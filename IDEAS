@@ -35,6 +35,3 @@
 	- backup/restore
 
  - Setting up rncd should also add to dhcpd.conf optionally
-
- - Pre/post commands for resellers
-	- http://virtualmin.com/node/32667

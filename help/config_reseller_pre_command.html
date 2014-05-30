@@ -1,0 +1,9 @@
+<header>Command to run before making changes to a reseller</header>
+
+This option can be used to specify a script or command to be run before
+a reseller is created, modified or deleted. It can make use of the
+environment variables RESELLER_NAME and RESELLER_ACTION to determine
+which reseller is being changed and what is happening to it. If the command
+exits with a non-zero status, modification of the reseller will be vetoed. <p>
+
+<footer>
