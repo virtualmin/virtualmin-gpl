@@ -3572,6 +3572,7 @@ resel_domsopts=Unowned domains
 resel_domssel=Owned by this reseller
 resel_equnlimit=The virtual server $1 cannot be assigned to this reseller, as it has unlimited disk quota, but the reseller has a limit
 resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as it has unlimited bandwidth quota, but the reseller has a limit
+resel_ebefore=Before modification command failed : $1
 
 licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice - Your Virtualmin license will expire in $1 days.
