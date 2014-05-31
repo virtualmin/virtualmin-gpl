@@ -159,7 +159,7 @@ sub parse_lsl_line
 local @w = split(/\s+/, $_[0]);
 local @now = localtime(time());
 local @st;
-return ( ) if ($w[0] !~ /^[rwxdlsSt\-]{10}(\+|@)?$/);
+return ( ) if ($w[0] !~ /^[rwxdlsSt\-]{10}(\+|@|\.)?$/);
 $st[3] = $w[1];			# Links
 $st[4] = $w[2];			# UID
 $st[5] = $w[3];			# GID
@@ -203,7 +203,7 @@ else {
 	return ( );
 	}
 $st[2] = 0;			# Permissions
-$w[0] =~ s/(\+|@)$//;		# Remove trailing + or @
+$w[0] =~ s/(\+|@|\.)$//;	# Remove trailing + or @ or .
 local @p = reverse(split(//, $w[0]));
 for(my $i=0; $i<9; $i++) {
 	if ($p[$i] ne '-') {
