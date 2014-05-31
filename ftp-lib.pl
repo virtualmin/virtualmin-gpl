@@ -229,6 +229,32 @@ if ($st[13] =~ s/\s+->\s+(.*)$//) {
 return @st;
 }
 
+# make_unix_perms(number)
+# Converts a permissions number into an ls -l format string
+sub make_unix_perms
+{
+my ($mode) = @_;
+my @perms = qw(--- --x -w- -wx r-- r-x rw- rwx);
+my @ftype = qw(. p c ? d ? b ? - ? l ? s ? ? ?);
+$ftype[0] = '';
+my $setids = ($mode & 07000)>>9;
+my @permstrs = @perms[($mode&0700)>>6, ($mode&0070)>>3, $mode&0007];
+my $ftype = $ftype[($mode & 0170000)>>12];
+
+if ($setids) {
+  if ($setids & 01) {         # Sticky bit
+    $permstrs[2] =~ s/([-x])$/$1 eq 'x' ? 't' : 'T'/e;
+    }
+  if ($setids & 04) {         # Setuid bit
+    $permstrs[0] =~ s/([-x])$/$1 eq 'x' ? 's' : 'S'/e;
+    }
+  if ($setids & 02) {         # Setgid bit
+    $permstrs[1] =~ s/([-x])$/$1 eq 'x' ? 's' : 'S'/e;
+    }
+  }
+return join('', $ftype, @permstrs);
+}
+
 # ftp_deletefile(host, file, &error, [user, pass], [port])
 # Delete some file or directory from an FTP server. This is done recursively
 # if needed. Returns the size of any deleted sub-directories.
