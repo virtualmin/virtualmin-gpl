@@ -2489,8 +2489,7 @@ sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
 if ($mysql::mysql_version >= 5) {
-	return "insert into user (host, user, password, ssl_type, ssl_cipher) ".
-	       "values ('$host', '$user', $encpass, '', '')";
+	return "insert into user (host, user, password, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', $encpass, '', '', '', '')";
 	}
 else {
 	return "insert into user (host, user, password) ".
