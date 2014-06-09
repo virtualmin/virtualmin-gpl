@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.2.2, Revive Adserver to 3.0.5, Magento to 1.9.0.1, Instiki to 0.19.7, TikiWiki to 12.2, FengOffice to 2.6.1, PiWik to 2.3.0, MediaWiki to 1.23.0 and 1.19.16, Dolibarr to 3.5.3, phpMyFAQ to 2.8.10, ZenPhoto to 1.4.6, osCommerce to 2.3.4, and Django to 1.6.5 and 1.4.13.
+html=Updated the phpMyAdmin script installer to version 4.2.3, Revive Adserver to 3.0.5, Magento to 1.9.0.1, Instiki to 0.19.7, TikiWiki to 12.2, FengOffice to 2.6.1, PiWik to 2.3.0, MediaWiki to 1.23.0 and 1.19.16, Dolibarr to 3.5.3, phpMyFAQ to 2.8.10, ZenPhoto to 1.4.6, osCommerce to 2.3.4, and Django to 1.6.5 and 1.4.13.
 master=1
 reseller=1
 domain=1
