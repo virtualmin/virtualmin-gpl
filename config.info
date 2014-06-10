@@ -33,6 +33,7 @@ domains_sort=Sort virtual servers by,1,user-Owner with subserver tree,dom-Domain
 show_ugroup=Allow selection of different group for server admins?,1,1-Yes,0-No
 theme_image=URL for company logo image,3,None or default,50
 theme_link=Link destination for company logo,3,None,50
+theme_alt=Alt text for company logo,3,None,50
 docs_link=Link destination for additional documentation,3,None,50
 docs_text=Link title for additional documentation,3,None or default,50
 show_nf=Show new features to,2,master-Master administrator,reseller-Resellers,domain-Domain owners

@@ -15095,7 +15095,7 @@ return @rv;
 sub get_provider_link
 {
 # Does this user's domain's reseller have a logo?
-local ($logo, $link);
+local ($logo, $link, $alt);
 local $d = &get_domain_by("user", $remote_user, "parent", "");
 if (!$d) {
 	# No domain found by user .. but is this user an extra admin?
@@ -15110,6 +15110,7 @@ if ($d && $d->{'reseller'} && defined(&get_reseller)) {
 		if ($resel->{'acl'}->{'logo'}) {
 			$logo = $resel->{'acl'}->{'logo'};
 			$link = $resel->{'acl'}->{'link'};
+			$alt = $resel->{'acl'}->{'alt'};
 			last;
 			}
 		}
@@ -15120,19 +15121,22 @@ if (!$d && &reseller_admin()) {
 	if ($resel->{'acl'}->{'logo'}) {
 		$logo = $resel->{'acl'}->{'logo'};
 		$link = $resel->{'acl'}->{'link'};
+		$alt = $resel->{'acl'}->{'alt'};
 		}
 	}
 if (!$logo) {
 	# Call back to global config
 	$logo = $config{'theme_image'} || $gconfig{'virtualmin_theme_image'};
 	$link = $config{'theme_link'} || $gconfig{'virtualmin_theme_link'};
+	$alt = $config{'theme_alt'} || $gconfig{'virtualmin_theme_alt'};
 	}
 if ($logo && $logo ne "none") {
 	local $html;
-	$html .= "<a href='$link' target=_blank>" if ($link);
-	$html .= "<img src='$image' border=0>";
+	$html .= "<a href='".&html_escape($link)."' target=_blank>" if ($link);
+	$html .= "<img src='".&html_escape($image)."' ".
+		 "alt='".&html_escape($alt)."' border=0>";
 	$html .= "</a>" if ($link);
-	return wantarray ? ( $html, $logo, $link ) : $html;
+	return wantarray ? ( $html, $logo, $link, $alt ) : $html;
 	}
 else {
 	return wantarray ? ( ) : undef;
