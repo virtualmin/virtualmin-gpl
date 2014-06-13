@@ -98,10 +98,17 @@ else {
 	# Values (type specific)
 	@vals = @{$t->{'values'}};
 	for(my $i=0; $i<@vals; $i++) {
-		print &ui_table_row($vals[$i]->{'desc'},
-			&ui_textbox("value_$i", $r->{'values'}->[$i],
-				    $vals[$i]->{'size'})." ".
-			$vals[$i]->{'suffix'});
+		if ($vals[$i]->{'size'}) {
+			$field = &ui_textbox("value_$i", $r->{'values'}->[$i],
+					     $vals[$i]->{'size'});
+			}
+		else {
+			$field = &ui_textarea("value_$i", $r->{'values'}->[$i],
+					     $vals[$i]->{'height'}, $vals[$i]->{'width'},
+					     "hard");
+			}
+		$field .= " ".$vals[$i]->{'suffix'};
+		print &ui_table_row($vals[$i]->{'desc'}, $field);
 		}
 	}
 

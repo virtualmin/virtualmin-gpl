@@ -2862,7 +2862,8 @@ elsif (($r->{'type'} eq 'SPF' ||
 	return 0;
 	}
 elsif ($r->{'type'} eq 'TXT' &&
-       $r->{'values'}->[0] =~ /^(t=|k=|v=)/) {
+       $r->{'values'}->[0] =~ /^(t=|k=|v=)/ &&
+       $config{'dkim_enabled'}) {
 	# DKIM, managed by Virtualmin
 	return 0;
 	}
@@ -2973,7 +2974,8 @@ return ( { 'type' => 'A',
 	   'domain' => 1,
 	   'create' => 1,
 	   'values' => [ { 'desc' => $text{'records_valuetxt'},
-                           'size' => 40,
+                           'width' => 60,
+			   'height' => 5,
 			   'regexp' => '\S',
 			   'dot' => 0,
                          },

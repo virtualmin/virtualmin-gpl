@@ -113,6 +113,8 @@ else {
 	$r->{'values'} = [ ];
 	for(my $i=0; $i<@vals; $i++) {
 		$v = $in{'value_'.$i};
+		$v =~ s/\r//g;
+		$v =~ s/\n/ /g;
 		$re = $vals[$i]->{'regexp'};
 		$fn = $vals[$i]->{'func'};
 		!$re || $v =~ /$re/ ||
