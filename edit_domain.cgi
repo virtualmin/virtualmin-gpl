@@ -206,11 +206,14 @@ if (!$parentdom) {
 					       $text{'edit_email_def'})
 			     : &ui_textbox("email", $d->{'email'}, 30));
 
+	$smsg = &get_password_synced_types($d) ?
+			"<br>".$text{'edit_dbsync'} : "";
 	print &ui_table_row($text{'edit_passwd'},
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
 				$text{'edit_set'}, undef, undef, undef,
-			 	"autocomplete=off"));
+			 	"autocomplete=off").
+		$smsg);
 	}
 
 # Show the external IP

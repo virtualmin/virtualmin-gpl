@@ -9823,6 +9823,27 @@ elsif (&indexof($type, &list_database_plugins()) >= 0) {
 return $rv || "localhost";
 }
 
+# get_password_synced_types(&domain)
+# Returns a list of DB types that are enabled for this domain and have their
+# passwords synced with the admin login
+sub get_password_synced_types
+{
+local ($d) = @_;
+my @rv;
+foreach my $t (&all_database_types()) {
+	my $sfunc = $t."_password_synced";
+	if (defined(&$sfunc) && &$sfunc($d)) {
+		# Definitely is synced
+		push(@rv, $t);
+		}
+	elsif (!defined(&$sfunc)) {
+		# Assume yes for other DB types
+		push(@rv, $t);
+		}
+	}
+return @rv;
+}
+
 # count_ftp_bandwidth(logfile, start, &bw-hash, &users, prefix, include-rotated)
 # Scans an FTP server log file for downloads by some user, and returns the
 # total bytes and time of last log entry.

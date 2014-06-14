@@ -14,6 +14,10 @@ elsif (!&reseller_admin() && !&extra_admin()) {
 
 &ui_print_header($d ? &domain_in($d) : undef, $text{'pass_title'}, "");
 
+if ($d && &get_password_synced_types($d)) {
+	print $text{'pass_dbsync'},"<p>\n";
+	}
+
 print &ui_form_start("save_pass.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_table_start($d ? $text{'pass_header1'} : $text{'pass_header2'},

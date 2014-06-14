@@ -957,6 +957,31 @@ sub list_all_postgres_databases
 return &postgresql::list_databases();
 }
 
+# postgres_password_synced(&domain)
+# Returns 1 if a domain's MySQL password will change along with its admin pass
+sub postgres_password_synced
+{
+my ($d) = @_;
+if ($d->{'parent'}) {
+	my $parent = &get_domain($d->{'parent'});
+	return &postgres_password_synced($parent);
+	}
+if ($d->{'hashpass'}) {
+	# Hashed passwords are being used
+	return 0;
+	}
+if ($d->{'postgres_pass'}) {
+	# Separate password set
+	return 0;
+	}
+my $tmpl = &get_template($d->{'template'});
+if ($tmpl->{'mysql_nopass'}) {
+	# Syncing disabled in the template
+	return 0;
+	}
+return 1;
+}
+
 $done_feature_script{'postgres'} = 1;
 
 1;
