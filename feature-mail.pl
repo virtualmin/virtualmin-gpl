@@ -2443,7 +2443,7 @@ if ($md && $md =~ /\/Maildir$/) {
 		}
 
 	# Create subscriptions file for Dovecot
-	if (@subs) {
+	if (@subs && !-e "$md/subscriptions") {
 		&open_tempfile(SUBS, ">$md/subscriptions");
 		foreach my $s (@subs) {
 			&print_tempfile(SUBS, $s."\n");
