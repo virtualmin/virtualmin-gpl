@@ -546,9 +546,12 @@ local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
 local %donedoms;				# Map from domain name->hash
 DOMAIN: foreach $d (@$doms) {
+	# Force lock and re-read the domain in case it has changed
+	&obtain_lock_everything($d);
+	$d = &get_domain($d->{'id'}, undef, 1);	
+
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
-	&obtain_lock_everything($d);
 	my @alldbs = &all_databases($d);
         &resync_all_databases($d, \@alldbs);
 	my $dstart = time();
