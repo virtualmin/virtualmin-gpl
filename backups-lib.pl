@@ -548,6 +548,7 @@ local %donedoms;				# Map from domain name->hash
 DOMAIN: foreach $d (@$doms) {
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
+	&obtain_lock_everything($d);
 	my @alldbs = &all_databases($d);
         &resync_all_databases($d, \@alldbs);
 	my $dstart = time();
@@ -821,6 +822,7 @@ DOMAIN: foreach $d (@$doms) {
 	&$second_print(&text('backup_donedomain',
 			     &nice_hour_mins_secs($dtime, 1, 1)));
 	&$cbfunc($d, 2, "$dest/$df") if ($cbfunc);
+	&release_lock_everything($d);
 	}
 
 # Remove duplicate done domains
