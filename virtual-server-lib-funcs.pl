@@ -12924,7 +12924,14 @@ if ($config{'dns'}) {
 					      $ns eq "127.0.0.1" ||
 					      $ns eq "0.0.0.0");
 				}
-			if (!$hasdns) {
+			if (!@{$dns->{'nameserver'}}) {
+				# No resolv.conf at all, but this means that
+				# DNS falls back to local
+				&$second_print($text{'check_dnsmissing'}." ".
+					       $mastermsg);
+				}
+			elsif (!$hasdns) {
+				# No local nameserver
 				my @dhcp = grep { $_->{'dhcp'} ||
 						  $_->{'bootp'} }
 						&net::boot_interfaces();
@@ -12932,7 +12939,10 @@ if ($config{'dns'}) {
 					     '/net/list_dns.cgi', $clink).
 				     (@dhcp ? " ".$text{'check_eresolv2'} : "");
 				}
-			&$second_print($text{'check_dnsok'}." ".$mastermsg);
+			else {
+				&$second_print($text{'check_dnsok'}." ".
+					       $mastermsg);
+				}
 			}
 		else {
 			&$second_print($text{'check_dnsok2'}." ".$mastermsg);
