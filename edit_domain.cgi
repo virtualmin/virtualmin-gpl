@@ -153,7 +153,7 @@ foreach $t (&list_templates()) {
 	}
 if (@cantmpls) {
 	push(@cantmpls, $tmpl) if (!$gottmpl);
-	print &ui_table_row($text{'edit_tmpl'},
+	print &ui_table_row(&hlink($text{'edit_tmpl'},"template"),
 		    &ui_select("template", $tmpl->{'id'},
 			[ map { [ $_->{'id'}, $_->{'name'} ] } @cantmpls ]));
 	}
@@ -177,11 +177,12 @@ print $js;
 # Show plan, with option to change
 if (!$parentdom) {
 	$plan = &get_plan($d->{'plan'});
+	$msg = &hlink($text{'edit_plan'}, "plan");
 	if (@plans) {
 		# Can select one
 		($onlist) = grep { $_->{'id'} eq $plan->{'id'} } @plans;
 		push(@plans, $plan) if (!$onlist);
-		print &ui_table_row($text{'edit_plan'},
+		print &ui_table_row($label,
 		   &ui_select("plan", $plan->{'id'},
 		     [ map { [ $_->{'id'}, $_->{'name'} ] } @plans ],
 		     1, 0, 0, 0,
@@ -191,7 +192,7 @@ if (!$parentdom) {
 		}
 	else {
 		# Just show current plan
-		print &ui_table_row($text{'edit_plan'}, $plan->{'name'});
+		print &ui_table_row($label, $plan->{'name'});
 		}
 	}
 
@@ -201,7 +202,7 @@ print &ui_table_row($text{'edit_owner'},
 
 if (!$parentdom) {
 	# Show owner's email address and password
-	print &ui_table_row($text{'edit_email'},
+	print &ui_table_row(&hlink($text{'edit_email'}, "ownersemail"),
 		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
 					       $text{'edit_email_def'})
 			     : &ui_textbox("email", $d->{'email'}, 30));
