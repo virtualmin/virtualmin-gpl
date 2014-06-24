@@ -499,7 +499,7 @@ if (!$parentuser && !$config{'template_auto'}) {
 $fields = &show_custom_fields(undef, \@tds);
 if ($fields) {
 	print &ui_hidden_table_start($text{'edit_customsect'}, "width=100%", 2,
-				     "custom", 0);
+				     "custom", 1);
 	print $fields;
 	print &ui_hidden_table_end("custom");
 	}
