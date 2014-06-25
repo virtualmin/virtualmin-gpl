@@ -209,19 +209,20 @@ else {
 	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						    $d->{'web_port'});
 	if ($virt && $apache::httpd_modules{'core'} >= 2.4) {
-		local $pdir = &public_html_dir($d);
-		local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
-				      $_->{'words'}->[0] eq $pdir."/" }
+		foreach my $pdir (&public_html_dir($d), &cgi_bin_dir($d)) {
+			local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+					      $_->{'words'}->[0] eq $pdir."/" }
 			    &apache::find_directive_struct("Directory", $vconf);
-		if ($dir) {
-			local @req = &apache::find_directive("Require",
-						$dir->{'members'});
-			local ($g) = grep { /all\s+granted/i } @req;
-			if (!$g) {
-				push(@req, "all granted");
-				&apache::save_directive("Require", \@req,
-					$dir->{'members'}, $conf);
-				&flush_file_lines($dir->{'file'});
+			if ($dir) {
+				local @req = &apache::find_directive("Require",
+							$dir->{'members'});
+				local ($g) = grep { /all\s+granted/i } @req;
+				if (!$g) {
+					push(@req, "all granted");
+					&apache::save_directive("Require",\@req,
+						$dir->{'members'}, $conf);
+					&flush_file_lines($dir->{'file'});
+					}
 				}
 			}
 		}
