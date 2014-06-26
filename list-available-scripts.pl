@@ -48,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--core-only") {
 		$coreonly = 1;
 		}
+	elsif ($a eq "--available-only") {
+		$availonly = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -58,6 +61,9 @@ while(@ARGV > 0) {
 @scripts = map { &get_script($_, $coreonly) } @types;
 if ($source) {
 	@scripts = grep { $_->{'source'} eq $source } @scripts;
+	}
+if ($availonly) {
+	@scripts = grep { $_->{'avail'} } @scripts;
 	}
 
 if ($multi) {
@@ -111,6 +117,7 @@ print "\n";
 print "virtualmin list-available-scripts [--multiline]\n";
 print "                                  [--source core|custom|plugin|latest]\n";
 print "                                  [--type name]*\n";
+print "                                  [--available-only]\n";
 exit(1);
 }
 
