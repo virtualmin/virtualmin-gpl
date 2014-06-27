@@ -3740,9 +3740,9 @@ scripts_epythoninst=.. automatic Python module installation failed
 scripts_installgem=Installing Ruby Gems package ..
 scripts_mmax=(At most $1)
 scripts_sitelink=More information on using this script can be found at <a href='$1' target=_blank>$1</a>.
-scripts_userpass=The initial administration login is $1 with the password $2.
-scripts_useronly=The initial administration login is $1.
-scripts_passonly=The initial administration password is $1.
+scripts_userpass=The initial administration login is $1 with the password $2 .
+scripts_useronly=The initial administration login is $1 .
+scripts_passonly=The initial administration password is $1 .
 scripts_passmode=Initial login for script
 scripts_passmodedef1=Same username and password as domain
 scripts_passmode1=Username $1 and password $2
