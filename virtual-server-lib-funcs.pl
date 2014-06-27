@@ -9209,7 +9209,7 @@ foreach my $f (&list_custom_fields()) {
 			}
 		elsif ($f->{'type'} == 7) {
 			$fv = &ui_radio($n, $v ? 1 : 0, [ [ 1, $text{'yes'} ],
-							   [ 0, $text{'no'} ] ]);
+							  [ 0, $text{'no'} ] ]);
 			}
 		elsif ($f->{'type'} == 8) {
 			local $sz = $f->{'opts'} || 30;
@@ -9218,7 +9218,7 @@ foreach my $f (&list_custom_fields()) {
 		elsif ($f->{'type'} == 9) {
 			local @opts = &read_opts_file($f->{'opts'});
 			local ($found) = grep { $_->[0] eq $v } @opts;
-			push(@opts, [ $v, $v ]) if (!$found);
+			push(@opts, [ $v, $v ]) if (!$found && $v ne '');
 			$fv = &ui_select($n, $v, \@opts);
 			}
 		elsif ($f->{'type'} == 10) {
