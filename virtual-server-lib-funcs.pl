@@ -8243,7 +8243,7 @@ if (scalar(@list_templates_cache)) {
 	}
 local @rv;
 push(@rv, { 'id' => 0,
-	    'name' => 'Default Settings',
+	    'name' => $text{'newtmpl_name0'},
 	    'standard' => 1,
 	    'default' => 1,
 	    'web' => $config{'apache_config'},
@@ -8426,7 +8426,7 @@ foreach my $m (&list_domain_owner_modules()) {
 	}
 $rv[0]->{'avail'} = join(' ', @avail);
 push(@rv, { 'id' => 1,
-	    'name' => 'Settings For Sub-Servers',
+	    'name' => $text{'newtmpl_name1'},
 	    'standard' => 1,
 	    'mail_on' => $config{'subdomain_template'} eq "none" ? "none" :
 			 $config{'subdomain_template'} eq "" ? "" : "yes",

@@ -2889,6 +2889,8 @@ newtmpl_scripts=Scripts
 newtmpl_delete=Delete Selected Templates
 newtmpl_created=Created on
 newtmpl_init=Virtualmin install
+newtmpl_name0=Default Settings
+newtmpl_name1=Settings For Sub-Servers
 
 tmpl_title1=Create Server Template
 tmpl_title2=Edit Server Template
