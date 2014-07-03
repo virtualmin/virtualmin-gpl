@@ -18,7 +18,7 @@ return "DokuWiki is a standards compliant, simple to use Wiki, mainly aimed at c
 # script_dokuwiki_versions()
 sub script_dokuwiki_versions
 {
-return ( "2013-12-08" );
+return ( "2014-05-05a" );
 }
 
 sub script_dokuwiki_category
@@ -147,7 +147,7 @@ return (1, "DokuWiki directory deleted.");
 sub script_dokuwiki_latest
 {
 return ( "http://download.dokuwiki.org/",
-	 "(2013-[0-9][0-9]-[0-9][a-z0-9\\-]+)" );
+	 "(201[4-9]-[0-9][0-9]-[0-9][0-9][a-z]+)" );
 }
 
 sub script_dokuwiki_site
