@@ -304,7 +304,7 @@ if ($limits_section) {
 $fields = &show_custom_fields($d, \@tds);
 if ($fields) {
 	print &ui_hidden_table_start($text{'edit_customsect'}, "width=100%", 2,
-				     "custom", 0, \@tds);
+				     "custom", 1, \@tds);
 	print $fields;
 	print &ui_hidden_table_end("custom");
 	}
