@@ -5890,6 +5890,13 @@ elsif ($config{'mail_system'} == 1) {
 		if ($dpo->[1] =~ /Port=(587|submission)/) {
 			$smtp_port = 587;
 			}
+		elsif ($dpo->[1] =~ /Port=(465|smtps)/) {
+			$smtp_port = 465;
+			if ($dpo->[1] =~ /Modifiers=([^,]+)/ && $1 =~ /s/) {
+				$smtp_type = "STARTTLS";
+				$smtp_ssl = "yes";
+				}
+			}
 		}
 	}
 
