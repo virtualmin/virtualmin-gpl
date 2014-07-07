@@ -30,6 +30,9 @@ by a reseller name. Or to list those not owned by any reseller, use the
 C<--no-reseller> flag. Finally, to list domains owned by any reseller, you
 can use the C<--any-reseller> option.
 
+To find the domain that contains a mailbox, use the C<--mail-user> flag
+followed by the full mailbox username (as used by FTP and IMAP).
+
 To get a list of domain names only, use the C<--name-only> parameter. To get
 just Virtualmin domain IDs, use C<--id-only>. These are useful when iterating
 through domains in a script. You can also use C<--user-only> to output only
@@ -84,6 +87,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--mail-user") {
+		push(@mailusers, shift(@ARGV));
 		}
 	elsif ($a eq "--id") {
 		push(@ids, shift(@ARGV));
@@ -152,6 +158,16 @@ elsif (@domains || @users || @plans) {
 	# Just showing listed domains or domains owned by some user
 	@doms = &get_domains_by_names_users(\@domains, \@users, \&usage,
 					    \@plans);
+	}
+elsif (@mailusers) {
+	# Get domains by mailboxes in them
+	my %done;
+	foreach my $u (@mailusers) {
+		$d = &get_user_domain($u);
+		if ($d && !$done{$d->{'id'}}++) {
+			push(@doms, $d);
+			}
+		}
 	}
 else {
 	# Showing all domains, with some limits
@@ -684,6 +700,7 @@ print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
 print "                         --simple-multiline | --user-only | --home-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
+print "                        [--mail-user name]*\n";
 print "                        [--id number]*\n";
 print "                        [--with-feature feature]\n";
 print "                        [--without-feature feature]\n";
