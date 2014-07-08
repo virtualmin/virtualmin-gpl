@@ -1450,7 +1450,7 @@ Reseller accounts can now be granted the ability to edit and create other resell
 DKIM keys can now be set on a domain by domain basis, rather than all virtual servers using the same key.
 Fixed support for the Options directive in Apache 2.4.
 ---- Changes since 4.08 ----
-Updated the phpMyAdmin script installer to version 4.2.5, Revive Adserver to 3.0.5, Magento to 1.9.0.1, Instiki to 0.19.7, TikiWiki to 12.2, FengOffice to 2.6.1, PiWik to 2.4.0, MediaWiki to 1.23.1 and 1.19.17, Dolibarr to 3.5.3, phpMyFAQ to 2.8.11, ZenPhoto to 1.4.6, osCommerce to 2.3.4, Joomla to 3.3.1 and 2.5.22, NodeJS to 0.10.29, SMF to 2.0.8, OwnCloud to 6.0.4, SugarCRM to 6.5.17, Z-push to 2.1.3, DokuWiki to 2014-05-05a, osTicket to 1.9.2 and 1.8.4, and Django to 1.6.5 and 1.4.13.
+Updated the phpMyAdmin script installer to version 4.2.5, Revive Adserver to 3.0.5, Magento to 1.9.0.1, Instiki to 0.19.7, TikiWiki to 12.2, FengOffice to 2.6.1, PiWik to 2.4.0, MediaWiki to 1.23.1 and 1.19.17, Dolibarr to 3.5.3, phpMyFAQ to 2.8.11, ZenPhoto to 1.4.6, osCommerce to 2.3.4, Joomla to 3.3.1 and 2.5.22, NodeJS to 0.10.29, SMF to 2.0.8, OwnCloud to 6.0.4, SugarCRM to 6.5.17, Z-push to 2.1.3, DokuWiki to 2014-05-05a, osTicket to 1.9.2 and 1.8.4, Coppermine to 1.5.30, and Django to 1.6.5 and 1.4.13.
 Renamed the X2CRM installer to X2Engine, and updated the version to 4.1.4.
 Added Virtualmin configuration options for commands to run before and after a reseller is created, modified or deleted.
 Added a warning message on the password change forms if a domain's MySQL or PostgreSQL logins would also be effected.
