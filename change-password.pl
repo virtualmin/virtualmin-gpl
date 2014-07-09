@@ -56,6 +56,8 @@ $olduser = { %$user };
 if ($user->{'domainowner'}) {
 	# This is the domain owner, so changing his password means updating
 	# all features
+
+	# Check old password
 	if ($d->{'pass'}) {
 		$d->{'pass'} eq $oldpass || &error_exit("Wrong password");
 		}
@@ -63,6 +65,15 @@ if ($user->{'domainowner'}) {
 		&useradmin::validate_password($oldpass, $user->{'pass'}) ||
 			&error_exit("Wrong password");
 		}
+
+	# Check password strength
+	$fakeuser = { 'user' => $d->{'user'}, 'plainpass' => $newpass };
+	$err = &check_password_restrictions($fakeuser, $d->{'webmin'});
+	if ($err) {
+		&error_exit($err);
+		}
+
+	# Update all domains
 	&set_all_null_print();
 	foreach my $d (&get_domain_by("user", $username)) {
 		$oldd = { %$d };
@@ -108,6 +119,10 @@ else {
 	$user->{'passmode'} = 3;
 	$user->{'plainpass'} = $newpass;
 	$user->{'pass'} = &encrypt_user_password($user, $newpass);
+	$err = &check_password_restrictions($user, 0, $d);
+	if ($err) {
+		&error_exit($err);
+		}
 	&set_pass_change($user);
 	&modify_user($user, $olduser, $d);
 
