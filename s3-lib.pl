@@ -48,7 +48,7 @@ for(my $i=0; $i<$tries; $i++) {
 	local $conn = &make_s3_connection($akey, $skey);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
-		sleep(10);
+		sleep(10*($i+1));
 		next;
 		}
 
@@ -62,7 +62,7 @@ for(my $i=0; $i<$tries; $i++) {
 	local $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
 		$err = &text('s3_elist', &extract_s3_message($response));
-		sleep(10);
+		sleep(10*($i+1));
 		next;
 		}
 
@@ -77,7 +77,7 @@ for(my $i=0; $i<$tries; $i++) {
 		if ($response->http_response->code != 200) {
 			$err = &text('s3_ecreate',
 				     &extract_s3_message($response));
-			sleep(10);
+			sleep(10*($i+1));
 			next;
 			}
 		}
@@ -319,7 +319,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	if ($err) {
 		# Wait a little before re-trying
-		sleep(10) if (!$newendpoint);
+		sleep(10*($i+1)) if (!$newendpoint);
 		}
 	else {
 		# Worked .. end of the job
