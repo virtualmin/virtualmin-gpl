@@ -1805,6 +1805,9 @@ local ($d, $subdir) = @_;
 local $p = &domain_has_website($d);
 local $path = $d->{'home'}."/".$subdir;
 local $oldpath = $d->{'public_html_path'};
+if (-l $path) {
+	return "The HTML directory cannot be a symbolic link";
+	}
 if ($p ne "web") {
 	my $err = &plugin_call($p, "feature_set_web_public_html_dir",
 			       $d, $subdir);
