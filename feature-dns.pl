@@ -1124,6 +1124,14 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				      "IN", "A", "127.0.0.1");
 		}
 
+	# If the hostname of the system is within this domain, add a record
+	# for it
+	my $hn = &get_system_hostname();
+	if ($hn =~ /\.\Q$d->{'dom'}\E$/ && !$already{$hn."."}) {
+		&bind8::create_record($file, $hn.".", undef,
+				      "IN", "A", &get_default_ip());
+		}
+
 	# If requested, add webmail and admin records
 	if ($d->{'web'} && &has_webmail_rewrite($d)) {
 		&add_webmail_dns_records_to_file($d, $tmpl, $file, \%already);
