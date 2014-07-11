@@ -6312,7 +6312,7 @@ $clone_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'phpmyadmin' ],
 		      [ 'path', '/phpmyadmin' ],
-		      [ 'version', '2.11.11.3' ] ],
+		      [ 'version', '3.5.8.2' ] ],
 	},
 
 	# Clone it
