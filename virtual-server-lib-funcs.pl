@@ -9188,6 +9188,10 @@ local ($d, $tds) = @_;
 local $rv;
 local $col = 0;
 foreach my $f (&list_custom_fields()) {
+	local ($desc, $tip) = split(/;/, $f->{'desc'}, 2);
+	if ($tip) {
+		$desc = "<div title='".&quote_escape($tip)."'>$desc</div>";
+		}
 	if ($f->{'visible'} == 0 || &master_admin()) {
 		# Can edit
 		local $n = "field_".$f->{'name'};
@@ -9228,12 +9232,12 @@ foreach my $f (&list_custom_fields()) {
 			$v =~ s/\t/\n/g;
 			$fv = &ui_textarea($n, $v, $h, $w);
 			}
-		$rv .= &ui_table_row($f->{'desc'}, $fv, 1, $tds);
+		$rv .= &ui_table_row($desc, $fv, 1, $tds);
 		}
 	elsif ($f->{'visible'} == 1 && $d) {
 		# Can only see
 		local $fv = $d->{"field_".$f->{'name'}};
-		$rv .= &ui_table_row($f->{'desc'}, $fv, 1, $tds);
+		$rv .= &ui_table_row($desc, $fv, 1, $tds);
 		}
 	}
 return $rv;

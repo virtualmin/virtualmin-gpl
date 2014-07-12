@@ -73,7 +73,8 @@ foreach $d (@doms) {
 				print "    $f->{'name'}: $v\n";
 				}
 			else {
-				print "    $f->{'desc'}: $v\n";
+				($desc) = split(/;/, $f->{'desc'});
+				print "    $desc: $v\n";
 				}
 			}
 		}
