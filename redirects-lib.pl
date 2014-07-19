@@ -59,14 +59,8 @@ foreach my $p (@ports) {
 		else {
 			$rd->{'dest'} = $al->{'words'}->[1];
 			}
-		my ($already) = grep { $_->{'dest'} eq $rd->{'dest'} } @rv;
-		if ($already) {
-			$already->{$proto} = 1;
-			next;
-			}
 		if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
 			$rd->{'path'} = $al->{'words'}->[0];
-			push(@rv, $rd);
 			}
 		elsif (($al->{'name'} eq 'AliasMatch' ||
 			$al->{'name'} eq 'RedirectMatch') &&
@@ -74,6 +68,16 @@ foreach my $p (@ports) {
 			$al->{'words'}->[0] =~ /^(.*)\(\.\*\)\$$/)) {
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
+			}
+		else {
+			next;
+			}
+
+		my ($already) = grep { $_->{'path'} eq $rd->{'path'} } @rv;
+		if ($already) {
+			$already->{$proto} = 1;
+			}
+		else {
 			push(@rv, $rd);
 			}
 		}
