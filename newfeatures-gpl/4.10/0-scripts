@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the phpMyAdmin script installer to versions 4.2.6, 4.0.10.1, and 4.1.14.2.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
