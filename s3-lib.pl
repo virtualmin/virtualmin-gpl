@@ -190,8 +190,10 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Read the headers
 	local %rheader;
+	local $htext;
 	while(1) {
 		local $hline = &read_http_connection($h);
+		$htext .= $hline;
 		$hline =~ s/\r\n//g;
 		$hline =~ /^(\S+):\s+(.*)$/ || last;
 		$rheader{lc($1)} = $2;
@@ -205,7 +207,7 @@ for(my $i=0; $i<$tries; $i++) {
 	&close_http_connection($out);
 
 	if ($line !~ /\S/) {
-		$err = "Empty response to HTTP request";
+		$err = "Empty response to HTTP request. Headers were : $htext";
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
 		$err = "Invalid HTTP response : $line";
