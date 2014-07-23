@@ -162,8 +162,10 @@ for(my $i=0; $i<$tries; $i++) {
 		       "for $page failed : $h";
 		next;
 		}
+	local $hinput;
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
+		$hinput .= $hfn.": ".$req->header($hfn)."\r\n";
 		}
 	&write_http_connection($h, "\r\n");
 
@@ -208,6 +210,11 @@ for(my $i=0; $i<$tries; $i++) {
 
 	if ($line !~ /\S/) {
 		$err = "Empty response to HTTP request. Headers were : $htext";
+		print STDERR "host=$host port=$port page=$page\n";
+		print STDERR "Request headers :\n";
+		print STDERR $hinput;
+		print STDERR "Reply headers :\n";
+		print STDERR $htext;
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
 		$err = "Invalid HTTP response : $line";
