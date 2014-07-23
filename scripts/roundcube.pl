@@ -190,7 +190,8 @@ if (!$upgrade) {
 		foreach my $l (@$lref) {
 			if ($l =~ /^\$rcmail_config\['db_dsnw'\]\s+=/) {
 				$l = "\$rcmail_config['db_dsnw'] = 'mysql://$dbuser:".
-				     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
+				     &php_quotemeta($dbpass, 1).
+				     "\@$dbhost/$dbname';";
 				}
 			elsif ($l =~ /^\$rcmail_config\['db_backend'\]\s+=/) {
 				$l = "\$rcmail_config['db_backend'] = 'db';";
@@ -247,7 +248,7 @@ if (!$upgrade) {
 			}
 		if ($l =~ /^\$(rcmail_config|config)\['db_dsnw'\]\s+=/) {
 			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
-			     &php_quotemeta($dbpass)."\@$dbhost/$dbname';";
+			     &php_quotemeta($dbpass, 1)."\@$dbhost/$dbname';";
 			}
 		}
 	if (!$added_vuf && $vuf) {

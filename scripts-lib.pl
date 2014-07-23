@@ -2762,15 +2762,17 @@ foreach my $sinfo (&list_domain_scripts($d)) {
 	}
 }
 
-# php_quotemeta(string)
+# php_quotemeta(string, [for-single-quotes])
 # Quote ' and " characters in a PHP string
 sub php_quotemeta
 {
-local ($str) = @_;
+local ($str, $single) = @_;
 $str =~ s/\\/\\\\/g;
 $str =~ s/'/\\'/g;
-$str =~ s/"/\\"/g;
-$str =~ s/\$/\\\$/g;
+if (!$single) {
+	$str =~ s/"/\\"/g;
+	$str =~ s/\$/\\\$/g;
+	}
 return $str;
 }
 

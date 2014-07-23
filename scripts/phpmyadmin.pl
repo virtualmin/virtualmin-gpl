@@ -244,7 +244,7 @@ foreach $l (@$lref) {
 			}
 		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['password'\]/) {
 			$l = "\$cfg['Servers'][\$i]['password'] = '".
-			     &php_quotemeta($dbpass)."';";
+			     &php_quotemeta($dbpass, 1)."';";
 			}
 		}
 	else {
@@ -269,7 +269,7 @@ foreach $l (@$lref) {
 			}
 		if ($l =~ /^\$cfgServers\[\$i\]\['password'\]/) {
 			$l = "\$cfgServers[\$i]['password'] = '".
-			     &php_quotemeta($dbpass)."';";
+			     &php_quotemeta($dbpass, 1)."';";
 			}
 		if ($l =~ /^\$cfgServers\[\$i\]\['host'\]/) {
 			$l = "\$cfgServers[\$i]['host'] = '$dbhost';";

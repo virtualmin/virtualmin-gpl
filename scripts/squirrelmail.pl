@@ -221,7 +221,7 @@ if (!$upgrade) {
 
 	# Update the config file
 	local $lref = &read_file_lines_as_domain_user($d, $cfile);
-	local $dburl = "$dbphptype://$dbuser:".&php_quotemeta($dbpass).
+	local $dburl = "$dbphptype://$dbuser:".&php_quotemeta($dbpass, 1).
 		       "\@$dbhost/$dbname";
 	foreach $l (@$lref) {
 		if ($l =~ /^\$domain\s*=\s*/) {
