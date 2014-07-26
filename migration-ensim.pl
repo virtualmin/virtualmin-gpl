@@ -521,13 +521,64 @@ if ($got{'mail'}) {
 	&$second_print(".. done (migrated $acount aliases)");
 	}
 
+# Re-create alias domains
+local $service = $manifest->{'siteIdent'}->{'service'};
+local ($sa) = grep { $_->{'serviceName'} eq 'aliases' } @$service;
+local @site_aliases = $sa ? (keys %{$sa->{config}->{alias}}) : ( );
+local @adoms;
+foreach my $ad (@site_aliases) {
+	&$first_print("Creating alias domain $ad ..");
+	if (&domain_name_clash($ad)) {
+		&$second_print(".. the domain $ad already exists");
+		next;
+		}
+	&$indent_print();
+	local %alias = ( 'id', &domain_id(),
+			 'dom', $ad,
+			 'user', $dom{'user'},
+			 'group', $dom{'group'},
+			 'prefix', $dom{'prefix'},
+			 'ugroup', $dom{'ugroup'},
+			 'pass', $dom{'pass'},
+			 'alias', $dom{'id'},
+			 'aliasmail', 1,
+			 'uid', $dom{'uid'},
+			 'gid', $dom{'gid'},
+			 'ugid', $dom{'ugid'},
+			 'owner', "Migrated Ensim alias for $dom{'dom'}",
+			 'email', $dom{'email'},
+			 'name', 1,
+			 'ip', $dom{'ip'},
+			 'virt', 0,
+			 'source', $dom{'source'},
+			 'parent', $dom{'id'},
+			 'template', $dom{'template'},
+			 'reseller', $dom{'reseller'},
+			 'nocreationmail', 1,
+			 'nocopyskel', 1,
+			);
+	foreach my $f (@alias_features) {
+		$alias{$f} = $dom{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$alias{'home'} = &server_home_directory(\%alias, $parentdom);
+	&generate_domain_password_hashes(\%alias, 1);
+	&complete_domain(\%alias);
+	&create_virtual_server(\%alias, $parentdom,
+			       $parentdom->{'user'});
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@adoms, \%alias);
+	}
+
 if ($parent) {
 	# Re-save parent user, to update Webmin ACLs
 	&refresh_webmin_user($parent);
 	}
 
 &sync_alias_virtuals(\%dom);
-return (\%dom);
+return (\%dom, @adoms);
 }
 
 # extract_ensim_dir(file)
