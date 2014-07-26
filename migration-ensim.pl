@@ -471,7 +471,7 @@ if ($userident->{$origuser}) {
 
 # Move server owner's inbox file
 local $owner = &get_domain_owner(\%dom);
-if (!$parent && -r "$root/var/spool/mail/$origuser") {
+if (!$parent && -r "$root/var/spool/mail/$origuser" && $owner) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &create_mail_file($owner, \%dom);
 	if ($mfile) {
