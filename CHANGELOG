@@ -1456,3 +1456,4 @@ Added Virtualmin configuration options for commands to run before and after a re
 Added a warning message on the password change forms if a domain's MySQL or PostgreSQL logins would also be effected.
 ---- Changes since 4.09 ----
 Updated the Dolibarr script installer to version 3.5.4, Drupal to 7.30 and 6.32, phpMyAdmin to 4.2.6, 4.0.10.1 and 4.1.14.2, Roundcube to 1.0.2, OpenGoo to 2.6.2.2, and X2Engine to 4.1.7.
+Ensim migration now includes alias domains and sub-domains.

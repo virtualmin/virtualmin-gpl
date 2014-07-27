@@ -521,12 +521,83 @@ if ($got{'mail'}) {
 	&$second_print(".. done (migrated $acount aliases)");
 	}
 
+# Migrate sub-domains
+local $service = $manifest->{'siteIdent'}->{'service'};
+local ($sa) = grep { $_->{'serviceName'} eq 'subdomain' } @$service;
+local @sdoms;
+if ($sa->{config}->{subdomain} and keys %{$sa->{config}->{subdomain}}) {
+	foreach my $sd (keys %{$sa->{config}->{subdomain}}) {
+		next if ($sd eq "DEFAULT");
+                my $subdomain = $sa->{config}->{subdomain}->{$sd};
+		local $sname = $sd.".".$dom{'dom'};
+		&$first_print("Creating sub-domain $sname ..");
+		if (&domain_name_clash($sname)) {
+			&$second_print(".. the domain $sname already exists");
+			next;
+			}
+		&$indent_print();
+		local %subd = ( 'id', &domain_id(),
+				'dom', $sname,
+				'user', $dom{'user'},
+				'group', $dom{'group'},
+				'prefix', $dom{'prefix'},
+				'ugroup', $dom{'ugroup'},
+				'pass', $dom{'pass'},
+				'subdom', $dom{'id'},
+				'subprefix', $sd,
+				'uid', $dom{'uid'},
+				'gid', $dom{'gid'},
+				'ugid', $dom{'ugid'},
+				'owner', "Migrated Ensim sub-domain",
+				'email', $dom{'email'},
+				'name', 1,
+				'ip', $dom{'ip'},
+				'virt', 0,
+				'source', $dom{'source'},
+				'parent', $dom{'id'},
+				'template', $dom{'template'},
+				'reseller', $dom{'reseller'},
+				'nocreationmail', 1,
+				'nocopyskel', 1,
+				'no_tmpl_aliases', 1,
+				);
+		foreach my $f (@subdom_features) {
+			$subd{$f} = $dom{$f};
+			}
+		local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+						  : \%dom;
+		$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+		&generate_domain_password_hashes(\%subd, 1);
+		&complete_domain(\%subd);
+
+		# Set correct sub-domain HTML and CGI dirs
+		local $sdir = $subdomain->{'document_root'};
+		$sdir =~ s/^.*\///;
+		if (!$sdir) {
+			&$second_print(".. invalid sub-domain directory");
+			next;
+			}
+		$subd{'public_html_dir'} = $sdir;
+		$subd{'public_html_path'} = $webdir."/".$sdir;
+		$subd{'cgi_bin_dir'} = $sdir;
+		$subd{'cgi_bin_path'} = $cgidir."/".$sdir;
+
+		&create_virtual_server(\%subd, $parentdom,
+				       $parentdom->{'user'});
+
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
+		push(@sdoms, \%subd);
+		}
+	}
+
 # Re-create alias domains
 local $service = $manifest->{'siteIdent'}->{'service'};
 local ($sa) = grep { $_->{'serviceName'} eq 'aliases' } @$service;
 local @site_aliases = $sa ? (keys %{$sa->{config}->{alias}}) : ( );
 local @adoms;
 foreach my $ad (@site_aliases) {
+	next if ($ad eq "name");
 	&$first_print("Creating alias domain $ad ..");
 	if (&domain_name_clash($ad)) {
 		&$second_print(".. the domain $ad already exists");
@@ -578,7 +649,7 @@ if ($parent) {
 	}
 
 &sync_alias_virtuals(\%dom);
-return (\%dom, @adoms);
+return (\%dom, @adoms, @sdoms);
 }
 
 # extract_ensim_dir(file)
