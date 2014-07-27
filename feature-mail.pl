@@ -550,6 +550,9 @@ if ($supports_dependent) {
 # Remove domain from DKIM list
 &update_dkim_domains($d, 'delete');
 
+# Remove secondary virtusers from slaves
+&sync_secondary_virtusers($d);
+
 &release_lock_mail($d);
 }
 
