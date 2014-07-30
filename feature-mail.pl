@@ -6060,6 +6060,8 @@ elsif ($p) {
 			local $cgidir = &cgi_bin_dir($d);
 			push(@sc, "/AutoDiscover/AutoDiscover.xml ".
 				  "$cgidir/autoconfig.cgi");
+			push(@sc, "/Autodiscover/Autodiscover.xml ".
+				  "$cgidir/autoconfig.cgi");
 			push(@sc, "/autodiscover/autodiscover.xml ".
 				  "$cgidir/autoconfig.cgi");
 			&apache::save_directive("ScriptAlias", \@sc,
