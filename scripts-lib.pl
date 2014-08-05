@@ -698,6 +698,7 @@ if (-r $phpini && &foreign_check("phpini")) {
 	&foreign_require("phpini", "phpini-lib.pl");
 	local $conf = &phpini::get_config($phpini);
 	local $anyini;
+	local $realver = &get_php_version($phpver, $d);
 
 	# Find PHP variables from template and from script
 	local @todo;
@@ -718,6 +719,10 @@ if (-r $phpini && &foreign_check("phpini")) {
 	# particular value, or have maximums or minumums
 	foreach my $t (@todo) {
 		local ($n, $v, $diff) = @$t;
+		if ($n eq "magic_quotes_gpc" && $realver >= 5.4) {
+			# Directive not supported in PHP 5.4
+			next;
+			}
 		local $ov = &phpini::find_value($n, $conf);
 		local $change = $diff eq '' && $ov ne $v ||
 				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
