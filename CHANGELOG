@@ -1455,5 +1455,5 @@ Renamed the X2CRM installer to X2Engine, and updated the version to 4.1.4.
 Added Virtualmin configuration options for commands to run before and after a reseller is created, modified or deleted.
 Added a warning message on the password change forms if a domain's MySQL or PostgreSQL logins would also be effected.
 ---- Changes since 4.09 ----
-Updated the Dolibarr script installer to version 3.5.4, Drupal to 7.30 and 6.32, phpMyAdmin to 4.2.7, 4.0.10.1 and 4.1.14.2, Roundcube to 1.0.2, FengOffice to 2.6.3, Joomla to 3.3.3 and 2.5.24, MediaWiki to 1.23.2 and 1.19.18, Node.JS to 0.10.30, phpMyFAQ to 2.8.12, and X2Engine to 4.1.7.
+Updated the Dolibarr script installer to version 3.5.4, Drupal to 7.30 and 6.32, phpMyAdmin to 4.2.7, 4.0.10.1 and 4.1.14.2, Roundcube to 1.0.2, FengOffice to 2.6.3, Joomla to 3.3.3 and 2.5.24, MediaWiki to 1.23.2 and 1.19.18, Node.JS to 0.10.30, phpMyFAQ to 2.8.12, ownCloud to 7.0.1, and X2Engine to 4.1.7.
 Ensim migration now includes alias domains and sub-domains.
