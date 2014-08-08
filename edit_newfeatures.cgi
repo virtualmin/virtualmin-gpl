@@ -27,7 +27,7 @@ foreach $f (@features) {
 		# Some features are *never* disabled, but may be not checked
 		# by default
 		push(@table, [
-			"<img src=images/tick.gif>",
+			ui_img("images/tick.gif", "Enabled"),
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			$module_info{'version'},
