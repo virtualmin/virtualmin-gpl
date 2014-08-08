@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Dolibarr script installer to version 3.5.4, Drupal to 7.30 and 6.32, phpMyAdmin to 4.2.7, 4.0.10.1 and 4.1.14.2, Roundcube to 1.0.2, FengOffice to 2.6.3, Joomla to 3.3.3 and 2.5.24, MediaWiki to 1.23.2 and 1.19.18, Node.JS to 0.10.30, phpMyFAQ to 2.8.12, ownCloud to 7.0.1, Wordpress to 3.9.2, and X2Engine to 4.1.7.
+html=Updated the Dolibarr script installer to version 3.5.4, Drupal to 7.31 and 6.33, phpMyAdmin to 4.2.7, 4.0.10.1 and 4.1.14.2, Roundcube to 1.0.2, FengOffice to 2.6.3, Joomla to 3.3.3 and 2.5.24, MediaWiki to 1.23.2 and 1.19.18, Node.JS to 0.10.30, phpMyFAQ to 2.8.12, ownCloud to 7.0.1, Wordpress to 3.9.2, and X2Engine to 4.1.7.
 master=1
 reseller=1
 domain=1
