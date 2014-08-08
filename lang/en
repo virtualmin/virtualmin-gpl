@@ -4621,6 +4621,7 @@ webmin_phpini2=PHP $2 configuration for $1
 
 newquotacheck_title=Check Disk Quotas
 newquotacheck_ecannot=You are not allowed to check disk quotas.
+newquotacheck_esupport=Quota checking is not supported or required by your filesystems
 newquotacheck_header=Disk quota check options
 newquotacheck_desc=This page allows you to validate disk usage on your system, to bring the counts maintained by the quota system into sync with the actual disk space used. This may take some time for large filesystems.
 newquotacheck_home=Check home directory quotas?

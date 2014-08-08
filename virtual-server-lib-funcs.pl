@@ -10823,6 +10823,21 @@ sub has_quota_commands
 return $config{'quota_commands'} ? 1 : 0;
 }
 
+# has_quotacheck()
+# Returns 1 if the home or mail filesystems support quota checking
+sub has_quotacheck
+{
+&foreign_require("mount");
+my @mounted = &mount::list_mounted();
+my ($hm) = grep { $_->[0] eq $config{'home_quotas'} } @mounted;
+return 1 if ($hm && $hm->[2] =~ /^ext/);
+if ($config{'mail_quotas'}) {
+	my ($mm) = grep { $_->[0] eq $config{'mail_quotas'} } @mounted;
+	return 1 if ($mm && $mm->[2] =~ /^ext/);
+	}
+return 0;
+}
+
 # get_database_usage(&domain)
 # Returns the number of bytes used by all this virtual server's databases. If
 # called in a array context, database space already counted by the quota system
@@ -11737,7 +11752,8 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
    &has_home_quotas() && $virtualmin_pro ? ( 'quotas' ) : ( ),
-   &has_home_quotas() && !&has_quota_commands() ? ( 'quotacheck' ) : ( ),
+   &has_home_quotas() && !&has_quota_commands() && &has_quotacheck() ?
+	( 'quotacheck' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
    'validate', 'chroot', 'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
@@ -14094,7 +14110,7 @@ if ($config{'mail_autoconfig'} ne '') {
 sub mount_point
 {
 local $dir = &resolve_links($_[0]);
-&foreign_require("mount", "mount-lib.pl");
+&foreign_require("mount");
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
 # Exclude swap mounts
