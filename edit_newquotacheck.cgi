@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newquotacheck_ecannot'});
+&has_quotacheck() || &error($text{'newquotacheck_esupport'});
 &ui_print_header(undef, $text{'newquotacheck_title'}, "");
 
 print "$text{'newquotacheck_desc'}<p>\n";
