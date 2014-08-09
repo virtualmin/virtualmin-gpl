@@ -36,8 +36,13 @@
 
  - Setting up rncd should also add to dhcpd.conf optionally
 
- - CentOS 6 LDAP client support
-	- http://www.server-world.info/en/note?os=CentOS_6&p=ldap&f=2
-	- Documentation
-	- CHANGELOG
-	- http://virtualmin.com/node/33343
+ - CentOS 7 support
+	- wizard should prompt for grub change & reboot
+	- Cloudmin
+		- XFS
+		- network config files
+		- eth vs ens
+		- switch back to eth via GRUB config at creation time
+
+ - Per-IP postfix and dovecot certs
+	- See email "Separate Instances of Servers" from Eric
