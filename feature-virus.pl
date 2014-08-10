@@ -446,7 +446,7 @@ elsif (&init::action_status("clamd-wrapper") ||
 	return 0;	# Redhat, not setup yet
 	}
 elsif (&init::action_status("clamd")) {
-	return 0;	# RHEL 6, not setup yet
+	return 0;	# RHEL 6+, not setup yet
 	}
 elsif (&init::action_status("clamav-clamd")) {
 	return 0;	# FreeBSD
@@ -606,8 +606,15 @@ elsif (&init::action_status("clamd-wrapper")) {
 	&$first_print(&text('clamd_start'));
 	&init::enable_at_boot("clamd-virtualmin");
 	&init::disable_at_boot("clamd-wrapper");
-	local $out = &backquote_logged("$ifile start 2>&1");
-	if ($? || $out =~ /failed|error/i) {
+	local ($ok, $out);
+	if (defined(&init::start_action)) {
+		($ok, $out) = &init::start_action($init);
+		}
+	else {
+		$out = &backquote_logged("$ifile start 2>&1");
+		$ok = !$?;
+		}
+	if (!$ok || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
 		}
