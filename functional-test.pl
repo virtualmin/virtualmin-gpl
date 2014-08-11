@@ -42,7 +42,7 @@ $test_reseller = "testsel";
 $test_reseller_two = "anothersel";
 $test_plan = "Test plan";
 $test_admin = "testadmin";
-$timeout = 120;			# Longest time a test should take
+$timeout = 240;			# Longest time a test should take
 $nowdate = strftime("%Y-%m-%d", localtime(time()));
 $yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
 $wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
