@@ -487,7 +487,7 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 		&foreign_require("net", "net-lib.pl");
 		foreach my $i (&net::active_interfaces()) {
 			if ($i->{'virtual'} eq '' &&
-			    $i->{'name'} =~ /^(eth|ppp|wlan|ath|wlan)/) {
+			    $i->{'name'} =~ /^(eth|em|eno|ens|enp|enx|ppp|wlan|ath|wlan)/) {
 				push(@ifaces, $i->{'name'});
 				}
 			}
