@@ -34,8 +34,6 @@
 	- CHANGELOG
 	- backup/restore
 
- - Setting up rncd should also add to dhcpd.conf optionally
-
  - CentOS 7 support
 	- wizard should prompt for grub change & reboot
 	- Cloudmin
@@ -46,3 +44,6 @@
 
  - Per-IP postfix and dovecot certs
 	- See email "Separate Instances of Servers" from Eric
+
+ - FreeBSD pkgng package installation
+	- https://github.com/webmin/webmin/issues/165
