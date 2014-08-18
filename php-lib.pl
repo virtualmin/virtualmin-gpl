@@ -294,7 +294,7 @@ foreach my $p (@ports) {
 			foreach my $v (@avail) {
 				push(@types,"application/x-httpd-php$v .php$v");
 				}
-			push(@types, "application/x-httpd-php$ver .php");
+			push(@types, "application/x-httpd-php .php");
 			}
 		&apache::save_directive("Action", \@actions, $phpconf, $conf);
 		&apache::save_directive("AddType", \@types, $phpconf, $conf);
