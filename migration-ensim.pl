@@ -445,11 +445,16 @@ if ($userident->{$origuser}) {
 			opendir(DIR, $mailsrc);
 			while(my $mf = readdir(DIR)) {
 				next if ($mf eq "." || $mf eq "..");
-				local $srcfolder = { 'type' => 0,
-					'file' => "$maildir/$mf" };
+				local $srcfolder = {
+					'file' => "$maildir/$mf",
+					};
 				next if (-d $srcfolder->{'file'});
-				local $dstfolder = { 'type' => $sftype,
-					'file' => "$uinfo->{'home'}/$sfdir/" };
+				$srcfolder->{'type'} = &mailboxes::folder_type(
+							$srcfolder->{'file'});
+				local $dstfolder = {
+					'type' => $sftype,
+					'file' => "$uinfo->{'home'}/$sfdir/",
+					};
 				if ($sftype == 0) {
 					$dstfolder->{'file'} .= $mf;
 					}

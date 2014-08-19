@@ -37,10 +37,9 @@
  - CentOS 7 support
 	- wizard should prompt for grub change & reboot
 	- Cloudmin
-		- XFS
-		- network config files
-		- eth vs ens
-		- switch back to eth via GRUB config at creation time
+		- handle ip command instead of ifconfig
+	- firewalld module
+		- open ports in Cloudmin too
 
  - Per-IP postfix and dovecot certs
 	- See email "Separate Instances of Servers" from Eric
