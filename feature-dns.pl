@@ -2778,7 +2778,7 @@ if ($d->{'provision_dns'}) {
 
 # If this domain has aliases, update their DNS records too
 if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
-	local @aliases = grep { $_->{'dns'} }
+	local @aliases = grep { $_->{'dns'} && !$_>{'dns_submode'} }
 			      &get_domain_by("alias", $d->{'id'});
 	foreach my $ad (@aliases) {
 		&obtain_lock_dns($ad);
