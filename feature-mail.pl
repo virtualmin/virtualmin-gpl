@@ -451,18 +451,23 @@ elsif ($config{'mail_system'} == 0) {
 	if ($lv) {
 		&delete_virtuser($lv);
 		}
-	local @md = split(/[, ]+/,
+
+	# Remove from mydestination, unless the domain is the hostname
+	if ($d->{'dom'} ne &get_system_hostname(0, 1)) {
+		local @md = split(/[, ]+/,
 			  lc(&postfix::get_current_value("mydestination")));
-	local $idx = &indexof($d->{'dom'}, @md);
-	if ($idx >= 0) {
-		# Delete old-style entry too
-		&lock_file($postfix::config{'postfix_config_file'});
-		splice(@md, $idx, 1);
-		&postfix::set_current_value("mydestination", join(", ", @md));
-		&unlock_file($postfix::config{'postfix_config_file'});
-		if (!$no_restart_mail) {
-			&shutdown_mail_server();
-			&startup_mail_server();
+		local $idx = &indexof($d->{'dom'}, @md);
+		if ($idx >= 0) {
+			# Delete old-style entry too
+			&lock_file($postfix::config{'postfix_config_file'});
+			splice(@md, $idx, 1);
+			&postfix::set_current_value("mydestination",
+						    join(", ", @md));
+			&unlock_file($postfix::config{'postfix_config_file'});
+			if (!$no_restart_mail) {
+				&shutdown_mail_server();
+				&startup_mail_server();
+				}
 			}
 		}
 	}
