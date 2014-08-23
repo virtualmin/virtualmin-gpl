@@ -21,6 +21,7 @@ return ( "intro",
 	 $config{'mysql'} ? ( "mysql", "mysize" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
 	 "hashpass",
+	 &needs_xfs_quota_fix() ? ( "xfs" ) : ( ),
 	 "done" );
 }
 
@@ -514,6 +515,38 @@ if ($in->{'hashpass'} && &foreign_check("usermin")) {
 return undef;
 }
 
+sub wizard_show_xfs
+{
+print &ui_table_row(undef, $text{'wizard_xfs'}, 2);
+
+local $xfs = &needs_xfs_quota_fix();
+if ($xfs == 1) {
+	print &ui_table_row(undef, $text{'wizard_xfsreboot'}, 2);
+	}
+elsif ($xfs == 2) {
+	print &ui_table_row($text{'wizard_xfsgrub'},
+		&ui_yesno_radio("enable", 1));
+	}
+elsif ($xfs == 3) {
+	print &ui_table_row(undef, $text{'wizard_xfsnoidea'}, 2);
+	}
+}
+
+sub wizard_parse_xfs
+{
+local ($in) = @_;
+
+# Update default template
+local @tmpls = &list_templates();
+local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+$tmpl->{'xfs'} = $in->{'xfs'};
+&save_template($tmpl);
+
+return undef;
+}
+
+
+
 # get_real_memory_size()
 # Returns the amount of RAM in bytes, or undef if we can't get it
 sub get_real_memory_size
@@ -532,6 +565,43 @@ sub get_uname_arch
 local $out = &backquote_command("uname -m");
 $out =~ s/\s+//g;
 return $out;
+}
+
+# needs_xfs_quota_fix()
+# Checks if quotas are enabled on the /home filesystem in /etc/fstab but
+# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is 
+# needed, 2 if GRUB needs to be configured, or 3 if we don't know how to
+# fix GRUB.
+sub needs_xfs_quota_fix
+{
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);	# Some other OS
+return 0 if (!$config{'quotas'});		# Quotas not even in use
+return 0 if ($config{'quota_commands'});	# Using external commands
+&require_useradmin();
+return 0 if (!$home_base);			# Don't know base dir
+return 0 if (&running_in_zone());		# Zones have no quotas
+local ($home_mtab, $home_fstab) = &mount_point($home_base);
+return 0 if (!$home_mtab || !$home_fstab);	# No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");		# Other FS type
+return 0 if ($home_mtab->[0] ne "/");		# /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,	# Not enabled in fstab
+				$home_fstab));
+return 0 if (&quota::quota_now($home_mtab,	# Already enabled in mtab
+			       $home_fstab));
+
+# At this point, we are definite in a bad state
+my $grubfile = "/etc/default/grub";
+return 3 if (!-r $grubfile);
+my %grub;
+&read_env_file($grubfile, \%grub);
+return 3 if (!$grub{'GRUB_CMDLINE_LINUX'});
+
+# Enabled already, so just need to reboot
+return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
+	     $grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*gquota,uquota/);
+
+# Otherwise, flags need adding
+return 2;
 }
 
 1;
