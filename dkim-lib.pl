@@ -9,8 +9,10 @@ $redhat_dkim_default = "/etc/sysconfig/dkim-milter";
 $ubuntu_dkim_config = "/etc/opendkim.conf";
 $ubuntu_dkim_default = "/etc/default/opendkim";
 
+$freebsd_dkim_config = "/usr/local/etc/mail/opendkim.conf";
+
 # get_dkim_type()
-# Returns either 'ubuntu', 'debian', 'redhat' or undef
+# Returns either 'ubuntu', 'debian', 'redhat', 'freebsd' or undef
 sub get_dkim_type
 {
 if ($gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7) {
@@ -29,6 +31,9 @@ elsif ($gconfig{'os_type'} eq 'debian-linux') {
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 	return 'redhat';
 	}
+elsif ($gconfig{'os_type'} eq 'freebsd') {
+	return 'freebsd';
+	}
 return undef;
 }
 
@@ -39,6 +44,7 @@ sub get_dkim_config_file
 return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_config :
        &get_dkim_type() eq 'debian' ? $debian_dkim_config :
        &get_dkim_type() eq 'redhat' ? $redhat_dkim_config :
+       &get_dkim_type() eq 'freebsd' ? $freebsd_dkim_config :
 				      undef;
 }
 
@@ -58,6 +64,7 @@ sub get_dkim_init_name
 {
 return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
        &get_dkim_type() eq 'debian' ? 'dkim-filter' :
+       &get_dkim_type() eq 'freebsd' ? 'milteropendkim' :
        &get_dkim_type() eq 'redhat' ? 'dkim-milter' : undef;
 }
 
@@ -108,6 +115,7 @@ sub install_dkim_package
 {
 &foreign_require("software", "software-lib.pl");
 my $pkg = &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
+	  &get_dkim_type() eq 'freebsd' ? 'opendkim' :
 	  &get_dkim_type() eq 'debian' ? 'dkim-filter' :
 	  &get_dkim_type() eq 'redhat' ? 'dkim-milter' : 'dkim';
 my @inst = &software::update_system_install($pkg);
@@ -194,6 +202,24 @@ elsif (&get_dkim_type() eq 'redhat') {
 		$rv{'verify'} = 1;
 		}
 	}
+elsif (&get_dkim_type() eq 'freebsd') {
+	# Read dkim config file
+	my $conf = &get_debian_dkim_config($dkim_config);
+	$rv{'enabled'} = &init::action_status($init) == 2;
+	$rv{'selector'} = $conf->{'Selector'};
+	$rv{'keyfile'} = $conf->{'KeyFile'};
+	$rv{'socket'} = $conf->{'Socket'};
+	
+	# Get sign/verify mode
+	if ($conf->{'Mode'} =~ /\S+/) {
+		$rv{'sign'} = $conf->{'Mode'} =~ /s/ ? 1 : 0;
+		$rv{'verify'} = $conf->{'Mode'} =~ /v/ ? 1 : 0;
+	}
+	else {
+		$rv{'sign'} = 1;
+		$rv{'verify'} = 1;
+	} 
+}
 
 # Check mail server
 &require_mail();
@@ -358,7 +384,7 @@ if ($dkim_config) {
                 "Syslog", "yes");
 
 	my $conf = &get_debian_dkim_config($dkim_config);
-	if (&get_dkim_type() eq 'ubuntu') {
+	if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'freebsd') {
 		# OpenDKIM version supplied with Ubuntu and Debian 6 supports
 		# a domains file
 		my $domfile = $conf->{'Domain'};
@@ -403,6 +429,26 @@ if ($dkim_config) {
 		&create_key_mapping_file(\@doms, $keylist, $selkeyfile,
 					 $dkim->{'extra'});
 		}
+		
+	if (&get_dkim_type() eq 'freebsd') {
+		# Set milter port to listen on
+		if (!$conf->{'Socket'} ||
+			$conf->{'Socket'} =~ /^inet:port/ ||
+			$conf->{'Socket'} =~ /^local:/ && $config{'mail_system'} == 0) {
+		    # Set socket is not set, or if a local file
+		    # and Postfix is in use
+		    &save_debian_dkim_config($dkim_config,
+			"Socket", "inet:8891\@localhost");
+		    $dkim->{'port'} = 8891;
+		}
+
+		# Save sign/verify mode flags
+		my $mode = ($dkim->{'sign'} ? "s" : "").
+			($dkim->{'verify'} ? "v" : "");
+		
+		&save_debian_dkim_config($dkim_config,
+			"Mode", $mode);
+ 	}
 	&unlock_file($dkim_config);
 
 	# Save list of extra domains
@@ -1129,6 +1175,9 @@ elsif (&get_dkim_type() eq 'debian') {
 	}
 elsif (&get_dkim_type() eq 'redhat') {
 	&set_ownership_permissions("dkim-milter", undef, 0700, $keyfile);
+	}
+elsif (&get_dkim_type() eq 'freebsd') {
+	&set_ownership_permissions("opendkim", undef, 0700, $keyfile);
 	}
 }
 
