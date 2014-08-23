@@ -25,10 +25,11 @@ $kfile ||= "$cdir/postfix.key.pem";
 $cafile ||= "$cdir/postfix.ca.pem";
 
 # Copy cert into those files
-&$first_print($text{'copycert_psaving'});
+$casrcfile = &get_website_ssl_file($d, "ca");
+&$first_print($casrcfile ? $text{'copycert_psaving2'}
+			 : $text{'copycert_psaving'});
 $cdata = &cert_pem_data($d);
 $kdata = &key_pem_data($d);
-$casrcfile = &get_website_ssl_file($d, "ca");
 $cadata = $casrcfile ? &read_file_contents($casrcfile) : undef;
 $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});

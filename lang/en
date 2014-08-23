@@ -5671,6 +5671,7 @@ copycert_denabling=Enabling SSL in Dovecot configuration ..
 copycert_ecert=No SSL certificate data found
 copycert_ekey=No SSL key data found
 copycert_psaving=Copying certificate and key to Postfix files ..
+copycert_psaving2=Copying certificate, key and CA to Postfix files ..
 copycert_penabling=Enabling SSL in Postfix configuration ..
 
 wizard_title=Post-Installation Wizard
