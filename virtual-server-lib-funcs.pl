@@ -10369,8 +10369,9 @@ return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
 }
 
 # warning_messages()
-# Returns HTML for an error message about the licence being expired, if it
-# is and if the current user is the master admin.
+# Returns HTML for an error messages such as the licence being expired, if it
+# is and if the current user is the master admin. Also warns about IP changes,
+# need to reboot, etc.
 sub warning_messages
 {
 return undef if (!&master_admin());
@@ -10511,6 +10512,17 @@ if ($config{'allow_modphp'} eq '') {
 		$config{'allow_modphp'} = 0;
 		&save_module_config();
 		}
+	}
+
+# Check if a reboot is needed to enable Xen quotas on /
+if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
+	my $alert_text;
+	$alert_text .= "<b>$text{'licence_xfsreboot'}</b><p>\n";
+	$alert_text .= &ui_form_start(
+		"$gconfig{'webprefix'}/init/reboot.cgi");
+	$alert_text .= &ui_submit($text{'licence_xfsrebootok'});
+	$alert_text .= &ui_form_end();
+	$rv .= &ui_alert_box($alert_text, "warn"); 
 	}
 
 return $rv;
