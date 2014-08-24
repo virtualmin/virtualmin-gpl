@@ -5755,7 +5755,11 @@ wizard_hashpass_warn=Warning - when hashed passwords are used, password recovery
 wizard_xfs=Your system uses XFS for its root filesystem, but quotas have not been fully enabled yet.
 wizard_xfsreboot=However, a reboot should be all that is needed to complete the setup of quotas. Virtualmin will prompt you to reboot after this installation wizard is complete.
 wizard_xfsnoidea=XFS quotas on the root filesystem can only be enabled by configuring GRUB, but Virtualmin does not know how to do this on your operation system.
-wizard_xfsgrub=Configure GRUB to enable XFS quotas? A reboot will be required later to complete the process.
+wizard_xfsgrub=Configure GRUB to enable XFS quotas?
+wizard_xfsgrub0=No - quotas will be un-usable in Virtualmin
+wizard_xfsgrub1=Yes - however, a reboot will be required later
+wizard_egrubfile=The GRUB configuration file $1 was not found!
+wizard_egrubline=The GRUB configuration file is missing a $1 line!
 
 backuplog_title=Backup Logs
 backuplog_ecannot=You are not allowed to view Virtualmin backup logs

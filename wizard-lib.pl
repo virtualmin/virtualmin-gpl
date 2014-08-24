@@ -525,7 +525,9 @@ if ($xfs == 1) {
 	}
 elsif ($xfs == 2) {
 	print &ui_table_row($text{'wizard_xfsgrub'},
-		&ui_yesno_radio("enable", 1));
+		&ui_radio("enable", 1,
+			  [ [ 0, $text{'wizard_xfsgrub0'} ],
+			    [ 1, $text{'wizard_xfsgrub1'} ] ]));
 	}
 elsif ($xfs == 3) {
 	print &ui_table_row(undef, $text{'wizard_xfsnoidea'}, 2);
@@ -535,17 +537,31 @@ elsif ($xfs == 3) {
 sub wizard_parse_xfs
 {
 local ($in) = @_;
+if ($in{'enable'}) {
+	# Update the grub config file source
+	my $grubfile = "/etc/default/grub";
+	my %grub;
+	&read_env_file($grubfile, \%grub) ||
+		return &text('wizard_egrubfile', "<tt>$grubfile</tt>");
+	my $v = $grub{'GRUB_CMDLINE_LINUX'};
+	$v || return &text('wizard_egrubline', "<tt>GRUB_CMDLINE_LINUX</tt>");
+	if ($v =~ /rootflags=(\S+)/) {
+		$v =~ s/rootflags=(\S+)/rootflags=$1,uquota,gquota/;
+		}
+	else {
+		$v .= " rootflags=uquota,gquota";
+		}
+	$grub{'GRUB_CMDLINE_LINUX'} = $v;
+	&write_env_file($grubfile, \%grub);
 
-# Update default template
-local @tmpls = &list_templates();
-local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
-$tmpl->{'xfs'} = $in->{'xfs'};
-&save_template($tmpl);
-
+	# Generate a new actual config file
+	&copy_source_dest("/boot/grub2/grub.cfg", "/boot/grub2/grub.cfg.orig");
+	my $out = &backquote_logged(
+		"grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 </dev/null");
+	$? && return "<tt>".&html_escape($out)."</tt>";
+	}
 return undef;
 }
-
-
 
 # get_real_memory_size()
 # Returns the amount of RAM in bytes, or undef if we can't get it
@@ -586,8 +602,9 @@ return 0 if ($home_mtab->[2] ne "xfs");		# Other FS type
 return 0 if ($home_mtab->[0] ne "/");		# /home is not on the / FS
 return 0 if (!&quota::quota_can($home_mtab,	# Not enabled in fstab
 				$home_fstab));
-return 0 if (&quota::quota_now($home_mtab,	# Already enabled in mtab
-			       $home_fstab));
+local $now = &quota::quota_now($home_mtab, $home_fstab);
+$now -= 4 if ($now >= 4);			# Ignore XFS always bit
+return 0 if ($now);				# Already enabled in mtab
 
 # At this point, we are definite in a bad state
 my $grubfile = "/etc/default/grub";
