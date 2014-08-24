@@ -267,7 +267,7 @@ if ($got{'dns'} && $si->{'config'}->{'zone'}) {
 	local %got = map { $_->{'name'}, $_ } @$recs;
 	local $count = 0;
 	foreach my $rec (@srcrecs) {
-		if (!$got{$rec->{'owner'}}) {
+		if (!$got{$rec->{'owner'}} && $rec->{'type'} ne 'NS') {
 			if ($rec->{'address'} eq $oldip) {
 				$rec->{'address'} = $ipinfo->{'ip'};
 				}
