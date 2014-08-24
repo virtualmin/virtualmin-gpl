@@ -34,9 +34,6 @@
 	- CHANGELOG
 	- backup/restore
 
- - CentOS 7 support
-	- wizard should prompt for grub change & reboot
-
  - Per-IP postfix and dovecot certs
 	- See email "Separate Instances of Servers" from Eric
 
