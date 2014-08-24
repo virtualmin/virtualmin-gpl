@@ -3607,6 +3607,8 @@ licence_fixphp=Virtualmin has detected that $1 domains on your system are config
 licence_fixphp2=WARNING : Fixing this setting will break any virtual servers that use both PHP execution modes, such as via a shared install of a PHP application.
 licence_fixphpok=Fix PHP Permissions
 licence_fixphpignore=Allow Use Of Both PHP Execution Modes
+licence_xfsreboot=Your system must be rebooted to enable XFS quotas on the root filesystem. Until this is done, Virtualmin will not detect quotas as being active, and it will be impossible to apply limits on disk usage to virtual servers or mailboxes.
+licence_xfsrebootok=Reboot Now
 
 config_deftheme=Global Webmin default
 config_oldtheme=Old Webmin theme
