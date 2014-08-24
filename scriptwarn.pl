@@ -12,7 +12,7 @@ if ($ARGV[0] eq "-debug" || $ARGV[0] eq "--debug") {
 	}
 
 # Find domains
-@doms = &list_domains();
+@doms = grep { !$_->{'disabled'} } &list_domains();
 if ($config{'scriptwarn_servers'} =~ /^\!(.*)$/) {
 	%servers = map { $_, 1 } split(/\s+/, $1);
 	@doms = grep { !$servers{$_->{'id'}} } @doms;
