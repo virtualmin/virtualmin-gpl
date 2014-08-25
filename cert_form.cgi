@@ -106,6 +106,7 @@ if (&can_webmin_cert()) {
 		$conf = &dovecot::get_config();
 		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
 			 &dovecot::find_value("ssl_cert", $conf);
+		$cfile =~ s/^<//;
 		if ($cfile && &same_cert_file($d->{'ssl_cert'}, $cfile)) {
 			$cert_already{'dovecot'} = 1;
 			}
