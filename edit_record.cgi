@@ -104,8 +104,8 @@ else {
 			}
 		else {
 			$field = &ui_textarea("value_$i", $r->{'values'}->[$i],
-					     $vals[$i]->{'height'}, $vals[$i]->{'width'},
-					     "hard");
+					     $vals[$i]->{'height'},
+					     $vals[$i]->{'width'}, "soft");
 			}
 		$field .= " ".$vals[$i]->{'suffix'};
 		print &ui_table_row($vals[$i]->{'desc'}, $field);
