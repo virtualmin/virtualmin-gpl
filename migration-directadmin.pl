@@ -14,7 +14,7 @@ local $backup = "$root/backup";
 
 if (!$dom) {
 	# Try to work out the domain
-	local @domdirs = glob("$domains/*");
+	local @domdirs = grep { !~ /\/default$/ } glob("$domains/*");
 	@domdirs || return ("No domains found in backup");
 	$domdirs[0] =~ /\/([^\/]+)$/;
 	$dom = $1;
