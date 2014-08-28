@@ -2188,6 +2188,18 @@ if ($ok) {
 			&create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
+
+			# If the domain was disabled in the backup, disable it
+			# again now
+			if ($d->{'disabled'}) {
+				&$first_print(&text('restore_disabledomain',
+						    &show_domain_name($d)));
+				&$indent_print();
+				my $err = &disable_virtual_server($d,
+					$d->{'disabled_reason'},
+					$d->{'disabled_why'});
+				&$outdent_print();
+				}
 			}
 		else {
 			# Make sure there are no databases that don't really
