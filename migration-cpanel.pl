@@ -893,7 +893,7 @@ if ($got{'mysql'}) {
 				# User already exists, so just give him the dbs
 				local $olduinfo = { %$already };
 				$already->{'dbs'} = $myuinfo->{'dbs'};
-				&modify_user($already, $old, \%dom);
+				&modify_user($already, $olduinfo, \%dom);
 				}
 			else {
 				$myuinfo->{'uid'} = &allocate_uid(\%taken);

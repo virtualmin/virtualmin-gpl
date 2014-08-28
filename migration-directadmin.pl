@@ -534,7 +534,7 @@ if ($got{'mysql'}) {
 					my $olduinfo = { %$already };
 					push(@{$already->{'dbs'}},
 					     @{$myuinfo->{'dbs'}});
-					&modify_user($already, $old, \%dom);
+					&modify_user($already, $olduinfo, \%dom);
 					}
 				else {
 					$myuinfo->{'uid'} =
