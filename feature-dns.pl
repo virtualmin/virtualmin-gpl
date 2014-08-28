@@ -1887,7 +1887,8 @@ if ($file) {
 		}
 	else {
 		# Only copy section after SOA
-		@thisrecs = &bind8::read_zone_file($file, $_[0]->{'dom'});
+		@thisrecs = &bind8::read_zone_file($file,
+		    $_[0]->{'dom'}.($_[0]->{'disabled'} ? ".disabled" : ""));
 		local $srclref = &read_file_lines($_[1], 1);
 		local $dstlref = &read_file_lines($absfile);
 		local ($srcstart, $srcend) = &except_soa($_[0], $_[1]);
