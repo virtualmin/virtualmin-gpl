@@ -240,6 +240,7 @@ local $phd = "$dom{'home'}/private_html";
 local $phdsrc = "$domains/$dom/private_html";
 if (-d $phdsrc) {
 	&$first_print("Copying private_html directory ..");
+	&make_dir_as_domain_user(\%dom, $phd, 0700);
 	&execute_command("cd ".quotemeta($phdsrc)." && ".
 			 &make_tar_command("cf", "-", ".")." | ".
 			 "(cd ".quotemeta($phd)." && ".
@@ -603,6 +604,58 @@ foreach my $adom (keys %aliaslist) {
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
+	}
+
+# Migrate any sub-domains
+my $sublist = &read_file_lines("$backup/$dom/subdomain.list", 1);
+foreach my $sdom (@$sublist) {
+	my $sname = $sdom.".".$dom{'dom'};
+	&$first_print("Creating sub-domain $sname ..");
+	if (&domain_name_clash($sname)) {
+		&$second_print(".. the domain $sname already exists");
+		next;
+		}
+	&$indent_print();
+	local %subd = ( 'id', &domain_id(),
+			'dom', $sname,
+			'user', $dom{'user'},
+			'group', $dom{'group'},
+			'prefix', $dom{'prefix'},
+			'ugroup', $dom{'ugroup'},
+			'pass', $dom{'pass'},
+			'subdom', $dom{'id'},
+			'subprefix', $sdom,
+			'uid', $dom{'uid'},
+			'gid', $dom{'gid'},
+			'ugid', $dom{'ugid'},
+			'owner', "Migrated Ensim sub-domain",
+			'email', $dom{'email'},
+			'name', 1,
+			'ip', $dom{'ip'},
+			'virt', 0,
+			'source', $dom{'source'},
+			'parent', $dom{'id'},
+			'template', $dom{'template'},
+			'reseller', $dom{'reseller'},
+			'nocreationmail', 1,
+			'nocopyskel', 1,
+			'no_tmpl_aliases', 1,
+			);
+	foreach my $f (@subdom_features) {
+		$subd{$f} = $dom{$f};
+		}
+	local $parentdom = $dom{'parent'} ? &get_domain($dom{'parent'})
+					  : \%dom;
+	$subd{'home'} = &server_home_directory(\%subd, $parentdom);
+	&generate_domain_password_hashes(\%subd, 1);
+	&complete_domain(\%subd);
+
+	&create_virtual_server(\%subd, $parentdom,
+			       $parentdom->{'user'});
+
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	push(@rvdoms, \%subd);
 	}
 
 if ($parent) {
