@@ -694,6 +694,9 @@ foreach my $db (@_[1..$#_]) {
 	if (&indexof($db, @dblist) >= 0) {
 		&postgresql::execute_sql_logged($qconfig{'basedb'},
 			"drop database ".&postgresql::quote_table($db));
+		if (defined(&postgresql::delete_database_backup_job)) {
+			&postgresql::delete_database_backup_job($db);
+			}
 		}
 	else {
 		push(@missing, $db);

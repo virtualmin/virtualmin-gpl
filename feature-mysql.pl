@@ -1387,6 +1387,9 @@ else {
 			&mysql::execute_sql_logged(
 				$mysql::master_db, "drop database ".
 				&mysql::quotestr($db));
+			if (defined(&mysql::delete_database_backup_job)) {
+				&mysql::delete_database_backup_job($db);
+				}
 			}
 		else {
 			push(@missing, $db);
