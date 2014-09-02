@@ -808,6 +808,9 @@ if ($virt) {
 	# Re-save PHP mode, in case it changed
 	&save_domain_php_mode($_[0], &get_domain_php_mode($_[0]));
 
+	# Add Require all granted directive if this system is Apache 2.4
+	&add_require_all_granted_directives($_[0], $_[0]->{'web_sslport'});
+
 	# Fix Options lines
 	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
 							$_[0]->{'web_sslport'});

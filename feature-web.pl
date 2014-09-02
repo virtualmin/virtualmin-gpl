@@ -206,26 +206,7 @@ else {
 		}
 
 	# For Apache 2.4+, add a "Require all granted" directive
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						    $d->{'web_port'});
-	if ($virt && $apache::httpd_modules{'core'} >= 2.4) {
-		foreach my $pdir (&public_html_dir($d), &cgi_bin_dir($d)) {
-			local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
-					      $_->{'words'}->[0] eq $pdir."/" }
-			    &apache::find_directive_struct("Directory", $vconf);
-			if ($dir) {
-				local @req = &apache::find_directive("Require",
-							$dir->{'members'});
-				local ($g) = grep { /all\s+granted/i } @req;
-				if (!$g) {
-					push(@req, "all granted");
-					&apache::save_directive("Require",\@req,
-						$dir->{'members'}, $conf);
-					&flush_file_lines($dir->{'file'});
-					}
-				}
-			}
-		}
+	&add_require_all_granted_directives($d, $d->{'web_port'});
 
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
@@ -1624,6 +1605,9 @@ if ($virt) {
 	if (($mode eq "fcgid" || $mode eq "cgi") && !$_[0]->{'alias'}) {
 		&fix_php_extension_dir($_[0]);
 		}
+
+	# Add Require all granted directive if this system is Apache 2.4
+	&add_require_all_granted_directives($_[0], $_[0]->{'web_port'});
 
 	# Set new public_html and cgi-bin paths
 	&find_html_cgi_dirs($_[0]);
@@ -3095,6 +3079,37 @@ foreach my $r (@rcond) {
 		}
 	}
 return @rv;
+}
+
+# add_require_all_granted_directives(&dom, [port])
+# For Apache 2.4+, add a "Require all granted" directive
+sub add_require_all_granted_directives
+{
+local ($d, $oneport) = @_;
+local @ports = $oneport ? ( $oneport ) :
+	       $d->{'ssl'} ? ( $d->{'web_port'}, $d->{'web_sslport'} ) :
+			     ( $d->{'web_port'} );
+foreach my $port (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	if ($virt && $apache::httpd_modules{'core'} >= 2.4) {
+		foreach my $pdir (&public_html_dir($d), &cgi_bin_dir($d)) {
+			local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
+					      $_->{'words'}->[0] eq $pdir."/" }
+			    &apache::find_directive_struct("Directory", $vconf);
+			if ($dir) {
+				local @req = &apache::find_directive("Require",
+							$dir->{'members'});
+				local ($g) = grep { /all\s+granted/i } @req;
+				if (!$g) {
+					push(@req, "all granted");
+					&apache::save_directive("Require",\@req,
+						$dir->{'members'}, $conf);
+					&flush_file_lines($dir->{'file'});
+					}
+				}
+			}
+		}
+	}
 }
 
 # find_html_cgi_dirs(&domain)
