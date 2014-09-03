@@ -17,6 +17,11 @@ more detail in a format that is suitable for reading by other programs. To
 just show the usernames, use the C<--name-only> flag. Or to list all email
 addresses for all users, use the C<--email-only> flag.
 
+When in multiline mode, any email forwarding destinations setup for the
+user will be listed in the internal mail server format. To get a more 
+friendly output that includes the contents of autoreply messages, use the
+C<--simple-aliases> flag.
+
 By default the server owner is not included in the list of users, but if you
 add the C<--include-owner> command line option, he will be. Also by default the
 size of each user's mail file is now shown in the multiline mode output, as
