@@ -177,7 +177,7 @@ print $js;
 # Show plan, with option to change
 if (!$parentdom) {
 	$plan = &get_plan($d->{'plan'});
-	$msg = &hlink($text{'edit_plan'}, "plan");
+	$label = &hlink($text{'edit_plan'}, "plan");
 	if (@plans) {
 		# Can select one
 		($onlist) = grep { $_->{'id'} eq $plan->{'id'} } @plans;
