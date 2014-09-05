@@ -1663,6 +1663,75 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	}
 }
 
+# sync_dovecot_ssl_cert(&domain)
+# If supported, configure Dovecot to use this domain's SSL cert for its IP
+sub sync_dovecot_ssl_cert
+{
+local ($d) = @_;
+
+# Check if dovecot is installed and supports this feature
+return undef if (!&foreign_installed("dovecot"));
+&foreign_require("dovecot");
+my $ver = &dovecot::get_dovecot_version();
+return undef if ($ver < 2);
+
+# Find the existing block for the IP
+my $cfile = &dovecot::get_config_file();
+&lock_file($cfile);
+my $conf = &dovecot::get_config();
+my ($l) = grep { $_->{'value'} eq $d->{'ip'} }
+	       &dovecot::find("local", $conf);
+my $imap;
+if ($l) {
+	($imap) = grep { $_->{'value'} eq 'imap' }
+		       &dovecot::find("protocol", $l->{'members'});
+	}
+
+if ($d->{'ssl'} && $d->{'virt'}) {
+	# Needs a cert for the IP
+	if (!$l) {
+		$l = { 'name' => 'local',
+		       'value' => $d->{'ip'},
+		       'members' => [],
+		       'file' => $cfile };
+		my $lref = &read_file_lines($l->{'file'}, 1);
+		$l->{'line'} = $l->{'eline'} = scalar(@$lref);
+		&dovecot::save_section($conf, $l);
+		push(@$conf, $l);
+		}
+	if (!$imap) {
+		$imap = { 'name' => 'protocol',
+			  'value' => 'imap',
+			  'members' => [],
+			  'indent' => 1,
+			  'file' => $l->{'file'},
+			  'line' => $l->{'line'},
+			  'eline' => $l->{'line'} };
+		&dovecot::save_section($conf, $imap);
+		push(@{$l->{'members'}}, $imap);
+		}
+	&dovecot::save_directive($l->{'members'}, "ssl_cert",
+				 $d->{'ssl_cert'}, "protocol", "imap");
+	&dovecot::save_directive($l->{'members'}, "ssl_key",
+				 $d->{'ssl_key'}, "protocol", "imap");
+	&flush_file_lines($imap->{'file'});
+	}
+else {
+	# Doesn't need one, either because SSL isn't enabled or the domain
+	# doesn't have a private IP. So remove the whole local block.
+	if ($l) {
+		my $lref = &read_file_lines($l->{'file'});
+		splice(@$lref, $l->{'line'}, $l->{'eline'}-$l->{'line'}+1);
+		&flush_file_lines($l->{'file'});
+		undef(@dovecot::get_config_cache);
+		}
+	}
+&unlock_file($cfile);
+if ($changed) {
+	&dovecot::apply_configuration();
+	}
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;
