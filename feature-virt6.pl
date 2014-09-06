@@ -5,14 +5,8 @@
 sub supports_ip6
 {
 if (!defined($supports_ip6_cache)) {
-	if ($gconfig{'os_type'} =~ /^(debian|redhat)-linux$/) {
-		local $out = &backquote_command(
-			"LC_ALL='' LANG='' ifconfig -a");
-		$supports_ip6_cache = $out =~ /inet6 addr:/ ? 1 : 0;
-		}
-	else {
-		$supports_ip6_cache = 0;
-		}
+	&foreign_require("net");
+	$supports_ip6_cache = &net::supports_address6() ? 1 : 0;
 	}
 return $supports_ip6_cache;
 }
