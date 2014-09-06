@@ -18,11 +18,11 @@ $dovedir = $cfile;
 $dovedir =~ s/\/([^\/]+)$//;
 $conf = &dovecot::get_config();
 $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
-	 &dovecot::find_value("ssl_cert", $conf);
+	 &dovecot::find_value("ssl_cert", $conf, 0, "");
 $kfile = &dovecot::find_value("ssl_key_file", $conf) ||
-	 &dovecot::find_value("ssl_key", $conf);
+	 &dovecot::find_value("ssl_key", $conf, 0, "");
 $cafile = &dovecot::find_value("ssl_ca_file", $conf) ||
-	  &dovecot::find_value("ssl_ca", $conf);
+	  &dovecot::find_value("ssl_ca", $conf, 0, "");
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
 $cafile =~ s/^<//;

@@ -209,6 +209,9 @@ if ($chained) {
 	}
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
+# Setup in Dovecot if possible
+&sync_dovecot_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
 if ($d->{'virt'}) {
@@ -453,18 +456,20 @@ return $rv;
 # Deletes the SSL virtual server from the Apache config
 sub delete_ssl
 {
+local ($d) = @_;
+
 &require_apache();
 &$first_print($text{'delete_ssl'});
-&obtain_lock_web($_[0]);
+&obtain_lock_web($d);
 local $conf = &apache::get_config();
 
 # Remove the custom Listen directive added for the domain, if any
 &remove_listen($d, $conf, $d->{'web_sslport'} || $default_web_sslport);
 
 # Remove the <virtualhost>
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-			    $_[0]->{'web_sslport'} || $default_web_sslport);
-local $tmpl = &get_template($_[0]->{'template'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+			    $d->{'web_sslport'} || $default_web_sslport);
+local $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	&delete_web_virtual_server($virt);
 	&$second_print($text{'setup_done'});
@@ -476,31 +481,34 @@ else {
 undef(@apache::get_config_cache);
 
 # Delete per-IP SSL cert
-&delete_ipkeys($_[0], \&get_miniserv_config,
+&delete_ipkeys($d, \&get_miniserv_config,
 	       \&put_miniserv_config,
 	       \&restart_webmin);
 if (&foreign_installed("usermin")) {
 	&foreign_require("usermin", "usermin-lib.pl");
-	&delete_ipkeys($_[0], \&usermin::get_usermin_miniserv_config,
+	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
 	}
 
 # If any other domains were using this one's SSL cert or key, break the linkage
-foreach my $od (&get_domain_by("ssl_same", $_[0]->{'id'})) {
+foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&break_ssl_linkage($od, $d);
 	&save_domain($od);
 	}
 
 # If this domain was sharing a cert with another, forget about it now
-if ($_[0]->{'ssl_same'}) {
-	delete($_[0]->{'ssl_cert'});
-	delete($_[0]->{'ssl_key'});
-	delete($_[0]->{'ssl_chain'});
-	delete($_[0]->{'ssl_same'});
+if ($d->{'ssl_same'}) {
+	delete($d->{'ssl_cert'});
+	delete($d->{'ssl_key'});
+	delete($d->{'ssl_chain'});
+	delete($d->{'ssl_same'});
 	}
 
-&release_lock_web($_[0]);
+# Remove from Dovecot if possible
+&sync_dovecot_ssl_cert($d, 0);
+
+&release_lock_web($d);
 }
 
 # clone_ssl(&domain, &old-domain)
@@ -1663,11 +1671,11 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	}
 }
 
-# sync_dovecot_ssl_cert(&domain)
+# sync_dovecot_ssl_cert(&domain, [enable-or-disable])
 # If supported, configure Dovecot to use this domain's SSL cert for its IP
 sub sync_dovecot_ssl_cert
 {
-local ($d) = @_;
+local ($d, $enable) = @_;
 
 # Check if dovecot is installed and supports this feature
 return undef if (!&foreign_installed("dovecot"));
@@ -1679,15 +1687,16 @@ return undef if ($ver < 2);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 my $conf = &dovecot::get_config();
-my ($l) = grep { $_->{'value'} eq $d->{'ip'} }
-	       &dovecot::find("local", $conf);
+my @loc = grep { $_->{'name'} eq 'local' &&
+		 $_->{'section'} } @$conf;
+my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
 my $imap;
 if ($l) {
 	($imap) = grep { $_->{'value'} eq 'imap' }
 		       &dovecot::find("protocol", $l->{'members'});
 	}
 
-if ($d->{'ssl'} && $d->{'virt'}) {
+if ($enable) {
 	# Needs a cert for the IP
 	if (!$l) {
 		$l = { 'name' => 'local',
@@ -1702,18 +1711,25 @@ if ($d->{'ssl'} && $d->{'virt'}) {
 	if (!$imap) {
 		$imap = { 'name' => 'protocol',
 			  'value' => 'imap',
-			  'members' => [],
+			  'members' => [
+				{ 'name' => 'ssl_cert',
+				  'value' => "<".$d->{'ssl_cert'} },
+				{ 'name' => 'ssl_key',
+				  'value' => "<".$d->{'ssl_key'} },
+				],
 			  'indent' => 1,
 			  'file' => $l->{'file'},
-			  'line' => $l->{'line'},
+			  'line' => $l->{'line'} + 1,
 			  'eline' => $l->{'line'} };
 		&dovecot::save_section($conf, $imap);
 		push(@{$l->{'members'}}, $imap);
 		}
-	&dovecot::save_directive($l->{'members'}, "ssl_cert",
-				 $d->{'ssl_cert'}, "protocol", "imap");
-	&dovecot::save_directive($l->{'members'}, "ssl_key",
-				 $d->{'ssl_key'}, "protocol", "imap");
+	else {
+		&dovecot::save_directive($l->{'members'}, "ssl_cert",
+				 "<".$d->{'ssl_cert'}, "protocol", "imap");
+		&dovecot::save_directive($l->{'members'}, "ssl_key",
+				 "<".$d->{'ssl_key'}, "protocol", "imap");
+		}
 	&flush_file_lines($imap->{'file'});
 	}
 else {
