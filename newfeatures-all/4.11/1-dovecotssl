@@ -1,0 +1,4 @@
+desc=Per-IP Dovecot SSL Certifcates
+html=If Dovecot version 2 or higher has SSL enabled, the certificate for domains with a private IP address will be used for connections to the Dovecot server.
+master=1
+reseller=1

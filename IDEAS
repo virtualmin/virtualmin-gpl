@@ -36,9 +36,12 @@
 
  - Per-IP postfix and dovecot certs
 	- See email "Separate Instances of Servers" from Eric
+	- CHANGELOG
 
  - Re-evaluate use of x.x.x.x:80 vs *:80 with Apache 2.4
 	- http://virtualmin.com/node/33860
 
  - Backup to Google Cloud Files & Dropbox
 	- Cloudmin too
+
+ - Domain and global level mailbox deletion policies

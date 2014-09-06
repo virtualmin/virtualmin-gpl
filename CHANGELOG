@@ -1459,3 +1459,4 @@ Updated the Dolibarr script installer to version 3.6.0, Drupal to 7.31 and 6.33,
 Ensim migration now includes alias domains and sub-domains.
 ---- Changes since 4.10 ----
 Updated the phpMyAdmin script installer to version 4.2.8, and Django to 1.4.15.
+If Dovecot 2 or higher has SSL enabled, the certificate for domains with a private IP address will be used for connections to the Dovecot server.
