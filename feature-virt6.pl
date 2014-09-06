@@ -317,19 +317,14 @@ else {
 # Returns a list of IPv6 addresses currently active
 sub active_ip6_interfaces
 {
+&foreign_require("net");
 local @rv;
-local $out = &backquote_command("ifconfig -a 2>/dev/null");
-local $ifacename;
-foreach my $l (split(/\r?\n/, $out)) {
-	if ($l =~ /^(\S+)/) {
-		# Start of a new interface
-		$ifacename = $1;
-		}
-	if ($l =~ /inet6\s+addr:\s+(\S+)\/(\d+)/i && $ifacename) {
-		# Found an IPv6 address
-		push(@rv, { 'name' => $ifacename,
-			    'address' => $1,
-			    'netmask' => $2 });
+foreach my $i (&net::active_interfaces()) {
+	next if (!$i->{'address6'});
+	for(my $j=0; $j<@{$i->{'address6'}}; $j++) {
+		push(@rv, { 'name' => $i->{'name'},
+			    'address' => $i->{'address6'}->[$j],
+			    'netmask' => $i->{'netmask6'}->[$j] });
 		}
 	}
 return @rv;
