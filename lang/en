@@ -2477,6 +2477,7 @@ restore_eresel2=.. the reseller $1 specified in the backup does not exist - remo
 restore_edefip=.. could not work out the default IP address
 restore_eclash=.. a clash was detected : $1
 restore_ewarnings=.. the following warnings were detected :
+restore_disabledomain=Re-disabling virtual server $1 ..
 restore_fordomain=Restoring backup for virtual server $1 ..
 restore_download=Downloading archive from FTP server ..
 restore_downloadssh=Downloading archive from SSH server ..
