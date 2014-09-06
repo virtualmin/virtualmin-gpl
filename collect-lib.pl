@@ -494,14 +494,29 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 		}
 	@ifaces = &unique(@ifaces);
 	local $ifaces = join(" ", @ifaces);
-	foreach my $iname (@ifaces) {
-		local $out = &backquote_command(
-			"LC_ALL='' LANG='' ifconfig ".
-			quotemeta($iname)." 2>/dev/null");
-		local $rx = $out =~ /RX\s+bytes:\s*(\d+)/i ? $1 : undef;
-		local $tx = $out =~ /TX\s+bytes:\s*(\d+)/i ? $1 : undef;
-		$rxtotal += $rx;
-		$txtotal += $tx;
+	if (&has_command("ifconfig")) {
+		# Get traffic from old ifconfig command
+		foreach my $iname (@ifaces) {
+			local $out = &backquote_command(
+				"LC_ALL='' LANG='' ifconfig ".
+				quotemeta($iname)." 2>/dev/null");
+			local $rx = $out =~ /RX\s+bytes:\s*(\d+)/i ? $1 : undef;
+			local $tx = $out =~ /TX\s+bytes:\s*(\d+)/i ? $1 : undef;
+			$rxtotal += $rx;
+			$txtotal += $tx;
+			}
+		}
+	else {
+		# Get traffic from /proc/net/dev
+		local $out = &read_file_contents("/proc/net/dev");
+		foreach my $l (split(/\r?\n/, $out)) {
+			$l =~ s/^\s+//;
+			my @w = split(/[ \t:]+/, $l);
+			if (&indexof($w[0], @ifaces) >= 0) {
+				$rxtotal += $w[9];
+				$txtotal += $w[1];
+				}
+			}
 		}
 
 	# Work out the diff since the last run, if we have it
