@@ -2118,6 +2118,7 @@ foreach my $dip ($d->{'ip'}, $d->{'ip6'} ? ( $d->{'ip6'} ) : ( )) {
 	local @listen = &apache::find_directive("Listen", $conf);
 	local $lfound;
 	foreach my $l (@listen) {
+		$l =~ s/\s\S+$//;	# Remove trailing port name
 		$lfound++ if (($l eq '*' && $web_port == $defport) ||
 			      ($l =~ /^\*:(\d+)$/ && $web_port == $1) ||
 			      ($l =~ /^0\.0\.0\.0:(\d+)$/ && $web_port == $1) ||
