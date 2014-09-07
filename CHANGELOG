@@ -1460,3 +1460,4 @@ Ensim migration now includes alias domains and sub-domains.
 ---- Changes since 4.10 ----
 Updated the phpMyAdmin script installer to version 4.2.8, and Django to 1.4.15.
 If Dovecot 2 or higher has SSL enabled, the certificate for domains with a private IP address will be used for connections to the Dovecot server.
+IPv6 addresses in Virtualmin are now supported on all operation systems that Webmin supports them for, rather than just Linux.
