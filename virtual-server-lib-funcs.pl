@@ -11771,7 +11771,8 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
    'dkim', 'ratelimit', 'provision',
-   $config{'mail'} ? ( 'autoconfig', 'retention' ) : ( ),
+   $config{'mail'} ? ( 'autoconfig' ) : ( ),
+   $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',

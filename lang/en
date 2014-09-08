@@ -2094,6 +2094,7 @@ log_nofixsymlinks=Allowed unsafe symbolic link permissions
 log_fixhtaccess=Fixed symbolic link htaccess options
 log_autoconfigon=Enabled mail client auto-configuration
 log_autoconfigoff=Disabled mail client auto-configuration
+log_retention=Updated mailbox cleanup settings
 log_postinstall=Ran post-install script
 log_install_ratelimit=Installed rate limiting server
 log_enable_ratelimit=Enabled mail rate limiting
