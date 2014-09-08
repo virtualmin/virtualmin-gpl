@@ -1191,14 +1191,23 @@ else {
 	delete($spamclear{$d->{'id'}});
 	}
 &write_file($spamclear_file, \%spamclear);
+&setup_spamclear_cron_job();
+}
 
-# Fix cron job
+# setup_spamclear_cron_job()
+# Create or remove the spam-clearing cron job based on whether retention or
+# spam clearing is enabled for any domain
+sub setup_spamclear_cron_job
+{
 local $job = &find_cron_script($spamclear_cmd);
-if ($job && !%spamclear) {
+local %spamclear;
+&read_file_cached($spamclear_file, \%spamclear);
+local $want = %spamclear || $config{'retention_policy'};
+if ($job && !$want) {
 	# Disable job, as we don't need it
 	&delete_cron_script($job);
 	}
-elsif (!$job && %spamclear) {
+elsif (!$job && $want) {
 	# Enable the job
 	$job = { 'user' => 'root',
 		 'command' => $spamclear_cmd,

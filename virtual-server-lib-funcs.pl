@@ -14080,6 +14080,9 @@ if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
 	&setup_scriptlatest_job(1);
 	}
 
+# Re-setup spam clearing / retention cron job
+&setup_spamclear_cron_job();
+
 # Re-setup the validation cron job based on the saved config
 local ($oldjob, $job);
 $oldjob = $job = &find_cron_script($validate_cron_cmd);
