@@ -1,0 +1,4 @@
+desc=Automatic Mailbox Cleanup
+html=Automatic cleanup of messages in all mailboxes and folders can now be setup in Virtualmin, to enforce an email retention policy or save on disk space.
+master=1
+link=edit_newretention.cgi

@@ -1461,3 +1461,4 @@ Ensim migration now includes alias domains and sub-domains.
 Updated the phpMyAdmin script installer to version 4.2.8, Wordpress to 4.0, PiWik to 2.6.1, and Django to 1.4.15.
 If Dovecot 2 or higher has SSL enabled, the certificate for domains with a private IP address will be used for connections to the Dovecot server.
 IPv6 addresses in Virtualmin are now supported on all operation systems that Webmin supports them for, rather than just Linux.
+Automatic cleanup of messages in all mailboxes and folders can now be setup in Virtualmin, to enforce an email retention policy or save on disk space.
