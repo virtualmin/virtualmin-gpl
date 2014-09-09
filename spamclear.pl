@@ -14,6 +14,9 @@ while(@ARGV) {
 	if ($a eq "--debug") {
 		$debug = 1;
 		}
+	elsif ($a eq "--dry-run") {
+		$dryrun = 1;
+		}
 	else {
 		$ucheck{$a}++;
 		}
@@ -61,15 +64,17 @@ foreach $d (&list_domains()) {
 		else {
 			print STDERR "$d->{'dom'}: no retention for domain\n"
 				if ($debug);
+			$retention = { };
 			}
 		}
 	else {
 		print STDERR "$d->{'dom'}: no retention active\n"
 			if ($debug);
+		$retention = { };
 		}
 
 	# Check if there is anything to do
-	if (!($auto && %$auto) && !($retention && %$retention)) {
+	if (!%$auto && !%$retention) {
 		print STDERR "$d->{'dom'}: no cleanup is needed\n"
 			if ($debug);
 		next;
@@ -126,14 +131,26 @@ foreach $d (&list_domains()) {
 			}
 
 		# For email retention policy
-		# XXX inbox or 
+		if (%$retention && $config{'retention_folders'} == 0) {
+			# All of the user's folders
+			push(@process, @folders);
+			}
+		elsif (%$retention && $config{'retention_folders'} == 1) {
+			# Just the inbox
+			push(@process, $folders[0]) if (@folders);
+			}
 
 		# Uniquify folders
 		my %donefolder;
 		@process = grep { !$donefolder{&mailboxes::folder_name($_)}++ }
 				@process;
 
+		print STDERR "  $u->{'user'}: processing ".scalar(@process).
+			     " folders\n" if ($debug);
 		foreach my $folder (@process) {
+			print STDERR "  $u->{'user'}: processing folder ".
+				     $folder->{'file'}."\n" if ($debug);
+
 			# Verify the index on the folder
 			if ($folder->{'type'} == 0) {
 				local $ifile = &mailboxes::user_index_file(
@@ -153,15 +170,19 @@ foreach $d (&list_domains()) {
 				}
 
 			# Work out the threshold
-			# XXX apply retention policy
 			local ($days, $size);
 			if ($fn eq $tfname) {
 				($days, $size) = ($auto->{'trashdays'},
 						  $auto->{'trashsize'});
 				}
-			else {
+			elsif ($fn eq $sfname || $fn eq $tfname) {
 				($days, $size) = ($auto->{'days'},
 						  $auto->{'size'});
+				}
+			if ($days eq '' && $size eq '' && %$retention) {
+				# Fall back to retention policy
+				$days = $retention->{'days'};
+				$size = $retention->{'size'};
 				}
 			if ($days eq '' && $size eq '') {
 				print STDERR "  $u->{'user'}: clearing ".
@@ -242,13 +263,21 @@ else {
 		}
 	}
 
-# Delete any mail found
-if (@delmail) {
-	print STDERR "  $u->{'user'}: deleting ",scalar(@delmail)," messages\n"
-		if ($debug);
-	&mailboxes::mailbox_delete_mail(
-		$folder, reverse(@delmail));
+if ($dryrun) {
+	if (@delmail) {
+		print STDERR "  $u->{'user'}: would delete ",scalar(@delmail),
+			     " messages\n" if ($debug);
+		}
+	return ($needsize, 0);
 	}
-
-return ($needsize, scalar(@delmail));
+else {
+	# Delete any mail found
+	if (@delmail) {
+		print STDERR "  $u->{'user'}: deleting ",scalar(@delmail),
+			     " messages\n" if ($debug);
+		&mailboxes::mailbox_delete_mail(
+			$folder, reverse(@delmail));
+		}
+	return ($needsize, scalar(@delmail));
+	}
 }
