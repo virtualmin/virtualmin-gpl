@@ -42,7 +42,7 @@ local $htaccess_file = "$stats/.htaccess";
 local $passwd_file = "$_[0]->{'home'}/.stats-htpasswd";
 if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	# Setup .htaccess file for directory
-	&create_webalizer_htaccess($d, $htaccess_file, $passwd_file);
+	&create_webalizer_htaccess($_[0], $htaccess_file, $passwd_file);
 
 	# Add to list of protected dirs
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
