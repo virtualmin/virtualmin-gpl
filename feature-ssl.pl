@@ -1710,6 +1710,7 @@ if ($l) {
 
 if ($enable) {
 	# Needs a cert for the IP
+	local $chain = &get_website_ssl_file($d, "ca");
 	if (!$l) {
 		$l = { 'name' => 'local',
 		       'value' => $d->{'ip'},
@@ -1733,6 +1734,11 @@ if ($enable) {
 			  'file' => $l->{'file'},
 			  'line' => $l->{'line'} + 1,
 			  'eline' => $l->{'line'} };
+		if ($chain) {
+			push(@{$imap->{'members'}},
+			     { 'name' => 'ssl_ca',
+			       'value' => "<".$chain });
+			}
 		&dovecot::save_section($conf, $imap);
 		push(@{$l->{'members'}}, $imap);
 		}
@@ -1741,6 +1747,10 @@ if ($enable) {
 				 "<".$d->{'ssl_cert'}, "protocol", "imap");
 		&dovecot::save_directive($l->{'members'}, "ssl_key",
 				 "<".$d->{'ssl_key'}, "protocol", "imap");
+		if ($chain) {
+			&dovecot::save_directive($l->{'members'}, "ssl_ca",
+					 "<".$chain, "protocol", "imap");
+			}
 		}
 	&flush_file_lines($imap->{'file'});
 	}
