@@ -1686,6 +1686,7 @@ sub sync_dovecot_ssl_cert
 local ($d, $enable) = @_;
 
 # Check if dovecot is installed and supports this feature
+return undef if (!$config{'dovecot_ssl'});
 return undef if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
@@ -1778,6 +1779,7 @@ local ($d, $enable) = @_;
 
 # Check if Postfix is in use
 return undef if ($config{'mail_system'} != 0);
+return undef if (!$config{'postfix_ssl'});
 
 # Check if using SSL globally
 &foreign_require("postfix");

@@ -78,6 +78,8 @@ cert_tmpl=Template for certificate path,3,Default (<tt>~/ssl.cert</tt>)
 ca_tmpl=Template for CA certificate path,3,Default (<tt>~/ssl.ca</tt>)
 openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
 sni_support=Allow multiple SSL websites on the same IP?,1,1-Yes,0-No
+dovecot_ssl=Copy per-IP SSL certificates to Dovecot?,1,1-Yes,0-No
+postfix_ssl=Copy per-IP SSL certificates to Postfix?,1,1-Yes,0-No
 
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
