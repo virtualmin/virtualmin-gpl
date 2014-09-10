@@ -11772,6 +11772,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
+   $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -11807,6 +11808,7 @@ local %tmplcat = (
 	'changelog' => 'setting',
 	'provision' => 'setting',
 	'autoconfig' => 'email',
+	'retention' => 'email',
 	);
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,
@@ -14078,6 +14080,9 @@ if (defined(&setup_scriptwarn_job) && defined($config{'scriptwarn_enabled'})) {
 if (defined(&setup_scriptlatest_job) && $config{'scriptlatest_enabled'}) {
 	&setup_scriptlatest_job(1);
 	}
+
+# Re-setup spam clearing / retention cron job
+&setup_spamclear_cron_job();
 
 # Re-setup the validation cron job based on the saved config
 local ($oldjob, $job);

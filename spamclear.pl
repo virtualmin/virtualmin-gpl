@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl
-# Clear spam folders in virtual servers that have requested it
+# Apply the spam cleanup and email retention polices for all virtual servers
+# that have them enabled.
 
 package virtual_server;
 $main::no_acl_check++;
@@ -13,6 +14,9 @@ while(@ARGV) {
 	if ($a eq "--debug") {
 		$debug = 1;
 		}
+	elsif ($a eq "--dry-run") {
+		$dryrun = 1;
+		}
 	else {
 		$ucheck{$a}++;
 		}
@@ -24,19 +28,57 @@ $temp = &transname();
 &mailboxes::open_dbm_db(\%dummy, "$temp/dummy", 0700);
 
 foreach $d (&list_domains()) {
-	# Is clearing enabled?
-	if (!$d->{'spam'}) {
+	# Is spam clearing enabled?
+	$auto = undef;
+	if ($d->{'spam'} && ($auto = &get_domain_spam_autoclear($d)) &&
+	    %$auto) {
+		print STDERR "$d->{'dom'}: spam clearing is enabled\n"
+			if ($debug);
+		}
+	else {
+		$auto = { };
 		print STDERR "$d->{'dom'}: spam filtering is not enabled\n"
 			if ($debug);
-		next;
 		}
-	$auto = &get_domain_spam_autoclear($d);
-	if (!$auto || !keys %$auto) {
-		print STDERR "$d->{'dom'}: spam clearing is not enabled\n"
+	print STDERR "$d->{'dom'}: finding mailboxes\n" if ($debug);
+
+	# Is email retention policy active?
+	$retention = undef;
+	if ($config{'retention_policy'}) {
+		%dids = map { $_, 1 } split(/\s+/, $config{'retention_doms'});
+		if ($config{'retention_mode'} == 0 ||
+		    $config{'retention_mode'} == 1 && $dids{$d->{'id'}} ||
+		    $config{'retention_mode'} == 2 && !$dids{$d->{'id'}}) {
+			# A policy exists, and is used for this domain
+			if ($config{'retention_policy'} == 1) {
+				$retention = {
+					'days' => $config{'retention_days'} };
+				}
+			elsif ($config{'retention_policy'} == 2) {
+				$retention = {
+					'size' => $config{'retention_size'} };
+				}
+			print STDERR "$d->{'dom'}: retention is enabled\n"
+				if ($debug);
+			}
+		else {
+			print STDERR "$d->{'dom'}: no retention for domain\n"
+				if ($debug);
+			$retention = { };
+			}
+		}
+	else {
+		print STDERR "$d->{'dom'}: no retention active\n"
+			if ($debug);
+		$retention = { };
+		}
+
+	# Check if there is anything to do
+	if (!%$auto && !%$retention) {
+		print STDERR "$d->{'dom'}: no cleanup is needed\n"
 			if ($debug);
 		next;
 		}
-	print STDERR "$d->{'dom'}: finding mailboxes\n" if ($debug);
 
 	# Work out the spam, virus and trash folders for this domain
 	local $sfname = "spam";
@@ -60,22 +102,54 @@ foreach $d (&list_domains()) {
 	# Check all mailboxes
 	@users = &list_domain_users($d, 0, 1, 1, 1);
 	foreach $u (@users) {
-		# Find spam folder
 		next if (keys %ucheck && !$ucheck{$u->{'user'}});
+
+		# Find the folders to process
 		print STDERR " $u->{'user'}: finding folders\n" if ($debug);
 		@uinfo = ( $u->{'user'}, $u->{'pass'}, $u->{'uid'},
 			   $u->{'gid'}, undef, undef, $u->{'real'},
 			   $u->{'home'}, $u->{'shell'} );
 		@folders = &mailboxes::list_user_folders(@uinfo);
-		foreach $fn (&unique($sfname, $vfname, $tfname)) {
-			($folder) = grep { $_->{'file'} =~ /\/(\.?)\Q$fn\E$/i &&
-					   $_->{'index'} != 0 } @folders;
-			if (!$folder) {
-				print STDERR "  $u->{'user'}: no $fn folder\n"
-					if ($debug);
-				next;
+		@process = ( );
+
+		# For spam clearing
+		if (%$auto) {
+			foreach $fn (&unique($sfname, $vfname, $tfname)) {
+				($folder) = grep {
+					$_->{'file'} =~ /\/(\.?)\Q$fn\E$/i &&
+					$_->{'index'} != 0
+					} @folders;
+				if (!$folder) {
+					print STDERR "  $u->{'user'}: no $fn ".
+						     "folder\n" if ($debug);
+					next;
+					}
+				print STDERR "  $u->{'user'}: $fn folder is ".
+					     "$folder->{'file'}\n" if ($debug);
+				push(@process, $folder);
 				}
-			print STDERR "  $u->{'user'}: $fn folder is $folder->{'file'}\n" if ($debug);
+			}
+
+		# For email retention policy
+		if (%$retention && $config{'retention_folders'} == 0) {
+			# All of the user's folders
+			push(@process, @folders);
+			}
+		elsif (%$retention && $config{'retention_folders'} == 1) {
+			# Just the inbox
+			push(@process, $folders[0]) if (@folders);
+			}
+
+		# Uniquify folders
+		my %donefolder;
+		@process = grep { !$donefolder{&mailboxes::folder_name($_)}++ }
+				@process;
+
+		print STDERR "  $u->{'user'}: processing ".scalar(@process).
+			     " folders\n" if ($debug);
+		foreach my $folder (@process) {
+			print STDERR "  $u->{'user'}: processing folder ".
+				     $folder->{'file'}."\n" if ($debug);
 
 			# Verify the index on the folder
 			if ($folder->{'type'} == 0) {
@@ -101,9 +175,14 @@ foreach $d (&list_domains()) {
 				($days, $size) = ($auto->{'trashdays'},
 						  $auto->{'trashsize'});
 				}
-			else {
+			elsif ($fn eq $sfname || $fn eq $tfname) {
 				($days, $size) = ($auto->{'days'},
 						  $auto->{'size'});
+				}
+			if ($days eq '' && $size eq '' && %$retention) {
+				# Fall back to retention policy
+				$days = $retention->{'days'};
+				$size = $retention->{'size'};
 				}
 			if ($days eq '' && $size eq '') {
 				print STDERR "  $u->{'user'}: clearing ".
@@ -184,13 +263,21 @@ else {
 		}
 	}
 
-# Delete any mail found
-if (@delmail) {
-	print STDERR "  $u->{'user'}: deleting ",scalar(@delmail)," messages\n"
-		if ($debug);
-	&mailboxes::mailbox_delete_mail(
-		$folder, reverse(@delmail));
+if ($dryrun) {
+	if (@delmail) {
+		print STDERR "  $u->{'user'}: would delete ",scalar(@delmail),
+			     " messages\n" if ($debug);
+		}
+	return ($needsize, 0);
 	}
-
-return ($needsize, scalar(@delmail));
+else {
+	# Delete any mail found
+	if (@delmail) {
+		print STDERR "  $u->{'user'}: deleting ",scalar(@delmail),
+			     " messages\n" if ($debug);
+		&mailboxes::mailbox_delete_mail(
+			$folder, reverse(@delmail));
+		}
+	return ($needsize, scalar(@delmail));
+	}
 }

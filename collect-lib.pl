@@ -513,8 +513,8 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 			$l =~ s/^\s+//;
 			my @w = split(/[ \t:]+/, $l);
 			if (&indexof($w[0], @ifaces) >= 0) {
-				$rxtotal += $w[9];
-				$txtotal += $w[1];
+				$rxtotal += $w[1];
+				$txtotal += $w[9];
 				}
 			}
 		}

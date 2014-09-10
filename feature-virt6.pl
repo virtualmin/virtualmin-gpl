@@ -5,14 +5,8 @@
 sub supports_ip6
 {
 if (!defined($supports_ip6_cache)) {
-	if ($gconfig{'os_type'} =~ /^(debian|redhat)-linux$/) {
-		local $out = &backquote_command(
-			"LC_ALL='' LANG='' ifconfig -a");
-		$supports_ip6_cache = $out =~ /inet6 addr:/ ? 1 : 0;
-		}
-	else {
-		$supports_ip6_cache = 0;
-		}
+	&foreign_require("net");
+	$supports_ip6_cache = &net::supports_address6() ? 1 : 0;
 	}
 return $supports_ip6_cache;
 }
@@ -334,48 +328,14 @@ return @rv;
 # Returns a list of IPv6 addresses activated at boot
 sub boot_ip6_interfaces
 {
+&foreign_require("net");
 local @rv;
-&foreign_require("net", "net-lib.pl");
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	# Read /etc/network/interfaces for inet6 blocks
-	local @defs = &net::get_interface_defs();
-	foreach my $i (grep { $_->[1] eq 'inet6' } @defs) {
-		foreach my $o (@{$i->[3]}) {
-			if ($o->[0] eq 'address') {
-				# Primary address
-				local ($mask) = grep { $_->[0] eq 'netmask' }
-						     @{$i->[3]};
-				push(@rv, { 'name' => $i->[0],
-					    'address' => $o->[1],
-					    'netmask' => $mask ? $mask->[1]
-							       : 64 });
-				}
-			elsif ($o->[0] eq 'up' &&
-			       $o->[1] =~ /ifconfig\s+(\S+)\s+inet6\s+add\s+([a-f0-9:]+)\/(\d+)/ &&
-			       $1 eq $i->[0]) {
-				# Extra address
-				push(@rv, { 'name' => $i->[0],
-					    'address' => $2,
-					    'netmask' => $3 });
-				}
-			}
-		}
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# Read ifcfg-* files for IPV6ADDR and IPV6ADDR_SECONDARIES
-	foreach my $b (grep { $_->{'virtual'} eq '' } &net::boot_interfaces()) {
-		local %conf;
-		&read_env_file($b->{'file'}, \%conf);
-		foreach my $a ($conf{'IPV6ADDR'},
-			       split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'})) {
-			local ($addr, $mask) = split(/\//, $a);
-			if ($addr) {
-				$mask ||= $config{'netmask6'} || 64;
-				push(@rv, { 'name' => $b->{'name'},
-					    'address' => $addr,
-					    'netmask' => $mask });
-				}
-			}
+foreach my $i (&net::boot_interfaces()) {
+	next if (!$i->{'address6'});
+	for(my $j=0; $j<@{$i->{'address6'}}; $j++) {
+		push(@rv, { 'name' => $i->{'name'},
+			    'address' => $i->{'address6'}->[$j],
+			    'netmask' => $i->{'netmask6'}->[$j] });
 		}
 	}
 return @rv;
@@ -386,12 +346,13 @@ return @rv;
 sub activate_ip6_interface
 {
 local ($iface) = @_;
-local $cmd = "ifconfig ".quotemeta($iface->{'name'})." inet6 add ".
-	     quotemeta($iface->{'address'})."/".$iface->{'netmask'};
-local $out = &backquote_logged("$cmd 2>&1 </dev/null");
-&error("<tt>".&html_escape($cmd)."</tt> failed : ".
-       "<tt>".&html_escape($out)."</tt>") if ($?);
-return undef;
+&foreign_require("net");
+my @active = &net::active_interfaces();
+my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
+$active || &error("No active interface found for $iface->{'name'}");
+push(@{$active->{'address6'}}, $iface->{'address'});
+push(@{$active->{'netmask6'}}, $iface->{'netmask'});
+&net::activate_interface($active);
 }
 
 # save_ip6_interface(&iface)
@@ -399,52 +360,13 @@ return undef;
 sub save_ip6_interface
 {
 local ($iface) = @_;
-&foreign_require("net", "net-lib.pl");
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	# Add to inet6 block in /etc/network/interfaces
-	local @defs = &net::get_interface_defs();
-	local ($boot) = grep { $_->[1] eq 'inet6' &&
-			       $_->[0] eq $iface->{'name'} } @defs;
-	local $ifconfig = &has_command("ifconfig");
-	if ($boot) {
-		# Add extra IP to this interface
-		push(@{$boot->[3]},
-		     [ "up", "$ifconfig $iface->{'name'} inet6 add ".
-			     "$iface->{'address'}/$iface->{'netmask'}" ]);
-		&net::modify_interface_def($boot->[0], $boot->[1],
-					   $boot->[2], $boot->[3], 0);
-		}
-	else {
-		# Need to add a new interface
-		&net::new_interface_def($iface->{'name'}, "inet6", "static",
-					[ [ "address", $iface->{'address'} ],
-					  [ "netmask", $iface->{'netmask'} ],
-					  [ "post-up", "sleep 3" ] ]);
-		}
-	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# Add to ifcfg-* file in IPV6ADDR_SECONDARIES line
-	local ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} }
-			     &net::boot_interfaces();
-	$boot || &error("No interface file found for $iface->{'name'}");
-	local %conf;
-	&read_env_file($boot->{'file'}, \%conf);
-	if (!$conf{'IPV6ADDR'}) {
-		# Set primary IPv6 address
-		$conf{'IPV6ADDR'} = $iface->{'address'}."/".$iface->{'netmask'};
-		}
-	else {
-		# Append to secondary
-		local @secs = split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'});
-		push(@secs, $iface->{'address'}."/".$iface->{'netmask'});
-		$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @secs);
-		}
-	$conf{'IPV6INIT'} = 'yes' if (lc($conf{'IPV6INIT'}) ne 'yes');
-	&write_env_file($boot->{'file'}, \%conf);
-	}
-else {
-	&error("Unsupported operating system for IPv6");
-	}
+&foreign_require("net");
+my @boot = &net::boot_interfaces();
+my ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} } @boot;
+$boot || &error("No boot-time interface found for $iface->{'name'}");
+push(@{$boot->{'address6'}}, $iface->{'address'});
+push(@{$boot->{'netmask6'}}, $iface->{'netmask'});
+&net::save_interface($boot);
 }
 
 # deactivate_ip6_interface(&iface)
@@ -452,12 +374,21 @@ else {
 sub deactivate_ip6_interface
 {
 local ($iface) = @_;
-local $cmd = "ifconfig ".quotemeta($iface->{'name'})." inet6 del ".
-	     quotemeta($iface->{'address'})."/".$iface->{'netmask'};
-local $out = &backquote_logged("$cmd 2>&1 </dev/null");
-&error("<tt>".&html_escape($cmd)."</tt> failed : ".
-       "<tt>".&html_escape($out)."</tt>") if ($?);
-return undef;
+my @active = &net::active_interfaces();
+my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
+$active || &error("No active interface found for $iface->{'name'}");
+my $found = 0;
+for(my $i=0; $i<@{$active->{'address6'}}; $i++) {
+	if (&canonicalize_ip6($iface->{'address'}) eq
+	    &canonicalize_ip6($active->{'address6'}->[$i])) {
+		splice(@{$active->{'address6'}}, $i, 1);
+		splice(@{$active->{'netmask6'}}, $i, 1);
+		$found++;
+		}
+	}
+if ($found) {
+	&net::activate_interface($active);
+	}
 }
 
 # delete_ip6_interface(&iface)
@@ -465,46 +396,20 @@ return undef;
 sub delete_ip6_interface
 {
 local ($iface) = @_;
-&foreign_require("net", "net-lib.pl");
-if ($gconfig{'os_type'} eq 'debian-linux') {
-	# Remove from inet6 block in /etc/network/interfaces
-	local @defs = &net::get_interface_defs();
-	local ($boot) = grep { $_->[1] eq 'inet6' &&
-			       $_->[0] eq $iface->{'name'} } @defs;
-	$boot || &error("No interface block found for $iface->{'name'}");
-	local @opts;
-	foreach my $o (@{$boot->[3]}) {
-		if ($o->[0] ne 'up' || $o->[1] !~ /ifconfig\s+(\S+)\s+inet6\s+add\s+([a-f0-9:]+)\/(\d+)/ || $2 ne $iface->{'address'}) {
-			push(@opts, $o);
-			}
-		if ($o->[0] eq 'address' &&
-		    &canonicalize_ip6($o->[1]) eq
-		     &canonicalize_ip6($iface->{'address'})) {
-			&error("Not removing primary IPv6 interface");
-			}
+my @boot = &net::boot_interfaces();
+my ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} } @boot;
+$boot || &error("No boot interface found for $iface->{'name'}");
+my $found = 0;
+for(my $i=0; $i<@{$boot->{'address6'}}; $i++) {
+	if (&canonicalize_ip6($iface->{'address'}) eq
+	    &canonicalize_ip6($boot->{'address6'}->[$i])) {
+		splice(@{$boot->{'address6'}}, $i, 1);
+		splice(@{$boot->{'netmask6'}}, $i, 1);
+		$found++;
 		}
-	&net::modify_interface_def($boot->[0], $boot->[1],
-				   $boot->[2], \@opts, 0);
 	}
-elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	# Remove from ifcfg-* file in IPV6ADDR_SECONDARIES line
-	local ($boot) = grep { $_->{'fullname'} eq $iface->{'name'} }
-			     &net::boot_interfaces();
-	$boot || &error("No interface file found for $iface->{'name'}");
-	local %conf;
-	&read_env_file($boot->{'file'}, \%conf);
-	local $full = $iface->{'address'}."/".$iface->{'netmask'};
-	if (&canonicalize_ip6($conf{'IPV6ADDR'}) eq &canonicalize_ip6($full)) {
-		&error("Not removing primary IPv6 interface");
-		}
-	local @secs = split(/\s+/, $conf{'IPV6ADDR_SECONDARIES'});
-	@secs = grep { &canonicalize_ip6($_) ne &canonicalize_ip6($full) }
-		     @secs;
-	$conf{'IPV6ADDR_SECONDARIES'} = join(" ", @secs);
-	&write_env_file($boot->{'file'}, \%conf);
-	}
-else {
-	&error("Unsupported operating system for IPv6");
+if ($found) {
+	&net::save_interface($boot);
 	}
 }
 

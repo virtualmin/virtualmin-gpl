@@ -249,7 +249,9 @@ eval {
 
 	# Create a root-owned file in ~/logs to prevent deletion of directory
 	local $logsdir = "$d->{'home'}/logs";
-	if (-d $logsdir && !-e "$logsdir/.nodelete") {
+	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
+	if (-d $logsdir && !-e "$logsdir/.nodelete" &&
+	    &is_under_directory($logsdir, $log)) {
 		open(NODELETE, ">$logsdir/.nodelete");
 		close(NODELETE);
 		&set_ownership_permissions(0, 0, 0700, "$logsdir/.nodelete");

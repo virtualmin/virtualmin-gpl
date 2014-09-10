@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.2.8, and Django to 1.4.15.
+html=Updated the phpMyAdmin script installer to version 4.2.8, Wordpress to 4.0, PiWik to 2.6.1, Moodle to 2.7, and Django to 1.4.15 and 1.7.
 master=1
 reseller=1
 domain=1

@@ -776,6 +776,7 @@ if (!$d->{'parent'}) {
 	}
 &system_logged("find ".quotemeta($d->{'home'})." ! -type l ".
 	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
+	       " | grep -v .nodelete".
 	       join("", @subhomes).
 	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
 	       " | xargs chown $d->{'uid'}:$gid");

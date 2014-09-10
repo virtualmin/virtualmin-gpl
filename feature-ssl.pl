@@ -447,6 +447,14 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 			       \&restart_usermin);
 		}
 	}
+
+# If anything has changed that would impact the Dovecot cert, re-set it up
+if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
+    $_[0]->{'home'} ne $_[1]->{'home'}) {
+	&sync_dovecot_ssl_cert($_[1], 0);
+	&sync_dovecot_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
+	}
+
 &release_lock_web($_[0]);
 &register_post_action(\&restart_apache, 1) if ($rv);
 return $rv;
@@ -1683,10 +1691,14 @@ return undef if (!&foreign_installed("dovecot"));
 my $ver = &dovecot::get_dovecot_version();
 return undef if ($ver < 2);
 
+# Check if dovecot is using SSL globally
+my $conf = &dovecot::get_config();
+my $sslyn = &dovecot::find_value("ssl_disable", $conf);
+return undef if ($sslyn !~ /yes|required/i);
+
 # Find the existing block for the IP
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
-my $conf = &dovecot::get_config();
 my @loc = grep { $_->{'name'} eq 'local' &&
 		 $_->{'section'} } @$conf;
 my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;

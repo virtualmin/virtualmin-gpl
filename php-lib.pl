@@ -294,6 +294,11 @@ foreach my $p (@ports) {
 			foreach my $v (@avail) {
 				push(@types,"application/x-httpd-php$v .php$v");
 				}
+			}
+		if ($mode eq "cgi") {
+			push(@types, "application/x-httpd-php$ver .php");
+			}
+		else {
 			push(@types, "application/x-httpd-php .php");
 			}
 		&apache::save_directive("Action", \@actions, $phpconf, $conf);
