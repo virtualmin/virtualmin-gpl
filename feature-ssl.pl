@@ -1760,6 +1760,73 @@ if ($changed) {
 	}
 }
 
+# sync_postfix_ssl_cert(&domain, enable)
+# Configure Postfix to use a domain's SSL cert for connections on its IP
+sub sync_postfix_ssl_cert
+{
+local ($d, $enable) = @_;
+
+# Check if Postfix is in use
+return undef if ($config{'mail_system'} != 0);
+
+# Check if using SSL globally
+&foreign_require("postfix");
+local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+return undef if (!$cfile);
+
+# Find the existing master file entry
+local $master = &postfix::get_master_config();
+local $already;
+local $smtp;
+foreach my $m (@$master) {
+	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {
+		$already = $m;
+		}
+	if ($m->{'name'} eq 'smtp' && $m->{'type'} eq 'inet' &&
+	    $m->{'enabled'}) {
+		$smtp = $m;
+		}
+	}
+
+local $changed = 0;
+if ($enable) {
+	# Create or update the entry
+	local $chain = &get_website_ssl_file($d, 'ca');
+	if (!$already) {
+		# Create based on smtp inet entry
+		$already = { %$smtp };
+		delete($already->{'line'});
+		delete($already->{'uline'});
+		$already->{'name'} = $d->{'ip'}.':'.$already->{'name'};
+		$already->{'command'} .=
+			" -o smtpd_tls_cert_file=$d->{'ssl_cert'}";
+		$already->{'command'} .=
+			" -o smtpd_tls_key_file=$d->{'ssl_key'}";
+		if ($chain) {
+			$already->{'command'} .=
+				" -o smtpd_tls_CAfile=$chain";
+			}
+		&postfix::create_master($already);
+		$changed = 1;
+		}
+	else {
+		# XXX Update cert file paths
+		# XXX set $changed
+		}
+	}
+else {
+	# Remove the entry
+	if ($already) {
+		&postfix::delete_master($already);
+		$changed = 1;
+		}
+	}
+
+if ($changed) {
+	&postfix::reload_postfix();
+	}
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;
