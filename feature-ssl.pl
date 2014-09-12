@@ -209,8 +209,9 @@ if ($chained) {
 	}
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
-# Setup in Dovecot if possible
+# Setup in Dovecot and Postfix if possible
 &sync_dovecot_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+&sync_postfix_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
@@ -452,7 +453,9 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
     $_[0]->{'home'} ne $_[1]->{'home'}) {
 	&sync_dovecot_ssl_cert($_[1], 0);
+	&sync_postfix_ssl_cert($_[1], 0);
 	&sync_dovecot_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
+	&sync_postfix_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
 	}
 
 &release_lock_web($_[0]);
@@ -513,8 +516,9 @@ if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_same'});
 	}
 
-# Remove from Dovecot if possible
+# Remove from Dovecot and Postfix if possible
 &sync_dovecot_ssl_cert($d, 0);
+&sync_postfix_ssl_cert($d, 0);
 
 &release_lock_web($d);
 }
@@ -1787,15 +1791,17 @@ local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 return undef if (!$cfile);
 
 # Find the existing master file entry
+&lock_file($postfix::config{'postfix_master'});
 local $master = &postfix::get_master_config();
 local $already;
 local $smtp;
+local $defip = &get_default_ip();
 foreach my $m (@$master) {
 	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {
 		$already = $m;
 		}
-	if ($m->{'name'} eq 'smtp' && $m->{'type'} eq 'inet' &&
-	    $m->{'enabled'}) {
+	if (($m->{'name'} eq 'smtp' || $m->{'name'} eq $defip.":smtp") &&
+	    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
 		$smtp = $m;
 		}
 	}
@@ -1804,26 +1810,40 @@ local $changed = 0;
 if ($enable) {
 	# Create or update the entry
 	local $chain = &get_website_ssl_file($d, 'ca');
+	local @flags = ( [ "smtpd_tls_cert_file", $d->{'ssl_cert'} ],
+			 [ "smtpd_tls_key_file", $d->{'ssl_key'} ] );
+	push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 	if (!$already) {
 		# Create based on smtp inet entry
 		$already = { %$smtp };
 		delete($already->{'line'});
 		delete($already->{'uline'});
-		$already->{'name'} = $d->{'ip'}.':'.$already->{'name'};
-		$already->{'command'} .=
-			" -o smtpd_tls_cert_file=$d->{'ssl_cert'}";
-		$already->{'command'} .=
-			" -o smtpd_tls_key_file=$d->{'ssl_key'}";
-		if ($chain) {
-			$already->{'command'} .=
-				" -o smtpd_tls_CAfile=$chain";
+		$already->{'name'} = $d->{'ip'}.':smtp';
+		foreach my $f (@flags) {
+			$already->{'command'} .= " -o ".$f->[0]."=".$f->[1];
 			}
 		&postfix::create_master($already);
 		$changed = 1;
+
+		# If the primary smtp entry isn't bound to an IP, fix it to
+		# prevent IP clashes
+		if ($smtp->{'name'} eq 'smtp') {
+			$smtp->{'name'} = $defip.":smtp";
+			&postfix::modify_master($smtp);
+			}
 		}
 	else {
-		# XXX Update cert file paths
-		# XXX set $changed
+		# Update cert file paths
+		local $oldcommand = $already->{'command'};
+		foreach my $f (@flags) {
+			($already->{'command'} =~
+			  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) ||
+			  ($already->{'command'} .= " -o ".$f->[0]."=".$f->[1]);
+			}
+		if ($oldcommand ne $already->{'command'}) {
+			&postfix::modify_master($already);
+			$changed = 1;
+			}
 		}
 	}
 else {
@@ -1833,6 +1853,7 @@ else {
 		$changed = 1;
 		}
 	}
+&unlock_file($postfix::config{'postfix_master'});
 
 if ($changed) {
 	&postfix::reload_postfix();
