@@ -1,0 +1,3 @@
+desc=Dovecot and Postfix SSL certificates
+html=If Postfix and Dovecot are setup to use SSL, they will be configured to use the certificate belonging to virtual servers with their own private IP address for connections to that IP.
+master=1
