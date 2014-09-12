@@ -8,6 +8,9 @@ local ($name, $maxes) = @_;
 if ($name =~ /count$/) {
 	return { 'type' => 'email', 'units' => $text{'history_messages'} };
 	}
+elsif ($name =~ /ratio$/) {
+	return { 'type' => 'system', 'units' => '%', 'scale' => 0.01 };
+	}
 elsif ($name =~ /^load/) {
 	return { 'type' => 'cpu', 'units' => $text{'history_cores'} };
 	}
