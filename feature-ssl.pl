@@ -1793,70 +1793,97 @@ return undef if (!$cfile);
 # Find the existing master file entry
 &lock_file($postfix::config{'postfix_master'});
 local $master = &postfix::get_master_config();
-local $already;
-local $smtp;
 local $defip = &get_default_ip();
-foreach my $m (@$master) {
-	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {
-		$already = $m;
-		}
-	if (($m->{'name'} eq 'smtp' || $m->{'name'} eq $defip.":smtp") &&
-	    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
-		$smtp = $m;
-		}
-	}
+
+# Work out which flags are needed
+local $chain = &get_website_ssl_file($d, 'ca');
+local @flags = ( [ "smtpd_tls_cert_file", $d->{'ssl_cert'} ],
+		 [ "smtpd_tls_key_file", $d->{'ssl_key'} ] );
+push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 
 local $changed = 0;
-if ($enable) {
-	# Create or update the entry
-	local $chain = &get_website_ssl_file($d, 'ca');
-	local @flags = ( [ "smtpd_tls_cert_file", $d->{'ssl_cert'} ],
-			 [ "smtpd_tls_key_file", $d->{'ssl_key'} ] );
-	push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
-	if (!$already) {
-		# Create based on smtp inet entry
-		$already = { %$smtp };
-		delete($already->{'line'});
-		delete($already->{'uline'});
-		$already->{'name'} = $d->{'ip'}.':smtp';
-		foreach my $f (@flags) {
-			$already->{'command'} .= " -o ".$f->[0]."=".$f->[1];
+foreach my $pfx ('smtp', 'submission') {
+	# Find the existing entry for the IP, and for the default service
+	local $already;
+	local $smtp;
+	local @others;
+	foreach my $m (@$master) {
+		if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'}) {
+			# Entry for service for the domain
+			$already = $m;
 			}
-		&postfix::create_master($already);
-		$changed = 1;
+		if (($m->{'name'} eq $pfx || $m->{'name'} eq $defip.':'.$pfx) &&
+		    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
+			# Entry for default service
+			$smtp = $m;
+			}
+		if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
+		    $1 ne $d->{'ip'} && $1 ne $defip) {
+			# Entry for some other domain
+			push(@others, $m);
+			}
+		}
+	next if (!$smtp);
 
-		# If the primary smtp entry isn't bound to an IP, fix it to
-		# prevent IP clashes
-		if ($smtp->{'name'} eq 'smtp') {
-			$smtp->{'name'} = $defip.":smtp";
-			&postfix::modify_master($smtp);
+	if ($enable) {
+		# Create or update the entry
+		if (!$already) {
+			# Create based on smtp inet entry
+			$already = { %$smtp };
+			delete($already->{'line'});
+			delete($already->{'uline'});
+			$already->{'name'} = $d->{'ip'}.':'.$pfx;
+			foreach my $f (@flags) {
+				$already->{'command'} .=
+					" -o ".$f->[0]."=".$f->[1];
+				}
+			&postfix::create_master($already);
+			$changed = 1;
+
+			# If the primary smtp entry isn't bound to an IP, fix it
+			# to prevent IP clashes
+			if ($smtp->{'name'} eq $pfx) {
+				$smtp->{'name'} = $defip.':'.$pfx;
+				&postfix::modify_master($smtp);
+				}
+			}
+		else {
+			# Update cert file paths
+			local $oldcommand = $already->{'command'};
+			foreach my $f (@flags) {
+				($already->{'command'} =~
+				  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/)
+				||
+				  ($already->{'command'} .=
+				   " -o ".$f->[0]."=".$f->[1]);
+				}
+			if ($oldcommand ne $already->{'command'}) {
+				&postfix::modify_master($already);
+				$changed = 1;
+				}
 			}
 		}
 	else {
-		# Update cert file paths
-		local $oldcommand = $already->{'command'};
-		foreach my $f (@flags) {
-			($already->{'command'} =~
-			  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/) ||
-			  ($already->{'command'} .= " -o ".$f->[0]."=".$f->[1]);
-			}
-		if ($oldcommand ne $already->{'command'}) {
-			&postfix::modify_master($already);
+		# Remove the entry
+		if ($already) {
+			&postfix::delete_master($already);
 			$changed = 1;
 			}
-		}
-	}
-else {
-	# Remove the entry
-	if ($already) {
-		&postfix::delete_master($already);
-		$changed = 1;
+		if (!@others && $smtp->{'name'} ne $pfx) {
+			# If the default service has an IP but this is no longer
+			# needed, remove it
+			$smtp->{'name'} = $pfx;
+			&postfix::modify_master($smtp);
+			$changed = 1;
+			}
 		}
 	}
 &unlock_file($postfix::config{'postfix_master'});
 
 if ($changed) {
-	&postfix::reload_postfix();
+	&postfix::stop_postfix();
+	sleep(1);
+	&postfix::start_postfix();
 	}
 }
 
