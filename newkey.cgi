@@ -126,6 +126,12 @@ if ($in{'newkey_mode'} != 2) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Apply any per-domain cert to Dovecot and Postfix
+if ($d->{'virt'}) {
+	&sync_dovecot_ssl_cert($d, 1);
+	&sync_postfix_ssl_cert($d, 1);
+	}
+
 # Remove the new private key we just installed
 &release_lock_ssl($d);
 if ($d->{'ssl_newkey'}) {

@@ -107,6 +107,12 @@ else {
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 
+	# Apply any per-domain cert to Dovecot and Postfix
+	if ($d->{'virt'}) {
+		&sync_dovecot_ssl_cert($d, 1);
+		&sync_postfix_ssl_cert($d, 1);
+		}
+
 	# Set permissions
 	&set_certificate_permissions($d, $d->{'ssl_cert'});
 	&set_certificate_permissions($d, $d->{'ssl_key'});

@@ -65,6 +65,13 @@ elsif ($in{'mode'} == 3) {
 $err = &save_website_ssl_file($d, 'ca', $chain);
 &error($err) if ($err);
 $d->{'ssl_chain'} = $chain;
+
+# Apply any per-domain cert to Dovecot and Postfix
+if ($d->{'virt'}) {
+	&sync_dovecot_ssl_cert($d, 1);
+	&sync_postfix_ssl_cert($d, 1);
+	}
+
 &release_lock_ssl($d);
 &save_domain($d);
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
