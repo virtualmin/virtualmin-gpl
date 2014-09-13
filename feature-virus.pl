@@ -438,7 +438,7 @@ if (!$clamd) {
 if (&init::action_status("clamdscan-clamd")) {
 	return 0;	# Joe's init script for redhat
 	}
-elsif (&init::action_status("clamd@scan")) {
+elsif (&init::action_status("clamd\@scan")) {
 	return 0;	# EPEL 7/Fedora 20 clamav-scanner package
 	}
 elsif (&init::action_status("clamav-daemon")) {
@@ -471,7 +471,7 @@ return 1 if ($st == 1 || $st == -1);
 # Check for simple init scripts
 local $init;
 &foreign_require("init", "init-lib.pl");
-foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "clamd@scan") {
+foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "clamd\@scan") {
 	if (&init::action_status($i)) {
 		$init = $i;
 		last;
@@ -699,7 +699,7 @@ sub disable_clamd
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd",
-		  "clamd@scan") {
+		  "clamd\@scan") {
 	if (&init::action_status($init)) {
 		&$first_print(&text('clamd_stop'));
 		&init::disable_at_boot($init);
@@ -763,7 +763,7 @@ sub stop_service_virus
 &foreign_require("init", "init-lib.pl");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd",
-		  "clamd@scan") {
+		  "clamd\@scan") {
 	if (&init::action_status($init)) {
 		local ($ok, $out) = &init::stop_action($init);
 		return $ok ? undef : "<tt>".&html_escape($out)."</tt>";
