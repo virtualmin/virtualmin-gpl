@@ -478,6 +478,25 @@ foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "cla
 		}
 	}
 
+# Make sure socket file is valid in config
+foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
+	       "/etc/clamd.d/virtualmin.conf") {
+	next if (!-r $c);
+	local $lref = &read_file_lines($c, 1);
+	local $sfile;
+	foreach my $l (@$lref) {
+		if ($l =~ /^\s*LocalSocket\s+(\S+)/) {
+			$sfile = $1;
+			}
+		}
+	if ($sfile =~ /^(\S+)\/([^\/]+)$/) {
+		local $sdir = $1;
+		if (!-d $sdir) {
+			&make_dir($sdir, 0777);
+			}
+		}
+	}
+
 if ($init) {
 	# Ubuntu, Joe's or FreeBSD .. all we have to do is enable and
 	# start the daemon!
