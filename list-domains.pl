@@ -30,6 +30,9 @@ by a reseller name. Or to list those not owned by any reseller, use the
 C<--no-reseller> flag. Finally, to list domains owned by any reseller, you
 can use the C<--any-reseller> option.
 
+To show only domains that are enabled, use the C<--enabled> flag. To show
+only disabled domains, use C<--disabled> instead.
+
 To find the domain that contains a mailbox, use the C<--mail-user> flag
 followed by the full mailbox username (as used by FTP and IMAP).
 
@@ -141,6 +144,8 @@ while(@ARGV > 0) {
 	elsif ($a eq "--any-reseller") {
 		$any_resel = 1;
 		}
+	elsif ($a eq "--disabled") { $disabled = 1; }
+	elsif ($a eq "--enabled") { $disabled = 0; }
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -204,6 +209,14 @@ elsif ($no_resel) {
 	}
 elsif ($any_resel) {
 	@doms = grep { $_->{'reseller'} } @doms;
+	}
+
+# Limit by enabled status
+if ($disabled eq '1') {
+	@doms = grep { $_->{'disabled'} } @doms;
+	}
+elsif ($disabled eq '0') {
+	@doms = grep { !$_->{'disabled'} } @doms;
 	}
 
 if ($multi) {
@@ -708,6 +721,7 @@ print "                        [--alias | --no-alias | --subserver |\n";
 print "                         --toplevel | --subdomain]\n";
 print "                        [--plan ID|name]\n";
 print "                        [--template ID|name]\n";
+print "                        [--disabled | --enabled]\n";
 if ($virtualmin_pro) {
 	print "                        [--reseller name | --no-reseller |\n";
 	print "                         --any-reseller]\n";
