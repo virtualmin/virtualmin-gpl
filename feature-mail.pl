@@ -5924,7 +5924,7 @@ foreach my $l (@$lref) {
 		$l = "#!".&get_perl_path();
 		}
 	elsif ($l =~ /^\$OWNER\s+=/) {
-		$l = "\$OWNER = '$d->{'owner'}';";
+		$l = "\$OWNER = \"".quotemeta($d->{'owner'})."\";";
 		}
 	elsif ($l =~ /^\$USER\s+=/ && !$d->{'parent'}) {
 		$l = "\$USER = '$d->{'user'}';";
@@ -6318,7 +6318,6 @@ return <<'EOF';
   </Response>
 </Autodiscover>
 EOF
-
 }
 
 $done_feature_script{'mail'} = 1;
