@@ -49,7 +49,7 @@ while(@ARGV > 0) {
 
 # Get the domains
 if ($all_doms) {
-	@doms = &list_domains();
+	@doms = grep { $_->{'dir'} } &list_domains();
 	}
 else {
 	foreach $n (@dnames) {
@@ -67,12 +67,17 @@ foreach $d (@doms) {
 # Do it for all domains
 foreach $d (@doms) {
 	&$first_print("Fixing permissions for server $d->{'dom'} ..");
-	$err = &set_home_ownership($d);
-	if ($err) {
-		&$second_print(".. failed : $err");
+	if (!$d->{'dir'}) {
+		&$second_print(".. does not have a home directory");
 		}
 	else {
-		&$second_print(".. done");
+		$err = &set_home_ownership($d);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
 		}
 	}
 

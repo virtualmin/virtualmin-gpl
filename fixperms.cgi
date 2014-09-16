@@ -8,7 +8,7 @@ require './virtual-server-lib.pl';
 
 # Check and parse inputs
 if ($in{'servers_def'}) {
-	@doms = &list_domains();
+	@doms = grep { $_->{'dir'} } &list_domains();
 	}
 else {
 	foreach $id (split(/\0/, $in{'servers'})) {
@@ -23,8 +23,18 @@ else {
 
 foreach $d (@doms) {
 	&$first_print(&text('fixperms_dom', &show_domain_name($d)));
-	$err = &set_home_ownership($d);
-	&$second_print($text{'setup_done'});
+	if (!$d->{'dir'}) {
+		&$second_print($text{'fixperms_edir'});
+		}
+	else {
+		$err = &set_home_ownership($d);
+		if ($err) {
+			&$second_print(&text('fixperms_failed', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 
 &ui_print_footer("", $text{'index_return'},

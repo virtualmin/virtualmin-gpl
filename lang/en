@@ -6179,6 +6179,8 @@ fixperms_err=Failed to fix permissions
 fixperms_edoms=No virtual servers selected
 fixperms_title=Fixing Permissions
 fixperms_dom=Fixing file ownership and permissions for $1 ..
+fixperms_edir=.. does not have a home directory
+fixperms_failed=.. failed : $1
 
 bkeys_title=Backup Encryption Keys
 bkeys_key=GPG key ID
