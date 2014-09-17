@@ -289,6 +289,18 @@ if ($host) {
 return $rv;
 }
 
+# get_clamdscan_args()
+# Returns any extra args needed for clamdscan, like for the config file
+sub get_clamdscan_args
+{
+local $scanfile = "/etc/clamd.d/scan.conf";
+&foreign_require("init");
+if (-r $scanfile && &init::action_status("clamd\@scan")) {
+	return " --config-file ".$scanfile;
+	}
+return undef;
+}
+
 # get_domain_virus_scanner(&domain)
 # Returns the virus scanning command use for some domain. This can be clamscan,
 # clamdscan or some other path.
@@ -303,10 +315,10 @@ if (@clamrec) {
 	local $rv = $clamrec[0]->{'action'};
 	$rv =~ s/^\Q$clam_wrapper_cmd\E\s+//;
 	local @rvs = &split_quoted_string($rv);
-	if ($rv eq &has_command("clamscan")) {
+	if ($rvs[0] eq &has_command("clamscan")) {
 		$rv = "clamscan";
 		}
-	elsif ($rv eq &has_command("clamdscan")) {
+	elsif ($rvs[0] eq &has_command("clamdscan")) {
 		$rv = "clamdscan";
 		}
 	elsif ($rvs[0] eq &has_command("clamd-stream-client")) {
@@ -334,6 +346,7 @@ if (@clamrec) {
 		}
 	elsif ($prog eq "clamdscan") {
 		$prog = &has_command("clamdscan");
+		$prog .= &get_clamdscan_args();
 		}
 	elsif ($prog eq "clamd-stream-client") {
 		$prog = &has_command("clamd-stream-client");
@@ -398,6 +411,9 @@ if ($cmd eq "clamd-stream-client") {
 	}
 else {
 	# Tell command to use stdin
+	if ($cmd eq "clamdscan") {
+		$fullcmd .= &get_clamdscan_args();
+		}
 	$fullcmd .= " -";
 	}
 local ($out, $timed_out) =
