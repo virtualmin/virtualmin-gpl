@@ -59,11 +59,11 @@ if ($_[0]->{'subdom'}) {
 &$second_print($text{'setup_done'});
 
 # Create mail file
-if (!$_[0]->{'parent'}) {
+if (!$_[0]->{'parent'} && $uinfo) {
 	&$first_print($text{'setup_usermail3'});
 	eval {
 		local $main::error_must_die = 1;
-		&create_mail_file(\%uinfo, $_[0]);
+		&create_mail_file($uinfo, $_[0]);
 
 		# Set the user's Usermin IMAP password
 		&set_usermin_imap_password($uinfo);
