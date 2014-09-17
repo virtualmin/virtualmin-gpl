@@ -2306,7 +2306,11 @@ elsif ($config{'mail_system'} == 0) {
 		}
 	elsif ($s == 2) {
 		# A mail directory
-		$md = &postfix::postfix_mail_file($user->{'user'});
+		local @uinfo = ( $user->{'user'}, $user->{'pass'},
+				 $user->{'uid'}, $user->{'gid'},
+				 undef, undef, $user->{'real'},
+			         $user->{'home'}, $user->{'shell'} );
+		$md = &postfix::postfix_mail_file(@uinfo);
 		}
 	}
 elsif ($config{'mail_system'} == 2 ||
