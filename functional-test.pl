@@ -1025,7 +1025,7 @@ $script_tests = [
 
 	# Check that it works
 	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
-	  'grep' => 'WordPress installation',
+	  'grep' => 'WordPress.*Installation',
 	},
 
 	# Check script list
@@ -1058,7 +1058,7 @@ $script_tests = [
 
 	# Check that it works with it's own DB
 	{ 'command' => $wget_command.'http://'.$test_domain.'/wordpress/',
-	  'grep' => 'WordPress installation',
+	  'grep' => 'WordPress.*Installation',
 	},
 
 	# Check script list
