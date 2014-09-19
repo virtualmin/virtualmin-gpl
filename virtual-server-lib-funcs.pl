@@ -4097,8 +4097,12 @@ return %hash;
 # ensure_template(file)
 sub ensure_template
 {
-&system_logged("cp $module_root_directory/$_[0] $module_config_directory/$_[0]")
-	if (!-r "$module_config_directory/$_[0]");
+local ($file) = @_;
+local $mpath = "$module_root_directory/$file";
+local $cpath = "$module_config_directory/$file";
+if (!-r $cpath || !-s $cpath) {
+	&copy_source_dest($mpath, $cpath);
+	}
 }
 
 # get_miniserv_port_proto()
