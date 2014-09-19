@@ -2269,12 +2269,12 @@ elsif ($err) {
 	}
 }
 
-# create_mail_file(&user, &domain)
+# create_mail_file(&user, &domain, [no-create-folders])
 # Creates a new empty mail file for a user, if necessary. Returns the path
 # and type (0 for mbox, 1 for maildir)
 sub create_mail_file
 {
-local ($user, $d) = @_;
+local ($user, $d, $nofolders) = @_;
 &require_mail();
 local $mf;
 local $md;
@@ -2413,7 +2413,7 @@ if (-d $user->{'home'} && $user->{'unix'}) {
 	}
 
 # Create spam, virus, drafts, sent and trash Maildir sub-directories
-if ($md && $md =~ /\/Maildir$/) {
+if ($md && $md =~ /\/Maildir$/ && !$nofolders) {
 	local @folders;
 	foreach my $n ("trash", "drafts", "sent") {
 		local $tname = $config{$n.'_folder'};
@@ -3412,7 +3412,7 @@ while(<UFILE>) {
 		# Create an empty mail file, which may be needed if inbox
 		# location has moved
 		if ($uinfo->{'email'} && !$uinfo->{'nomailfile'}) {
-			&create_mail_file($uinfo, $_[0]);
+			&create_mail_file($uinfo, $_[0], 1);
 			}
 
 		# If the user's home is outside the domain's home, re-extract
