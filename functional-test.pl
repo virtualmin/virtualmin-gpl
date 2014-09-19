@@ -5167,13 +5167,13 @@ $web_tests = [
 	# Change access and error logs to a new location
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'access-log' => '/tmp/'.$test_domain.'_access_log' ],
-		      [ 'error-log' => '/tmp/'.$test_domain.'_error_log' ] ],
+		      [ 'access-log' => '/var/log/'.$test_domain.'_access_log' ],
+		      [ 'error-log' => '/var/log/'.$test_domain.'_error_log' ] ],
 	},
 
 	# Verify the move
-	{ 'command' => 'ls -l /tmp/'.$test_domain.'_access_log' },
-	{ 'command' => 'ls -l /tmp/'.$test_domain.'_error_log' },
+	{ 'command' => 'ls -l /var/log/'.$test_domain.'_access_log' },
+	{ 'command' => 'ls -l /var/log/'.$test_domain.'_error_log' },
 
 	# Make another request
 	{ 'command' => $wget_command.'http://'.$test_domain.'/smeg',
@@ -5181,8 +5181,7 @@ $web_tests = [
 	},
 
 	# Verify that it was logged
-	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_access_log' },
-	{ 'command' => 'grep smeg /tmp/'.$test_domain.'_error_log' },
+	{ 'command' => 'grep smeg /var/log/'.$test_domain.'_access_log' },
 
 	# Create a test CGI script
 	{ 'command' => '(echo "#!/bin/sh" ; echo "echo Content-type: text/plain" ; echo echo ; echo uptime) >~'.$test_domain_user.'/cgi-bin/test.cgi',
