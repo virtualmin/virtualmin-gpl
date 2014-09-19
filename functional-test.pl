@@ -5015,6 +5015,7 @@ $web_tests = [
 	# Test wget, which should fail
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'antigrep' => 'Test web page',
+	  'ignorefail' => 1,
 	},
 
 	# Re-enable web feature
