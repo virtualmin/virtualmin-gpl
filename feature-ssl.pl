@@ -1807,6 +1807,7 @@ foreach my $pfx ('smtp', 'submission') {
 	local $already;
 	local $smtp;
 	local @others;
+	local $lsmtp;
 	foreach my $m (@$master) {
 		if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'}) {
 			# Entry for service for the domain
@@ -1818,9 +1819,14 @@ foreach my $pfx ('smtp', 'submission') {
 			$smtp = $m;
 			}
 		if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
-		    $1 ne $d->{'ip'} && $1 ne $defip) {
+		    $m->{'enabled'} && $1 ne $d->{'ip'} && $1 ne $defip) {
 			# Entry for some other domain
-			push(@others, $m);
+			if ($1 eq "127.0.0.1") {
+				$lsmtp = $m;
+				}
+			else {
+				push(@others, $m);
+				}
 			}
 		}
 	next if (!$smtp);
@@ -1845,6 +1851,15 @@ foreach my $pfx ('smtp', 'submission') {
 			if ($smtp->{'name'} eq $pfx) {
 				$smtp->{'name'} = $defip.':'.$pfx;
 				&postfix::modify_master($smtp);
+
+				# Also add an entry to listen on 127.0.0.1
+				if (!$lsmtp) {
+					$lsmtp = { %$smtp };
+					delete($lsmtp->{'line'});
+					delete($lsmtp->{'uline'});
+					$lsmtp->{'name'} = '127.0.0.1:'.$pfx;
+					&postfix::create_master($lsmtp);
+					}
 				}
 			}
 		else {
@@ -1875,6 +1890,11 @@ foreach my $pfx ('smtp', 'submission') {
 			$smtp->{'name'} = $pfx;
 			&postfix::modify_master($smtp);
 			$changed = 1;
+
+			# Also remove 127.0.0.1 entry
+			if ($lsmtp) {
+				&postfix::delete_master($lsmtp);
+				}
 			}
 		}
 	}
