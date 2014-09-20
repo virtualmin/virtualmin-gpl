@@ -17,11 +17,17 @@ if (!$_[0]->{'virtalready'}) {
 		return 0;
 		}
 	local $b;
-	local $vmax = $config{'iface_base'} || int($net::min_virtual_number);
+	local $vmin = $config{'iface_base'} || int($net::min_virtual_number);
+	local $vmax = -1;
 	foreach $b (@boot) {
 		$vmax = $b->{'virtual'}
-			if ($b->{'name'} eq $iface->{'name'} &&
+			if ($b->{'virtual'} ne '' &&
+			    $b->{'name'} eq $iface->{'name'} &&
 			    $b->{'virtual'} > $vmax);
+		}
+	local $vwant = $vmax + 1;
+	if ($vwant < $vmin) {
+		$vwant = $vmin;
 		}
 	local $netmask = $_[0]->{'netmask'} || $net::virtual_netmask ||
 			 $iface->{'netmask'};
@@ -30,7 +36,7 @@ if (!$_[0]->{'virtalready'}) {
 			'broadcast' => &net::compute_broadcast($_[0]->{'ip'},
 							       $netmask),
 			'name' => $iface->{'name'},
-			'virtual' => $vmax+1,
+			'virtual' => $vwant,
 			'up' => 1,
 			'desc' => "Virtualmin server $_[0]->{'dom'}",
 		      };
