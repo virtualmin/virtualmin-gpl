@@ -266,6 +266,9 @@ local $prog = $config{'clamscan_cmd'};
 if ($prog eq "clamd-stream-client") {
 	$prog .= &make_stream_client_args($config{'clamscan_host'});
 	}
+elsif ($prog eq "clamdscan") {
+	$prog .= &get_clamdscan_args();
+	}
 local ($cmd, @args) = &split_quoted_string($prog);
 local $fullcmd = &has_command($cmd);
 return undef if (!$fullcmd);
@@ -498,19 +501,38 @@ foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "cla
 foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 	       "/etc/clamd.d/virtualmin.conf") {
 	next if (!-r $c);
-	local $lref = &read_file_lines($c, 1);
+	local $lref = &read_file_lines($c);
 	local $sfile;
+	local $clamuser;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*LocalSocket\s+(\S+)/) {
 			$sfile = $1;
 			}
+		elsif ($l =~ /^\s*LocalSocketMode\s+/) {
+			$l = "LocalSocketMode 666";
+			}
+		elsif ($l =~ /^\s*User\s+(\S+)/) {
+			$clamuser = $1;
+			}
 		}
+	&flush_file_lines($c);
 	if ($sfile =~ /^(\S+)\/([^\/]+)$/) {
 		local $sdir = $1;
 		if (!-d $sdir) {
-			&make_dir($sdir, 0777);
+			if ($clamuser) {
+				&make_dir($sdir, 0755);
+				&set_ownership_permissions($clamuser, undef,
+							   0755, $sdir);
+				}
+			else {
+				&make_dir($sdir, 0777);
+				}
+			}
+		else {
+			&set_ownership_permissions(undef, undef, 0755, $sdir);
 			}
 		}
+	&set_ownership_permissions(undef, undef, 0666, $sfile);
 	}
 
 if ($init) {
