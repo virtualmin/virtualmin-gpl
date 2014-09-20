@@ -121,8 +121,8 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
-$webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
-$admin_webmin_wget_command = "wget -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+$webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
+$admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
 &get_miniserv_config(\%miniserv);
 $webmin_proto = "http";
 if ($miniserv{'ssl'}) {
@@ -208,6 +208,10 @@ $_config_tests = [
 	{ 'command' => $normal_agent_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/",
 	},
+
+	# Disallow SNI mode
+	{ 'command' => 'grep sni_support=0 '.
+		       $module_config_directory.'/config' },
 	];
 
 $domains_tests = [
