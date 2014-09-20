@@ -196,6 +196,7 @@ if ($lconf) {
 	undef(%logrotate::get_config_cache);
 	undef(%logrotate::get_config_lnum_cache);
 	undef(%logrotate::get_config_files_cache);
+	&logrotate::delete_if_empty($lconf->{'file'});
 	&$second_print($text{'setup_done'});
 	}
 else {
