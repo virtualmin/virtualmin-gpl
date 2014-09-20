@@ -1901,9 +1901,7 @@ foreach my $pfx ('smtp', 'submission') {
 &unlock_file($postfix::config{'postfix_master'});
 
 if ($changed) {
-	&postfix::stop_postfix();
-	sleep(1);
-	&postfix::start_postfix();
+	&register_post_action(\&restart_mail_server);
 	}
 }
 

@@ -2269,6 +2269,23 @@ elsif ($err) {
 	}
 }
 
+# restart_mail_server()
+# Stops and then re-starts the mail server, and prints stuff
+sub restart_mail_server
+{
+&$first_print($text{'setup_mailrestart'});
+my $err = &shutdown_mail_server(1);
+return $err if ($err);
+sleep(1);
+my $err = &startup_mail_server(1);
+if ($err) {
+	&$second_print(&text('setup_mailrestarterr', $err));
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+}
+
 # create_mail_file(&user, &domain, [no-create-folders])
 # Creates a new empty mail file for a user, if necessary. Returns the path
 # and type (0 for mbox, 1 for maildir)
