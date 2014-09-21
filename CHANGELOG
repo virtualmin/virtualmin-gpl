@@ -1458,7 +1458,7 @@ Added a warning message on the password change forms if a domain's MySQL or Post
 Updated the Dolibarr script installer to version 3.6.0, Drupal to 7.31 and 6.33, phpMyAdmin to 4.2.7.1, 4.0.10.2 and 4.1.14.3, Roundcube to 1.0.2, FengOffice to 2.6.3, Joomla to 3.3.3 and 2.5.24, MediaWiki to 1.23.3 and 1.19.18, Node.JS to 0.10.31, phpMyFAQ to 2.8.12, ownCloud to 7.0.2, Wordpress to 3.9.2, CMS Made Simple to 1.11.11, phpList to 3.0.7, PiWik to 2.5.0, Ghost to 0.5.1, Django to 1.6.6 and 1.4.14, and X2Engine to 4.1.7.
 Ensim migration now includes alias domains and sub-domains.
 ---- Changes since 4.10 ----
-Updated the phpMyAdmin script installer to version 4.2.9, 4.1.14.4 and 4.0.10.3, Moodle to 2.7, Wordpress to 4.0, PiWik to 2.6.1, X2CRM to 4.2.1, FengOffice to 2.7.1.1, Node.JS to 0.10.32, and Django to 1.4.15 and 1.7.
+Updated the phpMyAdmin script installer to version 4.2.9, 4.1.14.4 and 4.0.10.3, Moodle to 2.7, Wordpress to 4.0, PiWik to 2.6.1, X2CRM to 4.2.1, FengOffice to 2.7.1.1, Node.JS to 0.10.32, PHPList to 3.0.8, and Django to 1.4.15 and 1.7.
 If Dovecot 2 or higher has SSL enabled, the certificate for domains with a private IP address will be used for connections to the Dovecot server.
 IPv6 addresses in Virtualmin are now supported on all operation systems that Webmin supports them for, rather than just Linux.
 Automatic cleanup of messages in all mailboxes and folders can now be setup in Virtualmin, to enforce an email retention policy or save on disk space.
