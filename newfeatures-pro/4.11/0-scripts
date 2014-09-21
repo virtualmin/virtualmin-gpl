@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.2.9, 4.1.14.4 and 4.0.10.3, Wordpress to 4.0, PiWik to 2.6.1, Moodle to 2.7, X2CRM to 4.2.1, FengOffice to 2.7.0.1, Node.JS to 0.10.32, and Django to 1.4.15 and 1.7.
+html=Updated the phpMyAdmin script installer to version 4.2.9, 4.1.14.4 and 4.0.10.3, Wordpress to 4.0, PiWik to 2.6.1, Moodle to 2.7, X2CRM to 4.2.1, FengOffice to 2.7.1.1, Node.JS to 0.10.32, and Django to 1.4.15 and 1.7.
 master=1
 reseller=1
 domain=1
