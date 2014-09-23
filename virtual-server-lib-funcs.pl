@@ -6624,7 +6624,7 @@ return join(" ", @ranges);
 sub ip_within_ranges
 {
 my ($ip, $ranges) = @_;
-&foreign_require("net"");
+&foreign_require("net");
 my $n = &net::ip_to_integer($ip);
 foreach my $r (&parse_ip_ranges($ranges)) {
 	if (&check_ipaddress($r->[0])) {
@@ -6634,7 +6634,7 @@ foreach my $r (&parse_ip_ranges($ranges)) {
 			return 1;
 			}
 		}
-	elif (&check_ip6address($r->[0])) {
+	elsif (&check_ip6address($r->[0])) {
 		# IPv6 range
 		my ($p, $n) = split(/\//, lc($r));
 		$p =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
