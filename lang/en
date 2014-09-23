@@ -619,6 +619,8 @@ setup_warnings2=The following potential problems were detected with the modifica
 setup_warnrusure=Are you sure you want to continue?
 setup_warnok1=Yes, Create Virtual Server
 setup_warnok2=Yes, Modify Virtual Server
+setup_mailrestart=Restarting mail server ..
+setup_mailrestarterr=.. restart failed : $1
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2
