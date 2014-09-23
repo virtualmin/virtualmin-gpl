@@ -6624,13 +6624,26 @@ return join(" ", @ranges);
 sub ip_within_ranges
 {
 my ($ip, $ranges) = @_;
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net"");
 my $n = &net::ip_to_integer($ip);
 foreach my $r (&parse_ip_ranges($ranges)) {
-	next if (!&check_ipaddress($r->[0]));
-	if ($n >= &net::ip_to_integer($r->[0]) &&
-	    $n <= &net::ip_to_integer($r->[1])) {
-		return 1;
+	if (&check_ipaddress($r->[0])) {
+		# IPv4 range
+		if ($n >= &net::ip_to_integer($r->[0]) &&
+		    $n <= &net::ip_to_integer($r->[1])) {
+			return 1;
+			}
+		}
+	elif (&check_ip6address($r->[0])) {
+		# IPv6 range
+		my ($p, $n) = split(/\//, lc($r));
+		$p =~ /^([0-9a-f:]+):([0-9a-f]+)\-([0-9a-f]+)$/ || next;
+		local ($base, $s, $e) = ($1, $2, $3);
+		$ip =~ /^([0-9a-f:]+):([0-9a-f]+)$/ || next;
+		if (lc($1) eq lc($base) &&
+		    hex($2) >= hex($s) && hex($2) <= hex($e)) {
+			return 1;
+			}
 		}
 	}
 return 0;

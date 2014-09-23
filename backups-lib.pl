@@ -2066,7 +2066,7 @@ if ($ok) {
 						else { last DOMAIN; }
 						}
 					$d->{'virtalready6'} = 0;
-					if (&ip6_within_ranges(
+					if (&ip_within_ranges(
 					      $d->{'ip6'}, $tmpl->{'ranges6'}) &&
 					    !$taken{$d->{'ip6'}} &&
 					    !&ping_ip_address($d->{'ip6'})) {
