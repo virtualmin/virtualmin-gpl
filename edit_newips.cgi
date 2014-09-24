@@ -29,7 +29,7 @@ print &ui_table_row(&hlink($text{'newips_new'}, "newips_new"),
 				   	     $text{'newips_leave'})
 			   : &ui_textbox("new", $in{'new'}, 20));
 
-if ($anyv6) {
+if ($anyv6 && ($in{'old6'} || &get_default_ip6())) {
 	# Old IPv6 address
 	print &ui_table_row(&hlink($text{'newips_old6'}, "newips_old6"),
 		    &ui_textbox("old6", $in{'old6'} || &get_default_ip6(), 40));
