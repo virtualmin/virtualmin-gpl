@@ -701,6 +701,7 @@ if ($got{'mail'}) {
 		s/^\s*#.*$//;
 		if (/^(\S+):\s*(.*)$/) {
 			local ($name, $v) = ($1, $2);
+			next if (!$name);
 			local @values;
 			if ($v !~ /,/ && $v !~ /"/) {
 				# A single destination, not quoted!
@@ -739,6 +740,11 @@ if ($got{'mail'}) {
 
 			# Already done a domain forward
 			next if ($name =~ /^\*/ && $domfwd);
+
+			# No need for a catchall that bounces mail, as this
+			# will happen anyway
+			next if ($name =~ /^\*/ && @values == 1 &&
+				 $values[0] =~ /^BOUNCE/);
 
 			if ($useremail{$name}) {
 				# This is an alias from a user. Preserve
@@ -1280,6 +1286,7 @@ foreach my $vf (readdir(VF)) {
 		s/^\s*#.*$//;
 		if (/^(\S+):\s*(.*)$/) {
 			local ($name, $v) = ($1, $2);
+			next if (!$name);
 			local @values;
 			if ($v !~ /,/ && $v !~ /"/) {
 				# A single destination, not quoted!
