@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 2.7.0, Joomla to 3.3.4 and 2.5.25, Ghost to 0.5.2, Roundcube to 1.0.3, and MediaWiki to 1.23.4 and 1.19.19.
+html=Updated the Piwik script installer to version 2.7.0, Joomla to 3.3.4 and 2.5.25, Ghost to 0.5.2, Roundcube to 1.0.3, phpMyFAQ to 2.8.13, and MediaWiki to 1.23.4 and 1.19.19.
 master=1
 reseller=1
 domain=1
