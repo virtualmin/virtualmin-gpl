@@ -1464,4 +1464,4 @@ IPv6 addresses in Virtualmin are now supported on all operation systems that Web
 Automatic cleanup of messages in all mailboxes and folders can now be setup in Virtualmin, to enforce an email retention policy or save on disk space.
 If Postfix and Dovecot are setup to use SSL, they will be configured to use the certificate belonging to virtual servers with their own private IP address for connections to that IP.
 ---- Changes since 4.11 ----
-Updated the Piwik script installer to version 2.7.0, Joomla to 3.3.4 and 2.5.25, Ghost to 0.5.2, Roundcube to 1.0.3, phpMyFAQ to 2.8.13, Zikula to 1.3.9, phpMyAdmin to 4.2.9.1, 4.1.14.5 and 4.0.10.4, and MediaWiki to 1.23.4 and 1.19.19.
+Updated the Piwik script installer to version 2.7.0, Joomla to 3.3.4 and 2.5.25, Ghost to 0.5.2, Roundcube to 1.0.3, phpMyFAQ to 2.8.13, Zikula to 1.3.9, phpMyAdmin to 4.2.9.1, 4.1.14.5 and 4.0.10.4, and MediaWiki to 1.23.5 and 1.19.20.
