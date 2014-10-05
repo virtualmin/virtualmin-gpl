@@ -3431,6 +3431,12 @@ sub can_backup_buckets
 return &master_admin();
 }
 
+# Returns 1 if the current user can configure Cloud storage providers
+sub can_cloud_providers
+{
+return &master_admin();
+}
+
 # Returns 1 if the configured backup format supports incremental backups
 sub has_incremental_format
 {
@@ -3560,6 +3566,13 @@ if (&can_backup_keys()) {
 	push(@titles, $text{'index_bkeys'});
 	push(@descs, $text{'index_bkeysdesc'});
 	push(@codes, 'bkeys');
+	}
+if (&can_cloud_providers()) {
+	# Show a list of Cloud file provider settings pages
+	push(@links, "list_clouds.cgi");
+	push(@titles, $text{'index_clouds'});
+	push(@descs, $text{'index_cloudsdesc'});
+	push(@codes, 'clouds');
 	}
 if (&can_backup_buckets()) {
 	# Show list of S3 buckets

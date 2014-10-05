@@ -228,6 +228,8 @@ index_bkeys=Backup Encryption Keys
 index_bkeysdesc=List GPG keys used for signing and encrypting Virtualmin backups.
 index_buckets=Amazon S3 Buckets
 index_bucketsdesc=Show S3 buckets used for backups, and allow migration to Glacier to be configured.
+index_clouds=Cloud Storage Providers
+index_cloudsdesc=Configure authentication to cloud storage providers like S3, rackspace, Google and Dropbox.
 index_dmore=$1 more ..
 index_virtualminconfig=Virtualmin Configuration
 
@@ -6438,5 +6440,15 @@ domdkim_ekey=Invalid key format : $1
 domdkim_egen=Failed to generate new key : $1
 domdkim_enabled=DKIM is not current enabled
 domdkim_records=DNS records for external hosting
+
+clouds_title=Cloud Storage Providers
+clouds_name=Provider name
+clouds_state=Current state
+clouds_users=Backup users
+clouds_ecannot=You are not allowed to edit cloud storage providers
+cloud_s3desc=Amazon S3
+cloud_rsdesc=Rackspace Cloud Files
+cloud_googledesc=Google Cloud Storage
+cloud_dropboxdesc=Dropbox
 
 __norefs=1
