@@ -2068,13 +2068,22 @@ return @rv;
 # an existing NameVirtualHost entry for * or *:80 .
 # For Apache 2.2 and above, NameVirtualHost * will no longer match
 # virtualhosts like *:80, so we need to add *:80 even if * is already there.
+# Returns 1 if there is a NameVirtualHost directive for *, 0 if not.
 sub add_name_virtual
 {
 local ($d, $conf, $web_port, $no_star_match, $ip) = @_;
 &require_apache();
 if ($apache::httpd_modules{'core'} >= 2.4) {
-	# Apache 2.4 doesn't need NameVirtualHost any more
-	return 1;
+	# Apache 2.4 doesn't need NameVirtualHost any more.
+	# However, check if any existing <VirtualHost> uses *, which means that
+	# subsequent ones should as well. Otherwise, they can just use IPs.
+	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
+	foreach my $v (@virt) {
+		if ($v->{'words'}->[0] =~ /^\*/) {
+			return 1;
+			}
+		}
+	return 0;
 	}
 local $nvstar;
 if ($d->{'name'}) {
