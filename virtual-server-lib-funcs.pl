@@ -20,7 +20,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
-		 "ratelimit") {
+		 "ratelimit", "cloud") {
 	do "$virtual_server_root/$lib-lib.pl";
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
@@ -14825,7 +14825,13 @@ if (&can_show_pass() && $pass) {
 	if ($user) {
 		$link .= "&user=".&urlize($user->{'user'});
 		}
-	return "(<a href='$link' onClick='window.open(\"$link\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=500,height=70,resizable=yes\"); return false'>$text{'edit_showpass'}</a>)";
+	if (defined(&popup_window_link)) {
+		return &popup_window_link($link, $text{'edit_showpass'},
+					  500, 70, "no");
+		}
+	else {
+		return "(<a href='$link' onClick='window.open(\"$link\", \"showpass\", \"toolbar=no,menubar=no,scrollbar=no,width=500,height=70,resizable=yes\"); return false'>$text{'edit_showpass'}</a>)";
+		}
 	}
 else {
 	return "";
