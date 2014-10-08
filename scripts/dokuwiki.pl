@@ -146,7 +146,7 @@ return (1, "DokuWiki directory deleted.");
 # Returns a URL and regular expression or callback func to get the version
 sub script_dokuwiki_latest
 {
-return ( "http://download.dokuwiki.org/",
+return ( "http://download.dokuwiki.org/archive",
 	 "(201[4-9]-[0-9][0-9]-[0-9][0-9][a-z]*)" );
 }
 
