@@ -6,7 +6,15 @@ sub supports_ip6
 {
 if (!defined($supports_ip6_cache)) {
 	&foreign_require("net");
-	$supports_ip6_cache = &net::supports_address6() ? 1 : 0;
+	$supports_ip6_cache = 0;
+	if (&net::supports_address6()) {
+		foreach my $a (&net::active_interfaces()) {
+			if ($a->{'address6'} && @{$a->{'address6'}} > 0) {
+				$supports_ip6_cache = 1;
+				last;
+				}
+			}
+		}
 	}
 return $supports_ip6_cache;
 }
