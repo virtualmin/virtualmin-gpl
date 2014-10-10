@@ -1830,8 +1830,9 @@ if ($ok) {
 			elsif (!$oldweb && $d->{'virtualmin-nginx'}) {
 				$oldweb = 'virtualmin-nginx';
 				}
-			if (&indexof($oldweb, @features, @plugins) < 0) {
-				$d->{'oldweb'} = 0;
+			if ($oldweb &&
+			    &indexof($oldweb, @features, @plugins) < 0) {
+				$d->{$oldweb} = 0;
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
 				}
