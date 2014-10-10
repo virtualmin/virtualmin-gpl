@@ -9,8 +9,10 @@ require './virtual-server-lib.pl';
 
 @provs = &list_cloud_providers();
 ($prov) = grep { $_->{'name'} eq $in{'name'} } @provs;
+$prov || &error($text{'cloud_egone'});
 
 print &ui_form_start("save_cloud.cgi", "post");
+print &ui_hidden("name", $in{'name'});
 print &ui_table_start($text{'cloud_header'}, undef, 2);
 
 # Cloud provider name

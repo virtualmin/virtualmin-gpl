@@ -6453,7 +6453,7 @@ cloud_rsdesc=Rackspace Cloud Files
 cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_s3account=Using access key $1
-cloud_rsaccount=Using login $1
+cloud_rsuser=Using login $1
 cloud_s3_akey=Default S3 login
 cloud_noneset=None set
 cloud_below=Entered below ..
@@ -6465,5 +6465,8 @@ cloud_s3_chunk=Upload chunk size in MB
 cloud_title=Edit Cloud Provider
 cloud_header=Cloud storage provider options
 cloud_provider=Provider name
+cloud_es3_endpoint=S3 compatible server must be a valid hostname
+cloud_es3_chunk=Upload chunk size must be a positive number
+cloud_egone=Unknown cloud storage provider!
 
 __norefs=1
