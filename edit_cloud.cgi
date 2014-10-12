@@ -23,6 +23,27 @@ print &ui_table_row($text{'cloud_provider'},
 $ifunc = "cloud_".$prov->{'name'}."_show_inputs";
 print &$ifunc($prov);
 
+# Current users
+@users = grep { &backup_uses_cloud($_, $prov) } &list_scheduled_backups();
+if (@users) {
+	$utable = &ui_columns_start([ $text{'sched_dest'},
+				      $text{'sched_doms'} ], 100);
+	foreach my $s (@users) {
+		@dests = &get_scheduled_backup_dests($s);
+		@nices = map { &nice_backup_url($_, 1) } @dests;
+		$utable .= &ui_columns_row([
+			&ui_link("backup_form.cgi?sched=$s->{'id'}",
+				 join("<br>\n", @nices)),
+			&nice_backup_doms($s),
+			]);
+		}
+	$utable .= &ui_columns_end();
+	}
+else {
+	$utable = $text{'cloud_nousers'};
+	}
+print &ui_table_row($text{'cloud_users'}, $utable);
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

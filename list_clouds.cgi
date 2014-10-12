@@ -14,6 +14,8 @@ print &ui_columns_start([ $text{'clouds_name'},
 @allbackups = &list_scheduled_backups();
 foreach my $p (@provs) {
 	@users = grep { &backup_uses_cloud($_, $p) } @allbackups;
+	$users = @users ? &text('clouds_nusers', scalar(@users))
+			: $text{'clouds_nousers'};
 	$sfunc = "cloud_".$p->{'name'}."_get_state";
 	$state = &$sfunc($p);
 	print &ui_columns_row([

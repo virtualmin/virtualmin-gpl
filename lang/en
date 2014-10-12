@@ -6448,6 +6448,9 @@ clouds_users=Backup users
 clouds_ecannot=You are not allowed to edit cloud storage providers
 clouds_unconf=Not yet configured
 clouds_return=list of providers
+clouds_nusers=Used by $1 backups
+clouds_nousers=Not used by any backups
+
 cloud_s3desc=Amazon S3
 cloud_rsdesc=Rackspace Cloud Files
 cloud_googledesc=Google Cloud Storage
@@ -6473,5 +6476,7 @@ cloud_rs_user=Rackspace username
 cloud_rs_key=Rackspace API key
 cloud_rs_snet=Use internal Rackspace network servers?
 cloud_rs_chunk=Multi-part chunk size in MB
+cloud_users=Used by backups
+cloud_nousers=None yet
 
 __norefs=1
