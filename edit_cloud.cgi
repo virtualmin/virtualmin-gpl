@@ -11,6 +11,10 @@ require './virtual-server-lib.pl';
 ($prov) = grep { $_->{'name'} eq $in{'name'} } @provs;
 $prov || &error($text{'cloud_egone'});
 
+if ($prov->{'longdesc'}) {
+	print $prov->{'longdesc'},"<p>\n";
+	}
+
 print &ui_form_start("save_cloud.cgi", "post");
 print &ui_hidden("name", $in{'name'});
 print &ui_table_start($text{'cloud_header'}, undef, 2);

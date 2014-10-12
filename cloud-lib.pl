@@ -10,6 +10,10 @@ return ( { 'name' => 's3',
 	 { 'name' => 'rs',
 	   'prefix' => [ 'rs' ],
 	   'desc' => $text{'cloud_rsdesc'} },
+	 { 'name' => 'google',
+	   'prefix' => [ 'google' ],
+	   'desc' => $text{'cloud_googledesc'},
+	   'longdesc' => $text{'cloud_googlelongdesc'} },
        );
 }
 
@@ -211,6 +215,52 @@ return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
 
 sub cloud_google_get_state
 {
+if ($config{'google_account'}) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_gaccount', $config{'google_account'},
+				 $config{'google_project'}),
+	       };
+	}
+else {
+	return { 'ok' => 0 };
+	}
+}
+
+sub cloud_google_show_inputs
+{
+my $rv;
+
+# Google account
+$rv .= &ui_table_row($text{'cloud_google_account'},
+	&ui_textbox("google_account", $config{'google_account'}, 40));
+
+# Google OAuth2 client ID
+$rv .= &ui_table_row($text{'cloud_google_clientid'},
+	&ui_textbox("google_clientid", $config{'google_clientid'}, 40));
+
+# Google client secret
+$rv .= &ui_table_row($text{'cloud_google_secret'},
+	&ui_textbox("google_secret", $config{'google_secret'}, 40));
+
+# GCE project name
+$rv .= &ui_table_row($text{'cloud_google_project'},
+	&ui_textbox("google_project", $config{'google_project'}, 40));
+
+return $rv;
+}
+
+sub cloud_google_parse_inputs
+{
+my ($in) = @_;
+
+# Parse google account
+$in->{'google_account'} =~ /^\S+\@\S+$/ ||
+	&error($text{'cloud_egoogle_account'});
+$config{'google_account'} = $in->{'google_account'};
+
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 }
 
 ######## Functions for Dropbox ########
