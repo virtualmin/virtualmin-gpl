@@ -202,8 +202,8 @@ sub list_rackspace_endpoints
 {
 return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
 	 [ 'https://lon.auth.api.rackspacecloud.com/v1.0', 'UK default' ],
-	 [ 'https://identity.api.rackspacecloud.com/v1.0;DFW', 'US Dallas' ],
-	 [ 'https://identity.api.rackspacecloud.com/v1.0;ORD', 'US Chicago' ] );
+	 [ 'https://identity.api.rackspacecloud.com/v1.0;DFW', 'US - Dallas' ],
+	 [ 'https://identity.api.rackspacecloud.com/v1.0;ORD', 'US - Chicago' ] );
 }
 
 

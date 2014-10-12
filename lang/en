@@ -6476,6 +6476,7 @@ cloud_rs_user=Rackspace username
 cloud_rs_key=Rackspace API key
 cloud_rs_snet=Use internal Rackspace network servers?
 cloud_rs_chunk=Multi-part chunk size in MB
+cloud_rs_endpoint=Rackspace server location
 cloud_users=Used by backups
 cloud_nousers=None yet
 
