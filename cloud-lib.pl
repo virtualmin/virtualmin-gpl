@@ -131,30 +131,81 @@ else {
 sub cloud_rs_show_inputs
 {
 my $rv;
-# XXX
 
 # Default login
-$rv .= &ui_table_row($text{'cloud_s3_akey'},
-	&ui_radio("s3_akey_def", $config{'s3_akey'} ? 0 : 1,
+$rv .= &ui_table_row($text{'cloud_rs_user'},
+	&ui_radio("rs_user_def", $config{'rs_user'} ? 0 : 1,
 		  [ [ 1, $text{'cloud_noneset'} ],
 		    [ 0, $text{'cloud_below'} ] ])."<br>\n".
-	&ui_grid_table([ "<b>$text{'cloud_s3_access'}</b>",
-		         &ui_textbox("s3_akey", $config{'s3_akey'}, 50),
-		         "<b>$text{'cloud_s3_secret'}</b>",
-                         &ui_textbox("s3_skey", $config{'s3_skey'}, 50) ], 2));
+	&ui_grid_table([ "<b>$text{'cloud_rs_user'}</b>",
+		         &ui_textbox("rs_user", $config{'rs_user'}, 50),
+		         "<b>$text{'cloud_rs_key'}</b>",
+                         &ui_textbox("rs_key", $config{'rs_key'}, 50) ], 2));
 
-# S3 endpoint hostname, for non-amazon implementations
-$rv .= &ui_table_row($text{'cloud_s3_endpoint'},
-	&ui_opt_textbox("s3_endpoint", $config{'s3_endpoint'}, 40,
-			$text{'cloud_s3_amazon'}));
+# Rackspace endpoint
+my @eps = &list_rackspace_endpoints();
+$rv .= &ui_table_row($text{'cloud_rs_endpoint'},
+	&ui_select("rs_endpoint", $config{'rs_endpoint'}, \@eps, 1, 0, 1));
+
+# Use internal address?
+$rv .= &ui_table_row($text{'cloud_rs_snet'},
+	&ui_yesno_radio("rs_snet", $config{'rs_snet'}));
 
 # Upload chunk size
-$rv .= &ui_table_row($text{'cloud_s3_chunk'},
-	&ui_opt_textbox("s3_chunk", $config{'s3_chunk'}, 6,
-			$text{'default'}." (5 MB)"));
+$rv .= &ui_table_row($text{'cloud_rs_chunk'},
+	&ui_opt_textbox("rs_chunk", $config{'rs_chunk'}, 6,
+			$text{'default'}." (200 MB)"));
 
 return $rv;
 }
+
+sub cloud_rs_parse_inputs
+{
+my ($in) = @_;
+
+# Parse default login
+if ($in->{'rs_user_def'}) {
+	delete($config{'rs_user'});
+	delete($config{'rs_key'});
+	}
+else {
+	$in->{'rs_user'} =~ /^\S+$/ || &error($text{'backup_ersuser'});
+	$in->{'rs_key'} =~ /^\S+$/ || &error($text{'backup_erskey'});
+	$config{'rs_user'} = $in->{'rs_user'};
+	$config{'rs_key'} = $in->{'rs_key'};
+	}
+
+# Parse endpoint
+$config{'rs_endpoint'} = $in{'rs_endpoint'};
+
+# Parse internal network flag
+$config{'rs_snet'} = $in{'rs_snet'};
+
+# Parse chunk size
+if ($in->{'rs_chunk_def'}) {
+	delete($config{'rs_chunk'});
+	}
+else {
+	$in->{'rs_chunk'} =~ /^[1-9][0-9]*$/ ||
+		&error($text{'cloud_es3_chunk'});
+	$config{'rs_chunk'} = $in->{'rs_chunk'};
+	}
+
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+
+return undef;
+}
+
+sub list_rackspace_endpoints
+{
+return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
+	 [ 'https://lon.auth.api.rackspacecloud.com/v1.0', 'UK default' ],
+	 [ 'https://identity.api.rackspacecloud.com/v1.0;DFW', 'US Dallas' ],
+	 [ 'https://identity.api.rackspacecloud.com/v1.0;ORD', 'US Chicago' ] );
+}
+
 
 ######## Functions for Google Cloud Storage ########
 
