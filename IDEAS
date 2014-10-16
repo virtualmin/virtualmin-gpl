@@ -35,5 +35,7 @@
 	- backup/restore
 
  - Backup to Google Cloud Files & Dropbox
-	- Cloudmin too
+	- Cloud backups page to replace module config
+	- GPL version
 	- CHANGELOG
+	- https://cloud.google.com/storage/docs/authentication#oauth
