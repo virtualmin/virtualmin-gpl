@@ -207,23 +207,32 @@ foreach $d (&list_domains()) {
 				print STDERR "  $u->{'user'}: need to delete ",
 					     "$needsize bytes\n" if ($debug);
 				}
-			for($i=0; $i<$count; $i+=1000) {
-				last if (!$days && $needsize <= 0);
-				$endi = $i+1000-1;
-				$endi = $count-1 if ($endi >= $count);
-				my @mail = &mailboxes::mailbox_list_mails(
-					$i, $endi, $folder, 1);
-				@mail = @mail[$i .. $endi];
-				print STDERR "  $u->{'user'}: processing ",
-					     "range $i to $endi\n" if ($debug);
-				($needsize, $delcount) = &process_spam_mails(
-				    \@mail, $days, $size, $folder, $needsize);
-				$count -= $delcount;
-				if ($delcount) {
-					# Shift back pointer, as some new
-					# messages will be in the range now
-					$i -= 1000;
+			eval {
+				local $main::error_must_die = 1;
+				for($i=0; $i<$count; $i+=1000) {
+					last if (!$days && $needsize <= 0);
+					$endi = $i+1000-1;
+					$endi = $count-1 if ($endi >= $count);
+					my @mail = &mailboxes::mailbox_list_mails($i, $endi, $folder, 1);
+					@mail = @mail[$i .. $endi];
+					print STDERR "  $u->{'user'}: ",
+						"processing range $i to $endi\n"
+						if ($debug);
+					($needsize, $delcount) =
+					    &process_spam_mails(
+						\@mail, $days, $size,
+						$folder, $needsize);
+					$count -= $delcount;
+					if ($delcount) {
+						# Shift back pointer, as some 
+						# new messages will be in the
+						# range now
+						$i -= 1000;
+						}
 					}
+				};
+			if ($@ && $debug) {
+				print STDERR "  $u->{'user'}: exception: $@\n";
 				}
 			}
 		}
