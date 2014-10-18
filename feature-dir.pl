@@ -391,30 +391,19 @@ local $cmd;
 local $gzip = $homefmt && &has_command("gzip");
 
 # Create exclude file
-$xtemp = &transname();
-&open_tempfile(XTEMP, ">$xtemp");
-&print_tempfile(XTEMP, "domains\n");
-&print_tempfile(XTEMP, "./domains\n");
+local $xtemp = &transname();
+local @xlist;
+push(@xlist, "domains");
 if ($opts->{'dirnologs'}) {
-	&print_tempfile(XTEMP, "logs\n");
-	&print_tempfile(XTEMP, "./logs\n");
+	push(@xlist, "logs");
 	}
 if ($opts->{'dirnohomes'}) {
-	&print_tempfile(XTEMP, "homes\n");
-	&print_tempfile(XTEMP, "./homes\n");
+	push(@xlist, "homes");
 	}
-&print_tempfile(XTEMP, "virtualmin-backup\n");
-&print_tempfile(XTEMP, "./virtualmin-backup\n");
-foreach my $e (&get_backup_excludes($d)) {
-	&print_tempfile(XTEMP, "$e\n");
-	&print_tempfile(XTEMP, "./$e\n");
-	}
-foreach my $e (split(/\t+/, $opts->{'exclude'})) {
-	&print_tempfile(XTEMP, "$e\n");
-	&print_tempfile(XTEMP, "./$e\n");
-	}
-&print_tempfile(XTEMP, ".backup.lock\n");
-&print_tempfile(XTEMP, "./.backup.lock\n");
+push(@xlist, "virtualmin-backup");
+push(@xlist, &get_backup_excludes($d));
+push(@xlist, split(/\t+/, $opts->{'exclude'}));
+push(@xlist, "backup.lock");
 
 # Exclude all .zfs files, for Solaris
 if ($gconfig{'os_type'} eq 'solaris') {
@@ -422,10 +411,18 @@ if ($gconfig{'os_type'} eq 'solaris') {
 	while(<FIND>) {
 		s/\r|\n//g;
 		s/^\Q$d->{'home'}\E\///;
-		&print_tempfile(XTEMP, "$_\n");
-		&print_tempfile(XTEMP, "./$_\n");
+		push(@xlist, $_);
 		}
 	close(FIND);
+	}
+&open_tempfile(XTEMP, ">$xtemp");
+foreach my $x (@xlist) {
+	if ($homefmt && $config{'compression'} == 3) {
+		&print_tempfile(XTEMP, "$x\n");
+		}
+	else {
+		&print_tempfile(XTEMP, "./$x\n");
+		}
 	}
 &close_tempfile(XTEMP);
 
