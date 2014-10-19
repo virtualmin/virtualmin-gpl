@@ -13,7 +13,7 @@ return ( { 'name' => 's3',
 	 { 'name' => 'google',
 	   'prefix' => [ 'google' ],
 	   'desc' => $text{'cloud_googledesc'},
-	   'longdesc' => $text{'cloud_googlelongdesc'} },
+	   'longdesc' => $text{'cloud_google_longdesc'} },
        );
 }
 
@@ -40,7 +40,8 @@ sub cloud_s3_get_state
 {
 if ($config{'s3_akey'}) {
 	return { 'ok' => 1,
-		 'desc' => &text('cloud_s3account', $config{'s3_akey'}),
+		 'desc' => &text('cloud_s3account',
+				 "<tt>$config{'s3_akey'}</tt>"),
 	       };
 	}
 else {
@@ -124,7 +125,7 @@ sub cloud_rs_get_state
 {
 if ($config{'rs_user'}) {
 	return { 'ok' => 1,
-		 'desc' => &text('cloud_rsuser', $config{'rs_user'}),
+		 'desc' => &text('cloud_rsuser', "<tt>$config{'rs_user'}</tt>"),
 	       };
 	}
 else {
@@ -217,8 +218,9 @@ sub cloud_google_get_state
 {
 if ($config{'google_account'}) {
 	return { 'ok' => 1,
-		 'desc' => &text('cloud_gaccount', $config{'google_account'},
-				 $config{'google_project'}),
+		 'desc' => &text('cloud_gaccount',
+				 "<tt>$config{'google_account'}</tt>",
+				 "<tt>$config{'google_project'}</tt>"),
 	       };
 	}
 else {
@@ -236,7 +238,7 @@ $rv .= &ui_table_row($text{'cloud_google_account'},
 
 # Google OAuth2 client ID
 $rv .= &ui_table_row($text{'cloud_google_clientid'},
-	&ui_textbox("google_clientid", $config{'google_clientid'}, 40));
+	&ui_textbox("google_clientid", $config{'google_clientid'}, 60));
 
 # Google client secret
 $rv .= &ui_table_row($text{'cloud_google_secret'},
@@ -245,6 +247,18 @@ $rv .= &ui_table_row($text{'cloud_google_secret'},
 # GCE project name
 $rv .= &ui_table_row($text{'cloud_google_project'},
 	&ui_textbox("google_project", $config{'google_project'}, 40));
+
+# OAuth2 code
+if ($config{'google_oauth'}) {
+	$rv .= &ui_table_row($text{'cloud_google_oauth'},
+		             "<tt>$config{'google_oauth'}</tt>");
+	}
+
+# OAuth2 token
+if ($config{'google_token'}) {
+	$rv .= &ui_table_row($text{'cloud_google_token'},
+		             "<tt>$config{'google_token'}</tt>");
+	}
 
 return $rv;
 }
