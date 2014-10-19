@@ -258,9 +258,26 @@ $in->{'google_account'} =~ /^\S+\@\S+$/ ||
 	&error($text{'cloud_egoogle_account'});
 $config{'google_account'} = $in->{'google_account'};
 
+# Parse client ID
+$in->{'google_clientid'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_clientid'});
+$config{'google_clientid'} = $in->{'google_clientid'};
+
+# Parse client secret
+$in->{'google_secret'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_secret'});
+$config{'google_secret'} = $in->{'google_secret'};
+
+# Parse project name
+$in->{'google_project'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_project'});
+$config{'google_project'} = $in->{'google_project'};
+
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+
+# XXX redirect to auth enrollment page?
 }
 
 ######## Functions for Dropbox ########

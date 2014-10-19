@@ -3143,6 +3143,32 @@ if ($caps && !$current_lang_info->{'charset'} && $rv ne $url) {
 return $rv;
 }
 
+# nice_backup_doms(&backup)
+# Returns a human-friendly HTML description of what is included in a backup
+sub nice_backup_doms
+{
+local ($s) = @_;
+if ($s->{'all'} == 1) {
+	return "<i>$text{'sched_all'}</i>";
+	}
+elsif ($s->{'doms'}) {
+	local @dnames;
+	foreach my $did (split(/\s+/, $s->{'doms'})) {
+		local $d = &get_domain($did);
+		push(@dnames, &show_domain_name($d)) if ($d);
+		}
+	local $msg = @dnames > 4 ? join(", ", @dnames).", ..."
+				 : join(", ", @dnames);
+	return $s->{'all'} == 2 ? &text('sched_except', $msg) : $msg;
+	}
+elsif ($s->{'virtualmin'}) {
+	return $text{'sched_virtualmin'};
+	}
+else {
+	return $text{'sched_nothing'};
+	}
+}
+
 # show_backup_destination(name, value, no-local, [&domain], [no-download],
 #			  [no-upload])
 # Returns HTML for fields for selecting a local or FTP file
