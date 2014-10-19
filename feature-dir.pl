@@ -779,6 +779,10 @@ if (!$d->{'parent'}) {
 	       " | xargs chown $d->{'uid'}:$gid");
 &system_logged("chown $d->{'uid'}:$gid ".
 	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
+foreach my $dir (&virtual_server_directories($d)) {
+	&set_ownership_permissions(undef, undef, $dir->[1],
+				   $d->{'home'}."/".$d->[0]);
+	}
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($sd, 0);
