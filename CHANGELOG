@@ -1464,6 +1464,6 @@ IPv6 addresses in Virtualmin are now supported on all operation systems that Web
 Automatic cleanup of messages in all mailboxes and folders can now be setup in Virtualmin, to enforce an email retention policy or save on disk space.
 If Postfix and Dovecot are setup to use SSL, they will be configured to use the certificate belonging to virtual servers with their own private IP address for connections to that IP.
 ---- Changes since 4.11 ----
-Updated the Piwik script installer to version 2.8.0, Joomla to 3.3.6 and 2.5.27, Ghost to 0.5.2, Roundcube to 1.0.3, phpMyFAQ to 2.8.15, Zikula to 1.3.9, phpMyAdmin to 4.2.10, 4.1.14.5 and 4.0.10.4, DokuWiki to 2014-09-29a, Dolibarr to 3.6.1, SMF to 2.0.9, TikiWiki to 6.0.1, SugarCRM to 6.5.18, Coppermine to 1.5.32, X2CRM to 4.3, TikiWiki to 13.0, Drupal to 7.32, PHPList to 3.0.9, and MediaWiki to 1.23.5 and 1.19.20.
+Updated the Piwik script installer to version 2.8.0, Joomla to 3.3.6 and 2.5.27, Ghost to 0.5.2, Roundcube to 1.0.3, phpMyFAQ to 2.8.15, Zikula to 1.3.9, phpMyAdmin to 4.2.10, 4.1.14.5 and 4.0.10.4, DokuWiki to 2014-09-29a, Dolibarr to 3.6.1, SMF to 2.0.9, TikiWiki to 6.0.1, SugarCRM to 6.5.18, Coppermine to 1.5.32, X2CRM to 4.3, TikiWiki to 13.0, Drupal to 7.32, PHPList to 3.0.9, OpenCart to 2.0.0.0, and MediaWiki to 1.23.5 and 1.19.20.
 On systems running Apache 2.4 and above, VirtualHost blocks are now created with an IP address instead of *.
 Moved all S3 and Rackspace Cloud Files settings from the Virtualmin Configuration page to the new Cloud Storage Providers page.
