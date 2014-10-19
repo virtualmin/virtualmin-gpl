@@ -30,28 +30,9 @@ foreach $s (@scheds) {
 	     'value' => $s->{'id'}, 'disabled' => $s->{'id'}==1 });
 	@dests = &get_scheduled_backup_dests($s);
 	@nices = map { &nice_backup_url($_, 1) } @dests;
-	push(@row, "<a href='backup_form.cgi?sched=$s->{'id'}'>".
-		   join("<br>\n", @nices)."</a>");
-	if ($s->{'all'} == 1) {
-		push(@row, "<i>$text{'sched_all'}</i>");
-		}
-	elsif ($s->{'doms'}) {
-		local @dnames;
-		foreach my $did (split(/\s+/, $s->{'doms'})) {
-			local $d = &get_domain($did);
-			push(@dnames, &show_domain_name($d)) if ($d);
-			}
-		local $msg = @dnames > 4 ? join(", ", @dnames).", ..."
-					 : join(", ", @dnames);
-		push(@row, $s->{'all'} == 2 ? &text('sched_except', $msg)
-					    : $msg);
-		}
-	elsif ($s->{'virtualmin'}) {
-		push(@row, $text{'sched_virtualmin'});
-		}
-	else {
-		push(@row, $text{'sched_nothing'});
-		}
+	push(@row, &ui_link("backup_form.cgi?sched=$s->{'id'}",
+			    join("<br>\n", @nices)));
+	push(@row, &nice_backup_doms($s));
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
 		"<font color=#ff0000>$text{'no'}</font>");
