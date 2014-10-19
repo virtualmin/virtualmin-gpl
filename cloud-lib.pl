@@ -253,31 +253,62 @@ sub cloud_google_parse_inputs
 {
 my ($in) = @_;
 
-# Parse google account
-$in->{'google_account'} =~ /^\S+\@\S+$/ ||
-	&error($text{'cloud_egoogle_account'});
-$config{'google_account'} = $in->{'google_account'};
+if ($in{'google_set_oauth'}) {
+	# Special mode - saving the oauth token
+	$in->{'google_oauth'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_oauth'});
+	$config{'google_oauth'} = $in->{'google_oauth'};
+	}
+else {
+	# Parse google account
+	$in->{'google_account'} =~ /^\S+\@\S+$/ ||
+		&error($text{'cloud_egoogle_account'});
+	$config{'google_account'} = $in->{'google_account'};
 
-# Parse client ID
-$in->{'google_clientid'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_clientid'});
-$config{'google_clientid'} = $in->{'google_clientid'};
+	# Parse client ID
+	$in->{'google_clientid'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_clientid'});
+	$config{'google_clientid'} = $in->{'google_clientid'};
 
-# Parse client secret
-$in->{'google_secret'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_secret'});
-$config{'google_secret'} = $in->{'google_secret'};
+	# Parse client secret
+	$in->{'google_secret'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_secret'});
+	$config{'google_secret'} = $in->{'google_secret'};
 
-# Parse project name
-$in->{'google_project'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_project'});
-$config{'google_project'} = $in->{'google_project'};
+	# Parse project name
+	$in->{'google_project'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_project'});
+	$config{'google_project'} = $in->{'google_project'};
+	}
+
+if ($config{'google_oauth'} && !$config{'google_token'}) {
+	# Need to get access token
+	}
 
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
 
-# XXX redirect to auth enrollment page?
+if ($in{'google_set_oauth'}) {
+	# Nothing more to do
+	return undef;
+	}
+
+return &ui_link("https://accounts.google.com/o/oauth2/auth?".
+                "scope=https://www.googleapis.com/auth/devstorage.read_write&".
+                "redirect_uri=urn:ietf:wg:oauth:2.0:oob&".
+                "response_type=code&".
+                "client_id=".&urlize($in->{'google_clientid'})."&".
+		"login_hint=".&urlize($in->{'google_account'}),
+                $text{'cloud_openoauth'},
+                undef,
+                "target=_blank")."<p>\n".
+       &ui_form_start("save_cloud.cgi", "post").
+       &ui_hidden("name", "google").
+       &ui_hidden("google_set_oauth", 1).
+       "<b>$text{'cloud_newoauth'}</b> ".
+       &ui_textbox("google_oauth", undef, 60)."<p>\n".
+       &ui_form_end([ [ undef, $text{'save'} ] ]);
 }
 
 ######## Functions for Dropbox ########
