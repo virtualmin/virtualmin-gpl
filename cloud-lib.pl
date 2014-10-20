@@ -266,6 +266,7 @@ return $rv;
 sub cloud_google_parse_inputs
 {
 my ($in) = @_;
+my $reauth = 0;
 
 if ($in{'google_set_oauth'}) {
 	# Special mode - saving the oauth token
@@ -277,27 +278,31 @@ else {
 	# Parse google account
 	$in->{'google_account'} =~ /^\S+\@\S+$/ ||
 		&error($text{'cloud_egoogle_account'});
+	$reauth++ if ($config{'google_account'} ne $in->{'google_account'});
 	$config{'google_account'} = $in->{'google_account'};
 
 	# Parse client ID
 	$in->{'google_clientid'} =~ /^\S+$/ ||
 		&error($text{'cloud_egoogle_clientid'});
+	$reauth++ if ($config{'google_clientid'} ne $in->{'google_clientid'});
 	$config{'google_clientid'} = $in->{'google_clientid'};
 
 	# Parse client secret
 	$in->{'google_secret'} =~ /^\S+$/ ||
 		&error($text{'cloud_egoogle_secret'});
+	$reauth++ if ($config{'google_secret'} ne $in->{'google_secret'});
 	$config{'google_secret'} = $in->{'google_secret'};
 
 	# Parse project name
 	$in->{'google_project'} =~ /^\S+$/ ||
 		&error($text{'cloud_egoogle_project'});
+	$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
 	$config{'google_project'} = $in->{'google_project'};
 	}
 
 if ($config{'google_oauth'} && !$config{'google_token'}) {
 	# Need to get access token for the first time
-	my $gce = { 'code' => $config{'google_oauth'},
+	my $gce = { 'oauth' => $config{'google_oauth'},
 	            'clientid' => $config{'google_clientid'},
 		    'secret' => $config{'google_secret'} };
 	my ($ok, $token, $rtoken, $ttime) = &get_oauth_access_token($gce);
@@ -312,12 +317,14 @@ if ($config{'google_oauth'} && !$config{'google_token'}) {
 &save_module_config();
 &unlock_file($module_config_file);
 
-if ($in{'google_set_oauth'}) {
-	# Nothing more to do
+if ($in{'google_set_oauth'} || !$reauth) {
+	# Nothing more to do - either the OAuth2 token was just set, or the
+	# settings were saved with no change
 	return undef;
 	}
 
-return &ui_link("https://accounts.google.com/o/oauth2/auth?".
+return $text{'cloud_descoauth'}."<p>\n".
+       &ui_link("https://accounts.google.com/o/oauth2/auth?".
                 "scope=https://www.googleapis.com/auth/devstorage.read_write&".
                 "redirect_uri=urn:ietf:wg:oauth:2.0:oob&".
                 "response_type=code&".
@@ -330,7 +337,7 @@ return &ui_link("https://accounts.google.com/o/oauth2/auth?".
        &ui_hidden("name", "google").
        &ui_hidden("google_set_oauth", 1).
        "<b>$text{'cloud_newoauth'}</b> ".
-       &ui_textbox("google_oauth", undef, 60)."<p>\n".
+       &ui_textbox("google_oauth", undef, 80)."<p>\n".
        &ui_form_end([ [ undef, $text{'save'} ] ]);
 }
 

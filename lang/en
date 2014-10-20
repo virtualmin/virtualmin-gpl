@@ -6495,5 +6495,6 @@ cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_egoogle_oauth=Missing OAuth2 code
 cloud_egoogletoken=Failed to get initial OAuth2 token : $1
+cloud_descoauth=Before Google Cloud Storage can be used by Cloudmin, you must first authorize access to it by clicking on the link below. After logging into your Google account and authorizing access, a code will be displayed that you can enter into the text box below.
 
 __norefs=1
