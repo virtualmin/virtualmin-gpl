@@ -3054,48 +3054,62 @@ return $rv;
 # 5 for upload, 6 for rackspace), login, password, host, path and port
 sub parse_backup_url
 {
+local ($url) = @_;
 local @rv;
-if ($_[0] =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
-    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
-    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
-    $_[0] =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+if ($url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+    $url =~ /^ftp:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+    $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+    $url =~ /^ftp:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# FTP URL
 	@rv = (1, $1, $2, $3, $5, $4 ? substr($4, 1) : 21);
 	}
-elsif ($_[0] =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
-       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
-       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
-       $_[0] =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+elsif ($url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+       $url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+       $url =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $url =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
 	}
-elsif ($_[0] =~ /^s3:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
-	# S3 with regular redundancy
-	@rv = (3, $1, $2, $3, $5, 0);
+elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
+	# S3 with a username and password
+	@rv = (3, $2, $4, $4, $6, $1 eq "s3rrs" ? 1 : 0);
 	}
-elsif ($_[0] =~ /^s3rrs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
-	# S3 with less redundancy
-	@rv = (3, $1, $2, $3, $5, 1);
+elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'}) {
+	# S3 with the default login
+	return (3, $2, $4, $config{'s3_akey'}, $config{'s3_skey'},
+		$1 eq "s3rrs" ? 1 : 0);
 	}
-elsif ($_[0] =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
-	# Rackspace cloud files
+elsif ($url =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
+	# Rackspace cloud files with a username and password
 	@rv = (6, $1, $2, $3, $5, 0);
 	}
-elsif ($_[0] eq "download:") {
-	return (4, undef, undef, undef, undef, undef);
+elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'}) {
+	# Rackspace with the default login
+	@rv = (6, $1, $3, $config{'rs_user'}, $config{'rs_key'});
 	}
-elsif ($_[0] eq "upload:") {
-	return (5, undef, undef, undef, undef, undef);
+elsif ($url =~ /^google:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Google cloud files
+	@rv = (7, undef, undef, $1, $3, undef);
 	}
-elsif (!$_[0] || $_[0] =~ /^\//) {
+elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Dropbox folder
+	@rv = (8, undef, undef, $1, $3, undef);
+	}
+elsif ($url eq "download:") {
+	@rv = (4, undef, undef, undef, undef, undef);
+	}
+elsif ($url eq "upload:") {
+	@rv = (5, undef, undef, undef, undef, undef);
+	}
+elsif (!$url || $url =~ /^\//) {
 	# Absolute path
-	@rv = (0, undef, undef, undef, $_[0], undef);
+	@rv = (0, undef, undef, undef, $url, undef);
 	$rv[4] =~ s/\/+$//;	# No need for trailing /
 	}
 else {
 	# Relative to current dir
 	local $pwd = &get_current_dir();
-	@rv = (0, undef, undef, undef, $pwd."/".$_[0], undef);
+	@rv = (0, undef, undef, undef, $pwd."/".$url, undef);
 	$rv[4] =~ s/\/+$//;
 	}
 return @rv;
@@ -3132,6 +3146,16 @@ elsif ($proto == 6) {
 	$rv = $path ?
 		&text('backup_nicersp', "<tt>$host</tt>", "<tt>$path</tt>") :
 		&text('backup_nicers', "<tt>$host</tt>");
+	}
+elsif ($proto == 7) {
+	$rv = $path ?
+		&text('backup_nicegop', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicego', "<tt>$host</tt>");
+	}
+elsif ($proto == 8) {
+	$rv = $path ?
+		&text('backup_nicedbp', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicedb', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;
@@ -3284,6 +3308,9 @@ $st .= "<tr> <td>$text{'backup_rspath'}</td> <td>".
 $st .= "</table>\n";
 $st .= "<a href='http://affiliates.rackspacecloud.com/idevaffiliate.php?id=3533&url=105' target=_blank>$text{'backup_rssignup'}</a>\n";
 push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
+
+# Google cloud files
+# XXX
 
 if (!$nodownload) {
 	# Show mode to download in browser
