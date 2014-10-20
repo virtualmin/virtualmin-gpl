@@ -6492,5 +6492,6 @@ cloud_google_longdesc=The settings on this page are supplied by Google when you 
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_egoogle_oauth=Missing OAuth2 code
+cloud_egoogletoken=Failed to get initial OAuth2 token : $1
 
 __norefs=1

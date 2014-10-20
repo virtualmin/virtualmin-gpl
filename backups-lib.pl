@@ -408,6 +408,9 @@ foreach my $desturl (@$desturls) {
 			}
 
 		}
+	elsif ($mode == 7) {
+		# Connect to Google and create the directory
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
