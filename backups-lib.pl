@@ -409,13 +409,20 @@ foreach my $desturl (@$desturls) {
 
 		}
 	elsif ($mode == 7) {
-		# Connect to Google and create the directory
-		local $buckets = &list_google_buckets();
+		# Connect to Google and create the bucket
+		local $buckets = &list_gcs_buckets();
 		if (!ref($buckets)) {
 			&$first_print($buckets);
 			return (0, 0, $doms);
 			}
-		# XXX
+		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
+		if (!$already) {
+			local $err = &create_gcs_bucket($server);
+			if ($err) {
+				&$first_print($err);
+				return (0, 0, $doms);
+				}
+			}
 		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
