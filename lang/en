@@ -6484,6 +6484,8 @@ cloud_google_account=Google account email address
 cloud_google_clientid=OAuth2 client ID
 cloud_google_secret=OAuth2 client secret
 cloud_google_project=Project name
+cloud_google_oauth=OAuth2 code from Google
+cloud_google_token=OAuth2 token from Google
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/project target=_blank>Google Developers Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>.
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
