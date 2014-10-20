@@ -11,7 +11,7 @@ return ( { 'name' => 's3',
 	   'prefix' => [ 'rs' ],
 	   'desc' => $text{'cloud_rsdesc'} },
 	 { 'name' => 'google',
-	   'prefix' => [ 'google' ],
+	   'prefix' => [ 'gcs' ],
 	   'desc' => $text{'cloud_googledesc'},
 	   'longdesc' => $text{'cloud_google_longdesc'} },
        );
@@ -339,86 +339,6 @@ return $text{'cloud_descoauth'}."<p>\n".
        "<b>$text{'cloud_newoauth'}</b> ".
        &ui_textbox("google_oauth", undef, 80)."<p>\n".
        &ui_form_end([ [ undef, $text{'save'} ] ]);
-}
-
-# call_google_api(path, &params, [method], [project], [return-raw])
-# Calls a google cloud storage API, and return either the JSON response or an
-# error message
-sub call_google_api
-{
-my ($path, $params, $method, $project, $raw) = @_;
-my $gce = { 'rtoken' => $config{'google_rtoken'},
-	    'clientid' => $config{'google_clientid'},
-	    'secret' => $config{'google_secret'} };
-$method ||= "GET";
-if (time() - $config{'google_ttime'} > $config{'google_tstart'}) {
-        # Token refresh needed
-        my ($ok, $token, $rtoken, $ttime) = &get_oauth_access_token($gce, 1);
-        $ok || return "Refresh failed : $token";
-	$config{'google_token'} = $token;
-	$config{'google_ttime'} = $ttime;
-	$config{'google_tstart'} = time();
-	&lock_file($module_config_file);
-	&save_module_config();
-	&unlock_file($module_config_file);
-        }
-$params ||= [ ];
-my @allparams = @$params;
-if ($method eq "GET") {
-	push(@allparams, [ "maxResults", 500 ]);
-	}
-my $authheaders = { 'Authorization', 'Bearer '.$config{'google_token'} };
-my $allparams = join("&", map { &urlize($_->[0])."=".&urlize($_->[1]) } @allparams);
-my ($err, $out);
-$project ||= $config{'google_project'};
-if ($method eq "GET") {
-	&http_download("www.googleapis.com", 443,
-		       "/compute/v1/projects/$project/$path?$allparams",
-		       \$out, \$err, undef, 1, undef, undef, 0, 0, 1,
-		       $authheaders);
-	}
-elsif ($method eq "POST") {
-	my $json = { };
-	foreach my $p (@allparams) {
-		$json->{$p->[0]} = $p->[1];
-		}
-	&http_post_json("www.googleapis.com", 443,
-		        "/compute/v1/projects/$project/$path",
-		        $json, \$out, \$err, undef, 1, undef, undef, 0, 0, 1,
-		        $authheaders);
-	}
-elsif ($method eq "DELETE") {
-	&http_delete("www.googleapis.com", 443,
-		     "/compute/v1/projects/$project/$path",
-		     \$out, \$err, undef, 1, undef, undef, 0, 0, 1,
-		     $authheaders);
-	}
-return $err if ($err);
-if ($raw) {
-	# Just return ref to raw output string
-	return \$out;
-	}
-else {
-	# Decode to JSON
-	eval "use JSON::PP";
-	return "Missing Perl module JSON::PP" if ($@);
-	my $coder = JSON::PP->new->pretty;
-	my $perl;
-	eval {
-		$perl = $coder->decode($out);
-		};
-	return "JSON decoding failed : $@" if ($@);
-	if ($perl->{'error'}) {
-		if ($perl->{'error'}->{'errors'}) {
-			return $perl->{'error'}->{'errors'}->[0]->{'message'};
-			}
-		else {
-			return $perl->{'error'}->{'message'};
-			}
-		}
-	return $perl;
-	}
-
 }
 
 ######## Functions for Dropbox ########

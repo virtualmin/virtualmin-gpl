@@ -410,6 +410,12 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($mode == 7) {
 		# Connect to Google and create the directory
+		local $buckets = &list_google_buckets();
+		if (!ref($buckets)) {
+			&$first_print($buckets);
+			return (0, 0, $doms);
+			}
+		# XXX
 		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
@@ -3090,8 +3096,8 @@ elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'}) {
 	# Rackspace with the default login
 	@rv = (6, $1, $3, $config{'rs_user'}, $config{'rs_key'});
 	}
-elsif ($url =~ /^google:\/\/([^\/]+)(\/(\S+))?$/) {
-	# Google cloud files
+elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Google cloud storage
 	@rv = (7, undef, undef, $1, $3, undef);
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
@@ -3434,6 +3440,10 @@ elsif ($mode == 6) {
 		&error($text{'backup_erspath2'});
 	return "rs://".$in{$name.'_rsuser'}.":".$in{$name.'_rskey'}."\@".
 	       $in{$name.'_rspath'};
+	}
+elsif ($mode == 7) {
+	# Google cloud storage
+	# XXX
 	}
 else {
 	&error($text{'backup_emode'});
