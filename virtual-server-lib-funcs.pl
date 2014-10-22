@@ -9212,7 +9212,8 @@ foreach my $f (&list_custom_fields()) {
 	if ($f->{'visible'} == 0 || &master_admin()) {
 		# Can edit
 		local $n = "field_".$f->{'name'};
-		local $v = $d ? $d->{"field_".$f->{'name'}} : undef;
+		local $v = $d ? $d->{"field_".$f->{'name'}} :
+			   $f->{'type'} == 7 ? $f->{'opts'} : undef;
 		local $fv;
 		if ($f->{'type'} == 0) {
 			local $sz = $f->{'opts'} || 30;
