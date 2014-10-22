@@ -11117,6 +11117,51 @@ return $? ? &text('addstyle_ecmdfailed',
 		  "<tt>".&html_escape($out)."</tt>") : undef;
 }
 
+# get_compressed_file_size(file, [&key])
+# Returns the un-compressed size of a file in bytes, or undef if it cannot
+# be determined
+sub get_compressed_file_size
+{
+local ($file, $key) = @_;
+my $fmt = &compression_format($file, $key);
+my @st = stat($file);
+if ($rv == 0) {
+	# Not compressed at all
+	return $st[7];
+	}
+elsif ($rv = 1) {
+	# Gzip compressed
+	my $out = &backquote_command("gunzip -l ".quotemeta($file));
+	return undef if ($?);
+	return $out =~ /\d+\s+(\d+)\s+[0-9\.]+%/ ? $1 : undef;
+	}
+elsif ($rv == 2) {
+	# Classic compress - no idea how to handle
+	return undef;
+	}
+elsif ($rv == 3) {
+	# Bzip2 compressed - no way to estimate
+	return undef;
+	}
+elsif ($rv == 4) {
+	# Zip format - can sum up files
+	my $out = &backquote_command("unzip -l ".quotemeta($file));
+	return undef if ($?);
+	my $rv = 0;
+	foreach my $l (split(/\r?\n/, $out)) {
+		if ($l =~ /^\s*(\d+)\s+(\d+-\d+-\d+)/) {
+			$rv += $1;
+			}
+		}
+	return $rv;
+	}
+elsif ($rv == 5) {
+	# TAR format doesn't compress
+	return $st[7];
+	}
+return undef;
+}
+
 # feature_links(&domain)
 # Returns a list of links for editing specific features within a domain, such
 # as the DNS zone, apache config and so on. Includes plugins.
