@@ -46,7 +46,7 @@ return &compare_versions($ver, "4.2") > 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 3;		# To fix MySQL version issue
+return 4;		# To fix MySQL version issue again
 }
 
 sub script_phpmyadmin_category
