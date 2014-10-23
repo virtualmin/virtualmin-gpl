@@ -2687,7 +2687,7 @@ if ($d->{'dns_ip'}) {
 if ($d->{'ip'} ne $defip) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
-if ($d->{'ip6'} && $d->{'ip6'} ne $defip) {
+if ($d->{'ip6'} && $d->{'ip6'} ne $defip6) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
