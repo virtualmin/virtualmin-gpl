@@ -2270,6 +2270,7 @@ backup_upload=Uploading archive to FTP server $1 ..
 backup_upload2=Uploading archive to SSH server $1 ..
 backup_upload3=Uploading archive to Amazon's S3 service ..
 backup_upload6=Uploading archive to Rackspace's Cloud Files service ..
+backup_upload7=Uploading archive to Google Cloud Storage ..
 backup_uploadfailed=.. upload failed! $1
 backup_finalstatus=$1 servers backed up successfully, $2 had errors.
 backup_finalstatus2=$1 Virtualmin configuration settings backed up successfully.

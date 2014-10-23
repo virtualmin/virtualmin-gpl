@@ -809,6 +809,17 @@ DOMAIN: foreach $d (@$doms) {
 				$err = &rs_upload_object($rsh, $server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
+			elsif ($mode == 7) {
+				# Via Google upload
+				&$first_print($text{'backup_upload7'});
+				local $dfpath = $path ? $path."/".$df : $df;
+				$err = &upload_gcs_file(
+					$server, $dfpath, "$dest/$df");
+				$err = &upload_gcs_file($server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &upload_gcs_file($server,
+					$dfpath.".dom", $domtemp) if (!$err);
+				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
 						     $err));
