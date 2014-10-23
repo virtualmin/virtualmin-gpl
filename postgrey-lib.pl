@@ -58,7 +58,7 @@ local $postgrey = &has_command("postgrey");
 # First try running process
 &foreign_require("proc", "proc-lib.pl");
 foreach my $p (&proc::list_processes()) {
-	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E)\s+(.*)/) {
+	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E|\/\S+\/postgrey)\s+(.*)/) {
 		return $2;
 		}
 	}
@@ -169,8 +169,6 @@ else {
 &$first_print($text{'postgrey_proc'});
 if (!&find_byname("postgrey")) {
 	local ($ok, $out) = &init::start_action($init);
-	$port = &get_postgrey_port();	# In case we got it from the running
-					# process after the init script started
 	if (!$ok) {
 		&$second_print(&text('postgrey_procfailed',
 				     "<tt>".&html_escape($out)."</tt>"));
@@ -181,6 +179,8 @@ if (!&find_byname("postgrey")) {
 else {
 	&$second_print($text{'postgrey_procalready'});
 	}
+$port = &get_postgrey_port();	# In case we got it from the running
+				# process after the init script started
 
 # Configure Postfix and restart
 &$first_print($text{'postgrey_postfix'});
