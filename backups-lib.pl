@@ -418,6 +418,7 @@ foreach my $desturl (@$desturls) {
 		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
 			local $err = &create_gcs_bucket($server);
+			die "err=".Dumper($err);
 			if ($err) {
 				&$first_print($err);
 				return (0, 0, $doms);
