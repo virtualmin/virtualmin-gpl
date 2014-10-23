@@ -562,6 +562,19 @@ sub restore_dir
 local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
 
 &$first_print($text{'restore_dirtar'});
+
+# Check for free space, if possible
+my $osize = &get_compressed_file_size($file, $key);
+if ($osize && $config{'home_quotas'}) {
+	&foreign_require("mount");
+	my @space = &mount::disk_space(undef, $config{'home_quotas'});
+	if (@space && $space[1]*1024 < $osize) {
+		# Won't fit!
+		&$first_print(&text('restore_edirspace', &nice_size($osize),
+				    &nice_size($space[1]*1024)));
+		}
+	}
+
 local $iflag = "$d->{'home'}/.incremental";
 &unlink_file($iflag);
 if (defined(&set_php_wrappers_writable)) {
