@@ -22,6 +22,19 @@ sub script_phpmyadmin_versions
 return ( "4.2.10.1", "4.1.14.6", "4.0.10.5", "3.5.8.2" );
 }
 
+sub script_phpmyadmin_can_upgrade
+{
+local ($sinfo, $newver) = @_;
+if (&compare_versions($newver, "4.2.3") >= 0) {
+	my $out;
+	my $myver = &mysql::get_mysql_version(\$out);
+	if ($myver && $myver < 5.5) {
+		return 0;
+		}
+	}
+return 1;
+}
+
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
@@ -33,7 +46,7 @@ return &compare_versions($ver, "4.2") > 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 3;		# To fix MySQL version issue
+return 4;		# To fix MySQL version issue again
 }
 
 sub script_phpmyadmin_category
@@ -83,8 +96,8 @@ if ($wantver) {
 if (&compare_versions($ver, "4.2.3") >= 0) {
 	&require_mysql();
 	my $out;
-	my $ver = &mysql::get_mysql_version(\$out);
-	if ($ver && $ver < 5.5) {
+	my $myver = &mysql::get_mysql_version(\$out);
+	if ($myver && $myver < 5.5) {
 		push(@rv, "phpMyAdmin requires MySQL version 5.5 or later");
 		}
 	}
