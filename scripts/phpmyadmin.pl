@@ -27,6 +27,7 @@ sub script_phpmyadmin_can_upgrade
 local ($sinfo, $newver) = @_;
 if (&compare_versions($newver, "4.2.3") >= 0) {
 	my $out;
+	&require_mysql();
 	my $myver = &mysql::get_mysql_version(\$out);
 	if ($myver && $myver < 5.5) {
 		return 0;
@@ -46,7 +47,7 @@ return &compare_versions($ver, "4.2") > 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 4;		# To fix MySQL version issue again
+return 5;		# To fix MySQL version issue yet again
 }
 
 sub script_phpmyadmin_category
