@@ -2504,6 +2504,7 @@ restore_phpbad2=$1 - $2 - Version $3
 
 restore_unixuser=Updating administration password and quotas ..
 restore_dirtar=Extracting TAR file of home directory ..
+restore_edirspace=.. warning - this backup contains $1 of files, but your system only has $2 free ..
 restore_dirtarfailed=.. failed! $1
 restore_wasmissing=.. this was only an incremental backup. <b>Not all files have been restored - you should restore the full backup first!</b>
 restore_virtualmincp=Restoring virtual server password, quota and other details ..
