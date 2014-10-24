@@ -433,12 +433,14 @@ foreach my $p (@ports) {
         local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
         next if (!$vconf);
 	$pfound++;
+	local @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
+	local $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
 	if ($max) {
-		&apache::save_directive("IPCCommTimeout", [ $max+1 ],
+		&apache::save_directive($dirname, [ $max+1 ],
 					$vconf, $conf);
 		}
 	else {
-		&apache::save_directive("IPCCommTimeout", [ 9999 ],
+		&apache::save_directive($dirname, [ 9999 ],
 					$vconf, $conf);
 		}
 	&flush_file_lines($virt->{'file'});
@@ -460,6 +462,7 @@ elsif (!$p) {
 	}
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 local $v = &apache::find_directive("IPCCommTimeout", $vconf);
+$v ||= &apache::find_directive("FcgidIOTimeout", $vconf);
 return $v == 9999 ? undef : $v ? $v-1 : 40;
 }
 
