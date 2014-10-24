@@ -1382,6 +1382,73 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
+	elsif ($ok && $mode == 7 && (@destfiles || !$dirfmt)) {
+		# Upload to Google cloud storage
+		local $err;
+		&$first_print($text{'backup_upload7'});
+		local $infotemp = &transname();
+		local $domtemp = &transname();
+		if ($dirfmt) {
+			# Upload an entire directory of files
+			local $tstart = time();
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
+				local $dfpath = $path ? $path."/".$df : $df;
+				$err = &upload_gcs_file($server,
+					$dfpath, $dest."/".$df);
+				$err = &upload_gcs_file($server,
+					$dfpath.".info", $infotemp) if (!$err);
+				$err = &upload_gcs_file($server,
+					$dfpath.".dom", $domtemp) if (!$err);
+				}
+			if (!$err && $asd) {
+				# Log bandwidth used by domain
+				foreach my $df (@destfiles) {
+					local $d = $destfiles_map{$df};
+					if ($d) {
+						local @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7],
+							$tstart, time());
+						}
+					}
+				}
+			}
+		else {
+			# Upload one file to the container
+			local $tstart = time();
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
+			$err = &upload_gcs_file($server, $path, $dest);
+			$err = &upload_gcs_file($server, $path.".info",
+					  $infotemp) if (!$err);
+			$err = &upload_gcs_file($server, $path.".dom",
+					  $domtemp) if (!$err);
+			if ($asd && !$err) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
+							 $tstart, time());
+				}
+			}
+		if ($err) {
+			&$second_print(&text('backup_uploadfailed', $err));
+			$ok = 0;
+			}
+		&unlink_file($infotemp);
+		&unlink_file($domtemp);
+		&$second_print($text{'setup_done'}) if ($ok);
+		}
 	elsif ($ok && $mode == 0 && (@destfiles || !$dirfmt) &&
 	       $path ne $path0) {
 		# Copy to another local directory
@@ -3050,6 +3117,80 @@ elsif ($mode == 6) {
 		return $err if ($err);
 		}
 	}
+elsif ($mode == 7) {
+	# Download from Google cloud storage
+	local $files = &list_gcs_files($server);
+	return "Failed to list $server : $files" if (!ref($files));
+	local $pathslash = $path ? $path."/" : "";
+	if ($infoonly) {
+		# First try file with .info or .dom extension
+		$err = &download_gcs_file($server, $path.$sfx, $temp);
+		if ($err) {
+			# Doesn't exist .. but maybe path is a sub-directory
+			# full of .info and .dom files?
+			&make_dir($temp, 0700);
+			foreach my $f (@$files) {
+				if ($f =~ /\Q$sfx\E$/ &&
+				    $f =~ /^\Q$pathslash\E([^\/]*)$/) {
+					my $fname = $1;
+					&download_gcs_file($server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		}
+	else {
+		# If a list of domain names was given, first try to download
+		# only the files for those domains in the directory
+		local $gotfiles = 0;
+		if (@$domnames) {
+                        &unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				my $want = 0;
+				my $fname;
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/ &&
+				    $f !~ /\.\d+$/) {
+					$fname = $1;
+					foreach my $d (@$domnames) {
+						$want++ if ($fname =~
+							    /^\Q$d\E\./);
+						}
+					}
+				if ($want) {
+					$err = &download_gcs_file(
+						$server, $f,
+						$temp."/".$fname);
+					$gotfiles++ if (!$err);
+					}
+				else {
+					$err = undef;
+					}
+				}
+			}
+		if (!$gotfiles && $path && &indexof($path, @$files) >= 0) {
+			# Download the file
+			&unlink_file($temp);
+			$err = &download_gcs_file($server, $path, $temp);
+			}
+		elsif (!$gotfiles) {
+			# Download the directory
+			&unlink_file($temp);
+                        &make_dir($temp, 0711);
+			foreach my $f (@$files) {
+				if ($f =~ /^\Q$pathslash\E([^\/]*)$/ &&
+				    $f !~ /\.\d+$/) {
+					my $fname = $1;
+					$err = &download_gcs_file(
+						$server, $f,
+						$temp."/".$fname);
+					}
+				}
+			}
+		return $err if ($err);
+		}
+	}
+
 $main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
 }
@@ -3807,12 +3948,12 @@ elsif (($mode == 1 || $mode == 2) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 3 || $mode == 6) && $host =~ /%/) {
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 8) && $host =~ /%/) {
 	# S3 / Rackspace bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif (($mode == 3 || $mode == 6) && $path =~ /%/) {
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 8) && $path =~ /%/) {
 	# S3 / Rackspace filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
@@ -4113,9 +4254,6 @@ elsif ($mode == 6 && $path =~ /\%/) {
 			}
 		}
 	}
-
-
-
 
 &$outdent_print();
 
