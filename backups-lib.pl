@@ -418,7 +418,6 @@ foreach my $desturl (@$desturls) {
 		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
 			local $err = &create_gcs_bucket($server);
-			die "err=".Dumper($err);
 			if ($err) {
 				&$first_print($err);
 				return (0, 0, $doms);
@@ -1630,6 +1629,8 @@ if ($mode > 0) {
 	&$first_print($mode == 1 ? $text{'restore_download'} :
 		      $mode == 3 ? $text{'restore_downloads3'} :
 		      $mode == 6 ? $text{'restore_downloadrs'} :
+		      $mode == 7 ? $text{'restore_downloadgc'} :
+		      $mode == 8 ? $text{'restore_downloaddb'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local $cerr = &check_s3();
@@ -3479,7 +3480,16 @@ $st .= "<a href='http://affiliates.rackspacecloud.com/idevaffiliate.php?id=3533&
 push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 # Google cloud files
-# XXX
+my $state = &cloud_google_get_state();
+if ($state->{'ok'}) {
+	local $st = "<table>\n";
+	$st .= "<tr> <td>$text{'backup_gcpath'}</td> <td>".
+	       &ui_textbox($name."_gcpath", $mode != 7 ? undef :
+					    $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 7, $text{'backup_mode7'}, $st ]);
+	}
 
 if (!$nodownload) {
 	# Show mode to download in browser
@@ -3603,7 +3613,10 @@ elsif ($mode == 6) {
 	}
 elsif ($mode == 7) {
 	# Google cloud storage
-	# XXX
+	$in{$name.'_gcpath'} =~ /^\S+$/i || &error($text{'backup_egcpath'});
+	($in{$name.'_gcpath'} =~ /^\// || $in{$name.'_gcpath'} =~ /\/$/) &&
+		&error($text{'backup_gcspath'});
+	return "gcs://".$in{$name.'_gcpath'};
 	}
 else {
 	&error($text{'backup_emode'});
@@ -4254,6 +4267,75 @@ elsif ($mode == 6 && $path =~ /\%/) {
 			}
 		}
 	}
+
+elsif ($mode == 7 && $host =~ /\%/) {
+	# Search Google for buckets matching the regexp
+	local $buckets = &list_gcs_buckets();
+	if (!ref($buckets)) {
+		&$second_print(&text('backup_purgeegcbuckets', $buckets));
+		return 0;
+		}
+	foreach my $c (@$buckets) {
+		if ($c =~ /^$re$/) {
+			# Found one with a name to delete
+			local $st = &stat_gcs_bucket($c);
+			next if (!ref($st));
+			local $ctime = &google_timestamp($st->{'timeCreated'});
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingbucket',
+					    "<tt>$c</tt>", $old));
+
+			local $err = &delete_gcs_bucket($c, 1);
+			if ($err) {
+				&$second_print(
+					&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted', "XXX"));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+elsif ($mode == 7 && $path =~ /\%/) {
+	# Search for Google files under the bucket
+	local $files = &list_gcs_files($host);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles3', $files));
+		return 0;
+		}
+	foreach my $f (@$files) {
+		local $st = &stat_gcs_file($host, $f);
+		next if (!ref($st));
+		local $ctime = &google_timestamp($st->{'timeCreated'});
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
+		    $f !~ /\.\d+$/) {
+			# Found one to delete
+			$mcount++;
+			next if (!$ctime || $ctime >= $cutoff);
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+					    "<tt>$f</tt>", $old));
+			local $err = &delete_gcs_file($host, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_gcs_file($host, $f.".dom");
+				&delete_gcs_file($host, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($st->{'size'})));
+				$pcount++;
+				}
+			}
+		}
+	}
+
 
 &$outdent_print();
 
