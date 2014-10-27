@@ -36,6 +36,6 @@
 
  - Backup to Google Cloud Files & Dropbox
 	- Cloud backups page to replace module config
-	- GPL version
 	- CHANGELOG
 	- https://cloud.google.com/storage/docs/authentication#oauth
+	- Purge
