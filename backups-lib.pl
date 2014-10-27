@@ -3122,6 +3122,7 @@ elsif ($mode == 7) {
 	# Download from Google cloud storage
 	local $files = &list_gcs_files($server);
 	return "Failed to list $server : $files" if (!ref($files));
+	$files = [ map { $_->{'name'} } @$files ];
 	local $pathslash = $path ? $path."/" : "";
 	if ($infoonly) {
 		# First try file with .info or .dom extension
@@ -4308,9 +4309,8 @@ elsif ($mode == 7 && $path =~ /\%/) {
 		&$second_print(&text('backup_purgeefiles3', $files));
 		return 0;
 		}
-	foreach my $f (@$files) {
-		local $st = &stat_gcs_file($host, $f);
-		next if (!ref($st));
+	foreach my $st (@$files) {
+		my $f = $st->{'name'};
 		local $ctime = &google_timestamp($st->{'timeCreated'});
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
