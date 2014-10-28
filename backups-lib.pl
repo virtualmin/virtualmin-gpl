@@ -4311,7 +4311,8 @@ elsif ($mode == 7 && $path =~ /\%/) {
 		}
 	foreach my $st (@$files) {
 		my $f = $st->{'name'};
-		local $ctime = &google_timestamp($st->{'timeCreated'});
+		local $ctime = &google_timestamp($st->{'updated'});
+		print STDERR "f=$f ctime=$ctime\n";
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete

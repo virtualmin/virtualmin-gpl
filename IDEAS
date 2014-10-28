@@ -38,4 +38,4 @@
 	- Cloud backups page to replace module config
 	- CHANGELOG
 	- https://cloud.google.com/storage/docs/authentication#oauth
-	- Purge
+	- GCS deletion not working!?
