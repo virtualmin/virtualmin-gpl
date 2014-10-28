@@ -397,10 +397,8 @@ local ($d, $leave_aliases) = @_;
 &require_mail();
 
 local $isalias = $d->{'alias'} && !$d->{'aliasmail'};
-if ($isalias && !$d->{'aliascopy'} ||
-    !$isalias && $config{'mail_system'} == 0) {
-        # Remove whole-domain alias, for alias domains or regular domains using
-	# Postfix
+if ($isalias && !$d->{'aliascopy'}) {
+        # Remove whole-domain alias for alias domains
         local @virts = &list_virtusers();
         local ($catchall) = grep { lc($_->{'from'}) eq '@'.$d->{'dom'} }
 				 @virts;
