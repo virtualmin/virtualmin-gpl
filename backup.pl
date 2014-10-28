@@ -197,19 +197,21 @@ if ($sched->{'email'} && $has_mailboxes &&
     (!$ok || @$errdoms || !$sched->{'email_err'} || $force_email)) {
 	# Construct header for backup email
 	$output_header = "";
+	# Nice format $dest for email
+	$dest = &nice_backup_url($strfdests[0]);
 	if ($ok && !@$errdoms) {
 		$output_header .= &text('backup_done',
 					&nice_size($size))." ";
-		$subject = &text('backup_donesubject', $host);
+		$subject = &text('backup_donesubject', $host, $dest);
 		}
 	elsif ($ok && @$errdoms) {
 		$output_header .= &text('backup_partial',
 					&nice_size($size))." ";
-		$subject = &text('backup_partialsubject', $host);
+		$subject = &text('backup_partialsubject', $host, $dest);
 		}
 	else {
 		$output_header .= $text{'backup_failed'}." ";
-		$subject = &text('backup_failedsubject', $host);
+		$subject = &text('backup_failedsubject', $host, $dest);
 		}
 	$total_time = time() - $start_time;
 	$output_header .= &text('backup_time',
