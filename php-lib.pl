@@ -301,6 +301,7 @@ foreach my $p (@ports) {
 		else {
 			push(@types, "application/x-httpd-php .php");
 			}
+		@types = &unique(@types);
 		&apache::save_directive("Action", \@actions, $phpconf, $conf);
 		&apache::save_directive("AddType", \@types, $phpconf, $conf);
 		&apache::save_directive("AddHandler", \@handlers,
