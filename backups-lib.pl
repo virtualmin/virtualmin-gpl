@@ -4276,11 +4276,10 @@ elsif ($mode == 7 && $host =~ /\%/) {
 		&$second_print(&text('backup_purgeegcbuckets', $buckets));
 		return 0;
 		}
-	foreach my $c (@$buckets) {
+	foreach my $st (@$buckets) {
+		my $c = $st->{'name'};
 		if ($c =~ /^$re$/) {
 			# Found one with a name to delete
-			local $st = &stat_gcs_bucket($c);
-			next if (!ref($st));
 			local $ctime = &google_timestamp($st->{'timeCreated'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
@@ -4288,14 +4287,16 @@ elsif ($mode == 7 && $host =~ /\%/) {
 			&$first_print(&text('backup_deletingbucket',
 					    "<tt>$c</tt>", $old));
 
+			local $st2 = &stat_gcs_bucket($c, 1);
 			local $err = &delete_gcs_bucket($c, 1);
 			if ($err) {
 				&$second_print(
-					&text('backup_edelbucket',$err));
+					&text('backup_edelbucket', $err));
 				$ok = 0;
 				}
 			else {
-				&$second_print(&text('backup_deleted', "XXX"));
+				&$second_print(&text('backup_deleted',
+					&nice_size($st2->{'size'})));
 				$pcount++;
 				}
 			}
