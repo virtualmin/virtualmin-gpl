@@ -1,4 +1,4 @@
-desc=Backup to cloud storage providers
-html=Moved all S3 and Rackspace Cloud Files settings from the Virtualmin Configuration page to the new Cloud Storage Providers page.<br>Added support for backups to Google Cloud Storage, once an account is added on the new Cloud Storage Providers page.
+desc=Google Cloud Storage support
+html=Added support for backups to Google Cloud Storage, once an account is added on the new Cloud Storage Providers page.
 master=1
 link=list_clouds.cgi

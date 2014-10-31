@@ -1,0 +1,4 @@
+desc=Cloud storage providers page
+html=Moved all S3 and Rackspace Cloud Files settings from the Virtualmin Configuration page to the new Cloud Storage Providers page.
+master=1
+link=list_clouds.cgi
