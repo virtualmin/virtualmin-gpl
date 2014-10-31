@@ -220,7 +220,8 @@ if (@bdoms || @users || $all_doms) {
 	}
 foreach $dest (@dests) {
 	# Validate destination URL
-	($bmode, undef, undef, $host, $path) = &parse_backup_url($dest);
+	($bmode, $derr, undef, $host, $path) = &parse_backup_url($dest);
+	$bmode < 0 && &usage("Destination $dest is invalid : $derr");
 	if ($bmode && $mkdir) {
 		&usage("--mkdir option can only be used for local backups");
 		}

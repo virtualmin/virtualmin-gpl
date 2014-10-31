@@ -266,6 +266,10 @@ local $rsh;	# Rackspace cloud files handle
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
+	if ($mode < 0) {
+		&$first_print(&text('backup_edesturl', $desturl, $user));
+		return (0, 0, $doms);
+		}
 	local $starpass = "*" x length($pass);
 	$anyremote = 1 if ($mode > 0);
 	$anylocal = 1 if ($mode == 0);
@@ -1623,6 +1627,10 @@ if ($asowner) {
 local $ok = 1;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
+if ($mode < 0) {
+	&$second_print(&text('backup_edesturl', $file, $user));
+	return 0;
+	}
 local $starpass = "*" x length($pass);
 if ($mode > 0) {
 	# Need to download to temp file/directory first
@@ -3260,7 +3268,13 @@ elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'}) {
 	}
 elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Google cloud storage
-	@rv = (7, undef, undef, $1, $3, undef);
+	my $st = &cloud_google_get_state();
+	if ($st->{'ok'}) {
+		@rv = (7, undef, undef, $1, $3, undef);
+		}
+	else {
+		@rv = (-1, "Google Cloud Storage has not been configured");
+		}
 	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
