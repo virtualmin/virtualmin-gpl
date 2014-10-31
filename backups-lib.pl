@@ -3253,7 +3253,8 @@ elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with a username and password
 	@rv = (3, $2, $4, $4, $6, $1 eq "s3rrs" ? 1 : 0);
 	}
-elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'}) {
+elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'} &&
+       &can_use_cloud("s3")) {
 	# S3 with the default login
 	return (3, $2, $4, $config{'s3_akey'}, $config{'s3_skey'},
 		$1 eq "s3rrs" ? 1 : 0);
@@ -3262,7 +3263,8 @@ elsif ($url =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# Rackspace cloud files with a username and password
 	@rv = (6, $1, $2, $3, $5, 0);
 	}
-elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'}) {
+elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'} &&
+       &can_use_cloud("rs")) {
 	# Rackspace with the default login
 	@rv = (6, $1, $3, $config{'rs_user'}, $config{'rs_key'});
 	}
@@ -3451,7 +3453,7 @@ push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 # S3 backup fields (bucket, access key ID, secret key and file)
 local $s3user = $mode == 3 ? $user : undef;
 local $s3pass = $mode == 3 ? $pass : undef;
-if (&master_admin()) {
+if (&can_use_cloud("s3")) {
 	$s3user ||= $config{'s3_akey'};
 	$s3pass ||= $config{'s3_skey'};
 	}
@@ -3475,7 +3477,7 @@ push(@opts, [ 3, $text{'backup_mode3'}, $st ]);
 # Rackspace backup fields (username, API key and bucket/file)
 local $rsuser = $mode == 6 ? $user : undef;
 local $rspass = $mode == 6 ? $pass : undef;
-if (&master_admin()) {
+if (&can_use_cloud("rs")) {
 	$rsuser ||= $config{'rs_user'};
 	$rspass ||= $config{'rs_key'};
 	}
@@ -3496,7 +3498,7 @@ push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 
 # Google cloud files
 my $state = &cloud_google_get_state();
-if ($state->{'ok'}) {
+if ($state->{'ok'} && &can_use_cloud("google")) {
 	local $st = "<table>\n";
 	$st .= "<tr> <td>$text{'backup_gcpath'}</td> <td>".
 	       &ui_textbox($name."_gcpath", $mode != 7 ? undef :
@@ -3626,7 +3628,7 @@ elsif ($mode == 6) {
 	return "rs://".$in{$name.'_rsuser'}.":".$in{$name.'_rskey'}."\@".
 	       $in{$name.'_rspath'};
 	}
-elsif ($mode == 7) {
+elsif ($mode == 7 && &can_use_cloud("google")) {
 	# Google cloud storage
 	$in{$name.'_gcpath'} =~ /^\S+$/i || &error($text{'backup_egcpath'});
 	($in{$name.'_gcpath'} =~ /^\// || $in{$name.'_gcpath'} =~ /\/$/) &&
@@ -3691,6 +3693,24 @@ sub can_cloud_providers
 {
 return &master_admin();
 }
+
+# can_use_cloud(name)
+# Returns 1 if the current user has permission to use the default login of
+# some cloud provider
+sub can_use_cloud
+{
+my ($name) = @_;
+if (&master_admin()) {
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	return $config{'cloud_'.$name.'_reseller'};
+	}
+else {
+	return $config{'cloud_'.$name.'_owner'};
+	}
+}
+
 
 # Returns 1 if the configured backup format supports incremental backups
 sub has_incremental_format
@@ -4604,7 +4624,7 @@ if ($owner ne $oldowner) {
 sub list_all_s3_accounts
 {
 local @rv;
-if (&master_admin() && $config{'s3_akey'} && $config{'s3_skey'}) {
+if (&can_use_cloud("s3") && $config{'s3_akey'} && $config{'s3_skey'}) {
 	push(@rv, [ $config{'s3_akey'}, $config{'s3_skey'} ]);
 	}
 foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
