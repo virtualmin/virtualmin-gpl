@@ -4,17 +4,18 @@
 # Returns a list of hash refs with details of known providers
 sub list_cloud_providers
 {
-return ( { 'name' => 's3',
-	   'prefix' => [ 's3', 's3rrs' ],
-	   'desc' => $text{'cloud_s3desc'} },
-	 { 'name' => 'rs',
-	   'prefix' => [ 'rs' ],
-	   'desc' => $text{'cloud_rsdesc'} },
-	 { 'name' => 'google',
-	   'prefix' => [ 'gcs' ],
-	   'desc' => $text{'cloud_googledesc'},
-	   'longdesc' => $text{'cloud_google_longdesc'} },
-       );
+my @rv = ( { 'name' => 's3',
+	     'prefix' => [ 's3', 's3rrs' ],
+	     'desc' => $text{'cloud_s3desc'} },
+	   { 'name' => 'rs',
+	     'prefix' => [ 'rs' ],
+	     'desc' => $text{'cloud_rsdesc'} } );
+if ($virtualmin_pro) {
+	push(@rv, { 'name' => 'google',
+		    'prefix' => [ 'gcs' ],
+		    'desc' => $text{'cloud_googledesc'},
+		    'longdesc' => $text{'cloud_google_longdesc'} });
+	}
 }
 
 # backup_uses_cloud(&backup, &provider)

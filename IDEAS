@@ -37,4 +37,6 @@
  - Backup to Google Cloud Files & Dropbox
 	- Cloud backups page to replace module config
 	- CHANGELOG
-	- https://cloud.google.com/storage/docs/authentication#oauth
+ 
+ - Logrotate all domains in a single block, rather than one per domain
+	- for new installs only
