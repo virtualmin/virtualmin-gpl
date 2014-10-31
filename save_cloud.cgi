@@ -9,6 +9,8 @@ require './virtual-server-lib.pl';
 ($prov) = grep { $_->{'name'} eq $in{'name'} } @provs;
 $prov || &error($text{'cloud_egone'});
 
+$config{'cloud_'.$in{'name'}.'_reseller'} = $in{'useby_reseller'};
+$config{'cloud_'.$in{'name'}.'_owner'} = $in{'useby_owner'};
 $pfunc = "cloud_".$prov->{'name'}."_parse_inputs";
 $html = &$pfunc(\%in);
 &webmin_log("save", "cloud", $in{'name'});

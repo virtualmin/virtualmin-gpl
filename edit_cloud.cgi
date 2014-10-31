@@ -27,6 +27,13 @@ print &ui_table_row($text{'cloud_provider'},
 $ifunc = "cloud_".$prov->{'name'}."_show_inputs";
 print &$ifunc($prov);
 
+# Allow use by other users?
+print &ui_table_row($text{'cloud_useby'},
+	&ui_checkbox("useby_reseller", 1, $text{'cloud_byreseller'},
+		     $config{'cloud_'.$in{'name'}.'_reseller'})."\n".
+	&ui_checkbox("useby_owner", 1, $text{'cloud_byowner'},
+		     $config{'cloud_'.$in{'name'}.'_owner'}));
+
 # Current users
 @users = grep { &backup_uses_cloud($_, $prov) } &list_scheduled_backups();
 if (@users) {
