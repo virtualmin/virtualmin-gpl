@@ -126,6 +126,7 @@ foreach $d (&list_domains()) {
 					}
 				print STDERR "  $u->{'user'}: $fn folder is ".
 					     "$folder->{'file'}\n" if ($debug);
+				$folder->{'fn'} = $fn;
 				push(@process, $folder);
 				}
 			}
@@ -148,6 +149,7 @@ foreach $d (&list_domains()) {
 		print STDERR "  $u->{'user'}: processing ".scalar(@process).
 			     " folders\n" if ($debug);
 		foreach my $folder (@process) {
+			my $fn = $folder->{'fn'} || "other";
 			print STDERR "  $u->{'user'}: processing folder ".
 				     $folder->{'file'}."\n" if ($debug);
 
