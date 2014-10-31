@@ -50,7 +50,7 @@ while(@ARGV > 0) {
 	}
 
 # Login and list the buckets
-$files = &list_gcs_buckets($h);
+$files = &list_gcs_buckets();
 if (!ref($files)) {
 	print "ERROR: $files\n";
 	exit(1);
