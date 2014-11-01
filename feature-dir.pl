@@ -793,7 +793,7 @@ if (!$d->{'parent'}) {
 &system_logged("chown $d->{'uid'}:$gid ".
 	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
 foreach my $dir (&virtual_server_directories($d)) {
-	&set_ownership_permissions(undef, undef, $dir->[1],
+	&set_ownership_permissions(undef, undef, oct($dir->[1]),
 				   $d->{'home'}."/".$dir->[0]);
 	}
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
