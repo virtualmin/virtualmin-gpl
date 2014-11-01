@@ -387,6 +387,7 @@ foreach my $desturl (@$desturls) {
 			&$first_print($cerr);
 			return (0, 0, $doms);
 			}
+		print STDERR "user=$user pass=$pass\n";
 		local $err = &init_s3_bucket($user, $pass, $server,
 					     $s3_upload_tries);
 		if ($err) {
@@ -3251,7 +3252,7 @@ elsif ($url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with a username and password
-	@rv = (3, $2, $4, $4, $6, $1 eq "s3rrs" ? 1 : 0);
+	@rv = (3, $2, $3, $4, $6, $1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'} &&
        &can_use_cloud("s3")) {
