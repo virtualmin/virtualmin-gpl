@@ -16,6 +16,7 @@ if ($virtualmin_pro) {
 		    'desc' => $text{'cloud_googledesc'},
 		    'longdesc' => $text{'cloud_google_longdesc'} });
 	}
+return @rv;
 }
 
 # backup_uses_cloud(&backup, &provider)
