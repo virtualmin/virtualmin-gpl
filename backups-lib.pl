@@ -387,7 +387,6 @@ foreach my $desturl (@$desturls) {
 			&$first_print($cerr);
 			return (0, 0, $doms);
 			}
-		print STDERR "user=$user pass=$pass\n";
 		local $err = &init_s3_bucket($user, $pass, $server,
 					     $s3_upload_tries);
 		if ($err) {
