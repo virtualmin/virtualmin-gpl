@@ -2387,10 +2387,14 @@ return $conns;
 sub list_mysql_size_settings
 {
 local ($size) = @_;
+&require_mysql();
+my $myver = &mysql::get_mysql_version();
+my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
+						      : "table_cache";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
 		[ "max_allowed_packet", "1M" ],
-		[ "table_cache", "4" ],
+		[ $cachedir, "4" ],
 		[ "sort_buffer_size", "64K" ],
 		[ "read_buffer_size", "256K" ],
 		[ "read_rnd_buffer_size", "256K" ],
@@ -2414,7 +2418,7 @@ if ($size eq "small") {
 elsif ($size eq "medium") {
 	return ([ "key_buffer_size", "16M" ],
 		[ "max_allowed_packet", "1M" ],
-		[ "table_cache", "64" ],
+		[ $cachedir, "64" ],
 		[ "sort_buffer_size", "512K" ],
 		[ "read_buffer_size", "256K" ],
 		[ "net_buffer_length", "8K" ],
@@ -2438,7 +2442,7 @@ elsif ($size eq "medium") {
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
 		[ "max_allowed_packet", "1M" ],
-		[ "table_cache", "256" ],
+		[ $cachedir, "256" ],
 		[ "sort_buffer_size", "1M" ],
 		[ "read_buffer_size", "1M" ],
 		[ "net_buffer_length", undef ],
@@ -2462,7 +2466,7 @@ elsif ($size eq "large") {
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
 		[ "max_allowed_packet", "1M" ],
-		[ "table_cache", "512" ],
+		[ $cachedir, "512" ],
 		[ "sort_buffer_size", "2M" ],
 		[ "read_buffer_size", "2M" ],
 		[ "net_buffer_length", undef ],
