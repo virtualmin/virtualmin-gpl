@@ -188,9 +188,11 @@ if ($config{'web'}) {
 	&restart_apache();
 	}
 
+# Make sure autoreply.pl exists
+&set_alias_programs();
+
 if ($virtualmin_pro && !$config{'done_fix_autoreplies'}) {
 	# Create links for existing autoreply aliases
-	&set_alias_programs();
 	foreach my $d (&list_domains()) {
 		if ($d->{'mail'}) {
 			&create_autoreply_alias_links($d);
