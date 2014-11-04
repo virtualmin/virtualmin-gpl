@@ -52,7 +52,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--host") {
 		$desthost = shift(@ARGV);
-		&to_ipaddress($desthost) || &to_ip6address($desthost) ||
+		($desthostname) = split(/:/, $desthost);
+		&to_ipaddress($desthostname) || &to_ip6address($desthostname) ||
 			&usage("Destination system cannot be resolved");
 		}
 	elsif ($a eq "--pass") {

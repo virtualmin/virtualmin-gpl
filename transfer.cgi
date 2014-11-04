@@ -16,7 +16,8 @@ if ($in{'host_mode'}) {
 	}
 else {
 	$in{'host'} =~ /^\S+$/ || &error($text{'transfer_ehost'});
-	&to_ipaddress($in{'host'}) || &to_ip6address($in{'host'}) ||
+	($hostname) = split(/:/, $in{'host'});
+	&to_ipaddress($hostname) || &to_ip6address($hostname) ||
 		&error($text{'transfer_ehost2'});
 	$host = $in{'host'};
 	$pass = $in{'hostpass'};
