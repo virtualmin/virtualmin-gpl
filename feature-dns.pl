@@ -442,6 +442,7 @@ if ($d->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
 
 # Find and delete sub-domain records
 local @sublist = grep { $_->{'id'} ne $oldd->{'id'} &&
+			$_->{'id'} ne $d->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$oldd->{'dom'}\E$/ }
 		      &list_domains();
 foreach my $r (reverse(@$recs)) {
