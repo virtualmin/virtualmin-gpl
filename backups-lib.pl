@@ -568,7 +568,17 @@ local %donedoms;				# Map from domain name->hash
 DOMAIN: foreach $d (@$doms) {
 	# Force lock and re-read the domain in case it has changed
 	&obtain_lock_everything($d);
-	$d = &get_domain($d->{'id'}, undef, 1);	
+	my $reread_d = &get_domain($d->{'id'}, undef, 1);	
+	if ($reread_d) {
+		$d = $reread_d;
+		}
+	else {
+		# Has been deleted!
+		&$second_print(&text('backup_deleteddom',
+				     &show_domain_name($d)));
+		$dok = 0;
+		goto DOMAINFAILED;
+		}
 
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
@@ -1564,7 +1574,9 @@ foreach my $lockfile (@lockfiles) {
 # file so that future incremental backups aren't diffs against it
 if ($incremental == 0 && &has_incremental_tar()) {
 	foreach my $d (@errdoms) {
-		&unlink_file("$incremental_backups_dir/$d->{'id'}");
+		if ($d->{'id'}) {
+			&unlink_file("$incremental_backups_dir/$d->{'id'}");
+			}
 		}
 	}
 
