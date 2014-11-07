@@ -1470,3 +1470,4 @@ Moved all S3 and Rackspace Cloud Files settings from the Virtualmin Configuratio
 Added support for backups to Google Cloud Storage, once an account is added on the new Cloud Storage Providers page.
 ---- Changes since 4.12 ----
 Updated to Coppermine script installer to version 1.5.34, and MoinMoin to 1.9.8.
+A default shell can now be selected for reseller Unix accounts, independent of the domain owner default shell.
