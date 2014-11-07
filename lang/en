@@ -5359,6 +5359,7 @@ newshells_shell=Path to shell
 newshells_desc=Description
 newshells_owner=Admin?
 newshells_mailbox=Mailbox?
+newshells_reseller=Reseller?
 newshells_default=Default?
 newshells_avail=Enabled?
 newshells_err=Failed to save custom shells
@@ -5371,6 +5372,7 @@ newshells_emailboxes=No shells were selected for mailboxes
 newshells_eresellers=No shells were selected for resellers
 newshells_eownerdef=Exactly one shell must be the default for domain administrators
 newshells_emailboxdef=Exactly one shell must be the default for mailboxes
+newshells_eresellerdef=Exactly one shell must be the default for resellers
 newshells_id=Access
 
 shells_mailbox=Email only

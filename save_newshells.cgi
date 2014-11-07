@@ -39,6 +39,8 @@ else {
 	@doshells == 1 || &error($text{'newshells_eownerdef'});
 	@dmshells = grep { $_->{'default'} } @mshells;
 	@dmshells == 1 || &error($text{'newshells_emailboxdef'});
+	@drshells = grep { $_->{'default'} } @rshells;
+	@drshells == 1 || &error($text{'newshells_eresellerdef'});
 
 	# Save them
 	&save_available_shells(\@shells);
