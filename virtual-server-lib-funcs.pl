@@ -15363,7 +15363,8 @@ if (!@rv) {
 				 'desc' => $mail ? $text{'shells_'.$us->[0]}
 						: $text{'shells_'.$us->[0].'2'},
 				 'id' => $us->[0],
-				 'owner' => 1 );
+				 'owner' => 1,
+				 'reseller' => 1 );
 		if ($us->[1] eq $best_unix_shell) {
 			$shell{'default'} = 1;
 			$shell{'avail'} = 1;
@@ -15378,6 +15379,7 @@ if (!@rv) {
 				 'desc' => $text{'shells_ssh'},
 			         'id' => 'ssh',
 				 'owner' => 1,
+				 'reseller' => 1,
 				 'default' => 1,
 				 'avail' => 1 );
 		push(@rv, \%shell);
@@ -15415,7 +15417,7 @@ else {
 	}
 }
 
-# available_shells_menu(name, [value], 'owner'|'mailbox', [show-cmd],
+# available_shells_menu(name, [value], 'owner'|'mailbox'|'reseller', [show-cmd],
 # 			[must-ftp])
 # Returns HTML for selecting a shell for a mailbox or domain owner
 sub available_shells_menu
@@ -15460,7 +15462,7 @@ return &ui_select($name, $value,
 	  @ashells ]);
 }
 
-# default_available_shell('owner'|'mailbox')
+# default_available_shell('owner'|'mailbox'|'reseller')
 # Returns the default shell for a mailbox user or domain owner
 sub default_available_shell
 {

@@ -21,10 +21,11 @@ else {
 				 'desc' => $in{"desc_$i"},
 				 'owner' => $in{"owner_$i"},
 				 'mailbox' => $in{"mailbox_$i"},
+				 'reseller' => $in{"reseller_$i"},
 				 'default' => $in{"default_$i"},
 				 'id' => $in{"id_$i"},
 				 'avail' => $in{"avail_$i"} );
-		$shell{'owner'} || $shell{'mailbox'} ||
+		$shell{'owner'} || $shell{'mailbox'} || $shell{'reseller'} ||
 			&error(&text('newshells_eowner', $i+1));
 		push(@shells, \%shell);
 		}
@@ -32,10 +33,14 @@ else {
 	@oshells || &error($text{'newshells_eowners'});
 	@mshells = grep { $_->{'mailbox'} && $_->{'avail'} } @shells;
 	@mshells || &error($text{'newshells_emailboxes'});
+	@rshells = grep { $_->{'reseller'} && $_->{'avail'} } @shells;
+	@rshells || &error($text{'newshells_eresellers'});
 	@doshells = grep { $_->{'default'} } @oshells;
 	@doshells == 1 || &error($text{'newshells_eownerdef'});
 	@dmshells = grep { $_->{'default'} } @mshells;
 	@dmshells == 1 || &error($text{'newshells_emailboxdef'});
+	@drshells = grep { $_->{'default'} } @rshells;
+	@drshells == 1 || &error($text{'newshells_eresellerdef'});
 
 	# Save them
 	&save_available_shells(\@shells);

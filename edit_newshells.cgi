@@ -13,7 +13,7 @@ $i = 0;
 @fields = ( );
 foreach $s (@shells) {
 	push(@fields, "shell_$i", "desc_$i", "owner_$i", "mailbox_$i",
-		      "default_$i", "avail_$i");
+		      "reseller_$i", "default_$i", "avail_$i");
 	$i++;
 	}
 print &ui_form_start("save_newshells.cgi", "post");
@@ -39,6 +39,8 @@ foreach $s (@shells, { }) {
 		&ui_checkbox("owner_$i", 1, " ", $s->{'owner'}, undef, $defs),
 		&ui_checkbox("mailbox_$i", 1, " ", $s->{'mailbox'},
 			     undef, $defs),
+		&ui_checkbox("reseller_$i", 1, " ", $s->{'reseller'},
+			     undef, $defs),
 		&ui_checkbox("default_$i", 1, " ", $s->{'default'},
 			     undef, $defs),
 		&ui_select("id_$i", $s->{'id'},
@@ -53,8 +55,8 @@ foreach $s (@shells, { }) {
 print &ui_columns_table(
 	[ $text{'newshells_avail'}, $text{'newshells_shell'},
 	  $text{'newshells_desc'}, $text{'newshells_owner'},
-	  $text{'newshells_mailbox'}, $text{'newshells_default'},
-	  $text{'newshells_id'}, ],
+	  $text{'newshells_mailbox'}, $text{'newshells_reseller'},
+	  $text{'newshells_default'}, $text{'newshells_id'}, ],
 	100,
 	\@table,
 	undef,

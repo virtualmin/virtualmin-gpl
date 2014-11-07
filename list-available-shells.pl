@@ -42,6 +42,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mailbox") {
 		$type = "mailbox";
 		}
+	elsif ($a eq "--reseller") {
+		$type = "reseller";
+		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
@@ -66,6 +69,8 @@ if ($multi) {
 			($shell->{'mailbox'} ? "Yes" : "No"),"\n";
 		print "    For administrators: ",
 			($shell->{'owner'} ? "Yes" : "No"),"\n";
+		print "    For resellers: ",
+			($shell->{'reseller'} ? "Yes" : "No"),"\n";
 		print "    Available: ",
 			($shell->{'avail'} ? "Yes" : "No"),"\n";
 		print "    Default: ",
@@ -99,7 +104,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the shells available for mailboxes and domain administrators.\n";
 print "\n";
 print "virtualmin list-available-shells [--multiline]\n";
-print "                                 [--owner | --mailbox]\n";
+print "                                 [--owner | --mailbox | --reseller]\n";
 exit(1);
 }
 
