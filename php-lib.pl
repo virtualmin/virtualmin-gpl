@@ -1235,6 +1235,38 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 return 1;
 }
 
+# check_php_configuration(&domain, php-version, php-command)
+# Returns an error message if the domain's PHP config is invalid
+sub check_php_configuration
+{
+local ($d, $ver, $cmd) = @_;
+$cmd ||= &has_command("php".$ver) || &has_command("php");
+local $mode = &get_domain_php_mode($d);
+if ($mode eq "mod_php") {
+	local $gini = &get_global_php_ini($ver, $mode);
+	if ($gini) {
+		$gini =~ s/\/php.ini$//;
+		$ENV{'PHPRC'} = $gini;
+		}
+	}
+else {
+	$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
+	}
+&clean_environment();
+local $out = &backquote_command("$cmd -m 2>&1 >/dev/null");
+local @errs;
+foreach my $l (split(/\r?\n/, $out)) {
+	if ($l =~ /PHP\s+Fatal\s+error:\s*(.*)/) {
+		my $msg = $1;
+		$msg =~ s/\s+in\s+\S+\s+on\s+line\s+\d+//;
+		push(@errs, $msg);
+		}
+	}
+&reset_environment();
+delete($ENV{'PHPRC'});
+return join(", ", @errs);
+}
+
 # list_php_modules(&domain, php-version, php-command)
 # Returns a list of PHP modules available for some domain. Uses caching.
 sub list_php_modules

@@ -888,22 +888,32 @@ else {
 
 	# If using php via CGI or fcgi, check for wrappers
 	local $need_suexec = 0;
-	if (defined(&get_domain_php_mode)) {
-		local $mode = &get_domain_php_mode($d);
-		if ($mode ne "mod_php") {
-			local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
-						       : &cgi_bin_dir($_[0]);
-			local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
-			foreach my $dir (&list_domain_php_directories($d)) {
-				local $path = "$dest/php".
-					      $dir->{'version'}.".$suffix";
-				if (!-x $path) {
-					return &text('validate_ewebphp',
-						     $dir->{'version'},
-						     "<tt>$path</tt>");
-					}
+	local $mode = &get_domain_php_mode($d);
+	if ($mode ne "mod_php") {
+		local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
+					       : &cgi_bin_dir($_[0]);
+		local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
+		foreach my $dir (&list_domain_php_directories($d)) {
+			local $path = "$dest/php".
+				      $dir->{'version'}.".$suffix";
+			if (!-x $path) {
+				return &text('validate_ewebphp',
+					     $dir->{'version'},
+					     "<tt>$path</tt>");
 				}
-			$need_suexec = 1;
+			}
+		$need_suexec = 1;
+		}
+
+	# Validate the local PHP configuration
+	if ($mode ne "mod_php") {
+		foreach my $ver (&list_available_php_versions($d)) {
+			my $errs = &check_php_configuration(
+					$d, $ver->[0], $ver->[1]);
+			if ($errs) {
+				return &text('validate_ewebphpconfig',
+					     $ver->[0], $errs);
+				}
 			}
 		}
 
