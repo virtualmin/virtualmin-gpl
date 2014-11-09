@@ -4697,6 +4697,7 @@ phpmode_writeoff=Turning off logging via script ..
 phpmode_nothing=No configuration changes were made!
 phpmode_header2=PHP information
 phpmode_mods=Modules for PHP $1
+phpmode_errs=Configuration errors for PHP $1
 phpmode_pears=Pear modules for PHP $1
 phpmode_matchall=Website matches all sub-domains?
 phpmode_matchallon=Adding all sub-domains to webserver config ..
