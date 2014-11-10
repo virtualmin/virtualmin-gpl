@@ -3024,6 +3024,12 @@ sub can_show_history
 return $virtualmin_pro && &master_admin();
 }
 
+# Returns 1 if the user can change the UI language
+sub can_change_language
+{
+return 1;
+}
+
 sub can_edit_exclude
 {
 return !$access{'admin'};	# Any except extra admins
@@ -12054,6 +12060,12 @@ if (&can_show_history()) {
 	push(@rv, { 'url' => $vm."/history.cgi",
 		    'title' => $text{'edit_history'},
 		    'icon' => 'graph' });
+	}
+if (&can_change_language()) {
+	# Change language
+	push(@rv, { 'url' => $vm."/edit_lang.cgi",
+		    'title' => $text{'edit_lang'},
+		    'icon' => 'lang' });
 	}
 
 # Set category names

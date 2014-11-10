@@ -1109,6 +1109,7 @@ edit_webadesc=Click this button to show the most recently generated Webalizer re
 edit_bwgraph=Bandwidth Graph
 edit_bwgraphdesc=Click this button to display a graph of total bandwidth use for this virtual server and any sub-servers.
 edit_history=System Statistics
+edit_lang=Change Language
 edit_databases=Edit Databases
 edit_databasesdesc=View, create and delete databases associated with this virtual server.
 edit_scripts=Install Scripts
@@ -6517,5 +6518,16 @@ cloud_descoauth=Before Google Cloud Storage can be used by Cloudmin, you must fi
 cloud_useby=Allow use of provider by
 cloud_byreseller=Resellers
 cloud_byowner=Domain owners
+
+lang_title=Change Language
+lang_ecannot=You are not allowed to change the UI language!
+lang_euser=Webmin user not found!
+lang_header=Virtualmin UI language settings
+lang_current=Current language
+lang_default=System default language
+lang_preferred=Preferred language
+lang_ok=Change Now
+lang_err=Failed to change language
+lang_defsel=System default
 
 __norefs=1

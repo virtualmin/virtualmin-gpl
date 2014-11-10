@@ -1253,7 +1253,7 @@ else {
 	$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 	}
 &clean_environment();
-local $out = &backquote_command("$cmd -m 2>&1 >/dev/null");
+local $out = &backquote_command("$cmd -d error_log= -m 2>&1 >/dev/null");
 local @errs;
 foreach my $l (split(/\r?\n/, $out)) {
 	if ($l =~ /PHP\s+Fatal\s+error:\s*(.*)/) {
