@@ -109,6 +109,12 @@ elsif ($in{'mode'} == 3) {
 	$virt = 1;
 	}
 
+# Check external IP
+if (&can_dnsip()) {
+	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
+		&error($text{'save_ednsip'});
+	}
+
 if (!&supports_ip6() || !&can_use_feature("virt6")) {
 	# Cannot use or change IPv6, so no validation needed
 	}
@@ -219,6 +225,16 @@ elsif ($virt && $d->{'virt'} && $d->{'ip'} ne $ip) {
 	$d->{'ip'} = $ip;
 	$d->{'netmask'} = $netmask;
 	$d->{'virtalready'} = $virtalready;
+	}
+
+# Update DNS IP
+if (&can_dnsip()) {
+	if ($in{'dns_ip_def'}) {
+		delete($d->{'dns_ip'});
+		}
+	else {
+		$d->{'dns_ip'} = $in{'dns_ip'};
+		}
 	}
 
 # Update for IPv6 change

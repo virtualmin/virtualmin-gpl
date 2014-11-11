@@ -44,12 +44,6 @@ if (!$d->{'parent'} && defined($in{'plan'})) {
 	&can_use_plan($plan) || &error($text{'setup_eplan'});
 	}
 
-# Check external IP
-if (&can_dnsip()) {
-	$in{'dns_ip_def'} || &check_ipaddress($in{'dns_ip'}) ||
-		&error($text{'save_ednsip'});
-	}
-
 # Check if the prefix has been changed
 if (defined($in{'prefix'})) {
 	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
@@ -262,16 +256,6 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 		}
 	$d->{'plan'} = $plan->{'id'};
 	print $text{'setup_done'},"<p>\n";
-	}
-
-# Update DNS IP
-if (&can_dnsip()) {
-	if ($in{'dns_ip_def'}) {
-		delete($d->{'dns_ip'});
-		}
-	else {
-		$d->{'dns_ip'} = $in{'dns_ip'};
-		}
 	}
 
 # Update prefix

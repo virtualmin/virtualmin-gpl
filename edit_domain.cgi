@@ -217,13 +217,6 @@ if (!$parentdom) {
 		$smsg);
 	}
 
-# Show the external IP
-if (&can_dnsip()) {
-	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
-		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
-				&text('spf_default', $d->{'ip'})));
-	}
-
 print &ui_hidden_table_end("config");
 
 # Start of collapsible section for limits

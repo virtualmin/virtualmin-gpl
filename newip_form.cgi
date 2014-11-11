@@ -78,6 +78,13 @@ elsif (&can_use_feature("virt")) {
 		&ui_radio_table("mode", $d->{'virt'} ? 1 : 0, \@opts, 1));
 	}
 
+# Show the external IP
+if (&can_dnsip()) {
+	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
+		&ui_opt_textbox("dns_ip", $d->{'dns_ip'}, 20,
+				&text('spf_default', $d->{'ip'})));
+	}
+
 if (&supports_ip6() && $d->{'virt6'}) {
 	# Current IPv6 addres
 	print &ui_table_row($text{'newip_old6'},
