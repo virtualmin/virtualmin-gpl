@@ -763,6 +763,7 @@ foreach my $v (@all_possible_php_versions) {
 		$phpn ||= &has_command("php$nodotv-cgi") ||
 			  &has_command("php-cgi$nodotv") ||
 			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
+			  &has_command("/opt/atomic/php$nodotv/root/usr/bin/php") ||
 			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
 			  &has_command("php$nodotv") ||
 			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
@@ -1110,6 +1111,7 @@ local $nodotv = $ver;
 $nodotv =~ s/\.//g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/opt/rh/php$nodotv/lib/php.ini",
+	       "/opt/atomic/atomic-php$nodotv/root/etc/php.ini",
 	       "/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
 				     "/etc/php$ver/apache2/php.ini",
