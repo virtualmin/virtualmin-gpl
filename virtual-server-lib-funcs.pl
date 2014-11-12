@@ -8327,6 +8327,7 @@ push(@rv, { 'id' => 0,
 	    'ftp_dir' => $config{'ftp_dir'},
 	    'logrotate' => $config{'logrotate_config'} || "none",
 	    'logrotate_files' => $config{'logrotate_files'} || "none",
+	    'logrotate_shared' => $config{'logrotate_shared'} || "no",
 	    'status' => $config{'statusemail'} || "none",
 	    'statusonly' => int($config{'statusonly'}),
 	    'statustimeout' => $config{'statustimeout'},
@@ -8619,6 +8620,7 @@ if ($tmpl->{'id'} == 0) {
 					"" : $tmpl->{'logrotate'};
 	$config{'logrotate_files'} = $tmpl->{'logrotate_files'} eq "none" ?
 					"" : $tmpl->{'logrotate_files'};
+	$config{'logrotate_shared'} = $tmpl->{'logrotate_shared'};
 	$config{'statusemail'} = $tmpl->{'status'} eq 'none' ?
 					'' : $tmpl->{'status'};
 	$config{'statusonly'} = $tmpl->{'statusonly'};
@@ -8828,8 +8830,8 @@ if (!$tmpl->{'default'}) {
 		    "dom_aliases", "ranges", "ranges6",
 		    "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
-		    "domalias", "logrotate_files", "logrotate",
-		    "disabled_web", "disabled_url",
+		    "domalias", "logrotate_files", "logrotate_shared",
+		    "logrotate", "disabled_web", "disabled_url",
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",

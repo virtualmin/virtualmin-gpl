@@ -26,21 +26,8 @@ sub setup_logrotate
 local $tmpl = &get_template($_[0]->{'template'});
 
 # Work out the log files we are rotating
-local $alog = &get_website_log($_[0], 0);
-local $elog = &get_website_log($_[0], 1);
-local @logs = ( $alog, $elog );
-if ($_[0]->{'ftp'}) {
-	push(@logs, &get_proftpd_log($_[0]->{'ip'}));
-	}
-local @tmpllogs;
-foreach my $lt (split(/\t+/, $tmpl->{'logrotate_files'})) {
-	if ($lt && $lt ne "none") {
-		push(@tmpllogs, &substitute_domain_template($lt, $_[0]));
-		}
-	}
-push(@logs, @tmpllogs);
-local @logs = &unique(grep { $_ } @logs);
-local $tmpl = &get_template($_[0]->{'template'});
+local @logs = &get_all_domain_logs($_[0]);
+local @tmpllogs = &get_domain_template_logs($_[0]);
 if (@logs) {
 	# Check if any are already rotated
 	local $parent = &logrotate::get_config_parent();
@@ -54,39 +41,63 @@ if (@logs) {
 			}
 		}
 
-	# Add the new section
-	local $lconf = { 'file' => &logrotate::get_add_file($_[0]->{'dom'}),
-			 'name' => \@logs };
-	if ($tmpl->{'logrotate'} eq 'none') {
-		# Use automatic configurtation
-		local $script = &get_postrotate_script($_[0]);
-		$lconf->{'members'} = [
-				{ 'name' => 'rotate',
-				  'value' => $config{'logrotate_num'} || 5 },
-				{ 'name' => 'weekly' },
-				{ 'name' => 'compress' },
-				{ 'name' => 'postrotate',
-				  'script' => $script },
-				{ 'name' => 'sharedscripts' },
-				];
+	# If in single config mode, check if there is a block for Virtualmin
+	# already (based on the directory)
+	local $logdir = $logs[0];
+	$logdir =~ s/\/[^\/]+$//;
+	local $already;
+	if ($tmpl->{'logrotate_shared'} eq 'yes') {
+		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
+			foreach my $n (@{$c->{'name'}}) {
+				if ($n =~ /^\Q$logdir\E\/[^\/]+$/) {
+					$already = $c;
+					last LOGROTATE;
+					}
+				}
+			}
+		}
+
+	if (!$already) {
+		# Add the new section
+		local $lconf = { 'file' => &logrotate::get_add_file($_[0]->{'dom'}),
+				 'name' => \@logs };
+		if ($tmpl->{'logrotate'} eq 'none') {
+			# Use automatic configurtation
+			local $script = &get_postrotate_script($_[0]);
+			$lconf->{'members'} = [
+					{ 'name' => 'rotate',
+					  'value' => $config{'logrotate_num'} || 5 },
+					{ 'name' => 'weekly' },
+					{ 'name' => 'compress' },
+					{ 'name' => 'postrotate',
+					  'script' => $script },
+					{ 'name' => 'sharedscripts' },
+					];
+			}
+		else {
+			# Use manually defined directives
+			local $temp = &transname();
+			local $txt = $tmpl->{'logrotate'};
+			$txt =~ s/\t/\n/g;
+			&open_tempfile(TEMP, ">$temp");
+			&print_tempfile(TEMP, "/dev/null {\n");
+			&print_tempfile(TEMP,
+				&substitute_domain_template($txt, $_[0])."\n");
+			&print_tempfile(TEMP, "}\n");
+			&close_tempfile(TEMP);
+			local $tconf = &logrotate::get_config($temp);
+			$lconf->{'members'} = $tconf->[0]->{'members'};
+			unlink($temp);
+			}
+		&logrotate::save_directive($parent, undef, $lconf);
+		&flush_file_lines($lconf->{'file'});
 		}
 	else {
-		# Use manually defined directives
-		local $temp = &transname();
-		local $txt = $tmpl->{'logrotate'};
-		$txt =~ s/\t/\n/g;
-		&open_tempfile(TEMP, ">$temp");
-		&print_tempfile(TEMP, "/dev/null {\n");
-		&print_tempfile(TEMP,
-			&substitute_domain_template($txt, $_[0])."\n");
-		&print_tempfile(TEMP, "}\n");
-		&close_tempfile(TEMP);
-		local $tconf = &logrotate::get_config($temp);
-		$lconf->{'members'} = $tconf->[0]->{'members'};
-		unlink($temp);
+		# Add to existing section
+		push(@{$already->{'name'}}, @logs);
+		&logrotate::save_directive($parent, $already, $already);
+		&flush_file_lines($already->{'file'});
 		}
-	&logrotate::save_directive($parent, undef, $lconf);
-	&flush_file_lines($lconf->{'file'});
 
 	# Make sure extra log files actually exist
 	foreach my $lt (@tmpllogs) {
@@ -184,25 +195,38 @@ if ($_[0]->{'user'} ne $_[1]->{'user'} ||
 # Remove logrotate section for this domain
 sub delete_logrotate
 {
+local ($d) = @_;
 &require_logrotate();
 &$first_print($text{'delete_logrotate'});
-&obtain_lock_logrotate($_[0]);
-local $lconf = &get_logrotate_section($_[0]);
+&obtain_lock_logrotate($d);
+local $lconf = &get_logrotate_section($d);
+local $parent = &logrotate::get_config_parent();
 if ($lconf) {
-	local $parent = &logrotate::get_config_parent();
-	&logrotate::save_directive($parent, $lconf, undef);
-	&flush_file_lines($lconf->{'file'});
-	undef($logrotate::get_config_parent_cache);
-	undef(%logrotate::get_config_cache);
-	undef(%logrotate::get_config_lnum_cache);
-	undef(%logrotate::get_config_files_cache);
-	&logrotate::delete_if_empty($lconf->{'file'});
+	# Check if all log files in the section are related to the domain
+	local %logs = map { $_, 1 } &get_all_domain_logs($d);
+	local @leftover = grep { !$logs{$_} } @{$lconf->{'name'}};
+	if (@leftover) {
+		# Just remove some log files, but leave the block
+		$lconf->{'name'} = \@leftover;
+		&logrotate::save_directive($parent, $lconf, $lconf);
+		&flush_file_lines($lconf->{'file'});
+		}
+	else {
+		# Remove the whole logrotate block
+		&logrotate::save_directive($parent, $lconf, undef);
+		&flush_file_lines($lconf->{'file'});
+		undef($logrotate::get_config_parent_cache);
+		undef(%logrotate::get_config_cache);
+		undef(%logrotate::get_config_lnum_cache);
+		undef(%logrotate::get_config_files_cache);
+		&logrotate::delete_if_empty($lconf->{'file'});
+		}
 	&$second_print($text{'setup_done'});
 	}
 else {
 	&$second_print($text{'setup_nologrotate'});
 	}
-&release_lock_logrotate($_[0]);
+&release_lock_logrotate($d);
 }
 
 # clone_logrotate(&domain, &old-domain)
@@ -385,6 +409,14 @@ sub show_template_logrotate
 {
 local ($tmpl) = @_;
 
+# Use shared logrotate config
+print &ui_table_row(
+	&hlink($text{'tmpl_logrotate_shared'}, "template_logrotate_shared"),
+	&ui_radio("logrotate_shared", $tmpl->{'logrotate_shared'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'tmpl_default'} ] ),
+	    [ "no", $text{'tmpl_logrotate_shared0'} ],
+	    [ "yes", $text{'tmpl_logrotate_shared1'} ] ]));
+
 # Logrotate directives
 print &ui_table_row(
 	&hlink($text{'tmpl_logrotate'}, "template_logrotate"),
@@ -417,6 +449,7 @@ sub parse_template_logrotate
 local ($tmpl) = @_;
 
 # Save logrotate settings
+$tmpl->{'logrotate_shared'} = $in{'logrotate_shared'};
 $tmpl->{'logrotate'} = &parse_none_def("logrotate");
 if ($in{"logrotate_mode"} == 2) {
 	local $err = &check_logrotate_template($in{'logrotate'});
@@ -532,6 +565,36 @@ else {
 	$script = &plugin_call($p, "feature_restart_web_command", $d);
 	}
 return $script;
+}
+
+# get_all_domain_logs(&domain)
+# Returns all logs that should be rotated for a domain
+sub get_all_domain_logs
+{
+local ($d) = @_;
+local $alog = &get_website_log($d, 0);
+local $elog = &get_website_log($d, 1);
+local @logs = ( $alog, $elog );
+if ($d->{'ftp'}) {
+	push(@logs, &get_proftpd_log($d->{'ip'}));
+	}
+push(@logs, &get_domain_template_logs($d));
+return &unique(grep { $_ } @logs);
+}
+
+# get_domain_template_logs(&domain)
+# Returns extra logs from a domain's template 
+sub get_domain_template_logs
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local @tmpllogs;
+foreach my $lt (split(/\t+/, $tmpl->{'logrotate_files'})) {
+	if ($lt && $lt ne "none") {
+		push(@tmpllogs, &substitute_domain_template($lt, $d));
+		}
+	}
+return @tmpllogs;
 }
 
 $done_feature_script{'logrotate'} = 1;
