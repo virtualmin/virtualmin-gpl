@@ -588,10 +588,21 @@ DOMAIN: foreach $d (@$doms) {
 
 	# If domain has a reseller set who doesn't exist, clear it now
 	# to prevent errors on restore
-	if ($d->{'reseller'} && defined(&get_reseller) &&
-	    !&get_reseller($d->{'reseller'})) {
-		delete($d->{'reseller'});
-		&save_domain($d);
+	if ($d->{'reseller'} && defined(&get_reseller)) {
+		my @existing;
+		my $rmissing;
+		foreach my $rname (split(/\s+/, $d->{'reseller'})) {
+			if (&get_reseller($rname)) {
+				push(@existing, $rname);
+				}
+			else {
+				$rmissing++;
+				}
+			}
+		if ($rmissing) {
+			$d->{'reseller'} = join(" ", @existing);
+			&save_domain($d);
+			}
 		}
 
 	# Begin doing this domain
@@ -2015,21 +2026,30 @@ if ($ok) {
 					}
 				}
 
-			# Does the reseller exist? If not, fail
+			# Do all the resellers exist? If not, fail
 			if ($d->{'reseller'} && defined(&get_reseller)) {
-				my $resel = &get_reseller($d->{'reseller'});
-				if (!$resel && $skipwarnings) {
-					&$second_print(&text('restore_eresel2',
-							$d->{'reseller'}));
-					delete($d->{'reseller'});
+				my @existing;
+				foreach my $rname (split(/\s+/,
+							 $d->{'reseller'})) {
+					my $resel = &get_reseller($rname);
+					if (!$resel && $skipwarnings) {
+						&$second_print(
+							&text('restore_eresel2',
+							$rname));
+						}
+					elsif (!$resel) {
+						&$second_print(
+							&text('restore_eresel',
+							$rname));
+						$ok = 0;
+						if ($continue) { next DOMAIN; }
+						else { last DOMAIN; }
+						}
+					else {
+						push(@existing, $rname);
+						}
 					}
-				elsif (!$resel) {
-					&$second_print(&text('restore_eresel',
-							$d->{'reseller'}));
-					$ok = 0;
-					if ($continue) { next DOMAIN; }
-					else { last DOMAIN; }
-					}
+				$d->{'reseller'} = join(" ", @existing);
 				}
 
 			if ($parentdom) {
@@ -2913,12 +2933,15 @@ if ($doms) {
 		# If domain has a reseller, make sure it exists now
 		if ($d->{'missing'} && $d->{'reseller'} &&
 		    defined(&get_reseller)) {
-			my $resel = &get_reseller($d->{'reseller'});
-			if (!$resel) {
-				push(@rv, { 'critical' => 0,
-					    'desc' => &text('restore_ereseller',
-							    $d->{'reseller'}),
-					    'dom' => $d });
+			foreach my $rname (split(/\s+/, $d->{'reseller'})) {
+				my $resel = &get_reseller($rname);
+				if (!$resel) {
+					push(@rv, {
+					  'critical' => 0,
+					  'desc' => &text('restore_ereseller',
+							  $rname),
+					  'dom' => $d });
+					}
 				}
 			}
 
