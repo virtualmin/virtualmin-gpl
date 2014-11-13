@@ -1,0 +1,12 @@
+<header>Niveau de sauvegarde</header>
+
+Par défaut, les sauvegardes Virtualmin inclut tous les fichiers dans les répertoires personnels des domaines sélectionnés. Cependant, si vous sauvegardez régulièrement les gros serveurs virtuels, beaucoup de temps peut être consacré à copier les fichiers qui ne sont pas été modifiées récemment. <p>
+
+Si l'option <b>Incrémentaux</b> est sélectionnée ici, seuls les fichiers qui ont été modifiés ou créés depuis la dernière sauvegarde complète seront inclus. Ceci est très utile lorsque vous avez deux sauvegardes planifiées, comme une sauvegarde complète hebdomadaire et un incrémentielle quotidienne. En supposant que la plupart des fichiers dans un domaine sont inchangés jour en jour, ce qui réduira sensiblement la taille et le temps de sauvegardes quotidiennes. <p>
+
+Soyez conscient que lorsque vous restaurez, vous devrez restaurer d'abord la sauvegarde complète et puis le différentiel pour récupérer tous les fichiers. En outre, d'autres données telles que les configurations et les bases de données Apache ne sont pas sauvegardés de façon incrémentielle, et ils seront toujours inclus indépendamment de cette option. <p>
+
+L'option <b>Ni</b> effectue également une sauvegarde complète, mais ne change pas l'état de la sauvegarde incrémentielle. Cela peut être utile lorsque vous effectuez une sauvegarde ad hoc de domaines qui ont également des sauvegardes planifiées complètes et incrémentielles. <p>
+
+<footer>
+

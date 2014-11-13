@@ -1,0 +1,94 @@
+<header>Faire des substitutions de style strftime sur le nom de fichier ou de répertoire </header>
+
+Si cette case est cochée, les codes comme %d, %m, %Y et %u peuvent être utilisés dans la destination de sauvegarde fichier. Ceux-ci seront remplacés par le jour, le mois, l'année et le jour de la semaine, respectivement, lorsque la sauvegarde est effectuée. Ceci est utile si vous voulez enregistrer une sauvegarde différente chaque jour, de sorte que vous pouvez rouler un serveur à une date antérieure. <p>
+
+Parmi les autres codes qui peuvent être utilisés sont :<br>
+
+<pre><font size=-1>
+ %a   Le nom abrégé du jour ouvrable suivant la localisation en cours.
+
+ %A   Le nom du jour complet en fonction de la localisation en cours.
+
+ %b   Le nom abrégé du mois en fonction de la localisation en cours.
+
+ %B   Le nom complet du mois en fonction de la localisation en cours.
+
+ %c   La représentation pratique date et heure pour la localisation en cours.
+
+ %C   Le numéro de siècle (année/100) comme un nombre entier de 2 chiffres.
+
+ %d   Le jour du mois comme un nombre décimal (intervalle de 01 à 31).
+
+ %e   Comme %d, le jour du mois en nombre décimal, mais un zéro est remplacé par un espace.
+
+ %E   Modifier: utiliser le format de rechange, voir ci-dessous.
+
+ %G   L'année ISO 8601 avec le siècle en nombre décimal.
+      L'année à 4 chiffres correspondant au numéro de la semaine ISO (voir %V).  
+      Cela a le même format et la valeur en %y, sauf que si le nombre de semaine appartient à l'année précédente ou suivante, cette année est utilisé à la place.
+
+ %g   Comme %G, mais sans le siècle, i.e., avec une année à 2 chiffres (00-99).
+
+ %h   Équivalent à %b.
+
+ %H   L'heure comme un nombre décimal en utilisant une horloge de 24 heures (intervalle de 00 à 23).
+
+ %I   L'heure comme un nombre décimal en utilisant une horloge de 12 heures (intervalle de 01 à 12).
+
+ %j   Le jour de l'année comme un nombre décimal (intervalle de 001 à 366).
+
+ %k   L'heure (24 heures) en nombre décimal (intervalle de 0 à 23); les chiffres seuls sont précédés d'un espace. (Voir aussi %H.)
+
+ %l   L'heure (12 heures) en nombre décimal (de 1 à 12); les chiffres seuls sont précédés d'un espace. (Voir aussi %I.)
+
+ %m   Le mois comme un nombre décimal (de 01 à 12).
+
+ %M   La minute comme un nombre décimal (de 00 à 59).
+
+ %n   Un caractère de nouvelle ligne.
+
+ %O   Modifier: utiliser le format de rechange, voir ci-dessous.
+
+ %p   Soit am ou pm selon la valeur de temps donné, ou les chaînes correspondantes pour la localisation en cours. Midi est traité comme `h' et minuit comme `am'.
+
+ %P   Comme %p mais en minuscules: `am' ou `pm' ou une chaîne correspondant à la localisation en cours.
+
+ %r   Le temps dans la notation a.m. ou p.m. Dans la localisation POSIX ce qui est équivalent à `%I:%M:%S %p'.
+
+ %R   Le temps en notation 24 heures (%H:%M). Pour une version qui inclut les secondes, voir %T ci-dessous.
+
+ %s   Le nombre de secondes depuis l'Époque, i.e., depuis 1970-01-01 00:00:00 UTC.
+
+ %S   Le seconde comme un nombre décimal (de 00 à 61).
+
+ %t   Un caractère de tabulation.
+
+ %T   Le temps en notation 24 heures (%H:%M:%S).
+
+ %u   Le jour de la semaine comme un décimal, de 1 à 7, du lundi étant 1. Voir aussi %w.
+
+ %U   Le numéro de la semaine de l'année en cours comme un nombre décimal, de 00 à 53, en commençant par le premier dimanche étant le premier jour de la semaine 01. Voir aussi %V et %W.
+
+ %V   L'ISO 8601: nombre de 1988 la semaine de l'année en cours comme un nombre décimal, de 01 à 53, où la semaine 1 est la première semaine qui a au moins 4 jours dans l'année en cours, et avec le lundi comme premier jour de la semaine. Voir aussi %U et %W.
+
+ %w   Le jour de la semaine comme un décimal, de 0 à 6, le dimanche étant 0. Voir aussi %u.
+
+ %W   Le numéro de la semaine de l'année en cours comme un nombre décimal, de 00 à 53, en commençant par le premier lundi étant le premier jour de la semaine 01.
+
+ %x   La représentation préférée de date pour la localisation en cours sans le temps.
+
+ %X   La représentation préféré de temps pour la localisation en cours sans la date.
+
+ %y   L'année comme un nombre décimal, sans le siècle (de 00 à 99).
+
+ %Y   L'année comme un nombre décimal, avec le siècle.
+
+ %z   Le fuseau horaire comme décalage GMT. Nécessaire pour émettre dates RFC822-conforme (en utilisant "%a, %d  %b  %Y %H:%M:%S %z").
+
+ %Z   Le fuseau horaire ou le nom ou l'abréviation.
+
+ %%   Un caractère littéral `%'
+</font></pre>
+
+<footer>
+

@@ -1,0 +1,26 @@
+<header>Modifier manuellement Alias</header>
+
+Cette page vous permet de créer, modifier ou supprimer plusieurs alias de courriel à la fois par les éditer en format texte. Pas tous les alias peuvent être modifiés - ceux des destinations ou des répondeurs automatiques complexes ne sont pas adaptés pour le format texte utilisé sur cette page, et ainsi ne seront pas affichées. <p>
+
+Dans la zone de texte, vous devez inscrire un alias par ligne, et chaque ligne doit avoir le format suivant :<p>
+
+<tt><i>name</i>:[<i>comment</i>]:<i>destination1</i>[:<i>destination2</i>:...]</tt><p>
+
+Les significations des champs sont :<br>
+<dl>
+<dt>name
+<dd>Le nom de la boîte aux lettres de l'alias, avec comme <i>ventes</i>. Pour créer un alias qui correspond à tous les mails du domaine, entrez <i>*</i> ici.
+<dt>comment
+<dd>Ce champ facultatif peut être utilisé pour saisir un commentaire descriptif pour l'alias, tels que <i>Ventes aux entreprises</i>.
+<dt>destination
+<dd>Un ou plusieurs destinations peuvent être saisies, généralement sous la forme d'adresses e-mail à qui transférer le courrier, comme <i>joe@votredomaine.com</i> ou tout simplement <i>joe</i>. Les destinations spéciales suivantes sont également prises en charge :
+	<ul>
+	<li><tt>bounce</tt><br>
+	    Crée un alias qui rebondit email à l'expéditeur.
+	<li><tt>local <i>username</i></tt><br>
+	    Délivre le courrier électronique directement à la boîte aux lettres de l'utilisateur spécifié.
+	</ul>
+</dl><p>
+
+<footer>
+

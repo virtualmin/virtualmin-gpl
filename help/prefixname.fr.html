@@ -1,0 +1,8 @@
+<header>Préfixe pour les noms des utilisateurs de courrier</header>
+
+Par défaut, Virtualmin sera précédé ou suivre soit le nom d'utilisateur ou la première partie du nom de domaine à tous les utilisateurs de boîtes aux lettres créés dans ce domaine, afin d'assurer qu'il n'y a pas des affrontements de nom d'utilisateur. Cependant, ce domaine peut être utilisé pour spécifier un préfixe ou un suffixe différent, qui peut être utile si votre système a une longueur de nom d'utilisateur court (comme FreeBSD) et le préfixe par défaut est trop long. <p>
+
+Comment le préfixe est sélectionné par défaut est déterminée par l'option <b>Style de Nom de domaine dans le nom d'utilisateur</b> sur la page <b>Configuration du module</b>. Si elle est fixée à <b>Nom d'utilisateur ou première partie de domaine</b>, le préfixe sera le même que l'utilisateur et le nom du groupe du domaine . Si est réglé sur <b>Nom complet de domaine</b>, il sera toujours le nom de domaine du serveur virtuel. Sinon, ce sera la première partie du nom de domaine (sauf si il ya un conflit avec le préfixe d'un autre domaine). <p>
+
+<hr>
+

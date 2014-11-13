@@ -1,0 +1,25 @@
+<header>Destination de sauvegarde</header>
+
+Ces champs contrôlent où la sauvegarde Virtualmin est écrit. Vous pouvez choisir
+à partir de l'un des trois modes de destination:
+
+<dl>
+<dt><b>Répertoire de fichiers local</b>
+<dd>Dans ce mode, la sauvegarde est simplement enregistrée dans un fichier sur le système exécutant Virtualmin. Si l'on utilise le <b>Seul fichier d'archive</b> format de sauvegarde, vous devez entrer un nom de fichier ici, comme <tt>/backup/domainname.tgz</tt>. Si vous utilisez l'un des formats <b>Un fichier par serveur</b>, vous devez entrer un répertoire à la place, comme <tt>/backup</tt>.<br>
+<dt><b>Serveur FTP</b>
+<dd>Ce mode peut être utilisé pour avoir le fichier de sauvegarde ou des fichiers téléchargés à l'aide du protocole FTP à un autre serveur. Vous devez entrer le nom du serveur, login, mot de passe et fichier de destination ou répertoire.<br>
+<dt><b>Serveur SSH</b>
+<dd>Ceci est similaire au mode de FTP, mais transfère la sauvegarde à l'aide du protocole SSH.<br>
+</dl>
+
+Si le format de sauvegarde est un fichier unique, puis la destination que vous spécifiez ici doit être un fichier, qui sera écrasée ou créé. Si la création d'un fichier par domaine, la destination doit être un répertoire qui existe déjà. <p>
+
+Si vous sauvegarde sur un serveur FTP ou SSH sur un port non standard, vous pouvez entrer
+dans le champ de serveur séparé du nom d'hôte avec un côlon, comme 
+<tt>backupserver.yourdomain.com:2222</tt> . <p>
+
+Si vous sauvegarde sur un serveur SSH qui ne prend en charge l'authentification basée sur certifcate, le champ mot de passe est facultatif. 
+Cependant, le <tt>root</tt> doit avoir sa clé publique SSH dans le fichier de destination <tt>authorized_keys</tt>. <p>
+
+<footer>
+

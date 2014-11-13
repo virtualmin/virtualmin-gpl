@@ -1,0 +1,20 @@
+<header>Format de sauvegarde</header>
+
+Cette option contrôle le format de fichier que Virtualmin va utiliser pour cette sauvegarde.
+Les options disponibles sont:
+<dl>
+<dt>Fichier d'archivage unique
+<dd>Tous les serveurs virtuels stockent dans un fichier unique, à l'emplacement indiqué par le <b>Destination de Sauvegarde</b>.
+<dt>Un fichier par serveur (ancien format)
+<dd>Chaque serveur virtuel est sauvegardé dans son propre fichier séparé, dans le répertoire spécifié par la <b>Destination de Sauvegarde</b>.
+<dt>Un fichier par serveur, dans le nouveau format
+<dd>Chaque serveur virtuel est sauvegardé dans son propre fichier séparé, mais dans un format différent de l'option précédente. 
+    Ce nouveau format est supérieur car il ne nécessite pas un grand fichier créé dans le répertoire <tt>/tmp</tt> première, ce qui économise de l'espace disque.
+</dl>
+
+La dernière option est recommandée, car elle a permis serveurs virtuels individuels à être plus facilement restaurées, et économise de l'espace lors de la sauvegarde sur disque temporaire.
+<p>
+
+<footer>
+
+
