@@ -1,0 +1,13 @@
+<header>Share logrotate configuration with all domains?</header>
+
+When this is set to <b>No</b>, Virtualmin will create a separate block
+in the <tt>logrotate</tt> configuration file for each virtual server. This
+allows each to have different settings, but will cause the web server to be
+restarted after the rotation of each domains' logs - possibly interrupting
+service. <p>
+
+Selecting <b>Yes</b> will cause all new domains to share a single configuration
+block, which means the web server only has to be restarted once. However, it
+is not possible to have different rotation settings for each domain. <p>
+
+<footer>
