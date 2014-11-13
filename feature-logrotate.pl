@@ -340,6 +340,11 @@ else {
 sub restore_logrotate
 {
 &$first_print($text{'restore_logrotatecp'});
+local $tmpl = &get_template($_[0]->{'template'});
+if ($tmpl->{'logrotate_shared'}) {
+	&$second_print($text{'restore_logrotatecpshared'});
+	return 1;
+	}
 &obtain_lock_logrotate($_[0]);
 local $lconf = &get_logrotate_section($_[0]);
 local $rv;

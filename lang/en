@@ -2556,6 +2556,7 @@ restore_emailcontrol=.. restore failed : $1
 restore_webalizercp=Restoring Webalizer configuration files and Cron job ..
 restore_dirchowning=Setting ownership of home directory ..
 restore_logrotatecp=Restoring Logrotate configuration ..
+restore_logrotatecpshared=.. not needed when shared
 restore_dnsfixip=Change IP address in DNS records to server's IP?
 restore_webfixip=Change IP address in Apache config to server's IP?
 restore_spamcp=Restoring SpamAssassin and Procmail configurations ..

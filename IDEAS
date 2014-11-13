@@ -40,7 +40,7 @@
  
  - Logrotate all domains in a single block, rather than one per domain
 	- for new installs only (enable if no domains in postinstall.pl)
-	- backup and restore (no need to save?)
+	- CHANGELOG
 
  - Move left menu function down into Webmin/Virtualmin
 	- https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fqooob%2Fauthentic-theme%2Fissues%2F7&sa=D&sntz=1&usg=AFQjCNGPd7-QBIXCnZPTFRV-zAA0Z3eKxg
