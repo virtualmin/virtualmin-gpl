@@ -60,6 +60,9 @@ if ($multi) {
 		print "    Type: ",$r->{'alias'} ? "Alias" : "Redirect","\n";
 		print "    Match sub-paths: ",
 			$r->{'regexp'} ? "Yes" : "No","\n";
+		if ($r->{'code'}) {
+			print "    Code: ",$r->{'code'},"\n";
+			}
 		print "    Protocols: ",join(" ", grep { $r->{$_} } ("http", "https")),"\n";
 		}
 	}

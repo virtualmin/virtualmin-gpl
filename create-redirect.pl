@@ -22,6 +22,10 @@ For domains with both non-SSL and SSL websites, you can use the C<--http> and
 C<--https> flags to limit the alias or redirect to one website type or the
 other.
 
+To set a custom HTTP status code for the redirect, you can use the C<--code>
+flag followed by a number. Otherwise the default code of 301 (temporary
+redirect) will be used.
+
 =cut
 
 package virtual_server;
@@ -69,6 +73,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--https") {
 		$https = 1;
 		}
+	elsif ($a eq "--code") {
+		$code = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -111,6 +118,7 @@ $r = { 'path' => $path,
        'regexp' => $regexp,
        'http' => $http,
        'https' => $https,
+       'code' => $code,
      };
 $err = &create_redirect($d, $r);
 &release_lock_web($d);
@@ -134,6 +142,7 @@ print "virtualmin create-redirect --domain domain.name\n";
 print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
 print "                          [--regexp]\n";
+print "                          [--code number]\n";
 print "                          [--http | --https]\n";
 exit(1);
 }

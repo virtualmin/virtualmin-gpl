@@ -51,21 +51,19 @@ foreach my $p (@ports) {
 		my $rd = { 'alias' => $al->{'name'} =~ /^Alias/i ? 1 : 0,
 			   'dir' => $al,
 			   $proto => 1 };
-		if ($al->{'words'}->[2]) {
-			# Has a code too
-			$rd->{'code'} = $al->{'words'}->[1];
-			$rd->{'dest'} = $al->{'words'}->[2];
+		my @w = @{$al->{'words'}};
+		if (@w == 3) {
+			# Has a code
+			$rd->{'code'} = shift(@w);
 			}
-		else {
-			$rd->{'dest'} = $al->{'words'}->[1];
-			}
+		$rd->{'dest'} = $w[1];
 		if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
-			$rd->{'path'} = $al->{'words'}->[0];
+			$rd->{'path'} = $w[0];
 			}
 		elsif (($al->{'name'} eq 'AliasMatch' ||
 			$al->{'name'} eq 'RedirectMatch') &&
-		       ($al->{'words'}->[0] =~ /^(.*)\.\*\$$/ ||
-			$al->{'words'}->[0] =~ /^(.*)\(\.\*\)\$$/)) {
+		       ($w[0] =~ /^(.*)\.\*\$$/ ||
+			$w[0] =~ /^(.*)\(\.\*\)\$$/)) {
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
 			}
@@ -107,9 +105,9 @@ foreach my $p (@ports) {
 	$dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
 	push(@aliases, $redirect->{'path'}.
+			($redirect->{'code'} ? $redirect->{'code'}." " : "").
 			($redirect->{'regexp'} ? "(\.\*)\$" : "").
 			" ".
-			($redirect->{'code'} ? $redirect->{'code'}." " : "").
 			$redirect->{'dest'});
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
