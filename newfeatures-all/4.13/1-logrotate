@@ -1,0 +1,4 @@
+desc=Shared logrotate configuration
+html=For new installs, a single logrotate configuration block will now be shared by all virtual servers. For existing systems, whether to use a shared or separate blocks can be set on the Server Templates page.
+master=1
+link=edit_tmpl.cgi?id=0&editmode=logrotate

@@ -38,9 +38,6 @@
 	- Cloud backups page to replace module config
 	- CHANGELOG
  
- - Logrotate all domains in a single block, rather than one per domain
-	- for new installs only (enable if no domains in postinstall.pl)
-	- CHANGELOG
-
  - Move left menu function down into Webmin/Virtualmin
 	- https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fqooob%2Fauthentic-theme%2Fissues%2F7&sa=D&sntz=1&usg=AFQjCNGPd7-QBIXCnZPTFRV-zAA0Z3eKxg
+	- function in webmin which queries all modules to get extra items

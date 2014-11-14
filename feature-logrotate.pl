@@ -46,7 +46,8 @@ if (@logs) {
 	local $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	local $already;
-	if ($tmpl->{'logrotate_shared'} eq 'yes') {
+	if ($tmpl->{'logrotate_shared'} eq 'yes' &&
+	    $logs[0] !~ /^\Q$d->{'home'}\E\//) {
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
 				if ($n =~ /^\Q$logdir\E\/[^\/]+$/) {
@@ -88,6 +89,7 @@ if (@logs) {
 			local $tconf = &logrotate::get_config($temp);
 			$lconf->{'members'} = $tconf->[0]->{'members'};
 			unlink($temp);
+			$d->{'logrotate_shared'} = 1;
 			}
 		&logrotate::save_directive($parent, undef, $lconf);
 		&flush_file_lines($lconf->{'file'});
@@ -226,6 +228,7 @@ if ($lconf) {
 else {
 	&$second_print($text{'setup_nologrotate'});
 	}
+delete($d->{'logrotate_shared'});
 &release_lock_logrotate($d);
 }
 
@@ -341,7 +344,7 @@ sub restore_logrotate
 {
 &$first_print($text{'restore_logrotatecp'});
 local $tmpl = &get_template($_[0]->{'template'});
-if ($tmpl->{'logrotate_shared'}) {
+if ($d->{'logrotate_shared'}) {
 	&$second_print($text{'restore_logrotatecpshared'});
 	return 1;
 	}

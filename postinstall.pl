@@ -432,6 +432,17 @@ if (!&check_ratelimit() && &is_ratelimit_enabled()) {
 if (!&check_dkim()) {
 	my $dkim = &get_dkim_config();
 	$config{'dkim_enabled'} = $dkim && $dkim->{'enabled'} ? 1 : 0;
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
+# If there are no domains yet, enable shared logrotate
+if (!@doms && !$config{'logrotate_shared'}) {
+	$config{'logrotate_shared'} = 'yes';
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
 	}
 
 # Run any needed actions, like server restarts
