@@ -80,6 +80,7 @@ openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
 sni_support=Allow multiple SSL websites on the same IP?,1,1-Yes,0-No
 dovecot_ssl=Copy per-IP SSL certificates to Dovecot?,1,1-Yes,0-No
 postfix_ssl=Copy per-IP SSL certificates to Postfix?,1,1-Yes,0-No
+cert_type=Default SSL certificate hash,1,sha1-SHA1,sha2-SHA2
 
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme

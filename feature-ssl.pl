@@ -1422,7 +1422,7 @@ sub generate_certificate_request
 {
 local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
-$ctype ||= $config{'default_ctype'};
+$ctype ||= $config{'cert_type'};
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
