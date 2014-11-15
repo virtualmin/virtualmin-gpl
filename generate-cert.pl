@@ -35,6 +35,10 @@ C<--cn> - Specifies the domain name in the certificate.
 When run, the command will create certificate and private key files, and
 configure Apache to use them. Any existing files will be overwritten.
 
+By default the certificate will use the hash format (SHA1 or SHA2) set on the
+Virtualmin Configuration page. However, to force a particular format like the
+more secure SHA2, you can use the C<--sha2> flag.
+
 This command can also create a CSR, or certificate signing request. This is
 a file that is sent to a certificate authority like Verisign or Thawte along
 with payment and a request to validate the owner of a domain. The command is
@@ -42,7 +46,7 @@ run in the same way, except that the C<--csr> flag is used instead of C<--self>,
 and the generated files are different.
 
 Once the CA has validated the certificate, they will send you back a signed
-cert that can be installed using the C<--install-cert> command or the
+cert that can be installed using the C<install-cert> command or the
 Virtualmin web interface.
 
 =cut
@@ -93,6 +97,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a =~ /^--(sha1|sha2)$/) {
+		$ctype = $1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -128,6 +135,7 @@ if ($self) {
 		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
+		$ctype,
 		);
 	if ($err) {
 		&$second_print(".. failed : $err");
@@ -178,6 +186,7 @@ else {
 		$subject{'email'} || $d->{'emailto_addr'},
 		\@alts,
 		$d,
+		$ctype,
 		);
 	if ($err) {
 		&$second_print(".. failed : $err");
@@ -213,6 +222,7 @@ print "                        [--o organization]\n";
 print "                        [--ou organization-unit]\n";
 print "                        [--email email-address]\n";
 print "                        [--alt alternate-domain-name]*\n";
+print "                        [--sha2 | --sha1]\n";
 exit(1);
 }
 

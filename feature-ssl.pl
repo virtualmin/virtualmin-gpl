@@ -1360,13 +1360,14 @@ return undef;
 
 # generate_self_signed_cert(certfile, keyfile, size, days, country, state,
 # 			    city, org, orgunit, commonname, email, &altnames,
-# 			    &domain)
+# 			    &domain, [cert-type])
 # Generates a new self-signed cert, and stores it in the given cert and key
 # files. Returns undef on success, or an error message on failure.
 sub generate_self_signed_cert
 {
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
-       $orgunit, $common, $email, $altnames, $d) = @_;
+       $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
+$ctype ||= $config{'default_ctype'};
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
@@ -1381,7 +1382,10 @@ if ($altnames && @$altnames) {
 local $outtemp = &transname();
 local $keytemp = &transname();
 local $certtemp = &transname();
-&open_execute_command(CA, "openssl req $flag -newkey rsa:$size -x509 -nodes -out $certtemp -keyout $keytemp -days $days >$outtemp 2>&1", 0);
+local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
+&open_execute_command(CA, "openssl req $ctypeflag $flag -newkey rsa:$size ".
+			  "-x509 -nodes -out $certtemp -keyout $keytemp ".
+			  "-days $days >$outtemp 2>&1", 0);
 print CA ($country || "."),"\n";
 print CA ($state || "."),"\n";
 print CA ($city || "."),"\n";
@@ -1411,13 +1415,14 @@ return undef;
 
 # generate_certificate_request(csrfile, keyfile, size, days, country, state,
 # 			       city, org, orgunit, commonname, email, &altnames,
-# 			       &domain)
+# 			       &domain, [cert-type])
 # Generates a new self-signed cert, and stores it in the given csr and key
 # files. Returns undef on success, or an error message on failure.
 sub generate_certificate_request
 {
 local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
-       $orgunit, $common, $email, $altnames, $d) = @_;
+       $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
+$ctype ||= $config{'default_ctype'};
 &foreign_require("webmin", "webmin-lib.pl");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
@@ -1442,7 +1447,11 @@ if (!-r $keytemp || $rv) {
 # Generate the matching CSR
 local $outtemp = &transname();
 local $csrtemp = &transname();
-&open_execute_command(CA, "openssl req $flag -new -key ".quotemeta($keytemp)." -out ".quotemeta($csrtemp)." >$outtemp 2>&1", 0);
+local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
+&open_execute_command(CA, "openssl req $ctypeflag $flag -new".
+			  " -key ".quotemeta($keytemp).
+			  " -out ".quotemeta($csrtemp).
+			  " >$outtemp 2>&1", 0);
 print CA ($country || "."),"\n";
 print CA ($state || "."),"\n";
 print CA ($city || "."),"\n";
