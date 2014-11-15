@@ -52,7 +52,8 @@ if (!$in{'self'}) {
 		$in{'commonName'},
 		$in{'emailAddress'},
 		\@alts,
-		$d);
+		$d,
+		$in{'hash'});
 	&error($err) if ($err);
 	&set_certificate_permissions($d, $d->{'ssl_newkey'});
 	&set_certificate_permissions($d, $d->{'ssl_csr'});
@@ -95,7 +96,8 @@ else {
 				   $in{'commonName'},
 				   $in{'emailAddress'},
 				   \@alts,
-				   $d);
+				   $d,
+				   $in{'hash'});
 	&error($err) if ($err);
 	&$second_print($text{'setup_done'});
 	

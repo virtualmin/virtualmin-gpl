@@ -377,4 +377,8 @@ print &ui_table_row($webmin::text{'ssl_size'},
 
 print &ui_table_row($webmin::text{'ssl_days'},
 		    &ui_textbox("days", 1825, 8));
+
+print &ui_table_row($text{'cert_hash'},
+		    &ui_select("hash", $config{'cert_type'},
+			       [ [ "sha1", "SHA1" ], [ "sha2", "SHA2" ] ]));
 }

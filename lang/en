@@ -2775,6 +2775,7 @@ cert_pcopy=Copy to Postfix
 cert_pcopydesc=Use this certificate in Postfix for SSL-protected SMTP connections by mail clients.
 cert_desc7=This form should be used when you have recieved a signed certificate from your CA, in response to a signing request generated using Virtualmin.
 cert_header7=Signed certificate details
+cert_hash=Certificate hash type
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate

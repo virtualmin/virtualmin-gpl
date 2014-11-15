@@ -1473,3 +1473,4 @@ Updated to Coppermine script installer to version 1.5.34, Drupal to 7.33, Piwik 
 A default shell can now be selected for reseller Unix accounts, independent of the domain owner default shell.
 Added a Change Language link the on left menu for easily switching the UI language.
 For new installs, a single logrotate configuration block will now be shared by all virtual servers. For existing systems, whether to use a shared or separate blocks can be set on the Server Templates page.
+The hash format (SHA1 or SHA2) for new certificates can now be selected at creation time, and the default set on the Virtualmin Configuration page.
