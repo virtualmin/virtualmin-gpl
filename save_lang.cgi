@@ -13,6 +13,7 @@ $user || &error($text{'lang_euser'});
 # Update the Webmin user
 $user->{'lang'} = $in{'lang'};
 &acl::modify_user($user->{'name'}, $user);
+&clear_links_cache();
 &webmin_log("lang");
 
 # Refresh the whole UI
