@@ -1469,7 +1469,7 @@ On systems running Apache 2.4 and above, VirtualHost blocks are now created with
 Moved all S3 and Rackspace Cloud Files settings from the Virtualmin Configuration page to the new Cloud Storage Providers page.
 Added support for backups to Google Cloud Storage, once an account is added on the new Cloud Storage Providers page.
 ---- Changes since 4.12 ----
-Updated to Coppermine script installer to version 1.5.34, Drupal to 7.33, Piwik to 2.9.0, TikiWiki to 13.1 and 12.3, Moodle to 2.8.1, ownCloud to 6.0.6 and 7.0.3, phpMyFAQ to 2.8.17, and MoinMoin to 1.9.8.
+Updated to Coppermine script installer to version 1.5.34, Drupal to 7.33, Piwik to 2.9.0, TikiWiki to 13.1 and 12.3, Moodle to 2.8.1, ownCloud to 6.0.6 and 7.0.3, phpMyFAQ to 2.8.17, Ghost to 0.5.5, and MoinMoin to 1.9.8.
 A default shell can now be selected for reseller Unix accounts, independent of the domain owner default shell.
 Added a Change Language link the on left menu for easily switching the UI language.
 For new installs, a single logrotate configuration block will now be shared by all virtual servers. For existing systems, whether to use a shared or separate blocks can be set on the Server Templates page.
