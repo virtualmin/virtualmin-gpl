@@ -6534,4 +6534,16 @@ lang_ok=Change Now
 lang_err=Failed to change language
 lang_defsel=System default
 
+left_virtualmin=Virtualmin
+left_master=Master admin
+left_reseller=Reseller
+left_single=Mail manager
+left_user=Server owner
+left_extra=Extra admin
+left_owner=System owner
+left_master2=Cloudmin master admin
+left_login=Login: $1
+left_level=Level: $1
+left_generic=Create Virtual Server
+
 __norefs=1

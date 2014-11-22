@@ -2,10 +2,11 @@
 
 require 'virtual-server-lib.pl';
 
-# list_webmin_menu(&data)
+# list_webmin_menu(&data, &in)
 # Returns items for the Virtualmin left menu
 sub list_webmin_menu
 {
+my ($data, $in) = @_;
 my @rv;
 
 # Preferred title
@@ -27,6 +28,8 @@ if ($image) {
 	}
 
 # Login and level
+push(@rv, { 'type' => 'text',
+	    'desc' => &text('left_login', $remote_user) });
 my $level = &master_admin() ? $text{'left_master'} :
             &reseller_admin() ? $text{'left_reseller'} :
             &extra_admin() ? $text{'left_extra'} :
@@ -34,14 +37,41 @@ my $level = &master_admin() ? $text{'left_master'} :
                                   $text{'left_user'};
 push(@rv, { 'type' => 'text',
 	    'desc' => $level });
+push(@rv, { 'type' => 'hr' });
 
 my @alldoms = &list_domains();
 my @doms = &list_visible_domains();
-my $did = $data->{'dom'};
-my $d;
-if ($did) {
-	($d) = grep { $_->{'id'} eq $did } @doms;
+my ($d, $did);
+if (defined($in->{'dom'})) {
+	# Specific domain given
+	$did = $in->{'dom'};
+	$d = &get_domain($did);
 	}
+elsif (defined($in{'dname'})) {
+	# Domain selected by name or username
+	$d = &get_domain_by("dom", $in->{'dname'});
+	if (!$d) {
+		$d = &get_domain_by("user", $in->{'dname'}, "parent", "");
+		}
+	$did = $d->{'id'} if ($d);
+	}
+if (!$d || !&can_edit_domain($d)) {
+	$d = $did = undef;
+	}
+
+# Make sure the selected domain is in the menu .. may not be for
+# alias domains if they are hidden
+if ($d && &can_edit_domain($d)) {
+	my @ids = map { $_->{'id'} } @doms;
+	if (&indexof($d->{'id'}, @ids) < 0) {
+		push(@doms, $d);
+		}
+	}
+@doms = &sort_indent_domains(\@doms);
+
+# Fall back to first owned by this user, or first in list
+$d ||= &get_domain_by("user", $remote_user, "parent", "");
+$d ||= $doms[0];
 
 if (@doms) {
 	# Domain selector
@@ -59,7 +89,7 @@ if (@doms) {
 		      'icon' => '/'.$module_name.'/images/ok.gif',
 		      'value' => $did,
 		      'menu' => \@dlist };
-	push(@rv, $menu);
+	push(@rv, $dmenu);
 	}
 else {
 	# No domains!
