@@ -77,7 +77,6 @@ if (@doms) {
 	# Domain selector
 	# XXX what if too many?
 	# XXX auto-selection of summary_domain.cgi
-	# XXX default domain if none is selected
 	my @dlist = map { [ $_->{'id'},
 			    ("&nbsp;&nbsp;" x $_->{'indent'}).
                             &shorten_domain_name($_),
@@ -123,9 +122,7 @@ if ($d) {
 	# Top-level links first
 	my @incat = grep { $_->{'cat'} eq 'objects' } @buts;
 	foreach my $b (@incat) {
-		push(@rv, { 'type' => 'item',
-			    'desc' => $b->{'title'},
-			    'link' => $b->{'url'} });
+		push(@rv, &button_to_menu_item($b));
 		}
 
 	# Other items by category
@@ -134,6 +131,7 @@ if ($d) {
                 next if ($c eq 'objects' || $c eq 'create');
                 my @incat = grep { $_->{'cat'} eq $c } @buts;
 		my $cmenu = { 'type' => 'cat',
+			      'id' => 'cat_'.$c,
 			      'desc' => $incat[0]->{'catname'},
 			      'members' => [ ] };
 		push(@rv, $cmenu);
@@ -143,18 +141,50 @@ if ($d) {
                                         ($b->{'title'} || $b->{'desc'})} @incat;
                         }
 		foreach my $b (@incat) {
-			push(@{$cmenu->{'members'}},
-			     { 'type' => 'item',
-			       'desc' => $b->{'title'},
-			       'link' => $b->{'url'} });
+			push(@{$cmenu->{'members'}}, &button_to_menu_item($b));
 			}
 		}
 	}
 
 # Global options
-# XXX
+push(@rv, { 'type' => 'hr' });
+my @buts = &get_all_global_links();
+my @tcats = &unique(map { $_->{'cat'} } @buts);
+foreach my $tc (@tcats) {
+	my @incat = grep { $_->{'cat'} eq $tc } @buts;
+	if ($tc) {
+		# Under a category
+		my $cmenu = { 'type' => 'cat',
+			      'id' => 'global_'.$tc,
+			      'desc' => $incat[0]->{'catname'},
+			      'members' => [ ] };
+		foreach my $b (@incat) {
+			push(@{$cmenu->{'members'}}, &button_to_menu_item($b));
+			}
+		push(@rv, $cmenu);
+		}
+	else {
+		# At top level
+		foreach my $b (@incat) {
+			push(@rv, &button_to_menu_item($b, 1));
+			}
+		}
+	}
 
 return @rv;
+}
+
+# button_to_menu_item(&button, want-icon)
+sub button_to_menu_item
+{
+my ($b, $wanticon) = @_;
+my $i = { 'type' => 'item',
+	  'desc' => $b->{'title'},
+	  'url' => $b->{'url'} };
+if ($b->{'icon'} && $wanticon) {
+	$i->{'icon'} = '/'.$module_name.'/images/'.$b->{'icon'}.'.png';
+	}
+return $i;
 }
 
 1;
