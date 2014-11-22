@@ -12,7 +12,7 @@ my @rv;
 # Preferred title
 push(@rv, { 'type' => 'title',
 	    'id' => 'title',
-	    'icon' => '/'.$module_name.'/images/virtualmin.gif',
+	    'icon' => '/'.$module_name.'/images/virtualmin.png',
 	    'desc' => $text{'left_virtualmin'} });
 
 # Reseller's logo
@@ -85,7 +85,7 @@ if (@doms) {
 	my $dmenu = { 'type' => 'menu',
 		      'cgi' => '',
 		      'name' => 'dom',
-		      'icon' => '/'.$module_name.'/images/ok.gif',
+		      'icon' => '/'.$module_name.'/images/ok.png',
 		      'value' => $did,
 		      'menu' => \@dlist };
 	push(@rv, $dmenu);
