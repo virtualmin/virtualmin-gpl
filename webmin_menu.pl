@@ -73,9 +73,18 @@ if ($d && &can_edit_domain($d)) {
 $d ||= &get_domain_by("user", $remote_user, "parent", "");
 $d ||= $doms[0];
 
-if (@doms) {
+if (@doms > $config{'display_max'} && $config{'display_max'}) {
+	# Domain text box
+	my $dfield = { 'type' => 'input',
+		       'cgi' => '',
+		       'name' => 'dname',
+		       'icon' => '/'.$module_name.'/images/ok.png',
+		       'value' => $d ? $d->{'dom'} : '',
+		       'size' => 15 };
+	push(@rv, $dfield);
+	}
+elsif (@doms) {
 	# Domain selector
-	# XXX what if too many?
 	# XXX auto-selection of summary_domain.cgi
 	my @dlist = map { [ $_->{'id'},
 			    ("&nbsp;&nbsp;" x $_->{'indent'}).
@@ -180,7 +189,7 @@ sub button_to_menu_item
 my ($b, $wanticon) = @_;
 my $i = { 'type' => 'item',
 	  'desc' => $b->{'title'},
-	  'url' => $b->{'url'} };
+	  'link' => $b->{'url'} };
 if ($b->{'icon'} && $wanticon) {
 	$i->{'icon'} = '/'.$module_name.'/images/'.$b->{'icon'}.'.png';
 	}
