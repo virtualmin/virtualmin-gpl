@@ -85,7 +85,6 @@ if (@doms > $config{'display_max'} && $config{'display_max'}) {
 	}
 elsif (@doms) {
 	# Domain selector
-	# XXX auto-selection of summary_domain.cgi
 	my @dlist = map { [ $_->{'id'},
 			    ("&nbsp;&nbsp;" x $_->{'indent'}).
                             &shorten_domain_name($_),
@@ -96,6 +95,7 @@ elsif (@doms) {
 		      'name' => 'dom',
 		      'icon' => '/'.$module_name.'/images/ok.png',
 		      'value' => $did,
+		      'onchange' => '/'.$module_name.'/summary_domain.cgi?dom=',
 		      'menu' => \@dlist };
 	push(@rv, $dmenu);
 	}
