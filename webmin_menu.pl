@@ -55,6 +55,11 @@ elsif (defined($in{'dname'})) {
 		}
 	$did = $d->{'id'} if ($d);
 	}
+elsif ($data->{'dom'}) {
+	# Default as requested by theme
+	$did = $data->{'dom'};
+	$d = &get_domain($did);
+	}
 if (!$d || !&can_edit_domain($d)) {
 	$d = $did = undef;
 	}
