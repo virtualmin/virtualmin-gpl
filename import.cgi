@@ -650,25 +650,23 @@ else {
 		}
 
 	# Output form with confirm button
-	print &check_clicks_function();
-	print "<center><form action=import.cgi method=post>\n";
+	@hiddens = ( );
 	foreach $i (keys %in) {
-		print "<input type=hidden name=$i value='",
-			&html_escape($in{$i}),"'>\n";
+		push(@hiddens, [ $i, $in{$i} ]);
 		}
 	foreach $f (keys %found) {
-		print "<input type=hidden name=found value='$f'>\n";
+		push(@hiddens, [ "found", $f ]);
 		}
 	foreach $t (keys %dbnames) {
-		print "<input type=hidden name=found_$t value='",
-		      join(" ", @{$dbnames{$t}}),"'>\n";
+		push(@hiddens, [ "found_$t", join(" ", @{$dbnames{$t}}) ]);
 		}
-	print "<input type=hidden name=cruser value='$user'>\n";
-	print "<input type=hidden name=crgroup value='$group'>\n";
-	print "<b>$text{'import_rusure'}</b><p>\n";
-	print "<input type=submit name=confirm value='$text{'import_ok'}' ",
-	      "onClick='check_clicks(form)'>\n";
-	print "</form></center>\n";
+	push(@hiddens, [ "cruser", $user ]);
+	push(@hiddens, [ "crgroup", $group ]);
+	print &ui_confirmation_form(
+		"import.cgi",
+		$text{'import_rusure'},
+		\@hiddens,
+		[ [ "confirm", $text{'import_ok'} ] ]);
 	}
 
 &ui_print_footer("", $text{'index_return'});
