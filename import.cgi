@@ -12,7 +12,7 @@ require './virtual-server-lib.pl';
 $in{'dom'} = lc($in{'dom'});
 @doms = &list_domains();
 ($clash) = grep { $_->{'dom'} eq $in{'dom'} } @doms;
-$clash && &error_exit($text{'import_eexists'});
+$clash && &error($text{'import_eexists'});
 
 # Get the parent
 if (!$in{'parent_def'}) {
@@ -23,30 +23,36 @@ if (!$in{'parent_def'}) {
 if (!$parent) {
 	if (!$in{'user_def'}) {
 		$in{'user'} =~ /^[^\t :]+$/ ||
-			&error_exit($text{'setup_euser2'});
+			&error($text{'setup_euser2'});
 		&indexof($in{'user'}, @banned_usernames) < 0 ||
-			&error_exit(&text('setup_eroot',
+			&error(&text('setup_eroot',
 					  join(" ", @banned_usernames)));
 		$clash = &get_domain_by("user", $in{'user'});
 		$clash && &error(&text('import_euserclash',
 				       &show_domain_name($clash)));
 		}
-	$in{'group_def'} || $in{'group'} =~ /^[^\t :]+$/ ||
-		&error_exit($text{'import_egroup'});
-	$in{'group_def'} || &indexof($in{'group'}, @banned_usernames) < 0 ||
-		&error_exit(&text('setup_eroot2', join(" ", @banned_usernames)));
+	if (!$in{'group_def'}) {
+		$in{'group'} =~ /^[^\t :]+$/ ||
+			&error($text{'import_egroup'});
+		&indexof($in{'group'}, @banned_usernames) < 0 ||
+			&error(&text('setup_eroot2',
+				    join(" ", @banned_usernames)));
+		$clash = &get_domain_by("group", $in{'group'});
+		$clash && &error(&text('import_egroupclash',
+				       &show_domain_name($clash)));
+		}
 	}
 
 # Validate MySQL username
 if (!$parent && $config{'mysql'} && !$in{'db_mysql_user_def'}) {
 	$in{'db_mysql_user'} =~ /^\S+$/ ||
-		&error_exit($text{'import_emysql_user'});
+		&error($text{'import_emysql_user'});
 	my $faked = { 'dom' => $in{'dom'} };
 	&set_provision_features($faked);
 	&check_mysql_user_clash($faked, $in{'db_mysql_user'}) ||
-		&error_exit($text{'import_emysql_user2'});
+		&error($text{'import_emysql_user2'});
 	&indexof($in{'db_mysql_user'}, @banned_usernames) < 0 ||
-                &error_exit(&text('setup_eroot', join(" ", @banned_usernames)));
+                &error(&text('setup_eroot', join(" ", @banned_usernames)));
 	}
 
 # Make sure IP is valid
@@ -55,15 +61,15 @@ if ($in{'virt'}) {
 	($iface) = grep { $_->{'address'} eq $in{'ip'} }
 				( &net::boot_interfaces(),
 				  &net::active_interfaces() );
-	$iface || &error_exit($text{'import_enoip'});
+	$iface || &error($text{'import_enoip'});
 	$iface->{'address'} eq &get_default_ip() &&
-		&error_exit($text{'import_eipsame'});
+		&error($text{'import_eipsame'});
 	foreach $d (@doms) {
 		$d->{'ip'} eq $in{'ip'} &&
-			&error_exit(&text('import_eipclash', $d->{'dom'}));
+			&error(&text('import_eipclash', $d->{'dom'}));
 		}
 	$iface->{'virtual'} eq '' &&
-		&error_exit(&text('import_ereal', $iface->{'fullname'}));
+		&error(&text('import_ereal', $iface->{'fullname'}));
 	}
 
 # Validate home directory
@@ -379,7 +385,7 @@ else {
 				$user = $in{'dom'};
 				$try2 = $user;
 				if (defined(getpwnam($user))) {
-					&error_exit(&text('setup_eauto', $try1,$try2));
+					&error(&text('setup_eauto', $try1,$try2));
 					}
 				}
 			print "<b>",&text('import_user1',
@@ -666,11 +672,4 @@ else {
 	}
 
 &ui_print_footer("", $text{'index_return'});
-
-sub error_exit
-{
-print "<b>",$text{'import_err'}," : ",@_,"</b><p>\n";
-&ui_print_footer("", $text{'index_return'});
-exit;
-}
 

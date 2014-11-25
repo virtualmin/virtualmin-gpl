@@ -1414,6 +1414,7 @@ import_emysql_user2=The specified MySQL user does not exist
 import_err=Import failed
 import_eexists=The specified domain is already managed by Virtualmin
 import_euserclash=The virtual server $1 is already using the selected username
+import_egroupclash=The virtual server $1 is already using the selected group name
 import_enoip=The specified IP address is not active on your system.
 import_eipsame=You indicated that the IP is unique to this domain, but it is the systems default address.
 import_eipclash=The specified IP address is already used by domain $1.
