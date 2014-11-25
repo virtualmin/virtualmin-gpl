@@ -2333,8 +2333,8 @@ local ($tmpl) = @_;
 # Save DNS settings
 $tmpl->{'dns'} = &parse_none_def("dns");
 if ($in{"dns_mode"} == 2) {
-	$tmpl->{'default'} || $tmpl->{'dns'} || $in{'bind_replace'} == 0 ||
-		&error($text{'tmpl_edns'});
+	$tmpl->{'default'} || $tmpl->{'dns'} =~ /\S/ ||
+	    $in{'bind_replace'} == 0 || &error($text{'tmpl_edns'});
 	$tmpl->{'dns_replace'} = $in{'bind_replace'};
 	$tmpl->{'dns_view'} = $in{'view'};
 
