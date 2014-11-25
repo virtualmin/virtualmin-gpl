@@ -21,12 +21,18 @@ if (!$in{'parent_def'}) {
 
 # Validate username and group name
 if (!$parent) {
-	$in{'user_def'} || $in{'user'} =~ /^[^\t :]+$/ ||
-		&error_exit($text{'setup_euser2'});
+	if (!$in{'user_def'}) {
+		$in{'user'} =~ /^[^\t :]+$/ ||
+			&error_exit($text{'setup_euser2'});
+		&indexof($in{'user'}, @banned_usernames) < 0 ||
+			&error_exit(&text('setup_eroot',
+					  join(" ", @banned_usernames)));
+		$clash = &get_domain_by("user", $in{'user'});
+		$clash && &error(&text('import_euserclash',
+				       &show_domain_name($clash)));
+		}
 	$in{'group_def'} || $in{'group'} =~ /^[^\t :]+$/ ||
 		&error_exit($text{'import_egroup'});
-	$in{'user_def'} || &indexof($in{'user'}, @banned_usernames) < 0 ||
-		&error_exit(&text('setup_eroot', join(" ", @banned_usernames)));
 	$in{'group_def'} || &indexof($in{'group'}, @banned_usernames) < 0 ||
 		&error_exit(&text('setup_eroot2', join(" ", @banned_usernames)));
 	}
