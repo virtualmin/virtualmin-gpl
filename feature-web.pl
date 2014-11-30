@@ -3699,15 +3699,19 @@ local ($d, $nvstar, $nvstar6, $port) = @_;
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
-local $vip = $d->{'name'} &&
-	     $apache::httpd_modules{'core'} >= 1.312 &&
-	     &is_shared_ip($d->{'ip'}) &&
-	     $nvstar ? "*" : $d->{'ip'};
+local $vip = $config{'apache_star'} == 2 ? "*" :
+	     $config{'apache_star'} == 1 ? $d->{'ip'} :
+	     $d->{'name'} &&
+	       $apache::httpd_modules{'core'} >= 1.312 &&
+	       &is_shared_ip($d->{'ip'}) &&
+	       $nvstar ? "*" : $d->{'ip'};
 local @vips = ( "$vip:$port" );
 if ($d->{'ip6'}) {
-	local $vip6 = $d->{'name'} &&
-		      &is_shared_ip($d->{'ip6'}) &&
-		      $nvstar6 ? "*" : $d->{'ip6'};
+	local $vip6 = $config{'apache_star'} == 2 ? "*" :
+		      $config{'apache_star'} == 1 ? $d->{'ip6'} :
+		      $d->{'name'} &&
+		        &is_shared_ip($d->{'ip6'}) &&
+		        $nvstar6 ? "*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
 		# If already matching *:port for the IPv4 part, no need to
 		# repeat it for IPv6
