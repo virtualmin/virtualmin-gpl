@@ -39,6 +39,7 @@ push(@rv, { 'type' => 'text',
 	    'desc' => $level });
 push(@rv, { 'type' => 'hr' });
 
+# Get domains and find the default
 my @alldoms = &list_domains();
 my @doms = &list_visible_domains();
 my ($d, $did);
@@ -197,6 +198,12 @@ my $i = { 'type' => 'item',
 	  'link' => $b->{'url'} };
 if ($b->{'icon'} && $wanticon) {
 	$i->{'icon'} = '/'.$module_name.'/images/'.$b->{'icon'}.'.png';
+	}
+if ($b->{'target'} eq '_top') {
+	$i->{'target'} = 'window';
+	}
+elsif ($b->{'target'} eq '_blank' || $b->{'target'} eq '_new') {
+	$i->{'target'} = 'new';
 	}
 return $i;
 }
