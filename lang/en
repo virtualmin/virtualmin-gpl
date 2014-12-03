@@ -631,6 +631,7 @@ users_ecannot=You are not allowed to edit users in this domain
 users_ecannot2=You are not allowed to edit local users
 users_emailbox=The domain owner's mailbox cannot be edited
 users_indom=$1 users in domain $2
+users_indomsub=$1 users in domain $2 ($3 including sub-domains)
 users_title=Mail and FTP Users
 users_title2=FTP Users
 users_name=Name

@@ -9,8 +9,22 @@ $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_users() || &error($text{'users_ecannot'});
 @users = &list_domain_users($d, 0, 0, 0, 0);
-$msg = &text('users_indom', scalar(@users),
-	     "<tt>".&show_domain_name($d)."</tt>");
+$utotal = scalar(@users);
+if (!$d->{'parent'}) {
+	# Sum up users from all sub-domains
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		local @susers = &list_domain_users($sd, 0, 1, 1, 1);
+		$utotal += scalar(@susers);
+		}
+	}
+if ($utotal != scalar(@users)) {
+	$msg = &text('users_indomsub', scalar(@users),
+		     "<tt>".&show_domain_name($d)."</tt>", $utotal);
+	}
+else {
+	$msg = &text('users_indom', scalar(@users),
+		     "<tt>".&show_domain_name($d)."</tt>");
+	}
 &ui_print_header($msg, $d->{'mail'} ? $text{'users_title'}
 				    : $text{'users_title2'}, "");
 $webinit = &create_initial_user($d, undef, 1);
