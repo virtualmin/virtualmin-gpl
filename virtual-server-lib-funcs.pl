@@ -3232,7 +3232,8 @@ push(@heads, map { $text{'index_'.$_} } @colnames);
 foreach my $f (&list_custom_fields()) {
 	if ($f->{'show'} && ($f->{'visible'} < 2 || &master_admin())) {
 		push(@colnames, 'field_'.$f->{'name'});
-		push(@heads, $f->{'desc'});
+		my ($desc, $tip) = split(/;/, $f->{'desc'});
+		push(@heads, $desc);
 		}
 	}
 push(@heads, map { $text{'index_'.$_} } @table_features);
@@ -9065,7 +9066,7 @@ return 0;
 #          5=file chooser, 6=directory chooser, 7=yes/no, 8=password,
 #          9=options file, 10=text area
 #   opts - Name of options file
-#   desc - Human-readable description
+#   desc - Human-readable description, with optional ; separated tooltip
 #   show - 1=show in list of domains, 0=hide
 #   visible - 0=anyone can edit
 #   	      1=root can edit, others can view
