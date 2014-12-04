@@ -384,7 +384,8 @@ print &ui_form_end([ [ "save", $text{'edit_save'} ] ]);
 # Show actions for this domain, unless the theme vetos it (cause they are on
 # the left menu)
 if ($current_theme ne "virtual-server-theme" &&
-    !$main::basic_virtualmin_domain) {
+    !$main::basic_virtualmin_domain &&
+    !$main::basic_virtualmin_menu) {
 	&show_domain_buttons($d);
 	}
 
