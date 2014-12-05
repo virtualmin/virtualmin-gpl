@@ -986,6 +986,13 @@ return 0 if (!$any);
 # Re-create php.ini link
 &create_php_ini_link($d, $mode);
 
+# Copy in php.ini file for version if missing
+my @inifiles = &find_domain_php_ini_files($d);
+my ($iniver) = grep { $_->[0] eq $ver } @inifiles;
+if (!$iniver) {
+	&save_domain_php_mode($d, $mode);
+	}
+
 &register_post_action(\&restart_apache);
 $pfound || &error("Apache virtual host was not found");
 return 1;
