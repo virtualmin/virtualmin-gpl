@@ -57,7 +57,10 @@ $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
 	local $pyver = $1;
-	if ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
+	if ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
+		push(@rv, "Django 1.7 requires Python 2.7 or later");
+		}
+	elsif ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
 		push(@rv, "Django 1.5 requires Python 2.6.5 or later");
 		}
 	elsif (&compare_versions($pyver, "2.6") < 0) {
@@ -286,7 +289,8 @@ if (!$upgrade) {
 		if ($l =~ /DATABASE_HOST\s*=/) {
 			$l = "DATABASE_HOST = '$dbhost'";
 			}
-		if ($l =~ /INSTALLED_APPS\s*=\s*\(/) {
+		if ($l =~ /INSTALLED_APPS\s*=\s*\(/ &&
+		    $lref->[$i+1] !~ /django.contrib.admin/) {
 			splice(@$lref, $i+1, 0,
 			       "    'django.contrib.admin',");
 			}
