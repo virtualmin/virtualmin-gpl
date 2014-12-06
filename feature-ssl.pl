@@ -517,8 +517,10 @@ if ($d->{'ssl_same'}) {
 	}
 
 # Remove from Dovecot and Postfix if possible
-&sync_dovecot_ssl_cert($d, 0);
-&sync_postfix_ssl_cert($d, 0);
+if ($d->{'virt'}) {
+	&sync_dovecot_ssl_cert($d, 0);
+	&sync_postfix_ssl_cert($d, 0);
+	}
 
 &release_lock_web($d);
 }
