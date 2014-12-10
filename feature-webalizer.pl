@@ -432,19 +432,19 @@ sub disable_webalizer
 # Saves the server's Webalizer config file, module config file and schedule
 sub backup_webalizer
 {
+local ($d, $file) = @_;
 &$first_print($text{'backup_webalizercp'});
 &require_webalizer();
-local $alog = &get_website_log($_[0]);
+local $alog = &get_website_log($d);
 if (!$alog) {
 	&$second_print($text{'setup_nolog'});
 	return 0;
 	}
 else {
 	local $lcn = &webalizer::log_config_name($alog);
-	&execute_command("cp ".quotemeta($lcn)." ".quotemeta($_[1]));
-
+	&copy_source_dest_as_domain_user($d, $lcn, $file);
 	local $cfile = &webalizer::config_file_name($alog);
-	&execute_command("cp ".quotemeta($cfile)." ".quotemeta($_[1])."_conf");
+	&copy_source_dest_as_domain_user($d, $cfile, $file."_conf");
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
