@@ -2472,7 +2472,9 @@ print &ui_table_row(
     &hlink($text{'tmpl_phpver'}, "template_phpver"),
     &ui_select("web_phpver", $tmpl->{'web_phpver'},
 	       [ [ "", $text{'tmpl_phpverdef'} ],
-		 map { [ $_->[0] ] } &list_available_php_versions() ]));
+		 map { my $fullver = &get_php_version($_->[1]);
+		       [ $_->[0], $fullver || $_->[0] ] }
+		     &list_available_php_versions() ]));
 
 # Default number of PHP child processes
 print &ui_table_row(
