@@ -4596,7 +4596,7 @@ for(my $i=0; $i<=@values+2; $i++) {
 			      $type == 12 ? "edit_vfile.cgi" : undef;
 		if ($prog && $_[2]) {
 			local $di = $_[2] ? $_[2]->{'id'} : undef;
-			$f .= "<a href='$prog?dom=$di&file=$val&$_[3]=$_[4]&idx=$i'>$text{'alias_afile'}</a>\n";
+			$f .= "<a href='$prog?dom=$di&amp;file=$val&amp;$_[3]=$_[4]&amp;idx=$i'>$text{'alias_afile'}</a>\n";
 			}
 		}
 	print &ui_table_row($left, $f, undef, $tds);
@@ -5094,8 +5094,8 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	push(@cols, "<a href='edit_user.cgi?dom=$did&".
-	      "user=".&urlize($u->{'user'})."&unix=$u->{'unix'}'>".
+	push(@cols, "<a href='edit_user.cgi?dom=$did&amp;".
+	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
 	       $u->{'webowner'} &&
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
@@ -11737,7 +11737,7 @@ push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 
 # Add link to list sub-servers
 if (!$d->{'parent'}) {
-	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&what='.
+	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&amp;what='.
 			     &urlize($d->{'dom'}),
 		    'title' => $text{'edit_psearch'},
 		    'cat' => 'admin',
@@ -14884,7 +14884,7 @@ local $pass = $mode ? $d->{$mode."_pass"} :
 if (&can_show_pass() && $pass) {
 	local $link = "showpass.cgi?dom=$d->{'id'}&mode=".&urlize($mode);
 	if ($user) {
-		$link .= "&user=".&urlize($user->{'user'});
+		$link .= "&amp;user=".&urlize($user->{'user'});
 		}
 	if (defined(&popup_window_link)) {
 		return &popup_window_link($link, $text{'edit_showpass'},
