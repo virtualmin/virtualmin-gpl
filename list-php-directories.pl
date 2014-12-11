@@ -54,8 +54,10 @@ $d || usage("Virtual server $domain does not exist");
 if ($multi) {
 	# Show on separate lines
 	foreach $dir (@dirs) {
+		my $fullver = &get_php_version($dir->{'version'}, $d);
 		print $dir->{'dir'},"\n";
 		print "  PHP version: $dir->{'version'}\n";
+		print "  Full version: $fullver\n" if ($fullver);
 		print "  Execution mode: $dir->{'mode'}\n";
 		print "  Web root directory: ",
 		    ($dir->{'dir'} eq &public_html_dir($d) ? "Yes" : "No"),"\n";
