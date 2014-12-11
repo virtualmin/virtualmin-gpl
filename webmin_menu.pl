@@ -120,7 +120,7 @@ if (&can_create_master_servers() || &can_create_sub_servers()) {
 		push(@rv, { 'type' => 'item',
 			    'desc' => $text{'left_generic'},
 			    'link' => '/'.$module_name.
-			     '/domain_form.cgi?generic=1&gparent='.$did,
+			     '/domain_form.cgi?generic=1&amp;gparent='.$did,
 			  });
 		}
 	else {
