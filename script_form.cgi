@@ -42,7 +42,9 @@ if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
 	@gotvers = grep { local $v = $_; local $_;
 			  &check_php_version($d, $v) } @vers;
-	@gotvers = &expand_php_versions($d, \@gotvers);
+	@gotvers = sort { &get_php_version($b, $d) <=>
+                          &get_php_version($a, $d) }
+			&expand_php_versions($d, \@gotvers);
 	if (!@gotvers) {
 		print &text('scripts_ephpvers', join(" or ", @vers)),"<p>\n";
 		$ok = 0;
