@@ -616,18 +616,22 @@ return 0;
 # Also saves the auto-spam clearing settings.
 sub backup_spam
 {
+local ($d, $file) = @_;
 &$first_print($text{'backup_spamcp'});
-local $spamrc = "$procmail_spam_dir/$_[0]->{'id'}";
-local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
+local $spamrc = "$procmail_spam_dir/$d->{'id'}";
+local $spamdir = "$spam_config_dir/$d->{'id'}";
 if (-r $spamrc) {
-	&execute_command("cp ".quotemeta($spamrc)." ".
-			       quotemeta($_[1]));
+	&copy_write_as_domain_user($d, $spamrc, $file);
+	local $temp = &transname();
 	&execute_command("cd ".quotemeta($spamdir)." && tar cf ".
-			       quotemeta($_[1]."_cf")." . 2>/dev/null ");
+			       quotemeta($temp)." . 2>/dev/null ");
+	&copy_write_as_domain_user($d, $temp, $file."_cf");
+	&unlink_file($temp);
 
 	# Save spam clearing
 	local $auto = &get_domain_spam_autoclear($_[0]);
-	&write_file($_[1]."_auto", $auto || { });
+	&write_as_domain_user($d,
+		sub { &write_file($file."_auto", $auto || { }) });
 	&$second_print($text{'setup_done'});
 	return 1;
 	}

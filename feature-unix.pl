@@ -617,12 +617,12 @@ local ($d, $file) = @_;
 local $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
 &$first_print(&text('backup_cron'));
 if (-r $cronfile) {
-	&copy_source_dest($cronfile, $file);
+	&copy_write_as_domain_user($d, $cronfile, $file);
 	&$second_print($text{'setup_done'});
 	}
 else {
-	&open_tempfile(TOUCH, ">$file", 0, 1);
-	&close_tempfile(TOUCH);
+	&open_tempfile_as_domain_user($d, TOUCH, ">$file", 0, 1);
+	&close_tempfile_as_domain_user($d, TOUCH);
 	&$second_print($text{'backup_cronnone'});
 	}
 return 1;

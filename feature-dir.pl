@@ -443,8 +443,9 @@ if (&has_incremental_tar() && $increment != 2) {
 		# the backup (as tar modifies it)
 		if (-r $ifile) {
 			$iflag = "$d->{'home'}/.incremental";
-			&open_tempfile(IFLAG, ">$iflag", 0, 1);
-			&close_tempfile(IFLAG);
+			&open_tempfile_as_domain_user(
+				$d, IFLAG, ">$iflag", 0, 1);
+			&close_tempfile_as_domain_user($d, IFLAG);
 			$ifilecopy = &transname();
 			&copy_source_dest($ifile, $ifilecopy);
 			}
@@ -643,11 +644,11 @@ else {
 		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
 	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);
 	local $reader = $catter." | ".$comp;
-	#if ($asd) {
-	#	# Run as domain owner - disabled, as this prevents some files
-	#	# from being written to by tar
-	#	$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
-	#	}
+	if ($asd) {
+		# Run as domain owner - disabled, as this prevents some files
+		# from being written to by tar
+		$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
+		}
 	&execute_command("cd $qh && $reader | $tarcmd", undef, \$out, \$err);
 	}
 local $ex = $?;
