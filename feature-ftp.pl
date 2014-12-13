@@ -332,16 +332,16 @@ return 0;
 # Save the virtual server's ProFTPd config as a separate file
 sub backup_ftp
 {
+local ($d, $file) = @_;
 &$first_print($text{'backup_proftpdcp'});
-local ($virt, $vconf) = &get_proftpd_virtual($_[0]->{'ip'});
+local ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
 if ($virt) {
 	local $lref = &read_file_lines($virt->{'file'});
-	local $l;
-	&open_tempfile(FILE, ">$_[1]");
-	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
+	&open_tempfile_as_domain_user($d, FILE, ">$file");
+	foreach my $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
 		}
-	&close_tempfile(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}

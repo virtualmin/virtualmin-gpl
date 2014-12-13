@@ -3027,32 +3027,33 @@ return undef;
 # Saves all mail aliases and mailbox users for this domain
 sub backup_mail
 {
+local ($d, $file, $opts) = @_;
 &require_mail();
 
 # Create dummy file
-&open_tempfile(FILE, ">$_[1]");
-&close_tempfile(FILE);
+&open_tempfile_as_domain_user($d, FILE, ">$file");
+&close_tempfile_as_domain_user($d, FILE);
 
 # Build file of all virtusers. Each line contains one virtuser address and
 # it's destinations, in alias-style format. Those used by some plugin (like
 # Mailman) are not included
 &$first_print($text{'backup_mailaliases'});
-&open_tempfile(AFILE, ">$_[1]_aliases");
+&open_tempfile_as_domain_user($d, AFILE, ">${file}_aliases");
 local $a;
-foreach $a (&list_domain_aliases($_[0], 1)) {
+foreach $a (&list_domain_aliases($d, 1)) {
 	&print_tempfile(AFILE, $a->{'from'},": ");
 	&print_tempfile(AFILE, join(",", @{$a->{'to'}}),"\n");
 	}
-&close_tempfile(AFILE);
+&close_tempfile_as_domain_user($d, AFILE);
 &$second_print($text{'setup_done'});
 
 # Build file of all mailboxes. Each user has a passwd-file style line with
 # the email address and quotas appended, followed by a list of destination
 # addresses.
 &$first_print($text{'backup_mailusers'});
-&open_tempfile(UFILE, ">$_[1]_users");
+&open_tempfile_as_domain_user($d, UFILE, ">${file}_users");
 local $u;
-foreach $u (&list_domain_users($_[0])) {
+foreach $u (&list_domain_users($d)) {
 	&print_tempfile(UFILE, join(":", $u->{'user'}, $u->{'pass'},
 			      $u->{'webowner'} ? 'w' : $u->{'uid'}, $u->{'gid'},
 			      $u->{'real'}, $u->{'home'}, $u->{'shell'},
@@ -3097,55 +3098,55 @@ foreach $u (&list_domain_users($_[0])) {
 	&print_tempfile(UFILE, "\n");
 	&print_tempfile(UFILE, join(",", @{$u->{'to'}}),"\n");
 	}
-&close_tempfile(UFILE);
+&close_tempfile_as_domain_user($d, UFILE);
 
 # Copy plain text and hashed passwords file too
-if (-r "$plainpass_dir/$_[0]->{'id'}") {
-	&copy_source_dest("$plainpass_dir/$_[0]->{'id'}", "$_[1]_plainpass");
+if (-r "$plainpass_dir/$d->{'id'}") {
+	&copy_write_as_domain_user($d, "$plainpass_dir/$d->{'id'}", $file."_plainpass");
 	}
-if (-r "$hashpass_dir/$_[0]->{'id'}") {
-	&copy_source_dest("$hashpass_dir/$_[0]->{'id'}", "$_[1]_hashpass");
+if (-r "$hashpass_dir/$d->{'id'}") {
+	&copy_write_as_domain_user($d, "$hashpass_dir/$d->{'id'}", $file."_hashpass");
 	}
 
 # Copy no-spam flags file too
-if (-r "$nospam_dir/$_[0]->{'id'}") {
-	&copy_source_dest("$nospam_dir/$_[0]->{'id'}", "$_[1]_nospam");
+if (-r "$nospam_dir/$d->{'id'}") {
+	&copy_write_as_domain_user($d, "$nospam_dir/$d->{'id'}", $file."_nospam");
 	}
 
 # Create BCC files
 if ($supports_bcc) {
-	local $bcc = &get_domain_sender_bcc($_[0]);
-	&open_tempfile(BCC, ">$_[1]_bcc");
+	local $bcc = &get_domain_sender_bcc($d);
+	&open_tempfile(BCC, ">".$file."_bcc");
 	&print_tempfile(BCC, $bcc,"\n");
 	&close_tempfile(BCC);
 	}
 if ($supports_bcc == 2) {
-	local $rbcc = &get_domain_recipient_bcc($_[0]);
-	&open_tempfile(BCC, ">$_[1]_rbcc");
+	local $rbcc = &get_domain_recipient_bcc($d);
+	&open_tempfile(BCC, ">".$file."_rbcc");
 	&print_tempfile(BCC, $rbcc,"\n");
 	&close_tempfile(BCC);
 	}
 
 # Create sender dependent file
 if ($supports_dependent) {
-	local $dependent = &get_domain_dependent($_[0]);
-	&open_tempfile(DEPENDENT, ">$_[1]_dependent");
+	local $dependent = &get_domain_dependent($d);
+	&open_tempfile(DEPENDENT, ">".$file."_dependent");
 	&print_tempfile(DEPENDENT, $dependent,"\n");
 	&close_tempfile(DEPENDENT);
 	}
 
 # Create custom DKIM key file
-if ($_[0]->{'mail'} && !$_[0]->{'alias'} && $config{'dkim_enabled'}) {
-	local $keyfile = &get_domain_dkim_key($_[0]);
-	local $keyback = $_[1]."_domdkim";
+if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'}) {
+	local $keyfile = &get_domain_dkim_key($d);
+	local $keyback = $file."_domdkim";
 	if ($keyfile) {
 		# Save the key
-		&copy_source_dest($keyfile, $keyback);
+		&copy_write_as_domain_user($d, $keyfile, $keyback);
 		}
 	else {
 		# Record that there is no custom key
-		&open_tempfile(KEYFILE, ">$keyback");
-		&close_tempfile(KEYFILE);
+		&open_tempfile_as_domain_user($d, KEYFILE, ">$keyback");
+		&close_tempfile_as_domain_user($d, KEYFILE);
 		}
 	}
 
@@ -3156,7 +3157,7 @@ if (!&mail_under_home()) {
 	local $mbase = &mail_system_base();
 	local @mfiles;
 	&$first_print($text{'backup_mailfiles'});
-	foreach $u (&list_domain_users($_[0])) {
+	foreach $u (&list_domain_users($d)) {
 		local $umf = &user_mail_file($u);
 		if ($umf =~ s/^$mbase\///) {
 			push(@mfiles, $umf) if (-r "$mbase/$umf");
@@ -3166,9 +3167,11 @@ if (!&mail_under_home()) {
 		&$second_print($text{'backup_mailfilesnone'});
 		}
 	else {
+		# XXX permissions
 		local $mfiles = join(" ", map { quotemeta($_) } @mfiles);
 		local $out;
-		&execute_command("cd '$mbase' && tar cf '$_[1]_files' $mfiles",
+		&execute_command("cd ".quotemeta($mbase)." && ".
+				 "tar cf ".quotemeta($file."_files")." ".$mfiles,
 				 undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',
@@ -3185,14 +3188,14 @@ if (!&mail_under_home()) {
 &foreign_require("cron", "cron-lib.pl");
 &$first_print($text{'backup_mailcrons'});
 local $croncount = 0;
-foreach $u (&list_domain_users($_[0], 1)) {
+foreach $u (&list_domain_users($d, 1)) {
 	local $cronfile = &cron::cron_file({ 'user' => $u->{'user'} });
 	if (-r $cronfile) {
-		&copy_source_dest($cronfile, $_[1]."_cron_".$u->{'user'});
+		&copy_write_as_domain_user($d, $cronfile, $file."_cron_".$u->{'user'});
 		$croncount++;
 		}
 	}
-&open_tempfile(COUNT, ">$_[1]_cron");
+&open_tempfile(COUNT, ">".$file."_cron");
 &print_tempfile(COUNT, $croncount,"\n");
 &close_tempfile(COUNT);
 if ($croncount) {
@@ -3213,7 +3216,7 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 		local $control = $1;
 		&$first_print($text{'backup_mailcontrol'});
 		local @names;
-		foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
+		foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 			if (-e "$control/$u->{'user'}") {
 				push(@names, $u->{'user'});
 				}
@@ -3224,9 +3227,10 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 			}
 		@names = &unique(@names);
 		if (@names) {
+			# XXX permissions
 			local $out;
 			&execute_command("cd ".quotemeta($control)." && ".
-					 "tar cf ".quotemeta($_[1]."_control").
+					 "tar cf ".quotemeta($file."_control").
 					 " ".join(" ", @names),
 					 undef, \$out, \$out);
 			if ($?) {
@@ -3245,16 +3249,16 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 
 # If any user's homes are outside the domain root, back them up separately
 local @homeless;
-foreach $u (&list_domain_users($_[0], 1)) {
+foreach $u (&list_domain_users($d, 1)) {
 	if ($u->{'unix'} && -d $u->{'home'} &&
-	    !&is_under_directory($_[0]->{'home'}, $u->{'home'})) {
+	    !&is_under_directory($d->{'home'}, $u->{'home'})) {
 		push(@homeless, $u);
 		}
 	}
 if (@homeless) {
 	&$first_print(&text('backup_mailhomeless', scalar(@homeless)));
 	foreach my $u (@homeless) {
-		local $file = $_[1]."_homes_".$u->{'user'};
+		local $file = $file."_homes_".$u->{'user'};
 		local $out;
 		&execute_command("cd ".quotemeta($u->{'home'})." && ".
 				 "tar cf ".quotemeta($file)." .",

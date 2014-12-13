@@ -442,9 +442,9 @@ if (!$alog) {
 	}
 else {
 	local $lcn = &webalizer::log_config_name($alog);
-	&copy_source_dest_as_domain_user($d, $lcn, $file);
+	&copy_write_as_domain_user($d, $lcn, $file);
 	local $cfile = &webalizer::config_file_name($alog);
-	&copy_source_dest_as_domain_user($d, $cfile, $file."_conf");
+	&copy_write_as_domain_user($d, $cfile, $file."_conf");
 	&$second_print($text{'setup_done'});
 	return 1;
 	}

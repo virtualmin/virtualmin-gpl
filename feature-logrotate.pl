@@ -319,16 +319,16 @@ return 0;
 # Saves the log rotation section for this domain to a file
 sub backup_logrotate
 {
+local ($d, $file) = @_;
 &$first_print($text{'backup_logrotatecp'});
-local $lconf = &get_logrotate_section($_[0]);
+local $lconf = &get_logrotate_section($d);
 if ($lconf) {
 	local $lref = &read_file_lines($lconf->{'file'});
-	local $l;
-	&open_tempfile(FILE, ">$_[1]");
-	foreach $l (@$lref[$lconf->{'line'} .. $lconf->{'eline'}]) {
+	&open_tempfile_as_domain_user($d, FILE, ">$file");
+	foreach my $l (@$lref[$lconf->{'line'} .. $lconf->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
 		}
-	&close_tempfile(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
