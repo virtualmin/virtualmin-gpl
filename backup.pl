@@ -232,7 +232,7 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$output = $output_header.$output;
 
 	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
-				 [ 'Subject', $subject ],
+				 [ 'Subject', &html_tags_to_text($subject) ],
 				 [ 'To', $sched->{'email'} ] ],
 		  'attach'  => [ { 'headers' => [ [ 'Content-type',
 						    'text/plain' ] ],
@@ -266,7 +266,7 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 		$mail = {
 		  'headers' =>
 			[ [ 'From', &get_global_from_address($edoms[0]) ],
-			  [ 'Subject', $subject ],
+			  [ 'Subject', &html_tags_to_text($subject) ],
 			  [ 'To', $email ] ],
 		  'attach'  =>
 			[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
