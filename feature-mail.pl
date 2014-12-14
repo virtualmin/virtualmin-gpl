@@ -3167,11 +3167,11 @@ if (!&mail_under_home()) {
 		&$second_print($text{'backup_mailfilesnone'});
 		}
 	else {
-		# XXX permissions
 		local $mfiles = join(" ", map { quotemeta($_) } @mfiles);
 		local $out;
+		local $temp = &transname();
 		&execute_command("cd ".quotemeta($mbase)." && ".
-				 "tar cf ".quotemeta($file."_files")." ".$mfiles,
+				 "tar cf ".quotemeta($temp)." ".$mfiles,
 				 undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',
@@ -3179,6 +3179,8 @@ if (!&mail_under_home()) {
 			return 0;
 			}
 		else {
+			&copy_write_as_domain_user($d, $temp, $file."_files");
+			&unlink_file($temp);
 			&$second_print($text{'setup_done'});
 			}
 		}
@@ -3227,10 +3229,10 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 			}
 		@names = &unique(@names);
 		if (@names) {
-			# XXX permissions
 			local $out;
+			local $temp = &transname();
 			&execute_command("cd ".quotemeta($control)." && ".
-					 "tar cf ".quotemeta($file."_control").
+					 "tar cf ".quotemeta($temp).
 					 " ".join(" ", @names),
 					 undef, \$out, \$out);
 			if ($?) {
@@ -3238,6 +3240,9 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 						     $out));
 				}
 			else {
+				&copy_write_as_domain_user(
+					$d, $temp, $file."_control");
+				&unlink_file($temp);
 				&$second_print($text{'setup_done'});
 				}
 			}
@@ -3260,12 +3265,17 @@ if (@homeless) {
 	foreach my $u (@homeless) {
 		local $file = $file."_homes_".$u->{'user'};
 		local $out;
+		local $temp = &transname();
 		&execute_command("cd ".quotemeta($u->{'home'})." && ".
-				 "tar cf ".quotemeta($file)." .",
+				 "tar cf ".quotemeta($temp)." .",
 				 undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('backup_mailhomefailed',
 					     "<pre>$out</pre>"));
+			}
+		else {
+			&copy_write_as_domain_user($d, $temp, $file);
+			&unlink_file($temp);
 			}
 		}
 	&$second_print($text{'setup_done'});
