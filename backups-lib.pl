@@ -580,6 +580,12 @@ DOMAIN: foreach $d (@$doms) {
 		goto DOMAINFAILED;
 		}
 
+	# Ensure the backup dest dir is writable by this domain
+	if (!$homefmt) {
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+					   undef, $backupdir);
+		}
+
 	# Make sure there are no databases that don't really exist, as these
 	# can cause database feature backups to fail.
 	my @alldbs = &all_databases($d);
