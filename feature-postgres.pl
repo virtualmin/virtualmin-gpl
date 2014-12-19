@@ -6,6 +6,29 @@ $postgresql::use_global_login = 1;
 %qconfig = &foreign_config("postgresql");
 }
 
+# check_depends_postgres(&dom)
+# Ensure that a sub-server has a parent server with MySQL enabled
+sub check_depends_postgres
+{
+return undef if (!$_[0]->{'parent'});
+local $parent = &get_domain($_[0]->{'parent'});
+return $text{'setup_edeppostgres'} if (!$parent->{'postgres'});
+return undef;
+}
+
+# check_anti_depends_postgres(&dom)
+# Ensure that a parent server without MySQL does not have any children with it
+sub check_anti_depends_postgres
+{
+if (!$_[0]->{'postgres'}) {
+	local @subs = &get_domain_by("parent", $_[0]->{'id'});
+	foreach my $s (@subs) {
+		return $text{'setup_edeppostgressub'} if ($s->{'postgres'});
+		}
+	}
+return undef;
+}
+
 # check_warnings_postgres(&dom, &old-domain)
 # Return warning if a PosgreSQL database or user with a clashing name exists.
 # This can be overridden to allow a takeover of the DB.
