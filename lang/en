@@ -6551,4 +6551,18 @@ left_login=Login: $1
 left_level=Level: $1
 left_generic=Create Virtual Server
 
+right_statusheader=Status
+right_sysinfoheader=Programs
+right_virtheader=Virtualmin Information
+right_ipsheader=IP Address Allocation
+right_restart=Restart $1
+right_defip=(Default IP)
+right_ip=(Private IP)
+right_reselip=(Reseller $1)
+right_sharedip=(Shared IP)
+right_ips=$1 virtual servers
+right_iprange=$1 addresses, $2 used
+right_bwheader=Bandwidth
+right_updatesheader=Package Updates
+
 __norefs=1
