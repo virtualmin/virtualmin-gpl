@@ -8,6 +8,63 @@ my ($data, $in) = @_;
 
 my @rv;
 my $info = &get_collected_info();
+my @poss = $info ? @{$info->{'poss'}} : ( );
+
+# XXX resellers and domain owners and extra admins!
+
+# Check for wizard redirect
+my $redir = &wizard_redirect();
+if ($redir) {
+	push(@rv, { 'type' => 'redirect',
+		    'url' => $redir });
+	}
+
+# Custom URL redirect
+if ($data->{'alt'} && !$in{'noalt'}) {
+	push(@rv, { 'type' => 'redirect',
+		    'url' => $data->{'alt'} });
+	}
+
+# Warning messages
+foreach my $warn (&list_warning_messages()) {
+	push(@rv, { 'type' => 'warning',
+		    'level' => 'warn',
+		    'warning' => $warn });
+	}
+
+# Need to check module config?
+if (&need_config_check() && &can_check_config()) {
+	push(@rv, { 'type' => 'warning',
+		    'level' => 'info',
+		    'warning' => &ui_form_start('/'.$module_name.'/check.cgi').
+				 "<b>$text{'index_needcheck'}</b><p>\n".
+				 &ui_submit($text{'index_srefresh'}).
+				 &ui_form_end(),
+		  });
+	}
+
+# Virtualmin package updates
+my $hasposs = foreign_check("security-updates");
+my $canposs = foreign_available("security-updates");
+if (!$data->{'noupdates'} && $hasposs && $canposs && @poss) {
+	my $html = &ui_form_start("/security-updates/update.cgi");
+	$html .= &text(@poss > 1 ? 'right_upcount' : 'right_upcount1',
+		       scalar(@poss),
+		       '/security-updates/index.cgi?mode=updates')."<p>\n";
+	$html .= &ui_columns_start([ $text{'right_upname'},
+                                     $text{'right_updesc'},
+                                     $text{'right_upver'} ], "80%");
+	foreach my $p (@poss) {
+		$html .= &ui_columns_row([
+			$p->{'name'}, $p->{'desc'}, $p->{'version'} ]);
+		$html .= &ui_hidden("u", $p->{'update'}."/".$p->{'system'});
+		}
+	$html .= &ui_columns_end();
+	$html .= &ui_form_end([ [ undef, $text{'right_upok'} ] ]);
+	push(@rv, { 'type' => 'html',
+		    'desc' => $text{'right_updatesheader'},
+		    'html' => $html });
+	}
 
 # Status of various servers
 if (!$data->{'nostatus'} && $info->{'startstop'} &&
@@ -61,15 +118,17 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 		    'table' => \@table });
 	}
 
+# New features
+
 # Virtualmin feature counts
 
 # Top quota users
 
 # Top BW users
 
-# Programs and versions
+# IP addresses used
 
-# New features
+# Programs and versions
 
 # Virtualmin licence
 
