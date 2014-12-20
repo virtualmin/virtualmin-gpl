@@ -10401,8 +10401,19 @@ return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
 # need to reboot, etc.
 sub warning_messages
 {
-return undef if (!&master_admin());
 my $rv;
+foreach my $warn (&list_warning_messages()) {
+	$rv .= &ui_alert_box($warn, "warn");
+	}
+return $rv;
+}
+
+# list_warning_messages()
+# Returns all warning messages for the current user as an array
+sub list_warning_messages
+{
+return () if (!&master_admin());
+my @rv;
 
 # Get licence expiry date
 local ($status, $expiry, $err, undef, undef, $autorenew) =
@@ -10423,7 +10434,7 @@ if ($status != 0) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
-	$rv .= &ui_alert_box($alert_text, "danger");
+	push(@rv, $alert_text);
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
@@ -10441,7 +10452,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if default IP has changed
@@ -10458,7 +10469,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= &ui_hidden("also", 1);
 	$alert_text .= &ui_submit($text{'licence_changeip'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if in SSL mode, and SSL cert is < 2048 bits
@@ -10493,7 +10504,7 @@ if ($small) {
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if symlinks need to be fixed. Blank means not checked yet, 0 means
@@ -10510,7 +10521,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warn");
+		push(@rv, $alert_text);
 		}
 	else {
 		# All OK already, don't check again
@@ -10532,7 +10543,7 @@ if ($config{'allow_modphp'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixphpok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warn"); 
+		push(@rv, $alert_text);
 		}
 	else {
 		# All OK already, don't check again
@@ -10549,10 +10560,10 @@ if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
 		"$gconfig{'webprefix'}/init/reboot.cgi");
 	$alert_text .= &ui_submit($text{'licence_xfsrebootok'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn"); 
+	push(@rv, $alert_text);
 	}
 
-return $rv;
+return @rv;
 }
 
 # get_user_domain(user)
