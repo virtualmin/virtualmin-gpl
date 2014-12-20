@@ -163,15 +163,81 @@ if (!$data->{'nosysinfo'} && $info->{'progs'} && &can_view_sysinfo()) {
 	}
 
 # Virtualmin licence
+my %vserial;
+if (&read_env_file($virtualmin_license_file, \%vserial) &&
+    $vserial{'SerialNumber'} ne 'GPL') {
+	my @table;
+	my $open = 0;
+
+	# Serial and key
+	push(@table, { 'desc' => $text{'right_vserial'},
+		       'value' => $vserial{'SerialNumber'} });
+	push(@table, { 'desc' => $text{'right_vkey'},
+		       'value' => $vserial{'LicenseKey'} });
+
+	# Allowed domain counts
+	my ($dleft, $dreason, $dmax, $dhide) =
+		&count_domains("realdoms");
+	push(@table, { 'desc' => $text{'right_vmax'},
+		       'value' => $dmax <= 0 ? $text{'right_vunlimited'}
+					     : $dmax });
+	push(@table, { 'desc' => $text{'right_vleft'},
+		       'value' => $dleft < 0 ? $text{'right_vunlimited'}
+					     : $dleft });
+
+	# Add allowed system counts
+	my %lstatus;
+	&read_file($licence_status, \%lstatus);
+	if ($lstatus{'used_servers'}) {
+		push(@table, { 'desc' => $text{'right_smax'},
+			       'value' => $lstatus{'servers'} ||
+					  $text{'right_vunlimited'} });
+		push(@table, { 'desc' => $text{'right_sused'},
+			       'value' => $lstatus{'used_servers'} });
+		}
+
+	# Show license expiry date
+	if ($lstatus{'expiry'} =~ /^203[2-8]-/) {
+		push(@table, { 'desc' => $text{'right_expiry'},
+			       'value' => $text{'right_expirynever'} });
+		}
+	elsif ($lstatus{'expiry'}) {
+		push(@table, { 'desc' => $text{'right_expiry'},
+			       'value' => $lstatus{'expiry'} });
+		my $ltm = &parse_license_date($lstatus{'expiry'});
+		if ($ltm) {
+			my $days = int(($ltm - time()) / (24*60*60));
+			push(@table, { 'desc' => $text{'right_expirydays'},
+				       'value' => $days < 0 ?
+					&text('right_expiryago', -$days) :
+					$days });
+			$open = 1 if ($days < 7);
+			}
+		}
+
+	push(@rv, { 'type' => 'table',
+		    'id' => 'serial',
+		    'desc' => $text{'right_licenceheader'},
+		    'open' => $open,
+		    'table' => \@table });
+
+	# Re-check licence link
+	push(@rv, { 'type' => 'link',
+		    'priority' => 20,
+		    'desc' => $text{'right_vlcheck'},
+		    'link' => '/'.$module_name.'/licence.cgi' });
+	}
 
 # Documentation links
 my $doclink = &get_virtualmin_docs();
 push(@rv, { 'type' => 'link',
+	    'priority' => 50,
 	    'desc' => $text{'right_virtdocs'},
 	    'target' => 'new',
 	    'link' => $doclink });
 if ($config{'docs_link'}) {
 	push(@rv, { 'type' => 'link',
+		    'priority' => 49,
 		    'desc' => $text{'right_virtdocs2'},
 		    'target' => 'new',
 		    'link' => $config{'docs_link'} });
