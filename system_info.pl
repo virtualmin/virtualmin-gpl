@@ -62,6 +62,7 @@ if (!$data->{'noupdates'} && $hasposs && $canposs && @poss) {
 	$html .= &ui_columns_end();
 	$html .= &ui_form_end([ [ undef, $text{'right_upok'} ] ]);
 	push(@rv, { 'type' => 'html',
+		    'id' => 'updates',
 		    'desc' => $text{'right_updatesheader'},
 		    'html' => $html });
 	}
@@ -113,12 +114,31 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 		        "&nbsp;".$restart_link });
 		}
 	push(@rv, { 'type' => 'table',
+		    'id' => 'status',
 		    'desc' => $text{'right_statusheader'},
 		    'open' => @down ? 1 : 0,
 		    'table' => \@table });
 	}
 
 # New features
+my @doms = &list_visible_domains();
+if ($data->{'dom'}) {
+	$defdom = &get_domain($data->{'dom'});
+	if ($defdom && !&can_edit_domain($defdom)) {
+		$defdom = undef;
+		}
+	}
+if (!$defdom && @doms) {
+	$defdom = $doms[0];
+	}
+my $newhtml = &get_new_features_html($defdom);
+if ($newhtml) {
+	push(@rv, { 'type' => 'html',
+		    'id' => 'newfeatures',
+		    'open' => 1,
+		    'desc' => $text{'right_newfeaturesheader'},
+		    'html' => $newhtml });
+	}
 
 # Virtualmin feature counts
 
@@ -129,10 +149,44 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 # IP addresses used
 
 # Programs and versions
+if (!$data->{'nosysinfo'} && $info->{'progs'} && &can_view_sysinfo()) {
+	my @table;
+	foreach my $info (@{$info->{'progs'}}) {
+		push(@table, { 'desc' => $info->[0],
+			       'value' => $info->[1] });
+		}
+	push(@rv, { 'type' => 'table',
+		    'id' => 'sysinfo',
+		    'desc' => $text{'right_sysinfoheader'},
+		    'open' => 0,
+		    'table' => \@table });
+	}
 
 # Virtualmin licence
 
+# Documentation links
+my $doclink = &get_virtualmin_docs();
+push(@rv, { 'type' => 'link',
+	    'desc' => $text{'right_virtdocs'},
+	    'target' => 'new',
+	    'link' => $doclink });
+if ($config{'docs_link'}) {
+	push(@rv, { 'type' => 'link',
+		    'desc' => $text{'right_virtdocs2'},
+		    'target' => 'new',
+		    'link' => $config{'docs_link'} });
+	}
+
 return @rv;
 }
+
+sub get_virtualmin_docs
+{               
+return &master_admin() ?
+		"http://www.virtualmin.com/documentation" :
+       &reseller_admin() ?
+		"http://www.virtualmin.com/documentation/users/reseller" :
+       		"http://www.virtualmin.com/documentation/users/server-owner";
+}      
 
 1;

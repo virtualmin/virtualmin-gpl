@@ -6571,5 +6571,8 @@ right_upname=Package
 right_updesc=Description
 right_upver=Version
 right_upok=Install All Updates Now
+right_newfeaturesheader=New Virtualmin Features
+right_virtdocs=Virtualmin documentation
+right_virtdocs2=Additional documentation
 
 __norefs=1
