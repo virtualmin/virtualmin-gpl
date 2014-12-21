@@ -9,6 +9,7 @@ my ($data, $in) = @_;
 my @rv;
 my $info = &get_collected_info();
 my @poss = $info ? @{$info->{'poss'}} : ( );
+my @doms = &list_visible_domains();
 
 # XXX resellers and domain owners and extra admins!
 
@@ -121,7 +122,6 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 	}
 
 # New features
-my @doms = &list_visible_domains();
 if ($data->{'dom'}) {
 	$defdom = &get_domain($data->{'dom'});
 	if ($defdom && !&can_edit_domain($defdom)) {
@@ -140,9 +140,92 @@ if ($newhtml) {
 		    'html' => $newhtml });
 	}
 
-# Virtualmin feature counts
-
 # Top quota users
+my @quota = $info->{'quota'} ?
+		grep { &can_edit_domain($_->[0]) } @{$info->{'quota'}} : ( );
+if (!$data->{'noquotas'} && @quota) {
+	my @usage;
+	my $max = $data->{'max'} || 10;
+	my $maxquota = $info->{'maxquota'};
+
+	# Work out if showing by percent makes sense
+	my $qshow = $sects->{'qshow'};
+        if ($qshow) {
+                my @quotawithlimit = grep { $_->[2] } @quota;
+                $qshow = 0 if (!@quotawithlimit);
+                }
+
+	# Limit to those with a quota limit, if showing a percent
+	if ($qshow) {
+                @quota = grep { $_->[2] } @quota;
+                }
+
+	if ($qsort) {
+		# Sort by percent used
+		@quota = grep { $_->[2] } @quota;
+                @quota = sort { ($b->[1]+$b->[3])/$b->[2] <=>
+                                ($a->[1]+$a->[3])/$a->[2] } @quota;
+                }
+        else {
+                # Sort by usage
+		@quota = sort { $b->[1]+$b->[3] <=> $a->[1]+$a->[3] } @quota;
+                }
+
+	# Message above list
+	my $qmsg;
+        if (@quota > $max) {
+                @quota = @quota[0..($max-1)];
+                $qmsg = &text('right_quotamax', $max);
+                }
+	elsif (&master_admin()) {
+                $qmsg = $text{'right_quotaall'};
+                }
+        else {
+                $qmsg = $text{'right_quotayours'};
+                }
+
+	my $open = 0;
+	foreach my $q (@quota) {
+		my $cmd = &can_edit_domain($q->[0]) ? "edit_domain.cgi"
+						    : "view_domain.cgi";
+		my $chart = { 'desc' => &ui_link(
+			'/'.$module_name.'/'.$cmd.'?dom='.$q->[0]->{'id'},
+			 &show_domain_name($q->[0])) };
+		if ($qshow) {
+			# By percent used
+			my $qpc = int($q->[1]*100 / $q->[2]);
+                        my $dpc = int($q->[3]*100 / $q->[2]);
+			$chart->{'chart'} = [ 100, $qpc, $dpc ];
+			}
+		else {
+			# By actual usage
+			$chart->{'chart'} = [ $maxquota, $q->[1], $q->[3] ];
+			}
+		if ($q->[2]) {
+			# Show used and limit
+			my $pc = int(($q->[1]+$q->[3])*100 / $q->[2]);
+                        $pc = "&nbsp;$pc" if ($pc < 10);
+			$chart->{'value'} = &text('right_out',
+						  &nice_size($q->[1]+$q->[3]),
+						  &nice_size($q->[2]));
+			}
+		else {
+			# Just show used
+			$chart->{'value'} = &nice_size($q->[1]+$q->[3]);
+			}
+		if ($q->[2] && $q->[1]+$q->[3] >= $q->[2]) {
+			# Domain is over quota
+			$open = 1;
+			}
+		push(@usage, $chart);
+		}
+	push(@rv, { 'type' => 'chart',
+		    'id' => 'quota',
+		    'desc' => $text{'right_quotasheader'},
+		    'open' => $open,
+		    'header' => $qmsg,
+		    'chart' => \@usage });
+	}
 
 # Top BW users
 
@@ -165,7 +248,8 @@ if (!$data->{'nosysinfo'} && $info->{'progs'} && &can_view_sysinfo()) {
 # Virtualmin licence
 my %vserial;
 if (&read_env_file($virtualmin_license_file, \%vserial) &&
-    $vserial{'SerialNumber'} ne 'GPL') {
+    $vserial{'SerialNumber'} ne 'GPL' &&
+    &master_admin()) {
 	my @table;
 	my $open = 0;
 

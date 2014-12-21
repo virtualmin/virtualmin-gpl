@@ -6587,5 +6587,11 @@ right_expirynever=Lifetime license
 right_expirydays=Days until expiry
 right_expiryago=$1 days ago!
 right_vunlimited=Unlimited
+right_quotasheader=Quotas
+right_quotayours=All your top-level virtual servers shown ..
+right_quotaall=All top-level virtual servers shown ..
+right_quota10=Only top 10 servers shown ..
+right_quotamax=Only top $1 servers shown ..
+right_out=$1&nbsp;of&nbsp;$2
 
 __norefs=1
