@@ -160,7 +160,7 @@ if (!$data->{'noquotas'} && @quota) {
                 @quota = grep { $_->[2] } @quota;
                 }
 
-	if ($qsort) {
+	if ($qshow) {
 		# Sort by percent used
 		@quota = grep { $_->[2] } @quota;
                 @quota = sort { ($b->[1]+$b->[3])/$b->[2] <=>
@@ -228,8 +228,125 @@ if (!$data->{'noquotas'} && @quota) {
 	}
 
 # Top BW users
+my @bwdoms = grep { !$_->{'parent'} &&
+		    defined($_->{'bw_usage'}) } @doms;
+my $maxbw = 0;
+foreach my $d (@doms) {
+	$maxbw = $d->{'bw_limit'} if ($d->{'bw_limit'} > $maxbw);
+	$maxbw = $d->{'bw_usage'} if ($d->{'bw_usage'} > $maxbw);
+	}
+if (!$data->{'nobw'} && $config{'bw_active'} && @bwdoms && $maxbw) {
+	my $qshow = $sects->{'qshow'};
+
+	# Work out if showing by percent makes sense
+	my $qshow = $sects->{'qshow'};
+	if ($qshow) {
+		my @domswithlimit = grep { $_->{'bw_limit'} } @doms;
+		$qshow = 0 if (!@domswithlimit);
+		}
+
+	if ($qshow) {
+		# Sort by percent used
+                @doms = grep { $_->{'bw_limit'} } @doms;
+		@doms = sort { $b->{'bw_usage'}/$b->{'bw_limit'} <=>
+			       $a->{'bw_usage'}/$a->{'bw_limit'} } @doms;
+                }
+        else {
+                # Sort by usage
+		@doms = sort { $b->{'bw_usage'} <=> $a->{'bw_usage'} } @doms;
+                }
+
+	# Show message about number of domains being displayed
+	my $max = $data->{'max'} || 10;
+	my $qmsg;
+	if (@doms > $max) {
+		@doms = @doms[0..($max-1)];
+		$qmsg = &text('right_quotamax', $max);
+		}
+	else {
+		$qmsg = $text{'right_quotaall'};
+		}
+
+	# Add the table of domains
+	my $open = 0;
+	foreach my $d (@doms) {
+		my $cmd = &can_edit_domain($d) ? "edit_domain.cgi"
+					       : "view_domain.cgi";
+		my $chart = { 'desc' => &ui_link(
+			'/'.$module_name.'/'.$cmd.'?dom='.$d->{'id'},
+			 &show_domain_name($d)) };
+		my $pc = $d->{'bw_limit'} ?
+			int($d->{'bw_usage'}*100 / $d->{'bw_limit'}) : undef;
+		if ($qshow) {
+			# By percent used
+			$chart->{'chart'} = [ 100, $pc ];
+			}
+		else {
+			# By actual usage
+			$chart->{'chart'} = [ $maxbw, $d->{'bw_usage'} ];
+			}
+
+		# Percent used, if available
+		if ($d->{'bw_limit'}) {
+			$pc = "&nbsp;$pc" if ($pc < 10);
+			$chart->{'value'} = &text('right_out',
+					   &nice_size($d->{'bw_usage'}),
+					   &nice_size($d->{'bw_limit'}));
+			}
+		else {
+			$chart->{'value'} = &nice_size($d->{'bw_usage'});
+			}
+		push(@usage, $chart);
+		if ($d->{'bw_limit'} && $d->{'bw_usage'} >= $d->{'bw_limit'}) {
+			$open = 1;
+			}
+		}
+	push(@rv, { 'type' => 'chart',
+		    'id' => 'bw',
+		    'desc' => $text{'right_bwheader'},
+		    'open' => $open,
+		    'header' => $qmsg,
+		    'chart' => \@usage });
+	}
 
 # IP addresses used
+if (&master_admin() && !$data->{'noips'} && $info->{'ips'}) {
+	my @table;
+	my @allips = @{$info->{'ips'}};
+	push(@allips, @{$info->{'ips6'}}) if ($info->{'ips6'});
+	foreach my $ipi (@allips) {
+		my $umsg;
+		if ($ipi->[3] == 1) {
+			$umsg = "<tt>$ipi->[4]</tt>";
+			}
+		else {
+			my $slink = '/'.$module_name.
+				    '/search.cgi?field=ip&what='.$ipi->[0];
+			$umsg = &ui_link($slink, &text('right_ips', $ipi->[3]));
+			}
+		push(@table, { 'desc' => $ipi->[0],
+			       'value' => ($ipi->[1] eq 'def' ?
+				        $text{'right_defip'} :
+                                     $ipi->[1] eq 'reseller' ?
+                                        text('right_reselip', $ipi->[2]) :
+                                     $ipi->[1] eq 'shared' ?
+                                        $text{'right_sharedip'} :
+                                        $text{'right_ip'})." ".$umsg });
+		}
+	if ($info->{'ipranges'}) {
+		foreach my $r (@{$info->{'ipranges'}}) {
+			push(@table, { 'desc' => $r->[0],
+				       'value' => &text('right_iprange',
+							$r->[1], $r->[2]),
+				       'wide' => 1 });
+			}
+		}
+	push(@rv, { 'type' => 'table',
+                    'id' => 'ips',
+		    'desc' => $text{'right_ipsheader'},
+		    'open' => 0,
+		    'table' => \@table });
+	}
 
 # Programs and versions
 if (!$data->{'nosysinfo'} && $info->{'progs'} && &can_view_sysinfo()) {
