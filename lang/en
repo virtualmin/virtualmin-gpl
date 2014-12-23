@@ -6593,5 +6593,20 @@ right_quotaall=All top-level virtual servers shown ..
 right_quota10=Only top 10 servers shown ..
 right_quotamax=Only top $1 servers shown ..
 right_out=$1&nbsp;of&nbsp;$2
+right_header3=Virtual Server Information
+right_login=Logged in as
+right_from=Logged in from
+right_virtualmin=Virtualmin version
+right_dom=Your server name
+right_subs=Sub-servers
+right_aliases=Alias servers
+right_fusers=Mail/FTP users
+right_fusers2=FTP users
+right_fmailboxes=Mail/FTP users
+right_faliases=Mail aliases 
+right_fdbs=Databases
+right_quota=Disk usage and quota
+right_bw=Bandwith usage and limit
+
 
 __norefs=1

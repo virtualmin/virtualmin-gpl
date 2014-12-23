@@ -12,6 +12,8 @@ my @poss = $info ? @{$info->{'poss'}} : ( );
 my @doms = &list_visible_domains();
 
 # XXX resellers and domain owners and extra admins!
+# XXX domain owners and resellers shouldn't see system info?
+# XXX domain owners should see info about their domain
 
 # Check for wizard redirect
 my $redir = &wizard_redirect();
@@ -42,6 +44,29 @@ if (&need_config_check() && &can_check_config()) {
 				 &ui_submit($text{'index_srefresh'}).
 				 &ui_form_end(),
 		  });
+	}
+
+# Show a domain owner info about his domain, but NOT info about the system
+if (!&master_admin() && !&reseller_admin()) {
+	my @table;
+	my $ex = &extra_admin();
+	my $d = $ex ? &get_domain($ex)
+		    : &get_domain_by("user", $remote_user, "parent", "");
+	push(@table, { 'desc' => $text{'right_login'},
+		       'value' => $remote_user });
+	push(@table, { 'desc' => $text{'right_from'},
+		       'value' => $ENV{'REMOTE_HOST'} });
+	push(@table, { 'desc' => $text{'right_virtualmin'},
+		       'value' => $module_info{'version'} });
+	push(@table, { 'desc' => $text{'right_dom'},
+		       'value' => &show_domain_name($d) });
+	# XXX
+	push(@rv, { 'type' => 'table',
+		    'id' => 'domain',
+	 	    'desc' => $text{'right_header3'},
+		    'table' => \@table });
+	push(@rv, { 'type' => 'veto',
+		    'veto' => 'sysinfo' });
 	}
 
 # Virtualmin package updates
