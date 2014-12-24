@@ -49,6 +49,8 @@ if (&need_config_check() && &can_check_config()) {
 # Show a domain owner info about his domain, but NOT info about the system
 if (!&master_admin() && !&reseller_admin()) {
 	my @table;
+
+	# General info about the domain
 	my $ex = &extra_admin();
 	my $d = $ex ? &get_domain($ex)
 		    : &get_domain_by("user", $remote_user, "parent", "");
@@ -60,7 +62,73 @@ if (!&master_admin() && !&reseller_admin()) {
 		       'value' => $module_info{'version'} });
 	push(@table, { 'desc' => $text{'right_dom'},
 		       'value' => &show_domain_name($d) });
+
+	# Number of sub-servers
+        my @subs = ( $d, virtual_server::get_domain_by("parent", $d->{'id'}) );
+        my @reals = grep { !$_->{'alias'} } @subs;
+        my @mails = grep { $_->{'mail'} } @subs;
+        my ($sleft, $sreason, $stotal, $shide) =
+                &count_domains("realdoms");
+        if ($sleft < 0 || $shide) {
+		push(@table, { 'desc' => $text{'right_subs'},
+			       'value' => scalar(@reals) });
+                }
+        else {
+		push(@table, { 'desc' => $text{'right_subs'},
+                      	       'value' => &text('right_of',
+						scalar(@reals), $stotal) });
+
+                }
+
+	# Number of alias domains
+        my @aliases = grep { $_->{'alias'} } @subs;
+        if (@aliases) {
+                my ($aleft, $areason, $atotal, $ahide) =
+                        &count_domains("aliasdoms");
+                if ($aleft < 0 || $ahide) {
+			push(@table, { 'desc' => $text{'right_aliases'},
+				       'value' => scalar(@aliases) });
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_aliases'},
+				       'value' => &text('right_of',
+						scalar(@aliases), $atotal) });
+                        }
+                }
+
+	# Users and aliases
+        my $users = &count_domain_feature("mailboxes", @subs);
+        my ($uleft, $ureason, $utotal, $uhide) =
+		&count_feature("mailboxes");
+        my $msg = @mails ? $text{'right_fusers'} : $text{'right_fusers2'};
+        if ($uleft < 0 || $uhide) {
+		push(@table, { 'desc' => $msg,
+			       'value' => $users });
+                }
+        else {
+		push(@table, { 'desc' => $msg,
+			       'value' => &text('right_of', $users, $utotal) });
+                }
+
+	# Mail aliases
+        if (@mails) {
+                my $aliases = &count_domain_feature("aliases", @subs);
+                my ($aleft, $areason, $atotal, $ahide) =
+                        virtual_server::count_feature("aliases");
+                if ($aleft < 0 || $ahide) {
+			push(@table, { 'desc' => $text{'right_faliases'},
+				       'value' => $aliases });
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_faliases'},
+				       'value' => &text('right_of',
+							$aliases, $atotal) });
+                        }
+                }
+
+	# Database count
 	# XXX
+
 	push(@rv, { 'type' => 'table',
 		    'id' => 'domain',
 	 	    'desc' => $text{'right_header3'},
