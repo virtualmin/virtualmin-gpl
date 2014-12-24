@@ -1095,10 +1095,15 @@ if (!@files) {
 	}
 
 # Tar them all up
+local $temp = &transname();
 local $out = &backquote_command(
 	"cd $config_directory && ".
-	"tar cf ".quotemeta($file)." ".join(" ", @files)." 2>&1");
+	"tar cf ".quotemeta($temp)." ".join(" ", @files)." 2>&1");
 my $ex = $?;
+if (!$ex) {
+	&copy_write_as_domain_user($d, $temp, $file);
+	}
+&unlink_file($temp);
 &unlink_file(@acltemp) if (@acltemp);
 if ($ex) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));

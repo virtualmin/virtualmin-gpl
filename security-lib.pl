@@ -597,6 +597,34 @@ else {
 return wantarray ? ($ok, $err) : $ok;
 }
 
+# copy_write_as_domain_user(&domain, source, dest)
+# Copy a file, with only the writing done as the domain user
+sub copy_write_as_domain_user
+{
+my ($d, $src, $dst) = @_;
+return (1, undef) if (&is_readonly_mode());
+my ($ok, $err);
+$ok = 1;
+if (!open(SOURCEFILE, $src)) {
+	$ok = 0;
+	$err = $!;
+	}
+else {
+	if (!&open_tempfile_as_domain_user($d, DESTFILE, ">$dst", 0, 1)) {
+		$ok = 0;
+		$err = $!;
+		}
+	else {
+		while(<SOURCEFILE>) {
+			&print_tempfile(DESTFILE, $_);
+			}
+		close(SOURCEFILE);
+		&close_tempfile_as_domain_user($d, DESTFILE);
+		}
+	}
+return wantarray ? ($ok, $err) : $ok;
+}
+
 # safe_domain_file(&domain, file)
 # Returns 1 if some file is safe for a given domain to manage.
 # Currently just prevents symlinks

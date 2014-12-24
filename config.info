@@ -70,6 +70,7 @@ passwd_length=Length of randomly generated password,3,Default (15 characters),5
 passwd_chars=Characters for random passwords,3,Default (A-Z&#44; a-z&#44; 0-9)
 limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
 denied_domains=Regular expressions for disallowed domain names,0
+apache_star=Address format for Apache virtual hosts,1,2-Always use *,1-Always use IP,0-Decide automatically
 
 line2.1=SSL settings,11
 key_size=Default SSL key size,3,Webmin default (2048 bits),6,,bits

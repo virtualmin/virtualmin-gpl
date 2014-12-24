@@ -517,8 +517,10 @@ if ($d->{'ssl_same'}) {
 	}
 
 # Remove from Dovecot and Postfix if possible
-&sync_dovecot_ssl_cert($d, 0);
-&sync_postfix_ssl_cert($d, 0);
+if ($d->{'virt'}) {
+	&sync_dovecot_ssl_cert($d, 0);
+	&sync_postfix_ssl_cert($d, 0);
+	}
 
 &release_lock_web($d);
 }
@@ -723,28 +725,32 @@ else {
 # Save the SSL virtual server's Apache config as a separate file
 sub backup_ssl
 {
+local ($d, $file) = @_;
 &$first_print($text{'backup_sslcp'});
 
 # Save the apache directives
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_sslport'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_sslport'});
 if ($virt) {
 	local $lref = &read_file_lines($virt->{'file'});
-	local $l;
-	&open_tempfile(FILE, ">$_[1]");
-	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
+	&open_tempfile_as_domain_user($d, FILE, ">$file");
+	foreach my $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
 		}
-	&close_tempfile(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 
 	# Save the cert and key, if any
 	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 	if ($cert) {
-		&copy_source_dest($cert, "$_[1]_cert");
+		&copy_write_as_domain_user($d, $cert, $file."_cert");
 		}
 	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
 	if ($key && $key ne $cert) {
-		&copy_source_dest($key, "$_[1]_key");
+		&copy_write_as_domain_user($d, $key, $file."_key");
+		}
+	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf,1);
+	if ($ca) {
+		&copy_write_as_domain_user($d, $ca, $file."_ca");
 		}
 
 	&$second_print($text{'setup_done'});

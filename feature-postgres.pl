@@ -6,6 +6,29 @@ $postgresql::use_global_login = 1;
 %qconfig = &foreign_config("postgresql");
 }
 
+# check_depends_postgres(&dom)
+# Ensure that a sub-server has a parent server with MySQL enabled
+sub check_depends_postgres
+{
+return undef if (!$_[0]->{'parent'});
+local $parent = &get_domain($_[0]->{'parent'});
+return $text{'setup_edeppostgres'} if (!$parent->{'postgres'});
+return undef;
+}
+
+# check_anti_depends_postgres(&dom)
+# Ensure that a parent server without MySQL does not have any children with it
+sub check_anti_depends_postgres
+{
+if (!$_[0]->{'postgres'}) {
+	local @subs = &get_domain_by("parent", $_[0]->{'id'});
+	foreach my $s (@subs) {
+		return $text{'setup_edeppostgressub'} if ($s->{'postgres'});
+		}
+	}
+return undef;
+}
+
 # check_warnings_postgres(&dom, &old-domain)
 # Return warning if a PosgreSQL database or user with a clashing name exists.
 # This can be overridden to allow a takeover of the DB.
@@ -436,21 +459,22 @@ else {
 # Dumps this domain's postgreSQL database to a backup file
 sub backup_postgres
 {
+local ($d, $file) = @_;
 &require_postgres();
 
 # Find all the domains's databases
-local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
+local @dbs = split(/\s+/, $d->{'db_postgres'});
 
 # Create empty 'base' backup file
-&open_tempfile(EMPTY, ">$_[1]");
-&close_tempfile(EMPTY);
+&open_tempfile_as_domain_user($d, EMPTY, ">$file");
+&close_tempfile_as_domain_user($d, EMPTY);
 
 # Back them all up
 local $db;
 local $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_postgresdump', $db));
-	local $dbfile = $_[1]."_".$db;
+	local $dbfile = $file."_".$db;
 	local $destfile = $dbfile;
 	if ($postgresql::postgres_sameunix) {
 		# For a backup done as the postgres user, create an empty file
@@ -464,7 +488,8 @@ foreach $db (@dbs) {
 						   undef, $destfile);
 			}
 		}
-	local $err = &postgresql::backup_database($db, $destfile, 'c', undef);
+	local $err = &postgresql::backup_database($db, $destfile, 'c', undef,
+			$postgresql::postgres_sameunix ? undef : $d->{'user'});
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
@@ -472,7 +497,7 @@ foreach $db (@dbs) {
 		}
 	else {
 		if ($destfile ne $dbfile) {
-			&copy_source_dest($destfile, $dbfile);
+			&copy_write_as_domain_user($d, $destfile, $dbfile);
 			&unlink_file($destfile);
 			}
 		&$second_print($text{'setup_done'});

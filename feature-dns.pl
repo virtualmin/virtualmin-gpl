@@ -1843,21 +1843,22 @@ return &check_pid_file(&bind8::make_chroot($pidfile, 1));
 # Save all the virtual server's DNS records as a separate file
 sub backup_dns
 {
+my ($d, $file) = @_;
 &require_bind();
-return 1 if ($_[0]->{'dns_submode'});	# backed up in parent
+return 1 if ($d->{'dns_submode'});	# backed up in parent
 &$first_print($text{'backup_dnscp'});
-local ($recs, $file) = &get_domain_dns_records_and_file($_[0]);
-if ($file) {
+local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
+if ($zonefile) {
 	local $absfile = &bind8::make_chroot(
-			&bind8::absolute_path($file));
+			&bind8::absolute_path($zonefile));
 	if (-r $absfile) {
-		&copy_source_dest($absfile, $_[1]);
+		&copy_write_as_domain_user($d, $absfile, $file);
 		&$second_print($text{'setup_done'});
 		return 1;
 		}
 	else {
 		&$second_print(&text('backup_dnsnozonefile',
-				     "<tt>$file</tt>"));
+				     "<tt>$zonefile</tt>"));
 		return 0;
 		}
 	}
@@ -2333,8 +2334,8 @@ local ($tmpl) = @_;
 # Save DNS settings
 $tmpl->{'dns'} = &parse_none_def("dns");
 if ($in{"dns_mode"} == 2) {
-	$tmpl->{'default'} || $tmpl->{'dns'} || $in{'bind_replace'} == 0 ||
-		&error($text{'tmpl_edns'});
+	$tmpl->{'default'} || $tmpl->{'dns'} =~ /\S/ ||
+	    $in{'bind_replace'} == 0 || &error($text{'tmpl_edns'});
 	$tmpl->{'dns_replace'} = $in{'bind_replace'};
 	$tmpl->{'dns_view'} = $in{'view'};
 

@@ -917,34 +917,35 @@ return undef;
 # Dumps this domain's mysql database to a backup file
 sub backup_mysql
 {
+local ($d, $file) = @_;
 &require_mysql();
 
 # Find all domain's databases
-local $tmpl = &get_template($_[0]->{'template'});
-local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $_[0]);
-local @alldbs = &list_all_mysql_databases($_[0]);
+local $tmpl = &get_template($d->{'template'});
+local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
+local @alldbs = &list_all_mysql_databases($d);
 local @dbs;
 if ($wild) {
 	$wild =~ s/\%/\.\*/g;
 	$wild =~ s/_/\./g;
 	@dbs = grep { /^$wild$/i } @alldbs;
 	}
-push(@dbs, split(/\s+/, $_[0]->{'db_mysql'}));
+push(@dbs, split(/\s+/, $d->{'db_mysql'}));
 @dbs = &unique(@dbs);
 
 # Create base backup file with meta-information
-local @hosts = &get_mysql_allowed_hosts($_[0]);
+local @hosts = &get_mysql_allowed_hosts($d);
 local %info = ( 'hosts' => join(' ', @hosts) );
-&write_file($_[1], \%info);
+&write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
 local $db;
 local $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
-	local $dbfile = $_[1]."_".$db;
-	local $err = &mysql::backup_database($db, $dbfile, 0, 1, 0,
-					     undef, undef, undef, undef, 1);
+	local $dbfile = $file."_".$db;
+	local $err = &mysql::backup_database($db, $dbfile, 0, 1, undef,
+				     undef, undef, undef, $d->{'user'}, 1);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}

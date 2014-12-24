@@ -1379,11 +1379,11 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 				}
 			}
 		}
-	&open_tempfile(FILE, ">$file");
+	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach my $a (@aliasnames) {
 		&print_tempfile(FILE, $a,"\n");
 		}
-	&close_tempfile(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
@@ -1395,7 +1395,7 @@ if ($virt) {
 	local $l;
 	local @adoms = &get_domain_by("alias", $d->{'id'});
 	local %adoms = map { $_->{'dom'}, 1 } @adoms;
-	&open_tempfile(FILE, ">$file");
+	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		if ($l =~ /^\s*ServerAlias\s+(.*)/i) {
 			# Exclude ServerAlias entries for alias domains
@@ -1407,7 +1407,7 @@ if ($virt) {
 			}
 		&print_tempfile(FILE, "$l\n");
 		}
-	&close_tempfile(FILE);
+	&close_tempfile_as_domain_user($d, FILE);
 	&$second_print($text{'setup_done'});
 
 	# If the Apache log is outside the home, back it up too
@@ -1415,11 +1415,11 @@ if ($virt) {
 	if (!&is_under_directory($d->{'home'}, $alog) &&
 	    !$allopts->{'dir'}->{'dirnologs'}) {
 		&$first_print($text{'backup_apachelog'});
-		&copy_source_dest($alog, $file."_alog");
+		&copy_write_as_domain_user($d, $alog, $file."_alog");
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
 		if (!&is_under_directory($d->{'home'}, $elog)) {
-			&copy_source_dest($elog, $file."_elog");
+			&copy_write_as_domain_user($d, $elog, $file."_elog");
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -2472,7 +2472,9 @@ print &ui_table_row(
     &hlink($text{'tmpl_phpver'}, "template_phpver"),
     &ui_select("web_phpver", $tmpl->{'web_phpver'},
 	       [ [ "", $text{'tmpl_phpverdef'} ],
-		 map { [ $_->[0] ] } &list_available_php_versions() ]));
+		 map { my $fullver = &get_php_version($_->[1]);
+		       [ $_->[0], $fullver || $_->[0] ] }
+		     &list_available_php_versions() ]));
 
 # Default number of PHP child processes
 print &ui_table_row(
@@ -3699,15 +3701,19 @@ local ($d, $nvstar, $nvstar6, $port) = @_;
 local $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 $port ||= $d->{'web_port'};
 &require_apache();
-local $vip = $d->{'name'} &&
-	     $apache::httpd_modules{'core'} >= 1.312 &&
-	     &is_shared_ip($d->{'ip'}) &&
-	     $nvstar ? "*" : $d->{'ip'};
+local $vip = $config{'apache_star'} == 2 ? "*" :
+	     $config{'apache_star'} == 1 ? $d->{'ip'} :
+	     $d->{'name'} &&
+	       $apache::httpd_modules{'core'} >= 1.312 &&
+	       &is_shared_ip($d->{'ip'}) &&
+	       $nvstar ? "*" : $d->{'ip'};
 local @vips = ( "$vip:$port" );
 if ($d->{'ip6'}) {
-	local $vip6 = $d->{'name'} &&
-		      &is_shared_ip($d->{'ip6'}) &&
-		      $nvstar6 ? "*" : $d->{'ip6'};
+	local $vip6 = $config{'apache_star'} == 2 ? "*" :
+		      $config{'apache_star'} == 1 ? $d->{'ip6'} :
+		      $d->{'name'} &&
+		        &is_shared_ip($d->{'ip6'}) &&
+		        $nvstar6 ? "*" : $d->{'ip6'};
 	if ($vip6 ne "*") {
 		# If already matching *:port for the IPv4 part, no need to
 		# repeat it for IPv6

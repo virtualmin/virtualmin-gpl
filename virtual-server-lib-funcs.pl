@@ -3232,7 +3232,8 @@ push(@heads, map { $text{'index_'.$_} } @colnames);
 foreach my $f (&list_custom_fields()) {
 	if ($f->{'show'} && ($f->{'visible'} < 2 || &master_admin())) {
 		push(@colnames, 'field_'.$f->{'name'});
-		push(@heads, $f->{'desc'});
+		my ($desc, $tip) = split(/;/, $f->{'desc'});
+		push(@heads, $desc);
 		}
 	}
 push(@heads, map { $text{'index_'.$_} } @table_features);
@@ -4595,7 +4596,7 @@ for(my $i=0; $i<=@values+2; $i++) {
 			      $type == 12 ? "edit_vfile.cgi" : undef;
 		if ($prog && $_[2]) {
 			local $di = $_[2] ? $_[2]->{'id'} : undef;
-			$f .= "<a href='$prog?dom=$di&file=$val&$_[3]=$_[4]&idx=$i'>$text{'alias_afile'}</a>\n";
+			$f .= "<a href='$prog?dom=$di&amp;file=$val&amp;$_[3]=$_[4]&amp;idx=$i'>$text{'alias_afile'}</a>\n";
 			}
 		}
 	print &ui_table_row($left, $f, undef, $tds);
@@ -5093,8 +5094,8 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	push(@cols, "<a href='edit_user.cgi?dom=$did&".
-	      "user=".&urlize($u->{'user'})."&unix=$u->{'unix'}'>".
+	push(@cols, "<a href='edit_user.cgi?dom=$did&amp;".
+	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
 	       $u->{'webowner'} &&
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
@@ -9065,7 +9066,7 @@ return 0;
 #          5=file chooser, 6=directory chooser, 7=yes/no, 8=password,
 #          9=options file, 10=text area
 #   opts - Name of options file
-#   desc - Human-readable description
+#   desc - Human-readable description, with optional ; separated tooltip
 #   show - 1=show in list of domains, 0=hide
 #   visible - 0=anyone can edit
 #   	      1=root can edit, others can view
@@ -10400,8 +10401,19 @@ return defined(&running_in_zone) && &running_in_zone() ? 'zones' :
 # need to reboot, etc.
 sub warning_messages
 {
-return undef if (!&master_admin());
 my $rv;
+foreach my $warn (&list_warning_messages()) {
+	$rv .= &ui_alert_box($warn, "warn");
+	}
+return $rv;
+}
+
+# list_warning_messages()
+# Returns all warning messages for the current user as an array
+sub list_warning_messages
+{
+return () if (!&master_admin());
+my @rv;
 
 # Get licence expiry date
 local ($status, $expiry, $err, undef, undef, $autorenew) =
@@ -10422,7 +10434,7 @@ if ($status != 0) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
-	$rv .= &ui_alert_box($alert_text, "danger");
+	push(@rv, $alert_text);
 	}
 elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 	# One week to expiry .. tell the user
@@ -10440,7 +10452,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if default IP has changed
@@ -10457,7 +10469,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= &ui_hidden("also", 1);
 	$alert_text .= &ui_submit($text{'licence_changeip'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if in SSL mode, and SSL cert is < 2048 bits
@@ -10492,7 +10504,7 @@ if ($small) {
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn");
+	push(@rv, $alert_text);
 	}
 
 # Check if symlinks need to be fixed. Blank means not checked yet, 0 means
@@ -10509,7 +10521,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warn");
+		push(@rv, $alert_text);
 		}
 	else {
 		# All OK already, don't check again
@@ -10531,7 +10543,7 @@ if ($config{'allow_modphp'} eq '') {
 		$alert_text .= &ui_submit($text{'licence_fixphpok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
-		$rv .= &ui_alert_box($alert_text, "warn"); 
+		push(@rv, $alert_text);
 		}
 	else {
 		# All OK already, don't check again
@@ -10548,10 +10560,10 @@ if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
 		"$gconfig{'webprefix'}/init/reboot.cgi");
 	$alert_text .= &ui_submit($text{'licence_xfsrebootok'});
 	$alert_text .= &ui_form_end();
-	$rv .= &ui_alert_box($alert_text, "warn"); 
+	push(@rv, $alert_text);
 	}
 
-return $rv;
+return @rv;
 }
 
 # get_user_domain(user)
@@ -11736,7 +11748,7 @@ push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 
 # Add link to list sub-servers
 if (!$d->{'parent'}) {
-	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&what='.
+	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&amp;what='.
 			     &urlize($d->{'dom'}),
 		    'title' => $text{'edit_psearch'},
 		    'cat' => 'admin',
@@ -14883,7 +14895,7 @@ local $pass = $mode ? $d->{$mode."_pass"} :
 if (&can_show_pass() && $pass) {
 	local $link = "showpass.cgi?dom=$d->{'id'}&mode=".&urlize($mode);
 	if ($user) {
-		$link .= "&user=".&urlize($user->{'user'});
+		$link .= "&amp;user=".&urlize($user->{'user'});
 		}
 	if (defined(&popup_window_link)) {
 		return &popup_window_link($link, $text{'edit_showpass'},

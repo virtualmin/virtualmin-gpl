@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "4.2.11", "4.1.14.6", "4.0.10.5", "3.5.8.2" );
+return ( "4.3.3", "4.2.13.1", "4.1.14.8", "4.0.10.7", "3.5.8.2" );
 }
 
 sub script_phpmyadmin_can_upgrade
@@ -39,9 +39,10 @@ return 1;
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "4.2") > 0 ? "$ver (Latest)" :
-       &compare_versions($ver, "4.1") > 0 ? "$ver (Old)" :
-       &compare_versions($ver, "4.0") > 0 ? "$ver (Ancient)" :
+return &compare_versions($ver, "4.3") >= 0 ? "$ver (Latest)" :
+       &compare_versions($ver, "4.2") >= 0 ? "$ver (Stable)" :
+       &compare_versions($ver, "4.1") >= 0 ? "$ver (Old)" :
+       &compare_versions($ver, "4.0") >= 0 ? "$ver (Ancient)" :
 					    "$ver (Un-supported)";
 }
 
@@ -349,9 +350,13 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, "4.2") > 0) {
+if (&compare_versions($ver, "4.3") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "phpMyAdmin-(4\\.[2-9][0-9\\.]+)-all-languages\\.zip" );
+		 "phpMyAdmin-(4\\.[3-9][0-9\\.]+)-all-languages\\.zip" );
+	}
+elsif (&compare_versions($ver, "4.2") > 0) {
+	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
+		 "phpMyAdmin-(4\\.2\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "4.1") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",

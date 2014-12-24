@@ -194,7 +194,7 @@ if ($orig) {
 	push(@opts, [ -1, $text{'form_origip'} ]);
 	}
 push(@opts, [ 0, &text('form_shared', $defip6) ]);
-local @shared = &list_shared_ip6s();
+local @shared = sort { $a cmp $b } &list_shared_ip6s();
 if (@shared && &can_edit_sharedips()) {
 	# Can select from extra shared list
 	push(@opts, [ 3, $text{'form_shared2'},
