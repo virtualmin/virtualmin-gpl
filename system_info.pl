@@ -11,10 +11,6 @@ my $info = &get_collected_info();
 my @poss = $info ? @{$info->{'poss'}} : ( );
 my @doms = &list_visible_domains();
 
-# XXX resellers and domain owners and extra admins!
-# XXX domain owners and resellers shouldn't see system info?
-# XXX domain owners should see info about their domain
-
 # Check for wizard redirect
 my $redir = &wizard_redirect();
 if ($redir) {
