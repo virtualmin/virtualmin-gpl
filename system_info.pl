@@ -127,7 +127,38 @@ if (!&master_admin() && !&reseller_admin()) {
                 }
 
 	# Database count
-	# XXX
+        my $dbs = &count_domain_feature("dbs", @subs);
+        my ($dleft, $dreason, $dtotal, $dhide) =
+                virtual_server::count_feature("dbs");
+        if ($dleft < 0 || $dhide) {
+		push(@table, { 'desc' => $text{'right_fdbs'},
+			       'value' => $dbs });
+                }
+        else {
+		push(@table, { 'desc' => $text{'right_fdbs'},
+			       'value' => &text('right_of', $dbs, $dtotal) });
+                }
+
+	# Quota summary for top-level domain
+	if (!$sects->{'noquotas'} &&
+            virtual_server::has_home_quotas()) {
+                my $homesize = virtual_server::quota_bsize("home");
+                my $mailsize = virtual_server::quota_bsize("mail");
+                my ($home, $mail, $db) = &get_domain_quota($d, 1);
+                my $usage = $home*$homesize + $mail*$mailsize + $db;
+                my $limit = $d->{'quota'}*$homesize;
+                if ($limit) {
+			push(@table, { 'desc' => $text{'right_quota'},
+				       'value' => &text('right_out',
+					&nice_size($usage), &nice_size($limit)),
+				       'chart' => [ $limit, $usage-$db, $db ]});
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_quota'},
+				       'value' => &nice_size($usage),
+				       'wide' => 1 });
+                        }
+		}
 
 	push(@rv, { 'type' => 'table',
 		    'id' => 'domain',
@@ -236,7 +267,7 @@ if ($newhtml) {
 # Top quota users
 my @quota = $info->{'quota'} ?
 		grep { &can_edit_domain($_->[0]) } @{$info->{'quota'}} : ( );
-if (!$data->{'noquotas'} && @quota) {
+if (!$data->{'noquotas'} && @quota && (&master_admin() || &reseller_admin())) {
 	my @usage;
 	my $max = $data->{'max'} || 10;
 	my $maxquota = $info->{'maxquota'};
