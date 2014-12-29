@@ -397,8 +397,6 @@ if ($got{'dns'}) {
 		}
 	else {
 		local $rcount = 0;
-		use Data::Dumper;
-		print STDERR Dumper($zonexml->{'dnsrec'});
 		foreach my $rec (@{$zonexml->{'dnsrec'}}) {
 			local $recname = $rec->{'src'};
 			$recname .= ".".$dom."." if ($recname !~ /\.$/);
@@ -421,7 +419,6 @@ if ($got{'dns'}) {
 					# Not migratable
 					next;
 					}
-				print STDERR "adding $recname $rectype $recvalue\n";
 				&bind8::create_record($file,
 						      $recname,
 						      undef,
