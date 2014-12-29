@@ -11,6 +11,10 @@ C<mbox> format. Alternatley you can use the C<--filesonly> flag to just have
 it print all the files containing the user's mail (typically just one if
 the system using C<mbox> format, or many if C<Maildir> is in use).
 
+By default the user's inbox is listed, however you can select any folder
+owned by the user with the C<--folder> flag followed by either a path or
+a unique folder ID.
+
 =cut
 
 package virtual_server;
@@ -45,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--folder") {
+		$folderid = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -61,8 +68,17 @@ $d || &usage("No domain name $dname found");
 $user || &usage("Failed to find user $uname in $dname");
 
 # Dump his mail file
-&foreign_require("mailboxes", "mailboxes-lib.pl");
-($folder) = &mailboxes::list_user_folders($user->{'user'});
+&foreign_require("mailboxes");
+@folders = &mailboxes::list_user_folders($user->{'user'});
+@folders || &usage("User has no mail folders!");
+if ($folderid) {
+	($folder) = grep { $_->{'file'} eq $folderid ||
+			   &mailboxes::folder_name($_) eq $folderid } @folders;
+	$folder || &usage("No folder with ID $folderid found");
+	}
+else {
+	$folder = $folders[0];
+	}
 if ($filesonly) {
 	# Just filenames
 	@mails = &mailboxes::mailbox_list_mails(undef, undef, $folder, 1);
@@ -88,6 +104,7 @@ print "Dumps the mailbox for some user.\n";
 print "\n";
 print "virtualmin list-mailbox --domain domain.name\n";
 print "                        --user name\n";
+print "                       [--folder name|path]\n";
 print "                       [--filesonly]\n";
 exit(1);
 }
