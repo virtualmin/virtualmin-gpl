@@ -564,6 +564,15 @@ if ($config{'docs_link'}) {
 		    'link' => $config{'docs_link'} });
 	}
 
+# Sections defined by plugins
+foreach my $p (&list_plugin_sections()) {
+	push(@rv, { 'type' => 'html',
+		    'id' => 'plugin_'.$p->{'name'},
+		    'desc' => $p->{'title'},
+		    'html' => $p->{'html'},
+		    'open' => $p->{'status'} });
+	}
+
 return @rv;
 }
 
