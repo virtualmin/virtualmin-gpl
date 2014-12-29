@@ -1475,3 +1475,4 @@ Added a Change Language link the on left menu for easily switching the UI langua
 For new installs, a single logrotate configuration block will now be shared by all virtual servers. For existing systems, whether to use a shared or separate blocks can be set on the Server Templates page.
 The hash format (SHA1 or SHA2) for new certificates can now be selected at creation time, and the default set on the Virtualmin Configuration page.
 Added a Virtualmin Configuration page option to control whether a * or an IP is used in Apache VirtualHost blocks.
+All operations performed by Virtualmin on files in a domain's home directory are now done with the user's permissions, to prevent attacks involving a malicious symbolic or hard link.
