@@ -48,7 +48,7 @@ if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
 	&lock_file($htaccess_htpasswd::directories_file);
 	local @dirs = &htaccess_htpasswd::list_directories();
-	push(@dirs, [ $stats, $passwd_file, 0, 0, undef ]);
+	push(@dirs, [ $stats, $passwd_file, 0, 0, "" ]);
 	&htaccess_htpasswd::save_directories(\@dirs);
 	&unlock_file($htaccess_htpasswd::directories_file);
 	}
