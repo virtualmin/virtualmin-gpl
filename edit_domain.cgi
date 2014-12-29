@@ -309,19 +309,7 @@ if (!$d->{'disabled'}) {
 				     "feature", 0);
 	@grid = ( );
 	$i = 0;
-	@dom_features = $aliasdom && $d->{'aliasmail'} ? @aliasmail_features :
-			$aliasdom ? @opt_alias_features :
-			$subdom ? @opt_subdom_features : @opt_features;
-	foreach $f (@dom_features) {
-		# Webmin feature is not needed for sub-servers
-		next if ($d->{'parent'} && $f eq "webmin");
-
-		# Unix feature is not needed for subdomains
-		next if ($d->{'parent'} && $f eq "unix");
-
-		# Cannot enable features not in alias
-		next if ($aliasdom && !$aliasdom->{$f});
-
+	foreach my $f (&list_possible_domain_features($d)) {
 		# Don't show features that are always enabled, if currently set
 		if ($config{$f} == 3 && $d->{$f}) {
 			print &ui_hidden($f, $d->{$f}),"\n";
@@ -334,9 +322,6 @@ if (!$d->{'disabled'}) {
 			print &ui_hidden($f, $d->{$f}),"\n";
 			next;
 			}
-
-		# Don't show features that are globally disabled
-		next if (!$config{$f} && defined($config{$f}));
 
 		local $txt = $parentdom ? $text{'edit_sub'.$f} : undef;
 		$txt ||= $text{'edit_'.$f};
