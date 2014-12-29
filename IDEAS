@@ -37,11 +37,23 @@
  - Backup to Google Cloud Files & Dropbox
 	- Cloud backups page to replace module config
 	- CHANGELOG
- 
- - Move left menu function down into Webmin/Virtualmin
-	- https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fqooob%2Fauthentic-theme%2Fissues%2F7&sa=D&sntz=1&usg=AFQjCNGPd7-QBIXCnZPTFRV-zAA0Z3eKxg
-	- cloudmin
-	- new webmin release
 
+ - Theme function for right side
+	- notifications too
+	- CHANGELOG
+
+ - Mobile theme should use new menu function (but maybe wait till new release)
+	- and right-frame info too
+	- administrators notes function should integrate
+ 
  - Password reset for domain owners
 	- http://virtualmin.com/node/35362
+
+ - All writes to home dir should be done with domain owner permissions
+	- See email "Security Contact"
+	- CHANGELOG
+
+ - Feature association / disassociate
+	- http://virtualmin.com/node/35542
+	- with validation
+	- CHANGELOG
