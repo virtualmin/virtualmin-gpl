@@ -12,6 +12,7 @@ $d || &error($text{'edit_egone'});
 print $text{'assoc_desc'},"<p>\n";
 
 print &ui_form_start("assoc.cgi", "post");
+print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'assoc_header'}, undef, 2);
 
 # Features to enable or disable

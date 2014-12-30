@@ -1,0 +1,4 @@
+desc=Associate and Disassociate Features
+html=Added the Disassociate Features page for adding and removing features from a virtual server without actually changing the underlying configuration files.
+master=1
+link=assoc_form.cgi?dom=${ID}

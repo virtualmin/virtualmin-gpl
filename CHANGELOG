@@ -1476,3 +1476,4 @@ For new installs, a single logrotate configuration block will now be shared by a
 The hash format (SHA1 or SHA2) for new certificates can now be selected at creation time, and the default set on the Virtualmin Configuration page.
 Added a Virtualmin Configuration page option to control whether a * or an IP is used in Apache VirtualHost blocks.
 All operations performed by Virtualmin on files in a domain's home directory are now done with the user's permissions, to prevent attacks involving a malicious symbolic or hard link.
+Added the Disassociate Features page for adding and removing features from a virtual server without actually changing the underlying configuration files.

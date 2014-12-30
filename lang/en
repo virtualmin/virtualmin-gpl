@@ -1962,6 +1962,7 @@ log_newipshared_domain=Converted IP address for server $1 to shared
 log_style_domain=Applied new website content style to server $1
 log_exclude_domain=Updated excluded backup directories for server $1
 log_domdkim_domain=Changed DomainKey for server $1
+log_assoc_domain=Change associated features for server $1
 log_check=Re-checked configuration
 log_newweb=Updated new website template
 log_newuser=Updated new mailbox email template
@@ -6616,5 +6617,7 @@ assoc_desc=Features enabled or disabled on this page will not update any system 
 assoc_header=Feature association settings
 assoc_features=Features known to Virtualmin
 assoc_validate=Require successful validation before saving?
+assoc_err=Failed to associate features
+assoc_evalidate=Validation failed for $1 : $2
 
 __norefs=1

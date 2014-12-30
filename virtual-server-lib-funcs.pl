@@ -11840,13 +11840,13 @@ return &can_config_domain($_[0]) ?
 	( "$base/view_domain.cgi?dom=$_[0]->{'id'}", $text{'view_return'} );
 }
 
-# domain_redirect(&domain)
+# domain_redirect(&domain, [refresh-menu])
 # Calls redirect to edit_domain.cgi or view_domain.cgi
 sub domain_redirect
 {
-&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
-#&redirect(&can_config_domain($_[0]) ? "edit_domain.cgi?dom=$_[0]->{'id'}"
-#				    : "view_domain.cgi?dom=$_[0]->{'id'}");
+local ($d, $refresh) = @_;
+&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?".
+	  "dom=$d->{'id'}&refresh=$refresh");
 }
 
 # get_template_pages()
