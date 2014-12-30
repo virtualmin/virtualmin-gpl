@@ -6,6 +6,11 @@ sub list_system_info
 {
 my ($data, $in) = @_;
 
+# If user doesn't have access to Virtualmin, none of this makes sense
+if (!&foreign_available($module_name)) {
+	return ( );
+	}
+
 my @rv;
 my $info = &get_collected_info();
 my @poss = $info ? @{$info->{'poss'}} : ( );
