@@ -1031,7 +1031,6 @@ edit_delete=Delete Virtual Server
 edit_deletedesc=Completely delete this virtual server from the system. All files and data associated with it (and any sub-servers) will be permanently removed.
 edit_assoc=Disassociate Features
 edit_assocdesc=Add or remove features from a virtual server without actually creating or deleting real configuration files.
-edit_deletedesc=Completely delete this virtual server from the system. All files and data associated with it (and any sub-servers) will be permanently removed.
 edit_disable=Disable Virtual Server
 edit_disabledesc=De-active some or all of the features of this virtual server, so that it can no longer be used. This action is reversible, unlike deletion.
 edit_enable=Enable Virtual Server
