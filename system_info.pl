@@ -1,6 +1,7 @@
 # Provide more system info blocks specific to Virtualmin
 
 require 'virtual-server-lib.pl';
+use Time::Local;
 
 sub list_system_info
 {
@@ -589,5 +590,14 @@ return &master_admin() ?
 		"http://www.virtualmin.com/documentation/users/reseller" :
        		"http://www.virtualmin.com/documentation/users/server-owner";
 }      
+
+sub parse_license_date
+{
+my ($str) = @_;
+if ($str =~ /^(\d{4})-(\d+)-(\d+)$/) {
+        return eval { timelocal(0, 0, 0, $3, $2-1, $1-1900) };
+        }
+return undef;
+}
 
 1;
