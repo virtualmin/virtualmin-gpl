@@ -4082,7 +4082,7 @@ if ($mode == 0) {
 		    $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
-			next if ($st[9] >= $cutoff);
+			next if (!$st[9] || $st[9] >= $cutoff);
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text(-d $path ? 'backup_deletingdir'
 					             : 'backup_deletingfile',
