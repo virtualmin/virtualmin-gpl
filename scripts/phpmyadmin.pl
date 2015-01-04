@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "4.3.4", "4.2.13.1", "4.1.14.8", "4.0.10.7", "3.5.8.2" );
+return ( "4.3.4", "4.2.13.1", "4.0.10.7", "3.5.8.2" );
 }
 
 sub script_phpmyadmin_can_upgrade
@@ -358,13 +358,9 @@ elsif (&compare_versions($ver, "4.2") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-(4\\.2\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
-elsif (&compare_versions($ver, "4.1") > 0) {
-	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "phpMyAdmin-(4\\.1\\.[0-9\\.]+)-all-languages\\.zip" );
-	}
 elsif (&compare_versions($ver, "4.0") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "phpMyAdmin-(4\\.0\\.[0-9\\.]+)-all-languages\\.zip" );
+		 "phpMyAdmin-(4\\.[01]\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "3.0") > 0) {
 	return ( "https://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/",
