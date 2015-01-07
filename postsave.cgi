@@ -43,5 +43,9 @@ print "<li><a href='index.cgi'>$text{'postsave_index'}</a><p>\n";
 
 print "</ul>\n";
 
+if ($in{'refresh'} && defined(&theme_post_save_domain)) {
+	&theme_post_save_domain($d, 'modify');
+	}
+
 &ui_print_footer();
 

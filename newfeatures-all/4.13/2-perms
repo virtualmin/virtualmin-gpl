@@ -1,0 +1,3 @@
+desc=File permissions security fix
+html=All operations performed by Virtualmin on files in a domain's home directory are now done with the user's permissions, to prevent attacks involving a malicious symbolic or hard link.
+master=1

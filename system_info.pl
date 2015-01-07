@@ -1,19 +1,21 @@
 # Provide more system info blocks specific to Virtualmin
 
 require 'virtual-server-lib.pl';
+use Time::Local;
 
 sub list_system_info
 {
 my ($data, $in) = @_;
 
+# If user doesn't have access to Virtualmin, none of this makes sense
+if (!&foreign_available($module_name)) {
+	return ( );
+	}
+
 my @rv;
 my $info = &get_collected_info();
 my @poss = $info ? @{$info->{'poss'}} : ( );
 my @doms = &list_visible_domains();
-
-# XXX resellers and domain owners and extra admins!
-# XXX domain owners and resellers shouldn't see system info?
-# XXX domain owners should see info about their domain
 
 # Check for wizard redirect
 my $redir = &wizard_redirect();
@@ -49,6 +51,8 @@ if (&need_config_check() && &can_check_config()) {
 # Show a domain owner info about his domain, but NOT info about the system
 if (!&master_admin() && !&reseller_admin()) {
 	my @table;
+
+	# General info about the domain
 	my $ex = &extra_admin();
 	my $d = $ex ? &get_domain($ex)
 		    : &get_domain_by("user", $remote_user, "parent", "");
@@ -60,7 +64,104 @@ if (!&master_admin() && !&reseller_admin()) {
 		       'value' => $module_info{'version'} });
 	push(@table, { 'desc' => $text{'right_dom'},
 		       'value' => &show_domain_name($d) });
-	# XXX
+
+	# Number of sub-servers
+        my @subs = ( $d, virtual_server::get_domain_by("parent", $d->{'id'}) );
+        my @reals = grep { !$_->{'alias'} } @subs;
+        my @mails = grep { $_->{'mail'} } @subs;
+        my ($sleft, $sreason, $stotal, $shide) =
+                &count_domains("realdoms");
+        if ($sleft < 0 || $shide) {
+		push(@table, { 'desc' => $text{'right_subs'},
+			       'value' => scalar(@reals) });
+                }
+        else {
+		push(@table, { 'desc' => $text{'right_subs'},
+                      	       'value' => &text('right_of',
+						scalar(@reals), $stotal) });
+
+                }
+
+	# Number of alias domains
+        my @aliases = grep { $_->{'alias'} } @subs;
+        if (@aliases) {
+                my ($aleft, $areason, $atotal, $ahide) =
+                        &count_domains("aliasdoms");
+                if ($aleft < 0 || $ahide) {
+			push(@table, { 'desc' => $text{'right_aliases'},
+				       'value' => scalar(@aliases) });
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_aliases'},
+				       'value' => &text('right_of',
+						scalar(@aliases), $atotal) });
+                        }
+                }
+
+	# Users and aliases
+        my $users = &count_domain_feature("mailboxes", @subs);
+        my ($uleft, $ureason, $utotal, $uhide) =
+		&count_feature("mailboxes");
+        my $msg = @mails ? $text{'right_fusers'} : $text{'right_fusers2'};
+        if ($uleft < 0 || $uhide) {
+		push(@table, { 'desc' => $msg,
+			       'value' => $users });
+                }
+        else {
+		push(@table, { 'desc' => $msg,
+			       'value' => &text('right_of', $users, $utotal) });
+                }
+
+	# Mail aliases
+        if (@mails) {
+                my $aliases = &count_domain_feature("aliases", @subs);
+                my ($aleft, $areason, $atotal, $ahide) =
+                        virtual_server::count_feature("aliases");
+                if ($aleft < 0 || $ahide) {
+			push(@table, { 'desc' => $text{'right_faliases'},
+				       'value' => $aliases });
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_faliases'},
+				       'value' => &text('right_of',
+							$aliases, $atotal) });
+                        }
+                }
+
+	# Database count
+        my $dbs = &count_domain_feature("dbs", @subs);
+        my ($dleft, $dreason, $dtotal, $dhide) =
+                virtual_server::count_feature("dbs");
+        if ($dleft < 0 || $dhide) {
+		push(@table, { 'desc' => $text{'right_fdbs'},
+			       'value' => $dbs });
+                }
+        else {
+		push(@table, { 'desc' => $text{'right_fdbs'},
+			       'value' => &text('right_of', $dbs, $dtotal) });
+                }
+
+	# Quota summary for top-level domain
+	if (!$sects->{'noquotas'} &&
+            virtual_server::has_home_quotas()) {
+                my $homesize = virtual_server::quota_bsize("home");
+                my $mailsize = virtual_server::quota_bsize("mail");
+                my ($home, $mail, $db) = &get_domain_quota($d, 1);
+                my $usage = $home*$homesize + $mail*$mailsize + $db;
+                my $limit = $d->{'quota'}*$homesize;
+                if ($limit) {
+			push(@table, { 'desc' => $text{'right_quota'},
+				       'value' => &text('right_out',
+					&nice_size($usage), &nice_size($limit)),
+				       'chart' => [ $limit, $usage-$db, $db ]});
+                        }
+                else {
+			push(@table, { 'desc' => $text{'right_quota'},
+				       'value' => &nice_size($usage),
+				       'wide' => 1 });
+                        }
+		}
+
 	push(@rv, { 'type' => 'table',
 		    'id' => 'domain',
 	 	    'desc' => $text{'right_header3'},
@@ -168,7 +269,7 @@ if ($newhtml) {
 # Top quota users
 my @quota = $info->{'quota'} ?
 		grep { &can_edit_domain($_->[0]) } @{$info->{'quota'}} : ( );
-if (!$data->{'noquotas'} && @quota) {
+if (!$data->{'noquotas'} && @quota && (&master_admin() || &reseller_admin())) {
 	my @usage;
 	my $max = $data->{'max'} || 10;
 	my $maxquota = $info->{'maxquota'};
@@ -469,6 +570,15 @@ if ($config{'docs_link'}) {
 		    'link' => $config{'docs_link'} });
 	}
 
+# Sections defined by plugins
+foreach my $p (&list_plugin_sections()) {
+	push(@rv, { 'type' => 'html',
+		    'id' => 'plugin_'.$p->{'name'},
+		    'desc' => $p->{'title'},
+		    'html' => $p->{'html'},
+		    'open' => $p->{'status'} });
+	}
+
 return @rv;
 }
 
@@ -480,5 +590,14 @@ return &master_admin() ?
 		"http://www.virtualmin.com/documentation/users/reseller" :
        		"http://www.virtualmin.com/documentation/users/server-owner";
 }      
+
+sub parse_license_date
+{
+my ($str) = @_;
+if ($str =~ /^(\d{4})-(\d+)-(\d+)$/) {
+        return eval { timelocal(0, 0, 0, $3, $2-1, $1-1900) };
+        }
+return undef;
+}
 
 1;

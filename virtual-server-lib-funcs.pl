@@ -2711,6 +2711,13 @@ return &can_edit_domain($d) &&
 	$_[0]->{'parent'} && $access{'edit_delete'});
 }
 
+# can_associate_domain(&domain)
+# Only the master admin is allowed to disconnect or connect features
+sub can_associate_domain
+{
+return &master_admin();
+}
+
 sub can_move_domain
 {
 local ($d) = @_;
@@ -11709,6 +11716,15 @@ if (&can_delete_domain($d)) {
 		  });
 	}
 
+if (&can_associate_domain($d)) {
+	# Feature associate / disassociate button
+	push(@rv, { 'page' => 'assoc_form.cgi',
+		    'title' => $text{'edit_assoc'},
+		    'desc' => $text{'edit_assocdesc'},
+		    'cat' => 'delete',
+		  });
+	}
+
 if (&can_passwd()) {
 	# Change password button
 	push(@rv, { 'page' => 'edit_pass.cgi',
@@ -11824,13 +11840,13 @@ return &can_config_domain($_[0]) ?
 	( "$base/view_domain.cgi?dom=$_[0]->{'id'}", $text{'view_return'} );
 }
 
-# domain_redirect(&domain)
+# domain_redirect(&domain, [refresh-menu])
 # Calls redirect to edit_domain.cgi or view_domain.cgi
 sub domain_redirect
 {
-&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?dom=$_[0]->{'id'}");
-#&redirect(&can_config_domain($_[0]) ? "edit_domain.cgi?dom=$_[0]->{'id'}"
-#				    : "view_domain.cgi?dom=$_[0]->{'id'}");
+local ($d, $refresh) = @_;
+&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?".
+	  "dom=$d->{'id'}&refresh=$refresh");
 }
 
 # get_template_pages()
@@ -12239,6 +12255,7 @@ sub domain_features
 local ($d) = @_;
 return $d->{'alias'} && $d->{'aliasmail'} ? @aliasmail_features :
        $d->{'alias'} ? @alias_features :
+       $d->{'subdom'} ? @opt_subdom_features :
        $d->{'parent'} ? ( grep { $_ ne "webmin" && $_ ne "unix" } @features ) :
 		         @features;
 }
@@ -16730,6 +16747,27 @@ sub save_transfer_hosts
 my $hfile = "$module_config_directory/transfer-hosts";
 my %hosts = map { $_->[0], $_->[1] } @_;
 &write_file($hfile, \%hosts);
+}
+
+# list_possible_domain_features(&domain)
+# Given a domain, returns a list of core features that can possibly be enabled
+# or disabled for it
+sub list_possible_domain_features
+{
+my ($d) = @_;
+my @rv;
+my $aliasdom = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
+my $subdom = $d->{'subdom'} ? &get_domain($d->{'subdom'}) : undef;
+foreach my $f (&domain_features($d)) {
+	# Cannot enable features not in alias
+	next if ($aliasdom && !$aliasdom->{$f});
+
+	# Don't show features that are globally disabled
+	next if (!$config{$f} && defined($config{$f}));
+
+	push(@rv, $f);
+	}
+return @rv;
 }
 
 # load_plugin_libraries([plugin, ...])

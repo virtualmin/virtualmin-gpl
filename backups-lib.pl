@@ -266,6 +266,7 @@ local $rsh;	# Rackspace cloud files handle
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
+	print STDERR "user=$user pass=$pass\n";
 	if ($mode < 0) {
 		&$first_print(&text('backup_edesturl', $desturl, $user));
 		return (0, 0, $doms);
@@ -3297,7 +3298,7 @@ elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'} &&
        &can_use_cloud("s3")) {
 	# S3 with the default login
-	return (3, $2, $4, $config{'s3_akey'}, $config{'s3_skey'},
+	return (3, $config{'s3_akey'}, $config{'s3_skey'}, $2, $4,
 		$1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
@@ -3307,7 +3308,7 @@ elsif ($url =~ /^rs:\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 elsif ($url =~ /^rs:([^\/]+)(\/(.*))?$/ && $config{'rs_user'} &&
        &can_use_cloud("rs")) {
 	# Rackspace with the default login
-	@rv = (6, $1, $3, $config{'rs_user'}, $config{'rs_key'});
+	@rv = (6, $config{'rs_user'}, $config{'rs_key'}, $1, $3);
 	}
 elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Google cloud storage
@@ -4081,7 +4082,7 @@ if ($mode == 0) {
 		    $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
-			next if ($st[9] >= $cutoff);
+			next if (!$st[9] || $st[9] >= $cutoff);
 			local $old = int((time() - $st[9]) / (24*60*60));
 			&$first_print(&text(-d $path ? 'backup_deletingdir'
 					             : 'backup_deletingfile',

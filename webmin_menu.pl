@@ -173,7 +173,10 @@ foreach my $tc (@tcats) {
 			      'id' => 'global_'.$tc,
 			      'desc' => $incat[0]->{'catname'},
 			      'members' => [ ] };
-		foreach my $b (@incat) {
+		my @incatsort = sort { ($a->{'title'} || $a->{'desc'}) cmp
+                                        ($b->{'title'} || $b->{'desc'}) }
+				     @incat;
+		foreach my $b (@incatsort) {
 			push(@{$cmenu->{'members'}}, &button_to_menu_item($b));
 			}
 		push(@rv, $cmenu);

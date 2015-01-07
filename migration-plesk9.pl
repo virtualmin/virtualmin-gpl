@@ -428,7 +428,8 @@ if ($got{'dns'}) {
 				local $rectype = $rec->{'type'};
 				if ($rectype eq "A" && $recvalue eq $oldip) {
 					# Use new IP address
-					$recvalue = $ipinfo->{'ip'};
+					$recvalue = $dom{'dns_ip'} ||
+						    $dom{'ip'};
 					}
 				if ($rectype eq "MX") {
 					# Include priority in value
