@@ -266,7 +266,6 @@ local $rsh;	# Rackspace cloud files handle
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
-	print STDERR "user=$user pass=$pass\n";
 	if ($mode < 0) {
 		&$first_print(&text('backup_edesturl', $desturl, $user));
 		return (0, 0, $doms);
