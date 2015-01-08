@@ -755,7 +755,7 @@ if ($config{'bw_disable'}) {
 	}
 print "                        [--reseller reseller|NONE]\n";
 print "                        [--add-reseller reseller]*\n";
-print "                        [--delele-reseller reseller]*\n";
+print "                        [--delete-reseller reseller]*\n";
 print "                        [--ip address] | [--allocate-ip] |\n";
 print "                        [--default-ip | --shared-ip address]\n";
 if (&supports_ip6()) {
