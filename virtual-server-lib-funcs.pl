@@ -5026,6 +5026,7 @@ else {
 sub disable_quotas
 {
 local ($d) = @_;
+return if (!&has_home_quotas());
 if ($d->{'parent'}) {
 	local $pd = &get_domain($d->{'parent'});
 	&disable_quotas($pd);
@@ -5042,6 +5043,7 @@ elsif ($d->{'unix'} && $d->{'quota'}) {
 sub enable_quotas
 {
 local ($d) = @_;
+return if (!&has_home_quotas());
 if ($d->{'parent'}) {
         local $pd = &get_domain($d->{'parent'});
         &enable_quotas($pd);
