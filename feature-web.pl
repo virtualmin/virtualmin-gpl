@@ -3106,7 +3106,8 @@ return @rv;
 }
 
 # add_require_all_granted_directives(&dom, [port])
-# For Apache 2.4+, add a "Require all granted" directive
+# For Apache 2.4+, add a "Require all granted" directive, if no other Require
+# exists with a granted value for anything
 sub add_require_all_granted_directives
 {
 local ($d, $oneport) = @_;
@@ -3123,7 +3124,7 @@ foreach my $port (@ports) {
 			if ($dir) {
 				local @req = &apache::find_directive("Require",
 							$dir->{'members'});
-				local ($g) = grep { /all\s+granted/i } @req;
+				local ($g) = grep { /granted/i } @req;
 				if (!$g) {
 					push(@req, "all granted");
 					&apache::save_directive("Require",\@req,
