@@ -1479,4 +1479,4 @@ All operations performed by Virtualmin on files in a domain's home directory are
 Added the Disassociate Features page for adding and removing features from a virtual server without actually changing the underlying configuration files.
 Added APIs that allow Virtualmin to define the preferred left and right frame contents for a theme, rather than requiring theme authors to write code for this.
 ---- Changes since 4.13 ----
-Updated the phpMyAdmin script installer to version 4.3.5.
+Updated the phpMyAdmin script installer to version 4.3.6 and 4.0.10.8.
