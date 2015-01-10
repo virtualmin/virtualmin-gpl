@@ -67,7 +67,6 @@ key_tmpl=Vorlagepfad f&#252;r privaten Schl&#252;ssel,3,Standard (<tt>~/ssl.key<
 cert_tmpl=Template f&#252;r den Zertifikatspfad,3,Standard (<tt>~/ssl.cert</tt>)
 ca_tmpl=Template f&#252;r den CA&#45;Zertifikatspfad,3,Standard (<tt>~/ssl.ca</tt>)
 openssl_cnf=Ort der OpenSSL-Konfigurationsdatei,3,Automatisch ermitteln
-sni_support=Erlaube multiple SSL Webseiten auf der gleichen IP?,1,1-Ja,0-Nein
 line4=Aktion bei Domain&#45; und Benutzererzeugung,11
 from_addr=Absender&#45;Adresse f&#252;r E-Mails&#44; die durch Virtualmin versandt werden,3,Standard
 pre_command=Vor Domain&#45;Konfigurations&#228;nderung auszuf&#252;hrender Befehl,0

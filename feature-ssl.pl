@@ -23,8 +23,8 @@ if ($port != $defport) {
 	# Has a private port
 	return undef;
 	}
-elsif ($config{'sni_support'}) {
-	# Assume web server and clients can handle multiple SSL certs on
+elsif ($sni) {
+	# Web server and clients can handle multiple SSL certs on
 	# the same IP address
 	return undef;
 	}
@@ -38,8 +38,7 @@ else {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			local @certdoms = &list_domain_certificate($sslclash);
-			return &text($sni ? 'setup_edepssl5sni'
-					  : 'setup_edepssl5', $d->{'ip'},
+			return &text('setup_edepssl5', $d->{'ip'},
 				join(", ", map { "<tt>$_</tt>" } @certdoms),
 				$sslclash->{'dom'});
 			}
@@ -72,8 +71,7 @@ else {
 		# Clash .. but is the cert OK?
 		if (!&check_domain_certificate($d->{'dom'}, $sslclash)) {
 			local @certdoms = &list_domain_certificate($sslclash);
-			return &text($sni ? 'setup_edepssl5sni'
-					  : 'setup_edepssl5', $d->{'ip6'},
+			return &text('setup_edepssl5', $d->{'ip6'},
 				join(", ", map { "<tt>$_</tt>" } @certdoms),
 				$sslclash->{'dom'});
 			}
@@ -621,17 +619,6 @@ foreach my $v (&apache::find_directive_struct("VirtualHost",
 		$firstcert = &apache::find_directive("SSLCertificateFile",
 			$v->{'members'}, 1);
 		last;
-		}
-	}
-if ($firstcert && !$config{'sni_support'}) {
-	local $info = &cert_file_info($firstcert, $d);
-	if (!&check_domain_certificate($d->{'dom'}, $info)) {
-		return &text('validate_esslfirst',
-			     "<tt>".$d->{'dom'}."</tt>",
-			     "<tt>"."www.".$d->{'dom'}."</tt>",
-			     join(", ", map { "<tt>$_</tt>" }
-					    &list_domain_certificate($info)),
-			     $d->{'ip'});
 		}
 	}
 

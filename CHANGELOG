@@ -1480,3 +1480,4 @@ Added the Disassociate Features page for adding and removing features from a vir
 Added APIs that allow Virtualmin to define the preferred left and right frame contents for a theme, rather than requiring theme authors to write code for this.
 ---- Changes since 4.13 ----
 Updated the phpMyAdmin script installer to version 4.3.6 and 4.0.10.8.
+SNI (multiple SSL certs on the same IP) is now always assumed to be usable by clients, as long as the web server supports it.

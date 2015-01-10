@@ -10959,7 +10959,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "quota_list_users_command", "quota_list_groups_command",
 	       "quota_get_user_command", "quota_get_group_command",
 	       "preload_mode", "collect_interval", "api_helper",
-	       "spam_lock", "spam_white", "mem_low", "sni_support",
+	       "spam_lock", "spam_white", "mem_low",
 	       "lookup_domain_serial") {
 	# Some important config option was changed
 	return 1 if ($config{$c} ne $lastconfig{$c});
@@ -13402,11 +13402,6 @@ if ($config{'web'}) {
 	else {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
 		}
-	}
-
-# Make sure SNI is supported by webserver, if enabled
-if (&domain_has_website() && $config{'sni_support'} && !&has_sni_support()) {
-	return &text('check_esni', $mclink);
 	}
 
 if ($config{'webalizer'}) {

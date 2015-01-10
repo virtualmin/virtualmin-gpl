@@ -70,7 +70,6 @@ key_tmpl=Mal for sti for privat n&#248;kkel,3,Standard (<tt>~/ssl.key</tt>)
 cert_tmpl=Mal for sertifikatsti,3,Standard (<tt>~/ssl.cert</tt>
 ca_tmpl=Mal for CA sertifikat-sti,3,Standard (<tt>~/ssl.ca</tt>)
 openssl_cnf=Plassering av konfigurasjonsfil for OpenSSL,3,Oppdag automatisk
-sni_support=Tillat flere SSL nettsteder p&#229; samme IP?,1,1-Ja,0-Nei
 line4=Handlinger ved oppretting av tjener og bruker,11
 from_addr=Fra: adresse for e-post sendt av Virtualmin,3,Standard
 pre_command=Kommando som kj&#248;res f&#248;r det gj&#248;res endringer p&#229; en tjener,0

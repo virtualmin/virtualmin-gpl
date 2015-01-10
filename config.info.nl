@@ -68,7 +68,6 @@ key_tmpl=Template voor prive sleutel pad,3,Standaard (<tt>~/ssl.key</tt>)
 cert_tmpl=Template voor certificaat pad,3,Standaard (<tt>~/ssl.cert</tt>)
 ca_tmpl=Template voor CA certificaat pad,3,Standaard (<tt>~/ssl.ca</tt>)
 openssl_cnf=Locatie van de OpenSSL configuratie file,3,Automatisch uitwerken
-sni_support=Diverse SSL websites toestaan op hetzelfde IP adres?,1,1-Ja,0-Nee
 line6.5=Reseller instellingen,11
 reseller_theme=Theme voor nieuwe resellers,15,theme,reseller_theme
 reseller_modules=Extra modules voor resellers,15,modules,reseller_modules

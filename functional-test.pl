@@ -208,10 +208,6 @@ $_config_tests = [
 	{ 'command' => $normal_agent_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/",
 	},
-
-	# Disallow SNI mode
-	{ 'command' => 'grep sni_support=0 '.
-		       $module_config_directory.'/config' },
 	];
 
 $domains_tests = [
