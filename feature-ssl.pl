@@ -210,8 +210,10 @@ if ($chained) {
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
 # Setup in Dovecot and Postfix if possible
-&sync_dovecot_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
-&sync_postfix_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+if ($d->{'virt'}) {
+	&sync_dovecot_ssl_cert($d, 1);
+	&sync_postfix_ssl_cert($d, 1);
+	}
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
