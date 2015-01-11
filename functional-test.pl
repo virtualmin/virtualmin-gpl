@@ -4577,7 +4577,13 @@ $wildcard_tests = [
 		      @create_args, ],
         },
 
-	# XXX test a wget
+	# Test a wget which should return the new site thanks to SNI
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test SSL shared clash',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test SSL shared home page',
+	},
 
 	# Remove the test subdomain
 	{ 'command' => 'delete-domain.pl',
@@ -4620,6 +4626,14 @@ $wildcard_tests = [
 	{ 'command' => 'enable-feature.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ $ssl ] ],
+	},
+
+	# Test a wget which should return the new site thanks to SNI
+	{ 'command' => $wget_command.'http://'.$test_subdomain,
+	  'grep' => 'Test SSL shared clash',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test SSL shared home page',
 	},
 
 	# Remove the domain
