@@ -4563,8 +4563,8 @@ $wildcard_tests = [
 	  'grep' => [ 'O=Test SSL shared domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
-	# Try to create a domain on the same IP with a conflicting name,
-	# which should fail.
+	# Try to create a domain on the same IP with a conflicting name, which should
+	# be allowed by SNI
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'desc', 'Test SSL shared clash' ],
@@ -4575,8 +4575,15 @@ $wildcard_tests = [
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared clash' ],
 		      @create_args, ],
-	  'fail' => 1,
         },
+
+	# XXX test a wget
+
+	# Remove the test subdomain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ] ],
+	},
+
 
 	# Create a domain without SSL on the same IP
 	{ 'command' => 'create-domain.pl',
@@ -4609,11 +4616,10 @@ $wildcard_tests = [
 		      @create_args, ],
         },
 
-	# Enable SSL on that conflicting domain, which should fail
+	# Enable SSL on that conflicting domain, which should by allowed by SNI
 	{ 'command' => 'enable-feature.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ $ssl ] ],
-	  'fail' => 1,
 	},
 
 	# Remove the domain
