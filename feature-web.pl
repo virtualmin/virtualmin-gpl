@@ -1017,10 +1017,21 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 		"<h1>Website Disabled</h1>\n" :
 		join("\n", split(/\t/, $tmpl->{'disabled_web'}));
 	$msg = &substitute_domain_template($msg, $d);
-	&open_lock_tempfile(DISABLED, ">$dis");
-	&print_tempfile(DISABLED, $msg);
-	&close_tempfile(DISABLED);
-	&set_ownership_permissions(undef, undef, 0644, $disabled_website);
+	if (&is_under_directory($d->{'home'}, $dis)) {
+		# Write as the domain user
+		&open_tempfile_as_domain_user($d, DISABLED, ">$dis");
+		&print_tempfile(DISABLED, $msg);
+		&close_tempfile_as_domain_user($d, DISABLED);
+		&set_permissions_as_domain_user($d, 0644, $dis);
+		}
+	else {
+		# Write as root
+		&open_lock_tempfile(DISABLED, ">$dis");
+		&print_tempfile(DISABLED, $msg);
+		&close_tempfile(DISABLED);
+		&set_ownership_permissions(undef, undef, 0644,
+					   $disabled_website);
+		}
 	}
 else {
 	# Disable is done via redirect
@@ -1032,15 +1043,27 @@ else {
 	}
 }
 
-# disabled_website_html(&domain)
+# disabled_website_html(&domain, [force-new-mode])
 # Returns the file for storing the disabled site file for some domain
 sub disabled_website_html
 {
-if (!-d $disabled_website_dir) {
-	mkdir($disabled_website_dir, 0755);
-	&set_ownership_permissions(undef, undef, $disabled_website_dir, 0755);
+local ($d, $mode) = @_;
+&require_apache();
+$mode = $apache::httpd_modules{'core'} >= 2.4 ? 1 : 0 if (!defined($mode));
+if ($mode) {
+	# Apache 2.4+ doesn't allow use of HTML files outside the <directory>
+	# block for a domain
+	return &public_html_dir($d)."/disabled_by_virtualmin.html";
 	}
-return "$disabled_website_dir/$_[0]->{'id'}.html";
+else {
+	# Any location will work for older Apache versions
+	if (!-d $disabled_website_dir) {
+		mkdir($disabled_website_dir, 0755);
+		&set_ownership_permissions(undef, undef,
+					   $disabled_website_dir, 0755);
+		}
+	return "$disabled_website_dir/$d->{'id'}.html";
+	}
 }
 
 # enable_web(&domain)
@@ -1079,9 +1102,11 @@ local ($virt, $vconf, $d) = @_;
 
 # Remove local disables
 local @am = &apache::find_directive("AliasMatch", $vconf);
-local $dis = &disabled_website_html($d);
+local $olddis = &disabled_website_html($d, 0);
+local $newdis = &disabled_website_html($d, 1);
 @am = grep { $_ ne "^/.*\$ $disabled_website" &&
-	     $_ ne "^/.*\$ $dis" } @am;
+	     $_ ne "^/.*\$ $olddis" &&
+	     $_ ne "^/.*\$ $newdis" } @am;
 local $conf = &apache::get_config();
 &apache::save_directive("AliasMatch", \@am, $vconf, $conf);
 
