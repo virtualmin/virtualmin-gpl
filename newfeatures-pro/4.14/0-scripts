@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.3.7 and 4.0.10.8, Django to 1.7.3 and 1.4.18, FengOffice to 3.0.2, Ghost to 0.5.8, and PiWik to 2.10.0.
+html=Updated the phpMyAdmin script installer to version 4.3.7 and 4.0.10.8, Django to 1.7.3 and 1.4.18, FengOffice to 3.0.2, Ghost to 0.5.8, Moodle to 2.8.2, and PiWik to 2.10.0.
 master=1
 reseller=1
 domain=1
