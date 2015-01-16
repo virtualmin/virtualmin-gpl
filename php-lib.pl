@@ -1222,7 +1222,7 @@ foreach my $ver (&list_available_php_versions($d, "fcgi")) {
 	elsif ($children && !defined($idx)) {
 		# Add before export line
 		local $found = 0;
-		for(my $e=0; $i<@$lref; $e++) {
+		for(my $e=0; $e<@$lref; $e++) {
 			if ($lref->[$e] =~ /^export\s+PHP_FCGI_CHILDREN/) {
 				splice(@$lref, $e, 0,
 				       "PHP_FCGI_CHILDREN=$children");
