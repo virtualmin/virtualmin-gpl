@@ -1354,6 +1354,9 @@ foreach my $m (@mods) {
 			# Try to install old and new versions
 			push(@pkgs, "python-psycopg", "python-psycopg2");
 			}
+		elsif ($m eq "svn") {
+			push(@pkgs, "subversion-python");
+			}
 		else {
 			$mp = lc($mp);
 			push(@pkgs, "python-".$mp);
