@@ -4,52 +4,18 @@
 # Returns a hash reference containing system information
 sub collect_system_info
 {
-local $info = { };
+&foreign_require("system-status");
+local $info = &system_status::get_collected_info();
 
-# System information
-if (&foreign_check("proc")) {
-	&foreign_require("proc", "proc-lib.pl");
-	if (defined(&proc::get_cpu_info)) {
-		local @c = &proc::get_cpu_info();
-		$info->{'load'} = \@c;
-		}
-	local @procs = &proc::list_processes();
-	$info->{'procs'} = scalar(@procs);
-	if ($config{'mem_cmd'}) {
-		# Get from custom command
-		local $out = &backquote_command($config{'mem_cmd'});
-		local @lines = split(/\r?\n/, $out);
-		$info->{'mem'} = [ map { $_/1024 } @lines ];
-		}
-	elsif (defined(&proc::get_memory_info)) {
-		local @m = &proc::get_memory_info();
-		$info->{'mem'} = \@m;
-		if ($m[0] > 128*1024*1024 && $gconfig{'os_type'} eq 'freebsd') {
-			# Some Webmin versions overstated memory by a factor
-			# of 1k on FreeBSD - fix it
-			$m[0] /= 1024;
-			$m[1] /= 1024;
-			}
-		}
-	if (&foreign_check("mount")) {
-		&require_useradmin();
-		&foreign_require("mount", "mount-lib.pl");
-		local @cfs = split(/\s+/, $config{'collect_fs'});
-	        local ($total, $free) = &mount::local_disk_space(\@cfs);
-		$info->{'disk_total'} = $total;
-		$info->{'disk_free'} = $free;
-		}
+# Memory may come from a custom command
+if ($config{'mem_cmd'}) {
+	# Get from custom command
+	local $out = &backquote_command($config{'mem_cmd'});
+	local @lines = split(/\r?\n/, $out);
+	$info->{'mem'} = [ map { $_/1024 } @lines ];
 	}
 
-# CPU and kernel
-local $out = &backquote_command(
-	"uname -r 2>/dev/null ; uname -m 2>/dev/null ; uname -s 2>/dev/null");
-local ($r, $m, $o) = split(/\r?\n/, $out);
-$info->{'kernel'} = { 'version' => $r,
-		      'arch' => $m,
-		      'os' => $o };
-
-# Available package updates
+# Available Virtualmin package updates
 if (&foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
 	local @poss = &security_updates::list_possible_updates(2);
@@ -202,29 +168,6 @@ foreach my $f ("virtualmin", @features) {
 		}
 	}
 $info->{'progs'} = \@progs;
-
-# CPU and drive temps
-local @cpu = &get_current_cpu_temps();
-$info->{'cputemps'} = \@cpu if (@cpu);
-local @drive = &get_current_drive_temps();
-$info->{'drivetemps'} = \@drive if (@drive);
-
-# IO input and output
-if ($gconfig{'os_type'} =~ /-linux$/) {
-	local $out = &backquote_command("vmstat 1 2 2>/dev/null");
-	if (!$?) {
-		local @lines = split(/\r?\n/, $out);
-		local @w = split(/\s+/, $lines[$#lines]);
-		shift(@w) if ($w[0] eq '');
-		if ($w[8] =~ /^\d+$/ && $w[9] =~ /^\d+$/) {
-			# Blocks in and out
-			$info->{'io'} = [ $w[8], $w[9] ];
-
-			# CPU user, kernel, idle, io, vm
-			$info->{'cpu'} = [ @w[12..16] ];
-			}
-		}
-	}
 
 return $info;
 }
