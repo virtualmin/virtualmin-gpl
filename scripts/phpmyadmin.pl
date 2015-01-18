@@ -356,7 +356,7 @@ if (&compare_versions($ver, "4.3") > 0) {
 	}
 elsif (&compare_versions($ver, "4.2") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
-		 "phpMyAdmin-(4\\.2\\.[0-9\\.]+)-all-languages\\.zip" );
+		 "phpMyAdmin-(4\\.2\\.[0-9\\.]+)-(all-languages|english)\\." );
 	}
 elsif (&compare_versions($ver, "4.0") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
