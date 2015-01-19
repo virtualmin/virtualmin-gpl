@@ -3050,6 +3050,15 @@ local ($d) = @_;
 return &master_admin() || &reseller_admin() || $access{'edit_spf'};
 }
 
+# can_edit_dmarc(&domain)
+# Allow master admin, resellers, domain owners with DNS options permissions
+sub can_edit_dmarc
+{
+local ($d) = @_;
+return &get_webmin_version() >= 1.732 &&
+       (&master_admin() || &reseller_admin() || $access{'edit_spf'});
+}
+
 # can_edit_records(&domain)
 # Allow master admin, resellers, domain owners with DNS records permission
 sub can_edit_records

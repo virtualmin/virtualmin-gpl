@@ -2462,6 +2462,7 @@ if (!$config{'provision_dns'}) {
 sub get_domain_spf
 {
 local ($d) = @_;
+&require_bind();
 local @recs = &get_domain_dns_records($d);
 foreach my $r (@recs) {
 	if ($r->{'type'} eq 'SPF' &&
@@ -2477,6 +2478,7 @@ return undef;
 sub save_domain_spf
 {
 local ($d, $spf) = @_;
+&require_bind();
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
 	# Domain not found!
@@ -2503,6 +2505,69 @@ foreach my $t (@types) {
 		$bump = 1;
 		}
 	elsif (!$r && $spf) {
+		# Add record
+		&bind8::create_record($file, $d->{'dom'}.'.', undef,
+				      "IN", $t, "\"$str\"");
+		$bump = 1;
+		}
+	}
+if ($bump) {
+	&post_records_change($d, $recs, $file);
+	&register_post_action(\&restart_bind, $d);
+	}
+}
+
+# get_domain_dmarc(&domain)
+# Returns the DMARC object for a domain from its DNS records, or undef.
+sub get_domain_dmarc
+{
+local ($d) = @_;
+&require_bind();
+return undef if (!defined(&bind8::parse_dmarc));
+local @recs = &get_domain_dns_records($d);
+foreach my $r (@recs) {
+	if ($r->{'type'} eq 'TXT' &&
+	    $r->{'name'} eq '_dmarc.'.$d->{'dom'}.'.') {
+		return &bind8::parse_dmarc(@{$r->{'values'}});
+		}
+	}
+return undef;
+}
+
+# save_domain_dmarc(&domain, &dmarc)
+# Updates/creates/deletes a domain's SPF record.
+sub save_domain_dmarc
+{
+local ($d, $dmarc) = @_;
+&require_bind();
+&error("DMARC is not supported by this Webmin release")
+	if (!defined(&bind8::parse_dmarc));
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if (!$file) {
+	# Domain not found!
+	return;
+	}
+local $bump = 0;
+local @types = ( "TXT" );	# DMARC may one day get its own type
+foreach my $t (@types) {
+	local ($r) = grep { $_->{'type'} eq $t &&
+			    $_->{'values'}->[0] =~ /^v=DMARC1/i &&
+			    $_->{'name'} eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
+	local $str = $dmarc ? &bind8::join_dmarc($dmarc) : undef;
+	if ($r && $dmarc) {
+		# Update record
+		&bind8::modify_record(
+			$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
+			$r->{'class'}, $r->{'type'}, "\"$str\"",
+			$r->{'comment'});
+		$bump = 1;
+		}
+	elsif ($r && !$dmarc) {
+		# Remove record
+		&bind8::delete_record($r->{'file'}, $r);
+		$bump = 1;
+		}
+	elsif (!$r && $dmarc) {
 		# Add record
 		&bind8::create_record($file, $d->{'dom'}.'.', undef,
 				      "IN", $t, "\"$str\"");
