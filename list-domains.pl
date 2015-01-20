@@ -561,6 +561,9 @@ if ($multi) {
 			$spf = &get_domain_spf($d);
 			print "    SPF DNS record: ",
 			      ($spf ? "Enabled" : "Disabled"),"\n";
+			$dmarc = &get_domain_dmarc($d);
+			print "    DMARC DNS record: ",
+			      ($dmarc ? "Enabled" : "Disabled"),"\n";
 			}
 
 		# Slave DNS servers
