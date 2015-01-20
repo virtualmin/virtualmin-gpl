@@ -1,0 +1,12 @@
+<header>DMARC policy for emails that fail SPF or DKIM</header>
+
+If a message fails SPF or DKIM validation and DMARC is enabled, this setting
+determines how the receiving mail server should handle it. The options are :
+
+<ul>
+<li><b>Take no action</b> - The message is still delivered as normal.
+<li><b>Quarantine email</b> - This is recipient-dependent, but typically means that the message will be placed into a spam folder.
+<li><b>Reject email</b> - The message will be deleted.
+</ul>
+
+<footer>

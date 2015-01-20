@@ -37,6 +37,24 @@ print &ui_table_row(&hlink($text{'spf_all'}, 'spf_all'),
 			         [ 1, $text{'spf_all1'} ],
 			         [ 0, $text{'spf_all0'} ] ]));
 
+# DMARC enabled
+$dmarc = &get_domain_dmarc($d);
+$defdmarc = &default_domain_dmarc($d);
+print &ui_table_row(&hlink($text{'spf_denabled'}, 'spf_denabled'),
+		    &ui_yesno_radio("denabled", $dmarc ? 1 : 0));
+
+# DMARC policy
+$eddmarc = $dmarc || $defdmarc;
+print &ui_table_row(&hlink($text{'spf_dp'}, 'spf_dp'),
+	&ui_select("dp", $eddmarc->{'p'},
+		  [ [ "none", $text{'tmpl_dmarcnone'} ],
+		    [ "quarantine", $text{'tmpl_dmarcquar'} ],
+		    [ "reject", $text{'tmpl_dmarcreject'} ] ]));
+
+# DMARC percent
+print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
+	&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
+
 print &ui_table_end();
 
 # DNSSEC key details
