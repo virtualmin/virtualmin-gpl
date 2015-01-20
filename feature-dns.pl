@@ -2563,10 +2563,9 @@ sub get_domain_dmarc
 {
 local ($d) = @_;
 &require_bind();
-return undef if (!defined(&bind8::parse_dmarc));
 local @recs = &get_domain_dns_records($d);
 foreach my $r (@recs) {
-	if ($r->{'type'} eq 'TXT' &&
+	if (($r->{'type'} eq 'DMARC' || $r->{'type'} eq 'TXT') &&
 	    $r->{'name'} eq '_dmarc.'.$d->{'dom'}.'.') {
 		return &parse_dmarc(@{$r->{'values'}});
 		}
@@ -2580,39 +2579,35 @@ sub save_domain_dmarc
 {
 local ($d, $dmarc) = @_;
 &require_bind();
-&error("DMARC is not supported by this Webmin release")
-	if (!defined(&bind8::parse_dmarc));
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
 	# Domain not found!
 	return;
 	}
 local $bump = 0;
-local @types = ( "TXT" );	# DMARC may one day get its own type
-foreach my $t (@types) {
-	local ($r) = grep { $_->{'type'} eq $t &&
-			    $_->{'values'}->[0] =~ /^v=DMARC1/i &&
-			    $_->{'name'} eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
-	local $str = $dmarc ? &join_dmarc($dmarc) : undef;
-	if ($r && $dmarc) {
-		# Update record
-		&bind8::modify_record(
-			$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
-			$r->{'class'}, $r->{'type'}, "\"$str\"",
-			$r->{'comment'});
-		$bump = 1;
-		}
-	elsif ($r && !$dmarc) {
-		# Remove record
-		&bind8::delete_record($r->{'file'}, $r);
-		$bump = 1;
-		}
-	elsif (!$r && $dmarc) {
-		# Add record
-		&bind8::create_record($file, $d->{'dom'}.'.', undef,
-				      "IN", $t, "\"$str\"");
-		$bump = 1;
-		}
+local ($r) = grep { ($_->{'type'} eq 'TXT' ||
+		     $_->{'type'} eq 'DMARC') &&
+		    $_->{'values'}->[0] =~ /^v=DMARC1/i &&
+		    $_->{'name'} eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
+local $str = $dmarc ? &join_dmarc($dmarc) : undef;
+if ($r && $dmarc) {
+	# Update record
+	&bind8::modify_record(
+		$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
+		$r->{'class'}, $r->{'type'}, "\"$str\"",
+		$r->{'comment'});
+	$bump = 1;
+	}
+elsif ($r && !$dmarc) {
+	# Remove record
+	&bind8::delete_record($r->{'file'}, $r);
+	$bump = 1;
+	}
+elsif (!$r && $dmarc) {
+	# Add record
+	&bind8::create_record($file, '_dmarc.'.$d->{'dom'}.'.', undef,
+			      "IN", "TXT", "\"$str\"");
+	$bump = 1;
 	}
 if ($bump) {
 	&post_records_change($d, $recs, $file);
@@ -2629,7 +2624,7 @@ return &bind8::parse_dmarc(@_) if (defined(&bind8::parse_dmarc));
 # XXX remove this once Webmin 1.740 is out for Virtualmin
 my $txt = join(" ", @_);
 if ($txt =~ /^v=dmarc1/i) {
-        local @w = split(/;/, $txt);
+        local @w = split(/;\s*/, $txt);
         local $dmarc = { };
         foreach my $w (@w) {
                 $w = lc($w);
@@ -2669,7 +2664,7 @@ while(@rv) {
                 push(@rvwords, $rvword);
                 $rvword = "";
                 }
-        $rvword .= ";" if ($rvword);
+        $rvword .= "; " if ($rvword);
         $rvword .= $w;
         }
 push(@rvwords, $rvword);

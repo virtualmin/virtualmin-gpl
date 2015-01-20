@@ -24,6 +24,11 @@ To control how SPF treats senders not in the allowed hosts list, use one of
 the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>,
 C<--spf-all-allow> or C<--spf-all-default> parameters.
 
+To enable the DMARC DNS record for a domain, use the C<--dmarc> flag - or to
+disable it, use C<--no-dmarc>. The DMARC action for other mail servers to
+perform can be set with the C<--dmarc-policy> flag, and the percentage of
+messages it should be applied to can be set with C<--dmarc-percent>.
+
 This command can also be used to add and remove DNS records from all the
 selected domains. Adding is done with the C<--add-record> flag, which must
 be followed by a single parameter containing the record name, type and value.
@@ -114,6 +119,24 @@ while(@ARGV > 0) {
 			  $1 eq "neutral" ? 1 :
 			  $1 eq "allow" ? 0 : -1;
 		}
+	elsif ($a eq "--dmarc") {
+		$dmarc = 1;
+		}
+	elsif ($a eq "--no-dmarc") {
+		$dmarc = 0;
+		}
+	elsif ($a eq "--dmarc-policy") {
+		$dmarcp = shift(@ARGV);
+		$dmarcp =~ /^(none|reject|quarantine)$/ ||
+			&usage("--dmarc-policy must be followed by none, ".
+			       "reject or quarantine");
+		}
+	elsif ($a eq "--dmarc-percent") {
+		$dmarcpct = shift(@ARGV);
+		$dmarcpct =~ /^\d+$/ && $dmarcpct >= 0 && $dmarcpct <= 100 ||
+			&usage("--dmarc-percent must be followed by an ".
+			       "integer between 0 and 100");
+		}
 	elsif ($a eq "--dns-ip") {
 		$dns_ip = shift(@ARGV);
 		&check_ipaddress($dns_ip) ||
@@ -168,7 +191,7 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
-  &usage("Nothing to do");
+  defined($dmarc) || $dmarcp || defined($dmarcpct) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -234,6 +257,25 @@ foreach $d (@doms) {
 			}
 		}
 
+	$currdmarc = &get_domain_dmarc($d);
+	if (defined($dmarc)) {
+		# Turn DMARC on or off
+		if ($dmarc == 1 && !$currdmarc) {
+			# Need to enable, with default settings
+			&$first_print($text{'spf_dmarcenable'});
+			&save_domain_dmarc($d,
+				$currdmarc = &default_domain_dmarc($d));
+			&$second_print($text{'setup_done'});
+			}
+		elsif ($dmarc == 0 && $currdmarc) {
+			# Need to disable
+			&$first_print($text{'spf_dmarcdisable'});
+			&save_domain_dmarc($d, undef);
+			&$second_print($text{'setup_done'});
+			$currdmarc = undef;
+			}
+		}
+
 	if ((%add || %rem || defined($spfall)) && $currspf) {
 		# Update a, mx ip4 and ip6 in SPF record
 		&$first_print($text{'spf_change'});
@@ -258,6 +300,19 @@ foreach $d (@doms) {
 				}
 			}
 		&save_domain_spf($d, $currspf);
+		&$second_print($text{'setup_done'});
+		}
+
+	if (($dmarcp || defined($dmarcpct)) && $currdmarc) {
+		# Update current DMARC record
+		&$first_print($text{'spf_dmarcchange'});
+		if ($dmarcp) {
+			$currdmarc->{'p'} = $dmarcp;
+			}
+		if (defined($dmarcpct)) {
+			$currdmarc->{'pct'} = $dmarcpct;
+			}
+		&save_domain_dmarc($d, $currdmarc);
 		&$second_print($text{'setup_done'});
 		}
 
@@ -383,6 +438,9 @@ print "                     [--spf-remove-ip6 address]*\n";
 print "                     [--spf-all-disallow | --spf-all-discourage |\n";
 print "                      --spf-all-neutral | --spf-all-allow |\n";
 print "                      --spf-all-default]\n";
+print "                     [--dmarc | --no-dmarc]\n";
+print "                     [--dmarc-policy none|quarantine|reject]\n";
+print "                     [--dmarc-percent number]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--remove-record \"name type [value]\"]\n";
