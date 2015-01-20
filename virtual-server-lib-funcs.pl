@@ -3055,8 +3055,7 @@ return &master_admin() || &reseller_admin() || $access{'edit_spf'};
 sub can_edit_dmarc
 {
 local ($d) = @_;
-return &get_webmin_version() >= 1.732 &&
-       (&master_admin() || &reseller_admin() || $access{'edit_spf'});
+return &master_admin() || &reseller_admin() || $access{'edit_spf'};
 }
 
 # can_edit_records(&domain)
@@ -8328,6 +8327,9 @@ push(@rv, { 'id' => 0,
 	    'dns_spfhosts' => $config{'bind_spfhosts'},
 	    'dns_spfincludes' => $config{'bind_spfincludes'},
 	    'dns_spfall' => $config{'bind_spfall'},
+	    'dns_dmarc' => $config{'bind_dmarc'} || "none",
+	    'dns_dmarcp' => $config{'bind_dmarcp'} || "none",
+	    'dns_dmarcpct' => $config{'bind_dmarcpct'} || 100,
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
@@ -8613,6 +8615,10 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_spfhosts'} = $tmpl->{'dns_spfhosts'};
 	$config{'bind_spfincludes'} = $tmpl->{'dns_spfincludes'};
 	$config{'bind_spfall'} = $tmpl->{'dns_spfall'};
+	$config{'bind_dmarc'} = $tmpl->{'dns_dmarc'} eq 'none' ?
+					undef : $tmpl->{'dns_dmarc'};
+	$config{'bind_dmarcp'} = $tmpl->{'dns_dmarcp'};
+	$config{'bind_dmarcpct'} = $tmpl->{'dns_dmarcpct'};
 	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
 							   : $tmpl->{'dns_sub'};
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
@@ -8838,7 +8844,7 @@ if (!$tmpl->{'default'}) {
 	local $def = $tmpls[0];
 	local $p;
 	local %done;
-	foreach $p ("dns_spf", "dns_sub", "dns_master",
+	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_dmarc",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell",
 		    "mailboxlimit", "domslimit",

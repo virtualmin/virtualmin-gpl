@@ -2279,6 +2279,28 @@ print &ui_table_row(&hlink($text{'tmpl_spfall'},
 		    [ 1, $text{'tmpl_spfall1'} ],
 		    [ 2, $text{'tmpl_spfall2'} ] ]));
 
+print &ui_table_hr();
+
+# Option for DMARC record
+print &ui_table_row(&hlink($text{'tmpl_dmarc'},
+                           "template_dns_dmarc_mode"),
+	&none_def_input("dns_dmarc", $tmpl->{'dns_dmarc'},
+		        $text{'tmpl_dmarcyes'}, 0, 0, $text{'no'},
+			[ "dns_dmarcp", "dns_dmarcpct" ]));
+
+# DMARC policy
+print &ui_table_row(&hlink($text{'tmpl_dmarcp'},
+			   "template_dns_dmarcp"),
+	&ui_radio("dns_dmarcp", $tmpl->{'dns_dmarcp'},
+		  [ [ "none", $text{'tmpl_dmarcnone'} ],
+		    [ "quarantine", $text{'tmpl_dmarcquar'} ],
+		    [ "reject", $text{'tmpl_dmarcreject'} ] ]));
+
+# DMARC percentage
+print &ui_table_row(&hlink($text{'tmpl_dmarcpct'},
+			   "template_dns_dmarcpct"),
+	&ui_textbox("dns_dmarcpct", $tmpl->{'dns_dmarcpct'}, 5)."%");
+
 if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
 
@@ -2425,6 +2447,16 @@ $tmpl->{'dns_spfhosts'} = $in{'dns_spfhosts'};
 $tmpl->{'dns_spfincludes'} = $in{'dns_spfincludes'};
 $tmpl->{'dns_spfall'} = $in{'dns_spfall'};
 
+# Save DMARC
+$tmpl->{'dns_dmarc'} = $in{'dns_dmarc_mode'} == 0 ? "none" :
+		       $in{'dns_dmarc_mode'} == 1 ? undef : "yes";
+if ($in{'dns_dmarc_mode'} == 2) {
+	$in{'dns_dmarcpct'} =~ /^\d+$/ && $in{'dns_dmarcpct'} >= 0 &&
+	  $in{'dns_dmarcpct'} <= 100 || &error($text{'tmpl_edmarcpct'});
+	}
+$tmpl->{'dns_dmarcp'} = $in{'dns_dmarcp'};
+$tmpl->{'dns_dmarcpct'} = $in{'dns_dmarcpct'};
+
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 		     $in{'dns_sub_mode'} == 1 ? undef : "yes";
@@ -2528,7 +2560,7 @@ local @recs = &get_domain_dns_records($d);
 foreach my $r (@recs) {
 	if ($r->{'type'} eq 'TXT' &&
 	    $r->{'name'} eq '_dmarc.'.$d->{'dom'}.'.') {
-		return &bind8::parse_dmarc(@{$r->{'values'}});
+		return &parse_dmarc(@{$r->{'values'}});
 		}
 	}
 return undef;
@@ -2553,7 +2585,7 @@ foreach my $t (@types) {
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=DMARC1/i &&
 			    $_->{'name'} eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
-	local $str = $dmarc ? &bind8::join_dmarc($dmarc) : undef;
+	local $str = $dmarc ? &join_dmarc($dmarc) : undef;
 	if ($r && $dmarc) {
 		# Update record
 		&bind8::modify_record(
@@ -2578,6 +2610,62 @@ if ($bump) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
+}
+
+# parse_dmarc(text, ...)
+# If some text looks like an DMARC TXT record, return a parsed hash ref
+sub parse_dmarc
+{
+&require_bind();
+return &bind8::parse_dmarc(@_) if (defined(&bind8::parse_dmarc));
+# XXX remove this once Webmin 1.740 is out for Virtualmin
+my $txt = join(" ", @_);
+if ($txt =~ /^v=dmarc1/i) {
+        local @w = split(/;/, $txt);
+        local $dmarc = { };
+        foreach my $w (@w) {
+                $w = lc($w);
+                if ($w =~ /^(v|pct|ruf|rua|p|sp|adkim|aspf)=(\S+)$/i) {
+                        $dmarc->{$1} = $2;
+                        }
+                else {
+                        push(@{$dmarc->{'other'}}, $w);
+                        }
+                }
+        return $dmarc;
+        }
+return undef;
+}
+
+# join_dmarc(&dmarc)
+# Converts a DMARC record structure to a string, designed to be inserted into
+# quotes in a TXT record. If it is longer than 255 bytes, it will be split
+# into multiple quoted strings.
+sub join_dmarc
+{
+local ($dmarc) = @_;
+&require_bind();
+return &bind8::parse_dmarc(@_) if (defined(&bind8::parse_dmarc));
+local @rv = ( "v=DMARC1" );
+foreach my $s ("pct", "ruf", "rua", "p", "sp", "adkim", "aspf") {
+        if ($dmarc->{$s} ne '') {
+                push(@rv, $s."=".$dmarc->{$s});
+                }
+        }
+push(@rv, @{$dmarc->{'other'}});
+local @rvwords;
+local $rvword;
+while(@rv) {
+        my $w = shift(@rv);
+        if (length($rvword)+length($w)+1 >= 255) {
+                push(@rvwords, $rvword);
+                $rvword = "";
+                }
+        $rvword .= ";" if ($rvword);
+        $rvword .= $w;
+        }
+push(@rvwords, $rvword);
+return join("\" \"", @rvwords);
 }
 
 # get_domain_dns_records(&domain)
@@ -2759,6 +2847,19 @@ if ($d->{'ip6'} && $d->{'ip6'} ne $defip6) {
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
 return $spf;
+}
+
+# default_domain_dmarc(&domain)
+# Returns a default DMARC object for a domain, based on its template
+sub default_domain_dmarc
+{
+local ($d) = @_;
+local $tmpl = &get_template($d->{'template'});
+local $dmarc = { 'p' => $tmpl->{'dns_dmarcp'} || 'none',
+		 'pct' => $tmpl->{'dns_dmarcpct'} || '100',
+		 'ruf' => 'mailto:'.$d->{'emailto'},
+		 'rua' => 'mailto:'.$d->{'emailto'} };
+return $dmarc;
 }
 
 # text_to_named_conf(text)
