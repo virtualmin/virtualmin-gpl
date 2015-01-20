@@ -1155,6 +1155,14 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					      "IN", "SPF", "\"$str\"");
 			}
 		}
+
+	# Add DMARC record for domain, if defined and if it's not a sub-domain
+	if ($tmpl->{'dns_dmarc'} ne "none" &&
+	    !$d->{'dns_submode'}) {
+		local $str = &join_dmarc(&default_domain_dmarc($d));
+		&bind8::create_record($file, "_dmarc.".$withdot, undef,
+				      "IN", "TXT", "\"$str\"");
+		}
 	}
 
 if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
@@ -2645,7 +2653,7 @@ sub join_dmarc
 {
 local ($dmarc) = @_;
 &require_bind();
-return &bind8::parse_dmarc(@_) if (defined(&bind8::parse_dmarc));
+return &bind8::join_dmarc(@_) if (defined(&bind8::join_dmarc));
 local @rv = ( "v=DMARC1" );
 foreach my $s ("pct", "ruf", "rua", "p", "sp", "adkim", "aspf") {
         if ($dmarc->{$s} ne '') {
