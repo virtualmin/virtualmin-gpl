@@ -4780,6 +4780,9 @@ spf_public=DNSSEC public key
 spf_private=DNSSEC private key
 spf_dmarcenable=Creating DMARC record ..
 spf_dmarcdisable=Removing DMARC record ..
+spf_denabled=DMARC record enabled?
+spf_dp=DMARC policy for emails that fail SPF or DKIM
+spf_dpct=Percentage of messages to apply policy
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed
 s3_elist=Failed to list S3 buckets : $1

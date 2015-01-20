@@ -13,6 +13,7 @@ $oldd = { %$d };
 &obtain_lock_dns($d);
 $spf = &get_domain_spf($d);
 if ($in{'enabled'}) {
+	# Turn on and update SPF record
 	$spf ||= &default_domain_spf($d);
 	$defspf = &default_domain_spf($d);
 	foreach $t ('a', 'mx', 'ip4', 'ip6', 'include') {
@@ -49,8 +50,24 @@ if ($in{'enabled'}) {
 	&save_domain_spf($d, $spf);
 	}
 else {
-	# Just turn off
+	# Just turn off SPF record
 	&save_domain_spf($d, undef);
+	}
+
+$dmarc = &get_domain_dmarc($d);
+if ($in{'denabled'}) {
+	# Turn on and update DMARC record
+	$dmarc ||= &default_domain_dmarc($d);
+	$defdmarc = &default_domain_dmarc($d);
+	$dmarc->{'p'} = $in{'dp'};
+	$in{'dpct'} =~ /^\d+$/ && $in{'dpct'} >= 0 &&
+	  $in{'dpct'} <= 100 || &error($text{'tmpl_edmarcpct'});
+	$dmarc->{'pct'} = $in{'dpct'};
+	&save_domain_dmarc($d, $dmarc);
+	}
+else {
+	# Just turn off DMARC record
+	&save_domain_dmarc($d, undef);
 	}
 
 &modify_dns($d, $oldd);
