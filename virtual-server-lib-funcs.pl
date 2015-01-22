@@ -6426,7 +6426,7 @@ if (!$_[3]->{'fix'}) {
 			local $newdir = $_[0]->{'home'};
 			foreach my $sinfo (&list_domain_scripts($_[0])) {
 				$sinfo->{'opts'}->{'dir'} =~
-				       s/^\Q$olddir\E\//$newdir\//);
+				       s/^\Q$olddir\E\//$newdir\//;
 				&save_domain_script($_[0], $sinfo);
 				}
 			}
