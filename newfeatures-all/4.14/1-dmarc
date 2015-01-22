@@ -1,0 +1,6 @@
+desc=DMARC DNS records
+html=Added support for creating and editing DMARC DNS records for virtual servers, which specify a policy for other mail servers to be applied to email that does not pass SPF or DKIM validation.
+master=1
+reseller=1
+owner=1
+link=edit_spf.cgi?dom=${ID}
