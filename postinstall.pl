@@ -136,8 +136,10 @@ local $lowmem;
 &foreign_require("proc", "proc-lib.pl");
 if (defined(&proc::get_memory_info)) {
 	local ($real) = &proc::get_memory_info();
-	if ($real*1024 <= 384*1024*1024) {
-		# Less that 384 M .. don't preload
+	local $arch = &backquote_command("uname -m 2>/dev/null");
+	local $megs = $arch =~ /x86_64/ ? 512 : 384;
+	if ($real*1024 <= $megs*1024*1024) {
+		# Less that 384 M (or 512 M with 64-bit) .. don't preload
 		$lowmem = 1;
 		}
 	}
