@@ -467,11 +467,11 @@ foreach my $desturl (@$desturls) {
 					}
 				}
 			}
-		if (@$desturls == 1) {
-			$onebyone = 0;	# Local backups are always written
-					# to the destination directly
-			}
 		}
+	}
+if (!$anyremote) {
+	# If all backups are local, there is no point transferring one by one
+	$onebyone = 0;
 	}
 
 if (!$homefmt) {
