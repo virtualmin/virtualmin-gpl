@@ -2519,14 +2519,14 @@ sub save_domain_spf
 {
 local ($d, $spf) = @_;
 &require_bind();
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
-if (!$file) {
-	# Domain not found!
-	return;
-	}
-local $bump = 0;
 local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
 foreach my $t (@types) {
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
+		# Domain not found!
+		return;
+		}
+	local $bump = 0;
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=spf/ &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
@@ -2550,10 +2550,10 @@ foreach my $t (@types) {
 				      "IN", $t, "\"$str\"");
 		$bump = 1;
 		}
-	}
-if ($bump) {
-	&post_records_change($d, $recs, $file);
-	&register_post_action(\&restart_bind, $d);
+	if ($bump) {
+		&post_records_change($d, $recs, $file);
+		&register_post_action(\&restart_bind, $d);
+		}
 	}
 }
 
