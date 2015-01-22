@@ -6406,7 +6406,8 @@ if (!$_[3]->{'fix'}) {
 		}
 	if (-r $_[1]."_scripts") {
 		# Also restore script logs
-		&execute_command("rm -rf ".quotemeta("$script_log_directory/$_[0]->{'id'}"));
+		&execute_command("rm -rf ".
+			quotemeta("$script_log_directory/$_[0]->{'id'}"));
 		if (-s $_[1]."_scripts") {
 			if (!-d $script_log_directory) {
 				&make_dir($script_log_directory, 0755);
@@ -6417,6 +6418,17 @@ if (!$_[3]->{'fix'}) {
 			 " && ".
 			 &make_tar_command("xf",
 				quotemeta($_[1]."_scripts"), "."));
+			}
+
+		# Fix up home dir on scripts
+		if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+			local $olddir = $_[5]->{'home'};
+			local $newdir = $_[0]->{'home'};
+			foreach my $sinfo (&list_domain_scripts($_[0])) {
+				$sinfo->{'opts'}->{'dir'} =~
+				       s/^\Q$olddir\E\//$newdir\//);
+				&save_domain_script($_[0], $sinfo);
+				}
 			}
 		}
 	if (-r $_[1]."_saved_aliases") {
