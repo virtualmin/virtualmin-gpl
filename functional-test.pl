@@ -416,6 +416,58 @@ $domains_tests = [
 	  'fail' => 1,
 	},
 
+	# Disable SPF, then re-enable
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-spf' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'spf' ] ],
+	},
+
+	# Verify the record
+	{ 'command' => 'dig TXT '.$test_domain,
+	  'grep' => 'spf',
+	},
+
+	# Disable SPF again
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-spf' ] ],
+	},
+
+	# Verify the record is gone
+	{ 'command' => 'dig TXT '.$test_domain,
+	  'antigrep' => 'spf',
+	},
+
+	# Disable DMARC, then re-enable
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-dmarc' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dmarc' ] ],
+	},
+
+	# Verify the record
+	{ 'command' => 'dig TXT _dmarc.'.$test_domain,
+	  'grep' => 'DMARC',
+	},
+
+	# Disable DMARC again
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'no-dmarc' ] ],
+	},
+
+	# Verify the record is gone
+	{ 'command' => 'dig TXT _dmarc.'.$test_domain,
+	  'antigrep' => 'DMARC',
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
