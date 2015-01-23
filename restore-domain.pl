@@ -7,10 +7,10 @@ Restore one or more virtual servers
 To restore a Virtualmin backup from the command line, you will need to use
 this program. It takes very similar parameters to C<backup-domain>, with the
 exceptions that C<--dest> is replace with C<--source>, and the C<--separate> and
-C<--ignore-errors> options are not used. The extra option C<--reuid> can be
-specified to force the re-allocation of Unix UIDs and GIDs for virtual servers
-that are created by the restore process, which is usually a good idea as the
-IDs in the backup file may already be in use.
+C<--ignore-errors> options are not used. The extra option C<--no-reuid> can be
+specified prevent the re-allocation of Unix UIDs and GIDs for virtual servers
+that are created by the restore process, so that UIDs the original system
+are preserved.
 
 Specific features to restore can be selected with the C<--feature> flag,
 followed by a feature name like C<dns> to just restore a domain's DNS records.
