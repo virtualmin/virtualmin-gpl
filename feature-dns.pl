@@ -2858,10 +2858,11 @@ sub default_domain_dmarc
 {
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
+local $pm = 'postmaster@'.$d->{'dom'};
 local $dmarc = { 'p' => $tmpl->{'dns_dmarcp'} || 'none',
 		 'pct' => $tmpl->{'dns_dmarcpct'} || '100',
-		 'ruf' => 'mailto:'.$d->{'emailto'},
-		 'rua' => 'mailto:'.$d->{'emailto'} };
+		 'ruf' => 'mailto:'.$pm,
+		 'rua' => 'mailto:'.$pm, };
 return $dmarc;
 }
 
