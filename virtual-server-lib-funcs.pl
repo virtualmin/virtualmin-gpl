@@ -10725,7 +10725,9 @@ return ($home-$dbq, $mail, $db);
 sub compute_prefix
 {
 local ($name, $group, $parent, $creating) = @_;
-$name =~ s/^xn(-+)//;	# Strip IDN part
+if ($config{'longname'} != 1) {
+	$name =~ s/^xn(-+)//;	# Strip IDN part
+	}
 if ($config{'longname'} == 1) {
 	# Prefix is same as domain name
 	return $name;
