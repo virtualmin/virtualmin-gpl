@@ -565,6 +565,7 @@ local @errdoms;
 local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
 local %donedoms;				# Map from domain name->hash
+local $failalldoms;
 DOMAIN: foreach $d (@$doms) {
 	# Force lock and re-read the domain in case it has changed
 	&obtain_lock_everything($d);
@@ -659,6 +660,10 @@ DOMAIN: foreach $d (@$doms) {
 			}
 		}
 
+	# Turn off quotas for the domain so that writes as the domain owner
+	# don't fail
+	&disable_quotas($d);
+
 	&$indent_print();
 	foreach $f (@backupfeatures) {
 		local $bfunc = "backup_$f";
@@ -709,7 +714,8 @@ DOMAIN: foreach $d (@$doms) {
 				$ok = 0;
 				$errcount++;
 				push(@errdoms, $d);
-				last DOMAIN;
+				$failalldoms = 1;
+				goto DOMAINFAILED;
 				}
 			push(@donedoms, &clean_domain_passwords($d));
 			}
@@ -719,9 +725,11 @@ DOMAIN: foreach $d (@$doms) {
 		}
 
 	DOMAINFAILED:
+	&enable_quotas($d);
 	if ($lockdir) {
 		&unlock_file($lockdir);
 		}
+	last if ($failalldoms);
 	$donefeatures{$d->{'dom'}} = \@donefeatures;
 	$donedoms{$d->{'dom'}} = $d;
 	if ($dok) {

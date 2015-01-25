@@ -946,7 +946,6 @@ local %info = ( 'hosts' => join(' ', @hosts) );
 # Back them all up
 local $db;
 local $ok = 1;
-&disable_quotas($d);
 foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
 	local $dbfile = $file."_".$db;
@@ -973,7 +972,6 @@ foreach $db (@dbs) {
 			}
 		}
 	}
-&enable_quotas($d);
 return $ok;
 }
 
