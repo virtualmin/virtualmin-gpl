@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8.
+html=Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8, and Roundcube to 3.0.3.
 master=1
 reseller=1
 domain=1
