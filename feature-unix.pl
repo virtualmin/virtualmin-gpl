@@ -495,8 +495,10 @@ elsif ($d->{'enc_pass'}) {
 		}
 	}
 
-# Compare the domain's user and group quotas with reality
-if (&has_home_quotas()) {
+# Compare the domain's user and group quotas with reality (unless a backup is
+# in progress, as this can disable quotas temporarily)
+&require_useradmin();
+if (&has_home_quotas() && !&test_lock($useradmin::config{'passwd_file'})) {
 	# Domain owner's Unix quota
 	local $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
 						     : $user->{'softquota'};
