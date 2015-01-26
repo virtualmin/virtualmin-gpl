@@ -5788,6 +5788,58 @@ $quota_tests = [
 	  'timeout' => 60,
 	},
 
+	# Remove the user
+	{ 'command' => 'delete-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ] ],
+	},
+
+	# Enable some more features for backing up
+	{ 'command' => 'enable-feature.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ $web ], [ 'dns' ], [ 'mail' ],
+                      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+                      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+                      [ 'spam' ], [ 'virus' ], [ 'webmin' ] ],
+	},
+
+	# Fill up quota for the domain again
+	{ 'command' => &command_as_user($test_full_user, 0, "dd if=/dev/zero of=/home/$test_domain_user/homes/$test_user/junk bs=1024 count=20480"),
+	  'fail' => 1,
+	},
+
+	# Test a backup to a single file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Backup to a temp dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ] ],
+	},
+
+	# Backup to a temp dir (old format)
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'separate' ],
+		      [ 'dest', $test_backup_dir ] ],
+	},
+
+	# Backup to a file under the home dir, as the user - which will fail
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'asowner' ],
+		      [ 'dest', $test_domain_home.'/backup.tar.gz' ] ],
+	  'fail' => 1,
+	},
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],

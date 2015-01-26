@@ -37,16 +37,11 @@
  - Backup to Google Cloud Files & Dropbox
 	- Dropbox support
 
- - Theme function for right side
-	- New theme should handle Virtualmin and Cloudmin http://virtualmin.com/node/35876
-
  - Mobile theme should use new menu function (but maybe wait till new release)
 	- and right-frame info too
  
  - Password reset for domain owners
 	- http://virtualmin.com/node/35362
 
- - DMARC support
-	- http://virtualmin.com/node/35680
-	- DMARC DNS record option
-
+ - Upgrade to latest Net::Amazon::S3
+	- http://virtualmin.com/node/35937
