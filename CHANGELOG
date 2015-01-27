@@ -1479,6 +1479,6 @@ All operations performed by Virtualmin on files in a domain's home directory are
 Added the Disassociate Features page for adding and removing features from a virtual server without actually changing the underlying configuration files.
 Added APIs that allow Virtualmin to define the preferred left and right frame contents for a theme, rather than requiring theme authors to write code for this.
 ---- Changes since 4.13 ----
-Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8, Django to 1.7.3 and 1.4.18, FengOffice to 3.0.3, Ghost to 0.5.8, Moodle to 2.8.2, X2CRM to 5.0.2, CMS Made Simple to 1.11.12, Trac to 1.0.3, phpMyFAQ to 2.8.19, OpenCart to 2.0.1.1, Roundcube to 1.0.5, and PiWik to 2.10.0.
+Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8, Django to 1.7.3 and 1.4.18, FengOffice to 3.0.3, Ghost to 0.5.8, Moodle to 2.8.2, X2CRM to 5.0.2, CMS Made Simple to 1.11.12, Trac to 1.0.3, phpMyFAQ to 2.8.19, OpenCart to 2.0.1.1, Roundcube to 1.0.5, Mantis to 1.2.19, and PiWik to 2.10.0.
 SNI (multiple SSL certs on the same IP) is now always assumed to be usable by clients, as long as the web server supports it.
 Added support for creating and editing DMARC DNS records for virtual servers, which specify a policy for other mail servers to be applied to email that does not pass SPF or DKIM validation.
