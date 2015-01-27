@@ -285,7 +285,7 @@ while(@ARGV > 0) {
 	       $a eq "--limits-from-plan") {
 		$tlimit = 1;
 		}
-	elsif ($a eq "--prefix") {
+	elsif ($a eq "--prefix" || $a eq "--suffix") {
 		$prefix = shift(@ARGV);
 		}
 	elsif ($a eq "--db") {
@@ -889,7 +889,7 @@ if ($config{'bw_active'}) {
 print "                        [--template \"name\"]\n";
 print "                        [--plan \"name\"]\n";
 print "                        [--limits-from-plan]\n";
-print "                        [--prefix username-prefix]\n";
+print "                        [--suffix username-prefix]\n";
 print "                        [--db database-name]\n";
 print "                        [--fwdto email-address]\n";
 print "                        [--reseller name]\n";
