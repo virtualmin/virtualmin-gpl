@@ -4011,12 +4011,12 @@ $webmin_tests = [
 	},
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/left.cgi",
-	  'grep' => [ '<body', '</body>', 'Search:', '<select' ],
+	  'grep' => [ '<body', '</body>', '<select' ],
 	},
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/right.cgi",
 	  'grep' => [ '<body', '</body>', 'System hostname',
-		      $virtualmin_pro ? ( 'Virtualmin Licenses' ) : ( ) ],
+		      $virtualmin_pro ? ( 'Virtualmin License' ) : ( ) ],
 	},
 
 	# Create a test domain
