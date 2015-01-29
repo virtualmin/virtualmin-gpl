@@ -2,7 +2,7 @@
 # Common functions for Virtualmin
 
 BEGIN { push(@INC, ".."); };
-eval "use WebminCore;";
+use WebminCore;
 
 &init_config();
 if (&indexof($module_root_directory, @INC) < 0) {
