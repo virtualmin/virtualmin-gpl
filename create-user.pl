@@ -344,7 +344,7 @@ if ($user->{'email'} && !$user->{'nomailfile'}) {
 	}
 
 # Send an email upon creation
-if (!$nocreationmail) {
+if (!$nocreationmail && $user->{'email'}) {
 	@erv = &send_user_email($d, $user, undef, 0);
 	}
 
