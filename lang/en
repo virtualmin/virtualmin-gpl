@@ -6622,6 +6622,7 @@ right_faliases=Mail aliases
 right_fdbs=Databases
 right_quota=Disk usage and quota
 right_bw=Bandwith usage and limit
+right_of=$1 out of $2
 
 assoc_title=Associate and Dis-Associate Features
 assoc_desc=Features enabled or disabled on this page will not update any system configuration files - instead, only Virtualmin's database of features it expects a domain to have will be changed. This can be used to import a feature that has been setup manually, or to disconnect a configuration so that it is preserved when a virtual server is deleted.
