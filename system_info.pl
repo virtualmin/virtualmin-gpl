@@ -1,6 +1,6 @@
 # Provide more system info blocks specific to Virtualmin
 
-require 'virtual-server-lib.pl';
+do 'virtual-server-lib.pl';
 use Time::Local;
 
 sub list_system_info
