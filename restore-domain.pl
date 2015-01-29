@@ -17,6 +17,16 @@ followed by a feature name like C<dns> to just restore a domain's DNS records.
 However in most cases you will want to a full restore, in which case the
 C<--all-features> parameter should be given.
 
+Restore options for specific features can be set with the C<--option> flag
+followed by a feature name (like I<mail>), an option name and value. Some of
+the more useful options are :
+
+C<--option mail mailuser XXX> - restores only the mailbox XXX.
+
+C<--option dir dirnohomes 1> - exclude the C<homes> subdirectory from backups.
+
+C<--option dir delete 1> - delete files that were not in the original backup.
+
 If a virtual server that does not currently exist is selected to be restored,
 it will be created as part of the restore process. Be careful using this
 program, as it will not prompt for confirmation before restoring, which will
