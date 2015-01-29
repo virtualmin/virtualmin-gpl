@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8, Django to 1.7.3 and 1.4.18, FengOffice to 3.0.3, Ghost to 0.5.8, Moodle to 2.8.2, X2CRM to 5.0.2, CMS Made Simple to 1.11.12, Trac to 1.0.3, phpMyFAQ to 2.8.19, OpenCart to 2.0.1.1, Roundcube to 1.0.5, Mantis to 1.2.19, Node.JS to 0.10.36, and PiWik to 2.10.0.
+html=Updated the phpMyAdmin script installer to version 4.3.8 and 4.0.10.8, Django to 1.7.4 and 1.4.19, FengOffice to 3.0.3, Ghost to 0.5.8, Moodle to 2.8.2, X2CRM to 5.0.2, CMS Made Simple to 1.11.12, Trac to 1.0.3, phpMyFAQ to 2.8.19, OpenCart to 2.0.1.1, Roundcube to 1.0.5, Mantis to 1.2.19, Node.JS to 0.10.36, and PiWik to 2.10.0.
 master=1
 reseller=1
 domain=1
