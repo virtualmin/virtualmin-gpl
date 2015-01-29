@@ -4211,8 +4211,16 @@ local $mail = { 'headers' => [ [ 'From', $from ||
 			       [ 'Subject', &entities_to_ascii($subject) ],
 			     ],
 		'attach' => [ $attach ] };
-&mailboxes::send_mail($mail);
-return (1, &text('mail_ok', $to));
+eval {
+	local $main::error_must_die = 1;
+	&mailboxes::send_mail($mail);
+	};
+if ($@) {
+	return (0, $@);
+	}
+else {
+	return (1, &text('mail_ok', $to));
+	}
 }
 
 # send_notify_email(from, &doms|&users, [&dom], subject, body,
