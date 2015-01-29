@@ -1,6 +1,6 @@
 # Function to generate the left menu
 
-require 'virtual-server-lib.pl';
+do 'virtual-server-lib.pl';
 
 # list_webmin_menu(&data, &in)
 # Returns items for the Virtualmin left menu
