@@ -4626,6 +4626,7 @@ $wildcard_tests = [
 		      [ 'shared-ip', '$SHARED_IP' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared clash' ],
+		      [ 'skip-warnings' ],
 		      @create_args, ],
         },
 
@@ -4677,6 +4678,7 @@ $wildcard_tests = [
 	# Enable SSL on that conflicting domain, which should by allowed by SNI
 	{ 'command' => 'enable-feature.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'skip-warnings' ],
 		      [ $ssl ] ],
 	},
 
@@ -4994,7 +4996,7 @@ $plugin_tests = [
 		# Test SVN URL
 		{ 'command' => $wget_command.'-S http://'.$test_domain.'/svn',
 		  'ignorefail' => 1,
-		  'grep' => 'Authorization Required',
+		  'grep' => 'Authorization Required|Forbidden',
 		},
 
 		# Check for SVN config files
