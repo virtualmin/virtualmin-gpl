@@ -220,6 +220,8 @@ index_sched=Scheduled Backup
 index_scheds=Scheduled Backups
 index_scheddesc=Click this button to schedule a regular backup. A form for choosing which servers to backup on schedule, what features to save and where to backup to will be displayed.
 index_schedsdesc=Click this button to display a list of existing scheduled backups, and to add new ones or manage those that exist.
+index_running=Running Backups
+index_runningdesc=Show all scheduled backups that are currently running, so that they can be cancelled.
 index_restore=Restore Backup
 index_restoredesc=Click the button to restore a previous backup. A form for choosing the backup file, servers to extract and features to restore will be displayed.
 index_backuplog=Backup Logs
@@ -6631,5 +6633,15 @@ assoc_features=Features known to Virtualmin
 assoc_validate=Require successful validation before saving?
 assoc_err=Failed to associate features
 assoc_evalidate=Validation failed for $1 : $2
+
+running_title=Running Backups
+running_stop=Stop Selected Backups
+running_started=Started at
+running_mode=Started from
+running_none=No Virtualmin backups are currently running.
+running_web=Web UI
+running_cmd=Virtualmin API
+running_cron=Scheduled backup
+running_link=Visit the <a href='$1'>scheduled backups</a> page to create backups that run in the background on a regular schedule, or the <a href='$2'>backup logs</a> page to see backups that have already completed.
 
 __norefs=1

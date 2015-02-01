@@ -3871,6 +3871,12 @@ if (&can_backup_domain()) {
 		push(@titles, $text{'index_scheds'});
 		push(@descs, $text{'index_schedsdesc'});
 		push(@codes, 'sched');
+
+		# Also show any running backups
+		push(@links, "list_running.cgi");
+		push(@titles, $text{'index_running'});
+		push(@descs, $text{'index_runningdesc'});
+		push(@codes, 'running');
 		}
 	# Can do immediate
 	push(@links, "backup_form.cgi");
