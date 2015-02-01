@@ -31,6 +31,7 @@ while(@ARGV > 0) {
 	}
 ($sched) = grep { $_->{'id'} == $id } &list_scheduled_backups();
 $sched || &usage("No scheduled backup with ID $id exists");
+&start_running_backup($sched);
 
 # Work out what will be backed up
 if ($sched->{'all'} == 1) {
@@ -277,6 +278,9 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 			}
 		}
 	}
+
+# Backup is done
+&stop_running_backup($sched);
 
 # Override print functions to capture output
 sub first_save_print

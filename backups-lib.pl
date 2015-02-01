@@ -4717,5 +4717,56 @@ if ($ipinfo->{'ip6'}) {
 	}
 }
 
+# start_running_backup(&backup)
+# Write out a status file indicating that some backup is running
+sub start_running_backup
+{
+my ($sched) = @_;
+if (!-d $backups_running_dir) {
+	&make_dir($backups_running_dir, 0700);
+	}
+my $file = $backups_running_dir."/".$sched->{'id'}."-".$$;
+my %hash = %$sched;
+$hash{'pid'} = $$;
+$hash{'scripttype'} = $main::webmin_script_type;
+$hash{'started'} = time();
+if ($main::webmin_script_type eq 'cgi') {
+	$hash{'webminuser'} = $remote_user;
+	}
+&write_file($file, \%hash);
+}
+
+# stop_running_backup(&backup)
+# Clear the status file indicating that some backup is running
+sub stop_running_backup
+{
+my ($sched) = @_;
+my $file = $backups_running_dir."/".$sched->{'id'}."-".$$;
+unlink($file);
+}
+
+# list_running_backups()
+# Returns a list of the hash refs for currently running backups
+sub list_running_backups
+{
+my @rv;
+opendir(RUNNING, $backups_running_dir);
+my @files = readdir(RUNNING);
+closedir(RUNNING);
+foreach my $f (@files) {
+	next if ($f eq "." || $f eq "..");
+	next if ($f !~ /^(\S+)\-(\d+)$/);
+	my %sched;
+	&read_file("$backups_running_dir/$f", \%sched) || next;
+	if ($sched{'pid'} && kill(0, $sched{'pid'})) {
+		push(@rv, \%sched);
+		}
+	else {
+		unlink("$backups_running_dir/$f");
+		}
+	}
+return @rv;
+}
+
 1;
 

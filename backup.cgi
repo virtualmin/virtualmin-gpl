@@ -34,6 +34,11 @@ if ($in{'bg'}) {
 	exit;
 	}
 
+# Flag backup as started
+if ($sched) {
+	&start_running_backup($sched);
+	}
+
 # Validate inputs
 if ($in{'all'} == 1) {
 	# All domains
@@ -265,3 +270,7 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
+# Flag backup as done
+if ($sched) {
+	&stop_running_backup($sched);
+	}

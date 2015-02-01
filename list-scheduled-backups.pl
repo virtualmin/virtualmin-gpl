@@ -73,6 +73,7 @@ elsif ($reseller) {
 
 if ($multi) {
 	# Show all details
+	%running = map { $_->{'id'}, $_ } &list_running_backups();
 	foreach my $s (@scheds) {
 		print "$s->{'id'}\n";
 		print "    Domains: ",&make_nice_dnames($s),"\n";
@@ -122,6 +123,15 @@ if ($multi) {
 			$s->{'email_err'} ? "Only on failure" : "Always","\n";
 		print "    Notify domain owners: ",
 			$s->{'email_doms'} ? "Yes" : "No","\n";
+		$r = $running{$s->{'id'}};
+		if ($r) {
+			print "    Running: Yes\n";
+			print "    Started at: ",&make_date($r->{'started'}),"\n";
+			print "    Process ID: ",$r->{'pid'},"\n";
+			}
+		else {
+			print "    Running: No\n";
+			}
 		}
 	}
 else {
