@@ -4774,5 +4774,16 @@ foreach my $f (@files) {
 return @rv;
 }
 
+# kill_running_backup(&sched)
+# Kills one scheduled running backup
+sub kill_running_backup
+{
+my ($sched) = @_;
+$sched->{'pid'} || &error("Backup has no PID!");
+&kill_logged(9, $sched->{'pid'});
+my $file = $backups_running_dir."/".$sched->{'id'}."-".$sched->{'pid'};
+unlink($file);
+}
+
 1;
 

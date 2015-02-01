@@ -1992,6 +1992,7 @@ log_create_sched=Created scheduled backup for $1
 log_delete_sched=Deleted scheduled backup for $1
 log_modify_sched=Modified scheduled backup for $1
 log_delete_scheds=Deleted $1 scheduled backups
+log_kill_scheds=Stopped $1 scheduled backups
 log_sched_all=all domains
 log_sched_none=nothing
 log_sched_virtualmin=virtualmin settings
@@ -6643,5 +6644,7 @@ running_web=Web UI
 running_cmd=Virtualmin API
 running_cron=Scheduled backup
 running_link=Visit the <a href='$1'>scheduled backups</a> page to create backups that run in the background on a regular schedule, or the <a href='$2'>backup logs</a> page to see backups that have already completed.
+running_err=Failed to stop backups
+running_enone=None selected!
 
 __norefs=1
