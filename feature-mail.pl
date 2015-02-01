@@ -3170,8 +3170,11 @@ if (!&mail_under_home()) {
 		local $mfiles = join(" ", map { quotemeta($_) } @mfiles);
 		local $out;
 		local $temp = &transname();
+		local $flags = &has_failed_reads_tar() ? "--ignore-failed-read"
+						       : "";
 		&execute_command("cd ".quotemeta($mbase)." && ".
-				 "tar cf ".quotemeta($temp)." ".$mfiles,
+				 &get_tar_command()." cf ".
+				 quotemeta($temp)." ".$mfiles." ".$flags,
 				 undef, \$out, \$out);
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',

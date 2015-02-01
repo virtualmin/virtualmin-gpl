@@ -3776,6 +3776,14 @@ my $out = &backquote_command("$tar --help 2>&1 </dev/null");
 return $out =~ /--listed-incremental/;
 }
 
+# Returns 1 if the tar command supports the --ignore-failed-read flag
+sub has_failed_reads_tar
+{
+my $tar = &get_tar_command();
+my $out = &backquote_command("$tar --help 2>&1 </dev/null");
+return $out =~ /--ignore-failed-read/;
+}
+
 # get_tar_command()
 # Returns the full path to the tar command, which may be 'gtar' on BSD
 sub get_tar_command
