@@ -878,10 +878,18 @@ if (&has_home_quotas()) {
 		}
 	}
 
+# Add user-configured recovery addresses
+foreach my $u (@users) {
+	my $recovery = &read_file_contents("$user->{'home'}/.usermin/changepass/recovery");
+	if ($recovery) {
+		$recovery =~ s/\r|\n//g;
+		$user->{'recovery'} = $recovery;
+		}
+	}
+
 if (!$_[2]) {
 	# Add email addresses and forwarding addresses to user structures
-	local $u;
-	foreach $u (@users) {
+	foreach my $u (@users) {
 		next if ($u->{'qmail'});	# got from LDAP already
 		$u->{'email'} = $u->{'virt'} = undef;
 		$u->{'alias'} = $u->{'to'} = $u->{'generic'} = undef;
@@ -1414,6 +1422,9 @@ if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
 	&set_usermin_imap_password($_[0]);
 	}
 
+# Save the recovery address
+&set_usermin_recovery_address($_[0]);
+
 # Update cache of existing usernames
 $unix_user{&escape_alias($_[0]->{'user'})}++;
 
@@ -1926,6 +1937,9 @@ if ($_[0]->{'email'} || @{$_[0]->{'extraemail'}}) {
 	&set_usermin_imap_password($_[0]);
 	}
 
+# Save the recovery address
+&set_usermin_recovery_address($_[0]);
+
 # Update cache of existing usernames
 if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	$unix_user{&escape_alias($_[0]->{'user'})}++;
@@ -2169,23 +2183,7 @@ return 0 if ($mconfig{'pop3_server'} ne '' &&
 	     &to_ipaddress($mconfig{'pop3_server'}) ne &to_ipaddress(&get_system_hostname()));
 
 # Set the password
-foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/mailbox") {
-	next if ($user->{'webowner'} && $dir eq $user->{'home'});
-	next if ($user->{'domainowner'} && $dir eq $user->{'home'});
-	if (!-e $dir) {
-		if ($dir eq $user->{'home'}) {
-			&make_dir($dir, 0700);
-			&set_ownership_permissions(
-				$user->{'uid'}, $user->{'gid'}, 0700, $dir);
-			}
-		else {
-			&write_as_mailbox_user($user,
-				sub { &make_dir($dir, 0700);
-				      &set_ownership_permissions(undef, undef,
-								 0700, $dir) });
-			}
-		}
-	}
+&create_usermin_module_directory($user, "mailbox");
 if (-d "$user->{'home'}/.usermin/mailbox") {
 	local %inbox;
 	local $imapfile = "$user->{'home'}/.usermin/mailbox/inbox.imap";
@@ -2207,6 +2205,56 @@ if (-d "$user->{'home'}/.usermin/mailbox") {
 							 $imapfile, 0600) });
 		};
 	}
+}
+
+# create_usermin_module_directory(&user, module)
+# Creates the Usermin config directories for a user
+sub create_usermin_module_directory
+{
+my ($user, $mod) = @_;
+foreach my $dir ($user->{'home'}, "$user->{'home'}/.usermin", "$user->{'home'}/.usermin/$mod") {
+	next if ($user->{'webowner'} && $dir eq $user->{'home'});
+	next if ($user->{'domainowner'} && $dir eq $user->{'home'});
+	if (!-e $dir) {
+		if ($dir eq $user->{'home'}) {
+			&make_dir($dir, 0700);
+			&set_ownership_permissions(
+				$user->{'uid'}, $user->{'gid'}, 0700, $dir);
+			}
+		else {
+			&write_as_mailbox_user($user,
+				sub { &make_dir($dir, 0700);
+				      &set_ownership_permissions(undef, undef,
+								 0700, $dir) });
+			}
+		}
+	}
+}
+
+# set_usermin_recovery_address(&user)
+# Updates the password recovery file for a user
+sub set_usermin_recovery_address
+{
+my ($user) = @_;
+return 0 if (!$user->{'unix'} || !$user->{'home'});
+&create_usermin_module_directory($user, "changepass");
+if (-d "$user->{'home'}/.usermin/changepass") {
+	my $rfile = "$user->{'home'}/.usermin/changepass/recovery";
+	eval {
+		# Ignore errors here, in case user is over quota
+		local $main::error_must_die = 1;
+		&write_as_mailbox_user($user,
+			sub { open(RECOVERY, ">$rfile");
+			      if ($user->{'recovery'}) {
+				print RECOVERY $user->{'recovery'},"\n";
+			      }
+			      close(RECOVERY);
+			      &set_ownership_permissions(undef, undef,
+							 $rfile, 0600) });
+		};
+	return 1;
+	}
+return 0;
 }
 
 # delete_unix_cron_jobs(username)
