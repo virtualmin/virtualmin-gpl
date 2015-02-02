@@ -1,0 +1,4 @@
+desc=Running backups page
+html=Added the Running Backups page for viewing and killing scheduled and manually started backups that are currently executing.
+master=1
+link=list_running.cgi

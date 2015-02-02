@@ -42,6 +42,11 @@
  
  - Password reset for domain owners
 	- http://virtualmin.com/node/35362
+	- Recovery address for Usermin
+	- changepass link should appear on left menu
+	- add recovery link to usermin login page which points to webmin
+	- show in Edit Users page
+	- need to click a link to use random password
 
  - Upgrade to latest Net::Amazon::S3
 	- http://virtualmin.com/node/35937
