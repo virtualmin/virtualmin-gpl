@@ -45,6 +45,10 @@ to use, the C<--encpass> flag can be used to set it instead of C<--pass>.
 However, this will prevent Virtualmin from enabling MySQL access for the user,
 as it needs to know the plaintext password to re-hash it for MySQL.
 
+All mail users can have a password recovery address set, used by the forgotten
+password feature in Virtualmin. For new users, this can be set with the 
+C<--recovery> flag followed by an address.
+
 =cut
 
 package virtual_server;
@@ -147,6 +151,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-creation-mail") {
 		$nocreationmail = 1;
+		}
+	elsif ($a eq "--recovery") {
+		$recovery = shift(@ARGV);
+		$recovery =~ /^\S+\@\S+$/ ||
+		    &usage("--recovery must be followed by an email address");
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -273,6 +282,9 @@ else {
 if (!$noemail && !$user->{'noprimary'}) {
 	$user->{'email'} = "$username\@$d->{'dom'}"
 	}
+if (defined($recovery)) {
+	$user->{'recovery'} = $recovery;
+	}
 if ($user->{'mailquota'}) {
 	$user->{'qquota'} = $qquota;
 	}
@@ -387,6 +399,7 @@ if (!$user || $user->{'unix'}) {
 	}
 print "                      [--noemail]\n";
 print "                      [--extra email.address\@some.domain]\n";
+print "                      [--recovery address\@offsite.com]\n";
 print "                      [--mysql db]*\n";
 print "                      [--group name]*\n";
 print "                      [--web]\n";

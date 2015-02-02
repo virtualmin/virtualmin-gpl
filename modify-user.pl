@@ -62,6 +62,10 @@ which is stops being sent, use the C<--autoreply-end> flag. To limit the rate
 of replies to the same address, use the C<--autoreply-period> flag followed by
 a number in minutes. 
 
+All mail users can have a password recovery address set, used by the forgotten
+password feature in Virtualmin. This can be set with the C<--recovery> flag
+followed by an address, or cleared with the C<--no-recovery> flag.
+
 =cut
 
 package virtual_server;
@@ -226,6 +230,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-autoreply-period") {
 		$autoperiod = '';
 		}
+	elsif ($a eq "--recovery") {
+		$recovery = shift(@ARGV);
+		$recovery =~ /^\S+\@\S+$/ ||
+		    &usage("--recovery must be followed by an email address");
+		}
+	elsif ($a eq "--no-recovery") {
+		$recovery = "";
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -350,6 +362,9 @@ foreach $e (@delemails) {
 	($got) = grep { $_ eq $e } @{$user->{'extraemail'}};
 	$got || &usage("Email address $e does not belong to this user");
 	@{$user->{'extraemail'}} = grep { $_ ne $e } @{$user->{'extraemail'}};
+	}
+if (defined($recovery)) {
+	$user->{'recovery'} = $recovery;
 	}
 if (defined($newusername)) {
 	# Generate a new username.. first check for a clash in this domain
@@ -553,6 +568,7 @@ if ($config{'mail'}) {
 	print "                      [--disable-email]\n";
 	print "                      [--add-email address]\n";
 	print "                      [--remove-email address]\n";
+	print "                      [--recovery address\@offsite.domain | --no-recovery]\n";
 	}
 print "                      [--newuser new-username]\n";
 print "                      [--enable-ftp]\n";
