@@ -297,6 +297,20 @@ if ($test) {
 	exit(0);
 	}
 
+# Create a fake backup schedule object
+my $sched = { 'id' => 'backup.pl.'.time() };
+for(my $i=0; $i<@dests; $i++) {
+	$sched->{'dest'.$i} = $dests[$i];
+	}
+if ($all_doms) {
+	$sched->{'all'} = 1;
+	}
+elsif (@doms) {
+	$sched->{'doms'} = join(" ", map { $_->{'id'} } @doms);
+	}
+$sched->{'virtualmin'} = join(" ", @vbs);
+&start_running_backup($sched);
+
 # Do the backup, printing any output
 &start_print_capture();
 &$first_print("Starting backup..");
@@ -356,6 +370,7 @@ foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $increment, $start_time,
 			  $size, $ok, "api", $output, $errdoms, undef, $key);
 	}
+&stop_running_backup($sched);
 exit($ex);
 
 sub usage
