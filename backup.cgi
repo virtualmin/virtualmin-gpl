@@ -10,6 +10,7 @@ if ($in{'oneoff'} || $in{'bg'}) {
 	($sched) = grep { $_->{'id'} eq $in{'oneoff'} &&
 			  &can_backup_sched($_) } &list_scheduled_backups();
 	$sched || &error($text{'backup_egone'});
+	$runsched = $sched;
 	}
 
 if ($in{'bg'}) {
@@ -32,11 +33,6 @@ if ($in{'bg'}) {
 
 	&ui_print_footer("", $text{'index_return'});
 	exit;
-	}
-
-# Flag backup as started
-if ($sched) {
-	&start_running_backup($sched);
 	}
 
 # Validate inputs
@@ -143,6 +139,23 @@ else {
 	@vbs = ( );
 	}
 @doms || @vbs || &error($text{'backup_edoms'});
+
+# Flag backup as started
+if (!$runsched) {
+	# Fake up schedule object
+	$runsched = { 'id' => 'backup.cgi.'.time() };
+	for(my $i=0; $i<@dests; $i++) {
+		$runsched->{'dest'.$i} = $dests[$i];
+		}
+	if ($in{'all'}) {
+		$runsched->{'all'} = 1;
+		}
+	elsif (@doms) {
+		$runsched->{'doms'} = join(" ", map { $_->{'id'} } @doms);
+		}
+	$runsched->{'virtualmin'} = join(" ", @vbs);
+	}
+&start_running_backup($runsched);
 
 if ($dests[0] eq "download:") {
 	# Special case .. we backup to a temp file and output in the browser
@@ -271,6 +284,4 @@ else {
 	}
 
 # Flag backup as done
-if ($sched) {
-	&stop_running_backup($sched);
-	}
+&stop_running_backup($runsched);
