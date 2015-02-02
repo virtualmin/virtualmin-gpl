@@ -186,6 +186,10 @@ foreach $d (@doms) {
 					!$d->{'spam'} ? "Disabled for domain" :
 					$u->{'nospam'} ? "No" : "Yes","\n";
 				}
+			if ($u->{'recovery'}) {
+				print "    Recovery email address: ",
+					$u->{'recovery'},"\n";
+				}
 			$ll = &get_last_login_time($u->{'user'});
 			if ($ll) {
 				print "    Last logins: ",

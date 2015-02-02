@@ -880,10 +880,10 @@ if (&has_home_quotas()) {
 
 # Add user-configured recovery addresses
 foreach my $u (@users) {
-	my $recovery = &read_file_contents("$user->{'home'}/.usermin/changepass/recovery");
+	my $recovery = &read_file_contents("$u->{'home'}/.usermin/changepass/recovery");
 	if ($recovery) {
 		$recovery =~ s/\r|\n//g;
-		$user->{'recovery'} = $recovery;
+		$u->{'recovery'} = $recovery;
 		}
 	}
 
