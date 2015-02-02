@@ -296,6 +296,14 @@ else {
 						  : undef;
 		}
 
+	# Save recovery address
+	if (!$mailbox) {
+		$in{'recovery_def'} || $in{'recovery'} =~ /^\S+\@\S+$/ ||
+			&error($text{'user_erecovery'});
+		$user->{'recovery'} = $in{'recovery_def'} ? ""
+							  : $in{'recovery'};
+		}
+
 	# Get the email address to send new/updated mailbox, for the mailbox
 	# itself. Email may also be sent to the reseller and domain owner
 	if ($in{'new'} && &will_send_user_email($d, 1) &&

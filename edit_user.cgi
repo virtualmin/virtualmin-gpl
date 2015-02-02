@@ -124,6 +124,12 @@ if (!$mailbox) {
 	print &ui_table_row(&hlink($text{'user_pass'}, "password"),
 			    $pwfield,
 			    2, \@tds);
+
+	# Password recovery field
+	print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
+		&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
+				$text{'user_norecovery'},
+				$text{'user_gotrecovery'}));
 	}
 
 print &ui_hidden_table_end();
