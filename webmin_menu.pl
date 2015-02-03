@@ -78,6 +78,7 @@ if ($d && &can_edit_domain($d)) {
 # Fall back to first owned by this user, or first in list
 $d ||= &get_domain_by("user", $remote_user, "parent", "");
 $d ||= $doms[0];
+$did ||= ($d ? $d->{'id'} : undef);
 
 if (@doms > $config{'display_max'} && $config{'display_max'}) {
 	# Domain text box
