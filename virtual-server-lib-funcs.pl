@@ -6995,21 +6995,31 @@ if (!$dbtype) {
 $db = lc($db);
 $db =~ s/[\.\-]/_/g;	# mysql doesn't like . or _
 if (!$dbtype || $dbtype eq "postgres") {
-	$db =~ s/^0/zero/g;	# postgresql doesn't like leading numbers
-	$db =~ s/^1/one/g;
-	$db =~ s/^2/two/g;
-	$db =~ s/^3/three/g;
-	$db =~ s/^4/four/g;
-	$db =~ s/^5/five/g;
-	$db =~ s/^6/six/g;
-	$db =~ s/^7/seven/g;
-	$db =~ s/^8/eight/g;
-	$db =~ s/^9/nine/g;
+	# Postgresql doesn't like leading numbers
+	$db = &remove_numeric_prefix($db);
 	}
 if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
+return $db;
+}
+
+# remove_numeric_prefix(name)
+# If a name starts with a number, convert it to a work
+sub remove_numeric_prefix
+{
+my ($db) = @_;
+$db =~ s/^0/zero/g;
+$db =~ s/^1/one/g;
+$db =~ s/^2/two/g;
+$db =~ s/^3/three/g;
+$db =~ s/^4/four/g;
+$db =~ s/^5/five/g;
+$db =~ s/^6/six/g;
+$db =~ s/^7/seven/g;
+$db =~ s/^8/eight/g;
+$db =~ s/^9/nine/g;
 return $db;
 }
 
@@ -7037,11 +7047,12 @@ sub unixuser_name
 local ($dname) = @_;
 $dname =~ s/^xn(-+)//;
 $dname =~ /^([^\.]+)/;
+$dname = &remove_numeric_prefix($dbname);
 local ($try1, $user) = ($1, $1);
 if (defined(getpwnam($try1)) || $config{'longname'}) {
-	$user = $_[0];
+	$user = &remove_numeric_prefix($_[0]);
 	$try2 = $user;
-	if (defined(getpwnam($try))) {
+	if (defined(getpwnam($try2))) {
 		return (undef, $try1, $try2);
 		}
 	}
