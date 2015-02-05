@@ -56,6 +56,12 @@ elsif ($in{'remailbut'}) {
 		&error($erv[1]);
 		}
 	&redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
+	return;
+	}
+elsif ($in{'recoverybut'}) {
+	# Redirect to password recovery form
+	&redirect("recovery.cgi?dom=$in{'dom'}&user=$in{'old'}&unix=$in{'unix'}");
+	return;
 	}
 elsif ($in{'delete'}) {
 	# Just deleting a user

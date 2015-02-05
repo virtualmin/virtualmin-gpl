@@ -477,6 +477,8 @@ else {
 			    "onClick='form.target = \"_blank\"'" ] ) : ( ),
 	     &will_send_user_email($d) && $user->{'email'} ?
 	     	( [ "remailbut", $text{'user_remailbut'} ] ) : ( ),
+	     $user->{'recovery'} ?
+		( [ "recoverybut", $text{'user_sendrecover'} ] ) : ( ),
 	     $mailbox ? ( ) : ( [ "delete", $text{'delete'} ] ) ]);
 	}
 
