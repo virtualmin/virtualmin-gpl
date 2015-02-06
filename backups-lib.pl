@@ -3784,6 +3784,14 @@ my $out = &backquote_command("$tar --help 2>&1 </dev/null");
 return $out =~ /--ignore-failed-read/;
 }
 
+# Returns 1 if the tar command supports the --warning=no-file-changed flag
+sub has_no_file_changed
+{
+my $tar = &get_tar_command();
+my $out = &backquote_command("$tar --version 2>&1 </dev/null");
+return $out =~ /tar\s+\(GNU\s+tar\)\s+([0-9\.]+)/ && $1 >= 1.23;
+}
+
 # get_tar_command()
 # Returns the full path to the tar command, which may be 'gtar' on BSD
 sub get_tar_command
