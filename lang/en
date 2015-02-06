@@ -6654,7 +6654,12 @@ running_enone=None selected!
 
 recovery_title=Recover Password
 recovery_msg1=Are you sure you want to send the current password for $1 to $2?
-recovery_msg2=Are you sure you want to generate a new random password for $1 to and send it to $2?
+recovery_msg2=Are you sure you want to generate a new random password for $1 and send it to $2?
 recovery_send=Send Password
+recovery_subject=Password recovery for $1
+recovery_body1=The password for your email account $3 with login $2 is : $1
+recovery_body2=A new random password for your email account $3 with login $2 has been generated : $1
+recovery_sending=Sending password recovery email to $1 ..
+recovery_failed=.. failed : $1
 
 __norefs=1

@@ -13,6 +13,13 @@ else {
 	}
 &can_edit_users() || &error($text{'users_ecannot'});
 
+if ($in{'recoverybut'}) {
+	# Redirect to password recovery form
+	&redirect("recovery.cgi?dom=$in{'dom'}&user=$in{'old'}&".
+		  "unix=$in{'unix'}");
+	return;
+	}
+
 if (!$in{'delete'} || $in{'confirm'}) {
 	&obtain_lock_unix($d);
 	&obtain_lock_mail($d);
@@ -56,11 +63,6 @@ elsif ($in{'remailbut'}) {
 		&error($erv[1]);
 		}
 	&redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
-	return;
-	}
-elsif ($in{'recoverybut'}) {
-	# Redirect to password recovery form
-	&redirect("recovery.cgi?dom=$in{'dom'}&user=$in{'old'}&unix=$in{'unix'}");
 	return;
 	}
 elsif ($in{'delete'}) {

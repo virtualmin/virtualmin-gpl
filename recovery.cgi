@@ -17,7 +17,44 @@ $user || &error("User does not exist!");
 &ui_print_header(&domain_in($d), $text{'recovery_title'}, "");
 
 if ($in{'confirm'}) {
+	# Generate a new password
+	if (!$user->{'plainpass'}) {
+		local $olduser = { %$user };
+		$user->{'passmode'} = 3;
+		$user->{'plainpass'} = &random_password();
+		$user->{'pass'} = &encrypt_user_password(
+					$user, $user->{'plainpass'});
+		&modify_user($user, $olduser, $d);
+
+		# Call plugin save functions
+		foreach my $f (&list_mail_plugins()) {
+			&plugin_call($f, "mailbox_modify",
+				     $user, $olduser, $d);
+			}
+		$msgt = "recovery_body2";
+		}
+	else {
+		$msgt = "recovery_body1";
+		}
+
 	# Send the email
+	my $email = &remove_userdom($user->{'user'}, $d)."\@".
+		    &show_domain_name($d);
+	my $msg = &text($msgt, $user->{'plainpass'},
+			$user->{'user'}, $email)."\n";
+	$msg = join("\n", &mailboxes::wrap_lines($msg, 75));
+	my $subject = &text('recovery_subject', $email);
+
+	&$first_print(&text('recovery_sending',
+			"<tt>".&html_escape($user->{'recovery'})."</tt>"));
+	($ok, $err) = &send_template_email($msg, $user->{'recovery'}, { },
+					   $subject, undef, undef, $d);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('recovery_failed', $err));
+		}
 	}
 else {
 	# Show a confirmation form
