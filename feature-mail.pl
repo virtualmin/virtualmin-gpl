@@ -3171,8 +3171,10 @@ if (!&mail_under_home()) {
 		local $out;
 		local $temp = &transname();
 		local @flags;
-		push(@flags, "--ignore-failed-read") if (&has_failed_reads_tar());
-		push(@flags, "--warning=no-file-changed") if (&has_no_file_changed());
+		push(@flags, "--ignore-failed-read")
+			if (&has_failed_reads_tar());
+		push(@flags, "--warning=no-file-changed")
+			if (&has_no_file_changed());
 		&execute_command("cd ".quotemeta($mbase)." && ".
 				 &get_tar_command()." cf ".
 				 quotemeta($temp)." ".$mfiles." ".
