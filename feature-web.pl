@@ -907,7 +907,10 @@ else {
 
 	# Validate the local PHP configuration
 	if ($mode ne "mod_php") {
+		local @dirvers = &unique(map { $_->{'version'} }
+					     &list_domain_php_directories($d));
 		foreach my $ver (&list_available_php_versions($d)) {
+			next if (&indexof($ver->[0], @dirvers) < 0);
 			my $errs = &check_php_configuration(
 					$d, $ver->[0], $ver->[1]);
 			if ($errs) {
