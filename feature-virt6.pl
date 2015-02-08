@@ -8,7 +8,7 @@ if (!defined($supports_ip6_cache)) {
 	&foreign_require("net");
 	$supports_ip6_cache = 0;
 	if (&net::supports_address6()) {
-		foreach my $a (&net::active_interfaces()) {
+		foreach my $a (&net::active_interfaces(1)) {
 			if ($a->{'address6'} && @{$a->{'address6'}} > 0) {
 				$supports_ip6_cache = 1;
 				last;
