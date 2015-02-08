@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.9, Node.js to 0.12.0, phpMyFAQ to 2.8.20, and OpenGoo to 3.0.6.
+html=Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.9, Node.js to 0.12.0, phpMyFAQ to 2.8.20, Trac to 1.0.4, and OpenGoo to 3.0.6.
 master=1
 reseller=1
 domain=1
