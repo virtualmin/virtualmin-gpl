@@ -25,7 +25,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "1.0.5", "0.8.7" );
+return ( "1.1.0-complete", "0.8.7" );
 }
 
 sub script_roundcube_category
@@ -176,8 +176,10 @@ return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();
+local $verdir = $ver;
+$verdir =~ s/-complete$//;
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, "roundcubemail-$ver");
+                                     $opts->{'dir'}, "roundcubemail-$verdir");
 $err && return (0, "Failed to extract source : $err");
 
 if (!$upgrade) {
