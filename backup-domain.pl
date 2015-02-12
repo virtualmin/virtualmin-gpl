@@ -384,7 +384,6 @@ print "\n";
 print "virtualmin backup-domain [--dest file]+\n";
 print "                         [--test]\n";
 print "                         [--domain name] | [--all-domains]\n";
-print "                         [--id]\n";
 print "                         [--user name]\n";
 print "                         [--plan name]\n";
 print "                         [--feature name] | [--all-features]\n";
