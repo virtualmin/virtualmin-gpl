@@ -797,6 +797,15 @@ foreach my $dir (&virtual_server_directories($d)) {
 	&set_ownership_permissions(undef, undef, oct($dir->[1]),
 				   $d->{'home'}."/".$dir->[0]);
 	}
+foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
+	next if ($user->{'webowner'});
+	next if (!$user->{'unix'});
+	next if ($user->{'nocreatehome'});
+	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
+	next if ("$d->{'home'}/$hd" eq $user->{'home'});
+	&system_logged("chown -R $user->{'uid'}:$user->{'gid'} ".
+		       quotemeta($user->{'home'}));
+	}
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($sd, 0);
