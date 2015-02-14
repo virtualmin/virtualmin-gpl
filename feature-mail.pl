@@ -3183,7 +3183,6 @@ if (!&mail_under_home()) {
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',
 					     "<pre>$out</pre>"));
-			return 0;
 			}
 		else {
 			&copy_write_as_domain_user($d, $temp, $file."_files");
