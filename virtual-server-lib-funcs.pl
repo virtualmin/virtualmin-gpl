@@ -16125,6 +16125,15 @@ if ($script && $script->{'numeric_version'}) {
 	# Strict numeric compare
 	return $ver1 <=> $ver2;
 	}
+if ($script && $script->{'release_version'}) {
+	# Compare release and version separately
+	local ($rel1, $rel2);
+	($ver1, $rel1) = split(/-/, $ver1, 2);
+	($ver2, $rel2) = split(/-/, $ver2, 2);
+	print STDERR "ver1=$ver1 rel1=$rel1 ver2=$ver2 rel2=$rel2\n";
+	return &compare_versions($ver1, $ver2) ||
+               &compare_versions($rel1, $rel2);
+	}
 local @sp1 = split(/[\.\-]/, $ver1);
 local @sp2 = split(/[\.\-]/, $ver2);
 for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
@@ -16163,13 +16172,21 @@ for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
 		# rcN is always older than N
 		$comp = -1;
 		}
-	elsif ($v1 =~ /^\d+$/ && $v2 !~ /^\d+$/) {
+	elsif ($v1 =~ /^\d+$/ && $v2 !~ /^\d+$/ && $v2 ne "") {
 		# Numeric compared to non-numeric - numeric is always higher
 		$comp = 1;
 		}
-	elsif ($v1 !~ /^\d+$/ && $v2 =~ /^\d+$/) {
+	elsif ($v1 !~ /^\d+$/ && $v2 =~ /^\d+$/ && $v1 ne "") {
 		# Non-numeric compared to numeric - numeric is always higher
 		$comp = -1;
+		}
+	elsif ($v1 eq "" && $v2 ne "") {
+		# Any number is better an empty string
+		$comp = -1;
+		}
+	elsif ($v1 ne "" && $v2 eq "") {
+		# Any number is better an empty string
+		$comp = 1;
 		}
 	else {
 		# String compare

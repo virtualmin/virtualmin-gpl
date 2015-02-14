@@ -103,6 +103,7 @@ local $dfunc = "script_${name}_desc";
 local $lfunc = "script_${name}_longdesc";
 local $vfunc = "script_${name}_versions";
 local $nvfunc = "script_${name}_numeric_version";
+local $rvfunc = "script_${name}_release_version";
 local $rfunc = "script_${name}_release";
 local $ufunc = "script_${name}_uses";
 local $vdfunc = "script_${name}_version_desc";
@@ -140,6 +141,7 @@ local $rv = { 'name' => $name,
 	      'versions' => [ &$vfunc(0) ],
 	      'install_versions' => [ &$vfunc(1) ],
 	      'numeric_version' => defined(&$nvfunc) ? &$nvfunc() : 0,
+	      'release_version' => defined(&$rvfunc) ? &$rvfunc() : 0,
 	      'release' => defined(&$rfunc) ? &$rfunc() : 0,
 	      'uses' => defined(&$ufunc) ? [ &$ufunc() ] : [ ],
 	      'category' => defined(&$catfunc) ? &$catfunc() : undef,
