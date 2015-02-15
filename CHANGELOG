@@ -1484,4 +1484,4 @@ SNI (multiple SSL certs on the same IP) is now always assumed to be usable by cl
 Added support for creating and editing DMARC DNS records for virtual servers, which specify a policy for other mail servers to be applied to email that does not pass SPF or DKIM validation.
 ---- Changes since 4.14 ----
 Added the Running Backups page for viewing scheduled and manually started backups that are currently executing.
-Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.9, Node.js to 0.12.0, phpMyFAQ to 2.8.20, Trac to 1.0.4, ZenPhoto to 1.4.7, Roundcube to 1.1.0, Pydio to 6.0.3, X2CRM to 5.0.4, Z-Push to 2.2.0, and OpenGoo to 3.0.7.
+Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.9, Node.js to 0.12.0, phpMyFAQ to 2.8.20, Trac to 1.0.4, ZenPhoto to 1.4.7, Roundcube to 1.1.0, Pydio to 6.0.3, X2CRM to 5.0.4, Z-Push to 2.2.0, extPlorer to 2.1.7, and OpenGoo to 3.0.7.
