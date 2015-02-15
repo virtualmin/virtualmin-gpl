@@ -11,6 +11,11 @@ C<--version> (followed by the version number or the word I<latest>). Don't use t
 description with the C<--type> parameter - only the short name (as shown by
 C<list-available-scripts --multiline>) will work.
 
+By default only versions known to Virtualmin can be installed, but you can
+override this check with the C<--unsupported> flag. Note that this may cause
+the script to fail to download or install, due to inconsistent download URLs
+or install methods implemented by the script creator.
+
 All scripts will also need the C<--path> parameter, which must be followed by a
 URL path such as /drupal. This determines the directory where the script is
 installed. The directory can be overridden by the C<--force-dir> option though,
