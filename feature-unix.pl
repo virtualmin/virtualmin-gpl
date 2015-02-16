@@ -498,7 +498,17 @@ elsif ($d->{'enc_pass'}) {
 # Compare the domain's user and group quotas with reality (unless a backup is
 # in progress, as this can disable quotas temporarily)
 &require_useradmin();
-if (&has_home_quotas() && !&test_lock($useradmin::config{'passwd_file'})) {
+my $backing = 0;
+foreach my $r (&list_running_backups()) {
+	if ($r->{'all'}) {
+		$backing = 1;
+		}
+	elsif ($r->{'doms'} &&
+	       &indexof($d->{'id'}, split(/\s+/, $r->{'doms'})) >= 0) {
+		$backing = 1;
+		}
+	}
+if (&has_home_quotas() && !$backing) {
 	# Domain owner's Unix quota
 	local $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
 						     : $user->{'softquota'};
