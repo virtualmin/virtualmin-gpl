@@ -6535,6 +6535,7 @@ cloud_rs_endpoint=Rackspace server location
 cloud_users=Used by backups
 cloud_nousers=None yet
 cloud_gaccount=Using account $1 and project $2
+cloud_daccount=Using login $1
 cloud_google_account=Google account email address
 cloud_google_clientid=OAuth2 client ID
 cloud_google_secret=OAuth2 client secret
@@ -6542,6 +6543,7 @@ cloud_google_project=Project name
 cloud_google_oauth=OAuth2 code from Google
 cloud_google_token=OAuth2 token from Google
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/project target=_blank>Google Developers Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>.
+cloud_dropbox_longdesc=XXX
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_egoogle_oauth=Missing OAuth2 code
@@ -6550,6 +6552,11 @@ cloud_descoauth=Before Google Cloud Storage can be used by Cloudmin, you must fi
 cloud_useby=Allow use of provider by
 cloud_byreseller=Resellers
 cloud_byowner=Domain owners
+cloud_dropbox_account=Dropbox account
+cloud_dropbox_clientid=OAuth2 client ID
+cloud_dropbox_secret=OAuth2 client secret
+cloud_dropbox_oauth=OAuth2 code from Dropbox
+cloud_dropbox_token=OAuth2 token from Dropbox
 
 lang_title=Change Language
 lang_ecannot=You are not allowed to change the UI language!

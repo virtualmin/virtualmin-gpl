@@ -15,6 +15,10 @@ if ($virtualmin_pro) {
 		    'prefix' => [ 'gcs' ],
 		    'desc' => $text{'cloud_googledesc'},
 		    'longdesc' => $text{'cloud_google_longdesc'} });
+	push(@rv, { 'name' => 'dropbox',
+		    'prefix' => [ 'dropbox' ],
+		    'desc' => $text{'cloud_dropboxdesc'},
+		    'longdesc' => $text{'cloud_dropbox_longdesc'} });
 	}
 return @rv;
 }
@@ -347,6 +351,49 @@ return $text{'cloud_descoauth'}."<p>\n".
 
 sub cloud_dropbox_get_state
 {
+if ($config{'dropbox_account'}) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_daccount',
+				 "<tt>$config{'dropbox_account'}</tt>");
+	       };
+	}
+else {
+	return { 'ok' => 0 };
+	}
 }
+
+sub cloud_dropbox_show_inputs
+{
+my $rv;
+
+# Dropbox account
+$rv .= &ui_table_row($text{'cloud_dropbox_account'},
+	&ui_textbox("dropbox_account", $config{'dropbox_account'}, 40));
+
+# Dropbox OAuth2 client ID
+$rv .= &ui_table_row($text{'cloud_dropbox_clientid'},
+	&ui_textbox("dropbox_clientid", $config{'dropbox_clientid'}, 60));
+
+# Dropbox client secret
+# XXX
+$rv .= &ui_table_row($text{'cloud_dropbox_secret'},
+	&ui_textbox("dropbox_secret", $config{'dropbox_secret'}, 40));
+
+# OAuth2 code
+if ($config{'dropbox_oauth'}) {
+	$rv .= &ui_table_row($text{'cloud_dropbox_oauth'},
+		             "<tt>$config{'dropbox_oauth'}</tt>");
+	}
+
+# OAuth2 token
+if ($config{'dropbox_token'}) {
+	$rv .= &ui_table_row($text{'cloud_dropbox_token'},
+		             "<tt>$config{'dropbox_token'}</tt>");
+	}
+
+return $rv;
+}
+
+
 
 1;
