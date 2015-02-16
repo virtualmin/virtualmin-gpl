@@ -354,7 +354,7 @@ sub cloud_dropbox_get_state
 if ($config{'dropbox_account'}) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_daccount',
-				 "<tt>$config{'dropbox_account'}</tt>");
+				 "<tt>$config{'dropbox_account'}</tt>"),
 	       };
 	}
 else {
