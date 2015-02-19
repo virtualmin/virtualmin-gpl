@@ -64,7 +64,7 @@ sub get_dkim_init_name
 {
 return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
        &get_dkim_type() eq 'debian' ? 'dkim-filter' :
-       &get_dkim_type() eq 'freebsd' ? 'milteropendkim' :
+       &get_dkim_type() eq 'freebsd' ? 'milter-opendkim' :
        &get_dkim_type() eq 'redhat' ? 'dkim-milter' : undef;
 }
 
