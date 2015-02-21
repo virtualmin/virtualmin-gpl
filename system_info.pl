@@ -192,6 +192,12 @@ if (!$data->{'noupdates'} && $hasposs && $canposs && @poss) {
 		    'id' => 'updates',
 		    'desc' => $text{'right_updatesheader'},
 		    'html' => $html });
+	if (&get_webmin_version() >= 1.733) {
+		# Block same section from being shown by Cloudmin
+		push(@rv, { 'type' => 'veto',
+			    'veto' => 'updates',
+			    'veto_module' => 'server-manager' });
+		}
 	}
 
 # Status of various servers
