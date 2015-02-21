@@ -222,7 +222,7 @@ return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
 
 sub cloud_google_get_state
 {
-if ($config{'google_account'}) {
+if ($config{'google_account'} && $config{'google_oauth'}) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_gaccount',
 				 "<tt>$config{'google_account'}</tt>",
@@ -304,6 +304,8 @@ else {
 		&error($text{'cloud_egoogle_project'});
 	$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
 	$config{'google_project'} = $in->{'google_project'};
+
+	$reauth++ if (!$config{'google_oauth'});
 	}
 
 if ($config{'google_oauth'} && !$config{'google_token'}) {
@@ -351,7 +353,7 @@ return $text{'cloud_descoauth'}."<p>\n".
 
 sub cloud_dropbox_get_state
 {
-if ($config{'dropbox_account'}) {
+if ($config{'dropbox_account'} && $config{'dropbox_oauth'}) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_daccount',
 				 "<tt>$config{'dropbox_account'}</tt>"),
@@ -370,15 +372,6 @@ my $rv;
 $rv .= &ui_table_row($text{'cloud_dropbox_account'},
 	&ui_textbox("dropbox_account", $config{'dropbox_account'}, 40));
 
-# Dropbox OAuth2 client ID
-$rv .= &ui_table_row($text{'cloud_dropbox_clientid'},
-	&ui_textbox("dropbox_clientid", $config{'dropbox_clientid'}, 60));
-
-# Dropbox client secret
-# XXX
-$rv .= &ui_table_row($text{'cloud_dropbox_secret'},
-	&ui_textbox("dropbox_secret", $config{'dropbox_secret'}, 40));
-
 # OAuth2 code
 if ($config{'dropbox_oauth'}) {
 	$rv .= &ui_table_row($text{'cloud_dropbox_oauth'},
@@ -394,6 +387,58 @@ if ($config{'dropbox_token'}) {
 return $rv;
 }
 
+sub cloud_dropbox_parse_inputs
+{
+my ($in) = @_;
+my $reauth = 0;
 
+if ($in{'dropbox_set_oauth'}) {
+	# Special mode - saving the oauth token
+	$in->{'dropbox_oauth'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_oauth'});
+	$config{'dropbox_oauth'} = $in->{'dropbox_oauth'};
+	}
+else {
+	# Parse dropbox account
+	$in->{'dropbox_account'} =~ /^\S+\@\S+$/ ||
+		&error($text{'cloud_edropbox_account'});
+	$reauth++ if ($config{'dropbox_account'} ne $in->{'dropbox_account'});
+	$config{'dropbox_account'} = $in->{'dropbox_account'};
+
+	$reauth++ if (!$config{'dropbox_oauth'});
+	}
+
+if ($config{'dropbox_oauth'} && !$config{'dropbox_token'}) {
+	# Need to get access token for the first time
+	my ($ok, $token, $uid) = &get_dropbox_oauth_access_token();
+	$ok || &error(&text('cloud_egoogletoken', $token));
+	$config{'dropbox_token'} = $token;
+	$config{'dropbox_uid'} = $uid;
+	$config{'dropbox_tstart'} = time();
+	}
+
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+
+if ($in{'dropbox_set_oauth'} || !$reauth) {
+	# Nothing more to do - either the OAuth2 token was just set, or the
+	# settings were saved with no change
+	return undef;
+	}
+
+return $text{'cloud_descoauth_dropbox'}."<p>\n".
+       &ui_link("https://www.dropbox.com/1/oauth2/authorize?".
+		"response_type=code&client_id=$dropbox_app_key",
+                $text{'cloud_openoauth'},
+                undef,
+                "target=_blank")."<p>\n".
+       &ui_form_start("save_cloud.cgi", "post").
+       &ui_hidden("name", "dropbox").
+       &ui_hidden("dropbox_set_oauth", 1).
+       "<b>$text{'cloud_newoauth_dropbox'}</b> ".
+       &ui_textbox("dropbox_oauth", undef, 80)."<p>\n".
+       &ui_form_end([ [ undef, $text{'save'} ] ]);
+}
 
 1;
