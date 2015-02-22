@@ -3366,6 +3366,10 @@ elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 		@rv = (-1, "Google Cloud Storage has not been configured");
 		}
 	}
+elsif ($url =~ /^dropbox:\/\/([^\/]+\.(gz|zip|bz2))$/) {
+	# Dropbox file at the top level
+	@rv = (8, undef, undef, "", $1, undef);
+	}
 elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
 	@rv = (8, undef, undef, $1, $3, undef);
@@ -4125,15 +4129,25 @@ elsif (($mode == 1 || $mode == 2) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 8) && $host =~ /%/) {
-	# S3 / Rackspace bucket which is date-based
+elsif (($mode == 3 || $mode == 6 || $mode == 7) && $host =~ /%/) {
+	# S3 / Rackspace / GCS bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 8) && $path =~ /%/) {
-	# S3 / Rackspace filename which is date-based
+elsif (($mode == 3 || $mode == 6 || $mode == 7) && $path =~ /%/) {
+	# S3 / Rackspace / GCS filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
+	}
+elsif ($mode == 8) {
+	my $fullpath = $host.($host ? "/" : "").$path;
+	if ($fullpath =~ /^(\S+)\/([^%]*%.*)$/) {
+		# Dropbox path - has to be handled differently to S3 and GCS,
+		# as it really does support sub-directories
+		local ($base, $date) = ($1, $2);
+		$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
+		return ($base, $date);
+		}
 	}
 return ( );
 }
@@ -4500,10 +4514,48 @@ elsif ($mode == 7 && $path =~ /\%/) {
 		}
 	}
 
+elsif ($mode == 8) {
+	# Search for Dropbox files matching the date pattern
+	local $files = &list_dropbox_files($base);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles3', $files));
+		return 0;
+		}
+	foreach my $st (@$files) {
+		my $f = $st->{'path'};
+		$f =~ s/^\/?\Q$base\E\/?// || next;
+		local $ctime = &dropbox_timestamp($st->{'modified'});
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
+			# Found one to delete
+			$mcount++;
+                        next if (!$ctime || $ctime >= $cutoff);
+                        local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+                                            "<tt>$f</tt>", $old));
+			my $p = $st->{'path'};
+			$p =~ s/^\///;
+			my $size = $st->{'is_dir'} ?
+					&size_dropbox_directory($p) :
+					$st->{'bytes'};
+			local $err = &delete_dropbox_path($base, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_dropbox_path($base, $f.".dom");
+				&delete_dropbox_path($base, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($size)));
+				$pcount++;
+				}
+			}
+		}
+	}
 
 &$outdent_print();
 
-&$second_print($pcount ? &text('backup_purged', $pcount, $mcount) :
+&$second_print($pcount ? &text('backup_purged', $pcount, $mcount - $pcount) :
 	       $mcount ? &text('backup_purgedtime', $mcount) :
 		         $text{'backup_purgednone'});
 return $ok;

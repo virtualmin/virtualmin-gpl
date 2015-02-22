@@ -37,9 +37,9 @@
  - Backup to Google Cloud Files & Dropbox
 	- Dropbox support
 	- functional test
-	- Restore doesn't work
-	- Purge
-	- Test all restore / backup modes
+	- Take app to production in Dropbox console
+	- XXX description
+	- referral link?
 	- CHANGELOG
 
  - Mobile theme should use new menu function (but maybe wait till new release)
