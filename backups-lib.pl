@@ -3596,6 +3596,18 @@ if ($state->{'ok'} && &can_use_cloud("google")) {
 	push(@opts, [ 7, $text{'backup_mode7'}, $st ]);
 	}
 
+# Dropbox
+$state = &cloud_dropbox_get_state();
+if ($state->{'ok'} && &can_use_cloud("dropbox")) {
+	local $st = "<table>\n";
+	$st .= "<tr> <td>$text{'backup_dbpath'}</td> <td>".
+	       &ui_textbox($name."_dbpath", $mode != 8 ? undef :
+					    $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 8, $text{'backup_mode8'}, $st ]);
+	}
+
 if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 4, $text{'backup_mode4'},
@@ -3720,8 +3732,15 @@ elsif ($mode == 7 && &can_use_cloud("google")) {
 	# Google cloud storage
 	$in{$name.'_gcpath'} =~ /^\S+$/i || &error($text{'backup_egcpath'});
 	($in{$name.'_gcpath'} =~ /^\// || $in{$name.'_gcpath'} =~ /\/$/) &&
-		&error($text{'backup_gcspath'});
+		&error($text{'backup_gcpath2'});
 	return "gcs://".$in{$name.'_gcpath'};
+	}
+elsif ($mode == 8 && &can_use_cloud("dropbox")) {
+	# Dropbox
+	$in{$name.'_dbpath'} =~ /^\S+$/i || &error($text{'backup_edbpath'});
+	($in{$name.'_dbpath'} =~ /^\// || $in{$name.'_dbpath'} =~ /\/$/) &&
+		&error($text{'backup_dbpath2'});
+	return "dropbox://".$in{$name.'_dbpath'};
 	}
 else {
 	&error($text{'backup_emode'});
