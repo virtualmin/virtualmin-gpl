@@ -50,6 +50,7 @@ while(@ARGV > 0) {
 $path ||= "/";
 
 # Login and list the buckets
+$path =~ s/^\///;
 $files = &list_dropbox_files($path);
 if (!ref($files)) {
 	print "ERROR: $files\n";

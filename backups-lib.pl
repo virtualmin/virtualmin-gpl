@@ -433,7 +433,7 @@ foreach my $desturl (@$desturls) {
 		if ($server) {
 			my $parent = "/".$server;
 			$parent =~ s/\/([^\/]+)$//;
-			$parent = "/".$parent if ($parent !~ /^\//);
+			$parent =~ s/^\///;
 			my $files = &list_dropbox_files($parent);
 			if (!ref($files)) {
 				&$first_print($files);
@@ -3214,9 +3214,9 @@ elsif ($mode == 7 || $mode == 8) {
 		}
 	elsif ($mode == 8) {
 		# Get files under dir from Dropbox
-		$files = &list_dropbox_files("/".$server);
+		$files = &list_dropbox_files($server);
 		return "Failed to list $server : $files" if (!ref($files));
-		$files = [ map { my $n = $_->{'name'};
+		$files = [ map { my $n = $_->{'path'};
 				 $n =~ s/^.*\///;
 			         $n } @$files ];
 		$func = \&download_dropbox_file;
