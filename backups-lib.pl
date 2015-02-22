@@ -428,6 +428,28 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		}
+	elsif ($mode == 8) {
+		# Connect to Dropbox and create the folder if needed
+		if ($server) {
+			my $parent = "/".$server;
+			$parent =~ s/\/([^\/]+)$//;
+			$parent = "/".$parent if ($parent !~ /^\//);
+			my $files = &list_dropbox_files($parent);
+			if (!ref($files)) {
+				&$first_print($files);
+				return (0, 0, $doms);
+				}
+			my ($already) = grep { $_->{'path'} eq "/".$server }
+					     @$files;
+			if (!$already) {
+				my $err = &create_dropbox_dir("/".$server);
+				if ($err) {
+					&$first_print($err);
+					return (0, 0, $doms);
+					}
+				}
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -847,15 +869,17 @@ DOMAIN: foreach $d (@$doms) {
 				$err = &rs_upload_object($rsh, $server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
-			elsif ($mode == 7) {
-				# Via Google upload
-				&$first_print($text{'backup_upload7'});
+			elsif ($mode == 7 || $mode == 8) {
+				# Via Google or Dropbox upload
+				&$first_print($text{'backup_upload'.$mode});
 				local $dfpath = $path ? $path."/".$df : $df;
-				$err = &upload_gcs_file(
+				local $func = $mode == 7 ? \&upload_gcs_file
+							: \&upload_dropbox_file;
+				$err = &$func(
 					$server, $dfpath, "$dest/$df");
-				$err = &upload_gcs_file($server,
+				$err = &$func($server,
 					$dfpath.".info", $infotemp) if (!$err);
-				$err = &upload_gcs_file($server,
+				$err = &$func($server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
 			if ($err) {
@@ -1420,10 +1444,12 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	elsif ($ok && $mode == 7 && (@destfiles || !$dirfmt)) {
-		# Upload to Google cloud storage
+	elsif ($ok && ($mode == 7 || $mode == 8) && (@destfiles || !$dirfmt)) {
+		# Upload to Google cloud storage or Dropbox
 		local $err;
-		&$first_print($text{'backup_upload7'});
+		&$first_print($text{'backup_upload'.$mode});
+		local $func = $mode == 7 ? \&upload_gcs_file
+					 : \&upload_dropbox_file;
 		local $infotemp = &transname();
 		local $domtemp = &transname();
 		if ($dirfmt) {
@@ -1440,11 +1466,11 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				local $dfpath = $path ? $path."/".$df : $df;
-				$err = &upload_gcs_file($server,
+				$err = &$func($server,
 					$dfpath, $dest."/".$df);
-				$err = &upload_gcs_file($server,
+				$err = &$func($server,
 					$dfpath.".info", $infotemp) if (!$err);
-				$err = &upload_gcs_file($server,
+				$err = &$func($server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
 			if (!$err && $asd) {
@@ -1467,10 +1493,10 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			$err = &upload_gcs_file($server, $path, $dest);
-			$err = &upload_gcs_file($server, $path.".info",
+			$err = &$func($server, $path, $dest);
+			$err = &$func($server, $path.".info",
 					  $infotemp) if (!$err);
-			$err = &upload_gcs_file($server, $path.".dom",
+			$err = &$func($server, $path.".dom",
 					  $domtemp) if (!$err);
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
@@ -3175,15 +3201,30 @@ elsif ($mode == 6) {
 		return $err if ($err);
 		}
 	}
-elsif ($mode == 7) {
-	# Download from Google cloud storage
-	local $files = &list_gcs_files($server);
-	return "Failed to list $server : $files" if (!ref($files));
-	$files = [ map { $_->{'name'} } @$files ];
+elsif ($mode == 7 || $mode == 8) {
+	# Download from Google cloud storage or Dropbox
+	local $files;
+	local $func;
+	if ($mode == 7) {
+		# Get files under bucket from Google
+		$files = &list_gcs_files($server);
+		return "Failed to list $server : $files" if (!ref($files));
+		$files = [ map { $_->{'name'} } @$files ];
+		$func = \&download_gcs_file;
+		}
+	elsif ($mode == 8) {
+		# Get files under dir from Dropbox
+		$files = &list_dropbox_files("/".$server);
+		return "Failed to list $server : $files" if (!ref($files));
+		$files = [ map { my $n = $_->{'name'};
+				 $n =~ s/^.*\///;
+			         $n } @$files ];
+		$func = \&download_dropbox_file;
+		}
 	local $pathslash = $path ? $path."/" : "";
 	if ($infoonly) {
 		# First try file with .info or .dom extension
-		$err = &download_gcs_file($server, $path.$sfx, $temp);
+		$err = &$func($server, $path.$sfx, $temp);
 		if ($err) {
 			# Doesn't exist .. but maybe path is a sub-directory
 			# full of .info and .dom files?
@@ -3192,7 +3233,7 @@ elsif ($mode == 7) {
 				if ($f =~ /\Q$sfx\E$/ &&
 				    $f =~ /^\Q$pathslash\E([^\/]*)$/) {
 					my $fname = $1;
-					&download_gcs_file($server, $f,
+					&$func($server, $f,
 						$temp."/".$fname);
 					}
 				}
@@ -3217,9 +3258,8 @@ elsif ($mode == 7) {
 						}
 					}
 				if ($want) {
-					$err = &download_gcs_file(
-						$server, $f,
-						$temp."/".$fname);
+					$err = &$func($server, $f,
+						      $temp."/".$fname);
 					$gotfiles++ if (!$err);
 					}
 				else {
@@ -3230,7 +3270,7 @@ elsif ($mode == 7) {
 		if (!$gotfiles && $path && &indexof($path, @$files) >= 0) {
 			# Download the file
 			&unlink_file($temp);
-			$err = &download_gcs_file($server, $path, $temp);
+			$err = &$func($server, $path, $temp);
 			}
 		elsif (!$gotfiles) {
 			# Download the directory
@@ -3240,9 +3280,8 @@ elsif ($mode == 7) {
 				if ($f =~ /^\Q$pathslash\E([^\/]*)$/ &&
 				    $f !~ /\.\d+$/) {
 					my $fname = $1;
-					$err = &download_gcs_file(
-						$server, $f,
-						$temp."/".$fname);
+					$err = &$func($server, $f,
+						      $temp."/".$fname);
 					}
 				}
 			}
