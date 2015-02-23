@@ -1486,3 +1486,4 @@ Added support for creating and editing DMARC DNS records for virtual servers, wh
 Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.10, Node.js to 0.12.0, phpMyFAQ to 2.8.20, Trac to 1.0.4, ZenPhoto to 1.4.7, Roundcube to 1.1.0, Pydio to 6.0.3, X2CRM to 5.0.4, Z-Push to 2.2.0, extPlorer to 2.1.7, Wordpress to 4.1.1, Piwik to 2.11.0, and OpenGoo to 3.0.7.
 Added the Running Backups page for viewing scheduled and manually started backups that are currently executing.
 The password recovery email address can now be edited for mailbox users via the Edit User page and the modify-user API command. The password reset process can also be triggered from within Virtualmin, as well as using the password recovery plugin.
+Added support for backing up to and restoring from Dropbox, similar to Virtualmin's existing Google Cloud Storage backup feature.

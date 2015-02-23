@@ -1,0 +1,4 @@
+desc=Dropbox backup and restore
+html=Added support for backing up to and restoring from Dropbox, similar to Virtualmin's existing Google Cloud Storage backup feature.
+master=1
+link=list_clouds.cgi
