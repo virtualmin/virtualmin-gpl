@@ -3213,12 +3213,29 @@ elsif ($mode == 7 || $mode == 8) {
 		$func = \&download_gcs_file;
 		}
 	elsif ($mode == 8) {
-		# Get files under dir from Dropbox
-		$files = &list_dropbox_files($server);
-		return "Failed to list $server : $files" if (!ref($files));
+		# Get files under dir from Dropbox. These have to be converted
+		# to be relative to the top-level dir, as that's how GCS behaves
+		# and what subsequent code expects. Also, Dropbox allows files
+		# at the top level, unlike other storage providers.
+		my $fullpath;
+		my $prepend;
+		if ($path =~ /\.(gz|zip|bz2)$/i) {
+			# A file was requested - list only the parent dir
+			my $pathdir = $path =~ /^(.*)\// ? $1 : "";
+			$fullpath = $server.
+				    ($server && $pathdir ? "/" : "").$pathdir;
+			$prepend = $pathdir ? $pathdir."/" : "";
+			}
+		else {
+			# Assume source is a dir
+			$fullpath = $server.($server ? "/" : "").$path;
+			$prepend = $path ? $path."/" : "";
+			}
+		$files = &list_dropbox_files($fullpath);
+		return "Failed to list $fullpath : $files" if (!ref($files));
 		$files = [ map { my $n = $_->{'path'};
 				 $n =~ s/^.*\///;
-			         $n } @$files ];
+			         $prepend.$n } @$files ];
 		$func = \&download_dropbox_file;
 		}
 	local $pathslash = $path ? $path."/" : "";
