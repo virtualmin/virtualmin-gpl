@@ -6547,7 +6547,7 @@ cloud_google_project=Project name
 cloud_google_oauth=OAuth2 code from Google
 cloud_google_token=OAuth2 token from Google
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/project target=_blank>Google Developers Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>.
-cloud_dropbox_longdesc=XXX
+cloud_dropbox_longdesc=Before you can backup to Dropbox, you must first <a href=http://www.dropbox.com/ target=_blank>create an account</a> on their website if you don't already have one.
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_newoauth_dropbox=OAuth2 code from Dropbox:
