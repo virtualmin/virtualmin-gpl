@@ -1,0 +1,6 @@
+desc=Password recovery email
+html=The password recovery email address can now be edited for mailbox users via the Edit User page and the modify-user API command. The password reset process can also be triggered from within Virtualmin, as well as using the password recovery plugin.
+master=1
+reseller=1
+owner=1
+link=list_users.cgi?dom=${ID}
