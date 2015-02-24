@@ -48,16 +48,21 @@ sub script_roundcube_php_vers
 return ( 5 );
 }
 
+sub script_roundcube_release
+{
+return 2;	# For PHP 5.3.7 version check
+}
+
 sub script_roundcube_depends
 {
 local ($d, $ver, $sinfo, $phpver) = @_;
 local @rv;
-my $wantver = $ver >= 0.9 ? 5.3 : 5.2;
+my $wantver = $ver >= 0.9 ? "5.3.7" : 5.2;
 local $phpv = &get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
 	}
-elsif ($phpv < $wantver) {
+elsif (&compare_versions($phpv, $wantver) < 0) {
 	push(@rv, "Roundcube $ver requires PHP version $wantver or later");
 	}
 return @rv;
