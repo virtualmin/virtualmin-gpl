@@ -10786,7 +10786,7 @@ else {
 	($home, $mail, $dummy, $db, $dbq) = &get_domain_user_quotas(
 				$d, &get_domain_by("parent", $d->{'id'}));
 	}
-return ($home-$dbq, $mail, $db);
+return ($home >= $dbq ? $home-$dbq : $home, $mail, $db);
 }
 
 # compute_prefix(domain-name, group, [&parent], [creating-flag])
