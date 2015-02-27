@@ -103,9 +103,11 @@ if (&dovecot::get_dovecot_version() < 2) {
 
 # Enable PCI-compliant ciphers
 &foreign_require("webmin");
-&dovecot::save_directive($conf, "ssl_cipher_list",
-			 $webmin::strong_ssl_ciphers ||
-			   "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+if (!&dovecot::find_value("ssl_cipher_list", $conf)) {
+	&dovecot::save_directive($conf, "ssl_cipher_list",
+				 $webmin::strong_ssl_ciphers ||
+				   "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+	}
 
 &flush_file_lines();
 &unlock_file($cfile);
