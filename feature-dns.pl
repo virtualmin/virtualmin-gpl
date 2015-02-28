@@ -914,12 +914,20 @@ return $rv;
 sub join_record_values
 {
 local ($r, $oneline) = @_;
+local $j = join("", @{$r->{'values'}});
 if ($r->{'type'} eq 'SOA' && !$oneline) {
 	# Multiliple lines, with brackets
 	local $v = $r->{'values'};
 	local $sep = "\n\t\t\t";
 	return "$v->[0] $v->[1] ($sep$v->[2]$sep$v->[3]".
 	       "$sep$v->[4]$sep$v->[5]$sep$v->[6] )";
+	}
+elsif (($r->{'type'} eq 'TXT' || $r->{'type'} eq 'SPF') && !$oneline &&
+       (length($j) > 255 || @{$r->{'values'}} > 1)) {
+	# Multi-line text, possibly with brackets
+	my $rv = &split_long_txt_record($j);
+	$rv =~ s/\r?\n\s*/ /g;
+	return $rv;
 	}
 else {
 	# All one one line
