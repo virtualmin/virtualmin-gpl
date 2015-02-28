@@ -142,7 +142,7 @@ if (!&master_admin() && !&reseller_admin()) {
                 }
 
 	# Quota summary for top-level domain
-	if (!$sects->{'noquotas'} &&
+	if (!$data->{'noquotas'} &&
             virtual_server::has_home_quotas()) {
                 my $homesize = virtual_server::quota_bsize("home");
                 my $mailsize = virtual_server::quota_bsize("mail");
@@ -281,7 +281,7 @@ if (!$data->{'noquotas'} && @quota && (&master_admin() || &reseller_admin())) {
 	my $maxquota = $info->{'maxquota'};
 
 	# Work out if showing by percent makes sense
-	my $qshow = $sects->{'qshow'};
+	my $qshow = $data->{'qshow'};
         if ($qshow) {
                 my @quotawithlimit = grep { $_->[2] } @quota;
                 $qshow = 0 if (!@quotawithlimit);
@@ -368,10 +368,10 @@ foreach my $d (@doms) {
 	$maxbw = $d->{'bw_usage'} if ($d->{'bw_usage'} > $maxbw);
 	}
 if (!$data->{'nobw'} && $config{'bw_active'} && @bwdoms && $maxbw) {
-	my $qshow = $sects->{'qshow'};
+	my $qshow = $data->{'qshow'};
 
 	# Work out if showing by percent makes sense
-	my $qshow = $sects->{'qshow'};
+	my $qshow = $data->{'qshow'};
 	if ($qshow) {
 		my @domswithlimit = grep { $_->{'bw_limit'} } @doms;
 		$qshow = 0 if (!@domswithlimit);
