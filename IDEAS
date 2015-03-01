@@ -36,10 +36,16 @@
 
  - Backup to Google Cloud Files & Dropbox
 	- Take app to production in Dropbox console
-	- referral link?
 
  - Mobile theme should use new menu function (but maybe wait till new release)
 	- and right-frame info too
  
  - Upgrade to latest Net::Amazon::S3
 	- http://virtualmin.com/node/35937
+
+ - Improve replicated domain support
+	- MySQL on remote server
+	- NFS on remote
+
+ - Use OpemDKIM on CentOS 7 instead of DKIM-Milter
+	- UNLESS dkim-milter package is installed

@@ -9,10 +9,13 @@ $redhat_dkim_default = "/etc/sysconfig/dkim-milter";
 $ubuntu_dkim_config = "/etc/opendkim.conf";
 $ubuntu_dkim_default = "/etc/default/opendkim";
 
+$centos_dkim_config = "/etc/opendkim.conf";
+$centos_dkim_default = "/etc/sysconfig/opendkim";
+
 $freebsd_dkim_config = "/usr/local/etc/mail/opendkim.conf";
 
 # get_dkim_type()
-# Returns either 'ubuntu', 'debian', 'redhat', 'freebsd' or undef
+# Returns either 'ubuntu', 'debian', 'redhat', 'freebsd', 'centos' or undef
 sub get_dkim_type
 {
 if ($gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7) {
@@ -29,7 +32,14 @@ elsif ($gconfig{'os_type'} eq 'debian-linux') {
 	return 'debian';
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	return 'redhat';
+	if ($gconfig{'os_version'} >= 15) {
+		# Virtualmin provides opendkim now
+		return 'centos';
+		}
+	else {
+		# dkim-milter from older CentOS versions
+		return 'redhat';
+		}
 	}
 elsif ($gconfig{'os_type'} eq 'freebsd') {
 	return 'freebsd';
@@ -44,6 +54,7 @@ sub get_dkim_config_file
 return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_config :
        &get_dkim_type() eq 'debian' ? $debian_dkim_config :
        &get_dkim_type() eq 'redhat' ? $redhat_dkim_config :
+       &get_dkim_type() eq 'centos' ? $centos_dkim_config :
        &get_dkim_type() eq 'freebsd' ? $freebsd_dkim_config :
 				      undef;
 }
@@ -55,6 +66,7 @@ sub get_dkim_defaults_file
 return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_default :
        &get_dkim_type() eq 'debian' ? $debian_dkim_default :
        &get_dkim_type() eq 'redhat' ? $redhat_dkim_default :
+       &get_dkim_type() eq 'centos' ? $centos_dkim_default :
 				      undef;
 }
 
@@ -65,7 +77,8 @@ sub get_dkim_init_name
 return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
        &get_dkim_type() eq 'debian' ? 'dkim-filter' :
        &get_dkim_type() eq 'freebsd' ? 'milter-opendkim' :
-       &get_dkim_type() eq 'redhat' ? 'dkim-milter' : undef;
+       &get_dkim_type() eq 'redhat' ? 'dkim-milter' :
+       &get_dkim_type() eq 'centos' ? 'opendkim' : undef;
 }
 
 # check_dkim()
@@ -117,7 +130,9 @@ sub install_dkim_package
 my $pkg = &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
 	  &get_dkim_type() eq 'freebsd' ? 'opendkim' :
 	  &get_dkim_type() eq 'debian' ? 'dkim-filter' :
-	  &get_dkim_type() eq 'redhat' ? 'dkim-milter' : 'dkim';
+	  &get_dkim_type() eq 'redhat' ? 'dkim-milter' :
+	  &get_dkim_type() eq 'centos' ? 'opendkim' :
+					 'dkim';
 my @inst = &software::update_system_install($pkg);
 return scalar(@inst) || !&check_dkim();
 }
@@ -140,8 +155,8 @@ my $dkim_config = &get_dkim_config_file();
 my $dkim_defaults = &get_dkim_defaults_file();
 my $init = &get_dkim_init_name();
 if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
-	# Read Debian dkim config file
-	my $conf = &get_debian_dkim_config($dkim_config);
+	# Read Debian opendkim config file
+	my $conf = &get_open_dkim_config($dkim_config);
 	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
@@ -171,8 +186,8 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 		}
 	}
 elsif (&get_dkim_type() eq 'redhat') {
-	# Read Fedora dkim config file
-	my $conf = &get_debian_dkim_config($dkim_config);
+	# Read Fedora dkim-milter config file
+	my $conf = &get_open_dkim_config($dkim_config);
 	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
@@ -204,7 +219,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 	}
 elsif (&get_dkim_type() eq 'freebsd') {
 	# Read dkim config file
-	my $conf = &get_debian_dkim_config($dkim_config);
+	my $conf = &get_open_dkim_config($dkim_config);
 	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
@@ -214,12 +229,43 @@ elsif (&get_dkim_type() eq 'freebsd') {
 	if ($conf->{'Mode'} =~ /\S+/) {
 		$rv{'sign'} = $conf->{'Mode'} =~ /s/ ? 1 : 0;
 		$rv{'verify'} = $conf->{'Mode'} =~ /v/ ? 1 : 0;
-	}
+		}
 	else {
 		$rv{'sign'} = 1;
 		$rv{'verify'} = 1;
-	} 
-}
+		} 
+	}
+elsif (&get_dkim_type() eq 'centos') {
+	# Read CentOS 7+ opendkim config file
+	my $conf = &get_open_dkim_config($dkim_config);
+	$rv{'enabled'} = &init::action_status($init) == 2;
+	$rv{'selector'} = $conf->{'Selector'};
+	$rv{'keyfile'} = $conf->{'KeyFile'};
+
+	# Work out socket from config file
+	if ($conf->{'Socket'} =~ /^inet:(\d+)/) {
+		$rv{'port'} = $1;
+		}
+	elsif ($conf->{'Socket'} =~ /^local:([^:]+)/) {
+		$rv{'socket'} = $1;
+		}
+	else {
+		$rv{'enabled'} = 0;
+		}
+
+	# Parse defaults option to get sign/verify mode
+	my %def;
+	&read_env_file($dkim_defaults, \%def);
+	if ($def{'OPTIONS'} =~ /-b\s*(\S+)/) {
+		my $mode = $1;
+		$rv{'sign'} = $mode =~ /s/ ? 1 : 0;
+		$rv{'verify'} = $mode =~ /v/ ? 1 : 0;
+		}
+	else {
+		$rv{'sign'} = 1;
+		$rv{'verify'} = 1;
+		}
+	}
 
 # Check mail server
 &require_mail();
@@ -256,9 +302,9 @@ if ($rv{'keyfile'} && -r $rv{'keyfile'}) {
 return \%rv;
 }
 
-# get_debian_dkim_config(file)
+# get_open_dkim_config(file)
 # Returns the config file as seen on Debian into as hash ref
-sub get_debian_dkim_config
+sub get_open_dkim_config
 {
 my ($file) = @_;
 my %conf;
@@ -273,9 +319,9 @@ close(DKIM);
 return \%conf;
 }
 
-# save_debian_dkim_config(file, directive, value)
+# save_open_dkim_config(file, directive, value)
 # Update a value in the Debian-style config file
-sub save_debian_dkim_config
+sub save_open_dkim_config
 {
 my ($file, $name, $value) = @_;
 my $lref = &read_file_lines($file);
@@ -376,15 +422,16 @@ my $dkim_config = &get_dkim_config_file();
 if ($dkim_config) {
 	# Save domains and key file in config
 	&lock_file($dkim_config);
-	&save_debian_dkim_config($dkim_config, 
+	&save_open_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
-	&save_debian_dkim_config($dkim_config, 
+	&save_open_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
-	&save_debian_dkim_config($dkim_config,
+	&save_open_dkim_config($dkim_config,
                 "Syslog", "yes");
 
-	my $conf = &get_debian_dkim_config($dkim_config);
-	if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'freebsd') {
+	my $conf = &get_open_dkim_config($dkim_config);
+	if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'freebsd' ||
+	    &get_dkim_type() eq 'centos') {
 		# OpenDKIM version supplied with Ubuntu and Debian 6 supports
 		# a domains file
 		my $domfile = $conf->{'Domain'};
@@ -398,18 +445,18 @@ if ($dkim_config) {
 			&print_tempfile(DOMAINS, "$dom\n");
 			}
 		&close_tempfile(DOMAINS);
-		&save_debian_dkim_config($dkim_config,
+		&save_open_dkim_config($dkim_config,
 					 "Domain", $domfile);
 		}
 	else {
 		# Work out mapping file
-		&save_debian_dkim_config($dkim_config, 
+		&save_open_dkim_config($dkim_config, 
 			"Domain", undef);
 		my $keylist = $conf->{'KeyList'};
 		if (!$keylist) {
 			$keylist = $dkim_config;
 			$keylist =~ s/\/([^\/]+)$/\/keylist/;
-			&save_debian_dkim_config($dkim_config,
+			&save_open_dkim_config($dkim_config,
 				"KeyList", $keylist);
 			}
 
@@ -430,25 +477,26 @@ if ($dkim_config) {
 					 $dkim->{'extra'});
 		}
 		
-	if (&get_dkim_type() eq 'freebsd') {
+	if (&get_dkim_type() eq 'freebsd' || &get_dkim_type() eq 'centos') {
 		# Set milter port to listen on
 		if (!$conf->{'Socket'} ||
-			$conf->{'Socket'} =~ /^inet:port/ ||
-			$conf->{'Socket'} =~ /^local:/ && $config{'mail_system'} == 0) {
-		    # Set socket is not set, or if a local file
-		    # and Postfix is in use
-		    &save_debian_dkim_config($dkim_config,
-			"Socket", "inet:8891\@localhost");
-		    $dkim->{'port'} = 8891;
-		}
+		    $conf->{'Socket'} =~ /^inet:port/ ||
+		    $conf->{'Socket'} =~ /^local:/ &&
+		      $config{'mail_system'} == 0) {
+		        # Set socket is not set, or if a local file
+		        # and Postfix is in use
+		        &save_open_dkim_config($dkim_config,
+			    "Socket", "inet:8891\@localhost");
+		        $dkim->{'port'} = 8891;
+			}
 
 		# Save sign/verify mode flags
 		my $mode = ($dkim->{'sign'} ? "s" : "").
-			($dkim->{'verify'} ? "v" : "");
+			   ($dkim->{'verify'} ? "v" : "");
 		
-		&save_debian_dkim_config($dkim_config,
+		&save_open_dkim_config($dkim_config,
 			"Mode", $mode);
- 	}
+		}
 	&unlock_file($dkim_config);
 
 	# Save list of extra domains
@@ -478,6 +526,20 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	($flags =~ s/-b\s*(\S+)/-b $mode/) ||
 		($flags .= ($flags ? " " : "")."-b $mode");
 	$def{'DAEMON_OPTS'} = $flags;
+
+	&write_env_file($dkim_defaults, \%def);
+	&unlock_file($dkim_defaults);
+	}
+elsif (&get_dkim_type() eq 'centos') {
+	# Save sign/verify mode flags
+	&lock_file($dkim_defaults);
+	my %def;
+	my $flags = $def{'OPTIONS'};
+	my $mode = ($dkim->{'sign'} ? "s" : "").
+		   ($dkim->{'verify'} ? "v" : "");
+	($flags =~ s/-b\s*(\S+)/-b $mode/) ||
+		($flags .= ($flags ? " " : "")."-b $mode");
+	$def{'OPTIONS'} = $flags;
 
 	&write_env_file($dkim_defaults, \%def);
 	&unlock_file($dkim_defaults);
@@ -792,11 +854,11 @@ my $dkim_config = &get_dkim_config_file();
 my $init = &get_dkim_init_name();
 my $dkim = &get_dkim_config();
 if ($dkim_config) {
-	my $conf = &get_debian_dkim_config($dkim_config);
+	my $conf = &get_open_dkim_config($dkim_config);
 	my $keylist = $conf->{'KeyList'};
 	if ($keylist) {
 		# Update key to domain map
-		&save_debian_dkim_config($dkim_config, 
+		&save_open_dkim_config($dkim_config, 
 			"Domain", undef);
 		my $selector = $conf->{'Selector'};
 		my $keylist = $conf->{'KeyList'};
@@ -818,7 +880,7 @@ if ($dkim_config) {
 			&print_tempfile(DOMAINS, "$dom\n");
 			}
 		&close_tempfile(DOMAINS);
-		&save_debian_dkim_config($dkim_config,
+		&save_open_dkim_config($dkim_config,
 					 "Domain", $domfile);
 		}
 
@@ -950,7 +1012,7 @@ sub get_domain_dkim_key
 my ($d) = @_;
 my $dkim_config = &get_dkim_config_file();
 return undef if (!-r $dkim_config);
-my $conf = &get_debian_dkim_config($dkim_config);
+my $conf = &get_open_dkim_config($dkim_config);
 if ($conf->{'KeyList'}) {
 	# Old-style file mapping domains to key files
 	my $keyfile = $conf->{'KeyFile'};
@@ -1000,8 +1062,8 @@ if (!-r $dkim_config) {
 	&$second_print($text{'domdkim_econfig'});
 	return 0;
 	}
-my $conf = &get_debian_dkim_config($dkim_config);
-if (&get_dkim_type() ne 'ubuntu') {
+my $conf = &get_open_dkim_config($dkim_config);
+if (&get_dkim_type() ne 'ubuntu' && &get_dkim_type() ne 'centos') {
 	# Old style which supports a single key list file
 	if (!$conf->{'KeyList'}) {
 		&$second_print($text{'domdkim_ekeylist'});
@@ -1042,20 +1104,20 @@ if (&get_dkim_type() ne 'ubuntu') {
 	&flush_file_lines($conf->{'KeyList'});
 	&unlock_file($conf->{'KeyList'});
 	}
-elsif (&get_dkim_type() eq 'ubuntu') {
+else {
 	# New style with SigningTable and KeyTable options
 
 	# Add missing directives if needed
 	if (!$conf->{'SigningTable'}) {
 		$conf->{'SigningTable'} = "refile:".$dkim_config;
 		$conf->{'SigningTable'} =~ s/\/([^\/]+)$/\/dkim-signingtable/;
-		&save_debian_dkim_config($dkim_config,
+		&save_open_dkim_config($dkim_config,
 			"SigningTable", $conf->{'SigningTable'});
 		}
 	if (!$conf->{'KeyTable'}) {
 		$conf->{'KeyTable'} = $dkim_config;
 		$conf->{'KeyTable'} =~ s/\/([^\/]+)$/\/dkim-keytable/;
-		&save_debian_dkim_config($dkim_config,
+		&save_open_dkim_config($dkim_config,
 			"KeyTable", $conf->{'KeyTable'});
 		}
 
@@ -1167,7 +1229,7 @@ else {
 sub set_dkim_keyfile_permissions
 {
 my ($keyfile) = @_;
-if (&get_dkim_type() eq 'ubuntu') {
+if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'centos') {
 	&set_ownership_permissions("opendkim", undef, 0700, $keyfile);
 	}
 elsif (&get_dkim_type() eq 'debian') {
