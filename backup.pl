@@ -257,11 +257,12 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 
 		# Check if any of the domains failed
 		@failededoms = grep { $errdoms{$_->{'id'}} } @edoms;
+		$dest = &nice_backup_url($strfdests[0]);
 		if (@failededoms) {
-			$subject = &text('backup_failedsubject', $host);
+			$subject = &text('backup_failedsubject', $host, $dest);
 			}
 		else {
-			$subject = &text('backup_donesubject', $host);
+			$subject = &text('backup_donesubject', $host, $dest);
 			}
 
 		$mail = {
