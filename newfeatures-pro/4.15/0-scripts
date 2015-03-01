@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.10, Node.js to 0.12.0, phpMyFAQ to 2.8.20, Trac to 1.0.4, ZenPhoto to 1.4.7, Roundcube to 1.1.0, Pydio to 6.0.3, X2CRM to 5.0.4, Z-Push to 2.2.0, extPlorer to 2.1.7, Wordpress to 4.1.1, Piwik to 2.11.1, CMS Made Simple to 1.11.13, Django to 1.7.5, Dokuwiki to 2014-09-29c, Joomla to 3.4.0, ownCloud to 8.0.0, and FengOffice to 3.0.7.
+html=Updated the Moodle script installer to version 2.8.3, phpMyAdmin to 4.3.10, Node.js to 0.12.0, phpMyFAQ to 2.8.21, Trac to 1.0.4, ZenPhoto to 1.4.7, Roundcube to 1.1.0, Pydio to 6.0.3, X2CRM to 5.0.4, Z-Push to 2.2.0, extPlorer to 2.1.7, Wordpress to 4.1.1, Piwik to 2.11.1, CMS Made Simple to 1.11.13, Django to 1.7.5, Dokuwiki to 2014-09-29c, Joomla to 3.4.0, ownCloud to 8.0.0, and FengOffice to 3.0.7.
 master=1
 reseller=1
 domain=1
