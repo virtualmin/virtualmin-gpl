@@ -46,6 +46,3 @@
  - Improve replicated domain support
 	- MySQL on remote server
 	- NFS on remote
-
- - Use OpemDKIM on CentOS 7 instead of DKIM-Milter
-	- UNLESS dkim-milter package is installed

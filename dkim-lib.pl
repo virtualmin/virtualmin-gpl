@@ -32,7 +32,8 @@ elsif ($gconfig{'os_type'} eq 'debian-linux') {
 	return 'debian';
 	}
 elsif ($gconfig{'os_type'} eq 'redhat-linux') {
-	if ($gconfig{'os_version'} >= 15) {
+	if ($gconfig{'os_version'} >= 15 &&
+	    !-r $redhat_dkim_config) {
 		# Virtualmin provides opendkim now
 		return 'centos';
 		}
