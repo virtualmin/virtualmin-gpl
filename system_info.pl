@@ -30,6 +30,16 @@ if ($data->{'alt'} && !$in{'noalt'}) {
 		    'url' => $data->{'alt'} });
 	}
 
+# Refresh button that does Virtualmin too, and replaces the one
+# from the system-status module
+push(@rv, { 'type' => 'link',
+            'id' => 'vrecollect',
+            'priority' => 100,
+            'desc' => $text{'right_recollect'},
+            'link' => '/'.$module_name.'/recollect.cgi' });
+push(@rv, { 'type' => 'veto',
+	    'veto' => 'recollect' });
+
 # Warning messages
 foreach my $warn (&list_warning_messages()) {
 	push(@rv, { 'type' => 'warning',

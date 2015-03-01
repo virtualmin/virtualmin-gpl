@@ -6591,6 +6591,7 @@ right_statusheader=Status
 right_sysinfoheader=Programs
 right_virtheader=Virtualmin Information
 right_ipsheader=IP Address Allocation
+right_recollect=Refresh system information
 right_restart=Restart $1
 right_defip=(Default IP)
 right_ip=(Private IP)
