@@ -11743,7 +11743,7 @@ if ($config{'bw_active'} && &can_monitor_bandwidth($d)) {
 	}
 
 # Button to show disk usage
-if ($d->{'dir'} && !$d->{'parent'} && $virtualmin_pro) {
+if ($d->{'dir'} && !$d->{'parent'}) {
 	push(@rv, { 'page' => 'usage.cgi',
 		    'title' => $text{'edit_usage'},
 		    'desc' => $text{'edit_usagehdesc'},
