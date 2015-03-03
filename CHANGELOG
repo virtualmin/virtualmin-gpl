@@ -1488,3 +1488,5 @@ Added the Running Backups page for viewing scheduled and manually started backup
 The password recovery email address can now be edited for mailbox users via the Edit User page and the modify-user API command. The password reset process can also be triggered from within Virtualmin, as well as using the password recovery plugin.
 Added support for backing up to and restoring from Dropbox, similar to Virtualmin's existing Google Cloud Storage backup feature.
 Switch from the old dkim-milter package to OpenDKIM on CentOS 7 systems.
+---- Changes since 4.15 ----
+Updated the phpMyAdmin script installer to version 4.3.11.
