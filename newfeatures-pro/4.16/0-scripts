@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to version 4.3.11.
+html=Updated the phpMyAdmin script installer to version 4.3.11, and Pydio to 6.0.4.
 master=1
 reseller=1
 domain=1
