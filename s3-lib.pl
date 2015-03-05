@@ -105,12 +105,12 @@ sub s3_upload
 local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
 $tries ||= 1;
-&require_s3();
 local @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
 if (&can_use_aws_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
 	}
+&require_s3();
 my $headers = { };
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
@@ -349,35 +349,28 @@ sub s3_upload_aws_cmd
 {
 local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
+$tries ||= 1;
 local $err;
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $out = &backquote_command(
-		"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-		" cp ".quotemeta($sourcefile).
-		" s3://".quotemeta($bucket)."/".quotemeta($destfile));
+	local $out = &call_aws_cmd($akey,
+		[ "cp", $sourcefile, "s3://$bucket/$destfile" ]);
 	if ($?) {
 		$err = $out;
 		}
 	if (!$err && $info) {
 		# Upload the .info file
 		local $temp = &uncat_transname(&serialise_variable($info));
-		local $out = &backquote_command(
-			"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-			" cp ".quotemeta($temp).
-			" s3://".quotemeta($bucket)."/".quotemeta($destfile).
-			".info");
+		local $out = &call_aws_cmd($akey,
+			[ "cp", $temp, "s3://$bucket/$destfile.info" ]);
 		$err = $out if ($?);
 		}
 	if (!$err && $dom) {
 		# Upload the .dom file
 		local $temp = &uncat_transname(&serialise_variable(
 				&clean_domain_passwords($dom)));
-		local $out = &backquote_command(
-			"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-			" cp ".quotemeta($temp).
-			" s3://".quotemeta($bucket)."/".quotemeta($destfile).
-			".dom");
+		local $out = &call_aws_cmd($akey,
+			[ "cp", $temp, "s3://$bucket/$destfile.dom" ]);
 		$err = $out if ($?);
 		}
 	last if (!$err);
@@ -627,13 +620,16 @@ if ($response->http_response->code < 200 ||
 return undef;
 }
 
-# s3_download(access-key, secret-key, bucket, file, destfile)
+# s3_download(access-key, secret-key, bucket, file, destfile, tries)
 # Download some file for S3 into the given destination file. Returns undef on
 # success or an error message on failure.
 sub s3_download
 {
 local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
+if (&can_use_aws_cmd($akey, $skey)) {
+	return &s3_download_aws_cmd(@_);
+	}
 &require_s3();
 
 my $err;
@@ -723,6 +719,25 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	}
 
+return $err;
+}
+
+# s3_download_aws_cmd(access-key, secret-key, bucket, file, destfile, tries)
+# Like s3_download, but uses the aws command
+sub s3_download_aws_cmd
+{
+local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
+$tries ||= 1;
+my $err;
+for(my $i=0; $i<$tries; $i++) {
+	$err = undef;
+	local $out = &call_aws_cmd($akey,
+		[ "cp", "s3://$bucket/$file", $destfile ]);
+	if ($?) {
+		$err = $out;
+		}
+	last if (!$err);
+	}
 return $err;
 }
 
@@ -853,7 +868,7 @@ sub can_use_aws_cmd
 {
 my ($akey, $skey) = @_;
 return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
-my $out = &backquote_command("$config{'aws_cmd'} s3 --profile=$akey ls 2>&1");
+my $out = &call_aws_cmd($akey, "ls");
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
@@ -873,6 +888,18 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 		}
 	}
 return 1;
+}
+
+# call_aws_cmd(akey, params)
+# Run the aws command for s3 with some params, and return output
+sub call_aws_cmd
+{
+local ($akey, $params) = @_;
+if (ref($params)) {
+	$params = join(" ", map { quotemeta($_) } @$params);
+	}
+return &backquote_command("$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+			  " ".$params);
 }
 
 1;
