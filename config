@@ -215,3 +215,4 @@ postfix_ssl=1
 cert_type=sha2
 apache_star=0
 gzip_mysql=1
+aws_cmd=aws

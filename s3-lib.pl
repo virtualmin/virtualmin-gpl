@@ -108,7 +108,9 @@ $tries ||= 1;
 &require_s3();
 local @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
-my $can_use_write = &get_webmin_version() >= 1.451;
+if (&can_use_aws_cmd($akey, $skey)) {
+	return &s3_upload_aws_cmd(@_);
+	}
 my $headers = { };
 if ($rrs) {
 	$headers->{'x-amz-storage-class'} = 'REDUCED_REDUNDANCY';
@@ -176,8 +178,7 @@ for(my $i=0; $i<$tries; $i++) {
 		local $buf;
 		open(BACKUP, $sourcefile);
 		while(read(BACKUP, $buf, 1024) > 0) {
-			if (!&write_http_connection($h, $buf) &&
-			    $can_use_write) {
+			if (!&write_http_connection($h, $buf)) {
 				$writefailed = $!;
 				last;
 				}
@@ -336,6 +337,51 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	}
 
+return $err;
+}
+
+# s3_upload_aws_cmd(access-key, secret-key, bucket, source-file, dest-filename,
+# 		    [&info], [&domains], attempts, [reduced-redundancy],
+# 		    [multipart])
+# Has the same semantics as s3_upload, but uses the aws command instead of
+# implementing the upload process itself
+sub s3_upload_aws_cmd
+{
+local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
+       $rrs, $multipart) = @_;
+local $err;
+for(my $i=0; $i<$tries; $i++) {
+	$err = undef;
+	local $out = &backquote_command(
+		"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+		" cp ".quotemeta($sourcefile).
+		" s3://".quotemeta($bucket)."/".quotemeta($destfile));
+	if ($?) {
+		$err = $out;
+		}
+	if (!$err && $info) {
+		# Upload the .info file
+		local $temp = &uncat_transname(&serialise_variable($info));
+		local $out = &backquote_command(
+			"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+			" cp ".quotemeta($temp).
+			" s3://".quotemeta($bucket)."/".quotemeta($destfile).
+			".info");
+		$err = $out if ($?);
+		}
+	if (!$err && $dom) {
+		# Upload the .dom file
+		local $temp = &uncat_transname(&serialise_variable(
+				&clean_domain_passwords($dom)));
+		local $out = &backquote_command(
+			"$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+			" cp ".quotemeta($temp).
+			" s3://".quotemeta($bucket)."/".quotemeta($destfile).
+			".dom");
+		$err = $out if ($?);
+		}
+	last if (!$err);
+	}
 return $err;
 }
 
@@ -798,6 +844,35 @@ sub s3_list_locations
 local ($akey, $skey) = @_;
 return ( "us-west-1", "us-west-2", "EU", "ap-southeast-1", "ap-southeast-2",
 	 "ap-northeast-1", "sa-east-1", "eu-central-1" );
+}
+
+# can_use_aws_cmd(access-key, secret-key)
+# Returns 1 if the aws command is installed and can be used for uploads and
+# downloads
+sub can_use_aws_cmd
+{
+my ($akey, $skey) = @_;
+return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
+my $out = &backquote_command("$config{'aws_cmd'} s3 --profile=$akey ls 2>&1");
+if ($? || $out =~ /Unable to locate credentials/i ||
+	  $out =~ /could not be found/) {
+	# Credentials profile hasn't been setup yet
+	my $temp = &transname();
+	&open_tempfile(TEMP, ">$temp");
+	&print_tempfile(TEMP, $akey,"\n");
+	&print_tempfile(TEMP, $skey,"\n");
+	&print_tempfile(TEMP, "\n");
+	&print_tempfile(TEMP, "\n");
+	&close_tempfile(TEMP);
+	$out = &backquote_command(
+		"$config{'aws_cmd'} configure --profile=".quotemeta($akey).
+		" <$temp 2>&1");
+	if ($?) {
+		# Profile setup failed!
+		return 0;
+		}
+	}
+return 1;
 }
 
 1;
