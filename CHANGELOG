@@ -1489,4 +1489,4 @@ The password recovery email address can now be edited for mailbox users via the 
 Added support for backing up to and restoring from Dropbox, similar to Virtualmin's existing Google Cloud Storage backup feature.
 Switch from the old dkim-milter package to OpenDKIM on CentOS 7 systems.
 ---- Changes since 4.15 ----
-Updated the phpMyAdmin script installer to version 4.3.11.1 and 4.0.10.9, and Pydio to 6.0.4.
+Updated the phpMyAdmin script installer to version 4.3.11.1 and 4.0.10.9, Piwik to 2.11.2, and Pydio to 6.0.4.
