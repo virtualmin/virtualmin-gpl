@@ -9101,6 +9101,16 @@ local $path = $file =~ /^\// ? $file : "$module_config_directory/$file";
 &close_tempfile(FILE);
 }
 
+# uncat_transname(data)
+# Creates a temp file and writes some data to it
+sub uncat_transname
+{
+local ($data, $tabs) = @_;
+local $temp = &transname();
+&uncat_file($temp, $data, $tabs);
+return $temp;
+}
+
 # plugin_call(module, function, [arg, ...])
 # If some plugin function is defined, call it and return the result,
 # otherwise return undef
@@ -11252,25 +11262,25 @@ sub get_compressed_file_size
 local ($file, $key) = @_;
 my $fmt = &compression_format($file, $key);
 my @st = stat($file);
-if ($rv == 0) {
+if ($fmt == 0) {
 	# Not compressed at all
 	return $st[7];
 	}
-elsif ($rv = 1) {
+elsif ($fmt == 1) {
 	# Gzip compressed
 	my $out = &backquote_command("gunzip -l ".quotemeta($file));
 	return undef if ($?);
 	return $out =~ /\d+\s+(\d+)\s+[0-9\.]+%/ ? $1 : undef;
 	}
-elsif ($rv == 2) {
+elsif ($fmt == 2) {
 	# Classic compress - no idea how to handle
 	return undef;
 	}
-elsif ($rv == 3) {
+elsif ($fmt == 3) {
 	# Bzip2 compressed - no way to estimate
 	return undef;
 	}
-elsif ($rv == 4) {
+elsif ($fmt == 4) {
 	# Zip format - can sum up files
 	my $out = &backquote_command("unzip -l ".quotemeta($file));
 	return undef if ($?);
@@ -11282,7 +11292,7 @@ elsif ($rv == 4) {
 		}
 	return $rv;
 	}
-elsif ($rv == 5) {
+elsif ($fmt == 5) {
 	# TAR format doesn't compress
 	return $st[7];
 	}
