@@ -351,10 +351,12 @@ local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
 $tries ||= 1;
 local $err;
+local @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	local $out = &call_aws_cmd($akey,
-		[ "cp", $sourcefile, "s3://$bucket/$destfile" ]);
+		[ @regionflag,
+		  "cp", $sourcefile, "s3://$bucket/$destfile" ]);
 	if ($?) {
 		$err = $out;
 		}
@@ -362,7 +364,8 @@ for(my $i=0; $i<$tries; $i++) {
 		# Upload the .info file
 		local $temp = &uncat_transname(&serialise_variable($info));
 		local $out = &call_aws_cmd($akey,
-			[ "cp", $temp, "s3://$bucket/$destfile.info" ]);
+			[ @regionflag, 
+			  "cp", $temp, "s3://$bucket/$destfile.info" ]);
 		$err = $out if ($?);
 		}
 	if (!$err && $dom) {
@@ -370,12 +373,26 @@ for(my $i=0; $i<$tries; $i++) {
 		local $temp = &uncat_transname(&serialise_variable(
 				&clean_domain_passwords($dom)));
 		local $out = &call_aws_cmd($akey,
-			[ "cp", $temp, "s3://$bucket/$destfile.dom" ]);
+			[ @regionflag,
+			  "cp", $temp, "s3://$bucket/$destfile.dom" ]);
 		$err = $out if ($?);
 		}
 	last if (!$err);
 	}
 return $err;
+}
+
+# s3_region_flag(access-key, secret-key, bucket)
+# Returns the flags array needed to backup to some bucket
+sub s3_region_flag
+{
+local ($akey, $skey, $bucket) = @_;
+local @regionflag;
+my $info = &s3_get_bucket($akey, $skey, $bucket);
+if (ref($info) && $info->{'location'}) {
+	return ("--region", $info->{'location'});
+	}
+return ( );
 }
 
 # s3_list_backups(access-key, secret-key, bucket, [file])
@@ -550,14 +567,33 @@ return $response->http_response->code == 200 ||
 sub s3_list_files
 {
 local ($akey, $skey, $bucket) = @_;
-&require_s3();
-local $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-local $response = $conn->list_bucket($bucket);
-if ($response->http_response->code != 200) {
-	return &text('s3_elistfiles', &extract_s3_message($response));
+if (&can_use_aws_cmd($akey, $skey)) {
+	# Use the aws command
+	local @regionflag = &s3_region_flag($akey, $skey, $bucket);
+	local $out = &call_aws_cmd($akey,
+		[ @regionflag,
+		  "ls", "s3://$bucket/" ]);
+	return $out if ($?);
+	my @rv;
+	foreach my $l (split(/\r?\n/, $out)) {
+		my ($date, $time, $size, $file) = split(/\s+/, $l, 4);
+		push(@rv, { 'Key' => $file,
+			    'Size' => $size,
+			    'LastModified' => $date."T".$time.".000Z" });
+		}
+	return \@rv;
 	}
-return $response->entries;
+else {
+	# Make direct API call
+	&require_s3();
+	local $conn = &make_s3_connection($akey, $skey);
+	return $text{'s3_econn'} if (!$conn);
+	local $response = $conn->list_bucket($bucket);
+	if ($response->http_response->code != 200) {
+		return &text('s3_elistfiles', &extract_s3_message($response));
+		}
+	return $response->entries;
+	}
 }
 
 # s3_delete_file(access-key, secret-key, bucket, file)
@@ -729,10 +765,12 @@ sub s3_download_aws_cmd
 local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
 my $err;
+local @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	local $out = &call_aws_cmd($akey,
-		[ "cp", "s3://$bucket/$file", $destfile ]);
+		[ @regionflag,
+		  "cp", "s3://$bucket/$file", $destfile ]);
 	if ($?) {
 		$err = $out;
 		}
@@ -898,8 +936,9 @@ local ($akey, $params) = @_;
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
-return &backquote_command("$config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-			  " ".$params);
+return &backquote_command(
+	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+	" ".$params);
 }
 
 1;
