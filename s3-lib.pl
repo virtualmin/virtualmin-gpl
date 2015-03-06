@@ -402,27 +402,25 @@ sub s3_list_backups
 {
 local ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-local $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-
-local $response = $conn->list_bucket($bucket);
-if ($response->http_response->code != 200) {
-	return &text('s3_elist2', &extract_s3_message($response));
+local $files = &s3_list_files($akey, $skey, $bucket);
+if (!ref($files)) {
+	return &text('s3_elist2', $files);
 	}
 local $rv = { };
-foreach my $f (@{$response->entries}) {
+foreach my $f (@$files) {
 	if ($f->{'Key'} =~ /^(\S+)\.info$/ && $path eq $1 ||
 	    $f->{'Key'} =~ /^([^\/\s]+)\.info$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.info$/ && $path && $path eq $2){
 		# Found a valid info file .. get it
 		local $bfile = $1;
-		local ($bentry) = grep { $_->{'Key'} eq $bfile }
-				  @{$response->entries};
+		local ($bentry) = grep { $_->{'Key'} eq $bfile } @$files;
 		next if (!$bentry);	# No actual backup file found!
-		local $gresponse = $conn->get($bucket, $f->{'Key'});
-		if ($gresponse->http_response->code == 200) {
+		my $temp = &transname();
+		my $err = &s3_download($akey, $skey, $bucket,
+				       $f->{'Key'}, $temp);
+		if (!$err) {
 			local $info = &unserialise_variable(
-				$gresponse->object->data);
+					&read_file_contents($temp));
 			foreach my $dname (keys %$info) {
 				$rv->{$dname} = {
 					'file' => $bfile,
@@ -431,8 +429,7 @@ foreach my $f (@{$response->entries}) {
 				}
 			}
 		else {
-			return &text('s3_einfo2', $f->{'Key'},
-				     &extract_s3_message($response));
+			return &text('s3_einfo2', $f->{'Key'}, $err);
 			}
 		}
 	}
@@ -906,6 +903,8 @@ sub can_use_aws_cmd
 {
 my ($akey, $skey) = @_;
 return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
+return $can_use_aws_cmd_cache{$akey}
+	if (defined($can_use_aws_cmd_cache{$akey}));
 my $out = &call_aws_cmd($akey, "ls");
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
@@ -923,8 +922,10 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	if ($?) {
 		# Profile setup failed!
 		return 0;
+		$can_use_aws_cmd_cache{$akey} = 0;
 		}
 	}
+$can_use_aws_cmd_cache{$akey} = 1;
 return 1;
 }
 
