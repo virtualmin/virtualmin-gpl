@@ -961,8 +961,9 @@ foreach $db (@dbs) {
 		}
 	elsif ($config{'gzip_mysql'}) {
 		# Backup worked .. gzip the file
-		my $out = &run_as_domain_user(
-			$d, "gzip ".quotemeta($dbfile)." 2>&1");
+		unlink($dbfile.".gz");	# Prevent malicious symlink
+		my $out = &backquote_logged(
+				"gzip ".quotemeta($dbfile)." 2>&1");
 		if ($?) {
 			&$second_print(&text('backup_mysqlgzipfailed',
 					     "<pre>$out</pre>"));
@@ -1076,9 +1077,10 @@ foreach my $db (@dbs) {
 		$created{$db->[0]} = 1;
 		}
 	&$outdent_print();
-	if ($db->[1] =~ /\.gz$/) {
+	if ($db->[1] =~ /(.*)\.gz$/) {
 		# Need to uncompress first
-		local $out = &run_as_domain_user($_[0],
+		unlink("$1");	# To prevent malicious link overwrite
+		local $out = &backquote_logged(
 			"gunzip ".quotemeta($db->[1])." 2>&1");
 		if ($?) {
 			&$second_print(&text('restore_mysqlgunzipfailed',
