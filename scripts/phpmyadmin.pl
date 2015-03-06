@@ -360,7 +360,7 @@ elsif (&compare_versions($ver, "4.0") > 0) {
 	}
 elsif (&compare_versions($ver, "3.0") > 0) {
 	return ( "https://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/",
-		 "(3\\.[0-9]+\\.[0-9\\.]+)" );
+		 "(3\\.5\\.[0-9]+\\.[0-9\\.]+)" );
 	}
 else {
 	return ( );
