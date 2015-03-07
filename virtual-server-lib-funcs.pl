@@ -3265,6 +3265,13 @@ else {
 	}
 }
 
+# Returns 1 if the current user can see the preview website link
+sub can_use_preview
+{
+return $config{'show_preview'} == 2 ||
+       $config{'show_preview'} == 1 && &master_admin();
+}
+
 # domains_table(&domains, [checkboxes], [return-html], [exclude-cols])
 # Display a list of domains in a table, with links for editing
 sub domains_table
@@ -11898,7 +11905,7 @@ foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 
 # Add preview website link, proxied via Webmin
-if (&domain_has_website($d)) {
+if (&domain_has_website($d) && &can_use_preview()) {
 	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
 	push(@rv, { 'url' => "$gconfig{'webprefix'}/$module_name/".
 		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",

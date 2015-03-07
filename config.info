@@ -31,6 +31,7 @@ template_auto=Allow editing of limits when creating server?,1,0-Yes,1-No
 plan_auto=Set default features from plan when creating server?,1,1-Yes,0-No
 domains_sort=Sort virtual servers by,1,user-Owner with subserver tree,dom-Domain name,owner-Description,sub-Domain name with subserver tree
 show_ugroup=Allow selection of different group for server admins?,1,1-Yes,0-No
+show_preview=Show preview website link?,1,2-Always,1-Only for the master admin,0-Never
 theme_image=URL for company logo image,3,None or default,50
 theme_link=Link destination for company logo,3,None,50
 theme_alt=Alt text for company logo,3,None,50
