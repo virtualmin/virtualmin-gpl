@@ -528,7 +528,7 @@ if (&read_env_file($virtualmin_license_file, \%vserial) &&
 		       'value' => $dleft < 0 ? $text{'right_vunlimited'}
 					     : $dleft });
 
-	# Add allowed system counts
+	# Add allowed domain counts
 	my %lstatus;
 	&read_file($licence_status, \%lstatus);
 	if ($lstatus{'used_servers'}) {
