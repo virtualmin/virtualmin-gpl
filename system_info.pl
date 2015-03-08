@@ -282,6 +282,30 @@ if ($newhtml) {
 		    'html' => $newhtml });
 	}
 
+# Show usage count by type
+if (&master_admin() && !$data->{'novirtualmin'} && $info->{'fcount'}) {
+	my @table;
+	foreach my $f (@{$info->{'ftypes'}}) {
+		my $cur = int($info->{'fcount'}->{$f});
+		my $extra = $info->{'fextra'}->{$f};
+		my $max = $info->{'fmax'}->{$f};
+		my $hide = $info->{'fhide'}->{$f};
+		if ($extra < 0 || $hide) {
+			push(@table, { 'desc' => $text{'right_f'.$f},
+				       'value' => $cur });
+			}
+		else {
+			push(@table, { 'desc' => $text{'right_f'.$f},
+				       'value' => &text('right_out', $cur, $max) });
+			}
+		}
+	push(@rv, { 'type' => 'table',
+		    'id' => 'ftypes',
+		    'desc' => $text{'right_virtheader'},
+		    'open' => 0,
+		    'table' => \@table });
+	}
+
 # Top quota users
 my @quota = $info->{'quota'} ?
 		grep { &can_edit_domain($_->[0]) } @{$info->{'quota'}} : ( );
