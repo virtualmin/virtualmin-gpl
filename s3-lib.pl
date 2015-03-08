@@ -480,13 +480,27 @@ sub s3_list_buckets
 {
 &require_s3();
 local ($akey, $skey, $bucket) = @_;
-local $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-local $response = $conn->list_all_my_buckets();
-if ($response->http_response->code != 200) {
-	return &text('s3_elist', &extract_s3_message($response));
+if (&can_use_aws_cmd($akey, $skey)) {
+	# Use the aws command
+	local $out = &call_aws_cmd($akey, [ "ls" ]);
+	return $out if ($?);
+	foreach my $l (split(/\r?\n/, $out)) {
+		my ($date, $time, $file) = split(/\s+/, $l, 4);
+		push(@rv, { 'Name' => $file,
+			    'CreationDate' => $date."T".$time.".000Z" });
+		}
+	return \@rv;
 	}
-return $response->entries;
+else {
+	# Make an HTTP API call
+	local $conn = &make_s3_connection($akey, $skey);
+	return $text{'s3_econn'} if (!$conn);
+	local $response = $conn->list_all_my_buckets();
+	if ($response->http_response->code != 200) {
+		return &text('s3_elist', &extract_s3_message($response));
+		}
+	return $response->entries;
+	}
 }
 
 # s3_get_bucket(access-key, secret-key, bucket)
