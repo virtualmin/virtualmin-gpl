@@ -1,0 +1,4 @@
+desc=Using the aws command for S3 operations
+html=If the aws command is installed, Virtualmin will call it to perform S3 operations rather than using it's own code. Because this command is developed by Amazon, it can be expected to be reliable in the face of S3 API changes. You can download this command from <a href=http://aws.amazon.com/cli/ target=_blank>http://aws.amazon.com/cli/</a>
+master=1
+link=list_backups.cgi

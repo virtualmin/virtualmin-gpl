@@ -34,15 +34,9 @@
 	- CHANGELOG
 	- backup/restore
 
- - Backup to Google Cloud Files & Dropbox
-	- Take app to production in Dropbox console
-
  - Mobile theme should use new menu function (but maybe wait till new release)
 	- and right-frame info too
  
- - Upgrade to latest Net::Amazon::S3
-	- http://virtualmin.com/node/35937
-
  - Improve replicated domain support
 	- MySQL on remote server
 	- NFS on remote
