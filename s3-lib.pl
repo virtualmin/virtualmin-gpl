@@ -586,7 +586,7 @@ if (&can_use_aws_cmd($akey, $skey)) {
 	local @regionflag = &s3_region_flag($akey, $skey, $bucket);
 	local $out = &call_aws_cmd($akey,
 		[ @regionflag,
-		  "ls", "s3://$bucket/" ]);
+		  "ls", "--recursive", "s3://$bucket/" ]);
 	return $out if ($?);
 	my @rv;
 	foreach my $l (split(/\r?\n/, $out)) {
