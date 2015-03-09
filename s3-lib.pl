@@ -506,6 +506,9 @@ else {
 # s3_get_bucket(access-key, secret-key, bucket)
 # Returns a hash ref with details of a bucket. Keys are :
 # location - A location like us-west-1, if any is set
+# logging - XXX
+# acl - An array ref of ACL objects
+# lifecycle - An array ref of lifecycle rule objects
 sub s3_get_bucket
 {
 &require_s3();
@@ -612,15 +615,26 @@ else {
 sub s3_delete_file
 {
 local ($akey, $skey, $bucket, $file) = @_;
-&require_s3();
-local $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-local $response = $conn->delete($bucket, $file);
-if ($response->http_response->code < 200 ||
-    $response->http_response->code >= 300) {
-        return &text('s3_edeletefile', &extract_s3_message($response));
-        }
-return undef;
+if (&can_use_aws_cmd($akey, $skey, $bucket)) {
+	# Use the aws command to delete a file
+	local @regionflag = &s3_region_flag($akey, $skey, $bucket);
+	local $out = &call_aws_cmd($akey,
+		[ @regionflag,
+		  "rm", "s3://$bucket/$file" ]);
+	return $? ? $out : undef;
+	}
+else {
+	# Call the HTTP API directly
+	&require_s3();
+	local $conn = &make_s3_connection($akey, $skey);
+	return $text{'s3_econn'} if (!$conn);
+	local $response = $conn->delete($bucket, $file);
+	if ($response->http_response->code < 200 ||
+	    $response->http_response->code >= 300) {
+		return &text('s3_edeletefile', &extract_s3_message($response));
+		}
+	return undef;
+	}
 }
 
 # s3_parse_date(string)
