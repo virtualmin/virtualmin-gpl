@@ -993,7 +993,9 @@ local %info;
 local (%userdbs, %userpasses);
 foreach my $db (&domain_databases($_[0], [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($_[0], $db->{'name'})) {
-		if ($u->[0] ne $_[0]->{'user'}) {
+		if ($u->[0] ne $_[0]->{'user'} &&
+		    $u->[0] ne 'root' &&
+		    $u->[0] ne $mysql::config{'login'}) {
 			push(@{$userdbs{$u->[0]}}, $db->{'name'});
 			$userpasses{$u->[0]} = $u->[1];
 			}
