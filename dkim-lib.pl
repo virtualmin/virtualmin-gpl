@@ -440,12 +440,16 @@ if ($dkim_config) {
 			$domfile = $dkim_config;
 			$domfile =~ s/\/[^\/]+$/\/dkim-domains.txt/;
 			}
+		my $newfile = !-r $domfile;
 		&open_lock_tempfile(DOMAINS, ">$domfile");
 		foreach my $dom ((map { $_->{'dom'} } @doms),
 				 @{$dkim->{'extra'}}) {
 			&print_tempfile(DOMAINS, "$dom\n");
 			}
 		&close_tempfile(DOMAINS);
+		if ($newfile) {
+			&set_ownership_permissions(undef, undef, 0755,$domfile);
+			}
 		&save_open_dkim_config($dkim_config,
 					 "Domain", $domfile);
 		}
