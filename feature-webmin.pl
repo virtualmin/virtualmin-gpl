@@ -1001,6 +1001,12 @@ foreach my $admin (@admins) {
 	local $pass = $forcedis ? "*LK*" :
 			&acl::encrypt_password($admin->{'pass'});
 	if ($wuser) {
+		# User already exists .. make sure he's an extra admin
+		local %aacl = &get_module_acl($admin->{'name'}, $module_name);
+		if (!$aacl{'admin'}) {
+			next;
+			}
+
 		# Update password (if changed)
 		if ($pass eq "*LK*" ||
 		    &acl::encrypt_password($admin->{'pass'}, $wuser->{'pass'})
