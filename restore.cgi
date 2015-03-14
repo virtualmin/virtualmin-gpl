@@ -36,7 +36,11 @@ if ($src eq "upload:") {
 	$fn = $in{'src_upload_filename'};
 	$fn =~ s/^.*[\\\/]//;
 	if ($d) {
-		$temp = "$d->{'home'}/virtualmin-backup/$fn";
+		$bdir = "$d->{'home'}/virtualmin-backup";
+		if (!-d $bdir) {
+			&make_dir_as_domain_user($d, $bdir, 0700);
+			}
+		$temp = "$bdir/$fn";
 		&open_tempfile_as_domain_user($d, TEMP, ">$temp", 0, 1);
 		&print_tempfile(TEMP, $in{'src_upload'});
 		&close_tempfile_as_domain_user($d, TEMP);
