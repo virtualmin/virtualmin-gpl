@@ -36,6 +36,7 @@ if ($src eq "upload:") {
 	$fn = $in{'src_upload_filename'};
 	$fn =~ s/^.*[\\\/]//;
 	if ($d) {
+		# In domain's home dir
 		$bdir = "$d->{'home'}/virtualmin-backup";
 		if (!-d $bdir) {
 			&make_dir_as_domain_user($d, $bdir, 0700);
@@ -44,14 +45,17 @@ if ($src eq "upload:") {
 		&open_tempfile_as_domain_user($d, TEMP, ">$temp", 0, 1);
 		&print_tempfile(TEMP, $in{'src_upload'});
 		&close_tempfile_as_domain_user($d, TEMP);
+		&set_ownership_permissions(undef, undef, 0700, $temp);
 		}
 	else {
+		# In /tmp/.webmin
 		$temp = &tempname($fn);
 		&open_tempfile(TEMP, ">$temp", 0, 1);
 		&print_tempfile(TEMP, $in{'src_upload'});
 		&close_tempfile(TEMP);
+		&set_ownership_permissions(undef, undef,
+			$safe_backup ? 0700 : 0755, $temp);
 		}
-	&set_ownership_permissions(undef, undef, 0700, $temp);
 	$src = $temp;
 	}
 ($mode) = &parse_backup_url($src);
