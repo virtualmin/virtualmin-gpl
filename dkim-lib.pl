@@ -1129,6 +1129,7 @@ else {
 	# Find domain's entry in signing table
 	my $signingfile = $conf->{'SigningTable'};
 	$signingfile =~ s/^[a-z]+://;
+	my $newfile = !-r $signingfile;
 	&lock_file($signingfile);
 	my $slref = &read_file_lines($signingfile);
 	if (!@$slref) {
@@ -1155,8 +1156,12 @@ else {
 		}
 	&flush_file_lines($signingfile);
 	&unlock_file($signingfile);
+	if ($newfile) {
+		&set_ownership_permissions(undef, undef, 0755, $signingfile);
+		}
 
 	# Find domain's entry in key table
+	$newfile = !-r $conf->{'KeyTable'};
 	&lock_file($conf->{'KeyTable'});
 	my $klref = &read_file_lines($conf->{'KeyTable'});
 	if (!@$klref) {
@@ -1191,6 +1196,10 @@ else {
 		}
 	&flush_file_lines($conf->{'KeyTable'});
 	&unlock_file($conf->{'KeyTable'});
+	if ($newfile) {
+		&set_ownership_permissions(undef, undef, 0755,
+					   $conf->{'KeyTable'});
+		}
 	}
 &$second_print($text{'setup_done'});
 
