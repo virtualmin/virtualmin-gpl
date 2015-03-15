@@ -6304,6 +6304,7 @@ bkey_ok=Delete Now
 bkey_rusuerlogs=This key has been used to encrypt $1 previous backups, which will be un-restorable without it.
 bkey_edescclash=A GPG key with the same description already exists
 bkey_eemailclash=A GPG key with the same email address already exists
+bkey_download=Download Key
 
 hashtype_crypt=Unix DES crypt
 hashtype_md5=MD5 hash
