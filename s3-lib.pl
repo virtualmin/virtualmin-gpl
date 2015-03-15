@@ -32,10 +32,10 @@ foreach my $m (@s3_perl_modules) {
 sub init_s3_bucket
 {
 &require_s3();
-local ($akey, $skey, $bucket, $tries, $location) = @_;
+my ($akey, $skey, $bucket, $tries, $location) = @_;
 $tries ||= 1;
 my $err;
-local $data;
+my $data;
 if ($location) {
 	$data = "<CreateBucketConfiguration>".
 		"<LocationConstraint>".
@@ -45,7 +45,7 @@ if ($location) {
 	}
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $conn = &make_s3_connection($akey, $skey);
+	my $conn = &make_s3_connection($akey, $skey);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		sleep(10*($i+1));
@@ -53,13 +53,13 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 
 	# Check if the bucket already exists, by trying to list it
-	local $response = $conn->list_bucket($bucket);
+	my $response = $conn->list_bucket($bucket);
 	if ($response->http_response->code == 200) {
 		last;
 		}
 
 	# Try to fetch my buckets
-	local $response = $conn->list_all_my_buckets();
+	my $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
 		$err = &text('s3_elist', &extract_s3_message($response));
 		sleep(10*($i+1));
@@ -70,7 +70,7 @@ for(my $i=0; $i<$tries; $i++) {
 	$conn = &make_s3_connection($akey, $skey);
 
 	# Check if given bucket is in the list
-	local ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
+	my ($got) = grep { $_->{'Name'} eq $bucket } @{$response->entries};
 	if (!$got) {
 		# Create the bucket
 		$response = $conn->create_bucket($bucket, undef, $data);
@@ -88,7 +88,7 @@ return $err;
 
 sub extract_s3_message
 {
-local ($response) = @_;
+my ($response) = @_;
 if ($response->body() =~ /<Message>(.*)<\/Message>/i) {
 	return $1;
 	}
@@ -102,10 +102,10 @@ return undef;
 # a scalar for the content, which could be huge.
 sub s3_upload
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
+my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
 $tries ||= 1;
-local @st = stat($sourcefile);
+my @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
 if (&can_use_aws_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
@@ -128,9 +128,9 @@ my $err;
 my $endpoint = undef;
 my $noep_conn = &make_s3_connection($akey, $skey);
 for(my $i=0; $i<$tries; $i++) {
-	local $newendpoint;
+	my $newendpoint;
 	$err = undef;
-	local $conn = &make_s3_connection($akey, $skey, $endpoint);
+	my $conn = &make_s3_connection($akey, $skey, $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -147,7 +147,7 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Use the S3 library to create a request object, but use Webmin's HTTP
 	# function to open it.
-	local $req;
+	my $req;
 	if ($multipart) {
 		$req = &s3_make_request($conn, $path."?uploads", "POST",
 				"dummy", $headers, $authpath."?uploads");
@@ -156,15 +156,15 @@ for(my $i=0; $i<$tries; $i++) {
 		$req = &s3_make_request($conn, $path, "PUT", "dummy",
 				$headers, $authpath);
 		}
-	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
-	local $h = &make_http_connection(
+	my ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
+	my $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
 	if (!ref($h)) {
 		$err = "HTTP connection to ${host}:${port} ".
 		       "for $page failed : $h";
 		next;
 		}
-	local $hinput;
+	my $hinput;
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
 		$hinput .= $hfn.": ".$req->header($hfn)."\r\n";
@@ -172,10 +172,10 @@ for(my $i=0; $i<$tries; $i++) {
 	&write_http_connection($h, "\r\n");
 
 	# Send the backup file contents
-	local $writefailed;
+	my $writefailed;
 	if (!$multipart) {
 		local $SIG{'PIPE'} = 'IGNORE';
-		local $buf;
+		my $buf;
 		open(BACKUP, $sourcefile);
 		while(read(BACKUP, $buf, 1024) > 0) {
 			if (!&write_http_connection($h, $buf)) {
@@ -188,14 +188,14 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Read back response .. this needs to be our own code, as S3 does
 	# some wierd redirects
-	local $line = &read_http_connection($h);
+	my $line = &read_http_connection($h);
 	$line =~ s/\r|\n//g;
 
 	# Read the headers
-	local %rheader;
-	local $htext;
+	my %rheader;
+	my $htext;
 	while(1) {
-		local $hline = &read_http_connection($h);
+		my $hline = &read_http_connection($h);
 		$htext .= $hline;
 		$hline =~ s/\r\n//g;
 		$hline =~ /^(\S+):\s+(.*)$/ || last;
@@ -203,7 +203,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 
 	# Read the body
-	local $out;
+	my $out;
 	while(defined($buf = &read_http_connection($h, 1024))) {
 		$out .= $buf;
 		}
@@ -307,8 +307,8 @@ for(my $i=0; $i<$tries; $i++) {
 
 	if (!$err && $info) {
 		# Write out the info file, if given
-		local $iconn = &make_s3_connection($akey, $skey);
-		local $response = $iconn->put($bucket, $destfile.".info",
+		my $iconn = &make_s3_connection($akey, $skey);
+		my $response = $iconn->put($bucket, $destfile.".info",
 					     &serialise_variable($info),
 					     $rrsheaders);
 		if ($response->http_response->code != 200) {
@@ -318,8 +318,8 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	if (!$err && $dom) {
 		# Write out the .dom file, if given
-		local $iconn = &make_s3_connection($akey, $skey);
-		local $response = $iconn->put($bucket, $destfile.".dom",
+		my $iconn = &make_s3_connection($akey, $skey);
+		my $response = $iconn->put($bucket, $destfile.".dom",
 		     &serialise_variable(&clean_domain_passwords($dom)),
 		     $rrsheaders);
 		if ($response->http_response->code != 200) {
@@ -347,14 +347,14 @@ return $err;
 # implementing the upload process itself
 sub s3_upload_aws_cmd
 {
-local ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
+my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
 $tries ||= 1;
-local $err;
-local @regionflag = &s3_region_flag($akey, $skey, $bucket);
+my $err;
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $out = &call_aws_cmd($akey,
+	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
 		  "cp", $sourcefile, "s3://$bucket/$destfile" ]);
 	if ($?) {
@@ -362,17 +362,17 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	if (!$err && $info) {
 		# Upload the .info file
-		local $temp = &uncat_transname(&serialise_variable($info));
-		local $out = &call_aws_cmd($akey,
+		my $temp = &uncat_transname(&serialise_variable($info));
+		my $out = &call_aws_cmd($akey,
 			[ @regionflag, 
 			  "cp", $temp, "s3://$bucket/$destfile.info" ]);
 		$err = $out if ($?);
 		}
 	if (!$err && $dom) {
 		# Upload the .dom file
-		local $temp = &uncat_transname(&serialise_variable(
+		my $temp = &uncat_transname(&serialise_variable(
 				&clean_domain_passwords($dom)));
-		local $out = &call_aws_cmd($akey,
+		my $out = &call_aws_cmd($akey,
 			[ @regionflag,
 			  "cp", $temp, "s3://$bucket/$destfile.dom" ]);
 		$err = $out if ($?);
@@ -386,8 +386,8 @@ return $err;
 # Returns the flags array needed to backup to some bucket
 sub s3_region_flag
 {
-local ($akey, $skey, $bucket) = @_;
-local @regionflag;
+my ($akey, $skey, $bucket) = @_;
+my @regionflag;
 my $info = &s3_get_bucket($akey, $skey, $bucket);
 if (ref($info) && $info->{'location'}) {
 	return ("--region", $info->{'location'});
@@ -400,26 +400,26 @@ return ( );
 # message string on failure.
 sub s3_list_backups
 {
-local ($akey, $skey, $bucket, $path) = @_;
+my ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-local $files = &s3_list_files($akey, $skey, $bucket);
+my $files = &s3_list_files($akey, $skey, $bucket);
 if (!ref($files)) {
 	return &text('s3_elist2', $files);
 	}
-local $rv = { };
+my $rv = { };
 foreach my $f (@$files) {
 	if ($f->{'Key'} =~ /^(\S+)\.info$/ && $path eq $1 ||
 	    $f->{'Key'} =~ /^([^\/\s]+)\.info$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.info$/ && $path && $path eq $2){
 		# Found a valid info file .. get it
-		local $bfile = $1;
-		local ($bentry) = grep { $_->{'Key'} eq $bfile } @$files;
+		my $bfile = $1;
+		my ($bentry) = grep { $_->{'Key'} eq $bfile } @$files;
 		next if (!$bentry);	# No actual backup file found!
 		my $temp = &transname();
 		my $err = &s3_download($akey, $skey, $bucket,
 				       $f->{'Key'}, $temp);
 		if (!$err) {
-			local $info = &unserialise_variable(
+			my $info = &unserialise_variable(
 					&read_file_contents($temp));
 			foreach my $dname (keys %$info) {
 				$rv->{$dname} = {
@@ -441,28 +441,28 @@ return $rv;
 # message string on failure.
 sub s3_list_domains
 {
-local ($akey, $skey, $bucket, $path) = @_;
+my ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-local $conn = &make_s3_connection($akey, $skey);
+my $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
-local $response = $conn->list_bucket($bucket);
+my $response = $conn->list_bucket($bucket);
 if ($response->http_response->code != 200) {
 	return &text('s3_elist2', &extract_s3_message($response));
 	}
-local $rv = { };
+my $rv = { };
 foreach my $f (@{$response->entries}) {
 	if ($f->{'Key'} =~ /^(\S+)\.dom$/ && $path eq $1 ||
 	    $f->{'Key'} =~ /^([^\/\s]+)\.dom$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.dom$/ && $path && $path eq $2){
 		# Found a valid .dom file .. get it
-		local $bfile = $1;
-		local ($bentry) = grep { $_->{'Key'} eq $bfile }
+		my $bfile = $1;
+		my ($bentry) = grep { $_->{'Key'} eq $bfile }
 				  @{$response->entries};
 		next if (!$bentry);	# No actual backup file found!
-		local $gresponse = $conn->get($bucket, $f->{'Key'});
+		my $gresponse = $conn->get($bucket, $f->{'Key'});
 		if ($gresponse->http_response->code == 200) {
-			local $dom = &unserialise_variable(
+			my $dom = &unserialise_variable(
 				$gresponse->object->data);
 			foreach my $dname (keys %$dom) {
 				$rv->{$dname} = $dom->{$dname};
@@ -479,10 +479,10 @@ return $rv;
 sub s3_list_buckets
 {
 &require_s3();
-local ($akey, $skey, $bucket) = @_;
+my ($akey, $skey, $bucket) = @_;
 if (&can_use_aws_cmd($akey, $skey)) {
 	# Use the aws command
-	local $out = &call_aws_cmd($akey, [ "ls" ]);
+	my $out = &call_aws_cmd($akey, [ "ls" ]);
 	return $out if ($?);
 	foreach my $l (split(/\r?\n/, $out)) {
 		my ($date, $time, $file) = split(/\s+/, $l, 4);
@@ -493,9 +493,9 @@ if (&can_use_aws_cmd($akey, $skey)) {
 	}
 else {
 	# Make an HTTP API call
-	local $conn = &make_s3_connection($akey, $skey);
+	my $conn = &make_s3_connection($akey, $skey);
 	return $text{'s3_econn'} if (!$conn);
-	local $response = $conn->list_all_my_buckets();
+	my $response = $conn->list_all_my_buckets();
 	if ($response->http_response->code != 200) {
 		return &text('s3_elist', &extract_s3_message($response));
 		}
@@ -512,10 +512,10 @@ else {
 sub s3_get_bucket
 {
 &require_s3();
-local ($akey, $skey, $bucket) = @_;
-local %rv;
-local $conn = &make_s3_connection($akey, $skey);
-local $response = $conn->get_bucket_location($bucket);
+my ($akey, $skey, $bucket) = @_;
+my %rv;
+my $conn = &make_s3_connection($akey, $skey);
+my $response = $conn->get_bucket_location($bucket);
 if ($response->http_response->code == 200) {
 	$rv{'location'} = $response->{'LocationConstraint'};
 	}
@@ -540,11 +540,11 @@ return \%rv;
 sub s3_put_bucket_acl
 {
 &require_s3();
-local ($akey, $skey, $bucket, $acl) = @_;
-local $conn = &make_s3_connection($akey, $skey);
-local $xs = XML::Simple->new(KeepRoot => 1);
-local $xml = $xs->XMLout({ 'AccessControlPolicy' => [ $acl ] });
-local $response = $conn->put_bucket_acl($bucket, $xml);
+my ($akey, $skey, $bucket, $acl) = @_;
+my $conn = &make_s3_connection($akey, $skey);
+my $xs = XML::Simple->new(KeepRoot => 1);
+my $xml = $xs->XMLout({ 'AccessControlPolicy' => [ $acl ] });
+my $response = $conn->put_bucket_acl($bucket, $xml);
 return $response->http_response->code == 200 ? undef : 
 	&text('s3_eputacl', &extract_s3_message($response));
 }
@@ -555,13 +555,13 @@ return $response->http_response->code == 200 ? undef :
 sub s3_put_bucket_lifecycle
 {
 &require_s3();
-local ($akey, $skey, $bucket, $lifecycle) = @_;
-local $conn = &make_s3_connection($akey, $skey);
-local $response;
+my ($akey, $skey, $bucket, $lifecycle) = @_;
+my $conn = &make_s3_connection($akey, $skey);
+my $response;
 if (@{$lifecycle->{'Rule'}}) {
 	# Update lifecycle config
-	local $xs = XML::Simple->new(KeepRoot => 1);
-	local $xml = $xs->XMLout(
+	my $xs = XML::Simple->new(KeepRoot => 1);
+	my $xml = $xs->XMLout(
 		{ 'LifecycleConfiguration' => [ $lifecycle ] });
 	$response = $conn->put_bucket_lifecycle($bucket, $xml);
 	}
@@ -580,11 +580,11 @@ return $response->http_response->code == 200 ||
 # and 'LastModified'
 sub s3_list_files
 {
-local ($akey, $skey, $bucket) = @_;
+my ($akey, $skey, $bucket) = @_;
 if (&can_use_aws_cmd($akey, $skey)) {
 	# Use the aws command
-	local @regionflag = &s3_region_flag($akey, $skey, $bucket);
-	local $out = &call_aws_cmd($akey,
+	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
 		  "ls", "--recursive", "s3://$bucket/" ]);
 	return $out if ($?);
@@ -600,9 +600,9 @@ if (&can_use_aws_cmd($akey, $skey)) {
 else {
 	# Make direct API call
 	&require_s3();
-	local $conn = &make_s3_connection($akey, $skey);
+	my $conn = &make_s3_connection($akey, $skey);
 	return $text{'s3_econn'} if (!$conn);
-	local $response = $conn->list_bucket($bucket);
+	my $response = $conn->list_bucket($bucket);
 	if ($response->http_response->code != 200) {
 		return &text('s3_elistfiles', &extract_s3_message($response));
 		}
@@ -614,11 +614,11 @@ else {
 # Delete one file from an S3 bucket
 sub s3_delete_file
 {
-local ($akey, $skey, $bucket, $file) = @_;
+my ($akey, $skey, $bucket, $file) = @_;
 if (&can_use_aws_cmd($akey, $skey, $bucket)) {
 	# Use the aws command to delete a file
-	local @regionflag = &s3_region_flag($akey, $skey, $bucket);
-	local $out = &call_aws_cmd($akey,
+	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
 		  "rm", "s3://$bucket/$file" ]);
 	return $? ? $out : undef;
@@ -626,9 +626,9 @@ if (&can_use_aws_cmd($akey, $skey, $bucket)) {
 else {
 	# Call the HTTP API directly
 	&require_s3();
-	local $conn = &make_s3_connection($akey, $skey);
+	my $conn = &make_s3_connection($akey, $skey);
 	return $text{'s3_econn'} if (!$conn);
-	local $response = $conn->delete($bucket, $file);
+	my $response = $conn->delete($bucket, $file);
 	if ($response->http_response->code < 200 ||
 	    $response->http_response->code >= 300) {
 		return &text('s3_edeletefile', &extract_s3_message($response));
@@ -641,13 +641,13 @@ else {
 # Converts an S3 date string like 2007-09-30T05:58:39.000Z into a Unix time
 sub s3_parse_date
 {
-local ($str) = @_;
+my ($str) = @_;
 if ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.000Z/) {
-	local $rv = eval { timegm($6, $5, $4, $3, $2-1, $1-1900); };
+	my $rv = eval { timegm($6, $5, $4, $3, $2-1, $1-1900); };
 	return $@ ? undef : $rv;
 	}
 elsif ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
-	local $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1-1900); };
+	my $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1-1900); };
 	return $@ ? undef : $rv;
 	}
 return undef;
@@ -657,23 +657,23 @@ return undef;
 # Deletes an S3 bucket and all contents
 sub s3_delete_bucket
 {
-local ($akey, $skey, $bucket, $norecursive) = @_;
+my ($akey, $skey, $bucket, $norecursive) = @_;
 &require_s3();
-local $conn = &make_s3_connection($akey, $skey);
+my $conn = &make_s3_connection($akey, $skey);
 return $text{'s3_econn'} if (!$conn);
 
 if (!$norecursive) {
 	# Get and delete files first
-	local $files = &s3_list_files($akey, $skey, $bucket);
+	my $files = &s3_list_files($akey, $skey, $bucket);
 	return $files if (!ref($files));
 	foreach my $f (@$files) {
-		local $err = &s3_delete_file($akey, $skey,
+		my $err = &s3_delete_file($akey, $skey,
 					     $bucket, $f->{'Key'});
 		return $err if ($err);
 		}
 	}
 
-local $response = $conn->delete_bucket($bucket);
+my $response = $conn->delete_bucket($bucket);
 if ($response->http_response->code < 200 ||
     $response->http_response->code >= 300) {
         return &text('s3_edelete', &extract_s3_message($response));
@@ -686,7 +686,7 @@ return undef;
 # success or an error message on failure.
 sub s3_download
 {
-local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
+my ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
 if (&can_use_aws_cmd($akey, $skey)) {
 	return &s3_download_aws_cmd(@_);
@@ -696,11 +696,11 @@ if (&can_use_aws_cmd($akey, $skey)) {
 my $err;
 my $endpoint = undef;
 for(my $i=0; $i<$tries; $i++) {
-	local $newendpoint;
+	my $newendpoint;
 	$err = undef;
 
 	# Connect to S3
-	local $conn = &make_s3_connection($akey, $skey, $endpoint);
+	my $conn = &make_s3_connection($akey, $skey, $endpoint);
 	if (!$conn) {
 		$err = $text{'s3_econn'};
 		next;
@@ -710,12 +710,12 @@ for(my $i=0; $i<$tries; $i++) {
 	# function to open it.
 	my $path = $endpoint ? $file : "$bucket/$file";
 	my $authpath = "$bucket/$file";
-	local $req = &s3_make_request($conn, $path, "GET", "dummy",
+	my $req = &s3_make_request($conn, $path, "GET", "dummy",
 				      undef, $authpath);
-	local ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
-	local $h = &make_http_connection(
+	my ($host, $port, $page, $ssl) = &parse_http_url($req->uri);
+	my $h = &make_http_connection(
 		$host, $port, $ssl, $req->method, $page);
-	local @st = stat($sourcefile);
+	my @st = stat($sourcefile);
 	foreach my $hfn ($req->header_field_names) {
 		&write_http_connection($h, $hfn.": ".$req->header($hfn)."\r\n");
 		}
@@ -723,13 +723,13 @@ for(my $i=0; $i<$tries; $i++) {
 
 	# Read back response .. this needs to be our own code, as S3 does
 	# some wierd redirects
-	local $line = &read_http_connection($h);
+	my $line = &read_http_connection($h);
 	$line =~ s/\r|\n//g;
 
 	# Read the headers
-	local %rheader;
+	my %rheader;
 	while(1) {
-		local $hline = &read_http_connection($h);
+		my $hline = &read_http_connection($h);
 		$hline =~ s/\r\n//g;
 		$hline =~ /^(\S+):\s+(.*)$/ || last;
 		$rheader{lc($1)} = $2;
@@ -740,7 +740,7 @@ for(my $i=0; $i<$tries; $i++) {
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Read the body for the redirect
-		local $out;
+		my $out;
 		while(defined($buf = &read_http_connection($h, 1024))) {
 			$out .= $buf;
 			}
@@ -787,13 +787,13 @@ return $err;
 # Like s3_download, but uses the aws command
 sub s3_download_aws_cmd
 {
-local ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
+my ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
 my $err;
-local @regionflag = &s3_region_flag($akey, $skey, $bucket);
+my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	local $out = &call_aws_cmd($akey,
+	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
 		  "cp", "s3://$bucket/$file", $destfile ]);
 	if ($?) {
@@ -808,7 +808,7 @@ return $err;
 # Create a HTTP::Request object for talking to S3, 
 sub s3_make_request
 {
-local ($conn, $path, $method, $data, $headers, $authpath) = @_;
+my ($conn, $path, $method, $data, $headers, $authpath) = @_;
 my $object = S3::S3Object->new($data);
 $headers ||= { };
 $authpath ||= $path;
@@ -822,7 +822,7 @@ my @http_headers;
 foreach my $h ($merged->header_field_names()) {
 	push(@http_headers, lc($h), $merged->header($h));
 	}
-local $req = HTTP::Request->new($method, $url, \@http_headers);
+my $req = HTTP::Request->new($method, $url, \@http_headers);
 $req->content($object->data);
 return $req;
 }
@@ -831,7 +831,7 @@ return $req;
 # Returns an S3::AWSAuthConnection connection object
 sub make_s3_connection
 {
-local ($akey, $skey, $endpoint) = @_;
+my ($akey, $skey, $endpoint) = @_;
 $endpoint ||= $config{'s3_endpoint'};
 &require_s3();
 return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
@@ -843,7 +843,7 @@ return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
 # part. On failure returns 0 and an error message.
 sub s3_part_upload
 {
-local ($conn, $bucket, $endpoint, $sourcefile, $destfile, $part, $sent,
+my ($conn, $bucket, $endpoint, $sourcefile, $destfile, $part, $sent,
        $chunk, $uploadid) = @_;
 my $headers = { 'Content-Length' => $chunk };
 my $path = $endpoint ? $destfile : "$bucket/$destfile";
@@ -867,7 +867,7 @@ foreach my $hfn ($req->header_field_names) {
 
 # Send the chunk
 local $SIG{'PIPE'} = 'IGNORE';
-local $buf;
+my $buf;
 open(BACKUP, $sourcefile);
 seek(BACKUP, $sent, 0);
 my $got = 0;
@@ -885,20 +885,20 @@ while(1) {
 close(BACKUP);
 
 # Start reading back the response
-local $line = &read_http_connection($h);
+my $line = &read_http_connection($h);
 $line =~ s/\r|\n//g;
 
 # Read the headers
-local %rheader;
+my %rheader;
 while(1) {
-	local $hline = &read_http_connection($h);
+	my $hline = &read_http_connection($h);
 	$hline =~ s/\r\n//g;
 	$hline =~ /^(\S+):\s+(.*)$/ || last;
 	$rheader{lc($1)} = $2;
 	}
 
 # Read the body
-local $out;
+my $out;
 while(defined($buf = &read_http_connection($h, 1024))) {
 	$out .= $buf;
 	}
@@ -919,7 +919,7 @@ return (1, $rheader{'etag'});
 # Returns a list of all possible S3 locations for buckets
 sub s3_list_locations
 {
-local ($akey, $skey) = @_;
+my ($akey, $skey) = @_;
 return ( "us-west-1", "us-west-2", "EU", "ap-southeast-1", "ap-southeast-2",
 	 "ap-northeast-1", "sa-east-1", "eu-central-1" );
 }
@@ -961,7 +961,7 @@ return 1;
 # Run the aws command for s3 with some params, and return output
 sub call_aws_cmd
 {
-local ($akey, $params) = @_;
+my ($akey, $params) = @_;
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
