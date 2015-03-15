@@ -3753,14 +3753,14 @@ elsif ($mode == 7 && &can_use_cloud("google")) {
 	# Google cloud storage
 	$in{$name.'_gcpath'} =~ /^\S+$/i || &error($text{'backup_egcpath'});
 	($in{$name.'_gcpath'} =~ /^\// || $in{$name.'_gcpath'} =~ /\/$/) &&
-		&error($text{'backup_gcpath2'});
+		&error($text{'backup_egcpath2'});
 	return "gcs://".$in{$name.'_gcpath'};
 	}
 elsif ($mode == 8 && &can_use_cloud("dropbox")) {
 	# Dropbox
 	$in{$name.'_dbpath'} =~ /^\S+$/i || &error($text{'backup_edbpath'});
 	($in{$name.'_dbpath'} =~ /^\// || $in{$name.'_dbpath'} =~ /\/$/) &&
-		&error($text{'backup_dbpath2'});
+		&error($text{'backup_edbpath2'});
 	return "dropbox://".$in{$name.'_dbpath'};
 	}
 else {
