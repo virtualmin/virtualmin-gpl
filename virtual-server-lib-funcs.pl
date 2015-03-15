@@ -6453,7 +6453,8 @@ if (!$_[3]->{'fix'}) {
 		}
 	if (-r $_[1]."_admins") {
 		# Also restore extra admins
-		&execute_command("rm -rf ".quotemeta("$extra_admins_dir/$_[0]->{'id'}"));
+		&execute_command(
+			"rm -rf ".quotemeta("$extra_admins_dir/$_[0]->{'id'}"));
 		if (!-d $extra_admins_dir) {
 			&make_dir($extra_admins_dir, 755);
 			}
