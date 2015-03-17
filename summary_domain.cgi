@@ -39,10 +39,10 @@ else {
 
 # Creator
 print &ui_table_row($text{'edit_created'},
-	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'}),
+	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
 						  $d->{'creator'})
 			: &make_date($d->{'created'}),
-	undef, \@tds);
+	$d->{'creator'} ? 3 : 1, \@tds);
 
 # Owner
 print &ui_table_row($text{'edit_user'}, "<tt>$d->{'user'}</tt>",
