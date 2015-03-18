@@ -4097,11 +4097,20 @@ foreach my $d (@$doms) {
 				my @allow = &apache::find_directive(
 					"AllowOverride", $dir->{'members'});
 				if (!@allow) {
+					# AllowOverride not set at all .. add
+					# a line for it
 					push(@allow, "All ".$olist);
 					$ofixed++;
 					}
 				elsif ($allow[0] !~ /$olist/) {
-					$allow[0] .= " ".$olist;
+					if ($allow[0] =~ /Options=(\S+)/) {
+						# Fix existing options
+						$allow[0] =~ s/Options=(\S+)/$olist/;
+						}
+					else {
+						# Append correct options
+						$allow[0] .= " ".$olist;
+						}
 					$ofixed++;
 					}
 				if ($ofixed) {
