@@ -290,17 +290,18 @@ if ($user->{'mailquota'}) {
 	}
 if ($user->{'unix'} && !$user->{'noquota'}) {
 	# Set quotas, if not using the defaults
+	$pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	if (defined($quota)) {
 		$user->{'quota'} = $quota;
-		!$quota || !$d->{'quota'} || $quota <= $d->{'quota'} ||
+		!$quota || !$pd->{'quota'} || $quota <= $pd->{'quota'} ||
 			&usage("User's quota cannot be higher than domain's ".
-			       "quota of $d->{'quota'}");
+			       "quota of $pd->{'quota'}");
 		}
 	if (defined($mquota)) {
 		$user->{'mquota'} = $mquota;
-		!$mquota || !$d->{'mquota'} || $mquota <= $d->{'mquota'} ||
+		!$mquota || !$pd->{'mquota'} || $mquota <= $pd->{'mquota'} ||
 			&usage("User's mail quota cannot be higher than ".
-			       "domain's mail quota of $d->{'quota'}");
+			       "domain's mail quota of $pd->{'quota'}");
 		}
 	}
 $user->{'dbs'} = \@dbs if (@dbs);

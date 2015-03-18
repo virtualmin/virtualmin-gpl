@@ -301,17 +301,19 @@ if (defined($real)) {
 	$real =~ /^[^:]*$/ || &usage("Invalid real name");
 	$user->{'real'} = $real;
 	}
+$pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 if (defined($quota) && !$user->{'noquota'}) {
 	$user->{'quota'} = $quota eq "UNLIMITED" ? 0 : $quota;
-	$quota eq "UNLIMITED" || !$d->{'quota'} || $quota <= $d->{'quota'} ||
+	$quota eq "UNLIMITED" || !$pd->{'quota'} || $quota <= $pd->{'quota'} ||
 		&usage("User's quota cannot be higher than domain's ".
-		       "quota of $d->{'quota'}");
+		       "quota of $pd->{'quota'}");
 	}
 if (defined($mquota) && !$user->{'noquota'}) {
 	$user->{'mquota'} = $mquota eq "UNLIMITED" ? 0 : $mquota;
-	$mquota eq "UNLIMITED" || !$d->{'mquota'} || $mquota <= $d->{'mquota'}||
+	$mquota eq "UNLIMITED" || !$pd->{'mquota'} ||
+	    $mquota <= $pd->{'mquota'}||
 		&usage("User's mail quota cannot be higher than domain's ".
-		       "mail quota of $d->{'quota'}");
+		       "mail quota of $pd->{'quota'}");
 	}
 if (defined($qquota) && $user->{'mailquota'}) {
 	$user->{'qquota'} = $qquota eq "UNLIMITED" ? 0 : $qquota;

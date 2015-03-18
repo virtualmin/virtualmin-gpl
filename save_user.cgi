@@ -208,6 +208,7 @@ else {
 			# Check and save quota inputs
 			$qedit = &can_mailbox_quota();
 			@defmquota = split (/ /, $tmpl->{'defmquota'});
+			$pd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 			if (&has_home_quotas() && $qedit) {
 				# Use entered quota
 				if ( $in{'quota'} eq -1 ) {
@@ -216,10 +217,10 @@ else {
 				$in{'quota_def'} || $in{'quota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
 				$user->{'quota'} = $in{'quota_def'} ? 0 : &quota_parse("quota", "home");
-				!$user->{'quota'} || !$d->{'quota'} ||
-				  $user->{'quota'} <= $d->{'quota'} ||
+				!$user->{'quota'} || !$pd->{'quota'} ||
+				  $user->{'quota'} <= $pd->{'quota'} ||
 				  &error(&text('user_eoverquota',
-					&nice_size($d->{'quota'}*
+					&nice_size($pd->{'quota'}*
 						   &quota_bsize("home"))));
 				}
 			elsif (&has_home_quotas() && $in{'new'}) {
@@ -233,10 +234,10 @@ else {
 				$in{'mquota_def'} || $in{'mquota'} =~ /^[0-9\.]+$/ ||
 					&error($text{'user_equota'});
 				$user->{'mquota'} = $in{'mquota_def'} ? 0 : &quota_parse("mquota", "mail");
-				!$user->{'mquota'} || !$d->{'mquota'} ||
-				  $user->{'mquota'} <= $d->{'mquota'} ||
+				!$user->{'mquota'} || !$pd->{'mquota'} ||
+				  $user->{'mquota'} <= $pd->{'mquota'} ||
 				  &error(&text('user_eovermquota',
-					&nice_size($d->{'mquota'}*
+					&nice_size($pd->{'mquota'}*
 						   &quota_bsize("mail"))));
 				}
 			elsif (&has_mail_quotas() && $in{'new'}) {
