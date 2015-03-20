@@ -1489,5 +1489,5 @@ The password recovery email address can now be edited for mailbox users via the 
 Added support for backing up to and restoring from Dropbox, similar to Virtualmin's existing Google Cloud Storage backup feature.
 Switch from the old dkim-milter package to OpenDKIM on CentOS 7 systems.
 ---- Changes since 4.15 ----
-Updated the phpMyAdmin script installer to version 4.3.12 and 4.0.10.9, Piwik to 2.11.2, Moodle to 2.8.5, Django to 1.7.5, Roundcube to 1.1.1, Drupal to 7.35 and 6.35, and Pydio to 6.0.5.
+Updated the phpMyAdmin script installer to version 4.3.12 and 4.0.10.9, Piwik to 2.11.2, Moodle to 2.8.5, Django to 1.7.5, Roundcube to 1.1.1, Drupal to 7.35 and 6.35, Django to 1.7.7 and 1.4.20, and Pydio to 6.0.5.
 If the aws command is installed, Virtualmin will call it to perform S3 operations rather than using it's own code. Because this command is developed by Amazon, it can be expected to be reliable in the face of S3 API changes.
