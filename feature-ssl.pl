@@ -953,6 +953,8 @@ return \%rv;
 sub same_cert_file
 {
 local ($file1, $file2) = @_;
+return 1 if (!$file1 && !$file2);
+return 0 if ($file1 && !$file2 || !$file1 && $file2);
 local $info1 = &cert_file_info($file1);
 local $info2 = &cert_file_info($file2);
 return &same_file($file1, $file2) ||
