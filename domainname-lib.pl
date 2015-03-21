@@ -73,6 +73,9 @@ if (($name =~ /^xn--/ || $name =~ /\.xn--/) && $convert) {
 	if (!$@) {
 		$name = join(".",
 			  map { decode_punycode($_) } split(/\./, $name));
+		if ($ENV{'MINISERV_CONFIG'} && &get_charset() eq 'UTF-8') {
+			eval "utf8::encode(\$name)";
+			}
 		if ($ENV{'MINISERV_CONFIG'}) {
 			# In browser, so convert to entity format for HTML
 			my $ename;
@@ -97,6 +100,7 @@ $name =~ s/\s+$//;
 if ($name !~ /^[a-z0-9\.\-\_]+$/i) {
 	# Convert unicode to xn-- format
 	eval "use IDNA::Punycode";
+	eval "utf8::decode(\$name)";
 	if (!$@) {
 		$name = join(".",
 			  map { encode_punycode($_) } split(/\./, $name));
