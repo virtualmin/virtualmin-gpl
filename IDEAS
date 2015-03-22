@@ -40,3 +40,5 @@
  - Improve replicated domain support
 	- MySQL on remote server
 	- NFS on remote
+	- Documentation only?
+	- CHANGELOG
