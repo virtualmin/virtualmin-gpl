@@ -610,7 +610,7 @@ if (!open(SOURCEFILE, $src)) {
 	$err = $!;
 	}
 else {
-	if (!&open_tempfile_as_domain_user($d, DESTFILE, ">$dst", 0, 1)) {
+	if (!&open_tempfile_as_domain_user($d, DESTFILE, ">$dst", 1, 1)) {
 		$ok = 0;
 		$err = $!;
 		}
