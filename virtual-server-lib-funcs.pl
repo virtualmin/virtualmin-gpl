@@ -5107,6 +5107,7 @@ if ($d->{'parent'}) {
 elsif ($d->{'unix'} && $d->{'quota'}) {
 	local $nqd = { %$d };
 	$nqd->{'quota'} = 0;
+	$nqd->{'uquota'} = 0;
 	&set_server_quotas($nqd);
 	}
 }
