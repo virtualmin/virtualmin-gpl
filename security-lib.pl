@@ -615,8 +615,15 @@ else {
 		$err = $!;
 		}
 	else {
-		while(<SOURCEFILE>) {
-			&print_tempfile(DESTFILE, $_);
+		eval {
+			local $main::error_must_die = 1;
+			while(<SOURCEFILE>) {
+				&print_tempfile(DESTFILE, $_);
+				}
+			};
+		if ($@) {
+			$ok = 0;
+			$err = $@;
 			}
 		close(SOURCEFILE);
 		&close_tempfile_as_domain_user($d, DESTFILE);

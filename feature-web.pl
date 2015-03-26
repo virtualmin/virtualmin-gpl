@@ -1443,13 +1443,19 @@ if ($virt) {
 	if (!&is_under_directory($d->{'home'}, $alog) &&
 	    !$allopts->{'dir'}->{'dirnologs'}) {
 		&$first_print($text{'backup_apachelog'});
-		&copy_write_as_domain_user($d, $alog, $file."_alog");
+		my ($ok, $err) = &copy_write_as_domain_user($d, $alog, $file."_alog");
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
-		if (!&is_under_directory($d->{'home'}, $elog)) {
-			&copy_write_as_domain_user($d, $elog, $file."_elog");
+		if ($ok && !&is_under_directory($d->{'home'}, $elog)) {
+			($ok, $err) = &copy_write_as_domain_user($d, $elog, $file."_elog");
 			}
-		&$second_print($text{'setup_done'});
+		if ($ok) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print($err);
+			return 0;
+			}
 		}
 	return 1;
 	}
