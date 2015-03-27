@@ -3408,27 +3408,17 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "quota") {
 			# Quota assigned
-			if ($d->{'parent'}) {
-				# Domains with parent have no quota
-				if ($done{$d->{'parent'}}) {
-					push(@cols, "&nbsp;&nbsp;\"");
-					}
-				else {
-					push(@cols, $text{'index_samequ'});
-					}
-				}
-			else {
-				# Show quota for server
-				push(@cols, $d->{'quota'} ?
-				  &quota_show($d->{'quota'}, "home") :
-				  $text{'form_unlimit'});
-				}
+			my $qd = $d->{'parent'} ? &get_domain($d->{'parent'})
+						: $d;
+			push(@cols, $qd->{'quota'} ?
+			  &quota_show($qd->{'quota'}, "home") :
+			  $text{'form_unlimit'});
 			}
 		elsif ($c eq "uquota") {
 			# Quota used
 			if ($d->{'alias'} || $d->{'parent'}) {
 				# Alias and sub-servers have no usage
-				push(@cols, undef);
+				push(@cols, "0");
 				}
 			else {
 				# Show total usage for domain
