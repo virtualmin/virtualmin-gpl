@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the Trac script installer to version 1.0.5.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
