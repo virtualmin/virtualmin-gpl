@@ -10,6 +10,8 @@ require './virtual-server-lib.pl';
 @provs = &list_cloud_providers();
 ($prov) = grep { $_->{'name'} eq $in{'name'} } @provs;
 $prov || &error($text{'cloud_egone'});
+$sfunc = "cloud_".$prov->{'name'}."_get_state";
+$state = &$sfunc($p);
 
 if ($prov->{'longdesc'}) {
 	print $prov->{'longdesc'},"<p>\n";
@@ -56,6 +58,8 @@ else {
 print &ui_table_row($text{'cloud_users'}, $utable);
 
 print &ui_table_end();
-print &ui_form_end([ [ undef, $text{'save'} ] ]);
+print &ui_form_end([ [ undef, $text{'save'} ],
+		     $state->{'ok'} ? ( [ 'clear', $text{'cloud_clear'} ] )
+				    : ( ) ]);
 
 &ui_print_footer("list_clouds.cgi", $text{'clouds_return'});

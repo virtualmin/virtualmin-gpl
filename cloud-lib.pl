@@ -125,6 +125,17 @@ else {
 return undef;
 }
 
+# cloud_s3_clear()
+# Reset the S3 account to the default
+sub cloud_s3_clear
+{
+delete($config{'s3_akey'});
+delete($config{'s3_skey'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+}
+
 ######## Functions for Rackspace Cloud Files ########
 
 sub cloud_rs_get_state
@@ -207,6 +218,17 @@ else {
 &unlock_file($module_config_file);
 
 return undef;
+}
+
+# cloud_s3_clear()
+# Reset the Rackspace account to the default
+sub cloud_s3_clear
+{
+delete($config{'s3_user'});
+delete($config{'s3_key'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 }
 
 sub list_rackspace_endpoints
@@ -349,6 +371,20 @@ return $text{'cloud_descoauth'}."<p>\n".
        &ui_form_end([ [ undef, $text{'save'} ] ]);
 }
 
+# cloud_google_clear()
+# Reset the GCS account to the default
+sub cloud_google_clear
+{
+delete($config{'google_account'});
+delete($config{'google_clientid'});
+delete($config{'google_secret'});
+delete($config{'google_oauth'});
+delete($config{'google_token'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+}
+
 ######## Functions for Dropbox ########
 
 sub cloud_dropbox_get_state
@@ -439,6 +475,18 @@ return $text{'cloud_descoauth_dropbox'}."<p>\n".
        "<b>$text{'cloud_newoauth_dropbox'}</b> ".
        &ui_textbox("dropbox_oauth", undef, 80)."<p>\n".
        &ui_form_end([ [ undef, $text{'save'} ] ]);
+}
+
+# cloud_dropbox_clear()
+# Reset the GCS account to the default
+sub cloud_dropbox_clear
+{
+delete($config{'dropbox_account'});
+delete($config{'dropbox_oauth'});
+delete($config{'dropbox_token'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 }
 
 1;
