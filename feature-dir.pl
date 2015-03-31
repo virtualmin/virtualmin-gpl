@@ -390,6 +390,18 @@ local $out;
 local $cmd;
 local $gzip = $homefmt && &has_command("gzip");
 
+# Create an indicator file in the home directory showing where this backup
+# came from. This can be used when replicating to know that the home directory
+# is shared.
+my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
+my $tab = $home_mtab || $home_fstab;
+my %src = ( 'id' => $d->{'id'},
+	    'host' => &get_system_hostname(),
+	    'mount' => $tab ? $tab->[1] : undef );
+&write_as_domain_user($d, sub {
+	&write_file("$d->{'home'}/.virtualmin-src", \%src)
+	});
+
 # Create exclude file
 local $xtemp = &transname();
 local @xlist;
