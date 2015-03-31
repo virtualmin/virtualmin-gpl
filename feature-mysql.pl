@@ -940,7 +940,8 @@ push(@dbs, split(/\s+/, $d->{'db_mysql'}));
 
 # Create base backup file with meta-information
 local @hosts = &get_mysql_allowed_hosts($d);
-local %info = ( 'hosts' => join(' ', @hosts) );
+local %info = ( 'hosts' => join(' ', @hosts),
+		'remote' => $mysql::config{'host'} );
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
