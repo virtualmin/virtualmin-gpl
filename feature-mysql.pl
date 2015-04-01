@@ -987,14 +987,23 @@ return $ok;
 # the mysql user.
 sub restore_mysql
 {
+local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
 local %info;
-&read_file($_[1], \%info);
+&read_file($file, \%info);
+
+# If in replication mode, AND the remote MySQL system is the same on both
+# systems, do nothing
+if ($allopts->{'repl'} && $mysql::config{'host'} && $info{'remote'} &&
+    $mysql::config{'host'} eq $info{'remote'}) {
+	&$first_print(&text('restore_mysqlsameremote', $info{'remote'}));
+	return 1;
+	}
 
 # For DBs that exist already, save their user lists for later restore
 local (%userdbs, %userpasses);
-foreach my $db (&domain_databases($_[0], [ 'mysql' ])) {
-	foreach my $u (&list_mysql_database_users($_[0], $db->{'name'})) {
-		if ($u->[0] ne $_[0]->{'user'} &&
+foreach my $db (&domain_databases($d, [ 'mysql' ])) {
+	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
+		if ($u->[0] ne $d->{'user'} &&
 		    $u->[0] ne 'root' &&
 		    $u->[0] ne $mysql::config{'login'}) {
 			push(@{$userdbs{$u->[0]}}, $db->{'name'});
@@ -1003,7 +1012,7 @@ foreach my $db (&domain_databases($_[0], [ 'mysql' ])) {
 		}
 	}
 
-if (!$_[0]->{'wasmissing'}) {
+if (!$d->{'wasmissing'}) {
 	# Only delete and re-create databases if this domain was not created
 	# as part of the restore process.
 	&$first_print($text{'restore_mysqldrop'});
@@ -1013,18 +1022,18 @@ if (!$_[0]->{'wasmissing'}) {
 		&require_mysql();
 
 		# First clear out all current databases and the MySQL login
-		&delete_mysql($_[0]);
+		&delete_mysql($d);
 
 		# Now re-set up the login only
-		&setup_mysql($_[0], 1);
+		&setup_mysql($d, 1);
 		}
 	&$second_print($text{'setup_done'});
 	}
 
 # Re-grant allowed hosts from backup + local
-if (!$_[0]->{'parent'} && $info{'hosts'}) {
+if (!$d->{'parent'} && $info{'hosts'}) {
 	&$first_print($text{'restore_mysqlgrant'});
-	local @lhosts = &get_mysql_allowed_hosts($_[0]);
+	local @lhosts = &get_mysql_allowed_hosts($d);
 	push(@lhosts, split(/\s+/, $info{'hosts'}));
 	if (&indexof("%", @lhosts) >= 0 &&
 	    &indexof("localhost", @lhosts) < 0 &&
@@ -1036,29 +1045,29 @@ if (!$_[0]->{'parent'} && $info{'hosts'}) {
 		push(@lhosts, "localhost");
 		}
 	@lhosts = &unique(@lhosts);
-	&save_mysql_allowed_hosts($_[0], \@lhosts);
+	&save_mysql_allowed_hosts($d, \@lhosts);
 	&$second_print($text{'setup_done'});
 	}
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
-foreach $dbfile (glob("$_[1]_*")) {
+foreach $dbfile (glob($file."_*")) {
 	if (-r $dbfile) {
-		$dbfile =~ /\Q$_[1]\E_(.*)\.gz$/ ||
-			$dbfile =~ /\Q$_[1]\E_(.*)$/;
+		$dbfile =~ /\Q$file\E_(.*)\.gz$/ ||
+			$dbfile =~ /\Q$file\E_(.*)$/;
 		push(@dbs, [ $1, $dbfile ]);
 		}
 	}
 
 # Turn off quotas for the domain, to prevent the import failing
-&disable_quotas($_[0]);
+&disable_quotas($d);
 
 # Finally, import the data
 my $rv = 1;
 my %created;
 foreach my $db (@dbs) {
-	my $clash = &check_mysql_database_clash($_[0], $db->[0]);
-	if ($clash && $_[0]->{'wasmissing'}) {
+	my $clash = &check_mysql_database_clash($d, $db->[0]);
+	if ($clash && $d->{'wasmissing'}) {
 		# DB already exists, silently ignore it if not empty.
 		# This can happen during a restore when MySQL is on a remote
 		# system.
@@ -1068,7 +1077,7 @@ foreach my $db (@dbs) {
 			}
 		}
 	&$first_print(&text('restore_mysqlload', $db->[0]));
-	if ($clash && !$_[0]->{'wasmissing'}) {
+	if ($clash && !$d->{'wasmissing'}) {
 		# DB already exists, and this isn't a newly created domain
 		&$second_print($text{'restore_mysqlclash'});
 		$rv = 0;
@@ -1076,7 +1085,7 @@ foreach my $db (@dbs) {
 		}
 	&$indent_print();
 	if (!$clash) {
-		&create_mysql_database($_[0], $db->[0]);
+		&create_mysql_database($d, $db->[0]);
 		$created{$db->[0]} = 1;
 		}
 	&$outdent_print();
@@ -1094,10 +1103,10 @@ foreach my $db (@dbs) {
 		$db->[1] =~ s/\.gz$//;
 		}
 	local ($ex, $out);
-	if ($_[6]) {
+	if ($asd) {
 		# As the domain owner
 		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1],
-				&mysql_user($_[0]), &mysql_pass($_[0], 1));
+				&mysql_user($d), &mysql_pass($d, 1));
 		}
 	else {
 		# As master admin
@@ -1119,13 +1128,13 @@ foreach my $db (@dbs) {
 foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
 	if (@grant) {
-		&create_mysql_database_user($_[0], \@grant, $uname, undef,
+		&create_mysql_database_user($d, \@grant, $uname, undef,
 					    $userpasses{$uname});
 		}
 	}
 
 # Put quotas back
-&enable_quotas($_[0]);
+&enable_quotas($d);
 
 return $rv;
 }
