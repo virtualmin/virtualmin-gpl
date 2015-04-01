@@ -995,7 +995,7 @@ local %info;
 # systems, do nothing
 if ($allopts->{'repl'} && $mysql::config{'host'} && $info{'remote'} &&
     $mysql::config{'host'} eq $info{'remote'}) {
-	&$first_print(&text('restore_mysqlsameremote', $info{'remote'}));
+	&$second_print(&text('restore_mysqlsameremote', $info{'remote'}));
 	return 1;
 	}
 

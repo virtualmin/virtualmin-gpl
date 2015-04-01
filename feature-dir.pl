@@ -398,6 +398,10 @@ my $tab = $home_mtab || $home_fstab;
 my %src = ( 'id' => $d->{'id'},
 	    'host' => &get_system_hostname(),
 	    'mount' => $tab ? $tab->[1] : undef );
+if ($src{'mount'} !~ /^[a-z0-9_\-\.]+:/i) {
+	# Doesn't look like an NFS mount
+	delete($src{'mount'});
+	}
 &write_as_domain_user($d, sub {
 	&write_file("$d->{'home'}/.virtualmin-src", \%src)
 	});
@@ -575,6 +579,19 @@ sub restore_dir
 local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
 
 &$first_print($text{'restore_dirtar'});
+
+# Check if in replication mode and restoring to the same NFS server
+my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
+my $tab = $home_mtab || $home_fstab;
+my %src;
+&write_as_domain_user($d, sub {
+	&read_file("$d->{'home'}/.virtualmin-src", \%src)
+	});
+if ($allopts{'repl'} && $src{'id'} && $src{'id'} eq $d->{'id'} &&
+    $src{'mount'} && $src{'mount'} eq ($tab ? $tab->[1] : undef)) {
+	&$second_print(&text('restore_dirsame', $src{'mount'}));
+	return 1;
+	}
 
 # Check for free space, if possible
 my $osize = &get_compressed_file_size($file, $key);
