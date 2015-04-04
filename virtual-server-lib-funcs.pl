@@ -48,7 +48,7 @@ if (!$require_useradmin++) {
 		}
 	}
 if (!&has_quota_commands() && !$_[0] && !$require_useradmin_quota++) {
-	&foreign_require("quota", "quota-lib.pl");
+	&foreign_require("quota");
 	}
 }
 
@@ -1046,6 +1046,20 @@ eval {
 	$uc = &unix_crypt($pass, $salt);
 	};
 return $uc;
+}
+
+# get_user_database_url()
+# Returns a string to identify the remote system for storing users
+sub get_user_database_url
+{
+&require_useradmin(1);
+if ($usermodule eq "ldap-useradmin") {
+	my $ldap = &ldap_useradmin::ldap_connect();
+	my $rv = "ldap://".$ldap->host();
+	$ldap->unbind();
+	return $rv;
+	}
+return undef;	# Local files
 }
 
 # list_all_users_quotas([no-quotas])

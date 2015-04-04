@@ -3034,6 +3034,10 @@ local ($d, $file, $opts) = @_;
 &open_tempfile_as_domain_user($d, FILE, ">$file");
 &close_tempfile_as_domain_user($d, FILE);
 
+# Save backup source
+my $url = &get_user_database_url();
+&write_as_domain_user($d, sub { &uncat_file($file."_url", $url."\n") });
+
 # Build file of all virtusers. Each line contains one virtuser address and
 # it's destinations, in alias-style format. Those used by some plugin (like
 # Mailman) are not included

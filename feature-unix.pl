@@ -637,6 +637,11 @@ else {
 	&close_tempfile_as_domain_user($d, TOUCH);
 	&$second_print($text{'backup_cronnone'});
 	}
+
+# Save backup source
+my $url = &get_user_database_url();
+&write_as_domain_user($d, sub { &uncat_file($file."_url", $url."\n") });
+
 return 1;
 }
 
