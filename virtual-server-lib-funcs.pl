@@ -16728,13 +16728,13 @@ return undef;
 }
 
 # transfer_virtual_server(&domain, desthost, destpass, delete-mode,
-# 			  delete-missing-files)
+# 			  delete-missing-files, replication-mode)
 # Transfers a domain (and sub-servers) to a destination system, possibly while
 # deleting it from the source. Will print stuff while transferring, and returns
 # an OK flag.
 sub transfer_virtual_server
 {
-my ($d, $desthost, $destpass, $deletemode) = @_;
+my ($d, $desthost, $destpass, $deletemode, $replicate) = @_;
 
 # Get all domains to include
 my @doms = ( $d );
@@ -16836,7 +16836,9 @@ elsif ($deletemode == 1) {
 my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error ".
-	($deletemissing ? "--option dir delete 1" : ""));
+	($deletemissing ? "--option dir delete 1 " : "").
+	($replicate ? "--replicate " : "")
+	);
 if ($rok != 0) {
 	if ($deletemode == 2) {
 		&$second_print(&text('transfer_erestoring2', $rout,

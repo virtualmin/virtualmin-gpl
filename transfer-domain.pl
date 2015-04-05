@@ -19,6 +19,11 @@ will be remove from this system after being copied. Alternately, the
 C<--disable> flag can be used to disable the domain on the source system without
 completely removing it.
 
+If you are using this command to replicate a domain to another system that
+shared home directories, a MySQL server or users (via LDAP) with this system,
+the C<--replicate> flag is recommended to prevent the remote system from 
+un-necessarily overwriting shared data.
+
 If the C<--overwrite> flag is not given, this command will fail if the domain
 already exists on the destination system. If you do expect it to exist, the
 C<--delete-missing-files> flag will cause the restore to remove from the
@@ -74,6 +79,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--delete-missing-files") {
 		$deletemissing = 1;
 		}
+	elsif ($a eq "--replicate") {
+		$replicate = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -98,7 +106,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$indent_print();
 $ok = &transfer_virtual_server($d, $desthost, $destpass,
 			       $delete ? 2 : $disable ? 1 : 0,
-			       $deletemissing);
+			       $deletemissing, $replicate);
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
@@ -120,6 +128,7 @@ print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
 print "                          [--delete-missing-files]\n";
+print "                          [--replicate]\n";
 exit(1);
 }
 
