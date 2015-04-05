@@ -990,6 +990,7 @@ sub restore_mysql
 local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
 local %info;
 &read_file($file, \%info);
+&require_mysql();
 
 # Re-grant allowed hosts from backup + local
 if (!$d->{'parent'} && $info{'hosts'}) {
@@ -1039,7 +1040,6 @@ if (!$d->{'wasmissing'}) {
 		{
 		local $first_print = \&null_print;	# supress messages
 		local $second_print = \&null_print;
-		&require_mysql();
 
 		# First clear out all current databases and the MySQL login
 		&delete_mysql($d);

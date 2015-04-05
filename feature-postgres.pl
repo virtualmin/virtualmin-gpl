@@ -465,9 +465,9 @@ local ($d, $file) = @_;
 # Find all the domains's databases
 local @dbs = split(/\s+/, $d->{'db_postgres'});
 
-# Create empty 'base' backup file
-&open_tempfile_as_domain_user($d, EMPTY, ">$file");
-&close_tempfile_as_domain_user($d, EMPTY);
+# Create base backup file with meta-information
+local %info = ( 'remote' => $postgresql::config{'host'} );
+&write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
 local $db;
@@ -511,10 +511,21 @@ return $ok;
 # the postgresql user.
 sub restore_postgres
 {
+local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
+local %info;
+&read_file($file, \%info);
 &require_postgres();
-&foreign_require("proc", "proc-lib.pl");
 
-if (!$_[0]->{'wasmissing'}) {
+# If in replication mode, AND the remote PostgreSQL system is the same on both
+# systems, do nothing
+if ($allopts->{'repl'} && $postgresql::config{'host'} && $info{'remote'} &&
+    $postgresql::config{'host'} eq $info{'remote'}) {
+	&$first_print($text{'restore_postgresdummy'});
+	&$second_print(&text('restore_postgressameremote', $info{'remote'}));
+	return 1;
+	}
+
+if (!$d->{'wasmissing'}) {
 	# Only delete and re-create databases if this domain was not created
 	# as part of the restore process.
 	&$first_print($text{'restore_postgresdrop'});
@@ -524,20 +535,20 @@ if (!$_[0]->{'wasmissing'}) {
 		&require_mysql();
 
 		# First clear out the databases
-		&delete_postgres($_[0]);
+		&delete_postgres($d);
 
 		# Now re-set up the user only
-		&setup_postgres($_[0], 1);
+		&setup_postgres($d, 1);
 		}
 	&$second_print($text{'setup_done'});
 	}
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
-push(@dbs, [ $_[0]->{'db'}, $_[1] ]) if (-s $_[1]);
-foreach $dbfile (glob("$_[1]_*")) {
+push(@dbs, [ $d->{'db'}, $file ]) if (-s $file);
+foreach $dbfile (glob($file."_*")) {
 	if (-r $dbfile) {
-		$dbfile =~ /\Q$_[1]\E_(.*)$/;
+		$dbfile =~ /\Q$file\E_(.*)$/;
 		push(@dbs, [ $1, $dbfile ]);
 		}
 	}
@@ -545,8 +556,8 @@ foreach $dbfile (glob("$_[1]_*")) {
 # Finally, import the data
 local $db;
 foreach $db (@dbs) {
-	my $clash = &check_postgres_database_clash($_[0], $db->[0]);
-	if ($clash && $_[0]->{'wasmissing'}) {
+	my $clash = &check_postgres_database_clash($d, $db->[0]);
+	if ($clash && $d->{'wasmissing'}) {
 		# DB already exists, silently ignore it if not empty.
 		# This can happen during a restore when PostgreSQL is on a
 		# remote system.
@@ -556,14 +567,14 @@ foreach $db (@dbs) {
 			}
 		}
 	&$first_print(&text('restore_postgresload', $db->[0]));
-	if ($clash && !$_[0]->{'wasmissing'}) {
+	if ($clash && !$d->{'wasmissing'}) {
                 # DB already exists, and this isn't a newly created domain
 		&$second_print(&text('restore_postgresclash'));
 		return 0;
 		}
 	&$indent_print();
 	if (!$clash) {
-		&create_postgres_database($_[0], $db->[0]);
+		&create_postgres_database($d, $db->[0]);
 		}
 	&$outdent_print();
 	if ($postgresql::postgres_sameunix) {
@@ -573,16 +584,16 @@ foreach $db (@dbs) {
 		if (@uinfo) {
 			&set_ownership_permissions($uinfo[2], $uinfo[3],
 						   undef, $db->[1]);
-			local $dir = $_[1];
+			local $dir = $file;
 			$dir =~ s/\/[^\/]+$//;
 			&set_ownership_permissions(undef, undef, 0711, $dir);
 			}
 		}
 	local $err;
-	if ($_[6]) {
+	if ($asd) {
 		# As domain owner
-		local $postgresql::postgres_login = &postgres_user($_[0]);
-		local $postgresql::postgres_pass = &postgres_pass($_[0], 1);
+		local $postgresql::postgres_login = &postgres_user($d);
+		local $postgresql::postgres_pass = &postgres_pass($d, 1);
 		$err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
 		}
 	else {

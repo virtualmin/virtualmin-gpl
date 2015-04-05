@@ -2535,7 +2535,7 @@ restore_phpbad2=$1 - $2 - Version $3
 
 restore_unixuser=Updating administration password and quotas ..
 restore_dirtar=Extracting TAR file of home directory ..
-restore_dirsame=.. skipping directory to original server $1 in replication mode
+restore_dirsame=.. skipping restore to original server $1 in replication mode
 restore_edirspace=.. warning - this backup contains $1 of files, but your system only has $2 free ..
 restore_dirtarfailed=.. failed! $1
 restore_wasmissing=.. this was only an incremental backup. <b>Not all files have been restored - you should restore the full backup first!</b>
@@ -2555,6 +2555,8 @@ restore_apachecp2=Restoring Apache aliases ..
 restore_apachelog=Restoring Apache log files ..
 restore_proftpdcp=Restoring ProFTPd virtual server configuration ..
 restore_sslcp=Restoring SSL Apache virtual host configuration and certificate ..
+restore_postgresdummy=Restoring PostgreSQL databases ..
+restore_postgressameremote=.. skipping restore to original server $1 in replication mode
 restore_postgresdrop=Deleting old PostgreSQL databases ..
 restore_postgresload=Re-loading PostgreSQL database $1 ..
 restore_postgresloadfailed=.. load failed! $1
