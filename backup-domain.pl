@@ -101,7 +101,7 @@ while(@ARGV > 0) {
 		local $f = shift(@ARGV);
 		$f eq "virtualmin" || $config{$f} ||
 		   &indexof($f, &list_backup_plugins()) >= 0 ||
-			&usage("Feature $f is not enabled");
+			&usage("Feature $f is not enabled on this system");
 		push(@bfeats, $f);
 		}
 	elsif ($a eq "--domain") {
