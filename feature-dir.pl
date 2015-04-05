@@ -587,7 +587,7 @@ my %src;
 &write_as_domain_user($d, sub {
 	&read_file("$d->{'home'}/.virtualmin-src", \%src)
 	});
-if ($allopts{'repl'} && $src{'id'} && $src{'id'} eq $d->{'id'} &&
+if ($allopts->{'repl'} && $src{'id'} && $src{'id'} eq $d->{'id'} &&
     $src{'mount'} && $src{'mount'} eq ($tab ? $tab->[1] : undef)) {
 	&$second_print(&text('restore_dirsame', $src{'mount'}));
 	return 1;
