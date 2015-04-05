@@ -991,6 +991,25 @@ local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
 local %info;
 &read_file($file, \%info);
 
+# Re-grant allowed hosts from backup + local
+if (!$d->{'parent'} && $info{'hosts'}) {
+	&$first_print($text{'restore_mysqlgrant'});
+	local @lhosts = &get_mysql_allowed_hosts($d);
+	push(@lhosts, split(/\s+/, $info{'hosts'}));
+	if (&indexof("%", @lhosts) >= 0 &&
+	    &indexof("localhost", @lhosts) < 0 &&
+	    &indexof("127.0.0.1", @lhosts) < 0) {
+		# If all hosts were allowed previously via % but localhost was
+		# not, add it now. This is needed because some MySQL versions
+		# (such as the one seen on Ubuntu 12.04) do not allow localhost
+		# connections even if % is granted
+		push(@lhosts, "localhost");
+		}
+	@lhosts = &unique(@lhosts);
+	&save_mysql_allowed_hosts($d, \@lhosts);
+	&$second_print($text{'setup_done'});
+	}
+
 # If in replication mode, AND the remote MySQL system is the same on both
 # systems, do nothing
 if ($allopts->{'repl'} && $mysql::config{'host'} && $info{'remote'} &&
@@ -1027,25 +1046,6 @@ if (!$d->{'wasmissing'}) {
 		# Now re-set up the login only
 		&setup_mysql($d, 1);
 		}
-	&$second_print($text{'setup_done'});
-	}
-
-# Re-grant allowed hosts from backup + local
-if (!$d->{'parent'} && $info{'hosts'}) {
-	&$first_print($text{'restore_mysqlgrant'});
-	local @lhosts = &get_mysql_allowed_hosts($d);
-	push(@lhosts, split(/\s+/, $info{'hosts'}));
-	if (&indexof("%", @lhosts) >= 0 &&
-	    &indexof("localhost", @lhosts) < 0 &&
-	    &indexof("127.0.0.1", @lhosts) < 0) {
-		# If all hosts were allowed previously via % but localhost was
-		# not, add it now. This is needed because some MySQL versions
-		# (such as the one seen on Ubuntu 12.04) do not allow localhost
-		# connections even if % is granted
-		push(@lhosts, "localhost");
-		}
-	@lhosts = &unique(@lhosts);
-	&save_mysql_allowed_hosts($d, \@lhosts);
 	&$second_print($text{'setup_done'});
 	}
 
