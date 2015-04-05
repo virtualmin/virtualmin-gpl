@@ -1014,6 +1014,7 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 # systems, do nothing
 if ($allopts->{'repl'} && $mysql::config{'host'} && $info{'remote'} &&
     $mysql::config{'host'} eq $info{'remote'}) {
+	&$first_print($text{'restore_mysqldummy'});
 	&$second_print(&text('restore_mysqlsameremote', $info{'remote'}));
 	return 1;
 	}
