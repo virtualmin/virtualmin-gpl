@@ -21,7 +21,7 @@ completely removing it.
 
 If you are using this command to replicate a domain to another system that
 shared home directories, a MySQL server or users (via LDAP) with this system,
-the C<--replicate> flag is recommended to prevent the remote system from 
+the C<--replication> flag is recommended to prevent the remote system from 
 un-necessarily overwriting shared data.
 
 If the C<--overwrite> flag is not given, this command will fail if the domain
@@ -79,8 +79,8 @@ while(@ARGV > 0) {
 	elsif ($a eq "--delete-missing-files") {
 		$deletemissing = 1;
 		}
-	elsif ($a eq "--replicate") {
-		$replicate = 1;
+	elsif ($a eq "--replication") {
+		$replication = 1;
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -106,7 +106,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$indent_print();
 $ok = &transfer_virtual_server($d, $desthost, $destpass,
 			       $delete ? 2 : $disable ? 1 : 0,
-			       $deletemissing, $replicate);
+			       $deletemissing, $replication);
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
@@ -128,7 +128,7 @@ print "                          [--pass password]\n";
 print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
 print "                          [--delete-missing-files]\n";
-print "                          [--replicate]\n";
+print "                          [--replication]\n";
 exit(1);
 }
 
