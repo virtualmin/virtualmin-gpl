@@ -46,7 +46,8 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 		    $d->{'dom'}, $host, scalar(@subs)));
 &$indent_print();
 $ok = &transfer_virtual_server($d, $host, $pass,
-			       $delete ? 2 : $disable ? 1 : 0);
+			       $in{'delete'},
+			       $in{'overwrite'} && !$in{'delete'});
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
