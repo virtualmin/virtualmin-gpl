@@ -38,7 +38,10 @@
 	- and right-frame info too
  
  - Improve replicated domain support
-	- MySQL on remote server
-	- NFS on remote
-	- Documentation only?
+	- LDAP on remote .. what about clash?
+	- Deletion from one should not remove?
+	- Documentation
 	- CHANGELOG
+
+ - User editing on latest MacOS
+	- http://virtualmin.com/node/36777
