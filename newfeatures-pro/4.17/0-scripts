@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, and phpMyAdmin to 4.4.0.
+html=Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, and phpMyAdmin to 4.4.1.
 master=1
 reseller=1
 domain=1
