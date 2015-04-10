@@ -4608,6 +4608,26 @@ if ($output) {
 	&print_tempfile(OUTPUT, $output);
 	&close_tempfile(OUTPUT);
 	}
+
+if ($config{'backuplog_age'}) {
+	# Delete logs older than this number of days
+	my @del;
+	my $cutoff = time() - $config{'backuplog_age'}*86400;
+	opendir(LOGS, $backups_log_dir);
+	while(my $id = readdir(LOGS)) {
+		next if ($id eq "." || $id eq "..");
+		next if ($id =~ /\.out$/);
+		my ($time, $pid, $count) = split(/\-/, $id);
+		if ($time < $cutoff) {
+			push(@del, $backups_log_dir."/".$id);
+			push(@del, $backups_log_dir."/".$id.".out");
+			}
+		}
+	closedir(LOGS);
+	if (@del) {
+		&unlink_file(@del);
+		}
+	}
 }
 
 # list_backup_logs([start-time])
