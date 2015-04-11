@@ -314,13 +314,13 @@ if ($postgresql::config{'host'} && $preserve) {
 	}
 
 # Delete all databases
-&delete_postgres_database($_[0], @dblist) if (@dblist);
-local $user = &postgres_user($_[0]);
+&delete_postgres_database($d, @dblist) if (@dblist);
+local $user = &postgres_user($d);
 
-if (!$_[0]->{'parent'}) {
+if (!$d->{'parent'}) {
 	# Delete the user
 	&$first_print($text{'delete_postgresuser'});
-	if (&postgres_user_exists($_[0])) {
+	if (&postgres_user_exists($d)) {
 		&postgresql::execute_sql_logged($qconfig{'basedb'},
 			"drop user ".&postgres_uquote($user));
 		&$second_print($text{'setup_done'});
