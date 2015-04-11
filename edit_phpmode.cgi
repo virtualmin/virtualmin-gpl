@@ -155,6 +155,15 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 	print &ui_hidden_table_start($text{'phpmode_header2'}, "width=100%",
 				     2, "phpinfo", 0, [ "width=30%" ]);
 
+	# PHP versions
+	foreach $phpver (&list_available_php_versions($d)) {
+		my $fullver = $phpver->[1] ? &get_php_version($phpver->[1], $d)
+					   : $phpver->[0];
+		push(@vlist, $fullver);
+		}
+	print &ui_table_row($text{'phpmode_vers'},
+		@vlist ? join(", ", @vlist) : $text{'phpmode_novers'});
+
 	# PHP errors for the domain
 	foreach $phpver (&list_available_php_versions($d)) {
 		$errs = &check_php_configuration($d, $phpver->[0],$phpver->[1]);
