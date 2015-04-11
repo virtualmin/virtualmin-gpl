@@ -207,25 +207,36 @@ if (defined(&set_php_wrappers_writable)) {
 	}
 }
 
-# delete_dir(&domain)
+# delete_dir(&domain, [preserve-remote])
 # Delete the home directory
 sub delete_dir
 {
+local ($d, $preserve) = @_;
+
 # Delete homedir
-if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
+if (-d $d->{'home'} && $d->{'home'} ne "/") {
 	&$first_print($text{'delete_home'});
-	if (defined(&set_php_wrappers_writable)) {
-		&set_php_wrappers_writable($_[0], 1);
+
+	# Don't delete if on remote
+	my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
+	my $tab = $home_mtab || $home_fstab;
+	if ($preserve && $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i) {
+		&$second_print(&text('delete_homepreserve', $tab->[1]));
+		return 1;
 		}
-	local $err = &backquote_logged("rm -rf ".quotemeta($_[0]->{'home'}).
+
+	if (defined(&set_php_wrappers_writable)) {
+		&set_php_wrappers_writable($d, 1);
+		}
+	local $err = &backquote_logged("rm -rf ".quotemeta($d->{'home'}).
 				       " 2>&1");
 	if ($?) {
 		# Try again after running chattr
 		if (&has_command("chattr")) {
 			&system_logged("chattr -i -R ".
-				       quotemeta($_[0]->{'home'}));
+				       quotemeta($d->{'home'}));
 			$err = &backquote_logged(
-				"rm -rf ".quotemeta($_[0]->{'home'})." 2>&1");
+				"rm -rf ".quotemeta($d->{'home'})." 2>&1");
 			$err = undef if (!$?);
 			}
 		}
@@ -234,7 +245,7 @@ if (-d $_[0]->{'home'} && $_[0]->{'home'} ne "/") {
 		}
 	if ($err) {
 		# Ignore an error deleting a mount point
-		local @subs = &sub_mount_points($_[0]->{'home'});
+		local @subs = &sub_mount_points($d->{'home'});
 		if (@subs) {
 			$err = undef;
 			}
