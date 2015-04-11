@@ -22,7 +22,9 @@ if ($mode eq "mod_php") {
 	}
 @avail = &list_available_php_versions($d);
 if (@avail <= 1) {
-	print &text('phpver_eavail2', $avail[0]->[0]),"<p>\n";
+	my $fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
+				     : $avail[0]->[0];
+	print &text('phpver_eavail2', $fullver),"<p>\n";
 	&ui_print_footer(&domain_footer_link($d),
 			 "", $text{'index_return'});
 	return;
