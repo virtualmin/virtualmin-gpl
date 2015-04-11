@@ -7907,7 +7907,7 @@ if (!$nopost) {
 return undef;
 }
 
-# call_feature_delete(feature, &domain, args)
+# call_feature_delete(feature, &domain, arg, arg, ...)
 # Calls the core or plugin-specific function to delete a feature. May print
 # stuff.
 sub call_feature_delete
@@ -7923,7 +7923,7 @@ if (&indexof($f, @features) >= 0) {
 else {
 	# Call plugin delete function
 	local $main::error_must_die = 1;
-	eval { &plugin_call($f, "feature_delete", $dom) };
+	eval { &plugin_call($f, "feature_delete", $dom, @args) };
 	if ($@) {
 		local $err = $@;
 		&$second_print(&text('delete_failure',
