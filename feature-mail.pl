@@ -386,11 +386,11 @@ if (!$_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 &release_lock_mail($_[0]);
 }
 
-# delete_mail(&domain, [leave-aliases])
+# delete_mail(&domain, [preserve-remote], [leave-aliases])
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
-local ($d, $leave_aliases) = @_;
+local ($d, $preserve, $leave_aliases) = @_;
 
 &$first_print($text{'delete_doms'});
 &obtain_lock_mail($d);
@@ -893,8 +893,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	if ($supports_bcc == 2) {
 		$oldrbcc = &get_domain_recipient_bcc($_[1]);
 		}
-	&delete_mail($_[1], 1);
-	&setup_mail($_[0], 1);
+	&delete_mail($_[1], 0, 1);
+	&setup_mail($_[0], 0, 1);
 	if ($supports_bcc) {
 		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 		&save_domain_sender_bcc($_[0], $oldbcc);
@@ -1156,7 +1156,7 @@ if ($config{'mail_system'} == 5) {
 	}
 else {
 	# Delete mail access for the domain
-	&delete_mail($_[0], 1);
+	&delete_mail($_[0], 0, 1);
 	}
 
 &$first_print($text{'disable_users'});
