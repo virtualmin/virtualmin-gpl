@@ -275,6 +275,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--key") {
 		$keyid = shift(@ARGV);
 		}
+	elsif ($a eq "--replication") {
+		$replication = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -412,6 +415,7 @@ if ($test) {
 # Do it!
 $opts{'reuid'} = $reuid;
 $opts{'fix'} = $fix;
+$opts{'repl'} = $replication;
 &$first_print("Starting restore..");
 $ok = &restore_domains($src, \@doms, \@rfeats, \%opts, \@vbs, $onlyfeats,
 		       $ipinfo, $asowner, $skipwarnings, $key, $continue,
