@@ -1218,6 +1218,7 @@ delete_mysqlmissing=.. database $1 does not exist
 delete_mysqluser=Deleting MySQL login ..
 delete_mysqluser_provision=Deleting MySQL login on services host ..
 delete_emysqluser_provision=.. deletion failed : $1
+delete_mysqlpreserve=.. preserving remote databases on $1
 delete_postgresuser=Deleting PostgreSQL login ..
 delete_postgresdb=Deleting PostgreSQL database $1 ..
 delete_webmin=Deleting Webmin login ..

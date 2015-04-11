@@ -212,19 +212,28 @@ local $qdb = &quote_mysql_database($db);
 &mysql::execute_sql_logged($mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
 }
 
-# delete_mysql(&domain)
+# delete_mysql(&domain, [preserve-remote])
 # Delete mysql databases, the domain's mysql user and all permissions for both
 sub delete_mysql
 {
-local ($d) = @_;
+local ($d, $preserve) = @_;
 &require_mysql();
+my @dblist = &unique(split(/\s+/, $d->{'db_mysql'}));
+
+# If MySQL is hosted remotely, don't delete the DB on the assumption that
+# other servers sharing the DB will still be using it
+if ($mysql::config{'host'} && $preserve) {
+	&$first_print(&text('delete_mysqldb', join(" ", @dblist)));
+	&$second_print(&text('delete_mysqlpreserve', $mysql::config{'host'}));
+	return 1;
+	}
 
 # Get the domain's users, so we can remove their MySQL logins
 local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
 if ($d->{'db_mysql'}) {
-	&delete_mysql_database($d, &unique(split(/\s+/, $d->{'db_mysql'})));
+	&delete_mysql_database($d, @dblist);
 	}
 
 if ($d->{'provision_mysql'}) {

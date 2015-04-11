@@ -296,14 +296,25 @@ elsif ($user ne $olduser && $_[0]->{'parent'}) {
 	}
 }
 
-# delete_postgres(&domain)
+# delete_postgres(&domain, [preserve-remote])
 # Delete the PostgreSQL database and user
 sub delete_postgres
 {
-# Delete all databases
+local ($d, $preserve) = @_;
 &require_postgres();
-&delete_postgres_database($_[0], &unique(split(/\s+/, $_[0]->{'db_postgres'})))
-	if ($_[0]->{'db_postgres'});
+my @dblist = &unique(split(/\s+/, $d->{'db_postgres'}));
+
+# If PostgreSQL is hosted remotely, don't delete the DB on the assumption that
+# other servers sharing the DB will still be using it
+if ($postgresql::config{'host'} && $preserve) {
+	&$first_print(&text('delete_postgresdb', join(" ", @dblist)));
+	&$second_print(&text('delete_mysqlpreserve',
+			     $postgresql::config{'host'}));
+	return 1;
+	}
+
+# Delete all databases
+&delete_postgres_database($_[0], @dblist) if (@dblist);
 local $user = &postgres_user($_[0]);
 
 if (!$_[0]->{'parent'}) {

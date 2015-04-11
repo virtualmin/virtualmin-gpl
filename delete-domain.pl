@@ -10,7 +10,11 @@ the C<--domain> flag, must can be given multiple times. Alternately, you can
 select virtual servers by username, using the C<--user> flag.
 
 The C<--only> option can be used to not actually delete the servers, but
-instead simply remove them from the control of Virtualmin.
+instead simply remove them from the control of Virtualmin. Similarly, the
+C<--preserve-remote> flag tells Virtualmin to not delete any databases,
+home directories or users stored on remote systems. This can be useful when
+removing a domain that is replicated across multiple hosts with shared
+storage.
 
 Be careful with this program, as unlike the server deletion function in the
 Virtualmin web interface, it will NOT prompt for confirmation!
@@ -48,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--only") {
 		$only = 1;
 		}
+	elsif ($a eq "--preserve-remote") {
+		$preserve = 1;
+		}
 	elsif ($a eq "--pre-command") {
 		$precommand = shift(@ARGV);
 		}
@@ -76,7 +83,7 @@ $config{'post_command'} = $postcommand if ($postcommand);
 foreach $d (@doms) {
 	print "Deleting virtual server $d->{'dom'} ..\n";
 	&$indent_print();
-	$err = &delete_virtual_server($d, $only);
+	$err = &delete_virtual_server($d, $only, 0, $preserve);
 	&$outdent_print();
 	if ($err) {
 		print "$err\n";
@@ -95,6 +102,7 @@ print "\n";
 print "virtualmin delete-domain [--domain domain.name]*\n";
 print "                         [--user username]*\n";
 print "                         [--only]\n";
+print "                         [--preserve-remote]\n";
 exit(1);
 }
 
