@@ -1262,11 +1262,12 @@ else {
 	$ENV{'PHPRC'} = &get_domain_php_ini($d, $ver, 1);
 	}
 &clean_environment();
-local $out = &backquote_command("$cmd -d error_log= -m 2>&1 >/dev/null");
+local $out = &backquote_command("$cmd -d error_log= -m 2>&1");
 local @errs;
 foreach my $l (split(/\r?\n/, $out)) {
-	if ($l =~ /PHP\s+Fatal\s+error:\s*(.*)/) {
-		my $msg = $1;
+	$l = &html_tags_to_text($l);
+	if ($l =~ /(PHP\s+)?Fatal\s+error:\s*(.*)/) {
+		my $msg = $2;
 		$msg =~ s/\s+in\s+\S+\s+on\s+line\s+\d+//;
 		push(@errs, $msg);
 		}

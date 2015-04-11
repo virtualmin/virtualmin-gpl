@@ -3778,8 +3778,8 @@ $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
 $rv =~ s/<a[^>]*>|<\/a>//g;
 $rv =~ s/<pre>|<\/pre>//g;
-$rv =~ s/<br>/\n/g;
-$rv =~ s/<p>/\n\n/g;
+$rv =~ s/<br>|<br\s[^>]*>/\n/g;
+$rv =~ s/<p>|<p\s[^>]*>/\n\n/g;
 $rv = &entities_to_ascii($rv);
 return $rv;
 }
@@ -7716,12 +7716,12 @@ else {
 return undef;
 }
 
-# delete_virtual_server(&domain, only-disconnect, no-post)
+# delete_virtual_server(&domain, only-disconnect, no-post, preserve-remote)
 # Deletes a Virtualmin domain and all sub-domains and aliases. Returns undef
 # on succes, or an error message on failure.
 sub delete_virtual_server
 {
-local ($d, $only, $nopost) = @_;
+local ($d, $only, $nopost, $preserve) = @_;
 
 # Get domain details
 local @subs = &get_domain_by("parent", $d->{'id'});
@@ -7772,6 +7772,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 
 		if (@users) {
 			# Delete mail users and their mail files
+			# XXX even if home is shared??
 			&$first_print($text{'delete_users'});
 			foreach my $u (@users) {
 				if (!$u->{'nomailfile'}) {
@@ -7849,7 +7850,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		# Delete all plugins, with error handling
 		foreach $f (&list_feature_plugins()) {
 			if ($dd->{$f} && $f ne $p) {
-				&call_feature_delete($f, $dd);
+				&call_feature_delete($f, $dd, $preserve);
 				}
 			}
 		}
@@ -7857,11 +7858,11 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		if ($f eq "web" && $p && $p ne "web") {
 			# Delete web plugin later, after dependencies have
 			# been removed
-			&call_feature_delete($p, $dd);
+			&call_feature_delete($p, $dd, $preserve);
 			}
 		elsif ($config{$f} && $dd->{$f} || $f eq 'unix') {
 			# Delete core feature
-			local @args;
+			local @args = ( $preserve );
 			if ($f eq "mail") {
 				# Don't delete mail aliases, because we have
 				# already done so above
