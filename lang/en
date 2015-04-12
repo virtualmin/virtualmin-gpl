@@ -1198,6 +1198,7 @@ delete_mailboxes=Mail / FTP users and aliases - $1 mailboxes and $2 mail aliases
 delete_mailboxes2=Mail / FTP users - $1 mailboxes will be deleted, including all their mail files and home directories.
 delete_mailboxes3=Mail aliases - $1 mail aliases will be deleted.
 delete_ok=Yes, Delete It
+delete_preserve=Preserve features hosted remotely ($1)
 delete_only=Only remove server from Virtualmin's control, and leave website, users and databases untouched
 delete_domain=Deleting server details for $1 ..
 delete_apache=Deleting virtual website ..

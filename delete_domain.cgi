@@ -84,6 +84,12 @@ if (!$in{'confirm'}) {
 	print "<center>\n";
 	print &ui_form_start("delete_domain.cgi");
 	print &ui_hidden("dom", $in{'dom'});
+	@rfeatures = &list_remote_domain_features($d);
+	if (&can_import_servers() && @rfeatures) {
+		$rnames = join(", ", map { $text{'feature_'.$_} } @rfeatures);
+		print &ui_checkbox("preserve", 1,
+			   &text('delete_preserve', $rnames), 0),"<br>\n";
+		}
 	print &ui_form_end([ [ "confirm", $text{'delete_ok'} ] ]);
 	print "</center>\n";
 
@@ -93,7 +99,7 @@ if (!$in{'confirm'}) {
 else {
 	# Go ahead and delete this domain and all sub-domains ..
 	$in{'only'} = 0 if (!&can_import_servers());
-	$err = &delete_virtual_server($d, $in{'only'});
+	$err = &delete_virtual_server($d, $in{'only'}, 0, $in{'preserve'});
 	&error($err) if ($err);
 
 	# Call any theme post command
