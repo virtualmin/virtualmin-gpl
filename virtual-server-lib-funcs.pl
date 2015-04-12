@@ -14352,6 +14352,10 @@ if ($config{'mail_autoconfig'} ne '') {
 sub mount_point
 {
 local $dir = &resolve_links($_[0]);
+if ($mount_point_cache{$dir}) {
+	# Already found, so no need to re-lookup
+	return @{$mount_point_cache{$dir}};
+	}
 &foreign_require("mount");
 local @mounts = &mount::list_mounts();
 local @mounted = &mount::list_mounted();
@@ -14379,6 +14383,7 @@ foreach my $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
 				next;
 				}
 			# Found boot-time mount as well
+			$mount_point_cache{$dir} = [ $m, $m2 ];
 			return ($m, $m2);
 			}
 		}
@@ -16919,6 +16924,21 @@ foreach my $f (&domain_features($d)) {
 	next if (!$config{$f} && defined($config{$f}));
 
 	push(@rv, $f);
+	}
+return @rv;
+}
+
+# list_remote_domain_features(&domain)
+# Returns a list of all features for a domain that are on shared storage
+sub list_remote_domain_features
+{
+my ($d) = @_;
+my @rv;
+foreach my $f (grep { $d->{$_} } &domain_features($d)) {
+	my $rfunc = "remote_".$f;
+	if (defined(&$rfunc) && &$rfunc($d)) {
+		push(@rv, $f);
+		}
 	}
 return @rv;
 }

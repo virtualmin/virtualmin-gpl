@@ -218,9 +218,7 @@ if (-d $d->{'home'} && $d->{'home'} ne "/") {
 	&$first_print($text{'delete_home'});
 
 	# Don't delete if on remote
-	my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
-	my $tab = $home_mtab || $home_fstab;
-	if ($preserve && $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i) {
+	if ($preserve && &remote_dir($d)) {
 		&$second_print(&text('delete_homepreserve', $tab->[1]));
 		return 1;
 		}
@@ -963,6 +961,16 @@ if (@indexes) {
 &open_tempfile_as_domain_user($d, DESTOUT, ">$dest/index.html");
 &print_tempfile(DESTOUT, $content);
 &close_tempfile_as_domain_user($d, DESTOUT);
+}
+
+# remote_dir(&domain)
+# Returns 1 if the domain's home dir is on a remote server
+sub remote_dir
+{
+local ($d) = @_;
+my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
+my $tab = $home_mtab || $home_fstab;
+return $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i ? $tab->[1] : undef;
 }
 
 $done_feature_script{'dir'} = 1;

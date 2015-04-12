@@ -222,7 +222,7 @@ my @dblist = &unique(split(/\s+/, $d->{'db_mysql'}));
 
 # If MySQL is hosted remotely, don't delete the DB on the assumption that
 # other servers sharing the DB will still be using it
-if ($mysql::config{'host'} && $preserve) {
+if ($preserve && &remote_mysql($d)) {
 	&$first_print(&text('delete_mysqldb', join(" ", @dblist)));
 	&$second_print(&text('delete_mysqlpreserve', $mysql::config{'host'}));
 	return 1;
@@ -2562,6 +2562,15 @@ if ($tmpl->{'mysql_nopass'}) {
 	return 0;
 	}
 return 1;
+}
+
+# remote_mysql(&domain)
+# Returns 1 if the domain's MySQL DB is on a remote system
+sub remote_mysql
+{
+local ($d) = @_;
+&require_mysql();
+return $mysql::config{'host'};
 }
 
 $done_feature_script{'mysql'} = 1;

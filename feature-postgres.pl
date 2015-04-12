@@ -306,7 +306,7 @@ my @dblist = &unique(split(/\s+/, $d->{'db_postgres'}));
 
 # If PostgreSQL is hosted remotely, don't delete the DB on the assumption that
 # other servers sharing the DB will still be using it
-if ($postgresql::config{'host'} && $preserve) {
+if ($preserve && &remote_postgres($d)) {
 	&$first_print(&text('delete_postgresdb', join(" ", @dblist)));
 	&$second_print(&text('delete_mysqlpreserve',
 			     $postgresql::config{'host'}));
@@ -1030,6 +1030,15 @@ if ($tmpl->{'mysql_nopass'}) {
 	return 0;
 	}
 return 1;
+}
+
+# remote_postgres(&domain)
+# Returns true if the domain's PostgreSQL DB is on a remote system
+sub remote_postgres
+{
+local ($d) = @_;
+&require_postgres();
+return $postgresql::config{'host'};
 }
 
 $done_feature_script{'postgres'} = 1;

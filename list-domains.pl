@@ -354,6 +354,11 @@ if ($multi) {
 			join(" ", grep { $d->{$_} } @features),"\n";
 		print "    Plugins: ",
 			join(" ", grep { $d->{$_} } @fplugins),"\n";
+		@rfeatures = &list_remote_domain_features($d);
+		if (@rfeatures) {
+			print "    Remote features: ",
+				join(" ", @rfeatures),"\n";
+			}
 		if (&has_home_quotas() && !$d->{'parent'}) {
 			print "    Server quota: ",
 			      &quota_show($d->{'quota'}, "home"),"\n";

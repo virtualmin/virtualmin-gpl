@@ -1174,6 +1174,14 @@ foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 &release_lock_anything($d);
 }
 
+# remote_unix(&domain)
+# Returns true if Unix users are stored on a remote system
+sub remote_unix
+{
+local ($d) = @_;
+return &get_user_database_url();
+}
+
 $done_feature_script{'unix'} = 1;
 
 1;
