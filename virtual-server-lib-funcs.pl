@@ -16677,7 +16677,7 @@ if ($data->{'error'}) {
 	return (1, $data->{'error'});
 	}
 else {
-	return (0, $data->{'data'});
+	return (0, $data->{'data'}, $out);
 	}
 }
 
@@ -16729,13 +16729,14 @@ return undef;
 }
 
 # transfer_virtual_server(&domain, desthost, destpass, delete-mode,
-# 			  delete-missing-files, replication-mode)
+# 			  delete-missing-files, replication-mode, show-output)
 # Transfers a domain (and sub-servers) to a destination system, possibly while
 # deleting it from the source. Will print stuff while transferring, and returns
 # an OK flag.
 sub transfer_virtual_server
 {
-my ($d, $desthost, $destpass, $deletemode, $replicate) = @_;
+my ($d, $desthost, $destpass, $deletemode, $deletemissing, $replication,
+    $showoutput) = @_;
 
 # Get all domains to include
 my @doms = ( $d );
@@ -16752,8 +16753,10 @@ my $remotetemp = "/tmp/virtualmin-transfer-$$";
 local $config{'compression'} = 0;
 local $config{'zip_args'} = undef;
 &$first_print($text{'transfer_backing'});
-&push_all_print();
-&set_all_null_print();
+if (!$showoutput) {
+	&push_all_print();
+	&set_all_null_print();
+	}
 my ($ok, $errdoms) = &backup_domains(
 	"ssh://root:$destpass\@$desthost:$remotetemp",
 	\@doms,
@@ -16766,7 +16769,9 @@ my ($ok, $errdoms) = &backup_domains(
 	1,
 	1,
 	0);
-&pop_all_print();
+if (!$showoutput) {
+	&pop_all_print();
+	}
 if (!$ok) {
 	&$second_print($text{'transfer_ebackup'});
 	return 0;
@@ -16797,7 +16802,7 @@ if (@missing) {
 		}
 	else {
 		&$second_print(&text('transfer_missing', $remotetemp,
-			     join(" ", map { &show_domain_name($_) } @missing)));
+			    join(" ", map { &show_domain_name($_) } @missing)));
 		}
 	return 0;
 	}
@@ -16807,10 +16812,14 @@ if (@missing) {
 if ($deletemode == 2) {
 	# Delete from this system
 	&$first_print(&text('transfer_deleting', &show_domain_name($d)));
-	&push_all_print();
-	&set_all_null_print();
+	if (!$showoutput) {
+		&push_all_print();
+		&set_all_null_print();
+		}
 	my $err = &delete_virtual_server($d);
-	&pop_all_print();
+	if (!$showoutput) {
+		&pop_all_print();
+		}
 	if ($err) {
 		&$second_print(&text('transfer_edelete', $err));
 		return 0;
@@ -16822,34 +16831,41 @@ if ($deletemode == 2) {
 elsif ($deletemode == 1) {
 	# Disable on this system
 	&$first_print(&text('transfer_disabling', &show_domain_name($d)));
-	&push_all_print();
-	&set_all_null_print();
+	if (!$showoutput) {
+		&push_all_print();
+		&set_all_null_print();
+		}
 	foreach my $dd (@doms) {
 		&disable_virtual_server($dd, 'transfer',
 				'Transferred to '.$desthost);
 		}
-	&pop_all_print();
+	if (!$showoutput) {
+		&pop_all_print();
+		}
 	&$second_print($text{'setup_done'});
 	}
 
 # Restore via an API call to the remote system
 &$first_print($text{'transfer_restoring'});
-my ($rok, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
+my ($rok, $rerr, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error ".
 	($deletemissing ? "--option dir delete 1 " : "").
-	($replicate ? "--replicate " : "")
+	($replication ? "--replication --no-reuid " : "")
 	);
+if ($showoutput) {
+	&$first_print("<pre>".$rout."</pre>");
+	}
 if ($rok != 0) {
 	if ($deletemode == 2) {
-		&$second_print(&text('transfer_erestoring2', $rout,
+		&$second_print(&text('transfer_erestoring2', $rerr,
 				     $remotetemp, $desthost));
 		}
 	elsif ($deletemode == 1) {
-		&$second_print(&text('transfer_erestoring1', $rout));
+		&$second_print(&text('transfer_erestoring1', $rerr));
 		}
 	else {
-		&$second_print(&text('transfer_erestoring', $rout));
+		&$second_print(&text('transfer_erestoring', $rerr));
 		}
 	if ($deletemode != 2) {
 		&execute_command_via_ssh($desthost, $destpass,

@@ -40,6 +40,12 @@
  - Improve replicated domain support
 	- LDAP on remote .. what about clash?
 	- Deletion from one should not remove?
+		- Home dir
+		- Double-check that additioanl MySQL users are preserved
+		- LDAP
+		- UI
+	- UIDs must be preserved!
+	- Re-test with latest code and new domain, and an actual app
 	- Documentation
 	- CHANGELOG
 

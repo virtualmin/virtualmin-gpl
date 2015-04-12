@@ -82,6 +82,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--replication") {
 		$replication = 1;
 		}
+	elsif ($a eq "--output") {
+		$showoutput = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -106,7 +109,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$indent_print();
 $ok = &transfer_virtual_server($d, $desthost, $destpass,
 			       $delete ? 2 : $disable ? 1 : 0,
-			       $deletemissing, $replication);
+			       $deletemissing, $replication, $showoutput);
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});
@@ -129,6 +132,7 @@ print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
 print "                          [--delete-missing-files]\n";
 print "                          [--replication]\n";
+print "                          [--output]\n";
 exit(1);
 }
 
