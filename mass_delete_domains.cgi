@@ -77,10 +77,6 @@ if (!$in{'confirm'}) {
 		print &ui_hidden("d", $d->{'id'}),"\n";
 		}
 	print &ui_submit($text{'massdelete_ok'}, "confirm");
-	if (&can_import_servers() && !$virtualmin_pro) {
-		print "<p>",&ui_checkbox("only", 1,
-					 $text{'delete_only'}),"<br>\n";
-		}
 	print &ui_form_end();
 	print "</center>\n";
 
@@ -95,8 +91,7 @@ else {
 		# Go ahead and delete this domain and all sub-domains ..
 		&$first_print(&text('massdelete_doing', &show_domain_name($d)));
 		&$indent_print();
-		$in{'only'} = 0 if (!&can_import_servers());
-		$err = &delete_virtual_server($d, $in{'only'}, 1);
+		$err = &delete_virtual_server($d, 0, 1);
 		&error($err) if ($err);
 		&$outdent_print();
 		&$second_print($text{'setup_done'});

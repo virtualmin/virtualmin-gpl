@@ -98,8 +98,7 @@ if (!$in{'confirm'}) {
 	}
 else {
 	# Go ahead and delete this domain and all sub-domains ..
-	$in{'only'} = 0 if (!&can_import_servers());
-	$err = &delete_virtual_server($d, $in{'only'}, 0, $in{'preserve'});
+	$err = &delete_virtual_server($d, 0, 0, $in{'preserve'});
 	&error($err) if ($err);
 
 	# Call any theme post command
