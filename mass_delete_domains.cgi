@@ -36,6 +36,7 @@ if (!$in{'confirm'}) {
 	$aliases = 0;
 	$subs = 0;
 	$dbs = $dbssize = 0;
+	$anyremote = 0;
 	foreach $d (@doms) {
 		if ($d->{'dir'} &&
 		    (!$d->{'parent'} || !$idmap{$d->{'parent'}})) {
@@ -52,6 +53,9 @@ if (!$in{'confirm'}) {
 		$dbs += scalar(@dbs);
 		$dbssize += &get_database_usage($d);
 		push(@alldel, $d, @subs);
+		if (&list_remote_domain_features($d)) {
+			$anyremote++;
+			}
 		}
 	@alldel = &unique(@alldel);
 
@@ -76,6 +80,10 @@ if (!$in{'confirm'}) {
 	foreach $d (@doms) {
 		print &ui_hidden("d", $d->{'id'}),"\n";
 		}
+	if (&can_import_servers() && $anyremote) {
+		print &ui_checkbox("preserve", 1,
+			$text{'massdelete_preserve'}, 0),"<br>\n";
+		}
 	print &ui_submit($text{'massdelete_ok'}, "confirm");
 	print &ui_form_end();
 	print "</center>\n";
@@ -91,7 +99,7 @@ else {
 		# Go ahead and delete this domain and all sub-domains ..
 		&$first_print(&text('massdelete_doing', &show_domain_name($d)));
 		&$indent_print();
-		$err = &delete_virtual_server($d, 0, 1);
+		$err = &delete_virtual_server($d, 0, 1, $in{'preserve'});
 		&error($err) if ($err);
 		&$outdent_print();
 		&$second_print($text{'setup_done'});

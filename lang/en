@@ -4181,6 +4181,7 @@ massdelete_subs=$1 sub-servers will also be deleted.
 massdelete_users=$1 mail/FTP users will also be deleted.
 massdelete_dbs=$1 databases containing $2 of data will also be deleted.
 massdelete_ok=Delete Servers Now
+massdelete_preserve=Preserve features hosted remotely
 massdelete_doms=Servers to delete: $1
 massdelete_doing=Deleting server $1 ..
 
