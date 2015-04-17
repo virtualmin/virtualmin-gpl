@@ -7,7 +7,8 @@ Set correct permissions on a domain's home directory.
 This command ensures that the ownership and permissions on one or more virtual
 server's home directories are correct. It can be run either with the
 C<--all-domains> flag to update all virtual servers, or C<--domain> followed
-by a single domain name.
+by a single domain name. To include sub-servers of selected domains, you
+can also add the C<--subservers> flag.
 
 =cut
 
@@ -41,6 +42,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--subservers") {
+		$subservers = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -56,6 +60,9 @@ else {
 		$d = &get_domain_by("dom", $n);
 		$d || &usage("Domain $n does not exist");
 		push(@doms, $d);
+		if ($subservers && !$d->{'parent'}) {
+			push(@doms, &get_domain_by("parent", $d->{'id'}));
+			}
 		}
 	}
 
@@ -95,5 +102,6 @@ print "$_[0]\n\n" if ($_[0]);
 print "Set correct permissions on a domain's home directory.\n";
 print "\n";
 print "virtualmin fix-domain-permissions --domain name | --all-domains\n";
+print "                                 [--subservers]\n";
 exit(1);
 }
