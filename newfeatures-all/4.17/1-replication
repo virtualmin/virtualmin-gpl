@@ -1,0 +1,4 @@
+desc=Shared storage replication
+html=Improved support for replicating and deleting domains that use a shared home directory and MySQL database to synchronise state across two or more Virtualmin systems.
+master=1
+reseller=1

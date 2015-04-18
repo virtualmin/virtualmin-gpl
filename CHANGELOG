@@ -1493,3 +1493,4 @@ Updated the phpMyAdmin script installer to version 4.3.12 and 4.0.10.9, Piwik to
 If the aws command is installed, Virtualmin will call it to perform S3 operations rather than using it's own code. Because this command is developed by Amazon, it can be expected to be reliable in the face of S3 API changes.
 ---- Changes since 4.16 ----
 Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, Pydio to 6.0.6, vTigerCRM to 6.2.0, CMS Made Simple to 1.12, X2Engine to 5.0.6, and phpMyAdmin to 4.4.2.
+Improved support for replicating and deleting domains that use a shared home directory and MySQL database to synchronise state across two or more Virtualmin systems.
