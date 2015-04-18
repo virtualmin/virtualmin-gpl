@@ -219,7 +219,7 @@ if (-d $d->{'home'} && $d->{'home'} ne "/") {
 
 	# Don't delete if on remote
 	if ($preserve && &remote_dir($d)) {
-		&$second_print(&text('delete_homepreserve', &remote_dir($d)]));
+		&$second_print(&text('delete_homepreserve', &remote_dir($d)));
 		return 1;
 		}
 
