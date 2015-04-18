@@ -7738,6 +7738,12 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 		&$indent_print();
 		}
 
+	# What is shared for this domain?
+	my %remote;
+	if ($preserve) {
+		%remote = map { $_, 1 } &list_remote_domain_features($dd);
+		}
+
 	# Run the before command
 	&set_domain_envs($dd, "DELETE_DOMAIN");
 	local $merr = &making_changes();
@@ -7772,14 +7778,15 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 
 		if (@users) {
 			# Delete mail users and their mail files
-			# XXX even if home is shared??
 			&$first_print($text{'delete_users'});
 			foreach my $u (@users) {
-				if (!$u->{'nomailfile'}) {
+				if (!$u->{'nomailfile'} && !$remote{'dir'}) {
 					&delete_mail_file($u);
 					}
+				$u->{'dbs'} = [ grep { !$remote{$_->{'type'}} }
+						     @{$u->{'dbs'}} ];
 				&delete_user($u, $dd);
-				if (!$u->{'nocreatehome'}) {
+				if (!$u->{'nocreatehome'} && !$remote{'dir'}) {
 					&delete_user_home($u, $d);
 					}
 				}
@@ -7787,7 +7794,7 @@ foreach my $dd (@aliasdoms, @subs, $d) {
 			}
 
                 # Delete all virtusers
-		if (!$dd->{'aliascopy'}) {
+		if (!$dd->{'aliascopy'} && !$remote{'mail'}) {
 			&$first_print($text{'delete_aliases'});
 			foreach my $v (&list_virtusers()) {
 				if ($v->{'from'} =~ /\@(\S+)$/ &&
