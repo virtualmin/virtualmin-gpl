@@ -556,7 +556,6 @@ if (!$d->{'wasmissing'}) {
 
 # Work out which databases are in backup
 local ($dbfile, @dbs);
-push(@dbs, [ $d->{'db'}, $file ]) if (-s $file);
 foreach $dbfile (glob($file."_*")) {
 	if (-r $dbfile) {
 		$dbfile =~ /\Q$file\E_(.*)$/;
