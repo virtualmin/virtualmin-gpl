@@ -16759,6 +16759,15 @@ push(@doms, &get_domain_by("alias", $d->{'id'}));
 my @feats = grep { $config{$_} || $_ eq 'virtualmin' }
 	          @backup_features;
 push(@feats, &list_backup_plugins());
+my $homefmt;
+if ($replication) {
+	my %remotes = map { $_, 1 } &list_remote_domain_features($d);
+	@feats = grep { !$remotes{$_} } @feats;
+	$homefmt = &indexof("dir", @feats) >= 0 ? 1 : 0;
+	}
+else {
+	$homefmt = 1;
+	}
 
 # Backup all the domains to a temp dir on the remote system
 my $remotetemp = "/tmp/virtualmin-transfer-$$";
@@ -16776,7 +16785,7 @@ my ($ok, $errdoms) = &backup_domains(
 	1,
 	0,
 	{ },
-	1,
+	$homefmt,
 	[ ],
 	1,
 	1,
