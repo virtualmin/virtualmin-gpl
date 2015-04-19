@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, Pydio to 6.0.6, vTigerCRM to 6.2.0, CMS Made Simple to 1.12, X2Engine to 5.0.6, and phpMyAdmin to 4.4.2.
+html=Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, Pydio to 6.0.6, vTigerCRM to 6.2.0, CMS Made Simple to 1.12, X2Engine to 5.0.6, Ghost to 0.6.0, and phpMyAdmin to 4.4.2.
 master=1
 reseller=1
 domain=1
