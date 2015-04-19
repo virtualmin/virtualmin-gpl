@@ -1002,9 +1002,10 @@ local %info;
 &require_mysql();
 
 # Re-grant allowed hosts from backup + local
+local @lhosts;
 if (!$d->{'parent'} && $info{'hosts'}) {
 	&$first_print($text{'restore_mysqlgrant'});
-	local @lhosts = &get_mysql_allowed_hosts($d);
+	@lhosts = &get_mysql_allowed_hosts($d);
 	push(@lhosts, split(/\s+/, $info{'hosts'}));
 	if (&indexof("%", @lhosts) >= 0 &&
 	    &indexof("localhost", @lhosts) < 0 &&
@@ -1057,6 +1058,11 @@ if (!$d->{'wasmissing'}) {
 		&setup_mysql($d, 1);
 		}
 	&$second_print($text{'setup_done'});
+	}
+
+# Re-grant allowed hosts, as deleting and re-creating DBs may have cleared them
+if (@lhosts) {
+	&save_mysql_allowed_hosts($d, \@lhosts);
 	}
 
 # Work out which databases are in backup
