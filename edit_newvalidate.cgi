@@ -106,6 +106,10 @@ print &ui_table_row($text{'newvalidate_fixservers'},
 		    &servers_input("servers", [ ],
 			[ grep { !$_->{'parent'} } @doms ]));
 
+# Also check sub-servers?
+print &ui_table_row($text{'newvalidate_subservers'},
+	&ui_yesno_radio("subservers", 0));
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'newvalidate_fix'} ] ]);
 

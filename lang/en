@@ -4374,6 +4374,7 @@ newvalidate_always=Send email even if no problems are found?
 newvalidate_err2=Failed to save validation settings
 newvalidate_desc3=This page allows you to fix file ownerships on some or all virtual servers. It can be useful if files have been edited or created by <tt>root</tt>, and are now owned by the wrong user.
 newvalidate_fixservers=Virtual servers to fix
+newvalidate_subservers=Also fix sub-servers?
 newvalidate_fix=Fix Permissions Now
 newvalidate_header3=Permissions fix options
 

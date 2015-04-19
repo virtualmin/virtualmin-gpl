@@ -13,7 +13,13 @@ if ($in{'servers_def'}) {
 else {
 	foreach $id (split(/\0/, $in{'servers'})) {
 		$d = &get_domain($id);
-		push(@doms, $d) if ($d);
+		if ($d) {
+			push(@doms, $d);
+			if ($in{'subservers'}) {
+				push(@doms,
+				     &get_domain_by("parent", $d->{'id'}));
+				}
+			}
 		}
 	}
 @doms = grep { !$_->{'parent'} } @doms;
