@@ -6462,6 +6462,7 @@ transfer_savehost=Save for later use?
 transfer_pass=Root password for destination system
 transfer_passdef=(Optional if SSH authentication is configured)
 transfer_overwrite=Over-write existing domain?
+transfer_replication=Replicating to remote system?
 transfer_delete=Action after transfer
 transfer_delete2=Delete from this system
 transfer_delete1=Disable on this system
@@ -6497,6 +6498,7 @@ transfer_enewttl=New TTL must be a number of seconds
 transfer_deleting=Deleting $1 from this system ..
 transfer_edelete=.. deletion failed : $1
 transfer_disabling=Disabling $1 on this system ..
+transfer_ereplication=Both replication and deletion of the domain cannot be enabled at the same time
 
 domdkim_title=DomainKey Options
 domdkim_header=DomainKey options for this server

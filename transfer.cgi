@@ -35,6 +35,11 @@ else {
 my $err = &validate_transfer_host($d, $host, $pass, $in{'overwrite'});
 &error($err) if ($err);
 
+# Cannot both delete and replicate
+if ($in{'delete'} && $in{'replication'}) {
+	&error($text{'transfer_ereplication'});
+	}
+
 # Save the host, if requested
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'transfer_title'}, "");
@@ -47,7 +52,8 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$indent_print();
 $ok = &transfer_virtual_server($d, $host, $pass,
 			       $in{'delete'},
-			       $in{'overwrite'} && !$in{'delete'});
+			       $in{'overwrite'} && !$in{'delete'},
+			       $in{'replication'});
 &$outdent_print();
 if ($ok) {
 	&$second_print($text{'setup_done'});

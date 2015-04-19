@@ -90,6 +90,11 @@ print &ui_table_row($text{'transfer_delete'},
 print &ui_table_row($text{'transfer_overwrite'},
 	&ui_yesno_radio("overwrite", 0));
 
+# Replication mode?
+print &ui_table_row($text{'transfer_replication'},
+	&ui_yesno_radio("replication",
+			&list_remote_domain_features($d) ? 1 :0));
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'transfer_ok'} ] ]);
 
