@@ -40,8 +40,6 @@ if ($in{'delete'} && $in{'replication'}) {
 	&error($text{'transfer_ereplication'});
 	}
 
-# Save the host, if requested
-
 &ui_print_unbuffered_header(&domain_in($d), $text{'transfer_title'}, "");
 
 # Call the transfer function

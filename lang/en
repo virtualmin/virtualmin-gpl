@@ -6499,6 +6499,8 @@ transfer_deleting=Deleting $1 from this system ..
 transfer_edelete=.. deletion failed : $1
 transfer_disabling=Disabling $1 on this system ..
 transfer_ereplication=Both replication and deletion of the domain cannot be enabled at the same time
+transfer_ehost=Missing destination hostname
+transfer_ehost2=Destination hostname cannot be resolved
 
 domdkim_title=DomainKey Options
 domdkim_header=DomainKey options for this server
