@@ -215,38 +215,8 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	# If DNSSEC was requested, set it up
 	if ($tmpl->{'dnssec'} eq 'yes') {
 		&$first_print($text{'setup_dnssec'});
-		local $zone = &get_bind_zone($_[0]->{'dom'});
-		if (!defined(&bind8::supports_dnssec) ||
-		    !&bind8::supports_dnssec()) {
-			# Not supported
-			&$second_print($text{'setup_enodnssec'});
-			}
-		else {
-			local ($ok, $size) = &bind8::compute_dnssec_key_size(
-				$tmpl->{'dnssec_alg'}, 1);
-			local $err;
-			if (!$ok) {
-				# Key size failed
-				&$second_print(
-					&text('setup_ednssecsize', $size));
-				}
-			elsif ($err = &bind8::create_dnssec_key(
-					$zone, $tmpl->{'dnssec_alg'}, $size,
-					$tmpl->{'dnssec_single'})) {
-				# Key generation failed
-				&$second_print(
-					&text('setup_ednsseckey', $err));
-				}
-			elsif ($err = &bind8::sign_dnssec_zone($zone)) {
-				# Zone signing failed
-				&$second_print(
-					&text('setup_ednssecsign', $err));
-				}
-			else {
-				# All done!
-				&$second_print($text{'setup_done'});
-				}
-			}
+		$err = &enable_domain_dnssec($_[0]);
+		&$second_print($err || $text{'setup_done'});
 		}
 
 	# Create on slave servers
@@ -3260,6 +3230,45 @@ foreach my $k (@keyfiles) {
         &unlock_file($k);
         }
 &release_lock_dns($d);
+return undef;
+}
+
+# enable_domain_dnssec(&domain)
+# Add appropriate DNSSEC records for a domain
+sub enable_domain_dnssec
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+if (!$tmpl->{'dnssec_alg'}) {
+	return $text{'setup_enodnssecalg'};
+	}
+&obtain_lock_dns($d);
+my $zone = &get_bind_zone($d->{'dom'});
+if (!defined(&bind8::supports_dnssec) ||
+    !&bind8::supports_dnssec()) {
+	# Not supported
+	return $text{'setup_enodnssec'};
+	}
+else {
+	my ($ok, $size) = &bind8::compute_dnssec_key_size($tmpl->{'dnssec_alg'}, 1);
+	my $err;
+	if (!$ok) {
+		# Key size failed
+		return &text('setup_ednssecsize', $size);
+		}
+	elsif ($err = &bind8::create_dnssec_key(
+			$zone, $tmpl->{'dnssec_alg'}, $size,
+			$tmpl->{'dnssec_single'})) {
+		# Key generation failed
+		return &text('setup_ednsseckey', $err);
+		}
+	elsif ($err = &bind8::sign_dnssec_zone($zone)) {
+		# Zone signing failed
+		return &text('setup_ednssecsign', $err);
+		}
+	}
+&release_lock_dns($d);
+return undef;
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])

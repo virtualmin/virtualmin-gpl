@@ -417,15 +417,15 @@ foreach $d (@doms) {
 		if ($dnssec && !$key) {
 			# Enable it
 			&$first_print($text{'spf_enablednssec'});
-
-			&$second_print($text{'setup_done'});
+			$err = &enable_domain_dnssec($d);
+			&$second_print($err || $text{'setup_done'});
 			$changed++;
 			}
 		elsif (!$dnssec && $key) {
 			# Disable it
 			&$first_print($text{'spf_disablednssec'});
-			&disable_domain_dnssec($d);
-			&$second_print($text{'setup_done'});
+			$err = &disable_domain_dnssec($d);
+			&$second_print($err || $text{'setup_done'});
 			$changed++;
 			}
 		# Records may have changed, so re-read
