@@ -181,6 +181,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--add-all-slaves") {
 		$addallslaves = 1;
 		}
+	elsif ($a eq "--enable-dnssec") {
+		$dnssec = 1;
+		}
+	elsif ($a eq "--disable-dnssec") {
+		$dnssec = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -191,7 +197,8 @@ while(@ARGV > 0) {
 @dnames || $all_doms || usage("No domains specified");
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
-  defined($dmarc) || $dmarcp || defined($dmarcpct) || &usage("Nothing to do");
+  defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
+  &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -333,6 +340,7 @@ foreach $d (@doms) {
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	local $changed;
 	if (@delrecs) {
+		&$first_print(&text('spf_delrecs', scalar(@delrecs)));
 		local @alld;
 		foreach my $rn (@delrecs) {
 			my ($name, $type, @values) = @$rn;
@@ -353,10 +361,12 @@ foreach $d (@doms) {
 			&bind8::delete_record($file, $r);
 			$changed++;
 			}
+		&$second_print($text{'setup_done'});
 		}
 
 	# Add records to the domain
 	if (@addrecs) {
+		&$first_print(&text('spf_addrecs', scalar(@addrecs)));
 		foreach my $rn (@addrecs) {
 			my ($name, $type, $ttl, $values) = @$rn;
 			if ($name !~ /\.$/ && $name ne "\@") {
@@ -366,10 +376,12 @@ foreach $d (@doms) {
 					      uc($type), join(" ", @$values));
 			$changed++;
 			}
+		&$second_print($text{'setup_done'});
 		}
 
 	# Set or modify default TTL
 	if ($ttl) {
+		&$first_print(&text('spf_ttl', $ttl));
 		($oldttl) = grep { $_->{'defttl'} } @$recs;
 		if ($oldttl) {
 			$oldttl->{'defttl'} = $ttl;
@@ -383,6 +395,7 @@ foreach $d (@doms) {
 				}
 			}
 		$changed++;
+		&$second_print($text{'setup_done'});
 		}
 
 	# Change the TTL on any records that have one
@@ -396,6 +409,27 @@ foreach $d (@doms) {
 				$changed++;
 				}
 			}
+		}
+
+	# Enable or disable DNSSEC
+	if (defined($dnssec)) {
+		$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		if ($dnssec && !$key) {
+			# Enable it
+			&$first_print($text{'spf_enablednssec'});
+
+			&$second_print($text{'setup_done'});
+			$changed++;
+			}
+		elsif (!$dnssec && $key) {
+			# Disable it
+			&$first_print($text{'spf_disablednssec'});
+			&disable_domain_dnssec($d);
+			&$second_print($text{'setup_done'});
+			$changed++;
+			}
+		# Records may have changed, so re-read
+		($recs, $file) = &get_domain_dns_records_and_file($d);
 		}
 
 	if ($changed || $bumpsoa) {
@@ -448,6 +482,7 @@ print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
+print "                     [--enable-dnssec | --disable-dnssec]\n";
 exit(1);
 }
 

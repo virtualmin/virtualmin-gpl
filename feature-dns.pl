@@ -3240,6 +3240,28 @@ return $str =~ /^(\d+)s$/i ? $1 :
        $str =~ /^(\d+)w$/i ? $1*7*86400 : $str;
 }
 
+# disable_domain_dnssec(&domain)
+# Remove all DNSSEC records for a domain
+sub disable_domain_dnssec
+{
+my ($d) = @_;
+&obtain_lock_dns($d);
+my $zone = &get_bind_zone($d->{'dom'});
+my $key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+my @keyfiles;
+if ($key) {
+	@keyfiles = map { $k->{$_} } ('publicfile', 'privatefile');
+	}
+foreach my $k (@keyfiles) {
+        &lock_file($k);
+        }
+&bind8::delete_dnssec_key($zone);
+foreach my $k (@keyfiles) {
+        &unlock_file($k);
+        }
+&release_lock_dns($d);
+}
+
 # obtain_lock_dns(&domain, [named-conf-too])
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns
