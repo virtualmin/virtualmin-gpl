@@ -8,6 +8,7 @@ require './virtual-server-lib.pl';
 &require_mail() if ($config{'mail'});
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
 &can_config_domain($d) || &error($text{'edit_ecannot'});
 $oldd = { %$d };
 $tmpl = defined($in{'template'}) ? &get_template($in{'template'})
