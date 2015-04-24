@@ -4472,13 +4472,13 @@ if (-d $sendmail::config{'smrsh_dir'} &&
 	}
 }
 
-# set_domain_envs(&domain, action, [&new-domain], [&old-domain])
+# set_domain_envs(&domain, action, [&new-domain], [&old-domain], [&other-envs])
 # Sets up VIRTUALSERVER_ environment variables for a domain update or some kind,
 # prior to calling making_changes or made_changes. action must be one of
 # CREATE_DOMAIN, MODIFY_DOMAIN or DELETE_DOMAIN
 sub set_domain_envs
 {
-local ($d, $action, $newd, $oldd) = @_;
+local ($d, $action, $newd, $oldd, $others) = @_;
 &reset_domain_envs();
 $ENV{'VIRTUALSERVER_ACTION'} = $action;
 foreach my $e (keys %$d) {
@@ -4548,9 +4548,16 @@ if ($alias) {
 	$ENV{'ALIAS_VIRTUALSERVER_IDNDOM'} =
 		&show_domain_name($alias->{'dom'});
 	}
+# Set global variables
 foreach my $v (&get_global_template_variables()) {
 	if ($v->{'enabled'}) {
 		$ENV{'GLOBAL_'.uc($v->{'name'})} = $v->{'value'};
+		}
+	}
+# Set other variables
+if ($others) {
+	foreach my $e (keys %$others) {
+		$ENV{uc($e)} = $others->{$e};
 		}
 	}
 }

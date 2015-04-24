@@ -296,6 +296,15 @@ if (!$sinfo) {
 # Install needed packages
 &setup_script_packages($script, $d);
 
+# Run the before command
+%envs = map { 'script_'.$_, $opts->{$_} } (keys %$opts);
+$envs{'script_name'} = $sname;
+$envs{'script_version'} = $ver;
+&set_domain_envs($d, "SCRIPT_DOMAIN", \%newdom, undef, \%envs);
+$merr = &making_changes();
+&reset_domain_envs($d);
+&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 # Get locks
 &obtain_lock_web($d);
 &obtain_lock_cron($d);
@@ -418,6 +427,12 @@ else {
 
 &release_lock_web($d);
 &release_lock_cron($d);
+
+# Run post commands
+&set_domain_envs($d, "SCRIPT_DOMAIN", undef, \%envs);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
 
 exit($ok ? 0 : 1);
 
