@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.1, SMF to 2.0.10, and phpMyAdmin to 4.4.4.
+html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.1, SMF to 2.0.10, Revive Adserver to 3.2.0, and phpMyAdmin to 4.4.4.
 master=1
 reseller=1
 domain=1
