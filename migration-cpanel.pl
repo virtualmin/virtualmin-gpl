@@ -1403,7 +1403,7 @@ foreach my $vf (readdir(VF)) {
 				'nocreationmail', 1,
 				'nocopyskel', 1,
 				);
-		foreach my $f (@opt_features) {
+		foreach my $f (@subdom_features) {
 			if ($f ne "unix" && $f ne "webmin") {
 				$subs{$f} = $dom{$f};
 				}
