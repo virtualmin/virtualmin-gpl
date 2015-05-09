@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.0, Ghost to 0.6.2, Pydio to 6.0.7, and phpMyAdmin to 4.4.6.
+html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.0, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.37, and phpMyAdmin to 4.4.6.
 master=1
 reseller=1
 domain=1

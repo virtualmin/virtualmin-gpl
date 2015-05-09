@@ -1495,4 +1495,4 @@ If the aws command is installed, Virtualmin will call it to perform S3 operation
 Updated the Trac script installer to version 1.0.5, ownCloud to 8.0.2, MediaWiki to 1.24.2 and 1.19.24, Node.JS to 0.12.2, phpMyFAQ to 2.8.22, OpenCart to 2.0.2.0, Drupal to 7.36, Pydio to 6.0.6, vTigerCRM to 6.2.0, CMS Made Simple to 1.12, X2Engine to 5.0.6, Ghost to 0.6.0, and phpMyAdmin to 4.4.2.
 Improved support for replicating and deleting domains that use a shared home directory and MySQL database to synchronise state across two or more Virtualmin systems.
 ---- Changes since 4.17 ----
-Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.0, Ghost to 0.6.2, Pydio to 6.0.7, and phpMyAdmin to 4.4.6.
+Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.0, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.37, and phpMyAdmin to 4.4.6.
