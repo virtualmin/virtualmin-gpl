@@ -4918,37 +4918,38 @@ return @rv;
 # Fills in the the given hashes with used usernames and UIDs
 sub build_taken
 {
+my ($uidmap, $usermap, $users) = @_;
 &obtain_lock_unix();
 &require_useradmin();
 
 # Add Unix users
-local @users = $_[2] ? @{$_[2]} : &list_all_users();
+local @users = $users ? @$users : &list_all_users();
 local $u;
 foreach $u (@users) {
-	$_[0]->{$u->{'uid'}} = 1;
-	$_[1]->{$u->{'user'}} = 1;
+	$uidmap->{$u->{'uid'}} ||= 'user' if ($uidmap);
+	$usermap->{$u->{'user'}} ||= 'user' if ($usermap);
 	}
 
 # Add system users
 setpwent();
 while(my @uinfo = getpwent()) {
-	$_[0]->{$uinfo[2]} = 1;
-	$_[1]->{$uinfo[0]} = 1;
+	$uidmap->{$uinfo[2]} ||= 'user' if ($uidmap);
+	$usermap->{$uinfo[0]} ||= 'user' if ($usermap);
 	}
 endpwent();
 
 # Add domain users
 local $d;
 foreach $d (&list_domains()) {
-	$_[0]->{$d->{'uid'}} = 1;
-	$_[1]->{$d->{'user'}} = 1;
+	$uidmap->{$d->{'uid'}} ||= 'dom' if ($uidmap);
+	$usermap->{$d->{'user'}} ||= 'dom' if ($usermap);
 	}
 
 # Add UIDs used in the past
 my %uids;
 &read_file_cached($old_uids_file, \%uids);
 foreach my $uid (keys %uids) {
-	$_[0]->{$uid} = 1;
+	$uidmap->{$uid} ||= 'old' if ($uidmap);
 	}
 
 &release_lock_unix();
@@ -4958,37 +4959,38 @@ foreach my $uid (keys %uids) {
 # Fills in the the given hashes with used group names and GIDs
 sub build_group_taken
 {
+my ($gidmap, $groupmap, $groups) = @_;
 &obtain_lock_unix();
 &require_useradmin();
 
 # Add Unix groups
-local @groups = $_[2] ? @{$_[2]} : &list_all_groups();
+local @groups = $groups ? @$groups : &list_all_groups();
 local $g;
 foreach $g (@groups) {
-	$_[0]->{$g->{'gid'}} = 1;
-	$_[1]->{$g->{'group'}} = 1;
+	$gidmap->{$g->{'gid'}} ||= 'group' if ($gidmap);
+	$groupmap->{$g->{'group'}} ||= 'group' if ($groupmap);
 	}
 
 # Add system groups
 setgrent();
 while(my @ginfo = getgrent()) {
-	$_[0]->{$ginfo[2]} = 1;
-	$_[1]->{$ginfo[0]} = 1;
+	$gidmap->{$ginfo[2]} ||= 'group' if ($gidmap);
+	$groupmap->{$ginfo[0]} ||= 'group' if ($groupmap);
 	}
 endgrent();
 
 # Add domains
 local $d;
 foreach $d (&list_domains()) {
-	$_[0]->{$d->{'gid'}} = 1;
-	$_[1]->{$d->{'group'}} = 1;
+	$gidmap->{$d->{'gid'}} ||= 'dom' if ($gidmap);
+	$groupmap->{$d->{'group'}} ||= 'dom' if ($groupmap);
 	}
 
 # Add GIDs used in the past
 my %gids;
 &read_file_cached($old_gids_file, \%gids);
 foreach my $gid (keys %gids) {
-	$_[0]->{$gid} = 1;
+	$gidmap->{$gid} ||= 'old' if ($gidmap);
 	}
 
 &release_lock_unix();

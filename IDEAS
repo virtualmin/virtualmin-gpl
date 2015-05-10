@@ -37,8 +37,6 @@
  - Mobile theme should use new menu function (but maybe wait till new release)
 	- and right-frame info too
  
- - Improve replicated domain support
-	- Documentation
-
- - User editing on latest MacOS
-	- http://virtualmin.com/node/36777
+ - PFS fixes
+	- https://sourceforge.net/p/webadmin/bugs/4415/
+	- DH key functions

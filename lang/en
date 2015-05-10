@@ -2536,6 +2536,8 @@ restore_phpmodsnone=.. no PHP modules needed to be installed
 restore_es3info=No backup file for $1 was found on S3.
 restore_phpbad=WARNING - The following scripts used PHP versions that are not available on this system :
 restore_phpbad2=$1 - $2 - Version $3
+restore_euid=UID $1 is already in use on this system
+restore_egid=GID $1 is already in use on this system
 
 restore_unixuser=Updating administration password and quotas ..
 restore_dirtar=Extracting TAR file of home directory ..
@@ -6671,7 +6673,6 @@ right_fusers=Mail/FTP users
 right_fusers2=FTP users
 right_fmailboxes=Mail/FTP users
 right_faliases=Mail aliases 
-right_fdbs=Databases
 right_quota=Disk usage and quota
 right_bw=Bandwith usage and limit
 right_of=$1 out of $2

@@ -1904,7 +1904,7 @@ foreach $d (@{$_[1]}) {
 	}
 
 # Lock user DB for UID re-allocation
-if ($_[3]->{'reuid'}) {
+if ($opts->{'reuid'}) {
 	&obtain_lock_unix($d);
 	}
 
@@ -1934,7 +1934,7 @@ if ($ok) {
 	foreach $d (grep { $_->{'missing'} } @$doms) {
 		$d = &get_domain(undef,
 			"$restoredir/$d->{'dom'}_virtualmin");
-		if ($_[3]->{'fix'}) {
+		if ($opts->{'fix'}) {
 			# We can just use the domains file from the
 			# backup and import it
 			&save_domain($d, 1);
@@ -2092,20 +2092,22 @@ if ($ok) {
 				$d->{'reseller'} = join(" ", @existing);
 				}
 
+			# Build maps of used UIDs and GIDs
+			local (%gtaken, %taken);
+			&build_group_taken(\%gtaken);
+			&build_taken(\%taken);
+
 			if ($parentdom) {
 				# UID and GID always come from parent
 				$d->{'uid'} = $parentdom->{'uid'};
 				$d->{'gid'} = $parentdom->{'gid'};
 				$d->{'ugid'} = $parentdom->{'ugid'};
 				}
-			elsif ($_[3]->{'reuid'}) {
+			elsif ($opts->{'reuid'}) {
 				# Re-allocate the UID and GID
 				local ($samegid) = ($d->{'gid'}==$d->{'ugid'});
-				local (%gtaken, %taken);
-				&build_group_taken(\%gtaken);
 				$d->{'gid'} = &allocate_gid(\%gtaken);
 				$d->{'ugid'} = $d->{'gid'};
-				&build_taken(\%taken);
 				$d->{'uid'} = &allocate_uid(\%taken);
                                 if (!$samegid) {
                                         # Old ugid was custom, so set from old
@@ -2115,6 +2117,26 @@ if ($ok) {
                                                 $d->{'ugid'} = $ginfo[2];
                                                 }
                                         }
+				}
+			else {
+				# UID and GID are the same - but check for a
+				# clash with existing users
+				if ($taken{$d->{'uid'}} &&
+				    $taken{$d->{'uid'}} ne 'old') {
+					&$second_print(&text('restore_euid',
+							     $d->{'uid'}));
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				if ($gtaken{$d->{'gid'}} &&
+				    $gtaken{$d->{'gid'}} ne 'old') {
+					&$second_print(&text('restore_egid',
+							     $d->{'gid'}));
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
 				}
 
 			# Set the home directory to match this system's base
@@ -2447,7 +2469,7 @@ if ($ok) {
 					if (-r $ffile) {
 						# Call the restore function
 						$fok = &$rfunc($d, $ffile,
-						     $_[3]->{$f}, $_[3], $hft,
+						     $opts->{$f}, $opts, $hft,
 						     \%oldd, $asowner, $key);
 						}
 					}
@@ -2459,7 +2481,7 @@ if ($ok) {
 					if (-r $ffile) {
 						$fok = &plugin_call($f,
 						    "feature_restore", $d,
-						    $ffile, $_[3]->{$f}, $_[3],
+						    $ffile, $opts->{$f}, $opts,
 						    $hft, \%oldd, $asowner);
 						}
 					}
@@ -2603,7 +2625,7 @@ foreach my $d (@$doms) {
 		}
 	}
 
-if ($_[3]->{'reuid'}) {
+if ($opts->{'reuid'}) {
 	&release_lock_unix($d);
 	}
 
