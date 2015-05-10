@@ -429,6 +429,7 @@ $domains_tests = [
 	# Verify the record
 	{ 'command' => 'dig TXT '.$test_domain,
 	  'grep' => 'spf',
+	  'sleep' => 5,
 	},
 
 	# Disable SPF again
@@ -440,6 +441,7 @@ $domains_tests = [
 	# Verify the record is gone
 	{ 'command' => 'dig TXT '.$test_domain,
 	  'antigrep' => 'spf',
+	  'sleep' => 5,
 	},
 
 	# Disable DMARC, then re-enable
@@ -455,6 +457,7 @@ $domains_tests = [
 	# Verify the record
 	{ 'command' => 'dig TXT _dmarc.'.$test_domain,
 	  'grep' => 'DMARC',
+	  'sleep' => 5,
 	},
 
 	# Disable DMARC again
@@ -466,6 +469,7 @@ $domains_tests = [
 	# Verify the record is gone
 	{ 'command' => 'dig TXT _dmarc.'.$test_domain,
 	  'antigrep' => 'DMARC',
+	  'sleep' => 5,
 	},
 
 	# Cleanup the domains
