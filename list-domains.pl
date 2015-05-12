@@ -105,6 +105,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--alias") {
 		$must_alias = 1;
+		if (@ARGV && $ARGV[0] !~ /^-/) {
+			$aliasof = shift(@ARGV);
+			}
 		}
 	elsif ($a eq "--no-alias") {
 		$must_noalias = 1;
@@ -117,6 +120,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--subdomain") {
 		$must_subdomain = 1;
+		}
+	elsif ($a eq "--parent") {
+		$parentof = shift(@ARGV);
 		}
 	elsif ($a eq "--plan") {
 		$planname = shift(@ARGV);
@@ -178,6 +184,17 @@ else {
 	# Showing all domains, with some limits
 	@doms = &list_domains();
 	}
+
+# Get alias/parent domains
+if ($aliasof) {
+	$aliasofdom = &get_domain_by("dom", $aliasof);
+	$aliasofdom || &usage("No alias target named $aliasof found");
+	}
+if ($parentof) {
+	$parentofdom = &get_domain_by("dom", $parentof);
+	$parentofdom || &usage("No parent named $parentof found");
+	}
+
 @doms = grep { $_->{'alias'} } @doms if ($must_alias);
 @doms = grep { !$_->{'alias'} } @doms if ($must_noalias);
 @doms = grep { $_->{'parent'} } @doms if ($must_subserver);
@@ -185,6 +202,12 @@ else {
 @doms = grep { $_->{'subdom'} } @doms if ($must_subdomain);
 @doms = sort { $a->{'user'} cmp $b->{'user'} ||
 	       $a->{'created'} <=> $b->{'created'} } @doms;
+if ($aliasofdom) {
+	@doms = grep { $_->{'alias'} eq $aliasofdom->{'id'} } @doms;
+	}
+if ($parentofdom) {
+	@doms = grep { $_->{'parent'} eq $parentofdom->{'id'} } @doms;
+	}
 
 # Limit to those with/without some feature
 if ($with) {
@@ -725,8 +748,9 @@ print "                        [--mail-user name]*\n";
 print "                        [--id number]*\n";
 print "                        [--with-feature feature]\n";
 print "                        [--without-feature feature]\n";
-print "                        [--alias | --no-alias]\n";
+print "                        [--alias [domain] | --no-alias]\n";
 print "                        [--subserver | --toplevel | --subdomain]\n";
+print "                        [--parent domain]\n";
 print "                        [--plan ID|name]\n";
 print "                        [--template ID|name]\n";
 print "                        [--disabled | --enabled]\n";
