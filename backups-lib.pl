@@ -779,9 +779,8 @@ DOMAIN: foreach $d (@$doms) {
 				&parse_backup_url($desturl);
 			local $starpass = "*" x length($pass);
 			local $err;
-			if ($mode == 0) {
+			if ($mode == 0 && $path ne $path0) {
 				# Copy to another local directory
-				next if ($path eq $path0);
 				&$first_print(&text('backup_copy',
 						    "<tt>$path/$df</tt>"));
 				local $ok;
@@ -815,6 +814,29 @@ DOMAIN: foreach $d (@$doms) {
 				else {
 					&$second_print($text{'setup_done'});
 					$err = undef;
+					}
+				}
+			elsif ($mode == 0 && $path eq $path0) {
+				# Just silently write out .info and .dom files
+				# for this directory
+				local $ok;
+				if ($asd) {
+					($ok, $err) = 
+					  &copy_source_dest_as_domain_user(
+					  $asd, $infotemp, "$path/$df.info")
+						if (!$err);
+					($ok, $err) = 
+					  &copy_source_dest_as_domain_user(
+					  $asd, $domtemp, "$path/$df.dom")
+						if (!$err);
+					}
+				else {
+					($ok, $err) = &copy_source_dest(
+					  $infotemp, "$path/$df.info")
+						if (!$err);
+					($ok, $err) = &copy_source_dest(
+					  $domtemp, "$path/$df.dom")
+						if (!$err);
 					}
 				}
 			elsif ($mode == 1) {
