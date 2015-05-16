@@ -341,12 +341,15 @@ if (!-d $d->{'home'}) {
 	return &text('validate_edir', "<tt>$d->{'home'}</tt>");
 	}
 local @st = stat($d->{'home'});
-if ($d->{'uid'} && $st[4] != $d->{'uid'}) {
+local $auser = &get_apache_user($d);
+local @ainfo = getpwnam($auser);
+if ($d->{'uid'} && $st[4] != $d->{'uid'} && $st[4] != $ainfo[2]) {
 	local $owner = getpwuid($st[4]);
 	return &text('validate_ediruser', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'user'})
 	}
-if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'}) {
+if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
+    $st[5] != $ainfo[3]) {
 	local $owner = getgrgid($st[5]);
 	return &text('validate_edirgroup', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'group'})
@@ -359,7 +362,7 @@ if (!$d->{'alias'}) {
 				     "<tt>$sd->[0]</tt>")
 			}
 		local @st = stat("$d->{'home'}/$sd->[0]");
-		if ($d->{'uid'} && $st[4] != $d->{'uid'}) {
+		if ($d->{'uid'} && $st[4] != $d->{'uid'} && $st[4] != $ainfo[2]) {
 			# UID is wrong
 			local $owner = getpwuid($st[4]);
 			return &text('validate_esubdiruser',
@@ -367,7 +370,7 @@ if (!$d->{'alias'}) {
 				     $owner, $d->{'user'})
 			}
 		if ($d->{'gid'} && $st[5] != $d->{'gid'} &&
-				   $st[5] != $d->{'ugid'}) {
+		    $st[5] != $d->{'ugid'} && $st[5] != $ainfo[3]) {
 			# GID is wrong
 			local $owner = getgrgid($st[5]);
 			return &text('validate_esubdirgroup',
