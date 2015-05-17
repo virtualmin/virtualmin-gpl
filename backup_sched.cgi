@@ -169,6 +169,7 @@ else {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
 	$sched->{'enabled'} = $in{'enabled'};
+	$sched->{'kill'} = $in{'kill'};
 	if (&can_backup_commands()) {
 		$sched->{'before'} = $in{'before_def'} ? undef : $in{'before'};
 		$sched->{'after'} = $in{'after_def'} ? undef : $in{'after'};

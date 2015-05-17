@@ -66,6 +66,11 @@ On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to encrypt this backup with.
 Keys can be found using the C<list-backup-keys> API call.
 
+By default, only one backup to the same destination can be running at the
+same time - the second backup will immediately fail. You can invert this
+behavior with the C<--kill-running> flag, which terminates the first backup
+and allows this one to continue.
+
 =cut
 
 package virtual_server;
@@ -208,6 +213,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--kill-running") {
+		$kill = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -337,7 +345,8 @@ $opts{'dir'}->{'exclude'} = join("\t", @exclude);
 				undef,
 				$increment,
 				0,
-				$key);
+				$key,
+				$kill);
 if ($ok && !@$errdoms) {
 	&$second_print("Backup completed successfully. Final size was ".
 		       &nice_size($size));
@@ -404,6 +413,7 @@ print "                         [--purge days]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
+print "                         [--kill-running]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

@@ -217,14 +217,14 @@ if (@jobs) {
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func, incremental, on-schedule, &key)
+#		 &callback-func, incremental, on-schedule, &key, kill-running)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
 sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key, $kill) = @_;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
@@ -570,8 +570,18 @@ foreach my $desturl (@$desturls) {
 	if (&test_lock($lockfile)) {
 		local $lpid = &read_file_contents($lockfile.".lock");
 		chomp($lpid);
-		&$second_print(&text('backup_esamelock', $lpid));
-		return (0, 0, $doms);
+		if ($kill && $lpid && $lpid != $$) {
+			&kill_logged('TERM', $lpid);
+			sleep(2);
+			if (&test_lock($lockfile)) {
+				&kill_logged('KILL', $lpid);
+				}
+			&$second_print(&text('backup_ekilllock', $lpid));
+			}
+		else {
+			&$second_print(&text('backup_esamelock', $lpid));
+			return (0, 0, $doms);
+			}
 		}
 	&lock_file($lockfile);
 	push(@lockfiles, $lockfile);

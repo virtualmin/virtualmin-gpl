@@ -148,7 +148,8 @@ eval {
 					\&backup_cbfunc,
 					$sched->{'increment'},
 					1,
-					$key);
+					$key,
+					$sched->{'kill'});
 	};
 if ($@) {
 	# Perl error during backup!

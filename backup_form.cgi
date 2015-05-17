@@ -300,6 +300,12 @@ if ($in{'sched'} || $in{'new'}) {
 					    $sched->{'email_doms'}) : "")
 			    );
 
+	# Action on lock conflict
+	print &ui_table_row(&hlink($text{'backup_kill'}, "backup_kill"),
+		&ui_radio("kill", $sched->{'kill'} ? 1 : 0,
+			  [ [ 0, $text{'backup_kill0'} ],
+			    [ 1, $text{'backup_kill1'} ] ]));
+
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_when'}, "backup_when"),
 		&virtualmin_ui_show_cron_time("enabled", $sched->{'enabled'} ? $sched : undef, $text{'backup_disabled'}));
