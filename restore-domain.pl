@@ -291,7 +291,7 @@ if (@rdoms || $all_doms) {
 	@rfeats || $fix || usage("No features to restore specified");
 	}
 ($mode, $serr) = &parse_backup_url($src);
-$mode > 0 || -r $src || -d $src || &usage("Missing or invalid restore file");
+$mode > 0 || -r $src || -d $src || &usage("Restore file $src does not exist");
 $mode < 0 && &usage("Invalid backup source : $serr");
 $onlymissing && $onlyexisting && &usage("The --only-missing and --only-existing flags are mutually exclusive");
 
