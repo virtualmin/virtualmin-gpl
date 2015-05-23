@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.1, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.37, ownCloud to 8.0.3, Coppermine to 1.5.36, Node.JS to 0.12.3, ZenPhoto to 1.4.8, Ghost to 0.6.4, and phpMyAdmin to 4.4.7 and 4.0.10.10.
+html=Updated the Dolibarr script installer to version 3.7.0, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.1, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.37, ownCloud to 8.0.3, Coppermine to 1.5.36, Node.JS to 0.12.3, ZenPhoto to 1.4.8, Ghost to 0.6.4, X2CRM to 5.0.7, and phpMyAdmin to 4.4.7 and 4.0.10.10.
 master=1
 reseller=1
 domain=1
