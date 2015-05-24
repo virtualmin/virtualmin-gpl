@@ -47,10 +47,12 @@ print &ui_table_row($text{'edit_created'},
 # Owner
 print &ui_table_row($text{'edit_user'}, "<tt>$d->{'user'}</tt>",
 		    undef, \@tds);
-print &ui_table_row($text{'edit_group'},
+if (!$d->{'parent'}) {
+	print &ui_table_row($text{'edit_group'},
 		    $d->{'unix'} && $d->{'group'} ? "<tt>$d->{'group'}</tt>"
 						  : $text{'edit_nogroup'},
 		    undef, \@tds);
+	}
 
 # Show user and group quotas
 if (&has_home_quotas() && !$parentdom) {
