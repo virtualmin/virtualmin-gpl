@@ -3802,6 +3802,14 @@ if (-r "$_[1]_control" && &foreign_check("dovecot") &&
 		else {
 			&$second_print($text{'setup_done'});
 			}
+
+		# Fix up control file permissions for users in this domain
+		foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
+			next if ($_[2]->{'mailuser'} &&
+				 $_[2]->{'mailuser'} ne $u->{'user'});
+			&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
+			       quotemeta("$control/$u->{'user'}"));
+			}
 		}
 	}
 
