@@ -31,7 +31,7 @@ if ($in{'bg'}) {
 		&$second_print($text{'backup_started2'});
 		}
 
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer("list_sched.cgi", $text{'sched_return'});
 	exit;
 	}
 
@@ -280,7 +280,7 @@ else {
 			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
 		}
 
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer("list_sched.cgi", $text{'sched_return'});
 	}
 
 # Flag backup as done
