@@ -345,7 +345,8 @@ sub script_roundcube_check_latest
 local ($ver) = @_;
 return undef if ($ver < 0.9);
 local @vers = &osdn_package_versions("roundcubemail", "roundcubemail-([a-z0-9\\.\\-]+)\\.tar\\.gz");
-@vers = grep { !/beta/ && !/-dep$/ && !/alpha/ && !/-rc/ } @vers;
+@vers = grep { !/beta/ && !/-dep$/ && !/alpha/ && !/-rc/ && !/mailvelope/ }
+	     @vers;
 return "Failed to find versions" if (!@vers);
 return $ver eq $vers[0] ? undef : $vers[0];
 }
