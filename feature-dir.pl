@@ -823,17 +823,21 @@ foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 my @subhomes;
 if (!$d->{'parent'}) {
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-		push(@subhomes, " | grep -v ".quotemeta("$sd->{'home'}/$hd/"));
+		push(@subhomes, "$sd->{'home'}/$hd/");
 		}
 	}
-&system_logged("find ".quotemeta($d->{'home'})." ! -type l ".
-	       " | grep -v ".quotemeta("$d->{'home'}/$hd/").
-	       " | grep -v .nodelete".
-	       join("", @subhomes).
-	       " | sed -e 's/^/\"/' | sed -e 's/\$/\"/' ".
-	       " | xargs chown $d->{'uid'}:$gid");
-&system_logged("chown $d->{'uid'}:$gid ".
-	       quotemeta($d->{'home'})."/".$config{'homes_dir'});
+&open_execute_command(FIND, "find ".quotemeta($d->{'home'})." ! -type l", 1);
+LOOP: while(my $f = <FIND>) {
+	$f =~ s/\r|\n//;
+	next LOOP if ($f =~ /\/\.nodelete$/);
+	next LOOP if ($f =~ /^\Q$d->{'home'}\/$hd\/\E/);
+	foreach my $s (@subhomes) {
+		next LOOP if ($f =~ /^\Q$s\E/);
+		}
+	&set_ownership_permissions($d->{'uid'}, $gid, undef, $f);
+	}
+close(FIND);
+&set_ownership_permissions($d->{'uid'}, $gid, undef, $d->{'home'}."/".$hd);
 foreach my $dir (&virtual_server_directories($d)) {
 	&set_ownership_permissions(undef, undef, oct($dir->[1]),
 				   $d->{'home'}."/".$dir->[0]);
