@@ -332,7 +332,7 @@ if ($d->{'alias_mode'}) {
 			return 0;
 			}
 		local @sa = &apache::find_directive("ServerAlias", $pconf);
-		@sa = grep { !/\Q$d->{'dom'}\E$/ } @sa;
+		@sa = grep { !/(^|\.)\Q$d->{'dom'}\E$/ } @sa;
 		&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 		&flush_file_lines($pvirt->{'file'});
 		}
