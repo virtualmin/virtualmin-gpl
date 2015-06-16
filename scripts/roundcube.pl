@@ -50,7 +50,7 @@ return ( 5 );
 
 sub script_roundcube_release
 {
-return 2;	# For PHP 5.3.7 version check
+return 3;	# For folders path fix
 }
 
 sub script_roundcube_depends
@@ -207,6 +207,19 @@ if (!$upgrade) {
 		&flush_file_lines_as_domain_user($d, $dbcfile);
 		}
 
+	# Figure out folder names
+	local %fmap;
+	$fmap{'drafts'} = $config{'drafts_folder'} || 'drafts';
+	$fmap{'sent'} = $config{'sent_folder'} || 'sent';
+	$fmap{'trash'} = $config{'trash_folder'} || 'sent';
+	local ($sdmode, $sdpath) = &get_domain_spam_delivery($d);
+	if (($sdmode == 6 || $sdmode == 4) && $sdpath) {
+		$fmap{'junk'} = $sdpath;
+		}
+	elsif ($sdmode == 1 && $sdpath =~ /^Maildir\/\.?(\S+)\/$/) {
+		$fmap{'junk'} = $1;
+		}
+
 	# Fix up the main config file
 	local $mcfileorig = "$opts->{'dir'}/config/main.inc.php.dist";
 	local $mcfile = "$opts->{'dir'}/config/main.inc.php";
@@ -257,6 +270,10 @@ if (!$upgrade) {
 			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
 			     &php_quotemeta($dbpass, 1)."\@$dbhost/$dbname';";
 			}
+		if ($l =~ /^\$(rcmail_config|config)\['(\S+)_mbox'\]\s+=/ &&
+		    $fmap{$2} && $fmap{$2} ne "*") {
+                        $l = "\$${1}['${2}_mbox'] = '$fmap{$2}';";
+                        }
 		}
 	if (!$added_vuf && $vuf) {
 		# Need to add virtuser_file directive, as no default exists
