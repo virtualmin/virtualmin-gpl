@@ -44,6 +44,7 @@ print &ui_table_row($text{'cert_incert'}, "<tt>$d->{'ssl_cert'}</tt>", 3);
 print &ui_table_row($text{'cert_inkey'}, "<tt>$d->{'ssl_key'}</tt>", 3);
 
 $info = &cert_info($d);
+$chain = &get_website_ssl_file($d, 'ca');
 foreach $i (@cert_attributes) {
 	next if ($i eq 'modulus' || $i eq 'exponent');
 	$v = $info->{$i};
@@ -310,7 +311,6 @@ print &ui_tabs_end_tab();
 ##########################
 
 # CA certificate form
-$chain = &get_website_ssl_file($d, 'ca');
 print &ui_tabs_start_tab("mode", "chain");
 print "$text{'cert_desc5'}<p>\n";
 print "$text{'cert_desc5a'}<p>\n";
