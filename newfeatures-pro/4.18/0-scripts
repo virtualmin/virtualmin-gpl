@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Dolibarr script installer to version 3.7.1, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.1, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.38 and 6.36, ownCloud to 8.0.3, Coppermine to 1.5.36, Node.JS to 0.12.4, ZenPhoto to 1.4.8, Ghost to 0.6.4, X2CRM to 5.0.7, TikiWiki to 12.4 and 14.0, OpenCart to 2.0.3.1, MediaWiki to 1.25.1, Revive Adserver to 3.2.1, Roundcube to 1.1.2, Moodle to 2.9, phpMyFAQ 2.8.23, and phpMyAdmin to 4.4.10 and 4.0.10.10.
+html=Updated the Dolibarr script installer to version 3.7.1, Wordpress to 4.2.2, SMF to 2.0.10, Revive Adserver to 3.2.0, Piwik to 2.13.1, Ghost to 0.6.2, Pydio to 6.0.7, Drupal to 7.38 and 6.36, ownCloud to 8.0.3, Coppermine to 1.5.36, Node.JS to 0.12.4, ZenPhoto to 1.4.8, Ghost to 0.6.4, X2CRM to 5.0.7, TikiWiki to 12.4 and 14.0, OpenCart to 2.0.3.1, MediaWiki to 1.25.1, Revive Adserver to 3.2.1, Roundcube to 1.1.2, Moodle to 2.9, phpMyFAQ 2.8.23, SugarCRM to 6.5.21, and phpMyAdmin to 4.4.10 and 4.0.10.10.
 master=1
 reseller=1
 domain=1
