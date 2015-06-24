@@ -62,6 +62,7 @@ if (@logs) {
 		# Add the new section
 		local $lconf = { 'file' => &logrotate::get_add_file($_[0]->{'dom'}),
 				 'name' => \@logs };
+		local $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
 			# Use automatic configurtation
 			local $script = &get_postrotate_script($_[0]);
@@ -93,6 +94,10 @@ if (@logs) {
 			}
 		&logrotate::save_directive($parent, undef, $lconf);
 		&flush_file_lines($lconf->{'file'});
+		if ($newfile) {
+			&set_ownership_permissions(undef, undef, 0644,
+						   $lconf->{'file'});
+			}
 		}
 	else {
 		# Add to existing section
