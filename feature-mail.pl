@@ -4370,7 +4370,7 @@ if (&foreign_installed("syslog")) {
 		foreach my $s (@{$c->{'sel'}}) {
 			local ($fac,$level) = split(/\./, $s);
 			return $c->{'file'} if ($fac =~ /mail/ &&
-						$level ne "none");
+						$level !~ /none|error/);
 			}
 		}
 	}
