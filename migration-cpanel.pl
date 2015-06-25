@@ -238,15 +238,16 @@ if (-r "$homesrc/tmp/awstats/awstats.$dom.conf") {
 	push(@got, "virtualmin-awstats");
 	}
 
-local $dbuser = $origuser || $user;
 if (-s "$userdir/mysql.sql" && !$waschild) {
 	# Check for mysql
 	local $mycount = 0;
 	local $mydir = "$userdir/mysql";
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
-		if ($myf =~ /^(\Q$dbuser\E_\S*).sql$/ ||
-		    $myf eq "$dbuser.sql") {
+		if ($myf =~ /^(\Q$user\E_\S*).sql$/ ||
+		    $myf =~ /^(\Q$origuser\E_\S*).sql$/ ||
+		    $myf eq "$user.sql" ||
+		    $myf eq "$origuser.sql") {
 			$mycount++;
 			}
 		}
@@ -836,8 +837,10 @@ if ($got{'mysql'}) {
 	local $mydir = "$userdir/mysql";
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
-		if ($myf =~ /^(\Q$dbuser\E_\S*).sql$/ ||
-		    $myf =~ /^(\Q$dbuser\E).sql$/) {
+		if ($myf =~ /^(\Q$user\E_\S*).sql$/ ||
+		    $myf =~ /^(\Q$origuser\E_\S*).sql$/ ||
+		    $myf =~ /^(\Q$user\E).sql$/ ||
+		    $myf =~ /^(\Q$origuser\E).sql$/) {
 			local $db = $1;
 			&$indent_print();
 			&create_mysql_database(\%dom, $db);
