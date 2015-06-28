@@ -19,9 +19,13 @@ if ($config{'mem_cmd'}) {
 if (&foreign_check("security-updates")) {
 	&foreign_require("security-updates", "security-updates-lib.pl");
 	local @poss = &security_updates::list_possible_updates(2);
+	local %doneposs;
+	@poss = grep { !$doneposs{$_->{'name'},$_->{'version'}}++ } @poss;
 	$info->{'poss'} = \@poss;
 	if (!$config{'collect_noall'}) {
 		local @allposs = &security_updates::list_possible_updates(2, 1);
+		local %doneposs;
+		@allposs = grep { !$doneposs{$_->{'name'},$_->{'version'}}++ } @allposs;
 		$info->{'allposs'} = \@allposs;
 		}
 	}
