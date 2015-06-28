@@ -323,6 +323,8 @@ if ($certificate && $certificate->{'pub_key'}->{'src'} &&
 	}
 
 # Move the domain owner's mailbox (if needed) and cron jobs
+&foreign_require("mailboxes");
+$mailboxes::no_permanent_index = 1;
 if (!$parent) {
 	local $srcfolder = { 'file' => $dom{'home'}.'/Maildir', 'type' => 1 };
 	local $duser = &get_domain_owner(\%dom);

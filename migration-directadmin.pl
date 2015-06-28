@@ -373,7 +373,8 @@ if ($got{'dns'} && -r $dnsfile) {
 local (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
+$mailboxes::no_permanent_index = 1;
 local %usermap;
 if ($got{'mail'}) {
 	# Migrate mail users

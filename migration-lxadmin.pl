@@ -287,7 +287,8 @@ else {
 &obtain_lock_mail(\%dom);
 local (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
+$mailboxes::no_permanent_index = 1;
 
 # Restore mailboxes
 &$first_print("Re-creating mailbox users ..");

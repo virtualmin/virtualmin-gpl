@@ -381,7 +381,8 @@ local (%taken, %utaken);
 &build_taken(\%taken, \%utaken);
 
 # Migrate mail users (if there are any)
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
+$mailboxes::no_permanent_index = 1;
 local $usercount = 0;
 local $userident = $manifest->{'userIdent'};
 if ($userident->{$origuser}) {

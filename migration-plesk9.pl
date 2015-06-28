@@ -495,7 +495,8 @@ local (%taken, %utaken);
 
 # Re-create mail users and copy mail files
 &$first_print("Re-creating mail users ..");
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
+$mailboxes::no_permanent_index = 1;
 local $mcount = 0;
 # Linux mailboxes
 foreach my $name (keys %$mailusers) {
