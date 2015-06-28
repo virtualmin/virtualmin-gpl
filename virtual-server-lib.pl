@@ -96,7 +96,6 @@ foreach my $fname (@features, "virt", "virt6") {
 $backup_cron_cmd = "$module_config_directory/backup.pl";
 $bw_cron_cmd = "$module_config_directory/bw.pl";
 $licence_cmd = "$module_config_directory/licence.pl";
-$licence_status = "$module_config_directory/licence-status";
 $quotas_cron_cmd = "$module_config_directory/quotas.pl";
 $spamclear_cmd = "$module_config_directory/spamclear.pl";
 $dynip_cron_cmd = "$module_config_directory/dynip.pl";
@@ -118,17 +117,19 @@ $validate_cron_cmd = "$module_config_directory/validate.pl";
 		       $scriptlatest_cron_cmd, $spamtrap_cron_cmd,
 		       $validate_cron_cmd, );
 
+$licence_status = &cache_file_path("licence-status");
+
 $custom_fields_file = "$module_config_directory/custom-fields";
 $custom_links_file = "$module_config_directory/custom-links";
 $custom_link_categories_file = "$module_config_directory/custom-link-cats";
 $custom_shells_file = "$module_config_directory/custom-shells";
 
-@scripts_directories = ( "$module_config_directory/scripts",
-			 "$module_config_directory/latest-scripts",
+@scripts_directories = ( &cache_file_path("scripts"),
+			 &cache_file_path("latest-scripts"),
 			 "$module_root_directory/scripts",
 		       );
-$script_log_directory = "$module_config_directory/scriptlog";
-$scripts_unavail_file = "$module_config_directory/scriptsunavail";
+$script_log_directory = &cache_file_path("scriptlog");
+$scripts_unavail_file = &cache_file_path("scriptsunavail");
 
 @styles_directories = ( "$module_config_directory/styles",
 			"$module_root_directory/styles",
@@ -152,7 +153,7 @@ $reseller_group_name = "resellers";
 
 $initial_users_dir = "$module_config_directory/initial";
 
-$saved_aliases_dir = "$module_config_directory/saved-aliases";
+$saved_aliases_dir = &cache_file_path("saved-aliases");
 
 @edit_limits = ('domain', 'users', 'aliases', 'dbs', 'scripts',
 	        'ip', 'dnsip', 'ssl', 'forward', 'redirect', 'admins',
@@ -178,9 +179,9 @@ if ($virtualmin_pro) {
 	push(@limit_types, "mongrelslimit");
 	}
 
-$bandwidth_dir = "$module_config_directory/bandwidth";
-$plainpass_dir = "$module_config_directory/plainpass";
-$hashpass_dir = "$module_config_directory/hashpass";
+$bandwidth_dir = &cache_file_path("bandwidth");
+$plainpass_dir = &cache_file_path("plainpass");
+$hashpass_dir = &cache_file_path("hashpass");
 $nospam_dir = "$module_config_directory/nospam";
 @hashpass_types = ( 'md5', 'crypt', 'unix', 'mysql', 'digest' );
 
@@ -212,8 +213,8 @@ $ftp_upload_tries = $config{'upload_tries'} || 3;
 
 $denied_ssh_group = "deniedssh";
 
-$script_ratings_dir = "$module_config_directory/ratings";
-$script_ratings_overall = "$module_config_directory/overall-ratings";
+$script_ratings_dir = &cache_file_path("ratings");
+$script_ratings_overall = &cache_file_path("overall-ratings");
 $script_ratings_host = "software.virtualmin.com";
 $script_ratings_port = 80;
 $script_ratings_page = "/cgi-bin/sendratings.cgi";
@@ -221,7 +222,7 @@ $script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
 $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;
 $script_download_dir = "/";
-$script_warnings_file = "$module_config_directory/script-warnings-sent";
+$script_warnings_file = &cache_file_path("script-warnings-sent");
 $osdn_website_host = "sourceforge.net";
 $osdn_website_port = 80;
 
@@ -252,8 +253,8 @@ $resolve_check_page = "/cgi-bin/resolve.cgi";
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
 
-$collected_info_file = "$module_config_directory/collected";
-$historic_info_dir = "$module_config_directory/history";
+$collected_info_file = &cache_file_path("collected");
+$historic_info_dir = &cache_file_path("history");
 @historic_graph_colors = ( '#393939', '#c01627', '#27c016', '#167cc0',
 			   '#e6d42d', '#5a16c0', '#16c0af' );
 
@@ -262,13 +263,13 @@ $procmail_log_cmd = "$module_config_directory/procmail-logger.pl";
 $procmail_log_cache = "$ENV{'WEBMIN_VAR'}/procmail.cache";
 $procmail_log_times = "$ENV{'WEBMIN_VAR'}/procmail.times";
 
-$mail_login_file = "$module_config_directory/mailbox-logins";
+$mail_login_file = &cache_file_path("mailbox-logins");
 
 @newfeatures_dirs = ( "$module_root_directory/newfeatures-all",
 		      $virtualmin_pro ? "$module_root_directory/newfeatures-pro"
 				      : "$module_root_directory/newfeatures-gpl" );
-$newfeatures_seen_dir = "$module_config_directory/seenfeatures";
-$install_times_file = "$module_config_directory/installtimes";
+$newfeatures_seen_dir = &cache_file_path("seenfeatures");
+$install_times_file = &cache_file_path("installtimes");
 
 $disabled_website = "$module_config_directory/disabled.html";
 $disabled_website_dir = "$module_config_directory/disabledweb";
@@ -277,17 +278,17 @@ $linux_limits_config = "/etc/security/limits.conf";
 
 $scheduled_backups_dir = "$module_config_directory/backups";
 
-$backup_locks_dir = "$module_config_directory/backuplocks";
+$backup_locks_dir = &cache_file_path("backuplocks");
 
-$backup_maxes_file = "$module_config_directory/backupsrunning";
+$backup_maxes_file = &cache_file_path("backupsrunning");
 
 $backup_keys_dir = "$module_config_directory/bkeys";
 
-$incremental_backups_dir = "$module_config_directory/incremental";
+$incremental_backups_dir = &cache_file_path("incremental");
 
-$backups_log_dir = "$module_config_directory/backuplogs";
+$backups_log_dir = &cache_file_path("backuplogs");
 
-$backups_running_dir = "$module_config_directory/backuprunnings";
+$backups_running_dir = &cache_file_path("backuprunnings");
 
 $global_template_variables_file = "$module_config_directory/globals";
 
@@ -307,14 +308,14 @@ $user_quota_msg_file = "$module_config_directory/quotas-template";
 
 @automatic_dns_records = ( "@", "www", "ftp", "localhost", "m");
 
-$links_cache_dir = "$module_config_directory/links-cache";
+$links_cache_dir = &cache_file_path("links-cache");
 
 $cloudmin_provisioning_server = "provisioning.virtualmin.com";
 $cloudmin_provisioning_port = 10000;
 $cloudmin_provisioning_ssl = 1;
 
-$old_uids_file = "$module_config_directory/old-uids";
-$old_gids_file = "$module_config_directory/old-gids";
+$old_uids_file = &cache_file_path("old-uids");
+$old_gids_file = &cache_file_path("old-gids");
 
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
@@ -329,6 +330,18 @@ foreach my $pname (@confplugins) {
 		push(@plugins, $pname);
 		}
 	}
+}
+
+# cache_file_path(name)
+# Returns a path in the /var directory unless the file already exists under
+# /etc/webmin
+sub cache_file_path
+{
+my ($name) = @_;
+if (-e "$module_config_directory/$name" || !$module_var_directory) {
+	return "$module_config_directory/$name";
+	}
+return "$module_var_directory/$name";
 }
 
 1;
