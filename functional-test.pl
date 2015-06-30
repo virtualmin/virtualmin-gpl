@@ -2126,6 +2126,11 @@ $backup_tests = [
 	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
 	},
 
+	# Create a file that should get removed by the restore
+	{ 'command' => 'su -s /bin/sh '.$test_domain_user.
+		       ' -c "touch ~/public_html/kill.txt"',
+	},
+
 	# Restore with the domain still in place
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2133,7 +2138,13 @@ $backup_tests = [
 		      [ 'domain', $test_parallel_domain1 ],
 		      [ 'domain', $test_parallel_domain2 ],
 		      [ 'all-features' ],
+		      [ 'option', 'dir delete 1' ],
 		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Make sure the file that didn't exist before the backup was removed
+	{ 'command' => 'ls ~'.$test_domain_user.'/public_html/kill.txt',
+	  'fail' => 1,
 	},
 
 	# Test that everything still works
