@@ -1936,7 +1936,8 @@ if ($file) {
 			}
 		}
 
-	# Make sure any SPF record contains this system's default IP
+	# Make sure any SPF record contains this system's default IP v4 and
+	# v6 addresses
 	local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
 						    : ( "SPF" );
 	foreach my $t (@types) {
@@ -1944,9 +1945,18 @@ if ($file) {
 				    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
 		next if (!$r);
 		local $spf = &bind8::parse_spf(@{$r->{'values'}});
+		local $changed = 0;
 		local $defip = &get_default_ip();
 		if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
 			push(@{$spf->{'ip4'}}, $defip);
+			$changed++;
+			}
+		local $defip6 = &get_default_ip6();
+		if (&indexof($defip6, @{$spf->{'ip6'}}) < 0) {
+			push(@{$spf->{'ip6'}}, $defip6);
+			$changed++;
+			}
+		if ($changed) {
 			local $str = &bind8::join_spf($spf);
 			&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
 					      $r->{'ttl'}, $r->{'class'},
