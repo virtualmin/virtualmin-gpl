@@ -750,7 +750,6 @@ else {
 		}
 
 	# For a non-incremental restore, delete files that weren't in the backup
-	# XXX make optional
 	if (!$wasincr && $cf != 4 && $opts->{'delete'}) {
 		# Parse tar output to find files that were restored
 		my %restored;
@@ -771,10 +770,16 @@ else {
 			push(@existing, $l);
 			}
 
-		# Add standard dirs to exclude list
+		# Add standard dirs to exclude list (exclude public_html and
+		# cgi-bin)
+		my $phd = &public_html_dir($d, 1);
+		my $cgd = &cgi_bin_dir($d, 1);
 		foreach my $dir (&virtual_server_directories($d)) {
+			next if ($dir->[0] eq $phd || $dir->[0] eq $cgd);
 			push(@exc, $dir->[0]);
 			}
+
+		# Exclude other transient dirs
 		push(@exc, ".backup.lock");
 		push(@exc, "virtualmin-backup");
 		push(@exc, "logs");	# Some backups don't include logs
