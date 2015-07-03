@@ -2160,7 +2160,9 @@ else {
 			foreach my $u (&list_mysql_database_users(
 					$d, $db->{'name'})) {
 				# Re-populate db table for this db and user
-				next if ($u->[0] eq $user);
+				next if ($u->[0] eq $user ||
+					 $u->[0] eq 'root' ||
+					 $u->[0] eq $mysql::config{'login'});
 				&mysql::execute_sql_logged($mysql::master_db,
 					"delete from db where user = ? and ".
 					"db = ?", $u->[0], $db->{'name'});
