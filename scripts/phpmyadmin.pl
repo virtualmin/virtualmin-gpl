@@ -48,7 +48,7 @@ return &compare_versions($ver, "4.3") >= 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 5;		# To fix MySQL version issue yet again
+return 6;		# To fix download URLs
 }
 
 sub script_phpmyadmin_category
@@ -193,6 +193,7 @@ return undef;
 sub script_phpmyadmin_files
 {
 local ($d, $ver, $opts, $upgrade) = @_;
+local $origver = $ver;
 if (&compare_versions($ver, 2.2) < 0) {
 	$ver = $ver."-php";
 	}
@@ -209,7 +210,7 @@ elsif (&compare_versions($ver, "2.10.0") >= 0) {
 	}
 local @files = ( { 'name' => "source",
 	   'file' => "phpMyAdmin-$ver.zip",
-	   'url' => "http://osdn.dl.sourceforge.net/sourceforge/phpmyadmin/phpMyAdmin-$ver.zip" } );
+	   'url' => "https://files.phpmyadmin.net/phpMyAdmin/$origver/phpMyAdmin-$ver.zip" } );
 return @files;
 }
 
