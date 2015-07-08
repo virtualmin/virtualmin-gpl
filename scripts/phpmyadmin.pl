@@ -360,7 +360,7 @@ elsif (&compare_versions($ver, "4.0") > 0) {
 		 "phpMyAdmin-(4\\.[01]\\.[0-9\\.]+)-all-languages\\.zip" );
 	}
 elsif (&compare_versions($ver, "3.0") > 0) {
-	return ( "https://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/",
+	return ( "https://www.phpmyadmin.net/files/",
 		 "(3\\.5\\.[0-9]+\\.[0-9\\.]+)" );
 	}
 else {
