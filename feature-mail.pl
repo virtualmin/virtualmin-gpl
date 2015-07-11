@@ -1013,7 +1013,8 @@ if ($config{'mail_autoconfig'} &&
 
 # Update any outgoing IP mapping
 if (($_[0]->{'dom'} ne $_[1]->{'dom'} ||
-     $_[0]->{'ip'} ne $_[1]->{'ip'}) && $supports_dependent) {
+     $_[0]->{'ip'} ne $_[1]->{'ip'} ||
+     $_[0]->{'ip6'} ne $_[1]->{'ip6'}) && $supports_dependent) {
 	local $old_dependent = &get_domain_dependent($_[1]);
 	if ($old_dependent) {
 		&save_domain_dependent($_[1], 0);
