@@ -1166,7 +1166,7 @@ else {
 	my $klref = &read_file_lines($conf->{'KeyTable'});
 	if (!@$klref) {
 		# Add entry for the default key
-		push(@$klref, "default\t*:$dkim->{'selector'}:".
+		push(@$klref, "default\t%:$dkim->{'selector'}:".
 			      $dkim->{'keyfile'});
 		}
 	$i = 0;
