@@ -19,7 +19,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 sub script_django_versions
 {
 # XXX doesn't seem to work with 1.8.2 (500 error)
-return ( "1.7.7", "1.4.20" );
+return ( "1.7.7", "1.4.21" );
 }
 
 sub script_django_release
