@@ -27,7 +27,7 @@ $in{'body'} =~ /\S/ || &error($text{'newnotify_ebody'});
 # Construct and send the email
 &send_notify_email($in{'from'}, \@users, $d, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
-		   $in{"attach_content_type"});
+		   $in{"attach_content_type"}, undef, 0, &get_charset());
 
 # Tell the user
 &ui_print_header(&domain_in($d), $text{'mailusers_title'}, "");

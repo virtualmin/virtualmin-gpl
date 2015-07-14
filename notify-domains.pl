@@ -19,7 +19,8 @@ that do not have some feature enabled.
 
 The message contents are typically read from a file, specified with the 
 C<--body-file> parameter. Or they can be passed as input to the script if
-the C<--body-stdin> flag is used.
+the C<--body-stdin> flag is used. You can set a custom character set for the
+message body with the optional C<--charset> flag.
 
 The email subject line must be set with the C<--subject> flag. The from address
 defaults to whatever you have configured globally in Virutalmin, but can be
@@ -76,6 +77,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--body-stdin") {
 		$bodystdin = 1;
+		}
+	elsif ($a eq "--charset") {
+		$charset = shift(@ARGV);
 		}
 	elsif ($a eq "--admins") {
 		$admins = 1;
@@ -137,7 +141,8 @@ if ($admins) {
 @to = &unique(@to);
 
 # Send the mail
-&send_notify_email($from, \@doms, undef, $subject, $body);
+&send_notify_email($from, \@doms, undef, $subject, $body, undef, undef, undef,
+		   undef, undef, $charset);
 
 # Tell the user
 print "Sent email from $from to the following addresses ..\n";
@@ -157,8 +162,9 @@ print "virtualmin notify-domains [--domain name]\n";
 print "                          [--user login]\n";
 print "                          [--with-feature code]\n";
 print "                          [--without-feature code]\n";
-print "                          --body-file /path/to/file.txt | --body-stdin\n";
-print "                          --subject \"subject line\"\n";
+print "                           --body-file /path/to/file.txt | --body-stdin\n";
+print "                          [--charset cs]\n";
+print "                           --subject \"subject line\"\n";
 print "                          [--from user\@domain]\n";
 print "                          [--admins]\n";
 exit(1);

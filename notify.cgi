@@ -47,7 +47,7 @@ if ($in{'users'}) {
 &send_notify_email($in{'from'}, \@objs, undef, $in{'subject'}, $in{'body'},
 		   $in{'attach'}, $in{"attach_filename"},
 		   $in{"attach_content_type"}, $in{'admins'},
-		   !$in{'nomany'});
+		   !$in{'nomany'}, &get_charset());
 
 # Tell the user
 &ui_print_header(undef, $text{'newnotify_title'}, "");
