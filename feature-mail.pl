@@ -6372,6 +6372,47 @@ return <<'EOF';
 EOF
 }
 
+# list_cloud_mail_providers()
+# Returns a list of Cloud mail filtering providers that can be used via a
+# set of custom MX records
+sub list_cloud_mail_providers
+{
+return ( { 'name' => 'MailShark',
+	   'url' => 'http://www.mailshark.com.au/',
+	   'mx' => [ 'mx1.mailshark.com' ],
+	 },
+        );
+}
+
+# get_domain_cloud_mail_provider(&domain)
+# Returns the configured provider for some domain
+sub get_domain_cloud_mail_provider
+{
+local ($d) = @_;
+&require_dns();
+local @recs = &get_domain_dns_records($d);
+local %mxmap;
+foreach my $prov (&list_cloud_mail_providers()) {
+	foreach my $mx (@{$prov->{'mx'}}) {
+		$mxmap{$mx."."} = $prov;
+		}
+	}
+foreach my $r (@recs) {
+	if ($r->{'type'} eq 'MX') {
+		my $prov = $mxmap{$r->{'values'}->[1]};
+		return $prov if ($prov);
+		}
+	}
+return undef;
+}
+
+# save_domain_cloud_mail_provider(&domain, [&provider])
+# Updates the provider MX records for some domain, or clears it
+sub save_domain_cloud_mail_provider
+{
+local ($d, $prov) = @_;
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
