@@ -894,7 +894,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 		$oldrbcc = &get_domain_recipient_bcc($_[1]);
 		}
 	&delete_mail($_[1], 0, 1);
-	&setup_mail($_[0], 0, 1);
+	&setup_mail($_[0], 1);
 	if ($supports_bcc) {
 		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 		&save_domain_sender_bcc($_[0], $oldbcc);
