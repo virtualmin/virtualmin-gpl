@@ -4467,8 +4467,10 @@ $webmin_tests = [
 		      'Deleting server details' ],
 	  'cleanup' => 1,
 	},
-
 	];
+if (!$webmin_user || !$webmin_pass) {
+	$webmin_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	}
 
 $remote_tests = [
 	# Test domain creation via remote API
@@ -4516,10 +4518,8 @@ $remote_tests = [
 	  'cleanup' => 1,
 	},
 	];
-
 if (!$webmin_user || !$webmin_pass) {
-	$webmin_tests = [ { 'command' => 'echo Webmin tests cannot be run unless the --user and --pass parameters are given' } ];
-	$remote_tests = [ { 'command' => 'echo Remote API tests cannot be run unless the --user and --pass parameters are given' } ];
+	$remote_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
 
 $ssl_tests = [
@@ -5741,6 +5741,9 @@ $rename_tests = [
 	  'cleanup' => 1
         },
 	];
+if (!$webmin_user || !$webmin_pass) {
+	$rename_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	}
 
 # Tests for web, mail and FTP bandwidth accounting.
 # Uses a different domain to prevent re-reading of old mail logs.
