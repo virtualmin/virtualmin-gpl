@@ -1499,3 +1499,4 @@ Updated the Dolibarr script installer to version 3.7.1, Wordpress to 4.2.2, SMF 
 Added an option for scheduled backups to terminate an existing backup to the same destination, rather than being blocked by it.
 Under Webmin versions 1.780 and above, use /var/webmin for logs and data files instead of /etc/webmin.
 ---- Changes since 4.18 ----
+Updated the Piwik script installer to version 2.14.1.
