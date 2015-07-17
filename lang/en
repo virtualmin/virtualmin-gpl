@@ -2257,6 +2257,7 @@ backup_eonebyone2=The option to transfer each server after it is backed up can o
 backup_edest=Missing or invalid absolute local file
 backup_edest2=Missing or invalid backup file
 backup_edest3=Backup file path cannot use ..
+backup_edestext=A backup to a single file should have an extension like tar.gz or zip
 backup_eserver1=Missing or invalid FTP server
 backup_eserver1a=FTP server hostname cannot be resolved
 backup_eserver2=Missing or invalid SSH server

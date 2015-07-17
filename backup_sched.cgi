@@ -67,7 +67,7 @@ else {
 		next if ($in{"dest".$i."_mode"} == 0 &&
 			 !$in{"dest".$i."_file"});
 		$dest = &parse_backup_destination("dest".$i, \%in,
-						  $cbmode == 3, $d);
+						  $cbmode == 3, $d, $in{'fmt'});
 		push(@dests, $dest);
 
 		# Parse purge policy for the destination

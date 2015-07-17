@@ -98,7 +98,8 @@ else {
 for($i=0; defined($in{"dest".$i."_mode"}); $i++) {
 	next if ($in{"dest".$i."_mode"} == 0 &&
                  !$in{"dest".$i."_file"});
-	$dest = &parse_backup_destination("dest".$i, \%in, $cbmode == 3, $d);
+	$dest = &parse_backup_destination("dest".$i, \%in, $cbmode == 3, $d,
+					  $in{'fmt'});
 	push(@dests, $dest);
 	$anydownload++ if ($dest eq "download:");
 	}

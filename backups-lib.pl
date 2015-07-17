@@ -3698,13 +3698,18 @@ if (!$noupload) {
 return &ui_radio_selector(\@opts, $name."_mode", $mode);
 }
 
-# parse_backup_destination(name, &in, no-local, [&domain])
+# parse_backup_destination(name, &in, no-local, [&domain], format)
 # Returns a backup destination string, or calls error
 sub parse_backup_destination
 {
-local ($name, $in, $nolocal, $d) = @_;
+local ($name, $in, $nolocal, $d, $fmt) = @_;
 local %in = %$in;
 local $mode = $in{$name."_mode"};
+if ($mode == 0 && defined($fmt) && $fmt == 0) {
+	# For a single-file backup, make sure the filename makes sense
+	$in{$name."_file"} =~ /\.(gz|zip|tar|bz2|Z)$/i ||
+		&error($text{'backup_edestext'});
+	}
 if ($mode == 0 && $d) {
 	# Local file under virtualmin-backup directory
 	$in{$name."_file"} =~ /^\S+$/ || &error($text{'backup_edest2'});

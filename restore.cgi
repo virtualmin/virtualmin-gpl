@@ -27,7 +27,7 @@ elsif ($in{'src'}) {
 	}
 else {
 	# Restoring from user-entered source
-	$src = &parse_backup_destination("src", \%in, $crmode == 2, $d);
+	$src = &parse_backup_destination("src", \%in, $crmode == 2, $d, undef);
 	}
 $origsrc = $in{'origsrc'} || $src;
 $nice = &nice_backup_url($src);
