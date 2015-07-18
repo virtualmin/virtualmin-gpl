@@ -2202,7 +2202,7 @@ $backup_tests = [
 
 $enc_backup_tests = &convert_to_encrypted($backup_tests);
 
-$dbbackup_tests = [
+$mysqlbackup_tests = [
 	# Create a domain to be backed up
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2404,7 +2404,7 @@ $dbbackup_tests = [
 	},
 	];
 
-$enc_dbbackup_tests = &convert_to_encrypted($dbbackup_tests);
+$enc_mysqlbackup_tests = &convert_to_encrypted($mysqlbackup_tests);
 
 $multibackup_tests = [
 	# Create a parent domain to be backed up
@@ -7589,8 +7589,9 @@ $alltests = { '_config' => $_config_tests,
 	      'move' => $move_tests,
 	      'movealias' => $movealias_tests,
 	      'backup' => $backup_tests,
-	      'dbbackup' => $dbbackup_tests,
 	      'enc_backup' => $enc_backup_tests,
+	      'mysqlbackup' => $mysqlbackup_tests,
+	      'enc_mysqlbackup' => $enc_mysqlbackup_tests,
 	      'multibackup' => $multibackup_tests,
 	      'enc_multibackup' => $enc_multibackup_tests,
 	      'splitbackup' => $splitbackup_tests,
