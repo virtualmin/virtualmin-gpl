@@ -321,6 +321,26 @@ if (!$d->{'parent'}) {
 	# Delete the user
 	&$first_print($text{'delete_postgresuser'});
 	if (&postgres_user_exists($d)) {
+		eval {
+			local $main::error_must_die = 1;
+			local $s = &postgresql::execute_sql($qconfig{'basedb'},
+				"select datname from pg_database ".
+				"join pg_authid ".
+				"on pg_database.datdba = pg_authid.oid ".
+				"where rolname = '$user'");
+			foreach my $db (map { $_->[0] } @{$s->{'data'}}) {
+				&postgresql::execute_sql_logged(
+					$db,
+					"reassign owned by ".
+					  &postgres_uquote($user).
+					  " to ".
+					  $postgresql::postgres_login);
+				&postgresql::execute_sql_logged(
+					$qconfig{'basedb'},
+					"alter database $db owner to ".
+					  $postgresql::postgres_login);
+				}
+			};
 		&postgresql::execute_sql_logged($qconfig{'basedb'},
 			"drop user ".&postgres_uquote($user));
 		&$second_print($text{'setup_done'});
