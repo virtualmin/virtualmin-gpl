@@ -19,6 +19,7 @@ if (!$module_name) {
 	}
 $ENV{'PATH'} = "$module_root_directory:$ENV{'PATH'}";
 &require_mysql();
+&require_postgres();
 &require_mail();
 $mysql::mysql_login ||= 'root';
 
@@ -117,6 +118,9 @@ while(@ARGV > 0) {
 		$ssl = shift(@ARGV);
 		&indexof($ssl, @plugins) >= 0 || &usage("$ssl is not a plugin");
 		}
+	elsif ($a eq "--list-tests") {
+		$list_tests = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -155,10 +159,12 @@ $clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
 $test_full_user_mysql = &mysql_username($test_full_user);
+$test_full_user_postgres = &postgres_username($test_full_user);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
 $test_target_domain_db = 'targetdb';
 $test_domain_home = $test_domain{'home'} =
 	&server_home_directory(\%test_domain);
+$test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
@@ -179,10 +185,10 @@ $test_clone_domain_db = &database_name(\%test_clone_domain);
 $test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 $test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
 
-# Create PostgreSQL password file
+# Create PostgreSQL password file for root logins
 $pg_pass_file = "/tmp/pgpass.txt";
 open(PGPASS, ">$pg_pass_file");
-print PGPASS "*:*:*:$test_domain_user:smeg\n";
+print PGPASS "*:*:*:${postgresql::postgres_login}:${postgresql::postgres_pass}\n";
 close(PGPASS);
 $ENV{'PGPASSFILE'} = $pg_pass_file;
 chmod(0600, $pg_pass_file);
@@ -2405,6 +2411,140 @@ $mysqlbackup_tests = [
 	];
 
 $enc_mysqlbackup_tests = &convert_to_encrypted($mysqlbackup_tests);
+
+$postgresbackup_tests = [
+	# Make sure the PostgreSQL root login works
+	{ 'command' => 'psql -U '.$postgresql::postgres_login.
+		       ' -c "select version()"',
+	  'user' => $postgresql::postgres_sameunix ?
+			$postgresql::postgres_login : undef,
+	},
+
+	# Create a domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'postgres' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Create some tables
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db, $test_domain_home, 0, "create table foo (id int4)"),
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db.'_extra', $test_domain_home, 0, "create table bar (id int4)"),
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+
+	# Delete the tables
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db, $test_domain_home, 0, "drop table foo"),
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db.'_extra', $test_domain_home, 0, "drop table bar"),
+
+	# Restore just PostgreSQL from the temp file
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'feature', 'postgres' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Check that the domain owner still has access
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db, $test_domain_home, 0, "select version()"),
+
+	# Verify that DB contents exist again
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db, $test_domain_home, 0, "select count(*) from foo"),
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db.'_extra', $test_domain_home, 0, "select count(*) from bar"),
+
+	# Disconnect the databases
+	{ 'command' => 'disconnect-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_db ] ],
+	},
+	{ 'command' => 'disconnect-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Attempt a restore, which should fail (due to the DB clash)
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ] ],
+	  'fail' => 1,
+	  'grep' => 'Restore failed',
+	},
+
+	# Try the restore again with warnings disabled, which should
+	# re-associate the databases
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_file ],
+		      [ 'skip-warnings' ] ],
+	},
+
+	# Verify database association
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_domain_db.'_extra$',
+		      '^'.$test_domain_db.'$' ],
+	},
+
+	# Verify that DB contents still exist
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db, $test_domain_home, 0, "select count(*) from foo"),
+	&postgresql_login_commands($test_domain_user, 'smeg', $test_domain_db.'_extra', $test_domain_home, 0, "select count(*) from bar"),
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Cleanup leftover DBs and user
+	{ 'command' => 'psql -U '.$postgresql::postgres_login.
+		       ' -c "drop database '.$test_domain_db.'"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	  'user' => $postgresql::postgres_sameunix ?
+			$postgresql::postgres_login : undef,
+	},
+	{ 'command' => 'psql -U '.$postgresql::postgres_login.
+		       ' -c "drop database '.$test_domain_db.'_extra"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	  'user' => $postgresql::postgres_sameunix ?
+			$postgresql::postgres_login : undef,
+	},
+	{ 'command' => 'psql -U '.$postgresql::postgres_login.
+		       ' -c "drop user '.$test_domain_user.'"',
+	  'cleanup' => 1,
+	  'ignorefail' => 1,
+	  'user' => $postgresql::postgres_sameunix ?
+			$postgresql::postgres_login : undef,
+	},
+	];
+
+$enc_postgresbackup_tests = &convert_to_encrypted($postgresbackup_tests);
 
 $multibackup_tests = [
 	# Create a parent domain to be backed up
@@ -7592,6 +7732,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_backup' => $enc_backup_tests,
 	      'mysqlbackup' => $mysqlbackup_tests,
 	      'enc_mysqlbackup' => $enc_mysqlbackup_tests,
+	      'postgresbackup' => $postgresbackup_tests,
+	      'enc_postgresbackup' => $enc_postgresbackup_tests,
 	      'multibackup' => $multibackup_tests,
 	      'enc_multibackup' => $enc_multibackup_tests,
 	      'splitbackup' => $splitbackup_tests,
@@ -7658,6 +7800,14 @@ else {
 	@tests = sort { $a cmp $b } @tests;
 	}
 @tests = grep { &indexof($_, @skips) < 0 } @tests;
+
+# Just show tests that would be run
+if ($list_tests) {
+	foreach my $t (@tests) {
+		print $t,"\n";
+		}
+	exit(0);
+	}
 
 # Run selected tests
 $total_failed = 0;
@@ -7793,6 +7943,9 @@ if ($cmd =~ /^wget/) {
 	# Wget needs to write to current dir sometimes
 	$cmd = "cd / ; $cmd";
 	}
+if ($t->{'user'}) {
+	$cmd = &command_as_user($t->{'user'}, 0, $cmd);
+	}
 print "    Running $cmd ..\n";
 sleep($t->{'sleep'});
 if ($gconfig{'os_type'} !~ /-linux$/ && &has_command("bash")) {
@@ -7884,11 +8037,11 @@ print "                           [--user webmin-login --pass password]\n";
 exit(1);
 }
 
-# postgresql_login_commands(user, pass, db, home, failmode)
+# postgresql_login_commands(user, pass, db, home, failmode, [sql])
 # Returns test commands to test a login to PostgreSQL
 sub postgresql_login_commands
 {
-my ($user, $pass, $db, $home, $failmode) = @_;
+my ($user, $pass, $db, $home, $failmode, $sql) = @_;
 return (
 	# Create a .pgpass file for the user
 	{ 'command' => 'echo "*:*:*:'.$user.':'.$pass.'" > '.
@@ -7902,12 +8055,11 @@ return (
 	# Check PostgreSQL login
 	{ 'command' => 'su - '.$user.' -c '.
 		quotemeta('psql -U '.$user.' -h localhost '.
-			  '-c "select 666" '.$db),
-	  $failmode ? ( 'antigrep' => 666 ) : ( 'grep' => 666 ),
+			  '-c "'.($sql || 'select 666').'" '.$db),
+	  $sql ? ( ) : $failmode ? ( 'antigrep' => 666 ) : ( 'grep' => 666 ),
 	  'ignorefail' => $failmode,
 	},
 	);
-
 }
 
 # convert_to_encrypted(&tests)
