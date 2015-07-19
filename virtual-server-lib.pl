@@ -201,6 +201,8 @@ $max_php_fcgid_children = 20;
 $s3_upload_tries = $config{'upload_tries'} || 3;
 $rs_upload_tries = $config{'upload_tries'} || 3;
 $ftp_upload_tries = $config{'upload_tries'} || 3;
+$gcs_upload_tries = $config{'upload_tries'} || 3;
+$dropbox_upload_tries = $config{'upload_tries'} || 3;
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
 			'gid' => "$module_config_directory/map.gid",

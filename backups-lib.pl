@@ -907,12 +907,14 @@ DOMAIN: foreach $d (@$doms) {
 				local $dfpath = $path ? $path."/".$df : $df;
 				local $func = $mode == 7 ? \&upload_gcs_file
 							: \&upload_dropbox_file;
-				$err = &$func(
-					$server, $dfpath, "$dest/$df");
-				$err = &$func($server,
-					$dfpath.".info", $infotemp) if (!$err);
-				$err = &$func($server,
-					$dfpath.".dom", $domtemp) if (!$err);
+				local $tries = $mode == 7 ? $gcs_upload_tries
+						  : $dropbox_upload_tries;
+				$err = &$func($server, $dfpath, "$dest/$df",
+					      $tries);
+				$err = &$func($server, $dfpath.".info",
+					      $infotemp, $tries) if (!$err);
+				$err = &$func($server, $dfpath.".dom",
+					      $domtemp, $tries) if (!$err);
 				}
 			if ($err) {
 				&$second_print(&text('backup_uploadfailed',
@@ -1482,6 +1484,8 @@ foreach my $desturl (@$desturls) {
 		&$first_print($text{'backup_upload'.$mode});
 		local $func = $mode == 7 ? \&upload_gcs_file
 					 : \&upload_dropbox_file;
+		local $tries = $mode == 7 ? $gcs_upload_tries
+					  : $dropbox_upload_tries;
 		local $infotemp = &transname();
 		local $domtemp = &transname();
 		if ($dirfmt) {
@@ -1498,12 +1502,12 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				local $dfpath = $path ? $path."/".$df : $df;
-				$err = &$func($server,
-					$dfpath, $dest."/".$df);
-				$err = &$func($server,
-					$dfpath.".info", $infotemp) if (!$err);
-				$err = &$func($server,
-					$dfpath.".dom", $domtemp) if (!$err);
+				$err = &$func($server, $dfpath,
+					      $dest."/".$df, $tries);
+				$err = &$func($server, $dfpath.".info",
+					      $infotemp, $tries) if (!$err);
+				$err = &$func($server, $dfpath.".dom",
+					      $domtemp, $tries) if (!$err);
 				}
 			if (!$err && $asd) {
 				# Log bandwidth used by domain
@@ -1525,11 +1529,11 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			$err = &$func($server, $path, $dest);
+			$err = &$func($server, $path, $dest, $tries);
 			$err = &$func($server, $path.".info",
-					  $infotemp) if (!$err);
+				      $infotemp, $tries) if (!$err);
 			$err = &$func($server, $path.".dom",
-					  $domtemp) if (!$err);
+				      $domtemp, $tries) if (!$err);
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
 				local @tst = stat($dest);
