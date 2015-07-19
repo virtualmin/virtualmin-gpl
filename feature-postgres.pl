@@ -321,8 +321,7 @@ if (!$d->{'parent'}) {
 	# Delete the user
 	&$first_print($text{'delete_postgresuser'});
 	if (&postgres_user_exists($d)) {
-		eval {
-			local $main::error_must_die = 1;
+		if (&postgresql::get_postgresql_version() >= 8.0) {
 			local $s = &postgresql::execute_sql($qconfig{'basedb'},
 				"select datname from pg_database ".
 				"join pg_authid ".
@@ -593,6 +592,18 @@ foreach $db (@dbs) {
 		# remote system.
 		my @tables = &postgresql::list_tables($db->[0], 1);
 		if (@tables) {
+			# But grant access to the DB to the domain owner
+			if (&postgresql::get_postgresql_version() >= 8.0) {
+				local $q = &postgres_uquote(&postgres_user($d));
+				&postgresql::execute_sql_logged(
+                                        $qconfig{'basedb'},
+                                        "alter database $db->[0] owner to $q");
+				foreach my $t (@tables) {
+					&postgresql::execute_sql_logged(
+						$db->[0],
+						"alter table $t owner to $q");
+					}
+				}
 			next;
 			}
 		}
