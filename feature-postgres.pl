@@ -518,8 +518,7 @@ foreach $db (@dbs) {
 						   undef, $destfile);
 			}
 		}
-	local $err = &postgresql::backup_database($db, $destfile, 'c', undef,
-			$postgresql::postgres_sameunix ? undef : $d->{'user'});
+	local $err = &postgresql::backup_database($db, $destfile, 'c');
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
