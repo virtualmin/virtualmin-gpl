@@ -6379,7 +6379,8 @@ sub list_cloud_mail_providers
 {
 return ( { 'name' => 'MailShark',
 	   'url' => 'http://www.mailshark.com.au/',
-	   'mx' => [ 'mx1.mailshark.com' ],
+	   'mx' => [ 'jaws-in1.mailshark.com.au',
+		     'jaws-in2.mailshark.com.au' ],
 	 },
         );
 }
@@ -6411,6 +6412,33 @@ return undef;
 sub save_domain_cloud_mail_provider
 {
 local ($d, $prov) = @_;
+&require_dns();
+&obtain_lock_dns($d);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+
+# Remove all MX records
+foreach my $r (reverse(@$recs)) {
+	if ($r->{'type'} eq 'MX') {
+		&bind8::delete_record($file, $r);
+		}
+	}
+&post_records_change($d, $recs);
+
+($recs, $file) = &get_domain_dns_records_and_file($d);
+if ($prov) {
+	# Add provider records
+	foreach my $r (@{$prov->{'mx'}}) {
+		&bind8::create_record($file, $d->{'dom'}.".", undef,
+				      "IN", "MX", "10 ${r}.");
+		}
+	}
+else {
+	# Add standard records
+	&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
+	}
+&post_records_change($d, $recs);
+
+&release_lock_dns($d);
 }
 
 $done_feature_script{'mail'} = 1;

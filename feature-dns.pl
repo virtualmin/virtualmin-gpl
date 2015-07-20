@@ -709,7 +709,7 @@ if ($_[0]->{'mail'} && !$_[1]->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&$first_print($text{'save_dns4'});
 		local $ip = $_[0]->{'dns_ip'} || $_[0]->{'ip'};
 		local $ip6 = $_[0]->{'ip6'};
-		&create_mx_records($file, $_[0], $ip, $ip6);
+		&create_mail_records($file, $_[0], $ip, $ip6);
 		&$second_print($text{'setup_done'});
 		$rv++;
 		}
@@ -925,9 +925,9 @@ while($str) {
 return "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
 }
 
-# create_mx_records(file, &domain, ip, ip6)
-# Adds MX records to a DNS domain
-sub create_mx_records
+# create_mail_records(file, &domain, ip, ip6)
+# Adds MX and mail.domain records to a DNS domain
+sub create_mail_records
 {
 local ($file, $d, $ip, $ip6) = @_;
 local $withdot = $d->{'dom'}.".";
@@ -937,6 +937,17 @@ if ($d->{'ip6'} && $ip6) {
 	&bind8::create_record($file, "mail.$withdot", undef,
 			      "IN", "AAAA", $ip6);
 	}
+&create_mx_records($file, $d, $ip, $ip6);
+}
+
+# create_mx_records(file, &domain, ip, ip6)
+# Adds MX records to a DNS domain
+sub create_mx_records
+{
+local ($file, $d, $ip, $ip6) = @_;
+local $withdot = $d->{'dom'}.".";
+
+# MX for this system
 &bind8::create_record($file, $withdot, undef,
 		      "IN", "MX", "5 mail.$withdot");
 
@@ -1119,7 +1130,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# For mail domains, add MX to this server. Any IPv6 AAAA record is
 	# cloned later
 	if ($d->{'mail'}) {
-		&create_mx_records($file, $d, $ip, undef);
+		&create_mail_records($file, $d, $ip, undef);
 		}
 
 	# Add SPF record for domain, if defined and if it's not a sub-domain
