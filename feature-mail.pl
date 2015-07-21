@@ -6390,7 +6390,7 @@ return ( { 'name' => 'MailShark',
 sub get_domain_cloud_mail_provider
 {
 local ($d) = @_;
-&require_dns();
+&require_bind();
 local @recs = &get_domain_dns_records($d);
 local %mxmap;
 foreach my $prov (&list_cloud_mail_providers()) {
@@ -6399,7 +6399,7 @@ foreach my $prov (&list_cloud_mail_providers()) {
 		}
 	}
 foreach my $r (@recs) {
-	if ($r->{'type'} eq 'MX') {
+	if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
 		my $prov = $mxmap{$r->{'values'}->[1]};
 		return $prov if ($prov);
 		}
@@ -6412,13 +6412,13 @@ return undef;
 sub save_domain_cloud_mail_provider
 {
 local ($d, $prov) = @_;
-&require_dns();
+&require_bind();
 &obtain_lock_dns($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 
 # Remove all MX records
 foreach my $r (reverse(@$recs)) {
-	if ($r->{'type'} eq 'MX') {
+	if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
 		&bind8::delete_record($file, $r);
 		}
 	}
@@ -6431,14 +6431,18 @@ if ($prov) {
 		&bind8::create_record($file, $d->{'dom'}.".", undef,
 				      "IN", "MX", "10 ${r}.");
 		}
+	$d->{'cloud_mail_provider'} = $prov->{'name'};
 	}
 else {
 	# Add standard records
 	&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
+	$d->{'cloud_mail_provider'} = undef;
 	}
 &post_records_change($d, $recs);
 
 &release_lock_dns($d);
+
+return undef;
 }
 
 $done_feature_script{'mail'} = 1;

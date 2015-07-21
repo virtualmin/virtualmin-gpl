@@ -49,6 +49,12 @@ for this domain. Alternately you can revert to the default key with the
 C<--default-dkim-key> flag, or generate a new random key with the
 C<--generate-dkim-key> flag.
 
+To use a cloud mail filter, specify the C<--cloud-mail> flag followed by
+the name of a provider like MailShark. This will update the MX records for the
+domain to point to that provider's filtering servers (which you typically must
+sign up for in advance). To revert to using only the local mail server, 
+set the C<--no-cloud-mail> flag.
+
 =cut
 
 package virtual_server;
@@ -130,6 +136,16 @@ while(@ARGV > 0) {
 		($ok, $key) = &generate_dkim_key();
 		$ok || &usage("Failed to generate key : $key");
 		}
+	elsif ($a eq "--cloud-mail") {
+		$cloud = shift(@ARGV);
+		@provs = &list_cloud_mail_providers();
+		($prov) = grep { $_->{'name'} eq $cloud } @provs;
+		$prov || &usage("Valid cloud mail filter providers are : ".
+				join(" ", map { $_->{'name'} } @provs));
+		}
+	elsif ($a eq "--no-cloud-mail") {
+		$prov = "";
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -139,7 +155,8 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
-    defined($autoconfig) || defined($key) || &usage("Nothing to do");
+    defined($autoconfig) || defined($key) || defined($prov) ||
+    &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -266,6 +283,21 @@ foreach $d (@doms) {
 		&save_domain_dkim_key($d, $key);
 		}
 
+	# Enable or disable cloud mail provider
+	if (defined($prov)) {
+		local $err;
+		if ($prov) {
+			&$first_print("Using cloud mail filter ".
+				      "$prov->{'name'} ..");
+			$err = &save_domain_cloud_mail_provider($d, $prov);
+			}
+		else {
+			&$first_print("Disabling cloud mail filter ..");
+			$err = &save_domain_cloud_mail_provider($d, undef);
+			}
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
 	&save_domain($d);
 
 	&$outdent_print();
@@ -290,6 +322,7 @@ print "                      [--outgoing-ip | --no-outgoing-ip]\n";
 print "                      [--autoconfig | --no-autoconfig]\n";
 print "                      [--dkim-key file | --default-dkim-key |\n";
 print "                       --generate-dkim-key]\n";
+print "                      [--cloud-mail name | --no-cloud-mail]\n";
 exit(1);
 }
 
