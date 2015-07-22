@@ -25,12 +25,14 @@ if ($supports_bcc) {
 		&$first_print(&text('mail_bccing', $in{'bcc'}));
 		&save_domain_sender_bcc($d, $in{'bcc'});
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	elsif ($bcc && $in{'bcc_def'}) {
 		# Turn off BCC
 		&$first_print($text{'mail_nobcc'});
 		&save_domain_sender_bcc($d, undef);
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	else {
 		&$second_print($text{'mail_bccoff'});
@@ -43,12 +45,14 @@ if ($supports_bcc == 2) {
 		&$first_print(&text('mail_rbccing', $in{'rbcc'}));
 		&save_domain_recipient_bcc($d, $in{'rbcc'});
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	elsif ($rbcc && $in{'rbcc_def'}) {
 		# Turn off BCC
 		&$first_print($text{'mail_norbcc'});
 		&save_domain_recipient_bcc($d, undef);
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	else {
 		&$second_print($text{'mail_rbccoff'});
@@ -65,12 +69,14 @@ if (defined($in{'aliascopy'}) && $d->{'mail'}) {
 		&create_virtuser({ 'from' => '@'.$d->{'dom'},
 				   'to' => [ '%1@'.$aliasdom->{'dom'} ] });
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	elsif (!$d->{'aliascopy'} && $in{'aliascopy'}) {
 		# Switch to copy mode
 		&$first_print($text{'save_aliascopy1'});
 		&copy_alias_virtuals($d, $aliasdom);
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
 	$d->{'aliascopy'} = $in{'aliascopy'};
 	}
@@ -84,7 +90,34 @@ if (defined($in{'dependent'}) && $supports_dependent) {
 				&text('mail_dependenting0'));
 		&save_domain_dependent($d, $in{'dependent'});
 		&$second_print($text{'setup_done'});
+		$changed++;
 		}
+	}
+
+# Update cloud mail provider
+$oldprov = &get_domain_cloud_mail_provider($d);
+if ($in{'cloud'}) {
+	@provs = &list_cloud_mail_providers();
+	($prov) = grep { $_->{'name'} eq $in{'cloud'} } @provs;
+	$prov || &error($text{'mail_ecloud'});
+	if (!$oldprov || $prov->{'name'} ne $oldprov->{'name'}) {
+		&$first_print(&text('mail_cloudon', $prov->{'name'}));
+		&save_domain_cloud_mail_provider($d, $prov);
+		&$second_print($text{'setup_done'});
+		$changed++;
+		}
+	}
+else {
+	if ($oldprov) {
+		&$first_print(&text('mail_cloudoff'));
+		&save_domain_cloud_mail_provider($d, undef);
+		&$second_print($text{'setup_done'});
+		$changed++;
+		}
+	}
+
+if (!$changed) {
+	&$first_print($text{'mail_nothing'});
 	}
 
 &save_domain($d);

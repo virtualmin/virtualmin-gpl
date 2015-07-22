@@ -55,6 +55,14 @@ if ($supports_dependent) {
 			      ]));
 	}
 
+# Cloud mail filter
+@provs = &list_cloud_mail_providers();
+$prov = &get_domain_cloud_mail_provider($d);
+print &ui_table_row($text{'mail_cloud'},
+	&ui_select("cloud", $prov ? $prov->{'name'} : undef,
+		   [ [ undef, "&lt;".$text{'mail_cloudnone'}."&gt;" ],
+		     map { $_->{'name'} } @provs ]));
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

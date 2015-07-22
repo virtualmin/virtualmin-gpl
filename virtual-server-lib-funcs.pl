@@ -11758,8 +11758,7 @@ if (&can_edit_records($d)) {
 	}
 
 &require_mail();
-if ($d->{'mail'} && $config{'mail'} && &can_edit_mail() &&
-    ($supports_bcc || $d->{'alias'} && $supports_aliascopy)) {
+if ($d->{'mail'} && $config{'mail'} && &can_edit_mail()) {
 	# Email settings button
 	push(@rv, { 'page' => 'edit_mail.cgi',
 		    'title' => $text{'edit_mailopts'},
