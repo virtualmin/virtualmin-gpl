@@ -97,7 +97,7 @@ if (defined($in{'dependent'}) && $supports_dependent) {
 # Update cloud mail provider
 $oldprov = &get_domain_cloud_mail_provider($d);
 if ($in{'cloud'}) {
-	@provs = &list_cloud_mail_providers();
+	@provs = &list_cloud_mail_providers($d);
 	($prov) = grep { $_->{'name'} eq $in{'cloud'} } @provs;
 	$prov || &error($text{'mail_ecloud'});
 	if (!$oldprov || $prov->{'name'} ne $oldprov->{'name'}) {

@@ -6372,11 +6372,12 @@ return <<'EOF';
 EOF
 }
 
-# list_cloud_mail_providers()
+# list_cloud_mail_providers([&domain])
 # Returns a list of Cloud mail filtering providers that can be used via a
 # set of custom MX records
 sub list_cloud_mail_providers
 {
+local ($d) = @_;
 return ( { 'name' => 'MailShark',
 	   'url' => 'http://www.mailshark.com.au/',
 	   'mx' => [ 'jaws-in1.mailshark.com.au',
@@ -6393,7 +6394,7 @@ local ($d) = @_;
 &require_bind();
 local @recs = &get_domain_dns_records($d);
 local %mxmap;
-foreach my $prov (&list_cloud_mail_providers()) {
+foreach my $prov (&list_cloud_mail_providers($d)) {
 	foreach my $mx (@{$prov->{'mx'}}) {
 		$mxmap{$mx."."} = $prov;
 		}

@@ -56,7 +56,7 @@ if ($supports_dependent) {
 	}
 
 # Cloud mail filter
-@provs = &list_cloud_mail_providers();
+@provs = &list_cloud_mail_providers($d);
 $prov = &get_domain_cloud_mail_provider($d);
 print &ui_table_row($text{'mail_cloud'},
 	&ui_select("cloud", $prov ? $prov->{'name'} : undef,

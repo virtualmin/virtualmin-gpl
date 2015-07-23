@@ -287,12 +287,16 @@ foreach $d (@doms) {
 	if (defined($prov)) {
 		local $err;
 		if ($prov) {
-			&$first_print("Using cloud mail filter ".
+			# Re-fetch provider object for this domain
+			my @provs = &list_cloud_mail_providers($d);
+			($prov) = grep { $_->{'name'} eq $cloud } @provs;
+			&$first_print("Configuring MX records for filter ".
 				      "$prov->{'name'} ..");
 			$err = &save_domain_cloud_mail_provider($d, $prov);
 			}
 		else {
-			&$first_print("Disabling cloud mail filter ..");
+			&$first_print("Configuring MX records to deliver ".
+				      "to this system ..");
 			$err = &save_domain_cloud_mail_provider($d, undef);
 			}
 		&$second_print($err ? ".. failed : $err" : ".. done");
