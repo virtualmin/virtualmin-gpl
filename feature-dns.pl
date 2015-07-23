@@ -1501,7 +1501,8 @@ if (&domain_has_website($d)) {
 	}
 
 # If domain has email, make sure MX record points to this system
-if ($d->{'mail'} && $config{'mx_validate'}) {
+local $prov = &get_domain_cloud_mail_provider($d);
+if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 	local @mxs = grep { $_->{'name'} eq $d->{'dom'}.'.' &&
 			    $_->{'type'} eq 'MX' } @$recs;
 	local $defip = &get_default_ip();
