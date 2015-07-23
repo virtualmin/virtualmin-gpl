@@ -1,0 +1,7 @@
+desc=Cloud email filtering
+html=MX records for a domain can be pointed to a cloud mail filtering provider on the Email Options page, or using the modify-mail API command.
+master=1
+reseller=1
+owner=1
+link=edit_mail.cgi?dom=${ID}
+feature=mail

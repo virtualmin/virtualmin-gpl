@@ -1500,3 +1500,4 @@ Added an option for scheduled backups to terminate an existing backup to the sam
 Under Webmin versions 1.780 and above, use /var/webmin for logs and data files instead of /etc/webmin.
 ---- Changes since 4.18 ----
 Updated the Piwik script installer to version 2.14.1, and phpMyAdmin to 4.4.12.
+MX records for a domain can be pointed to a cloud mail filtering provider on the Email Options page, or using the modify-mail API command.
