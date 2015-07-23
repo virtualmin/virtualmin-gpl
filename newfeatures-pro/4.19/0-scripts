@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 2.14.1, and phpMyAdmin to 4.4.12.
+html=Updated the Piwik script installer to version 2.14.1, Wordpress to 4.2.3, and phpMyAdmin to 4.4.12.
 master=1
 reseller=1
 domain=1
