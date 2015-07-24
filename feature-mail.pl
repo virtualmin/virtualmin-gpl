@@ -6372,12 +6372,12 @@ return <<'EOF';
 EOF
 }
 
-# list_cloud_mail_providers([&domain])
+# list_cloud_mail_providers([&domain], [id])
 # Returns a list of Cloud mail filtering providers that can be used via a
 # set of custom MX records
 sub list_cloud_mail_providers
 {
-local ($d) = @_;
+local ($d, $id) = @_;
 return ( { 'name' => 'MailShark',
 	   'url' => 'http://www.mailshark.com.au/',
 	   'mx' => [ 'jaws-in1.mailshark.com.au',
@@ -6394,6 +6394,7 @@ return ( { 'name' => 'MailShark',
 		     $d->{'dom'}.'.p20.mxguardian.net',
 		     $d->{'dom'}.'.p30.mxguardian.net',
 		     $d->{'dom'}.'.p40.mxguardian.net' ],
+	   'dom' => 1,
 	 },
 	 { 'name' => 'EveryCloud',
 	   'url' => 'http://www.everycloudtech.com/',
@@ -6401,6 +6402,15 @@ return ( { 'name' => 'MailShark',
 		     'mx102.everycloudtech.com',
 		     'mx103.everycloudtech.com',
 		     'mx104.everycloudtech.com' ],
+	 },
+	 { 'name' => 'Postini',
+	   'url' => 'http://www.postini.com/',
+	   'id' => 1,
+	   'dom' => 1,
+	   'mx' => [ $d->{'dom'}.'.s'.$id.'a1.psmtp.com',
+		     $d->{'dom'}.'.s'.$id.'a2.psmtp.com',
+		     $d->{'dom'}.'.s'.$id.'b1.psmtp.com',
+		     $d->{'dom'}.'.s'.$id.'b2.psmtp.com' ],
 	 },
         );
 }
@@ -6413,7 +6423,7 @@ local ($d) = @_;
 &require_bind();
 local @recs = &get_domain_dns_records($d);
 local %mxmap;
-foreach my $prov (&list_cloud_mail_providers($d)) {
+foreach my $prov (&list_cloud_mail_providers($d, $d->{'cloud_mail_id'})) {
 	foreach my $mx (@{$prov->{'mx'}}) {
 		$mxmap{$mx."."} = $prov;
 		}
@@ -6427,11 +6437,11 @@ foreach my $r (@recs) {
 return undef;
 }
 
-# save_domain_cloud_mail_provider(&domain, [&provider])
+# save_domain_cloud_mail_provider(&domain, [&provider], [id])
 # Updates the provider MX records for some domain, or clears it
 sub save_domain_cloud_mail_provider
 {
-local ($d, $prov) = @_;
+local ($d, $prov, $id) = @_;
 &require_bind();
 &obtain_lock_dns($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -6452,11 +6462,13 @@ if ($prov) {
 				      "IN", "MX", "10 ${r}.");
 		}
 	$d->{'cloud_mail_provider'} = $prov->{'name'};
+	$d->{'cloud_mail_id'} = $id;
 	}
 else {
 	# Add standard records
 	&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
-	$d->{'cloud_mail_provider'} = undef;
+	delete($d->{'cloud_mail_provider'});
+	delete($d->{'cloud_mail_id'});
 	}
 &post_records_change($d, $recs);
 

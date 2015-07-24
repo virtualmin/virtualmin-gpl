@@ -52,8 +52,10 @@ C<--generate-dkim-key> flag.
 To use a cloud mail filter, specify the C<--cloud-mail> flag followed by
 the name of a provider like MailShark. This will update the MX records for the
 domain to point to that provider's filtering servers (which you typically must
-sign up for in advance). To revert to using only the local mail server, 
-set the C<--no-cloud-mail> flag.
+sign up for in advance). For some providers Virtualmin also needs to know
+a customer ID (used in the MX records), which is set with the C<--cloud-mail-id>
+flag. To revert to using only the local mail server, set the
+C<--no-cloud-mail> flag.
 
 =cut
 
@@ -138,13 +140,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--cloud-mail") {
 		$cloud = shift(@ARGV);
-		@provs = &list_cloud_mail_providers();
-		($prov) = grep { $_->{'name'} eq $cloud } @provs;
-		$prov || &usage("Valid cloud mail filter providers are : ".
-				join(" ", map { $_->{'name'} } @provs));
 		}
 	elsif ($a eq "--no-cloud-mail") {
 		$prov = "";
+		}
+	elsif ($a eq "--cloud-mail-id") {
+		$cloudid = shift(@ARGV);
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -178,6 +179,18 @@ if (defined($rbcc) && $supports_bcc != 2) {
 	}
 if (defined($dependent) && !$supports_dependent) {
 	&usage("Outgoing IP addresses are not supported on this system");
+	}
+
+# Check cloud mail filter
+if ($cloud) {
+	@provs = &list_cloud_mail_providers();
+	($prov) = grep { $_->{'name'} eq $cloud } @provs;
+	$prov || &usage("Valid cloud mail filter providers are : ".
+			join(" ", map { $_->{'name'} } @provs));
+	if ($prov->{'id'} && !$cloudid) {
+		&usage("The cloud mail filter ".$cloud." requires a customer ".
+		       "ID to be set with the C<--cloud-mail-id> flag");
+		}
 	}
 
 # Do it for all domains
@@ -286,18 +299,30 @@ foreach $d (@doms) {
 	# Enable or disable cloud mail provider
 	if (defined($prov)) {
 		local $err;
+		local $oldprov = &get_domain_cloud_mail_provider($d);
 		if ($prov) {
-			# Re-fetch provider object for this domain
-			my @provs = &list_cloud_mail_providers($d);
-			($prov) = grep { $_->{'name'} eq $cloud } @provs;
-			&$first_print("Configuring MX records for filter ".
-				      "$prov->{'name'} ..");
-			$err = &save_domain_cloud_mail_provider($d, $prov);
+			if (!$oldprov ||
+			    $prov->{'name'} ne $oldprov->{'name'}) {
+				# Re-fetch provider object for THIS domain, and
+				# apply it
+				my @provs = &list_cloud_mail_providers(
+						$d, $cloudid);
+				($prov) = grep { $_->{'name'} eq $cloud }
+					       @provs;
+				&$first_print("Configuring MX records for ".
+					      "filter $prov->{'name'} ..");
+				$err = &save_domain_cloud_mail_provider(
+						$d, $prov, $cloudid);
+				}
 			}
 		else {
-			&$first_print("Configuring MX records to deliver ".
-				      "to this system ..");
-			$err = &save_domain_cloud_mail_provider($d, undef);
+			if ($oldprov) {
+				# Stop using filter provider
+				&$first_print("Configuring MX records to ".
+					      "deliver to this system ..");
+				$err = &save_domain_cloud_mail_provider(
+						$d, undef, undef);
+				}
 			}
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
@@ -327,6 +352,7 @@ print "                      [--autoconfig | --no-autoconfig]\n";
 print "                      [--dkim-key file | --default-dkim-key |\n";
 print "                       --generate-dkim-key]\n";
 print "                      [--cloud-mail name | --no-cloud-mail]\n";
+print "                      [--cloud-mail-id number]\n";
 exit(1);
 }
 
