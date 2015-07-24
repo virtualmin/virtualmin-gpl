@@ -142,7 +142,7 @@ while(@ARGV > 0) {
 		$cloud = shift(@ARGV);
 		}
 	elsif ($a eq "--no-cloud-mail") {
-		$prov = "";
+		$cloud = "";
 		}
 	elsif ($a eq "--cloud-mail-id") {
 		$cloudid = shift(@ARGV);
@@ -156,7 +156,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || @users || usage("No domains or users specified");
 defined($bcc) || defined($rbcc) || defined($aliascopy) || defined($dependent) ||
-    defined($autoconfig) || defined($key) || defined($prov) ||
+    defined($autoconfig) || defined($key) || defined($cloud) ||
     &usage("Nothing to do");
 
 # Get domains to update
@@ -189,7 +189,7 @@ if ($cloud) {
 			join(" ", map { $_->{'name'} } @provs));
 	if ($prov->{'id'} && !$cloudid) {
 		&usage("The cloud mail filter ".$cloud." requires a customer ".
-		       "ID to be set with the C<--cloud-mail-id> flag");
+		       "ID to be set with the --cloud-mail-id flag");
 		}
 	}
 
@@ -297,7 +297,7 @@ foreach $d (@doms) {
 		}
 
 	# Enable or disable cloud mail provider
-	if (defined($prov)) {
+	if (defined($cloud)) {
 		local $err;
 		local $oldprov = &get_domain_cloud_mail_provider($d);
 		if ($prov) {
