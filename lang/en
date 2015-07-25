@@ -5487,10 +5487,12 @@ mail_dependenting0=Reverting outgoing SMTP connections to system's default addre
 mail_bccsupport=Not currently enabled in your <a href='$1'>Postfix configuration</a>
 mail_cloud=Cloud mail filtering provider
 mail_cloudnone=None - deliver email directly to this system
+mail_cloudid=ID with mail filtering provider
 mail_ecloud=Selected provider does not exist!
 mail_cloudon=Configuring MX records for filter $1 ..
 mail_cloudoff=Configuring MX records to deliver to this system ..
 mail_nothing=No changes were made!
+mail_ecloudid=An ID must be specified for the selected cloud mail filter
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

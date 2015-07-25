@@ -63,6 +63,10 @@ print &ui_table_row($text{'mail_cloud'},
 		   [ [ undef, "&lt;".$text{'mail_cloudnone'}."&gt;" ],
 		     map { $_->{'name'} } @provs ]));
 
+# Cloud mail filter ID
+print &ui_table_row($text{'mail_cloudid'},
+	&ui_textbox("cloudid", $d->{'cloud_mail_id'}, 20));
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

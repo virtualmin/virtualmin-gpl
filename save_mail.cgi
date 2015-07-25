@@ -97,12 +97,17 @@ if (defined($in{'dependent'}) && $supports_dependent) {
 # Update cloud mail provider
 $oldprov = &get_domain_cloud_mail_provider($d);
 if ($in{'cloud'}) {
-	@provs = &list_cloud_mail_providers($d);
+	@provs = &list_cloud_mail_providers($d, $in{'cloudid'});
 	($prov) = grep { $_->{'name'} eq $in{'cloud'} } @provs;
 	$prov || &error($text{'mail_ecloud'});
-	if (!$oldprov || $prov->{'name'} ne $oldprov->{'name'}) {
+	if ($prov->{'id'} && !$in{'cloudid'}) {
+		&error($text{'mail_ecloudid'});
+		}
+	if (!$oldprov ||
+	    $prov->{'name'} ne $oldprov->{'name'} ||
+	    $in{'cloudid'} ne $d->{'cloud_mail_id'}) {
 		&$first_print(&text('mail_cloudon', $prov->{'name'}));
-		&save_domain_cloud_mail_provider($d, $prov);
+		&save_domain_cloud_mail_provider($d, $prov, $in{'cloudid'});
 		&$second_print($text{'setup_done'});
 		$changed++;
 		}
