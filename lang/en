@@ -5493,6 +5493,8 @@ mail_cloudon=Configuring MX records for filter $1 ..
 mail_cloudoff=Configuring MX records to deliver to this system ..
 mail_nothing=No changes were made!
 mail_ecloudid=An ID must be specified for the selected cloud mail filter
+mail_url=Current filtering provider's URL
+mail_mx=Current MX records
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature

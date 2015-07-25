@@ -67,6 +67,16 @@ print &ui_table_row($text{'mail_cloud'},
 print &ui_table_row($text{'mail_cloudid'},
 	&ui_textbox("cloudid", $d->{'cloud_mail_id'}, 20));
 
+if ($prov) {
+	# Show MX records and URL
+	print &ui_table_row($text{'mail_url'},
+		&ui_link($prov->{'url'}, $prov->{'url'}, undef,
+			 'target=_blank'));
+
+	print &ui_table_row($text{'mail_mx'},
+		join("<br>\n", @{$prov->{'mx'}}));
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 
