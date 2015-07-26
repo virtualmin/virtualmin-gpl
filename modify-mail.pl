@@ -302,7 +302,8 @@ foreach $d (@doms) {
 		local $oldprov = &get_domain_cloud_mail_provider($d);
 		if ($prov) {
 			if (!$oldprov ||
-			    $prov->{'name'} ne $oldprov->{'name'}) {
+			    $prov->{'name'} ne $oldprov->{'name'} ||
+			    $cloudid ne $d->{'cloud_mail_id'}) {
 				# Re-fetch provider object for THIS domain, and
 				# apply it
 				my @provs = &list_cloud_mail_providers(
