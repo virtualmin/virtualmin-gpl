@@ -553,8 +553,15 @@ splice(@$slref, $svirt->{'line'}+1, $svirt->{'eline'}-$svirt->{'line'}-1,
        @ssldirs, @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
 &flush_file_lines($svirt->{'file'});
 undef(@apache::get_config_cache);
-&release_lock_web($d);
 
+# Is the linked SSL cert still valid for the new domain? If not, break the
+# linkage by copying over the cert.
+if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
+	local $oldsame = &get_domain($d->{'ssl_same'});
+	&break_ssl_linkage($d, $oldsame);
+	}
+
+&release_lock_web($d);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, 1);
 return 1;
