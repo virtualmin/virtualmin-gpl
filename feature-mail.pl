@@ -6412,6 +6412,16 @@ return ( { 'name' => 'MailShark',
 		     $d->{'dom'}.'.s'.$id.'b1.psmtp.com',
 		     $d->{'dom'}.'.s'.$id.'b2.psmtp.com' ],
 	 },
+	 { 'name' => 'CudaMail',
+	   'url' => 'http://www.cudamail.com/',
+	   'id' => 1,
+	   'mx' => [ $id.'.cudamail.com' ],
+	 },
+	 { 'name' => 'Barracuda',
+	   'url' => 'https://www.barracuda.com/products/emailsecurityservice',
+	   'id' => 1,
+	   'mx' => [ $id.'.ess.barracudanetworks.com' ],
+	 },
         );
 }
 
