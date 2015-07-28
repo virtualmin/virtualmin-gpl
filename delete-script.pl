@@ -13,6 +13,8 @@ are installed, you can also use C<--version> to select a specific one to remove.
 
 Be careful using this program, as it removes all data files, web pages and
 database tables for the script, without asking for confirmation.
+If you want to make Virtualmin forget about a script without actually removing
+it, use the C<--deregister> flag. 
 
 =cut
 
@@ -58,6 +60,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--deregister") {
+		$dereg = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -88,36 +93,47 @@ else {
 	$sinfo = $matches[0];
 	}
 
-# Remove it
 $script = &get_script($sinfo->{'name'});
-&$first_print(&text('scripts_uninstalling', $script->{'desc'},
-					    $sinfo->{'version'}));
-($ok, $msg) = &{$script->{'uninstall_func'}}($d, $sinfo->{'version'},
-						 $sinfo->{'opts'});
-if ($msg =~ /</) {
-	$msg = &mailboxes::html_to_text($msg);
-	$msg =~ s/^\s+//;
-	$msg =~ s/\s+$//;
-	}
-print "$msg\n";
-if ($ok) {
-	&$second_print($text{'setup_done'});
-
-	# Remove any custom PHP directory
-	&clear_php_version($d, $sinfo);
-
-	# Remove custom proxy path
-	&delete_noproxy_path($d, $script, $sinfo->{'version'},
-			     $sinfo->{'opts'});
-
-	# Record script un-install in domain
+if ($dereg) {
+	# Just un-register it
+	&$first_print(&text('scripts_deregistering', $script->{'desc'},
+						     $sinfo->{'version'}));
 	&remove_domain_script($d, $sinfo);
-
+	&$second_print($text{'setup_done'});
 	&run_post_actions();
 	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
-	&$second_print($text{'scripts_failed'});
+	# Remove it
+	&$first_print(&text('scripts_uninstalling', $script->{'desc'},
+						    $sinfo->{'version'}));
+	($ok, $msg) = &{$script->{'uninstall_func'}}($d, $sinfo->{'version'},
+							 $sinfo->{'opts'});
+	if ($msg =~ /</) {
+		$msg = &mailboxes::html_to_text($msg);
+		$msg =~ s/^\s+//;
+		$msg =~ s/\s+$//;
+		}
+	print "$msg\n";
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+
+		# Remove any custom PHP directory
+		&clear_php_version($d, $sinfo);
+
+		# Remove custom proxy path
+		&delete_noproxy_path($d, $script, $sinfo->{'version'},
+				     $sinfo->{'opts'});
+
+		# Record script un-install in domain
+		&remove_domain_script($d, $sinfo);
+
+		&run_post_actions();
+		&virtualmin_api_log(\@OLDARGV, $d);
+		}
+	else {
+		&$second_print($text{'scripts_failed'});
+		}
 	}
 
 sub usage
@@ -128,6 +144,7 @@ print "\n";
 print "virtualmin delete-script --domain domain.name\n";
 print "                        [--type name --version number] |\n";
 print "                        [--id number]\n";
+print "                        [--deregister]\n";
 exit(1);
 }
 
