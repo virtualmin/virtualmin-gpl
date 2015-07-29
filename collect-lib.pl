@@ -75,12 +75,26 @@ if (&has_home_quotas()) {
 	foreach my $d (@doms) {
 		# If this is a parent domain, sum up quotas
 		if (!$d->{'parent'}) {
-			local ($home, $mail, $dbusage) =
-				&get_domain_quota($d, 1);
+			local ($home, $mail, $dbusage, $quota);
+			if ($config{'show_uquotas'} == 0) {
+				# Domain group quotas
+				($home, $mail, $dbusage) =
+					&get_domain_quota($d, 1);
+				$quota = $d->{'quota'};
+				}
+			else {
+				# Just the domain owner
+				local $duser = &get_domain_owner($d, 1, 0, 1);
+				$home = $duser->{'uquota'};
+				$mail = $duser->{'umquota'};
+				$dbusage = 0;
+				$quota = $duser->{'quota'} + $duser->{'mquota'};
+				}
 			local $usage = $home*$homesize +
 				       $mail*$mailsize;
-			$maxquota = $usage+$dbusage if ($usage+$dbusage > $maxquota);
-			local $limit = $d->{'quota'}*$homesize;
+			$maxquota = $usage+$dbusage
+				if ($usage+$dbusage > $maxquota);
+			local $limit = $quota * $homesize;
 			$maxquota = $limit if ($limit > $maxquota);
 			push(@quota, [ $d, $usage, $limit, $dbusage ]);
 			}
