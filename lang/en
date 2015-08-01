@@ -3760,6 +3760,7 @@ scripts_upok=Upgrade To Version:
 scripts_upok2=Upgrade To Un-supported Version:
 scripts_udesc=This page can be used to un-install a script, or upgrade it to the latest version. If you un-install, any data files and databases associated with it will be lost.
 scripts_uninstalling=Now un-installing $1 version $2 ..
+scripts_deregistering=Now de-registering $1 version $2 ..
 scripts_uptitle=Upgrade Script
 scripts_intitle=Install Script
 scripts_eavail=This script is not available
