@@ -25,7 +25,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "1.1.2-complete", "0.8.7" );
+return ( "1.1.2-complete", "1.0.6", "0.8.7" );
 }
 
 sub script_roundcube_category
@@ -364,6 +364,9 @@ return undef if ($ver < 0.9);
 local @vers = &osdn_package_versions("roundcubemail", "roundcubemail-([a-z0-9\\.\\-]+)\\.tar\\.gz");
 @vers = grep { !/beta/ && !/-dep$/ && !/alpha/ && !/-rc/ && !/mailvelope/ }
 	     @vers;
+if ($ver < 1.1) {
+	@vers = grep { $_ < 1.1 } @vers;
+	}
 return "Failed to find versions" if (!@vers);
 return $ver eq $vers[0] ? undef : $vers[0];
 }
