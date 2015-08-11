@@ -589,7 +589,7 @@ else {
 	# Can just copy with cp
 	my ($out, $ex) = &run_as_domain_user($d,
 		"cp -p ".quotemeta($src)." ".quotemeta($dst)." 2>&1");
-	if ($ex) {
+	if ($ex && $out !~ /failed to preserve ownership/i) {
 		$ok = 0;
 		$err = $out;
 		}
