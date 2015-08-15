@@ -41,8 +41,7 @@
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - Include filemin in Webmin release
-	- remove un-necessary dependencies
-
- - Cloning a domain doesn't break shared cert linkage
-	- http://virtualmin.com/node/37571
+ - Grant access to filemin to domain owners
+	- audit security code
+	- upload doesn't work as non-root?
+	- ensure no escape via links

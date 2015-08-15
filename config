@@ -18,6 +18,7 @@ defquota=1048576
 defuquota=1048576
 defmquota=51200
 avail_file=1
+avail_filemin=1
 avail_passwd=1
 avail_proc=2
 avail_cron=1

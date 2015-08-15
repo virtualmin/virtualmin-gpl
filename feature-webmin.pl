@@ -547,7 +547,7 @@ if (!$_[0]->{'domslimit'}) {
 &save_module_acl_logged(\%acl, $_[1]->{'name'}, ".");
 
 if ($extramods{'file'} && $_[0]->{'unix'}) {
-	# Limit file manager to user's directory, as unix user
+	# Limit old Java file manager to user's directory, as unix user
 	local %acl = ( 'noconfig' => 1,
 		       'uid' => $_[0]->{'uid'},
 		       'follow' => 0,
@@ -557,6 +557,18 @@ if ($extramods{'file'} && $_[0]->{'unix'}) {
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "file")
 		if (!$hasmods{'file'});
 	push(@mods, "file");
+	}
+
+if ($extramods{'filemin'} && $_[0]->{'unix'}) {
+	# Limit new HTML file manager to user's directory, as unix user
+	local %acl = ( 'noconfig' => 1,
+		       'work_as_root' => 0,
+		       'work_as_user', $_[0]->{'user'},
+		       'allowed_paths' => &resolve_links($_[0]->{'home'}),
+		     );
+	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "filemin")
+		if (!$hasmods{'filemin'});
+	push(@mods, "filemin");
 	}
 
 if ($_[0]->{'unix'}) {
