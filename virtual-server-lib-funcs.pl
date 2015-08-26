@@ -476,6 +476,8 @@ if (!$creating && $d->{'id'} && !-r "$domains_dir/$d->{'id'}") {
 	}
 &make_dir($domains_dir, 0700);
 &lock_file("$domains_dir/$d->{'id'}");
+local $oldd = { };
+&read_file("$domains_dir/$d->{'id'}", $oldd);
 if (!$d->{'created'}) {
 	$d->{'created'} = time();
 	$d->{'creator'} ||= $remote_user;
@@ -490,7 +492,14 @@ if (scalar(@main::list_domains_cache)) {
 	@main::list_domains_cache =
 		&unique(@main::list_domains_cache, $d->{'id'});
 	}
-&build_domain_maps();
+# Only rebuild maps if something relevant changed
+local $mchanged = 0;
+foreach my $m (keys %get_domain_by_maps) {
+	$mchanged++ if ($d->{$m} ne $oldd->{$m});
+	}
+if ($mchanged) {
+	&build_domain_maps();
+	}
 &set_ownership_permissions(undef, undef, 0700, "$domains_dir/$d->{'id'}");
 return 1;
 }
