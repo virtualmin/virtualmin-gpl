@@ -1824,7 +1824,8 @@ foreach my $pfx ('smtp', 'submission') {
 	local @others;
 	local $lsmtp;
 	foreach my $m (@$master) {
-		if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'}) {
+		if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'} &&
+		    $d->{'ip'} ne $defip) {
 			# Entry for service for the domain
 			$already = $m;
 			}
