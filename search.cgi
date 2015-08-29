@@ -68,7 +68,7 @@ else {
            $in{'field'} eq 'parent' ? [ 'user', 'quota', 'squota', 'uquota' ]
 				    : [ ]);
 	print &ui_links_row(\@links);
-	if ($virtualmin_pro) {
+	if ($virtualmin_pro && &can_config_domain($doms[0])) {
 		print &ui_submit($text{'index_delete'}, "delete"),"\n";
 		print &ui_submit($text{'index_mass'}, "mass"),"\n";
 		if (&can_disable_domain($doms[0])) {
