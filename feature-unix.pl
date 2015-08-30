@@ -201,7 +201,7 @@ if (!$_[0]->{'parent'}) {
 	     $_[0]->{'group'} ne $_[1]->{'group'})) {
 		# Get old resource limits, and clear
 		$rv = &get_domain_resource_limits($_[1]);
-		&save_domain_resource_limits($_[1], { });
+		&save_domain_resource_limits($_[1], { }, 1);
 		}
 	if ($uinfo) {
 		local %old = %$uinfo;
@@ -294,7 +294,7 @@ if (!$_[0]->{'parent'}) {
 
 	if ($rv) {
 		# Put back resource limits, perhaps under new name
-		&save_domain_resource_limits($_[0], $rv);
+		&save_domain_resource_limits($_[0], $rv, 1);
 		}
 	&release_lock_unix($_[0]);
 	}
