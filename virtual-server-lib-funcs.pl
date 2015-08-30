@@ -13127,9 +13127,13 @@ my %oldd = %$d;
 my $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 
 # Validate username, home directory and prefix
-if ($user eq 'auto') {
+if ($d->{'parent'}) {
+	# Sub-servers don't have a separate user
+	$user = undef;
+	}
+elsif ($user eq 'auto') {
 	my ($try1, $try2);
-	($user, $try1, $try2) = &unixuser_name($in{'new'});
+	($user, $try1, $try2) = &unixuser_name($dom || $d->{'dom'});
 	$user || return &text('setup_eauto', $try1, $try2);
 	}
 elsif ($user) {
@@ -13170,7 +13174,7 @@ if ($home eq 'auto') {
 	}
 elsif ($home) {
 	# User-selected home
-	-e $in{'home'} && return $text{'rename_ehome3'};
+	-e $home && return $text{'rename_ehome3'};
 	$home =~ /^(.*)\// && -d $1 || return $text{'rename_ehome4'};
 	&change_home_directory($d, $home);
 	}

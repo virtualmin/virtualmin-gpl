@@ -7,7 +7,15 @@ Change the domain name, home directory or username of a virtual server.
 This command is typically used to rename an existing server, selected with the
 C<--domain> flag, and changed to the name set with the C<--new-domain> option.
 
-XXX
+By default, the administration username, home directory and prefix for mailboxes
+will remaing unchanged. You can have these selected automatically based on
+the new domain name with the C<--auto-user>, C<--auto-home> and C<--auto-prefix>
+flags. Alternately, you can set them directly with the C<--new-user>, 
+C<--new-home> and C<--new-prefix> flags followed by the settings you want.
+
+This command can also be used to change the home directory or username for
+a domain without even changign the domain name - just set the C<--new-home>
+or C<--new-user> flags without C<--new-domain>.
 
 =cut
 
@@ -61,16 +69,18 @@ while(@ARGV > 0) {
 		}
 	}
 
-# Find the domain
+# Find the domain and validate inputss
 $domain || usage("No domain specified");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
-
-# Validate other inputs
 $newdomain || $newuser || $newhome || $newprefix ||
 	&usage("No changes specified");
-# XXX
 
+# Do the rename
+$err = &rename_virtual_server($d, $newdomain, $newuser, $newhome, $newprefix);
+&usage($err) if ($err);
+
+&run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
 
 sub usage
