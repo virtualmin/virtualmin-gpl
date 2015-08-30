@@ -5770,8 +5770,8 @@ if (!&supports_ip6()) {
 	$ip6_tests = [ { 'command' => 'echo IPv6 is not supported' } ];
 	}
 
-# Tests for renaming a virtual server
-$rename_tests = [
+# Tests for renaming a virtual server via the web UI
+$webrename_tests = [
 	# Create a domain that will get renamed
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -5882,8 +5882,121 @@ $rename_tests = [
         },
 	];
 if (!$webmin_user || !$webmin_pass) {
-	$rename_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	$webrename_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
+
+# Tests for renaming a virtual server via the API
+$rename_tests = [
+	# Create a domain that will get renamed
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test rename domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      [ 'logrotate' ],
+		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test rename page' ],
+		      @create_args, ],
+	},
+
+	# Create a mailbox
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'ftp' ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Create an alias
+	{ 'command' => 'create-alias.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'from', $test_alias ],
+		      [ 'to', 'nobody@virtualmin.com' ] ],
+	},
+
+	# Validate the domain before
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Rename the domain
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'new-domain' => $test_rename_domain ],
+		      [ 'auto-user' ],
+		      [ 'auto-home' ],
+		      [ 'auto-prefix' ] ],
+	},
+
+	# Validate the domain
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Make sure DNS works
+	{ 'command' => 'host '.$test_rename_domain,
+	  'grep' => &get_default_ip(),
+	},
+
+	# Make sure website works
+	{ 'command' => $wget_command.'http://'.$test_rename_domain,
+	  'grep' => 'Test rename page',
+	},
+
+	# Make sure MySQL login works
+	{ 'command' => 'mysql -u '.$test_rename_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Validate renamed mailbox
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Unix username: '.$test_rename_full_user ],
+	},
+	
+	# Validate renamed alias
+	{ 'command' => 'list-aliases.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^'.$test_alias.'@'.$test_rename_domain ],
+	},
+
+	# Check that log file was renamed
+	-d "/var/log/virtualmin" ? (
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_rename_domain.'_access_log' },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_rename_domain.'_error_log' },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_access_log',
+	  'fail' => 1 },
+	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
+	  'fail' => 1 },
+	) : ( ),
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_rename_domain ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1
+        },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1
+        },
+	];
+if (!$webmin_user || !$webmin_pass) {
+	$webrename_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	}
+
+
 
 # Tests for web, mail and FTP bandwidth accounting.
 # Uses a different domain to prevent re-reading of old mail logs.
@@ -7766,6 +7879,7 @@ $alltests = { '_config' => $_config_tests,
 	      'plans' => $plans_tests,
 	      'plugin' => $plugin_tests,
 	      'ip6' => $ip6_tests,
+	      'webrename' => $webrename_tests,
 	      'rename' => $rename_tests,
 	      'bw' => $bw_tests,
 	      'quota' => $quota_tests,
