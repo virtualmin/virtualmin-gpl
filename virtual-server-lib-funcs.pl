@@ -13126,6 +13126,14 @@ $prefix = undef if ($prefix eq $d->{'prefix'});
 my %oldd = %$d;
 my $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 
+# Validate domain name
+if ($dom) {
+	my $derr = &allowed_domain_name($parentdom, $dom);
+	return $derr if ($derr);
+	my $clash = &get_domain_by("dom", $dom);
+	$clash && return $text{'rename_eclash'};
+	}
+
 # Validate username, home directory and prefix
 if ($d->{'parent'}) {
 	# Sub-servers don't have a separate user
