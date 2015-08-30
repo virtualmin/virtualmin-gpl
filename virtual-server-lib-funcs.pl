@@ -13118,11 +13118,38 @@ $d->{'email'} = $parent->{'email'};
 sub rename_virtual_server
 {
 my ($d, $dom, $user, $home, $prefix) = @_;
-if ($dom eq $d->{'dom'}) {
-	# Not actually changing
-	$dom = undef;
-	}
+
+$dom = undef if ($dom eq $d->{'dom'});
+$home = undef if ($home eq $d->{'home'});
+$prefix = undef if ($prefix eq $d->{'prefix'});
+
 my %oldd = %$d;
+my $parentdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+
+# Validate username, home directory and prefix
+if ($user eq 'auto') {
+	my ($try1, $try2);
+	($user, $try1, $try2) = &unixuser_name($in{'new'});
+	$user || return &text('setup_eauto', $try1, $try2);
+	}
+elsif ($user) {
+	&valid_mailbox_name($user) && return $text{'setup_euser2'};
+        my ($clash) = grep { $_->{'user'} eq $user } &list_all_users();
+        $clash && return $text{'rename_euserclash'};
+	}
+if ($prefix eq 'auto') {
+	$prefix = &compute_prefix($dom || $d->{'dom'}, $user || $d->{'user'},
+				  $parentdom);
+	}
+elsif ($prefix) {
+	$prefix =~ /^[a-z0-9\.\-]+$/i || return $text{'setup_eprefix'};
+        my $pclash = &get_domain_by("prefix", $prefix);
+        $pclash && return &text('setup_eprefix3', $prefix, $pclash->{'dom'});
+	}
+my $group;
+if ($prefix) {
+	$group = $user || $d->{'user'};
+	}
 
 # Update the domain object with the new domain name and username
 if ($dom) {
@@ -13136,18 +13163,16 @@ if ($user) {
 	$d->{'user'} = $user;
 	}
 
+# Validate and set home directory
 if ($home eq 'auto') {
 	# Automatic home
 	&change_home_directory($d, &server_home_directory($d, $parentdom));
 	}
 elsif ($home) {
 	# User-selected home
+	-e $in{'home'} && return $text{'rename_ehome3'};
 	$home =~ /^(.*)\// && -d $1 || return $text{'rename_ehome4'};
 	&change_home_directory($d, $home);
-	}
-my $newhome;
-if ($oldd{'home'} ne $d->{'home'}) {
-	$newhome = $d->{'home'};
 	}
 if ($group) {
 	$d->{'group'} = $group;
@@ -13218,8 +13243,8 @@ if ($dom) {
 if ($user) {
 	&$first_print(&text('rename_doinguser', "<tt>$user</tt>"));
 	}
-if ($newhome) {
-	&$first_print(&text('rename_doinghome', "<tt>$newhome</tt>"));
+if ($home) {
+	&$first_print(&text('rename_doinghome', "<tt>$home</tt>"));
 	}
 
 # Build the list of domains being changed
