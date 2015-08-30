@@ -13109,16 +13109,253 @@ $d->{'postgres_user'} = $parent->{'postgres_user'};
 $d->{'email'} = $parent->{'email'};
 }
 
-# rename_virtual_server(&domain, new-domain, new-user, new-home)
+# rename_virtual_server(&domain, [new-domain], [new-user], [new-home|"auto"],
+# 		        new-prefix)
 # Updates a virtual server and possibly sub-servers with a new domain name,
 # username and home directory. If any of the parameters are undef, they are
 # left un-changed. Prints progress output, and returns undef on success or
 # an error message on failure.
 sub rename_virtual_server
 {
-my ($d, $newdom, $newuser, $newhome) = @_;
+my ($d, $dom, $user, $home, $prefix) = @_;
+if ($dom eq $d->{'dom'}) {
+	# Not actually changing
+	$dom = undef;
+	}
+my %oldd = %$d;
 
-# XXX
+# Update the domain object with the new domain name and username
+if ($dom) {
+	$d->{'email'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+	$d->{'emailto'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+	$d->{'dom'} = $dom;
+	}
+if ($user) {
+	$d->{'email'} =~ s/^\Q$d->{'user'}\E\@/$user\@/g;
+	$d->{'emailto'} =~ s/^\Q$d->{'user'}\E\@/$user\@/g;
+	$d->{'user'} = $user;
+	}
+
+if ($home eq 'auto') {
+	# Automatic home
+	&change_home_directory($d, &server_home_directory($d, $parentdom));
+	}
+elsif ($home) {
+	# User-selected home
+	$home =~ /^(.*)\// && -d $1 || return $text{'rename_ehome4'};
+	&change_home_directory($d, $home);
+	}
+my $newhome;
+if ($oldd{'home'} ne $d->{'home'}) {
+	$newhome = $d->{'home'};
+	}
+if ($group) {
+	$d->{'group'} = $group;
+	$d->{'prefix'} = $prefix;
+	}
+
+# Find any sub-domain objects and update them
+if (!$d->{'parent'}) {
+	my @subs = &get_domain_by("parent", $d->{'id'});
+	foreach my $sd (@subs) {
+		my %oldsd = %$sd;
+		push(@oldsubs, \%oldsd);
+		if ($user) {
+			$sd->{'email'} =~ s/^\Q$sd->{'user'}\E\@/$user\@/g;
+			$sd->{'emailto'} =~ s/^\Q$sd->{'user'}\E\@/$user\@/g;
+			$sd->{'user'} = $user;
+			}
+		if ($dom) {
+			$sd->{'email'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+			$sd->{'emailto'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+			}
+		if ($home) {
+			&change_home_directory($sd,
+					       &server_home_directory($sd, $d));
+			}
+		if ($group) {
+			$sd->{'group'} = $group;
+			}
+		}
+	}
+
+# Find any domains aliases to this one, excluding child domains
+my @aliases = &get_domain_by("alias", $d->{'id'});
+my @aliases = grep { $_->{'parent'} != $d->{'id'} } @aliases;
+foreach my $ad (@aliases) {
+	my %oldad = %$ad;
+	push(@oldaliases, \%oldad);
+	}
+
+# Check for domain name clash, where the domain, user or group have changed
+foreach my $f (@features) {
+	my $cfunc = "check_${f}_clash";
+	if (defined(&$cfunc) && $dom{$f}) {
+		if ($dom && &$cfunc($d, 'dom')) {
+			return &text('setup_e'.$f, $dom, $dom{'db'},
+				     $user, $d->{'group'} || $group);
+			}
+		if ($user && &$cfunc($d, 'user')) {
+			return &text('setup_e'.$f, $dom, $dom{'db'},
+				     $user, $d->{'group'} || $group);
+			}
+		if ($group && &$cfunc($d, 'group')) {
+			return &text('setup_e'.$f, $dom, $dom{'db'},
+				     $user, $group);
+			}
+		}
+	}
+
+# Run the before command
+&set_domain_envs(\%oldd, "MODIFY_DOMAIN", $d);
+my $merr = &making_changes();
+&reset_domain_envs(\%oldd);
+return &text('rename_emaking', "<tt>$merr</tt>") if (defined($merr));
+
+if ($dom) {
+	&$first_print(&text('rename_doingdom', "<tt>$dom</tt>"));
+	}
+if ($user) {
+	&$first_print(&text('rename_doinguser', "<tt>$user</tt>"));
+	}
+if ($newhome) {
+	&$first_print(&text('rename_doinghome', "<tt>$newhome</tt>"));
+	}
+
+# Build the list of domains being changed
+my @doms = ( $d );
+my @olddoms = ( \%oldd );
+push(@doms, @subs, @aliases);
+push(@olddoms, @oldsubs, @oldaliases);
+
+# Setup print function to include domain name
+sub first_html_withdom
+{
+print &text('rename_dd', $doing_dom->{'dom'})," : ",@_,"<br>\n";
+}
+if (@doms > 1) {
+	$first_print = \&first_html_withdom;
+	}
+
+# Update all features in all domains. Include the mail feature always, as this
+# covers FTP users
+local $doing_dom;	# Has to be local for scoping
+foreach my $f (&unique(@features, 'mail')) {
+	my $mfunc = "modify_$f";
+	for(my $i=0; $i<@doms; $i++) {
+		my $p = &domain_has_website($doms[$i]);
+		if ($f eq "web" && $p && $p ne "web") {
+			# Web feature is provided by a plugin .. call it now
+			$doing_dom = $doms[$i];
+			&try_plugin_call($p, "feature_modify",
+					 $doms[$i], $olddoms[$i]);
+			}
+		elsif ($doms[$i]->{$f} && $config{$f} ||
+	               $f eq "unix" || $f eq "mail") {
+			$doing_dom = $doms[$i];
+			local $main::error_must_die = 1;
+			eval {
+				if ($doms[$i]->{'alias'}) {
+					# Is an alias domain, so pass in old
+					# and new target domain objects
+					local $aliasdom = &get_domain(
+						$doms[$i]->{'alias'});
+					local $idx = &indexof($aliasdom, @doms);
+					if ($idx >= 0) {
+						&try_function($f, $mfunc,
+						   $doms[$i], $olddoms[$i],
+						   $doms[$idx], $olddoms[$idx]);
+						}
+					else {
+						&try_function($f, $mfunc,
+						   $doms[$i], $olddoms[$i],
+						   $aliasdom, $aliasdom);
+						}
+					}
+				else {
+					# Not an alias domain
+					&try_function($f, $mfunc,
+						      $doms[$i], $olddoms[$i]);
+					}
+				};
+			if ($@) {
+				&$second_print(&text('setup_failure',
+					$text{'feature_'.$f}, "$@"));
+				}
+			}
+		}
+	}
+
+# Update plugins in all domains
+foreach $f (&list_feature_plugins()) {
+	for(my $i=0; $i<@doms; $i++) {
+		my $p = &domain_has_website($doms[$i]);
+		if ($doms[$i]->{$f} && $f ne $p) {
+			$doing_dom = $doms[$i];
+			&try_plugin_call($f, "feature_modify",
+					 $doms[$i], $olddoms[$i]);
+			}
+		}
+	}
+
+# Fix script installer paths in all domains
+if (defined(&list_domain_scripts)) {
+	&$first_print($text{'rename_scripts'});
+	for(my $i=0; $i<@doms; $i++) {
+		my ($olddir, $newdir) =
+		    ($olddoms[$i]->{'home'}, $doms[$i]->{'home'});
+		my ($olddname, $newdname) =
+		    ($olddoms[$i]->{'dom'}, $doms[$i]->{'dom'});
+		foreach my $sinfo (&list_domain_scripts($doms[$i])) {
+			my $changed = 0;
+			if ($olddir ne $newdir) {
+				# Fix directory
+				$changed++ if ($sinfo->{'opts'}->{'dir'} =~
+				       	       s/^\Q$olddir\E\//$newdir\//);
+				}
+			if ($olddname ne $newdname) {
+				# Fix domain in URL
+				$changed++ if ($sinfo->{'url'} =~
+					       s/\Q$olddname\E/$newdname/);
+				}
+			if (!$info{'opts'}->{'dir'} ||
+			    -d $info{'opts'}->{'dir'}) {
+				# list_domain_scripts will set deleted flag
+				# due to home directory move, so fix it now that
+				# script dir has been corrected
+				$sinfo->{'deleted'} = 0;
+				}
+			&save_domain_script($doms[$i], $sinfo) if ($changed);
+			}
+		}
+	&$second_print($text{'setup_done'});
+	}
+
+# Fix backup schedule and key owners
+if (!$oldd{'parent'}) {
+	&rename_backup_owner($d, \%oldd);
+	}
+
+&refresh_webmin_user($d);
+&run_post_actions();
+
+# Save all new domain details
+&$first_print($text{'save_domain'});
+for(my $i=0; $i<@doms; $i++) {
+	&save_domain($doms[$i]);
+	}
+&$second_print($text{'setup_done'});
+
+# Run the after command
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);
+my $merr = &made_changes();
+&$second_print(&text('rename_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
+
+# Clear all left-frame links caches, as links to Apache may no longer be valid
+&clear_links_cache();
+
+return undef;
 }
 
 # check_virtual_server_config([&lastconfig])
