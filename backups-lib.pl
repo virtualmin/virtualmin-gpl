@@ -612,6 +612,10 @@ DOMAIN: foreach $d (@$doms) {
 		$dok = 0;
 		goto DOMAINFAILED;
 		}
+	my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+	if ($parent) {
+		&obtain_lock_everything($parent);
+		}
 
 	# Ensure the backup dest dir is writable by this domain
 	if (!$homefmt) {
@@ -949,6 +953,9 @@ DOMAIN: foreach $d (@$doms) {
 	&$second_print(&text('backup_donedomain',
 			     &nice_hour_mins_secs($dtime, 1, 1)));
 	&$cbfunc($d, 2, "$dest/$df") if ($cbfunc);
+	if ($parent) {
+		&release_lock_everything($parent);
+		}
 	&release_lock_everything($d);
 	}
 
