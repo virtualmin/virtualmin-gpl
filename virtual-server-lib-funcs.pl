@@ -3441,7 +3441,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			# Quota used
 			if ($d->{'alias'} || $d->{'parent'}) {
 				# Alias and sub-servers have no usage
-				push(@cols, "0");
+				push(@cols, &nice_size(0));
 				}
 			else {
 				# Show total usage for domain
