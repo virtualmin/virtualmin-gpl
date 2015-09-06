@@ -341,6 +341,10 @@ if ($config{'google_oauth'} && !$config{'google_token'}) {
 	$config{'google_rtoken'} = $rtoken;
 	$config{'google_ttime'} = $ttime;
 	$config{'google_tstart'} = time();
+
+	# Validate that it actually works
+	my $buckets = &list_gcs_buckets();
+	ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
 	}
 
 &lock_file($module_config_file);
