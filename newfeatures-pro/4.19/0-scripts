@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Piwik script installer to version 2.14.3, Wordpress to 4.3, phpMyFAQ to 2.8.24, FengOffice to 3.3, Dolibarr to 3.7.2 and 3.6.4, MediaWiki to 1.25.2, Coppermine to 1.5.38, Magento to 1.9.2.1, Dokuwiki to 2015-08-10a, SugarCRM to 6.5.22, ownCloud to 8.1.1, Drupal to 7.39 and 6.37, Django to 1.4.22, Trac to 1.0.8 and 0.12.7, FosWiki to 2.0.1, CMS Made Simple to 1.12.1, and phpMyAdmin to 4.4.14.1.
+html=Updated the Piwik script installer to version 2.14.3, Wordpress to 4.3, phpMyFAQ to 2.8.24, FengOffice to 3.3, Dolibarr to 3.7.2 and 3.6.4, MediaWiki to 1.25.2, Coppermine to 1.5.38, Magento to 1.9.2.1, Dokuwiki to 2015-08-10a, SugarCRM to 6.5.22, ownCloud to 8.1.1, Drupal to 7.39 and 6.37, Django to 1.4.22, Trac to 1.0.8 and 0.12.7, FosWiki to 2.0.1, CMS Made Simple to 1.12.1, Typo3 to 6.2.15, and phpMyAdmin to 4.4.14.1.
 master=1
 reseller=1
 domain=1
