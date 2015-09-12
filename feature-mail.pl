@@ -1150,14 +1150,17 @@ sub disable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-if ($config{'mail_system'} == 5) {
-	# Just call vpopmail's disable function
-	local $qdom = quotemeta($_[0]->{'dom'});
-	&system_logged("$vpopbin/vmoduser -p $qdom 2>&1");
-	}
-else {
-	# Delete mail access for the domain
-	&delete_mail($_[0], 0, 1);
+
+if (!$config{'disable_mail'}) {
+	if ($config{'mail_system'} == 5) {
+		# Just call vpopmail's disable function
+		local $qdom = quotemeta($_[0]->{'dom'});
+		&system_logged("$vpopbin/vmoduser -p $qdom 2>&1");
+		}
+	else {
+		# Delete mail access for the domain
+		&delete_mail($_[0], 0, 1);
+		}
 	}
 
 &$first_print($text{'disable_users'});
@@ -1181,17 +1184,21 @@ sub enable_mail
 {
 &obtain_lock_mail($_[0]);
 &obtain_lock_unix($_[0]);
-if ($config{'mail_system'} == 5) {
-	# Just call vpopmail's enable function
-	local $qdom = quotemeta($_[0]->{'dom'});
-	&system_logged("$vpopbin/vmoduser -x $qdom 2>&1");
-	}
-else {
-	# Re-enable mail, and re-copy aliases from target domain (if any)
-	&setup_mail($_[0], 1);
-	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'} && $_[0]->{'aliascopy'}) {
-		my $target = &get_domain($_[0]->{'alias'});
-		&copy_alias_virtuals($_[0], $target);
+
+if (!$config{'disable_mail'}) {
+	if ($config{'mail_system'} == 5) {
+		# Just call vpopmail's enable function
+		local $qdom = quotemeta($_[0]->{'dom'});
+		&system_logged("$vpopbin/vmoduser -x $qdom 2>&1");
+		}
+	else {
+		# Re-enable mail, and re-copy aliases from target domain
+		&setup_mail($_[0], 1);
+		if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'} &&
+		    $_[0]->{'aliascopy'}) {
+			my $target = &get_domain($_[0]->{'alias'});
+			&copy_alias_virtuals($_[0], $target);
+			}
 		}
 	}
 
