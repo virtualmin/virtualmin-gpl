@@ -249,7 +249,8 @@ print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
 print &ui_table_row(&hlink($text{'backup_errors'}, "backup_errors"),
 		    &ui_radio("errors", int($sched->{'errors'}),
 			      [ [ 0, $text{'backup_errors0'} ],
-				[ 1, $text{'backup_errors1'} ] ]));
+				[ 1, $text{'backup_errors1'} ],
+				[ 2, $text{'backup_errors2'} ] ]));
 
 # For a single domain, show option to add sub-servers
 if ($d) {

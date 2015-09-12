@@ -159,7 +159,7 @@ if ($@) {
 
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
-if ($ok || $sched->{'errors'}) {
+if ($ok || $sched->{'errors'} == 1) {
 	$i = 0;
 	foreach $dest (@dests) {
 		if ($purges[$i]) {

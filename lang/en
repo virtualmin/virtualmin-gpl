@@ -2155,6 +2155,7 @@ backup_mkdir=Create destination directory?
 backup_errors=Action on error
 backup_errors0=Halt the backup immediately
 backup_errors1=Continue with other features and servers
+backup_errors2=Continue, but don't purge old backups
 backup_increment=Backup level
 backup_increment0=Full (all files)
 backup_increment1=Incremental (only files changed since last full backup)
