@@ -33,6 +33,9 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
+if (&can_use_aws_cmd($akey, $skey)) {
+	return &init_s3_bucket_aws_cmd(@_);
+	}
 $tries ||= 1;
 my $err;
 my $data;
@@ -82,6 +85,42 @@ for(my $i=0; $i<$tries; $i++) {
 			}
 		}
 	last;
+	}
+return $err;
+}
+
+# init_s3_bucket_aws_cmd(access-key, secret-key, bucket, attempts, [location])
+# Like init_s3_bucket, but shells out to the awe command
+sub init_s3_bucket_aws_cmd
+{
+my ($akey, $skey, $bucket, $tries, $location) = @_;
+my @regionflag = $location ? ( "--region", $location ) : ( );
+$tries ||= 1;
+my $err;
+for(my $i=0; $i<$tries; $i++) {
+	$err = undef;
+
+	# Check if bucket already exists
+	my $buckets = &s3_list_buckets($akey, $skey);
+	if (!ref($buckets)) {
+		$err = $buckets;
+		sleep(10*($i+1));
+		next;
+		}
+	my ($got) = grep { $_->{'Name'} eq $bucket } @$buckets;
+	last if ($got);
+
+	# If not, create it in the chosen region
+	my $out = &call_aws_cmd($akey,
+                [ @regionflag, "mb", "s3://$bucket" ]);
+	if ($?) {
+		$err = $out;
+		sleep(10*($i+1));
+		next;
+		}
+	else {
+		last;
+		}
 	}
 return $err;
 }
@@ -479,7 +518,7 @@ return $rv;
 sub s3_list_buckets
 {
 &require_s3();
-my ($akey, $skey, $bucket) = @_;
+my ($akey, $skey) = @_;
 if (&can_use_aws_cmd($akey, $skey)) {
 	# Use the aws command
 	my $out = &call_aws_cmd($akey, [ "ls" ]);
