@@ -319,6 +319,8 @@ $cloudmin_provisioning_ssl = 1;
 $old_uids_file = &cache_file_path("old-uids");
 $old_gids_file = &cache_file_path("old-gids");
 
+$recommended_theme = 'authentic-theme';
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.

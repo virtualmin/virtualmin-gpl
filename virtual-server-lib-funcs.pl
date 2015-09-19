@@ -10721,6 +10721,22 @@ if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
 	push(@rv, $alert_text);
 	}
 
+# Suggest that the user switch themes to authentic
+my @themes = &list_themes();
+my ($theme) = grep { $_->{'dir'} eq $recommended_theme } @themes;
+if ($theme && $current_theme ne $recommended_theme &&
+    !$config{'theme_switch_'.$recommended_theme}) {
+	my $switch_text;
+	$switch_text .= "<b>".&text('index_themeswitch',
+				    $theme->{'desc'})."</b><p>\n";
+	$switch_text .= &ui_form_start(
+		"$gconfig{'webprefix'}/$module_name/switch_theme.cgi");
+	$switch_text .= &ui_submit($text{'index_themeswitchok'});
+	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
+	$switch_text .= &ui_form_end();
+	push(@rv, $switch_text);
+	}
+
 return @rv;
 }
 

@@ -22,10 +22,6 @@
 	- Contao https://www.virtualmin.com/node/16164
 	- net2ftp https://www.virtualmin.com/node/19024
 
- - Command-line domain rename
-	- Add to unit tests
-	- http://www.virtualmin.com/node/18938
-
  - Per-directory SVN access control
 	- http://www.virtualmin.com/node/18073
 
@@ -34,14 +30,11 @@
 	- CHANGELOG
 	- backup/restore
 
- - Mobile theme should use new menu function (but maybe wait till new release)
-	- and right-frame info too
- 
  - PFS fixes
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - Grant access to filemin to domain owners
-	- audit security code
-	- upload doesn't work as non-root?
-	- ensure no escape via links
+ - Test virtualmin will 100k domains
+
+ - If a domain owner has a key in .ssh, use it for backups via SSH that he
+   creates : http://virtualmin.com/node/38033

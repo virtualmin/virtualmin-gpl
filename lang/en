@@ -234,6 +234,9 @@ index_clouds=Cloud Storage Providers
 index_cloudsdesc=Configure authentication to cloud storage providers like S3, rackspace, Google and Dropbox.
 index_dmore=$1 more ..
 index_virtualminconfig=Virtualmin Configuration
+index_themeswitch=You are not currently using the recommended theme for Virtualmin : <i>$1</i>. Switch now to get the best user interface and experience!
+index_themeswitchok=Switch Themes
+index_themeswitchnot=Don't Ask Me Again
 
 form_title=Create Virtual Server
 form_title2=Create Virtual Sub-Server
