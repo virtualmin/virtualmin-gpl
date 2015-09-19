@@ -2,7 +2,6 @@
 # Show details of a single logged email
 
 require './virtual-server-lib.pl';
-use POSIX;
 &ReadParse();
 &error_setup($text{'viewmaillog_err'});
 

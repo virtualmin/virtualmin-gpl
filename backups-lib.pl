@@ -224,7 +224,8 @@ if (@jobs) {
 sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
-       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key, $kill) = @_;
+       $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key,
+       $kill) = @_;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
@@ -3380,8 +3381,6 @@ return undef;
 sub backup_strftime
 {
 local ($dest) = @_;
-eval "use POSIX";
-eval "use posix" if ($@);
 local @tm = localtime(time());
 &clear_time_locale() if (defined(&clear_time_locale));
 local $rv;

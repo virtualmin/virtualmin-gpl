@@ -29,7 +29,6 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-shared-addresses.pl must be run as root";
 	}
-use POSIX;
 
 # Parse command-line args
 $owner = 1;

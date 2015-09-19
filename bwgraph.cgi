@@ -4,7 +4,6 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-use POSIX;
 
 # Work out which domains to show
 if ($in{'dom'}) {

@@ -2,7 +2,6 @@
 # Runs all Virtualmin tests
 
 package virtual_server;
-use POSIX;
 if (!$module_name) {
 	$main::no_acl_check++;
 	$ENV{'WEBMIN_CONFIG'} ||= "/etc/webmin";
@@ -5821,7 +5820,7 @@ $webrename_tests = [
 
 	# Call the rename CGI
 	{ 'command' => $webmin_wget_command.
-		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/rename.cgi\\?dom=\$DOMID\\&new=$test_rename_domain\\&user_mode=1\\&home_mode=1\\&group_mode=1",
+		       "${webmin_proto}://localhost:${webmin_port}/virtual-server/rename.cgi\\?dom=\$DOMID\\&new=$test_rename_domain\\&user_mode=1\\&home_mode=1\\&prefix_mode=1",
 	   'grep' => 'Saving server details',
 	},
 

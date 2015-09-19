@@ -28,7 +28,6 @@ if (!$module_name) {
 	$< == 0 || die "modify-custom.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-use POSIX;
 
 # Parse command-line args
 $owner = 1;

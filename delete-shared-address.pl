@@ -27,7 +27,6 @@ if (!$module_name) {
 	$< == 0 || die "delete-shared-address.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-use POSIX;
 
 # Parse command-line args
 $owner = 1;

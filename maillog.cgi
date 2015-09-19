@@ -2,7 +2,6 @@
 # Show a form for searching mail logs, and the results
 
 require './virtual-server-lib.pl';
-use POSIX;
 &ReadParse();
 if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});

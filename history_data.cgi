@@ -4,7 +4,6 @@
 require './virtual-server-lib.pl';
 &can_show_history() || &error($text{'history_ecannot'});
 &ReadParse();
-use POSIX;
 @stats = split(/\0/, $in{'stat'});
 
 # Get the stats, and fill in missing section to the left. All stats need

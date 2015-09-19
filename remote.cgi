@@ -3,8 +3,8 @@
 # simply passes on parameters to a specified command-line program
 
 package virtual_server;
-use Socket;
 use POSIX;
+use Socket;
 $trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();

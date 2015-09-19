@@ -2,7 +2,6 @@
 # Show the details of one domain
 
 require './virtual-server-lib.pl';
-use POSIX;
 &ReadParse();
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
