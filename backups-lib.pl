@@ -243,6 +243,7 @@ if ($asowner) {
 	($asd) = grep { !$_->{'parent'} } @$doms;
 	$asd ||= $doms->[0];
 	}
+local $asuser = $asd ? $asd->{'user'} : undef;
 
 # Find the tar command
 if (!&get_tar_command()) {
@@ -322,13 +323,13 @@ foreach my $desturl (@$desturls) {
 		local $temp = &transname();
 		open(TEMP, ">$temp");
 		close(TEMP);
-		&scp_copy($temp, $r, $pass, \$scperr, $port);
+		&scp_copy($temp, $r, $pass, \$scperr, $port, $asuser);
 		if ($scperr) {
 			# Copy to /tmp failed .. try current dir instead
 			$scperr = undef;
 			$testfile = "virtualmin-copy-test.$testuser";
 			$r = ($user ? "$user\@" : "").$qserver.":".$testfile;
-			&scp_copy($temp, $r, $pass, \$scperr, $port);
+			&scp_copy($temp, $r, $pass, \$scperr, $port, $asuser);
 			}
 		if ($scperr) {
 			# Copy to ~ failed .. try target dir instead
@@ -340,7 +341,7 @@ foreach my $desturl (@$desturls) {
 				$testfile = "$pathdir/virtualmin-copy-test.$testuser";
 				}
 			$r = ($user ? "$user\@" : "").$qserver.":".$testfile;
-			&scp_copy($temp, $r, $pass, \$scperr, $port);
+			&scp_copy($temp, $r, $pass, \$scperr, $port, $asuser);
 			}
 		if ($scperr) {
 			$scperr =~ s/\Q$pass\E/$starpass/g;
@@ -363,7 +364,8 @@ foreach my $desturl (@$desturls) {
 			# ssh mkdir first
 			local $mkcmd = $sshcmd." 'mkdir -p $path'";
 			local $err;
-			local $lsout = &run_ssh_command($mkcmd, $pass, \$err);
+			local $lsout = &run_ssh_command($mkcmd, $pass, \$err,
+							$asuser);
 
 			if ($err) {
 				# Try scping an empty dir
@@ -372,7 +374,8 @@ foreach my $desturl (@$desturls) {
 				&make_dir($empty, 0700);
 				local $r = ($user ? "$user\@" : "").
 					   "$server:$pathdir";
-				&scp_copy($empty, $r, $pass, \$mkdirerr, $port);
+				&scp_copy($empty, $r, $pass, \$mkdirerr, $port,
+					  $asuser);
 				&unlink_file($empty);
 				}
 			}
@@ -879,11 +882,12 @@ DOMAIN: foreach $d (@$doms) {
 							"[$server]" : $server;
 				local $r = ($user ? "$user\@" : "").
 					   "$qserver:$path";
-				&scp_copy("$dest/$df", $r, $pass, \$err, $port);
+				&scp_copy("$dest/$df", $r, $pass, \$err, $port,
+					  $asuser);
 				&scp_copy($infotemp, "$r/$df.info", $pass,
-					  \$err, $port) if (!$err);
+					  \$err, $port, $asuser) if (!$err);
 				&scp_copy($domtemp, "$r/$df.dom", $pass,
-					  \$err, $port) if (!$err);
+					  \$err, $port, $asuser) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
 				}
 			elsif ($mode == 3) {
@@ -1298,14 +1302,15 @@ foreach my $desturl (@$desturls) {
 			local $tstart = time();
 			foreach my $df (@destfiles) {
 				&scp_copy("$dest/$df", "$r/$df",
-					  $pass, \$err, $port);
+					  $pass, \$err, $port, $asuser);
 				last if ($err);
 				}
 			if ($err) {
 				# Target dir didn't exist, so scp just the
 				# directory and all files
 				$err = undef;
-				&scp_copy($dest, $r, $pass, \$err, $port);
+				&scp_copy($dest, $r, $pass, \$err, $port,
+					  $asuser);
 				}
 			# Upload each domain's .info and .dom files
 			foreach my $df (@destfiles) {
@@ -1319,9 +1324,9 @@ foreach my $desturl (@$desturls) {
 				&uncat_file($domtemp,
 					    &serialise_variable($bdom));
 				&scp_copy($infotemp, $r."/$df.info", $pass,
-					  \$err, $port) if (!$err);
+					  \$err, $port, $asuser) if (!$err);
 				&scp_copy($domtemp, $r."/$df.dom", $pass,
-					  \$err, $port) if (!$err);
+					  \$err, $port, $asuser) if (!$err);
 				}
 			$err =~ s/\Q$pass\E/$starpass/g;
 			if (!$err && $asd) {
@@ -1344,11 +1349,11 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donefeatures));
 			&uncat_file($domtemp,
 				    &serialise_variable(\%donedoms));
-			&scp_copy($dest, $r, $pass, \$err, $port);
-			&scp_copy($infotemp, $r.".info", $pass, \$err, $port)
-				if (!$err);
-			&scp_copy($domtemp, $r.".dom", $pass, \$err, $port)
-				if (!$err);
+			&scp_copy($dest, $r, $pass, \$err, $port, $asuser);
+			&scp_copy($infotemp, $r.".info", $pass, \$err, $port,
+				  $asuser) if (!$err);
+			&scp_copy($domtemp, $r.".dom", $pass, \$err, $port,
+				  $asuser) if (!$err);
 			$err =~ s/\Q$pass\E/$starpass/g;
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
@@ -1729,6 +1734,7 @@ if ($asowner) {
 	($asd) = grep { !$_->{'parent'} && !$_->{'missing'} } @$doms;
 	$asd ||= $doms->[0];
 	}
+local $asuser = $asd ? $asd->{'user'} : undef;
 
 # Work out where the backup is located
 local $ok = 1;
@@ -1757,7 +1763,7 @@ if ($mode > 0) {
 	$backup = &transname();
 	local $tstart = time();
 	local $derr = &download_backup($_[0], $backup,
-		[ map { $_->{'dom'} } @$doms ], $vbs);
+		[ map { $_->{'dom'} } @$doms ], $vbs, 0, $asd);
 	if ($derr) {
 		$derr =~ s/\Q$pass\E/$starpass/g;
 		&$second_print(&text('restore_downloadfailed', $derr));
@@ -2681,13 +2687,13 @@ if ($mode > 0) {
 return $ok;
 }
 
-# backup_contents(file, [want-domains], [&key])
+# backup_contents(file, [want-domains], [&key], [&as-domain])
 # Returns a hash ref of domains and features in a backup file, or an error
 # string if it is invalid. If the want-domains flag is given, the domain
 # structures are also returned as a list of hash refs (except for S3).
 sub backup_contents
 {
-local ($file, $wantdoms, $key) = @_;
+local ($file, $wantdoms, $key, $asd) = @_;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
 local $doms;
@@ -2708,7 +2714,7 @@ if ($mode == 3) {
 elsif ($mode > 0) {
 	# Download info files via SSH or FTP
 	local $infotemp = &transname();
-	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1);
+	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1, $asd);
 	if (!$infoerr) {
 		if (-d $infotemp) {
 			# Got a whole dir of .info files
@@ -2759,7 +2765,7 @@ if ($mode == 3) {
 elsif ($mode > 0) {
 	# Download .dom files via SSH or FTP
 	local $domtemp = &transname();
-	local $domerr = &download_backup($_[0], $domtemp, undef, undef, 2);
+	local $domerr = &download_backup($_[0], $domtemp, undef, undef, 2, $asd);
 	if (!$domerr) {
 		if (-d $domtemp) {
 			# Got a whole dir of .dom files
@@ -2810,7 +2816,7 @@ if (%dom && %info && keys(%dom) >= keys(%info)) {
 if ($mode > 0) {
 	# Need to download the whole file
 	$backup = &transname();
-	local $derr = &download_backup($_[0], $backup);
+	local $derr = &download_backup($_[0], $backup, undef, undef, 0, $asd);
 	return $derr if ($derr);
 	}
 else {
@@ -2827,10 +2833,10 @@ if (-d $backup) {
 		local ($cont, $fdoms);
 		if ($wantdoms) {
 			($cont, $fdoms) = &backup_contents(
-						"$backup/$f", 1, $key);
+						"$backup/$f", 1, $key, $asd);
 			}
 		else {
-			$cont = &backup_contents("$backup/$f", 0, $key);
+			$cont = &backup_contents("$backup/$f", 0, $key, $asd);
 			}
 		if (ref($cont)) {
 			# Merge in contents of file
@@ -3075,12 +3081,14 @@ return @rv;
 }
 
 # download_backup(url, tempfile, [&domain-names], [&config-features],
-#                 [info-files-only])
+#                 [info-files-only], [&as-domain])
 # Downloads a backup file or directory to a local temp file or directory.
 # Returns undef on success, or an error message.
 sub download_backup
 {
-local ($url, $temp, $domnames, $vbs, $infoonly) = @_;
+local ($url, $temp, $domnames, $vbs, $infoonly, $asd) = @_;
+local $asuser = $asd ? $asd->{'user'} : undef;
+print STDERR "asuser=$asuser\n";
 local $cache = $main::download_backup_cache{$url};
 if ($cache && -r $cache && !$infoonly) {
 	# Already got the file .. no need to re-download
@@ -3130,13 +3138,13 @@ elsif ($mode == 2) {
 	if ($infoonly) {
 		# First try file with .info or .dom extension
 		&scp_copy(($user ? "$user\@" : "")."$qserver:$path".$sfx,
-			  $temp, $pass, \$err, $port);
+			  $temp, $pass, \$err, $port, $asuser);
 		if ($err) {
 			# Fall back to .info or .dom files in directory
 			&make_dir($temp, 0700);
 			&scp_copy(($user ? "$user\@" : "").
 				  $qserver.":".$path."/*".$sfx,
-				  $temp, $pass, \$err, $port);
+				  $temp, $pass, \$err, $port, $asuser);
 			$err = undef;
 			}
 		}
@@ -3151,7 +3159,7 @@ elsif ($mode == 2) {
 							"virtualmin")."}";
 			&scp_copy(($user ? "$user\@" : "").
 				  "$qserver:$path/$domfiles.*",
-				  $temp, $pass, \$err, $port);
+				  $temp, $pass, \$err, $port, $asuser);
 			$gotfiles = 1 if (!$err);
 			$err = undef;
 			}
@@ -3161,7 +3169,7 @@ elsif ($mode == 2) {
 			&unlink_file($temp);	# Must remove so that recursive
 						# scp doesn't copy into it
 			&scp_copy(($user ? "$user\@" : "")."$qserver:$path",
-				  $temp, $pass, \$err, $port);
+				  $temp, $pass, \$err, $port, $asuser);
 			}
 		}
 	return $err if ($err);

@@ -6535,12 +6535,12 @@ if (!$_[3]->{'fix'}) {
 return 1;
 }
 
-# scp_copy(source, dest, password, &error, port)
+# scp_copy(source, dest, password, &error, port, [as-user])
 # Copies a file from some source to a destination. One or the other can be
 # a server, like user@foo:/path/to/bar/
 sub scp_copy
 {
-local ($src, $dest, $pass, $err, $port) = @_;
+local ($src, $dest, $pass, $err, $port, $asuser) = @_;
 if ($src =~ /\s/) {
 	my ($host, $path) = split(/:/, $src, 2);
 	$src = $host.":".quotemeta($path);
@@ -6551,16 +6551,19 @@ if ($dest =~ /\s/) {
 	}
 local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
-&run_ssh_command($cmd, $pass, $err);
+&run_ssh_command($cmd, $pass, $err, $asuser);
 }
 
-# run_ssh_command(command, pass, &error)
+# run_ssh_command(command, pass, &error, [as-user])
 # Attempt to run some command that uses ssh or scp, feeding in a password.
 # Returns the output, and sets the error variable ref if failed.
 sub run_ssh_command
 {
-local ($cmd, $pass, $err) = @_;
+local ($cmd, $pass, $err, $asuser) = @_;
 &foreign_require("proc", "proc-lib.pl");
+if ($asuser) {
+	$cmd = &command_as_user($asuser, 0, $cmd);
+	}
 local ($fh, $fpid) = &proc::pty_process_exec($cmd);
 local $out;
 while(1) {

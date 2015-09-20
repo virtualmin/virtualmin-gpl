@@ -305,8 +305,13 @@ if ($keyid) {
 	$key || &usage("No backup key with ID or description $keyid exists");
 	}
 
+# Find the owner of a domain
+if ($asowner && @rdoms) {
+	$asd = &get_domain_by("dom", $rdoms[0]);
+	}
+
 # Find the selected domains
-($cont, $contdoms) = &backup_contents($src, 1, $key);
+($cont, $contdoms) = &backup_contents($src, 1, $key, $asd);
 ref($cont) || &usage("Failed to read backup file : $cont");
 (keys %$cont) || &usage("Nothing in backup file!");
 if ($all_doms) {
