@@ -17274,6 +17274,24 @@ foreach my $f (grep { $d->{$_} } &domain_features($d)) {
 return @rv;
 }
 
+# transname_owned(user|&domain)
+# Create a temporary sub-directory owned by some user, and return a filename
+# inside it
+sub transname_owned
+{
+my ($user) = @_;
+$user = $user->{'user'} if (ref($user));
+my $temp = &transname();
+if (!$user || $user eq "root") {
+	return $temp;
+	}
+&make_dir($temp, 0755);
+&set_ownership_permissions($user, undef, undef, $temp);
+my $rv = $temp."/".($$."_".($transname_owned_counter++));
+unshift(@main::temporary_files, $rv);
+return $rv;
+}
+
 # load_plugin_libraries([plugin, ...])
 # Call foreign_require on some or all plugins, just once
 sub load_plugin_libraries

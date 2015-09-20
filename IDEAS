@@ -38,8 +38,4 @@
 
  - If a domain owner has a key in .ssh, use it for backups via SSH that he
    creates : http://virtualmin.com/node/38033
-	- restores too
 	- purge?
-	- download function?
-	- all calls to backup_contents
-	- download to temp file needs to be writable by $asd

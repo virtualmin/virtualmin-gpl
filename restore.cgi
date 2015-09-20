@@ -141,7 +141,7 @@ if ($crmode == 1) {
 		}
 	}
 
-($cont, $contdoms) = &backup_contents($src, 1, $key);
+($cont, $contdoms) = &backup_contents($src, 1, $key, $d);
 if (!$in{'confirm'}) {
 	# See what is in the tar file or directory, to show the user
 	ref($cont) || &error(&text('restore_efile', $cont));

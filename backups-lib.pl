@@ -1760,7 +1760,7 @@ if ($mode > 0) {
 			return 0;
 			}
 		}
-	$backup = &transname();
+	$backup = &transname_owned($asd);
 	local $tstart = time();
 	local $derr = &download_backup($_[0], $backup,
 		[ map { $_->{'dom'} } @$doms ], $vbs, 0, $asd);
@@ -2713,7 +2713,7 @@ if ($mode == 3) {
 	}
 elsif ($mode > 0) {
 	# Download info files via SSH or FTP
-	local $infotemp = &transname();
+	local $infotemp = &transname_owned($asd);
 	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1, $asd);
 	if (!$infoerr) {
 		if (-d $infotemp) {
@@ -2764,7 +2764,7 @@ if ($mode == 3) {
 	}
 elsif ($mode > 0) {
 	# Download .dom files via SSH or FTP
-	local $domtemp = &transname();
+	local $domtemp = &transname_owned($asd);
 	local $domerr = &download_backup($_[0], $domtemp, undef, undef, 2, $asd);
 	if (!$domerr) {
 		if (-d $domtemp) {
@@ -2815,7 +2815,7 @@ if (%dom && %info && keys(%dom) >= keys(%info)) {
 
 if ($mode > 0) {
 	# Need to download the whole file
-	$backup = &transname();
+	$backup = &transname_owned($asd);
 	local $derr = &download_backup($_[0], $backup, undef, undef, 0, $asd);
 	return $derr if ($derr);
 	}
@@ -3088,7 +3088,6 @@ sub download_backup
 {
 local ($url, $temp, $domnames, $vbs, $infoonly, $asd) = @_;
 local $asuser = $asd ? $asd->{'user'} : undef;
-print STDERR "asuser=$asuser\n";
 local $cache = $main::download_backup_cache{$url};
 if ($cache && -r $cache && !$infoonly) {
 	# Already got the file .. no need to re-download
