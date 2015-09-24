@@ -161,11 +161,12 @@ if ($@) {
 @purges = &get_scheduled_backup_purges($sched);
 if ($ok || $sched->{'errors'} == 1) {
 	$i = 0;
+	$asd = $cbmode == 2 ? &get_backup_as_domain(\@doms) : undef;
 	foreach $dest (@dests) {
 		if ($purges[$i]) {
 			$current_id = undef;
 			$pok = &purge_domain_backups(
-				$dest, $purges[$i], $start_time);
+				$dest, $purges[$i], $start_time, $asd);
 			$ok = 0 if (!$pok);
 			}
 		$i++;

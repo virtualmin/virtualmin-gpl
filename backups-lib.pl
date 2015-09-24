@@ -215,6 +215,16 @@ if (@jobs) {
 	}
 }
 
+# get_backup_as_domain(&domains)
+# Returns the domain whose user should be used to run backups
+sub get_backup_as_domain
+{
+my ($doms) = @_;
+my ($asd) = grep { !$_->{'parent'} } @$doms;
+$asd ||= $doms->[0];
+return $asd;
+}
+
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
 #		 &callback-func, incremental, on-schedule, &key, kill-running)
@@ -238,11 +248,7 @@ if ($err) {
 	}
 
 # Work out who the backup is running as
-local $asd;
-if ($asowner) {
-	($asd) = grep { !$_->{'parent'} } @$doms;
-	$asd ||= $doms->[0];
-	}
+local $asd = $asowner ? &get_backup_as_domain($doms) : undef;
 local $asuser = $asd ? $asd->{'user'} : undef;
 
 # Find the tar command
@@ -1729,11 +1735,7 @@ local ($file, $doms, $features, $opts, $vbs, $onlyfeats, $ipinfo, $asowner,
        $skipwarnings, $key, $continue, $delete_existing) = @_;
 
 # Find owning domain
-local $asd;
-if ($asowner) {
-	($asd) = grep { !$_->{'parent'} && !$_->{'missing'} } @$doms;
-	$asd ||= $doms->[0];
-	}
+local $asd = $asowner ? &get_backup_as_domain($doms) : undef;
 local $asuser = $asd ? $asd->{'user'} : undef;
 
 # Work out where the backup is located
@@ -4245,12 +4247,13 @@ elsif ($mode == 8) {
 return ( );
 }
 
-# purge_domain_backups(dest, days, [time-now])
+# purge_domain_backups(dest, days, [time-now], [&as-domain])
 # Searches a backup destination for backup files or directories older than
 # same number of days, and deletes them. May print stuff using first_print.
 sub purge_domain_backups
 {
-local ($dest, $days, $start) = @_;
+local ($dest, $days, $start, $asd) = @_;
+local $asuser = $asd ? $asd->{'user'} : undef;
 &$first_print(&text('backup_purging2', $days, &nice_backup_url($dest)));
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
@@ -4345,12 +4348,12 @@ elsif ($mode == 2) {
 			$user."\@".$host;
 	local $err;
 	local $lscmd = $sshcmd." LANG=C ls -l ".quotemeta($base);
-	local $lsout = &run_ssh_command($lscmd, $pass, \$err);
+	local $lsout = &run_ssh_command($lscmd, $pass, \$err, $asuser);
 	if ($err) {
 		# Try again without LANG=C , in case shell isn't bash/sh
 		$err = undef;
 		$lscmd = $sshcmd." ls -l ".quotemeta($base);
-		$lsout = &run_ssh_command($lscmd, $pass, \$err);
+		$lsout = &run_ssh_command($lscmd, $pass, \$err, $asuser);
 		}
 	if ($err) {
 		&$second_print(&text('backup_purgeesshls', $err));
@@ -4372,7 +4375,7 @@ elsif ($mode == 2) {
 				       " ".quotemeta("$base/$st[13].info").
 				       " ".quotemeta("$base/$st[13].dom");
 			local $rmerr;
-			&run_ssh_command($rmcmd, $pass, \$rmerr);
+			&run_ssh_command($rmcmd, $pass, \$rmerr, $asuser);
 			if ($rmerr) {
 				&$second_print(&text('backup_edelssh', $rmerr));
 				$ok = 0;

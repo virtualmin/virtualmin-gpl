@@ -251,11 +251,12 @@ else {
 	if (($ok || $in{'errors'}) && $in{'oneoff'}) {
 		@purges = &get_scheduled_backup_purges($sched);
 		$i = 0;
+		$asd = $cbmode == 2 ? &get_backup_as_domain(\@doms) : undef;
 		foreach $dest (@dests) {
 			if ($purges[$i]) {
 				$current_id = undef;
 				$pok = &purge_domain_backups(
-					$dest, $purges[$i], $start_time);
+					$dest, $purges[$i], $start_time, $asd);
 				}
 			$i++;
 			}

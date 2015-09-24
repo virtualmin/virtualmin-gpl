@@ -35,7 +35,3 @@
 	- DH key functions
 
  - Test virtualmin will 100k domains
-
- - If a domain owner has a key in .ssh, use it for backups via SSH that he
-   creates : http://virtualmin.com/node/38033
-	- purge?

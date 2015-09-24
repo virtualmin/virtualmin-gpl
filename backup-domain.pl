@@ -365,8 +365,9 @@ else {
 # Purge if requested
 $pok = 1;
 if ($purge && $ok) {
+	$asd = $asowner ? &get_backup_as_domain(\@doms) : undef;
 	foreach $dest (@dests) {
-		$pok = &purge_domain_backups($dest, $purge, $start_time);
+		$pok = &purge_domain_backups($dest, $purge, $start_time, $asd);
 		if (!$pok) {
 			$ex = 3;
 			}
