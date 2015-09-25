@@ -1,5 +1,6 @@
 
 use Time::Local;
+use POSIX;
 
 # Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
