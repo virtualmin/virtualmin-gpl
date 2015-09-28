@@ -48,7 +48,7 @@ return &compare_versions($ver, "4.3") >= 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 6;		# To fix download URLs
+return 7;		# To fix PHP 5.5 requirement
 }
 
 sub script_phpmyadmin_category
@@ -82,7 +82,8 @@ local @rv;
 	push(@rv, "phpMyAdmin requires a MySQL database");
 
 # Check for PHP 5.2+ or 5.3+, if needed
-my $wantver = &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
+my $wantver = &compare_versions($ver, "4.5") > 0 ? 5.5 :
+	      &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
 	      &compare_versions($ver, "3.1") > 0 ? 5.2 : undef;
 if ($wantver) {
 	local $phpv = &get_php_version($phpver || 5, $d);
