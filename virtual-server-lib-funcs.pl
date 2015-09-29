@@ -509,7 +509,8 @@ return 1;
 # Delete all of Virtualmin's internal information about a domain
 sub delete_domain
 {
-local $id = $_[0]->{'id'};
+my ($d) = @_;
+my $id = $d->{'id'};
 &unlink_logged("$domains_dir/$id");
 
 # And the bandwidth and plain-text password files
@@ -555,15 +556,18 @@ if (-r $script_warnings_file) {
 &unlink_file("$incremental_backups_dir/$id");
 
 # Delete cached links for the domain
-&clear_links_cache($_[0]);
+&clear_links_cache($d);
 
 # Delete any saved aliases
 &unlink_file("$saved_aliases_dir/$id");
 
+# Release any lock on the name
+&unlock_file("$domainnames_dir/$d->{'dom'}.lock");
+
 # Remove from caches
-delete($main::get_domain_cache{$_[0]->{'id'}});
+delete($main::get_domain_cache{$d->{'id'}});
 if (scalar(@main::list_domains_cache)) {
-	@main::list_domains_cache = grep { $_ ne $_[0]->{'id'} }
+	@main::list_domains_cache = grep { $_ ne $d->{'id'} }
 					 @main::list_domains_cache;
 	}
 &build_domain_maps();
