@@ -4197,7 +4197,7 @@ sub ensure_template
 local ($file) = @_;
 local $mpath = "$module_root_directory/$file";
 local $cpath = "$module_config_directory/$file";
-if (!-r $cpath || !-s $cpath) {
+if (!-s $cpath) {
 	&copy_source_dest($mpath, $cpath);
 	}
 }
@@ -8415,6 +8415,9 @@ if (scalar(@list_templates_cache)) {
 	return @list_templates_cache;
 	}
 local @rv;
+&ensure_template("domain-template");
+&ensure_template("subdomain-template");
+&ensure_template("framefwd-template");
 push(@rv, { 'id' => 0,
 	    'name' => $text{'newtmpl_name0'},
 	    'standard' => 1,
