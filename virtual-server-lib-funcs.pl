@@ -9391,7 +9391,7 @@ foreach my $f (&list_custom_fields()) {
 		# Can edit
 		local $n = "field_".$f->{'name'};
 		local $v = $d ? $d->{"field_".$f->{'name'}} :
-			   $f->{'type'} == 7 ? $f->{'opts'} : undef;
+			   $f->{'type'} == 7 ? 1 : undef;
 		local $fv;
 		if ($f->{'type'} == 0) {
 			local $sz = $f->{'opts'} || 30;
