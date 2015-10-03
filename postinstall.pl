@@ -294,6 +294,7 @@ if ($virtualmin_pro) {
 	}
 
 # Add ftp user to the groups for all domains that have FTP enabled
+&obtain_lock_unix();
 foreach my $d (&list_domains()) {
 	if ($d->{'ftp'}) {
 		local $ftp_user = &get_proftpd_user($d);
@@ -302,6 +303,7 @@ foreach my $d (&list_domains()) {
 			}
 		}
 	}
+&release_lock_unix();
 
 # Mark PHP wrappers as immutable
 if (defined(&set_php_wrappers_writable) && &has_command("chattr")) {
