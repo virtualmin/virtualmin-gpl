@@ -341,10 +341,8 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	foreach my $dir ("User", "Group", "SuexecUserGroup") {
-		local @vals = &apache::find_directive($dir, $nonvconf);
-		&apache::save_directive($dir, \@vals, $vconf, $conf);
-		}
+	local @vals = &apache::find_directive("SuexecUserGroup", $nonvconf);
+	&apache::save_directive("SuexecUserGroup", \@vals, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	$rv++;
 	&$second_print($text{'setup_done'});
@@ -795,13 +793,11 @@ if ($virt) {
 	local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
 						      $_[0]->{'web_port'});
 	if ($nvirt && $virt) {
-		local $any;
-		foreach my $dir ("User", "Group", "SuexecUserGroup") {
-			local @vals = &apache::find_directive($dir, $nvconf);
-			&apache::save_directive($dir, \@vals, $vconf, $conf);
-			$any++ if (@vals);
-			}
-		if ($any) {
+		local @vals = &apache::find_directive("SuexecUserGroup",
+						      $nvconf);
+		if (@vals) {
+			&apache::save_directive("SuexecUserGroup", \@vals,
+						$vconf, $conf);
 			&flush_file_lines($virt->{'file'});
 			}
 		}

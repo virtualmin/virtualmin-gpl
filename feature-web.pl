@@ -766,7 +766,7 @@ else {
 		&$second_print($text{'setup_done'});
 		}
 	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
-		# Username has changed .. update SuexecUserGroup and User
+		# Username has changed .. update SuexecUserGroup
 		&$first_print($text{'save_apache7'});
 		&modify_web_user_group($_[0], $_[1], $virt, $vconf, $conf);
 		$rv++;
@@ -923,12 +923,8 @@ else {
 	# If there are suexec directives, validate them
 	local ($suexec) = &apache::find_directive_struct(
 		"SuexecUserGroup", $vconf);
-	local ($suuser) = &apache::find_directive_struct(
-		"User", $vconf);
-	local ($sugroup) = &apache::find_directive_struct(
-		"Group", $vconf);
 	if ($suexec) {
-		# Has new-style suexec
+		# Has suexec line - validate it
 		if ($suexec->{'words'}->[0] ne $_[0]->{'user'} &&
 		    $suexec->{'words'}->[0] ne '#'.$_[0]->{'uid'}) {
 			return &text('validate_ewebuid',
@@ -940,21 +936,8 @@ else {
 			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
 			}
 		}
-	elsif ($suuser && $sugroup) {
-		# Has old style user and group
-		if ($suuser->{'words'}->[0] ne $_[0]->{'user'} &&
-		    $suuser->{'words'}->[0] ne '#'.$_[0]->{'uid'}) {
-			return &text('validate_ewebuid',
-			     $suexec->{'words'}->[0], $_[0]->{'uid'});
-			}
-		if ($sugroup->{'words'}->[1] ne $_[0]->{'group'} &&
-		    $sugroup->{'words'}->[1] ne '#'.$_[0]->{'ugid'}) {
-			return &text('validate_ewebgid',
-			     $suexec->{'words'}->[1], $_[0]->{'ugid'});
-			}
-		}
 	elsif ($need_suexec) {
-		# Has neither, but needs them!
+		# Is missing suexec, but needs it
 		return $text{'validate_ewebphpsuexec'};
 		}
 
@@ -1317,23 +1300,15 @@ $dirs = &substitute_domain_template($dirs, $_[1]);
 local @dirs = split(/\n/, $dirs);
 local ($sudir, $ppdir);
 foreach (@dirs) {
-	$sudir++ if (/^\s*SuexecUserGroup\s/i || /^\s*User\s/i);
+	$sudir++ if (/^\s*SuexecUserGroup\s/i);
 	$ppdir++ if (/^\s*ProxyPass\s/);
 	}
 local $tmpl = &get_template($_[1]->{'template'});
 local $pdom = $_[1]->{'parent'} ? &get_domain($_[1]->{'parent'}) : $_[1];
 if (!$sudir && $_[2] && $pdom->{'unix'}) {
 	# Automatically add suexec directives if missing
-	if ($apache::httpd_modules{'core'} >= 2.0) {
-		if ($apache::httpd_modules{'mod_suexec'}) {
-			unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
-				       "\"#$pdom->{'ugid'}\"");
-			}
-		}
-	else {
-		unshift(@dirs, "User \"#$pdom->{'uid'}\"",
-			       "Group \"#$pdom->{'ugid'}\"");
-		}
+	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
+		       "\"#$pdom->{'ugid'}\"");
 	}
 if (!$ppdir && $_[1]->{'proxy_pass'}) {
 	# Add proxy directives
@@ -1519,13 +1494,8 @@ if ($virt) {
 		local $i;
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
 			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
-				$dstlref->[$i] = "SuexecUserGroup \"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
-				}
-			elsif ($dstlref->[$i] =~ /^\s*User\s/) {
-				$dstlref->[$i] = "User \"#$_[0]->{'uid'}\"";
-				}
-			elsif ($dstlref->[$i] =~ /^\s*Group\s/) {
-				$dstlref->[$i] = "Group \"#$_[0]->{'ugid'}\"";
+				$dstlref->[$i] = "SuexecUserGroup ".
+				  "\"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
 				}
 			}
 		}
@@ -1533,37 +1503,9 @@ if ($virt) {
 		# Remove suexec directives if not supported on this server
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^\s*(SuexecUserGroup|User|Group)\s/) {
+			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
 				splice(@$dstlref, $i--, 1);
 				}
-			}
-		}
-	else {
-		# Fix SuexecUserGroup or User/Group directives to match
-		# Apache version
-		local ($uline, $gline, $suline);
-		foreach $i ($virt->{'line'} ..
-			    $virt->{'line'}+scalar(@$srclref)-1) {
-			local $l = $dstlref->[$i];
-			$uline = $i if ($l =~ /^\s*User\s/);
-			$gline = $i if ($l =~ /^\s*Group\s/);
-			$suline = $i if ($l =~ /^\s*SuexecUserGroup\s/);
-			}
-		local $pdom = $_[0]->{'parent'} ?
-				&get_domain($_[0]->{'parent'}) : $_[0];
-		if ($apache::httpd_modules{'core'} >= 2.0 && $uline) {
-			# Replace User and Group with SuexecUserGroup
-			splice(@$dstlref, $uline, 1,
-			       "SuexecUserGroup \"#$pdom->{'uid'}\" \"#$pdom->{'ugid'}\"");
-			if ($gline) {
-				splice(@$dstlref, $gline, 1);
-				}
-			}
-		elsif ($apache::httpd_modules{'core'} < 2.0 && $suline) {
-			# Replace SuexecUserGroup with User and Group
-			splice(@$dstlref, $suline, 1,
-			       "User \"#$pdom->{'uid'}\"",
-			       "Group \"#$pdom->{'ugid'}\"");
 			}
 		}
 
@@ -2857,17 +2799,8 @@ sub get_domain_suexec
 local ($d) = @_;
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-if ($apache::httpd_modules{'core'} >= 2.0) {
-	# Look for SuexecUserGroup
-	local $su = &apache::find_directive("SuexecUserGroup", $vconf);
-	return $su ? 1 : 0;
-	}
-else {
-	# Look for User and Group
-	local $u = &apache::find_directive("User", $vconf);
-	local $g = &apache::find_directive("Group", $vconf);
-	return $u && $g ? 1 : 0;
-	}
+local $su = &apache::find_directive("SuexecUserGroup", $vconf);
+return $su ? 1 : 0;
 }
 
 # save_domain_suexec(&domain, enabled)
@@ -2883,19 +2816,9 @@ foreach my $port (@ports) {
 	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
 	local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-	if ($apache::httpd_modules{'core'} >= 2.0) {
-		# Add or remove SuexecUserGroup
-		&apache::save_directive("SuexecUserGroup",
-		    $mode ? [ "\"#$pdom->{'uid'}\" \"#$pdom->{'gid'}\"" ] : [],
-		    $vconf, $conf);
-		}
-	else {
-		# Add or remove User and Group directives
-		&apache::save_directive("User",
-		    $mode ? [ "\"#$pdom->{'uid'}\"" ] : [ ], $vconf, $conf);
-		&apache::save_directive("Group",
-		    $mode ? [ "\"#$pdom->{'gid'}\"" ] : [ ], $vconf, $conf);
-		}
+	&apache::save_directive("SuexecUserGroup",
+	    $mode ? [ "\"#$pdom->{'uid'}\" \"#$pdom->{'gid'}\"" ] : [],
+	    $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
 &register_post_action(\&restart_apache);
@@ -3971,13 +3894,6 @@ if ($suexec && ($suexec->{'words'}->[0] eq $oldd->{'user'} ||
 	&apache::save_directive("SuexecUserGroup",
 			[ "#$d->{'uid'} #$d->{'ugid'}" ],
 			$vconf, $conf);
-	&flush_file_lines($virt->{'file'});
-	}
-local $user = &apache::find_directive_struct("User", $vconf);
-if ($user && ($user->{'words'}->[0] eq $oldd->{'user'} ||
-	      $user->{'words'}->[0] eq '#'.$oldd->{'uid'})) {
-	&apache::save_directive("User", [ '#'.$d->{'uid'} ],
-				$vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
 }
