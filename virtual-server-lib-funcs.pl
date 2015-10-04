@@ -9391,7 +9391,8 @@ foreach my $f (&list_custom_fields()) {
 		# Can edit
 		local $n = "field_".$f->{'name'};
 		local $v = $d ? $d->{"field_".$f->{'name'}} :
-			   $f->{'type'} == 7 ? 1 : undef;
+			   $f->{'type'} == 7 ? 1 :
+			   $f->{'type'} == 11 ? 0 : undef;
 		local $fv;
 		if ($f->{'type'} == 0) {
 			local $sz = $f->{'opts'} || 30;
@@ -9407,7 +9408,7 @@ foreach my $f (&list_custom_fields()) {
 			$fv = &ui_textbox($n, $v, 30)." ".
 				&file_chooser_button($n, $f->{'type'}-5);
 			}
-		elsif ($f->{'type'} == 7) {
+		elsif ($f->{'type'} == 7 || $f->{'type'} == 11) {
 			$fv = &ui_radio($n, $v ? 1 : 0, [ [ 1, $text{'yes'} ],
 							  [ 0, $text{'no'} ] ]);
 			}
@@ -9465,7 +9466,7 @@ foreach my $f (&list_custom_fields()) {
 		local @g = getgrnam($in{$n});
 		$rv = $f->{'type'} == 3 ? $in{$n} : $g[2];
 		}
-	elsif ($f->{'type'} == 7) {
+	elsif ($f->{'type'} == 7 || $f->{'type'} == 11) {
 		$rv = $in{$n} ? $f->{'opts'} : "";
 		}
 	elsif ($f->{'type'} == 9) {
