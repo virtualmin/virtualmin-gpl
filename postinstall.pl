@@ -365,14 +365,6 @@ if (defined(&supports_resource_limits) &&
 # Clear left-side links caches, in case new features are available
 &clear_links_cache();
 
-# Re-validate all HTML directories
-foreach my $d (@doms) {
-	if ($d->{'web'} && !$d->{'alias'} && !$d->{'subdom'}) {
-		&find_html_cgi_dirs($d);
-		&save_domain($d);
-		}
-	}
-
 # Fix up PID file path on Debian
 if ($gconfig{'os_type'} eq 'debian-linux' && &foreign_check("bind8")) {
 	local %bconfig = &foreign_config("bind8");
