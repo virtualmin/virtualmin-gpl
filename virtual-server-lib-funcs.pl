@@ -10825,30 +10825,12 @@ local ($d, $dbtoo) = @_;
 local ($home, $mail, $db, $dbq);
 if (&has_group_quotas()) {
 	# Query actual group quotas
-	if (&has_quota_commands()) {
-		# Get from group quota list command
-		local $out = &run_quota_command("list_groups");
-		foreach my $l (split(/\r?\n/, $out)) {
-			local ($group, $used, $soft, $hard) = split(/\s+/, $l);
-			if ($group eq $d->{'group'}) {
-				$home = $used;
-				}
-			}
-		}
-	else {
-		# Get from real quotas
-		&require_useradmin();
-		local $n = &quota::group_filesystems($d->{'group'});
-		for(my $i=0; $i<$n; $i++) {
-			if ($quota::filesys{$i,'filesys'} eq
-			    $config{'home_quotas'}) {
-				$home = $quota::filesys{$i,'ublocks'};
-				}
-			elsif ($config{'mail_quotas'} &&
-			       $quota::filesys{$i,'filesys'} eq
-			       $config{'mail_quotas'}) {
-				$mail = $quota::filesys{$i,'ublocks'};
-				}
+	my @groups = &list_all_groups_quotas(0);
+	my ($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
+	if ($group) {
+		$home = $group->{'uquota'};
+		if ($config{'mail_quotas'}) {
+			$mail = $group->{'umquota'};
 			}
 		}
 	if ($dbtoo) {
