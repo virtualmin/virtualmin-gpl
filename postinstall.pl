@@ -359,13 +359,6 @@ if (defined(&supports_resource_limits) &&
 	&release_lock_unix();
 	}
 
-# Create files listing all addresses in domain, for domains with mail
-foreach my $d (@doms) {
-	if ($d->{'mail'} && !$d->{'alias'}) {
-		&create_everyone_file($d);
-		}
-	}
-
 # Update IP list cache
 &build_local_ip_list();
 
