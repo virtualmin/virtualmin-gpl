@@ -305,15 +305,6 @@ foreach my $d (&list_domains()) {
 	}
 &release_lock_unix();
 
-# Mark PHP wrappers as immutable
-if (defined(&set_php_wrappers_writable) && &has_command("chattr")) {
-	foreach my $d (&list_domains()) {
-		if ($d->{'web'}) {
-			&set_php_wrappers_writable($d);
-			}
-		}
-	}
-
 # Fix old PHP memory limit default
 if ($config{'php_vars'} =~ /^memory_limit=32M/) {
 	$config{'php_vars'} = "+".$config{'php_vars'};
