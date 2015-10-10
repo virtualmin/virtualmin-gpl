@@ -220,3 +220,4 @@ aws_cmd=aws
 show_preview=2
 show_uquotas=0
 disable_mail=0
+delete_logs=0

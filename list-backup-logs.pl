@@ -121,6 +121,7 @@ foreach $l (@alllogs) {
 
 if ($multi) {
 	# Show all details
+	%schedmap = map { $_->{'id'}, $_ } &list_scheduled_backups();
 	foreach my $l (@logs) {
 		print "$l->{'id'}:\n";
 		print "    Domains: $l->{'doms'}\n";
@@ -143,6 +144,21 @@ if ($multi) {
 			print "    Run by user: $l->{'user'}\n";
 			}
 		print "    Run from: $l->{'mode'}\n";
+		if ($l->{'sched'}) {
+			$sched = $schedmap{$l->{'sched'}};
+			if ($sched) {
+				print "    Scheduled backup ID: ",
+				      $sched->{'id'},"\n";
+				@dests = get_scheduled_backup_dests($sched);
+				for(my $i=0; $i<@dests; $i++) {
+					print "    Scheduled destination: ",
+					      "$dests[$i]\n";
+					}
+				}
+			else {
+				print "    Scheduled backup ID: DELETED\n";
+				}
+			}
 		if ($l->{'key'}) {
 			print "    Encrypted: Yes\n";
 			print "    Encryption key ID: $l->{'key'}\n";

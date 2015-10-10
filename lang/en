@@ -5578,6 +5578,7 @@ sched_actions=Actions
 sched_now=Backup..
 sched_restore=Restore..
 sched_return=scheduled backups
+sched_logs=Backup logs..
 
 cron_special=Simple schedule
 cron_complex=Complex schedule
@@ -5880,6 +5881,7 @@ backuplog_search=Find logs matching
 backuplog_ok=Search
 backuplog_match=Showing logs matching $1 ..
 backuplog_days=Showing logs from last $1 days ..
+backuplog_sched=Showing logs from scheduled backup to $1 ..
 backuplog_when=Started
 backuplog_who=Made by
 backuplog_len=Run time
@@ -5892,6 +5894,7 @@ backuplog_doms=$1 domains
 backuplog_part=Partial
 backuplog_nodoms=No domains
 backuplog_return=backup log listing
+backuplg_esched=Scheduled backup does not exist!
 
 viewbackup_title=View Backup Log
 viewbackup_eid=Missing or invalid backup ID!
@@ -5926,6 +5929,8 @@ viewbackup_enc=Encrypted backup?
 viewbackup_nopro=Yes, but encryption is not supported
 viewbackup_nokey=Yes, but with missing key $1
 viewbackup_key=Yes, with key $1
+viewbackup_sched=From scheduled backup
+viewbackup_gone=ID $1 (deleted)
 
 redirects_title=Website Redirects
 redirects_ecannot=You are not allowed to edit website redirects for this domain

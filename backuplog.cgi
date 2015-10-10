@@ -14,12 +14,18 @@ print &ui_submit($text{'backuplog_ok'});
 print &ui_form_end(),"<p>\n";
 
 # Get backups to list
-$days = $config{'backuplog_days'} || 7;
+$days = $in{'sched'} ? 365 : ($config{'backuplog_days'} || 7);
 @logs = &list_backup_logs($in{'search'} ? undef : time()-24*60*60*$days);
 if ($in{'search'}) {
 	@logs = grep { $_->{'user'} eq $in{'search'} ||
 		       $_->{'doms'} =~ /\Q$in{'search'}\E/i ||
 		       $_->{'dest'} =~ /\Q$in{'search'}\E/i } @logs;
+	}
+elsif ($in{'sched'}) {
+	($sched) = grep { $_->{'id'} eq $in{'sched'} }
+			&list_scheduled_backups();
+	$sched || &error($text{'backuplg_esched'});
+	@logs = grep { $_->{'sched'} eq $in{'sched'} } @logs;
 	}
 $anylogs = scalar(@logs);
 @logs = grep { &can_backup_log($_) } @logs;
@@ -28,6 +34,11 @@ $anylogs = scalar(@logs);
 if ($in{'search'}) {
 	print &text('backuplog_match',
 		    "<i>".&html_escape($in{'search'})."</i>"),"<br>\n";
+	}
+elsif ($in{'sched'}) {
+	@dests = &get_scheduled_backup_dests($sched);
+	@nices = map { &nice_backup_url($_, 1) } @dests;
+	print &text('backuplog_sched', $nices[0]),"<br>\n";
 	}
 else {
 	print &text('backuplog_days', $days),"<br>\n";

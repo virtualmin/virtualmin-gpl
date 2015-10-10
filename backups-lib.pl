@@ -213,6 +213,22 @@ if ($backup->{'id'} == 1) {
 if (@jobs) {
 	&delete_cron_script($jobs[0]);
 	}
+
+# Also delete logs of this backup
+if ($config{'delete_logs'}) {
+	my @del;
+	foreach my $log (&list_backup_logs()) {
+		if ($log->{'sched'} && $log->{'sched'} eq $backup->{'id'}) {
+			my $id = $log->{'id'};
+			next if (!$id);
+			push(@del, $backups_log_dir."/".$id);
+			push(@del, $backups_log_dir."/".$id.".out");
+			}
+		}
+	if (@del) {
+		&unlink_file(@del);
+		}
+	}
 }
 
 # get_backup_as_domain(&domains)
@@ -4658,12 +4674,13 @@ return $ok;
 }
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
-# 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key])
+# 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
+# 		   [schedule-id])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms, $user, $key) = @_;
+       $output, $errdoms, $user, $key, $schedid) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -4678,6 +4695,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'user' => $user || $remote_user,
 	       'mode' => $mode,
 	       'key' => $key->{'id'},
+	       'sched' => $schedid,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;
