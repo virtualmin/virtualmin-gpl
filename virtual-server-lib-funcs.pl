@@ -1069,7 +1069,14 @@ sub get_user_database_url
 &require_useradmin(1);
 if ($usermodule eq "ldap-useradmin") {
 	my $ldap = &ldap_useradmin::ldap_connect();
-	my $rv = "ldap://".$ldap->host();
+	my $rv;
+	eval {
+		$rv = "ldap://".$ldap->host();
+		};
+	if ($@) {
+		# Fall back to host from config
+		$rv = $ldap_useradmin::config{'ldap_host'} || "localhost";
+		}
 	$ldap->unbind();
 	return $rv;
 	}
