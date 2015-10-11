@@ -2505,7 +2505,8 @@ local ($d) = @_;
 &require_bind();
 local @recs = &get_domain_dns_records($d);
 foreach my $r (@recs) {
-	if ($r->{'type'} eq 'SPF' &&
+	if (($r->{'type'} eq 'SPF' ||
+	     $r->{'type'} eq 'TXT' && $r->{'values'}->[0] =~ /^v=spf1/) &&
 	    $r->{'name'} eq $d->{'dom'}.'.') {
 		return &bind8::parse_spf(@{$r->{'values'}});
 		}
