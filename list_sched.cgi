@@ -57,6 +57,8 @@ foreach $s (@scheds) {
 		     "$text{'sched_now'}</a>");
 	push(@links, "<a href='restore_form.cgi?sched=$s->{'id'}'>".
 		     "$text{'sched_restore'}</a>") if (&can_restore_domain());
+	push(@links, "<a href='backuplog.cgi?sched=$s->{'id'}'>".
+		     "$text{'sched_logs'}</a>");
 
 	push(@row, &ui_links_row(\@links));
 	push(@table, \@row);
