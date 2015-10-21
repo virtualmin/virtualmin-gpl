@@ -437,13 +437,17 @@ return 1;
 sub create_zone_on_slaves
 {
 local ($d, $slaves) = @_;
+local $tmpl = &get_template($d->{'template'});
+local @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
+			   split(/\s+/, $tmpl->{'dns_ns'});
 &require_bind();
 local $myip = $bconfig{'this_ip'} ||
 	      &to_ipaddress(&get_system_hostname());
 &$first_print(&text('setup_bindslave', $slaves));
 local @slaveerrs = &bind8::create_on_slaves(
 	$d->{'dom'}, $myip, undef, $slaves,
-	$d->{'dns_view'} || $tmpl->{'dns_view'});
+	$d->{'dns_view'} || $tmpl->{'dns_view'},
+	\@extra_slaves);
 if (@slaveerrs) {
 	&$second_print($text{'setup_eslaves'});
 	foreach my $sr (@slaveerrs) {
