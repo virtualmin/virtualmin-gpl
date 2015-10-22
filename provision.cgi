@@ -9,22 +9,16 @@ require './virtual-server-lib.pl';
 print &ui_form_start("save_provision.cgi");
 print &ui_table_start($text{'provision_header'}, undef, 2);
 
-# Central provisioning server
-$cm = $config{'provision_server'} eq $cloudmin_provisioning_server ? 1 : 0;
-$js = "onClick='form.provision_server.disabled = ".
-      "form.provision_port.disabled = form.provision_ssl.disabled = checked;'";
 print &ui_table_row($text{'provision_server'},
-	&ui_checkbox("provision_cloudmin", 1, $text{'provision_cloudmin'},
-		     $cm, $js)."<br>\n".
-	&ui_textbox("provision_server", $config{'provision_server'}, 40, $cm));
+	&ui_textbox("provision_server", $config{'provision_server'}, 40));
 
 # Server port and SSL
 $config{'provision_port'} ||= 10000;
 $config{'provision_ssl'} = 1 if ($config{'provision_ssl'} eq '');
 print &ui_table_row($text{'provision_port'},
-	&ui_textbox("provision_port", $config{'provision_port'}, 6, $cm)." ".
+	&ui_textbox("provision_port", $config{'provision_port'}, 6)." ".
 	&ui_checkbox("provision_ssl", 1, $text{'provision_ssl'},
-		     $config{'provision_ssl'}, undef, $cm));
+		     $config{'provision_ssl'}, undef));
 
 # Login name
 print &ui_table_row($text{'provision_user'},
