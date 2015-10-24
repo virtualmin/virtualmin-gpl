@@ -1505,3 +1505,4 @@ Added the rename-domain API command, to allow changing the domain name, username
 ---- Changes since 4.19 ----
 Removed support for Apache versions older than 2.0.
 Backup logs are now associated with the scheduled backup that created them, and are linked in the UI.
+The Excluded Directories page can now also be used to enter MySQL and PostgreSQL databases and tables to exclude from backups.

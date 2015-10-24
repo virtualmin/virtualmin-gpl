@@ -1,0 +1,6 @@
+desc=Exclude databases and tables from backups
+html=MySQL and PostgreSQL databases and tables that you don't want to include in backups can now be entered on the Excluded Directories page.
+link=edit_exclude.cgi?dom=${ID}
+master=1
+reseller=1
+owner=1
