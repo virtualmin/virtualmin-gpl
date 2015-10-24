@@ -947,6 +947,11 @@ if ($wild) {
 push(@dbs, split(/\s+/, $d->{'db_mysql'}));
 @dbs = &unique(@dbs);
 
+# Filter out any excluded DBs
+my @exclude = &get_backup_db_excludes($d);
+my %exclude = map { $_, 1 } @exclude;
+@dbs = grep { !$exclude{$_} } @dbs;
+
 # Create base backup file with meta-information
 local @hosts = &get_mysql_allowed_hosts($d);
 local %info = ( 'hosts' => join(' ', @hosts),
@@ -959,8 +964,17 @@ local $ok = 1;
 foreach $db (@dbs) {
 	&$first_print(&text('backup_mysqldump', $db));
 	local $dbfile = $file."_".$db;
+
+	# Limit tables to those that aren't excluded
+	my %texclude = map { $_, 1 }
+			 map { (split(/\./, $_))[1] }
+			   grep { /^\Q$db\E\./ } @exclude;
+	my $tables;
+	if (%texclude) {
+		$tables = [ grep { !$texclude{$_} } &mysql::list_tables($db) ];
+		}
 	local $err = &mysql::backup_database($db, $dbfile, 0, 1, undef,
-				     undef, undef, undef, $d->{'user'}, 1);
+				     undef, undef, $tables, $d->{'user'}, 1);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}

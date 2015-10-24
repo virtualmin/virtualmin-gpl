@@ -495,6 +495,11 @@ local ($d, $file) = @_;
 # Find all the domains's databases
 local @dbs = split(/\s+/, $d->{'db_postgres'});
 
+# Filter out any excluded DBs
+my @exclude = &get_backup_db_excludes($d);
+my %exclude = map { $_, 1 } @exclude;
+@dbs = grep { !$exclude{$_} } @dbs;
+
 # Create base backup file with meta-information
 local %info = ( 'remote' => $postgresql::config{'host'} );
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
@@ -518,7 +523,18 @@ foreach $db (@dbs) {
 						   undef, $destfile);
 			}
 		}
-	local $err = &postgresql::backup_database($db, $destfile, 'c');
+
+	# Limit tables to those that aren't excluded
+	my %texclude = map { $_, 1 }
+			 map { (split(/\./, $_))[1] }
+			   grep { /^\Q$db\E\./ } @exclude;
+	my $tables;
+	if (%texclude) {
+		$tables = [ grep { !$texclude{$_} }
+				 &postgresql::list_tables($db) ];
+		}
+
+	local $err = &postgresql::backup_database($db, $destfile, 'c', $tables);
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
