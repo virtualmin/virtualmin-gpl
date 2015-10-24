@@ -5199,10 +5199,13 @@ aedit_eauto=Automatic replies cannot be setup when manually editing aliases
 exclude_title=Excluded Directories
 exclude_header=Backup exclusion options
 exclude_dirs=Directories under home to skip
+exclude_dbs=Databases and tables to skip
 exclude_desc=By default, Virtualmin will include all data in a servers's home directory when making a backup. However, if a virtual server has files that are too large to include or are backed up via some other method, this page can be used to exclude them from backups.
+exclude_dbdesc=On each line, enter a <tt>database</tt> name or <tt>database.table</tt> name.
 exclude_err=Failed to save excluded directories
 exclude_eabs=Directory '$1' cannot be an absolute path
 exclude_edot=Directory '$1' cannot contain ..
+exclude_edb=Database name '$1' is invalid
 
 balancers_title=Proxy Paths
 balancers_ecannot=You are not allowed to edit proxy paths for this domain

@@ -17,6 +17,12 @@ foreach $e (@exclude) {
 	}
 &save_backup_excludes($d, \@exclude);
 
+@dbexclude = grep { /\S/ } split(/\r?\n/, $in{'dbs'});
+foreach $e (@dbexclude) {
+	$e =~ /^[a-z0-9\.\_\-\*]+$/i || &error(&text('exclude_edb', $e));
+	}
+&save_backup_db_excludes($d, \@dbexclude);
+
 # All done
 &run_post_actions_silently();
 &webmin_log("exclude", "domain", $d->{'dom'});
