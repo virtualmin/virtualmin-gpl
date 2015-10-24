@@ -527,7 +527,7 @@ foreach $db (@dbs) {
 	# Limit tables to those that aren't excluded
 	my %texclude = map { $_, 1 }
 			 map { (split(/\./, $_))[1] }
-			   grep { /^\Q$db\E\./ } @exclude;
+			   grep { /^\Q$db\E\./ || /^\*\./ } @exclude;
 	my $tables;
 	if (%texclude) {
 		$tables = [ grep { !$texclude{$_} }
