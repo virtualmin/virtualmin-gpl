@@ -15690,6 +15690,23 @@ $d->{'backup_excludes'} = join("\t", @$excludes);
 &save_domain($d);
 }
 
+# get_backup_db_excludes(&domain)
+# Returns a list of excluded DB or DB.table names
+sub get_backup_db_excludes
+{
+local ($d) = @_;
+return split(/\t+/, $d->{'backup_db_excludes'});
+}
+
+# save_backup_db_excludes(&domain, &excludes)
+# Updates the list of excluded DB or DB.table names
+sub save_backup_db_excludes
+{
+local ($d, $excludes) = @_;
+$d->{'backup_db_excludes'} = join("\t", @$excludes);
+&save_domain($d);
+}
+
 # list_plugin_sections(level)
 # Returns a list of right-frame sections defined by Virtualmin plugins.
 # Level 0 = master admin, 1 = domain owner, 2 = reseller

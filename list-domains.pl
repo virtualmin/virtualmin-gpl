@@ -695,6 +695,9 @@ if ($multi) {
 			foreach my $e (&get_backup_excludes($d)) {
 				print "    Backup exclusion: $e\n";
 				}
+			foreach my $e (&get_backup_db_excludes($d)) {
+				print "    Backup DB exclusion: $e\n";
+				}
 			}
 
 		# Show allowed DB hosts

@@ -224,6 +224,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-exclude") {
 		push(@remove_excludes, shift(@ARGV));
 		}
+	elsif ($a eq "--add-db-exclude") {
+		push(@add_db_excludes, shift(@ARGV));
+		}
+	elsif ($a eq "--remove-db-exclude") {
+		push(@remove_db_excludes, shift(@ARGV));
+		}
 	elsif ($a eq "--pre-command") {
 		$precommand = shift(@ARGV);
 		}
@@ -717,6 +723,16 @@ if (@add_excludes || @remove_excludes) {
 	&save_backup_excludes($dom, \@excludes);
 	&$second_print($text{'setup_done'});
 	}
+if (@add_db_excludes || @remove_db_excludes) {
+	&$first_print("Updating excluded databases ..");
+	@db_excludes = &get_backup_db_excludes($dom);
+	push(@db_excludes, @add_db_excludes);
+	%remove_db_excludes = map { $_, 1 } @remove_db_excludes;
+	@db_excludes = grep { !$remove_db_excludes{$_} } @db_excludes;
+	@db_excludes = &unique(@db_excludes);
+	&save_backup_db_excludes($dom, \@db_excludes);
+	&$second_print($text{'setup_done'});
+	}
 
 # Update the Webmin user for this domain, or the parent
 &refresh_webmin_user($dom, $old);
@@ -769,6 +785,8 @@ print "                        [--plan name|id | --apply-plan name|id]\n";
 print "                        [--plan-features]\n";
 print "                        [--add-exclude directory]*\n";
 print "                        [--remove-exclude directory]*\n";
+print "                        [--add-db-exclude db|db.table]*\n";
+print "                        [--remove-db-exclude db|db.table]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
