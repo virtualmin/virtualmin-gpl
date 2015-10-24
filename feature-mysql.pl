@@ -1154,6 +1154,12 @@ foreach my $db (@dbs) {
 		}
 	}
 
+# If the restore re-created a domain, the list of databases should be synced
+# to those in the backup
+if ($d->{'wasmissing'}) {
+	$d->{'db_mysql'} = join(" ", map { $_->[0] } @dbs);
+	}
+
 # Grant back permissions to any users who had access to the restored DBs
 # previously
 foreach my $uname (keys %userdbs) {

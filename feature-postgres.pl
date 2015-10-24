@@ -664,6 +664,13 @@ foreach $db (@dbs) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+
+# If the restore re-created a domain, the list of databases should be synced
+# to those in the backup
+if ($d->{'wasmissing'}) {
+	$d->{'db_postgres'} = join(" ", map { $_->[0] } @dbs);
+	}
+
 return 1;
 }
 
