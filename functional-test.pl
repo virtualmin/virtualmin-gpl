@@ -4142,7 +4142,7 @@ $exclude_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ],
+		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
 		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
@@ -4160,6 +4160,13 @@ $exclude_tests = [
 	{ 'command' => 'su -s /bin/sh '.$test_domain_user.' -c "touch ~/aaa/yyy.txt"',
 	},
 
+	# Add an extra MySQL database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_user.'_extra' ] ],
+	},
+
 	# Set exclude path
 	{ 'command' => 'modify-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -4168,12 +4175,20 @@ $exclude_tests = [
 		      [ 'add-exclude', 'vvv' ] ],
 	},
 
+	# Set exclude DB
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-db-exclude', $test_domain_user.'_extra' ] ],
+	},
+
 	# Check exclude list
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv',
-		      'Backup exclusion: zzz' ],
+	  'grep' => [ 'Backup exclusion: xxx',
+		      'Backup exclusion: vvv',
+		      'Backup exclusion: zzz',
+		      'Backup DB exclusion: '.$test_domain_user.'_extra' ],
 	},
 
 	# Backup to a temp file
@@ -4204,18 +4219,33 @@ $exclude_tests = [
 	{ 'command' => 'ls -ld '.$test_domain_home.'/aaa',
 	},
 
-	# Remove an exclude
+	# Make sure the removed DB is gone
+	{ 'command' => 'list-databases.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => '^'.$test_domain_user.'_extra',
+	},
+
+	# Remove path exclude
 	{ 'command' => 'modify-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'remove-exclude', 'zzz' ] ],
+	},
+
+	# Remove DB exclude
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-db-exclude', $test_domain_user.'_extra' ] ],
 	},
 
 	# Re-check exclude list
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ 'Backup exclusion: xxx', 'Backup exclusion: vvv' ],
-	  'antigrep' => [ 'Backup exclusion: zzz' ],
+	  'grep' => [ 'Backup exclusion: xxx',
+		      'Backup exclusion: vvv' ],
+	  'antigrep' => [ 'Backup exclusion: zzz',
+			  'Backup DB exclusion: '.$test_domain_user.'_extra' ],
 	},
 
 	# Cleanup the domain
