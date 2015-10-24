@@ -1,0 +1,6 @@
+desc=Scheduled backup logs
+html=Backup logs are now associated with the scheduled backup that created them, and are linked in the UI.
+link=backuplog.cgi
+master=1
+reseller=1
+owner=1
