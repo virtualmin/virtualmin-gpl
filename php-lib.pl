@@ -763,10 +763,12 @@ foreach my $v (@all_possible_php_versions) {
 		$phpn ||= &has_command("php$nodotv-cgi") ||
 			  &has_command("php-cgi$nodotv") ||
 			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
+			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi") ||
 			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php") ||
 			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
 			  &has_command("php$nodotv") ||
 			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
+			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php");
 			  &has_command("/opt/rh/php$nodotv/bin/php") ||
 			  &has_command(glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
 		}
