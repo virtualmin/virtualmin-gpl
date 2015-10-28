@@ -682,7 +682,7 @@ DOMAIN: foreach $d (@$doms) {
 		# Has no domain name!
 		&$second_print($text{'backup_emptydomain'});
 		$dok = 0;
-		goto DOMAINFAILED;
+		goto DOMAINFAILED_NOQUOTAS;
 		}
 	local $f;
 	local $dok = 1;
@@ -788,6 +788,7 @@ DOMAIN: foreach $d (@$doms) {
 
 	DOMAINFAILED:
 	&enable_quotas($d);
+	DOMAINFAILED_NOQUOTAS:
 	if ($lockdir) {
 		&unlock_file($lockdir);
 		}
