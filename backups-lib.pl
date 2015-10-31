@@ -2047,7 +2047,8 @@ if ($ok) {
 				else { last DOMAIN; }
 				}
 
-			# Only features in the backup are enabled
+			# Only re-create the domain with features that are
+			# included in the backup
 			if ($onlyfeats) {
 				foreach my $f (@backup_features, @bplugins) {
 					if ($d->{$f} &&
