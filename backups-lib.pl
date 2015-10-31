@@ -3030,10 +3030,9 @@ foreach my $f (@allfeatures) {
 				$desc = &plugin_call($f, "feature_name");
 				};
 			}
-		local $critical = $f eq "virtualmin-google-analytics" ? 1 : 0;
 		push(@rv, { 'feature' => $f,
 			    'plugin' => 1,
-			    'critical' => $critical,
+			    'critical' => 0,
 			    'desc' => $desc });
 		}
 	}

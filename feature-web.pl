@@ -1544,6 +1544,16 @@ if ($virt) {
 			}
 		}
 
+	# If this system doesn't support mod_perl, remove any Perl directives
+	# as set by virtualmin-google-analytics
+	if (!$apache::httpd_modules{'mod_perl'}) {
+		foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
+			if ($dstlref->[$i] =~ /^\s*Perl/) {
+				$dstlref->[$i] =~ s/^/#/g;
+				}
+			}
+		}
+
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
 
