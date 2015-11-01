@@ -774,6 +774,18 @@ foreach my $v (@all_possible_php_versions) {
 		}
 	$vercmds{$v} = $phpn if ($phpn);
 	}
+
+# Add extra configured PHP commands, and determine their versions
+foreach my $path (split(/\t+/, $config{'php_paths'})) {
+	next if (!-x $path);
+	&clean_environment();
+	local $out = &backquote_command("$path -v 2>&1 </dev/null");
+	&reset_environment();
+	if ($out =~ /PHP\s+(\d+.\d+)/ && !$vercmds{$1}) {
+		$vercms{$1} = $path;
+		}
+	}
+
 local $php = &has_command("php-cgi") || &has_command("php");
 if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	# What version is the php command? If it is a version we don't have
