@@ -175,6 +175,10 @@ ssh_args=Additonal parameters to ssh and scp commands,0
 aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Not installed
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
 
+line9=PHP options,11
+fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
+php_paths=Additonal locations for PHP commands,9,60,3,\t
+
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
 dns_check=Check resolv.conf for this system?,1,1-Yes,0-No
@@ -188,7 +192,6 @@ allow_subdoms=Allow creation of sub-domains?,1,1-Yes,0-No,-Decide automatically
 mem_cmd=Command to get memory usage,3,Query operating system
 mem_low=Minimum recommended real memory,0,5,,MB
 api_helper=Path to create API helper command,3,Determine automatically
-fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
 secmx_nodns=Add DNS MX records for secondary mail servers?,1,0-Yes,1-No
 mx_validate=Validate MX records for domains with email?,1,0-Yes,1-No
 scriptdir=Template for default script directory,10,-Script default,*-Top level public_html directory,Directory template
