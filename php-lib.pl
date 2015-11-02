@@ -782,7 +782,7 @@ foreach my $path (split(/\t+/, $config{'php_paths'})) {
 	local $out = &backquote_command("$path -v 2>&1 </dev/null");
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+.\d+)/ && !$vercmds{$1}) {
-		$vercms{$1} = $path;
+		$vercmds{$1} = $path;
 		}
 	}
 
