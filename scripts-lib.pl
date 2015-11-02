@@ -925,6 +925,11 @@ if (defined(&$optmodfunc)) {
 	push(@mods, @optmods);
 	}
 foreach my $m (@mods) {
+	if ($phpver >= 7 && $m eq "mysql") {
+		# PHP 7 only supports mysqli, but that's OK because most scripts
+		# can use it
+		$m = "mysqli";
+		}
 	next if (&check_php_module($m, $phpver, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
