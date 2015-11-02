@@ -34,4 +34,5 @@
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - Test virtualmin with 100k domains
+ - Add support for PHP7
+	- CHANGELOG
