@@ -43,8 +43,9 @@ if ($in{'new'}) {
 		&ui_textbox("name", undef, 40));
 
 	print &ui_table_row($text{'bucket_location'},
-		&ui_select("location", "us-west-1",
-			   [ &s3_list_locations(@$account) ]));
+		&ui_select("location", "",
+			   [ [ "", $text{'default'} ],
+			     &s3_list_locations(@$account) ]));
 	}
 else {
 	# Account, bucket and location are fixed
