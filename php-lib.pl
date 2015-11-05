@@ -1052,7 +1052,7 @@ return 0;
 sub cleanup_php_cgi_processes
 {
 if (&foreign_check("proc") && $config{'web'}) {
-	&foreign_require("proc", "proc-lib.pl");
+	&foreign_require("proc");
 	local @procs = &proc::list_processes();
 	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)\-cgi/ &&
 			     $_->{'ppid'} == 1 } @procs;

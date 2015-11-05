@@ -6572,7 +6572,7 @@ local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 sub run_ssh_command
 {
 local ($cmd, $pass, $err, $asuser) = @_;
-&foreign_require("proc", "proc-lib.pl");
+&foreign_require("proc");
 if ($asuser) {
 	$cmd = &command_as_user($asuser, 0, $cmd);
 	}

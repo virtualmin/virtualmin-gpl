@@ -133,7 +133,7 @@ $config{'old_defip6'} ||= &get_default_ip6();
 
 # Check if we have enough memory to preload
 local $lowmem;
-&foreign_require("proc", "proc-lib.pl");
+&foreign_require("proc");
 if (defined(&proc::get_memory_info)) {
 	local ($real) = &proc::get_memory_info();
 	local $arch = &backquote_command("uname -m 2>/dev/null");

@@ -56,7 +56,7 @@ local $ofile = "/etc/default/postgrey";
 local $postgrey = &has_command("postgrey");
 
 # First try running process
-&foreign_require("proc", "proc-lib.pl");
+&foreign_require("proc");
 foreach my $p (&proc::list_processes()) {
 	if ($p->{'args'} =~ /^(postgrey|\Q$postgrey\E|\/\S+\/postgrey)\s+(.*)/) {
 		return $2;

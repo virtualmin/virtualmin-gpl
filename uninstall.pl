@@ -11,8 +11,8 @@ foreach my $cmd (@all_cron_commands) {
 	}
 
 # Turn off lookup-domain action
-&foreign_require("init", "init-lib.pl");
-&foreign_require("proc", "proc-lib.pl");
+&foreign_require("init");
+&foreign_require("proc");
 if (&check_pid_file($pidfile)) {
 	&init::stop_action("lookup-domain");
 	}
