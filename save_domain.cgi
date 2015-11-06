@@ -305,6 +305,8 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 
 # If the template has changed, update secondary groups
 if ($d->{'template'} ne $oldd->{'template'}) {
+	&update_domain_owners_group(undef, $oldd);
+	&update_domain_owners_group($d, undef);
 	&update_secondary_groups($d);
 	}
 

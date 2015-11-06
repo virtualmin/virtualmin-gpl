@@ -739,6 +739,8 @@ if (@add_db_excludes || @remove_db_excludes) {
 
 # If the template has changed, update secondary groups
 if ($dom->{'template'} ne $old->{'template'}) {
+	&update_domain_owners_group(undef, $oldd);
+	&update_domain_owners_group($d, undef);
 	&update_secondary_groups($dom);
 	}
 
