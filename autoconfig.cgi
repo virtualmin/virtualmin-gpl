@@ -81,7 +81,7 @@ $MAILBOX = $mailbox;
 
 # Output the XML
 print "Content-type: text/xml\n\n";
-if ($ENV{'SCRIPT_NAME'} =~ /autodiscover.xml/) {
+if ($ENV{'SCRIPT_NAME'} =~ /autodiscover.xml/i) {
 	# Outlook
 	print <<EOF;
 _OUTLOOK_XML_GOES_HERE_
