@@ -294,7 +294,7 @@ if (!$sinfo) {
 	}
 
 # Install needed packages
-&setup_script_packages($script, $d);
+&setup_script_packages($script, $d, $ver);
 
 # Run the before command
 %envs = map { 'script_'.$_, $opts->{$_} } (keys %$opts);

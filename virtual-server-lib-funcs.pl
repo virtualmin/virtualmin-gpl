@@ -7553,7 +7553,7 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			}
 
 		# Install needed packages
-		&setup_script_packages($script, $d);
+		&setup_script_packages($script, $d, $ver);
 
 		# Check PHP version
 		local $phpvfunc = $script->{'php_vers_func'};

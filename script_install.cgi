@@ -86,7 +86,7 @@ if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
 if (!$fcount) {
 	# Install needed packages (unless we are going to prompt for
 	# overwrite confirmation)
-	&setup_script_packages($script, $d);
+	&setup_script_packages($script, $d, $ver);
 	}
 
 # Check for install into non-empty directory, unless upgrading

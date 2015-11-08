@@ -39,7 +39,7 @@ if ($in{'confirm'}) {
 		$opts = $sinfo->{'opts'};
 
 		# Install needed packages
-		&setup_script_packages($script, $d);
+		&setup_script_packages($script, $d, $ver);
 
 		&$first_print(&text('massg_doing', $script->{'desc'}, $ver));
 		if (&compare_versions($sinfo->{'version'}, $ver,

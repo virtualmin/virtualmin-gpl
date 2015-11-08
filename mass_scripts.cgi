@@ -78,7 +78,7 @@ if ($in{'confirm'}) {
 			}
 
 		# Install needed packages
-		&setup_script_packages($script, $d);
+		&setup_script_packages($script, $d, $ver);
 
 		# Get locks
 		&obtain_lock_web($d);

@@ -2530,14 +2530,14 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 return 1;
 }
 
-# setup_script_packages(&script, &domain)
+# setup_script_packages(&script, &domain, version)
 # Install any software packages requested by the script
 sub setup_script_packages
 {
-local ($script, $d) = @_;
+local ($script, $d, $ver) = @_;
 local $pkgfunc = $script->{'packages_func'};
 return 1 if (!defined(&$pkgfunc));
-local @pkgs = &$pkgfunc($d);
+local @pkgs = &$pkgfunc($d, $ver);
 return 1 if (!@pkgs);
 &$first_print(&text('scripts_needpackages', scalar(@pkgs)));
 local $canpkgs = 0;
