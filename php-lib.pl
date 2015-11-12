@@ -167,9 +167,6 @@ foreach my $ver (@vers) {
 		}
 	}
 
-# Link ~/etc/php.ini to the per-version ini file
-&create_php_ini_link($d, $mode);
-
 # Call plugin-specific function to perform webserver setup
 if ($p ne 'web') {
 	return &plugin_call($p, "feature_save_web_php_mode",
@@ -405,6 +402,9 @@ foreach my $p (@ports) {
 
 	&flush_file_lines();
 	}
+
+# Link ~/etc/php.ini to the per-version ini file
+&create_php_ini_link($d, $mode);
 
 &register_post_action(\&restart_apache);
 $pfound || &error("Apache virtual host was not found");
