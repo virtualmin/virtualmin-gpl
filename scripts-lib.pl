@@ -2116,7 +2116,7 @@ local $gfunc = $script->{'gems_func'};
 if (defined(&$gfunc)) {
 	local @gems = &$gfunc($d, $ver, $opts);
 	foreach my $g (@gems) {
-		local ($name, $version, $nore) = @$g;
+		local ($name, $version, $nore, $optional) = @$g;
 		&$first_print(
 		  $version ? &text('scripts_geminstall2',
 				   "<tt>$name</tt>", $version) :
@@ -2125,7 +2125,7 @@ if (defined(&$gfunc)) {
 		if ($err) {
 			&$second_print(&text('scripts_gemfailed',
 					"<tt>".&html_escape($err)."</tt>"));
-			return 0;
+			return 0 if (!$optional);
 			}
 		else {
 			&$second_print($text{'setup_done'});
