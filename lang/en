@@ -6745,4 +6745,10 @@ recovery_body2=A new random password for your email account $3 with login $2 has
 recovery_sending=Sending password recovery email to $1 ..
 recovery_failed=.. failed : $1
 
+letsencrypt_err=Failed to request certificate
+letsencrypt_title=Request Certificate
+letsencrypt_doing=Requesting a certificate for this domain from Let's Encrypt ..
+letsencrypt_failed=.. request failed : $1
+letsencrypt_done=.. request was successful!
+
 __norefs=1
