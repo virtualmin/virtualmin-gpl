@@ -372,6 +372,10 @@ else {
 	$phd = &public_html_dir($d);
 	print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
 
+	print &ui_opt_textbox("dname", undef, 30,
+			      $text{'cert_dnamedef'}."<br>\n",
+			      $text{'cert_dnamesel'}),"<p>\n";
+
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
 	}

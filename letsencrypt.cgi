@@ -6,7 +6,15 @@ require './virtual-server-lib.pl';
 &error_setup($text{'letsencrypt_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
-$dname = $d->{'dom'};
+
+if ($in{'dname_def'}) {
+	$dname = $d->{'dom'};
+	}
+else {
+	$dname = lc(&parse_domain_name($in{'dname'}));
+	$err = &valid_domain_name($dname);
+	&error($err) if ($err);
+	}
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'letsencrypt_title'}, "");
 

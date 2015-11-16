@@ -2822,6 +2822,8 @@ cert_desc6=Let's Encrypt is a free, automated, and open certificate authority th
 cert_letsdesc=This page can be used to request a new certificate, which will overwrite any other currently have configured for this domain. However, the Let's Encrypt service requires that your ownership of the certificate domain be validated by checking that this system hosts the website for the domain. This is done by placing a small temporary file in the website's document directory $1.
 cert_elets=However, it cannot be used on your system : $1
 cert_ewebminver=Only Webmin versions 1.780 and above support Let's Encrypt
+cert_dnamedef=Request certificate for this domain
+cert_dnamesel=Request certificate for
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
