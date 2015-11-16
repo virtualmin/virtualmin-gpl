@@ -31,7 +31,8 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( [ "savecsr", $text{'cert_tabsavecsr'}, $prog."savecsr" ] ) :
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
-	  [ "chain", $text{'cert_tabchain'}, $prog."new" ],
+	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
+	  [ "lets", $text{'cert_tablets'}, $prog."lets" ],
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
@@ -349,6 +350,31 @@ if ($chain) {
 print &ui_table_end();
 print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
+
+# Let's encrypt tab
+&foreign_require("webmin");
+if (!defined(&webmin::check_letsencrypt)) {
+	$err = $text{'cert_ewebminver'};
+	}
+else {
+	$err = &webmin::check_letsencrypt();
+	}
+print &ui_tabs_start_tab("mode", "lets");
+print "$text{'cert_desc6'}<p>\n";
+
+if ($err) {
+	print &text('cert_elets', $err),"<p>\n";
+	}
+else {
+	print &ui_form_start("letsencrypt.cgi");
+	print &ui_hidden("dom", $in{'dom'});
+
+	$phd = &public_html_dir($d);
+	print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
+
+	print &ui_table_end();
+	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
+	}
 
 print &ui_tabs_end(1);
 
