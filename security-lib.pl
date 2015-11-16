@@ -53,7 +53,7 @@ $ENV{'HOME'} = $uinfo[7];
 $ENV{'USER'} = $uinfo[0];
 $ENV{'LOGNAME'} = $uinfo[0];
 
-&foreign_require("proc", "proc-lib.pl");
+&foreign_require("proc");
 local @uinfo = getpwnam($d->{'user'});
 local @rv;
 if (($uinfo[8] =~ /\/(sh|bash|tcsh|csh)$/ ||
