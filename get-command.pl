@@ -65,15 +65,16 @@ if ($src =~ /=head1\s+(.*)\n\n(.*)\n/) {
 $ENV{'WEBMIN_CONFIG'} = $config_directory;
 $out = &backquote_command("$cmdpath --help 2>&1 </dev/null");
 &reset_environment();
+@helpargs = ( );
 foreach my $l (split(/\r?\n/, $out)) {
 	$l =~ s/^(virtualmin|cloudmin)\s+(\S+)//;	# strip command
-	last if (@args && $l !~ /\S/);			# end of help
+	last if (@helpargs && $l !~ /\S/);		# end of help
 	next if ($l !~ /--/ || $l =~ /--help/);
-	push(@args, $l);
+	push(@helpargs, $l);
 	}
 
 # Parse flags string
-$args = join(" ", @args);
+$args = join(" ", @helpargs);
 while($args =~ /\S/) {
 	$args =~ s/^\s*\|\s*//;
 	if ($args =~ /^\s*\[([^\]]+)\](\*|\+|)(.*)$/) {
