@@ -761,7 +761,7 @@ print "                        [--mail-user name]*\n";
 print "                        [--id number]*\n";
 print "                        [--with-feature feature]\n";
 print "                        [--without-feature feature]\n";
-print "                        [--alias [domain] | --no-alias]\n";
+print "                        [--alias domain | --no-alias]\n";
 print "                        [--subserver | --toplevel | --subdomain]\n";
 print "                        [--parent domain]\n";
 print "                        [--plan ID|name]\n";
