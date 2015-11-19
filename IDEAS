@@ -34,5 +34,12 @@
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - Add support for PHP7
-	- CHANGELOG
+ - Test replication with NFS home
+	- http://virtualmin.com/node/38572
+
+ - Let's encrypt
+	- Virtualmin
+	- CHANGELOGs
+
+ - Copy cert to proftpd
+	- http://virtualmin.com/node/38647
