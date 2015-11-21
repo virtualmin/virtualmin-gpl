@@ -376,7 +376,6 @@ else {
 			      $text{'cert_dnamedef'}."<br>\n",
 			      $text{'cert_dnamesel'}),"<p>\n";
 
-	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
 	}
 

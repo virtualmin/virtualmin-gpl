@@ -37,9 +37,8 @@
  - Test replication with NFS home
 	- http://virtualmin.com/node/38572
 
- - Let's encrypt
-	- Virtualmin
-	- CHANGELOGs
-
  - Copy cert to proftpd
 	- http://virtualmin.com/node/38647
+
+ - Preserve PHP version when switching to/from mod_php
+	- http://virtualmin.com/node/38457

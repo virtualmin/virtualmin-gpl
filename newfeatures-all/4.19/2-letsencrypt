@@ -1,0 +1,6 @@
+desc=Let's Encrypt support
+html=Added a tab to the Manage SSL Certificate page to request a certificate from the free Let's Encrypt service.
+master=1
+reseller=1
+owner=1
+link=cert_form.cgi?dom=${ID}
