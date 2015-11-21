@@ -180,9 +180,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--virtualmin") {
 		$v = shift(@ARGV);
-		&indexof($v, @virtualmin_backups) >= 0 ||
-			&usage("Unknown --virtualmin option $v. Available options are : ".join(" ", @virtualmin_backups));
-		push(@vbs, $v);
+		if (&indexof($v, @virtualmin_backups) < 0) {
+			print STDERR "Unknown --virtualmin option $v. Available options are : ".join(" ", @virtualmin_backups)."\n";
+			}
+		else {
+			push(@vbs, $v);
+			}
 		}
 	elsif ($a eq "--all-virtualmin") {
 		@vbs = @virtualmin_backups;
@@ -192,8 +195,8 @@ while(@ARGV > 0) {
 		@vbs = grep { $_ ne $v } @vbs;
 		}
 	elsif ($a eq "--incremental") {
-		&has_incremental_format() || &error("The configured backup format does not support incremental backups");
-		&has_incremental_tar() || &error("The tar command on this system does not support incremental backups");
+		&has_incremental_format() || &usage("The configured backup format does not support incremental backups");
+		&has_incremental_tar() || &usage("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
 	elsif ($a eq "--no-incremental") {
