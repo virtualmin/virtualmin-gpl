@@ -80,6 +80,11 @@ backup over it. This means that any files in the domain's home directory that
 were not included in the backup will still exist after the restore. To force
 the domain to be deleted before restoring, use the C<--delete-existing> flag.
 
+When restoring a backup on a system that shares a home directory, MySQL database
+server or LDAP user database with the system the backup was take from, you
+can use the C<--replication> flag to tell Virtualmin that it is expected that
+the directories, databases or users may already exist.
+
 =cut
 
 package virtual_server;
@@ -460,6 +465,7 @@ print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
 print "                         [--continue-on-error]\n";
 print "                         [--delete-existing]\n";
+print "                         [--replication]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
