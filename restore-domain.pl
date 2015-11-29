@@ -135,6 +135,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--except-feature") {
 		local $f = shift(@ARGV);
+		@rfeats || &usage("--except-feature must come after ".
+				  "--all-features");
 		@rfeats = grep { $_ ne $f } @rfeats;
 		}
 	elsif ($a eq "--all-domains") {
