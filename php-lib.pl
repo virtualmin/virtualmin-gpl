@@ -1405,24 +1405,33 @@ foreach my $i (&list_domain_php_inis($d)) {
 	}
 }
 
-# create_php_ini_link(&domain, [php-mode])
-# Create a link from etc/php.ini to the PHP version used by the domain's
-# public_html directory
-sub create_php_ini_link
+# get_domain_php_version(&domain, [php-mode])
+# Get the PHP version used by the domain by default (for public_html)
+sub get_domain_php_version
 {
 local ($d, $mode) = @_;
 $mode ||= &get_domain_php_mode($d);
 if ($mode ne "mod_php") {
 	local @dirs = &list_domain_php_directories($d);
 	local $phd = &public_html_dir($d);
-	local ($hdir) = grep { $_->{'dir'} eq $phd } @dirs;
-	$hdir ||= $dirs[0];
+        local ($hdir) = grep { $_->{'dir'} eq $phd } @dirs;
+        $hdir ||= $dirs[0];
+	return $hdir ? $hdir->{'version'} : undef;
+	}
+return undef;
+}
+
+# create_php_ini_link(&domain, [php-mode])
+# Create a link from etc/php.ini to the PHP version used by the domain's
+# public_html directory
+sub create_php_ini_link
+{
+local ($d, $mode) = @_;
+local $ver = &get_domain_php_version($d, $mode);
+if ($ver) {
 	local $etc = "$d->{'home'}/etc";
-	if ($hdir) {
-		&unlink_file_as_domain_user($d, "$etc/php.ini");
-		&symlink_file_as_domain_user($d,
-			"php".$hdir->{'version'}."/php.ini", "$etc/php.ini");
-		}
+	&unlink_file_as_domain_user($d, "$etc/php.ini");
+	&symlink_file_as_domain_user($d, "php".$ver."/php.ini", "$etc/php.ini");
 	}
 }
 
