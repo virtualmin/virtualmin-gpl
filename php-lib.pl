@@ -50,6 +50,13 @@ local ($d, $mode, $port, $newdom) = @_;
 local $p = &domain_has_website($d);
 $p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
+local $oldmode = &get_domain_php_mode($d);
+
+if ($mode eq "mod_php" && $oldmode ne "mod_php") {
+	# Save the PHP version for later recovery
+	local $oldver = &get_domain_php_version($d, $oldmode);
+	$d->{'last_php_version'} = $oldver;
+	}
 
 # Work out source php.ini files
 local (%srcini, %subs_ini);
@@ -401,6 +408,14 @@ foreach my $p (@ports) {
 				$vconf, $conf);
 
 	&flush_file_lines();
+	}
+
+local @vlist = map { $_->[0] } &list_available_php_versions($d);
+if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
+    &indexof($d->{'last_php_version'}, @vlist) >= 0) {
+	# Restore PHP version from before mod_php
+	&save_domain_php_directory($d, &public_html_dir($d),
+				   $d->{'last_php_version'}, 1);
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
@@ -879,14 +894,14 @@ foreach my $dir (@dirs) {
 return @rv;
 }
 
-# save_domain_php_directory(&domain, dir, phpversion)
+# save_domain_php_directory(&domain, dir, phpversion, [skip-ini-copy])
 # Sets up a directory to run PHP scripts with a specific version of PHP.
 # Should only be called on domains in cgi or fcgid mode! Returns 1 if the
 # directory version was set OK, 0 if not (because the virtualhost couldn't
 # be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
-local ($d, $dir, $ver) = @_;
+local ($d, $dir, $ver, $noini) = @_;
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_php_directory",
@@ -1002,10 +1017,12 @@ return 0 if (!$any);
 &create_php_ini_link($d, $mode);
 
 # Copy in php.ini file for version if missing
-my @inifiles = &find_domain_php_ini_files($d);
-my ($iniver) = grep { $_->[0] eq $ver } @inifiles;
-if (!$iniver) {
-	&save_domain_php_mode($d, $mode);
+if (!$noini) {
+	my @inifiles = &find_domain_php_ini_files($d);
+	my ($iniver) = grep { $_->[0] eq $ver } @inifiles;
+	if (!$iniver) {
+		&save_domain_php_mode($d, $mode);
+		}
 	}
 
 &register_post_action(\&restart_apache);
