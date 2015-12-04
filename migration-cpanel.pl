@@ -242,12 +242,15 @@ if (-s "$userdir/mysql.sql" && !$waschild) {
 	# Check for mysql
 	local $mycount = 0;
 	local $mydir = "$userdir/mysql";
+	local %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
+							  $user, $origuser);
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
 		if ($myf =~ /^(\Q$user\E_\S*).sql$/ ||
 		    $myf =~ /^(\Q$origuser\E_\S*).sql$/ ||
 		    $myf eq "$user.sql" ||
-		    $myf eq "$origuser.sql") {
+		    $myf eq "$origuser.sql" ||
+		    $myf =~ /^(\S+).sql$/ && $dblist{$1}) {
 			$mycount++;
 			}
 		}
@@ -836,12 +839,15 @@ if ($got{'mysql'}) {
 	&$first_print("Re-creating and loading MySQL databases ..");
 	&disable_quotas(\%dom);
 	local $mydir = "$userdir/mysql";
+	local %dblist = map { $_, 1 } &get_cpanel_db_list("$userdir/mysql.sql",
+							  $user, $origuser);
 	opendir(MYDIR, $mydir);
 	while($myf = readdir(MYDIR)) {
 		if ($myf =~ /^(\Q$user\E_\S*).sql$/ ||
 		    $myf =~ /^(\Q$origuser\E_\S*).sql$/ ||
 		    $myf =~ /^(\Q$user\E).sql$/ ||
-		    $myf =~ /^(\Q$origuser\E).sql$/) {
+		    $myf =~ /^(\Q$origuser\E).sql$/ ||
+		    $myf =~ /^(\S+).sql$/ && $dblist{$1}) {
 			local $db = $1;
 			&$indent_print();
 			&create_mysql_database(\%dom, $db);
@@ -1652,6 +1658,24 @@ while(<PASSWD>) {
 	}
 close(PASSWD);
 &$second_print(".. done (migrated $mcount mail users)");
+}
+
+# get_cpanel_db_list(file, user, origuser)
+# Reads from mysql.sql the list of DBs granted to the domain user
+sub get_cpanel_db_list
+{
+my ($file, $user1, $user2) = @_;
+my $lref = &read_file_lines($file, 1);
+my @rv;
+foreach my $l (@$lref) {
+	if ($l =~ /^GRANT ALL PRIVILEGES ON `([^`]+)`\.\* TO '([^']+)'/ &&
+	    ($2 eq $user1 || $2 eq $user2)) {
+		my $db = $1;
+		$db =~ s/\\(.)/$1/g;
+		push(@rv, $db);
+		}
+	}
+return @rv;
 }
 
 1;
