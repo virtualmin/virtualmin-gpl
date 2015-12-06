@@ -130,6 +130,19 @@ if (&can_webmin_cert()) {
 				      'ca' => $cafile });
 			}
 		}
+	if ($config{'ftp'}) {
+		&foreign_require("proftpd");
+		$conf = &proftpd::get_config();
+		$cfile = &proftpd::find_directive(
+				"TLSRSACertificateFile", $conf);
+		$cafile = &proftpd::find_directive(
+				"TLSCACertificateFile", $conf);
+		if ($cfile) {
+			push(@svcs, { 'id' => 'proftpd',
+				      'cert' => $cfile,
+				      'ca' => $cafile });
+			}
+		}
 
 	# Work out which ones are already copied
 	%cert_already = ( );
@@ -187,6 +200,15 @@ if (&can_webmin_cert()) {
 			$text{'cert_pcopy'}, $text{'cert_pcopydesc'},
 			&ui_hidden("dom", $in{'dom'}).
 			&ui_hidden("postfix", 1));
+		}
+
+	# Copy to ProFTPd, if in use
+	if ($config{'ftp'} && !$cert_already{'proftpd'}) {
+		print &ui_buttons_row(
+			"copy_cert_proftpd.cgi",
+			$text{'cert_fcopy'}, $text{'cert_fcopydesc'},
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden("proftpd", 1));
 		}
 
 	print &ui_buttons_end();

@@ -34,11 +34,5 @@
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - Test replication with NFS home
-	- http://virtualmin.com/node/38572
-
- - Copy cert to proftpd
-	- http://virtualmin.com/node/38647
-
- - Preserve PHP version when switching to/from mod_php
-	- http://virtualmin.com/node/38457
+ - New user fields in MySQL 5.7
+	- http://virtualmin.com/node/38397
