@@ -2980,6 +2980,24 @@ $s3backup_tests = [
 		      [ 'source', $s3_backup_prefix."/subdir" ] ],
 	},
 
+	# Backup to S3 subdirectory using a date-based filename
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'strftime' ],
+		      [ 'dest', $s3_backup_prefix."/subdir-%d-%M-%Y" ] ],
+	},
+
+	# Purge backups from S3
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'dest', $s3_backup_prefix."/subdir-%d-%M-%Y" ],
+		      [ 'strftime' ],
+		      [ 'purge', '0.00001' ] ],
+	  'grep' => 'Deleting file',
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
