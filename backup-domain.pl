@@ -224,7 +224,7 @@ while(@ARGV > 0) {
 		}
 	}
 @dests || usage("No destinations specified");
-@bdoms || @users || $all_doms || @plans || @vbs ||
+@bdoms || @users || $all_doms || @plans || @vbs || $purge ||
 	&usage("No domains specified");
 if (@bdoms || @users || $all_doms) {
 	@bfeats || usage("No features specified");
@@ -322,9 +322,7 @@ elsif (@doms) {
 $sched->{'virtualmin'} = join(" ", @vbs);
 &start_running_backup($sched);
 
-# Do the backup, printing any output
 &start_print_capture();
-&$first_print("Starting backup..");
 $start_time = time();
 if ($strftime) {
 	@strfdests = map { &backup_strftime($_) } @dests;
@@ -333,36 +331,46 @@ else {
 	@strfdests = @dests;
 	}
 $opts{'dir'}->{'exclude'} = join("\t", @exclude);
-($ok, $size, $errdoms) = &backup_domains(
-				\@strfdests,
-				\@doms,
-				\@bfeats,
-				$separate,
-				$ignore_errors,
-				\%opts,
-				$newformat,
-				\@vbs,
-				$mkdir,
-				$onebyone,
-				$asowner,
-				undef,
-				$increment,
-				0,
-				$key,
-				$kill);
-if ($ok && !@$errdoms) {
-	&$second_print("Backup completed successfully. Final size was ".
-		       &nice_size($size));
-	$ex = 0;
-	}
-elsif ($ok && @$errdoms) {
-	&$second_print("Backup partially completed. Final size was ".
-		       &nice_size($size));
-	$ex = 4;
+
+# Do the backup, printing any output
+if ($sched->{'doms'} || $sched->{'all'} || $sched->{'virtualmin'}) {
+	&$first_print("Starting backup..");
+	($ok, $size, $errdoms) = &backup_domains(
+					\@strfdests,
+					\@doms,
+					\@bfeats,
+					$separate,
+					$ignore_errors,
+					\%opts,
+					$newformat,
+					\@vbs,
+					$mkdir,
+					$onebyone,
+					$asowner,
+					undef,
+					$increment,
+					0,
+					$key,
+					$kill);
+	if ($ok && !@$errdoms) {
+		&$second_print("Backup completed successfully. Final size was ".
+			       &nice_size($size));
+		$ex = 0;
+		}
+	elsif ($ok && @$errdoms) {
+		&$second_print("Backup partially completed. Final size was ".
+			       &nice_size($size));
+		$ex = 4;
+		}
+	else {
+		&$second_print("Backup failed!");
+		$ex = 2;
+		}
 	}
 else {
-	&$second_print("Backup failed!");
-	$ex = 2;
+	# Probably just purging
+	$ok = 1;
+	$size = 0;
 	}
 
 # Purge if requested
