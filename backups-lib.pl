@@ -4631,7 +4631,7 @@ elsif ($mode == 8) {
 	# Search for Dropbox files matching the date pattern
 	local $files = &list_dropbox_files($base);
 	if (!ref($files)) {
-		&$second_print(&text('backup_purgeefiles3', $files));
+		&$second_print(&text('backup_purgeefiles4', $files));
 		return 0;
 		}
 	foreach my $st (@$files) {

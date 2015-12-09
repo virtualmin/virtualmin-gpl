@@ -2417,6 +2417,7 @@ backup_purgeegcbuckets=.. failed to list Google buckets : $1
 backup_purgeefiles=.. failed to list S3 files : $1
 backup_purgeefiles2=.. failed to list Rackspace files : $1
 backup_purgeefiles3=.. failed to list Google Cloud Storage files : $1
+backup_purgeefiles4=.. failed to list Dropbox files : $1
 backup_deletingbucket=Deleting S3 bucket $1, which is $2 days old ..
 backup_edelbucket=.. deletion failed : $1
 backup_purgeelistdir=.. failed to list FTP directory : $1
