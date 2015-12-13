@@ -131,7 +131,7 @@ foreach my $ver (@vers) {
 		if (&foreign_check("phpini") && -r "$inidir/php.ini") {
 			# Fix up session save path, extension_dir and
 			# gc_probability / gc_divisor
-			&foreign_require("phpini", "phpini-lib.pl");
+			&foreign_require("phpini");
 			local $pconf = &phpini::get_config("$inidir/php.ini");
 			local $tmp = &create_server_tmp($d);
 			&phpini::save_directive($pconf, "session.save_path",
@@ -362,7 +362,7 @@ foreach my $p (@ports) {
 			# From PHP config
 			local $inifile = &get_domain_php_ini($d, $ver);
 			if (-r $inifile) {
-				&foreign_require("phpini", "phpini-lib.pl");
+				&foreign_require("phpini");
 				local $iniconf = &phpini::get_config($inifile);
 				$maxex = &phpini::find_value(
 					"max_execution_time", $iniconf);
@@ -487,7 +487,7 @@ return $v == 9999 ? undef : $v ? $v-1 : 40;
 sub set_php_max_execution_time
 {
 local ($d, $max) = @_;
-&foreign_require("phpini", "phpini-lib.pl");
+&foreign_require("phpini");
 foreach my $ini (&list_domain_php_inis($d)) {
 	local $f = $ini->[1];
 	local $conf = &phpini::get_config($f);
@@ -501,7 +501,7 @@ foreach my $ini (&list_domain_php_inis($d)) {
 sub get_php_max_execution_time
 {
 local ($d, $max) = @_;
-&foreign_require("phpini", "phpini-lib.pl");
+&foreign_require("phpini");
 foreach my $ini (&list_domain_php_inis($d)) {
 	local $f = $ini->[1];
 	local $conf = &phpini::get_config($f);
@@ -1184,7 +1184,7 @@ local $inifile = $tmpl->{'web_php_ini_'.$vers[0]->[0]};
 if (!$inifile || $inifile eq "none" || !-r $inifile) {
 	$inifile = &get_global_php_ini($vers[0]->[0], $mode);
 	}
-&foreign_require("phpini", "phpini-lib.pl");
+&foreign_require("phpini");
 local $gconf = &phpini::get_config($inifile);
 local $sock = &phpini::find_value("mysql.default_socket", $gconf);
 return $sock;
@@ -1360,7 +1360,7 @@ local ($mode, $rv);
 if (defined(&get_domain_php_mode) &&
     ($mode = &get_domain_php_mode($d)) && $mode ne "mod_php" &&
     &foreign_check("phpini")) {
-	&foreign_require("phpini", "phpini-lib.pl");
+	&foreign_require("phpini");
 	&$first_print($text{'save_apache10'});
 	foreach my $i (&list_domain_php_inis($d)) {
 		&unflush_file_lines($i->[1]);	# In case cached
@@ -1400,7 +1400,7 @@ sub fix_php_extension_dir
 {
 local ($d) = @_;
 return if (!&foreign_check("phpini"));
-&foreign_require("phpini", "phpini-lib.pl");
+&foreign_require("phpini");
 foreach my $i (&list_domain_php_inis($d)) {
 	local $pconf = &phpini::get_config($i->[1]);
 	local $ed = &phpini::find_value("extension_dir", $pconf);
