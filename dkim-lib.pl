@@ -117,7 +117,7 @@ sub can_install_dkim
 {
 if ($gconfig{'os_type'} eq 'debian-linux' ||
     $gconfig{'os_type'} eq 'redhat-linux') {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	return defined(&software::update_system_install);
 	}
 return 0;
@@ -127,7 +127,7 @@ return 0;
 # Attempt to install DKIM filter, outputting progress messages
 sub install_dkim_package
 {
-&foreign_require("software", "software-lib.pl");
+&foreign_require("software");
 my $pkg = &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
 	  &get_dkim_type() eq 'freebsd' ? 'opendkim' :
 	  &get_dkim_type() eq 'debian' ? 'dkim-filter' :

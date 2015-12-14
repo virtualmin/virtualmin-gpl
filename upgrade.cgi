@@ -2,8 +2,8 @@
 # Upgrade from Virtualmin GPL to Pro
 
 require './virtual-server-lib.pl';
-&foreign_require("webmin", "webmin-lib.pl");
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("webmin");
+&foreign_require("cron");
 &can_edit_templates() || &error($text{'upgrade_ecannot'});
 &error_setup($text{'upgrade_err'});
 &ReadParse();
@@ -38,7 +38,7 @@ if ($itype eq "rpm") {
 		&error(&text('upgrade_etypematch', $itype, $witype));
 
 	# Make sure YUM works
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	($wvs) = grep { $_->{'name'} eq 'wbm-virtual-server' }
 		      &software::update_system_available();
 	if (!$wvs) {
@@ -99,7 +99,7 @@ if ($itype eq "rpm") {
 	&$second_print($text{'setup_done'});
 
 	# Update all Virtualmin-related packages
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	foreach $p (&software::update_system_available()) {
 		if ($p->{'name'} eq 'wbm-virtualmin-multi-login' &&
 		    !&foreign_check('server-manager')) {
@@ -145,7 +145,7 @@ elsif ($itype eq "deb") {
 	&$second_print($text{'setup_done'});
 
 	# Update all Virtualmin-related packages
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	foreach $p (&software::update_system_available()) {
 		if ($p->{'name'} eq 'webmin-virtualmin-multi-login' &&
 		    !&foreign_check('server-manager')) {
@@ -320,7 +320,7 @@ else {
 
 # Clear security updates caches, as we now have new updates available
 if (&foreign_installed("security-updates")) {
-	&foreign_require("security-updates", "security-updates-lib.pl");
+	&foreign_require("security-updates");
 	unlink($security_updates::security_cache_file);
 	unlink($security_updates::available_cache_file);
 	unlink($security_updates::current_cache_file);

@@ -5,7 +5,7 @@
 sub setup_virt
 {
 &obtain_lock_virt($_[0]);
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local @boot = &net::active_interfaces();
 if (!$_[0]->{'virtalready'}) {
 	# Actually bring up
@@ -71,7 +71,7 @@ sub delete_virt
 if (!$_[0]->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
 	&obtain_lock_virt($_[0]);
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local ($biface) = grep { $_->{'address'} eq $_[0]->{'ip'} }
 			       &net::boot_interfaces();
 	local ($aiface) = grep { $_->{'address'} eq $_[0]->{'ip'} }
@@ -103,7 +103,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
 	# Change IP on virtual interface
 	&$first_print($text{'save_virt'});
 	&obtain_lock_virt($_[0]);
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local ($biface) = grep { $_->{'address'} eq $_[1]->{'ip'} }
 			       &net::boot_interfaces();
 	local ($aiface) = grep { $_->{'address'} eq $_[1]->{'ip'} }
@@ -228,7 +228,7 @@ else {
 		}
 	if ($anyzone) {
 		# Can select an existing active IP
-		&foreign_require("net", "net-lib.pl");
+		&foreign_require("net");
 		local @act = grep { $_->{'virtual'} ne '' }
 				  &net::active_interfaces();
 		if (@act) {
@@ -431,7 +431,7 @@ foreach my $ranges ("ranges", &supports_ip6() ? ( "ranges6" ) : ( )) {
 # Create a local cache file of IPs on this system
 sub build_local_ip_list
 {
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 &open_lock_tempfile(IPCACHE, ">$module_config_directory/localips");
 foreach my $a (&net::active_interfaces()) {
 	if ($a->{'address'}) {
@@ -448,7 +448,7 @@ sub obtain_lock_virt
 # Lock the network config directory or file
 &obtain_lock_anything();
 if ($main::got_lock_virt == 0) {
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	$main::got_lock_virt_file = $net::network_interfaces_config ||
 				    $net::network_config ||
 				    "$module_config_directory/virtlock";

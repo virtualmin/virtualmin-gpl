@@ -12,8 +12,8 @@ $spamassassin_lock_file = "/tmp/virtualmin.spamassassin";
 sub require_spam
 {
 return if ($require_spam++);
-&foreign_require("procmail", "procmail-lib.pl");
-&foreign_require("spam", "spam-lib.pl");
+&foreign_require("procmail");
+&foreign_require("spam");
 }
 
 sub check_depends_spam
@@ -36,7 +36,7 @@ sub setup_spam
 {
 &$first_print($text{'setup_spam'});
 &require_spam();
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 
 # Create the needed directories now, so we can lock files in them
 if (!-d $procmail_spam_dir) {
@@ -1295,7 +1295,7 @@ foreach my $d (grep { $_->{'spam'} } &list_domains()) {
 # background process
 sub setup_lookup_domain_daemon
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 local $helper = &get_api_helper_command();
 local $old_init_mode = $init::init_mode;
@@ -1330,7 +1330,7 @@ if ($pid) {
 # Turn off the background domain-lookup daemon
 sub delete_lookup_domain_daemon
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 &init::disable_at_boot("lookup-domain");
 local $pidfile = "$ENV{'WEBMIN_VAR'}/lookup-domain-daemon.pid";
 &init::stop_action("lookup-domain");
@@ -1344,7 +1344,7 @@ if ($pid) {
 # Returns 1 if the domain lookup daemon is running, 0 if not
 sub check_lookup_domain_daemon
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 return &init::action_status("lookup-domain") == 2 ? 1 : 0;
 }
 
@@ -1472,7 +1472,7 @@ foreach my $f ($spamfile, $hamfile) {
 # Create the cron job that blacklists trapped spam, if needed
 sub setup_spamtrap_cron
 {
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $job = &find_cron_script($spamtrap_cron_cmd);
 if (!$job) {
 	$job = { 'user' => 'root',
@@ -1540,7 +1540,7 @@ local $st = &check_spamd_status();
 return 1 if ($st == 1 || $st == -1);
 
 # Find init script
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 local $init;
 foreach my $i ("spamassassin", "spamd", "sa-spamd") {
 	if (&init::action_status($i)) {
@@ -1602,7 +1602,7 @@ return 1 if ($st == 0 || $st == -1);
 
 # Find init script
 &$first_print(&text('spamd_unboot'));
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 local $init;
 foreach my $i ("spamassassin", "spamd", "sa-spamd", "virtualmin-spamassassin") {
 	if (&init::action_status($i)) {
@@ -1720,7 +1720,7 @@ return $rv ? undef : $text{'spamd_estartmsg'};
 # message on failure.
 sub stop_service_spam
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 foreach my $init ("spamassassin", "spamd", "sa-spamd",
 	          "virtualmin-spamassassin") {
 	if (&init::action_status($init)) {

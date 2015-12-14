@@ -2,7 +2,7 @@ sub require_mysql
 {
 return if ($require_mysql++);
 $mysql::use_global_login = 1;
-&foreign_require("mysql", "mysql-lib.pl");
+&foreign_require("mysql");
 if (!$mysql::config{'login'}) {
 	$mysql::config{'login'} = 'root';
 	$mysql::mysql_login ||= 'root';

@@ -214,7 +214,7 @@ if ($anychoose) {
 	}
 if ($anyzone) {
 	# Can select an existing active IP, for inside a Solaris zone
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local @act = grep { $_->{'virtual'} ne '' }
 			  &net::active_interfaces();
 	if (@act) {

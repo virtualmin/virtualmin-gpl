@@ -5,7 +5,7 @@ package virtual_server;
 $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 exit(1) if (!$config{'dynip_service'});
 

@@ -111,7 +111,7 @@ if (-r $sources_list) {
 	}
 
 # Update Webmin updates file
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 	&$first_print("Updating Webmin module updates URL ..");
 	&lock_file($webmin::module_config_file);

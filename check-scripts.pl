@@ -194,7 +194,7 @@ foreach $s (@scripts) {
 
 # Send off any errors via email
 if (@errs) {
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	&foreign_require("mailboxes");
 	$body = "The following errors were detected downloading script files:\n";
 	foreach $e (@errs) {
 		$body .= "\n";

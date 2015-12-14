@@ -8,7 +8,7 @@ $writelogs_cmd = "$module_config_directory/writelogs.pl";
 sub require_apache
 {
 return if ($require_apache++);
-&foreign_require("apache", "apache-lib.pl");
+&foreign_require("apache");
 }
 
 # setup_web(&domain)
@@ -1905,7 +1905,7 @@ return &ui_table_row($label,
 # Creates the writelogs wrapper
 sub setup_writelogs
 {
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 &cron::create_wrapper($writelogs_cmd, $module_name, "writelogs.pl");
 if (&has_command("chcon")) {
 	&execute_command("chcon -t httpd_sys_script_exec_t ".quotemeta($writelogs_cmd).
@@ -2937,7 +2937,7 @@ foreach my $r ('webmail', 'admin') {
 		if ($r eq 'webmail') {
 			# From Usermin
 			if (&foreign_installed("usermin")) {
-				&foreign_require("usermin", "usermin-lib.pl");
+				&foreign_require("usermin");
 				local %miniserv;
 				&usermin::get_usermin_miniserv_config(
 					\%miniserv);
@@ -3822,7 +3822,7 @@ undef(@apache::get_config_cache);
 
 # Fix all php.ini files that use old path
 if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
-	&foreign_require("phpini", "phpini-lib.pl");
+	&foreign_require("phpini");
 	my $mode = &get_domain_php_mode($d);
 	$mode = "cgi" if ($mode eq "mod_php");
 	foreach my $ini (&list_domain_php_inis($d, $mode)) {

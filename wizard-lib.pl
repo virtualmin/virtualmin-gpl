@@ -220,7 +220,7 @@ print &ui_table_row($text{'wizard_db_postgres'},
 sub wizard_parse_db
 {
 local ($in) = @_;
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 
 &require_mysql();
 if ($in->{'mysql'}) {
@@ -486,7 +486,7 @@ $tmpl->{'hashpass'} = $in->{'hashpass'};
 if ($in->{'hashpass'} && &foreign_check("usermin")) {
 	# Make sure read mail module is installed, and setup to use local
 	# mail files
-	&foreign_require("usermin", "usermin-lib.pl");
+	&foreign_require("usermin");
 	return undef if (!&usermin::get_usermin_module_info("mailbox"));
 	my %mconfig;
 	my $cfile = "$usermin::config{'usermin_dir'}/mailbox/config";

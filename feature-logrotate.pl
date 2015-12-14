@@ -3,7 +3,7 @@
 sub require_logrotate
 {
 return if ($require_logrotate++);
-&foreign_require("logrotate", "logrotate-lib.pl");
+&foreign_require("logrotate");
 }
 
 sub check_depends_logrotate

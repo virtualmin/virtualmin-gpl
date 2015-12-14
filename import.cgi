@@ -57,7 +57,7 @@ if (!$parent && $config{'mysql'} && !$in{'db_mysql_user_def'}) {
 
 # Make sure IP is valid
 if ($in{'virt'}) {
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	($iface) = grep { $_->{'address'} eq $in{'ip'} }
 				( &net::boot_interfaces(),
 				  &net::active_interfaces() );

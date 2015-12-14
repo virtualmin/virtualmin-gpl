@@ -293,7 +293,7 @@ if ($hasspam) {
 	$awl_link = undef;
 	if (!$in{'new'} && &foreign_available("spam")) {
 		# Create AWL link
-		&foreign_require("spam", "spam-lib.pl");
+		&foreign_require("spam");
 		if (defined(&spam::can_edit_awl) &&
 		    &spam::supports_auto_whitelist() == 2 &&
 		    &spam::get_auto_whitelist_file($user->{'user'}) &&
@@ -368,7 +368,7 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 $procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
 if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
     &foreign_check("filter")) {
-	&foreign_require("filter", "filter-lib.pl");
+	&foreign_require("filter");
 	@filters = &filter::list_filters($procmailrc);
 	}
 if (@filters) {
@@ -455,7 +455,7 @@ if ($anyother) {
 $usermin = 0;
 if (&can_switch_usermin($d, $user) &&
     $user->{'unix'} && &foreign_installed("usermin", 1)) {
-	&foreign_require("usermin", "usermin-lib.pl");
+	&foreign_require("usermin");
 	local %uminiserv;
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	if (&check_pid_file($uminiserv{'pidfile'}) &&

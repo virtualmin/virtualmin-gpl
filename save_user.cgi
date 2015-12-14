@@ -49,7 +49,7 @@ if ($in{'switch'}) {
 	# Auto-login to Usermin
 	&can_switch_usermin($d, $user) ||
 		&error($text{'user_eswitch'});
-	&foreign_require("usermin", "usermin-lib.pl");
+	&foreign_require("usermin");
 	($cookie, $url) = &usermin::switch_to_usermin_user($user->{'user'});
 	print "Set-Cookie: $cookie\n";
 	&redirect($url);

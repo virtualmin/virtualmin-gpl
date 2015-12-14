@@ -4,7 +4,7 @@ require 'virtual-server-lib.pl';
 sub show_theme
 {
 local ($value, $desc, $type, $func, $name) = @_;
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 return &ui_select($name, $value,
 		  [ [ "*", $text{'config_deftheme'} ],
 		    [ "", $text{'config_oldtheme'} ],

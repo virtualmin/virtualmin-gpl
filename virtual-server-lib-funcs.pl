@@ -32,12 +32,12 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 sub require_useradmin
 {
 if (!$require_useradmin++) {
-	&foreign_require("useradmin", "user-lib.pl");
+	&foreign_require("useradmin");
 	%uconfig = &foreign_config("useradmin");
 	$home_base = &resolve_links($config{'home_base'} || $uconfig{'home_base'});
 	$cannot_rehash_password = 0;
 	if ($config{'ldap'}) {
-		&foreign_require("ldap-useradmin", "ldap-useradmin-lib.pl");
+		&foreign_require("ldap-useradmin");
 		$usermodule = "ldap-useradmin";
 		if ($ldap_useradmin::config{'md5'} == 3 ||
 		    $ldap_useradmin::config{'md5'} == 4) {
@@ -2209,7 +2209,7 @@ return 0 if (!$user->{'plainpass'});
 
 # Make sure Usermin is installed, and the mailbox module is setup for IMAP
 return 0 if (!&foreign_check("usermin"));
-&foreign_require("usermin", "usermin-lib.pl");
+&foreign_require("usermin");
 return 0 if (!&usermin::get_usermin_module_info("mailbox"));
 local %mconfig;
 &read_file("$usermin::config{'usermin_dir'}/mailbox/config", \%mconfig);
@@ -2299,7 +2299,7 @@ return 0;
 sub delete_unix_cron_jobs
 {
 local ($username) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 local $cronfile;
 foreach my $j (@jobs) {
@@ -2322,7 +2322,7 @@ sub rename_unix_cron_jobs
 {
 local ($username, $oldusername) = @_;
 return if ($username eq $oldusername);
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 if (-r "$cron::config{'cron_dir'}/$oldusername") {
 	# Rename user's crontab directory file
 	&rename_logged("$cron::config{'cron_dir'}/$oldusername",
@@ -2348,7 +2348,7 @@ sub copy_unix_cron_jobs
 {
 local ($username, $oldusername) = @_;
 return if ($username eq $oldusername);
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 foreach my $j (@jobs) {
 	if ($j->{'user'} eq $oldusername) {
@@ -2364,7 +2364,7 @@ foreach my $j (@jobs) {
 sub disable_unix_cron_jobs
 {
 local ($username) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 local $cronfile;
 foreach my $j (@jobs) {
@@ -2386,7 +2386,7 @@ foreach my $j (@jobs) {
 sub enable_unix_cron_jobs
 {
 local ($username) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 local $cronfile;
 foreach my $j (@jobs) {
@@ -3625,7 +3625,7 @@ if ($config{'defip'}) {
 	}
 elsif (&running_in_zone()) {
 	# From zone's interface
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local ($iface) = grep { $_->{'up'} &&
 				&net::iface_type($_->{'name'}) =~ /ethernet/i }
 			      &net::active_interfaces();
@@ -3633,7 +3633,7 @@ elsif (&running_in_zone()) {
 	}
 else {
 	# From interface detected at check time
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local $ifacename = $config{'iface'} || &first_ethernet_iface();
 	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
 			      &net::active_interfaces();
@@ -3665,7 +3665,7 @@ if ($config{'defip6'}) {
 	}
 else {
 	# From interface detected at check time
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local $ifacename = $config{'iface'} || &first_ethernet_iface();
 	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
 			      &net::boot_interfaces();
@@ -3691,7 +3691,7 @@ else {
 # Returns the name of the first active ethernet interface
 sub first_ethernet_iface
 {
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 my @active = &net::active_interfaces();
 
 # First try to find a non-virtual Ethernet interface
@@ -3723,7 +3723,7 @@ return undef;
 sub get_address_iface
 {
 local ($a) = @_;
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local ($iface) = grep { $_->{'address'} eq $a ||
 			&indexof($a, @{$_->{'address6'}}) >= 0 }
 		      &net::active_interfaces();
@@ -4269,7 +4269,7 @@ if (!$to) {
 	$to = $cc;
 	$cc = undef;
 	}
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 # Set content type and encoding based on whether the email contains HTML
 # and/or non-ascii characters
@@ -4314,7 +4314,7 @@ sub send_notify_email
 {
 local ($from, $recips, $d, $subject, $body, $attach, $attachfile, $attachtype,
        $admins, $many, $charset) = @_;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 local %done;
 foreach my $r (@$recips) {
 	# Work out recipient type and addresses
@@ -4375,7 +4375,7 @@ foreach my $r (@$recips) {
 sub get_global_from_address
 {
 local ($d) = @_;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 local $rv = $config{'from_addr'} || &mailboxes::get_from_address();
 if ($d && $d->{'reseller'} && defined(&get_reseller)) {
 	# From first reseller
@@ -6660,7 +6660,7 @@ return %taken;
 # right now.
 sub active_ip_addresses
 {
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local @rv;
 push(@rv, map { $_->{'address'} } &net::active_interfaces());
 if (&supports_ip6()) {
@@ -6686,7 +6686,7 @@ return grep { $_ ne '' } &unique(@rv);
 # Returns a list of IP addresses (v4 and v6) that are activated at boot time
 sub bootup_ip_addresses
 {
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local @rv;
 foreach my $i (&net::boot_interfaces()) {
 	if ($i->{'range'} && $i->{'start'} && $i->{'end'}) {
@@ -10551,7 +10551,7 @@ if (&has_command("hostid")) {
 	chop($id = `hostid 2>/dev/null`);
 	}
 if (!$id || $id =~ /^0+$/ || $id eq '7f0100') {
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} }
 			      &net::active_interfaces();
 	$id = $iface->{'ether'} if ($iface);
@@ -12434,7 +12434,7 @@ return $d->{'alias'} && $d->{'aliasmail'} ? @aliasmail_features :
 sub list_mx_servers
 {
 if (&foreign_check("servers")) {
-	&foreign_require("servers", "servers-lib.pl");
+	&foreign_require("servers");
 	local %servers = map { $_->{'id'}, $_ } &servers::list_servers();
 	local @rv;
 	foreach my $idname (split(/\s+/, $config{'mx_servers'})) {
@@ -13423,7 +13423,7 @@ local $mclink = "../config.cgi?$module_name";
 
 # Make sure networking is supported
 if (!&foreign_check("net")) {
-	&foreign_require("net", "net-lib.pl");
+	&foreign_require("net");
 	if (!defined(&net::boot_interfaces)) {
 		return &text('index_enet');
 		}
@@ -13498,7 +13498,7 @@ if ($config{'dns'}) {
 
 		# Make sure this server is configured to use the local BIND
 		if (&foreign_check("net") && $config{'dns_check'}) {
-			&foreign_require("net", "net-lib.pl");
+			&foreign_require("net");
 			local %ips = map { $_, 1 } &active_ip_addresses();
 			local $dns = &net::get_dns_config();
 			local $hasdns;
@@ -13850,7 +13850,7 @@ if ($config{'webalizer'}) {
 	&domain_has_website() || return &text('check_edepwebalizer', $clink);
 	&foreign_installed("webalizer", 1) == 2 ||
 		return &text('index_ewebalizer', "/webalizer/", $clink);
-	&foreign_require("webalizer", "webalizer-lib.pl");
+	&foreign_require("webalizer");
 
 	# This is not needed
 	#local $conf = &webalizer::get_config();
@@ -13966,7 +13966,7 @@ if ($config{'logrotate'}) {
 	# Make sure logrotate is installed
 	&foreign_installed("logrotate", 1) == 2 ||
 		return &text('index_elogrotate', "/logrotate/", $clink);
-	&foreign_require("logrotate", "logrotate-lib.pl");
+	&foreign_require("logrotate");
 	local $ver = &logrotate::get_logrotate_version();
 	$ver >= 3.6 ||
 		return &text('index_elogrotatever', "/logrotate/",
@@ -14389,7 +14389,7 @@ if ($config{'unix'}) {
 	if (&find_byname("nscd")) {
 		local $msg;
 		if (&foreign_available("init")) {
-			&foreign_require("init", "init-lib.pl");
+			&foreign_require("init");
 			if (($init::init_mode eq 'init' ||
 			     $init::init_mode eq 'upstart' ||
 			     $init::init_mode eq 'systemd') &&
@@ -14471,7 +14471,7 @@ if (defined(&supports_resource_limits)) {
 
 # Check if software packages work, for script installs
 if (&foreign_check("software")) {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (defined(&software::check_package_system)) {
 		local $err = &software::check_package_system();
 		local $uerr = &software::check_update_system();
@@ -14716,7 +14716,7 @@ return ( );
 sub sub_mount_points
 {
 local $dir = &resolve_links($_[0]);
-&foreign_require("mount", "mount-lib.pl");
+&foreign_require("mount");
 local @mounted = &mount::list_mounted();
 local @rv;
 foreach my $m (@mounted) {
@@ -15215,7 +15215,7 @@ if ($d) {
 	}
 if ($webmin) {
 	# Check ACL module too
-	&foreign_require("acl", "acl-lib.pl");
+	&foreign_require("acl");
 	$err = &acl::check_password_restrictions(
 			$user->{'user'}, $user->{'plainpass'});
 	return $err if ($err);
@@ -15446,7 +15446,7 @@ return 0;
 sub activate_shared_ip
 {
 local ($ip, $netmask) = @_;
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local @boot = &net::active_interfaces();
 local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
 if (!$iface) {
@@ -15478,7 +15478,7 @@ return undef;
 sub deactivate_shared_ip
 {
 local ($ip) = @_;
-&foreign_require("net", "net-lib.pl");
+&foreign_require("net");
 local @boot = &net::boot_interfaces();
 local @active = &net::active_interfaces();
 local ($b) = grep { $_->{'address'} eq $ip } @boot;
@@ -16326,7 +16326,7 @@ sub setup_bandwidth_job
 {
 local ($active, $step) = @_;
 $step ||= 1;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $job = &find_bandwidth_job();
 if ($job) {
 	&delete_cron_script($job);
@@ -16968,7 +16968,7 @@ if ($u->{'extraemail'}) {
 sub extract_address_parts
 {
 local ($str) = @_;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 return grep { /^[^@ ]+\@[^@ ]+$/ }
 	    map { $_->[0] } &mailboxes::split_addresses($str);
 }

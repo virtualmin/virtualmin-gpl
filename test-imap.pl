@@ -67,7 +67,7 @@ $folder = { 'server' => $server,
 	    'user' => $user,
 	    'pass' => $pass,
 	    'mailbox' => $mailbox };
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 $main::error_must_die = 1;
 ($st, $h, $count) = &mailboxes::imap_login($folder);
 if ($@) {

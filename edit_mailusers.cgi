@@ -7,7 +7,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'users_ecannot'});
 &can_edit_users() || &error($text{'users_ecannot'});
 &ui_print_header(&domain_in($d), $text{'mailusers_title'}, "");
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
 $text{'sub_USER'} = $text{'sub_POP3'};

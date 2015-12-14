@@ -194,7 +194,7 @@ if ($tmpl->{'web_webmin_ssl'} && $d->{'virt'}) {
 	}
 if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
     $d->{'virt'}) {
-	&foreign_require("usermin", "usermin-lib.pl");
+	&foreign_require("usermin");
 	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
@@ -439,7 +439,7 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 		       \&put_miniserv_config,
 		       \&restart_webmin);
 	if (&foreign_installed("usermin")) {
-		&foreign_require("usermin", "usermin-lib.pl");
+		&foreign_require("usermin");
 		&modify_ipkeys($_[0], $_[1],
 			       \&usermin::get_usermin_miniserv_config,
 			       \&usermin::put_usermin_miniserv_config,
@@ -494,7 +494,7 @@ undef(@apache::get_config_cache);
 	       \&put_miniserv_config,
 	       \&restart_webmin);
 if (&foreign_installed("usermin")) {
-	&foreign_require("usermin", "usermin-lib.pl");
+	&foreign_require("usermin");
 	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
 		      \&restart_usermin);
@@ -656,14 +656,14 @@ return 0;
 sub check_webmin_port_clash
 {
 my ($d, $port) = @_;
-foreign_require("webmin", "webmin-lib.pl");
+foreign_require("webmin");
 my @checks;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 push(@checks, [ \%miniserv, "Webmin" ]);
 if (&foreign_installed("usermin")) {
 	my %uminiserv;
-	foreign_require("usermin", "usermin-lib.pl");
+	foreign_require("usermin");
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	push(@checks, [ \%uminiserv, "Usermin" ]);
 	}
@@ -1180,7 +1180,7 @@ return $data;
 sub setup_ipkeys
 {
 local ($dom, $getfunc, $putfunc, $postfunc) = @_;
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
@@ -1199,7 +1199,7 @@ return 1;
 sub delete_ipkeys
 {
 local ($dom, $getfunc, $putfunc, $postfunc) = @_;
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
@@ -1368,7 +1368,7 @@ sub generate_self_signed_cert
 local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
 $ctype ||= $config{'default_ctype'};
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
 
@@ -1423,7 +1423,7 @@ sub generate_certificate_request
 local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
 $ctype ||= $config{'cert_type'};
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
 

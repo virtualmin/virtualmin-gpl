@@ -376,7 +376,7 @@ if (@mailusers) {
 	&$first_print("Re-creating mail users ..");
 	}
 local $mcount = 0;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 foreach my $mailuser (@mailusers) {
 	local $muinfo = &create_initial_user(\%dom);
 	local $name = $mailuser->{'login'}->{'name'};
@@ -561,7 +561,7 @@ if ($pdirs && ref($pdirs) ne 'ARRAY') {
 	}
 if (@$pdirs && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
-	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&foreign_require("htaccess-htpasswd");
 	local $hdir = &public_html_dir(\%dom);
 	local $etc = "$dom{'home'}/etc";
 	if (!-d $etc) {

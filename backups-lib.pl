@@ -148,7 +148,7 @@ else {
 	}
 
 # Update or delete cron job
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $cmd = $backup_cron_cmd;
 $cmd .= " --id $backup->{'id'}" if ($backup->{'id'} != 1);
 local $job;

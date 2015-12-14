@@ -31,7 +31,7 @@ if (@ARGV) {
 	}
 
 &require_webalizer();
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 
 &cron::create_wrapper($webalizer::cron_cmd,
 		      "webalizer", "webalizer.pl");

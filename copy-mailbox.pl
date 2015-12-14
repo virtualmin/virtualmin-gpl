@@ -52,7 +52,7 @@ while(@ARGV > 0) {
 $src && $dest || &usage("Missing --source or --dest parameter");
 
 # Get the folders
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 $srcfolder = { 'file' => $src,
 	       'type' => 0 };
 if ($src =~ /\/$/ || -d $src) {

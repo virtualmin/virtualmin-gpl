@@ -806,7 +806,7 @@ if ($got{'virtualmin-mailman'}) {
 
 # Copy cron jobs for user (direct to his cron file)
 if (-r "$userdir/cron/$user" && !$waschild) {
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	&$first_print("Copying Cron jobs ..");
 	$cron::cron_temp_file = &transname();
 	eval {
@@ -1539,7 +1539,7 @@ closedir(VF);
 sub cpanel_migrate_mailboxes
 {
 local ($dom, $d, $usermap) = @_;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 &$first_print("Re-creating mail users for $dom ..");
 local $mcount = 0;
 local (%pass, %quota);

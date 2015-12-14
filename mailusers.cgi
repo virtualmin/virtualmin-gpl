@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'users_ecannot'});
 &can_edit_users() || &error($text{'users_ecannot'});
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 # Validate inputs
 &error_setup($text{'mailusers_err'});

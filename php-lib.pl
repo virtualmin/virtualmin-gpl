@@ -396,7 +396,7 @@ foreach my $p (@ports) {
                        $gconfig{'os_version'} >= 14 &&
 		       &foreign_check("software")) {
 			# CentOS 6 and Fedora 14+ may have it..
-			&foreign_require("software", "software-lib.pl");
+			&foreign_require("software");
 			local @pinfo = &software::package_info("mod_fcgid");
 			if (&compare_versions($pinfo[4], "2.3.6") >= 0) {
 				$setmax = 1;

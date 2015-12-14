@@ -6,7 +6,7 @@ $main::no_acl_check++;
 require './virtual-server-lib.pl';
 $host = &get_system_hostname();
 if (&foreign_check("mailboxes")) {
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	&foreign_require("mailboxes");
 	$has_mailboxes++;
 	}
 

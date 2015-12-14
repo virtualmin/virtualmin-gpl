@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 &popup_header($text{'cron_title'});
 
 # Create the job object

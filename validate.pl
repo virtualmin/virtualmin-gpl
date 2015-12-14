@@ -4,7 +4,7 @@
 package virtual_server;
 $main::no_acl_check++;
 require './virtual-server-lib.pl';
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 if ($ARGV[0] eq "--debug") {
 	$debug_mode = 1;

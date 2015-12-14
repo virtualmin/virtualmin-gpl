@@ -5,7 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 
 # Validate inputs
 &error_setup($text{'csr_err'});

@@ -3,7 +3,7 @@
 sub require_status
 {
 return if ($require_status++);
-&foreign_require("status", "status-lib.pl");
+&foreign_require("status");
 }
 
 sub check_depends_status

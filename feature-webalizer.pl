@@ -2,7 +2,7 @@
 sub require_webalizer
 {
 return if ($require_webalizer++);
-&foreign_require("webalizer", "webalizer-lib.pl");
+&foreign_require("webalizer");
 %wconfig = &foreign_config("webalizer");
 }
 
@@ -45,7 +45,7 @@ if ($tmpl->{'web_stats_pass'} && !-r $htaccess_file) {
 	&create_webalizer_htaccess($_[0], $htaccess_file, $passwd_file);
 
 	# Add to list of protected dirs
-	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&foreign_require("htaccess-htpasswd");
 	&lock_file($htaccess_htpasswd::directories_file);
 	local @dirs = &htaccess_htpasswd::list_directories();
 	push(@dirs, [ $stats, $passwd_file, 0, 0, undef ]);
@@ -139,7 +139,7 @@ if (!$job) {
 sub setup_webalizer_cron
 {
 local ($lconf, $alog) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $job = { 'user' => 'root',
 	       'active' => 1,
 	       'mins' => $lconf->{'mins'},
@@ -197,7 +197,7 @@ if ($alog ne $oldalog) {
 	&flush_file_lines($changed) if ($changed);
 
 	# Change the log file path in the Cron job
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	local ($job) = grep
 		{ $_->{'command'} eq "$webalizer::cron_cmd $oldalog" }
 		&cron::list_cron_jobs();
@@ -314,7 +314,7 @@ if ($_[0]->{'deleting'}) {
 	}
  
 # Turn off cron job for webalizer config
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 		    &cron::list_cron_jobs();
 if ($job) {
@@ -324,7 +324,7 @@ if ($job) {
 &release_lock_cron($_[0]);
 
 # Remove from list of protected dirs
-&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+&foreign_require("htaccess-htpasswd");
 &lock_file($htaccess_htpasswd::directories_file);
 local @dirs = &htaccess_htpasswd::list_directories();
 @dirs = grep { $_->[0] ne $stats } @dirs;
@@ -403,7 +403,7 @@ return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$alog);
 local $cfile = &webalizer::config_file_name($alog);
 return &text('validate_ewebalizer', "<tt>$cfile</tt>") if (!-r $cfile);
 if (!$config{'webalizer_nocron'}) {
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 			    &cron::list_cron_jobs();
 	return &text('validate_ewebalizercron') if (!$job);
@@ -492,7 +492,7 @@ else {
 
 	# Delete and re-create the cron job
 	&obtain_lock_cron($_[0]);
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 			    &cron::list_cron_jobs();
 	if ($job) {
@@ -531,7 +531,7 @@ sub update_create_htpasswd
 {
 my ($d, $file, $olduser) = @_;
 local ($pass, $encpass);
-&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+&foreign_require("htaccess-htpasswd");
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
 	$pass = $parent->{'pass'};

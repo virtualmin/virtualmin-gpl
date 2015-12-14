@@ -6,8 +6,8 @@ package virtual_server;
 $main::no_acl_check++;
 $no_virtualmin_plugins = 1;
 require './virtual-server-lib.pl';
-&foreign_require("mailboxes", "mailboxes-lib.pl");
-&foreign_require("spam", "spam-lib.pl");
+&foreign_require("mailboxes");
+&foreign_require("spam");
 
 # Find the sa-learn command
 $salearn = &has_command($spam::config{'sa_learn'} || "sa-learn");

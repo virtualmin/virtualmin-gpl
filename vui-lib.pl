@@ -95,7 +95,7 @@ sub virtualmin_ui_show_cron_time
 return &theme_virtualmin_ui_show_cron_time(@_)
 	if (defined(&theme_virtualmin_ui_show_cron_time));
 local ($name, $job, $offmsg) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $rv;
 local $mode = !$job ? 0 : $job->{'special'} ? 1 : 2;
 local $complex = $mode == 2 ? &cron::when_text($job, 1) : undef;

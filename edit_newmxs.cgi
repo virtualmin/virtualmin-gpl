@@ -2,7 +2,7 @@
 # Show a form for selecting Webmin servers to use as secondary MXs for mail
 
 require './virtual-server-lib.pl';
-&foreign_require("servers", "servers-lib.pl");
+&foreign_require("servers");
 &can_edit_templates() || &error($text{'newmxs_ecannot'});
 &ui_print_header(undef, $text{'newmxs_title'}, "", "newmxs");
 

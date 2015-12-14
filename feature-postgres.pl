@@ -2,7 +2,7 @@ sub require_postgres
 {
 return if ($require_postgres++);
 $postgresql::use_global_login = 1;
-&foreign_require("postgresql", "postgresql-lib.pl");
+&foreign_require("postgresql");
 %qconfig = &foreign_config("postgresql");
 }
 

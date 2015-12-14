@@ -453,7 +453,7 @@ if (!$clamd) {
 	# No installed
 	return -1;
 	}
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 if (&init::action_status("clamdscan-clamd")) {
 	return 0;	# Joe's init script for redhat
 	}
@@ -489,7 +489,7 @@ return 1 if ($st == 1 || $st == -1);
 
 # Check for simple init scripts
 local $init;
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 foreach my $i ("clamav-daemon", "clamdscan-clamd", "clamav-clamd", "clamd", "clamd\@scan") {
 	if (&init::action_status($i)) {
 		$init = $i;
@@ -753,7 +753,7 @@ return 1;
 # Shut down the clamd process and disable at boot. May also print stuff.
 sub disable_clamd
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd",
 		  "clamd\@scan") {
@@ -817,7 +817,7 @@ return $rv ? undef : $text{'clamd_estartmsg'};
 # message on failure.
 sub stop_service_virus
 {
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 foreach my $init ("clamdscan-clamd", "clamav-daemon", "clamd-virtualmin",
 		  "clamd-wrapper", "clamd-csw", "clamav-clamd", "clamd",
 		  "clamd\@scan") {

@@ -33,7 +33,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "list-php-ini.pl must be run as root";
 	}
-&foreign_require("phpini", "phpini-lib.pl");
+&foreign_require("phpini");
 @OLDARGV = @ARGV;
 &set_all_text_print();
 

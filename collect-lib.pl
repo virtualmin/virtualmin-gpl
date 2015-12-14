@@ -17,7 +17,7 @@ if ($config{'mem_cmd'}) {
 
 # Available Virtualmin package updates
 if (&foreign_check("security-updates")) {
-	&foreign_require("security-updates", "security-updates-lib.pl");
+	&foreign_require("security-updates");
 	local @poss = &security_updates::list_possible_updates(2);
 	local %doneposs;
 	@poss = grep { !$doneposs{$_->{'name'},$_->{'version'}}++ } @poss;
@@ -232,7 +232,7 @@ local ($pkgs) = @_;
 local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
 if ($info->{'poss'} && &foreign_check("security-updates")) {
-	&foreign_require("security-updates", "security-updates-lib.pl");
+	&foreign_require("security-updates");
 	local @poss = &security_updates::list_possible_updates(2);
 	$info->{'poss'} = \@poss;
 	local @allposs = &security_updates::list_possible_updates(2, 1);
@@ -445,7 +445,7 @@ if (&foreign_check("net") && $gconfig{'os_type'} =~ /-linux$/) {
 		}
 	else {
 		# Get list from net module
-		&foreign_require("net", "net-lib.pl");
+		&foreign_require("net");
 		if (defined(&net::active_interfaces)) {
 			foreach my $i (&net::active_interfaces()) {
 				if ($i->{'virtual'} eq '' &&

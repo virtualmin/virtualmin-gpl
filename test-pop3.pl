@@ -62,7 +62,7 @@ $folder = { 'server' => $server,
 	    'port' => $port,
 	    'user' => $user,
 	    'pass' => $pass };
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 $main::error_must_die = 1;
 ($st, $h) = &mailboxes::pop3_login($folder);
 if ($@) {

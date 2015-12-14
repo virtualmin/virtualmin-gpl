@@ -34,7 +34,7 @@ if (!$module_name) {
 	$< == 0 || die "delete-script.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 $first_print = \&first_text_print;
 $second_print = \&second_text_print;

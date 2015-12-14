@@ -2,7 +2,7 @@
 sub require_bind
 {
 return if ($require_bind++);
-&foreign_require("bind8", "bind8-lib.pl");
+&foreign_require("bind8");
 %bconfig = &foreign_config("bind8");
 }
 
@@ -528,7 +528,7 @@ sub exists_on_slave
 {
 my ($name, $slave) = @_;
 &remote_error_setup(\&bind8::slave_error_handler);
-&remote_foreign_require($slave, "bind8", "bind8-lib.pl");
+&remote_foreign_require($slave, "bind8");
 return $bind8::slave_error if ($bind8::slave_error);
 my $z = &remote_foreign_call($slave, "bind8", "get_zone_name", $name, "any");
 return $z ? "OK" : undef;
@@ -778,7 +778,7 @@ if ($_[0]->{'mx_servers'} ne $_[1]->{'mx_servers'} && $_[0]->{'mail'} &&
 		}
 	local @newmxs = split(/\s+/, $_[0]->{'mx_servers'});
 	local @oldmxs = split(/\s+/, $_[1]->{'mx_servers'});
-	&foreign_require("servers", "servers-lib.pl");
+	&foreign_require("servers");
 	local %servers = map { $_->{'id'}, $_ }
 			     (&servers::list_servers(), &list_mx_servers());
 	local $withdot = $_[0]->{'dom'}.".";

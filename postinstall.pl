@@ -5,7 +5,7 @@ do 'virtual-server-lib.pl';
 
 sub module_install
 {
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $need_restart;
 
 # If Webmin version has a copy of webmincron.pl that is too old, copy over
@@ -217,7 +217,7 @@ if (!@doms && !defined($config{'backup_feature_all'})) {
 # If supported by OpenSSH, create a group of users to deny SSH for
 if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	# Add to SSHd config
-	&foreign_require("sshd", "sshd-lib.pl");
+	&foreign_require("sshd");
 	local $conf = &sshd::get_sshd_config();
 	local @denyg = &sshd::find_value("DenyGroups", $conf);
 	local $commas = $sshd::version{'type'} eq 'ssh' &&

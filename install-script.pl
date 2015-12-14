@@ -71,7 +71,7 @@ if (!$module_name) {
 	}
 @OLDARGV = @ARGV;
 
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 &set_all_text_print();
 
 # Parse command-line args

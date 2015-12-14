@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newnotify_ecannot'});
 &ui_print_header(undef, $text{'newnotify_title'}, "");
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 
 print &ui_hidden_start($text{'newuser_docs'}, "docs", 0);
 print "$text{'newnotify_desc'}<p>\n";

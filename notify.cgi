@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newnotify_ecannot'});
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 &ReadParseMime();
 
 # Validate inputs

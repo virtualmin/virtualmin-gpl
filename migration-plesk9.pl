@@ -735,7 +735,7 @@ if ($got{'mysql'}) {
 local $pdir = $domain->{'phosting'}->{'preferences'}->{'pdir'};
 if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
-	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&foreign_require("htaccess-htpasswd");
 	local $hdir = &public_html_dir(\%dom);
 	local $etc = "$dom{'home'}/etc";
 	if (!-d $etc) {

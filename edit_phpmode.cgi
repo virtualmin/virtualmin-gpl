@@ -186,7 +186,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 
 	# Pear modules
 	if (&foreign_check("php-pear")) {
-		&foreign_require("php-pear", "php-pear-lib.pl");
+		&foreign_require("php-pear");
 		@allmods = ( );
 		if (defined(&php_pear::list_installed_pear_modules)) {
 			@allmods = &php_pear::list_installed_pear_modules();

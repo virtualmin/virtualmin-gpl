@@ -99,7 +99,7 @@ elsif ($config{'mail_system'} == 0) {
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
        $config{'mail_system'} == 5) {
 	# Using qmail for email
-	&foreign_require("qmailadmin", "qmail-lib.pl");
+	&foreign_require("qmailadmin");
 	%qmconfig = &foreign_config("qmailadmin");
 	$can_alias_types{2} = 0;	# cannot use addresses in file
 	$can_alias_types{8} = 0;	# cannot use same in other domain
@@ -132,7 +132,7 @@ elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
 	}
 elsif ($config{'mail_system'} == 6) {
 	# Using sendmail for email
-	&foreign_require("exim", "exim-lib.pl");
+	&foreign_require("exim");
 	%xconfig = &foreign_config("exim");
 	$can_alias_comments = 0;
 	$supports_aliascopy = 0;
@@ -2521,7 +2521,7 @@ sub delete_mail_file
 &require_mail();
 
 # Remove mailboxes moduile indexes
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 &mailboxes::delete_user_index_files($_[0]->{'user'});
 
 local $umf = &user_mail_file($_[0]);
@@ -2576,7 +2576,7 @@ closedir(TEMP);
 
 # Remove Dovecot index files
 if (&foreign_check("dovecot")) {
-	&foreign_require("dovecot", "dovecot-lib.pl");
+	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
 	local $loc = &dovecot::find_value("mail_location", $conf);
 	$loc ||= &dovecot::find_value("default_mail_env", $conf);
@@ -2628,7 +2628,7 @@ if (!&mail_under_home()) {
 
 # Rename Dovecot index files
 if (&foreign_check("dovecot")) {
-	&foreign_require("dovecot", "dovecot-lib.pl");
+	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
 	local $loc = &dovecot::find_value("mail_location", $conf);
 	$loc ||= &dovecot::find_value("default_mail_env", $conf);
@@ -3205,7 +3205,7 @@ if (!&mail_under_home()) {
 	}
 
 # Backup all user cron jobs
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 &$first_print($text{'backup_mailcrons'});
 local $croncount = 0;
 foreach $u (&list_domain_users($d, 1)) {
@@ -3615,7 +3615,7 @@ if (!$_[2]->{'mailuser'}) {
 	}
 
 # Get users whose mail files may need to be moved
-&foreign_require("mailboxes", "mailboxes-lib.pl");
+&foreign_require("mailboxes");
 local @users = &list_domain_users($_[0]);
 if ($_[2]->{'mailuser'}) {
 	@users = grep { $_->{'user'} eq $foundmailuser } @users;
@@ -3769,7 +3769,7 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 # Restore Cron job files
 if (-r "$_[1]_cron") {
 	&$first_print($text{'restore_mailcrons'});
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	foreach $u (&list_domain_users($_[0], 1)) {
 		next if ($_[2]->{'mailuser'} && $u->{'user'} ne $foundmailuser);
 		local $cf = $_[1]."_cron_".$u->{'user'};
@@ -4369,7 +4369,7 @@ sub get_mail_log
 {
 if (&foreign_installed("syslog")) {
 	# Try syslog first
-	&foreign_require("syslog", "syslog-lib.pl");
+	&foreign_require("syslog");
 	local $conf = &syslog::get_config();
 	foreach my $c (@$conf) {
 		next if (!$c->{'active'});
@@ -4385,7 +4385,7 @@ if (&foreign_installed("syslog")) {
 elsif (&foreign_installed("syslog-ng")) {
 	# Try syslog-ng (by looking for a d_mail destination, or any dest
 	# with mail in the name)
-	&foreign_require("syslog-ng", "syslog-ng-lib.pl");
+	&foreign_require("syslog-ng");
 	local $conf = &syslog_ng::get_config();
 	local @dests = &syslog_ng::find("destination", $conf);
 	local ($dest) = grep { $_->{'name'} eq 'd_mail' } @dests;
@@ -4439,7 +4439,7 @@ else {
 	}
 if (&foreign_installed("dovecot")) {
 	# Add status for Dovecot
-	&foreign_require("dovecot", "dovecot-lib.pl");
+	&foreign_require("dovecot");
 	local @dlinks;
 	push(@dlinks, { 'link' => "/dovecot/",
 		        'desc' => $text{'index_dmanage'},
@@ -4477,13 +4477,13 @@ return &shutdown_mail_server(1);
 
 sub start_service_dovecot
 {
-&foreign_require("dovecot", "dovecot-lib.pl");
+&foreign_require("dovecot");
 return &dovecot::start_dovecot();
 }
 
 sub stop_service_dovecot
 {
-&foreign_require("dovecot", "dovecot-lib.pl");
+&foreign_require("dovecot");
 return &dovecot::stop_dovecot();
 }
 

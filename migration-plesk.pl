@@ -748,7 +748,7 @@ if ($got{'mysql'}) {
 local $pdir = $domain->{'phosting'}->{'pdir'};
 if ($pdir && &foreign_check("htaccess-htpasswd")) {
 	&$first_print("Re-creating protected directories ..");
-	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&foreign_require("htaccess-htpasswd");
 	local $hdir = &public_html_dir(\%dom);
 	local $etc = "$dom{'home'}/etc";
 	if (!-d $etc) {
@@ -1036,7 +1036,7 @@ if ($cf == 4) {
 	}
 else {
 	# Read the backup file, parsing it into files as we go
-	&foreign_require("mailboxes", "mailboxes-lib.pl");
+	&foreign_require("mailboxes");
 	local $mail = { };
 	if ($cf == 0) {
 		# MIME format file

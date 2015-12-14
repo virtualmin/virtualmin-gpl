@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
-&foreign_require("webmin", "webmin-lib.pl");
+&foreign_require("webmin");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
 
 # If this domain shares a cert file with another, link to it's page

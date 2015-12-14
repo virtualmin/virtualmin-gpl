@@ -625,7 +625,7 @@ if (!$_[0]->{'parent'}) {
 sub backup_unix
 {
 local ($d, $file) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
 &$first_print(&text('backup_cron'));
 if (-r $cronfile) {
@@ -693,7 +693,7 @@ if ($uinfo && !$d->{'parent'}) {
 # Copy cron jobs file
 if (-r $file) {
 	&$first_print($text{'restore_cron'});
-	&foreign_require("cron", "cron-lib.pl");
+	&foreign_require("cron");
 	&copy_source_dest($file, $cron::cron_temp_file);
 	&cron::copy_crontab($d->{'user'});
 	&$second_print($text{'setup_done'});
@@ -971,7 +971,7 @@ if (&foreign_installed("sshd")) {
 	local @links = ( { 'link' => '/sshd/',
 			   'desc' => $text{'index_sshmanage'},
 			   'manage' => 1 } );
-	&foreign_require("sshd", "sshd-lib.pl");
+	&foreign_require("sshd");
 	if (&sshd::get_sshd_pid()) {
 		push(@rv, { 'status' => 1,
 			    'feature' => 'sshd',
@@ -1005,13 +1005,13 @@ return &start_service_ftp();
 
 sub stop_service_sshd
 {
-&foreign_require("sshd", "sshd-lib.pl");
+&foreign_require("sshd");
 return &sshd::stop_sshd();
 }
 
 sub start_service_sshd
 {
-&foreign_require("sshd", "sshd-lib.pl");
+&foreign_require("sshd");
 return &sshd::start_sshd();
 }
 
@@ -1151,7 +1151,7 @@ local ($d) = @_;
 &obtain_lock_anything($d);
 foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 0) {
-		&foreign_require("cron", "cron-lib.pl");
+		&foreign_require("cron");
 		&lock_file(&cron::cron_file({ 'user' => $u }));
 		}
 	$main::got_lock_cron_user{$u}++;
@@ -1165,7 +1165,7 @@ sub release_lock_cron
 local ($d) = @_;
 foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 1) {
-		&foreign_require("cron", "cron-lib.pl");
+		&foreign_require("cron");
 		&unlock_file(&cron::cron_file({ 'user' => $u }));
 		}
 	$main::got_lock_cron_user{$u}--

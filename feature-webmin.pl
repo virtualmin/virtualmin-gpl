@@ -1,7 +1,7 @@
 sub require_acl
 {
 return if ($require_acl++);
-&foreign_require("acl", "acl-lib.pl");
+&foreign_require("acl");
 }
 
 # setup_webmin(&domain)
@@ -98,7 +98,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'} && &foreign_check("htaccess-htpasswd")) {
 	# If home has changed, update protected web directories that
 	# referred to old dir
 	&$first_print($text{'save_htaccess'});
-	&foreign_require("htaccess-htpasswd", "htaccess-lib.pl");
+	&foreign_require("htaccess-htpasswd");
 	local @dirs = &htaccess_htpasswd::list_directories(1);
 	foreach $d (@dirs) {
 		if ($d->[0] eq $_[1]->{'home'}) {
@@ -265,7 +265,7 @@ else {
 # restart_usermin()
 sub restart_usermin
 {
-&foreign_require("usermin", "usermin-lib.pl");
+&foreign_require("usermin");
 &$first_print($text{'setup_userminpid'});
 &usermin::restart_usermin_miniserv();
 &$second_print($text{'setup_done'});

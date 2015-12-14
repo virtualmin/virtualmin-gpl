@@ -78,7 +78,7 @@ sub can_install_ratelimit
 {
 if ($gconfig{'os_type'} eq 'debian-linux' ||
     $gconfig{'os_type'} eq 'redhat-linux') {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	return defined(&software::update_system_install);
 	}
 return 0;

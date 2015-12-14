@@ -27,7 +27,7 @@ sub can_install_postgrey
 {
 if ($gconfig{'os_type'} eq 'debian-linux' ||
     $gconfig{'os_type'} eq 'redhat-linux') {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	return defined(&software::update_system_install);
 	}
 return 0;
@@ -37,7 +37,7 @@ return 0;
 # Attempt to install Postgrey, outputting progress messages
 sub install_postgrey_package
 {
-&foreign_require("software", "software-lib.pl");
+&foreign_require("software");
 local @inst = &software::update_system_install("postgrey");
 return scalar(@inst) || !&check_postgrey();
 }
@@ -73,7 +73,7 @@ if (-r $ofile) {
 		}
 	}
 
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 if ($init::init_mode eq 'init') {
 	# Last try checking the init script
 	local $ifile = &init::action_filename(&get_postgrey_init());
@@ -118,7 +118,7 @@ if (!&find_byname("postgrey")) {
 	# Not running
 	return 0;
 	}
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 if (&init::action_status(&get_postgrey_init()) != 2) {
 	# Not enabled at boot
 	return 0;
@@ -143,7 +143,7 @@ return 0;
 sub enable_postgrey
 {
 # Enable at boot
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 local $init = &get_postgrey_init();
 local $port = &get_postgrey_port();
 &$first_print($text{'postgrey_init'});
@@ -233,7 +233,7 @@ else {
 	}
 
 # Kill the process
-&foreign_require("init", "init-lib.pl");
+&foreign_require("init");
 local $init = &get_postgrey_init();
 &$first_print($text{'postgrey_noproc'});
 if (&find_byname("postgrey")) {

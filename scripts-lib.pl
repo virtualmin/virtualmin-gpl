@@ -697,7 +697,7 @@ local $phpini = &get_domain_php_ini($d, $phpver);
 if (-r $phpini && &foreign_check("phpini")) {
 	# Add the variables to the domain's php.ini file. Start by finding
 	# the variables already set, including those that are commented out.
-	&foreign_require("phpini", "phpini-lib.pl");
+	&foreign_require("phpini");
 	local $conf = &phpini::get_config($phpini);
 	local $anyini;
 	local $realver = &get_php_version($phpver, $d);
@@ -780,7 +780,7 @@ sub check_pear_module
 local ($mod, $ver, $d) = @_;
 local ($mod, $modver) = split(/\-/, $mod);
 return -1 if (!&foreign_check("php-pear"));
-&foreign_require("php-pear", "php-pear-lib.pl");
+&foreign_require("php-pear");
 local @cmds = &php_pear::get_pear_commands();
 return -1 if (!@cmds);
 if ($ver) {
@@ -936,7 +936,7 @@ foreach my $m (@mods) {
 			    "<tt>$m</tt>"));
 
 	# Find the php.ini file
-	&foreign_require("phpini", "phpini-lib.pl");
+	&foreign_require("phpini");
 	local $mode = &get_domain_php_mode($d);
 	local $inifile = $mode eq "mod_php" ?
 			&get_global_php_ini($phpver, $mode) :
@@ -996,7 +996,7 @@ foreach my $m (@mods) {
 		if ($opt) { next; }
 		else { return 0; }
 		}
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (!defined(&software::update_system_install)) {
 		&$outdent_print();
 		&$second_print($text{'scripts_eupdate'});
@@ -1140,7 +1140,7 @@ if (!&foreign_check("php-pear")) {
 	}
 
 # And that we have Pear for this PHP version
-&foreign_require("php-pear", "php-pear-lib.pl");
+&foreign_require("php-pear");
 local @cmds = &php_pear::get_pear_commands();
 local ($vercmd) = grep { $_->[1] == $phpver } @cmds;
 if (!$vercmd) {
@@ -1156,7 +1156,7 @@ foreach my $m (@mods) {
 
 	# Install if needed
 	&$first_print(&text('scripts_needpear', "<tt>$mname</tt>"));
-	&foreign_require("php-pear", "php-pear-lib.pl");
+	&foreign_require("php-pear");
 	local $err = &php_pear::install_pear_module($m, $phpver);
 	if ($err) {
 		print $err;
@@ -1198,7 +1198,7 @@ if (defined(&$optmodfunc)) {
 # Check if the software module is installed and can do update
 local $canpkgs = 0;
 if (&foreign_installed("software")) {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (defined(&software::update_system_install)) {
 		$canpkgs = 1;
 		}
@@ -1311,7 +1311,7 @@ return 1 if (!@mods);
 # Check if the software module is installed and can do update
 local $canpkgs = 0;
 if (&foreign_installed("software")) {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (defined(&software::update_system_install)) {
 		$canpkgs = 1;
 		}
@@ -2041,7 +2041,7 @@ if (!&has_command("gem") &&
 		&$second_print($text{'scripts_esoftware'});
 		return 0;
 		}
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (!defined(&software::update_system_install)) {
 		&$second_print($text{'scripts_eupdate'});
 		return 0;
@@ -2161,7 +2161,7 @@ sub create_script_wget_job
 {
 local ($d, $url, $mins, $hours, $callnow) = @_;
 return 0 if (!&foreign_check("cron"));
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $wget = &has_command("wget");
 return 0 if (!$wget);
 local $job = { 'user' => $d->{'user'},
@@ -2197,7 +2197,7 @@ sub delete_script_wget_job
 {
 local ($d, $url) = @_;
 return 0 if (!&foreign_check("cron"));
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local @jobs = &cron::list_cron_jobs();
 local ($job) = grep { $_->{'user'} eq $d->{'user'} &&
 		      $_->{'command'} =~ /^\S*wget\s.*\s(\S+)$/ &&
@@ -2542,7 +2542,7 @@ return 1 if (!@pkgs);
 &$first_print(&text('scripts_needpackages', scalar(@pkgs)));
 local $canpkgs = 0;
 if (&foreign_installed("software")) {
-	&foreign_require("software", "software-lib.pl");
+	&foreign_require("software");
 	if (defined(&software::update_system_install)) {
 		$canpkgs = 1;
 		}
@@ -2674,7 +2674,7 @@ local %unavail;
 sub setup_scriptwarn_job
 {
 local ($enabled, $when) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $job = &find_cron_script($scriptwarn_cron_cmd);
 if ($job && !$enabled) {
 	# Delete job
@@ -2701,7 +2701,7 @@ elsif ($job && $enabled && $when &&
 sub setup_scriptlatest_job
 {
 local ($enabled) = @_;
-&foreign_require("cron", "cron-lib.pl");
+&foreign_require("cron");
 local $job = &find_cron_script($scriptlatest_cron_cmd);
 if ($job && !$enabled) {
 	# Delete job

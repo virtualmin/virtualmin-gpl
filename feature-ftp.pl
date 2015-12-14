@@ -5,7 +5,7 @@ $feature_depends{'ftp'} = [ 'dir' ];
 sub require_proftpd
 {
 return if ($require_proftpd++);
-&foreign_require("proftpd", "proftpd-lib.pl");
+&foreign_require("proftpd");
 }
 
 # setup_ftp(&domain)
