@@ -157,7 +157,7 @@ if (@opts) {
 			    &ui_select("script", undef, \@opts));
 
 	# Servers to upgrade
-	@doms = &list_domains();
+	@doms = grep { !$_->{'disabled'} } &list_domains();
 	print &ui_table_row($text{'newscripts_servers'},
 			    &ui_radio("servers_def", 1,
 				[ [ 1, $text{'newips_all'} ],
