@@ -382,7 +382,7 @@ else {
 	$err = &webmin::check_letsencrypt();
 	}
 print &ui_tabs_start_tab("mode", "lets");
-print "$text{'cert_desc6'}<p>\n";
+print "$text{'cert_desc8'}<p>\n";
 
 if ($err) {
 	print &text('cert_elets', $err),"<p>\n";
