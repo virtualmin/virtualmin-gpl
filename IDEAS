@@ -36,3 +36,10 @@
 
  - New user fields in MySQL 5.7
 	- http://virtualmin.com/node/38397
+	- virtualmin too
+	- other priv fields
+	- useradmin sync
+	- CHANGELOGs
+
+ - Parallel backups and restores
+	- http://virtualmin.com/node/38808
