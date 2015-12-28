@@ -160,6 +160,9 @@ if (!&master_admin() && !&reseller_admin()) {
                 my $usage = $home*$homesize + $mail*$mailsize + $db;
                 my $limit = $d->{'quota'}*$homesize;
                 if ($limit) {
+			if ($usage > $limit) {
+				$limit = $usage;
+				}
 			push(@table, { 'desc' => $text{'right_quota'},
 				       'value' => &text('right_out',
 					&nice_size($usage), &nice_size($limit)),
