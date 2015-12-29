@@ -43,7 +43,7 @@ elsif ($sched->{'all'} == 2) {
 	%exc = map { $_, 1 } split(/\s+/, $sched->{'doms'});
 	@doms = grep { !$exc{$_->{'id'}} } &list_domains();
 	if ($sched->{'parent'}) {
-		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
+		@doms = grep { !$_->{'parent'} || !$exc{$_->{'parent'}} } @doms;
 		}
 	}
 else {

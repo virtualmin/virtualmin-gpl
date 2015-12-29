@@ -46,7 +46,7 @@ elsif ($in{'all'} == 2) {
 	@doms = grep { &can_backup_domain($_) &&
 		       !$exc{$_->{'id'}} } &list_domains();
 	if ($in{'parent'}) {
-		@doms = grep { !$_->{'parent'} || !$ext{$_->{'parent'}} } @doms;
+		@doms = grep { !$_->{'parent'} || !$exc{$_->{'parent'}} } @doms;
 		}
 	}
 else {
