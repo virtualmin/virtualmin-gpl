@@ -159,8 +159,7 @@ else {
 				&mysql::execute_sql_logged($mysql::master_db,
 				    "delete from user where host = '$h' ".
 				    "and user = '$user'");
-				&mysql::execute_sql_logged($mysql::master_db,
-				    &get_user_creation_sql($h, $user,$encpass));
+				&execute_user_creation_sql($h, $user,$encpass);
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
@@ -443,8 +442,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 		local $pfunc = sub {
 			local $h;
 			foreach $h (@hosts) {
-				&mysql::execute_sql_logged($mysql::master_db,
-				  &get_user_creation_sql($h, $user, $encpass));
+				&execute_user_creation_sql($h, $user,$encpass);
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($h, $wild, $user);
 					}
@@ -1668,10 +1666,9 @@ else {
 			&mysql::execute_sql_logged($mysql::master_db,
 			    "delete from user where host = '$h' ".
 			    "and user = '$user'");
-			&mysql::execute_sql_logged($mysql::master_db,
-			    &get_user_creation_sql($h, $myuser, 
+			&execute_user_creation_sql($h, $myuser, 
 			      $encpass ? "'$encpass'"
-				        : "$password_func('$qpass')"));
+				       : "$password_func('$qpass')");
 			local $db;
 			foreach $db (@$dbs) {
 				&add_db_table($h, $db, $myuser);
@@ -2161,8 +2158,7 @@ else {
 		&mysql::execute_sql_logged($mysql::master_db,
 			"delete from db where user = '$user'");
 		foreach my $h (@$hosts) {
-			&mysql::execute_sql_logged($mysql::master_db,
-				&get_user_creation_sql($h, $user, $encpass));
+			&execute_user_creation_sql($h, $user, $encpass);
 			foreach my $db (@dbs) {
 				&add_db_table($h, $db->{'name'}, $user);
 				}
@@ -2199,9 +2195,8 @@ else {
 			&mysql::execute_sql_logged($mysql::master_db,
 				"delete from user where user = ?", $u->[0]);
 			foreach my $h (@$hosts) {
-				&mysql::execute_sql_logged($mysql::master_db,
-				    &get_user_creation_sql($h, $u->[0],
-							   "'$u->[1]'"));
+				&execute_user_creation_sql($h, $u->[0],
+							   "'$u->[1]'");
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
@@ -2554,17 +2549,26 @@ elsif ($size eq "huge") {
 return ( );
 }
 
+# execute_user_creation_sql(host, user, password-sql)
+# Create a MySQL user and set his password
+sub execute_user_creation_sql
+{
+my ($host, $user, $encpass) = @_;
+foreach my $sql (&get_user_creation_sql($host, $user,$encpass)) {
+	&mysql::execute_sql_logged($mysql::master_db, $sql);
+	}
+}
+
 # get_user_creation_sql(host, user, password-sql)
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
 if ($mysql::mysql_version >= 5) {
-	return "insert into user (host, user, password, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', $encpass, '', '', '', '')";
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
-	return "insert into user (host, user, password) ".
-	       "values ('$host', '$user', $encpass)";
+	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
 	}
 }
 
