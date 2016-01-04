@@ -1706,6 +1706,181 @@ if ($incremental == 0 && &has_incremental_tar()) {
 return ($ok, $sz, \@errdoms);
 }
 
+# backup_one_domain(&domain)
+# Backup a single domain. Returns 1 on success, 0 and a status code on failure
+sub backup_one_domain
+{
+my ($d, $homefmt, $dest, $backupdir, $increment, $asd, $opts, $key) = @_;
+my @rv;
+
+# Force lock and re-read the domain in case it has changed
+# XXX move this lock out
+&obtain_lock_everything($d);
+my $reread_d = &get_domain($d->{'id'}, undef, 1);	
+if ($reread_d) {
+	$d = $reread_d;
+	}
+else {
+	# Has been deleted!
+	return (0, &text('backup_deleteddom',
+			 &show_domain_name($d)));
+	}
+my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
+if ($parent) {
+	&obtain_lock_everything($parent);
+	}
+
+# Ensure the backup dest dir is writable by this domain
+if (!$homefmt) {
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+				   undef, $backupdir);
+	}
+
+# Make sure there are no databases that don't really exist, as these
+# can cause database feature backups to fail.
+my @alldbs = &all_databases($d);
+&resync_all_databases($d, \@alldbs);
+my $dstart = time();
+
+# If domain has a reseller set who doesn't exist, clear it now
+# to prevent errors on restore
+if ($d->{'reseller'} && defined(&get_reseller)) {
+	my @existing;
+	my $rmissing;
+	foreach my $rname (split(/\s+/, $d->{'reseller'})) {
+		if (&get_reseller($rname)) {
+			push(@existing, $rname);
+			}
+		else {
+			$rmissing++;
+			}
+		}
+	if ($rmissing) {
+		$d->{'reseller'} = join(" ", @existing);
+		&save_domain($d);
+		}
+	}
+
+# Begin doing this domain
+# XXX move print up
+&$cbfunc($d, 0, $backupdir) if ($cbfunc);
+&$first_print(&text('backup_fordomain', &show_domain_name($d) ||
+					$d->{'id'}));
+if (!$d->{'dom'} || !$d->{'home'}) {
+	# Has no domain name!
+	return (0, $text{'backup_emptydomain'});
+	}
+local $f;
+local $dok = 1;
+local @donefeatures;
+
+if ($homefmt && !$d->{'dir'} && !-d $d->{'home'}) {
+	# Create temporary home directory
+	&make_dir($d->{'home'}, 0755);
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
+				   $d->{'home'});
+	$d->{'dir'} = 1;
+	push(@cleanuphomes, $d);
+	}
+elsif ($homefmt && $d->{'dir'} && !-d $d->{'home'}) {
+	# Missing home dir which we need, so create it
+	&make_dir($d->{'home'}, 0755);
+	&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
+				   $d->{'home'});
+	}
+elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
+	# Home directory actually exists, so enable it on the domain
+	$d->{'dir'} = 1;
+	}
+
+my $lockdir;
+if ($homefmt) {
+	# Backup goes to a sub-dir of the home
+	$lockdir = $backupdir = "$d->{'home'}/.backup";
+	&lock_file($lockdir);
+	system("rm -rf ".quotemeta($backupdir));
+	my $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
+	if ($derr) {
+		&unlock_file($lockdir);
+		return (0, &text('backup_ebackupdir',
+				 "<tt>$backupdir</tt>", $derr));
+		}
+	}
+
+# Turn off quotas for the domain so that writes as the domain owner
+# don't fail
+&disable_quotas($d);
+
+&$indent_print();
+foreach my $f (@backupfeatures) {
+	my $bfunc = "backup_$f";
+	my $fok;
+	my $ffile;
+	if (&indexof($f, &list_backup_plugins()) < 0 &&
+	    defined(&$bfunc) &&
+	    ($d->{$f} || $f eq "virtualmin" ||
+	     $f eq "mail" && &can_domain_have_users($d))) {
+		# Call core feature backup function
+		if ($homefmt && $f eq "dir") {
+			# For a home format backup, write the home
+			# itself to the backup destination
+			$ffile = "$dest/$d->{'dom'}.$hfsuffix";
+			}
+		else {
+			$ffile = "$backupdir/$d->{'dom'}_$f";
+			}
+		$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
+			       $increment, $asd, $opts, $key);
+		}
+	elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
+	       $d->{$f}) {
+		# Call plugin backup function
+		$ffile = "$backupdir/$d->{'dom'}_$f";
+		$fok = &plugin_call($f, "feature_backup",
+				  $d, $ffile, $opts->{$f}, $homefmt,
+				  $increment, $asd, $opts);
+		}
+	if (defined($fok)) {
+		# See if it worked or not
+		if (!$fok) {
+			# Didn't work .. remove failed file, so we
+			# don't have partial data
+			if ($ffile && $f ne "dir" &&
+			    $f ne "mysql" && $f ne "postgres") {
+				foreach my $ff ($ffile,
+					glob("${ffile}_*")) {
+					&unlink_file($ff);
+					}
+				}
+			$dok = 0;
+			}
+		if (!$fok && (!$skip || $homefmt && $f eq "dir")) {
+			# If this feature failed and errors aren't being
+			# skipped, stop the backup. Also stop if this
+			# was the directory step of a home-format backup
+			# XXX how to return this?
+			#$ok = 0;
+			#$errcount++;
+			#push(@errdoms, $d);
+			#$failalldoms = 1;
+			@rv = (0, &text('backup_efeature', $f));
+			last;
+			}
+		#push(@donedoms, &clean_domain_passwords($d));
+		# XXX
+		}
+	if ($fok) {
+		push(@donefeatures, $f);
+		}
+	}
+
+&enable_quotas($d);
+if ($lockdir) {
+	&unlock_file($lockdir);
+	}
+return @rv;
+}
+
 # make_backup_dir(dir, perms, recursive, &as-domain)
 # Create the directory for a backup destination, perhaps as the domain owner.
 # Returns undef if OK, or an error message if failed.
