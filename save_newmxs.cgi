@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 &ui_print_header(undef, $text{'newmxs_title'}, "");
 
 # Get old MX servers and all servers
-&foreign_require("servers";
+&foreign_require("servers");
 @oldmxs = &list_mx_servers();
 %oldmxids = map { $_->{'id'}, $_ } @oldmxs;
 @servers = grep { $_->{'user'} } &servers::list_servers();
