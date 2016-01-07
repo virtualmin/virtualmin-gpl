@@ -21,7 +21,15 @@ else {
 &$first_print($text{'letsencrypt_doing'});
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
-($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert($dname, $phd);
+if (&get_webmin_version() >= 1.782) {
+	@dnames = ( $dname, "www.".$dname );
+	($ok, $cert, $key, $chain) =
+		&webmin::request_letsencrypt_cert(\@dnames, $phd);
+	}
+else {
+	($ok, $cert, $key, $chain) =
+		&webmin::request_letsencrypt_cert($dname, $phd);
+	}
 if (!$ok) {
 	&$second_print(&text('letsencrypt_failed',
 			     "<pre>".&html_escape($cert)."</pre>"));
