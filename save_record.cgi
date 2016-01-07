@@ -135,7 +135,8 @@ else {
 		%clash = map { $_->{'name'}, $_ }
 			     grep { $_ ne $r } @$newrecs;
 		foreach $e (@$newrecs) {
-			if ($e->{'type'} eq 'CNAME' && $clash{$r->{'name'}}) {
+			if (($e->{'type'} eq 'CNAME' || $r->{'type'} eq 'A') &&
+			    $clash{$r->{'name'}}) {
 				&error(&text('record_ecname', $r->{'name'}));
 				}
 			}
