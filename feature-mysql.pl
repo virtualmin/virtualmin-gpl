@@ -352,11 +352,8 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
 			local $pfunc = sub {
-				&mysql::execute_sql_logged($mysql::master_db,
-					"update user set password = $encpass ".
-					"where user = ?", $olduser);
-				&mysql::execute_sql_logged($master_db,
-					"flush privileges");
+				&execute_password_change_sql(
+					$olduser, $encpass);
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -805,8 +802,7 @@ else {
 	local $user = &mysql_user($d);
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
-			&mysql::execute_sql_logged($mysql::master_db, "update user set password = '*LK*' where user = '$user'");
-			&mysql::execute_sql_logged($master_db, 'flush privileges');
+			&execute_password_change_sql($user, "'".("0" x 41)."'");
 			};
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
@@ -851,12 +847,12 @@ else {
 			if ($d->{'disabled_oldmysql'}) {
 				local $qpass = &mysql_escape(
 					$d->{'disabled_oldmysql'});
-				&mysql::execute_sql_logged($mysql::master_db, "update user set password = '$qpass' where user = '$user'");
+				&execute_password_change_sql($user, "'$qpass'");
 				}
 			else {
 				local $pass = &mysql_pass($d);
 				local $qpass = &mysql_escape($pass);
-				&mysql::execute_sql_logged($mysql::master_db, "update user set password = $password_func('$qpass') where user = '$user'");
+				&execute_password_change_sql($user, "$password_func('$qpass')");
 				}
 			&mysql::execute_sql($master_db, 'flush privileges');
 			};
@@ -876,7 +872,18 @@ sub mysql_user_exists
 {
 &require_mysql();
 local $user = &mysql_user($_[0]);
-local $u = &mysql::execute_sql($mysql::master_db, "select password from user where user = '$user'");
+local $u;
+eval {
+	# Try old password column first
+	local $main::error_must_die = 1;
+	$u = &mysql::execute_sql($mysql::master_db,
+		"select password from user where user = ?", $user);
+	};
+if ($@) {
+	# Try new mysql user table format
+	$u = &mysql::execute_sql($mysql::master_db,
+		"select authentication_string from user where user = ?", $user);
+	}
 foreach my $r (@{$u->{'data'}}) {
 	return $r->[0] if ($r->[0]);
 	}
@@ -1757,16 +1764,12 @@ else {
 		if (defined($pass)) {
 			# Change the password
 			if ($encpass) {
-				&mysql::execute_sql_logged($mysql::master_db,
-					"update user ".
-					"set password = ? ".
-					"where user = ?", $encpass, $myuser);
+				&execute_password_change_sql($myuser, $encpass);
 				}
 			else {
-				&mysql::execute_sql_logged($mysql::master_db,
-					"update user ".
-					"set password = $password_func(?) ".
-					"where user = ?", $pass, $myuser);
+				local $qpass = &mysql_escape($pass);
+				&execute_password_change_sql($myuser,
+					"$password_func('$qpass')");
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -2569,6 +2572,19 @@ if ($mysql::mysql_version >= 5) {
 	}
 else {
 	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
+	}
+}
+
+# execute_password_change_sql(user, pass-str)
+# Update a MySQL user's password for all hosts
+sub execute_password_change_sql
+{
+my ($user, $encpass) = @_;
+my $d = &mysql::execute_sql($mysql::master_db,
+		"select host from user where user = ?", $user);
+foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
+	my $sql = "set password for '$user'\@'$host' = $encpass";
+	&mysql::execute_sql_logged($mysql::master_db, $sql);
 	}
 }
 
