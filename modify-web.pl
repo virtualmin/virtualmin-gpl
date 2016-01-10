@@ -372,7 +372,7 @@ foreach $d (@doms) {
 
 	# Update PHP version
 	if ($version && !$d->{'alias'}) {
-		&save_domain_php_directory($d,  &public_html_dir($d), $version);
+		&save_domain_php_directory($d, &public_html_dir($d), $version);
 		my $dommode = $mode || &get_domain_php_mode($d);
 		if ($dommode ne "mod_php") {
 			&save_domain_php_mode($d, $dommode);
@@ -596,7 +596,7 @@ foreach $d (@doms) {
 		}
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
-	    $port || $sslport || $urlport || $sslurlport) {
+	    $port || $sslport || $urlport || $sslurlport || $mode || $version) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
