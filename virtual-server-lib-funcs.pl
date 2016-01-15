@@ -10598,7 +10598,9 @@ local ($status, $expiry, $err, undef, undef, $autorenew) =
 local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	# Make Unix time
-	$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
+	eval {
+		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
+		};
 	}
 if ($status != 0) {
 	my $alert_text;
