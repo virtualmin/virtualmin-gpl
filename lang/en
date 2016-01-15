@@ -2457,6 +2457,7 @@ backup_brun=Running pre-backup command ..
 backup_arun=Running post-backup command ..
 backup_brunfailed=.. failed. The backup will not proceed.
 backup_arunfailed=.. failed!
+backup_efeature=.. feature $1 failed
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup
@@ -3683,6 +3684,7 @@ licence_ok3=.. license is OK! It is valid for $1 Virtualmin domains, and for use
 licence_warn=However, a temporary problem occurred during this license check : $1.
 licence_unlimited=unlimited
 licence_goterr=.. a problem was detected : $1
+licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 servers, but you have $2.
 licence_maxservers=Your serial number is licensed for only $1 servers, but is being used on $2.

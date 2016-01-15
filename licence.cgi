@@ -22,7 +22,9 @@ if ($status == 0) {
 		}
 	# Check for license close to expiry
 	if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
-		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
+		eval {
+			$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
+			};
 		}
 	if ($expirytime && $expirytime - time() < 7*24*60*60) {
 		$days = int(($expirytime - time()) / (24*60*60));
@@ -35,6 +37,10 @@ if ($status == 0) {
 			print &text('licence_soon2', $hours);
 			}
 		print "</b></font><p>\n";
+		}
+	else {
+		print "<b>",&text('licence_goterr2',
+			"<font color=#ff0000>$expiry</font>"),"</b><p>\n";
 		}
 	}
 else {
