@@ -39,11 +39,10 @@ return 1;
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "4.3") >= 0 ? "$ver (Latest)" :
-       &compare_versions($ver, "4.2") >= 0 ? "$ver (Stable)" :
-       &compare_versions($ver, "4.1") >= 0 ? "$ver (Old)" :
-       &compare_versions($ver, "4.0") >= 0 ? "$ver (Ancient)" :
-					    "$ver (Un-supported)";
+return &compare_versions($ver, "4.5") >= 0 ? "$ver (Latest)" :
+       &compare_versions($ver, "4.4") >= 0 ? "$ver (Stable)" :
+       &compare_versions($ver, "4.0") >= 0 ? "$ver (Old)" :
+					     "$ver (Un-supported)";
 }
 
 sub script_phpmyadmin_release
