@@ -410,6 +410,13 @@ else {
 		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
 				$text{'cert_letsnotrenew'}));
 
+	# Current cert details
+	if ($d->{'letsencrypt_last'}) {
+		$ago = (time() - $d->{'letsencrypt_last'}) / (30*24*60*60);
+		print &ui_table_row($text{'cert_letsage'},
+			&text('cert_letsmonths', sprintf("%.2f", $ago)));
+		}
+
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
 	}

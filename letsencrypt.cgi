@@ -49,50 +49,17 @@ else {
 	# Worked .. copy to the domain
 	&obtain_lock_ssl($d);
 	&$first_print($text{'newkey_apache'});
+	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
-	# Copy and save the cert
-	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-	$cert_text = &read_file_contents($cert);
-	&lock_file($d->{'ssl_cert'});
-        &unlink_file($d->{'ssl_cert'});
-        &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
-        &print_tempfile(CERT, $cert_text);
-        &close_tempfile_as_domain_user($d, CERT);
-        &set_certificate_permissions($d, $d->{'ssl_cert'});
-        &unlock_file($d->{'ssl_cert'});
-	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
-
-	# And the key
-	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
-	$key_text = &read_file_contents($key);
-        &lock_file($d->{'ssl_key'});
-        &unlink_file($d->{'ssl_key'});
-        &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
-        &print_tempfile(CERT, $key_text);
-        &close_tempfile_as_domain_user($d, CERT);
-        &set_certificate_permissions($d, $d->{'ssl_key'});
-        &unlock_file($d->{'ssl_key'});
-	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
-
-	# Let's encrypt certs have no passphrase
-	$d->{'ssl_pass'} = undef;
-	&save_domain_passphrase($d);
-
-	# And the chained file
-	if ($chain) {
-		$chainfile = &default_certificate_file($d, 'ca');
-		$chain_text = &read_file_contents($chain);
-		&lock_file($chainfile);
-		&unlink_file_as_domain_user($d, $chainfile);
-		&open_tempfile_as_domain_user($d, CERT, ">$chainfile");
-		&print_tempfile(CERT, $chain_text);
-		&close_tempfile_as_domain_user($d, CERT);
-		&set_permissions_as_domain_user($d, 0755, $chainfile);
-		&unlock_file($chainfile);
-		$err = &save_website_ssl_file($d, 'ca', $chainfile);
-		}
-
+	# Save renewal state
 	$d->{'letsencrypt_dname'} = $custom_dname;
+	if ($in{'renew_def'}) {
+		delete($d->{'letsencrypt_renew'});
+		}
+	else {
+		$d->{'letsencrypt_renew'} = $in{'renew'};
+		}
+	$d->{'letsencrypt_last'} = time();
 	&save_domain($d);
 
 	# Apply any per-domain cert to Dovecot and Postfix

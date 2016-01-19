@@ -1926,6 +1926,123 @@ my @rv = ( $d->{'dom'}, "www.".$d->{'dom'} );
 return @rv;
 }
 
+# apply_letsencrypt_cert_renewals()
+# Check all domains that need a new Let's Encrypt cert
+sub apply_letsencrypt_cert_renewals
+{
+foreach my $d (&list_domains()) {
+	# Does the domain have SSL enabled and a renewal policy?
+	next if (!$d->{'ssl'} || !$d->{'letsencrypt_renew'});
+
+	# Is it time?
+	next if (time() - $d->{'letsencrypt_last'} <
+		  $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60);
+	
+	# Is the current cert even from Let's Encrypt?
+	my $info = &cert_info($d);
+	next if (!$info || $info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
+
+	# Time to do it!
+	my $phd = &public_html_dir($d);
+	my ($ok, $cert, $key, $chain);
+	my @dnames;
+	if ($d->{'letsencrypt_dname'}) {
+		@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		}
+	else {
+		@dnames = &get_hostnames_for_ssl($d);
+		}
+	if (&get_webmin_version() >= 1.782) {
+		($ok, $cert, $key, $chain) =
+			&webmin::request_letsencrypt_cert(\@dnames, $phd);
+		}
+	else {
+		($ok, $cert, $key, $chain) =
+			&webmin::request_letsencrypt_cert($dnames[0], $phd);
+		}
+
+	my ($subject, $body);
+	if (!$ok) {
+		# Failed! Tell the user
+		$subject = $text{'letsencrypt_sfailed'};
+		$body = &text('letsencrypt_bfailed', join(", ",@dnames), $cert);
+		}
+	else {
+		# Copy into place
+		&obtain_lock_ssl($d);
+		&install_letsencrypt_cert($d, $cert, $key, $chain);
+		$d->{'letsencrypt_last'} = time();
+		&save_domain($d);
+		&release_lock_ssl($d);
+
+		# Apply any per-domain cert to Dovecot and Postfix
+		if ($d->{'virt'}) {
+			&sync_dovecot_ssl_cert($d, 1);
+			&sync_postfix_ssl_cert($d, 1);
+			}
+
+		# Tell the user
+		$subject = $text{'letsencrypt_sdone'};
+		$body = &text('letsencrypt_bdone', join(", ", @dnames));
+		}
+	print STDERR "subject=$subject\n";
+	print STDERR "body=$body\n";
+
+	# Send email
+	my $from = &get_global_from_address($d);
+	&send_notify_email($from, [$d], $d, $subject, $body);
+	}
+}
+
+# install_letsencrypt_cert(&domain, certfile, keyfile, chainfile)
+# Update the current cert and key for a domain
+sub install_letsencrypt_cert
+{
+my ($d, $cert, $key, $chain) = @_;
+
+# Copy and save the cert
+$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
+$cert_text = &read_file_contents($cert);
+&lock_file($d->{'ssl_cert'});
+&unlink_file($d->{'ssl_cert'});
+&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
+&print_tempfile(CERT, $cert_text);
+&close_tempfile_as_domain_user($d, CERT);
+&set_certificate_permissions($d, $d->{'ssl_cert'});
+&unlock_file($d->{'ssl_cert'});
+&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+
+# And the key
+$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+$key_text = &read_file_contents($key);
+&lock_file($d->{'ssl_key'});
+&unlink_file($d->{'ssl_key'});
+&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
+&print_tempfile(CERT, $key_text);
+&close_tempfile_as_domain_user($d, CERT);
+&set_certificate_permissions($d, $d->{'ssl_key'});
+&unlock_file($d->{'ssl_key'});
+&save_website_ssl_file($d, "key", $d->{'ssl_key'});
+
+# Let's encrypt certs have no passphrase
+$d->{'ssl_pass'} = undef;
+&save_domain_passphrase($d);
+
+# And the chained file
+if ($chain) {
+	$chainfile = &default_certificate_file($d, 'ca');
+	$chain_text = &read_file_contents($chain);
+	&lock_file($chainfile);
+	&unlink_file_as_domain_user($d, $chainfile);
+	&open_tempfile_as_domain_user($d, CERT, ">$chainfile");
+	&print_tempfile(CERT, $chain_text);
+	&close_tempfile_as_domain_user($d, CERT);
+	&set_permissions_as_domain_user($d, 0755, $chainfile);
+	&unlock_file($chainfile);
+	$err = &save_website_ssl_file($d, 'ca', $chainfile);
+	}
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;

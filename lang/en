@@ -2833,6 +2833,8 @@ cert_dnamedef=Domains associated with this server
 cert_dnamesel=Domain names listed here
 cert_letsrenew=Months between automatic renewal
 cert_letsnotrenew=Only renew manually
+cert_letsage=Time since last renewal
+cert_letsmonths=$1 months
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
@@ -6767,5 +6769,9 @@ letsencrypt_failed=.. request failed : $1
 letsencrypt_done=.. request was successful!
 letsencrypt_renew=Automatically renew certificate?
 letsencrypt_erenew=Missing or non-numeric months before renewing
+letsencrypt_sfailed=Let's Encrypt certificate renewal failed!
+letsencrypt_bfailed=An error occurred requesting a new certificate for $1 from Let's Encrypt : $2
+letsencrypt_sdone=Let's Encrypt certificate complete
+letsencrypt_bdone=A new certificate was successfully requested from Let's Encrypt, and installed for $1.
 
 __norefs=1

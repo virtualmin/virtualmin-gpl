@@ -34,12 +34,15 @@
 	- https://sourceforge.net/p/webadmin/bugs/4415/
 	- DH key functions
 
- - New user fields in MySQL 5.7
-	- http://virtualmin.com/node/38397
-	- virtualmin too
-	- other priv fields
-	- useradmin sync
-	- CHANGELOGs
-
  - Parallel backups and restores
+	- split up backup_one_domain
 	- http://virtualmin.com/node/38808
+
+ - Use lighter weight lets-encrypt client
+	- https://www.metachris.com/2015/12/comparison-of-10-acme-lets-encrypt-clients/
+
+	- acme-tiny
+
+ - Support multiple email attachments
+	- http://sourceforge.net/p/webadmin/usermin-bugs/451/
+	- http://www.w3schools.com/tags/att_input_multiple.asp
