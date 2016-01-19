@@ -395,14 +395,20 @@ else {
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_table_start(undef, undef, 2);
 
+	# Domain names to request cert for
 	@defnames = &get_hostnames_for_ssl($d);
-	print &ui_table_row(
-		$text{'cert_dnamefor'},
-		&ui_radio_table("dname_def", 1,
+	print &ui_table_row($text{'cert_dnamefor'},
+		&ui_radio_table("dname_def", 
+		      $d->{'letsencrypt_dname'} ? 0 : 1,
 		      [ [ 1, $text{'cert_dnamedef'},
 			  join(" ", map { "<tt>$_</tt>" } @defnames) ],
 			[ 0, $text{'cert_dnamesel'},
-			  &ui_textarea("dname", undef, 5, 60) ] ]));
+			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60) ] ]));
+
+	# Setup automatic renewal?
+	print &ui_table_row($text{'cert_letsrenew'},
+		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
+				$text{'cert_letsnotrenew'}));
 
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);

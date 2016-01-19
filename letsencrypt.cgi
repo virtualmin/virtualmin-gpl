@@ -22,6 +22,8 @@ else {
 		}
 	$custom_dname = join(" ", @dnames);
 	}
+$in{'renew_def'} || $in{'renew'} =~ /^[1-9][0-9]*$/ ||
+	&error($text{'letsencrypt_erenew'});
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'letsencrypt_title'}, "");
 

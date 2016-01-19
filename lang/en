@@ -2831,6 +2831,8 @@ cert_ewebminver=Only Webmin versions 1.780 and above support Let's Encrypt
 cert_dnamefor=Request certificate for
 cert_dnamedef=Domains associated with this server
 cert_dnamesel=Domain names listed here
+cert_letsrenew=Months between automatic renewal
+cert_letsnotrenew=Only renew manually
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate
@@ -6763,5 +6765,7 @@ letsencrypt_title=Request Certificate
 letsencrypt_doing2=Requesting a certificate for $1 from Let's Encrypt ..
 letsencrypt_failed=.. request failed : $1
 letsencrypt_done=.. request was successful!
+letsencrypt_renew=Automatically renew certificate?
+letsencrypt_erenew=Missing or non-numeric months before renewing
 
 __norefs=1
