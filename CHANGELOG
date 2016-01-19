@@ -1509,4 +1509,4 @@ The Excluded Directories page can now also be used to enter MySQL and PostgreSQL
 The paths to additional PHP versions can now be entered on the Virtualmin Configuration page, under PHP Options. This also makes it possible to run PHP version 7.
 Added a tab to the Manage SSL Certificate page to request a certificate from the free Let's Encrypt service.
 ---- Changes since 5.00 ----
-Updated the WordPress script installer to version 4.4.1, Moodle to 3.0.2 and 2.9.4, Drupal to 8.0.2, eGroupware to 14.3.20160113, and Typo3 to 6.2.17.
+Updated the WordPress script installer to version 4.4.1, Moodle to 3.0.2 and 2.9.4, Drupal to 8.0.2, eGroupware to 14.3.20160113, TikiWiki to 14.2, 12.5 and 6.15, and Typo3 to 6.2.17.
