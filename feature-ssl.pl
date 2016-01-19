@@ -1917,6 +1917,15 @@ if ($changed) {
 	}
 }
 
+# get_hostnames_for_ssl(&domain)
+# Returns a list of names that should be used in an SSL cert
+sub get_hostnames_for_ssl
+{
+my ($d) = @_;
+my @rv = ( $d->{'dom'}, "www.".$d->{'dom'} );
+return @rv;
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;

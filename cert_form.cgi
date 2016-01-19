@@ -388,16 +388,23 @@ if ($err) {
 	print &text('cert_elets', $err),"<p>\n";
 	}
 else {
-	print &ui_form_start("letsencrypt.cgi");
-	print &ui_hidden("dom", $in{'dom'});
-
 	$phd = &public_html_dir($d);
 	print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
 
-	print &ui_opt_textbox("dname", undef, 30,
-			      $text{'cert_dnamedef'}."<br>\n",
-			      $text{'cert_dnamesel'}),"<p>\n";
+	print &ui_form_start("letsencrypt.cgi");
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_table_start(undef, undef, 2);
 
+	@defnames = &get_hostnames_for_ssl($d);
+	print &ui_table_row(
+		$text{'cert_dnamefor'},
+		&ui_radio_table("dname_def", 1,
+		      [ [ 1, $text{'cert_dnamedef'},
+			  join(" ", map { "<tt>$_</tt>" } @defnames) ],
+			[ 0, $text{'cert_dnamesel'},
+			  &ui_textarea("dname", undef, 5, 60) ] ]));
+
+	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
 	}
 

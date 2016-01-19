@@ -8,27 +8,34 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 
 if ($in{'dname_def'}) {
-	$dname = $d->{'dom'};
+	@dnames = &get_hostnames_for_ssl($d);
+	$custom_dname = undef;
 	}
 else {
-	$dname = lc(&parse_domain_name($in{'dname'}));
-	$err = &valid_domain_name($dname);
-	&error($err) if ($err);
+	foreach my $dname (split(/\s+/, $in{'dname'})) {
+		$dname = lc(&parse_domain_name($dname));
+		my $checkname = $dname;
+		$checkname =~ s/^www\.//;
+		$err = &valid_domain_name($checkname);
+		&error($err) if ($err);
+		push(@dnames, $dname);
+		}
+	$custom_dname = join(" ", @dnames);
 	}
 
 &ui_print_unbuffered_header(&domain_in($d), $text{'letsencrypt_title'}, "");
 
-&$first_print($text{'letsencrypt_doing'});
+&$first_print(&text('letsencrypt_doing2',
+		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
 if (&get_webmin_version() >= 1.782) {
-	@dnames = ( $dname, "www.".$dname );
 	($ok, $cert, $key, $chain) =
 		&webmin::request_letsencrypt_cert(\@dnames, $phd);
 	}
 else {
 	($ok, $cert, $key, $chain) =
-		&webmin::request_letsencrypt_cert($dname, $phd);
+		&webmin::request_letsencrypt_cert($dnames[0], $phd);
 	}
 if (!$ok) {
 	&$second_print(&text('letsencrypt_failed',
@@ -83,6 +90,7 @@ else {
 		$err = &save_website_ssl_file($d, 'ca', $chainfile);
 		}
 
+	$d->{'letsencrypt_dname'} = $custom_dname;
 	&save_domain($d);
 
 	# Apply any per-domain cert to Dovecot and Postfix
