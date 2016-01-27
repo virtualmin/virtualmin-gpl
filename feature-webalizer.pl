@@ -99,7 +99,7 @@ if (!-r $lcn || !-r $cfile) {
 		&webalizer::save_directive($wconf, "LogFile", $alog);
 		&webalizer::save_directive($wconf, "HostName", $_[0]->{'dom'});
 		&webalizer::save_directive($wconf, "HideReferrer", "*.$_[0]->{'dom'}");
-		&flush_file_lines();
+		&flush_file_lines($cfile);
 		}
 	local $group = $_[0]->{'group'} || $_[0]->{'ugroup'};
 	&set_ownership_permissions($_[0]->{'user'}, $group, undef, $cfile);
@@ -112,7 +112,7 @@ else {
 	local $wconf = &webalizer::get_config($alog);
 	&webalizer::save_directive($wconf, "HistoryName", "$stats/webalizer.hist");
 	&webalizer::save_directive($wconf, "IncrementalName", "$stats/webalizer.current");
-	&flush_file_lines();
+	&flush_file_lines($cfile);
 	}
 
 # If webserver for domain isn't apache, add log to Webalizer module's log list
