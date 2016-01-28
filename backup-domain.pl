@@ -97,6 +97,7 @@ $outdent_print = \&outdent_text_print;
 # Parse command-line args
 $asowner = 0;
 @allplans = &list_plans();
+@OLDARGV = @ARGV;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--dest") {
@@ -392,6 +393,7 @@ foreach $dest (@strfdests) {
 			  $size, $ok, "api", $output, $errdoms, undef, $key);
 	}
 &stop_running_backup($sched);
+&virtualmin_api_log(\@OLDARGV, $doms[0]);
 exit($ex);
 
 sub usage
