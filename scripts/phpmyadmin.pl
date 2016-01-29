@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "4.5.3.1", "4.4.15.2", "4.0.10.12", "3.5.8.2" );
+return ( "4.5.4", "4.4.15.3", "4.0.10.13", "3.5.8.2" );
 }
 
 sub script_phpmyadmin_can_upgrade
