@@ -810,8 +810,12 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	&clean_environment();
 	local $out = &backquote_command("$php -v 2>&1 </dev/null");
 	&reset_environment();
-	if ($out =~ /PHP\s+(\d+)\./ && !$vercmds{$1}) {
-		$vercmds{$1} = $php;
+	if ($out =~ /PHP\s+(\d+\.\d+)/) {
+		my $v = $1;
+		$v = int($ver) if ($ver <= 5);
+		if (!$vercmds{$v}) {
+			$vercmds{$v} = $php;
+			}
 		}
 	}
 
