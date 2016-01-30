@@ -5261,21 +5261,26 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 
 	if ($config{'show_mailsize'} && $d->{'mail'}) {
 		# Mailbox link, if this user has email enabled or is the owner
+		local ($szmsg, $sz);
 		if (!$u->{'nomailfile'} &&
 		    ($u->{'email'} || @{$u->{'extraemail'}})) {
-			local ($sz) = &mail_file_size($u);
+			($sz) = &mail_file_size($u);
 			$sz = $sz ? &nice_size($sz) : $text{'users_empty'};
 			local $lnk = &read_mail_link($u, $d);
 			if ($lnk) {
-				push(@cols, "<a href='$lnk'>$sz</a>");
+				$szmsg = &ui_link($lnk, $sz);
 				}
 			else {
-				push(@cols, $sz);
+				$szmsg = $sz;
 				}
 			}
 		else {
-			push(@cols, $text{'users_noemail'});
+			$szmsg = $text{'users_noemail'};
+			$sz = 0;
 			}
+		push(@cols, { 'type' => 'string',
+			      'td' => 'data-sort='.$sz,
+			      'value' => $szmsg });
 		}
 
 	if ($config{'show_lastlogin'} && $d->{'mail'}) {
