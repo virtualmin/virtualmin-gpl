@@ -832,6 +832,12 @@ local ($cmd, $d) = @_;
 if ($cmd !~ /^\//) {
 	local ($phpn) = grep { $_->[0] == $cmd }
 			     &list_available_php_versions($d);
+	if (!$phpn && $cmd == 5) {
+		# If the system ONLY has PHP 7, consider it compatible with
+		# PHP major version 5
+		($phpn) = grep { $_->[0] >= $cmd }
+                             &list_available_php_versions($d);
+		}
 	return undef if (!$phpn);
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
