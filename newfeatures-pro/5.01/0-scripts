@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the WordPress script installer to version 4.4.1, Moodle to 3.0.2 and 2.9.4, Drupal to 8.0.3, eGroupware to 14.3.20160113, TikiWiki to 14.2, 12.5 and 6.15, IONcube to 5.0.23, Pydio to 6.2.2, Node.JS to 5.5.0, Magento to 1.9.2.3, Rails to 4.2.5.1, phpMyAdmin to 4.5.4.1, 4.4.15.4 and 4.0.10.14, ownCloud to 8.2.2, 7.0.12 and 6.0.9, Wordpress to 4.4.2, and Typo3 to 6.2.17.
+html=Updated the WordPress script installer to version 4.4.1, Moodle to 3.0.2 and 2.9.4, Drupal to 8.0.3, eGroupware to 14.3.20160113, TikiWiki to 14.2, 12.6 and 6.15, IONcube to 5.0.23, Pydio to 6.2.2, Node.JS to 5.5.0, Magento to 1.9.2.3, Rails to 4.2.5.1, phpMyAdmin to 4.5.4.1, 4.4.15.4 and 4.0.10.14, ownCloud to 8.2.2, 7.0.12 and 6.0.9, Wordpress to 4.4.2, and Typo3 to 6.2.17.
 master=1
 reseller=1
 domain=1
