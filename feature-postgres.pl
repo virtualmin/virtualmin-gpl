@@ -243,9 +243,12 @@ elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
 	&$first_print($text{'save_postgresuser'});
 	if (&postgresql::get_postgresql_version() >= 8.0) {
 		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
+			&postgresql::execute_sql_logged($db,
+			    "reassign owned by ".&postgres_uquote($olduser).
+			    " to ".&postgres_uquote($user));
 			&postgresql::execute_sql_logged($qconfig{'basedb'},
-				"alter database ".&postgres_uquote($db->{'name'}).
-				" owner to ".&postgres_uquote($user));
+			    "alter database ".&postgres_uquote($db->{'name'}).
+			    " owner to ".&postgres_uquote($user));
 			}
 		}
 	if (&postgres_user_exists($_[1])) {
