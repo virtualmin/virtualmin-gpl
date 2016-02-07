@@ -1344,6 +1344,11 @@ return $info->{'issuer_cn'} eq $info->{'cn'} &&
 # Returns the full path to the OpenSSL config file, or undef if not found
 sub find_openssl_config_file
 {
+&foreign_require("webmin");
+if (defined(&webmin::find_openssl_config_file)) {
+	return &webmin::find_openssl_config_file();
+	}
+# XXX remove this code once Webmin 1.790 has been out for a while 
 foreach my $p ($config{'openssl_cnf'},		# Module config
 	       "/etc/ssl/openssl.cnf",		# Debian and FreeBSD
 	       "/etc/openssl.cnf",
@@ -1481,6 +1486,7 @@ return undef;
 # names. Returns the additional command line parameters for openssl to use it.
 sub setup_openssl_altnames
 {
+# XXX once Webmin 1.790 is out, call the build_ssl_config function instead
 local ($altnames, $self) = @_;
 local @alts = &unique(@$altnames);
 local $temp = &transname();
