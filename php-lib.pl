@@ -812,7 +812,7 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	&reset_environment();
 	if ($out =~ /PHP\s+(\d+\.\d+)/) {
 		my $v = $1;
-		$v = int($ver) if ($ver <= 5);
+		$v = int($v) if ($v <= 5);
 		if (!$vercmds{$v}) {
 			$vercmds{$v} = $php;
 			}
