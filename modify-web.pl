@@ -116,7 +116,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--php-timeout" && $supports_php) {
 		$timeout = shift(@ARGV);
-		$timeout =~ /^[1-9]\d*$/ ||
+		$timeout =~ /^[1-9]\d*$/ && $timeout <= 86400 ||
 			&usage("Invalid PHP script timeout in seconds");
 		}
 	elsif ($a eq "--no-php-timeout" && $supports_php) {

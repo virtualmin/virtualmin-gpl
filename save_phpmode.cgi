@@ -29,7 +29,7 @@ if (!$d->{'alias'} && $can == 2) {
 	}
 if (!$d->{'alias'}) {
 	if (defined($in{'maxtime_def'}) && !$in{'maxtime_def'} &&
-	    $in{'maxtime'} !~ /^[1-9]\d*$/) {
+	    $in{'maxtime'} !~ /^[1-9]\d*$/ && $in{'maxtime'} < 86400) {
 		&error($text{'phpmode_emaxtime'});
 		}
 	}
