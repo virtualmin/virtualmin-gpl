@@ -5216,7 +5216,7 @@ aedit_complete=.. done ($1 created, $3 modified, $4 deleted, $2 errors).
 aedit_etwice=An alias with the same name is listed more than once
 aedit_eauto=Automatic replies cannot be setup when manually editing aliases
 
-exclude_title=Excluded Directories
+exclude_title=Excluded Directories and DBs
 exclude_header=Backup exclusion options
 exclude_dirs=Directories under home to skip
 exclude_dbs=Databases and tables to skip
