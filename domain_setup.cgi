@@ -41,7 +41,7 @@ if ($parentuser && !$parentdom) {
 	}
 if ($in{'subdom'}) {
 	$subdom = &get_domain($in{'subdom'});
-	$subdom || &error(&text('form_esubdom', $in{'subdom'}));
+	$subdom || &error(&text('form_esubdom', &html_escape($in{'subdom'})));
 	}
 
 # Check if domains limit has been exceeded
