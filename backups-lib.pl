@@ -969,12 +969,16 @@ DOMAIN: foreach $d (@$doms) {
 		&unlink_file($infotemp);
 		&unlink_file($domtemp);
 
-		# Delete .backup directory
-		&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
+		# If none of the backups are to a local destination, remove the
+		# local temp copy
 		if (!$anylocal) {
 			&execute_command("rm -rf ".quotemeta("$dest/$df"));
 			}
 		}
+
+	# Delete .backup directory, because its contents will already have
+	# been tarred up
+	&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
 
 	&$outdent_print();
 	my $dtime = time() - $dstart;
