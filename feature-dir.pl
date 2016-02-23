@@ -515,7 +515,7 @@ elsif ($homefmt && $config{'compression'} == 1) {
 	}
 elsif ($homefmt && $config{'compression'} == 3) {
 	# ZIP archive
-	$cmd = "zip -r -x\@$xtemp - .";
+	$cmd = "zip -r - . -x\@$xtemp";
 	}
 else {
 	# Plain tar
