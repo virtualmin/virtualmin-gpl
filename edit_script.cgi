@@ -82,10 +82,13 @@ if ($opts->{'port'}) {
 $sfunc = $script->{'status_server_func'};
 if (defined(&$sfunc)) {
 	@pids = &$sfunc($d, $opts);
-	print &ui_table_row($text{'scripts_istatus'},
-		@pids ? "<font color=#00aa00>$text{'scripts_istatus1'}</font>"
-		      : "<font color=#ff0000>$text{'scripts_istatus0'}</font>");
-	$gotstatus = 1;
+	if ($pids[0] >= 0) {
+		print &ui_table_row($text{'scripts_istatus'},
+		    @pids ?
+		      "<font color=#00aa00>$text{'scripts_istatus1'}</font>" :
+		      "<font color=#ff0000>$text{'scripts_istatus0'}</font>");
+		$gotstatus = 1;
+		}
 	}
 
 print &ui_table_end();
