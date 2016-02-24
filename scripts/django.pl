@@ -7,7 +7,7 @@ return "Django";
 
 sub script_django_uses
 {
-return ( "python", "apache" );
+return ( "python", "apache", "proxy" );
 }
 
 sub script_django_longdesc
@@ -18,8 +18,17 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-# XXX doesn't seem to work with 1.8.2 (500 error)
-return ( "1.7.7", "1.4.22" );
+return ( "1.9.2", "1.7.11", "1.4.22" );
+}
+
+sub script_django_can_upgrade
+{
+local ($sinfo, $newver) = @_;
+if ($sinfo->{'version'} < 1.9 && $newver >= 1.9) {
+	# Cannot upgrade from fcgi mode to proxy mode
+	return 0;
+	}
+return 1;
 }
 
 sub script_django_release
@@ -228,6 +237,11 @@ $err && return (0, "Failed to extract Django source : $err");
 &run_as_domain_user($d,
 	"find ".quotemeta($temp)." -name '*.pyc' | xargs rm -f");
 
+# Stop running server if upgrading
+if ($upgrade) {
+	&script_nodejs_stop_server($d, $opts);
+	}
+
 # Install to target dir
 local $icmd = "(cd ".quotemeta("$temp/Django-$ver")." && ".
       "$python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
@@ -301,19 +315,19 @@ if (!$upgrade) {
 			$l = "        'ENGINE': 'django.db.backends.$pdbtype',";
 			$engine = $i;
 			}
-		if ($l =~ /'NAME':/) {
+		if ($l =~ /'NAME':/ && !$gotname) {
 			$l = "        'NAME': '$dbname',";
 			$gotname++;
 			}
-		if ($l =~ /'USER':/) {
+		if ($l =~ /'USER':/ && !$gotuser) {
 			$l = "        'USER': '$dbuser',";
 			$gotuser++;
 			}
-		if ($l =~ /'PASSWORD':/) {
+		if ($l =~ /'PASSWORD':/ && !$gotpass) {
 			$l = "        'PASSWORD': '$dbpass',";
 			$gotpass++;
 			}
-		if ($l =~ /'HOST':/) {
+		if ($l =~ /'HOST':/ && !$gothost) {
 			$l = "        'HOST': '$dbhost',";
 			$gothost++;
 			}
@@ -355,107 +369,169 @@ if (!$upgrade) {
 	&flush_file_lines_as_domain_user($d, $ufile);
 
 	# Initialize the DB
-	# Input is 'yes', username, email, password, password again
-	local $icmd = &command_as_user($d->{'user'}, 0,
-				       "$python manage.py syncdb");
 	local $pwd = &get_current_dir();
-	&foreign_require("proc", "proc-lib.pl");
 	chdir($pdir);
-	$ENV{'LANG'} = 'en_US';	# Needed because manage.py chokes with the
-				# default locale
-	local ($fh, $fpid) = &proc::pty_process_exec($icmd);
-	chdir($pwd);
-	local $out;
-	$domuser =~ s/[\.\@\-]/_/g;
-	foreach my $w ([ "yes.no", "yes" ],
-		       [ "Username", $domuser ],
-		       [ "E-?mail address", $d->{'emailto_addr'} ],
-		       [ "Password", $dompass ],
-		       [ "Password", $dompass ]) {
-		local $rv = &wait_for($fh, $w->[0]);
-		if ($rv < 0) {
-			return (-1,
-			   "Database initialization failed at $w->[0] : ".
-			   "<pre>".&html_escape($wait_for_input)."</pre>");
+	if ($ver < 1.9) {
+		# Input is 'yes', username, email, password, password again
+		local $icmd = &command_as_user($d->{'user'}, 0,
+					       "$python manage.py syncdb");
+		&foreign_require("proc", "proc-lib.pl");
+		$ENV{'LANG'} = 'en_US';	# Needed because manage.py chokes with
+					# the default locale
+		local ($fh, $fpid) = &proc::pty_process_exec($icmd);
+		chdir($pwd);
+		local $out;
+		$domuser =~ s/[\.\@\-]/_/g;
+		foreach my $w ([ "yes.no", "yes" ],
+			       [ "Username", $domuser ],
+			       [ "E-?mail address", $d->{'emailto_addr'} ],
+			       [ "Password", $dompass ],
+			       [ "Password", $dompass ]) {
+			local $rv = &wait_for($fh, $w->[0]);
+			if ($rv < 0) {
+				return (-1,
+				   "Database initialization failed at $w->[0] : ".
+				   "<pre>".&html_escape($wait_for_input)."</pre>");
+				}
+			&sysprint($fh, $w->[1]."\n");
+			$out .= $wait_for_input;
 			}
-		&sysprint($fh, $w->[1]."\n");
-		$out .= $wait_for_input;
+		&wait_for($fh, 'EOF');		# Wait till done
+		close($fh);
+		waitpid($fpid, 0);
+		local $ex = $?;
+		if ($ex || $out =~ /error/i) {
+			return (-1, "Database initialization failed : ".
+				    "<pre>".&html_escape($out)."</pre>");
+			}
 		}
-	&wait_for($fh, 'EOF');		# Wait till done
-	close($fh);
-	waitpid($fpid, 0);
-	local $ex = $?;
-	if ($ex || $out =~ /error/i) {
-		return (-1, "Database initialization failed : ".
-			    "<pre>".&html_escape($out)."</pre>");
+	else {
+		# Use new migrate command
+		local $out = &run_as_domain_user($d,
+				"$python manage.py migrate 2>&1");
+		chdir($pwd);
+		if ($?) {
+			return (-1, "DB initialization install failed : ".
+				   "<pre>".&html_escape($out)."</pre>");
+			}
+
 		}
 	}
 
-# Create python fcgi wrapper script
-local $wrapper = "$opts->{'dir'}/django.fcgi";
-if (!-r $wrapper) {
-	&open_tempfile_as_domain_user($d, WRAPPER, ">$wrapper");
-	&print_tempfile(WRAPPER, "#!$python\n");
-	&print_tempfile(WRAPPER, "import sys, os\n");
-	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/lib/python\")\n");
-	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}\")\n");
-	&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/$opts->{'project'}\")\n");
-	&print_tempfile(WRAPPER, "os.chdir(\"$opts->{'dir'}\")\n");
-	&print_tempfile(WRAPPER, "os.environ['DJANGO_SETTINGS_MODULE'] = \"$opts->{'project'}.settings\"\n");
-	&print_tempfile(WRAPPER, "from django.core.servers.fastcgi import runfastcgi\n");
-	&print_tempfile(WRAPPER, "runfastcgi(method=\"threaded\", daemonize=\"false\")\n");
-	&close_tempfile_as_domain_user($d, WRAPPER);
-	&set_permissions_as_domain_user($d, 0755, $wrapper);
-	}
+if ($ver < 1.9) {
+	# Create python fcgi wrapper script
+	local $wrapper = "$opts->{'dir'}/django.fcgi";
+	if (!-r $wrapper) {
+		&open_tempfile_as_domain_user($d, WRAPPER, ">$wrapper");
+		&print_tempfile(WRAPPER, "#!$python\n");
+		&print_tempfile(WRAPPER, "import sys, os\n");
+		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/lib/python\")\n");
+		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}\")\n");
+		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/$opts->{'project'}\")\n");
+		&print_tempfile(WRAPPER, "os.chdir(\"$opts->{'dir'}\")\n");
+		&print_tempfile(WRAPPER, "os.environ['DJANGO_SETTINGS_MODULE'] = \"$opts->{'project'}.settings\"\n");
+		&print_tempfile(WRAPPER, "from django.core.servers.fastcgi import runfastcgi\n");
+		&print_tempfile(WRAPPER, "runfastcgi(method=\"threaded\", daemonize=\"false\")\n");
+		&close_tempfile_as_domain_user($d, WRAPPER);
+		&set_permissions_as_domain_user($d, 0755, $wrapper);
+		}
 
-# Add <Location> block to Apache config
-local $conf = &apache::get_config();
-local @ports = ( $d->{'web_port'},
-		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-	next if (!$virt);
-	local @locs = &apache::find_directive_struct("Location", $vconf);
-	local ($loc) = grep { $_->{'words'}->[0] eq $opts->{'path'} } @locs;
-	next if ($loc);
-	local $reldir = $opts->{'dir'};
-	$reldir =~ s/^\Q$d->{'home'}\/\E//;
-	local $loc = { 'name' => 'Location',
-		       'value' => $opts->{'path'},
-		       'type' => 1,
-		       'members' => [
-			{ 'name' => 'AddHandler',
-			  'value' => 'fcgid-script .fcgi' },
-			{ 'name' => 'RewriteEngine',
-			  'value' => 'On' },
-			{ 'name' => 'RewriteCond',
-			  'value' =>
-				'%{REQUEST_FILENAME} !django.fcgi|/media/|/static/' },
-			{ 'name' => 'RewriteRule',
-			  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
-			]
-		     };
-	&apache::save_directive_struct(undef, $loc, $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
-	}
-
-# Add /media and /static/admin aliases to Apache config
-local @paths;
-push(@paths, $opts->{'path'} eq '/' ? "/media/"
-                                    : "$opts->{'path'}/media/");
-push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
-                                    : "$opts->{'path'}/static/admin/");
-local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/static/admin/";
-foreach my $path (@paths) {
+	# Add <Location> block to Apache config
+	local $conf = &apache::get_config();
+	local @ports = ( $d->{'web_port'},
+			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	foreach my $port (@ports) {
 		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
 		next if (!$virt);
-		local @al = &apache::find_directive("Alias", $vconf);
-		local ($media) = grep { $_ =~ /^\Q$path\E\s/ } @al;
-		next if ($media);
-		push(@al, "$path $mdir");
-		&apache::save_directive("Alias", \@al, $vconf, $conf);
+		local @locs = &apache::find_directive_struct("Location", $vconf);
+		local ($loc) = grep { $_->{'words'}->[0] eq $opts->{'path'} } @locs;
+		next if ($loc);
+		local $reldir = $opts->{'dir'};
+		$reldir =~ s/^\Q$d->{'home'}\/\E//;
+		local $loc = { 'name' => 'Location',
+			       'value' => $opts->{'path'},
+			       'type' => 1,
+			       'members' => [
+				{ 'name' => 'AddHandler',
+				  'value' => 'fcgid-script .fcgi' },
+				{ 'name' => 'RewriteEngine',
+				  'value' => 'On' },
+				{ 'name' => 'RewriteCond',
+				  'value' =>
+					'%{REQUEST_FILENAME} !django.fcgi|/media/|/static/' },
+				{ 'name' => 'RewriteRule',
+				  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
+				]
+			     };
+		&apache::save_directive_struct(undef, $loc, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
+		}
+
+	# Add /media and /static/admin aliases to Apache config
+	local @paths;
+	push(@paths, $opts->{'path'} eq '/' ? "/media/"
+					    : "$opts->{'path'}/media/");
+	push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
+					    : "$opts->{'path'}/static/admin/");
+	local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/static/admin/";
+	foreach my $path (@paths) {
+		foreach my $port (@ports) {
+			local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
+			next if (!$virt);
+			local @al = &apache::find_directive("Alias", $vconf);
+			local ($media) = grep { $_ =~ /^\Q$path\E\s/ } @al;
+			next if ($media);
+			push(@al, "$path $mdir");
+			&apache::save_directive("Alias", \@al, $vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			}
+		}
+	}
+else {
+	# Django 1.9+ use a server process
+	my $port;
+	if ($upgrade) {
+		$port = $opts->{'port'};
+		}
+	else {
+		$port = &allocate_mongrel_port(undef, 1);
+		$opts->{'port'} = $port;
+		}
+	$opts->{'logfile'} ||= "$opts->{'dir'}/runserver.log";
+
+	# Create an init script
+	my $cmd = &get_django_start_cmd($d, $opts);
+	my $userd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if (&foreign_installed("init") && $userd &&
+	    $userd->{'unix'} && !$upgrade) {
+		my $killcmd = "kill -9 `fuser $opts->{'logfile'}`";
+		&foreign_require("init");
+		my $opts = { };
+		if ($init::init_mode eq 'upstart' ||
+		    $init::init_mode eq 'systemd') {
+			# Init system will background it
+			$opts->{'fork'} = 0;
+			}
+		else {
+			$cmd .= "&";
+			}
+		&init::enable_at_boot(
+			"django-$d->{'dom'}-$port",
+			"Start Django server for $d->{'dom'}",
+			&command_as_user($userd->{'user'}, 0, $cmd),
+			&command_as_user($userd->{'user'}, 0, $killcmd),
+			undef,
+			$opts,
+			);
+		}
+
+
+	# Start the server process
+	&run_as_domain_user($d, $cmd, 1);
+
+	if (!$upgrade) {
+		# Configure Apache to proxy to it
+		&setup_mongrel_proxy($d, $opts->{'path'}, $port);
 		}
 	}
 
@@ -479,10 +555,11 @@ local ($d, $version, $opts) = @_;
 local $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
-# Remove base Django tables from the database
+# Remove base Django tables from the database (twice, because of dependencies)
+&cleanup_script_database($d, $opts->{'db'}, "(django|auth)_");
 &cleanup_script_database($d, $opts->{'db'}, "(django|auth)_");
 
-# Remove <Location> block
+# Remove <Location> block (if it exists)
 &require_apache();
 local $conf = &apache::get_config();
 local @ports = ( $d->{'web_port'},
@@ -497,7 +574,7 @@ foreach my $port (@ports) {
 	&flush_file_lines($virt->{'file'});
 	}
 
-# Remove /media and /static/admin aliases
+# Remove /media and /static/admin aliases (if they exist)
 local @paths;
 push(@paths, $opts->{'path'} eq '/' ? "/media/"
                                     : "$opts->{'path'}/media/");
@@ -516,6 +593,12 @@ foreach my $path (@paths) {
 		}
 	}
 
+# Remove proxy path
+&delete_mongrel_proxy($d, $opts->{'path'});
+
+# Stop the server
+&script_django_stop($d, { 'opts' => $opts });
+
 &register_post_action(\&restart_apache);
 
 # Take out the DB
@@ -532,7 +615,8 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 $ver >= 1.5 ? "Django-([0-9\\.]+)\\.tar\\.gz" 
+	 $ver >= 1.9 ? "Django-([0-9\\.]+)\\.tar\\.gz" :
+	 $ver >= 1.7 ? "Django-(1\\.7\\.[0-9\\.]+)\\.tar\\.gz" 
 		     : "Django-(1\\.4\\.[0-9\\.]+)\\.tar\\.gz" );
 }
 
@@ -544,6 +628,69 @@ return 'http://www.djangoproject.com/';
 sub script_django_passmode
 {
 return 1;
+}
+
+# script_nodejs_stop(&domain, &sinfo)
+# Stop running django webserver, and delete init script
+sub script_django_stop
+{
+local ($d, $sinfo) = @_;
+my $opts = $sinfo->{'opts'};
+return undef if (!$opts->{'port'});
+&script_django_stop_server($d, $opts);
+&foreign_require("init");
+my $name =  "django-$d->{'dom'}-$opts->{'port'}";
+if (defined(&init::delete_at_boot)) {
+	&init::delete_at_boot($name)
+	}
+else {
+	&init::disable_at_boot($name);
+	}
+}
+
+# Start the django webserver
+sub script_django_start_server
+{
+local ($d, $opts) = @_;
+return undef if (!$opts->{'port'});
+my $cmd = &get_django_start_cmd($d, $opts);
+&run_as_domain_user($d, $cmd, 1);
+}
+
+# Return the PID if the node server is running
+sub script_django_status_server
+{
+local ($d, $opts) = @_;
+return ( ) if (!$opts->{'port'});    # Change to -1 once Virtualmin 5.1 is out
+local @pids;
+if ($opts->{'logfile'}) {
+	&foreign_require("proc");
+	@pids = &proc::find_file_processes($opts->{'logfile'});
+	}
+return @pids;
+}
+
+# script_django_stop_server(&domain, &opts)
+# Stop running django webserver
+sub script_django_stop_server
+{
+local ($d, $opts) = @_;
+return undef if (!$opts->{'port'});
+if ($opts->{'logfile'}) {
+	&foreign_require("proc");
+	local @pids = &proc::find_file_processes($opts->{'logfile'});
+	foreach my $pid (@pids) {
+		&run_as_domain_user($d, "kill -9 $pid");
+		}
+	}
+}
+
+sub get_django_start_cmd
+{
+my ($d, $opts) = @_;
+my $python = &has_command($config{'python_cmd'} || "python");
+my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib/python $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
+return $cmd;
 }
 
 1;
