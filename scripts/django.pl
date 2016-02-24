@@ -436,6 +436,12 @@ if ($ver < 1.9) {
 		&set_permissions_as_domain_user($d, 0755, $wrapper);
 		}
 
+	# Link to django dir inside egg, which is needed for some reason
+	my ($egg) = glob("$opts->{'dir'}/lib/python/Django-*.egg");
+	$egg =~ s/^.*\/lib\/python\///;
+	&symlink_file_as_domain_user($d, "$egg/django",
+				     "$opts->{'dir'}/lib/python/django");
+
 	# Add <Location> block to Apache config
 	local $conf = &apache::get_config();
 	local @ports = ( $d->{'web_port'},
