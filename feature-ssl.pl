@@ -1296,7 +1296,7 @@ foreach my $check ($dname, "www.".$dname) {
 		return 1;
 		}
 	elsif ($info->{'cn'} =~ /^\*\.(\S+)$/ &&
-	       (lc($check) eq lc($1) || $check =~ /\.\Q$1\E$/i)) {
+	       (lc($check) eq lc($1) || $check =~ /^([^\.]+)\.\Q$1\E$/i)) {
 		# Matches wildcard
 		return 1;
 		}
@@ -1309,7 +1309,8 @@ foreach my $check ($dname, "www.".$dname) {
 		foreach my $a (@{$info->{'alt'}}) {
 			if (lc($a) eq $check ||
 			    $a =~ /^\*\.(\S+)$/ &&
-			    (lc($check) eq lc($1) || $check =~ /\.\Q$1\E$/i)) {
+			    (lc($check) eq lc($1) ||
+			     $check =~ /([^\.]+)\.\Q$1\E$/i)) {
 				return 1;
 				}
 			}
