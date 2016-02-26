@@ -189,7 +189,7 @@ return @files;
 sub script_django_commands
 {
 local ($d, $ver, $opts) = @_;
-return ($config{'python_cmd'} || "python");
+return ($config{'python_cmd'} || "python", "fuser");
 }
 
 # script_django_install(&domain, version, &opts, &files, &upgrade-info)
