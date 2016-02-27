@@ -865,7 +865,7 @@ foreach $u (@users) {
 
 # Check if spamc is being used
 local $spamc;
-if ($_[0]->{'spam'}) {
+if ($_[0] && $_[0]->{'spam'}) {
 	local $spamclient = &get_domain_spam_client($_[0]);
 	$spamc = 1 if ($spamclient =~ /spamc/);
 	}
