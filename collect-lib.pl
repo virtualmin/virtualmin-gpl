@@ -233,9 +233,9 @@ local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
 if ($info->{'poss'} && &foreign_check("security-updates")) {
 	&foreign_require("security-updates");
-	local @poss = &security_updates::list_possible_updates(2);
+	local @poss = &security_updates::list_possible_updates(1);
 	$info->{'poss'} = \@poss;
-	local @allposs = &security_updates::list_possible_updates(2, 1);
+	local @allposs = &security_updates::list_possible_updates(1, 1);
 	$info->{'allposs'} = \@allposs;
 	}
 &save_collected_info($info);
