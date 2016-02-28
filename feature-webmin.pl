@@ -561,14 +561,16 @@ if ($extramods{'file'} && $_[0]->{'unix'}) {
 
 if ($extramods{'filemin'} && $_[0]->{'unix'}) {
 	# Limit new HTML file manager to user's directory, as unix user
+	my $modname = &foreign_check("file-manager") ?
+				"file-manager" : "filemin";
 	local %acl = ( 'noconfig' => 1,
 		       'work_as_root' => 0,
 		       'work_as_user', $_[0]->{'user'},
 		       'allowed_paths' => &resolve_links($_[0]->{'home'}),
 		     );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "filemin")
-		if (!$hasmods{'filemin'});
-	push(@mods, "filemin");
+	&save_module_acl_logged(\%acl, $_[1]->{'name'}, $modname)
+		if (!$hasmods{$modname});
+	push(@mods, $modname);
 	}
 
 if ($_[0]->{'unix'}) {
