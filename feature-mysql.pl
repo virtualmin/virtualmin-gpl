@@ -1764,7 +1764,8 @@ else {
 		if (defined($pass)) {
 			# Change the password
 			if ($encpass) {
-				&execute_password_change_sql($myuser, $encpass);
+				&execute_password_change_sql($myuser,
+							     "'$encpass'");
 				}
 			else {
 				local $qpass = &mysql_escape($pass);
