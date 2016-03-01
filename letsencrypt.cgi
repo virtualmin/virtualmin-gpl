@@ -32,12 +32,12 @@ $in{'renew_def'} || $in{'renew'} =~ /^[1-9][0-9]*$/ ||
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
 if (&get_webmin_version() >= 1.782) {
-	($ok, $cert, $key, $chain) =
-		&webmin::request_letsencrypt_cert(\@dnames, $phd);
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+					\@dnames, $phd, $d->{'emailto'});
 	}
 else {
-	($ok, $cert, $key, $chain) =
-		&webmin::request_letsencrypt_cert($dnames[0], $phd);
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+					$dnames[0], $phd);
 	}
 if (!$ok) {
 	&$second_print(&text('letsencrypt_failed',
