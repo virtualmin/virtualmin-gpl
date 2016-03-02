@@ -1,0 +1,6 @@
+desc=Let's Encrypt improvements
+html=Added support for multiple hostnames and automatic renewal of Let's Encrypt certificates.
+master=1
+reseller=1
+domain=1
+link=cert_form.cgi?dom=${ID}
