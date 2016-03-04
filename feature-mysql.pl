@@ -1605,7 +1605,16 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Query local MySQL server
 	local $qdb = &quote_mysql_database($db);
-	local $d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+	local $d;
+	eval {
+		# Try old password column first
+		local $main::error_must_die = 1;
+		$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+		};
+	if ($@) {
+		# Try new mysql user table format
+		$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+		}
 	local (@rv, %done);
 	foreach my $u (@{$d->{'data'}}) {
 		push(@rv, $u) if (!$done{$u->[0]}++);
