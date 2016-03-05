@@ -10553,7 +10553,8 @@ sub get_licence_hostid
 {
 local $id;
 if (&has_command("hostid")) {
-	chop($id = `hostid 2>/dev/null`);
+	$id = &backquote_command("hostid 2>/dev/null");
+	chop($id);
 	}
 if (!$id || $id =~ /^0+$/ || $id eq '7f0100') {
 	&foreign_require("net");
