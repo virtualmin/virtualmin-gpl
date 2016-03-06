@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Rails script installer to version 4.2.5.2, Django to 1.9.4, and Node.JS to 5.7.1.
+html=Updated the Rails script installer to version 4.2.5.2, Drupal to 8.0.5, Django to 1.9.4, and Node.JS to 5.7.1.
 master=1
 reseller=1
 domain=1
