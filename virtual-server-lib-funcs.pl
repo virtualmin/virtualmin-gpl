@@ -16587,6 +16587,7 @@ local $d = { %$oldd };
 local $parent;
 local $tmpl = &get_template($d->{'template'});
 $d->{'id'} = &domain_id();
+$d->{'clone'} = $oldd->{'id'};
 $d->{'dom'} = $newdom;
 $d->{'owner'} = "Clone of ".($d->{'owner'} || $d->{'dom'});
 if (!$d->{'parent'}) {
