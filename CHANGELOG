@@ -1513,3 +1513,4 @@ Updated the WordPress script installer to version 4.4.1, Moodle to 3.0.2 and 2.9
 Added support for multiple hostnames and automatic renewal of Let's Encrypt certificates.
 ---- Changes since 5.01 ----
 Updated the Rails script installer to version 4.2.5.2, Drupal to 8.0.5, Django to 1.9.4, Revive AdServer to 3.2.3, FengOffice to 3.4.1, and Node.JS to 5.7.1.
+Added the generate-letsencrypt-cert API command, to request and install a cert from Let's Encrypt.
