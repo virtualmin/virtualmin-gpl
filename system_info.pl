@@ -614,7 +614,9 @@ if ($config{'docs_link'}) {
 	}
 
 # Sections defined by plugins
-foreach my $p (&list_plugin_sections()) {
+my $level = &master_admin() ? 0 :
+	    &reseller_admin() ? 2 : 1;
+foreach my $p (&list_plugin_sections($level)) {
 	push(@rv, { 'type' => 'html',
 		    'id' => 'plugin_'.$p->{'name'},
 		    'desc' => $p->{'title'},
