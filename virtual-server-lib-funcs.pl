@@ -14785,8 +14785,10 @@ if (@resels) {
 local @owners = &unique(map { $_->{'user'} } &list_domains());
 print &ui_table_row(
 	&hlink($text{'tmpl_owners'}, "template_owners"),
-	&ui_radio("owners_def", $tmpl->{'owners'} eq "*" ? 1 : 0,
+	&ui_radio("owners_def", $tmpl->{'owners'} eq "*" ? 1 :
+				$tmpl->{'owners'} eq "" ? 2 : 0,
 		  [ [ 1, $text{'tmpl_owners_all'} ],
+		    [ 2, $text{'tmpl_owners_none'} ],
 		    [ 0, $text{'tmpl_owners_sel'} ] ])."<br>\n".
 		  &ui_select("owners", [ split(/\s+/, $tmpl->{'owners'}) ],
 			     \@owners, 5, 1));
@@ -14824,8 +14826,11 @@ if (@resels) {
 	}
 
 # Save system owners
-if ($in{'owners_def'}) {
+if ($in{'owners_def'} == 1) {
 	$tmpl->{'owners'} = '*';
+	}
+elsif ($in{'owners_def'} == 2) {
+	$tmpl->{'owners'} = '';
 	}
 else {
 	$tmpl->{'owners'} = join(" ", split(/\0/, $in{'owners'}));
