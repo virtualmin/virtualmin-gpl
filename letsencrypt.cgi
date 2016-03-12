@@ -84,7 +84,7 @@ else {
 		&save_domain($od);
 		}
 
-	&release_lock_ssl();
+	&release_lock_ssl($d);
 	&$second_print($text{'setup_done'});
 
 	&run_post_actions();
