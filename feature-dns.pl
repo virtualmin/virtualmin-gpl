@@ -1545,6 +1545,19 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 		}
 	}
 
+# Make sure the domain has NS records, and that they are resolvable
+if (!$d->{'dns_submode'}) {
+	$got{'NS'} || return $text{'validate_ednsns2'};
+	foreach my $ns (map { $_->{'values'}->[0] }
+			    grep { $_->{'type'} eq 'NS' } @$recs) {
+		local ($arec) = grep { $_->{'name'} eq $ns &&
+				       ($_->{'type'} eq 'A' ||
+					$_->{'type'} eq 'AAAA') } @$recs;
+		$arec || &to_ipaddress($ns) || &to_ip6address($ns) ||
+			return &text('validate_ednsns', $ns);
+		}
+	}
+
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
     !$d->{'provision_dns'} && !$d->{'dns_submode'} && !$recsonly) {
