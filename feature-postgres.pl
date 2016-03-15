@@ -222,7 +222,7 @@ if ($pass ne $oldpass && !$_[0]->{'parent'} &&
 if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
 	# Server has been converted to a parent .. need to create user, and
 	# change database ownerships
-	local $user = $_[0]->{'postgres_user'} = &postgres_user($_[0]);
+	delete($_[0]->{'postgres_user'});
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($_[0]);
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
