@@ -3104,6 +3104,13 @@ sub can_edit_ssl
 return &master_admin() || &reseller_admin() || $access{'edit_ssl'};
 }
 
+sub can_edit_letsencrypt
+{
+return &master_admin() ||
+       &reseller_admin() && $config{'can_letsencrypt'} <= 1 ||
+       $config{'can_letsencrypt'} == 0;
+}
+
 # Returns 1 if the current user can setup bandwidth limits for a domain
 sub can_edit_bandwidth
 {

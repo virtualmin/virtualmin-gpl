@@ -32,7 +32,9 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  [ "lets", $text{'cert_tablets'}, $prog."lets" ],
+	  &can_edit_letsencrypt() ?
+		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
+		( ),
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
