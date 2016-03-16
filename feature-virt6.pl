@@ -439,6 +439,7 @@ return undef;
 # canonicalize_ip6(address)
 # Converts an address to its full long form. Ie. 2001:db8:0:f101::20 to
 # 2001:0db8:0000:f101:0000:0000:0000:0020
+# XXX call net::canonicalize_ip6 instead
 sub canonicalize_ip6
 {
 my ($addr) = @_;
