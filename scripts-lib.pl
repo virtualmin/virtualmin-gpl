@@ -1038,10 +1038,11 @@ foreach my $m (@mods) {
 		elsif ($software::update_system eq "yum" &&
 		       $fullphpver =~ /^5\.3/) {
 			# If PHP 5.3 is being used, packages may start with
-			# php53-
+			# php53- or rh-php53-
 			my @vposs = grep { /^php5-/ } @poss;
 			push(@poss, map { my $p = $_;
-					     $p =~ s/php5/php53/; $p } @vposs);
+					     $p =~ s/php5/php53/;
+					  ($p, "rh-".$p) } @vposs);
 			}
 		}
 	foreach my $pkg (@poss) {
