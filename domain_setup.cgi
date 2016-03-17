@@ -280,7 +280,7 @@ if (&supports_ip6()) {
 		}
 	else {
 		# User can select
-		($ip6, $virt6, $virtalready6, $netmask6) =
+		($ip6, $virt6, $virt6already, $netmask6) =
 			&parse_virtual_ip6($tmpl, $resel);
 		}
 	}
