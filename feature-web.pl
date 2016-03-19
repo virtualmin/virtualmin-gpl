@@ -3066,7 +3066,7 @@ return ( ) if (!$virt);
 local @rcond = &apache::find_directive("RewriteCond", $vconf);
 local @rv;
 foreach my $r (@rcond) {
-	if ($r =~ /^\%{HTTP_HOST}\s+=(\S+)/) {
+	if ($r =~ /^\%\{HTTP_HOST\}\s+=(\S+)/) {
 		push(@rv, $1);
 		}
 	}
