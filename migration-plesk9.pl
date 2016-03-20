@@ -194,7 +194,11 @@ local ($wwwcid) = grep { $_->{'type'} eq 'docroot' } @$cids;
 if ($domain->{'www'} eq 'true' || $wwwcid) {
 	push(@got, "web");
 	}
-if ($domain->{'properties'}->{'ip'}->{'ip-type'} eq 'exclusive' && $ipinfo->{'virt'}) {
+my $ip = $domain->{'properties'}->{'ip'};
+if (ref($ip) eq 'ARRAY') {
+	($ip) = grep { &check_ipaddress($_->{'ip-address'}) } @$ip;
+	}
+if ($ip->{'ip-type'} eq 'exclusive' && $ipinfo->{'virt'}) {
 	push(@got, "ssl");
 	}
 if (($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' || $windows) && &indexof("web", @got) >= 0) {
@@ -404,7 +408,7 @@ if ($cids) {
 	}
 
 # Re-create DNS records
-local $oldip = $domain->{'properties'}->{'ip'}->{'ip-address'};
+local $oldip = $ip->{'ip-address'};
 if ($got{'dns'}) {
 	&$first_print("Copying and fixing DNS records ..");
 	local $zonexml = $domain->{'properties'}->{'dns-zone'};
