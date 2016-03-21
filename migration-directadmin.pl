@@ -162,6 +162,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'no_mysql_db', $got{'mysql'} ? 1 : 0,
 	 'nocreationmail', 1,
 	 'nocopyskel', 1,
+	 'nocreationscripts', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
         );
 $dom{'home'} = &server_home_directory(\%dom, $parent);
