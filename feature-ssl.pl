@@ -819,6 +819,14 @@ if ($virt) {
 		&copy_source_dest_as_domain_user($_[0], "$_[1]_key", $key);
 		&unlock_file($key);
 		}
+	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
+	if ($ca && -r "$_[1]_ca") {
+		&lock_file($ca);
+		&set_ownership_permissions(
+			$_[0]->{'uid'}, undef, undef, "$_[1]_ca");
+		&copy_source_dest_as_domain_user($_[0], "$_[1]_ca", $ca);
+		&unlock_file($ca);
+		}
 
 	# Re-setup any SSL passphrase
 	&save_domain_passphrase($_[0]);
