@@ -41,8 +41,7 @@ else {
 					$dnames[0], $phd);
 	}
 if (!$ok) {
-	&$second_print(&text('letsencrypt_failed',
-			     "<pre>".&html_escape($cert)."</pre>"));
+	&$second_print(&text('letsencrypt_failed', $cert));
 	}
 else {
 	&$second_print($text{'letsencrypt_done'});
