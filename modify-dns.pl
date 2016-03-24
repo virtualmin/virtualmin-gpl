@@ -477,7 +477,7 @@ print "                     [--dmarc-policy none|quarantine|reject]\n";
 print "                     [--dmarc-percent number]\n";
 print "                     [--add-record \"name type value\"]\n";
 print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
-print "                     [--remove-record \"name type [value]\"]\n";
+print "                     [--remove-record \"name type value\"]\n";
 print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
