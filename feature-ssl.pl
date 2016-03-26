@@ -602,8 +602,13 @@ if ($key && !-r $key) {
 	return &text('validate_esslkeyfile', "<tt>$key</tt>");
 	}
 
-# Make sure this domain or www.domain matches cert
-if (!&check_domain_certificate($d->{'dom'}, $d)) {
+# Make sure this domain or www.domain matches cert. Include aliases, because
+# in some cases the alias may be the externally visible domain
+my $match = 0;
+foreach my $cd ($d, &get_domain_by("alias", $d->{'id'})) {
+	$match++ if (&check_domain_certificate($cd->{'dom'}, $d));
+	}
+if (!$match) {
 	return &text('validate_essldom',
 		     "<tt>".$d->{'dom'}."</tt>",
 		     "<tt>"."www.".$d->{'dom'}."</tt>",
