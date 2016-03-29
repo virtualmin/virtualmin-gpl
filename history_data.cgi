@@ -38,22 +38,47 @@ $first = $infomap{$stats[0]};
 
 print "Content-type: text/plain\n\n";
 $maxes = &get_historic_maxes();
-for($i=0; $i<scalar(@$first); $i++) {
-	@values = ( );
+if ($in{'json'}) {
+	# One block per stat
+	print "[\n";
+	$j = 0;
 	foreach $stat (@stats) {
-		$v = $infomap{$stat}->[$i]->[1];
-		if ($in{'nice'}) {
-			$fmt = &historic_stat_info($stat, $maxes);
-			$v /= $fmt->{'scale'} if ($fmt && $fmt->{'scale'});
+		$color = $historic_graph_colors[
+				$j % scalar(@historic_graph_colors)];
+		$sttxt = $text{'history_stat_'.$stat};
+		@data = ( );
+		for($i=0; $i<scalar(@$first); $i++) {
+			$v = $infomap{$stat}->[$i]->[1];
+			$v = &make_nice_value($v, $stat, $maxes);
+			push(@data, "{ time: ".$first->[$i]->[0].", ".
+				    "value: ".$v." },");
 			}
-		if ($v ne int($v)) {
-			# Two decimal places only
-			$v = sprintf("%.2f", $v);
+		print "  {\n";
+		print "    color: \"$color\",\n";
+		print "    name: \"$sttxt\",\n";
+		print "    data: [\n";
+		foreach $data (@data) {
+			print "      $data\n";
 			}
-		push(@values, $v);
+		print "    ],\n";
+		print "  },\n";
+		$j++;
 		}
-	print strftime("%Y-%m-%d %H:%M:%S", localtime($first->[$i]->[0])),",",
-	      join(",", @values),"\n";
+	print "]\n";
+	}
+else {
+	# One row per timestamp
+	for($i=0; $i<scalar(@$first); $i++) {
+		@values = ( );
+		foreach $stat (@stats) {
+			$v = $infomap{$stat}->[$i]->[1];
+			push(@values, &make_nice_value($v, $stat, $maxes));
+			push(@values, $v);
+			}
+		print strftime("%Y-%m-%d %H:%M:%S",
+			       localtime($first->[$i]->[0])),",",
+		      join(",", @values),"\n";
+		}
 	}
 
 # compute_average_gap(&info-list)
@@ -74,4 +99,18 @@ if ($totalcount) {
 	return $totalgap / $totalcount;
 	}
 return 5*60;
+}
+
+sub make_nice_value
+{
+local ($v, $stat, $maxes) = @_;
+if ($in{'nice'}) {
+	$fmt = &historic_stat_info($stat, $maxes);
+	$v /= $fmt->{'scale'} if ($fmt && $fmt->{'scale'});
+	}
+if ($v ne int($v)) {
+	# Two decimal places only
+	$v = sprintf("%.2f", $v);
+	}
+return $v;
 }
