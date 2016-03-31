@@ -815,6 +815,7 @@ DOMAIN: foreach $d (@$doms) {
 		&uncat_file($infotemp, &serialise_variable($binfo));
 		local $domtemp = &transname();
 		&uncat_file($domtemp, &serialise_variable($bdom));
+		local $done_transferred_sz = 0;
 		foreach my $desturl (@$desturls) {
 			local ($mode, $user, $pass, $server, $path, $port) =
 				&parse_backup_url($desturl);
@@ -957,7 +958,7 @@ DOMAIN: foreach $d (@$doms) {
 			else {
 				&$second_print($text{'setup_done'});
 				local @tst = stat("$dest/$df");
-				if ($mode != 0) {
+				if ($mode != 0 && !$done_transferred_sz++) {
 					$transferred_sz += $tst[7];
 					}
 				if ($asd && $mode != 0) {
