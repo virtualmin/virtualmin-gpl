@@ -60,6 +60,10 @@ if ($format && !defined($in{'simple-multiline'})) {
 @args = ( );
 foreach $iv (@in) {
 	($i, $v) = split(/=/, $iv, 2);
+	$i =~ tr/\+/ /;
+	$v =~ tr/\+/ /;
+	$i =~ s/%(..)/pack("c",hex($1))/ge;
+	$v =~ s/%(..)/pack("c",hex($1))/ge;
 	next if ($i eq "program" || $i eq $format);
 	if ($v eq "") {
 		push(@args, "--$i");
