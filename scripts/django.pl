@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "1.9.4", "1.7.11", "1.4.22" );
+return ( "1.9.5", "1.7.11", "1.4.22" );
 }
 
 sub script_django_can_upgrade
@@ -91,6 +91,11 @@ $apache::httpd_modules{'mod_fcgid'} ||
 	push(@rv, "Apache does not have the mod_fcgid module");
 $apache::httpd_modules{'mod_rewrite'} || $got_rewrite ||
 	push(@rv, "Apache does not have the mod_rewrite module");
+
+if ($ver >= 1.9 && !defined(&allocate_mongrel_port)) {
+	push(@rv, "Your Virtualmin version does not support proxying");
+	}
+
 return @rv;
 }
 
@@ -239,7 +244,7 @@ $err && return (0, "Failed to extract Django source : $err");
 
 # Stop running server if upgrading
 if ($upgrade) {
-	&script_nodejs_stop_server($d, $opts);
+	&script_django_stop_server($d, $opts);
 	}
 
 # Install to target dir
@@ -494,7 +499,7 @@ if ($ver < 1.9) {
 		}
 	}
 else {
-	# Django 1.9+ use a server process
+	# Django 1.9+ uses a server process
 	my $port;
 	if ($upgrade) {
 		$port = $opts->{'port'};
@@ -636,7 +641,7 @@ sub script_django_passmode
 return 1;
 }
 
-# script_nodejs_stop(&domain, &sinfo)
+# script_django_stop(&domain, &sinfo)
 # Stop running django webserver, and delete init script
 sub script_django_stop
 {
