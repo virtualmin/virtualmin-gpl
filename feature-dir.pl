@@ -663,7 +663,8 @@ if (!-e $d->{'home'}) {
 # Turn off quotas for the domain, to prevent the import failing
 &disable_quotas($d);
 
-local ($out, $err);
+local $outfile = &transname();
+local $errfile = &transname();
 local $cf = &compression_format($file, $key);
 local $q = quotemeta($file);
 local $qh = quotemeta($d->{'home'});
@@ -677,7 +678,7 @@ else {
 if ($cf == 4) {
 	# Unzip command does un-compression and un-archiving
 	# XXX ZIP doesn't support excludes of paths :-(
-	&execute_command("cd $qh && unzip -o $q", undef, \$out, \$out);
+	&execute_command("cd $qh && unzip -o $q", undef, $outfile, $outfile);
 	}
 else {
 	local $comp = $cf == 1 ? "gunzip -c" :
@@ -690,8 +691,10 @@ else {
 		# from being written to by tar
 		$tarcmd = &command_as_user($d->{'user'}, 0, $tarcmd);
 		}
-	&execute_command("cd $qh && $reader | $tarcmd", undef, \$out, \$err);
+	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
+local $out = &read_file_contents($outfile);
+local $err = &read_file_contents($errfile);
 local $ex = $?;
 &enable_quotas($d);
 if ($ex) {
