@@ -1007,8 +1007,9 @@ elsif (!$_[0]->{'dns'} && $_[1]->{'dns'}) {
 if ($config{'mail_autoconfig'} &&
     &domain_has_website($_[0]) && !$_[0]->{'alias'} &&
     $_[0]->{'dns'} && !$_[1]->{'dns'}) {
-	local $autoconfig = &get_autoconfig_hostname($_[0]);
-	&enable_dns_autoconfig($_[0], $autoconfig);
+	foreach my $autoconfig (&get_autoconfig_hostname($_[0])) {
+		&enable_dns_autoconfig($_[0], $autoconfig);
+		}
 	}
 
 # Update any outgoing IP mapping
@@ -5887,7 +5888,7 @@ my ($d) = @_;
 sub get_autoconfig_hostname
 {
 local ($d) = @_;
-return "autoconfig.".$d->{'dom'};
+return ( "autoconfig.".$d->{'dom'}, "autodiscover.".$d->{'dom'} );
 }
 
 # enable_email_autoconfig(&domain)
@@ -5897,7 +5898,7 @@ return "autoconfig.".$d->{'dom'};
 sub enable_email_autoconfig
 {
 local ($d) = @_;
-local $autoconfig = &get_autoconfig_hostname($d);
+local @autoconfig = &get_autoconfig_hostname($d);
 
 # Work out IMAP server port and mode
 local $imap_host = "mail.$d->{'dom'}";
@@ -6082,18 +6083,21 @@ elsif ($p) {
 		$found++;
 
 		# Add ServerAlias
-		local @sa = &apache::find_directive("ServerAlias", $vconf);
-		local $found;
-		foreach my $sa (@sa) {
-			local @saw = split(/\s+/, $sa);
-			$found++ if (&indexoflc($autoconfig, @saw) >= 0);
-			}
-		if (!$found) {
-			push(@sa, $autoconfig);
-			&apache::save_directive("ServerAlias", \@sa,
-						$vconf, $conf);
-			&flush_file_lines($virt->{'file'});
-			$any++;
+		foreach my $autoconfig (@autoconfig) {
+			local @sa = &apache::find_directive(
+					"ServerAlias", $vconf);
+			local $found;
+			foreach my $sa (@sa) {
+				local @saw = split(/\s+/, $sa);
+				$found++ if (&indexoflc($autoconfig,@saw) >= 0);
+				}
+			if (!$found) {
+				push(@sa, $autoconfig);
+				&apache::save_directive("ServerAlias", \@sa,
+							$vconf, $conf);
+				&flush_file_lines($virt->{'file'});
+				$any++;
+				}
 			}
 
 		# Add redirect to thunderbird CGI
@@ -6144,8 +6148,10 @@ elsif ($p) {
 
 if ($d->{'dns'}) {
 	# Add DNS entry
-	my $err = &enable_dns_autoconfig($d, $autoconfig);
-	return $err if ($err);
+	foreach my $autoconfig (@autoconfig) {
+		my $err = &enable_dns_autoconfig($d, $autoconfig);
+		return $err if ($err);
+		}
 	}
 
 return undef;
@@ -6204,7 +6210,7 @@ return undef;
 sub disable_email_autoconfig
 {
 local ($d) = @_;
-local $autoconfig = &get_autoconfig_hostname($d);
+local @autoconfig = &get_autoconfig_hostname($d);
 
 # Remove ServerAlias and redirect if they exist
 local $p = &domain_has_website($d);
@@ -6220,31 +6226,33 @@ elsif ($p) {
 	local @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	local $any;
-	local $found;
+	local $foundvirt;
 	foreach my $p (@ports) {
 		local ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
-		$found++;
+		$foundvirt++;
 
 		# Remove ServerAlias
-		local @sa = &apache::find_directive("ServerAlias", $vconf);
-		local $found;
-		foreach my $sa (@sa) {
-			local @saw = split(/\s+/, $sa);
-			local $idx = &indexoflc($autoconfig, @saw);
-			if ($idx >= 0) {
-				splice(@saw, $idx, 1);
-				$sa = join(" ", @saw);
-				$found++;
+		foreach my $autoconfig (@autoconfig) {
+			local @sa = &apache::find_directive("ServerAlias", $vconf);
+			local $found;
+			foreach my $sa (@sa) {
+				local @saw = split(/\s+/, $sa);
+				local $idx = &indexoflc($autoconfig, @saw);
+				if ($idx >= 0) {
+					splice(@saw, $idx, 1);
+					$sa = join(" ", @saw);
+					$found++;
+					}
 				}
-			}
-		if ($found) {
-			@sa = grep { $_ ne "" } @sa;
-			&apache::save_directive("ServerAlias", \@sa,
-						$vconf, $conf);
-			&flush_file_lines($virt->{'file'});
-			$any++;
+			if ($found) {
+				@sa = grep { $_ ne "" } @sa;
+				&apache::save_directive("ServerAlias", \@sa,
+							$vconf, $conf);
+				&flush_file_lines($virt->{'file'});
+				$any++;
+				}
 			}
 
 		# Remove redirect to CGI for Thunderbird
@@ -6285,28 +6293,31 @@ elsif ($p) {
 	if ($any) {
 		&register_post_action(\&restart_apache);
 		}
-	$found || return "No Apache virtual hosts for $d->{'dom'} found";
+	$foundvirt || return "No Apache virtual hosts for $d->{'dom'} found";
 	}
 
 if ($d->{'dns'}) {
 	# Remove DNS entry
 	&obtain_lock_dns($d);
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
-	$autoconfig .= ".";
-	if ($file) {
-		local $changed = 0;
-		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig }
+	if (!$file) {
+		&release_lock_dns($d);
+		return "No DNS zone for $d->{'dom'} found";
+		}
+	local $changed = 0;
+	foreach my $autoconfig (@autoconfig) {
+		$autoconfig_dot = $autoconfig.".";
+		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig_dot }
 					    @$recs)) {
 			&bind8::delete_record($file, $r);
 			$changed++;
 			}
-		if ($changed) {
-			my $err = &post_records_change($d, $recs, $file);
-			&register_post_action(\&restart_bind, $d);
-			}
+		}
+	if ($changed) {
+		my $err = &post_records_change($d, $recs, $file);
+		&register_post_action(\&restart_bind, $d);
 		}
 	&release_lock_dns($d);
-	$file || return "No DNS zone for $d->{'dom'} found";
 	}
 return undef;
 }
