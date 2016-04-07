@@ -1514,3 +1514,4 @@ Added support for multiple hostnames and automatic renewal of Let's Encrypt cert
 ---- Changes since 5.01 ----
 Updated the Rails script installer to version 4.2.5.2, Drupal to 8.0.5, Django to 1.9.5, Revive AdServer to 3.2.4, FengOffice to 3.4.1, Dolibarr to 3.9.0, Moodle to 3.0.3 and 2.9.5, ZenPhoto to 1.4.12, ownCloud to 7.0.13, phpMyAdmin to 4.6.0, Joomla to 3.5.0, Pydio to 6.4.0, and Node.JS to 5.10.1.
 Added the generate-letsencrypt-cert API command, to request and install a cert from Let's Encrypt.
+Fixed support for mail server settings autodiscovery for Outlook clients.
