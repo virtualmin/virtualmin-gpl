@@ -1942,7 +1942,16 @@ if ($changed) {
 sub get_hostnames_for_ssl
 {
 my ($d) = @_;
-my @rv = ( $d->{'dom'}, "www.".$d->{'dom'} );
+my @rv = ( $d->{'dom'} );
+my $www = "www.".$d->{'dom'};
+if ($d->{'dns'}) {
+	my $recs = &get_domain_dns_records($d);
+	my ($r) = grep { $_->{'name'} eq $www."." } @$recs;
+	push(@rv, $www);
+	}
+elsif (&to_ipaddress($www)) {
+	push(@rv, $www);
+	}
 return @rv;
 }
 
