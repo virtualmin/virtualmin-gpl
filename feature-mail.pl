@@ -5984,7 +5984,8 @@ foreach my $l (@$lref) {
 		$l = "#!".&get_perl_path();
 		}
 	elsif ($l =~ /^\$OWNER\s+=/) {
-		$l = "\$OWNER = \"".quotemeta($d->{'owner'})."\";";
+		$l = "\$OWNER = \"".
+		     quotemeta(&html_escape($d->{'owner'}))."\";";
 		}
 	elsif ($l =~ /^\$USER\s+=/ && !$d->{'parent'}) {
 		$l = "\$USER = '$d->{'user'}';";
