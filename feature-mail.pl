@@ -6110,7 +6110,9 @@ elsif ($p) {
 				}
 			}
 		if (!$found_thunderbird) {
-			push(@rd, "/mail/config-v1.1.xml ".
+			my $ac = "/mail/config-v1.1.xml";
+			push(@rd, $ac." /cgi-bin/autoconfig.cgi");
+			push(@rd, "/.well-known/autoconfig".$ac." ".
 				  "/cgi-bin/autoconfig.cgi");
 			&apache::save_directive("Redirect", \@rd,
 						$vconf, $conf);
@@ -6259,15 +6261,15 @@ elsif ($p) {
 		# Remove redirect to CGI for Thunderbird
 		local ($found_thunderbird, $found_outlook);
 		local @rd = &apache::find_directive("Redirect", $vconf);
+		local @newrd = @rd;
 		foreach my $rd (@rd) {
-			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
-				@rd = grep { $_ ne $rd } @rd;
+			if ($rd =~ /^(\/.well-known\/autoconfig)?\/mail\/config-v1.1.xml\s/) {
+				@newrd = grep { $_ ne $rd } @newrd;
 				$found_thunderbird++;
-				last;
 				}
 			}
 		if ($found_thunderbird) {
-			&apache::save_directive("Redirect", \@rd,
+			&apache::save_directive("Redirect", \@newrd,
 						$vconf, $conf);
 			}
 
