@@ -335,6 +335,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
 		}
+	elsif ($a eq "--letsencrypt") {
+		$letsencrypt = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -733,6 +736,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'nosecondaries', $nosecondaries,
 	 'subprefix', $subprefix,
 	 'hashpass', $hashpass,
+	 'auto_letsencrypt', $letsencrypt,
         );
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
@@ -915,6 +919,7 @@ foreach $f (&list_feature_plugins()) {
 		}
 	}
 print "                        [--skip-warnings]\n";
+print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
 exit(1);
 }
