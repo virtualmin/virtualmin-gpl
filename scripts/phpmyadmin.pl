@@ -231,6 +231,12 @@ local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
 local $dbhost = &get_database_host("mysql");
 
+# Delete old files known to be obsolete
+if ($upgrade && $ver >= 4) {
+	&unlink_file_as_domain_user($d, "$opts->{'dir'}/main.php");
+	&unlink_file_as_domain_user($d, "$opts->{'dir'}/libraries/header_http.inc.php");
+	}
+
 # Extract tar file to temp dir and copy to target
 local $verdir = &compare_versions($ver, "2.9.1.1") >= 0 ?
 	"phpMyAdmin-$ver-*" : "phpMyAdmin-$ver";
