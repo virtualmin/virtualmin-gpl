@@ -2463,6 +2463,7 @@ local ($size) = @_;
 my $myver = &mysql::get_mysql_version();
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
+my $tc = &compare_versions($myver, "5.7") < 0;
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
 		[ "max_allowed_packet", "1M" ],
@@ -2523,7 +2524,7 @@ elsif ($size eq "large") {
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
 		[ "query_cache_size", "16M" ],
-		[ "thread_concurrency", "8" ],
+		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "128M", "isamchk" ],
 		[ "sort_buffer_size", "128M", "isamchk" ],
@@ -2547,7 +2548,7 @@ elsif ($size eq "huge") {
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
 		[ "query_cache_size", "32M" ],
-		[ "thread_concurrency", "8" ],
+		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "256M", "isamchk" ],
 		[ "sort_buffer_size", "256M", "isamchk" ],
