@@ -165,7 +165,7 @@ else {
 		    join(",", map { $_."=".$options{$f}->{$_} }
 				  keys %{$options{$f}});
 		}
-	if (scalar(@vbs) && &can_backup_virtualmin()) {
+	if (&can_backup_virtualmin()) {
 		$sched->{'virtualmin'} = join(" ", @vbs);
 		}
 	$sched->{'enabled'} = $in{'enabled'};
