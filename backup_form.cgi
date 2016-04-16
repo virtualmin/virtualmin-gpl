@@ -150,7 +150,6 @@ foreach $f (&list_backup_plugins()) {
 		}
 	$ftable .= "<br>\n";
 	}
-$ftable .= &ui_links_row(\@links);
 print &ui_table_row(&hlink($text{'backup_features'}, "backup_features"),
 		    $ftable);
 
