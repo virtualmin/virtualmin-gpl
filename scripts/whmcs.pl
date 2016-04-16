@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "5.2.15" );
+return ( "6.3.0" );
 }
 
 sub script_whmcs_gpl
@@ -361,17 +361,18 @@ if (!$upgrade) {
 	if ($err) {
 		return (-1, "Failed to fetch system check page : $err");
 		}
-	elsif ($out !~ /Continue/) {
+	elsif ($out !~ /Continue|Begin\s+Installation/i) {
 		return (-1, "System check failed");
 		}
 
 	# Post to DB setup page
 	local @params = (
-		[ "licensekey", $opts->{'licensekey'} ],
-		[ "dbhost", $dbhost ],
-		[ "dbname", $dbname ],
-		[ "dbusername", $dbuser ],
-		[ "dbpassword", $dbpass ],
+		[ "licenseKey", $opts->{'licensekey'} ],
+		[ "databaseHost", $dbhost ],
+		[ "databasePort", 3306 ],
+		[ "databaseUsername", $dbuser ],
+		[ "databasePassword", $dbpass ],
+		[ "databaseName", $dbname ],
 		);
 	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
 	local ($out, $err);
@@ -387,12 +388,16 @@ if (!$upgrade) {
 	local $firstname = $d->{'owner'};
 	$firstname =~ s/\s.*$//;
 	$firstname =~ s/['"]//g;
+	if (length($dompass) <= 5) {
+		$dompass .= "12345";
+		}
 	local @params = (
-		[ "firstname", $firstname ],
-		[ "lastname", "" ],
+		[ "firstName", $firstname ],
+		[ "lastName", "Virtualmin" ],
 		[ "email", $d->{'emailto_addr'} ],
 		[ "username", $domuser ],
 		[ "password", $dompass ],
+		[ "confirmPassword", $dompass ],
 		);
 	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
 	local ($out, $err);
@@ -461,7 +466,7 @@ sub script_whmcs_uninstall
 local ($d, $version, $opts) = @_;
 
 # Remove tbl* tables from the database
-&cleanup_script_database($d, $opts->{'db'}, "tbl");
+&cleanup_script_database($d, $opts->{'db'}, "(tbl|mod_)");
 
 # Delete the cron job
 &delete_script_wget_job($d, $sinfo->{'url'}."admin/cron.php");
