@@ -47,7 +47,7 @@ $ipinfo = { };
 	&parse_virtual_ip($tmpl, $parent ? $parent->{'reseller'} :
 				 &reseller_admin() ? $base_remote_user : undef);
 if (&supports_ip6()) {
-	($ipinfo->{'ip6'}, $ipinfo->{'virt6'}, $ipinfo->{'virtalready6'},
+	($ipinfo->{'ip6'}, $ipinfo->{'virt6'}, $ipinfo->{'virt6already'},
 	 $ipinfo->{'netmask6'}) =
 		&parse_virtual_ip6($tmpl, $parent ? $parent->{'reseller'} :
 					 &reseller_admin() ? $base_remote_user : undef);

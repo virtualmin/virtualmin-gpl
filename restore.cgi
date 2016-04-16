@@ -131,12 +131,12 @@ if ($crmode == 1) {
 		}
 	if (&can_select_ip6() && &supports_ipv6() && $in{'virt6'} != -1) {
 		# Different IPv6 address selected
-		($ip6, $virt6, $virtalready6, $netmask6) =
+		($ip6, $virt6, $virt6already, $netmask6) =
 			&parse_virtual_ip6($tmpl, undef);
 		$ipinfo->{'ip6'} = $ip6;
 		$ipinfo->{'virt6'} = $virt6;
 		$ipinfo->{'mode6'} = $in{'virt6'};
-		$ipinfo->{'virtalready6'} = $virtalready6;
+		$ipinfo->{'virt6already'} = $virt6already;
 		$ipinfo->{'netmask6'} = $netmask6;
 		}
 	}

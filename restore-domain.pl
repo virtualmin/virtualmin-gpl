@@ -246,7 +246,7 @@ while(@ARGV > 0) {
 		  &usage("$sharedip is not in the shared IPv6 addresses list");
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 0, 'ip6' => $sharedip6,
-			    'virtalready6' => 0, 'mode6' => 3 };
+			    'virt6already' => 0, 'mode6' => 3 };
 		}
 	elsif ($a eq "--ip6") {
 		$ip6 = shift(@ARGV);
@@ -255,14 +255,14 @@ while(@ARGV > 0) {
 			&usage("IPv6 address is already in use");
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
-			    'virtalready6' => 0, 'mode6' => 1 };
+			    'virt6already' => 0, 'mode6' => 1 };
 		}
 	elsif ($a eq "--allocate-ip6") {
 		$tmpl = &get_template(0);
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
-			    'virtalready6' => 0, 'netmask6' => $netmask6,
+			    'virt6already' => 0, 'netmask6' => $netmask6,
 			    'mode6' => 2 };
 		}
 	elsif ($a eq "--original-ip6") {
@@ -270,7 +270,7 @@ while(@ARGV > 0) {
 		($ip6, $netmask6) = &free_ip6_address($tmpl);
 		$ipinfo = { %$ipinfo,
 			    'virt6' => 1, 'ip6' => $ip6,
-			    'virtalready6' => 0, 'netmask6' => $netmask6,
+			    'virt6already' => 0, 'netmask6' => $netmask6,
 			    'mode6' => 5 };
 		}
 

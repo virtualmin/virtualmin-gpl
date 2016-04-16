@@ -2514,7 +2514,7 @@ if ($ok) {
 						if ($continue) { next DOMAIN; }
 						else { last DOMAIN; }
 						}
-					$d->{'virtalready6'} = 0;
+					$d->{'virt6already'} = 0;
 					if (&ip_within_ranges(
 					      $d->{'ip6'}, $tmpl->{'ranges6'}) &&
 					    !$taken{$d->{'ip6'}} &&
@@ -2558,7 +2558,7 @@ if ($ok) {
 				# Use IPv6 specified on backup form
 				$d->{'ip6'} = $ipinfo->{'ip6'};
 				$d->{'virt6'} = $ipinfo->{'virt6'};
-				$d->{'virtalready6'} = $ipinfo->{'virtalready6'};
+				$d->{'virt6already'} = $ipinfo->{'virt6already'};
 				$d->{'netmask6'} = $netmaskinfo->{'netmask6'};
 				if ($ipinfo->{'mode'} == 2) {
 					# Re-allocate an IP, as we might be
@@ -5150,7 +5150,7 @@ $d->{'name'} = !$ipinfo->{'virt'};
 if ($ipinfo->{'ip6'}) {
 	$d->{'virt6'} = $ipinfo->{'virt6'};
 	$d->{'ip6'} = $ipinfo->{'ip6'};
-	$d->{'virtalready6'} = $ipinfo->{'virtalready6'};
+	$d->{'virt6already'} = $ipinfo->{'virt6already'};
 	$d->{'netmask6'} = $ipinfo->{'netmask6'};
 	$d->{'name6'} = !$ipinfo->{'virt6'};
 	}

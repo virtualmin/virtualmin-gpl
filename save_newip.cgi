@@ -132,7 +132,7 @@ elsif ($in{'mode6'} == 0) {
 elsif ($in{'mode6'} == 1) {
 	# Sticking with private IP
 	$ip6 = $d->{'ip6'};
-	$virtalready6 = $d->{'virtalready6'};
+	$virt6already = $d->{'virt6already'};
 	$virt6 = 1;
 	}
 elsif ($in{'mode6'} == 2) {
@@ -151,20 +151,20 @@ elsif ($in{'mode6'} == 2) {
 		&error(&text('setup_evirt6alloc3'));
 		}
 	$virt6 = 1;
-	$virtalready6 = 0;
+	$virt6already = 0;
 	}
 elsif ($in{'mode6'} == 3) {
 	# Validate manually entered IP
 	$ip6 = $in{'virt6'};
-	$virtalready6 = $in{'virtalready6'};
+	$virt6already = $in{'virt6already'};
 	&check_ip6address($ip6) ||
 		&error($text{'setup_eip6'});
 	$clash = &check_virt6_clash($ip6);
-	if (!$virtalready6) {
+	if (!$virt6already) {
 		# Make sure the IPv6 address isn't assigned yet
 		$clash && &error(&text('setup_evirt6clash'));
 		}
-	elsif ($virtalready6) {
+	elsif ($virt6already) {
 		# Make sure the IP is assigned already, but
 		# not to any domain
 		$clash || &error(&text('setup_evirt6clash2', $ip6));
@@ -265,7 +265,7 @@ elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 	# Changing private IPv6 address
 	$d->{'ip6'} = $ip6;
 	$d->{'netmask6'} = $netmask6;
-	$d->{'virtalready6'} = $virtalready6;
+	$d->{'virt6already'} = $virt6already;
 	}
 
 # Update for web ports

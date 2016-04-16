@@ -124,7 +124,7 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 	# already active
 	push(@opts, [ 3, $text{'newip_virtaddr3'},
 		      &ui_textbox("virt6", undef, 40)." ".
-		      &ui_checkbox("virtalready6", 1,
+		      &ui_checkbox("virt6already", 1,
 				   $text{'form_virtalready'}) ]);
 
 	# Show new IPv6 field

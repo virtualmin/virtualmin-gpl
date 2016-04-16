@@ -209,7 +209,7 @@ if ($anychoose) {
 	# Can enter arbitrary IP
 	push(@opts, [ 1, $text{'form_vip'},
 		 &ui_textbox("ip6", undef, 40)." ".
-		 &ui_checkbox("virtalready6", 1,
+		 &ui_checkbox("virt6already", 1,
 			      $text{'form_virtalready'}) ]);
 	}
 if ($anyzone) {
@@ -272,7 +272,7 @@ elsif ($in{'virt6'} == 1) {
 	$tmpl->{'ranges6'} eq "none" || &error(&text('setup_evirttmpl2'));
 	&check_ip6address($in{'ip6'}) || &error($text{'setup_eip'});
 	local $clash = &check_virt6_clash($in{'ip6'});
-	if ($in{'virtalready6'}) {
+	if ($in{'virt6already'}) {
 		# Fail if the IP isn't yet active, or if claimed by another
 		# virtual server
 		$clash || &error(&text('setup_evirtclash2', $in{'ip6'}));
@@ -284,7 +284,7 @@ elsif ($in{'virt6'} == 1) {
 		# Fail if the IP *is* already active
 		$clash && &error(&text('setup_evirtclash'));
 		}
-	return ($in{'ip6'}, 1, $in{'virtalready6'});
+	return ($in{'ip6'}, 1, $in{'virt6already'});
 	}
 elsif ($in{'virt6'} == 3 && &can_edit_sharedips()) {
 	# On a shared virtual IP
