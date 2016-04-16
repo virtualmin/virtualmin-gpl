@@ -36,7 +36,7 @@ else {
 		$mleft == 0 && &error($text{'alias_ealiaslimit'});
 		}
 	if (!$in{$sfx.'name_def'}) {
-		my $nerr = &valid_mailbox_name($in{$sfx.'name'});
+		my $nerr = &valid_alias_name($in{$sfx.'name'});
 		if ($nerr || $in{$sfx.'name'} =~ /\@/) {
 			&error($text{'alias_ename'});
 			}

@@ -76,6 +76,8 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 $d->{'mail'} || usage("Virtual server $domain does not have email enabled");
 $from =~ /\@/ && &usage("No domain name is needed in the --from parameter");
+$err = &valid_alias_name($from);
+$err && &usage("Invalid alias name : $err");
 $d->{'aliascopy'} && &usage("Aliases cannot be edited in alias domains in copy mode");
 
 # Check for clash

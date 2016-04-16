@@ -3586,19 +3586,30 @@ else {
 	}
 }
 
+# valid_alias_name(name)
+# Returns an error message if an alias name contains bogus characters
+sub valid_alias_name
+{
+local ($name) = @_;
+if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/) {
+	return $text{'user_euser'};
+	}
+return undef;
+}
+
 # valid_mailbox_name(name)
-# Returns an error message if a mailbox name contains bogus characters
+# Returns an error message if a mailbox name contains bogus characters, or uses
+# a reserved name
 sub valid_mailbox_name
 {
 local ($name) = @_;
 &require_useradmin();
-if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/) {
-	return $text{'user_euser'};
-	}
+local $err = &valid_alias_name($name);
+return $err if ($err);
 if ($name eq "domains" || $name eq "logs" || $name eq "virtualmin-backup") {
 	return &text('user_ereserved', $name);
 	}
-local $err = &useradmin::check_username_restrictions($name);
+$err = &useradmin::check_username_restrictions($name);
 if ($err) {
 	return $err;
 	}
