@@ -367,6 +367,7 @@ if (defined(&set_php_wrappers_writable)) {
 	&set_php_wrappers_writable(\%dom, 1);
 	}
 local $hdir = &public_html_dir(\%dom);
+local $phdir = $hdir;
 if ($cids) {
 	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
 	local $user_data_files = &extract_plesk9_cid($root, $cids, "user-data");
@@ -934,10 +935,20 @@ foreach my $sdom (keys %$subdoms) {
 	local $cids = $subdom->{'phosting'}->{'content'}->{'cid'} ||
 		      $subdom->{'content'}->{'cid'};
 	local $docroot_files = &extract_plesk9_cid($root, $cids, "docroot");
+	local $wwwroot = $subdom->{'phosting'}->{'www-root'};
+	$wwwroot =~ s/^.*\///;
 	if ($docroot_files) {
 		&$first_print(
 			"Copying web pages for sub-domain $subd{'dom'} ..");
 		&copy_source_dest($docroot_files, $hdir);
+		&set_home_ownership(\%subd);
+		&$second_print(".. done");
+		}
+	elsif ($wwwroot && -d "$phdir/$wwwroot") {
+		&$first_print(
+			"Moving web pages for sub-domain $subd{'dom'} ..");
+		&unlink_file_as_domain_user(\%subd, $hdir);
+		&rename_as_domain_user(\%subd, "$phdir/$wwwroot", $hdir);
 		&set_home_ownership(\%subd);
 		&$second_print(".. done");
 		}
