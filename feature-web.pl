@@ -454,6 +454,28 @@ if (!$virt) {
 	}
 &obtain_lock_web($d);
 
+# Fix up all the Apache directives
+&clone_web_domain($oldd, $d, $ovirt, $virt, $d->{'web_port'});
+
+# Update cached public_html and CGI dirs, re-create PHP wrappers with new home
+&link_apache_logs($d);
+&find_html_cgi_dirs($d);
+if (defined(&create_php_wrappers)) {
+	&create_php_wrappers($d);
+	}
+
+&release_lock_web($d);
+&register_post_action(\&restart_apache);
+&$second_print($text{'setup_done'});
+return 1;
+}
+
+# clone_web_domain(&old-vhost, &vhost, &old-domain, &domain, port)
+# Copies across and fixes Apache directives for some vhost when cloning
+sub clone_web_domain
+{
+local ($oldd, $d, $ovirt, $virt, $port) = @_;
+
 # Splice across directives, fixing ServerName so that get_apache_virtual works
 local $olref = &read_file_lines($ovirt->{'file'});
 local $lref = &read_file_lines($virt->{'file'});
@@ -466,11 +488,12 @@ foreach my $l (@lines) {
 splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
 &flush_file_lines($virt->{'file'});
 undef(@apache::get_config_cache);
-($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 
 # Fix home dir
 &modify_web_home_directory($d, $oldd, $virt);
-($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+local ($vconf, $conf);
+($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 
 # Fix username in suexec, if needed
 if ($d->{'user'} ne $oldd->{'user'}) {
@@ -479,7 +502,6 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 
 # Fix domain name in apache config
 &modify_web_domain($d, $oldd, $virt, $vconf, $conf, 0);
-&link_apache_logs($d);
 
 # Remove ServerAlias directives not for this domain, such as for an alias of
 # the cloned source
@@ -492,17 +514,6 @@ if (@newsa) {
 	&apache::save_directive("ServerAlias", \@newsa, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
-
-# Update cached public_html and CGI dirs, re-create PHP wrappers with new home
-&find_html_cgi_dirs($d);
-if (defined(&create_php_wrappers)) {
-	&create_php_wrappers($d);
-	}
-
-&release_lock_web($d);
-&register_post_action(\&restart_apache);
-&$second_print($text{'setup_done'});
-return 1;
 }
 
 # is_empty(&lref|file)

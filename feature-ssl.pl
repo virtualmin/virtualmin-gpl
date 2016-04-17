@@ -531,26 +531,20 @@ sub clone_ssl
 local ($d, $oldd) = @_;
 local $tmpl = &get_template($d->{'template'});
 &$first_print($text{'clone_ssl'});
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-local ($svirt, $svconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
-if (!$virt) {
-	&$second_print($text{'setup_esslcopy'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_sslport'});
+local ($ovirt, $ovconf) = &get_apache_virtual($oldd->{'dom'},
+					      $oldd->{'web_sslport'});
+if (!$ovirt) {
+	&$second_print($text{'clone_webold'});
 	return 0;
 	}
-if (!$svirt) {
+if (!$virt) {
 	&$second_print($text{'clone_webnew'});
 	return 0;
 	}
 
-# Copy across directives, adding the ones for SSL
-&obtain_lock_web($d);
-local $lref = &read_file_lines($virt->{'file'});
-local @ssldirs = &apache_ssl_directives($d, $tmpl);
-local $slref = &read_file_lines($svirt->{'file'});
-splice(@$slref, $svirt->{'line'}+1, $svirt->{'eline'}-$svirt->{'line'}-1,
-       @ssldirs, @$lref[$virt->{'line'}+1 .. $virt->{'eline'}-1]);
-&flush_file_lines($svirt->{'file'});
-undef(@apache::get_config_cache);
+# Fix up all the Apache directives
+&clone_web_domain($oldd, $d, $ovirt, $virt, $d->{'web_sslport'});
 
 # Is the linked SSL cert still valid for the new domain? If not, break the
 # linkage by copying over the cert.
