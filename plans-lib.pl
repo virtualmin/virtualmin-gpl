@@ -269,7 +269,7 @@ local %lmap = ( 'domslimit' => 'max_doms',
 		'mailboxlimit' => 'max_mailboxes',
 		'aliaslimit' => 'max_aliases',
 		'dbslimit' => 'max_dbs',
-		'bw_limit' => 'max_bw' );
+		'bwlimit' => 'max_bw' );
 foreach my $m (keys %lmap) {
 	if ($plan->{$m} eq '') {
 		delete($resel->{'acl'}->{$lmap{$m}});
