@@ -223,3 +223,4 @@ webmin_ssl=1
 usermin_ssl=1
 can_letsencrypt=0
 auto_letsencrypt=0
+logrotate_shared=yes
