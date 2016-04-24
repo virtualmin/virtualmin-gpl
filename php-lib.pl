@@ -769,7 +769,8 @@ foreach my $v (@all_possible_php_versions) {
 		# after the PHP version
 		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
 		}
-	$phpn ||= &has_command("php$v-cgi") || &has_command("php$v");
+	$phpn ||= &has_command("php$v-cgi") || &has_command("php-cgi$v") ||
+		  &has_command("php$v");
 	local $nodotv = $v;
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
