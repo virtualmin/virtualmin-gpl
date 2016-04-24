@@ -308,10 +308,7 @@ if (!$in{'mypass_def'}) {
 	# Change in DB
 	local $esc = &mysql::escapestr($in->{'mypass'});
 	local $user = $mysql::mysql_login || "root";
-	&mysql::execute_sql_logged($mysql::master_db,
-	    "update user set password = $mysql::password_func('$esc') ".
-	    "where user = '$user'");
-	&mysql::execute_sql_logged($mysql::master_db, 'flush privileges');
+	&execute_password_change_sql("root", "$mysql::password_func('$esc')");
 
 	# Update Webmin
 	$mysql::config{'pass'} = $in->{'mypass'};
