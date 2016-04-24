@@ -78,19 +78,6 @@ local $tmpl = &get_template($d->{'template'});
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
 
-# Check if only hashed passwords are stored, and if so generate a random
-# MySQL password now
-if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'mysql_pass'}) {
-	# Hashed passwords in use
-	$d->{'mysql_pass'} = &random_password(16);
-	delete($d->{'mysql_enc_pass'});
-	}
-elsif ($tmpl->{'mysql_nopass'} == 2 && !$d->{'parent'} && !$d->{'mysql_pass'}) {
-	# Using random password by default
-	$d->{'mysql_pass'} = &random_password(16);
-	delete($d->{'mysql_enc_pass'});
-	}
-
 if ($d->{'provision_mysql'}) {
 	# Create the user on provisioning server
 	if (!$d->{'parent'}) {

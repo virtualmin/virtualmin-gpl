@@ -7408,6 +7408,23 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
+if ($d->{'mysql'}) {
+	# Check if only hashed passwords are stored, and if so generate a random
+	# MySQL password now. This has to be done before any features are setup
+	# so that mysql_pass is available to all features.
+	if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'mysql_pass'}) {
+		# Hashed passwords in use
+		$d->{'mysql_pass'} = &random_password(16);
+		delete($d->{'mysql_enc_pass'});
+		}
+	elsif ($tmpl->{'mysql_nopass'} == 2 && !$d->{'parent'} &&
+	       !$d->{'mysql_pass'}) {
+		# Using random password by default
+		$d->{'mysql_pass'} = &random_password(16);
+		delete($d->{'mysql_enc_pass'});
+		}
+	}
+
 # Set up all the selected features (except Webmin login)
 my $f;
 local @dof = grep { $_ ne "webmin" } @features;
