@@ -2329,6 +2329,17 @@ if ($copydir) {
 			}
 		}
 
+	# Make sure all dirs to copy from are readable
+	if (-d $path) {
+		my $try = 0;
+		while($try++ < 50) {
+			my $out = &run_as_domain_user($d,
+				"(find ".quotemeta($path).
+				" -type d | xargs chmod +x) 2>&1");
+			last if ($out !~ /permission\s+denied/i);
+			}
+		}
+
 	local $out;
 	if (-f $path) {
 		# Copy one file
