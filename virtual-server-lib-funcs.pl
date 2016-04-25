@@ -7408,20 +7408,20 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
-if ($d->{'mysql'}) {
+if ($dom->{'mysql'}) {
 	# Check if only hashed passwords are stored, and if so generate a random
 	# MySQL password now. This has to be done before any features are setup
 	# so that mysql_pass is available to all features.
-	if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'mysql_pass'}) {
+	if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'mysql_pass'}) {
 		# Hashed passwords in use
-		$d->{'mysql_pass'} = &random_password(16);
-		delete($d->{'mysql_enc_pass'});
+		$dom->{'mysql_pass'} = &random_password(16);
+		delete($dom->{'mysql_enc_pass'});
 		}
-	elsif ($tmpl->{'mysql_nopass'} == 2 && !$d->{'parent'} &&
-	       !$d->{'mysql_pass'}) {
+	elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
+	       !$dom->{'mysql_pass'}) {
 		# Using random password by default
-		$d->{'mysql_pass'} = &random_password(16);
-		delete($d->{'mysql_enc_pass'});
+		$dom->{'mysql_pass'} = &random_password(16);
+		delete($dom->{'mysql_enc_pass'});
 		}
 	}
 
