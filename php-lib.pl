@@ -746,6 +746,9 @@ if ($d) {
 		elsif ($apache::httpd_modules{'mod_php5'}) {
 			return ([ 5, undef ]);
 			}
+		elsif ($apache::httpd_modules{'mod_php7'}) {
+			return ([ "7.0", undef ]);
+			}
 		else {
 			return ( );
 			}
@@ -758,6 +761,9 @@ else {
 		}
 	elsif ($apache::httpd_modules{'mod_php5'}) {
 		push(@rv, [ 5, undef ]);
+		}
+	elsif ($apache::httpd_modules{'mod_php7'}) {
+		push(@rv, [ "7.0", undef ]);
 		}
 	}
 

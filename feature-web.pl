@@ -3931,7 +3931,8 @@ local @flush;
 local @fixdoms;
 local @lockdoms;
 if (!$apache::httpd_modules{'mod_php4'} &&
-    !$apache::httpd_modules{'mod_php5'}) {
+    !$apache::httpd_modules{'mod_php5'} &&
+    !$apache::httpd_modules{'mod_php7'}) {
 	# mod_php not even enabled, so do nothing
 	return ( );
 	}
