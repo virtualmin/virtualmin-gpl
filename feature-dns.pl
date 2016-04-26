@@ -907,7 +907,7 @@ else {
 	# All one one line
 	local @rv;
 	foreach my $v (@{$r->{'values'}}) {
-		push(@rv, $v =~ /\s/ ? "\"$v\"" : $v);
+		push(@rv, $v =~ /\s|\(/ ? "\"$v\"" : $v);
 		}
 	return join(" ", @rv);
 	}
