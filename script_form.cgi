@@ -41,10 +41,10 @@ $phpvfunc = $script->{'php_vers_func'};
 if (defined(&$phpvfunc)) {
 	@vers = &$phpvfunc($d, $ver);
 	@gotvers = grep { local $v = $_; local $_;
-			  &check_php_version($d, $v) } @vers;
+			  &check_php_version($d, $v) }
+			&expand_php_versions($d, \@vers);
 	@gotvers = sort { &get_php_version($b, $d) <=>
-                          &get_php_version($a, $d) }
-			&expand_php_versions($d, \@gotvers);
+                          &get_php_version($a, $d) } @gotvers;
 	if (!@gotvers) {
 		print &text('scripts_ephpvers', join(" or ", @vers)),"<p>\n";
 		$ok = 0;
