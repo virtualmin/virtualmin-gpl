@@ -1518,3 +1518,5 @@ Added the generate-letsencrypt-cert API command, to request and install a cert f
 Fixed support for mail server settings autodiscovery for Outlook clients.
 Added a Virtualmin Configuration setting to request a Let's Encrypt certificate at virtual server creation time.
 Improved support for Ubuntu 16 and MySQL 5.7.
+---- Changes since 5.02 ----
+Updated the Dolibarr script installer to version 3.9.1.

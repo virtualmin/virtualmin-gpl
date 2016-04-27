@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the Dolibarr script installer to version 3.9.1.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
