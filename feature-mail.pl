@@ -6180,23 +6180,27 @@ $autoconfig .= ".";
 
 # Add A record for IPv4
 local $changed = 0;
-local ($r) = grep { $_->{'name'} eq $autoconfig &&
-		    $_->{'type'} eq 'A' } @$recs;
-if (!$r) {
-	my $ip = $d->{'dns_ip'} || $d->{'ip'};
-	&bind8::create_record($file, $autoconfig, undef,
-			      "IN", "A", $ip);
-	$changed++;
-	}
+local ($cr) = grep { $_->{'name'} eq $autoconfig &&
+		     $_->{'type'} eq 'CNAME' } @$recs;
+if (!$cr) {
+	local ($r) = grep { $_->{'name'} eq $autoconfig &&
+			    $_->{'type'} eq 'A' } @$recs;
+	if (!$r) {
+		my $ip = $d->{'dns_ip'} || $d->{'ip'};
+		&bind8::create_record($file, $autoconfig, undef,
+				      "IN", "A", $ip);
+		$changed++;
+		}
 
-# Add AAAA record for IPv6
-local ($r) = grep { $_->{'name'} eq $autoconfig &&
-		    $_->{'type'} eq 'AAAA' } @$recs;
-if (!$r && $d->{'ip6'}) {
-	my $ip = $d->{'ip6'};
-	&bind8::create_record($file, $autoconfig, undef,
-			      "IN", "AAAA", $ip);
-	$changed++;
+	# Add AAAA record for IPv6
+	local ($r) = grep { $_->{'name'} eq $autoconfig &&
+			    $_->{'type'} eq 'AAAA' } @$recs;
+	if (!$r && $d->{'ip6'}) {
+		my $ip = $d->{'ip6'};
+		&bind8::create_record($file, $autoconfig, undef,
+				      "IN", "AAAA", $ip);
+		$changed++;
+		}
 	}
 
 if ($changed) {
@@ -6310,7 +6314,8 @@ if ($d->{'dns'}) {
 	local $changed = 0;
 	foreach my $autoconfig (@autoconfig) {
 		$autoconfig_dot = $autoconfig.".";
-		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig_dot }
+		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig_dot &&
+					      $_->{'type'} =~ /^(A|AAAA)$/ }
 					    @$recs)) {
 			&bind8::delete_record($file, $r);
 			$changed++;
