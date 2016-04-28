@@ -13740,7 +13740,7 @@ if ($config{'mail'}) {
 		if ($myhost &&
 		    &indexoflc($myhost, @mydest) < 0 &&
 		    &indexoflc('$myhostname', @mydest) < 0) {
-			return &text('check_emydest', $myhost);
+			return &text('check_emydest', $myhost, join(", ", @mydest));
 			}
 
 		&$second_print($text{'check_postfixok'});
