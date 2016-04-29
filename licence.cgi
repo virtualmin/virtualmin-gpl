@@ -38,7 +38,7 @@ if ($status == 0) {
 			}
 		print "</b></font><p>\n";
 		}
-	else {
+	elsif (!$expirytime) {
 		print "<b>",&text('licence_goterr2',
 			"<font color=#ff0000>$expiry</font>"),"</b><p>\n";
 		}
