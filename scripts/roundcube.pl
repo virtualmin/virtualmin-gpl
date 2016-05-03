@@ -25,7 +25,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "1.1.5", "1.0.8", "0.8.7" );
+return ( "1.1.5", "1.0.9", "0.8.7" );
 }
 
 sub script_roundcube_category
@@ -150,6 +150,8 @@ local @files = ( { 'name' => "source",
 	           'file' => "roundcube-$ver.tar.gz",
 	           'url' => $ver >= 1.1 ?
 			"https://github.com/roundcube/roundcubemail/releases/download/${ver}/roundcubemail-${ver}-complete.tar.gz" :
+			    $ver >= 1.0 ?
+			"https://github.com/roundcube/roundcubemail/releases/download/${ver}/roundcubemail-${ver}.tar.gz" :
 			"http://easynews.dl.sourceforge.net/sourceforge/roundcubemail/roundcubemail-${ver}.tar.gz" },
 	    );
 return @files;
@@ -356,21 +358,18 @@ return (1, $dbname ? "RoundCube directory and tables deleted."
 		   : "RoundCube directory deleted.");
 }
 
-# script_roundcube_check_latest(version)
-# Checks if some version is the latest for this project, and if not returns
-# a newer one. Otherwise returns undef.
-sub script_roundcube_check_latest
+# script_roundcube_latest(version)
+# Returns a URL and regular expression or callback func to get the version
+sub script_roundcube_latest
 {
 local ($ver) = @_;
-return undef if ($ver < 0.9);
-local @vers = &osdn_package_versions("roundcubemail", "roundcubemail-([a-z0-9\\.\\-]+)\\.tar\\.gz");
-@vers = grep { !/beta/ && !/-dep$/ && !/alpha/ && !/-rc/ && !/mailvelope/ }
-	     @vers;
-if ($ver < 1.1) {
-	@vers = grep { $_ < 1.1 } @vers;
+if ($ver < 1) {
+	# No longer updated
+	return ( );
 	}
-return "Failed to find versions" if (!@vers);
-return $ver eq $vers[0] ? undef : $vers[0];
+return ( "http://roundcube.net/download/",
+	 $ver >= 1.1 ? "roundcubemail-([0-9\\.]+).tar.gz" :
+		       "roundcubemail-(1\\.0\\.[0-9\\.]+).tar.gz" );
 }
 
 sub script_roundcube_site
