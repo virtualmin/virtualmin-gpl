@@ -13735,6 +13735,8 @@ if ($config{'mail'}) {
 			$myhost = &read_file_contents($myhost);
 			$myhost =~ s/\s//g;
 			}
+		$myhost =~ s/^\s+//;
+		$myhost =~ s/\s+$//;
 		local @mydest = split(/[, ]+/,
 				   &postfix::get_real_value("mydestination"));
 		if ($myhost &&
