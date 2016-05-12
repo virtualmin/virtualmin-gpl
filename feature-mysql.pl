@@ -2557,6 +2557,9 @@ sub execute_user_creation_sql
 my ($host, $user, $encpass) = @_;
 foreach my $sql (&get_user_creation_sql($host, $user,$encpass)) {
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
+	if ($sql =~ /flush\s+privileges/) {
+		sleep(1);
+		}
 	}
 }
 
@@ -2566,9 +2569,7 @@ sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
 if ($mysql::mysql_version >= 5) {
-	#return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
-	return ("create user '$user'\@'$host' identified by password $encpass",
-		"flush privileges");
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
 	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
