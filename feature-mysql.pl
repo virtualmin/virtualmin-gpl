@@ -2566,7 +2566,9 @@ sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
 if ($mysql::mysql_version >= 5) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	#return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	return ("create user '$user'\@'$host' identified by password $encpass",
+		"flush privileges");
 	}
 else {
 	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
