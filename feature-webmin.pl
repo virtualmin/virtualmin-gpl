@@ -312,7 +312,7 @@ local %extramods = map { $_, $avail{$_} }
 
 # Grant access to BIND module if needed
 if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'}) {
-	# Allow user to manage just this domain
+	# Allow user to manage just their domains
 	push(@mods, "bind8");
 	local %acl = ( 'noconfig' => 1,
 		       'zones' => join(" ",
