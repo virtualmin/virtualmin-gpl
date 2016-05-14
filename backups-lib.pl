@@ -640,6 +640,14 @@ DOMAIN: foreach $d (@$doms) {
 		}
 	my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 	if ($parent) {
+		my $reread_parent = &get_domain($parent->{'id'}, undef, 1);	
+		if (!$reread_parent) {
+			# Parent has been deleted!
+			&$second_print(&text('backup_deleteddom',
+					     &show_domain_name($parent)));
+			$dok = 0;
+			goto DOMAINFAILED;
+			}
 		&obtain_lock_everything($parent);
 		}
 
