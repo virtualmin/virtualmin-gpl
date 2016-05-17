@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updated the Django script installer to version 1.9.6.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
