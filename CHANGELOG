@@ -1521,4 +1521,4 @@ Improved support for Ubuntu 16 and MySQL 5.7.
 ---- Changes since 5.02 ----
 Updated the Dolibarr script installer to version 3.9.1, and Wordpress to version 4.5.1.
 ---- Changes since 5.03 ----
-Updated the Django script installer to version 1.9.6.
+Updated the Django script installer to version 1.9.6, and Typo3 to 6.2.23.
