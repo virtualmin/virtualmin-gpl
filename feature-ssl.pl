@@ -1398,7 +1398,7 @@ local $certtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
 &open_execute_command(CA, "openssl req $ctypeflag $flag -newkey rsa:$size ".
 			  "-x509 -nodes -out $certtemp -keyout $keytemp ".
-			  "-days $days >$outtemp 2>&1", 0);
+			  "-days $days -utf8 >$outtemp 2>&1", 0);
 print CA ($country || "."),"\n";
 print CA ($state || "."),"\n";
 print CA ($city || "."),"\n";
@@ -1461,7 +1461,7 @@ if (!-r $keytemp || $rv) {
 local $outtemp = &transname();
 local $csrtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
-&open_execute_command(CA, "openssl req $ctypeflag $flag -new".
+&open_execute_command(CA, "openssl req $ctypeflag $flag -new -utf8".
 			  " -key ".quotemeta($keytemp).
 			  " -out ".quotemeta($csrtemp).
 			  " >$outtemp 2>&1", 0);
