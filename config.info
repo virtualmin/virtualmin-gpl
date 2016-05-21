@@ -72,6 +72,7 @@ passwd_mode=Password field type,1,1-Randomly generated password,0-Enter password
 passwd_length=Length of randomly generated password,3,Default (15 characters),5
 passwd_chars=Characters for random passwords,3,Default (A-Z&#44; a-z&#44; 0-9)
 limitnoalias=Include alias servers in limits?,1,0-Yes,1-No
+username_length=Maximum lenth for automatically generated usernames,3,Unlimited
 denied_domains=Regular expressions for disallowed domain names,0
 apache_star=Address format for Apache virtual hosts,1,2-Always use *,1-Always use IP,0-Decide automatically
 

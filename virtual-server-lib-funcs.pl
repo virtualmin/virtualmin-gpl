@@ -7132,6 +7132,13 @@ if (defined(getpwnam($try1)) || $config{'longname'}) {
 		return (undef, $try1, $try2);
 		}
 	}
+if ($config{'username_length'} && length($user) > $config{'username_length'}) {
+	# Admin asked for a short username
+	my $short = substr($user, 0, $config{'username_length'});
+	if (!defined(getpwnam($short))) {
+		$user = $short;
+		}
+	}
 return ($user);
 }
 
