@@ -1440,12 +1440,6 @@ $ctype ||= $config{'cert_type'};
 $size ||= $webmin::default_key_size;
 $days ||= 1825;
 
-# Prepare for SSL alt names
-local $flag;
-if ($altnames && @$altnames) {
-	$flag = &setup_openssl_altnames([ @$altnames, $common ], 0);
-	}
-
 # Generate the key
 local $keytemp = &transname();
 local $out = &backquote_command("openssl genrsa -out ".quotemeta($keytemp)." $size 2>&1 </dev/null");
@@ -1453,36 +1447,20 @@ local $rv = $?;
 if (!-r $keytemp || $rv) {
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
+
+# Generate the CSR
+local @cnames = ( $common );
+push(@cnames, @$altnames) if ($altnames);
+local ($ok, $csrtemp) = &webmin::generate_ssl_csr($keytemp, $country, $state, $city, $org, $orgunit, \@cnames, $email, $ctype);
+if (!$ok) {
+	return &text('csr_ecsr', "<pre>$csrtemp</pre>");
+	}
+
+# Copy into place
 &open_tempfile_as_domain_user($d, KEY, ">$keyfile");
 &print_tempfile(KEY, &read_file_contents($keytemp));
 &close_tempfile_as_domain_user($d, KEY);
 
-# Generate the matching CSR
-local $outtemp = &transname();
-local $csrtemp = &transname();
-local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
-&open_execute_command(CA, "openssl req $ctypeflag $flag -new -utf8".
-			  " -key ".quotemeta($keytemp).
-			  " -out ".quotemeta($csrtemp).
-			  " >$outtemp 2>&1", 0);
-print CA ($country || "."),"\n";
-print CA ($state || "."),"\n";
-print CA ($city || "."),"\n";
-print CA ($org || "."),"\n";
-print CA ($orgunit || "."),"\n";
-print CA ($common || "*"),"\n";
-print CA ($email || "."),"\n";
-print CA ".\n";
-print CA ".\n";
-close(CA);
-local $rv = $?;
-local $out = &read_file_contents($outtemp);
-unlink($outtemp);
-if (!-r $csrtemp || $rv) {
-	return &text('csr_ecsr', "<pre>$out</pre>");
-	}
-
-# Copy into place
 &open_tempfile_as_domain_user($d, CERT, ">$csrfile");
 &print_tempfile(CERT, &read_file_contents($csrtemp));
 &close_tempfile_as_domain_user($d, CERT);
