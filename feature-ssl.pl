@@ -1386,31 +1386,23 @@ $size ||= $webmin::default_key_size;
 $days ||= 1825;
 
 # Prepare for SSL alt names
-local $flag;
-if ($altnames && @$altnames) {
-	$flag = &setup_openssl_altnames([ @$altnames, $common ], 1);
-	}
+local @cnames = ( $common );
+push(@cnames, @$altnames) if ($altnames);
+local $conf = &webmin::build_ssl_config(\@cnames);
+local $subject = &webmin::build_ssl_subject($country, $state, $city, $org,
+					    $orgunit, \@cnames, $email);
 
 # Call openssl and write to temp files
 local $outtemp = &transname();
 local $keytemp = &transname();
 local $certtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
-&open_execute_command(CA, "openssl req $ctypeflag $flag -newkey rsa:$size ".
-			  "-x509 -nodes -out $certtemp -keyout $keytemp ".
-			  "-days $days -utf8 >$outtemp 2>&1", 0);
-print CA ($country || "."),"\n";
-print CA ($state || "."),"\n";
-print CA ($city || "."),"\n";
-print CA ($org || "."),"\n";
-print CA ($orgunit || "."),"\n";
-print CA ($common || "*"),"\n";
-print CA ($email || "."),"\n";
-close(CA);
+local $out = &backquote_logged(
+	"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
+	"-x509 -nodes -out $certtemp -keyout $keytemp ".
+	"-days $days -config $conf -subj ".quotemeta($subject)." -utf8 2>&1");
 local $rv = $?;
-local $out = &read_file_contents($outtemp);
-unlink($outtemp);
-if (!-r $certtemp || !-r $keytemp || $?) {
+if (!-r $certtemp || !-r $keytemp || $rv) {
 	# Failed .. return error
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
@@ -1464,76 +1456,6 @@ if (!$ok) {
 &print_tempfile(CERT, &read_file_contents($csrtemp));
 &close_tempfile_as_domain_user($d, CERT);
 return undef;
-}
-
-# setup_openssl_altnames(&altnames, self-signed)
-# Creates a temporary openssl.cnf file for generating a cert with alternate
-# names. Returns the additional command line parameters for openssl to use it.
-sub setup_openssl_altnames
-{
-# XXX once Webmin 1.790 is out, call the build_ssl_config function instead
-local ($altnames, $self) = @_;
-local @alts = &unique(@$altnames);
-local $temp = &transname();
-local $sconf = &find_openssl_config_file();
-$sconf || &error($text{'cert_esconf'});
-&copy_source_dest($sconf, $temp);
-
-# Make sure subjectAltNames is set in .cnf file, in the right places
-local $lref = &read_file_lines($temp);
-local $i = 0;
-local $found_req = 0;
-local $found_ca = 0;
-local $altline = "subjectAltName=".join(",", map { "DNS:$_" } @alts);
-foreach my $l (@$lref) {
-	if ($l =~ /^\s*\[\s*v3_req\s*\]/ && !$found_req) {
-		splice(@$lref, $i+1, 0, $altline);
-		$found_req = 1;
-		}
-	if ($l =~ /^\s*\[\s*v3_ca\s*\]/ && !$found_ca) {
-		splice(@$lref, $i+1, 0, $altline);
-		$found_ca = 1;
-		}
-	$i++;
-	}
-# If v3_req or v3_ca sections are missing, add at end
-if (!$found_req) {
-	push(@$lref, "[ v3_req ]", $altline);
-	}
-if (!$found_ca) {
-	push(@$lref, "[ v3_ca ]", $altline);
-	}
-
-# Add copyall line if needed
-local $i = 0;
-local $found_copy = 0;
-local $copyline = "copy_extensions=copyall";
-foreach my $l (@$lref) {
-	if (/^\s*\#*\s*copy_extensions\s*=/) {
-		$l = $copyline;
-		$found_copy = 1;
-		last;
-		}
-	elsif (/^\s*\[\s*CA_default\s*\]/) {
-		$found_ca = $i;
-		}
-	$i++;
-	}
-if (!$found_copy) {
-	if ($found_ca) {
-		splice(@$lref, $found_ca+1, 0, $copyline);
-		}
-	else {
-		push(@$lref, "[ CA_default ]", $copyline);
-		}
-	}
-
-&flush_file_lines($temp);
-local $flag = "-config $temp -reqexts v3_req";
-if ($self) {
-	$flag .= " -reqexts v3_ca";
-	}
-return $flag;
 }
 
 # obtain_lock_ssl(&domain)
