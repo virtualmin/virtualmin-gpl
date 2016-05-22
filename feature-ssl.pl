@@ -1438,7 +1438,6 @@ local ($csrfile, $keyfile, $size, $country, $state, $city, $org,
 $ctype ||= $config{'cert_type'};
 &foreign_require("webmin");
 $size ||= $webmin::default_key_size;
-$days ||= 1825;
 
 # Generate the key
 local $keytemp = &transname();
