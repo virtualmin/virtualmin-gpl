@@ -236,7 +236,7 @@ if ($d->{'ssl_csr'} && -r $d->{'ssl_csr'}) {
 print &ui_form_start("csr.cgi");
 print &ui_hidden("dom", $in{'dom'});
 print &ui_table_start($text{'cert_header1'}, undef, 2);
-&print_cert_fields();
+&print_cert_fields(0);
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'cert_csrok'} ] ]);
 print &ui_tabs_end_tab();
@@ -259,7 +259,7 @@ print &ui_form_start("csr.cgi");
 print &ui_hidden("dom", $in{'dom'});
 print &ui_hidden("self", 1);
 print &ui_table_start($text{'cert_header6'}, undef, 2);
-&print_cert_fields();
+&print_cert_fields(1);
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'cert_self'} ] ]);
 print &ui_tabs_end_tab();
@@ -433,8 +433,11 @@ if (defined(&theme_select_domain)) {
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
 
+# print_cert_fields(show-days)
 sub print_cert_fields
 {
+local ($showdays) = @_;
+
 print &ui_table_row($webmin::text{'ssl_cn'},
 		    &ui_textbox("commonName", "www.$d->{'dom'}", 30));
 
@@ -467,8 +470,10 @@ print &ui_table_row($webmin::text{'ssl_size'},
 			    "$text{'default'} ($webmin::default_key_size)").
 			" ".$text{'ssl_bits'});
 
-print &ui_table_row($webmin::text{'ssl_days'},
-		    &ui_textbox("days", 1825, 8));
+if ($showdays) {
+	print &ui_table_row($webmin::text{'ssl_days'},
+			    &ui_textbox("days", 1825, 8));
+	}
 
 print &ui_table_row($text{'cert_hash'},
 		    &ui_select("hash", $config{'cert_type'},

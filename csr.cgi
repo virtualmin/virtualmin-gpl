@@ -13,7 +13,9 @@ $in{'commonName'} =~ /^[A-Za-z0-9\.\-\*]+$/ ||
 	&error($webmin::text{'newkey_ecn'});
 $in{'size_def'} || $in{'size'} =~ /^\d+$/ ||
 	&error($webmin::text{'newkey_esize'});
-$in{'days'} =~ /^\d+$/ || &error($webmin::text{'newkey_edays'});
+if (defined($in{'days'})) {
+	$in{'days'} =~ /^\d+$/ || &error($webmin::text{'newkey_edays'});
+	}
 $size = $in{'size_def'} ? undef : $in{'size'};
 
 # Copy openssl.cnf if needed to add alternate names field
@@ -43,7 +45,7 @@ if (!$in{'self'}) {
 	&lock_file($d->{'ssl_csr'});
 	&lock_file($d->{'ssl_newkey'});
 	$err = &generate_certificate_request(
-		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, $size, $in{'days'},
+		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, $size,
 		$in{'countryName'},
 		$in{'stateOrProvinceName'},
 		$in{'cityName'},

@@ -176,7 +176,7 @@ else {
 	&lock_file($d->{'ssl_csr'});
 	&lock_file($d->{'ssl_newkey'});
 	$err = &generate_certificate_request(
-		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, undef, 1825,
+		$d->{'ssl_csr'}, $d->{'ssl_newkey'}, undef,
 		$subject{'c'},
 		$subject{'st'},
 		$subject{'l'},

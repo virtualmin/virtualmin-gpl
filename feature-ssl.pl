@@ -1426,14 +1426,14 @@ if (!-r $certtemp || !-r $keytemp || $?) {
 return undef;
 }
 
-# generate_certificate_request(csrfile, keyfile, size, days, country, state,
+# generate_certificate_request(csrfile, keyfile, size, country, state,
 # 			       city, org, orgunit, commonname, email, &altnames,
 # 			       &domain, [cert-type])
 # Generates a new self-signed cert, and stores it in the given csr and key
 # files. Returns undef on success, or an error message on failure.
 sub generate_certificate_request
 {
-local ($csrfile, $keyfile, $size, $days, $country, $state, $city, $org,
+local ($csrfile, $keyfile, $size, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
 $ctype ||= $config{'cert_type'};
 &foreign_require("webmin");
