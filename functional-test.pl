@@ -4836,6 +4836,14 @@ $ssl_tests = [
 		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
 	},
 
+	# Test SSL cert info
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin',
+		      'alt: test_subdomain' ],
+	},
+
 	# Test new SSL cert via HTTP
 	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port 443 </dev/null',
