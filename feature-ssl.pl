@@ -1601,8 +1601,10 @@ sub break_invalid_ssl_linkages
 local ($d, $newcert) = @_;
 foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	if (!&check_domain_certificate($od->{'dom'}, $newcert || $d)) {
+		&obtain_lock_ssl($d);
 		&break_ssl_linkage($od, $d);
 		&save_domain($od);
+		&release_lock_ssl($d);
 		}
 	}
 }
