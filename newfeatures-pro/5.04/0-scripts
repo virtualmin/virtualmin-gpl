@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Django script installer to version 1.9.6, FengOffice to 3.4.2, Roundcube to 1.2.0, phpMyAdmin to 4.6.2 and 4.4.15.6, MediaWiki to 1.26.3, and Typo3 to 6.2.23.
+html=Updated the Django script installer to version 1.9.6, FengOffice to 3.4.2, Roundcube to 1.2.0, phpMyAdmin to 4.6.2 and 4.4.15.6, MediaWiki to 1.26.3, Rainloop to 1.10.0.107, and Typo3 to 6.2.23.
 master=1
 reseller=1
 domain=1
