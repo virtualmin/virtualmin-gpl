@@ -478,6 +478,11 @@ if (!$creating && $d->{'id'} && !-r "$domains_dir/$d->{'id'}") {
 	print STDERR "Domain was deleted before saving!\n";
 	return 0;
 	}
+if ($d->{'dom'} eq '') {
+	# Has no domain name!
+	print STDERR "Domain has no name!\n";
+	return 0;
+	}
 &make_dir($domains_dir, 0700);
 &lock_file("$domains_dir/$d->{'id'}");
 local $oldd = { };
