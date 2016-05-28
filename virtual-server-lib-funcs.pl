@@ -272,7 +272,7 @@ if (!defined($dom->{'plan'}) && !$main::no_auto_plan) {
 	local @plans = sort { $a->{'id'} <=> $b->{'id'} } &list_plans();
 	$dom->{'plan'} = $plans[0]->{'id'};
 	}
-if ($dom->{'db'} eq '') {
+if ($dom->{'db'} eq '' && ($dom->{'mysql'} || $dom->{'postgres'})) {
 	$dom->{'db'} = &database_name($dom);
 	}
 if (!defined($dom->{'db_mysql'}) && $dom->{'mysql'}) {
