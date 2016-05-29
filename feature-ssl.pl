@@ -1237,6 +1237,7 @@ if (&delete_ipkeys($olddom, $getfunc, $putfunc, $postfunc)) {
 sub apache_ssl_directives
 {
 local ($d, $tmpl) = @_;
+&require_apache();
 local @dirs;
 push(@dirs, "SSLEngine on");
 push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
@@ -1244,6 +1245,14 @@ push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 if ($d->{'ssl_chain'}) {
 	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
 	}
+local @tls = ( "SSLv2", "SSLv3" );
+if ($apache::httpd_modules{'core'} >= 2.4) {
+	push(@tls, "TLSv1");
+	if (&get_openssl_version() >= 1) {
+		push(@tls, "TLSv1.1");
+		}
+	}
+push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
 return @dirs;
 }
 
@@ -1965,6 +1974,17 @@ if ($chain) {
 	&unlock_file($chainfile);
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
 	}
+}
+
+# get_openssl_version()
+# Returns the version of the installed OpenSSL command
+sub get_openssl_version
+{
+my $out = &backquote_command("openssl version 2>/dev/null");
+if ($out =~ /OpenSSL\s+([0-9\.a-z]+)/i) {
+	return $1;
+	}
+return undef;
 }
 
 $done_feature_script{'ssl'} = 1;
