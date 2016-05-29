@@ -17196,8 +17196,16 @@ else {
 	$homefmt = 1;
 	}
 
+# Attempt to get the preferred temp dir on the remote system
+my ($tok, $tout) = &execute_command_via_ssh($desthost, $destpass,
+				      "grep tempdir= /etc/webmin/config");
+my $remotetempdir = "/tmp";
+if ($tok && $tout =~ /tempdir=(\/\S+)/) {
+	$remotetempdir = $1;
+	}
+
 # Backup all the domains to a temp dir on the remote system
-my $remotetemp = "/tmp/virtualmin-transfer-$$";
+my $remotetemp = "$remotetempdir/virtualmin-transfer-$$";
 local $config{'compression'} = 0;
 local $config{'zip_args'} = undef;
 &$first_print($text{'transfer_backing'});
