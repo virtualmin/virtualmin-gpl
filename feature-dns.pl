@@ -1050,14 +1050,14 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			local @slaves = &bind8::list_slave_servers();
 			foreach $slave (@slaves) {
 				local @bn = $slave->{'nsname'} ?
-						( $slave->{'nsname'} ) :
-						gethostbyname($slave->{'host'});
+					( $slave->{'nsname'} ) :
+					gethostbyname($slave->{'host'});
 				if ($bn[0]) {
-					local $full = "$bn[0].";
+					local $full = $bn[0].".";
 					&bind8::create_record(
 						$file, "@", undef, "IN",
-						"NS", $bn[0].".");
-					push(@created_ns, $bn[0].".");
+						"NS", $full);
+					push(@created_ns, $full);
 					}
 				}
 
@@ -1232,6 +1232,13 @@ RECORD: foreach my $r (@$recs) {
 	foreach my $ns (&get_slave_nameservers($tmpl)) {
 		$tmplns{$ns} = 1;
 		}
+	local @slaves = &bind8::list_slave_servers();
+	foreach my $slave (@slaves) {
+		local @bn = $slave->{'nsname'} ?
+			( $slave->{'nsname'} ) :
+			gethostbyname($slave->{'host'});
+		$tmplns{$bn[0]."."} = 1 if ($bn[0]);
+		}
 	if ($r->{'type'} ne 'NS' || !$tmplns{$r->{'values'}->[0]}) {
 		foreach my $v (@{$r->{'values'}}) {
 			$v =~ s/\Q$olddom\E/$dom/i;
@@ -1252,7 +1259,7 @@ RECORD: foreach my $r (@$recs) {
 }
 
 # get_master_nameserver(&template)
-# Returns default primary NS name
+# Returns default primary NS name (with a . appended)
 sub get_master_nameserver
 {
 local ($tmpl) = @_;
@@ -1267,7 +1274,7 @@ return $master;
 }
 
 # get_slave_nameserver(&template)
-# Returns default additional slave NS names
+# Returns default additional slave NS names (with . appended)
 sub get_slave_nameservers
 {
 local ($tmpl) = @_;
