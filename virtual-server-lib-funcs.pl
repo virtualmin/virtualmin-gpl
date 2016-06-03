@@ -3750,9 +3750,11 @@ sub get_address_iface
 {
 local ($a) = @_;
 &foreign_require("net");
-local ($iface) = grep { $_->{'address'} eq $a ||
-			&indexof($a, @{$_->{'address6'}}) >= 0 }
-		      &net::active_interfaces();
+local ($iface) = grep {
+	$_->{'address'} eq $a ||
+	&indexof(&net::canonicalize_ip6($a),
+		 (map { &net::canonicalize_ip6($_) } @{$_->{'address6'}})) >= 0
+	} &net::active_interfaces();
 return $iface ? $iface->{'fullname'} : undef;
 }
 
