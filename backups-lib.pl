@@ -1170,42 +1170,37 @@ if ($ok) {
 			&$second_print($text{'setup_done'});
 			}
 		}
+	}
 
+# Create a separate file in the destination directory for Virtualmin
+# config backups
+if (@$vbs && ($homefmt || $dirfmt)) {
+	local $comp;
+	local $vdestfile;
+	local ($out, $err);
+	if (&has_command("gzip")) {
+		$comp = "gzip -c $config{'zip_args'}";
+		$vdestfile = "virtualmin.tar.gz";
+		}
+	else {
+		$comp = "cat";
+		$vdestfile = "virtualmin.tar";
+		}
 	# If encrypting, add gpg to the pipeline
 	if ($key) {
-		$writer = &backup_encryption_command($key).
-			  " | $writer";
+		$comp = $comp." | ".&backup_encryption_command($key);
 		}
-
-	# Create a separate file in the destination directory for Virtualmin
-	# config backups
-	if (@$vbs && ($homefmt || $dirfmt)) {
-		local $comp;
-		local $vdestfile;
-		if (&has_command("gzip")) {
-			$comp = "gzip -c $config{'zip_args'}";
-			$vdestfile = "virtualmin.tar.gz";
-			}
-		else {
-			$comp = "cat";
-			$vdestfile = "virtualmin.tar";
-			}
-		# If encrypting, add gpg to the pipeline
-		if ($key) {
-			$comp = $comp." | ".&backup_encryption_command($key);
-			}
-		&execute_command(
-		    "cd $backupdir && ".
-		    "(".&make_tar_command("cf", "-", "virtualmin_*").
-		    " | $comp > $dest/$vdestfile) 2>&1",
-		    undef, \$out, \$out);
-		&set_ownership_permissions(undef, undef, 0600,
-					   $dest."/".$vdestfile);
-		push(@destfiles, $vdestfile);
-		$destfiles_map{$vdestfile} = "virtualmin";
-		}
-	$donefeatures{"virtualmin"} = $vbs;
+	&execute_command(
+	    "cd $backupdir && ".
+	    "(".&make_tar_command("cf", "-", "virtualmin_*").
+	    " | $comp > $dest/$vdestfile) 2>&1",
+	    undef, \$out, \$out);
+	&set_ownership_permissions(undef, undef, 0600,
+				   $dest."/".$vdestfile);
+	push(@destfiles, $vdestfile);
+	$destfiles_map{$vdestfile} = "virtualmin";
 	}
+$donefeatures{"virtualmin"} = $vbs;
 
 # Remove any temporary home dirs
 foreach my $d (@cleanuphomes) {
@@ -1681,7 +1676,7 @@ foreach my $desturl (@$desturls) {
 	}
 
 if (!$anylocal) {
-	# Always delete the temporary destination
+	# Delete the temporary location, as long as there are no local backups
 	&execute_command("rm -rf ".quotemeta($dest));
 	}
 
