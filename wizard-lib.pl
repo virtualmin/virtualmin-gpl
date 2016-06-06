@@ -238,7 +238,7 @@ if ($in->{'mysql'}) {
 		}
 
 	# Make sure MySQL can be used
-	if (&foreign_installed("mysql", 1) != 2) {
+	if (&foreign_installed("mysql", 1) == 0) {
 		return &text('wizard_emysqlconf', '../mysql/');
 		}
 	}
@@ -284,18 +284,28 @@ return undef;
 sub wizard_show_mysql
 {
 &require_mysql();
-print &ui_table_row(undef, $text{'wizard_mysql'}.
-		   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
-				       : $text{'wizard_mysql2'}), 2);
-if ($mysql::mysql_pass) {
-	print &ui_table_row($text{'wizard_mysql_pass'},
-		&ui_opt_textbox("mypass", undef, 20,
-				$text{'wizard_mysql_pass1'}."<br>",
-				$text{'wizard_mysql_pass0'}));
-	}
-else {
+if (&mysql::is_mysql_running() == -1) {
+	# Cannot even login with the current password
+	print &ui_table_row(undef, $text{'wizard_mysql4'}, 2);
+
 	print &ui_table_row($text{'wizard_mysql_empty'},
 		&ui_textbox("mypass", undef, 20));
+	}
+else {
+	# Offer to change the password
+	print &ui_table_row(undef, $text{'wizard_mysql'}.
+			   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
+					       : $text{'wizard_mysql2'}), 2);
+	if ($mysql::mysql_pass) {
+		print &ui_table_row($text{'wizard_mysql_pass'},
+			&ui_opt_textbox("mypass", undef, 20,
+					$text{'wizard_mysql_pass1'}."<br>",
+					$text{'wizard_mysql_pass0'}));
+		}
+	else {
+		print &ui_table_row($text{'wizard_mysql_empty'},
+			&ui_textbox("mypass", undef, 20));
+		}
 	}
 }
 
@@ -304,17 +314,29 @@ sub wizard_parse_mysql
 {
 local ($in) = @_;
 &require_mysql();
-if (!$in{'mypass_def'}) {
-	# Change in DB
-	local $esc = &mysql::escapestr($in->{'mypass'});
-	local $user = $mysql::mysql_login || "root";
-	&execute_password_change_sql("root", "$mysql::password_func('$esc')");
-
-	# Update Webmin
+if (&mysql::is_mysql_running() == -1) {
+	# Save the password 
 	$mysql::config{'pass'} = $in->{'mypass'};
+	$mysql::mysql_pass = $in->{'mypass'};
 	&mysql::save_module_config(\%mysql::config, "mysql");
+	$mysql::authstr = &mysql::make_authstr();
+	return &mysql::is_mysql_running() > 0 ? undef :
+		$text{'wizard_mysql_epass'};
 	}
-return undef;
+else {
+	if (!$in{'mypass_def'}) {
+		# Change in DB
+		local $esc = &mysql::escapestr($in->{'mypass'});
+		local $user = $mysql::mysql_login || "root";
+		&execute_password_change_sql("root",
+			"$mysql::password_func('$esc')");
+
+		# Update Webmin
+		$mysql::config{'pass'} = $in->{'mypass'};
+		&mysql::save_module_config(\%mysql::config, "mysql");
+		}
+	return undef;
+	}
 }
 
 # Show a form to select the MySQL size configuration
