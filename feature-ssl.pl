@@ -1899,6 +1899,11 @@ foreach my $d (&list_domains()) {
 		# Failed! Tell the user
 		$subject = $text{'letsencrypt_sfailed'};
 		$body = &text('letsencrypt_bfailed', join(", ",@dnames), $cert);
+
+		# Move the renewal time up by a random number of hours, so
+		# that we don't re-try every 5 minutes
+		$d->{'letsencrypt_last'} += int(rand() * 24) * 60 * 60
+		&save_domain($d);
 		}
 	else {
 		# Copy into place
