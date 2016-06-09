@@ -622,8 +622,9 @@ elsif (!&can_select_ip6()) {
 else {
 	# Can select addres or allocate one
 	print &ui_table_row(&hlink($text{'form_iface6'}, "iface6"),
-		&virtual_ip6_input(\@cantmpls, $resel),
-		undef, \@tds, undef, $config{'ip6enabled'} ? 0 : -2);
+		&virtual_ip6_input(\@cantmpls, $resel, 0,
+				   $config{'ip6enabled'} ? 0 : -2),
+		undef, \@tds);
 	}
 
 # Show DNS IP address field
