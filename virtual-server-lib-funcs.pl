@@ -17358,6 +17358,7 @@ sub save_transfer_hosts
 my $hfile = "$module_config_directory/transfer-hosts";
 my %hosts = map { $_->[0], $_->[1] } @_;
 &write_file($hfile, \%hosts);
+&set_ownership_permissions(undef, undef, 0600, $hfile);
 }
 
 # list_possible_domain_features(&domain)

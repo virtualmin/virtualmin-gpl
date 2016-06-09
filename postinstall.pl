@@ -425,6 +425,10 @@ if (!@doms && !$config{'logrotate_shared'}) {
 	&unlock_file($module_config_file);
 	}
 
+# Lock down transfer hosts file
+my $hfile = "$module_config_directory/transfer-hosts";
+&set_ownership_permissions(undef, undef, 0600, $hfile);
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
