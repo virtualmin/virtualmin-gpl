@@ -7129,8 +7129,8 @@ sub unixuser_name
 {
 local ($dname) = @_;
 $dname =~ s/^xn(-+)//;
-$dname =~ /^([^\.]+)/;
 $dname = &remove_numeric_prefix($dbname);
+$dname =~ /^([^\.]+)/;
 local ($try1, $user) = ($1, $1);
 if (defined(getpwnam($try1)) || $config{'longname'}) {
 	$user = &remove_numeric_prefix($_[0]);
