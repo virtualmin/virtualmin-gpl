@@ -379,6 +379,11 @@ if (!$_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
 # Add domain to DKIM list
 &update_dkim_domains($_[0], 'setup');
 
+# Setup sender-dependent outgoing IP
+if ($supports_dependent && $_[0]->{'virt'} && $config{'dependent_mail'}) {
+	&save_domain_dependent($_[0], 1);
+	}
+
 # Request a call to sync to secondary MX servers after creation.
 # create_virtuser cannot do this, as the domain doesn't exist yet
 &register_post_action(\&sync_secondary_virtusers, $_[0]);
