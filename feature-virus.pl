@@ -298,7 +298,8 @@ sub get_clamdscan_args
 {
 local $scanfile = "/etc/clamd.d/scan.conf";
 &foreign_require("init");
-if (-r $scanfile && &init::action_status("clamd\@scan")) {
+if (-r $scanfile && (&init::action_status("clamd\@scan") ||
+		     &init::action_status("clamd.scan"))) {
 	return " --config-file ".$scanfile;
 	}
 return undef;
