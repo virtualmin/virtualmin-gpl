@@ -282,7 +282,7 @@ else {
 			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
 		}
 
-	&ui_print_footer("list_sched.cgi", $text{'sched_return'});
+	&ui_print_footer("/$module_name/list_sched.cgi", $text{'sched_return'});
 	}
 
 # Flag backup as done
