@@ -69,6 +69,7 @@ else {
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
+&suppress_letsencrypt_proxy($d);
 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
                                         \@dnames, $phd, $d->{'emailto'});
 if (!$ok) {

@@ -1992,6 +1992,19 @@ if ($out =~ /OpenSSL\s+([0-9\.a-z]+)/i) {
 return undef;
 }
 
+# suppress_letsencrypt_proxy(&domain)
+# If there is any proxy setup that would block /.well-known, add a negative
+# path to ensure direct access
+sub suppress_letsencrypt_proxy
+{
+local ($d) = @_;
+&push_all_print();
+&set_all_null_print();
+&setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
+		    { 'path' => '/.well-known' },
+&pop_all_print();
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;
