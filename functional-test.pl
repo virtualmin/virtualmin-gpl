@@ -7007,6 +7007,12 @@ $clone_tests = [
 	  'grep' => "^$test_clone_domain",
 	},
 
+	# Validate new ownership
+	{ 'command' => 'find ~'.$test_clone_domain_user.
+		       ' -type f -user '.$test_domain_user,
+	  'antigrep' => [ $test_domain_user ],
+	},
+
 	# Force change web content
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain', $test_clone_domain ],
