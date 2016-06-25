@@ -227,3 +227,4 @@ can_letsencrypt=0
 auto_letsencrypt=0
 logrotate_shared=yes
 dependent_mail=0
+auto_redirect=0

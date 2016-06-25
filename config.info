@@ -88,6 +88,7 @@ postfix_ssl=Copy per-IP SSL certificates to Postfix?,1,1-Yes,0-No
 cert_type=Default SSL certificate hash,1,sha1-SHA1,sha2-SHA2
 can_letsencrypt=Who can request Let's Encrypt certificates?,1,0-All users,1-Resellers,2-Only master admin
 auto_letsencrypt=Request Let's Encrypt certificate at domain creation time?,1,1-Yes,0-No
+auto_redirect=Redirect HTTP to HTTPS by default?,1,1-Yes,0-No
 
 line6.5=Reseller settings,11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
