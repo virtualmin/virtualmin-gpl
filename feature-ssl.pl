@@ -213,6 +213,16 @@ if ($d->{'virt'}) {
 	&sync_postfix_ssl_cert($d, 1);
 	}
 
+# Redirect HTTP to HTTPS
+if ($config{'auto_redirect'}) {
+	my $redir = { 'path' => '/',
+		      'dest' => 'https://'.$d->{'dom'}.'/',
+		      'alias' => 0,
+		      'http' => 1,
+		      'https' => 0 };
+	&create_redirect($d, $redir);
+	}
+
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
 if ($d->{'virt'}) {
