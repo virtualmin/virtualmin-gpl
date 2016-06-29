@@ -1927,8 +1927,6 @@ foreach my $d (&list_domains()) {
 		$subject = $text{'letsencrypt_sdone'};
 		$body = &text('letsencrypt_bdone', join(", ", @dnames));
 		}
-	print STDERR "subject=$subject\n";
-	print STDERR "body=$body\n";
 
 	# Send email
 	my $from = &get_global_from_address($d);
