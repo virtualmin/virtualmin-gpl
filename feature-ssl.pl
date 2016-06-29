@@ -1895,14 +1895,8 @@ foreach my $d (&list_domains()) {
 	else {
 		@dnames = &get_hostnames_for_ssl($d);
 		}
-	if (&get_webmin_version() >= 1.782) {
-		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			\@dnames, $phd, $d->{'emailto'});
-		}
-	else {
-		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			$dnames[0], $phd);
-		}
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+		\@dnames, $phd, $d->{'emailto'});
 
 	my ($subject, $body);
 	if (!$ok) {
