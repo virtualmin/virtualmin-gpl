@@ -215,9 +215,10 @@ if ($d->{'virt'}) {
 
 # Redirect HTTP to HTTPS
 if ($config{'auto_redirect'}) {
-	my $redir = { 'path' => '/',
-		      'dest' => 'https://'.$d->{'dom'}.'/',
+	my $redir = { 'path' => '^/(?!.well-known)',
+		      'dest' => 'https://'.$d->{'dom'}.'/$1',
 		      'alias' => 0,
+		      'regexp' => 1,
 		      'http' => 1,
 		      'https' => 0 };
 	&create_redirect($d, $redir);
@@ -2000,11 +2001,15 @@ return undef;
 sub suppress_letsencrypt_proxy
 {
 local ($d) = @_;
+
+# Turn off proxy
 &push_all_print();
 &set_all_null_print();
 &setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
 		    { 'path' => '/.well-known' },
 &pop_all_print();
+
+# Redirect?
 }
 
 $done_feature_script{'ssl'} = 1;
