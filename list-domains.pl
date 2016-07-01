@@ -581,6 +581,16 @@ if ($multi) {
 			if ($same) {
 				print "    SSL shared with: $same->{'dom'}\n";
 				}
+			if ($d->{'letsencrypt_renew'}) {
+				print "    Lets Encrypt renewal: ",
+				    $d->{'letsencrypt_renew'}, " months\n";
+				print "    Lets Encrypt cert issued: ",
+				    &make_date($d->{'letsencrypt_last'}),"\n";
+				}
+			if ($d->{'letsencrypt_dname'}) {
+				print "    Lets Encrypt domain: ",
+				    $d->{'letsencrypt_dname'},"\n";
+				}
 			}
 
 		# Show DNS SPF mode

@@ -68,6 +68,11 @@ Alternately, you can change the HTTP port that Virtualmin uses in URLs
 referencing this domain with the C<--url-port> flag. For SSL websites, you can
 also use the C<--ssl-url-port> flag.
 
+If the domain's SSL certificate was requested from Let's Encrypt, you can
+turn on automatic renewal with the C<--letsencrypt-renew> flag followed by
+a number of months. Alternately, renewal can be disabled with the 
+C<--no-letsencrypt-renew> parameter.
+
 =cut
 
 package virtual_server;
@@ -212,6 +217,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--letsencrypt-renew") {
+		$renew = shift(@ARGV);
+		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
+		    &usage("--letsencrypt-renew must be followed by a number of months");
+		}
+	elsif ($a eq "--no-letsencrypt-renew") {
+		$renew = "";
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -222,7 +235,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  &usage("Nothing to do");
+  defined($renew) || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -595,8 +608,19 @@ foreach $d (@doms) {
 			}
 		}
 
+	if (defined($renew) && $d->{'letsencrypt_last'}) {
+		# Change let's encrypt renewal period
+		if ($renew) {
+			$d->{'letsencrypt_renew'} = $renew;
+			}
+		else {
+			delete($d->{'letsencrypt_renew'});
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
-	    $port || $sslport || $urlport || $sslurlport || $mode || $version) {
+	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
+	    defined($renew)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -652,6 +676,7 @@ print "                     [--document-dir subdirectory]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
+print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
 exit(1);
 }
 
