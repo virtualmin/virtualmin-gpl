@@ -9,6 +9,9 @@ name. By default the certificate will be the for domain name only, but you
 can specify an alternate list of hostnames with the C<--host> flag, which
 can be given multiple times.
 
+If the optional C<--renew> flag is given, automatic renewal will be configured
+for the specified number of months in the future.
+
 =cut
 
 package virtual_server;
@@ -40,6 +43,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
+		}
+	elsif ($a eq "--renew") {
+		$renew = shift(@ARGV);
+		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
+		    &usage("--renew must be followed by a number of months");
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -87,6 +95,12 @@ else {
 	# Save renewal state
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
+	if ($renew) {
+		$d->{'letsencrypt_renew'} = $renew;
+		}
+	else {
+		delete($d->{'letsencrypt_renew'});
+		}
 	&save_domain($d);
 
 	# Apply any per-domain cert to Dovecot and Postfix
@@ -125,6 +139,7 @@ print "Requests and installs a Let's Encrypt cert for a virtual server.\n";
 print "\n";
 print "virtualmin generate-letsencrypt-cert --domain name\n";
 print "                                    [--host hostname]*\n";
+print "                                    [--renew months]\n";
 exit(1);
 }
 
