@@ -635,12 +635,6 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 			}
 		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
 		       $atype == 5 || $atype == 6) {
-			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
-				# Rename the autoreply file too
-				local $newadest = "$d->{'home'}/$1";
-				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
-				&rename_logged($adest, $newadest);
-				}
 			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			if ($atype == 5) {
 				# Change domain name and ID in autoreply files
@@ -693,12 +687,6 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 			}
 		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
 		       $atype == 5 || $atype == 6) {
-			if ($adest =~ /^\Q$oldd->{'home'}\E\/(\S+)$/) {
-				# Rename the autoreply file too
-				local $newadest = "$d->{'home'}/$1";
-				$newadest =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
-				&rename_logged($adest, $newadest);
-				}
 			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			if ($atype == 5) {
 				# Change domain name and ID in autoreply files
@@ -719,6 +707,7 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 		$acount++;
 		}
 	}
+&break_autoreply_alias_links($d);
 &create_autoreply_alias_links($d);
 &sync_alias_virtuals($d);
 &$second_print(&text('clone_maildone', $acount));
@@ -3838,9 +3827,7 @@ foreach $u (&list_domain_users($_[0], 1)) {
 	}
 
 # Create autoreply file links
-if (defined(&create_autoreply_alias_links)) {
-	&create_autoreply_alias_links($_[0]);
-	}
+&create_autoreply_alias_links($_[0]);
 
 &release_lock_mail($_[0]);
 &release_lock_unix($_[0]);
