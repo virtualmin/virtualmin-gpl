@@ -2001,15 +2001,11 @@ return undef;
 sub suppress_letsencrypt_proxy
 {
 local ($d) = @_;
-
-# Turn off proxy
 &push_all_print();
 &set_all_null_print();
 &setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
-		    { 'path' => '/.well-known' },
+		    { 'path' => '/.well-known' });
 &pop_all_print();
-
-# Redirect?
 }
 
 $done_feature_script{'ssl'} = 1;
