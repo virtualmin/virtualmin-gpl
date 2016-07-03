@@ -562,5 +562,25 @@ foreach my $user (&list_domain_users($d)) {
 	}
 }
 
+# break_autoreply_alias_links(&domain)
+# Delete all autoreply hard links for a domain. This is needed in preparation
+# for copying with tar, which tries to preserve hard links which isn't what
+# we want.
+sub break_autoreply_alias_links        
+{                               
+local ($d) = @_;                
+local $adir = &get_autoreply_file_dir();
+foreach my $virt (&list_domain_aliases($d), &list_domain_users($d)) {
+	local $simple = &get_simple_alias($d, $virt);
+	if ($simple && $simple->{'auto'}) {
+		local $link = &convert_autoreply_file(
+			$d, $simple->{'autoreply'});
+		if ($link && -r $link && $link ne $simple->{'autoreply'}) {
+			&unlink_file($link);
+			}
+		}
+	}
+}
+
 1;
 
