@@ -2824,6 +2824,7 @@ cert_desc7=This form should be used when you have recieved a signed certificate 
 cert_header7=Signed certificate details
 cert_hash=Certificate hash type
 cert_letsok=Request Certificate
+cert_letsonly=Only Update Renewal
 cert_desc8=Let's Encrypt is a free, automated, and open certificate authority that can be used to generate an SSL certificate for use by Virtualmin.
 cert_letsdesc=This page can be used to request a new certificate, which will overwrite any other you currently have configured for this domain. However, the Let's Encrypt service requires that your ownership of the certificate domain be validated by checking that this system hosts the website for the domain. This is done by placing a small temporary file in the website's document directory $1.
 cert_elets=However, it cannot be used on your system : $1

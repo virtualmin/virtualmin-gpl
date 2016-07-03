@@ -420,7 +420,8 @@ else {
 		}
 
 	print &ui_table_end();
-	print &ui_form_end([ [ undef, $text{'cert_letsok'} ] ]);
+	print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
+			     [ 'only', $text{'cert_letsonly'} ] ]);
 	}
 
 print &ui_tabs_end(1);
