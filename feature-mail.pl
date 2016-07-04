@@ -627,22 +627,11 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 	$newu->{'dbs'} = \@newdbs;
 
 	# Fix email forwarding destinations
+	local @to;
 	foreach my $t (@{$newu->{'to'}}) {
-		local ($atype, $adest) = &alias_type($t, $u->{'user'});
-		if ($atype == 1) {
-			# Change destination to new domain
-			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
-			}
-		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
-		       $atype == 5 || $atype == 6) {
-			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
-			if ($atype == 5) {
-				# Change domain name and ID in autoreply files
-				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
-				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
-				}
-			}
+		push(@to, &fix_cloned_alias($t, $u->{'user'}, $oldd, $d));
 		}
+	$newu->{'to'} = \@to;
 
 	# Create the user
 	&create_user($newu, $d);
@@ -681,23 +670,7 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 	local ($mailbox, $dom) = split(/\@/, $a->{'from'});
 	local @to;
 	foreach my $t (@{$a->{'to'}}) {
-		local ($atype, $adest) = &alias_type($t, $a->{'from'});
-		if ($atype == 1) {
-			$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
-			}
-		elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
-		       $atype == 5 || $atype == 6) {
-			$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
-			if ($atype == 5) {
-				# Change domain name and ID in autoreply files
-				$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
-				$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
-				}
-			}
-		elsif ($atype == 13) {
-			$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
-			}
-		push(@to, $t);
+		push(@to, &fix_cloned_alias($t, $a->{'from'}, $oldd, $d));
 		}
 	local $newa = { 'from' => $mailbox."\@".$d->{'dom'},
 			'cmt' => $a->{'cmt'},
@@ -715,6 +688,34 @@ foreach my $a (&list_domain_aliases($oldd, 1)) {
 &release_lock_cron($d);
 &release_lock_mail($d);
 return 1;
+}
+
+# fix_cloned_alias(dest, from, &old-domain, &domain)
+sub fix_cloned_alias
+{
+local ($t, $from, $oldd, $d) = @_;
+local ($atype, $adest) = &alias_type($t, $from);
+if ($atype == 1) {
+	$t =~ s/\@\Q$oldd->{'dom'}\E$/\@$d->{'dom'}/;
+	}
+elsif ($atype == 2 || $atype == 3 || $atype == 4 ||
+       $atype == 5 || $atype == 6) {
+	$t =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	if ($atype == 5) {
+		# Change domain name and ID in autoreply files
+		local ($oldatype, $oldadest) = &alias_type($t, $from);
+		$t =~ s/\@\Q$oldd->{'dom'}\E/\@$d->{'dom'}/g;
+		$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
+		local ($newatype, $newadest) = &alias_type($t, $from);
+		if ($oldadest ne $newadest) {
+			&rename_logged($oldadest, $newadest);
+			}
+		}
+	}
+elsif ($atype == 13) {
+	$t =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/;
+	}
+return $t;
 }
 
 # modify_mail(&domain, &olddomain)

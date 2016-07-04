@@ -308,11 +308,17 @@ if (!$d->{'parent'}) {
 	&disable_quotas($d);
 	&disable_quotas($oldd);
 	}
+if ($d->{'mail'}) {
+	&break_autoreply_alias_links($oldd);
+	}
 local $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
 	       "tar cfX - $xtemp . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
 	       " tar xpf -) 2>&1");
+if ($d->{'mail'}) {
+	&create_autoreply_alias_links($oldd);
+	}
 &set_home_ownership($d);
 if (!$d->{'parent'}) {
 	&enable_quotas($oldd);
