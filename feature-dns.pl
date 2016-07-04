@@ -201,15 +201,16 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
-	if (!-r $rootfile) {
-		if ($copyfromalias) {
-			&create_alias_records($file, $_[0], $ip);
-			}
-		else {
-			&create_standard_records($file, $_[0], $ip);
-			}
-		&bind8::set_ownership($rootfile);
+	if (-r $rootfile && -f $rootfile) {
+		&unlink_Logged($rootfile);
 		}
+	if ($copyfromalias) {
+		&create_alias_records($file, $_[0], $ip);
+		}
+	else {
+		&create_standard_records($file, $_[0], $ip);
+		}
+	&bind8::set_ownership($rootfile);
 	&$second_print($text{'setup_done'});
 
 	# If DNSSEC was requested, set it up
