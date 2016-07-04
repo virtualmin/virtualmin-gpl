@@ -6994,6 +6994,14 @@ $clone_tests = [
 		      [ 'version', '3.5.8.2' ] ],
 	},
 
+	# Create a dummy .htaccess file with a path
+	{ 'command' => 'echo AuthUserFile '.$test_domain_home.'/users.txt >'.
+		       $test_domain_home.'/.htaccess',
+	},
+	{ 'command' => 'chown '.$test_domain_user.': '.
+		       $test_domain_home.'/.htaccess',
+	},
+
 	# Clone it
 	{ 'command' => 'clone-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -7005,6 +7013,11 @@ $clone_tests = [
 	# Make sure the domain was created
 	{ 'command' => 'list-domains.pl',
 	  'grep' => "^$test_clone_domain",
+	},
+
+	# Check the new .htaccess file has been fixed
+	{ 'command' => 'cat ~'.$test_clone_domain_user.'/.htaccess',
+	  'antigrep' => [ $test_domain_home.'/' ],
 	},
 
 	# Validate new ownership

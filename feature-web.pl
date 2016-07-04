@@ -3855,6 +3855,32 @@ if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
 		&unlock_file($ini->[1]);
 		}
 	}
+
+# Fix paths in .htaccess files
+my $filename = ".htaccess";
+local $out = &run_as_domain_user($d, "find ".quotemeta($d->{'home'}).
+				     " -type f -name ".quotemeta($filename).
+				     " 2>/dev/null");
+foreach my $file (split(/\r?\n/, $out)) {
+	next if (!-r $file);
+	eval {
+		local $main::error_must_die = 1;
+		&lock_file($file);
+		local $lref = &read_file_lines_as_domain_user($d, $file);
+		foreach my $l (@$lref) {
+			if ($l =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g) {
+				$fixed++;
+				}
+			}
+		if ($fixed) {
+			&flush_file_lines_as_domain_user($d, $file);
+			}
+		else {
+			&unflush_file_lines($file);
+			}
+		&unlock_file($file);
+		};
+	}
 }
 
 # modify_web_domain(&domain, &old-domain, &virt, &vconf, &apache-config,
