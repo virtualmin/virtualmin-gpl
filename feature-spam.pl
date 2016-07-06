@@ -655,6 +655,18 @@ local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &execute_command("cd ".quotemeta($spamdir)." && tar xf ".
 		       quotemeta($_[1]."_cf"));
 
+# Fix any incorrect /etc/webmin references
+my $lref = &read_file_lines($spamrc);
+foreach my $l (@$lref) {
+	if ($l =~ /^(.*\s+)(\S+\/clam-wrapper.pl)(\s+.*)$/) {
+		$l = $1.$clam_wrapper_cmd.$3;
+		}
+	if ($l =~ /^(.*\s+--siteconfigpath\s+)(\S+\/virtual-server\/spam\/\S+)$/) {
+		$l = $1.$spamdir;
+		}
+	}
+&flush_file_lines($spamrc);
+
 if (-r $_[1]."_auto") {
 	# Replace auto-clearing setting
 	&save_domain_spam_autoclear($_[0], undef);
