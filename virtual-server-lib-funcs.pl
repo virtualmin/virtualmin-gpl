@@ -243,13 +243,19 @@ if (!defined($dom->{'virt'})) {
 	# compat - assume virtual IP if interface assigned
 	$dom->{'virt'} = $dom->{'iface'} ? 1 : 0;
 	}
+if (!defined($dom->{'template'})) {
+	# assume default parent or sub-server template
+	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
+	}
 if (!defined($dom->{'web_port'}) && $dom->{'web'}) {
 	# compat - assume web port is current setting
-	$dom->{'web_port'} = $default_web_port;
+	my $tmpl = &get_template($dom->{'template'});
+	$dom->{'web_port'} = $tmpl->{'web_port'} || $default_web_port;
 	}
 if (!defined($dom->{'web_sslport'}) && $dom->{'ssl'}) {
 	# compat - assume SSL port is current setting
-	$dom->{'web_sslport'} = $web_sslport;
+	my $tmpl = &get_template($dom->{'template'});
+	$dom->{'web_sslport'} = $tmpl->{'web_sslport'} || $web_sslport;
 	}
 if (!defined($dom->{'prefix'})) {
 	# compat - assume that prefix is same as group
@@ -262,10 +268,6 @@ if (!defined($dom->{'home'})) {
 if (!defined($dom->{'proxy_pass_mode'}) && $dom->{'proxy_pass'}) {
 	# assume that proxy pass mode is proxy-based if not set
 	$dom->{'proxy_pass_mode'} = 1;
-	}
-if (!defined($dom->{'template'})) {
-	# assume default parent or sub-server template
-	$dom->{'template'} = $dom->{'parent'} ? 1 : 0;
 	}
 if (!defined($dom->{'plan'}) && !$main::no_auto_plan) {
 	# assume first plan
