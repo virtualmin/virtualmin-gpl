@@ -12,7 +12,8 @@ called with parameters like :
 This command would add a user to the server I<foo.com> named I<jimmy> with password
 I<smeg> and a disk quota of 1MB. The actual POP3 and FTP username may end up as
 jimmy.foo, depending on whether or not domain suffix are always appended to
-usernames, and what suffix format is used.
+usernames, and what suffix format is used. However, you can force use of the
+specified username with the C<--noappend> flag.
 
 The C<--ftp> option can be used to give the new user an FTP login as well - by
 default, he will only be given an email account. The C<--noemail> option turns
@@ -157,6 +158,9 @@ while(@ARGV > 0) {
 		$recovery =~ /^\S+\@\S+$/ ||
 		    &usage("--recovery must be followed by an email address");
 		}
+	elsif ($a eq "--noappend") {
+		$noappend = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -273,7 +277,8 @@ if ($disable) {
 if (!$user->{'noextra'}) {
 	$user->{'extraemail'} = \@extra;
 	}
-if (($utaken{$username} || $config{'append'}) && !$user->{'noappend'}) {
+if (($utaken{$username} || $config{'append'}) && !$user->{'noappend'} &&
+    !$noappend) {
 	$user->{'user'} = &userdom_name($username, $d);
 	}
 else {
@@ -409,5 +414,6 @@ if ($config{'spam'}) {
 	}
 print "                      [--no-creation-mail]\n";
 print "                      [--home directory]\n";
+print "                      [--noappend]\n";
 exit(1);
 }
