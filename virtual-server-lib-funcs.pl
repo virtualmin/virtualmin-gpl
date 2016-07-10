@@ -7763,10 +7763,10 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 # Attempt to request a let's encrypt cert
 $dom->{'auto_letsencrypt'} ||= $config{'auto_letsencrypt'};
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom)) {
-	&$first_print(&text('letsencrypt_doing2',
-			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	&foreign_require("webmin");
 	my @dnames = &get_hostnames_for_ssl($dom);
+	&$first_print(&text('letsencrypt_doing2',
+			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	my $phd = &public_html_dir($dom);
 	my ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 					    \@dnames, $phd, $dom->{'emailto'});
