@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() && &can_edit_letsencrypt() ||
 	&error($text{'edit_ecannot'});
+$d->{'disabled'} && &error($text{'letsencrypt_eenabled'});
 
 if ($in{'dname_def'}) {
 	@dnames = &get_hostnames_for_ssl($d);

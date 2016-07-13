@@ -7762,7 +7762,8 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 
 # Attempt to request a let's encrypt cert
 $dom->{'auto_letsencrypt'} ||= $config{'auto_letsencrypt'};
-if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom)) {
+if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
+    !$dom->{'disabled'}) {
 	&foreign_require("webmin");
 	my @dnames = &get_hostnames_for_ssl($dom);
 	&$first_print(&text('letsencrypt_doing2',
