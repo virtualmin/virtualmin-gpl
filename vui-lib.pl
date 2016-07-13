@@ -156,12 +156,7 @@ sub virtualmin_ui_html_editor_bodytags
 {
 return &theme_virtualmin_ui_html_editor_bodytags(@_)
 	if (defined(&theme_virtualmin_ui_html_editor_bodytags));
-if (&get_webmin_version() >= 1.491) {
-	return "onload='xinha_init()'";
-	}
-else {
-	return "onload='initEditor()'";
-	}
+return "onload='xinha_init()'";
 }
 
 # virtualmin_ui_show_html_editor(name, html, baseurl)
@@ -183,8 +178,7 @@ $rv .= <<EOF;
 EOF
 
 # Javascript for making the Xinha editor, depending on version
-if (&get_webmin_version() >= 1.491) {
-	$rv .= <<EOF;
+$rv .= <<EOF;
 <script type="text/javascript" src="../mailboxes/xinha/XinhaCore.js"></script>
 <script type="text/javascript">
 xinha_init = function()
@@ -198,23 +192,6 @@ Xinha.startEditors(xinha_editors);
 }
 </script>
 EOF
-	}
-else {
-	$rv .= <<EOF;
-<script type="text/javascript" src="../mailboxes/xinha/htmlarea.js"></script>
-<script type="text/javascript">
-var editor = null;
-function initEditor() {
-  editor = new HTMLArea("body");
-  editor.config.baseHref = "$baseurl";
-  editor.config.baseURL = "$baseurl";
-  editor.config.getHtmlMethod = "TransformInnerHTML";
-  editor.generate();
-  return false;
-}
-</script>
-EOF
-	}
 
 # The actual textbox
 $rv .= "<textarea rows=20 cols=80 style='width:100%;height:70%' name=$name id=$name>";
@@ -238,10 +215,6 @@ $size = &ui_max_text_width($size);
 $rv .= &ui_radio($name."_def", $value eq '' ? 1 : 0,
 		 [ [ 1, $opt1, "onClick='$dis1'" ],
 		   [ 0, $opt2 || " ", "onClick='$dis2'" ] ], $dis)."\n";
-if (&get_webmin_version() < 1.518) {
-	# defaultunits doesn't work yet, so fake it
-	$value = $defaultunits * 10;
-	}
 $rv .= &ui_bytesbox($name, $value, $size, $value eq "" || $dis, $tags,
 		    $defaultunits);
 return $rv;

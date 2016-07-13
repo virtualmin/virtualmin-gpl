@@ -2187,22 +2187,8 @@ sub links_web
 {
 local ($d) = @_;
 local @rv;
-local ($link, $slink);
-if (&get_webmin_version() < 1.582) {
-	&require_apache();
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						     $d->{'web_port'});
-	$link = &indexof($virt, @$conf);
-	if ($d->{'ssl'}) {
-		local ($svirt, $svconf) = &get_apache_virtual($d->{'dom'},
-							$d->{'web_sslport'});
-		$slink = &indexof($svirt, @$conf);
-		}
-	}
-else {
-	$link = $d->{'dom'}.":".$d->{'web_port'};
-	$slink = $d->{'dom'}.":".$d->{'web_sslport'};
-	}
+my $link = $d->{'dom'}.":".$d->{'web_port'};
+my $slink = $d->{'dom'}.":".$d->{'web_sslport'};
 # Link to configure virtual host
 push(@rv, { 'mod' => 'apache',
 	    'desc' => $text{'links_web'},
@@ -3542,12 +3528,6 @@ foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
 			}
 		push(@rv, [ $v, $vd ]);
 		}
-	}
-# If domain files are in a directory, sort by filename as older Webmin's
-# dont do this for us
-if ($apache::config{'virt_file'} && -d $apache::config{'virt_file'} &&
-    &get_webmin_version() < 1.490) {
-	@rv = sort { $a->[0]->{'file'} cmp $b->[0]->{'file'} } @rv;
 	}
 return @rv;
 }

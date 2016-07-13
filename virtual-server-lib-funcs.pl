@@ -13775,8 +13775,7 @@ if ($config{'mail'}) {
 			&$second_print($text{'check_dependentever'});
 			}
 		else {
-			local $l = &get_webmin_version() >= 1.593 ?
-				'../postfix/dependent.cgi' : '../postfix/';
+			local $l = '../postfix/dependent.cgi';
 			&$second_print(&text('check_dependentesupport', $l));
 			}
 		}
@@ -16137,10 +16136,8 @@ else {
 		push(@preload, "virtual-server=$file");
 		}
 
-	if (&get_webmin_version() >= 1.455) {
-		# Do new perl module version of Webmin API
-		$miniserv{'premodules'} = "WebminCore";
-		}
+	# Do new perl module version of Webmin API
+	$miniserv{'premodules'} = "WebminCore";
 	}
 $miniserv{'preload'} = join(" ", &unique(@preload));
 &put_miniserv_config(\%miniserv);
