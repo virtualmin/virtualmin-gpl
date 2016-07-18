@@ -646,7 +646,7 @@ DOMAIN: foreach $d (@$doms) {
 			&$second_print(&text('backup_deleteddom',
 					     &show_domain_name($parent)));
 			$dok = 0;
-			goto DOMAINFAILED;
+			goto DOMAINFAILED_NOQUOTAS;
 			}
 		&obtain_lock_everything($parent);
 		}
