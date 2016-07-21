@@ -4752,6 +4752,7 @@ while(my $id = readdir(LOGS)) {
 	local %log;
 	&read_file("$backups_log_dir/$id", \%log) || next;
 	$log{'output'} = &read_file_contents("$backups_log_dir/$id.out");
+	$log{'id'} = $id;
 	push(@rv, \%log);
 	}
 close(LOGS);
@@ -4767,6 +4768,16 @@ local %log;
 &read_file("$backups_log_dir/$id", \%log) || return undef;
 $log{'output'} = &read_file_contents("$backups_log_dir/$id.out");
 return \%log;
+}
+
+# delete_backup_log(&log)
+# Deletes the log entry for a backup
+sub delete_backup_log
+{
+my ($log) = @_;
+$log->{'id'} || return "Backup log to delete has no ID!";
+&unlink_logged("$backups_log_dir/$log->{'id'}");
+return undef;
 }
 
 # record_backup_bandwidth(&domain, bytes-in, bytes-out, start, end)
@@ -5044,6 +5055,25 @@ $sched->{'pid'} || &error("Backup has no PID!");
 &kill_logged(9, $sched->{'pid'});
 my $file = $backups_running_dir."/".$sched->{'id'}."-".$sched->{'pid'};
 unlink($file);
+}
+
+# delete_backup(dest)
+# Delete the backup from some destination path, like /backup/foo.com.tar.gz
+sub delete_backup
+{
+my ($dest) = @_;
+my ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
+foreach my $sfx ("", ".info", ".dom") {
+	if ($proto == 0) {
+		# File on server
+		&unlink_logged($path.$sfx);
+		}
+	else {
+		# XXX
+		return "Deletion of remote backups is not supported yet";
+		}
+	}
+return undef;
 }
 
 1;
