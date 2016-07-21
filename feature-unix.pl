@@ -571,27 +571,37 @@ return 0;
 }
 
 # disable_unix(&domain)
-# Lock out the password of this domain's Unix user
+# Lock out the password and shell of this domain's Unix user
 sub disable_unix
 {
-if (!$_[0]->{'parent'}) {
-	&obtain_lock_unix($_[0]);
+my ($d) = @_;
+if (!$d->{'parent'}) {
+	&obtain_lock_unix($d);
 	&require_useradmin();
 	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
+	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'disable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
 			      'MODIFY_USER', "", undef, $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
-		$_[0]->{'disabled_oldpass'} = $uinfo->{'pass'};
+		$d->{'disabled_oldpass'} = $uinfo->{'pass'};
 		$uinfo->{'pass'} = $uconfig{'lock_string'};
+		my ($nologin_shell) = &get_common_available_shells();
+		if ($nologin_shell && $uinfo->{'shell'} ne $nologin_shell) {
+			# Also switch to no-login shell
+			$d->{'disabled_shell'} = $uinfo->{'shell'};
+			$uinfo->{'shell'} = $nologin_shell;
+			}
+		else {
+			delete($d->{'disabled_shell'});
+			}
 		&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 		&foreign_call($usermodule, "made_changes");
 		&disable_unix_cron_jobs($uinfo->{'user'});
 		&$second_print($text{'setup_done'});
 		}
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	}
 }
 
@@ -599,24 +609,30 @@ if (!$_[0]->{'parent'}) {
 # Re-enable this domain's Unix user
 sub enable_unix
 {
-if (!$_[0]->{'parent'}) {
-	&obtain_lock_unix($_[0]);
+my ($d) = @_;
+if (!$d->{'parent'}) {
+	&obtain_lock_unix($d);
 	&require_useradmin();
 	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
+	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'enable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
 			      'MODIFY_USER', "", undef, $uinfo, "");
 		&foreign_call($usermodule, "making_changes");
-		$uinfo->{'pass'} = $_[0]->{'disabled_oldpass'};
-		delete($_[0]->{'disabled_oldpass'});
+		$uinfo->{'pass'} = $d->{'disabled_oldpass'};
+		delete($d->{'disabled_oldpass'});
+		if ($d->{'disabled_shell'}) {
+			# Also put back old shell
+			$uinfo->{'shell'} = $d->{'disabled_shell'};
+			delete($d->{'disabled_shell'});
+			}
 		&foreign_call($usermodule, "modify_user", $uinfo, $uinfo);
 		&foreign_call($usermodule, "made_changes");
 		&enable_unix_cron_jobs($uinfo->{'user'});
 		&$second_print($text{'setup_done'});
 		}
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	}
 }
 
