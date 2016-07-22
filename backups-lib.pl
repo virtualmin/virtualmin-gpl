@@ -4684,12 +4684,12 @@ return $ok;
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
-# 		   [schedule-id])
+# 		   [schedule-id], [separate-format])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms, $user, $key, $schedid) = @_;
+       $output, $errdoms, $user, $key, $schedid, $separate) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -4705,6 +4705,8 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'mode' => $mode,
 	       'key' => $key->{'id'},
 	       'sched' => $schedid,
+	       'compression' => $config{'compression'},
+	       'separate' => $separate,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;

@@ -190,7 +190,8 @@ if ($sched->{'after'}) {
 foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $sched->{'increment'}, $start_time,
 			  $size, $ok, "sched", $output, $errdoms,
-			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'});
+			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
+			  $sched->{'fmt'});
 	}
 
 PREFAILED:

@@ -390,7 +390,9 @@ $output = &stop_print_capture();
 &cleanup_backup_limits(0, 1);
 foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $increment, $start_time,
-			  $size, $ok, "api", $output, $errdoms, undef, $key);
+			  $size, $ok, "api", $output, $errdoms, undef, $key,
+			  undef,
+			  $separate && $newformat ? 2 : $separate ? 1 : 0);
 	}
 &stop_running_backup($sched);
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
