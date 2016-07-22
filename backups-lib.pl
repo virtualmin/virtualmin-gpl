@@ -577,9 +577,7 @@ local @backupfeatures = @$features;
 local $hfsuffix;
 if ($homefmt) {
 	@backupfeatures = ((grep { $_ ne "dir" } @$features), "dir");
-	$hfsuffix = $config{'compression'} == 0 ? "tar.gz" :
-		    $config{'compression'} == 1 ? "tar.bz2" :
-		    $config{'compression'} == 3 ? "zip" : "tar";
+	$hfsuffix = &compression_to_suffix($config{'compression'});
 	}
 
 # Take a lock on the backup destination, to avoid concurrent backups to
@@ -5076,6 +5074,16 @@ foreach my $sfx ("", ".info", ".dom") {
 		}
 	}
 return undef;
+}
+
+# compression_to_suffix(format)
+# Converts a compressioin format integer to a filename suffix
+sub compression_to_suffix
+{
+my ($c) = @_;
+return $c == 0 ? "tar.gz" :
+       $c == 1 ? "tar.bz2" :
+       $c == 3 ? "zip" : "tar";
 }
 
 1;

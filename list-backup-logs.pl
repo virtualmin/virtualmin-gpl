@@ -132,6 +132,16 @@ if ($multi) {
 		print "    Incremental: ",
 		      ($l->{'increment'} == 1 ? "Yes" :
 		       $l->{'increment'} == 2 ? "Disabled" : "No"),"\n";
+		if (defined($l->{'compression'})) {
+			print "    Compression: ",
+			    &compression_to_suffix($l->{'compression'}),"\n";
+			}
+		if (defined($l->{'separate'})) {
+			print "    Format: ",
+			    ($l->{'separate'} == 0 ? "Single archive file" :
+			     $l->{'separate'} == 1 ? "One file per server (old format)" :
+						    "One file per server"),"\n";
+			}
 		print "    Started: ",&make_date($l->{'start'}),"\n";
 		print "    Ended: ",&make_date($l->{'end'}),"\n";
 		if ($l->{'size'}) {

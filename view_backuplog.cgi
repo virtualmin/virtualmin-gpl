@@ -63,6 +63,18 @@ print &ui_table_row($text{'viewbackup_inc'},
 	$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
 			    	   $text{'viewbackup_inc0'});
 
+# Compression format?
+if (defined($log->{'compression'})) {
+	print &ui_table_row($text{'viewbackup_compression'},
+		&compression_to_suffix($log->{'compression'}));
+	}
+
+# File format
+if (defined($log->{'separate'})) {
+	print &ui_table_row($text{'viewbackup_separate'},
+		$text{'backup_fmt'.$log->{'separate'}});
+	}
+
 # Final result
 print &ui_table_row($text{'viewbackup_ok'},
 	$log->{'ok'} && !$log->{'errdoms'} ? $text{'viewbackup_success'} :
@@ -109,7 +121,8 @@ if (@dnames == @alldnames) {
 	}
 
 if ($log->{'ok'} || $log->{'errdoms'}) {
-	print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ] ]);
+	print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ],
+			     [ 'delete', $text{'viewbackup_delete'} ] ]);
 	}
 else {
 	print &ui_form_end();
