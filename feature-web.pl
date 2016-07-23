@@ -2761,16 +2761,30 @@ if ($tmpl->{'id'} == 0) {
 	}
 }
 
+# list_php_wrapper_templates()
+# Returns the list of template names for PHP wrappers, based on the installed
+# PHP versions
+sub list_php_wrapper_templates
+{
+my @vers = &list_available_php_versions();
+my @rv;
+push(@rv, map { "php".$_->[0]."cgi" } @vers);
+push(@rv, map { "php".$_->[0]."fcgi" } @vers);
+return @rv;
+}
+
 # show_template_phpwrappers(&template)
 # Outputs HTML for setting custom PHP wrapper scripts
 sub show_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (@php_wrapper_templates) {
+foreach my $w (&list_php_wrapper_templates()) {
 	local $ndi = &none_def_input($w, $tmpl->{$w},
 				     $text{'tmpl_wrapperbelow'}, 0, 0,
 				     $text{'tmpl_wrappernone'}, [ $w ]);
-	print &ui_table_row(&hlink($text{'tmpl_'.$w}, "template_".$w),
+	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
+	local ($v, $t) = ($1, $2);
+	print &ui_table_row(&hlink(&text('tmpl_php'.$t, $v), "template_".$w),
 			    $ndi."<br>".
 		&ui_textarea($w, $tmpl->{$w} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{$w})),
@@ -2783,7 +2797,9 @@ foreach my $w (@php_wrapper_templates) {
 sub parse_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (@php_wrapper_templates) {
+foreach my $w (&list_php_wrapper_templates()) {
+	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
+	local ($v, $t) = ($1, $2);
 	if ($in{$w."_mode"} == 0) {
 		$tmpl->{$w} = 'none';
 		}
@@ -2792,7 +2808,7 @@ foreach my $w (@php_wrapper_templates) {
 		}
 	elsif ($in{$w."_mode"} == 2) {
 		$in{$w} =~ s/\r//g;
-		$in{$w} =~ /^\#\!/ || &error($text{'tmpl_e'.$w});
+		$in{$w} =~ /^\#\!/ || &error(&text('tmpl_ephp'.$t, $v));
 		$tmpl->{$w} = $in{$w};
 		$tmpl->{$w} =~ s/\n/\t/g;
 		}

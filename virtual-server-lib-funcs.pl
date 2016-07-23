@@ -8683,7 +8683,7 @@ push(@rv, { 'id' => 0,
 	    'autoconfig' => $config{'tmpl_autoconfig'} || "none",
 	    'outlook_autoconfig' => $config{'tmpl_outlook_autoconfig'} || "none",
 	  } );
-foreach my $w (@php_wrapper_templates) {
+foreach my $w (&list_php_wrapper_templates()) {
 	$rv[0]->{$w} = $config{$w} || 'none';
 	}
 foreach my $phpver (@all_possible_php_versions) {
@@ -8993,7 +8993,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
-	foreach my $w (@php_wrapper_templates) {
+	foreach my $w (&list_php_wrapper_templates()) {
 		$config{$w} = $tmpl->{$w};
 		}
 	my %avail = map { split(/=/, $_) } split(/\s+/, $tmpl->{'avail'});
@@ -9095,7 +9095,7 @@ if (!$tmpl->{'default'}) {
 		    "ipfollow",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
-		    @php_wrapper_templates,
+		    &list_php_wrapper_templates(),
 		    "capabilities",
 		    "featurelimits",
 		    "hashpass", "hashtypes", "autoconfig", "outlook_autoconfig",
