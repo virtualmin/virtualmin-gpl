@@ -5085,6 +5085,7 @@ sub delete_backup
 {
 my ($dest) = @_;
 my ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
+my $rsh;
 foreach my $sfx ("", ".info", ".dom") {
 	my $spath = $path.$sfx;
 	my $err;
@@ -5105,16 +5106,17 @@ foreach my $sfx ("", ".info", ".dom") {
 		&run_ssh_command($rmcmd, $pass, \$err);
 		}
 	elsif ($proto == 3) {
-		# S3 bucket
-		# XXX
+		# S3 bucket file
+		$err = &s3_delete_file($user, $pass, $host, $spath);
 		}
 	elsif ($proto == 6) {
-		# Rackspace container
-		# XXX
+		# Rackspace container file
+		$rsh ||= &rs_connect($config{'rs_endpoint'}, $user, $pass);
+		$err = &rs_delete_object($rsh, $host, $spath);
 		}
 	elsif ($proto == 7) {
-		# GCS bucket
-		# XXX
+		# GCS bucket file
+		$err = &delete_gcs_file($host, $spath);
 		}
 	elsif ($proto == 8) {
 		# Dropbox file
@@ -5127,7 +5129,6 @@ foreach my $sfx ("", ".info", ".dom") {
 			}
 		}
 	else {
-		# XXX
 		return "Deletion of remote backups is not supported yet";
 		}
 	if ($err && !$sfx) {
