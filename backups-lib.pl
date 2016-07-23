@@ -5057,6 +5057,28 @@ my $file = $backups_running_dir."/".$sched->{'id'}."-".$sched->{'pid'};
 unlink($file);
 }
 
+# delete_backup_from_log(&log)
+# If a backup log used a separate file for each domain, delete them all
+sub delete_backup_from_log
+{
+my ($log) = @_;
+my $dest = $log->{'dest'};
+my $c = defined($log->{'compression'}) ? $log->{'compression'}
+				       : $config{'compression'};
+my $sfx = &compression_to_suffix($c);
+if ($log->{'separate'}) {
+	my $err;
+	foreach my $dname (split(/\s+/, $log->{'doms'})) {
+		my $ddest = $dest."/".$dname.".".$sfx;
+		$err ||= &delete_backup($ddest);
+		}
+	return $err;
+	}
+else {
+	return &delete_backup($dest);
+	}
+}
+
 # delete_backup(dest)
 # Delete the backup from some destination path, like /backup/foo.com.tar.gz
 sub delete_backup
@@ -5064,13 +5086,52 @@ sub delete_backup
 my ($dest) = @_;
 my ($proto, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 foreach my $sfx ("", ".info", ".dom") {
+	my $spath = $path.$sfx;
+	my $err;
 	if ($proto == 0) {
-		# File on server
-		&unlink_logged($path.$sfx);
+		# File on this system
+		$err = &unlink_logged($spath) ? undef : $!;
+		}
+	elsif ($proto == 1) {
+		# FTP server
+		&ftp_deletefile($host, $path, \$err, $user, $pass, $port);
+		}
+	elsif ($proto == 2) {
+		# SSH server
+		my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
+			     $config{'ssh_args'}." ".
+			     $user."\@".$host;
+		my $rmcmd = $sshcmd." rm -rf ".quotemeta($spath);
+		&run_ssh_command($rmcmd, $pass, \$err);
+		}
+	elsif ($proto == 3) {
+		# S3 bucket
+		# XXX
+		}
+	elsif ($proto == 6) {
+		# Rackspace container
+		# XXX
+		}
+	elsif ($proto == 7) {
+		# GCS bucket
+		# XXX
+		}
+	elsif ($proto == 8) {
+		# Dropbox file
+		if ($spath =~ /^(.*)\/([^\/]+)$/) {
+			my ($dir, $f) = ($1, $2);
+			$err = &delete_dropbox_path($dir, $f);
+			}
+		else {
+			$err = &delete_dropbox_path($spath);
+			}
 		}
 	else {
 		# XXX
 		return "Deletion of remote backups is not supported yet";
+		}
+	if ($err && !$sfx) {
+		return $err;
 		}
 	}
 return undef;

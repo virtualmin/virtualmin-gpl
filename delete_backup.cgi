@@ -20,9 +20,9 @@ scalar(@alldnames) == scalar(@owndnames) ||
 if ($in{'confirm'}) {
 	# Do it
 	&$first_print(&text('dbackup_doing', &nice_backup_url($log->{'dest'})));
-	$err = &delete_backup($log->{'dest'});
+	$err = &delete_backup_from_log($log);
 	if (!$err) {
-		$err ||= &delete_backup_log($log);
+		$err = &delete_backup_log($log);
 		}
 	if ($err) {
 		&$second_print(&text('dbackup_failed', $err));

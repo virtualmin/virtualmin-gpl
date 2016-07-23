@@ -54,9 +54,14 @@ if ($id) {
 	}
 
 print "Deleting backup at $dest ..\n";
-$err = &delete_backup($dest);
-if ($id && !$err) {
-	$err ||= &delete_backup_log($log);
+if ($log) {
+	$err = &delete_backup_from_log($log);
+	}
+else {
+	$err = &delete_backup($dest);
+	}
+if ($log && !$err) {
+	$err = &delete_backup_log($log);
 	}
 &virtualmin_api_log(\@OLDARGV, { 'dest' => $dest, 'id' => $id });
 if ($err) {
