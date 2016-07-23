@@ -1,0 +1,4 @@
+desc=Delete backups
+html=Backups can now be deleted either from the Backup Logs page, or using the delete-backup API command.
+master=1
+link=backuplog.cgi
