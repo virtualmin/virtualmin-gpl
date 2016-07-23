@@ -2,11 +2,18 @@
 # Show a form for restoring a single virtual server, or a bunch
 
 require './virtual-server-lib.pl';
+&ReadParse();
+
+if ($in{'delete'}) {
+	# Redirect to backup deletion page
+	&redirect("delete_backup.cgi?id=".&urlize($in{'log'}));
+	return;
+	}
+
 $crmode = &can_restore_domain();
 $crmode || &error($text{'restore_ecannot'});
 $safe_backup = $crmode == 1 ? 1 : 0;
 &ui_print_header(undef, $text{'restore_title'}, "");
-&ReadParse();
 
 if ($in{'sched'}) {
 	# Get the schedule being restored from
