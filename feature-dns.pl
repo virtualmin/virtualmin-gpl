@@ -202,7 +202,7 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
 	if (-r $rootfile && -f $rootfile) {
-		&unlink_Logged($rootfile);
+		&unlink_logged($rootfile);
 		}
 	if ($copyfromalias) {
 		&create_alias_records($file, $_[0], $ip);
