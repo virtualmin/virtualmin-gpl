@@ -333,6 +333,7 @@ elsif (!$_[0]->{'dns_submode'}) {
 		unlink($bind8::zone_names_cache);
 		undef(@bind8::list_zone_names_cache);
 		undef(@bind8::get_config_cache);
+		undef(%bind8::get_config_parent_cache);
 		&$second_print($text{'setup_done'});
 		}
 	else {
