@@ -43,6 +43,12 @@ else {
 	&ui_print_unbuffered_header(&domain_in($d),
 				    $text{'letsencrypt_title'}, "");
 
+	# Run the before command
+	&set_domain_envs($oldd, "SSL_DOMAIN", $d);
+	$merr = &making_changes();
+	&reset_domain_envs($oldd);
+	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 	&$first_print(&text('letsencrypt_doing2',
 			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	&foreign_require("webmin");
@@ -97,6 +103,13 @@ else {
 
 		&release_lock_ssl($d);
 		&$second_print($text{'setup_done'});
+
+		# Run the after command
+		&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
+		local $merr = &made_changes();
+		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
+			if (defined($merr));
+		&reset_domain_envs($d);
 
 		&run_post_actions();
 		&webmin_log("letsencrypt", "domain", $d->{'dom'}, $d);

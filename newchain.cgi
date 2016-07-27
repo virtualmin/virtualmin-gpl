@@ -59,6 +59,12 @@ elsif ($in{'mode'} == 3) {
 	&unlock_file($chain);
 	}
 
+# Run the before command
+&set_domain_envs($oldd, "SSL_DOMAIN", $d);
+$merr = &making_changes();
+&reset_domain_envs($oldd);
+&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 # Apply it, including domains that share a cert
 &set_all_null_print();
 &obtain_lock_ssl($d);
@@ -80,6 +86,12 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_website_ssl_file($od, 'ca', $chain);
 	&save_domain($od);
 	}
+
+# Run the after command
+&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
 
 &run_post_actions();
 &domain_redirect($d);

@@ -55,8 +55,6 @@ $err && &error(&text('newkey_ecert2', $err));
 $err = &validate_cert_format($newkey, "key");
 $err && &error(&text('newkey_enewkey2', $err));
 
-#&error("key=<pre>".$newkey."</pre> cert=<pre>".$cert."</pre>");
-
 # Check if a passphrase is needed
 $passok = &check_passphrase($newkey, $in{'pass_def'} ? undef : $in{'pass'});
 $passok || &error($text{'newkey_epass'});
@@ -66,6 +64,12 @@ $certerr = &check_cert_key_match($cert, $newkey);
 $certerr && &error(&text('newkey_ematch', $certerr));
 
 &ui_print_header(&domain_in($d), $text{'newkey_title'}, "");
+
+# Run the before command
+&set_domain_envs($oldd, "SSL_DOMAIN", $d);
+$merr = &making_changes();
+&reset_domain_envs($oldd);
+&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 # Break SSL linkages that no longer work with this cert
 $temp = &transname();
@@ -160,6 +164,12 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_domain_passphrase($od);
 	&save_domain($od);
 	}
+
+# Run the after command
+&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
 
 &run_post_actions();
 &webmin_log("newkey", "domain", $d->{'dom'}, $d);
