@@ -40,7 +40,8 @@ if ($in{'only'}) {
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
 else {
-	&ui_print_unbuffered_header(&domain_in($d), $text{'letsencrypt_title'}, "");
+	&ui_print_unbuffered_header(&domain_in($d),
+				    $text{'letsencrypt_title'}, "");
 
 	&$first_print(&text('letsencrypt_doing2',
 			    join(", ", map { "<tt>$_</tt>" } @dnames)));
@@ -77,8 +78,9 @@ else {
 			&sync_postfix_ssl_cert($d, 1);
 			}
 
-		# For domains that were using the SSL cert on this domain originally but
-		# can no longer due to the cert hostname changing, break the linkage
+		# For domains that were using the SSL cert on this domain
+		# originally but can no longer due to the cert hostname
+		# changing, break the linkage
 		&break_invalid_ssl_linkages($d);
 
 		# Copy SSL directives to domains using same cert
