@@ -47,7 +47,7 @@ if (!$d->{'parent'} && defined($in{'plan'})) {
 
 # Check if the prefix has been changed
 if (defined($in{'prefix'})) {
-	$in{'prefix'} =~ /^[a-z0-9\.\-]+$/i ||
+	$in{'prefix'} =~ /^[a-z0-9\.\-\_]+$/i ||
 		&error($text{'setup_eprefix'});
 	if ($in{'prefix'} ne $d->{'prefix'}) {
 		$pclash = &get_domain_by("prefix", $in{'prefix'});
