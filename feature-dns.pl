@@ -1963,7 +1963,12 @@ if ($file) {
 		local @ns = grep { $_->{'type'} eq 'NS' } @recs;
 		foreach my $r (@thisns) {
 			# Create NS records that were in new system's file
-			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+			my $name = $r->{'name'};
+			$name =~ s/\.disabled\.$/\./;
+			if (@ns && $ns[0]->{'name'} =~ /\.disabled\.$/) {
+				$name .= "disabled.";
+				}
+			&bind8::create_record($file, $name, $r->{'ttl'},
 					      $r->{'class'}, $r->{'type'},
 					      &join_record_values($r),
 					      $r->{'comment'});
