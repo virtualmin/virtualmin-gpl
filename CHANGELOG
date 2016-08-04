@@ -1543,4 +1543,4 @@ In the post-installation wizard, if Virtualmin does not know the current MySQL p
 Added a config option to redirect HTTP requests to HTTPS for new domains (if they have an SSL website enabled).
 Backups can now be deleted either from the Backup Logs page, or using the delete-backup API command.
 ---- Changes since 5.04 ----
-Updated the Moodle script installer to version 2.9.7.
+Updated the Moodle script installer to version 2.9.7, and Pydio to 6.4.2.
