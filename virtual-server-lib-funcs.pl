@@ -6419,6 +6419,9 @@ if (&check_ratelimit() eq '') {
 			}
 		}
 	}
+else {
+	&$second_print($text{'restore_vmailserver_missing'});
+	}
 
 &release_lock_mail();
 
