@@ -2568,7 +2568,10 @@ foreach my $sql (&get_user_creation_sql($host, $user,$encpass)) {
 sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
-if ($mysql::mysql_version >= 5) {
+if (&compare_versions($mysql::mysql_version, "5.7.6") >= 0) {
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
+	}
+elsif (&compare_versions($mysql::mysql_version, 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
