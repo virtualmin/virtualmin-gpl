@@ -7783,6 +7783,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
 
 		$dom->{'letsencrypt_dname'} = '';
 		$dom->{'letsencrypt_last'} = time();
+		$dom->{'letsencrypt_renew'} ||= 2;
 		&save_domain($dom);
 
 		if ($dom->{'virt'}) {
