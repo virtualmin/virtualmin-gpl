@@ -2123,7 +2123,8 @@ if ($ok) {
 					}
 				}
 			if (!$tmpl) {
-				&$second_print($text{'restore_etemplate'});
+				&$second_print(&text('restore_etemplate',
+						     $d->{'template'}));
 				$ok = 0;
 				if ($continue) { next DOMAIN; }
 				else { last DOMAIN; }
