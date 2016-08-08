@@ -51,6 +51,19 @@ if ($nameonly) {
 		print $tmpl->{'name'},"\n";
 		}
 	}
+elsif ($multiline) {
+	# Multiline format with some details
+	foreach $tmpl (@tmpls) {
+		print $tmpl->{'id'},"\n";
+		print "    Name: ",$tmpl->{'name'},"\n";
+		foreach $w ('web', 'dns', 'ftp', 'logrotate', 'mail_on') {
+			($sw = $w) =~ s/_on$//;
+			print "    Custom ${sw}: ",
+			      ($tmpl->{$w} eq "none" ? "None" :
+			       $tmpl->{$w} eq "" ? "Default" : "Custom"),"\n";
+			}
+		}
+	}
 else {
 	# More details
 	$fmt = "%-18.18s %-60.60s\n";
