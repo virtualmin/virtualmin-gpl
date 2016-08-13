@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Moodle script installer to version 2.9.7, Piwik to 2.16.2, Drupal to 8.1.8, osTicket to 1.8.12, and Pydio to 6.4.2.
+html=Updated the Moodle script installer to version 2.9.7, Piwik to 2.16.2, Drupal to 8.1.8, osTicket to 1.9.14 and 1.8.12, and Pydio to 6.4.2.
 master=1
 reseller=1
 domain=1
