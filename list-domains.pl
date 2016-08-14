@@ -327,6 +327,7 @@ if ($multi) {
 		print "    Contact email: $d->{'emailto'}\n";
 		print "    Contact address: $d->{'emailto_addr'}\n";
 		print "    Created on: ",&make_date($d->{'created'}),"\n";
+		print "    Created Unix time: ",$d->{'created'},"\n";
 		if ($d->{'creator'}) {
 			print "    Created by: $d->{'creator'}\n";
 			}
