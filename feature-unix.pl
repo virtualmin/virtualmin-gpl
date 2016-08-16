@@ -588,10 +588,11 @@ if (!$d->{'parent'}) {
 		$d->{'disabled_oldpass'} = $uinfo->{'pass'};
 		$uinfo->{'pass'} = $uconfig{'lock_string'};
 		my ($nologin_shell) = &get_common_available_shells();
-		if ($nologin_shell && $uinfo->{'shell'} ne $nologin_shell) {
+		if ($nologin_shell &&
+		    $uinfo->{'shell'} ne $nologin_shell->{'shell'}) {
 			# Also switch to no-login shell
 			$d->{'disabled_shell'} = $uinfo->{'shell'};
-			$uinfo->{'shell'} = $nologin_shell;
+			$uinfo->{'shell'} = $nologin_shell->{'shell'};
 			}
 		else {
 			delete($d->{'disabled_shell'});
