@@ -293,6 +293,7 @@ $sofile ||
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();
 local $cfile = "$opts->{'dir'}/configuration.php";
+local $cfilesrc = "$opts->{'dir'}/configuration.php.new";
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
 				     $opts->{'dir'}, "whmcs");
 $err && return (0, "Failed to extract source : $err");
@@ -345,10 +346,16 @@ if (!$got) {
 &restart_apache();
 &pop_all_print();
 
-# Create empty config file
 if (!-r $cfile) {
-	&open_tempfile_as_domain_user($d, CFILE, ">$cfile");
-	&close_tempfile_as_domain_user($d, CFILE);
+	if (-r $cfilesrc) {
+		# Use template config file
+		&copy_source_dest_as_domain_user($d, $cfilesrc, $cfile);
+		}
+	else {
+		# Create empty config file
+		&open_tempfile_as_domain_user($d, CFILE, ">$cfile");
+		&close_tempfile_as_domain_user($d, CFILE);
+		}
 	&make_file_php_writable($d, $cfile);
 	}
 
