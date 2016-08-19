@@ -85,6 +85,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--home-only") {
 		$homeonly = 1;
 		}
+	elsif ($a eq "--file-only") {
+		$fileonly = 1;
+		}
 	elsif ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -749,6 +752,12 @@ elsif ($homeonly) {
 		print $d->{'home'},"\n";
 		}
 	}
+elsif ($fileonly) {
+	# Just domain files
+	foreach $d (@doms) {
+		print $d->{'file'},"\n";
+		}
+	}
 else {
 	# Just show summary table
 	$fmt = "%-30.30s %-15.15s %-30.30s\n";
@@ -765,7 +774,8 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the virtual servers on this system.\n";
 print "\n";
 print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
-print "                         --simple-multiline | --user-only | --home-only]\n";
+print "                         --simple-multiline | --user-only |\n";
+print "                         --home-only | --file-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
 print "                        [--mail-user name]*\n";
