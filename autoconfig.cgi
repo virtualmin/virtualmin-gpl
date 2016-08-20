@@ -40,6 +40,7 @@ elsif ($ENV{'REQUEST_METHOD'} eq 'POST') {
 	$buf =~ /<EMailAddress>([^@<>]+)@([^<>]+)<\/EMailAddress>/i ||
 		&error_exit("EMailAddress missing from input XML");
 	($mailbox, $SMTP_DOMAIN) = ($1, $2);
+	$email = $1."\@".$2;
 	}
 else {
 	&error_exit("Missing emailaddress parameter");
