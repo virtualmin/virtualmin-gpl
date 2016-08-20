@@ -34,7 +34,7 @@ return 1;
 
 sub script_whmcs_release
 {
-return 3;
+return 4;	# To fix copy of default config file
 }
 
 sub script_whmcs_category
