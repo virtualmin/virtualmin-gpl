@@ -200,9 +200,13 @@ foreach $d (&list_domains()) {
 		# Update black or white list, for senders who are not local
 		$cf = $m->{'spamtrap'} ? 'spam_trap_black' : 'ham_trap_white';
 		$dir = $m->{'spamtrap'} ? 'blacklist_from' : 'whitelist_from';
+		print STDERR "$d->{'dom'}: ${cf}: $config{$cf}\n"
+			if ($debug);
 		if ($config{$cf}) {
 			$spamcfile = "$spam_config_dir/$d->{'id'}/".
 				     "virtualmin.cf";
+			print STDERR "$d->{'dom'}: config: $spamcfile\n"
+				if ($debug);
 			$conf = &spam::get_config($config{$cf} == 2 ? undef :
 						   $spamcfile);
 			@from = map { @{$_->{'words'}} }
@@ -212,6 +216,8 @@ foreach $d (&list_domains()) {
 			foreach $e (&unique(@senders)) {
 				$euser = &find_user_by_email(
 					$e, \@users, \@aliases);
+				print STDERR "$d->{'dom'}: sender: $e\n"
+					if ($debug);
 				if (!$euser && !$already{$e}) {
 					push(@from, $e);
 					print STDERR "$d->{'dom'}: Adding $e",
