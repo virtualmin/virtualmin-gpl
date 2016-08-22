@@ -1896,6 +1896,7 @@ foreach my $d (&list_domains()) {
 	else {
 		@dnames = &get_hostnames_for_ssl($d);
 		}
+	&foreign_require("webmin");
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		\@dnames, $phd, $d->{'emailto'});
 
