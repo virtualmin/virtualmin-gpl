@@ -363,7 +363,7 @@ if ($got{'dns'} && -r $dnsfile) {
 				$r->{'comment'});
 			}
 		}
-	&post_records_change(\%dom, $zdstfile, $recs);
+	&post_records_change(\%dom, $recs, $zdstfile);
 	&$second_print(".. done");
 	&register_post_action(\&restart_bind);
 	}
