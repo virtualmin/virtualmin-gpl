@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the Moodle script installer to version 2.9.7, Piwik to 2.16.2, Drupal to 8.1.8, osTicket to 1.9.14 and 1.8.12, Mantis to 1.3.0, Rainloop to 1.10.3.151, phpMyAdmin to 4.6.4, 4.0.10.17 and 4.4.15.8, Wordpress to 4.6, Joomla to 3.6.2, MediaWiki to 1.27.1, and Pydio to 6.4.2.
+html=Updated the Moodle script installer to version 2.9.7, Piwik to 2.16.2, Drupal to 8.1.8, osTicket to 1.9.14 and 1.8.12, Mantis to 1.3.0, Rainloop to 1.10.3.151, phpMyAdmin to 4.6.4, 4.0.10.17 and 4.4.15.8, Wordpress to 4.6, Joomla to 3.6.2, MediaWiki to 1.27.1, ZenPhoto to 1.4.13, and Pydio to 6.4.2.
 master=1
 reseller=1
 domain=1
