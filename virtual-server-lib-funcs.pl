@@ -16720,6 +16720,10 @@ $d->{'db'} = &database_name($d);
 $d->{'no_mysql_db'} = 1;	# Don't create DB automatically
 $d->{'no_tmpl_aliases'} = 1;	# Don't create any aliases
 
+# Fix creator
+$d->{'created'} = time();
+$d->{'creator'} = $remote_user ||  getpwuid($<);
+
 # Fix any paths that refer to old home, like SSL certs
 foreach my $k (keys %$d) {
 	next if ($k eq "home");	# already fixed
