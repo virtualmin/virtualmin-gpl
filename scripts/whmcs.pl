@@ -395,6 +395,7 @@ if (!$upgrade) {
 	local $firstname = $d->{'owner'};
 	$firstname =~ s/\s.*$//;
 	$firstname =~ s/['"]//g;
+	$firstname ||= $d->{'dom'};
 	if (length($dompass) <= 5) {
 		$dompass .= "12345";
 		}
