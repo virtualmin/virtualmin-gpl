@@ -219,7 +219,7 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--letsencrypt-renew") {
 		$renew = shift(@ARGV);
-		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
+		$renew =~ /^\d+(\.\d+)?$/ && $renew > 0 ||
 		    &usage("--letsencrypt-renew must be followed by a number of months");
 		}
 	elsif ($a eq "--no-letsencrypt-renew") {

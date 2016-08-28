@@ -24,7 +24,7 @@ else {
 		}
 	$custom_dname = join(" ", @dnames);
 	}
-$in{'renew_def'} || $in{'renew'} =~ /^[1-9][0-9]*$/ ||
+$in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
 	&error($text{'letsencrypt_erenew'});
 
 if ($in{'only'}) {
