@@ -646,6 +646,7 @@ if (!$alias) {
 		}
 	}
 else {
+	# IP comes from alias target
 	$ip = $alias->{'ip'};
 	$ip6 = $alias->{'ip6'};
 	}
@@ -702,6 +703,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	       $sharedip ? $sharedip : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
+		   $alias ? $alias->{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip($resel),
          'virt', $virt,

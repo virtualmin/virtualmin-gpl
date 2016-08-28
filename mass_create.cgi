@@ -326,7 +326,8 @@ foreach $line (@lines) {
 		 'ip6', $ip6,
 		 'netmask', $netmask,
 		 'netmask6', $netmask6,
-		 'dns_ip', $virt || $config{'all_namevirtual'} ? undef :
+		 'dns_ip', $alias ? $alias->{'dns_ip'} :
+			   $virt || $config{'all_namevirtual'} ? undef :
 			   &get_dns_ip($resel),
 		 'virt', $virt,
 		 'virt6', $virt6,
