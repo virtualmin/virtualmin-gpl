@@ -505,16 +505,21 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 	local $lref = &read_file_lines($c);
 	local $sfile;
 	local $clamuser;
+	local $added_socketmode = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\s*LocalSocket\s+(\S+)/) {
 			$sfile = $1;
 			}
 		elsif ($l =~ /^\s*LocalSocketMode\s+/) {
 			$l = "LocalSocketMode 666";
+			$added_socketmode++;
 			}
 		elsif ($l =~ /^\s*User\s+(\S+)/) {
 			$clamuser = $1;
 			}
+		}
+	if (!$added_socketmode) {
+		push(@$lref, "LocalSocketMode 666");
 		}
 	&flush_file_lines($c);
 	if ($sfile =~ /^(\S+)\/([^\/]+)$/) {
