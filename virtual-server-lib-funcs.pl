@@ -16804,6 +16804,11 @@ if ($cerr) {
 	}
 &$second_print($text{'setup_done'});
 
+# By default the old chained cert doesn't need to be used by the clone,
+# because it won't get copied over and the SSL cert is being re-generated
+# anyway.
+delete($d->{'ssl_chain'});
+
 # Create it
 &$first_print($text{'clone_create'});
 &$indent_print();
