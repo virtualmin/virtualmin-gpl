@@ -1583,7 +1583,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 sub break_ssl_linkage
 {
 local ($d, $samed) = @_;
-foreach my $k ('cert', 'key', 'ca') {
+foreach my $k ('cert', 'key', 'chain') {
 	if ($d->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
 		if ($d->{'user'} eq $samed->{'user'}) {
