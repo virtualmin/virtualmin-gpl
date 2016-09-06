@@ -1296,6 +1296,7 @@ else {
 sub default_certificate_file
 {
 local ($d, $mode) = @_;
+$mode = "ca" if ($mode eq "chain");
 return $config{$mode.'_tmpl'} ?
 	    &absolute_domain_path($d,
 	     &substitute_domain_template($config{$mode.'_tmpl'}, $d)) :
