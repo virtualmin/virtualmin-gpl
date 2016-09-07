@@ -17003,7 +17003,7 @@ local $dir = $type eq 'cert' ? "SSLCertificateFile" :
 	     $type eq 'key' ? "SSLCertificateKeyFile" :
 	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
 if ($dir) {
-	&apache::save_directive($dir, [ $file ], $vconf, $conf);
+	&apache::save_directive($dir, $file ? [ $file ] : [ ], $vconf, $conf);
 	}
 &release_lock_ssl($d);
 if ($dir) {
