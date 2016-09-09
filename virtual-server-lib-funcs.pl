@@ -14066,7 +14066,7 @@ if ($config{'logrotate'}) {
 		return &text('index_elogrotate', "/logrotate/", $clink);
 	&foreign_require("logrotate");
 	local $ver = &logrotate::get_logrotate_version();
-	$ver >= 3.6 ||
+	&compare_versions($ver, 3.6) >= 0 ||
 		return &text('index_elogrotatever', "/logrotate/",
 				   $clink, $ver, 3.6);
 
