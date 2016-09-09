@@ -332,6 +332,7 @@ my $line;
 ($line = &read_http_connection($h)) =~ tr/\r\n//d;
 if ($line !~ /^HTTP\/1\..\s+(20[0-9])(\s+|$)/) {
 	alarm(0);
+	&close_http_connection($h);
 	return (0, $line ? "Invalid HTTP response : $line"
 			 : "Empty HTTP response");
 	}
@@ -345,6 +346,7 @@ while(1) {
 	}
 alarm(0);
 if ($main::download_timed_out) {
+	&close_http_connection($h);
 	return (0, $main::download_timed_out);
 	}
 
@@ -360,6 +362,7 @@ else {
 	# Write to a file
 	my $got = 0;
 	if (!&open_tempfile(PFILE, ">$dstfile", 1)) {
+		&close_http_connection($h);
 		return (0, "Failed to write to $dstfile : $!");
 		}
 	binmode(PFILE);		# For windows
@@ -370,6 +373,7 @@ else {
 	&close_tempfile(PFILE);
 	if ($header{'content-length'} &&
 	    $got != $header{'content-length'}) {
+		&close_http_connection($h);
 		return (0, "Download incomplete");
 		}
 	}
