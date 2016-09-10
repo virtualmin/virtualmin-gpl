@@ -4421,9 +4421,9 @@ elsif ($mode == 3 && $host =~ /\%/) {
 		return 0;
 		}
 	foreach my $b (@$buckets) {
-		local $ctime = &s3_parse_date($b->{'CreationDate'});
 		if ($b->{'Name'} =~ /^$re$/) {
 			# Found one to delete
+			local $ctime = &s3_parse_date($b->{'CreationDate'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
@@ -4462,9 +4462,9 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $f (@$files) {
-		local $ctime = &s3_parse_date($f->{'LastModified'});
 		if ($f->{'Key'} =~ /^$re$/ && $f->{'Key'} !~ /\.(dom|info)$/) {
 			# Found one to delete
+			local $ctime = &s3_parse_date($f->{'LastModified'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
@@ -4501,11 +4501,11 @@ elsif ($mode == 6 && $host =~ /\%/) {
 		return 0;
 		}
 	foreach my $c (@$containers) {
-		local $st = &rs_stat_container($rsh, $c);
-		next if (!ref($st));
-		local $ctime = int($st->{'X-Timestamp'});
 		if ($c =~ /^$re$/) {
 			# Found one to delete
+			local $st = &rs_stat_container($rsh, $c);
+			next if (!ref($st));
+			local $ctime = int($st->{'X-Timestamp'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
@@ -4539,12 +4539,12 @@ elsif ($mode == 6 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $f (@$files) {
-		local $st = &rs_stat_object($rsh, $host, $f);
-		next if (!ref($st));
-		local $ctime = int($st->{'X-Timestamp'});
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete
+			local $st = &rs_stat_object($rsh, $host, $f);
+			next if (!ref($st));
+			local $ctime = int($st->{'X-Timestamp'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
@@ -4609,10 +4609,10 @@ elsif ($mode == 7 && $path =~ /\%/) {
 		}
 	foreach my $st (@$files) {
 		my $f = $st->{'name'};
-		local $ctime = &google_timestamp($st->{'updated'});
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete
+			local $ctime = &google_timestamp($st->{'updated'});
 			$mcount++;
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
