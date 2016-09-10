@@ -270,12 +270,14 @@ elsif ($virt6 && $d->{'virt6'} && $d->{'ip6'} ne $ip6) {
 
 # Update for web ports
 if (&domain_has_website($d)) {
-	$d->{'web_port'} = $in{'port'};
-	$d->{'web_sslport'} = $in{'sslport'};
-	$d->{'web_urlport'} =
-		$in{'urlport_def'} ? undef : $in{'urlport'};
-	$d->{'web_urlsslport'} =
-		$in{'urlsslport_def'} ? undef : $in{'urlsslport'};
+	foreach my $pd ($d, &get_domain_by("alias", $d->{'id'})) {
+		$pd->{'web_port'} = $in{'port'};
+		$pd->{'web_sslport'} = $in{'sslport'};
+		$pd->{'web_urlport'} =
+			$in{'urlport_def'} ? undef : $in{'urlport'};
+		$pd->{'web_urlsslport'} =
+			$in{'urlsslport_def'} ? undef : $in{'urlsslport'};
+		}
 	}
 
 # Run the before command

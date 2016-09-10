@@ -558,17 +558,19 @@ foreach $d (@doms) {
 
 
 	# Change web ports
-	if ($port) {
-		$d->{'web_port'} = $port;
-		}
-	if ($sslport) {
-		$d->{'web_sslport'} = $sslport;
-		}
-	if ($urlport) {
-		$d->{'web_urlport'} = $urlport;
-		}
-	if ($urlsslport) {
-		$d->{'web_urlsslport'} = $urlsslport;
+	foreach my $pd ($d, &get_domain_by("alias", $d->{'id'})) {
+		if ($port) {
+			$pd->{'web_port'} = $port;
+			}
+		if ($sslport) {
+			$pd->{'web_sslport'} = $sslport;
+			}
+		if ($urlport) {
+			$pd->{'web_urlport'} = $urlport;
+			}
+		if ($urlsslport) {
+			$pd->{'web_urlsslport'} = $urlsslport;
+			}
 		}
 
 	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
