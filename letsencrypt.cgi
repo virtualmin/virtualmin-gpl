@@ -55,7 +55,8 @@ else {
 	$phd = &public_html_dir($d);
 	&suppress_letsencrypt_proxy($d);
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-					\@dnames, $phd, $d->{'emailto'});
+					\@dnames, $phd, $d->{'emailto'},
+					$config{'key_size'});
 	if (!$ok) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}

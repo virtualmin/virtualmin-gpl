@@ -33,6 +33,7 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
+$size = $config{'key_size'};
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -48,6 +49,11 @@ while(@ARGV > 0) {
 		$renew = shift(@ARGV);
 		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
 		    &usage("--renew must be followed by a number of months");
+		}
+	elsif  ($a eq "--size") {
+		$size = shift(@ARGV);
+		$size =~ /^\d+$/ ||
+		    &usage("--size must be followed by a number of bits");
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -79,7 +85,7 @@ $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
 &suppress_letsencrypt_proxy($d);
 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-                                        \@dnames, $phd, $d->{'emailto'});
+			\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
 if (!$ok) {
 	&$second_print(".. failed : $cert");
 	exit(1);

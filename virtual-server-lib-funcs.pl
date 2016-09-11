@@ -7773,7 +7773,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
 			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	my $phd = &public_html_dir($dom);
 	my ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-					    \@dnames, $phd, $dom->{'emailto'});
+		    \@dnames, $phd, $dom->{'emailto'}, $config{'key_size'});
 	if (!$ok) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}

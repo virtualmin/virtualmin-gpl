@@ -1899,7 +1899,7 @@ foreach my $d (&list_domains()) {
 		}
 	&foreign_require("webmin");
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		\@dnames, $phd, $d->{'emailto'});
+		\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
 
 	my ($subject, $body);
 	if (!$ok) {
