@@ -876,7 +876,7 @@ if ($d->{'alias_mode'}) {
 		return undef;
 		}
 	local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
-						     $d->{'web_port'});
+						     $target->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$pvirt);
 	}
 else {
