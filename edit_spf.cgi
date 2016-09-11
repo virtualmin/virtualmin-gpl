@@ -71,6 +71,17 @@ if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
 		print &ui_table_row($text{'spf_private'},
 			&ui_textarea("keyline", $key->{'privatetext'}, 10, 80,
 				     "off", 0, "readonly"));
+		$dsrecs = &get_domain_dnssec_ds_records($d);
+		if (ref($dsrecs)) {
+			$dsrecstext = &dns_records_to_text(@$dsrecs);
+			$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 10, 80,
+						  "off", 0, "readonly");
+			}
+		else {
+			$dsrecsbox = &text('spf_edsrecs', $dsrecs);
+			}
+		print &ui_table_row($text{'spf_dsrecs'},
+			$dsrecsbox);
 		print &ui_hidden_table_end();
 		}
 	}

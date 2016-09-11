@@ -3331,6 +3331,7 @@ return undef;
 sub get_domain_dnssec_ds_records
 {
 local ($d) = @_;
+&require_bind();
 local $withdot = $d->{'dom'}.".";
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 ref($recs) || return $recs;
@@ -3351,6 +3352,20 @@ local @dsrecs = &bind8::read_zone_file($dstemp, $d->{'dom'}, undef, undef, 1);
 @dsrecs = grep { $_->{'type'} eq 'DS' } @dsrecs;
 @dsrecs || return "No DS records generated!";
 return \@dsrecs;
+}
+
+# dns_records_to_text(&record, ...)
+# Returns a newline-terminate text list of DNS records
+sub dns_records_to_text
+{
+my $rv = "";
+&require_bind();
+foreach my $r (@_) {
+	$rv .= &bind8::make_record($r->{'name'}, $r->{'ttl'}, $r->{'class'},
+				   $r->{'type'}, join(" ", @{$r->{'values'}}));
+	$rv .= "\n";
+	}
+return $rv;
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])
