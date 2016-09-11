@@ -3325,6 +3325,34 @@ else {
 return undef;
 }
 
+# get_domain_dnssec_ds_records(&domain)
+# Returns the DS records for this domain (to be used at the registrar) in
+# the bind8 module's format
+sub get_domain_dnssec_ds_records
+{
+local ($d) = @_;
+local $withdot = $d->{'dom'}.".";
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+ref($recs) || return $recs;
+local ($dnskey) = grep { $_->{'type'} eq 'DNSKEY' &&
+			 $_->{'name'} eq $withdot } @$recs;
+$dnskey || return "No DNSKEY record found for $withdot";
+&has_command("dnssec-dsfromkey") ||
+	return "The dnssec-dsfromkey command was not found";
+$file = &bind8::make_chroot($file);
+local $dstemp = &transname();
+local $out = &backquote_command("dnssec-dsfromkey -f ".quotemeta($file)." ".
+				quotemeta($d->{'dom'})." 2>&1 >$dstemp");
+if ($?) {
+	return "dnssec-dsfromkey failed : $out";
+	}
+local @dsrecs = &bind8::read_zone_file($dstemp, $d->{'dom'}, undef, undef, 1);
+&unlink_file($dstemp);
+@dsrecs = grep { $_->{'type'} eq 'DS' } @dsrecs;
+@dsrecs || return "No DS records generated!";
+return \@dsrecs;
+}
+
 # obtain_lock_dns(&domain, [named-conf-too])
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns

@@ -12,6 +12,10 @@ By default, output is in a human-readable table format. However, you can
 choose to a more easily parsed and complete format with the C<--multiline>
 flag, or get a list of just record names with the C<--name-only> option.
 
+Normally the command will output the DNS records in the domain's zone file,
+but you can request to show the DNSSEC DS records that should be created
+in the registrar's zone with the C<--ds-records> flag.
+
 =cut
 
 package virtual_server;
@@ -36,6 +40,9 @@ while(@ARGV > 0) {
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
+	elsif ($a eq "--ds-records") {
+		$dsmode = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -53,7 +60,14 @@ $d = &get_domain_by("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
 $d->{'dns'} || &usage("Virtual server $dname does not have DNS enabled");
 
-@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
+if ($dsmode) {
+	$dsrecs = &get_domain_dnssec_ds_records($d);
+	ref($dsrecs) || &usage($dsrecs);
+	@recs = @$dsrecs;
+	}
+else {
+	@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
+	}
 if ($nameonly) {
 	# Only record names
 	foreach $r (@recs) {
@@ -93,6 +107,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Lists the DNS records in some domain.\n";
 print "\n";
 print "virtualmin get-dns --domain name\n";
+print "                  [--ds-records]\n";
 print "                  [--multiline | --name-only]\n";
 exit(1);
 }
