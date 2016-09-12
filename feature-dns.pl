@@ -217,6 +217,9 @@ elsif (!$_[0]->{'subdom'} && !&under_parent_domain($_[0]) ||
 	if ($tmpl->{'dnssec'} eq 'yes') {
 		&$first_print($text{'setup_dnssec'});
 		$err = &enable_domain_dnssec($_[0]);
+		if (!$err) {
+			&add_parent_dnssec_ds_records($_[0]);
+			}
 		&$second_print($err || $text{'setup_done'});
 		}
 
@@ -264,6 +267,7 @@ else {
 	&post_records_change($parent, \@recs);
 
 	&release_lock_dns($parent);
+	&add_parent_dnssec_ds_records($_[0]);
 	&$second_print($text{'setup_done'});
 	}
 &register_post_action(\&restart_bind, $_[0]);
@@ -304,6 +308,9 @@ elsif (!$_[0]->{'dns_submode'}) {
 	&obtain_lock_dns($_[0], 1);
 	local $z = &get_bind_zone($_[0]->{'dom'});
 	if ($z) {
+		# Delete DS records in parent
+		&delete_parent_dnssec_ds_records($_[0]);
+
 		# Delete any dnssec key
 		if (defined(&bind8::supports_dnssec) &&
 		    &bind8::supports_dnssec()) {
@@ -349,6 +356,7 @@ else {
 			&get_domain($_[0]->{'parent'});
 	&$first_print(&text('delete_bindsub', $parent->{'dom'}));
 	&obtain_lock_dns($parent);
+	&delete_parent_dnssec_ds_records($_[0]);
 	local $z = &get_bind_zone($parent->{'dom'});
 	if (!$z) {
 		&$second_print($text{'save_nobind'});
@@ -3304,7 +3312,8 @@ if (!defined(&bind8::supports_dnssec) ||
 	return $text{'setup_enodnssec'};
 	}
 else {
-	my ($ok, $size) = &bind8::compute_dnssec_key_size($tmpl->{'dnssec_alg'}, 1);
+	my ($ok, $size) = &bind8::compute_dnssec_key_size(
+				$tmpl->{'dnssec_alg'}, 1);
 	my $err;
 	if (!$ok) {
 		# Key size failed
@@ -3322,6 +3331,77 @@ else {
 		}
 	}
 &release_lock_dns($d);
+return undef;
+}
+
+# add_parent_dnssec_ds_records(&domain)
+# Add DS records to parent domain, if we also host it
+sub add_parent_dnssec_ds_records
+{
+my ($d) = @_;
+my $pname = $d->{'dom'};
+$pname =~ s/^([^\.]+)\.//;
+my $parent = &get_domain_by("dom", $pname);
+my $dsrecs = &get_domain_dnssec_ds_records($d);
+if ($parent && ref($dsrecs)) {
+	# Parent exists, and we have records to add
+	&obtain_lock_dns($parent);
+	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	my %already;
+	foreach my $rec (@$precs) {
+		$already{$rec->{'name'},$rec->{'type'}}++;
+		}
+	foreach my $ds (@$dsrecs) {
+		if (!$already{$ds->{'name'},$ds->{'type'}}) {
+			&bind8::create_record(
+				$pfile, $ds->{'name'}, $ds->{'ttl'},
+				$ds->{'class'}, $ds->{'type'},
+				&join_record_values($ds, 1));
+			}
+		}
+	if (!$already{$d->{'dom'}.".","NS"}) {
+		# Also need to add an NS record, or else signing will fail
+		my $tmpl = &get_template($d->{'template'});
+		my $master = &get_master_nameserver($tmpl);
+		&bind8::create_record(
+			$pfile, $d->{'dom'}.".", undef,
+			"IN", "NS", $master);
+		}
+	&post_records_change($parent, $precs, $pfile);
+	&release_lock_dns($parent);
+	}
+
+return undef;
+}
+
+# delete_parent_dnssec_ds_records(&domain)
+# Delete any DS records in the parent for a sub-domain
+sub delete_parent_dnssec_ds_records
+{
+my ($d) = @_;
+my $pname = $d->{'dom'};
+$pname =~ s/^([^\.]+)\.//;
+my $parent = &get_domain_by("dom", $pname);
+my $dsrecs = &get_domain_dnssec_ds_records($d);
+if ($parent && ref($dsrecs)) {
+	&obtain_lock_dns($parent);
+	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	foreach my $rec (reverse(@$precs)) {
+		DS: foreach my $ds (@$dsrecs) {
+			if ($rec->{'name'} eq $ds->{'name'} &&
+			    $rec->{'type'} eq $ds->{'type'}) {
+				&bind8::delete_record($pfile, $rec);
+				last DS;
+				}
+			}
+		if ($rec->{'name'} eq $d->{'dom'}."." &&
+		    $rec->{'type'} eq 'NS') {
+			&bind8::delete_record($pfile, $rec);
+			}
+		}
+	&post_records_change($parent, $precs, $pfile);
+	&release_lock_dns($parent);
+	}
 return undef;
 }
 

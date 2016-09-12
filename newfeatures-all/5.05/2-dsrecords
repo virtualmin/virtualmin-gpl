@@ -1,0 +1,6 @@
+desc=DNSSEC DS Records
+html=When using DNSSEC, the DS records that need to be created at your registrar are now displayed on the DNS Options page. If the parent domain is hosted by Virtualmin, the DS records will be added automatically.
+master=1
+owner=1
+reseller=1
+link=edit_spf.cgi?dom=${ID}
