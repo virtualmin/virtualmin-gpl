@@ -104,7 +104,7 @@ return $ok ? undef : $out;
 sub rs_list_objects
 {
 my ($h, $container) = @_;
-my ($ok, $out, $headers) = &rs_api_call($h, "/$container", "GET");
+my ($ok, $out, $headers) = &rs_api_call($h, "/$container?limit=1000000", "GET");
 return $out if (!$ok);
 return [ split(/\r?\n/, $out) ];
 }
