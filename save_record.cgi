@@ -84,6 +84,7 @@ else {
 		else {
 			$in{'name'} =~ /^[a-z0-9\.\_\-]+$/i ||
 			    $in{'name'} eq '*' ||
+			    $in{'name'} =~ /^\*\.[a-z0-9\.\_\-]+$/i ||
 				&error($text{'record_ename'});
 			($in{'name'} =~ /^\./ || $in{'name'} =~ /\.$/) &&
 				&error($text{'record_enamedot'});
