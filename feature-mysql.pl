@@ -468,7 +468,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 			}
 
 		# Then remove the user
-		if ($ok) {
+		if ($ok && $mysql::config{'host'}) {
 			my $info = { 'user' => $olduser,
 				     'host' => $mysql::config{'host'} };
 			($ok, $msg) = &provision_api_call(
