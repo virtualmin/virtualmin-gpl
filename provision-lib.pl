@@ -76,7 +76,7 @@ foreach my $k (keys %$args) {
 if ($err) {
 	return (0, $err);
 	}
-if ($out =~ /^ERROR:\s+(.*)/) {
+if ($out =~ /^ERROR:\s+(.*)/ || $out =~ /\nERROR:\s+(.*)/) {
 	# Command reported failure
 	return (0, $1);
 	}
