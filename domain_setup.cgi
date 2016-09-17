@@ -366,12 +366,9 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	);
 if (!$parentuser) {
 	# Set initial limits
-	if ($config{'template_auto'}) {
-		# From template
-		&set_limits_from_plan(\%dom, $plan);
-		}
-	else {
-		# From user inputs
+	&set_limits_from_plan(\%dom, $plan);
+	if (!$config{'template_auto'}) {
+		# Override from user inputs
 		$dom{'mailboxlimit'} = $mailboxlimit;
 		$dom{'aliaslimit'} = $aliaslimit;
 		$dom{'dbslimit'} = $dbslimit;
