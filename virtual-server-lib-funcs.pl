@@ -4406,12 +4406,20 @@ sub get_global_from_address
 local ($d) = @_;
 &foreign_require("mailboxes");
 local $rv = $config{'from_addr'} || &mailboxes::get_from_address();
-if ($d && $d->{'reseller'} && defined(&get_reseller)) {
+if ($d && $d->{'reseller'} && defined(&get_reseller) && $config{'from_reseller'}) {
 	# From first reseller
 	my @r = split(/\s+/, $d->{'reseller'});
 	local $resel = &get_reseller($r[0]);
 	if ($resel && $resel->{'acl'}->{'email'}) {
-		$rv = $resel->{'acl'}->{'email'};
+		# Reseller has an email .... but is it valid for this system?
+		my $rs = $resel->{'acl'}->{'email'};
+		my ($rsmbox, $rsdom) = split(/\@/, $rs);
+		my $rsd = &get_domain_by("dom", $rsdom);
+		if ($rsd || $rsdom eq &get_system_hostname() ||
+		    $config{'from_reseller'} == 2) {
+			# Yes - safe to use
+			$rv = $rs;
+			}
 		}
 	}
 return $rv;

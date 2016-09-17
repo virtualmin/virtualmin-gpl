@@ -99,7 +99,7 @@ reseller_post_command=Command to run after making changes to a reseller,0
 
 line4=Actions upon server and user creation,11
 from_addr=From: address for email sent by Virtualmin,3,Webmin default
-from_reseller=From: address to email sent to domain owners,1,1-Reseller's address (if any),0-Address set above
+from_reseller=From: address to email sent to domain owners,1,1-Reseller's address (if domain is hosted locally),2-Reseller's address (always),0-Address set above
 pre_command=Command to run before making changes to a server,0
 post_command=Command to run after making changes to a server,0
 output_command=Always show output from pre and post commands?,1,1-Yes,0-Only on failure
