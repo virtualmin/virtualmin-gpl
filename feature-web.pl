@@ -1430,11 +1430,25 @@ if ($virt) {
 	    !&is_under_directory($d->{'home'}, $alog) &&
 	    !$allopts->{'dir'}->{'dirnologs'}) {
 		&$first_print($text{'backup_apachelog'});
-		my ($ok, $err) = &copy_write_as_domain_user($d, $alog, $file."_alog");
+		my ($ok, $err) = &copy_write_as_domain_user(
+			$d, $alog, $file."_alog");
+		if ($config{'backup_rotated'} || $opts->{'rotated'}) {
+			# Included rotated access log files
+			&foreign_require("syslog");
+			foreach my $l (&syslog::all_log_files($alog)) {
+				$l =~ /^\Q$alog\E(.+)$/ || next;
+				my $sfx = $1;
+				&copy_write_as_domain_user(
+					$d, $l, $file."_alog_".$sfx);
+				}
+			}
+
+		# Also copy the error log
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
 		if ($elog && $ok && !&is_under_directory($d->{'home'}, $elog)) {
-			($ok, $err) = &copy_write_as_domain_user($d, $elog, $file."_elog");
+			($ok, $err) = &copy_write_as_domain_user(
+					$d, $elog, $file."_elog");
 			}
 		if ($ok) {
 			&$second_print($text{'setup_done'});
@@ -1628,11 +1642,26 @@ if ($virt) {
 	# Copy back log files if they were in the backup
 	if (-r $_[1]."_alog") {
 		&$first_print($text{'restore_apachelog'});
+
+		# Restore the access log
 		local $alog = &get_apache_log($_[0]->{'dom'},
 					      $_[0]->{'web_port'});
 		&copy_source_dest($_[1]."_alog", $alog);
 		&set_apache_log_permissions($_[0], $alog);
+
+		# If the backup contained any rotated log files, restore them
+		&foreign_require("syslog");
+		my @alogs = grep { $_ ne $_[1] }
+				 &syslog::all_log_files($_[1]."_alog");
+		foreach my $l (@alogs) {
+			$l =~ /^.*_alog_(.*)$/ || next;
+			my $sfx = $1;
+			&copy_source_dest($l, $alog.$sfx);
+			print STDERR "copying $l to ".$alog.$sfx."\n";
+			}
+
 		if (-r $_[1]."_elog") {
+			# Restore the error log
 			local $elog = &get_apache_log($_[0]->{'dom'},
 						      $_[0]->{'web_port'}, 1);
 			&copy_source_dest($_[1]."_elog", $elog);

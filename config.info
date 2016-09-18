@@ -167,6 +167,7 @@ compression=Backup compression format,1,0-gzip,1-bzip2,2-None (tar only),3-ZIP
 zip_args=Extra command-line parameters for compression command,3,None
 pbzip2=Bzip2 compression command,1,0-Regular (bzip2),1-Parallel (pbzip2)
 gzip_mysql=Compress MySQL backups?,1,1-Yes,0-No
+backup_rotated=Included old rotated logs in backups?,1,1-Yes,0-No
 max_backups=Maximum concurrent backups,3,Unlimited,5
 max_timeout=Time to wait if maximum is exceeded,3,Halt immediately,5,,seconds
 max_all=Apply limit to,1,1-Backups by anyone,0-Only those by domain owners
