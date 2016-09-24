@@ -2530,10 +2530,14 @@ if (!&useradmin::check_md5()) {
 $rv{'unix'} = &encrypt_user_password($user, $pass);
 if ($config{'mysql'}) {
 	&require_mysql();
-	local $qpass = &mysql_escape($pass);
-	local $d = &mysql::execute_sql_safe($mysql::master_db,
+	eval {
+		# This can fail if MySQL is down
+		local $main::error_must_die = 1;
+		local $qpass = &mysql_escape($pass);
+		local $d = &mysql::execute_sql_safe($mysql::master_db,
 					    "select $password_func('$qpass')");
-	$rv{'mysql'} = $d->{'data'}->[0]->[0];
+		$rv{'mysql'} = $d->{'data'}->[0]->[0];
+		};
 	}
 if (&foreign_check("htaccess-htpasswd")) {
 	&foreign_require("htaccess-htpasswd");
