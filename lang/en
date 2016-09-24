@@ -5789,6 +5789,7 @@ editgrey_re=Regular expression match
 editgrey_gone=Whitelist entry no longer exists!
 editgrey_err=Failed to save whitelist entry
 editgrey_evalueclients=Missing or invalid-looking mail server IP address or hostname
+editgrey_eregexp=Invalid regular expression : $1
 editgrey_evaluerecipients=Missing or invalid-looking recipient email address
 
 delgrey_err=Failed to delete whitelist entries

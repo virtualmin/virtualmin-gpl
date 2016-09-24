@@ -22,6 +22,12 @@ else {
 	$in{'value'} =~ /^\S+$/ || &error($text{'editgrey_evalue'.$in{'type'}});
 	$d->{'value'} = $in{'value'};
 	$d->{'re'} = $in{'re'};
+	if ($in{'re'}) {
+		eval "'foo' =~ /$in{'value'}/";
+		if ($@) {
+			&error(&text('editgrey_eregexp', "$@"));
+			}
+		}
 	@cmts = grep { /\S/ } split(/\r?\n/, $in{'cmts'});
 	$d->{'cmts'} = \@cmts;
 
