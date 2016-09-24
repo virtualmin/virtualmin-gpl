@@ -878,6 +878,7 @@ return &cert_file_info($_[0]->{'ssl_cert'}, $_[0]);
 sub cert_file_info
 {
 local ($file, $d) = @_;
+return undef if (!-r $file);
 local %rv;
 local $_;
 local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text";
@@ -966,6 +967,15 @@ foreach my $k (keys %rv) {
 $rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
 					  : $text{'cert_typereal'};
 return \%rv;
+}
+
+# parse_notafter_date(str)
+# Parse a date string like "Nov 30 07:46:00 2016 GMT" into a Unix time
+sub parse_notafter_date
+{
+my ($str) = @_;
+&foreign_require("mailboxes");
+return &mailboxes::parse_mail_date($str);
 }
 
 # same_cert_file(file1, file2)
@@ -1879,61 +1889,69 @@ foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!$d->{'ssl'} || !$d->{'letsencrypt_renew'});
 
-	# Is it time?
-	next if (time() - $d->{'letsencrypt_last'} <
-		  $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60);
-	
-	# Is the current cert even from Let's Encrypt?
+	# Get the cert and date
 	my $info = &cert_info($d);
-	next if (!$info || $info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
+	next if (!$info);
+	my $expiry = &parse_notafter_date($info->{'notafter'});
 
-	# Time to do it!
-	my $phd = &public_html_dir($d);
-	my ($ok, $cert, $key, $chain);
-	my @dnames;
-	if ($d->{'letsencrypt_dname'}) {
-		@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
-		}
-	else {
-		@dnames = &get_hostnames_for_ssl($d);
-		}
-	&foreign_require("webmin");
-	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
+	# Is the current cert even from Let's Encrypt?
+	next if ($info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
 
-	my ($subject, $body);
-	if (!$ok) {
-		# Failed! Tell the user
-		$subject = $text{'letsencrypt_sfailed'};
-		$body = &text('letsencrypt_bfailed', join(", ",@dnames), $cert);
+	# Is it time? Either the user-chosen number of months has passed, or
+	# the cert is within 5 days of expiry
+	my $age = time() - $d->{'letsencrypt_last'};
+	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
+	    $expiry && $expiry - time() < 5 * 24 * 60 * 60) {
+	
+		# Time to do it!
+		my $phd = &public_html_dir($d);
+		my ($ok, $cert, $key, $chain);
+		my @dnames;
+		if ($d->{'letsencrypt_dname'}) {
+			@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+			}
+		else {
+			@dnames = &get_hostnames_for_ssl($d);
+			}
+		&foreign_require("webmin");
+		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+			\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
 
-		# Move the renewal time up by a random number of hours, so
-		# that we don't re-try every 5 minutes
-		$d->{'letsencrypt_last'} += int(rand() * 24) * 60 * 60
-		&save_domain($d);
-		}
-	else {
-		# Copy into place
-		&obtain_lock_ssl($d);
-		&install_letsencrypt_cert($d, $cert, $key, $chain);
-		$d->{'letsencrypt_last'} = time();
-		&save_domain($d);
-		&release_lock_ssl($d);
+		my ($subject, $body);
+		if (!$ok) {
+			# Failed! Tell the user
+			$subject = $text{'letsencrypt_sfailed'};
+			$body = &text('letsencrypt_bfailed',
+				      join(", ",@dnames), $cert);
 
-		# Apply any per-domain cert to Dovecot and Postfix
-		if ($d->{'virt'}) {
-			&sync_dovecot_ssl_cert($d, 1);
-			&sync_postfix_ssl_cert($d, 1);
+			# Move the renewal time up by a random number of hours,
+			# so that we don't re-try every 5 minutes
+			$d->{'letsencrypt_last'} += int(rand() * 24) * 60 * 60
+			&save_domain($d);
+			}
+		else {
+			# Copy into place
+			&obtain_lock_ssl($d);
+			&install_letsencrypt_cert($d, $cert, $key, $chain);
+			$d->{'letsencrypt_last'} = time();
+			&save_domain($d);
+			&release_lock_ssl($d);
+
+			# Apply any per-domain cert to Dovecot and Postfix
+			if ($d->{'virt'}) {
+				&sync_dovecot_ssl_cert($d, 1);
+				&sync_postfix_ssl_cert($d, 1);
+				}
+
+			# Tell the user
+			$subject = $text{'letsencrypt_sdone'};
+			$body = &text('letsencrypt_bdone', join(", ", @dnames));
 			}
 
-		# Tell the user
-		$subject = $text{'letsencrypt_sdone'};
-		$body = &text('letsencrypt_bdone', join(", ", @dnames));
+		# Send email
+		my $from = &get_global_from_address($d);
+		&send_notify_email($from, [$d], $d, $subject, $body);
 		}
-
-	# Send email
-	my $from = &get_global_from_address($d);
-	&send_notify_email($from, [$d], $d, $subject, $body);
 	}
 }
 
