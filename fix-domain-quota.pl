@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage("No domains to fix specified");
-&has_home_quotas() || &usage("Quotas are not enabled on this system");
+&has_home_quotas() || &usage("Quotas have not been detected on this system");
 
 # Get the domains
 if ($all_doms) {
