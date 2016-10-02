@@ -384,7 +384,7 @@ if ($got{'mail'}) {
 if ($got{'virtualmin-mailman'}) {
 	# XXX how to migrate members?
 	&$first_print("Re-creating Mailman mailing lists ..");
-	&foreign_require('virtualmin-mailman', 'virtualmin-mailman-lib.pl');
+	&foreign_require('virtualmin-mailman');
 	local $lcount = 0;
 	local @lists = keys %{$domhash->{'mmail_o'}->{'mailinglist_l'}};
 	foreach my $e (@lists) {
