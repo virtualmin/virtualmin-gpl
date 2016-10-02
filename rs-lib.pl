@@ -104,9 +104,21 @@ return $ok ? undef : $out;
 sub rs_list_objects
 {
 my ($h, $container) = @_;
-my ($ok, $out, $headers) = &rs_api_call($h, "/$container?limit=1000000", "GET");
-return $out if (!$ok);
-return [ split(/\r?\n/, $out) ];
+my $chunk = 10000;
+my @all;
+my $marker;
+while(1) {
+	my ($ok, $out, $headers) = &rs_api_call($h,
+		"/$container?limit=$chunk".
+		($marker eq '' ? '' : "&marker=$marker"), "GET");
+	return $out if (!$ok);
+	my @part = split(/\r?\n/, $out);
+	last if (!@part);		# No more
+	push(@all, @part);
+	last if (@part < $chunk);	# Got less than the chunk size
+	$marker = $part[$#part];
+	}
+return \@all;
 }
 
 # rs_upload_object(&handle, container, file, source-file, [multipart],
