@@ -480,6 +480,7 @@ if ($userident->{$origuser}) {
 local $owner = &get_domain_owner(\%dom);
 if (!$parent && -r "$root/var/spool/mail/$origuser" && $owner) {
 	&$first_print("Moving server owner's mailbox ..");
+	&disable_quotas(\%dom);
 	local ($mfile, $mtype) = &create_mail_file($owner, \%dom);
 	if ($mfile) {
 		local $srcfolder = { 'type' => 0,
@@ -492,6 +493,7 @@ if (!$parent && -r "$root/var/spool/mail/$origuser" && $owner) {
 	else {
 		&$second_print(".. could not work out mail file");
 		}
+	&enable_quotas(\%dom);
 	}
 
 if ($got{'mail'}) {
@@ -499,8 +501,7 @@ if ($got{'mail'}) {
 	local $acount = 0;
 	&$first_print("Copying email aliases ..");
 	&set_alias_programs();
-	&foreign_require("sendmail", "sendmail-lib.pl");
-	&foreign_require("sendmail", "aliases-lib.pl");
+	&foreign_require("sendmail");
 	local @srcaliases = &sendmail::list_aliases([ "$root/etc/aliases" ]);
 	local %already = map { $_->{'from'}, $_ } &list_virtusers();
 	foreach my $src (@srcaliases) {
