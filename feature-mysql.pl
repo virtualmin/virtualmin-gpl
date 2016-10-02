@@ -114,6 +114,9 @@ if ($d->{'provision_mysql'}) {
 			$mysql::config{'host'} = $mysql_host;
 			$mysql::config{'login'} = $mysql_user;
 			$mysql::config{'pass'} = $mysql_pass;
+			$mysql::mysql_login = $mysql_user;
+			$mysql::mysql_pass = $mysql_pass;
+			$mysql::authstr = &mysql::make_authstr();
 			&mysql::save_module_config(\%mysql::config, 'mysql');
 			}
 		elsif ($mysql::config{'host'} ne $mysql_host) {
