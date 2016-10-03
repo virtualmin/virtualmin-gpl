@@ -227,3 +227,4 @@ logrotate_shared=yes
 dependent_mail=0
 auto_redirect=0
 backup_rotated=0
+tlsa_records=0

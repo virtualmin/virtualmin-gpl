@@ -3434,6 +3434,66 @@ local @dsrecs = &bind8::read_zone_file($dstemp, $d->{'dom'}, undef, undef, 1);
 return \@dsrecs;
 }
 
+# create_dane_dns_record(cert-file, port, hostname)
+# Given an SSL cert file, port number (assumed TCP) and hostname, returns a
+# BIND record structure for it
+sub create_dane_dns_record
+{
+my ($file, $port, $host) = @_;
+my $hash = &backquote_command(
+	"openssl x509 -in ".quotemeta($file)." -outform DER | openssl sha256");
+return undef if ($?);
+$hash =~ /=\s*([0-9a-f]+)/ || return undef;
+return { 'name' => "_".$port."._tcp.".$host.".",
+	 'class' => "IN",
+	 'type' => "TLSA",
+	 'values' => [ 3, 0, 0, $hash ] };
+}
+
+# sync_domain_tlsa_records(&domain)
+# Replace all TLSA records for a domain with its actual SSL certs (if enabled)
+sub sync_domain_tlsa_records
+{
+my ($d) = @_;
+return undef if (!$config{'tlsa_records'});
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+return undef if (!$file);
+
+# Find all existing TLSA records
+my @oldrecs = grep { $_->{'type'} eq 'TLSA' &&
+		     ($_->{'name'} eq $d->{'dom'}."." ||
+		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
+
+# Work out which TLSA records are needed
+my @need;
+if ($d->{'ssl'}) {
+	# SSL website
+	push(@need, &create_dane_dns_record(
+		$d->{'ssl_cert'}, $d->{'web_sslport'}, $d->{'dom'}));
+	push(@need, &create_dane_dns_record(
+		$d->{'ssl_cert'}, $d->{'web_sslport'}, "www.".$d->{'dom'}));
+	}
+
+if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
+	&obtain_lock_dns($d);
+
+	# Delete all old records
+	foreach my $r (reverse(@oldrecs)) {
+		&bind8::delete_record($file, $r);
+		}
+
+	# Add the new ones
+	foreach my $r (@need) {
+		&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+				      $r->{'class'}, $r->{'type'},
+				      &join_record_values($r));
+		}
+
+	&post_records_change($d, $recs);
+	&release_lock_dns($d);
+	}
+}
+
 # dns_records_to_text(&record, ...)
 # Returns a newline-terminate text list of DNS records
 sub dns_records_to_text
