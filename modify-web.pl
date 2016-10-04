@@ -390,6 +390,7 @@ foreach $d (@doms) {
 		if ($dommode ne "mod_php") {
 			&save_domain_php_mode($d, $dommode);
 			}
+		&clear_links_cache($d);
 		}
 
 	# Update Ruby mode

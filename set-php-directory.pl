@@ -80,6 +80,7 @@ elsif ($dir !~ /^\//) {
 &save_domain_php_directory($d, $dir, $version);
 &save_domain_php_mode($d, $mode);
 &release_lock_web($d);
+&clear_links_cache($d);
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
 
