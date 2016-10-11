@@ -136,7 +136,7 @@ $scripts_unavail_file = &cache_file_path("scriptsunavail");
 		      );
 $styles_unavail_file = "$module_config_directory/stylesunavail";
 
-@reseller_maxes = ("doms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
+@reseller_maxes = ("doms", "topdoms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 @plan_maxes = ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
                $virtualmin_pro ? ( "mongrels" ) : ( ));
 @plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder');

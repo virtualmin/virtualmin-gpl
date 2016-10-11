@@ -2045,7 +2045,8 @@ if ($ok) {
 
 			# Check if licence limits are exceeded
 			local ($dleft, $dreason, $dmax) = &count_domains(
-				$d->{'alias'} ? "aliasdoms" :"realdoms");
+				$d->{'alias'} ? "aliasdoms" :
+				$d->{'parent'} ? "realdoms" : "topdoms");
 			if ($dleft == 0) {
 				&$second_print(&text('restore_elimit', $dmax));
 				$ok = 0;

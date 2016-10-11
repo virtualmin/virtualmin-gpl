@@ -12,8 +12,9 @@ if ($d->{'parent'} && !&can_create_sub_servers() ||
     !$d->{'parent'} && !&can_create_master_servers()) {
 	&error($text{'clone_ecannot'});
 	}
-($dleft, $dreason, $dmax) = &count_domains($d->{'alias'} ? "aliasdoms"
-							 : "realdoms");
+($dleft, $dreason, $dmax) = &count_domains(
+	$d->{'alias'} ? "aliasdoms" :
+	$d->{'parent'} ? "realdoms" : "topdoms");
 &error(&text('setup_emax', $dmax)) if ($dleft == 0);
 
 # Validate inputs

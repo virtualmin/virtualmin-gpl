@@ -260,7 +260,8 @@ foreach $line (@lines) {
 
 	# Check if domains limit has been exceeded
 	local ($dleft, $dreason, $dmax) =
-		&count_domains($aliasdom ? "aliasdoms" : "realdoms");
+		&count_domains($aliasdom ? "aliasdoms" :
+			       $parentdom ? "realdoms" : "topdoms");
 	if ($dleft == 0) {
 		&line_error(&text('setup_emax', $dmax));
 		next;

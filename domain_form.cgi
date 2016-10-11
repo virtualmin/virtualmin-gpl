@@ -53,20 +53,21 @@ elsif ($in{'enable'}) {
 # If we are in generic mode, work out all possible modes for the current user
 if ($in{'generic'}) {
 	$gparent = &get_domain($in{'gparent'}) if ($in{'gparent'});
-	($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
+	($tdleft, $tdreason, $tdmax) = &count_domains("topdoms");
 	if (&can_create_master_servers()) {
 		# Top-level server
-		if ($rdleft) {
+		if ($tdleft) {
 			push(@generics, [ $text{'form_generic_master'}, '' ]);
 			}
 		}
 	if (&can_create_sub_servers() && $gparent) {
 		# Sub-server under parent's user
-		($adleft, $adreason, $admax) = &count_domains("aliasdoms");
+		($rdleft, $rdreason, $rdmax) = &count_domains("realdoms");
 		if ($rdleft) {
 			push(@generics, [ $text{'form_generic_subserver'},
 				  'add1=1&parentuser1='.$gparent->{'user'} ]);
 			}
+		($adleft, $adreason, $admax) = &count_domains("aliasdoms");
 		if (!$gparent->{'alias'} && $adleft) {
 			# Alias domain
 			push(@generics, [ &text('form_generic_alias',

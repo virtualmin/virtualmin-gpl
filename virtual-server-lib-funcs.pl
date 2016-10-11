@@ -6914,8 +6914,8 @@ return ( $count, $parent->{'mailboxlimit'} ? $parent->{'mailboxlimit'} : 0,
 # user is allowed to create, the reason for the limit (2=this reseller,
 # 1=reseller, 0=user), the total allowed, and a flag indicating if this
 # limit should be hidden from the user.
-# Feature can be "doms", "aliasdoms", "realdoms", "mailboxes", "aliases",
-# "quota", "uquota", "dbs", "bw" or a feature
+# Feature can be "doms", "aliasdoms", "realdoms", "topdoms", "mailboxes",
+# "aliases", "quota", "uquota", "dbs", "bw" or a feature
 sub count_feature
 {
 local ($f) = @_;
@@ -6988,12 +6988,19 @@ if ($reseller) {
 				}
 			}
 		}
-	if (($f eq "aliasdoms" || $f eq "realdoms") &&
+	if (($f eq "aliasdoms" || $f eq "realdoms" || $f eq "topdoms") &&
 	    $racl{'max_doms'}) {
 		# See if the reseller is over the limit for all domains types
 		local $got = &count_domain_feature("doms", @rdoms);
 		if ($got >= $racl{'max_doms'}) {
 			return (0, $reason, $racl{'max_doms'}, $hide);
+			}
+		}
+	if ($f eq "topdoms" && $racl{'max_realdoms'}) {
+		# See if the reseller is over the limit for all real domains
+		local $got = &count_domain_feature("realdoms", @rdoms);
+		if ($got >= $racl{'max_realdoms'}) {
+			return (0, $reason, $racl{'max_realdoms'}, $hide);
 			}
 		}
 	}
@@ -7042,6 +7049,9 @@ foreach $d (@doms) {
 		}
 	elsif ($f eq "realdoms") {
 		$rv++ if (!$d->{'alias'});
+		}
+	elsif ($f eq "topdoms") {
+		$rv++ if (!$d->{'parent'});
 		}
 	else {
 		$rv++ if ($d->{$f});
@@ -7317,7 +7327,8 @@ if ($left != -1 && $left-$newquota < 0) {
 # Check domains limit
 if (!$oldd) {
 	($left, $reason, $max) = &count_domains(
-				    $d->{'alias'} ? 'aliasdoms' : 'realdoms');
+				$d->{'alias'} ? 'aliasdoms' :
+				$d->{'parent'} ? 'realdoms' : 'topdoms');
 	if ($left == 0) {
 		return &text('index_noadd'.$reason, $max);
 		}

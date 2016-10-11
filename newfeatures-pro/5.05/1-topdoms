@@ -1,0 +1,4 @@
+desc=Reseller top-level servers limit
+html=The number of top-level virtual servers a reseller is allowed to create can now be limited. These are defined as servers with their own separate administration user.
+master=1
+reseller=1

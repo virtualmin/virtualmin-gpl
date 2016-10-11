@@ -45,7 +45,9 @@ if ($in{'subdom'}) {
 	}
 
 # Check if domains limit has been exceeded
-($dleft, $dreason, $dmax) = &count_domains($aliasdom ? "aliasdoms" :"realdoms");
+($dleft, $dreason, $dmax) = &count_domains(
+	$aliasdom ? "aliasdoms" :
+	$parentdom ? "realdoms" : "topdoms");
 &error(&text('setup_emax', $dmax)) if ($dleft == 0);
 
 # Validate inputs (check domain name to see if in use)
