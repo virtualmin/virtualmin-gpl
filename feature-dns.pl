@@ -3441,13 +3441,14 @@ sub create_dane_dns_record
 {
 my ($file, $port, $host) = @_;
 my $hash = &backquote_command(
-	"openssl x509 -in ".quotemeta($file)." -outform DER | openssl sha256");
+	"openssl x509 -in ".quotemeta($file)." -outform DER 2>/dev/null | ".
+	"openssl sha256 2>/dev/null");
 return undef if ($?);
 $hash =~ /=\s*([0-9a-f]+)/ || return undef;
 return { 'name' => "_".$port."._tcp.".$host.".",
 	 'class' => "IN",
 	 'type' => "TLSA",
-	 'values' => [ 3, 0, 0, $hash ] };
+	 'values' => [ 3, 0, 0, $1 ] };
 }
 
 # sync_domain_tlsa_records(&domain)
@@ -3459,10 +3460,11 @@ return undef if (!$config{'tlsa_records'});
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return undef if (!$file);
 
-# Find all existing TLSA records
+# Find all existing TLSA records (without TTL, for easier comparison)
 my @oldrecs = grep { $_->{'type'} eq 'TLSA' &&
 		     ($_->{'name'} eq $d->{'dom'}."." ||
 		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
+@oldrecs = map { my %r = %$_; delete($r{'ttl'}); \%r } @oldrecs;
 
 # Work out which TLSA records are needed
 my @need;
@@ -3473,8 +3475,9 @@ if ($d->{'ssl'}) {
 	push(@need, &create_dane_dns_record(
 		$d->{'ssl_cert'}, $d->{'web_sslport'}, "www.".$d->{'dom'}));
 	}
-
+@need = grep { defined($_) } @need;
 if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
+	print STDERR "need to create ",scalar(@need)," DANE records\n";
 	&obtain_lock_dns($d);
 
 	# Delete all old records

@@ -213,6 +213,9 @@ if ($d->{'virt'}) {
 	&sync_postfix_ssl_cert($d, 1);
 	}
 
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
+
 # Redirect HTTP to HTTPS
 if ($config{'auto_redirect'}) {
 	my $redir = { 'path' => '^/(?!.well-known)',
@@ -467,6 +470,9 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	&sync_postfix_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
 	}
 
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
+
 &release_lock_web($_[0]);
 &register_post_action(\&restart_apache, 1) if ($rv);
 return $rv;
@@ -530,6 +536,9 @@ if ($d->{'virt'}) {
 	&sync_dovecot_ssl_cert($d, 0);
 	&sync_postfix_ssl_cert($d, 0);
 	}
+
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
 
 &release_lock_web($d);
 }
