@@ -1595,33 +1595,33 @@ foreach my $desturl (@$desturls) {
 	       $path ne $path0) {
 		# Copy to another local directory
 		&$first_print(&text('backup_copy', "<tt>$path</tt>"));
-		my ($ok, $err);
+		my ($lok, $lerr);
 		if ($asd && $dirfmt) {
 			# Copy separate files as doman owner
 			foreach my $df (@destfiles) {
-				($ok, $err) = &copy_source_dest_as_domain_user(
+				($lok,$lerr) = &copy_source_dest_as_domain_user(
 					$asd, "$path0/$df", "$path/$df");
-				last if (!$ok);
+				last if (!$lok);
 				}
 			}
 		elsif ($asd && !$dirfmt) {
 			# Copy one file as domain owner
-			($ok, $err) = &copy_source_dest_as_domain_user(
+			($lok, $lerr) = &copy_source_dest_as_domain_user(
 				$asd, $path0, $path);
 			}
 		elsif (!$asd && $dirfmt) {
 			# Copy separate files as root
 			foreach my $df (@destfiles) {
-				($ok, $err) = &copy_source_dest(
+				($lok, $lerr) = &copy_source_dest(
 					"$path0/$df", "$path/$df");
-				last if (!$ok);
+				last if (!$lok);
 				}
 			}
 		elsif (!$asd && !$dirfmt) {
 			# Copy one file as root
-			($ok, $err) = &copy_source_dest($path0, $path);
+			($lok, $lerr) = &copy_source_dest($path0, $path);
 			}
-		if (!$ok) {
+		if (!$lok) {
 			&$second_print(&text('backup_copyfailed', $err));
 			$ok = 0;
 			}
