@@ -90,63 +90,9 @@ print &ui_table_end();
 
 # Buttons to copy cert to Webmin
 if (&can_webmin_cert()) {
-	# Build a list of services and their certs
-	&get_miniserv_config(\%miniserv);
-	my @svcs;
-	if ($miniserv{'ssl'}) {
-		push(@svcs, { 'id' => 'webmin',
-			      'cert' => $miniserv{'certfile'},
-			      'ca' => $miniserv{'extracas'} });
-		}
-	if (&foreign_installed("usermin")) {
-                &foreign_require("usermin");
-                &usermin::get_usermin_miniserv_config(\%uminiserv);
-		if ($uminiserv{'ssl'}) {
-			push(@svcs, { 'id' => 'usermin',
-				      'cert' => $uminiserv{'certfile'},
-				      'ca' => $uminiserv{'extracas'} });
-			}
-		}
-	if (&foreign_installed("dovecot")) {
-                &foreign_require("dovecot");
-                $conf = &dovecot::get_config();
-                $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
-                         &dovecot::find_value("ssl_cert", $conf, 0, "");
-                $cfile =~ s/^<//;
-		$cafile = &dovecot::find_value("ssl_ca_file", $conf) ||
-			  &dovecot::find_value("ssl_ca", $conf, 0, "");
-                $cafile =~ s/^<//;
-		if ($cfile) {
-			push(@svcs, { 'id' => 'dovecot',
-				      'cert' => $cfile,
-				      'ca' => $cafile });
-			}
-		}
-	if ($config{'mail_system'} == 0) {
-		&foreign_require("postfix");
-		$cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-		$cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-		if ($cfile) {
-			push(@svcs, { 'id' => 'postfix',
-				      'cert' => $cfile,
-				      'ca' => $cafile });
-			}
-		}
-	if ($config{'ftp'}) {
-		&foreign_require("proftpd");
-		$conf = &proftpd::get_config();
-		$cfile = &proftpd::find_directive(
-				"TLSRSACertificateFile", $conf);
-		$cafile = &proftpd::find_directive(
-				"TLSCACertificateFile", $conf);
-		if ($cfile) {
-			push(@svcs, { 'id' => 'proftpd',
-				      'cert' => $cfile,
-				      'ca' => $cafile });
-			}
-		}
-
-	# Work out which ones are already copied
+	# Build a list of services and their certs, and work out which ones
+	# are already copied
+	@svcs = &get_all_service_ssl_certs();
 	%cert_already = ( );
 	foreach my $svc (@svcs) {
 		if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
