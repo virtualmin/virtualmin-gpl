@@ -3475,9 +3475,38 @@ if ($d->{'ssl'}) {
 	push(@need, &create_dane_dns_record(
 		$d->{'ssl_cert'}, $d->{'web_sslport'}, "www.".$d->{'dom'}));
 	}
+foreach my $svc (&get_all_service_ssl_certs()) {
+	my $cfile = $svc->{'cfile'};
+	if (($svc->{'id'} eq 'webmin' || $svc->{'id'} eq 'usermin') &&
+	    $d->{'virt'}) {
+		# If there is a per-IP cert, use it instead
+		my %miniserv;
+		&foreign_require("webmin");
+		if ($svc->{'id'} eq 'webmin') {
+			&get_miniserv_config(\%miniserv);
+			}
+		else {
+			&foreign_require("usermin");
+			&usermin::get_usermin_miniserv_config(\%miniserv);
+			}
+		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
+		foreach my $k (@ipkeys) {
+			if (&indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
+				$cfile = $k->{'cert'};
+				last;
+				}
+			}
+		}
+	push(@need, &create_dane_dns_record(
+		$cfile, $svc->{'port'}, $svc->{'prefix'}.'.'.$d->{'dom'}));
+	push(@need, &create_dane_dns_record(
+		$cfile, $svc->{'port'}, $d->{'dom'}));
+	}
 @need = grep { defined($_) } @need;
+my %done;
+@need = grep { !$done{$_->{'name'}}++ } @need;
+
 if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
-	print STDERR "need to create ",scalar(@need)," DANE records\n";
 	&obtain_lock_dns($d);
 
 	# Delete all old records

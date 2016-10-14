@@ -2047,7 +2047,9 @@ my @svcs;
 if ($miniserv{'ssl'}) {
 	push(@svcs, { 'id' => 'webmin',
 		      'cert' => $miniserv{'certfile'},
-		      'ca' => $miniserv{'extracas'} });
+		      'ca' => $miniserv{'extracas'},
+		      'prefix' => 'admin',
+		      'port' => $miniserv{'port'} });
 	}
 if (&foreign_installed("usermin")) {
 	&foreign_require("usermin");
@@ -2056,7 +2058,9 @@ if (&foreign_installed("usermin")) {
 	if ($uminiserv{'ssl'}) {
 		push(@svcs, { 'id' => 'usermin',
 			      'cert' => $uminiserv{'certfile'},
-			      'ca' => $uminiserv{'extracas'} });
+			      'ca' => $uminiserv{'extracas'},
+			      'prefix' => 'webmail',
+			      'port' => $miniserv{'port'} });
 		}
 	}
 if (&foreign_installed("dovecot")) {
@@ -2071,7 +2075,9 @@ if (&foreign_installed("dovecot")) {
 	if ($cfile) {
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
-			      'ca' => $cafile });
+			      'ca' => $cafile,
+			      'prefix' => 'mail',
+			      'port' => 993, });
 		}
 	}
 if ($config{'mail_system'} == 0) {
@@ -2081,7 +2087,9 @@ if ($config{'mail_system'} == 0) {
 	if ($cfile) {
 		push(@svcs, { 'id' => 'postfix',
 			      'cert' => $cfile,
-			      'ca' => $cafile });
+			      'ca' => $cafile,
+			      'prefix' => 'mail',
+			      'port' => 587 });
 		}
 	}
 if ($config{'ftp'}) {
@@ -2094,7 +2102,9 @@ if ($config{'ftp'}) {
 	if ($cfile) {
 		push(@svcs, { 'id' => 'proftpd',
 			      'cert' => $cfile,
-			      'ca' => $cafile });
+			      'ca' => $cafile,
+			      'prefix' => 'ftp',
+			      'port' => 990, });
 		}
 	}
 return @svcs;
