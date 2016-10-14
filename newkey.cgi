@@ -165,6 +165,12 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_domain($od);
 	}
 
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
+foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+	&sync_domain_tlsa_records($od);
+	}
+
 # Run the after command
 &set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
 local $merr = &made_changes();

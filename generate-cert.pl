@@ -164,6 +164,12 @@ if ($self) {
                 }
 	&$second_print(".. done");
 
+	# Update DANE DNS records
+	&sync_domain_tlsa_records($d);
+	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		&sync_domain_tlsa_records($od);
+		}
+
 	# Re-start Apache
 	&register_post_action(\&restart_website_server, $d, 1);
 	&run_post_actions();

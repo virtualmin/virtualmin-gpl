@@ -131,6 +131,12 @@ else {
 		&save_domain($od);
 		}
 
+	# Update DANE DNS records
+	&sync_domain_tlsa_records($d);
+	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		&sync_domain_tlsa_records($od);
+		}
+
 	&release_lock_ssl($d);
 	&$second_print(".. done");
 

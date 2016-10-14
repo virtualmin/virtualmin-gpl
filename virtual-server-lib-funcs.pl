@@ -7814,6 +7814,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
 			&sync_postfix_ssl_cert($dom, 1);
 			}
 		&break_invalid_ssl_linkages($dom);
+		&sync_domain_tlsa_records($dom);
 		&release_lock_ssl($dom);
 		&$second_print($text{'letsencrypt_done'});
 		}

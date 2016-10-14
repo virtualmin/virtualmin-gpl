@@ -33,7 +33,7 @@ if (!$in{'self'}) {
 	# Generate the private key and CSR
 	&ui_print_header(&domain_in($d), $text{'csr_title'}, "");
 
-	# Break SSL linkages that no longer work with this cert
+	# Break SSL linkages that no longer work with the cert being requested
 	$newcert = { 'cn' => $in{'commonName'},
 		     'alt' => \@alts };
 	&break_invalid_ssl_linkages($d, $newcert);
@@ -131,6 +131,12 @@ else {
 		&save_domain_passphrase($od);
 		&save_domain($od);
 		&release_lock_ssl($od);
+		}
+
+	# Update DANE DNS records
+	&sync_domain_tlsa_records($d);
+	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
+		&sync_domain_tlsa_records($od);
 		}
 
 	&save_domain($d);
