@@ -187,6 +187,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-dnssec") {
 		$dnssec = 0;
 		}
+	elsif ($a eq "--enable-tlsa") {
+		$tlsa = 1;
+		}
+	elsif ($a eq "--disable-tlsa") {
+		$tlsa = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -198,7 +204,7 @@ while(@ARGV > 0) {
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
-  &usage("Nothing to do");
+  defined($tlsa) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -432,6 +438,19 @@ foreach $d (@doms) {
 		($recs, $file) = &get_domain_dns_records_and_file($d);
 		}
 
+	# Create or remove TLSA records
+	if (defined($tlsa)) {
+		if ($tlsa) {
+			&$first_print($text{'spf_enabletlsa'});
+			&sync_domain_tlsa_records($d, 1);
+			}
+		else {
+			&$first_print($text{'spf_disabletlsa'});
+			&sync_domain_tlsa_records($d, 2);
+			}
+		&$second_print($text{'setup_done'});
+		}
+
 	if ($changed || $bumpsoa) {
 		&post_records_change($d, $recs, $file);
 		&reload_bind_records($d);
@@ -483,6 +502,7 @@ print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
+print "                     [--enable-tlsa | --disable-tlsa]\n";
 exit(1);
 }
 
