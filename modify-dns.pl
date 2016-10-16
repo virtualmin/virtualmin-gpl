@@ -449,12 +449,14 @@ foreach $d (@doms) {
 			else {
 				&sync_domain_tlsa_records($d, 1);
 				&$second_print($text{'setup_done'});
+				$changed++;
 				}
 			}
 		else {
 			&$first_print($text{'spf_disabletlsa'});
 			&sync_domain_tlsa_records($d, 2);
 			&$second_print($text{'setup_done'});
+			$changed++;
 			}
 		}
 

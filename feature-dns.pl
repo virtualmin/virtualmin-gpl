@@ -3448,21 +3448,28 @@ my $out = &backquote_command(
 return $? || $out =~ /invalid\s+command/i ? $text{'index_etlsassl'} : undef;
 }
 
-# create_tlsa_dns_record(cert-file, port, hostname)
+# create_tlsa_dns_record(cert-file, chain-file, port, hostname)
 # Given an SSL cert file, port number (assumed TCP) and hostname, returns a
 # BIND record structure for it
 sub create_tlsa_dns_record
 {
-my ($file, $port, $host) = @_;
+my ($file, $chain, $port, $host) = @_;
+my $temp = &transname();
+&open_tempfile(TEMP, ">$temp");
+if ($chain) {
+	&print_tempfile(TEMP, &read_file_contents($chain));
+	}
+&print_tempfile(TEMP, &read_file_contents($file));
+&close_tempfile(TEMP);
 my $hash = &backquote_command(
-	"openssl x509 -in ".quotemeta($file)." -outform DER 2>/dev/null | ".
+	"openssl x509 -in ".quotemeta($temp)." -outform DER 2>/dev/null | ".
 	"openssl sha256 2>/dev/null");
 return undef if ($?);
 $hash =~ /=\s*([0-9a-f]+)/ || return undef;
 return { 'name' => "_".$port."._tcp.".$host.".",
 	 'class' => "IN",
 	 'type' => "TLSA",
-	 'values' => [ 3, 0, 0, $1 ] };
+	 'values' => [ 3, 0, 1, $1 ] };
 }
 
 # sync_domain_tlsa_records(&domain, [force-mode])
@@ -3471,7 +3478,6 @@ return { 'name' => "_".$port."._tcp.".$host.".",
 sub sync_domain_tlsa_records
 {
 my ($d, $force) = @_;
-return undef if (!$config{'tlsa_records'} && !$force);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return undef if (!$file);
 
@@ -3481,17 +3487,23 @@ my @oldrecs = grep { $_->{'type'} eq 'TLSA' &&
 		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
 @oldrecs = map { my %r = %$_; delete($r{'ttl'}); \%r } @oldrecs;
 
+# Exit now if TLSA is not enabled globally, unless it's being forced on OR
+# there are already records
+return undef if (!$config{'tlsa_records'} && !$force && !@oldrecs);
+
 # Work out which TLSA records are needed
 my @need;
 if ($d->{'ssl'}) {
 	# SSL website
+	my $chain = &get_website_ssl_file($d, 'ca');
 	push(@need, &create_tlsa_dns_record(
-		$d->{'ssl_cert'}, $d->{'web_sslport'}, $d->{'dom'}));
+		$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $d->{'dom'}));
 	push(@need, &create_tlsa_dns_record(
-		$d->{'ssl_cert'}, $d->{'web_sslport'}, "www.".$d->{'dom'}));
+		$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, "www.".$d->{'dom'}));
 	}
 foreach my $svc (&get_all_service_ssl_certs()) {
-	my $cfile = $svc->{'cfile'};
+	my $cfile = $svc->{'cert'};
+	my $chain = $svc->{'ca'};
 	if (($svc->{'id'} eq 'webmin' || $svc->{'id'} eq 'usermin') &&
 	    $d->{'virt'}) {
 		# If there is a per-IP cert, use it instead
@@ -3508,14 +3520,15 @@ foreach my $svc (&get_all_service_ssl_certs()) {
 		foreach my $k (@ipkeys) {
 			if (&indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
 				$cfile = $k->{'cert'};
+				$chain = $k->{'extracas'};
 				last;
 				}
 			}
 		}
-	push(@need, &create_tlsa_dns_record(
-		$cfile, $svc->{'port'}, $svc->{'prefix'}.'.'.$d->{'dom'}));
-	push(@need, &create_tlsa_dns_record(
-		$cfile, $svc->{'port'}, $d->{'dom'}));
+	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
+		$svc->{'prefix'}.'.'.$d->{'dom'}));
+	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
+		$d->{'dom'}));
 	}
 @need = grep { defined($_) } @need;
 my %done;

@@ -2060,7 +2060,7 @@ if (&foreign_installed("usermin")) {
 			      'cert' => $uminiserv{'certfile'},
 			      'ca' => $uminiserv{'extracas'},
 			      'prefix' => 'webmail',
-			      'port' => $miniserv{'port'} });
+			      'port' => $uminiserv{'port'} });
 		}
 	}
 if (&foreign_installed("dovecot")) {
