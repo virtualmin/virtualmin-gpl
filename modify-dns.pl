@@ -442,13 +442,20 @@ foreach $d (@doms) {
 	if (defined($tlsa)) {
 		if ($tlsa) {
 			&$first_print($text{'spf_enabletlsa'});
-			&sync_domain_tlsa_records($d, 1);
+			$err = &check_tlsa_support();
+			if ($err) {
+				&$second_print(&text('spf_etlsa', $err));
+				}
+			else {
+				&sync_domain_tlsa_records($d, 1);
+				&$second_print($text{'setup_done'});
+				}
 			}
 		else {
 			&$first_print($text{'spf_disabletlsa'});
 			&sync_domain_tlsa_records($d, 2);
+			&$second_print($text{'setup_done'});
 			}
-		&$second_print($text{'setup_done'});
 		}
 
 	if ($changed || $bumpsoa) {

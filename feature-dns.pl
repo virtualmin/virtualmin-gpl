@@ -3434,10 +3434,24 @@ local @dsrecs = &bind8::read_zone_file($dstemp, $d->{'dom'}, undef, undef, 1);
 return \@dsrecs;
 }
 
-# create_dane_dns_record(cert-file, port, hostname)
+# check_tlsa_support()
+# Returns undef if TLSA is supported on the system, or an error message if not
+sub check_tlsa_support
+{
+my $file = "$config_directory/miniserv.pem";
+if (!-r $file) {
+	$file = "$root_directory/miniserv.pem";
+	}
+my $out = &backquote_command(
+	"(openssl x509 -in ".quotemeta($file)." -outform DER | ".
+	"openssl sha256) 2>&1 >/dev/null");
+return $? || $out =~ /invalid\s+command/i ? $text{'index_etlsassl'} : undef;
+}
+
+# create_tlsa_dns_record(cert-file, port, hostname)
 # Given an SSL cert file, port number (assumed TCP) and hostname, returns a
 # BIND record structure for it
-sub create_dane_dns_record
+sub create_tlsa_dns_record
 {
 my ($file, $port, $host) = @_;
 my $hash = &backquote_command(
@@ -3451,12 +3465,13 @@ return { 'name' => "_".$port."._tcp.".$host.".",
 	 'values' => [ 3, 0, 0, $1 ] };
 }
 
-# sync_domain_tlsa_records(&domain)
+# sync_domain_tlsa_records(&domain, [force-mode])
 # Replace all TLSA records for a domain with its actual SSL certs (if enabled)
+# force-mode 0 = use config, 1 = enable, 2 = disable
 sub sync_domain_tlsa_records
 {
-my ($d) = @_;
-return undef if (!$config{'tlsa_records'});
+my ($d, $force) = @_;
+return undef if (!$config{'tlsa_records'} && !$force);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return undef if (!$file);
 
@@ -3470,9 +3485,9 @@ my @oldrecs = grep { $_->{'type'} eq 'TLSA' &&
 my @need;
 if ($d->{'ssl'}) {
 	# SSL website
-	push(@need, &create_dane_dns_record(
+	push(@need, &create_tlsa_dns_record(
 		$d->{'ssl_cert'}, $d->{'web_sslport'}, $d->{'dom'}));
-	push(@need, &create_dane_dns_record(
+	push(@need, &create_tlsa_dns_record(
 		$d->{'ssl_cert'}, $d->{'web_sslport'}, "www.".$d->{'dom'}));
 	}
 foreach my $svc (&get_all_service_ssl_certs()) {
@@ -3497,14 +3512,18 @@ foreach my $svc (&get_all_service_ssl_certs()) {
 				}
 			}
 		}
-	push(@need, &create_dane_dns_record(
+	push(@need, &create_tlsa_dns_record(
 		$cfile, $svc->{'port'}, $svc->{'prefix'}.'.'.$d->{'dom'}));
-	push(@need, &create_dane_dns_record(
+	push(@need, &create_tlsa_dns_record(
 		$cfile, $svc->{'port'}, $d->{'dom'}));
 	}
 @need = grep { defined($_) } @need;
 my %done;
 @need = grep { !$done{$_->{'name'}}++ } @need;
+if ($force == 2) {
+	# Just removing records
+	@need = ();
+	}
 
 if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
 	&obtain_lock_dns($d);

@@ -67,6 +67,7 @@ index_eprocmail=The Procmail program needed for spam filtering does not appear t
 index_evirus=The ClamAV program $1 does not appear to be installed on your system. Either adjust the path on the <a href='$2'>module configuration</a> page, or disable this feature.
 index_estatus=The System and Server Status module does not appear to be installed on your system. Either install it, or disable status monitoring on the <a href='$2'>module configuration</a> page.
 index_evirusrun2=The ClamAV program $1 does not appear to be working properly : $2. Either change the program on the <a href='$3'>spam and virus scanners</a> page, or disable this feature.
+index_etlsassl=OpenSSL does not support certificate parsing or SHA-256 hashing
 index_astart=Start Apache
 index_astartdesc=The Apache webserver is currently down, meaning that all virtual server web pages are inaccessible. Click this button to start it.
 index_astop=Stop Apache
@@ -1805,6 +1806,8 @@ check_ftpok=ProFTPD is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.
 check_dnsok3=BIND DNS domains will be hosted on a services host.
+check_etlsa=TLSA DNS records cannot be created on your system : $1.
+check_tlsaok=TLSA DNS records will be added to new domains.
 check_dnsmaster=However, the default master DNS server $1 is not a fully qualified domain name.
 check_mysqlok=MySQL is installed and running.
 check_mysqlok2=MySQL client programs are installed for use with a services host.
@@ -4854,6 +4857,7 @@ spf_enablednssec=Creating DNSSEC key and records ..
 spf_disablednssec=Removing DNSSEC records ..
 spf_enabletlsa=Creating TLSA records ..
 spf_disabletlsa=Removing TLSA records ..
+spf_etlsa=.. not supported on this system : $1
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed
 s3_elist=Failed to list S3 buckets : $1
