@@ -3456,10 +3456,10 @@ sub create_tlsa_dns_record
 my ($file, $chain, $port, $host) = @_;
 my $temp = &transname();
 &open_tempfile(TEMP, ">$temp");
+&print_tempfile(TEMP, &read_file_contents($file));
 if ($chain) {
 	&print_tempfile(TEMP, &read_file_contents($chain));
 	}
-&print_tempfile(TEMP, &read_file_contents($file));
 &close_tempfile(TEMP);
 my $hash = &backquote_command(
 	"openssl x509 -in ".quotemeta($temp)." -outform DER 2>/dev/null | ".
