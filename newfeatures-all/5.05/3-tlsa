@@ -1,0 +1,5 @@
+desc=TLSA DNS records for SSL
+html=Virtualmin can now generate TLSA DNS records for DANE SSL certificate verification, which (when combined with DNSSEC) provide additional assurance to clients that they are connecting to the correct webserver.
+master=1
+owner=1
+reseller=1

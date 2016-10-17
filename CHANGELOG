@@ -1547,3 +1547,4 @@ Updated the Moodle script installer to version 2.9.8 and 3.1.2, Piwik to 2.16.5,
 Added a script installer for Nextcloud 10.0.1, a fork of ownCloud.
 When using DNSSEC, the DS records that need to be created at your registrar are now displayed on the DNS Options page. If the parent domain is hosted by Virtualmin, the DS records will be added automatically.
 The number of top-level virtual servers a reseller is allowed to create can now be limited.
+Virtualmin can now generate TLSA DNS records for DANE SSL certificate verification, which (when combined with DNSSEC) provide additional assurance to clients that they are connecting to the correct webserver.
