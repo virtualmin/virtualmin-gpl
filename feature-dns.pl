@@ -409,7 +409,7 @@ if (!$recs) {
 local $absfile = &bind8::make_chroot($file);
 local $absofile = &bind8::make_chroot($ofile);
 &copy_source_dest($absofile, $absfile);
-$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+$recs = [ &bind8::read_zone_file($file, $oldd->{'dom'}) ];
 &modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
 local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
 local $newip = $d->{'dns_ip'} || $d->{'ip'};
