@@ -28,6 +28,14 @@ sub script_roundcube_versions
 return ( "1.2.2", "1.0.9", "0.8.7" );
 }
 
+sub script_roundcube_version_desc
+{
+local ($ver) = @_;
+return &compare_versions($ver, "1.2") >= 0 ? "$ver (Latest)" :
+       &compare_versions($ver, "1.0") >= 0 ? "$ver (LTS)" :
+					     "$ver (Un-supported)";
+}
+
 sub script_roundcube_category
 {
 return "Email";
