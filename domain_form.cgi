@@ -547,7 +547,7 @@ foreach $f (@fplugins) {
 	$label = "<b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
-	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f})." ".$label);
+	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f}).$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}
