@@ -186,4 +186,94 @@ if (!&dovecot::find_value("ssl_cipher_list", $conf)) {
 &dovecot::apply_configuration();
 }
 
+# copy_postfix_ssl_service(&domain)
+# Copy a domain's SSL cert to Postfix
+sub copy_postfix_ssl_service
+{
+my ($d) = @_;
+
+# Get the Postfix config and cert files
+&foreign_require("postfix");
+my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+my $kfile = &postfix::get_real_value("smtpd_tls_key_file");
+my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+my $cdir = &postfix::guess_config_dir();
+if ($cfile =~ /snakeoil/) {
+	# Hack to not use shared cert file on Ubuntu / Debian
+	$cfile = $kfile = $cafile = undef;
+	}
+$cfile ||= "$cdir/postfix.cert.pem";
+$kfile ||= "$cdir/postfix.key.pem";
+$cafile ||= "$cdir/postfix.ca.pem";
+
+# Copy cert into those files
+my $casrcfile = &get_website_ssl_file($d, "ca");
+&$first_print($casrcfile ? $text{'copycert_psaving2'}
+			 : $text{'copycert_psaving'});
+my $cdata = &cert_pem_data($d);
+my $kdata = &key_pem_data($d);
+my $cadata = $casrcfile ? &read_file_contents($casrcfile) : undef;
+$cdata || &error($text{'copycert_ecert'});
+$kdata || &error($text{'copycert_ekey'});
+&open_lock_tempfile(CERT, ">$cfile");
+&print_tempfile(CERT, $cdata,"\n");
+&close_tempfile(CERT);
+&set_ownership_permissions(undef, undef, 0700, $cfile);
+if ($cfile eq $kfile) {
+	&open_lock_tempfile(KEY, ">>$kfile");
+	&print_tempfile(KEY, $kdata,"\n");
+	&close_tempfile(KEY);
+	}
+else {
+	&open_lock_tempfile(KEY, ">$kfile");
+	&print_tempfile(KEY, $kdata,"\n");
+	&close_tempfile(KEY);
+	&set_ownership_permissions(undef, undef, 0700, $kfile);
+	}
+if ($cadata) {
+	&open_lock_tempfile(CA, ">$cafile");
+	&print_tempfile(CA, $cadata,"\n");
+	&close_tempfile(CA);
+	&set_ownership_permissions(undef, undef, 0750, $cafile);
+	}
+
+# Update config with correct files
+&postfix::set_current_value("smtpd_tls_cert_file", $cfile);
+&postfix::set_current_value("smtpd_tls_key_file", $kfile);
+&postfix::set_current_value("smtpd_tls_CAfile", $cadata ? $cafile : undef);
+&$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
+
+# Make sure SSL is enabled
+&$first_print($text{'copycert_penabling'});
+if ($postfix::postfix_version >= 2.3) {
+	&postfix::set_current_value("smtpd_tls_security_level", "may");
+	}
+else {
+	&postfix::set_current_value("smtpd_use_tls", "yes");
+	}
+&postfix::set_current_value("smtpd_tls_mandatory_protocols", "SSLv3, TLSv1");
+&postfix::set_current_value("smtpd_tls_mandatory_ciphers", "high");
+&lock_file($postfix::config{'postfix_master'});
+my $master = &postfix::get_master_config();
+my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
+my ($smtp) = grep { $_->{'name'} eq 'smtp' } @$master;
+if ($smtps && !$smtps->{'enabled'}) {
+	# Enable existing entry
+	$smtps->{'enabled'} = 1;
+	&postfix::modify_master($smtps);
+	}
+elsif (!$smtps && $smtp) {
+	# Add new smtps entry, cloned from smtp
+	$smtps = { %$smtp };
+	$smtps->{'name'} = 'smtps';
+	$smtps->{'command'} .= " -o smtpd_tls_wrappermode=yes";
+	&postfix::create_master($smtps);
+	}
+&unlock_file($postfix::config{'postfix_master'});
+&$second_print($text{'setup_done'});
+
+# Apply Postfix config
+&postfix::reload_postfix();
+}
+
 1;
