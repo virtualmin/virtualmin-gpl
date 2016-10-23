@@ -342,4 +342,97 @@ if ($cadata) {
 &$second_print($text{'setup_done'});
 }
 
+# copy_webmin_ssl_service(&domain)
+# Copy a domain's SSL cert to Webmin
+sub copy_webmin_ssl_service
+{
+my ($d) = @_;
+
+# Copy to appropriate config dir
+my $dir = $config_directory;
+&$first_print(&text('copycert_webmindir', "<tt>$dir</tt>"));
+my $certfile = "$dir/$d->{'dom'}.cert";
+&lock_file($certfile);
+&copy_source_dest($d->{'ssl_cert'}, $certfile);
+&unlock_file($certfile);
+if ($d->{'ssl_key'}) {
+	$keyfile = "$dir/$d->{'dom'}.key";
+	&lock_file($keyfile);
+	&copy_source_dest($d->{'ssl_key'}, $keyfile);
+	&unlock_file($keyfile);
+	}
+if ($d->{'ssl_chain'}) {
+	$chainfile = "$dir/$d->{'dom'}.chain";
+	&lock_file($chainfile);
+	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
+	&unlock_file($chainfile);
+	}
+&$second_print($text{'setup_done'});
+
+# Configure Webmin to use it
+&$first_print($text{'copycert_webminconfig'});
+&lock_file($ENV{'MINISERV_CONFIG'});
+&get_miniserv_config(\%miniserv);
+$miniserv{'certfile'} = $certfile;
+$miniserv{'keyfile'} = $keyfile;
+$miniserv{'extracas'} = $chainfile;
+&put_miniserv_config(\%miniserv);
+&unlock_file($ENV{'MINISERV_CONFIG'});
+&restart_miniserv();
+&$second_print($text{'setup_done'});
+
+# Tell the user if not in SSL mode
+if (!$miniserv{'ssl'}) {
+	&$second_print(&text('copycert_webminnot',
+			     "../webmin/edit_ssl.cgi"));
+	}
+}
+
+# copy_usermin_ssl_service(&domain)
+# Copy a domain's SSL cert to Usermin
+sub copy_usermin_ssl_service
+{
+my ($d) = @_;
+
+# Copy to appropriate config dir
+&foreign_require("usermin");
+my $dir = $usermin::config{'usermin_dir'};
+&$first_print(&text('copycert_webmindir', "<tt>$dir</tt>"));
+$certfile = "$dir/$d->{'dom'}.cert";
+&lock_file($certfile);
+&copy_source_dest($d->{'ssl_cert'}, $certfile);
+&unlock_file($certfile);
+if ($d->{'ssl_key'}) {
+	$keyfile = "$dir/$d->{'dom'}.key";
+	&lock_file($keyfile);
+	&copy_source_dest($d->{'ssl_key'}, $keyfile);
+	&unlock_file($keyfile);
+	}
+if ($d->{'ssl_chain'}) {
+	$chainfile = "$dir/$d->{'dom'}.chain";
+	&lock_file($chainfile);
+	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
+	&unlock_file($chainfile);
+	}
+&$second_print($text{'setup_done'});
+
+# Configure Usermin to use it
+&$first_print($text{'copycert_userminconfig'});
+&lock_file($usermin::usermin_miniserv_config);
+&usermin::get_usermin_miniserv_config(\%miniserv);
+$miniserv{'certfile'} = $certfile;
+$miniserv{'keyfile'} = $keyfile;
+$miniserv{'extracas'} = $chainfile;
+&usermin::put_usermin_miniserv_config(\%miniserv);
+&unlock_file($usermin::usermin_miniserv_config);
+&usermin::restart_usermin_miniserv();
+&$second_print($text{'setup_done'});
+
+# Tell the user if not in SSL mode
+if (!$miniserv{'ssl'}) {
+	&$second_print(&text('copycert_userminnot',
+			     "../usermin/edit_ssl.cgi"));
+	}
+}
+
 1;
