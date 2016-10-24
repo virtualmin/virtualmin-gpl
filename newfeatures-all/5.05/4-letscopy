@@ -1,0 +1,5 @@
+desc=Let's Encrypt certificate for servers
+html=When a Let's Encrypt certificate is automatically renewed, the new cert will be copied to servers like Postfix, Dovecot and Webmin that were using the old version.
+master=1
+link=cert_form.cgi?dom=${ID}
+features=ssl
