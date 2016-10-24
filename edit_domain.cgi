@@ -348,11 +348,11 @@ if (!$d->{'disabled'}) {
 			push(@grid, &ui_checkbox($f."_dis", 1, "",
 						 $d->{$f}, undef, 1).
 				    &ui_hidden($f, $d->{$f}).
-				    " ".$label);
+				    $label);
 			}
 		else {
 			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
-				    " ".$label);
+				    $label);
 			}
 		}
 
