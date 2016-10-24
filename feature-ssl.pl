@@ -1939,6 +1939,16 @@ foreach my $d (&list_domains()) {
 			&save_domain($d);
 			}
 		else {
+			# Figure out which services (webmin, postfix, etc)
+			# were using the old cert
+			my @before;
+			foreach my $svc (&get_all_service_ssl_certs()) {
+				if (&same_cert_file(
+				    $d->{'ssl_cert'}, $svc->{'cert'})) {
+					push(@before, $svc);
+					}
+				}
+
 			# Copy into place
 			&obtain_lock_ssl($d);
 			&install_letsencrypt_cert($d, $cert, $key, $chain);
@@ -1954,6 +1964,15 @@ foreach my $d (&list_domains()) {
 
 			# Update DANE DNS records
 			&sync_domain_tlsa_records($d);
+
+			# Update services that were using the old cert
+			foreach my $svc (@before) {
+				&push_all_print();
+				&set_all_null_print();
+				my $func = "copy_".$svc->{'id'}."_ssl_service";
+				&$func($d);
+				&pop_all_print();
+				}
 
 			# Tell the user
 			$subject = $text{'letsencrypt_sdone'};
