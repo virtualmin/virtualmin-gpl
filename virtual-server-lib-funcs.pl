@@ -16856,6 +16856,12 @@ if ($err) {
 	}
 &$second_print($text{'setup_done'});
 
+# Run the before clone command
+&set_domain_envs($d, "CLONE_DOMAIN");
+local $merr = &making_changes();
+&reset_domain_envs($d);
+return &text('setup_emaking', "<tt>$merr</tt>") if (defined($merr));
+
 # Copy across features, mail last so that user DB association works
 my @clonefeatures = @features;
 if (&indexof("mail", @clonefeatures) >= 0) {
@@ -16894,6 +16900,12 @@ if (defined(&list_domain_scripts) && -d $scriptsrc) {
 	}
 
 &run_post_actions();
+
+&set_domain_envs($d, "CLONE_DOMAIN");
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
+
 return 1;
 }
 
