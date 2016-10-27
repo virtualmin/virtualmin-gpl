@@ -87,13 +87,13 @@ local ($d, $uinfo) = @_;
 local $perms = oct($uconfig{'homedir_perms'});
 if (&has_domain_user($d) && $d->{'parent'}) {
 	# Run as domain owner, as this is a sub-server
-	&make_dir_as_domain_user($d, $d->{'home'}, $perms);
+	&make_dir_as_domain_user($d, $d->{'home'}, $perms, 1);
 	&set_permissions_as_domain_user($d, $perms, $d->{'home'});
 	}
 else {
 	# Run commands as root, as user is missing
 	if (!-d $d->{'home'}) {
-		&make_dir($d->{'home'}, $perms);
+		&make_dir($d->{'home'}, $perms, 1);
 		}
 	&set_ownership_permissions(undef, undef, $perms, $d->{'home'});
 	if ($uinfo) {
