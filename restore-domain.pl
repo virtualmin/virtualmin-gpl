@@ -332,9 +332,11 @@ foreach $dname (@rdoms) {
 		$got_vbs = 1;
 		}
 	elsif ($dinfo) {
+		# Domain exists on this system already
 		push(@doms, $dinfo);
 		}
 	else {
+		# Doesn't exist, will need to be re-created
 		push(@doms, { 'dom' => $dname,
 			      'missing' => 1 });
 		}

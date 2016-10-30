@@ -2027,7 +2027,7 @@ if ($ok) {
 				   $a->{'alias'} <=> $b->{'alias'} } @$doms) {
 
 		if ($delete_existing && !$d->{'missing'}) {
-			# Delete the domain first
+			# Delete the domain first in preparation for re-create.
 			&$first_print(&text('restore_deletefirst',
 					    &show_domain_name($d)));
 			&$indent_print();
@@ -2036,6 +2036,19 @@ if ($ok) {
 			&$second_print($text{'setup_done'});
 
 			$d->{'missing'} = 1;
+
+			# For domains being re-created (not missing, but the
+			# user has requested deletion and re-creation), use the
+			# features from the backup
+			if ($delete_existing) {
+				my $bd = &get_domain(undef,
+					"$restoredir/$d->{'dom'}_virtualmin");
+				foreach my $f (@$features) {
+					if ($bd->{$f} && !$d->{$f}) {
+						$d->{$f} = $bd->{$f};
+						}
+					}
+				}
 			}
 
 		if ($d->{'missing'}) {
