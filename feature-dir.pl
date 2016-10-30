@@ -214,7 +214,9 @@ sub delete_dir
 local ($d, $preserve) = @_;
 
 # Delete homedir
-if (-d $d->{'home'} && $d->{'home'} ne "/") {
+&require_useradmin();
+if (-d $d->{'home'} && $d->{'home'} ne "/" &&
+    !&same_file($d->{'home'}, $home_base)) {
 	&$first_print($text{'delete_home'});
 
 	# Don't delete if on remote
