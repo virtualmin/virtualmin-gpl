@@ -1885,6 +1885,18 @@ if ($zonefile) {
 			&bind8::absolute_path($zonefile));
 	if (-r $absfile) {
 		&copy_write_as_domain_user($d, $absfile, $file);
+		my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		@keys = grep { ref($_) &&
+			       $_->{'privatefile'} &&
+			       $_->{'publicfile'} } @keys;
+		my $i = 0;
+		foreach my $key (@keys) {
+			&copy_write_as_domain_user($d, $key->{'privatefile'},
+						   $file."_dnssec_private_".$i);
+			&copy_write_as_domain_user($d, $key->{'publicfile'},
+						   $file."_dnssec_public_".$i);
+			$i++;
+			}
 		&$second_print($text{'setup_done'});
 		return 1;
 		}
@@ -1909,6 +1921,7 @@ return 1 if ($_[0]->{'dns_submode'});	# restored in parent
 &$first_print($text{'restore_dnscp'});
 &obtain_lock_dns($_[0], 1);
 local ($recs, $file) = &get_domain_dns_records_and_file($_[0]);
+local $ok;
 if ($file) {
 	local $absfile = &bind8::make_chroot(
 			&bind8::absolute_path($file));
@@ -1930,6 +1943,19 @@ if ($file) {
 		splice(@$dstlref, $dststart, $dstend - $dststart + 1,
 		       @$srclref[$srcstart .. $srcend]);
 		&flush_file_lines($absfile);
+		}
+
+	# If the backup contained a DNSSEC key and this system has the zone
+	# signed, copy them in
+	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} } @keys;
+	my $i = 0;
+	foreach my $key (@keys) {
+		&copy_source_dest($file."_dnssec_private_".$i,
+				  $key->{'privatefile'});
+		&copy_source_dest($file."_dnssec_public_".$i,
+				  $key->{'publicfile'});
+		$i++;
 		}
 
 	# Re-read records, bump SOA and upload records to provisioning server
@@ -2019,13 +2045,14 @@ if ($file) {
 	&$second_print($text{'setup_done'});
 
 	&register_post_action(\&restart_bind, $_[0]);
-	return 1;
+	$ok = 1;
 	}
 else {
 	&$second_print($text{'backup_dnsnozone'});
-	return 0;
+	$ok = 0;
 	}
 &release_lock_dns($_[0], 1);
+return $ok;
 }
 
 # modify_records_ip_address(&records, filename, oldip, newip, [domain])
