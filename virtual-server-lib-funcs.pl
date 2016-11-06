@@ -13554,12 +13554,14 @@ if (!&foreign_check("net")) {
 # Check for sensible memory limits
 if (&foreign_check("proc")) {
 	&foreign_require("proc");
-	local $rmem = ($config{'mem_low'} || 256)*1024*1024;
+	local $arch = &backquote_command("uname -m");
+	local $defmem = $arch =~ /x86_64/ ? 768 : 512;
+	local $rmem = ($config{'mem_low'} || $defmem)*1024*1024;
 	if (defined(&proc::get_memory_info)) {
 		local @mem = &proc::get_memory_info();
 		local $beans = &get_beancounters();
 		if ($mem[0]*1024 < $rmem) {
-			# Memory is less than 256 M
+			# Memory is less than 512 MB (768 on 64-bit)
 			&$second_print("<b>".&text('check_lowmemory',
 				&nice_size($mem[0]*1024),
 				&nice_size($rmem))."</b>");
