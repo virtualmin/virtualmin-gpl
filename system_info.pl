@@ -179,8 +179,10 @@ if (!&master_admin() && !&reseller_admin()) {
 		    'id' => 'domain',
 	 	    'desc' => $text{'right_header3'},
 		    'table' => \@table });
-	push(@rv, { 'type' => 'veto',
-		    'veto' => 'sysinfo' });
+	if ($data->{'nosysinfo'} || !&can_view_sysinfo()) {
+		push(@rv, { 'type' => 'veto',
+			    'veto' => 'sysinfo' });
+		}
 	}
 
 # Virtualmin package updates
