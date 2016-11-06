@@ -37,7 +37,7 @@ if ($src eq "upload:") {
 	$fn =~ s/^.*[\\\/]//;
 	if ($d) {
 		# In domain's home dir
-		$bdir = "$d->{'home'}/virtualmin-backup";
+		$bdir = "$d->{'home'}/$home_virtualmin_backup";
 		if (!-d $bdir) {
 			&make_dir_as_domain_user($d, $bdir, 0700);
 			}

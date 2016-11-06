@@ -3616,11 +3616,11 @@ local $rv;
 local @opts;
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
-	local $bdir = "$d->{'home'}/virtualmin-backup";
+	local $bdir = "$d->{'home'}/$home_virtualmin_backup";
 	$bdir =~ s/\.\///g;	# Fix /./ in directory path
 	push(@opts, [ 0, $text{'backup_mode0a'},
 	       &ui_textbox($name."_file",
-		  $mode == 0 && $path =~ /virtualmin-backup\/(.*)$/ ? $1 : "",
+		  $mode == 0 && $path =~ /\Q$home_virtualmin_backup\E\/(.*)$/ ? $1 : "",
 		  50)." ".
 	       &file_chooser_button($name."_file", 0, 0, $bdir)."<br>\n" ]);
 	}
@@ -3773,7 +3773,7 @@ if ($mode == 0 && $d) {
 	$in{$name."_file"} =~ /\.\./ && &error($text{'backup_edest3'});
 	$in{$name."_file"} =~ s/\/+$//;
 	$in{$name."_file"} =~ s/^\/+//;
-	return "$d->{'home'}/virtualmin-backup/".$in{$name."_file"};
+	return "$d->{'home'}/$home_virtualmin_backup/".$in{$name."_file"};
 	}
 elsif ($mode == 0 && !$nolocal) {
 	# Any local file

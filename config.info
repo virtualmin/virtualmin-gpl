@@ -181,6 +181,7 @@ tar_args=Additonal parameters to tar command,0
 ssh_args=Additonal parameters to ssh and scp commands,0
 aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Not installed
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
+home_backup=Users' backup directory under home,0
 
 line9=PHP options,11
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds

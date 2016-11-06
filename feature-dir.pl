@@ -436,7 +436,7 @@ if ($opts->{'dirnologs'}) {
 if ($opts->{'dirnohomes'}) {
 	push(@xlist, "homes");
 	}
-push(@xlist, "virtualmin-backup");
+push(@xlist, $home_virtualmin_backup);
 push(@xlist, &get_backup_excludes($d));
 push(@xlist, split(/\t+/, $opts->{'exclude'}));
 push(@xlist, "backup.lock");
@@ -792,7 +792,7 @@ else {
 
 		# Exclude other transient dirs
 		push(@exc, ".backup.lock");
-		push(@exc, "virtualmin-backup");
+		push(@exc, $home_virtualmin_backup);
 		push(@exc, "logs");	# Some backups don't include logs
 		push(@exc, "homes");	# or homes dirs
 		push(@exc, &get_backup_excludes($d));
