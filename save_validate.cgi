@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'newvalidate_err2'});
-&can_edit_templates() || &error($text{'newvalidate_ecannot'});
+&can_use_validation() == 2 || &error($text{'newvalidate_ecannot'});
 
 # Validate inputs
 $oldjob = $job = &find_cron_script($validate_cron_cmd);

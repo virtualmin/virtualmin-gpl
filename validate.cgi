@@ -4,16 +4,20 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'newvalidate_err'});
-&can_edit_templates() || &error($text{'newvalidate_ecannot'});
+&can_use_validation() || &error($text{'newvalidate_ecannot'});
 
 # Check and parse inputs
 if ($in{'servers_def'}) {
-	@doms = &list_domains();
+	@doms = &list_available_domains();
 	}
 else {
 	foreach $id (split(/\0/, $in{'servers'})) {
 		$d = &get_domain($id);
-		push(@doms, $d) if ($d);
+		if ($d) {
+			&can_edit_domain($d) ||
+				&error($text{'newvalidate_ecannot'});
+			push(@doms, $d)
+			}
 		}
 	}
 @doms || &error($text{'newvalidate_edoms'});

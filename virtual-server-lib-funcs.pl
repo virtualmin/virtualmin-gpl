@@ -102,6 +102,13 @@ if ($config{'hide_alias'}) {
 return @rv;
 }
 
+# list_available_domains()
+# Returns a list of domain structures the current user has access to
+sub list_available_domains
+{
+return grep { &can_edit_domain($_) } &list_domains();
+}
+
 # sort_indent_domains(&domains)
 # Returns a list of all domains sorted according to the module config setting.
 # Those that should be indented have the 'indent' field set to some number.
@@ -3325,6 +3332,14 @@ sub can_use_preview
 {
 return $config{'show_preview'} == 2 ||
        $config{'show_preview'} == 1 && &master_admin();
+}
+
+# can_use_validation()
+# Returns 1 if the current user can validate virtual servers, 2 if they can
+# setup scheduled validaton.
+sub can_use_validation
+{
+return &master_admin() ? 2 : 0;
 }
 
 # domains_table(&domains, [checkboxes], [return-html], [exclude-cols])
