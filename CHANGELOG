@@ -1549,3 +1549,4 @@ When using DNSSEC, the DS records that need to be created at your registrar are 
 The number of top-level virtual servers a reseller is allowed to create can now be limited.
 Virtualmin can now generate TLSA DNS records for DANE SSL certificate verification, which (when combined with DNSSEC) provide additional assurance to clients that they are connecting to the correct webserver.
 When a Let's Encrypt certificate is automatically renewed, the new cert will be copied to servers like Postfix, Dovecot and Webmin that were using the old version.
+Added configuration options to allow domain owners to see overall system statistics, and run validation on their domains.
