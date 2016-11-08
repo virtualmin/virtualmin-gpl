@@ -8,8 +8,11 @@ require './virtual-server-lib.pl';
 
 # Start of tabs
 print &ui_tabs_start([ [ 'val', $text{'newvalidate_tabval'} ],
-		       [ 'sched', $text{'newvalidate_tabsched'} ],
-		       [ 'fix', $text{'newvalidate_tabsfix'} ] ],
+		       &can_use_validation() == 2 ? (
+		         [ 'sched', $text{'newvalidate_tabsched'} ],
+		         [ 'fix', $text{'newvalidate_tabsfix'} ],
+			 ) : ( ),
+		     ],
 		     'mode', $in{'mode'} || 'val', 1);
 
 # Start of validation form

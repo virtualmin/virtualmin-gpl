@@ -3339,7 +3339,18 @@ return $config{'show_preview'} == 2 ||
 # setup scheduled validaton.
 sub can_use_validation
 {
-return &master_admin() ? 2 : 0;
+if (&master_admin()) {
+	return 2;
+	}
+elsif ($config{'show_validation'} >= 1 && &reseller_admin()) {
+	return 1;
+	}
+elsif ($config{'show_validation'} == 2) {
+	return 1;
+	}
+else {
+	return 0;
+	}
 }
 
 # domains_table(&domains, [checkboxes], [return-html], [exclude-cols])
@@ -12401,6 +12412,12 @@ if (&can_change_language()) {
 	push(@rv, { 'url' => $vm."/edit_lang.cgi",
 		    'title' => $text{'edit_lang'},
 		    'icon' => 'lang' });
+	}
+if (&can_use_validation() && !&can_edit_templates()) {
+	# Validation page for domain owner
+	push(@rv, { 'url' => $vm."/edit_newvalidate.cgi",
+		    'title' => $text{'newvalidate_title'},
+		    'icon' => 'validate' });
 	}
 
 # Set category names
