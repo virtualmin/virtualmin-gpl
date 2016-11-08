@@ -445,24 +445,26 @@ local @ports = ( $d->{'web_port'},
 @ports = ( $port ) if ($port);	# Overridden to just do SSL or non-SSL
 local $conf = &apache::get_config();
 local $pfound = 0;
+local $changed = 0;
 foreach my $p (@ports) {
         local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
         next if (!$vconf);
 	$pfound++;
 	local @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
 	local $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
-	if ($max) {
-		&apache::save_directive($dirname, [ $max+1 ],
+	local $oldvalue = &apache::find_directive($dirname, $vconf);
+	local $want = $max ? $max + 1 : 9999;
+	if ($oldvalue ne $want) {
+		&apache::save_directive($dirname, [ $want ],
 					$vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		$changed++;
 		}
-	else {
-		&apache::save_directive($dirname, [ 9999 ],
-					$vconf, $conf);
-		}
-	&flush_file_lines($virt->{'file'});
 	}
-&register_post_action(\&restart_apache);
 $pfound || &error("Apache virtual host was not found");
+if ($changed) {
+	&register_post_action(\&restart_apache);
+	}
 }
 
 # get_fcgid_max_execution_time(&domain)
