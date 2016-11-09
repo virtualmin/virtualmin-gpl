@@ -306,6 +306,22 @@ else {
 		print &ui_table_row($text{'wizard_mysql_empty'},
 			&ui_textbox("mypass", undef, 20));
 		}
+
+	# Offer to clean up test/anonymous DB and user, if they exist
+	my @dbs = &mysql::list_databases();
+	if (&indexof("test", @dbs) >= 0) {
+		my @tables = &mysql::list_tables("test", 1);
+		print &ui_table_row($text{'wizard_mysql_deltest'}.
+			(@tables ? " ".&text('wizard_mysql_delc',
+					     scalar(@tables)) : ""),
+			&ui_yesno_radio("deltest", @tables ? 0 : 1));
+		}
+	my $rv = &mysql::execute_sql_logged($mysql::master_db,
+		"select * from user where user = ''");
+	if (@{$rv->{'data'}}) {
+		print &ui_table_row($text{'wizard_mysql_delanon'},
+			&ui_yesno_radio("delanon", 1));
+		}
 	}
 }
 
@@ -320,8 +336,9 @@ if (&mysql::is_mysql_running() == -1) {
 	$mysql::mysql_pass = $in->{'mypass'};
 	&mysql::save_module_config(\%mysql::config, "mysql");
 	$mysql::authstr = &mysql::make_authstr();
-	return &mysql::is_mysql_running() > 0 ? undef :
-		$text{'wizard_mysql_epass'};
+	if (&mysql::is_mysql_running() <= 0) {
+		return $text{'wizard_mysql_epass'};
+		}
 	}
 else {
 	if (!$in{'mypass_def'}) {
@@ -335,8 +352,18 @@ else {
 		$mysql::config{'pass'} = $in->{'mypass'};
 		&mysql::save_module_config(\%mysql::config, "mysql");
 		}
-	return undef;
 	}
+
+# Remove test database if requested
+if ($in->{'deltest'}) {
+	&mysql::execute_sql_logged($mysql::master_db, "drop database test");
+	}
+if ($in->{'delanon'}) {
+	&mysql::execute_sql_logged($mysql::master_db,
+		"delete from user where user = ''");
+	}
+
+return undef;
 }
 
 # Show a form to select the MySQL size configuration
