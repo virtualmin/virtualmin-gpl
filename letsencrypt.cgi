@@ -63,6 +63,15 @@ else {
 	else {
 		&$second_print($text{'letsencrypt_done'});
 
+		# Figure out which services (webmin, postfix, etc)
+		# were using the old cert
+		my @before;
+		foreach my $svc (&get_all_service_ssl_certs()) {
+			if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'})) {
+				push(@before, $svc);
+				}
+			}
+
 		# Worked .. copy to the domain
 		&obtain_lock_ssl($d);
 		&$first_print($text{'newkey_apache'});
@@ -110,6 +119,12 @@ else {
 
 		&release_lock_ssl($d);
 		&$second_print($text{'setup_done'});
+
+		# Update services that were using the old cert
+		foreach my $svc (@before) {
+			my $func = "copy_".$svc->{'id'}."_ssl_service";
+			&$func($d);
+			}
 
 		# Run the after command
 		&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
