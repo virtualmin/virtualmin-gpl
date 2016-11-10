@@ -1890,13 +1890,18 @@ if ($zonefile) {
 			       $_->{'privatefile'} &&
 			       $_->{'publicfile'} } @keys;
 		my $i = 0;
+		my %kinfo;
 		foreach my $key (@keys) {
-			&copy_write_as_domain_user($d, $key->{'privatefile'},
-						   $file."_dnssec_private_".$i);
-			&copy_write_as_domain_user($d, $key->{'publicfile'},
-						   $file."_dnssec_public_".$i);
+			foreach my $t ('private', 'public') {
+				&copy_write_as_domain_user(
+					$d, $key->{$t.'file'},
+					$file.'_dnssec_'.$t.'_'.$i);
+				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
+				$kinfo{$t.'_'.$i} = $1;
+				}
 			$i++;
 			}
+		&write_file($file."_dnssec_keyinfo", \%kinfo);
 		&$second_print($text{'setup_done'});
 		return 1;
 		}
@@ -1946,15 +1951,26 @@ if ($file) {
 		}
 
 	# If the backup contained a DNSSEC key and this system has the zone
-	# signed, copy them in
+	# signed, copy them in (but under the OLD filenames, so they match
+	# up with the key IDs in records)
 	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} } @keys;
 	my $i = 0;
+	my %kinfo;
+	&read_file($_[1]."_dnssec_keyinfo", \%kinfo);
 	foreach my $key (@keys) {
-		&copy_source_dest($file."_dnssec_private_".$i,
-				  $key->{'privatefile'});
-		&copy_source_dest($file."_dnssec_public_".$i,
-				  $key->{'publicfile'});
+		foreach my $t ('private', 'public') {
+			next if (!-r $_[1].'_dnssec_'.$t.'_'.$i);
+			&unlink_file($key->{$t.'file'});
+			$key->{$t.'file'} =~ /^(.*)\// || next;
+			my $keydir = $1;
+			if ($kinfo{$t.'_'.$i}) {
+				$key->{$t.'file'} = $keydir.'/'.
+					$kinfo{$t.'_'.$i};
+				}
+			&copy_source_dest($_[1].'_dnssec_'.$t.'_'.$i,
+					  $key->{$t.'file'});
+			}
 		$i++;
 		}
 
