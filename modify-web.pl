@@ -73,6 +73,11 @@ turn on automatic renewal with the C<--letsencrypt-renew> flag followed by
 a number of months. Alternately, renewal can be disabled with the 
 C<--no-letsencrypt-renew> parameter.
 
+To change the domain's HTML directory, use the C<--document-dir> flag followed
+by a path relative to the domain's home. Alternately, if the Apache config has
+been modified outside of Virtualmin and you just want to detect the new path,
+use the C<--fix-document-dir> flag.
+
 =cut
 
 package virtual_server;
@@ -191,6 +196,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--document-dir") {
 		$htmldir = shift(@ARGV);
 		}
+	elsif ($a eq "--fix-document-dir") {
+		$fixhtmldir = 1;
+		}
 	elsif ($a eq "--port") {
 		$port = shift(@ARGV);
 		$port =~ /^\d+$/ && $port > 0 && $port < 65536 ||
@@ -235,7 +243,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || &usage("Nothing to do");
+  defined($renew) || $fixhtmldir || &usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -557,6 +565,12 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
+	if ($fixhtmldir) {
+		# Update HTML directory from actual configs
+		&$first_print("Correcting documents directory ..");
+		&find_html_cgi_dirs($d);
+		&$second_print(".. set to $d->{'public_html_path'}");
+		}
 
 	# Change web ports
 	foreach my $pd ($d, &get_domain_by("alias", $d->{'id'})) {
@@ -675,7 +689,7 @@ print "                     [--includes extension | --no-includes]\n";
 print "                     [--default-website]\n";
 print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
-print "                     [--document-dir subdirectory]\n";
+print "                     [--document-dir subdirectory | --fix-document-dir]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
