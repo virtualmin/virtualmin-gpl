@@ -248,6 +248,17 @@ if ($d->{'provision_mysql'}) {
 			&delete_mysql_database_user($d, $u->{'user'});
 			}
 		}
+
+	# If this was the last domain with MySQL enabled on the system,
+	# turn off use of the remote host that if it gets enabled again, a
+	# new host and login are used
+	my @mdoms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
+			 &list_domains();
+	if (!@mdoms && $mysql::config{'host'}) {
+		delete($mysql::config{'host'});
+		$mysql::authstr = &mysql::make_authstr();
+		&mysql::save_module_config(\%mysql::config, 'mysql');
+		}
 	}
 else {
 	# Remove the main user locally
