@@ -359,7 +359,7 @@ if (!$parentuser) {
 if (!$parentuser && $config{'force_email'}) {
 	# Contact email address (if manadatory)
 	print &ui_table_row(&hlink($text{'form_email'}, "ownersemail"),
-		&ui_textbox("email", undef, 40),
+		&ui_textbox("email", $config{'contact_email'}, 40),
 		undef, \@tds);
 	}
 
@@ -377,7 +377,7 @@ if (!$parentuser) {
 	# Contact email address (if optional)
 	if (!$config{'force_email'}) {
 		print &ui_table_row(&hlink($text{'form_email'}, "ownersemail"),
-			&ui_opt_textbox("email", undef, 30,
+			&ui_opt_textbox("email", $config{'contact_email'}, 30,
 					$text{'form_email_def'},
 					$text{'form_email_set'}),
 			undef, \@tds);
