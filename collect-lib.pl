@@ -15,21 +15,6 @@ if ($config{'mem_cmd'}) {
 	$info->{'mem'} = [ map { $_/1024 } @lines ];
 	}
 
-# Available Virtualmin package updates
-if (&foreign_check("security-updates")) {
-	&foreign_require("security-updates");
-	local @poss = &security_updates::list_possible_updates(2);
-	local %doneposs;
-	@poss = grep { !$doneposs{$_->{'name'},$_->{'version'}}++ } @poss;
-	$info->{'poss'} = \@poss;
-	if (!$config{'collect_noall'}) {
-		local @allposs = &security_updates::list_possible_updates(2, 1);
-		local %doneposs;
-		@allposs = grep { !$doneposs{$_->{'name'},$_->{'version'}}++ } @allposs;
-		$info->{'allposs'} = \@allposs;
-		}
-	}
-
 # System status
 $info->{'startstop'} = [ &get_startstop_links() ];
 
@@ -231,13 +216,6 @@ sub refresh_possible_packages
 local ($pkgs) = @_;
 local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
-if ($info->{'poss'} && &foreign_check("security-updates")) {
-	&foreign_require("security-updates");
-	local @poss = &security_updates::list_possible_updates(1);
-	$info->{'poss'} = \@poss;
-	local @allposs = &security_updates::list_possible_updates(1, 1);
-	$info->{'allposs'} = \@allposs;
-	}
 &save_collected_info($info);
 }
 

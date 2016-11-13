@@ -6709,9 +6709,9 @@ right_ips=$1 virtual servers
 right_iprange=$1 addresses, $2 used
 right_bwheader=Bandwidth
 right_updatesheader=Package Updates
-right_upcount=$1 updates to Virtualmin packages are available. Use the <a href='$2'>Virtualmin Package Updates</a> module to install them selectively.
-right_upcount1=One updated Virtualmin package is available. Use the <a href='$2'>Virtualmin Package Updates</a> module to see all managed packages.
-right_upsys=$1 updates to system packages are available. Use the <a href='$2'>Virtualmin Package Updates</a> module to install them selectively.
+right_upcount=$1 updates to Virtualmin packages are available. Use the <a href='$2'>Software Package Updates</a> module to install them selectively.
+right_upcount1=One updated Virtualmin package is available. Use the <a href='$2'>Software Package Updates</a> module to see all managed packages.
+right_upsys=$1 updates to system packages are available. Use the <a href='$2'>Software Package Updates</a> module to install them selectively.
 right_upname=Package
 right_updesc=Description
 right_upver=Version

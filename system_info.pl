@@ -185,44 +185,15 @@ if (!&master_admin() && !&reseller_admin()) {
 		}
 	}
 
-# Virtualmin package updates, from security-updates module
-# XXX remove this one we stop using this module
-my $hasposs = foreign_check("security-updates");
-my $canposs = foreign_available("security-updates");
-if (!$data->{'noupdates'} && $hasposs && $canposs && @poss) {
-	my $html = &ui_form_start("/security-updates/update.cgi");
-	$html .= &text(@poss > 1 ? 'right_upcount' : 'right_upcount1',
-		       scalar(@poss),
-		       '/security-updates/index.cgi?mode=updates')."<p>\n";
-	$html .= &ui_columns_start([ $text{'right_upname'},
-                                     $text{'right_updesc'},
-                                     $text{'right_upver'} ], "80%");
-	foreach my $p (@poss) {
-		$html .= &ui_columns_row([
-			$p->{'name'}, $p->{'desc'}, $p->{'version'} ]);
-		$html .= &ui_hidden("u", $p->{'update'}."/".$p->{'system'});
-		}
-	$html .= &ui_columns_end();
-	$html .= &ui_form_end([ [ undef, $text{'right_upok'} ] ]);
-	push(@rv, { 'type' => 'html',
-		    'id' => 'updates',
-		    'desc' => $text{'right_updatesheader'},
-		    'html' => $html });
-	# Block same section from being shown by Cloudmin
-	push(@rv, { 'type' => 'veto',
-		    'veto' => 'updates',
-		    'veto_module' => 'server-manager' });
-	}
-
 # Virtualmin package updates, filtered from the possible updates list
-my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'allposs'}};
+my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 my $hasvposs = foreign_check("package-updates");
 my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	my $html = &ui_form_start("/package-updates/update.cgi");
 	$html .= &text(@poss > 1 ? 'right_upcount' : 'right_upcount1',
 		       scalar(@poss),
-		       '/security-updates/index.cgi?mode=updates')."<p>\n";
+		       '/package-updates/index.cgi?mode=updates')."<p>\n";
 	$html .= &ui_columns_start([ $text{'right_upname'},
                                      $text{'right_updesc'},
                                      $text{'right_upver'} ], "80%");
@@ -237,6 +208,10 @@ if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 		    'id' => 'updates',
 		    'desc' => $text{'right_updatesheader'},
 		    'html' => $html });
+	# Block same section from being shown by Cloudmin
+	push(@rv, { 'type' => 'veto',
+		    'veto' => 'updates',
+		    'veto_module' => 'server-manager' });
 	}
 
 # Status of various servers
@@ -678,7 +653,7 @@ my @virtualmin_packages = (
 	"subversion", "python", "ruby", "irb", "rdoc", "rubygems",
 	"openssl", "perl", "php5", "webmin", "usermin",
 	"fcgid", "awstats", "dovecot", "postgrey",
-	"virtualmin-modules", "kvm", "xen", "nginx",
+	"virtualmin-modules", "kvm", "xen", "nginx", "bash",
         );
 
 # is_virtualmin_package(&package)
@@ -689,7 +664,7 @@ my ($pkg) = @_;
 &foreign_require("software");
 return 0 if (!defined(&software::update_system_resolve));
 foreach my $n (@virtualmin_packages) {
-	my @res = &software::update_system_resolve($n);
+	my @res = split(/\s+/, &software::update_system_resolve($n));
 	foreach my $re (@res) {
 		return 1 if ($pkg->{'name'} =~ /^$re$/i);
 		}
