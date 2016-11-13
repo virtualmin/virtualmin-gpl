@@ -14,7 +14,7 @@ if (!&foreign_available($module_name)) {
 
 my @rv;
 my $info = &get_collected_info();
-my @poss = $info ? @{$info->{'poss'}} : ( );
+my @vposs = $info ? @{$info->{'vposs'}} : ( );
 my @doms = &list_visible_domains();
 
 # Check for wizard redirect
@@ -186,7 +186,6 @@ if (!&master_admin() && !&reseller_admin()) {
 	}
 
 # Virtualmin package updates, filtered from the possible updates list
-my @vposs = @{$info->{'vposs'}};
 my $hasvposs = foreign_check("package-updates");
 my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
