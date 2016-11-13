@@ -81,7 +81,7 @@ delete($info->{'startstop'});
 delete($info->{'quota'});
 delete($info->{'inst'}) if (!@{$info->{'inst'}});
 delete($info->{'poss'}) if (!@{$info->{'poss'}});
-delete($info->{'allposs'}) if (!@{$info->{'allposs'}});
+delete($info->{'vposs'}) if (!@{$info->{'vposs'}});
 delete($info->{'fextra'});
 delete($info->{'fhide'});
 delete($info->{'fmax'});

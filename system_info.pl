@@ -186,13 +186,13 @@ if (!&master_admin() && !&reseller_admin()) {
 	}
 
 # Virtualmin package updates, filtered from the possible updates list
-my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
+my @vposs = @{$info->{'vposs'}};
 my $hasvposs = foreign_check("package-updates");
 my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	my $html = &ui_form_start("/package-updates/update.cgi");
-	$html .= &text(@poss > 1 ? 'right_upcount' : 'right_upcount1',
-		       scalar(@poss),
+	$html .= &text(@vposs > 1 ? 'right_upcount' : 'right_upcount1',
+		       scalar(@vposs),
 		       '/package-updates/index.cgi?mode=updates')."<p>\n";
 	$html .= &ui_columns_start([ $text{'right_upname'},
                                      $text{'right_updesc'},
@@ -644,32 +644,6 @@ if ($str =~ /^(\d{4})-(\d+)-(\d+)$/) {
         return eval { timelocal(0, 0, 0, $3, $2-1, $1-1900) };
         }
 return undef;
-}
-
-my @virtualmin_packages = (
-	"apache", "postfix", "sendmail", "bind", "procmail",
-	"spamassassin", "logrotate", "webalizer", "mysql",
-	"postgresql", "proftpd", "clamav", "php4", "mailman",
-	"subversion", "python", "ruby", "irb", "rdoc", "rubygems",
-	"openssl", "perl", "php5", "webmin", "usermin",
-	"fcgid", "awstats", "dovecot", "postgrey",
-	"virtualmin-modules", "kvm", "xen", "nginx", "bash",
-        );
-
-# is_virtualmin_package(&package)
-# Returns 1 if some package looks to be one of the Virtualmin deps
-sub is_virtualmin_package
-{
-my ($pkg) = @_;
-&foreign_require("software");
-return 0 if (!defined(&software::update_system_resolve));
-foreach my $n (@virtualmin_packages) {
-	my @res = split(/\s+/, &software::update_system_resolve($n));
-	foreach my $re (@res) {
-		return 1 if ($pkg->{'name'} =~ /^$re$/i);
-		}
-	}
-return 0;
 }
 
 1;

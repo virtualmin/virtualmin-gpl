@@ -318,7 +318,7 @@ else {
 		}
 	}
 
-# Clear security updates caches, as we now have new updates available
+# Clear package updates caches, as we now have new updates available
 if (&foreign_installed("package-updates")) {
 	&foreign_require("package-updates");
 	unlink($package_updates::available_cache_file);

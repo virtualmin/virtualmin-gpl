@@ -172,6 +172,10 @@ foreach my $f ("virtualmin", @features) {
 	}
 $info->{'progs'} = \@progs;
 
+# Classify Virtualmin-specific packages
+my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
+$info->{'vposs'} = \@vposs;
+
 return $info;
 }
 
@@ -746,6 +750,32 @@ if (!$config{'collect_notemp'} && $virtualmin_pro &&
 	close(SENSORS);
 	}
 return @rv;
+}
+
+my @virtualmin_packages = (
+	"apache", "postfix", "sendmail", "bind", "procmail",
+	"spamassassin", "logrotate", "webalizer", "mysql",
+	"postgresql", "proftpd", "clamav", "php4", "mailman",
+	"subversion", "python", "ruby", "irb", "rdoc", "rubygems",
+	"openssl", "perl", "php5", "webmin", "usermin",
+	"fcgid", "awstats", "dovecot", "postgrey",
+	"virtualmin-modules", "kvm", "xen", "nginx",
+        );
+
+# is_virtualmin_package(&package)
+# Returns 1 if some package looks to be one of the Virtualmin deps
+sub is_virtualmin_package
+{
+my ($pkg) = @_;
+&foreign_require("software");
+return 0 if (!defined(&software::update_system_resolve));
+foreach my $n (@virtualmin_packages) {
+	my @res = split(/\s+/, &software::update_system_resolve($n));
+	foreach my $re (@res) {
+		return 1 if ($pkg->{'name'} =~ /^$re$/i);
+		}
+	}
+return 0;
 }
 
 1;
