@@ -10,6 +10,7 @@ if (!$mysql::config{'login'}) {
 	}
 %mconfig = &foreign_config("mysql");
 $password_func = $mysql::password_func || "password";
+$mysql_user_size = $config{'mysql_user_size'} || 16;
 }
 
 # check_depends_mysql(&dom)
@@ -1205,22 +1206,24 @@ if ($_[0]->{'parent'}) {
 	return &mysql_user(&get_domain($_[0]->{'parent'}), $_[1]);
 	}
 return $_[0]->{'mysql_user'} if (defined($_[0]->{'mysql_user'}) && !$_[1]);
-return length($_[0]->{'user'}) > 16 ?
-	  substr($_[0]->{'user'}, 0, 16) : $_[0]->{'user'};
+return length($_[0]->{'user'}) > $mysql_user_size ?
+	  substr($_[0]->{'user'}, 0, $mysql_user_size) : $_[0]->{'user'};
 }
 
 # set_mysql_user(&domain, newuser)
 # Updates a domain object with a new MySQL username
 sub set_mysql_user
 {
-$_[0]->{'mysql_user'} = length($_[1]) > 16 ? substr($_[1], 0, 16) : $_[1];
+$_[0]->{'mysql_user'} = length($_[1]) > $mysql_user_size ?
+	substr($_[1], 0, $mysql_user_size) : $_[1];
 }
 
 # mysql_username(username)
 # Adjusts a username to be suitable for MySQL
 sub mysql_username
 {
-return length($_[0]) > 16 ? substr($_[0], 0, 16) : $_[0];
+return length($_[0]) > $mysql_user_size ?
+	substr($_[0], 0, $mysql_user_size) : $_[0];
 }
 
 # set_mysql_pass(&domain, [password])

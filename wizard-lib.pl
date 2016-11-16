@@ -363,6 +363,19 @@ if ($in->{'delanon'}) {
 		"delete from user where user = ''");
 	}
 
+# Work out the max mysql username length, but only for new installs
+if (!&list_domains() && !$config{'mysql_user_size'}) {
+	eval {
+		local $main::error_must_die = 1;
+		my @str = &mysql::table_structure($mysql::master_db, "user");
+		my ($ufield) = grep { lc($_->{'field'}) eq 'user' } @str;
+		if ($ufield && $ufield->{'type'} =~ /\((\d+)\)/) {
+			$config{'mysql_user_size'} = $1;
+			&save_module_config();
+			}
+		};
+	}
+
 return undef;
 }
 
