@@ -1201,6 +1201,7 @@ return undef;
 # Returns the MySQL login name for a domain
 sub mysql_user
 {
+&require_mysql();
 if ($_[0]->{'parent'}) {
 	# Get from parent domain
 	return &mysql_user(&get_domain($_[0]->{'parent'}), $_[1]);
@@ -1214,6 +1215,7 @@ return length($_[0]->{'user'}) > $mysql_user_size ?
 # Updates a domain object with a new MySQL username
 sub set_mysql_user
 {
+&require_mysql();
 $_[0]->{'mysql_user'} = length($_[1]) > $mysql_user_size ?
 	substr($_[1], 0, $mysql_user_size) : $_[1];
 }
@@ -1222,6 +1224,7 @@ $_[0]->{'mysql_user'} = length($_[1]) > $mysql_user_size ?
 # Adjusts a username to be suitable for MySQL
 sub mysql_username
 {
+&require_mysql();
 return length($_[0]) > $mysql_user_size ?
 	substr($_[0], 0, $mysql_user_size) : $_[0];
 }
