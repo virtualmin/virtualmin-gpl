@@ -91,8 +91,8 @@ if ($d->{'provision_mysql'}) {
 		else {
 			$info->{'pass'} = &mysql_pass($d);
 			}
-		local @hosts = map { &to_ipaddress($_) }
-				   &get_mysql_hosts($d, 1);
+		local @hosts = &unique(map { &to_ipaddress($_) }
+				  	   &get_mysql_hosts($d, 2));
 		$info->{'remote'} = \@hosts;
 		my $conns = &get_mysql_user_connections($d, 0);
 		$info->{'conns'} = $conns if ($conns);
@@ -1565,6 +1565,10 @@ else {
 # get_mysql_hosts(&domain, [always-from-template])
 # Returns the allowed MySQL hosts for some domain, to be used when creating.
 # Uses hosts the user has currently by default, or those from the template.
+# If always-from-template == 1, then hosts already granted will never be used.
+# Instead, those from the template will be used.
+# If always-from-template == 2, then template hosts will be used AND we will
+# assume that we're connecting to a remote system.
 sub get_mysql_hosts
 {
 local ($d, $always) = @_;
@@ -1580,7 +1584,8 @@ if (!@hosts) {
 	    split(/\s+/, &substitute_domain_template(
 				$tmpl->{'mysql_hosts'}, $d));
 	@hosts = ( 'localhost' ) if (!@hosts);
-	if ($mysql::config{'host'} && $mysql::config{'host'} ne 'localhost') {
+	if ($always == 2 ||
+	    $mysql::config{'host'} && $mysql::config{'host'} ne 'localhost') {
 		# Add this host too, as we are talking to a remote server
 		push(@hosts, &get_system_hostname());
 		local $myip = &to_ipaddress(&get_system_hostname());
@@ -1667,7 +1672,7 @@ if ($d->{'provision_mysql'}) {
 	else {
 		$info->{'pass'} = $pass;
 		}
-	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 1);
+	local @hosts = map { &to_ipaddress($_) } &get_mysql_hosts($d, 2);
 	$info->{'remote'} = \@hosts;
 	$info->{'database'} = $dbs;
 	my $conns = &get_mysql_user_connections($d, 1);
