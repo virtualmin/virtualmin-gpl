@@ -47,6 +47,7 @@ while(@ARGV > 0) {
 		&usage("Unknown parameter $a");
 		}
 	}
+$bucket || &usage("Missing --bucket parameter");
 
 # Login and list the buckets
 $files = &list_gcs_files($bucket);
