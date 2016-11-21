@@ -235,6 +235,7 @@ if ($d->{'virt'}) {
 else {
 	&register_post_action(\&restart_apache);
 	}
+return 1;
 }
 
 # modify_ssl(&domain, &olddomain)
@@ -541,6 +542,7 @@ if ($d->{'virt'}) {
 &sync_domain_tlsa_records($d);
 
 &release_lock_web($d);
+return 1;
 }
 
 # clone_ssl(&domain, &old-domain)

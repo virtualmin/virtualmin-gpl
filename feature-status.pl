@@ -50,6 +50,7 @@ if (&domain_has_ssl($_[0])) {
 		&$second_print($text{'setup_done'});
 		}
 	}
+return 1;
 }
 
 # make_monitor(&domain, ssl)
@@ -228,6 +229,7 @@ if (&domain_has_ssl($_[0])) {
 		}
 	&$second_print($text{'setup_done'});
 	}
+return 1;
 }
 
 # validate_status(&domain)

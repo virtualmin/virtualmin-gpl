@@ -271,6 +271,7 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 &register_post_action(\&restart_bind, $_[0]);
+return 1;
 }
 
 sub slave_error_handler
@@ -380,6 +381,7 @@ else {
 	$_[0]->{'dns_submode'} = 0;
 	}
 &register_post_action(\&restart_bind, $_[0]);
+return 1;
 }
 
 # clone_dns(&domain, &old-domain)

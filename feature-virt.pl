@@ -92,6 +92,7 @@ if (!$_[0]->{'virtalready'}) {
 	&release_lock_virt($_[0]);
 	}
 delete($_[0]->{'iface'});
+return 1;
 }
 
 # modify_virt(&domain, &old)

@@ -55,6 +55,7 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 &release_lock_virus($_[0]);
+return 1;
 }
 
 # modify_virus(&domain, &olddomain)
@@ -95,6 +96,7 @@ else {
 	&$second_print($text{'delete_virusnone'});
 	}
 &release_lock_virus($_[0]);
+return 1;
 }
 
 # clone_virus(&domain, &old-domain)

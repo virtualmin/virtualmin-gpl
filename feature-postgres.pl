@@ -139,6 +139,7 @@ else {
 if ($tmpl->{'postgres_nopass'}) {
 	&set_postgres_pass(&postgres_pass($d, 1));
 	}
+return 1;
 }
 
 # set_postgres_pass(&domain, [password])
@@ -354,6 +355,7 @@ if (!$d->{'parent'}) {
 		&$second_print($text{'save_nopostgres'});
 		}
 	}
+return 1;
 }
 
 # clone_postgres(&domain, &old-domain)

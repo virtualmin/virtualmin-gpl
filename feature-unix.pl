@@ -380,6 +380,7 @@ if (!$_[0]->{'parent'}) {
 # Update any groups
 &build_denied_ssh_group(undef, $_[0]);
 &update_domain_owners_group(undef, $_[0]);
+return 1;
 }
 
 # clone_unix(&domain, &src-domain)

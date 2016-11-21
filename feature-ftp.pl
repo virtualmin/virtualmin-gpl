@@ -55,6 +55,7 @@ local $ftp_user = &get_proftpd_user($d);
 if ($ftp_user) {
 	&add_user_to_domain_group($d, $ftp_user, 'setup_ftpuser');
 	}
+return 1;
 }
 
 # delete_ftp(&domain)
@@ -80,6 +81,7 @@ else {
 	&$second_print($text{'delete_noproftpd'});
 	}
 &release_lock_ftp($d);
+return 1;
 }
 
 # clone_ftp(&domain, &old-domain)

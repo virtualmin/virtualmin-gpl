@@ -222,6 +222,7 @@ if ($tmpl->{'spamtrap'} eq 'yes') {
 &release_lock_cron($_[0]);
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # spamassassin_client_command(&domain, [client])
@@ -556,6 +557,7 @@ local $spamdir = "$spam_config_dir/$_[0]->{'id'}";
 &save_domain_spam_autoclear($_[0], undef);
 &release_lock_spam($_[0]);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # clone_spam(&domain, &old-domain)

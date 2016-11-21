@@ -133,6 +133,7 @@ if (!$job) {
 &release_lock_webalizer($_[0]);
 &release_lock_cron($_[0]);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # setup_webalizer_cron(&lconf, access-log)
@@ -337,6 +338,7 @@ local @custom = &webalizer::read_custom_logs();
 &webalizer::write_custom_logs(@custom);
 
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # clone_webalizer(&domain, &old-domain)

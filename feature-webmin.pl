@@ -49,6 +49,7 @@ else {
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # webmin_password(&domain)
@@ -89,6 +90,7 @@ local %miniserv;
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # modify_webmin(&domain, &olddomain)

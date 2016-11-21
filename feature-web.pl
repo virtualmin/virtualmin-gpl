@@ -307,6 +307,7 @@ foreach my $ad (@adoms) {
 	}
 
 &release_lock_web($lockdom);
+return 1;
 }
 
 # delete_web(&domain)
@@ -410,6 +411,7 @@ else {
 	&release_lock_web($d);
 	}
 undef(@apache::get_config_cache);
+return 1;
 }
 
 # delete_web_virtual_server(&vhost)

@@ -240,6 +240,7 @@ if ($d->{'provision_mysql'}) {
 		else {
 			&$second_print(&text('delete_emysqluser_provision',
 					     $msg));
+			return 0;
 			}
 		}
 	# Take away access from mailbox users
@@ -306,6 +307,7 @@ else {
 	&execute_for_all_mysql_servers($dfunc);
 	&$second_print($text{'setup_done'}) if (!$d->{'parent'});
 	}
+return 1;
 }
 
 # modify_mysql(&domain, &olddomain)

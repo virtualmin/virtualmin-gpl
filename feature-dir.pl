@@ -257,6 +257,7 @@ if (-d $d->{'home'} && $d->{'home'} ne "/" &&
 		&$second_print($text{'setup_done'});
 		}
 	}
+return 1;
 }
 
 # clone_dir(&domain, &src-domain)

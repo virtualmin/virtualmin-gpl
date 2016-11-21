@@ -123,6 +123,7 @@ else {
 	&$second_print($text{'setup_nolog'});
 	}
 &release_lock_logrotate($_[0]);
+return 1;
 }
 
 # modify_logrotate(&domain, &olddomain)
@@ -235,6 +236,7 @@ else {
 	}
 delete($d->{'logrotate_shared'});
 &release_lock_logrotate($d);
+return 1;
 }
 
 # clone_logrotate(&domain, &old-domain)

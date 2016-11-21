@@ -389,6 +389,7 @@ if ($supports_dependent && $_[0]->{'virt'} && $config{'dependent_mail'}) {
 &register_post_action(\&sync_secondary_virtusers, $_[0]);
 
 &release_lock_mail($_[0]);
+return 1;
 }
 
 # delete_mail(&domain, [preserve-remote], [leave-aliases])
@@ -562,6 +563,7 @@ if ($supports_dependent) {
 &sync_secondary_virtusers($d);
 
 &release_lock_mail($d);
+return 1;
 }
 
 # clone_mail(&domain, &old-domain)

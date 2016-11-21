@@ -112,6 +112,7 @@ if ($config{'dns'} && !$d->{'provision_dns'}) {
 		&register_post_action(\&restart_bind);
 		}
 	}
+return 1;
 }
 
 # clone_virt6(&domain, &old-domain)
