@@ -2261,7 +2261,9 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 	}
 
 # Links to edit PHP configs
-foreach my $ini (&find_domain_php_ini_files($d)) {
+my %availvers = map { $_->[0], $_ } &list_available_php_versions($d);
+foreach my $ini (grep { !$_->[0] || $availvers{$_->[0]} }
+		      &find_domain_php_ini_files($d)) {
 	push(@rv, { 'mod' => 'phpini',
 		    'desc' => $ini->[0] ?
 			&text('links_phpini2', $ini->[0]) :
