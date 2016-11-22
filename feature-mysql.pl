@@ -795,9 +795,11 @@ elsif ($d->{'provision_mysql'}) {
 	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	if (!$ok) {
 		&$second_print(&text('disable_emysqluser_provision', $msg));
+		return 0;
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		return 1;
 		}
 	}
 else {
@@ -811,9 +813,11 @@ else {
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
 		&$second_print($text{'setup_done'});
+		return 1;
 		}
 	else {
 		&$second_print($text{'save_nomysql'});
+		return 0;
 		}
 	}
 }
@@ -826,6 +830,7 @@ local ($d) = @_;
 &require_mysql();
 if ($d->{'parent'}) {
 	&$second_print($text{'save_nomysqlpar'});
+	return 0;
 	}
 elsif ($d->{'provision_mysql'}) {
 	# Unlock on provisioning server
@@ -837,9 +842,11 @@ elsif ($d->{'provision_mysql'}) {
 		"modify-mysql-login", $info, 0);
 	if (!$ok) {
 		&$second_print(&text('enable_emysql_provision', $msg));
+		return 0;
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		return 1;
 		}
 	}
 else {
@@ -863,9 +870,11 @@ else {
 		&execute_for_all_mysql_servers($efunc);
 		delete($d->{'disabled_oldmysql'});
 		&$second_print($text{'setup_done'});
+		return 1;
 		}
 	else {
 		&$second_print($text{'save_nomysql'});
+		return 0;
 		}
 	}
 }

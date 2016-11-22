@@ -605,6 +605,7 @@ if (!$d->{'parent'}) {
 		}
 	&release_lock_unix($d);
 	}
+return 1;
 }
 
 # enable_unix(&domain)
@@ -636,6 +637,7 @@ if (!$d->{'parent'}) {
 		}
 	&release_lock_unix($d);
 	}
+return 1;
 }
 
 # backup_unix(&domain, file)

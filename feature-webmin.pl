@@ -230,6 +230,7 @@ if ($wuser) {
 	}
 &release_lock_webmin($_[0]);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # enable_webmin(&domain)
@@ -247,6 +248,7 @@ if ($wuser) {
 	}
 &release_lock_webmin($_[0]);
 &$second_print($text{'setup_done'});
+return 1;
 }
 
 # restart_webmin()

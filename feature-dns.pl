@@ -1637,11 +1637,12 @@ else {
 	if ($d->{'dns_submode'}) {
 		# Disable is not done for sub-domains
 		&$second_print($text{'disable_bindnosub'});
-		return;
+		return 0;
 		}
 	&obtain_lock_dns($d, 1);
 	&require_bind();
 	local $z = &get_bind_zone($d->{'dom'});
+	local $ok;
 	if ($z) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'}.".disabled";
@@ -1675,11 +1676,14 @@ else {
 		# If on any slaves, delete there too
 		$d->{'old_dns_slave'} = $d->{'dns_slave'};
 		&delete_zone_on_slaves($d);
+		$ok = 1;
 		}
 	else {
 		&$second_print($text{'save_nobind'});
+		$ok = 0;
 		}
 	&release_lock_dns($d, 1);
+	return $ok;
 	}
 }
 
@@ -1699,17 +1703,19 @@ if ($d->{'provision_dns'}) {
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
+	return 1;
 	}
 else {
 	&$first_print($text{'enable_bind'});
 	if ($d->{'dns_submode'}) {
 		# Disable is not done for sub-domains
 		&$second_print($text{'enable_bindnosub'});
-		return;
+		return 0;
 		}
 	&obtain_lock_dns($d, 1);
 	&require_bind();
 	local $z = &get_bind_zone($d->{'dom'});
+	local $ok;
 	if ($z) {
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'};
@@ -1745,11 +1751,14 @@ else {
 		$d->{'dns_slave'} = $d->{'old_dns_slave'};
 		&create_zone_on_slaves($d, $d->{'dns_slave'});
 		delete($d->{'old_dns_slave'});
+		$ok = 1;
 		}
 	else {
 		&$second_print($text{'save_nobind'});
+		$ok = 0;
 		}
 	&release_lock_dns($d, 1);
+	return $ok;
 	}
 }
 

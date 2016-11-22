@@ -423,11 +423,13 @@ return 0;
 sub enable_webalizer
 {
 # Does nothing yet
+return 1;
 }
 
 sub disable_webalizer
 {
 # Does nothing yet
+return 1;
 }
 
 # backup_webalizer(&domain, file)

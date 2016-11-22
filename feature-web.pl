@@ -988,15 +988,19 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
 &obtain_lock_web($_[0]);
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
+local $ok;
 if ($virt) {
 	&create_disable_directives($virt, $vconf, $_[0]);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
+	$ok = 1;
 	}
 else {
 	&$second_print($text{'delete_noapache'});
+	$ok = 0;
 	}
 &release_lock_web($_[0]);
+return $ok;
 }
 
 # create_disable_directives(&virt, &vconf, &domain)
@@ -1083,15 +1087,19 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'} == 1) {
 &obtain_lock_web($_[0]);
 local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
 					    $_[0]->{'web_port'});
+local $ok;
 if ($virt) {
 	&remove_disable_directives($virt, $vconf, $_[0]);
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
+	$ok = 1;
 	}
 else {
 	&$second_print($text{'delete_noapache'});
+	$ok = 0;
 	}
 &release_lock_web($_[0]);
+return $ok;
 }
 
 # remove_disable_directives(&virt, &vconf, &domain)

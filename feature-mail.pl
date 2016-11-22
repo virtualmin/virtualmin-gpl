@@ -1174,6 +1174,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 &$second_print($text{'setup_done'});
 &release_lock_mail($_[0]);
 &release_lock_unix($_[0]);
+return 1;
 }
 
 # enable_mail(&domain)
@@ -1213,6 +1214,7 @@ foreach my $user (&list_domain_users($_[0], 1)) {
 &$second_print($text{'setup_done'});
 &release_lock_mail($_[0]);
 &release_lock_unix($_[0]);
+return 1;
 }
 
 # check_mail_clash()

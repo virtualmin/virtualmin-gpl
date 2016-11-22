@@ -282,6 +282,7 @@ if (domain_has_ssl($_[0])) {
 		&$second_print($text{'delete_nostatus'});
 		}
 	}
+return 1;
 }
 
 # enable_status(&domain)
@@ -319,6 +320,7 @@ if (&domain_has_ssl($_[0])) {
 		&$second_print($text{'delete_nostatus'});
 		}
 	}
+return 1;
 }
 
 # show_template_status(&tmpl)

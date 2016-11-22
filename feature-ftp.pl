@@ -205,6 +205,7 @@ sub disable_ftp
 &$first_print($text{'disable_proftpd'});
 &obtain_lock_ftp($_[0]);
 &require_proftpd();
+local $ok;
 local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
 if ($anon) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
@@ -217,11 +218,14 @@ if ($anon) {
 		}
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_proftpd);
+	$ok = 1;
 	}
 else {
 	&$second_print($text{'delete_noproftpd'});
+	$ok = 0;
 	}
 &release_lock_ftp($_[0]);
+return $ok;
 }
 
 # enable_ftp(&domain)
@@ -232,6 +236,7 @@ sub enable_ftp
 &obtain_lock_ftp($_[0]);
 &require_proftpd();
 local ($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
+local $ok;
 if ($virt) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
 	local ($login) = grep { $_->{'words'}->[0] eq "LOGIN" } @limit;
@@ -243,11 +248,14 @@ if ($virt) {
 		}
 	&$second_print($text{'setup_done'});
 	&register_post_action(\&restart_proftpd);
+	$ok = 1;
 	}
 else {
 	&$second_print($text{'delete_noproftpd'});
+	$ok = 0;
 	}
 &release_lock_ftp($_[0]);
+return $ok;
 }
 
 # proftpd_template(text, &domain)

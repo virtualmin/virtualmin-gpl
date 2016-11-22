@@ -713,9 +713,11 @@ if ($virt) {
         &create_disable_directives($virt, $vconf, $_[0]);
         &$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
+	return 1;
         }
 else {
         &$second_print($text{'delete_noapache'});
+	return 0;
         }
 }
 
@@ -730,9 +732,11 @@ if ($virt) {
         &remove_disable_directives($virt, $vconf, $_[0]);
         &$second_print($text{'setup_done'});
 	&register_post_action(\&restart_apache);
+	return 1;
         }
 else {
         &$second_print($text{'delete_noapache'});
+	return 0;
         }
 }
 

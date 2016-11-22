@@ -458,6 +458,7 @@ sub disable_postgres
 local $user = &postgres_user($_[0]);
 if ($_[0]->{'parent'}) {
 	&$second_print($text{'save_nopostgrespar'});
+	return 0;
 	}
 elsif (&postgres_user_exists($_[0])) {
 	&require_postgres();
@@ -466,9 +467,11 @@ elsif (&postgres_user_exists($_[0])) {
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote($date));
 	&$second_print($text{'setup_done'});
+	return 1;
 	}
 else {
 	&$second_print($text{'save_nopostgres'});
+	return 0;
 	}
 }
 
@@ -480,6 +483,7 @@ sub enable_postgres
 local $user = &postgres_user($_[0]);
 if ($_[0]->{'parent'}) {
 	&$second_print($text{'save_nopostgrespar'});
+	return 0;
 	}
 elsif (&postgres_user_exists($_[0])) {
 	&require_postgres();
@@ -487,9 +491,11 @@ elsif (&postgres_user_exists($_[0])) {
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote("Jan 1 2038"));
 	&$second_print($text{'setup_done'});
+	return 1;
 	}
 else {
 	&$second_print($text{'save_nopostgres'});
+	return 0;
 	}
 }
 
