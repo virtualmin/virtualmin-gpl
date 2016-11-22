@@ -7522,19 +7522,22 @@ foreach $f (&list_feature_plugins()) {
 # Setup Webmin login last, once all plugins are done
 if ($dom->{'webmin'}) {
 	local $sfunc = "setup_webmin";
-	if (!&try_function($f, $sfunc, $dom)) {
+	local ($ok, $fok) = &try_function($f, $sfunc, $dom);
+	if (!$ok || !$fok) {
 		$dom->{$f} = 0;
 		}
 	}
 
 # Add virtual IP address, if needed
 if ($dom->{'virt'}) {
-	if (!&try_function("virt", "setup_virt", $dom)) {
+	local ($ok, $fok) = &try_function("virt", "setup_virt", $dom);
+	if (!$ok || !$fok) {
 		$dom->{'virt'} = 0;
 		}
 	}
 if ($dom->{'virt6'}) {
-	if (!&try_function("virt6", "setup_virt6", $dom)) {
+	local ($ok, $fok) = &try_function("virt6", "setup_virt6", $dom);
+	if (!$ok || !$fok) {
 		$dom->{'virt6'} = 0;
 		}
 	}
@@ -7878,7 +7881,8 @@ if (&indexof($f, @features) >= 0) {
 		}
 	else {
 		# Failure can be ignored
-		if (!&try_function($f, $sfunc, $dom)) {
+		local ($ok, $fok) = &try_function($f, $sfunc, $dom);
+		if (!$ok || !$fok) {
 			$dom->{$f} = 0;
 			}
 		}
@@ -8104,7 +8108,8 @@ local ($f, $dom, @args) = @_;
 if (&indexof($f, @features) >= 0) {
 	# Call core delete function
 	local $dfunc = "delete_$f";
-	if (!&try_function($f, $dfunc, $dom, @args)) {
+	local ($ok, $fok) = &try_function($f, $dfunc, $dom, @args);
+	if (!$ok || !$fok) {
 		$dom->{$f} = 1;
 		}
 	}
@@ -8148,7 +8153,8 @@ my @disabled;
 foreach my $f (@features) {
 	if ($d->{$f} && $disable{$f}) {
 		my $dfunc = "disable_$f";
-		if (&try_function($f, $dfunc, $d)) {
+		local ($ok, $fok) = &try_function($f, $dfunc, $d);
+		if ($ok && $fok) {
 			push(@disabled, $f);
 			}
 		}
@@ -10277,18 +10283,21 @@ return $rv;
 }
 
 # try_function(feature, function, arg, ...)
-# Executes some function, and if it fails prints an error message
+# Executes some function, and if it fails prints an error message. In a scalar
+# context returns 0 if the function failed, 1 otherwise. In an array context,
+# returns this flag plus the function's actual return value.
 sub try_function
 {
 local ($f, $func, @args) = @_;
 local $main::error_must_die = 1;
-eval { &$func(@args) };
+local $rv;
+eval { $rv = &$func(@args) };
 if ($@) {
 	&$second_print(&text('setup_failure',
 			     $text{'feature_'.$f}, "$@"));
-	return 0;
+	return wantarray ? ( 0 ) : 0;
 	}
-return 1;
+return wantarray ? ( 1, $rv ) : 1;
 }
 
 # bandwidth_period_start([ago])
@@ -12541,13 +12550,15 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 	local $mfunc = "modify_$f";
 	if ($d->{$f} && !$oldd->{$f}) {
 		# Setup some feature
-		if (!&try_function($f, $sfunc, $d)) {
+		local ($ok, $fok) = &try_function($f, $sfunc, $d);
+		if (!$ok || !$fok) {
 			$d->{$f} = 0;
 			}
 		}
 	elsif (!$d->{$f} && $oldd->{$f}) {
 		# Delete some feature
-		if (!&try_function($f, $dfunc, $oldd)) {
+		local ($ok, $fok) = &try_function($f, $dfunc, $oldd);
+		if (!$ok || !$fok) {
 			$d->{$f} = 1;
 			}
 		}
