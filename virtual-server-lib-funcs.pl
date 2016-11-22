@@ -14006,7 +14006,8 @@ if ($config{'web'}) {
 
 	# Check PHP versions
 	local @msg;
-	foreach my $v (&list_available_php_versions()) {
+	local @vers = &list_available_php_versions();
+	foreach my $v (@vers) {
 		if ($v->[1]) {
 			local $realv = &get_php_version($v->[0]);
 			push(@msg, ($realv || $v->[0])." (".$v->[1].")");
@@ -14020,6 +14021,20 @@ if ($config{'web'}) {
 		}
 	else {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
+		}
+
+	# Check if any new PHP versions have shown up
+	local @newvernums = sort { $a <=> $b } map { $_->[0] } @vers;
+	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
+	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
+		&$second_print(&text('check_webphpversinis',
+				     join(", ", @newvernums)));
+		foreach my $d (grep { &domain_has_website($_) }
+				    &list_domains()) {
+			&save_domain_php_mode($d, &get_domain_php_mode($d));
+			&clear_links_cache($d);
+			}
+		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
 	}
 
