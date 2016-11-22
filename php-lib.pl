@@ -34,7 +34,6 @@ if ($virt) {
 			}
 		}
 	foreach my $a (@actions) {
-		print STDERR "a=$a\n";
 		if ($a =~ /^application\/x-httpd-php[0-9\.]+\s+\/cgi-bin\/php\S+\.cgi/) {
 			return 'cgi';
 			}
