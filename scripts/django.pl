@@ -18,6 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
+# XXX 1.10.3 release doesn't support "syncdb" 
 return ( "1.9.7", "1.7.11", "1.4.22" );
 }
 
