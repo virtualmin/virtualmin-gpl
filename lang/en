@@ -1802,6 +1802,7 @@ check_ewebphp=Apache configuration file $1 contains $2 lines that prevent PHP fr
 check_webok=Apache is installed.
 check_webphpvers=The following PHP versions are available : $1
 check_webphpnovers=No PHP versions were found on this system!
+check_webphpversinis=PHP versions have changed to $1 since last check. Regenerating any missing php.ini files.
 check_ftpok=ProFTPD is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.
