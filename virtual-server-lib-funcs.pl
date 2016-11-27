@@ -17331,10 +17331,11 @@ local $config{'compression'} = 0;
 local $config{'zip_args'} = undef;
 &$first_print($text{'transfer_backing'});
 if (!$showoutput) {
+	$print_output = "";
 	&push_all_print();
-	&set_all_null_print();
+	&set_all_capture_print();
 	}
-my ($ok, $errdoms) = &backup_domains(
+my ($ok, $size, $errdoms) = &backup_domains(
 	"ssh://root:$destpass\@$desthost:$remotetemp",
 	\@doms,
 	\@feats,
@@ -17350,6 +17351,11 @@ if (!$showoutput) {
 	&pop_all_print();
 	}
 if (!$ok) {
+	my @lines = grep { /\S/ } split(/\r?\n/, $print_output);
+	my $ll = pop(@lines);
+	my $sl = pop(@lines);
+	&$second_print($sl);
+	&$second_print($ll);
 	&$second_print($text{'transfer_ebackup'});
 	return 0;
 	}
