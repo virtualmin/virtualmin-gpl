@@ -14031,8 +14031,12 @@ if ($config{'web'}) {
 				     join(", ", @newvernums)));
 		foreach my $d (grep { &domain_has_website($_) }
 				    &list_domains()) {
-			&save_domain_php_mode($d, &get_domain_php_mode($d));
-			&clear_links_cache($d);
+			eval {
+				local $main::error_must_die = 1;
+				&save_domain_php_mode(
+					$d, &get_domain_php_mode($d));
+				&clear_links_cache($d);
+				};
 			}
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
