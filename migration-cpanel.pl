@@ -9,6 +9,7 @@ local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || return ("Not a cPanel tar.gz file : $root");
 local $daily = glob("$root/backup*/cpbackup/daily");
 local ($homedir) = glob("$root/*/homedir");
+$homedir = "$root/homedir" if (!-d $homedir);
 local $datastore = "$root/.cpanel-datastore";
 -d $daily || -d $homedir || -d $datastore ||
 	return ("Not a cPanel daily or home directory backup file");
@@ -131,6 +132,7 @@ $ftp_shell ||= $def_shell;
 # Work out the username again if it wasn't supplied
 local $origuser;
 local ($homedir) = glob("$root/*/homedir");
+$homedir = "$root/homedir" if (!-d $homedir);
 if (-d $daily) {
 	local ($tgz) = glob("$daily/*.tar.gz");
 	$tgz =~ /\/([^\/]+)\.tar\.gz$/;
