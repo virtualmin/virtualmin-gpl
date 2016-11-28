@@ -14029,7 +14029,8 @@ if ($config{'web'}) {
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
 		&$second_print(&text('check_webphpversinis',
 				     join(", ", @newvernums)));
-		foreach my $d (grep { &domain_has_website($_) }
+		foreach my $d (grep { &domain_has_website($_) &&
+				      !$_->{'alias'} }
 				    &list_domains()) {
 			eval {
 				local $main::error_must_die = 1;
