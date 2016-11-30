@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to versions 4.6.5.1, 4.4.15.9 and 4.0.10.18, Roundcube to 1.2.3, and ownCloud to 9.1.2.
+html=Updated the phpMyAdmin script installer to versions 4.6.5.1, 4.4.15.9 and 4.0.10.18, Roundcube to 1.2.3, MediaWiki to 1.28.0, and ownCloud to 9.1.2.
 master=1
 reseller=1
 domain=1
