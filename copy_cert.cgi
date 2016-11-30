@@ -14,7 +14,7 @@ if ($in{'usermin'}) {
 	&copy_usermin_ssl_service($d);
 	}
 else {
-	&copy_usermin_ssl_service($d);
+	&copy_webmin_ssl_service($d);
 	}
 
 &run_post_actions();
