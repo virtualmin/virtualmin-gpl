@@ -15423,6 +15423,10 @@ if ($webmin) {
 			$user->{'user'}, $user->{'plainpass'});
 	return $err if ($err);
 	}
+if ($user->{'plainpass'} =~ /\\/) {
+	# MySQL breaks with backslash passwords
+	return $text{'setup_eslashpass'};
+	}
 return undef;
 }
 

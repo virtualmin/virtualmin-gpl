@@ -485,6 +485,7 @@ setup_efwdtomail=A default mail forwarding address can only be entered if mail i
 setup_econtent=No initial website text entered
 setup_edefip=New virtual server has no IP address! Perhaps Virtualmin could not work out the system's default IP.
 setup_qmailme=This domain name cannot be used for Qmail, as it is the same as the server's hostname $1 (from the <tt>control/me</tt> file)
+setup_eslashpass=Passwords containing a backslash are not supported by MySQL
 
 setup_title=Setting Up Virtual Server
 setup_group=Creating administration group $1 ..
