@@ -2623,9 +2623,17 @@ my ($user, $encpass) = @_;
 my $d = &mysql::execute_sql($mysql::master_db,
 		"select host from user where user = ?", $user);
 foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
-	my $sql = "set password for '$user'\@'$host' = $encpass";
+	my $sql;
+	if (&compare_versions($mysql::mysql_version, "5.7.6") >= 0) {
+		$sql = "update user set authentication_string = $encpass ".
+		       "where user = '$user' and host = '$host'";
+		}
+	else {
+		$sql = "set password for '$user'\@'$host' = $encpass";
+		}
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
 	}
+&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
 }
 
 # mysql_password_synced(&domain)
