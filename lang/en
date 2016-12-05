@@ -6236,6 +6236,8 @@ record_name=Record name
 record_type=Record type
 record_comment=Record comment
 record_ttl=Cache time
+record_sservice=Service name
+record_sproto=Service protocol
 record_ttl1=Domain default
 record_ttl0=Custom time
 record_eparse=Record is not within the domain
@@ -6252,6 +6254,8 @@ record_ecname=The Name Alias record $1 has the same name as an existing record
 record_eunder=DNS record $1 cannot be edited, as it is not under $2
 record_defttl=Default cache time
 record_epost=Record was not fully saved : $1
+record_esservice=Missing or invalid-looking service name
+record_esproto=Invalid service protocol
 
 clone_err=Failed to clone virtual server
 clone_object=Creating new virtual server settings ..

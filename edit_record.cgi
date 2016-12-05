@@ -49,6 +49,12 @@ print &ui_hidden("type", $in{'type'});
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'record_header'}, undef, 2);
 
+# Extract name and protocol from SRV
+if ($r->{'type'} eq 'SRV' && $r->{'name'} =~ /^_([^\.]+)\._([^\.]+)\.(.*)/) {
+	($sservice, $sproto) = ($1, $2);
+	$r->{'name'} = $3;
+	}
+
 # Record name
 if ($r->{'defttl'}) {
 	# Default TTL has no name!
@@ -94,6 +100,18 @@ else {
 			  [ [ 1, $text{'record_ttl1'} ],
 			    [ 0, $text{'record_ttl0'} ] ])." ".
 		&ttl_field("ttl", $r->{'ttl'}));
+
+	# For SRV records, show name and protocol separately
+	if ($r->{'type'} eq 'SRV') {
+		print &ui_table_row($text{'record_sservice'},
+			&ui_textbox("sservice", $sservice, 30));
+
+		print &ui_table_row($text{'record_sproto'},
+			&ui_select("sproto", $sproto || "tcp",
+				[ [ "tcp", "TCP" ],
+				  [ "udp", "UDP" ],
+				  [ "tls", "TLS" ] ], undef, undef, 1));
+		}
 
 	# Values (type specific)
 	@vals = @{$t->{'values'}};

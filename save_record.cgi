@@ -92,6 +92,16 @@ else {
 				&error($text{'record_enamedom'});
 			$r->{'name'} = $in{'name'}.".".$d->{'dom'}.".";
 			}
+
+		# Add SRV record components
+		if ($r->{'type'} eq 'SRV') {
+			$in{'sservice'} =~ /^[a-z0-9\.\_\-]+$/i ||
+				&error($text{'record_esservice'});
+			$in{'sproto'} =~ /^[a-z0-9\.\_\-]+$/i ||
+				&error($text{'record_esproto'});
+			$r->{'name'} = '_'.$in{'sservice'}.'._'.$in{'sproto'}.
+				       '.'.$r->{'name'};
+			}
 		}
 
 	# Validate TTL
