@@ -14034,9 +14034,11 @@ if ($config{'web'}) {
 				    &list_domains()) {
 			eval {
 				local $main::error_must_die = 1;
-				&save_domain_php_mode(
-					$d, &get_domain_php_mode($d));
-				&clear_links_cache($d);
+				local $mode = &get_domain_php_mode($d);
+				if ($mode ne "mod_php") {
+					&save_domain_php_mode($d, $mode);
+					&clear_links_cache($d);
+					}
 				};
 			}
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
