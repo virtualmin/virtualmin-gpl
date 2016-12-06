@@ -3169,7 +3169,7 @@ if (!&mail_under_home()) {
 	local $mbase = &mail_system_base();
 	local @mfiles;
 	&$first_print($text{'backup_mailfiles'});
-	foreach $u (&list_domain_users($d)) {
+	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 		local $umf = &user_mail_file($u);
 		if ($umf =~ s/^$mbase\///) {
 			push(@mfiles, $umf) if (-r "$mbase/$umf");
