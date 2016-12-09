@@ -6807,4 +6807,8 @@ letsencrypt_sdone=Let's Encrypt certificate renewal complete
 letsencrypt_bdone=A new certificate was successfully requested from Let's Encrypt, and installed for $1.
 letsencrypt_eenabled=Cannot request certificate for disabled domains
 
+php_fpmrestart=Restarting PHP-FPM server ..
+php_fpmnoinit=.. no bootup action found!
+php_fpmeinit=.. failed : $1
+
 __norefs=1

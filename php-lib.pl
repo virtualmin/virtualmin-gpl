@@ -726,6 +726,10 @@ if ($apache::httpd_modules{'mod_fcgid'}) {
 	# Check for Apache fcgi module
 	push(@rv, "fcgid");
 	}
+if (&get_php_fpm_config()) {
+	# Check for php-fpm install
+	push(@rv, "fpm");
+	}
 return @rv;
 }
 
@@ -1471,6 +1475,69 @@ if ($ver) {
 	local $etc = "$d->{'home'}/etc";
 	&unlink_file_as_domain_user($d, "$etc/php.ini");
 	&symlink_file_as_domain_user($d, "php".$ver."/php.ini", "$etc/php.ini");
+	}
+}
+
+# get_php_fpm_config()
+# Returns a hash ref with details of the system's php-fpm configuration. Assumes
+# use of standard packages.
+sub get_php_fpm_config
+{
+my $rv = { };
+
+# Config directory for per-domain pool files
+foreach my $cdir ("/etc/php-fpm.d") {
+	if (-d $cdir) {
+		$rv->{'dir'} = $cdir;
+		last;
+		}
+	}
+return undef if (!$rv->{'dir'});
+
+# Init script
+&foreign_require("init");
+foreach my $init ("php-fpm") {
+	my $st = &init::action_status($init);
+	if ($st) {
+		$rv->{'init'} = $init;
+		$rv->{'enabled'} = $init > 1;
+		last;
+		}
+	}
+return undef if (!$rv->{'init'});
+
+return $rv;
+}
+
+sub create_php_fpm_pool
+{
+}
+
+sub delete_php_fpm_pool
+{
+}
+
+# restart_php_fpm_serve()
+# Post-action script to restart the server
+sub restart_php_fpm_server
+{
+my $conf = &get_php_fpm_config();
+&$first_print($text{'php_fpmrestart'});
+if ($conf->{'init'}) {
+	&foreign_require("init");
+	my ($ok, $err) = &init::restart_action($conf->{'init'});
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		return 1;
+		}
+	else {
+		&$second_print(&text('php_fpmeinit', $err));
+		return 0;
+		}
+	}
+else {
+	&$second_print($text{'php_fpmnoinit'});
+	return 0;
 	}
 }
 
