@@ -759,6 +759,23 @@ if ($d) {
 			return ( );
 			}
 		}
+
+	# If the domain is using FPM, only the PHP version run by the
+	# FPM package can be used
+	if ($mode eq "fpm") {
+		my $conf = &get_php_fpm_config();
+		my $ver = $conf->{'version'} || 5;
+		$ver =~ s/^(\d+\.\d+)\..*/$1/;	# Reduce version to 5.x
+		my $cmd = &php_command_for_version($ver);
+		if (!$cmd && $ver =~ /^5\./) {
+			# Try just PHP version 5
+			$ver = 5;
+			$cmd = &php_command_for_version($ver);
+			}
+		if ($cmd) {
+			push(@rv, [ $ver, $cmd ]);
+			}
+		}
 	}
 else {
 	# If no domain is given, included mod_php versions if active
@@ -773,35 +790,9 @@ else {
 		}
 	}
 
-# For CGI and fCGId modes, check which wrappers could exist
+# For CGI and fCGId modes, check which PHP commands exist
 foreach my $v (@all_possible_php_versions) {
-	local $phpn;
-	if ($gconfig{'os_type'} eq 'solaris') {
-		# On Solaris with CSW packages, php-cgi is in a directory named
-		# after the PHP version
-		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
-		}
-	$phpn ||= &has_command("php$v-cgi") || &has_command("php-cgi$v") ||
-		  &has_command("php$v");
-	local $nodotv = $v;
-	$nodotv =~ s/\.//;
-	if ($nodotv ne $v) {
-		# For a version like 5.4, check for binaries like php54 and
-		# /opt/rh/php54/root/usr/bin/php
-		$phpn ||= &has_command("php$nodotv-cgi") ||
-			  &has_command("php-cgi$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php") ||
-			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
-			  &has_command("/opt/remi/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("php$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/php$nodotv/bin/php") ||
-			  &has_command(glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
-		}
+	my $phpn = &php_command_for_version($v);
 	$vercmds{$v} = $phpn if ($phpn);
 	}
 
@@ -834,6 +825,41 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 
 # Return results as list
 return map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
+}
+
+# php_command_for_version(ver)
+# Given a version like 5.4 or 5, returns the full path to the PHP executable
+sub php_command_for_version
+{
+my ($v) = @_;
+my $phpn;
+if ($gconfig{'os_type'} eq 'solaris') {
+	# On Solaris with CSW packages, php-cgi is in a directory named
+	# after the PHP version
+	$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
+	}
+$phpn ||= &has_command("php$v-cgi") || &has_command("php-cgi$v") ||
+	  &has_command("php$v");
+my $nodotv = $v;
+$nodotv =~ s/\.//;
+if ($nodotv ne $v) {
+	# For a version like 5.4, check for binaries like php54 and
+	# /opt/rh/php54/root/usr/bin/php
+	$phpn ||= &has_command("php$nodotv-cgi") ||
+		  &has_command("php-cgi$nodotv") ||
+		  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
+		  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi") ||
+		  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi") ||
+		  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php") ||
+		  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
+		  &has_command("/opt/remi/php$nodotv/root/usr/bin/php-cgi") ||
+		  &has_command("php$nodotv") ||
+		  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
+		  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php");
+		  &has_command("/opt/rh/php$nodotv/bin/php") ||
+		  &has_command(glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
+	}
+return $phpn;
 }
 
 # get_php_version(number|command, [&domain])
@@ -1506,15 +1532,65 @@ foreach my $init ("php-fpm") {
 	}
 return undef if (!$rv->{'init'});
 
+# What version are we running?
+&foreign_require("software");
+foreach my $pname ("php-fpm") {
+	my @pinfo = &software::package_info($pname);
+	if (@pinfo && $pinfo[0]) {
+		$rv->{'version'} = $pinfo[4];
+		$rv->{'version'} =~ s/\-.*$//;
+		last;
+		}
+	}
+
 return $rv;
 }
 
-sub create_php_fpm_pool
+# get_php_fpm_socket_file(&domain)
+# Returns the path to the per-domain PHP-FPM socket file. Creates the directory
+# if needed.
+sub get_php_fpm_socket_file
 {
+my ($d) = @_;
+my $base = "/var/php-fpm";
+if (!-d $base) {
+	&make_dir($base, 0755);
+	}
+return $base."/".$d->{'id'}.".sock";
 }
 
+# create_php_fpm_pool(&domain)
+# Create a per-domain pool config file
+sub create_php_fpm_pool
+{
+my ($d) = @_;
+my $conf = &get_php_fpm_config();
+return $text{'php_fpmeconfig'} if (!$conf);
+my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+my $sock = &get_php_fpm_socket_file($d);
+&open_lock_tempfile(CONF, ">$file");
+&print_tempfile(CONF, "[$d->{'id'}]\n");
+&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
+&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
+&print_tempfile(CONF, "listen = ",$sock,"\n");
+&close_tempfile(CONF);
+&register_post_action(\&restart_php_fpm_server);
+return undef;
+}
+
+# delete_php_fpm_pool(&domain)
+# Remove the per-domain pool configuration file
 sub delete_php_fpm_pool
 {
+my ($d) = @_;
+my $conf = &get_php_fpm_config();
+return $text{'php_fpmeconfig'} if (!$conf);
+my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+&unlink_logged($file);
+my $sock = &get_php_fpm_socket_file($d);
+&unlink_logged($sock);
+&register_post_action(\&restart_php_fpm_server);
+return undef;
 }
 
 # restart_php_fpm_serve()
