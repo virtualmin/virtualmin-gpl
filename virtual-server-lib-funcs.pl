@@ -16919,7 +16919,7 @@ delete($d->{'ssl_chain'});
 &$first_print($text{'clone_create'});
 &$indent_print();
 local $err = &create_virtual_server($d, $parent,
-				    $parent ? $parent->{'user'} : undef);
+				    $parent ? $parent->{'user'} : undef, 1);
 &$outdent_print();
 if ($err) {
 	&$second_print(&text('clone_createfailed', $err));
