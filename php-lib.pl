@@ -18,6 +18,15 @@ elsif (!$p) {
 local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_port'});
 if ($virt) {
+	# First check for FPM socket
+	local $fsock = &get_php_fpm_socket_file($d, 1);
+	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+	foreach my $ppm (@ppm) {
+		if ($ppm =~ /unix:\Q$fsock\E/) {
+			return 'fpm';
+			}
+		}
+
 	local @actions = &apache::find_directive("Action", $vconf);
 	local $pdir = &public_html_dir($d);
 	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||

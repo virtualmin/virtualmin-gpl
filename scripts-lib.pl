@@ -802,7 +802,6 @@ return $got ? 1 : 0;
 sub check_php_module
 {
 local ($mod, $ver, $d) = @_;
-local $mode = &get_domain_php_mode($d);
 local @vers = &list_available_php_versions();
 local $verinfo;
 if ($ver) {
@@ -938,13 +937,13 @@ foreach my $m (@mods) {
 	# Find the php.ini file
 	&foreign_require("phpini");
 	local $mode = &get_domain_php_mode($d);
-	local $inifile = $mode eq "mod_php" ?
+	local $inifile = $mode eq "mod_php" || $mode eq "fpm" ?
 			&get_global_php_ini($phpver, $mode) :
 			&get_domain_php_ini($d, $phpver);
 	if (!$inifile) {
 		# Could not find php.ini
-		&$second_print($mode eq "mod_php" ? $text{'scripts_noini'}
-						  : $text{'scripts_noini2'});
+		&$second_print($mode eq "mod_php" || $mode eq "fpm" ?
+			$text{'scripts_noini'} : $text{'scripts_noini2'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
@@ -973,8 +972,12 @@ foreach my $m (@mods) {
 			# At end of file (should never happen, but..)
 			push(@$lref, "extension=$m.so");
 			}
-		if ($mode eq "mod_php") {
+		if ($mode eq "mod_php" || $mode eq "fpm") {
 			&flush_file_lines($inifile);
+			if ($mode eq "fpm") {
+				# To apply new ini file
+				&register_post_action(\&restart_php_fpm_server);
+				}
 			}
 		else {
 			&write_as_domain_user($d,
@@ -2386,8 +2389,8 @@ if ($copydir) {
 		&run_as_domain_user($d, "chmod -R o-rxw ".quotemeta($copydir));
 		}
 	elsif ($mode ne "mod_php") {
-		# Running via CGI or fastCGI, so make .php, .cgi and .pl files
-		# non-world-readable
+		# Running via FPM, CGI or fastCGI, so make .php, .cgi and .pl
+		# files non-world-readable
 		&run_as_domain_user($d,
 		  "find ".quotemeta($copydir)." -type f ".
 		  "-name '*.php' -o -name '*.php?' -o -name '*.cgi' ".
@@ -2883,6 +2886,7 @@ return wantarray ? ($status, $canup) : $status;
 # disable_script_php_timeout(&domain)
 # Temporarily disable any PHP execution timeout for a domain, to allow long
 # running install scripts to complete
+# XXX fpm mode support
 sub disable_script_php_timeout
 {
 local ($d) = @_;
@@ -2910,6 +2914,7 @@ else {
 
 # enable_script_php_timeout(&domain, old-timeout)
 # Undoes the changes made by disable_script_php_timeout
+# XXX fpm mode support
 sub enable_script_php_timeout
 {
 local ($d, $max) = @_;

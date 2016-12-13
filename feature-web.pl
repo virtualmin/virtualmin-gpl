@@ -410,6 +410,7 @@ else {
 		}
 	&release_lock_web($d);
 	}
+&delete_php_fpm_pool($d);	# May not exist, but delete just in case
 undef(@apache::get_config_cache);
 return 1;
 }
@@ -902,7 +903,7 @@ else {
 	# If using php via CGI or fcgi, check for wrappers
 	local $need_suexec = 0;
 	local $mode = &get_domain_php_mode($d);
-	if ($mode ne "mod_php") {
+	if ($mode ne "mod_php" && $mode ne "fpm") {
 		local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
 					       : &cgi_bin_dir($_[0]);
 		local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
@@ -1601,7 +1602,7 @@ if ($virt) {
 
 	# Make sure the PHP execution mode is valid
 	local $mode;
-	if (defined(&get_domain_php_mode) && !$_[0]->{'alias'}) {
+	if (!$_[0]->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
 		$mode = &get_domain_php_mode($_[0]);
 		local @supp = &supported_php_modes($_[0]);
@@ -2260,18 +2261,21 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 		}
 	}
 
-# Links to edit PHP configs
-my %availvers = map { $_->[0], $_ } &list_available_php_versions($d);
-foreach my $ini (grep { !$_->[0] || $availvers{$_->[0]} }
-		      &find_domain_php_ini_files($d)) {
-	push(@rv, { 'mod' => 'phpini',
-		    'desc' => $ini->[0] ?
-			&text('links_phpini2', $ini->[0]) :
-			&text('links_phpini'),
-		    'page' => 'list_ini.cgi?file='.
-				&urlize($ini->[1]),
-		    'cat' => 'services',
-		  });
+# Links to edit PHP configs (if per-domain files exist)
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "cgi" || $mode eq "fcgid") {
+	my %availvers = map { $_->[0], $_ } &list_available_php_versions($d);
+	foreach my $ini (grep { !$_->[0] || $availvers{$_->[0]} }
+			      &find_domain_php_ini_files($d)) {
+		push(@rv, { 'mod' => 'phpini',
+			    'desc' => $ini->[0] ?
+				&text('links_phpini2', $ini->[0]) :
+				&text('links_phpini'),
+			    'page' => 'list_ini.cgi?file='.
+					&urlize($ini->[1]),
+			    'cat' => 'services',
+			  });
+		}
 	}
 
 return @rv;
@@ -2895,18 +2899,16 @@ sub add_script_language_directives
 {
 local ($d, $tmpl, $port) = @_;
 
-if (defined(&save_domain_php_mode)) {
-	&require_apache();
-	if ($tmpl->{'web_php_suexec'} == 1 ||
-	    $tmpl->{'web_php_suexec'} == 2 &&
-	     !$apache::httpd_modules{'mod_fcgid'}) {
-		# Create cgi wrappers for PHP 4 and 5
-		&save_domain_php_mode($d, "cgi", $port, 1);
-		}
-	elsif ($tmpl->{'web_php_suexec'} == 2) {
-		# Add directives for FastCGId
-		&save_domain_php_mode($d, "fcgid", $port, 1);
-		}
+&require_apache();
+if ($tmpl->{'web_php_suexec'} == 1 ||
+    $tmpl->{'web_php_suexec'} == 2 &&
+     !$apache::httpd_modules{'mod_fcgid'}) {
+	# Create cgi wrappers for PHP 4 and 5
+	&save_domain_php_mode($d, "cgi", $port, 1);
+	}
+elsif ($tmpl->{'web_php_suexec'} == 2) {
+	# Add directives for FastCGId
+	&save_domain_php_mode($d, "fcgid", $port, 1);
 	}
 
 if (defined(&save_domain_ruby_mode)) {
@@ -3869,10 +3871,10 @@ for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 undef(@apache::get_config_cache);
 
 # Fix all php.ini files that use old path
-if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
+if (&foreign_check("phpini")) {
 	&foreign_require("phpini");
 	my $mode = &get_domain_php_mode($d);
-	$mode = "cgi" if ($mode eq "mod_php");
+	$mode = "cgi" if ($mode eq "mod_php" || $mode eq "fpm");
 	foreach my $ini (&list_domain_php_inis($d, $mode)) {
 		&lock_file($ini->[1]);
 		my $conf = &phpini::get_config($ini->[1]);
@@ -4002,7 +4004,7 @@ if (!$apache::httpd_modules{'mod_php4'} &&
 foreach my $d (@$doms) {
 	next if (!$d->{'web'} || $d->{'alias'});
 	my $mode = &get_domain_php_mode($d);
-	if ($mode eq "cgi" || $mode eq "fcgid") {
+	if ($mode eq "cgi" || $mode eq "fcgid" || $mode eq "fpm") {
 		local @ports = ( $d->{'web_port'},
 				 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 		local $domfixed;
