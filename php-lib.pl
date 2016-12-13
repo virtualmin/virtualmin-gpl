@@ -182,8 +182,16 @@ if ($p ne 'web') {
 &require_apache();
 
 # Create wrapper scripts
-if ($mode ne "mod_php") {
+if ($mode ne "mod_php" && $mode ne "fpm") {
 	&create_php_wrappers($d, $mode);
+	}
+
+# Setup PHP-FPM pool
+if ($mode eq "fpm") {
+	&create_php_fpm_pool($d);
+	}
+else {
+	&delete_php_fpm_pool($d);
 	}
 
 # Add the appropriate directives to the Apache config
@@ -302,7 +310,7 @@ foreach my $p (@ports) {
 		if ($mode eq "cgi") {
 			push(@types, "application/x-httpd-php$ver .php");
 			}
-		else {
+		elsif ($mode eq "mod_php" || $mode eq "fcgid") {
 			push(@types, "application/x-httpd-php .php");
 			}
 		@types = &unique(@types);
@@ -321,6 +329,16 @@ foreach my $p (@ports) {
 						$phpconf, $conf);
 			}
 		}
+
+	# For FPM mode, we need a proxy directive at the top level
+	local $fsock = &get_php_fpm_socket_file($d, 1);
+	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+	@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
+	if ($mode eq "fpm") {
+		local $phd = $phpconfs[0]->{'words'}->[0];
+		push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://localhost${phd}/\$1");
+		}
+	&apache::save_directive("ProxyPassMatch", \@ppm, $vconf, $conf);
 
 	# For non-mod_php mode, we need a RemoveHandler .php directive at
 	# the <virtualhost> level to supress mod_php which may still be active
@@ -740,8 +758,26 @@ sub list_available_php_versions
 {
 local ($d, $mode) = @_;
 local @rv;
-
 &require_apache();
+
+# In FPM mode, only the PHP version run by the FPM package can be used
+if ($mode eq "fpm") {
+	my $conf = &get_php_fpm_config();
+	my $ver = $conf->{'version'} || 5;
+	$ver =~ s/^(\d+\.\d+)\..*/$1/;	# Reduce version to 5.x
+	my $cmd = &php_command_for_version($ver);
+	if (!$cmd && $ver =~ /^5\./) {
+		# Try just PHP version 5
+		$ver = 5;
+		$cmd = &php_command_for_version($ver);
+		}
+	$cmd ||= &has_command("php");
+	if ($cmd) {
+		return ([ $ver, $cmd ]);
+		}
+	return ( );
+	}
+
 if ($d) {
 	# If the domain is using mod_php, we can only use one version
 	$mode ||= &get_domain_php_mode($d);
@@ -757,23 +793,6 @@ if ($d) {
 			}
 		else {
 			return ( );
-			}
-		}
-
-	# If the domain is using FPM, only the PHP version run by the
-	# FPM package can be used
-	if ($mode eq "fpm") {
-		my $conf = &get_php_fpm_config();
-		my $ver = $conf->{'version'} || 5;
-		$ver =~ s/^(\d+\.\d+)\..*/$1/;	# Reduce version to 5.x
-		my $cmd = &php_command_for_version($ver);
-		if (!$cmd && $ver =~ /^5\./) {
-			# Try just PHP version 5
-			$ver = 5;
-			$cmd = &php_command_for_version($ver);
-			}
-		if ($cmd) {
-			push(@rv, [ $ver, $cmd ]);
 			}
 		}
 	}
@@ -907,8 +926,8 @@ local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
 local $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php") {
-	# All are run as version from Apache mod
+if ($mode eq "mod_php" || $mode eq "fpm") {
+	# All are run as version from Apache mod or FPM pool
 	local @avail = &list_available_php_versions($d, $mode);
 	if (@avail) {
 		return ( { 'dir' => &public_html_dir($d),
@@ -962,7 +981,7 @@ elsif (!$p) {
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
-return 0 if ($mode eq "mod_php");
+return 0 if ($mode eq "mod_php" || $mode eq "fpm");
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 local $any = 0;
@@ -1371,7 +1390,7 @@ local $mode = &get_domain_php_mode($d);
 if (!defined($main::php_modules{$ver,$d->{'id'}})) {
 	$cmd ||= &has_command("php".$ver) || &has_command("php");
 	$main::php_modules{$ver} = [ ];
-	if ($mode eq "mod_php") {
+	if ($mode eq "mod_php" || $mode eq "fpm") {
 		# Use global PHP config, since with mod_php we can't do
 		# per-domain configurations
 		local $gini = &get_global_php_ini($ver, $mode);
@@ -1410,7 +1429,9 @@ sub fix_php_ini_files
 local ($d, $fixes) = @_;
 local ($mode, $rv);
 if (defined(&get_domain_php_mode) &&
-    ($mode = &get_domain_php_mode($d)) && $mode ne "mod_php" &&
+    ($mode = &get_domain_php_mode($d)) &&
+    $mode ne "mod_php" &&
+    $mode ne "fpm" &&
     &foreign_check("phpini")) {
 	&foreign_require("phpini");
 	&$first_print($text{'save_apache10'});
@@ -1546,14 +1567,14 @@ foreach my $pname ("php-fpm") {
 return $rv;
 }
 
-# get_php_fpm_socket_file(&domain)
+# get_php_fpm_socket_file(&domain, [dont-make-dir])
 # Returns the path to the per-domain PHP-FPM socket file. Creates the directory
 # if needed.
 sub get_php_fpm_socket_file
 {
-my ($d) = @_;
+my ($d, $nomkdir) = @_;
 my $base = "/var/php-fpm";
-if (!-d $base) {
+if (!-d $base && !$nomkdir) {
 	&make_dir($base, 0755);
 	}
 return $base."/".$d->{'id'}.".sock";
@@ -1568,12 +1589,34 @@ my $conf = &get_php_fpm_config();
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 my $sock = &get_php_fpm_socket_file($d);
-&open_lock_tempfile(CONF, ">$file");
-&print_tempfile(CONF, "[$d->{'id'}]\n");
-&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
-&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
-&print_tempfile(CONF, "listen = ",$sock,"\n");
-&close_tempfile(CONF);
+&lock_file($file);
+if (-r $file) {
+	# Fix up existing one, in case user or group changed
+	my $lref = &read_file_lines($file);
+	foreach my $l (@$lref) {
+		if ($l =~ /^user\s*=/) {
+			$l = "user = ".$d->{'user'};
+			}
+		if ($l =~ /^group\s*=/) {
+			$l = "group = ".$d->{'ugroup'};
+			}
+		}
+	&flush_file_lines($file);
+	}
+else {
+	# Create a new file
+	&open_tempfile(CONF, ">$file");
+	&print_tempfile(CONF, "[$d->{'id'}]\n");
+	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
+	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
+	&print_tempfile(CONF, "listen = ",$sock,"\n");
+	&print_tempfile(CONF, "pm = dynamic\n");
+	&print_tempfile(CONF, "pm.max_children = 9999\n");
+	&print_tempfile(CONF, "pm.min_spare_servers = 5\n");
+	&print_tempfile(CONF, "pm.max_spare_servers = 9999\n");
+	&close_tempfile(CONF);
+	}
+&unlock_file($file);
 &register_post_action(\&restart_php_fpm_server);
 return undef;
 }
