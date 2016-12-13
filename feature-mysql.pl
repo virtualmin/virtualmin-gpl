@@ -892,10 +892,14 @@ eval {
 	$u = &mysql::execute_sql($mysql::master_db,
 		"select password from user where user = ?", $user);
 	};
-if ($@) {
-	# Try new mysql user table format
-	$u = &mysql::execute_sql($mysql::master_db,
-		"select authentication_string from user where user = ?", $user);
+if ($@ || @{$u->{'data'}} && $u->{'data'}->[0]->[0] eq '') {
+	# Try new mysql user table format if the password query failed, or
+	# if there was no password
+	eval {
+		local $main::error_must_die = 1;
+		$u = &mysql::execute_sql($mysql::master_db,
+			"select authentication_string from user where user = ?", $user);
+		};
 	}
 foreach my $r (@{$u->{'data'}}) {
 	return $r->[0] if ($r->[0]);
@@ -1634,9 +1638,13 @@ else {
 		local $main::error_must_die = 1;
 		$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 		};
-	if ($@) {
-		# Try new mysql user table format
-		$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+	if ($@ || @{$d->{'data'}} && $d->{'data'}->[0]->[1] eq '') {
+		# Try new mysql user table format if the password query failed,
+		# or if the password was empty
+		eval {
+			local $main::error_must_die = 1;
+			$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+			};
 		}
 	local (@rv, %done);
 	foreach my $u (@{$d->{'data'}}) {
