@@ -1539,7 +1539,9 @@ foreach my $cdir ("/etc/php-fpm.d") {
 		last;
 		}
 	}
-return undef if (!$rv->{'dir'});
+if (!$rv->{'dir'}) {
+	return wantarray ? ( undef, $text{'php_fpmnodir'} ) : undef;
+	}
 
 # Init script
 &foreign_require("init");
@@ -1551,7 +1553,9 @@ foreach my $init ("php-fpm") {
 		last;
 		}
 	}
-return undef if (!$rv->{'init'});
+if (!$rv->{'init'}) {
+	return wantarray ? ( undef, $text{'php_fpmnoinit'} ) : undef;
+	}
 
 # What version are we running?
 &foreign_require("software");
@@ -1564,7 +1568,7 @@ foreach my $pname ("php-fpm") {
 		}
 	}
 
-return $rv;
+return wantarray ? ( $rv, undef ) : $rv;
 }
 
 # get_php_fpm_socket_file(&domain, [dont-make-dir])

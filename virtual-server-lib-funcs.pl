@@ -14023,6 +14023,15 @@ if ($config{'web'}) {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
 		}
 
+	# Check for PHP-FPM support
+	my ($fconf, $ferr) = &get_php_fpm_config();
+	if ($fconf) {
+		&$second_print($text{'check_webphpfpm'});
+		}
+	else {
+		&$second_print(&text('check_webphpnofpm', $ferr));
+		}
+
 	# Check if any new PHP versions have shown up
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } @vers;
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
