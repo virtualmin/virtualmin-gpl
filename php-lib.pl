@@ -1275,26 +1275,48 @@ return $sock;
 # Returns 0 if not set, -1 if the file doesn't even exist, -2 if not supported
 sub get_domain_php_children
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
+my ($d) = @_;
+my $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_get_web_php_children", $d);
 	}
 elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
-local ($ver) = &list_available_php_versions($d, "fcgid");
-return -2 if (!$ver);
-local $childs = 0;
-&open_readfile_as_domain_user($d, WRAPPER,
-	"$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -1;
-while(<WRAPPER>) {
-	if (/^PHP_FCGI_CHILDREN\s*=\s*(\d+)/) {
-		$childs = $1;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fcgid") {
+	# Set in wrapper script 
+	my ($ver) = &list_available_php_versions($d, "fcgid");
+	return -2 if (!$ver);
+	my $childs = 0;
+	&open_readfile_as_domain_user($d, WRAPPER,
+		"$d->{'home'}/fcgi-bin/php$ver->[0].fcgi") || return -1;
+	while(<WRAPPER>) {
+		if (/^PHP_FCGI_CHILDREN\s*=\s*(\d+)/) {
+			$childs = $1;
+			}
 		}
+	&close_readfile_as_domain_user($d, WRAPPER);
+	return $childs;
 	}
-&close_readfile_as_domain_user($d, WRAPPER);
-return $childs;
+elsif ($mode eq "fpm") {
+	# Set in pool config file
+	my $conf = &get_php_fpm_config();
+	return -1 if (!$conf);
+	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+	my $lref = &read_file_lines($file, 1);
+	my $childs = 0;
+	foreach my $l (@$lref) {
+		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+			$childs = $1;
+			}
+		}
+	&unflush_file_lines($file);
+	return $childs;
+	}
+else {
+	return -2;
+	}
 }
 
 # save_domain_php_children(&domain, children, [no-writable])
