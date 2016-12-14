@@ -1312,7 +1312,7 @@ elsif ($mode eq "fpm") {
 			}
 		}
 	&unflush_file_lines($file);
-	return $childs;
+	return $childs == 9999 ? 0 : $childs;
 	}
 else {
 	return -2;
@@ -1332,51 +1332,77 @@ if ($p && $p ne 'web') {
 elsif (!$p) {
 	return "Virtual server does not have a website";
 	}
-local $count = 0;
-&set_php_wrappers_writable($d, 1) if (!$nowritable);
-foreach my $ver (&list_available_php_versions($d, "fcgi")) {
-	local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
-	next if (!-r $wrapper);
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fcgid") {
+	# Update in FCGI wrapper scripts
+	local $count = 0;
+	&set_php_wrappers_writable($d, 1) if (!$nowritable);
+	foreach my $ver (&list_available_php_versions($d, "fcgi")) {
+		local $wrapper = "$d->{'home'}/fcgi-bin/php$ver->[0].fcgi";
+		next if (!-r $wrapper);
 
-	# Find the current line
-	local $lref = &read_file_lines_as_domain_user($d, $wrapper);
-	local $idx;
-	for(my $i=0; $i<@$lref; $i++) {
-		if ($lref->[$i] =~ /PHP_FCGI_CHILDREN\s*=\s*\d+/) {
-			$idx = $i;
-			}
-		}
-
-	# Update, remove or add
-	if ($children && defined($idx)) {
-		$lref->[$idx] = "PHP_FCGI_CHILDREN=$children";
-		}
-	elsif (!$children && defined($idx)) {
-		splice(@$lref, $idx, 1);
-		}
-	elsif ($children && !defined($idx)) {
-		# Add before export line
-		local $found = 0;
-		for(my $e=0; $e<@$lref; $e++) {
-			if ($lref->[$e] =~ /^export\s+PHP_FCGI_CHILDREN/) {
-				splice(@$lref, $e, 0,
-				       "PHP_FCGI_CHILDREN=$children");
-				$found++;
-				last;
+		# Find the current line
+		local $lref = &read_file_lines_as_domain_user($d, $wrapper);
+		local $idx;
+		for(my $i=0; $i<@$lref; $i++) {
+			if ($lref->[$i] =~ /PHP_FCGI_CHILDREN\s*=\s*\d+/) {
+				$idx = $i;
 				}
 			}
-		if (!$found) {
-			# Add both lines at top
-			splice(@$lref, 1, 0,
-			       "PHP_FCGI_CHILDREN=$children",
-			       "export PHP_FCGI_CHILDREN");
+
+		# Update, remove or add
+		if ($children && defined($idx)) {
+			$lref->[$idx] = "PHP_FCGI_CHILDREN=$children";
+			}
+		elsif (!$children && defined($idx)) {
+			splice(@$lref, $idx, 1);
+			}
+		elsif ($children && !defined($idx)) {
+			# Add before export line
+			local $found = 0;
+			for(my $e=0; $e<@$lref; $e++) {
+				if ($lref->[$e] =~ /^export\s+PHP_FCGI_CHILDREN/) {
+					splice(@$lref, $e, 0,
+					       "PHP_FCGI_CHILDREN=$children");
+					$found++;
+					last;
+					}
+				}
+			if (!$found) {
+				# Add both lines at top
+				splice(@$lref, 1, 0,
+				       "PHP_FCGI_CHILDREN=$children",
+				       "export PHP_FCGI_CHILDREN");
+				}
+			}
+		&flush_file_lines_as_domain_user($d, $wrapper);
+		}
+	&set_php_wrappers_writable($d, 0) if (!$nowritable);
+	&register_post_action(\&restart_apache);
+	return 1;
+	}
+elsif ($mode eq "fpm") {
+	# Update in FPM pool file
+	my $conf = &get_php_fpm_config();
+	return 0 if (!$conf);
+	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+	my $lref = &read_file_lines($file);
+	$children = 9999 if ($children == 0);	# Unlimited
+	foreach my $l (@$lref) {
+		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+			$l = "pm.max_children = $children";
+			}
+		if ($l =~ /pm.max_spare_servers\s*=\s*(\d+)/) {
+			$l = "pm.max_spare_servers = $children";
 			}
 		}
-	&flush_file_lines_as_domain_user($d, $wrapper);
+	&flush_file_lines($file);
+	&register_post_action(\&restart_php_fpm_server);
+	return 1;
 	}
-&set_php_wrappers_writable($d, 0) if (!$nowritable);
-&register_post_action(\&restart_apache);
-return 1;
+else {
+	return 0;
+	}
 }
 
 # check_php_configuration(&domain, php-version, php-command)
@@ -1640,15 +1666,18 @@ if (-r $file) {
 	}
 else {
 	# Create a new file
+	my $tmpl = &get_template($d->{'template'});
+	my $defchildren = $tmpl->{'web_phpchildren'};
+	$defchildren = 9999 if ($defchildren eq "none");
 	&open_tempfile(CONF, ">$file");
 	&print_tempfile(CONF, "[$d->{'id'}]\n");
 	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
 	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
 	&print_tempfile(CONF, "listen = ",$sock,"\n");
 	&print_tempfile(CONF, "pm = dynamic\n");
-	&print_tempfile(CONF, "pm.max_children = 9999\n");
-	&print_tempfile(CONF, "pm.min_spare_servers = 5\n");
-	&print_tempfile(CONF, "pm.max_spare_servers = 9999\n");
+	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
+	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
+	&print_tempfile(CONF, "pm.max_spare_servers = $defchildren\n");
 	&close_tempfile(CONF);
 	}
 &unlock_file($file);
