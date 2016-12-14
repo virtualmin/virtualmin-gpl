@@ -56,7 +56,8 @@ if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2 &&
 	}
 
 # PHP max execution time, for fcgi mode
-if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 &&
+if (!$d->{'alias'} &&
+    (&indexof("fcgid", @modes) >= 0 || &indexof("fpm", @modes) >= 0) &&
     ($p eq 'web' ||
      &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
 	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
