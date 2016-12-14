@@ -2488,13 +2488,14 @@ foreach my $r ('webmail', 'admin') {
 
 print &ui_table_hr();
 
-# Run PHP scripts as user
+# Run PHP scripts using mode
 print &ui_table_row(
     &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
     &ui_radio("web_php_suexec", int($tmpl->{'web_php_suexec'}),
 	      [ [ 0, $text{'phpmode_mod_php'}."<br>" ],
 		[ 1, $text{'phpmode_cgi'}."<br>" ],
-		[ 2, $text{'phpmode_fcgid'}."<br>" ] ]));
+		[ 2, $text{'phpmode_fcgid'}."<br>" ],
+		[ 3, $text{'phpmode_fpm'}."<br>" ] ]));
 
 # Default PHP version to setup
 print &ui_table_row(
@@ -2909,6 +2910,10 @@ if ($tmpl->{'web_php_suexec'} == 1 ||
 elsif ($tmpl->{'web_php_suexec'} == 2) {
 	# Add directives for FastCGId
 	&save_domain_php_mode($d, "fcgid", $port, 1);
+	}
+elsif ($tmpl->{'web_php_suexec'} == 3) {
+	# Add directives for FPM
+	&save_domain_php_mode($d, "fpm", $port, 1);
 	}
 
 if (defined(&save_domain_ruby_mode)) {
