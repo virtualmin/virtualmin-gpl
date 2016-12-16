@@ -843,6 +843,7 @@ elsif ($content) {
 
 &virtualmin_api_log(\@OLDARGV, \%dom, $dom{'hashpass'} ? [ "pass" ] : [ ]);
 &run_post_actions_silently();
+&unlock_domain_name($domain);
 print "All done!\n";
 
 sub usage

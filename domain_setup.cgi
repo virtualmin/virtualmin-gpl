@@ -484,6 +484,7 @@ if (defined($in{'content'}) && !$in{'content_def'} &&
 	}
 
 &run_post_actions();
+&unlock_domain_name($dname);
 &webmin_log("create", "domain", $dom{'dom'}, \%dom);
 
 # Call any theme post command

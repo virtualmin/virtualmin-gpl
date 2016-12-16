@@ -108,6 +108,7 @@ $mfunc = "migration_$in{'type'}_migrate";
 @doms = &$mfunc($src, $domain, $user, $in{'webmin'}, $in{'template'},
 		$ipinfo, $pass, $parent, $prefix,
 		$in{'email_def'} ? undef : $in{'email'});
+&unlock_domain_name($domain);
 &run_post_actions();
 &$outdent_print();
 

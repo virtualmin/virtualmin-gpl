@@ -355,6 +355,7 @@ if ($in{'confirm'}) {
 		# Update parent domain's webmin user
 		&modify_webmin($parent, $parent);
 		}
+	&unlock_domain_name($in{'dom'});
 	&run_post_actions();
 
 	# Call any theme post command

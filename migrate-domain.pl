@@ -263,6 +263,7 @@ print "Starting migration of $domain from $nice ..\n\n";
 $mfunc = "migration_${type}_migrate";
 @doms = &$mfunc($src, $domain, $user, $webmin, $template,
 		$ipinfo, $pass, $parent, $prefix, $email);
+&unlock_domain_name($domain);
 &run_post_actions();
 
 # Fix htaccess files

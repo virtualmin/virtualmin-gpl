@@ -579,7 +579,8 @@ if (-r $script_warnings_file) {
 &unlink_file("$saved_aliases_dir/$id");
 
 # Release any lock on the name
-&unlock_file("$domainnames_dir/$d->{'dom'}.lock");
+&unlock_file("$domainnames_dir/$d->{'dom'}");
+&unlink_file("$domainnames_dir/$d->{'dom'}.lock");
 
 # Remove from caches
 delete($main::get_domain_cache{$d->{'id'}});
@@ -15450,6 +15451,14 @@ if (!-d $domainnames_dir) {
 	&make_dir($domainnames_dir, 0755);
 	}
 &lock_file("$domainnames_dir/$name");
+}
+
+# unlock_domain_name(name)
+# Release a lock on some domain name, used to prevent concurrent creation
+sub unlock_domain_name
+{
+local ($name) = @_;
+&unlock_file("$domainnames_dir/$name");
 }
 
 # show_domain_quota_usage(&domain)
