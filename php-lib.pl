@@ -512,7 +512,8 @@ return $v == 9999 ? undef : $v ? $v-1 : 40;
 }
 
 # set_php_max_execution_time(&domain, max)
-# Updates the max execution time in all php.ini files
+# Updates the max execution time in all php.ini files, and possibly in the FPM
+# config file
 sub set_php_max_execution_time
 {
 local ($d, $max) = @_;
@@ -522,6 +523,10 @@ foreach my $ini (&list_domain_php_inis($d)) {
 	local $conf = &phpini::get_config($f);
 	&phpini::save_directive($conf, "max_execution_time", $max);
 	&flush_file_lines($f);
+	}
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# XXX
 	}
 }
 
@@ -1386,6 +1391,7 @@ elsif ($mode eq "fpm") {
 	my $conf = &get_php_fpm_config();
 	return 0 if (!$conf);
 	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+	return 0 if (!-r $file);
 	my $lref = &read_file_lines($file);
 	$children = 9999 if ($children == 0);	# Unlimited
 	foreach my $l (@$lref) {
@@ -1587,6 +1593,9 @@ if ($ver) {
 # use of standard packages.
 sub get_php_fpm_config
 {
+if ($php_fpm_config_cache) {
+	return $php_fpm_config_cache;
+	}
 my $rv = { };
 
 # Config directory for per-domain pool files
@@ -1625,6 +1634,7 @@ foreach my $pname ("php-fpm") {
 		}
 	}
 
+$php_fpm_config_cache = $rv;
 return wantarray ? ( $rv, undef ) : $rv;
 }
 
@@ -1722,6 +1732,57 @@ else {
 	&$second_print($text{'php_fpmnoinit'});
 	return 0;
 	}
+}
+
+# get_php_fpm_ini_value(&domain, name)
+# Returns the value of a ini setting from the domain's pool file
+sub get_php_fpm_ini_value
+{
+my ($d, $name) = @_;
+my $conf = &get_php_fpm_config();
+return undef if (!$conf);
+my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+my $lref = &read_file_lines($file, 1);
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*php_value\[(\S+)\]\s*=\s*(.*)/ && $1 eq $name) {
+		return $2;
+		}
+	}
+return undef;
+}
+
+# save_php_fpm_ini_value(&domain, name, value)
+# Adds, updates or deletes an ini setting in the domain's pool file
+sub save_php_fpm_ini_value
+{
+my ($d, $name, $value) = @_;
+my $conf = &get_php_fpm_config();
+return 0 if (!$conf);
+my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+my $lref = &read_file_lines($file);
+my $found = -1;
+my $lnum = 0;
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*php_value\[(\S+)\]\s*=\s*(.*)/ && $1 eq $name) {
+		$found = $lnum;
+		last;
+		}
+	$lnum++;
+	}
+if ($found >= 0 && defined($value)) {
+	# Update existing line
+	$lref->[$found] = "php_value[$name] = $value";
+	}
+elsif ($found >=0 && !defined($value)) {
+	# Remove existing line
+	splice(@$lref, $found, 1);
+	}
+elsif ($found < 0 && defined($value)) {
+	# Need to add new line
+	push(@$lref, "php_value[$name] = $value");
+	}
+&flush_file_lines($file);
+return 1;
 }
 
 1;
