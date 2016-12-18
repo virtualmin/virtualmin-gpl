@@ -526,7 +526,8 @@ foreach my $ini (&list_domain_php_inis($d)) {
 	}
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
-	# XXX
+	&save_php_fpm_ini_value($d, "max_execution_time",
+				$max == 0 ? undef : $max);
 	}
 }
 
@@ -1392,6 +1393,7 @@ elsif ($mode eq "fpm") {
 	return 0 if (!$conf);
 	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 	return 0 if (!-r $file);
+	&lock_file($file);
 	my $lref = &read_file_lines($file);
 	$children = 9999 if ($children == 0);	# Unlimited
 	foreach my $l (@$lref) {
@@ -1403,6 +1405,7 @@ elsif ($mode eq "fpm") {
 			}
 		}
 	&flush_file_lines($file);
+	&unlock_file($file);
 	&register_post_action(\&restart_php_fpm_server);
 	return 1;
 	}
@@ -1759,6 +1762,7 @@ my ($d, $name, $value) = @_;
 my $conf = &get_php_fpm_config();
 return 0 if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+&lock_file($file);
 my $lref = &read_file_lines($file);
 my $found = -1;
 my $lnum = 0;
@@ -1782,6 +1786,8 @@ elsif ($found < 0 && defined($value)) {
 	push(@$lref, "php_value[$name] = $value");
 	}
 &flush_file_lines($file);
+&unlock_file($file);
+&register_post_action(\&restart_php_fpm_server);
 return 1;
 }
 
