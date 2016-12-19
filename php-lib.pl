@@ -1602,7 +1602,7 @@ if ($php_fpm_config_cache) {
 my $rv = { };
 
 # Config directory for per-domain pool files
-foreach my $cdir ("/etc/php-fpm.d") {
+foreach my $cdir ("/etc/php-fpm.d", "/etc/php5/fpm/pool.d") {
 	if (-d $cdir) {
 		$rv->{'dir'} = $cdir;
 		last;
@@ -1614,7 +1614,7 @@ if (!$rv->{'dir'}) {
 
 # Init script
 &foreign_require("init");
-foreach my $init ("php-fpm") {
+foreach my $init ("php-fpm", "php5-fpm") {
 	my $st = &init::action_status($init);
 	if ($st) {
 		$rv->{'init'} = $init;
@@ -1628,7 +1628,7 @@ if (!$rv->{'init'}) {
 
 # What version are we running?
 &foreign_require("software");
-foreach my $pname ("php-fpm") {
+foreach my $pname ("php-fpm", "php5-fpm") {
 	my @pinfo = &software::package_info($pname);
 	if (@pinfo && $pinfo[0]) {
 		$rv->{'version'} = $pinfo[4];
