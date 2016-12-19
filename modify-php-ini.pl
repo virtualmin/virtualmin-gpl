@@ -163,9 +163,18 @@ foreach my $d (@doms) {
 			}
 		}
 
+	# Update PHP-FPM pool file settings
+	if ($mode eq "fpm") {
+		for(my $i=0; $i<@ini_names; $i++) {
+			&save_php_fpm_ini_value($d, $ini_names[$i],
+						$ini_values[$i]);
+			}
+		}
+
 	&$second_print(".. updated ",scalar(@ini_names)," variables in ",
 		       scalar(@inis)," files",
-		       ($mod_php ? " and Apache configuration" : ""));
+		       ($mod_php ? " and Apache configuration" : "").
+		       ($mode eq "fpm" ? " and FPM configuration" : ""));
 	}
 
 &run_post_actions();
