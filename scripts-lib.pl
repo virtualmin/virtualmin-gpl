@@ -693,6 +693,27 @@ if ($p eq "web" && ($apache::httpd_modules{'mod_php4'} ||
 		}
 	}
 
+# Find PHP variables from template and from script
+local @todo;
+foreach my $pv (@tmplphpvars) {
+	local ($n, $v) = split(/=/, $pv, 2);
+	local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
+	push(@todo, [ $n, $v, $diff ]);
+	}
+if ($script && defined(&{$script->{'php_vars_func'}})) {
+	push(@todo, &{$script->{'php_vars_func'}}($d));
+	}
+
+# Always set the session.save_path to ~/tmp, as on some systems
+# it is set by default to a directory only writable by Apache
+push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
+
+# Magic quotes directive not supported in PHP 5.4
+local $realver = &get_php_version($phpver, $d);
+if ($realver >= 5.4) {
+	@todo = grep { $_->[0] ne "magic_quotes_gpc" } @todo;
+	}
+
 local $phpini = &get_domain_php_ini($d, $phpver);
 if (-r $phpini && &foreign_check("phpini")) {
 	# Add the variables to the domain's php.ini file. Start by finding
@@ -700,31 +721,11 @@ if (-r $phpini && &foreign_check("phpini")) {
 	&foreign_require("phpini");
 	local $conf = &phpini::get_config($phpini);
 	local $anyini;
-	local $realver = &get_php_version($phpver, $d);
-
-	# Find PHP variables from template and from script
-	local @todo;
-	foreach my $pv (@tmplphpvars) {
-		local ($n, $v) = split(/=/, $pv, 2);
-		local $diff = $n =~ s/^(\+|\-)// ? $1 : undef;
-		push(@todo, [ $n, $v, $diff ]);
-		}
-	if ($script && defined(&{$script->{'php_vars_func'}})) {
-		push(@todo, &{$script->{'php_vars_func'}}($d));
-		}
-
-	# Always set the session.save_path to ~/tmp, as on some systems
-	# it is set by default to a directory only writable by Apache
-	push(@todo, [ 'session.save_path', &create_server_tmp($d) ]);
 
 	# Make any needed changes. Variables can be either forced to a
 	# particular value, or have maximums or minumums
 	foreach my $t (@todo) {
 		local ($n, $v, $diff) = @$t;
-		if ($n eq "magic_quotes_gpc" && $realver >= 5.4) {
-			# Directive not supported in PHP 5.4
-			next;
-			}
 		local $ov = &phpini::find_value($n, $conf);
 		local $change = $diff eq '' && $ov ne $v ||
 				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
@@ -745,6 +746,21 @@ if (-r $phpini && &foreign_check("phpini")) {
 		local $p = &domain_has_website($d);
 		if ($p ne "web") {
 			&plugin_call($p, "feature_restart_web_php", $d);
+			}
+		}
+	}
+
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	# Update PHP ini values in FPM config file as well
+	foreach my $t (@todo) {
+		local ($n, $v, $diff) = @$t;
+		local $ov = &get_php_fpm_ini_value($d, $n);
+		local $change = $diff eq '' && $ov ne $v ||
+				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
+				$diff eq '-' && &php_value_diff($ov, $v) > 0;
+		if ($change) {
+			&save_php_fpm_ini_value($d, $n, $v);
 			}
 		}
 	}
