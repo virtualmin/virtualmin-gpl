@@ -1073,6 +1073,7 @@ edit_alloc=Create now with allocated IP
 edit_virt6on=Add with address
 edit_virt6using=Using address
 edit_dnsip=External IP address
+edit_dnsip2=$1 externally
 edit_return=virtual server details
 edit_users2=Edit Mail and FTP Users
 edit_users3=Edit FTP Users

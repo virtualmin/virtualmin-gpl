@@ -99,7 +99,8 @@ if ($d->{'ip6'}) {
 	push(@ips, $d->{'ip6'});
 	}
 print &ui_table_row($text{'edit_ips'},
-	join(", ", @ips));
+	join(", ", @ips).
+	($d->{'dns_ip'} ? " (".&text('edit_dnsip2', $d->{'dns_ip'}).")" : ""));
 
 if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
 	# Show forwarding / proxy destination
