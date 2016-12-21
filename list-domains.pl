@@ -496,8 +496,7 @@ if ($multi) {
 
 		# Show PHP and suexec execution mode
 		if (!$d->{'alias'} &&
-		    &domain_has_website($d) &&
-		    defined(&get_domain_php_mode) && $multi == 1) {
+		    &domain_has_website($d) && $multi == 1) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
 			$s = &get_domain_suexec($d);

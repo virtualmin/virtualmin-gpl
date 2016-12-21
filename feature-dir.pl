@@ -300,7 +300,7 @@ foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr', 'ssl_newkey') {
 # Clear any in-memory caches of files under home dir
 if (defined(&list_domain_php_inis) && &foreign_check("phpini")) {
 	my $mode = &get_domain_php_mode($d);
-        $mode = "cgi" if ($mode eq "mod_php");
+        $mode = "cgi" if ($mode eq "mod_php" || $mode eq "fpm");
 	foreach my $ini (&list_domain_php_inis($d, $mode)) {
 		delete($phpini::get_config_cache{$ini->[1]});
 		}

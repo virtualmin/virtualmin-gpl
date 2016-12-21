@@ -805,8 +805,9 @@ local @pconfs;
 if ($extramods{'phpini'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (@doms) {
-		if ($sd->{'web'} && defined(&get_domain_php_mode) &&
-		    &get_domain_php_mode($sd) ne "mod_php") {
+		my $mode = &get_domain_php_mode($sd);
+		if ($sd->{'web'} &&
+		    $mode ne "mod_php" && $mode ne "fpm") {
 			foreach my $ini (&list_domain_php_inis($sd)) {
 				local @st = stat($ini->[1]);
 				if (@st && $st[4] == $sd->{'uid'}) {

@@ -1681,7 +1681,7 @@ else {
 	# Create a new file
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
-	$defchildren = 9999 if ($defchildren eq "none");
+	$defchildren = 9999 if ($defchildren eq "none" || !$defchildren);
 	&open_tempfile(CONF, ">$file");
 	&print_tempfile(CONF, "[$d->{'id'}]\n");
 	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");

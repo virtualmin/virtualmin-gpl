@@ -14045,7 +14045,7 @@ if ($config{'web'}) {
 			eval {
 				local $main::error_must_die = 1;
 				local $mode = &get_domain_php_mode($d);
-				if ($mode ne "mod_php") {
+				if ($mode ne "mod_php" && $mode ne "fpm") {
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
 					}

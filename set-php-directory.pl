@@ -64,6 +64,8 @@ $d || usage("Virtual server $domain does not exist");
 $mode = &get_domain_php_mode($d);
 $mode eq "mod_php" &&
     usage("The PHP version cannot be set for virtual servers using mod_php");
+$mode eq "fpm" &&
+    usage("The PHP version cannot be set for virtual servers using FPM");
 @avail = map { $_->[0] } &list_available_php_versions($d);
 &indexof($version, @avail) >= 0 ||
     usage("Only the following PHP version are available : ".join(" ", @avail));

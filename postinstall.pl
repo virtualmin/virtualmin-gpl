@@ -55,7 +55,7 @@ if ($virtualmin_pro) {
 	foreach my $d (&list_domains()) {
 		next if (!$d->{'web'} || !$d->{'dir'});
 		local $mode = &get_domain_php_mode($d);
-		next if ($mode eq "mod_php");
+		next if ($mode eq "mod_php" && $mode ne "fpm");
 		if (!-r "$d->{'home'}/etc/php4/php.ini" &&
 		    !-r "$d->{'home'}/etc/php5/php.ini") {
 			&save_domain_php_mode($d, $mode);

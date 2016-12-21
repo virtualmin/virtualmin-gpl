@@ -14,7 +14,7 @@ $virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
 
 $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php") {
+if ($mode eq "mod_php" || $mode eq "fpm") {
 	print &text('phpver_emodphp'),"<p>\n";
 	&ui_print_footer(&domain_footer_link($d),
 			 "", $text{'index_return'});

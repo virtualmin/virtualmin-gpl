@@ -317,9 +317,7 @@ foreach $d (@doms) {
 
 # Make sure suexec and PHP / Ruby settings don't clash
 foreach $d (@doms) {
-	if (defined(&get_domain_php_mode)) {
-		$p = $mode || &get_domain_php_mode($d);
-		}
+	$p = $mode || &get_domain_php_mode($d);
 	if (defined(&get_domain_ruby_mode)) {
 		$r = $rubymode || &get_domain_ruby_mode($d);
 		}
@@ -395,7 +393,7 @@ foreach $d (@doms) {
 	if ($version && !$d->{'alias'}) {
 		&save_domain_php_directory($d, &public_html_dir($d), $version);
 		my $dommode = $mode || &get_domain_php_mode($d);
-		if ($dommode ne "mod_php") {
+		if ($dommode ne "mod_php" && $dommode ne "fpm") {
 			&save_domain_php_mode($d, $dommode);
 			}
 		&clear_links_cache($d);
