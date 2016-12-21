@@ -1400,9 +1400,6 @@ elsif ($mode eq "fpm") {
 		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
 			$l = "pm.max_children = $children";
 			}
-		if ($l =~ /pm.max_spare_servers\s*=\s*(\d+)/) {
-			$l = "pm.max_spare_servers = $children";
-			}
 		}
 	&flush_file_lines($file);
 	&unlock_file($file);
@@ -1690,7 +1687,7 @@ else {
 	&print_tempfile(CONF, "pm = dynamic\n");
 	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
 	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
-	&print_tempfile(CONF, "pm.max_spare_servers = $defchildren\n");
+	&print_tempfile(CONF, "pm.max_spare_servers = 5\n");
 	&close_tempfile(CONF);
 	}
 &unlock_file($file);
@@ -1706,10 +1703,12 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config();
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-&unlink_logged($file);
-my $sock = &get_php_fpm_socket_file($d);
-&unlink_logged($sock);
-&register_post_action(\&restart_php_fpm_server);
+if (-r $file) {
+	&unlink_logged($file);
+	my $sock = &get_php_fpm_socket_file($d);
+	&unlink_logged($sock);
+	&register_post_action(\&restart_php_fpm_server);
+	}
 return undef;
 }
 
