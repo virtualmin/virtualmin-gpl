@@ -2230,9 +2230,15 @@ if ($ok) {
 					}
 				}
 
-			# Set the home directory to match this system's base
+			# Set the home directory to match this system's base, 
+			# but only if it's not compatible with this system
+			&require_useradmin();
+			local $newhome = &server_home_directory($d, $parentdom);
 			local $oldhome = $d->{'home'};
-			$d->{'home'} = &server_home_directory($d, $parentdom);
+			if ($oldhome !~ /^\Q$home_base\E\//) {
+				# Totally different base
+				$d->{'home'} = $newhome;
+				}
 			if ($d->{'home'} ne $oldhome) {
 				# Fix up setings that reference the home
 				$d->{'ssl_cert'} =~s/\Q$oldhome\E/$d->{'home'}/;
