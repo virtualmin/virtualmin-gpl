@@ -1,0 +1,6 @@
+desc=PHP-FPM support
+html=Added support for FPM as a PHP execution mode, on systems that have a system package which runs an FPM pool server.
+master=1
+reseller=1
+owner=1
+link=edit_phpmode.cgi?dom=${ID}
