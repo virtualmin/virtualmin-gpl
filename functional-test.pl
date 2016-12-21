@@ -64,10 +64,9 @@ $test_email_dir = "/usr/local/webadmin/virtualmin/testmail";
 $spam_email_file = "$test_email_dir/spam.txt";
 $virus_email_file = "$test_email_dir/virus.txt";
 $ok_email_file = "$test_email_dir/ok.txt";
-$supports_fcgid = defined(&supported_php_modes) &&
-		  &indexof("fcgid", &supported_php_modes()) >= 0;
-$supports_cgi = defined(&supported_php_modes) &&
-		&indexof("cgi", &supported_php_modes()) >= 0;
+$supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
+$supports_fpm = &indexof("fpm", &supported_php_modes()) >= 0;
+$supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -300,6 +299,13 @@ $domains_tests = [
 			      [ 'mode', 'cgi' ] ],
 		},
 
+		# Validate PHP mode
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: cgi' ],
+		},
+
 		# Check PHP running via CGI
 		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
@@ -316,7 +322,37 @@ $domains_tests = [
 			      [ 'mode', 'fcgid' ] ],
 		},
 
+		# Validate PHP mode
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: fcgid' ],
+		},
+
 		# Check PHP running via fCGId
+		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
+			       $test_domain_user.'/public_html/test.php',
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		},
+		) : ( ),
+
+	$supports_fpm ? (
+		# Switch PHP mode to FPM
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'fpm' ] ],
+		},
+
+		# Validate PHP mode
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: fpm' ],
+		},
+
+		# Check PHP running via FPM
 		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
 		},
