@@ -1622,7 +1622,7 @@ foreach my $init ("php-fpm", "php5-fpm", "php7-fpm", "php7.0-fpm") {
 		}
 	}
 if (!$rv->{'init'}) {
-	return wantarray ? ( undef, $text{'php_fpmnoinit'} ) : undef;
+	return wantarray ? ( undef, $text{'php_fpmnoinit2'} ) : undef;
 	}
 
 # What version are we running?

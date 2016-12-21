@@ -6816,5 +6816,6 @@ php_fpmrestart=Restarting PHP-FPM server ..
 php_fpmnoinit=.. no bootup action found!
 php_fpmeinit=.. failed : $1
 php_fpmnodir=No FPM configuration directory found
-php_fpmnoinit=No FPM server bootup action found
+php_fpmnoinit2=No FPM server bootup action found
+
 __norefs=1
