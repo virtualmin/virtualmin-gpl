@@ -990,10 +990,6 @@ foreach my $m (@mods) {
 			}
 		if ($mode eq "mod_php" || $mode eq "fpm") {
 			&flush_file_lines($inifile);
-			if ($mode eq "fpm") {
-				# To apply new ini file
-				&register_post_action(\&restart_php_fpm_server);
-				}
 			}
 		else {
 			&write_as_domain_user($d,
@@ -1135,6 +1131,11 @@ foreach my $m (@mods) {
 		elsif ($p) {
 			&plugin_call($p, "feature_restart_web_php", $d);
 			}
+		}
+
+	# In FPM mode, a pool server reload is needed
+	if ($mode eq "fpm") {
+		&register_post_action(\&restart_php_fpm_server);
 		}
 	}
 return 1;
