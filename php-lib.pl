@@ -1599,9 +1599,11 @@ if ($php_fpm_config_cache) {
 my $rv = { };
 
 # Config directory for per-domain pool files
-foreach my $cdir ("/etc/php-fpm.d", "/etc/php5/fpm/pool.d") {
-	if (-d $cdir) {
-		$rv->{'dir'} = $cdir;
+foreach my $cdir ("/etc/php-fpm.d", "/etc/php*/fpm/pool.d",
+		  "/etc/php/*/fpm/pool.d") {
+	my ($realdir) = glob($cdir);
+	if ($realdir && -d $realdir) {
+		$rv->{'dir'} = $realdir;
 		last;
 		}
 	}
@@ -1611,7 +1613,7 @@ if (!$rv->{'dir'}) {
 
 # Init script
 &foreign_require("init");
-foreach my $init ("php-fpm", "php5-fpm") {
+foreach my $init ("php-fpm", "php5-fpm", "php7-fpm", "php7.0-fpm") {
 	my $st = &init::action_status($init);
 	if ($st) {
 		$rv->{'init'} = $init;
@@ -1630,6 +1632,8 @@ foreach my $pname ("php-fpm", "php5-fpm") {
 	if (@pinfo && $pinfo[0]) {
 		$rv->{'version'} = $pinfo[4];
 		$rv->{'version'} =~ s/\-.*$//;
+		$rv->{'version'} =~ s/\+.*$//;
+		$rv->{'version'} =~ s/^\d+://;
 		last;
 		}
 	}
