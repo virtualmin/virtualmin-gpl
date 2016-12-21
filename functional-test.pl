@@ -1305,7 +1305,17 @@ $gplscript_tests = [
 	  'cleanup' => 1 },
 	];
 
-
+if ($supports_fpm) {
+	$fpmscript_tests = [ @$script_tests ];
+	splice(@$fpmscript_tests, 1, 0,
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'fpm' ] ],
+		});
+	}
+else {
+	$fpmscript_tests = [];
+	}
 
 # Database tests
 $database_tests = [
@@ -7951,6 +7961,7 @@ $alltests = { '_config' => $_config_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
 	      'gplscript' => $gplscript_tests,
+	      'fpmscript' => $fpmscript_tests,
 	      'database' => $database_tests,
 	      'proxy' => $proxy_tests,
 	      'migrate' => $migrate_tests,
