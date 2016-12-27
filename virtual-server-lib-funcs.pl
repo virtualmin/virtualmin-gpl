@@ -14140,6 +14140,11 @@ if ($config{'mysql'}) {
 			}
 		}
 
+	# Update any cached MySQL version
+	if (defined(&mysql::save_mysql_version)) {
+		&mysql::save_mysql_version();
+		}
+
 	# If MYSQL_PWD doesn't work, disable it
 	if (defined(&mysql::working_env_pass) &&
 	    !&mysql::working_env_pass()) {
