@@ -35,6 +35,7 @@ if (!$in{'pass_def'}) {
 $tmpl = &get_template($in{'template'});
 if (!$in{'parent_def'}) {
 	$parent = &get_domain_by("user", $in{'parent'}, "parent", "");
+	&can_config_domain($parent) || &error($text{'edit_ecannot'});
 	}
 if ($parent && !$tmpl->{'for_sub'}) {
 	&error($text{'migrate_etmplsub'});
@@ -115,6 +116,14 @@ $mfunc = "migration_$in{'type'}_migrate";
 # Fix htaccess files
 foreach my $d (@doms) {
 	&fix_script_htaccess_files($d, &public_html_dir($d));
+	}
+
+# If this user is a reseller, grant any new domains to him
+if (&reseller_admin()) {
+	foreach my $d (@doms) {
+		$d->{'reseller'} = $base_remote_user;
+		&save_domain($d);
+		}
 	}
 
 if (@doms) {

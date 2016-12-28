@@ -64,7 +64,7 @@ if (&supports_ip6()) {
 
 # Parent user
 @doms = sort { $a->{'user'} cmp $b->{'user'} }
-	     grep { $_->{'unix'} } &list_domains();
+	     grep { $_->{'unix'} && &can_config_domain($_) } &list_domains();
 if (@doms) {
 	print &ui_table_row($text{'migrate_parent'},
 			    &ui_radio("parent_def", 1,
