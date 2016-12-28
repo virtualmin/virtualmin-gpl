@@ -8,7 +8,7 @@ require './virtual-server-lib.pl';
 &require_migration();
 
 # Parse source file input
-$src = &parse_backup_destination("src", \%in, 0, undef, undef);
+$src = &parse_backup_destination("src", \%in, !&master_admin(), undef, undef);
 ($mode) = &parse_backup_url($src);
 if ($mode == 0) {
 	-r $src || &error($text{'migrate_efile'});

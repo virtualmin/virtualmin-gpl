@@ -1,6 +1,7 @@
 edit=1
 create=1
 import=1
+migrate=1
 domains=*
 stop=1
 local=1

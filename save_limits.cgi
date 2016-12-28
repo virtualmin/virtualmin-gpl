@@ -31,6 +31,7 @@ $d->{'realdomslimit'} = $in{'realdomslimit_def'} == 1 ? undef
 		   				      : $in{'realdomslimit'};
 $d->{'nodbname'} = $in{'nodbname'};
 $d->{'norename'} = $in{'norename'};
+$d->{'migrate'} = $in{'migrate'};
 $d->{'forceunder'} = $in{'forceunder'};
 $d->{'safeunder'} = $in{'safeunder'};
 $d->{'ipfollow'} = $in{'ipfollow'};

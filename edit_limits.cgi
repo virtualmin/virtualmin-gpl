@@ -71,6 +71,11 @@ print &ui_table_row(&hlink($text{'limits_norename'}, "limits_norename"),
 	&ui_radio("norename", $d->{'norename'} ? 1 : 0,
 	       [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
 
+# Can migrate domains?
+print &ui_table_row(&hlink($text{'limits_migrate'}, "limits_migrate"),
+	&ui_radio("migrate", $d->{'migrate'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
 # Force sub-domain under master domain
 print &ui_table_row(&hlink($text{'limits_forceunder'}, "limits_forceunder"),
 	&ui_radio("forceunder", $d->{'forceunder'} ? 1 : 0,

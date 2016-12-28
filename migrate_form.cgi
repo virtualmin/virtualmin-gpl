@@ -14,11 +14,7 @@ print &ui_table_start($text{'migrate_header'}, "width=100%", 2, [ "width=30%"]);
 
 # Source file
 print &ui_table_row($text{'migrate_file'},
-	&show_backup_destination("src", undef, 0, undef, 1, 0));
-#	&ui_radio("mode", 0,
-#		[ [ 0, &text('migrate_file0', &ui_upload("upload"))."<br>" ],
-#		  [ 1, &text('migrate_file1', &ui_textbox("file", undef, 50)).
-#		         &file_chooser_button("file") ] ]));
+	&show_backup_destination("src", undef, !&master_admin(), undef, 1, 0));
 
 # Source type (plesk, cpanel, etc..)
 print &ui_table_row($text{'migrate_type'},

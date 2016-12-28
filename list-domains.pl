@@ -663,6 +663,8 @@ if ($multi) {
 				($d->{'nodbname'} ? "No" : "Yes"),"\n";
 			print "    Can rename servers: ",
 				($d->{'norename'} ? "No" : "Yes"),"\n";
+			print "    Can migrate backups: ",
+				($d->{'migrate'} ? "Yes" : "No"),"\n";
 			print "    Sub-servers must be under main domain: ",
 				($d->{'forceunder'} ? "Yes" : "No"),"\n";
 			print "    Sub-servers cannot be under other domains: ",

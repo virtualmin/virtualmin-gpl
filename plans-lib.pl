@@ -208,7 +208,7 @@ foreach my $ltmpl (&list_templates()) {
 	$plan->{'capabilities'} = $tmpl->{'capabilities'} eq 'none' ? '' :
 				   $tmpl->{'capabilities'};
 	foreach my $n ('nodbname', 'norename', 'forceunder', 'safeunder',
-		       'ipfollow') {
+		       'ipfollow', 'migrate') {
 		$plan->{$n} = $tmpl->{$n};
 		}
 	&save_plan($plan);
@@ -254,6 +254,7 @@ $d->{'norename'} = $plan->{'norename'};
 $d->{'forceunder'} = $plan->{'forceunder'};
 $d->{'safeunder'} = $plan->{'safeunder'};
 $d->{'ipfollow'} = $plan->{'ipfollow'};
+$d->{'migrate'} = $plan->{'migrate'};
 }
 
 # set_reseller_limits_from_plan(&reseller, &plan)

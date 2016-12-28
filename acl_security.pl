@@ -21,7 +21,7 @@ foreach $d (&list_domains()) {
 	}
 print "</select></td> </tr>\n";
 
-foreach $q ('create', 'import', 'edit', 'local', 'stop') {
+foreach $q ('create', 'import', 'migrate', 'edit', 'local', 'stop') {
 	print "<tr> <td><b>",$text{'acl_'.$q},"</b></td> <td>\n";
 	printf "<input type=radio name=%s value=1 %s> %s\n",
 		$q, $_[0]->{$q} == 1 ? "checked" : "", $text{'yes'};

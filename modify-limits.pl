@@ -159,6 +159,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cannot-rename") {
 		$cannotrename = 1;
 		}
+	elsif ($a eq "--can-migrate") {
+		$canmigrate = 1;
+		}
+	elsif ($a eq "--cannot-migrate") {
+		$cannotmigrate = 1;
+		}
 	elsif ($a eq "--force-under") {
 		$forceunder = 1;
 		}
@@ -272,6 +278,8 @@ $dom->{'nodbname'} = $candbname ? 0 :
 		     $cannotdbname ? 1 : $dom->{'nodbname'};
 $dom->{'norename'} = $canrename ? 0 :
 		     $cannotrename ? 1 : $dom->{'norename'};
+$dom->{'migrate'} = $canmigrate ? 1 :
+		    $cannotmigrate ? 0 : $dom->{'migrate'};
 $dom->{'forceunder'} = $forceunder ? 1 :
 		       $noforceunder ? 0 : $dom->{'forceunder'};
 $dom->{'safeunder'} = $safeunder ? 1 :
@@ -329,6 +337,7 @@ print "                        [--max-dbs max|UNLIMITED]\n";
 print "                        [--max-aliases max|UNLIMITED]\n";
 print "                        [--can-dbname] | [--cannot-dbname]\n";
 print "                        [--can-rename] | [--cannot-rename]\n";
+print "                        [--can-migrate] | [--cannot-migrate]\n";
 print "                        [--force-under] | [--noforce-under]\n";
 print "                        [--safe-under] | [--nosafe-under]\n";
 print "                        [--ipfollow] | [--noipfollow]\n";
