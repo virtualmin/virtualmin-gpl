@@ -11,6 +11,17 @@ if (!$mysql::config{'login'}) {
 %mconfig = &foreign_config("mysql");
 $password_func = $mysql::password_func || "password";
 $mysql_user_size = $config{'mysql_user_size'} || 16;
+
+# Try to get the mysql server version, but fall back to the local version
+eval {
+	local $main::error_must_die = 1;
+	if (defined(&mysql::get_remote_mysql_version)) {
+		$remote_mysql_version = &mysql::get_remote_mysql_version();
+		}
+	};
+if ($@ || !$remote_mysql_version) {
+	$remote_mysql_version = $mysql::mysql_version;
+	}
 }
 
 # check_depends_mysql(&dom)
@@ -1854,8 +1865,7 @@ sub sysinfo_mysql
 {
 &require_mysql();
 return ( ) if ($config{'provision_mysql'});
-local $ver = &mysql::get_mysql_version();
-return ( [ $text{'sysinfo_mysql'}, $ver ] );
+return ( [ $text{'sysinfo_mysql'}, $remote_mysql_version ] );
 }
 
 sub startstop_mysql
@@ -1988,7 +1998,7 @@ if (-d $mysql::config{'mysql_data'} &&
 				( [ "", $text{'default'} ] ) )]));
 	}
 
-if ($mysql::mysql_version >= 4.1 && $config{'mysql'}) {
+if ($remote_mysql_version >= 4.1 && $config{'mysql'}) {
 	# Default MySQL character set
 	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
 				   "template_mysql_charset"),
@@ -2000,7 +2010,7 @@ if ($mysql::mysql_version >= 4.1 && $config{'mysql'}) {
 		      &list_mysql_character_sets() ]));
 	}
 
-if ($mysql::mysql_version >= 5 && $config{'mysql'}) {
+if ($remote_mysql_version >= 5 && $config{'mysql'}) {
 	# Default MySQL collation order
 	print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
 				   "template_mysql_collate"),
@@ -2086,7 +2096,7 @@ if (-d $mysql::config{'mysql_data'} &&
     !$config{'provision_mysql'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}
-if ($mysql::mysql_version >= 4.1 && $config{'mysql'}) {
+if ($remote_mysql_version >= 4.1 && $config{'mysql'}) {
 	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
 	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
 	}
@@ -2106,7 +2116,7 @@ sub creation_form_mysql
 {
 &require_mysql();
 local $rv;
-if ($mysql::mysql_version >= 4.1) {
+if ($remote_mysql_version >= 4.1) {
 	local $tmpl = &get_template($_[0]->{'template'});
 
 	# Character set
@@ -2347,7 +2357,7 @@ if ($config{'provision_mysql'}) {
 	}
 else {
 	# Query local DB
-	if ($mysql::mysql_version >= 5) {
+	if ($remote_mysql_version >= 5) {
 		local $d = &mysql::execute_sql(
 			$mysql::master_db, "show collation");
 		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
@@ -2612,10 +2622,10 @@ foreach my $sql (&get_user_creation_sql($host, $user,$encpass)) {
 sub get_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
-if (&compare_versions($mysql::mysql_version, "5.7.6") >= 0) {
+if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
-elsif (&compare_versions($mysql::mysql_version, 5) >= 0) {
+elsif (&compare_versions($remote_mysql_version, 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
@@ -2632,7 +2642,7 @@ my $d = &mysql::execute_sql($mysql::master_db,
 		"select host from user where user = ?", $user);
 foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 	my $sql;
-	if (&compare_versions($mysql::mysql_version, "5.7.6") >= 0) {
+	if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		}
