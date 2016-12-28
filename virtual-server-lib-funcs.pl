@@ -2930,7 +2930,8 @@ return &master_admin() || &reseller_admin() || $config{'batch_create'};
 # Returns 1 if the user can migrate servers from other control panels
 sub can_migrate_servers
 {
-return $access{'import'};
+return $access{'import'} ||
+       $access{'migrate'};
 }
 
 # Returns 1 if the user can import existing servers and databases
