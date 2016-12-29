@@ -392,7 +392,7 @@ else {
 		$orighome = "/home/$user";
 		}
 	}
-if ($orighome && &is_under_directory($home_base, $orighome)) {
+if ($orighome && &is_under_directory($home_base, $orighome) && !$parent) {
 	# Use same home directory as cPanel
 	$dom{'home'} = $orighome;
 	}
