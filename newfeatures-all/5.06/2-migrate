@@ -1,0 +1,3 @@
+desc=Migration by domain owners and resellers
+html=Resellers and domain owners can be granted the ability to migrate backups from other control panels, like cPanel and Plesk. This is disabled by default and should only be granted to trusted users though.
+master=1
