@@ -2,13 +2,14 @@
 # Migrate some virtual server backup file
 
 require './virtual-server-lib.pl';
-&can_migrate_servers() || &error($text{'migrate_ecannot'});
+$can = &can_migrate_servers();
+$can || &error($text{'migrate_ecannot'});
 &error_setup($text{'migrate_err'});
 &ReadParseMime();
 &require_migration();
 
 # Parse source file input
-$src = &parse_backup_destination("src", \%in, !&master_admin(), undef, undef);
+$src = &parse_backup_destination("src", \%in, $can > 1, undef, undef);
 ($mode) = &parse_backup_url($src);
 if ($mode == 0) {
 	-r $src || &error($text{'migrate_efile'});
@@ -33,9 +34,18 @@ if (!$in{'pass_def'}) {
 	$pass = $in{'pass'};
 	}
 $tmpl = &get_template($in{'template'});
-if (!$in{'parent_def'}) {
-	$parent = &get_domain_by("user", $in{'parent'}, "parent", "");
-	&can_config_domain($parent) || &error($text{'edit_ecannot'});
+&can_use_template($tmpl) || &error($text{'setup_etmpl'});
+if ($can < 3) {
+	# Parent can be chosen
+	if (!$in{'parent_def'}) {
+		$parent = &get_domain_by("user", $in{'parent'}, "parent", "");
+		&can_config_domain($parent) || &error($text{'edit_ecannot'});
+		}
+	}
+else {
+	# This user's master domain
+	$parent = &get_domain_by_user($base_remote_user);
+	$parent && &can_edit_domain($parent) || &error($text{'edit_ecannot'});
 	}
 if ($parent && !$tmpl->{'for_sub'}) {
 	&error($text{'migrate_etmplsub'});

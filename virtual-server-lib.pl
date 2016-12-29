@@ -139,7 +139,8 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 @reseller_maxes = ("doms", "topdoms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 @plan_maxes = ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
                $virtualmin_pro ? ( "mongrels" ) : ( ));
-@plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder');
+@plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder',
+		      'migrate');
 
 @reseller_modules = ("webminlog", "mailboxes", "bind8", "syslog");
 

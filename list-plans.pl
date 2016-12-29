@@ -112,6 +112,8 @@ elsif ($multiline) {
 			$plan->{'nodbname'} ? "No" : "Yes","\n";
 		print "    Can rename domains: ",
 			$plan->{'norename'} ? "No" : "Yes","\n";
+		print "    Can migrate backups: ",
+			$plan->{'migrate'} ? "Yes" : "No","\n";
 		print "    Can create sub-servers under any domain: ",
 			$plan->{'forceunder'} ? "No" : "Yes","\n";
 		print "    Can create sub-servers under other domains: ",

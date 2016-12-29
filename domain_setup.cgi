@@ -72,6 +72,7 @@ $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
 &domain_name_clash($dname) && &error($text{'setup_edomain4'});
 $tmpl = &get_template($in{'template'});
+&can_use_template($tmpl) || &error($text{'setup_etmpl'});
 if (!$parentdom) {
 	$plan = &get_plan($in{'plan'});
 	$plan && &can_use_plan($plan) || &error($text{'setup_eplan'});
@@ -380,6 +381,7 @@ if (!$parentuser) {
 		$dom{'quota'} = $quota;
 		$dom{'uquota'} = $uquota;
 		$dom{'norename'} = $plan->{'norename'};	# No input for this
+		$dom{'migrate'} = $plan->{'migrate'};	# No input for this
 
 		# No fields for these, so set from plan
 		$dom{'aliasdomslimit'} = $plan->{'aliasdomslimit'} eq '' ? '*' :

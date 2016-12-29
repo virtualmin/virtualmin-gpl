@@ -3,7 +3,12 @@
 
 require './virtual-server-lib.pl';
 &require_migration();
-&can_migrate_servers() || &error($text{'migrate_ecannot'});
+$can = &can_migrate_servers();
+$can || &error($text{'migrate_ecannot'});
+if ($can == 3) {
+	$parent = &get_domain_by_user($base_remote_user);
+	$parent && &can_edit_domain($parent) || &error($text{'edit_ecannot'});
+	}
 
 &ui_print_header(undef, $text{'migrate_title'}, "");
 
@@ -14,7 +19,7 @@ print &ui_table_start($text{'migrate_header'}, "width=100%", 2, [ "width=30%"]);
 
 # Source file
 print &ui_table_row($text{'migrate_file'},
-	&show_backup_destination("src", undef, !&master_admin(), undef, 1, 0));
+	&show_backup_destination("src", undef, $can > 1, undef, 1, 0));
 
 # Source type (plesk, cpanel, etc..)
 print &ui_table_row($text{'migrate_type'},
@@ -26,23 +31,24 @@ print &ui_table_row($text{'migrate_type'},
 print &ui_table_row($text{'migrate_dom'},
 		   &ui_opt_textbox("dom", undef, 50, $text{'migrate_auto2'}));
 
-# Username, if needed
-print &ui_table_row($text{'migrate_user'},
+if ($can < 3) {
+	# Username, if needed
+	print &ui_table_row($text{'migrate_user'},
 		    &ui_opt_textbox("user", undef, 20, $text{'migrate_auto2'},
 				    undef, 0, undef, 0, "autocomplete=off"));
 
-# Password, if needed
-print &ui_table_row($text{'migrate_pass'},
+	# Password, if needed
+	print &ui_table_row($text{'migrate_pass'},
 		    &ui_opt_textbox("pass", undef, 20, $text{'migrate_auto2'},
 				    undef, 0, undef, 0, "autocomplete=off"));
 
-# Create Webmin user?
-print &ui_table_row($text{'migrate_webmin'},
+	# Create Webmin user?
+	print &ui_table_row($text{'migrate_webmin'},
 		    &ui_yesno_radio("webmin", 1));
+	}
 
 # Template to use
-foreach $t (&list_templates()) {
-	next if ($t->{'deleted'});
+foreach $t (&list_available_templates($parent)) {
 	push(@tmpls, $t);
 	}
 print &ui_table_row($text{'migrate_template'},
@@ -61,7 +67,7 @@ if (&supports_ip6()) {
 # Parent user
 @doms = sort { $a->{'user'} cmp $b->{'user'} }
 	     grep { $_->{'unix'} && &can_config_domain($_) } &list_domains();
-if (@doms) {
+if (@doms && $can < 3) {
 	print &ui_table_row($text{'migrate_parent'},
 			    &ui_radio("parent_def", 1,
 				      [ [ 1, $text{'migrate_parent1'} ],

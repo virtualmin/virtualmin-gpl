@@ -2927,11 +2927,23 @@ sub can_create_batch
 return &master_admin() || &reseller_admin() || $config{'batch_create'};
 }
 
-# Returns 1 if the user can migrate servers from other control panels
+# Returns 1 if the user can migrate servers from other control panels with
+# no limits, 2 if only remote file migration is allowed, and 3 if only
+# remote file migration of sub-servers is allowed.
 sub can_migrate_servers
 {
-return $access{'import'} ||
-       $access{'migrate'};
+if (!$access{'import'} && !$access{'migrate'}) {
+	return 0;
+	}
+elsif (&master_admin()) {
+	return 1;
+	}
+elsif (&reseller_admin()) {
+	return 2;
+	}
+else {
+	return 3;
+	}
 }
 
 # Returns 1 if the user can import existing servers and databases
