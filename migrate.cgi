@@ -25,13 +25,17 @@ else {
 	&error($err) if ($err);
 	$domain = $in{'dom'};
 	}
-if (!$in{'user_def'}) {
-	$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i || &error($text{'migrate_euser'});
-	$user = $in{'user'};
-	defined(getpwnam($in{'user'})) && &error($text{'migrate_euserclash'});
-	}
-if (!$in{'pass_def'}) {
-	$pass = $in{'pass'};
+if ($can < 3) {
+	if (!$in{'user_def'}) {
+		$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i ||
+			&error($text{'migrate_euser'});
+		$user = $in{'user'};
+		defined(getpwnam($in{'user'})) &&
+			&error($text{'migrate_euserclash'});
+		}
+	if (!$in{'pass_def'}) {
+		$pass = $in{'pass'};
+		}
 	}
 $tmpl = &get_template($in{'template'});
 &can_use_template($tmpl) || &error($text{'setup_etmpl'});
