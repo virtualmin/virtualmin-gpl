@@ -55,6 +55,8 @@ while(@ARGV > 0) {
 		$f = shift(@ARGV);
 		$v = &read_file_contents($f);
 		defined($v) || &usage("Failed to read file $f : $!");
+		$v =~ s/\r?\n/\t/g;
+		$v =~ s/\t*$//;
 		push(@values, $v);
 		}
 	elsif ($a eq "--fix-options") {
