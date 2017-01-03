@@ -110,6 +110,7 @@ local $web_sslport = $d->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
 &obtain_lock_web($d);
 local $conf = &apache::get_config();
+$d->{'letsencrypt_renew'} = 2;		# Default let's encrypt renewal
 
 # Find out if this domain will share a cert with another
 &find_matching_certificate($d);
