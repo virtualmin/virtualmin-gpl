@@ -345,13 +345,16 @@ else {
 
 	# Domain names to request cert for
 	@defnames = &get_hostnames_for_ssl($d);
+	$dis1 = &js_disable_inputs([ "dname" ], [ ], "onClick");
+	$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
 	print &ui_table_row($text{'cert_dnamefor'},
 		&ui_radio_table("dname_def", 
 		      $d->{'letsencrypt_dname'} ? 0 : 1,
 		      [ [ 1, $text{'cert_dnamedef'},
-			  join(" ", map { "<tt>$_</tt>" } @defnames) ],
+			  join(" ", map { "<tt>$_</tt>" } @defnames), $dis1 ],
 			[ 0, $text{'cert_dnamesel'},
-			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60) ] ]));
+			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
+				       undef, $d->{'letsencrypt_dname'} ? 0 : 1), $dis0 ] ]));
 
 	# Setup automatic renewal?
 	print &ui_table_row($text{'cert_letsrenew'},
