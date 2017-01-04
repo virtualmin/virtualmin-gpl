@@ -1553,17 +1553,19 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 sub find_matching_certificate
 {
 local ($d) = @_;
-local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
+local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
 			   $_->{'ssl'} &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
-if ($sslclash && &check_domain_certificate($d->{'dom'}, $sslclash)) {
-	# Yes - so just use it. In practice this doesn't really matter, as
-	# Apache will pick up the first domain's cert anyway.
-	$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-	$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-	$d->{'ssl_same'} = $sslclash->{'id'};
-	$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+foreach my $sslclash (@sslclashes) {
+	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
+		# Found a match, so add a link to it
+		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$d->{'ssl_same'} = $sslclash->{'id'};
+		$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+		last;
+		}
 	}
 }
 
