@@ -17,6 +17,10 @@ if ($d->{'ssl_same'}) {
 		print &text('cert_samelink', "cert_form.cgi?dom=$same->{'id'}");
 		}
 	print "</b><p>\n";
+	print $text{'cert_breakdesc'},"<p>\n";
+	print &ui_form_start("break_cert.cgi");
+	print &ui_hidden("dom", $d->{'id'});
+	print &ui_form_end([ [ undef, $text{'cert_break'} ] ]);
 	&ui_print_footer(&domain_footer_link($d),
 			 "", $text{'index_return'});
 	return;
