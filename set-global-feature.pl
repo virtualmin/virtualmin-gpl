@@ -84,10 +84,11 @@ push(@neweverything, @enable);
 @neweverything = &unique(@neweverything);
 
 # Make sure new plugins can be used
+&load_plugin_libraries();
 foreach $f (@enable) {
 	if (&indexof($f, @features) < 0) {
-		&foreign_require($f, "virtual_feature.pl", \@neweverything);
-		$err = &plugin_call($f, "feature_check");
+		&foreign_require($f, "virtual_feature.pl");
+		$err = &plugin_call($f, "feature_check", \@neweverything);
 		&usage("Plugin $f cannot be enabled : $err") if ($err);
 		}
 	}
