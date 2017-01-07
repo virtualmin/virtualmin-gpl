@@ -8607,6 +8607,7 @@ push(@rv, { 'id' => 0,
 	    'web_sslport' => $default_web_sslport,
 	    'web_urlport' => $config{'web_urlport'},
 	    'web_urlsslport' => $config{'web_urlsslport'},
+	    'web_sslprotos' => $config{'web_sslprotos'},
 	    'web_alias' => $config{'alias_mode'},
 	    'web_webmin_ssl' => $config{'webmin_ssl'},
 	    'web_usermin_ssl' => $config{'usermin_ssl'},
@@ -8888,6 +8889,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_sslport'} = $tmpl->{'web_sslport'};
 	$config{'web_urlport'} = $tmpl->{'web_urlport'};
 	$config{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
+	$config{'web_sslprotos'} = $tmpl->{'web_sslprotos'};
 	$config{'webmin_ssl'} = $tmpl->{'web_webmin_ssl'};
 	$config{'usermin_ssl'} = $tmpl->{'web_usermin_ssl'};
 	$config{'web_webmail'} = $tmpl->{'web_webmail'};

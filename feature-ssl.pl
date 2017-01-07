@@ -1282,14 +1282,19 @@ push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 if ($d->{'ssl_chain'}) {
 	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
 	}
-local @tls = ( "SSLv2", "SSLv3" );
-if ($apache::httpd_modules{'core'} >= 2.4) {
-	push(@tls, "TLSv1");
-	if (&get_openssl_version() >= 1) {
-		push(@tls, "TLSv1.1");
-		}
+if ($tmpl->{'web_sslprotos'}) {
+	push(@dirs, "SSLProtocol ".$tmpl->{'web_sslprotos'});
 	}
-push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
+else {
+	local @tls = ( "SSLv2", "SSLv3" );
+	if ($apache::httpd_modules{'core'} >= 2.4) {
+		push(@tls, "TLSv1");
+		if (&get_openssl_version() >= 1) {
+			push(@tls, "TLSv1.1");
+			}
+		}
+	push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
+	}
 return @dirs;
 }
 

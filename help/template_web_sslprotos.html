@@ -1,0 +1,10 @@
+<header>Apache SSL protocols to allow</header>
+
+By default, when Virtualmin sets up a new SSL website it configures Apache
+to reject unsafe SSL protocol versions (TLSv1.1 and below). However, you can
+specify your own list of protocols by listing them here. Valid protocols are
+<tt>SSLv2</tt>, <tt>SSLv3</tt>, <tt>TLSv1</tt>, <tt>TLSv1.1</tt> and so on.
+To reject a protocol, put a <tt>-</tt> before the name. To allow all protocols,
+enter <tt>all</tt>. <p>
+
+<footer>

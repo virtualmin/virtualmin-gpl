@@ -2458,6 +2458,12 @@ print &ui_table_row(
 	&ui_opt_textbox("web_urlsslport", $tmpl->{'web_urlsslport'}, 6,
 			$text{'newweb_sameport'}));
 
+# Disallowed SSL protocol versions
+print &ui_table_row(
+	&hlink($text{'newweb_sslprotos'}, "template_web_sslprotos"),
+	&ui_opt_textbox("web_sslprotos", $tmpl->{'web_sslprotos'}, 30,
+                        $text{'newweb_sslprotos_def'}));
+
 # Setup matching Webmin/Usermin SSL cert
 print &ui_table_row(&hlink($text{'newweb_webmin'},
 			   "template_web_webmin_ssl"),
@@ -2687,6 +2693,16 @@ if ($in{"web_mode"} == 2) {
 		&error($text{'newweb_esslport'});
 	$tmpl->{'web_urlsslport'} = $in{'web_urlsslport_def'} ?
 					undef : $in{'web_urlsslport'};
+	if ($in{'web_sslprotos_def'}) {
+		$tmpl->{'web_sslprotos'} = undef;
+		}
+	else {
+		foreach my $p (split(/\s+/, $in{'web_sslprotos'})) {
+			$p =~ /^[\+\-]?(TLS|SSL)v[0-9\.]+$/ || $p eq "all" ||
+				&error($text{'newweb_esslproto'});
+			}
+		$tmpl->{'web_sslprotos'} = $in{'web_sslprotos'};
+		}
 
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
