@@ -635,8 +635,7 @@ local $varstr = &substitute_domain_template($tmpl->{'php_vars'}, $d);
 local @tmplphpvars = $varstr eq 'none' ? ( ) : split(/\t+/, $varstr);
 local $p = &domain_has_website($d);
 
-if ($p eq "web" && ($apache::httpd_modules{'mod_php4'} ||
-		    $apache::httpd_modules{'mod_php5'})) {
+if ($p eq "web" && &get_apache_mod_php_version()) {
 	# Add the PHP variables to the domain's <Virtualhost> in Apache config
 	&require_apache();
 	local $conf = &apache::get_config();

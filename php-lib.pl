@@ -364,8 +364,7 @@ foreach my $p (@ports) {
 
 	# For non-mod_php mode, use php_admin_value to turn off mod_php in
 	# case it gets enabled in a .htaccess file
-	if ($apache::httpd_modules{'mod_php4'} ||
-	    $apache::httpd_modules{'mod_php5'}) {
+	if (&get_apache_mod_php_version()) {
 		local @admin = &apache::find_directive("php_admin_value",
 						       $vconf);
 		@admin = grep { !/^engine\s+/ } @admin;
@@ -737,7 +736,7 @@ if ($p ne 'web') {
 	}
 &require_apache();
 local @rv;
-if ($apache::httpd_modules{'mod_php4'} || $apache::httpd_modules{'mod_php5'}) {
+if (&get_apache_mod_php_version()) {
 	# Check for Apache PHP module
 	push(@rv, "mod_php");
 	}
@@ -797,14 +796,9 @@ if ($d) {
 	# If the domain is using mod_php, we can only use one version
 	$mode ||= &get_domain_php_mode($d);
 	if ($mode eq "mod_php") {
-		if ($apache::httpd_modules{'mod_php4'}) {
-			return ([ 4, undef ]);
-			}
-		elsif ($apache::httpd_modules{'mod_php5'}) {
-			return ([ 5, undef ]);
-			}
-		elsif ($apache::httpd_modules{'mod_php7'}) {
-			return ([ "7.0", undef ]);
+		my $v = &get_apache_mod_php_version();
+		if ($v) {
+			return ([ $v, undef ]);
 			}
 		else {
 			return ( );
@@ -813,14 +807,9 @@ if ($d) {
 	}
 else {
 	# If no domain is given, included mod_php versions if active
-	if ($apache::httpd_modules{'mod_php4'}) {
-		push(@rv, [ 4, undef ]);
-		}
-	elsif ($apache::httpd_modules{'mod_php5'}) {
-		push(@rv, [ 5, undef ]);
-		}
-	elsif ($apache::httpd_modules{'mod_php7'}) {
-		push(@rv, [ "7.0", undef ]);
+	my $v = &get_apache_mod_php_version();
+	if ($v) {
+		push(@rv, [ $v, undef ]);
 		}
 	}
 
@@ -1792,6 +1781,16 @@ elsif ($found < 0 && defined($value)) {
 &unlock_file($file);
 &register_post_action(\&restart_php_fpm_server);
 return 1;
+}
+
+# get_apache_mod_php_version()
+# If Apache has mod_phpX installed, return the version number
+sub get_apache_mod_php_version
+{
+&require_apache();
+return $apache::httpd_modules{'mod_php4'} ? 4 :
+       $apache::httpd_modules{'mod_php5'} ? 5 :
+       $apache::httpd_modules{'mod_php7'} ? "7.0" : undef;
 }
 
 1;

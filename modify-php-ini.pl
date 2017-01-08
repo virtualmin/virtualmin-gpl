@@ -124,8 +124,7 @@ foreach my $d (@doms) {
 
 	# Update Apache PHP directives
 	$mod_php = 0;
-	if ($d->{'web'} && ($apache::httpd_modules{'mod_php4'} ||
-			    $apache::httpd_modules{'mod_php5'})) {
+	if ($d->{'web'} && &get_apache_mod_php_version()) {
 		&obtain_lock_web($d);
 		local @ports;
 		push(@ports, $d->{'web_port'}) if ($d->{'web'});
