@@ -1679,6 +1679,7 @@ else {
 	&print_tempfile(CONF, "listen = ",$sock,"\n");
 	&print_tempfile(CONF, "pm = dynamic\n");
 	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
+	&print_tempfile(CONF, "pm.start_servers = 1\n");
 	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
 	&print_tempfile(CONF, "pm.max_spare_servers = 5\n");
 	&close_tempfile(CONF);
