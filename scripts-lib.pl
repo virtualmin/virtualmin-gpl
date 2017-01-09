@@ -602,7 +602,7 @@ return $@ || $droperr;
 sub delete_script_database
 {
 local ($d, $dbspec) = @_;
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 local $cfunc = "check_".$dbtype."_database_clash";
 if (!&$cfunc($d, $dbname)) {
