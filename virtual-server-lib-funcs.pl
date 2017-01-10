@@ -14748,6 +14748,7 @@ local ($lastconfig) = @_;
 local $webminchanged = 0;
 foreach my $k (keys %config) {
 	if ($k eq 'leave_acl' || $k eq 'webmin_modules' ||
+	    $k eq 'last_check_php_vers' ||
 	    &indexof($k, @features) >= 0) {
 		$webminchanged++ if ($config{$k} ne $lastconfig->{$k});
 		}
