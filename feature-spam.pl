@@ -314,7 +314,8 @@ local ($dir, $style, $mailbox, $maildir) = &get_mail_style();
 local $maildef = $dir && $dir =~ /^(.*)\/$/ ? "$1/\$LOGNAME/" :
 	         $dir ? "$dir/\$LOGNAME" :
 		 $maildir ? "\$HOME/$maildir/" :
-		 $mailbox ? "\$HOME/$mailbox" : undef;
+		 $mailbox ? "\$HOME/$mailbox" :
+			    "/var/mail/\$LOGNAME";
 if ($gotdef) {
 	# Update default delivery definition
 	$gotdef->{'value'} = $maildef;
