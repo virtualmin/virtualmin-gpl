@@ -1048,6 +1048,7 @@ foreach my $m (@mods) {
 			# PHP 5.3+ packages from software collections are
 			# named like php54-php-mysql
 			unshift(@poss, "php".$nodotphpver."-php-".$m);
+			unshift(@poss, "rh-php".$nodotphpver."-php-".$m);
 			}
 		elsif ($software::update_system eq "yum" &&
 		       $fullphpver =~ /^5\.3/) {
