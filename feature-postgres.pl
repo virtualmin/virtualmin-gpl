@@ -120,9 +120,10 @@ if (!$d->{'parent'}) {
 		&postgresql::execute_sql_logged($qconfig{'basedb'},
 		  "drop user ".&postgres_uquote($user));
 		}
+	local $popts = &get_postgresql_user_flags();
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
 		"create user ".&postgres_uquote($user).
-		" with password $pass nocreatedb nocreateuser");
+		" with password $pass $popts");
 	&$second_print($text{'setup_done'});
 	}
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
@@ -226,9 +227,10 @@ if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
 	delete($_[0]->{'postgres_user'});
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($_[0]);
+	local $popts = &get_postgresql_user_flags();
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
 		"create user ".&postgres_uquote($user).
-		" with password $pass nocreatedb nocreateuser");
+		" with password $pass $popts");
 	if (&postgresql::get_postgresql_version() >= 8.0) {
 		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
 			&postgresql::execute_sql_logged($db,
@@ -1105,6 +1107,16 @@ sub remote_postgres
 local ($d) = @_;
 &require_postgres();
 return $postgresql::config{'host'};
+}
+
+sub get_postgresql_user_flags
+{
+&require_postgres();
+my @rv = ( "nocreatedb" );
+if (&postgresql::get_postgresql_version() < 9.5) {
+	push(@rv, "nocreateuser");
+	}
+return join(" ", @rv);
 }
 
 $done_feature_script{'postgres'} = 1;
