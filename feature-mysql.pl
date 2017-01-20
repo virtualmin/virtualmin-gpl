@@ -180,6 +180,12 @@ local $ok;
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
 	local $opts = &default_mysql_creation_opts($d);
 	$ok = &create_mysql_database($d, $d->{'db'}, $opts);
+	if (!$ok) {
+		# Failed, but instread of marking this whole feature as failed,
+		# just record that there was no DB
+		$d->{'db_mysql'} = "";
+		$ok = 1;
+		}
 	}
 else {
 	# No DBs can exist
