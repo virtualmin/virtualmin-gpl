@@ -1071,8 +1071,13 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 		push(@lhosts, "localhost");
 		}
 	@lhosts = &unique(@lhosts);
-	&save_mysql_allowed_hosts($d, \@lhosts);
-	&$second_print($text{'setup_done'});
+	my $err = &save_mysql_allowed_hosts($d, \@lhosts);
+	if ($err) {
+		&$second_print(&text('restore_emysqlgrant', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 # If in replication mode, AND the remote MySQL system is the same on both

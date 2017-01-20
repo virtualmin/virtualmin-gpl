@@ -2576,6 +2576,7 @@ restore_mysqldummy=Restoring MySQL databases ..
 restore_mysqlsameremote=.. skipping restore to original server $1 in replication mode
 restore_mysqldrop=Deleting old MySQL databases ..
 restore_mysqlgrant=Restoring allowed MySQL hosts ..
+restore_emysqlgrant=.. restore failed : $1
 restore_mysqlload=Re-loading MySQL database $1 ..
 restore_mysqlloadfailed=.. load failed! $1
 restore_mysqlgunzipfailed=.. gunzip failed! $1
