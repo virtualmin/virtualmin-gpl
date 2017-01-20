@@ -116,20 +116,24 @@ if (!%opts) {
 	}
 
 # Do it
-$first_print = \&null_print;
-$second_print = \&null_print;
+&set_all_null_print();
 if (&indexof($type, &list_database_plugins()) >= 0) {
-	&plugin_call($type, "database_create", $d, $name, \%opts);
+	$ok = &plugin_call($type, "database_create", $d, $name, \%opts);
 	}
 else {
 	$crfunc = "create_".$type."_database";
-	&$crfunc($d, $name, \%opts);
+	$ok = &$crfunc($d, $name, \%opts);
 	}
 &save_domain($d);
 &refresh_webmin_user($d);
 &run_post_actions();
-&virtualmin_api_log(\@OLDARGV, $d);
-print "Database $name created successfully\n";
+if ($ok) {
+	&virtualmin_api_log(\@OLDARGV, $d);
+	print "Database $name created successfully\n";
+	}
+else {
+	print "Database creation failed!\n";
+	}
 
 sub usage
 {
