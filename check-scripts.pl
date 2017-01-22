@@ -102,7 +102,7 @@ foreach $s (@scripts) {
 				&write_http_connection($h, "\r\n");
 				$line = &read_http_connection($h);
 				$line =~ s/\r|\n//g;
-				if ($line !~ /^HTTP\/1\..\s+(200|302|301)\s+/) {
+				if ($line !~ /^HTTP\/1\..\s+(200|303|302|301)\s+/) {
 					print ".. HTTP error : $line\n";
 					push(@errs, [ $script, $v, $url, $line ]);
 					}
