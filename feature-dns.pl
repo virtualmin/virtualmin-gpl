@@ -41,6 +41,8 @@ if ($_[0]->{'provision_dns'}) {
 	local $temp = &transname();
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
+	$_[0]->{'dns_submode'} = 0;	# Adding to existing domain not
+					# supported by Cloudmin Services
 	if ($_[0]->{'alias'}) {
 		&create_alias_records($temp, $_[0], $ip);
 		}
