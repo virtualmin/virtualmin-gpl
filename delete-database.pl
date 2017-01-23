@@ -61,8 +61,7 @@ $d || usage("Virtual server $domain does not exist");
 $db || &usage("The specified database is not associated with this server");
 
 # Do it
-$first_print = \&null_print;
-$second_print = \&null_print;
+&set_all_null_print();
 if (&indexof($type, &list_database_plugins()) >= 0) {
 	&plugin_call($type, "database_delete", $d, $name);
 	}
