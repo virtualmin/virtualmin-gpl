@@ -233,8 +233,16 @@ foreach my $nf (@rv) {
 			$link = $d ? &$subs($nf->{'link'}, $d)
 				   : $nf->{'link'};
 			if ($link !~ /^\// && $link !~ /^(http|https):/) {
-				# Assume in this module
-				$link = "$gconfig{'webprefix'}/$module_name/$link";
+				# Assume in this module if relative
+				if ($link =~ /^([^\?]+)/ &&
+				    !-r "$module_root_directory/$1") {
+					# Script doesn't exist!
+					$link = undef;
+					}
+				else {
+					# Convert to absolute path
+					$link = "$gconfig{'webprefix'}/$module_name/$link";
+					}
 				}
 			}
 		}
