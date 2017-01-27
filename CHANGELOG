@@ -1556,3 +1556,4 @@ Added support for FPM as a PHP execution mode, on systems that have a system pac
 Resellers and domain owners can be granted the ability to migrate backups from other control panels, like cPanel and Plesk.
 Added a button to the Manage SSL Certifcate page and a flag to the modify-web API command to break shared certificate linkage.
 Added the start-stop-script API command to manage the servers behind Ruby and Node.JS scripts.
+Virtualmin will now also generate SSHFP DNS records (for SSH host keys) when it creates TLSA records.

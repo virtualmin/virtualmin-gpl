@@ -3528,6 +3528,25 @@ return { 'name' => "_".$port."._tcp.".$host.".",
 	 'values' => [ 3, 0, 1, $1 ] };
 }
 
+# create_sshfp_dns_record(key-file, key-type, hostname)
+# Given an SSH key file and hostname, returns a BIND record structure for it
+sub create_sshfp_dns_record
+{
+my ($file, $type, $host) = @_;
+my $hash = &backquote_command(
+	"awk '{ print \$2 }' ".quotemeta($file)." | ".
+	"openssl base64 -d -A 2>/dev/null | openssl sha1 2>/dev/null");
+return undef if ($?);
+my @types = ( "rsa", "dsa", "ecdsa", "ed25519" );
+my $tn = &indexof($type, @types) + 1;
+return undef if (!$tn);
+$hash =~ /=\s*([0-9a-f]+)/ || return undef;
+return { 'name' => $host.".",
+	 'class' => "IN",
+	 'type' => "SSHFP",
+	 'values' => [ $tn, 1, $1 ] };
+}
+
 # sync_domain_tlsa_records(&domain, [force-mode])
 # Replace all TLSA records for a domain with its actual SSL certs (if enabled)
 # force-mode 0 = use config, 1 = enable, 2 = disable
@@ -3538,7 +3557,7 @@ my ($recs, $file) = &get_domain_dns_records_and_file($d);
 return undef if (!$file);
 
 # Find all existing TLSA records (without TTL, for easier comparison)
-my @oldrecs = grep { $_->{'type'} eq 'TLSA' &&
+my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 		     ($_->{'name'} eq $d->{'dom'}."." ||
 		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
 @oldrecs = map { my %r = %$_; delete($r{'ttl'}); \%r } @oldrecs;
@@ -3586,9 +3605,24 @@ foreach my $svc (&get_all_service_ssl_certs()) {
 	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
 		$d->{'dom'}));
 	}
+
+# Filter out dupes by name (which includes the port)
 @need = grep { defined($_) } @need;
 my %done;
 @need = grep { !$done{$_->{'name'}}++ } @need;
+
+# Also add local SSH host key
+foreach my $t ("rsa", "dsa", "ecdsa", "ed25519") {
+	my $hostkey = "/etc/ssh/ssh_host_${t}_key.pub";
+	next if (!-r $hostkey);
+	push(@need, &create_sshfp_dns_record($hostkey, $t, $d->{'dom'}));
+	push(@need, &create_sshfp_dns_record($hostkey, $t, "www.".$d->{'dom'}));
+	}
+
+# Filter out dupes by name and algorithm
+@need = grep { defined($_) } @need;
+@need = grep { !$done{$_->{'name'},$_->{'values'}->[0]}++ } @need;
+
 if ($force == 2) {
 	# Just removing records
 	@need = ();
