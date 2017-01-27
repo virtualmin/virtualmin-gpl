@@ -97,6 +97,9 @@ while(<FILE>) {
 	elsif (/^From:\s*(.*)/) {
 		$simple->{'from'} = $1;
 		}
+	elsif (/^Charset:\s*(.*)/) {
+		$simple->{'charset'} = $1;
+		}
 	else {
 		push(@lines, $_);
 		if (/\S/) {
@@ -198,6 +201,9 @@ if ($simple->{'autotext'}) {
         if ($simple->{'from'}) {
                 &print_tempfile(AUTO, "From: $simple->{'from'}\n");
                 }
+        if ($simple->{'charset'}) {
+                &print_tempfile(AUTO, "Charset: $simple->{'charset'}\n");
+                }
         &print_tempfile(AUTO, $simple->{'autotext'});
         &close_tempfile_as_domain_user($d, AUTO);
 
@@ -288,10 +294,17 @@ print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 
 # Hidden section for autoreply options
 my $aopts = $simple->{'replies'} ||
+	    $simple->{'charset'} ||
 	    $simple->{'autoreply_start'} ||
 	    $simple->{'autoreply_end'} ||
 	    $simple->{'from'} && !$nofrom;
 print &ui_hidden_table_row_start($text{'alias_aopts'}, "aopts", $aopts);
+
+# Message character set
+my $charset = $simple->{'autotext'} ? $simple->{'charset'}
+				    : &get_charset();
+print &ui_table_row(&hlink($text{'user_charset'}, "user_charset"),
+	&ui_opt_textbox("charset", $charset, 10, $text{'user_charset_def'}));
 
 # Autoreply period
 $period = $simple->{'replies'} && $simple->{'period'} ?
@@ -407,6 +420,16 @@ if ($in->{'autotext'}) {
 			# a home on a different fs
 			$simple->{'replies'} = "$d->{'home'}/replies-$name";
 			}
+		}
+
+	# Save character set
+	if ($in{'charset_def'}) {
+		delete($simple->{'charset'});
+		}
+	else {
+		$in{'charset'} =~ /^[a-z0-9\.\-\_]+$/i ||
+                        error($text{'user_echarset'});
+		$simple->{'charset'} = $in{'charset'};
 		}
 
 	# Save autoreply start and end
