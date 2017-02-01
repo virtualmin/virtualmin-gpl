@@ -1678,8 +1678,10 @@ return undef if ($ver < 2);
 
 # Check if dovecot is using SSL globally
 my $conf = &dovecot::get_config();
-my $sslyn = &dovecot::find_value("ssl_disable", $conf);
+my $sslyn = &dovecot::find_value("ssl", $conf);
 return undef if ($sslyn !~ /yes|required/i);
+my $ssldis = &dovecot::find_value("ssl_disable", $conf);
+return undef if ($sslyn =~ /yes/i);
 
 # Find the existing block for the IP
 my $cfile = &dovecot::get_config_file();
