@@ -44,9 +44,9 @@ else {
 				    $text{'letsencrypt_title'}, "");
 
 	# Run the before command
-	&set_domain_envs($oldd, "SSL_DOMAIN", $d);
+	&set_domain_envs($d, "SSL_DOMAIN");
 	$merr = &making_changes();
-	&reset_domain_envs($oldd);
+	&reset_domain_envs($d);
 	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 	&$first_print(&text('letsencrypt_doing2',
@@ -127,7 +127,7 @@ else {
 			}
 
 		# Run the after command
-		&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
+		&set_domain_envs($d, "SSL_DOMAIN");
 		local $merr = &made_changes();
 		&$second_print(&text('setup_emade', "<tt>$merr</tt>"))
 			if (defined($merr));
