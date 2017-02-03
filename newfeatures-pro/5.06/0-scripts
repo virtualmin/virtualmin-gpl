@@ -1,5 +1,5 @@
 desc=Updated script installers
-html=Updated the phpMyAdmin script installer to versions 4.6.5.2, 4.4.15.9 and 4.0.10.18, Roundcube to 1.2.3, MediaWiki to 1.28.0, Mantis to 1.3.4, Typo3 to 6.2.30, Wordpress to 4.7.2, Drupal to 8.2.5 and 7.53, NextCloud to 10.0.3 and 11.0.1, IONcube to 6.0.9, Joomla to 3.6.5, Node.js to 7.5.0, Piwik to 3.0.1, TikiWiki to 16.1 and 12.11, Dolibarr to 3.9.4, Moodle to 3.2, Magento to 2.1.3, SMF to 2.0.13, Ghost to 0.11.4, phpMyAdmin to 4.0.10.19 and 4.6.6, ZenPhoto to 1.4.14, and ownCloud to 9.1.3.
+html=Updated the phpMyAdmin script installer to versions 4.6.5.2, 4.4.15.9 and 4.0.10.18, Roundcube to 1.2.3, MediaWiki to 1.28.0, Mantis to 1.3.4, Typo3 to 6.2.30, Wordpress to 4.7.2, Drupal to 8.2.6 and 7.54, NextCloud to 10.0.3 and 11.0.1, IONcube to 6.0.9, Joomla to 3.6.5, Node.js to 7.5.0, Piwik to 3.0.1, TikiWiki to 16.1 and 12.11, Dolibarr to 3.9.4, Moodle to 3.2, Magento to 2.1.3, SMF to 2.0.13, Ghost to 0.11.4, phpMyAdmin to 4.0.10.19 and 4.6.6, ZenPhoto to 1.4.14, and ownCloud to 9.1.3.
 master=1
 reseller=1
 domain=1
