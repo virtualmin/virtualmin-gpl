@@ -1939,8 +1939,8 @@ foreach my $d (&list_domains()) {
 			@dnames = &get_hostnames_for_ssl($d);
 			}
 		&foreign_require("webmin");
-		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
+		($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
+						$d, \@dnames);
 
 		my ($subject, $body);
 		if (!$ok) {
@@ -2073,6 +2073,27 @@ local ($d) = @_;
 &setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
 		    { 'path' => '/.well-known' });
 &pop_all_print();
+}
+
+# request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size])
+# Attempts to request a Let's Encrypt cert for a domain, trying both web and
+# DNS modes if possible
+sub request_domain_letsencrypt_cert
+{
+my ($d, $dnames, $staging, $size) = @_;
+$size ||= $config{'key_size'};
+&foreign_require("webmin");
+my $phd = &public_html_dir($d);
+my ($ok, $cert, $key, $chain);
+if ($d->{'web'}) {
+	 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
+	}
+if (!$ok && &get_webmin_version() >= 1.832 && $d->{'dns'}) {
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
+	}
+return ($ok, $cert, $key, $chain);
 }
 
 $done_feature_script{'ssl'} = 1;

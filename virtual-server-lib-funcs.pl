@@ -7838,8 +7838,8 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
 	&$first_print(&text('letsencrypt_doing2',
 			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	my $phd = &public_html_dir($dom);
-	my ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		    \@dnames, $phd, $dom->{'emailto'}, $config{'key_size'});
+	my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
+						$dom, \@dnames);
 	if (!$ok) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}

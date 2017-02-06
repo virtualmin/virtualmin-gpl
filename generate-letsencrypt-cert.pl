@@ -55,6 +55,9 @@ while(@ARGV > 0) {
 		$size =~ /^\d+$/ ||
 		    &usage("--size must be followed by a number of bits");
 		}
+	elsif ($a eq "--staging") {
+		$staging = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -84,8 +87,8 @@ else {
 $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
 &suppress_letsencrypt_proxy($d);
-($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-			\@dnames, $phd, $d->{'emailto'}, $config{'key_size'});
+($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
+				$d, \@dnames, $staging, $size);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
 	exit(1);
@@ -152,6 +155,8 @@ print "\n";
 print "virtualmin generate-letsencrypt-cert --domain name\n";
 print "                                    [--host hostname]*\n";
 print "                                    [--renew months]\n";
+print "                                    [--size bits]\n";
+print "                                    [--staging]\n";
 exit(1);
 }
 
