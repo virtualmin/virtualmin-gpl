@@ -6224,7 +6224,7 @@ if ($p && $p ne "web") {
 	return $err if ($err);
 	}
 elsif ($p) {
-	# Add to Apache config
+	# Remove from Apache config
 	&require_apache();
 	&obtain_lock_web($d);
 	local @ports = ( $d->{'web_port'},
