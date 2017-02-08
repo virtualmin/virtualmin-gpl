@@ -54,15 +54,23 @@ if (&foreign_installed("dovecot")) {
 		}
 	}
 if ($config{'mail_system'} == 0) {
-	&foreign_require("postfix");
-	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+	my ($cfile, $kfile, $cafile, $ip);
+	if ($perip) {
+		# Try per-IP cert first
+		($cfile, $kfile, $cafile, $ip) = &get_postfix_ssl_cert($d);
+		}
+	if (!$cfile) {
+		&foreign_require("postfix");
+		$cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+		$cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+		}
 	if ($cfile) {
 		push(@svcs, { 'id' => 'postfix',
 			      'cert' => $cfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
-			      'port' => 587 });
+			      'port' => 587,
+			      'ip' => $ip, });
 		}
 	}
 if ($config{'ftp'}) {

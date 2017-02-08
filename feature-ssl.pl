@@ -1691,8 +1691,11 @@ my @loc = grep { $_->{'name'} eq 'local' &&
 my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
 my $imap;
 if ($l) {
-	($imap) = grep { $_->{'value'} eq 'imap' }
-		       &dovecot::find("protocol", $l->{'members'});
+	($imap) = grep { $_->{'name'} eq 'protocol' &&
+			 $_->{'value'} eq 'imap' &&
+			 $_->{'enabled'} &&
+			 $_->{'sectionname'} eq 'local' &&
+			 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 	}
 
 if ($enable) {
@@ -1766,15 +1769,19 @@ my ($d) = @_;
 return ( ) if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
+print STDERR "ver=$ver\n";
 return ( ) if ($ver < 2);
 
-my $cfile = &dovecot::get_config_file();
+my $conf = &dovecot::get_config();
 my @loc = grep { $_->{'name'} eq 'local' &&
 		 $_->{'section'} } @$conf;
 my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
 return ( ) if (!$l);
-my ($imap) = grep { $_->{'value'} eq 'imap' }
-	       &dovecot::find("protocol", $l->{'members'});
+my ($imap) = grep { $_->{'name'} eq 'protocol' &&
+		    $_->{'value'} eq 'imap' &&
+		    $_->{'enabled'} &&
+		    $_->{'sectionname'} eq 'local' &&
+		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
@@ -1926,13 +1933,14 @@ return ( ) if ($config{'mail_system'} != 0);
 &foreign_require("postfix");
 local $master = &postfix::get_master_config();
 foreach my $m (@$master) {
-	if ($m->{'name'} eq $d->{'ip'}.':smtpd' && $m->{'enabled'}) {
+	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {
 		if ($m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/) {
 			my @rv = ( $1 );
 			push(@rv, $m->{'command'} =~ /smtpd_tls_key_file=(\S+)/
 					? $1 : undef);
 			push(@rv, $m->{'command'} =~ /smtpd_tls_CAfile=(\S+)/
 					? $1 : undef);
+			push(@rv, $d->{'ip'});
 			return @rv;
 			}
 		}
