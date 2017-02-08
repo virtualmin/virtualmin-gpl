@@ -96,7 +96,7 @@ print &ui_table_end();
 if (&can_webmin_cert()) {
 	# Build a list of services and their certs, and work out which ones
 	# are already copied
-	@svcs = &get_all_service_ssl_certs();
+	@svcs = &get_all_service_ssl_certs($d);
 	%cert_already = ( );
 	foreach my $svc (@svcs) {
 		if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
@@ -105,11 +105,21 @@ if (&can_webmin_cert()) {
 			}
 		}
 
+	# Show which services are already using the cert
 	if (%cert_already) {
-		print "<p><b>".&text('cert_already',
-			join(", ", map { $text{'cert_already_'.$_} }
-				       (keys %cert_already))),"</b><p>\n";
+		my @a;
+		foreach my $k (keys %cert_already) {
+			if ($cert_already{$k}->{'ip'}) {
+				push(@a, &text('cert_already_'.$k.'_ip',
+					       $cert_already{$k}->{'ip'}));
+				}
+			else {
+				push(@a, $text{'cert_already_'.$k});
+				}
+			}
+		print "<p><b>".&text('cert_already', join(", ",@a)),"</b><p>\n";
 		}
+
 	print &ui_hr();
 	print &ui_buttons_start();
 

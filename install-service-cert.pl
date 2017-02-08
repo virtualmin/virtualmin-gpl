@@ -53,7 +53,7 @@ $d || &usage("No virtual server named $dname found");
 @services || &usage("No services to copy the cert to specified");
 
 # Do the specified services exist?
-@svcs = &get_all_service_ssl_certs();
+@svcs = &get_all_service_ssl_certs($d, 0);
 %svcnames = map { $_->{'id'}, $_ } @svcs;
 foreach my $s (@services) {
 	$svcnames{$s} || &usage("Invalid service $s. Valid services are ".

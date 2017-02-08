@@ -1,9 +1,10 @@
 # Functions for copying SSL certs to other servers
 
-# get_all_service_ssl_certs()
+# get_all_service_ssl_certs(&domain, include-per-ip-certs)
 # Returns a list of all SSL certs used by global services like Postfix
 sub get_all_service_ssl_certs
 {
+my ($d, $perip) = @_;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 my @svcs;
@@ -27,20 +28,29 @@ if (&foreign_installed("usermin")) {
 		}
 	}
 if (&foreign_installed("dovecot")) {
-	&foreign_require("dovecot");
-	my $conf = &dovecot::get_config();
-	my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
-		    &dovecot::find_value("ssl_cert", $conf, 0, "");
-	$cfile =~ s/^<//;
-	my $cafile = &dovecot::find_value("ssl_ca_file", $conf) ||
-		     &dovecot::find_value("ssl_ca", $conf, 0, "");
-	$cafile =~ s/^<//;
+	my ($cfile, $kfile, $cafile, $ip);
+	if ($perip) {
+		# Try per-IP cert first
+		($cfile, $kfile, $cafile, $ip) = &get_dovecot_ssl_cert($d);
+		}
+	if (!$cfile) {
+		# Fall back to global Dovecot cert
+		&foreign_require("dovecot");
+		my $conf = &dovecot::get_config();
+		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+			 &dovecot::find_value("ssl_cert", $conf, 0, "");
+		$cfile =~ s/^<//;
+		$cafile = &dovecot::find_value("ssl_ca_file", $conf) ||
+			  &dovecot::find_value("ssl_ca", $conf, 0, "");
+		$cafile =~ s/^<//;
+		}
 	if ($cfile) {
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
-			      'port' => 993, });
+			      'port' => 993,
+			      'ip' => $ip, });
 		}
 	}
 if ($config{'mail_system'} == 0) {

@@ -3576,7 +3576,7 @@ if ($d->{'ssl'}) {
 	push(@need, &create_tlsa_dns_record(
 		$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, "www.".$d->{'dom'}));
 	}
-foreach my $svc (&get_all_service_ssl_certs()) {
+foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	my $cfile = $svc->{'cert'};
 	my $chain = $svc->{'ca'};
 	if (($svc->{'id'} eq 'webmin' || $svc->{'id'} eq 'usermin') &&

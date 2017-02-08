@@ -1757,6 +1757,34 @@ if ($changed) {
 	}
 }
 
+# get_dovecot_ssl_cert(&domain)
+# Returns the path to the cert, key and CA cert in the Dovecot config for
+# a domain, if any
+sub get_dovecot_ssl_cert
+{
+my ($d) = @_;
+return ( ) if (!&foreign_installed("dovecot"));
+&foreign_require("dovecot");
+my $ver = &dovecot::get_dovecot_version();
+return ( ) if ($ver < 2);
+
+my $cfile = &dovecot::get_config_file();
+my @loc = grep { $_->{'name'} eq 'local' &&
+		 $_->{'section'} } @$conf;
+my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
+return ( ) if (!$l);
+my ($imap) = grep { $_->{'value'} eq 'imap' }
+	       &dovecot::find("protocol", $l->{'members'});
+return ( ) if (!$imap);
+my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
+return ( ) if (!$mems{'ssl_cert'});
+my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'}, $d->{'ip'} );
+foreach my $r (@rv) {
+	$r =~ s/^<//;
+	}
+return @rv;
+}
+
 # sync_postfix_ssl_cert(&domain, enable)
 # Configure Postfix to use a domain's SSL cert for connections on its IP
 sub sync_postfix_ssl_cert
@@ -1888,6 +1916,30 @@ if ($changed) {
 	}
 }
 
+# get_postfix_ssl_cert(&domain)
+# Returns the path to the cert, key and CA cert in the Postfix config for
+# a domain, if any
+sub get_postfix_ssl_cert
+{
+my ($d) = @_;
+return ( ) if ($config{'mail_system'} != 0);
+&foreign_require("postfix");
+local $master = &postfix::get_master_config();
+foreach my $m (@$master) {
+	if ($m->{'name'} eq $d->{'ip'}.':smtpd' && $m->{'enabled'}) {
+		if ($m->{'command'} =~ /smtpd_tls_cert_file=(\S+)/) {
+			my @rv = ( $1 );
+			push(@rv, $m->{'command'} =~ /smtpd_tls_key_file=(\S+)/
+					? $1 : undef);
+			push(@rv, $m->{'command'} =~ /smtpd_tls_CAfile=(\S+)/
+					? $1 : undef);
+			return @rv;
+			}
+		}
+	}
+return ( );
+}
+
 # get_hostnames_for_ssl(&domain)
 # Returns a list of names that should be used in an SSL cert
 sub get_hostnames_for_ssl
@@ -1958,7 +2010,7 @@ foreach my $d (&list_domains()) {
 			# Figure out which services (webmin, postfix, etc)
 			# were using the old cert
 			my @before;
-			foreach my $svc (&get_all_service_ssl_certs()) {
+			foreach my $svc (&get_all_service_ssl_certs($d, 0)) {
 				if (&same_cert_file(
 				    $d->{'ssl_cert'}, $svc->{'cert'})) {
 					push(@before, $svc);
@@ -2085,13 +2137,18 @@ $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
-if ($d->{'web'}) {
+if ($d->{'web'} && 0) {
 	 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
 	}
 if (!$ok && &get_webmin_version() >= 1.832 && $d->{'dns'}) {
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
+	}
+elsif (!$ok) {
+	$ok = 0;
+	$cert = "Domain has no website, ".
+		"and DNS-based validation is not possible";
 	}
 return ($ok, $cert, $key, $chain);
 }
