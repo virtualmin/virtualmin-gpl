@@ -1557,3 +1557,4 @@ Resellers and domain owners can be granted the ability to migrate backups from o
 Added a button to the Manage SSL Certifcate page and a flag to the modify-web API command to break shared certificate linkage.
 Added the start-stop-script API command to manage the servers behind Ruby and Node.JS scripts.
 Virtualmin will now also generate SSHFP DNS records (for SSH host keys) when it creates TLSA records.
+---- Changes since 5.06 ----
