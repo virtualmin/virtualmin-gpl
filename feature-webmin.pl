@@ -269,10 +269,17 @@ else {
 # restart_usermin()
 sub restart_usermin
 {
-&foreign_require("usermin");
 &$first_print($text{'setup_userminpid'});
-&usermin::restart_usermin_miniserv();
-&$second_print($text{'setup_done'});
+&foreign_require("usermin");
+local %miniserv;
+&usermin::get_usermin_miniserv_config(\%miniserv);
+if (&check_pid_file($miniserv{'pidfile'})) {
+	&usermin::restart_usermin_miniserv();
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print($text{'setup_usermindown'});
+	}
 }
 
 # set_user_modules(&domain, &webminuser, [&acs-for-this-module], [no-features],
