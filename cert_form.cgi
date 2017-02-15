@@ -388,7 +388,7 @@ else {
 	}
 
 print &ui_tabs_end(1);
-
+print "</div>";
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {
 	&theme_select_domain($d);
