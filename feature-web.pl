@@ -2730,11 +2730,12 @@ if ($in{"web_mode"} == 2) {
 
 	# Save PHP settings
 	&require_apache();
-	if ($in{'web_php_suexec'}) {
+	if ($in{'web_php_suexec'} == 1 || $in{'web_php_suexec'} == 2) {
 		$in{'suexec'} ||
 			&error($text{'tmpl_ephpsuexec'});
-		&has_command("php") ||
-			&error($text{'tmpl_ephpcmd'});
+		my @vers = grep { $_->[1] }
+				&list_available_php_versions(undef, "cgi");
+		@vers || &error($text{'tmpl_ephpcmd'});
 		}
 	$tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
 	$tmpl->{'web_phpver'} = $in{'web_phpver'};
