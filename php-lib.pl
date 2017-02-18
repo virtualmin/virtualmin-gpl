@@ -1682,6 +1682,9 @@ else {
 	&print_tempfile(CONF, "pm.start_servers = 1\n");
 	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
 	&print_tempfile(CONF, "pm.max_spare_servers = 5\n");
+	local $tmp = &create_server_tmp($d);
+	&print_tempfile(CONF, "php_admin_value[upload_tmp_dir] = $tmp\n");
+	&print_tempfile(CONF, "php_admin_value[session.save_path] = $tmp\n");
 	&close_tempfile(CONF);
 	}
 &unlock_file($file);
