@@ -687,7 +687,7 @@ print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-web --domain name | --all-domains\n";
 if ($supports_php) {
-	print "                     [--mode mod_php|cgi|fcgid]\n";
+	print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
 	print "                     [--php-children number | --no-php-children]\n";
 	print "                     [--php-version num]\n";
 	print "                     [--php-timeout seconds | --no-php-timeout]\n";
