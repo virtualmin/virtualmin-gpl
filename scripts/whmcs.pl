@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "6.3.2" );
+return ( "6.3.2", "7.1.1" );
 }
 
 sub script_whmcs_gpl
@@ -45,6 +45,22 @@ return "Commerce";
 sub script_whmcs_php_vers
 {
 return ( 5 );
+}
+
+# script_whmcs_depends(&domain, version)
+sub script_whmcs_depends
+{
+local ($d, $ver, $sinfo, $phpver) = @_;
+if ($ver >= 7) {
+	local $phpv = &get_php_version($phpver || 5, $d);
+	if (!$phpv) {
+		return ("Could not work out exact PHP version");
+		}
+	if (&compare_versions($phpv, "5.6") < 0) {
+		return ("WHMCS requires PHP version 5.6 or later");
+		}
+	}
+return ( );
 }
 
 sub script_whmcs_php_modules
@@ -284,7 +300,7 @@ local $iotemp = &transname();
 local $err = &extract_script_archive($files->{'ioncube'}, $iotemp, $d);
 $err && return (0, "Failed to extract ionCube files : $err");
 local $io = &script_whmcs_get_ioncube_type();
-local $phpver = &get_php_version(5);
+local $phpver = &get_php_version($opts->{'phpver'});
 $phpver =~ s/^(\d+\.\d+)\..*$/$1/;
 local ($sofile) = glob("$iotemp/ioncube/ioncube_loader_*_$phpver.so");
 $sofile ||
@@ -309,7 +325,7 @@ foreach my $k (keys %$files) {
 	}
 
 # Copy loader to ~/etc , adjust php.ini
-local $inifile = &get_domain_php_ini($d, 5);
+local $inifile = &get_domain_php_ini($d, $opts->{'phpver'});
 $inifile && -r $inifile || return (0, "PHP configuration file was not found!");
 $sofile =~ /\/([^\/]+)$/;
 local $sodest = "$d->{'home'}/etc/$1";
