@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "6.3.1" );
+return ( "6.3.2" );
 }
 
 sub script_whmcs_gpl
@@ -424,7 +424,7 @@ else {
 	if ($err) {
 		return (-1, "Failed to fetch upgrade check page : $err");
 		}
-	elsif ($out !~ /Perform\s+Upgrade/) {
+	elsif ($out !~ /Perform\s+Upgrade|already\s+running/) {
 		return (-1, "Upgrade check failed");
 		}
 
