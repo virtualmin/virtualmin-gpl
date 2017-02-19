@@ -34,7 +34,7 @@ return 1;
 
 sub script_whmcs_release
 {
-return 4;	# To fix copy of default config file
+return 5;	# To update ioncube download URL
 }
 
 sub script_whmcs_category
@@ -205,7 +205,7 @@ local @files = ( { 'name' => "source",
 local $io = &script_whmcs_get_ioncube_type();
 push(@files, { 'name' => "ioncube",
 	       'file' => "ioncube_loaders.zip",
-	       'url' => "http://downloads2.ioncube.com/".
+	       'url' => "http://downloads3.ioncube.com/".
 			"loader_downloads/ioncube_loaders_$io.zip" });
 if (&compare_versions($ver, "4.5.2") <= 0) {
 	# Also need security patch
