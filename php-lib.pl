@@ -1677,6 +1677,7 @@ else {
 	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
 	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
 	&print_tempfile(CONF, "listen = ",$sock,"\n");
+	&print_tempfile(CONF, "listen.mode = 0600\n");
 	&print_tempfile(CONF, "pm = dynamic\n");
 	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
 	&print_tempfile(CONF, "pm.start_servers = 1\n");
