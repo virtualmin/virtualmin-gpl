@@ -1974,6 +1974,9 @@ foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!$d->{'ssl'} || !$d->{'letsencrypt_renew'});
 
+	# Is the domain enabled?
+	next if ($d->{'disabled'});
+
 	# Get the cert and date
 	my $info = &cert_info($d);
 	next if (!$info);
