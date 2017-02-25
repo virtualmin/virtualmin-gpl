@@ -350,7 +350,9 @@ else {
 
 		# Update Webmin
 		$mysql::config{'pass'} = $in->{'mypass'};
+		$mysql::mysql_pass = $in->{'mypass'};
 		&mysql::save_module_config(\%mysql::config, "mysql");
+		$mysql::authstr = &mysql::make_authstr();
 		}
 	}
 
