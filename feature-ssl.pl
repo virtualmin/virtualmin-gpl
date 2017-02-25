@@ -2148,7 +2148,7 @@ $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
-if ($d->{'web'}) {
+if (&domain_has_website($d)) {
 	 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
 	}
