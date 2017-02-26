@@ -3004,5 +3004,25 @@ return &has_command($config{'python_cmd'}) ||
        &has_command("python") || "python";
 }
 
+# allocate_free_tcp_port(&used-ports-map, starting-port)
+# Returns a free port number starting at the base and not in the used ports
+# map, by making probing TCP connections
+sub allocate_free_tcp_port
+{
+my ($used, $rport) = @_;
+while($rport < 65536) {
+	if (!$used->{$rport} &&
+	    !getservbyname($rport, "tcp")) {
+		my $err;
+		if (!&open_socket("127.0.0.1", $rport, RSOCK, \$err)) {
+			last;
+			}
+		close(RSOCK);
+		}
+	$rport++;
+	}
+return $rport >= 65536 ? undef : $rport;
+}
+
 1;
 
