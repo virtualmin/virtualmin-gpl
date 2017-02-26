@@ -47,6 +47,11 @@ local $vips = &get_apache_vhost_ips($d, $nvstar, $nvstar6, $web_port);
 # Add Listen if needed
 &add_listen($d, $conf, $web_port);
 
+# If in FPM mode with a TCP port (from a restore), re-allocate it
+if ($d->{'php_fpm_port'}) {
+	delete($d->{'php_fpm_port'});
+	}
+
 local @dirs = &apache_template($tmpl->{'web'}, $d, $tmpl->{'web_suexec'});
 if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host (and the SSL virtual host, if any)

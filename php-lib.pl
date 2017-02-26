@@ -20,9 +20,11 @@ local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 if ($virt) {
 	# First check for FPM socket
 	local $fsock = &get_php_fpm_socket_file($d, 1);
+	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	foreach my $ppm (@ppm) {
-		if ($ppm =~ /unix:\Q$fsock\E/) {
+		if ($ppm =~ /unix:\Q$fsock\E/ ||
+		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/) {
 			return 'fpm';
 			}
 		}
@@ -341,11 +343,25 @@ foreach my $p (@ports) {
 
 	# For FPM mode, we need a proxy directive at the top level
 	local $fsock = &get_php_fpm_socket_file($d, 1);
+	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
-	@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
+	if ($fsock) {
+		@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
+		}
+	if ($fport) {
+		@ppm = grep { !/fcgi:\/\/localhost:\Q$fport\E/ } @ppm;
+		}
 	if ($mode eq "fpm") {
 		local $phd = $phpconfs[0]->{'words'}->[0];
-		push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://localhost${phd}/\$1");
+		if (-r $fsock) {
+			# Use existing socket file, since it presumably works
+			push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://localhost${phd}/\$1");
+			}
+		else {
+			# Allocate and use a port number
+			$fport = &get_php_fpm_socket_port($d);
+			push(@ppm, "^/(.*\.php(/.*)?)\$ fcgi://localhost:${fport}${phd}/\$1");
+			}
 		}
 	&apache::save_directive("ProxyPassMatch", \@ppm, $vconf, $conf);
 
@@ -1644,6 +1660,22 @@ if (!-d $base && !$nomkdir) {
 return $base."/".$d->{'id'}.".sock";
 }
 
+# get_php_fpm_socket_port(&domain)
+# Selects a dynamic port number for a per-domain PHP FPM socket
+sub get_php_fpm_socket_port
+{
+my ($d) = @_;
+if ($d->{'php_fpm_port'}) {
+	# Already chosen
+	return $d->{'php_fpm_port'};
+	}
+my %used = map { $_->{'php_fpm_port'}, $_ }
+	       grep { $_->{'php_fpm_port'} } &list_domains();
+my $rv = &allocate_free_tcp_port(\%used, 8000);
+$rv || &error("Failed to allocate FPM port starting at 8000");
+return $rv;
+}
+
 # create_php_fpm_pool(&domain)
 # Create a per-domain pool config file
 sub create_php_fpm_pool
@@ -1652,7 +1684,7 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config();
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-my $sock = &get_php_fpm_socket_file($d);
+my $port = &get_php_fpm_socket_port($d);
 &lock_file($file);
 if (-r $file) {
 	# Fix up existing one, in case user or group changed
@@ -1663,6 +1695,9 @@ if (-r $file) {
 			}
 		if ($l =~ /^group\s*=/) {
 			$l = "group = ".$d->{'ugroup'};
+			}
+		if ($l =~ /^listen\s*=(\d+)/) {
+			$l = "listen = ".$port;
 			}
 		}
 	&flush_file_lines($file);
@@ -1676,8 +1711,7 @@ else {
 	&print_tempfile(CONF, "[$d->{'id'}]\n");
 	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
 	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
-	&print_tempfile(CONF, "listen = ",$sock,"\n");
-	&print_tempfile(CONF, "listen.mode = 0600\n");
+	&print_tempfile(CONF, "listen = ",$port,"\n");
 	&print_tempfile(CONF, "pm = dynamic\n");
 	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
 	&print_tempfile(CONF, "pm.start_servers = 1\n");
@@ -1703,8 +1737,10 @@ return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 if (-r $file) {
 	&unlink_logged($file);
-	my $sock = &get_php_fpm_socket_file($d);
-	&unlink_logged($sock);
+	my $sock = &get_php_fpm_socket_file($d, 1);
+	if (-r $sock) {
+		&unlink_logged($sock);
+		}
 	&register_post_action(\&restart_php_fpm_server);
 	}
 return undef;
