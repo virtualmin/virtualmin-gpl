@@ -2158,8 +2158,8 @@ if (!$ok && &get_webmin_version() >= 1.832 && $d->{'dns'}) {
 	}
 elsif (!$ok) {
 	$ok = 0;
-	$cert = "Domain has no website, ".
-		"and DNS-based validation is not possible";
+	$cert ||= "Domain has no website, ".
+		  "and DNS-based validation is not possible";
 	}
 return ($ok, $cert, $key, $chain);
 }
