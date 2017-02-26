@@ -1769,7 +1769,6 @@ my ($d) = @_;
 return ( ) if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
-print STDERR "ver=$ver\n";
 return ( ) if ($ver < 2);
 
 my $conf = &dovecot::get_config();
