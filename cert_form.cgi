@@ -100,7 +100,8 @@ if (&can_webmin_cert()) {
 	%cert_already = ( );
 	foreach my $svc (@svcs) {
 		if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
-		    &same_cert_file($chain, $svc->{'ca'})) {
+		    (&same_cert_file($chain, $svc->{'ca'}) ||
+		     $svc->{'ca'} eq 'none')) {
 			$cert_already{$svc->{'id'}} = $svc;
 			}
 		}

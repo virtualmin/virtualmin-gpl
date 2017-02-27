@@ -1784,7 +1784,7 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, $mems{'ssl_ca'}, $d->{'ip'} );
+my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'} );
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
