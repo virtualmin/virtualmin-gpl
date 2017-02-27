@@ -1673,6 +1673,7 @@ my %used = map { $_->{'php_fpm_port'}, $_ }
 	       grep { $_->{'php_fpm_port'} } &list_domains();
 my $rv = &allocate_free_tcp_port(\%used, 8000);
 $rv || &error("Failed to allocate FPM port starting at 8000");
+$d->{'php_fpm_port'} = $rv;
 return $rv;
 }
 

@@ -16745,6 +16745,7 @@ if ($script && $script->{'release_version'}) {
 	return &compare_versions($ver1, $ver2) ||
                &compare_versions($rel1, $rel2);
 	}
+# XXX call webmin's compare_version_numbers function instead after 1.830 is out
 local @sp1 = split(/[\.\-]/, $ver1);
 local @sp2 = split(/[\.\-]/, $ver2);
 for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
