@@ -966,8 +966,10 @@ local ($file, $d, $ip, $ip6) = @_;
 local $withdot = $d->{'dom'}.".";
 
 # MX for this system
+local $mxname = $tmpl->{'dns_mx'} || "mail.$withdot";
+$mxname .= "." if ($mxname !~ /\.$/);
 &bind8::create_record($file, $withdot, undef,
-		      "IN", "MX", "5 mail.$withdot");
+		      "IN", "MX", "5 $mxname");
 
 # Add MX records for slaves, if enabled
 if (!$config{'secmx_nodns'}) {
@@ -2330,6 +2332,14 @@ print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
 	&ui_checkbox("dnsprins", 1, $text{'tmpl_dnsprins'},
 		     $tmpl->{'dns_prins'}));
 
+# Hostname for MX record
+print &ui_table_row(&hlink($text{'tmpl_dnsmx'}, "template_dns_mx"),
+	&none_def_input("dns_mx", $tmpl->{'dns_mx'},
+			$text{'tmpl_dnsmnames'}, 0, 0,
+			$text{'tmpl_dnsmxauto'}."<br>", [ "dns_mx" ])." ".
+	&ui_textbox("dns_mx", $tmpl->{'dns_mx'} eq 'none' ? '' :
+				$tmpl->{'dns_mx'}, 40));
+
 # Option for view to add to, for BIND 9
 if (@views || $tmpl->{'dns_view'}) {
 	print &ui_table_row($text{'newdns_view'},
@@ -2542,6 +2552,12 @@ $in{'dns_master_mode'} != 2 ||
 	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
+
+# Save MX hostname
+$in{'dns_mx_mode'} != 2 || $in{'dns_mx'} =~ /^[a-z0-9\.\-\_]+$/i ||
+	&error($text{'tmpl_ednsmx'});
+$tmpl->{'dns_mx'} = $in{'dns_mx_mode'} == 0 ? "none" :
+		    $in{'dns_mx_mode'} == 1 ? undef : $in{'dns_mx'};
 
 # Save SPF
 $tmpl->{'dns_spf'} = $in{'dns_spf_mode'} == 0 ? "none" :

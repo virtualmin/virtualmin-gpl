@@ -8639,6 +8639,7 @@ push(@rv, { 'id' => 0,
 	    'dns_dmarcpct' => $config{'bind_dmarcpct'} || 100,
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_master' => $config{'bind_master'} || "none",
+	    'dns_mx' => $config{'bind_mx'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
 	    'dns_prins' => $config{'dns_prins'},
 	    'dns_records' => $config{'dns_records'},
@@ -8931,6 +8932,8 @@ if ($tmpl->{'id'} == 0) {
 							   : $tmpl->{'dns_sub'};
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
 						   : $tmpl->{'dns_master'};
+	$config{'bind_mx'} = $tmpl->{'dns_mx'} eq 'none' ? undef
+						   : $tmpl->{'dns_mx'};
 	$config{'dns_view'} = $tmpl->{'dns_view'};
 	$config{'dns_ns'} = $tmpl->{'dns_ns'};
 	$config{'dns_prins'} = $tmpl->{'dns_prins'};
@@ -9152,7 +9155,7 @@ if (!$tmpl->{'default'}) {
 	local $def = $tmpls[0];
 	local $p;
 	local %done;
-	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_dmarc",
+	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell",
 		    "mailboxlimit", "domslimit",
