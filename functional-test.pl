@@ -443,10 +443,12 @@ $domains_tests = [
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'remove-record', 'testing A' ] ],
+	  'sleep' => 1,
 	},
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'remove-record', 'ttltest A 5.6.7.8' ] ],
+	  'sleep' => 1,
 	},
 
 	# Make sure they are gone
