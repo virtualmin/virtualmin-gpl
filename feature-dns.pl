@@ -966,8 +966,8 @@ local ($file, $d, $ip, $ip6) = @_;
 local $withdot = $d->{'dom'}.".";
 
 # MX for this system
-local $mxname = $tmpl->{'dns_mx'} || "mail.$withdot";
-$mxname .= "." if ($mxname !~ /\.$/);
+local $mxname = $tmpl->{'dns_mx'} && $tmpl->{'dns_mx'} ne 'none' ?
+			$tmpl->{'dns_mx'}."." : "mail.$withdot";
 &bind8::create_record($file, $withdot, undef,
 		      "IN", "MX", "5 $mxname");
 
