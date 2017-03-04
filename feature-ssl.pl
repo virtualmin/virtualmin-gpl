@@ -1953,14 +1953,16 @@ sub get_hostnames_for_ssl
 {
 my ($d) = @_;
 my @rv = ( $d->{'dom'} );
-my $www = "www.".$d->{'dom'};
-if ($d->{'dns'}) {
-	my $recs = &get_domain_dns_records($d);
-	my ($r) = grep { $_->{'name'} eq $www."." } @$recs;
-	push(@rv, $www);
-	}
-elsif (&to_ipaddress($www)) {
-	push(@rv, $www);
+foreach my $sfx ("www", "mail") {
+	my $full = $sfx.".".$d->{'dom'};
+	if ($d->{'dns'}) {
+		my $recs = &get_domain_dns_records($d);
+		my ($r) = grep { $_->{'name'} eq $full."." } @$recs;
+		push(@rv, $full);
+		}
+	elsif (&to_ipaddress($full)) {
+		push(@rv, $full);
+		}
 	}
 return @rv;
 }
