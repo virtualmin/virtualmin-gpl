@@ -1,0 +1,6 @@
+desc=Updated script installers
+html=Updates the Node.JS installer to version 7.7.1.
+master=1
+reseller=1
+domain=1
+link=list_scripts.cgi?dom=${ID}
