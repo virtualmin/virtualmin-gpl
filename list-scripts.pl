@@ -144,7 +144,7 @@ foreach my $d (@doms) {
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});
 			$path = $sinfo->{'url'};
-			$path =~ s/^http:\/\/([^\/]+)//;
+			$path =~ s/^(http|https):\/\/([^\/]+)//;
 			$path ||= $sinfo->{'path'};
 			printf $fmt, $sinfo->{'id'},
 				     $script->{'desc'},
