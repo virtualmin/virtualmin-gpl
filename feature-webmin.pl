@@ -252,6 +252,7 @@ return 1;
 }
 
 # restart_webmin()
+# Send a signal to Webmin to re-read it's config
 sub restart_webmin
 {
 &$first_print($text{'setup_webminpid2'});
@@ -266,7 +267,24 @@ else {
 	}
 }
 
+# restart_webmin_fully()
+# Send a signal to Webmin to make it fully restart and re-read it's config
+sub restart_webmin_fully
+{
+&$first_print($text{'setup_webminpid'});
+local %miniserv;
+&get_miniserv_config(\%miniserv);
+if (&check_pid_file($miniserv{'pidfile'})) {
+	&restart_miniserv();
+	&$second_print($text{'setup_done'});
+	}
+else {
+	&$second_print($text{'setup_webmindown'});
+	}
+}
+
 # restart_usermin()
+# Send a signal to Usermin to make it fully restart and re-read it's config
 sub restart_usermin
 {
 &$first_print($text{'setup_userminpid'});
