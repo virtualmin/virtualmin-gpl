@@ -189,12 +189,11 @@ if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
-if ($tmpl->{'web_webmin_ssl'} && $d->{'virt'}) {
+if ($tmpl->{'web_webmin_ssl'}) {
 	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
-		      \&restart_webmin);
+		      \&restart_webmin_fully);
 	}
-if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin") &&
-    $d->{'virt'}) {
+if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
@@ -449,11 +448,12 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 
 # Changes for Webmin and Usermin
 if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
+    $_[0]->{'dom'} ne $_[1]->{'dom'} ||
     $_[0]->{'home'} ne $_[1]->{'home'}) {
-        # IP address has changed .. fix per-IP SSL cert
+        # IP address or domain name has changed .. fix per-IP/per-domain SSL cert
 	&modify_ipkeys($_[0], $_[1], \&get_miniserv_config,
 		       \&put_miniserv_config,
-		       \&restart_webmin);
+		       \&restart_webmin_fully);
 	if (&foreign_installed("usermin")) {
 		&foreign_require("usermin");
 		&modify_ipkeys($_[0], $_[1],
@@ -511,7 +511,7 @@ undef(@apache::get_config_cache);
 # Delete per-IP SSL cert
 &delete_ipkeys($d, \&get_miniserv_config,
 	       \&put_miniserv_config,
-	       \&restart_webmin);
+	       \&restart_webmin_fully);
 if (&foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
@@ -1220,34 +1220,49 @@ return $data;
 }
 
 # setup_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)
-# Add the per-IP SSL key for some domain, based on its IP address
+# Add the per-IP/domain SSL key for some domain
 sub setup_ipkeys
 {
-local ($dom, $getfunc, $putfunc, $postfunc) = @_;
+local ($d, $getfunc, $putfunc, $postfunc) = @_;
 &foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
-push(@ipkeys, { 'ips' => [ $_[0]->{'ip'} ],
-		'key' => $_[0]->{'ssl_key'},
-		'cert' => $_[0]->{'ssl_cert'},
-		'extracas' => $_[0]->{'ssl_ca'}, });
-&webmin::save_ipkeys(\%miniserv, \@ipkeys);
-&$putfunc(\%miniserv);
-&register_post_action($postfunc);
+local @ips;
+if ($d->{'virt'}) {
+	push(@ips, $d->{'ip'});
+	}
+if (&get_webmin_version() >= 1.834) {
+	push(@ips, $d->{'dom'}, "*.$d->{'dom'}");
+	}
+if (@ips) {
+	push(@ipkeys, { 'ips' => \@ips,
+			'key' => $d->{'ssl_key'},
+			'cert' => $d->{'ssl_cert'},
+			'extracas' => $d->{'ssl_ca'}, });
+	&webmin::save_ipkeys(\%miniserv, \@ipkeys);
+	&$putfunc(\%miniserv);
+	&register_post_action($postfunc);
+	}
 return 1;
 }
 
 # delete_ipkeys(&domain, &miniserv-getter, &miniserv-saver, &post-action)
-# Remove the per-IP SSL key for some domain, based on its IP address
+# Remove the per-IP/domain SSL key for some domain
 sub delete_ipkeys
 {
-local ($dom, $getfunc, $putfunc, $postfunc) = @_;
+local ($d, $getfunc, $putfunc, $postfunc) = @_;
 &foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
-local @newipkeys = grep { $_->{'ips'}->[0] ne $_[0]->{'ip'} } @ipkeys;
+local @newipkeys;
+foreach my $ipk (@ipkeys) {
+	my $search = $d->{'virt'} ? $d->{'ip'} : $d->{'dom'};
+	if (&indexof($search, @{$ipk->{'ips'}}) < 0) {
+		push(@newipkeys, $ipk);
+		}
+	}
 if (@ipkeys != @newipkeys) {
 	&webmin::save_ipkeys(\%miniserv, \@newipkeys);
 	&$putfunc(\%miniserv);
@@ -1591,7 +1606,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	local $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $d->{'owner'}, undef,
-		"*.$d->{'dom'}", $d->{'emailto_addr'}, undef, $d);
+		"*.$d->{'dom'}", $d->{'emailto_addr'}, [ $d->{'dom'} ], $d);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		return 0;
@@ -2112,6 +2127,7 @@ if ($chain) {
 	&set_permissions_as_domain_user($d, 0755, $chainfile);
 	&unlock_file($chainfile);
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
+	$d->{'ssl_chain'} = $chainfile;
 	}
 }
 
@@ -2153,7 +2169,7 @@ if (&domain_has_website($d)) {
 	 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
 	}
-if (!$ok && &get_webmin_version() >= 1.832 && $d->{'dns'}) {
+if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'}) {
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
 	}
