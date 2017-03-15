@@ -1,0 +1,4 @@
+desc=Per-domain Virtualmin SSL certificates
+html=The SSL certificate for all virtual servers will now be configured for use in the Virtualmin UI on port 10000, so that URLs like https://admin.domain.com:10000/ work without cert errors.
+master=1
+features=ssl

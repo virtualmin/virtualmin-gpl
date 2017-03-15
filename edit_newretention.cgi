@@ -37,3 +37,5 @@ print &ui_table_row($text{'retention_folders'},
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
+&ui_print_footer("", $text{'index_return'});
