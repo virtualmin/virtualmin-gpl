@@ -6286,6 +6286,9 @@ record_esservice=Missing or invalid-looking service name
 record_esproto=Invalid service protocol
 
 clone_err=Failed to clone virtual server
+clone_eclash=A virtual server with the same name already exists
+clone_eclash2=A user with the same name already exists
+clone_epass=No password entered for new parent server
 clone_object=Creating new virtual server settings ..
 clone_clash=Checking for clashes and dependency problems ..
 clone_clashfound=.. clash found : $1
