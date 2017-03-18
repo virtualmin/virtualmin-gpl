@@ -703,6 +703,7 @@ else {
 	&execute_command("cd $qh && $reader | $tarcmd", undef, $outfile,$errfile);
 	}
 local $out = &read_file_contents($outfile);
+$out =~ s/\\([0-7]+)/chr(oct($1))/ge;
 local $err = &read_file_contents($errfile);
 local $ex = $?;
 &enable_quotas($d);
