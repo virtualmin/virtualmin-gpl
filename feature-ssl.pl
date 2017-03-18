@@ -1748,13 +1748,17 @@ if ($enable) {
 		push(@{$l->{'members'}}, $imap);
 		}
 	else {
-		&dovecot::save_directive($l->{'members'}, "ssl_cert",
+		eval {
+			local $main::error_must_die = 1;
+			&dovecot::save_directive($l->{'members'}, "ssl_cert",
 				 "<".$d->{'ssl_cert'}, "protocol", "imap");
-		&dovecot::save_directive($l->{'members'}, "ssl_key",
+			&dovecot::save_directive($l->{'members'}, "ssl_key",
 				 "<".$d->{'ssl_key'}, "protocol", "imap");
-		if ($chain) {
-			&dovecot::save_directive($l->{'members'}, "ssl_ca",
-					 "<".$chain, "protocol", "imap");
+			if ($chain) {
+				&dovecot::save_directive(
+					$l->{'members'}, "ssl_ca",
+					"<".$chain, "protocol", "imap");
+				}
 			}
 		}
 	&flush_file_lines($imap->{'file'});
