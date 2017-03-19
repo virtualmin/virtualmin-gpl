@@ -421,6 +421,15 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 	local $info = &cert_info($_[0]);
 	&lock_file($_[0]->{'ssl_cert'});
 	&lock_file($_[0]->{'ssl_key'});
+	local @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
+	foreach my $a (@newalt) {
+		if ($a eq $_[1]->{'dom'}) {
+			$a = $_[0]->{'dom'};
+			}
+		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $_[1]->{'dom'}) {
+			$a = $1.".".$_[0]->{'dom'};
+			}
+		}
 	local $err = &generate_self_signed_cert(
 		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'},
 		undef,
@@ -432,7 +441,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 		$info->{'ou'},
 		"*.$_[0]->{'dom'}",
 		$_[0]->{'emailto_addr'},
-		$info->{'alt'},
+		\@newalt,
 		$_[0],
 		);
 	&unlock_file($_[0]->{'ssl_key'});
