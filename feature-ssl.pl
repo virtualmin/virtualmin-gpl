@@ -241,51 +241,52 @@ return 1;
 # modify_ssl(&domain, &olddomain)
 sub modify_ssl
 {
+local ($d, $oldd) = @_;
 local $rv = 0;
 &require_apache();
-&obtain_lock_web($_[0]);
+&obtain_lock_web($d);
 
 # Get objects for SSL and non-SSL virtual hosts
-local ($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-                                                   $_[1]->{'web_sslport'});
-local ($nonvirt, $nonvconf) = &get_apache_virtual($_[0]->{'dom'},
-						  $_[0]->{'web_port'});
-local $tmpl = &get_template($_[0]->{'template'});
+local ($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
+                                                   $oldd->{'web_sslport'});
+local ($nonvirt, $nonvconf) = &get_apache_virtual($d->{'dom'},
+						  $d->{'web_port'});
+local $tmpl = &get_template($d->{'template'});
 
-if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
-    $_[0]->{'ip6'} ne $_[1]->{'ip6'} ||
-    $_[0]->{'virt6'} != $_[1]->{'virt6'} ||
-    $_[0]->{'name6'} != $_[1]->{'name6'} ||
-    $_[0]->{'web_sslport'} != $_[1]->{'web_sslport'}) {
+if ($d->{'ip'} ne $oldd->{'ip'} ||
+    $d->{'ip6'} ne $oldd->{'ip6'} ||
+    $d->{'virt6'} != $oldd->{'virt6'} ||
+    $d->{'name6'} != $oldd->{'name6'} ||
+    $d->{'web_sslport'} != $oldd->{'web_sslport'}) {
 	# IP address or port has changed .. update VirtualHost
 	&$first_print($text{'save_ssl'});
 	if (!$virt) {
 		&$second_print($text{'delete_noapache'});
 		goto VIRTFAILED;
 		}
-	local $nvstar = &add_name_virtual($_[0], $conf,
-					  $_[0]->{'web_sslport'}, 0,
-					  $_[0]->{'ip'});
+	local $nvstar = &add_name_virtual($d, $conf,
+					  $d->{'web_sslport'}, 0,
+					  $d->{'ip'});
 	local $nvstar6;
-	if ($_[0]->{'ip6'}) {
+	if ($d->{'ip6'}) {
 		$nvstar6 = &add_name_virtual(
-			$_[0], $conf, $_[0]->{'web_sslport'}, 0,
-			"[".$_[0]->{'ip6'}."]");
+			$d, $conf, $d->{'web_sslport'}, 0,
+			"[".$d->{'ip6'}."]");
 		}
-	&add_listen($_[0], $conf, $_[0]->{'web_sslport'});
+	&add_listen($d, $conf, $d->{'web_sslport'});
 	local $lref = &read_file_lines($virt->{'file'});
 	$lref->[$virt->{'line'}] =
 		"<VirtualHost ".
-		&get_apache_vhost_ips($_[0], $nvstar, $nvstar6,
-				      $_[0]->{'web_sslport'}).">";
+		&get_apache_vhost_ips($d, $nvstar, $nvstar6,
+				      $d->{'web_sslport'}).">";
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-					      	     $_[1]->{'web_sslport'});
+	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
+					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+if ($d->{'home'} ne $oldd->{'home'}) {
 	# Home directory has changed .. update any directives that referred
 	# to the old directory
 	&$first_print($text{'save_ssl3'});
@@ -295,18 +296,18 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 		}
 	local $lref = &read_file_lines($virt->{'file'});
 	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
-		$lref->[$i] =~ s/\Q$_[1]->{'home'}\E/$_[0]->{'home'}/g;
+		$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 		}
 	&flush_file_lines();
 	$rv++;
 	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-					      	     $_[1]->{'web_sslport'});
+	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
+					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'proxy_pass_mode'} == 1 &&
-    $_[1]->{'proxy_pass_mode'} == 1 &&
-    $_[0]->{'proxy_pass'} ne $_[1]->{'proxy_pass'}) {
+if ($d->{'proxy_pass_mode'} == 1 &&
+    $oldd->{'proxy_pass_mode'} == 1 &&
+    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
 	# This is a proxying forwarding website and the URL has
 	# changed - update all Proxy* directives
 	&$first_print($text{'save_ssl6'});
@@ -317,18 +318,18 @@ if ($_[0]->{'proxy_pass_mode'} == 1 &&
 	local $lref = &read_file_lines($virt->{'file'});
 	for($i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 		if ($lref->[$i] =~ /^\s*ProxyPass(Reverse)?\s/) {
-			$lref->[$i] =~ s/$_[1]->{'proxy_pass'}/$_[0]->{'proxy_pass'}/g;
+			$lref->[$i] =~ s/$oldd->{'proxy_pass'}/$d->{'proxy_pass'}/g;
 			}
 		}
 	&flush_file_lines();
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
+if ($d->{'proxy_pass_mode'} != $oldd->{'proxy_pass_mode'}) {
 	# Proxy mode has been enabled or disabled .. copy all directives from
 	# non-SSL site
-	local $mode = $_[0]->{'proxy_pass_mode'} ||
-		      $_[1]->{'proxy_pass_mode'};
+	local $mode = $d->{'proxy_pass_mode'} ||
+		      $oldd->{'proxy_pass_mode'};
 	&$first_print($mode == 2 ? $text{'save_ssl8'}
 				 : $text{'save_ssl9'});
 	if (!$virt) {
@@ -337,19 +338,19 @@ if ($_[0]->{'proxy_pass_mode'} != $_[1]->{'proxy_pass_mode'}) {
 		}
 	local $lref = &read_file_lines($virt->{'file'});
 	local $nonlref = &read_file_lines($nonvirt->{'file'});
-	local $tmpl = &get_template($_[0]->{'tmpl'});
+	local $tmpl = &get_template($d->{'tmpl'});
 	local @dirs = @$nonlref[$nonvirt->{'line'}+1 .. $nonvirt->{'eline'}-1];
-	push(@dirs, &apache_ssl_directives($_[0], $tmpl));
+	push(@dirs, &apache_ssl_directives($d, $tmpl));
 	splice(@$lref, $virt->{'line'} + 1,
 	       $virt->{'eline'} - $virt->{'line'} - 1, @dirs);
 	&flush_file_lines($virt->{'file'});
 	$rv++;
 	undef(@apache::get_config_cache);
-	($virt, $vconf, $conf) = &get_apache_virtual($_[1]->{'dom'},
-					      	     $_[1]->{'web_sslport'});
+	($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
+					      	     $oldd->{'web_sslport'});
 	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+if ($d->{'user'} ne $oldd->{'user'}) {
 	# Username has changed .. copy suexec directives from parent
 	&$first_print($text{'save_ssl10'});
 	if (!$virt || !$nonvirt) {
@@ -362,7 +363,7 @@ if ($_[0]->{'user'} ne $_[1]->{'user'}) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
+if ($d->{'dom'} ne $oldd->{'dom'}) {
         # Domain name has changed .. fix up Apache config by copying relevant
         # directives from the real domain
         &$first_print($text{'save_ssl2'});
@@ -383,55 +384,55 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
 
 # Code after here still works even if SSL virtualhost is missing
 VIRTFAILED:
-if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[1]->{'ssl_same'}) {
+if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
 	# IP has changed - maybe clear ssl_same field
-	local ($sslclash) = grep { $_->{'ip'} eq $_[0]->{'ip'} &&
+	local ($sslclash) = grep { $_->{'ip'} eq $d->{'ip'} &&
 				   $_->{'ssl'} &&
-				   $_->{'id'} ne $_[0]->{'id'} &&
+				   $_->{'id'} ne $d->{'id'} &&
 				   !$_->{'ssl_same'} } &list_domains();
-	local $oldsslclash = &get_domain($_[1]->{'ssl_same'});
-	if ($sslclash && $_[1]->{'ssl_same'} eq $sslclash->{'id'}) {
+	local $oldsslclash = &get_domain($oldd->{'ssl_same'});
+	if ($sslclash && $oldd->{'ssl_same'} eq $sslclash->{'id'}) {
 		# No need to change
 		}
 	elsif ($sslclash &&
-	       &check_domain_certificate($_[0]->{'dom'}, $sslclash)) {
+	       &check_domain_certificate($d->{'dom'}, $sslclash)) {
 		# New domain with same cert
-		$_[0]->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$_[0]->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$_[0]->{'ssl_same'} = $sslclash->{'id'};
+		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$d->{'ssl_same'} = $sslclash->{'id'};
 		$chained = &get_website_ssl_file($sslclash, 'ca');
-		$_[0]->{'ssl_chain'} = $chained;
+		$d->{'ssl_chain'} = $chained;
 		}
 	else {
 		# No domain has the same cert anymore - copy the one from the
 		# old sslclash domain
-		&break_ssl_linkage($_[0], $oldsslclash);
+		&break_ssl_linkage($d, $oldsslclash);
 		}
 	}
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+if ($d->{'home'} ne $oldd->{'home'}) {
 	# Fix SSL cert file locations
 	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
-		$_[0]->{$k} =~ s/\Q$_[1]->{'home'}\E\//$_[0]->{'home'}\//;
+		$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//;
 		}
 	}
-if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
-    !&check_domain_certificate($_[0]->{'dom'}, $_[0])) {
+if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
 	# Domain name has changed .. re-generate self-signed cert
 	&$first_print($text{'save_ssl11'});
-	local $info = &cert_info($_[0]);
-	&lock_file($_[0]->{'ssl_cert'});
-	&lock_file($_[0]->{'ssl_key'});
+	local $info = &cert_info($d);
+	&lock_file($d->{'ssl_cert'});
+	&lock_file($d->{'ssl_key'});
 	local @newalt = $info->{'alt'} ? @{$info->{'alt'}} : ( );
 	foreach my $a (@newalt) {
-		if ($a eq $_[1]->{'dom'}) {
-			$a = $_[0]->{'dom'};
+		if ($a eq $oldd->{'dom'}) {
+			$a = $d->{'dom'};
 			}
-		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $_[1]->{'dom'}) {
-			$a = $1.".".$_[0]->{'dom'};
+		elsif ($a =~ /^([^\.]+)\.(\S+)$/ && $2 eq $oldd->{'dom'}) {
+			$a = $1.".".$d->{'dom'};
 			}
 		}
 	local $err = &generate_self_signed_cert(
-		$_[0]->{'ssl_cert'}, $_[0]->{'ssl_key'},
+		$d->{'ssl_cert'}, $d->{'ssl_key'},
 		undef,
 		1825,
 		$info->{'c'},
@@ -439,13 +440,13 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 		$info->{'l'},
 		$info->{'o'},
 		$info->{'ou'},
-		"*.$_[0]->{'dom'}",
-		$_[0]->{'emailto_addr'},
+		"*.$d->{'dom'}",
+		$d->{'emailto_addr'},
 		\@newalt,
-		$_[0],
+		$d,
 		);
-	&unlock_file($_[0]->{'ssl_key'});
-	&unlock_file($_[0]->{'ssl_cert'});
+	&unlock_file($d->{'ssl_key'});
+	&unlock_file($d->{'ssl_cert'});
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		}
@@ -456,16 +457,16 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && &self_signed_cert($_[0]) &&
 	}
 
 # Changes for Webmin and Usermin
-if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
-    $_[0]->{'dom'} ne $_[1]->{'dom'} ||
-    $_[0]->{'home'} ne $_[1]->{'home'}) {
+if ($d->{'ip'} ne $oldd->{'ip'} ||
+    $d->{'dom'} ne $oldd->{'dom'} ||
+    $d->{'home'} ne $oldd->{'home'}) {
         # IP address or domain name has changed .. fix per-IP/per-domain SSL cert
-	&modify_ipkeys($_[0], $_[1], \&get_miniserv_config,
+	&modify_ipkeys($d, $oldd, \&get_miniserv_config,
 		       \&put_miniserv_config,
 		       \&restart_webmin_fully);
 	if (&foreign_installed("usermin")) {
 		&foreign_require("usermin");
-		&modify_ipkeys($_[0], $_[1],
+		&modify_ipkeys($d, $oldd,
 			       \&usermin::get_usermin_miniserv_config,
 			       \&usermin::put_usermin_miniserv_config,
 			       \&restart_usermin);
@@ -473,18 +474,18 @@ if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
 	}
 
 # If anything has changed that would impact the Dovecot cert, re-set it up
-if ($_[0]->{'ip'} ne $_[1]->{'ip'} ||
-    $_[0]->{'home'} ne $_[1]->{'home'}) {
-	&sync_dovecot_ssl_cert($_[1], 0);
-	&sync_postfix_ssl_cert($_[1], 0);
-	&sync_dovecot_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
-	&sync_postfix_ssl_cert($_[0], $_[0]->{'ssl'} && $_[0]->{'virt'});
+if ($d->{'ip'} ne $oldd->{'ip'} ||
+    $d->{'home'} ne $oldd->{'home'}) {
+	&sync_dovecot_ssl_cert($oldd, 0);
+	&sync_postfix_ssl_cert($oldd, 0);
+	&sync_dovecot_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+	&sync_postfix_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
 	}
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
 
-&release_lock_web($_[0]);
+&release_lock_web($d);
 &register_post_action(\&restart_apache, 1) if ($rv);
 return $rv;
 }
