@@ -12012,7 +12012,7 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 # Button to show mail logs
 if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
     &can_view_maillog($d) && $d->{'mail'}) {
-	push(@rv, { 'page' => 'maillog.cgi',
+	push(@rv, { 'page' => 'pro/maillog.cgi',
 		    'title' => $text{'edit_maillog'},
 		    'desc' => $text{'edit_maillogdesc'},
 		    'cat' => 'logs',
@@ -12021,7 +12021,7 @@ if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
 
 # Button to validate connectivity
 if ($virtualmin_pro) {
-	push(@rv, { 'page' => 'connectivity.cgi',
+	push(@rv, { 'page' => 'pro/connectivity.cgi',
 		    'title' => $text{'edit_connect'},
 		    'desc' => $text{'edit_connectdesc'},
 		    'cat' => 'logs',
@@ -12263,8 +12263,9 @@ local %nonew = ( 'history', 1,
 		 'ratelimit', 1,
 		 'provision', 1,
 	       );
-local @tlinks = map { $nonew{$_} ? "${_}.cgi"
-			         : "edit_new${_}.cgi" } @tmpls;
+local %pro = ( 'resels', 1 );
+local @tlinks = map { ($pro{$_} ? "pro/" : "").
+		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
 			          : $text{"new${_}_title"} } @tmpls;
 local @ticons = map { $nonew{$_} ? "images/${_}.gif"
@@ -12321,7 +12322,7 @@ if (&can_edit_templates()) {
 				# Special link for upgrading GPL to Pro
 				$url = $config{'upgrade_link'};
 				}
-			elsif ($tlinks->[$i] =~ /\//) {
+			elsif ($tlinks->[$i] =~ /^\//) {
 				# Outside virtualmin module
 				$url = $gconfig{'webprefix'}.$tlinks->[$i];
 				}
