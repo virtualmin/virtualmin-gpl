@@ -133,7 +133,7 @@ $script_log_directory = &cache_file_path("scriptlog");
 $scripts_unavail_file = &cache_file_path("scriptsunavail");
 
 @styles_directories = ( "$module_config_directory/styles",
-			"$module_root_directory/styles",
+			"$module_root_directory/pro/styles",
 		      );
 $styles_unavail_file = "$module_config_directory/stylesunavail";
 
