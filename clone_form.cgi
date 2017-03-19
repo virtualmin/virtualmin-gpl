@@ -36,7 +36,7 @@ if (!$d->{'parent'}) {
 		&ui_textbox("newuser", undef, 20));
 
 	print &ui_table_row($text{'clone_newpass'},
-		&ui_radio("pass_def", 1,
+		&ui_radio("newpass_def", 1,
 			  [ [ 1, $text{'clone_samepass'} ],
 			    [ 0, &ui_password("newpass", undef, 20) ] ]));
 	}
