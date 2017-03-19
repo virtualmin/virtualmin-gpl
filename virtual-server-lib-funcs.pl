@@ -24,7 +24,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
-		my $libfile = "$virtual_server_root$lib-lib.pl";
+		my $libfile = "$virtual_server_root/$lib-lib.pl";
 		}
 	do $libfile;
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
