@@ -366,7 +366,7 @@ else {
 		&ui_radio_table("dname_def", 
 		      $d->{'letsencrypt_dname'} ? 0 : 1,
 		      [ [ 1, $text{'cert_dnamedef'},
-			  join(" ", map { "<tt>$_</tt>" } @defnames), $dis1 ],
+			  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
 			[ 0, $text{'cert_dnamesel'},
 			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
 				       undef, $d->{'letsencrypt_dname'} ? 0 : 1), $dis0 ] ]));
