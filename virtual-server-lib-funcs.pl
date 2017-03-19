@@ -22,7 +22,11 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert") {
-	do "$virtual_server_root/$lib-lib.pl";
+	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
+	if (!-r $libfile) {
+		my $libfile = "$virtual_server_root$lib-lib.pl";
+		}
+	do $libfile;
 	if ($@ && -r "$virtual_server_root/$lib-lib.pl") {
 		print STDERR "failed to load $lib-lib.pl : $@\n";
 		}
@@ -14835,7 +14839,7 @@ if ($config{'default_procmail'} != $lastconfig{'default_procmail'}) {
 # Re-create API helper command
 if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
 	&$first_print($text{'check_apicmd'});
-	local ($ok, $path) = &create_api_helper_command();
+	local ($ok, $path) = &create_virtualmin_api_helper_command();
 	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
 			     $path));
 	}
@@ -17592,6 +17596,14 @@ if (!$user || $user eq "root") {
 my $rv = $temp."/".($$."_".($transname_owned_counter++));
 unshift(@main::temporary_files, $rv);
 return $rv;
+}
+
+# create_virtualmin_api_helper_command()
+# Create the API helper for virtualmin core and all plugins
+sub create_virtualmin_api_helper_command
+{
+local @plugindirs = map { &module_root_directory($_) } @plugins;
+return &create_api_helper_command(\@plugindirs);
 }
 
 # load_plugin_libraries([plugin, ...])

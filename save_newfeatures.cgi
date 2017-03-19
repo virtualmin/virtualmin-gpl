@@ -89,8 +89,7 @@ if ($config{'virus'}) {
 	}
 
 # Re-generate helper script, for plugins
-@plugindirs = map { &module_root_directory($_) } @plugins;
-&create_api_helper_command(\@plugindirs);
+&create_virtualmin_api_helper_command();
 
 # Save the config
 &lock_file($module_config_file);
