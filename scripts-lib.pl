@@ -1671,12 +1671,13 @@ else {
 }
 
 # post_http_connection(&domain, page, &cgi-params, &out, &err,
-#		       &moreheaders, &returnheaders, &returnheaders-array)
+#		       &moreheaders, &returnheaders, &returnheaders-array,
+#		       form-data-mode)
 # Makes an HTTP post to some URL, sending the given CGI parameters as data.
 sub post_http_connection
 {
 local ($d, $page, $params, $out, $err, $headers,
-       $returnheaders, $returnheaders_array) = @_;
+       $returnheaders, $returnheaders_array, $formdata) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
 local $port = $d->{'web_port'} || 80;
@@ -1691,15 +1692,36 @@ if (!ref($h)) {
 	}
 &write_http_connection($h, "Host: $host\r\n");
 &write_http_connection($h, "User-agent: Webmin\r\n");
-&write_http_connection($h, "Content-type: application/x-www-form-urlencoded\r\n");
-&write_http_connection($h, "Content-length: ".length($params)."\r\n");
 if ($headers) {
 	foreach my $hd (keys %$headers) {
 		&write_http_connection($h, "$hd: $headers->{$hd}\r\n");
 		}
 	}
-&write_http_connection($h, "\r\n");
-&write_http_connection($h, "$params\r\n");
+if ($formdata) {
+	# Use multipart format, suiteable for file uploads
+	my $bound = time().$$;
+	&write_http_connection($h, "Content-type: multipart/form-data; boundary=----${bound}\r\n");
+	&write_http_connection($h, "\r\n");
+	foreach my $i (split(/\&/, $params)) {
+		my ($k, $v) = split(/=/, $i, 2);
+		$k =~ tr/\+/ /;
+		$v =~ tr/\+/ /;
+		$k =~ s/%(..)/pack("c",hex($1))/ge;
+		$v =~ s/%(..)/pack("c",hex($1))/ge;
+		&write_http_connection($h, "------${bound}\r\n");
+		&write_http_connection($h, "Content-Disposition: form-data; name=\"$k\"\r\n");
+		&write_http_connection($h, "\r\n");
+		&write_http_connection($h, "$v\r\n");
+		}
+	&write_http_connection($h, "------${bound}--\r\n");
+	}
+else {
+	# Use regular POST format
+	&write_http_connection($h, "Content-type: application/x-www-form-urlencoded\r\n");
+	&write_http_connection($h, "Content-length: ".length($params)."\r\n");
+	&write_http_connection($h, "\r\n");
+	&write_http_connection($h, "$params\r\n");
+	}
 
 # Read back the results
 $post_http_headers = undef;
