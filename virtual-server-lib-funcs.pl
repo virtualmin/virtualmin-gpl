@@ -17603,7 +17603,8 @@ return $rv;
 sub create_virtualmin_api_helper_command
 {
 local @plugindirs = map { &module_root_directory($_) } @plugins;
-return &create_api_helper_command(\@plugindirs);
+return &create_api_helper_command([ "$module_root_directory/pro",
+				    @plugindirs ]);
 }
 
 # load_plugin_libraries([plugin, ...])
