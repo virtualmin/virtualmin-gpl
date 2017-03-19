@@ -8,8 +8,11 @@ local ($coreonly) = @_;
 local @rv;
 
 # From core directories
-foreach my $s ($coreonly ? "$module_root_directory/scripts"
-		         : @scripts_directories) {
+my @sd = @scripts_directories;
+if ($coreonly) {
+	@sd = grep { /^\Q$module_root_directory\// } @sd;
+	}
+foreach my $s (@sd) {
 	opendir(DIR, $s);
 	foreach $f (readdir(DIR)) {
 		push(@rv, $1) if ($f =~ /^(.*)\.pl$/);

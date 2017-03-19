@@ -127,6 +127,7 @@ $custom_shells_file = "$module_config_directory/custom-shells";
 @scripts_directories = ( &cache_file_path("scripts"),
 			 &cache_file_path("latest-scripts"),
 			 "$module_root_directory/scripts",
+			 "$module_root_directory/pro/scripts",
 		       );
 $script_log_directory = &cache_file_path("scriptlog");
 $scripts_unavail_file = &cache_file_path("scriptsunavail");
