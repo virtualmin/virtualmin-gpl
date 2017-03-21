@@ -3035,8 +3035,16 @@ return &has_command($config{'python_cmd'}) ||
 sub allocate_free_tcp_port
 {
 my ($used, $rport) = @_;
+my $lsof = { };
+my $out = &backquote_command("lsof -i tcp -n -l -P");
+foreach my $l (split(/\r?\n/, $out)) {
+	if ($l =~ /\s+([^:]+):(\d+)\s+\(LISTEN\)/) {
+		$lsof->{$2} = 1;
+		}
+	}
 while($rport < 65536) {
 	if (!$used->{$rport} &&
+	    !$lsof->{$rport} &&
 	    !getservbyname($rport, "tcp")) {
 		my $err;
 		if (!&open_socket("127.0.0.1", $rport, RSOCK, \$err)) {
