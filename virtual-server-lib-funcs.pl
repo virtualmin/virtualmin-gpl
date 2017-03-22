@@ -12263,7 +12263,8 @@ local %nonew = ( 'history', 1,
 		 'ratelimit', 1,
 		 'provision', 1,
 	       );
-local %pro = ( 'resels', 1 );
+local %pro = ( 'resels', 1,
+	       'styles', 1 );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
