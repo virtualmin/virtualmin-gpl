@@ -1977,13 +1977,17 @@ return ( );
 }
 
 # get_hostnames_for_ssl(&domain)
-# Returns a list of names that should be used in an SSL cert
+# Returns a list of names that should be used in an SSL cert, based on their
+# IP address and whether Apache is configured to accept them.
 sub get_hostnames_for_ssl
 {
 my ($d) = @_;
 my @rv = ( $d->{'dom'} );
+my ($defvirt) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 foreach my $sfx ("www", "mail") {
 	my $full = $sfx.".".$d->{'dom'};
+	my ($virt) = &get_apache_virtual($full, $d->{'web_port'});
+	next if (!$virt || $virt ne $defvirt);
 	if ($d->{'dns'}) {
 		my $recs = &get_domain_dns_records($d);
 		my ($r) = grep { $_->{'name'} eq $full."." } @$recs;
