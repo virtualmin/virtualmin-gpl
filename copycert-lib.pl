@@ -343,25 +343,42 @@ if ($cadata) {
 sub copy_webmin_ssl_service
 {
 my ($d) = @_;
+my $homecert = &is_under_directory($d->{'home'}, $d->{'ssl_cert'});
 
 # Copy to appropriate config dir
 my $dir = $config_directory;
 &$first_print(&text('copycert_webmindir', "<tt>$dir</tt>"));
-my $certfile = "$dir/$d->{'dom'}.cert";
-&lock_file($certfile);
-&copy_source_dest($d->{'ssl_cert'}, $certfile);
-&unlock_file($certfile);
+my $certfile;
+if ($homecert) {
+	$certfile = "$dir/$d->{'dom'}.cert";
+	&lock_file($certfile);
+	&copy_source_dest($d->{'ssl_cert'}, $certfile);
+	&unlock_file($certfile);
+	}
+else {
+	$certfile = $d->{'ssl_cert'};
+	}
 if ($d->{'ssl_key'}) {
-	$keyfile = "$dir/$d->{'dom'}.key";
-	&lock_file($keyfile);
-	&copy_source_dest($d->{'ssl_key'}, $keyfile);
-	&unlock_file($keyfile);
+	if ($homecert) {
+		$keyfile = "$dir/$d->{'dom'}.key";
+		&lock_file($keyfile);
+		&copy_source_dest($d->{'ssl_key'}, $keyfile);
+		&unlock_file($keyfile);
+		}
+	else {
+		$keyfile = $d->{'ssl_key'};
+		}
 	}
 if ($d->{'ssl_chain'}) {
-	$chainfile = "$dir/$d->{'dom'}.chain";
-	&lock_file($chainfile);
-	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
-	&unlock_file($chainfile);
+	if ($homecert) {
+		$chainfile = "$dir/$d->{'dom'}.chain";
+		&lock_file($chainfile);
+		&copy_source_dest($d->{'ssl_chain'}, $chainfile);
+		&unlock_file($chainfile);
+		}
+	else {
+		$chainfile = $d->{'ssl_chain'};
+		}
 	}
 &$second_print($text{'setup_done'});
 
