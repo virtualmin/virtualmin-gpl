@@ -4109,7 +4109,7 @@ if (&can_restore_domain()) {
 	}
 if (&can_backup_keys()) {
 	# Show list of backup keys
-	push(@links, "list_bkeys.cgi");
+	push(@links, "pro/list_bkeys.cgi");
 	push(@titles, $text{'index_bkeys'});
 	push(@descs, $text{'index_bkeysdesc'});
 	push(@codes, 'bkeys');
