@@ -907,7 +907,7 @@ local ($file, $d) = @_;
 return undef if (!-r $file);
 local %rv;
 local $_;
-local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -text";
+local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -startdate -text";
 if ($d && &is_under_directory($d->{'home'}, $file)) {
 	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
 	}
@@ -962,6 +962,9 @@ while(<OUT>) {
 		}
 	if (/notAfter=(.*)/) {
 		$rv{'notafter'} = $1;
+		}
+	if (/notBefore=(.*)/) {
+		$rv{'notbefore'} = $1;
 		}
 	if (/Subject\s+Alternative\s+Name/i) {
 		local $alts = <OUT>;
@@ -2019,9 +2022,15 @@ foreach my $d (&list_domains()) {
 	# Is the current cert even from Let's Encrypt?
 	next if ($info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
 
+	# Figure out when the cert was last renewed. This is the max of the
+	# date in the cert and the time recorded in Virtualmin
+	my $ltime = $info->{'notbefore'};
+	$ltime = $d->{'letsencrypt_last'}
+		if ($d->{'letsencrypt_last'} > $ltime);
+
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 5 days of expiry
-	my $age = time() - $d->{'letsencrypt_last'};
+	my $age = time() - $ltime;
 	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
 	    $expiry && $expiry - time() < 5 * 24 * 60 * 60) {
 	
