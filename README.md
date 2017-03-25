@@ -1,4 +1,5 @@
-# virtualmin-gpl
+# Virtuamin
+
 Virtualmin virtual-server web hosting control panel module for Webmin.
 
 Virtualmin is a full-featured open source web hosting control panel for Linux and \*BSD systems. This is the core virtual-server module, and there are a couple dozen additional plugins for Virtualmin, to provide additional features, like nginx support, SQLite and Oracle database support, support for other DNS and mail servers, etc. You'll need a full LAMP (or LEMP) stack, plus Webmin, to make this useful. There is an easy to use install script available from [Virtualmin.com](https://www.virtualmin.com/download) that will install everything you need on supported platforms (CentOS, Ubuntu, and Debian, at this time).
