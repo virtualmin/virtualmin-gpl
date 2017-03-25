@@ -29,7 +29,7 @@ Virtualmin includes the following features (and more):
   - Big community of users (over 100,000 active installs)
   - Based on Webmin! (over a million installations worldwide!)
 
-Virtualmin has been in active development since 2005, averaging a new release every couple of months.
+Virtualmin has been in active development since ~2003, averaging a new release every couple of months.
 
 # Getting Support
 
