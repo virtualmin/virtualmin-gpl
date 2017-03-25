@@ -26,10 +26,10 @@ Virtualmin includes the following features (and more):
   - Comprehensive CLI and remote API
   - Powerful HTML5/JS file manager
   - Tons of plugins
-  - Big community of users (over 100,000 active installs)
+  - Big community of users (over 100,000 active installations)
   - Based on Webmin! (over a million installations worldwide!)
 
-Virtualmin has been in active development since ~2003, averaging a new release every couple of months.
+Virtualmin has been under consistent development since ~2003, averaging a new release every couple of months.
 
 # Getting Support
 
@@ -43,5 +43,5 @@ Bugs can be reported here at github in the issue tracker or at the ticket tracke
 
 # Extending Virtualmin
 
-The best way to extend Virtualmin is usually through plugins. Virtualmin plugins are merely Webmin modules, with a few extra files. Webmin module development is documented in the [Webmin Wiki](http://doxfer.webmin.com/Webmin/ModuleDevelopment), and lots of example plugins exist in our other repos (e.g. virtualmin-nginx is a good example of extending core functionality with plugins).
+The best way to extend Virtualmin is usually through plugins. Virtualmin plugins are merely Webmin modules, with a few extra files, and some hooks into the Virtualmin API. Webmin module development is documented in the [Webmin Wiki](http://doxfer.webmin.com/Webmin/ModuleDevelopment), and lots of example plugins exist in our other repos (e.g. virtualmin-nginx is a good example of extending core functionality with plugins).
 
