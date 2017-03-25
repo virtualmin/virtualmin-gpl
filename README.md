@@ -1,4 +1,4 @@
-# Virtuamin
+# Virtualmin
 
 Virtualmin virtual-server web hosting control panel module for Webmin.
 
