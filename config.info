@@ -93,16 +93,16 @@ auto_letsencrypt=Request Let's Encrypt certificate at domain creation time?,1,1-
 auto_redirect=Redirect HTTP to HTTPS by default?,1,1-Yes,0-No
 tlsa_records=Create TLSA DNS records for SSL certificates,1,1-Yes,0-No
 
-line6.5=Reseller settings,11
+line6.5=Reseller settings (Pro Only),11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
 reseller_modules=Additional modules for resellers,15,modules,reseller_modules
 reseller_unix=Create Unix user for new resellers?,1,1-Yes,0-No
 reseller_pre_command=Command to run before making changes to a reseller,0
 reseller_post_command=Command to run after making changes to a reseller,0
+from_reseller=From: address to email sent to domain owners,1,1-Reseller's address (if domain is hosted locally),2-Reseller's address (always),0-Address set above
 
 line4=Actions upon server and user creation,11
 from_addr=From: address for email sent by Virtualmin,3,Webmin default
-from_reseller=From: address to email sent to domain owners,1,1-Reseller's address (if domain is hosted locally),2-Reseller's address (always),0-Address set above
 pre_command=Command to run before making changes to a server,0
 post_command=Command to run after making changes to a server,0
 output_command=Always show output from pre and post commands?,1,1-Yes,0-Only on failure
