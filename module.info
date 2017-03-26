@@ -8,7 +8,6 @@ desc_de=Virtualmin Virtuelle Server
 desc_fr=Serveurs virtuels Virtualmin
 readonly=1
 feedback=feedback@webmin.com
-virtualmin=pro
 desc_tr=Virtualmin Sanal Sunucular&#305;
 desc_nl=Virtualmin Virtuele Servers
 desc_cz=Virtuální servery Virtualmin
