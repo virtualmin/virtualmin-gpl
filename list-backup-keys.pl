@@ -1,5 +1,4 @@
 #!/usr/local/bin/perl
-# fooo
 
 =head1 list-backup-keys.pl
 
