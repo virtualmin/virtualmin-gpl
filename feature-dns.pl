@@ -3639,6 +3639,10 @@ foreach my $t ("rsa", "dsa", "ecdsa", "ed25519") {
 @need = grep { defined($_) } @need;
 @need = grep { !$done{$_->{'name'},$_->{'values'}->[0]}++ } @need;
 
+# Filter out clashes with CNAMEs
+my %cnames = map { $_->{'name'}, $_ } grep { $_->{'type'} eq 'CNAME' } @$recs;
+@need = grep { !$cnames{$_->{'name'}} } @need;
+
 if ($force == 2) {
 	# Just removing records
 	@need = ();
