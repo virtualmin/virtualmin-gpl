@@ -24,7 +24,7 @@ $user = "root";
 while(@ARGV) {
         $a = shift(@ARGV);
         if ($a eq "--dir") {
-                $dir = shift(@ARGV);
+                push(@dirs, shift(@ARGV));
                 }
 	elsif ($a eq "--key") {
 		$key = shift(@ARGV);
@@ -50,24 +50,26 @@ while(@ARGV) {
         }
 
 # Check for needed args
-$dir || &usage("Missing --dir followed by SVN directory");
+@dirs || &usage("Missing --dir followed by Git directory");
 $key || &usage("Missing --key followed by GPG key email");
 $ssh_user || &usage("Missing --ssh-user followed by remote SSH user");
 $ssh_host || &usage("Missing --ssh-user followed by SSH server hostname");
 $ssh_dir || &usage("Missing --ssh-user followed by SSH server directory");
 
 # Run an SVN update to get checked-in scripts
-print "Updating scripts from GIT ..\n";
-system("cd ".quotemeta($dir)." && su $user -c 'git pull'");
-if ($?) {
-	print ".. SVN failed!\n";	
-	exit(1);
+print "Updating scripts from Git ..\n";
+foreach my $dir (@dirs) {
+	system("cd ".quotemeta($dir)." && su $user -c 'git pull'");
+	if ($?) {
+		print ".. Git failed!\n";	
+		exit(1);
+		}
 	}
 print ".. done\n";
 
 # Build list of scripts and versions
 print "Building list of scripts and versions ..\n";
-@scripts_directories = ( $dir );
+@scripts_directories = ( @dirs );
 @plugins = ( );
 @snames = &list_scripts();
 foreach $sname (@snames) {
@@ -89,7 +91,7 @@ else {
 
 # Write out version file
 print "Saving versions file ..\n";
-$vfile = "$dir/scripts.txt";
+$vfile = "$dirs[0]/scripts.txt";
 &open_tempfile(VFILE, ">$vfile");
 foreach $script (@scripts) {
 	&print_tempfile(VFILE, $script->{'name'}."\t".
@@ -109,7 +111,7 @@ if ($?) {
 print ".. done\n";
 
 # GPG sign any new script files
-foreach my $sfile (glob("$dir/*.pl")) {
+foreach my $sfile (map { glob("$_/*.pl") } @dirs) {
 	$sigfile = $sfile."-sig.asc";
 	@st = stat($sfile);
 	@sigst = stat($sigfile);
@@ -128,7 +130,8 @@ foreach my $sfile (glob("$dir/*.pl")) {
 # Upload via SSH
 print "Uploading via SCP to $ssh_host ..\n";
 $snames = "{".join(",", @upload)."}.pl*";
-system("su $user -c 'scp $dir/$snames $dir/scripts.txt* ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
+system("su $user -c 'scp ".join(" ", map { "$_/$snames" } @dirs).
+       " $dirs[0]/scripts.txt* ${ssh_user}\@${ssh_host}:${ssh_dir}/'");
 if ($?) {
 	print ".. SCP failed!\n";
 	exit(4);
