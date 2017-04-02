@@ -230,3 +230,4 @@ backup_rotated=0
 tlsa_records=0
 home_backup=virtualmin-backup
 show_validation=0
+jailkit_root=/home/chroot
