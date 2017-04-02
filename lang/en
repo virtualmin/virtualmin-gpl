@@ -1933,6 +1933,8 @@ check_ehomebase=The home base directory $1 is not an absolute path. This can be 
 check_ehomebase2=The home base directory $1 is not an absolute path. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
 check_ehomeformat=The home directory format $1 does not contain the username or domain name. This can be corrected on the <a href='$2'>Virtualmin configuration</a> page.
 check_ehomestyle=The home directory style is set to "Just base directory", which is unusable with Virtualmin. This can be corrected on the <a href='$2'>Users and Groups module configuration</a> page.
+check_jailkitok=Chroot jails are available on this system
+check_jailkiterr=Chroot jails are not available : $1
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
@@ -6846,7 +6848,9 @@ php_fpmnoinit2=No FPM server bootup action found
 
 jailkit_emodule=The Webmin Jailkit module not installed
 jailkit_emodule2=The Jailkit software is not installed on your system
-check_jailkitok=Chroot jails are available on this system
-check_jailkiterr=Chroot jails are not available : $1
+jailkit_einit=Failed to initialize jail : $1
+jailkit_elinux=Jailkit is only supported on Linux systems
+jailkit_emount=Failed to BIND mount home directory : $1
+jailkit_euser=Domain user $1 does not exist!
 
 __norefs=1
