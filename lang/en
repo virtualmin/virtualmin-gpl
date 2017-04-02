@@ -6844,4 +6844,9 @@ php_fpmeinit=.. failed : $1
 php_fpmnodir=No FPM configuration directory found
 php_fpmnoinit2=No FPM server bootup action found
 
+jailkit_emodule=The Webmin Jailkit module not installed
+jailkit_emodule2=The Jailkit software is not installed on your system
+check_jailkitok=Chroot jails are available on this system
+check_jailkiterr=Chroot jails are not available : $1
+
 __norefs=1

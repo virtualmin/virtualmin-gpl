@@ -21,7 +21,8 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
 		 "domainname", "commands", "connectivity", "plans",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
-		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert") {
+		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
+		 "jailkit") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -14724,6 +14725,15 @@ if (&foreign_check("software")) {
 			&$second_print(&text('check_packageok'));
 			}
 		}
+	}
+
+# Check if jailkit support is available
+my $err = &check_jailkit_support();
+if ($err) {
+	&$second_print(&text('check_jailkiterr', $err));
+	}
+else {
+	&$second_print(&text('check_jailkitok'));
 	}
 
 # Check for disabled features that are in use
