@@ -250,6 +250,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--enable-jail") {
+		$jail = 1;
+		}
+	elsif ($a eq "--disable-jail") {
+		$jail = 0;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -385,6 +391,12 @@ if ($planfeatures) {
 	$plan->{'featurelimits'} eq 'none' &&
 		&usage("--plan-features cannot be used if the plan has ".
 		       "no features");
+	}
+
+# Make sure jails are available
+if (defined($jail)) {
+	my $err = &check_jailkit_support();
+	$err && &usage("Chroot jails are not supported on this system : $err");
 	}
 
 # Find all other domains to be changed
@@ -601,6 +613,20 @@ elsif (!$dom->{'virt6'} && $old->{'virt6'}) {
 	&delete_virt6($old);
 	}
 
+# Apply any jail change
+if (defined($jail)) {
+	my $err;
+	if ($jail) {
+		print "Enabling chroot jail ..\n";
+		$err = &enable_domain_jailkit($dom);
+		}
+	else {
+		print "Disabling chroot jail ..\n";
+		$err = &disable_domain_jailkit($dom);
+		}
+	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+	}
+
 # If the plan is being applied, update features
 if ($planfeatures) {
 	if ($plan->{'featurelimits'}) {
@@ -790,6 +816,7 @@ print "                        [--remove-exclude directory]*\n";
 print "                        [--add-db-exclude db|db.table]*\n";
 print "                        [--remove-db-exclude db|db.table]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
+print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }

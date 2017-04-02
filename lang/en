@@ -6848,9 +6848,12 @@ php_fpmnoinit2=No FPM server bootup action found
 
 jailkit_emodule=The Webmin Jailkit module not installed
 jailkit_emodule2=The Jailkit software is not installed on your system
+jailkit_emodule3=The Webmin Jailkit module cannot be used - maybe some Perl dependencies are missing?
 jailkit_einit=Failed to initialize jail : $1
 jailkit_elinux=Jailkit is only supported on Linux systems
 jailkit_emount=Failed to BIND mount home directory : $1
 jailkit_euser=Domain user $1 does not exist!
+jailkit_eparent=Jails can only be enabled for top-level virtual servers
+jailkit_emkdir=Failed to create directory : $1
 
 __norefs=1
