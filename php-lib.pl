@@ -787,7 +787,6 @@ return @rv;
 sub list_available_php_versions
 {
 local ($d, $mode) = @_;
-local @rv;
 &require_apache();
 
 # In FPM mode, only the PHP version run by the FPM package can be used
@@ -819,13 +818,6 @@ if ($d) {
 		else {
 			return ( );
 			}
-		}
-	}
-else {
-	# If no domain is given, included mod_php versions if active
-	my $v = &get_apache_mod_php_version();
-	if ($v) {
-		push(@rv, [ $v, undef ]);
 		}
 	}
 
@@ -863,7 +855,14 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Return results as list
-return map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
+my @rv = map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
+
+# If no domain is given, included mod_php versions if active
+my $v = &get_apache_mod_php_version();
+if ($v) {
+	push(@rv, [ $v, undef ]);
+	}
+return @rv;
 }
 
 # php_command_for_version(ver)
