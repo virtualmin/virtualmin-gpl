@@ -40,7 +40,7 @@ else {
 	# Validate inputs
 	&error_setup($text{'admin_err'});
 	$tmpl = &get_template($d->{'template'});
-	$in{'name'} =~ /^[a-z0-9\.\_\-]+$/ || &error($text{'admin_ename'});
+	$in{'name'} =~ /^[a-z0-9\.\_\-]+$/i || &error($text{'admin_ename'});
 	$in{'name'} eq 'webmin' && &error($text{'resel_ewebmin'});
 	if ($tmpl->{'extra_prefix'} ne "none") {
 		# Force-prepend prefix
