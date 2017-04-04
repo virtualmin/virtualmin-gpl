@@ -6009,6 +6009,7 @@ mkdir($temp, 0700);
 		 &make_tar_command("xf", quotemeta($file)));
 foreach my $resel (&list_resellers()) {
 	&acl::delete_user($resel->{'name'});
+	&delete_reseller_unix_user($resel);
 	}
 local %miniserv;
 &get_miniserv_config(\%miniserv);
