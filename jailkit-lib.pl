@@ -71,10 +71,12 @@ if (!$already) {
 		return &text('jailkit_emount', $err);
 		}
 	}
+foreach $f (&mount::files_to_lock()) { &lock_file($f); }
 my ($already) = grep { $_->[0] eq $jailhome } &mount::list_mounts();
 if (!$already) {
 	&mount::create_mount($jailhome, $d->{'home'}, "bind", "defaults");
 	}
+foreach $f (&mount::files_to_lock()) { &unlock_file($f); }
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
@@ -83,8 +85,11 @@ if (!$uinfo) {
 	return &text('jailkit_euser', $d->{'user'});
 	}
 my $olduinfo = { %$uinfo };
-my $oldshell = $uinfo->{'shell'};
-$uinfo->{'shell'} = &has_command("jk_chrootsh") || "/usr/sbin/jk_chrootsh";
+if ($uinfo->{'shell'} !~ /\/jk_chrootsh$/) {
+	$d->{'unjailed_shell'} = $uinfo->{'shell'};
+	$uinfo->{'shell'} = &has_command("jk_chrootsh") ||
+			    "/usr/sbin/jk_chrootsh";
+	}
 $uinfo->{'home'} = $dir."/.".$d->{'home'};
 &foreign_call($usermodule, "set_user_envs", $uinfo,
 	      'MODIFY_USER', $plainpass, [], $olduinfo);
@@ -93,7 +98,6 @@ $uinfo->{'home'} = $dir."/.".$d->{'home'};
 &foreign_call($usermodule, "made_changes");
 
 # Create a fake /etc/passwd file in the jail
-# XXX
 &create_jailkit_passwd_file($d);
 
 return undef;
@@ -106,14 +110,53 @@ sub disable_domain_jailkit
 my ($d) = @_;
 $d->{'parent'} && return $text{'jailkit_eparent'};
 &foreign_require("jailkit");
+my $dir = &domain_jailkit_dir($d);
 
 # Switch back the user's shell and home dir
+&require_useradmin();
+my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } &list_all_users();
+if (!$uinfo) {
+	return &text('jailkit_euser', $d->{'user'});
+	}
+my $olduinfo = { %$uinfo };
+if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
+	$uinfo->{'shell'} = $d->{'unjailed_shell'};
+	delete($d->{'unjailed_shell'});
+	}
+$uinfo->{'home'} =~ s/^\Q$dir\E\/\.//;
+&foreign_call($usermodule, "set_user_envs", $uinfo,
+	      'MODIFY_USER', $plainpass, [], $olduinfo);
+&foreign_call($usermodule, "making_changes");
+&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+&foreign_call($usermodule, "made_changes");
 
 # Remove the BIND mount
-# XXX umount may fail?
+&foreign_require("mount");
+my $jailhome = $dir.$d->{'home'};
+foreach $f (&mount::files_to_lock()) { &lock_file($f); }
+my @mounted = &mount::list_mounted();
+my ($mounted) = grep { $_->[0] eq $jailhome } @mounted;
+if ($mounted) {
+	my $err = &mount::unmount_dir(
+		$mounted->[0], $mounted->[1], $mounted->[2], undef, 1);
+	if ($err) {
+		return &text('jailkit_eumount', $err);
+		}
+	}
+foreach $f (&mount::files_to_lock()) { &unlock_file($f); }
+my @mounts = &mount::list_mounts();
+my ($mount) = grep { $_->[0] eq $jailhome } @mounts;
+if ($mount) {
+	my $idx = &indexof($mount, @mounts);
+	if ($idx > 0) {
+		&mount::delete_mount($idx);
+		}
+	}
 
 # Delete the jail dir
 # XXX
+
+return undef;
 }
 
 # get_domain_jailkit(&domain)
@@ -156,7 +199,7 @@ foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
 	if ($shell =~ /\/jk_chrootsh$/) {
 		# Put back real shell
-		$shell = "/bin/bash";
+		$shell = $u->{'owner'} ? $d->{'unjailed_shell'} : "/bin/false";
 		}
 	my $home = $u->{'home'};
 	$home =~ s/^\Q$dir\E\/\.//;
