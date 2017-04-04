@@ -858,9 +858,11 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 my @rv = map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
 
 # If no domain is given, included mod_php versions if active
-my $v = &get_apache_mod_php_version();
-if ($v) {
-	push(@rv, [ $v, undef ]);
+if (!$d) {
+	my $v = &get_apache_mod_php_version();
+	if ($v) {
+		push(@rv, [ $v, undef ]);
+		}
 	}
 return @rv;
 }
@@ -1828,10 +1830,24 @@ return 1;
 # If Apache has mod_phpX installed, return the version number
 sub get_apache_mod_php_version
 {
+return $apache_mod_php_version_cache if ($apache_mod_php_version_cache);
 &require_apache();
-return $apache::httpd_modules{'mod_php4'} ? 4 :
-       $apache::httpd_modules{'mod_php5'} ? 5 :
-       $apache::httpd_modules{'mod_php7'} ? "7.0" : undef;
+my $major = $apache::httpd_modules{'mod_php4'} ? 4 :
+	    $apache::httpd_modules{'mod_php5'} ? 5 :
+            $apache::httpd_modules{'mod_php7'} ? "7.0" : undef;
+return undef if (!$major);
+foreach my $php ("php$major", "php") {
+	next if (!&has_command($php));
+	&clean_environment();
+	my $out = &backquote_command("$php -v 2>&1 </dev/null");
+	&reset_environment();
+	if ($out =~ /PHP\s+(\d+\.\d+)/) {
+		$major = $1;
+		last;
+		}
+	}
+$apache_mod_php_version_cache = $major;
+return $major;
 }
 
 1;
