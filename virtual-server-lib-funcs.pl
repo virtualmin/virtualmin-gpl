@@ -1497,6 +1497,11 @@ if ($_[1]) {
 if ($_[1] && $_[1]->{'mail'}) {
 	&create_everyone_file($_[1]);
 	}
+
+# Sync up jail password file
+if ($_[1]) {
+	&create_jailkit_passwd_file($_[1]);
+	}
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
@@ -2020,6 +2025,11 @@ if ($_[0]->{'domainowner'}) {
 if ($_[2] && $_[2]->{'mail'}) {
 	&create_everyone_file($_[2]);
 	}
+
+# Sync up jail password file
+if ($_[2]) {
+	&create_jailkit_passwd_file($_[2]);
+	}
 }
 
 # delete_user(&user, &domain)
@@ -2218,7 +2228,14 @@ if ($_[1] && $_[1]->{'mail'}) {
 	&create_everyone_file($_[1]);
 	}
 
-&sync_alias_virtuals($_[1]);
+if ($_[1]) {
+	&sync_alias_virtuals($_[1]);
+	}
+
+# Sync up jail password file
+if ($_[1]) {
+	&create_jailkit_passwd_file($_[1]);
+	}
 }
 
 # set_usermin_imap_password(&user)
