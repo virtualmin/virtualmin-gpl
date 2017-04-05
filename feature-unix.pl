@@ -479,6 +479,11 @@ if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 		if ($d->{'gid'} != $group->{'gid'});
 	}
 
+# Make sure home matches the domain (or it's chroot)
+return &text('validate_euserhome', $user->{'user'}, $d->{'home'}, $user->{'home'})
+	if ($user->{'home'} ne $d->{'home'} &&
+	    $user->{'home'} !~ /\/\.\Q$d->{'home'}\E$/);
+
 # Make sure encrypted password matches
 if (!$cannot_rehash_password && $d->{'pass'}) {
 	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
