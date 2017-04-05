@@ -160,11 +160,14 @@ return undef;
 }
 
 # get_domain_jailkit(&domain)
+# Returns the root if jailing is enabled for the domain, undef otherwise
 sub get_domain_jailkit
 {
 my ($d) = @_;
 &foreign_require("jailkit");
-# XXX
+my $dir = &domain_jailkit_dir($d);
+my $uinfo = &get_domain_owner($d, 1, 1, 1);
+return $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
 # create_jailkit_passwd_file(&domain)

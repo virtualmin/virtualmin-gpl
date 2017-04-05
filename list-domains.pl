@@ -320,6 +320,9 @@ if ($multi) {
 				}
 			}
 		print "    Home directory: $d->{'home'}\n";
+		if (!$d->{'parent'} && ($jail = &get_domain_jailkit($d))) {
+			print "    Jail directory: $jail\n";
+			}
 		if (&domain_has_website($d)) {
 			$wd = $d->{'alias'} ? &get_domain($d->{'alias'}) : $d;
 			print "    HTML directory: ",&public_html_dir($wd),"\n";
