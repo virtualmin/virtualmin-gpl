@@ -1987,8 +1987,8 @@ sub get_hostnames_for_ssl
 my ($d) = @_;
 my @rv = ( $d->{'dom'} );
 my ($defvirt) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-foreach my $sfx ("www", "mail") {
-	my $full = $sfx.".".$d->{'dom'};
+foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
+		  &get_autoconfig_hostname($d)) {
 	my ($virt) = &get_apache_virtual($full, $d->{'web_port'});
 	next if (!$virt || $virt ne $defvirt);
 	if ($d->{'dns'}) {
