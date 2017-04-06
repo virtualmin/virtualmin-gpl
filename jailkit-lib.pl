@@ -40,7 +40,7 @@ $d->{'parent'} && return $text{'jailkit_eparent'};
 
 # Create root dir if missing
 if (!-d $config{'jailkit_root'}) {
-	&make_dir_logged($config{'jailkit_root'}, 0755) ||
+	&make_dir($config{'jailkit_root'}, 0755) ||
 		return &text('jailkit_emkdir', $!);
 	}
 
@@ -61,7 +61,7 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
 &foreign_require("mount");
 my $jailhome = $dir.$d->{'home'};
 if (!-d $jailhome) {
-	&make_dir_logged($jailhome, 755, 1);
+	&make_dir($jailhome, 755, 1);
 	}
 my ($already) = grep { $_->[0] eq $jailhome } &mount::list_mounted();
 if (!$already) {
@@ -177,6 +177,7 @@ sub create_jailkit_passwd_file
 {
 my ($d) = @_;
 my $dir = &domain_jailkit_dir($d);
+return undef if (!-d $dir);		# Jailing isn't enabled
 
 # Build a list of users and groups that are either system-related, or
 # associated with this domain
@@ -202,7 +203,8 @@ foreach my $u (@ucreate) {
 	my $shell = $u->{'shell'};
 	if ($shell =~ /\/jk_chrootsh$/) {
 		# Put back real shell
-		$shell = $u->{'owner'} ? $d->{'unjailed_shell'} : "/bin/false";
+		$shell = $u->{'domainowner'} ? $d->{'unjailed_shell'}
+					     : "/bin/false";
 		}
 	my $home = $u->{'home'};
 	$home =~ s/^\Q$dir\E\/\.//;

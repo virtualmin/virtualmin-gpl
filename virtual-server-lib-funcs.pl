@@ -7886,6 +7886,19 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
 		}
 	}
 
+# Put the user in a jail if possible
+if ($dom->{'jail'} && !&check_jailkit_support()) {
+	&$first_print($text{'setup_jail'});
+	my $err = &enable_domain_jailkit($dom);
+	if ($err) {
+		&$second_print(&text('setup_ejail', $err));
+		}
+	else {
+		&$second_print(&text('setup_jailed',
+				     &domain_jailkit_dir($dom)));
+		}
+	}
+
 # Run the after creation command
 if (!$nopost) {
 	&run_post_actions();
@@ -11126,6 +11139,23 @@ else {
 	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
 	return $user;
 	}
+}
+
+# change_domain_shell(&domain, shell-path)
+# Change the shell for a domain user, taking chroot into account
+sub change_domain_shell
+{
+my ($d, $shell) = @_;
+my $user = &get_domain_owner($d);
+my $olduser = { %$user };
+if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
+	$d->{'unjailed_shell'} = $shell;
+	&save_domain($d);
+	}
+else {
+	$user->{'shell'} = $shell;
+	}
+&modify_user($user, $olduser, $d);
 }
 
 # new_password_input(name)

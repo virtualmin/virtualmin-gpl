@@ -313,10 +313,7 @@ if (defined($allowedscripts)) {
 
 # Update the domain owner user's shell
 if ($shell && $dom->{'unix'}) {
-	$user = &get_domain_owner($dom);
-	$olduser = { %$user };
-	$user->{'shell'} = $shell->{'shell'};
-	&modify_user($user, $olduser, $dom);
+	&change_domain_shell($dom, $shell->{'shell'});
 	}
 
 &run_post_actions();

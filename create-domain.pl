@@ -49,6 +49,10 @@ login. However, you can specify a different password with the --mysql-pass or
 that database type. These options are only available for top-level virtual
 servers though.
 
+If your system supports chroot jails with Jailkit, the C<--enable-jail>
+flag can be used to force all commands run by the domain to execute in
+a jail. Conversely, this can be turned off with the C<--disable-jail> flag.
+
 By default, virtual server creation will be blocked if any warnings are 
 detected, such as an existing database or SSL certificate conflict. These can
 be overridden with the C<--skip-warnings> flag.
@@ -339,6 +343,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--letsencrypt") {
 		$letsencrypt = 1;
 		}
+	elsif ($a eq "--enable-jail") {
+		$jail = 1;
+		}
+	elsif ($a eq "--disable-jail") {
+		$jail = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -372,6 +382,9 @@ $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 $plan || &usage("Plan does not exist");
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
+if (!defined($jail)) {
+	$jail = $tmpl->{'unix_jail'};
+	}
 
 if ($ip eq "allocate") {
 	# Allocate IP now
@@ -740,6 +753,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'subprefix', $subprefix,
 	 'hashpass', $hashpass,
 	 'auto_letsencrypt', $letsencrypt,
+	 'jail', $jail,
         );
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
@@ -925,6 +939,7 @@ foreach $f (&list_feature_plugins()) {
 print "                        [--skip-warnings]\n";
 print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
+print "                        [--enable-jail | --disable-jail]\n";
 exit(1);
 }
 

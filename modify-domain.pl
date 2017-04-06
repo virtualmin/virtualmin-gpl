@@ -44,6 +44,10 @@ be given, followed by the external IP address to use. To revert to using the
 real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
 DNS records managed by Virtualmin will be updated.
 
+If your system supports chroot jails with Jailkit, the C<--enable-jail>
+flag can be used to force all commands run by the domain to execute in
+a jail. Conversely, this can be turned off with the C<--disable-jail> flag.
+
 By default, virtual server plan changes that modify features will be blocked
 if any warnings are detected, such as an existing database or SSL certificate
 conflict. These can be overridden with the C<--skip-warnings> flag.
@@ -624,6 +628,7 @@ if (defined($jail)) {
 		print "Disabling chroot jail ..\n";
 		$err = &disable_domain_jailkit($dom);
 		}
+	$d->{'jail'} = $jail if (!$err);
 	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
 	}
 
