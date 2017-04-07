@@ -685,14 +685,15 @@ if ($multi) {
 			print "    Allowed scripts: ",
 				($d->{'allowedscripts'} || "All"),"\n";
 
-			($shell) = grep { $_->{'shell'} eq $duser->{'shell'} }
+			$shellcmd = &get_domain_shell($d);
+			($shell) = grep { $_->{'shell'} eq $shellcmd }
 					@shells;
 			if ($shell) {
 				print "    Shell type: $shell->{'id'}\n";
 				print "    Login permissions: ",
 				      "$shell->{'desc'}\n";
 				}
-			print "    Shell command: $duser->{'shell'}\n";
+			print "    Shell command: $shellcmd\n";
 			}
 
 		# Show resource limits

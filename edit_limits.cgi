@@ -182,9 +182,9 @@ if (&can_webmin_modules()) {
 
 if (&can_edit_shell() && $d->{'unix'}) {
 	# Login shell, which determines FTP/SSH access
-	$user = &get_domain_owner($d, 1);
+	my $shell = &get_domain_shell($d);
 	print &ui_table_row(&hlink($text{'limits_shell'}, "limits_shell"),
-		    &available_shells_menu("shell", $user->{'shell'}, 'owner'));
+		    &available_shells_menu("shell", $shell, 'owner'));
 	}
 
 print &ui_hidden_table_end("other");

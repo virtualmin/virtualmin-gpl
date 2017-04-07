@@ -11142,6 +11142,20 @@ else {
 	}
 }
 
+# get_domain_shell(&domain)
+# Return the real shell for a domain's unix user
+sub get_domain_shell
+{
+my ($d) = @_;
+my $user = &get_domain_owner($d, 1, 1, 1);
+if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
+	return $d->{'unjailed_shell'};
+	}
+else {
+	return $user->{'shell'};
+	}
+}
+
 # change_domain_shell(&domain, shell-path)
 # Change the shell for a domain user, taking chroot into account
 sub change_domain_shell
