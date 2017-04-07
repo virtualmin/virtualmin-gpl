@@ -23,7 +23,8 @@ $key ||= $serial{'LicenseKey'};
 	       $virtualmin_licence_port,
 	       "$virtualmin_licence_prog?id=$hostid&".
 		"serial=$key&doms=".scalar(@doms)."&vps=$vps",
-	       \$out, \$error, undef, $virtualmin_licence_ssl);
+	       \$out, \$error, undef, $virtualmin_licence_ssl,
+	       undef, undef, 0, 0, 1);
 return (2, undef, "Failed to contact licence server : $error") if ($error);
 return $out =~ /^EXP\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ?
 	(3, $1, "The licence for this server expired on $1", $2, $3, $4) :
