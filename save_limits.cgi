@@ -79,12 +79,7 @@ if (defined(&list_scripts)) {
 &save_domain($d);
 if (defined($in{'shell'})) {
 	# Update shell
-	$user = &get_domain_owner($d);
-	$olduser = { %$user };
-	if ($olduser->{'shell'} ne $in{'shell'}) {
-		$user->{'shell'} = $in{'shell'};
-		&modify_user($user, $olduser, $d);
-		}
+	&change_domain_shell($d, $in{'shell'});
 	}
 &refresh_webmin_user($d);
 &run_post_actions();

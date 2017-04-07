@@ -284,9 +284,7 @@ foreach $d (@doms) {
 		$user = &get_domain_owner($d);
 		if ($user) {
 			&$first_print($text{'massdomains_shelling'});
-			$olduser = { %$user };
-			$user->{'shell'} = $in{'shell'};
-			&modify_user($user, $olduser, undef);
+			&change_domain_shell($d, $in{'shell'});
 			&$second_print($text{'setup_done'});
 			}
 		}
