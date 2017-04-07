@@ -4843,9 +4843,10 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 		}
 	elsif ($t == 4) {
 		$v =~ /^(\S+)/ || &error($text{'alias_etype4none'});
-		(-x $1) && &check_aliasfile($1, 0) ||
-		   $1 eq "if" || $1 eq "export" || &has_command("$1") ||
-			&error(&text('alias_etype4', $1));
+		my $prog = $1;
+		(-x $prog) && &check_aliasfile($prog, 0) ||
+		   $prog eq "if" || $prog eq "export" || &has_command($prog) ||
+			&error(&text('alias_etype4', $prog));
 		}
 	elsif ($t == 7 && !defined(getpwnam($v)) &&
 	       $config{'mail_system'} != 4 && $config{'mail_system'} != 5) {
