@@ -187,6 +187,15 @@ if (&can_edit_shell() && $d->{'unix'}) {
 		    &available_shells_menu("shell", $shell, 'owner'));
 	}
 
+if (!&check_jailkit_support()) {
+	# Chroot directory
+	my $jail = &get_domain_jailkit($d);
+	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
+		&ui_radio("jail", $jail ? 1 : 0,
+		  [ [ 1, $text{'yes'}.($jail ? " <tt>$jail</tt>" : "") ],
+		    [ 0, $text{'no'} ] ]));
+	}
+
 print &ui_hidden_table_end("other");
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
 

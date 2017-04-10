@@ -82,6 +82,22 @@ if (defined($in{'shell'})) {
 	&change_domain_shell($d, $in{'shell'});
 	}
 &refresh_webmin_user($d);
+
+# Update jail
+if (!&check_jailkit_support()) {
+	my $oldjail = &get_domain_jailkit($d);
+	if (!$oldjail && $in{'jail'}) {
+		# Setup jail for this user
+		$err = &enable_domain_jailkit($d);
+		&error(&text('limits_ejailon', $err)) if ($err);
+		}
+	elsif ($oldjail && !$in{'jail'}) {
+		# Tear down jail for this user
+		$err = &disable_domain_jailkit($d);
+		&error(&text('limits_ejailoff', $err)) if ($err);
+		}
+	}
+
 &run_post_actions();
 &webmin_log("limits", "domain", $d->{'dom'}, $d);
 

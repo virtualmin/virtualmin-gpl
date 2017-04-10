@@ -2720,6 +2720,9 @@ limits_shell_nologin=No login
 limits_shell_ftp=FTP only
 limits_shell_ssh=SSH and FTP
 limits_unshell=Using unknown shell $1
+limits_jail=Chroot jail domain Unix user?
+limits_ejailon=Failed to enable chroot jail : $1
+limits_ejailoff=Failed to disable chroot jail : $1
 
 rename_title=Change Domain Name
 rename_header=Virtual server domain name change options

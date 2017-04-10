@@ -50,7 +50,6 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
 		  "editors", "netutils") {
 	my $cmd = "jk_init -j ".quotemeta($dir)." ".$sect;
 	my ($out, $err);
-	# XXX log the command
 	&execute_command($cmd, undef, \$out, \$err);
 	if ($?) {
 		return &text('jailkit_einit', $err);
