@@ -350,6 +350,11 @@ if (!$_[0]->{'parent'}) {
 		&save_domain_resource_limits($_[0], { }, 1);
 		}
 
+	# Undo the chroot, if any
+	if (!&check_jailkit_support() && &get_domain_jailkit()) {
+		&disable_domain_jailkit($_[0]);
+		}
+
 	# Delete unix user
 	if ($uinfo) {
 		&$first_print($text{'delete_user'});
