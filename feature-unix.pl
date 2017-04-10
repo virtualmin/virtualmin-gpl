@@ -351,7 +351,7 @@ if (!$_[0]->{'parent'}) {
 		}
 
 	# Undo the chroot, if any
-	if (!&check_jailkit_support() && &get_domain_jailkit()) {
+	if (!&check_jailkit_support() && &get_domain_jailkit($_[0])) {
 		&disable_domain_jailkit($_[0]);
 		}
 
