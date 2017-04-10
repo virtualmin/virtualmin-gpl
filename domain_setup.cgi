@@ -390,6 +390,9 @@ if (!$parentuser) {
 					 $plan->{'realdomslimit'};
 		}
 	&set_capabilities_from_plan(\%dom, $plan);
+	if ($tmpl->{'ujail'}) {
+		$dom{'jail'} = $tmpl->{'ujail'};
+		}
 	}
 $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 		  $dom{'email'} ? $dom{'email'} :

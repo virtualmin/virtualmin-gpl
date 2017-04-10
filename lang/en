@@ -3131,6 +3131,7 @@ tmpl_eugroup=Missing or invalid default Unix group
 tmpl_esgroup=Missing or invalid secondary Unix group
 tmpl_ehashtypes=No password hash types selected
 tmpl_ushell=Initial Unix shell
+tmpl_jail=Chroot jail new domain Unix users?
 tmpl_uplainpass=Store clear text passwords?
 tmpl_uplainpassno=No, only store hashed passwords
 tmpl_hashtypes=Hashed password types to store

@@ -801,6 +801,14 @@ print &ui_table_row(&hlink($text{'tmpl_ushell'}, "template_ushell"),
 		"owner", 1),
 	0, 0, $text{'tmpl_ushelldef'}, [ "ushell" ]));
 
+# Chroot by default
+if (!&check_jailkit_support()) {
+	print &ui_table_row(&hlink($text{'tmpl_jail'}, "template_jail"),
+	    &ui_radio("ujail", $tmpl->{'ujail'},
+		      [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
+			[ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	}
+
 # Store plaintext passwords?
 print &ui_table_row(&hlink($text{'tmpl_uplainpass'}, "template_uplainpass"),
     &ui_radio("hashpass", $tmpl->{'hashpass'},
@@ -846,6 +854,11 @@ if ($in{"sgroup_mode"} == 2) {
 
 # Save initial shell
 $tmpl->{'ushell'} = &parse_none_def("ushell");
+
+# Chroot setting
+if (!&check_jailkit_support()) {
+	$tmpl->{'ujail'}= $in{'ujail'};
+	}
 
 # Save password type
 $tmpl->{'hashpass'} = $in{'hashpass'};

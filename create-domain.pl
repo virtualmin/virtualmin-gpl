@@ -382,9 +382,6 @@ $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 $plan || &usage("Plan does not exist");
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
-if (!defined($jail)) {
-	$jail = $tmpl->{'unix_jail'};
-	}
 
 if ($ip eq "allocate") {
 	# Allocate IP now
@@ -451,6 +448,12 @@ if (!$tlimit && !$anylimits) {
 # Make sure all needed args are set
 $domain || &usage("Missing domain name");
 $parentdomain || $pass || &usage("Missing password");
+if (!defined($jail) && !$parentdomain) {
+	$jail = $tmpl->{'ujail'};
+	}
+if ($jail && $parentdomain) {
+	&usage("--enable-jail can only be used for top-level virtual servers");
+	}
 if (&has_home_quotas() && !$parentdomain) {
 	$quota && $uquota || $tlimit || &usage("No quota specified");
 	}

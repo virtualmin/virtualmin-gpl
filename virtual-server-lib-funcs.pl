@@ -8746,6 +8746,7 @@ push(@rv, { 'id' => 0,
 	    'quota' => $config{'defquota'} || "none",
 	    'uquota' => $config{'defuquota'} || "none",
 	    'ushell' => $config{'defushell'} || "none",
+	    'ujail' => $config{'defujail'} || "none",
 	    'mailboxlimit' => $config{'defmailboxlimit'} eq "" ? "none" :
 			      $config{'defmailboxlimit'},
 	    'aliaslimit' => $config{'defaliaslimit'} eq "" ? "none" :
@@ -9062,6 +9063,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'defquota'} = $tmpl->{'quota'};
 	$config{'defuquota'} = $tmpl->{'uquota'};
 	$config{'defushell'} = $tmpl->{'ushell'};
+	$config{'defujail'} = $tmpl->{'ujail'};
 	$config{'defmailboxlimit'} = $tmpl->{'mailboxlimit'} eq 'none' ? undef :
 				     $tmpl->{'mailboxlimit'};
 	$config{'defaliaslimit'} = $tmpl->{'aliaslimit'} eq 'none' ? undef :
@@ -9194,7 +9196,7 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "web", "dns", "ftp", "frame", "user_aliases",
-		    "ugroup", "sgroup", "quota", "uquota", "ushell",
+		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
 		    "dbslimit", "aliaslimit", "bwlimit", "mongrelslimit","skel",
 		    "mysql_hosts", "mysql_mkdb", "mysql_suffix", "mysql_chgrp",
