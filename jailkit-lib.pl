@@ -27,7 +27,7 @@ return undef;
 sub domain_jailkit_dir
 {
 my ($d) = @_;
-return $config{'jailkit_root'}."/".$d->{'dom'};
+return $config{'jailkit_root'}."/".$d->{'id'};
 }
 
 # enable_domain_jailkit(&domain)
