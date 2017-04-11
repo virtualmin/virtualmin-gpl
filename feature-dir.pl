@@ -137,73 +137,90 @@ foreach my $dir (&virtual_server_directories($d)) {
 # Rename home directory if needed
 sub modify_dir
 {
+local ($d, $oldd) = @_;
+
 # Special case .. converting alias to non-alias, so some directories need to
 # be created
-if ($_[1]->{'alias'} && !$_[0]->{'alias'}) {
+if ($oldd->{'alias'} && !$d->{'alias'}) {
 	&$first_print($text{'save_dirunalias'});
-	local $tmpl = &get_template($_[0]->{'template'});
+	local $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'skel'} ne "none") {
-		local $uinfo = &get_domain_owner($_[0], 1);
+		local $uinfo = &get_domain_owner($d, 1);
 		&copy_skel_files(
-			&substitute_domain_template($tmpl->{'skel'}, $_[0]),
-			$uinfo, $_[0]->{'home'},
-			$_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
+			&substitute_domain_template($tmpl->{'skel'}, $d),
+			$uinfo, $d->{'home'},
+			$d->{'group'} || $d->{'ugroup'}, $d);
 		}
-	&create_standard_directories($_[0]);
+	&create_standard_directories($d);
 	&$second_print($text{'setup_done'});
 	}
 
 if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($_[1], 1);
+	&set_php_wrappers_writable($oldd, 1);
 	}
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+if ($d->{'home'} ne $oldd->{'home'}) {
 	# Move the home directory if changed, and if not already moved as
 	# part of parent
-	if (-d $_[1]->{'home'}) {
+	if (-d $oldd->{'home'}) {
 		&$first_print($text{'save_dirhome'});
 		if (defined(&set_php_wrappers_writable)) {
-			&set_php_wrappers_writable($_[0], 1);
+			&set_php_wrappers_writable($d, 1);
+			}
+		local $wasjailed = 0;
+		if (!&check_jailkit_support() && !$oldd->{'parent'} &&
+		    &get_domain_jailkit($oldd)) {
+			# Turn off jail for the old home
+			&disable_domain_jailkit($oldd);
+			$wasjailed = 1;
 			}
 		local $cmd = $config{'move_command'} || "mv";
-		$cmd .= " ".quotemeta($_[1]->{'home'}).
-			" ".quotemeta($_[0]->{'home'});
+		$cmd .= " ".quotemeta($oldd->{'home'}).
+			" ".quotemeta($d->{'home'});
 		$cmd .= " 2>&1 </dev/null";
-		&set_domain_envs($_[1], "MODIFY_DOMAIN", $_[0]);
+		&set_domain_envs($oldd, "MODIFY_DOMAIN", $d);
 		local $out = &backquote_logged($cmd);
-		&reset_domain_envs($_[1]);
+		&reset_domain_envs($oldd);
 		if ($?) {
-			&$second_print(&text('save_dirhomefailed', "<tt>$out</tt>"));
+			&$second_print(&text('save_dirhomefailed',
+					     "<tt>$out</tt>"));
 			}
 		else {
 			&$second_print($text{'setup_done'});
 			}
+		if ($wasjailed) {
+			# Turn jail back on for the new home
+			my $err = &enable_domain_jailkit($d);
+			if ($err) {
+				&$second_print(&text('setup_ejail', $err));
+				}
+			}
 		if (defined(&set_php_wrappers_writable)) {
-			&set_php_wrappers_writable($_[0], 0);
+			&set_php_wrappers_writable($d, 0);
 			}
 		}
 	}
-if ($_[0]->{'unix'} && !$_[1]->{'unix'} ||
-    $_[0]->{'uid'} ne $_[1]->{'uid'}) {
+if ($d->{'unix'} && !$oldd->{'unix'} ||
+    $d->{'uid'} ne $oldd->{'uid'}) {
 	# Unix user now exists or has changed! Set ownership of home dir
 	&$first_print($text{'save_dirchown'});
-	&set_home_ownership($_[0]);
+	&set_home_ownership($d);
 	&$second_print($text{'setup_done'});
 	}
-if (!$_[0]->{'subdom'} && $_[1]->{'subdom'}) {
+if (!$d->{'subdom'} && $oldd->{'subdom'}) {
 	# No longer a sub-domain .. move the HTML dir
-	local $phsrc = &public_html_dir($_[1]);
-	local $phdst = &public_html_dir($_[0]);
+	local $phsrc = &public_html_dir($oldd);
+	local $phdst = &public_html_dir($d);
 	&copy_source_dest($phsrc, $phdst);
 	&unlink_file($phsrc);
 
 	# And the CGI directory
-	local $cgisrc = &cgi_bin_dir($_[1]);
-	local $cgidst = &cgi_bin_dir($_[0]);
+	local $cgisrc = &cgi_bin_dir($oldd);
+	local $cgidst = &cgi_bin_dir($d);
 	&copy_source_dest($cgisrc, $cgidst);
 	&unlink_file($cgisrc);
 	}
 if (defined(&set_php_wrappers_writable)) {
-	&set_php_wrappers_writable($_[0], 0);
+	&set_php_wrappers_writable($d, 0);
 	}
 }
 

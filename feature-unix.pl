@@ -177,42 +177,43 @@ return 1;
 # Change the password and real name for a domain unix user
 sub modify_unix
 {
-if (!$_[0]->{'pass_set'} &&
-    $_[0]->{'user'} eq $_[1]->{'user'} &&
-    $_[0]->{'home'} eq $_[1]->{'home'} &&
-    $_[0]->{'owner'} eq $_[1]->{'owner'} &&
-    $_[0]->{'group'} eq $_[1]->{'group'} &&
-    $_[0]->{'quota'} eq $_[1]->{'quota'} &&
-    $_[0]->{'uquota'} eq $_[1]->{'uquota'} &&
-    $_[0]->{'parent'} eq $_[1]->{'parent'}) {
+local ($d, $oldd) = @_;
+if (!$d->{'pass_set'} &&
+    $d->{'user'} eq $oldd->{'user'} &&
+    $d->{'home'} eq $oldd->{'home'} &&
+    $d->{'owner'} eq $oldd->{'owner'} &&
+    $d->{'group'} eq $oldd->{'group'} &&
+    $d->{'quota'} eq $oldd->{'quota'} &&
+    $d->{'uquota'} eq $oldd->{'uquota'} &&
+    $d->{'parent'} eq $oldd->{'parent'}) {
 	# Nothing important has changed, so return now
 	return 1;
 	}
-if (!$_[0]->{'parent'}) {
+if (!$d->{'parent'}) {
 	# Check for a user change
-	&obtain_lock_unix($_[0]);
+	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &list_domain_users($_[1]);
-	local ($uinfo) = grep { $_->{'user'} eq $_[1]->{'user'} } @allusers;
+	local @allusers = &list_domain_users($oldd);
+	local ($uinfo) = grep { $_->{'user'} eq $oldd->{'user'} } @allusers;
 	local $rv;
 	if (defined(&supports_resource_limits) &&
 	    &supports_resource_limits() &&
-	    ($_[0]->{'user'} ne $_[1]->{'user'} ||
-	     $_[0]->{'group'} ne $_[1]->{'group'})) {
+	    ($d->{'user'} ne $oldd->{'user'} ||
+	     $d->{'group'} ne $oldd->{'group'})) {
 		# Get old resource limits, and clear
-		$rv = &get_domain_resource_limits($_[1]);
-		&save_domain_resource_limits($_[1], { }, 1);
+		$rv = &get_domain_resource_limits($oldd);
+		&save_domain_resource_limits($oldd, { }, 1);
 		}
 	if ($uinfo) {
 		local %old = %$uinfo;
 		&$first_print($text{'save_user'});
-		$uinfo->{'real'} = $_[0]->{'owner'};
-		if ($_[0]->{'pass_set'}) {
+		$uinfo->{'real'} = $d->{'owner'};
+		if ($d->{'pass_set'}) {
 			# Update the Unix user's password
 			local $enc;
-			if ($_[0]->{'pass'}) {
+			if ($d->{'pass'}) {
 				$enc = &foreign_call($usermodule,
-					"encrypt_password", $_[0]->{'pass'});
+					"encrypt_password", $d->{'pass'});
 				delete($d->{'enc_pass'});# Any stored encrypted
 							 # password is not valid
 				}
@@ -227,7 +228,7 @@ if (!$_[0]->{'parent'}) {
 				# Set password now
 				$uinfo->{'pass'} = $enc;
 				}
-			$uinfo->{'plainpass'} = $_[0]->{'pass'};
+			$uinfo->{'plainpass'} = $d->{'pass'};
 			&set_pass_change($uinfo);
 			&set_usermin_imap_password($uinfo);
 			}
@@ -236,25 +237,31 @@ if (!$_[0]->{'parent'}) {
 			$uinfo->{'passmode'} = 4;
 			}
 
-		if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		if ($d->{'user'} ne $oldd->{'user'}) {
 			# Unix user was re-named
-			$uinfo->{'olduser'} = $_[1]->{'user'};
-			$uinfo->{'user'} = $_[0]->{'user'};
+			$uinfo->{'olduser'} = $oldd->{'user'};
+			$uinfo->{'user'} = $d->{'user'};
 			&rename_mail_file($uinfo, \%old);
-			&obtain_lock_cron($_[0]);
-			&rename_unix_cron_jobs($_[0]->{'user'},
-					       $_[1]->{'user'});
-			&release_lock_cron($_[0]);
+			&obtain_lock_cron($d);
+			&rename_unix_cron_jobs($d->{'user'},
+					       $oldd->{'user'});
+			&release_lock_cron($d);
 			}
 
-		if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+		if ($d->{'home'} ne $oldd->{'home'}) {
 			# Home directory was changed
-			$uinfo->{'home'} = $_[0]->{'home'};
+			if ($uinfo->{'home'} =~ /^(.*)\/\.\//) {
+				# Under a chroot, separated by /.
+				$uinfo->{'home'} = $1."/.".$d->{'home'};
+				}
+			else {
+				$uinfo->{'home'} = $d->{'home'};
+				}
 			}
 
-		if ($_[0]->{'owner'} ne $_[1]->{'owner'}) {
+		if ($d->{'owner'} ne $oldd->{'owner'}) {
 			# Domain description was changed
-			$uinfo->{'real'} = $_[0]->{'owner'};
+			$uinfo->{'real'} = $d->{'owner'};
 			}
 
 		&modify_user($uinfo, \%old, undef);
@@ -269,21 +276,21 @@ if (!$_[0]->{'parent'}) {
 
 	if (&has_home_quotas() && $access{'edit'} == 1) {
 		# Update the unix user's and domain's quotas (if changed)
-		if ($_[0]->{'quota'} != $_[1]->{'quota'} ||
-		    $_[0]->{'uquota'} != $_[1]->{'uquota'}) {
+		if ($d->{'quota'} != $oldd->{'quota'} ||
+		    $d->{'uquota'} != $oldd->{'uquota'}) {
 			&$first_print($text{'save_quota'});
-			&set_server_quotas($_[0]);
+			&set_server_quotas($d);
 			&$second_print($text{'setup_done'});
 			}
 		}
 
 	# Check for a group change
-	local ($ginfo) = grep { $_->{'group'} eq $_[1]->{'group'} }
+	local ($ginfo) = grep { $_->{'group'} eq $oldd->{'group'} }
 			      &list_all_groups();
-	if ($ginfo && $_[0]->{'group'} ne $_[1]->{'group'}) {
+	if ($ginfo && $d->{'group'} ne $oldd->{'group'}) {
 		local %old = %$ginfo;
 		&$first_print($text{'save_group'});
-		$ginfo->{'group'} = $_[0]->{'group'};
+		$ginfo->{'group'} = $d->{'group'};
 		&foreign_call($usermodule, "set_group_envs", $ginfo,
 					   'MODIFY_GROUP', \%old);
 		&foreign_call($usermodule, "making_changes");
@@ -294,13 +301,13 @@ if (!$_[0]->{'parent'}) {
 
 	if ($rv) {
 		# Put back resource limits, perhaps under new name
-		&save_domain_resource_limits($_[0], $rv, 1);
+		&save_domain_resource_limits($d, $rv, 1);
 		}
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	}
-elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
+elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Unix feature has been turned off .. so delete the user and group
-	&delete_unix($_[1]);
+	&delete_unix($oldd);
 	}
 }
 

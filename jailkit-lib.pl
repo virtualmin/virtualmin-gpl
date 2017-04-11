@@ -166,7 +166,7 @@ my ($d) = @_;
 &foreign_require("jailkit");
 my $dir = &domain_jailkit_dir($d);
 my $uinfo = &get_domain_owner($d, 1, 1, 1);
-return $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
+return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
 }
 
 # create_jailkit_passwd_file(&domain)
