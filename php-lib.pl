@@ -1631,6 +1631,14 @@ if (!$rv->{'init'}) {
 	return wantarray ? ( undef, $text{'php_fpmnoinit2'} ) : undef;
 	}
 
+# Apache modules
+&require_apache();
+foreach my $m ("mod_proxy", "mod_fcgid") {
+	if (!$apache::httpd_modules{$m}) {
+		return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
+		}
+	}
+
 # What version are we running?
 &foreign_require("software");
 foreach my $pname ("php-fpm", "php5-fpm") {
