@@ -232,3 +232,4 @@ home_backup=virtualmin-backup
 show_validation=0
 jailkit_root=/home/chroot
 defujail=0
+jail_age=24

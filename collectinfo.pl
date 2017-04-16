@@ -39,3 +39,6 @@ if ($info) {
 
 # For any domains that are due for a let's encrypt cert renewal, do it now
 &apply_letsencrypt_cert_renewals();
+
+# Resync all jails
+&copy_all_domain_jailkit_files();

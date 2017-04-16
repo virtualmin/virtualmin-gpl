@@ -86,8 +86,8 @@ if (defined($in{'shell'})) {
 # Update jail
 if (!&check_jailkit_support()) {
 	my $oldjail = &get_domain_jailkit($d);
-	if (!$oldjail && $in{'jail'}) {
-		# Setup jail for this user
+	if ($in{'jail'}) {
+		# Setup or re-sync jail for this user
 		$err = &enable_domain_jailkit($d);
 		&error(&text('limits_ejailon', $err)) if ($err);
 		$d->{'jail'} = 1 if (!$err);

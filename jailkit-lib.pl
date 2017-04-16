@@ -238,7 +238,27 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
 		return &text('jailkit_einit', $err);
 		}
 	}
+$d->{'jail_last_copy'} = time();
 return undef;
+}
+
+# copy_all_domain_jailkit_files()
+# For all domains with a jail enabled and which haven't copied files in the
+# last 24 hours, copy them now
+sub copy_all_domain_jailkit_files
+{
+foreach my $d (&list_domains()) {
+	next if ($d->{'parent'});
+	my $dir = &domain_jailkit_dir($d);
+	next if (!$dir || !-d $dir);
+	if ($config{'jail_age'} &&
+	    time() - $d->{'jail_last_copy'} > $config{'jail_age'}*3600) {
+		# Time to sync
+		&copy_jailkit_files($d, $dir);
+		$d->{'jail_last_copy'} = time();
+		&save_domain($d);
+		}
+	}
 }
 
 1;
