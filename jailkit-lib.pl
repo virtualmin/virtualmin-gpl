@@ -102,11 +102,11 @@ $uinfo->{'home'} = $dir."/.".$d->{'home'};
 return undef;
 }
 
-# disable_domain_jailkit(&domain)
+# disable_domain_jailkit(&domain, [deleting-domain])
 # Return a domain to regular non-chroot mode
 sub disable_domain_jailkit
 {
-my ($d) = @_;
+my ($d, $deleting) = @_;
 $d->{'parent'} && return $text{'jailkit_eparent'};
 &foreign_require("jailkit");
 my $dir = &domain_jailkit_dir($d);
@@ -122,12 +122,13 @@ if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
 	$uinfo->{'shell'} = $d->{'unjailed_shell'};
 	delete($d->{'unjailed_shell'});
 	}
-$uinfo->{'home'} =~ s/^\Q$dir\E\/\.//;
-&foreign_call($usermodule, "set_user_envs", $uinfo,
-	      'MODIFY_USER', $plainpass, [], $olduinfo);
-&foreign_call($usermodule, "making_changes");
-&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
-&foreign_call($usermodule, "made_changes");
+if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
+	&foreign_call($usermodule, "set_user_envs", $uinfo,
+		      'MODIFY_USER', $plainpass, [], $olduinfo);
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "modify_user", $olduinfo, $uinfo);
+	&foreign_call($usermodule, "made_changes");
+	}
 
 # Remove the BIND mount
 &foreign_require("mount");
@@ -152,8 +153,11 @@ if ($mount) {
 		}
 	}
 
-# Delete the jail dir
-# XXX
+# Delete the jail dir, but only if completely removing the domain
+if ($deleting && $dir && -d $dir &&
+    &is_under_directory($config{'jailkit_root'}, $dir)) {
+	&unlink_logged($dir);
+	}
 
 return undef;
 }

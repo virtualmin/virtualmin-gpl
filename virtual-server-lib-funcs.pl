@@ -7964,6 +7964,11 @@ local @subs = &get_domain_by("parent", $d->{'id'});
 local @aliasdoms = &get_domain_by("alias", $d->{'id'});
 local @aliasdoms = grep { $_->{'parent'} != $d->{'id'} } @aliasdoms;
 
+# Delete any jail
+if (!&check_jailkit_support() && !$d->{'parent'}) {
+	&disable_domain_jailkit($d, 1);
+	}
+
 # Go ahead and delete this domain and all sub-domains ..
 &obtain_lock_mail();
 &obtain_lock_unix();

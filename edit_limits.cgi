@@ -192,7 +192,7 @@ if (!&check_jailkit_support()) {
 	my $jail = &get_domain_jailkit($d);
 	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
 		&ui_radio("jail", $jail ? 1 : 0,
-		  [ [ 1, $text{'yes'}.($jail ? " <tt>$jail</tt>" : "") ],
+		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
 		    [ 0, $text{'no'} ] ]));
 	}
 
