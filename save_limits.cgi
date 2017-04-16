@@ -90,11 +90,13 @@ if (!&check_jailkit_support()) {
 		# Setup jail for this user
 		$err = &enable_domain_jailkit($d);
 		&error(&text('limits_ejailon', $err)) if ($err);
+		$d->{'jail'} = 1 if (!$err);
 		}
 	elsif ($oldjail && !$in{'jail'}) {
 		# Tear down jail for this user
 		$err = &disable_domain_jailkit($d);
 		&error(&text('limits_ejailoff', $err)) if ($err);
+		$d->{'jail'} = 0 if (!$err);
 		}
 	}
 
