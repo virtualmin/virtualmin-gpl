@@ -1998,6 +1998,7 @@ log_exclude_domain=Updated excluded backup directories for server $1
 log_domdkim_domain=Changed DomainKey for server $1
 log_assoc_domain=Change associated features for server $1
 log_mail_domain=Changed email settings for server $1
+log_proxy_domain=Changed proxying for server $1
 log_check=Re-checked configuration
 log_newweb=Updated new website template
 log_newuser=Updated new user email template
@@ -6853,6 +6854,7 @@ php_fpmnoinit=.. no bootup action found!
 php_fpmeinit=.. failed : $1
 php_fpmnodir=No FPM configuration directory found
 php_fpmnoinit2=No FPM server bootup action found
+php_fpmnomod=Apache module $1 is missing or not enabled
 
 jailkit_emodule=The Webmin Jailkit module not installed
 jailkit_emodule2=The Jailkit software is not installed on your system
