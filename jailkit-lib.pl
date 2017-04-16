@@ -46,15 +46,8 @@ if (!-d $config{'jailkit_root'}) {
 
 # Create a jail for the domain
 my $dir = &domain_jailkit_dir($d);
-foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
-		  "editors", "netutils") {
-	my $cmd = "jk_init -j ".quotemeta($dir)." ".$sect;
-	my ($out, $err);
-	&execute_command($cmd, undef, \$out, \$err);
-	if ($?) {
-		return &text('jailkit_einit', $err);
-		}
-	}
+my $err = &copy_jailkit_files($d, $dir);
+return $err if ($err);
 
 # Bind mount the home dir into the chroot
 &foreign_require("mount");
@@ -228,6 +221,24 @@ foreach my $g (@gcreate) {
 	&print_tempfile(GROUP, join(":", @gline),"\n");
 	}
 &close_tempfile(GROUP);
+}
+
+# copy_jailkit_files(&domain, [dir])
+# Copy files for various jail sections
+sub copy_jailkit_files
+{
+my ($d, $dir) = @_;
+$dir ||= &domain_jailkit_dir($d);
+foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
+		  "editors", "netutils") {
+	my $cmd = "jk_init -j ".quotemeta($dir)." ".$sect;
+	my ($out, $err);
+	&execute_command($cmd, undef, \$out, \$err);
+	if ($?) {
+		return &text('jailkit_einit', $err);
+		}
+	}
+return undef;
 }
 
 1;
