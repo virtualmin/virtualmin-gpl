@@ -208,3 +208,4 @@ scriptdir=Template for default script directory,10,-Script default,*-Top level p
 python_cmd=Path to <tt>python</tt> command,3,Use system default
 jailkit_root=Base directory for Jailkit directories,0
 jail_age=Hours between Jailkit root directory refreshes,3,Never refesh automatically
+jail_sects=Additional Jailkit sections to copy,0
