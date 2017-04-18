@@ -522,6 +522,77 @@ $domains_tests = [
 
 	];
 
+$jail_tests = [
+	# Create a jailed domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'enable-jail' ],
+		      @create_args, ],
+	},
+
+	# Make sure it is chroot'd
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => "Jail directory:",
+	},
+
+	# Check that the Unix user is chroot'd
+	{ 'command' => 'su '.$test_domain_user." -c 'ls $home_base' | wc -l",
+	  'grep' => '^1$',
+	},
+
+	$supports_fpm ? (
+		# Switch PHP mode to FPM
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'mode', 'fpm' ] ],
+		},
+
+		# Make sure that PHP scripts are also chrooted
+		{ 'command' => 'echo "<?php system(\'ls '.$home_base.' | wc -l\'); ?>" >~'.
+			       $test_domain_user.'/public_html/test.php',
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => '^1$',
+		},
+		) : ( ),
+
+	# Turn off the chroot
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'disable-jail' ] ],
+	},
+
+	# Make sure it is not chroot'd
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => "Jail directory:",
+	},
+
+	# Check that the Unix user is not chroot'd
+	{ 'command' => 'su '.$test_domain_user." -c 'ls $home_base' | wc -l",
+	  'antigrep' => '^1$',
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+if (&check_jailkit_support()) {
+	$jail_tests = [ { 'command' => 'echo Jailkit support is not available on this system' } ];
+	}
+
 $disable_tests = [
 	# Create a domain that we will disable
 	{ 'command' => 'create-domain.pl',
@@ -8020,6 +8091,7 @@ $alltests = { '_config' => $_config_tests,
 	      's3_eu' => $s3_eu_tests,
 	      'exclude' => $exclude_tests,
 	      'rs' => $rs_tests,
+	      'jail' => $jail_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
