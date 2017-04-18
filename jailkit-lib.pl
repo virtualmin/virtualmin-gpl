@@ -4,17 +4,8 @@
 # Returns an error message if jailing users is not available, undef otherwise
 sub check_jailkit_support
 {
-if (!&foreign_check("jailkit")) {
-	return $text{'jailkit_emodule'};
-	}
-eval {
-	local $main::error_must_die = 1;
-	if (!&foreign_installed("jailkit")) {
-		return $text{'jailkit_emodule2'};
-		}
-	};
-if ($@) {
-	return $text{'jailkit_emodule3'};
+if (!&has_command('jk_init')) {
+	return &text('jailkit_ecmd', '<tt>jk_init</tt>');
 	}
 if ($gconfig{'os_type'} !~ /-linux$/) {
 	return $text{'jailkit_elinux'};
@@ -36,7 +27,6 @@ sub enable_domain_jailkit
 {
 my ($d) = @_;
 $d->{'parent'} && return $text{'jailkit_eparent'};
-&foreign_require("jailkit");
 
 # Create root dir if missing
 if (!-d $config{'jailkit_root'}) {
@@ -108,7 +98,6 @@ sub disable_domain_jailkit
 {
 my ($d, $deleting) = @_;
 $d->{'parent'} && return $text{'jailkit_eparent'};
-&foreign_require("jailkit");
 my $dir = &domain_jailkit_dir($d);
 
 # Turn off chroot for all domains' PHP-FPM configs
@@ -174,7 +163,6 @@ return undef;
 sub get_domain_jailkit
 {
 my ($d) = @_;
-&foreign_require("jailkit");
 my $dir = &domain_jailkit_dir($d);
 my $uinfo = &get_domain_owner($d, 1, 1, 1);
 return $uinfo && $uinfo->{'home'} =~ /^\Q$dir\E\/\.\// ? $dir : undef;
