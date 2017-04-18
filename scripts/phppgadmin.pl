@@ -137,7 +137,7 @@ local ($out, $ex);
 local @dbs = split(/\s+/, $opts->{'db'});
 local $dbuser = &postgres_user($d);
 local $dbpass = &postgres_pass($d, 1);
-local $dbhost = &get_database_host("postgres");
+local $dbhost = &get_database_host("postgres", $d);
 
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();

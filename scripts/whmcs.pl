@@ -291,7 +291,7 @@ local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 local $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
-local $dbhost = &get_database_host($dbtype);
+local $dbhost = &get_database_host($dbtype, $d);
 local $dberr = &check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 

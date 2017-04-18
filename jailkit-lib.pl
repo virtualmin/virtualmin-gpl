@@ -92,6 +92,13 @@ $uinfo->{'home'} = $dir."/.".$d->{'home'};
 # Create a fake /etc/passwd file in the jail
 &create_jailkit_passwd_file($d);
 
+# Set chroot for all domains' PHP-FPM configs
+foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
+	my $mode = &get_domain_php_mode($pd);
+	next if ($mode ne "fpm");
+	&save_php_fpm_config_value($pd, "chroot", $dir);
+	}
+
 return undef;
 }
 
@@ -103,6 +110,13 @@ my ($d, $deleting) = @_;
 $d->{'parent'} && return $text{'jailkit_eparent'};
 &foreign_require("jailkit");
 my $dir = &domain_jailkit_dir($d);
+
+# Turn off chroot for all domains' PHP-FPM configs
+foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
+	my $mode = &get_domain_php_mode($pd);
+	next if ($mode ne "fpm");
+	&save_php_fpm_config_value($pd, "chroot", undef);
+	}
 
 # Switch back the user's shell and home dir
 &require_useradmin();
@@ -237,6 +251,10 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
 	if ($?) {
 		return &text('jailkit_einit', $err);
 		}
+	}
+my $tmp = "$dir/tmp";
+if (!-d $tmp) {
+	&make_dir($tmp, 01777);
 	}
 $d->{'jail_last_copy'} = time();
 return undef;

@@ -229,7 +229,7 @@ local ($out, $ex);
 local @dbs = map { s/^mysql_//; $_ } split(/\s+/, $opts->{'db'});
 local $dbuser = &mysql_user($d);
 local $dbpass = &mysql_pass($d);
-local $dbhost = &get_database_host("mysql");
+local $dbhost = &get_database_host("mysql", $d);
 
 # Delete old files known to be obsolete
 if ($upgrade && $ver >= 4) {

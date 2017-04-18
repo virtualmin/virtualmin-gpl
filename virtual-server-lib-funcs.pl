@@ -10225,23 +10225,32 @@ if (!$defdb && @domdbs) {
 	}
 }
 
-# get_database_host(type)
+# get_database_host(type, [&domain])
 # Returns the remote host that we use for the given database type. If the
 # DB is on the same server, returns localhost
 sub get_database_host
 {
-local ($type) = @_;
+local ($type, $d) = @_;
 local $rv;
 if (&indexof($type, @features) >= 0) {
 	# Built-in DB
 	local $hfunc = "get_database_host_".$type;
-	$rv = &$hfunc();
+	$rv = &$hfunc($d);
 	}
 elsif (&indexof($type, &list_database_plugins()) >= 0) {
 	# From plugin
-	$rv = &plugin_call($type, "database_host");
+	$rv = &plugin_call($type, "database_host", $d);
 	}
-return $rv || "localhost";
+$rv ||= "localhost";
+if ($rv eq "localhost" && $type eq "mysql") {
+	# Is this domain under a chroot? If so, use 127.0.0.1 to force use
+	# of a TCP connection rather than a socket
+	my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+	if (&get_domain_jailkit($parent)) {
+		$rv = "127.0.0.1";
+		}
+	}
+return $rv;
 }
 
 # get_password_synced_types(&domain)

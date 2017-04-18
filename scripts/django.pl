@@ -214,7 +214,7 @@ if ($opts->{'newdb'} && !$upgrade) {
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
-local $dbhost = &get_database_host($dbtype);
+local $dbhost = &get_database_host($dbtype, $d);
 $dbhost = undef if ($dbhost eq "localhost" || $dbhost eq "127.0.0.1");
 if ($dbtype) {
 	local $dberr = &check_script_db_connection($dbtype, $dbname,

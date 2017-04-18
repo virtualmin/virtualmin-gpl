@@ -1780,9 +1780,9 @@ else {
 	}
 }
 
-# get_php_fpm_ini_value(&domain, name)
-# Returns the value of a ini setting from the domain's pool file
-sub get_php_fpm_ini_value
+# get_php_fpm_config_value(&domain, name)
+# Returns the value of a config setting from the domain's pool file
+sub get_php_fpm_config_value
 {
 my ($d, $name) = @_;
 my $conf = &get_php_fpm_config();
@@ -1790,16 +1790,24 @@ return undef if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 my $lref = &read_file_lines($file, 1);
 foreach my $l (@$lref) {
-	if ($l =~ /^\s*php_value\[(\S+)\]\s*=\s*(.*)/ && $1 eq $name) {
+	if ($l =~ /^\s*(\S+)\s*=\s*(.*)/ && $1 eq $name) {
 		return $2;
 		}
 	}
 return undef;
 }
 
-# save_php_fpm_ini_value(&domain, name, value)
-# Adds, updates or deletes an ini setting in the domain's pool file
-sub save_php_fpm_ini_value
+# get_php_fpm_ini_value(&domain, name)
+# Returns the value of a ini setting from the domain's pool file
+sub get_php_fpm_ini_value
+{
+my ($d, $name) = @_;
+return &get_php_fpm_config_value($d, "php_value[${name}]");
+}
+
+# save_php_fpm_config_value(&domain, name, value)
+# Adds, updates or deletes an config setting in the domain's pool file
+sub save_php_fpm_config_value
 {
 my ($d, $name, $value) = @_;
 my $conf = &get_php_fpm_config();
@@ -1810,7 +1818,7 @@ my $lref = &read_file_lines($file);
 my $found = -1;
 my $lnum = 0;
 foreach my $l (@$lref) {
-	if ($l =~ /^\s*php_value\[(\S+)\]\s*=\s*(.*)/ && $1 eq $name) {
+	if ($l =~ /^\s*(\S+)\s*=\s*(.*)/ && $1 eq $name) {
 		$found = $lnum;
 		last;
 		}
@@ -1818,7 +1826,7 @@ foreach my $l (@$lref) {
 	}
 if ($found >= 0 && defined($value)) {
 	# Update existing line
-	$lref->[$found] = "php_value[$name] = $value";
+	$lref->[$found] = "$name = $value";
 	}
 elsif ($found >=0 && !defined($value)) {
 	# Remove existing line
@@ -1826,12 +1834,20 @@ elsif ($found >=0 && !defined($value)) {
 	}
 elsif ($found < 0 && defined($value)) {
 	# Need to add new line
-	push(@$lref, "php_value[$name] = $value");
+	push(@$lref, "$name = $value");
 	}
 &flush_file_lines($file);
 &unlock_file($file);
 &register_post_action(\&restart_php_fpm_server);
 return 1;
+}
+
+# save_php_fpm_ini_value(&domain, name, value)
+# Adds, updates or deletes an ini setting in the domain's pool file
+sub save_php_fpm_ini_value
+{
+my ($d, $name, $value) = @_;
+return &save_php_fpm_config_value($d, "php_value[${name}]", $value);
 }
 
 # get_apache_mod_php_version()
