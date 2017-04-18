@@ -1698,19 +1698,9 @@ my $port = &get_php_fpm_socket_port($d);
 &lock_file($file);
 if (-r $file) {
 	# Fix up existing one, in case user or group changed
-	my $lref = &read_file_lines($file);
-	foreach my $l (@$lref) {
-		if ($l =~ /^user\s*=/) {
-			$l = "user = ".$d->{'user'};
-			}
-		if ($l =~ /^group\s*=/) {
-			$l = "group = ".$d->{'ugroup'};
-			}
-		if ($l =~ /^listen\s*=(\d+)/) {
-			$l = "listen = ".$port;
-			}
-		}
-	&flush_file_lines($file);
+	&save_php_fpm_config_value($d, "user", $d->{'user'});
+	&save_php_fpm_config_value($d, "group", $d->{'ugroup'});
+	&save_php_fpm_config_value($d, "listen", $port);
 	}
 else {
 	# Create a new file
@@ -1732,6 +1722,9 @@ else {
 	&print_tempfile(CONF, "php_admin_value[session.save_path] = $tmp\n");
 	&close_tempfile(CONF);
 	}
+my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
+my $dir = &get_domain_jailkit($parent);
+&save_php_fpm_config_value($d, "chroot", $dir);
 &unlock_file($file);
 &register_post_action(\&restart_php_fpm_server);
 return undef;
