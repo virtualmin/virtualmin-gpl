@@ -306,7 +306,8 @@ sub set_user_modules
 {
 local ($d, $wuser, $acls, $nofeatures, $noextras, $isextra, $onlydoms) = @_;
 local @mods;
-local $tmpl = &get_template($_[0]->{'template'});
+local $tmpl = &get_template($d->{'template'});
+local $chroot = &get_domain_jailkit($d);
 
 # Work out which module's ACLs to leave alone
 local %hasmods = map { $_, 1 } @{$_[1]->{'modules'}};
@@ -634,7 +635,7 @@ if ($_[0]->{'unix'}) {
 		}
 	}
 
-if ($extramods{'proc'} && $_[0]->{'unix'}) {
+if ($extramods{'proc'} && $_[0]->{'unix'} && !$chroot) {
 	# Can only manage and see his own processes
 	local %acl = ( 'noconfig' => 1,
 		       'uid' => $_[0]->{'uid'},
@@ -647,7 +648,7 @@ if ($extramods{'proc'} && $_[0]->{'unix'}) {
 	push(@mods, "proc");
 	}
 
-if ($extramods{'cron'} && $_[0]->{'unix'}) {
+if ($extramods{'cron'} && $_[0]->{'unix'} && !$chroot) {
 	# Can only manage his cron jobs
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
@@ -658,7 +659,7 @@ if ($extramods{'cron'} && $_[0]->{'unix'}) {
 	push(@mods, "cron");
 	}
 
-if ($extramods{'at'} && $_[0]->{'unix'}) {
+if ($extramods{'at'} && $_[0]->{'unix'} && !$chroot) {
 	# Can only manage his at jobs
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
@@ -690,7 +691,8 @@ if ($extramods{'custom'}) {
 if ($extramods{'shell'} && $_[0]->{'unix'}) {
 	# Can only run commands as server owner
 	local %acl = ( 'noconfig' => 1,
-		       'user' => $_[0]->{'user'} );
+		       'user' => $_[0]->{'user'},
+		       'chroot' => $chroot || '/' );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "shell")
 		if (!$hasmods{'shell'});
 	push(@mods, "shell");
