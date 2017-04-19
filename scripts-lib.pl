@@ -1062,6 +1062,10 @@ foreach my $m (@mods) {
 					     $p =~ s/php5/php53/;
 					  ($p, "rh-".$p) } @vposs);
 			}
+		if ($software::update_system eq "apt" && $phpver >= 7) {
+			# On Debian, sometimes the package is like php7.0-gd
+			push(@poss, "php".$phpver."-".$m);
+			}
 		}
 	foreach my $pkg (@poss) {
 		local @pinfo = &software::package_info($pkg);
