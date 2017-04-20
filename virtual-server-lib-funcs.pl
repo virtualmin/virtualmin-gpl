@@ -7853,38 +7853,13 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 		}
 	}
 
-# Attempt to request a let's encrypt cert
+# Attempt to request a let's encrypt cert. This has to be done after the
+# initial setup and when Apache has been restarted, so that it can serve the
+# new website.
 $dom->{'auto_letsencrypt'} ||= $config{'auto_letsencrypt'};
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
     !$dom->{'disabled'}) {
-	&foreign_require("webmin");
-	my @dnames = &get_hostnames_for_ssl($dom);
-	&$first_print(&text('letsencrypt_doing2',
-			    join(", ", map { "<tt>$_</tt>" } @dnames)));
-	my $phd = &public_html_dir($dom);
-	my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-						$dom, \@dnames);
-	if (!$ok) {
-		&$second_print(&text('letsencrypt_failed', $cert));
-		}
-	else {
-		&obtain_lock_ssl($dom);
-		&install_letsencrypt_cert($dom, $cert, $key, $chain);
-
-		$dom->{'letsencrypt_dname'} = '';
-		$dom->{'letsencrypt_last'} = time();
-		$dom->{'letsencrypt_renew'} ||= 2;
-		&save_domain($dom);
-
-		if ($dom->{'virt'}) {
-			&sync_dovecot_ssl_cert($dom, 1);
-			&sync_postfix_ssl_cert($dom, 1);
-			}
-		&break_invalid_ssl_linkages($dom);
-		&sync_domain_tlsa_records($dom);
-		&release_lock_ssl($dom);
-		&$second_print($text{'letsencrypt_done'});
-		}
+	&create_initial_letsencrypt_cert($dom);
 	}
 
 # Put the user in a jail if possible
@@ -7910,6 +7885,44 @@ local $merr = &made_changes();
 &reset_domain_envs($dom);
 
 return undef;
+}
+
+# create_initial_letsencrypt_cert(&domain)
+# Create the initial default let's encrypt cert for a domain which has just
+# had SSL enabled. May print stuff.
+sub create_initial_letsencrypt_cert
+{
+local ($dom) = @_;
+&foreign_require("webmin");
+my @dnames = &get_hostnames_for_ssl($dom);
+&$first_print(&text('letsencrypt_doing2',
+		    join(", ", map { "<tt>$_</tt>" } @dnames)));
+my $phd = &public_html_dir($dom);
+my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
+					$dom, \@dnames);
+if (!$ok) {
+	&$second_print(&text('letsencrypt_failed', $cert));
+	return 0;
+	}
+else {
+	&obtain_lock_ssl($dom);
+	&install_letsencrypt_cert($dom, $cert, $key, $chain);
+
+	$dom->{'letsencrypt_dname'} = '';
+	$dom->{'letsencrypt_last'} = time();
+	$dom->{'letsencrypt_renew'} ||= 2;
+	&save_domain($dom);
+
+	if ($dom->{'virt'}) {
+		&sync_dovecot_ssl_cert($dom, 1);
+		&sync_postfix_ssl_cert($dom, 1);
+		}
+	&break_invalid_ssl_linkages($dom);
+	&sync_domain_tlsa_records($dom);
+	&release_lock_ssl($dom);
+	&$second_print($text{'letsencrypt_done'});
+	return 1;
+	}
 }
 
 # call_feature_setup(feature, &domain, [args])
