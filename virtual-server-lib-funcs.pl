@@ -7863,6 +7863,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
     !$dom->{'disabled'}) {
 	&create_initial_letsencrypt_cert($dom);
 	}
+&save_domain($dom);
 
 # Put the user in a jail if possible
 if ($dom->{'jail'} && !&check_jailkit_support()) {
