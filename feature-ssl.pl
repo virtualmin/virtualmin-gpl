@@ -117,7 +117,7 @@ $d->{'letsencrypt_renew'} = 2;		# Default let's encrypt renewal
 local $chained = $d->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
-&generate_default_certificate($d);
+my $generated = &generate_default_certificate($d);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
@@ -235,6 +235,14 @@ if ($d->{'virt'}) {
 else {
 	&register_post_action(\&restart_apache);
 	}
+
+# Try to request a Let's Encrypt cert when enabling SSL post-creation for
+# the first time
+if (!$d->{'creating'} && $generated && $d->{'auto_letsencrypt'} &&
+    !$d->{'disabled'}) {
+	&create_initial_letsencrypt_cert($d);
+	}
+
 return 1;
 }
 
@@ -1635,7 +1643,9 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 		}
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
+	return 1;
 	}
+return 0;
 }
 
 # break_ssl_linkage(&domain, &old-same-domain)

@@ -7537,6 +7537,7 @@ if ($dom->{'mysql'}) {
 my $f;
 local @dof = grep { $_ ne "webmin" } @features;
 local $p = &domain_has_website($dom);
+$dom->{'creating'} = 1;	# Tell features that they are being called for creation
 foreach $f (@dof) {
 	my $err;
 	if ($f eq 'web' && $p && $p ne 'web') {
@@ -7579,6 +7580,7 @@ if ($dom->{'virt6'}) {
 		$dom->{'virt6'} = 0;
 		}
 	}
+delete($dom->{'creating'});
 
 if (!$nopost) {
 	&run_post_actions();
