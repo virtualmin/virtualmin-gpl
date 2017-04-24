@@ -8767,7 +8767,7 @@ push(@rv, { 'id' => 0,
 	    'quota' => $config{'defquota'} || "none",
 	    'uquota' => $config{'defuquota'} || "none",
 	    'ushell' => $config{'defushell'} || "none",
-	    'ujail' => $config{'defujail'} || "none",
+	    'ujail' => $config{'defujail'},
 	    'mailboxlimit' => $config{'defmailboxlimit'} eq "" ? "none" :
 			      $config{'defmailboxlimit'},
 	    'aliaslimit' => $config{'defaliaslimit'} eq "" ? "none" :
