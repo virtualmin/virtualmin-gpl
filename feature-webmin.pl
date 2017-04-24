@@ -560,8 +560,13 @@ local %acl = ( 'feedback' => 0,
 	       'negative' => 1,
 	       'readonly' => $_[0]->{'demo'},
 	       'fileunix' => $_[0]->{'user'} );
-$acl{'root'} = &resolve_links(
-	&substitute_domain_template($tmpl->{'gacl_root'}, $_[0]));
+if ($chroot) {
+	$acl{'root'} = $_[0]->{'home'};
+	}
+else {
+	$acl{'root'} = &resolve_links(
+		&substitute_domain_template($tmpl->{'gacl_root'}, $_[0]));
+	}
 if ($tmpl->{'gacl_umode'} == 1) {
 	$acl{'uedit_mode'} = 5;
 	$acl{'uedit'} = &substitute_domain_template($tmpl->{'gacl_ugroups'}, $_[0]);
