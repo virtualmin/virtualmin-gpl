@@ -4560,7 +4560,8 @@ $webmin_tests = [
 		      $virtualmin_pro ? ( 'Delete Selected' ) : ( ) ],
 	},
 
-	# Check left and right frames
+	# Check left and right frames (if using the framed theme)
+	$current_theme eq "virtual-server-theme" ? (
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/",
 	  'grep' => [ '<frameset', '</frameset>', 'left.cgi', 'right.cgi' ],
@@ -4574,6 +4575,7 @@ $webmin_tests = [
 	  'grep' => [ '<body', '</body>', 'System hostname',
 		      $virtualmin_pro ? ( 'Virtualmin License' ) : ( ) ],
 	},
+	) : ( ),
 
 	# Create a test domain
 	{ 'command' => $webmin_wget_command.
