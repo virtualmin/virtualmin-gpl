@@ -16,7 +16,7 @@ if (!$module_name) {
 	require './virtual-server-lib.pl';
 	$< == 0 || die "functional-test.pl must be run as root";
 	}
-$ENV{'PATH'} = "$module_root_directory:$ENV{'PATH'}";
+$ENV{'PATH'} = "$module_root_directory:$module_root_directory/pro:$ENV{'PATH'}";
 &require_mysql();
 &require_postgres();
 &require_mail();
@@ -6855,7 +6855,7 @@ $admin_tests = [
 	{ 'command' => $admin_webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}".
 		       "/virtual-server/",
-	  'grep' => [ 'Virtualmin Virtual Servers', $test_domain ],
+	  'grep' => [ 'Virtualmin Virtual Servers|Virtual Email', $test_domain ],
 	},
 
 	# Check he can list aliases
