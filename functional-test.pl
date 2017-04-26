@@ -271,7 +271,9 @@ $domains_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	},
 
@@ -396,8 +398,9 @@ $domains_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.
-		       ':newpass@localhost:'.$webmin_port.'/',
+		       '--user '.$test_domain_user.' '.
+		       '--password newpass '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
 
 	# Create a sub-server
@@ -664,7 +667,9 @@ $disable_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	  'fail' => 1,
 	},
@@ -946,8 +951,9 @@ $reseller_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_reseller.
-		       ':smeg@localhost:'.$webmin_port.'/',
+		       '--user '.$test_reseller.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
 
 	# Check FTP login
@@ -984,8 +990,9 @@ $reseller_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_reseller.
-		       ':smeg2@localhost:'.$webmin_port.'/',
+		       '--user '.$test_reseller.' '.
+		       '--password smeg2 '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
 
 	# Check FTP login again
@@ -2072,8 +2079,9 @@ $aliasdom_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.
-		       ':smeg@localhost:'.$webmin_port.'/',
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
 
 	# Check MySQL login
@@ -4588,7 +4596,9 @@ $webmin_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	},
 
@@ -4800,7 +4810,9 @@ $remote_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	},
 
@@ -7242,7 +7254,9 @@ $clone_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_clone_domain_user.':foo@localhost:'.
+		       '--user '.$test_clone_domain_user.' '.
+		       '--password foo '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	},
 
@@ -7532,7 +7546,9 @@ $hashpass_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.':smeg@localhost:'.
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://localhost:'.
 		       $webmin_port.'/',
 	},
 
@@ -7555,8 +7571,9 @@ $hashpass_tests = [
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
 						 : '').
-		       $webmin_proto.'://'.$test_domain_user.
-		       ':newpass@localhost:'.$webmin_port.'/',
+		       '--user '.$test_domain_user.' '.
+		       '--password newpass '.
+		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
 
 	# Check FTP login with new password
