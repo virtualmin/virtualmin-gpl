@@ -717,6 +717,13 @@ DOMAIN: foreach $d (@$doms) {
 	if ($homefmt) {
 		# Backup goes to a sub-dir of the home
 		$lockdir = $backupdir = "$d->{'home'}/.backup";
+		my $pid = &test_lock($lockdir);
+		if ($pid) {
+			&$second_print(&text('backup_ebackupdirlock',
+				"<tt>$backupdir</tt>", $pid));
+			$dok = 1;
+			goto DOMAINFAILED;
+			}
 		&lock_file($lockdir);
 		system("rm -rf ".quotemeta($backupdir));
 		local $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
