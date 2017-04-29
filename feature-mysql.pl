@@ -2651,18 +2651,22 @@ sub execute_password_change_sql
 my ($user, $encpass) = @_;
 my $d = &mysql::execute_sql($mysql::master_db,
 		"select host from user where user = ?", $user);
+my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 	my $sql;
 	if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
+		$flush++;
 		}
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
 		}
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
 	}
-&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
+if ($flush) {
+	&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
+	}
 }
 
 # mysql_password_synced(&domain)
