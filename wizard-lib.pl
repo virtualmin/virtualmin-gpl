@@ -394,12 +394,12 @@ if ($mem && !$mysize) {
 		  $mem <= 1024*1024*1024 ? "large" : "huge";
 	}
 print &ui_table_row($text{'wizard_mysize_type'},
-	    &ui_radio("mysize", $mysize,
-		      [ [ "", $text{'wizard_mysize_def'}."<br>" ],
-			[ "small", $text{'wizard_mysize_small'}."<br>" ],
-			[ "medium", $text{'wizard_mysize_medium'}."<br>" ],
-			[ "large", $text{'wizard_mysize_large'}."<br>" ],
-			[ "huge", $text{'wizard_mysize_huge'}."<br>" ] ]));
+	    &ui_radio_table("mysize", $mysize,
+		      [ [ "", $text{'wizard_mysize_def'} ],
+			[ "small", $text{'wizard_mysize_small'} ],
+			[ "medium", $text{'wizard_mysize_medium'} ],
+			[ "large", $text{'wizard_mysize_large'} ],
+			[ "huge", $text{'wizard_mysize_huge'} ] ]));
 }
 
 sub wizard_parse_mysize
