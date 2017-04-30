@@ -2644,11 +2644,11 @@ else {
 	}
 }
 
-# execute_password_change_sql(user, pass-str, [force-user-table])
+# execute_password_change_sql(user, pass-str, [force-user-table], [no-flush])
 # Update a MySQL user's password for all hosts
 sub execute_password_change_sql
 {
-my ($user, $encpass, $forceuser) = @_;
+my ($user, $encpass, $forceuser, $noflush) = @_;
 my $d = &mysql::execute_sql($mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
@@ -2669,7 +2669,7 @@ foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 		}
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
 	}
-if ($flush) {
+if ($flush && !$noflush) {
 	&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
 	}
 }
@@ -2764,23 +2764,27 @@ if (!$rv) {
 	my $qpass = &mysql_escape($pass);
 	eval {
 		local $main::error_must_die = 1;
-		&execute_password_change_sql($user, "$password_func('$qpass')", 1);
+		&execute_password_change_sql($user, "$password_func('$qpass')", 1, 1);
 		};
 	if ($@) {
-		$rv = &text('mysqlpass_echange', $@);
+		$rv = &text('mysqlpass_echange', "$@");
 		&$second_print($rv);
 		}
 	else {
 		&$second_print($text{'setup_done'});
 		}
 
-	# Shut down again, by killing the process
+	# Shut down again, with the mysqladmin command
 	&$first_print($text{'mysqlpass_kill'});
-	&kill_logged('TERM', $pid);
-	sleep(2);
-	&kill_logged('KILL', $pid);
-	sleep(5);
-	&$second_print($text{'setup_done'});
+	my $out = &backquote_logged("$mysql::config{'mysqladmin'} shutdown 2>&1 </dev/null");
+	if ($?) {
+		$rv = &text('mysqlpass_eshutdown', $out);
+		&$second_print($rv);
+		return $rv;
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 # Finally, re-start in normal mode
