@@ -5920,6 +5920,7 @@ wizard_mysql_pass=Change MySQL password
 wizard_mysql_pass1=Leave un-changed
 wizard_mysql_pass0=Set to
 wizard_mysql_empty=Set MySQL password
+wizard_mysql_forcepass=Override the <tt>root</tt> MySQL password to match
 wizard_mysql_deltest=Remove <tt>test</tt> MySQL database?
 wizard_mysql_delc=(Contains $1 tables)
 wizard_mysql_delanon=Remove anonymous MySQL user?
@@ -6865,5 +6866,17 @@ jailkit_euser=Domain user $1 does not exist!
 jailkit_eparent=Jails can only be enabled for top-level virtual servers
 jailkit_emkdir=Failed to create directory : $1
 jailkit_eumount=Failed to unmount bind home directory : $1
+
+mysqlpass_shutdown=Shutting down MySQL server ..
+mysqlpass_eshutdown=.. shutdown failed : $1
+mysqlpass_startup=Starting up MySQL server ..
+mysqlpass_estartup=.. startup failed : $1
+mysqlpass_eremote=You can only override the MySQL password when the server is running locally
+mysqlpass_esafecmd=The command $1 needed to start MySQL with authentication disabled was not found
+mysqlpass_safe=Starting MySQL server with authentication disabled ..
+mysqlpass_esafe=.. startup failed : $1
+mysqlpass_change=Changing the password for user $1 ..
+mysqlpass_echange=.. password change failed : $1
+mysqlpass_kill=Stopping the MySQL server with authentication disabled ..
 
 __norefs=1

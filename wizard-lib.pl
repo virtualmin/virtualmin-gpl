@@ -289,7 +289,8 @@ if (&mysql::is_mysql_running() == -1) {
 	print &ui_table_row(undef, $text{'wizard_mysql4'}, 2);
 
 	print &ui_table_row($text{'wizard_mysql_empty'},
-		&ui_textbox("mypass", undef, 20));
+		&ui_textbox("mypass", undef, 20)."<br>\n".
+		&ui_checkbox("forcepass", 1, $text{'wizard_mysql_forcepass'}, 0));
 	}
 else {
 	# Offer to change the password
@@ -331,6 +332,15 @@ sub wizard_parse_mysql
 local ($in) = @_;
 &require_mysql();
 if (&mysql::is_mysql_running() == -1) {
+	# Forcibly change the mysql password
+	if ($in->{'forcepass'}) {
+		&push_all_print();
+		&set_all_null_print();
+		my $err = &force_set_mysql_password("root", $in->{'mypass'});
+		&pop_all_print();
+		return $err if ($err);
+		}
+
 	# Save the password 
 	$mysql::config{'pass'} = $in->{'mypass'};
 	$mysql::mysql_pass = $in->{'mypass'};
