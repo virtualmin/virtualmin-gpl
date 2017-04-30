@@ -2644,11 +2644,11 @@ else {
 	}
 }
 
-# execute_password_change_sql(user, pass-str)
+# execute_password_change_sql(user, pass-str, [force-user-table])
 # Update a MySQL user's password for all hosts
 sub execute_password_change_sql
 {
-my ($user, $encpass) = @_;
+my ($user, $encpass, $forceuser) = @_;
 my $d = &mysql::execute_sql($mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
@@ -2656,6 +2656,11 @@ foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 	my $sql;
 	if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
+		       "where user = '$user' and host = '$host'";
+		$flush++;
+		}
+	elsif ($forceuser) {
+		$sql = "update user set password = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
 		}
@@ -2701,6 +2706,95 @@ sub remote_mysql
 local ($d) = @_;
 &require_mysql();
 return $mysql::config{'host'};
+}
+
+# force_set_mysql_password(user, pass)
+# Forcibly change the MySQL password for some user by shutting down the server.
+# May print stuff. Returns undef on success or an error message on failure.
+sub force_set_mysql_password
+{
+my ($user, $pass) = @_;
+&require_mysql();
+&foreign_require("proc");
+
+# This is only possible when run locally
+if (&remote_mysql()) {
+	&$second_print($text{'mysqlpass_eremote'});
+	return $text{'mysqlpass_eremote'};
+	}
+
+# Find the mysqld_safe command
+my $safe = &has_command("mysqld_safe");
+if (!$safe) {
+	&$second_print(&text('mysqlpass_esafecmd', "<tt>mysqld_safe</tt>"));
+	return &text('mysqlpass_esafecmd', "<tt>mysqld_safe</tt>");
+	}
+
+# Shut down server if running
+if (&mysql::is_mysql_running()) {
+	&$first_print($text{'mysqlpass_shutdown'});
+	my $err = &stop_service_mysql();
+	if ($err) {
+		&$second_print(&text('mysqlpass_eshutdown', $err));
+		return &text('mysqlpass_eshutdown', $err);
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
+# Start up with skip-grants flag
+&$first_print($text{'mysqlpass_safe'});
+my $cmd = $safe." --skip-grant-tables";
+my ($pty, $pid) = &proc::pty_process_exec($cmd, 0, 0);
+my $rv = undef;
+sleep(5);
+if (!$pid || !kill(0, $pid)) {
+	my $err = <$pty>;
+	$rv = &text('mysqlpass_esafe', $err);
+	&$second_print($rv);
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+
+if (!$rv) {
+	# Change the password
+	&$first_print(&text('mysqlpass_change', $user));
+	my $qpass = &mysql_escape($pass);
+	eval {
+		local $main::error_must_die = 1;
+		&execute_password_change_sql($user, "$password_func('$qpass')", 1);
+		};
+	if ($@) {
+		$rv = &text('mysqlpass_echange', $@);
+		&$second_print($rv);
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+
+	# Shut down again, by killing the process
+	&$first_print($text{'mysqlpass_kill'});
+	&kill_logged('TERM', $pid);
+	sleep(2);
+	&kill_logged('KILL', $pid);
+	sleep(5);
+	&$second_print($text{'setup_done'});
+	}
+
+# Finally, re-start in normal mode
+&$first_print($text{'mysqlpass_startup'});
+my $err = &start_service_mysql();
+if ($err) {
+	$rv = &text('mysqlpass_estartup', $err);
+	&$second_print($rv);
+	}
+else {
+	&$second_print($text{'setup_done'});
+	}
+
+return $rv;
 }
 
 $done_feature_script{'mysql'} = 1;
