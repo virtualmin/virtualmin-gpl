@@ -7916,8 +7916,8 @@ else {
 	$dom->{'letsencrypt_renew'} ||= 2;
 	&save_domain($dom);
 
+	&sync_dovecot_ssl_cert($dom, 1);
 	if ($dom->{'virt'}) {
-		&sync_dovecot_ssl_cert($dom, 1);
 		&sync_postfix_ssl_cert($dom, 1);
 		}
 	&break_invalid_ssl_linkages($dom);

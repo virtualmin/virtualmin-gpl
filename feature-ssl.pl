@@ -208,8 +208,8 @@ if ($chained) {
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
 # Setup in Dovecot and Postfix if possible
+&sync_dovecot_ssl_cert($d, 1);
 if ($d->{'virt'}) {
-	&sync_dovecot_ssl_cert($d, 1);
 	&sync_postfix_ssl_cert($d, 1);
 	}
 
@@ -486,7 +486,7 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'home'} ne $oldd->{'home'}) {
 	&sync_dovecot_ssl_cert($oldd, 0);
 	&sync_postfix_ssl_cert($oldd, 0);
-	&sync_dovecot_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+	&sync_dovecot_ssl_cert($d, $d->{'ssl'});
 	&sync_postfix_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
 	}
 
@@ -552,8 +552,8 @@ if ($d->{'ssl_same'}) {
 	}
 
 # Remove from Dovecot and Postfix if possible
+&sync_dovecot_ssl_cert($d, 0);
 if ($d->{'virt'}) {
-	&sync_dovecot_ssl_cert($d, 0);
 	&sync_postfix_ssl_cert($d, 0);
 	}
 
@@ -1719,81 +1719,140 @@ my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
 return undef if ($sslyn !~ /yes|required/i);
 my $ssldis = &dovecot::find_value("ssl_disable", $conf);
-return undef if ($sslyn =~ /yes/i);
+return undef if ($ssldis =~ /yes/i);
 
-# Find the existing block for the IP
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
-my @loc = grep { $_->{'name'} eq 'local' &&
-		 $_->{'section'} } @$conf;
-my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
-my $imap;
-if ($l) {
-	($imap) = grep { $_->{'name'} eq 'protocol' &&
-			 $_->{'value'} eq 'imap' &&
-			 $_->{'enabled'} &&
-			 $_->{'sectionname'} eq 'local' &&
-			 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
-	}
 
-if ($enable) {
-	# Needs a cert for the IP
-	local $chain = &get_website_ssl_file($d, "ca");
-	if (!$l) {
-		$l = { 'name' => 'local',
-		       'value' => $d->{'ip'},
-		       'members' => [],
-		       'file' => $cfile };
-		my $lref = &read_file_lines($l->{'file'}, 1);
-		$l->{'line'} = $l->{'eline'} = scalar(@$lref);
-		&dovecot::save_section($conf, $l);
-		push(@$conf, $l);
+if ($d->{'virt'}) {
+	# Domain has it's own IP
+
+	# Find the existing block for the IP
+	my @loc = grep { $_->{'name'} eq 'local' &&
+			 $_->{'section'} } @$conf;
+	my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
+	my $imap;
+	if ($l) {
+		($imap) = grep { $_->{'name'} eq 'protocol' &&
+				 $_->{'value'} eq 'imap' &&
+				 $_->{'enabled'} &&
+				 $_->{'sectionname'} eq 'local' &&
+				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 		}
-	if (!$imap) {
-		$imap = { 'name' => 'protocol',
-			  'value' => 'imap',
-			  'members' => [
-				{ 'name' => 'ssl_cert',
-				  'value' => "<".$d->{'ssl_cert'} },
-				{ 'name' => 'ssl_key',
-				  'value' => "<".$d->{'ssl_key'} },
-				],
-			  'indent' => 1,
-			  'file' => $l->{'file'},
-			  'line' => $l->{'line'} + 1,
-			  'eline' => $l->{'line'} };
-		if ($chain) {
-			push(@{$imap->{'members'}},
-			     { 'name' => 'ssl_ca',
-			       'value' => "<".$chain });
+
+	if ($enable) {
+		# Needs a cert for the IP
+		local $chain = &get_website_ssl_file($d, "ca");
+		if (!$l) {
+			$l = { 'name' => 'local',
+			       'value' => $d->{'ip'},
+			       'members' => [],
+			       'file' => $cfile };
+			my $lref = &read_file_lines($l->{'file'}, 1);
+			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
+			&dovecot::save_section($conf, $l);
+			push(@$conf, $l);
 			}
-		&dovecot::save_section($conf, $imap);
-		push(@{$l->{'members'}}, $imap);
-		}
-	else {
-		eval {
-			local $main::error_must_die = 1;
-			&dovecot::save_directive($l->{'members'}, "ssl_cert",
-				 "<".$d->{'ssl_cert'}, "protocol", "imap");
-			&dovecot::save_directive($l->{'members'}, "ssl_key",
-				 "<".$d->{'ssl_key'}, "protocol", "imap");
+		if (!$imap) {
+			$imap = { 'name' => 'protocol',
+				  'value' => 'imap',
+				  'members' => [
+					{ 'name' => 'ssl_cert',
+					  'value' => "<".$d->{'ssl_cert'} },
+					{ 'name' => 'ssl_key',
+					  'value' => "<".$d->{'ssl_key'} },
+					],
+				  'indent' => 1,
+				  'file' => $l->{'file'},
+				  'line' => $l->{'line'} + 1,
+				  'eline' => $l->{'line'} };
 			if ($chain) {
-				&dovecot::save_directive(
-					$l->{'members'}, "ssl_ca",
-					"<".$chain, "protocol", "imap");
+				push(@{$imap->{'members'}},
+				     { 'name' => 'ssl_ca',
+				       'value' => "<".$chain });
+				}
+			&dovecot::save_section($conf, $imap);
+			push(@{$l->{'members'}}, $imap);
+			}
+		else {
+			eval {
+				local $main::error_must_die = 1;
+				&dovecot::save_directive($l->{'members'},
+					"ssl_cert", "<".$d->{'ssl_cert'},
+					"protocol", "imap");
+				&dovecot::save_directive($l->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'},
+					"protocol", "imap");
+				if ($chain) {
+					&dovecot::save_directive(
+						$l->{'members'}, "ssl_ca",
+						"<".$chain, "protocol", "imap");
+					}
 				}
 			}
+		&flush_file_lines($imap->{'file'});
 		}
-	&flush_file_lines($imap->{'file'});
+	else {
+		# Doesn't need one, either because SSL isn't enabled or the
+		# domain doesn't have a private IP. So remove the local block.
+		if ($l) {
+			my $lref = &read_file_lines($l->{'file'});
+			splice(@$lref, $l->{'line'},
+			       $l->{'eline'}-$l->{'line'}+1);
+			&flush_file_lines($l->{'file'});
+			undef(@dovecot::get_config_cache);
+			}
+		}
 	}
 else {
-	# Doesn't need one, either because SSL isn't enabled or the domain
-	# doesn't have a private IP. So remove the whole local block.
-	if ($l) {
-		my $lref = &read_file_lines($l->{'file'});
-		splice(@$lref, $l->{'line'}, $l->{'eline'}-$l->{'line'}+1);
-		&flush_file_lines($l->{'file'});
+	# Domain has no IP, but Dovecot supports SNI in version 2
+	my @loc = grep { $_->{'name'} eq 'local_name' &&
+			 $_->{'section'} } @$conf;
+	my @sslnames = &get_hostnames_for_ssl($d);
+	my %sslnames = map { $_, 1 } @sslnames;
+	my @myloc = grep { $sslnames{$_->{'value'}} } @loc;
+	if ($enable && !@myloc) {
+		# Need to add
+		foreach my $n (@sslnames) {
+			my $l = { 'name' => 'local_name',
+				  'value' => $n,
+				  'members' => [
+					{ 'name' => 'ssl_cert',
+					  'value' => "<".$d->{'ssl_cert'} },
+					{ 'name' => 'ssl_key',
+					  'value' => "<".$d->{'ssl_key'} },
+					],
+				  'file' => $cfile };
+			if ($chain) {
+				push(@{$l->{'members'}},
+				     { 'name' => 'ssl_ca',
+				       'value' => '<'.$chain });
+				}
+			my $lref = &read_file_lines($l->{'file'}, 1);
+			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
+			&dovecot::save_section($conf, $l);
+			push(@$conf, $l);
+			}
+		&flush_file_lines($cfile);
+		}
+	elsif (!$enable && @myloc) {
+		# Need to remove
+		foreach my $l (reverse(@myloc)) {
+			my $lref = &read_file_lines($l->{'file'});
+			splice(@$lref, $l->{'line'},
+			       $l->{'eline'}-$l->{'line'}+1);
+			&flush_file_lines($l->{'file'});
+			}
 		undef(@dovecot::get_config_cache);
+		}
+	elsif ($enable && @myloc) {
+		# May need to update paths
+		foreach my $l (@myloc) {
+			&dovecot::save_directive($l->{'members'},
+                                        "ssl_cert", "<".$d->{'ssl_cert'});
+			&dovecot::save_directive($l->{'members'},
+                                        "ssl_key", "<".$d->{'ssl_key'});
+			}
 		}
 	}
 &unlock_file($cfile);
@@ -1812,6 +1871,8 @@ return ( ) if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
 return ( ) if ($ver < 2);
+
+# XXX local_name support
 
 my $conf = &dovecot::get_config();
 my @loc = grep { $_->{'name'} eq 'local' &&
@@ -2089,8 +2150,8 @@ foreach my $d (&list_domains()) {
 			&release_lock_ssl($d);
 
 			# Apply any per-domain cert to Dovecot and Postfix
+			&sync_dovecot_ssl_cert($d, 1);
 			if ($d->{'virt'}) {
-				&sync_dovecot_ssl_cert($d, 1);
 				&sync_postfix_ssl_cert($d, 1);
 				}
 

@@ -112,8 +112,8 @@ else {
 	&save_domain_passphrase($d);
 
 	# Apply any per-domain cert to Dovecot and Postfix
+	&sync_dovecot_ssl_cert($d, 1);
 	if ($d->{'virt'}) {
-		&sync_dovecot_ssl_cert($d, 1);
 		&sync_postfix_ssl_cert($d, 1);
 		}
 
