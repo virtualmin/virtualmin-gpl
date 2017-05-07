@@ -207,11 +207,8 @@ if ($chained) {
 	}
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
-# Setup in Dovecot and Postfix if possible
+# Setup in Dovecot
 &sync_dovecot_ssl_cert($d, 1);
-if ($d->{'virt'}) {
-	&sync_postfix_ssl_cert($d, 1);
-	}
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -486,8 +483,8 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'home'} ne $oldd->{'home'}) {
 	&sync_dovecot_ssl_cert($oldd, 0);
 	&sync_postfix_ssl_cert($oldd, 0);
-	&sync_dovecot_ssl_cert($d, $d->{'ssl'});
-	&sync_postfix_ssl_cert($d, $d->{'ssl'} && $d->{'virt'});
+	&sync_dovecot_ssl_cert($d, 1);
+	&sync_postfix_ssl_cert($d, $d->{'virt'});
 	}
 
 # Update DANE DNS records
@@ -551,11 +548,8 @@ if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_same'});
 	}
 
-# Remove from Dovecot and Postfix if possible
+# Remove from Dovecot
 &sync_dovecot_ssl_cert($d, 0);
-if ($d->{'virt'}) {
-	&sync_postfix_ssl_cert($d, 0);
-	}
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -1907,7 +1901,9 @@ return undef if (!$config{'postfix_ssl'});
 # Check if using SSL globally
 &foreign_require("postfix");
 local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-return undef if (!$cfile);
+local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
+local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+return undef if ($enable && (!$cfile || !$kfile));
 
 # Find the existing master file entry
 &lock_file($postfix::config{'postfix_master'});
@@ -1915,9 +1911,11 @@ local $master = &postfix::get_master_config();
 local $defip = &get_default_ip();
 
 # Work out which flags are needed
-local $chain = &get_website_ssl_file($d, 'ca');
-local @flags = ( [ "smtpd_tls_cert_file", $d->{'ssl_cert'} ],
-		 [ "smtpd_tls_key_file", $d->{'ssl_key'} ] );
+local $chain = $s->{'ssl'} ? &get_website_ssl_file($d, 'ca') : $cafile;
+local @flags = ( [ "smtpd_tls_cert_file",
+		   $d->{'ssl'} ? $d->{'ssl_cert'} : $cfile ],
+		 [ "smtpd_tls_key_file",
+		   $d->{'ssl'} ? $d->{'ssl_key'} : $kfile ] );
 push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 
 local $changed = 0;

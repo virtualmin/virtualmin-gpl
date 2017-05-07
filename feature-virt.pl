@@ -4,12 +4,13 @@
 # Bring up an interface for a domain, if the IP isn't already enabled
 sub setup_virt
 {
-&obtain_lock_virt($_[0]);
+local ($d) = @_;
+&obtain_lock_virt($d);
 &foreign_require("net");
 local @boot = &net::active_interfaces();
-if (!$_[0]->{'virtalready'}) {
+if (!$d->{'virtalready'}) {
 	# Actually bring up
-	&$first_print(&text('setup_virt', $_[0]->{'ip'}));
+	&$first_print(&text('setup_virt', $d->{'ip'}));
 	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
 	if (!$iface) {
 		# Interface doesn't really exist!
@@ -29,37 +30,38 @@ if (!$_[0]->{'virtalready'}) {
 	if ($vwant < $vmin) {
 		$vwant = $vmin;
 		}
-	local $netmask = $_[0]->{'netmask'} || $net::virtual_netmask ||
+	local $netmask = $d->{'netmask'} || $net::virtual_netmask ||
 			 $iface->{'netmask'};
-	local $virt = { 'address' => $_[0]->{'ip'},
+	local $virt = { 'address' => $d->{'ip'},
 			'netmask' => $netmask,
-			'broadcast' => &net::compute_broadcast($_[0]->{'ip'},
+			'broadcast' => &net::compute_broadcast($d->{'ip'},
 							       $netmask),
 			'name' => $iface->{'name'},
 			'virtual' => $vwant,
 			'up' => 1,
-			'desc' => "Virtualmin server $_[0]->{'dom'}",
+			'desc' => "Virtualmin server $d->{'dom'}",
 		      };
 	$virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
 	&net::save_interface($virt);
 	&net::activate_interface($virt);
-	$_[0]->{'iface'} = $virt->{'fullname'};
-	&$second_print(&text('setup_virtdone', $_[0]->{'iface'}));
+	$d->{'iface'} = $virt->{'fullname'};
+	&$second_print(&text('setup_virtdone', $d->{'iface'}));
 	}
 else {
 	# Just guess the interface
-	&$first_print(&text('setup_virt2', $_[0]->{'ip'}));
-	local ($virt) = grep { $_->{'address'} eq $_[0]->{'ip'} } @boot;
-	$_[0]->{'iface'} = $virt ? $virt->{'fullname'} : undef;
-	if ($_[0]->{'iface'}) {
-		&$second_print(&text('setup_virtdone2', $_[0]->{'iface'}));
+	&$first_print(&text('setup_virt2', $d->{'ip'}));
+	local ($virt) = grep { $_->{'address'} eq $d->{'ip'} } @boot;
+	$d->{'iface'} = $virt ? $virt->{'fullname'} : undef;
+	if ($d->{'iface'}) {
+		&$second_print(&text('setup_virtdone2', $d->{'iface'}));
 		}
 	else {
-		&$second_print(&text('setup_virtnotdone', $_[0]->{'ip'}));
+		&$second_print(&text('setup_virtnotdone', $d->{'ip'}));
 		}
 	}
 &build_local_ip_list();
-&release_lock_virt($_[0]);
+&sync_postfix_ssl_cert($d, 1);
+&release_lock_virt($d);
 &register_post_action(\&restart_bind) if ($config{'dns'});
 return 1;
 }
@@ -68,16 +70,18 @@ return 1;
 # Take down the network interface for a domain
 sub delete_virt
 {
-if (!$_[0]->{'virtalready'}) {
+local ($d) = @_;
+&sync_postfix_ssl_cert($d, 0);
+if (!$d->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
-	&obtain_lock_virt($_[0]);
+	&obtain_lock_virt($d);
 	&foreign_require("net");
-	local ($biface) = grep { $_->{'address'} eq $_[0]->{'ip'} }
+	local ($biface) = grep { $_->{'address'} eq $d->{'ip'} }
 			       &net::boot_interfaces();
-	local ($aiface) = grep { $_->{'address'} eq $_[0]->{'ip'} }
+	local ($aiface) = grep { $_->{'address'} eq $d->{'ip'} }
 			       &net::active_interfaces();
 	if (!$biface) {
-		&$second_print(&text('delete_noiface', $_[0]->{'iface'}));
+		&$second_print(&text('delete_noiface', $d->{'iface'}));
 		}
 	elsif ($biface->{'virtual'} ne '') {
 		&net::delete_interface($biface);
@@ -89,9 +93,9 @@ if (!$_[0]->{'virtalready'}) {
 		&$second_print(&text('delete_novirt', $biface->{'fullname'}));
 		}
 	&build_local_ip_list();
-	&release_lock_virt($_[0]);
+	&release_lock_virt($d);
 	}
-delete($_[0]->{'iface'});
+delete($d->{'iface'});
 return 1;
 }
 
@@ -99,32 +103,40 @@ return 1;
 # Change the virtual IP address for a domain
 sub modify_virt
 {
-if ($_[0]->{'ip'} ne $_[1]->{'ip'} && $_[0]->{'virt'} &&
-    !$_[0]->{'virtalready'}) {
+local ($d, $oldd) = @_;
+if ($d->{'ip'} ne $oldd->{'ip'} && $d->{'virt'} &&
+    !$d->{'virtalready'}) {
 	# Change IP on virtual interface
 	&$first_print($text{'save_virt'});
-	&obtain_lock_virt($_[0]);
+	&obtain_lock_virt($d);
 	&foreign_require("net");
-	local ($biface) = grep { $_->{'address'} eq $_[1]->{'ip'} }
+	local ($biface) = grep { $_->{'address'} eq $oldd->{'ip'} }
 			       &net::boot_interfaces();
-	local ($aiface) = grep { $_->{'address'} eq $_[1]->{'ip'} }
+	local ($aiface) = grep { $_->{'address'} eq $oldd->{'ip'} }
 			       &net::active_interfaces();
 	if ($biface && $aiface) {
 		if ($biface->{'virtual'} ne '') {
-			$biface->{'address'} = $_[0]->{'ip'};
+			$biface->{'address'} = $d->{'ip'};
 			&net::save_interface($biface);
 			}
 		if ($aiface->{'virtual'} ne '') {
-			$aiface->{'address'} = $_[0]->{'ip'};
+			$aiface->{'address'} = $d->{'ip'};
 			&net::activate_interface($aiface);
 			}
 		&$second_print($text{'setup_done'});
 		}
 	else {
-		&$second_print(&text('delete_novirt', $_[1]->{'iface'}));
+		&$second_print(&text('delete_novirt', $oldd->{'iface'}));
 		}
 	&build_local_ip_list();
-	&release_lock_virt($_[0]);
+	if (!$d->{'ssl'}) {
+		# If IP changed, may also need to upate in Postfix config
+		# (unless SSL is enabled, in which case this happens in
+		# modify_ssl)
+		&sync_postfix_ssl_cert($oldd, 0);
+		&sync_postfix_ssl_cert($d, 1);
+		}
+	&release_lock_virt($d);
 	&register_post_action(\&restart_bind) if ($config{'dns'});
 	}
 }
