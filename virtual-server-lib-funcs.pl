@@ -14625,9 +14625,9 @@ elsif ($config{'quotas'}) {
 				else {
 					# Both are enabled
 					$config{'home_quotas'} =
-						$home_mtab->[0];
+						mount_point_bind($home_mtab->[0]);
 					$config{'mail_quotas'} =
-						$home_mtab->[0];
+						mount_point_bind($home_mtab->[0]);
 					}
 				}
 			else {
@@ -15054,6 +15054,24 @@ foreach my $m (sort { length($b->[0]) <=> length($a->[0]) } @mounted) {
 	}
 print STDERR "Failed to find mount point for $dir\n";
 return ( );
+}
+
+# mount_point_bind(dir)
+# Check the home to be mounted with other device
+sub mount_point_bind
+{
+    my $mount       = $_[0];
+    my %uconfig     = foreign_config("useradmin");
+    my %bind_mounts = map { $_ => 1 } split( /\n/m, backquote_command('findmnt | grep -oP \'\[\K[^\]]+\'') );
+
+    if ( exists( $bind_mounts{ $uconfig{'home_base'} } ) ) {
+        ( my $device = backquote_command("cat /etc/mtab | grep $uconfig{'home_base'} | cut -d \" \" -f1") ) =~
+          s/^\s+|\s+$//g;
+        if ($device) {
+            $mount = $device;
+        }
+    }
+    return $mount;
 }
 
 # sub_mount_points(dir)
