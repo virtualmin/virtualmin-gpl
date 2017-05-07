@@ -1619,7 +1619,7 @@ if (!$rv->{'dir'}) {
 
 # Init script
 &foreign_require("init");
-foreach my $init ("php-fpm", "php5-fpm", "php7-fpm", "php7.0-fpm") {
+foreach my $init ("php-fpm", "php5-fpm", "php7-fpm", "php7.0-fpm", "php7.1-fpm") {
 	my $st = &init::action_status($init);
 	if ($st) {
 		$rv->{'init'} = $init;
