@@ -6445,6 +6445,13 @@ return ( { 'name' => 'MailShark',
 	   'id' => 1,
 	   'mx' => [ $id.'.ess.barracudanetworks.com' ],
 	 },
+	 { 'name' => 'SpamExperts',
+	   'url' => 'https://my.spamexperts.com/',
+	   'id' => 0,
+	   'mx' => [ 'mx.spamexperts.com',
+		     'fallbackmx.spamexperts.eu',
+		     'lastmx.spamexperts.net', ],
+	 },
         );
 }
 
