@@ -2102,6 +2102,11 @@ foreach my $d (&list_domains()) {
 	my $age = time() - $ltime;
 	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
 	    $expiry && $expiry - time() < 5 * 24 * 60 * 60) {
+
+		# Run the before command
+		&set_domain_envs($d, "SSL_DOMAIN");
+		my $merr = &making_changes();
+		&reset_domain_envs($d);
 	
 		# Time to do it!
 		my $phd = &public_html_dir($d);
@@ -2114,8 +2119,15 @@ foreach my $d (&list_domains()) {
 			@dnames = &get_hostnames_for_ssl($d);
 			}
 		&foreign_require("webmin");
-		($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-						$d, \@dnames);
+		if ($merr) {
+			# Pre-command failed
+			$ok = 0;
+			$cert = $merr;
+			}
+		else {
+			($ok, $cert, $key, $chain) =
+				&request_domain_letsencrypt_cert($d, \@dnames);
+			}
 
 		my ($subject, $body);
 		if (!$ok) {
@@ -2164,6 +2176,11 @@ foreach my $d (&list_domains()) {
 				&$func($d);
 				&pop_all_print();
 				}
+
+			# Call the post command
+			&set_domain_envs($d, "SSL_DOMAIN");
+			&made_changes();
+			&reset_domain_envs($d);
 
 			# Tell the user
 			$subject = $text{'letsencrypt_sdone'};
