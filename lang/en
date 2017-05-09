@@ -238,6 +238,9 @@ index_virtualminconfig=Virtualmin Configuration
 index_themeswitch=Virtualmin 5 comes with a brand new HTML 5 theme! Would you like to try it now?
 index_themeswitchok=Switch Themes
 index_themeswitchnot=Don't Ask Me Again
+index_certwarn=SSL Certificate Warning
+index_certexpired=Some virtual servers' SSL certifcates have expired : $1
+index_certnearly=Some virtual servers' SSL certifcates are about to expire : $1
 
 form_title=Create Virtual Server
 form_title2=Create Virtual Sub-Server
@@ -4499,6 +4502,7 @@ validate_esslcert=No SSL certificate file specified in Apache virtual host
 validate_esslcertfile=SSL certificate file $1 does not exist
 validate_esslkeyfile=SSL key file $1 does not exist
 validate_essldom=The SSL certificate for this virtual server does not match $1 or $2. Instead, it matches the hostnames : $3
+validate_esslexpired=The SSL certificate for this virtual server expired on $1
 validate_esslfirst=The SSL certificate for the first Apache SSL virtual host on $4 does not match $1 or $2. Instead, it matches the hostnames : $3
 validate_elogfile=No webserver log found for virtual host $1
 validate_elogrotate=No logrotate configuration found for file $1

@@ -178,7 +178,15 @@ $info->{'vposs'} = \@vposs;
 
 # SSL certificate expiries
 foreach my $d (@doms) {
-	next if (!&domain_has_ssl($d));
+	if (!&domain_has_ssl($d)) {
+		# Doesn't even have SSL, so clear cache fields
+		if ($d->{'ssl_cert_expiry'}) {
+			delete($d->{'ssl_cert_expiry_cache'});
+			delete($d->{'ssl_cert_expiry'});
+			&save_domain($d);
+			}
+		next;
+		}
 	my @st = stat($d->{'ssl_cert'});
 	next if (!@st);		# Should never happen
 	next if ($d->{'ssl_cert_expiry_cache'} == $st[9]);

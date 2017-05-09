@@ -645,6 +645,15 @@ if (!$match) {
 			            &list_domain_certificate($d)));
 	}
 
+# Make sure the cert isn't expired
+local $info = &cert_info($d);
+if ($info && $info->{'notafter'}) {
+	local $notafter = &parse_notafter_date($info->{'notafter'});
+	if ($notafter < time()) {
+		return &text('validate_esslexpired', &make_date($notafter));
+		}
+	}
+
 # Make sure the first virtualhost on this IP serves the same cert, unless
 # SNI is enabled
 &require_apache();

@@ -11000,7 +11000,48 @@ if ($theme && $current_theme ne $recommended_theme &&
 	push(@rv, $switch_text);
 	}
 
+# Check for expired SSL certs (if enabled)
+my (@expired, @nearly);
+foreach my $d (&list_domains()) {
+	next if (!$d->{'ssl_cert_expiry'});
+
+	# Check if cached cert file time is valid
+	my @st = stat($d->{'ssl_cert'});
+	next if (!@st);
+	next if ($d->{'ssl_cert_expiry_cache'} != $st[9]);
+
+	# Check if at or near expiry
+	if ($d->{'ssl_cert_expiry'} < time()) {
+		push(@expired, $d);
+		}
+	elsif ($d->{'ssl_cert_expiry'} < time() + 24*60*60) {
+		push(@nearly, $d);
+		}
+	}
+if (@expired || @nearly) {
+	my $cert_text = "<b>$text{'index_certwarn'}</b><p>\n";
+	if (@expired) {
+		$cert_text .= &text('index_certexpired',
+				    &domain_ssl_page_links(\@expired));
+		}
+	if (@nearly) {
+		$cert_text .= &text('index_certnearly',
+				    &domain_ssl_page_links(\@nearly));
+		}
+	push(@rv, $cert_text);
+	}
+
+# Warn about low disk space?
+# XXX
+
 return @rv;
+}
+
+sub domain_ssl_page_links
+{
+my ($doms) = @_;
+return join(" ", map { &ui_link("/$module_name/cert_form.cgi?dom=$_->{'id'}",
+				&show_domain_name($_)) } @$doms);
 }
 
 # get_user_domain(user)

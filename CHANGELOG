@@ -1564,3 +1564,4 @@ Updates the Node.JS installer to version 7.7.4, DokuWiki to 2017-02-19b, Roundcu
 The SSL certificate for all virtual servers will now be configured for use in the Virtualmin UI on port 10000, so that URLs like https://admin.domain.com:10000/ work without cert errors.
 Chroot jails for virtual server domain owners can now be setup at domain creation time or afterwards. This limits the files visible to SSH sessions and PHP apps run via FPM to the jail directory.
 SSL certificates can now be copied to Dovecot even for virtual servers that don't have their own private IP address.
+SSL certificates that are expired or close to it are displayed on the System Information page.
