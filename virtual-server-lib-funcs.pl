@@ -15065,10 +15065,9 @@ sub mount_point_bind
     my %bind_mounts = map { $_ => 1 } split( /\n/m, backquote_command('findmnt | grep -oP \'\[\K[^\]]+\'') );
 
     if ( exists( $bind_mounts{ $uconfig{'home_base'} } ) ) {
-        ( my $device = backquote_command("cat /etc/mtab | grep $uconfig{'home_base'} | cut -d \" \" -f1") ) =~
-          s/^\s+|\s+$//g;
-        if ($device) {
-            $mount = $device;
+        my @device = sub_mount_points( $uconfig{'home_base'} );
+        if (@device) {
+            $mount = $device[0]->[1];
         }
     }
     return $mount;
