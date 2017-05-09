@@ -176,6 +176,20 @@ $info->{'progs'} = \@progs;
 my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 $info->{'vposs'} = \@vposs;
 
+# SSL certificate expiries
+foreach my $d (@doms) {
+	next if (!&domain_has_ssl($d));
+	my @st = stat($d->{'ssl_cert'});
+	next if (!@st);		# Should never happen
+	next if ($d->{'ssl_cert_expiry_cache'} == $st[9]);
+	my $info = &cert_info($d);
+	next if (!$info);
+	$d->{'ssl_cert_expiry_cache'} = $st[9];
+	my $notafter = &parse_notafter_date($info->{'notafter'});
+	$d->{'ssl_cert_expiry'} = $notafter;
+	&save_domain($d);
+	}
+
 return $info;
 }
 
