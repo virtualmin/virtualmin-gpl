@@ -421,7 +421,9 @@ return 0;
 sub backup_dir
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
-&$first_print($homefmt && $config{'compression'} == 3 ? $text{'backup_dirzip'} :
+local $compression = $opts->{'compression'} ne '' ? $opts->{'compression'}
+						  : $config{'compression'};
+&$first_print($homefmt && $compression == 3 ? $text{'backup_dirzip'} :
 	      $increment == 1 ? $text{'backup_dirtarinc'}
 			      : $text{'backup_dirtar'});
 local $out;
@@ -471,7 +473,7 @@ if ($gconfig{'os_type'} eq 'solaris') {
 	}
 &open_tempfile(XTEMP, ">$xtemp");
 foreach my $x (@xlist) {
-	if ($homefmt && $config{'compression'} == 3) {
+	if ($homefmt && $compression == 3) {
 		&print_tempfile(XTEMP, "$x\n");
 		}
 	else {
@@ -529,17 +531,17 @@ if ($key && $homefmt) {
 	}
 
 # Do the backup
-if ($homefmt && $config{'compression'} == 0) {
+if ($homefmt && $compression == 0) {
 	# With gzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
 	       " | gzip -c $config{'zip_args'}";
 	}
-elsif ($homefmt && $config{'compression'} == 1) {
+elsif ($homefmt && $compression == 1) {
 	# With bzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
 	       " | ".&get_bzip2_command()." -c $config{'zip_args'}";
 	}
-elsif ($homefmt && $config{'compression'} == 3) {
+elsif ($homefmt && $compression == 3) {
 	# ZIP archive
 	$cmd = "zip -r - . -x\@$xtemp";
 	}
