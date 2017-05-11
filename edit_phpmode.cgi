@@ -38,8 +38,8 @@ if (!$d->{'alias'} && $can == 2 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 	# PHP execution mode
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
-			    &ui_radio("mode", $mode,
-			      [ map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+			    &ui_radio_table("mode", $mode,
+			      [ map { [ $_, $text{'phpmode_'.$_} ] }
 				    @modes ]));
 	}
 
@@ -75,9 +75,9 @@ if (defined(&supported_ruby_modes)) {
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_ruby_mode"))) {
 		print &ui_table_row(
 			&hlink($text{'phpmode_rubymode'}, "rubymode"),
-			&ui_radio("rubymode", &get_domain_ruby_mode($d),
-				  [ [ "", $text{'phpmode_noruby'}."<br>" ],
-				    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
+			&ui_radio_table("rubymode", &get_domain_ruby_mode($d),
+				  [ [ "", $text{'phpmode_noruby'} ],
+				    map { [ $_, $text{'phpmode_'.$_} ] }
 					@rubys ]));
 		}
 	}
