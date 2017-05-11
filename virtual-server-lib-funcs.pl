@@ -15101,17 +15101,19 @@ return ( );
 # Check the home to be mounted with other device
 sub mount_point_bind
 {
-    my $mount       = $_[0];
-    my %uconfig     = foreign_config("useradmin");
-    my %bind_mounts = map { $_ => 1 } split( /\n/m, backquote_command('findmnt | grep -oP \'\[\K[^\]]+\'') );
-
-    if ( exists( $bind_mounts{ $uconfig{'home_base'} } ) ) {
-        my @device = sub_mount_points( $uconfig{'home_base'} );
-        if (@device) {
-            $mount = $device[0]->[1];
-        }
-    }
-    return $mount;
+my ($mount) = @_;
+if (!&has_command("findmnt")) {
+	return $mount;
+	}
+my %uconfig = foreign_config("useradmin");
+my %bind_mounts = map { $_ => 1 } split(/\n/m, &backquote_command('findmnt | grep -oP \'\[\K[^\]]+\'') );
+if (exists($bind_mounts{$uconfig{'home_base'}})) {
+	my @device = sub_mount_points($uconfig{'home_base'});
+	if (@device) {
+		$mount = $device[0]->[1];
+		}
+	}
+return $mount;
 }
 
 # sub_mount_points(dir)
