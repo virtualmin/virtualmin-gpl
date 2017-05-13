@@ -42,3 +42,5 @@ if ($info) {
 
 # Resync all jails
 &copy_all_domain_jailkit_files();
+
+&run_post_actions_silently();
