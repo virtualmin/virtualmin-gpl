@@ -634,7 +634,7 @@ DOMAIN: foreach $d (@$doms) {
 		&$second_print(&text('backup_deleteddom',
 				     &show_domain_name($d)));
 		$dok = 0;
-		goto DOMAINFAILED;
+		goto DOMAINFAILED_NOQUOTAS;
 		}
 	my $parent = $d->{'parent'} ? &get_domain($d->{'parent'}) : undef;
 	if ($parent) {
