@@ -105,12 +105,22 @@ elsif ($config{'loginmode'} == 1) {
 # Connect to the server
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
-$con = &make_http_connection($ip, $port, $ssl, $meth, $path);
+$httphost = $host;
+$con = &make_http_connection($ip, $port, $ssl, $meth, $path, undef, undef,
+			     { 'host' => $host,
+			       'checkhost' => $host });
+if (!ref($con)) {
+	# Maybe the alternate SSL hostname will work?
+	$httphost = $althost;
+	$con = &make_http_connection(
+		$ip, $port, $ssl, $meth, $path, undef, undef,
+		{ 'host' => $althost, 'checkhost' => $althost });
+	}
 $gconfig{'http_proxy'} = $oldproxy;
 &error($con) if (!ref($con));
 
 # Send request headers
-&write_http_connection($con, "Host: $host\r\n");
+&write_http_connection($con, "Host: $httphost\r\n");
 &write_http_connection($con, "User-agent: Webmin\r\n");
 if ($user) {
 	$auth = &encode_base64("$user:$pass");
