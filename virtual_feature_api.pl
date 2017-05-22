@@ -567,6 +567,13 @@ sub feature_change_web_error_log
 {
 }
 
+# feature_get_domain_web_config(domain-name, port)
+# Returns an internal config object for the web host on some domain and port,
+# or undef if not found
+sub feature_get_domain_web_config
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.
