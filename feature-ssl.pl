@@ -2078,6 +2078,14 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 		push(@rv, $full);
 		}
 	}
+if (!$d->{'alias'}) {
+	# Add aliases of this domain that have SSL enabled
+	foreach my $alias (&get_domain_by("alias", $d->{'id'})) {
+		if (&domain_has_website($alias)) {
+			push(@rv, &get_hostnames_for_ssl($alias));
+			}
+		}
+	}
 return @rv;
 }
 
