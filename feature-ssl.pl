@@ -2064,10 +2064,27 @@ sub get_hostnames_for_ssl
 {
 my ($d) = @_;
 my @rv = ( $d->{'dom'} );
-my ($defvirt) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $defvirt;
+my $p = &domain_has_website($d);
+return @rv if (!$p);
+if ($p eq "web") {
+	$defvirt = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+	}
+else {
+	$defvirt = &plugin_call($p, "feature_get_domain_web_config",
+				$d->{'dom'}, $d->{'web_port'});
+	}
+return @rv if (!$defvirt);
 foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 		  &get_autoconfig_hostname($d)) {
-	my ($virt) = &get_apache_virtual($full, $d->{'web_port'});
+	my $virt;
+	if ($p eq "web") {
+		$virt = &get_apache_virtual($full, $d->{'web_port'});
+		}
+	else {
+		$virt = &plugin_call($p, "feature_get_domain_web_config",
+				     $full, $d->{'web_port'});
+		}
 	next if (!$virt || $virt ne $defvirt);
 	if ($d->{'dns'}) {
 		my $recs = &get_domain_dns_records($d);
@@ -2086,7 +2103,7 @@ if (!$d->{'alias'}) {
 			}
 		}
 	}
-return @rv;
+return &unique(@rv);
 }
 
 # apply_letsencrypt_cert_renewals()
