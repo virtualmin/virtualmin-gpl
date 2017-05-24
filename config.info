@@ -1,5 +1,5 @@
 line1=Server settings,11
-mail_system=Mail server to configure,4,1-Sendmail,0-Postfix,2-Qmail,4-Qmail+LDAP,5-Qmail+VPOPMail,6-Exim (experimental),3-Detect automatically
+mail_system=Mail server to configure,4,1-Sendmail,0-Postfix,2-Qmail,5-Qmail+VPOPMail,6-Exim (experimental),3-Detect automatically
 generics=Also update outgoing addresses for mailboxes?,1,1-Yes,0-No
 bccs=Allow automatic BCCing of outgoing email?,1,1-Yes,0-No
 quotas=Set quotas for domain and mail users?,1,1-Yes (if enabled),0-No
@@ -116,18 +116,6 @@ nodeniedssh=Add users with no SSH access to <tt>deniedssh</tt> group?,1,0-Yes,1-
 trash_folder=Trash folder name for new mailboxes,10,*-Don't create any,trash-trash,Trash-Trash,Other name
 drafts_folder=Drafts folder name for new mailboxes,10,*-Don't create any,drafts-drafts,Drafts-Drafts,Other name
 sent_folder=Sent mail folder name for new mailboxes,10,*-Don't create any,sent-sent,Sent-Sent,Other name
-
-line4.5=Qmail+LDAP options,11
-ldap_host=LDAP server,0
-ldap_port=LDAP port,3,Default
-ldap_login=Login for LDAP server,0
-ldap_pass=Password for LDAP server,0
-ldap_base=Base for mail users,0
-ldap_unix=Qmail LDAP users are Unix users too?,1,1-Yes,0-No
-ldap_mailstore=Mail store for users,0
-ldap_classes=Additional object classes for LDAP users,0
-ldap_aclasses=Additional object classes for LDAP aliases,0
-ldap_props=Additional attributes for LDAP users,9,40,3,\t
 
 line4.6=VPOPMail options,11
 vpopmail_dir=Base directory for VPOPMail,0

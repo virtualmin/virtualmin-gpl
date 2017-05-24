@@ -53,10 +53,6 @@ index_emodssl2=The Apache configuration on your system does not appear to be lis
 index_esendmail=The Sendmail mail server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Sendmail Mail Server</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
 index_epostfix=The Postfix server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>Postfix Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
 index_eqmail=The QMail server does not appear to be installed on your system, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
-index_eqmailldap=The QMail server does not appear to be installed on your system, is not configured to use LDAP, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
-index_eqmailhost=The Qmail LDAP host set on the <a href='$1'>module configuration</a> page is missing or invalid.
-index_eqmailbase=The Qmail LDAP base set on the <a href='$1'>module configuration</a> page is missing or invalid.
-index_eqmailconn=An error occurred connecting to the LDAP server used for Qmail : $1. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
 index_evpopmail=The QMail server does not appear to be installed on your system, is missing the VPOPMail extensions, or has not yet been set up properly in Webmin's <a href='$1'>QMail Configuration</a> module. If you are running a different mail server, select it on the <a href='$2'>module configuration</a> page.
 index_emailboxessystem=The Read User Mail module is not setup to use the $3 mail server. Either adjust its <a href='$1'>module configuration</a> to match, or change the <a href='$2'>Virtualmin configuration</a>.
 index_eiface=No Ethernet interface could be automatically found on your system. Use the <a href='$1'>module configuration</a> page to set the interface manually.
@@ -1847,7 +1843,6 @@ check_dependentesupport=Postfix can support per-domain outgoing IP addresses, bu
 check_qmailok=Mail server Qmail is installed and configured.
 check_qmailmode6=Mail server Qmail is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, which may not work.
 check_postfixmode6=Mail server Postfix is installed and configured. However, the username format on the server templates page is set to <b>username@domain</b>, is not supported by Postfix.
-check_qmailldapok=Mail server Qmail with LDAP is installed and configured.
 check_vpopmailok=Mail server Qmail with VPOPMail extensions is installed and configured.
 check_done=.. your system is ready for use by Virtualmin.
 check_failed=.. your system is not ready for use by Virtualmin.
@@ -1946,6 +1941,7 @@ checkmap_enone=No map sources were found in the <a href='$1'>Postfix configurati
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile
 checkmap_eaccess=The map source <tt>$1</tt> cannot be used : $2
 checkmap_efile=The map type is not supported by this version of Webmin - only maps using files like <tt>hash</tt> and <tt>regexp</tt> can be used
+check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users

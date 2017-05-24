@@ -721,31 +721,7 @@ if ($_[0]) {
 		@users = grep { !$umap{$_->{'user'}} } @users;
 		}
 
-	if ($config{'mail_system'} == 4) {
-		# Add Qmail LDAP users (who have same GID?)
-		local $ldap = &connect_qmail_ldap();
-		local $rv = $ldap->search(base => $config{'ldap_base'},
-				  filter => "(&(objectClass=qmailUser)(|(qmailGID=$_[0]->{'gid'})(gidNumber=$_[0]->{'gid'})))");
-		&error($rv->error) if ($rv->code);
-		foreach $u ($rv->all_entries) {
-			local %uinfo = &qmail_dn_to_hash($u);
-			next if (!$uinfo{'mailstore'});	# alias only
-			$uinfo{'ldap'} = $u;
-                        if ($_[0]->{'parent'}) {
-                                # In sub-domain, exclude parent domain users
-                                next if ($_->{'home'} !~ /^$_[0]->{'home'}\//);
-                                }
-                        elsif (@subdoms) {
-                                # In parent domain exclude sub-domain users
-                                next if ($_->{'home'} =~ /^$_[0]->{'home'}\/doma
-ins\//);
-                                }
-			@users = grep { $_->{'user'} ne $uinfo{'user'} } @users;
-			push(@users, \%uinfo);
-			}
-		$ldap->unbind();
-		}
-	elsif ($config{'mail_system'} == 5) {
+	if ($config{'mail_system'} == 5) {
 		# Add VPOPMail users for this domain
 		local %attr_map = ( 'name' => 'user',
 				    'passwd' => 'pass',
@@ -929,7 +905,6 @@ foreach my $u (@users) {
 if (!$_[2]) {
 	# Add email addresses and forwarding addresses to user structures
 	foreach my $u (@users) {
-		next if ($u->{'qmail'});	# got from LDAP already
 		$u->{'email'} = $u->{'virt'} = undef;
 		$u->{'alias'} = $u->{'to'} = $u->{'generic'} = undef;
 		$u->{'extraemail'} = $u->{'extravirt'} = undef;
@@ -1254,20 +1229,7 @@ local $pop3 = &remove_userdom($_[0]->{'user'}, $_[1]);
 &require_useradmin();
 &require_mail();
 
-if ($_[0]->{'qmail'}) {
-	# Create user in Qmail LDAP
-	local $ldap = &connect_qmail_ldap();
-	local $_[0]->{'dn'} = "uid=$_[0]->{'user'},$config{'ldap_base'}";
-	local @oc = ( "qmailUser" );
-	push(@oc, "posixAccount") if ($_[0]->{'unix'});
-	push(@oc, split(/\s+/, $config{'ldap_classes'}));
-	local $attrs = &qmail_user_to_dn($_[0], \@oc, $_[1]);
-	push(@$attrs, "objectClass" => \@oc);
-	local $rv = $ldap->add($_[0]->{'dn'}, attr => $attrs);
-	&error($rv->error) if ($rv->code);
-	$ldap->unbind();
-	}
-elsif ($_[0]->{'vpopmail'}) {
+if ($_[0]->{'vpopmail'}) {
 	# Create user in VPOPMail
 	local $quser = quotemeta($_[0]->{'user'});
 	local $qdom = $_[1]->{'dom'};
@@ -1315,74 +1277,70 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
 	&foreign_call($usermodule, "made_changes");
 	}
 
+# Add virtusers
 local $firstemail;
 local @to = @{$_[0]->{'to'}};
-if (!$_[0]->{'qmail'}) {
-	# Add his virtusers for non Qmail+LDAP users
-	local $vto = @to ? &escape_alias($_[0]->{'user'}) :
-		     $extrauser ? $extrauser->{'user'} :
-				  &escape_user($_[0]->{'user'});
-	if ($_[0]->{'email'}) {
-		local $virt = { 'from' => $_[0]->{'email'},
-				'to' => [ $vto ] };
-		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
-		$firstemail ||= $_[0]->{'email'};
+local $vto = @to ? &escape_alias($_[0]->{'user'}) :
+	     $extrauser ? $extrauser->{'user'} :
+			  &escape_user($_[0]->{'user'});
+if ($_[0]->{'email'}) {
+	local $virt = { 'from' => $_[0]->{'email'},
+			'to' => [ $vto ] };
+	&create_virtuser($virt);
+	$_[0]->{'virt'} = $virt;
+	$firstemail ||= $_[0]->{'email'};
+	}
+elsif ($can_alias_types{9} && $_[1] && !$_[0]->{'noprimary'} &&
+       $_[1]->{'mail'}) {
+	# Add bouncer if email disabled
+	local $virt = { 'from' => "$pop3\@$_[1]->{'dom'}",
+			'to' => [ "BOUNCE" ] };
+	&create_virtuser($virt);
+	$_[0]->{'virt'} = $virt;
+	}
+local @extravirt;
+local $e;
+foreach $e (&unique(@{$_[0]->{'extraemail'}})) {
+	local $virt = { 'from' => $e,
+			'to' => [ $vto ] };
+	&create_virtuser($virt);
+	push(@extravirt, $virt);
+	$firstemail ||= $e;
+	}
+$_[0]->{'extravirt'} = \@extravirt;
+
+# Add his alias, if any
+if (@to) {
+	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+			 'enabled' => 1,
+			 'values' => $_[0]->{'to'} };
+	&check_alias_clash($_[0]->{'user'}) &&
+		&error(&text('alias_eclash2', $_[0]->{'user'}));
+	if ($config{'mail_system'} == 1) {
+		&sendmail::lock_alias_files($sendmail_afiles);
+		&sendmail::create_alias($alias, $sendmail_afiles);
+		&sendmail::unlock_alias_files($sendmail_afiles);
 		}
-	elsif ($can_alias_types{9} && $_[1] && !$_[0]->{'noprimary'} &&
-	       $_[1]->{'mail'}) {
-		# Add bouncer if email disabled
-		local $virt = { 'from' => "$pop3\@$_[1]->{'dom'}",
-				'to' => [ "BOUNCE" ] };
-		&create_virtuser($virt);
-		$_[0]->{'virt'} = $virt;
+	elsif ($config{'mail_system'} == 0) {
+		&postfix::lock_alias_files($postfix_afiles);
+		&$postfix_create_alias($alias, $postfix_afiles);
+		&postfix::unlock_alias_files($postfix_afiles);
+		&postfix::regenerate_aliases();
 		}
-	local @extravirt;
-	local $e;
-	foreach $e (&unique(@{$_[0]->{'extraemail'}})) {
-		local $virt = { 'from' => $e,
-				'to' => [ $vto ] };
-		&create_virtuser($virt);
-		push(@extravirt, $virt);
-		$firstemail ||= $e;
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 5) {
+		# Set up user's .qmail file
+		local $dqm = &dotqmail_file($_[0]);
+		&lock_file($dqm);
+		&save_dotqmail($alias, $dqm, $pop3);
+		&unlock_file($dqm);
 		}
-	$_[0]->{'extravirt'} = \@extravirt;
+	$_[0]->{'alias'} = $alias;
 	}
 
-if (!$_[0]->{'qmail'}) {
-	# Add his alias, if any, for non Qmail+LDAP users
-	if (@to) {
-		local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
-				 'enabled' => 1,
-				 'values' => $_[0]->{'to'} };
-		&check_alias_clash($_[0]->{'user'}) &&
-			&error(&text('alias_eclash2', $_[0]->{'user'}));
-		if ($config{'mail_system'} == 1) {
-			&sendmail::lock_alias_files($sendmail_afiles);
-			&sendmail::create_alias($alias, $sendmail_afiles);
-			&sendmail::unlock_alias_files($sendmail_afiles);
-			}
-		elsif ($config{'mail_system'} == 0) {
-			&postfix::lock_alias_files($postfix_afiles);
-			&$postfix_create_alias($alias, $postfix_afiles);
-			&postfix::unlock_alias_files($postfix_afiles);
-			&postfix::regenerate_aliases();
-			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
-			# Set up user's .qmail file
-			local $dqm = &dotqmail_file($_[0]);
-			&lock_file($dqm);
-			&save_dotqmail($alias, $dqm, $pop3);
-			&unlock_file($dqm);
-			}
-		$_[0]->{'alias'} = $alias;
-		}
-
-	if ($config{'generics'} && $firstemail) {
-		# Add genericstable entry too
-		&create_generic($_[0]->{'user'}, $firstemail);
-		}
+if ($config{'generics'} && $firstemail) {
+	# Add genericstable entry too
+	&create_generic($_[0]->{'user'}, $firstemail);
 	}
 
 if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
@@ -1515,32 +1473,7 @@ if ($_[0]->{'unix'}) {
 
 local $pop3 = &remove_userdom($_[0]->{'user'}, $_[2]);
 local $extrauser;
-if ($_[1]->{'qmail'}) {
-	# Update user in Qmail LDAP
-	local $ldap = &connect_qmail_ldap();
-	local ($attrs, $delattrs) = &qmail_user_to_dn($_[0],
-		[ $_[1]->{'ldap'}->get_value("objectClass") ], $_[2]);
-	@$delattrs = grep { defined($_[1]->{'ldap'}->get_value($_))} @$delattrs;
-	local (%attrs, $i);
-	for($i=0; $i<@$attrs; $i+=2) {
-		$attrs{$attrs->[$i]} = $attrs->[$i+1];
-		}
-	local $newdn = "uid=$_[0]->{'user'},$config{'ldap_base'}";
-	if (!&same_dn($newdn, $_[1]->{'dn'})) {
-		# Renamed, so change DN
-		$rv = $ldap->moddn($_[1]->{'dn'},
-				   newrdn => "uid=$_[0]->{'user'}");
-		&error($rv->error) if ($rv->code);
-		$_[0]->{'dn'} = $newdn;
-		}
-	# Update other attributes
-	local $rv = $ldap->modify($_[0]->{'dn'},
-				  replace => \%attrs,
-				  delete => $delattrs);
-	&error($rv->error) if ($rv->code);
-	$ldap->unbind();
-	}
-elsif ($_[1]->{'vpopmail'}) {
+if ($_[1]->{'vpopmail'}) {
 	# Update VPOPMail user
 	local $quser = quotemeta($_[1]->{'user'});
 	local $qdom = $_[2]->{'dom'};
@@ -1656,7 +1589,7 @@ if ($oldto ne $newto) {
 local $firstemail;
 local @to = @{$_[0]->{'to'}};
 local @oldto = @{$_[1]->{'to'}};
-if (!$_[0]->{'qmail'} && $echanged) {
+if ($echanged) {
 	# Take away all virtusers and add new ones, for non Qmail+LDAP users
 	&delete_virtuser($_[1]->{'virt'}) if ($_[1]->{'virt'});
 	local %oldcmt;
@@ -1705,97 +1638,95 @@ else {
 		}
 	}
 
-if (!$_[0]->{'qmail'}) {
-	# Update, create or delete alias, for non Qmail+LDAP users
-	if (@to && !@oldto) {
-		# Need to add alias
-		local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
-				 'enabled' => 1,
-				 'values' => $_[0]->{'to'} };
-		&check_alias_clash($_[0]->{'user'}) &&
-			&error(&text('alias_eclash2', $_[0]->{'user'}));
-		if ($config{'mail_system'} == 1) {
-			# Create Sendmail alias with same name as user
-			&sendmail::lock_alias_files($sendmail_afiles);
-			&sendmail::create_alias($alias, $sendmail_afiles);
-			&sendmail::unlock_alias_files($sendmail_afiles);
-			}
-		elsif ($config{'mail_system'} == 0) {
-			# Create Postfix alias with same name as user
-			&postfix::lock_alias_files($postfix_afiles);
-			&$postfix_create_alias($alias, $postfix_afiles);
-			&postfix::unlock_alias_files($postfix_afiles);
-			&postfix::regenerate_aliases();
-			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
-			# Set up user's .qmail file
-			local $dqm = &dotqmail_file($_[0]);
-			&lock_file($dqm);
-			&save_dotqmail($alias, $dqm, $pop3);
-			&unlock_file($dqm);
-			}
-		$_[0]->{'alias'} = $alias;
+# Update, create or delete alias
+if (@to && !@oldto) {
+	# Need to add alias
+	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+			 'enabled' => 1,
+			 'values' => $_[0]->{'to'} };
+	&check_alias_clash($_[0]->{'user'}) &&
+		&error(&text('alias_eclash2', $_[0]->{'user'}));
+	if ($config{'mail_system'} == 1) {
+		# Create Sendmail alias with same name as user
+		&sendmail::lock_alias_files($sendmail_afiles);
+		&sendmail::create_alias($alias, $sendmail_afiles);
+		&sendmail::unlock_alias_files($sendmail_afiles);
 		}
-	elsif (!@to && @oldto) {
-		# Need to delete alias
-		if ($config{'mail_system'} == 1) {
-			# Delete Sendmail alias
-			&lock_file($_[0]->{'alias'}->{'file'});
-			&sendmail::delete_alias($_[0]->{'alias'});
-			&unlock_file($_[0]->{'alias'}->{'file'});
-			}
-		elsif ($config{'mail_system'} == 0) {
-			# Delete Postfix alias
-			&lock_file($_[0]->{'alias'}->{'file'});
-			&$postfix_delete_alias($_[0]->{'alias'});
-			&unlock_file($_[0]->{'alias'}->{'file'});
-			&postfix::regenerate_aliases();
-			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
-			# Remove user's .qmail file
-			local $dqm = &dotqmail_file($_[0]);
-			&unlink_logged($dqm);
-			}
+	elsif ($config{'mail_system'} == 0) {
+		# Create Postfix alias with same name as user
+		&postfix::lock_alias_files($postfix_afiles);
+		&$postfix_create_alias($alias, $postfix_afiles);
+		&postfix::unlock_alias_files($postfix_afiles);
+		&postfix::regenerate_aliases();
 		}
-	elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
-		# Need to update the alias
-		local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
-				 'enabled' => 1,
-				 'values' => $_[0]->{'to'} };
-		if ($config{'mail_system'} == 1) {
-			# Update Sendmail alias
-			&lock_file($_[1]->{'alias'}->{'file'});
-			&sendmail::modify_alias($_[1]->{'alias'}, $alias);
-			&unlock_file($_[1]->{'alias'}->{'file'});
-			}
-		elsif ($config{'mail_system'} == 0) {
-			# Update Postfix alias
-			&lock_file($_[1]->{'alias'}->{'file'});
-			&$postfix_modify_alias($_[1]->{'alias'}, $alias);
-			&unlock_file($_[1]->{'alias'}->{'file'});
-			&postfix::regenerate_aliases();
-			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
-			# Set up user's .qmail file
-			local $dqm = &dotqmail_file($_[0]);
-			&lock_file($dqm);
-			&save_dotqmail($alias, $dqm, $pop3);
-			&unlock_file($dqm);
-			}
-		$_[0]->{'alias'} = $alias;
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 5) {
+		# Set up user's .qmail file
+		local $dqm = &dotqmail_file($_[0]);
+		&lock_file($dqm);
+		&save_dotqmail($alias, $dqm, $pop3);
+		&unlock_file($dqm);
 		}
+	$_[0]->{'alias'} = $alias;
+	}
+elsif (!@to && @oldto) {
+	# Need to delete alias
+	if ($config{'mail_system'} == 1) {
+		# Delete Sendmail alias
+		&lock_file($_[0]->{'alias'}->{'file'});
+		&sendmail::delete_alias($_[0]->{'alias'});
+		&unlock_file($_[0]->{'alias'}->{'file'});
+		}
+	elsif ($config{'mail_system'} == 0) {
+		# Delete Postfix alias
+		&lock_file($_[0]->{'alias'}->{'file'});
+		&$postfix_delete_alias($_[0]->{'alias'});
+		&unlock_file($_[0]->{'alias'}->{'file'});
+		&postfix::regenerate_aliases();
+		}
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 5) {
+		# Remove user's .qmail file
+		local $dqm = &dotqmail_file($_[0]);
+		&unlink_logged($dqm);
+		}
+	}
+elsif (@to && @oldto && join(" ", @to) ne join(" ", @oldto)) {
+	# Need to update the alias
+	local $alias = { 'name' => &escape_alias($_[0]->{'user'}),
+			 'enabled' => 1,
+			 'values' => $_[0]->{'to'} };
+	if ($config{'mail_system'} == 1) {
+		# Update Sendmail alias
+		&lock_file($_[1]->{'alias'}->{'file'});
+		&sendmail::modify_alias($_[1]->{'alias'}, $alias);
+		&unlock_file($_[1]->{'alias'}->{'file'});
+		}
+	elsif ($config{'mail_system'} == 0) {
+		# Update Postfix alias
+		&lock_file($_[1]->{'alias'}->{'file'});
+		&$postfix_modify_alias($_[1]->{'alias'}, $alias);
+		&unlock_file($_[1]->{'alias'}->{'file'});
+		&postfix::regenerate_aliases();
+		}
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 5) {
+		# Set up user's .qmail file
+		local $dqm = &dotqmail_file($_[0]);
+		&lock_file($dqm);
+		&save_dotqmail($alias, $dqm, $pop3);
+		&unlock_file($dqm);
+		}
+	$_[0]->{'alias'} = $alias;
+	}
 
-	if ($config{'generics'} && $echanged) {
-		# Update genericstable entry too
-		if ($_[1]->{'generic'}) {
-			&delete_generic($_[1]->{'generic'});
-			}
-		if ($firstemail) {
-			&create_generic($_[0]->{'user'}, $firstemail);
-			}
+if ($config{'generics'} && $echanged) {
+	# Update genericstable entry too
+	if ($_[1]->{'generic'}) {
+		&delete_generic($_[1]->{'generic'});
+		}
+	if ($firstemail) {
+		&create_generic($_[0]->{'user'}, $firstemail);
 		}
 	}
 &sync_alias_virtuals($_[2]);
@@ -2046,14 +1977,7 @@ if ($_[0]->{'unix'}) {
 	&delete_unix_cron_jobs($_[0]->{'user'});
 	}
 
-if ($_[0]->{'qmail'}) {
-	# Delete user in Qmail LDAP
-	local $ldap = &connect_qmail_ldap();
-	local $rv = $ldap->delete($_[0]->{'dn'});
-	&error($rv->error) if ($rv->code);
-	$ldap->unbind();
-	}
-elsif ($_[0]->{'vpopmail'}) {
+if ($_[0]->{'vpopmail'}) {
 	# Call VPOPMail delete user program
 	local $quser = quotemeta($_[0]->{'user'});
 	local $qdom = $_[1]->{'dom'};
@@ -2095,47 +2019,43 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 		}
 	}
 
-if (!$_[0]->{'qmail'}) {
-	# Delete any virtusers (extra email addresses for this user)
-	&delete_virtuser($_[0]->{'virt'}) if ($_[0]->{'virt'});
-	local $e;
-	foreach $e (@{$_[0]->{'extravirt'}}) {
-		&delete_virtuser($e);
+# Delete any virtusers (extra email addresses for this user)
+&delete_virtuser($_[0]->{'virt'}) if ($_[0]->{'virt'});
+local $e;
+foreach $e (@{$_[0]->{'extravirt'}}) {
+	&delete_virtuser($e);
+	}
+
+# Delete his alias (for forwarding), if any
+if ($_[0]->{'alias'}) {
+	if ($config{'mail_system'} == 1) {
+		# Delete Sendmail alias with same name as user
+		if (!$_[0]->{'alias'}->{'deleted'}) {
+			&lock_file($_[0]->{'alias'}->{'file'});
+			&sendmail::delete_alias($_[0]->{'alias'});
+			&unlock_file($_[0]->{'alias'}->{'file'});
+			$_[0]->{'alias'}->{'deleted'} = 1;
+			}
+		}
+	elsif ($config{'mail_system'} == 0) {
+		# Delete Postfix alias with same name as user
+		if (!$_[0]->{'alias'}->{'deleted'}) {
+			&lock_file($_[0]->{'alias'}->{'file'});
+			&$postfix_delete_alias($_[0]->{'alias'});
+			&unlock_file($_[0]->{'alias'}->{'file'});
+			&postfix::regenerate_aliases();
+			$_[0]->{'alias'}->{'deleted'} = 1;
+			}
+		}
+	elsif ($config{'mail_system'} == 2 ||
+	       $config{'mail_system'} == 5) {
+		# .qmail will be deleted when user is
 		}
 	}
 
-if (!$_[0]->{'qmail'}) {
-	# Delete his alias (for forwarding), if any
-	if ($_[0]->{'alias'}) {
-		if ($config{'mail_system'} == 1) {
-			# Delete Sendmail alias with same name as user
-			if (!$_[0]->{'alias'}->{'deleted'}) {
-				&lock_file($_[0]->{'alias'}->{'file'});
-				&sendmail::delete_alias($_[0]->{'alias'});
-				&unlock_file($_[0]->{'alias'}->{'file'});
-				$_[0]->{'alias'}->{'deleted'} = 1;
-				}
-			}
-		elsif ($config{'mail_system'} == 0) {
-			# Delete Postfix alias with same name as user
-			if (!$_[0]->{'alias'}->{'deleted'}) {
-				&lock_file($_[0]->{'alias'}->{'file'});
-				&$postfix_delete_alias($_[0]->{'alias'});
-				&unlock_file($_[0]->{'alias'}->{'file'});
-				&postfix::regenerate_aliases();
-				$_[0]->{'alias'}->{'deleted'} = 1;
-				}
-			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 5) {
-			# .qmail will be deleted when user is
-			}
-		}
-
-	if ($config{'generics'} && $_[0]->{'generic'}) {
-		# Delete genericstable entry too
-		&delete_generic($_[0]->{'generic'});
-		}
+if ($config{'generics'} && $_[0]->{'generic'}) {
+	# Delete genericstable entry too
+	&delete_generic($_[0]->{'generic'});
 	}
 
 # Delete database access (unless this is the domain owner)
@@ -2516,17 +2436,9 @@ sub encrypt_user_password
 {
 &require_useradmin();
 local ($user, $pass) = @_;
-if ($user->{'qmail'}) {
-	# Force crypt mode for Qmail+LDAP
-	local $salt = $user->{'pass'} || &random_salt();
-	$salt =~ s/^\!//;
-	return &unix_crypt($pass, $salt);
-	}
-else {
-	local $salt = $user->{'pass'};
-	$salt =~ s/^\!//;
-	return &foreign_call($usermodule, "encrypt_password", $pass, $salt);
-	}
+local $salt = $user->{'pass'};
+$salt =~ s/^\!//;
+return &foreign_call($usermodule, "encrypt_password", $pass, $salt);
 }
 
 # generate_password_hashes(&user, text, &domain)
@@ -5010,17 +4922,6 @@ if ($config{'ldap'}) {
 		push(@rv, $u);
 		}
 	}
-if ($config{'mail_system'} == 4) {
-	local $ldap = &connect_qmail_ldap();
-	local $rv = $ldap->search(base => $config{'ldap_base'},
-				  filter => "(objectClass=qmailUser)");
-	local $u;
-	foreach $u ($rv->all_entries) {
-		local %uinfo = &qmail_dn_to_hash($u);
-		push(@rv, \%uinfo);
-		}
-	$ldap->unbind();
-	}
 return @rv;
 }
 
@@ -5276,7 +5177,7 @@ sub users_table
 local ($users, $d, $cgi, $buttons, $links, $empty) = @_;
 
 local $can_quotas = &has_home_quotas() || &has_mail_quotas();
-local $can_qquotas = $config{'mail_system'} == 4 || $config{'mail_system'} == 5;
+local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
 # Work out table header
@@ -6323,8 +6224,7 @@ elsif ($config{'mail_system'} == 1) {
 			  $file."_sendmailmc");
 	&$second_print($text{'setup_done'});
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 			 &make_tar_command("cf", quotemeta($file), "."));
@@ -6536,8 +6436,7 @@ if ($bms eq $config{'mail_system'}) {
 		undef(@sendmail::sendmailcf_cache);
 		&$second_print($text{'setup_done'});
 		}
-	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-	       $config{'mail_system'} == 5) {
+	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 		# Un-tar qmail dir
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
 				 &make_tar_command("xf", quotemeta($file)));
@@ -9744,209 +9643,12 @@ close(FILE);
 return @rv;
 }
 
-# connect_qmail_ldap([return-error])
-# Connect to the LDAP server used for Qmail. Returns an LDAP handle on success,
-# or an error message on failure.
-sub connect_qmail_ldap
-{
-eval "use Net::LDAP";
-if ($@) {
-	local $err = &text('ldap_emod', "<tt>Net::LDAP</tt>");
-	if ($_[0]) { return $err; }
-	else { &error($err); }
-	}
-
-# Connect to server
-local $ipv6 = !&to_ipaddress($config{'ldap_host'}) &&
-	      defined(&to_ip6address) && &to_ip6address($config{'ldap_host'});
-local $port = $config{'ldap_port'} || 389;
-local $ldap = Net::LDAP->new($config{'ldap_host'},
-			     port => $port, inet6 => $ipv6);
-if (!$ldap) {
-	local $err = &text('ldap_econn',
-			   "<tt>$config{'ldap_host'}</tt>","<tt>$port</tt>");
-	if ($_[0]) { return $err; }
-	else { &error($err); }
-	}
-
-# Start TLS if configured
-if ($config{'ldap_tls'}) {
-	$ldap->start_tls();
-	}
-
-# Login
-local $mesg;
-if ($config{'ldap_login'}) {
-	$mesg = $ldap->bind(dn => $config{'ldap_login'},
-			    password => $config{'ldap_pass'});
-	}
-else {
-	$mesg = $ldap->bind(anonymous => 1);
-	}
-if (!$mesg || $mesg->code) {
-	local $err = &text('ldap_elogin', "<tt>$config{'ldap_host'}</tt>",
-		     $dn, $mesg ? $mesg->error : "Unknown error");
-	if ($_[0]) { return $err; }
-	else { &error($err); }
-	}
-return $ldap;
-}
-
-# qmail_dn_to_hash(&ldap-object)
-# Given a LDAP object containing user details, convert it to a hash
-sub qmail_dn_to_hash
-{
-local $x;
-local %oc = map { $_, 1 } $_[0]->get_value("objectClass");
-local %user = ( 'dn' => $_[0]->dn(),
-		'qmail' => 1,
-		'user' => scalar($_[0]->get_value("uid")),
-		'plainpass' => scalar($_[0]->get_value("cuserPassword")),
-		'uid' => $oc{'posixAccount'} ?
-			scalar($_[0]->get_value("uidNumber")) :
-			scalar($_[0]->get_value("qmailUID")),
-		'gid' => $oc{'posixAccount'} ?
-			scalar($_[0]->get_value("gidNumber")) :
-			scalar($_[0]->get_value("qmailGID")),
-		'real' => scalar($_[0]->get_value("cn")),
-		'shell' => scalar($_[0]->get_value("loginShell")),
-		'home' => scalar($_[0]->get_value("homeDirectory")),
-		'pass' => scalar($_[0]->get_value("userPassword")),
-		'mailstore' => scalar($_[0]->get_value("mailMessageStore")),
-		'qquota' => scalar($_[0]->get_value("mailQuotaSize")),
-		'email' => scalar($_[0]->get_value("mail")),
-		'extraemail' => [ $_[0]->get_value("mailAlternateAddress") ],
-	      );
-local @fwd = $_[0]->get_value("mailForwardingAddress");
-if (@fwd) {
-	$user{'to'} = \@fwd;
-	}
-$user{'pass'} =~ s/^{[a-z0-9]+}//i;
-$user{'qmail'} = 1;
-$user{'unix'} = 1 if ($oc{'posixAccount'});
-$user{'person'} = 1 if ($oc{'person'} || $oc{'inetOrgPerson'} ||
-			$oc{'posixAccount'});
-$user{'mailquota'} = 1;
-return %user;
-}
-
-# qmail_user_to_dn(&user, &classes, &domain)
-# Given a useradmin-style user hash, returns a list of properties to 
-# add/update and to delete
-sub qmail_user_to_dn
-{
-&require_mail();
-local $pfx = $_[0]->{'pass'} =~ /^\{[a-z0-9]+\}/i ? undef : "{crypt}";
-local @ee = @{$_[0]->{'extraemail'}};
-local @to = @{$_[0]->{'to'}};
-local @delrv;
-local $mailhost;
-if (defined(&qmailadmin::get_control_file)) {
-	$mailhost = &qmailadmin::get_control_file("me");
-	}
-$mailhost ||= &get_system_hostname();
-local @rv = (
-	 "uid" => $_[0]->{'user'},
-	 "qmailUID" => $_[0]->{'uid'},
-	 "qmailGID" => $_[0]->{'gid'},
-	 "homeDirectory" => $_[0]->{'home'},
-	 "userPassword" => $pfx.$_[0]->{'pass'},
-	 "mailMessageStore" => $_[0]->{'mailstore'},
-	 "mailQuotaSize" => $_[0]->{'qquota'},
-	 "mail" => $_[0]->{'email'},
-	 "mailHost" => $mailhost,
-	 "accountStatus" => "active",
-	);
-if (@ee) {
-	push(@rv, "mailAlternateAddress" => \@ee );
-	}
-else {	
-	push(@delrv, "mailAlternateAddress");
-	}
-if (@to) {
-	push(@rv, "mailForwardingAddress" => \@to );
-	push(@rv, "deliveryMode", "nolocal");
-	}
-else {	
-	push(@delrv, "mailForwardingAddress");
-	push(@rv, "deliveryMode", "noforward");
-	}
-if ($_[0]->{'unix'}) {
-	push(@rv, "uidNumber" => $_[0]->{'uid'},
-		  "gidNumber" => $_[0]->{'gid'},
-		  "loginShell" => $_[0]->{'shell'});
-	}
-if ($_[0]->{'person'}) {
-	push(@rv, "cn" => $_[0]->{'real'});
-	}
-if (&indexof("person", @{$_[1]}) >= 0 ||
-    &indexof("inetOrgPerson", @{$_[1]}) >= 0) {
-	# Have to set sn
-	push(@rv, "sn" => $_[0]->{'user'});
-	}
-# Add extra attribs, which can override those set above
-local %subs = %{$_[0]};
-&userdom_substitutions(\%subs, $_[2]);
-local @props = &split_props($config{'ldap_props'}, \%subs);
-local @addprops;
-local $i;
-local %over;
-for($i=0; $i<@props; $i+=2) {
-	if ($props[$i+1] ne "") {
-		push(@addprops, $props[$i], $props[$i+1]);
-		}
-	else {
-		push(@delrv, $props[$i]);
-		}
-	$over{$props[$i]} = $props[$i+1];
-	}
-for($i=0; $i<@rv; $i+=2) {
-	if (exists($over{$rv[$i]})) {
-		splice(@rv, $i, 2);
-		$i -= 2;
-		}
-	}
-push(@rv, @addprops);
-return wantarray ? ( \@rv, \@delrv ) : \@rv;
-}
-
-# split_props(text, &user)
-# Splits up LDAP properties
-sub split_props
-{
-local %pmap;
-foreach $p (split(/\t+/, &substitute_virtualmin_template($_[0], $_[1]))) {
-	if ($p =~ /^(\S+):\s*(.*)/) {
-		push(@{$pmap{$1}}, $2);
-		}
-	}
-local @rv;
-local $k;
-foreach $k (keys %pmap) {
-	local $v = $pmap{$k};
-	if (@$v == 1) {
-		push(@rv, $k, $v->[0]);
-		}
-	else {
-		push(@rv, $k, $v);
-		}
-	}
-return @rv;
-}
-
 # create_initial_user(&dom, [no-template], [for-web])
 # Returns a structure for a new mailbox user
 sub create_initial_user
 {
 local $user;
-if ($config{'mail_system'} == 4) {
-	# User is for Qmail+LDAP
-	$user = { 'qmail' => 1,
-		  'mailquota' => 1,
-		  'person' => $config{'ldap_classes'} =~ /person|inetOrgPerson/ || $config{'ldap_unix'} ? 1 : 0,
-		  'unix' => $config{'ldap_unix'} };
-	}
-elsif ($config{'mail_system'} == 5) {
+if ($config{'mail_system'} == 5) {
 	# VPOPMail user
 	$user = { 'vpopmail' => 1,
 		  'mailquota' => 1,
@@ -11347,8 +11049,7 @@ return $config{'mail_quotas'} &&
 # Returns 1 if the system's mail server supports mail quotas
 sub has_server_quotas
 {
-return $config{'mail'} && ($config{'mail_system'} == 4 ||
-			   $config{'mail_system'} == 5);
+return $config{'mail'} && $config{'mail_system'} == 5;
 }
 
 # has_group_quotas()
@@ -13881,9 +13582,6 @@ if ($config{'mail'}) {
 		elsif (&qmail_vpopmail_installed()) {
 			$config{'mail_system'} = 5;
 			}
-		elsif (&qmail_ldap_installed()) {
-			$config{'mail_system'} = 4;
-			}
 		elsif (&qmail_installed()) {
 			$config{'mail_system'} = 2;
 			}
@@ -14047,31 +13745,8 @@ if ($config{'mail'}) {
 		$expected_mailboxes = 2;
 		}
 	elsif ($config{'mail_system'} == 4) {
-		# Make sure qmail with LDAP is installed
-		if (!&qmail_ldap_installed()) {
-			return &text('index_eqmailldap', '/qmailadmin/',
-					   "../config.cgi?$module_name");
-			}
-		if ($config{'generics'}) {
-			return &text('index_eqgens', $mclink);
-			}
-		if ($config{'bccs'}) {
-			return &text('check_eqmailbccs', $mclink);
-			}
-		if (!&to_ipaddress($config{'ldap_host'}) &&
-	            !(defined(&to_ip6address) &&
-		      &to_ip6address($config{'ldap_host'}))) {
-			return &text('index_eqmailhost', $mclink);
-			}
-		if (!$config{'ldap_base'}) {
-			return &text('index_eqmailbase', $mclink);
-			}
-		local $lerr = &connect_qmail_ldap(1);
-		if (!ref($lerr)) {
-			return &text('index_eqmailconn', $lerr, $mclink);
-			}
-		&$second_print($text{'check_qmailldapok'});
-		$expected_mailboxes = 4;
+		# Qmail+LDAP is deprecated
+		return $text{'check_eqmailldap'};
 		}
 	elsif ($config{'mail_system'} == 5) {
 		# Make sure qmail with VPOPMail is installed

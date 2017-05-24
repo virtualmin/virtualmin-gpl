@@ -96,8 +96,7 @@ elsif ($config{'mail_system'} == 0) {
 
 	$supports_aliascopy = 1;
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Using qmail for email
 	&foreign_require("qmailadmin");
 	%qmconfig = &foreign_config("qmailadmin");
@@ -230,17 +229,6 @@ elsif ($config{'mail_system'} == 2) {
 	local $virtmap = { 'domain' => $_[0]->{'dom'},
 			   'prepend' => $_[0]->{'prefix'}.'pfx' };
 	&qmailadmin::create_virt($virtmap);
-	if (!$no_restart_mail) {
-		&qmailadmin::restart_qmail();
-		}
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Just add to qmail locals file, as virtualdomains is not
-	# needed for qmail+ldap
-	local $llist = &qmailadmin::list_control_file("locals");
-	push(@$llist, $_[0]->{'dom'});
-	&qmailadmin::save_control_file("locals", $llist);
-	&execute_command("cd /etc/qmail && make");
 	if (!$no_restart_mail) {
 		&qmailadmin::restart_qmail();
 		}
@@ -475,7 +463,7 @@ elsif ($config{'mail_system'} == 0) {
 			}
 		}
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+elsif ($config{'mail_system'} == 2) {
 	# Delete domain from qmail locals file, rcpthosts file and virtuals
 	local $dlist = &qmailadmin::list_control_file("locals");
 	$dlist = [ grep { lc($_) ne $d->{'dom'} } @$dlist ];
@@ -909,8 +897,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 			&shutdown_mail_server();
 			&startup_mail_server();
 			}
-		elsif ($config{'mail_system'} == 2 ||
-		       $config{'mail_system'} == 4) {
+		elsif ($config{'mail_system'} == 2) {
 			&qmailadmin::restart_qmail();
 			}
 		elsif ($config{'mail_system'} == 6) {
@@ -1223,7 +1210,7 @@ return 1;
 sub check_mail_clash
 {
 local ($dname) = @_;
-if ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+if ($config{'mail_system'} == 2) {
 	# Qmail virtualdomains don't work if the domain name is the same
 	# as the hostname
 	&require_mail();
@@ -1269,12 +1256,6 @@ elsif ($config{'mail_system'} == 2) {
 	local ($virtmap) = grep { lc($_->{'domain'}) eq $_[0]->{'dom'} &&
 				  !$_->{'user'} } &qmailadmin::list_virts();
 	$found++ if (&indexof($_[0], @$rlist) >= 0 && $virtmap);
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Check qmail locals file
-	local $rlist = &qmailadmin::list_control_file("locals");
-	@$rlist = map { lc($_) } @$rlist;
-	$found++ if (&indexof($_[0], @$rlist) >= 0);
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Check active vpopmail domains
@@ -1409,28 +1390,6 @@ elsif ($config{'mail_system'} == 2) {
 			       'to' => [ map { s/^\&//; $_ }
 					       @{$a->{'values'}} ] });
 		}
-	return @virts;
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Looks for psuedo qmail users with no mail store
-	local $ldap = &connect_qmail_ldap();
-	local $rv = $ldap->search(base => $config{'ldap_base'},
-				  filter => "(objectClass=qmailUser)");
-	&error($rv->error) if ($rv->code);
-	local ($u, @virts);
-	foreach $u ($rv->all_entries) {
-		next if ($u->get_value("mailMessageStore"));	# skip user
-		local $mail = $u->get_value("mail");
-		if ($mail =~ /^catchall\@(.*)$/) {
-			$mail = "\@$1";
-			}
-		local @to = $u->get_value("mailForwardingAddress");
-		push(@virts, { 'from' => $mail,
-			       'dn' => $u->dn(),
-			       'ldap' => $u,
-			       'to' => \@to });
-		}
-	$ldap->unbind();
 	return @virts;
 	}
 elsif ($config{'mail_system'} == 5) {
@@ -1601,13 +1560,6 @@ elsif ($config{'mail_system'} == 2) {
 	&qmailadmin::delete_alias($_[0]->{'alias'});
 	$_[0]->{'alias'}->{'deleted'} = 1;
 	}
-elsif ($config{'mail_system'} == 4) {
-	# Remove pseudo Qmail user
-	local $ldap = &connect_qmail_ldap();
-	local $rv = $ldap->delete($_[0]->{'dn'});
-	&error($rv->error) if ($rv->code);
-	$ldap->unbind();
-	}
 elsif ($config{'mail_system'} == 5) {
 	# Remove all vpopmail aliases
 	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
@@ -1770,28 +1722,6 @@ elsif ($config{'mail_system'} == 2) {
 	&qmailadmin::modify_alias($_[0]->{'alias'}, $alias);
 	$_[1]->{'alias'} = $alias;
 	}
-elsif ($config{'mail_system'} == 4) {
-	# Update the Qmail+LDAP pseudo-user
-	local $ldap = &connect_qmail_ldap();
-	$_[1]->{'from'} =~ /^(\S*)\@(\S+)$/;
-	local ($box, $dom) = ($1 || "catchall", $2);
-	local $newdn = "uid=$box-$dom,$config{'ldap_base'}";
-	if (!&same_dn($_[0]->{'dn'}, $newdn)) {
-		# Re-named, so use new DN first
-		$rv = $ldap->moddn($_[0]->{'dn'},
-				   newrdn => "uid=$box-$dom");
-		&error($rv->error) if ($rv->code);
-		$_[1]->{'dn'} = $newdn;
-		}
-	# Update other attributes
-	local $attrs = [ "uid" => "$box-$dom",
-			 "mail" => $box."\@".$dom,
-			 "mailForwardingAddress" => $_[1]->{'to'} ];
-	local $rv = $ldap->modify($_[1]->{'dn'},
-				  replace => $attrs);
-	&error($rv->error) if ($rv->code);
-	$ldap->unbind();
-	}
 elsif ($config{'mail_system'} == 5) {
 	# Just delete the old vpopmail alias, and re-add!
 	&delete_virtuser($_[0]);
@@ -1912,22 +1842,6 @@ elsif ($config{'mail_system'} == 2) {
 			 'values' => \@to };
 	&qmailadmin::create_alias($alias);
 	$_[0]->{'alias'} = $alias;
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Create a psuedo Qmail user
-	local $ldap = &connect_qmail_ldap();
-	$_[0]->{'from'} =~ /^(\S*)\@(\S+)$/;
-	local ($box, $dom) = ($1 || "catchall", $2);
-	local $_[0]->{'dn'} = "uid=$box-$dom,$config{'ldap_base'}";
-	local @oc = ( "qmailUser", split(/\s+/, $config{'ldap_aclasses'}) );
-	local $attrs = [ "objectClass" => \@oc,
-			 "uid" => "$box-$dom",
-		 	 "deliveryMode" => "nolocal",
-			 "mail" => $box."\@".$dom,
-			 "mailForwardingAddress" => $_[0]->{'to'} ];
-	local $rv = $ldap->add($_[0]->{'dn'}, attr => $attrs);
-        &error($rv->error) if ($rv->code);
-        $ldap->unbind();
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Add one vpopmail alias for each destination
@@ -2200,8 +2114,7 @@ elsif ($config{'mail_system'} == 0) {
 	# Call the postfix module 
 	return &postfix::is_postfix_running();
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Just look for qmail-send
 	local ($pid) = &find_byname("qmail-send");
 	return $pid ? 1 : 0;
@@ -2227,8 +2140,7 @@ elsif ($config{'mail_system'} == 0) {
 	# Run the postfix stop command
 	$err = &postfix::stop_postfix();
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Call the qmail stop function
 	$err = &qmailadmin::stop_qmail();
 	}
@@ -2258,8 +2170,7 @@ elsif ($config{'mail_system'} == 0) {
 	# Run the postfix start command
 	$err = &postfix::start_postfix();
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Call the qmail start function
 	$err = &qmailadmin::start_qmail();
 	}
@@ -2336,35 +2247,13 @@ elsif ($config{'mail_system'} == 0) {
 		$md = &postfix::postfix_mail_file(@uinfo);
 		}
 	}
-elsif ($config{'mail_system'} == 2 ||
-       $config{'mail_system'} == 4 && !$user->{'qmail'}) {
+elsif ($config{'mail_system'} == 2) {
 	# Normal Qmail user
 	if ($qmailadmin::config{'mail_system'} == 0) {
 		$mf = &qmailadmin::user_mail_file($user->{'user'});
 		}
 	elsif ($qmailadmin::config{'mail_system'} == 1) {
 		$md = &qmailadmin::user_mail_dir($user->{'user'});
-		}
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Qmail+LDAP mail file comes from DB
-	if ($user->{'mailstore'} =~ /^(.*)\/$/) {
-		$md = &add_ldapmessagestore("$1");
-		}
-	else {
-		$mf = &add_ldapmessagestore($user->{'mailstore'});
-		}
-	if (!$user->{'unix'}) {
-		# For non-NSS Qmail+LDAP users, set the ownership based on
-		# LDAP control files
-		local $quid = &qmailadmin::get_control_file("qmailuid");
-		local $qgid = &qmailadmin::get_control_file("qmailgid");
-		local $cuid = &qmailadmin::get_control_file("ldapuid");
-		local $cgid = &qmailadmin::get_control_file("ldapgid");
-		$uid = defined($quid) ? $quid :
-		       defined($cuid) ? $cuid : $uid;
-		$gid = defined($qgid) ? $qgid :
-		       defined($cgid) ? $cgid : $gid;
 		}
 	}
 elsif ($config{'mail_system'} == 5) {
@@ -2612,17 +2501,11 @@ if (!&mail_under_home()) {
 		local $of = &postfix::postfix_mail_file($_[1]->{'user'});
 		&rename_logged($of, $nf) if ($of ne $nf);
 		}
-	elsif ($config{'mail_system'} == 2 ||
-	       $config{'mail_system'} == 4 && !$_[0]->{'qmail'}) {
+	elsif ($config{'mail_system'} == 2) {
 		# Just rename the Qmail mail file (if necessary)
 		local $of = &qmailadmin::user_mail_file($_[1]->{'user'});
 		local $nf = &qmailadmin::user_mail_file($_[0]->{'user'});
 		&rename_logged($of, $nf) if ($of ne $nf);
-		}
-	elsif ($config{'mail_system'} == 4) {
-		# Rename from LDAP property
-		&rename_logged($_[1]->{'mailstore'}, $_[0]->{'mailstore'})
-			if ($_[1]->{'mailstore'} ne $_[0]->{'mailstore'});
 		}
 	}
 
@@ -2693,8 +2576,7 @@ elsif ($config{'mail_system'} == 0) {
 	@rv = ( &postfix::postfix_mail_file($_[0]->{'user'}),
 		$pms[0] == 2 ? 1 : 0 );
 	}
-elsif ($config{'mail_system'} == 2 ||
-       $config{'mail_system'} == 4 && !$_[0]->{'qmail'}) {
+elsif ($config{'mail_system'} == 2) {
 	# Find out from Qmail which file or dir to check
 	@rv = ( &qmailadmin::user_mail_dir($_[0]->{'user'}),
 		$qmailadmin::config{'mail_system'} == 1 ? 1 : 0 );
@@ -2777,10 +2659,6 @@ elsif ($config{'mail_system'} == 2) {
 		return (undef, $qmailadmin::config{'mail_style'},
 			$qmailadmin::config{'mail_file'}, undef);
 		}
-	}
-elsif ($config{'mail_system'} == 4) {
-	# Assume ~/Maildir for qmail+ldap
-	return (undef, undef, undef, "Maildir");
 	}
 return ( );
 }
@@ -2881,25 +2759,7 @@ elsif ($config{'mail_system'} == 2) {
 		return $qmconfig{'mail_dir'};
 		}
 	}
-elsif ($config{'mail_system'} == 4) {
-	# Need to look at template from module config
-	local $pfx = &qmailadmin::get_control_file("ldapmessagestore");
-	if ($config{'ldap_mailstore'} =~ /^(\$HOME|\$\{HOME\})/) {
-		# Under home .. return it
-		&require_useradmin();
-		return $home_base;
-		}
-	elsif ($config{'ldap_mailstore'} !~ /^\//) {
-		return $pfx;
-		}
-	else {
-		# Get fixed directory
-		local $dir = $config{'ldap_mailstore'};
-		$dir =~ s/\$.*$//;
-		$dir =~ s/\/[^\/]*$//;
-		return $dir || "/";
-		}
-	}
+
 # If we get here, assume that mail is under home dirs
 local %uconfig = &foreign_config("useradmin");
 return $home_base;
@@ -2992,15 +2852,6 @@ return &foreign_installed("exim", 1) == 2;
 sub qmail_installed
 {
 return &foreign_installed("qmailadmin", 1) == 2;
-}
-
-# qmail_ldap_installed()
-# Returns 1 if qmail is installed, and supports LDAP
-sub qmail_ldap_installed
-{
-return 0 if (!&qmail_installed());
-local %qconfig = &foreign_config("qmailadmin");
-return -r "$qconfig{'qmail_dir'}/control/ldapserver" ? 1 : 0;
 }
 
 # qmail_vpopmail_installed()
@@ -4306,8 +4157,7 @@ elsif ($config{'mail_system'} == 1) {
 		 [ $text{'sysinfo_mailprog'},
 			$sendmail::config{'sendmail_path'}." -t" ] );
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Some Qmail variant
 	return ( [ $text{'sysinfo_qmail'}, "Unknown" ],
 		 [ $text{'sysinfo_mailprog'},
@@ -4342,7 +4192,7 @@ elsif ($config{'mail_system'} == 1) {
 		}
 	return 0;
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+elsif ($config{'mail_system'} == 2) {
 	# Check Qmail rc script for use of procmail as default delivery
 	local $got;
 	local $_;
@@ -4499,7 +4349,6 @@ elsif ($ms == 3) {
 elsif ($ms == 1 && !&sendmail_installed() ||
        $ms == 0 && !&postfix_installed() ||
        $ms == 2 && !&qmail_installed() ||
-       $ms == 4 && !&qmail_ldap_installed() ||
        $ms == 5 && !&qmail_vpopmail_installed()) {
 	return &text('newmxs_esystem', $text{'mail_system_'.$ms});
 	}
@@ -4559,8 +4408,7 @@ elsif ($config{'mail_system'} == 0) {
 		&unlock_file($postfix::config{'postfix_config_file'});
 		}
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Add to Qmail rcpthosts file
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
 	if (&indexof(lc($dom), (map { lc($_) } @$rlist)) >= 0) {
@@ -4626,8 +4474,7 @@ elsif ($config{'mail_system'} == 0) {
 		&unlock_file($postfix::config{'postfix_config_file'});
 		}
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Add to Qmail rcpthosts file
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
 	local $idx = &indexof(lc($dom), (map { lc($_) } @$rlist));
@@ -4661,8 +4508,7 @@ elsif ($config{'mail_system'} == 0) {
 	local $idx = &indexof(lc($dom), (map { lc($_) } @rd));
 	return $idx < 0 ? 0 : 1;
 	}
-elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4 ||
-       $config{'mail_system'} == 5) {
+elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Add to Qmail rcpthosts file
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
 	local $idx = &indexof(lc($dom), (map { lc($_) } @$rlist));
@@ -5685,7 +5531,7 @@ if ($main::got_lock_mail == 0) {
 		undef(@sendmail::list_virtusers_cache);
 		undef(@sendmail::list_generics_cache);
 		}
-	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 4) {
+	elsif ($config{'mail_system'} == 2) {
 		# Lock Qmail control files
 		push(@main::got_lock_mail_files,
 		     "$qmailadmin::qmail_control_dir/rcpthosts",

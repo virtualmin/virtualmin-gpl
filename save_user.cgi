@@ -475,14 +475,6 @@ else {
 			&error(&text('user_emkhome', $home));
 			}
 
-		# Set mail file location
-		if ($user->{'qmail'}) {
-			&userdom_substitutions($user, $d);
-			$user->{'mailstore'} =
-			    &substitute_virtualmin_template(
-				$config{'ldap_mailstore'}, $user);
-			}
-
 		if (!$user->{'noalias'}) {
 			# Save alias
 			if ($in{'simplemode'} eq 'simple') {

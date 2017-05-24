@@ -1565,3 +1565,5 @@ The SSL certificate for all virtual servers will now be configured for use in th
 Chroot jails for virtual server domain owners can now be setup at domain creation time or afterwards. This limits the files visible to SSH sessions and PHP apps run via FPM to the jail directory.
 SSL certificates can now be copied to Dovecot even for virtual servers that don't have their own private IP address.
 SSL certificates that are expired or close to it are displayed on the System Information page.
+---- Changes since 5.99 ----
+Removed support for Qmail+LDAP as a mail server.

@@ -409,13 +409,6 @@ if (defined($newusername)) {
 		$user->{'email'} = $newusername."\@".$d->{'dom'};
 		}
 
-	# Set mail file location
-	if ($user->{'qmail'}) {
-		local $store = &substitute_virtualmin_template(
-			$config{'ldap_mailstore'}, $user);
-		$user->{'mailstore'} = $store;
-		}
-
 	if (!$user->{'nomailfile'}) {
 		# Rename his mail file, if needed
 		&rename_mail_file($user, $olduser);
