@@ -2312,20 +2312,33 @@ $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
+my @errs;
 if (&domain_has_website($d)) {
-	 ($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+	# Try using website first
+	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
+	push(@errs, $cert) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'}) {
+	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
+	push(@errs, $cert) if (!$ok);
 	}
 elsif (!$ok) {
 	$ok = 0;
-	$cert ||= "Domain has no website, ".
-		  "and DNS-based validation is not possible";
+	if (!$cert) {
+		$cert = "Domain has no website, ".
+			"and DNS-based validation is not possible";
+		push(@errs, $cert);
+		}
 	}
-return ($ok, $cert, $key, $chain);
+if (!$ok) {
+	return ($ok, join("\n", @errs), $key, $chain);
+	}
+else {
+	return ($ok, $cert, $key, $chain);
+	}
 }
 
 $done_feature_script{'ssl'} = 1;
