@@ -205,6 +205,7 @@ if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	$html .= &ui_form_end([ [ undef, $text{'right_upok'} ] ]);
 	push(@rv, { 'type' => 'html',
 		    'id' => 'updates',
+		    'open' => 1,
 		    'desc' => $text{'right_updatesheader'},
 		    'html' => $html });
 	# Block same section from being shown by Cloudmin
