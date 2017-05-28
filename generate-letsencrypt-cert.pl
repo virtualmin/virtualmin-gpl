@@ -86,9 +86,10 @@ else {
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
-&suppress_letsencrypt_proxy($d);
+$before = &before_letsencrypt_website($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 				$d, \@dnames, $staging, $size);
+&after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
 	exit(1);

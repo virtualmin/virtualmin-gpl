@@ -7794,34 +7794,36 @@ return undef;
 # had SSL enabled. May print stuff.
 sub create_initial_letsencrypt_cert
 {
-local ($dom) = @_;
+local ($d) = @_;
 &foreign_require("webmin");
-my @dnames = &get_hostnames_for_ssl($dom);
+my @dnames = &get_hostnames_for_ssl($d);
 &$first_print(&text('letsencrypt_doing2',
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
-my $phd = &public_html_dir($dom);
+my $phd = &public_html_dir($d);
+my $before = &before_letsencrypt_website($d);
 my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-					$dom, \@dnames);
+					$d, \@dnames);
+&after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(&text('letsencrypt_failed', $cert));
 	return 0;
 	}
 else {
-	&obtain_lock_ssl($dom);
-	&install_letsencrypt_cert($dom, $cert, $key, $chain);
+	&obtain_lock_ssl($d);
+	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
-	$dom->{'letsencrypt_dname'} = '';
-	$dom->{'letsencrypt_last'} = time();
-	$dom->{'letsencrypt_renew'} ||= 2;
-	&save_domain($dom);
+	$d->{'letsencrypt_dname'} = '';
+	$d->{'letsencrypt_last'} = time();
+	$d->{'letsencrypt_renew'} ||= 2;
+	&save_domain($d);
 
-	&sync_dovecot_ssl_cert($dom, 1);
-	if ($dom->{'virt'}) {
-		&sync_postfix_ssl_cert($dom, 1);
+	&sync_dovecot_ssl_cert($d, 1);
+	if ($d->{'virt'}) {
+		&sync_postfix_ssl_cert($d, 1);
 		}
-	&break_invalid_ssl_linkages($dom);
-	&sync_domain_tlsa_records($dom);
-	&release_lock_ssl($dom);
+	&break_invalid_ssl_linkages($d);
+	&sync_domain_tlsa_records($d);
+	&release_lock_ssl($d);
 	&$second_print($text{'letsencrypt_done'});
 	return 1;
 	}

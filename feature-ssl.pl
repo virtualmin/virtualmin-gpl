@@ -2289,16 +2289,49 @@ if ($out =~ /OpenSSL\s+([0-9\.a-z]+)/i) {
 return undef;
 }
 
-# suppress_letsencrypt_proxy(&domain)
+# before_letsencrypt_website(&domain)
 # If there is any proxy setup that would block /.well-known, add a negative
 # path to ensure direct access
-sub suppress_letsencrypt_proxy
+sub before_letsencrypt_website
 {
 local ($d) = @_;
+local $rv = { };
 &push_all_print();
 &set_all_null_print();
 &setup_noproxy_path($d, { 'uses' => [ 'proxy' ] }, undef,
 		    { 'path' => '/.well-known' });
+if (&has_web_redirects($d)) {
+	# Remove redirects that may block let's encrypt
+	local @redirs;
+	foreach my $r (&list_redirects($d)) {
+		if ($r->{'path'} eq '/' && $r->{'http'}) {
+			# Possible problem redirect
+			&delete_redirect($d, $r);
+			push(@redirs, { %$r });
+			}
+		}
+	if (@redirs) {
+		&run_post_actions();
+		$rv->{'redirs'} = \@redirs;
+		}
+	}
+&pop_all_print();
+return $rv;
+}
+
+# after_letsencrypt_website(&domain, &before-rv)
+# Undoes changes made by before_letsencrypt_website
+sub after_letsencrypt_website
+{
+local ($d, $before) = @_;
+&push_all_print();
+&set_all_null_print();
+if ($before->{'redirs'}) {
+	foreach my $r (@{$before->{'redirs'}}) {
+		&create_redirect($d, $r);
+		}
+	&run_post_actions();
+	}
 &pop_all_print();
 }
 

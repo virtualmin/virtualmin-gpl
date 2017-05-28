@@ -53,9 +53,10 @@ else {
 			    join(", ", map { "<tt>$_</tt>" } @dnames)));
 	&foreign_require("webmin");
 	$phd = &public_html_dir($d);
-	&suppress_letsencrypt_proxy($d);
+	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames);
+	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		&$second_print(&text('letsencrypt_failed', $cert));
 		}
