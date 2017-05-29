@@ -294,7 +294,7 @@ if (&mysql::is_mysql_running() == -1) {
 	}
 else {
 	# Offer to change the password
-	print &ui_table_row(undef, $text{'wizard_mysql'}.
+	print &ui_table_row(undef, $text{'wizard_mysql'} . " " .
 			   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
 					       : $text{'wizard_mysql2'}), 2);
 	if ($mysql::mysql_pass) {
@@ -341,7 +341,7 @@ if (&mysql::is_mysql_running() == -1) {
 		return $err if ($err);
 		}
 
-	# Save the password 
+	# Save the password
 	$mysql::config{'pass'} = $in->{'mypass'};
 	$mysql::mysql_pass = $in->{'mypass'};
 	&mysql::save_module_config(\%mysql::config, "mysql");
@@ -656,7 +656,7 @@ return $out;
 
 # needs_xfs_quota_fix()
 # Checks if quotas are enabled on the /home filesystem in /etc/fstab but
-# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is 
+# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is
 # needed, 2 if GRUB needs to be configured, or 3 if we don't know how to
 # fix GRUB.
 sub needs_xfs_quota_fix
@@ -693,4 +693,3 @@ return 2;
 }
 
 1;
-
