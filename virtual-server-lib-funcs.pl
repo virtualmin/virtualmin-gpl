@@ -11544,18 +11544,6 @@ if (&can_domain_have_scripts($d) && &can_edit_scripts()) {
 		  });
 	}
 
-if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
-    !$d->{'proxy_pass_mode'} &&
-    $virtualmin_pro && &can_edit_html()) {
-	# Edit web pages button
-	push(@rv, { 'page' => 'edit_html.cgi',
-		    'title' => $text{'edit_html'},
-		    'desc' => $text{'edit_htmldesc'},
-		    'cat' => 'objects',
-		    'icon' => 'page_edit',
-		  });
-	}
-
 if (&can_rename_domains()) {
 	# Rename domain button
 	push(@rv, { 'page' => 'rename_form.cgi',
@@ -11984,6 +11972,18 @@ if (&domain_has_website($d) && &can_use_preview()) {
 		    'cat' => 'services',
 		    'catname' => $text{'cat_services'},
 		    'target' => '_new',
+		  });
+	}
+
+if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
+    !$d->{'proxy_pass_mode'} &&
+    $virtualmin_pro && &can_edit_html()) {
+	# Edit web pages button
+	push(@rv, { 'page' => 'edit_html.cgi',
+		    'title' => $text{'edit_html'},
+		    'desc' => $text{'edit_htmldesc'},
+		    'cat' => 'services',
+		    'icon' => 'page_edit',
 		  });
 	}
 
