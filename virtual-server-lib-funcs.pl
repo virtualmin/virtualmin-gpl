@@ -11910,6 +11910,31 @@ if (&can_passwd()) {
 		  });
 	}
 
+if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
+    !$d->{'proxy_pass_mode'} &&
+    $virtualmin_pro && &can_edit_html()) {
+	# Edit web pages button
+	push(@rv, { 'page' => 'edit_html.cgi',
+		    'title' => $text{'edit_html'},
+		    'desc' => $text{'edit_htmldesc'},
+		    'cat' => 'services',
+		    'icon' => 'page_edit',
+		  });
+	}
+
+if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
+    !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
+	# Link to file manager for HTML directory
+	my $phd = &public_html_dir($d);
+	push(@rv, { 'page' => 'index.cgi?path='.&urlize($phd),
+		    'mod' => 'filemin',
+		    'title' => $text{'edit_filemin'},
+		    'desc' => $text{'edit_filemindesc'},
+		    'cat' => 'objects',
+		    'icon' => 'page_edit',
+		  });
+	}
+
 &save_links_cache($ckey, $v, \@rv);
 return @rv;
 }
@@ -11972,18 +11997,6 @@ if (&domain_has_website($d) && &can_use_preview()) {
 		    'cat' => 'services',
 		    'catname' => $text{'cat_services'},
 		    'target' => '_new',
-		  });
-	}
-
-if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
-    !$d->{'proxy_pass_mode'} &&
-    $virtualmin_pro && &can_edit_html()) {
-	# Edit web pages button
-	push(@rv, { 'page' => 'edit_html.cgi',
-		    'title' => $text{'edit_html'},
-		    'desc' => $text{'edit_htmldesc'},
-		    'cat' => 'services',
-		    'icon' => 'page_edit',
 		  });
 	}
 
