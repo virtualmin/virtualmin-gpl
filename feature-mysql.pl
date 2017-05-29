@@ -2637,7 +2637,7 @@ if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
 elsif (&compare_versions($remote_mysql_version, 5) >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "update user set password=$encpass where User='$user' and Host='$host'");
 	}
 else {
 	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
@@ -2665,7 +2665,7 @@ foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 		$flush++;
 		}
 	else {
-		$sql = "set password for '$user'\@'$host' = $encpass";
+	    $sql = "update user set password=$encpass where User='$user' and Host='$host'";
 		}
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
 	}
