@@ -2620,11 +2620,37 @@ return ( );
 sub execute_user_creation_sql
 {
 my ($host, $user, $encpass) = @_;
-foreach my $sql (&get_user_creation_sql($host, $user,$encpass)) {
-	&mysql::execute_sql_logged($mysql::master_db, $sql);
+foreach my $sql (&get_user_creation_sql($host, $user, $encpass)) {
+	if ($sql =~ /^set\s+password/) {
+		&execute_set_password_sql($sql, $host);
+		}
+	else {
+		&mysql::execute_sql_logged($mysql::master_db, $sql);
+		};
 	if ($sql =~ /flush\s+privileges/) {
 		sleep(1);
 		}
+	}
+}
+
+# execute_set_password_sql(sql, hostname)
+# Runs a 'set password' SQL statement, with a re-try using an IP instead of host
+sub execute_set_password_sql
+{
+my ($sql, $host) = @_;
+my $ip = &to_ipaddress($host);
+eval {
+	local $main::error_must_die = 1;
+	&mysql::execute_sql_logged($mysql::master_db, $sql);
+	};
+if ($@ && $ip && $ip ne $host) {
+	# Try again, this time with IP instead of host
+	$sql =~ s/'$host'/'$ip'/g;
+	&mysql::execute_sql_logged($mysql::master_db, $sql);
+	}
+elsif ($@) {
+	# Some other failure .. re-throw it
+	&error($@);
 	}
 }
 
@@ -2667,7 +2693,12 @@ foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
 		}
-	&mysql::execute_sql_logged($mysql::master_db, $sql);
+	if ($sql =~ /^set\s+password/) {
+		&execute_set_password_sql($sql, $host);
+		}
+	else {
+		&mysql::execute_sql_logged($mysql::master_db, $sql);
+		};
 	}
 if ($flush && !$noflush) {
 	&mysql::execute_sql_logged($mysql::master_db, "flush privileges");
