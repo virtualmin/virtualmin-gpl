@@ -2269,6 +2269,7 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 # Links to edit PHP configs (if per-domain files exist)
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "cgi" || $mode eq "fcgid") {
+	# Link to phpini module for each PHP version
 	my %availvers = map { $_->[0], $_ } &list_available_php_versions($d);
 	foreach my $ini (grep { !$_->[0] || $availvers{$_->[0]} }
 			      &find_domain_php_ini_files($d)) {
@@ -2278,6 +2279,19 @@ if ($mode eq "cgi" || $mode eq "fcgid") {
 				&text('links_phpini'),
 			    'page' => 'list_ini.cgi?file='.
 					&urlize($ini->[1]),
+			    'cat' => 'services',
+			  });
+		}
+	}
+elsif ($mode eq "fpm" && &get_webmin_version() >= 1.844) {
+	# Link to phpini module for the FPM version
+	my $conf = &get_php_fpm_config();
+	if ($conf) {
+		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+		push(@rv, { 'mod' => 'phpini',
+			    'desc' => &text('links_phpini3'),
+			    'page' => 'list_ini.cgi?file='.
+					&urlize($file),
 			    'cat' => 'services',
 			  });
 		}

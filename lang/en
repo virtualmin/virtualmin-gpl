@@ -4231,6 +4231,7 @@ links_elog=Apache Error Log
 links_flog=ProFTPD Log
 links_phpini=PHP Configuration
 links_phpini2=PHP $1 Configuration
+links_phpini3=PHP-FPM Configuration
 
 massscript_err=Failed to upgrade scripts
 massscript_enone=No virtual servers selected
