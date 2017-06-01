@@ -11918,7 +11918,6 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 		    'title' => $text{'edit_html'},
 		    'desc' => $text{'edit_htmldesc'},
 		    'cat' => 'services',
-		    'icon' => 'page_edit',
 		  });
 	}
 
