@@ -186,8 +186,8 @@ $port = &get_postgrey_port();	# In case we got it from the running
 &$first_print($text{'postgrey_postfix'});
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
-    $rr =~ /check_policy_service\s+unix:([^, ]+)/ && $1 eq $port) {
+if ($rr =~ /check_policy_service\s+inet:\S+:\Q$port\E/ ||
+    $rr =~ /check_policy_service\s+unix:\Q$port\E/) {
 	# Already OK
 	&$second_print($text{'postgrey_postfixalready'});
 	}
@@ -221,9 +221,9 @@ local $port = &get_postgrey_port();
 local $init = &get_postgrey_init();
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:(\d+)(.*)/ && $2 == $port ||
-    $rr =~ /^(.*)\s*check_policy_service\s+unix:([^, ]+)(.*)/ && $2 eq $port) {
-	$rr = $1.$3;
+if ($rr =~ /^(.*)\s*check_policy_service\s+inet:\S+:\Q$port\E(.*)/ ||
+    $rr =~ /^(.*)\s*check_policy_service\s+unix:\Q$port\E(.*)/) {
+	$rr = $1.$2;
 	&postfix::set_current_value("smtpd_recipient_restrictions", $rr);
 	&postfix::reload_postfix();
 	&$second_print($text{'postgrey_nopostfixdone'});
