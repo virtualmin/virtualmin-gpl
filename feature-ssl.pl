@@ -1859,10 +1859,17 @@ return ( ) if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
 return ( ) if ($ver < 2);
-
-# XXX local_name support
-
 my $conf = &dovecot::get_config();
+my @rv = &get_dovecot_ssl_cert_name($d, $conf);
+@rv = &get_dovecot_ssl_cert_ip($d, $conf) if (!@rv);
+return @rv;
+}
+
+# get_dovecot_ssl_cert_ip(&domain, &conf)
+# Lookup a domain's Dovecot cert by IP address
+sub get_dovecot_ssl_cert_ip
+{
+my ($d, $conf) = @_;
 my @loc = grep { $_->{'name'} eq 'local' &&
 		 $_->{'section'} } @$conf;
 my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
@@ -1874,6 +1881,25 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 		    $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
+return ( ) if (!$mems{'ssl_cert'});
+my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'} );
+foreach my $r (@rv) {
+	$r =~ s/^<//;
+	}
+return @rv;
+}
+
+# get_dovecot_ssl_cert_name(&domain, &conf)
+# Lookup a domain's Dovecot cert by domain name
+sub get_dovecot_ssl_cert_name
+{
+# XXX validate that this works
+my ($d, $conf) = @_;
+my @loc = grep { $_->{'name'} eq 'local_name' &&
+		 $_->{'section'} } @$conf;
+my ($l) = grep { $_->{'value'} eq $d->{'dom'} } @loc;
+return ( ) if (!$l);
+my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
 my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'} );
 foreach my $r (@rv) {
