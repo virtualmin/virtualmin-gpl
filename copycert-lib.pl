@@ -2,27 +2,59 @@
 
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)
 # Returns a list of all SSL certs used by global services like Postfix
+# XXX include per-IP webmin and usermin certs
 sub get_all_service_ssl_certs
 {
 my ($d, $perip) = @_;
+my @svcs;
+
+&foreign_require("webmin");
 my %miniserv;
 &get_miniserv_config(\%miniserv);
-my @svcs;
 if ($miniserv{'ssl'}) {
+	my ($cfile, $chain, $ip, $dom);
+	if ($perip) {
+		# Check for per-IP or per-domain cert first
+		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
+		($cfile, $chain, $ip, $dom) =
+			&ipkeys_to_domain_cert($d, \@ipkeys);
+		}
+	if (!$cfile) {
+		# Fall back to global config
+		$cfile = $miniserv{'certfile'};
+		$chain = $miniserv{'extracas'};
+		}
 	push(@svcs, { 'id' => 'webmin',
-		      'cert' => $miniserv{'certfile'},
-		      'ca' => $miniserv{'extracas'},
+		      'cert' => $cfile,
+		      'ca' => $chain,
+		      'ip' => $ip,
+		      'dom' => $dom,
 		      'prefix' => 'admin',
 		      'port' => $miniserv{'port'} });
 	}
+
 if (&foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	my %uminiserv;
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
 	if ($uminiserv{'ssl'}) {
+		my ($cfile, $chain, $ip, $dom);
+		if ($perip) {
+			# Check for per-IP or per-domain cert first
+			my @ipkeys = &webmin::get_ipkeys(\%uminiserv);
+			($cfile, $chain, $ip, $dom) =
+				&ipkeys_to_domain_cert($d, \@ipkeys);
+			}
+		if (!$cfile) {
+			# Fall back to global config
+			$cfile = $uminiserv{'certfile'};
+			$chain = $uminiserv{'extracas'};
+			}
 		push(@svcs, { 'id' => 'usermin',
-			      'cert' => $uminiserv{'certfile'},
-			      'ca' => $uminiserv{'extracas'},
+			      'cert' => $cfile,
+			      'ca' => $chain,
+			      'ip' => $ip,
+			      'dom' => $dom,
 			      'prefix' => 'webmail',
 			      'port' => $uminiserv{'port'} });
 		}
@@ -87,6 +119,23 @@ if ($config{'ftp'}) {
 		}
 	}
 return @svcs;
+}
+
+# ipkeys_to_domain_cert(&domain, &ipkeys)
+# Returns the cert, chain file, IP and domain for a matching ipkeys entry
+sub ipkeys_to_domain_cert
+{
+my ($d, $ipkeys) = @_;
+foreach my $k (@$ipkeys) {
+	if (&indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0) {
+		return ($k->{'cert'}, $k->{'extracas'}, undef, $d->{'dom'});
+		}
+	if ($d->{'virt'} &&
+	    &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
+		return ($k->{'cert'}, $k->{'extracas'}, $d->{'ip'}, undef);
+		}
+	}
+return ( );
 }
 
 # copy_dovecot_ssl_service(&domain)

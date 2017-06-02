@@ -3595,27 +3595,6 @@ if ($d->{'ssl'}) {
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	my $cfile = $svc->{'cert'};
 	my $chain = $svc->{'ca'};
-	if (($svc->{'id'} eq 'webmin' || $svc->{'id'} eq 'usermin') &&
-	    $d->{'virt'}) {
-		# If there is a per-IP cert, use it instead
-		my %miniserv;
-		&foreign_require("webmin");
-		if ($svc->{'id'} eq 'webmin') {
-			&get_miniserv_config(\%miniserv);
-			}
-		else {
-			&foreign_require("usermin");
-			&usermin::get_usermin_miniserv_config(\%miniserv);
-			}
-		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
-		foreach my $k (@ipkeys) {
-			if (&indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
-				$cfile = $k->{'cert'};
-				$chain = $k->{'extracas'};
-				last;
-				}
-			}
-		}
 	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
 		$svc->{'prefix'}.'.'.$d->{'dom'}));
 	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
