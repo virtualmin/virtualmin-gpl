@@ -130,8 +130,8 @@ if (!$port) {
 	}
 &require_mail();
 local $rr = &postfix::get_real_value("smtpd_recipient_restrictions");
-if ($rr =~ /check_policy_service\s+inet:\S+:(\d+)/ && $1 == $port ||
-    $rr =~ /check_policy_service\s+unix:([^ ,]+)/ && $1 eq $port) {
+if ($rr =~ /check_policy_service\s+inet:\S+:\Q$port\E/ ||
+    $rr =~ /check_policy_service\s+unix:\Q$port\E/) {
 	return 1;
 	}
 return 0;
