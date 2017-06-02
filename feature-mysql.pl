@@ -2638,7 +2638,7 @@ foreach my $sql (&get_user_creation_sql($host, $user, $encpass)) {
 sub execute_set_password_sql
 {
 my ($sql, $host) = @_;
-my $ip = &to_ipaddress($host);
+my $ip = $host =~ /%/ ? undef : &to_ipaddress($host);
 eval {
 	local $main::error_must_die = 1;
 	&mysql::execute_sql_logged($mysql::master_db, $sql);
