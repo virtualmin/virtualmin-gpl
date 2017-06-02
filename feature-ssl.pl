@@ -1444,22 +1444,7 @@ return $info->{'issuer_cn'} eq $info->{'cn'} &&
 sub find_openssl_config_file
 {
 &foreign_require("webmin");
-if (defined(&webmin::find_openssl_config_file)) {
-	return &webmin::find_openssl_config_file();
-	}
-# XXX remove this code once Webmin 1.790 has been out for a while 
-foreach my $p ($config{'openssl_cnf'},		# Module config
-	       "/etc/ssl/openssl.cnf",		# Debian and FreeBSD
-	       "/etc/openssl.cnf",
-               "/usr/local/etc/openssl.cnf",
-	       "/etc/pki/tls/openssl.cnf",	# Redhat
-	       "/opt/csw/ssl/openssl.cnf",	# Solaris CSW
-	       "/opt/csw/etc/ssl/openssl.cnf",	# Solaris CSW
-	       "/System/Library/OpenSSL/openssl.cnf", # OSX
-	      ) {
-	return $p if ($p && -r $p);
-	}
-return undef;
+return &webmin::find_openssl_config_file();
 }
 
 # generate_self_signed_cert(certfile, keyfile, size, days, country, state,
