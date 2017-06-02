@@ -28,10 +28,10 @@ if (&foreign_installed("usermin")) {
 		}
 	}
 if (&foreign_installed("dovecot")) {
-	my ($cfile, $kfile, $ip);
+	my ($cfile, $kfile, $ip, $dom);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, undef, $ip) = &get_dovecot_ssl_cert($d);
+		($cfile, $kfile, undef, $ip, $dom) = &get_dovecot_ssl_cert($d);
 		}
 	if (!$cfile) {
 		# Fall back to global Dovecot cert
@@ -47,7 +47,8 @@ if (&foreign_installed("dovecot")) {
 			      'ca' => 'none',
 			      'prefix' => 'mail',
 			      'port' => 993,
-			      'ip' => $ip, });
+			      'ip' => $ip,
+			      'dom' => $dom, });
 		}
 	}
 if ($config{'mail_system'} == 0) {

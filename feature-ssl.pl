@@ -1850,8 +1850,8 @@ if ($changed) {
 }
 
 # get_dovecot_ssl_cert(&domain)
-# Returns the path to the cert, key and CA cert in the Dovecot config for
-# a domain, if any
+# Returns the path to the cert, key and CA cert, and optionally domain and IP
+# in the Dovecot config for a domain, if any
 sub get_dovecot_ssl_cert
 {
 my ($d) = @_;
@@ -1882,7 +1882,7 @@ my ($imap) = grep { $_->{'name'} eq 'protocol' &&
 return ( ) if (!$imap);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$imap->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'} );
+my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'}, undef );
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
@@ -1893,7 +1893,6 @@ return @rv;
 # Lookup a domain's Dovecot cert by domain name
 sub get_dovecot_ssl_cert_name
 {
-# XXX validate that this works
 my ($d, $conf) = @_;
 my @loc = grep { $_->{'name'} eq 'local_name' &&
 		 $_->{'section'} } @$conf;
@@ -1901,7 +1900,7 @@ my ($l) = grep { $_->{'value'} eq $d->{'dom'} } @loc;
 return ( ) if (!$l);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
-my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, $d->{'ip'} );
+my @rv = ( $mems{'ssl_cert'}, $mems{'ssl_key'}, undef, undef, $d->{'dom'} );
 foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}

@@ -114,6 +114,10 @@ if (&can_webmin_cert()) {
 				push(@a, &text('cert_already_'.$k.'_ip',
 					       $cert_already{$k}->{'ip'}));
 				}
+			elsif ($cert_already{$k}->{'dom'}) {
+				push(@a, &text('cert_already_'.$k.'_dom',
+					       $cert_already{$k}->{'dom'}));
+				}
 			else {
 				push(@a, $text{'cert_already_'.$k});
 				}
