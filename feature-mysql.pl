@@ -1628,6 +1628,10 @@ if (!@hosts) {
 		local $myip = &to_ipaddress(&get_system_hostname());
 		push(@hosts, $myip) if ($myip);
 		}
+	if (&indexof("%", @hosts) >= 0) {
+		# All hosts allowed - no need for other entries
+		@hosts = ( "%" );
+		}
 	}
 return &unique(@hosts);
 }
