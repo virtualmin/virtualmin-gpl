@@ -3312,6 +3312,7 @@ tmpl_editmode_plugins=Plugin options
 tmpl_editmode_autoconfig=Mail client auto-configuration
 tmpl_editmode_limits=Default domain owner limits
 tmpl_editmode_phpwrappers=PHP wrapper scripts
+tmpl_editmode_php=PHP options
 tmpl_editmode_resources=CPU and memory resource limits
 tmpl_editmode_avail=Administrator's Webmin modules
 tmpl_noplugins=No plugins have defined any template options.
