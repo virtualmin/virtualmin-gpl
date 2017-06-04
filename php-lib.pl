@@ -32,7 +32,8 @@ if ($virt) {
 	local @actions = &apache::find_directive("Action", $vconf);
 	local $pdir = &public_html_dir($d);
 	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
-			      $_->{'words'}->[0] eq $pdir."/" }
+			      $_->{'words'}->[0] eq $pdir."/" ||
+			      &path_glob_match($_->{'words'}->[0], $pdir) }
 		    &apache::find_directive_struct("Directory", $vconf);
 	if ($dir) {
 		push(@actions, &apache::find_directive("Action",

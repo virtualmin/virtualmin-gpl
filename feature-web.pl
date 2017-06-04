@@ -4480,6 +4480,16 @@ if ($changed) {
 	}
 }
 
+# path_glob_match(glob-path, dir)
+# Returns 1 if a path that could contain globs like * matches a directory
+sub path_glob_match
+{
+my ($glob, $dir) = @_;
+$glob =~ s/\?/./g;
+$glob =~ s/\*/.*/g;
+return $dir =~ /^$glob$/;
+}
+
 $done_feature_script{'web'} = 1;
 
 1;
