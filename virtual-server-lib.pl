@@ -74,7 +74,7 @@ $config{'virt6'} = 1;
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
 		       'plugins', 'scripts', 'autoconfig',
-		       'phpwrappers', 'avail' );
+		       'php', 'phpwrappers', 'avail' );
 @template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );

@@ -1723,6 +1723,17 @@ else {
 	&print_tempfile(CONF, "php_admin_value[upload_tmp_dir] = $tmp\n");
 	&print_tempfile(CONF, "php_admin_value[session.save_path] = $tmp\n");
 	&close_tempfile(CONF);
+
+	# Add / override custom options (with substitution)
+	my $tmpl = &get_template($d->{'template'});
+	if ($tmpl->{'php_fpm'} ne 'none') {
+		foreach my $l (split(/\t+/,
+		    &substitute_domain_template($tmpl->{'php_fpm'}, $d))) {
+			next if ($l !~ /^\s*(\S+)\s*=\s*(.*)/);
+			my ($n, $v) = ($1, $2);
+			&save_php_fpm_config_value($d, $n, $v);
+			}
+		}
 	}
 my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
 my $dir = &get_domain_jailkit($parent);
