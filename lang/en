@@ -3284,6 +3284,7 @@ tmpl_phpverdef=Highest available
 tmpl_edisabled_url=Missing or invalid disabled website URL
 tmpl_php_vars=PHP configuration variables for scripts
 tmpl_ephp_var='$1' is not a valid PHP variable name
+tmpl_php_fpm=Additional FPM pool options
 tmpl_status=Additional email address for monitoring messages
 tmpl_statusemail=Address
 tmpl_statusonly=Send email to server owner?

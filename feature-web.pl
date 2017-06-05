@@ -2780,6 +2780,16 @@ print &ui_table_row(
 			$text{'tmpl_disabled_websel'}, 0, 0, undef,
 			\@pfields)."<br>\n".
 	$ptable);
+
+# FPM specific options
+if (&indexof("fpm", &supported_php_modes()) >= 0) {
+	# Template pool config file
+	print &ui_table_row(
+		&hlink($text{'tmpl_php_fpm'}, "template_php_fpm"),
+		&ui_textarea("php_fpm",
+			$tmpl->{'php_fpm'} eq 'none' ? '' :
+			join("\n", split(/\t/, $tmpl->{'php_fpm'})), 5, 80));
+	}
 }
 
 # parse_template_php(&tmpl)
@@ -2839,7 +2849,15 @@ elsif ($in{"php_vars_mode"} == 2) {
 	$tmpl->{'php_vars'} = join("\t", @phpvars);
 	}
 
-
+# Save FPM specific options
+if (&indexof("fpm", &supported_php_modes()) >= 0) {
+	if ($in{'php_fpm'}) {
+		$tmpl->{'php_fpm'} = join("\t", split(/\r?\n/, $in{'php_fpm'}));
+		}
+	else {
+		$tmpl->{'php_fpm'} = 'none';
+		}
+	}
 }
 
 # list_php_wrapper_templates()
