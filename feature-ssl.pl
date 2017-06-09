@@ -2369,7 +2369,6 @@ if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'}) {
 	push(@errs, $cert) if (!$ok);
 	}
 elsif (!$ok) {
-	$ok = 0;
 	if (!$cert) {
 		$cert = "Domain has no website, ".
 			"and DNS-based validation is not possible";
