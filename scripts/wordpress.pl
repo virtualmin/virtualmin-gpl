@@ -1,3 +1,7 @@
+use strict;
+use warnings;
+
+our (%in, %config);
 
 # script_wordpress_desc()
 sub script_wordpress_desc
@@ -28,7 +32,7 @@ return "Blog";
 
 sub script_wordpress_php_vers
 {
-local ($d, $ver) = @_;
+my ($d, $ver) = @_;
 if ($ver >= 3.2) {
 	return ( 5 );
 	}
@@ -55,17 +59,17 @@ return ("mysql");
 # script_wordpress_depends(&domain, version)
 sub script_wordpress_depends
 {
-local ($d, $ver, $sinfo, $phpver) = @_;
-local @rv;
+my ($d, $ver, $sinfo, $phpver) = @_;
+my @rv;
 
 # Check for MySQL 4+
-&require_mysql();
-if (&mysql::get_mysql_version() < 4) {
+require_mysql();
+if (mysql::get_mysql_version() < 4) {
 	push(@rv, "WordPress requires MySQL version 4 or higher");
 	}
 
 # Check for PHP 5.2+
-local $phpv = &get_php_version($phpver || 5, $d);
+my $phpv = get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
 	}
@@ -80,24 +84,24 @@ return @rv;
 # Returns HTML for table rows for options for installing Wordpress
 sub script_wordpress_params
 {
-local ($d, $ver, $upgrade) = @_;
-local $rv;
-local $hdir = &public_html_dir($d, 1);
+my ($d, $ver, $upgrade) = @_;
+my $rv;
+my $hdir = public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	local ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
-	$rv .= &ui_table_row("Database for WordPress tables", $dbname);
-	local $dir = $upgrade->{'opts'}->{'dir'};
+	my ($dbtype, $dbname) = split(/_/, $upgrade->{'opts'}->{'db'}, 2);
+	$rv .= ui_table_row("Database for WordPress tables", $dbname);
+	my $dir = $upgrade->{'opts'}->{'dir'};
 	$dir =~ s/^$d->{'home'}\///;
-	$rv .= &ui_table_row("Install directory", $dir);
+	$rv .= ui_table_row("Install directory", $dir);
 	}
 else {
 	# Show editable install options
-	local @dbs = &domain_databases($d, [ "mysql" ]);
-	$rv .= &ui_table_row("Database for WordPress tables",
-		     &ui_database_select("db", undef, \@dbs, $d, "wordpress"));
-	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
-			     &ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
+	my @dbs = domain_databases($d, [ "mysql" ]);
+	$rv .= ui_table_row("Database for WordPress tables",
+		     ui_database_select("db", undef, \@dbs, $d, "wordpress"));
+	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
+			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
 	}
 return $rv;
 }
@@ -106,17 +110,17 @@ return $rv;
 # Returns either a hash ref of parsed options, or an error string
 sub script_wordpress_parse
 {
-local ($d, $ver, $in, $upgrade) = @_;
+my ($d, $ver, $in, $upgrade) = @_;
 if ($upgrade) {
 	# Options are always the same
 	return $upgrade->{'opts'};
 	}
 else {
-	local $hdir = &public_html_dir($d, 0);
+	my $hdir = public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	local $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
-	local ($newdb) = ($in->{'db'} =~ s/^\*//);
+	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
+	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
@@ -128,14 +132,14 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_wordpress_check
 {
-local ($d, $ver, $opts, $upgrade) = @_;
+my ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/wp-login.php") {
 	return "WordPress appears to be already installed in the selected directory";
 	}
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $clash = &find_database_table($dbtype, $dbname, "wp_.*");
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $clash = find_database_table($dbtype, $dbname, "wp_.*");
 $clash && return "WordPress appears to be already using the selected database (table $clash)";
 return undef;
 }
@@ -145,8 +149,8 @@ return undef;
 # containing a name, filename and URL
 sub script_wordpress_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local @files = ( { 'name' => "source",
+my ($d, $ver, $opts, $upgrade) = @_;
+my @files = ( { 'name' => "source",
 	   'file' => "wordpress-$ver.zip",
 	   'url' => "http://wordpress.org/latest.zip",
 	   'virtualmin' => 1,
@@ -164,47 +168,46 @@ return ("unzip");
 # message, or 0 and an error
 sub script_wordpress_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
-local ($out, $ex);
+my ($d, $version, $opts, $files, $upgrade) = @_;
+my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
-        local $err = &create_script_database($d, $opts->{'db'});
+        my $err = create_script_database($d, $opts->{'db'});
         return (0, "Database creation failed : $err") if ($err);
         }
-local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
-local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
-local $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
-local $dbhost = &get_database_host($dbtype, $d);
-local $dberr = &check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
+my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
+my $dbuser = $dbtype eq "mysql" ? mysql_user($d) : postgres_user($d);
+my $dbpass = $dbtype eq "mysql" ? mysql_pass($d) : postgres_pass($d, 1);
+my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
+my $dbhost = get_database_host($dbtype, $d);
+my $dberr = check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 # Extract tar file to temp dir and copy to target
-local $verdir = "wordpress";
-local $temp = &transname();
-local $err = &extract_script_archive($files->{'source'}, $temp, $d,
+my $verdir = "wordpress";
+my $temp = transname();
+my $err = extract_script_archive($files->{'source'}, $temp, $d,
                                      $opts->{'dir'}, $verdir);
 $err && return (0, "Failed to extract source : $err");
-local $cfileorig = "$opts->{'dir'}/wp-config-sample.php";
-local $cfile = "$opts->{'dir'}/wp-config.php";
+my $cfileorig = "$opts->{'dir'}/wp-config-sample.php";
+my $cfile = "$opts->{'dir'}/wp-config.php";
 
 # Create the 'wordpress' virtuser, if missing
 if ($config{'mail'} && $d->{'mail'}) {
-	local ($wpvirt) = grep { $_->{'from'} eq 'wordpress@'.$d->{'dom'} }
-			       &list_virtusers();
+	my ($wpvirt) = grep { $_->{'from'} eq 'wordpress@'.$d->{'dom'} }
+			       list_virtusers();
 	if (!$wpvirt) {
 		$wpvirt = { 'from' => 'wordpress@'.$d->{'dom'},
 			    'to' => [ $d->{'emailto_addr'} ] };
-		&create_virtuser($wpvirt);
+		create_virtuser($wpvirt);
 		}
 	}
 
 # Copy and update the config file
 if (!-r $cfile) {
-	&run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
+	run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
 				      quotemeta($cfile));
-	local $lref = &read_file_lines_as_domain_user($d, $cfile);
-	local $l;
-	foreach $l (@$lref) {
+	my $lref = read_file_lines_as_domain_user($d, $cfile);
+	foreach my $l (@$lref) {
 		if ($l =~ /^define\('DB_NAME',/) {
 			$l = "define('DB_NAME', '$dbname');";
 			}
@@ -216,27 +219,27 @@ if (!-r $cfile) {
 			}
 		if ($l =~ /^define\('DB_PASSWORD',/) {
 			$l = "define('DB_PASSWORD', '".
-			     &php_quotemeta($dbpass, 1)."');";
+			     php_quotemeta($dbpass, 1)."');";
 			}
 		if ($l =~ /define\('(AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY|AUTH_SALT|SECURE_AUTH_SALT|LOGGED_IN_SALT|NONCE_SALT)'/) {
-			my $salt = &random_password(64);
+			my $salt = random_password(64);
 			$l = "define('$1', '$salt');";
 			}
 		if ($l =~ /^define\('WP_AUTO_UPDATE_CORE',/) {
 			$l = "define('WP_AUTO_UPDATE_CORE', false);";
 			}
 		}
-	&flush_file_lines_as_domain_user($d, $cfile);
+	flush_file_lines_as_domain_user($d, $cfile);
 	}
 
 # Make content directory writable, for uploads
-&make_file_php_writable($d, "$opts->{'dir'}/wp-content", 0);
+make_file_php_writable($d, "$opts->{'dir'}/wp-content", 0);
 
 # Return a URL for the user
-local $url = &script_path_url($d, $opts).
+my $url = script_path_url($d, $opts).
 	     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
-local $userurl = &script_path_url($d, $opts);
-local $rp = $opts->{'dir'};
+my $userurl = script_path_url($d, $opts);
+my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 return (1, "WordPress installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $userurl);
 }
@@ -246,18 +249,18 @@ return (1, "WordPress installation complete. It can be accessed at <a target=_bl
 # Returns 1 on success and a message, or 0 on failure and an error
 sub script_wordpress_uninstall
 {
-local ($d, $version, $opts) = @_;
+my ($d, $version, $opts) = @_;
 
 # Remove the contents of the target directory
-local $derr = &delete_script_install_directory($d, $opts);
+my $derr = delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Remove all wp_ tables from the database
-&cleanup_script_database($d, $opts->{'db'}, "wp_");
+cleanup_script_database($d, $opts->{'db'}, "wp_");
 
 # Take out the DB
 if ($opts->{'newdb'}) {
-        &delete_script_database($d, $opts->{'db'});
+        delete_script_database($d, $opts->{'db'});
         }
 
 return (1, "WordPress directory and tables deleted.");
@@ -267,8 +270,8 @@ return (1, "WordPress directory and tables deleted.");
 # Returns the real version number of some script install, or undef if unknown
 sub script_wordpress_realversion
 {
-local ($d, $opts, $sinfo) = @_;
-local $lref = &read_file_lines("$opts->{'dir'}/wp-includes/version.php", 1);
+my ($d, $opts, $sinfo) = @_;
+my $lref = read_file_lines("$opts->{'dir'}/wp-includes/version.php", 1);
 foreach my $l (@$lref) {
 	if ($l =~ /wp_version\s*=\s*'([0-9\.]+)'/) {
 		return $1;
@@ -281,7 +284,7 @@ return undef;
 # Returns a URL and regular expression or callback func to get the version
 sub script_wordpress_latest
 {
-local ($ver) = @_;
+my ($ver) = @_;
 return ( "http://wordpress.org/download/",
 	 "Version\\s+([0-9\\.]+)" );
 }
@@ -297,4 +300,3 @@ return 1;
 }
 
 1;
-
