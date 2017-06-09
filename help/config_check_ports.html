@@ -1,0 +1,12 @@
+<header>Can listen on unexpected ports?</header>
+
+Virtualmin has the ability to check for server processes run by domain owners that
+listen on TCP ports that are not associated with a known script or FPM pool.
+This option determines if these servers are just ignored, if they are allowed
+but included in the validation report, or if they are automatically terminated.
+<p>
+
+Servers running on unexpected ports can be dangerous, as they may allow a 
+rouge domain owner to capture network traffic meant for another domain. <p>
+
+<footer>

@@ -555,18 +555,21 @@ if (&has_home_quotas() && !$backing) {
 		}
 	}
 
-# Check for user of any ports that the domain shouldn't allow
-my %canports = map { $_->{'lport'}, $_ } &allowed_domain_server_ports($d);
-my @usedports = &active_domain_server_ports($d);
-my @porterrs;
-foreach my $p (@usedports) {
-	next if ($canports{$p->{'lport'}});
-	push(@porterrs, &text('validate_eport',
-			      $p->{'lport'},
-			      $p->{'user'}->{'user'},
-			      $p->{'proc'}->{'args'}));
+if ($config{'check_ports'}) {
+	# Check for user of any ports that the domain shouldn't allow
+	my %canports = map { $_->{'lport'}, $_ }
+			   &allowed_domain_server_ports($d);
+	my @usedports = &active_domain_server_ports($d);
+	my @porterrs;
+	foreach my $p (@usedports) {
+		next if ($canports{$p->{'lport'}});
+		push(@porterrs, &text('validate_eport',
+				      $p->{'lport'},
+				      $p->{'user'}->{'user'},
+				      $p->{'proc'}->{'args'}));
+		}
+	return join(", ", @porterrs) if (@porterrs);
 	}
-return join(", ", @porterrs) if (@porterrs);
 
 return undef;
 }
