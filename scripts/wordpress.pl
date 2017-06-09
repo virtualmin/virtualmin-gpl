@@ -294,7 +294,7 @@ sub script_wordpress_site
 return 'http://wordpress.org/';
 }
 
-sub script_phpmyadmin_gpl
+sub script_wordpress_gpl
 {
 return 1;
 }
