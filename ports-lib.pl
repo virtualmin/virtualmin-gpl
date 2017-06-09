@@ -22,7 +22,7 @@ if (&domain_has_website($d)) {
 
 # Script ports
 foreach my $sinfo (&list_domain_scripts($d)) {
-	foreach my $p (split(/\s+/, $ds->{'opts'}->{'port'})) {
+	foreach my $p (split(/\s+/, $sinfo->{'opts'}->{'port'})) {
 		push(@rv, { 'lport' => $p,
 			    'type' => 'script',
 			    'script' => $sinfo->{'type'},
@@ -54,7 +54,12 @@ foreach my $p (&proc::list_processes()) {
 	next if (!$u);
 	foreach my $s (&proc::find_process_sockets($p->{'pid'})) {
 		next if (!$s->{'listen'});
+		if ($s->{'lport'} !~ /^\d+$/) {
+			$s->{'lport'} = getservbyname(
+				$s->{'lport'}, lc($s->{'proto'}));
+			}
 		$s->{'user'} = $u;
+		$s->{'proc'} = $p;
 		push(@rv, $s);
 		}
 	}

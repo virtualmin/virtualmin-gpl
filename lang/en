@@ -4479,6 +4479,7 @@ validate_eenc=Encrypted password for Unix user $1 does not match virtual server
 validate_eenc2=Hashed password for Unix user $1 does not match virtual server
 validate_euquota=Unix user $1's quota of $2 does not match the domain owner's quota of $3
 validate_egquota=Unix group $1's quota of $2 does not match the virtual server's quota of $3
+validate_eport=Port $1 is being used by $2 to run unexpected server '$3'
 validate_edns=No DNS zone found for domain $1
 validate_ednsfile=No DNS zone file set for domain $1
 validate_ednsfile2=DNS zone file $1 does not exist
