@@ -68,4 +68,14 @@ my %donepid;
 return @rv;
 }
 
+# disallowed_domain_server_ports(&domain)
+# Returns active ports that should not be in use
+sub disallowed_domain_server_ports
+{
+my ($d) = @_;
+my %canports = map { $_->{'lport'}, $_ } &allowed_domain_server_ports($d);
+my @usedports = &active_domain_server_ports($d);
+return grep { !$canports{$_->{'lport'}} } @usedports;
+}
+
 1;
