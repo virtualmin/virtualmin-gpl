@@ -63,6 +63,8 @@ foreach my $p (&proc::list_processes()) {
 		push(@rv, $s);
 		}
 	}
+my %donepid;
+@rv = grep { !$donepid{$_->{'proc'}->{'pid'}}++ } @rv;
 return @rv;
 }
 
