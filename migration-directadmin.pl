@@ -517,7 +517,7 @@ if ($got{'mysql'}) {
 			&read_env_file("$backup/$db.conf", \%dbusers);
 			foreach my $myuser (keys %dbusers) {
 				next if ($myuser eq $user);
-				next if ($dbusers{$myuser} !~ /passwd=([^=]+)/);
+				next if ($dbusers{$myuser} !~ /passwd=([^&]+)/);
 				my $mypass = $1;
 				local $myuinfo = &create_initial_user(\%dom);
 				$myuinfo->{'user'} = $myuser;
