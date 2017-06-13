@@ -78,4 +78,71 @@ my @usedports = &active_domain_server_ports($d);
 return grep { !$canports{$_->{'lport'}} } @usedports;
 }
 
+# kill_disallowed_domain_server_ports(&domain)
+# Terminate server processes that shouldn't be running
+sub kill_disallowed_domain_server_ports
+{
+my ($d) = @_;
+my @ports = &disallowed_domain_server_ports($d);
+return 0 if (!@ports);
+
+# Kill the processes
+foreach my $p (@ports) {
+	next if ($p->{'proc'}->{'pid'} <= 0);
+	next if (!$p->{'proc'}->{'user'} ||
+		 $p->{'proc'}->{'user'} eq 'root');
+	$p->{'msg'} = "Killing $p->{'proc'}->{'pid'}";
+	my $ok = &kill_logged('TERM', $p->{'proc'}->{'pid'});
+	my $msg;
+	if (!$ok || kill(0, $p->{'proc'}->{'pid'})) {
+		# Maybe a KILL is needed?
+		sleep(2);
+		if (kill(0, $p->{'proc'}->{'pid'})) {
+			$ok = &kill_logged('KILL', $p->{'proc'}->{'pid'});
+			}
+		else {
+			# It shut down in the 2 seconds
+			$ok = 1;
+			}
+		}
+	if (!$ok) {
+		# Kill failed?!
+		$msg = &text('kill_failed', "$!");
+		}
+	elsif (kill(0, $p->{'proc'}->{'pid'})) {
+		# Somehow it is still running
+		$msg = $text{'kill_still'};
+		}
+	else {
+		# Worked!
+		$msg = $text{'kill_done'};
+		}
+	$p->{'msg'} = $msg;
+	}
+
+# Email the master admin, if configured
+if ($config{'bw_email'}) {
+	$fmt = "%-20.20s %-6.6s %-30.30s %-20.20s\n";
+	my $body = $text{'kill_header'}."\n\n";
+	$body .= sprintf($fmt, $text{'kill_user'},
+			       $text{'kill_port'},
+			       $text{'kill_cmd'},
+			       $text{'kill_result'});
+	$body .= sprintf($fmt, "-" x 20, "-" x 6, "-" x 30, "-" x 20);
+	foreach my $p (@ports) {
+		$body .= sprintf($fmt, $p->{'user'}->{'user'},
+				       $p->{'lport'},
+				       $p->{'proc'}->{'args'},
+				       $p->{'msg'});
+		}
+	&foreign_require("mailboxes");
+	&mailboxes::send_text_mail(
+		&get_global_from_address(),
+		$config{'bw_email'},
+		undef,
+		$text{'kill_subject'},
+		$body);
+	}
+}
+
 1;

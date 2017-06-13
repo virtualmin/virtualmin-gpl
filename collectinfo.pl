@@ -43,4 +43,12 @@ if ($info) {
 # Resync all jails
 &copy_all_domain_jailkit_files();
 
+# Kill disallowed server processes
+if ($config{'check_ports'} == 2) {
+	foreach my $d (grep { $_->{'unix'} && !$_->{'parent'} }
+			    &list_domains()) {
+		&kill_disallowed_domain_server_ports($d);
+		}
+	}
+
 &run_post_actions_silently();

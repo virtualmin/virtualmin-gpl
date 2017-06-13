@@ -6889,4 +6889,14 @@ mysqlpass_change=Changing the password for user $1 ..
 mysqlpass_echange=.. password change failed : $1
 mysqlpass_kill=Stopping the MySQL server with authentication disabled ..
 
+kill_failed=Kill failed : $1
+kill_still=Still running!
+kill_done=Killed
+kill_header=The following unexpected server processes have been detected :
+kill_user=Username
+kill_port=Port
+kill_cmd=Server command
+kill_result=Result
+kill_subject=Virtualmin server process monitoring
+
 __norefs=1
