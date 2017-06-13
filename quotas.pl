@@ -168,10 +168,10 @@ local ($msgs, $email) = @_;
 
 local $fmt = "%-30.30s %-15.15s %-15.15s %-15.15s\n";
 local $body = "$text{'quotawarn_body2'}\n\n";
-local $body .= sprintf($fmt, $text{'quotawarn_email'},
-                             $text{'quotawarn_quota'},
-                             $text{'quotawarn_usage'},
-                             $text{'quotawarn_status'});
+$body .= sprintf($fmt, $text{'quotawarn_email'},
+                       $text{'quotawarn_quota'},
+                       $text{'quotawarn_usage'},
+                       $text{'quotawarn_status'});
 $body .= sprintf($fmt, "-" x 35, "-" x 15, "-" x 15, "-" x 15);
 local $emaild = undef;
 foreach my $m (@$msgs) {
