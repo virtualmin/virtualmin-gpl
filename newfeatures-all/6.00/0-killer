@@ -1,0 +1,3 @@
+desc=Unexpected server detection
+html=Unexpected server processes running as domain users are now detected and included in the validation report, and can optionally be automatically terminated.
+master=1

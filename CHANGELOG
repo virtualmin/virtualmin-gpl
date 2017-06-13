@@ -1567,3 +1567,4 @@ SSL certificates can now be copied to Dovecot even for virtual servers that don'
 SSL certificates that are expired or close to it are displayed on the System Information page.
 ---- Changes since 5.99 ----
 Removed support for Qmail+LDAP as a mail server.
+Unexpected server processes running as domain users are now detected and included in the validation report, and can optionally be automatically terminated.
