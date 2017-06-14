@@ -25,9 +25,9 @@ if (!$module_name) {
 	else {
 		chop($pwd = `pwd`);
 		}
-	$0 = "$pwd/install-cert.pl";
+	$0 = "$pwd/generate-letsencrypt-cert.pl";
 	require './virtual-server-lib.pl';
-	$< == 0 || die "install-cert.pl must be run as root";
+	$< == 0 || die "generate-letsencrypt-cert.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
 &set_all_text_print();
