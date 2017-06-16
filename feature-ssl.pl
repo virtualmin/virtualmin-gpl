@@ -2137,9 +2137,13 @@ foreach my $d (&list_domains()) {
 
 	# Figure out when the cert was last renewed. This is the max of the
 	# date in the cert and the time recorded in Virtualmin
-	my $ltime = $info->{'notbefore'};
+	my $ltime = &parse_notafter_date($info->{'notbefore'});
 	$ltime = $d->{'letsencrypt_last'}
 		if ($d->{'letsencrypt_last'} > $ltime);
+
+	# If an attempt was made in the last hour, skip for now to prevent
+	# hammering the Let's Encrypt serivce
+	next if (time() - $d->{'letsencrypt_last'} < 60*60);
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 5 days of expiry
@@ -2179,10 +2183,8 @@ foreach my $d (&list_domains()) {
 			$subject = $text{'letsencrypt_sfailed'};
 			$body = &text('letsencrypt_bfailed',
 				      join(", ",@dnames), $cert);
-
-			# Move the renewal time up by a random number of hours,
-			# so that we don't re-try every 5 minutes
-			$d->{'letsencrypt_last'} += int(rand() * 24) * 60 * 60
+			$d->{'letsencrypt_last'} = time();
+			$d->{'letsencrypt_last_failure'} = time();
 			&save_domain($d);
 			}
 		else {
@@ -2200,6 +2202,7 @@ foreach my $d (&list_domains()) {
 			&obtain_lock_ssl($d);
 			&install_letsencrypt_cert($d, $cert, $key, $chain);
 			$d->{'letsencrypt_last'} = time();
+			$d->{'letsencrypt_last_success'} = time();
 			&save_domain($d);
 			&release_lock_ssl($d);
 
