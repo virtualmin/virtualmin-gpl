@@ -5118,8 +5118,10 @@ foreach my $sfx ("", ".info", ".dom") {
 	my $spath = $path.$sfx;
 	my $err;
 	if ($proto == 0) {
-		# File on this system
-		$err = &unlink_logged($spath) ? undef : $!;
+		# File on this system (but skip if missing)
+		if (-e $spath) {
+			$err = &unlink_logged($spath) ? undef : $!;
+			}
 		}
 	elsif ($proto == 1) {
 		# FTP server
