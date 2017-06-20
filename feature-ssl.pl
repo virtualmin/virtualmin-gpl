@@ -2122,7 +2122,7 @@ sub apply_letsencrypt_cert_renewals
 {
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
-	next if (!$d->{'ssl'} || !$d->{'letsencrypt_renew'});
+	next if (!&domain_has_ssl($d) || !$d->{'letsencrypt_renew'});
 
 	# Is the domain enabled?
 	next if ($d->{'disabled'});
