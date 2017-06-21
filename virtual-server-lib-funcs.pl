@@ -12292,7 +12292,7 @@ if (&reseller_admin() && &can_edit_resellers()) {
 	}
 if (&can_show_history()) {
 	# History graphs
-	push(@rv, { 'url' => $vm."/history.cgi",
+	push(@rv, { 'url' => $vm."/pro/history.cgi",
 		    'title' => $text{'edit_history'},
 		    'icon' => 'graph' });
 	}
