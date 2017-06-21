@@ -11917,7 +11917,7 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
     !$d->{'proxy_pass_mode'} &&
     $virtualmin_pro && &can_edit_html()) {
 	# Edit web pages button
-	push(@rv, { 'page' => 'edit_html.cgi',
+	push(@rv, { 'page' => 'pro/edit_html.cgi',
 		    'title' => $text{'edit_html'},
 		    'desc' => $text{'edit_htmldesc'},
 		    'cat' => 'services',
