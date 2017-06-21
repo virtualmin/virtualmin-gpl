@@ -2810,7 +2810,6 @@ return &master_admin();
 # Returns 1 if the user can view software versions and other info
 sub can_view_sysinfo
 {
-return 0 if (!$virtualmin_pro);
 return $config{'show_sysinfo'} == 1 ||
        $config{'show_sysinfo'} == 2 && &master_admin() ||
        $config{'show_sysinfo'} == 3 && (&master_admin() || &reseller_admin());
