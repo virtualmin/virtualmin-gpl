@@ -67,11 +67,13 @@ if (&has_home_quotas() && !$parentdom) {
 
 # IP-related options
 if (!$aliasdom) {
-	foreach $r (split(/\s+/, $d->{'reseller'})) {
-		$resel = &get_reseller($r);
-		if ($resel && $resel->{'acl'}->{'defip'}) {
-			$reselip = $resel->{'acl'}->{'defip'};
-			$reselip6 = $resel->{'acl'}->{'defip6'};
+	if (defined(&get_reseller)) {
+		foreach $r (split(/\s+/, $d->{'reseller'})) {
+			$resel = &get_reseller($r);
+			if ($resel && $resel->{'acl'}->{'defip'}) {
+				$reselip = $resel->{'acl'}->{'defip'};
+				$reselip6 = $resel->{'acl'}->{'defip6'};
+				}
 			}
 		}
 	print &ui_table_row($text{'edit_ip'},
