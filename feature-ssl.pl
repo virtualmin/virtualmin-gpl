@@ -215,7 +215,7 @@ $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
 # Redirect HTTP to HTTPS
 if ($config{'auto_redirect'}) {
-	my $redir = { 'path' => '^/(?!.well-known)',
+	my $redir = { 'path' => '/(?!.well-known)',
 		      'dest' => 'https://'.$d->{'dom'}.'/$1',
 		      'alias' => 0,
 		      'regexp' => 1,
