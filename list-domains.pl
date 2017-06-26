@@ -630,11 +630,9 @@ if ($multi) {
 
 		# Show cloud mail setting
 		if ($config{'mail'} && $d->{'mail'} && $multi == 1) {
-			$prov = &get_domain_cloud_mail_provider(
-					$d, $d->{'cloud_mail_id'});
-			if ($prov) {
+			if ($d->{'cloud_mail_provider'}) {
 				print "    Cloud mail filter: ",
-				      "$prov->{'name'}\n";
+				      $d->{'cloud_mail_provider'},"\n";
 				}
 			}
 
