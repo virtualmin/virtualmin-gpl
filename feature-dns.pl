@@ -2654,17 +2654,49 @@ foreach my $t (@types) {
 	elsif ($r && !$spf) {
 		# Remove record
 		&bind8::delete_record($r->{'file'}, $r);
+		$d->{'domain_spf_enabled'} = 0;
+		&save_domain($d);
 		$bump = 1;
 		}
 	elsif (!$r && $spf) {
 		# Add record
 		&bind8::create_record($file, $d->{'dom'}.'.', undef,
 				      "IN", $t, "\"$str\"");
+		$d->{'domain_spf_enabled'} = 1;
+		&save_domain($d);
 		$bump = 1;
 		}
 	if ($bump) {
 		&post_records_change($d, $recs, $file);
 		&register_post_action(\&restart_bind, $d);
+		}
+	}
+}
+
+# is_domain_spf_enabled(&domain)
+# Returns (possibly cached) SPF status
+sub is_domain_spf_enabled
+{
+my ($d) = @_;
+if (!defined($d->{'domain_spf_enabled'})) {
+	my $spf = &get_domain_spf($d);
+	$d->{'domain_spf_enabled'} = $spf ? 1 : 0;
+	}
+return $d->{'domain_spf_enabled'};
+}
+
+# build_spf_dmarc_caches()
+# Set the local cache of SPF and DMARC status for all domains
+sub build_spf_dmarc_caches
+{
+foreach my $d (grep { $_->{'dns'} } &list_domains()) {
+	if (!defined($d->{'domain_spf_enabled'})) {
+		&is_domain_spf_enabled($d);
+		&save_domain($d);
+		}
+	if (!defined($d->{'domain_dmarc_enabled'})) {
+		&is_domain_dmarc_enabled($d);
+		&save_domain($d);
 		}
 	}
 }
@@ -2725,6 +2757,18 @@ if ($bump) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
+}
+
+# is_domain_dmarc_enabled(&domain)
+# Returns (possibly cached) DMARC status
+sub is_domain_dmarc_enabled
+{
+my ($d) = @_;
+if (!defined($d->{'domain_dmarc_enabled'})) {
+	my $dmarc = &get_domain_dmarc($d);
+	$d->{'domain_dmarc_enabled'} = $dmarc ? 1 : 0;
+	}
+return $d->{'domain_dmarc_enabled'};
 }
 
 # parse_dmarc(text, ...)

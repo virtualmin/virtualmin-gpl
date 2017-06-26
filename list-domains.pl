@@ -602,10 +602,10 @@ if ($multi) {
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
 		    $multi == 1) {
-			$spf = &get_domain_spf($d);
+			$spf = &is_domain_spf_enabled($d);
 			print "    SPF DNS record: ",
 			      ($spf ? "Enabled" : "Disabled"),"\n";
-			$dmarc = &get_domain_dmarc($d);
+			$dmarc = &is_domain_dmarc_enabled($d);
 			print "    DMARC DNS record: ",
 			      ($dmarc ? "Enabled" : "Disabled"),"\n";
 			}
