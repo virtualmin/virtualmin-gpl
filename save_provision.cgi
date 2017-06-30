@@ -183,7 +183,9 @@ elsif (!$in{'provision_spam'} && $config{'provision_spam_host'}) {
 foreach $f (@$feats) {
 	$v = $f->{'values'};
 	push(@lmsgs, &text('provision_limit',
-			   $v->{'limit'}->[0], $v->{'description'}->[0]).
+			   $v->{'limit'} ? $v->{'limit'}->[0]
+					 : $text{'provision_nolimit'},
+			   $v->{'description'}->[0]).
 		     ($v->{'usage'}->[0] ? " ".&text('provision_used',
 						     $v->{'usage'}->[0]) : ""));
 	}
