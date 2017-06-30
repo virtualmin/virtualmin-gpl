@@ -1821,7 +1821,6 @@ else {
 			&dovecot::save_section($conf, $l);
 			push(@$conf, $l);
 			}
-		&flush_file_lines($cfile);
 		}
 	elsif (!$enable && @myloc) {
 		# Need to remove
