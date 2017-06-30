@@ -133,10 +133,21 @@ if ($d->{'provision_mysql'}) {
 			}
 		elsif ($mysql::config{'host'} ne $mysql_host) {
 			# Mis-match with current setting!?
-			&$second_print(&text('setup_emysqluser_provclash',
-					     $mysql::config{'host'},
-					     $mysql_host));
-			return 0;
+			if (&to_ipaddress($mysql::config{'host'}) eq
+			    &to_ipaddress($mysql_host)) {
+				# Same IP, but name changed
+				$mysql::config{'host'} = $mysql_host;
+				$mysql::authstr = &mysql::make_authstr();
+				&mysql::save_module_config(
+					\%mysql::config, 'mysql');
+				}
+			else {
+				&$second_print(
+					&text('setup_emysqluser_provclash',
+					      $mysql::config{'host'},
+					      $mysql_host));
+				return 0;
+				}
 			}
 
 		&$second_print(&text('setup_mysqluser_provisioned',
