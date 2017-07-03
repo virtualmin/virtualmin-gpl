@@ -6197,6 +6197,7 @@ provision_echeck=.. check failed : $1
 provision_saving=Saving Cloudmin services settings ..
 provision_limits=Checking Cloudmin services limits ..
 provision_limit=$1 $2
+provision_nolimit=unlimited
 provision_limitsgot=.. your limits are : $1
 provision_used=($1 used)
 provision_mysqlcheck=Checking for existing local MySQL databases ..
