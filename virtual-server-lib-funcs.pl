@@ -892,13 +892,15 @@ if (&has_home_quotas()) {
 	}
 
 # Add user-configured recovery addresses
-foreach my $u (@users) {
-	if (!defined($u->{'recovery'})) {
-		my $recovery = &write_as_mailbox_user($u,
-			sub { &read_file_contents(
+if (!$novirts) {
+	foreach my $u (@users) {
+		if (!defined($u->{'recovery'})) {
+			my $recovery = &write_as_mailbox_user($u,
+			    sub { &read_file_contents(
 				"$u->{'home'}/.usermin/changepass/recovery") });
-		$recovery =~ s/\r|\n//g;
-		$u->{'recovery'} = $recovery;
+			$recovery =~ s/\r|\n//g;
+			$u->{'recovery'} = $recovery;
+			}
 		}
 	}
 
