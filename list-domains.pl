@@ -256,6 +256,7 @@ if ($multi) {
 		$hs = &quota_bsize("home");
 		$ms = &quota_bsize("mail");
 		$sender_bcc = &get_all_domains_sender_bcc();
+		$recipient_bcc = &get_all_domains_recipient_bcc();
 		}
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
@@ -622,11 +623,9 @@ if ($multi) {
 		if ($bcc) {
 			print "    BCC email to: $bcc\n";
 			}
-		if ($config{'mail'} && $supports_bcc && $multi == 1) {
-			$rbcc = &get_domain_recipient_bcc($d);
-			if ($rbcc) {
-				print "    BCC incoming email to: $rbcc\n";
-				}
+		$rbcc = &get_domain_recipient_bcc($d);
+		if ($rbcc) {
+			print "    BCC incoming email to: $rbcc\n";
 			}
 
 		# Show cloud mail setting
