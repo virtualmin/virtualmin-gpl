@@ -255,6 +255,7 @@ if ($multi) {
 	if ($multi == 1) {
 		$hs = &quota_bsize("home");
 		$ms = &quota_bsize("mail");
+		$sender_bcc = &get_all_domains_sender_bcc();
 		}
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
@@ -617,11 +618,11 @@ if ($multi) {
 			}
 
 		# Show BCC setting
+		$bcc = $sender_bcc->{$d->{'id'}};
+		if ($bcc) {
+			print "    BCC email to: $bcc\n";
+			}
 		if ($config{'mail'} && $supports_bcc && $multi == 1) {
-			$bcc = &get_domain_sender_bcc($d);
-			if ($bcc) {
-				print "    BCC email to: $bcc\n";
-				}
 			$rbcc = &get_domain_recipient_bcc($d);
 			if ($rbcc) {
 				print "    BCC incoming email to: $rbcc\n";

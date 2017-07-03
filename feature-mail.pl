@@ -5282,6 +5282,24 @@ if ($config{'mail_server'} == 0 && $sender_bcc_maps) {
 return undef;
 }
 
+# get_all_domains_sender_bcc()
+# Return a hash ref from domain ID to bcc destination
+sub get_all_domains_sender_bcc
+{
+&require_mail();
+my %rv;
+if ($config{'mail_server'} == 0 && $sender_bcc_maps) {
+	my $map = &postfix::get_maps("sender_bcc_maps");
+	my %dmap = map { $_->{'dom'}, $_->{'id'} } &list_domains();
+	foreach my $m (@$map) {
+		if ($m->{'name'} =~ /^\@(\S+)$/ && $dmap{$1}) {
+			$rv{$dmap{$1}} = $m->{'value'};
+			}
+		}
+	}
+return \%rv;
+}
+
 # save_domain_sender_bcc(&domain, [email])
 # Turns on or off automatic BCCing for some domain. May call &error.
 sub save_domain_sender_bcc
