@@ -34,6 +34,9 @@ if ($info) {
 # Update IP list cache
 &build_local_ip_list();
 
+# Update SPF and DMARC caches
+&build_spf_dmarc_caches();
+
 # Update DB of per-user last login times
 &update_last_login_times();
 
