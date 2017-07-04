@@ -105,6 +105,7 @@ else {
 	# Save renewal state
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
+	$d->{'letsencrypt_last_success'} = time();
 	if ($renew) {
 		$d->{'letsencrypt_renew'} = $renew;
 		}

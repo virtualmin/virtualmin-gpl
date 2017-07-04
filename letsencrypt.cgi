@@ -86,6 +86,7 @@ else {
 			$d->{'letsencrypt_renew'} = $in{'renew'};
 			}
 		$d->{'letsencrypt_last'} = time();
+		$d->{'letsencrypt_last_success'} = time();
 		&save_domain($d);
 
 		# Apply any per-domain cert to Dovecot and Postfix
