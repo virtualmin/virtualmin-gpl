@@ -2879,6 +2879,9 @@ cert_letsrenew=Months between automatic renewal
 cert_letsnotrenew=Only renew manually
 cert_letsage=Time since last renewal
 cert_letsmonths=$1 months
+cert_lets_success=Last successful renewal
+cert_lets_failure=Last failed renewal
+cert_lets_freason=Renewal failed due to
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate

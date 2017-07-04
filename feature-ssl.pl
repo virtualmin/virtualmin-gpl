@@ -2184,6 +2184,8 @@ foreach my $d (&list_domains()) {
 				      join(", ",@dnames), $cert);
 			$d->{'letsencrypt_last'} = time();
 			$d->{'letsencrypt_last_failure'} = time();
+			$cert =~ s/\r?\n/\t/g;
+			$d->{'letsencrypt_last_err'} = $cert;
 			&save_domain($d);
 			}
 		else {
@@ -2202,6 +2204,7 @@ foreach my $d (&list_domains()) {
 			&install_letsencrypt_cert($d, $cert, $key, $chain);
 			$d->{'letsencrypt_last'} = time();
 			$d->{'letsencrypt_last_success'} = time();
+			delete($d->{'letsencrypt_last_err'});
 			&save_domain($d);
 			&release_lock_ssl($d);
 

@@ -380,11 +380,29 @@ else {
 		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
 				$text{'cert_letsnotrenew'}));
 
-	# Current cert details
+	# Recent renewal details
 	if ($d->{'letsencrypt_last'}) {
 		$ago = (time() - $d->{'letsencrypt_last'}) / (30*24*60*60);
 		print &ui_table_row($text{'cert_letsage'},
 			&text('cert_letsmonths', sprintf("%.2f", $ago)));
+		}
+	if ($d->{'letsencrypt_last_success'}) {
+		print &ui_table_row($text{'cert_lets_success'},
+			&make_date($d->{'letsencrypt_last_success'}));
+		}
+	if ($d->{'letsencrypt_last_failure'} &&
+	    $d->{'letsencrypt_last_failure'} > $d->{'letsencrypt_last_success'}) {
+		print &ui_table_row($text{'cert_lets_failure'},
+			"<font color=red>".
+			&make_date($d->{'letsencrypt_last_failure'}).
+			"</font>");
+
+		if ($d->{'letsencrypt_last_err'}) {
+			my $err = $d->{'letsencrypt_last_err'};
+			$err =~ s/\t/\n/g;
+			print &ui_table_row($text{'cert_lets_freason'},
+				"<font color=red>".$err."</font>");
+			}
 		}
 
 	print &ui_table_end();
