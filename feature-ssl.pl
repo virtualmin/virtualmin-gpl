@@ -2365,13 +2365,13 @@ if (&domain_has_website($d)) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
-	push(@errs, $cert) if (!$ok);
+	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'}) {
 	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
-	push(@errs, $cert) if (!$ok);
+	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {
 	if (!$cert) {
