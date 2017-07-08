@@ -2847,6 +2847,85 @@ else {
 return $rv;
 }
 
+# list_remote_mysql_modules()
+# Returns a list of hash refs containing details of MySQL module clones for
+# local or remote databases
+sub list_remote_mysql_modules
+{
+my @rv;
+foreach my $minfo (&get_all_module_infos()) {
+	next if ($minfo->{'dir'} ne 'mysql' &&
+		 $minfo->{'cloneof'} ne 'mysql');
+	my %mconfig = &foreign_config($minfo->{'dir'});
+	my $mm = { 'minfo' => $minfo,
+		   'master' => $minfo->{'cloneof'} ? 0 : 1,
+		   'config' => \%mconfig };
+	push(@rv, $mm);
+	}
+return @rv;
+}
+
+# create_remote_mysql_module(&mod)
+# Creates and configures a new clone of the mysql module
+sub create_remote_mysql_module
+{
+my ($mm) = @_;
+
+# Create the config dir
+if (!$mm->{'minfo'}->{'dir'}) {
+	$mm->{'minfo'}->{'dir'} =
+		"mysql-".($mm->{'config'}->{'host'} || 'local');
+	}
+my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
+my $srccdir = "$config_directory/mysql";
+-d $cdir && &error("Config directory $cdir already exists!");
+&make_dir($cdir, 0700);
+&copy_source_dest("$srccdir/config", "$cdir/config");
+
+# Create the clone symlink
+my $mdir = "$root_directory/$mm->{'minfo'}->{'dir'}";
+&symlink_logged("mysql", $mdir);
+
+# Populate the config dir
+my %mconfig = &foreign_config($mm->{'minfo'}->{'dir'});
+foreach my $k (keys %{$mm->{'config'}}) {
+	$mconfig{$k} = $mm->{'config'}->{$k};
+	}
+&save_module_config(\%mconfig, $mm->{'minfo'}->{'dir'});
+
+# Grant access to the current (root) user
+my %acl;
+&read_acl(undef, \%acl);
+&open_lock_tempfile(ACL, "> ".&acl_filename());
+foreach $u (keys %acl) {
+        my @mods = @{$acl{$u}};
+        if ($u eq $base_remote_user) {
+                @mods = &unique(@mods, $mm->{'minfo'}->{'dir'});
+                }
+        &print_tempfile(ACL, "$u: ",join(' ', @mods),"\n");
+        }
+&close_tempfile(ACL);
+
+# Category?
+# XXX
+
+# Refresh visible modules cache
+unlink("$config_directory/module.infos.cache");
+unlink("$var_directory/module.infos.cache");
+}
+
+# delete_remote_mysql_module(&mod)
+# Removes one MySQL module clone
+sub delete_remote_mysql_module
+{
+my ($mm) = @_;
+$mm->{'minfo'}->{'cloneof'} || &error("Only MySQL clones can be removed!");
+my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
+&unlink_logged($cdir);
+&unlink_logged(&module_root_directory($mm->{'minfo'}->{'dir'}));
+# XXX remove from ACLs?
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;
