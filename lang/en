@@ -4362,6 +4362,26 @@ newmxs_syncing=Updating allowed users for relaying ..
 newmxs_esynced=.. some failed : $1
 newmxs_synced=.. done on $1
 
+newmysqls_title=MySQL Servers
+newmysqls_ecannot=You are not allowed to edit additional MySQL servers
+newmysqls_host=Server hostname
+newmysqls_doms=Used by
+newmysqls_actions=Actions
+newmysqls_open=Manage ..
+newmysqls_delete=Remove Selected Servers
+newmysqls_local=Local server
+newmysqls_none=None
+newmysqls_dcount=$1 virtual servers
+newmysqls_header=New MySQL server options
+newmysqls_host=Connect to MySQL server
+newmysqls_remote=Remote host
+newmysqls_sock=Local socket file
+newmysqls_nohost=Default local server
+newmysqls_port=Connect to TCP port
+newmysqls_portdef=MySQL default (3306)
+newmysqls_user=Login with username
+newmysqls_pass=Login with password
+
 ddatabases_title=Delete Databases
 ddatabases_edb=$1 database $2 no longer exists!
 ddatabases_edbdef=You are not allowed to remove the default $1 database $2
