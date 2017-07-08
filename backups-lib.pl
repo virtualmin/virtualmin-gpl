@@ -481,9 +481,13 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt && !-d $desturl) {
 			# Looking for a directory
 			if ($mkdir) {
-				local $derr = &make_backup_dir(
-						$desturl, 0700, 1, $asd)
-					if (!-d $desturl);
+				local $derr;
+				if (!-d $desturl) {
+					# Create the directory as the domain
+					# user, and check that it worked
+					$derr = &make_backup_dir(
+						$desturl, 0700, 1, $asd);
+					}
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
 						   "<tt>$desturl</tt>", $derr));
@@ -726,7 +730,9 @@ DOMAIN: foreach $d (@$doms) {
 			}
 		&lock_file($lockdir);
 		system("rm -rf ".quotemeta($backupdir));
+		&disable_quotas($asd) if ($asd);
 		local $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
+		&enable_quotas($asd) if ($asd);
 		if ($derr) {
 			&$second_print(&text('backup_ebackupdir',
 				"<tt>$backupdir</tt>", $derr));
