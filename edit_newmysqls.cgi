@@ -2,7 +2,6 @@
 # Show a list of known remote MySQL servers
 
 require './virtual-server-lib.pl';
-&foreign_require("servers");
 &can_edit_templates() || &error($text{'newmysqls_ecannot'});
 &ui_print_header(undef, $text{'newmysqls_title'}, "", "newmysqls");
 

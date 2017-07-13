@@ -294,6 +294,10 @@ if (!defined($dom->{'db_mysql'}) && $dom->{'mysql'}) {
 	$dom->{'db_mysql'} = $dom->{'db'};
 	}
 $dom->{'db_mysql'} = join(" ", &unique(split(/\s+/, $dom->{'db_mysql'})));
+if ($dom->{'mysql'} && !$dom->{'mysql_module'}) {
+	# Assume original MySQL module
+	$dom->{'mysql_module'} = 'mysql';
+	}
 if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	# Assume just one PostgreSQL DB
 	$dom->{'db_postgres'} = $dom->{'db'};
@@ -12076,6 +12080,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
+   $config{'mysql'} ? ( 'mysqls' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -12112,6 +12117,7 @@ local %tmplcat = (
 	'provision' => 'setting',
 	'autoconfig' => 'email',
 	'retention' => 'email',
+	'mysqls' => 'setting',
 	);
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,

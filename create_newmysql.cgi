@@ -19,9 +19,9 @@ if (!$in{'port_def'}) {
 	$in{'port'} =~ /^\d+$/ || &error($text{'newmysqls_eport'});
 	$port = $in{'port'};
 	}
-$in{'user'} =~ /^\S+$/ || &error($text{'newmysqls_euser'});
-$user = $in{'user'};
-$pass = $in{'pass'};
+$in{'myuser'} =~ /^\S+$/ || &error($text{'newmysqls_euser'});
+$user = $in{'myuser'};
+$pass = $in{'mypass'};
 
 # Add the clone module
 $mm = { 'minfo' => { },
@@ -37,7 +37,7 @@ $mm = { 'minfo' => { },
 $mod = $mm->{'minfo'}->{'dir'};
 &foreign_require($mod);
 ($ok, $err) = &foreign_call($mod, "is_mysql_running");
-if ($ok != -1) {
+if ($ok != 1) {
 	&delete_remote_mysql_module($mm);
 	&error(&text('newmysqls_econn', $err));
 	}

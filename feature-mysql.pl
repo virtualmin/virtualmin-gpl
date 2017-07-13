@@ -2862,7 +2862,7 @@ foreach my $minfo (&get_all_module_infos()) {
 		   'config' => \%mconfig };
 	push(@rv, $mm);
 	}
-return @rv;
+return sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
 }
 
 # create_remote_mysql_module(&mod)
@@ -2876,6 +2876,7 @@ if (!$mm->{'minfo'}->{'dir'}) {
 	$mm->{'minfo'}->{'dir'} =
 		"mysql-".($mm->{'config'}->{'host'} || 'local');
 	}
+$mm->{'minfo'}->{'cloneof'} = 'mysql';
 my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
 my $srccdir = "$config_directory/mysql";
 -d $cdir && &error("Config directory $cdir already exists!");
@@ -2890,6 +2891,11 @@ my $mdir = "$root_directory/$mm->{'minfo'}->{'dir'}";
 my %mconfig = &foreign_config($mm->{'minfo'}->{'dir'});
 foreach my $k (keys %{$mm->{'config'}}) {
 	$mconfig{$k} = $mm->{'config'}->{$k};
+	}
+foreach my $k (keys %mconfig) {
+	if ($k =~ /^(backup_|sync_)/) {
+		delete($mconfig{$k});
+		}
 	}
 &save_module_config(\%mconfig, $mm->{'minfo'}->{'dir'});
 
@@ -2919,11 +2925,19 @@ unlink("$var_directory/module.infos.cache");
 sub delete_remote_mysql_module
 {
 my ($mm) = @_;
-$mm->{'minfo'}->{'cloneof'} || &error("Only MySQL clones can be removed!");
+$mm->{'minfo'}->{'cloneof'} eq 'mysql' ||
+	&error("Only MySQL clones can be removed!");
+$mm->{'minfo'}->{'dir'} || &error("Module has no directory!");
 my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
+my $rootdir = &module_root_directory($mm->{'minfo'}->{'dir'});
+-l $rootdir || &error("Module is not actually a clone!");
 &unlink_logged($cdir);
-&unlink_logged(&module_root_directory($mm->{'minfo'}->{'dir'}));
+&unlink_logged($rootdir);
 # XXX remove from ACLs?
+
+# Refresh visible modules cache
+unlink("$config_directory/module.infos.cache");
+unlink("$var_directory/module.infos.cache");
 }
 
 $done_feature_script{'mysql'} = 1;
