@@ -14,6 +14,7 @@ $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 &run_post_actions();
 &webmin_log("copycert", "proftpd");
 
-&ui_print_footer(&domain_footer_link($d),
+&ui_print_footer("cert_form.cgi?dom=$d->{'id'}", $text{'cert_return'},
+		 &domain_footer_link($d),
 		 "", $text{'index_return'});
 

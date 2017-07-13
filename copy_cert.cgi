@@ -20,6 +20,7 @@ else {
 &run_post_actions();
 &webmin_log("copycert", $in{'usermin'} ? "usermin" : "webmin");
 
-&ui_print_footer(&domain_footer_link($d),
+&ui_print_footer("cert_form.cgi?dom=$d->{'id'}", $text{'cert_return'},
+		 &domain_footer_link($d),
 		 "", $text{'index_return'});
 
