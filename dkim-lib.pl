@@ -14,8 +14,10 @@ $centos_dkim_default = "/etc/sysconfig/opendkim";
 
 $freebsd_dkim_config = "/usr/local/etc/mail/opendkim.conf";
 
+$gentoo_dkim_config = "/etc/opendkim/opendkim.conf";
+
 # get_dkim_type()
-# Returns either 'ubuntu', 'debian', 'redhat', 'freebsd', 'centos' or undef
+# Returns either 'ubuntu', 'debian', 'redhat', 'freebsd', 'centos', 'gentoo' or undef
 sub get_dkim_type
 {
 if ($gconfig{'os_type'} eq 'debian-linux' && $gconfig{'os_version'} >= 7) {
@@ -45,6 +47,9 @@ elsif ($gconfig{'os_type'} eq 'redhat-linux') {
 elsif ($gconfig{'os_type'} eq 'freebsd') {
 	return 'freebsd';
 	}
+elsif ($gconfig{'os_type'} eq 'gentoo-linux') {
+	return 'gentoo';
+	}
 return undef;
 }
 
@@ -57,6 +62,7 @@ return &get_dkim_type() eq 'ubuntu' ? $ubuntu_dkim_config :
        &get_dkim_type() eq 'redhat' ? $redhat_dkim_config :
        &get_dkim_type() eq 'centos' ? $centos_dkim_config :
        &get_dkim_type() eq 'freebsd' ? $freebsd_dkim_config :
+       &get_dkim_type() eq 'gentoo' ? $gentoo_dkim_config :
 				      undef;
 }
 
@@ -78,6 +84,7 @@ sub get_dkim_init_name
 return &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
        &get_dkim_type() eq 'debian' ? 'dkim-filter' :
        &get_dkim_type() eq 'freebsd' ? 'milter-opendkim' :
+       &get_dkim_type() eq 'gentoo' ? 'opendkim' :
        &get_dkim_type() eq 'redhat' ? 'dkim-milter' :
        &get_dkim_type() eq 'centos' ? 'opendkim' : undef;
 }
@@ -130,6 +137,7 @@ sub install_dkim_package
 &foreign_require("software");
 my $pkg = &get_dkim_type() eq 'ubuntu' ? 'opendkim' :
 	  &get_dkim_type() eq 'freebsd' ? 'opendkim' :
+	  &get_dkim_type() eq 'gentoo' ? 'opendkim' :
 	  &get_dkim_type() eq 'debian' ? 'dkim-filter' :
 	  &get_dkim_type() eq 'redhat' ? 'dkim-milter' :
 	  &get_dkim_type() eq 'centos' ? 'opendkim' :
@@ -218,13 +226,23 @@ elsif (&get_dkim_type() eq 'redhat') {
 		$rv{'verify'} = 1;
 		}
 	}
-elsif (&get_dkim_type() eq 'freebsd') {
+elsif (&get_dkim_type() eq 'freebsd' || &get_dkim_type() eq 'gentoo') {
 	# Read dkim config file
 	my $conf = &get_open_dkim_config($dkim_config);
 	$rv{'enabled'} = &init::action_status($init) == 2;
 	$rv{'selector'} = $conf->{'Selector'};
 	$rv{'keyfile'} = $conf->{'KeyFile'};
-	$rv{'socket'} = $conf->{'Socket'};
+	
+	# Work out socket from config file
+	if ($conf->{'Socket'} =~ /^inet:(\d+)/) {
+		$rv{'port'} = $1;
+		}
+	elsif ($conf->{'Socket'} =~ /^local:([^:]+)/) {
+		$rv{'socket'} = $1;
+		}
+	else {
+		$rv{'enabled'} = 0;
+		}
 	
 	# Get sign/verify mode
 	if ($conf->{'Mode'} =~ /\S+/) {
@@ -432,7 +450,7 @@ if ($dkim_config) {
 
 	my $conf = &get_open_dkim_config($dkim_config);
 	if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'freebsd' ||
-	    &get_dkim_type() eq 'centos') {
+	    &get_dkim_type() eq 'centos' || &get_dkim_type() eq 'gentoo') {
 		# OpenDKIM version supplied with Ubuntu and Debian 6 supports
 		# a domains file
 		my $domfile = $conf->{'Domain'};
@@ -482,7 +500,7 @@ if ($dkim_config) {
 					 $dkim->{'extra'});
 		}
 		
-	if (&get_dkim_type() eq 'freebsd' || &get_dkim_type() eq 'centos') {
+	if (&get_dkim_type() eq 'freebsd' || &get_dkim_type() eq 'centos' || &get_dkim_type() eq 'gentoo') {
 		# Set milter port to listen on
 		if (!$conf->{'Socket'} ||
 		    $conf->{'Socket'} =~ /^inet:port/ ||
@@ -1251,6 +1269,9 @@ elsif (&get_dkim_type() eq 'debian') {
 	}
 elsif (&get_dkim_type() eq 'redhat') {
 	&set_ownership_permissions("dkim-milter", undef, 0700, $keyfile);
+	}
+elsif (&get_dkim_type() eq 'gentoo') {
+	&set_ownership_permissions("milter", undef, 0700, $keyfile);
 	}
 elsif (&get_dkim_type() eq 'freebsd') {
 	&set_ownership_permissions("opendkim", undef, 0700, $keyfile);
