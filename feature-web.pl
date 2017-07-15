@@ -233,6 +233,7 @@ if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 	}
 
 &$first_print($text{'setup_webpost'});
+my $err;
 eval {
 	local $main::error_must_die = 1;
 
@@ -264,7 +265,7 @@ eval {
 
 	# Setup for script languages
 	if (!$d->{'alias'} && $d->{'dir'}) {
-		&add_script_language_directives($d, $tmpl,
+		$err = &add_script_language_directives($d, $tmpl,
 					        $d->{'web_port'});
 		}
 
@@ -298,6 +299,9 @@ eval {
 	};
 if ($@) {
 	&$second_print(&text('setup_ewebpost', "$@"));
+	}
+elsif ($err) {
+	&$second_print(&text('setup_ewebpost', $err));
 	}
 else {
 	&$second_print($text{'setup_done'});
@@ -2952,26 +2956,34 @@ foreach my $port (@ports) {
 sub add_script_language_directives
 {
 local ($d, $tmpl, $port) = @_;
+my $err;
 
 &require_apache();
+my $mode;
 if ($tmpl->{'web_php_suexec'} == 0) {
 	# Add directives for mod_php
-	&save_domain_php_mode($d, "mod_php", $port, 1);
+	$mode = "mod_php";
 	}
 elsif ($tmpl->{'web_php_suexec'} == 1 ||
        $tmpl->{'web_php_suexec'} == 2 &&
         !$apache::httpd_modules{'mod_fcgid'}) {
 	# Create cgi wrappers for PHP 4 and 5
-	&save_domain_php_mode($d, "cgi", $port, 1);
+	$mode = "cgi";
 	}
 elsif ($tmpl->{'web_php_suexec'} == 2) {
 	# Add directives for FastCGId
-	&save_domain_php_mode($d, "fcgid", $port, 1);
+	$mode = "fcgid";
 	}
 elsif ($tmpl->{'web_php_suexec'} == 3) {
 	# Add directives for FPM
-	&save_domain_php_mode($d, "fpm", $port, 1);
+	$mode = "fpm";
 	}
+my @supp = &supported_php_modes();
+if (&indexof($mode, @supp) < 0) {
+	$err = &text('setup_ewebphpmode', $mode);
+	$mode = $supp[0];
+	}
+&save_domain_php_mode($d, $mode, $port, 1);
 
 if (defined(&save_domain_ruby_mode)) {
 	if ($tmpl->{'web_ruby_suexec'} >= 0) {
@@ -2982,6 +2994,8 @@ if (defined(&save_domain_ruby_mode)) {
 			$port, 1);
 		}
 	}
+
+return $err;
 }
 
 # add_proxy_allow_directives(&domain)

@@ -503,6 +503,7 @@ setup_webalias=Updating target virtual website ..
 setup_ewebalias=.. failed to find target virtual website!
 setup_webpost=Performing other Apache configuration ..
 setup_ewebpost=.. configuration failed : $1
+setup_ewebphpmode=PHP configuration mode $1 was selected, but is not supported on this system!
 setup_openssl=Creating SSL certificate and private key ..
 setup_ssl=Adding new SSL virtual website ..
 setup_esslportclash=IP address $1 and port $2 are being used by $3
