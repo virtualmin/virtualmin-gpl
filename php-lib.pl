@@ -1634,10 +1634,12 @@ if (!$rv->{'init'}) {
 	}
 
 # Apache modules
-&require_apache();
-foreach my $m ("mod_proxy", "mod_fcgid") {
-	if (!$apache::httpd_modules{$m}) {
-		return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
+if ($config{'web'}) {
+	&require_apache();
+	foreach my $m ("mod_proxy", "mod_fcgid") {
+		if (!$apache::httpd_modules{$m}) {
+			return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
+			}
 		}
 	}
 
