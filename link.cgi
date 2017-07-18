@@ -128,7 +128,7 @@ if ($user) {
 	&write_http_connection($con, "Authorization: basic $auth\r\n");
 	}
 &write_http_connection($con, sprintf(
-			"Webmin-servers: %s://%s:%d/$module_name/\n",
+			"Webmin-servers: %s://%s:%d/$module_name/\r\n",
 			$ENV{'HTTPS'} eq "ON" ? "https" : "http",
 			$ENV{'SERVER_NAME'}, $ENV{'SERVER_PORT'}));
 $cl = $ENV{'CONTENT_LENGTH'};
