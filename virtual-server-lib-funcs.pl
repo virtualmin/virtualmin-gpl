@@ -13864,7 +13864,9 @@ if ($config{'web'}) {
 	else {
 		&$second_print($text{'check_webok'});
 		}
+	}
 
+if (&domain_has_website()) {
 	# Check PHP versions
 	local @msg;
 	local @vers = &list_available_php_versions();
