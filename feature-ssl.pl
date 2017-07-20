@@ -928,53 +928,53 @@ else {
 while(<OUT>) {
 	s/\r|\n//g;
 	s/http:\/\//http:\|\|/g;	# So we can parse with regexp
-	if (/subject=.*C=([^\/]+)/) {
+	if (/subject=.*C\s*=\s*([^\/]+)/) {
 		$rv{'c'} = $1;
 		}
-	if (/subject=.*ST=([^\/]+)/) {
+	if (/subject=.*ST\s*=\s*([^\/]+)/) {
 		$rv{'st'} = $1;
 		}
-	if (/subject=.*L=([^\/]+)/) {
+	if (/subject=.*L\s*=\s*([^\/]+)/) {
 		$rv{'l'} = $1;
 		}
-	if (/subject=.*O=([^\/]+)/) {
+	if (/subject=.*O\s*=\s*([^\/]+)/) {
 		$rv{'o'} = $1;
 		}
-	if (/subject=.*OU=([^\/]+)/) {
+	if (/subject=.*OU\s*=\s*([^\/]+)/) {
 		$rv{'ou'} = $1;
 		}
-	if (/subject=.*CN=([^\/]+)/) {
+	if (/subject=.*CN\s*=\s*([^\/]+)/) {
 		$rv{'cn'} = $1;
 		}
-	if (/subject=.*emailAddress=([^\/]+)/) {
+	if (/subject=.*emailAddress\s*=\s*([^\/]+)/) {
 		$rv{'email'} = $1;
 		}
 
-	if (/issuer=.*C=([^\/]+)/) {
+	if (/issuer=.*C\s*=\s*([^\/]+)/) {
 		$rv{'issuer_c'} = $1;
 		}
-	if (/issuer=.*ST=([^\/]+)/) {
+	if (/issuer=.*ST\s*=\s*([^\/]+)/) {
 		$rv{'issuer_st'} = $1;
 		}
-	if (/issuer=.*L=([^\/]+)/) {
+	if (/issuer=.*L\s*=\s*([^\/]+)/) {
 		$rv{'issuer_l'} = $1;
 		}
-	if (/issuer=.*O=([^\/]+)/) {
+	if (/issuer=.*O\s*=\s*([^\/]+)/) {
 		$rv{'issuer_o'} = $1;
 		}
-	if (/issuer=.*OU=([^\/]+)/) {
+	if (/issuer=.*OU\s*=\s*([^\/]+)/) {
 		$rv{'issuer_ou'} = $1;
 		}
-	if (/issuer=.*CN=([^\/]+)/) {
+	if (/issuer=.*CN\s*=\s*([^\/]+)/) {
 		$rv{'issuer_cn'} = $1;
 		}
-	if (/issuer=.*emailAddress=([^\/]+)/) {
+	if (/issuer=.*emailAddress\s*=\s*([^\/]+)/) {
 		$rv{'issuer_email'} = $1;
 		}
-	if (/notAfter=(.*)/) {
+	if (/notAfter\s*=\s*(.*)/) {
 		$rv{'notafter'} = $1;
 		}
-	if (/notBefore=(.*)/) {
+	if (/notBefore\s*=\s*(.*)/) {
 		$rv{'notbefore'} = $1;
 		}
 	if (/Subject\s+Alternative\s+Name/i) {
