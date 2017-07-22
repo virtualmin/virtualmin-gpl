@@ -1264,6 +1264,7 @@ sub get_apache_template_log
 local ($dom, $error) = @_;
 local $tmpl = &get_template($dom->{'template'});
 local @dirs = &apache_template($tmpl->{'web'}, $dom, $tmpl->{'web_suexec'});
+local $log;
 foreach my $l (@dirs) {
 	if ($error && $l =~ /^\s*ErrorLog\s+(\S+)/) {
 		$log = $1;
@@ -1272,8 +1273,11 @@ foreach my $l (@dirs) {
 		$log = $2;
 		}
 	}
+if (!$log) {
+	$log = $errorlog ? "error_log" : "access_log";
+	}
 if ($log !~ /^\//) {
-	$log = "$dom->{'home'}/$log";
+	$log = "$dom->{'home'}/logs/$log";
 	}
 return $log;
 }
