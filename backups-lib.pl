@@ -4158,13 +4158,15 @@ sub can_backup_virtualmin
 return &master_admin();
 }
 
-# can_backup_domain([&domain])
+# can_backup_domain([&domain], [user])
 # Returns 0 if no backups are allowed, 1 if they are, 2 if only backups to
 # remote or a file under the domain are allowed, 3 if only remote is allowed.
 # If a domain is given, checks if backups of that domain are allowed.
 sub can_backup_domain
 {
-local ($d) = @_;
+local ($d, $acluser) = @_;
+$acluser ||= $base_remote_user;
+local %access = &get_module_acl($acluser);	# Use local for scoping
 if (&master_admin()) {
 	# Master admin can do anything
 	return 1;

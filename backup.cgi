@@ -36,14 +36,15 @@ if ($in{'bg'}) {
 	}
 
 # Validate inputs
+$acluser = $sched ? $sched->{'owner'} : undef;
 if ($in{'all'} == 1) {
 	# All domains
-	@doms = grep { &can_backup_domain($_) } &list_domains();
+	@doms = grep { &can_backup_domain($_, $acluser) } &list_domains();
 	}
 elsif ($in{'all'} == 2) {
 	# All except selected
 	%exc = map { $_, 1 } split(/\0/, $in{'doms'});
-	@doms = grep { &can_backup_domain($_) &&
+	@doms = grep { &can_backup_domain($_, $acluser) &&
 		       !$exc{$_->{'id'}} } &list_domains();
 	if ($in{'parent'}) {
 		@doms = grep { !$_->{'parent'} || !$exc{$_->{'parent'}} } @doms;
@@ -53,7 +54,7 @@ else {
 	# Only selected
 	foreach $did (split(/\0/, $in{'doms'})) {
 		local $dinfo = &get_domain($did);
-		if ($dinfo && &can_backup_domain($dinfo)) {
+		if ($dinfo && &can_backup_domain($dinfo, $acluser)) {
 			push(@doms, $dinfo);
 			if (!$dinfo->{'parent'} && $in{'parent'}) {
 				push(@doms, &get_domain_by("parent", $did));
