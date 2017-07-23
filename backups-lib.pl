@@ -729,7 +729,7 @@ DOMAIN: foreach $d (@$doms) {
 			goto DOMAINFAILED;
 			}
 		&lock_file($lockdir);
-		system("rm -rf ".quotemeta($backupdir));
+		&execute_command("rm -rf ".quotemeta($backupdir));
 		&disable_quotas($asd) if ($asd);
 		local $derr = &make_backup_dir($backupdir, 0777, 0, $asd);
 		&enable_quotas($asd) if ($asd);
@@ -1227,7 +1227,12 @@ if (!$homefmt) {
 elsif (!$onebyone) {
 	# For each domain, remove it's .backup directory
 	foreach $d (@$doms) {
-		&execute_command("rm -rf ".quotemeta("$d->{'home'}/.backup"));
+		my $backupdir = "$d->{'home'}/.backup";
+		if (-d $backupdir) {
+			&lock_file($backupdir);
+			&execute_command("rm -rf ".quotemeta($backupdir));
+			&unlock_file($backupdir);
+			}
 		}
 	}
 
