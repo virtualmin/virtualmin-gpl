@@ -595,9 +595,8 @@ foreach my $desturl (@$desturls) {
 		&make_dir($backup_locks_dir, 0700);
 		}
 	local $lockfile = $backup_locks_dir."/".$lockname;
-	if (&test_lock($lockfile)) {
-		local $lpid = &read_file_contents($lockfile.".lock");
-		chomp($lpid);
+	local $lpid = &test_lock($lockfile);
+	if ($lpid) {
 		if ($kill && $lpid && $lpid != $$) {
 			&kill_logged('TERM', $lpid);
 			sleep(2);
