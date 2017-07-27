@@ -250,7 +250,7 @@ else {
 		}
 
 	# If purging old backups, do that now
-	if (($ok || $in{'errors'}) && $in{'oneoff'}) {
+	if (($ok || $in{'errors'} == 1) && $in{'oneoff'}) {
 		@purges = &get_scheduled_backup_purges($sched);
 		$i = 0;
 		$asd = $cbmode == 2 ? &get_backup_as_domain(\@doms) : undef;
