@@ -29,6 +29,7 @@ index_reseller=Reseller
 index_emailto=Email address
 index_admins=Admins
 index_created=Created
+index_plan=Plan
 index_none=No virtual servers have been created yet.
 index_none2=You do not have access to any virtual servers.
 index_return=virtual servers list

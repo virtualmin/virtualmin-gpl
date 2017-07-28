@@ -3472,6 +3472,17 @@ foreach my $d (&sort_indent_domains($doms)) {
 			# Creation date
 			push(@cols, &make_date($d->{'created'}, 1));
 			}
+		elsif ($c eq "plan") {
+			# Account plan
+			my $p;
+			if ($d->{'plan'} && defined(&get_plan) &&
+			    ($p = &get_plan($d->{'plan'}))) {
+				push(@cols, $p->{'name'});
+				}
+			else {
+				push(@cols, "");
+				}
+			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
 			push(@cols, &html_escape($d->{$c}));
@@ -12080,7 +12091,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
-   $config{'mysql'} ? ( 'mysqls' ) : ( ),
+   $config{'mysql'} && $config{'experiment_mysqls'} ? ( 'mysqls' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
