@@ -87,11 +87,21 @@ else {
                 $err = &valid_domain_name($checkname);
                 &usage($err) if ($err);
 		}
+	$custom_dname = join(" ", @dnames);
 	}
 
 # Check for external connectivity first
 if ($connectivity && defined(&check_domain_connectivity)) {
-	my @errs = &check_domain_connectivity($d, { 'mail' => 1, 'ssl' => 1 });
+	my @cdoms = ( $d );
+	if (!$d->{'alias'} && !$custom_dname) {
+		push(@cdoms, grep { &domain_has_website($_) }
+				  &get_domain_by("alias", $d->{'id'}));
+		}
+	my @errs;
+	foreach my $cd (@cdoms) {
+		push(@errs, &check_domain_connectivity($cd,
+				{ 'mail' => 1, 'ssl' => 1 }));
+		}
 	if (@errs) {
 		print "Connectivity check failed :\n";
 		foreach my $e (@errs) {
