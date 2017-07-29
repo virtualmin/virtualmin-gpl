@@ -38,8 +38,9 @@ foreach $s (@scheds) {
 		"<font color=#ff0000>$text{'no'}</font>");
 	if ($hasinc) {
 		# Incremental level
-		push(@row, $s->{'increment'} ? $text{'sched_inc'}
-					     : $text{'sched_full'});
+		push(@row, $s->{'increment'} == 1 ? $text{'sched_inc'} :
+			   $s->{'increment'} == 2 ? $text{'sched_inc2'} :
+					            $text{'sched_full'});
 		}
 	# Creator of the backup
 	if ($hasowner) {

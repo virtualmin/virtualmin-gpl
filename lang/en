@@ -5688,6 +5688,7 @@ sched_disable=Disable Selected
 sched_enable=Enable Selected
 sched_level=Level
 sched_inc=Incremental
+sched_inc2=Full (no update)
 sched_full=Full
 sched_owner=Owner
 sched_actions=Actions
