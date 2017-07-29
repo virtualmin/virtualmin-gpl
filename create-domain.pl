@@ -349,6 +349,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-jail") {
 		$jail = 0;
 		}
+	elsif ($a eq "--mysql-server") {
+		$myserver = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -694,6 +697,13 @@ else {
 	$uid = $ugid = $gid = undef;
 	}
 
+# Get remote MySQL server
+if ($myserver) {
+	my $mm = &get_remote_mysql_module($myserver);
+	$mm || &usage("No remote MySQL server named $myserver was found");
+	$mysql_module = $mm->{'minfo'}->{'dir'};
+	}
+
 # Work out prefix if needed, and check it
 $prefix ||= &compute_prefix($domain, $group, $parent, 1);
 $prefix =~ /^[a-z0-9\.\-]+$/i || &usage($text{'setup_eprefix'});
@@ -757,6 +767,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'hashpass', $hashpass,
 	 'auto_letsencrypt', $letsencrypt,
 	 'jail', $jail,
+	 'mysql_module', $mysql_module,
         );
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
@@ -943,6 +954,7 @@ print "                        [--skip-warnings]\n";
 print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
+print "                        [--mysql-server hostname]\n";
 exit(1);
 }
 
