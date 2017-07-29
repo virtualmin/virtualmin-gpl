@@ -12,6 +12,10 @@ can be given multiple times.
 If the optional C<--renew> flag is given, automatic renewal will be configured
 for the specified number of months in the future.
 
+To have Virtualmin attempt to verify external Internet connectivity to your
+domain before requesting the certificate, use the C<--check-first> flag. This
+will detect common errors before your Let's Encrypt service quota is consumed.
+
 =cut
 
 package virtual_server;
@@ -58,6 +62,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--staging") {
 		$staging = 1;
 		}
+	elsif ($a eq "--check-first") {
+		$connectivity = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -79,6 +86,18 @@ else {
                 $checkname =~ s/^www\.//;
                 $err = &valid_domain_name($checkname);
                 &usage($err) if ($err);
+		}
+	}
+
+# Check for external connectivity first
+if ($connectivity && defined(&check_domain_connectivity)) {
+	my @errs = &check_domain_connectivity($d, { 'mail' => 1, 'ssl' => 1 });
+	if (@errs) {
+		print "Connectivity check failed :\n";
+		foreach my $e (@errs) {
+			print "ERROR: $e->{'desc'} : $e->{'error'}\n";
+			}
+		exit(1);
 		}
 	}
 
@@ -159,6 +178,7 @@ print "                                    [--host hostname]*\n";
 print "                                    [--renew months]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
+print "                                    [--check-first]\n";
 exit(1);
 }
 
