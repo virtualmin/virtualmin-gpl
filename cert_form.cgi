@@ -380,6 +380,12 @@ else {
 		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
 				$text{'cert_letsnotrenew'}));
 
+	# Test connectivity first?
+	if (defined(&check_domain_connectivity)) {
+		print &ui_table_row($text{'cert_connectivity'},
+			&ui_yesno_radio("connectivity", 0));
+		}
+
 	# Recent renewal details
 	if ($d->{'letsencrypt_last'}) {
 		$ago = (time() - $d->{'letsencrypt_last'}) / (30*24*60*60);
