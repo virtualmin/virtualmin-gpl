@@ -72,13 +72,18 @@ if ($config{'virus'}) {
 	else {
 		$mode = $scanner eq 'clamscan' ? 0 :
 			$scanner eq 'clamdscan' ? 1 :
-			$scanner eq 'clamd-stream-client' ? 3 : 2;
+			$scanner eq 'clamd-stream-client' ? 3 :
+			$scanner eq 'clamdscan-remote' ? 4 : 2;
+		$show_stream = $mode == 3 ||
+			       &has_command("clamd-stream-client");
 		print &ui_table_row(
 			&hlink($text{'spam_scanner'}, 'spam_scanner'),
 			&ui_radio('scanner', $mode,
 			  [ [ 0, $text{'spam_scanner0'}."<br>" ],
 			    [ 1, $text{'spam_scanner1'}."<br>" ],
-			    [ 3, $text{'spam_scanner3'}."<br>" ],
+			    [ 4, $text{'spam_scanner4'}."<br>" ],
+			    $show_stream ?
+				( [ 3, $text{'spam_scanner3'}."<br>" ] ) : ( ),
 			    [ 2, &text('spam_scanner2',
 			&ui_textbox("scanprog", $mode == 2 ? $scanner : "", 40))
 			  ] ]));

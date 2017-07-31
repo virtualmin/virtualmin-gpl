@@ -62,6 +62,10 @@ if ($config{'virus'} && !$config{'provision_virus_host'}) {
 			&error($text{'sv_estream'});
 		$fullcmd = "clamd-stream-client";
 		}
+	elsif ($in{'scanner'} == 4) {
+		&has_command("clamdscan") || &error($text{'sv_eclamdscan'});
+		$fullcmd = "clamdscan-remote";
+		}
 	$in{'vhost_def'} || &to_ipaddress($in{'vhost'}) ||
 		&error($text{'sv_evhost'});
 	$err = &test_virus_scanner($fullcmd,
