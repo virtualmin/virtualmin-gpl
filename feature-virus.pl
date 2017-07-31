@@ -31,6 +31,7 @@ if (@clamrec) {
 else {
 	# Copy the wrapper program
 	&copy_clam_wrapper();
+	&create_clamdscan_remote_wrapper_cmd();
 
 	# Add the recipe
 	local $recipe0 = { 'flags' => [ 'c', 'w' ],
@@ -271,6 +272,10 @@ if ($prog eq "clamd-stream-client") {
 	}
 elsif ($prog eq "clamdscan") {
 	$prog .= &get_clamdscan_args();
+	}
+elsif ($prog eq "clamdscan-remote") {
+	$prog = $clamdscan_remote_wrapper_cmd.
+		&make_stream_client_args($config{'clamscan_host'});
 	}
 local ($cmd, @args) = &split_quoted_string($prog);
 local $fullcmd = &has_command($cmd);

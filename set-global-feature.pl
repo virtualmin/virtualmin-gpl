@@ -164,6 +164,7 @@ if ($config{'spam'}) {
 if ($config{'virus'}) {
 	&copy_clam_wrapper();
 	&fix_clam_wrapper();
+	&create_clamdscan_remote_wrapper_cmd();
 	}
 
 # Re-generate helper script, for plugins

@@ -113,6 +113,7 @@ if ($config{'spam'}) {
 if ($config{'virus'}) {
 	&copy_clam_wrapper();
 	&fix_clam_wrapper();
+	&create_clamdscan_remote_wrapper_cmd();
 	}
 
 # Save the current default IP address if we don't currently know it
