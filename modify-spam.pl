@@ -161,7 +161,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--spam-no-delete-level") {
 		$spamlevel = 0;
 		}
-	elsif ($a =~ /^--use-(clamscan|clamdscan)$/) {
+	elsif ($a =~ /^--use-(clamscan|clamdscan|clamd-stream-client|clamdscan-remote)$/) {
 		$virus_scanner = $1;
 		}
 	elsif ($a eq "--spamtrap") {
@@ -288,7 +288,8 @@ print "                       --spamclear-size bytes]\n";
 print "                      [--trashclear-none |\n";
 print "                       --trashclear-days days\n";
 print "                       --trashclear-size bytes]\n";
-print "                      [--use-clamscan | --use-clamdscan]\n";
+print "                      [--use-clamscan | --use-clamdscan |\n";
+print "                       --use-clamd-stream-client | --use-clamdscan-remote]\n";
 print "                      [--spamtrap | --no-spamtrap]\n";
 print "\n";
 print "Warning - modifying the SpamAssassin or virus scanning client for\n";

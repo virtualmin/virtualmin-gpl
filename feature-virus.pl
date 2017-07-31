@@ -8,6 +8,7 @@ return !$_[0]->{'spam'} ? $text{'setup_edepvirus'} : undef;
 sub init_virus
 {
 $clam_wrapper_cmd = "$module_config_directory/clam-wrapper.pl";
+$clamdscan_remote_wrapper_cmd = "$module_config_directory/clamdscan-remote-wrapper.pl";
 }
 
 # setup_virus(&domain)
@@ -330,6 +331,9 @@ if (@clamrec) {
 	elsif ($rvs[0] eq &has_command("clamd-stream-client")) {
 		$rv = "clamd-stream-client";
 		}
+	elsif ($rvs[0] eq $clamdscan_remote_wrapper_cmd) {
+		$rv = "clamdscan-remote";
+		}
 	return $rv;
 	}
 else {
@@ -358,9 +362,24 @@ if (@clamrec) {
 		$prog = &has_command("clamd-stream-client");
 		$prog .= &make_stream_client_args($config{'clamscan_host'});
 		}
+	elsif ($prog eq "clamdscan-remote") {
+		$prog = $clamdscan_remote_wrapper_cmd;
+		$prog .= &make_stream_client_args($config{'clamscan_host'});
+		if (!-r $clamdscan_remote_wrapper_cmd) {
+			&create_clamdscan_remote_wrapper_cmd();
+			}
+		}
 	$clamrec[0]->{'action'} = "$clam_wrapper_cmd $prog";
 	&procmail::modify_recipe($clamrec[0]);
 	}
+}
+
+# create_clamdscan_remote_wrapper_cmd()
+# Create a command to call clamdscan with a remote target in the /etc dir
+sub create_clamdscan_remote_wrapper_cmd
+{
+&copy_source_dest("$module_root_directory/clamdscan-remote-wrapper.pl",
+		  $clamdscan_remote_wrapper_cmd);
 }
 
 # get_global_virus_scanner()
@@ -414,6 +433,11 @@ local $fullcmd = $cmd;
 if ($cmd eq "clamd-stream-client") {
 	# Set remote host
 	$fullcmd .= &make_stream_client_args($host);
+	}
+elsif ($cmd eq "clamdscan-remote") {
+	# Use actual wrapper and set remote host
+	$fullcmd = $clamdscan_remote_wrapper_cmd." ".
+		   &make_stream_client_args($host);
 	}
 else {
 	# Tell command to use stdin

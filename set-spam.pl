@@ -68,7 +68,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-spamc-max" || $a eq "--no-spam-max") {
 		$spam_max = 0;
 		}
-	elsif ($a =~ /^--use-(clamscan|clamdscan|clamd-stream-client)$/) {
+	elsif ($a =~ /^--use-(clamscan|clamdscan|clamd-stream-client|clamdscan-remote)$/) {
 		$virus_scanner = $1;
 		}
 	elsif ($a eq "--use-virus") {
@@ -144,8 +144,9 @@ $new_virus_host = defined($virus_host) ? $virus_host
 # Make sure the new virus scanner works
 if ($virus_scanner || $virus_host) {
 	local ($cmd, @args) = &split_quoted_string($new_virus_scanner);
-	&has_command($cmd) ||
-		&usage("Virus scanning command $cmd does not exist");
+	local $shcmd = $cmd eq "clamdscan-remote" ? "clamdscan" : $cmd;
+	&has_command($shcmd) ||
+		&usage("Virus scanning command $shcmd does not exist");
 	if (!$clamd || $new_virus_scanner ne "clamdscan") {
 		# Only test if we aren't enabling clamd anyway
 		$err = &test_virus_scanner($new_virus_scanner, $new_virus_host);
@@ -260,7 +261,8 @@ print "virtualmin set-spam [--use-spamassassin | --use-spamc]\n";
 print "                    [--spamc-host hostname | --no-spamc-host]\n";
 print "                    [--spam-max bytes | --no-spam-max]\n";
 print "                    [--use-clamscan | --use-clamdscan |\n";
-print "                     --use-clamd-stream-client | --use-virus command]\n";
+print "                     --use-clamd-stream-client | --use-clamdscan-remote |\n";
+print "                     --use-virus command]\n";
 print "                    [--clamd-host hostname]\n";
 if (&check_clamd_status() >= 0) {
 	print "                    [--enable-clamd | --disable-clamd]\n";

@@ -2940,6 +2940,22 @@ unlink("$config_directory/module.infos.cache");
 unlink("$var_directory/module.infos.cache");
 }
 
+# get_remote_mysql_module(name)
+# Returns a mysql module hash, looked up by hostname or socket file
+sub get_remote_mysql_module
+{
+my ($name) = @_;
+foreach my $mm (&list_remote_mysql_modules()) {
+	my $c = $mm->{'config'};
+	if ($c->{'sock'} && $name eq $c->{'sock'} ||
+	    $c->{'host'} && $name eq $c->{'host'}.':'.($c->{'port'} || 3306) ||
+	    $c->{'host'} && $name eq $c->{'host'}) {
+		return $mm;
+		}
+	}
+return undef;
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;
