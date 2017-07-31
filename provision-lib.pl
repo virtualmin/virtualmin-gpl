@@ -37,6 +37,7 @@ if ($config{'provision_mysql'}) {
 if ($config{'provision_virus'}) {
 	# Make sure remote scanning is possible
 	&has_command("clamd-stream-client") ||
+	    &has_command("clamdscan") ||
 		return &text('provision_evirusclient', 'clamd-stream-client');
 	}
 if ($config{'provision_spam'}) {

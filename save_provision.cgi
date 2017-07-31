@@ -79,7 +79,7 @@ if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
 		}
 	}
 
-# If virus provisioning is enabled, force use of clamd-stream-client for
+# If virus provisioning is enabled, force use of clamdscan remote for
 # all domains
 if ($in{'provision_virus'} && !$config{'provision_virus_host'}) {
 	&$first_print($text{'provision_virussetup'});
@@ -93,13 +93,13 @@ if ($in{'provision_virus'} && !$config{'provision_virus_host'}) {
 		$clamhost = $1;
 		$msg =~ /port=(\S+)/;
 		$clamhost .= ":$1" if ($1 != 3310);
-		$err = &test_virus_scanner("clamd-stream-client", $clamhost);
+		$err = &test_virus_scanner("clamdscan-remote", $clamhost);
 		if ($err) {
 			&$second_print(&text('provision_evirustest',
 					     $clamhost, $err));
 			}
 		else {
-			&save_global_virus_scanner("clamd-stream-client",
+			&save_global_virus_scanner("clamdscan-remote",
 						   $clamhost);
 			$msg =~ /host=(\S+)/;
 			$config{'provision_virus_host'} = $1;
