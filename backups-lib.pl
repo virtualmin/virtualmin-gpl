@@ -625,7 +625,7 @@ local %donefeatures;				# Map from domain name->features
 local @cleanuphomes;				# Temporary homes
 local %donedoms;				# Map from domain name->hash
 local $failalldoms;
-DOMAIN: foreach $d (@$doms) {
+DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	# Force lock and re-read the domain in case it has changed
 	&obtain_lock_everything($d);
 	my $reread_d = &get_domain($d->{'id'}, undef, 1);	
@@ -1225,7 +1225,7 @@ if (!$homefmt) {
 	}
 elsif (!$onebyone) {
 	# For each domain, remove it's .backup directory
-	foreach $d (@$doms) {
+	foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		my $backupdir = "$d->{'home'}/.backup";
 		if (-d $backupdir) {
 			&lock_file($backupdir);
