@@ -1,5 +1,3 @@
-use strict;
-use warnings;
 
 our (%in, %config);
 
@@ -54,6 +52,11 @@ return ("curl");
 sub script_wordpress_dbs
 {
 return ("mysql");
+}
+
+sub script_wordpress_release
+{
+return 2;	# For strict change
 }
 
 # script_wordpress_depends(&domain, version)
