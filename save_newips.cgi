@@ -35,6 +35,7 @@ if (!@doms) {
 	}
 
 # Do each domain, and all active features in it
+my $changes = 0;
 foreach $d (@doms) {
 	# Update IP addresses, if matching. Alias domains whose target points to
 	# the old IP are also updated
@@ -76,6 +77,7 @@ foreach $d (@doms) {
 			}
 		}
 	next if (!$changed);
+	$changes++;
 
 	&$first_print(&text('newips_dom', $d->{'dom'}));
 	&$indent_print();
@@ -111,6 +113,11 @@ foreach $d (@doms) {
 	&reset_domain_envs($d);
 
 	&$outdent_print();
+	}
+
+# Tell the user if nothing happened
+if (!$changes) {
+	print "<b>$text{'newips_none3'}</b><p>\n";
 	}
 
 # Update old default IP
