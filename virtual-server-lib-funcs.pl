@@ -558,10 +558,28 @@ if (defined(&get_autoreply_file_dir)) {
 	closedir(AUTODIR);
 	}
 
-# Delete scheduled backups
+# Delete scheduled backups owned by the domain owner, or that backup only
+# this dokmain
 foreach my $sched (&list_scheduled_backups()) {
+	my @dids = split(/\s+/, $sched->{'doms'});
 	if ($sched->{'owner'} eq $id) {
 		&delete_scheduled_backup($sched);
+		}
+	elsif (!$sched->{'all'} && !$sched->{'virtualmin'} &&
+	       &indexof($id, @dids) >= 0) {
+		# If the backup is for specified domains, check if any of
+		# them exist and aren't this domain
+		my $candelete = 1;
+		foreach my $did (@dids) {
+			my $bd = &get_domain($did);
+			if ($bd && $id ne $bd->{'id'}) {
+				$candelete = 0;
+				last;
+				}
+			}
+		if ($candelete) {
+			&delete_scheduled_backup($sched);
+			}
 		}
 	}
 
