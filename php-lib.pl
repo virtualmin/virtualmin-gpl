@@ -814,7 +814,9 @@ if ($d) {
 	if ($mode eq "mod_php") {
 		my $v = &get_apache_mod_php_version();
 		if ($v) {
-			return ([ $v, undef ]);
+			my $cmd = &has_command("php$v") ||
+				  &has_command("php");
+			return ([ $v, $cmd ]);
 			}
 		else {
 			return ( );

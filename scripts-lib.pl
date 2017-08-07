@@ -820,7 +820,7 @@ return $got ? 1 : 0;
 sub check_php_module
 {
 local ($mod, $ver, $d) = @_;
-local @vers = &list_available_php_versions();
+local @vers = &list_available_php_versions($d);
 local $verinfo;
 if ($ver) {
 	($verinfo) = grep { $_->[0] == $ver } @vers;
