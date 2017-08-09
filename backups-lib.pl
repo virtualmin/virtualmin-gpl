@@ -3105,9 +3105,13 @@ my ($conts, $doms) = @_;
 my @rv;
 if ($doms) {
 	foreach my $d (@$doms) {
-		# If domain has a reseller, make sure it exists now
+		# If domain has a reseller, make sure it exists now (unless
+		# the restore also includes resellers, in which case we assume
+		# that it will included)
 		if ($d->{'missing'} && $d->{'reseller'} &&
-		    defined(&get_reseller)) {
+		    defined(&get_reseller) &&
+		    (!$conts->{'virtualmin'} ||
+		     &indexof('reseller', @{$conts->{'virtualmin'}}) < 0)) {
 			foreach my $rname (split(/\s+/, $d->{'reseller'})) {
 				my $resel = &get_reseller($rname);
 				if (!$resel) {
