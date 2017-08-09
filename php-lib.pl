@@ -913,7 +913,7 @@ return $php_command_for_version_cache{$v};
 
 # get_php_version(number|command, [&domain])
 # Given a PHP based version like 4 or 5, or a path to PHP, return the real
-# version number, like 5.2.
+# version number, like 5.2.7
 sub get_php_version
 {
 local ($cmd, $d) = @_;
