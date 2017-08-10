@@ -1628,8 +1628,11 @@ if (!$rv->{'dir'}) {
 
 # Init script
 &foreign_require("init");
+my @nodot = map { my $u = $_; $u =~ s/\.//g; $u } @all_possible_php_versions;
 foreach my $init ("php-fpm", "php5-fpm", "php7-fpm",
-		  (map { "php${_}-fpm" } @all_possible_php_versions)) {
+		  (map { "php${_}-fpm" } @all_possible_php_versions),
+		  (map { "rh-php${_}-php-fpm" } @nodot),
+		  (map { "php${_}-php-fpm" } @nodot)) {
 	my $st = &init::action_status($init);
 	if ($st) {
 		$rv->{'init'} = $init;
