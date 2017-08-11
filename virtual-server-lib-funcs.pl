@@ -8689,6 +8689,7 @@ push(@rv, { 'id' => 0,
 	    'skel' => $config{'virtual_skel'} || "none",
 	    'skel_subs' => int($config{'virtual_skel_subs'}),
 	    'skel_nosubs' => $config{'virtual_skel_nosubs'},
+	    'exclude' => $config{'default_exclude'} || "none",
 	    'frame' => &cat_file("framefwd-template", 1),
 	    'gacl' => 1,
 	    'gacl_umode' => $config{'gacl_umode'},
@@ -9006,6 +9007,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'postgres_encoding'} = $tmpl->{'postgres_encoding'};
 	$config{'virtual_skel'} = $tmpl->{'skel'} eq "none" ? "" :
 				  $tmpl->{'skel'};
+	$config{'default_exclude'} = $tmpl->{'exclude'} eq "none" ? "" :
+				     $tmpl->{'exclude'};
 	$config{'virtual_skel_subs'} = $tmpl->{'skel_subs'};
 	$config{'virtual_skel_nosubs'} = $tmpl->{'skel_nosubs'};
 	$config{'gacl_umode'} = $tmpl->{'gacl_umode'};
@@ -9169,7 +9172,7 @@ if (!$tmpl->{'default'}) {
 		    "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
-		    "ipfollow",
+		    "ipfollow", "exclude",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),

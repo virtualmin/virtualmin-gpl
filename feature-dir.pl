@@ -76,6 +76,11 @@ if (!$_[0]->{'parent'} && $uinfo) {
 		}
 	}
 
+# Copy excludes from template
+if ($tmpl->{'exclude'} ne 'none') {
+	$_[0]->{'backup_excludes'} = $tmpl->{'exclude'};
+	}
+
 return 1;
 }
 
@@ -966,14 +971,23 @@ print &ui_table_row(&hlink($text{'tmpl_skel'}, "template_skel"),
 print &ui_table_row(&hlink($text{'tmpl_skel_subs'}, "template_skel_subs"),
 	&ui_yesno_radio("skel_subs", int($tmpl->{'skel_subs'})));
 
-# File patterns to exclude
+# File patterns to exclude from skeleton dir
 print &ui_table_row(&hlink($text{'tmpl_skel_nosubs'}, "template_skel_nosubs"),
 	&ui_textbox("skel_nosubs", $tmpl->{'skel_nosubs'}, 60));
 
-# File patterns to include
+# File patterns to include from skeleton dir
 print &ui_table_row(&hlink($text{'tmpl_skel_onlysubs'},
 			   "template_skel_onlysubs"),
 	&ui_textbox("skel_onlysubs", $tmpl->{'skel_onlysubs'}, 60));
+
+print &ui_table_hr();
+
+# Default excludes for backups
+print &ui_table_row(&hlink($text{'tmpl_exclude'}, "template_exclude"),
+	&none_def_input("exclude", $tmpl->{'exclude'}, $text{'tmpl_exdirs'}, 0,
+			$tmpl->{'standard'} ? 1 : 0)."<br>\n".
+	&ui_textarea("exclude", $tmpl->{'exclude'} eq "none" ? undef :
+			join("\n", split(/\t+/, $tmpl->{'exclude'})), 5, 60));
 }
 
 # parse_template_dir(&tmpl)
@@ -984,11 +998,22 @@ local ($tmpl) = @_;
 
 # Save skeleton directory
 $tmpl->{'skel'} = &parse_none_def("skel");
-if ($in{"skel_mode"} == 2) {
+if ($in{'skel_mode'} == 2) {
 	-d $in{'skel'} || &error($text{'tmpl_eskel'});
 	$tmpl->{'skel_subs'} = $in{'skel_subs'};
 	$tmpl->{'skel_nosubs'} = $in{'skel_nosubs'};
 	$tmpl->{'skel_onlysubs'} = $in{'skel_onlysubs'};
+	}
+
+# Save excludes
+if ($in{'exclude_mode'} == 0) {
+	$tmpl->{'exclude'} = 'none';
+	}
+elsif ($in{'exclude_mode'} == 1) {
+	delete($tmpl->{'exclude'});
+	}
+else {
+	$tmpl->{'exclude'} = join("\t", split(/\r?\n/, $in{'exclude'}));
 	}
 }
 
