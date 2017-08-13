@@ -10,6 +10,10 @@ domain name of the server to update. You must also supply the C<--set> parameter
 at least once, which has to be followed by the code for the field to update
 and the new value.
 
+For menu-type custom fields, the value must be the underlying value, not
+the one that is displayed to the user. For yes/no fields, the value must be
+either <tt>1</tt> for Yes or <tt>0</tt> for No.
+
 =cut
 
 package virtual_server;
