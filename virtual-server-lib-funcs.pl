@@ -11965,6 +11965,11 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
     !$d->{'proxy_pass_mode'} && &foreign_available("filemin")) {
 	# Link to file manager for HTML directory
 	my $phd = &public_html_dir($d);
+	my %faccess = &get_module_acl(undef, 'filemin');
+	my @ap = split(/\s+/, $faccess{'allowed_paths'});
+	if (@ap == 1) {
+		$phd =~ s/^\Q$ap[0]\E//;
+		}
 	push(@rv, { 'page' => 'index.cgi?path='.&urlize($phd),
 		    'mod' => 'filemin',
 		    'title' => $text{'edit_filemin'},
