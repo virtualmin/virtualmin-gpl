@@ -5,9 +5,11 @@
 Requests and installs a Let's Encrypt cert for a virtual server.
 
 The server must be specified with the C<--domain> flag, followed by a domain
-name. By default the certificate will be the for domain name only, but you
-can specify an alternate list of hostnames with the C<--host> flag, which
-can be given multiple times.
+name. By default the certificate will be the for either previously used
+hostnames for Let's Encrypt, or the default SSL hostnames for the domain.
+However, you can specify an alternate list of hostnames with the C<--host>
+flag, which can be given multiple times. Or you can force use of the default
+SSL hostname list with C<--default-hosts>.
 
 If the optional C<--renew> flag is given, automatic renewal will be configured
 for the specified number of months in the future.
@@ -46,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--host") {
 		push(@dnames, lc(shift(@ARGV)));
 		}
+	elsif ($a eq "--default-hosts") {
+		$defdnames = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -77,10 +82,20 @@ $d || &usage("No virtual server named $dname found");
 &domain_has_ssl($d) ||
 	&usage("Virtual server $dname does not have SSL enabled");
 if (!@dnames) {
-	@dnames = &get_hostnames_for_ssl($d);
-        $custom_dname = undef;
+	# No hostnames specified
+	if ($defdnames || !$d->{'letsencrypt_dname'}) {
+		# Use default hostnames
+		@dnames = &get_hostnames_for_ssl($d);
+		$custom_dname = undef;
+		}
+	else {
+		# Use hostnames from last time
+		@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		$custom_dname = $d->{'letsencrypt_dname'};
+		}
 	}
 else {
+	# Hostnames given
 	foreach my $dname (@dnames) {
                 my $checkname = $dname;
                 $checkname =~ s/^www\.//;
@@ -185,6 +200,7 @@ print "Requests and installs a Let's Encrypt cert for a virtual server.\n";
 print "\n";
 print "virtualmin generate-letsencrypt-cert --domain name\n";
 print "                                    [--host hostname]*\n";
+print "                                    [--default-hosts]\n";
 print "                                    [--renew months]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
