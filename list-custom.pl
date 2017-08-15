@@ -9,6 +9,10 @@ set for all virtual servers. The C<--domain> parameter can be used to limit the
 display to a single named server, while the C<--names> parameter will switch the
 display to show field codes rather than their full descriptions.
 
+By default all fields are shown, but you can use the C<--field> flag followed
+by a code to show just that field. To further limit the display to just values,
+use the C<--value-only> flag.
+
 =cut
 
 package virtual_server;
@@ -40,6 +44,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--field") {
+		$field = shift(@ARGV);
+		}
+	elsif ($a eq "--value-only") {
+		$valueonly = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -60,20 +70,36 @@ else {
 @doms = sort { $a->{'user'} cmp $b->{'user'} ||
 	       $a->{'created'} <=> $b->{'created'} } @doms;
 
-# Show attributes on multiple lines
 @fields = &list_custom_fields();
-foreach $d (@doms) {
-	print "$d->{'dom'}\n";
-	foreach $f (@fields) {
-		$v = $d->{'field_'.$f->{'name'}};
-		$v =~ s/\n/\\n/g;
-		if (defined($v)) {
-			if ($names) {
-				print "    $f->{'name'}: $v\n";
-				}
-			else {
-				($desc) = split(/;/, $f->{'desc'});
-				print "    $desc: $v\n";
+if ($field) {
+	@fields = grep { $_->{'name'} eq $field } @fields;
+	}
+
+if ($valueonly) {
+	# Show just values
+	foreach $d (@doms) {
+		foreach $f (@fields) {
+			$v = $d->{'field_'.$f->{'name'}};
+			$v =~ s/\n/\\n/g;
+			print $v,"\n";
+			}
+		}
+	}
+else {
+	# Show attributes on multiple lines
+	foreach $d (@doms) {
+		print "$d->{'dom'}\n";
+		foreach $f (@fields) {
+			$v = $d->{'field_'.$f->{'name'}};
+			$v =~ s/\n/\\n/g;
+			if (defined($v)) {
+				if ($names) {
+					print "    $f->{'name'}: $v\n";
+					}
+				else {
+					($desc) = split(/;/, $f->{'desc'});
+					print "    $desc: $v\n";
+					}
 				}
 			}
 		}
@@ -86,6 +112,8 @@ print "Lists the values of custom fields for some or all servers\n";
 print "\n";
 print "virtualmin list-custom [--domain name]*\n";
 print "                       [--names]\n";
+print "                       [--field name]\n";
+print "                       [--value-only]\n";
 exit(1);
 }
 
