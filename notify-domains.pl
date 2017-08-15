@@ -108,8 +108,7 @@ if ($with) {
 if ($without) {
 	@doms = grep { !$_->{$without} } @doms;
 	}
-@doms = grep { !$_->{'parent'} } @doms;
-@doms || &usage("No top-level virtual servers selected");
+@doms || &usage("No virtual servers selected");
 
 # Read the message
 if ($bodyfile) {
