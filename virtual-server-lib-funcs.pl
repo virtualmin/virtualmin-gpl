@@ -7108,6 +7108,12 @@ if ($db eq "test" || $db eq "mysql" || $db =~ /^template/) {
 	# These names are reserved by MySQL and PostgreSQL
 	$db = "db".$db;
 	}
+if (!$dbtype || $dbtype eq "mysql") {
+	# MySQL DB names cannot be longer than 64 chars
+	if (length($db) > 64) {
+		$db = substr($db, 0, 64);
+		}
+	}
 return $db;
 }
 
