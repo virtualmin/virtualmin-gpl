@@ -10907,8 +10907,17 @@ if ($config{'longname'} == 1) {
 	return $name;
 	}
 elsif ($group && !$parent && $config{'longname'} == 0) {
-	# For top-level domains, prefix is same as group name
-	return $group;
+	# For top-level domains, prefix is same as group name (but append a
+	# number if there's a clash)
+	my $rv = $group;
+	if ($creating) {
+		my $sfx;
+		while(&get_domain_by("prefix", $rv)) {
+			$sfx++;
+			$rv = $group.$sfx;
+			}
+		}
+	return $rv;
 	}
 else {
 	# Otherwise, prefix comes from first part of domain. If this clashes,
