@@ -51,7 +51,6 @@ else {
 		# Verify and store complex inputs
 		@values = &parse_alias($in{$sfx.'name_def'}, $in{$sfx.'name'},
 			       %oldvirt ? $oldvirt{'to'} : undef, "alias", $d);
-		@values || &error($text{'alias_enone'});
 		$virt->{'to'} = \@values;
 		}
 	else {
@@ -70,6 +69,7 @@ else {
 			&error(&text('alias_ebounce'));
 			}
 		}
+	@{$virt->{'to'}} || &error($text{'alias_enone'});
 
 	# Make sure alias doesn't forward to itself
 	foreach my $t (@{$virt->{'to'}}) {
