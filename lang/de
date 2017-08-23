@@ -677,7 +677,7 @@ check_dnsok3=BIND DNS-Domains werden auf Service-Host gehostet.
 check_done=.. Ihr System kann mit Virtualmin konfiguriert werden.
 check_ebcmd=Der Befehl $1, welcher ben&#246;tigt wird um Sicherungen zu erstellen und wiederherzustellen, ist nicht installiert.
 check_edepssl=SSL kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn Apache nicht installiert ist.
-check_edepwebalizer=Webalizer kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn Apache nicht installiert ist.
+check_edepwebalizer=Webalizer kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn ein web server nicht installiert ist.
 check_eftpshell=Die Shell $1 f&#252;r FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang unm&#246;glich macht.
 check_eldap=Eine Fehler ist bei der Kontakaufnahme zum LDAP-Server aufgetreten : $1. Entweder mu&#223; LDAP in der <a href='$2'>Modulkonfiguration</a> deaktiviert werden, oder das <a href='$3'>LDAP-Benutzer und -Gruppen</a>-Modul mu&#223; erst richtig konfiguriert werden.
 check_eldap2=Das installierte LDAP-Benutzer und -Gruppen-Modul ist zu alt, um von Webmin unterst&#252;tzt zu werden. Entweder mu&#223; es in der <a href='$1'>Modulkonfiguration</a> deaktiviert oder einfach auf Version $2 gebracht werden.
