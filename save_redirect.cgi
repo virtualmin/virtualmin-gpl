@@ -29,8 +29,8 @@ else {
 		     &error(&text('redirect_epath2', $d->{'dom'}));
 		$r->{'path'} = $3;
 		}
-	elsif ($in{'path'} =~ /^\/\S*$/) {
-		# Just a path
+	elsif ($in{'path'} =~ /^\/\S*$/ || $in{'path'} =~ /^\^\S*/) {
+		# Just a path or a regexp
 		$r->{'path'} = $in{'path'};
 		}
 	else {
