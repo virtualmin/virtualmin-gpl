@@ -1854,7 +1854,7 @@ check_nogroup=User quotas are enabled for home and email directories, but group 
 check_group=Both user and group quotas are enabled for home and email directories.
 check_noquotas=Disk quotas have been disabled in the module configuration.
 check_sslok=Apache is configured to host SSL websites.
-check_edepwebalizer=Webalizer cannot be enabled in Virtualmin's <a href='$1'>module configuration</a> unless Apache is.
+check_edepwebalizer=Webalizer cannot be enabled in Virtualmin's <a href='$1'>module configuration</a> unless a web server is.
 check_edepssl=SSL cannot be enabled in Virtualmin's <a href='$1'>module configuration</a> unless Apache is.
 check_eshell=Shell $1 for non-FTP users is included in $2, which may allow FTP access.
 check_eftpshell=Shell $1 for FTP users is not included in $2, which may prevent FTP access.

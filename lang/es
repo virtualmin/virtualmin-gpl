@@ -954,7 +954,7 @@ check_ebcmd=El comando $1 necesario para crear o restaurar backups no est&#225; 
 check_ecanonical_maps=Se ha encontrado un problema con los mapas de can&#243;nicos de Postfix usados para mapeo de direcciones salientes : $1
 check_eclamd=Ha seleccionado usar <tt>clamdscan</tt> para escaneo de virus, pero el <tt>clamd</tt> el servidor al que le habla no est&#225; corriendo
 check_edepssl=SSL no puede ser habilitado en la <a href='$1'>configuraci&#243;n de m&#243;dulo</a> de Virtualmin salvo que Apache tambi&#233;n lo est&#233;.
-check_edepwebalizer=Webalizer no puede ser habilitado en la <a href='$1'>configuraci&#243;n de m&#243;dulo</a> de Virtualmin salvo que Apache tambi&#233;n lo est&#233;.
+check_edepwebalizer=Webalizer no puede ser habilitado en la <a href='$1'>configuraci&#243;n de m&#243;dulo</a> de Virtualmin salvo que un servidor web tambi&#233;n lo est&#233;.
 check_eftpshell=El int&#233;rprete de comandos $1 para los usuarios FTP no est&#225; inclu&#237;do en $2, lo cual podr&#237;a evitar el acceso FTP.
 check_eget_group=Los comando de quota externos est&#225;n habilitados, pero el comando para obtener la quota de un solo grupo no existe
 check_eget_user=Los comandos de quota externos est&#225;n habilitados, pero el comando para obtener la quota de un solo usuario no existe
