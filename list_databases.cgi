@@ -47,8 +47,10 @@ if (!$d->{'parent'}) {
 	}
 
 # Show message about DB host
-if ($config{'mysql'} && $mysql::config{'host'} && &master_admin()) {
-	print &text('databases_hosted', "<tt>$mysql::config{'host'}</tt>");
+$mymod = $d->{'mysql_module'} || 'mysql';
+%myconfig = &foreign_config($mymod);
+if ($config{'mysql'} && $myconfig{'host'} && &master_admin()) {
+	print &text('databases_hosted', "<tt>$myconfig{'host'}</tt>");
 	print "<p>\n";
 	}
 
