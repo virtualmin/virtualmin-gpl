@@ -2137,13 +2137,14 @@ $tmpl->{'mysql_uconns'} = &parse_none_def("mysql_uconns");
 # Returns options for a new mysql database
 sub creation_form_mysql
 {
+my ($d) = @_;
 &require_mysql();
 local $rv;
-if (&get_dom_remote_mysql_version($_[0]) >= 4.1) {
-	local $tmpl = &get_template($_[0]->{'template'});
+if (&get_dom_remote_mysql_version($d) >= 4.1) {
+	local $tmpl = &get_template($d->{'template'});
 
 	# Character set
-	local @charsets = &list_mysql_character_sets();
+	local @charsets = &list_mysql_character_sets($d);
 	local $cs = $tmpl->{'mysql_charset'};
 	$cs = "" if ($cs eq "none");
 	$rv .= &ui_table_row($text{'database_charset'},
@@ -2155,7 +2156,7 @@ if (&get_dom_remote_mysql_version($_[0]) >= 4.1) {
 	# Collation order
 	local $cl = $tmpl->{'mysql_collate'};
 	$cl = "" if ($cs eq "none");
-	local @colls = &list_mysql_collation_orders();
+	local @colls = &list_mysql_collation_orders($d);
 	if (@colls) {
 		local %csmap = map { $_->[0], $_->[1] } @charsets;
 		$rv .= &ui_table_row($text{'database_collate'},
@@ -2358,11 +2359,12 @@ else {
 	}
 }
 
-# list_mysql_collation_orders()
+# list_mysql_collation_orders($d)
 # Returns a list of supported collation orders. Each row is an array ref of
 # a code and character set it can work with.
 sub list_mysql_collation_orders
 {
+my ($d) = @_;
 &require_mysql();
 local @rv;
 if ($config{'provision_mysql'}) {
@@ -2379,8 +2381,8 @@ if ($config{'provision_mysql'}) {
 	}
 else {
 	# Query local DB
-	if (&get_dom_remote_mysql_version() >= 5) {
-		local $d = &mysql::execute_sql(
+	if (&get_dom_remote_mysql_version($d) >= 5) {
+		local $d = &execute_dom_sql($d, 
 			$mysql::master_db, "show collation");
 		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
 		}
@@ -2388,11 +2390,12 @@ else {
 return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
 }
 
-# list_mysql_character_sets()
+# list_mysql_character_sets(&domain)
 # Returns a list of supported character sets. Each row is an array ref of
 # a code and character set name
 sub list_mysql_character_sets
 {
+my ($d) = @_;
 &require_mysql();
 if ($config{'provision_mysql'}) {
 	if ($mysql::config{'host'}) {
@@ -2406,7 +2409,8 @@ if ($config{'provision_mysql'}) {
 	}
 else {
 	# Query local DB
-	return &mysql::list_character_sets();
+	my $mod = &require_dom_mysql($d);
+	return &foreign_call($mod, "list_character_sets");
 	}
 }
 
