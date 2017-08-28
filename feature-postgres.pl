@@ -863,12 +863,13 @@ sub create_postgres_database_user
 {
 }
 
-# list_postgres_tables(database)
+# list_postgres_tables(&domain, database)
 # Returns a list of tables in the specified database
 sub list_postgres_tables
 {
+my ($d, $db) = @_;
 &require_postgres();
-return &postgresql::list_tables($_[0], 1);
+return &postgresql::list_tables($db, 1);
 }
 
 # get_database_host_postgres()

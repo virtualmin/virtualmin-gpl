@@ -290,15 +290,25 @@ local ($d, $info) = @_;
 &unlink_file($info->{'file'});
 }
 
-# find_database_table(dbtype, dbname, table|regexp)
+# find_database_table([&domain], dbtype, dbname, table|regexp)
 # Returns 1 if some table exists in the specified database (if the db exists)
+# XXX horrible hack - this handles the case where $d is defined in the local
+#     scope by script callers, because they can't be all updated at once to
+#     pass in the database
 sub find_database_table
 {
-local ($dbtype, $dbname, $table) = @_;
+my $myd;
+if (ref($_[0])) {
+	$myd = shift(@_);
+	}
+else {
+	$myd = $d;
+	}
+my ($dbtype, $dbname, $table) = @_;
 local $cfunc = "check_".$dbtype."_database_clash";
 if (&$cfunc(undef, $dbname)) {
 	local $lfunc = "list_".$dbtype."_tables";
-	local @tables = &$lfunc($dbname);
+	local @tables = &$lfunc($myd, $dbname);
 	foreach my $t (@tables) {
 		if ($t =~ /^$table$/i) {
 			return $t;
@@ -569,7 +579,7 @@ eval {
 	if ($dbtype eq "mysql") {
 		# Delete from MySQL
 		&require_mysql();
-		foreach my $t (&mysql::list_tables($dbname)) {
+		foreach my $t (&list_dom_mysql_tables($d, $dbname)) {
 			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
 			    !ref($tables) && $t =~ /^$tables/i) {
 				eval {
@@ -613,7 +623,7 @@ if (!&$cfunc($d, $dbname)) {
 	}
 
 local $lfunc = "list_".$dbtype."_tables";
-local @tables = &$lfunc($dbname);
+local @tables = &$lfunc($d, $dbname);
 if (!@tables) {
 	&push_all_print();
 	local $dfunc = "delete_".$dbtype."_database";

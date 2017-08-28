@@ -11,17 +11,6 @@ if (!$mysql::config{'login'}) {
 %mconfig = &foreign_config("mysql");
 $password_func = $mysql::password_func || "password";
 $mysql_user_size = $config{'mysql_user_size'} || 16;
-
-# Try to get the mysql server version, but fall back to the local version
-eval {
-	local $main::error_must_die = 1;
-	if (defined(&mysql::get_remote_mysql_version)) {
-		$remote_mysql_version = &mysql::get_remote_mysql_version();
-		}
-	};
-if ($@ || !$remote_mysql_version) {
-	$remote_mysql_version = $mysql::mysql_version;
-	}
 }
 
 # check_depends_mysql(&dom)
@@ -1899,7 +1888,7 @@ sub sysinfo_mysql
 {
 &require_mysql();
 return ( ) if ($config{'provision_mysql'});
-return ( [ $text{'sysinfo_mysql'}, $remote_mysql_version ] );
+return ( [ $text{'sysinfo_mysql'}, &get_dom_remote_mysql_version() ] );
 }
 
 sub startstop_mysql
@@ -2032,7 +2021,7 @@ if (-d $mysql::config{'mysql_data'} &&
 				( [ "", $text{'default'} ] ) )]));
 	}
 
-if ($remote_mysql_version >= 4.1 && $config{'mysql'}) {
+if (&get_dom_remote_mysql_version() >= 4.1 && $config{'mysql'}) {
 	# Default MySQL character set
 	print &ui_table_row(&hlink($text{'tmpl_mysql_charset'},
 				   "template_mysql_charset"),
@@ -2044,7 +2033,7 @@ if ($remote_mysql_version >= 4.1 && $config{'mysql'}) {
 		      &list_mysql_character_sets() ]));
 	}
 
-if ($remote_mysql_version >= 5 && $config{'mysql'}) {
+if (&get_dom_remote_mysql_version() >= 5 && $config{'mysql'}) {
 	# Default MySQL collation order
 	print &ui_table_row(&hlink($text{'tmpl_mysql_collate'},
 				   "template_mysql_collate"),
@@ -2130,7 +2119,7 @@ if (-d $mysql::config{'mysql_data'} &&
     !$config{'provision_mysql'}) {
 	$tmpl->{'mysql_chgrp'} = $in{'mysql_chgrp'};
 	}
-if ($remote_mysql_version >= 4.1 && $config{'mysql'}) {
+if (&get_dom_remote_mysql_version() >= 4.1 && $config{'mysql'}) {
 	$tmpl->{'mysql_charset'} = $in{'mysql_charset'};
 	$tmpl->{'mysql_collate'} = $in{'mysql_collate'};
 	}
@@ -2150,7 +2139,7 @@ sub creation_form_mysql
 {
 &require_mysql();
 local $rv;
-if ($remote_mysql_version >= 4.1) {
+if (&get_dom_remote_mysql_version($_[0]) >= 4.1) {
 	local $tmpl = &get_template($_[0]->{'template'});
 
 	# Character set
@@ -2391,7 +2380,7 @@ if ($config{'provision_mysql'}) {
 	}
 else {
 	# Query local DB
-	if ($remote_mysql_version >= 5) {
+	if (&get_dom_remote_mysql_version() >= 5) {
 		local $d = &mysql::execute_sql(
 			$mysql::master_db, "show collation");
 		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
@@ -2643,7 +2632,7 @@ return ( );
 sub execute_user_creation_sql
 {
 my ($d, $host, $user, $encpass) = @_;
-foreach my $sql (&get_user_creation_sql($host, $user, $encpass)) {
+foreach my $sql (&get_user_creation_sql($d, $host, $user, $encpass)) {
 	if ($sql =~ /^set\s+password/) {
 		&execute_set_password_sql($d, $sql, $host);
 		}
@@ -2677,15 +2666,15 @@ elsif ($@) {
 	}
 }
 
-# get_user_creation_sql(host, user, password-sql)
+# get_user_creation_sql(&domain, host, user, password-sql)
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
 {
-my ($host, $user, $encpass) = @_;
-if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
+my ($d, $host, $user, $encpass) = @_;
+if (&compare_versions(&get_dom_remote_mysql_version($d), "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
-elsif (&compare_versions($remote_mysql_version, 5) >= 0) {
+elsif (&compare_versions(&get_dom_remote_mysql_version($d), 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
@@ -2704,7 +2693,8 @@ my $d = &execute_dom_sql($d, $mysql::master_db,
 my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
 	my $sql;
-	if (&compare_versions($remote_mysql_version, "5.7.6") >= 0) {
+	if (&compare_versions(&get_dom_remote_mysql_version($d),
+			      "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
@@ -2966,13 +2956,22 @@ foreach my $mm (&list_remote_mysql_modules()) {
 return undef;
 }
 
+# require_dom_mysql(&domain)
+# Finds and loads the MySQL module for a domain
+sub require_dom_mysql
+{
+my ($d) = @_;
+my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
+&foreign_require($mod);
+return $mod;
+}
+
 # execute_dom_sql(&domain, db, sql, ...)
 # Run some SQL, but in the module for the domain's MySQL connection
 sub execute_dom_sql
 {
 my ($d, $db, $sql, @params) = @_;
-my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
-&foreign_require($mod);
+my $mod = &require_dom_mysql($d);
 if ($sql =~ /^(select|show)\s+/i) {
 	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
 	}
@@ -2986,8 +2985,7 @@ else {
 sub execute_dom_sql_file
 {
 my ($d, $db, $file, @params) = @_;
-my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
-&foreign_require($mod);
+my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "execute_sql_file", $db, $file, @params);
 }
 
@@ -2996,8 +2994,7 @@ return &foreign_call($mod, "execute_sql_file", $db, $file, @params);
 sub list_dom_mysql_tables
 {
 my ($d, $db, $empty_denied, $include_views) = @_;
-my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
-&foreign_require($mod);
+my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "list_tables", $db, $empty_denied, $include_views);
 }
 
@@ -3006,9 +3003,30 @@ return &foreign_call($mod, "list_tables", $db, $empty_denied, $include_views);
 sub list_dom_mysql_databases
 {
 my ($d, $db) = @_;
-my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
-&foreign_require($mod);
+my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "list_databases");
+}
+
+# get_dom_remote_mysql_version(&domain)
+# Returns the MySQL server version for a domain
+sub get_dom_remote_mysql_version
+{
+my ($d) = @_;
+my $mod = &require_dom_mysql($d);
+if ($get_dom_remote_mysql_version_cache{$mod}) {
+	return $get_dom_remote_mysql_version_cache{$mod};
+	}
+else {
+	my $rv;
+	eval {
+		local $main::error_must_die = 1;
+		$rv = &foreign_call($mod, "get_remote_mysql_version");
+		};
+	$rv ||= eval $mod.'::mysql_version';
+	$rv ||= $mysql::mysql_version;
+	$get_dom_remote_mysql_version_cache{$mod} = $rv;
+	return $rv;
+	}
 }
 
 $done_feature_script{'mysql'} = 1;

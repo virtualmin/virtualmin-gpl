@@ -3452,7 +3452,7 @@ mail_system_5=Qmail+VPOPMail
 
 databases_title=Edit Databases
 databases_indom=$1 databases in domain $2
-databases_hosted=All databases on this system are hosted on the remote MySQL server $1.
+databases_hosted=All databases for this domain are hosted on the remote MySQL server $1.
 databases_none=This virtual server does not have any databases yet.
 databases_db=Database name
 databases_type=Database type
