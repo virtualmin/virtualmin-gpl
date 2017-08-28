@@ -56,7 +56,7 @@ return ("mysql");
 
 sub script_wordpress_release
 {
-return 2;	# For strict change
+return 3;	# For local $d
 }
 
 # script_wordpress_depends(&domain, version)
@@ -135,7 +135,7 @@ else {
 # Returns an error message if a required option is missing or invalid
 sub script_wordpress_check
 {
-my ($d, $ver, $opts, $upgrade) = @_;
+local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/wp-login.php") {
@@ -171,7 +171,7 @@ return ("unzip");
 # message, or 0 and an error
 sub script_wordpress_install
 {
-my ($d, $version, $opts, $files, $upgrade) = @_;
+local ($d, $version, $opts, $files, $upgrade) = @_;
 my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
         my $err = create_script_database($d, $opts->{'db'});
