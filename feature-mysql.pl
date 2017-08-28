@@ -794,7 +794,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local %got = map { $_, 1 } &mysql::list_databases();
+	local %got = map { $_, 1 } &list_dom_mysql_databases($d);
 	foreach my $db (&domain_databases($d, [ "mysql" ])) {
 		$got{$db->{'name'}} ||
 			return &text('validate_emysql', $db->{'name'});
@@ -897,8 +897,8 @@ else {
 				&execute_password_change_sql(
 					$d, $user, "$password_func('$qpass')");
 				}
-			&mysql::execute_sql(
-				$mysql::master_db, 'flush privileges');
+			&execute_dom_sql($d, $mysql::master_db,
+					 'flush privileges');
 			};
 		&execute_for_all_mysql_servers($efunc);
 		delete($d->{'disabled_oldmysql'});
@@ -916,13 +916,14 @@ else {
 # Returns his password if a mysql user exists for the domain's user, or undef
 sub mysql_user_exists
 {
+my ($d) = @_;
 &require_mysql();
-local $user = &mysql_user($_[0]);
+local $user = &mysql_user($d);
 local $u;
 eval {
 	# Try old password column first
 	local $main::error_must_die = 1;
-	$u = &mysql::execute_sql($mysql::master_db,
+	$u = &execute_dom_sql($d, $mysql::master_db,
 		"select password from user where user = ?", $user);
 	};
 if ($@ || @{$u->{'data'}} && $u->{'data'}->[0]->[0] eq '') {
@@ -930,7 +931,7 @@ if ($@ || @{$u->{'data'}} && $u->{'data'}->[0]->[0] eq '') {
 	# if there was no password
 	eval {
 		local $main::error_must_die = 1;
-		$u = &mysql::execute_sql($mysql::master_db,
+		$u = &execute_dom_sql($d, $mysql::master_db,
 			"select authentication_string from user where user = ?", $user);
 		};
 	}
@@ -969,7 +970,7 @@ if ($d->{'provision_mysql'}) {
 else {
 	# DB clash on local
 	&require_mysql();
-	local @dblist = &mysql::list_databases();
+	local @dblist = &list_dom_mysql_databases($d);
 	return &text('setup_emysqldb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
@@ -1026,7 +1027,8 @@ foreach $db (@dbs) {
 			   grep { /^\Q$db\E\./ || /^\*\./ } @exclude;
 	my $tables;
 	if (%texclude) {
-		$tables = [ grep { !$texclude{$_} } &mysql::list_tables($db) ];
+		$tables = [ grep { !$texclude{$_} }
+				 &list_dom_mysql_tables($d, $db) ];
 		}
 
 	local $err = &mysql::backup_database($db, $dbfile, 0, 1, undef,
@@ -1162,7 +1164,7 @@ foreach my $db (@dbs) {
 		# DB already exists, silently ignore it if not empty.
 		# This can happen during a restore when MySQL is on a remote
 		# system.
-		my @tables = &mysql::list_tables($db->[0], 1);
+		my @tables = &list_dom_mysql_tables($d, $db->[0], 1);
 		if (@tables) {
 			next;
 			}
@@ -1196,12 +1198,12 @@ foreach my $db (@dbs) {
 	local ($ex, $out);
 	if ($asd) {
 		# As the domain owner
-		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1],
+		($ex, $out) = &execute_dom_sql_file($d, $db->[0], $db->[1],
 				&mysql_user($d), &mysql_pass($d, 1));
 		}
 	else {
 		# As master admin
-		($ex, $out) = &mysql::execute_sql_file($db->[0], $db->[1]);
+		($ex, $out) = &execute_dom_sql_file($d, $db->[0], $db->[1]);
 		}
 	if ($ex) {
 		&$second_print(&text('restore_mysqlloadfailed',
@@ -1331,15 +1333,16 @@ return $rv;
 # domain's Unix quota.
 sub mysql_size
 {
+my ($d, $dbname, $sizeonly) = @_;
 &require_mysql();
 local ($size, $qsize);
-local $dd = &get_mysql_database_dir($_[1]);
+local $dd = &get_mysql_database_dir($dbname);
 if ($dd) {
 	# Can check actual on-disk size
 	$size = &disk_usage_kb($dd)*1024;
 	local @dst = stat($dd);
 	if (&has_group_quotas() && &has_mysql_quotas() &&
-            $dst[5] == $_[0]->{'gid'}) {
+            $dst[5] == $d->{'gid'}) {
 		$qsize = $size;
 		}
 	}
@@ -1348,14 +1351,14 @@ else {
 	$size = 0;
 	eval {
 		local $main::error_must_die = 1;
-		my $rv = &mysql::execute_sql($_[1], "show table status");
+		my $rv = &execute_dom_sql($d, $dbname, "show table status");
 		foreach my $r (@{$rv->{'data'}}) {
 			$size += $r->[6];
 			}
 		};
 	}
 local @tables;
-if (!$_[2]) {
+if (!$sizeonly) {
 	eval {
 		# Make sure DBI errors don't cause a total failure
 		local $main::error_must_die = 1;
@@ -1364,7 +1367,7 @@ if (!$_[2]) {
 			# 'mysql' DB
 			$mysql::supports_views_cache = 0;
 			}
-		@tables = &mysql::list_tables($_[1], 1);
+		@tables = &list_dom_mysql_tables($d, $dbname, 1);
 		};
 	}
 return ($size, scalar(@tables), $qsize);
@@ -1385,7 +1388,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local @dblist = &mysql::list_databases();
+	local @dblist = &list_dom_mysql_databases($d);
 	return &indexof($name, @dblist) >= 0 ? 1 : 0;
 	}
 }
@@ -1415,7 +1418,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Create the database locally, unless it already exists
-	if (&indexof($dbname, &mysql::list_databases()) < 0) {
+	if (&indexof($dbname, &list_dom_mysql_databases($d)) < 0) {
 		&$first_print(&text('setup_mysqldb', $dbname));
 		&execute_dom_sql($d, $mysql::master_db,
 				 "create database ".&mysql::quotestr($dbname).
@@ -1504,7 +1507,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Delete locally
-	local @dblist = &mysql::list_databases();
+	local @dblist = &list_dom_mysql_databases($d);
 	&$first_print(&text('delete_mysqldb', join(", ", @dbnames)));
 	foreach my $db (@dbnames) {
 		local $qdb = &quote_mysql_database($db);
@@ -1563,7 +1566,7 @@ local $dfunc = sub {
 local $dfunc = sub {
 	local $duser = &mysql_user($d);
 	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
-		local $o = &mysql::execute_sql($mysql::master_db, "select user from db where user = '$up->[0]'");
+		local $o = &execute_dom_sql($d, $mysql::master_db, "select user from db where user = '$up->[0]'");
 		if (!@{$o->{'data'}}) {
 			&execute_dom_sql($d, $mysql::master_db, "delete from user where user = '$up->[0]'");
 			}
@@ -1677,14 +1680,14 @@ else {
 	eval {
 		# Try old password column first
 		local $main::error_must_die = 1;
-		$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+		$d = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 		};
 	if ($@ || @{$d->{'data'}} && $d->{'data'}->[0]->[1] eq '') {
 		# Try new mysql user table format if the password query failed,
 		# or if the password was empty
 		eval {
 			local $main::error_must_die = 1;
-			$d = &mysql::execute_sql($mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+			$d = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 			};
 		}
 	local (@rv, %done);
@@ -1711,7 +1714,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
-	local $rv = &mysql::execute_sql($mysql::master_db,
+	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select user from user where user = ?", $user);
 	return @{$rv->{'data'}} ? 1 : 0;
 	}
@@ -1873,12 +1876,13 @@ else {
 	}
 }
 
-# list_mysql_tables(database)
+# list_mysql_tables(&domain, database)
 # Returns a list of tables in the given database
 sub list_mysql_tables
 {
+my ($d, $db) = @_;
 &require_mysql();
-return &mysql::list_tables($_[0], 1);
+return &list_dom_mysql_tables($d, $db, 1);
 }
 
 # get_database_host_mysql()
@@ -2204,7 +2208,7 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Get from local DB
-	local $data = &mysql::execute_sql($mysql::master_db,
+	local $data = &execute_dom_sql($d, $mysql::master_db,
 	    "select distinct host from user where user = ?", &mysql_user($d));
 	return map { $_->[0] } @{$data->{'data'}};
 	}
@@ -2323,6 +2327,7 @@ else {
 
 # check_mysql_login(dbname, dbuser, dbpass)
 # Tries to login to MySQL with the given credentials, returning undef on failure
+# XXX
 sub check_mysql_login
 {
 local ($dbname, $dbuser, $dbpass) = @_;
@@ -2463,8 +2468,8 @@ sub get_mysql_creation_opts
 {
 local ($d, $dbname) = @_;
 &require_mysql();
-local $data = &mysql::execute_sql($dbname, "show create database ".
-					   &mysql::quotestr($dbname));
+local $data = &execute_dom_sql($d, $dbname, "show create database ".
+					    &mysql::quotestr($dbname));
 local $sql = $data->{'data'}->[0]->[1];
 local $opts = { };
 if ($sql =~ /CHARACTER\s+SET\s+(\S+)/i) {
@@ -2495,7 +2500,7 @@ if ($prov) {
 	}
 else {
 	# Local list
-	return &mysql::list_databases();
+	return &list_dom_mysql_databases($d);
 	}
 }
 
@@ -2694,7 +2699,7 @@ else {
 sub execute_password_change_sql
 {
 my ($d, $user, $encpass, $forceuser, $noflush) = @_;
-my $d = &mysql::execute_sql($mysql::master_db,
+my $d = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
@@ -2968,7 +2973,42 @@ sub execute_dom_sql
 my ($d, $db, $sql, @params) = @_;
 my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
 &foreign_require($mod);
-return &foreign_call($mod, "execute_sql_logged", $db, $sql, @params);
+if ($sql =~ /^(select|show)\s+/i) {
+	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
+	}
+else {
+	return &foreign_call($mod, "execute_sql_logged", $db, $sql, @params);
+	}
+}
+
+# execute_dom_sql_file(&domain, db, file, ...)
+# Run some SQL file, but in the module for the domain's MySQL connection
+sub execute_dom_sql_file
+{
+my ($d, $db, $file, @params) = @_;
+my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
+&foreign_require($mod);
+return &foreign_call($mod, "execute_sql_file", $db, $file, @params);
+}
+
+# list_dom_mysql_tables(&domain, db, empty-if-denied, no-filter-views)
+# Returns a list of mysql tables in some DB, from the server used by a domain
+sub list_dom_mysql_tables
+{
+my ($d, $db, $empty_denied, $include_views) = @_;
+my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
+&foreign_require($mod);
+return &foreign_call($mod, "list_tables", $db, $empty_denied, $include_views);
+}
+
+# list_dom_mysql_databases(&domain)
+# Returns a list of mysql databases, from the server used by a domain
+sub list_dom_mysql_databases
+{
+my ($d, $db) = @_;
+my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
+&foreign_require($mod);
+return &foreign_call($mod, "list_databases");
 }
 
 $done_feature_script{'mysql'} = 1;
