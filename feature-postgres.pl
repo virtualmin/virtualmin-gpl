@@ -941,12 +941,12 @@ sub start_service_postgres
 return &postgresql::start_postgresql();
 }
 
-# check_postgres_login(dbname, dbuser, dbpass)
+# check_postgres_login(&domain, dbname, dbuser, dbpass)
 # Tries to login to PostgreSQL with the given credentials, returning undef
 # on failure
 sub check_postgres_login
 {
-local ($dbname, $dbuser, $dbpass) = @_;
+local ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_postgres();
 local $main::error_must_die = 1;
 local $postgresql::postgres_login = $dbuser;

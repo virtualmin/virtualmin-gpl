@@ -297,13 +297,7 @@ local ($d, $info) = @_;
 #     pass in the database
 sub find_database_table
 {
-my $myd;
-if (ref($_[0])) {
-	$myd = shift(@_);
-	}
-else {
-	$myd = $d;
-	}
+my $myd = ref($_[0]) ? shift(@_) : $d;
 my ($dbtype, $dbname, $table) = @_;
 local $cfunc = "check_".$dbtype."_database_clash";
 if (&$cfunc(undef, $dbname)) {
@@ -2063,17 +2057,18 @@ local ($overall) = @_;
 &write_file($script_ratings_overall, $overall);
 }
 
-# check_script_db_connection(dbtype, dbname, dbuser, dbpass)
+# check_script_db_connection([&domain], dbtype, dbname, dbuser, dbpass)
 # Returns an error message if connection to the database with the given details
 # would fail, undef otherwise
 sub check_script_db_connection
 {
-local ($dbtype, $dbname, $dbuser, $dbpass) = @_;
+my $myd = ref($_[0]) ? shift(@_) : $d;
+my ($dbtype, $dbname, $dbuser, $dbpass) = @_;
 if (&indexof($dbtype, @database_features) >= 0) {
 	# Core feature
 	local $cfunc = "check_".$dbtype."_login";
 	if (defined(&$cfunc)) {
-		return &$cfunc($dbname, $dbuser, $dbpass);
+		return &$cfunc($d, $dbname, $dbuser, $dbpass);
 		}
 	}
 elsif (&indexof($dbtype, &list_database_plugins()) >= 0) {
