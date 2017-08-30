@@ -2370,9 +2370,9 @@ local @rv;
 if ($config{'provision_mysql'}) {
 	if ($mysql::config{'host'}) {
 		# Query provisioning DB system
-		local $d = &mysql::execute_sql(
+		my $rv = &mysql::execute_sql(
 			"information_schema", "show collation");
-		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+		@rv = map { [ $_->[0], $_->[1] ] } @{$rv->{'data'}};
 		}
 	else {
 		# No MySQL host yet
@@ -2382,9 +2382,9 @@ if ($config{'provision_mysql'}) {
 else {
 	# Query local DB
 	if (&get_dom_remote_mysql_version($d) >= 5) {
-		local $d = &execute_dom_sql($d, 
+		my $rv = &execute_dom_sql($d, 
 			$mysql::master_db, "show collation");
-		@rv = map { [ $_->[0], $_->[1] ] } @{$d->{'data'}};
+		@rv = map { [ $_->[0], $_->[1] ] } @{$rv->{'data'}};
 		}
 	}
 return sort { lc($a->[0]) cmp lc($b->[0]) } @rv;
