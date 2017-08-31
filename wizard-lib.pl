@@ -309,15 +309,15 @@ else {
 		}
 
 	# Offer to clean up test/anonymous DB and user, if they exist
-	my @dbs = &mysql::list_databases();
+	my @dbs = &list_dom_mysql_databases(undef);
 	if (&indexof("test", @dbs) >= 0) {
-		my @tables = &mysql::list_tables("test", 1);
+		my @tables = &list_dom_mysql_tables(undef, "test", 1);
 		print &ui_table_row($text{'wizard_mysql_deltest'}.
 			(@tables ? " ".&text('wizard_mysql_delc',
 					     scalar(@tables)) : ""),
 			&ui_yesno_radio("deltest", @tables ? 0 : 1));
 		}
-	my $rv = &mysql::execute_sql_logged($mysql::master_db,
+	my $rv = &execute_dom_sql(undef, $mysql::master_db,
 		"select * from user where user = ''");
 	if (@{$rv->{'data'}}) {
 		print &ui_table_row($text{'wizard_mysql_delanon'},
@@ -355,7 +355,7 @@ else {
 		# Change in DB
 		local $esc = &mysql::escapestr($in->{'mypass'});
 		local $user = $mysql::mysql_login || "root";
-		&execute_password_change_sql("root",
+		&execute_password_change_sql(undef, "root",
 			"$mysql::password_func('$esc')");
 
 		# Update Webmin
@@ -368,12 +368,12 @@ else {
 
 # Remove test database if requested
 if ($in->{'deltest'}) {
-	&mysql::execute_sql_logged($mysql::master_db, "drop database test");
-	&mysql::execute_sql_logged($mysql::master_db,
+	&execute_dom_sql(undef, $mysql::master_db, "drop database test");
+	&execute_dom_sql(undef, $mysql::master_db,
 		"delete from db where db = 'test' or db = 'test_%'");
 	}
 if ($in->{'delanon'}) {
-	&mysql::execute_sql_logged($mysql::master_db,
+	&execute_dom_sql(undef, $mysql::master_db,
 		"delete from user where user = ''");
 	}
 

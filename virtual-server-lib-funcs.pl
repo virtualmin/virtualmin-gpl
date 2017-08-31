@@ -12132,7 +12132,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
-   $config{'mysql'} && $config{'experiment_mysqls'} ? ( 'mysqls' ) : ( ),
+   $config{'mysql'} ? ( 'mysqls' ) : ( ),
    );
 local %tmplcat = (
 	'features' => 'setting',
