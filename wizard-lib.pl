@@ -369,6 +369,8 @@ else {
 # Remove test database if requested
 if ($in->{'deltest'}) {
 	&mysql::execute_sql_logged($mysql::master_db, "drop database test");
+	&mysql::execute_sql_logged($mysql::master_db,
+		"delete from db where db = 'test' or db = 'test_%'");
 	}
 if ($in->{'delanon'}) {
 	&mysql::execute_sql_logged($mysql::master_db,
