@@ -699,7 +699,7 @@ if ($got{'mysql'}) {
 		&$indent_print();
 		&create_mysql_database(\%dom, $name);
 		&save_domain(\%dom, 1);
-		local ($ex, $out) = &mysql::execute_sql_file($name,
+		local ($ex, $out) = &execute_dom_sql_file(\%dom, $name,
 			"$root/$database->{'cid'}");
 		if ($ex) {
 			&$first_print("Error loading $db : $out");

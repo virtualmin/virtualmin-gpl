@@ -410,7 +410,7 @@ if ($got{'mysql'}) {
 	&$first_print("Re-creating MySQL databases ..");
 	&disable_quotas(\%dom);
 	&require_mysql();
-	local @gotmysql = &mysql::list_databases();
+	local @gotmysql = &list_dom_mysql_tables(\%dom);
 	local $dcount = 0;
 	local @dbs = keys %{$filehash->{'bobject'}->{'mysqldb_l'}};
 	foreach my $db (@dbs) {
@@ -437,7 +437,7 @@ if ($got{'mysql'}) {
 			}
 
 		# Load the SQL
-		local ($ex, $out) = &mysql::execute_sql_file($db,
+		local ($ex, $out) = &execute_dom_sql_file(\%dom, $db,
 					"$dbdir/mysql-$db.dump");
 		if ($ex) {
 			&$first_print("Error loading $db : $out");

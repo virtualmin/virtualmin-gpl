@@ -507,7 +507,7 @@ if ($got{'mysql'}) {
 		else {
 			&$first_print("Unknown compression format for $name");
 			}
-		local ($ex, $out) = &mysql::execute_sql_file($name, $myplain);
+		local ($ex, $out) = &execute_dom_sql_file(\%dom, $name, $myplain);
 		if ($ex) {
 			&$first_print("Error loading $name : $out");
 			}

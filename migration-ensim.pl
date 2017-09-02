@@ -364,7 +364,7 @@ if ($got{'mysql'}) {
 		&$indent_print();
 		&create_mysql_database(\%dom, $db);
 		&save_domain(\%dom, 1);
-		local ($ex, $out) = &mysql::execute_sql_file($db,"$mydir/$myf");
+		local ($ex, $out) = &execute_dom_sql_file(\%dom, $db,"$mydir/$myf");
 		if ($ex) {
 			&$first_print("Error loading $db : $out");
 			}

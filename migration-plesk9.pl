@@ -654,8 +654,8 @@ if ($got{'mysql'}) {
 			&$first_print("Database content missing SQL file");
 			}
 		else {
-			local ($ex, $out) = &mysql::execute_sql_file($name,
-								     $sqlfile);
+			local ($ex, $out) = &execute_dom_sql_file(\%dom, $name,
+								  $sqlfile);
 			if ($ex) {
 				&$first_print("Error loading $db : $out");
 				}
