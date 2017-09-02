@@ -1669,22 +1669,22 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Query local MySQL server
 	local $qdb = &quote_mysql_database($db);
-	local $d;
+	local $rv;
 	eval {
 		# Try old password column first
 		local $main::error_must_die = 1;
-		$d = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+		$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.password from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 		};
-	if ($@ || @{$d->{'data'}} && $d->{'data'}->[0]->[1] eq '') {
+	if ($@ || @{$rv->{'data'}} && $rv->{'data'}->[0]->[1] eq '') {
 		# Try new mysql user table format if the password query failed,
 		# or if the password was empty
 		eval {
 			local $main::error_must_die = 1;
-			$d = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
+			$rv = &execute_dom_sql($d, $mysql::master_db, "select user.user,user.authentication_string from user,db where db.user = user.user and (db.db = '$db' or db.db = '$qdb')");
 			};
 		}
 	local (@rv, %done);
-	foreach my $u (@{$d->{'data'}}) {
+	foreach my $u (@{$rv->{'data'}}) {
 		push(@rv, $u) if (!$done{$u->[0]}++);
 		}
 	return @rv;
@@ -2695,10 +2695,10 @@ else {
 sub execute_password_change_sql
 {
 my ($d, $user, $encpass, $forceuser, $noflush) = @_;
-my $d = &execute_dom_sql($d, $mysql::master_db,
+my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
-foreach my $host (&unique(map { $_->[0] } @{$d->{'data'}})) {
+foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
 	if (&compare_versions(&get_dom_remote_mysql_version($d),
 			      "5.7.6") >= 0) {

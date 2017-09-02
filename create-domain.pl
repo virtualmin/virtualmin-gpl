@@ -57,6 +57,10 @@ By default, virtual server creation will be blocked if any warnings are
 detected, such as an existing database or SSL certificate conflict. These can
 be overridden with the C<--skip-warnings> flag.
 
+If you have configured additional remote (or local) MySQL servers, you can
+select which one this domain will use with the C<--mysql-server> flag followed
+by a hostname, hostname:port or socket file.
+
 =cut
 
 package virtual_server;
