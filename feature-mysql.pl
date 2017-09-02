@@ -721,15 +721,17 @@ if (%dbmap) {
 	foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 		local $oldname = $dbmap{$db->{'name'}};
 		local $temp = &transname();
-		local $err = &mysql::backup_database($oldname, $temp, 0, 1, 0,
-					undef, undef, undef, undef, 1);
+		local $mymod = &require_dom_mysql($oldd);
+		local $err = &foreign_call(
+			$mymod, "backup_database", $oldname, $temp, 0, 1, 0,
+			undef, undef, undef, undef, 1);
 		if ($err) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
 			next;
 			}
-		local ($ex, $out) = &mysql::execute_sql_file($db->{'name'},
-							     $temp);
+		local ($ex, $out) = &execute_dom_sql_file($d, $db->{'name'},
+							  $temp);
 		&unlink_file($temp);
 		if ($ex) {
 			&$second_print(&text('clone_mysqlrestore',
@@ -1020,8 +1022,10 @@ foreach $db (@dbs) {
 				 &list_dom_mysql_tables($d, $db) ];
 		}
 
-	local $err = &mysql::backup_database($db, $dbfile, 0, 1, undef,
-				     undef, undef, $tables, $d->{'user'}, 1);
+	local $mymod = &require_dom_mysql($d);
+	local $err = &foreign_call(
+		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
+		undef, undef, $tables, $d->{'user'}, 1);
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}

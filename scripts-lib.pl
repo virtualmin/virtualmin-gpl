@@ -577,7 +577,7 @@ eval {
 			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
 			    !ref($tables) && $t =~ /^$tables/i) {
 				eval {
-					&mysql::execute_sql_logged($dbname,
+					&execute_dom_sql($d, $dbname,
 						"drop table ".
 						&mysql::quotestr($t));
 					};
