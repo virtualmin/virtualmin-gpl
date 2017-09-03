@@ -321,6 +321,10 @@ if ($multi) {
 				print "    Password for ${f}: $p\n";
 				}
 			}
+		if ($d->{'mysql'} && $d->{'mysql_module'} ne 'mysql') {
+			my $host = &get_database_host_mysql($d);
+			print "    Hostname for mysql: $host\n";
+			}
 		print "    Home directory: $d->{'home'}\n";
 		if (!$d->{'parent'} && ($jail = &get_domain_jailkit($d))) {
 			print "    Jail directory: $jail\n";

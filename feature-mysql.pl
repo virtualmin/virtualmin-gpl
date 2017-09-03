@@ -1329,7 +1329,7 @@ sub mysql_size
 my ($d, $dbname, $sizeonly) = @_;
 &require_mysql();
 local ($size, $qsize);
-local $dd = &get_mysql_database_dir($dbname);
+local $dd = &get_mysql_database_dir($d, $dbname);
 if ($dd) {
 	# Can check actual on-disk size
 	$size = &disk_usage_kb($dd)*1024;
@@ -1463,7 +1463,7 @@ else {
 	&execute_for_all_mysql_servers($pfunc);
 
 	# Set group ownership of database directory, to enforce quotas
-	local $dd = &get_mysql_database_dir($dbname);
+	local $dd = &get_mysql_database_dir($d, $dbname);
 	local $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'mysql_chgrp'} && $dd) {
 		&system_logged("chgrp -R $d->{'group'} ".quotemeta($dd));
@@ -1571,7 +1571,7 @@ local $dfunc = sub {
 # Fix group owner, if the DB still exists, by setting to the owner of the
 # 'mysql' database
 local $tmpl = &get_template($d->{'template'});
-local $dd = &get_mysql_database_dir($dbname);
+local $dd = &get_mysql_database_dir($d, $dbname);
 if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
 	local @st = stat("$dd/../mysql");
 	local $group = scalar(@st) ? $st[5] : "mysql";
@@ -1579,34 +1579,37 @@ if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
 	}
 }
 
-# get_mysql_database_dir(db)
+# get_mysql_database_dir(&domain, db)
 # Returns the directory in which a DB's files are stored, or undef if unknown.
 # If MySQL is running remotely, this will always return undef.
 sub get_mysql_database_dir
 {
-local ($db) = @_;
+local ($d, $db) = @_;
 &require_mysql();
-return undef if ($config{'provision_mysql'});
-return undef if ($mysql::config{'host'} &&
-		 $mysql::config{'host'} ne 'localhost' &&
-		 &to_ipaddress($mysql::config{'host'}) ne
+return undef if ($config{'provision_mysql'});	# XXX to broad
+local $mymod = &require_dom_mysql($d);
+local %myconfig = &foreign_config($mymod);
+return undef if ($myconfig{'host'} &&
+		 $myconfig{'host'} ne 'localhost' &&
+		 &to_ipaddress($myconfig{'host'}) ne
 			&to_ipaddress(&get_system_hostname()));
 my $mysql_dir;
-my $conf = &mysql::get_mysql_config();
+my $conf = &foreign_call($mymod, "get_mysql_config");
 my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$conf;
 my $dir;
 if ($mysqld) {
-	$dir = &mysql::find_value("datadir", $mysqld->{'members'});
+	$dir = &foreign_call($mymod, "find_value",
+			     "datadir", $mysqld->{'members'});
 	}
-$dir ||= $mysql::config{'mysql_data'};
+$dir ||= $myconfig{'mysql_data'};
 return undef if (!-d $dir);
 local $escdb = $db;
 $escdb =~ s/-/\@002d/g;
-if (-d "$mysql::config{'mysql_data'}/$escdb") {
-	return "$mysql::config{'mysql_data'}/$escdb";
+if (-d "$myconfig{'mysql_data'}/$escdb") {
+	return "$myconfig{'mysql_data'}/$escdb";
 	}
 else {
-	return "$mysql::config{'mysql_data'}/$db";
+	return "$myconfig{'mysql_data'}/$db";
 	}
 }
 
@@ -1632,8 +1635,10 @@ if (!@hosts) {
 	    split(/\s+/, &substitute_domain_template(
 				$tmpl->{'mysql_hosts'}, $d));
 	@hosts = ( 'localhost' ) if (!@hosts);
+	local $mymod = &require_dom_mysql($d);
+	local %myconfig = &foreign_config($mymod);
 	if ($always == 2 ||
-	    $mysql::config{'host'} && $mysql::config{'host'} ne 'localhost') {
+	    $myconfig{'host'} && $myconfig{'host'} ne 'localhost') {
 		# Add this host too, as we are talking to a remote server
 		push(@hosts, &get_system_hostname());
 		local $myip = &to_ipaddress(&get_system_hostname());
@@ -1878,12 +1883,14 @@ my ($d, $db) = @_;
 return &list_dom_mysql_tables($d, $db, 1);
 }
 
-# get_database_host_mysql()
+# get_database_host_mysql([&domain])
 # Returns the hostname of the server on which MySQL is actually running
 sub get_database_host_mysql
 {
-&require_mysql();
-return $mysql::config{'host'} || 'localhost';
+my ($d) = @_;
+my $mymod = &require_dom_mysql($d);
+my %myconfig = &foreign_config($mymod);
+return $myconfig{'host'} || 'localhost';
 }
 
 # sysinfo_mysql()
@@ -2968,7 +2975,7 @@ return undef;
 sub require_dom_mysql
 {
 my ($d) = @_;
-my $mod = !$d ? undef : $d->{'mysql_module'} || 'mysql';
+my $mod = !$d ? 'mysql' : $d->{'mysql_module'} || 'mysql';
 &foreign_require($mod);
 return $mod;
 }
