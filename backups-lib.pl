@@ -2200,6 +2200,17 @@ if ($ok) {
 				$d->{'reseller'} = join(" ", @existing);
 				}
 
+			# Does the remote MySQL server module exist? If not,
+			# use the default
+			if ($d->{'mysql_module'}) {
+				my @mymods = &list_remote_mysql_modules();
+				my ($mod) = grep { $_->{'minfo'}->{'dir'} eq
+						$d->{'mysql_module'} } @mymods;
+				if (!$mod) {
+					delete($d->{'mysql_module'});
+					}
+				}
+
 			# Build maps of used UIDs and GIDs
 			local (%gtaken, %taken);
 			&build_group_taken(\%gtaken);
