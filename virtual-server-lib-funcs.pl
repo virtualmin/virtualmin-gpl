@@ -9877,6 +9877,8 @@ if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 	local %done;
 	local $av = &foreign_available("mysql");
 	&require_mysql();
+	local $myhost = &get_database_host_mysql($d);
+	$myhost = undef if ($myhost eq 'localhost');
 	foreach my $db (split(/\s+/, $d->{'db_mysql'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
@@ -9885,13 +9887,15 @@ if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 			     'link' => $av ? "../mysql/edit_dbase.cgi?db=$db"
 					   : undef,
 			     'desc' => $text{'databases_mysql'},
-			     'host' => $mysql::config{'host'}, });
+			     'host' => $myhost, });
 		}
 	}
 if ($d->{'postgres'} && (!$types || &indexof("postgres", @$types) >= 0)) {
 	local %done;
 	local $av = &foreign_available("postgresql");
 	&require_postgres();
+	local $pghost = &get_database_host_postgres($d);
+	$pghost = undef if ($pghost eq 'localhost');
 	foreach my $db (split(/\s+/, $d->{'db_postgres'})) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
@@ -9900,7 +9904,7 @@ if ($d->{'postgres'} && (!$types || &indexof("postgres", @$types) >= 0)) {
 					     "edit_dbase.cgi?db=$db"
 					   : undef,
 			     'desc' => $text{'databases_postgres'},
-			     'host' => $postgresql::config{'host'}, });
+			     'host' => $pghost, });
 		}
 	}
 

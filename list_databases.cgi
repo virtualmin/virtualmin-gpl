@@ -47,11 +47,12 @@ if (!$d->{'parent'}) {
 	}
 
 # Show message about DB host
-$mymod = $d->{'mysql_module'} || 'mysql';
-%myconfig = &foreign_config($mymod);
-if ($config{'mysql'} && $myconfig{'host'} && &master_admin()) {
-	print &text('databases_hosted', "<tt>$myconfig{'host'}</tt>");
-	print "<p>\n";
+if ($d->{'mysql'} && &master_admin()) {
+	my $myhost = &get_database_host_mysql($d);
+	if ($myhost && $myhost ne 'localhost') {
+		print "<b>",&text('databases_hosted',
+				  "<tt>$myconfig{'host'}</tt>"),"</b><p>\n";
+		}
 	}
 
 # Start tabs for various options, if appropriate
