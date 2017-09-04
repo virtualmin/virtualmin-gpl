@@ -2201,8 +2201,13 @@ if ($ok) {
 				}
 
 			# Does the remote MySQL server module exist? If not,
-			# use the default
-			if ($d->{'mysql_module'}) {
+			# use the default. However, if this is a sub-server,
+			# always use the setting from parent.
+			if ($parentdom) {
+				$d->{'mysql_module'} =
+					$parentdom->{'mysql_module'};
+				}
+			elsif ($d->{'mysql_module'}) {
 				my @mymods = &list_remote_mysql_modules();
 				my ($mod) = grep { $_->{'minfo'}->{'dir'} eq
 						$d->{'mysql_module'} } @mymods;
