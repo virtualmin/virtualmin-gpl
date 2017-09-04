@@ -2894,7 +2894,13 @@ foreach my $minfo (&get_all_module_infos()) {
 		}
 	push(@rv, $mm);
 	}
-return sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
+@rv = sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
+my ($def) = grep { $_->{'config'}->{'virtualmin_default'} } @rv;
+if (!$def) {
+	# Assume core module is the default
+	$rv[0]->{'config'}->{'virtualmin_default'} = 1;
+	}
+return @rv;
 }
 
 # create_remote_mysql_module(&mod)

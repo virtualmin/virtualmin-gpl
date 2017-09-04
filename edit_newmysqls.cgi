@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 @alldoms = grep { $_->{'mysql'} } &list_domains();
 print &ui_form_start("delete_newmysqls.cgi");
 print &ui_columns_start([ "", $text{'newmysqls_host'}, $text{'newmysqls_doms'},
-			  $text{'newmysqls_actions'} ]);
+			  $text{'newmysqls_def'}, $text{'newmysqls_actions'} ]);
 foreach my $mm (&list_remote_mysql_modules()) {
 	@doms = grep { $_->{'mysql_module'} eq
 		       $mm->{'minfo'}->{'dir'} } @alldoms;
@@ -21,11 +21,14 @@ foreach my $mm (&list_remote_mysql_modules()) {
 		  $mm->{'config'}->{'sock'} ||
 		  "<i>$text{'newmysqls_local'}</i>",
 		$doms,
+		$mm->{'config'}->{'virtualmin_default'} ? $text{'yes'}
+						        : $text{'no'},
 		&ui_link("/$mm->{'minfo'}->{'dir'}", $text{'newmysqls_open'}),
 		], \@tds, "d", $mm->{'minfo'}->{'dir'});
 	}
 print &ui_columns_end();
-print &ui_form_end([ [ undef, $text{'newmysqls_delete'} ] ]);
+print &ui_form_end([ [ undef, $text{'newmysqls_delete'} ],
+		     [ 'default', $text{'newmysqls_makedef'} ] ]);
 
 # Show a form to add a new one
 print &ui_hr();
