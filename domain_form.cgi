@@ -432,6 +432,19 @@ if (&can_edit_templates() && defined(&list_resellers) && !$parentdom) {
 		}
 	}
 
+# Show remote MySQL field
+if (&can_edit_templates() && $config{'mysql'} && !$aliasdom && !$parentdom) {
+	my @mymods = &list_remote_mysql_modules();
+	if (@mymods > 1) {
+		print &ui_table_row(&hlink($text{'form_rmysql'}, "rmysql"),
+		   &ui_select("rmysql",
+			($parentdom ? $parentdom->{'mysql_module'} : undef) ||
+			  "mysql",
+			[ map { [ $_->{'minfo'}->{'dir'},
+				  $_->{'desc'} ] } @mymods ]));
+		}
+	}
+
 if ($has_advanced) {
 	print &ui_hidden_table_end("advanced");
 	}

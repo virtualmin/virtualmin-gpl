@@ -7470,6 +7470,11 @@ if ($dom->{'mysql'}) {
 		$dom->{'mysql_pass'} = &random_password(16);
 		delete($dom->{'mysql_enc_pass'});
 		}
+
+	# MySQL module comes from parent always
+	if ($parentdom) {
+		$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
+		}
 	}
 
 # Set up all the selected features (except Webmin login)

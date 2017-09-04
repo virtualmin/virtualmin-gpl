@@ -51,7 +51,7 @@ if ($d->{'mysql'} && &master_admin()) {
 	my $myhost = &get_database_host_mysql($d);
 	if ($myhost && $myhost ne 'localhost') {
 		print "<b>",&text('databases_hosted',
-				  "<tt>$myconfig{'host'}</tt>"),"</b><p>\n";
+				  "<tt>$myhost</tt>"),"</b><p>\n";
 		}
 	}
 

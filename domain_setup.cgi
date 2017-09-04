@@ -399,6 +399,12 @@ $dom{'emailto'} = $parentdom ? $parentdom->{'emailto'} :
 		  $dom{'mail'} ? $dom{'user'}.'@'.$dom{'dom'} :
 		  		 $dom{'user'}.'@'.&get_system_hostname();
 
+# Remote MySQL server
+if ($config{'mysql'} && &can_edit_templates() && !$aliasdom && !$parentdom) {
+	# User can select
+	$dom{'mysql_module'} = $in{'rmysql'};
+	}
+
 # Set selected features in domain object
 # Special magic - if the dir feature is enabled by default and this is an alias
 # domain, don't set it

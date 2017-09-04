@@ -267,6 +267,7 @@ form_mgroup=Group for domain users
 form_prefix=Prefix for mail usernames
 form_dbname=Default database name
 form_reseller=Owned by reseller
+form_rmysql=MySQL database server
 form_noreseller=&lt;None&gt;
 form_nwgroup=Custom group name
 form_group=Group for administration user
@@ -6941,5 +6942,11 @@ kill_port=Port
 kill_cmd=Server command
 kill_result=Result
 kill_subject=Virtualmin server process monitoring
+
+mysql_rsock=Socket file $1
+mysql_rhostport=Remote host $1 port $2
+mysql_rhost=Remote host $1
+mysql_rport=Local port $1
+mysql_rlocal=Local server
 
 __norefs=1

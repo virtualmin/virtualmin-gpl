@@ -2874,6 +2874,24 @@ foreach my $minfo (&get_all_module_infos()) {
 	my $mm = { 'minfo' => $minfo,
 		   'master' => $minfo->{'cloneof'} ? 0 : 1,
 		   'config' => \%mconfig };
+	if ($mconfig{'sock'}) {
+		$mm->{'desc'} = &text('mysql_rsock',
+				      "<tt>$mconfig{'sock'}</tt>");
+		}
+	elsif ($mconfig{'host'} && $mconfig{'port'}) {
+		$mm->{'desc'} = &text('mysql_rhostport',
+			"<tt>$mconfig{'host'}</tt>", $mconfig{'port'});
+		}
+	elsif ($mconfig{'host'}) {
+		$mm->{'desc'} = &text('mysql_rhost',
+			"<tt>$mconfig{'host'}</tt>");
+		}
+	elsif ($mconfig{'port'}) {
+		$mm->{'desc'} = &text('mysql_rport', $mconfig{'port'});
+		}
+	else {
+		$mm->{'desc'} = $text{'mysql_rlocal'};
+		}
 	push(@rv, $mm);
 	}
 return sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
