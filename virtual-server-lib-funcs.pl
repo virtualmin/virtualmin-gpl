@@ -9880,8 +9880,8 @@ local ($d, $types) = @_;
 local @dbs;
 if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 	local %done;
-	local $av = &foreign_available("mysql");
-	&require_mysql();
+	local $mymod = &require_dom_mysql($d);
+	local $av = &foreign_available($mymod);
 	local $myhost = &get_database_host_mysql($d);
 	$myhost = undef if ($myhost eq 'localhost');
 	foreach my $db (split(/\s+/, $d->{'db_mysql'})) {
@@ -9889,7 +9889,7 @@ if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 		push(@dbs, { 'name' => $db,
 			     'type' => 'mysql',
 			     'users' => 1,
-			     'link' => $av ? "../mysql/edit_dbase.cgi?db=$db"
+			     'link' => $av ? "../$mymod/edit_dbase.cgi?db=$db"
 					   : undef,
 			     'desc' => $text{'databases_mysql'},
 			     'host' => $myhost, });

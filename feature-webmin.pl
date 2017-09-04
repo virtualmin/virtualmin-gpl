@@ -317,11 +317,11 @@ local %hasmods = map { $_, 1 } @{$_[1]->{'modules'}};
 local @doms = ( $_[0], &get_domain_by("parent", $_[0]->{'id'}) );
 local %doneid;
 @doms = grep { !$doneid{$_->{'id'}}++ } @doms;
-local (%features, $d, $f);
+local (%features, $sd, $f);
 if (!$nofeatures) {
-	foreach $d (@doms) {
+	foreach $sd (@doms) {
 		foreach $f (@features) {
-			$features{$f}++ if ($d->{$f});
+			$features{$f}++ if ($sd->{$f});
 			}
 		}
 	}
@@ -380,7 +380,8 @@ else {
 # Grant access to MySQL module if needed
 if ($features{'mysql'} && $avail{'mysql'}) {
 	# Allow user to manage just the domain's DB
-	push(@mods, "mysql");
+	my $mymod = &require_dom_mysql($d);
+	push(@mods, $mymod);
 	local %acl = ( 'noconfig' => 1,
 		       'dbs' => join(" ", map { split(/\s+/, $_->{'db_mysql'}) }
 					      grep { $_->{'mysql'} } @doms),
@@ -393,11 +394,11 @@ if ($features{'mysql'} && $avail{'mysql'}) {
 		       'pass' => &mysql_pass($_[0]),
 		       'buser' => $_[0]->{'user'},
 		       'bpath' => "/" );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "mysql")
-		if (!$hasmods{'mysql'});
+	&save_module_acl_logged(\%acl, $_[1]->{'name'}, $mymod)
+		if (!$hasmods{$mymod});
 	}
 else {
-	@mods = grep { $_ ne "mysql" } @mods;
+	@mods = grep { !/^mysql(-.*)?$/ } @mods;
 	}
 
 # Grant access to PostgreSQL module if needed
