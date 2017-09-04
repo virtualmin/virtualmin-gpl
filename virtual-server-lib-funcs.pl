@@ -2500,9 +2500,9 @@ if ($config{'mysql'}) {
 		# This can fail if MySQL is down
 		local $main::error_must_die = 1;
 		local $qpass = &mysql_escape($pass);
-		local $d = &mysql::execute_sql_safe($mysql::master_db,
-					    "select $password_func('$qpass')");
-		$rv{'mysql'} = $d->{'data'}->[0]->[0];
+		local $rv = &execute_dom_sql($d, $mysql::master_db,
+					     "select $password_func('$qpass')");
+		$rv{'mysql'} = $rv->{'data'}->[0]->[0];
 		};
 	}
 if (&foreign_check("htaccess-htpasswd")) {
