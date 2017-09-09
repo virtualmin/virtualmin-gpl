@@ -2289,10 +2289,11 @@ if (!$config{'provision_dns'}) {
 	}
 
 # DNS records
-local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 1,
-     0, undef, [ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
-		 "dnsprins", "dns_records",
-		 @views || $tmpl->{'dns_view'} ? ( "view" ) : ( ) ]);
+local $ndi = &none_def_input("dns", $tmpl->{'dns'}, $text{'tmpl_dnsbelow'}, 0,
+     0, $text{'tmpl_dnsnone'},
+	[ "dns", "bind_replace", "dnsns", "dns_ttl_def", "dns_ttl",
+	  "dnsprins", "dns_records",
+          @views || $tmpl->{'dns_view'} ? ( "view" ) : ( ) ], 1);
 print &ui_table_row(&hlink($text{'tmpl_dns'}, "template_dns"),
 	$ndi."<br>\n".
 	&ui_textarea("dns", $tmpl->{'dns'} eq "none" ? "" :
@@ -2472,7 +2473,6 @@ if ($in{"dns_mode"} == 2) {
 	$tmpl->{'default'} || $tmpl->{'dns'} =~ /\S/ ||
 	    $in{'bind_replace'} == 0 || &error($text{'tmpl_edns'});
 	$tmpl->{'dns_replace'} = $in{'bind_replace'};
-	$tmpl->{'dns_view'} = $in{'view'};
 
 	&require_bind();
 	local $fakeip = "1.2.3.4";
@@ -2516,6 +2516,10 @@ if ($in{"dns_mode"} == 2) {
 		# Make sure SOA doesn't exist
 		$soa && &error($text{'newdns_esoa2'});
 		}
+	}
+
+if ($in{"dns_mode"} != 1) {
+	$tmpl->{'dns_view'} = $in{'view'};
 
 	# Save default TTL
 	if ($in{'dns_ttl_def'} == 0) {

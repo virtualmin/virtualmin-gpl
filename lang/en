@@ -3079,6 +3079,7 @@ tmpl_dnsttl1=None
 tmpl_dnsttl2=Custom TTL
 tmpl_ednsttl=Missing or invalid default TTL - must be like 3600 or 1h
 tmpl_dnsbelow=Records below ..
+tmpl_dnsnone=No additional records
 tmpl_replace=Record mode
 tmpl_replace0=Add above to automatically generated records
 tmpl_replace1=Use only the records above
