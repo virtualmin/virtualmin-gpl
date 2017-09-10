@@ -75,6 +75,10 @@ sub setup_mysql
 {
 local ($d, $nodb) = @_;
 local $tmpl = &get_template($d->{'template'});
+if (!$d->{'mysql_module'}) {
+	# Use the default module for this system
+	$d->{'mysql_module'} = &get_default_mysql_module();
+	}
 &require_mysql();
 $d->{'mysql_user'} = &mysql_user($d);
 local $user = $d->{'mysql_user'};
@@ -3065,6 +3069,15 @@ else {
 	$get_dom_remote_mysql_version_cache{$mod} = $rv;
 	return $rv;
 	}
+}
+
+# get_default_mysql_module()
+# Returns the name of the default module for remote MySQL
+sub get_default_mysql_module
+{
+my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
+		 &list_remote_mysql_modules();
+return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
 }
 
 $done_feature_script{'mysql'} = 1;

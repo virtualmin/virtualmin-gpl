@@ -438,8 +438,7 @@ if (&can_edit_templates() && $config{'mysql'} && !$aliasdom && !$parentdom) {
 	if (@mymods > 1) {
 		print &ui_table_row(&hlink($text{'form_rmysql'}, "rmysql"),
 		   &ui_select("rmysql",
-			($parentdom ? $parentdom->{'mysql_module'} : undef) ||
-			  "mysql",
+			&get_default_mysql_module(),
 			[ map { [ $_->{'minfo'}->{'dir'},
 				  $_->{'desc'} ] } @mymods ]));
 		}

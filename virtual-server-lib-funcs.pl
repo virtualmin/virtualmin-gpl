@@ -294,10 +294,6 @@ if (!defined($dom->{'db_mysql'}) && $dom->{'mysql'}) {
 	$dom->{'db_mysql'} = $dom->{'db'};
 	}
 $dom->{'db_mysql'} = join(" ", &unique(split(/\s+/, $dom->{'db_mysql'})));
-if ($dom->{'mysql'} && !$dom->{'mysql_module'}) {
-	# Assume original MySQL module
-	$dom->{'mysql_module'} = 'mysql';
-	}
 if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	# Assume just one PostgreSQL DB
 	$dom->{'db_postgres'} = $dom->{'db'};
