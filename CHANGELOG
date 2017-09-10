@@ -1569,3 +1569,5 @@ SSL certificates that are expired or close to it are displayed on the System Inf
 Removed support for Qmail+LDAP as a mail server.
 Unexpected server processes running as domain users are now detected and included in the validation report, and can optionally be automatically terminated.
 Added support for using clamdscan for remote virus scanning, so that clamd-stream-client doesn't need to be installed.
+---- Changes since 6.00 ----
+Multiple remote MySQL servers can now be defined, and selected on a per-domain basis at virtual server creation time. This allows some or all domains to easily use different MySQL hosts.
