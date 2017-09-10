@@ -6957,5 +6957,8 @@ mysql_rhostport=Remote host $1 port $2
 mysql_rhost=Remote host $1
 mysql_rport=Local port $1
 mysql_rlocal=Local server
+mysql_movebackup=Backing up users and databases on original host ..
+mysql_moverestore=Restoring users and databases on new host ..
+mysql_movedelete=Removing users and databases from original host ..
 
 __norefs=1

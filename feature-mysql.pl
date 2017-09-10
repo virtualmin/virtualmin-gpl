@@ -2991,7 +2991,9 @@ foreach my $mm (&list_remote_mysql_modules()) {
 	my $c = $mm->{'config'};
 	if ($c->{'sock'} && $name eq $c->{'sock'} ||
 	    $c->{'host'} && $name eq $c->{'host'}.':'.($c->{'port'} || 3306) ||
-	    $c->{'host'} && $name eq $c->{'host'}) {
+	    $c->{'host'} && $name eq $c->{'host'} ||
+	    !$c->{'host'} && $name eq "localhost:".($c->{'port'} || 3306) ||
+	    !$c->{'host'} && $name eq "localhost") {
 		return $mm;
 		}
 	}
@@ -3078,6 +3080,65 @@ sub get_default_mysql_module
 my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 		 &list_remote_mysql_modules();
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
+}
+
+# move_mysql_server(&domain, new-mysql-module)
+# Update the MySQL module for a domain, by moving across all databases and
+# permissions. Prints progress, and returns 1 on success or 0 on failure.
+sub move_mysql_server
+{
+my ($d, $newmod) = @_;
+
+# Get all the domain objects being moved
+my $oldd = { %$d };
+my @doms = ( $d );
+my @olddoms = ( $oldd );
+if (!$d->{'parent'}) {
+	foreach my $pd (&get_domain_by("parent", $d->{'id'})) {
+		my $oldpd = { %$pd };
+		push(@doms, $pd);
+		push(@olddoms, $oldpd);
+		}
+	}
+
+# Backup just mysql to a temp file
+# XXX what about mailbox users??
+my $temp = &transname();
+&$first_print($text{'mysql_movebackup'});
+&$indent_print();
+my ($ok) = &backup_domains($temp, \@olddoms, [ 'mysql' ], 0, 0, undef, 0, undef,
+			   0, 0, 0);
+&$outdent_print();
+if (!$ok) {
+	&unlink_file($temp);
+	return 0;
+	}
+
+# Restore from the temp file on the new system
+foreach my $ad (@doms) {
+	$ad->{'mysql_module'} = $newmod;
+	}
+&$first_print($text{'mysql_moverestore'});
+&$indent_print();
+my $ok = &restore_domains($temp, \@doms, [ 'mysql' ]);
+&$outdent_print();
+if (!$ok) {
+	&unlink_file($temp);
+	return 0;
+	}
+
+# Delete users and databases on the old system
+&$first_print($text{'mysql_movedelete'});
+&$indent_print();
+foreach my $dd (reverse(@olddoms)) {
+	&delete_mysql($dd);
+	}
+&$outdent_print();
+
+foreach my $sd (@doms) {
+	&save_domain($sd);
+	}
+return 1;
 }
 
 $done_feature_script{'mysql'} = 1;

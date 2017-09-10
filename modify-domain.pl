@@ -48,6 +48,11 @@ If your system supports chroot jails with Jailkit, the C<--enable-jail>
 flag can be used to force all commands run by the domain to execute in
 a jail. Conversely, this can be turned off with the C<--disable-jail> flag.
 
+If you have configured additional remote (or local) MySQL servers, you can
+change the one used by this domain with the C<--mysql-server> flag followed
+by a hostname, hostname:port or socket file. All databases and users will be
+migrated to the new server.
+
 By default, virtual server plan changes that modify features will be blocked
 if any warnings are detected, such as an existing database or SSL certificate
 conflict. These can be overridden with the C<--skip-warnings> flag.
@@ -260,6 +265,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-jail") {
 		$jail = 0;
 		}
+	elsif ($a eq "--mysql-server") {
+		$myserver = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -401,6 +409,15 @@ if ($planfeatures) {
 if (defined($jail)) {
 	my $err = &check_jailkit_support();
 	$err && &usage("Chroot jails are not supported on this system : $err");
+	}
+
+# Make sure the MySQL server is valid
+if ($myserver) {
+	$dom->{'parent'} && &usage("The MySQL server can only be updated for ".
+				   "top level virtual servers");
+	my $mm = &get_remote_mysql_module($myserver);
+	$mm || &usage("No remote MySQL server named $myserver was found");
+	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 
 # Find all other domains to be changed
@@ -765,6 +782,18 @@ if (@add_db_excludes || @remove_db_excludes) {
 	&$second_print($text{'setup_done'});
 	}
 
+# If the MySQL module changed, update it
+if ($mysql_module) {
+	&$first_print("Moving databases to MySQL server $x ..");
+	my $ok = &move_mysql_server($dom, $mysql_module);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(".. move failed");
+		}
+	}
+
 # Update the Webmin user for this domain, or the parent
 &refresh_webmin_user($dom, $old);
 
@@ -822,6 +851,7 @@ print "                        [--add-db-exclude db|db.table]*\n";
 print "                        [--remove-db-exclude db|db.table]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--enable-jail | --disable-jail]\n";
+print "                        [--mysql-server hostname]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }
