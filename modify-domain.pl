@@ -784,13 +784,21 @@ if (@add_db_excludes || @remove_db_excludes) {
 
 # If the MySQL module changed, update it
 if ($mysql_module) {
-	&$first_print("Moving databases to MySQL server $x ..");
-	my $ok = &move_mysql_server($dom, $mysql_module);
-	if ($ok) {
-		&$second_print($text{'setup_done'});
+	if ($dom->{'mysql'}) {
+		my ($mod) = grep { $_->{'minfo'}->{'dir'} eq $mysql_module }
+			         &list_remote_mysql_modules();
+		&$first_print("Moving databases to MySQL server $mod->{'desc'} ..");
+		my $ok = &move_mysql_server($dom, $mysql_module);
+		if ($ok) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(".. move failed");
+			}
 		}
 	else {
-		&$second_print(".. move failed");
+		# Save if enabled later
+		$dom->{'mysql_module'} = $mysql_module;
 		}
 	}
 

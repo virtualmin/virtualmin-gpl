@@ -3088,6 +3088,7 @@ return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
 sub move_mysql_server
 {
 my ($d, $newmod) = @_;
+return 1 if (&require_dom_mysql($d) eq $newmod);	# Already using it
 
 # Get all the domain objects being moved
 my $oldd = { %$d };
@@ -3102,7 +3103,6 @@ if (!$d->{'parent'}) {
 	}
 
 # Backup just mysql to a temp file
-# XXX what about mailbox users??
 my $temp = &transname();
 &$first_print($text{'mysql_movebackup'});
 &$indent_print();
@@ -3112,6 +3112,14 @@ my ($ok) = &backup_domains($temp, \@olddoms, [ 'mysql' ], 0, 0, undef, 0, undef,
 if (!$ok) {
 	&unlink_file($temp);
 	return 0;
+	}
+
+# Get all users and their DBs (deep copy so that subsequent calls don't re-use
+# the same user objects)
+my %umap;
+foreach my $ad (@olddoms) {
+	my @users = &list_domain_users($ad, 1, 1, 1, 0);
+	$umap{$ad->{'id'}} = [ map { my %u = %$_; \%u } @users ];
 	}
 
 # Restore from the temp file on the new system
@@ -3134,6 +3142,22 @@ foreach my $dd (reverse(@olddoms)) {
 	&delete_mysql($dd);
 	}
 &$outdent_print();
+
+# Re-grant users access to their databases
+foreach my $ad (@doms) {
+	use Data::Dumper;
+	my @users = &list_domain_users($ad, 1);
+	print Dumper(\@users);
+	my @oldusers = @{$umap{$ad->{'id'}}};
+	foreach my $u (@users) {
+		my ($oldu) = grep { $_->{'user'} eq $u->{'user'} } @oldusers;
+		next if (!$oldu);	# Should never happen!
+		my $beforeu = { %$u };
+		$u->{'dbs'} = $oldu->{'dbs'};
+		$u->{'pass_mysql'} = $oldu->{'pass_mysql'};
+		&modify_user($u, $beforeu, $ad);
+		}
+	}
 
 foreach my $sd (@doms) {
 	&save_domain($sd);
