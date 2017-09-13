@@ -62,7 +62,7 @@ if ($r->{'defttl'}) {
 elsif ($in{'type'} && $t->{'domain'}) {
 	# New record, might be same as domain, or within it
 	print &ui_table_row($text{'record_name'},
-			    &ui_radio("name_def", 0,
+			    &ui_radio("name_def", 1,
 				      [ [ 1, $text{'record_same'} ],
 					[ 0, " " ] ]).
 			    &ui_textbox("name", undef, 20).
