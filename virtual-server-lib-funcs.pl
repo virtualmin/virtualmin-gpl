@@ -10744,7 +10744,7 @@ if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
 # Suggest that the user switch themes to authentic
 my @themes = &list_themes();
 my ($theme) = grep { $_->{'dir'} eq $recommended_theme } @themes;
-if ($theme && $current_theme ne $recommended_theme &&
+if ($theme && $current_theme !~ /$recommended_theme/ &&
     !$config{'theme_switch_'.$recommended_theme}) {
 	my $switch_text;
 	$switch_text .= "<b>".&text('index_themeswitch',
