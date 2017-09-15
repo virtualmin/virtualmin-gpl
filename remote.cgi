@@ -41,7 +41,7 @@ $main::virtualmin_remote_api = 1;
 $ENV{'VIRTUALMIN_REMOTE_API'} = 1;
 $in{'program'} =~ /^[a-z0-9\.\-]+$/i || &api_error($text{'remote_eprogram'});
 $cmd = $dir = undef;
-foreach $m ($module_name, @plugins) {
+foreach $m ($module_name, "$module_name/pro", @plugins) {
 	$mdir = &module_root_directory($m);
 	$mcmd = "$mdir/$in{'program'}.pl";
 	if (-x $mcmd) {
