@@ -166,6 +166,7 @@ if (!$multipart) {
 my $err;
 my $endpoint = undef;
 my $noep_conn = &make_s3_connection($akey, $skey);
+my $backoff = 2;
 for(my $i=0; $i<$tries; $i++) {
 	my $newendpoint;
 	$err = undef;
@@ -250,14 +251,21 @@ for(my $i=0; $i<$tries; $i++) {
 
 	if ($line !~ /\S/) {
 		$err = "Empty response to HTTP request. Headers were : $htext";
-		print STDERR "host=$host port=$port page=$page\n";
-		print STDERR "Request headers :\n";
-		print STDERR $hinput;
-		print STDERR "Reply headers :\n";
-		print STDERR $htext;
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
 		$err = "Invalid HTTP response : $line";
+		}
+	elsif ($line !~ /^HTTP\/1\..\s+(503)(\s+|$)/) {
+		# Backoff and retry without increasing the tries count
+		sleep($backoff);
+		$backoff *= 2;
+		if ($backoff > 120) {
+			$err = "Backed off up to limit of 120 seconds";
+			}
+		else {
+			$i--;
+			next;
+			}
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Follow the SOAP redirect
