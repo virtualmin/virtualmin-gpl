@@ -190,6 +190,7 @@ my $hasvposs = foreign_check("package-updates");
 my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	my $html = &ui_form_start("/package-updates/update.cgi");
+	$html .= &ui_hidden("redirdesc", $text{'right_sysinfo'});
 	$html .= &text(@vposs > 1 ? 'right_upcount' : 'right_upcount1',
 		       scalar(@vposs),
 		       '/package-updates/index.cgi?mode=updates')."<p>\n";
