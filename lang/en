@@ -2426,6 +2426,7 @@ backup_edownloadmany=When a backup is being download, that must be the only dest
 backup_edownloadfmt=Only backups to a single file can be downloaded in your browser
 backup_edownloadfailed=Backup failed - try again to a file on the server to see the full error message
 backup_egone=Scheduled backup no longer exists!
+backup_eownergone=Owner domain no longer exists!
 backup_starting=Starting background backup to $1 ..
 backup_started=.. completion email will be sent to $1.
 backup_started2=.. started.
@@ -6865,6 +6866,7 @@ right_faliases=Mail aliases
 right_quota=Disk usage and quota
 right_bw=Bandwith usage and limit
 right_of=$1 out of $2
+right_sysinfo=system information
 
 assoc_title=Associate and Dis-Associate Features
 assoc_desc=Features enabled or disabled on this page will not update any system configuration files - instead, only Virtualmin's database of features it expects a domain to have will be changed. This can be used to import a feature that has been setup manually, or to disconnect a configuration so that it is preserved when a virtual server is deleted.

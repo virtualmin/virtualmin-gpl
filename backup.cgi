@@ -36,7 +36,14 @@ if ($in{'bg'}) {
 	}
 
 # Validate inputs
-$acluser = $sched ? $sched->{'owner'} : undef;
+if ($sched->{'owner'}) {
+	$od = &get_domain($sched->{'owner'});
+	$od || &error($text{'backup_eownergone'});
+	$acluser = $od->{'user'};
+	}
+else {
+	$acluser = undef;
+	}
 if ($in{'all'} == 1) {
 	# All domains
 	@doms = grep { &can_backup_domain($_, $acluser) } &list_domains();
