@@ -2959,9 +2959,6 @@ foreach $u (keys %acl) {
         }
 &close_tempfile(ACL);
 
-# Category?
-# XXX
-
 # Refresh visible modules cache
 unlink("$config_directory/module.infos.cache");
 unlink("$var_directory/module.infos.cache");
@@ -2980,7 +2977,6 @@ my $rootdir = &module_root_directory($mm->{'minfo'}->{'dir'});
 -l $rootdir || &error("Module is not actually a clone!");
 &unlink_logged($cdir);
 &unlink_logged($rootdir);
-# XXX remove from ACLs?
 
 # Refresh visible modules cache
 unlink("$config_directory/module.infos.cache");
