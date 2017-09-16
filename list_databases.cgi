@@ -71,6 +71,9 @@ if (&can_import_servers()) {
 if ($can_allowed_hosts) {
 	push(@tabs, [ "hosts", $text{'databases_tabhosts'} ]);
 	}
+if (&can_edit_templates() && !$d->{'parent'}) {
+	push(@tabs, [ "remote", $text{'databases_tabremote'} ]);
+	}
 foreach $t (@tabs) {
 	$t->[2] = "list_databases.cgi?dom=$in{'dom'}&databasemode=$t->[0]";
 	}
@@ -258,6 +261,39 @@ if ($can_allowed_hosts) {
 			"<br>".$text{'databases_hosts_fmt'}, 2);
 		print &ui_table_end();
 		print &ui_form_end([ [ undef, $text{'save'} ] ]);
+		}
+	print &ui_tabs_end_tab() if (@tabs > 1);
+	}
+
+# Show MySQL host system
+if (&can_edit_templates() && !$d->{'parent'}) {
+	print &ui_tabs_start_tab("databasemode", "remote") if (@tabs > 1);
+        print "$text{'databases_desc6'}<p>\n";
+	my @mymods = &list_remote_mysql_modules();
+	if (@mymods < 2) {
+		# Cannot change
+		print &text('databases_desc6a', 'edit_newmysqls.cgi'),"<p>\n";
+		}
+	else {
+		print &ui_form_start("save_mysqlremote.cgi", "post");
+		print &ui_hidden("dom", $in{'dom'});
+		print &ui_table_start(undef, undef, 2);
+
+		# Current host system
+		my ($mymod) = grep { ($_->{'mysql_module'} || 'mysql') eq
+				     $_->{'minfo'}->{'dir'} } @mymods;
+		print &ui_table_row($text{'databases_remoteold'},
+			$mymod->{'desc'});
+
+		# New host system
+		print &ui_table_row($text{'databases_remotenew'},
+			&ui_select("mymod", $mymod->{'minfo'}->{'dir'},
+				[ map { [ $_->{'minfo'}->{'dir'},
+					  $_->{'desc'} ] } @mymods ]));
+
+		print &ui_table_end();
+		print &ui_form_end([ [ undef, $text{'databases_remoteok'} ] ]);
+		print "<b>$text{'databases_warn'}</b> <p>\n";
 		}
 	print &ui_tabs_end_tab() if (@tabs > 1);
 	}

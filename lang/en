@@ -3493,7 +3493,7 @@ databases_desc3=This form can be used to change the primary database passwords f
 databases_desc3h=This form can be used to change the primary database passwords for this virtual server.
 databases_desc4=This form allows you to bring existing manually created databases on the system under the ownership of this virtual server.
 databases_noimport=However, there are no un-owned databases on the system.
-databases_tabhosts=Remote hosts
+databases_tabhosts=Remote Hosts
 databases_desc5=This form lists remote hosts that are allowed to connect to databases owned by this virtual server, and any sub-servers. These apply to the domain owner and any other users with MySQL access.
 databases_ahosts=Allowed hosts for $1
 databases_hosts_mysql=You may enter hostnames, IP addresses, or network patterns like <tt>192.168.1.%</tt> .
@@ -3501,6 +3501,13 @@ databases_hosts_fmt=Each hostname or IP must be entered on a separate line.
 databases_ierr=Failed to import databases
 databases_eimysql=Database $1 is internal to MySQL
 databases_eipostgres=Database $1 is a PostgreSQL template
+databases_tabremote=MySQL Server Host
+databases_desc6=This page allows you to select which remote MySQL server is used to host databases for this domain.
+databases_desc6a=However, no additional MySQL servers have been defined yet. You can add one on the <a href='$1'>MySQL Servers</a> page.
+databases_remoteold=Current MySQL host
+databases_remotenew=New MySQL host
+databases_remoteok=Move Databases
+databases_warn=WARNING! Any scripts or applications currently installed will NOT be updated to use the new host system.
 
 database_title1=Create Database
 database_title2=Edit Database
