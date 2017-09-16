@@ -21,6 +21,13 @@ if (!@oldplans) {
 	&convert_plans();
 	}
 
+# If this is a new install, set dns_ip to * by default to use the externally
+# detected IP for DNS records
+if (!$config{'first_version'} && !$config{'dns_ip'}) {
+	$config{'dns_ip'} = '*';
+	&save_module_config();
+	}
+
 # Remember the first version we installed, to avoid showing new features
 # from before it
 $config{'first_version'} ||= &get_base_module_version();
