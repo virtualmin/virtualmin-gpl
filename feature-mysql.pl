@@ -2915,8 +2915,13 @@ my ($mm) = @_;
 
 # Create the config dir
 if (!$mm->{'minfo'}->{'dir'}) {
+	my $sock = $mm->{'config'}->{'sock'};
+	$sock =~ s/\//-/g;
 	$mm->{'minfo'}->{'dir'} =
-		"mysql-".($mm->{'config'}->{'host'} || 'local');
+		"mysql-".($mm->{'config'}->{'host'} ||
+			  $mm->{'config'}->{'port'} ||
+			  $sock ||
+			  'local');
 	}
 $mm->{'minfo'}->{'cloneof'} = 'mysql';
 my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
