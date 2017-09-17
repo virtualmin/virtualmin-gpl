@@ -3508,6 +3508,7 @@ databases_remoteold=Current MySQL host
 databases_remotenew=New MySQL host
 databases_remoteok=Move Databases
 databases_warn=WARNING! Any scripts or applications currently installed will NOT be updated to use the new host system.
+databases_moving=Moving MySQL databases from $1 to $2 ..
 
 database_title1=Create Database
 database_title2=Edit Database

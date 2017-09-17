@@ -3146,9 +3146,7 @@ foreach my $dd (reverse(@olddoms)) {
 
 # Re-grant users access to their databases
 foreach my $ad (@doms) {
-	use Data::Dumper;
 	my @users = &list_domain_users($ad, 1);
-	print Dumper(\@users);
 	my @oldusers = @{$umap{$ad->{'id'}}};
 	foreach my $u (@users) {
 		my ($oldu) = grep { $_->{'user'} eq $u->{'user'} } @oldusers;

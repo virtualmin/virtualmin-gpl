@@ -71,7 +71,7 @@ if (&can_import_servers()) {
 if ($can_allowed_hosts) {
 	push(@tabs, [ "hosts", $text{'databases_tabhosts'} ]);
 	}
-if (&can_edit_templates() && !$d->{'parent'}) {
+if ($d->{'mysql'} && &can_edit_templates() && !$d->{'parent'}) {
 	push(@tabs, [ "remote", $text{'databases_tabremote'} ]);
 	}
 foreach $t (@tabs) {
@@ -266,7 +266,7 @@ if ($can_allowed_hosts) {
 	}
 
 # Show MySQL host system
-if (&can_edit_templates() && !$d->{'parent'}) {
+if ($d->{'mysql'} && &can_edit_templates() && !$d->{'parent'}) {
 	print &ui_tabs_start_tab("databasemode", "remote") if (@tabs > 1);
         print "$text{'databases_desc6'}<p>\n";
 	my @mymods = &list_remote_mysql_modules();
@@ -280,7 +280,7 @@ if (&can_edit_templates() && !$d->{'parent'}) {
 		print &ui_table_start(undef, undef, 2);
 
 		# Current host system
-		my ($mymod) = grep { ($_->{'mysql_module'} || 'mysql') eq
+		my ($mymod) = grep { ($d->{'mysql_module'} || 'mysql') eq
 				     $_->{'minfo'}->{'dir'} } @mymods;
 		print &ui_table_row($text{'databases_remoteold'},
 			$mymod->{'desc'});
