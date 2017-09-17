@@ -417,6 +417,9 @@ if ($myserver) {
 				   "top level virtual servers");
 	my $mm = &get_remote_mysql_module($myserver);
 	$mm || &usage("No remote MySQL server named $myserver was found");
+	$mm->{'config'}->{'virtualmin_provision'} &&
+		&usage("Remote MySQL server $myserver is for use only by ".
+		       "Cloudmin Services provisioned domains");
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 

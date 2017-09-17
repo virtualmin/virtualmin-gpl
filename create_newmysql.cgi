@@ -28,7 +28,7 @@ $mm = { 'minfo' => { },
 	'config' => { 'host' => $host,
 		      'port' => $port,
 		      'sock' => $sock,
-		      'user' => $user,
+		      'login' => $user,
 		      'pass' => $pass },
       };
 &create_remote_mysql_module($mm);

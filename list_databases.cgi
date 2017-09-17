@@ -269,7 +269,8 @@ if ($can_allowed_hosts) {
 if ($d->{'mysql'} && &can_edit_templates() && !$d->{'parent'}) {
 	print &ui_tabs_start_tab("databasemode", "remote") if (@tabs > 1);
         print "$text{'databases_desc6'}<p>\n";
-	my @mymods = &list_remote_mysql_modules();
+	my @mymods = grep { !$_->{'config'}->{'virtualmin_provision'} }
+			  &list_remote_mysql_modules();
 	if (@mymods < 2) {
 		# Cannot change
 		print &text('databases_desc6a', 'edit_newmysqls.cgi'),"<p>\n";

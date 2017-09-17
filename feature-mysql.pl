@@ -88,6 +88,7 @@ if ($d->{'provision_mysql'}) {
 	if (!$d->{'parent'}) {
 		&$first_print($text{'setup_mysqluser_provision'});
 		my $info = { 'user' => $user,
+			     'any-host' => '',
 			     'domain-owner' => '' };
 		if ($d->{'mysql_enc_pass'}) {
 			$info->{'encpass'} = $d->{'mysql_enc_pass'};
@@ -108,40 +109,28 @@ if ($d->{'provision_mysql'}) {
 			return 0;
 			}
 
-		# Configure MySQL module to use that system from now on
+		# Find or create a MySQL module for that system
 		my $mysql_host = $msg =~ /host=(\S+)/ ? $1 : undef;
 		my $mysql_user = $msg =~ /owner_user=(\S+)/ ? $1 : undef;
 		my $mysql_pass = $msg =~ /owner_pass=(\S+)/ ? $1 : undef;
-		my @mdoms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
-				 &list_domains();
-		if (!$mysql::config{'host'} || !@mdoms) {
-			# Configure MySQL module
-			$mysql::config{'host'} = $mysql_host;
-			$mysql::config{'login'} = $mysql_user;
-			$mysql::config{'pass'} = $mysql_pass;
-			$mysql::mysql_login = $mysql_user;
-			$mysql::mysql_pass = $mysql_pass;
-			$mysql::authstr = &mysql::make_authstr();
-			&mysql::save_module_config(\%mysql::config, 'mysql');
+		my @mymods = &list_remote_mysql_modules();
+		my ($mymod) = grep { $_->{'config'}->{'host'} eq $mysql_host &&
+				     $_->{'config'}->{'login'} eq $mysql_user &&
+				     $_->{'config'}->{'pass'} eq $mysql_pass }
+				   @mymods;
+		if (!$mymod) {
+			# Need to set one up
+			$mymod = { 'minfo' => { },
+				   'config' => {
+					'host' => $mysql_host,
+					'login' => $mysql_user,
+					'pass' => $mysql_pass,
+					'virtualmin_provision' => $d->{'id'},
+					},
+				 };
+			&create_remote_mysql_module($mymod);
 			}
-		elsif ($mysql::config{'host'} ne $mysql_host) {
-			# Mis-match with current setting!?
-			if (&to_ipaddress($mysql::config{'host'}) eq
-			    &to_ipaddress($mysql_host)) {
-				# Same IP, but name changed
-				$mysql::config{'host'} = $mysql_host;
-				$mysql::authstr = &mysql::make_authstr();
-				&mysql::save_module_config(
-					\%mysql::config, 'mysql');
-				}
-			else {
-				&$second_print(
-					&text('setup_emysqluser_provclash',
-					      $mysql::config{'host'},
-					      $mysql_host));
-				return 0;
-				}
-			}
+		$d->{'mysql_module'} = $mymod->{'minfo'}->{'dir'};
 
 		&$second_print(&text('setup_mysqluser_provisioned',
 				     $mysql_host));
@@ -265,6 +254,7 @@ if ($d->{'provision_mysql'}) {
 			return 0;
 			}
 		}
+
 	# Take away access from mailbox users
 	foreach my $u (@users) {
 		my @mydbs = grep { $_->{'type'} eq 'mysql' } @{$u->{'dbs'}};
@@ -1400,6 +1390,7 @@ local @dbs = split(/\s+/, $d->{'db_mysql'});
 
 if ($d->{'provision_mysql'}) {
 	# Create the database on the provisioning server
+	# XXX need to supply host
 	&$first_print(&text('setup_mysqldb_provision', $dbname));
 	my $info = { 'user' => &mysql_user($d),
 		     'database' => $dbname };
@@ -2922,6 +2913,14 @@ if (!$mm->{'minfo'}->{'dir'}) {
 			  $mm->{'config'}->{'port'} ||
 			  $sock ||
 			  'local');
+	if (&foreign_check($mm->{'minfo'}->{'dir'})) {
+		# Clash! Try appending username
+		$mm->{'minfo'}->{'dir'} .= "-".($mm->{'config'}->{'user'} || 'root');
+		if (&foreign_check($mm->{'minfo'}->{'dir'})) {
+			&error("The module ".$mm->{'minfo'}->{'dir'}.
+			       " already exists");
+			}
+		}
 	}
 $mm->{'minfo'}->{'cloneof'} = 'mysql';
 my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
