@@ -1353,7 +1353,7 @@ local $ex = $?;
 if ($ex) {
 	return "<tt>".&html_escape($out)."</tt>";
 	}
-elsif ($out !~ /subject=.*(CN|O)=/) {
+elsif ($out !~ /subject\s*=\s*.*(CN|O)=/) {
 	return $text{'cert_esubject'};
 	}
 else {
