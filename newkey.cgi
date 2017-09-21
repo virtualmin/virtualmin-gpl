@@ -148,6 +148,7 @@ if ($d->{'ssl_newkey'}) {
 		&save_domain($d);
 		}
 	}
+&sync_combined_ssl_cert($d);
 
 # For domains that were using the SSL cert on this domain originally but
 # can no longer due to the cert hostname changing, break the linkage

@@ -141,6 +141,7 @@ foreach $g (@got) {
 		&save_website_ssl_file($d, $g->[0], $d->{'ssl_'.$g->[0]});
 		}
 	}
+&sync_combined_ssl_cert($d);
 &$second_print(".. done");
 
 # Remove old private key and CSR, as they are now installed

@@ -1361,7 +1361,7 @@ else {
 	}
 }
 
-# default_certificate_file(&domain, "cert"|"key"|"ca")
+# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined")
 # Returns the default path that should be used for a cert, key or CA file
 sub default_certificate_file
 {
@@ -1490,6 +1490,7 @@ if (!-r $certtemp || !-r $keytemp || $rv) {
 &open_tempfile_as_domain_user($d, KEY, ">$keyfile");
 &print_tempfile(KEY, &read_file_contents($keytemp));
 &close_tempfile_as_domain_user($d, KEY);
+&sync_combined_ssl_cert($d);
 
 return undef;
 }
@@ -2251,7 +2252,7 @@ my ($d, $cert, $key, $chain) = @_;
 
 # Copy and save the cert
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
-$cert_text = &read_file_contents($cert);
+my $cert_text = &read_file_contents($cert);
 &lock_file($d->{'ssl_cert'});
 &unlink_file($d->{'ssl_cert'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
@@ -2263,7 +2264,7 @@ $cert_text = &read_file_contents($cert);
 
 # And the key
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
-$key_text = &read_file_contents($key);
+my $key_text = &read_file_contents($key);
 &lock_file($d->{'ssl_key'});
 &unlink_file($d->{'ssl_key'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
@@ -2291,6 +2292,27 @@ if ($chain) {
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
 	$d->{'ssl_chain'} = $chainfile;
 	}
+
+# Create the combined cert file
+&sync_combined_ssl_cert($d);
+}
+
+# sync_combined_ssl_cert(&domain)
+# If a domain has a regular cert and a CA cert, combine them into one file
+sub sync_combined_ssl_cert
+{
+my ($d) = @_;
+my $combfile = &default_certificate_file($d, 'combined');
+&lock_file($combfile);
+&open_tempfile_as_domain_user($d, COMB, ">$combfile");
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+if (-r $d->{'ssl_chain'}) {
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	}
+&close_tempfile_as_domain_user($d, COMB);
+&unlock_file($combfile);
+&set_certificate_permissions($d, $combfile);
+$d->{'ssl_combined'} = $combfile;
 }
 
 # get_openssl_version()

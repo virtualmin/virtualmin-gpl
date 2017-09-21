@@ -71,6 +71,7 @@ $merr = &making_changes();
 $err = &save_website_ssl_file($d, 'ca', $chain);
 &error($err) if ($err);
 $d->{'ssl_chain'} = $chain;
+&sync_combined_ssl_cert($d);
 
 # Apply any per-domain cert to Dovecot and Postfix
 &sync_dovecot_ssl_cert($d, 1);
