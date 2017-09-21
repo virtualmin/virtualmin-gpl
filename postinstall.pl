@@ -424,6 +424,13 @@ if (!@doms && !$config{'logrotate_shared'}) {
 my $hfile = "$module_config_directory/transfer-hosts";
 &set_ownership_permissions(undef, undef, 0600, $hfile);
 
+# Create combined cert files for domains with SSL
+foreach my $d (&list_domains()) {
+	if (&domain_has_ssl($d)) {
+		&sync_combined_ssl_cert($d);
+		}
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
