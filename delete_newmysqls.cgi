@@ -40,6 +40,8 @@ else {
 			&error($text{'newmysqls_edelete'});
 		$mm->{'config'}->{'virtualmin_default'} &&
 			&error($text{'newmysqls_edefault'});
+		$mm->{'config'}->{'virtualmin_provision'} &&
+			&error($text{'newmysqls_eprovision'});
 		my @doms = grep { $_->{'mysql_module'} eq
 			       $mm->{'minfo'}->{'dir'} } @alldoms;
 		@doms == 0 || &error(&text('newmysqls_einuse', scalar(@doms)));

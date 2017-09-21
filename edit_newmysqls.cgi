@@ -9,9 +9,10 @@ require './virtual-server-lib.pl';
 @alldoms = grep { $_->{'mysql'} } &list_domains();
 print &ui_form_start("delete_newmysqls.cgi");
 print &ui_columns_start([ "", $text{'newmysqls_host'}, $text{'newmysqls_doms'},
-			  $text{'newmysqls_def'}, $text{'newmysqls_actions'} ]);
+			  $text{'newmysqls_def'}, $text{'newmysqls_creator'},
+			  $text{'newmysqls_actions'} ]);
 foreach my $mm (&list_remote_mysql_modules()) {
-	@doms = grep { $_->{'mysql_module'} eq
+	@doms = grep { ($_->{'mysql_module'} || 'mysql') eq
 		       $mm->{'minfo'}->{'dir'} } @alldoms;
 	$doms = !@doms ? $text{'newmysqls_none'} :
 		@doms > 5 ? &text('newmysqls_dcount', scalar(@doms)) :
@@ -21,8 +22,10 @@ foreach my $mm (&list_remote_mysql_modules()) {
 		  $mm->{'config'}->{'sock'} ||
 		  "<i>$text{'newmysqls_local'}</i>",
 		$doms,
-		$mm->{'config'}->{'virtualmin_default'} ? $text{'yes'}
-						        : $text{'no'},
+		$mm->{'config'}->{'virtualmin_default'} ?
+			$text{'yes'} : $text{'no'},
+		$mm->{'config'}->{'virtualmin_provision'} ?
+			$text{'newmysqls_cm'} : $text{'newmysqls_man'},
 		&ui_link("/$mm->{'minfo'}->{'dir'}", $text{'newmysqls_open'}),
 		], \@tds, "d", $mm->{'minfo'}->{'dir'});
 	}

@@ -4385,6 +4385,9 @@ newmysqls_host=Server hostname
 newmysqls_doms=Used by
 newmysqls_actions=Actions
 newmysqls_def=Default?
+newmysqls_creator=Created by
+newmysqls_man=Admin user
+newmysqls_cm=Cloudmin Services
 newmysqls_open=Manage ..
 newmysqls_delete=Remove Selected Servers
 newmysqls_makedef=Make Selected Default
@@ -4411,6 +4414,7 @@ newmysqls_enone=None selected!
 newmysqls_egone=Selected server no longer exists!
 newmysqls_edelete=The local server cannot be removed
 newmysqls_edefault=The default server cannot be removed
+newmysqls_eprovision=A server created by Cloudmin Services cannot be removed
 newmysqls_einuse=A server in use by $1 domains cannot be removed
 
 ddatabases_title=Delete Databases

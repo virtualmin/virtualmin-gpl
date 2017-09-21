@@ -220,12 +220,14 @@ sub delete_mysql
 local ($d, $preserve) = @_;
 &require_mysql();
 my @dblist = &unique(split(/\s+/, $d->{'db_mysql'}));
+my $mymod = &get_domain_mysql_module($d);
 
 # If MySQL is hosted remotely, don't delete the DB on the assumption that
 # other servers sharing the DB will still be using it
 if ($preserve && &remote_mysql($d)) {
 	&$first_print(&text('delete_mysqldb', join(" ", @dblist)));
-	&$second_print(&text('delete_mysqlpreserve', $mysql::config{'host'}));
+	&$second_print(&text('delete_mysqlpreserve',
+			     $mymod->{'config'}->{'host'}));
 	return 1;
 	}
 
@@ -242,7 +244,7 @@ if ($d->{'provision_mysql'}) {
 	if (!$d->{'parent'}) {
 		&$first_print($text{'delete_mysqluser_provision'});
 		my $info = { 'user' => &mysql_user($d),
-			     'host' => $mysql::config{'host'} };
+			     'host' => $mymod->{'config'}->{'host'} };
 		my ($ok, $msg) = &provision_api_call(
 			"unprovision-mysql-login", $info, 0);
 		if ($ok) {
@@ -266,12 +268,23 @@ if ($d->{'provision_mysql'}) {
 	# If this was the last domain with MySQL enabled on the system,
 	# turn off use of the remote host that if it gets enabled again, a
 	# new host and login are used
+	# XXX
 	my @mdoms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
 			 &list_domains();
 	if (!@mdoms && $mysql::config{'host'}) {
 		delete($mysql::config{'host'});
 		$mysql::authstr = &mysql::make_authstr();
 		&mysql::save_module_config(\%mysql::config, 'mysql');
+		}
+
+	# Remove record of remote MySQL host, so that it isn't re-used if
+	# setup without Cloudmin Services later
+	delete($d->{'mysql_module'});
+	if (!$d->{'parent'}) {
+		foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+			delete($sd->{'mysql_module'});
+			&save_domain($sd);
+			}
 		}
 	}
 else {
@@ -328,6 +341,7 @@ sub modify_mysql
 local ($d, $oldd) = @_;
 local $tmpl = &get_template($d->{'template'});
 &require_mysql();
+my $mymod = &get_domain_mysql_module($d);
 local $rv = 0;
 local $changeduser = $d->{'user'} ne $oldd->{'user'} &&
 		     !$tmpl->{'mysql_nouser'} ? 1 : 0;
@@ -345,7 +359,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		# Change on provisioning server
 		&$first_print($text{'save_mysqlpass_provision'});
 		my $info = { 'user' => &mysql_user($d),
-			     'host' => $mysql::config{'host'} };
+			     'host' => $mymod->{'config'}->{'host'} };
 		if ($d->{'mysql_enc_pass'}) {
 			$info->{'encpass'} = $d->{'mysql_enc_pass'};
 			}
@@ -418,7 +432,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 		# Then take away DBs from old user
 		if ($ok && @dbnames) {
 			my $info = { 'user' => $olduser,
-				     'host' => $mysql::config{'host'},
+				     'host' => $mymod->{'config'}->{'host'},
 				     'remove-database' => \@dbnames };
 			($ok, $msg) = &provision_api_call(
 				"modify-mysql-login", $info, 0);
@@ -431,7 +445,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 		# Grant to new user
 		if ($ok && @dbnames) {
 			my $info = { 'user' => $user,
-				     'host' => $mysql::config{'host'},
+				     'host' => $mymod->{'config'}->{'host'},
 				     'add-database' => \@dbnames };
 			($ok, $msg) = &provision_api_call(
 				"modify-mysql-login", $info, 0);
@@ -486,7 +500,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		my ($ok, $msg) = (1, undef);
 		if (@dbnames) {
 			my $info = { 'user' => $olduser,
-				     'host' => $mysql::config{'host'},
+				     'host' => $mymod->{'config'}->{'host'},
 				     'remove-database' => \@dbnames };
 			($ok, $msg) = &provision_api_call(
 				"modify-mysql-login", $info, 0);
@@ -499,7 +513,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		# Then remove the user
 		if ($ok && $mysql::config{'host'}) {
 			my $info = { 'user' => $olduser,
-				     'host' => $mysql::config{'host'} };
+				     'host' => $mymod->{'config'}->{'host'} };
 			($ok, $msg) = &provision_api_call(
 				"unprovision-mysql-login", $info, 0);
 			if (!$ok) {
@@ -511,7 +525,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		# Then grant DBs to new user
 		if ($ok && @dbnames) {
 			my $info = { 'user' => $user,
-				     'host' => $mysql::config{'host'},
+				     'host' => $mymod->{'config'}->{'host'},
 				     'add-database' => \@dbnames };
 			($ok, $msg) = &provision_api_call(
 				"modify-mysql-login", $info, 0);
@@ -549,7 +563,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 		# Rename on provisioning server
 		&$first_print($text{'save_mysqluser_provision'});
 		my $info = { 'user' => $olduser,
-			     'host' => $mysql::config{'host'},
+			     'host' => $mymod->{'config'}->{'host'},
 			     'new-user' => $user };
 		my ($ok, $msg) = &provision_api_call(
 			"modify-mysql-login", $info, 0);
@@ -592,7 +606,7 @@ elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 		# owner's list, and added to new owner's list
 		&$first_print($text{'save_mysqluser2_provision'});
 		my $info = { 'user' => $olduser,
-			     'host' => $mysql::config{'host'},
+			     'host' => $mymod->{'config'}->{'host'},
 			     'remove-database' => \@dbnames };
 		my ($ok, $msg) = &provision_api_call(
 			"modify-mysql-login", $info, 0);
@@ -603,7 +617,7 @@ elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 		else {
 			# Add databases back to the new owner
 			my $info = { 'user' => $user,
-				     'host' => $mysql::config{'host'},
+				     'host' => $mymod->{'config'}->{'host'},
 				     'add-database' => \@dbnames };
 			my ($ok, $msg) = &provision_api_call(
 				"modify-mysql-login", $info, 0);
@@ -748,6 +762,7 @@ if (!$d->{'parent'}) {
 sub validate_mysql
 {
 local ($d) = @_;
+my $mymod = &get_domain_mysql_module($d);
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Check login on provisioning server
@@ -759,9 +774,9 @@ if ($d->{'provision_mysql'}) {
 	elsif ($msg !~ /host=(\S+)/) {
 		return &text('validate_emysqluser', &mysql_user($d));
 		}
-	elsif ($1 ne $mysql::config{'host'}) {
+	elsif ($1 ne $mymod->{'config'}->{'host'}) {
 		return &text('validate_emysqluserhost',
-			     $1, $mysql::config{'host'});
+			     $1, $mymod->{'config'}->{'host'});
 		}
 
 	# Check DBs on provisioning server
@@ -803,8 +818,9 @@ if ($d->{'parent'}) {
 elsif ($d->{'provision_mysql'}) {
 	# Lock on provisioning server
 	&$first_print($text{'disable_mysqluser_provision'});
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => &mysql_user($d),
-		     'host' => $mysql::config{'host'},
+		     'host' => $mymod->{'config'}->{'host'},
 		     'lock' => '' };
 	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	if (!$ok) {
@@ -850,8 +866,9 @@ if ($d->{'parent'}) {
 elsif ($d->{'provision_mysql'}) {
 	# Unlock on provisioning server
 	&$first_print($text{'enable_mysql_provision'});
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => &mysql_user($d),
-		     'host' => $mysql::config{'host'},
+		     'host' => $mymod->{'config'}->{'host'},
 		     'unlock' => '' };
 	my ($ok, $msg) = &provision_api_call(
 		"modify-mysql-login", $info, 0);
@@ -995,8 +1012,9 @@ my %exclude = map { $_, 1 } @exclude;
 
 # Create base backup file with meta-information
 local @hosts = &get_mysql_allowed_hosts($d);
+my $mymod = &get_domain_mysql_module($d);
 local %info = ( 'hosts' => join(' ', @hosts),
-		'remote' => $mysql::config{'host'} );
+		'remote' => $mymod->{'config'}->{'host'} );
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
@@ -1016,7 +1034,7 @@ foreach $db (@dbs) {
 				 &list_dom_mysql_tables($d, $db) ];
 		}
 
-	local $mymod = &require_dom_mysql($d);
+	my $mymod = &require_dom_mysql($d);
 	local $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
 		undef, undef, $tables, $d->{'user'}, 1);
@@ -1087,8 +1105,9 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 
 # If in replication mode, AND the remote MySQL system is the same on both
 # systems, do nothing
-if ($allopts->{'repl'} && $mysql::config{'host'} && $info{'remote'} &&
-    $mysql::config{'host'} eq $info{'remote'}) {
+my $mymod = &get_domain_mysql_module($d);
+if ($allopts->{'repl'} && $mymod->{'config'}->{'host'} && $info{'remote'} &&
+    $mymod->{'config'}->{'host'} eq $info{'remote'}) {
 	&$first_print($text{'restore_mysqldummy'});
 	&$second_print(&text('restore_mysqlsameremote', $info{'remote'}));
 	return 1;
@@ -1100,7 +1119,7 @@ foreach my $db (&domain_databases($d, [ 'mysql' ])) {
 	foreach my $u (&list_mysql_database_users($d, $db->{'name'})) {
 		if ($u->[0] ne $d->{'user'} &&
 		    $u->[0] ne 'root' &&
-		    $u->[0] ne $mysql::config{'login'}) {
+		    $u->[0] ne $mymod->{'config'}->{'login'}) {
 			push(@{$userdbs{$u->[0]}}, $db->{'name'});
 			$userpasses{$u->[0]} = $u->[1];
 			}
@@ -1390,9 +1409,10 @@ local @dbs = split(/\s+/, $d->{'db_mysql'});
 
 if ($d->{'provision_mysql'}) {
 	# Create the database on the provisioning server
-	# XXX need to supply host
 	&$first_print(&text('setup_mysqldb_provision', $dbname));
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => &mysql_user($d),
+		     'host' => $mymod->{'config'}->{'host'},
 		     'database' => $dbname };
 	$info->{'charset'} = $opts->{'charset'} if ($opts->{'charset'});
 	$info->{'collate'} = $opts->{'collate'} if ($opts->{'collate'});
@@ -1438,8 +1458,9 @@ local ($d, $dbname) = @_;
 
 if ($d->{'provision_mysql'}) {
 	# Call remote API to grant access
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => &mysql_user($d),
-		     'host' => $mysql::config{'host'},
+		     'host' => $mymod->{'config'}->{'host'},
 		     'add-database' => $dbname };
 	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	&error(&text('user_emysqlprov', $msg)) if (!$ok);
@@ -1480,9 +1501,10 @@ local $failed = 0;
 if ($d->{'provision_mysql'}) {
 	# Delete on provisioning server
 	&$first_print(&text('delete_mysqldb_provision', join(", ", @dbnames)));
+	my $mymod = &get_domain_mysql_module($d);
 	foreach my $db (@dbnames) {
 		my $info = { 'database' => $db,
-			     'host' => $mysql::config{'host'} };
+			     'host' => $mymod->{'config'}->{'host'} };
 		my ($ok, $msg) = &provision_api_call(
 			"unprovision-mysql-database", $info, 0);
 		if (!$ok) {
@@ -1655,7 +1677,8 @@ local ($d, $db) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Fetch from provisioning server
-	my $info = { 'host' => $mysql::config{'host'},
+	my $mymod = &get_domain_mysql_module($d);
+	my $info = { 'host' => $mymod->{'config'}->{'host'},
 		     'database' => $db };
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-mysql-users", $info, 1);
@@ -1774,8 +1797,9 @@ local ($d, $user) = @_;
 local $myuser = &mysql_username($user);
 if ($d->{'provision_mysql'}) {
 	# Delete on provisioning server
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => $myuser,
-		     'host' => $mysql::config{'host'} };
+		     'host' => $mymod->{'config'}->{'host'} };
 	my ($ok, $msg) = &provision_api_call(
 		"unprovision-mysql-login", $info, 0);
 	&error(&text('user_emysqldelete', $msg)) if (!$ok);
@@ -1806,8 +1830,9 @@ local $myuser = &mysql_username($user);
 	local $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
 	# Update on provisioning server
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => $myolduser,
-		     'host' => $mysql::config{'host'} };
+		     'host' => $mymod->{'config'}->{'host'} };
 	if ($olduser ne $user) {
 		$info->{'new-user'} = $myuser;
 		}
@@ -2195,7 +2220,8 @@ local ($d) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Query provisioning server
-	my $info = { 'host' => $mysql::config{'host'},
+	my $mymod = &get_domain_mysql_module($d);
+	my $info = { 'host' => $mymod->{'config'}->{'host'},
 		     'user' => &mysql_user($d) };
 	my ($ok, $msg) = &provision_api_call(
 		"list-provision-mysql-users", $info, 1);
@@ -2221,8 +2247,9 @@ local $user = &mysql_user($d);
 
 if ($d->{'provision_mysql'}) {
 	# Call the remote API
+	my $mymod = &get_domain_mysql_module($d);
 	my $info = { 'user' => $user,
-		     'host' => $mysql::config{'host'},
+		     'host' => $mymod->{'config'}->{'host'},
 		     'remote' => $hosts };
 	my ($ok, $msg) = &provision_api_call("modify-mysql-login", $info, 0);
 	return &text('user_emysqlprovips', $msg) if (!$ok);
@@ -2254,6 +2281,7 @@ else {
 
 	# Add db table entries for all users, and user table entries
 	# for mailboxes
+	my $mymod = &get_domain_mysql_module($d);
 	local $ufunc = sub {
 		my %allusers;
 		foreach my $db (@dbs) {
@@ -2262,7 +2290,7 @@ else {
 				# Re-populate db table for this db and user
 				next if ($u->[0] eq $user ||
 					 $u->[0] eq 'root' ||
-					 $u->[0] eq $mysql::config{'login'});
+					 $u->[0] eq $mymod->{'config'}->{'login'});
 				&execute_dom_sql($d, $mysql::master_db,
 					"delete from db where user = ? and ".
 					"db = ?", $u->[0], $db->{'name'});
@@ -2374,7 +2402,9 @@ my ($d) = @_;
 &require_mysql();
 local @rv;
 if ($config{'provision_mysql'}) {
-	if ($mysql::config{'host'}) {
+	# XXX
+	my $mymod = &get_domain_mysql_module($d);
+	if ($mymod->{'config'}->{'host'}) {
 		# Query provisioning DB system
 		my $rv = &mysql::execute_sql(
 			"information_schema", "show collation");
@@ -2404,7 +2434,8 @@ sub list_mysql_character_sets
 my ($d) = @_;
 &require_mysql();
 if ($config{'provision_mysql'}) {
-	if ($mysql::config{'host'}) {
+	my $mymod = &get_domain_mysql_module($d);
+	if ($mymod->{'config'}->{'host'}) {
 		# Query provisioning DB system
 		return &mysql::list_character_sets("information_schema");
 		}
@@ -2758,8 +2789,8 @@ return 1;
 sub remote_mysql
 {
 local ($d) = @_;
-&require_mysql();
-return $mysql::config{'host'};
+my $mymod = &get_domain_mysql_module($d);
+return $mymod->{'config'}->{'host'};
 }
 
 # force_set_mysql_password(user, pass)
@@ -3008,6 +3039,17 @@ my ($d) = @_;
 my $mod = !$d ? 'mysql' : $d->{'mysql_module'} || 'mysql';
 &foreign_require($mod);
 return $mod;
+}
+
+# get_domain_mysql_module(&domain)
+# Returns the mysql module hash for a domain, or undef
+sub get_domain_mysql_module
+{
+my ($d) = @_;
+my @mymods = &list_remote_mysql_modules();
+my ($mymod) = grep { $_->{'minfo'}->{'dir'} eq
+		     ($d->{'mysql_module'} || 'mysql') } @mymods;
+return $mymod;
 }
 
 # execute_dom_sql(&domain, db, sql, ...)
