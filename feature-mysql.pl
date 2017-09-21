@@ -265,16 +265,27 @@ if ($d->{'provision_mysql'}) {
 			}
 		}
 
-	# If this was the last domain with MySQL enabled on the system,
-	# turn off use of the remote host that if it gets enabled again, a
-	# new host and login are used
-	# XXX
-	my @mdoms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
+	my @mdoms = grep { $_->{'mysql'} &&
+			   $_->{'id'} ne $d->{'id'} &&
+			   ($_->{'mysql_module'} || 'mysql') eq
+				$mymod->{'minfo'}->{'dir'} }
 			 &list_domains();
-	if (!@mdoms && $mysql::config{'host'}) {
-		delete($mysql::config{'host'});
-		$mysql::authstr = &mysql::make_authstr();
-		&mysql::save_module_config(\%mysql::config, 'mysql');
+	if ($mymod->{'minfo'}->{'dir'} eq 'mysql') {
+		# If this was the last domain with MySQL enabled on the system,
+		# turn off use of the remote host that if it gets enabled
+		# again, new host and login are used
+		if (!@mdoms && $mysql::config{'host'}) {
+			delete($mysql::config{'host'});
+			$mysql::authstr = &mysql::make_authstr();
+			&mysql::save_module_config(\%mysql::config, 'mysql');
+			}
+		}
+	else {
+		# If this was the last domain that used the remote module,
+		# remove it
+		if (!@mdoms && $mymod->{'config'}->{'virtualmin_provision'}) {
+			&delete_remote_mysql_module($mymod);
+			}
 		}
 
 	# Remove record of remote MySQL host, so that it isn't re-used if
@@ -1603,7 +1614,7 @@ sub get_mysql_database_dir
 {
 local ($d, $db) = @_;
 &require_mysql();
-return undef if ($config{'provision_mysql'});	# XXX to broad
+return undef if ($d->{'provision_mysql'});
 local $mymod = &require_dom_mysql($d);
 local %myconfig = &foreign_config($mymod);
 return undef if ($myconfig{'host'} &&
@@ -2402,7 +2413,6 @@ my ($d) = @_;
 &require_mysql();
 local @rv;
 if ($config{'provision_mysql'}) {
-	# XXX
 	my $mymod = &get_domain_mysql_module($d);
 	if ($mymod->{'config'}->{'host'}) {
 		# Query provisioning DB system
@@ -2990,8 +3000,7 @@ foreach $u (keys %acl) {
 &close_tempfile(ACL);
 
 # Refresh visible modules cache
-unlink("$config_directory/module.infos.cache");
-unlink("$var_directory/module.infos.cache");
+&flush_webmin_caches();
 }
 
 # delete_remote_mysql_module(&mod)

@@ -51,34 +51,6 @@ else {
 	&$second_print($text{'setup_done'});
 	}
 
-# If any domains exist that were provisioned old-style for mysql, complain
-if ($in{'provision_mysql'} && !$oldconfig{'provision_mysql'}) {
-	&$first_print($text{'provision_mysqlcheck'});
-	@mydoms = grep { $_->{'mysql'} && !$_->{'provision_mysql'} }
-		       &list_domains();
-	if (@mydoms && $in{'override'}) {
-		# Some exist, but override mode is on
-		&$second_print($text{'provision_mysqlcheckskip'});
-		}
-	elsif (@mydoms) {
-		# Some exist .. show error and override button
-		&$second_print(&text('provision_mysqlcheckfail',
-			join(" ", map { $_->{'dom'} } @mydoms)));
-
-		print &ui_form_start("save_provision.cgi");
-		foreach $i (keys %in) {
-			print &ui_hidden($i, $in{$i});
-			}
-		print "<b>",$text{'provision_mysqlcheckoverride'},"</b><p>\n";
-		print &ui_form_end([ [ "override",
-				       $text{'provision_override'} ] ]);
-		goto FAILED;
-		}
-	else {
-		&$second_print($text{'provision_mysqlcheckok'});
-		}
-	}
-
 # If virus provisioning is enabled, force use of clamdscan remote for
 # all domains
 if ($in{'provision_virus'} && !$config{'provision_virus_host'}) {
