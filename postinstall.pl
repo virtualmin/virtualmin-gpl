@@ -250,17 +250,8 @@ if (&foreign_installed("sshd") && !$config{'nodeniedssh'}) {
 	}
 &build_denied_ssh_group();
 
-# Create the cron job for sending in script ratings
-$job = { 'mins' => int(rand()*60),
-	 'hours' => int(rand()*24),
-	 'days' => '*',
-	 'months' => '*',
-	 'weekdays' => '*',
-	 'user' => 'root',
-	 'active' => 1,
-	 'command' => $ratings_cron_cmd };
-&setup_cron_script($job);
-&execute_command($ratings_cron_cmd);
+# Delete the old cron job for sending in script ratings
+&delete_cron_script($ratings_cron_cmd);
 
 # Create the cron job for collecting system info
 &setup_collectinfo_job();

@@ -68,12 +68,14 @@ if ($availonly) {
 
 if ($multi) {
 	# Show each script on a separate line
-	$overall = &get_overall_script_ratings();
 	foreach $script (@scripts) {
 		print "$script->{'name'}\n";
 		print "    Name: $script->{'desc'}\n";
-		if ($script->{'category'}) {
-			print "    Category: $script->{'category'}\n";
+		$cats = $script->{'categories'};
+		if ($cats) {
+			foreach my $c (@$cats) {
+				print "    Category: $c\n";
+				}
 			}
 		print "    Available: ",$script->{'avail'} ? "Yes" : "No","\n";
 		print "    Versions: ",join(" ", @{$script->{'versions'}}),"\n";
@@ -85,9 +87,6 @@ if ($multi) {
 				       @{$script->{'versions'}}),"\n";
 		print "    Description: $script->{'longdesc'}\n";
 		print "    Uses: ",join(" ", @{$script->{'uses'}}),"\n";
-		if ($overall->{$script->{'name'}}) {
-			print "    Rating: ".$overall->{$script->{'name'}}."\n";
-			}
 		if ($script->{'site'}) {
 			print "    Website: $script->{'site'}\n";
 			}
