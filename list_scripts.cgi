@@ -147,6 +147,7 @@ foreach $script (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 	      "src=images/ok.gif ".
 	      "onClick='form.fhidden.value=\"$script->{'name'}\"'>",
 	    $script->{'longdesc'},
+	    join(", ", @{$script->{'categories'}}),
 	    ]);
 	}
 
@@ -158,7 +159,8 @@ print &ui_form_columns_table(
 	undef,
 	[ [ "dom", $in{'dom'} ],
 	  [ "fhidden", "" ] ],
-	[ "", $text{'scripts_name'}, $text{'scripts_ver'}, $text{'scripts_longdesc'} ],
+	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
+	      $text{'scripts_longdesc'}, $text{'scripts_cats'}, ],
 	100,
 	\@table,
 	undef,

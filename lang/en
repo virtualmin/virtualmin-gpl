@@ -3868,6 +3868,7 @@ scripts_tabnew=Available Scripts
 scripts_tabunsup=Install Un-supported Version
 scripts_name=Script
 scripts_ver=Version
+scripts_cats=Cateories
 scripts_path=Install path
 scripts_db=Using database
 scripts_nodb=None

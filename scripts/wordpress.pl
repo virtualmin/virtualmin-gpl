@@ -25,7 +25,7 @@ return ( "4.8.2" );
 
 sub script_wordpress_category
 {
-return "Blog";
+return ("Blog", "CMS");
 }
 
 sub script_wordpress_php_vers
