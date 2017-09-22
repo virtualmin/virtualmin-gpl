@@ -989,6 +989,9 @@ while(<OUT>) {
 	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
 		$rv{'size'} = $1;
 		}
+	if (/EC\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+		$rv{'size'} = $1;
+		}
 	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
 		$inmodulus = 1;
 		}
@@ -1159,11 +1162,11 @@ local ($data, $type) = @_;
 if ($data =~ /^\//) {
 	$data = &read_file_contents($data);
 	}
-local %headers = ( 'key' => '(RSA )?PRIVATE KEY',
+local %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
 		   'cert' => 'CERTIFICATE',
 		   'ca' => 'CERTIFICATE',
 		   'csr' => 'CERTIFICATE REQUEST',
-		   'newkey' => '(RSA ?)PRIVATE KEY' );
+		   'newkey' => '(RSA |EC )?PRIVATE KEY' );
 local $h = $headers{$type};
 $h || return "Unknown SSL file type $type";
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
@@ -1206,6 +1209,9 @@ if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)---
 	return $1;
 	}
 elsif ($data =~ /(-----BEGIN\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+PRIVATE\s+KEY-----)/) {
+	return $1;
+	}
+elsif ($data =~ /(-----BEGIN\s+EC\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+EC\s+PRIVATE\s+KEY-----)/) {
 	return $1;
 	}
 return undef;
