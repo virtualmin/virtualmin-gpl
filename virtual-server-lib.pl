@@ -217,12 +217,6 @@ $dropbox_upload_tries = $config{'upload_tries'} || 3;
 
 $denied_ssh_group = "deniedssh";
 
-$script_ratings_dir = &cache_file_path("ratings");
-$script_ratings_overall = &cache_file_path("overall-ratings");
-$script_ratings_host = "software.virtualmin.com";
-$script_ratings_port = 80;
-$script_ratings_page = "/cgi-bin/sendratings.cgi";
-$script_fetch_ratings_page = "/cgi-bin/getratings.cgi";
 $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;
 $script_download_dir = "/";
