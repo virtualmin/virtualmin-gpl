@@ -252,10 +252,7 @@ for(my $i=0; $i<$tries; $i++) {
 	if ($line !~ /\S/) {
 		$err = "Empty response to HTTP request. Headers were : $htext";
 		}
-	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-		$err = "Invalid HTTP response : $line";
-		}
-	elsif ($line !~ /^HTTP\/1\..\s+(503)(\s+|$)/) {
+	elsif ($line =~ /^HTTP\/1\..\s+(503)(\s+|$)/) {
 		# Backoff and retry without increasing the tries count
 		sleep($backoff);
 		$backoff *= 2;
@@ -266,6 +263,9 @@ for(my $i=0; $i<$tries; $i++) {
 			$i--;
 			next;
 			}
+		}
+	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
+		$err = "Invalid HTTP response : $line";
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Follow the SOAP redirect
