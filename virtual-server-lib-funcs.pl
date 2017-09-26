@@ -983,6 +983,9 @@ if (!$_[4] && $_[0]) {
 	local @dbs = &domain_databases($_[0]);
 	local $db;
 	local %dbdone;
+	foreach $u (@users) {
+		$u->{'dbs'} = [ ];
+		}
 	foreach $db (@dbs) {
 		local @dbu;
 		local $ufunc;
@@ -1005,8 +1008,6 @@ if (!$_[4] && $_[0]) {
 		local $domufunc = $db->{'type'}.'_user';
 		local $domu = defined(&$domufunc) ? &$domufunc($_[0]) : undef;
 		foreach $u (@users) {
-			$u->{'dbs'} = [ ];
-
 			# Domain owner always gets all databases
 			next if ($u->{'user'} eq $_[0]->{'user'} &&
 				 $u->{'unix'});
