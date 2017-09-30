@@ -13955,7 +13955,8 @@ if (&domain_has_website()) {
 		&$second_print(&text('check_webphpnofpm', $ferr));
 		}
 
-	# Check if any new PHP versions have shown up
+	# Check if any new PHP versions have shown up, and re-generate their
+	# cgi and fcgid wrappers
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } @vers;
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
