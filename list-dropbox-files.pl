@@ -60,23 +60,28 @@ if (!ref($files)) {
 if ($multi) {
 	# Full details
 	foreach $f (@$files) {
-		$name = $f->{'path'};
+		$name = $f->{'path_display'};
 		$name =~ s/^\Q$path\E\/?//;
 		print $name,"\n";
-		print "    Last modified: ",
-		      &make_date(&dropbox_timestamp($f->{'modified'})),"\n";
-		print "    Size: ",$f->{'bytes'},"\n";
-		print "    Type: ",($f->{'is_dir'} ? "Directory" :
-					$f->{'mime_type'}),"\n";
-		print "    Full path: ",$f->{'path'},"\n";
+		if ($f->{'client_modified'} ne '') {
+			print "    Last modified: ",
+				&make_date(&dropbox_timestamp(
+				$f->{'client_modified'})),"\n";
+			}
+		if ($f->{'size'} ne '') {
+			print "    Size: ",$f->{'size'},"\n";
+			}
+		print "    Type: ",($f->{'.tag'} eq 'folder' ?
+				    "Directory" : "File"),"\n";
+		print "    Full path: ",$f->{'path_display'},"\n";
 		}
 	}
 elsif ($nameonly) {
 	# Container names only
 	foreach $f (@$files) {
-		$name = $f->{'path'};
+		$name = $f->{'path_display'};
 		$name =~ s/^\Q$path\E\/?//;
-		$name .= "/" if ($f->{'is_dir'});
+		$name .= "/" if ($f->{'.tag'} eq 'folder');
                 print $name,"\n";
 		}
 	}
@@ -86,12 +91,13 @@ else {
 	printf $fmt, "File name", "Type", "Modified", "Size";
 	printf $fmt, ("-" x 40), ("-" x 4), ("-" x 20), ("-" x 10);
 	foreach $f (@$files) {
-		$name = $f->{'path'};
+		$name = $f->{'path_display'};
                 $name =~ s/^\Q$path\E\/?//;
 		printf $fmt, $name,
-		     $f->{'is_dir'} ? "Dir" : "File",
-		     &make_date(&dropbox_timestamp($f->{'modified'})),
-		     &nice_size($f->{'bytes'});
+		     $f->{'.tag'} eq 'folder' ? "Dir" : "File",
+		     $f->{'client_modified'} eq '' ? '-' :
+		       &make_date(&dropbox_timestamp($f->{'client_modified'})),
+		     $f->{'size'} eq '' ? '-' : &nice_size($f->{'size'});
 		}
 	}
 

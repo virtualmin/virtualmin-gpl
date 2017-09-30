@@ -468,7 +468,7 @@ if ($in{'dropbox_set_oauth'} || !$reauth) {
 	}
 
 return $text{'cloud_descoauth_dropbox'}."<p>\n".
-       &ui_link("https://www.dropbox.com/1/oauth2/authorize?".
+       &ui_link("https://www.dropbox.com/oauth2/authorize?".
 		"response_type=code&client_id=$dropbox_app_key",
                 $text{'cloud_openoauth'},
                 undef,
