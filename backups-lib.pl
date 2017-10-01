@@ -465,8 +465,8 @@ foreach my $desturl (@$desturls) {
 				&$first_print($files);
 				return (0, 0, $doms);
 				}
-			my ($already) = grep { $_->{'path'} eq "/".$server }
-					     @$files;
+			my ($already) =
+			  grep { $_->{'path_display'} eq "/".$server } @$files;
 			if (!$already) {
 				my $err = &create_dropbox_dir("/".$server);
 				if ($err) {
@@ -3389,7 +3389,7 @@ elsif ($mode == 7 || $mode == 8) {
 			}
 		$files = &list_dropbox_files($fullpath);
 		return "Failed to list $fullpath : $files" if (!ref($files));
-		$files = [ map { my $n = $_->{'path'};
+		$files = [ map { my $n = $_->{'path_display'};
 				 $n =~ s/^.*\///;
 			         $prepend.$n } @$files ];
 		$func = \&download_dropbox_file;
@@ -4701,9 +4701,9 @@ elsif ($mode == 8) {
 		return 0;
 		}
 	foreach my $st (@$files) {
-		my $f = $st->{'path'};
+		my $f = $st->{'path_display'};
 		$f =~ s/^\/?\Q$base\E\/?// || next;
-		local $ctime = &dropbox_timestamp($st->{'modified'});
+		local $ctime = &dropbox_timestamp($st->{'client_modified'});
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
@@ -4713,9 +4713,9 @@ elsif ($mode == 8) {
                                             "<tt>$f</tt>", $old));
 			my $p = $st->{'path'};
 			$p =~ s/^\///;
-			my $size = $st->{'is_dir'} ?
+			my $size = $st->{'.tag'} eq 'folder' ?
 					&size_dropbox_directory($p) :
-					$st->{'bytes'};
+					$st->{'size'};
 			local $err = &delete_dropbox_path($base, $f);
 			if ($err) {
 				&$second_print(&text('backup_edelbucket',$err));
