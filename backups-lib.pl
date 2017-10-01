@@ -3378,14 +3378,14 @@ elsif ($mode == 7 || $mode == 8) {
 		if ($path =~ /\.(gz|zip|bz2)$/i) {
 			# A file was requested - list only the parent dir
 			my $pathdir = $path =~ /^(.*)\// ? $1 : "";
-			$fullpath = $server.
+			$fullpath = "/".$server.
 				    ($server && $pathdir ? "/" : "").$pathdir;
-			$prepend = $pathdir ? $pathdir."/" : "";
+			$prepend = ($pathdir ? $pathdir."/" : "");
 			}
 		else {
 			# Assume source is a dir
-			$fullpath = $server.($server ? "/" : "").$path;
-			$prepend = $path ? $path."/" : "";
+			$fullpath = "/".$server.($server ? "/" : "").$path;
+			$prepend = ($path ? $path."/" : "");
 			}
 		$files = &list_dropbox_files($fullpath);
 		return "Failed to list $fullpath : $files" if (!ref($files));
