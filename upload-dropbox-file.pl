@@ -37,6 +37,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--file") {
 		$file = shift(@ARGV);
 		}
+	elsif ($a eq "--multipart") {
+		$multipart = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -53,7 +56,7 @@ if ($file =~ /^(\/\S+)?\/([^\/]+)$/) {
 else {
 	&usage("--file must be followed by an absolute path");
 	}
-$err = &upload_dropbox_file($path, $file, $source);
+$err = &upload_dropbox_file($path, $file, $source, 1, $multipart);
 if ($err) {
 	print "ERROR: $err\n";
 	exit(1);
@@ -70,5 +73,6 @@ print "Uploads a single file to Dropbox.\n";
 print "\n";
 print "virtualmin upload-dropbox-file --source local-file\n";
 print "                               --file remote-file\n";
+print "                              [--multipart]\n";
 exit(1);
 }
