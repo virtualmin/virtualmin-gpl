@@ -4323,6 +4323,7 @@ elsif ($mode == 8) {
 		# Dropbox path - has to be handled differently to S3 and GCS,
 		# as it really does support sub-directories
 		local ($base, $date) = ($1, $2);
+		$base = "/".$base if ($base !~ /^\//);
 		$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 		return ($base, $date);
 		}
