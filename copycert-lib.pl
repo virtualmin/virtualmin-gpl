@@ -298,7 +298,6 @@ else {
 	&postfix::set_current_value("smtpd_use_tls", "yes");
 	}
 &postfix::set_current_value("smtpd_tls_mandatory_protocols", "!SSLv2, !SSLv3");
-&postfix::set_current_value("smtpd_tls_mandatory_ciphers", "high");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
 my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
