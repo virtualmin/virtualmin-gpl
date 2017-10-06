@@ -1057,9 +1057,14 @@ foreach my $m (@mods) {
 			}
 		if ($phpver =~ /\./ && $software::update_system eq "yum") {
 			# PHP 5.3+ packages from software collections are
-			# named like php54-php-mysql
+			# named like php54-php-mysql or sometimes even
+			# php54-php-mysqlnd
 			unshift(@poss, "php".$nodotphpver."-php-".$m);
 			unshift(@poss, "rh-php".$nodotphpver."-php-".$m);
+			if ($m eq "mysql") {
+				unshift(@poss, "rh-php".$nodotphpver.
+					       "-php-".$m."nd");
+				}
 			}
 		elsif ($software::update_system eq "yum" &&
 		       $fullphpver =~ /^5\.3/) {
