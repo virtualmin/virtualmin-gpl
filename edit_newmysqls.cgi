@@ -39,7 +39,7 @@ print &ui_form_start("create_newmysql.cgi", "post");
 print &ui_table_start($text{'newmysqls_header'}, undef, 2);
 
 # Remote server, or local socket
-print &ui_table_row($text{'newmysqls_host'},
+print &ui_table_row($text{'newmysqls_formhost'},
 	&ui_radio_table("mode", 0,
 		[ [ 0, $text{'newmysqls_remote'},
 		    &ui_textbox("host", undef, 40) ],
