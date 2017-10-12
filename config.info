@@ -86,6 +86,7 @@ key_tmpl=Template for private key path,3,Default (<tt>~/ssl.key</tt>)
 cert_tmpl=Template for certificate path,3,Default (<tt>~/ssl.cert</tt>)
 ca_tmpl=Template for CA certificate path,3,Default (<tt>~/ssl.ca</tt>)
 combined_tmpl=Template for combined certificate path,3,Default (<tt>~/ssl.combined</tt>)
+everything_tmpl=Template for key and certificates path,3,Default (<tt>~/ssl.everything</tt>)
 openssl_cnf=Location of OpenSSL configuration file,3,Work out automatically
 dovecot_ssl=Copy per-IP SSL certificates to Dovecot?,1,1-Yes,0-No
 postfix_ssl=Copy per-IP SSL certificates to Postfix?,1,1-Yes,0-No

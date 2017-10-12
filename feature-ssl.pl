@@ -1367,7 +1367,7 @@ else {
 	}
 }
 
-# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined")
+# default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything")
 # Returns the default path that should be used for a cert, key or CA file
 sub default_certificate_file
 {
@@ -2308,6 +2308,8 @@ if ($chain) {
 sub sync_combined_ssl_cert
 {
 my ($d) = @_;
+
+# Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
 &lock_file($combfile);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
@@ -2319,6 +2321,20 @@ if (-r $d->{'ssl_chain'}) {
 &unlock_file($combfile);
 &set_certificate_permissions($d, $combfile);
 $d->{'ssl_combined'} = $combfile;
+
+# Create file of all the certs, and the key
+my $everyfile = &default_certificate_file($d, 'everything');
+&lock_file($everyfile);
+&open_tempfile_as_domain_user($d, COMB, ">$everyfile");
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'}));
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+if (-r $d->{'ssl_chain'}) {
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	}
+&close_tempfile_as_domain_user($d, COMB);
+&unlock_file($everyfile);
+&set_certificate_permissions($d, $everyfile);
+$d->{'ssl_everything'} = $everyfile;
 }
 
 # get_openssl_version()
