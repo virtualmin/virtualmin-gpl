@@ -10473,7 +10473,8 @@ return ($licence{'status'}, $licence{'expiry'},
 
 # update_licence_from_site(&licence)
 # Attempts to validate the license, and updates the given hash ref with
-# license details.
+# license details. Returns the status code (0=OK, 1=Invalid, 2=Down, 3=Expired) and
+# error message.
 sub update_licence_from_site
 {
 local ($licence) = @_;
@@ -10508,6 +10509,7 @@ if (defined($servers)) {
 	$licence->{'used_servers'} = $servers;
 	$licence->{'servers'} = $max_servers;
 	}
+return ($status, $err);
 }
 
 # check_licence_site()
