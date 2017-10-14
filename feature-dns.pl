@@ -1174,7 +1174,8 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	}
 
-if ($tmpl->{'dns'} && (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
+if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
+    (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	# Add or use the user-defined records template, if defined and if this
 	# isn't a sub-domain being added to an existing file OR if we are just
 	# adding records
