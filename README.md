@@ -1,3 +1,5 @@
+[![Gratipay](https://img.shields.io/gratipay/project/Virtualmin.svg)](https://gratipay.com/Virtualmin/)
+
 # Virtualmin
 
 Virtualmin virtual-server web hosting control panel module for Webmin.
