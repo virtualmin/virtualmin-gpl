@@ -18,7 +18,7 @@ elsif (!$p) {
 local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_port'});
 if ($virt) {
-	# First check for FPM socket
+	# First check for FPM socket, using a single ProxyPassMatch
 	local $fsock = &get_php_fpm_socket_file($d, 1);
 	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
@@ -26,6 +26,17 @@ if ($virt) {
 		if ($ppm =~ /unix:\Q$fsock\E/ ||
 		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/) {
 			return 'fpm';
+			}
+		}
+
+	# Also check for FPM socket in a FilesMatch block
+	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+		next if ($f->{'words'}->[0] ne '\.php$');
+		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
+			if ($h eq "proxy:fcgi://localhost:$fport" ||
+			    $h eq "proxy:fcgi:$fsock") {
+				return 'fpm';
+				}
 			}
 		}
 
@@ -346,13 +357,19 @@ foreach my $p (@ports) {
 	local $fsock = &get_php_fpm_socket_file($d, 1);
 	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+	local @oldppm = grep { /unix:\Q$fsock\E/ || /fcgi:\/\/localhost:\Q$fport\E/ } @ppm;
 	if ($fsock) {
 		@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
 		}
 	if ($fport) {
 		@ppm = grep { !/fcgi:\/\/localhost:\Q$fport\E/ } @ppm;
 		}
-	if ($mode eq "fpm") {
+	local $files;
+	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+		$files = $f if ($f->{'words'}->[0] eq '\.php$');
+		}
+	if ($mode eq "fpm" && ($apache::httpd_modules{'core'} < 2.4 || @oldppm)) {
+		# Use a proxy directive for older Apache or if this is what's already in use
 		local $phd = $phpconfs[0]->{'words'}->[0];
 		if (-r $fsock) {
 			# Use existing socket file, since it presumably works
@@ -362,6 +379,33 @@ foreach my $p (@ports) {
 			# Allocate and use a port number
 			$fport = &get_php_fpm_socket_port($d);
 			push(@ppm, "^/(.*\.php(/.*)?)\$ fcgi://localhost:${fport}${phd}/\$1");
+			}
+		}
+	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
+		# Can use a FilesMatch block with SetHandler inside instead
+		my $wanth = 'proxy:fcgi://localhost:'.$fport;
+		if (!$files) {
+			$fport = &get_php_fpm_socket_port($d);
+			$files = { 'name' => 'FilesMatch',
+			           'type' => 1,
+				   'value' => '\.php$',
+				   'members' => [
+					{ 'name' => 'SetHandler',
+					  'value' => $wanth,
+					},
+				   ],
+				 };
+			&apache::save_directive_struct(undef, $files, $vconf, $conf);
+			}
+		else {
+			# Add the SetHandler directive
+			&apache::save_directive("SetHandler", [$wanth], $files->{'members'}, $conf);
+			}
+		}
+	else {
+		# For non-FPM mode, remove the whole files block
+		if ($files) {
+			&apache::save_directive_struct($files, undef, $vconf, $conf);
 			}
 		}
 	&apache::save_directive("ProxyPassMatch", \@ppm, $vconf, $conf);
