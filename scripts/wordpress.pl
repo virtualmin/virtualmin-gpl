@@ -56,7 +56,7 @@ return ("mysql");
 
 sub script_wordpress_release
 {
-return 3;	# For local $d
+return 4;	# For wp-cli support
 }
 
 # script_wordpress_depends(&domain, version)
@@ -105,6 +105,11 @@ else {
 		     ui_database_select("db", undef, \@dbs, $d, "wordpress"));
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
+	if (&has_wordpress_cli()) {
+		# Can select the blog title
+		$rv .= ui_table_row("WordPress Blog title",
+			ui_textbox("title", $d->{'owner'}, 40));
+		}
 	}
 return $rv;
 }
@@ -127,7 +132,8 @@ else {
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
-		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}", };
+		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}",
+		 'title' => $in{'title'} };
 	}
 }
 
@@ -153,6 +159,10 @@ return undef;
 sub script_wordpress_files
 {
 my ($d, $ver, $opts, $upgrade) = @_;
+if ($d && &has_wordpress_cli()) {
+	# Nothing to download
+	return ( );
+	}
 my @files = ( { 'name' => "source",
 	   'file' => "wordpress-$ver.zip",
 	   'url' => "http://wordpress.org/latest.zip",
@@ -171,7 +181,7 @@ return ("unzip");
 # message, or 0 and an error
 sub script_wordpress_install
 {
-local ($d, $version, $opts, $files, $upgrade) = @_;
+local ($d, $version, $opts, $files, $upgrade, $domuser, $dompass) = @_;
 my ($out, $ex);
 if ($opts->{'newdb'} && !$upgrade) {
         my $err = create_script_database($d, $opts->{'db'});
@@ -185,66 +195,116 @@ my $dbhost = get_database_host($dbtype, $d);
 my $dberr = check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
-# Extract tar file to temp dir and copy to target
-my $verdir = "wordpress";
-my $temp = transname();
-my $err = extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, $verdir);
-$err && return (0, "Failed to extract source : $err");
-my $cfileorig = "$opts->{'dir'}/wp-config-sample.php";
-my $cfile = "$opts->{'dir'}/wp-config.php";
+if (&has_wordpress_cli()) {
+	if (!$upgrade) {
+		# Execute the download command
+		&make_dir_as_domain_user($d, $opts->{'dir'}, 0755);
+		my $wp = "cd ".quotemeta($opts->{'dir'})." && ".&has_command("wp");
+		my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
+		if ($?) {
+			return (-1, "wp core download failed : $out");
+			}
 
-# Create the 'wordpress' virtuser, if missing
-if ($config{'mail'} && $d->{'mail'}) {
-	my ($wpvirt) = grep { $_->{'from'} eq 'wordpress@'.$d->{'dom'} }
-			       list_virtusers();
-	if (!$wpvirt) {
-		$wpvirt = { 'from' => 'wordpress@'.$d->{'dom'},
-			    'to' => [ $d->{'emailto_addr'} ] };
-		create_virtuser($wpvirt);
+		# Configure the database
+		my $out = &run_as_domain_user($d,
+			"$wp config create --dbname=".quotemeta($dbname).
+			" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
+			" --dbhost=".quotemeta($dbhost)." 2>&1");
+		if ($?) {
+			return (-1, "wp config create failed : $out");
+			}
+
+		# Do the install
+		my $out = &run_as_domain_user($d,
+			"$wp core install --url=$d->{'dom'}$opts->{'path'}".
+			" --title=".quotemeta($opts->{'title'} || $d->{'owner'}).
+			" --admin_user=".quotemeta($domuser).
+			" --admin_password=".quotemeta($dompass).
+			" --admin_email=".quotemeta($d->{'emailto'})." 2>&1");
+		if ($?) {
+			return (-1, "wp core install failed : $out");
+			}
+		}
+	else {
+		# Do the upgrade
+		my $out = &run_as_domain_user($d,
+                        "$wp core upgrade --version=$version");
+		if ($?) {
+			return (-1, "wp core upgrade failed : $out");
+			}
 		}
 	}
+else {
+	# Extract tar file to temp dir and copy to target
+	my $verdir = "wordpress";
+	my $temp = transname();
+	my $err = extract_script_archive($files->{'source'}, $temp, $d,
+					     $opts->{'dir'}, $verdir);
+	$err && return (0, "Failed to extract source : $err");
+	my $cfileorig = "$opts->{'dir'}/wp-config-sample.php";
+	my $cfile = "$opts->{'dir'}/wp-config.php";
 
-# Copy and update the config file
-if (!-r $cfile) {
-	run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
-				      quotemeta($cfile));
-	my $lref = read_file_lines_as_domain_user($d, $cfile);
-	foreach my $l (@$lref) {
-		if ($l =~ /^define\('DB_NAME',/) {
-			$l = "define('DB_NAME', '$dbname');";
-			}
-		if ($l =~ /^define\('DB_USER',/) {
-			$l = "define('DB_USER', '$dbuser');";
-			}
-		if ($l =~ /^define\('DB_HOST',/) {
-			$l = "define('DB_HOST', '$dbhost');";
-			}
-		if ($l =~ /^define\('DB_PASSWORD',/) {
-			$l = "define('DB_PASSWORD', '".
-			     php_quotemeta($dbpass, 1)."');";
-			}
-		if ($l =~ /define\('(AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY|AUTH_SALT|SECURE_AUTH_SALT|LOGGED_IN_SALT|NONCE_SALT)'/) {
-			my $salt = random_password(64);
-			$l = "define('$1', '$salt');";
-			}
-		if ($l =~ /^define\('WP_AUTO_UPDATE_CORE',/) {
-			$l = "define('WP_AUTO_UPDATE_CORE', false);";
+	# Create the 'wordpress' virtuser, if missing
+	if ($config{'mail'} && $d->{'mail'}) {
+		my ($wpvirt) = grep { $_->{'from'} eq 'wordpress@'.$d->{'dom'} }
+				       list_virtusers();
+		if (!$wpvirt) {
+			$wpvirt = { 'from' => 'wordpress@'.$d->{'dom'},
+				    'to' => [ $d->{'emailto_addr'} ] };
+			create_virtuser($wpvirt);
 			}
 		}
-	flush_file_lines_as_domain_user($d, $cfile);
+
+	# Copy and update the config file
+	if (!-r $cfile) {
+		run_as_domain_user($d, "cp ".quotemeta($cfileorig)." ".
+					      quotemeta($cfile));
+		my $lref = read_file_lines_as_domain_user($d, $cfile);
+		foreach my $l (@$lref) {
+			if ($l =~ /^define\('DB_NAME',/) {
+				$l = "define('DB_NAME', '$dbname');";
+				}
+			if ($l =~ /^define\('DB_USER',/) {
+				$l = "define('DB_USER', '$dbuser');";
+				}
+			if ($l =~ /^define\('DB_HOST',/) {
+				$l = "define('DB_HOST', '$dbhost');";
+				}
+			if ($l =~ /^define\('DB_PASSWORD',/) {
+				$l = "define('DB_PASSWORD', '".
+				     php_quotemeta($dbpass, 1)."');";
+				}
+			if ($l =~ /define\('(AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY|AUTH_SALT|SECURE_AUTH_SALT|LOGGED_IN_SALT|NONCE_SALT)'/) {
+				my $salt = random_password(64);
+				$l = "define('$1', '$salt');";
+				}
+			if ($l =~ /^define\('WP_AUTO_UPDATE_CORE',/) {
+				$l = "define('WP_AUTO_UPDATE_CORE', false);";
+				}
+			}
+		flush_file_lines_as_domain_user($d, $cfile);
+		}
 	}
 
 # Make content directory writable, for uploads
 make_file_php_writable($d, "$opts->{'dir'}/wp-content", 0);
 
-# Return a URL for the user
-my $url = script_path_url($d, $opts).
-	     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
-my $userurl = script_path_url($d, $opts);
-my $rp = $opts->{'dir'};
-$rp =~ s/^$d->{'home'}\///;
-return (1, "WordPress installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $userurl);
+if (&has_wordpress_cli()) {
+	# Install is all done, return the base URL
+	my $url = script_path_url($d, $opts);
+	my $rp = $opts->{'dir'};
+	$rp =~ s/^$d->{'home'}\///;
+	return (1, "WordPress installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url, $domuser, $dompass);
+	}
+else {
+	# Return a URL to complete the install
+	my $url = script_path_url($d, $opts).
+		     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
+	my $userurl = script_path_url($d, $opts);
+	my $rp = $opts->{'dir'};
+	$rp =~ s/^$d->{'home'}\///;
+	return (1, "WordPress initial installation complete. It can be completed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $userurl);
+	}
 }
 
 # script_wordpress_uninstall(&domain, version, &opts)
@@ -300,6 +360,16 @@ return 'http://wordpress.org/';
 sub script_wordpress_gpl
 {
 return 1;
+}
+
+sub script_wordpress_passmode
+{
+return &has_wordpress_cli() ? 1 : 0;
+}
+
+sub has_wordpress_cli
+{
+return &has_command("wp");
 }
 
 1;
