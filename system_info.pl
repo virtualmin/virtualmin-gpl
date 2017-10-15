@@ -544,8 +544,6 @@ if (&read_env_file($virtualmin_license_file, \%vserial) &&
 	# Serial and key
 	push(@table, { 'desc' => $text{'right_vserial'},
 		       'value' => $vserial{'SerialNumber'} });
-	push(@table, { 'desc' => $text{'right_vkey'},
-		       'value' => $vserial{'LicenseKey'} });
 
 	# Allowed domain counts
 	my ($dleft, $dreason, $dmax, $dhide) =
