@@ -1785,7 +1785,7 @@ if ($d->{'virt'}) {
 					}
 				}
 			}
-		&flush_file_lines($imap->{'file'});
+		&flush_file_lines($imap->{'file'}, undef, 1);
 		}
 	else {
 		# Doesn't need one, either because SSL isn't enabled or the
