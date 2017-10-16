@@ -2216,6 +2216,16 @@ if ($ok) {
 					}
 				}
 
+			# If this was a DNS sub-domain and the parent no longer exists, use a
+			# separate zone file
+			if ($d->{'dns_subof'}) {
+				my $dnsparent = &get_domain($d->{'dns_subof'});
+				if (!$dnsparent) {
+					delete($d->{'dns_subof'});
+					delete($d->{'dns_submode'});
+					}
+				}
+
 			# Build maps of used UIDs and GIDs
 			local (%gtaken, %taken);
 			&build_group_taken(\%gtaken);
