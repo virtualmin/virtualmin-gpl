@@ -299,6 +299,10 @@ if (!defined($dom->{'db_postgres'}) && $dom->{'postgres'}) {
 	$dom->{'db_postgres'} = $dom->{'db'};
 	}
 $dom->{'db_postgres'} = join(" ", &unique(split(/\s+/, $dom->{'db_postgres'})));
+if ($dom->{'dns'} && $dom->{'dns_submode'} && !$dom->{'dns_subof'}) {
+	# Assume parent DNS domain is parent virtual server
+	$dom->{'dns_subof'} = $dom->{'subdom'} || $dom->{'parent'};
+	}
 
 # Emailto is a computed field
 &compute_emailto($dom);
@@ -7923,7 +7927,19 @@ local ($d, $only, $nopost, $preserve) = @_;
 # Get domain details
 local @subs = &get_domain_by("parent", $d->{'id'});
 local @aliasdoms = &get_domain_by("alias", $d->{'id'});
-local @aliasdoms = grep { $_->{'parent'} != $d->{'id'} } @aliasdoms;
+local @aliasdoms = grep { $_->{'parent'} ne $d->{'id'} } @aliasdoms;
+local @alldoms = (@aliasdoms, @subs, $d);
+
+# Check for DNS dependencies
+foreach my $dd (@alldoms) {
+	foreach my $du (&get_domain_by("dns_subof", $dd->{'id'})) {
+		if (&indexof($du, @alldoms) < 0) {
+			# Domain is being used as a DNS parent, and user isn't being deleted
+			return &text('delete_ednssubof', &show_domain_name($dd),
+							 &show_domain_name($du));
+			}
+		}
+	}
 
 # Delete any jail
 if (!&check_jailkit_support() && !$d->{'parent'}) {
@@ -7933,7 +7949,7 @@ if (!&check_jailkit_support() && !$d->{'parent'}) {
 # Go ahead and delete this domain and all sub-domains ..
 &obtain_lock_mail();
 &obtain_lock_unix();
-foreach my $dd (@aliasdoms, @subs, $d) {
+foreach my $dd (@alldoms) {
 	if ($dd ne $d) {
 		# Show domain name
 		&$first_print(&text('delete_dom', &show_domain_name($dd)));
