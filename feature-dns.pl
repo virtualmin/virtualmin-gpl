@@ -32,6 +32,23 @@ local $tmpl = &get_template($d->{'template'});
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 
+# Find the DNS domain that this could be placed under
+local $dnsparent;
+if ($d->{'subdom'}) {
+	# Special subdom mode, always under that domain
+	$dnsparent = &get_domain($d->{'subdom'});
+	}
+elsif (!$d->{'alias'} && $tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
+	# Find most suitable domain with the same owner that has it's own file
+	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
+			     &get_domain_by("parent", $d->{'parent'})) {
+		if (!$pd->{'dns_submode'} && &under_parent_domain($d, $pd)) {
+			$dnsparent = $pd;
+			last;
+			}
+		}
+	}
+
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
 	&$first_print($text{'setup_bind_provision'});
@@ -63,9 +80,7 @@ if ($d->{'provision_dns'}) {
 	&$second_print(&text('setup_bind_provisioned',
 			     $d->{'provision_dns_host'}));
 	}
-elsif (!$d->{'subdom'} && !&under_parent_domain($d) ||
-       $tmpl->{'dns_sub'} ne 'yes' ||
-       $d->{'alias'}) {
+elsif (!$dnsparent) {
 	# Creating a new real zone
 	&$first_print($text{'setup_bind'});
 	&obtain_lock_dns($d, 1);
@@ -245,20 +260,17 @@ elsif (!$d->{'subdom'} && !&under_parent_domain($d) ||
 	}
 else {
 	# Creating a sub-domain - add to parent's DNS zone.
-	# This only happens if the parent zone has the same owner, and this
-	# feature is enabled in templates, and this zone isn't an alias.
-	local $parent = &get_domain($d->{'subdom'}) ||
-			&get_domain($d->{'parent'});
-	&$first_print(&text('setup_bindsub', $parent->{'dom'}));
-	&obtain_lock_dns($parent);
-	local $z = &get_bind_zone($parent->{'dom'});
+	&$first_print(&text('setup_bindsub', $dnsparent->{'dom'}));
+	&obtain_lock_dns($dnsparent);
+	local $z = &get_bind_zone($dnsparent->{'dom'});
 	if (!$z) {
-		&error(&text('setup_ednssub', $parent->{'dom'}));
+		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
 		}
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
-	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
+	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
 	$d->{'dns_submode'} = 1;	# So we know how this was done
+	$d->{'dns_subof'} = $dnsparent->{'id'};
 	local ($already) = grep { $_->{'name'} eq $d->{'dom'}."." }
 				grep { $_->{'type'} eq 'A' } @recs;
 	if ($already) {
@@ -268,9 +280,9 @@ else {
 		}
 	local $ip = $d->{'dns_ip'} || $d->{'ip'};
 	&create_standard_records($fn, $d, $ip);
-	&post_records_change($parent, \@recs);
+	&post_records_change($dnsparent, \@recs);
 
-	&release_lock_dns($parent);
+	&release_lock_dns($dnsparent);
 	&add_parent_dnssec_ds_records($d);
 	&$second_print($text{'setup_done'});
 	}
@@ -358,19 +370,18 @@ elsif (!$d->{'dns_submode'}) {
 	}
 else {
 	# Delete records from parent zone
-	local $parent = &get_domain($d->{'subdom'}) ||
-			&get_domain($d->{'parent'});
-	&$first_print(&text('delete_bindsub', $parent->{'dom'}));
-	&obtain_lock_dns($parent);
+	local $dnsparent = &get_domain($d->{'dns_subof'});
+	&$first_print(&text('delete_bindsub', $dnsparent->{'dom'}));
+	&obtain_lock_dns($dnsparent);
 	&delete_parent_dnssec_ds_records($d);
-	local $z = &get_bind_zone($parent->{'dom'});
+	local $z = &get_bind_zone($dnsparent->{'dom'});
 	if (!$z) {
 		&$second_print($text{'save_nobind'});
 		return;
 		}
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
-	local @recs = &bind8::read_zone_file($fn, $parent->{'dom'});
+	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
 	local $withdot = $d->{'dom'}.".";
 	foreach $r (reverse(@recs)) {
 		# Don't delete if outside sub-domain
@@ -380,8 +391,8 @@ else {
 			 $d->{'dns_subalready'});
 		&bind8::delete_record($fn, $r);
 		}
-	&post_records_change($parent, \@recs);
-	&release_lock_dns($parent);
+	&post_records_change($dnsparent, \@recs);
+	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
 	$d->{'dns_submode'} = 0;
 	}
@@ -578,12 +589,11 @@ local $tmpl = &get_template($d->{'template'});
 local ($oldzonename, $newzonename, $lockon, $lockconf, $zdom);
 if ($d->{'dns_submode'}) {
 	# Get parent domain
-	local $parent = &get_domain($d->{'subdom'}) ||
-			&get_domain($d->{'parent'});
-	&obtain_lock_dns($parent);
-	$lockon = $parent;
-	$zdom = $parent;
-	$oldzonename = $newzonename = $parent->{'dom'};
+	local $dnsparent = &get_domain($d->{'dns_subof'});
+	&obtain_lock_dns($dnsparent);
+	$lockon = $dnsparent;
+	$zdom = $dnsparent;
+	$oldzonename = $newzonename = $dnsparent->{'dom'};
 	}
 else {
 	# Get this domain
@@ -1093,8 +1103,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Work out which records are already in the file
 	local $rd = $d;
 	if ($d->{'dns_submode'}) {
-		$rd = &get_domain($d->{'subdom'}) ||
-		      &get_domain($d->{'parent'});
+		$rd = &get_domain($d->{'dns_subof'});
 		}
 	local %already = map { $_->{'name'}, $_ }
 			     grep { $_->{'type'} eq 'A' }
@@ -1479,7 +1488,7 @@ local ($d, $recs, $recsonly) = @_;
 local $file;
 if ($d->{'dns_submode'}) {
 	# For a sub-domain, don't complain if parent is disabled
-	my $parent = &get_domain($d->{'parent'});
+	my $parent = &get_domain($d->{'dns_subof'});
 	if ($parent && $parent->{'disabled'}) {
 		return undef;
 		}
@@ -2866,8 +2875,7 @@ if ($d->{'provision_dns'}) {
 local $z;
 if ($d->{'dns_submode'}) {
 	# Records are in super-domain
-	local $parent = &get_domain($d->{'subdom'}) ||
-			&get_domain($d->{'parent'});
+	local $parent = &get_domain($d->{'dns_subof'});
 	$z = &get_bind_zone($parent->{'dom'});
 	}
 else {
@@ -2951,8 +2959,7 @@ else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
 	return ("No zone file found for $d->{'dom'}") if (!$file);
-	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'subdom'} ||
-						      $d->{'parent'}) : $d;
+	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
 	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
 	&set_record_ids(\@recs);
 	return (\@recs, $file);
