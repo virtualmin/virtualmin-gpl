@@ -76,6 +76,7 @@ foreach $d (@doms) {
 	$idmap{$d->{'id'}} = $d;
 	}
 @doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
+@doms = sort { $b->{'dns_subof'} <=> $a->{'dns_subof'} } @doms;
 
 # Kill them
 $config{'pre_command'} = $precommand if ($precommand);

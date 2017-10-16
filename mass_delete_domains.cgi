@@ -93,6 +93,7 @@ if (!$in{'confirm'}) {
 else {
 	# Strip out all sub-domains of domains to be deleted
 	@doms = grep { !$_->{'parent'} || !$idmap{$_->{'parent'}} } @doms;
+	@doms = sort { $b->{'dns_subof'} <=> $a->{'dns_subof'} } @doms;
 	@das = ( );
 
 	foreach $d (@doms) {
