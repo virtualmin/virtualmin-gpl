@@ -1280,6 +1280,7 @@ delete_nostatus=.. not found!
 delete_mxs=Removing secondary mail servers $1 ..
 delete_dom=Deleting sub-server $1 ..
 delete_aliasfailure=.. $1 alias deletion failed : $2
+delete_ednssubof=Virtual server $1 cannot be deleted, as it contains DNS records for server $2
 
 save_err=Failed to modify server
 save_title=Save Server
