@@ -1909,44 +1909,54 @@ sub backup_dns
 {
 my ($d, $file) = @_;
 &require_bind();
-return 1 if ($d->{'dns_submode'});	# backed up in parent
 &$first_print($text{'backup_dnscp'});
 local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
-if ($zonefile) {
-	local $absfile = &bind8::make_chroot(
-			&bind8::absolute_path($zonefile));
-	if (-r $absfile) {
-		&copy_write_as_domain_user($d, $absfile, $file);
-		my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-		@keys = grep { ref($_) &&
-			       $_->{'privatefile'} &&
-			       $_->{'publicfile'} } @keys;
-		my $i = 0;
-		my %kinfo;
-		foreach my $key (@keys) {
-			foreach my $t ('private', 'public') {
-				&copy_write_as_domain_user(
-					$d, $key->{$t.'file'},
-					$file.'_dnssec_'.$t.'_'.$i);
-				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
-				$kinfo{$t.'_'.$i} = $1;
-				}
-			$i++;
-			}
-		&write_file($file."_dnssec_keyinfo", \%kinfo);
-		&$second_print($text{'setup_done'});
-		return 1;
-		}
-	else {
-		&$second_print(&text('backup_dnsnozonefile',
-				     "<tt>$zonefile</tt>"));
-		return 0;
-		}
-	}
-else {
+if (!$zonefile) {
+	# Zone doesn't exist!
 	&$second_print($text{'backup_dnsnozone'});
 	return 0;
 	}
+local $absfile = &bind8::make_chroot(&bind8::absolute_path($zonefile));
+if (!-r $absfile) {
+	# Zone file doesn't exist!
+	&$second_print(&text('backup_dnsnozonefile', "<tt>$zonefile</tt>"));
+	return 0;
+	}
+if (!$d->{'dns_submode'}) {
+	# Can just copy the whole zone file
+	&copy_write_as_domain_user($d, $absfile, $file);
+	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	@keys = grep { ref($_) &&
+		       $_->{'privatefile'} &&
+		       $_->{'publicfile'} } @keys;
+	my $i = 0;
+	my %kinfo;
+	foreach my $key (@keys) {
+		foreach my $t ('private', 'public') {
+			&copy_write_as_domain_user(
+				$d, $key->{$t.'file'},
+				$file.'_dnssec_'.$t.'_'.$i);
+			$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
+			$kinfo{$t.'_'.$i} = $1;
+			}
+		$i++;
+		}
+	&write_file($file."_dnssec_keyinfo", \%kinfo);
+	}
+else {
+	# Extract the appropriate records
+	local $bind8::chroot = "/";	# So that create_record will write to the backup file
+	$recs = &filter_domain_dns_records($d, $recs);
+	foreach my $rec (@$recs) {
+		next if ($rec->{'name'} eq '$ttl' || $rec->{'name'} eq '$generate');
+		&bind8::create_record($file, $rec->{'name'},
+			$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
+			&join_record_values($rec, 1),
+			$rec->{'comment'});
+		}
+	}
+&$second_print($text{'setup_done'});
+return 1;
 }
 
 # restore_dns(&domain, file, &options)
@@ -3802,6 +3812,38 @@ if ($conftoo && !$prov) {
 	}
 
 &release_lock_anything($d);
+}
+
+# filter_domain_dns_records(&domain, &recs)
+# Given a domain and a list of DNS records, return only those records that are in the domain and
+# not any sub-domains
+sub filter_domain_dns_records
+{
+my ($d, $recs) = @_;
+
+# Find sub-domains to exclude records in
+my @subdoms;
+foreach $sd (&list_domains()) {
+	if ($sd->{'dns_submode'} && $sd->{'id'} ne $d->{'id'} &&
+	    $sd->{'dom'} =~ /\.\Q$d->{'dom'}\E$/) {
+		push(@subdoms, $sd->{'dom'});
+		}
+	}
+
+my @rv;
+RECORD: foreach my $r (@$recs) {
+	# Skip sub-domain records
+	foreach $sname (@subdoms) {
+		next RECORD if ($r->{'name'} eq $sname."." ||
+				$r->{'name'} =~ /\.\Q$sname\E\.$/);
+		}
+	# Skip records not in this domain, such as if we are in
+	# a sub-domain
+	next if ($r->{'name'} ne $d->{'dom'}."." &&
+		 $r->{'name'} !~ /\.$d->{'dom'}\.$/);
+	push(@rv, $r);
+	}
+return \@rv;
 }
 
 $done_feature_script{'dns'} = 1;

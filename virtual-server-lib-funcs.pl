@@ -7933,7 +7933,7 @@ local @alldoms = (@aliasdoms, @subs, $d);
 # Check for DNS dependencies
 foreach my $dd (@alldoms) {
 	foreach my $du (&get_domain_by("dns_subof", $dd->{'id'})) {
-		if (&indexof($du->{'id'}, (map { $_->{'id'} } @alldoms)) < 0) {
+		if (&indexof($du, @alldoms) < 0) {
 			# Domain is being used as a DNS parent, and user isn't being deleted
 			return &text('delete_ednssubof', &show_domain_name($dd),
 							 &show_domain_name($du));

@@ -622,6 +622,12 @@ if ($multi) {
 			      $d->{'dns_slave'},"\n";
 			}
 
+		# Containing DNS domain
+		if ($d->{'dns_submode'}) {
+			$dnsparent = &get_domain($d->{'dns_subof'});
+			print "    Parent DNS virtual server: ",$dnsparent->{'dom'},"\n";
+			}
+
 		# Show BCC setting
 		$bcc = $sender_bcc->{$d->{'id'}};
 		if ($bcc) {

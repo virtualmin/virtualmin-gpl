@@ -10,14 +10,6 @@ $d || &error($text{'edit_egone'});
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
 
-# Find sub-domains to exclude records in
-foreach $sd (&list_domains()) {
-	if ($sd->{'dns_submode'} && $sd->{'id'} ne $d->{'id'} &&
-	    $sd->{'dom'} =~ /\.\Q$d->{'dom'}\E$/) {
-		push(@subdoms, $sd->{'dom'});
-		}
-	}
-
 &ui_print_header(&domain_in($d), $text{'records_title'}, "", "records");
 
 # Warn if DNS records are not valid
@@ -26,6 +18,9 @@ if ($err) {
 	print "<font color=red><b>",&text('records_evalid', $err),
 	      "</b></font><p>\n";
 	}
+
+# Exclude sub-domains and parent domains
+$recs = &filter_domain_dns_records($d, $recs);
 
 # Check if we need a comment column
 foreach $r (@$recs) {
@@ -67,15 +62,6 @@ RECORD: foreach $r (@$recs) {
 			 $r->{'type'} eq 'NSEC' ||
 			 $r->{'type'} eq 'NSEC3' ||
 			 $r->{'type'} eq 'RRSIG');
-		# Skip sub-domain records
-		foreach $sname (@subdoms) {
-			next RECORD if ($r->{'name'} eq $sname."." ||
-					$r->{'name'} =~ /\.\Q$sname\E\.$/);
-			}
-		# Skip records not in this domain, such as if we are in
-		# a sub-domain
-		next if ($r->{'name'} ne $d->{'dom'}."." &&
-			 $r->{'name'} !~ /\.$d->{'dom'}\.$/);
 
 		$name = $r->{'name'};
 		$name =~ s/\.$//;
