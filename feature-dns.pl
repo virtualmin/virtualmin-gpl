@@ -1965,34 +1965,53 @@ sub restore_dns
 {
 local ($d, $file, $opts) = @_;
 &require_bind();
-return 1 if ($d->{'dns_submode'});	# restored in parent
 &$first_print($text{'restore_dnscp'});
 &obtain_lock_dns($d, 1);
 local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
 local $ok;
-if ($zonefile) {
-	local $absfile = &bind8::make_chroot(
-			&bind8::absolute_path($zonefile));
-	local @thisrecs;
+if (!$zonefile) {
+	# DNS zone not found!
+	&$second_print($text{'backup_dnsnozone'});
+	&release_lock_dns($d, 1);
+	return 0;
+	}
+local $absfile = &bind8::make_chroot(&bind8::absolute_path($zonefile));
+local @thisrecs;
 
-	if ($opts->{'wholefile'}) {
-		# Copy whole file
-		&copy_source_dest($file, $absfile);
-		&bind8::set_ownership($zonefile);
+if ($d->{'dns_submode'}) {
+	# Only replacing records for this sub-domain
+	my $oldsubrecs = &filter_domain_dns_records($d, $recs);
+	my @backuprecs = &bind8::read_zone_file($file, $d->{'dom'});
+	$oldsubrecs = &filter_domain_dns_records($d, $oldsubrecs);
+	my $newsubrecs = &filter_domain_dns_records($d, \@backuprecs);
+	print STDERR "replacing ",scalar(@$oldsubrecs)," with ",scalar(@$newsubrecs),"\n";
+	foreach my $r (reverse(@$oldsubrecs)) {
+		&bind8::delete_record($zonefile, $r);
 		}
-	else {
-		# Only copy section after SOA
-		@thisrecs = &bind8::read_zone_file($zonefile,
-		    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""));
-		local $srclref = &read_file_lines($file, 1);
-		local $dstlref = &read_file_lines($absfile);
-		local ($srcstart, $srcend) = &except_soa($d, $file);
-		local ($dststart, $dstend) = &except_soa($d, $absfile);
-		splice(@$dstlref, $dststart, $dstend - $dststart + 1,
-		       @$srclref[$srcstart .. $srcend]);
-		&flush_file_lines($absfile);
+	foreach my $r (@$newsubrecs) {
+		&bind8::create_record($zonefile, $r->{'name'}, $r->{'ttl'},
+				      'IN', $r->{'type'}, &join_record_values($r));
 		}
+	}
+elsif ($opts->{'wholefile'}) {
+	# Copy whole file
+	&copy_source_dest($file, $absfile);
+	&bind8::set_ownership($zonefile);
+	}
+else {
+	# Only copy section after SOA
+	@thisrecs = &bind8::read_zone_file($zonefile,
+	    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""));
+	local $srclref = &read_file_lines($file, 1);
+	local $dstlref = &read_file_lines($absfile);
+	local ($srcstart, $srcend) = &except_soa($d, $file);
+	local ($dststart, $dstend) = &except_soa($d, $absfile);
+	splice(@$dstlref, $dststart, $dstend - $dststart + 1,
+	       @$srclref[$srcstart .. $srcend]);
+	&flush_file_lines($absfile);
+	}
 
+if (!$d->{'dns_submode'}) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
@@ -2016,102 +2035,97 @@ if ($zonefile) {
 			}
 		$i++;
 		}
-
-	# Re-read records, bump SOA and upload records to provisioning server
-	local @recs = &bind8::read_zone_file($zonefile, $d->{'dom'});
-	&post_records_change($d, \@recs, $zonefile);
-
-	# Need to update IP addresses
-	local $r;
-	local ($baserec) = grep { $_->{'type'} eq "A" &&
-				  ($_->{'name'} eq $d->{'dom'}."." ||
-				   $_->{'name'} eq '@') } @recs;
-	local $ip = $d->{'dns_ip'} || $d->{'ip'};
-	local $baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
-		        $d->{'old_ip'} ? $d->{'old_ip'} :
-				$baserec ? $baserec->{'values'}->[0] : undef;
-	if ($baseip) {
-		&modify_records_ip_address(\@recs, $zonefile, $baseip, $ip);
-		}
-
-	# Need to update IPv6 address
-	local ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
-				   ($_->{'name'} eq $d->{'dom'}."." ||
-				    $_->{'name'} eq '@') } @recs;
-	local $ip6 = $d->{'ip6'};
-	local $baseip6 = $d->{'old_ip6'} ? $d->{'old_ip6'} :
-				$baserec6 ? $baserec6->{'values'}->[0] : undef;
-	if ($baseip6 && $ip6) {
-		# Update to new v6 address
-		&modify_records_ip_address(\@recs, $zonefile, $baseip6, $ip6);
-		}
-	elsif ($baseip6 && !$ip6) {
-		# This domain doesn't have a v6 address now, so remove AAAAs
-		&remove_ip6_records($d, $zonefile, \@recs);
-		}
-
-	# Replace NS records with those from new system
-	if (!$opts->{'wholefile'}) {
-		local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
-		local @ns = grep { $_->{'type'} eq 'NS' } @recs;
-		foreach my $r (@thisns) {
-			# Create NS records that were in new system's file
-			my $name = $r->{'name'};
-			$name =~ s/\.disabled\.$/\./;
-			if (@ns && $ns[0]->{'name'} =~ /\.disabled\.$/) {
-				$name .= "disabled.";
-				}
-			&bind8::create_record($zonefile, $name, $r->{'ttl'},
-					      $r->{'class'}, $r->{'type'},
-					      &join_record_values($r),
-					      $r->{'comment'});
-			}
-		foreach my $r (reverse(@ns)) {
-			# Remove old NS records that we copied over
-			&bind8::delete_record($zonefile, $r);
-			}
-		}
-
-	# Make sure any SPF record contains this system's default IP v4 and
-	# v6 addresses
-	local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
-						    : ( "SPF" );
-	foreach my $t (@types) {
-		local ($r) = grep { $_->{'type'} eq $t &&
-				    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
-		next if (!$r);
-		local $spf = &bind8::parse_spf(@{$r->{'values'}});
-		local $changed = 0;
-		local $defip = &get_default_ip();
-		if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
-			push(@{$spf->{'ip4'}}, $defip);
-			$changed++;
-			}
-		local $defip6 = &get_default_ip6();
-		if (&indexof($defip6, @{$spf->{'ip6'}}) < 0) {
-			push(@{$spf->{'ip6'}}, $defip6);
-			$changed++;
-			}
-		if ($changed) {
-			local $str = &bind8::join_spf($spf);
-			&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
-					      $r->{'ttl'}, $r->{'class'},
-					      $r->{'type'}, "\"$str\"",
-					      $r->{'comment'});
-			}
-		}
-
-	&$second_print($text{'setup_done'});
-
-	&register_post_action(\&restart_bind, $d);
-	$ok = 1;
 	}
-else {
-	&$second_print($text{'backup_dnsnozone'});
-	$ok = 0;
+
+# Re-read records, bump SOA and upload records to provisioning server
+local @recs = &bind8::read_zone_file($zonefile, $d->{'dom'});
+&post_records_change($d, \@recs, $zonefile);
+
+# Need to update IP addresses
+local $r;
+local ($baserec) = grep { $_->{'type'} eq "A" &&
+			  ($_->{'name'} eq $d->{'dom'}."." ||
+			   $_->{'name'} eq '@') } @recs;
+local $ip = $d->{'dns_ip'} || $d->{'ip'};
+local $baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
+		$d->{'old_ip'} ? $d->{'old_ip'} :
+			$baserec ? $baserec->{'values'}->[0] : undef;
+if ($baseip) {
+	&modify_records_ip_address(\@recs, $zonefile, $baseip, $ip);
 	}
+
+# Need to update IPv6 address
+local ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
+			   ($_->{'name'} eq $d->{'dom'}."." ||
+			    $_->{'name'} eq '@') } @recs;
+local $ip6 = $d->{'ip6'};
+local $baseip6 = $d->{'old_ip6'} ? $d->{'old_ip6'} :
+			$baserec6 ? $baserec6->{'values'}->[0] : undef;
+if ($baseip6 && $ip6) {
+	# Update to new v6 address
+	&modify_records_ip_address(\@recs, $zonefile, $baseip6, $ip6);
+	}
+elsif ($baseip6 && !$ip6) {
+	# This domain doesn't have a v6 address now, so remove AAAAs
+	&remove_ip6_records($d, $zonefile, \@recs);
+	}
+
+# Replace NS records with those from new system
+if (!$opts->{'wholefile'}) {
+	local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
+	local @ns = grep { $_->{'type'} eq 'NS' } @recs;
+	foreach my $r (@thisns) {
+		# Create NS records that were in new system's file
+		my $name = $r->{'name'};
+		$name =~ s/\.disabled\.$/\./;
+		if (@ns && $ns[0]->{'name'} =~ /\.disabled\.$/) {
+			$name .= "disabled.";
+			}
+		&bind8::create_record($zonefile, $name, $r->{'ttl'},
+				      $r->{'class'}, $r->{'type'},
+				      &join_record_values($r),
+				      $r->{'comment'});
+		}
+	foreach my $r (reverse(@ns)) {
+		# Remove old NS records that we copied over
+		&bind8::delete_record($zonefile, $r);
+		}
+	}
+
+# Make sure any SPF record contains this system's default IP v4 and
+# v6 addresses
+local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
+					    : ( "SPF" );
+foreach my $t (@types) {
+	local ($r) = grep { $_->{'type'} eq $t &&
+			    $r->{'name'} eq $d->{'dom'}.'.' } @recs;
+	next if (!$r);
+	local $spf = &bind8::parse_spf(@{$r->{'values'}});
+	local $changed = 0;
+	local $defip = &get_default_ip();
+	if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
+		push(@{$spf->{'ip4'}}, $defip);
+		$changed++;
+		}
+	local $defip6 = &get_default_ip6();
+	if (&indexof($defip6, @{$spf->{'ip6'}}) < 0) {
+		push(@{$spf->{'ip6'}}, $defip6);
+		$changed++;
+		}
+	if ($changed) {
+		local $str = &bind8::join_spf($spf);
+		&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
+				      $r->{'ttl'}, $r->{'class'},
+				      $r->{'type'}, "\"$str\"",
+				      $r->{'comment'});
+		}
+	}
+
+&$second_print($text{'setup_done'});
+
+&register_post_action(\&restart_bind, $d);
 &release_lock_dns($d, 1);
-return $ok;
+return 1;
 }
 
 # modify_records_ip_address(&records, filename, oldip, newip, [domain])
@@ -3750,8 +3764,9 @@ local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
 if ($d && !$prov) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
 		&require_bind();
+		local $lockd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
 		local $conf = &bind8::get_config();
-		local $z = &get_bind_zone($d->{'dom'}, $conf);
+		local $z = &get_bind_zone($lockd->{'dom'}, $conf);
 		local $fn;
 		if ($z) {
 			local $file = &bind8::find("file", $z->{'members'});
@@ -3760,7 +3775,7 @@ if ($d && !$prov) {
 		else {
 			local $base = $bconfig{'master_dir'} ||
 				      &bind8::base_directory($conf);
-			$fn = &bind8::automatic_filename($d->{'dom'}, 0, $base);
+			$fn = &bind8::automatic_filename($lockd->{'dom'}, 0, $base);
 			}
 		local $rootfn = &bind8::make_chroot($fn);
 		&lock_file($rootfn);
