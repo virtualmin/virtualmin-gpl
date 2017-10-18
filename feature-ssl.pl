@@ -2105,7 +2105,9 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 	if ($d->{'dns'}) {
 		my $recs = &get_domain_dns_records($d);
 		my ($r) = grep { $_->{'name'} eq $full."." } @$recs;
-		push(@rv, $full);
+		if ($r) {
+			push(@rv, $full);
+			}
 		}
 	elsif (&to_ipaddress($full)) {
 		push(@rv, $full);
