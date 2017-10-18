@@ -3046,6 +3046,7 @@ sub require_dom_mysql
 {
 my ($d) = @_;
 my $mod = !$d ? 'mysql' : $d->{'mysql_module'} || 'mysql';
+eval "\$${mod}::use_global_login = 1;";
 &foreign_require($mod);
 return $mod;
 }
