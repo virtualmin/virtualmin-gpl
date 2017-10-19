@@ -12,14 +12,6 @@ if (!$d->{'alias'}) {
 	$mode = &get_domain_php_mode($d);
 	}
 
-$p = &domain_has_website($d);
-if ($p eq 'web') {
-	# Make sure an Apache virtualhost exists, or else all the rest
-	# is pointless
-	($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-	$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
-	}
-
 &ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
 
 print &ui_form_start("save_phpmode.cgi");

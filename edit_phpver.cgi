@@ -7,10 +7,6 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_phpver($d) || &error($text{'phpver_ecannot'});
 
-# Make sure an Apache virtualhost exists, or else all the rest is pointless
-($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-$virt || &error(&text('phpmode_evirt', $d->{'dom'}, $d->{'web_port'}));
-
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
 
 $mode = &get_domain_php_mode($d);
