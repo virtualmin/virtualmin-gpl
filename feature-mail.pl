@@ -5785,6 +5785,8 @@ local $imap_port = 143;
 local $imap_type = "plain";
 local $imap_ssl = "no";
 local $imap_enc = "password-cleartext";
+local $pop3_port = 110;
+local $pop3_enc = "password-cleartext";
 if (&foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
 	local $conf = &dovecot::get_config();
@@ -5793,12 +5795,14 @@ if (&foreign_installed("dovecot")) {
 	if ($sslopt eq "ssl" &&
 	    &dovecot::find_value($sslopt, $conf) ne "no") {
 		$imap_port = 993;
+		$pop3_port = 995;
 		$imap_type = "SSL";
 		$imap_ssl = "yes";
 		}
 	elsif ($sslopt eq "ssl_disable" &&
 	       &dovecot::find_value($sslopt, $conf) ne "yes") {
 		$imap_port = 993;
+		$pop3_port = 995;
 		$imap_type = "SSL";
 		$imap_ssl = "yes";
 		}
@@ -5898,6 +5902,12 @@ foreach my $l (@$lref) {
 		}
 	elsif ($l =~ /^\$IMAP_SSL\s+=/) {
 		$l = "\$IMAP_SSL = '$imap_ssl';";
+		}
+	elsif ($l =~ /^\$POP3_PORT\s+=/) {
+		$l = "\$POP3_PORT = '$pop3_port';";
+		}
+	elsif ($l =~ /^\$POP3_ENC\s+=/) {
+		$l = "\$POP3_ENC = '$pop3_enc';";
 		}
 	elsif ($l =~ /^\$PREFIX\s+=/) {
 		$l = "\$PREFIX = '$d->{'prefix'}';";
@@ -6226,6 +6236,13 @@ return <<'EOF';
       <port>$IMAP_PORT</port>
       <socketType>$IMAP_TYPE</socketType>
       <authentication>$IMAP_ENC</authentication>
+      <username>$SMTP_LOGIN</username>
+    </incomingServer>
+    <incomingServer type="pop3">
+      <hostname>$IMAP_HOST</hostname>
+      <port>$POP3_PORT</port>
+      <socketType>$IMAP_TYPE</socketType>
+      <authentication>$POP3_ENC</authentication>
       <username>$SMTP_LOGIN</username>
     </incomingServer>
     <outgoingServer type="smtp">
