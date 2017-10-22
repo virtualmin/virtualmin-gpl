@@ -418,15 +418,16 @@ if ($d->{'ssl_key'}) {
 		$keyfile = $d->{'ssl_key'};
 		}
 	}
-if ($d->{'ssl_chain'}) {
+my $dchain = &get_website_ssl_file($d, 'ca');
+if ($dchain) {
 	if ($homecert) {
 		$chainfile = "$dir/$d->{'dom'}.chain";
 		&lock_file($chainfile);
-		&copy_source_dest($d->{'ssl_chain'}, $chainfile);
+		&copy_source_dest($dchain, $chainfile);
 		&unlock_file($chainfile);
 		}
 	else {
-		$chainfile = $d->{'ssl_chain'};
+		$chainfile = $dchain;
 		}
 	}
 &$second_print($text{'setup_done'});
