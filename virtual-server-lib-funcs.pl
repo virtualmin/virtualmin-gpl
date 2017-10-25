@@ -14660,6 +14660,50 @@ else {
 	&$second_print(&text('check_jailkitok'));
 	}
 
+# If using the Pro version, make sure the repo licence matches
+my %vserial;
+if ($virtualmin_pro &&
+    &read_env_file($virtualmin_license_file, \%vserial) &&
+    $vserial{'SerialNumber'} ne 'GPL') {
+	if ($gconfig{'os_type'} eq 'redhat-linux') {
+		# Check the YUM config file
+		my $repo = "/etc/yum.repos.d/virtualmin.repo";
+		if (!-r $repo) {
+			&$second_print(&text('check_eyumrepofile', $repo));
+			}
+		else {
+			# File exists, but does it contain the right repo line?
+			my $lref = &read_file_lines($repo, 1);
+			my $found = 0;
+			foreach my $l (@$lref) {
+				if ($l =~ /baseurl=http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+					if ($1 eq $vserial{'SerialNumber'} &&
+					    $2 eq $vserial{'LicenseKey'}) {
+						$found = 2;
+						}
+					else {
+						$found = 1;
+						}
+					last;
+					}
+				}
+			if ($found == 2) {
+				&$second_print($text{'check_yumrepook'});
+				}
+			elsif ($found == 1) {
+				&$second_print(&text('check_yumrepowrong', $repo));
+				}
+			else {
+				&$second_print(&text('check_yumrepomissing', $repo));
+				}
+			}
+		}
+	elsif ($gconfig{'os_type'} eq 'debian-linux') {
+		# Check the APT config file
+		# XXX
+		}
+	}
+
 # Check for disabled features that are in use
 my @doms = &list_domains();
 foreach my $f (@features) {
