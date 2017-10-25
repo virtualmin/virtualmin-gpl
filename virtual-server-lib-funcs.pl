@@ -13280,6 +13280,13 @@ if ($dom) {
 	$clash && return $text{'rename_eclash'};
 	}
 
+# If this domain has any DNS sub-domains, disallow the rename
+my @dnssub = &get_domain_by("dns_subof", $d->{'id'});
+if (@dnssub) {
+	return &text('rename_ednssub',
+		join(" ", map { &show_domain_name($_) } @dnssub));
+	}
+
 # Validate username, home directory and prefix
 if ($d->{'parent'}) {
 	# Sub-servers don't have a separate user
