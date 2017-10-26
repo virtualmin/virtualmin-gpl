@@ -6215,6 +6215,7 @@ autoconfig_edoms=No virtual servers with both email and a website enabled exist!
 autoconfig_enable=Enabling mail client autoconfiguration for $1 virtual servers ..
 autoconfig_disable=Disabling mail client autoconfiguration for $1 virtual servers ..
 autoconfig_failed=Failed for $1 : $2
+autoconfig_enabled_global=Saved mail autoconfiguration settings.
 
 newretention_title=Mailbox Cleanup
 retention_ecannot=You are not allowed to configured mailbox cleanup
