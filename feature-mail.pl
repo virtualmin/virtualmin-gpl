@@ -5823,7 +5823,7 @@ if ($config{'mail_system'} == 0) {
 	# Check for Postfix submission port
 	&foreign_require("postfix");
 	local $master = postfix::get_master_config();
-	local ($submission) = grep { $_->{'name'} eq 'submission' &&
+	local ($submission) = grep { $_->{'name'} =~ /^(submission|[0-9\.]+:submissions)$/ &&
 				     $_->{'enabled'} } @$master;
 	if ($submission) {
 		$smtp_port = 587;
