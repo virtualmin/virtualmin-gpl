@@ -888,7 +888,7 @@ print "Adds a new Virtualmin virtual server, with the settings and features\n";
 print "specified on the command line.\n";
 print "\n";
 print "virtualmin create-domain --domain domain.name\n";
-print "                         --pass password-for-unix-user |\n";
+print "                         --pass \"password-for-new-domain\" |\n";
 print "                         --passfile password-file\n";
 print "                        [--hashpass]\n";
 print "                        [--parent domain.name | --alias domain.name |\n";

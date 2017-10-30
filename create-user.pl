@@ -380,7 +380,7 @@ print "Adds a new mailbox user to an existing Virtualmin domain.\n";
 print "\n";
 print "virtualmin create-user --domain domain.name\n";
 print "                       --user new-username\n";
-print "                       --pass password-for-new-user |\n";
+print "                       --pass \"password-for-new-user\" |\n";
 print "                       --encpass encrypted-password |\n";
 print "                       --random-pass |\n";
 print "                       --passfile password-file\n";

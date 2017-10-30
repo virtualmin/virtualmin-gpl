@@ -292,7 +292,7 @@ print "virtualmin migrate-domain --source file\n";
 print "                          --type $types\n";
 print "                          --domain name\n";
 print "                         [--user username]\n";
-print "                         [--pass password]\n";
+print "                         [--pass \"password\"]\n";
 print "                         [--webmin]\n";
 print "                         [--template name]\n";
 print "                         [--parent domain]\n";

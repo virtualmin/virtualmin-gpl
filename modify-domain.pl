@@ -833,7 +833,7 @@ print "\n";
 print "virtualmin modify-domain --domain domain.name\n";
 print "                        [--desc new-description]\n";
 print "                        [--user new-username]\n";
-print "                        [--pass new-password | --passfile password-file]\n";
+print "                        [--pass \"new-password\" | --passfile password-file]\n";
 print "                        [--email new-email]\n";
 print "                        [--quota new-quota|UNLIMITED]\n";
 print "                        [--uquota new-unix-quota|UNLIMITED]\n";

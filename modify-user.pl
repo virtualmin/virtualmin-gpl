@@ -542,7 +542,7 @@ print "Modifies a mail, FTP or database user in a Virtualmin domain.\n";
 print "\n";
 print "virtualmin modify-user --domain domain.name\n";
 print "                       --user username\n";
-print "                      [--pass new-password | --passfile password-file]\n";
+print "                      [--pass \"new-password\" | --passfile password-file]\n";
 print "                      [--disable | --enable]\n";
 print "                      [--real real-name]\n";
 if (&has_home_quotas()) {
