@@ -2,7 +2,6 @@
 
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)
 # Returns a list of all SSL certs used by global services like Postfix
-# XXX include per-IP webmin and usermin certs
 sub get_all_service_ssl_certs
 {
 my ($d, $perip) = @_;
