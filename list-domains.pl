@@ -605,6 +605,13 @@ if ($multi) {
 				}
 			}
 
+		# Show SSL cert usage by other services
+		if ($d->{'ssl'} && $multi == 1) {
+			foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
+				print "    SSL cert used by: ",$svc->{'id'},"\n";
+				}
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
 		    $multi == 1) {
