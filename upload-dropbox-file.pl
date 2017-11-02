@@ -49,7 +49,7 @@ $source || &usage("Missing --source parameter");
 $file || &usage("Missing --file parameter");
 
 # Try the upload
-if ($file =~ /^(\/\S+)?\/([^\/]+)$/) {
+if ($file =~ /^\/?(\S+)?\/([^\/]+)$/) {
 	$path = $1;
 	$file = $2;
 	}
