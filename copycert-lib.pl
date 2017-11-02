@@ -120,6 +120,23 @@ if ($config{'ftp'}) {
 return @svcs;
 }
 
+# get_all_domain_service_ssl_certs(&domain)
+# Returns certs that are using this domain's cert and key
+sub get_all_domain_service_ssl_certs
+{
+my ($d) = @_;
+my @rv;
+my $chain = &get_website_ssl_file($d, 'ca');
+foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
+	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
+	    (&same_cert_file($chain, $svc->{'ca'}) ||
+	     $svc->{'ca'} eq 'none')) {
+		push(@rv, $svc);
+		}
+	}
+return @rv;
+}
+
 # ipkeys_to_domain_cert(&domain, &ipkeys)
 # Returns the cert, chain file, IP and domain for a matching ipkeys entry
 sub ipkeys_to_domain_cert

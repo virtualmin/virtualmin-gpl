@@ -96,15 +96,8 @@ print &ui_table_end();
 if (&can_webmin_cert()) {
 	# Build a list of services and their certs, and work out which ones
 	# are already copied
-	@svcs = &get_all_service_ssl_certs($d, 1);
-	%cert_already = ( );
-	foreach my $svc (@svcs) {
-		if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
-		    (&same_cert_file($chain, $svc->{'ca'}) ||
-		     $svc->{'ca'} eq 'none')) {
-			$cert_already{$svc->{'id'}} = $svc;
-			}
-		}
+	%cert_already = map { $_->{'id'}, $_ }
+			    &get_all_domain_service_ssl_certs($d);
 
 	# Show which services are already using the cert
 	if (%cert_already) {
