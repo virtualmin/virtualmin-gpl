@@ -1945,7 +1945,11 @@ check_jailkiterr=Chroot jails are not available : $1
 check_eyumrepofile=The Virtualmin YUM repository config file $1 does not exist!
 check_yumrepook=The Virtualmin YUM repository is configured correctly
 check_yumrepowrong=The Virtualmin YUM repository config file $1 contains the wrong serial number of licence key!
-check_yumrepomissing=The Virtualmin YUM repository config file $1 does not refer to software.virtualmin.com!
+check_yumrepomissing=The Virtualmin APT repository config file $1 does not refer to software.virtualmin.com!
+check_eaptrepofile=The APT repository config file $1 does not exist!
+check_aptrepook=The Virtualmin APT repository is configured correctly
+check_aptrepowrong=The APT repository config file $1 contains the wrong serial number of licence key!
+check_aptrepomissing=The repository config file $1 does not refer to software.virtualmin.com!
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile

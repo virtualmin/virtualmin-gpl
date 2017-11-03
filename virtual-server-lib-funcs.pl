@@ -10807,9 +10807,6 @@ if (@expired || @nearly) {
 	push(@rv, $cert_text);
 	}
 
-# Warn about low disk space?
-# XXX
-
 return @rv;
 }
 
@@ -14700,7 +14697,36 @@ if ($virtualmin_pro &&
 		}
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
-		# XXX
+		my $repo = "/etc/apt/sources.list";
+		if (!-r $repo) {
+			&$second_print(&text('check_eaptrepofile', $repo));
+			}
+		else {
+			# File exists, but does it contain the right repo line?
+			my $lref = &read_file_lines($repo, 1);
+			my $found = 0;
+			foreach my $l (@$lref) {
+				if ($l =~ /^deb\s+http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+					if ($1 eq $vserial{'SerialNumber'} &&
+					    $2 eq $vserial{'LicenseKey'}) {
+						$found = 2;
+						}
+					else {
+						$found = 1;
+						}
+					last;
+					}
+				}
+			if ($found == 2) {
+				&$second_print($text{'check_aptrepook'});
+				}
+			elsif ($found == 1) {
+				&$second_print(&text('check_aptrepowrong', $repo));
+				}
+			else {
+				&$second_print(&text('check_aptrepomissing', $repo));
+				}
+			}
 		}
 	}
 
