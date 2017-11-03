@@ -303,11 +303,20 @@ if ($cadata) {
 &postfix::set_current_value("smtpd_tls_cert_file", $cfile);
 &postfix::set_current_value("smtpd_tls_key_file", $kfile);
 &postfix::set_current_value("smtpd_tls_CAfile", $cadata ? $cafile : undef);
+if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
+	&postfix::set_current_value("smtpd_tls_security_level", "may");
+	if (&compare_version_numbers($postfix::postfix_version, "2.11") >= 0) {
+		&postfix::set_current_value("smtp_tls_security_level", "dane");
+		}
+	else {
+		&postfix::set_current_value("smtp_tls_security_level", "may");
+		}
+	}
 &$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
 
 # Make sure SSL is enabled
 &$first_print($text{'copycert_penabling'});
-if ($postfix::postfix_version >= 2.3) {
+if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 	&postfix::set_current_value("smtpd_tls_security_level", "may");
 	}
 else {
