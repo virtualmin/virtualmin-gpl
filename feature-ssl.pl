@@ -189,16 +189,7 @@ if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
-if ($tmpl->{'web_webmin_ssl'}) {
-	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
-		      \&restart_webmin_fully);
-	}
-if ($tmpl->{'web_usermin_ssl'} && &foreign_installed("usermin")) {
-	&foreign_require("usermin");
-	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
-		      \&usermin::put_usermin_miniserv_config,
-		      \&restart_usermin);
-	}
+&setup_domain_ipkeys($d, $tmpl);
 
 # Copy chained CA cert in from domain with same IP, if any
 $d->{'web_sslport'} = $web_sslport;
@@ -524,15 +515,7 @@ else {
 undef(@apache::get_config_cache);
 
 # Delete per-IP SSL cert
-&delete_ipkeys($d, \&get_miniserv_config,
-	       \&put_miniserv_config,
-	       \&restart_webmin_fully);
-if (&foreign_installed("usermin")) {
-	&foreign_require("usermin");
-	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
-		      \&usermin::put_usermin_miniserv_config,
-		      \&restart_usermin);
-	}
+&delete_domain_ipkeys($d);
 
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
@@ -2431,6 +2414,39 @@ if (!$ok) {
 	}
 else {
 	return ($ok, $cert, $key, $chain);
+	}
+}
+
+# setup_domain_ipkeys(&domain, [&tmpl])
+# Copy the SSL cert for webmin and usermin
+sub setup_domain_ipkeys
+{
+my ($d) = @_;
+if (!$tmpl || $tmpl->{'web_webmin_ssl'}) {
+	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
+		      \&restart_webmin_fully);
+	}
+if ((!$tmpl || $tmpl->{'web_usermin_ssl'}) && &foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
+		      \&usermin::put_usermin_miniserv_config,
+		      \&restart_usermin);
+	}
+}
+
+# delete_domain_ipkeys(&domain)
+# Remove the per-domain SSL cert for webmin and usermin
+sub delete_domain_ipkeys
+{
+my ($d) = @_;
+&delete_ipkeys($d, \&get_miniserv_config,
+	       \&put_miniserv_config,
+	       \&restart_webmin_fully);
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
+		       \&usermin::put_usermin_miniserv_config,
+		       \&restart_usermin);
 	}
 }
 

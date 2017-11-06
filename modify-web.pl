@@ -82,6 +82,10 @@ by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
 use the C<--fix-document-dir> flag.
 
+To copy the domain's SSL certificate to Webmin and Usermin for use by clients
+requesting this domain or it's private IP, use the C<--add-webmin-cert> flag.
+Or to remove this, use the C<--remove-webmin-cert>.
+
 =cut
 
 package virtual_server;
@@ -240,6 +244,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--break-ssl-cert") {
 		$breakcert = 1;
 		}
+	elsif ($a eq "--add-webmin-cert") {
+		$ipkeys = 1;
+		}
+	elsif ($a eq "--remove-webmin-cert") {
+		$ipkeys = 0;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -250,7 +260,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || $fixhtmldir || $breakcert || &usage("Nothing to do");
+  defined($renew) || $fixhtmldir || $breakcert || defined($ipkeys) ||
+	&usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -657,6 +668,18 @@ foreach $d (@doms) {
 			}
 		}
 
+	if (&domain_has_ssl($d) && defined($ipkeys)) {
+		if ($ipkeys) {
+			&$first_print("Setting up Webmin and Usermin cert ..");
+			&setup_domain_ipkeys($d);
+			}
+		else {
+			&$first_print("Removing Webmin and Usermin cert ..");
+			&delete_domain_ipkeys($d);
+			}
+		&$second_print(".. done");
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($renew) || $breakcert) {
@@ -717,6 +740,7 @@ print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert]\n";
+print "                     [--add-webmin-cert | --remove-webmin-cert]\n";
 exit(1);
 }
 
