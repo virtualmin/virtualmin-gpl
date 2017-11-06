@@ -240,6 +240,7 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
 	if ($?) {
 		return &text('jailkit_einit', $err);
 		}
+	&system_logged("chmod g-w ".quotemeta($dir)."/*");
 	}
 my $tmp = "$dir/tmp";
 if (!-d $tmp) {
