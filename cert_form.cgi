@@ -96,34 +96,36 @@ print &ui_table_end();
 if (&can_webmin_cert()) {
 	# Build a list of services and their certs, and work out which ones
 	# are already copied
-	%cert_already = map { $_->{'id'}, $_ }
-			    &get_all_domain_service_ssl_certs($d);
+	@already = &get_all_domain_service_ssl_certs($d);
 
 	# Show which services are already using the cert
-	if (%cert_already) {
+	if (@already) {
 		my @a;
-		foreach my $k (keys %cert_already) {
-			if ($cert_already{$k}->{'ip'}) {
-				push(@a, &text('cert_already_'.$k.'_ip',
-					       $cert_already{$k}->{'ip'}));
+		foreach my $svc (@already) {
+			if ($svc->{'ip'}) {
+				push(@a,
+				  &text('cert_already_'.$svc->{'id'}.'_ip',
+					$svc->{'ip'}));
 				}
-			elsif ($cert_already{$k}->{'dom'}) {
-				push(@a, &text('cert_already_'.$k.'_dom',
-					       $cert_already{$k}->{'dom'}));
+			elsif ($svc->{'dom'}) {
+				push(@a,
+				  &text('cert_already_'.$svc->{'id'}.'_dom',
+					$svc->{'dom'}));
 				}
 			else {
-				push(@a, $text{'cert_already_'.$k});
+				push(@a, $text{'cert_already_'.$svc->{'id'}});
 				}
 			}
 		print "<p><b>".&text('cert_already', join(", ",@a)),"</b><p>\n";
 		}
+	%cert_already = map { $_->{'id'}, $_ } @already;
 
 	print &ui_hr();
 	print &ui_buttons_start();
 
 	# Copy to Webmin button
 	&get_miniserv_config(\%miniserv);
-	if (!$cert_already{'webmin'}) {
+	if (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'}) {
 		print &ui_buttons_row(
 			"copy_cert.cgi",
 			$text{'cert_copy'},
@@ -133,7 +135,8 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Usermin, if installed
-	if (&foreign_installed("usermin") && !$cert_already{'usermin'}) {
+	if (&foreign_installed("usermin") &&
+	    (!$cert_already{'usermin'} || $cert_already{'usermin'}->{'d'})) {
 		&foreign_require("usermin");
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		print &ui_buttons_row(

@@ -11,23 +11,28 @@ my @svcs;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 if ($miniserv{'ssl'}) {
-	my ($cfile, $chain, $ip, $dom);
 	if ($perip) {
 		# Check for per-IP or per-domain cert first
 		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
-		($cfile, $chain, $ip, $dom) =
+		my ($cfile, $chain, $ip, $dom) =
 			&ipkeys_to_domain_cert($d, \@ipkeys);
+		if ($cfile) {
+			push(@svcs, { 'id' => 'webmin',
+				      'cert' => $cfile,
+				      'ca' => $chain,
+				      'ip' => $ip,
+				      'dom' => $dom,
+				      'd' => $d,
+				      'prefix' => 'admin',
+				      'port' => $miniserv{'port'} });
+			}
 		}
-	if (!$cfile) {
-		# Fall back to global config
-		$cfile = $miniserv{'certfile'};
-		$chain = $miniserv{'extracas'};
-		}
+	# Also add global config
+	my $cfile = $miniserv{'certfile'};
+	my $chain = $miniserv{'extracas'};
 	push(@svcs, { 'id' => 'webmin',
 		      'cert' => $cfile,
 		      'ca' => $chain,
-		      'ip' => $ip,
-		      'dom' => $dom,
 		      'prefix' => 'admin',
 		      'port' => $miniserv{'port'} });
 	}
@@ -41,19 +46,25 @@ if (&foreign_installed("usermin")) {
 		if ($perip) {
 			# Check for per-IP or per-domain cert first
 			my @ipkeys = &webmin::get_ipkeys(\%uminiserv);
-			($cfile, $chain, $ip, $dom) =
+			my ($cfile, $chain, $ip, $dom) =
 				&ipkeys_to_domain_cert($d, \@ipkeys);
+			if ($cfile) {
+				push(@svcs, { 'id' => 'usermin',
+					      'cert' => $cfile,
+					      'ca' => $chain,
+					      'ip' => $ip,
+					      'dom' => $dom,
+					      'd' => $d,
+					      'prefix' => 'webmail',
+					      'port' => $uminiserv{'port'} });
+				}
 			}
-		if (!$cfile) {
-			# Fall back to global config
-			$cfile = $uminiserv{'certfile'};
-			$chain = $uminiserv{'extracas'};
-			}
+		# Also add global config
+		my $cfile = $uminiserv{'certfile'};
+		my $chain = $uminiserv{'extracas'};
 		push(@svcs, { 'id' => 'usermin',
 			      'cert' => $cfile,
 			      'ca' => $chain,
-			      'ip' => $ip,
-			      'dom' => $dom,
 			      'prefix' => 'webmail',
 			      'port' => $uminiserv{'port'} });
 		}
