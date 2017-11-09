@@ -671,6 +671,7 @@ foreach $d (@doms) {
 	if (&domain_has_ssl($d) && defined($ipkeys)) {
 		if ($ipkeys) {
 			&$first_print("Setting up Webmin and Usermin cert ..");
+			&delete_domain_ipkeys($d);
 			&setup_domain_ipkeys($d);
 			}
 		else {
