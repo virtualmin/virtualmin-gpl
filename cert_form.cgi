@@ -121,6 +121,8 @@ if (&can_webmin_cert()) {
 	%cert_already = map { $_->{'id'}, $_ } @already;
 
 	print &ui_hr();
+	print "<b>$text{'cert_copymsg'}</b><p>\n";
+
 	print &ui_buttons_start();
 
 	# Copy to Webmin button
