@@ -4714,7 +4714,24 @@ elsif ($mode == 8) {
 	foreach my $st (@$files) {
 		my $f = $st->{'path_display'};
 		$f =~ s/^\/?\Q$base\E\/?// || next;
-		local $ctime = &dropbox_timestamp($st->{'client_modified'});
+		local $ctime;
+		if ($st->{'.tag'} eq 'folder') {
+			# Age is age of the oldest file
+			$ctime = time();
+			my $subfiles = &list_dropbox_files(
+				$st->{'path_display'});
+			if (ref($subfiles)) {
+				foreach my $sf (@$subfiles) {
+					my $subctime = &dropbox_timestamp(
+						$sf->{'client_modified'});
+					$ctime = $subctime
+					  if ($subctime && $subctime < $ctime);
+					}
+				}
+			}
+		else {
+			$ctime = &dropbox_timestamp($st->{'client_modified'});
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
