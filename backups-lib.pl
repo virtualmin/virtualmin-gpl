@@ -4329,7 +4329,7 @@ elsif (($mode == 3 || $mode == 6 || $mode == 7) && $path =~ /%/) {
 	}
 elsif ($mode == 8) {
 	my $fullpath = $host.($host ? "/" : "").$path;
-	if ($fullpath =~ /^(\S+)\/([^%]*%.*)$/) {
+	if ($fullpath =~ /^\/?(\S+)\/([^%]*%.*)$/) {
 		# Dropbox path - has to be handled differently to S3 and GCS,
 		# as it really does support sub-directories
 		local ($base, $date) = ($1, $2);
