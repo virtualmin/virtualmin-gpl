@@ -6410,6 +6410,7 @@ else {
 	delete($d->{'cloud_mail_id'});
 	}
 &post_records_change($d, $recs);
+&register_post_action(\&restart_bind, $d);
 
 &release_lock_dns($d);
 
