@@ -13899,6 +13899,11 @@ if ($config{'web'}) {
 	    !$apache::httpd_modules{'mod_fcgid'}) {
 		return $text{'tmpl_ephpmode2'};
 		}
+	if ($apache::httpd_modules{'core'} >= 2.4 &&
+	    !$apache::httpd_modules{'mod_cgi'} &&
+	    !$apache::httpd_modules{'mod_cgid'}) {
+		return $text{'tmpl_ewebcgi'};
+		}
 
 	# Run Apache config check
 	local $err = &apache::test_config();
