@@ -1293,7 +1293,7 @@ else {
 # Unix user without the @ but all the other details the same
 local $extrauser;
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
-    !$_[0]->{'webowner'}) {
+    !$_[0]->{'webowner'} && !$config{'nopostfix_extra_user'}) {
 	$extrauser = { %{$_[0]} };
 	$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
 	&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);

@@ -184,6 +184,7 @@ line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
 dns_check=Check resolv.conf for this system?,1,1-Yes,0-No
 ldap_mail=Add mail attribute to LDAP users?,1,1-Yes using only <tt>mail</tt> attribute,2-Yes using <tt>mail</tt> and <tt>mailAlternateAddress</tt>,0-No
+nopostfix_extra_user=Create extra Unix user on Postfix systems when using user@domain format?,1,0-Yes,1-No
 maillog_hide=Allow searching of mail logs,1,0-Yes,1-For master admin only,2-No
 maillog_period=Number of days to keep processed mail logs,3,Forever
 allow_upper=Force mailbox usernames to lower case?,1,0-Yes,1-No

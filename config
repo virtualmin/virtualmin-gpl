@@ -236,3 +236,4 @@ jailkit_root=/home/chroot
 defujail=0
 jail_age=24
 check_ports=1
+nopostfix_extra_user=0
