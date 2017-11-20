@@ -154,8 +154,8 @@ if ($err) {
 	&$second_print(&text('setup_esslkey', $err));
 	return 0;
 	}
-if ($d->{'ssl_ca'}) {
-	local $cadata = &read_file_contents($d->{'ssl_ca'});
+if ($d->{'ssl_chain'}) {
+	local $cadata = &read_file_contents($d->{'ssl_chain'});
 	local $err = &validate_cert_format($cadata, 'ca');
 	if ($err) {
 		&$second_print(&text('setup_esslca', $err));
@@ -1252,7 +1252,7 @@ if (@ips) {
 	push(@ipkeys, { 'ips' => \@ips,
 			'key' => $d->{'ssl_key'},
 			'cert' => $d->{'ssl_cert'},
-			'extracas' => $d->{'ssl_ca'}, });
+			'extracas' => $d->{'ssl_chain'}, });
 	&webmin::save_ipkeys(\%miniserv, \@ipkeys);
 	&$putfunc(\%miniserv);
 	&register_post_action($postfunc);
@@ -2417,16 +2417,17 @@ else {
 	}
 }
 
-# setup_domain_ipkeys(&domain, [&tmpl])
+# setup_domain_ipkeys(&domain, [&tmpl], [service])
 # Copy the SSL cert for webmin and usermin
 sub setup_domain_ipkeys
 {
-my ($d) = @_;
-if (!$tmpl || $tmpl->{'web_webmin_ssl'}) {
+my ($d, $tmpl, $svc) = @_;
+if ((!$svc || $svc eq 'webmin') && (!$tmpl || $tmpl->{'web_webmin_ssl'})) {
 	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
 		      \&restart_webmin_fully);
 	}
-if ((!$tmpl || $tmpl->{'web_usermin_ssl'}) && &foreign_installed("usermin")) {
+if ((!$svc || $svc eq 'usermin') && (!$tmpl || $tmpl->{'web_usermin_ssl'}) &&
+    &foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
@@ -2434,15 +2435,17 @@ if ((!$tmpl || $tmpl->{'web_usermin_ssl'}) && &foreign_installed("usermin")) {
 	}
 }
 
-# delete_domain_ipkeys(&domain)
+# delete_domain_ipkeys(&domain, [service])
 # Remove the per-domain SSL cert for webmin and usermin
 sub delete_domain_ipkeys
 {
-my ($d) = @_;
-&delete_ipkeys($d, \&get_miniserv_config,
-	       \&put_miniserv_config,
-	       \&restart_webmin_fully);
-if (&foreign_installed("usermin")) {
+my ($d, $svc) = @_;
+if (!$svc || $svc eq 'webmin') {
+	&delete_ipkeys($d, \&get_miniserv_config,
+		       \&put_miniserv_config,
+		       \&restart_webmin_fully);
+	}
+if ((!$svc || $svc eq 'usermin') && &foreign_installed("usermin")) {
 	&foreign_require("usermin");
 	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		       \&usermin::put_usermin_miniserv_config,

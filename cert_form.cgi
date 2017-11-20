@@ -39,6 +39,9 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 	  &can_edit_letsencrypt() ?
 		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
 		( ),
+	  &can_webmin_cert() ?
+		( [ "perip", $text{'cert_tabperip'}, $prog."perip" ] ) :
+		( ),
 	);
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
@@ -414,8 +417,39 @@ else {
 			     [ 'only', $text{'cert_letsonly'} ] ]);
 	}
 
+print &ui_tabs_end_tab();
+
+# Per-IP or per-domain server usage
+if (&can_webmin_cert()) {
+	print &ui_tabs_start_tab("mode", "perip");
+	print "$text{'cert_desc9'}<p>\n";
+	print &ui_form_start("save_peripcerts.cgi", "post");
+	print &ui_hidden("dom", $in{'dom'});
+	print &ui_table_start($text{'cert_peripheader'}, undef, 2);
+
+	($webmina) = grep { $_->{'d'} && $_->{'id'} eq 'webmin' } @already;
+	$ipmsg = $d->{'virt'} ?
+		&text('cert_webminsvcip', $d->{'ip'}, $d->{'dom'}) :
+		&text('cert_webminsvcdom', $d->{'dom'});
+	print &ui_table_row($text{'cert_webminsvc'},
+		&ui_radio("webmin", $webmina ? 1 : 0,
+		  [ [ 1, $ipmsg ],
+		    [ 0, $text{'cert_webminsvcdef'} ] ]));
+
+	($usermina) = grep { $_->{'d'} && $_->{'id'} eq 'usermin' } @already;
+	print &ui_table_row($text{'cert_userminsvc'},
+		&ui_radio("usermin", $usermina ? 1 : 0,
+		  [ [ 1, $ipmsg ],
+		    [ 0, $text{'cert_webminsvcdef'} ] ]));
+
+	print &ui_table_end();
+	print &ui_form_end([ [ undef, $text{'save'} ] ]);
+	print &ui_tabs_end_tab();
+	}
+
 print &ui_tabs_end(1);
 print "</div>";
+
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {
 	&theme_select_domain($d);
