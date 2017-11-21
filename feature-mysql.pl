@@ -805,6 +805,10 @@ if ($d->{'provision_mysql'}) {
 	}
 else {
 	# Check locally
+	local $mod = $d->{'mysql_module'} || 'mysql';
+	if (!&foreign_check($mod)) {
+		return &text('validate_emysqlmod', $mod);
+		}
 	local %got = map { $_, 1 } &list_dom_mysql_databases($d);
 	foreach my $db (&domain_databases($d, [ "mysql" ])) {
 		$got{$db->{'name'}} ||

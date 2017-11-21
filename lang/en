@@ -4607,6 +4607,7 @@ validate_evirt6b=No boot-time IPv6 address $1 found
 validate_evirt6a=No active IPv6 address $1 found
 validate_ewebmin=Webmin user $1 does not exist
 validate_ewebminextra=Extra administrator Webmin user $1 does not exist
+validate_emysqlmod=MySQL Webmin module $1 does not exist!
 validate_emysql=MySQL database $1 does not exist
 validate_emysqluser=MySQL login $1 does not exist
 validate_emysqlcheck=Failed to check for MySQL login on services host : $1
