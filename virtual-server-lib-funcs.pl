@@ -7807,9 +7807,33 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 # new website.
 $dom->{'auto_letsencrypt'} ||= $config{'auto_letsencrypt'};
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
-    !$dom->{'disabled'}) {
+    !$dom->{'disabled'} && !$dom->{'alias'}) {
 	&create_initial_letsencrypt_cert($dom);
 	}
+
+# For a new alias domain, if the target has a Let's Encrypt cert for all possible
+# hostnames, re-request it to include the alias
+if ($dom->{'alias'} && &domain_has_website($dom)) {
+	local $target = &get_domain($dom->{'alias'});
+	local $tinfo;
+	if ($target &&
+	    &domain_has_ssl($target) &&
+	    !$target->{'letsencrypt_dname'} &&
+	    ($tinfo = &cert_info($target)) &&
+	    $tinfo->{'issuer_cn'} =~ /Let's\s+Encrypt/i) {
+		&$first_print(&text('setup_letsaliases',
+				    &show_domain_name($target),
+				    &show_domain_name($dom)));
+		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($target);
+		if ($ok) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(&text('setup_eletsaliases', $err));
+			}
+		}
+	}
+
 &save_domain($dom);
 
 # Put the user in a jail if possible

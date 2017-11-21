@@ -2086,8 +2086,8 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 		}
 	next if (!$virt || $virt ne $defvirt);
 	if ($d->{'dns'}) {
-		my $recs = &get_domain_dns_records($d);
-		my ($r) = grep { $_->{'name'} eq $full."." } @$recs;
+		my @recs = &get_domain_dns_records($d);
+		my ($r) = grep { $_->{'name'} eq $full."." } @recs;
 		if ($r) {
 			push(@rv, $full);
 			}
@@ -2141,91 +2141,23 @@ foreach my $d (&list_domains()) {
 	my $age = time() - $ltime;
 	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
 	    $expiry && $expiry - time() < 5 * 24 * 60 * 60) {
-
-		# Run the before command
-		&set_domain_envs($d, "SSL_DOMAIN");
-		my $merr = &making_changes();
-		&reset_domain_envs($d);
-	
-		# Time to do it!
-		my $phd = &public_html_dir($d);
-		my ($ok, $cert, $key, $chain);
-		my @dnames;
-		if ($d->{'letsencrypt_dname'}) {
-			@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
-			}
-		else {
-			@dnames = &get_hostnames_for_ssl($d);
-			}
-		&foreign_require("webmin");
-		if ($merr) {
-			# Pre-command failed
-			$ok = 0;
-			$cert = $merr;
-			}
-		else {
-			($ok, $cert, $key, $chain) =
-				&request_domain_letsencrypt_cert($d, \@dnames);
-			}
-
+		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 		my ($subject, $body);
 		if (!$ok) {
 			# Failed! Tell the user
 			$subject = $text{'letsencrypt_sfailed'};
 			$body = &text('letsencrypt_bfailed',
-				      join(", ",@dnames), $cert);
+				      join(", ", @$dnames), $err);
 			$d->{'letsencrypt_last'} = time();
 			$d->{'letsencrypt_last_failure'} = time();
 			$cert =~ s/\r?\n/\t/g;
-			$d->{'letsencrypt_last_err'} = $cert;
+			$d->{'letsencrypt_last_err'} = $err;
 			&save_domain($d);
 			}
 		else {
-			# Figure out which services (webmin, postfix, etc)
-			# were using the old cert
-			my @before;
-			foreach my $svc (&get_all_service_ssl_certs($d, 0)) {
-				if (&same_cert_file(
-				    $d->{'ssl_cert'}, $svc->{'cert'})) {
-					push(@before, $svc);
-					}
-				}
-
-			# Copy into place
-			&obtain_lock_ssl($d);
-			&install_letsencrypt_cert($d, $cert, $key, $chain);
-			$d->{'letsencrypt_last'} = time();
-			$d->{'letsencrypt_last_success'} = time();
-			delete($d->{'letsencrypt_last_err'});
-			&save_domain($d);
-			&release_lock_ssl($d);
-
-			# Apply any per-domain cert to Dovecot and Postfix
-			&sync_dovecot_ssl_cert($d, 1);
-			if ($d->{'virt'}) {
-				&sync_postfix_ssl_cert($d, 1);
-				}
-
-			# Update DANE DNS records
-			&sync_domain_tlsa_records($d);
-
-			# Update services that were using the old cert
-			foreach my $svc (@before) {
-				&push_all_print();
-				&set_all_null_print();
-				my $func = "copy_".$svc->{'id'}."_ssl_service";
-				&$func($d);
-				&pop_all_print();
-				}
-
-			# Call the post command
-			&set_domain_envs($d, "SSL_DOMAIN");
-			&made_changes();
-			&reset_domain_envs($d);
-
-			# Tell the user
+			# Tell the user it worked
 			$subject = $text{'letsencrypt_sdone'};
-			$body = &text('letsencrypt_bdone', join(", ", @dnames));
+			$body = &text('letsencrypt_bdone', join(", ", @$dnames));
 			}
 
 		# Send email
@@ -2233,6 +2165,88 @@ foreach my $d (&list_domains()) {
 		&send_notify_email($from, [$d], $d, $subject, $body);
 		}
 	}
+}
+
+# renew_letsencrypt_cert(&domain)
+# Re-request the Let's Encrypt cert for a domain. 
+sub renew_letsencrypt_cert
+{
+my ($d) = @_;
+
+# Run the before command
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&reset_domain_envs($d);
+
+# Time to do it!
+my $phd = &public_html_dir($d);
+my ($ok, $cert, $key, $chain);
+my @dnames;
+if ($d->{'letsencrypt_dname'}) {
+	@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+	}
+else {
+	@dnames = &get_hostnames_for_ssl($d);
+	}
+&foreign_require("webmin");
+if ($merr) {
+	# Pre-command failed
+	return (0, $merr, \@dnames);
+	}
+else {
+	($ok, $cert, $key, $chain) =
+		&request_domain_letsencrypt_cert($d, \@dnames);
+	}
+
+my ($subject, $body);
+if (!$ok) {
+	# Failed! Tell the user
+	return (0, $cert, \@dnames);
+	}
+
+# Figure out which services (webmin, postfix, etc)
+# were using the old cert
+my @before;
+foreach my $svc (&get_all_service_ssl_certs($d, 0)) {
+	if (&same_cert_file(
+	    $d->{'ssl_cert'}, $svc->{'cert'})) {
+		push(@before, $svc);
+		}
+	}
+
+# Copy into place
+&obtain_lock_ssl($d);
+&install_letsencrypt_cert($d, $cert, $key, $chain);
+$d->{'letsencrypt_last'} = time();
+$d->{'letsencrypt_last_success'} = time();
+delete($d->{'letsencrypt_last_err'});
+&save_domain($d);
+&release_lock_ssl($d);
+
+# Apply any per-domain cert to Dovecot and Postfix
+&sync_dovecot_ssl_cert($d, 1);
+if ($d->{'virt'}) {
+	&sync_postfix_ssl_cert($d, 1);
+	}
+
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
+
+# Update services that were using the old cert
+foreach my $svc (@before) {
+	&push_all_print();
+	&set_all_null_print();
+	my $func = "copy_".$svc->{'id'}."_ssl_service";
+	&$func($d);
+	&pop_all_print();
+	}
+
+# Call the post command
+&set_domain_envs($d, "SSL_DOMAIN");
+&made_changes();
+&reset_domain_envs($d);
+
+return (1, undef, \@dnames);
 }
 
 # install_letsencrypt_cert(&domain, certfile, keyfile, chainfile)

@@ -639,6 +639,8 @@ setup_mailrestarterr=.. restart failed : $1
 setup_jail=Setting up chroot jail ..
 setup_ejail=.. jail failed : $1
 setup_jailed=.. jail directory is now $1
+setup_letsaliases=Re-requesting Let's Encrypt certificate for $1 to include $2 ..
+setup_eletsaliases=.. failed : $1
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2

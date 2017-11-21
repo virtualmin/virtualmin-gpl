@@ -1577,3 +1577,5 @@ Installable scripts can now be in multiple categories, and the UI has been updat
 PHP scripts run in FPM mode are now compatible with .htaccess files.
 The Wordpress script installer use wp-cli if available for installation and upgrades.
 Any virtual servers can now share a DNS zone file, unlike in previous Virtualmin releases where only a top-level server could be a DNS domain parent. This removes the need to create additional NS records in the parent domain in most cases.
+---- Changes since 6.02 ----
+When adding an alias to a domain with a Let's Encrypt SSL certificate, the cert is automatically updated to include the alias domain.
