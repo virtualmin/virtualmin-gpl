@@ -141,17 +141,17 @@ if ($domain->{'dns-zone'} || $domain->{'dns_zone'}) {
 	}
 if ($domain->{'www'} eq 'true' || -d "$root/$dom/httpdocs" ||
     $domain->{'www'} && (-r "$root/$dom.httpdocs" || -r "$root/$dom.htdocs")) {
-	push(@got, "web");
+	push(@got, &domain_has_website());
 	}
 if ($domain->{'ip'}->{'ip-type'} eq 'exclusive' && $virt) {
-	push(@got, "ssl");
+	push(@got, &domain_has_ssl());
 	}
 if ($domain->{'phosting'}->{'logrotation'}->{'enabled'} eq 'true' ||
-    $windows && &indexof("web", @got) >= 0) {
+    $windows && &indexof(&domain_has_website(), @got) >= 0) {
 	push(@got, "logrotate");
 	}
 if ($domain->{'phosting'}->{'webalizer'} &&
-    &indexof("web", @got) >= 0) {
+    &indexof(&domain_has_website(), @got) >= 0) {
 	push(@got, "webalizer");
 	}
 

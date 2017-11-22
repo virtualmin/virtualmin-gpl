@@ -192,20 +192,20 @@ if ($domain->{'properties'}->{'dns-zone'}) {
 	}
 local ($wwwcid) = grep { $_->{'type'} eq 'docroot' } @$cids;
 if ($domain->{'www'} eq 'true' || $wwwcid) {
-	push(@got, "web");
+	push(@got, &domain_has_website());
 	}
 my $ip = $domain->{'properties'}->{'ip'};
 if (ref($ip) eq 'ARRAY') {
 	($ip) = grep { &check_ipaddress($_->{'ip-address'}) } @$ip;
 	}
 if ($ip->{'ip-type'} eq 'exclusive' && $ipinfo->{'virt'}) {
-	push(@got, "ssl");
+	push(@got, &domain_has_ssl());
 	}
-if (($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' || $windows) && &indexof("web", @got) >= 0) {
+if (($domain->{'phosting'}->{'preferences'}->{'logrotation'}->{'enabled'} eq 'true' || $windows) && &indexof(&domain_has_website(), @got) >= 0) {
 	push(@got, "logrotate");
 	}
 if ($domain->{'phosting'}->{'preferences'}->{'webalizer'} &&
-    &indexof("web", @got) >= 0) {
+    &indexof(&domain_has_website(), @got) >= 0) {
 	push(@got, "webalizer");
 	}
 

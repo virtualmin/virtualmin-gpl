@@ -82,7 +82,7 @@ push(@got, "webmin") if ($webmin && !$parent);
 foreach my $sm ([ "logrotate", "logrotate" ],
 		[ "bind", "dns" ],
 		[ "sendmail", "mail" ],
-		[ "apache", "web" ],
+		[ "apache", &domain_has_website() ],
 		[ "anonftp", "ftp" ],
 		[ "spam_filter", "spam" ],
 		[ "majordomo", "virtualmin-mailman" ],
@@ -95,7 +95,7 @@ foreach my $sm ([ "logrotate", "logrotate" ],
 	}
 
 # Don't enable logrotate if no Apache
-if (&indexof("web", @got) < 0) {
+if (&indexof(&domain_has_website(), @got) < 0) {
 	@got = grep { $_ ne "logrotate" } @got;
 	}
 

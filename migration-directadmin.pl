@@ -82,7 +82,8 @@ local %dinfo;
 
 # First work out what features we have ..
 &$first_print("Checking for DirectAdmin features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web", "logrotate" );
+local @got = ( "dir", $parent ? () : ("unix"),
+	       &domain_has_website(), "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
 local @sqlfiles = glob("$backup/*.sql");
 if (@sqlfiles) {
@@ -99,7 +100,7 @@ if (-r "$backup/$dom/email/aliases") {
 	push(@got, "mail");
 	}
 if (uc($dinfo{'ssl'}) eq 'ON') {
-	push(@got, "ssl");
+	push(@got, &domain_has_ssl());
 	}
 
 # Tell the user what we have got

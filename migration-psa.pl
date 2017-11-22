@@ -97,14 +97,14 @@ push(@got, "mail");	# Assume that all domains have mail
 if ($domain->{'dns'}) {
 	push(@got, "dns");
 	}
-push(@got, "web");	# Assume has website
+push(@got, &domain_has_website());	# Assume has website
 if ($uinfo && $uinfo->{'services'}->{'ssl'} eq 'true') {
-	push(@got, "ssl");
+	push(@got, &domain_has_ssl());
 	}
 if ($uinfo && $uinfo->{'services'}->{'webstat'} eq 'true') {
 	push(@got, "webalizer");
 	}
-if (&indexof("web", @got) >= 0) {
+if (&indexof(&domain_has_website(), @got) >= 0) {
 	push(@got, "logrotate");
 	}
 

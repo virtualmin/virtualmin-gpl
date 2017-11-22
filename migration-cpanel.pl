@@ -149,7 +149,8 @@ local $ugroup = $group;
 
 # First work out what features we have ..
 &$first_print("Checking for cPanel features ..");
-local @got = ( "dir", $parent ? () : ("unix"), "web", "logrotate" );
+local @got = ( "dir", $parent ? () : ("unix"), &domain_has_website(),
+	       "logrotate" );
 push(@got, "webmin") if ($webmin && !$parent);
 local $userdir;
 local $homesrc;
@@ -266,7 +267,7 @@ if ($ipinfo->{'virt'}) {
 if ($ipinfo->{'virt'} && -s "$userdir/sslcerts/www.$dom.crt" &&
 		         -s "$userdir/sslkeys/www.$dom.key") {
 	# Enable SSL, if we have a private IP and if the key was found
-	push(@got, "ssl");
+	push(@got, &domain_has_ssl());
 	}
 
 # Look for mailing lists
@@ -510,14 +511,14 @@ elsif ($got{'web'}) {
 	}
 $dom{'cgi_bin_correct'} = 0;	# So that it is computed from now on
 
-if ($got{'ssl'}) {
+if ($got{&domain_has_ssl()}) {
 	# Copy and use the SSL certs that came with the domain
 	&$first_print("Copying SSL certificate and key ..");
-	&execute_command("cp ".quotemeta("$userdir/sslcerts/www.$dom.crt")." ".
-		     quotemeta($dom{'ssl_cert'}));
-	&execute_command("cp ".quotemeta("$userdir/sslcerts/www.$dom.key")." ".
-		     quotemeta($dom{'ssl_key'}));
-	&register_post_action(\&restart_apache, 1);
+	&copy_source_dest("$userdir/sslcerts/www.$dom.crt", $dom{'ssl_cert'});
+	&copy_source_dest("$userdir/sslcerts/www.$dom.key", $dom{'ssl_key'});
+	if ($got{'ssl'}) {
+		&register_post_action(\&restart_apache, 1);
+		}
 	&$second_print(".. done");
 	}
 
