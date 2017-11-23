@@ -1005,6 +1005,7 @@ edit_prefix=Mailbox name prefix
 edit_suffix=Mailbox name suffix
 edit_noprefix=Used by $1 users
 edit_home=Home directory
+edit_id=Domain ID
 edit_tmpl=Server configuration template
 edit_plan=Account plan
 edit_applyplan=Apply limits from new plan if changed

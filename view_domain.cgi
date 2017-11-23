@@ -114,6 +114,12 @@ if (!$aliasdom && $d->{'dir'}) {
 # Description
 print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
 
+# Show domain ID
+if (&master_admin()) {
+	print &ui_table_row($text{'edit_id'},
+			    "<tt>$d->{'id'}</tt>");
+	}
+
 # Show forwarding / proxy destination
 if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
 	print &ui_table_row($text{'edit_proxy'.$d->{'proxy_pass_mode'}},

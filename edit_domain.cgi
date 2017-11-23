@@ -123,6 +123,12 @@ elsif ($parentdom) {
 			    &show_domain_name($parentdom)."</a>");
 	}
 
+# Show domain ID
+if (&master_admin()) {
+	print &ui_table_row($text{'edit_id'},
+			    "<tt>$d->{'id'}</tt>");
+	}
+
 print &ui_hidden_table_end("basic");
 
 
