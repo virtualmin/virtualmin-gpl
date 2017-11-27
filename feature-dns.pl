@@ -413,6 +413,7 @@ if ($d->{'dns_submode'}) {
 	}
 local ($orecs, $ofile) = &get_domain_dns_records_and_file($oldd);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
+local @dnskeys = grep { $_->{'type'} eq 'DNSKEY' } @$recs;
 if (!$orecs) {
 	&$second_print($text{'clone_dnsold'});
 	return 0;
@@ -438,18 +439,30 @@ if ($d->{'ip6'} && $d->{'ip6'} ne $oldd->{'ip6'}) {
 	&modify_records_ip_address($recs, $file, $oldd->{'ip6'}, $d->{'ip6'});
 	}
 
-# Find and delete sub-domain records
+# Find and delete sub-domain records, plus any DNSSEC records (since we need
+# to re-sign the zone)
 local @sublist = grep { $_->{'id'} ne $oldd->{'id'} &&
 			$_->{'id'} ne $d->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$oldd->{'dom'}\E$/ }
 		      &list_domains();
-foreach my $r (reverse(@$recs)) {
+RECORD: foreach my $r (reverse(@$recs)) {
 	foreach my $sd (@sublist) {
 		if ($r->{'name'} eq $sd->{'dom'}."." ||
 		    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
 			&bind8::delete_record($file, $r);
+			next RECORD;
 			}
 		}
+	if (&is_dnssec_record($r)) {
+		&bind8::delete_record($file, $r);
+		}
+	}
+
+# If DNSSEC was enabled in the clone, put back the DNSKEY records
+foreach my $r (@dnskeys) {
+	my $str = &join_record_values($r);
+	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+			      'IN', $r->{'type'}, $str);
 	}
 
 &post_records_change($d, $recs, $file);
@@ -1231,8 +1244,7 @@ RECORD: foreach my $r (@$recs) {
 		# Skip SOA and NS records for sub-domains in the same file
 		next;
 		}
-	if ($r->{'type'} eq 'NSEC' || $r->{'type'} eq 'NSEC3' ||
-	    $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY') {
+	if (&is_dnssec_record($r)) {
 		# Skip DNSSEC records, as they get re-generated
 		next;
 		}
@@ -3859,6 +3871,14 @@ RECORD: foreach my $r (@$recs) {
 	push(@rv, $r);
 	}
 return \@rv;
+}
+
+# is_dnssec_record(&record)
+sub is_dnssec_record
+{
+my ($r) = @_;
+return $r->{'type'} eq 'NSEC' || $r->{'type'} eq 'NSEC3' ||
+       $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY';
 }
 
 $done_feature_script{'dns'} = 1;
