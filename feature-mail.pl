@@ -623,6 +623,12 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 		}
 	$newu->{'to'} = \@to;
 
+	# Fix home directory permissions
+	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
+		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
+                       quotemeta($newu->{'home'}));
+		}
+
 	# Create the user
 	&create_user($newu, $d);
 	&create_mail_file($newu, $d);
@@ -637,12 +643,6 @@ foreach my $u (&list_domain_users($oldd, 1, 0, 0, 0)) {
 			&set_ownership_permissions(
 				$st[5], $st[5], $st[2]&0777, $newmf);
 			}
-		}
-
-	# Fix home directory permissions
-	if (-d $newu->{'home'} && &is_under_directory($hb, $newu->{'home'})) {
-		&execute_command("chown -R $newu->{'uid'}:$newu->{'gid'} ".
-                       quotemeta($newu->{'home'}));
 		}
 
 	# Copy user cron jobs
