@@ -14993,7 +14993,7 @@ if (!&has_command("findmnt")) {
 	return $mount;
 	}
 my %uconfig = foreign_config("useradmin");
-my %bind_mounts = map { $_ => 1 } split(/\n/m, &backquote_command('findmnt | grep -oP \'\[\K[^\]]+\'') );
+my %bind_mounts = map { $_ => 1 } split( /\n/m, &backquote_command('findmnt -r | grep -oP \'^(\S+)(?=.*\[\/)\'') );
 if (exists($bind_mounts{$uconfig{'home_base'}})) {
 	my @device = sub_mount_points($uconfig{'home_base'});
 	if (@device) {
