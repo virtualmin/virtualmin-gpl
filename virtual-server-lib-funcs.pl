@@ -7464,13 +7464,13 @@ if ($dom->{'mysql'}) {
 	# so that mysql_pass is available to all features.
 	if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'mysql_pass'}) {
 		# Hashed passwords in use
-		$dom->{'mysql_pass'} = &random_password(16);
+		$dom->{'mysql_pass'} = &random_password();
 		delete($dom->{'mysql_enc_pass'});
 		}
 	elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
 	       !$dom->{'mysql_pass'}) {
 		# Using random password by default
-		$dom->{'mysql_pass'} = &random_password(16);
+		$dom->{'mysql_pass'} = &random_password();
 		delete($dom->{'mysql_enc_pass'});
 		}
 
