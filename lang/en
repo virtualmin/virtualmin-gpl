@@ -798,6 +798,7 @@ user_dbsall=Databases in domain
 user_dbssel=Granted access to
 user_groups=Secondary group membership
 user_edbpass=The user's password must be changed when granting access to databases for the first time
+user_ehomehome=Home directory is not under $1
 user_edbclash=A database login with the same name already exists
 user_mysqluser2=MySQL username
 user_postgresuser=(PostgreSQL login $1)

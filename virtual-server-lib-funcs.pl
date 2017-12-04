@@ -2411,6 +2411,10 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 			}
 		}
 	}
+if ($d && !&is_under_directory($d->{'home'}, $user->{'home'})) {
+	# Home dir is outside domain's home
+	return &text('user_ehomehome', $d->{'home'});
+	}
 return undef;
 }
 
