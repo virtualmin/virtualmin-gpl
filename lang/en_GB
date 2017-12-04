@@ -26,3 +26,5 @@ right_expirynever=Lifetime licence
 right_vkey=Virtualmin licence key
 right_smax=Licenced Virtualmin systems
 right_vmax=Licenced domains
+check_yumrepowrong=The Virtualmin YUM repository config file $1 contains the wrong serial number of licence key!
+check_aptrepowrong=The APT repository config file $1 contains the wrong serial number of licence key!
