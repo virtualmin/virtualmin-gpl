@@ -7462,26 +7462,24 @@ if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	$dom->{'autoalias'} = $aliasname;
 	}
 
-if ($dom->{'mysql'}) {
-	# Check if only hashed passwords are stored, and if so generate a random
-	# MySQL password now. This has to be done before any features are setup
-	# so that mysql_pass is available to all features.
-	if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'mysql_pass'}) {
-		# Hashed passwords in use
-		$dom->{'mysql_pass'} = &random_password();
-		delete($dom->{'mysql_enc_pass'});
-		}
-	elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
-	       !$dom->{'mysql_pass'}) {
-		# Using random password by default
-		$dom->{'mysql_pass'} = &random_password();
-		delete($dom->{'mysql_enc_pass'});
-		}
+# Check if only hashed passwords are stored, and if so generate a random
+# MySQL password now. This has to be done before any features are setup
+# so that mysql_pass is available to all features.
+if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'mysql_pass'}) {
+	# Hashed passwords in use
+	$dom->{'mysql_pass'} = &random_password();
+	delete($dom->{'mysql_enc_pass'});
+	}
+elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
+       !$dom->{'mysql_pass'}) {
+	# Using random password by default
+	$dom->{'mysql_pass'} = &random_password();
+	delete($dom->{'mysql_enc_pass'});
+	}
 
-	# MySQL module comes from parent always
-	if ($parentdom) {
-		$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
-		}
+# MySQL module comes from parent always
+if ($parentdom) {
+	$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
 	}
 
 # Set up all the selected features (except Webmin login)
