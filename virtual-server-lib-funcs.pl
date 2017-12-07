@@ -14548,10 +14548,11 @@ if ($nologin_shell && $shells{$nologin_shell->{'shell'}}) {
 	&$second_print(&text('check_eshell',
 		"<tt>$nologin_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
-if ($ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
+if ($config{'ftp'} && $ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
 	&$second_print(&text('check_eftpshell',
 		"<tt>$ftp_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
+
 
 # Check for problem module config settings
 if ($config{'all_namevirtual'} && $config{'dns_ip'}) {
