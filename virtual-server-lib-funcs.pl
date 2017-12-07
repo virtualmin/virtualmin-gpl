@@ -13928,7 +13928,7 @@ if ($config{'web'}) {
 	if ($apache::httpd_modules{'core'} >= 2.4 &&
 	    !$apache::httpd_modules{'mod_cgi'} &&
 	    !$apache::httpd_modules{'mod_cgid'}) {
-		return $text{'tmpl_ewebcgi'};
+		return $text{'check_ewebcgi'};
 		}
 
 	# Run Apache config check
