@@ -13925,7 +13925,8 @@ if ($config{'web'}) {
 	    !$apache::httpd_modules{'mod_fcgid'}) {
 		return $text{'tmpl_ephpmode2'};
 		}
-	if ($apache::httpd_modules{'core'} >= 2.4 &&
+	if ($config{'mail'} &&
+	    $apache::httpd_modules{'core'} >= 2.4 &&
 	    !$apache::httpd_modules{'mod_cgi'} &&
 	    !$apache::httpd_modules{'mod_cgid'}) {
 		return $text{'check_ewebcgi'};
@@ -14547,10 +14548,11 @@ if ($nologin_shell && $shells{$nologin_shell->{'shell'}}) {
 	&$second_print(&text('check_eshell',
 		"<tt>$nologin_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
-if ($ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
+if ($config{'ftp'} && $ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
 	&$second_print(&text('check_eftpshell',
 		"<tt>$ftp_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
 	}
+
 
 # Check for problem module config settings
 if ($config{'all_namevirtual'} && $config{'dns_ip'}) {
