@@ -11,6 +11,7 @@ if (!$d->{'alias'}) {
 	@modes = &supported_php_modes($d);
 	$mode = &get_domain_php_mode($d);
 	}
+$p = &domain_has_website($d);
 
 &ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
 
