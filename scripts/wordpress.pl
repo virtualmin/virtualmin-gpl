@@ -30,13 +30,7 @@ return ("Blog", "CMS");
 
 sub script_wordpress_php_vers
 {
-my ($d, $ver) = @_;
-if ($ver >= 3.2) {
-	return ( 5 );
-	}
-else {
-	return ( 4, 5 );
-	}
+return ( 5 );
 }
 
 sub script_wordpress_php_modules

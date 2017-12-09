@@ -57,8 +57,7 @@ return "Database";
 
 sub script_phpmyadmin_php_vers
 {
-local ($d, $ver) = @_;
-return $ver >= 3.1 ? ( 5 ) : ( 5, 4 );
+return ( 5 );
 }
 
 sub script_phpmyadmin_php_modules
