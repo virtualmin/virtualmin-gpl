@@ -4744,14 +4744,16 @@ elsif ($mode == 8) {
 			my $size = $st->{'.tag'} eq 'folder' ?
 					&size_dropbox_directory($p) :
 					$st->{'size'};
-			local $err = &delete_dropbox_path($base, $f);
+			local $dropbase = $base;
+			$dropbase =~ s/^\///;
+			local $err = &delete_dropbox_path($dropbase, $f);
 			if ($err) {
 				&$second_print(&text('backup_edelbucket',$err));
 				$ok = 0;
 				}
 			else {
-				&delete_dropbox_path($base, $f.".dom");
-				&delete_dropbox_path($base, $f.".info");
+				&delete_dropbox_path($dropbase, $f.".dom");
+				&delete_dropbox_path($dropbase, $f.".info");
 				&$second_print(&text('backup_deleted',
 				     &nice_size($size)));
 				$pcount++;
