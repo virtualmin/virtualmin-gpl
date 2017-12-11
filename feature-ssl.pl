@@ -1647,6 +1647,7 @@ foreach my $k ('cert', 'key', 'chain') {
 		}
 	}
 delete($d->{'ssl_same'});
+&sync_combined_ssl_cert($d);
 if ($d->{'web'}) {
 	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
 		$d->{'dom'}, $d->{'web_sslport'});
