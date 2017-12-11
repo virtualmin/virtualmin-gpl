@@ -2891,7 +2891,7 @@ foreach my $w (&unique(&list_php_wrapper_templates())) {
 				     $text{'tmpl_wrappernone'}, [ $w ]);
 	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
 	local ($v, $t) = ($1, $2);
-	print &ui_table_row(&hlink(&text('tmpl_php'.$t, $v), "template_".$w),
+	print &ui_table_row(&hlink(&text('tmpl_php'.$t, $v), "template_php".$t),
 			    $ndi."<br>".
 		&ui_textarea($w, $tmpl->{$w} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{$w})),
