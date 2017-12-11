@@ -2885,7 +2885,7 @@ return @rv;
 sub show_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (&list_php_wrapper_templates()) {
+foreach my $w (&unique(&list_php_wrapper_templates())) {
 	local $ndi = &none_def_input($w, $tmpl->{$w},
 				     $text{'tmpl_wrapperbelow'}, 0, 0,
 				     $text{'tmpl_wrappernone'}, [ $w ]);
@@ -2904,7 +2904,7 @@ foreach my $w (&list_php_wrapper_templates()) {
 sub parse_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (&list_php_wrapper_templates()) {
+foreach my $w (&unique(&list_php_wrapper_templates())) {
 	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
 	local ($v, $t) = ($1, $2);
 	if ($in{$w."_mode"} == 0) {
