@@ -1572,6 +1572,7 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 sub find_matching_certificate
 {
 local ($d) = @_;
+return if ($config{'nolink_certs'});
 local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
 			   $_->{'ssl'} &&
 			   $_->{'id'} ne $d->{'id'} &&

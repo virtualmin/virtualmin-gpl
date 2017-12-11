@@ -95,6 +95,7 @@ can_letsencrypt=Who can request Let's Encrypt certificates?,1,0-All users,1-Rese
 auto_letsencrypt=Request Let's Encrypt certificate at domain creation time?,1,1-Yes,0-No
 auto_redirect=Redirect HTTP to HTTPS by default?,1,1-Yes,0-No
 tlsa_records=Create TLSA DNS records for SSL certificates,1,1-Yes,0-No
+nolink_certs=Share SSL certificates between domains where possible?,1,0-Yes,1-No
 
 line6.5=Reseller settings (Pro Only),11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
