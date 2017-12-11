@@ -60,7 +60,7 @@ while(@ARGV > 0) {
 		else {
 			# In parameter
 			$f =~ s/\r//g;
-			$f =~ s/\s+/\n/g;
+			$f =~ s/\t+/\n/g;
 			push(@got, [ $g, $f ]);
 			}
 		}
