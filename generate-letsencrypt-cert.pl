@@ -70,6 +70,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--check-first") {
 		$connectivity = 1;
 		}
+	elsif ($a =~ /^--(web|dns)$/) {
+		$mode = $1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -132,7 +135,7 @@ $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
 $before = &before_letsencrypt_website($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-				$d, \@dnames, $staging, $size);
+				$d, \@dnames, $staging, $size, $mode);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
@@ -205,6 +208,7 @@ print "                                    [--renew months]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first]\n";
+print "                                    [--web | --dns]\n";
 exit(1);
 }
 
