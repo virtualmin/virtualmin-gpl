@@ -3130,7 +3130,7 @@ return 1;
 
 sub can_edit_exclude
 {
-return !$access{'admin'};	# Any except extra admins
+return !$access{'admin'} && &can_backup_domain();
 }
 
 # can_edit_spf(&domain)
