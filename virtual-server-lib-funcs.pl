@@ -2900,13 +2900,17 @@ if (!$access{'import'} && !$access{'migrate'}) {
 	return 0;
 	}
 elsif (&master_admin()) {
+	# Root can import everything
 	return 1;
 	}
 elsif (&reseller_admin()) {
+	# Resellers can import from remote
 	return 2;
 	}
 else {
-	return 3;
+	# Domain owners can migrate sub-servers from remote, iff they can also
+	# restore backups
+	return &can_restore_domain() ? 3 : 0;
 	}
 }
 
