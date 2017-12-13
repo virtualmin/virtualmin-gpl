@@ -41,7 +41,8 @@ if ($d->{'subdom'}) {
 elsif (!$d->{'alias'} && $tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
-			     &get_domain_by("parent", $d->{'parent'})) {
+			     (&get_domain_by("parent", $d->{'parent'}),
+			      &get_domain($d->{'parent'}))) {
 		if (!$pd->{'dns_submode'} && &under_parent_domain($d, $pd)) {
 			$dnsparent = $pd;
 			last;
