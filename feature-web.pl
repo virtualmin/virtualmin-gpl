@@ -1450,7 +1450,7 @@ if ($virt) {
 
 	# If the Apache log is outside the home, back it up too
 	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
-	if ($alog && 
+	if ($alog && -r $alog &&
 	    !&is_under_directory($d->{'home'}, $alog) &&
 	    !$allopts->{'dir'}->{'dirnologs'}) {
 		&$first_print($text{'backup_apachelog'});
@@ -1470,7 +1470,8 @@ if ($virt) {
 		# Also copy the error log
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
-		if ($elog && $ok && !&is_under_directory($d->{'home'}, $elog)) {
+		if ($elog && -r $elog && $ok &&
+		    !&is_under_directory($d->{'home'}, $elog)) {
 			($ok, $err) = &copy_write_as_domain_user(
 					$d, $elog, $file."_elog");
 			}
