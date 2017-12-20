@@ -6943,6 +6943,7 @@ letsencrypt_bfailed=An error occurred requesting a new certificate for $1 from L
 letsencrypt_sdone=Let's Encrypt certificate renewal complete
 letsencrypt_bdone=A new certificate was successfully requested from Let's Encrypt, and installed for $1.
 letsencrypt_eenabled=Cannot request certificate for disabled domains
+letsencrypt_ednames=No domain names to request certificate for entered!
 letsencrypt_eweb=Web-based validation failed : $1
 letsencrypt_edns=DNS-based validation failed : $1
 letsencrypt_conncheck=Checking external connectivity for $1 ..

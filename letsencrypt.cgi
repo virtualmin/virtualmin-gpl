@@ -24,6 +24,7 @@ else {
 		}
 	$custom_dname = join(" ", @dnames);
 	}
+@dnames || &error($text{'letsencrypt_ednames'});
 $in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
 	&error($text{'letsencrypt_erenew'});
 
