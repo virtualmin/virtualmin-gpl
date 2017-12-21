@@ -2472,6 +2472,16 @@ print &ui_table_row(&hlink($text{'tmpl_dmarcpct'},
 			   "template_dns_dmarcpct"),
 	&ui_textbox("dns_dmarcpct", $tmpl->{'dns_dmarcpct'}, 5)."%");
 
+# DMARC email templates
+print &ui_table_row(&hlink($text{'tmpl_dmarcruf'},
+			   "template_dns_dmarcruf"),
+	&ui_opt_textbox("dns_dmarcruf", $tmpl->{'dns_dmarcruf'}, 40,
+			"mailto:postmaster\@domain"));
+print &ui_table_row(&hlink($text{'tmpl_dmarcrua'},
+			   "template_dns_dmarcrua"),
+	&ui_opt_textbox("dns_dmarcrua", $tmpl->{'dns_dmarcrua'}, 40,
+			"mailto:postmaster\@domain"));
+
 if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
 
@@ -2636,6 +2646,8 @@ if ($in{'dns_dmarc_mode'} == 2) {
 	}
 $tmpl->{'dns_dmarcp'} = $in{'dns_dmarcp'};
 $tmpl->{'dns_dmarcpct'} = $in{'dns_dmarcpct'};
+$tmpl->{'dns_dmarcruf'} = $in{'dns_dmarcruf_def'} ? undef : $in{'dns_dmarcruf'};
+$tmpl->{'dns_dmarcrua'} = $in{'dns_dmarcrua_def'} ? undef : $in{'dns_dmarcrua'};
 
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
@@ -3074,10 +3086,24 @@ sub default_domain_dmarc
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $pm = 'postmaster@'.$d->{'dom'};
+local $ruf = $tmpl->{'dns_dmarcruf'};
+if ($ruf && $ruf ne "none") {
+	$ruf = &substitute_domain_template($ruf, $d);
+	}
+else {
+	$ruf = $pm;
+	}
+local $rua = $tmpl->{'dns_dmarcrua'};
+if ($rua && $rua ne "none") {
+	$rua = &substitute_domain_template($rua, $d);
+	}
+else {
+	$rua = $pm;
+	}
 local $dmarc = { 'p' => $tmpl->{'dns_dmarcp'} || 'none',
 		 'pct' => $tmpl->{'dns_dmarcpct'} || '100',
-		 'ruf' => 'mailto:'.$pm,
-		 'rua' => 'mailto:'.$pm, };
+		 'ruf' => $ruf,
+		 'rua' => $rua, };
 return $dmarc;
 }
 
