@@ -9225,7 +9225,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url",
-		    "php", "status", "extra_prefix", "capabilities",
+		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
 		    "ipfollow", "exclude",
