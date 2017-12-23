@@ -95,8 +95,9 @@ elsif (@doms) {
 	my @dlist = map { [ $_->{'id'},
 			    ("&nbsp;&nbsp;" x $_->{'indent'}).
                             &shorten_domain_name($_),
-                            $_->{'disabled'} ?
-				"style='font-style:italic'" : "" ] } @doms;
+                            (($_->{'disabled'} ?
+				"style='font-style:italic'" : "") . 
+				"title=\"" . show_domain_name($_) . "\"") ] } @doms;
 	my $dmenu = { 'type' => 'menu',
 		      'cgi' => '',
 		      'name' => 'dom',
