@@ -18,6 +18,10 @@ To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
 will detect common errors before your Let's Encrypt service quota is consumed.
 
+To have Virtualmin perform a local validation check of the domain, use the
+C<--validate-first> flag. This is automatically enabled when C<--check-first>
+is set.
+
 =cut
 
 package virtual_server;
@@ -70,6 +74,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--check-first") {
 		$connectivity = 1;
 		}
+	elsif ($a eq "--validate-first") {
+		$validation = 1;
+		}
 	elsif ($a =~ /^--(web|dns)$/) {
 		$mode = $1;
 		}
@@ -108,13 +115,15 @@ else {
 	$custom_dname = join(" ", @dnames);
 	}
 
+# Build a list of the domains being validated
+my @cdoms = ( $d );
+if (!$d->{'alias'} && !$custom_dname) {
+	push(@cdoms, grep { &domain_has_website($_) }
+			  &get_domain_by("alias", $d->{'id'}));
+	}
+
 # Check for external connectivity first
 if ($connectivity && defined(&check_domain_connectivity)) {
-	my @cdoms = ( $d );
-	if (!$d->{'alias'} && !$custom_dname) {
-		push(@cdoms, grep { &domain_has_website($_) }
-				  &get_domain_by("alias", $d->{'id'}));
-		}
 	my @errs;
 	foreach my $cd (@cdoms) {
 		push(@errs, &check_domain_connectivity($cd,
@@ -122,6 +131,18 @@ if ($connectivity && defined(&check_domain_connectivity)) {
 		}
 	if (@errs) {
 		print "Connectivity check failed :\n";
+		foreach my $e (@errs) {
+			print "ERROR: $e->{'desc'} : $e->{'error'}\n";
+			}
+		exit(1);
+		}
+	}
+
+# If doing a connectivity check, also do web and DNS validation
+if ($connectivity || $validation) {
+	my @errs = map { &validate_letsencrypt_config($_) } @cdoms;
+	if (@errs) {
+		print "Validation check failed :\n";
 		foreach my $e (@errs) {
 			print "ERROR: $e->{'desc'} : $e->{'error'}\n";
 			}
@@ -207,7 +228,7 @@ print "                                    [--default-hosts]\n";
 print "                                    [--renew months]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
-print "                                    [--check-first]\n";
+print "                                    [--check-first | --validate-first]\n";
 print "                                    [--web | --dns]\n";
 exit(1);
 }

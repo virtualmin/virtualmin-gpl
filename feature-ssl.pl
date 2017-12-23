@@ -2434,6 +2434,25 @@ else {
 	}
 }
 
+# validate_letsencrypt_config(&domain)
+# Returns a list of validation errors that might prevent Let's Encrypt
+sub validate_letsencrypt_config
+{
+my ($d) = @_;
+my @rv;
+foreach my $f ("web", "dns") {
+	if ($d->{$f} && $config{$f}) {
+		my $vfunc = "validate_$f";
+		my $err = &$vfunc($d);
+		if ($err) {
+			push(@rv, { 'desc' => $text{'feature_'.$f},
+				    'error' => $err });
+			}
+		}
+	}
+return @rv;
+}
+
 # setup_domain_ipkeys(&domain, [&tmpl], [service])
 # Copy the SSL cert for webmin and usermin
 sub setup_domain_ipkeys
