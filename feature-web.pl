@@ -974,6 +974,20 @@ else {
 			return &text('validate_ewebdir', $pdir);
 			}
 		}
+
+	# If an IPv6 DNS record exists, make sure the Apache config supports it
+	my $ip6addr = &to_ip6address("www.".$d->{'dom'}) ||
+		      &to_ip6address($d->{'dom'});
+	if ($ip6addr) {
+		if (!$d->{'ip6'}) {
+			return &text('validate_ewebipv6', $ip6addr);
+			}
+		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
+		if (&indexof($ipp, @{$virt->{'words'}}) < 0 &&
+		    &indexof("*:".$d->{'web_port'}, @{$virt->{'words'}}) < 0) {
+			return &text('validate_ewebipv6virt', $ip6addr);
+			}
+		}
 	}
 return undef;
 }
