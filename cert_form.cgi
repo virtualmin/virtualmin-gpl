@@ -384,7 +384,10 @@ else {
 	# Test connectivity first?
 	if (defined(&check_domain_connectivity)) {
 		print &ui_table_row($text{'cert_connectivity'},
-			&ui_yesno_radio("connectivity", 0));
+			&ui_radio("connectivity", 1,
+				  [ [ 2, $text{'cert_connectivity2'} ],
+				    [ 1, $text{'cert_connectivity1'} ],
+				    [ 0, $text{'cert_connectivity0'} ] ]));
 		}
 
 	# Recent renewal details

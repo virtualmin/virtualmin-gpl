@@ -2899,6 +2899,9 @@ cert_dnamesel=Domain names listed here
 cert_letsrenew=Months between automatic renewal
 cert_letsnotrenew=Only renew manually
 cert_connectivity=Check connectivity first?
+cert_connectivity2=Test connectivity
+cert_connectivity1=Validate domain
+cert_connectivity0=Skip tests
 cert_letsage=Time since last renewal
 cert_letsmonths=$1 months
 cert_lets_success=Last successful renewal
@@ -6953,6 +6956,7 @@ letsencrypt_edns=DNS-based validation failed : $1
 letsencrypt_conncheck=Checking external connectivity for $1 ..
 letsencrypt_connerrs=.. errors were found, which will prevent Let's Encrypt from issuing a certificate :
 letsencrypt_connok=.. no problems found
+letsencrypt_validcheck=Validating configuration for $1 ..
 
 php_fpmrestart=Restarting PHP-FPM server ..
 php_fpmnoinit=.. no bootup action found!
