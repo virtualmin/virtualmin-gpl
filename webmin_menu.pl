@@ -97,7 +97,7 @@ elsif (@doms) {
                             &shorten_domain_name($_),
                             (($_->{'disabled'} ?
 				"style='font-style:italic'" : "") . 
-				"title=\"" . show_domain_name($_) . "\"") ] } @doms;
+				"title=\"" . &show_domain_name($_) . "\"") ] } @doms;
 	my $dmenu = { 'type' => 'menu',
 		      'cgi' => '',
 		      'name' => 'dom',
