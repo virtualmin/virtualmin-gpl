@@ -196,7 +196,7 @@ $spamclear_file = "$module_config_directory/spamclear";
 $plans_dir = "$module_config_directory/plans";
 
 $extra_admins_dir = "$module_config_directory/admins";
-@all_possible_php_versions = (4, 5, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9,
+@all_possible_php_versions = (5, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9,
 			      "7.0", 7.1);
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 $max_php_fcgid_children = 20;

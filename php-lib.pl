@@ -1077,7 +1077,7 @@ foreach my $p (@ports) {
 		if ($mode eq "cgi") {
 			local @types = &apache::find_directive(
 				"AddType", $dirstr->{'members'});
-			@types = grep { $_ !~ /^application\/x-httpd-php[45]/ }
+			@types = grep { $_ !~ /^application\/x-httpd-php[57]/ }
 				      @types;
 			foreach my $v (&list_available_php_versions($d)) {
 				push(@types, "application/x-httpd-php$v->[0] ".
@@ -1207,7 +1207,7 @@ return 0;
 }
 
 # cleanup_php_cgi_processes()
-# Finds and kills and php-cgi, php4-cgi and php5-cgi processes which are
+# Finds and kills and php-cgi and php5-cgi processes which are
 # orphans (owned by init). This can happen if they are not killed when Apache
 # is restarted.
 sub cleanup_php_cgi_processes
@@ -1215,7 +1215,7 @@ sub cleanup_php_cgi_processes
 if (&foreign_check("proc") && $config{'web'}) {
 	&foreign_require("proc");
 	local @procs = &proc::list_processes();
-	local @cgis = grep { $_->{'args'} =~ /^\S+php(4|5|)\-cgi/ &&
+	local @cgis = grep { $_->{'args'} =~ /^\S+php(5|)\-cgi/ &&
 			     $_->{'ppid'} == 1 } @procs;
 	foreach my $p (@cgis) {
 		kill('KILL', $p->{'pid'});
@@ -1919,8 +1919,7 @@ sub get_apache_mod_php_version
 {
 return $apache_mod_php_version_cache if ($apache_mod_php_version_cache);
 &require_apache();
-my $major = $apache::httpd_modules{'mod_php4'} ? 4 :
-	    $apache::httpd_modules{'mod_php5'} ? 5 :
+my $major = $apache::httpd_modules{'mod_php5'} ? 5 :
             $apache::httpd_modules{'mod_php7'} ? "7.0" : undef;
 return undef if (!$major);
 foreach my $php ("php$major", "php") {

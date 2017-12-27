@@ -1580,3 +1580,5 @@ Any virtual servers can now share a DNS zone file, unlike in previous Virtualmin
 ---- Changes since 6.02 ----
 When adding an alias to a domain with a Let's Encrypt SSL certificate, the cert is automatically updated to include the alias domain.
 Backups from cPanel, Plesk and other control panels can now be migrated even when Nginx is used as a webserver.
+---- Changes since 6.03 ----
+Removed support for PHP 4.

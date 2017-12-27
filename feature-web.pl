@@ -2986,7 +2986,7 @@ if ($tmpl->{'web_php_suexec'} == 0) {
 elsif ($tmpl->{'web_php_suexec'} == 1 ||
        $tmpl->{'web_php_suexec'} == 2 &&
         !$apache::httpd_modules{'mod_fcgid'}) {
-	# Create cgi wrappers for PHP 4 and 5
+	# Create cgi wrappers for PHP
 	$mode = "cgi";
 	}
 elsif ($tmpl->{'web_php_suexec'} == 2) {
