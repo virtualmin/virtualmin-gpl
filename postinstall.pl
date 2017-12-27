@@ -263,22 +263,8 @@ if ($config{'allow_subdoms'} eq '') {
 	&save_module_config();
 	}
 
-# Create the cron job for killing orphan php*-cgi processes
-if ($virtualmin_pro) {
-	local $job = &find_cron_script($fcgiclear_cron_cmd);
-	if (!$job) {
-		# Create, and run for the first time
-		$job = { 'mins' => '0',
-			 'hours' => '*',
-			 'days' => '*',
-			 'months' => '*',
-			 'weekdays' => '*',
-			 'user' => 'root',
-			 'active' => 1,
-			 'command' => $fcgiclear_cron_cmd };
-		&setup_cron_script($job);
-		}
-	}
+# Remove old cron job for killing orphan php*-cgi processes
+&delete_cron_script($fcgiclear_cron_cmd);
 
 # Add ftp user to the groups for all domains that have FTP enabled
 &obtain_lock_unix();

@@ -1208,7 +1208,6 @@ else {
 	# Just signal a re-load
 	&apache::restart_apache();
 	}
-&cleanup_php_cgi_processes() if (defined(&cleanup_php_cgi_processes));
 &unlock_file($apachelock);
 &$second_print($text{'setup_done'});
 return 1;

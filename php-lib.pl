@@ -1206,25 +1206,6 @@ if ($dirstr) {
 return 0;
 }
 
-# cleanup_php_cgi_processes()
-# Finds and kills and php-cgi and php5-cgi processes which are
-# orphans (owned by init). This can happen if they are not killed when Apache
-# is restarted.
-sub cleanup_php_cgi_processes
-{
-if (&foreign_check("proc") && $config{'web'}) {
-	&foreign_require("proc");
-	local @procs = &proc::list_processes();
-	local @cgis = grep { $_->{'args'} =~ /^\S+php(5|)\-cgi/ &&
-			     $_->{'ppid'} == 1 } @procs;
-	foreach my $p (@cgis) {
-		kill('KILL', $p->{'pid'});
-		}
-	return scalar(@cgis);
-	}
-return -1;
-}
-
 # list_domain_php_inis(&domain, [force-mode])
 # Returns a list of php.ini files used by a domain, and their PHP versions
 sub list_domain_php_inis
