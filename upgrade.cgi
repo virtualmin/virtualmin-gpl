@@ -131,6 +131,9 @@ elsif ($itype eq "deb") {
 		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl(\/.*)/) {
 			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
 			}
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl(\/.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+                        }
 		}
 	&flush_file_lines($sources_list);
 
