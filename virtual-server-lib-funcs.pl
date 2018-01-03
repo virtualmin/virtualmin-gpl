@@ -620,7 +620,7 @@ if (scalar(@main::list_domains_cache)) {
 
 # build_domain_maps()
 # Create the files used by get_domain_by to quickly lookup domains by user
-# or parent 
+# or parent
 sub build_domain_maps
 {
 local @doms = &list_domains();
@@ -2759,7 +2759,7 @@ if ($access{'reseller'}) {
 		return &can_edit_domain(&get_domain($_[0]->{'parent'}));
 		}
 	else {
-		return &indexof($base_remote_user, 
+		return &indexof($base_remote_user,
 				split(/\s+/, $_[0]->{'reseller'})) >= 0;
 		}
 	}
@@ -4530,7 +4530,7 @@ return wantarray ? @rv : $rv[0];
 }
 
 # set_alias_programs()
-# Copy the wrapper scripts needed for autoresponders 
+# Copy the wrapper scripts needed for autoresponders
 sub set_alias_programs
 {
 &require_mail();
@@ -5533,26 +5533,26 @@ if ($bsize) {
 		}
 	$val = sprintf("%.2f", $val) if ($val);
 	$val =~ s/\.00$//;
-	$rv .= "    document.forms[0].${name}.value = \"$val\";\n";
-	$rv .= "    document.forms[0].${name}_units.selectedIndex = $index;\n";
+	$rv .= "    !!domain_form_target[0].${name} && (domain_form_target[0].${name}.value = \"$val\");\n";
+	$rv .= "    !!domain_form_target[0].${name}_units && (domain_form_target[0].${name}_units.selectedIndex = $index);\n";
 	}
 else  {
 	# Just set blocks value
-	$rv .= "    document.forms[0].${name}.value = \"$value\";\n";
+	$rv .= "    !!domain_form_target[0].${name} && (domain_form_target[0].${name}.value = \"$value\");\n";
 	}
 if ($unlimited) {
 	if ($value eq "") {
-		$rv .= "    document.forms[0].${name}_def[0].checked = true;\n";
-		$rv .= "    document.forms[0].${name}.disabled = true;\n";
-		$rv .= "    if (document.forms[0].${name}_units) {\n";
-		$rv .= "        document.forms[0].${name}_units.disabled = true;\n";
+		$rv .= "    !!domain_form_target[0].${name}_def && (domain_form_target[0].${name}_def[0].checked = true);\n";
+		$rv .= "    !!domain_form_target[0].${name} && (domain_form_target[0].${name}.disabled = true);\n";
+		$rv .= "    if (domain_form_target[0].${name}_units) {\n";
+		$rv .= "        domain_form_target[0].${name}_units.disabled = true;\n";
 		$rv .= "    }\n";
 		}
 	else {
-		$rv .= "    document.forms[0].${name}_def[1].checked = true;\n";
-		$rv .= "    document.forms[0].${name}.disabled = false;\n";
-		$rv .= "    if (document.forms[0].${name}_units) {\n";
-		$rv .= "        document.forms[0].${name}_units.disabled = false;\n";
+		$rv .= "    !!domain_form_target[0].${name}_def && (domain_form_target[0].${name}_def[1].checked = true);\n";
+		$rv .= "    !!domain_form_target[0].${name} && (domain_form_target[0].${name}.disabled = false);\n";
+		$rv .= "    if (domain_form_target[0].${name}_units) {\n";
+		$rv .= "        domain_form_target[0].${name}_units.disabled = false;\n";
 		$rv .= "    }\n";
 		}
 	}
@@ -5900,7 +5900,7 @@ foreach my $sched (&list_scheduled_backups()) {
 		}
 	}
 
-# Re-create the restored ones 
+# Re-create the restored ones
 opendir(BACKUPDIR, $temp);
 foreach my $t (readdir(BACKUPDIR)) {
         next if ($t eq "." || $t eq "..");
@@ -6684,7 +6684,7 @@ return wantarray ? ( ) : undef;
 sub free_ip6_address
 {
 local ($tmpl) = @_;
-local %taken = &interface_ip_addresses(); 
+local %taken = &interface_ip_addresses();
 local @ranges = split(/\s+/, $tmpl->{'ranges6'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, lc($rn));
@@ -8487,7 +8487,7 @@ if (@_ >= 5) {
 	$rv .= &ui_table_row($text{'newdom_to'},
 	     &ui_checkbox("mailbox", 1, $text{'newdom_mailbox'}, $mailbox)." ".
 	     &ui_checkbox("owner", 1, $text{'newdom_owner'}, $owner)." ".
-	     ($virtualmin_pro ? 
+	     ($virtualmin_pro ?
 		&ui_checkbox("reseller", 1, $text{'newdom_reseller'},
 			     $reseller) : ""));
 	}
@@ -9599,7 +9599,7 @@ foreach my $l (&list_custom_links()) {
 		'url' => &substitute_domain_template($l->{'url'}, $d),
 		'open' => $l->{'open'},
 		'catname' => $cats{$l->{'cat'}},
-		'cat' => $l->{'cat'}, 
+		'cat' => $l->{'cat'},
 		};
 	if ($nl->{'desc'} && $nl->{'url'}) {
 		push(@rv, $nl);
@@ -11223,7 +11223,7 @@ if ($db->{'type'} eq 'mysql' || $db->{'type'} eq 'postgres') {
 	}
 else {
 	# Get size from plugin
-	local ($size, $tables, $qsize) = &plugin_call($db->{'type'}, 
+	local ($size, $tables, $qsize) = &plugin_call($db->{'type'},
 		      "database_size", $d, $db->{'name'}, 1);
 	return ($size, $qsize);
 	}
@@ -11393,7 +11393,7 @@ sub extract_compressed_file
 {
 local ($file, $dir) = @_;
 local $format = &compression_format($file);
-local $tar = &get_tar_command(); 
+local $tar = &get_tar_command();
 local $bunzip2 = &get_bunzip2_command();
 local @needs = ( undef,
 		 [ "gunzip", $tar ],
@@ -11742,7 +11742,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 			  });
 		}
 	if ($aleft != 0) {
-		# Alias domain 
+		# Alias domain
 		push(@rv, { 'page' => 'domain_form.cgi',
 			    'title' => $text{'edit_alias'},
 			    'desc' => $text{'edit_aliasdesc'},
@@ -12234,7 +12234,7 @@ local %pro = ( 'resels', 1,
 	       'styles', 1 );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
-local @ttitles = map { $nonew{$_} ? $text{"${_}_title"} 
+local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
 			          : $text{"new${_}_title"} } @tmpls;
 local @ticons = map { $nonew{$_} ? "images/${_}.gif"
 			         : "images/new${_}.gif" } @tmpls;
@@ -14423,7 +14423,7 @@ $config{'home_quotas'} = '';
 $config{'mail_quotas'} = '';
 $config{'group_quotas'} = '';
 if ($config{'quotas'} && $config{'quota_commands'}) {
-	# External commands are being used for quotas - make sure they exist! 
+	# External commands are being used for quotas - make sure they exist!
 	foreach my $c ("set_user", "set_group", "list_users", "list_groups") {
 		local $cmd = $config{"quota_".$c."_command"};
 		$cmd && &has_command($cmd) || return $text{'check_e'.$c};
@@ -15180,7 +15180,7 @@ local @rv = (
 	    [ 0, 'No' ] ] ],
         [ 'proc', 'Running Processes (user\'s processes only)',
 	  [ [ 2, 'See own processes' ],
-	    [ 1, 'See all processes' ], 
+	    [ 1, 'See all processes' ],
 	    [ 0, 'No' ] ] ],
         [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
         [ 'at', 'Scheduled Commands (user\'s commands)' ],
@@ -16039,7 +16039,7 @@ foreach my $p (@plugins) {
 				push(@rv, $s);
 				}
 			}
-		} 
+		}
         }
 return @rv;
 }

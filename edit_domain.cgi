@@ -169,6 +169,7 @@ if (@cantmpls) {
 $js = "<script>\n";
 $js .= "function select_plan(num)\n";
 $js .= "{\n";
+$js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain\"][action*=\".cgi\"]');\n";
 foreach $plan (@plans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
 	$js .= &quota_javascript("quota", $plan->{'quota'}, "home", 1);
@@ -386,4 +387,3 @@ if (defined(&theme_select_domain)) {
 	}
 
 &ui_print_footer("", $text{'index_return'});
-
