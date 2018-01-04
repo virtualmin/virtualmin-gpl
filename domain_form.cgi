@@ -95,7 +95,7 @@ if ($in{'generic'}) {
 		}
 	@generics || &error($text{'form_enomore'});
 
-	# Force inputs to match selected generic type 
+	# Force inputs to match selected generic type
 	$generic = $generics[$in{'genericmode'}];
 	%in = ( %in, map { split(/=/, $_, 2) } split(/\&/, $generic->[1]) );
 	}
@@ -227,6 +227,7 @@ $deftmpl ||= $availtmpls[0];
 $js = "<script>\n";
 $js .= "function select_template(num)\n";
 $js .= "{\n";
+$js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain_setup.cgi\"]');\n";
 foreach $t (@availtmpls) {
 	local $tmpl = &get_template($t->{'id'});
 	if (!$parentdom && &can_choose_ugroup()) {
@@ -234,8 +235,8 @@ foreach $t (@availtmpls) {
 		$js .= "if (num == $tmpl->{'id'}) {\n";
 		$num = $tmpl->{'ugroup'} eq "none" ? 0 : 1;
 		$val = $tmpl->{'ugroup'} eq "none" ? "" : $tmpl->{'ugroup'};
-		$js .= "    document.forms[0].group_def[$num].checked = true;\n";
-		$js .= "    document.forms[0].group.value = \"$val\";\n";
+		$js .= "    domain_form_target[0].group_def[$num].checked = true;\n";
+		$js .= "    domain_form_target[0].group.value = \"$val\";\n";
 		$js .= "    }\n";
 		}
 	}
@@ -260,6 +261,7 @@ $defplan = &get_default_plan();
 $js = "<script>\n";
 $js .= "function select_plan(num)\n";
 $js .= "{\n";
+$js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain\"][action*=\".cgi\"]');\n";
 foreach $plan (@availplans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
 	if (!$config{'template_auto'}) {
@@ -283,7 +285,7 @@ foreach $plan (@availplans) {
 		$num = $plan->{'domslimit'} eq "" ? 1 :
 		       $plan->{'domslimit'} eq "0" ? 0 : 2;
 		$val = $num == 2 ? $plan->{'domslimit'} : "";
-		$js .= "    var f = document.forms[0];\n";
+		$js .= "    var f = domain_form_target[0];\n";
 		$js .= "    f.domslimit_def[$num].checked = true;\n";
 		$js .= "    f.domslimit.value = \"$val\";\n";
 
@@ -298,8 +300,8 @@ foreach $plan (@availplans) {
 				split(/\s+/, $plan->{'featurelimits'}) :
 				@def_features;
 		foreach $f (@dom_features, @fplugins) {
-			$js .= "    if (document.forms[0]['$f']) {\n";
-			$js .= "        document.forms[0]['$f'].checked = ".
+			$js .= "    if (domain_form_target[0]['$f']) {\n";
+			$js .= "        domain_form_target[0]['$f'].checked = ".
 			       (&indexof($f, @fl) >= 0 ? 1 : 0).";\n";
 			$js .= "    }\n";
 			}
@@ -658,7 +660,7 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 
 	# Initial content
 	print &ui_table_row(&hlink($text{'form_content'},"form_content"),
-			    &ui_radio("content_def", 1, 
+			    &ui_radio("content_def", 1,
 				      [ [ 1, $text{'form_content1'} ] ,
 					[ 0, $text{'form_content0'} ] ])."<br>".
 			    &ui_textarea("content", undef, 5, 70),
@@ -681,4 +683,3 @@ if (!$parentdom) {
 	}
 
 &ui_print_footer("", $text{'index_return'});
-
