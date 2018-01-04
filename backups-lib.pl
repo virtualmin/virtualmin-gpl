@@ -697,19 +697,24 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	local $dok = 1;
 	local @donefeatures;
 
-	if ($homefmt && !$d->{'dir'} && !-d $d->{'home'}) {
-		# Create temporary home directory
-		&make_dir($d->{'home'}, 0755);
-		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
-					   $d->{'home'});
-		$d->{'dir'} = 1;
-		push(@cleanuphomes, $d);
-		}
-	elsif ($homefmt && $d->{'dir'} && !-d $d->{'home'}) {
-		# Missing home dir which we need, so create it
-		&make_dir($d->{'home'}, 0755);
-		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
-					   $d->{'home'});
+	if ($homefmt && !-d $d->{'home'}) {
+		# Create home directory
+		if (&has_domain_user($d) && $d->{'parent'}) {
+			# As domain user (sub-server, likely an alias)
+			&make_dir_as_domain_user($d, $d->{'home'}, 0755, 1);
+			&set_permissions_as_domain_user($d, 0755, $d->{'home'});
+			}
+		else {
+			# As root (top-level, which should never happen)
+			&make_dir($d->{'home'}, 0755);
+			&set_ownership_permissions(
+				$d->{'uid'}, $d->{'gid'}, undef, $d->{'home'});
+			}
+		if (!$d->{'dir'}) {
+			# Only temporary
+			$d->{'dir'} = 1;
+			push(@cleanuphomes, $d);
+			}
 		}
 	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
 		# Home directory actually exists, so enable it on the domain
