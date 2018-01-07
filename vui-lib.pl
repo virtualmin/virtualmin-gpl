@@ -106,6 +106,7 @@ return &theme_virtualmin_ui_show_html_editor(@_)
 local ($name, $html, $baseurl) = @_;
 local $rv;
 
+if ($current_theme !~ /authentic-theme/) {
 # Xinha editor config
 $rv .= <<EOF;
 <script type="text/javascript">
@@ -116,7 +117,7 @@ EOF
 
 # Javascript for making the Xinha editor, depending on version
 $rv .= <<EOF;
-<script type="text/javascript" src="../mailboxes/xinha/XinhaCore.js"></script>
+<script type="text/javascript" src="$gconfig{'webprefix'}/mailboxes/xinha/XinhaCore.js"></script>
 <script type="text/javascript">
 xinha_init = function()
 {
@@ -129,6 +130,10 @@ Xinha.startEditors(xinha_editors);
 }
 </script>
 EOF
+  }
+else {
+		print '<script type="text/javascript">xinha_init = function(){}</script>';
+}
 
 # The actual textbox
 $rv .= "<textarea rows=20 cols=80 style='width:100%;height:70%' name=$name id=$name>";
@@ -159,4 +164,3 @@ return $rv;
 }
 
 1;
-
