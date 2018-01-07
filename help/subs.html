@@ -4,12 +4,22 @@ actual values from the domain when the template is used :<p>
 <table>
 <tr> <td><tt><b>${DOM}</b></td>
 <td>The domain name, such as <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${IP}</b></td>
+<td>The virtual server's IP address, like <tt>1.2.3.4</tt></td> </tr>
+<tr> <td><tt><b>${DNS_IP}</b></td>
+<td>The virtual server's external IP address, used in DNS records</td> </tr>
 <tr> <td><tt><b>${USER}</b></td>
 <td>The server's administration login, such as <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${UID}</b> and <b>${GID}</b></td>
+<td>The server's Unix user ID and group ID respectively</td></tr>
 <tr> <td><tt><b>${HOME}</b></td>
 <td>The server's home directory, like <tt>/home/foo</tt></td> </tr>
 <tr> <td><tt><b>${EMAILTO}</b></td>
 <td>The virtual server's contact email address</td> </tr>
+<tr> <td><tt><b>${PARENT}</b></td>
+<td>If this is a sub-server, the unique ID of the parent domain.</td> </tr>
+<tr> <td><tt><b>${ALIAS}</b></td>
+<td>If this is an alias, the unique ID of the target domain.</td> </tr>
 </table>
 
 In addition, conditional blocks like <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> may be used.<p>
