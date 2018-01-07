@@ -2337,6 +2337,7 @@ backup_ebucket2=Slashes cannot be used in S3 bucket names
 backup_eakey=Missing or invalid S3 authentication key
 backup_eskey=Missing or invalid S3 secret key
 backup_esfile=Invalid characters in S3 filename
+backup_einconly=An incremental scheduled backup cannot be created unless you have at least one full backup configured
 backup_done=Backup is complete. Final size was $1.
 backup_partial=Backup is partially complete. Final size was $1.
 backup_partial2=Virtual servers that failed :

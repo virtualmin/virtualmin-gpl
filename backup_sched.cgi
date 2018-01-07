@@ -185,6 +185,14 @@ else {
 		&virtualmin_ui_parse_cron_time("enabled", $sched, \%in);
 		}
 
+	# Check for incremental-only setup
+	if ($in{'new'} && $sched->{'increment'}) {
+		my @full = grep { !$_->{'increment'} } @scheds;
+		if (!@full) {
+			&error($text{'backup_einconly'});
+			}
+		}
+
 	# Save the schedule and thus the cron job
 	&save_scheduled_backup($sched);
 	}
