@@ -305,7 +305,7 @@ else {
 		}
 	else {
 		print &ui_table_row($text{'wizard_mysql_empty'},
-			&ui_textbox("mypass", undef, 20));
+			&ui_textbox("mypass", &random_password(16), 20));
 		}
 
 	# Offer to clean up test/anonymous DB and user, if they exist
