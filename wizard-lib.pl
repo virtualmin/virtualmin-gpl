@@ -398,27 +398,34 @@ sub wizard_show_mysize
 {
 print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 
-local $mem = &get_real_memory_size();
-local $mysize = $config{'mysql_size'};
-if ($mem && !$mysize) {
-	$mysize = $mem <= 256*1024*1024 ? "small" :
-		  $mem <= 512*1024*1024 ? "medium" :
-		  $mem <= 1024*1024*1024 ? "large" : "huge";
+&require_mysql();
+if (-r $mysql::config{'my_cnf'}) {
+	local $mem = &get_real_memory_size();
+	local $mysize = $config{'mysql_size'};
+	if ($mem && !$mysize) {
+		$mysize = $mem <= 256*1024*1024 ? "small" :
+			  $mem <= 512*1024*1024 ? "medium" :
+			  $mem <= 1024*1024*1024 ? "large" : "huge";
+		}
+	print &ui_table_row($text{'wizard_mysize_type'},
+		    &ui_radio_table("mysize", $mysize,
+			      [ [ "", $text{'wizard_mysize_def'} ],
+				[ "small", $text{'wizard_mysize_small'} ],
+				[ "medium", $text{'wizard_mysize_medium'} ],
+				[ "large", $text{'wizard_mysize_large'} ],
+				[ "huge", $text{'wizard_mysize_huge'} ] ]));
 	}
-print &ui_table_row($text{'wizard_mysize_type'},
-	    &ui_radio_table("mysize", $mysize,
-		      [ [ "", $text{'wizard_mysize_def'} ],
-			[ "small", $text{'wizard_mysize_small'} ],
-			[ "medium", $text{'wizard_mysize_medium'} ],
-			[ "large", $text{'wizard_mysize_large'} ],
-			[ "huge", $text{'wizard_mysize_huge'} ] ]));
+else {
+	print &ui_table_row(&text('wizard_mysize_ecnf',
+				  "<tt>$mysql::config{'my_cnf'}</tt>"));
+	}
 }
 
 sub wizard_parse_mysize
 {
 local ($in) = @_;
 &require_mysql();
-if ($in->{'mysize'}) {
+if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
 	if ($running) {

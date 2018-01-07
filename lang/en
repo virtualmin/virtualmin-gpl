@@ -6037,6 +6037,7 @@ wizard_mysize_small=Small system (256M) with infrequent MySQL use
 wizard_mysize_medium=Medium system (512M) with regular MySQL use
 wizard_mysize_large=Large system (1G) on which MySQL is heavily used
 wizard_mysize_huge=Huge system (2G or more) on which MySQL is heavily used
+wizard_mysize_ecnf=Your MySQL size cannot be changed as the config file $1 does not exist.
 wizard_emysizestart=MySQL could not be started with the new configuration : $1. The old configuration has been restored.
 wizard_title_done=All done
 wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
