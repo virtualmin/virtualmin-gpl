@@ -22,6 +22,7 @@ if ($in{'parse'} || $in{'mypass'}) {
 	$pfunc = "wizard_parse_".$step;
 	if (defined(&$pfunc)) {
 		$err = &$pfunc(\%in);
+		&webmin_log("wizard", undef, $step);
 		}
 	if (!$err) {
 		# Worked, show next step, if there is one

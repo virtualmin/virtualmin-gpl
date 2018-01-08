@@ -2170,6 +2170,7 @@ log_install_ratelimit=Installed rate limiting server
 log_enable_ratelimit=Enabled mail rate limiting
 log_disable_ratelimit=Disabled mail rate limiting
 log_modify_ratelimit=Updated mail rate limiting
+log_wizard=Install Wizard step : $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -6033,6 +6034,7 @@ wizard_title_mysize=MySQL database size
 wizard_mysize=MySQL can be configured to trade off memory use for performance, depending on how much RAM your system has and how heavily you expect the database to be used.
 wizard_mysize_type=MySQL configuration size
 wizard_mysize_def=Leave current settings unchanged
+wizard_mysize_deft=Similar to $1
 wizard_mysize_small=Small system (256M) with infrequent MySQL use
 wizard_mysize_medium=Medium system (512M) with regular MySQL use
 wizard_mysize_large=Large system (1G) on which MySQL is heavily used
