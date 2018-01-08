@@ -407,13 +407,27 @@ if (-r $mysql::config{'my_cnf'}) {
 			  $mem <= 512*1024*1024 ? "medium" :
 			  $mem <= 1024*1024*1024 ? "large" : "huge";
 		}
+	my @types = &list_mysql_size_setting_types();
+	my $conf = &mysql::get_mysql_config();
+	my $currt;
+	foreach my $t (@types) {
+		my ($oneset) = &list_mysql_size_settings($t);
+		my $sname = $oneset->[2] || "mysqld";
+		my ($sect) = grep { $_->{'name'} eq $sname &&
+				    $_->{'members'} } @$conf;
+		if ($sect) {
+			my $v = &mysql::find_value($oneset->[0], $sect->{'members'});
+			if ($v && $v eq $oneset->[1]) {
+				$currt = $t;
+				}
+			}
+		}
 	print &ui_table_row($text{'wizard_mysize_type'},
 		    &ui_radio_table("mysize", $mysize,
-			      [ [ "", $text{'wizard_mysize_def'} ],
-				[ "small", $text{'wizard_mysize_small'} ],
-				[ "medium", $text{'wizard_mysize_medium'} ],
-				[ "large", $text{'wizard_mysize_large'} ],
-				[ "huge", $text{'wizard_mysize_huge'} ] ]));
+		      [ [ "", $text{'wizard_mysize_def'}.
+			      ($currt ? " - ".&text('wizard_mysize_deft',
+				$text{'wizard_mysize_'.$currt}) : "") ],
+			map { [ $_, $text{'wizard_mysize_'.$_} ] } @types ]));
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
@@ -434,9 +448,14 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 
 	# Adjust my.cnf
 	my $temp = &transname();
-	&copy_source_dest($mysql::config{'my_cnf'}, $temp);
-	&lock_file($mysql::config{'my_cnf'});
 	my $conf = &mysql::get_mysql_config();
+	my @files = &unique(map { $_->{'file'} } @$conf);
+	foreach my $file (@files) {
+		my $bf = $file;
+		$bf =~ s/.*\///;
+		&copy_source_dest($file, $temp."_".$bf);
+		&lock_file($file);
+		}
 	foreach my $s (&list_mysql_size_settings($in->{'mysize'})) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
@@ -446,8 +465,10 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 					       $s->[1] ? [ $s->[1] ] : [ ]);
 			}
 		}
-	&flush_file_lines($mysql::config{'my_cnf'});
-	&unlock_file($mysql::config{'my_cnf'});
+	foreach my $file (@files) {
+		&flush_file_lines($file, undef, 1);
+		&unlock_file($file);
+		}
 	$config{'mysql_size'} = $in->{'mysize'};
 
 	# Start it up again
@@ -457,7 +478,11 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		if ($err) {
 			# Panic! MySQL couldn't start with the new config ..
 			# try to roll it back
-			&copy_source_dest($temp, $mysql::config{'my_cnf'});
+			foreach my $file (@files) {
+				my $bf = $file;
+				$bf =~ s/.*\///;
+				&copy_source_dest($temp."_".$bf, $file);
+				}
 			&mysql::start_mysql();
 			return &text('wizard_emysizestart', $err);
 			}

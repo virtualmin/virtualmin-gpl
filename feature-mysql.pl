@@ -2571,6 +2571,11 @@ $conns = undef if ($conns eq "none");
 return $conns;
 }
 
+sub list_mysql_size_setting_types
+{
+return ("small", "medium", "large", "huge");
+}
+
 # list_mysql_size_settings("small"|"medium"|"large"|"huge")
 # Returns an array of tupes for MySQL my.cnf settings for some size
 # diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
