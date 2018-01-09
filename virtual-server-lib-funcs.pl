@@ -4042,6 +4042,11 @@ else {
 	$hash{'dns_serial'} = time();
 	}
 
+# Add DNS master nameserver
+if ($config{'dns'}) {
+	$hash{'dns_master'} = &get_master_nameserver($tmpl);
+	}
+
 # Add webmin and usermin ports
 $hash{'virtualmin_url'} = &get_virtualmin_url($d);
 local %miniserv;
