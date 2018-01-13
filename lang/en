@@ -4437,6 +4437,7 @@ newmysqls_user=Login with username
 newmysqls_pass=Login with password
 newmysqls_err=Failed to add MySQL server
 newmysqls_ehost=Missing or invalid server hostname
+newmysqls_eip=Remote MySQL server must be entered as a hostname, not an IP address
 newmysqls_esock=Missing or non-absolute socket path
 newmysqls_eport=Missing or non-numeric port number
 newmysqls_euser=Missing username

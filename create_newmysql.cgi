@@ -9,6 +9,7 @@ require './virtual-server-lib.pl';
 # Validate inputs
 if ($in{'mode'} == 0) {
 	&to_ipaddress($in{'host'}) || &error($text{'newmysqls_ehost'});
+	&check_ipaddress($in{'host'}) && &error($text{'newmysqls_eip'});
 	$host = $in{'host'};
 	}
 elsif ($in{'mode'} == 1) {
