@@ -176,6 +176,7 @@ sub create_jailkit_passwd_file
 my ($d) = @_;
 my $dir = &domain_jailkit_dir($d);
 return undef if (!-d $dir);		# Jailing isn't enabled
+return undef if (!-d "$dir/etc");	# Jail directory is invalid
 
 # Build a list of users and groups that are either system-related, or
 # associated with this domain
