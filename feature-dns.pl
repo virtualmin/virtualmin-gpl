@@ -1048,7 +1048,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				}
 			}
 		&close_tempfile(RECS);
-		local $master = &get_master_nameserver($tmpl);
+		local $master = &get_master_nameserver($tmpl, $d);
 		local $email = $bconfig{'tmpl_email'} ||
 			       "root\@$master";
 		$email = &bind8::email_to_dotted($email);
@@ -1270,7 +1270,7 @@ RECORD: foreach my $r (@$recs) {
 	# Change domain name to alias in record values, unless it is an NS
 	# that is set in the template
 	my %tmplns;
-	my $master = &get_master_nameserver($tmpl);
+	my $master = &get_master_nameserver($tmpl, $d);
 	$tmplns{$master} = 1;
 	foreach my $ns (&get_slave_nameservers($tmpl)) {
 		$tmplns{$ns} = 1;
@@ -1301,11 +1301,11 @@ RECORD: foreach my $r (@$recs) {
 	}
 }
 
-# get_master_nameserver(&template)
+# get_master_nameserver(&template, &domain)
 # Returns default primary NS name (with a . appended)
 sub get_master_nameserver
 {
-local ($tmpl) = @_;
+my ($tmpl, $d) = @_;
 &require_bind();
 local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
 			$tmpl->{'dns_master'};
@@ -1313,6 +1313,9 @@ local $master = $tmaster ||
 		$bconfig{'default_prins'} ||
 		&get_system_hostname();
 $master .= "." if ($master !~ /\.$/);
+if ($d) {
+	$master = &substitute_domain_template($master, $d);
+	}
 return $master;
 }
 
@@ -2618,8 +2621,8 @@ if ($in{"dns_mode"} != 1) {
 
 # Save NS hostname
 $in{'dns_master_mode'} != 2 ||
-   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_]+$/i && $in{'dns_master'} =~ /\./ &&
-    !&check_ipaddress($in{'dns_master'})) ||
+   ($in{'dns_master'} =~ /^[a-z0-9\.\-\_\$\{\}]+$/i &&
+    $in{'dns_master'} =~ /\./ && !&check_ipaddress($in{'dns_master'})) ||
 	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
@@ -3563,7 +3566,7 @@ if ($parent && ref($dsrecs)) {
 	if (!$already{$d->{'dom'}.".","NS"}) {
 		# Also need to add an NS record, or else signing will fail
 		my $tmpl = &get_template($d->{'template'});
-		my $master = &get_master_nameserver($tmpl);
+		my $master = &get_master_nameserver($tmpl, $d);
 		&bind8::create_record(
 			$pfile, $d->{'dom'}.".", undef,
 			"IN", "NS", $master);
