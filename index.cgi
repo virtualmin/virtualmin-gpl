@@ -131,6 +131,7 @@ elsif (@doms) {
 	$shown_table = 1;
 	}
 else {
+	# No domains, so show buttons to create some
 	if (@alldoms) {
 		print "<b>$text{'index_none2'}</b><p>\n";
 		}
@@ -138,6 +139,7 @@ else {
 		print "<b>$text{'index_none'}</b><p>\n";
 		}
 	print &ui_form_start("domain_form.cgi", "post");
+	&create_links(1);
 	}
 if ($current_theme ne "virtual-server-theme" &&
     !$main::nocreate_virtualmin_menu) {
@@ -293,13 +295,14 @@ PAGEEND:
 # create_links(num)
 sub create_links
 {
+local ($num) = @_;
 local ($dleft, $dreason, $dmax, $dhide) = &count_domains("realdoms");
 local ($cannot_add, $limit_reason);
 if ($dleft == 0) {
 	# Need to show reason for hitting the limit
 	$cannot_add = &text('index_noadd'.$dreason, $dmax);
 	}
-elsif ($dleft != -1 && $_[0] == 1 && !$dhide) {
+elsif ($dleft != -1 && $num == 1 && !$dhide) {
 	# Tell the user how close they are to the limit, and why
 	$limit_reason = &text('index_canadd'.$dreason, $dleft);
 	}
@@ -307,9 +310,9 @@ if (!&can_create_master_servers() && &can_create_sub_servers()) {
 	# Can just add sub-server
 	if (!$cannot_add) {
 		print "<b>$limit_reason</b><p>\n" if ($limit_reason);
-		print "<input type=submit name=add$_[0] value='$text{'index_add1'}'>\n";
+		print &ui_submit($text{'index_add1'}, "add".$num);
 		}
-	elsif ($_[0] == 1) {
+	elsif ($num == 1) {
 		print "<b>",$cannot_add,"</b><br>\n";
 		}
 	}
@@ -317,24 +320,21 @@ elsif (&can_create_master_servers()) {
 	# Can add either master or sub-server
 	if (!$cannot_add) {
 		print "<b>$limit_reason</b><p>\n" if ($limit_reason);
-		print "<input type=submit name=add$_[0] value='$text{'index_add2'}'>\n";
-		print "<select name=parentuser$_[0]>\n";
-		print "<option value=''>$text{'index_newuser'}\n";
-		foreach $u (sort(&unique(map { $_->{'user'} }
-					 grep { $_->{'unix'} } @doms))) {
-			print "<option>$u\n";
-			}
-		print "</select>\n";
+		print &ui_submit($text{'index_add2'}, "add".$num);
+		print &ui_select("parentuser".$num, undef,
+			[ [ "", $text{'index_newuser'} ],
+			  sort(&unique(map { $_->{'user'} }
+                                         grep { $_->{'unix'} } @doms)) ]);
 		}
-	elsif ($_[0] == 1) {
+	elsif ($num == 1) {
 		print "<b>",$cannot_add,"</b><br>\n";
 		}
 	}
 if (&can_import_servers()) {
-	print "<input type=submit name=import value='$text{'index_import'}'>\n";
+	print &ui_submit($text{'index_import'}, "import");
 	}
 if (&can_migrate_servers()) {
-	print "<input type=submit name=migrate value='$text{'index_migrate'}'>\n";
+	print &ui_submit($text{'index_migrate'}, "migrate");
 	}
 if ((&can_create_master_servers() || &can_create_sub_servers()) &&
     $virtualmin_pro && &can_create_batch()) {
