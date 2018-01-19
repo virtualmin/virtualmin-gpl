@@ -24,7 +24,6 @@ if (!$done_virtual_server_lib_funcs) {
 
 # Can this user only view mailboxes in one domain? If so, we use a special UI
 $single_domain_mode = !$main::nosingledomain_virtualmin_mode &&
-		      $current_theme ne "virtual-server-theme" &&
 		      $access{'domains'} =~ /^\d+$/ &&
 		      !$access{'edit'} && !$access{'create'} &&
 		      !$access{'stop'} && !$access{'local'} ?
