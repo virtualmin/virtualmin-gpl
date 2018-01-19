@@ -303,7 +303,9 @@ if ($hasspam) {
 				    "'>$text{'user_awl'}</a> )";
 			}
 		}
-	print &ui_table_row(&hlink($text{'user_nospam'}, "nospam"),
+	print &ui_table_row(
+		&hlink($d->{'virus'} ? $text{'user_nospam'}
+				     : $text{'user_nospam2'}, "nospam"),
 		!$d->{'spam'} ? $text{'user_spamdis'} :
 			&ui_radio("nospam", int($user->{'nospam'}),
 				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).

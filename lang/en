@@ -790,6 +790,7 @@ user_remail=Send updated account email to
 user_remail0=Address
 user_remail1=Don't send
 user_nospam=Check email for spam and viruses?
+user_nospam2=Check email for spam?
 user_spamdis=No (disabled for virtual server)
 user_enewmail=Missing or invalid address for user creation mail
 user_eremail=Missing or invalid address for user update mail
