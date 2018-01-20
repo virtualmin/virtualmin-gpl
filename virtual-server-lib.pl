@@ -142,7 +142,7 @@ $styles_unavail_file = "$module_config_directory/stylesunavail";
 @plan_restrictions = ('nodbname', 'norename', 'forceunder', 'safeunder',
 		      'migrate');
 
-@reseller_modules = ("webminlog", "mailboxes", "bind8", "syslog");
+@reseller_modules = ("webminlog", "mailboxes", "bind8", "syslog", "filemin");
 
 $reseller_group_name = "resellers";
 
