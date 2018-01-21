@@ -3659,11 +3659,11 @@ else {
 }
 
 # show_backup_destination(name, value, no-local, [&domain], [no-download],
-#			  [no-upload])
+#			  [no-upload], [show-remove-option])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d, $nodownload, $noupload) = @_;
+local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
@@ -3672,6 +3672,11 @@ local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
 
 local @opts;
+if ($remove) {
+	# Remove this destination
+	push(@opts, [ -1, $text{'backup_moderemove'} ]);
+	}
+
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	local $bdir = "$d->{'home'}/$home_virtualmin_backup";
@@ -3820,6 +3825,10 @@ sub parse_backup_destination
 local ($name, $in, $nolocal, $d, $fmt) = @_;
 local %in = %$in;
 local $mode = $in{$name."_mode"};
+if ($mode == -1) {
+	# Removing this one
+	return undef;
+	}
 if ($mode == 0 && defined($fmt) && $fmt == 0) {
 	# For a single-file backup, make sure the filename makes sense
 	$in{$name."_file"} =~ /\.(gz|zip|tar|bz2|Z)$/i ||
