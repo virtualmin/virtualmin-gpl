@@ -3815,7 +3815,7 @@ if (!$noupload) {
 		      &ui_upload($name."_upload", 40) ]);
 	}
 
-return &ui_radio_selector(\@opts, $name."_mode", $mode);
+return &ui_radio_selector(\@opts, $name."_mode", $mode, 1);
 }
 
 # parse_backup_destination(name, &in, no-local, [&domain], format)

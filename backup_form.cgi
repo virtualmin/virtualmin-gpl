@@ -184,7 +184,8 @@ my $i = 0;
 foreach $dest (@dests) {
 	# Show destination fields
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
-					   $d, $nodownload, 1);
+					   $d, $nodownload, 1,
+					   $i > 0 && $dest);
 
 	# Add purging option
 	@grid = ( );
