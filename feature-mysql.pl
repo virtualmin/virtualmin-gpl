@@ -1619,6 +1619,7 @@ sub get_mysql_database_dir
 local ($d, $db) = @_;
 &require_mysql();
 return undef if ($d->{'provision_mysql'});
+return undef if (!$db);
 local $mymod = &require_dom_mysql($d);
 local %myconfig = &foreign_config($mymod);
 return undef if ($myconfig{'host'} &&
