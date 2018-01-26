@@ -653,8 +653,14 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 				$common .= "PHP_FCGI_CHILDREN=$defchildren\n";
 				}
 			$common .= "export PHP_FCGI_CHILDREN\n";
-			$common .= "PHP_FCGI_MAX_REQUESTS=99999\n";
+			$common .= "PHP_FCGI_MAX_REQUESTS=500\n";
 			$common .= "export PHP_FCGI_MAX_REQUESTS\n";
+			$common .= "FcgidIdleTimeout=60\n";
+			$common .= "export FcgidIdleTimeout\n";
+			$common .= "FcgidProcessLifeTime=120\n";
+			$common .= "export FcgidProcessLifeTime\n";
+			$common .= "FcgidIdleScanInterval=30\n";
+			$common .= "export FcgidIdleScanInterval\n";
 			}
 		elsif ($mode eq "cgi") {
 			$common .= "if [ \"\$REDIRECT_URL\" != \"\" ]; then\n";
