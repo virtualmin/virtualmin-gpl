@@ -931,7 +931,9 @@ return ( $d->{'subdom'} || $d->{'alias'} ? ( ) :
          $d->{'subdom'} || $d->{'alias'} ? ( ) :
 		( [ &cgi_bin_dir($d, 1), $perms ] ),
          [ 'logs', '750' ],
-         [ $config{'homes_dir'}, '755' ] );
+         [ $config{'homes_dir'}, '755' ],
+	 $d->{'parent'} ? ( ) :
+		( [ 'virtualmin-backup', '700' ] ) );
 }
 
 # create_server_tmp(&domain)
