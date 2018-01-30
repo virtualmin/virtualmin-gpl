@@ -111,7 +111,9 @@ $outdent_print = \&outdent_save_print;
 $start_time = time();
 if ($sched->{'before'}) {
 	&$first_print("Running pre-backup command ..");
+	&set_backup_envs($sched, \@doms);
 	$out .= &backquote_command("($sched->{'before'}) 2>&1 </dev/null");
+	&reset_backup_envs();
 	print $out;
 	$output .= $out;
 	if ($?) {
@@ -175,7 +177,9 @@ if ($ok || $sched->{'errors'} == 1) {
 # Run any after command
 if ($sched->{'after'}) {
 	&$first_print("Running post-backup command ..");
+	&set_backup_envs($sched, \@doms);
 	$out = &backquote_command("($sched->{'after'}) 2>&1 </dev/null");
+	&reset_backup_envs();
 	print $out;
 	$output .= $out;
 	if ($?) {

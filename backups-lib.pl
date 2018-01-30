@@ -5254,5 +5254,25 @@ return $c == 0 ? "tar.gz" :
        $c == 3 ? "zip" : "tar";
 }
 
+# set_backup_envs(&backup, &doms)
+# Set environment variables from a backup object
+sub set_backup_envs
+{
+my ($sched, $doms) = @_;
+foreach my $k (keys %$sched) {
+	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
+	}
+$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
+}
+
+# reset_backup_envs()
+# Clear variables set by set_backup_envs
+sub reset_backup_envs
+{
+foreach my $e (keys %ENV) {
+	delete($ENV{$e}) if ($e =~ /^(BACKUP_)/);
+	}
+}
+
 1;
 
