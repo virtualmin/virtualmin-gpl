@@ -387,6 +387,7 @@ if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
 	}
 if (!$d->{'alias'}) {
 	foreach my $sd (&virtual_server_directories($d)) {
+		next if ($sd->[0] eq 'virtualmin-backup');   # Not all domains
 		if (!-d "$d->{'home'}/$sd->[0]") {
 			# Dir is missing
 			return &text('validate_esubdir',
