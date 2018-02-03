@@ -309,12 +309,17 @@ if ($gconfig{'os_type'} eq 'solaris') {
 		}
 	close(FIND);
 	}
-foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr', 'ssl_newkey') {
-	my $p = $d->{$s};
-	if ($p) {
-		$p =~ s/^\Q$d->{'home'}\E\///;
-		&print_tempfile(XTEMP, "$p\n");
-		&print_tempfile(XTEMP, "./$p\n");
+if ($d->{'ssl'}) {
+	# Exclude SSL certs because they are covered by backup_ssl, unless
+	# Nginx is being used
+	foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr',
+		       'ssl_newkey') {
+		my $p = $d->{$s};
+		if ($p) {
+			$p =~ s/^\Q$d->{'home'}\E\///;
+			&print_tempfile(XTEMP, "$p\n");
+			&print_tempfile(XTEMP, "./$p\n");
+			}
 		}
 	}
 &close_tempfile(XTEMP);
