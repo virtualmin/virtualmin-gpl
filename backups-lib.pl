@@ -723,15 +723,9 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 
 	local $lockdir;
 	if ($homefmt) {
-		# Backup goes to a sub-dir of the home
+		# Backup for most features goes to a sub-dir of the home, which
+		# is then included in a tar of the home directory
 		$lockdir = $backupdir = "$d->{'home'}/.backup";
-		my $pid = &test_lock($lockdir);
-		if ($pid) {
-			&$second_print(&text('backup_ebackupdirlock',
-				"<tt>$backupdir</tt>", $pid));
-			$dok = 1;
-			goto DOMAINFAILED;
-			}
 		&lock_file($lockdir);
 		&execute_command("rm -rf ".quotemeta($backupdir));
 		&disable_quotas($asd) if ($asd);
