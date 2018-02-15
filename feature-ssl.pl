@@ -1711,10 +1711,15 @@ if ($d->{'virt'}) {
 	my @loc = grep { $_->{'name'} eq 'local' &&
 			 $_->{'section'} } @$conf;
 	my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
-	my $imap;
+	my ($imap, $pop3);
 	if ($l) {
 		($imap) = grep { $_->{'name'} eq 'protocol' &&
 				 $_->{'value'} eq 'imap' &&
+				 $_->{'enabled'} &&
+				 $_->{'sectionname'} eq 'local' &&
+				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
+		($pop3) = grep { $_->{'name'} eq 'protocol' &&
+				 $_->{'value'} eq 'pop3' &&
 				 $_->{'enabled'} &&
 				 $_->{'sectionname'} eq 'local' &&
 				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
@@ -1767,6 +1772,43 @@ if ($d->{'virt'}) {
 					&dovecot::save_directive(
 						$l->{'members'}, "ssl_ca",
 						"<".$chain, "protocol", "imap");
+					}
+				}
+			}
+		if (!$pop3) {
+			$pop3 = { 'name' => 'protocol',
+				  'value' => 'pop3',
+				  'members' => [
+					{ 'name' => 'ssl_cert',
+					  'value' => "<".$d->{'ssl_cert'} },
+					{ 'name' => 'ssl_key',
+					  'value' => "<".$d->{'ssl_key'} },
+					],
+				  'indent' => 1,
+				  'file' => $l->{'file'},
+				  'line' => $l->{'line'} + 1,
+				  'eline' => $l->{'line'} };
+			if ($chain) {
+				push(@{$pop3->{'members'}},
+				     { 'name' => 'ssl_ca',
+				       'value' => "<".$chain });
+				}
+			&dovecot::save_section($conf, $pop3);
+			push(@{$l->{'members'}}, $pop3);
+			}
+		else {
+			eval {
+				local $main::error_must_die = 1;
+				&dovecot::save_directive($l->{'members'},
+					"ssl_cert", "<".$d->{'ssl_cert'},
+					"protocol", "pop3");
+				&dovecot::save_directive($l->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'},
+					"protocol", "pop3");
+				if ($chain) {
+					&dovecot::save_directive(
+						$l->{'members'}, "ssl_ca",
+						"<".$chain, "protocol", "pop3");
 					}
 				}
 			}
