@@ -1963,11 +1963,11 @@ local $master = &postfix::get_master_config();
 local $defip = &get_default_ip();
 
 # Work out which flags are needed
-local $chain = $s->{'ssl'} ? &get_website_ssl_file($d, 'ca') : $cafile;
+local $chain = &domain_has_ssl($d) ? &get_website_ssl_file($d, 'ca') : $cafile;
 local @flags = ( [ "smtpd_tls_cert_file",
-		   $d->{'ssl'} ? $d->{'ssl_cert'} : $cfile ],
+		   &domain_has_ssl($d) ? $d->{'ssl_cert'} : $cfile ],
 		 [ "smtpd_tls_key_file",
-		   $d->{'ssl'} ? $d->{'ssl_key'} : $kfile ] );
+		   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
 push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 
 local $changed = 0;
