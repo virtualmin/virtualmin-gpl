@@ -1086,8 +1086,6 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		else {
 			# Add NS records for master and auto-configured slaves
 			if ($tmpl->{'dns_prins'}) {
-				&bind8::create_record($file, "@", undef, "IN",
-						      "NS", $master);
 				push(@created_ns, $master);
 				}
 			local $slave;
@@ -1098,18 +1096,33 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					gethostbyname($slave->{'host'});
 				if ($bn[0]) {
 					local $full = $bn[0].".";
-					&bind8::create_record(
-						$file, "@", undef, "IN",
-						"NS", $full);
 					push(@created_ns, $full);
 					}
 				}
 
 			# Add NS records from template
-			foreach my $ns (&get_slave_nameservers($tmpl)) {
-				&bind8::create_record($file, "@", undef, "IN",
-						      "NS", $ns);
-				push(@created_ns, $ns);
+			push(@created_ns, &get_slave_nameservers($tmpl));
+
+			if ($tmpl->{'dns_indom'}) {
+				# Add A records pointing to the nameserver IPs
+				my $i = 1;
+				foreach my $ns (@created_ns) {
+					my $a = &to_ipaddress($ns);
+					next if (!$a);
+					my $r = "ns".$i.".".$d->{'dom'}.".";
+					&bind8::create_record(
+					  $file, "@", undef, "IN", "NS", $r);
+					&bind8::create_record(
+					  $file, $r, undef, "IN", "A", $a);
+					$i++;
+					}
+				}
+			else {
+				# Just add NS records
+				foreach my $ns (@created_ns) {
+					&bind8::create_record(
+					  $file, "@", undef, "IN", "NS", $ns);
+					}
 				}
 			}
 		}
@@ -2426,6 +2439,11 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
 	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
 					$tmpl->{'dns_master'}, 40));
 
+# Add NS records in this domain
+print &ui_table_row(&hlink($text{'tmpl_dnsindom'},
+                           "template_dns_indom"),
+	&ui_yesno_radio("dns_indom", $tmpl->{'dns_indom'}));
+
 print &ui_table_hr();
 
 # Option for SPF record
@@ -2626,6 +2644,7 @@ $in{'dns_master_mode'} != 2 ||
 	&error($text{'tmpl_ednsmaster'});
 $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 		        $in{'dns_master_mode'} == 1 ? undef : $in{'dns_master'};
+$tmpl->{'dns_indom'} = $in{'dns_indom'};
 
 # Save MX hostname
 $in{'dns_mx_mode'} != 2 || $in{'dns_mx'} =~ /^[a-z0-9\.\-\_]+$/i ||

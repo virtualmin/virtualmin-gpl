@@ -8699,6 +8699,7 @@ push(@rv, { 'id' => 0,
 	    'dns_prins' => $config{'dns_prins'},
 	    'dns_records' => $config{'dns_records'},
 	    'dns_ttl' => $config{'dns_ttl'},
+	    'dns_indom' => $config{'bind_indom'},
 	    'dnssec' => $config{'dnssec'} || "none",
 	    'dnssec_alg' => $config{'dnssec_alg'},
 	    'dnssec_single' => $config{'dnssec_single'},
@@ -8993,6 +8994,7 @@ if ($tmpl->{'id'} == 0) {
 						   : $tmpl->{'dns_master'};
 	$config{'bind_mx'} = $tmpl->{'dns_mx'} eq 'none' ? undef
 						   : $tmpl->{'dns_mx'};
+	$config{'bind_indom'} = $tmpl->{'dns_indom'};
 	$config{'dns_view'} = $tmpl->{'dns_view'};
 	$config{'dns_ns'} = $tmpl->{'dns_ns'};
 	$config{'dns_prins'} = $tmpl->{'dns_prins'};
