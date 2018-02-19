@@ -213,6 +213,14 @@ else {
 	# For Apache 2.4+, add a "Require all granted" directive
 	&add_require_all_granted_directives($d, $d->{'web_port'});
 
+	# If the default ServerName matches this domain name, change it
+	my $defsn = &get_apache_default_servername();
+	if ($defdn eq $d->{'dom'}) {
+		&apache::save_directive("ServerName", [ "nomatch.".$defsn ],
+					$conf, $conf);
+		&flush_file_lines();
+		}
+
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
 	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
@@ -4537,6 +4545,19 @@ my ($glob, $dir) = @_;
 $glob =~ s/\?/./g;
 $glob =~ s/\*/.*/g;
 return $dir =~ /^$glob$/;
+}
+
+# get_apache_default_servername()
+# Returns the servername that Apache uses for the default server
+sub get_apache_default_servername
+{
+&require_apache();
+my $conf = &apache::get_config();
+my ($sn) = &apache::find_directive("ServerName", $conf);
+if (!$sn) {
+	$sn = &get_system_hostname();
+	}
+return $sn;
 }
 
 $done_feature_script{'web'} = 1;
