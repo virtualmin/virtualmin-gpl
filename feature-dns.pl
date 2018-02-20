@@ -2005,7 +2005,8 @@ if (!$zonefile) {
 	return 0;
 	}
 local $absfile = &bind8::make_chroot(&bind8::absolute_path($zonefile));
-local @thisrecs;
+local @thisrecs = &bind8::read_zone_file($zonefile,
+    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""));
 
 if ($d->{'dns_submode'}) {
 	# Only replacing records for this sub-domain
@@ -2028,8 +2029,6 @@ elsif ($opts->{'wholefile'}) {
 	}
 else {
 	# Only copy section after SOA
-	@thisrecs = &bind8::read_zone_file($zonefile,
-	    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""));
 	local $srclref = &read_file_lines($file, 1);
 	local $dstlref = &read_file_lines($absfile);
 	local ($srcstart, $srcend) = &except_soa($d, $file);
