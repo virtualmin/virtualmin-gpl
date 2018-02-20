@@ -2013,7 +2013,6 @@ if ($d->{'dns_submode'}) {
 	my @backuprecs = &bind8::read_zone_file($file, $d->{'dom'});
 	$oldsubrecs = &filter_domain_dns_records($d, $oldsubrecs);
 	my $newsubrecs = &filter_domain_dns_records($d, \@backuprecs);
-	print STDERR "replacing ",scalar(@$oldsubrecs)," with ",scalar(@$newsubrecs),"\n";
 	foreach my $r (reverse(@$oldsubrecs)) {
 		&bind8::delete_record($zonefile, $r);
 		}
