@@ -128,11 +128,11 @@ elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl(\/.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl(\/.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/6/$1";
                         }
 		}
 	&flush_file_lines($sources_list);
