@@ -1639,8 +1639,10 @@ if ($php_fpm_config_cache) {
 my $rv = { };
 
 # Config directory for per-domain pool files
-DIR: foreach my $cdir ("/etc/php-fpm.d", "/etc/php*/fpm/pool.d",
-		  "/etc/php/*/fpm/pool.d") {
+DIR: foreach my $cdir ("/etc/php-fpm.d",
+		       "/etc/php*/fpm/pool.d",
+		       "/etc/php/*/fpm/pool.d",
+		       "/etc/opt/remi/php*/php-fpm.d") {
 	foreach my $realdir (glob($cdir)) {
 		if ($realdir && -d $realdir) {
 			my @files = glob("$realdir/*");
