@@ -1642,7 +1642,8 @@ my $rv = { };
 DIR: foreach my $cdir ("/etc/php-fpm.d",
 		       "/etc/php*/fpm/pool.d",
 		       "/etc/php/*/fpm/pool.d",
-		       "/etc/opt/remi/php*/php-fpm.d") {
+		       "/etc/opt/remi/php*/php-fpm.d",
+		       "/usr/local/etc/php-fpm.d") {
 	foreach my $realdir (glob($cdir)) {
 		if ($realdir && -d $realdir) {
 			my @files = glob("$realdir/*");
