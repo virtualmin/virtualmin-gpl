@@ -4707,7 +4707,7 @@ spam_procmail=Allow mailbox users to create mail filters?
 spam_trap=Create <tt>spamtrap</tt> and <tt>hamtrap</tt> email aliases?
 spam_trapcannot=Not available, as conflicting aliases exist
 spam_prov=Cloudmin Services system $1
-spam_exitcode=When an over-quote user receives email
+spam_exitcode=When an over-quota user receives email
 spam_bounce=Bounce back to sender
 spam_queue=Queue for later delivery
 
