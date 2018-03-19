@@ -3335,6 +3335,24 @@ else {
 	}
 }
 
+# can_forward_alias(address)
+# Returns 1 if forwarding to some remote address is allowed
+sub can_forward_alias
+{
+my ($a) = @_;
+return 1 if (&master_admin());
+return 1 if ($config{'remote_alias'});
+my %allowed = map { $_->{'dom'}, 1 } &list_domains();
+$allowed{&get_system_hostname(0)} = 1;
+$allowed{&get_system_hostname(1)} = 1;
+foreach my $e (&extract_address_parts($a)) {
+	my ($mb, $dn) = split(/\@/, $e);
+	next if (!$dn);
+	$allowed{lc($dn)} || return 0;
+	}
+return 1;
+}
+
 # domains_table(&domains, [checkboxes], [return-html], [exclude-cols])
 # Display a list of domains in a table, with links for editing
 sub domains_table
@@ -4799,6 +4817,9 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 	$v =~ s/\s+$//;
 	if ($t == 1 && $v !~ /^([^\|\:\"\' \t\/\\\%]\S*)$/) {
 		&error(&text('alias_etype1', $v));
+		}
+	elsif ($t == 1 && !&can_forward_alias($v)) {
+		&error(&text('alias_etype1f', $v));
 		}
 	elsif ($t == 3 && $v !~ /^\/(\S+)$/ && $v !~ /^\.\//) {
 		&error(&text('alias_etype3', $v));

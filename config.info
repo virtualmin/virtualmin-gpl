@@ -45,6 +45,7 @@ hide_alias=Include alias virtual servers in menu?,1,0-Yes,1-No
 
 line1.5=Server administrator permissions,11
 edit_afiles=Can edit alias include and reply files?,1,1-Yes,0-No
+remote_alias=Can forward email to non-local domains?,1,1-Yes,0-No
 edit_homes=Can select home directories for users?,1,1-Yes,0-No,2-Only for website FTP users
 edit_ftp=Can create FTP users?,1,1-Yes,0-No
 edit_quota=Can set mailbox quotas?,1,1-Yes,0-No

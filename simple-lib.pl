@@ -381,6 +381,7 @@ if ($in->{'forward'}) {
 	foreach my $f (@{$simple->{'forward'}}) {
 		$f =~ /^([^\|\:\"\' \t\/\\\%]\S*)$/ ||
 			&error(&text('alias_etype1', $f));
+		&can_forward_alias($f) || &error(&text('alias_etype1f', $f));
 		}
 	}
 else {

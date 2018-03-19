@@ -907,6 +907,7 @@ alias_ename=Missing or invalid alias name (no @ should be included)
 alias_edest=Missing alias destination
 alias_eclash=A user or mail alias with the same name and domain already exists
 alias_etype1='$1' is not a valid email address
+alias_etype1f=You are not allowed to forward email to '$1'
 alias_etype2=Addresses file '$1' is not valid or does not exist
 alias_etype3='$1' is not a valid filename
 alias_etype4='$1' is not a valid program or does not exist
