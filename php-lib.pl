@@ -961,6 +961,9 @@ return $php_command_for_version_cache{$v};
 sub get_php_version
 {
 local ($cmd, $d) = @_;
+if (exists($get_php_version_cache{$cmd})) {
+	return $get_php_version_cache{$cmd};
+	}
 if ($cmd !~ /^\//) {
 	local ($phpn) = grep { $_->[0] == $cmd }
 			     &list_available_php_versions($d);
@@ -970,15 +973,20 @@ if ($cmd !~ /^\//) {
 		($phpn) = grep { $_->[0] >= $cmd }
                              &list_available_php_versions($d);
 		}
-	return undef if (!$phpn);
+	if (!$phpn) {
+		$get_php_version_cache{$cmd} = undef;
+		return undef;
+		}
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
 &clean_environment();
 local $out = &backquote_command("$cmd -v 2>&1 </dev/null");
 &reset_environment();
 if ($out =~ /PHP\s+([0-9\.]+)/) {
+	$get_php_version_cache{$cmd} = $1;
 	return $1;
 	}
+$get_php_version_cache{$cmd} = undef;
 return undef;
 }
 

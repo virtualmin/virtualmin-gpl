@@ -3530,6 +3530,16 @@ foreach my $d (&sort_indent_domains($doms)) {
 				push(@cols, "");
 				}
 			}
+		elsif ($c eq "phpv") {
+			# PHP version
+			my $ver;
+			if (&domain_has_website($d)) {
+				$ver = &get_domain_php_version($d);
+				$ver ||= &get_apache_mod_php_version();
+				$ver = &get_php_version($ver) || $ver;
+				}
+			push(@cols, $ver);
+			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
 			push(@cols, &html_escape($d->{$c}));
