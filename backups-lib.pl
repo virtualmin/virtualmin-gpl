@@ -761,8 +761,17 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			else {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
-			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
-				       $increment, $asd, $opts, $key);
+			eval {
+				local $main::error_must_die = 1;
+				$fok = &$bfunc(
+					$d, $ffile, $opts->{$f}, $homefmt,
+					$increment, $asd, $opts, $key);
+				};
+			if ($@) {
+				&$second_print(&text('backup_efeatureeval',
+						     $f, $@));
+				$fok = 0;
+				}
 			}
 		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       $d->{$f}) {

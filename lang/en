@@ -2388,6 +2388,7 @@ backup_deleteddom=Virtual server $1 cannot be backed up as it has been deleted!
 backup_donedomain=.. completed in $1
 backup_ebackupdir=.. failed to create temporary backup directory $1 : $2
 backup_ebackupdirlock=.. temporary backup directory $1 is locked by process $2
+backup_efeatureeval=.. backup of $1 failed : $2
 backup_final=Creating final backup archive ..
 backup_final2=Creating final backup archives in directory ..
 backup_finalfailed=.. archive failed! $1
