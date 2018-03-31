@@ -299,17 +299,23 @@ sub get_logrotate_section
 {
 &require_logrotate();
 &require_apache();
-local $alog = ref($_[0]) ? &get_website_log($_[0]) : $_[0];
+local $alog = ref($_[0]) ? &get_website_log($_[0], 0) : $_[0];
 if (!$alog && ref($_[0])) {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.
-	$alog = &get_apache_template_log($_[0]);
+	$alog = &get_apache_template_log($_[0], 0);
+	}
+local $elog;
+if (ref($_[0])) {
+	$elog = &get_website_log($_[0], 1) ||
+		&get_apache_template_log($_[0], 1);
 	}
 local $conf = &logrotate::get_config();
 local ($c, $n);
 foreach $c (@$conf) {
 	foreach $n (@{$c->{'name'}}) {
 		return $c if ($n eq $alog);
+		return $c if ($elog && $n eq $elog);
 		}
 	}
 return undef;
