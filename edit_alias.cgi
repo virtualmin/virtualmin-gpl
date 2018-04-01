@@ -16,12 +16,19 @@ else {
 	($virt) = grep { $_->{'from'} eq $in{'alias'} } @aliases;
 	}
 
-# Start of form
-print &ui_form_start("save_alias.cgi", "post");
-print &ui_hidden("new", $in{'new'}),"\n";
-print &ui_hidden("dom", $in{'dom'}),"\n";
-print &ui_hidden("show", $in{'show'}),"\n";
-print &ui_hidden("old", $in{'alias'}),"\n";
+# Create form start and end
+$fstart = &ui_form_start("save_alias.cgi", "post").
+	  &ui_hidden("new", $in{'new'}).
+	  &ui_hidden("dom", $in{'dom'}).
+	  &ui_hidden("show", $in{'show'}).
+	  &ui_hidden("old", $in{'alias'});
+if ($in{'new'}) {
+	$fend = &ui_form_end([ [ "create", $text{'create'} ] ]);
+	}
+else {
+	$fend = &ui_form_end([ [ "save", $text{'save'} ],
+			       [ "delete", $text{'delete'} ] ]);
+	}
 
 # Work out if simple mode is supported
 if ($in{'new'} || &get_simple_alias($d, $virt)) {
@@ -43,30 +50,29 @@ print &ui_tabs_start(\@tabs, "simplemode",
 if ($can_simple) {
 	# Simple mode form and destinations
 	print &ui_tabs_start_tab("simplemode", "simple");
+	print $fstart;
+	print &ui_hidden("simplemode", "simple");
 	&alias_form_start("simple");
 	$simple = $in{'new'} ? { } : &get_simple_alias($d, $virt);
 	&show_simple_form($simple, 0, 0, 0, 0, \@tds);
 	print &ui_table_end();
+	print $fend;
 	print &ui_tabs_end_tab();
 	}
 
 # Complex alias destinations
 print &ui_tabs_start_tab("simplemode", "complex");
+print $fstart;
+print &ui_hidden("simplemode", "complex");
 &alias_form_start("complex");
 &alias_form($virt->{'to'}, &hlink("<b>$text{'alias_dests'}</b>", "aliasdest"),
 	    $d, "alias", $in{'alias'}, \@tds);
 print &ui_table_end();
+print $fend;
 print &ui_tabs_end_tab();
 
 # End of tabs and the form
 print &ui_tabs_end(1);
-if ($in{'new'}) {
-	print &ui_form_end([ [ "create", $text{'create'} ] ]);
-	}
-else {
-	print &ui_form_end([ [ "save", $text{'save'} ],
-			     [ "delete", $text{'delete'} ] ]);
-	}
 
 # End of the page, with backlinks
 if ($single_domain_mode) {
