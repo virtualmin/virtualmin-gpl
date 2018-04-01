@@ -17445,19 +17445,22 @@ return undef;
 }
 
 # transfer_virtual_server(&domain, desthost, destpass, delete-mode,
-# 			  delete-missing-files, replication-mode, show-output)
+# 			  delete-missing-files, replication-mode, show-output,
+# 			  reallocate-ip)
 # Transfers a domain (and sub-servers) to a destination system, possibly while
 # deleting it from the source. Will print stuff while transferring, and returns
 # an OK flag.
 sub transfer_virtual_server
 {
 my ($d, $desthost, $destpass, $deletemode, $deletemissing, $replication,
-    $showoutput) = @_;
+    $showoutput, $reallocate) = @_;
 
 # Get all domains to include
 my @doms = ( $d );
 push(@doms, &get_domain_by("parent", $d->{'id'}));
 push(@doms, &get_domain_by("alias", $d->{'id'}));
+my @vdoms = grep { $_->{'virt'} } @doms;
+$reallocate = 0 if (!@vdoms);
 
 # Get all feature names
 my @feats = grep { $config{$_} || $_ eq 'virtualmin' }
@@ -17590,7 +17593,8 @@ my ($rok, $rerr, $rout) = &execute_virtualmin_api_command($desthost, $destpass,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error ".
 	($deletemissing ? "--option dir delete 1 " : "").
-	($replication ? "--replication --no-reuid " : "")
+	($replication ? "--replication --no-reuid " : "").
+	($reallocate ? "--allocate-ip " : "")
 	);
 if ($showoutput) {
 	&$first_print("<pre>".$rout."</pre>");
