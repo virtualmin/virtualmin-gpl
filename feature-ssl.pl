@@ -1622,6 +1622,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 		}
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
+	delete($d->{'ssl_chain'});	# No longer valid
 	return 1;
 	}
 return 0;
