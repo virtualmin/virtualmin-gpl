@@ -2294,6 +2294,9 @@ if ($ok) {
 				# Fix up setings that reference the home
 				$d->{'ssl_cert'} =~s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_chain'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_everything'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_combined'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				}
 
 			# Fix up the IPv4 address if needed
