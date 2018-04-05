@@ -72,7 +72,8 @@ $pfunc = "parse_template_".$in{'editmode'};
 # Check for name clash
 if ($in{'new'} || lc($tmpl->{'name'}) ne lc($oldname)) {
 	($clash) = grep { lc($_->{'name'}) eq lc($tmpl->{'name'}) &&
-			 $_->{'id'} ne $tmpl->{'id'} } @tmpls;
+			 $_->{'id'} ne $tmpl->{'id'} &&
+			 !$_->{'deleted'} } @tmpls;
 	$clash && &error($text{'tmpl_eclash'});
 	}
 

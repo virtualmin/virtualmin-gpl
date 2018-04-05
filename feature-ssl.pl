@@ -114,10 +114,10 @@ $d->{'letsencrypt_renew'} = 2;		# Default let's encrypt renewal
 
 # Find out if this domain will share a cert with another
 &find_matching_certificate($d);
-local $chained = $d->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
 my $generated = &generate_default_certificate($d);
+local $chained = $d->{'ssl_chain'};
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
