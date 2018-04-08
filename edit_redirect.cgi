@@ -37,6 +37,14 @@ print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 		    &ui_textbox("dir", $r->{'alias'} ? $r->{'dest'} : '', 40) ],
 		]));
 
+# HTTP status code
+print &ui_table_row(&hlink($text{'redirect_code'}, 'redirect_code'),
+	&ui_select("code", $r->{'code'},
+		   [ [ "", $text{'default'} ],
+		     [ 301, $text{'redirect_301'} ],
+		     [ 302, $text{'redirect_302'} ],
+		     [ 303, $text{'redirect_303'} ] ], 1, 0, 1));
+
 # Include sub-paths
 print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),
 	&ui_yesno_radio("regexp", $r->{'regexp'}));

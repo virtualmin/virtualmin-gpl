@@ -104,11 +104,10 @@ foreach my $p (@ports) {
 	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
 	$dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
-	push(@aliases, $redirect->{'path'}.
-			($redirect->{'code'} ? $redirect->{'code'}." " : "").
-			($redirect->{'regexp'} ? "(\.\*)\$" : "").
-			" ".
-			$redirect->{'dest'});
+	push(@aliases, ($redirect->{'code'} ? $redirect->{'code'}." " : "").
+		       $redirect->{'path'}.
+		       ($redirect->{'regexp'} ? "(\.\*)\$" : "").
+		       " ".$redirect->{'dest'});
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	$count++;
@@ -143,11 +142,11 @@ foreach my $port (@ports) {
 	my @newaliases;
 	if ($redirect->{'regexp'}) {
 		# Handle .*$ or (.*)$ at the end
-		@newaliases = grep { !/^\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+		@newaliases = grep { !/^(\d+\s+)?\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
 		}
 	else {
 		# Match on path only
-		@newaliases = grep { !/^\Q$re\E\s/ } @aliases;
+		@newaliases = grep { !/^(\d+\s+)?\Q$re\E\s/ } @aliases;
 		}
 	if (scalar(@aliases) != scalar(@newaliases)) {
 		&apache::save_directive($dir, \@newaliases, $vconf, $conf);

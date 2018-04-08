@@ -43,6 +43,9 @@ else {
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
 		$r->{'alias'} = 0;
+		$r->{'code'} = $in{'code'};
+		$in{'code'} eq '' || $in{'code'} =~ /^\d{3}$/ && $in{'code'} >= 300 && $in{'code'} < 400 ||
+			&error($text{'redirect_ecode'});
 		}
 	else {
 		# Alias to a directory
