@@ -75,6 +75,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--code") {
 		$code = shift(@ARGV);
+		$code =~ /^\d{3}$/ && $code >= 300 && $code < 400 ||
+			&usage("--code must be followed by a HTTP status code between 300 and 400");
 		}
 	else {
 		&usage("Unknown parameter $a");
