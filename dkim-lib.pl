@@ -392,8 +392,8 @@ my ($dkim, $newkey, $size) = @_;
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
-@doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
+my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
+my @doms = grep { $_->{'dns'} && $_->{'mail'} } @alldoms;
 if (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
@@ -591,8 +591,12 @@ elsif (&get_dkim_type() eq 'redhat') {
 	}
 &$second_print($text{'setup_done'});
 
-# Add public key to DNS domains
-&add_dkim_dns_records(\@doms, $dkim);
+# Add public key to DNS zones for all domains that have DNS and email enabled,
+# or are on the extra domains list
+my %extra = map { $_, 1 } @{$dkim->{'extra'}};
+my @dnsdoms = grep { $_->{'dns'} &&
+		     ($_->{'mail'} || $extra{$_->{'dom'}}) } @alldoms;
+&add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from excluded domains
 my @exdoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) >= 0 }
@@ -799,7 +803,7 @@ my $init = &get_dkim_init_name();
 return 1;
 }
 
-# update_dkim_domains([&domain, action])
+# update_dkim_domains(&domain, action)
 # Updates the list of domains to sign mail for, if needed
 sub update_dkim_domains
 {
@@ -811,10 +815,10 @@ return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
 my @doms = grep { $_->{'mail'} && $_->{'dns'} } &list_domains();
-if ($d && ($action eq 'setup' || $action eq 'modify')) {
+if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
-elsif ($d && $action eq 'delete') {
+elsif ($action eq 'delete') {
 	@doms = grep { $_->{'id'} ne $d->{'id'} } @doms;
 	}
 my %done;
@@ -825,14 +829,11 @@ my %done;
 
 # Add or remove DNS records
 if ($d->{'dns'}) {
-	if ($d && ($action eq 'setup' || $action eq 'modify')) {
+	if ($action eq 'setup' || $action eq 'modify') {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
-	elsif ($d && $action eq 'delete') {
+	elsif ($action eq 'delete') {
 		&remove_dkim_dns_records([ $d ], $dkim);
-		}
-	else {
-		&add_dkim_dns_records(\@doms, $dkim);
 		}
 	}
 }
