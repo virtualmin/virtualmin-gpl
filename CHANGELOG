@@ -1582,3 +1582,4 @@ When adding an alias to a domain with a Let's Encrypt SSL certificate, the cert 
 Backups from cPanel, Plesk and other control panels can now be migrated even when Nginx is used as a webserver.
 ---- Changes since 6.03 ----
 Removed support for PHP 4.
+Before a DNS zone is updated, BIND will be told to freeze it and thaw afterwards. This ensures that dynamic updates are preserved.

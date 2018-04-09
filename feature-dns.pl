@@ -3147,6 +3147,23 @@ undef($bind8::get_chroot_cache);		# reset cache back
 return @rv;
 }
 
+# pre_records_change(&domain)
+# Called before records in a domain are changed or read, to freeze the zone
+# if necessary
+sub pre_records_change
+{
+local ($d) = @_;
+
+# Freeze the zone, so that updates to dynamic zones work
+if (!$d->{'provision_dns'}) {
+	&require_bind();
+	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
+	if ($z && defined(&bind8::before_editing)) {
+		&bind8::before_editing($z);
+		}
+	}
+}
+
 # post_records_change(&domain, &recs, [file])
 # Called after some records in a domain are changed, to bump to SOA
 # and possibly re-sign
@@ -3207,6 +3224,14 @@ if ($d->{'provision_dns'}) {
 	my ($ok, $msg) = &provision_api_call("modify-dns-records", $info, 0);
 	if (!ok) {
 		return "Error from provisioning server updating records : $msg";
+		}
+	}
+
+# Un-freeeze the zone
+if (!$d->{'provision_dns'}) {
+	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
+	if ($z && defined(&bind8::after_editing)) {
+		&bind8::after_editing($z);
 		}
 	}
 
