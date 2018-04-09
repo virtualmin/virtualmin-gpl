@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "4.9.4" );
+return ( "4.9.5" );
 }
 
 sub script_wordpress_category
@@ -195,7 +195,7 @@ if (&has_wordpress_cli()) {
 		&make_dir_as_domain_user($d, $opts->{'dir'}, 0755);
 		my $wp = "cd ".quotemeta($opts->{'dir'})." && ".&has_command("wp");
 		my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
-		if ($?) {
+		if ($? && $out !~ /Success:\s+WordPress\s+downloaded/i) {
 			return (-1, "wp core download failed : $out");
 			}
 
