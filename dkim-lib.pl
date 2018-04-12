@@ -925,13 +925,15 @@ my $anychanged = 0;
 foreach my $d (@$doms) {
 	my $pubkey = &get_dkim_pubkey($dkim, $d);
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
-	if (!$file) {
-		&$second_print($text{'dkim_ednszone'});
-		next;
-		}
 	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
 		&$second_print($text{'dkim_ednsexclude'});
+		next;
+		}
+	&pre_records_change($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
+		&after_records_change($d);
+		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
 	&obtain_lock_dns($d);
@@ -966,6 +968,7 @@ foreach my $d (@$doms) {
 		$anychanged++;
 		}
 	else {
+		&after_records_change($d);
 		&$second_print($text{'dkim_dnsalready'});
 		}
 	&release_lock_dns($d);
@@ -981,8 +984,10 @@ my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
+	&pre_records_change($d);
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
+		&after_records_change($d);
 		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
@@ -1009,6 +1014,7 @@ foreach my $d (@$doms) {
 		$anychanged++;
 		}
 	else {
+		&after_records_change($d);
 		&$second_print($text{'dkim_dnsalreadygone'});
 		}
 	&release_lock_dns($d);

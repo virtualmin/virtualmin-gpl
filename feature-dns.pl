@@ -267,6 +267,7 @@ else {
 	if (!$z) {
 		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
 		}
+	&pre_records_change($dnsparent);
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
@@ -380,6 +381,7 @@ else {
 		&$second_print($text{'save_nobind'});
 		return;
 		}
+	&pre_records_change($dnsparent);
 	local $file = &bind8::find("file", $z->{'members'});
 	local $fn = $file->{'values'}->[0];
 	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
@@ -429,6 +431,7 @@ if (!$recs) {
 local $absfile = &bind8::make_chroot($file);
 local $absofile = &bind8::make_chroot($ofile);
 &copy_source_dest($absofile, $absfile);
+&pre_records_change($d);
 $recs = [ &bind8::read_zone_file($file, $oldd->{'dom'}) ];
 &modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
 local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
@@ -686,6 +689,7 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && !$d->{'provision_dns'}) {
 
 	# Modify any records containing the old name
 	&lock_file(&bind8::make_chroot($nfn));
+	&pre_records_change($d);
         local @recs = &bind8::read_zone_file($nfn, $oldzonename);
 	&modify_records_domain_name(\@recs, $nfn,
 				    $oldd->{'dom'}, $d->{'dom'});
@@ -913,6 +917,7 @@ elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
 	}
 
 # Update SOA and upload records to provisioning server
+# XXX when to call pre_records_change
 if ($file) {
 	&post_records_change($d, $recs, $file);
 	}
@@ -1351,12 +1356,16 @@ sub add_webmail_dns_records
 {
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
+&pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 local $count = &add_webmail_dns_records_to_file($d, $tmpl, $file);
 if ($count) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
+	}
+else {
+	&after_records_change($d);
 	}
 return $count;
 }
@@ -1385,6 +1394,7 @@ return $count;
 sub remove_webmail_dns_records
 {
 local ($d) = @_;
+&pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 local $count = 0;
@@ -1399,6 +1409,9 @@ foreach my $r (reverse('webmail', 'admin')) {
 if ($count) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
+	}
+else {
+	&after_records_change($d);
 	}
 return $count;
 }
@@ -1485,6 +1498,7 @@ for(my $i=@$recs-1; $i>=0; $i--) {
 sub save_domain_matchall_record
 {
 local ($d, $star) = @_;
+&pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
 local $withstar = "*.".$d->{'dom'}.".";
@@ -1505,6 +1519,9 @@ if ($any) {
 	my $err = &post_records_change($d, $recs, $file);
 	return 0 if ($err);
 	&register_post_action(\&restart_bind, $d);
+	}
+else {
+	&after_records_change($d);
 	}
 return $any;
 }
@@ -1996,6 +2013,7 @@ local ($d, $file, $opts) = @_;
 &require_bind();
 &$first_print($text{'restore_dnscp'});
 &obtain_lock_dns($d, 1);
+&pre_records_change($d);
 local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
 local $ok;
 if (!$zonefile) {
@@ -2726,6 +2744,7 @@ local ($d, $spf) = @_;
 &require_bind();
 local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
 foreach my $t (@types) {
+	&pre_records_change($d);
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
 		# Domain not found!
@@ -2762,6 +2781,9 @@ foreach my $t (@types) {
 	if ($bump) {
 		&post_records_change($d, $recs, $file);
 		&register_post_action(\&restart_bind, $d);
+		}
+	else {
+		&after_records_change($d);
 		}
 	}
 }
@@ -2816,6 +2838,7 @@ sub save_domain_dmarc
 {
 local ($d, $dmarc) = @_;
 &require_bind();
+&pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
 	# Domain not found!
@@ -2849,6 +2872,9 @@ elsif (!$r && $dmarc) {
 if ($bump) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
+	}
+else {
+	&after_records_change($d);
 	}
 }
 
@@ -3164,6 +3190,19 @@ if (!$d->{'provision_dns'}) {
 	}
 }
 
+# after_records_change(&domain)
+# Should be called after pre_records_change, but only if nothing was changed
+sub after_records_change
+{
+local ($d) = @_;
+if (!$d->{'provision_dns'}) {
+	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
+	if ($z && defined(&bind8::after_editing)) {
+		&bind8::after_editing($z);
+		}
+	}
+}
+
 # post_records_change(&domain, &recs, [file])
 # Called after some records in a domain are changed, to bump to SOA
 # and possibly re-sign
@@ -3228,12 +3267,7 @@ if ($d->{'provision_dns'}) {
 	}
 
 # Un-freeeze the zone
-if (!$d->{'provision_dns'}) {
-	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
-	if ($z && defined(&bind8::after_editing)) {
-		&bind8::after_editing($z);
-		}
-	}
+&after_records_change($d);
 
 # If this domain has aliases, update their DNS records too
 if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
@@ -3241,6 +3275,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 			      &get_domain_by("alias", $d->{'id'});
 	foreach my $ad (@aliases) {
 		&obtain_lock_dns($ad);
+		&pre_records_change($d);
 		local $file;
 		local $recs;
 		if ($ad->{'provision_dns'}) {
@@ -3592,6 +3627,7 @@ my $dsrecs = &get_domain_dnssec_ds_records($d);
 if ($parent && ref($dsrecs)) {
 	# Parent exists, and we have records to add
 	&obtain_lock_dns($parent);
+	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
 	my %already;
 	foreach my $rec (@$precs) {
@@ -3631,6 +3667,7 @@ my $parent = &get_domain_by("dom", $pname);
 my $dsrecs = &get_domain_dnssec_ds_records($d);
 if ($parent && ref($dsrecs)) {
 	&obtain_lock_dns($parent);
+	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
 	foreach my $rec (reverse(@$precs)) {
 		DS: foreach my $ds (@$dsrecs) {
@@ -3743,8 +3780,12 @@ return { 'name' => $host.".",
 sub sync_domain_tlsa_records
 {
 my ($d, $force) = @_;
+&pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
-return undef if (!$file);
+if (!$file) {
+	&after_records_change($d);
+	return undef;
+	}
 
 # Find all existing TLSA records (without TTL, for easier comparison)
 my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
@@ -3754,7 +3795,10 @@ my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 
 # Exit now if TLSA is not enabled globally, unless it's being forced on OR
 # there are already records
-return undef if (!$config{'tlsa_records'} && !$force && !@oldrecs);
+if (!$config{'tlsa_records'} && !$force && !@oldrecs) {
+	&after_records_change($d);
+	return undef;
+	}
 
 # Work out which TLSA records are needed
 my @need;
@@ -3818,6 +3862,9 @@ if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
 
 	&post_records_change($d, $recs);
 	&release_lock_dns($d);
+	}
+else {
+	&after_records_change($d);
 	}
 }
 
