@@ -232,7 +232,7 @@ sub copy_jailkit_files
 {
 my ($d, $dir) = @_;
 $dir ||= &domain_jailkit_dir($d);
-foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp",
+foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php",
 		  split(/\s+/, $config{'jail_sects'})) {
 	my $cmd = "jk_init -f -j ".quotemeta($dir)." ".$sect;
