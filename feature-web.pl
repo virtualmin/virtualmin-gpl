@@ -483,6 +483,12 @@ if (!$virt) {
 if (defined(&create_php_wrappers)) {
 	&create_php_wrappers($d);
 	}
+my $mode = &get_domain_php_mode($oldd);
+if ($mode eq "fpm") {
+	# Force port re-allocation
+	delete($d->{'php_fpm_port'});
+	&save_domain_php_mode($d, $mode);
+	}
 
 &release_lock_web($d);
 &register_post_action(\&restart_apache);
