@@ -627,6 +627,7 @@ local $rv = 0;
 
 # Zone file name and records, if we read them
 local ($file, $recs);
+&pre_records_change($d);
 
 if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	# Domain name has changed .. rename via API call
@@ -917,9 +918,11 @@ elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
 	}
 
 # Update SOA and upload records to provisioning server
-# XXX when to call pre_records_change
 if ($file) {
 	&post_records_change($d, $recs, $file);
+	}
+else {
+	&after_records_change($d);
 	}
 
 # Release locks
