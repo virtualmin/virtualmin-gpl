@@ -46,6 +46,11 @@ sub script_roundcube_php_modules
 return ("mysql");
 }
 
+sub script_roundcube_php_optional_modules
+{
+return ("mbstring");
+}
+
 sub script_roundcube_dbs
 {
 return ("mysql");
