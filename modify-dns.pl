@@ -377,7 +377,10 @@ foreach $d (@doms) {
 	# Add records to the domain
 	if (@addrecs) {
 		&$first_print(&text('spf_addrecs', scalar(@addrecs)));
-		&pre_records_change($d);
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		foreach my $rn (@addrecs) {
 			my ($name, $type, $ttl, $values) = @$rn;
 			if ($name !~ /\.$/ && $name ne "\@") {
