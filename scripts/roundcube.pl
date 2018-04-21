@@ -381,8 +381,8 @@ if ($ver < 1) {
 	return ( );
 	}
 return ( "http://roundcube.net/download/",
-	 $ver >= 1.1 ? "roundcubemail-([0-9\\.]+).tar.gz" :
-		       "roundcubemail-(1\\.0\\.[0-9\\.]+).tar.gz" );
+	 $ver >= 1.3 ? "roundcubemail-([0-9\\.]+)-complete.tar.gz" :
+		       "roundcubemail-(1\\.[0-2]\\.[0-9\\.]+)-complete.tar.gz" );
 }
 
 sub script_roundcube_site
