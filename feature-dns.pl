@@ -2746,9 +2746,10 @@ sub save_domain_spf
 local ($d, $spf) = @_;
 &require_bind();
 local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
+local ($recs, $file);
+&pre_records_change($d);
 foreach my $t (@types) {
-	&pre_records_change($d);
-	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
 		# Domain not found!
 		return;
@@ -2781,13 +2782,13 @@ foreach my $t (@types) {
 		&save_domain($d);
 		$bump = 1;
 		}
-	if ($bump) {
-		&post_records_change($d, $recs, $file);
-		&register_post_action(\&restart_bind, $d);
-		}
-	else {
-		&after_records_change($d);
-		}
+	}
+if ($bump) {
+	&post_records_change($d, $recs, $file);
+	&reload_bind_records($d);
+	}
+else {
+	&after_records_change($d);
 	}
 }
 
