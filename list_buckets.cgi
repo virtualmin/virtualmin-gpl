@@ -4,6 +4,8 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 can_backup_buckets() || &error($text{'buckets_ecannot'});
+$err = &check_s3();
+&error($err) if ($err);
 
 &ui_print_header(undef, $text{'buckets_title'}, "", "buckets");
 
