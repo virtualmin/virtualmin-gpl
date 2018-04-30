@@ -19,8 +19,9 @@ that do not have some feature enabled.
 
 The message contents are typically read from a file, specified with the 
 C<--body-file> parameter. Or they can be passed as input to the script if
-the C<--body-stdin> flag is used. You can set a custom character set for the
-message body with the optional C<--charset> flag.
+the C<--body-stdin> flag is used. Or for very short messages, you can specify
+the contents on the command line with C<--body-message>. Als, you can set a
+custom character set for the message body with the optional C<--charset> flag.
 
 The email subject line must be set with the C<--subject> flag. The from address
 defaults to whatever you have configured globally in Virutalmin, but can be
@@ -75,6 +76,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--body-file") {
 		$bodyfile = shift(@ARGV);
 		}
+	elsif ($a eq "--body-message") {
+		$body = shift(@ARGV);
+		}
 	elsif ($a eq "--body-stdin") {
 		$bodystdin = 1;
 		}
@@ -123,8 +127,8 @@ elsif ($bodystdin) {
 	close(STDIN);
 	$body || &usage("No message body given as input");
 	}
-else {
-	&usage("One of --body-file or --body-stdin must be given");
+elsif (!$body) {
+	&usage("One of --body-file, --body-stdin or --body-message must be given");
 	}
 $subject || &usage("Missing --subject parameter");
 
@@ -161,7 +165,9 @@ print "virtualmin notify-domains [--domain name]\n";
 print "                          [--user login]\n";
 print "                          [--with-feature code]\n";
 print "                          [--without-feature code]\n";
-print "                           --body-file /path/to/file.txt | --body-stdin\n";
+print "                           --body-file /path/to/file.txt |\n";
+print "                           --body-message \"text\" |\n";
+print "                           --body-stdin\n";
 print "                          [--charset cs]\n";
 print "                           --subject \"subject line\"\n";
 print "                          [--from user\@domain]\n";
