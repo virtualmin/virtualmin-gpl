@@ -1332,22 +1332,38 @@ return @dirs;
 sub check_certificate_data
 {
 local ($data) = @_;
+my @lines = split(/\r?\n/, $data);
+my @certs;
+my $inside = 0;
+foreach my $l (@lines) {
+	if ($l =~ /^-+BEGIN/) {
+		push(@certs, $l."\n");
+		$inside = 1;
+		}
+	elsif ($l =~ /^-+END/ && $inside) {
+		$certs[$#certs] .= $l."\n";
+		}
+	elsif ($inside) {
+		$certs[$#certs] .= $l."\n";
+		}
+	}
+@certs || return $text{'cert_ecerts'};
 local $temp = &transname();
-&open_tempfile(CERTDATA, ">$temp", 0, 1);
-&print_tempfile(CERTDATA, $data);
-&close_tempfile(CERTDATA);
-local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
-local $ex = $?;
-&unlink_file($temp);
-if ($ex) {
-	return "<tt>".&html_escape($out)."</tt>";
+foreach my $cdata (@certs) {
+	&open_tempfile(CERTDATA, ">$temp", 0, 1);
+	&print_tempfile(CERTDATA, $cdata);
+	&close_tempfile(CERTDATA);
+	local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
+	local $ex = $?;
+	&unlink_file($temp);
+	if ($ex) {
+		return "<tt>".&html_escape($out)."</tt>";
+		}
+	elsif ($out !~ /subject\s*=\s*.*(CN|O)\s*=/) {
+		return $text{'cert_esubject'};
+		}
 	}
-elsif ($out !~ /subject\s*=\s*.*(CN|O)\s*=/) {
-	return $text{'cert_esubject'};
-	}
-else {
-	return undef;
-	}
+return undef;
 }
 
 # default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything")
