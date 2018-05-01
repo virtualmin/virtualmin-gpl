@@ -1340,13 +1340,16 @@ foreach my $l (@lines) {
 		push(@certs, $l."\n");
 		$inside = 1;
 		}
-	elsif ($l =~ /^-+END/ && $inside) {
+	elsif ($l =~ /^-+END/) {
+		$inside || return $text{'cert_eoutside'};
 		$certs[$#certs] .= $l."\n";
+		$inside = 0;
 		}
 	elsif ($inside) {
 		$certs[$#certs] .= $l."\n";
 		}
 	}
+$inside && return $text{'cert_einside'};
 @certs || return $text{'cert_ecerts'};
 local $temp = &transname();
 foreach my $cdata (@certs) {
