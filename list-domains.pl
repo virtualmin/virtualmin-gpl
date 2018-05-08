@@ -263,6 +263,7 @@ if ($multi) {
 		local ($duser) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		print "$d->{'dom'}\n";
 		print "    ID: $d->{'id'}\n";
+		print "    File: $d->{'file'}\n";
 		print "    Type: ",($d->{'alias'} && $d->{'aliasmail'} ?
 					"Alias with own email" :
 				    $d->{'alias'} ? "Alias" :
