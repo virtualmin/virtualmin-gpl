@@ -354,6 +354,16 @@ foreach $sd (@doms) {
 		$sd->{'web_sslport'} = $in{'sslport'};
 		}
 
+	# Update DNS IP to follow target
+	if (&can_dnsip()) {
+		if ($in{'dns_ip_def'}) {
+			delete($sd->{'dns_ip'});
+			}
+		else {
+			$sd->{'dns_ip'} = $in{'dns_ip'};
+			}
+		}
+
 	foreach $f (@features) {
 		local $mfunc = "modify_$f";
 		if ($config{$f} && $sd->{$f}) {
