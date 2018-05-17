@@ -453,7 +453,13 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 	# Update autoresponder
 	if (defined($autotext)) {
 		if ($autotext) {
-			$simple->{'from'} ||= $user->{'email'};
+			if ($user->{'real'}) {
+				$fullemail = '"'.$user->{'real'}.'" <'.$user->{'email'}.'>';
+				}
+			else {
+				$fullemail = $user->{'email'};
+				}
+			$simple->{'from'} ||= $fullemail;
 			$autotext =~ s/\\n/\n/g;
 			$autotext .= "\n" if ($autotext !~ /\n$/);
 			$simple->{'autotext'} = $autotext;
