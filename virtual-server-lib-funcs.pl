@@ -13347,10 +13347,13 @@ if ($dom) {
 	}
 
 # If this domain has any DNS sub-domains, disallow the rename
-my @dnssub = &get_domain_by("dns_subof", $d->{'id'});
-if (@dnssub) {
-	return &text('rename_ednssub',
-		join(" ", map { &show_domain_name($_) } @dnssub));
+if ($d->{'dns'}) {
+	my @dnssub = grep { $_->{'dns'} }
+			  &get_domain_by("dns_subof", $d->{'id'});
+	if (@dnssub) {
+		return &text('rename_ednssub',
+			join(" ", map { &show_domain_name($_) } @dnssub));
+		}
 	}
 
 # Validate username, home directory and prefix
