@@ -16788,11 +16788,11 @@ foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 return $d->{'dom'};	# Fallback
 }
 
-# date_to_time(date-string, [gmt])
+# date_to_time(date-string, [gmt], [end-of-day])
 # Convert a date string like YYYY-MM-DD or -5 to a Unix time
 sub date_to_time
 {
-local ($date, $gmt) = @_;
+local ($date, $gmt, $eod) = @_;
 local $rv;
 if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
 	# Date only
@@ -16802,6 +16802,7 @@ if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
 	else {
 		$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
 		}
+	$rv += 24*60*60-1 if ($eod);
 	}
 elsif ($date =~ /^\-(\d+)$/) {
 	# Some days ago

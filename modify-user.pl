@@ -217,7 +217,7 @@ while(@ARGV > 0) {
 		$autostart = '';
 		}
 	elsif ($a eq "--autoreply-end") {
-		$autoend = &date_to_time(shift(@ARGV));
+		$autoend = &date_to_time(shift(@ARGV), 0, 1);
 		}
 	elsif ($a eq "--no-autoreply-end") {
 		$autoend = '';
