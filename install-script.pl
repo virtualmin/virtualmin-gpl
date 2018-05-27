@@ -287,10 +287,14 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo && !$logonly) {
 		}
 	}
 
-# Check for a clash, unless upgrading
-if (!$sinfo) {
+# Check for a directory clash, unless upgrading
+if (!$sinfo && !$script->{'overlap'}) {
 	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @scripts;
-	$clash && &usage(&text('scripts_eclash', $opts->{'dir'}));
+	if ($clash) {
+		$clashscript = &get_script($clash->{'name'});
+		$clashscript->{'overlap'} ||
+			&usage(&text('scripts_eclash', $opts->{'dir'}));
+		}
 	}
 
 # Install needed packages
