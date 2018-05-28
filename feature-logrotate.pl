@@ -46,8 +46,7 @@ if (@logs) {
 	local $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	local $already;
-	if ($tmpl->{'logrotate_shared'} eq 'yes' &&
-	    $logs[0] !~ /^\Q$d->{'home'}\E\//) {
+	if ($tmpl->{'logrotate_shared'} eq 'yes') {
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
 				if ($n =~ /^\Q$logdir\E\/[^\/]+$/) {
@@ -64,7 +63,7 @@ if (@logs) {
 				 'name' => \@logs };
 		local $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
-			# Use automatic configurtation
+			# Use automatic configuration
 			local $script = &get_postrotate_script($_[0]);
 			$lconf->{'members'} = [
 					{ 'name' => 'rotate',
@@ -74,6 +73,7 @@ if (@logs) {
 					{ 'name' => 'postrotate',
 					  'script' => $script },
 					{ 'name' => 'sharedscripts' },
+					{ 'name' => 'missingok' },
 					];
 			}
 		else {
