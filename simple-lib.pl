@@ -349,6 +349,10 @@ if (!$nofrom) {
 		undef, $tds);
 	}
 
+# Skip autoreply for forwarded email
+print &ui_table_row(&hlink($text{'user_noforward'}, "user_noforward"),
+	&ui_yesno_radio("forwardreply", !$simple->{'no_forward_reply'}));
+
 # End of hidden
 print &ui_hidden_table_row_end("aopts");
 }
@@ -464,6 +468,12 @@ if ($in->{'autotext'}) {
 			$simple->{'from'} = $in->{'from'};
 			}
 		}
+
+	# Save autoreply to forwarded
+	if (defined($in->{'forwardreply'})) {
+		$simple->{'no_forward_reply'} = !$in{'forwardreply'};
+		}
+
 	&set_alias_programs();
 	}
 if ($in->{'auto'}) {

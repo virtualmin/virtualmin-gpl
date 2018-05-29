@@ -838,6 +838,7 @@ user_lastlogin_pop3=POP3 (fetching email)
 user_lastlogin_imap=IMAP (fetching email)
 user_lastlogin_smtp=SMTP (sending email)
 user_lastlogin_never=No logins recorded yet
+user_noforward=Autoreply to forwarded email?
 
 aliases_ecannot=You are not allowed to edit aliases in this domain
 aliases_indom=$1 aliases in domain $2
