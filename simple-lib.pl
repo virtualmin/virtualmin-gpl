@@ -100,6 +100,9 @@ while(<FILE>) {
 	elsif (/^Charset:\s*(.*)/) {
 		$simple->{'charset'} = $1;
 		}
+	elsif (/^No-Forward-Reply:\s*(.*)/) {
+		$simple->{'no_forward_reply'} = $1;
+		}
 	else {
 		push(@lines, $_);
 		if (/\S/) {
@@ -203,6 +206,9 @@ if ($simple->{'autotext'}) {
                 }
         if ($simple->{'charset'}) {
                 &print_tempfile(AUTO, "Charset: $simple->{'charset'}\n");
+                }
+        if ($simple->{'no_forward_reply'}) {
+                &print_tempfile(AUTO, "No-Forward-Reply: $simple->{'no_forward_reply'}\n");
                 }
         &print_tempfile(AUTO, $simple->{'autotext'});
         &close_tempfile_as_domain_user($d, AUTO);
