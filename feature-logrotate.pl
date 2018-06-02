@@ -42,14 +42,15 @@ if (@logs) {
 		}
 
 	# If in single config mode, check if there is a block for Virtualmin
-	# already (based on the directory)
+	# already (either under /var/log/virtualmin, or in a domain's home)
 	local $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	local $already;
 	if ($tmpl->{'logrotate_shared'} eq 'yes') {
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
-				if ($n =~ /^\Q$logdir\E\/[^\/]+$/) {
+				if ($n =~ /^\Q$logdir\E\/[^\/]+$/ ||
+				    $n =~ /^\Q$home_base\E\//) {
 					$already = $c;
 					last LOGROTATE;
 					}
