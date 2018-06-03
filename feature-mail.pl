@@ -744,9 +744,10 @@ if ($wasalias && !$isalias) {
 	return 1;
 	}
 
-# Second special case - changing of alias target
+# Second special case - changing of alias target (for a real alias domain)
 if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
-    $_[0]->{'alias'} != $_[1]->{'alias'}) {
+    $_[0]->{'alias'} != $_[1]->{'alias'} &&
+    !$_[0]->{'aliasmail'}) {
 	&delete_mail($_[1]);
 	&setup_mail($_[0]);
 	return 1;
