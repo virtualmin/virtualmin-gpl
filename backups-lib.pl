@@ -2930,7 +2930,7 @@ if (-d $backup) {
 	# A directory of backup files, one per domain
 	opendir(DIR, $backup);
 	foreach my $f (readdir(DIR)) {
-		next if ($f eq "." || $f eq ".." || $f =~ /\.(info|dom)$/);
+		next if ($f =~ /^\./ || $f =~ /\.(info|dom)$/);
 		local ($cont, $fdoms);
 		if ($wantdoms) {
 			($cont, $fdoms) = &backup_contents(
@@ -3215,7 +3215,7 @@ if ($mode == 1) {
 		return $err if (!$list);
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
-			next if ($f eq "." || $f eq ".." || $f eq "");
+			next if ($f =~ /^\./ || $f eq "");
 			next if ($infoonly && $f !~ /\Q$sfx\E$/);
 			if (@$domnames && $f =~ /^(\S+)\.(tar.*|zip)$/i &&
 			    $f !~ /^virtualmin\.(tar.*|zip)$/i) {
