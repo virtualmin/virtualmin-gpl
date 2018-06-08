@@ -2156,7 +2156,7 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 			push(@rv, $full);
 			}
 		}
-	elsif (&to_ipaddress($full)) {
+	if (&to_ipaddress($full)) {
 		push(@rv, $full);
 		}
 	}
