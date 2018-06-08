@@ -110,7 +110,7 @@ if (&can_edit_limits($doms[0])) {
 				 &ui_textbox($l, "", 4) ] ]),
 			1, \@tds);
 		}
-	print &ui_hidden_end(),&ui_table_end();
+	print &ui_hidden_table_end("limits");
 
 	# Editable capabilities
 	print &ui_hidden_table_start($text{'massdomains_headerc'}, "width=100%",
@@ -139,7 +139,7 @@ if (&can_edit_limits($doms[0])) {
 			  [ 0, $text{'massdomains_features0'}." ".
 				&ui_select("feature0", undef, \@opts)."<br>" ] ]
 			), 1, \@tds);
-	print &ui_hidden_table_end("limits");
+	print &ui_hidden_table_end("capabilities");
 	}
 
 # Start section for PHP options
