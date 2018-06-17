@@ -1,8 +1,23 @@
 <header>Files to exclude from each domain</header>
-
-This field allows you to enter the relative paths to files under each
-virtual server's home directory to exclude from this backup. For example, to
-skip Webalizer statistics, you could enter <tt>public_html/stats</tt>. <p>
-
+<p>This field allows you to enter the relative paths to files under each
+virtual server's home directory to exclude from this backup.</p>
+<p>
+<b>Examples</b>
+</p>
+<p>
+To exclude an entire directory, provide the relative path from the user's home directory,
+such as <tt>public_html/stats</tt> to exclude the Webalizer reports directory or
+<tt>homes</tt> to exclude user home directories.
+</p>
+<p>
+To exclude a single file, provide the relative path to the filename, such as 
+<tt>public_html/index.html</tt>.
+</p>
+<p>
+Files can also be specified using wildcards, such as <tt>*.log</tt>, which will exclude 
+any file with the <tt>.log</tt> file extension anywhere within the home directory of 
+the domain. A path can also be provided, such as <tt>etc/*.ini</tt> to exclude all
+files ending in <tt>.ini</tt>.
+</p>
 <footer>
 
