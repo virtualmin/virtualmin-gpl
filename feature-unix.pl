@@ -704,7 +704,7 @@ local ($d, $file, $opts) = @_;
 &obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
 
-# And update password and description
+# Update domain owner user password and description
 &require_useradmin();
 local @allusers = &foreign_call($usermodule, "list_users");
 local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
