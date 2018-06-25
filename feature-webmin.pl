@@ -840,7 +840,7 @@ if ($extramods{'phpini'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (@doms) {
 		my $mode = &get_domain_php_mode($sd);
-		if ($sd->{'web'} &&
+		if (&domain_has_website($sd) &&
 		    $mode ne "mod_php" && $mode ne "fpm") {
 			foreach my $ini (&list_domain_php_inis($sd)) {
 				local @st = stat($ini->[1]);
