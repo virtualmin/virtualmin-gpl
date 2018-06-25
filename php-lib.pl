@@ -1646,7 +1646,21 @@ if ($php_fpm_config_cache) {
 	}
 my $rv = { };
 
+# What version are we running?
+&foreign_require("software");
+foreach my $pname ("php-fpm", "php5-fpm") {
+	my @pinfo = &software::package_info($pname);
+	if (@pinfo && $pinfo[0]) {
+		$rv->{'version'} = $pinfo[4];
+		$rv->{'version'} =~ s/\-.*$//;
+		$rv->{'version'} =~ s/\+.*$//;
+		$rv->{'version'} =~ s/^\d+://;
+		last;
+		}
+	}
+
 # Config directory for per-domain pool files
+my @verdirs;
 DIR: foreach my $cdir ("/etc/php-fpm.d",
 		       "/etc/php*/fpm/pool.d",
 		       "/etc/php/*/fpm/pool.d",
@@ -1656,15 +1670,17 @@ DIR: foreach my $cdir ("/etc/php-fpm.d",
 		if ($realdir && -d $realdir) {
 			my @files = glob("$realdir/*");
 			if (@files) {
-				$rv->{'dir'} = $realdir;
-				last DIR;
+				push(@verdirs, $realdir);
 				}
 			}
 		}
 	}
-if (!$rv->{'dir'}) {
+if (!@verdirs) {
 	return wantarray ? ( undef, $text{'php_fpmnodir'} ) : undef;
 	}
+my ($bestver) = grep { /\Q$rv->{'version'}\E/ } @verdirs;
+$bestdir ||= $verdirs[0];
+$rv->{'dir'} = $bestdir;
 
 # Init script
 &foreign_require("init");
@@ -1691,19 +1707,6 @@ if ($config{'web'}) {
 		if (!$apache::httpd_modules{$m}) {
 			return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
 			}
-		}
-	}
-
-# What version are we running?
-&foreign_require("software");
-foreach my $pname ("php-fpm", "php5-fpm") {
-	my @pinfo = &software::package_info($pname);
-	if (@pinfo && $pinfo[0]) {
-		$rv->{'version'} = $pinfo[4];
-		$rv->{'version'} =~ s/\-.*$//;
-		$rv->{'version'} =~ s/\+.*$//;
-		$rv->{'version'} =~ s/^\d+://;
-		last;
 		}
 	}
 

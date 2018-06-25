@@ -14049,7 +14049,7 @@ if (&domain_has_website()) {
 	# Check for PHP-FPM support
 	my ($fconf, $ferr) = &get_php_fpm_config();
 	if ($fconf) {
-		&$second_print($text{'check_webphpfpm'});
+		&$second_print(&text('check_webphpfpm', $fconf->{'version'}));
 		}
 	else {
 		&$second_print(&text('check_webphpnofpm', $ferr));
