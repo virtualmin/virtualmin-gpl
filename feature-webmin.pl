@@ -838,10 +838,10 @@ else {
 local @pconfs;
 if ($extramods{'phpini'}) {
 	# Can edit PHP configuration files
-	foreach my $sd (@doms) {
+	foreach my $sd (grep { $_->{'web'} } @doms) {
 		my $mode = &get_domain_php_mode($sd);
-		if (&domain_has_website($sd) &&
-		    $mode ne "mod_php" && $mode ne "fpm") {
+		if ($mode ne "mod_php" && $mode ne "fpm") {
+			# Allow access to .ini files
 			foreach my $ini (&list_domain_php_inis($sd)) {
 				local @st = stat($ini->[1]);
 				if (@st && $st[4] == $sd->{'uid'}) {
@@ -856,6 +856,16 @@ if ($extramods{'phpini'}) {
 						    $sd->{'dom'}));
 						}
 					}
+				}
+			}
+		elsif ($mode eq "fpm") {
+			# Allow access to FPM configs for PHP overrides
+			my $conf = &get_php_fpm_config();
+			if ($conf) {
+				my $file = $conf->{'dir'}."/".
+					   $sd->{'id'}.".conf";
+				push(@pconfs, $file."=".
+					&text('webmin_phpini', $sd->{'dom'}));
 				}
 			}
 		}
