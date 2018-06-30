@@ -1069,7 +1069,9 @@ elsif ($conf->{'SigningTable'} && $conf->{'KeyTable'}) {
 			}
 		}
 	return undef if (!$keyname);
-	my $klref = &read_file_lines($conf->{'KeyTable'}, 1);
+	my $keyfile = $conf->{'KeyTable'};
+	$keyfile =~ s/^[a-z]+://;
+	my $klref = &read_file_lines($keyfile, 1);
 	foreach my $l (@$klref) {
 		my ($name, $kdom, $ksel, $kfile) = split(/\s+|:/, $l);
 		if ($name eq $keyname) {
@@ -1186,9 +1188,11 @@ else {
 		}
 
 	# Find domain's entry in key table
-	$newfile = !-r $conf->{'KeyTable'};
-	&lock_file($conf->{'KeyTable'});
-	my $klref = &read_file_lines($conf->{'KeyTable'});
+	my $keyfile = $conf->{'KeyTable'};
+	$keyfile =~ s/^[a-z]+://;
+	$newfile = !-r $keyfile;
+	&lock_file($keyfile);
+	my $klref = &read_file_lines($keyfile);
 	if (!@$klref) {
 		# Add entry for the default key
 		push(@$klref, "default\t%:$dkim->{'selector'}:".
@@ -1219,11 +1223,10 @@ else {
 		# Need to remove
 		splice(@$klref, $kidx, 1);
 		}
-	&flush_file_lines($conf->{'KeyTable'});
-	&unlock_file($conf->{'KeyTable'});
+	&flush_file_lines($keyfile);
+	&unlock_file($keyfile);
 	if ($newfile) {
-		&set_ownership_permissions(undef, undef, 0755,
-					   $conf->{'KeyTable'});
+		&set_ownership_permissions(undef, undef, 0755, $keyfile);
 		}
 	}
 &$second_print($text{'setup_done'});
