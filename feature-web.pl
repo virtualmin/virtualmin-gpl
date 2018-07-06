@@ -2168,7 +2168,8 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 	# subsequent ones should as well. Otherwise, they can just use IPs.
 	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
 	foreach my $v (@virt) {
-		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)/i) {
+		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))/i &&
+		    (!$3 || $3 == $web_port)) {
 			return 1;
 			}
 		}
