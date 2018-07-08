@@ -1943,7 +1943,7 @@ if ($ok) {
 		if ($key) {
 			$lerr =~ s/\r/ /g;
 			if ($lerr !~ /Good\s+signature\s+from/ ||
-			    $lerr !~ /(key\s+ID|using\s+\S+\s+key)\s+(\S+)/ ||
+			    $lerr !~ /(key,?\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ ||
 			    substr($2, -length($key->{'key'})) ne $key->{'key'}) {
 				&$second_print(&text('restore_badkey',
 					$key->{'key'},
