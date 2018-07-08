@@ -2747,6 +2747,7 @@ local ($d, $spf) = @_;
 &require_bind();
 local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
 local ($recs, $file);
+local $bump = 0;
 &pre_records_change($d);
 foreach my $t (@types) {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -2754,7 +2755,6 @@ foreach my $t (@types) {
 		# Domain not found!
 		return;
 		}
-	local $bump = 0;
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=spf/ &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
