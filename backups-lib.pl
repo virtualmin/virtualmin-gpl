@@ -1941,10 +1941,18 @@ if ($ok) {
 
 		# If encrypted, check signature too
 		if ($key) {
+			my $keyok = 0;
 			$lerr =~ s/\r/ /g;
-			if ($lerr !~ /Good\s+signature\s+from/ ||
-			    $lerr !~ /(key,?\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ ||
-			    substr($2, -length($key->{'key'})) ne $key->{'key'}) {
+			my $l = length($key->{'key'});
+			if ($lerr =~ /Good\s+signature\s+from/) {
+				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+					$keyok = 1;
+					}
+				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+					$keyok = 1;
+					}
+				}
+			if (!$keyok) {
 				&$second_print(&text('restore_badkey',
 					$key->{'key'},
 					"<pre>".&html_escape($lerr)."</pre>"));
