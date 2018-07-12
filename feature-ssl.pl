@@ -1975,7 +1975,7 @@ return undef if (!$config{'postfix_ssl'});
 local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-return undef if ($enable && (!$cfile || !$kfile));
+return undef if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
 
 # Find the existing master file entry
 &lock_file($postfix::config{'postfix_master'});
