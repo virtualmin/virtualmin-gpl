@@ -1146,7 +1146,7 @@ foreach my $p (@ports) {
 				" ".&get_allowed_options_list() : "";
 		local @lines = (
 			"<Directory $dir>",
-			"Options +Indexes +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
+			"Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
 			"allow from all",
 			"AllowOverride All".$olist,
 			@phplines,
