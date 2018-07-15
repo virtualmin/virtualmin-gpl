@@ -7,6 +7,7 @@ require './virtual-server-lib.pl';
 
 &ui_print_header(undef, $text{'cloud_title'}, "");
 
+# Lookup the provider
 @provs = &list_cloud_providers();
 ($prov) = grep { $_->{'name'} eq $in{'name'} } @provs;
 $prov || &error($text{'cloud_egone'});
@@ -15,6 +16,17 @@ $state = &$sfunc($p);
 
 if ($prov->{'longdesc'}) {
 	print $prov->{'longdesc'},"<p>\n";
+	}
+
+# First check if provider can be used
+my $cfunc = "check_".$prov->{'name'};
+if (defined(&$cfunc)) {
+	my $err = &$cfunc();
+	if ($err) {
+		print &text('cloud_echeck', $prov->{'desc'}, $err),"<p>\n";
+		&ui_print_footer("list_clouds.cgi", $text{'clouds_return'});
+		return;
+		}
 	}
 
 print &ui_form_start("save_cloud.cgi", "post");

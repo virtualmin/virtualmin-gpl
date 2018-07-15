@@ -6842,6 +6842,7 @@ cloud_dropbox_oauth=OAuth2 code from Dropbox
 cloud_dropbox_token=OAuth2 token from Dropbox
 cloud_edropbox_account=Missing or invalid-looking Dropbox account
 cloud_clear=Clear All Settings
+cloud_echeck=Cloud storage provider $1 cannot be used : $2
 
 lang_title=Change Language
 lang_ecannot=You are not allowed to change the UI language!
