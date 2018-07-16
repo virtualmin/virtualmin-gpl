@@ -699,10 +699,20 @@ return 1;
 # Note - quotas are not set here, as they get set in restore_domain
 sub restore_unix
 {
-local ($d, $file, $opts) = @_;
+local ($d, $file, $opts, $allopts) = @_;
 &obtain_lock_unix($_[0]);
 &obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
+
+# Check if users are being stored in the same remote storage, if replicating
+my $url = &get_user_database_url();
+my $burl = &read_file_contents($file."_url");
+chop($burl);
+if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
+	$url =~ s/^\S+:\/\///g;
+	&$second_print(&text('restore_unixsame', $url));
+	return 1;
+	}
 
 # Update domain owner user password and description
 &require_useradmin();
