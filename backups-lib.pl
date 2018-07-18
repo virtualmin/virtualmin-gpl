@@ -721,6 +721,10 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		$d->{'dir'} = 1;
 		}
 
+	# Turn off quotas for the domain so that writes as the domain owner
+	# don't fail
+	&disable_quotas($d);
+
 	local $lockdir;
 	if ($homefmt) {
 		# Backup for most features goes to a sub-dir of the home, which
@@ -738,10 +742,6 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			goto DOMAINFAILED;
 			}
 		}
-
-	# Turn off quotas for the domain so that writes as the domain owner
-	# don't fail
-	&disable_quotas($d);
 
 	&$indent_print();
 	foreach $f (@backupfeatures) {
