@@ -3135,7 +3135,7 @@ sub default_domain_dmarc
 {
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
-local $pm = 'postmaster@'.$d->{'dom'};
+local $pm = 'mailto:postmaster@'.$d->{'dom'};
 local $ruf = $tmpl->{'dns_dmarcruf'};
 if ($ruf && $ruf ne "none") {
 	$ruf = &substitute_domain_template($ruf, $d);
