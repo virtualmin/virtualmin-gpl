@@ -1724,6 +1724,7 @@ return undef if ($ssldis =~ /yes/i);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
+local $chain = &get_website_ssl_file($d, "ca");
 if ($d->{'virt'}) {
 	# Domain has it's own IP
 
@@ -1747,7 +1748,6 @@ if ($d->{'virt'}) {
 
 	if ($enable) {
 		# Needs a cert for the IP
-		local $chain = &get_website_ssl_file($d, "ca");
 		if (!$l) {
 			$l = { 'name' => 'local',
 			       'value' => $d->{'ip'},
