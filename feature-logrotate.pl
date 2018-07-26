@@ -347,7 +347,8 @@ if ($lconf) {
 	return 1;
 	}
 else {
-	&$second_print($text{'setup_nologrotate'});
+	local $alog = &get_website_log($d, 0);
+	&$second_print(&text('setup_nologrotate', $alog));
 	return 0;
 	}
 }
