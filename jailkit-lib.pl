@@ -181,16 +181,17 @@ return undef if (!-d "$dir/etc");	# Jail directory is invalid
 # Build a list of users and groups that are either system-related, or
 # associated with this domain
 &require_useradmin();
-my @ucreate;
+my (@ucreate, @gcreate);
 foreach my $u (&list_all_users()) {
 	push(@ucreate, $u) if ($u->{'uid'} < 500);
 	}
-push(@ucreate, &list_domain_users($d, 0, 1, 1, 1));
-my @gcreate;
 foreach my $g (&list_all_groups()) {
 	push(@gcreate, $g) if ($g->{'gid'} < 500 ||
-			       $g->{'group'} eq $d->{'group'} ||
-			       $g->{'group'} eq $d->{'ugroup'});
+			       $g->{'group'} eq $sd->{'group'} ||
+                               $g->{'group'} eq $sd->{'ugroup'});
+	}
+foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
+	push(@ucreate, &list_domain_users($sd, 0, 1, 1, 1));
 	}
 
 # Write out chosen users to the jail passwd file
