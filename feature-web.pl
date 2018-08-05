@@ -2514,7 +2514,7 @@ print &ui_table_row(
 	&ui_opt_textbox("web_sslprotos", $tmpl->{'web_sslprotos'}, 30,
                         $text{'newweb_sslprotos_def'}));
 
-# Setup matching Webmin/Usermin SSL cert
+# Setup matching Webmin/Usermin SSL certs
 print &ui_table_row(&hlink($text{'newweb_webmin'},
 			   "template_web_webmin_ssl"),
 	&ui_radio("web_webmin_ssl",
@@ -2525,6 +2525,19 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 			   "template_web_usermin_ssl"),
 	&ui_radio("web_usermin_ssl",
 		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+# Setup Dovecot and Postfix SSL certs
+print &ui_table_row(&hlink($text{'newweb_dovecot'},
+			   "template_web_dovecot_ssl"),
+	&ui_radio("web_dovecot_ssl",
+		  $tmpl->{'web_dovecot_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+print &ui_table_row(&hlink($text{'newweb_postfix'},
+			   "template_web_postfix_ssl"),
+	&ui_radio("web_postfix_ssl",
+		  $tmpl->{'web_postfix_ssl'} ? 1 : 0,
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Add rewrites for webmail and admin
@@ -2678,6 +2691,8 @@ if ($in{"web_mode"} == 2) {
 
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+	$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
+	$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 
 	# Parse SSI setting
 	$tmpl->{'web_ssi'} = $in{'web_ssi'};

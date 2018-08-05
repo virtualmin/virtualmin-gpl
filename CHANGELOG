@@ -1583,3 +1583,4 @@ Backups from cPanel, Plesk and other control panels can now be migrated even whe
 ---- Changes since 6.03 ----
 Removed support for PHP 4.
 Before a DNS zone is updated, BIND will be told to freeze it and thaw afterwards. This ensures that dynamic updates are preserved.
+Dovecot and Postfix per-IP SSL certificate setup can now be configured on a per-template basis.

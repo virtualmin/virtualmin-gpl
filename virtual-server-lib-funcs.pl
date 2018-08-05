@@ -8711,6 +8711,8 @@ push(@rv, { 'id' => 0,
 	    'web_phpchildren' => $config{'phpchildren'},
 	    'web_ssi' => $config{'web_ssi'} eq '' ? 2 : $config{'web_ssi'},
 	    'web_ssi_suffix' => $config{'web_ssi_suffix'},
+	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
+	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -8997,6 +8999,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'phpchildren'} = $tmpl->{'web_phpchildren'};
 	$config{'web_ssi'} = $tmpl->{'web_ssi'};
 	$config{'web_ssi_suffix'} = $tmpl->{'web_ssi_suffix'};
+	$config{'dovecot_ssl'} = $tmpl->{'web_dovecot_ssl'};
+	$config{'postfix_ssl'} = $tmpl->{'web_postfix_ssl'};
 	foreach my $phpver (@all_possible_php_versions) {
 		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
 		}

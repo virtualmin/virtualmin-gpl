@@ -1706,9 +1706,10 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 sub sync_dovecot_ssl_cert
 {
 local ($d, $enable) = @_;
+local $tmpl = &get_template($d->{'template'});
 
 # Check if dovecot is installed and supports this feature
-return undef if (!$config{'dovecot_ssl'});
+return undef if (!$tmpl->{'web_dovecot_ssl'});
 return undef if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
@@ -1965,10 +1966,11 @@ return @rv;
 sub sync_postfix_ssl_cert
 {
 local ($d, $enable) = @_;
+local $tmpl = &get_template($d->{'template'});
 
 # Check if Postfix is in use
 return undef if ($config{'mail_system'} != 0);
-return undef if (!$config{'postfix_ssl'});
+return undef if (!$tmpl->{'web_postfix_ssl'});
 
 # Check if using SSL globally
 &foreign_require("postfix");
