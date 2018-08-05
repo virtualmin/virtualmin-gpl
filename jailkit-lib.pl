@@ -116,7 +116,6 @@ if (!$uinfo) {
 my $olduinfo = { %$uinfo };
 if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
 	$uinfo->{'shell'} = $d->{'unjailed_shell'};
-	delete($d->{'unjailed_shell'});
 	}
 if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
 	&foreign_call($usermodule, "set_user_envs", $uinfo,
