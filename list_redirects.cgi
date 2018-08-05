@@ -10,13 +10,13 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(&domain_in($d), $text{'redirects_title'}, "", "redirects");
 
 # Build table data
-@redirects = &list_redirects($d);
+@redirects = map { &remove_wellknown_redirect($_) } &list_redirects($d);
 foreach $r (@redirects) {
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $r->{'path'} },
+		  'value' => $r->{'id'} },
 		"<a href='edit_redirect.cgi?dom=$in{'dom'}&".
-		  "path=$r->{'path'}'>$r->{'path'}</a>",
+		  "id=$r->{'id'}'>$r->{'path'}</a>",
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
 		$r->{'dest'},

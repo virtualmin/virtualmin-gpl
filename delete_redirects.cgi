@@ -14,8 +14,8 @@ $d = &get_domain($in{'dom'});
 @d || &error($text{'redirects_denone'});
 &obtain_lock_web($d);
 @redirects = &list_redirects($d);
-foreach $path (@d) {
-	($r) = grep { $_->{'path'} eq $path } @redirects;
+foreach $id (@d) {
+	($r) = grep { $_->{'id'} eq $id } @redirects;
 	if ($r) {
 		$err = &delete_redirect($d, $r);
 		&error($err) if ($err);

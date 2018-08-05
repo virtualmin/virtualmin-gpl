@@ -9,7 +9,7 @@ $d = &get_domain($in{'dom'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
 &error_setup($text{'redirect_err'});
 if (!$in{'new'}) {
-	($r) = grep { $_->{'path'} eq $in{'old'} } &list_redirects($d);
+	($r) = grep { $_->{'id'} eq $in{'old'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
 	$oldr = { %$r };
 	}
@@ -69,6 +69,7 @@ else {
 	$r->{'regexp'} = $in{'regexp'};
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
+	$r = &add_wellknown_redirect($r);
 
 	# Create or update
 	if ($in{'new'}) {
