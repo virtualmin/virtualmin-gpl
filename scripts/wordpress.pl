@@ -343,7 +343,7 @@ sub script_wordpress_latest
 {
 my ($ver) = @_;
 return ( "http://wordpress.org/download/",
-	 "Version\\s+([0-9\\.]+)" );
+	 "Download\\s+WordPress\\s+([0-9\\.]+)" );
 }
 
 sub script_wordpress_site
