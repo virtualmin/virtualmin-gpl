@@ -194,11 +194,12 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && lc($1) eq lc($d->{'dom'}) &&
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
+local ($d, $noaliases) = @_;
 &$first_print($text{'setup_doms'});
-&obtain_lock_mail($_[0]);
-&complete_domain($_[0]);
+&obtain_lock_mail($d);
+&complete_domain($d);
 &require_mail();
-local $tmpl = &get_template($_[0]->{'template'});
+local $tmpl = &get_template($d->{'template'});
 if ($config{'mail_system'} == 1) {
 	# Just add to sendmail local domains file
 	local $conf = &sendmail::get_sendmailcf();
@@ -207,7 +208,7 @@ if ($config{'mail_system'} == 1) {
 						     \$cwfile);
 	&lock_file($cwfile) if ($cwfile);
 	&lock_file($sendmail::config{'sendmail_cf'});
-	&sendmail::add_file_or_config($conf, "w", $_[0]->{'dom'});
+	&sendmail::add_file_or_config($conf, "w", $d->{'dom'});
 	&flush_file_lines();
 	&unlock_file($sendmail::config{'sendmail_cf'});
 	&unlock_file($cwfile) if ($cwfile);
@@ -217,17 +218,17 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Add a special postfix virtual entry just for the domain
-	&create_virtuser({ 'from' => $_[0]->{'dom'},
-			   'to' => [ $_[0]->{'dom'} ] });
+	&create_virtuser({ 'from' => $d->{'dom'},
+			   'to' => [ $d->{'dom'} ] });
 	}
 elsif ($config{'mail_system'} == 2) {
 	# Add to qmail rcpthosts file and virtualdomains file
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
-	push(@$rlist, $_[0]->{'dom'});
+	push(@$rlist, $d->{'dom'});
 	&qmailadmin::save_control_file("rcpthosts", $rlist);
 
-	local $virtmap = { 'domain' => $_[0]->{'dom'},
-			   'prepend' => $_[0]->{'prefix'}.'pfx' };
+	local $virtmap = { 'domain' => $d->{'dom'},
+			   'prepend' => $d->{'prefix'}.'pfx' };
 	&qmailadmin::create_virt($virtmap);
 	if (!$no_restart_mail) {
 		&qmailadmin::restart_qmail();
@@ -235,27 +236,27 @@ elsif ($config{'mail_system'} == 2) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain creation program
-	local $qdom = quotemeta($_[0]->{'dom'});
-	local $qpass = quotemeta($_[0]->{'pass'});
+	local $qdom = quotemeta($d->{'dom'});
+	local $qpass = quotemeta($d->{'pass'});
 	local $qowner = '';
 	local $qdir = '';
 	if ($config{'vpopmail_owner'}) {
-		local $quid = quotemeta($_[0]->{'uid'});
-		local $qgid = quotemeta($_[0]->{'gid'});
+		local $quid = quotemeta($d->{'uid'});
+		local $qgid = quotemeta($d->{'gid'});
 		$qowner = "-i $quid -g $qgid"
 	}
 	if ($config{'vpopmail_maildir'}) {
-		local $qmdir = quotemeta($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
+		local $qmdir = quotemeta($d->{'home'}.'/'.$config{'vpopmail_maildir'});
 		$qdir = "-d $qmdir";
 		if (!-e $qmdir) {
-			mkdir($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
-			chown($_[0]->{'uid'},$_[0]->{'gid'},$_[0]->{'home'}.'/'.$config{'vpopmail_maildir'})
+			mkdir($d->{'home'}.'/'.$config{'vpopmail_maildir'});
+			chown($d->{'uid'},$d->{'gid'},$d->{'home'}.'/'.$config{'vpopmail_maildir'})
 		}
 	}
 	local $out;
 	local $errorlabel;
-	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
-		local $aliasdom = &get_domain($_[0]->{'alias'});
+	if ($d->{'alias'} && !$d->{'aliasmail'}) {
+		local $aliasdom = &get_domain($d->{'alias'});
 		$out = &backquote_command(
 		    "$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1");
 		$errorlabel = 'setup_evaddaliasdomain';
@@ -271,40 +272,40 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	}
 elsif ($config{'mail_system'} == 6) {
-	&exim::add_local_domain( $_[0]->{'dom'} );
+	&exim::add_local_domain( $d->{'dom'} );
 	}
 
 &$second_print($text{'setup_done'});
 
 # Create any aliases specified in the template, if missing
-if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
+if (!$noaliases && !$d->{'no_tmpl_aliases'}) {
 	local %gotvirt;
 	foreach my $v (&list_virtusers()) {
 		$gotvirt{$v->{'from'}} = $v;
 		}
-	if ($_[0]->{'alias'}) {
+	if ($d->{'alias'}) {
 		# Alias all mail to this domain to a different domain
-		local $aliasdom = &get_domain($_[0]->{'alias'});
-		if ($supports_aliascopy && !$_[0]->{'aliasmail'}) {
-			$_[0]->{'aliascopy'} = $tmpl->{'aliascopy'};
+		local $aliasdom = &get_domain($d->{'alias'});
+		if ($supports_aliascopy && !$d->{'aliasmail'}) {
+			$d->{'aliascopy'} = $tmpl->{'aliascopy'};
 			}
-		if ($_[0]->{'aliascopy'}) {
+		if ($d->{'aliascopy'}) {
 			# Sync all virtusers from the dest domain
-			&copy_alias_virtuals($_[0], $aliasdom);
+			&copy_alias_virtuals($d, $aliasdom);
 			}
-		elsif (!$gotvirt{'@'.$_[0]->{'dom'}}) {
+		elsif (!$gotvirt{'@'.$d->{'dom'}}) {
 			# Just create a catchall
-			&create_virtuser({ 'from' => '@'.$_[0]->{'dom'},
+			&create_virtuser({ 'from' => '@'.$d->{'dom'},
 				   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
 			}
 		}
-	elsif (&has_deleted_aliases($_[0])) {
+	elsif (&has_deleted_aliases($d)) {
 		# Restore aliases from before mail was deleted
-		my @deleted = &get_deleted_aliases($_[0]);
+		my @deleted = &get_deleted_aliases($d);
 		foreach my $a (@deleted) {
 			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
 			}
-		&clear_deleted_aliases($_[0]);
+		&clear_deleted_aliases($d);
 		}
 	elsif ($tmpl->{'dom_aliases'} && $tmpl->{'dom_aliases'} ne "none") {
 		# Setup aliases from this domain based on the template
@@ -319,8 +320,8 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 				# on vpopmail systems
 				next;
 				}
-			$to = &substitute_domain_template($to, $_[0]);
-			$from = $from eq "*" ? "\@$_[0]->{'dom'}" : "$from\@$_[0]->{'dom'}";
+			$to = &substitute_domain_template($to, $d);
+			$from = $from eq "*" ? "\@$d->{'dom'}" : "$from\@$d->{'dom'}";
 			if ($acreate{$from}) {
 				push(@{$acreate{$from}->{'to'}}, $to);
 				}
@@ -333,15 +334,15 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
 			}
 		if ($tmpl->{'dom_aliases_bounce'} &&
-		    !$acreate{"\@$_[0]->{'dom'}"} &&
-		    !$gotvirt{'@'.$_[0]->{'dom'}} &&
+		    !$acreate{"\@$d->{'dom'}"} &&
+		    !$gotvirt{'@'.$d->{'dom'}} &&
 		    $config{'mail_system'} != 0) {
 			# Add bounce alias, if there isn't one yet, and if
 			# we are not running Postfix.
-			local $v = { 'from' => "\@$_[0]->{'dom'}",
+			local $v = { 'from' => "\@$d->{'dom'}",
 				     'to' => [ 'BOUNCE' ] };
 			&create_virtuser($v);
-			$gotvirt{'@'.$_[0]->{'dom'}}++;
+			$gotvirt{'@'.$d->{'dom'}}++;
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -350,33 +351,33 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 # Setup default BCC address
 if ($supports_bcc && $tmpl->{'bccto'} ne 'none') {
 	&$first_print(&text('mail_bccing', $tmpl->{'bccto'}));
-	&save_domain_sender_bcc($_[0], $tmpl->{'bccto'});
+	&save_domain_sender_bcc($d, $tmpl->{'bccto'});
 	&$second_print($text{'setup_done'});
 	}
 
 # Setup any secondary MX servers
-if (!$_[0]->{'nosecondaries'}) {
-	&setup_on_secondaries($_[0]);
+if (!$d->{'nosecondaries'}) {
+	&setup_on_secondaries($d);
 	}
 
 # Create file containing all users' email addresses
-if (!$_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
-	&create_everyone_file($_[0]);
+if (!$d->{'alias'} && !$d->{'aliasmail'}) {
+	&create_everyone_file($d);
 	}
 
 # Add domain to DKIM list
-&update_dkim_domains($_[0], 'setup');
+&update_dkim_domains($d, 'setup');
 
 # Setup sender-dependent outgoing IP
-if ($supports_dependent && $_[0]->{'virt'} && $config{'dependent_mail'}) {
-	&save_domain_dependent($_[0], 1);
+if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
+	&save_domain_dependent($d, 1);
 	}
 
 # Request a call to sync to secondary MX servers after creation.
 # create_virtuser cannot do this, as the domain doesn't exist yet
-&register_post_action(\&sync_secondary_virtusers, $_[0]);
+&register_post_action(\&sync_secondary_virtusers, $d);
 
-&release_lock_mail($_[0]);
+&release_lock_mail($d);
 return 1;
 }
 
