@@ -7890,6 +7890,7 @@ if ($dom->{'jail'} && !&check_jailkit_support()) {
 		&$second_print(&text('setup_jailed',
 				     &domain_jailkit_dir($dom)));
 		}
+	&save_domain($dom);
 	}
 
 # Run the after creation command

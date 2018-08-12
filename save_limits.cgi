@@ -98,6 +98,7 @@ if (!&check_jailkit_support()) {
 		&error(&text('limits_ejailoff', $err)) if ($err);
 		$d->{'jail'} = 0 if (!$err);
 		}
+	&save_domain($d);
 	}
 
 &run_post_actions();
