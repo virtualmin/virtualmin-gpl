@@ -377,6 +377,12 @@ if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
 # create_virtuser cannot do this, as the domain doesn't exist yet
 &register_post_action(\&sync_secondary_virtusers, $d);
 
+# If enabling email after creation, maybe add autoconfig DNS records
+if (!$d->{'creating'} && $config{'mail_autoconfig'} &&
+    &domain_has_website($d) && !$d->{'alias'}) {
+	&enable_email_autoconfig($d);
+	}
+
 &release_lock_mail($d);
 return 1;
 }
