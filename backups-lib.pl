@@ -526,6 +526,12 @@ if (!$anyremote) {
 	$onebyone = 0;
 	}
 
+if ($homefmt && $dirfmt && &indexof("dir", @$features) < 0) {
+	# A home-format backup was requested, but the home directory was not
+	# included. Silently switch to dir-format so that it still works.
+	$homefmt = 0;
+	}
+
 if (!$homefmt) {
 	# Create a temp dir for the backup, to be tarred up later
 	$backupdir = &transname();
@@ -533,18 +539,11 @@ if (!$homefmt) {
 		&make_dir($backupdir, 0700);
 		}
 	}
-else {
-	# A home-format backup can only be used if the home directory is
-	# included, and if we are doing one per domain, and if all domains
-	# *have* a home directory
-	if (!$dirfmt) {
-		&$first_print($text{'backup_ehomeformat'});
-		return (0, 0, $doms);
-		}
-	if (&indexof("dir", @$features) == -1) {
-		&$first_print($text{'backup_ehomeformat2'});
-		return (0, 0, $doms);
-		}
+
+if ($homefmt && !$dirfmt) {
+	# Home format must imply one-per-domain format
+	&$first_print($text{'backup_ehomeformat'});
+	return (0, 0, $doms);
 	}
 
 # Work out where to write the final tar files to

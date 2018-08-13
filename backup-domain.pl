@@ -26,11 +26,10 @@ features in the backup, but you can instead use the C<--feature> option one or
 more times to control exactly what gets included. In this case, it is wise to
 use at least C<--feature dir> to include each server's home directory.
 
-The C<--separate> option tells the backup program to create a separate file for
-each virtual server. The C<--newformat> also causes multiple files to be created,
-but using the format supported by Virtualmin versions 2.86 and above which
-puts all information into each domain's home directory, and thus avoids the
-need to create a large file in C</tmp> during the backup process.
+The C<--newformat> option tells the backup program to create a separate file for
+each virtual server. As long as the entire domain is being backed up, this 
+format also uses less temporary space as all databases and other additional
+files are included in the home directory archive.
 
 Using the C<--ignore-errors> option means than any errors
 encountered backing up one feature or server will be reported and ignored,
@@ -414,7 +413,7 @@ print "                         [--plan name]\n";
 print "                         [--feature name] | [--all-features]\n";
 print "                                            [--except-feature name]\n";
 print "                         [--ignore-errors]\n";
-print "                         [--separate] | [--newformat]\n";
+print "                         [--newformat]\n";
 print "                         [--onebyone]\n";
 print "                         [--strftime] [--purge days]\n";
 if (&has_incremental_tar()) {
