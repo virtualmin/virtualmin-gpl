@@ -579,6 +579,7 @@ if ($_[1]->{'alias'} != $_[0]->{'alias'}) {
 
 local $conf = &apache::get_config();
 local $need_restart = 0;
+local $mode = &get_domain_php_mode($_[1]);
 
 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	# Possibly just updating parent virtual server
@@ -830,6 +831,11 @@ else {
 		if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 			&add_user_to_domain_group($_[0], $web_user,
 						  'setup_webuser');
+			}
+
+		# Update FPM config file with new username
+		if ($mode eq "fpm") {
+			&create_php_fpm_pool($_[0]);
 			}
 		}
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
