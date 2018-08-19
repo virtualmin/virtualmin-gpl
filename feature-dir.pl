@@ -862,18 +862,26 @@ sub set_home_ownership
 local ($d) = @_;
 local $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
+local @users = grep { $_->{'unix'} && !$_->{'webowner'} }
+		    &list_domain_users($d, 1, 1, 1, 1);
 local $gid = $d->{'gid'} || $d->{'ugid'};
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($sd, 1);
 		}
 	}
+
+# Build list of dirs to skip (sub-domain homes and user homes)
 my @subhomes;
 if (!$d->{'parent'}) {
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
 		push(@subhomes, "$sd->{'home'}/$hd/");
 		}
 	}
+foreach my $user (@users) {
+	push(@subhomes, $user->{'home'});
+	}
+
 &open_execute_command(FIND, "find ".quotemeta($d->{'home'})." ! -type l", 1);
 LOOP: while(my $f = <FIND>) {
 	$f =~ s/\r|\n//;
@@ -890,9 +898,7 @@ foreach my $dir (&virtual_server_directories($d)) {
 	&set_ownership_permissions(undef, undef, oct($dir->[1]),
 				   $d->{'home'}."/".$dir->[0]);
 	}
-foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
-	next if ($user->{'webowner'});
-	next if (!$user->{'unix'});
+foreach my $user (@users) {
 	next if ($user->{'nocreatehome'});
 	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
 	next if ("$d->{'home'}/$hd" eq $user->{'home'});
