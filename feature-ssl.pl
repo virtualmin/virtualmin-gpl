@@ -1991,6 +1991,7 @@ local @flags = ( [ "smtpd_tls_cert_file",
 		 [ "smtpd_tls_key_file",
 		   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
 push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
+push(@flags, [ "smtpd_tls_security_level", "may" ]);
 
 local $changed = 0;
 foreach my $pfx ('smtp', 'submission') {
