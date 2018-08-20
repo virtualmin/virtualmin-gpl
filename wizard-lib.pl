@@ -556,8 +556,7 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 
 sub wizard_show_done
 {
-print &ui_table_row(undef,
-	&text('wizard_done', 'edit_newfeatures.cgi', 'edit_newsv.cgi'), 2);
+print &ui_table_row(undef, &text('wizard_done'), 2);
 }
 
 sub wizard_parse_done

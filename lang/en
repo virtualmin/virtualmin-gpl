@@ -6057,7 +6057,7 @@ wizard_mysize_huge=Huge system (2G or more) on which MySQL is heavily used
 wizard_mysize_ecnf=Your MySQL size cannot be changed as the config file $1 does not exist.
 wizard_emysizestart=MySQL could not be started with the new configuration : $1. The old configuration has been restored.
 wizard_title_done=All done
-wizard_done=Virtualmin post-installation configuration is now complete!<p>You can adjust the settings you just made on the <a href='$1'>Features and Plugins</a> and <a href='$2'>Spam and Virus Scanning</a> pages.
+wizard_done=Virtualmin post-installation configuration is now complete!
 wizard_title_dns=DNS configuration
 wizard_dns=For DNS zones created by Virtualmin to be resolvable, the primary nameserver record for each zone must be set to something that can itself be resolved by other systems on the Internet.
 wizard_dns_prins=Primary nameserver
