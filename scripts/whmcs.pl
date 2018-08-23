@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "6.3.2", "7.1.1" );
+return ( "6.3.2", "7.6.0" );
 }
 
 sub script_whmcs_gpl
@@ -201,7 +201,7 @@ local $shortver = $ver;
 $shortver =~ s/\.//g;
 local @files = ( { 'name' => "source",
 	   'file' => "whmcs_v$shortver.zip",
-	   'url' => "http://software.virtualmin.com/download/whmcs_v$shortver.zip" } );
+	   'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}_full.zip" } );
 local $io = &script_whmcs_get_ioncube_type();
 push(@files, { 'name' => "ioncube",
 	       'file' => "ioncube_loaders.zip",
