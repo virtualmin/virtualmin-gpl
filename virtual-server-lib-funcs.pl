@@ -16500,6 +16500,7 @@ local ($d) = @_;
 # Assume that we are about to do something important, and so don't want to be
 # killed by a SIGPIPE triggered by a browser cancel.
 $SIG{'PIPE'} = 'ignore';
+$SIG{'TERM'} = 'ignore';
 }
 
 # release_lock_anything(&domain)
