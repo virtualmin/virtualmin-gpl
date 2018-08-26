@@ -411,6 +411,7 @@ setup_eiface2=The network interface $1 to which virtual addresses are added does
 setup_edepweb=A website cannot be enabled unless a home directory is created
 setup_edepunix=A domain cannot have an administration user without a home directory
 setup_edepunix2=A website cannot be enabled without an administration user
+setup_edepunixdir=A top-level virtual server with a home direction must have a Unix user
 setup_edeplogrotate=Log file rotation cannot be enabled unless a website is
 setup_edepdnssub=A sub-domain cannot have a DNS zone unless its parent does
 setup_edepmysql=A sub-server cannot have MySQL enabled unless the parent server does
