@@ -1,5 +1,17 @@
 # Functions for managing a domain's home directory
 
+# check_depends_dir(&domain)
+# A top-level domain with no Unix user makes no sense, because who's going to
+# own the files?
+sub check_depends_dir
+{
+local ($d) = @_;
+if (!$d->{'parent'} && !$d->{'unix'}) {
+	return $text{'setup_edepunixdir'};
+	}
+return undef;
+}
+
 # setup_dir(&domain)
 # Creates the home directory
 sub setup_dir
