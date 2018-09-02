@@ -2232,8 +2232,8 @@ if ($ok) {
 					}
 				}
 
-			# If this was a DNS sub-domain and the parent no longer exists, use a
-			# separate zone file
+			# If this was a DNS sub-domain and the parent no longer
+			# exists, use a separate zone file
 			if ($d->{'dns_subof'}) {
 				my $dnsparent = &get_domain($d->{'dns_subof'});
 				if (!$dnsparent) {
@@ -2270,9 +2270,11 @@ if ($ok) {
 				}
 			else {
 				# UID and GID are the same - but check for a
-				# clash with existing users
+				# clash with existing users (unless replicating,
+				# in which case they may be in shared storage)
 				if ($taken{$d->{'uid'}} &&
-				    $taken{$d->{'uid'}} ne 'old') {
+				    $taken{$d->{'uid'}} ne 'old' &&
+				    !$opts->{'repl'}) {
 					&$second_print(&text('restore_euid',
 							     $d->{'uid'}));
 					$ok = 0;
@@ -2280,7 +2282,8 @@ if ($ok) {
 					else { last DOMAIN; }
 					}
 				if ($gtaken{$d->{'gid'}} &&
-				    $gtaken{$d->{'gid'}} ne 'old') {
+				    $gtaken{$d->{'gid'}} ne 'old' &&
+				    !$opts->{'repl'}) {
 					&$second_print(&text('restore_egid',
 							     $d->{'gid'}));
 					$ok = 0;
@@ -2543,9 +2546,16 @@ if ($ok) {
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
-			&create_virtual_server($d, $parentdom,
+			my $err = &create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
+			if ($err) {
+				&$second_print(
+					&text('restore_erecreate', $err));
+				$ok = 0;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
 
 			# If the domain was disabled in the backup, disable it
 			# again now
