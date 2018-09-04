@@ -14,6 +14,7 @@ $in{'data'} =~ /\S/ || &error($text{'mrecords_enone'});
 
 # Get the zone and records
 &obtain_lock_dns($d);
+&pre_records_change($d);
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
 $chroot_relative_file = $file;

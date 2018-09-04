@@ -343,10 +343,14 @@ foreach $d (@doms) {
 		}
 
 	# Remove records from the domain
-	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	local ($recs, $file);
 	local $changed;
 	if (@delrecs) {
 		&$first_print(&text('spf_delrecs', scalar(@delrecs)));
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		local @alld;
 		foreach my $rn (@delrecs) {
 			my ($name, $type, @values) = @$rn;
@@ -373,6 +377,10 @@ foreach $d (@doms) {
 	# Add records to the domain
 	if (@addrecs) {
 		&$first_print(&text('spf_addrecs', scalar(@addrecs)));
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		foreach my $rn (@addrecs) {
 			my ($name, $type, $ttl, $values) = @$rn;
 			if ($name !~ /\.$/ && $name ne "\@") {
@@ -388,6 +396,10 @@ foreach $d (@doms) {
 	# Set or modify default TTL
 	if ($ttl) {
 		&$first_print(&text('spf_ttl', $ttl));
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		($oldttl) = grep { $_->{'defttl'} } @$recs;
 		if ($oldttl) {
 			$oldttl->{'defttl'} = $ttl;
@@ -406,6 +418,10 @@ foreach $d (@doms) {
 
 	# Change the TTL on any records that have one
 	if ($allttl) {
+		if (!$recs) {
+			&pre_records_change($d);
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		foreach my $r (@$recs) {
 			if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
 				$r->{'ttl'} = $ttl;
@@ -419,6 +435,7 @@ foreach $d (@doms) {
 
 	# Enable or disable DNSSEC
 	if (defined($dnssec)) {
+		&pre_records_change($d);
 		$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 		if ($dnssec && !$key) {
 			# Enable it
@@ -440,6 +457,7 @@ foreach $d (@doms) {
 
 	# Create or remove TLSA records
 	if (defined($tlsa)) {
+		&pre_records_change($d);
 		if ($tlsa) {
 			&$first_print($text{'spf_enabletlsa'});
 			$err = &check_tlsa_support();

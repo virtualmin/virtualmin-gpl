@@ -114,6 +114,7 @@ local $catfunc = "script_${name}_category";
 local $disfunc = "script_${name}_disabled";
 local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
+local $overlapfunc = "script_${name}_overlap";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -149,6 +150,7 @@ local $rv = { 'name' => $name,
 	      'uses' => defined(&$ufunc) ? [ &$ufunc() ] : [ ],
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
 	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
+	      'overlap' => defined(&$overlapfunc) ? &$overlapfunc() : undef,
 	      'dir' => $sdir,
 	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",

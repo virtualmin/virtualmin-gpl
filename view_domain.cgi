@@ -234,8 +234,7 @@ else {
 
 # Show actions for this domain, unless the theme vetos it (cause they are on
 # the left menu)
-if ($current_theme ne "virtual-server-theme" &&
-    !$main::basic_virtualmin_domain) {
+if (!$main::basic_virtualmin_domain) {
 	&show_domain_buttons($d);
 	}
 

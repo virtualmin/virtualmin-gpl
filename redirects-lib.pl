@@ -70,6 +70,7 @@ foreach my $p (@ports) {
 		else {
 			next;
 			}
+		$rd->{'id'} = $al->{'name'}."_".$rd->{'path'};
 
 		my ($already) = grep { $_->{'path'} eq $rd->{'path'} } @rv;
 		if ($already) {
@@ -104,11 +105,10 @@ foreach my $p (@ports) {
 	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
 	$dir .= "Match" if ($redirect->{'regexp'});
 	my @aliases = &apache::find_directive($dir, $vconf);
-	push(@aliases, $redirect->{'path'}.
-			($redirect->{'code'} ? $redirect->{'code'}." " : "").
-			($redirect->{'regexp'} ? "(\.\*)\$" : "").
-			" ".
-			$redirect->{'dest'});
+	push(@aliases, ($redirect->{'code'} ? $redirect->{'code'}." " : "").
+		       $redirect->{'path'}.
+		       ($redirect->{'regexp'} ? "(\.\*)\$" : "").
+		       " ".$redirect->{'dest'});
 	&apache::save_directive($dir, \@aliases, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	$count++;
@@ -143,11 +143,11 @@ foreach my $port (@ports) {
 	my @newaliases;
 	if ($redirect->{'regexp'}) {
 		# Handle .*$ or (.*)$ at the end
-		@newaliases = grep { !/^\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+		@newaliases = grep { !/^(\d+\s+)?\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
 		}
 	else {
 		# Match on path only
-		@newaliases = grep { !/^\Q$re\E\s/ } @aliases;
+		@newaliases = grep { !/^(\d+\s+)?\Q$re\E\s/ } @aliases;
 		}
 	if (scalar(@aliases) != scalar(@newaliases)) {
 		&apache::save_directive($dir, \@newaliases, $vconf, $conf);
@@ -186,6 +186,31 @@ elsif ($d->{'parent'}) {
 else {
 	return $d->{'home'};
 	}
+}
+
+# add_wellknown_redirect(&redir)
+# If a redirect is for everything, modify it to be for a regexp that skips
+# .well-known
+sub add_wellknown_redirect
+{
+my ($redir) = @_;
+if ($redir->{'path'} eq '/' && !$redir->{'alias'} && !$redir->{'regexp'}) {
+	$redir->{'path'} = '^/(?!.well-known)';
+	$redir->{'regexp'} = 1;
+	}
+return $redir;
+}
+
+# remove_wellknown_redirect(&redir)
+# If a redirect is for everything except .well-known, modify it to be for just /
+sub remove_wellknown_redirect
+{
+my ($redir) = @_;
+if ($redir->{'path'} eq '^/(?!.well-known)' && !$redir->{'alias'} && $redir->{'regexp'}) {
+	$redir->{'path'} = '/';
+	$redir->{'regexp'} = 0;
+	}
+return $redir;
 }
 
 1;

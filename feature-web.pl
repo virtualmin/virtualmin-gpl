@@ -213,6 +213,14 @@ else {
 	# For Apache 2.4+, add a "Require all granted" directive
 	&add_require_all_granted_directives($d, $d->{'web_port'});
 
+	# If the default ServerName matches this domain name, change it
+	my $defsn = &get_apache_default_servername();
+	if ($defdn eq $d->{'dom'}) {
+		&apache::save_directive("ServerName", [ "nomatch.".$defsn ],
+					$conf, $conf);
+		&flush_file_lines();
+		}
+
 	# Create empty access and error log files, owned by the domain's user.
 	# Apache opens them as root, so it will be able to write.
 	local $log = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 0);
@@ -403,11 +411,11 @@ else {
 		if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
 		    !$d->{'subdom'}) {
 			&$first_print($text{'delete_apachelog'});
-			local @dlogs = ($alog, glob("$alog.*"),
-					glob("$alog-*"));
+			local @dlogs = ($alog, glob("${alog}.*"),
+					glob("${alog}_*"), glob("${alog}-*"));
 			if ($elog) {
-				push(@dlogs, $elog, glob("$elog.*"),
-				     	     glob("$elog-*"));
+				push(@dlogs, $elog, glob("${elog}.*"),
+				     glob("${elog}_*"), glob("${elog}-*"));
 				}
 			&unlink_file(@dlogs);
 			&$second_print($text{'setup_done'});
@@ -474,6 +482,12 @@ if (!$virt) {
 &find_html_cgi_dirs($d);
 if (defined(&create_php_wrappers)) {
 	&create_php_wrappers($d);
+	}
+my $mode = &get_domain_php_mode($oldd);
+if ($mode eq "fpm") {
+	# Force port re-allocation
+	delete($d->{'php_fpm_port'});
+	&save_domain_php_mode($d, $mode);
 	}
 
 &release_lock_web($d);
@@ -565,6 +579,7 @@ if ($_[1]->{'alias'} != $_[0]->{'alias'}) {
 
 local $conf = &apache::get_config();
 local $need_restart = 0;
+local $mode = &get_domain_php_mode($_[1]);
 
 if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	# Possibly just updating parent virtual server
@@ -816,6 +831,11 @@ else {
 		if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 			&add_user_to_domain_group($_[0], $web_user,
 						  'setup_webuser');
+			}
+
+		# Update FPM config file with new username
+		if ($mode eq "fpm") {
+			&create_php_fpm_pool($_[0]);
 			}
 		}
 	if ($_[0]->{'dom'} ne $_[1]->{'dom'}) {
@@ -1866,8 +1886,8 @@ local ($d, $subdir) = @_;
 local $p = &domain_has_website($d);
 local $path = $d->{'home'}."/".$subdir;
 local $oldpath = $d->{'public_html_path'};
-if (-l $path) {
-	return "The HTML directory cannot be a symbolic link";
+if (-f $path) {
+	return "The HTML directory cannot be a file";
 	}
 if ($p ne "web") {
 	my $err = &plugin_call($p, "feature_set_web_public_html_dir",
@@ -2150,15 +2170,22 @@ local ($d, $conf, $web_port, $no_star_match, $ip) = @_;
 &require_apache();
 if ($apache::httpd_modules{'core'} >= 2.4) {
 	# Apache 2.4 doesn't need NameVirtualHost any more.
-	# However, check if any existing <VirtualHost> uses *, which means that
+	# However, check if all existing <VirtualHost>s uses *, which means that
 	# subsequent ones should as well. Otherwise, they can just use IPs.
 	local @virt = &apache::find_directive_struct("VirtualHost", $conf);
+	local $starcount = 0;
+	local $ipcount = 0;
 	foreach my $v (@virt) {
-		if ($v->{'words'}->[0] =~ /^\*/) {
-			return 1;
+		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
+		    (!$3 || $3 == $web_port)) {
+			$startcount++;
+			}
+		elsif ($v->{'words'}->[0] =~ /^(\S+)(:(\d+))?/i && $1 eq $ip &&
+		       (!$3 || $3 == $web_port)) {
+			$ipcount++;
 			}
 		}
-	return 0;
+	return $ipcount || !$starcount ? 0 : 1;
 	}
 local $nvstar;
 if ($d->{'name'}) {
@@ -2499,7 +2526,7 @@ print &ui_table_row(
 	&ui_opt_textbox("web_sslprotos", $tmpl->{'web_sslprotos'}, 30,
                         $text{'newweb_sslprotos_def'}));
 
-# Setup matching Webmin/Usermin SSL cert
+# Setup matching Webmin/Usermin SSL certs
 print &ui_table_row(&hlink($text{'newweb_webmin'},
 			   "template_web_webmin_ssl"),
 	&ui_radio("web_webmin_ssl",
@@ -2510,6 +2537,19 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 			   "template_web_usermin_ssl"),
 	&ui_radio("web_usermin_ssl",
 		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+# Setup Dovecot and Postfix SSL certs
+print &ui_table_row(&hlink($text{'newweb_dovecot'},
+			   "template_web_dovecot_ssl"),
+	&ui_radio("web_dovecot_ssl",
+		  $tmpl->{'web_dovecot_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+print &ui_table_row(&hlink($text{'newweb_postfix'},
+			   "template_web_postfix_ssl"),
+	&ui_radio("web_postfix_ssl",
+		  $tmpl->{'web_postfix_ssl'} ? 1 : 0,
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 # Add rewrites for webmail and admin
@@ -2663,6 +2703,8 @@ if ($in{"web_mode"} == 2) {
 
 	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+	$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
+	$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 
 	# Parse SSI setting
 	$tmpl->{'web_ssi'} = $in{'web_ssi'};
@@ -4537,6 +4579,19 @@ my ($glob, $dir) = @_;
 $glob =~ s/\?/./g;
 $glob =~ s/\*/.*/g;
 return $dir =~ /^$glob$/;
+}
+
+# get_apache_default_servername()
+# Returns the servername that Apache uses for the default server
+sub get_apache_default_servername
+{
+&require_apache();
+my $conf = &apache::get_config();
+my ($sn) = &apache::find_directive("ServerName", $conf);
+if (!$sn) {
+	$sn = &get_system_hostname();
+	}
+return $sn;
 }
 
 $done_feature_script{'web'} = 1;

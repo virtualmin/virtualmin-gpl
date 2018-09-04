@@ -114,10 +114,10 @@ $d->{'letsencrypt_renew'} = 2;		# Default let's encrypt renewal
 
 # Find out if this domain will share a cert with another
 &find_matching_certificate($d);
-local $chained = $d->{'ssl_chain'};
 
 # Create a self-signed cert and key, if needed
 my $generated = &generate_default_certificate($d);
+local $chained = $d->{'ssl_chain'};
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
@@ -1332,22 +1332,41 @@ return @dirs;
 sub check_certificate_data
 {
 local ($data) = @_;
+my @lines = split(/\r?\n/, $data);
+my @certs;
+my $inside = 0;
+foreach my $l (@lines) {
+	if ($l =~ /^-+BEGIN/) {
+		push(@certs, $l."\n");
+		$inside = 1;
+		}
+	elsif ($l =~ /^-+END/) {
+		$inside || return $text{'cert_eoutside'};
+		$certs[$#certs] .= $l."\n";
+		$inside = 0;
+		}
+	elsif ($inside) {
+		$certs[$#certs] .= $l."\n";
+		}
+	}
+$inside && return $text{'cert_einside'};
+@certs || return $text{'cert_ecerts'};
 local $temp = &transname();
-&open_tempfile(CERTDATA, ">$temp", 0, 1);
-&print_tempfile(CERTDATA, $data);
-&close_tempfile(CERTDATA);
-local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
-local $ex = $?;
-&unlink_file($temp);
-if ($ex) {
-	return "<tt>".&html_escape($out)."</tt>";
+foreach my $cdata (@certs) {
+	&open_tempfile(CERTDATA, ">$temp", 0, 1);
+	&print_tempfile(CERTDATA, $cdata);
+	&close_tempfile(CERTDATA);
+	local $out = &backquote_command("openssl x509 -in ".quotemeta($temp)." -issuer -subject -enddate 2>&1");
+	local $ex = $?;
+	&unlink_file($temp);
+	if ($ex) {
+		return "<tt>".&html_escape($out)."</tt>";
+		}
+	elsif ($out !~ /subject\s*=\s*.*(CN|O)\s*=/) {
+		return $text{'cert_esubject'};
+		}
 	}
-elsif ($out !~ /subject\s*=\s*.*(CN|O)=/) {
-	return $text{'cert_esubject'};
-	}
-else {
-	return undef;
-	}
+return undef;
 }
 
 # default_certificate_file(&domain, "cert"|"key"|"ca"|"combined"|"everything")
@@ -1622,6 +1641,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 		}
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
+	delete($d->{'ssl_chain'});	# No longer valid
 	return 1;
 	}
 return 0;
@@ -1686,9 +1706,10 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 sub sync_dovecot_ssl_cert
 {
 local ($d, $enable) = @_;
+local $tmpl = &get_template($d->{'template'});
 
 # Check if dovecot is installed and supports this feature
-return undef if (!$config{'dovecot_ssl'});
+return undef if (!$tmpl->{'web_dovecot_ssl'});
 return undef if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
@@ -1704,6 +1725,7 @@ return undef if ($ssldis =~ /yes/i);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
+local $chain = &get_website_ssl_file($d, "ca");
 if ($d->{'virt'}) {
 	# Domain has it's own IP
 
@@ -1711,10 +1733,15 @@ if ($d->{'virt'}) {
 	my @loc = grep { $_->{'name'} eq 'local' &&
 			 $_->{'section'} } @$conf;
 	my ($l) = grep { $_->{'value'} eq $d->{'ip'} } @loc;
-	my $imap;
+	my ($imap, $pop3);
 	if ($l) {
 		($imap) = grep { $_->{'name'} eq 'protocol' &&
 				 $_->{'value'} eq 'imap' &&
+				 $_->{'enabled'} &&
+				 $_->{'sectionname'} eq 'local' &&
+				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
+		($pop3) = grep { $_->{'name'} eq 'protocol' &&
+				 $_->{'value'} eq 'pop3' &&
 				 $_->{'enabled'} &&
 				 $_->{'sectionname'} eq 'local' &&
 				 $_->{'sectionvalue'} eq $d->{'ip'} } @$conf;
@@ -1722,7 +1749,6 @@ if ($d->{'virt'}) {
 
 	if ($enable) {
 		# Needs a cert for the IP
-		local $chain = &get_website_ssl_file($d, "ca");
 		if (!$l) {
 			$l = { 'name' => 'local',
 			       'value' => $d->{'ip'},
@@ -1767,6 +1793,43 @@ if ($d->{'virt'}) {
 					&dovecot::save_directive(
 						$l->{'members'}, "ssl_ca",
 						"<".$chain, "protocol", "imap");
+					}
+				}
+			}
+		if (!$pop3) {
+			$pop3 = { 'name' => 'protocol',
+				  'value' => 'pop3',
+				  'members' => [
+					{ 'name' => 'ssl_cert',
+					  'value' => "<".$d->{'ssl_cert'} },
+					{ 'name' => 'ssl_key',
+					  'value' => "<".$d->{'ssl_key'} },
+					],
+				  'indent' => 1,
+				  'file' => $l->{'file'},
+				  'line' => $l->{'line'} + 1,
+				  'eline' => $l->{'line'} };
+			if ($chain) {
+				push(@{$pop3->{'members'}},
+				     { 'name' => 'ssl_ca',
+				       'value' => "<".$chain });
+				}
+			&dovecot::save_section($conf, $pop3);
+			push(@{$l->{'members'}}, $pop3);
+			}
+		else {
+			eval {
+				local $main::error_must_die = 1;
+				&dovecot::save_directive($l->{'members'},
+					"ssl_cert", "<".$d->{'ssl_cert'},
+					"protocol", "pop3");
+				&dovecot::save_directive($l->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'},
+					"protocol", "pop3");
+				if ($chain) {
+					&dovecot::save_directive(
+						$l->{'members'}, "ssl_ca",
+						"<".$chain, "protocol", "pop3");
 					}
 				}
 			}
@@ -1903,17 +1966,18 @@ return @rv;
 sub sync_postfix_ssl_cert
 {
 local ($d, $enable) = @_;
+local $tmpl = &get_template($d->{'template'});
 
 # Check if Postfix is in use
 return undef if ($config{'mail_system'} != 0);
-return undef if (!$config{'postfix_ssl'});
+return undef if (!$tmpl->{'web_postfix_ssl'});
 
 # Check if using SSL globally
 &foreign_require("postfix");
 local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-return undef if ($enable && (!$cfile || !$kfile));
+return undef if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
 
 # Find the existing master file entry
 &lock_file($postfix::config{'postfix_master'});
@@ -1921,12 +1985,13 @@ local $master = &postfix::get_master_config();
 local $defip = &get_default_ip();
 
 # Work out which flags are needed
-local $chain = $s->{'ssl'} ? &get_website_ssl_file($d, 'ca') : $cafile;
+local $chain = &domain_has_ssl($d) ? &get_website_ssl_file($d, 'ca') : $cafile;
 local @flags = ( [ "smtpd_tls_cert_file",
-		   $d->{'ssl'} ? $d->{'ssl_cert'} : $cfile ],
+		   &domain_has_ssl($d) ? $d->{'ssl_cert'} : $cfile ],
 		 [ "smtpd_tls_key_file",
-		   $d->{'ssl'} ? $d->{'ssl_key'} : $kfile ] );
+		   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
 push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
+push(@flags, [ "smtpd_tls_security_level", "may" ]);
 
 local $changed = 0;
 foreach my $pfx ('smtp', 'submission') {
@@ -2094,7 +2159,7 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 			push(@rv, $full);
 			}
 		}
-	elsif (&to_ipaddress($full)) {
+	if (&to_ipaddress($full)) {
 		push(@rv, $full);
 		}
 	}

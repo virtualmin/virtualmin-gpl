@@ -12,6 +12,7 @@ $in{'newttl'} =~ /^\d+$/ || &error($text{'transfer_enewttl'});
 
 # Update default TTL
 &obtain_lock_dns($d);
+&pre_records_change($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my ($oldttl) = grep { $_->{'defttl'} } @$recs;
 if ($oldttl) {

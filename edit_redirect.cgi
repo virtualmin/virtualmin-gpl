@@ -8,8 +8,9 @@ $d = &get_domain($in{'dom'});
 	&error($text{'redirects_ecannot'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
 if (!$in{'new'}) {
-	($r) = grep { $_->{'path'} eq $in{'path'} } &list_redirects($d);
+	($r) = grep { $_->{'id'} eq $in{'id'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
+	$r = &remove_wellknown_redirect($r);
 	}
 else {
 	$r = { 'http' => 1, 'https' => 1 };
@@ -21,7 +22,7 @@ else {
 print &ui_form_start("save_redirect.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("dom", $in{'dom'});
-print &ui_hidden("old", $in{'path'});
+print &ui_hidden("old", $in{'id'});
 print &ui_table_start($text{'redirect_header'}, undef, 2);
 
 # URL path
@@ -36,6 +37,14 @@ print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 		  [ 1, $text{'redirect_dir'},
 		    &ui_textbox("dir", $r->{'alias'} ? $r->{'dest'} : '', 40) ],
 		]));
+
+# HTTP status code
+print &ui_table_row(&hlink($text{'redirect_code'}, 'redirect_code'),
+	&ui_select("code", $r->{'code'},
+		   [ [ "", $text{'default'} ],
+		     [ 301, $text{'redirect_301'} ],
+		     [ 302, $text{'redirect_302'} ],
+		     [ 303, $text{'redirect_303'} ] ], 1, 0, 1));
 
 # Include sub-paths
 print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),

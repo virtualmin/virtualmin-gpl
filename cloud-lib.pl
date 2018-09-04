@@ -220,12 +220,12 @@ else {
 return undef;
 }
 
-# cloud_s3_clear()
+# cloud_rs_clear()
 # Reset the Rackspace account to the default
-sub cloud_s3_clear
+sub cloud_rs_clear
 {
-delete($config{'s3_user'});
-delete($config{'s3_key'});
+delete($config{'rs_user'});
+delete($config{'rs_key'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);

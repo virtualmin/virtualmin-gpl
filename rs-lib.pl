@@ -250,6 +250,7 @@ sub rs_http_call
 {
 my ($url, $method, $headers, $dstfile, $srcfile, $offset, $length, $tries) = @_;
 $tries ||= $rs_upload_tries;
+local @rv;
 
 for(my $i=0; $i<$tries; $i++) {
 	@rv = &rs_http_single_call($url, $method, $headers, $dstfile, $srcfile,
@@ -299,7 +300,7 @@ my $h = &make_http_connection($host, $port, $ssl, $method, $page, \@headers);
 alarm(0);
 $h = $main::download_timed_out if ($main::download_timed_out);
 if (!ref($h)) {
-	return (0, $error);
+	return (0, $h);
 	}
 
 if ($srcfile =~ /^\// && -r $srcfile) {

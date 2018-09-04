@@ -305,7 +305,7 @@ else {
 		}
 	else {
 		print &ui_table_row($text{'wizard_mysql_empty'},
-			&ui_textbox("mypass", undef, 20));
+			&ui_textbox("mypass", &random_password(16), 20));
 		}
 
 	# Offer to clean up test/anonymous DB and user, if they exist
@@ -398,27 +398,48 @@ sub wizard_show_mysize
 {
 print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 
-local $mem = &get_real_memory_size();
-local $mysize = $config{'mysql_size'};
-if ($mem && !$mysize) {
-	$mysize = $mem <= 256*1024*1024 ? "small" :
-		  $mem <= 512*1024*1024 ? "medium" :
-		  $mem <= 1024*1024*1024 ? "large" : "huge";
+&require_mysql();
+if (-r $mysql::config{'my_cnf'}) {
+	local $mem = &get_real_memory_size();
+	local $mysize = $config{'mysql_size'};
+	if ($mem && !$mysize) {
+		$mysize = $mem <= 256*1024*1024 ? "small" :
+			  $mem <= 512*1024*1024 ? "medium" :
+			  $mem <= 1024*1024*1024 ? "large" : "huge";
+		}
+	my @types = &list_mysql_size_setting_types();
+	my $conf = &mysql::get_mysql_config();
+	my $currt;
+	foreach my $t (@types) {
+		my ($oneset) = &list_mysql_size_settings($t);
+		my $sname = $oneset->[2] || "mysqld";
+		my ($sect) = grep { $_->{'name'} eq $sname &&
+				    $_->{'members'} } @$conf;
+		if ($sect) {
+			my $v = &mysql::find_value($oneset->[0], $sect->{'members'});
+			if ($v && $v eq $oneset->[1]) {
+				$currt = $t;
+				}
+			}
+		}
+	print &ui_table_row($text{'wizard_mysize_type'},
+		    &ui_radio_table("mysize", $mysize,
+		      [ [ "", $text{'wizard_mysize_def'}.
+			      ($currt ? " - ".&text('wizard_mysize_deft',
+				$text{'wizard_mysize_'.$currt}) : "") ],
+			map { [ $_, $text{'wizard_mysize_'.$_} ] } @types ]));
 	}
-print &ui_table_row($text{'wizard_mysize_type'},
-	    &ui_radio_table("mysize", $mysize,
-		      [ [ "", $text{'wizard_mysize_def'} ],
-			[ "small", $text{'wizard_mysize_small'} ],
-			[ "medium", $text{'wizard_mysize_medium'} ],
-			[ "large", $text{'wizard_mysize_large'} ],
-			[ "huge", $text{'wizard_mysize_huge'} ] ]));
+else {
+	print &ui_table_row(&text('wizard_mysize_ecnf',
+				  "<tt>$mysql::config{'my_cnf'}</tt>"));
+	}
 }
 
 sub wizard_parse_mysize
 {
 local ($in) = @_;
 &require_mysql();
-if ($in->{'mysize'}) {
+if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
 	if ($running) {
@@ -427,9 +448,14 @@ if ($in->{'mysize'}) {
 
 	# Adjust my.cnf
 	my $temp = &transname();
-	&copy_source_dest($mysql::config{'my_cnf'}, $temp);
-	&lock_file($mysql::config{'my_cnf'});
 	my $conf = &mysql::get_mysql_config();
+	my @files = &unique(map { $_->{'file'} } @$conf);
+	foreach my $file (@files) {
+		my $bf = $file;
+		$bf =~ s/.*\///;
+		&copy_source_dest($file, $temp."_".$bf);
+		&lock_file($file);
+		}
 	foreach my $s (&list_mysql_size_settings($in->{'mysize'})) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
@@ -439,8 +465,10 @@ if ($in->{'mysize'}) {
 					       $s->[1] ? [ $s->[1] ] : [ ]);
 			}
 		}
-	&flush_file_lines($mysql::config{'my_cnf'});
-	&unlock_file($mysql::config{'my_cnf'});
+	foreach my $file (@files) {
+		&flush_file_lines($file, undef, 1);
+		&unlock_file($file);
+		}
 	$config{'mysql_size'} = $in->{'mysize'};
 
 	# Start it up again
@@ -450,7 +478,11 @@ if ($in->{'mysize'}) {
 		if ($err) {
 			# Panic! MySQL couldn't start with the new config ..
 			# try to roll it back
-			&copy_source_dest($temp, $mysql::config{'my_cnf'});
+			foreach my $file (@files) {
+				my $bf = $file;
+				$bf =~ s/.*\///;
+				&copy_source_dest($temp."_".$bf, $file);
+				}
 			&mysql::start_mysql();
 			return &text('wizard_emysizestart', $err);
 			}
@@ -524,8 +556,7 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 
 sub wizard_show_done
 {
-print &ui_table_row(undef,
-	&text('wizard_done', 'edit_newfeatures.cgi', 'edit_newsv.cgi'), 2);
+print &ui_table_row(undef, &text('wizard_done'), 2);
 }
 
 sub wizard_parse_done

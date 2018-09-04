@@ -673,7 +673,7 @@ return if (!$config{'webalizer'});
 
 if ($main::got_lock_webalizer_dom{$d->{'id'}} == 1) {
 	local $alog = $main::got_lock_webalizer_alog{$d->{'id'}};
-	local $stats = $main::got_lock_webalizer_alog{$d->{'id'}};
+	local $stats = $main::got_lock_webalizer_stats{$d->{'id'}};
 	if ($alog) {
 		&unlock_file(&webalizer::log_config_name($alog));
 		&unlock_file(&webalizer::config_file_name($alog));

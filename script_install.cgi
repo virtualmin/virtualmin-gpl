@@ -55,9 +55,13 @@ if ($opts && !ref($opts)) {
 	}
 
 # Check for a clash, unless upgrading
-if (!$sinfo) {
+if (!$sinfo && !$script->{'overlap'}) {
 	($clash) = grep { $_->{'opts'}->{'path'} eq $opts->{'path'} } @got;
-	$clash && &error(&text('scripts_eclash', "<tt>$opts->{'dir'}</tt>"));
+	if ($clash) {
+		$clashscript = &get_script($clash->{'name'});
+                $clashscript->{'overlap'} ||
+		    &error(&text('scripts_eclash', "<tt>$opts->{'dir'}</tt>"));
+		}
 	}
 
 # Check options, unless upgrading

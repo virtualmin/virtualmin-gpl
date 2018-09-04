@@ -68,6 +68,7 @@ else {
 			 !$in{"dest".$i."_file"});
 		$dest = &parse_backup_destination("dest".$i, \%in,
 						  $cbmode == 3, $d, $in{'fmt'});
+		next if (!$dest);	# Removed by user
 		push(@dests, $dest);
 
 		# Parse purge policy for the destination
@@ -183,6 +184,14 @@ else {
 		}
 	if ($in{'enabled'}) {
 		&virtualmin_ui_parse_cron_time("enabled", $sched, \%in);
+		}
+
+	# Check for incremental-only setup
+	if ($in{'new'} && $sched->{'increment'}) {
+		my @full = grep { !$_->{'increment'} } @scheds;
+		if (!@full) {
+			&error($text{'backup_einconly'});
+			}
 		}
 
 	# Save the schedule and thus the cron job

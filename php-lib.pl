@@ -961,6 +961,9 @@ return $php_command_for_version_cache{$v};
 sub get_php_version
 {
 local ($cmd, $d) = @_;
+if (exists($get_php_version_cache{$cmd})) {
+	return $get_php_version_cache{$cmd};
+	}
 if ($cmd !~ /^\//) {
 	local ($phpn) = grep { $_->[0] == $cmd }
 			     &list_available_php_versions($d);
@@ -970,15 +973,20 @@ if ($cmd !~ /^\//) {
 		($phpn) = grep { $_->[0] >= $cmd }
                              &list_available_php_versions($d);
 		}
-	return undef if (!$phpn);
+	if (!$phpn) {
+		$get_php_version_cache{$cmd} = undef;
+		return undef;
+		}
 	$cmd = $phpn->[1] || &has_command("php$cmd") || &has_command("php");
 	}
 &clean_environment();
 local $out = &backquote_command("$cmd -v 2>&1 </dev/null");
 &reset_environment();
 if ($out =~ /PHP\s+([0-9\.]+)/) {
+	$get_php_version_cache{$cmd} = $1;
 	return $1;
 	}
+$get_php_version_cache{$cmd} = undef;
 return undef;
 }
 
@@ -1138,7 +1146,7 @@ foreach my $p (@ports) {
 				" ".&get_allowed_options_list() : "";
 		local @lines = (
 			"<Directory $dir>",
-			"Options +Indexes +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
+			"Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
 			"allow from all",
 			"AllowOverride All".$olist,
 			@phplines,
@@ -1638,18 +1646,41 @@ if ($php_fpm_config_cache) {
 	}
 my $rv = { };
 
-# Config directory for per-domain pool files
-foreach my $cdir ("/etc/php-fpm.d", "/etc/php*/fpm/pool.d",
-		  "/etc/php/*/fpm/pool.d") {
-	my ($realdir) = glob($cdir);
-	if ($realdir && -d $realdir) {
-		$rv->{'dir'} = $realdir;
+# What version are we running?
+&foreign_require("software");
+foreach my $pname ("php-fpm", "php5-fpm") {
+	my @pinfo = &software::package_info($pname);
+	if (@pinfo && $pinfo[0]) {
+		$rv->{'version'} = $pinfo[4];
+		$rv->{'version'} =~ s/\-.*$//;
+		$rv->{'version'} =~ s/\+.*$//;
+		$rv->{'version'} =~ s/^\d+://;
 		last;
 		}
 	}
-if (!$rv->{'dir'}) {
+
+# Config directory for per-domain pool files
+my @verdirs;
+DIR: foreach my $cdir ("/etc/php-fpm.d",
+		       "/etc/php*/fpm/pool.d",
+		       "/etc/php/*/fpm/pool.d",
+		       "/etc/opt/remi/php*/php-fpm.d",
+		       "/usr/local/etc/php-fpm.d") {
+	foreach my $realdir (glob($cdir)) {
+		if ($realdir && -d $realdir) {
+			my @files = glob("$realdir/*");
+			if (@files) {
+				push(@verdirs, $realdir);
+				}
+			}
+		}
+	}
+if (!@verdirs) {
 	return wantarray ? ( undef, $text{'php_fpmnodir'} ) : undef;
 	}
+my ($bestver) = grep { /\Q$rv->{'version'}\E/ } @verdirs;
+$bestdir ||= $verdirs[0];
+$rv->{'dir'} = $bestdir;
 
 # Init script
 &foreign_require("init");
@@ -1676,19 +1707,6 @@ if ($config{'web'}) {
 		if (!$apache::httpd_modules{$m}) {
 			return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
 			}
-		}
-	}
-
-# What version are we running?
-&foreign_require("software");
-foreach my $pname ("php-fpm", "php5-fpm") {
-	my @pinfo = &software::package_info($pname);
-	if (@pinfo && $pinfo[0]) {
-		$rv->{'version'} = $pinfo[4];
-		$rv->{'version'} =~ s/\-.*$//;
-		$rv->{'version'} =~ s/\+.*$//;
-		$rv->{'version'} =~ s/^\d+://;
-		last;
 		}
 	}
 

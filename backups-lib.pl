@@ -526,6 +526,12 @@ if (!$anyremote) {
 	$onebyone = 0;
 	}
 
+if ($homefmt && $dirfmt && &indexof("dir", @$features) < 0) {
+	# A home-format backup was requested, but the home directory was not
+	# included. Silently switch to dir-format so that it still works.
+	$homefmt = 0;
+	}
+
 if (!$homefmt) {
 	# Create a temp dir for the backup, to be tarred up later
 	$backupdir = &transname();
@@ -533,18 +539,11 @@ if (!$homefmt) {
 		&make_dir($backupdir, 0700);
 		}
 	}
-else {
-	# A home-format backup can only be used if the home directory is
-	# included, and if we are doing one per domain, and if all domains
-	# *have* a home directory
-	if (!$dirfmt) {
-		&$first_print($text{'backup_ehomeformat'});
-		return (0, 0, $doms);
-		}
-	if (&indexof("dir", @$features) == -1) {
-		&$first_print($text{'backup_ehomeformat2'});
-		return (0, 0, $doms);
-		}
+
+if ($homefmt && !$dirfmt) {
+	# Home format must imply one-per-domain format
+	&$first_print($text{'backup_ehomeformat'});
+	return (0, 0, $doms);
 	}
 
 # Work out where to write the final tar files to
@@ -697,36 +696,39 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	local $dok = 1;
 	local @donefeatures;
 
-	if ($homefmt && !$d->{'dir'} && !-d $d->{'home'}) {
-		# Create temporary home directory
-		&make_dir($d->{'home'}, 0755);
-		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
-					   $d->{'home'});
-		$d->{'dir'} = 1;
-		push(@cleanuphomes, $d);
-		}
-	elsif ($homefmt && $d->{'dir'} && !-d $d->{'home'}) {
-		# Missing home dir which we need, so create it
-		&make_dir($d->{'home'}, 0755);
-		&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef,
-					   $d->{'home'});
+	if ($homefmt && !-d $d->{'home'}) {
+		# Create home directory
+		if (&has_domain_user($d) && $d->{'parent'}) {
+			# As domain user (sub-server, likely an alias)
+			&make_dir_as_domain_user($d, $d->{'home'}, 0755, 1);
+			&set_permissions_as_domain_user($d, 0755, $d->{'home'});
+			}
+		else {
+			# As root (top-level, which should never happen)
+			&make_dir($d->{'home'}, 0755);
+			&set_ownership_permissions(
+				$d->{'uid'}, $d->{'gid'}, undef, $d->{'home'});
+			}
+		if (!$d->{'dir'}) {
+			# Only temporary
+			$d->{'dir'} = 1;
+			push(@cleanuphomes, $d);
+			}
 		}
 	elsif ($homefmt && !$d->{'dir'} && -d $d->{'home'}) {
 		# Home directory actually exists, so enable it on the domain
 		$d->{'dir'} = 1;
 		}
 
+	# Turn off quotas for the domain so that writes as the domain owner
+	# don't fail
+	&disable_quotas($d);
+
 	local $lockdir;
 	if ($homefmt) {
-		# Backup goes to a sub-dir of the home
+		# Backup for most features goes to a sub-dir of the home, which
+		# is then included in a tar of the home directory
 		$lockdir = $backupdir = "$d->{'home'}/.backup";
-		my $pid = &test_lock($lockdir);
-		if ($pid) {
-			&$second_print(&text('backup_ebackupdirlock',
-				"<tt>$backupdir</tt>", $pid));
-			$dok = 1;
-			goto DOMAINFAILED;
-			}
 		&lock_file($lockdir);
 		&execute_command("rm -rf ".quotemeta($backupdir));
 		&disable_quotas($asd) if ($asd);
@@ -739,10 +741,6 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			goto DOMAINFAILED;
 			}
 		}
-
-	# Turn off quotas for the domain so that writes as the domain owner
-	# don't fail
-	&disable_quotas($d);
 
 	&$indent_print();
 	foreach $f (@backupfeatures) {
@@ -762,8 +760,17 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			else {
 				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
-			$fok = &$bfunc($d, $ffile, $opts->{$f}, $homefmt,
-				       $increment, $asd, $opts, $key);
+			eval {
+				local $main::error_must_die = 1;
+				$fok = &$bfunc(
+					$d, $ffile, $opts->{$f}, $homefmt,
+					$increment, $asd, $opts, $key);
+				};
+			if ($@) {
+				&$second_print(&text('backup_efeatureeval',
+						     $f, $@));
+				$fok = 0;
+				}
 			}
 		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
 		       $d->{$f}) {
@@ -1933,9 +1940,18 @@ if ($ok) {
 
 		# If encrypted, check signature too
 		if ($key) {
-			if ($lerr !~ /Good\s+signature\s+from/ ||
-			    $lerr !~ /Signature\s+made.*key\s+ID\s+(\S+)/ ||
-			    $1 ne $key->{'key'}) {
+			my $keyok = 0;
+			$lerr =~ s/\r/ /g;
+			my $l = length($key->{'key'});
+			if ($lerr =~ /Good\s+signature\s+from/) {
+				if ($lerr =~ /(key,\s+ID|using\s+\S+\s+key)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+					$keyok = 1;
+					}
+				elsif ($lerr =~ /(key\s+ID)\s+([A-Za-z0-9]+)/ && substr($2, -$l) eq $key->{'key'}) {
+					$keyok = 1;
+					}
+				}
+			if (!$keyok) {
 				&$second_print(&text('restore_badkey',
 					$key->{'key'},
 					"<pre>".&html_escape($lerr)."</pre>"));
@@ -2216,8 +2232,8 @@ if ($ok) {
 					}
 				}
 
-			# If this was a DNS sub-domain and the parent no longer exists, use a
-			# separate zone file
+			# If this was a DNS sub-domain and the parent no longer
+			# exists, use a separate zone file
 			if ($d->{'dns_subof'}) {
 				my $dnsparent = &get_domain($d->{'dns_subof'});
 				if (!$dnsparent) {
@@ -2254,9 +2270,11 @@ if ($ok) {
 				}
 			else {
 				# UID and GID are the same - but check for a
-				# clash with existing users
+				# clash with existing users (unless replicating,
+				# in which case they may be in shared storage)
 				if ($taken{$d->{'uid'}} &&
-				    $taken{$d->{'uid'}} ne 'old') {
+				    $taken{$d->{'uid'}} ne 'old' &&
+				    !$opts->{'repl'}) {
 					&$second_print(&text('restore_euid',
 							     $d->{'uid'}));
 					$ok = 0;
@@ -2264,7 +2282,8 @@ if ($ok) {
 					else { last DOMAIN; }
 					}
 				if ($gtaken{$d->{'gid'}} &&
-				    $gtaken{$d->{'gid'}} ne 'old') {
+				    $gtaken{$d->{'gid'}} ne 'old' &&
+				    !$opts->{'repl'}) {
 					&$second_print(&text('restore_egid',
 							     $d->{'gid'}));
 					$ok = 0;
@@ -2286,6 +2305,9 @@ if ($ok) {
 				# Fix up setings that reference the home
 				$d->{'ssl_cert'} =~s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_chain'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_everything'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'ssl_combined'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				}
 
 			# Fix up the IPv4 address if needed
@@ -2524,9 +2546,16 @@ if ($ok) {
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
-			&create_virtual_server($d, $parentdom,
+			my $err = &create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
+			if ($err) {
+				&$second_print(
+					&text('restore_erecreate', $err));
+				$ok = 0;
+				if ($continue) { next DOMAIN; }
+				else { last DOMAIN; }
+				}
 
 			# If the domain was disabled in the backup, disable it
 			# again now
@@ -2919,7 +2948,7 @@ if (-d $backup) {
 	# A directory of backup files, one per domain
 	opendir(DIR, $backup);
 	foreach my $f (readdir(DIR)) {
-		next if ($f eq "." || $f eq ".." || $f =~ /\.(info|dom)$/);
+		next if ($f =~ /^\./ || $f =~ /\.(info|dom)$/);
 		local ($cont, $fdoms);
 		if ($wantdoms) {
 			($cont, $fdoms) = &backup_contents(
@@ -3204,7 +3233,7 @@ if ($mode == 1) {
 		return $err if (!$list);
 		foreach $f (@$list) {
 			$f =~ s/^$path[\\\/]//;
-			next if ($f eq "." || $f eq ".." || $f eq "");
+			next if ($f =~ /^\./ || $f eq "");
 			next if ($infoonly && $f !~ /\Q$sfx\E$/);
 			if (@$domnames && $f =~ /^(\S+)\.(tar.*|zip)$/i &&
 			    $f !~ /^virtualmin\.(tar.*|zip)$/i) {
@@ -3654,11 +3683,11 @@ else {
 }
 
 # show_backup_destination(name, value, no-local, [&domain], [no-download],
-#			  [no-upload])
+#			  [no-upload], [show-remove-option])
 # Returns HTML for fields for selecting a local or FTP file
 sub show_backup_destination
 {
-local ($name, $value, $nolocal, $d, $nodownload, $noupload) = @_;
+local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
 local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
@@ -3667,6 +3696,11 @@ local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
 
 local @opts;
+if ($remove) {
+	# Remove this destination
+	push(@opts, [ -1, $text{'backup_moderemove'} ]);
+	}
+
 if ($d && $d->{'dir'}) {
 	# Limit local file to under virtualmin-backups
 	local $bdir = "$d->{'home'}/$home_virtualmin_backup";
@@ -3805,7 +3839,7 @@ if (!$noupload) {
 		      &ui_upload($name."_upload", 40) ]);
 	}
 
-return &ui_radio_selector(\@opts, $name."_mode", $mode);
+return &ui_radio_selector(\@opts, $name."_mode", $mode, 1);
 }
 
 # parse_backup_destination(name, &in, no-local, [&domain], format)
@@ -3815,6 +3849,10 @@ sub parse_backup_destination
 local ($name, $in, $nolocal, $d, $fmt) = @_;
 local %in = %$in;
 local $mode = $in{$name."_mode"};
+if ($mode == -1) {
+	# Removing this one
+	return undef;
+	}
 if ($mode == 0 && defined($fmt) && $fmt == 0) {
 	# For a single-file backup, make sure the filename makes sense
 	$in{$name."_file"} =~ /\.(gz|zip|tar|bz2|Z)$/i ||
@@ -5238,6 +5276,26 @@ my ($c) = @_;
 return $c == 0 ? "tar.gz" :
        $c == 1 ? "tar.bz2" :
        $c == 3 ? "zip" : "tar";
+}
+
+# set_backup_envs(&backup, &doms)
+# Set environment variables from a backup object
+sub set_backup_envs
+{
+my ($sched, $doms) = @_;
+foreach my $k (keys %$sched) {
+	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
+	}
+$ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
+}
+
+# reset_backup_envs()
+# Clear variables set by set_backup_envs
+sub reset_backup_envs
+{
+foreach my $e (keys %ENV) {
+	delete($ENV{$e}) if ($e =~ /^(BACKUP_)/);
+	}
 }
 
 1;

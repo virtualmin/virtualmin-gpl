@@ -100,6 +100,9 @@ while(<FILE>) {
 	elsif (/^Charset:\s*(.*)/) {
 		$simple->{'charset'} = $1;
 		}
+	elsif (/^No-Forward-Reply:\s*(.*)/) {
+		$simple->{'no_forward_reply'} = $1;
+		}
 	else {
 		push(@lines, $_);
 		if (/\S/) {
@@ -203,6 +206,9 @@ if ($simple->{'autotext'}) {
                 }
         if ($simple->{'charset'}) {
                 &print_tempfile(AUTO, "Charset: $simple->{'charset'}\n");
+                }
+        if ($simple->{'no_forward_reply'}) {
+                &print_tempfile(AUTO, "No-Forward-Reply: $simple->{'no_forward_reply'}\n");
                 }
         &print_tempfile(AUTO, $simple->{'autotext'});
         &close_tempfile_as_domain_user($d, AUTO);
@@ -343,6 +349,10 @@ if (!$nofrom) {
 		undef, $tds);
 	}
 
+# Skip autoreply for forwarded email
+print &ui_table_row(&hlink($text{'user_noforward'}, "user_noforward"),
+	&ui_yesno_radio("forwardreply", !$simple->{'no_forward_reply'}));
+
 # End of hidden
 print &ui_hidden_table_row_end("aopts");
 }
@@ -381,6 +391,7 @@ if ($in->{'forward'}) {
 	foreach my $f (@{$simple->{'forward'}}) {
 		$f =~ /^([^\|\:\"\' \t\/\\\%]\S*)$/ ||
 			&error(&text('alias_etype1', $f));
+		&can_forward_alias($f) || &error(&text('alias_etype1f', $f));
 		}
 	}
 else {
@@ -457,6 +468,12 @@ if ($in->{'autotext'}) {
 			$simple->{'from'} = $in->{'from'};
 			}
 		}
+
+	# Save autoreply to forwarded
+	if (defined($in->{'forwardreply'})) {
+		$simple->{'no_forward_reply'} = !$in{'forwardreply'};
+		}
+
 	&set_alias_programs();
 	}
 if ($in->{'auto'}) {

@@ -52,7 +52,7 @@ else {
 		}
 
 	# Validate connectivity
-	if ($in{'connectivity'} >= 1) {
+	if ($in{'connectivity'} == 2) {
 		&$first_print(&text('letsencrypt_conncheck',
 			join(" ", map { &show_domain_name($_) } @cdoms)));
 		my @errs;
@@ -78,7 +78,7 @@ else {
 		}
 
 	# Validate config
-	if ($in{'connectivity'} == 1) {
+	if ($in{'connectivity'} >= 1) {
 		&$first_print(&text('letsencrypt_validcheck',
 			join(" ", map { &show_domain_name($_) } @cdoms)));
 		my @errs = map { &validate_letsencrypt_config($_) } @cdoms;

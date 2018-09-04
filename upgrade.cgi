@@ -128,11 +128,11 @@ elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl(\/.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl(\/.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com$1";
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/6/$1";
                         }
 		}
 	&flush_file_lines($sources_list);
@@ -298,26 +298,6 @@ else {
 		&$second_print(&text('upgrade_schednot',
 				     "../webmin/edit_upgrade.cgi",
 				     $webmin::module_info{'desc'}));
-		}
-
-	# Use the Virtualmin framed theme
-	if ($current_theme ne "virtual-server-theme" &&
-	    $current_theme ne "thejax-theme") {
-		%tinfo = &get_theme_info("virtual-server-theme");
-		if (%tinfo) {
-			&$first_print(&text('upgrade_theme', $tinfo{'desc'}));
-			&lock_file("$config_directory/config");
-			$gconfig{'theme'} = "virtual-server-theme";
-			&write_file("$config_directory/config", \%gconfig);
-			&unlock_file("$config_directory/config");
-			&lock_file($ENV{'MINISERV_CONFIG'});
-			&get_miniserv_config(\%miniserv);
-			$miniserv{'preroot'} = "virtual-server-theme";
-			&put_miniserv_config(\%miniserv);
-			&unlock_file($ENV{'MINISERV_CONFIG'});
-			&reload_miniserv();
-			&$second_print($text{'setup_done'});
-			}
 		}
 	}
 

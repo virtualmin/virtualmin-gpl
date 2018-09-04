@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "4.9.1" );
+return ( "4.9.8" );
 }
 
 sub script_wordpress_category
@@ -190,12 +190,12 @@ my $dberr = check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
 if (&has_wordpress_cli()) {
+	my $wp = "cd ".quotemeta($opts->{'dir'})." && ".&has_command("wp");
 	if (!$upgrade) {
 		# Execute the download command
 		&make_dir_as_domain_user($d, $opts->{'dir'}, 0755);
-		my $wp = "cd ".quotemeta($opts->{'dir'})." && ".&has_command("wp");
 		my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
-		if ($?) {
+		if ($? && $out !~ /Success:\s+WordPress\s+downloaded/i) {
 			return (-1, "wp core download failed : $out");
 			}
 
@@ -222,7 +222,7 @@ if (&has_wordpress_cli()) {
 	else {
 		# Do the upgrade
 		my $out = &run_as_domain_user($d,
-                        "$wp core upgrade --version=$version");
+                        "$wp core upgrade --version=$version 2>&1");
 		if ($?) {
 			return (-1, "wp core upgrade failed : $out");
 			}
@@ -343,7 +343,7 @@ sub script_wordpress_latest
 {
 my ($ver) = @_;
 return ( "http://wordpress.org/download/",
-	 "Version\\s+([0-9\\.]+)" );
+	 "Download\\s+WordPress\\s+([0-9\\.]+)" );
 }
 
 sub script_wordpress_site

@@ -473,8 +473,8 @@ $domains_tests = [
 	},
 
 	# Verify the record
-	{ 'command' => 'dig TXT '.$test_domain,
-	  'grep' => 'spf',
+	{ 'command' => 'dig TXT '.$test_domain.' ; dig SPF '.$test_domain,
+	  'grep' => 'v=spf1',
 	  'sleep' => 5,
 	},
 
@@ -485,8 +485,8 @@ $domains_tests = [
 	},
 
 	# Verify the record is gone
-	{ 'command' => 'dig TXT '.$test_domain,
-	  'antigrep' => 'spf',
+	{ 'command' => 'dig TXT '.$test_domain.' ; dig SPF '.$test_domain,
+	  'antigrep' => 'v=spf1',
 	  'sleep' => 5,
 	},
 

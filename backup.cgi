@@ -213,8 +213,10 @@ else {
 	$start_time = time();
 	if ($in{'oneoff'} && $sched->{'before'}) {
 		&$first_print($text{'backup_brun'});
+		&set_backup_envs($sched, \@doms);
 		$out .= &backquote_logged(
 			"($sched->{'before'}) 2>&1 </dev/null");
+		&reset_backup_envs();
 		print "<pre>".&html_escape($out)."</pre>";
 		if ($?) {
 			&$second_print($text{'backup_brunfailed'});
@@ -274,8 +276,10 @@ else {
 	# Run any after command
 	if ($in{'oneoff'} && $sched->{'after'}) {
 		&$first_print($text{'backup_arun'});
+		&set_backup_envs($sched, \@doms);
 		$out = &backquote_command(
 			"($sched->{'after'}) 2>&1 </dev/null");
+		&reset_backup_envs();
 		print "<pre>".&html_escape($out)."</pre>";
 		if ($?) {
 			&$second_print($text{'backup_arunfailed'});

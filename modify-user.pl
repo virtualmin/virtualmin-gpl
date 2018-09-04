@@ -217,7 +217,7 @@ while(@ARGV > 0) {
 		$autostart = '';
 		}
 	elsif ($a eq "--autoreply-end") {
-		$autoend = &date_to_time(shift(@ARGV));
+		$autoend = &date_to_time(shift(@ARGV), 0, 1);
 		}
 	elsif ($a eq "--no-autoreply-end") {
 		$autoend = '';
@@ -229,6 +229,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-autoreply-period") {
 		$autoperiod = '';
+		}
+	elsif ($a eq "--no-autoreply-forward") {
+		$autonoforward = 1;
+		}
+	elsif ($a eq "--autoreply-forward") {
+		$autonoforward = 0;
 		}
 	elsif ($a eq "--recovery") {
 		$recovery = shift(@ARGV);
@@ -453,7 +459,13 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 	# Update autoresponder
 	if (defined($autotext)) {
 		if ($autotext) {
-			$simple->{'from'} ||= $user->{'email'};
+			if ($user->{'real'}) {
+				$fullemail = '"'.$user->{'real'}.'" <'.$user->{'email'}.'>';
+				}
+			else {
+				$fullemail = $user->{'email'};
+				}
+			$simple->{'from'} ||= $fullemail;
 			$autotext =~ s/\\n/\n/g;
 			$autotext .= "\n" if ($autotext !~ /\n$/);
 			$simple->{'autotext'} = $autotext;
@@ -476,6 +488,7 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 		$simple->{'replies'} ||=
 			&convert_autoreply_file($d, "replies-$user->{'user'}")
 			if ($simple->{'period'});
+		$simple->{'no_forward_reply'} = $autonoforward;
 		}
 
 	if (@{$user->{'to'}} == 1 && $simple->{'tome'}) {
@@ -489,7 +502,8 @@ if (!$user->{'noalias'} && ($user->{'email'} || $user->{'noprimary'})) {
 		# at all.
 		$user->{'to'} = undef;
 		}
-	if ($autotext || $autostart || $autoend || $autoperiod) {
+	if ($autotext || $autostart || $autoend || $autoperiod ||
+	    defined($autonoforward)) {
 		&write_simple_autoreply($d, $simple);
 		}
 	}
@@ -513,7 +527,7 @@ if ($user->{'email'} && !$user->{'nomailfile'}) {
 
 # Call plugin save functions
 foreach $f (&list_mail_plugins()) {
-	&plugin_call($f, "mailbox_modify", $user, \%old, $d);
+	&plugin_call($f, "mailbox_modify", $user, $olduser, $d);
 	}
 
 # Call other module functions

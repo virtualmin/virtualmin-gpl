@@ -169,6 +169,7 @@ if (@cantmpls) {
 $js = "<script>\n";
 $js .= "function select_plan(num)\n";
 $js .= "{\n";
+$js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain\"][action*=\".cgi\"]');\n";
 foreach $plan (@plans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
 	$js .= &quota_javascript("quota", $plan->{'quota'}, "home", 1);
@@ -374,8 +375,7 @@ print &ui_form_end([ [ "save", $text{'edit_save'} ] ]);
 
 # Show actions for this domain, unless the theme vetos it (cause they are on
 # the left menu)
-if ($current_theme ne "virtual-server-theme" &&
-    !$main::basic_virtualmin_domain &&
+if (!$main::basic_virtualmin_domain &&
     !$main::basic_virtualmin_menu) {
 	&show_domain_buttons($d);
 	}
@@ -386,4 +386,3 @@ if (defined(&theme_select_domain)) {
 	}
 
 &ui_print_footer("", $text{'index_return'});
-

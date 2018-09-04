@@ -9,7 +9,7 @@ $d = &get_domain($in{'dom'});
 &has_web_redirects($d) || &error($text{'redirects_eweb'});
 &error_setup($text{'redirect_err'});
 if (!$in{'new'}) {
-	($r) = grep { $_->{'path'} eq $in{'old'} } &list_redirects($d);
+	($r) = grep { $_->{'id'} eq $in{'old'} } &list_redirects($d);
 	$r || &error($text{'redirect_egone'});
 	$oldr = { %$r };
 	}
@@ -43,6 +43,9 @@ else {
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
 		$r->{'alias'} = 0;
+		$r->{'code'} = $in{'code'};
+		$in{'code'} eq '' || $in{'code'} =~ /^\d{3}$/ && $in{'code'} >= 300 && $in{'code'} < 400 ||
+			&error($text{'redirect_ecode'});
 		}
 	else {
 		# Alias to a directory
@@ -66,6 +69,7 @@ else {
 	$r->{'regexp'} = $in{'regexp'};
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
+	$r = &add_wellknown_redirect($r);
 
 	# Create or update
 	if ($in{'new'}) {

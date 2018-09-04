@@ -1619,6 +1619,7 @@ sub get_mysql_database_dir
 local ($d, $db) = @_;
 &require_mysql();
 return undef if ($d->{'provision_mysql'});
+return undef if (!$db);
 local $mymod = &require_dom_mysql($d);
 local %myconfig = &foreign_config($mymod);
 return undef if ($myconfig{'host'} &&
@@ -2571,6 +2572,11 @@ $conns = undef if ($conns eq "none");
 return $conns;
 }
 
+sub list_mysql_size_setting_types
+{
+return ("small", "medium", "large", "huge");
+}
+
 # list_mysql_size_settings("small"|"medium"|"large"|"huge")
 # Returns an array of tupes for MySQL my.cnf settings for some size
 # diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
@@ -3050,7 +3056,9 @@ sub require_dom_mysql
 {
 my ($d) = @_;
 my $mod = !$d ? 'mysql' : $d->{'mysql_module'} || 'mysql';
-eval "\$${mod}::use_global_login = 1;";
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+eval "\$${pkg}::use_global_login = 1;";
 &foreign_require($mod);
 return $mod;
 }

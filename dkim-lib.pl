@@ -392,8 +392,8 @@ my ($dkim, $newkey, $size) = @_;
 
 # Find domains that we can enable DKIM for (those with mail and DNS)
 &$first_print($text{'dkim_domains'});
-my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
-@doms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } @doms;
+my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
+my @doms = grep { $_->{'dns'} && $_->{'mail'} } @alldoms;
 if (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
@@ -591,8 +591,12 @@ elsif (&get_dkim_type() eq 'redhat') {
 	}
 &$second_print($text{'setup_done'});
 
-# Add public key to DNS domains
-&add_dkim_dns_records(\@doms, $dkim);
+# Add public key to DNS zones for all domains that have DNS and email enabled,
+# or are on the extra domains list
+my %extra = map { $_, 1 } @{$dkim->{'extra'}};
+my @dnsdoms = grep { $_->{'dns'} &&
+		     ($_->{'mail'} || $extra{$_->{'dom'}}) } @alldoms;
+&add_dkim_dns_records(\@dnsdoms, $dkim);
 
 # Remove from excluded domains
 my @exdoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) >= 0 }
@@ -799,7 +803,7 @@ my $init = &get_dkim_init_name();
 return 1;
 }
 
-# update_dkim_domains([&domain, action])
+# update_dkim_domains(&domain, action)
 # Updates the list of domains to sign mail for, if needed
 sub update_dkim_domains
 {
@@ -811,10 +815,10 @@ return if (!$dkim || !$dkim->{'enabled'});
 
 # Enable DKIM for all domains with mail
 my @doms = grep { $_->{'mail'} && $_->{'dns'} } &list_domains();
-if ($d && ($action eq 'setup' || $action eq 'modify')) {
+if (($action eq 'setup' || $action eq 'modify')) {
 	push(@doms, $d);
 	}
-elsif ($d && $action eq 'delete') {
+elsif ($action eq 'delete') {
 	@doms = grep { $_->{'id'} ne $d->{'id'} } @doms;
 	}
 my %done;
@@ -825,14 +829,11 @@ my %done;
 
 # Add or remove DNS records
 if ($d->{'dns'}) {
-	if ($d && ($action eq 'setup' || $action eq 'modify')) {
+	if ($action eq 'setup' || $action eq 'modify') {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
-	elsif ($d && $action eq 'delete') {
+	elsif ($action eq 'delete') {
 		&remove_dkim_dns_records([ $d ], $dkim);
-		}
-	else {
-		&add_dkim_dns_records(\@doms, $dkim);
 		}
 	}
 }
@@ -924,13 +925,15 @@ my $anychanged = 0;
 foreach my $d (@$doms) {
 	my $pubkey = &get_dkim_pubkey($dkim, $d);
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
-	if (!$file) {
-		&$second_print($text{'dkim_ednszone'});
-		next;
-		}
 	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
 		&$second_print($text{'dkim_ednsexclude'});
+		next;
+		}
+	&pre_records_change($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
+		&after_records_change($d);
+		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
 	&obtain_lock_dns($d);
@@ -965,6 +968,7 @@ foreach my $d (@$doms) {
 		$anychanged++;
 		}
 	else {
+		&after_records_change($d);
 		&$second_print($text{'dkim_dnsalready'});
 		}
 	&release_lock_dns($d);
@@ -980,8 +984,10 @@ my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
 	&$first_print(&text('dkim_undns', "<tt>$d->{'dom'}</tt>"));
+	&pre_records_change($d);
 	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
+		&after_records_change($d);
 		&$second_print($text{'dkim_ednszone'});
 		next;
 		}
@@ -1008,6 +1014,7 @@ foreach my $d (@$doms) {
 		$anychanged++;
 		}
 	else {
+		&after_records_change($d);
 		&$second_print($text{'dkim_dnsalreadygone'});
 		}
 	&release_lock_dns($d);
@@ -1062,7 +1069,9 @@ elsif ($conf->{'SigningTable'} && $conf->{'KeyTable'}) {
 			}
 		}
 	return undef if (!$keyname);
-	my $klref = &read_file_lines($conf->{'KeyTable'}, 1);
+	my $keyfile = $conf->{'KeyTable'};
+	$keyfile =~ s/^[a-z]+://;
+	my $klref = &read_file_lines($keyfile, 1);
 	foreach my $l (@$klref) {
 		my ($name, $kdom, $ksel, $kfile) = split(/\s+|:/, $l);
 		if ($name eq $keyname) {
@@ -1179,9 +1188,11 @@ else {
 		}
 
 	# Find domain's entry in key table
-	$newfile = !-r $conf->{'KeyTable'};
-	&lock_file($conf->{'KeyTable'});
-	my $klref = &read_file_lines($conf->{'KeyTable'});
+	my $keyfile = $conf->{'KeyTable'};
+	$keyfile =~ s/^[a-z]+://;
+	$newfile = !-r $keyfile;
+	&lock_file($keyfile);
+	my $klref = &read_file_lines($keyfile);
 	if (!@$klref) {
 		# Add entry for the default key
 		push(@$klref, "default\t%:$dkim->{'selector'}:".
@@ -1212,11 +1223,10 @@ else {
 		# Need to remove
 		splice(@$klref, $kidx, 1);
 		}
-	&flush_file_lines($conf->{'KeyTable'});
-	&unlock_file($conf->{'KeyTable'});
+	&flush_file_lines($keyfile);
+	&unlock_file($keyfile);
 	if ($newfile) {
-		&set_ownership_permissions(undef, undef, 0755,
-					   $conf->{'KeyTable'});
+		&set_ownership_permissions(undef, undef, 0755, $keyfile);
 		}
 	}
 &$second_print($text{'setup_done'});

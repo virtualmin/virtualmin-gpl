@@ -9,6 +9,7 @@ $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_records($d) || &error($text{'records_ecannot'});
 &require_bind();
+&pre_records_change($d);
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
 

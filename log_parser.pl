@@ -179,6 +179,9 @@ elsif ($action eq "autoconfig") {
 elsif ($type eq "ratelimit") {
 	return &text('log_'.$action.'_ratelimit');
 	}
+elsif ($action eq "wizard") {
+	return &text('log_wizard', $text{'wizard_title_'.$object});
+	}
 else {
 	return $text{'log_'.$action};
 	}

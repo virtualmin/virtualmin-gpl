@@ -82,6 +82,8 @@ if ($ip eq "allocate") {
 	($ip, $netmask) = &free_ip_address($tmpl);
 	$ip || &usage("Failed to find a free IP address in ".
 		      "range $tmpl->{'ranges'}");
+	&indexof($ip, @ips) < 0 ||
+		&usage("Allocated IP address $ip is already a shared address");
 	}
 
 # Activate if required, otherwise ensure it is on the system

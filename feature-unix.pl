@@ -22,6 +22,12 @@ if ($_[0]->{'group'} eq '' && &mail_system_needs_group()) {
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.
 local @allusers = &list_all_users();
+local ($uclash) = grep { $_->{'user'} == $_[0]->{'user'} } @allusers;
+if ($uclash && &remote_unix() && $_[0]->{'wasmissing'}) {
+	# Domain is being re-created as part of a restore and users are stored
+	# remotely, and the user already exists. Assume shared LDAP storage.
+	goto QUOTAS;
+	}
 local ($clash) = grep { $_->{'uid'} == $_[0]->{'uid'} } @allusers;
 if ($clash || !$_[0]->{'uid'}) {
 	local (%taken, %utaken);
@@ -116,6 +122,7 @@ if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
 &$second_print($text{'setup_done'});
 
 # Set the user's quota
+QUOTAS:
 if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
@@ -315,33 +322,35 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 # Delete the unix user and group for a domain
 sub delete_unix
 {
-if (!$_[0]->{'parent'}) {
+local ($d, $preserve) = @_;
+
+if (!$d->{'parent'}) {
 	# Get the user object
-	&obtain_lock_unix($_[0]);
-	&obtain_lock_cron($_[0]);
+	&obtain_lock_unix($d);
+	&obtain_lock_cron($d);
 	&require_useradmin();
 	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
+	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 
 	# Zero his quotas
 	if ($uinfo) {
-		&set_user_quotas($uinfo->{'user'}, 0, 0, $_[0]);
+		&set_user_quotas($uinfo->{'user'}, 0, 0, $d);
 		}
 
 	# Delete his cron jobs
-	&delete_unix_cron_jobs($_[0]->{'user'});
+	&delete_unix_cron_jobs($d->{'user'});
 
 	# Delete virtuser and generic
 	local @virts = &list_virtusers();
-	local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
+	local $email = $d->{'user'}."\@".$d->{'dom'};
 	local ($virt) = grep { $_->{'from'} eq $email } @virts;
 	if ($virt) {
 		&delete_virtuser($virt);
-		&sync_alias_virtuals($_[0]);
+		&sync_alias_virtuals($d);
 		}
 	if ($config{'generics'}) {
 		local %generics = &get_generics_hash();
-		local $g = $generics{$_[0]->{'user'}};
+		local $g = $generics{$d->{'user'}};
 		if ($g) {
 			&delete_generic($g);
 			}
@@ -354,44 +363,54 @@ if (!$_[0]->{'parent'}) {
 
 	# Clear any resource limits
 	if (defined(&supports_resource_limits) && &supports_resource_limits()) {
-		&save_domain_resource_limits($_[0], { }, 1);
+		&save_domain_resource_limits($d, { }, 1);
 		}
 
 	# Undo the chroot, if any
-	if (!&check_jailkit_support() && &get_domain_jailkit($_[0])) {
-		&disable_domain_jailkit($_[0]);
+	if (!&check_jailkit_support() && &get_domain_jailkit($d)) {
+		&disable_domain_jailkit($d);
 		}
 
-	# Delete unix user
-	if ($uinfo) {
-		&$first_print($text{'delete_user'});
-		&delete_user($uinfo, $_[0]);
-		if ($config{'other_doms'}) {
-			&foreign_call($usermodule, "other_modules",
-				      "useradmin_delete_user", $uinfo);
+	# Delete unix user (unless on remote and we are keeping
+	# remote resources)
+	if (!$preserve || !&remote_unix($d)) {
+		if ($uinfo) {
+			&$first_print($text{'delete_user'});
+			&delete_user($uinfo, $d);
+			if ($config{'other_doms'}) {
+				&foreign_call($usermodule, "other_modules",
+					      "useradmin_delete_user", $uinfo);
+				}
+			&$second_print($text{'setup_done'});
 			}
-		&$second_print($text{'setup_done'});
-		}
 
-	# Delete unix group
-	local @allgroups = &foreign_call($usermodule, "list_groups");
-	local ($ginfo) = grep { $_->{'group'} eq $_[0]->{'group'} } @allgroups;
-	if ($ginfo) {
-		&$first_print($text{'delete_group'});
-		&foreign_call($usermodule, "set_group_envs", $ginfo, 'DELETE_GROUP');
-		&foreign_call($usermodule, "making_changes");
-		&foreign_call($usermodule, "delete_group", $ginfo);
-		&foreign_call($usermodule, "made_changes");
-		&$second_print($text{'setup_done'});
+		# Delete unix group
+		local @allgroups = &foreign_call($usermodule, "list_groups");
+		local ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
+				      @allgroups;
+		if ($ginfo) {
+			&$first_print($text{'delete_group'});
+			&foreign_call($usermodule, "set_group_envs", $ginfo,
+				      'DELETE_GROUP');
+			&foreign_call($usermodule, "making_changes");
+			&foreign_call($usermodule, "delete_group", $ginfo);
+			&foreign_call($usermodule, "made_changes");
+			&$second_print($text{'setup_done'});
+			}
+		&record_old_uid($uinfo->{'uid'}, $uinfo->{'gid'});
 		}
-	&record_old_uid($uinfo->{'uid'}, $uinfo->{'gid'});
-	&release_lock_unix($_[0]);
-	&release_lock_cron($_[0]);
+	else {
+		&$first_print($text{'delete_user'});
+		&$second_print(&text('delete_remoteuser',
+				     &get_user_database_url()));
+		}
+	&release_lock_unix($d);
+	&release_lock_cron($d);
 	}
 
 # Update any groups
-&build_denied_ssh_group(undef, $_[0]);
-&update_domain_owners_group(undef, $_[0]);
+&build_denied_ssh_group(undef, $d);
+&update_domain_owners_group(undef, $d);
 return 1;
 }
 
@@ -699,12 +718,22 @@ return 1;
 # Note - quotas are not set here, as they get set in restore_domain
 sub restore_unix
 {
-local ($d, $file, $opts) = @_;
+local ($d, $file, $opts, $allopts) = @_;
 &obtain_lock_unix($_[0]);
 &obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
 
-# And update password and description
+# Check if users are being stored in the same remote storage, if replicating
+my $url = &get_user_database_url();
+my $burl = &read_file_contents($file."_url");
+chop($burl);
+if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
+	$url =~ s/^\S+:\/\///g;
+	&$second_print(&text('restore_unixsame', $url));
+	return 1;
+	}
+
+# Update domain owner user password and description
 &require_useradmin();
 local @allusers = &foreign_call($usermodule, "list_users");
 local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;

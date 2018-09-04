@@ -42,15 +42,15 @@ if (@logs) {
 		}
 
 	# If in single config mode, check if there is a block for Virtualmin
-	# already (based on the directory)
+	# already (either under /var/log/virtualmin, or in a domain's home)
 	local $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	local $already;
-	if ($tmpl->{'logrotate_shared'} eq 'yes' &&
-	    $logs[0] !~ /^\Q$d->{'home'}\E\//) {
+	if ($tmpl->{'logrotate_shared'} eq 'yes') {
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
-				if ($n =~ /^\Q$logdir\E\/[^\/]+$/) {
+				if ($n =~ /^\Q$logdir\E\/[^\/]+$/ ||
+				    $n =~ /^\Q$home_base\E\//) {
 					$already = $c;
 					last LOGROTATE;
 					}
@@ -64,7 +64,7 @@ if (@logs) {
 				 'name' => \@logs };
 		local $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
-			# Use automatic configurtation
+			# Use automatic configuration
 			local $script = &get_postrotate_script($_[0]);
 			$lconf->{'members'} = [
 					{ 'name' => 'rotate',
@@ -74,6 +74,7 @@ if (@logs) {
 					{ 'name' => 'postrotate',
 					  'script' => $script },
 					{ 'name' => 'sharedscripts' },
+					{ 'name' => 'missingok' },
 					];
 			}
 		else {
@@ -299,17 +300,23 @@ sub get_logrotate_section
 {
 &require_logrotate();
 &require_apache();
-local $alog = ref($_[0]) ? &get_website_log($_[0]) : $_[0];
+local $alog = ref($_[0]) ? &get_website_log($_[0], 0) : $_[0];
 if (!$alog && ref($_[0])) {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.
-	$alog = &get_apache_template_log($_[0]);
+	$alog = &get_apache_template_log($_[0], 0);
+	}
+local $elog;
+if (ref($_[0])) {
+	$elog = &get_website_log($_[0], 1) ||
+		&get_apache_template_log($_[0], 1);
 	}
 local $conf = &logrotate::get_config();
 local ($c, $n);
 foreach $c (@$conf) {
 	foreach $n (@{$c->{'name'}}) {
 		return $c if ($n eq $alog);
+		return $c if ($elog && $n eq $elog);
 		}
 	}
 return undef;
@@ -340,7 +347,8 @@ if ($lconf) {
 	return 1;
 	}
 else {
-	&$second_print($text{'setup_nologrotate'});
+	local $alog = &get_website_log($d, 0);
+	&$second_print(&text('setup_nologrotate', $alog));
 	return 0;
 	}
 }

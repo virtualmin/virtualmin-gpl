@@ -13,7 +13,7 @@ $d = &get_domain($in{'dom'});
 @hosts = split(/\r?\n/, $in{'hosts'});
 @hosts || &error($text{'dbhosts_enone'});
 foreach $h (@hosts) {
-	$h =~ /^[a-z0-9\.\-\_\%\\]+$/i ||
+	$h =~ /^[a-z0-9\.\-\_\%\\:]+$/i ||
 		&error(&text('dbhosts_ehost', $h));
 	}
 

@@ -184,7 +184,8 @@ my $i = 0;
 foreach $dest (@dests) {
 	# Show destination fields
 	$dfield = &show_backup_destination("dest".$i, $dest, $cbmode == 3,
-					   $d, $nodownload, 1);
+					   $d, $nodownload, 1,
+					   $i > 0 && $dest);
 
 	# Add purging option
 	@grid = ( );
@@ -239,7 +240,8 @@ if (@allkeys) {
 print &ui_table_row(&hlink($text{'backup_fmt'}, "backup_fmt"),
 	&ui_radio("fmt", int($sched->{'fmt'}),
 		  [ [ 0, $text{'backup_fmt0'} ],
-		    [ 1, $text{'backup_fmt1'} ],
+		    $sched->{'fmt'} == 1 ?
+			( [ 1, $text{'backup_fmt1'} ] ) : ( ),
 		    [ 2, $text{'backup_fmt2'} ] ])."<br>".
 	&ui_checkbox("mkdir", 1, $text{'backup_mkdir'},
 		     int($sched->{'mkdir'})));

@@ -1,5 +1,17 @@
 # Functions for managing a domain's home directory
 
+# check_depends_dir(&domain)
+# A top-level domain with no Unix user makes no sense, because who's going to
+# own the files?
+sub check_depends_dir
+{
+local ($d) = @_;
+if (!$d->{'parent'} && !$d->{'unix'}) {
+	return $text{'setup_edepunixdir'};
+	}
+return undef;
+}
+
 # setup_dir(&domain)
 # Creates the home directory
 sub setup_dir
@@ -309,12 +321,17 @@ if ($gconfig{'os_type'} eq 'solaris') {
 		}
 	close(FIND);
 	}
-foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr', 'ssl_newkey') {
-	my $p = $d->{$s};
-	if ($p) {
-		$p =~ s/^\Q$d->{'home'}\E\///;
-		&print_tempfile(XTEMP, "$p\n");
-		&print_tempfile(XTEMP, "./$p\n");
+if ($d->{'ssl'}) {
+	# Exclude SSL certs because they are covered by backup_ssl, unless
+	# Nginx is being used
+	foreach my $s ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_csr',
+		       'ssl_newkey') {
+		my $p = $d->{$s};
+		if ($p) {
+			$p =~ s/^\Q$d->{'home'}\E\///;
+			&print_tempfile(XTEMP, "$p\n");
+			&print_tempfile(XTEMP, "./$p\n");
+			}
 		}
 	}
 &close_tempfile(XTEMP);
@@ -387,6 +404,7 @@ if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
 	}
 if (!$d->{'alias'}) {
 	foreach my $sd (&virtual_server_directories($d)) {
+		next if ($sd->[0] eq 'virtualmin-backup');   # Not all domains
 		if (!-d "$d->{'home'}/$sd->[0]") {
 			# Dir is missing
 			return &text('validate_esubdir',
@@ -856,18 +874,26 @@ sub set_home_ownership
 local ($d) = @_;
 local $hd = $config{'homes_dir'};
 $hd =~ s/^\.\///;
+local @users = grep { $_->{'unix'} && !$_->{'webowner'} }
+		    &list_domain_users($d, 1, 1, 1, 1);
 local $gid = $d->{'gid'} || $d->{'ugid'};
 foreach my $sd ($d, &get_domain_by("parent", $d->{'id'})) {
 	if (defined(&set_php_wrappers_writable)) {
 		&set_php_wrappers_writable($sd, 1);
 		}
 	}
+
+# Build list of dirs to skip (sub-domain homes and user homes)
 my @subhomes;
 if (!$d->{'parent'}) {
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
 		push(@subhomes, "$sd->{'home'}/$hd/");
 		}
 	}
+foreach my $user (@users) {
+	push(@subhomes, $user->{'home'});
+	}
+
 &open_execute_command(FIND, "find ".quotemeta($d->{'home'})." ! -type l", 1);
 LOOP: while(my $f = <FIND>) {
 	$f =~ s/\r|\n//;
@@ -884,9 +910,7 @@ foreach my $dir (&virtual_server_directories($d)) {
 	&set_ownership_permissions(undef, undef, oct($dir->[1]),
 				   $d->{'home'}."/".$dir->[0]);
 	}
-foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
-	next if ($user->{'webowner'});
-	next if (!$user->{'unix'});
+foreach my $user (@users) {
 	next if ($user->{'nocreatehome'});
 	next if (!&is_under_directory("$d->{'home'}/$hd", $user->{'home'}));
 	next if ("$d->{'home'}/$hd" eq $user->{'home'});
@@ -931,7 +955,9 @@ return ( $d->{'subdom'} || $d->{'alias'} ? ( ) :
          $d->{'subdom'} || $d->{'alias'} ? ( ) :
 		( [ &cgi_bin_dir($d, 1), $perms ] ),
          [ 'logs', '750' ],
-         [ $config{'homes_dir'}, '755' ] );
+         [ $config{'homes_dir'}, '755' ],
+	 $d->{'parent'} ? ( ) :
+		( [ 'virtualmin-backup', '700' ] ) );
 }
 
 # create_server_tmp(&domain)

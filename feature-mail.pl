@@ -194,11 +194,12 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && lc($1) eq lc($d->{'dom'}) &&
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
+local ($d, $noaliases) = @_;
 &$first_print($text{'setup_doms'});
-&obtain_lock_mail($_[0]);
-&complete_domain($_[0]);
+&obtain_lock_mail($d);
+&complete_domain($d);
 &require_mail();
-local $tmpl = &get_template($_[0]->{'template'});
+local $tmpl = &get_template($d->{'template'});
 if ($config{'mail_system'} == 1) {
 	# Just add to sendmail local domains file
 	local $conf = &sendmail::get_sendmailcf();
@@ -207,7 +208,7 @@ if ($config{'mail_system'} == 1) {
 						     \$cwfile);
 	&lock_file($cwfile) if ($cwfile);
 	&lock_file($sendmail::config{'sendmail_cf'});
-	&sendmail::add_file_or_config($conf, "w", $_[0]->{'dom'});
+	&sendmail::add_file_or_config($conf, "w", $d->{'dom'});
 	&flush_file_lines();
 	&unlock_file($sendmail::config{'sendmail_cf'});
 	&unlock_file($cwfile) if ($cwfile);
@@ -217,17 +218,17 @@ if ($config{'mail_system'} == 1) {
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Add a special postfix virtual entry just for the domain
-	&create_virtuser({ 'from' => $_[0]->{'dom'},
-			   'to' => [ $_[0]->{'dom'} ] });
+	&create_virtuser({ 'from' => $d->{'dom'},
+			   'to' => [ $d->{'dom'} ] });
 	}
 elsif ($config{'mail_system'} == 2) {
 	# Add to qmail rcpthosts file and virtualdomains file
 	local $rlist = &qmailadmin::list_control_file("rcpthosts");
-	push(@$rlist, $_[0]->{'dom'});
+	push(@$rlist, $d->{'dom'});
 	&qmailadmin::save_control_file("rcpthosts", $rlist);
 
-	local $virtmap = { 'domain' => $_[0]->{'dom'},
-			   'prepend' => $_[0]->{'prefix'}.'pfx' };
+	local $virtmap = { 'domain' => $d->{'dom'},
+			   'prepend' => $d->{'prefix'}.'pfx' };
 	&qmailadmin::create_virt($virtmap);
 	if (!$no_restart_mail) {
 		&qmailadmin::restart_qmail();
@@ -235,27 +236,27 @@ elsif ($config{'mail_system'} == 2) {
 	}
 elsif ($config{'mail_system'} == 5) {
 	# Call vpopmail domain creation program
-	local $qdom = quotemeta($_[0]->{'dom'});
-	local $qpass = quotemeta($_[0]->{'pass'});
+	local $qdom = quotemeta($d->{'dom'});
+	local $qpass = quotemeta($d->{'pass'});
 	local $qowner = '';
 	local $qdir = '';
 	if ($config{'vpopmail_owner'}) {
-		local $quid = quotemeta($_[0]->{'uid'});
-		local $qgid = quotemeta($_[0]->{'gid'});
+		local $quid = quotemeta($d->{'uid'});
+		local $qgid = quotemeta($d->{'gid'});
 		$qowner = "-i $quid -g $qgid"
 	}
 	if ($config{'vpopmail_maildir'}) {
-		local $qmdir = quotemeta($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
+		local $qmdir = quotemeta($d->{'home'}.'/'.$config{'vpopmail_maildir'});
 		$qdir = "-d $qmdir";
 		if (!-e $qmdir) {
-			mkdir($_[0]->{'home'}.'/'.$config{'vpopmail_maildir'});
-			chown($_[0]->{'uid'},$_[0]->{'gid'},$_[0]->{'home'}.'/'.$config{'vpopmail_maildir'})
+			mkdir($d->{'home'}.'/'.$config{'vpopmail_maildir'});
+			chown($d->{'uid'},$d->{'gid'},$d->{'home'}.'/'.$config{'vpopmail_maildir'})
 		}
 	}
 	local $out;
 	local $errorlabel;
-	if ($_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
-		local $aliasdom = &get_domain($_[0]->{'alias'});
+	if ($d->{'alias'} && !$d->{'aliasmail'}) {
+		local $aliasdom = &get_domain($d->{'alias'});
 		$out = &backquote_command(
 		    "$vpopbin/vaddaliasdomain $qdom $aliasdom->{'dom'} 2>&1");
 		$errorlabel = 'setup_evaddaliasdomain';
@@ -271,40 +272,40 @@ elsif ($config{'mail_system'} == 5) {
 		}
 	}
 elsif ($config{'mail_system'} == 6) {
-	&exim::add_local_domain( $_[0]->{'dom'} );
+	&exim::add_local_domain( $d->{'dom'} );
 	}
 
 &$second_print($text{'setup_done'});
 
 # Create any aliases specified in the template, if missing
-if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
+if (!$noaliases && !$d->{'no_tmpl_aliases'}) {
 	local %gotvirt;
 	foreach my $v (&list_virtusers()) {
 		$gotvirt{$v->{'from'}} = $v;
 		}
-	if ($_[0]->{'alias'}) {
+	if ($d->{'alias'}) {
 		# Alias all mail to this domain to a different domain
-		local $aliasdom = &get_domain($_[0]->{'alias'});
-		if ($supports_aliascopy && !$_[0]->{'aliasmail'}) {
-			$_[0]->{'aliascopy'} = $tmpl->{'aliascopy'};
+		local $aliasdom = &get_domain($d->{'alias'});
+		if ($supports_aliascopy && !$d->{'aliasmail'}) {
+			$d->{'aliascopy'} = $tmpl->{'aliascopy'};
 			}
-		if ($_[0]->{'aliascopy'}) {
+		if ($d->{'aliascopy'}) {
 			# Sync all virtusers from the dest domain
-			&copy_alias_virtuals($_[0], $aliasdom);
+			&copy_alias_virtuals($d, $aliasdom);
 			}
-		elsif (!$gotvirt{'@'.$_[0]->{'dom'}}) {
+		elsif (!$gotvirt{'@'.$d->{'dom'}}) {
 			# Just create a catchall
-			&create_virtuser({ 'from' => '@'.$_[0]->{'dom'},
+			&create_virtuser({ 'from' => '@'.$d->{'dom'},
 				   'to' => [ '%1@'.$aliasdom->{'dom'} ] })
 			}
 		}
-	elsif (&has_deleted_aliases($_[0])) {
+	elsif (&has_deleted_aliases($d)) {
 		# Restore aliases from before mail was deleted
-		my @deleted = &get_deleted_aliases($_[0]);
+		my @deleted = &get_deleted_aliases($d);
 		foreach my $a (@deleted) {
 			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
 			}
-		&clear_deleted_aliases($_[0]);
+		&clear_deleted_aliases($d);
 		}
 	elsif ($tmpl->{'dom_aliases'} && $tmpl->{'dom_aliases'} ne "none") {
 		# Setup aliases from this domain based on the template
@@ -319,8 +320,8 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 				# on vpopmail systems
 				next;
 				}
-			$to = &substitute_domain_template($to, $_[0]);
-			$from = $from eq "*" ? "\@$_[0]->{'dom'}" : "$from\@$_[0]->{'dom'}";
+			$to = &substitute_domain_template($to, $d);
+			$from = $from eq "*" ? "\@$d->{'dom'}" : "$from\@$d->{'dom'}";
 			if ($acreate{$from}) {
 				push(@{$acreate{$from}->{'to'}}, $to);
 				}
@@ -333,15 +334,15 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 			&create_virtuser($a) if (!$gotvirt{$a->{'from'}}++);
 			}
 		if ($tmpl->{'dom_aliases_bounce'} &&
-		    !$acreate{"\@$_[0]->{'dom'}"} &&
-		    !$gotvirt{'@'.$_[0]->{'dom'}} &&
+		    !$acreate{"\@$d->{'dom'}"} &&
+		    !$gotvirt{'@'.$d->{'dom'}} &&
 		    $config{'mail_system'} != 0) {
 			# Add bounce alias, if there isn't one yet, and if
 			# we are not running Postfix.
-			local $v = { 'from' => "\@$_[0]->{'dom'}",
+			local $v = { 'from' => "\@$d->{'dom'}",
 				     'to' => [ 'BOUNCE' ] };
 			&create_virtuser($v);
-			$gotvirt{'@'.$_[0]->{'dom'}}++;
+			$gotvirt{'@'.$d->{'dom'}}++;
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -350,33 +351,39 @@ if (!$_[1] && !$_[0]->{'no_tmpl_aliases'}) {
 # Setup default BCC address
 if ($supports_bcc && $tmpl->{'bccto'} ne 'none') {
 	&$first_print(&text('mail_bccing', $tmpl->{'bccto'}));
-	&save_domain_sender_bcc($_[0], $tmpl->{'bccto'});
+	&save_domain_sender_bcc($d, $tmpl->{'bccto'});
 	&$second_print($text{'setup_done'});
 	}
 
 # Setup any secondary MX servers
-if (!$_[0]->{'nosecondaries'}) {
-	&setup_on_secondaries($_[0]);
+if (!$d->{'nosecondaries'}) {
+	&setup_on_secondaries($d);
 	}
 
 # Create file containing all users' email addresses
-if (!$_[0]->{'alias'} && !$_[0]->{'aliasmail'}) {
-	&create_everyone_file($_[0]);
+if (!$d->{'alias'} && !$d->{'aliasmail'}) {
+	&create_everyone_file($d);
 	}
 
 # Add domain to DKIM list
-&update_dkim_domains($_[0], 'setup');
+&update_dkim_domains($d, 'setup');
 
 # Setup sender-dependent outgoing IP
-if ($supports_dependent && $_[0]->{'virt'} && $config{'dependent_mail'}) {
-	&save_domain_dependent($_[0], 1);
+if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
+	&save_domain_dependent($d, 1);
 	}
 
 # Request a call to sync to secondary MX servers after creation.
 # create_virtuser cannot do this, as the domain doesn't exist yet
-&register_post_action(\&sync_secondary_virtusers, $_[0]);
+&register_post_action(\&sync_secondary_virtusers, $d);
 
-&release_lock_mail($_[0]);
+# If enabling email after creation, maybe add autoconfig DNS records
+if (!$d->{'creating'} && $config{'mail_autoconfig'} &&
+    &domain_has_website($d) && !$d->{'alias'}) {
+	&enable_email_autoconfig($d);
+	}
+
+&release_lock_mail($d);
 return 1;
 }
 
@@ -744,9 +751,10 @@ if ($wasalias && !$isalias) {
 	return 1;
 	}
 
-# Second special case - changing of alias target
+# Second special case - changing of alias target (for a real alias domain)
 if ($_[0]->{'alias'} && $_[1]->{'alias'} &&
-    $_[0]->{'alias'} != $_[1]->{'alias'}) {
+    $_[0]->{'alias'} != $_[1]->{'alias'} &&
+    !$_[0]->{'aliasmail'}) {
 	&delete_mail($_[1]);
 	&setup_mail($_[0]);
 	return 1;
@@ -3154,28 +3162,48 @@ return 1;
 }
 
 # restore_mail(&domain, file, &options, &all-options)
+# Restore all mail aliases and mailbox users for this domain
 sub restore_mail
 {
+local ($d, $file, $opts, $allopts) = @_;
 local ($u, %olduid, @errs);
-&obtain_lock_mail($_[0]);
-&obtain_lock_unix($_[0]);
-if ($_[2]->{'mailuser'}) {
+
+# Check if users are being stored in the same remote storage, if replicating
+my $url = &get_user_database_url();
+my $burl = &read_file_contents($file."_url");
+chop($burl);
+my $sameurl;
+if ($url && $burl && $url eq $burl && $allopts->{'repl'} &&
+    !$opts->{'mailuser'}) {
+	$url =~ s/^\S+:\/\///g;
+	$sameurl = $url;
+	}
+
+&obtain_lock_mail($d);
+&obtain_lock_unix($d);
+if ($opts->{'mailuser'}) {
 	# Just doing a single user .. delete him first if he exists
-	&$first_print(&text('restore_mailusers2', $_[2]->{'mailuser'}));
-	($u) = grep { $_->{'user'} eq $_[2]->{'mailuser'} ||
-	      &remove_userdom($_->{'user'}, $_[0]) eq $_[2]->{'mailuser'} }
-	      &list_domain_users($_[0], 1);
+	&$first_print(&text('restore_mailusers2', $opts->{'mailuser'}));
+	($u) = grep { $_->{'user'} eq $opts->{'mailuser'} ||
+	      &remove_userdom($_->{'user'}, $d) eq $opts->{'mailuser'} }
+	      &list_domain_users($d, 1);
 	if ($u) {
 		$olduid{$u->{'user'}} = $u->{'uid'};
-		&delete_user($u, $_[0]);
+		&delete_user($u, $d);
 		}
 	}
 else {
 	# Delete all mailboxes (but not home dirs) and re-create
 	&$first_print($text{'restore_mailusers'});
-	foreach $u (&list_domain_users($_[0], 1)) {
-		$olduid{$u->{'user'}} = $u->{'uid'};
-		&delete_user($u, $_[0]);
+	if (!$sameurl) {
+		foreach $u (&list_domain_users($d, 1)) {
+			$olduid{$u->{'user'}} = $u->{'uid'};
+			&delete_user($u, $d);
+			}
+		}
+	else {
+		# Replicating from same LDAP DB, so no need to delete
+		&$second_print($text{'restore_mailuserssame'});
 		}
 	}
 local %exists;
@@ -3184,16 +3212,17 @@ foreach $u (&list_all_users()) {
 	}
 local $foundmailuser;
 local $_;
-open(UFILE, "$_[1]_users");
+local @users = &list_domain_users($d);
+open(UFILE, $file."_users");
 while(<UFILE>) {
 	s/\r|\n//g;
 	local @user = split(/:/, $_);
 	$_ = <UFILE>;
 	s/\r|\n//g;
-	if ($_[2]->{'mailuser'}) {
+	if ($opts->{'mailuser'}) {
 		# Skip all users except the specified one
-		if ($user[0] eq $_[2]->{'mailuser'} ||
-		    &remove_userdom($user[0], $_[0]) eq $_[2]->{'mailuser'}) {
+		if ($user[0] eq $opts->{'mailuser'} ||
+		    &remove_userdom($user[0], $d) eq $opts->{'mailuser'}) {
 			$foundmailuser = $user[0];
 			}
 		else {
@@ -3201,20 +3230,29 @@ while(<UFILE>) {
 			}
 		}
 	local @to = split(/,/, $_);
-	if ($user[0] eq $_[0]->{'user'}) {
+	if ($user[0] eq $d->{'user'}) {
 		# Domain owner, just update alias list
-		local @users = &list_domain_users($_[0]);
-		local ($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'}} @users;
+		local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		if ($uinfo) {
 			local %old = %$uinfo;
 			$uinfo->{'email'} = $user[7];
 			$uinfo->{'to'} = \@to;
-			&modify_user($uinfo, \%old, $_[0]);
+			&modify_user($uinfo, \%old, $d);
+			}
+		}
+	elsif ($sameurl) {
+		# Same LDAP server, so just update alias list for this user
+		local ($uinfo) = grep { $_->{'user'} eq $user[0] } @users;
+		if ($uinfo) {
+			local %old = %$uinfo;
+			$uinfo->{'email'} = $user[7];
+			$uinfo->{'to'} = \@to;
+			&modify_user($uinfo, \%old, $d);
 			}
 		}
 	else {
-		# Need to create user
-		local $uinfo = &create_initial_user($_[0], 0, $user[2] eq 'w');
+		# Need to re-create user
+		local $uinfo = &create_initial_user($d, 0, $user[2] eq 'w');
 		if ($exists{$user[0],$uinfo->{'unix'}}) {
 			push(@errs, &text('restore_mailexists', $user[0]));
 			next;
@@ -3223,7 +3261,7 @@ while(<UFILE>) {
 		$uinfo->{'pass'} = $user[1];
 		if ($user[2] eq 'w') {
 			# Web management user, so user same UID as server
-			$uinfo->{'uid'} = $_[0]->{'uid'};
+			$uinfo->{'uid'} = $d->{'uid'};
 			}
 		elsif ($olduid{$user[0]}) {
 			# Use old UID
@@ -3239,16 +3277,16 @@ while(<UFILE>) {
 			# Stick with original
 			$uinfo->{'uid'} = $user[2];
 			}
-		$uinfo->{'gid'} = $_[0]->{'gid'};
+		$uinfo->{'gid'} = $d->{'gid'};
 		$uinfo->{'real'} = $user[4];
 		if ($uinfo->{'fixedhome'}) {
 			# Home directory is fixed, so don't set
 			}
-		elsif ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+		elsif ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
 			# Restoring under different domain home, so need to fix
 			# user's home
 			$uinfo->{'home'} = $user[5];
-			$uinfo->{'home'} =~s/^$_[5]->{'home'}/$_[0]->{'home'}/g;
+			$uinfo->{'home'} =~s/^$_[5]->{'home'}/$d->{'home'}/g;
 			}
 		else {
 			# Use home from original
@@ -3291,11 +3329,11 @@ while(<UFILE>) {
 
 		# Check for possible DB username clashes
 		#foreach my $dt (&unique(map { $_->{'type'} }
-		#			&domain_databases($_[0]))) {
+		#			&domain_databases($d))) {
 		#	local $cfunc = "check_".$dt."_user_clash";
 		#	next if (!defined(&$cfunc));
 		#	local $ufunc = $dt."_username";
-		#	if (&$cfunc($_[0], &$ufunc($uinfo->{'user'}))) {
+		#	if (&$cfunc($d, &$ufunc($uinfo->{'user'}))) {
 		#		# Clash found! Don't create this DB type login
 		#		@{$uinfo->{'dbs'}} =
 		#			grep { $_->{'type'} ne $dt }
@@ -3305,21 +3343,21 @@ while(<UFILE>) {
 		#	}
 
 		# Create the user, which will also add any configured DB account
-		&create_user($uinfo, $_[0]);
+		&create_user($uinfo, $d);
 
 		# Create an empty mail file, which may be needed if inbox
 		# location has moved
 		if ($uinfo->{'email'} && !$uinfo->{'nomailfile'}) {
-			&create_mail_file($uinfo, $_[0], 1);
+			&create_mail_file($uinfo, $d, 1);
 			}
 
 		# If the user's home is outside the domain's home, re-extract
 		# it from the backup
 		if ($uinfo->{'unix'} &&
-		    !&is_under_directory($_[0]->{'home'}, $uinfo->{'home'})) {
-			local $file = $_[1]."_homes_".$uinfo->{'user'};
+		    !&is_under_directory($d->{'home'}, $uinfo->{'home'})) {
+			local $file = $file."_homes_".$uinfo->{'user'};
 			if (!-d $uinfo->{'home'}) {
-				&create_user_home($uinfo, $_[0]);
+				&create_user_home($uinfo, $d);
 				}
 			local $out;
 			&execute_command(
@@ -3332,87 +3370,87 @@ while(<UFILE>) {
 close(UFILE);
 
 # Restore plain-text password file too
-if (-r "$_[1]_plainpass") {
+if (-r $file."_plainpass") {
 	if ($_[2]->{'mailuser'}) {
 		# Just copy one plain password
 		local (%oldplain, %newplain);
-		&read_file("$_[1]_plainpass", \%oldplain);
-		&read_file("$plainpass_dir/$_[0]->{'id'}", \%newplain);
+		&read_file($file."_plainpass", \%oldplain);
+		&read_file("$plainpass_dir/$d->{'id'}", \%newplain);
 		$newplain{$_[2]->{'mailuser'}} = $oldplain{$_[2]->{'mailuser'}};
 		$newplain{$_[2]->{'mailuser'}." encrypted"} =
 			$oldplain{$_[2]->{'mailuser'}." encrypted"};
-		&write_file("$plainpass_dir/$_[0]->{'id'}", \%newplain);
+		&write_file("$plainpass_dir/$d->{'id'}", \%newplain);
 		}
 	else {
 		# Copy the whole file
-		&copy_source_dest("$_[1]_plainpass",
-				  "$plainpass_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_plainpass",
+				  "$plainpass_dir/$d->{'id'}");
 		}
 	}
 
 # Restore hashed password file too
-if (-r "$_[1]_hashpass") {
+if (-r $file."_hashpass") {
 	if ($_[2]->{'mailuser'}) {
 		# Just copy one hash password
 		local (%oldhash, %newhash);
-		&read_file("$_[1]_hashpass", \%oldhash);
-		&read_file("$hashpass_dir/$_[0]->{'id'}", \%newhash);
+		&read_file($file."_hashpass", \%oldhash);
+		&read_file("$hashpass_dir/$d->{'id'}", \%newhash);
 		foreach my $s (@hashpass_types) {
 			$newhash{$_[2]->{'mailuser'}.' '.$s} =
 				$oldhash{$_[2]->{'mailuser'}.' '.$s};
 			}
-		&write_file("$hashpass_dir/$_[0]->{'id'}", \%newhash);
+		&write_file("$hashpass_dir/$d->{'id'}", \%newhash);
 		}
 	else {
 		# Copy the whole file
-		&copy_source_dest("$_[1]_hashpass",
-				  "$hashpass_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_hashpass",
+				  "$hashpass_dir/$d->{'id'}");
 		}
 	}
 
 # Restore no-spam flags file too
-if (-r "$_[1]_nospam") {
+if (-r $file."_nospam") {
 	if ($_[2]->{'mailuser'}) {
 		# Just copy one flag
 		local (%oldspam, %newspam);
-		&read_file("$_[1]_nospam", \%oldspam);
-		&read_file("$nospam_dir/$_[0]->{'id'}", \%newspam);
+		&read_file($file."_nospam", \%oldspam);
+		&read_file("$nospam_dir/$d->{'id'}", \%newspam);
 		$newspam{$_[2]->{'mailuser'}} = $oldspam{$_[2]->{'mailuser'}};
-		&write_file("$nospam_dir/$_[0]->{'id'}", \%newspam);
+		&write_file("$nospam_dir/$d->{'id'}", \%newspam);
 		}
 	else {
 		# Copy the whole file
-		&copy_source_dest("$_[1]_nospam",
-				  "$nospam_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_nospam",
+				  "$nospam_dir/$d->{'id'}");
 		}
 	}
 
 # Restore BCC files
-if ($supports_bcc && -r "$_[1]_bcc") {
-	local $bcc = &read_file_contents("$_[1]_bcc");
+if ($supports_bcc && -r $file."_bcc") {
+	local $bcc = &read_file_contents($file."_bcc");
 	chop($bcc);
-	&save_domain_sender_bcc($_[0], $bcc);
+	&save_domain_sender_bcc($d, $bcc);
 	}
-if ($supports_bcc == 2 && -r "$_[1]_rbcc") {
-	local $rbcc = &read_file_contents("$_[1]_rbcc");
+if ($supports_bcc == 2 && -r $file."_rbcc") {
+	local $rbcc = &read_file_contents($file."_rbcc");
 	chop($rbcc);
-	&save_domain_recipient_bcc($_[0], $rbcc);
+	&save_domain_recipient_bcc($d, $rbcc);
 	}
 
 # Restore sender-dependent IP
-if ($supports_dependent && -r "$_[1]_dependent") {
-	local $dependent = &read_file_contents("$_[1]_dependent");
+if ($supports_dependent && -r $file."_dependent") {
+	local $dependent = &read_file_contents($file."_dependent");
 	chop($dependent);
-	&save_domain_dependent($_[0], $dependent ? 1 : 0);
+	&save_domain_dependent($d, $dependent ? 1 : 0);
 	}
 
 # Restore custom DKIM key
-if ($_[0]->{'mail'} && !$_[0]->{'alias'} && $config{'dkim_enabled'} &&
-    -r $_[1]."_domdkim") {
-	local $key = &read_file_contents($_[1]."_domdkim");
+if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'} &&
+    -r $file."_domdkim") {
+	local $key = &read_file_contents($file."_domdkim");
 	&push_all_print();
 	&set_all_null_print();
-	&save_domain_dkim_key($_[0], $key);
+	&save_domain_dkim_key($d, $key);
 	&pop_all_print();
 	}
 
@@ -3431,12 +3469,12 @@ if (!$_[2]->{'mailuser'}) {
 	# such as mailman)
 	&$first_print($text{'restore_mailaliases'});
 	local $a;
-	foreach $a (&list_domain_aliases($_[0], 1)) {
+	foreach $a (&list_domain_aliases($d, 1)) {
 		&delete_virtuser($a);
 		}
 	local %existing = map { $_->{'from'}, $_ } &list_virtusers();
 	local $_;
-	open(AFILE, "$_[1]_aliases");
+	open(AFILE, $file."_aliases");
 	while(<AFILE>) {
 		if (/^(\S+):\s*(.*)/) {
 			local $virt = { 'from' => $1,
@@ -3461,18 +3499,18 @@ if (!$_[2]->{'mailuser'}) {
 			}
 		}
 	close(AFILE);
-	&sync_alias_virtuals($_[0]);
+	&sync_alias_virtuals($d);
 	&$second_print($text{'setup_done'});
 	}
 
 # Get users whose mail files may need to be moved
 &foreign_require("mailboxes");
-local @users = &list_domain_users($_[0]);
+local @users = &list_domain_users($d);
 if ($_[2]->{'mailuser'}) {
 	@users = grep { $_->{'user'} eq $foundmailuser } @users;
 	}
 
-if (-r "$_[1]_files" &&
+if (-r $file."_files" &&
     (!$_[2]->{'mailuser'} || $foundmailuser)) {
 	local $xtract;
 	if (!&mail_under_home()) {
@@ -3490,12 +3528,12 @@ if (-r "$_[1]_files" &&
 	if ($_[2]->{'mailuser'}) {
 		# Just do one user
 		&$first_print(&text('restore_mailfiles3', $_[2]->{'mailuser'}));
-		&execute_command("cd '$xtract' && tar xf '$_[1]_files' '$foundmailuser' 2>&1", undef, \$out, \$out);
+		&execute_command("cd '$xtract' && tar xf '${file}_files' '$foundmailuser' 2>&1", undef, \$out, \$out);
 		}
 	else {
 		# Do all users
 		&$first_print($text{'restore_mailfiles'});
-		&execute_command("cd '$xtract' && tar xf '$_[1]_files' 2>&1",
+		&execute_command("cd '$xtract' && tar xf '${file}_files' 2>&1",
 				 undef, \$out, \$out);
 		}
 	if ($?) {
@@ -3554,7 +3592,7 @@ elsif (!&mail_under_home()) {
 # and if so copy them across
 local %mconfig = &foreign_config("mailboxes");
 local $newdir = $mconfig{'mail_usermin'};
-local $olddir = $_[0]->{'backup_mail_folders'};
+local $olddir = $d->{'backup_mail_folders'};
 if ($newdir && $olddir && $newdir ne $olddir && @users) {
 	# Need to migrate, such as when moving from a system using ~/mail/mbox
 	# to ~/Maildir/.dir
@@ -3618,12 +3656,12 @@ if ($newdir && $olddir && $newdir ne $olddir && @users) {
 	}
 
 # Restore Cron job files
-if (-r "$_[1]_cron") {
+if (-r $file."_cron") {
 	&$first_print($text{'restore_mailcrons'});
 	&foreign_require("cron");
-	foreach $u (&list_domain_users($_[0], 1)) {
+	foreach $u (&list_domain_users($d, 1)) {
 		next if ($_[2]->{'mailuser'} && $u->{'user'} ne $foundmailuser);
-		local $cf = $_[1]."_cron_".$u->{'user'};
+		local $cf = $file."_cron_".$u->{'user'};
 		$cf = "/dev/null" if (!-r $cf);
 		&copy_source_dest($cf, $cron::cron_temp_file);
 		&cron::copy_crontab($u->{'user'});
@@ -3632,7 +3670,7 @@ if (-r "$_[1]_cron") {
 	}
 
 # Restore Dovecot control files
-if (-r "$_[1]_control" && &foreign_check("dovecot") &&
+if (-r $file."_control" && &foreign_check("dovecot") &&
 			  &foreign_installed("dovecot")) {
 	&foreign_require("dovecot");
         local $conf = &dovecot::get_config();
@@ -3644,7 +3682,7 @@ if (-r "$_[1]_control" && &foreign_check("dovecot") &&
 		local $control = $1;
 		&$first_print($text{'restore_mailcontrol'});
 		local $cmd = "cd ".quotemeta($control)." && ".
-                             "tar xf ".quotemeta($_[1]."_control");
+                             "tar xf ".quotemeta($file."_control");
 		if ($_[2]->{'mailuser'}) {
 			# Limit extract to one user
 			$cmd .= " ".quotemeta($_[2]->{'mailuser'});
@@ -3663,7 +3701,7 @@ if (-r "$_[1]_control" && &foreign_check("dovecot") &&
 			}
 
 		# Fix up control file permissions for users in this domain
-		foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
+		foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 			next if ($_[2]->{'mailuser'} &&
 				 $_[2]->{'mailuser'} ne $u->{'user'});
 			&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
@@ -3673,8 +3711,8 @@ if (-r "$_[1]_control" && &foreign_check("dovecot") &&
 	}
 
 # Set mailbox user home directory permissions
-local $hb = "$_[0]->{'home'}/$config{'homes_dir'}";
-foreach $u (&list_domain_users($_[0], 1)) {
+local $hb = "$d->{'home'}/$config{'homes_dir'}";
+foreach $u (&list_domain_users($d, 1)) {
 	if (-d $u->{'home'} && &is_under_directory($hb, $u->{'home'}) &&
 	    (!$_[2]->{'mailuser'} || $u->{'user'} eq $foundmailuser)) {
 		&execute_command("chown -R $u->{'uid'}:$u->{'gid'} ".
@@ -3683,10 +3721,10 @@ foreach $u (&list_domain_users($_[0], 1)) {
 	}
 
 # Create autoreply file links
-&create_autoreply_alias_links($_[0]);
+&create_autoreply_alias_links($d);
 
-&release_lock_mail($_[0]);
-&release_lock_unix($_[0]);
+&release_lock_mail($d);
+&release_lock_unix($d);
 return 1;
 }
 
