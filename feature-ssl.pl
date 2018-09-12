@@ -2379,9 +2379,9 @@ my ($d) = @_;
 my $combfile = &default_certificate_file($d, 'combined');
 &lock_file($combfile);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($combfile);
@@ -2392,10 +2392,10 @@ $d->{'ssl_combined'} = $combfile;
 my $everyfile = &default_certificate_file($d, 'everything');
 &lock_file($everyfile);
 &open_tempfile_as_domain_user($d, COMB, ">$everyfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'}));
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'})."\n");
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($everyfile);
