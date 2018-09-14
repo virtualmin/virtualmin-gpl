@@ -33,8 +33,8 @@ if ($virt) {
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
-			if ($h eq "proxy:fcgi://localhost:$fport" ||
-			    $h eq "proxy:fcgi:$fsock") {
+			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
+			    $h =~ /proxy:fcgi:/) {
 				return 'fpm';
 				}
 			}
