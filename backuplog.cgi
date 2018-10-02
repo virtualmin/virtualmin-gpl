@@ -64,6 +64,8 @@ if (@logs) {
 			&make_date($log->{'start'}),
 			&short_nice_hour_mins_secs(
 				$log->{'end'} - $log->{'start'}),
+			$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
+						   $text{'viewbackup_inc0'},
 			&nice_size($log->{'size'}),
 			$log->{'ok'} && !$log->{'errdoms'} ? $text{'yes'} :
 			 $log->{'ok'} && $log->{'errdoms'} ?
@@ -75,6 +77,7 @@ if (@logs) {
 				  $text{'backuplog_who'},
 				  $text{'backuplog_when'},
 				  $text{'backuplog_len'},
+				  $text{'backuplog_type'},
 				  $text{'backuplog_size'},
 				  $text{'backuplog_ok2'} ],
 				100, \@table);

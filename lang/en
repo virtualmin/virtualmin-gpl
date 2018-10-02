@@ -6095,6 +6095,7 @@ backuplog_sched=Showing logs from scheduled backup to $1 ..
 backuplog_when=Started
 backuplog_who=Made by
 backuplog_len=Run time
+backuplog_incr=Type
 backuplog_size=Final size
 backuplog_ok2=OK?
 backuplog_nomatch=No backup logs matching your search were found.
