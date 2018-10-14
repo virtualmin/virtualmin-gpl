@@ -171,6 +171,9 @@ else {
 		}
 	$sched->{'enabled'} = $in{'enabled'};
 	$sched->{'kill'} = $in{'kill'};
+	if (&master_admin()) {
+		$sched->{'ownrestore'} = $in{'ownrestore'};
+		}
 	if (&can_backup_commands()) {
 		$sched->{'before'} = $in{'before_def'} ? undef : $in{'before'};
 		$sched->{'after'} = $in{'after_def'} ? undef : $in{'after'};

@@ -2223,6 +2223,7 @@ backup_onebyone=Transfer each virtual server after it is backed up
 backup_kill=Action if destination is in use
 backup_kill0=Cancel this backup
 backup_kill1=Kill the running backup
+backup_ownrestore=Can be restored by virtual server owners?
 backup_now=Backup Now
 backup_bg=Backup In Background
 backup_save=Save Schedule

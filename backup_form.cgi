@@ -308,6 +308,13 @@ if ($in{'sched'} || $in{'new'}) {
 			  [ [ 0, $text{'backup_kill0'} ],
 			    [ 1, $text{'backup_kill1'} ] ]));
 
+	# Can be restored by domain owners?
+	if (&master_admin()) {
+		print &ui_table_row(
+			&hlink($text{'backup_ownrestore'}, "backup_ownrestore"),
+			&ui_yesno_radio("ownrestore", $sched->{'ownrestore'}));
+		}
+
 	# Enabled/disabled input
 	print &ui_table_row(&hlink($text{'backup_when'}, "backup_when"),
 		&virtualmin_ui_show_cron_time("enabled", $sched->{'enabled'} ? $sched : undef, $text{'backup_disabled'}));
