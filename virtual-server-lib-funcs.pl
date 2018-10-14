@@ -3541,6 +3541,12 @@ foreach my $d (&sort_indent_domains($doms)) {
 				}
 			push(@cols, $ver);
 			}
+		elsif ($c eq "ip") {
+			# IP address
+			my $ip = $d->{'ip'};
+			$ip = "<i>$ip</i>" if ($d->{'virt'});
+			push(@cols, $ip);
+			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
 			push(@cols, &html_escape($d->{$c}));
