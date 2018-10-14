@@ -33,8 +33,8 @@ if ($virt) {
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
-			if ($h eq "proxy:fcgi://localhost:$fport" ||
-			    $h eq "proxy:fcgi:$fsock") {
+			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
+			    $h =~ /proxy:fcgi:/) {
 				return 'fpm';
 				}
 			}
@@ -1280,6 +1280,8 @@ sub get_global_php_ini
 local ($ver, $mode) = @_;
 local $nodotv = $ver;
 $nodotv =~ s/\.//g;
+local $shortv = $ver;
+$shortv =~ s/^(\d+\.\d+)\..*$/$1/g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/opt/rh/php$nodotv/lib/php.ini",
 	       "/opt/remi/php$nodotv/root/etc/php.ini",
@@ -1288,11 +1290,17 @@ foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
 				     "/etc/php$ver/apache2/php.ini",
 				     "/etc/php$nodotv/apache/php.ini",
-                                     "/etc/php$nodotv/apache2/php.ini")
+                                     "/etc/php$nodotv/apache2/php.ini",
+				     "/etc/php$shortv/apache/php.ini",
+                                     "/etc/php$shortv/apache2/php.ini",
+				    )
 				  : ("/etc/php$ver/cgi/php.ini",
 				     "/etc/php$nodotv/cgi/php.ini",
+				     "/etc/php$shortv/cgi/php.ini",
 				     "/etc/php/$ver/cgi/php.ini",
-				     "/etc/php/$nodotv/cgi/php.ini"),
+				     "/etc/php/$nodotv/cgi/php.ini",
+				     "/etc/php/$shortv/cgi/php.ini",
+				    ),
 	       "/opt/csw/php$ver/lib/php.ini",
 	       "/usr/local/lib/php.ini",
 	       "/usr/local/etc/php.ini",

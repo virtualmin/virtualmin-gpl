@@ -60,7 +60,10 @@ if (@logs) {
 
 	if (!$already) {
 		# Add the new section
-		local $lconf = { 'file' => &logrotate::get_add_file($_[0]->{'dom'}),
+		local $file = &logrotate::get_add_file(
+			$tmpl->{'logrotate_shared'} eq 'yes' ?
+			    'virtualmin' : $_[0]->{'dom'});
+		local $lconf = { 'file' => $file,
 				 'name' => \@logs };
 		local $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {

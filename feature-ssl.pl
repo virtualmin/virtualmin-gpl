@@ -1,3 +1,4 @@
+# XXX SSL cert linkage should be broken when an incompatible cert is installed
 
 sub init_ssl
 {
@@ -1155,10 +1156,10 @@ $h || return "Unknown SSL file type $type";
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
 local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
 local $end = quotemeta("-----END ").$h.quotemeta("-----");
-$lines[0] =~ /^$begin$/ || return "Data does not start with line ".
-				  "-----BEGIN $h-----";
-$lines[$#lines] =~ /^$end$/ || return "Data does not end with line ".
-				      "-----END $h-----";
+$lines[0] =~ /^$begin$/ ||
+	return "Data starts with $lines[0] , but expected -----BEGIN $h-----";
+$lines[$#lines] =~ /^$end$/ ||
+	return "Data ends with $lines[$#lines] , but expected -----END $h-----";
 for(my $i=1; $i<$#lines; $i++) {
 	$lines[$i] =~ /^[A-Za-z0-9\+\/=]+\s*$/ ||
 	    ($type eq 'ca' && ($lines[$i] =~ /^$begin$/ ||
@@ -1992,6 +1993,7 @@ local @flags = ( [ "smtpd_tls_cert_file",
 		   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
 push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 push(@flags, [ "smtpd_tls_security_level", "may" ]);
+push(@flags, [ "myhostname", $d->{'dom'} ]);
 
 local $changed = 0;
 foreach my $pfx ('smtp', 'submission') {
@@ -2379,9 +2381,9 @@ my ($d) = @_;
 my $combfile = &default_certificate_file($d, 'combined');
 &lock_file($combfile);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($combfile);
@@ -2392,10 +2394,10 @@ $d->{'ssl_combined'} = $combfile;
 my $everyfile = &default_certificate_file($d, 'everything');
 &lock_file($everyfile);
 &open_tempfile_as_domain_user($d, COMB, ">$everyfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'}));
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'}));
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'})."\n");
+&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'}));
+	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($everyfile);

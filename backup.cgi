@@ -196,7 +196,7 @@ if ($dests[0] eq "download:") {
 		print "\n";
 		open(TEMP, $temp);
 		unlink($temp);
-		while(read(TEMP, $buf, 1024) > 0) {
+		while(read(TEMP, $buf, 32768) > 0) {
 			print $buf;
 			}
 		close(TEMP);
