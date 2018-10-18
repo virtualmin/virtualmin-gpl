@@ -36,7 +36,7 @@ $mm = { 'minfo' => { },
 
 # Check that the MySQL connection works, and delete if not
 $mod = $mm->{'minfo'}->{'dir'};
-&foreign_require($mod);
+&foreign_require($mod, "mysql-lib.pl");
 ($ok, $err) = &foreign_call($mod, "is_mysql_running");
 if ($ok != 1) {
 	&delete_remote_mysql_module($mm);
