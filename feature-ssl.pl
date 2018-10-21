@@ -2038,6 +2038,7 @@ foreach my $pfx ('smtp', 'submission') {
 				$already->{'command'} .=
 					" -o ".$f->[0]."=".$f->[1];
 				}
+			$already->{'command'} =~ s/-o smtpd_(client|helo|sender)_restrictions=\$mua_client_restrictions\s+//g;
 			&postfix::create_master($already);
 			$changed = 1;
 
