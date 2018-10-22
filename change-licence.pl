@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 =head1 change-licence.pl
 
@@ -128,19 +128,18 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 	}
 
 # Update Virtualmin licence file
-&$first_print("Updating Virtualmin license file ..");
+&$first_print("Updating Virtualmin license file .. $virtualmin_license_file");
 &lock_file($virtualmin_license_file);
 %lfile = ( 'SerialNumber' => $serial,
            'LicenseKey' => $key );
-if (!$nocheck) {
-	($status, $err) = &update_licence_from_site(\%lfile);
-	}
-else {
-	$status = 0;	# Assume it worked
-	}
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
 if ($status == 0) {
+	# Update the status file
+	&read_file($licence_status, \%licence);
+	&update_licence_from_site(\%licence);
+	&write_file($licence_status, \%licence);
+
 	&$second_print(".. done");
 	}
 else {
