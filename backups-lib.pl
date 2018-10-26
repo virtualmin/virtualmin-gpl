@@ -3649,7 +3649,8 @@ elsif ($proto == 8) {
 else {
 	$rv = $url;
 	}
-if ($caps && !$current_lang_info->{'charset'} && $rv ne $url) {
+if ($caps && (!$current_lang_info->{'charset'} || $current_lang =~ /^en/) &&
+    $rv ne $url) {
 	# Make first letter upper case
 	$rv = ucfirst($rv);
 	}
@@ -4289,18 +4290,35 @@ else {
 
 # can_backup_log([&log])
 # Returns 1 if the current user can view backup logs, and if given a specific
-# log entry
+# log entry returns 1 if the user can view that log.
 sub can_backup_log
 {
 local ($log) = @_;
 return 1 if (&master_admin());
-return 0 if (!&can_backup_domain());
 if ($log) {
 	# Only allow non-admins to view their own logs
 	local @dnames = &backup_log_own_domains($log);
-	return @dnames ? 1 : 0;
+	if (!@dnames) {
+		# None of this user's domains are in the backup
+		return 0;
+		}
+	elsif (&master_admin() || $log->{'user'} eq $base_remote_user) {
+		# Backup was created by this user, or user is root
+		return 1;
+		}
+	elsif ($log->{'ownrestore'}) {
+		# Backup was created by root, but includes this user's domains
+		return 2;
+		}
+	return 0;
 	}
-return 1;
+else {
+	# Do any schedules that allow restore by the domain owner exist?
+	foreach my $s (&list_scheduled_backups()) {
+		return 1 if ($s->{'ownrestore'});
+		}
+	}
+return &can_backup_domain() ? 1 : 0;
 }
 
 # can_backup_keys()
@@ -4323,7 +4341,7 @@ sub backup_log_own_domains
 local ($log, $errormode) = @_;
 local @dnames = split(/\s+/, $errormode ? $log->{'errdoms'} : $log->{'doms'});
 return @dnames if (&master_admin() || $log->{'user'} eq $remote_user);
-if ($config{'own_restore'}) {
+if ($log->{'ownrestore'}) {
 	local @rv;
 	foreach my $d (&get_domains_by_names(@dnames)) {
 		push(@rv, $d->{'dom'}) if (&can_edit_domain($d));
@@ -4810,12 +4828,12 @@ return $ok;
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
-# 		   [schedule-id], [separate-format])
+# 		   [schedule-id], [separate-format], [allow-owner-restore])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms, $user, $key, $schedid, $separate) = @_;
+       $output, $errdoms, $user, $key, $schedid, $separate, $ownrestore) = @_;
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -4833,6 +4851,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'sched' => $schedid,
 	       'compression' => $config{'compression'},
 	       'separate' => $separate,
+	       'ownrestore' => $ownrestore,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;

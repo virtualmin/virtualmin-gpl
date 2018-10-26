@@ -194,7 +194,7 @@ foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $sched->{'increment'}, $start_time,
 			  $size, $ok, "sched", $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
-			  $sched->{'fmt'});
+			  $sched->{'fmt'}, $sched->{'ownrestore'});
 	}
 
 PREFAILED:

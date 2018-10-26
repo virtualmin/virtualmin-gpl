@@ -48,7 +48,6 @@ post_check=Oppdater alle Webmin brukere etter konfigurasjonsendringer,1,1-Ja,0-N
 webmin_modules=Ekstra Webmin moduler for tjener administratorer,15,modules,webmin_modules
 webmin_theme=Webmin tema for tjener administratorer,15,theme,webmin_theme
 usermin_switch=Tillat innlogging til Usermin som postbokser,1,1-Ja,0-Nei
-own_restore=Kan gjenopprette sikkerhetskopier utf&#248;rt av master admin?,1,1-Ja,0-Nei
 line2=Standarder for nye domener,11
 home_base=Base for hjemmekataloger,3,Fra modulen Brukere og grupper
 home_format=Hjem underkatalog,10,-Automatisk,Fra mal (kan bruke $USER og $DOM)
