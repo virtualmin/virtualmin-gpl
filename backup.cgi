@@ -31,7 +31,7 @@ if ($in{'bg'}) {
 		&$second_print($text{'backup_started2'});
 		}
 
-	&ui_print_footer("list_sched.cgi", $text{'sched_return'});
+	&ui_print_footer("/$module_name/list_sched.cgi", $text{'sched_return'});
 	exit;
 	}
 

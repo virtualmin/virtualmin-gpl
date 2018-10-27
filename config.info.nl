@@ -46,7 +46,6 @@ webmin_modules=Extra Webmin modules voor server administrators,15,modules,webmin
 webmin_theme=Webmin theme voor server administrators,15,theme,webmin_theme
 show_tabs=Categoriseren van Webmin modules op hoofd pagina?,1,1-Ja,0-Nee
 usermin_switch=Inloggen toestaan bij Usermin als mailboxen?,1,1-Ja,0-Nee
-own_restore=Mag backup's herstellen die gemaakt zijn door de master admin?,1,1-Ja,0-Nee
 line2=Standaard voor nieuwe domeinen,11
 home_base=Home directory basis,3,Van gebruikers en groepen module
 home_format=Home subdirectory,10,-Automatisch,Van template (maak gebruik van $USER en $DOM)

@@ -172,6 +172,9 @@ else {
 	$sched->{'enabled'} = $in{'enabled'};
 	$sched->{'kill'} = $in{'kill'};
 	if (&master_admin()) {
+		if ($in{'ownrestore'} && !$key) {
+			&error($text{'backup_eownrestore'});
+			}
 		$sched->{'ownrestore'} = $in{'ownrestore'};
 		}
 	if (&can_backup_commands()) {

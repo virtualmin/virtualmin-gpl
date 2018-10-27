@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 $in{'id'} =~ /^[0-9\.\-]+$/ || &error($text{'viewbackup_eid'});
 $log = &get_backup_log($in{'id'});
 $log || &error($text{'viewbackup_egone'});
-&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
+&can_backup_log($log) == 1 || &error($text{'viewbackup_ecannot'});
 @alldnames = split(/\s+/, $log->{'doms'});
 @owndnames = &backup_log_own_domains($log);
 scalar(@alldnames) == scalar(@owndnames) ||

@@ -2964,9 +2964,11 @@ if (!$mm->{'minfo'}->{'dir'}) {
 			  $mm->{'config'}->{'port'} ||
 			  $sock ||
 			  'local');
+	$mm->{'minfo'}->{'dir'} =~ s/\./-/g;
 	if (&foreign_check($mm->{'minfo'}->{'dir'})) {
 		# Clash! Try appending username
 		$mm->{'minfo'}->{'dir'} .= "-".($mm->{'config'}->{'user'} || 'root');
+		$mm->{'minfo'}->{'dir'} =~ s/\./-/g;
 		if (&foreign_check($mm->{'minfo'}->{'dir'})) {
 			&error("The module ".$mm->{'minfo'}->{'dir'}.
 			       " already exists");

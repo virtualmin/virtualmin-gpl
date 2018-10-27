@@ -6,7 +6,8 @@ require './virtual-server-lib.pl';
 $in{'id'} =~ /^[0-9\.\-]+$/ || &error($text{'viewbackup_eid'});
 $log = &get_backup_log($in{'id'});
 $log || &error($text{'viewbackup_egone'});
-&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
+$can = &can_backup_log($log);
+$can || &error($text{'viewbackup_ecannot'});
 
 &ui_print_header(undef, $text{'viewbackup_title'}, "");
 
@@ -62,6 +63,10 @@ print &ui_table_row($text{'viewbackup_inc'},
 	$log->{'increment'} == 1 ? $text{'viewbackup_inc1'} :
 	$log->{'increment'} == 2 ? $text{'viewbackup_inc2'} :
 			    	   $text{'viewbackup_inc0'});
+
+# Can be restored by owners?
+print &ui_table_row($text{'viewbackup_ownrestore'},
+	$log->{'ownrestore'} ? $text{'yes'} : $text{'no'});
 
 # Compression format?
 if (defined($log->{'compression'})) {
@@ -121,8 +126,10 @@ if (@dnames == @alldnames) {
 	}
 
 if ($log->{'ok'} || $log->{'errdoms'}) {
-	print &ui_form_end([ [ undef, $text{'viewbackup_restore'} ],
-			     [ 'delete', $text{'viewbackup_delete'} ] ]);
+	print &ui_form_end([
+		[ undef, $text{'viewbackup_restore'} ],
+		$can == 2 ? ( ) : ( [ 'delete', $text{'viewbackup_delete'} ] )
+		]);
 	}
 else {
 	print &ui_form_end();

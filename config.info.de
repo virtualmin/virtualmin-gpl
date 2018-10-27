@@ -45,7 +45,6 @@ post_check=Alle Webminbenutzer nach Konfigurations&#228;nderungen aktualisieren?
 webmin_modules=Zus&#228;tzliche Webminmodule f&#252;r Serveradmins aktivieren,15,modules,webmin_modules
 webmin_theme=Webmin&#45;Design f&#252;r neue Webminbenutzer,15,theme,webmin_theme
 usermin_switch=Usermin-Logins zu Mailbox erlauben?,1,1-Ja,0-Nein
-own_restore=K&#246;nnen Backups&#44; welche von Master Admin erstellt worden&#44; wiederherzustellen?,1,1-Ja,0-Nein
 line2=Standardeinstellungen f&#252;r neue Domainen,11
 home_base=Heimatverzeichnis in,3,Aus dem Benutzer&#45; und Gruppenmodul ermitteln
 home_format=Heimatunterverzeichnis,10,-Automatisch,Aus der Vorlage (darf $USER and $DOM benutzen)

@@ -2374,6 +2374,7 @@ backup_copy=Copying to additional destination $1 ..
 backup_copyfailed=.. copy failed : $1
 backup_ekey=The selected backup key does not exist!
 backup_ekeycannot=You are not allowed to use the selected backup key
+backup_eownrestore=Only signed backups can be restored by virtual server owners
 
 backup_dirtar=Creating TAR file of home directory ..
 backup_dirtarinc=Creating incremental TAR file of home directory ..
@@ -6146,6 +6147,7 @@ viewbackup_nokey=Yes, but with missing key $1
 viewbackup_key=Yes, with key $1
 viewbackup_sched=From scheduled backup
 viewbackup_gone=ID $1 (deleted)
+viewbackup_ownrestore=Owners can restore?
 
 dbackup_err=Failed to delete backup
 dbackup_title=Delete Backup
