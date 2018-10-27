@@ -132,15 +132,14 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 &lock_file($virtualmin_license_file);
 %lfile = ( 'SerialNumber' => $serial,
            'LicenseKey' => $key );
-if (!$nocheck) {
-	($status, $err) = &update_licence_from_site(\%lfile);
-	}
-else {
-	$status = 0;	# Assume it worked
-	}
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
-if ($status == 0) {
+if ($status == 0 && !$nocheck) {
+	# Update the status file
+	&read_file($licence_status, \%licence);
+	&update_licence_from_site(\%licence);
+	&write_file($licence_status, \%licence);
+
 	&$second_print(".. done");
 	}
 else {
