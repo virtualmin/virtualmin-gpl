@@ -13489,7 +13489,11 @@ if ($dom) {
 if ($user) {
 	&$first_print(&text('rename_doinguser', "<tt>$user</tt>"));
 	}
-if ($home) {
+if ($home eq 'auto') {
+	&$first_print(&text('rename_doinghome',
+		"<tt>".&server_home_directory($d, $parentdom)."</tt>"));
+	}
+elsif ($home) {
 	&$first_print(&text('rename_doinghome', "<tt>$home</tt>"));
 	}
 
