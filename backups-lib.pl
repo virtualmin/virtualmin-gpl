@@ -4290,7 +4290,8 @@ else {
 
 # can_backup_log([&log])
 # Returns 1 if the current user can view backup logs, and if given a specific
-# log entry returns 1 if the user can view that log.
+# log entry returns 1 if the user can view that log (or 2 if they can but it
+# was created by root)
 sub can_backup_log
 {
 local ($log) = @_;

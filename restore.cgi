@@ -20,7 +20,11 @@ if ($in{'log'}) {
 	$log || &error($text{'viewbackup_egone'});
 	&can_backup_log($log) || &error($text{'viewbackup_ecannot'});
 	$src = $log->{'dest'};
-	$safe_backup = $log->{'owner'} eq $remote_user ? 0 : 1;
+
+	# Can all features of this backup be restored? Only true for backups
+	# created by root
+	$safe_backup = $log->{'owner'} ne $remote_user ||
+		       $log->{'ownrestore'};
 	}
 elsif ($in{'src'}) {
 	$src = $in{'src'};
@@ -142,6 +146,18 @@ if ($crmode == 1) {
 	}
 
 ($cont, $contdoms) = &backup_contents($src, 1, $key, $d);
+if ($log && ref($cont)) {
+	# Limit to domains in the backup that the user has access to
+	my %dnames = map { $_, 1 } &backup_log_own_domains($log);
+	foreach my $k (keys $cont) {
+		if (!$dnames{$k}) {
+			delete($cont->{$k});
+			}
+		}
+	if ($contdoms) {
+		$contdoms = [ grep { $dnames{$_->{'dom'}} } @$contdoms ];
+		}
+	}
 if (!$in{'confirm'}) {
 	# See what is in the tar file or directory, to show the user
 	ref($cont) || &error(&text('restore_efile', $cont));

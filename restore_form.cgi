@@ -65,6 +65,11 @@ if ($in{'log'}) {
 
 	print &ui_table_row($text{'restore_madeat'},
 		&make_date($log->{'start'}));
+
+	# Show domains to include
+	my @dnames = &backup_log_own_domains($log);
+	print &ui_table_row($text{'restore_doms'},
+	    join(" ", map { "<tt>".&show_domain_name($_)."</tt>" } @dnames));
 	}
 else {
 	# Can select restore source
