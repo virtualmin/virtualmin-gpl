@@ -2842,9 +2842,22 @@ return &master_admin();
 # Returns 1 if the user can view software versions and other info
 sub can_view_sysinfo
 {
-return $config{'show_sysinfo'} == 1 ||
-       $config{'show_sysinfo'} == 2 && &master_admin() ||
-       $config{'show_sysinfo'} == 3 && (&master_admin() || &reseller_admin());
+if ($config{'show_sysinfo'} == 1) {
+	# Show to everyone
+	return 1;
+	}
+elsif ($config{'show_sysinfo'} == 2) {
+	# Show to root only
+	return &master_admin();
+	}
+elsif ($config{'show_sysinfo'} == 3) {
+	# Show to root and resellers (not used)
+	return &master_admin() || &reseller_admin();
+	}
+else {
+	# Show to nobody (not used)
+	return 0;
+	}
 }
 
 # Returns 1 if the user can re-check the licence status
