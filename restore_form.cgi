@@ -78,13 +78,23 @@ else {
 	}
 
 # Show decryption key field
-@allkeys = defined(&list_backup_keys) ? &list_available_backup_keys() : ( );
+@allkeys = defined(&list_backup_keys) ?  &list_backup_keys() : ( );
 if (@allkeys) {
-	print &ui_table_row($text{'restore_key'},
-		&ui_select("key", $sched->{'key'},
+	@cankeys = grep { &can_backup_key($_) } @allkeys;
+	if ($log && $log->{'key'}) {
+		# Always use the key from the log
+		$key = &get_backup_key($log->{'key'});
+		print &ui_table_row($text{'restore_key'},
+			$key ? $key->{'desc'} : $log->{'key'});
+		}
+	elsif (@cankeys) {
+		# Allow selection of usable keys
+		print &ui_table_row($text{'restore_key'},
+			&ui_select("key", $sched->{'key'},
 			   [ [ "", "&lt;$text{'restore_nokey'}&gt;" ],
-		 	     map { [ $_->{'id'}, $_->{'desc'} ] } @allkeys ],
+			     map { [ $_->{'id'}, $_->{'desc'} ] } @cankeys ],
 			   1, 0, 1));
+		}
 	}
 
 print &ui_hidden_table_end("source");

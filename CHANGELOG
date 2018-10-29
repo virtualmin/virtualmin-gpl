@@ -1585,3 +1585,5 @@ Removed support for PHP 4.
 Before a DNS zone is updated, BIND will be told to freeze it and thaw afterwards. This ensures that dynamic updates are preserved.
 Dovecot and Postfix per-IP SSL certificate setup can now be configured on a per-template basis.
 Redirects for / created using the UI are automatically adjusted to exclude Let's Encrypt validation paths.
+---- Changes since 6.04 ----
+Scheduled backups create by root can now be designated as allowing restore by virtual server owners, so that they don't have to maintain their own backups.

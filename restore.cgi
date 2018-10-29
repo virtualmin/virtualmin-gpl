@@ -67,10 +67,18 @@ $mode > 0 || -r $src || -d $src || &error($text{'restore_esrc'});
 
 # Get the backup key
 $key = undef;
-if (defined(&get_backup_key) && $in{'key'}) {
-	$key = &get_backup_key($in{'key'});
-	$key || &error($text{'backup_ekey'});
-	&can_backup_key($key) || &error($text{'backup_ekeycannot'});
+if (defined(&get_backup_key)) {
+	if ($in{'key'}) {
+		# User selected key
+		$key = &get_backup_key($in{'key'});
+		$key || &error($text{'backup_ekey'});
+		&can_backup_key($key) || &error($text{'backup_ekeycannot'});
+		}
+	elsif ($log && $log->{'key'}) {
+		# Key from the logged backup
+		$key = &get_backup_key($log->{'key'});
+		$key || &error($text{'backup_ekey'});
+		}
 	}
 
 # Parse features
