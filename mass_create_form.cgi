@@ -58,7 +58,9 @@ if (&can_create_master_servers() && @plans) {
 	}
 
 # Owning reseller
-@resels = sort { $a->{'name'} cmp $b->{'name'} } &list_resellers();
+if (defined(&list_resellers)) {
+	@resels = sort { $a->{'name'} cmp $b->{'name'} } &list_resellers();
+	}
 if (@resels && &master_admin()) {
 	print &ui_table_row($text{'cmass_resel'},
 		    &ui_select('resel', undef,
