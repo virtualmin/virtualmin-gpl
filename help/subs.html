@@ -10,6 +10,8 @@ actual values from the domain when the template is used :<p>
 <td>The virtual server's external IP address, used in DNS records</td> </tr>
 <tr> <td><tt><b>${USER}</b></td>
 <td>The server's administration login, such as <tt>foo</tt></td> </tr>
+<tr> <td><tt><b>${GROUP}</b></td>
+<td>The Unix group for this virtual server.</td> </tr>
 <tr> <td><tt><b>${UID}</b> and <b>${GID}</b></td>
 <td>The server's Unix user ID and group ID respectively</td></tr>
 <tr> <td><tt><b>${HOME}</b></td>
@@ -20,6 +22,12 @@ actual values from the domain when the template is used :<p>
 <td>If this is a sub-server, the unique ID of the parent domain.</td> </tr>
 <tr> <td><tt><b>${ALIAS}</b></td>
 <td>If this is an alias, the unique ID of the target domain.</td> </tr>
+<tr> <td><tt><b>${ID}</b></td>
+<td>The unique numeric ID for this domain.</td> </tr>
+<tr> <td><tt><b>${CREATED}</b></td>
+<td>The timestamp at which this domain was created.</td> </tr>
+<tr> <td><tt><b>${DB}</b></td>
+<td>MySQL or PostgreSQL database name.</td> </tr>
 </table>
 
 In addition, conditional blocks like <i>${IF-MAIL}...${ENDIF-MAIL}</i> and <i>${IF-WEB}...${ELSE-WEB}...{$ENDIF-WEB}</i> may be used.<p>
