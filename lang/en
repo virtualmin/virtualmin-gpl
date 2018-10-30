@@ -414,6 +414,7 @@ setup_edepunix2=A website cannot be enabled without an administration user
 setup_edepunixdir=A top-level virtual server with a home direction must have a Unix user
 setup_edeplogrotate=Log file rotation cannot be enabled unless a website is
 setup_edepdnssub=A sub-domain cannot have a DNS zone unless its parent does
+setup_edepdnssub2=DNS cannot be disabled while sub-domain still have it enabled
 setup_edepmysql=A sub-server cannot have MySQL enabled unless the parent server does
 setup_edepmysqlsub=A top-level server must have MySQL enabled if any sub-servers do
 setup_edeppostgres=A sub-server cannot have PostgreSQL enabled unless the parent server does

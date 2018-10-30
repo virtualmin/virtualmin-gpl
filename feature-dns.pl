@@ -22,6 +22,21 @@ if ($d->{'subdom'}) {
 return undef;
 }
 
+# check_anti_depends_dns(&dom)
+# Ensure that a parent server without DNS does not have any sub-domains with it
+sub check_anti_depends_dns
+{
+local ($d) = @_;
+if (!$d->{'dns'}) {
+	foreach my $sd (&get_domain_by("dns_subof", $d->{'id'})) {
+		if ($sd->{'dns'}) {
+			return $text{'setup_edepdnssub2'};
+			}
+		}
+	}
+return undef;
+}
+
 # setup_dns(&domain)
 # Set up a zone for a domain
 sub setup_dns
