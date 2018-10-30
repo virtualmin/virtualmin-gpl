@@ -179,10 +179,16 @@ if (!&master_admin() && !&reseller_admin()) {
 		    'id' => 'domain',
 	 	    'desc' => $text{'right_header3'},
 		    'table' => \@table });
-	if ($data->{'nosysinfo'} || !&can_view_sysinfo()) {
+	if ($data->{'nosysinfo'}) {
 		push(@rv, { 'type' => 'veto',
 			    'veto' => 'sysinfo' });
 		}
+	}
+
+# If this user can't see system info, block it
+if (!&can_view_sysinfo()) {
+	push(@rv, { 'type' => 'veto',
+		    'veto' => 'sysinfo' });
 	}
 
 # Virtualmin package updates, filtered from the possible updates list
