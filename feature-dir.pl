@@ -404,7 +404,8 @@ if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
 	}
 if (!$d->{'alias'}) {
 	foreach my $sd (&virtual_server_directories($d)) {
-		next if ($sd->[0] eq 'virtualmin-backup');   # Not all domains
+		next if ($sd->[0] eq 'virtualmin-backup' ||   # Not all domains
+			 $sd->[0] eq $home_virtualmin_backup);
 		if (!-d "$d->{'home'}/$sd->[0]") {
 			# Dir is missing
 			return &text('validate_esubdir',
@@ -957,7 +958,7 @@ return ( $d->{'subdom'} || $d->{'alias'} ? ( ) :
          [ 'logs', '750' ],
          [ $config{'homes_dir'}, '755' ],
 	 $d->{'parent'} ? ( ) :
-		( [ 'virtualmin-backup', '700' ] ) );
+		( [ $home_virtualmin_backup, '700' ] ) );
 }
 
 # create_server_tmp(&domain)
