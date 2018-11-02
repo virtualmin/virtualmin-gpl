@@ -4035,8 +4035,9 @@ if ($d->{'disabled_time'}) {
 	}
 
 # Add parent domain info
+local $parent;
 if ($d->{'parent'}) {
-	local $parent = &get_domain($d->{'parent'});
+	$parent = &get_domain($d->{'parent'});
 	foreach my $k (keys %$parent) {
 		$hash{'parent_domain_'.$k} = $parent->{$k};
 		}
@@ -4140,9 +4141,15 @@ $hash{'postgres_pass'} ||= '';
 # Setup MySQL and PostgreSQL usernames if not set yet
 if ($d->{'mysql'} && !$hash{'mysql_user'}) {
 	$hash{'mysql_user'} = &mysql_user($d);
+	if ($d->{'parent'}) {
+		$hash{'mysql_pass'} = $parent->{'mysql_pass'};
+		}
 	}
 if ($d->{'postgres'} && !$hash{'postgres_user'}) {
 	$hash{'postgres_user'} = &postgres_user($d);
+	if ($d->{'parent'}) {
+		$hash{'postgres_pass'} = $parent->{'postgres_pass'};
+		}
 	}
 
 # Add random numbers length 1-10
