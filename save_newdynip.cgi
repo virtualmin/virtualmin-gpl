@@ -16,6 +16,10 @@ if ($in{'enabled'}) {
 # Save them
 &lock_file($module_config_file);
 $config{'dynip_service'} = $in{'service'};
+if ($in{'service'} eq 'external') {
+	$in{'external'} =~ /^\// || &error($text{'newdynip_eexternal'});
+	}
+$config{'dynip_external'} = $in{'external'};
 $config{'dynip_host'} = $in{'host'};
 $config{'dynip_auto'} = $in{'auto'};
 $config{'dynip_user'} = $in{'duser'};

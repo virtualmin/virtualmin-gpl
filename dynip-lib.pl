@@ -6,6 +6,9 @@ sub list_dynip_services
 {
 return ( { 'name' => 'dyndns',
 	   'desc' => $text{'dynip_dyndns'} },
+	 { 'name' => 'external',
+	   'desc' => $text{'dynip_external'},
+	   'external' => 1, },
        );
 }
 
@@ -88,6 +91,18 @@ if ($config{'dynip_service'} eq 'dyndns') {
 		}
 	else {
 		return (undef, $out);
+		}
+	}
+elsif ($config{'dynip_service'} eq 'external') {
+	# Just run an external script with the IP and hostname as args
+	my $cmd = $config{'dynip_external'}." ".quotemeta($ip).
+		  " ".quotemeta($config{'dynip_host'});
+	my $out = &backquote_logged("$cmd 2>&1 </dev/null");
+	if ($?) {
+		return (undef, "$cmd failed : $out");
+		}
+	else {
+		return ($ip, undef);
 		}
 	}
 else {
