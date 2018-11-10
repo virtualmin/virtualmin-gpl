@@ -3513,31 +3513,34 @@ return undef;
 }
 
 # get_suexec_document_root()
-# Returns the directory under which suexec will run binaries, or undef 
+# Returns the directories under which suexec will run binaries, or undef 
 # if unknown
 sub get_suexec_document_root
 {
 local $suexec = &get_suexec_path();
-return undef if (!$suexec);
+return ( ) if (!$suexec);
 local $out = &backquote_command("$suexec -V 2>&1 </dev/null");
 if ($out =~ /AP_DOC_ROOT="([^"]+)"/ ||
     $out =~ /AP_DOC_ROOT=(\S+)/) {
-	return $1;
+	return split(/:/, $1);
 	}
 # Try new Debian-style suexec config files
 local $user = &get_apache_user();
 if ($out =~ /SUEXEC_CONFIG_DIR="([^"]+)"/ ||
     $out =~ /SUEXEC_CONFIG_DIR=(\S+)/) {
 	foreach my $cf ("$1/$user", "$1/www-data") {
-		if (open(SUEXECCF, $cf)) {
-			my $basedir = <SUEXECCF>;
-			close(SUEXECCF);
-			$basedir =~ s/\r|\n//g;
-			return $basedir if ($basedir);
+		my @roots;
+		next if (!-r $cf);
+		my $lref = &read_file_lines($cf);
+		foreach my $l (@$lref) {
+			if ($l =~ /^(\/\S+)/) {
+				push(@roots, $1);
+				}
 			}
+		return @roots if (@roots);
 		}
 	}
-return undef;
+return ( );
 } 
 
 # check_suexec_install(&template)
@@ -3549,7 +3552,7 @@ local ($tmpl) = @_;
 
 # Make sure suexec is actually installed
 local $suexec = &get_suexec_path();
-local $suhome = &get_suexec_document_root();
+local @suhome = &get_suexec_document_root();
 local $suerr;
 if ($tmpl->{'web_suexec'} && !$suexec) {
 	return $text{'check_ewebsuexecbin'};
@@ -3565,13 +3568,18 @@ foreach my $l (@dirs) {
 	}
 $cgibase =~ s/\/$//;
 
-# Make sure home base is under base directory, or template CGI directory is
-if ($tmpl->{'web_suexec'} && $suhome &&
-    !&same_file($suhome, $home_base) &&
-    !&is_under_directory($suhome, $home_base) &&
-    (!$cgibase || !&is_under_directory($suhome, $cgibase))) {
+# Make sure home base is under a base directory, or template CGI directory is
+if ($tmpl->{'web_suexec'} && @suhome) {
+	foreach my $suhome (@suhome) {
+		if (&same_file($suhome, $home_base) ||
+		    &is_under_directory($suhome, $home_base) ||
+		    $cgibase && &is_under_directory($suhome, $cgibase)) {
+			# Got a match on a configured directory
+			return undef;
+			}
+		}
 	return &text('check_ewebsuexechome',
-		     "<tt>$home_base</tt>", "<tt>$suhome</tt>");
+		     "<tt>$home_base</tt>", "<tt>".join(", ", @suhome)."</tt>");
 	}
 return undef;
 }
