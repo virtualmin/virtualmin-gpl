@@ -109,6 +109,7 @@ else {
 	foreach my $dname (@dnames) {
                 my $checkname = $dname;
                 $checkname =~ s/^www\.//;
+                $checkname =~ s/^\*\.//;
                 $err = &valid_domain_name($checkname);
                 &usage($err) if ($err);
 		}

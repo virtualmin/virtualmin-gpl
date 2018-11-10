@@ -18,6 +18,7 @@ else {
 		$dname = lc(&parse_domain_name($dname));
 		my $checkname = $dname;
 		$checkname =~ s/^www\.//;
+		$checkname =~ s/^\*\.//;
 		$err = &valid_domain_name($checkname);
 		&error($err) if ($err);
 		push(@dnames, $dname);
