@@ -202,12 +202,12 @@ print "\n";
 print "virtualmin enable-feature --domain name | --user name | --all-domains\n";
 print "                         [--associate]\n";
 foreach $f (@features) {
-	print "                          [--$f]\n" if ($config{$f});
+	print "                         [--$f]\n" if ($config{$f});
 	}
 foreach $f (&list_feature_plugins()) {
-	print "                          [--$f]\n";
+	print "                         [--$f]\n";
 	}
-print "                          [--skip-warnings]\n";
+print "                         [--skip-warnings]\n";
 exit(1);
 }
 
