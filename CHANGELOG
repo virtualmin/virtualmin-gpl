@@ -1587,3 +1587,4 @@ Dovecot and Postfix per-IP SSL certificate setup can now be configured on a per-
 Redirects for / created using the UI are automatically adjusted to exclude Let's Encrypt validation paths.
 ---- Changes since 6.04 ----
 Scheduled backups create by root can now be designated as allowing restore by virtual server owners, so that they don't have to maintain their own backups.
+When used with Webmin 1.900 or above, Let's Encrypt SSL certificates can be requested for wildcard domains.
