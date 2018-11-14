@@ -6,7 +6,7 @@
 #  id - A unique name
 #  desc - A short description
 #  html - A longer HTML description
-#  master,reseller,domain - Set to 1 if usable by this type of user
+#  master,reseller,extra,domain - Set to 1 if usable by this type of user
 #  link - An optional link to the feature. May include substitutions like $ID
 # The list is returned newest first, assuming that features have numeric prefix
 sub list_new_features
@@ -128,7 +128,8 @@ my $me;
 if (defined(&master_admin)) {
 	# In Virtualmin
 	$me = &master_admin() ? 'master' :
-	      &reseller_admin() ? 'reseller' : 'domain';
+	      &reseller_admin() ? 'reseller' :
+	      &extra_admin() ? 'extra' : 'domain';
 	}
 else {
 	# In Cloudmin
