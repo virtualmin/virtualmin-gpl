@@ -28,7 +28,7 @@ print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 # Domain name (with link), user and group
 if ($d->{'web'}) {
 	print &ui_table_row($text{'edit_domain'},
-	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_new")."</tt>",
+	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_blank")."</tt>",
 	    undef, \@tds);
 	}
 else {
