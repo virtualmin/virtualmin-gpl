@@ -224,6 +224,17 @@ if (!$parentdom) {
 		$smsg);
 	}
 
+# Show domain for use in links
+my @aliases = grep { &domain_has_website($_) }
+		   &get_domain_by("alias", $d->{'id'});
+if (!$d->{'alias'} && @aliases && &domain_has_website($d)) {
+	print &ui_table_row(&hlink($text{'edit_linkdom'}, "linkdom"),
+		&ui_select("linkdom", $d->{'linkdom'},
+			   [ [ undef, "&lt;$text{'edit_nolinkdom'}&gt;" ],
+			     map { [ $_->{'id'}, &show_domain_name($_) ] }
+				 @aliases ]));
+	}
+
 print &ui_hidden_table_end("config");
 
 # Start of collapsible section for limits

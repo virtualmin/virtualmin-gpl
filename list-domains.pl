@@ -286,6 +286,11 @@ if ($multi) {
 			$parentdom = &get_domain_by("id", $d->{'parent'});
 			print "    Parent domain: $parentdom->{'dom'}\n";
 			}
+		if ($d->{'linkdom'}) {
+			$linkdom = &get_domain($d->{'linkdom'});
+			print "    Domain for links: $linkdom->{'dom'}\n"
+				if ($linkdom);
+			}
 		print "    Description: $d->{'owner'}\n";
 		print "    Template ID: $d->{'template'}\n";
 		($tmpl) = grep { $_->{'id'} eq $d->{'template'} } @tmpls;

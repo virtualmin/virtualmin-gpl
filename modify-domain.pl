@@ -53,6 +53,10 @@ change the one used by this domain with the C<--mysql-server> flag followed
 by a hostname, hostname:port or socket file. All databases and users will be
 migrated to the new server.
 
+To specify an alias server that will be used for any links inside Virtualmin
+to this server, use the C<--link-domain> flag followed by a domain name. To
+revert to the normal behavior, use C<--no-link-domain>.
+
 By default, virtual server plan changes that modify features will be blocked
 if any warnings are detected, such as an existing database or SSL certificate
 conflict. These can be overridden with the C<--skip-warnings> flag.
@@ -268,6 +272,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
 		}
+	elsif ($a eq "--link-domain") {
+		$linkdname = shift(@ARGV);
+		}
+	elsif ($a eq "--no-link-domain") {
+		$linkdname = "";
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -423,6 +433,14 @@ if ($myserver) {
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 
+# Validate link domain
+if ($linkdname) {
+	$linkd = &get_domain_by("dom", $linkdname);
+	$linkd || &usage("Link domain $linkdname does not exist");
+	$linkd->{'alias'} eq $dom->{'id'} || 
+	    &usage("Link domain $linkdname is not an alias of this domain");
+	}
+
 # Find all other domains to be changed
 @doms = ( $dom );
 @olddoms = ( $old );
@@ -487,6 +505,9 @@ if (defined($bw)) {
 	}
 if (defined($bw_no_disable)) {
 	$dom->{'bw_no_disable'} = $bw_no_disable;
+	}
+if ($linkdname) {
+	$dom->{'linkdom'} = $linkd ? $linkd->{'id'} : undef;
 	}
 
 # Apply new IPv4 address
@@ -864,6 +885,7 @@ print "                        [--remove-db-exclude db|db.table]*\n";
 print "                        [--dns-ip address | --no-dns-ip]\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
+print "                        [--link-domain domain | --no-link-domain]\n";
 print "                        [--skip-warnings]\n";
 exit(1);
 }

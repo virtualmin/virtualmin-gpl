@@ -68,6 +68,14 @@ if (!$in{'email_def'} && !$d->{'parent'}) {
 	&extract_address_parts($in{'email'}) || &error($text{'setup_eemail3'});
 	}
 
+# Check domain for use in links
+if ($in{'linkdom'}) {
+	$linkd = &get_domain($in{'linkdom'});
+	$linkd || &error($text{'edit_elinkdom'});
+	$linkd->{'alias'} eq $d->{'id'} ||
+		&error($text{'edit_elinkdom2'});
+	}
+
 # Work out which features are relevant
 @dom_features = &domain_features($d);
 
@@ -262,6 +270,11 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 # Update prefix
 if (defined($in{'prefix'}) && $in{'prefix'} ne $d->{'prefix'}) {
 	$d->{'prefix'} = $in{'prefix'};
+	}
+
+# Update domain for use in links
+if (defined($in{'linkdom'})) {
+	$d->{'linkdom'} = $in{'linkdom'};
 	}
 
 if (!$d->{'disabled'}) {

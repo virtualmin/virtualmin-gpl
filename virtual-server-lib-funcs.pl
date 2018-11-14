@@ -16770,14 +16770,20 @@ else {
 return $rv;
 }
 
-# get_domain_url(&domain)
+# get_domain_url(&domain, [ssl-if-enabled])
 # Returns the URL for a domain (with no trailing /)
 sub get_domain_url
 {
-my ($d) = @_;
-my $ptn = $d->{'web_urlport'} || $d->{'web_port'};
+my ($d, $ssl) = @_;
+my $linkd;
+if ($d->{'linkdom'}) {
+	$linkd = &get_domain($d->{'linkdom'});
+	}
+$linkd ||= $d;
+my $ptn = $linkd->{'web_urlport'} || $linkd->{'web_port'};
 my $pt = $ptn == 80 || !$ptn ?  "" : ":".$ptn;
-return "http://".$d->{'dom'}.$pt;
+return ($ssl && &domain_has_ssl($d) ? "https" : "http").
+       "://".$linkd->{'dom'}.$pt;
 }
 
 # get_quotas_message()
