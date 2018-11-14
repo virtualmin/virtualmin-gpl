@@ -210,17 +210,18 @@ return $rv;
 # entry in the list is a hash ref containing the id, name, version and opts
 sub list_domain_scripts
 {
-local ($f, @rv, $i);
-local $ddir = "$script_log_directory/$_[0]->{'id'}";
+my ($d) = @_;
+my $ddir = "$script_log_directory/$d->{'id'}";
+my @rv;
 opendir(DIR, $ddir);
-while($f = readdir(DIR)) {
+while(my $f = readdir(DIR)) {
 	if ($f =~ /^(\S+)\.script$/) {
-		local %info;
+		my %info;
 		&read_file("$ddir/$f", \%info);
-		local @st = stat("$ddir/$f");
+		my @st = stat("$ddir/$f");
 		$info{'id'} = $1;
 		$info{'file'} = "$ddir/$f";
-		foreach $i (keys %info) {
+		foreach my $i (keys %info) {
 			if ($i =~ /^opts_(.*)$/) {
 				$info{'opts'}->{$1} = $info{$i};
 				delete($info{$i});
@@ -232,6 +233,11 @@ while($f = readdir(DIR)) {
 			}
 		else {
 			$info{'deleted'} = 0;
+			}
+		if ($info{'url'} =~ /^(http|https):\/\/([^\/]+)(\/.*)/) {
+			# Fix URL to match actual domain name
+			my $url = &get_domain_url($d, $1 eq "https");
+			$info{'url'} = $url.$3;
 			}
 		push(@rv, \%info);
 		}
