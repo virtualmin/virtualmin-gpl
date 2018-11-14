@@ -28,8 +28,8 @@ print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 # Domain name (with link), user and group
 if ($d->{'web'}) {
 	print &ui_table_row($text{'edit_domain'},
-			"<tt><a href=http://$d->{'dom'}/>$d->{'dom'}</a></tt>",
-			undef, \@tds);
+	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_new")."</tt>",
+	    undef, \@tds);
 	}
 else {
 	print &ui_table_row($text{'edit_domain'},
