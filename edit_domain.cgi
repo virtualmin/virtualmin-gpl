@@ -45,7 +45,7 @@ $dname = &show_domain_name($d);
 $url = &get_domain_url($d)."/";
 print &ui_table_row($text{'edit_domain'},
 	&domain_has_website($d) ?
-	  "<tt><a target=_blank href=$url>$dname</a></tt>" :
+	  "<tt>".&ui_link($url, $dname, undef, "target=_new")."</tt>" :
 	  "<tt>$dname</tt>");
 
 if ($dname ne $d->{'dom'}) {
