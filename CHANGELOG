@@ -1588,3 +1588,4 @@ Redirects for / created using the UI are automatically adjusted to exclude Let's
 ---- Changes since 6.04 ----
 Scheduled backups create by root can now be designated as allowing restore by virtual server owners, so that they don't have to maintain their own backups.
 When used with Webmin 1.900 or above, Let's Encrypt SSL certificates can be requested for wildcard domains.
+The domain name used in links to a server's website can now be customized to use one of it's aliases instead.
