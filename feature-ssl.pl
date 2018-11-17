@@ -1876,6 +1876,7 @@ else {
 			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
 			&dovecot::save_section($conf, $l);
 			push(@$conf, $l);
+			&flush_file_lines($l->{'file'}, undef, 1);
 			}
 		}
 	elsif (!$enable && @myloc) {
@@ -1896,6 +1897,7 @@ else {
 			&dovecot::save_directive($l->{'members'},
                                         "ssl_key", "<".$d->{'ssl_key'});
 			}
+		&flush_file_lines($l->{'file'}, undef, 1);
 		}
 	}
 &unlock_file($cfile);
