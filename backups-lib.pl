@@ -740,6 +740,8 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			$dok = 1;
 			goto DOMAINFAILED;
 			}
+		# If this script exits unexpectedly, cleaup the temporary dir
+		push(@main::temporary_files, $backupdir);
 		}
 
 	&$indent_print();
