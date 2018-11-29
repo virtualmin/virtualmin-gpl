@@ -22,7 +22,7 @@ if ($_[0]->{'group'} eq '' && &mail_system_needs_group()) {
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.
 local @allusers = &list_all_users();
-local ($uclash) = grep { $_->{'user'} == $_[0]->{'user'} } @allusers;
+local ($uclash) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
 if ($uclash && &remote_unix() && $_[0]->{'wasmissing'}) {
 	# Domain is being re-created as part of a restore and users are stored
 	# remotely, and the user already exists. Assume shared LDAP storage.
