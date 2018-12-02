@@ -14503,11 +14503,13 @@ $config{'group_quotas'} = '';
 if ($config{'quotas'} && $config{'quota_commands'}) {
 	# External commands are being used for quotas - make sure they exist!
 	foreach my $c ("set_user", "set_group", "list_users", "list_groups") {
-		local $cmd = $config{"quota_".$c."_command"};
+		local ($cmd) = &split_quoted_string(
+			$config{"quota_".$c."_command"});
 		$cmd && &has_command($cmd) || return $text{'check_e'.$c};
 		}
 	foreach my $c ("get_user", "get_group") {
-		local $cmd = $config{"quota_".$c."_command"};
+		local ($cmd) = &split_quoted_string(
+			$config{"quota_".$c."_command"});
 		!$cmd || &has_command($cmd) || return $text{'check_e'.$c};
 		}
 	&$second_print($text{'check_quotacommands'});
