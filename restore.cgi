@@ -157,7 +157,7 @@ if ($crmode == 1) {
 if ($log && ref($cont)) {
 	# Limit to domains in the backup that the user has access to
 	my %dnames = map { $_, 1 } &backup_log_own_domains($log);
-	foreach my $k (keys $cont) {
+	foreach my $k (keys %$cont) {
 		if (!$dnames{$k}) {
 			delete($cont->{$k});
 			}
