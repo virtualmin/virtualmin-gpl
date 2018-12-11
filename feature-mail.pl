@@ -6389,6 +6389,12 @@ return ( { 'name' => 'MailShark',
 		     'fallbackmx.spamexperts.eu',
 		     'lastmx.spamexperts.net', ],
 	 },
+	 { 'name' => 'Mail Assure',
+	   'url' => 'https://www.solarwindsmsp.com/products/mail',
+	   'id' => 0,
+	   'mx' => [ 'mx1.mtaroutes.com',
+		     'mx2.mtaroutes.com', ],
+	 },
         );
 }
 
