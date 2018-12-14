@@ -6395,6 +6395,11 @@ return ( { 'name' => 'MailShark',
 	   'mx' => [ 'mx1.mtaroutes.com',
 		     'mx2.mtaroutes.com', ],
 	 },
+         { 'name' => 'MailRoute',
+           'url' => 'https://www.mailroute.net',
+           'id' => 0,
+           'mx' => [ 'mail.mailroute.net', ],
+         },
         );
 }
 
