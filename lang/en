@@ -6818,6 +6818,7 @@ cloud_s3_secret=Secret key
 cloud_s3_endpoint=S3-compatible server hostname
 cloud_s3_amazon=Use Amazon S3
 cloud_s3_chunk=Upload chunk size in MB
+cloud_s3_location=Location for new buckets
 cloud_title=Edit Cloud Provider
 cloud_header=Cloud storage provider options
 cloud_provider=Provider name

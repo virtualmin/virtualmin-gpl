@@ -43,7 +43,7 @@ if ($in{'new'}) {
 		&ui_textbox("name", undef, 40));
 
 	print &ui_table_row($text{'bucket_location'},
-		&ui_select("location", "",
+		&ui_select("location", $config{'s3_location'},
 			   [ [ "", $text{'default'} ],
 			     &s3_list_locations(@$account) ]));
 	}

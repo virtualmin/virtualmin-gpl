@@ -79,6 +79,12 @@ $rv .= &ui_table_row($text{'cloud_s3_chunk'},
 	&ui_opt_textbox("s3_chunk", $config{'s3_chunk'}, 6,
 			$text{'default'}." (5 MB)"));
 
+# Location for new buckets
+$rv .= &ui_table_row($text{'cloud_s3_location'},
+	&ui_select("s3_location", $config{'s3_location'},
+		   [ [ "", $text{'default'} ],
+		     &s3_list_locations(@$account) ]));
+
 return $rv;
 }
 
@@ -117,6 +123,9 @@ else {
 		&error($text{'cloud_es3_chunk'});
 	$config{'s3_chunk'} = $in->{'s3_chunk'};
 	}
+
+# Parse new bucket location
+$config{'s3_location'} = $in->{'s3_location'};
 
 &lock_file($module_config_file);
 &save_module_config();

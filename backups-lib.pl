@@ -414,7 +414,8 @@ foreach my $desturl (@$desturls) {
 			return (0, 0, $doms);
 			}
 		local $err = &init_s3_bucket($user, $pass, $server,
-					     $s3_upload_tries);
+					     $s3_upload_tries,
+					     $config{'s3_location'});
 		if ($err) {
 			&$first_print($err);
 			return (0, 0, $doms);
