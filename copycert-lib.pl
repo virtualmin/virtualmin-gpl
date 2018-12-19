@@ -11,6 +11,7 @@ my @svcs;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 if ($miniserv{'ssl'}) {
+	# Check Webmin certificate
 	if ($perip) {
 		# Check for per-IP or per-domain cert first
 		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
@@ -38,6 +39,7 @@ if ($miniserv{'ssl'}) {
 	}
 
 if (&foreign_installed("usermin")) {
+	# Check Usermin certificate
 	&foreign_require("usermin");
 	my %uminiserv;
 	&usermin::get_usermin_miniserv_config(\%uminiserv);
@@ -69,11 +71,13 @@ if (&foreign_installed("usermin")) {
 			      'port' => $uminiserv{'port'} });
 		}
 	}
+
 if (&foreign_installed("dovecot")) {
-	my ($cfile, $kfile, $ip, $dom);
+	# Check Dovecot certificate
+	my ($cfile, $kfile, $cafile, $ip, $dom);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, undef, $ip, $dom) = &get_dovecot_ssl_cert($d);
+		($cfile, $kfile, $cafile, $ip,$dom) = &get_dovecot_ssl_cert($d);
 		}
 	if (!$cfile) {
 		# Fall back to global Dovecot cert
@@ -82,18 +86,22 @@ if (&foreign_installed("dovecot")) {
 		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
 			 &dovecot::find_value("ssl_cert", $conf, 0, "");
 		$cfile =~ s/^<//;
+		$cafile = &dovecot::find_value("ssl_ca", $conf);
+		$cafile =~ s/^<//;
 		}
 	if ($cfile) {
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
-			      'ca' => 'none',
+			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 993,
 			      'ip' => $ip,
 			      'dom' => $dom, });
 		}
 	}
+
 if ($config{'mail_system'} == 0) {
+	# Check Postfix certificate
 	my ($cfile, $kfile, $cafile, $ip);
 	if ($perip) {
 		# Try per-IP cert first
@@ -113,7 +121,9 @@ if ($config{'mail_system'} == 0) {
 			      'ip' => $ip, });
 		}
 	}
+
 if ($config{'ftp'}) {
+	# Check ProFTPd certificate
 	&foreign_require("proftpd");
 	my $conf = &proftpd::get_config();
 	my $cfile = &proftpd::find_directive(
@@ -178,18 +188,22 @@ my $configfile = &dovecot::get_config_file();
 my $dovedir = $cfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
+my $v2 = &dovecot::find_value("ssl_cert", $conf, 2);
 my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
 	 &dovecot::find_value("ssl_cert", $conf, 0, "");
 my $kfile = &dovecot::find_value("ssl_key_file", $conf) ||
 	 &dovecot::find_value("ssl_key", $conf, 0, "");
+my $cafile = &dovecot::find_value("ssl_ca", $conf);
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
+$cafile =~ s/^<//;
 if ($cfile =~ /snakeoil/) {
 	# Hack to not use shared cert file on Ubuntu / Debian
 	$cfile = $kfile = $cafile = undef;
 	}
 $cfile ||= "$dovedir/dovecot.cert.pem";
 $kfile ||= "$dovedir/dovecot.key.pem";
+$cafile ||= "$dovedir/dovecot.key.ca";
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
@@ -201,7 +215,7 @@ $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
 &print_tempfile(CERT, $cdata,"\n");
-if ($cadata) {
+if ($cadata && !$v2) {
 	&print_tempfile(CERT, $cadata,"\n");
 	}
 &close_tempfile(CERT);
@@ -210,12 +224,19 @@ if ($cadata) {
 &print_tempfile(KEY, $kdata,"\n");
 &close_tempfile(KEY);
 &set_ownership_permissions(undef, undef, 0750, $kfile);
+if ($v2) {
+	&open_lock_tempfile(KEY, ">$cafile");
+	&print_tempfile(KEY, $cadata,"\n");
+	&close_tempfile(KEY);
+	&set_ownership_permissions(undef, undef, 0750, $cafile);
+	}
 
 # Update config with correct files
-if (&dovecot::find_value("ssl_cert", $conf, 2)) {
+if ($v2) {
 	# 2.0 and later format
 	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
 	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
+	&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
 	}
 else {
 	# Pre-2.0 format
