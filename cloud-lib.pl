@@ -285,6 +285,12 @@ $rv .= &ui_table_row($text{'cloud_google_secret'},
 $rv .= &ui_table_row($text{'cloud_google_project'},
 	&ui_textbox("google_project", $config{'google_project'}, 40));
 
+# Default location for new buckets
+$rv .= &ui_table_row($text{'cloud_google_location'},
+	&ui_select("google_location", $config{'google_location'},
+		   [ [ "", $text{'default'} ],
+		     &list_gcs_locations() ]));
+
 # OAuth2 code
 if ($config{'google_oauth'}) {
 	$rv .= &ui_table_row($text{'cloud_google_oauth'},
@@ -335,6 +341,9 @@ else {
 		&error($text{'cloud_egoogle_project'});
 	$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
 	$config{'google_project'} = $in->{'google_project'};
+
+	# Parse bucket location
+	$config{'google_location'} = $in->{'google_location'};
 
 	$reauth++ if (!$config{'google_oauth'});
 	}

@@ -448,7 +448,8 @@ foreach my $desturl (@$desturls) {
 			}
 		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
-			local $err = &create_gcs_bucket($server);
+			local $err = &create_gcs_bucket(
+				$server, $config{'google_location'});
 			if ($err) {
 				&$first_print($err);
 				return (0, 0, $doms);
