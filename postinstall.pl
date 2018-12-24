@@ -28,6 +28,12 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	&save_module_config();
 	}
 
+# Fix invalid sysinfo
+if ($config{'show_sysinfo'} >= 2) {
+	$config{'show_sysinfo'} = 1;
+	&save_module_config();
+	}
+
 # Remember the first version we installed, to avoid showing new features
 # from before it
 $config{'first_version'} ||= &get_base_module_version();
