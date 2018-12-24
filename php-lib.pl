@@ -1650,7 +1650,13 @@ sub get_php_fpm_config
 {
 my @confs = &list_php_fpm_configs();
 return ( ) if (!@confs);
-return wantarray ? ( $confs[0], $confs[0]->{'err'} ) : $confs[0];
+my $c = $confs[0];
+if (wantarray) {
+	return $c->{'err'} ? ( undef, $c->{'err'} ) : ( $c, undef );
+	}
+else {
+	return $c->{'err'} ? undef : $c;
+	}
 }
 
 # list_php_fpm_configs()
