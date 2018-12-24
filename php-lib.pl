@@ -1645,81 +1645,113 @@ if ($ver) {
 }
 
 # get_php_fpm_config()
-# Returns a hash ref with details of the system's php-fpm configuration. Assumes
-# use of standard packages.
+# Returns the first FPM config and optionally an error message
 sub get_php_fpm_config
 {
-if ($php_fpm_config_cache) {
-	return $php_fpm_config_cache;
-	}
-my $rv = { };
+my @confs = &list_php_fpm_configs();
+return ( ) if (!@confs);
+return wantarray ? ( $confs[0], $confs[0]->{'err'} ) : $confs[0];
+}
 
-# What version are we running?
+# list_php_fpm_configs()
+# Returns hash refs with details of the system's php-fpm configurations. Assumes
+# use of standard packages.
+sub list_php_fpm_configs
+{
+if ($php_fpm_config_cache) {
+	return @$php_fpm_config_cache;
+	}
+
+# What version packages are installed?
 &foreign_require("software");
+my @rv;
 foreach my $pname ("php-fpm", "php5-fpm") {
 	my @pinfo = &software::package_info($pname);
-	if (@pinfo && $pinfo[0]) {
-		$rv->{'version'} = $pinfo[4];
-		$rv->{'version'} =~ s/\-.*$//;
-		$rv->{'version'} =~ s/\+.*$//;
-		$rv->{'version'} =~ s/^\d+://;
-		last;
-		}
-	}
+	next if (!@pinfo || !$pinfo[0]);
 
-# Config directory for per-domain pool files
-my @verdirs;
-DIR: foreach my $cdir ("/etc/php-fpm.d",
-		       "/etc/php*/fpm/pool.d",
-		       "/etc/php/*/fpm/pool.d",
-		       "/etc/opt/remi/php*/php-fpm.d",
-		       "/usr/local/etc/php-fpm.d") {
-	foreach my $realdir (glob($cdir)) {
-		if ($realdir && -d $realdir) {
-			my @files = glob("$realdir/*");
-			if (@files) {
-				push(@verdirs, $realdir);
+	# Normalize the version
+	my $rv = { };
+	$rv->{'version'} = $pinfo[4];
+	$rv->{'version'} =~ s/\-.*$//;
+	$rv->{'version'} =~ s/\+.*$//;
+	$rv->{'version'} =~ s/^\d+://;
+	push(@rv, $rv);
+
+	# Config directory for per-domain pool files
+	my @verdirs;
+	DIR: foreach my $cdir ("/etc/php-fpm.d",
+			       "/etc/php*/fpm/pool.d",
+			       "/etc/php/*/fpm/pool.d",
+			       "/etc/opt/remi/php*/php-fpm.d",
+			       "/usr/local/etc/php-fpm.d") {
+		foreach my $realdir (glob($cdir)) {
+			if ($realdir && -d $realdir) {
+				my @files = glob("$realdir/*");
+				if (@files) {
+					push(@verdirs, $realdir);
+					}
+				}
+			}
+		}
+	if (!@verdirs) {
+		$rv->{'err'} = $text{'php_fpmnodir'};
+		next;
+		}
+	my ($bestver) = grep { /\Q$rv->{'version'}\E/ } @verdirs;
+	$bestdir ||= $verdirs[0];
+	$rv->{'dir'} = $bestdir;
+
+	# Init script for this version
+	&foreign_require("init");
+	my $shortver = $rv->{'version'};
+	$shortver =~ s/^(\d+\.\d+)\..*/$1/g;
+	my $nodot = $shortver;
+	$nodot =~ s/\.//g;
+	foreach my $init ("php${shortver}-fpm",
+			  "rh-php${nodot}-php-fpm",
+			  "php${nodot}-php-fpm") {
+		my $st = &init::action_status($init);
+		if ($st) {
+			$rv->{'init'} = $init;
+			$rv->{'enabled'} = $st > 1;
+			last;
+			}
+		}
+	if (!$rv->{'init'}) {
+		# Init script for any version as a fallback
+		my @nodot = map { my $u = $_; $u =~ s/\.//g; $u }
+				@all_possible_php_versions;
+		foreach my $init ("php-fpm", "php5-fpm", "php7-fpm",
+				  (map { "php${_}-fpm" }
+				       @all_possible_php_versions),
+				  (map { "rh-php${_}-php-fpm" } @nodot),
+				  (map { "php${_}-php-fpm" } @nodot)) {
+			my $st = &init::action_status($init);
+			if ($st) {
+				$rv->{'init'} = $init;
+				$rv->{'enabled'} = $st > 1;
+				last;
+				}
+			}
+		}
+	if (!$rv->{'init'}) {
+		$rv->{'err'} = $text{'php_fpmnoinit2'};
+		next;
+		}
+
+	# Apache modules
+	if ($config{'web'}) {
+		&require_apache();
+		foreach my $m ("mod_proxy", "mod_fcgid") {
+			if (!$apache::httpd_modules{$m}) {
+				$rv->{'err'} = &text('php_fpmnomod', $m);
 				}
 			}
 		}
 	}
-if (!@verdirs) {
-	return wantarray ? ( undef, $text{'php_fpmnodir'} ) : undef;
-	}
-my ($bestver) = grep { /\Q$rv->{'version'}\E/ } @verdirs;
-$bestdir ||= $verdirs[0];
-$rv->{'dir'} = $bestdir;
 
-# Init script
-&foreign_require("init");
-my @nodot = map { my $u = $_; $u =~ s/\.//g; $u } @all_possible_php_versions;
-foreach my $init ("php-fpm", "php5-fpm", "php7-fpm",
-		  (map { "php${_}-fpm" } @all_possible_php_versions),
-		  (map { "rh-php${_}-php-fpm" } @nodot),
-		  (map { "php${_}-php-fpm" } @nodot)) {
-	my $st = &init::action_status($init);
-	if ($st) {
-		$rv->{'init'} = $init;
-		$rv->{'enabled'} = $init > 1;
-		last;
-		}
-	}
-if (!$rv->{'init'}) {
-	return wantarray ? ( undef, $text{'php_fpmnoinit2'} ) : undef;
-	}
-
-# Apache modules
-if ($config{'web'}) {
-	&require_apache();
-	foreach my $m ("mod_proxy", "mod_fcgid") {
-		if (!$apache::httpd_modules{$m}) {
-			return wantarray ? ( undef, &text('php_fpmnomod', $m) ) : undef;
-			}
-		}
-	}
-
-$php_fpm_config_cache = $rv;
-return wantarray ? ( $rv, undef ) : $rv;
+$php_fpm_config_cache = \@rv;
+return @rv;
 }
 
 # get_php_fpm_socket_file(&domain, [dont-make-dir])
