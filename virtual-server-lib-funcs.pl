@@ -14082,12 +14082,22 @@ if (&domain_has_website()) {
 		}
 
 	# Check for PHP-FPM support
-	my ($fconf, $ferr) = &get_php_fpm_config();
-	if ($fconf) {
-		&$second_print(&text('check_webphpfpm', $fconf->{'version'}));
+	my @fpms = &list_php_fpm_configs();
+	if (!@fpms) {
+		&$second_print($text{'check_webphpnofpm2'});
 		}
 	else {
-		&$second_print(&text('check_webphpnofpm', $ferr));
+		my @okfpms = grep { !$_->{'err'} } @fpms;
+		my @errfpms = grep { $_->{'err'} } @fpms;
+		if (@okfpms) {
+			&$second_print(&text('check_webphpfpm2',
+				join(" ", map { $_->{'version'} } @okfpms)));
+			}
+		if (@errfpms) {
+			&$second_print(&text('check_ewebphpfpm2',
+				join(" ", map { $_->{'version'}." ".
+					"(".$_->{'err'}.")" } @errfpms)));
+			}
 		}
 
 	# Check if any new PHP versions have shown up, and re-generate their

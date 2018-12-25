@@ -1645,18 +1645,11 @@ if ($ver) {
 }
 
 # get_php_fpm_config()
-# Returns the first FPM config and optionally an error message
+# Returns the first valid FPM config
 sub get_php_fpm_config
 {
-my @confs = &list_php_fpm_configs();
-return ( ) if (!@confs);
-my $c = $confs[0];
-if (wantarray) {
-	return $c->{'err'} ? ( undef, $c->{'err'} ) : ( $c, undef );
-	}
-else {
-	return $c->{'err'} ? undef : $c;
-	}
+my @confs = grep { !$_->{'err'} } &list_php_fpm_configs();
+return @confs ? $confs[0] : undef;
 }
 
 # list_php_fpm_configs()
@@ -1671,7 +1664,10 @@ if ($php_fpm_config_cache) {
 # What version packages are installed?
 &foreign_require("software");
 my @rv;
-foreach my $pname ("php-fpm", "php5-fpm") {
+foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
+		   (map { my $v=$_; $v =~ s/\.//g;
+			  ("php${v}-php-fpm", "php${v}-fpm") }
+		        @all_possible_php_versions)) {
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
 
