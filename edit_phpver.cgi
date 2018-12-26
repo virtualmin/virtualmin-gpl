@@ -10,13 +10,13 @@ $d = &get_domain($in{'dom'});
 &ui_print_header(&domain_in($d), $text{'phpver_title'}, "", "phpver");
 
 $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php" || $mode eq "fpm") {
+if ($mode eq "mod_php") {
 	print &text('phpver_emodphp'),"<p>\n";
 	&ui_print_footer(&domain_footer_link($d),
 			 "", $text{'index_return'});
 	return;
 	}
-@avail = &list_available_php_versions($d);
+@avail = &list_available_php_versions($d, $mode);
 if (@avail <= 1) {
 	my $fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
 				     : $avail[0]->[0];
@@ -82,12 +82,15 @@ foreach $dir (@dirs) {
 	$i++;
 	}
 
-# Add row for new dir
-push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
-		 'value' => 1, 'disabled' => 1 },
-	       &ui_textbox("newdir", undef, 30),
-	       &ui_select("newver", $dir->{'version'}, \@vlist),
-	     ]);
+# Add row for new dir (unless we're in FPM mode, in which case only one
+# path can be configured)
+if ($mode ne "fpm") {
+	push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
+			 'value' => 1, 'disabled' => 1 },
+		       &ui_textbox("newdir", undef, 30),
+		       &ui_select("newver", $dir->{'version'}, \@vlist),
+		     ]);
+	}
 
 # Generate the table
 print &ui_form_columns_table(

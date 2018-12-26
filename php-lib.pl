@@ -75,6 +75,13 @@ $p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
 local $oldmode = &get_domain_php_mode($d);
 
+# Work out the default PHP version for FPM
+if ($mode eq "fpm" && !$d->{'php_fpm_version'}) {
+	local @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
+	@fpms || &error("No FPM versions found!");
+	$d->{'php_fpm_version'} = $fpms[0]->{'shortversion'};
+	}
+
 if ($mode eq "mod_php" && $oldmode ne "mod_php") {
 	# Save the PHP version for later recovery
 	local $oldver = &get_domain_php_version($d, $oldmode);
@@ -103,7 +110,6 @@ local $etc = "$d->{'home'}/etc";
 if (!-d $etc) {
 	&make_dir_as_domain_user($d, $etc, 0755);
 	}
-local $defver = $vers[0]->[0];
 foreach my $ver (@vers) {
 	# Create separate .ini file for each PHP version, if missing
 	local $subs_ini = $subs_ini{$ver->[0]};
@@ -834,22 +840,23 @@ sub list_available_php_versions
 local ($d, $mode) = @_;
 &require_apache();
 
-# In FPM mode, only the PHP version run by the FPM package can be used
+# In FPM mode, only the versions for which packages are installed can be used
 if ($mode eq "fpm") {
-	my $conf = &get_php_fpm_config();
-	my $ver = $conf->{'version'} || 5;
-	$ver =~ s/^(\d+\.\d+)\..*/$1/;	# Reduce version to 5.x
-	my $cmd = &php_command_for_version($ver);
-	if (!$cmd && $ver =~ /^5\./) {
-		# Try just PHP version 5
-		$ver = 5;
-		$cmd = &php_command_for_version($ver);
+	my @rv;
+	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
+		my $ver = $conf->{'shortversion'};
+		my $cmd = &php_command_for_version($ver);
+		if (!$cmd && $ver =~ /^5\./) {
+			# Try just PHP version 5
+			$ver = 5;
+			$cmd = &php_command_for_version($ver);
+			}
+		$cmd ||= &has_command("php");
+		if ($cmd) {
+			push(@rv, [ $ver, $cmd ]);
+			}
 		}
-	$cmd ||= &has_command("php");
-	if ($cmd) {
-		return ([ $ver, $cmd ]);
-		}
-	return ( );
+	return @rv;
 	}
 
 if ($d) {
@@ -1008,8 +1015,8 @@ local $conf = &apache::get_config();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
 local $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php" || $mode eq "fpm") {
-	# All are run as version from Apache mod or FPM pool
+if ($mode eq "mod_php") {
+	# All are run as version from Apache module
 	local @avail = &list_available_php_versions($d, $mode);
 	if (@avail) {
 		return ( { 'dir' => &public_html_dir($d),
@@ -1019,6 +1026,13 @@ if ($mode eq "mod_php" || $mode eq "fpm") {
 	else {
 		return ( );
 		}
+	}
+elsif ($mode eq "fpm") {
+	# Version is store in the domain's config
+	# XXX get from the actual port
+	return ( { 'dir' => &public_html_dir($d),
+		   'version' => $d->{'php_fpm_version'},
+		   'mode' => $mode } );
 	}
 
 # Find directories with either FCGIWrapper or AddType directives, and check
@@ -1063,7 +1077,7 @@ elsif (!$p) {
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
-return 0 if ($mode eq "mod_php" || $mode eq "fpm");
+return 0 if ($mode eq "mod_php");
 local @ports = ( $d->{'web_port'},
 		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 local $any = 0;
@@ -1074,6 +1088,23 @@ foreach my $p (@ports) {
 	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
 	$pfound++;
+
+	# In FPM mode, just update the proxy path
+	if ($mode eq "fpm") {
+		# Remove the old version pool and create a new one if needed
+		if ($ver ne $d->{'php_fpm_version'}) {
+			&delete_php_fpm_pool($d);
+			$d->{'php_fpm_version'} = $ver;
+			&save_domain($d);
+			&create_php_fpm_pool($d);
+			}
+
+		# Find and update the proxy path
+		# XXX???
+		local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
+		$any++;
+		next;
+		}
 
 	# Check for an existing <Directory> block
 	local @dirs = &apache::find_directive_struct("Directory", $vconf);
@@ -1644,11 +1675,16 @@ if ($ver) {
 	}
 }
 
-# get_php_fpm_config()
+# get_php_fpm_config([version])
 # Returns the first valid FPM config
 sub get_php_fpm_config
 {
+my ($ver) = @_;
 my @confs = grep { !$_->{'err'} } &list_php_fpm_configs();
+if ($ver) {
+	@confs = grep { $_->{'version'} eq $ver ||
+			$_->{'shortversion'} eq $ver } @confs;
+	}
 return @confs ? $confs[0] : undef;
 }
 
@@ -1672,11 +1708,21 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 	next if (!@pinfo || !$pinfo[0]);
 
 	# Normalize the version
-	my $rv = { };
+	my $rv = { 'package' => $pname };
 	$rv->{'version'} = $pinfo[4];
 	$rv->{'version'} =~ s/\-.*$//;
 	$rv->{'version'} =~ s/\+.*$//;
 	$rv->{'version'} =~ s/^\d+://;
+	$rv->{'shortversion'} = $rv->{'version'};
+	$rv->{'shortversion'} =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
+	if (($pname eq "php-fpm" || $pname eq "php5-fpm") &&
+	    $rv->{'shortversion'} =~ /^5/) {
+		# For historic reasons, we just use the version number '5' for
+		# the first PHP 5.x version on the system.
+		$rv->{'shortversion'} = 5;
+		}
+	$rv->{'pkgversion'} = $rv->{'shortversion'};
+	$rv->{'pkgversion'} =~ s/\.//g;
 	push(@rv, $rv);
 
 	# Config directory for per-domain pool files
@@ -1686,6 +1732,7 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 			       "/etc/php/*/fpm/pool.d",
 			       "/etc/opt/remi/php*/php-fpm.d",
 			       "/usr/local/etc/php-fpm.d") {
+		print STDERR "considering $cdir\n";
 		foreach my $realdir (glob($cdir)) {
 			if ($realdir && -d $realdir) {
 				my @files = glob("$realdir/*");
@@ -1699,7 +1746,10 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		$rv->{'err'} = $text{'php_fpmnodir'};
 		next;
 		}
-	my ($bestver) = grep { /\Q$rv->{'version'}\E/ } @verdirs;
+	print STDERR "verdirs=",join(" ", @verdirs),"\n";
+	my ($bestdir) = grep { /\Q$rv->{'version'}\E/ ||
+			       /\Q$rv->{'pkgversion'}\E/ } @verdirs;
+	print STDERR "version=$rv->{'version'} pkgversion=$rv->{'pkgversion'} bestdir=$bestdir\n";
 	$bestdir ||= $verdirs[0];
 	$rv->{'dir'} = $bestdir;
 
@@ -1791,9 +1841,11 @@ return $rv;
 sub create_php_fpm_pool
 {
 my ($d) = @_;
-my $conf = &get_php_fpm_config();
+my $conf = &get_php_fpm_config($d->{'php_fpm_version'});
+print STDERR "ver=$d->{'php_fpm_version'} conf=$conf\n";
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+print STDERR "creating file=$file\n";
 my $port = &get_php_fpm_socket_port($d);
 &lock_file($file);
 if (-r $file) {
@@ -1846,9 +1898,10 @@ return undef;
 sub delete_php_fpm_pool
 {
 my ($d) = @_;
-my $conf = &get_php_fpm_config();
+my $conf = &get_php_fpm_config($d->{'php_fpm_version'});
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+print STDERR "deleting file=$file\n";
 if (-r $file) {
 	&unlink_logged($file);
 	my $sock = &get_php_fpm_socket_file($d, 1);
