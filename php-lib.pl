@@ -1738,7 +1738,6 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 			       "/etc/php/*/fpm/pool.d",
 			       "/etc/opt/remi/php*/php-fpm.d",
 			       "/usr/local/etc/php-fpm.d") {
-		print STDERR "considering $cdir\n";
 		foreach my $realdir (glob($cdir)) {
 			if ($realdir && -d $realdir) {
 				my @files = glob("$realdir/*");
@@ -1752,10 +1751,8 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		$rv->{'err'} = $text{'php_fpmnodir'};
 		next;
 		}
-	print STDERR "verdirs=",join(" ", @verdirs),"\n";
 	my ($bestdir) = grep { /\Q$rv->{'version'}\E/ ||
 			       /\Q$rv->{'pkgversion'}\E/ } @verdirs;
-	print STDERR "version=$rv->{'version'} pkgversion=$rv->{'pkgversion'} bestdir=$bestdir\n";
 	$bestdir ||= $verdirs[0];
 	$rv->{'dir'} = $bestdir;
 
@@ -1848,10 +1845,8 @@ sub create_php_fpm_pool
 {
 my ($d) = @_;
 my $conf = &get_php_fpm_config($d);
-print STDERR "ver=$d->{'php_fpm_version'} conf=$conf\n";
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-print STDERR "creating file=$file\n";
 my $port = &get_php_fpm_socket_port($d);
 &lock_file($file);
 if (-r $file) {
@@ -1907,7 +1902,6 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-print STDERR "deleting file=$file\n";
 if (-r $file) {
 	&unlink_logged($file);
 	my $sock = &get_php_fpm_socket_file($d, 1);
