@@ -79,7 +79,10 @@ local $oldmode = &get_domain_php_mode($d);
 if ($mode eq "fpm" && !$d->{'php_fpm_version'}) {
 	local @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
 	@fpms || &error("No FPM versions found!");
-	$d->{'php_fpm_version'} = $fpms[0]->{'shortversion'};
+	my $defconf = $tmpl->{'web_phpver'} ?
+		&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
+	$defconf ||= $fpms[0];
+	$d->{'php_fpm_version'} = $defconf->{'shortversion'};
 	}
 
 if ($mode eq "mod_php" && $oldmode ne "mod_php") {
@@ -825,7 +828,7 @@ if ($apache::httpd_modules{'mod_fcgid'}) {
 	# Check for Apache fcgi module
 	push(@rv, "fcgid");
 	}
-if (&get_php_fpm_config()) {
+if (&get_php_fpm_config($d)) {
 	# Check for php-fpm install
 	push(@rv, "fpm");
 	}
@@ -1394,7 +1397,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Set in pool config file
-	my $conf = &get_php_fpm_config();
+	my $conf = &get_php_fpm_config($d);
 	return -1 if (!$conf);
 	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 	my $lref = &read_file_lines($file, 1);
@@ -1476,7 +1479,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Update in FPM pool file
-	my $conf = &get_php_fpm_config();
+	my $conf = &get_php_fpm_config($d);
 	return 0 if (!$conf);
 	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 	return 0 if (!-r $file);
@@ -1490,7 +1493,7 @@ elsif ($mode eq "fpm") {
 		}
 	&flush_file_lines($file);
 	&unlock_file($file);
-	&register_post_action(\&restart_php_fpm_server);
+	&register_post_action(\&restart_php_fpm_server, $conf);
 	return 1;
 	}
 else {
@@ -1675,11 +1678,14 @@ if ($ver) {
 	}
 }
 
-# get_php_fpm_config([version])
+# get_php_fpm_config([version|&domain])
 # Returns the first valid FPM config
 sub get_php_fpm_config
 {
 my ($ver) = @_;
+if (ref($ver)) {
+	$ver = $ver->{'php_fpm_version'};
+	}
 my @confs = grep { !$_->{'err'} } &list_php_fpm_configs();
 if ($ver) {
 	@confs = grep { $_->{'version'} eq $ver ||
@@ -1841,7 +1847,7 @@ return $rv;
 sub create_php_fpm_pool
 {
 my ($d) = @_;
-my $conf = &get_php_fpm_config($d->{'php_fpm_version'});
+my $conf = &get_php_fpm_config($d);
 print STDERR "ver=$d->{'php_fpm_version'} conf=$conf\n";
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
@@ -1889,7 +1895,7 @@ my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
 my $dir = &get_domain_jailkit($parent);
 &save_php_fpm_config_value($d, "chroot", $dir);
 &unlock_file($file);
-&register_post_action(\&restart_php_fpm_server);
+&register_post_action(\&restart_php_fpm_server, $conf);
 return undef;
 }
 
@@ -1898,7 +1904,7 @@ return undef;
 sub delete_php_fpm_pool
 {
 my ($d) = @_;
-my $conf = &get_php_fpm_config($d->{'php_fpm_version'});
+my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 print STDERR "deleting file=$file\n";
@@ -1908,16 +1914,17 @@ if (-r $file) {
 	if (-r $sock) {
 		&unlink_logged($sock);
 		}
-	&register_post_action(\&restart_php_fpm_server);
+	&register_post_action(\&restart_php_fpm_server, $conf);
 	}
 return undef;
 }
 
-# restart_php_fpm_serve()
+# restart_php_fpm_server([&config])
 # Post-action script to restart the server
 sub restart_php_fpm_server
 {
-my $conf = &get_php_fpm_config();
+my ($conf) = @_;
+$conf ||= &get_php_fpm_config();
 &$first_print($text{'php_fpmrestart'});
 if ($conf->{'init'}) {
 	&foreign_require("init");
@@ -1942,7 +1949,7 @@ else {
 sub get_php_fpm_config_value
 {
 my ($d, $name) = @_;
-my $conf = &get_php_fpm_config();
+my $conf = &get_php_fpm_config($d);
 return undef if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 my $lref = &read_file_lines($file, 1);
@@ -1967,7 +1974,7 @@ return &get_php_fpm_config_value($d, "php_value[${name}]");
 sub save_php_fpm_config_value
 {
 my ($d, $name, $value) = @_;
-my $conf = &get_php_fpm_config();
+my $conf = &get_php_fpm_config($d);
 return 0 if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 &lock_file($file);
@@ -1995,7 +2002,7 @@ elsif ($found < 0 && defined($value)) {
 	}
 &flush_file_lines($file);
 &unlock_file($file);
-&register_post_action(\&restart_php_fpm_server);
+&register_post_action(\&restart_php_fpm_server, $conf);
 return 1;
 }
 

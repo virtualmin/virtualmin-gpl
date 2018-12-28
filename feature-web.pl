@@ -2402,7 +2402,6 @@ return $err;
 sub show_template_web
 {
 local ($tmpl) = @_;
-local @allvers = &unique(map { $_->[0] } &list_available_php_versions());
 
 # Work out fields to disable
 local @webfields = ( "web", "suexec", "user_def",
