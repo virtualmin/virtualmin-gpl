@@ -5,7 +5,8 @@
 Lists the available PHP versions on this system.
 
 This command simply outputs a table of the installed PHP versions on your
-system. Use the C<--name-only> flag to limit the output to version numbers only.
+system. Use the C<--name-only> flag to limit the output to version numbers only,
+or C<--multiline> to show more details.
 
 =cut
 
@@ -48,6 +49,17 @@ if ($nameonly) {
 		print $s->[0],"\n";
 		}
 	}
+elsif ($multiline) {
+	# Show full details
+	foreach $s (@vers) {
+		print $s->[0],"\n";
+		print "    Command: $s->[1]\n";
+		$fpm = &get_php_fpm_config($s->[0]);
+		print "    FPM support: ",($fpm ? "Yes" : "No"),"\n";
+		$fv = &get_php_version($s->[0]);
+		print "    Full version: ",$fv,"\n";
+		}
+	}
 else {
 	# Show table of details
 	printf $fmt, "Version", "Path";
@@ -62,7 +74,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the available PHP versions on this system.\n";
 print "\n";
-print "virtualmin list-php-versions [--name-only]\n";
+print "virtualmin list-php-versions [--name-only | --multiline]\n";
 exit(1);
 }
 
