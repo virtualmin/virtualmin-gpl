@@ -841,6 +841,9 @@ return @rv;
 sub list_available_php_versions
 {
 local ($d, $mode) = @_;
+if ($d) {
+	$mode ||= &get_domain_php_mode($d);
+	}
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
@@ -864,7 +867,6 @@ if ($mode eq "fpm") {
 
 if ($d) {
 	# If the domain is using mod_php, we can only use one version
-	$mode ||= &get_domain_php_mode($d);
 	if ($mode eq "mod_php") {
 		my $v = &get_apache_mod_php_version();
 		if ($v) {
@@ -1076,7 +1078,7 @@ if ($p && $p ne 'web') {
 			    $d, $dir, $ver);
 	}
 elsif (!$p) {
-	return "Virtual server does not have a website";
+	return 0;
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
@@ -1094,17 +1096,15 @@ foreach my $p (@ports) {
 
 	# In FPM mode, just update the proxy path
 	if ($mode eq "fpm") {
-		# Remove the old version pool and create a new one if needed
+		# Remove the old version pool and create a new one if needed.
+		# Since it will be on the same port, no Apache changes
+		# are needed.
 		if ($ver ne $d->{'php_fpm_version'}) {
 			&delete_php_fpm_pool($d);
 			$d->{'php_fpm_version'} = $ver;
 			&save_domain($d);
 			&create_php_fpm_pool($d);
 			}
-
-		# Find and update the proxy path
-		# XXX???
-		local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 		$any++;
 		next;
 		}
