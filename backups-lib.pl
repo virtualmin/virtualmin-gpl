@@ -2125,7 +2125,7 @@ if ($ok) {
 				$oldweb = 'virtualmin-nginx';
 				}
 			if ($oldweb &&
-			    &indexof($oldweb, @features, @plugins) < 0) {
+			    &indexof($oldweb, @config_features, @plugins) < 0) {
 				$d->{$oldweb} = 0;
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
