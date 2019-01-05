@@ -9,8 +9,11 @@ sub check_s3
 {
 foreach my $m ("XML::Simple", "Crypt::SSLeay", "Digest::HMAC_SHA1", @s3_perl_modules) {
 	eval "use $m";
-	if ($@) {
+	if ($@ =~ /Can't locate/) {
 		return &text('s3_emodule', "<tt>$m</tt>");
+		}
+	elsif ($@) {
+		return &text('s3_emodule2', "<tt>$m</tt>", "$@");
 		}
 	}
 return undef;
