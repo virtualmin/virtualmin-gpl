@@ -478,6 +478,23 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		}
+	elsif ($mode == 9) {
+		# Connect to the remote Webmin server
+		local $w = &dest_to_webmin($desturl);
+		eval {
+			local $main::error_must_die = 1;
+			&remote_foreign_require($w, "webmin");
+			if ($dirfmt && $path ne "/") {
+				# Remotely create the destination dir
+				&remote_foreign_call($w, "webmin", "make_dir",
+						     $path, undef, 1);
+				}
+			};
+		if ($@) {
+			&$first_print($@);
+			return (0, 0, $doms);
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -942,6 +959,22 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				&scp_copy($domtemp, "$r/$df.dom", $pass,
 					  \$err, $port, $asuser) if (!$err);
 				$err =~ s/\Q$pass\E/$starpass/g;
+				}
+			elsif ($mode == 9) {
+				# Via Webmin file transfer
+				&$first_print(&text('backup_upload9',
+						    "<tt>$server</tt>"));
+				local $w = &dest_to_webmin($desturl);
+				eval {
+					local $main::error_must_die = 1;
+					&remote_write($w, "$dest/$df",
+							  "$path/$df");
+					&remote_write($w, $infotemp,
+							  "$path/$df.info");
+					&remote_write($w, $domtemp,
+							  "$path/$df.dom");
+					};
+				$err = $@;
 				}
 			elsif ($mode == 3) {
 				# Via S3 upload
@@ -1604,6 +1637,85 @@ foreach my $desturl (@$desturls) {
 				      $infotemp, $tries) if (!$err);
 			$err = &$func($server, $path.".dom",
 				      $domtemp, $tries) if (!$err);
+			if ($asd && !$err) {
+				# Log bandwidth used by whole transfer
+				local @tst = stat($dest);
+				&record_backup_bandwidth($asd, 0, $tst[7], 
+							 $tstart, time());
+				}
+			}
+		if ($err) {
+			&$second_print(&text('backup_uploadfailed', $err));
+			$ok = 0;
+			}
+		&unlink_file($infotemp);
+		&unlink_file($domtemp);
+		&$second_print($text{'setup_done'}) if ($ok);
+		}
+	elsif ($ok && $mode == 9 && (@destfiles || !$dirfmt)) {
+		# Upload to Webmin server
+		&$first_print(&text('backup_upload9', "<tt>$server</tt>"));
+		local $w = &dest_to_webmin($desturl);
+		local $infotemp = &transname();
+		local $domtemp = &transname();
+		if ($dirfmt) {
+			# Need to upload all backup files in the directory
+			local $tstart = time();
+			eval {
+				local $main::error_must_die = 1;
+				foreach my $df (@destfiles) {
+					&remote_write($w, "$dest/$df","$r/$df");
+					}
+				};
+			$err = $@;
+
+			# Upload each domain's .info and .dom files
+			foreach my $df (@destfiles) {
+				local $d = $destfiles_map{$df};
+				local $n = $d eq "virtualmin" ? "virtualmin"
+							      : $d->{'dom'};
+				local $binfo = { $n => $donefeatures{$n} };
+				local $bdom = { $n => $d };
+				&uncat_file($infotemp,
+					    &serialise_variable($binfo));
+				&uncat_file($domtemp,
+					    &serialise_variable($bdom));
+				eval {
+					local $main::error_must_die = 1;
+					&remote_write($w, $infotemp,
+						      $r."/$df.info");
+					&remote_write($w, $domtemp,
+						      $r."/$df.dom");
+					};
+				}
+			if (!$err && $asd) {
+				# Log bandwidth used by domain
+				foreach my $df (@destfiles) {
+					local $d = $destfiles_map{$df};
+					if ($d) {
+						local @tst = stat("$dest/$df");
+						&record_backup_bandwidth(
+							$d, 0, $tst[7],
+							$tstart, time());
+						}
+					}
+				}
+
+			}
+		else {
+			# Just a single file
+			local $tstart = time();
+			&uncat_file($infotemp,
+				    &serialise_variable(\%donefeatures));
+			&uncat_file($domtemp,
+				    &serialise_variable(\%donedoms));
+			eval {
+				local $main::error_must_die = 1;
+				&remote_write($w, $dest, $r);
+				&remote_write($w, $infotemp, $r.".info");
+				&remote_write($w, $domtemp, $r.".dom");
+				};
+			$err = $@;
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
 				local @tst = stat($dest);
@@ -3532,7 +3644,8 @@ return $rv;
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
-# 5 for upload, 6 for rackspace), login, password, host, path and port
+# 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin), login,
+# password, host, path and port
 sub parse_backup_url
 {
 local ($url) = @_;
@@ -3550,6 +3663,13 @@ elsif ($url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
+	}
+elsif ($url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
+       $url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
+       $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# Webmin URL
+	@rv = (9, $1, $2, $3, $5, $4 ? substr($4, 1) : 10000);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with a username and password
@@ -3650,6 +3770,9 @@ elsif ($proto == 8) {
 		&text('backup_nicedbp', "<tt>$host</tt>", "<tt>$path</tt>") :
 		&text('backup_nicedb', "<tt>$host</tt>");
 	}
+elsif ($proto == 9) {
+	$rv = &text('backup_nicewebmin', "<tt>$path</tt>", "<tt>$host</tt>");
+	}
 else {
 	$rv = $url;
 	}
@@ -3695,7 +3818,9 @@ sub show_backup_destination
 local ($name, $value, $nolocal, $d, $nodownload, $noupload, $remove) = @_;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($value);
 $mode = 1 if (!$value && $nolocal);	# Default to FTP
-local $defport = $mode == 1 ? 21 : $mode == 2 ? 22 : undef;
+local $defport = $mode == 1 ? 21 :
+		 $mode == 2 ? 22 :
+		 $mode == 9 ? 10000 : undef;
 $server = "[$server]" if (&check_ip6address($server));
 local $serverport = $port && $port != $defport ? "$server:$port" : $server;
 local $rv;
@@ -5320,6 +5445,35 @@ sub reset_backup_envs
 foreach my $e (keys %ENV) {
 	delete($ENV{$e}) if ($e =~ /^(BACKUP_)/);
 	}
+}
+
+# dest_to_webmin(&dest-string)
+# Converts a backup destination string into a Webmin server object
+sub dest_to_webmin
+{
+my ($dest) = @_;
+my ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($dest);
+
+# Find existing registered server, if any
+&foreign_require("servers");
+my @servers = &servers::list_servers();
+my ($already) = grep { $_->{'host'} eq $server &&
+		       $_->{'port'} == $port } @servers;
+if (!$already) {
+	($already) = grep { $_->{'host'} eq $server &&
+			    $_->{'port'} == $port } @servers;
+	}
+
+# Construct a server object using provided and stored info
+$user ||= $already->{'user'} if ($already);
+$pass ||= $already->{'pass'} if ($already);
+$port ||= $already->{'port'} if ($already);
+return { 'host' => $server,
+	 'port' => $port || 10000,
+	 'ssl' => $already ? $already->{'ssl'} : 1,
+	 'fast' => $already ? $already->{'fast'} : 1,
+	 'user' => $user,
+	 'pass' => $pass };
 }
 
 1;
