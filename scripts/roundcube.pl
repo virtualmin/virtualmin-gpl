@@ -43,7 +43,7 @@ return "Email";
 
 sub script_roundcube_php_modules
 {
-return ("mysql");
+return ("mysql", "xml");
 }
 
 sub script_roundcube_php_optional_modules
