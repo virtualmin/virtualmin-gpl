@@ -2608,6 +2608,7 @@ restore_downloads3=Downloading archive from Amazon S3 server ..
 restore_downloadrs=Downloading archive from Rackspace Cloud Files ..
 restore_downloadgc=Downloading archive from Google Cloud Storage ..
 restore_downloaddb=Downloading archive from Dropbox ..
+restore_downloadwebmin=Downloading archive from Webmin server ..
 restore_downloadfailed=.. download failed! $1
 restore_global2=Restoring Virtualmin settings ..
 restore_phpmods=Enabling PHP modules for restored scripts ..

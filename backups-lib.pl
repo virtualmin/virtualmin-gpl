@@ -1917,6 +1917,7 @@ if ($mode > 0) {
 		      $mode == 6 ? $text{'restore_downloadrs'} :
 		      $mode == 7 ? $text{'restore_downloadgc'} :
 		      $mode == 8 ? $text{'restore_downloaddb'} :
+		      $mode == 9 ? $text{'restore_downloadwebmin'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local $cerr = &check_s3();
@@ -3616,6 +3617,80 @@ elsif ($mode == 7 || $mode == 8) {
 		return $err if ($err);
 		}
 	}
+elsif ($mode == 9) {
+	# Download from Webmin server
+	my $w = &dest_to_webmin($url);
+	if ($infoonly) {
+		# First try file with .info or .dom extension
+		eval {
+			local $main::error_must_die = 1;
+			&remote_read($w, $temp, $path.$sfx);
+			};
+		$err = $@;
+		$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+		if ($err) {
+			# Fall back to all .info or .dom files in directory
+			&make_dir($temp, 0700);
+			eval {
+				local $main::error_must_die = 1;
+				my $fls = &remote_eval($w, "webmin",
+						     "[ glob('$path/*$sfx') ]");
+				foreach my $f (@$fls) {
+					$f =~ s/^.*\///;
+					&remote_read($w, "$temp/$f",
+							 "$path/$f");
+					}
+				};
+			$err = $@;
+			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+			}
+		}
+	else {
+		# If a list of domain names was given, first try to scp down
+		# only the files for those domains in the directory
+		local $gotfiles = 0;
+		if (@$domnames) {
+			&unlink_file($temp);
+			&make_dir($temp, 0711);
+			eval {
+				local $main::error_must_die = 1;
+				foreach my $dn (@$domnames) {
+					my $fn = $dn.".tar.gz";
+					&remote_read($w, "$temp/$fn$sfx",
+						     "$path/$fn$sfx");
+					if (!-s "$temp/$fn$sfx") {
+						# Can happen if path is a dir
+						&unlink_file("$temp/$fn$sfx");
+						die "Empty file";
+						}
+					}
+				};
+			$gotfiles = 1 if (!$@);
+			}
+
+		if (!$gotfiles) {
+			# Download the whole file or directory
+			eval {
+				local $main::error_must_die = 1;
+				my $fls = &remote_eval($w, "webmin",
+						     "[ glob('$path/*') ]");
+				foreach my $f (@$fls) {
+					$f =~ s/^.*\///;
+					&remote_read($w, "$temp/$f",
+							 "$path/$f");
+					}
+				if (!@$fls) {
+					# Glob returned nothing, so it's a file
+					&unlink_file($temp);
+					&remote_read($w, $temp, $path);
+					}
+				};
+			$err = $@;
+			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+			}
+		}
+	return $err if ($err);
+	}
 
 $main::download_backup_cache{$url} = $temp if (!$infoonly);
 return undef;
@@ -3668,8 +3743,13 @@ elsif ($url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
-	# Webmin URL
+	# Webmin URL with username and password
 	@rv = (9, $1, $2, $3, $5, $4 ? substr($4, 1) : 10000);
+	}
+elsif ($url =~ /^webmin:\/\/([^\/:\@]+)(:\d+)?:?(\/.*)$/ ||
+       $url =~ /^webmin:\/\/([^\/:\@]+)(:\d+)?:(.+)$/) {
+	# Webmin URL with no login
+	@rv = (9, undef, undef, $1, $3, $2 ? substr($2, 1) : 10000);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with a username and password
