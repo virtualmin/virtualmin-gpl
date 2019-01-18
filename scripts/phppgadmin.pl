@@ -19,7 +19,12 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "5.6" );
+return ( "5.6.0" );
+}
+
+sub script_phppgadmin_release
+{
+return 2;	# Fix download URL
 }
 
 sub script_phppgadmin_category
@@ -113,12 +118,12 @@ return undef;
 sub script_phppgadmin_files
 {
 local ($d, $ver, $opts, $upgrade) = @_;
-if ($ver <= 2.2) {
-	$ver = $ver."-php";
-	}
+local $uver = $ver;
+$uver =~ s/\./-/g;
 local @files = ( { 'name' => "source",
 	   'file' => "phpPgAdmin-$ver.tar.gz",
-	   'url' => "http://downloads.sourceforge.net/phppgadmin/phpPgAdmin-$ver.tar.gz" } );
+	   'url' => "https://github.com/phppgadmin/phppgadmin/archive/REL_$uver.tar.gz" 
+	} );
 return @files;
 }
 
@@ -142,7 +147,7 @@ local $dbhost = &get_database_host("postgres", $d);
 # Extract tar file to temp dir and copy to target
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, "phpPgAdmin-$ver");
+                                     $opts->{'dir'}, "phppgadmin-*");
 $err && return (0, "Failed to extract source : $err");
 local $cfileorig = "$opts->{'dir'}/conf/config.inc.php-dist";
 local $cfile = "$opts->{'dir'}/conf/config.inc.php";
