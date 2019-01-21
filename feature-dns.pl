@@ -3836,6 +3836,13 @@ foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 		$svc->{'prefix'}.'.'.$d->{'dom'}));
 	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
 		$d->{'dom'}));
+	if ($svc->{'port'} == 587) {
+		# Also add one for port 25 for STARTTLS
+		push(@need, &create_tlsa_dns_record($cfile, $chain, 25,
+			$svc->{'prefix'}.'.'.$d->{'dom'}));
+		push(@need, &create_tlsa_dns_record($cfile, $chain, 25,
+			$d->{'dom'}));
+		}
 	}
 
 # Filter out dupes by name (which includes the port)
