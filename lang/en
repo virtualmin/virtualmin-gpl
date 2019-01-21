@@ -5804,6 +5804,7 @@ cron_ehidden=No complex schedule was selected
 dsched_err=Failed to delete scheduled backups
 dsched_enone=None selected
 dsched_egone=The backup with ID $1 no longer exists
+dsched_erunning=The backup with ID $1 is no longer running
 dsched_ecannot=You are not allowed to manage the backup with ID $1
 
 dbhosts_err=Failed to change remote database hosts

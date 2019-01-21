@@ -13,7 +13,8 @@ foreach $sid_pid (@d) {
 	($sid, $pid) = split(/-/, $sid_pid);
 	($sched) = grep { $_->{'id'} eq $sid &&
 			  $_->{'pid'} == $pid } @running;
-	$sched && &can_backup_sched($sched) ||
+	$sched || &error(&text('dsched_erunning', $sid));
+	&can_backup_sched($sched) ||
 		&error(&text('dsched_ecannot', $sid));
 	push(@scheds, $sched);
 	}
