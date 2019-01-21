@@ -1272,8 +1272,11 @@ local %miniserv;
 local @ipkeys = &webmin::get_ipkeys(\%miniserv);
 local @newipkeys;
 foreach my $ipk (@ipkeys) {
-	my $search = $d->{'virt'} ? $d->{'ip'} : $d->{'dom'};
-	if (&indexof($search, @{$ipk->{'ips'}}) < 0) {
+	my $del = &indexof($d->{'dom'}, @{$ipk->{'ips'}}) >= 0;
+	if ($d->{'virt'} && !$del) {
+		$del = &indexof($d->{'ip'}, @{$ipk->{'ips'}}) >= 0;
+		}
+	if (!$del) {
 		push(@newipkeys, $ipk);
 		}
 	}
