@@ -1708,7 +1708,7 @@ if ($php_fpm_config_cache) {
 my @rv;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		   (map { my $v=$_; $v =~ s/\.//g;
-			  ("php${v}-php-fpm", "php${v}-fpm") }
+			  ("php${v}-php-fpm", "php${v}-fpm", "rh-php${v}-php-fpm") }
 		        @all_possible_php_versions)) {
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
@@ -1737,6 +1737,7 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 			       "/etc/php*/fpm/pool.d",
 			       "/etc/php/*/fpm/pool.d",
 			       "/etc/opt/remi/php*/php-fpm.d",
+			       "/etc/opt/rh/rh-php*/php-fpm.d",
 			       "/usr/local/etc/php-fpm.d") {
 		foreach my $realdir (glob($cdir)) {
 			if ($realdir && -d $realdir) {

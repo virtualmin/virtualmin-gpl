@@ -38,6 +38,9 @@ if (!$in{'self'}) {
 		     'alt' => \@alts };
 	&break_invalid_ssl_linkages($d, $newcert);
 
+	&set_domain_envs($d, "SSL_DOMAIN");
+        my $merr = &making_changes();
+
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, "csr");
@@ -66,6 +69,10 @@ if (!$in{'self'}) {
 
 	# Save the domain
 	&save_domain($d);
+	
+	&made_changes();
+        &reset_domain_envs($d);
+	
 	&run_post_actions();
 	&webmin_log("newcsr", "domain", $d->{'dom'}, $d);
 
@@ -82,6 +89,9 @@ if (!$in{'self'}) {
 else {
 	# Create key and cert files
 	&ui_print_header(&domain_in($d), $text{'csr_title2'}, "");
+
+	&set_domain_envs($d, "SSL_DOMAIN");
+        my $merr = &making_changes();
 
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
@@ -140,6 +150,10 @@ else {
 		}
 
 	&save_domain($d);
+	
+	&made_changes();
+        &reset_domain_envs($d);
+	
 	&run_post_actions();
 	&webmin_log("newself", "domain", $d->{'dom'}, $d);
 	}
