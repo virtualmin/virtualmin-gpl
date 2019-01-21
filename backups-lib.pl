@@ -5409,9 +5409,25 @@ sub kill_running_backup
 {
 my ($sched) = @_;
 $sched->{'pid'} || &error("Backup has no PID!");
-&kill_logged(9, $sched->{'pid'});
+foreach my $pid (&find_backup_subprocesses($sched->{'pid'})) {
+	&kill_logged(9, $pid);
+	}
 my $file = $backups_running_dir."/".$sched->{'id'}."-".$sched->{'pid'};
 unlink($file);
+}
+
+# find_backup_subprocesses(pid, [&procs])
+# Returns a list of all subprocesses of the given PID
+sub find_backup_subprocesses
+{
+my ($pid, $procs) = @_;
+&foreign_require("proc");
+$procs ||= [ &proc::list_processes() ];
+my @rv = ( $pid );
+foreach my $sp (map { $_->{'pid'} } grep { $_->{'ppid'} == $pid } @$procs) {
+	push(@rv, &find_backup_subprocesses($sp, $procs));
+	}
+return @rv;
 }
 
 # delete_backup_from_log(&log)
