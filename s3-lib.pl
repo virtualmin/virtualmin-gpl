@@ -401,12 +401,18 @@ my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
        $rrs, $multipart) = @_;
 $tries ||= 1;
 my $err;
+my $rrsString1;
+my $rrsString2;
+if($rrs){
+	$rrsString1 = "--storage-class";
+	$rrsString2 = "REDUCED_REDUNDANCY";
+}
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
 	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
-		  "cp", $sourcefile, "s3://$bucket/$destfile" ]);
+		  "cp", $sourcefile, "s3://$bucket/$destfile", $rrsString1, $rrsString2 ]);
 	if ($?) {
 		$err = $out;
 		}
@@ -415,7 +421,7 @@ for(my $i=0; $i<$tries; $i++) {
 		my $temp = &uncat_transname(&serialise_variable($info));
 		my $out = &call_aws_cmd($akey,
 			[ @regionflag, 
-			  "cp", $temp, "s3://$bucket/$destfile.info" ]);
+			  "cp", $temp, "s3://$bucket/$destfile.info", $rrsString1, $rrsString2 ]);
 		$err = $out if ($?);
 		}
 	if (!$err && $dom) {
@@ -424,7 +430,7 @@ for(my $i=0; $i<$tries; $i++) {
 				&clean_domain_passwords($dom)));
 		my $out = &call_aws_cmd($akey,
 			[ @regionflag,
-			  "cp", $temp, "s3://$bucket/$destfile.dom" ]);
+			  "cp", $temp, "s3://$bucket/$destfile.dom", $rrsString1, $rrsString2 ]);
 		$err = $out if ($?);
 		}
 	last if (!$err);
