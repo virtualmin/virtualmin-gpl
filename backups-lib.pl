@@ -4620,16 +4620,16 @@ sub extract_purge_path
 {
 local ($dest) = @_;
 local ($mode, undef, undef, $host, $path) = &parse_backup_url($dest);
-if (($mode == 0 || $mode == 1 || $mode == 2) &&
+if (($mode == 0 || $mode == 1 || $mode == 2 || $mode == 9) &&
     $path =~ /^(\S+)\/([^%]*%.*)$/) {
-	# Local, FTP or SSH file like /backup/%d-%m-%Y
+	# Local, FTP, SSH or Webmin file like /backup/%d-%m-%Y
 	local ($base, $date) = ($1, $2);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 1 || $mode == 2) &&
+elsif (($mode == 1 || $mode == 2 || $mode == 9) &&
        $path =~ /^([^%\/]+%.*)$/) {
-	# FTP or SSH file like backup-%d-%m-%Y
+	# FTP, SSH or Webmin file like backup-%d-%m-%Y
 	local ($base, $date) = ("", $1);
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
@@ -4797,6 +4797,62 @@ elsif ($mode == 2) {
 				$pcount++;
 				}
 			}
+		}
+	}
+
+elsif ($mode == 9) {
+	# Use stat via Webmin RPC to list directory
+	local $err;
+	local $w = &dest_to_webmin($dest);
+	local $files;
+	eval {
+		local $main::error_must_die = 1;
+		&remote_foreign_require($w, "webmin");
+		$files = &remote_eval($w, "webmin",
+			'$base = "'.quotemeta($base).'"; '.
+			'opendir(DIR, $base); '.
+			'@f = readdir(DIR); '.
+			'closedir(DIR); '.
+			'[ map { [ $_, stat("$base/$_") ] } @f ]');
+		};
+	my $err = $@;
+	if ($err) {
+		$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+		&$second_print(&text('backup_purgeewebminls', $err));
+		return 0;
+		}
+	foreach my $f (@$files) {
+		my ($fn, @st) = @$f;
+		if ($fn =~ /^$re$/ &&
+		    $fn !~ /\.(dom|info)$/ &&
+		    $fn ne "." && $fn ne "..") {
+			$mcount++;
+			next if (!$st[9] || $st[9] >= $cutoff);
+			local $old = int((time() - $st[9]) / (24*60*60));
+			&$first_print(&text('backup_deletingwebmin',
+					    "<tt>$base/$fn</tt>", $old));
+			eval {
+				local $main::error_must_die = 1;
+				&remote_foreign_call($w, "webmin",
+					"unlink_file", "$base/$fn");
+				&remote_foreign_call($w, "webmin",
+					"unlink_file", "$base/$fn.info");
+				&remote_foreign_call($w, "webmin",
+					"unlink_file", "$base/$fn.dom");
+				};
+			my $err = $@;
+			if ($err) {
+				$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+				&$second_print(&text('backup_edelwebmin',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+						     &nice_size($st[7])));
+				$pcount++;
+				}
+			}
+
 		}
 	}
 
