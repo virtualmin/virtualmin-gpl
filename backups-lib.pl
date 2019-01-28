@@ -491,7 +491,9 @@ foreach my $desturl (@$desturls) {
 				}
 			};
 		if ($@) {
-			&$first_print($@);
+			my $err = $@;
+			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
+			&$first_print($err);
 			return (0, 0, $doms);
 			}
 		}
@@ -788,8 +790,10 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 					$increment, $asd, $opts, $key);
 				};
 			if ($@) {
+				my $err = $@;
+				$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 				&$second_print(&text('backup_efeatureeval',
-						     $f, $@));
+						     $f, $err));
 				$fok = 0;
 				}
 			}
@@ -975,6 +979,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 							  "$path/$df.dom");
 					};
 				$err = $@;
+				$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 				}
 			elsif ($mode == 3) {
 				# Via S3 upload
@@ -1664,10 +1669,11 @@ foreach my $desturl (@$desturls) {
 			eval {
 				local $main::error_must_die = 1;
 				foreach my $df (@destfiles) {
-					&remote_write($w, "$dest/$df","$r/$df");
+					&remote_write($w, "$dest/$df","$path/$df");
 					}
 				};
 			$err = $@;
+			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 
 			# Upload each domain's .info and .dom files
 			foreach my $df (@destfiles) {
@@ -1683,9 +1689,9 @@ foreach my $desturl (@$desturls) {
 				eval {
 					local $main::error_must_die = 1;
 					&remote_write($w, $infotemp,
-						      $r."/$df.info");
+						      $path."/$df.info");
 					&remote_write($w, $domtemp,
-						      $r."/$df.dom");
+						      $path."/$df.dom");
 					};
 				}
 			if (!$err && $asd) {
@@ -1716,6 +1722,7 @@ foreach my $desturl (@$desturls) {
 				&remote_write($w, $domtemp, $r.".dom");
 				};
 			$err = $@;
+			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 			if ($asd && !$err) {
 				# Log bandwidth used by whole transfer
 				local @tst = stat($dest);
@@ -3967,6 +3974,25 @@ $st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
+# Webmin RPC fields
+local $wt = "<table>\n";
+$wt .= "<tr> <td>$text{'backup_webminserver'}</td> <td>".
+       &ui_textbox($name."_wserver", $mode == 9 ? $serverport : undef, 20).
+       "</td> </tr>\n";
+$wt .= "<tr> <td>$text{'backup_path'}</td> <td>".
+       &ui_textbox($name."_wpath", $mode == 9 ? $path : undef, 50).
+       "</td> </tr>\n";
+$wt .= "<tr> <td>$text{'backup_login'}</td> <td>".
+       &ui_textbox($name."_wuser", $mode == 9 ? $user : undef, 15,
+		   0, undef, $noac).
+       "</td> </tr>\n";
+$wt .= "<tr> <td>$text{'backup_pass'}</td> <td>".
+       &ui_password($name."_wpass", $mode == 9 ? $pass : undef, 15,
+		   0, undef, $noac).
+       "</td> </tr>\n";
+$wt .= "</table>\n";
+push(@opts, [ 9, $text{'backup_mode9'}, $wt ]);
+
 # S3 backup fields (bucket, access key ID, secret key and file)
 local $s3user = $mode == 3 ? $user : undef;
 local $s3pass = $mode == 3 ? $pass : undef;
@@ -4179,6 +4205,31 @@ elsif ($mode == 8 && &can_use_cloud("dropbox")) {
 	($in{$name.'_dbpath'} =~ /^\// || $in{$name.'_dbpath'} =~ /\/$/) &&
 		&error($text{'backup_edbpath2'});
 	return "dropbox://".$in{$name.'_dbpath'};
+	}
+elsif ($mode == 9) {
+	# Webmin server
+	local ($server, $port);
+	if ($in{$name."_wserver"} =~ /^\[([^\]]+)\](:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	elsif ($in{$name."_wserver"} =~ /^([A-Za-z0-9\.\-\_]+)(:(\d+))?$/) {
+		($server, $port) = ($1, $3);
+		}
+	else {
+		&error($text{'backup_eserver9'});
+		}
+	&to_ipaddress($server) ||
+	    defined(&to_ip6address) && &to_ip6address($server) ||
+		&error($text{'backup_eserver9a'});
+	$port =~ /^\d*$/ || &error($text{'backup_eport'});
+	$in{$name."_wpath"} =~ /\S/ || &error($text{'backup_epath'});
+	$in{$name."_wuser"} =~ /^[^:\/ ]*$/ || &error($text{'backup_euser2'});
+	if ($in{$name."_wpath"} ne "/") {
+		# Strip trailing /
+		$in{$name."_spath"} =~ s/\/+$//;
+		}
+	return "webmin://".$in{$name."_wuser"}.":".$in{$name."_wpass"}."\@".
+	       $in{$name."_wserver"}.":".$in{$name."_wpath"};
 	}
 else {
 	&error($text{'backup_emode'});
@@ -5549,6 +5600,9 @@ sub dest_to_webmin
 {
 my ($dest) = @_;
 my ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($dest);
+
+# Clear any previous handler that would prefer error from calling die
+&remote_error_setup(undef);
 
 # Find existing registered server, if any
 &foreign_require("servers");
