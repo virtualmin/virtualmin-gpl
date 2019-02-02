@@ -62,7 +62,7 @@ return ( 5 );
 
 sub script_phpmyadmin_php_modules
 {
-return ("mysql");
+return ("mysqli");
 }
 
 sub script_phpmyadmin_php_optional_modules
