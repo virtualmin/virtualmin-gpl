@@ -381,6 +381,14 @@ if ($max) {
 	}
 else {
 	print "<b>$text{'bwgraph_none'}</b><p>\n";
+	if (&can_edit_templates()) {
+		my $job = &find_bandwidth_job();
+		if (!$job || !$config{'bw_active'}) {
+			print &text('bwgraph_enable',
+			    &ui_link('edit_newbw.cgi', $text{'newbw_title'})),
+			    "<p>\n";
+			}
+		}
 	}
 
 if ($parent) {

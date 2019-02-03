@@ -3466,6 +3466,7 @@ newplugin_open=Open
 
 bwgraph_title=Bandwidth Usage
 bwgraph_none=No bandwidth usage statistics have been collected yet.
+bwgraph_enable=Check the $1 page to ensure that statistics collection is enabled.
 bwgraph_mode=Display mode:
 bwgraph_mode_0=Parent servers only
 bwgraph_mode_0one=Limit and usage
