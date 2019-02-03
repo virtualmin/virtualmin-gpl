@@ -1717,9 +1717,9 @@ foreach my $desturl (@$desturls) {
 				    &serialise_variable(\%donedoms));
 			eval {
 				local $main::error_must_die = 1;
-				&remote_write($w, $dest, $r);
-				&remote_write($w, $infotemp, $r.".info");
-				&remote_write($w, $domtemp, $r.".dom");
+				&remote_write($w, $dest, $path);
+				&remote_write($w, $infotemp, $path.".info");
+				&remote_write($w, $domtemp, $path.".dom");
 				};
 			$err = $@;
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
