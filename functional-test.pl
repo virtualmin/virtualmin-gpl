@@ -3056,6 +3056,23 @@ $webminbackup_tests = [
 		      [ 'source', "$webmin_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
+	# Backup via Webmin in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', "$webmin_backup_prefix/backups" ] ],
+	},
+
+	# Restore via Webmin in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$webmin_backup_prefix/backups" ] ],
+	},
+
 	# Cleanup the backup domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
