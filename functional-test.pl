@@ -3000,6 +3000,79 @@ $remotebackup_tests = [
 
 $enc_remotebackup_tests = &convert_to_encrypted($remotebackup_tests);
 
+$webmin_backup_dir = "/tmp/webminbackup-test";
+$webmin_backup_prefix = "webmin://$webmin_user:$webmin_pass\@localhost$webmin_backup_dir";
+
+$webminbackup_tests = [
+	# Create a domain for the backup target
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Create backup dir
+	{ 'command' => 'mkdir -p '.$webmin_backup_dir },
+
+	# Backup via Webmin
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$webmin_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$webmin_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore via Webmin
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$webmin_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain via Webmin
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$webmin_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+
+	# Cleanup backup dir
+	{ 'command' => 'rm -rf '.$webmin_backup_dir,
+	  'cleanup' => 1,
+	},
+	];
+if (!$webmin_user || !$webmin_pass) {
+	$webminbackup_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	}
+
+$enc_webminbackup_tests = &convert_to_encrypted($webminbackup_tests);
+
 $s3_backup_prefix = "s3://$config{'s3_akey'}:$config{'s3_skey'}\@virtualmin-test-backup-bucket";
 $s3backup_tests = [
 	# Create target bucket
@@ -8081,6 +8154,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_rsbackup' => $enc_rsbackup_tests,
 	      'configbackup' => $configbackup_tests,
 	      'enc_configbackup' => $enc_configbackup_tests,
+	      'webminbackup' => $webminbackup_tests,
+	      'enc_webminbackup' => $enc_webminbackup_tests,
 	      'ipbackup' => $ipbackup_tests,
 	      'purge' => $purge_tests,
 	      'incremental' => $incremental_tests,
