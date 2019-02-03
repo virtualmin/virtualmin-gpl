@@ -1591,3 +1591,4 @@ When used with Webmin 1.900 or above, Let's Encrypt SSL certificates can be requ
 The domain name used in links to a server's website can now be customized to use one of it's aliases instead.
 ---- Changes since 6.05 ----
 If multiple versions of the PHP-FPM packages are installed, a different version can be selected for each domain in Virtualmin.
+Remote backups can now be made using Webmin's RPC protocol, along with SSH. This allows backups to systems that only allow sudo logins.
