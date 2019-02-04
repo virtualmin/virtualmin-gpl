@@ -6583,6 +6583,7 @@ bkey_owner=Owned by
 bkey_source=Source for new key
 bkey_upload=Uploaded file
 bkey_paste=Pasted text
+bkey_extra=Existing key
 bkey_generate=Generate a new key
 bkey_generateemail=Email address
 bkey_generatesize=Key size
