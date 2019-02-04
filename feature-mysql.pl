@@ -155,7 +155,7 @@ else {
 				    "delete from user where host = '$h' ".
 				    "and user = '$user'");
 				&execute_user_creation_sql($d, $h, $user,
-							   $encpass);
+						   $encpass, &mysql_pass($d));
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($d, $h, $wild, $user);
 					}
@@ -393,7 +393,8 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		if (&mysql_user_exists($d)) {
 			local $pfunc = sub {
 				&execute_password_change_sql(
-					$d, $olduser, $encpass);
+					$d, $olduser, $encpass,
+					0, 0, &mysql_pass($d));
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -480,7 +481,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			local $h;
 			foreach $h (@hosts) {
 				&execute_user_creation_sql($d, $h, $user,
-							   $encpass);
+						   $encpass, &mysql_pass($d));
 				if ($wild && $wild ne $d->{'db'}) {
 					&add_db_table($d, $h, $wild, $user);
 					}
@@ -848,13 +849,15 @@ elsif ($d->{'provision_mysql'}) {
 		}
 	}
 else {
-	# Lock locally
+	# Lock locally by setting hashed password to an invalid string (or real
+	# password to a random string, only mysql 8)
 	&$first_print($text{'disable_mysqluser'});
 	local $user = &mysql_user($d);
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
 			&execute_password_change_sql(
-				$d, $user, "'".("0" x 41)."'");
+				$d, $user, "'".("0" x 41)."'",
+				0, 0, &random_password(16));
 			};
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
@@ -903,16 +906,20 @@ else {
 	if (&mysql_user_exists($d)) {
 		local $efunc = sub {
 			if ($d->{'disabled_oldmysql'}) {
+				# Can put back old hashed password
 				local $qpass = &mysql_escape(
 					$d->{'disabled_oldmysql'});
 				&execute_password_change_sql(
-					$d, $user, "'$qpass'");
+					$d, $user, "'$qpass'",
+					0, 0, &mysql_pass($d));
 				}
 			else {
+				# Need to re-set encrypted password
 				local $pass = &mysql_pass($d);
 				local $qpass = &mysql_escape($pass);
 				&execute_password_change_sql(
-					$d, $user, "$password_func('$qpass')");
+					$d, $user, "$password_func('$qpass')",
+					0, 0, &mysql_pass($d));
 				}
 			&execute_dom_sql($d, $mysql::master_db,
 					 'flush privileges');
@@ -1791,7 +1798,8 @@ else {
 			    "and user = '$user'");
 			&execute_user_creation_sql($d, $h, $myuser, 
 			      $encpass ? "'$encpass'"
-				       : "$password_func('$qpass')");
+				       : "$password_func('$qpass')",
+			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
 				&add_db_table($d, $h, $db, $myuser);
@@ -1881,14 +1889,15 @@ else {
 			}
 		if (defined($pass)) {
 			# Change the password
-			if ($encpass) {
+			if ($encpass && !$pass) {
 				&execute_password_change_sql(
 					$d, $myuser, "'$encpass'");
 				}
 			else {
 				local $qpass = &mysql_escape($pass);
 				&execute_password_change_sql(
-				    $d, $myuser, "$password_func('$qpass')");
+				    $d, $myuser, "$password_func('$qpass')",
+				    0, 0, $pass);
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -2285,7 +2294,8 @@ else {
 		&execute_dom_sql($d, $mysql::master_db,
 			"delete from db where user = '$user'");
 		foreach my $h (@$hosts) {
-			&execute_user_creation_sql($d, $h, $user, $encpass);
+			&execute_user_creation_sql($d, $h, $user, $encpass,
+						   &mysql_pass($d));
 			foreach my $db (@dbs) {
 				&add_db_table($d, $h, $db->{'name'}, $user);
 				}
@@ -2318,6 +2328,7 @@ else {
 				}
 			}
 		# Re-populate user table
+		# XXX plainpass?
 		foreach my $u (values %allusers) {
 			&execute_dom_sql($d, $mysql::master_db,
 				"delete from user where user = ?", $u->[0]);
@@ -2687,12 +2698,12 @@ elsif ($size eq "huge") {
 return ( );
 }
 
-# execute_user_creation_sql(&domain, host, user, password-sql)
+# execute_user_creation_sql(&domain, host, user, password-sql, plain-pass)
 # Create a MySQL user and set his password
 sub execute_user_creation_sql
 {
-my ($d, $host, $user, $encpass) = @_;
-foreach my $sql (&get_user_creation_sql($d, $host, $user, $encpass)) {
+my ($d, $host, $user, $encpass, $plainpass) = @_;
+foreach my $sql (&get_user_creation_sql($d, $host, $user, $encpass, $plainpass)) {
 	if ($sql =~ /^set\s+password/) {
 		&execute_set_password_sql($d, $sql, $host);
 		}
@@ -2726,15 +2737,21 @@ elsif ($@) {
 	}
 }
 
-# get_user_creation_sql(&domain, host, user, password-sql)
+# get_user_creation_sql(&domain, host, user, password-sql, plain-pass)
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
 {
-my ($d, $host, $user, $encpass) = @_;
-if (&compare_versions(&get_dom_remote_mysql_version($d), "5.7.6") >= 0) {
+my ($d, $host, $user, $encpass, $plainpass) = @_;
+my $ver = &get_dom_remote_mysql_version($d);
+if (&compare_versions($ver, 8) >= 0) {
+	my $native = &is_domain_mysql_remote($d) ?
+			"with mysql_native_password" : "";
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
+	}
+elsif (&compare_versions($ver, "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
-elsif (&compare_versions(&get_dom_remote_mysql_version($d), 5) >= 0) {
+elsif (&compare_versions($ver, 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
 	}
 else {
@@ -2742,19 +2759,24 @@ else {
 	}
 }
 
-# execute_password_change_sql(&domain, user, pass-str, [force-user-table],
-# 			      [no-flush])
+# execute_password_change_sql(&domain, user, password-sql, [force-user-table],
+# 			      [no-flush], [plaintext-pass])
 # Update a MySQL user's password for all hosts
 sub execute_password_change_sql
 {
-my ($d, $user, $encpass, $forceuser, $noflush) = @_;
+my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
 my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
-	if (&compare_versions(&get_dom_remote_mysql_version($d),
-			      "5.7.6") >= 0) {
+	my $ver = &get_dom_remote_mysql_version($d);
+	if ($plainpass && &compare_versions($ver, "8") >= 0) {
+		# Use the plaintext password wherever possible
+		$sql = "set password for '$user'\@'$host' = '".
+		       &mysql_escape($plainpass)."'";
+		}
+	elsif (&compare_versions($ver, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
@@ -2870,7 +2892,8 @@ if (!$rv) {
 	eval {
 		local $main::error_must_die = 1;
 		&execute_password_change_sql(
-			undef, $user, "$password_func('$qpass')", 1, 1);
+			undef, $user, "$password_func('$qpass')", 1, 1,
+			$pass);
 		};
 	if ($@) {
 		$rv = &text('mysqlpass_echange', "$@");
@@ -3074,6 +3097,15 @@ my @mymods = &list_remote_mysql_modules();
 my ($mymod) = grep { $_->{'minfo'}->{'dir'} eq
 		     ($d->{'mysql_module'} || 'mysql') } @mymods;
 return $mymod;
+}
+
+# is_domain_mysql_remote(&domain)
+# Is this domain using a remote MySQL server?
+sub is_domain_mysql_remote
+{
+my ($d) = @_;
+my $mod = !$d ? 'mysql' : $d->{'mysql_module'} || 'mysql';
+return $mod ne "mysql";
 }
 
 # execute_dom_sql(&domain, db, sql, ...)
