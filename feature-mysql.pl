@@ -916,9 +916,8 @@ else {
 			else {
 				# Need to re-set encrypted password
 				local $pass = &mysql_pass($d);
-				local $qpass = &mysql_escape($pass);
 				&execute_password_change_sql(
-					$d, $user, "$password_func('$qpass')",
+					$d, $user, undef,
 					0, 0, &mysql_pass($d));
 				}
 			&execute_dom_sql($d, $mysql::master_db,
@@ -1759,7 +1758,7 @@ else {
 	}
 }
 
-# create_mysql_database_user(&domain, &dbs, username, password, [mysql-pass])
+# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass])
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
@@ -1797,8 +1796,7 @@ else {
 			    "delete from user where host = '$h' ".
 			    "and user = '$user'");
 			&execute_user_creation_sql($d, $h, $myuser, 
-			      $encpass ? "'$encpass'"
-				       : "$password_func('$qpass')",
+			      $encpass ? "'$encpass'" : undef,
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
@@ -1894,10 +1892,8 @@ else {
 					$d, $myuser, "'$encpass'");
 				}
 			else {
-				local $qpass = &mysql_escape($pass);
 				&execute_password_change_sql(
-				    $d, $myuser, "$password_func('$qpass')",
-				    0, 0, $pass);
+				    $d, $myuser, undef, 0, 0, $pass);
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -2328,7 +2324,6 @@ else {
 				}
 			}
 		# Re-populate user table
-		# XXX plainpass?
 		foreach my $u (values %allusers) {
 			&execute_dom_sql($d, $mysql::master_db,
 				"delete from user where user = ?", $u->[0]);
@@ -2743,7 +2738,7 @@ sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
 my $ver = &get_dom_remote_mysql_version($d);
-if (&compare_versions($ver, 8) >= 0) {
+if (&compare_versions($ver, 8) >= 0 && $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
 			"with mysql_native_password" : "";
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
@@ -2765,6 +2760,11 @@ else {
 sub execute_password_change_sql
 {
 my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
+if (!$encpass && $plainpass) {
+	# Hash password for insertion
+	my $qpass = &mysql_escape($plainpass);
+	$encpass = "$password_func('$qpass')";
+	}
 my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;

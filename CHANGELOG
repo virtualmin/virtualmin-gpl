@@ -1592,3 +1592,4 @@ The domain name used in links to a server's website can now be customized to use
 ---- Changes since 6.05 ----
 If multiple versions of the PHP-FPM packages are installed, a different version can be selected for each domain in Virtualmin.
 Remote backups can now be made using Webmin's RPC protocol, along with SSH. This allows backups to systems that only allow sudo logins.
+Added support for MySQL 8 systems that use a different password hashing method.
