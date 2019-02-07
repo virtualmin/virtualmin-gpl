@@ -2738,6 +2738,11 @@ sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
 my $ver = &get_dom_remote_mysql_version($d);
+if (!$encpass && $plainpass) {
+	# Hash password for setting
+	my $qpass = &mysql_escape($plainpass);
+	$encpass = "$password_func('$qpass')";
+	}
 if (&compare_versions($ver, 8) >= 0 && $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
 			"with mysql_native_password" : "";
