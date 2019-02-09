@@ -214,7 +214,7 @@ foreach $dest (@dests) {
 
 # Show destination fields
 print &ui_hidden_table_start($text{'backup_headerdest'}, "width=100%", 2,
-			     "dest", 1, \@tds);
+			     "dest", 0, \@tds);
 print &ui_table_row(&hlink($text{'backup_dest'}, "backup_dest"),
 	    join("<hr>\n", @dfields));
 
