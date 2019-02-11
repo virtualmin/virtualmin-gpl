@@ -3213,6 +3213,7 @@ $s3backup_tests = [
 		      [ 'strftime' ],
 		      [ 'purge', '0.00001' ] ],
 	  'grep' => 'Deleting file',
+	  'sleep' => 1,
 	},
 
 	# Cleanup the backup domain
