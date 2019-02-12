@@ -234,6 +234,7 @@ if (!$pid) {
 	$ENV{'REMOTE_HOST'} = $remote_host;
 	$ENV{'MINISERV_PID'} = $miniserv_pid;
 	$ENV{'MINISERV_CONFIG'} = $miniserv_config;
+	$ENV{'DISABLE_REFERERS_CHECK'} = 1;
 	$main::no_referers_check = 1;
 	my $pkg = $cmd;
 	$pkg =~ s/[^A-Za-z0-9]/_/g;
