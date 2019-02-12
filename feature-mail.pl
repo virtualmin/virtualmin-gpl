@@ -6400,6 +6400,12 @@ return ( { 'name' => 'MailShark',
            'id' => 0,
            'mx' => [ 'mail.mailroute.net', ],
          },
+	 { 'name' => 'Appriver',
+           'url' => 'https://www.appriver.com/services/spam-and-virus-protection/',
+           'id' => 0,
+           'mx' => [ $d->{'dom'}.'.1.0001.arsmtp.com',
+		     $d->{'dom'}.'.2.0001.arsmtp.com' ],
+         },
         );
 }
 
