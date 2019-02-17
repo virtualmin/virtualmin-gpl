@@ -62,10 +62,8 @@ if ($r->{'defttl'}) {
 elsif ($in{'type'} && $t->{'domain'}) {
 	# New record, might be same as domain, or within it
 	print &ui_table_row($text{'record_name'},
-			    &ui_radio("name_def", 1,
-				      [ [ 1, $text{'record_same'} ],
-					[ 0, " " ] ]).
-			    &ui_textbox("name", undef, 20).
+			    &ui_opt_textbox("name", undef, 20,
+					    $text{'record_same'}).
 			    "<tt>.$d->{'dom'}</tt>");
 	}
 elsif ($r->{'name'} eq $d->{'dom'}.".") {
