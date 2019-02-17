@@ -12217,7 +12217,7 @@ return @rv;
 # Returns a link and text suitable for the footer function
 sub domain_footer_link
 {
-local $base = "$gconfig{'webprefix'}/$module_name";
+local $base = "/".$module_name;
 return &can_config_domain($_[0]) ?
 	( "$base/edit_domain.cgi?dom=$_[0]->{'id'}", $text{'edit_return'} ) :
 	( "$base/view_domain.cgi?dom=$_[0]->{'id'}", $text{'view_return'} );
