@@ -14208,7 +14208,8 @@ if ($config{'mysql'}) {
 					     '/mysql/root_form.cgi'));
 			}
 		else {
-			&$second_print($text{'check_mysqlok'});
+			my ($v, $var) = &get_dom_remote_mysql_version();
+			&$second_print(&text('check_mysqlok'.$var, $v));
 			}
 		}
 

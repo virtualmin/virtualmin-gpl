@@ -2743,6 +2743,8 @@ if (!$encpass && $plainpass) {
 	my $qpass = &mysql_escape($plainpass);
 	$encpass = "$password_func('$qpass')";
 	}
+# XXX mariaDB 10.2 and later support 'alter user'
+# XXX get_dom_remote_mysql_version should return remote version type as well
 if (&compare_versions($ver, 8) >= 0 && &compare_versions($ver, 10) < 0 &&
     $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
@@ -3162,11 +3164,11 @@ sub get_dom_remote_mysql_version
 {
 my ($d) = @_;
 my $mod = &require_dom_mysql($d);
+my $rv;
 if ($get_dom_remote_mysql_version_cache{$mod}) {
-	return $get_dom_remote_mysql_version_cache{$mod};
+	$rv = $get_dom_remote_mysql_version_cache{$mod};
 	}
 else {
-	my $rv;
 	eval {
 		local $main::error_must_die = 1;
 		$rv = &foreign_call($mod, "get_remote_mysql_version");
@@ -3174,8 +3176,16 @@ else {
 	$rv ||= eval $mod.'::mysql_version';
 	$rv ||= $mysql::mysql_version;
 	$get_dom_remote_mysql_version_cache{$mod} = $rv;
-	return $rv;
 	}
+my $variant = "mysql";
+if ($rv =~ /^([0-9\.]+)\-(.*)/) {
+	$rv = $1;
+	$variant = $2;
+	if ($variant =~ /mariadb/i) {
+		$variant = "mariadb";
+		}
+	}
+return wantarray ? ($rv, $variant) : $rv;
 }
 
 # get_default_mysql_module()

@@ -1852,7 +1852,8 @@ check_dnsok3=BIND DNS domains will be hosted on a services host.
 check_etlsa=TLSA DNS records cannot be created on your system : $1.
 check_tlsaok=TLSA DNS records will be added to new domains.
 check_dnsmaster=However, the default master DNS server $1 is not a fully qualified domain name.
-check_mysqlok=MySQL is installed and running.
+check_mysqlokmysql=MySQL $1 is installed and running.
+check_mysqlokmariadb=MariaDB $1 is installed and running.
 check_mysqlok2=MySQL client programs are installed for use with a services host.
 check_mysqlnopass=MySQL is installed and running, but does not have any <tt>root</tt> password set! <b>This should be changed immediately in the <a href='$1'>MySQL Database</a> module</b>.
 check_postgresok=PostgreSQL is installed and running.
