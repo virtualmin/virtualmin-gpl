@@ -1707,8 +1707,9 @@ if ($php_fpm_config_cache) {
 &foreign_require("software");
 my @rv;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
-		   (map { my $v=$_; $v =~ s/\.//g;
-			  ("php${v}-php-fpm", "php${v}-fpm", "rh-php${v}-php-fpm") }
+		   (map { my $v = $_; $v =~ s/\.//g;
+			  ("php$v-php-fpm", "php$v-fpm",
+			   "rh-php$v-php-fpm", "php$_-fpm") }
 		        @all_possible_php_versions)) {
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
