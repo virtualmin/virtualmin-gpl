@@ -1940,7 +1940,8 @@ sub sysinfo_mysql
 {
 &require_mysql();
 return ( ) if ($config{'provision_mysql'});
-return ( [ $text{'sysinfo_mysql'}, &get_dom_remote_mysql_version() ] );
+my $v = &get_dom_remote_mysql_version();
+return ( [ $text{'sysinfo_mysql'}, $v ] );
 }
 
 sub startstop_mysql
@@ -2737,15 +2738,14 @@ elsif ($@) {
 sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
-my $ver = &get_dom_remote_mysql_version($d);
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 if (!$encpass && $plainpass) {
 	# Hash password for setting
 	my $qpass = &mysql_escape($plainpass);
 	$encpass = "$password_func('$qpass')";
 	}
-# XXX mariaDB 10.2 and later support 'alter user'
-# XXX get_dom_remote_mysql_version should return remote version type as well
-if (&compare_versions($ver, 8) >= 0 && &compare_versions($ver, 10) < 0 &&
+if (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
+     $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
     $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
 			"with mysql_native_password" : "";
@@ -2778,9 +2778,10 @@ my $rv = &execute_dom_sql($d, $mysql::master_db,
 my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
-	my $ver = &get_dom_remote_mysql_version($d);
-	if ($plainpass && &compare_versions($ver, "8") >= 0 &&
-                          &compare_versions($ver, 10) < 0) {
+	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+	if (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
+	     $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
+	    $plainpass) {
 		# Use the plaintext password wherever possible
 		$sql = "set password for '$user'\@'$host' = '".
 		       &mysql_escape($plainpass)."'";
