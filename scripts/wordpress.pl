@@ -50,7 +50,7 @@ return ("mysql");
 
 sub script_wordpress_release
 {
-return 4;	# For wp-cli support
+return 5;	# Fix format of wp-config.php
 }
 
 # script_wordpress_depends(&domain, version)
@@ -255,24 +255,24 @@ else {
 					      quotemeta($cfile));
 		my $lref = read_file_lines_as_domain_user($d, $cfile);
 		foreach my $l (@$lref) {
-			if ($l =~ /^define\('DB_NAME',/) {
+			if ($l =~ /^define\(\s*'DB_NAME',/) {
 				$l = "define('DB_NAME', '$dbname');";
 				}
-			if ($l =~ /^define\('DB_USER',/) {
+			if ($l =~ /^define\(\s*'DB_USER',/) {
 				$l = "define('DB_USER', '$dbuser');";
 				}
-			if ($l =~ /^define\('DB_HOST',/) {
+			if ($l =~ /^define\(\s*'DB_HOST',/) {
 				$l = "define('DB_HOST', '$dbhost');";
 				}
-			if ($l =~ /^define\('DB_PASSWORD',/) {
+			if ($l =~ /^define\(\s*'DB_PASSWORD',/) {
 				$l = "define('DB_PASSWORD', '".
 				     php_quotemeta($dbpass, 1)."');";
 				}
-			if ($l =~ /define\('(AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY|AUTH_SALT|SECURE_AUTH_SALT|LOGGED_IN_SALT|NONCE_SALT)'/) {
+			if ($l =~ /define\(\s*'(AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY|AUTH_SALT|SECURE_AUTH_SALT|LOGGED_IN_SALT|NONCE_SALT)'/) {
 				my $salt = random_password(64);
 				$l = "define('$1', '$salt');";
 				}
-			if ($l =~ /^define\('WP_AUTO_UPDATE_CORE',/) {
+			if ($l =~ /^define\(\s*'WP_AUTO_UPDATE_CORE',/) {
 				$l = "define('WP_AUTO_UPDATE_CORE', false);";
 				}
 			}
