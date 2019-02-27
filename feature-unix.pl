@@ -593,6 +593,7 @@ return undef;
 sub check_unix_clash
 {
 return 0 if ($_[0]->{'parent'});	# user already exists!
+return 0 if (&remote_unix() && $_[0]->{'wasmissing'});
 if (!$_[1] || $_[1] eq 'user') {
 	# Check for username clash
 	return &text('setup_eunixclash1', $_[0]->{'user'})
