@@ -1071,7 +1071,7 @@ foreach $db (@dbs) {
 		# Backup worked .. gzip the file
 		unlink($dbfile.".gz");	# Prevent malicious symlink
 		my $out = &backquote_logged(
-				"gzip ".quotemeta($dbfile)." 2>&1");
+			&get_gzip_command()." ".quotemeta($dbfile)." 2>&1");
 		if ($?) {
 			&$second_print(&text('backup_mysqlgzipfailed',
 					     "<pre>$out</pre>"));
@@ -1213,7 +1213,7 @@ foreach my $db (@dbs) {
 		# Need to uncompress first
 		unlink("$1");	# To prevent malicious link overwrite
 		local $out = &backquote_logged(
-			"gunzip ".quotemeta($db->[1])." 2>&1");
+			&get_gunzip_command()." ".quotemeta($db->[1])." 2>&1");
 		if ($?) {
 			&$second_print(&text('restore_mysqlgunzipfailed',
 					     "<pre>$out</pre>"));

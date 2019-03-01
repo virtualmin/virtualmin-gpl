@@ -1111,7 +1111,8 @@ if ($ok) {
 			local $comp = "cat";
 			if ($config{'compression'} == 0) {
 				$destfile .= ".gz";
-				$comp = "gzip -c $config{'zip_args'}";
+				$comp = &get_gzip_command().
+					" -c $config{'zip_args'}";
 				}
 			elsif ($config{'compression'} == 1) {
 				$destfile .= ".bz2";
@@ -1177,7 +1178,8 @@ if ($ok) {
 		# Tar up the directory into the final file
 		local $comp = "cat";
 		if ($dest =~ /\.(gz|tgz)$/i) {
-			$comp = "gzip -c $config{'zip_args'}";
+			$comp = &get_gzip_command().
+				" -c $config{'zip_args'}";
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
 			$comp = &get_bzip2_command().
@@ -1238,7 +1240,7 @@ if (@$vbs && ($homefmt || $dirfmt)) {
 	local $vdestfile;
 	local ($out, $err);
 	if (&has_command("gzip")) {
-		$comp = "gzip -c $config{'zip_args'}";
+		$comp = &get_gzip_command()." -c $config{'zip_args'}";
 		$vdestfile = "virtualmin.tar.gz";
 		}
 	else {
@@ -2032,7 +2034,7 @@ if ($ok) {
 			}
 		else {
 			# Other formats use uncompress | tar
-			local $comp = $cf == 1 ? "gunzip -c" :
+			local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
 				      $cf == 2 ? "uncompress -c" :
 				      $cf == 3 ? &get_bunzip2_command()." -c" :
 						 "cat";
@@ -3123,7 +3125,7 @@ else {
 		else {
 			$catter = "cat $q";
 			}
-		$comp = $cf == 1 ? "gunzip -c" :
+		$comp = $cf == 1 ? &get_gunzip_command()." -c" :
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
 				   "cat";
@@ -4404,11 +4406,35 @@ if (!$config{'pbzip2'}) {
 	return &has_command('bunzip2') || 'bunzip2';
 	}
 elsif (&has_command('pbunzip2')) {
-	return &has_command('pbunzip2') || 'pbunzip2';
+	return &has_command('pbunzip2');
 	}
 else {
 	# Fall back to using -d option
 	return (&has_command('pbzip2') || 'pbzip2').' -d';
+	}
+}
+
+# get_gzip_command()
+# Returns the full path to the gzip-compatible command
+sub get_gzip_command
+{
+local $cmd = $config{'pigz'} ? 'pigz' : 'gzip';
+return &has_command($cmd) || $cmd;
+}
+
+# get_gunzip_command()
+# Returns the full path to the gunzip-compatible command
+sub get_gunzip_command
+{
+if (!$config{'pigz'}) {
+	return &has_command('gunzip') || 'gunzip';
+	}
+elsif (&has_command('unpigz')) {
+	return &has_command('unpigz');
+	}
+else {
+	# Fall back to using -d option
+	return (&has_command('pigz') || 'pigz').' -d';
 	}
 }
 

@@ -558,7 +558,7 @@ if ($key && $homefmt) {
 if ($homefmt && $compression == 0) {
 	# With gzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
-	       " | gzip -c $config{'zip_args'}";
+	       " | ".&get_gzip_command()." -c $config{'zip_args'}";
 	}
 elsif ($homefmt && $compression == 1) {
 	# With bzip
@@ -733,7 +733,7 @@ if ($cf == 4) {
 	&execute_command("cd $qh && unzip -o $q", undef, $outfile, $outfile);
 	}
 else {
-	local $comp = $cf == 1 ? "gunzip -c" :
+	local $comp = $cf == 1 ? &get_gunzip_command()." -c" :
 		      $cf == 2 ? "uncompress -c" :
 		      $cf == 3 ? &get_bunzip2_command()." -c" : "cat";
 	local $tarcmd = &make_tar_command("xvfX", "-", $xtemp);

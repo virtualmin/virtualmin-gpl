@@ -236,3 +236,4 @@ check_ports=1
 nopostfix_extra_user=0
 nolink_certs=0
 remote_alias=1
+pigz=0
