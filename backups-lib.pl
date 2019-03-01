@@ -2638,6 +2638,7 @@ if ($ok) {
 			&set_provision_features($d);
 
 			# Check for clashes
+			$d->{'wasmissing'} = 1;
 			local $cerr = &virtual_server_clashes($d);
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
@@ -2666,7 +2667,6 @@ if ($ok) {
 			# Finally, create it
 			&$indent_print();
 			delete($d->{'missing'});
-			$d->{'wasmissing'} = 1;
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
