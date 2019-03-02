@@ -512,12 +512,22 @@ if ($dkim_config) {
 			    "Socket", "inet:8891\@localhost");
 		        $dkim->{'port'} = 8891;
 			}
-		elsif ($conf->{'Socket'} =~ /^inet:(\d+)/ &&
-		       $dkim->{'port'} &&
-		       $1 != $dkim->{'port'}) {
-			# Fix up port in Socket line if wrong
-		        &save_open_dkim_config($dkim_config,
-			    "Socket", "inet:$dkim->{'port'}\@localhost");
+		elsif ($dkim->{'port'}) {
+			# Fix up port if incorrect
+			if ($conf->{'Socket'} =~ /^local:/ ||
+			    $conf->{'Socket'} =~ /^inet:(\d+)/ &&
+			    $1 != $dkim->{'port'}) {
+				&save_open_dkim_config($dkim_config,
+				  "Socket", "inet:$dkim->{'port'}\@localhost");
+				}
+			}
+		elsif ($dkim->{'socket'}) {
+			if ($conf->{'Socket'} =~ /^inet:/ ||
+			    $conf->{'Socket'} =~ /^local:(\S+)/ &&
+			    $1 ne $dkim->{'socket'}) {
+				&save_open_dkim_config($dkim_config,
+				  "Socket", "local:$dkim->{'socket'}");
+				}
 			}
 
 		# Save sign/verify mode flags
