@@ -15,8 +15,7 @@ $file || &error($recs);
 # Warn if DNS records are not valid
 $err = &validate_dns($d, $recs, 1);
 if ($err) {
-	print "<font color=red><b>",&text('records_evalid', $err),
-	      "</b></font><p>\n";
+	print ui_alert_box(&text('records_evalid', $err), 'warn');
 	}
 
 # Exclude sub-domains and parent domains
