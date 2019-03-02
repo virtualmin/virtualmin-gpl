@@ -506,11 +506,18 @@ if ($dkim_config) {
 		    $conf->{'Socket'} =~ /^inet:port/ ||
 		    $conf->{'Socket'} =~ /^local:/ &&
 		      $config{'mail_system'} == 0) {
-		        # Set socket is not set, or if a local file
+		        # Set socket if not set, or if a local file
 		        # and Postfix is in use
 		        &save_open_dkim_config($dkim_config,
 			    "Socket", "inet:8891\@localhost");
 		        $dkim->{'port'} = 8891;
+			}
+		elsif ($conf->{'Socket'} =~ /^inet:(\d+)/ &&
+		       $dkim->{'port'} &&
+		       $1 != $dkim->{'port'}) {
+			# Fix up port in Socket line if wrong
+		        &save_open_dkim_config($dkim_config,
+			    "Socket", "inet:$dkim->{'port'}\@localhost");
 			}
 
 		# Save sign/verify mode flags
