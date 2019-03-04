@@ -1915,10 +1915,12 @@ return if (!@servers);
 
 # Build list of mailboxes in the domain
 local @mailboxes;
-foreach my $v (&list_virtusers(1)) {
-	my ($mb, $dom) = split(/\@/, $v->{'from'});
-	if ($dom eq $d->{'dom'}) {
-		push(@mailboxes, $mb);
+if (!$d->{'disabled'}) {
+	foreach my $v (&list_virtusers(1)) {
+		my ($mb, $dom) = split(/\@/, $v->{'from'});
+		if ($dom eq $d->{'dom'}) {
+			push(@mailboxes, $mb);
+			}
 		}
 	}
 
