@@ -8546,7 +8546,7 @@ if ($filemode eq "none" || $filemode eq "default") {
 	}
 $rv .= &ui_table_row($text{'newdom_subject'},
 		     &ui_textbox("subject", $subject, 60));
-if (@_ >= 5) {
+if (defined($mailbox)) {
 	# Show inputs for selecting destination
 	$rv .= &ui_table_row($text{'newdom_to'},
 	     &ui_checkbox("mailbox", 1, $text{'newdom_mailbox'}, $mailbox)." ".

@@ -23,9 +23,9 @@ print &email_template_input($file,
 	    $config{'newuser_subject'} || $text{'mail_usubject'},
 	    $config{'newuser_cc'},
 	    $config{'newuser_bcc'},
-	    $config{'newuser_to_mailbox'},
-	    $config{'newuser_to_owner'},
-	    $config{'newuser_to_reseller'},
+	    $config{'newuser_to_mailbox'} || 0,
+	    $config{'newuser_to_owner'} || 0,
+	    $config{'newuser_to_reseller'} || 0,
 	    $text{'newuser_header'},
 	    $config{'user_template'});
 print &ui_form_end([ [ "save", $text{'save'} ] ]);

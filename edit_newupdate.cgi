@@ -22,9 +22,9 @@ print &email_template_input($file,
 	    $config{'newupdate_subject'} || $text{'mail_upsubject'},
 	    $config{'newupdate_cc'},
 	    $config{'newupdate_bcc'},
-	    $config{'newupdate_to_mailbox'},
-	    $config{'newupdate_to_owner'},
-	    $config{'newupdate_to_reseller'},
+	    $config{'newupdate_to_mailbox'} || 0,
+	    $config{'newupdate_to_owner'} || 0,
+	    $config{'newupdate_to_reseller'} || 0,
 	    $text{'newupdate_header'},
 	    $config{'update_template'});
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
