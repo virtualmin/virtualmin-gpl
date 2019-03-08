@@ -12228,7 +12228,7 @@ return &can_config_domain($_[0]) ?
 sub domain_redirect
 {
 local ($d, $refresh) = @_;
-&redirect("$gconfig{'webprefix'}/$module_name/postsave.cgi?".
+&redirect("/$module_name/postsave.cgi?".
 	  "dom=$d->{'id'}&refresh=$refresh");
 }
 
