@@ -1841,6 +1841,22 @@ $d->{'php_fpm_port'} = $rv;
 return $rv;
 }
 
+# list_php_fpm_pools(&conf)
+# Returns a list of all pool IDs for some FPM config
+sub list_php_fpm_pools
+{
+my ($conf) = @_;
+my @rv;
+opendir(DIR, $conf->{'dir'});
+foreach my $f (readdir(DIR)) {
+	if ($f =~ /^(\S+)\.conf$/) {
+		push(@rv, $1);
+		}
+	}
+closedir(DIR);
+return @rv;
+}
+
 # create_php_fpm_pool(&domain)
 # Create a per-domain pool config file
 sub create_php_fpm_pool
@@ -1947,7 +1963,15 @@ sub get_php_fpm_config_value
 my ($d, $name) = @_;
 my $conf = &get_php_fpm_config($d);
 return undef if (!$conf);
-my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+return &get_php_fpm_pool_config_value($conf, $d->{'id'}, $name);
+}
+
+# get_php_fpm_pool_config_value(&conf, id, name)
+# Returns the value of a config setting from any pool file
+sub get_php_fpm_pool_config_value
+{
+my ($conf, $id, $name) = @_;
+my $file = $conf->{'dir'}."/".$id.".conf";
 my $lref = &read_file_lines($file, 1);
 foreach my $l (@$lref) {
 	if ($l =~ /^\s*(\S+)\s*=\s*(.*)/ && $1 eq $name) {
@@ -1972,7 +1996,15 @@ sub save_php_fpm_config_value
 my ($d, $name, $value) = @_;
 my $conf = &get_php_fpm_config($d);
 return 0 if (!$conf);
-my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+return &save_php_fpm_pool_config_value($conf, $d->{'id'}, $name, $value);
+}
+
+# save_php_fpm_pool_config_value(&conf, id, name, value)
+# Adds, updates or deletes an config setting in a pool file
+sub save_php_fpm_pool_config_value
+{
+my ($conf, $id, $name, $value) = @_;
+my $file = $conf->{'dir'}."/".$id.".conf";
 &lock_file($file);
 my $lref = &read_file_lines($file);
 my $found = -1;
@@ -2008,6 +2040,20 @@ sub save_php_fpm_ini_value
 {
 my ($d, $name, $value) = @_;
 return &save_php_fpm_config_value($d, "php_value[${name}]", $value);
+}
+
+# increase_fpm_port(string)
+# Increase the number in a port string
+sub increase_fpm_port
+{
+my ($t) = @_;
+if ($t =~ /^(\d+)$/) {
+	return $t + 1;
+	}
+elsif ($t =~ /^(.*):(\d+)$/) {
+	return $1.":".($2 + 1);
+	}
+return undef;
 }
 
 # get_apache_mod_php_version()
