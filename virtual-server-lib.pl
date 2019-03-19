@@ -129,6 +129,9 @@ $custom_shells_file = "$module_config_directory/custom-shells";
 			 "$module_root_directory/pro/scripts",
 		       );
 $script_log_directory = &cache_file_path("scriptlog");
+if (!-d $script_log_directory) {
+	$script_log_directory = "$module_config_directory/scriptlog";
+	}
 $scripts_unavail_file = &cache_file_path("scriptsunavail");
 
 @styles_directories = ( "$module_config_directory/styles",
