@@ -16940,70 +16940,7 @@ if ($script && $script->{'release_version'}) {
 	return &compare_versions($ver1, $ver2) ||
                &compare_versions($rel1, $rel2);
 	}
-# XXX call webmin's compare_version_numbers function instead after 1.830 is out
-local @sp1 = split(/[\.\-]/, $ver1);
-local @sp2 = split(/[\.\-]/, $ver2);
-for(my $i=0; $i<@sp1 || $i<@sp2; $i++) {
-	local $v1 = $sp1[$i];
-	local $v2 = $sp2[$i];
-	local $comp;
-	if ($v1 =~ /^\d+$/ && $v2 =~ /^\d+$/) {
-		# Full numeric compare
-		$comp = $v1 <=> $v2;
-		}
-	elsif ($v1 =~ /^\d+\S*$/ && $v2 =~ /^\d+\S*$/) {
-		# Numeric followed by string
-		$v1 =~ /^(\d+)(\S*)$/;
-		local ($v1n, $v1s) = ($1, $2);
-		$v2 =~ /^(\d+)(\S*)$/;
-		local ($v2n, $v2s) = ($1, $2);
-		$comp = $v1n <=> $v2n;
-		if (!$comp) {
-			# X.rcN is always older than X
-			if ($v1s =~ /^rc\d+$/i && $v2s =~ /^\d*$/) {
-				$comp = -1;
-				}
-			elsif ($v1s =~ /^\d*$/ && $v2s =~ /^rc\d+$/i) {
-				$comp = 1;
-				}
-			else {
-				$comp = $v1s cmp $v2s;
-				}
-			}
-		}
-	elsif ($v1 =~ /^\d+$/ && $v2 =~ /^rc\d+$/i) {
-		# N is always newer than rcN
-		$comp = 1;
-		}
-	elsif ($v1 =~ /^rc\d+$/i && $v2 =~ /^\d+$/) {
-		# rcN is always older than N
-		$comp = -1;
-		}
-	elsif ($v1 =~ /^\d+$/ && $v2 !~ /^\d+$/ && $v2 ne "") {
-		# Numeric compared to non-numeric - numeric is always higher
-		$comp = 1;
-		}
-	elsif ($v1 !~ /^\d+$/ && $v2 =~ /^\d+$/ && $v1 ne "") {
-		# Non-numeric compared to numeric - numeric is always higher
-		$comp = -1;
-		}
-	elsif ($v1 eq "" && $v2 ne "") {
-		# Any number is better an empty string
-		$comp = -1;
-		}
-	elsif ($v1 ne "" && $v2 eq "") {
-		# Any number is better an empty string
-		$comp = 1;
-		}
-	else {
-		# String compare
-		$v1 = 0 if ($v1 eq '');
-		$v2 = 0 if ($v2 eq '');
-		$comp = $v1 cmp $v2;
-		}
-	return $comp if ($comp);
-	}
-return 0;
+return &compare_version_numbers($ver1, $ver2);
 }
 
 # clone_virtual_server(&domain, new-domain, [new-user, [new-password]],
