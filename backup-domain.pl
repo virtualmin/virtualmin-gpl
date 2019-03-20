@@ -435,6 +435,7 @@ print "Features must be specified using their short names, like web and dns.\n";
 print "\n";
 print "The destination can be one of :\n";
 print " - A local file, like /backup/yourdomain.com.tgz\n";
+print " - A local directory can be given while passing --newformat option, like /backup/\n";
 print " - An FTP destination, like ftp://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An SSH destination, like ssh://login:pass\@server/backup/yourdomain.com.tgz\n";
 print " - An S3 bucket, like s3://accesskey:secretkey\@bucket\n";
