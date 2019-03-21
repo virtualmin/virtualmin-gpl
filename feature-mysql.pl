@@ -1273,7 +1273,7 @@ local ($dbfile) = @_;
 open(DBFILE, $dbfile);
 local $first = <DBFILE>;
 close(DBFILE);
-if ($first =~ /^mysqldump:.*error/) {
+if ($first =~ /^mysqldump:.*error/i) {
 	return $first;
 	}
 return undef;
