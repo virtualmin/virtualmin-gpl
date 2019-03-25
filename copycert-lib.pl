@@ -1,5 +1,10 @@
 # Functions for copying SSL certs to other servers
 
+sub list_service_ssl_cert_types
+{
+return ('webmin', 'usermin', 'dovecot', 'postfix', 'proftpd');
+}
+
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)
 # Returns a list of all SSL certs used by global services like Postfix
 sub get_all_service_ssl_certs

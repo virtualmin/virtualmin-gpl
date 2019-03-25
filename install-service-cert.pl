@@ -55,8 +55,7 @@ $d || &usage("No virtual server named $dname found");
 @services || &usage("No services to copy the cert to specified");
 
 # Do the specified services exist?
-@svcs = &get_all_service_ssl_certs($d, 0);
-%svcnames = map { $_->{'id'}, $_ } @svcs;
+%svcnames = map { $_, 1 } &list_service_ssl_cert_types();
 foreach my $s (@services) {
 	$svcnames{$s} || &usage("Invalid service $s. Valid services are ".
 				join(" ", keys %svcnames));
@@ -64,7 +63,6 @@ foreach my $s (@services) {
 
 # Copy to each of them
 foreach my $s (@services) {
-	$svc = $svcnames{$s};
 	&$first_print("Copying to service $s ..");
 	&$indent_print();
 	$func = "copy_".$s."_ssl_service";
