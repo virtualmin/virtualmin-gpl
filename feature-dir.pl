@@ -602,7 +602,8 @@ sub show_backup_dir
 local ($opts) = @_;
 return &ui_checkbox("dir_logs", 1, $text{'backup_dirlogs'},
 		    !$opts->{'dirnologs'})." ".
-       &ui_checkbox("dir_homes", 1, $text{'backup_dirhomes'},
+       &ui_checkbox("dir_homes", 1,
+		    &text('backup_dirhomes2', $config{'homes_dir'}),
 		    !$opts->{'dirnohomes'});
 }
 
