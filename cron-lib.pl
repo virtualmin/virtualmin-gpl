@@ -29,10 +29,10 @@ local ($job) = @_;
 &foreign_require("cron");
 &foreign_require("webmincron");
 local $cronjob = &find_module_cron_job($job->{'command'});
-if ($job->{'command'} =~ /\Q$module_config_directory\E\/([^ \|\&><;]+)/) {
+if ($job->{'command'} =~ /(\Q$module_config_directory\E\/([^ \|\&><;]+))/) {
 	# Run from this module
-	local $script = $1;
-	&cron::create_wrapper($job->{'command'}, $module_name,
+	local ($wrapper, $script) = ($1, $2);
+	&cron::create_wrapper($wrapper, $module_name,
 			      $script);
 
 	# Find existing classic cron job, and remove it
@@ -77,9 +77,9 @@ else {
 	# Some other random job .. just use normal cron
 	if (!$cronjob) {
 		if ($job->{'command'} =~
-		    /\Q$config_directory\E\/([^\/]+)\/([^ \|\&><;]+)/) {
-			local ($m, $s) = ($1, $2);
-			&cron::create_wrapper($job->{'command'}, $m, $s);
+		    /(\Q$config_directory\E\/([^\/]+)\/([^ \|\&><;]+))/) {
+			local ($wrapper, $m, $s) = ($1, $2, $3);
+			&cron::create_wrapper($wrapper, $m, $s);
 			}
 		&lock_file(&cron::cron_file($job));
 		&cron::create_cron_job($job);
