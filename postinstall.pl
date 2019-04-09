@@ -29,7 +29,7 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	}
 
 # Fix invalid sysinfo
-if ($config{'show_sysinfo'} >= 2) {
+if ($config{'show_sysinfo'} == 0 || $config{'show_sysinfo'} == 3) {
 	$config{'show_sysinfo'} = 1;
 	&save_module_config();
 	}
