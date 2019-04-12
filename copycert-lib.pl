@@ -273,8 +273,7 @@ if (&dovecot::get_dovecot_version() < 2) {
 &foreign_require("webmin");
 if (!&dovecot::find_value("ssl_cipher_list", $conf)) {
 	&dovecot::save_directive($conf, "ssl_cipher_list",
-				 $webmin::strong_ssl_ciphers ||
-				   "HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3");
+				 $webmin::strong_ssl_ciphers);
 	}
 
 &flush_file_lines();
