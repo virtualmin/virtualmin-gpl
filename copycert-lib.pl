@@ -359,7 +359,7 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 else {
 	&postfix::set_current_value("smtpd_use_tls", "yes");
 	}
-&postfix::set_current_value("smtpd_tls_mandatory_protocols", "!SSLv2, !SSLv3");
+&postfix::set_current_value("smtpd_tls_mandatory_protocols", "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
 my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
