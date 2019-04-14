@@ -2271,8 +2271,10 @@ if ($merr) {
 	return (0, $merr, \@dnames);
 	}
 else {
+	my $before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) =
 		&request_domain_letsencrypt_cert($d, \@dnames);
+	&after_letsencrypt_website($d, $before);
 	}
 
 my ($subject, $body);
