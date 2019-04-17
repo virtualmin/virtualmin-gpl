@@ -11135,22 +11135,22 @@ sub new_password_input
 local ($name) = @_;
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
-	return &ui_textbox($name, &random_password(), 13, 0, undef,
+	return &ui_textbox($name, &random_password(), 21, 0, undef,
 			   "autocomplete=off");
 	}
 elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
-	return &ui_password($name, undef, 13, 0, undef,
+	return &ui_password($name, undef, 21, 0, undef,
 			    "autocomplete=off");
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
 	return "<table>\n".
 	       "<tr><td>$text{'form_passf'}</td> ".
-	       "<td>".&ui_password($name, undef, 13, 0, undef,
+	       "<td>".&ui_password($name, undef, 21, 0, undef,
 				   "autocomplete=off")."</td> </tr>\n".
 	       "<tr><td>$text{'form_passa'}</td> ".
-	       "<td>".&ui_password($name."_again", undef, 13, 0, undef,
+	       "<td>".&ui_password($name."_again", undef, 21, 0, undef,
 				   "autocomplete=off")."</td> </tr>\n".
 	       "</table>";
 	}
