@@ -1006,11 +1006,12 @@ else {
 return undef;
 }
 
-# backup_mysql(&domain, file)
+# backup_mysql(&domain, file, &options, home-format, incremental, [&as-domain],
+#              &all-options, &key)
 # Dumps this domain's mysql database to a backup file
 sub backup_mysql
 {
-local ($d, $file) = @_;
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 &require_mysql();
 
 # Find all domain's databases
@@ -1058,7 +1059,7 @@ foreach $db (@dbs) {
 	my $mymod = &require_dom_mysql($d);
 	local $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
-		undef, undef, $tables, $d->{'user'}, 1);
+		undef, undef, $tables, $d->{'user'}, 1, 0, $allopts->{'skip'});
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
 		}

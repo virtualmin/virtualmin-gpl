@@ -252,6 +252,7 @@ sub backup_domains
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key,
        $kill) = @_;
+$opts->{'skip'} = $skip;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
