@@ -1766,6 +1766,7 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 	my $nodot = $shortver;
 	$nodot =~ s/\.//g;
 	foreach my $init ("php${shortver}-fpm",
+			  "php-fpm${shortver}",
 			  "rh-php${nodot}-php-fpm",
 			  "php${nodot}-php-fpm") {
 		my $st = &init::action_status($init);
