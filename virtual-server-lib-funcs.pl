@@ -13766,7 +13766,7 @@ if ($config{'dns'}) {
 						 $text{'check_eresolvlist'}),
 					&ui_link($clink,
 						 $text{'newfeatures_title'})).
-				     (@dhcp ? " ".$text{'check_eresolv2'} : "");
+				     (@dhcp ? " ".$text{'check_eresolv3'} : "");
 				}
 			else {
 				&$second_print($text{'check_dnsok'}." ".
