@@ -2176,7 +2176,7 @@ foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
 if (!$d->{'alias'}) {
 	# Add aliases of this domain that have SSL enabled
 	foreach my $alias (&get_domain_by("alias", $d->{'id'})) {
-		if (&domain_has_website($alias)) {
+		if (&domain_has_website($alias) && !$alias->{'disabled'}) {
 			push(@rv, &get_hostnames_for_ssl($alias));
 			}
 		}
