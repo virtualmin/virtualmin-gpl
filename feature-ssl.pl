@@ -219,7 +219,7 @@ if ($config{'auto_redirect'}) {
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
 if ($d->{'virt'}) {
-	&register_post_action(\&restart_apache, 1);
+	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 	}
 else {
 	&register_post_action(\&restart_apache);
@@ -483,7 +483,7 @@ if ($d->{'ip'} ne $oldd->{'ip'} ||
 &sync_domain_tlsa_records($d);
 
 &release_lock_web($d);
-&register_post_action(\&restart_apache, 1) if ($rv);
+&register_post_action(\&restart_apache, &ssl_needs_apache_restart()) if ($rv);
 return $rv;
 }
 
@@ -508,7 +508,7 @@ local $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	&delete_web_virtual_server($virt);
 	&$second_print($text{'setup_done'});
-	&register_post_action(\&restart_apache, 1);
+	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 	}
 else {
 	&$second_print($text{'delete_noapache'});
@@ -574,7 +574,7 @@ if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
-&register_post_action(\&restart_apache, 1);
+&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 return 1;
 }
 
@@ -1100,7 +1100,7 @@ else {
 &lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
 &apache::save_directive("SSLPassPhraseDialog", \@pps, $conf, $conf);
 &flush_file_lines();
-&register_post_action(\&restart_apache, 1);
+&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 }
 
 # check_cert_key_match(cert-text, key-text)
@@ -2564,6 +2564,14 @@ if ((!$svc || $svc eq 'usermin') && &foreign_installed("usermin")) {
 		       \&usermin::put_usermin_miniserv_config,
 		       \&restart_usermin);
 	}
+}
+
+# ssl_needs_apache_restart()
+# Returns 1 if an SSL cert change needs an Apache restart
+sub ssl_needs_apache_restart
+{
+&require_apache();
+return $apache::httpd_modules{'core'} >= 2.4 ? 0 : 1;
 }
 
 $done_feature_script{'ssl'} = 1;
