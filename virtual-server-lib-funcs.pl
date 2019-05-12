@@ -5260,6 +5260,13 @@ elsif ($d->{'unix'} && $d->{'quota'}) {
 	$nqd->{'quota'} = 0;
 	$nqd->{'uquota'} = 0;
 	&set_server_quotas($nqd);
+	if (!@disable_quotas_users) {
+		@disable_quotas_users = &list_domain_users($d, 1, 1, 0, 1);
+		foreach my $u (@disable_quotas_users) {
+			next if ($u->{'noquota'});
+			&set_user_quotas($u->{'user'}, 0, 0, $d);
+			}
+		}
 	}
 }
 
@@ -5275,6 +5282,14 @@ if ($d->{'parent'}) {
         }
 elsif ($d->{'unix'} && $d->{'quota'}) {
 	&set_server_quotas($d);
+	if (@disable_quotas_users) {
+		foreach my $u (@disable_quotas_users) {
+			next if ($u->{'noquota'});
+			&set_user_quotas($u->{'user'}, $u->{'quota'},
+					 $u->{'mquota'}, $d);
+			}
+		@disable_quotas_users = ( );
+		}
 	}
 }
 
