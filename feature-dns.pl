@@ -2944,7 +2944,7 @@ local ($dmarc) = @_;
 &require_bind();
 return &bind8::join_dmarc(@_) if (defined(&bind8::join_dmarc));
 local @rv = ( "v=DMARC1" );
-foreach my $s ("pct", "ruf", "rua", "p", "sp", "adkim", "aspf") {
+foreach my $s ("p", "pct", "ruf", "rua", "sp", "adkim", "aspf") {
         if ($dmarc->{$s} ne '') {
                 push(@rv, $s."=".$dmarc->{$s});
                 }
