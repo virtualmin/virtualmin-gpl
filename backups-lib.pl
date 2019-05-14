@@ -28,6 +28,7 @@ if ($config{'backup_dest'}) {
 			  'before' => $config{'backup_before'},
 			  'after' => $config{'backup_after'},
 			  'exclude' => $config{'backup_exclude'},
+			  'key' => $config{'backup_key'},
 			 );
 	local @bf;
 	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
@@ -119,6 +120,7 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_before'} = $backup->{'before'};
 	$config{'backup_after'} = $backup->{'after'};
 	$config{'backup_exclude'} = $backup->{'exclude'};
+	$config{'backup_key'} = $backup->{'key'};
 	local @bf = split(/\s+/, $backup->{'features'});
 	foreach $f (&get_available_backup_features(), &list_backup_plugins()) {
 		$config{'backup_feature_'.$f} = &indexof($f, @bf) >= 0 ? 1 : 0;
