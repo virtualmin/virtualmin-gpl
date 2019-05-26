@@ -168,6 +168,8 @@ else {
 		if (!$config{'allow_upper'}) {
 			$in{'mailuser'} = lc($in{'mailuser'});
 			}
+		$in{'mailuser'} =~ s/^\s+//;
+		$in{'mailuser'} =~ s/\s+$//;
 		$err = &valid_mailbox_name($in{'mailuser'});
 		&error($err) if ($err);
 		if ($user->{'person'}) {
