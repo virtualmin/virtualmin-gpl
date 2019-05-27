@@ -457,7 +457,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
-        # IP address or domain name has changed .. fix per-IP/per-domain SSL cert
+        # IP address or domain name has changed - fix per-IP/per-domain SSL cert
 	&modify_ipkeys($d, $oldd, \&get_miniserv_config,
 		       \&put_miniserv_config,
 		       \&restart_webmin_fully);
@@ -1176,6 +1176,7 @@ sub cert_pem_data
 {
 local ($d) = @_;
 local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_cert'});
+$data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
 	return $1;
 	}
@@ -1189,6 +1190,7 @@ sub key_pem_data
 local ($d) = @_;
 local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_key'} ||
 						     $d->{'ssl_cert'});
+$data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+RSA\s+PRIVATE\s+KEY-----)/) {
 	return $1;
 	}
