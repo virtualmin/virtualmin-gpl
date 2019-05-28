@@ -1,29 +1,29 @@
-<header>CrÃ©er plusieurs utilisateurs</header>
+<header>Créer plusieurs utilisateurs</header>
 
-Cette page vous permet de crÃ©er plusieurs mail ou FTP utilisateurs Ã  la fois Ã  partir d'un fichier texte. Ce fichier doit indiquer un utilisateur par ligne, et chaque ligne doit avoir le format suivant :<p>
+Cette page vous permet de créer plusieurs mail ou FTP utilisateurs à la fois à partir d'un fichier texte. Ce fichier doit indiquer un utilisateur par ligne, et chaque ligne doit avoir le format suivant :<p>
 
 <tt><i>username</i>:<i>realname</i>:<i>password</i>:<i>ftp-flag</i>:<i>email-flag</i>:<i>quota</i>:[<i>extras</i>]:[<i>forwards</i>]:[<i>databases</i>]</tt><p>
 
 Les significations des champs sont :<br>
 <dl>
 <dt>username
-<dd>Nom court d'identification de l'utilisateur, tels que <i>joe</i>. Si nÃ©cessaire, le prÃ©fixe de domaine sera annexÃ© Ã  faire le vrai nom de connexion.
+<dd>Nom court d'identification de l'utilisateur, tels que <i>joe</i>. Si nécessaire, le préfixe de domaine sera annexé à faire le vrai nom de connexion.
 <dt>realname
 <dd>Vrai nom de l'utilisateur, comme <i>Joe Smith</i>.
 <dt>password
 <dd>Le mot de passe pour l'utilisateur, en texte brut.
 <dt>ftp-flag
-<dd>Si ce paramÃ¨tre est rÃ©glÃ© Ã  1, l'utilisateur sera autorisÃ© Ã  se connecter via FTP. La valeur de 0 ou laisser vide empÃªche l'accÃ¨s FTP. Vous pouvez Ã©galement utiliser le chemin complet vers un shell valide pour les utilisateurs de boÃ®te aux lettres, comme <tt>/usr/bin/scponly</tt>.
+<dd>Si ce paramètre est réglé à 1, l'utilisateur sera autorisé à se connecter via FTP. La valeur de 0 ou laisser vide empêche l'accès FTP. Vous pouvez également utiliser le chemin complet vers un shell valide pour les utilisateurs de boîte aux lettres, comme <tt>/usr/bin/scponly</tt>.
 <dt>email-flag
-<dd>Si ce paramÃ¨tre est rÃ©glÃ© Ã  1, adresse e-mail principale de l'utilisateur est activÃ©e.
+<dd>Si ce paramètre est réglé à 1, adresse e-mail principale de l'utilisateur est activée.
 <dt>quota
-<dd>Le quota de l'utilisateur de messagerie et le rÃ©pertoire home, en blocs de 1 Ko de disque.
+<dd>Le quota de l'utilisateur de messagerie et le répertoire home, en blocs de 1 Ko de disque.
 <dt>extras
-<dd>Une liste sÃ©parÃ©e par des virgules des adresses e-mail supplÃ©mentaires pour cet utilisateur. Ceux-ci doivent Ãªtre dans des domaines Virtualmin que vous gÃ©rez.
+<dd>Une liste séparée par des virgules des adresses e-mail supplémentaires pour cet utilisateur. Ceux-ci doivent être dans des domaines Virtualmin que vous gérez.
 <dt>forwards
-<dd>Une liste sÃ©parÃ©e par des virgules des destinations e-mail d'expÃ©dition pour cet utilisateur (adresse gÃ©nÃ©ralement comme <i>joe@autredomaine.com</i>).
+<dd>Une liste séparée par des virgules des destinations e-mail d'expédition pour cet utilisateur (adresse généralement comme <i>joe@autredomaine.com</i>).
 <dt>databases
-<dd>Une liste des bases de donnÃ©es sÃ©parÃ©es par des virgules pour accorder l'accÃ¨s Ã  cet utilisateur. Chacun doit Ãªtre un type de base de donnÃ©es (<i>mysql</i> ou <i>postgres</i>) et un nom de base de donnÃ©es, sÃ©parÃ©s par un espace.
+<dd>Une liste des bases de données séparées par des virgules pour accorder l'accès à cet utilisateur. Chacun doit être un type de base de données (<i>mysql</i> ou <i>postgres</i>) et un nom de base de données, séparés par un espace.
 </dl><p>
 
 <footer>

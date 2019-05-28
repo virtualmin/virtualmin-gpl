@@ -1,12 +1,12 @@
 <header>Niveau de sauvegarde</header>
 
-Par dÃ©faut, les sauvegardes Virtualmin inclut tous les fichiers dans les rÃ©pertoires personnels des domaines sÃ©lectionnÃ©s. Cependant, si vous sauvegardez rÃ©guliÃ¨rement les gros serveurs virtuels, beaucoup de temps peut Ãªtre consacrÃ© Ã  copier les fichiers qui ne sont pas Ã©tÃ© modifiÃ©es rÃ©cemment. <p>
+Par défaut, les sauvegardes Virtualmin inclut tous les fichiers dans les répertoires personnels des domaines sélectionnés. Cependant, si vous sauvegardez régulièrement les gros serveurs virtuels, beaucoup de temps peut être consacré à copier les fichiers qui ne sont pas été modifiées récemment. <p>
 
-Si l'option <b>IncrÃ©mentaux</b> est sÃ©lectionnÃ©e ici, seuls les fichiers qui ont Ã©tÃ© modifiÃ©s ou crÃ©Ã©s depuis la derniÃ¨re sauvegarde complÃ¨te seront inclus. Ceci est trÃ¨s utile lorsque vous avez deux sauvegardes planifiÃ©es, comme une sauvegarde complÃ¨te hebdomadaire et un incrÃ©mentielle quotidienne. En supposant que la plupart des fichiers dans un domaine sont inchangÃ©s jour en jour, ce qui rÃ©duira sensiblement la taille et le temps de sauvegardes quotidiennes. <p>
+Si l'option <b>Incrémentaux</b> est sélectionnée ici, seuls les fichiers qui ont été modifiés ou créés depuis la dernière sauvegarde complète seront inclus. Ceci est très utile lorsque vous avez deux sauvegardes planifiées, comme une sauvegarde complète hebdomadaire et un incrémentielle quotidienne. En supposant que la plupart des fichiers dans un domaine sont inchangés jour en jour, ce qui réduira sensiblement la taille et le temps de sauvegardes quotidiennes. <p>
 
-Soyez conscient que lorsque vous restaurez, vous devrez restaurer d'abord la sauvegarde complÃ¨te et puis le diffÃ©rentiel pour rÃ©cupÃ©rer tous les fichiers. En outre, d'autres donnÃ©es telles que les configurations et les bases de donnÃ©es Apache ne sont pas sauvegardÃ©s de faÃ§on incrÃ©mentielle, et ils seront toujours inclus indÃ©pendamment de cette option. <p>
+Soyez conscient que lorsque vous restaurez, vous devrez restaurer d'abord la sauvegarde complète et puis le différentiel pour récupérer tous les fichiers. En outre, d'autres données telles que les configurations et les bases de données Apache ne sont pas sauvegardés de façon incrémentielle, et ils seront toujours inclus indépendamment de cette option. <p>
 
-L'option <b>Ni</b> effectue Ã©galement une sauvegarde complÃ¨te, mais ne change pas l'Ã©tat de la sauvegarde incrÃ©mentielle. Cela peut Ãªtre utile lorsque vous effectuez une sauvegarde ad hoc de domaines qui ont Ã©galement des sauvegardes planifiÃ©es complÃ¨tes et incrÃ©mentielles. <p>
+L'option <b>Ni</b> effectue également une sauvegarde complète, mais ne change pas l'état de la sauvegarde incrémentielle. Cela peut être utile lorsque vous effectuez une sauvegarde ad hoc de domaines qui ont également des sauvegardes planifiées complètes et incrémentielles. <p>
 
 <footer>
 
