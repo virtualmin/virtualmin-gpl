@@ -3311,6 +3311,7 @@ tmpl_dmarcreject=Reject email
 tmpl_dmarcpct=Percentage of messages to apply policy
 tmpl_dmarcruf=Reporting URI for forensic reports
 tmpl_dmarcrua=Reporting URI for aggregate reports
+tmpl_dmarcskip=None set
 tmpl_dmarcyes=Yes, with policy below
 tmpl_edmarcpct=Percentage of messages must be an integer between 0 and 100
 tmpl_edns=No DNS records entered

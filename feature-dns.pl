@@ -2528,14 +2528,18 @@ print &ui_table_row(&hlink($text{'tmpl_dmarcpct'},
 	&ui_textbox("dns_dmarcpct", $tmpl->{'dns_dmarcpct'}, 5)."%");
 
 # DMARC email templates
-print &ui_table_row(&hlink($text{'tmpl_dmarcruf'},
-			   "template_dns_dmarcruf"),
-	&ui_opt_textbox("dns_dmarcruf", $tmpl->{'dns_dmarcruf'}, 40,
-			"mailto:postmaster\@domain"));
-print &ui_table_row(&hlink($text{'tmpl_dmarcrua'},
-			   "template_dns_dmarcrua"),
-	&ui_opt_textbox("dns_dmarcrua", $tmpl->{'dns_dmarcrua'}, 40,
-			"mailto:postmaster\@domain"));
+foreach my $r ('ruf', 'rua') {
+	print &ui_table_row(&hlink($text{'tmpl_dmarc'.$r},
+				   "template_dns_dmarc".$r),
+		&ui_radio("dns_dmarc".$r."_def",
+			  $tmpl->{'dns_dmarc'.$r} eq "" ? 1 :
+			  $tmpl->{'dns_dmarc'.$r} eq "skip" ? 2 : 0,
+			  [ [ 1, $text{'default'}.
+				 " <tt>mailto:postmaster\@domain</tt>" ],
+			    [ 2, $text{'tmpl_dmarcskip'} ],
+			    [ 0, &ui_textbox('dns_dmarc'.$r,
+					$tmpl->{'dns_dmarc'.$r}, 40) ] ]));
+	}
 
 if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
@@ -2702,8 +2706,10 @@ if ($in{'dns_dmarc_mode'} == 2) {
 	}
 $tmpl->{'dns_dmarcp'} = $in{'dns_dmarcp'};
 $tmpl->{'dns_dmarcpct'} = $in{'dns_dmarcpct'};
-$tmpl->{'dns_dmarcruf'} = $in{'dns_dmarcruf_def'} ? undef : $in{'dns_dmarcruf'};
-$tmpl->{'dns_dmarcrua'} = $in{'dns_dmarcrua_def'} ? undef : $in{'dns_dmarcrua'};
+foreach my $r ('ruf', 'rua') {
+	$tmpl->{'dns_dmarc'.$r} = $in{'dns_dmarc'.$r.'_def'} == 1 ? undef :
+	  $in{'dns_dmarc'.$r.'_def'} == 2 ? "skip" : $in{'dns_dmarc'.$r};
+	}
 
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
@@ -3151,24 +3157,19 @@ sub default_domain_dmarc
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $pm = 'mailto:postmaster@'.$d->{'dom'};
-local $ruf = $tmpl->{'dns_dmarcruf'};
-if ($ruf && $ruf ne "none") {
-	$ruf = &substitute_domain_template($ruf, $d);
-	}
-else {
-	$ruf = $pm;
-	}
-local $rua = $tmpl->{'dns_dmarcrua'};
-if ($rua && $rua ne "none") {
-	$rua = &substitute_domain_template($rua, $d);
-	}
-else {
-	$rua = $pm;
-	}
 local $dmarc = { 'p' => $tmpl->{'dns_dmarcp'} || 'none',
 		 'pct' => $tmpl->{'dns_dmarcpct'} || '100',
-		 'ruf' => $ruf,
-		 'rua' => $rua, };
+	       };
+foreach my $r ('ruf', 'rua') {
+	local $v = $tmpl->{'dns_dmarc'.$r};
+	next if ($v eq "skip");
+	if ($v && $v ne "none") {
+		$dmarc->{$r} = &substitute_domain_template($v, $d);
+		}
+	else {
+		$dmarc->{$r} = $pm;
+		}
+	}
 return $dmarc;
 }
 
