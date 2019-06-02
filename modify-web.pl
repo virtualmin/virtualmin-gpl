@@ -602,6 +602,9 @@ foreach $d (@doms) {
 		if ($urlsslport) {
 			$pd->{'web_urlsslport'} = $urlsslport;
 			}
+		if ($pd->{'alias'}) {
+			&save_domain($pd);
+			}
 		}
 
 	if (defined($proxy) || defined($framefwd) || $port || $sslport) {
