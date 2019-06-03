@@ -100,7 +100,7 @@ else {
 	$rv .= &ui_table_row("WHMCS license key",
 			     &ui_textbox("licensekey", undef, 30));
 	$rv .= &ui_table_row(" ",
-		"You must purchase an <a href='http://www.whmcs.com/members/aff.php?aff=4115' target=_blank>WHMCS license</a> before installing this script");
+		"You must purchase an <a href='https://www.whmcs.com/members/aff.php?aff=4115' target=_blank>WHMCS license</a> before installing this script");
 	}
 return $rv;
 }
