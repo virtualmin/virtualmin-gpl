@@ -34,7 +34,7 @@ return 1;
 
 sub script_whmcs_release
 {
-return 5;	# To update ioncube download URL
+return 6;	# To update SSL link
 }
 
 sub script_whmcs_category
