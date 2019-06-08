@@ -3503,6 +3503,18 @@ $dropboxbackup_tests = [
 		      [ 'dest', "$dropbox_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
+	# Backup to Dropbox again, to test that over-writing works
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$dropbox_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$dropbox_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
 	# Restore from Dropbox
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -3518,6 +3530,15 @@ $dropboxbackup_tests = [
 	},
 
 	# Backup to Dropbox in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $dropbox_backup_prefix ] ],
+	},
+
+	# Backup to Dropbox in home format again, to test overwriting
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
