@@ -18,8 +18,9 @@ servers are included in the backup. The C<--domain> parameter followed by a
 domain name can be given multiple times, to select more than one server.
 
 Alternately, virtual servers can be selected with the C<--user> flag followed
-by an administrator's username, or C<--plan> followed by a plan name. In both
-cases, all sub-servers will be included too.
+by an administrator's username, C<--plan> followed by a plan name, or
+C<-reseller> followed by a reseller name. In all cases, all sub-servers will be
+included too.
 
 Typically the C<--all-features> option will be used to include all virtual server
 features in the backup, but you can instead use the C<--feature> option one or
@@ -114,6 +115,11 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
+		}
+	elsif ($a eq "--reseller") {
+		defined(&list_resellers) ||
+			&usage("Your system does not support resellers");
+		push(@resellers, shift(@ARGV));
 		}
 	elsif ($a eq "--plan") {
 		$planname = shift(@ARGV);
@@ -224,6 +230,12 @@ while(@ARGV > 0) {
 		}
 	}
 @dests || usage("No destinations specified");
+if (@resellers) {
+	# Map resellers to domains
+	foreach $r (@resellers) {
+		push(@bdoms, map { $_->{'dom'} } &get_reseller_domains($r));
+		}
+	}
 @bdoms || @users || $all_doms || @plans || @vbs || $purge ||
 	&usage("No domains specified");
 if (@bdoms || @users || $all_doms) {
@@ -409,6 +421,7 @@ print "virtualmin backup-domain [--dest file]+\n";
 print "                         [--test]\n";
 print "                         [--domain name] | [--all-domains]\n";
 print "                         [--user name]\n";
+print "                         [--reseller name]\n";
 print "                         [--plan name]\n";
 print "                         [--feature name] | [--all-features]\n";
 print "                                            [--except-feature name]\n";

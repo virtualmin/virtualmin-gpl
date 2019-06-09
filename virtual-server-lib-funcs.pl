@@ -419,12 +419,12 @@ return wantarray ? @rv : $rv[0];
 sub get_domains_by_names_users
 {
 local ($dnames, $users, $efunc, $plans) = @_;
-foreach my $domain (@$dnames) {
+foreach my $domain (&unique(@$dnames)) {
 	local $d = &get_domain_by("dom", $domain);
 	$d || &$efunc("Virtual server $domain does not exist");
 	push(@doms, $d);
 	}
-foreach my $uname (@$users) {
+foreach my $uname (&unique(@$users)) {
 	local $dinfo = &get_domain_by("user", $uname, "parent", "");
 	if ($dinfo) {
 		push(@doms, $dinfo);
@@ -434,7 +434,7 @@ foreach my $uname (@$users) {
 		&$efunc("No top-level domain owned by $uname exists");
 		}
 	}
-foreach my $plan (@$plans) {
+foreach my $plan (&unique(@$plans)) {
 	foreach my $dinfo (&get_domain_by("plan", $plan->{'id'})) {
 		push(@doms, $dinfo);
 		push(@doms, &get_domain_by("parent", $dinfo->{'id'}));
