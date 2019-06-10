@@ -124,6 +124,10 @@ else {
 		$sched->{'plan'} = $in{'plan_def'} ? undef :
 			join(" ", split(/\0/, $in{'plan'}));
 		}
+	if (&can_edit_resellers()) {
+		$sched->{'reseller'} = $in{'reseller_def'} ? undef :
+			join(" ", split(/\0/, $in{'reseller'}));
+		}
 	$sched->{'parent'} = $in{'parent'};
 	%sel_features = map { $_, 1 } split(/\0/, $in{'feature'});
 	$sched->{'feature_all'} = $in{'feature_all'};

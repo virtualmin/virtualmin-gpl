@@ -19,6 +19,8 @@ if ($config{'backup_dest'}) {
 			  'parent' => $config{'backup_parent'},
 			  'all' => $config{'backup_all'},
 			  'doms' => $config{'backup_doms'},
+			  'plan' => $config{'backup_plan'},
+			  'reseller' => $config{'backup_reseller'},
 			  'feature_all' => $config{'backup_feature_all'},
 			  'email' => $config{'backup_email'},
 			  'email_err' => $config{'backup_email_err'},
@@ -111,6 +113,8 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_parent'} = $backup->{'parent'};
 	$config{'backup_all'} = $backup->{'all'};
 	$config{'backup_doms'} = $backup->{'doms'};
+	$config{'backup_plan'} = $backup->{'plan'};
+	$config{'backup_reseller'} = $backup->{'reseller'};
 	$config{'backup_feature_all'} = $backup->{'feature_all'};
 	$config{'backup_email'} = $backup->{'email'};
 	$config{'backup_email_err'} = $backup->{'email_err'};
@@ -3883,7 +3887,32 @@ sub nice_backup_doms
 {
 local ($s) = @_;
 if ($s->{'all'} == 1) {
-	return "<i>$text{'sched_all'}</i>";
+	if ($s->{'plan'}) {
+		# All on some plans
+		my @plans = split(/\s+/, $s->{'plan'});
+		if (@plans == 1) {
+			my $plan = &get_plan($plans[0]);
+			return &text('sched_allplan',
+			    "<i>".($plan ? $plan->{'name'} : $plans[0])."</i>");
+			}
+		else {
+			return &text('sched_allplans', scalar(@plans));
+			}
+		}
+	elsif ($s->{'reseller'}) {
+		# All owned by some resellers
+		my @resellers = split(/\s+/, $s->{'reseller'});
+		if (@resellers == 1) {
+			return &text('sched_allreseller',
+			    "<i>".$resellers[0]."</i>");
+			}
+		else {
+			return &text('sched_allresellers', scalar(@resellers));
+			}
+		}
+	else {
+		return "<i>$text{'sched_all'}</i>";
+		}
 	}
 elsif ($s->{'doms'}) {
 	local @dnames;

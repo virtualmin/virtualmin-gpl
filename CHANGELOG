@@ -1594,3 +1594,5 @@ If multiple versions of the PHP-FPM packages are installed, a different version 
 Remote backups can now be made using Webmin's RPC protocol, along with SSH. This allows backups to systems that only allow sudo logins.
 Added support for MySQL 8 systems that use a different password hashing method.
 Existing GPG keys owned by the root user can now be imported as backup encrytion keys.
+---- Changes since 6.06 ----
+Virtual servers to backup can now be selected by reseller.

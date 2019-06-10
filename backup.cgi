@@ -79,6 +79,12 @@ if ($in{'plan'} && !$in{'plan_def'} && &can_edit_plans()) {
 		       $plandoms{$_->{'parent'}} } @doms;
 	}
 
+# Limit to those owned by some resellers, if given
+if ($in{'reseller'} && !$in{'reseller_def'} && &can_edit_resellers()) {
+	%resels = map { $_, 1 } split(/\0/, $in{'reseller'});
+	@doms = grep { $_->{'reseller'} && $resels{$_->{'reseller'}} } @doms;
+	}
+
 # Work out the current user's main domain, if needed
 if ($cbmode == 2) {
 	$d = &get_domain_by_user($base_remote_user);

@@ -105,6 +105,19 @@ if (&can_edit_plans()) {
 			   5, 1));
 	}
 
+# Limit to resellers
+if (&can_edit_resellers() && defined(&list_resellers) &&
+    (@resellers = &list_resellers())) {
+	@resellers = sort { lc($a->{'name'}) cmp lc($b->{'name'}) } @resellers;
+	print &ui_table_row(&hlink($text{'backup_reseller'}, "backup_reseller"),
+		&ui_radio("reseller_def", $sched->{'reseller'} ? 0 : 1,
+			  [ [ 1, $text{'backup_anyreseller'} ],
+			    [ 0, $text{'backup_selreseller'} ] ])."<br>\n".
+		&ui_select("reseller", [ split(/\s+/, $sched->{'reseller'}) ],
+			   [ map { $_->{'name'} } @resellers ],
+			   3, 1));
+	}
+
 print &ui_hidden_table_end("doms");
 
 # Show feature and plugin selection boxes
