@@ -236,7 +236,7 @@ if ($hasprimary) {
 		    2, \@tds);
 	}
 
-if ($hasmailfile) {
+if ($hasmailfile && $config{'show_mailuser'}) {
 	# Show the user's mail file
 	local ($sz, $umf, $lastmod) = &mail_file_size($user);
 	local $link = &read_mail_link($user, $d);
