@@ -3213,7 +3213,7 @@ local @sa = &apache::find_directive("ServerAlias", $vconf);
 
 # Filter out redirect rules
 for(my $i=0; $i<@rcond; $i++) {
-	if ($rcond[$i] =~ /^\%{HTTP_HOST}\s+=(webmail|admin)\.$d->{'dom'}/) {
+	if ($rcond[$i] =~ /^\%\{HTTP_HOST\}\s+=(webmail|admin)\.\Q$d->{'dom'}\E/) {
 		splice(@rcond, $i, 1);
 		if ($rrule[$i] =~ /^\^\(\.\*\)\s+(http|https):/) {
 			splice(@rrule, $i, 1);
