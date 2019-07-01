@@ -65,10 +65,11 @@ foreach my $l (@plan_maxes) {
 
 # Rename and DB name limits
 foreach my $n (@plan_restrictions) {
+	my @o = $n eq "migrate" ? (1, 0) : (0, 1);
 	print &ui_table_row(&hlink($text{'limits_'.$n}, 'limits_'.$n),
 		&ui_radio($n, int($plan->{$n}),
-			  [ [ 0, $text{'yes'} ],
-			    [ 1, $text{'no'} ] ]));
+			  [ [ $o[0], $text{'yes'} ],
+			    [ $o[1], $text{'no'} ] ]));
 	}
 
 print &ui_hidden_table_end();
