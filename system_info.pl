@@ -195,7 +195,7 @@ if (!&can_view_sysinfo()) {
 my $hasvposs = foreign_check("package-updates");
 my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
-	my $html = &ui_form_start("/package-updates/update.cgi");
+	my $html = &ui_form_start("$gconfig{'webprefix'}/package-updates/update.cgi");
 	$html .= &ui_hidden("redirdesc", $text{'right_sysinfo'});
 	$html .= &text(@vposs > 1 ? 'right_upcount' : 'right_upcount1',
 		       scalar(@vposs),
@@ -205,8 +205,10 @@ if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
                                      $text{'right_upver'} ], "80%");
 	foreach my $p (@vposs) {
 		$html .= &ui_columns_row([
-			$p->{'name'}, $p->{'desc'}, $p->{'version'} ]);
-		$html .= &ui_hidden("u", $p->{'update'}."/".$p->{'system'});
+			($p->{'name'} . &ui_hidden("u", $p->{'update'}."/".$p->{'system'})), 
+			 $p->{'desc'}, 
+			 $p->{'version'} ]
+			);
 		}
 	$html .= &ui_columns_end();
 	$html .= &ui_form_end([ [ undef, $text{'right_upok'} ] ]);
