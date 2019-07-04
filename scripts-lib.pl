@@ -3032,5 +3032,17 @@ while($rport < 65536) {
 return $rport >= 65536 ? undef : $rport;
 }
 
+# get_php_cli_command(script-php-version) 
+# Returns the path to the non-CGI version of the PHP command
+sub get_php_cli_command
+{
+local ($v) = @_;
+local ($p5) = grep { $_->[0] == $v } &list_available_php_versions($d);
+local $cmd = $p5->[1];
+$cmd ||= &has_command("php5") || &has_command("php");
+$cmd =~ s/-cgi//;
+return $cmd;
+}
+
 1;
 
