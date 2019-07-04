@@ -65,13 +65,13 @@ if (mysql::get_mysql_version() < 4) {
 	push(@rv, "WordPress requires MySQL version 4 or higher");
 	}
 
-# Check for PHP 5.2+
+# Check for PHP 5.6.20+
 my $phpv = get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
 	}
-elsif ($phpv < 5.2) {
-	push(@rv, "Wordpress requires PHP version 5.2 or later");
+elsif (&compare_versions($phpv, "5.6.20") < 0) {
+	push(@rv, "Wordpress requires PHP version 5.6.20 or later");
 	}
 
 return @rv;
