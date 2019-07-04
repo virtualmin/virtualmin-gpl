@@ -1186,6 +1186,14 @@ $script_tests = [
 		      @create_args, ],
         },
 
+	# Upgrade PHP version on the domain if possible
+	{ 'command' => 'set-php-directory.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'dir', '.' ],
+		      [ 'version', '7.0' ] ],
+	  'ignorefail' => 1,
+	},
+
 	# List all scripts
 	{ 'command' => 'list-available-scripts.pl',
 	  'grep' => 'WordPress',
