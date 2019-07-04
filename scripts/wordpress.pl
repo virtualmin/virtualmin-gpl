@@ -153,7 +153,7 @@ return undef;
 sub script_wordpress_files
 {
 my ($d, $ver, $opts, $upgrade) = @_;
-if ($d && &has_wordpress_cli()) {
+if ($d && &has_wordpress_cli() && !$opts->{'nocli'}) {
 	# Nothing to download
 	return ( );
 	}
@@ -189,7 +189,7 @@ my $dbhost = get_database_host($dbtype, $d);
 my $dberr = check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
 return (0, "Database connection failed : $dberr") if ($dberr);
 
-if (&has_wordpress_cli()) {
+if (&has_wordpress_cli() && !$opts->{'nocli'}) {
 	my $wp = "cd ".quotemeta($opts->{'dir'})." && ".&has_command("wp");
 	if (!$upgrade) {
 		# Execute the download command
@@ -283,7 +283,7 @@ else {
 # Make content directory writable, for uploads
 make_file_php_writable($d, "$opts->{'dir'}/wp-content", 0);
 
-if (&has_wordpress_cli()) {
+if (&has_wordpress_cli() && !$opts->{'nocli'}) {
 	# Install is all done, return the base URL
 	my $url = script_path_url($d, $opts);
 	my $rp = $opts->{'dir'};
