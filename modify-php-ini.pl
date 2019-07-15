@@ -142,7 +142,7 @@ foreach my $d (@doms) {
 				for(my $j=0; $j<@phpv; $j++) {
 					if ($phpv[$j] =~ /^(\S+)\s/ &&
 					    $1 eq $ini_names[$i]) {
-						if (defined($ini_values[$i]) {
+						if (defined($ini_values[$i])) {
 							$phpv[$j] = $ini_names[$i]." ".$ini_values[$i];
 							}
 						else {
