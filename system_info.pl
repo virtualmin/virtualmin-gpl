@@ -199,7 +199,7 @@ if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	$html .= &ui_hidden("redirdesc", $text{'right_sysinfo'});
 	$html .= &text(@vposs > 1 ? 'right_upcount' : 'right_upcount1',
 		       scalar(@vposs),
-		       '/package-updates/index.cgi?mode=updates')."<p>\n";
+		       $gconfig{'webprefix'} . '/package-updates/index.cgi?mode=updates')."<p>\n";
 	$html .= &ui_columns_start([ $text{'right_upname'},
                                      $text{'right_updesc'},
                                      $text{'right_upver'} ], "80%");
