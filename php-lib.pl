@@ -1706,6 +1706,7 @@ if ($php_fpm_config_cache) {
 # What version packages are installed?
 &foreign_require("software");
 my @rv;
+my %donever;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		   (map { my $v = $_; $v =~ s/\.//g;
 			  ("php$v-php-fpm", "php$v-fpm",
@@ -1720,6 +1721,7 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 	$rv->{'version'} =~ s/\-.*$//;
 	$rv->{'version'} =~ s/\+.*$//;
 	$rv->{'version'} =~ s/^\d+://;
+	next if ($donever{$rv->{'version'}}++);
 	$rv->{'shortversion'} = $rv->{'version'};
 	$rv->{'shortversion'} =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
 	if (($pname eq "php-fpm" || $pname eq "php5-fpm") &&
