@@ -14123,6 +14123,7 @@ if (&domain_has_website()) {
 
 		if (@okfpms > 1) {
 			# Fix any port clashes
+			my %used;
 			foreach my $conf (@okfpms) {
 				my @pools = &list_php_fpm_pools($conf);
 				my $restart = 0;
@@ -14131,7 +14132,7 @@ if (&domain_has_website()) {
 						$conf, $p, "listen");
 					if ($t && $used{$t}++) {
 						# Port is wrong!
-						&$second_print(&text('check_webphpfpmport', $conf->{'version'}));
+						&$second_print(&text('check_webphpfpmport', $conf->{'version'}, $t));
 						while($used{$t}) {
 							$t = &increase_fpm_port($t) || 9001;
 							}
