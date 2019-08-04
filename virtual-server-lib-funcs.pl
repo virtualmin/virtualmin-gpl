@@ -14122,12 +14122,14 @@ if (&domain_has_website()) {
 			}
 
 		if (@okfpms > 1) {
-			# Fix any port clashes
+			# Fix any port clashes for non-Virtualmin pools
 			my %used;
 			foreach my $conf (@okfpms) {
 				my @pools = &list_php_fpm_pools($conf);
 				my $restart = 0;
 				foreach my $p (@pools) {
+					my $pd = &get_domain($p);
+					next if ($pd);
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
 					if ($t && $used{$t}++) {
