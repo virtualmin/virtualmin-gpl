@@ -2734,6 +2734,19 @@ elsif ($@) {
 	}
 }
 
+# execute_user_deletion_sql(&domain, host, user)
+# Run SQL commands to delete a user
+sub execute_user_deletion_sql
+{
+my ($d, $host, $user) = @_;
+foreach my $sql (&get_user_deletion_sql($d, $host, $user)) {
+	&execute_dom_sql($d, $mysql::master_db, $sql);
+	if ($sql =~ /flush\s+privileges/) {
+		sleep(1);
+		}
+	}
+}
+
 # get_user_creation_sql(&domain, host, user, password-sql, plain-pass)
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
@@ -2745,9 +2758,15 @@ if (!$encpass && $plainpass) {
 	my $qpass = &mysql_escape($plainpass);
 	$encpass = "$password_func('$qpass')";
 	}
-if (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
-     $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
-    $plainpass) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	# Need to use new 'create user' command
+	return ("create user '$user'\@'$host' identified by ".
+		($plainpass ? "'".&mysql_escape($plainpass)."'"
+			    : $encpass));
+	}
+elsif (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
+        $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
+       $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
 			"with mysql_native_password" : "";
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
@@ -2760,6 +2779,21 @@ elsif (&compare_versions($ver, 5) >= 0) {
 	}
 else {
 	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
+	}
+}
+
+# get_user_deletion_sql(&domain, host, user)
+# Returns SQL to delete a MySQL user
+sub get_user_deletion_sql
+{
+my ($d, $host, $user) = @_;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	return ("drop user if exists '$user'\@'$host'");
+	}
+else {
+	return ("delete from user where host = '$host' and user = '$user'",
+	        "flush privileges");
 	}
 }
 
