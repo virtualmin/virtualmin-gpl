@@ -14132,7 +14132,7 @@ if (&domain_has_website()) {
 					next if ($pd);
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
-					if ($t && $used{$t}++) {
+					if ($t && $t =~ /^\d+$/ && $used{$t}++) {
 						# Port is wrong!
 						&$second_print(&text('check_webphpfpmport', $conf->{'version'}, $t));
 						while($used{$t}) {
