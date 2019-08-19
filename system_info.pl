@@ -248,14 +248,14 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 		   "<img src='$idir/stop.png' alt='$status->{'desc'}' />" :
 		   "<img src='$idir/start.png' alt='$status->{'desc'}' />");
 		my $action_link = "<a href='/$module_name/$action?".
-		   "feature=$status->{'feature'}'".
+		   "feature=$status->{'feature'}&id=$status->{'id'}'".
 		   " title='$status->{'desc'}'>".
 		   "$action_icon</a>";
 
 		# Restart link 
 		my $restart_link = ($status->{'status'}
 		   ? "<a href='/$module_name/restart_feature.cgi?".
-		     "feature=$status->{'feature'}'".
+		     "feature=$status->{'feature'}&id=$status->{'id'}'".
 		     " title='$status->{'restartdesc'}'>".
 		     "<img src='$idir/reload.png'".
 		     "alt='$status->{'restartdesc'}'></a>\n"

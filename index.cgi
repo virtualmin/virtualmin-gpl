@@ -276,7 +276,8 @@ if (&can_stop_servers()) {
 				"stop_feature.cgi" : "start_feature.cgi",
 				$status->{'desc'},
 				$status->{'longdesc'},
-				&ui_hidden("feature", $status->{'feature'}),
+				&ui_hidden("feature", $status->{'feature'}).
+				&ui_hidden("id", $status->{'id'}),
 				undef,
 				$status->{'status'} ? "<img src=images/up.gif>"
 					: "<img src=images/down.gif>");

@@ -2360,21 +2360,51 @@ local $apid = defined($typestatus->{'apache'}) ?
 local @links = ( { 'link' => '/apache/',
 		   'desc' => $text{'index_amanage'},
 		   'manage' => 1 } );
+local @rv;
 if ($apid) {
-	return ( { 'status' => 1,
-		   'name' => $text{'index_aname'},
-		   'desc' => $text{'index_astop'},
-		   'restartdesc' => $text{'index_arestart'},
-		   'longdesc' => $text{'index_astopdesc'},
-		   'links' => \@links } );
+	push(@rv, { 'status' => 1,
+		    'name' => $text{'index_aname'},
+		    'desc' => $text{'index_astop'},
+		    'restartdesc' => $text{'index_arestart'},
+		    'longdesc' => $text{'index_astopdesc'},
+		    'links' => \@links });
 	}
 else {
-	return ( { 'status' => 0,
-		   'name' => $text{'index_aname'},
-		   'desc' => $text{'index_astart'},
-		   'longdesc' => $text{'index_astartdesc'},
-		   'links' => \@links } );
+	push(@rv, { 'status' => 0,
+		    'name' => $text{'index_aname'},
+		    'desc' => $text{'index_astart'},
+		    'longdesc' => $text{'index_astartdesc'},
+		    'links' => \@links });
 	}
+foreach my $fpm (&list_php_fpm_configs()) {
+	&foreign_require("init");
+	next if (!$fpm->{'init'});
+	next if (!defined(&init::status_action));
+	my $st = &init::status_action($fpm->{'init'});
+	next if ($st < 0);
+	if ($st) {
+		# Running, show buttons to stop and restart
+		push(@rv, { 'status' => 1,
+			    'feature' => 'fpm',
+			    'id' => $fpm->{'version'},
+			    'name' => &text('index_fpmname', $fpm->{'version'}),
+			    'desc' => $text{'index_fpmstop'},
+			    'restartdesc' => $text{'index_fpmrestart'},
+			    'longdesc' => &text('index_fpmstopdesc',
+						$fpm->{'version'}) });
+		}
+	else {
+		# Down, show button to start
+		push(@rv, { 'status' => 0,
+			    'feature' => 'fpm',
+			    'id' => $fpm->{'version'},
+			    'name' => &text('index_fpmname', $fpm->{'version'}),
+			    'desc' => $text{'index_fpmstart'},
+			    'longdesc' => &text('index_fpmstartdesc',
+						$fpm->{'version'}) });
+		}
+	}
+return @rv;
 }
 
 # start_service_web()
@@ -2395,6 +2425,30 @@ sub stop_service_web
 local $err = &apache::stop_apache();
 sleep(1) if (!$err);
 return $err;
+}
+
+# start_service_fpm(version)
+# Attempts to start the FPM server for some version
+sub start_service_fpm
+{
+my ($ver) = @_;
+my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
+return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+&foreign_require("init");
+my ($ok, $err) = &init::start_action($fpm->{'init'});
+return $ok ? undef : $err;
+}
+
+# stops_service_fpm(version)
+# Attempts to stop the FPM server for some version
+sub stop_service_fpm
+{
+my ($ver) = @_;
+my ($fpm) = grep { $_->{'version'} eq $ver } &list_php_fpm_configs();
+return "Invalid version $ver" if (!$fpm || !$fpm->{'init'});
+&foreign_require("init");
+my ($ok, $err) = &init::stop_action($fpm->{'init'});
+return $ok ? undef : $err;
 }
 
 # show_template_web(&tmpl)

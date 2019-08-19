@@ -8,22 +8,22 @@ if (&indexof($in{'feature'}, @plugins) < 0) {
 	# Core feature
 	$startfunc = "start_service_".$in{'feature'};
 	$stopfunc = "stop_service_".$in{'feature'};
-	$err = &$stopfunc();
+	$err = &$stopfunc($in{'id'});
 	if (!$err) {
-		$err = &$startfunc();
+		$err = &$startfunc($in{'id'});
 		if ($err) {
 			# Delay for Apache to close sockets
 			sleep(5);
-			$err = &$startfunc();
+			$err = &$startfunc($in{'id'});
 			}
 		}
 	$name = $text{'feature_'.$in{'feature'}};
 	}
 else {
 	# Plugin
-	$err = &plugin_call($in{'feature'}, "feature_stop_service");
+	$err = &plugin_call($in{'feature'}, "feature_stop_service", $in{'id'});
 	if (!$err) {
-		$err = &plugin_call($in{'feature'}, "feature_start_service");
+		$err = &plugin_call($in{'feature'}, "feature_start_service", $in{'id'});
 		}
 	$name = &plugin_call($in{'feature'}, "feature_name");
 	}

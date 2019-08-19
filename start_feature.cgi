@@ -7,12 +7,12 @@ require './virtual-server-lib.pl';
 if (&indexof($in{'feature'}, @plugins) < 0) {
 	# Core feature
 	$sfunc = "start_service_".$in{'feature'};
-	$err = &$sfunc();
+	$err = &$sfunc($in{'id'});
 	$name = $text{'feature_'.$in{'feature'}};
 	}
 else {
 	# Plugin
-	$err = &plugin_call($in{'feature'}, "feature_start_service");
+	$err = &plugin_call($in{'feature'}, "feature_start_service", $in{'id'});
 	$name = &plugin_call($in{'feature'}, "feature_name");
 	}
 &error_setup($text{'start_err'});
