@@ -112,9 +112,9 @@ if (!$parentuser) {
 		@parts || &error($text{'setup_eemail3'});
 		foreach my $p (@parts) {
 			if ($p =~ /^(\S+)\@(\S+)$/ && $2 eq $in{'dom'} &&
-			    $1 ne $user) {
+			    $1 ne $user && $in{'mail'}) {
 				# Don't allow contact address to be in the
-				# domain being created
+				# domain being created (if email is local)
 				&error($text{'setup_eemail4'});
 				}
 			}
