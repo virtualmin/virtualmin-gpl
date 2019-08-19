@@ -356,7 +356,7 @@ else {
 		local $esc = &mysql::escapestr($in->{'mypass'});
 		local $user = $mysql::mysql_login || "root";
 		&execute_password_change_sql(undef, "root",
-			"$mysql::password_func('$esc')");
+			undef, 0, 0, $in->{'mypass'});
 
 		# Update Webmin
 		$mysql::config{'pass'} = $in->{'mypass'};
