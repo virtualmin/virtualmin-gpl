@@ -67,7 +67,11 @@ return ("mysql");
 
 sub script_phpmyadmin_php_optional_modules
 {
-return ("mcrypt");
+my ($d, $ver, $phpver, $opts) = @_;
+if (&compare_versions($phpver, "7.1") < 0) {
+	return ("mcrypt");
+	}
+return ();
 }
 
 # Must have at least one existing DB, and PHP 5.2
