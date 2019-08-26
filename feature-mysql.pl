@@ -2814,14 +2814,13 @@ my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
-	     $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
+	if ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
 	    $plainpass) {
 		# Use the plaintext password wherever possible
 		$sql = "set password for '$user'\@'$host' = '".
 		       &mysql_escape($plainpass)."'";
 		}
-	elsif (&compare_versions($ver, "5.7.6") >= 0) {
+	elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
