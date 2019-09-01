@@ -2216,10 +2216,10 @@ foreach my $d (&list_domains()) {
 	next if (time() - $d->{'letsencrypt_last'} < 60*60);
 
 	# Is it time? Either the user-chosen number of months has passed, or
-	# the cert is within 5 days of expiry
+	# the cert is within 21 days of expiry
 	my $age = time() - $ltime;
 	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
-	    $expiry && $expiry - time() < 5 * 24 * 60 * 60) {
+	    $expiry && $expiry - time() < 21 * 24 * 60 * 60) {
 		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 		my ($subject, $body);
 		if (!$ok) {
