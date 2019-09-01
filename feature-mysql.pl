@@ -2764,9 +2764,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
 			    : $encpass));
 	}
-elsif (($variant eq "mysql" && &compare_versions($ver, "8") >= 0 ||
-        $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0) &&
-       $plainpass) {
+elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
 			"with mysql_native_password" : "";
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
