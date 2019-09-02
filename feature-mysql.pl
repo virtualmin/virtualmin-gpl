@@ -159,8 +159,6 @@ else {
 					}
 				&set_mysql_user_connections($d, $h, $user, 0);
 				}
-			&execute_dom_sql(
-				$d, $mysql::master_db, 'flush privileges');
 			};
 		&execute_for_all_mysql_servers($cfunc);
 		&$second_print($text{'setup_done'});
@@ -216,6 +214,40 @@ else {
 	# Can update the DB table directly
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
 	&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
+	}
+}
+
+# remove_db_table(&domain, db, user)
+# Removes an existing entry from the database table
+sub remove_db_table
+{
+local ($d, $db, $user) = @_;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	# Use the revoke command
+	local $rv = &execute_dom_sql($d, $mysql::master_db,
+		"select host from user where user = ?", $user);
+	local $dbstr;
+	if ($db) {
+		local $qdb = &quote_mysql_database($db);
+		$dbstr = "`$qdb`.*";
+		}
+	else {
+		$dbstr = "*.*";
+		}
+	foreach my $r (@{$rv->{'data'}}) {
+		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$user'\@'$r->[0]'");
+		}
+	}
+else {
+	# Directly update DB table
+	my @c;
+	push(@c, "db = '$db'") if ($db);
+	push(@c, "user = '$user'") if ($user);
+	@c || &error("remove_db_table called with no db or user");
+	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
+	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
 }
 
@@ -318,8 +350,8 @@ else {
 			}
 		if ($wild && $wild ne $d->{'db'}) {
 			# Remove any wildcard entry for the user
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from db where db = '$wild'");
+			# XXX doesn't work on MariaDB 10.4
+			&remove_db_table($d, $wild, undef);
 			}
 		# Remove any other users. This has to be done here, as when
 		# users in the domain are deleted they won't be able to find
@@ -485,14 +517,13 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 				&set_mysql_user_connections($d, $h, $user, 0);
 				}
 			foreach my $db (@dbnames) {
+				# XXX
 				local $qdb = &quote_mysql_database($db);
 				&execute_dom_sql($d, $mysql::master_db,
 				  "update db set user = ? where user = ? and ".
 				  "(db = ? or db = ?)",
 				  $user, $olduser, $db, $qdb);
 				}
-			&execute_dom_sql($d, $mysql::master_db,
-					 'flush privileges');
 			};
 		&execute_for_all_mysql_servers($pfunc);
 		&$second_print($text{'setup_done'});
@@ -552,6 +583,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		# Update locally
 		&$first_print($text{'save_mysqluser'});
 		local $pfunc = sub {
+			# XXX need to fix
 			&execute_user_deletion_sql($d, undef, $olduser);
 			&execute_dom_sql($d, $mysql::master_db,
 				"update db set user = ? where user = ?",
@@ -589,6 +621,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 		if (&mysql_user_exists($oldd)) {
 			$d->{'mysql_user'} = $user;
 			local $pfunc = sub {
+				# XXX need to fix
 				&execute_dom_sql($d, $mysql::master_db,
 				  "update user set user = ? where user = ?",
 				  $user, $olduser);
@@ -643,6 +676,7 @@ elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 		# Change locally
 		&$first_print($text{'save_mysqluser2'});
 		local $pfunc = sub {
+			# XXX need to fix
 			foreach my $db (@dbnames) {
 				local $qdb = &quote_mysql_database($db);
 				&execute_dom_sql($d, $mysql::master_db,
@@ -916,8 +950,6 @@ else {
 					$d, $user, undef,
 					0, 0, &mysql_pass($d));
 				}
-			&execute_dom_sql($d, $mysql::master_db,
-					 'flush privileges');
 			};
 		&execute_for_all_mysql_servers($efunc);
 		delete($d->{'disabled_oldmysql'});
@@ -1492,7 +1524,6 @@ else {
 		foreach $h (@hosts) {
 			&add_db_table($d, $h, $dbname, $user);
 			}
-		&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 		};
 	&execute_for_all_mysql_servers($pfunc);
 
@@ -1582,11 +1613,9 @@ local @unames = ( &mysql_user($d),
 
 # Take away MySQL permissions for users in this domain
 local $dfunc = sub {
-	local $qdbname = &quote_mysql_database($dbname);
 	foreach my $uname (@unames) {
-		&execute_dom_sql($d, $mysql::master_db, "delete from db where (db = ? or db = ?) and user = ?", $dbname, $qdbname, $uname);
+		&remove_db_table($d, $dbname, $uname);
 		}
-	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
 	};
 &execute_for_all_mysql_servers($dfunc);
 
@@ -1599,7 +1628,6 @@ local $dfunc = sub {
 			&execute_user_deletion_sql($d, undef, $up->[0]);
 			}
 		}
-	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	};
 &execute_for_all_mysql_servers($dfunc);
 
@@ -1799,7 +1827,6 @@ else {
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
-		&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 		};
 	&execute_for_all_mysql_servers($cfunc);
 	}
@@ -1889,8 +1916,7 @@ else {
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
 			# Update accessible database list
 			local @hosts = &get_mysql_hosts($d);
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from db where user = ?", $myuser);
+			&remove_db_table($d, undef, $myuser);
 			local $h;
 			foreach $h (@hosts) {
 				local $db;
@@ -1899,7 +1925,6 @@ else {
 					}
 				}
 			}
-		&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 		};
 	&execute_for_all_mysql_servers($mfunc);
 	}
@@ -2285,7 +2310,6 @@ else {
 				}
 			&set_mysql_user_connections($d, $h, $user, 0);
 			}
-		&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 		};
 	&execute_for_all_mysql_servers($ufunc);
 
@@ -2301,9 +2325,7 @@ else {
 				next if ($u->[0] eq $user ||
 					 $u->[0] eq 'root' ||
 					 $u->[0] eq $mymod->{'config'}->{'login'});
-				&execute_dom_sql($d, $mysql::master_db,
-					"delete from db where user = ? and ".
-					"db = ?", $u->[0], $db->{'name'});
+				&remove_db_table($d, $db->{'name'}, $u->[0]);
 				foreach my $h (@$hosts) {
 					&add_db_table($d, $h, $db->{'name'},
 						      $u->[0]);
@@ -2320,8 +2342,6 @@ else {
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
-		&execute_dom_sql($d, $mysql::master_db,
-					   'flush privileges');
 		};
 	&execute_for_all_mysql_servers($ufunc);
 	}
@@ -2548,9 +2568,19 @@ sub set_mysql_user_connections
 local ($d, $host, $user, $mailbox) = @_;
 local $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
-	&execute_dom_sql($d, $mysql::master_db,
-		"update user set max_user_connections = ? ".
-		"where user = ? and host = ?", $conns, $user, $host);
+	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+		# Need to use the alter user command
+		&execute_dom_sql($d, $mysql::master_db,
+			"alter user '$user'\@'$host' ".
+			"with max_user_connections $conns");
+		}
+	else {
+		# Directly update the user table
+		&execute_dom_sql($d, $mysql::master_db,
+			"update user set max_user_connections = ? ".
+			"where user = ? and host = ?", $conns, $user, $host);
+		}
 	}
 }
 
@@ -2774,6 +2804,7 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my @rv;
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	if ($host) {
+		# Host is known
 		@rv = ("drop user if exists '$user'\@'$host'");
 		}
 	else {
@@ -3162,6 +3193,7 @@ sub execute_dom_sql
 {
 my ($d, $db, $sql, @params) = @_;
 my $mod = &require_dom_mysql($d);
+print STDERR $sql,"\n";
 if ($sql =~ /^(select|show)\s+/i) {
 	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
 	}
