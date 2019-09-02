@@ -151,9 +151,7 @@ else {
 		local $cfunc = sub {
 			local $encpass = &encrypted_mysql_pass($d);
 			foreach my $h (@hosts) {
-				&execute_dom_sql($d, $mysql::master_db,
-				    "delete from user where host = '$h' ".
-				    "and user = '$user'");
+				&execute_user_deletion_sql($d, $h, $user);
 				&execute_user_creation_sql($d, $h, $user,
 						   $encpass, &mysql_pass($d));
 				if ($wild && $wild ne $d->{'db'}) {
@@ -209,8 +207,16 @@ foreach $s (@str) {
 		}
 	}
 local $qdb = &quote_mysql_database($db);
-&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
-&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	# Use the grant command
+	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
+	}
+else {
+	# Can update the DB table directly
+	&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
+	&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+	}
 }
 
 # delete_mysql(&domain, [preserve-remote])
@@ -308,10 +314,7 @@ else {
 				$tmpl->{'mysql_wild'}, $d);
 		if (!$d->{'parent'}) {
 			# Delete the user and any database permissions
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from user where user = '$user'");
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from db where user = '$user'");
+			&execute_user_deletion_sql($d, undef, $user, 1);
 			}
 		if ($wild && $wild ne $d->{'db'}) {
 			# Remove any wildcard entry for the user
@@ -326,14 +329,8 @@ else {
 				if ($udb->{'type'} eq 'mysql') {
 					local $myuser =
 						&mysql_username($u->{'user'});
-					&execute_dom_sql(
-					    $d, $mysql::master_db,
-					    "delete from user where user = ?",
-					    $myuser);
-					&execute_dom_sql(
-					    $d, $mysql::master_db,
-					    "delete from db where user = ?",
-					    $myuser);
+					&execute_user_deletion_sql(
+						$d, undef, $myuser, 1);
 					}
 				}
 			}
@@ -555,8 +552,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		# Update locally
 		&$first_print($text{'save_mysqluser'});
 		local $pfunc = sub {
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from user where user = ?", $olduser);
+			&execute_user_deletion_sql($d, undef, $olduser);
 			&execute_dom_sql($d, $mysql::master_db,
 				"update db set user = ? where user = ?",
 				$user, $olduser);
@@ -1600,7 +1596,7 @@ local $dfunc = sub {
 	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
 		local $o = &execute_dom_sql($d, $mysql::master_db, "select user from db where user = '$up->[0]'");
 		if (!@{$o->{'data'}}) {
-			&execute_dom_sql($d, $mysql::master_db, "delete from user where user = '$up->[0]'");
+			&execute_user_deletion_sql($d, undef, $up->[0]);
 			}
 		}
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
@@ -1793,9 +1789,7 @@ else {
 	local $h;
 	local $cfunc = sub {
 		foreach $h (@hosts) {
-			&execute_dom_sql($d, $mysql::master_db,
-			    "delete from user where host = '$h' ".
-			    "and user = '$user'");
+			&execute_user_deletion_sql($d, $h, $user);
 			&execute_user_creation_sql($d, $h, $myuser, 
 			      $encpass ? "'$encpass'" : undef,
 			      $pass);
@@ -1830,12 +1824,7 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Delete locally
 	local $dfunc = sub {
-		&execute_dom_sql($d, $mysql::master_db,
-			"delete from user where user = ?", $myuser);
-		&execute_dom_sql($d, $mysql::master_db,
-			"delete from db where user = ?", $myuser);
-		&execute_dom_sql($d, $mysql::master_db,
-			"flush privileges");
+		&execute_user_deletion_sql($d, undef, $myuser, 1);
 		};
 	&execute_for_all_mysql_servers($dfunc);
 	}
@@ -2287,10 +2276,7 @@ else {
 	local $ufunc = sub {
 		# Update the user table entry for the main user
 		local $encpass = &encrypted_mysql_pass($d);
-		&execute_dom_sql($d, $mysql::master_db,
-			"delete from user where user = '$user'");
-		&execute_dom_sql($d, $mysql::master_db,
-			"delete from db where user = '$user'");
+		&execute_user_deletion_sql($d, undef, $user, 1);
 		foreach my $h (@$hosts) {
 			&execute_user_creation_sql($d, $h, $user, $encpass,
 						   &mysql_pass($d));
@@ -2327,8 +2313,7 @@ else {
 			}
 		# Re-populate user table
 		foreach my $u (values %allusers) {
-			&execute_dom_sql($d, $mysql::master_db,
-				"delete from user where user = ?", $u->[0]);
+			&execute_user_deletion_sql($d, undef, $u->[0]);
 			foreach my $h (@$hosts) {
 				&execute_user_creation_sql($d, $h, $u->[0],
 							   "'$u->[1]'");
@@ -2734,12 +2719,12 @@ elsif ($@) {
 	}
 }
 
-# execute_user_deletion_sql(&domain, host, user)
+# execute_user_deletion_sql(&domain, host, user, db-too)
 # Run SQL commands to delete a user
 sub execute_user_deletion_sql
 {
-my ($d, $host, $user) = @_;
-foreach my $sql (&get_user_deletion_sql($d, $host, $user)) {
+my ($d, $host, $user, $dbtoo) = @_;
+foreach my $sql (&get_user_deletion_sql($d, $host, $user, $dbtoo)) {
 	&execute_dom_sql($d, $mysql::master_db, $sql);
 	if ($sql =~ /flush\s+privileges/) {
 		sleep(1);
@@ -2780,19 +2765,40 @@ else {
 	}
 }
 
-# get_user_deletion_sql(&domain, host, user)
+# get_user_deletion_sql(&domain, host, user, [db-too])
 # Returns SQL to delete a MySQL user
 sub get_user_deletion_sql
 {
-my ($d, $host, $user) = @_;
+my ($d, $host, $user, $dbtoo) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my @rv;
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
-	return ("drop user if exists '$user'\@'$host'");
+	if ($host) {
+		@rv = ("drop user if exists '$user'\@'$host'");
+		}
+	else {
+		# Need to drop from all hosts explicitly
+		local $rv = &execute_dom_sql($d, $mysql::master_db,
+			"select host from user where user = ?", $user);
+		foreach my $r (@{$rv->{'data'}}) {
+			push(@rv, "drop user if exists '$user'\@'$r->[0]'");
+			}
+		}
 	}
 else {
-	return ("delete from user where host = '$host' and user = '$user'",
-	        "flush privileges");
+	@rv = ("delete from user where user = '$user'");
+	if ($host) {
+		$rv[0] .= "and host = '$host'";
+		}
+	if ($dbtoo) {
+		push(@rv, "delete from db where user = '$user'");
+		if ($host) {
+			$rv[1] .= "and host = '$host'";
+			}
+		}
+	push(@rv, "flush privileges");
 	}
+return @rv;
 }
 
 # execute_password_change_sql(&domain, user, password-sql, [force-user-table],
