@@ -22,20 +22,6 @@ sub script_phpmyadmin_versions
 return ( "4.9.0.1", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
 }
 
-sub script_phpmyadmin_can_upgrade
-{
-local ($sinfo, $newver) = @_;
-if (&compare_versions($newver, "4.2.3") >= 0) {
-	my $out;
-	&require_mysql();
-	my $myver = &mysql::get_mysql_version(\$out);
-	if ($myver && $myver < 5.5) {
-		return 0;
-		}
-	}
-return 1;
-}
-
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
@@ -47,7 +33,7 @@ return &compare_versions($ver, "4.5") >= 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 8;		# To add intermediate version 4.4.15.10
+return 9;		# To check remote MySQL version
 }
 
 sub script_phpmyadmin_category
@@ -99,9 +85,7 @@ if ($wantver) {
 
 # Check for latest MySQL
 if (&compare_versions($ver, "4.2.3") >= 0) {
-	&require_mysql();
-	my $out;
-	my $myver = &mysql::get_mysql_version(\$out);
+	my ($myver, $variant) = &get_dom_remote_mysql_version($d);
 	if ($myver && $myver < 5.5) {
 		push(@rv, "phpMyAdmin requires MySQL version 5.5 or later");
 		}
