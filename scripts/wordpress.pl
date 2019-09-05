@@ -59,12 +59,6 @@ sub script_wordpress_depends
 my ($d, $ver, $sinfo, $phpver) = @_;
 my @rv;
 
-# Check for MySQL 4+
-require_mysql();
-if (mysql::get_mysql_version() < 4) {
-	push(@rv, "WordPress requires MySQL version 4 or higher");
-	}
-
 # Check for PHP 5.6.20+
 my $phpv = get_php_version($phpver || 5, $d);
 if (!$phpv) {
