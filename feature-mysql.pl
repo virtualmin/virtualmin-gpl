@@ -621,15 +621,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 		if (&mysql_user_exists($oldd)) {
 			$d->{'mysql_user'} = $user;
 			local $pfunc = sub {
-				# XXX need to fix
-				&execute_dom_sql($d, $mysql::master_db,
-				  "update user set user = ? where user = ?",
-				  $user, $olduser);
-				&execute_dom_sql($d, $mysql::master_db,
-				  "update db set user = ? where user = ?",
-				  $user, $olduser);
-				&execute_dom_sql($d, mysql::master_db,
-				  "flush privileges");
+				&execute_user_rename_sql($d, $olduser, $user);
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -2762,6 +2754,31 @@ foreach my $sql (&get_user_deletion_sql($d, $host, $user, $dbtoo)) {
 	}
 }
 
+# execute_user_rename_sql(&domain, old-user, new-user)
+# Run SQL commands to rename a user
+sub execute_user_rename_sql
+{
+my ($d, $olduser, $user) = @_;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	# Need to alter user
+	local $rv = &execute_dom_sql($d, $mysql::master_db,
+		"select host from user where user = ?", $olduser);
+	foreach my $r (@{$rv->{'data'}}) {
+		&execute_dom_sql($d, $mysql::master_db,
+			"rename '$olduser'@'$r->[0]' to '$user'@'$r->[0]'");
+		}
+	}
+else {
+	# Can just update in user and db tables
+	&execute_dom_sql($d, $mysql::master_db,
+		"update user set user = ? where user = ?", $user, $olduser);
+	&execute_dom_sql($d, $mysql::master_db,
+		"update db set user = ? where user = ?", $user, $olduser);
+	&execute_dom_sql($d, mysql::master_db, "flush privileges");
+	}
+}
+
 # get_user_creation_sql(&domain, host, user, password-sql, plain-pass)
 # Returns SQL to add a user, with SSL fields if needed
 sub get_user_creation_sql
@@ -3193,7 +3210,6 @@ sub execute_dom_sql
 {
 my ($d, $db, $sql, @params) = @_;
 my $mod = &require_dom_mysql($d);
-print STDERR $sql,"\n";
 if ($sql =~ /^(select|show)\s+/i) {
 	return &foreign_call($mod, "execute_sql", $db, $sql, @params);
 	}
