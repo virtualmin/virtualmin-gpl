@@ -313,6 +313,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'nocreationscripts', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
+	 'creation_type', 'migrate',
+	 'migration_type', 'plesk9',
         );
 &merge_ipinfo_domain(\%dom, $ipinfo);
 if (!$parent) {

@@ -165,6 +165,8 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
 	 'nocopyskel', 1,
 	 'nocreationscripts', 1,
 	 'parent', $parent ? $parent->{'id'} : undef,
+	 'creation_type', 'migrate',
+	 'migration_type', 'directadmin',
         );
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 &merge_ipinfo_domain(\%dom, $ipinfo);
