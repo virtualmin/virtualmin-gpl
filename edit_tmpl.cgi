@@ -6,8 +6,6 @@ require './virtual-server-lib.pl';
 &ReadParse();
 
 @tmpls = &list_templates();
-@hargs = ( 0, 0, undef, undef, undef,
-	   &virtualmin_ui_apply_radios("onLoad") );
 if ($in{'new'}) {
 	if ($in{'clone'}) {
 		# Start with template we are cloning
@@ -15,8 +13,7 @@ if ($in{'new'}) {
 		$tmpl || &error("Failed to find template with ID $in{'clone'} to clone");
 		$tmpl->{'name'} .= " (Clone)";
 		$tmpl->{'standard'} = 0;
-		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls",
-			 	 @hargs);
+		&ui_print_header(undef, $text{'tmpl_title3'}, "", "tmpls");
 		}
 	elsif ($in{'cp'}) {
 		# Start with the default settings
@@ -24,20 +21,17 @@ if ($in{'new'}) {
 		$tmpl->{'name'} .= " (Copy)";
 		$tmpl->{'standard'} = 0;
 		$tmpl->{'default'} = 0;
-		&ui_print_header(undef, $text{'tmpl_title4'}, "", "tmpls",
-			 	 @hargs);
+		&ui_print_header(undef, $text{'tmpl_title4'}, "", "tmpls");
 		}
 	else {
 		# Start with an empty template
-		&ui_print_header(undef, $text{'tmpl_title1'}, "", "tmpls",
-			 	 @hargs);
+		&ui_print_header(undef, $text{'tmpl_title1'}, "", "tmpls");
 		}
 	}
 else {
 	($tmpl) = grep { $_->{'id'} == $in{'id'} } @tmpls;
 	$tmpl || &error("Failed to find template with ID $in{'id'}");
-	&ui_print_header($tmpl->{'name'}, $text{'tmpl_title2'}, "", "tmpls",
-			 @hargs);
+	&ui_print_header($tmpl->{'name'}, $text{'tmpl_title2'}, "", "tmpls");
 	}
 
 # Show section selector form
@@ -119,6 +113,9 @@ print &ui_form_end([
 		( [ "delete", $text{'delete'} ] ) : ( ),
 	]);
 
+# Hack to make any fields that are disabled by JS get disabled on form load
+print "<script>",&virtualmin_ui_apply_radios(),"</script>\n";
+
 &ui_print_footer("edit_newtmpl.cgi", $text{'newtmpl_return'},
 		 "", $text{'index_return'});
 
@@ -155,5 +152,4 @@ else {
 	}
 return $rv;
 }
-
 
