@@ -668,16 +668,10 @@ elsif ($user ne $olduser && $d->{'parent'} && @dbnames) {
 		# Change locally
 		&$first_print($text{'save_mysqluser2'});
 		local $pfunc = sub {
-			# XXX need to fix
 			foreach my $db (@dbnames) {
-				local $qdb = &quote_mysql_database($db);
-				&execute_dom_sql($d, $mysql::master_db,
-				    "update db set user = ? where user = ? ".
-				    "and (db = ? or db = ?)",
-				    $user, $olduser, $db, $qdb);
+				&execute_database_reassign_sql(
+					$d, $db, $olduser, $user);
 				}
-			&execute_dom_sql($d, $mysql::master_db,
-				'flush privileges');
 			};
 		&execute_for_all_mysql_servers($pfunc);
 		$rv++;
@@ -2776,6 +2770,32 @@ else {
 	&execute_dom_sql($d, $mysql::master_db,
 		"update db set user = ? where user = ?", $user, $olduser);
 	&execute_dom_sql($d, mysql::master_db, "flush privileges");
+	}
+}
+
+# execute_database_reassign_sql(&domain, db, old-user, new-user)
+# Change ownership of a DB to a new user
+sub execute_database_reassign_sql
+{
+my ($d, $db, $olduser, $user) = @_;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	# Revoke access from the old user on all hosts
+	local $rv = &execute_dom_sql($d, $mysql::master_db,
+		"select host from user where user = ?", $olduser);
+	local $qdb = &quote_mysql_database($db);
+	$dbstr = "`$qdb`.*";
+	foreach my $r (@{$rv->{'data'}}) {
+		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
+		}
+	}
+else {
+	# Just update the DB table
+	&execute_dom_sql($d, $mysql::master_db,
+		"update db set user = ? where user = ? and db = ?",
+		$user, $olduser, $db);
+	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
 	}
 }
 
