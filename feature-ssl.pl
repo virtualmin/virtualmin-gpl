@@ -792,37 +792,38 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_ssl
 {
+local ($d, $file, $opts) = @_;
 &$first_print($text{'restore_sslcp'});
-&obtain_lock_web($_[0]);
+&obtain_lock_web($d);
 my $rv = 1;
 
 # Restore the Apache directives
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_sslport'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_sslport'});
 if ($virt) {
-	local $srclref = &read_file_lines($_[1], 1);
+	local $srclref = &read_file_lines($file, 1);
 	local $dstlref = &read_file_lines($virt->{'file'});
 	splice(@$dstlref, $virt->{'line'}+1,
 	       $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
 		# Fix up any DocumentRoot or other file-related directives
 		local $i;
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
-			    s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+			    s/\Q$_[5]->{'home'}\E/$d->{'home'}/g;
 			}
 		}
 	&flush_file_lines($virt->{'file'});
 	undef(@apache::get_config_cache);
 
 	# Copy suexec-related directives from non-SSL virtual host
-	($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					      $_[0]->{'web_sslport'});
-	local ($nvirt, $nvconf) = &get_apache_virtual($_[0]->{'dom'},
-						      $_[0]->{'web_port'});
+	($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					      $d->{'web_sslport'});
+	local ($nvirt, $nvconf) = &get_apache_virtual($d->{'dom'},
+						      $d->{'web_port'});
 	if ($nvirt && $virt) {
 		local @vals = &apache::find_directive("SuexecUserGroup",
 						      $nvconf);
@@ -835,45 +836,49 @@ if ($virt) {
 
 	# Restore the cert and key, if any and if saved
 	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
-	if ($cert && -r "$_[1]_cert") {
+	if ($cert && -r $file."_cert") {
 		&lock_file($cert);
 		&set_ownership_permissions(
-			$_[0]->{'uid'}, undef, undef, "$_[1]_cert");
-		&copy_source_dest_as_domain_user($_[0], "$_[1]_cert", $cert);
+			$d->{'uid'}, undef, undef, $file."_cert");
+		&copy_source_dest_as_domain_user($d, $file."_cert", $cert);
 		&unlock_file($cert);
 		}
 	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
-	if ($key && -r "$_[1]_key" && $key ne $cert) {
+	if ($key && -r $file."_key" && $key ne $cert) {
 		&lock_file($key);
 		&set_ownership_permissions(
-			$_[0]->{'uid'}, undef, undef, "$_[1]_key");
-		&copy_source_dest_as_domain_user($_[0], "$_[1]_key", $key);
+			$d->{'uid'}, undef, undef, $file."_key");
+		&copy_source_dest_as_domain_user($d, $file."_key", $key);
 		&unlock_file($key);
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
-	if ($ca && -r "$_[1]_ca") {
+	if ($ca && -r $file."_ca") {
 		&lock_file($ca);
 		&set_ownership_permissions(
-			$_[0]->{'uid'}, undef, undef, "$_[1]_ca");
-		&copy_source_dest_as_domain_user($_[0], "$_[1]_ca", $ca);
+			$d->{'uid'}, undef, undef, $file."_ca");
+		&copy_source_dest_as_domain_user($d, $file."_ca", $ca);
 		&unlock_file($ca);
 		}
 
 	# Re-setup any SSL passphrase
-	&save_domain_passphrase($_[0]);
+	&save_domain_passphrase($d);
 
 	# Re-save PHP mode, in case it changed
-	&save_domain_php_mode($_[0], &get_domain_php_mode($_[0]));
+	&save_domain_php_mode($d, &get_domain_php_mode($d));
 
 	# Add Require all granted directive if this system is Apache 2.4
-	&add_require_all_granted_directives($_[0], $_[0]->{'web_sslport'});
+	&add_require_all_granted_directives($d, $d->{'web_sslport'});
 
 	# Fix Options lines
-	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
-							$_[0]->{'web_sslport'});
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+							$d->{'web_sslport'});
 	if ($virt) {
 		&fix_options_directives($vconf, $conf, 0);
 		}
+
+	# Sync cert to Dovecot and Postfix
+	&sync_dovecot_ssl_cert($d, 1);
+	&sync_postfix_ssl_cert($d, $d->{'virt'});
 
 	&$second_print($text{'setup_done'});
 	}
@@ -882,7 +887,7 @@ else {
 	$rv = 0;
 	}
 
-&release_lock_web($_[0]);
+&release_lock_web($d);
 &register_post_action(\&restart_apache);
 return $rv;
 }
