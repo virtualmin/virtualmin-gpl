@@ -33,7 +33,7 @@ return &compare_versions($ver, "4.5") >= 0 ? "$ver (Latest)" :
 
 sub script_phpmyadmin_release
 {
-return 9;		# To check remote MySQL version
+return 10;		# To fix MySQL version check
 }
 
 sub script_phpmyadmin_category
@@ -84,7 +84,8 @@ if ($wantver) {
 	}
 
 # Check for latest MySQL
-if (&compare_versions($ver, "4.2.3") >= 0) {
+if (&compare_versions($ver, "4.2.3") >= 0 &&
+    defined(&get_dom_remote_mysql_version)) {
 	my ($myver, $variant) = &get_dom_remote_mysql_version($d);
 	if ($myver && $myver < 5.5) {
 		push(@rv, "phpMyAdmin requires MySQL version 5.5 or later");
