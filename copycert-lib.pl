@@ -190,7 +190,7 @@ my ($d) = @_;
 &foreign_require("dovecot");
 my $configfile = &dovecot::get_config_file();
 &lock_file($configfile);
-my $dovedir = $cfile;
+my $dovedir = $configfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
 my $v2 = &dovecot::find_value("ssl_cert", $conf, 2);
