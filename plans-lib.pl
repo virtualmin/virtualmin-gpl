@@ -126,6 +126,7 @@ else {
 sub get_plan
 {
 local ($id) = @_;
+return undef if ($id !~ /^\d+$/);
 local %plan;
 &read_file_cached("$plans_dir/$id", \%plan) || return undef;
 $plan{'id'} = $id;
