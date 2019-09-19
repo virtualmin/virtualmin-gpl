@@ -38,10 +38,12 @@ elsif ($in{'parentuser'}) {
 if ($parentuser && !$parentdom) {
 	$parentdom = &get_domain_by("user", $parentuser, "parent", "");
 	$parentdom || &error(&text('form_eparent', $parentuser));
+	&can_edit_domain($parentdom) || &error($text{'form_ecannot'});
 	}
 if ($in{'subdom'}) {
 	$subdom = &get_domain($in{'subdom'});
 	$subdom || &error(&text('form_esubdom', &html_escape($in{'subdom'})));
+	&can_edit_domain($subdom) || &error($text{'form_ecannot'});
 	}
 
 # Check if domains limit has been exceeded
