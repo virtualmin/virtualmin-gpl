@@ -3671,7 +3671,7 @@ else {
 sub valid_alias_name
 {
 local ($name) = @_;
-if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!]+$/) {
+if ($name !~ /^[^ \t:\&\(\)\|\;\<\>\*\?\!\/\\]+$/) {
 	return $text{'user_euser'};
 	}
 return undef;
