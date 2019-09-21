@@ -6741,6 +6741,7 @@ sub free_ip_address
 {
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
+%taken = (%taken, &domain_ip_addresses());
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, $rn);
@@ -6763,6 +6764,7 @@ sub free_ip6_address
 {
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
+%taken = (%taken, &domain_ip_addresses());
 local @ranges = split(/\s+/, $tmpl->{'ranges6'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, lc($rn));
@@ -6786,6 +6788,18 @@ sub interface_ip_addresses
 local %taken;
 foreach my $ip (&active_ip_addresses(), &bootup_ip_addresses()) {
 	$taken{$ip} = 1;
+	}
+return %taken;
+}
+
+# domain_ip_addresses()
+# Returns a hash of IPs that are assigned to any domains as virtual IPs
+sub domain_ip_addresses
+{
+local %taken;
+foreach my $d (&list_domains()) {
+	$taken{$d->{'ip'}} = 1 if ($d->{'virt'});
+	$taken{$d->{'ip6'}} = 1 if ($d->{'virt6'});
 	}
 return %taken;
 }
