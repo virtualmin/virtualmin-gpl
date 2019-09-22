@@ -14127,7 +14127,8 @@ if (&domain_has_website()) {
 		my @errfpms = grep { $_->{'err'} } @fpms;
 		if (@okfpms) {
 			&$second_print(&text('check_webphpfpm2',
-				join(" ", map { $_->{'version'} } @okfpms)));
+			  join(" ", map { $_->{'version'}.
+					  " (".$_->{'package'}.")" } @okfpms)));
 			}
 		if (@errfpms) {
 			&$second_print(&text('check_ewebphpfpm2',
