@@ -1931,6 +1931,7 @@ check_quotacommands=External quota commands will be used for virtual servers and
 check_eclamd=You have selected to use <tt>clamdscan</tt> for virus scanning, but the <tt>clamd</tt> server it talks to is not running
 check_eresolv2=Virtualmin is configured to setup DNS zones, but this system is not setup to use itself as a DNS server. Either add 127.0.0.1 to the $1, or turn off the BIND feature on the $2 page.
 check_eresolv3=It appears that DHCP is being used to dynamically configure your network interfaces, which can cause the DNS servers to be set based on settings provided by the DHCP server. Using a static IP address is strongly recommended with Virtualmin.
+check_eresolvlist=list of DNS servers
 check_dnsmissing=The system does not appear to have any DNS servers configured. However, the default behaviour of using a local DNS server should still work.
 check_evirusspam=Virus scanning cannot be enabled without spam filtering
 check_preload=Updating Virtualmin library pre-load settings ..
