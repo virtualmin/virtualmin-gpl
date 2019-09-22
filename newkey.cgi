@@ -172,6 +172,9 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&sync_domain_tlsa_records($od);
 	}
 
+# Turn off any let's encrypt renewal
+&disable_letsencrypt_renewal($d);
+
 # Run the after command
 &set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
 local $merr = &made_changes();

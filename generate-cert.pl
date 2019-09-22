@@ -170,6 +170,9 @@ if ($self) {
 		&sync_domain_tlsa_records($od);
 		}
 
+	# Turn off any let's encrypt renewal
+	&disable_letsencrypt_renewal($d);
+
 	# Re-start Apache
 	&register_post_action(\&restart_website_server, $d, 1);
 	&run_post_actions();

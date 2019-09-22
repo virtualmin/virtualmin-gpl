@@ -1712,6 +1712,17 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	}
 }
 
+# disable_letsencrypt_renewal(&domain)
+# If Let's Encrypt renewal is enabled for a domain, turn it off
+sub disable_letsencrypt_renewal
+{
+local ($d) = @_;
+if ($d->{'letsencrypt_renew'}) {
+	delete($d->{'letsencrypt_renew'});
+	&save_domain($d);
+	}
+}
+
 # sync_dovecot_ssl_cert(&domain, [enable-or-disable])
 # If supported, configure Dovecot to use this domain's SSL cert for its IP
 sub sync_dovecot_ssl_cert

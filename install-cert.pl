@@ -174,6 +174,9 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&sync_domain_tlsa_records($od);
 	}
 
+# Turn off any let's encrypt renewal
+&disable_letsencrypt_renewal($d);
+
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV, $d);
 

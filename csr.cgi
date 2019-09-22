@@ -149,6 +149,9 @@ else {
 		&sync_domain_tlsa_records($od);
 		}
 
+	# Turn off any let's encrypt renewal
+	&disable_letsencrypt_renewal($d);
+
 	&save_domain($d);
 	
 	&made_changes();
