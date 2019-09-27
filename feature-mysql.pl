@@ -2810,7 +2810,7 @@ if (!$encpass && $plainpass) {
 	my $qpass = &mysql_escape($plainpass);
 	$encpass = "$password_func('$qpass')";
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
@@ -2886,7 +2886,12 @@ my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
+		return ("alter user '$user'\@'$host' identified by ".
+			($plainpass ? "'".&mysql_escape($plainpass)."'"
+				: $encpass));
+	}
+	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
 	    $plainpass) {
 		# Use the plaintext password wherever possible
 		$sql = "set password for '$user'\@'$host' = '".
