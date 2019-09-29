@@ -1622,6 +1622,8 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			local $ip = &to_ipaddress($mxh);
 			if ($ip eq $d->{'ip'} ||
 			    $ip eq $d->{'dns_ip'} ||
+			    $ip eq $d->{'ip6'} ||
+			    $ip eq $d->{'dns_ip6'} ||
 			    $ip eq $defip ||
 			    $inuse{$ip}) {
 				$found = $ip;
@@ -1633,6 +1635,8 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 				$ip = $arec->{'values'}->[0];
 				if ($ip eq $d->{'ip'} ||
 				    $ip eq $d->{'dns_ip'} ||
+				    $ip eq $d->{'ip6'} ||
+				    $ip eq $d->{'dns_ip6'} ||
 				    $ip eq $defip) {
 					$found = $ip;
 					last;
