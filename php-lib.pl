@@ -1715,6 +1715,12 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
 
+	# The php-fpm package on Ubuntu is just a meta-package
+	if ($pname eq "php-fpm" && $pinfo[3] eq "all" &&
+	    $gconfig{'os_type'} eq 'debian-linux') {
+		next;
+		}
+
 	# Normalize the version
 	my $rv = { 'package' => $pname };
 	$rv->{'version'} = $pinfo[4];
