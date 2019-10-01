@@ -294,6 +294,7 @@ if ($key && $config{'compression'} == 3) {
 local $anyremote;
 local $anylocal;
 local $rsh;	# Rackspace cloud files handle
+local @okurls;
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
@@ -302,8 +303,6 @@ foreach my $desturl (@$desturls) {
 		return (0, 0, $doms);
 		}
 	local $starpass = "*" x length($pass);
-	$anyremote = 1 if ($mode > 0);
-	$anylocal = 1 if ($mode == 0);
 	if ($mode == 0 && $asd) {
 		# Always create virtualmin-backup directory
 		$mkdir = 1;
@@ -315,7 +314,7 @@ foreach my $desturl (@$desturls) {
 		if ($ftperr) {
 			$ftperr =~ s/\Q$pass\E/$starpass/g;
 			&$first_print(&text('backup_eftptest', $ftperr));
-			return (0, 0, $doms);
+			next;
 			}
 		if ($dirfmt) {
 			# Also create the destination directory and all parents
@@ -375,7 +374,7 @@ foreach my $desturl (@$desturls) {
 		if ($scperr) {
 			$scperr =~ s/\Q$pass\E/$starpass/g;
 			&$first_print(&text('backup_escptest', $scperr));
-			return (0, 0, $doms);
+			next;
 			}
 
 		# Clean up dummy file if possible
@@ -413,36 +412,36 @@ foreach my $desturl (@$desturls) {
 		# Connect to S3 service and create bucket
 		if (!$path && !$dirfmt) {
 			&$first_print($text{'backup_es3nopath'});
-			return (0, 0, $doms);
+			next;
 			}
 		local $cerr = &check_s3();
 		if ($cerr) {
 			&$first_print($cerr);
-			return (0, 0, $doms);
+			next;
 			}
 		local $err = &init_s3_bucket($user, $pass, $server,
 					     $s3_upload_tries,
 					     $config{'s3_location'});
 		if ($err) {
 			&$first_print($err);
-			return (0, 0, $doms);
+			next;
 			}
 		}
 	elsif ($mode == 6) {
 		# Connect to Rackspace cloud files and create container
 		if (!$path && !$dirfmt) {
 			&$first_print($text{'backup_ersnopath'});
-			return (0, 0, $doms);
+			next;
 			}
 		$rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
 		if (!ref($rsh)) {
 			&$first_print($rsh);
-			return (0, 0, $doms);
+			next;
 			}
 		local $err = &rs_create_container($rsh, $server);
 		if ($err) {
 			&$first_print($err);
-			return (0, 0, $doms);
+			next;
 			}
 
 		}
@@ -451,7 +450,7 @@ foreach my $desturl (@$desturls) {
 		local $buckets = &list_gcs_buckets();
 		if (!ref($buckets)) {
 			&$first_print($buckets);
-			return (0, 0, $doms);
+			next;
 			}
 		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
@@ -459,7 +458,7 @@ foreach my $desturl (@$desturls) {
 				$server, $config{'google_location'});
 			if ($err) {
 				&$first_print($err);
-				return (0, 0, $doms);
+				next;
 				}
 			}
 		}
@@ -472,7 +471,7 @@ foreach my $desturl (@$desturls) {
 			my $files = &list_dropbox_files($parent);
 			if (!ref($files)) {
 				&$first_print($files);
-				return (0, 0, $doms);
+				next;
 				}
 			my ($already) =
 			  grep { $_->{'path_display'} eq "/".$server } @$files;
@@ -480,7 +479,7 @@ foreach my $desturl (@$desturls) {
 				my $err = &create_dropbox_dir("/".$server);
 				if ($err) {
 					&$first_print($err);
-					return (0, 0, $doms);
+					next;
 					}
 				}
 			}
@@ -501,7 +500,7 @@ foreach my $desturl (@$desturls) {
 			my $err = $@;
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
 			&$first_print($err);
-			return (0, 0, $doms);
+			next;
 			}
 		}
 	elsif ($mode == 0) {
@@ -519,19 +518,19 @@ foreach my $desturl (@$desturls) {
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
 						   "<tt>$desturl</tt>", $derr));
-					return (0, 0, $doms);
+					next;
 					}
 				}
 			else {
 				&$first_print(&text('backup_edirtest',
 						    "<tt>$desturl</tt>"));
-				return (0, 0, $doms);
+				next;
 				}
 			}
 		elsif (!$dirfmt && -d $desturl) {
 			&$first_print(&text('backup_enotdirtest',
 					    "<tt>$desturl</tt>"));
-			return (0, 0, $doms);
+			next;
 			}
 		if (!$dirfmt && $mkdir) {
 			# Create parent directories if requested
@@ -543,12 +542,22 @@ foreach my $desturl (@$desturls) {
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
 						   "<tt>$dirdest</tt>", $derr));
-					return (0, 0, $doms);
+					next;
 					}
 				}
 			}
 		}
+
+	# If we made it this far, the URL is valid
+	push(@okurls, $desturl);
+	$anyremote = 1 if ($mode > 0);
+	$anylocal = 1 if ($mode == 0);
 	}
+if (!@okurls) {
+	# No URLs were valid
+	return (0, 0, $doms);
+	}
+@$desturls = @okurls;
 if (!$anyremote) {
 	# If all backups are local, there is no point transferring one by one
 	$onebyone = 0;
