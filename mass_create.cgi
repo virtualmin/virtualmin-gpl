@@ -240,6 +240,10 @@ foreach $line (@lines) {
 				&line_error($text{'setup_euser'});
 				next;
 				}
+			if (!&valid_mailbox_name($user)) {
+				&line_error($text{'setup_euser2'});
+				next;
+				}
 			}
 
 		# Work out mailboxes group name
