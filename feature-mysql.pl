@@ -517,12 +517,8 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 				&set_mysql_user_connections($d, $h, $user, 0);
 				}
 			foreach my $db (@dbnames) {
-				# XXX
-				local $qdb = &quote_mysql_database($db);
-				&execute_dom_sql($d, $mysql::master_db,
-				  "update db set user = ? where user = ? and ".
-				  "(db = ? or db = ?)",
-				  $user, $olduser, $db, $qdb);
+				&execute_database_reassign_sql(
+					$d, $db, $olduser, $user);
 				}
 			};
 		&execute_for_all_mysql_servers($pfunc);
@@ -583,13 +579,12 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 		# Update locally
 		&$first_print($text{'save_mysqluser'});
 		local $pfunc = sub {
-			# XXX need to fix
+			my $rv = &execute_dom_sql($d, $mysql::master_db,
+			    "select host,db from db where user = ?", $olduser);
 			&execute_user_deletion_sql($d, undef, $olduser);
-			&execute_dom_sql($d, $mysql::master_db,
-				"update db set user = ? where user = ?",
-				$user, $olduser);
-			&execute_dom_sql($d, $mysql::master_db,
-				'flush privileges');
+			foreach my $r (@{$rv->{'data'}}) {
+				&add_db_table($d, $r->[0], $r->[1], $user);
+				}
 			};
 		&execute_for_all_mysql_servers($pfunc);
 		&$second_print($text{'setup_done'});
