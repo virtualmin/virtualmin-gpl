@@ -13,6 +13,7 @@ if ($in{'upgrade'}) {
 	@got = &list_domain_scripts($d);
 	($sinfo) = grep { $_->{'id'} eq $in{'script'} } @got;
 	$script = &get_script($sinfo->{'name'});
+	$script || &error($text{'scripts_emissing'});
 	$sname = $sinfo->{'name'};
 	$ver = $in{'version'};
 	&ui_print_header(&domain_in($d), $text{'scripts_uptitle'}, "");
@@ -23,6 +24,7 @@ else {
 	$sname || &error($text{'scripts_enosel'});
 	$ver = $in{'ver_'.$sname} || $in{'ver'};
 	$script = &get_script($sname);
+	$script || &error($text{'scripts_emissing'});
 	$script->{'avail'} || &error($text{'scripts_eavail'});
 	&can_script_version($script, $ver) || &error($text{'scripts_eavail'});
 	&ui_print_header(&domain_in($d), $text{'scripts_intitle'}, "");

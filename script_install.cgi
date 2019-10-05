@@ -11,6 +11,7 @@ $ENV{'HTTP_REFERER'} = "list_scripts.cgi?dom=$in{'dom'}";
 $sname = $in{'script'};
 $ver = $in{'version'};
 $script = &get_script($sname);
+$script || &error($text{'scripts_emissing'});
 @got = &list_domain_scripts($d);
 if ($in{'upgrade'}) {
 	($sinfo) = grep { $_->{'id'} eq $in{'upgrade'} } @got;

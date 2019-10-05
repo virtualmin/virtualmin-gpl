@@ -3900,6 +3900,7 @@ scripts_ereturn=script information
 scripts_edep=This script cannot be installed, as this virtual server does not meet its requirements : $1
 scripts_ecommands=This script cannot be installed, as it requires the following commands : <tt>$1</tt>
 scripts_eweb=Scripts can only be installed into virtual servers with a home directory and website
+scripts_emissing=Script does not exist!
 scripts_ephpvers=This script cannot be installed, as it requires PHP version $1.
 scripts_return=list of scripts
 scripts_edownload=Download of $2 failed : $1

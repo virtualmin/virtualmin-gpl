@@ -8,6 +8,7 @@ $d = &get_domain($in{'dom'});
 @got = &list_domain_scripts($d);
 ($sinfo) = grep { $_->{'id'} eq $in{'script'} } @got;
 $script = &get_script($sinfo->{'name'});
+$script || &error($text{'scripts_emissing'});
 $opts = $sinfo->{'opts'};
 
 &ui_print_header(&domain_in($d), $text{'scripts_etitle'}, "");
