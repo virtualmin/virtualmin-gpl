@@ -2618,7 +2618,8 @@ if ($home) {
 sub delete_user_home
 {
 local ($user, $d) = @_;
-if ($user->{'unix'} && -d $user->{'home'} && $user->{'home'} ne "/") {
+if ($user->{'unix'} && -d $user->{'home'} && $user->{'home'} ne "/" &&
+    &is_under_directory($d->{'home'}, $user->{'home'})) {
 	&system_logged("rm -rf ".quotemeta($user->{'home'}));
 	}
 }
