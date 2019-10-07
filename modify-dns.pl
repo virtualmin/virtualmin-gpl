@@ -476,6 +476,10 @@ foreach $d (@doms) {
 			&$second_print($text{'setup_done'});
 			$changed++;
 			}
+		if ($changed) {
+			# Records have changed, so re-read
+			($recs, $file) = &get_domain_dns_records_and_file($d);
+			}
 		}
 
 	if ($changed || $bumpsoa) {
