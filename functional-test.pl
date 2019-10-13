@@ -1193,6 +1193,12 @@ $script_tests = [
 		      [ 'version', '7.0' ] ],
 	  'ignorefail' => 1,
 	},
+	{ 'command' => 'set-php-directory.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'dir', '.' ],
+		      [ 'version', '7.2' ] ],
+	  'ignorefail' => 1,
+	},
 
 	# List all scripts
 	{ 'command' => 'list-available-scripts.pl',
@@ -8471,8 +8477,9 @@ if ($t->{'save'}) {
 	$saved_vars{$t->{'save'}} = $out;
 	print "    .. saved $t->{'save'} value $out\n";
 	}
-print $t->{'fail'} ? "    .. successfully failed\n"
-		   : "    .. success\n";
+print $t->{'fail'} ?             "    .. successfully failed\n" :
+      $t->{'ignorefail'} && $? ? "    .. failed but ignored\n" :
+		                 "    .. success\n";
 return 1;
 }
 
