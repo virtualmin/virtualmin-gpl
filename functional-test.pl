@@ -1284,7 +1284,7 @@ $script_tests = [
 
 	# Check that it works
 	{ 'command' => $wget_command.'http://'.$test_domain.'/',
-	  'grep' => 'SugarCRM',
+	  'grep' => 'SugarCRM|modules/Users/login.css',
 	},
 
 	# Un-install
