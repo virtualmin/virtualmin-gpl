@@ -243,7 +243,8 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 else {
 	# Directly update DB table
 	my @c;
-	push(@c, "db = '$db'") if ($db);
+	local $qdb = &quote_mysql_database($db);
+	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
 	@c || &error("remove_db_table called with no db or user");
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where ".join(" and ", @c));
@@ -1601,10 +1602,11 @@ local $dfunc = sub {
 &execute_for_all_mysql_servers($dfunc);
 
 # If any users had access to this DB only, remove them too
+use Data::Dumper;
 local $dfunc = sub {
 	local $duser = &mysql_user($d);
 	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
-		local $o = &execute_dom_sql($d, $mysql::master_db, "select user from db where user = '$up->[0]'");
+		local $o = &execute_dom_sql($d, $mysql::master_db, "select db from db where user = '$up->[0]'");
 		if (!@{$o->{'data'}}) {
 			&execute_user_deletion_sql($d, undef, $up->[0]);
 			}
