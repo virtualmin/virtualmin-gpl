@@ -86,6 +86,9 @@ To copy the domain's SSL certificate to Webmin and Usermin for use by clients
 requesting this domain or it's private IP, use the C<--add-webmin-cert> flag.
 Or to remove this, use the C<--remove-webmin-cert>.
 
+To force re-generated of TLSA DNS records after the SSL cert is manually
+modified, use the C<--sync-tlsa> flag.
+
 =cut
 
 package virtual_server;
@@ -250,12 +253,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-webmin-cert") {
 		$ipkeys = 0;
 		}
+	elsif ($a eq "--sync-tlsa") {
+		$tlsa = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
-$mode || $rubymode || defined($proxy) || defined($framefwd) ||
+$mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   defined($suexec) || $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
@@ -684,6 +690,13 @@ foreach $d (@doms) {
 		&$second_print(".. done");
 		}
 
+	if ($tlsa && $d->{'dns'}) {
+		# Resync TLSA records
+		&$first_print("Updating TLSA DNS records ..");
+		&sync_domain_tlsa_records($d);
+		&$second_print(".. done");
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($renew) || $breakcert) {
@@ -745,6 +758,7 @@ print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert]\n";
 print "                     [--add-webmin-cert | --remove-webmin-cert]\n";
+print "                     [--sync-tlsa]\n";
 exit(1);
 }
 
