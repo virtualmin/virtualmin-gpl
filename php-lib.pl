@@ -1950,7 +1950,13 @@ $conf ||= &get_php_fpm_config();
 &$first_print($text{'php_fpmrestart'});
 if ($conf->{'init'}) {
 	&foreign_require("init");
-	my ($ok, $err) = &init::restart_action($conf->{'init'});
+	my ($ok, $err) = (0);
+	if (defined(&init::reload_action)) {
+		($ok, $err) = &init::reload_action($conf->{'init'});
+		}
+	if (!$ok) {
+		($ok, $err) = &init::restart_action($conf->{'init'});
+		}
 	if ($ok) {
 		&$second_print($text{'setup_done'});
 		return 1;
