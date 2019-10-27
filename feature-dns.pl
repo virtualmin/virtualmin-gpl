@@ -1588,19 +1588,30 @@ if ($d->{'dns_submode'}) {
 	}
 local %got;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
+local $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
 $d->{'dns_submode'} || $got{'SOA'} || return $text{'validate_ednssoa2'};
 $got{'A'} || return $text{'validate_ednsa2'};
+if ($d->{'virt6'}) {
+	$got{'AAAA'} || return $text{'validate_ednsa6'};
+	}
 if (&domain_has_website($d)) {
 	foreach my $n ($d->{'dom'}.'.', 'www.'.$d->{'dom'}.'.') {
 		my @nips = map { $_->{'values'}->[0] }
 			       grep { $_->{'type'} eq 'A' &&
 				      $_->{'name'} eq $n } @$recs;
+		my @nips6 = map { $_->{'values'}->[0] }
+			       grep { $_->{'type'} eq 'AAAA' &&
+				      $_->{'name'} eq $n } @$recs;
 		if (@nips && &indexof($ip, @nips) < 0) {
 			return &text('validate_ednsip', "<tt>$n</tt>",
 			    "<tt>".join(' or ', @nips)."</tt>", "<tt>$ip</tt>");
+			}
+		if ($d->{'virt6'} && @nips6 && &indexof($ip6, @nips6) < 0) {
+			return &text('validate_ednsip6', "<tt>$n</tt>",
+			  "<tt>".join(' or ', @nips6)."</tt>", "<tt>$ip6</tt>");
 			}
 		}
 	}
