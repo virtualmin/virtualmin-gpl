@@ -215,6 +215,8 @@ foreach my $u (@ucreate) {
 	}
 &close_tempfile(SHADOW);
 &close_tempfile(PASSWD);
+&set_ownership_permissions(undef, undef, 0644, $pfile);
+&set_ownership_permissions(undef, undef, 0600, $sfile);
 
 # Write out chosen groups to the jail group file
 my $gfile = $dir."/etc/group";
