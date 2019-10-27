@@ -6241,11 +6241,10 @@ if ($d->{'dns'}) {
 		return "No DNS zone for $d->{'dom'} found";
 		}
 	local $changed = 0;
-	foreach my $autoconfig (@autoconfig) {
-		$autoconfig_dot = $autoconfig.".";
-		foreach my $r (reverse(grep { $_->{'name'} eq $autoconfig_dot &&
-					      $_->{'type'} =~ /^(A|AAAA)$/ }
-					    @$recs)) {
+	local %adots = map { $_.".", 1 } @autoconfig;
+	foreach my $r (reverse(@$recs)) {
+		if ($r->{'type'} =~ /^(A|AAAA)$/ &&
+		    $adots{$r->{'name'}}) {
 			&bind8::delete_record($file, $r);
 			$changed++;
 			}
