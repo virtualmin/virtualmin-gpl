@@ -29,7 +29,6 @@ print &ui_table_row($text{'dkim_enabled'},
 	&ui_yesno_radio("enabled", $dkim && $dkim->{'enabled'}));
 
 # Selector for record
-@tm = localtime(time());
 if ($dkim && $dkim->{'enabled'}) {
 	# Selector is fixed
 	print &ui_table_row($text{'dkim_selector'},
@@ -38,9 +37,11 @@ if ($dkim && $dkim->{'enabled'}) {
 	}
 else {
 	# New selector input
+	@tm = localtime(time());
+	$defsel = sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
 	print &ui_table_row($text{'dkim_selector'},
 		&ui_textbox("selector",
-			    $dkim && $dkim->{'selector'} || $tm[5]+1900, 20));
+			    $dkim && $dkim->{'selector'} || $defsel, 20));
 	}
 
 # Verify incoming email?
