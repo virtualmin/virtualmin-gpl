@@ -2316,12 +2316,14 @@ else {
 				}
 			}
 		# Re-populate user table
-		# XXX plainpass?
+		local %pmap = map { $_->{'mysql_user'}, $_->{'mysql_pass'} }
+				grep { $_->{'mysql_user'} }
+				  &list_domain_users($d, 1, 1, 1, 1);
 		foreach my $u (values %allusers) {
 			&execute_user_deletion_sql($d, undef, $u->[0]);
 			foreach my $h (@$hosts) {
 				&execute_user_creation_sql($d, $h, $u->[0],
-							   "'$u->[1]'");
+						   "'$u->[1]'", $pmap{$u->[0]});
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
