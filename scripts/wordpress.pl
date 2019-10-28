@@ -361,7 +361,7 @@ sub has_wordpress_cli
 my ($opts) = @_;
 my $wp = &has_command("wp");
 return undef if (!$wp);
-return $wp if (!$opts || !defined(&get_php_cli_command));
+return $wp if (!$opts);
 my $cli = &get_php_cli_command($opts->{'phpver'});
 return $wp if (!$cli);
 return $cli." ".$wp;
