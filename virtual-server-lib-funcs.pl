@@ -14082,6 +14082,13 @@ if ($config{'web'}) {
                         }
 		}
 
+	# Check for breaking SetHandler lines
+	local $conf = &apache::get_config();
+	local $fixed = &recursive_fix_sethandler($conf, $conf);
+	if ($fixed) {
+		&flush_file_lines();
+		}
+
 	# Make sure suexec is installed, if enabled. Also check home path.
 	local $err = &check_suexec_install($tmpl);
 	if ($err) {
@@ -14967,6 +14974,31 @@ $config{'disable'} =~ s/user/unix/g;	# changed since last release
 &write_file("$module_config_directory/last-config", \%config);
 
 return undef;
+}
+
+# recursive_fix_sethandler(&directive, &config)
+# Remove any global SetHandler lines that would run PHP in mod_php mode
+sub recursive_fix_sethandler
+{
+my ($dirs, $conf) = @_;
+my $rv = 0;
+my @sh = &apache::find_directive("SetHandler", $dirs);
+my @newsh;
+foreach my $sh (@sh) {
+	if ($sh !~ /^application\/x-httpd-php/) {
+		push(@newsh, @sh);
+		}
+	}
+if (@sh != @newsh) {
+	$rv += @sh - @newsh;
+	&apache::save_directive("SetHandler", \@newsh, $dirs, $conf);
+	}
+foreach my $m (@$dirs) {
+	if ($m->{'type'} && $m->{'name'} ne 'VirtualHost') {
+		$rv += &recursive_fix_sethandler($m->{'members'}, $conf);
+		}
+	}
+return $rv;
 }
 
 # need_update_webmin_users_post_config(&oldconfig)
