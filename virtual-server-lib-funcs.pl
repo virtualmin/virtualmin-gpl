@@ -5517,23 +5517,26 @@ local ($name, $value, $fs, $dis) = @_;
 local $bsize = &quota_bsize($fs);
 if ($bsize) {
 	# Allow units selection
+	my $opt_nobin = $gconfig{'nicesizenobinary'} eq '1';
+	my $unit = $opt_nobin ? 1024 : 1024;
+	my $utext = $opt_nobin ? undef : "i";
 	local $sz = $value*$bsize;
 	local $units = 1;
 	if ($value eq "") {
 		# Default to MB, since bytes are rarely useful
-		$units = 1024*1024;
+		$units = $unit*$unit;
 		}
-	elsif ($sz >= 1024*1024*1024*1024) {
-		$units = 1024*1024*1024*1024;
+	elsif ($sz >= $unit*$unit*$unit*$unit) {
+		$units = $unit*$unit*$unit*$unit;
 		}
-	elsif ($sz >= 1024*1024*1024) {
-		$units = 1024*1024*1024;
+	elsif ($sz >= $unit*$unit*$unit) {
+		$units = $unit*$unit*$unit;
 		}
-	elsif ($sz >= 1024*1024) {
-		$units = 1024*1024;
+	elsif ($sz >= $unit*$unit) {
+		$units = $unit*$unit;
 		}
-	elsif ($sz >= 1024) {
-		$units = 1024;
+	elsif ($sz >= $unit) {
+		$units = $unit;
 		}
 	else {
 		$units = 1;
@@ -5542,11 +5545,12 @@ if ($bsize) {
 	$sz =~ s/\.00$//;
 	return &ui_textbox($name, $sz, 8, $dis)." ".
 	       &ui_select($name."_units", $units,
-			 [ [ 1, "bytes" ],
-			   [ 1024, "kB" ],
-			   [ 1024*1024, "MB" ],
-			   [ 1024*1024*1024, "GB" ],
-			   [ 1024*1024*1024*1024, "TB" ] ],
+			 [ [ 1, $text{"nice_size_b"} ],
+			   [ $unit, $text{"nice_size_k${utext}B"} ],
+			   [ $unit*$unit, $text{"nice_size_M${utext}B"} ],
+			   [ $unit*$unit*$unit, $text{"nice_size_G${utext}B"} ],
+			   [ $unit*$unit*$unit*$unit, $text{"nice_size_T${utext}B"} ],
+			   [ $unit*$unit*$unit*$unit*$unit, $text{"nice_size_P${utext}B"} ] ],
 			 1, 0, 0, $_[3]);
 	}
 else {
@@ -8513,32 +8517,35 @@ if (!$nounlimited) {
 		}
 	}
 local ($val, $u);
+my $opt_nobin = $gconfig{'nicesizenobinary'} eq '1';
+my $unit = $opt_nobin ? 1024 : 1024;
+my $utext = $opt_nobin ? undef : "i";
 if ($value eq "") {
 	# Default to GB, since bytes are rarely useful
-	$u = "GB";
+	$u = $text{"nice_size_G${utext}B"};
 	}
-elsif ($value && $value%(1024*1024*1024*1024) == 0) {
-	$val = $value/(1024*1024*1024*1024);
-	$u = "TB";
+elsif ($value && $value%($unit*$unit*$unit*$unit) == 0) {
+	$val = $value/($unit*$unit*$unit*$unit);
+	$u = $text{"nice_size_T${utext}B"};
 	}
-elsif ($value && $value%(1024*1024*1024) == 0) {
-	$val = $value/(1024*1024*1024);
-	$u = "GB";
+elsif ($value && $value%($unit*$unit*$unit) == 0) {
+	$val = $value/($unit*$unit*$unit);
+	$u = $text{"nice_size_G${utext}B"};
 	}
-elsif ($value && $value%(1024*1024) == 0) {
-	$val = $value/(1024*1024);
-	$u = "MB";
+elsif ($value && $value%($unit*$unit) == 0) {
+	$val = $value/($unit*$unit);
+	$u = $text{"nice_size_M${utext}B"};
 	}
-elsif ($value && $value%(1024) == 0) {
-	$val = $value/(1024);
-	$u = "kB";
+elsif ($value && $value%($unit) == 0) {
+	$val = $value/($unit);
+	$u = $text{"nice_size_k${utext}B"};
 	}
 else {
 	$val = $value;
-	$u = "bytes";
+	$u = $text{"nice_size_b"};
 	}
 local $sel = &ui_select($name."_units", $u,
-		[ ["bytes"], ["kB"], ["MB"], ["GB"], ["TB"] ], 1, 0, 0, $dis);
+		[ [$text{"nice_size_b"}], [$text{"nice_size_k${utext}B"}], [$text{"nice_size_M${utext}B"}], [$text{"nice_size_G${utext}B"}], [$text{"nice_size_T${utext}B"}] ], 1, 0, 0, $dis);
 $rv .= &text('edit_bwpast_'.$config{'bw_past'},
 	     &ui_textbox($name, $val, 10, $dis)." ".$sel,
 	     $config{'bw_period'});
@@ -8552,11 +8559,14 @@ if ($in{"$_[0]_def"} && !$_[2]) {
 	return undef;
 	}
 else {
+	my $opt_nobin = $gconfig{'nicesizenobinary'} eq '1';
+	my $unit = $opt_nobin ? 1024 : 1024;
+	my $utext = $opt_nobin ? undef : "i";
 	$in{$_[0]} =~ /^\d+$/ && $in{$_[0]} > 0 || &error($_[1]);
-	local $m = $in{"$_[0]_units"} eq "TB" ? 1024*1024*1024*1024 :
-		   $in{"$_[0]_units"} eq "GB" ? 1024*1024*1024 :
-		   $in{"$_[0]_units"} eq "MB" ? 1024*1024 :
-		   $in{"$_[0]_units"} eq "kB" ? 1024 : 1;
+	local $m = $in{"$_[0]_units"} eq $text{"nice_size_T${utext}B"} ? $unit*$unit*$unit*$unit :
+		   $in{"$_[0]_units"} eq $text{"nice_size_G${utext}B"} ? $unit*$unit*$unit :
+		   $in{"$_[0]_units"} eq $text{"nice_size_M${utext}B"} ? $unit*$unit :
+		   $in{"$_[0]_units"} eq $text{"nice_size_k${utext}B"} ? $unit : 1;
 	return $in{$_[0]} * $m;
 	}
 }
