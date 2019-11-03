@@ -188,8 +188,6 @@ while(@ARGV > 0) {
 		$sharedip = shift(@ARGV);
 		$virt = 0;
 		$name = 1;
-		&indexof($sharedip, &list_shared_ips()) >= 0 ||
-		    &usage("$sharedip is not in the shared IP addresses list");
 		}
 	elsif ($a eq "--parent-ip") {
 		$parentip = 1;
@@ -389,6 +387,15 @@ $plan = $planid ne '' ? &get_plan($planid) : &get_default_plan();
 $plan || &usage("Plan does not exist");
 $defip = &get_default_ip($resel);
 $defip6 = &get_default_ip6($resel);
+if ($sharedip) {
+	if ($sharedip eq $defip) {
+		$sharedip = undef;
+		}
+	else {
+		&indexof($sharedip, &list_shared_ips()) >= 0 ||
+		    &usage("$sharedip is not in the shared IP addresses list");
+		}
+	}
 
 if ($ip eq "allocate") {
 	# Allocate IP now
