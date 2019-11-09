@@ -1788,6 +1788,7 @@ else {
 # Re-names this domain in named.conf to remove the .disabled suffix
 sub enable_dns
 {
+local ($d) = @_;
 if ($d->{'provision_dns'}) {
 	# Unlock on provisioning server
 	&$first_print($text{'enable_bind_provision'});
