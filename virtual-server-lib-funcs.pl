@@ -7068,7 +7068,7 @@ else {
 	$reseller = $user;
 	}
 
-if ($reseller) {
+if ($reseller && defined(&get_reseller_domains)) {
 	# Either this user is owned by a reseller, or he is a reseller.
 	local @rdoms = &get_reseller_domains($reseller);
 	local %racl = &get_reseller_acl($reseller);
