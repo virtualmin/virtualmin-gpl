@@ -1876,6 +1876,9 @@ my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 my $port = &get_php_fpm_socket_port($d);
+if ($port =~ /^\d+$/) {
+	$port = "localhost:".$port;
+	}
 &lock_file($file);
 if (-r $file) {
 	# Fix up existing one, in case user or group changed
