@@ -2169,7 +2169,8 @@ else {
 				$d->{'dom'}, $d->{'web_port'});
 	}
 return @rv if (!$defvirt);
-foreach my $full ("www.".$d->{'dom'}, "mail.".$d->{'dom'},
+foreach my $full ("www.".$d->{'dom'},
+		  ($d->{'mail'} ? ("mail.".$d->{'dom'}) : ()),
 		  &get_autoconfig_hostname($d)) {
 	my $virt;
 	if ($p eq "web") {
@@ -2397,6 +2398,36 @@ if ($chain) {
 
 # Create the combined cert file
 &sync_combined_ssl_cert($d);
+
+# If the domain has DNS, setup a CAA record
+&update_caa_record($d);
+}
+
+# update_caa_record(&domain)
+# Update the CAA record for Let's Encrypt if needed
+sub update_caa_record
+{
+local ($d) = @_;
+return undef if (!$d->{'dns'});
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
+local $info = &cert_info($d);
+local $lets = $info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ? 1 : 0;
+if (!$caa && $lets) {
+	# Need to add a Let's Encrypt record
+	&pre_records_change($d);
+	&bind8::create_record($file, "@", undef, "IN",
+		      "CAA", join(" ", "0", "issuewild", "letsencrypt.org"));
+	&post_records_change($d, $recs, $file);
+	&reload_bind_records($d);
+	}
+elsif ($caa && $caa->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
+	# Need to remove the record
+	&pre_records_change($d);
+	&bind8::delete_record($file, $caa);
+	&post_records_change($d, $recs, $file);
+	&reload_bind_records($d);
+	}
 }
 
 # sync_combined_ssl_cert(&domain)
