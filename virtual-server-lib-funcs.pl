@@ -14198,6 +14198,27 @@ if (&domain_has_website()) {
 			&$second_print(&text('check_webphpverfixed',
 					     scalar(@fpmfixed)));
 			}
+
+		# Fix numeric ports for any Virtualmin domains
+		foreach my $conf (@okfpms) {
+			my @pools = &list_php_fpm_pools($conf);
+			my $changed = 0;
+			foreach my $p (@pools) {
+				my $t = get_php_fpm_pool_config_value(
+					$conf, $p, "listen");
+				if ($t =~ /^\d+$/) {
+					$t = "localhost:".$t;
+					&save_php_fpm_pool_config_value(
+					    $conf, $p, "listen", $t);
+					$changed++;
+					}
+				}
+			if ($changed) {
+				&$second_print(&text('check_webphplocalfixed',
+					     $changed, $conf->{'version'}));
+				&restart_php_fpm_server($conf);
+				}
+			}
 		}
 
 	# Check if any new PHP versions have shown up, and re-generate their
