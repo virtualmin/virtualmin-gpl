@@ -14,7 +14,7 @@ if (&domain_has_website($d)) {
 	if ($mode eq "fpm") {
 		my $port = &get_php_fpm_config_value($d, "listen");
 		if ($port =~ /^([a-zA-Z0-9\-\.\_]+:)?(\d+)$/) {
-			push(@rv, { 'lport' => $1,
+			push(@rv, { 'lport' => $2,
 				    'type' => 'fpm' });
 			}
 		}
