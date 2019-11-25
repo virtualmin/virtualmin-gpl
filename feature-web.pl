@@ -996,11 +996,18 @@ else {
 		}
 
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
-	my $ip6addr = &to_ip6address("www.".$d->{'dom'}) ||
-		      &to_ip6address($d->{'dom'});
+	my $ip6addr;
+	my $ip6name;
+	foreach my $try ("www.".$d->{'dom'}, $d->{'dom'}) {
+		$ip6addr = &to_ipaddress($try);
+		if ($ip6addr) {
+			$ip6name = $try;
+			last;
+			}
+		}
 	if ($ip6addr) {
 		if (!$d->{'ip6'}) {
-			return &text('validate_ewebipv6', $ip6addr);
+			return &text('validate_ewebipv6', $ip6addr, $ip6name);
 			}
 		local $ipp = "[".$d->{'ip6'}."]:".$d->{'web_port'};
 		if (&indexof($ipp, @{$virt->{'words'}}) < 0 &&
