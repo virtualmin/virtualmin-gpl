@@ -1117,7 +1117,7 @@ local ($d, $file, $opts) = @_;
 &require_acl();
 
 # Write out .acl files for domain owner and extra admins, if they are in 
-# MySQL or LDAP
+# MySQL or LDAP, and if the .acl files don't already exist
 my ($wuser) = &acl::get_user($d->{'user'});
 my @nonlocal;
 push(@nonlocal, $wuser) if ($wuser && $wuser->{'proto'});
@@ -1131,8 +1131,10 @@ foreach my $u (@nonlocal) {
 		my %acl = &get_module_acl($u->{'name'}, $m, 0, 1);
 		if (%acl) {
 			my $acltemp = "$config_directory/$m/$u->{'name'}.acl";
-			&write_file($acltemp, \%acl);
-			push(@acltemp, $acltemp);
+			if (!-r $acltemp) {
+				&write_file($acltemp, \%acl);
+				push(@acltemp, $acltemp);
+				}
 			}
 		}
 	}
