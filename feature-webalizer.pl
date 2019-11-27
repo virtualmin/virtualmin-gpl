@@ -290,23 +290,24 @@ if ($_[0]->{'stats_pass'}) {
 # Delete the Webalizer config files and Cron job
 sub delete_webalizer
 {
+local ($d) = @_;
 &$first_print($text{'delete_webalizer'});
-&obtain_lock_webalizer($_[0]);
-&obtain_lock_cron($_[0]);
+&obtain_lock_webalizer($d);
+&obtain_lock_cron($d);
 &require_webalizer();
-local $stats = &webalizer_stats_dir($_[0]);
-local $alog = &get_website_log($_[0]);
-if (!$alog && -r "$_[0]->{'home'}/logs/access_log") {
+local $stats = &webalizer_stats_dir($d);
+local $alog = &get_website_log($d);
+if (!$alog) {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.
-	$alog = &get_apache_template_log($_[0]);
+	$alog = &get_apache_template_log($d);
 	}
 if (!$alog) {
 	&$second_print($text{'delete_webalizerno'});
 	return;
 	}
 
-if ($_[0]->{'deleting'}) {
+if ($d->{'deleting'}) {
 	# Delete config files
 	local $lfile = &webalizer::log_config_name($alog);
 	unlink($lfile);
@@ -321,8 +322,8 @@ local ($job) = grep { $_->{'command'} eq "$webalizer::cron_cmd $alog" }
 if ($job) {
 	&cron::delete_cron_job($job);
         }
-&release_lock_webalizer($_[0]);
-&release_lock_cron($_[0]);
+&release_lock_webalizer($d);
+&release_lock_cron($d);
 
 # Remove from list of protected dirs
 &foreign_require("htaccess-htpasswd");
