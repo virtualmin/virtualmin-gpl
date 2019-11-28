@@ -232,7 +232,7 @@ foreach $line (@lines) {
 			}
 		else {
 			# Check supplied username
-			if ($user =~ /^[^\t :]+$/) {
+			if ($user !~ /^[^\t :]+$/) {
 				&line_error($text{'setup_euser2'});
 				next;
 				}
