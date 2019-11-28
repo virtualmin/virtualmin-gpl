@@ -344,17 +344,19 @@ print &ui_tabs_end_tab();
 
 # Let's encrypt tab
 &foreign_require("webmin");
-if (!defined(&webmin::check_letsencrypt)) {
-	$err = $text{'cert_ewebminver'};
-	}
-else {
-	$err = &webmin::check_letsencrypt();
-	}
+$err = &webmin::check_letsencrypt();
 print &ui_tabs_start_tab("mode", "lets");
 print "$text{'cert_desc8'}<p>\n";
 
 if ($err) {
 	print &text('cert_elets', $err),"<p>\n";
+	if (&master_admin() &&
+	    defined(&webmin::get_letsencrypt_install_message)) {
+		my $msg = &webmin::get_letsencrypt_install_message(
+			"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
+			$text{'cert_title'});
+		print $msg,"<p>\n";
+		}
 	}
 else {
 	$phd = &public_html_dir($d);
