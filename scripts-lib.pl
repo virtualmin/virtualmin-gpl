@@ -1071,7 +1071,7 @@ foreach my $m (@mods) {
 			unshift(@poss, "rh-php".$nodotphpver."-php-".$m);
 			if ($m eq "mysql") {
 				unshift(@poss, "rh-php".$nodotphpver.
-					       "-php-".$m."nd");
+					       "-php-mysqlnd");
 				}
 			}
 		elsif ($software::update_system eq "yum" &&
