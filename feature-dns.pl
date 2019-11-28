@@ -217,8 +217,7 @@ elsif (!$dnsparent) {
 		}
 	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
 	&flush_file_lines();
-	unlink($bind8::zone_names_cache);
-	undef(@bind8::list_zone_names_cache);
+	&bind8::flush_zones_names();
 	undef(@bind8::get_config_cache);
 
 	# Work out if can copy from alias target - not possible if target
