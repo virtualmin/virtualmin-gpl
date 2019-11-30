@@ -13479,6 +13479,9 @@ elsif ($home) {
 	&change_home_directory($d, $home);
 	}
 if ($group) {
+	if ($d->{'ugroup'} eq $d->{'group'}) {
+		$d->{'ugroup'} = $group;
+		}
 	$d->{'group'} = $group;
 	$d->{'prefix'} = $prefix;
 	}
