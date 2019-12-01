@@ -245,6 +245,7 @@ index_themeswitchnot=Don't Ask Me Again
 index_certwarn=SSL Certificate Warning
 index_certexpired=Some virtual servers' SSL certificates have expired : $1
 index_certnearly=Some virtual servers' SSL certificates are about to expire : $1
+index_certlets=Let's Encrypt certification renewal is enabled for $1 virtual servers, but the required package is not installed : $2
 
 form_title=Create Virtual Server
 form_title2=Create Virtual Sub-Server

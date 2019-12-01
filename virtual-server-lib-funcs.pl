@@ -10945,6 +10945,27 @@ if (@expired || @nearly) {
 	push(@rv, $cert_text);
 	}
 
+# Check if certbot is needed for let's encrypt renewal
+my @letsdoms;
+foreach my $d (&list_domains()) {
+	next if (!&domain_has_ssl($d));
+	local $info = &cert_info($d);
+	next if ($info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
+	push(@letsdoms, $d);
+	}
+if (@letsdoms) {
+	&foreign_require("webmin");
+	my $err = &webmin::check_letsencrypt();
+	if ($err) {
+		my $msg = &text('index_certlets', scalar(@letsdoms), $err);
+		if (defined(&webmin::get_letsencrypt_install_message)) {
+			$msg .= "<p>".&webmin::get_letsencrypt_install_message(
+				"/", $text{'index_title'});
+			}
+		push(@rv, $msg);
+		}
+	}
+
 return @rv;
 }
 
