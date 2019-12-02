@@ -1922,9 +1922,7 @@ else {
 		}
 	}
 &unlock_file($cfile);
-if ($changed) {
-	&dovecot::apply_configuration();
-	}
+&dovecot::apply_configuration();
 }
 
 # get_dovecot_ssl_cert(&domain)
