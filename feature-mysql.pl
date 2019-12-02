@@ -917,20 +917,19 @@ else {
 	local $user = &mysql_user($d);
 	if (&mysql_user_exists($d)) {
 		local $efunc = sub {
-			if ($d->{'disabled_oldmysql'}) {
+			local $pass = &mysql_pass($d);
+			if ($pass) {
+				# Need to re-set plaintext password
+				&execute_password_change_sql(
+					$d, $user, undef,
+					0, 0, &mysql_pass($d));
+				}
+			else {
 				# Can put back old hashed password
 				local $qpass = &mysql_escape(
 					$d->{'disabled_oldmysql'});
 				&execute_password_change_sql(
-					$d, $user, "'$qpass'",
-					0, 0, &mysql_pass($d));
-				}
-			else {
-				# Need to re-set encrypted password
-				local $pass = &mysql_pass($d);
-				&execute_password_change_sql(
-					$d, $user, undef,
-					0, 0, &mysql_pass($d));
+					$d, $user, "'$qpass'");
 				}
 			};
 		&execute_for_all_mysql_servers($efunc);
@@ -2889,9 +2888,9 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 		return ("alter user '$user'\@'$host' identified by ".
 			($plainpass ? "'".&mysql_escape($plainpass)."'"
 				    : $encpass));
-	}
+		}
 	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
-	    $plainpass) {
+	       $plainpass) {
 		# Use the plaintext password wherever possible
 		$sql = "set password for '$user'\@'$host' = '".
 		       &mysql_escape($plainpass)."'";
