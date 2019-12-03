@@ -1704,7 +1704,9 @@ if ($php_fpm_config_cache) {
 	}
 
 # What version packages are installed?
+return ( ) if (!&foreign_installed("software"));
 &foreign_require("software");
+return ( ) if (!defined(&software::package_info));
 my @rv;
 my %donever;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
