@@ -217,7 +217,7 @@ elsif (!$dnsparent) {
 		}
 	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
 	&flush_file_lines();
-	&bind8::flush_zone_names();
+	&bind8::flush_zones_names();
 	undef(@bind8::get_config_cache);
 
 	# Work out if can copy from alias target - not possible if target
@@ -245,33 +245,6 @@ elsif (!$dnsparent) {
 		&create_standard_records($file, $d, $ip);
 		}
 	&bind8::set_ownership($rootfile);
-
-	# If parent DNS domain exists, add NS records to it
-	my $supername = $d->{'dom'};
-	$supername =~ s/^[^\.]+\.//;
-	my $sd = &get_domain_by("dom", $supername);
-	if ($sd && $sd->{'dns'}) {
-		&obtain_lock_dns($sd);
-		my ($srecs, $sfile) = &get_domain_dns_records_and_file($sd);
-		my ($recs, $file) = &get_domain_dns_records_and_file($d);
-		my %already;
-		foreach my $r (@$srecs) {
-			$already{$r->{'name'},$r->{'type'}}++;
-			}
-		foreach my $r (@$recs) {
-			if ($r->{'type'} eq 'NS' &&
-			    ($r->{'name'} eq $d->{'dom'}.'.' ||
-			     $r->{'name'} eq '@') &&
-			    !$already{$r->{'name'},$r->{'type'}}) {
-				my $str = &join_record_values($r);
-				&bind8::create_record($sfile, $d->{'dom'}.".",
-					$r->{'ttl'}, 'IN', $r->{'type'}, $str);
-				}
-			}
-		&post_records_change($sd, $srecs, $sfile);
-		&release_lock_dns($sd);
-		}
-
 	&$second_print($text{'setup_done'});
 
 	# If DNSSEC was requested, set it up
@@ -3646,6 +3619,14 @@ if ($parent && ref($dsrecs)) {
 				$ds->{'class'}, $ds->{'type'},
 				&join_record_values($ds, 1));
 			}
+		}
+	if (!$already{$d->{'dom'}.".","NS"}) {
+		# Also need to add an NS record, or else signing will fail
+		my $tmpl = &get_template($d->{'template'});
+		my $master = &get_master_nameserver($tmpl, $d);
+		&bind8::create_record(
+			$pfile, $d->{'dom'}.".", undef,
+			"IN", "NS", $master);
 		}
 	&post_records_change($parent, $precs, $pfile);
 	&release_lock_dns($parent);
