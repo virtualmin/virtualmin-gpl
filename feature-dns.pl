@@ -3603,7 +3603,8 @@ my $pname = $d->{'dom'};
 $pname =~ s/^([^\.]+)\.//;
 my $parent = &get_domain_by("dom", $pname);
 my $dsrecs = &get_domain_dnssec_ds_records($d);
-if ($parent && ref($dsrecs)) {
+$dsrecs = [ ] if (!ref($dsrecs));
+if ($parent) {
 	# Parent exists, and we have records to add
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
@@ -3644,7 +3645,8 @@ my $pname = $d->{'dom'};
 $pname =~ s/^([^\.]+)\.//;
 my $parent = &get_domain_by("dom", $pname);
 my $dsrecs = &get_domain_dnssec_ds_records($d);
-if ($parent && ref($dsrecs)) {
+$dsrecs = [ ] if (!ref($dsrecs));
+if ($parent) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
