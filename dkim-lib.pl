@@ -318,6 +318,7 @@ if ($rv{'keyfile'} && -r $rv{'keyfile'}) {
 	$rv{'size'} = &get_key_size($rv{'keyfile'});
 	}
 
+$rv{'enabled'} = 0 if (!$rv{'selector'});
 return \%rv;
 }
 
