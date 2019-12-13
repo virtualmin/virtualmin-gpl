@@ -87,7 +87,7 @@ else {
 	$main::list_domains_cache_time = $st[9];
 	}
 foreach $d (@files) {
-	if ($d !~ /^\./ && $d !~ /\.(lock|bak|rpmsave|sav|swp|webmintmp|~)$/i) {
+	if ($d !~ /^\./ && $d !~ /\.(lock|bak|back|backup|rpmsave|sav|swp|webmintmp|~)$/i) {
 		push(@rv, &get_domain($d));
 		}
 	}
