@@ -3140,6 +3140,18 @@ foreach my $k (keys %mconfig) {
 	}
 &save_module_config(\%mconfig, $mm->{'minfo'}->{'dir'});
 
+# Create the clone description
+my %myinfo = &get_module_info('mysql');
+my $defdesc = $mm->{'config'}->{'host'} ? 
+		"MySQL Server on ".$mm->{'config'}->{'host'} :
+	      $mm->{'config'}->{'port'} ?
+		"MySQL Server on port ".$mm->{'config'}->{'host'} :
+	      $mm->{'config'}->{'sock'} ?
+		"MySQL Server via ".$mm->{'config'}->{'host'} :
+		"MySQL Server on local";
+my %cdesc = ( 'desc' => $mm->{'minfo'}->{'desc'} || $defdesc );
+&write_file("$config_directory/$mm->{'minfo'}->{'dir'}/clone", \%cdesc);
+
 # Grant access to the current (root) user
 my %acl;
 &read_acl(undef, \%acl);
