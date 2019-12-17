@@ -7906,14 +7906,16 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 # Attempt to request a let's encrypt cert. This has to be done after the
 # initial setup and when Apache has been restarted, so that it can serve the
 # new website.
-$dom->{'auto_letsencrypt'} ||= $config{'auto_letsencrypt'};
+if (!defined($dom->{'auto_letsencrypt'})) {
+	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
+	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'}) {
 	&create_initial_letsencrypt_cert($dom);
 	}
 
-# For a new alias domain, if the target has a Let's Encrypt cert for all possible
-# hostnames, re-request it to include the alias
+# For a new alias domain, if the target has a Let's Encrypt cert for all
+# possible hostnames, re-request it to include the alias
 if ($dom->{'alias'} && &domain_has_website($dom)) {
 	local $target = &get_domain($dom->{'alias'});
 	local $tinfo;
