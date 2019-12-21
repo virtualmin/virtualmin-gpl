@@ -999,7 +999,7 @@ else {
 	my $ip6addr;
 	my $ip6name;
 	foreach my $try ("www.".$d->{'dom'}, $d->{'dom'}) {
-		$ip6addr = &to_ipaddress($try);
+		$ip6addr = &to_ip6address($try);
 		if ($ip6addr) {
 			$ip6name = $try;
 			last;
