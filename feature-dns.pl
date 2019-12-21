@@ -3605,7 +3605,6 @@ my $parent = &get_domain_by("dom", $pname);
 my $dsrecs = &get_domain_dnssec_ds_records($d);
 $dsrecs = [ ] if (!ref($dsrecs));
 if ($parent) {
-	# Parent exists, and we have records to add
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
@@ -3621,7 +3620,7 @@ if ($parent) {
 				&join_record_values($ds, 1));
 			}
 		}
-	if (!$already{$d->{'dom'}.".","NS"}) {
+	if (!$already{$d->{'dom'}.".","NS"} && !$d->{'dns_submode'}) {
 		# Also need to add an NS record, or else signing will fail
 		my $tmpl = &get_template($d->{'template'});
 		my $master = &get_master_nameserver($tmpl, $d);
