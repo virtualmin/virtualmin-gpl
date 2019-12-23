@@ -1566,7 +1566,7 @@ $migrate_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Username: apservice',
 		      'Features: unix dir dns mail web webalizer',
-		      'Server quota:\s+30\s+MB' ],
+		      'Server quota:\s+30\s+Mi?B' ],
 	  'migrate' => 'ensim',
 	},
 
@@ -6394,7 +6394,7 @@ $bw_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => 'Bandwidth usage: 7(\\.[0-9]+)?\s+MB',
+	  'grep' => 'Bandwidth usage: 7(\\.[0-9]+)?\s+Mi?B',
 	},
 
 	# Create a sub-server
@@ -6429,7 +6429,7 @@ $bw_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'domain', $test_bw_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => 'Bandwidth usage: 12(\\.[0-9]+)?\s+MB',
+	  'grep' => 'Bandwidth usage: 12(\\.[0-9]+)?\s+Mi?B',
 	},
 
 	# Check separate usage in parent domain
