@@ -13790,6 +13790,16 @@ if ($config{'dns'}) {
 		&foreign_installed("bind8", 1) == 2 ||
 			return &text('index_ebind', "/bind8/", $clink);
 
+		# Validate BIND config
+		&require_bind();
+		if (&bind8::supports_check_conf()) {
+			my @errs = &bind8::check_bind_config();
+			if (@errs) {
+				return &text('index_ebinderrs',
+					     join(", ", @errs));
+				}
+			}
+
 		# Check that primary NS hostname is reasonable
 		&require_bind();
 		local $tmpl = &get_template(0);
