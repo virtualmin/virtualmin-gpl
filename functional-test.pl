@@ -1186,6 +1186,28 @@ $script_tests = [
 		      @create_args, ],
         },
 
+	# Install SugarCRM
+	{ 'command' => 'install-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'sugarcrm' ],
+		      [ 'path', '/' ],
+		      [ 'db', 'mysql '.$test_domain_db ],
+		      [ 'opt', 'demo 1' ],
+		      [ 'version', 'latest' ] ],
+	  'timeout' => 300,
+	},
+
+	# Check that it works
+	{ 'command' => $wget_command.'http://'.$test_domain.'/',
+	  'grep' => 'SugarCRM|modules/Users/login.css',
+	},
+
+	# Un-install
+	{ 'command' => 'delete-script.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'sugarcrm' ] ],
+	},
+
 	# Upgrade PHP version on the domain if possible
 	{ 'command' => 'set-php-directory.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -1275,28 +1297,6 @@ $script_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
 	  'antigrep' => '^'.$test_domain_db.'_wp',
-	},
-
-	# Install SugarCRM
-	{ 'command' => 'install-script.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'sugarcrm' ],
-		      [ 'path', '/' ],
-		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'opt', 'demo 1' ],
-		      [ 'version', 'latest' ] ],
-	  'timeout' => 300,
-	},
-
-	# Check that it works
-	{ 'command' => $wget_command.'http://'.$test_domain.'/',
-	  'grep' => 'SugarCRM|modules/Users/login.css',
-	},
-
-	# Un-install
-	{ 'command' => 'delete-script.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'type', 'sugarcrm' ] ],
 	},
 
 	# Cleanup the domain
