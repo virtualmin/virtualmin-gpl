@@ -3793,15 +3793,12 @@ if ($d->{'ssl'}) {
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	my $cfile = $svc->{'cert'};
 	my $chain = $svc->{'ca'};
-	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
-		$svc->{'prefix'}.'.'.$d->{'dom'}));
-	push(@need, &create_tlsa_dns_record($cfile, $chain, $svc->{'port'},
-		$d->{'dom'}));
-	if ($svc->{'port'} == 587) {
-		# Also add one for port 25 for STARTTLS
-		push(@need, &create_tlsa_dns_record($cfile, $chain, 25,
+	my @ports = ( $svc->{'port'} );
+	push(@ports, @{$svc->{'sslports'}}) if ($svc->{'sslports'});
+	foreach my $p (@ports) {
+		push(@need, &create_tlsa_dns_record($cfile, $chain, $p,
 			$svc->{'prefix'}.'.'.$d->{'dom'}));
-		push(@need, &create_tlsa_dns_record($cfile, $chain, 25,
+		push(@need, &create_tlsa_dns_record($cfile, $chain, $p,
 			$d->{'dom'}));
 		}
 	}

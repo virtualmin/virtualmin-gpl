@@ -100,6 +100,7 @@ if (&foreign_installed("dovecot")) {
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 993,
+			      'sslports' => [ 995 ],
 			      'ip' => $ip,
 			      'dom' => $dom, });
 		}
@@ -123,6 +124,7 @@ if ($config{'mail_system'} == 0) {
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 587,
+			      'sslports' => [ 25 ],
 			      'ip' => $ip, });
 		}
 	}
