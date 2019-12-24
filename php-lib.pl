@@ -859,7 +859,7 @@ if ($mode eq "fpm") {
 			}
 		$cmd ||= &has_command("php");
 		if ($cmd) {
-			push(@rv, [ $ver, $cmd ]);
+			push(@rv, [ $ver, $cmd, ["fpm"] ]);
 			}
 		}
 	return @rv;
@@ -872,7 +872,7 @@ if ($d) {
 		if ($v) {
 			my $cmd = &has_command("php$v") ||
 				  &has_command("php");
-			return ([ $v, $cmd ]);
+			return ([ $v, $cmd, ["mod_php"] ]);
 			}
 		else {
 			return ( );
@@ -917,13 +917,14 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 	}
 
 # Return results as list
-my @rv = map { [ $_, $vercmds{$_} ] } sort { $a <=> $b } (keys %vercmds);
+my @rv = map { [ $_, $vercmds{$_}, ["cgi", "fcgid"] ] }
+	     sort { $a <=> $b } (keys %vercmds);
 
 # If no domain is given, included mod_php versions if active
 if (!$d) {
 	my $v = &get_apache_mod_php_version();
 	if ($v) {
-		push(@rv, [ $v, undef ]);
+		push(@rv, [ $v, undef, ["mod_php"] ]);
 		}
 	}
 return @rv;

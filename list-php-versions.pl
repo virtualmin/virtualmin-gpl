@@ -53,7 +53,12 @@ elsif ($multiline) {
 	# Show full details
 	foreach $s (@vers) {
 		print $s->[0],"\n";
-		print "    Command: $s->[1]\n";
+		if ($s->[1]) {
+			print "    Command: $s->[1]\n";
+			}
+		if ($s->[2]) {
+			print "    PHP modes: ",join(" ", @{$s->[2]}),"\n";
+			}
 		$fpm = &get_php_fpm_config($s->[0]);
 		print "    FPM support: ",($fpm ? "Yes" : "No"),"\n";
 		$fv = &get_php_version($s->[0]);
