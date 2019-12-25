@@ -1334,6 +1334,9 @@ else {
 		}
 	push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
 	}
+if ($tmpl->{'web_ssl'} ne 'none') {
+	push(@dirs, split(/\t+/, $tmpl->{'web_ssl'}));
+	}
 return @dirs;
 }
 

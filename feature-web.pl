@@ -2465,7 +2465,7 @@ sub show_template_web
 local ($tmpl) = @_;
 
 # Work out fields to disable
-local @webfields = ( "web", "suexec", "user_def",
+local @webfields = ( "web", "web_ssl", "suexec", "user_def",
 		     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
@@ -2478,6 +2478,7 @@ if (defined(&get_domain_ruby_mode)) {
 	push(@webfields, "web_ruby_suexec");
 	}
 
+# Apache directives
 local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
 			     0, undef, \@webfields);
 print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
@@ -2485,6 +2486,11 @@ print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
 	&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'web'})),
 		     10, 60));
+
+# Extra SSL directives
+print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
+	&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
+		     5, 60));
 
 # Input for adding suexec directives
 print &ui_table_row(&hlink($text{'newweb_suexec'}, "template_suexec"),
@@ -2694,6 +2700,8 @@ $tmpl->{'web'} = &parse_none_def("web");
 if ($in{"web_mode"} == 2) {
 	$err = &check_apache_directives($in{"web"});
 	&error($err) if ($err);
+	$in{'web_ssl'} =~ s/\r?\n/\t/g;
+	$tmpl->{'web_ssl'} = $in{'web_ssl'};
 	$tmpl->{'web_suexec'} = $in{'suexec'};
 	if (defined($in{'writelogs'})) {
 		$tmpl->{'web_writelogs'} = $in{'writelogs'};

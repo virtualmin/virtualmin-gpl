@@ -8743,6 +8743,7 @@ push(@rv, { 'id' => 0,
 	    'standard' => 1,
 	    'default' => 1,
 	    'web' => $config{'apache_config'},
+	    'web_ssl' => $config{'apache_ssl_config'},
 	    'web_suexec' => $config{'suexec'},
 	    'web_writelogs' => $config{'web_writelogs'},
 	    'web_user' => $config{'web_user'},
@@ -9034,6 +9035,7 @@ if ($tmpl->{'id'} == 0) {
 		$config{'tmpl_owners'} = $tmpl->{'owners'};
 		}
 	$config{'apache_config'} = $tmpl->{'web'};
+	$config{'apache_ssl_config'} = $tmpl->{'web_ssl'};
 	$config{'suexec'} = $tmpl->{'web_suexec'};
 	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
 	$config{'web_user'} = $tmpl->{'web_user'};
