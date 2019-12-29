@@ -336,11 +336,11 @@ sub compute_emailto
 {
 local ($dom) = @_;
 local $parent;
-if ($dom->{'email'}) {
-	$dom->{'emailto'} = $dom->{'email'};
-	}
-elsif ($dom->{'parent'} && ($parent = &get_domain($dom->{'parent'}))) {
+if ($dom->{'parent'} && ($parent = &get_domain($dom->{'parent'}))) {
 	$dom->{'emailto'} = $parent->{'emailto'};
+	}
+elsif ($dom->{'email'}) {
+	$dom->{'emailto'} = $dom->{'email'};
 	}
 elsif ($dom->{'mail'}) {
 	$dom->{'emailto'} = $dom->{'user'}.'@'.$dom->{'dom'};
