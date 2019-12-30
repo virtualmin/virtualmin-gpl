@@ -5055,6 +5055,7 @@ spf_edsrecs=Failed to generate DS records : $1
 spf_dmarcenable=Creating DMARC record ..
 spf_dmarcdisable=Removing DMARC record ..
 spf_denabled=DMARC record enabled?
+spf_dnssec=DNSSEC signature enabled?
 spf_dp=DMARC policy for emails that fail SPF or DKIM
 spf_dpct=Percentage of messages to apply policy
 spf_delrecs=Deleting $1 DNS records ..

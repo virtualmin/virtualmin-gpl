@@ -70,6 +70,29 @@ else {
 	&save_domain_dmarc($d, undef);
 	}
 
+if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
+    !$d->{'provision_dns'} && defined($in{'dnssec'})) {
+	# Turn DNSSEC on or off
+	&pre_records_change($d);
+	my $key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	my $err;
+	my $changed = 0;
+	if ($key && !$in{'dnssec'}) {
+		$err = &disable_domain_dnssec($d);
+		$changed++;
+		}
+	elsif (!$key && $in{'dnssec'}) {
+		$err = &enable_domain_dnssec($d);
+		$changed++;
+		}
+	&error($err) if ($err);
+	if ($changed) {
+		($recs, $file) = &get_domain_dns_records_and_file($d);
+		&post_records_change($d, $recs, $file);
+		&reload_bind_records($d);
+		}
+	}
+
 &modify_dns($d, $oldd);
 &release_lock_dns($d);
 &save_domain($d);

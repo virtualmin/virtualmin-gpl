@@ -55,35 +55,39 @@ print &ui_table_row(&hlink($text{'spf_dp'}, 'spf_dp'),
 print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
 	&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
 
-print &ui_table_end();
-
-# DNSSEC key details
+# DNSSEC enabled
 &require_bind();
 if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
     !$d->{'provision_dns'}) {
 	$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-	if ($key) {
-		print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",
-					     2, "dnssec", 0, \@tds);
-		print &ui_table_row($text{'spf_public'},
-			&ui_textarea("keyline", $key->{'publictext'}, 2, 80,
-				     "off", 0, "readonly"));
-		print &ui_table_row($text{'spf_private'},
-			&ui_textarea("keyline", $key->{'privatetext'}, 10, 80,
-				     "off", 0, "readonly"));
-		$dsrecs = &get_domain_dnssec_ds_records($d);
-		if (ref($dsrecs)) {
-			$dsrecstext = &dns_records_to_text(@$dsrecs);
-			$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 10, 80,
-						  "off", 0, "readonly");
-			}
-		else {
-			$dsrecsbox = &text('spf_edsrecs', $dsrecs);
-			}
-		print &ui_table_row($text{'spf_dsrecs'},
-			$dsrecsbox);
-		print &ui_hidden_table_end();
+	print &ui_table_row(&hlink($text{'spf_dnssec'}, 'spf_dnssec'),
+			    &ui_yesno_radio("dnssec", $key ? 1 : 0));
+	}
+
+print &ui_table_end();
+
+# DNSSEC key details
+if ($key) {
+	print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",
+				     2, "dnssec", 0, \@tds);
+	print &ui_table_row($text{'spf_public'},
+		&ui_textarea("keyline", $key->{'publictext'}, 2, 80,
+			     "off", 0, "readonly"));
+	print &ui_table_row($text{'spf_private'},
+		&ui_textarea("keyline", $key->{'privatetext'}, 10, 80,
+			     "off", 0, "readonly"));
+	$dsrecs = &get_domain_dnssec_ds_records($d);
+	if (ref($dsrecs)) {
+		$dsrecstext = &dns_records_to_text(@$dsrecs);
+		$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 10, 80,
+					  "off", 0, "readonly");
 		}
+	else {
+		$dsrecsbox = &text('spf_edsrecs', $dsrecs);
+		}
+	print &ui_table_row($text{'spf_dsrecs'},
+		$dsrecsbox);
+	print &ui_hidden_table_end();
 	}
 
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
