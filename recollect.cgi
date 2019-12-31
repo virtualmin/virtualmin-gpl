@@ -14,7 +14,7 @@ if (&foreign_check("system-status")) {
 	}
 
 # Refresh Virtualmin-specific info
-$info = &collect_system_info();
+$info = &collect_system_info(1);
 if ($info) {
 	&save_collected_info($info);
 	}

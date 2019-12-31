@@ -1,9 +1,10 @@
 # Functions for collecting general system info
 
-# collect_system_info()
+# collect_system_info([manual-refesh])
 # Returns a hash reference containing system information
 sub collect_system_info
 {
+my ($manual) = @_;
 &foreign_require("system-status");
 local $info = &system_status::get_collected_info();
 
@@ -202,7 +203,7 @@ foreach my $d (@doms) {
 my $now = time();
 foreach my $d (@doms) {
 	next if (!$d->{'dns'});
-	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
+	next if ($d->{'whois_next'} && $now < $d->{'whois_next'} && !$manual);
 	my ($exp, $err) = &get_whois_expiry($d);
 	$d->{'whois_next'} = $now + 7*24*60*60 + int(rand(24*60*60));
 	$d->{'whois_last'} = $now;
