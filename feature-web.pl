@@ -52,7 +52,7 @@ if ($d->{'php_fpm_port'}) {
 	delete($d->{'php_fpm_port'});
 	}
 
-local @dirs = &apache_template($tmpl->{'web'}, $d, $tmpl->{'web_suexec'});
+local @dirs = &apache_template($tmpl->{'web'}, $d);
 if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host (and the SSL virtual host, if any)
 	local @ports = ( $alias->{'web_port'} );
@@ -1303,7 +1303,7 @@ sub get_apache_template_log
 {
 local ($dom, $error) = @_;
 local $tmpl = &get_template($dom->{'template'});
-local @dirs = &apache_template($tmpl->{'web'}, $dom, $tmpl->{'web_suexec'});
+local @dirs = &apache_template($tmpl->{'web'}, $dom);
 local $log;
 foreach my $l (@dirs) {
 	if ($error && $l =~ /^\s*ErrorLog\s+(\S+)/) {
@@ -1364,7 +1364,7 @@ sub get_apache_pid
 return &check_pid_file(&apache::get_pid_file());
 }
 
-# apache_template(text, &domain, suexec)
+# apache_template(text, &domain)
 # Returns a suitably substituted Apache template, as a list of directive
 # text lines
 sub apache_template
@@ -1380,7 +1380,7 @@ foreach (@dirs) {
 	}
 local $tmpl = &get_template($_[1]->{'template'});
 local $pdom = $_[1]->{'parent'} ? &get_domain($_[1]->{'parent'}) : $_[1];
-if (!$sudir && $_[2] && $pdom->{'unix'}) {
+if (!$sudir && $pdom->{'unix'}) {
 	# Automatically add suexec directives if missing
 	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
 		       "\"#$pdom->{'ugid'}\"");
@@ -1586,15 +1586,6 @@ if ($virt) {
 			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
 				$dstlref->[$i] = "SuexecUserGroup ".
 				  "\"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
-				}
-			}
-		}
-	if (!$tmpl->{'web_suexec'}) {
-		# Remove suexec directives if not supported on this server
-		foreach $i ($virt->{'line'} ..
-			    $virt->{'line'}+scalar(@$srclref)-1) {
-			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
-				splice(@$dstlref, $i--, 1);
 				}
 			}
 		}
@@ -2492,10 +2483,6 @@ print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
 	&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
 		     5, 60));
 
-# Input for adding suexec directives
-print &ui_table_row(&hlink($text{'newweb_suexec'}, "template_suexec"),
-	&ui_yesno_radio("suexec", $tmpl->{'web_suexec'} ? 1 : 0));
-
 # Input for logging via program. Deprecated, so don't show unless enabled
 if ($tmpl->{'web_writelogs'}) {
 	print &ui_table_row(&hlink($text{'newweb_writelogs'},
@@ -2702,7 +2689,6 @@ if ($in{"web_mode"} == 2) {
 	&error($err) if ($err);
 	$in{'web_ssl'} =~ s/\r?\n/\t/g;
 	$tmpl->{'web_ssl'} = $in{'web_ssl'};
-	$tmpl->{'web_suexec'} = $in{'suexec'};
 	if (defined($in{'writelogs'})) {
 		$tmpl->{'web_writelogs'} = $in{'writelogs'};
 		}
@@ -3622,7 +3608,7 @@ local ($tmpl) = @_;
 local $suexec = &get_suexec_path();
 local @suhome = &get_suexec_document_root();
 local $suerr;
-if ($tmpl->{'web_suexec'} && !$suexec) {
+if (!$suexec) {
 	return $text{'check_ewebsuexecbin'};
 	}
 
@@ -3637,7 +3623,7 @@ foreach my $l (@dirs) {
 $cgibase =~ s/\/$//;
 
 # Make sure home base is under a base directory, or template CGI directory is
-if ($tmpl->{'web_suexec'} && @suhome) {
+if (@suhome) {
 	foreach my $suhome (@suhome) {
 		if (&same_file($suhome, $home_base) ||
 		    &is_under_directory($suhome, $home_base) ||

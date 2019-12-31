@@ -8744,7 +8744,6 @@ push(@rv, { 'id' => 0,
 	    'default' => 1,
 	    'web' => $config{'apache_config'},
 	    'web_ssl' => $config{'apache_ssl_config'},
-	    'web_suexec' => $config{'suexec'},
 	    'web_writelogs' => $config{'web_writelogs'},
 	    'web_user' => $config{'web_user'},
 	    'web_html_dir' => $config{'html_dir'},
@@ -9036,7 +9035,6 @@ if ($tmpl->{'id'} == 0) {
 		}
 	$config{'apache_config'} = $tmpl->{'web'};
 	$config{'apache_ssl_config'} = $tmpl->{'web_ssl'};
-	$config{'suexec'} = $tmpl->{'web_suexec'};
 	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
 	$config{'web_user'} = $tmpl->{'web_user'};
 	$config{'html_dir'} = $tmpl->{'web_html_dir'};
@@ -14075,7 +14073,7 @@ if ($config{'web'}) {
 
 	# Make sure needed Apache modules are active
 	local $tmpl = &get_template(0);
-	if ($tmpl->{'web_suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
+	if ($apache::httpd_modules{'core'} >= 2.0 &&
 	    !$apache::httpd_modules{'mod_suexec'}) {
 		return &text('check_ewebsuexec');
 		}
@@ -14133,14 +14131,7 @@ if ($config{'web'}) {
 	# Make sure suexec is installed, if enabled. Also check home path.
 	local $err = &check_suexec_install($tmpl);
 	if ($err) {
-		if ($tmpl->{'web_suexec'}) {
-			# Absolutely needed for PHP run via CGI or fCGId
-			return $err;
-			}
-		else {
-			# Just a warning
-			&$second_print($err);
-			}
+		return $err;
 		}
 	else {
 		&$second_print($text{'check_webok'});
