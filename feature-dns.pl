@@ -3984,6 +3984,27 @@ return $r->{'type'} eq 'NSEC' || $r->{'type'} eq 'NSEC3' ||
        $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY';
 }
 
+# get_whois_expiry(&domain)
+# Returns the Unix time that a DNS domain is going to expire at it's registrar,
+# and an error message.
+sub get_whois_expiry
+{
+my ($d) = @_;
+my $whois = &has_command("whois");
+return (0, "Missing whois command") if (!$whois);
+my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
+return (0, "No DNS registrar found for domain")
+	if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
+return (0, "Whois command did not report expiry date")
+	if ($out !~ /Expiry\s+Date:\s+(\d+)\-(\d+)\-(\d+)/i);
+local $tm;
+eval {
+	$tm = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+	};
+return (0, "Expiry date is not valid") if ($@);
+return ($tm);
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;

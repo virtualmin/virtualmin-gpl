@@ -645,6 +645,12 @@ if ($multi) {
 			print "    Parent DNS virtual server: ",$dnsparent->{'dom'},"\n";
 			}
 
+		# DNS registrar expiry date
+		if ($d->{'whois_expiry'}) {
+			print "    DNS expiry date: ",
+				&make_date($d->{'whois_expiry'}, 1),"\n";
+			}
+
 		# Show BCC setting
 		$bcc = $sender_bcc->{$d->{'id'}};
 		if ($bcc) {
