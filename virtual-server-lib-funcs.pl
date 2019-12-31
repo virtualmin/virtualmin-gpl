@@ -10918,6 +10918,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 
 # Check for expired SSL certs (if enabled)
 my (@expired, @nearly);
+my $now = time();
 foreach my $d (&list_domains()) {
 	next if (!$d->{'ssl_cert_expiry'});
 
@@ -10927,10 +10928,10 @@ foreach my $d (&list_domains()) {
 	next if ($d->{'ssl_cert_expiry_cache'} != $st[9]);
 
 	# Check if at or near expiry
-	if ($d->{'ssl_cert_expiry'} < time()) {
+	if ($d->{'ssl_cert_expiry'} < $now) {
 		push(@expired, $d);
 		}
-	elsif ($d->{'ssl_cert_expiry'} < time() + 24*60*60) {
+	elsif ($d->{'ssl_cert_expiry'} < $now + 24*60*60) {
 		push(@nearly, $d);
 		}
 	}
@@ -10966,6 +10967,30 @@ if (@letsdoms) {
 			}
 		push(@rv, $msg);
 		}
+	}
+
+# Check for impending DNS registrar expiry
+my (@expired, @nearly);
+foreach my $d (&list_domains()) {
+	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+	if ($d->{'whois_expiry'} < $now) {
+		push(@expired, $d);
+		}
+	elsif ($d->{'whois_expiry'} < $now + 24*60*60) {
+		push(@nearly, $d);
+		}
+	}
+if (@expired || @nearly) {
+	my $expiry_text = "<b>$text{'index_expirywarn'}</b><p>\n";
+	if (@expired) {
+		$expiry_text .= &text('index_expiryexpired',
+			join(" ", map { &show_domain_name($_) } @expired));
+		}
+	if (@nearly) {
+		$expiry_text .= &text('index_expirynearly',
+			join(" ", map { &show_domain_name($_) } @nearly));
+		}
+	push(@rv, $expiry_text);
 	}
 
 return @rv;
