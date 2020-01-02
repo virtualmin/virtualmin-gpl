@@ -3607,7 +3607,6 @@ local ($tmpl) = @_;
 # Make sure suexec is actually installed
 local $suexec = &get_suexec_path();
 local @suhome = &get_suexec_document_root();
-local $suerr;
 if (!$suexec) {
 	return $text{'check_ewebsuexecbin'};
 	}
@@ -3636,6 +3635,43 @@ if (@suhome) {
 		     "<tt>$home_base</tt>", "<tt>".join(", ", @suhome)."</tt>");
 	}
 return undef;
+}
+
+# supports_suexec([&domain])
+# Returns 1 if suexec is enabled and usable for a domain, and thus it can run
+# CGI scripts
+sub supports_suexec
+{
+local ($d) = @_;
+
+# Make sure suexec is actually installed
+local $suexec = &get_suexec_path();
+return 0 if (!$suexec);
+
+# Is the domain's CGI directory under one of the roots?
+&require_useradmin();
+local @suhome = &get_suexec_document_root();
+local $cgi = $d ? $home_base : &cgi_bin_dir($d);
+local $under = 0;
+foreach my $suhome (@suhome) {
+	if (&is_under_directory($suhome, $cgi)) {
+		$under = 1;
+		last;
+		}
+	}
+return 0 if (!$under);
+
+if ($d) {
+	# Is SuExec enabled in the Apache config?
+	local ($virt, $vconf) = &get_apache_virtual(
+					$d->{'dom'}, $d->{'web_port'});
+	return 0 if (!$virt);
+	local ($suexec) = &apache::find_directive_struct(
+					"SuexecUserGroup", $vconf);
+	return 0 if (!$suexec);
+	}
+
+return 1;
 }
 
 # setup_apache_logs(&domain, [access-log, error-log])
