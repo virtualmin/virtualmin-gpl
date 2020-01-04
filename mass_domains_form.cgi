@@ -159,7 +159,7 @@ if (&can_edit_phpmode()) {
 			    map { [ $_, $text{'phpmode_'.$_}."<br>" ] }
 				&supported_php_modes() ]), 1, \@tds);
 	}
-@rubys = &supported_ruby_modes();
+@rubys = defined(&supported_ruby_modes) ? &supported_ruby_modes() : ( );
 if (&can_edit_phpmode() && @rubys) {
 	print &ui_table_row($text{'massdomains_rubymode'},
 		&ui_radio("rubymode", undef,
