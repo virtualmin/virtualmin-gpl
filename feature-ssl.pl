@@ -2236,31 +2236,36 @@ foreach my $d (&list_domains()) {
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 21 days of expiry
 	my $age = time() - $ltime;
-	if ($age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
-	    $expiry && $expiry - time() < 21 * 24 * 60 * 60) {
-		my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
-		my ($subject, $body);
-		if (!$ok) {
-			# Failed! Tell the user
-			$subject = $text{'letsencrypt_sfailed'};
-			$body = &text('letsencrypt_bfailed',
-				      join(", ", @$dnames), $err);
-			$d->{'letsencrypt_last'} = time();
-			$d->{'letsencrypt_last_failure'} = time();
-			$cert =~ s/\r?\n/\t/g;
-			$d->{'letsencrypt_last_err'} = $err;
-			&save_domain($d);
-			}
-		else {
-			# Tell the user it worked
-			$subject = $text{'letsencrypt_sdone'};
-			$body = &text('letsencrypt_bdone', join(", ", @$dnames));
-			}
+	my $renew = $age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
+		    $expiry && $expiry - time() < 21 * 24 * 60 * 60;
+	next if (!$renew);
 
-		# Send email
-		my $from = &get_global_from_address($d);
-		&send_notify_email($from, [$d], $d, $subject, $body);
+	# Don't even attempt now if the lock is being held
+	next if (&test_lock($ssl_letsencrypt_lock));
+
+	# Time to attempt the renewal
+	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
+	my ($subject, $body);
+	if (!$ok) {
+		# Failed! Tell the user
+		$subject = $text{'letsencrypt_sfailed'};
+		$body = &text('letsencrypt_bfailed',
+			      join(", ", @$dnames), $err);
+		$d->{'letsencrypt_last'} = time();
+		$d->{'letsencrypt_last_failure'} = time();
+		$cert =~ s/\r?\n/\t/g;
+		$d->{'letsencrypt_last_err'} = $err;
+		&save_domain($d);
 		}
+	else {
+		# Tell the user it worked
+		$subject = $text{'letsencrypt_sdone'};
+		$body = &text('letsencrypt_bdone', join(", ", @$dnames));
+		}
+
+	# Send email
+	my $from = &get_global_from_address($d);
+	&send_notify_email($from, [$d], $d, $subject, $body);
 	}
 }
 
@@ -2533,6 +2538,7 @@ $size ||= $config{'key_size'};
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
 my @errs;
+&obtain_lock($ssl_letsencrypt_lock);
 if (&domain_has_website($d) && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
@@ -2553,8 +2559,9 @@ elsif (!$ok) {
 		push(@errs, $cert);
 		}
 	}
+&release_lock($ssl_letsencrypt_lock);
 if (!$ok) {
-	return ($ok, join("\n", @errs), $key, $chain);
+	return ($ok, join(", ", @errs), $key, $chain);
 	}
 else {
 	return ($ok, $cert, $key, $chain);
