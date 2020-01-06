@@ -43,7 +43,9 @@ if (@data) {
                 $status = 'EXPIRED';
             }
             my $diff = int(($valid_until_st - $now_st) / (3600 * 24));
-            if ($diff > 365) {
+            if ($diff < 0) {
+                $diff = '';
+            } elsif ($diff > 365) {
                 $diff = floor($diff / 365);
                 if ($diff == 1) {
                     $diff .= " year";
@@ -59,9 +61,6 @@ if (@data) {
                 } else {
                     $diff .= " days";
                 }
-            }
-            if ($diff < 0) {
-                $diff = '';
             }
             $table->addRow($domain, $cfile, $valid_until->strftime($fpm_out), $diff, $status);
         }
