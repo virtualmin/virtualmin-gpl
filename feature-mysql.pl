@@ -3300,7 +3300,7 @@ else {
 	$get_dom_remote_mysql_version_cache{$mod} = $rv;
 	}
 my $variant = "mysql";
-if ($rv =~ /^([0-9\.]+)\-(.*)/) {
+if ($rv =~ /^([0-9\.]+)\-(.*)/ && $rv !~ /ubuntu/i) {
 	$rv = $1;
 	$variant = $2;
 	if ($variant =~ /mariadb/i) {
