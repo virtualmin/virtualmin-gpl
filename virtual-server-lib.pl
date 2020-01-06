@@ -296,6 +296,8 @@ $everyone_alias_dir = "$module_config_directory/everyone";
 
 $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
+$ssl_letsencrypt_lock = "$module_var_directory/letsencrypt-lock";
+
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
 		    'type', 'alt', 'modulus', 'exponent');
 

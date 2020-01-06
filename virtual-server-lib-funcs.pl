@@ -14183,6 +14183,10 @@ if (&domain_has_website()) {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
 		}
 
+	# Report on supported PHP modes
+	my @modes = &supported_php_modes();
+	&$second_print(&text('check_webphpmodes', join(", ", map { $text{'phpmode_short_'.$_} || $_ } @modes)));
+
 	# Check for PHP-FPM support
 	my @fpms = &list_php_fpm_configs();
 	if (!@fpms) {

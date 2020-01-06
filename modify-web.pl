@@ -9,9 +9,7 @@ virtual servers. Like other scripts, the servers to change are selecting
 using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
-parameter followed by one of C<mod_php>, C<cgi> or C<fcgid>. To enable
-or disable the use of Suexec for running CGI scripts, give either the
-C<--suexec> or C<--no-suexec> parameter.
+parameter followed by one of C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
 
 The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. To disable this, the
@@ -110,7 +108,6 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
-$supports_php = defined(&supported_php_modes);
 $supports_ruby = defined(&supported_ruby_modes);
 $supports_styles = defined(&list_content_styles);
 while(@ARGV > 0) {
@@ -121,29 +118,29 @@ while(@ARGV > 0) {
 	elsif ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
-	elsif ($a eq "--mode" && $supports_php) {
+	elsif ($a eq "--mode") {
 		$mode = shift(@ARGV);
 		}
 	elsif ($a eq "--ruby-mode" && $supports_ruby) {
 		$rubymode = shift(@ARGV);
 		}
-	elsif ($a eq "--php-children" && $supports_php) {
+	elsif ($a eq "--php-children") {
 		$children = shift(@ARGV);
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
 		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
 		}
-	elsif ($a eq "--no-php-children" && $supports_php) {
+	elsif ($a eq "--no-php-children") {
 		$children = 0;
 		}
-	elsif ($a eq "--php-timeout" && $supports_php) {
+	elsif ($a eq "--php-timeout") {
 		$timeout = shift(@ARGV);
 		$timeout =~ /^[1-9]\d*$/ && $timeout <= 86400 ||
 			&usage("Invalid PHP script timeout in seconds");
 		}
-	elsif ($a eq "--no-php-timeout" && $supports_php) {
+	elsif ($a eq "--no-php-timeout") {
 		$timeout = 0;
 		}
-	elsif ($a eq "--php-version" && $supports_php) {
+	elsif ($a eq "--php-version") {
 		$version = shift(@ARGV);
 		}
 	elsif ($a eq "--proxy") {
@@ -164,12 +161,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-framefwd") {
 		$framefwd = "";
-		}
-	elsif ($a eq "--suexec") {
-		$suexec = 1;
-		}
-	elsif ($a eq "--no-suexec") {
-		$suexec = 0;
 		}
 	elsif ($a eq "--style") {
 		$stylename = shift(@ARGV);
@@ -262,7 +253,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
-  defined($suexec) || $stylename || $content || defined($children) ||
+  $stylename || $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
@@ -271,9 +262,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
-if ($supports_php) {
-	@modes = &supported_php_modes();
-	}
+@modes = &supported_php_modes();
 if (defined($timeout)) {
 	&indexof("fcgid", @modes) >= 0 ||
 		&usage("The PHP script timeout can only be set on systems ".
@@ -345,15 +334,10 @@ foreach $d (@doms) {
 	if (defined(&get_domain_ruby_mode)) {
 		$r = $rubymode || &get_domain_ruby_mode($d);
 		}
-	$s = defined($suexec) ? $suexec : &get_domain_suexec($d);
-	if ($p eq "cgi" && !$s) {
-		&usage("For PHP to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
-		}
 	if ($r eq "cgi" && !$s) {
 		&usage("For Ruby to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
 		}
-	@supp = defined(&supported_php_modes) ? &supported_php_modes($d)
-					      : ( );
+	@supp = &supported_php_modes($d);
 	!$mode || &indexof($mode, @supp) >= 0 ||
 		&usage("The selected PHP exection mode cannot be used with $d->{'dom'}");
 	if ($version) {
@@ -427,11 +411,6 @@ foreach $d (@doms) {
 	if ($rubymode && !$d->{'alias'}) {
 		&save_domain_ruby_mode($d,
 			$rubymode eq "none" ? undef : $rubymode);
-		}
-
-	# Update suexec setting
-	if (defined($suexec) && !$d->{'alias'}) {
-		&save_domain_suexec($d, $suexec);
 		}
 
 	local $oldd = { %$d };
@@ -726,16 +705,13 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-web --domain name | --all-domains\n";
-if ($supports_php) {
-	print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
-	print "                     [--php-children number | --no-php-children]\n";
-	print "                     [--php-version num]\n";
-	print "                     [--php-timeout seconds | --no-php-timeout]\n";
-	}
+print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
+print "                     [--php-children number | --no-php-children]\n";
+print "                     [--php-version num]\n";
+print "                     [--php-timeout seconds | --no-php-timeout]\n";
 if ($supports_ruby) {
 	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
 	}
-print "                     [--suexec | --no-suexec]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--frametitle \"title\" ]\n";

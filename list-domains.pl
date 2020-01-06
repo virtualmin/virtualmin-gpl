@@ -514,6 +514,9 @@ if ($multi) {
 		    &domain_has_website($d) && $multi == 1) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
+			@modes = &supported_php_modes($d);
+			print "    Possible PHP execution modes: ",
+				join(" ", @modes),"\n";
 			$s = &get_domain_suexec($d);
 			print "    SuExec for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";

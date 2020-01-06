@@ -21,13 +21,6 @@ print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
 if (!$d->{'alias'} && $can == 2 &&
-    ($p eq 'web' || &plugin_defined($p, "feature_get_web_suexec"))) {
-	# Use suexec
-	print &ui_table_row(&hlink($text{'phpmode_suexec'}, "phpmode_suexec"),
-			    &ui_yesno_radio("suexec", &get_domain_suexec($d)));
-	}
-
-if (!$d->{'alias'} && $can == 2 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 	# PHP execution mode
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),

@@ -13,14 +13,6 @@ $p = &domain_has_website($d);
 
 # Check for option clashes
 if (!$d->{'alias'} && $can == 2) {
-	if (($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
-	    defined($in{'suexec'}) && !$in{'suexec'}) {
-		&error($text{'phpmode_esuexec'});
-		}
-	if ($in{'suexec'} && $apache::httpd_modules{'core'} >= 2.0 &&
-	    !$apache::httpd_modules{'mod_suexec'}) {
-		&error($text{'phpmode_emodsuexec'});
-		}
 	if (defined($in{'children_def'}) && !$in{'children_def'} &&
 	    ($in{'children'} < 1 ||
 	     $in{'children'} > $max_php_fcgid_children)) {
@@ -35,6 +27,7 @@ if (!$d->{'alias'}) {
 	}
 
 # Check for working Apache suexec for PHP
+# XXX
 if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
     $can == 2 && $p eq 'web') {
 	$tmpl = &get_template($d->{'template'});
@@ -105,16 +98,6 @@ if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'} &&
 	&$first_print(&text('phpmode_rmoding',
 			    $text{'phpmode_'.$in{'rubymode'}}));
 	&save_domain_ruby_mode($d, $in{'rubymode'});
-	&$second_print($text{'setup_done'});
-	$anything++;
-	}
-
-# Save suexec mode
-if (defined($in{'suexec'}) && $in{'suexec'} != &get_domain_suexec($d) &&
-    $can == 2) {
-	&$first_print($in{'suexec'} ? $text{'phpmode_suexecon'}
-				    : $text{'phpmode_suexecoff'});
-	&save_domain_suexec($d, $in{'suexec'});
 	&$second_print($text{'setup_done'});
 	$anything++;
 	}
