@@ -60,6 +60,9 @@ if (@data) {
                     $diff .= " days";
                 }
             }
+            if ($diff < 0) {
+                $diff = '';
+            }
             $table->addRow($domain, $cfile, $valid_until->strftime($fpm_out), $diff, $status);
         }
         $i++;
