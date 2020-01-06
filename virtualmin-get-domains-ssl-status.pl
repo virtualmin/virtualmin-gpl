@@ -18,16 +18,16 @@ if ($@) {
 "Error: Perl module Time::Piece is not installed.\nYou can install it by package name on\n  RHEL systems\n\    `perl-Time-Piece\`\n  Debian systems\n    `libtime-piece-perl\`\nIf one of the above packages are not availabe on your\nsystem, you could install it using CPAN command:\n\   `cpan -i Time::Piece\`\nExiting..\n";
     exit;
 }
-my $out     = `virtualmin list-certs --all-domains --cert`;
-my (@data)  = $out =~ /(.*):\n.*\n.*File:\s+(.*?)\n/g;
-my $i       = 1;
-my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
-my $fpm_in  = "%b  %d %H:%M:%S %Y";
-my $fpm_out = "%b %d, %Y";
-my $now     = Time::Piece->new();
+my $out = `virtualmin list-certs --all-domains --cert`;
+my (@data) = $out =~ /(.*):\n.*\n.*File:\s+(.*?)\n/g;
 
 if (@data) {
+    my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
+    my $fpm_in  = "%b  %d %H:%M:%S %Y";
+    my $fpm_out = "%b %d, %Y";
+    my $now     = Time::Piece->new();
     $table->setCols('DOMAIN NAME', 'PATH TO CERTIFICATE FILE', 'VALID UNTIL', 'EXPIRES IN', 'STATUS');
+    my $i = 1;
     foreach my $d (@data) {
         if ($i % 2 == 1) {
             my $domain          = $d;
