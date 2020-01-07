@@ -3562,6 +3562,18 @@ foreach my $d (&sort_indent_domains($doms)) {
 			$ip = "<i>$ip</i>" if ($d->{'virt'});
 			push(@cols, $ip);
 			}
+		elsif ($c eq "ssl_expiry") {
+			# SSL cert expiry
+			if (!&domain_has_ssl($d)) {
+				push(@cols, "");
+				}
+			elsif ($d->{'ssl_cert_expiry'}) {
+				push(@cols, &make_date($d->{'ssl_cert_expiry'}, 1));
+				}
+			else {
+				push(@cols, "<i>$text{'maillog_unknown'}</i>");
+				}
+			}
 		elsif ($c =~ /^field_/) {
 			# Some custom field
 			push(@cols, &html_escape($d->{$c}));
@@ -14097,22 +14109,16 @@ if ($config{'web'}) {
 		return &text('index_eapache', "/apache/", $clink);
 
 	# Make sure needed Apache modules are active
-	local $tmpl = &get_template(0);
-	if ($apache::httpd_modules{'core'} >= 2.0 &&
-	    !$apache::httpd_modules{'mod_suexec'}) {
-		return &text('check_ewebsuexec');
-		}
 	if (!$apache::httpd_modules{'mod_actions'}) {
 		return &text('check_ewebactions');
 		}
-	if ($tmpl->{'web_php_suexec'} == 2 &&
-	    !$apache::httpd_modules{'mod_fcgid'}) {
-		return $text{'tmpl_ephpmode2'};
-		}
-	if ($apache::httpd_modules{'core'} >= 2.4 &&
-	    !$apache::httpd_modules{'mod_cgi'} &&
-	    !$apache::httpd_modules{'mod_cgid'}) {
-		return $text{'check_ewebcgi'};
+
+	# Check if template PHP mode is supported
+	my $tmpl = &get_template(0);
+	my $mode = &template_to_php_mode($tmpl);
+	my @supp = &supported_php_modes();
+	if (&indexof($mode, @supp) < 0) {
+		return &text('check_ewebdefphpmode', $mode, join(" ", @supp));
 		}
 
 	# Run Apache config check
@@ -14156,7 +14162,7 @@ if ($config{'web'}) {
 	# Make sure suexec is installed, if enabled. Also check home path.
 	local $err = &check_suexec_install($tmpl);
 	if ($err) {
-		return $err;
+		&$second_print(&text('check_webnosuexec', $err));
 		}
 	else {
 		&$second_print($text{'check_webok'});
@@ -14184,8 +14190,8 @@ if (&domain_has_website()) {
 		}
 
 	# Report on supported PHP modes
-	my @modes = &supported_php_modes();
-	&$second_print(&text('check_webphpmodes', join(", ", map { $text{'phpmode_short_'.$_} || $_ } @modes)));
+	my @supp = &supported_php_modes();
+	&$second_print(&text('check_webphpmodes', join(" ", @supp)));
 
 	# Check for PHP-FPM support
 	my @fpms = &list_php_fpm_configs();
