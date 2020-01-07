@@ -602,6 +602,10 @@ if ($multi) {
 			if ($same) {
 				print "    SSL shared with: $same->{'dom'}\n";
 				}
+			if ($d->{'ssl_cert_expiry'}) {
+				print "    SSL cert expiry: ",
+				    &make_date($d->{'ssl_cert_expiry'}),"\n";
+				}
 			if ($d->{'letsencrypt_renew'}) {
 				print "    Lets Encrypt renewal: ",
 				    $d->{'letsencrypt_renew'}, " months\n";
