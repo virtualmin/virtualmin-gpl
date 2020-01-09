@@ -22,10 +22,10 @@ my $out = `virtualmin list-certs --all-domains --cert`;
 my (@data) = $out =~ /(.*):\n.*\n.*File:\s+(.*?)\n/g;
 
 if (@data) {
-    my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
     my $fpm_in  = "%b  %d %H:%M:%S %Y";
     my $fpm_out = "%b %d, %Y";
     my $now     = Time::Piece->new();
+    my $table   = Text::ASCIITable->new({ headingText => 'SSL CERTIFICATES EXPIRATION DATES' });
     $table->setCols('DOMAIN NAME', 'PATH TO CERTIFICATE FILE', 'VALID UNTIL', 'EXPIRES IN', 'STATUS');
     my $i = 1;
     foreach my $d (@data) {
@@ -35,10 +35,10 @@ if (@data) {
             my $expiration_date = `openssl x509 -enddate -noout -in "$cfile"`;
             ($expiration_date) = $expiration_date =~ /notAfter=(.*)\sGMT/;
             my $valid_until    = Time::Piece->strptime($expiration_date, $fpm_in);
-            my $status         = 'VALID';
-            my $now_st         = $now->strftime("%s");
             my $valid_until_st = $valid_until->strftime("%s");
+            my $now_st         = $now->strftime("%s");
 
+            my $status = 'VALID';
             if ($now_st > $valid_until_st) {
                 $status = 'EXPIRED';
             }
