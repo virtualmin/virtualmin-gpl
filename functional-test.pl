@@ -8273,7 +8273,8 @@ if ($list_tests) {
 # Run selected tests
 $total_failed = 0;
 @failed_tests = ( );
-foreach $tt (@tests) {
+@press = grep { $_->{'status'} } &get_startstop_links();
+TESTS: foreach $tt (@tests) {
 	next if ($done_test{$tt}++);
 
 	# Cleanup backups first
@@ -8327,6 +8328,17 @@ foreach $tt (@tests) {
 	$total_failed += $failed;
 	if ($failed) {
 		push(@failed_tests, $tt);
+		}
+
+	# Fail hard if the test broke any servers
+	foreach my $ss (&get_startstop_links()) {
+		my ($oldss) = grep { $ss->{'feature'} eq $_->{'feature'} &&
+				     $ss->{'id'} eq $_->{'id'} } @press;
+		if (!$ss->{'status'} && $oldss) {
+			print "ABORT: $ss->{'name'} no longer running!\n";
+			push(@failed_tests, $tt);
+			last TESTS;
+			}
 		}
 	}
 
