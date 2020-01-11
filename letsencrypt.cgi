@@ -25,6 +25,7 @@ else {
 		}
 	$custom_dname = join(" ", @dnames);
 	}
+push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 @dnames || &error($text{'letsencrypt_ednames'});
 $in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
 	&error($text{'letsencrypt_erenew'});
@@ -32,6 +33,7 @@ $in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
 if ($in{'only'}) {
 	# Just update renewal date and domains
 	$d->{'letsencrypt_dname'} = $custom_dname;
+	$d->{'letsencrypt_dwild'} = $in{'dwild'};
 	if ($in{'renew_def'}) {
 		delete($d->{'letsencrypt_renew'});
 		}
@@ -137,6 +139,7 @@ else {
 
 		# Save renewal state
 		$d->{'letsencrypt_dname'} = $custom_dname;
+		$d->{'letsencrypt_dwild'} = $in{'dwild'};
 		if ($in{'renew_def'}) {
 			delete($d->{'letsencrypt_renew'});
 			}

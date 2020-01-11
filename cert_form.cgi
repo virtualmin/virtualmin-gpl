@@ -377,7 +377,8 @@ else {
 			  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
 			[ 0, $text{'cert_dnamesel'},
 			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
-				       undef, $d->{'letsencrypt_dname'} ? 0 : 1), $dis0 ] ]));
+				       undef, $d->{'letsencrypt_dname'} ? 0 : 1)."<br>".
+			  &ui_checkbox("dwild", 1, $text{'cert_dwild'}, $d->{'letsencrypt_dwild'}), $dis0 ] ]));
 
 	# Setup automatic renewal?
 	print &ui_table_row($text{'cert_letsrenew'},

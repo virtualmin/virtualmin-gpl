@@ -103,6 +103,7 @@ if (!@dnames) {
 		@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
 		$custom_dname = $d->{'letsencrypt_dname'};
 		}
+	push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 	}
 else {
 	# Hostnames given

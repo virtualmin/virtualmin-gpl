@@ -8001,6 +8001,7 @@ else {
 	&install_letsencrypt_cert($d, $cert, $key, $chain);
 
 	$d->{'letsencrypt_dname'} = '';
+	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_renew'} ||= 2;
 	&save_domain($d);

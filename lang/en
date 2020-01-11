@@ -2954,6 +2954,7 @@ cert_ewebminver=Only Webmin versions 1.780 and above support Let's Encrypt
 cert_dnamefor=Request certificate for
 cert_dnamedef=Domains associated with this server
 cert_dnamesel=Domain names listed here
+cert_dwild=Also request wildcard certificate?
 cert_letsrenew=Months between automatic renewal
 cert_letsnotrenew=Only renew manually
 cert_connectivity=Check connectivity first?

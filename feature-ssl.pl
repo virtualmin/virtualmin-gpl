@@ -2290,6 +2290,7 @@ if ($d->{'letsencrypt_dname'}) {
 else {
 	@dnames = &get_hostnames_for_ssl($d);
 	}
+push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 &foreign_require("webmin");
 if ($merr) {
 	# Pre-command failed
