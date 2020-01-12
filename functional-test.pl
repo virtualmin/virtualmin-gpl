@@ -5140,7 +5140,7 @@ $ssl_tests = [
 	{ 'command' => 'list-certs.pl',
 	  'args' => [ [ 'domain' => $test_domain ] ],
 	  'grep' => [ 'BEGIN CERTIFICATE', 'END CERTIFICATE',
-		      'BEGIN RSA PRIVATE KEY', 'END RSA PRIVATE KEY',
+		      'BEGIN (RSA )?PRIVATE KEY', 'END (RSA )?PRIVATE KEY',
 		      'BEGIN CERTIFICATE REQUEST', 'END CERTIFICATE REQUEST' ],
 	},
 
@@ -8336,7 +8336,9 @@ TESTS: foreach $tt (@tests) {
 				     $ss->{'id'} eq $_->{'id'} } @press;
 		if (!$ss->{'status'} && $oldss) {
 			print "ABORT: $ss->{'name'} no longer running!\n";
-			push(@failed_tests, $tt);
+			if (!$failed) {
+				push(@failed_tests, $tt);
+				}
 			last TESTS;
 			}
 		}
