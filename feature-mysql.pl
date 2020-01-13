@@ -1601,7 +1601,6 @@ local $dfunc = sub {
 &execute_for_all_mysql_servers($dfunc);
 
 # If any users had access to this DB only, remove them too
-use Data::Dumper;
 local $dfunc = sub {
 	local $duser = &mysql_user($d);
 	foreach my $up (grep { $_->[0] ne $duser } @oldusers) {
