@@ -2529,18 +2529,39 @@ if ($before->{'redirs'}) {
 &pop_all_print();
 }
 
+# filter_ssl_wildcards(&hostnames)
+# Returns an array ref of hostnames for an SSL cert request, minus any that
+# are redundant due to wildcards
+sub filter_ssl_wildcards
+{
+my ($dnames) = @_;
+my @rv;
+my %wild;
+foreach my $h (@$dnames) {
+	if ($h =~ /^\*\.(.*)$/) {
+		$wild{$1} = 1;
+		}
+	}
+foreach my $h (@$dnames) {
+	next if ($h =~ /^([^\.\*]+)\.(.*)$/ && $wild{$1});
+	push(@rv, $h);
+	}
+return \@rv;
+}
+
 # request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
 # DNS modes if possible
 sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode) = @_;
+$dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
 my @errs;
-&obtain_lock($ssl_letsencrypt_lock);
+&lock_file($ssl_letsencrypt_lock);
 if (&domain_has_website($d) && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
@@ -2561,7 +2582,7 @@ elsif (!$ok) {
 		push(@errs, $cert);
 		}
 	}
-&release_lock($ssl_letsencrypt_lock);
+&unlock_file($ssl_letsencrypt_lock);
 if (!$ok) {
 	return ($ok, join(", ", @errs), $key, $chain);
 	}
