@@ -10,7 +10,7 @@ $d = &get_domain($in{'dom'});
 $d->{'disabled'} && &error($text{'letsencrypt_eenabled'});
 
 if ($in{'dname_def'}) {
-	@dnames = &get_hostnames_for_ssl($d);
+	@dnames = ($in{'dwild'} ? ($d->{'dom'}) : &get_hostnames_for_ssl($d));
 	$custom_dname = undef;
 	}
 else {
