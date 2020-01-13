@@ -27,6 +27,11 @@ else {
 	}
 push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 @dnames || &error($text{'letsencrypt_ednames'});
+
+# Filter wildcard to prevent redundancy
+my $fdnames = &filter_ssl_wildcards(\@dnames);
+@dnames = @$fdnames;
+
 $in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
 	&error($text{'letsencrypt_erenew'});
 
