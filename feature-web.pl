@@ -932,7 +932,7 @@ else {
 	# If using php via CGI or fcgi, check for wrappers
 	local $need_suexec = 0;
 	local $mode = &get_domain_php_mode($d);
-	if ($mode ne "mod_php" && $mode ne "fpm") {
+	if ($mode eq "cgi" || $mode eq "fcgid") {
 		local $dest = $mode eq "fcgid" ? "$d->{'home'}/fcgi-bin"
 					       : &cgi_bin_dir($_[0]);
 		local $suffix = $mode eq "fcgid" ? "fcgi" : "cgi";
@@ -2456,7 +2456,7 @@ sub show_template_web
 local ($tmpl) = @_;
 
 # Work out fields to disable
-local @webfields = ( "web", "web_ssl", "suexec", "user_def",
+local @webfields = ( "web", "web_ssl", "user_def",
 		     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
 		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
@@ -3043,44 +3043,17 @@ local $su = &apache::find_directive("SuexecUserGroup", $vconf);
 return $su ? 1 : 0;
 }
 
-# save_domain_suexec(&domain, enabled)
-# Enables or disables suexec for some virtual host
-sub save_domain_suexec
+# template_to_php_mode(&tmpl)
+# Returns the default PHP execution mode selected by a template
+sub template_to_php_mode
 {
-local ($d, $mode) = @_;
-&require_apache();
-local @ports;
-push(@ports, $d->{'web_port'}) if ($d->{'web'});
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
-foreach my $port (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
-	next if (!$virt);
-	local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-	&apache::save_directive("SuexecUserGroup",
-	    $mode ? [ "\"#$pdom->{'uid'}\" \"#$pdom->{'gid'}\"" ] : [],
-	    $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
-	}
-&register_post_action(\&restart_apache);
-}
-
-# add_script_language_directives(&domain, &tmpl, port)
-# Adds directives needed to enable PHP, Ruby and other languages to the
-# <virtualhost> for some new domain.
-sub add_script_language_directives
-{
-local ($d, $tmpl, $port) = @_;
-my $err;
-
-&require_apache();
-my $mode;
+my ($tmpl) = @_;
+my $mode = undef;
 if ($tmpl->{'web_php_suexec'} == 0) {
 	# Add directives for mod_php
 	$mode = "mod_php";
 	}
-elsif ($tmpl->{'web_php_suexec'} == 1 ||
-       $tmpl->{'web_php_suexec'} == 2 &&
-        !$apache::httpd_modules{'mod_fcgid'}) {
+elsif ($tmpl->{'web_php_suexec'} == 1) {
 	# Create cgi wrappers for PHP
 	$mode = "cgi";
 	}
@@ -3092,6 +3065,19 @@ elsif ($tmpl->{'web_php_suexec'} == 3) {
 	# Add directives for FPM
 	$mode = "fpm";
 	}
+return $mode;
+}
+
+# add_script_language_directives(&domain, &tmpl, port)
+# Adds directives needed to enable PHP, Ruby and other languages to the
+# <virtualhost> for some new domain.
+sub add_script_language_directives
+{
+local ($d, $tmpl, $port) = @_;
+my $err;
+
+&require_apache();
+my $mode = &template_to_php_mode($tmpl);
 my @supp = &supported_php_modes();
 if (&indexof($mode, @supp) < 0) {
 	$err = &text('setup_ewebphpmode', $mode);
@@ -3644,6 +3630,13 @@ sub supports_suexec
 {
 local ($d) = @_;
 
+# Does Apache even support suexec?
+&require_apache();
+if ($apache::httpd_modules{'core'} >= 2.0 &&
+    !$apache::httpd_modules{'mod_suexec'}) {
+	return 0;
+	}
+
 # Make sure suexec is actually installed
 local $suexec = &get_suexec_path();
 return 0 if (!$suexec);
@@ -3651,7 +3644,7 @@ return 0 if (!$suexec);
 # Is the domain's CGI directory under one of the roots?
 &require_useradmin();
 local @suhome = &get_suexec_document_root();
-local $cgi = $d ? $home_base : &cgi_bin_dir($d);
+local $cgi = $d ? &cgi_bin_dir($d) : $home_base;
 local $under = 0;
 foreach my $suhome (@suhome) {
 	if (&is_under_directory($suhome, $cgi)) {

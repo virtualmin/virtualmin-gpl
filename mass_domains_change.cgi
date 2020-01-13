@@ -237,11 +237,6 @@ foreach $d (@doms) {
 	if (&can_edit_phpmode() && $in{'phpmode'} && $d->{'web'} &&
 	    !$d->{'alias'}) {
 		&$first_print($text{'massdomains_phpmoding'});
-		if ($in{'phpmode'} ne 'mod_php' &&
-		    !&get_domain_suexec($d)) {
-			# Enable suexec automatically
-			&save_domain_suexec($d, 1);
-			}
 		&save_domain_php_mode($d, $in{'phpmode'});
 		&$second_print($text{'setup_done'});
 		}
@@ -259,12 +254,6 @@ foreach $d (@doms) {
 	if (&can_edit_phpmode() && $in{'rubymode'} && $d->{'web'} &&
 	    !$d->{'alias'}) {
 		&$first_print($text{'massdomains_rubymoding'});
-		if ($in{'rubymode'} ne 'mod_ruby' &&
-		    $in{'rubymode'} ne 'none' &&
-		    !&get_domain_suexec($d)) {
-			# Enable suexec automatically
-			&save_domain_suexec($d, 1);
-			}
 		&save_domain_ruby_mode($d, $in{'rubymode'} eq 'none' ?
 					    undef : $in{'rubymode'});
 		&$second_print($text{'setup_done'});

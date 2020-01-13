@@ -812,20 +812,25 @@ if (&get_apache_mod_php_version()) {
 	}
 local $suexec = &supports_suexec($d);
 if ($suexec) {
-	# PHP in CGI and fcgid modes only works if suexec does
-	if ($d) {
-		# Check for domain's cgi-bin directory
-		local ($pvirt, $pconf) = &get_apache_virtual($d->{'dom'},
-							     $d->{'web_port'});
-		if ($pconf) {
-			local @sa = grep { /^\/cgi-bin\s/ }
+	# PHP in CGI and fcgid modes only works if suexec does, and if the
+	# required Apache modules are installed
+	if ($apache::httpd_modules{'core'} < 2.4 ||
+	    $apache::httpd_modules{'mod_cgi'} ||
+	    $apache::httpd_modules{'mod_cgid'}) {
+		if ($d) {
+			# Check for domain's cgi-bin directory
+			local ($pvirt, $pconf) = &get_apache_virtual(
+				$d->{'dom'}, $d->{'web_port'});
+			if ($pconf) {
+				local @sa = grep { /^\/cgi-bin\s/ }
 				 &apache::find_directive("ScriptAlias", $pconf);
+				push(@rv, "cgi");
+				}
+			}
+		else {
+			# Assume all domains have CGI
 			push(@rv, "cgi");
 			}
-		}
-	else {
-		# Assume all domains have CGI
-		push(@rv, "cgi");
 		}
 	if ($apache::httpd_modules{'mod_fcgid'}) {
 		# Check for Apache fcgi module
