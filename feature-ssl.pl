@@ -1777,6 +1777,7 @@ if ($d->{'virt'}) {
 		if (!$l) {
 			$l = { 'name' => 'local',
 			       'value' => $d->{'ip'},
+			       'section' => 1,
 			       'members' => [],
 			       'file' => $cfile };
 			my $lref = &read_file_lines($l->{'file'}, 1);
