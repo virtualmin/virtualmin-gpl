@@ -2292,6 +2292,8 @@ else {
 	@dnames = &get_hostnames_for_ssl($d);
 	}
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
+my $fdnames = &filter_ssl_wildcards(\@dnames);
+@dnames = @$fdnames;
 &foreign_require("webmin");
 if ($merr) {
 	# Pre-command failed
@@ -2543,7 +2545,7 @@ foreach my $h (@$dnames) {
 		}
 	}
 foreach my $h (@$dnames) {
-	next if ($h =~ /^([^\.\*]+)\.(.*)$/ && $wild{$1});
+	next if ($h =~ /^([^\.\*]+)\.(.*)$/ && $wild{$2});
 	push(@rv, $h);
 	}
 return \@rv;
@@ -2555,7 +2557,7 @@ return \@rv;
 sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode) = @_;
-$dnames = &filter_ssl_wildcards($dnames);
+my $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
