@@ -606,6 +606,8 @@ if ($d->{'ftp'}) {
 	push(@logs, &get_proftpd_log($d->{'ip'}));
 	}
 push(@logs, &get_domain_template_logs($d));
+push(@logs, &get_apache_template_log($d, 0));
+push(@logs, &get_apache_template_log($d, 1));
 return &unique(grep { $_ } @logs);
 }
 
