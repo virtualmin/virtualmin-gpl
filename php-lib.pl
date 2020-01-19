@@ -837,9 +837,17 @@ if ($suexec) {
 		push(@rv, "fcgid");
 		}
 	}
-if (&get_php_fpm_config($d)) {
-	# Check for php-fpm install
-	push(@rv, "fpm");
+if ($d) {
+	# Does this domain's FPM version exist?
+	if (&get_php_fpm_config($d)) {
+		# Check for php-fpm install
+		push(@rv, "fpm");
+		}
+	}
+else {
+	# Do anyt FPM versions exist?
+	my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
+	push(@rv, "fpm") if (@okfpms);
 	}
 return @rv;
 }
