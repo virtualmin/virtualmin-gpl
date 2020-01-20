@@ -2818,7 +2818,7 @@ elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
 			"with mysql_native_password" : "";
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
 	}
-elsif (&compare_versions($ver, "5.7.6") >= 0) {
+elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
