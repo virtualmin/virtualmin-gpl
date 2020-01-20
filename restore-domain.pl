@@ -38,6 +38,11 @@ the C<--only-missing> flag. Conversely, you can specify only domains that
 already exist with the C<--only-existing> flag, to prevent any new virtual
 servers in the backup from being created.
 
+If a virtual server is re-created as part of the restore, you can use the
+C<--only-features> flag to limit the features it is created with to those
+that are being restored. Otherwise, it will be created with all original
+features regardless of whether or not they were backed up.
+
 To restore core Virtualmin settings (if included in the backup), the
 C<--all-virtualmin> option can be specified as well. Alternately, you can select
 exactly which settings to include with the C<--virtualmin> parameter. For example,
