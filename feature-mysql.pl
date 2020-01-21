@@ -2757,7 +2757,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 		"select host from user where user = ?", $olduser);
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db,
-			"rename '$olduser'@'$r->[0]' to '$user'@'$r->[0]'");
+			"rename '$olduser'\@'$r->[0]' to '$user'\@'$r->[0]'");
 		}
 	}
 else {
