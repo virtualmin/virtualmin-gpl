@@ -896,7 +896,8 @@ return $rv;
 # Returns a hash of details of a domain's cert
 sub cert_info
 {
-return &cert_file_info($_[0]->{'ssl_cert'}, $_[0]);
+local ($d) = @_;
+return &cert_file_info($d->{'ssl_cert'}, $d);
 }
 
 # cert_file_info(file, &domain)
