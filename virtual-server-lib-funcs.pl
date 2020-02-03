@@ -8792,7 +8792,7 @@ push(@rv, { 'id' => 0,
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
-	    'dns' => $config{'bind_config'},
+	    'dns' => $config{'bind_config'} || "none",
 	    'dns_replace' => $config{'bind_replace'},
 	    'dns_view' => $config{'dns_view'},
 	    'dns_spf' => $config{'bind_spf'} || "none",
@@ -9091,7 +9091,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'disabled_url'} = $tmpl->{'disabled_url'} eq "none" ? "" :
 					$tmpl->{'disabled_url'};
 	$config{'alias_mode'} = $tmpl->{'web_alias'};
-	$config{'bind_config'} = $tmpl->{'dns'};
+	$config{'bind_config'} = $tmpl->{'dns'} eq "none" ? ""
+							  : $tmpl->{'dns'};
 	$config{'bind_replace'} = $tmpl->{'dns_replace'};
 	$config{'bind_spf'} = $tmpl->{'dns_spf'} eq 'none' ? undef
 							   : $tmpl->{'dns_spf'};
@@ -17499,7 +17500,7 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 return undef if (!$virt);
 local $dir = $type eq 'cert' ? "SSLCertificateFile" :
 	     $type eq 'key' ? "SSLCertificateKeyFile" :
-	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+	     $type eq 'ca' || $type eq 'chain' ? "SSLCACertificateFile" : undef;
 return undef if (!$dir);
 local ($file) = &apache::find_directive($dir, $vconf);
 return $file;
