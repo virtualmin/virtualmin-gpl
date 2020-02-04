@@ -3052,24 +3052,9 @@ return $su ? 1 : 0;
 sub template_to_php_mode
 {
 my ($tmpl) = @_;
-my $mode = undef;
-if ($tmpl->{'web_php_suexec'} == 0) {
-	# Add directives for mod_php
-	$mode = "mod_php";
-	}
-elsif ($tmpl->{'web_php_suexec'} == 1) {
-	# Create cgi wrappers for PHP
-	$mode = "cgi";
-	}
-elsif ($tmpl->{'web_php_suexec'} == 2) {
-	# Add directives for FastCGId
-	$mode = "fcgid";
-	}
-elsif ($tmpl->{'web_php_suexec'} == 3) {
-	# Add directives for FPM
-	$mode = "fpm";
-	}
-return $mode;
+my $mmap = &php_mode_numbers_map();
+$mmap = { reverse(%$mmap) };
+return $mmap->{int($tmpl->{'web_php_suexec'})};
 }
 
 # add_script_language_directives(&domain, &tmpl, port)
