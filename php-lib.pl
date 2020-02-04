@@ -852,6 +852,16 @@ else {
 return @rv;
 }
 
+# php_mode_numbers_map()
+# Returns a map from mode names (like 'cgi') to template numbers
+sub php_mode_numbers_map
+{
+return { 'mod_php' => 0,
+	 'cgi' => 1,
+	 'fcgid' => 2,
+	 'fpm' => 3 };
+}
+
 # list_available_php_versions([&domain], [forcemode])
 # Returns a list of PHP versions and their executables installed on the system,
 # for use by a domain
