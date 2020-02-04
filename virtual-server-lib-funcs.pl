@@ -14115,12 +14115,16 @@ if ($config{'web'}) {
 		return &text('check_ewebactions');
 		}
 
-	# Check if template PHP mode is supported
+	# Check if template PHP mode is supported, and if not change it
 	my $tmpl = &get_template(0);
 	my $mode = &template_to_php_mode($tmpl);
 	my @supp = &supported_php_modes();
 	if (&indexof($mode, @supp) < 0) {
-		return &text('check_ewebdefphpmode', $mode, join(" ", @supp));
+		my $mmap = &php_mode_numbers_map();
+		$tmpl->{'web_php_suexec'} = $mmap->{$supp[0]};
+		&$second_print(
+			&text('check_ewebdefphpmode2', $mode, $supp[0])));
+		&save_template($tmpl);
 		}
 
 	# Run Apache config check
