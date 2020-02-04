@@ -14123,7 +14123,7 @@ if ($config{'web'}) {
 		my $mmap = &php_mode_numbers_map();
 		$tmpl->{'web_php_suexec'} = $mmap->{$supp[0]};
 		&$second_print(
-			&text('check_ewebdefphpmode2', $mode, $supp[0])));
+			&text('check_ewebdefphpmode2', $mode, $supp[0]));
 		&save_template($tmpl);
 		}
 
