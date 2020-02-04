@@ -2830,13 +2830,17 @@ local ($tmpl) = @_;
 local @allvers = &unique(map { $_->[0] } &list_available_php_versions());
 
 # Run PHP scripts using mode
+my $mmap = &php_mode_numbers_map();
+my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
+$cannums{int($tmpl->{'web_php_suexec'})} = 1;
+my @opts = grep { $cannums{$_->[0]} }
+		([ 0, $text{'phpmode_mod_php'} ],
+	         [ 1, $text{'phpmode_cgi'} ],
+	         [ 2, $text{'phpmode_fcgid'} ],
+	         [ 3, $text{'phpmode_fpm'} ]);
 print &ui_table_row(
     &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
-    &ui_radio_table("web_php_suexec", int($tmpl->{'web_php_suexec'}),
-	      [ [ 0, $text{'phpmode_mod_php'} ],
-		[ 1, $text{'phpmode_cgi'} ],
-		[ 2, $text{'phpmode_fcgid'} ],
-		[ 3, $text{'phpmode_fpm'} ] ]));
+    &ui_radio_table("web_php_suexec", int($tmpl->{'web_php_suexec'}), \@opts));
 
 # Default PHP version to setup
 print &ui_table_row(
