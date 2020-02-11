@@ -2865,7 +2865,7 @@ local ($d) = @_;
 local @recs = &get_domain_dns_records($d);
 foreach my $r (@recs) {
 	if (($r->{'type'} eq 'DMARC' || $r->{'type'} eq 'TXT') &&
-	    $r->{'name'} eq '_dmarc.'.$d->{'dom'}.'.') {
+	    lc($r->{'name'}) eq '_dmarc.'.$d->{'dom'}.'.') {
 		return &bind8::parse_dmarc(@{$r->{'values'}});
 		}
 	}
@@ -2888,7 +2888,7 @@ local $bump = 0;
 local ($r) = grep { ($_->{'type'} eq 'TXT' ||
 		     $_->{'type'} eq 'DMARC') &&
 		    $_->{'values'}->[0] =~ /^v=DMARC1/i &&
-		    $_->{'name'} eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
+		    lc($_->{'name'}) eq '_dmarc.'.$d->{'dom'}.'.' } @$recs;
 local $str = $dmarc ? &bind8::join_dmarc($dmarc) : undef;
 if ($r && $dmarc) {
 	# Update record
