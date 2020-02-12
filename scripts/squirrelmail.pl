@@ -37,6 +37,11 @@ sub script_squirrelmail_php_vers
 return ( 5 );
 }
 
+sub script_squirrelmail_abandoned
+{
+return 1;
+}
+
 sub script_squirrelmail_pear_modules
 {
 local ($d, $opts) = @_;
