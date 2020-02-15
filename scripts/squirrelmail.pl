@@ -128,13 +128,16 @@ sub script_squirrelmail_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
+	   'nocheck' => 1,
 	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-webmail-$ver.tar.gz" },
 	   { 'name' => 'set_user_data',
 	     'file' => 'set_user_data.tar.gz',
 	     'nofetch' => 1,
+	     'nocheck' => 1,
 	     'url' => 'http://scripts.virtualmin.com/set_user_data-1.0.tar.gz' },
 	   { 'name' => 'locales',
 	     'file' => 'locales.tar.gz',
+	     'nocheck' => 1,
 	     'url' => "http://sourceforge.net/projects/squirrelmail/files/locales/1.4.18-20090526/all_locales-1.4.18-20090526.tar.gz" },
 	    );
 return @files;
