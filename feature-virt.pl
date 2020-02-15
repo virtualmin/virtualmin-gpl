@@ -7,11 +7,11 @@ sub setup_virt
 local ($d) = @_;
 &obtain_lock_virt($d);
 &foreign_require("net");
-local @boot = &net::active_interfaces();
+local @active = &net::active_interfaces();
 if (!$d->{'virtalready'}) {
 	# Actually bring up
 	&$first_print(&text('setup_virt', $d->{'ip'}));
-	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @boot;
+	local ($iface) = grep { $_->{'fullname'} eq $config{'iface'} } @active;
 	if (!$iface) {
 		# Interface doesn't really exist!
 		&$second_print(&text('setup_virtmissing', $config{'iface'}));
@@ -20,7 +20,7 @@ if (!$d->{'virtalready'}) {
 	local $b;
 	local $vmin = $config{'iface_base'} || int($net::min_virtual_number);
 	local $vmax = -1;
-	foreach $b (@boot) {
+	foreach $b (@active) {
 		$vmax = $b->{'virtual'}
 			if ($b->{'virtual'} ne '' &&
 			    $b->{'name'} eq $iface->{'name'} &&
@@ -50,7 +50,7 @@ if (!$d->{'virtalready'}) {
 else {
 	# Just guess the interface
 	&$first_print(&text('setup_virt2', $d->{'ip'}));
-	local ($virt) = grep { $_->{'address'} eq $d->{'ip'} } @boot;
+	local ($virt) = grep { $_->{'address'} eq $d->{'ip'} } @active;
 	$d->{'iface'} = $virt ? $virt->{'fullname'} : undef;
 	if ($d->{'iface'}) {
 		&$second_print(&text('setup_virtdone2', $d->{'iface'}));
