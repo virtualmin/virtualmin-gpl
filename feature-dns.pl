@@ -2527,7 +2527,7 @@ print &ui_table_row(&hlink($text{'tmpl_dmarc'},
                            "template_dns_dmarc_mode"),
 	&none_def_input("dns_dmarc", $tmpl->{'dns_dmarc'},
 		        $text{'tmpl_dmarcyes'}, 0, 0, $text{'no'},
-			[ "dns_dmarcp", "dns_dmarcpct" ]));
+			[ "dns_dmarcp", "dns_dmarcpct", "dns_dmarcextra" ]));
 
 # DMARC policy
 print &ui_table_row(&hlink($text{'tmpl_dmarcp'},
@@ -2555,6 +2555,11 @@ foreach my $r ('ruf', 'rua') {
 			    [ 0, &ui_textbox('dns_dmarc'.$r,
 					$tmpl->{'dns_dmarc'.$r}, 40) ] ]));
 	}
+
+# Extra DMARC fields
+print &ui_table_row(&hlink($text{'tmpl_dmarcextra'},
+			   "template_dns_dmarcextra"),
+	&ui_textbox("dns_dmarcextra", $tmpl->{'dns_dmarcextra'}, 40));
 
 if (!$config{'provision_dns'}) {
 	print &ui_table_hr();
@@ -2725,6 +2730,7 @@ foreach my $r ('ruf', 'rua') {
 	$tmpl->{'dns_dmarc'.$r} = $in{'dns_dmarc'.$r.'_def'} == 1 ? undef :
 	  $in{'dns_dmarc'.$r.'_def'} == 2 ? "skip" : $in{'dns_dmarc'.$r};
 	}
+$tmpl->{'dns_dmarcextra'} = $in{'dns_dmarcextra'};
 
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
@@ -3128,6 +3134,10 @@ foreach my $r ('ruf', 'rua') {
 	else {
 		$dmarc->{$r} = $pm;
 		}
+	}
+foreach my $w (split(/;\s*/, $tmpl->{'dns_dmarcextra'})) {
+	my ($n, $v) = split(/=/, $w);
+	$dmarc->{$n} = $v;
 	}
 return $dmarc;
 }

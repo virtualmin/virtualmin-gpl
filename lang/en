@@ -3334,6 +3334,7 @@ tmpl_dmarcruf=Reporting URI for forensic reports
 tmpl_dmarcrua=Reporting URI for aggregate reports
 tmpl_dmarcskip=None set
 tmpl_dmarcyes=Yes, with policy below
+tmpl_dmarcextra=Extra DMARC options
 tmpl_edmarcpct=Percentage of messages must be an integer between 0 and 100
 tmpl_edns=No DNS records entered
 tmpl_dns_sub=Add sub-domain DNS records to parent domain?
