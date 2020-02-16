@@ -3135,10 +3135,7 @@ foreach my $r ('ruf', 'rua') {
 		$dmarc->{$r} = $pm;
 		}
 	}
-foreach my $w (split(/;\s*/, $tmpl->{'dns_dmarcextra'})) {
-	my ($n, $v) = split(/=/, $w);
-	$dmarc->{$n} = $v;
-	}
+$dmarc->{'other'} = [ split(/;\s*/, $tmpl->{'dns_dmarcextra'}) ];
 return $dmarc;
 }
 
