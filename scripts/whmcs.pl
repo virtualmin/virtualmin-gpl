@@ -34,7 +34,7 @@ return 1;
 
 sub script_whmcs_release
 {
-return 6;	# To update SSL link
+return 7;	# To fix download URL
 }
 
 sub script_whmcs_category
@@ -201,7 +201,7 @@ local $shortver = $ver;
 $shortver =~ s/\.//g;
 local @files = ( { 'name' => "source",
 	   'file' => "whmcs_v$shortver.zip",
-	   'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}_full.zip" } );
+	   'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
 local $io = &script_whmcs_get_ioncube_type();
 push(@files, { 'name' => "ioncube",
 	       'file' => "ioncube_loaders.zip",
