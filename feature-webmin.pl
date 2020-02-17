@@ -1319,6 +1319,7 @@ $tmpl->{'gacl_groups'} = $in{'gacl_groups'};
 $tmpl->{'gacl_root'} = $in{'gacl_root'};
 $tmpl->{'extra_prefix'} = &parse_none_def("extra_prefix");
 if ($in{'webmin_group'} && $in{'webmin_group'} ne "none") {
+	&require_acl();
 	local ($group) = grep { $_->{'name'} eq $in{'webmin_group'} }
 			      &acl::list_groups();
 	&indexof($module_name, @{$group->{'members'}}) < 0 ||
