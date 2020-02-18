@@ -213,4 +213,17 @@ if ($redir->{'path'} eq '^/(?!.well-known)' && !$redir->{'alias'} && $redir->{'r
 return $redir;
 }
 
+# get_redirect_to_ssl(&domain)
+# Returns a default non-SSL to SSL redirect
+sub get_redirect_to_ssl
+{
+my ($d) = @_;
+return { 'path' => '^/(?!.well-known)',
+	 'dest' => 'https://'.$d->{'dom'}.'/$1',
+	 'alias' => 0,
+	 'regexp' => 1,
+	 'http' => 1,
+	 'https' => 0 };
+}
+
 1;

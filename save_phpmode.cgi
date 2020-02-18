@@ -198,6 +198,27 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 		}
 	}
 
+# Update SSL redirect
+if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
+	my @redirects = map { &remove_wellknown_redirect($_) }
+			    &list_redirects($d);
+	my ($defredir) = grep { $_->{'path'} eq '/' &&
+			        $_->{'http'} && !$_->{'https'} } @redirects;
+	if ($defredir && !$in{'sslredir'}) {
+		&$first_print($text{'phpmode_ssloff'});
+		$defredir = &add_wellknown_redirect($defredir);
+		my $err = &delete_redirect($d, $defredir);
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
+	elsif (!$defredir && $in{'sslredir'}) {
+		&$first_print($text{'phpmode_sslon'});
+		my $err = &create_redirect($d, &get_redirect_to_ssl($d));
+		&$second_print($err ? $err : $text{'setup_done'});
+		$anything++;
+		}
+	}
+
 # Change HTML directory
 if (defined($in{'htmldir'}) &&
     !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&

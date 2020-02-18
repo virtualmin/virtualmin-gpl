@@ -135,6 +135,16 @@ if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ && $p eq 'web') {
 		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
 	}
 
+# Redirect non-SSL to SSL?
+if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
+	my @redirects = map { &remove_wellknown_redirect($_) }
+			    &list_redirects($d);
+	my ($defredir) = grep { $_->{'path'} eq '/' &&
+			        $_->{'http'} && !$_->{'https'} } @redirects;
+	print &ui_table_row(&hlink($text{'phpmode_sslredir'}, 'sslredir'),
+		&ui_yesno_radio("sslredir", $defredir ? 1 : 0));
+	}
+
 print &ui_hidden_table_end();
 
 # Show PHP information

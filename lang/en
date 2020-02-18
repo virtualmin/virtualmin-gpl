@@ -5016,6 +5016,7 @@ phpmode_evirt=Website options cannot be edited, as no Apache virtual host for $1
 phpmode_alog=Webserver access log file
 phpmode_elog=Webserver error log file
 phpmode_htmldir=Website documents sub-directory
+phpmode_sslredir=Redirect all requests to SSL site?
 phpmode_setalog=Changing webserver access log ..
 phpmode_logerr=.. failed : $1
 phpmode_setelog=Changing webserver error log ..
@@ -5025,6 +5026,8 @@ phpmode_ehtmldir=Missing or invalid website documents sub-directory
 phpmode_ehtmldir2=Website documents sub-directory cannot start with or end with /
 phpmode_ehtmldir3=The website documents sub-directory cannot contain ..
 phpmode_ehtmldir4=The website documents sub-directory cannot be under <tt>domains</tt>, as that directory is reserved for sub-servers
+phpmode_ssloff=Removing redirect to SSL site ..
+phpmode_sslon=Adding redirect to SSL site ..
 
 spf_title=DNS Options
 spf_ecannot=You are not allowed to edit DNS options
