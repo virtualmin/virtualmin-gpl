@@ -3859,6 +3859,19 @@ else {
 	}
 }
 
+# get_domain_tlsa_records(&domain)
+# Returns all TLSA records for a domain, to check if it's enabled or not
+sub get_domain_tlsa_records
+{
+my ($d) = @_;
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+return () if (!$file);
+my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
+		     ($_->{'name'} eq $d->{'dom'}."." ||
+		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
+return @oldrecs;
+}
+
 # dns_records_to_text(&record, ...)
 # Returns a newline-terminate text list of DNS records
 sub dns_records_to_text

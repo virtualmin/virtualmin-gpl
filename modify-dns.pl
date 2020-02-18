@@ -59,6 +59,10 @@ be given, followed by the external IP address to use. To revert to using the
 real IP in DNS, use C<--no-dns-ip> instead. In both cases, the actual
 DNS records managed by Virtualmin will be updated.
 
+To add TLSA records (for publishing SSL certs) to selected domains, use the 
+C<--enable-tlsa> flag. Similarly the C<--disable-tlsa> removes them, and the
+C<--sync-tlsa> updates them in domains where they already exist.
+
 =cut
 
 package virtual_server;
@@ -192,6 +196,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--disable-tlsa") {
 		$tlsa = 0;
+		}
+	elsif ($a eq "--sync-tlsa") {
+		$tlsa = 2;
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -458,7 +465,7 @@ foreach $d (@doms) {
 	# Create or remove TLSA records
 	if (defined($tlsa)) {
 		&pre_records_change($d);
-		if ($tlsa) {
+		if ($tlsa == 1) {
 			&$first_print($text{'spf_enabletlsa'});
 			$err = &check_tlsa_support();
 			if ($err) {
@@ -470,11 +477,22 @@ foreach $d (@doms) {
 				$changed++;
 				}
 			}
-		else {
+		elsif ($tlsa == 0) {
 			&$first_print($text{'spf_disabletlsa'});
 			&sync_domain_tlsa_records($d, 2);
 			&$second_print($text{'setup_done'});
 			$changed++;
+			}
+		elsif ($tlsa == 2) {
+			&$first_print($text{'spf_synctlsa'});
+			my @recs = &get_domain_tlsa_records($d);
+			if (@recs) {
+				&sync_domain_tlsa_records($d, 1);
+				&$second_print($text{'setup_done'});
+				}
+			else {
+				&$first_print($text{'spf_esynctlsa'});
+				}
 			}
 		if ($changed) {
 			# Records have changed, so re-read
@@ -533,7 +551,7 @@ print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
 print "                     [--remove-slave hostname]*\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
-print "                     [--enable-tlsa | --disable-tlsa]\n";
+print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
 exit(1);
 }
 

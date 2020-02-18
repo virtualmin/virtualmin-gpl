@@ -5075,6 +5075,8 @@ spf_disablednssec=Removing DNSSEC records ..
 spf_enabletlsa=Creating TLSA records ..
 spf_disabletlsa=Removing TLSA records ..
 spf_etlsa=.. not supported on this system : $1
+spf_synctlsa=Updating TLSA records ..
+spf_esynctlsa=.. none found for this domain
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed
 s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2
