@@ -3739,7 +3739,7 @@ $hash =~ /=\s*([0-9a-f]+)/ || return undef;
 return { 'name' => "_".$port."._tcp.".$host.".",
 	 'class' => "IN",
 	 'type' => "TLSA",
-         'ttl' => 60,
+         'ttl' => 3600,
 	 'values' => [ 3, 0, 1, $1 ] };
 }
 
