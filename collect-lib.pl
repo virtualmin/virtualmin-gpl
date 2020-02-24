@@ -793,7 +793,7 @@ my @virtualmin_packages = (
 	"spamassassin", "logrotate", "webalizer", "mysql",
 	"postgresql", "proftpd", "clamav", "php4", "mailman",
 	"subversion", "python", "ruby", "irb", "rdoc", "rubygems",
-	"openssl", "perl", "php5", "webmin", "usermin",
+	"openssl", "perl", "php.*", "webmin", "usermin",
 	"fcgid", "awstats", "dovecot", "postgrey",
 	"virtualmin-modules", "kvm", "xen", "nginx", "jailkit",
         );
