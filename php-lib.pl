@@ -430,6 +430,7 @@ foreach my $p (@ports) {
 			push(@remove, ".php$v");
 			}
 		}
+	@remove = &unique(@remove);
 	&apache::save_directive("RemoveHandler", \@remove, $vconf, $conf);
 
 	# For non-mod_php mode, use php_admin_value to turn off mod_php in
@@ -1170,6 +1171,7 @@ foreach my $p (@ports) {
 				     "$dest/php$v->[0].fcgi .php$v->[0]");
 				}
 			push(@wrappers, "$dest/php$ver.fcgi .php");
+			@wrappers = &unique(@wrappers);
 			&apache::save_directive("FCGIWrapper", \@wrappers,
 						$dirstr->{'members'}, $conf);
 			&flush_file_lines($dirstr->{'file'});
