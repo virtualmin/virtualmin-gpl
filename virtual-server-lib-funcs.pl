@@ -9367,6 +9367,7 @@ if (!$tmpl->{'default'}) {
 			local $k;
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
+				next if ($p eq "php" && $k =~ /^php_fpm/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
 					$tmpl->{$k} = $def->{$k};

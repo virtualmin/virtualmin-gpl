@@ -1939,7 +1939,6 @@ else {
 	&close_tempfile(CONF);
 
 	# Add / override custom options (with substitution)
-	my $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'php_fpm'} ne 'none') {
 		foreach my $l (split(/\t+/,
 		    &substitute_domain_template($tmpl->{'php_fpm'}, $d))) {
