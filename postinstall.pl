@@ -365,10 +365,6 @@ if ($config{'allow_symlinks'} eq '') {
 	local @fixdoms = &fix_symlink_security(undef, 1);
 	$warn++ if (@fixdoms);
 	}
-if ($config{'allow_modphp'} eq '') {
-	local @fixdoms = &fix_mod_php_security(undef, 1);
-	$warn++ if (@fixdoms);
-	}
 if ($warn) {
 	print STDERR "WARNING: Potential security problems detected. Login to Virtualmin at\n";
 	print STDERR &get_virtualmin_url()," to fix them.\n";

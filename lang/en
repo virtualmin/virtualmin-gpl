@@ -3866,10 +3866,6 @@ licence_fixlinks=Virtualmin has detected that $1 domains on your system are conf
 licence_fixlinks2=WARNING : Fixing this setting will break all virtual servers that have content or applications under symbolic links to other directories.
 licence_fixlinksok=Fix Symbolic Link Permissions
 licence_fixlinksignore=Allow Unsafe Symbolic Links
-licence_fixphp=Virtualmin has detected that $1 domains on your system are configured to allow PHP scripts to be run using <tt>mod_php</tt>, even when this execution mode is disabled. This can be exploited by a domain owner to access configurations files and private data in other virtual servers, because all PHP scripts run as the Apache user which has access to all domains' files.
-licence_fixphp2=WARNING : Fixing this setting will break any virtual servers that use both PHP execution modes, such as via a shared install of a PHP application.
-licence_fixphpok=Fix PHP Permissions
-licence_fixphpignore=Allow Use Of Both PHP Execution Modes
 licence_xfsreboot=Your system must be rebooted to enable XFS quotas on the root filesystem. Until this is done, Virtualmin will not detect quotas as being active, and it will be impossible to apply limits on disk usage to virtual servers or users.
 licence_xfsrebootok=Reboot Now
 

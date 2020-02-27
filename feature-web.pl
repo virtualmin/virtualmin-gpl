@@ -290,9 +290,6 @@ eval {
 
 	# Apply symlink and mod_php fixes, in case the template wasn't
 	# updated with them
-	if ($config{'allow_modphp'} ne '1' && !$d->{'alias'}) {
-		&fix_mod_php_security([ $d ]);
-		}
 	if ($config{'allow_symlinks'} ne '1' && !$d->{'alias'}) {
 		&fix_symlink_security([ $d ]);
 		}
@@ -4198,76 +4195,6 @@ if ($suexec && ($suexec->{'words'}->[0] eq $oldd->{'user'} ||
 			$vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
-}
-
-# fix_mod_php_security([&domains], [find-only])
-# Goes through all virtual servers in non-mod_php mode, and adds the 
-# php_admin_value directive to forcibly disable mod_php if missing
-sub fix_mod_php_security
-{
-local ($doms, $findonly) = @_;
-$doms ||= [ &list_domains() ];
-local @flush;
-&require_apache();
-local @fixdoms;
-local @lockdoms;
-if (!&get_apache_mod_php_version()) {
-	# mod_php not even enabled, so do nothing
-	return ( );
-	}
-foreach my $d (@$doms) {
-	next if (!$d->{'web'} || $d->{'alias'});
-	my $mode = &get_domain_php_mode($d);
-	if ($mode eq "cgi" || $mode eq "fcgid" || $mode eq "fpm") {
-		local @ports = ( $d->{'web_port'},
-				 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-		local $domfixed;
-		if (!$findonly) {
-			&obtain_lock_web($d);
-			&obtain_lock_ssl($d) if ($d->{'ssl'});
-			push(@lockdoms, $d);
-			}
-		foreach my $p (@ports) {
-			local ($virt, $vconf, $conf) = &get_apache_virtual(
-				$d->{'dom'}, $p);
-			next if (!$virt);
-			local @admin = &apache::find_directive(
-					"php_admin_value", $vconf);
-			local ($engine) = grep { /engine\s+Off/i } @admin;
-			if (!$engine) {
-				push(@admin, "engine Off");
-				&apache::save_directive(
-					"php_admin_value", \@admin,
-					$vconf, $conf);
-				push(@flush, $virt->{'file'});
-				$domfixed++;
-				}
-			}
-		push(@fixdoms, $d) if ($domfixed);
-		}
-	}
-@flush = &unique(@flush);
-if ($findonly) {
-	# Roll back all changes, since we are only testing for fixes
-        foreach my $f (@flush) {
-                &unflush_file_lines($f);
-                }
-	}
-else {
-	# Actually save the files
-	foreach my $f (@flush) {
-		&flush_file_lines($f);
-		}
-	if (@flush) {
-		&register_post_action(\&restart_apache);
-		}
-	}
-# Unlock all locked domains
-foreach my $d (@lockdoms) {
-	&release_lock_ssl($d) if ($d->{'ssl'});
-	&release_lock_web($d);
-	}
-return @fixdoms;
 }
 
 # fix_symlink_security([&domains], [find-only])

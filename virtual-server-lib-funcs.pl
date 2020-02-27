@@ -10883,28 +10883,6 @@ if ($config{'allow_symlinks'} eq '') {
 		}
 	}
 
-# Check if mod_php needs to be disabled
-if ($config{'allow_modphp'} eq '') {
-	my $alert_text;
-	# Do any domains allow mod_php incorrectly?
-	local @fixdoms = &fix_mod_php_security(undef, 1);
-	if (@fixdoms) {
-		$alert_text .= "<b>".&text('licence_fixphp', scalar(@fixdoms))."<p>".
-		             $text{'licence_fixphp2'}."</b><p>\n";
-		$alert_text .= &ui_form_start(
-			"$gconfig{'webprefix'}/$module_name/fix_modphp.cgi");
-		$alert_text .= &ui_submit($text{'licence_fixphpok'}, undef);
-		$alert_text .= &ui_submit($text{'licence_fixphpignore'}, 'ignore');
-		$alert_text .= &ui_form_end();
-		push(@rv, $alert_text);
-		}
-	else {
-		# All OK already, don't check again
-		$config{'allow_modphp'} = 0;
-		&save_module_config();
-		}
-	}
-
 # Check if a reboot is needed to enable Xen quotas on /
 if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
 	my $alert_text;

@@ -439,7 +439,7 @@ foreach my $p (@ports) {
 		local @admin = &apache::find_directive("php_admin_value",
 						       $vconf);
 		@admin = grep { !/^engine\s+/ } @admin;
-		if ($mode ne "mod_php" && !$config{'allow_modphp'}) {
+		if ($mode ne "mod_php") {
 			push(@admin, "engine Off");
 			}
 		&apache::save_directive("php_admin_value", \@admin,
