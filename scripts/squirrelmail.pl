@@ -21,6 +21,11 @@ sub script_squirrelmail_versions
 return ( "1.4.22" );
 }
 
+sub script_squirrelmail_release
+{
+return 2;	# Remove set_user_data
+}
+
 sub script_squirrelmail_version_desc
 {
 local ($ver) = @_;
@@ -130,11 +135,6 @@ local @files = ( { 'name' => "source",
 	   'file' => "squirrelmail-$ver.tar.gz",
 	   'nocheck' => 1,
 	   'url' => "http://prdownloads.sourceforge.net/squirrelmail/squirrelmail-webmail-$ver.tar.gz" },
-	   { 'name' => 'set_user_data',
-	     'file' => 'set_user_data.tar.gz',
-	     'nofetch' => 1,
-	     'nocheck' => 1,
-	     'url' => 'http://scripts.virtualmin.com/set_user_data-1.0.tar.gz' },
 	   { 'name' => 'locales',
 	     'file' => 'locales.tar.gz',
 	     'nocheck' => 1,
@@ -291,60 +291,6 @@ if (!$upgrade) {
 				prefval BLOB DEFAULT '' NOT NULL,
 				PRIMARY KEY (user,prefkey)
 			)");
-		}
-
-	# Install the set user data plugin
-	local $vut = &get_mail_virtusertable();
-	if ($vut) {
-		$out = &run_as_domain_user($d,
-			"cd ".quotemeta("$opts->{'dir'}/plugins").
-			" && (gunzip -c $files->{'set_user_data'} | tar xf -)");
-		local $sdir = "$opts->{'dir'}/plugins/set_user_data";
-		local $scfilesrc = "$sdir/config.php.sample";
-		-r $scfilesrc ||
-			return (0, "Failed to extract set_user_data plugin : ".
-				   "<tt>$out</tt>.");
-
-		# Setup the config file
-		local $scfile = "$sdir/config.php";
-		&copy_source_dest_as_domain_user($d, $scfilesrc, $scfile);
-		local $sc = &read_file_contents_as_domain_user($d, $scfile);
-		$sc =~ s/'passwd'/'passwd+', 'virtual'/;
-		$sc =~ s/\['loginmode'\]\s*=\s*0/\['loginmode'\] = 1/;
-		$sc =~ s/\['loginmethods'\]\s*=\s*array\(/\['loginmethods'\] = array\('virtual'/;
-		&open_tempfile_as_domain_user($d, CONF, ">$scfile");
-		&print_tempfile(CONF, $sc);
-		&close_tempfile_as_domain_user($d, CONF);
-
-		# Setup passwd config file
-		&copy_source_dest_as_domain_user($d,
-			"$sdir/methods/passwd.php.sample",
-			"$sdir/methods/passwd.php");
-		local $vc = &read_file_contents_as_domain_user($d,
-			"$sdir/methods/passwd.php");
-		$vc =~ s/settings\['posix'\]\s*=\s*0/settings\['posix'\] = 1/;
-		&open_tempfile_as_domain_user($d, CONF,
-			">$sdir/methods/passwd.php");
-		&print_tempfile(CONF, $vc);
-		&close_tempfile_as_domain_user($d, CONF);
-
-		# Setup virtual config file
-		&copy_source_dest_as_domain_user($d,
-			"$sdir/methods/virtual.php.sample",
-			"$sdir/methods/virtual.php");
-		local $vc = &read_file_contents_as_domain_user($d,
-			"$sdir/methods/virtual.php");
-		$vc =~ s/settings\['file'\]\s*=\s*'.*'/settings\['file'\] = '$vut'/g;
-		&open_tempfile_as_domain_user($d, CONF,
-			">$sdir/methods/virtual.php");
-		&print_tempfile(CONF, $vc);
-		&close_tempfile_as_domain_user($d, CONF);
-
-		# Register in squirrelmail config file
-		local $lref = &read_file_lines_as_domain_user($d, $cfile);
-		splice(@$lref, @$lref-1, 0,
-		       "\$plugins[0] = 'set_user_data';");
-		&flush_file_lines_as_domain_user($d, $cfile);
 		}
 	}
 
