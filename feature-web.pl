@@ -1537,8 +1537,8 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	# Just re-add ServerAlias entries if missing
 	&$first_print($text{'restore_apachecp2'});
 	local $alias = &get_domain($_[0]->{'alias'});
-	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
-						     $alias->{'web_port'});
+	local ($pvirt, $pconf, $conf) = &get_apache_virtual($alias->{'dom'},
+						            $alias->{'web_port'});
 	if (!$pvirt) {
 		&$second_print($text{'setup_ewebalias'});
 		return 0;
