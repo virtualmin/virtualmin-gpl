@@ -8,6 +8,7 @@ $d = &get_domain($in{'dom'});
 &can_edit_phpver($d) || &error($text{'phpver_ecannot'});
 &obtain_lock_web($d);
 
+my $updated = 0;
 &set_all_null_print();
 if ($in{'delete'}) {
 	# Remove selected
@@ -25,6 +26,7 @@ else {
 		    &list_domain_php_directories($d);
 	for($i=0; defined($in{"dir_$i"}); $i++) {
 		if ($in{"ver_$i"} ne $curr{$in{"dir_$i"}}) {
+			$updated = 1;
 			&save_domain_php_directory($d, $in{"dir_$i"},
 						       $in{"ver_$i"});
 			}
@@ -36,6 +38,7 @@ else {
 			&error($text{'phpver_enewdir'});
 		$in{'newdir'} =~ /^(http|https|ftp):/ &&
 			&error($text{'phpver_enewdir'});
+		$updated = 1;
 		&save_domain_php_directory($d, &public_html_dir($d)."/".
 					       $in{'newdir'}, $in{'newver'});
 		}
@@ -48,5 +51,4 @@ if ($mode ne "mod_php" && $mode ne "fpm") {
 &clear_links_cache($d);
 &run_post_actions();
 &webmin_log("phpver", "domain", $d->{'dom'});
-&domain_redirect($d);
-
+&domain_redirect($d, $updated);
