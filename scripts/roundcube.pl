@@ -320,7 +320,7 @@ else {
 	&require_mysql();
 	local $sqltemp = &transname();
 	&open_tempfile(SQLTEMP, ">$sqltemp", 0, 1);
-	open(SQLIN, "$opts->{'dir'}/SQL/mysql.update.sql");
+	open(SQLIN, "<$opts->{'dir'}/SQL/mysql.update.sql");
 	local $foundver = 0;
 	while(<SQLIN>) {
 		if (/Updates\s+from\s+version\s+(\S+)/ &&
