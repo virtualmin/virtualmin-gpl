@@ -25,7 +25,7 @@ else {
 
 # Read the autoreply file
 if (-e $in{'file'}) {
-	open(FILE, $in{'file'}) ||
+	open(FILE, "<".$in{'file'}) ||
 		&error(&text('rfile_eread', $in{'file'}, $d->{'user'}, $!));
 	while(<FILE>) {
 		push(@lines, $_);

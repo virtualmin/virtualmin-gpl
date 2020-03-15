@@ -328,7 +328,7 @@ sub get_open_dkim_config
 {
 my ($file) = @_;
 my %conf;
-open(DKIM, $file) || return undef;
+open(DKIM, "<".$file) || return undef;
 while(my $l = <DKIM>) {
 	$l =~ s/#.*$//;
 	if ($l =~ /^\s*(\S+)\s+(\S.*)/) {

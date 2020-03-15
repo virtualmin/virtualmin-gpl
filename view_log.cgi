@@ -17,7 +17,7 @@ $file =~ /\.\./ || $file =~ /\<|\>|\||\0/ &&
 $lconf = &webalizer::get_log_config($log) ||
 	&error($webalizer::text{'view_elog'}." : $log");
 $full = "$lconf->{'dir'}$file";
-open(FILE, $full) || &error($webalizer::text{'view_eopen'}." : $full");
+open(FILE, "<".$full) || &error($webalizer::text{'view_eopen'}." : $full");
 
 # Display file contents
 if ($full =~ /\.(html|htm)$/i) {

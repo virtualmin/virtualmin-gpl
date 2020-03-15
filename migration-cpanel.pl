@@ -307,7 +307,7 @@ else {
 local $quota;
 if (-r "$userdir/quota") {
 	# Get the quota (from home directory backup)
-	open(QUOTA, "$userdir/quota");
+	open(QUOTA, "<$userdir/quota");
 	$quota = <QUOTA>;
 	close(QUOTA);
 	$quota = int($quota) * 1024;	# cpanel quotas are in MB
@@ -315,7 +315,7 @@ if (-r "$userdir/quota") {
 elsif (-r "$datastore/quota_-v") {
 	# Get the quota (from v10 backup)
 	local $_;
-	open(QUOTA, "$datastore/quota_-v");
+	open(QUOTA, "<$datastore/quota_-v");
 	while(<QUOTA>) {
 		if (/^\s+\S+\s+(\d+)\s+(\d+)\s+(\d+)/) {
 			$quota = $2;
@@ -371,7 +371,7 @@ foreach my $f (@features, &list_feature_plugins()) {
 &set_featurelimits_from_plan(\%dom, $plan);
 
 # Work out the master admin MySQL password
-if (open(MYSQL, "$userdir/mysql.sql")) {
+if (open(MYSQL, "<$userdir/mysql.sql")) {
 	while(<MYSQL>) {
 		s/\r|\n//g;
 		if (/^GRANT USAGE ON \*\.\* TO '(\S+)'\@'(\S+)' IDENTIFIED BY PASSWORD '(\S+)';/ && $1 eq $user) {
@@ -690,7 +690,7 @@ if ($got{'mail'}) {
 	&set_alias_programs();
 	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
 	local $_;
-	open(VAD, "$userdir/vad/$dom");
+	open(VAD, "<$userdir/vad/$dom");
 	while(<VAD>) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
@@ -706,7 +706,7 @@ if ($got{'mail'}) {
 			}
 		}
 	close(VAD);
-	open(VA, "$userdir/va/$dom");
+	open(VA, "<$userdir/va/$dom");
 	while(<VA>) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
@@ -877,7 +877,7 @@ if ($got{'mysql'}) {
 		local %myusers;
 		local $_;
 		local (%donemysqluser, %donemysqlpriv);
-		open(MYSQL, "$userdir/mysql.sql");
+		open(MYSQL, "<$userdir/mysql.sql");
 		while(<MYSQL>) {
 			s/\r|\n//g;
 			if (/^GRANT USAGE ON \*\.\* TO '(\S+)'\@'(\S+)' IDENTIFIED BY PASSWORD '(\S+)';/) {
@@ -955,7 +955,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 	local $fcount = 0;
 	&$first_print("Re-creating FTP users ..");
 	local $_;
-	open(FTP, "$userdir/proftpdpasswd");
+	open(FTP, "<$userdir/proftpdpasswd");
 	while(<FTP>) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
@@ -1015,7 +1015,7 @@ if (-r "$userdir/proftpdpasswd" && !$waschild) {
 local @parked;
 if (!$waschild) {
 	local $_;
-	open(PARKED, "$userdir/pds");
+	open(PARKED, "<$userdir/pds");
 	while(<PARKED>) {
 		s/\r|\n//g;
 		local ($pdom) = split(/\s+/, $_);
@@ -1296,7 +1296,7 @@ foreach my $vf (readdir(VF)) {
 	&$first_print("Copying email aliases for addon domain $vf ..");
 	local $acount = 0;
 	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
-	open(VA, "$userdir/va/$vf");
+	open(VA, "<$userdir/va/$vf");
 	while(<VA>) {
 		s/\r|\n//g;
 		s/^\s*#.*$//;
@@ -1550,7 +1550,7 @@ local ($dom, $d, $usermap) = @_;
 local $mcount = 0;
 local (%pass, %quota);
 local $_;
-open(SHADOW, "$homesrc/etc/$dom/shadow");
+open(SHADOW, "<$homesrc/etc/$dom/shadow");
 while(<SHADOW>) {
 	s/\r|\n//g;
 	local ($suser, $spass) = split(/:/, $_);
@@ -1559,7 +1559,7 @@ while(<SHADOW>) {
 close(SHADOW);
 local $_;
 local $bsize = &quota_bsize("home");
-open(QUOTA, "$homesrc/etc/$dom/quota");
+open(QUOTA, "<$homesrc/etc/$dom/quota");
 while(<QUOTA>) {
 	s/\r|\n//g;
 	local ($quser, $qquota) = split(/:/, $_);
@@ -1567,7 +1567,7 @@ while(<QUOTA>) {
 	}
 close(QUOTA);
 local $_;
-open(PASSWD, "$homesrc/etc/$dom/passwd");
+open(PASSWD, "<$homesrc/etc/$dom/passwd");
 while(<PASSWD>) {
 	# Create the user
 	s/\r|\n//g;

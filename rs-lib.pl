@@ -306,7 +306,7 @@ if (!ref($h)) {
 if ($srcfile =~ /^\// && -r $srcfile) {
 	# Send body contents from file
 	my $buf;
-	open(SRCFILE, $srcfile);
+	open(SRCFILE, "<".$srcfile);
 	if ($offset) {
 		# Seek to some position
 		seek(SRCFILE, $offset, 0);

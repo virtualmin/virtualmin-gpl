@@ -79,7 +79,7 @@ else {
 	local $out;
 	close(TEMP);
 	local $_;
-	open(TEMP, $temp);
+	open(TEMP, "<".$temp);
 	while(<TEMP>) {
 		$out .= $_;
 		}
@@ -361,7 +361,7 @@ if (!$pid) {
 
 	# Open the file and start reading
 	&switch_to_domain_user($d);
-	my $ok = open(FILE, $file);
+	my $ok = open(FILE, "<".$file);
 	if (!$ok) {
 		print $readin "Failed to open $file : $!\n";
 		exit(1);
@@ -605,7 +605,7 @@ my ($d, $src, $dst) = @_;
 return (1, undef) if (&is_readonly_mode());
 my ($ok, $err);
 $ok = 1;
-if (!open(SOURCEFILE, $src)) {
+if (!open(SOURCEFILE, "<".$src)) {
 	$ok = 0;
 	$err = $!;
 	}

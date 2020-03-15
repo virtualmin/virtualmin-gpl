@@ -1429,7 +1429,7 @@ elsif ($config{'mail_system'} == 5) {
 						    "\@$dname" : "$1\@$dname",
 						 'to' => [ ] };
 				local $_;
-				open(QMAIL, "$ddir/$qf");
+				open(QMAIL, "<$ddir/$qf");
 				while(<QMAIL>) {
 					s/\r|\n//g;
 					push(@{$alias->{'to'}},
@@ -3215,7 +3215,7 @@ foreach $u (&list_all_users()) {
 local $foundmailuser;
 local $_;
 local @users = &list_domain_users($d);
-open(UFILE, $file."_users");
+open(UFILE, "<".$file."_users");
 while(<UFILE>) {
 	s/\r|\n//g;
 	local @user = split(/:/, $_);
@@ -3476,7 +3476,7 @@ if (!$_[2]->{'mailuser'}) {
 		}
 	local %existing = map { $_->{'from'}, $_ } &list_virtusers();
 	local $_;
-	open(AFILE, $file."_aliases");
+	open(AFILE, "<".$file."_aliases");
 	while(<AFILE>) {
 		if (/^(\S+):\s*(.*)/) {
 			local $virt = { 'from' => $1,
@@ -4236,7 +4236,7 @@ elsif ($config{'mail_system'} == 2) {
 	# Check Qmail rc script for use of procmail as default delivery
 	local $got;
 	local $_;
-	open(RC, "$qmailadmin::config{'qmail_dir'}/rc");
+	open(RC, "<$qmailadmin::config{'qmail_dir'}/rc");
 	while(<RC>) {
 		s/#.*$//;
 		$got = 1 if (/procmail/);
@@ -5684,7 +5684,7 @@ if ($lastpos > $st[7]) {
 	# Off end .. file has probably been rotated
 	$lastpos = 0;
 	}
-open(MAILLOG, $maillog);
+open(MAILLOG, "<".$maillog);
 seek(MAILLOG, $lastpos, 0);
 my $now = time();
 my @tm = localtime($now);
@@ -5775,7 +5775,7 @@ sub get_deleted_aliases
 {
 my ($d) = @_;
 my @rv;
-open(DELETED, "$saved_aliases_dir/$d->{'id'}");
+open(DELETED, "<$saved_aliases_dir/$d->{'id'}");
 while(my $l = <DELETED>) {
 	$l =~ s/\r|\n//g;
 	my ($from, @to) = split(/\t+/, $l);

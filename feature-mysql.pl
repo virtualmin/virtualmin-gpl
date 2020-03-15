@@ -1280,7 +1280,7 @@ return $rv;
 sub validate_mysql_backup
 {
 local ($dbfile) = @_;
-open(DBFILE, $dbfile);
+open(DBFILE, "<".$dbfile);
 local $first = <DBFILE>;
 close(DBFILE);
 if ($first =~ /^mysqldump:.*error/i) {

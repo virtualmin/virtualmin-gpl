@@ -32,7 +32,7 @@ elsif ($in{'source'} == 2) {
 	}
 
 # Check file type (tar.gz, tar.Z or just .pl script)
-open(PFILE, $file);
+open(PFILE, "<".$file);
 read(PFILE, $two, 2);
 close(PFILE);
 if ($two eq "\037\235") {

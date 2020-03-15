@@ -200,7 +200,7 @@ if ($dests[0] eq "download:") {
 		print "Content-type: application/octet-stream\n";
 		print "Content-length: $st[7]\n";
 		print "\n";
-		open(TEMP, $temp);
+		open(TEMP, "<".$temp);
 		unlink($temp);
 		while(read(TEMP, $buf, 32768) > 0) {
 			print $buf;

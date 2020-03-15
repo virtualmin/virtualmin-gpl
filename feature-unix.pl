@@ -940,7 +940,7 @@ sub get_unix_shells
 local @rv;
 local $_;
 local @shells;
-open(SHELLS, "/etc/shells");
+open(SHELLS, "</etc/shells");
 while(<SHELLS>) {
 	s/\r|\n//g;
 	s/#.*$//;

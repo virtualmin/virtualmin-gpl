@@ -13,7 +13,7 @@ require './virtual-server-lib.pl';
 if ($in{'file_def'} == 1) {
 	# Server-side file
 	&master_admin() || &error($text{'cmass_elocal'});
-	open(LOCAL, $in{'local'}) || &error($text{'cmass_elocal2'});
+	open(LOCAL, "<".$in{'local'}) || &error($text{'cmass_elocal2'});
 	while(<LOCAL>) {
 		$source .= $_;
 		}

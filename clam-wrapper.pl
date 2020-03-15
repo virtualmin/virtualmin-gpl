@@ -35,7 +35,7 @@ if ($timed_out) {
 	}
 
 # Read back status from clamscan, and exit non-zero if a virus was found
-open(OUTPUT, $temp);
+open(OUTPUT, "<".$temp);
 while(<OUTPUT>) {
 	$out .= $_;
 	}

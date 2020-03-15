@@ -328,7 +328,7 @@ if (-r $procmail_log_file && $hasprocmail) {
 		$lasttime = time();
 		}
 
-	open(PROCMAILLOG, $procmail_log_file);
+	open(PROCMAILLOG, "<".$procmail_log_file);
 	if ($st[1] == $lastinode && $lastpos) {
 		seek(PROCMAILLOG, $lastpos, 0);
 		}
@@ -384,7 +384,7 @@ if ($mail_log_file) {
 	# Read the log, finding number of messages recived, bounced and
 	# greylisted
 	local ($recvcount, $bouncecount, $greycount, $ratecount) = (0, 0, 0);
-	open(MAILLOG, $mail_log_file);
+	open(MAILLOG, "<".$mail_log_file);
 	if ($st[1] == $lastinode && $lastpos) {
 		seek(MAILLOG, $lastpos, 0);
 		}
@@ -592,7 +592,7 @@ local ($stat, $start, $end) = @_;
 local @rv;
 local $last_time;
 local $now = time();
-open(HISTORY, "$historic_info_dir/$stat");
+open(HISTORY, "<$historic_info_dir/$stat");
 while(<HISTORY>) {
 	chop;
 	local ($time, $value) = split(" ", $_);
@@ -638,7 +638,7 @@ return \%maxpossible;
 sub get_historic_first_last
 {
 local ($stat) = @_;
-open(HISTORY, "$historic_info_dir/$stat") || return (undef, undef);
+open(HISTORY, "<$historic_info_dir/$stat") || return (undef, undef);
 local $first = <HISTORY>;
 $first || return (undef, undef);
 chop($first);

@@ -1769,7 +1769,7 @@ foreach $l (&unique(@logs)) {
 			open(LOG, "uncompress -c ".quotemeta($f)." |");
 			}
 		else {
-			open(LOG, $f);
+			open(LOG, "<".$f);
 			}
 		while(<LOG>) {
 			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/) {

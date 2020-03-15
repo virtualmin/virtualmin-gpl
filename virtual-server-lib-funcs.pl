@@ -6253,7 +6253,7 @@ local ($file, $vbs) = @_;
 &$first_print($text{'restore_vchroot_doing'});
 &obtain_lock_ftp();
 local @chroots;
-open(CHROOT, $file);
+open(CHROOT, "<".$file);
 while(<CHROOT>) {
 	s/\r|\n//g;
 	local %c = map { my ($n, $v) = split(/=/, $_, 2);
@@ -8699,7 +8699,7 @@ $_[0] =~ /\.qmail(-(\S+))?$/;
 local $alias = { 'file' => $_[0],
 		 'name' => $2 };
 local $_;
-open(AFILE, $_[0]) || return undef;
+open(AFILE, "<".$_[0]) || return undef;
 while(<AFILE>) {
 	s/\r|\n//g;
 	s/#.*$//g;
@@ -9604,7 +9604,7 @@ sub list_custom_fields
 {
 local @rv;
 local $_;
-open(FIELDS, $custom_fields_file);
+open(FIELDS, "<".$custom_fields_file);
 while(<FIELDS>) {
 	s/\r|\n//g;
 	local @a = split(/:/, $_, 6);
@@ -9638,7 +9638,7 @@ sub list_custom_links
 {
 local @rv;
 local $_;
-open(LINKS, $custom_links_file);
+open(LINKS, "<".$custom_links_file);
 while(<LINKS>) {
 	s/\r|\n//g;
 	local @a = split(/\t/, $_);
@@ -9677,7 +9677,7 @@ foreach my $a (@{$_[0]}) {
 sub list_custom_link_categories
 {
 local @rv;
-open(LINKCATS, $custom_link_categories_file);
+open(LINKCATS, "<".$custom_link_categories_file);
 while(<LINKCATS>) {
 	s/\r|\n//g;
 	local @a = split(/\t/, $_);
@@ -9848,7 +9848,7 @@ if ($file !~ /^\//) {
 		}
 	}
 local $_;
-open(FILE, $file);
+open(FILE, "<".$file);
 while(<FILE>) {
 	s/\r|\n//g;
 	if (/^"([^"]*)"\s+"([^"]*)"$/) {
@@ -10237,7 +10237,7 @@ foreach $f ($_[5] ? &all_log_files($_[0], $max_ltime) : ( $_[0] )) {
 		open(LOG, "uncompress -c ".quotemeta($f)." |");
 		}
 	else {
-		open(LOG, $f);
+		open(LOG, "<".$f);
 		}
 	while(<LOG>) {
 		if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/) {
@@ -11517,7 +11517,7 @@ if ($key) {
 		     quotemeta($file)." 2>/dev/null |");
 	}
 else {
-	open(BACKUP, $file);
+	open(BACKUP, "<".$file);
 	}
 local $two;
 read(BACKUP, $two, 2);
@@ -14802,7 +14802,7 @@ else {
 
 # Check for FTP shells in /etc/shells
 local $_;
-open(SHELLS, "/etc/shells");
+open(SHELLS, "</etc/shells");
 while(<SHELLS>) {
 	s/\r|\n//g;
 	s/#.*$//;
@@ -15098,7 +15098,7 @@ sub get_beancounters
 {
 local %beans;
 local $inctx = 0;
-open(BEANS, "/proc/user_beancounters") || return undef;
+open(BEANS, "</proc/user_beancounters") || return undef;
 while(<BEANS>) {
 	if (/^\s*(\d+):/) {
 		if ($1 != 0) {
@@ -16140,7 +16140,7 @@ elsif ($f =~ /\.bz2$/i) {
 	return open($fh, &get_bunzip2_command()." -c ".quotemeta($f)." |");
 	}
 else {
-	return open($fh, $f);
+	return open($fh, "<".$f);
 	}
 }
 
@@ -16414,7 +16414,7 @@ if ($list_available_shells_cache{$mail}) {
 	}
 if (-r $custom_shells_file) {
 	# Read shells data file
-	open(SHELLS, $custom_shells_file);
+	open(SHELLS, "<".$custom_shells_file);
 	while(<SHELLS>) {
 		s/\r|\n//g;
 		local %shell = map { split(/=/, $_, 2) } split(/\t+/, $_);

@@ -50,7 +50,7 @@ $| = 1;
 $meth = $ENV{'REQUEST_METHOD'};
 
 # Make sure the IP is on this system
-open(IPCACHE, "$module_config_directory/localips");
+open(IPCACHE, "<$module_config_directory/localips");
 chop(@localips = <IPCACHE>);
 close(IPCACHE);
 &indexof($ip, @localips) >= 0 ||

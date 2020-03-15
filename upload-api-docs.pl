@@ -49,7 +49,7 @@ foreach my $dir (&list_api_directories($pwd)) {
 	foreach my $f (readdir(DIR)) {
 		if ($f =~ /\.pl$/ && &indexof($f, @skip_scripts) < 0) {
 			local $/ = undef;
-			open(FILE, "$dir/$f");
+			open(FILE, "<$dir/$f");
 			my $data = <FILE>;
 			close(FILE);
 			if ($data =~ /=head1/) {

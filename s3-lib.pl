@@ -220,7 +220,7 @@ for(my $i=0; $i<$tries; $i++) {
 	if (!$multipart) {
 		local $SIG{'PIPE'} = 'IGNORE';
 		my $buf;
-		open(BACKUP, $sourcefile);
+		open(BACKUP, "<".$sourcefile);
 		while(read(BACKUP, $buf, 1024) > 0) {
 			if (!&write_http_connection($h, $buf)) {
 				$writefailed = $!;
@@ -923,7 +923,7 @@ foreach my $hfn ($req->header_field_names) {
 # Send the chunk
 local $SIG{'PIPE'} = 'IGNORE';
 my $buf;
-open(BACKUP, $sourcefile);
+open(BACKUP, "<".$sourcefile);
 seek(BACKUP, $sent, 0);
 my $got = 0;
 while(1) {
