@@ -400,11 +400,12 @@ print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 &require_mysql();
 if (-r $mysql::config{'my_cnf'}) {
 	local $mem = &get_real_memory_size();
-	local $mysize = $config{'mysql_size'};
-	if ($mem && !$mysize) {
-		$mysize = $mem <= 256*1024*1024 ? "small" :
-			  $mem <= 512*1024*1024 ? "medium" :
-			  $mem <= 1024*1024*1024 ? "large" : "huge";
+	local $mysize = $config{'mysql_size'} || "";
+	local $recsize;
+	if ($mem) {
+		$recsize = $mem <= 256*1024*1024 ? "small" :
+			   $mem <= 512*1024*1024 ? "medium" :
+			   $mem <= 1024*1024*1024 ? "large" : "huge";
 		}
 	my @types = &list_mysql_size_setting_types();
 	my $conf = &mysql::get_mysql_config();
@@ -426,7 +427,9 @@ if (-r $mysql::config{'my_cnf'}) {
 		      [ [ "", $text{'wizard_mysize_def'}.
 			      ($currt ? " - ".&text('wizard_mysize_deft',
 				$text{'wizard_mysize_'.$currt}) : "") ],
-			map { [ $_, $text{'wizard_mysize_'.$_} ] } @types ]));
+			map { [ $_, $text{'wizard_mysize_'.$_}.
+			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
+			      ] } @types ]));
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
