@@ -51,7 +51,7 @@ print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),
 	&ui_yesno_radio("regexp", $r->{'regexp'}));
 
 # Protocols to include
-if ($d->{'ssl'}) {
+if (&domain_has_ssl($d)) {
 	print &ui_table_row(&hlink($text{'redirect_proto'}, 'redirect_proto'),
 		&ui_checkbox("http", 1, $text{'redirect_http'}, $r->{'http'}).
 		" ".
