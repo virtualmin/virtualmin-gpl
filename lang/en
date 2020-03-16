@@ -1861,6 +1861,7 @@ check_webphpnofpm2=No PHP-FPM packages were found on this system.
 check_webphpfpmport=Fixing port $2 clash for PHP-FPM version $1
 check_webphpverfixed=Corrected FPM version for $1 domains.
 check_webphplocalfixed=Limited FPM server version $2 to localhost for $1 domains.
+check_webadminfixed=Removed unsupported $1 directive from $2 Apache websites.
 check_ftpok=ProFTPD is installed.
 check_dnsok=BIND DNS server is installed, and the system is configured to use it.
 check_dnsok2=BIND DNS server is installed.

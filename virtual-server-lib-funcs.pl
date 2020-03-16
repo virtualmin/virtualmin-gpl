@@ -14272,6 +14272,33 @@ if (&domain_has_website()) {
 			}
 		}
 
+	# Check for any unsupported mod_php directives
+	if (!&get_apache_mod_php_version()) {
+		my $changed = 0;
+		foreach my $d (grep { $_->{'web'} } &list_domains()) {
+			my @ports = ( $d->{'web_port'},
+			      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+			foreach my $p (@ports) {
+				my ($virt, $vconf, $conf) =
+					&get_apache_virtual($d->{'dom'}, $p);
+				next if (!$vconf);
+				my @admin = &apache::find_directive(
+					"php_admin_value", $vconf);
+				if (@admin) {
+					&apache::save_directive(
+					 "php_admin_value", [], $vconf, $conf);
+					$changed++;
+					}
+				}
+			}
+		if ($changed) {
+			&$second_print(&text('check_webadminfixed',
+				"<tt>php_admin_value</tt>", $changed));
+			&flush_file_lines();
+			&register_post_action(\&restart_apache);
+			}
+		}
+
 	# Check if any new PHP versions have shown up, and re-generate their
 	# cgi and fcgid wrappers
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
