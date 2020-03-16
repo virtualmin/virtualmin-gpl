@@ -2884,9 +2884,9 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 	if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
-		return ("alter user '$user'\@'$host' identified by ".
+		$sql = "alter user '$user'\@'$host' identified by ".
 			($plainpass ? "'".&mysql_escape($plainpass)."'"
-				    : $encpass));
+				    : $encpass);
 		}
 	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
 	       $plainpass) {
