@@ -353,7 +353,6 @@ if (&mysql::is_mysql_running() == -1) {
 else {
 	if (!$in{'mypass_def'}) {
 		# Change in DB
-		local $esc = &mysql::escapestr($in->{'mypass'});
 		local $user = $mysql::mysql_login || "root";
 		&execute_password_change_sql(undef, "root",
 			undef, 0, 0, $in->{'mypass'});
