@@ -1815,6 +1815,11 @@ if ($d->{'virt'}) {
 						$l->{'members'}, "ssl_ca",
 						"<".$chain, "protocol", "imap");
 					}
+				else {
+					&dovecot::save_directive(
+						$l->{'members'}, "ssl_ca",
+						undef, "protocol", "imap");
+					}
 				}
 			}
 		if (!$pop3) {
@@ -1851,6 +1856,11 @@ if ($d->{'virt'}) {
 					&dovecot::save_directive(
 						$l->{'members'}, "ssl_ca",
 						"<".$chain, "protocol", "pop3");
+					}
+				else {
+					&dovecot::save_directive(
+						$l->{'members'}, "ssl_ca",
+						undef, "protocol", "pop3");
 					}
 				}
 			}
@@ -1916,6 +1926,14 @@ else {
                                         "ssl_cert", "<".$d->{'ssl_cert'});
 			&dovecot::save_directive($l->{'members'},
                                         "ssl_key", "<".$d->{'ssl_key'});
+			if ($chain) {
+				&dovecot::save_directive($l->{'members'},
+						"ssl_ca", "<".$chain);
+				}
+			else {
+				&dovecot::save_directive($l->{'members'},
+						"ssl_ca", undef);
+				}
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
