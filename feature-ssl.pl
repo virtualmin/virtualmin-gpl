@@ -1746,6 +1746,7 @@ my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
 local $chain = &get_website_ssl_file($d, "ca");
+local $nochange = 0;
 if ($d->{'virt'}) {
 	# Domain has it's own IP
 
@@ -1876,6 +1877,10 @@ if ($d->{'virt'}) {
 			&flush_file_lines($l->{'file'});
 			undef(@dovecot::get_config_cache);
 			}
+		else {
+			# Nothing to add or remove
+			$nochange = 1;
+			}
 		}
 	}
 else {
@@ -1937,9 +1942,13 @@ else {
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
+	else {
+		# Nothing to add or remove
+		$nochange = 1;
+		}
 	}
 &unlock_file($cfile);
-&dovecot::apply_configuration();
+&dovecot::apply_configuration() if (!$nochange);
 }
 
 # get_dovecot_ssl_cert(&domain)
