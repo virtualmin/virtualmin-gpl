@@ -2811,7 +2811,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
-			    : $encpass));
+			    : "password ".$encpass));
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
 	my $native = &is_domain_mysql_remote($d) ?
