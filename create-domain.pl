@@ -469,7 +469,7 @@ if ($jail && $parentdomain) {
 	&usage("--enable-jail can only be used for top-level virtual servers");
 	}
 if (&has_home_quotas() && !$parentdomain) {
-	$quota && $uquota || $tlimit || &usage("No quota specified");
+	$quota ne '' && $uquota ne '' || $tlimit || &usage("No quota specified");
 	}
 if ($parentdomain) {
 	$feature{'unix'} && &usage("--unix option makes no sense for sub-servers");
