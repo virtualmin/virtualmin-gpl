@@ -124,14 +124,24 @@ if (&can_webmin_cert()) {
 		}
 	%cert_already = map { $_->{'id'}, $_ } @already;
 
-	print &ui_hr();
-	print "<b>$text{'cert_copymsg'}</b><p>\n";
+	my $cert_used_wm = (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'});
+	my $cert_used_um = (&foreign_installed("usermin") && 
+							(!$cert_already{'usermin'} || $cert_already{'usermin'}->{'d'}));
+	my $cert_used_dovecot = (&foreign_installed("dovecot") && !$cert_already{'dovecot'});
+	my $cert_used_postfix = ($config{'mail_system'} == 0 && !$cert_already{'postfix'});
+	my $cert_used_ftp = ($config{'ftp'} && !$cert_already{'proftpd'});
+	
+	# Don't print copy msg in case all alreay copied	
+	if ($cert_used_wm || $cert_used_um || $cert_used_dovecot ||	$cert_used_postfix || $cert_used_ftp) {
+		print &ui_hr();
+		print "<b>$text{'cert_copymsg'}</b><p>\n";
+		}
 
 	print &ui_buttons_start();
 
 	# Copy to Webmin button
 	&get_miniserv_config(\%miniserv);
-	if (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'}) {
+	if ($cert_used_wm) {
 		print &ui_buttons_row(
 			"copy_cert.cgi",
 			$text{'cert_copy'},
@@ -141,8 +151,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Usermin, if installed
-	if (&foreign_installed("usermin") &&
-	    (!$cert_already{'usermin'} || $cert_already{'usermin'}->{'d'})) {
+	if ($cert_used_um) {
 		&foreign_require("usermin");
 		&usermin::get_usermin_miniserv_config(\%uminiserv);
 		print &ui_buttons_row(
@@ -154,7 +163,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Dovecot, if installed
-	if (&foreign_installed("dovecot") && !$cert_already{'dovecot'}) {
+	if ($cert_used_dovecot) {
 		print &ui_buttons_row(
 			"copy_cert_dovecot.cgi",
 			$text{'cert_dcopy'}, $text{'cert_dcopydesc'},
@@ -163,7 +172,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to Postfix, if in use
-	if ($config{'mail_system'} == 0 && !$cert_already{'postfix'}) {
+	if ($cert_used_postfix) {
 		print &ui_buttons_row(
 			"copy_cert_postfix.cgi",
 			$text{'cert_pcopy'}, $text{'cert_pcopydesc'},
@@ -172,7 +181,7 @@ if (&can_webmin_cert()) {
 		}
 
 	# Copy to ProFTPd, if in use
-	if ($config{'ftp'} && !$cert_already{'proftpd'}) {
+	if ($cert_used_ftp) {
 		print &ui_buttons_row(
 			"copy_cert_proftpd.cgi",
 			$text{'cert_fcopy'}, $text{'cert_fcopydesc'},

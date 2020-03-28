@@ -4,7 +4,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
-&can_edit_domain($d) && &can_edit_ssl() && &can_webmin_cert() ||
+$d && &can_edit_domain($d) && &can_edit_ssl() && &can_webmin_cert() ||
 	&error($text{'copycert_ecannot'});
 $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 
