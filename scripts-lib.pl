@@ -3001,7 +3001,9 @@ return @fixed;
 sub get_python_path
 {
 return &has_command($config{'python_cmd'}) ||
-       &has_command("python") || "python";
+       &has_command("python") ||
+       &has_command("python3") ||
+       "python";
 }
 
 # allocate_free_tcp_port(&used-ports-map, starting-port)
