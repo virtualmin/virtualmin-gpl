@@ -19,30 +19,20 @@ return undef;
 # Create logrotate entries for the server's access and error logs
 sub setup_logrotate
 {
+my ($d) = @_;
 &$first_print($text{'setup_logrotate'});
 &require_logrotate();
 &require_apache();
-&obtain_lock_logrotate($_[0]);
-local $tmpl = &get_template($_[0]->{'template'});
+&obtain_lock_logrotate($d);
+local $tmpl = &get_template($d->{'template'});
 
 # Work out the log files we are rotating
-local @logs = &get_all_domain_logs($_[0]);
-local @tmpllogs = &get_domain_template_logs($_[0]);
+local @logs = &get_all_domain_logs($d);
+local @tmpllogs = &get_domain_template_logs($d);
 if (@logs) {
-	# Check if any are already rotated
-	local $parent = &logrotate::get_config_parent();
-	foreach my $c (@{$parent->{'members'}}) {
-		foreach my $n (@{$c->{'name'}}) {
-			if (&indexof($n, @logs) >= 0) {
-				# Clash!!
-				&error(&text('setup_clashlogrotate',
-					     "<tt>$n</tt>"));
-				}
-			}
-		}
-
 	# If in single config mode, check if there is a block for Virtualmin
 	# already (either under /var/log/virtualmin, or in a domain's home)
+	local $parent = &logrotate::get_config_parent();
 	local $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
 	local $already;
@@ -58,17 +48,37 @@ if (@logs) {
 			}
 		}
 
+	# Check if any are already rotated
+	foreach my $c (@{$parent->{'members'}}) {
+		foreach my $n (@{$c->{'name'}}) {
+			if (&indexof($n, @logs) >= 0) {
+				# Yes, but maybe that's OK
+				if ($already) {
+					&release_lock_logrotate($d);
+					&$second_print(
+						&text('setup_logrotatealready',
+                                                      "<tt>$n</tt>"));
+					return 1;
+					}
+				else {
+					&error(&text('setup_clashlogrotate',
+						     "<tt>$n</tt>"));
+					}
+				}
+			}
+		}
+
 	if (!$already) {
 		# Add the new section
 		local $file = &logrotate::get_add_file(
 			$tmpl->{'logrotate_shared'} eq 'yes' ?
-			    'virtualmin' : $_[0]->{'dom'});
+			    'virtualmin' : $d->{'dom'});
 		local $lconf = { 'file' => $file,
 				 'name' => \@logs };
 		local $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
 			# Use automatic configuration
-			local $script = &get_postrotate_script($_[0]);
+			local $script = &get_postrotate_script($d);
 			$lconf->{'members'} = [
 					{ 'name' => 'rotate',
 					  'value' => $config{'logrotate_num'} || 5 },
@@ -88,7 +98,7 @@ if (@logs) {
 			&open_tempfile(TEMP, ">$temp");
 			&print_tempfile(TEMP, "/dev/null {\n");
 			&print_tempfile(TEMP,
-				&substitute_domain_template($txt, $_[0])."\n");
+				&substitute_domain_template($txt, $d)."\n");
 			&print_tempfile(TEMP, "}\n");
 			&close_tempfile(TEMP);
 			local $tconf = &logrotate::get_config($temp);
@@ -113,11 +123,11 @@ if (@logs) {
 	# Make sure extra log files actually exist
 	foreach my $lt (@tmpllogs) {
 		if (!-e $lt) {
-			&open_tempfile_as_domain_user($_[0], TOUCHLOG,
+			&open_tempfile_as_domain_user($d, TOUCHLOG,
 						      ">$lt", 1, 1);
-			&close_tempfile_as_domain_user($_[0], TOUCHLOG);
+			&close_tempfile_as_domain_user($d, TOUCHLOG);
 			&set_permissions_as_domain_user(
-				$_[0], 0777, $lt);
+				$d, 0777, $lt);
 			}
 		}
 
@@ -126,7 +136,7 @@ if (@logs) {
 else {
 	&$second_print($text{'setup_nolog'});
 	}
-&release_lock_logrotate($_[0]);
+&release_lock_logrotate($d);
 return 1;
 }
 
