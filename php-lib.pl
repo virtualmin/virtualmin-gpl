@@ -1877,8 +1877,9 @@ if ($d->{'php_fpm_port'}) {
 	}
 my %used = map { $_->{'php_fpm_port'}, $_ }
 	       grep { $_->{'php_fpm_port'} } &list_domains();
-my $rv = &allocate_free_tcp_port(\%used, 8000);
-$rv || &error("Failed to allocate FPM port starting at 8000");
+my $base = $config{'php_fpm_port'} || 8000;
+my $rv = &allocate_free_tcp_port(\%used, $base);
+$rv || &error("Failed to allocate FPM port starting at $base");
 $d->{'php_fpm_port'} = $rv;
 return $rv;
 }

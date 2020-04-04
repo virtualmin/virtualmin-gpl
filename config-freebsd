@@ -237,3 +237,4 @@ nolink_certs=0
 remote_alias=1
 pigz=0
 show_mailuser=1
+php_fpm_port=8000
