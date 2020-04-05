@@ -29,7 +29,7 @@ elsif ($in{'log'}) {
 	$sched = { 'feature_all' => 1,
 		   'key' => $log->{'key'},
 		   'dest' => $log->{'dest'} };
-	$safe_backup = $log->{'owner'} eq $remote_user ? 0 : 1;
+	$safe_backup = $log->{'user'} eq $remote_user ? 0 : 1;
 	}
 else {
 	# Sensible defaults
