@@ -75,11 +75,21 @@ print &ui_table_row($text{'dkim_exclude'},
 
 # Public key and DNS record, for offsite DNS domains
 if ($dkim && $dkim->{'enabled'}) {
-	$pubkey = &get_dkim_pubkey($dkim);
+	$dnskey = &get_dkim_dns_pubkey($dkim);
 	$records = $dkim->{'selector'}."._domainkey IN TXT ".
-		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$pubkey\"");
+		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$dnskey\"");
 	print &ui_table_row($text{'dkim_records'},
-		&ui_textarea("records", $records, 4, 60, "off",
+		&ui_textarea("records", $records, 8, 60, "off",
+			     undef, "readonly=true"));
+
+	$pubkey = &get_dkim_pubkey($dkim);
+	print &ui_table_row($text{'dkim_pubkeypem'},
+		&ui_textarea("pubkey", $pubkey, 8, 60, "hard",
+			     undef, "readonly=true"));
+
+	$privkey = &get_dkim_privkey($dkim);
+	print &ui_table_row($text{'dkim_privkeypem'},
+		&ui_textarea("privkey", $privkey, 8, 60, "hard",
 			     undef, "readonly=true"));
 	}
 

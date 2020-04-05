@@ -429,7 +429,7 @@ if (!$dkim->{'keyfile'} || !-r $dkim->{'keyfile'} || $newkey) {
 
 # Get the public key
 &$first_print(&text('dkim_pubkey', "<tt>$dkim->{'keyfile'}</tt>"));
-my $pubkey = &get_dkim_pubkey($dkim);
+my $pubkey = &get_dkim_dns_pubkey($dkim);
 if (!$pubkey) {
 	&$second_print($text{'dkim_epubkey'});
 	return 0;
@@ -715,8 +715,20 @@ elsif ($config{'mail_system'} == 1) {
 return 1;
 }
 
-# get_dkim_pubkey(&dkim, &domain)
+# get_dkim_dns_pubkey(&dkim, &domain)
 # Returns the public key in a format suitable for inclusion in a DNS record
+sub get_dkim_dns_pubkey
+{
+my ($dkim, $d) = @_;
+my $pubkey = &get_dkim_pubkey($dkim, $d);
+return undef if (!$pubkey);
+$pubkey =~ s/\-+(BEGIN|END)\s+PUBLIC\s+KEY\-+//g;
+$pubkey =~ s/\s+//g;
+return $pubkey;
+}
+
+# get_dkim_pubkey(&dkim, &domain)
+# Returns the public key in PEM format
 sub get_dkim_pubkey
 {
 my ($dkim, $d) = @_;
@@ -728,9 +740,17 @@ my $pubkey = &backquote_command(
 if ($? || $pubkey !~ /BEGIN\s+PUBLIC\s+KEY/) {
 	return undef;
         }
-$pubkey =~ s/\-+(BEGIN|END)\s+PUBLIC\s+KEY\-+//g;
-$pubkey =~ s/\s+//g;
 return $pubkey;
+}
+
+# get_dkim_privkey(&dkim, &domain)
+# Returns the private key in PEM format
+sub get_dkim_privkey
+{
+my ($dkim, $d) = @_;
+my $keyfile = &get_domain_dkim_key($d) ||
+	      $dkim->{'keyfile'};
+return &read_file_contents($keyfile);
 }
 
 # disable_dkim(&dkim)
@@ -941,7 +961,7 @@ sub add_dkim_dns_records
 my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
-	my $pubkey = &get_dkim_pubkey($dkim, $d);
+	my $pubkey = &get_dkim_dns_pubkey($dkim, $d);
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
 	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
 		&$second_print($text{'dkim_ednsexclude'});
