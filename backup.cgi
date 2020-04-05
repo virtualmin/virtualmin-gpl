@@ -129,7 +129,7 @@ $key = undef;
 if (defined(&get_backup_key) && $in{'key'}) {
 	$key = &get_backup_key($in{'key'});
 	$key || &error($text{'backup_ekey'});
-	&can_backup_key($key) || &error($text{'backup_ekeycannot'});
+	&can_use_backup_key($key) || &error($text{'backup_ekeycannot'});
 	}
 
 # Parse option inputs
@@ -254,7 +254,7 @@ else {
 		&write_backup_log(\@doms, $dest, $in{'increment'}, $start_time,
 				  $size, $ok, "cgi", $output, $errdoms,
 				  undef, $key, $sched ? $sched->{'id'} : undef,
-				  $in{'fmt'});
+				  $in{'fmt'}, 0);
 		}
 	&run_post_actions();
 	if (!$ok) {
