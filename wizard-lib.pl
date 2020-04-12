@@ -94,13 +94,15 @@ return undef;
 # Show a form asking the user if he wants to run clamd
 sub wizard_show_virus
 {
-print &ui_table_row(undef, $text{'wizard_virus'}, 2);
+print &ui_table_row(undef, $text{'wizard_virusnew'}, 2);
 local $cs = &check_clamd_status();
 if ($cs != -1) {
-	print &ui_table_row($text{'wizard_clamd'},
-		&ui_radio("clamd", $cs ? 1 : 0,
-			  [ [ 1, $text{'wizard_clamd1'}."<br>" ],
-			    [ 0, $text{'wizard_clamd0'} ] ]));
+	$cs = 2 if (!$cs && $config{'virus'});
+	print &ui_table_row($text{'wizard_virusmsg'},
+		&ui_radio("clamd", $cs,
+			  [ [ 1, $text{'wizard_virus1'}."<br>" ],
+			    $cs == 2 ? ( [ 2, $text{'wizard_virus2'} ] ) : ( ),
+			    [ 0, $text{'wizard_virus0'} ] ]));
 	}
 else {
 	print &ui_table_row($text{'wizard_clamdnone'});
@@ -113,7 +115,7 @@ sub wizard_parse_virus
 local ($in) = @_;
 if (defined($in->{'clamd'})) {
 	local $cs = &check_clamd_status();
-	if ($in->{'clamd'} && !$cs) {
+	if ($in->{'clamd'} == 1 && !$cs) {
 		# Enable if needed
 		&push_all_print();
 		&set_all_null_print();
@@ -141,14 +143,33 @@ if (defined($in->{'clamd'})) {
 		else {
 			return $text{'wizard_eclamdenable'};
 			}
+		$config{'virus'} = 1;
+		&save_module_config();
 		}
-	elsif (!$in->{'clamd'} && $cs) {
-		# Disable if needed
+	elsif ($in->{'clamd'} == 0) {
+		# Disable clamd and virus feature, unless some domains are
+		# using it
+		my @doms = grep { $_->{'virus'} } &list_domains();
+		if (@doms) {
+			return &text('wizard_eclaminuse', scalar(@doms));
+			}
 		&push_all_print();
 		&set_all_null_print();
 		&disable_clamd();
 		&pop_all_print();
 		&save_global_virus_scanner("clamscan");
+		$config{'virus'} = 0;
+		&save_module_config();
+		}
+	elsif ($in->{'clamd'} == 2) {
+		# Must have been on clamscan mode, so leave it
+		&push_all_print();
+		&set_all_null_print();
+		&disable_clamd();
+		&pop_all_print();
+		&save_global_virus_scanner("clamscan");
+		$config{'virus'} = 1;
+		&save_module_config();
 		}
 	}
 return undef;
