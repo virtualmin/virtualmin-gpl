@@ -24,19 +24,17 @@ print &ui_table_row($text{'domdkim_key'},
 		    [ 0, $text{'domdkim_key0'} ] ])."<br>\n".
 	&ui_textarea("key", $key, 20, 80));
 
-if (!$d->{'dns'}) {
-	$dnskey = &get_dkim_dns_pubkey($dkim, $d);
-	$records = $dkim->{'selector'}."._domainkey IN TXT ".
-		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$dnskey\"");
-	print &ui_table_row($text{'domdkim_records'},
-		&ui_textarea("records", $records, 4, 80, "off",
-			     undef, "readonly=true"));
+$dnskey = &get_dkim_dns_pubkey($dkim, $d);
+$records = $dkim->{'selector'}."._domainkey IN TXT ".
+	   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$dnskey\"");
+print &ui_table_row($text{'domdkim_records'},
+	&ui_textarea("records", $records, 4, 80, "off",
+		     undef, "readonly=true"));
 
-	$pubkey = &get_dkim_pubkey($dkim, $d);
-	print &ui_table_row($text{'dkim_pubkeypem'},
-		&ui_textarea("pubkey", $pubkey, 8, 60, "hard",
-			     undef, "readonly=true"));
-	}
+$pubkey = &get_dkim_pubkey($dkim, $d);
+print &ui_table_row($text{'dkim_pubkeypem'},
+	&ui_textarea("pubkey", $pubkey, 8, 60, "hard",
+		     undef, "readonly=true"));
 
 print &ui_table_end();
 print &ui_form_end([ [ "save", $text{'save'} ] ]);
