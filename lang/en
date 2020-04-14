@@ -531,6 +531,7 @@ setup_esslmatch=.. certificate and key do not match : $1
 setup_esslcert=.. certificate file is not valid : $1
 setup_esslkey=.. key file is not valid : $1
 setup_esslca=.. certificate authority file is not valid : $1
+setup_esslusermin=Usermin is not installed
 setup_webpid=Applying web server configuration ..
 setup_webpid2=Stopping and re-starting web server ..
 setup_webfailed=.. failed! An Apache configuration error was detected : $1
@@ -1310,6 +1311,7 @@ delete_mxs=Removing secondary mail servers $1 ..
 delete_dom=Deleting sub-server $1 ..
 delete_aliasfailure=.. $1 alias deletion failed : $2
 delete_ednssubof=Virtual server $1 cannot be deleted, as it contains DNS records for server $2
+delete_esslnoips=No SSL certificate found for domain
 
 save_err=Failed to modify server
 save_title=Save Server
@@ -6837,7 +6839,7 @@ transfer_ehost2=Destination hostname cannot be resolved
 
 domdkim_title=DomainKey Options
 domdkim_header=DomainKey options for this server
-domdkim_key=DKIM key for this domain
+domdkim_key=DKIM private key in PEM format
 domdkim_key1=Use global default key
 domdkim_key2=Generate new key
 domdkim_key0=Use key below
@@ -6849,7 +6851,7 @@ domdkim_ekeylist=.. no key list is set in the DKIM configuration file
 domdkim_ekey=Invalid key format : $1
 domdkim_egen=Failed to generate new key : $1
 domdkim_enabled=DKIM is not current enabled
-domdkim_records=DNS records for external hosting
+domdkim_records=DKIM DNS records
 
 clouds_title=Cloud Storage Providers
 clouds_name=Provider name
