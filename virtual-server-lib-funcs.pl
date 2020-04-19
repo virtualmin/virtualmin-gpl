@@ -13759,7 +13759,8 @@ if (!&foreign_check("net")) {
 if (&foreign_check("proc")) {
 	&foreign_require("proc");
 	local $arch = &backquote_command("uname -m");
-	local $defmem = $arch =~ /x86_64/ ? 768 : 512;
+	local $defmem = 1024;
+	$defmem += 512 if ($config{'virus'});	# ClamAV eats RAM
 	local $rmem = ($config{'mem_low'} || $defmem)*1024*1024;
 	if (defined(&proc::get_memory_info)) {
 		local @mem = &proc::get_memory_info();
