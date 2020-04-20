@@ -1022,7 +1022,7 @@ if (ref($params)) {
 	}
 return &backquote_command(
 	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-	" ".$params);
+	" ".$params." 2>&1");
 }
 
 1;
