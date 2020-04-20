@@ -4972,7 +4972,9 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $f (@$files) {
-		if ($f->{'Key'} =~ /^$re$/ && $f->{'Key'} !~ /\.(dom|info)$/) {
+		if (($f->{'Key'} =~ /^$re$/ ||
+		     $f->{'Key'} =~ /^$re\/.*\.(tar\.gz|tar\.bz2|zip|tar)$/) &&
+		    $f->{'Key'} !~ /\.(dom|info)$/) {
 			# Found one to delete
 			local $ctime = &s3_parse_date($f->{'LastModified'});
 			$mcount++;
