@@ -471,6 +471,13 @@ if ($dkim_config) {
 			}
 		&save_open_dkim_config($dkim_config,
 					 "Domain", $domfile);
+		
+		# Set socket to listen on interface
+		if (!$conf->{'Socket'} ||
+		    $conf->{'Socket'} =~ /^local:/) {
+		        &save_open_dkim_config($dkim_config,
+			    "Socket", "inet:8891\@localhost");
+			}
 		}
 	else {
 		# Work out mapping file
