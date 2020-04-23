@@ -6921,17 +6921,6 @@ cloud_edropbox_account=Missing or invalid-looking Dropbox account
 cloud_clear=Clear All Settings
 cloud_echeck=Cloud storage provider $1 cannot be used : $2
 
-lang_title=Change Language
-lang_ecannot=You are not allowed to change the UI language!
-lang_euser=Webmin user not found!
-lang_header=Virtualmin UI language settings
-lang_current=Current language
-lang_default=System default language
-lang_preferred=Preferred language
-lang_ok=Change Now
-lang_err=Failed to change language
-lang_defsel=System default
-
 left_virtualmin=Virtualmin
 left_master=Master admin
 left_reseller=Reseller
