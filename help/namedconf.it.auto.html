@@ -1,0 +1,6 @@
+<header> Ulteriori direttive named.conf per nuove zone </header> Quando viene creata una nuova zona BIND DNS, le direttive immesse in questa casella di testo verranno aggiunte alla sezione della zona nel file di configurazione <tt>named.conf</tt> . Ad esempio, è possibile immettere quanto segue per limitare i trasferimenti di zona a indirizzi IP selezionati: <pre>
+allow-transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Questa funzione deve essere utilizzata solo da coloro che hanno già familiarità con il formato di configurazione BIND, poiché un errore potrebbe interrompere il funzionamento dell&#39;intero server DNS. <p><footer>

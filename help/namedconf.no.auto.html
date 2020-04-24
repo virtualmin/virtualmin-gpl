@@ -1,0 +1,6 @@
+<header> Ytterligere navngivne.conf-direktiver for nye soner </header> Når en ny BIND DNS-sone opprettes, vil direktivene som er lagt inn i denne tekstboksen bli lagt til sonens seksjon i den <tt>named.conf</tt> konfigurasjonsfilen. Du kan for eksempel angi følgende for å begrense sonoverføringer til valgte IP-adresser: <pre>
+tillatelse-overføring { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Denne funksjonen skal bare brukes av de som allerede er kjent med BIND-konfigurasjonsformatet, da en feil kan føre til at hele DNS-serveren slutter å fungere. <p><footer>

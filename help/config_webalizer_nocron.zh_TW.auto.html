@@ -1,0 +1,1 @@
+<header>為每個虛擬服務器設置Webalizer Cron作業？ </header>當此選項設置為“ <b>是”</b> （默認情況下）時，Virtualmin將為每個啟用Webalizer的虛擬服務器創建一個單獨的Cron作業，以便每天從其日誌中生成報告。 <p>但是，在具有大量域的服務器上，您可能希望將此選項更改為<b>No</b> ，而是使用Cron手動計劃命令<tt>/usr/libexec/webmin/virtual-server/run-all-webalizer.pl</tt> 。這將確保為每個域依次運行Webalizer，而不是潛在地同時處理多個域，並且使您可以更精確地控制何時完成處理。 <p><footer>

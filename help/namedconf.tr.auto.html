@@ -1,0 +1,6 @@
+<header> Yeni bölgeler için ek adlandırılmış. Conf yönergeleri </header> Yeni bir BIND DNS bölgesi oluşturulduğunda, bu metin kutusuna girilen yönergeler, <tt>named.conf</tt> yapılandırma dosyasındaki bölgenin bölümüne eklenir. Örneğin, seçilen IP adreslerine bölge aktarımlarını sınırlamak için aşağıdakileri girebilirsiniz: <pre>
+izin ver transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Bu özellik yalnızca BIND yapılandırma biçimine aşina olanlar tarafından kullanılmalıdır, çünkü bir hata tüm DNS sunucunuzun çalışmasının durmasına neden olabilir. <p><footer>

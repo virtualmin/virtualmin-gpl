@@ -1,0 +1,6 @@
+<header> Zusätzliche named.conf-Direktiven für neue Zonen </header> Wenn eine neue BIND-DNS-Zone erstellt wird, werden die in dieses Textfeld eingegebenen Anweisungen zum Abschnitt der Zone in der Konfigurationsdatei <tt>named.conf</tt> hinzugefügt. Sie können beispielsweise Folgendes eingeben, um die Zonenübertragung auf eine ausgewählte IP-Adresse zu beschränken: <pre>
+Erlaubnisübertragung { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Diese Funktion sollte nur von Personen verwendet werden, die bereits mit dem BIND-Konfigurationsformat vertraut sind, da ein Fehler dazu führen kann, dass Ihr gesamter DNS-Server nicht mehr funktioniert. <p><footer>

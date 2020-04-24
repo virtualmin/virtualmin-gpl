@@ -1,0 +1,6 @@
+<header> Dodatkowe dyrektywy named.conf dla nowych stref </header> Po utworzeniu nowej strefy BIND DNS dyrektywy wprowadzone w tym polu tekstowym zostaną dodane do sekcji strefy w pliku konfiguracyjnym <tt>named.conf</tt> . Na przykład możesz wprowadzić następujące dane, aby ograniczyć transfery stref do wybranych adresów IP: <pre>
+zezwól na transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Z tej funkcji powinni korzystać tylko osoby znające format konfiguracji BIND, ponieważ błąd może spowodować, że cały serwer DNS przestanie działać. <p><footer>

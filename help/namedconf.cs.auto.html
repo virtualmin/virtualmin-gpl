@@ -1,0 +1,6 @@
+<header> Další direktivy named.conf pro nové zóny </header> Po vytvoření nové zóny BIND DNS budou směrnice zadané do tohoto textového pole přidány do sekce zóny v konfiguračním souboru <tt>named.conf</tt> . Můžete například zadat následující, abyste omezili přenosy zóny na vybrané adresy IP: <pre>
+allow-transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre> Tuto funkci by měli používat pouze ti, kteří již jsou obeznámeni s konfiguračním formátem BIND, protože chyba by mohla způsobit, že celý server DNS přestane fungovat. <p><footer>

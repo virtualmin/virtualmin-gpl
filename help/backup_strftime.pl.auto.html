@@ -1,0 +1,126 @@
+<header> Wykonuj zamiany czasu w stylu strftime na nazwę pliku lub katalogu </header> Jeśli to pole jest zaznaczone, kody takie jak% d,% m,% Y i% u mogą być użyte w docelowej nazwie pliku kopii zapasowej. Zostaną one zastąpione odpowiednio dniem, miesiącem, rokiem i dniem tygodnia, w którym wykonywana jest kopia zapasowa. Jest to przydatne, jeśli chcesz codziennie zapisywać inną kopię zapasową, aby przywrócić serwer do poprzedniej daty. <p> Niektóre inne kody, których można użyć to: <br><pre> <font size=-1>
+ % a Skrócona nazwa dnia tygodnia zgodnie z cur</font> <AD> <font size=-1>
+        wynajem lokalu.
+
+ % A Pełna nazwa dnia tygodnia zgodnie z bieżącym
+        widownia.
+
+ % b Skrócona nazwa miesiąca zgodnie z bieżącym
+        widownia.
+
+ % B Pełna nazwa miesiąca zgodnie z bieżącym
+        widownia.
+
+ % c Preferowana reprezentacja daty i godziny dla
+        aktualne ustawienia regionalne.
+
+ % C Liczba wieku (rok / 100) jako 2-cyfrowa liczba całkowita.
+
+ % d Dzień miesiąca jako liczba dziesiętna (zakres 01
+        do 31).
+
+ % e Podobnie jak% d, dzień miesiąca jako liczba dziesiętna,
+        ale wiodące zero jest zastępowane spacją.
+
+ Modyfikator% E: użyj alternatywnego formatu, patrz poniżej.
+
+ % G ISO 8601 rok z wiekiem jako liczbą dziesiętną.
+        4-cyfrowy rok odpowiadający numerowi tygodnia ISO</font> <AD> <font size=-1>
+        ber (patrz% V). Ma ten sam format i tę samą wartość
+        jako% y, z tym wyjątkiem, że należy numer tygodnia ISO
+        do poprzedniego lub następnego roku, ten rok jest używany
+        zamiast.
+
+ % g Jak% G, ale bez wieku, tzn. z 2 cyframi
+        rok (00–99).
+
+ % h Odpowiednik% b.
+
+ % H Godzina jako liczba dziesiętna przy użyciu zegara 24-godzinnego
+        (zakres od 00 do 23).
+
+ % I Godzina jako liczba dziesiętna przy użyciu zegara 12-godzinnego
+        (zakres od 01 do 12).
+
+ % j Dzień roku jako liczba dziesiętna (zakres 001
+        do 366).
+
+ % k Godzina (zegar 24-godzinny) jako liczba dziesiętna (zakres
+        Od 0 do 23); pojedyncze cyfry są poprzedzone spacją.
+        (Zobacz także% H.)
+
+ % l Godzina (zegar 12-godzinny) jako liczba dziesiętna (zakres
+        Od 1 do 12); pojedyncze cyfry są poprzedzone spacją.
+        (Zobacz także% I.)
+
+ % m Miesiąc jako liczba dziesiętna (zakres od 01 do 12).
+
+ % M Minuta jako liczba dziesiętna (zakres od 00 do 59).
+
+ % n Znak nowej linii.
+
+ Modyfikator% O: użyj alternatywnego formatu, patrz poniżej.
+
+ % p „AM” lub „PM” zgodnie z podanym czasem
+        wartość lub odpowiednie ciągi dla prądu
+        widownia. Południe traktowane jest jako „pm”, a północ jak
+        „jestem”.
+
+ % P Jak% p, ale małymi literami: `am &#39;lub` pm&#39; lub odpowiednik</font> <AD> <font size=-1>
+        sponding string dla bieżących ustawień narodowych.
+
+ % r Czas w notacji am lub pm. W POSIX
+        ustawienia regionalne jest to równoważne z `% I:% M:% S% p &#39;.
+
+ % R Czas w notacji 24-godzinnej (% H:% M). Dla
+        wersja zawierająca sekundy, patrz% T poniżej.
+
+ % s Liczba sekund od Epoki, tj. od
+        1970-01-01 00:00:00 UTC.
+
+ % S Drugi jako liczba dziesiętna (zakres od 00 do 61).
+
+ % t Znak tabulacji.
+
+ % T Czas w notacji 24-godzinnej (% H:% M:% S).
+
+ % u Dzień tygodnia jako liczba dziesiętna, zakres od 1 do 7,
+        Poniedziałek jest 1. Zobacz także% w.
+
+ % U Numer tygodnia bieżącego roku w systemie dziesiętnym
+        liczba, zakres od 00 do 53, zaczynając od pierwszego
+        Niedziela jako pierwszy dzień tygodnia 01. Zobacz także% V i
+        % W.
+
+ % V Numer tygodnia według ISO 8601: 1988 bieżącego roku
+        jako liczba dziesiętna, zakres od 01 do 53, gdzie tydzień 1
+        to pierwszy tydzień, który ma co najmniej 4 dni w
+        w bieżącym roku oraz w poniedziałek jako pierwszy dzień
+        tydzień. Zobacz także% U i% W.
+
+ % w dzień tygodnia jako liczba dziesiętna, zakres od 0 do 6,
+        Niedziela to 0. Zobacz także% u.
+
+ % W Numer tygodnia bieżącego roku jako liczba dziesiętna
+        liczba, zakres od 00 do 53, zaczynając od pierwszego
+        Poniedziałek jako pierwszy dzień tygodnia 01.
+
+ % x Preferowana reprezentacja daty dla prądu
+        lokalizacja bez czasu.
+
+ % X Preferowana reprezentacja czasu dla prądu
+        ustawienia regionalne bez daty.
+
+ % y Rok jako liczba dziesiętna bez wieku
+        (zakres od 00 do 99).
+
+ % Y Rok jako liczba dziesiętna łącznie z wiekiem.
+
+ % z Strefa czasowa jako przesunięcie godziny od GMT. Wymagany do
+        emitują daty zgodne z RFC822 (używając „% a,% d% b% Y
+        % H:% M:% S% z &quot;).
+
+ % Z Strefa czasowa lub nazwa lub skrót.
+
+ %% Dosłowny znak `% &#39;.
+</font> </pre><footer>
