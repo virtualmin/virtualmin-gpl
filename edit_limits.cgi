@@ -9,8 +9,6 @@ $d = &get_domain($in{'dom'});
 
 &ui_print_header(&domain_in($d), $text{'limits_title'}, "", "limits");
 
-#print "$text{'limits_desc'}<p>\n";
-
 print &ui_form_start("save_limits.cgi", "post");
 print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden_table_start($text{'limits_header'}, "width=100%", 2,
