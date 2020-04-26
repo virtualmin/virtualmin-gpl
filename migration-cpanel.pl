@@ -1630,7 +1630,7 @@ while(<PASSWD>) {
 			}
 		closedir(DIR);
 		}
-	else {
+	elsif (!-d $mailsrc) {
 		# Assume that mail files are mbox formatted
 		opendir(DIR, $mailsrc);
 		local $mf;
