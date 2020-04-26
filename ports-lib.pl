@@ -49,7 +49,10 @@ return ( ) if (!&foreign_check("proc"));
 &foreign_require("proc");
 my @rv;
 my %umap = map { $_->{'user'}, $_ } &list_domain_users($d, 0, 1, 1, 1);
-foreach my $p (&proc::list_processes()) {
+if (!@active_domain_server_ports_procs) {
+	@active_domain_server_ports_procs = &proc::list_processes();
+	}
+foreach my $p (@active_domain_server_ports_procs) {
 	my $u = $umap{$p->{'user'}};
 	next if (!$u);
 	foreach my $s (&proc::find_process_sockets($p->{'pid'})) {
@@ -116,6 +119,8 @@ foreach my $p (@ports) {
 	else {
 		# Worked!
 		$msg = $text{'kill_done'};
+		@active_domain_server_ports_procs =
+			grep { $_ ne $p } @active_domain_server_ports_procs;
 		}
 	$p->{'msg'} = $msg;
 	}
