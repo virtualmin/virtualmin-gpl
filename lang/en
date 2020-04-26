@@ -248,7 +248,6 @@ index_themeswitchnot=Don't Ask Me Again
 index_certwarn=SSL Certificate Warning
 index_certexpired=Some virtual servers' SSL certificates have expired : $1
 index_certnearly=Some virtual servers' SSL certificates are about to expire : $1
-index_certlets=Let's Encrypt certification renewal is enabled for $1 virtual servers, but the required package is not installed : $2
 index_expirywarn=DNS Registration Warning
 index_expiryexpired=Some virtual servers' DNS registrations have expired : $1
 index_expirynearly=Some virtual servers' DNS registrations are about to expire : $1
