@@ -133,7 +133,11 @@ foreach my $p (@ports) {
 		# Worked!
 		$msg = $text{'kill_done'};
 		@active_domain_server_ports_procs =
-			grep { $_ ne $p } @active_domain_server_ports_procs;
+			grep { $_->{'pid'} != $p->{'proc'}->{'pid'} }
+			@active_domain_server_ports_procs;
+		@active_domain_server_ports_socks =
+			grep { $_->{'pid'} != $p->{'proc'}->{'pid'} }
+			@active_domain_server_ports_socks;
 		}
 	$p->{'msg'} = $msg;
 	}
