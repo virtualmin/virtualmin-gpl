@@ -41,7 +41,7 @@ index_eapache=Apache webtjeneren ser ikke ut til å være installert på systeme
 index_eproftpd=ProFTPd tjeneren ser ikke ut til å være installert på systemet ditt, eller så er den ikke satt opp korrekt i <a href='$1'>Webmins ProFTPd tjener</a> modul. Derom systemet ditt ikke bruker ProFTPd må du deaktivere den i Virtualmins <a href='$2'>konfigurasjonsside</a>.
 index_ebind=BIND DNS tjener versjon 8 eller 9 ser ikke ut til å være installert på systemet ditt, eller så er den ikke korrekt satt opp i Webmins <a href='$1'>BIND DNS tjener</a> modul. Dersom systemet ditt ikke bruker BIND bør du deaktivere den i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
 index_ebindmod=Webmin modulen BIND DNS tjener er ikke installert på systemet ditt.
-index_email=Ingen av de stÃ¸ttede e-post tjenerene (Sendmail, Postfix og Qmail) ble oppdaget pÃ¥ systemet ditt. Kanskje de ikke er installert, eller sÃ¥ er de korresponderende Webmin-modulene ikke satt opp riktig.
+index_email=Ingen av de støttede e-post tjenerene (Sendmail, Postfix og Qmail) ble oppdaget på systemet ditt. Kanskje de ikke er installert, eller så er de korresponderende Webmin-modulene ikke satt opp riktig.
 index_emysql=MySQL ser ikke ut til å være installert og kjørende på systemet ditt, eller så er den ikke korrekt satt opp i Virtualmins <a href='$1'>MySQL database</a> modul. Dersom systemet ditt ikke bruker MySQL bør du deaktivere denne i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
 index_emysql2=MySQL klient-programmer ser ikke ut til å være installert, eller så er de ikke korrekt satt opp i Virtualmins <a href='$1'>MySQL database</a> modul. Dersom systemet ditt ikke bruker MySQL bør du deaktivere denne i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
 index_epostgres=Det ser ikke ut som PostgreSQL er installert og kjører på systemet ditt, eller så er den ikke satt opp korrekt i Webmins <a href='$1'>PostgreSQL Database</a> modul. Dersom systemet ditt ikke bruker PostgreSQL, må du dekativere den i Virtualmins <a href='$2'>modulkonfigurasjon</a>.
@@ -3232,7 +3232,7 @@ databases_tabimport=Importer database
 databases_desc1=Denne tabellen viser eksisterende databaser tilknyttet denne virtuelle tjeneren. Klikk på lenken Administrer for å se på databasenes tabeller, eller klikk på et databasenavn for ytterligere informasjon om den enkelte databasen.
 databases_desc2=Dette skjemaet kan brukes til å endre navn på databasebrukere for denne virtuelle tjeneren. Standardverdien er å bruke samme brukernavn som tjenerens administrasjonsbruker.
 databases_desc3=Dette skjemaet kan brukes til å endre det primære databasepassordet for denne virtuelle tjeneren. Standardverdien er å bruke samme passord som administrasjonspassordet fpr tjeneren.
-databases_desc3h=Dette skjemaet kan brukes til Ã¥ endre de primÃ¦re databasepassordene for denne virtuelle tjeneren.
+databases_desc3h=Dette skjemaet kan brukes til å endre de primære databasepassordene for denne virtuelle tjeneren.
 databases_desc4=Dette skjemaet lar deg hente inn eksisterende manuelt opprettede databaser på systemet og lar dem bli eid av denne virtuelle tjeneren.
 databases_noimport=Det finnes imidlertid ingen ikke-eide databaser på systemet.
 databases_tabhosts=Fjernverter
@@ -5854,7 +5854,7 @@ clone_newuser=Nytt brukernavn
 clone_newpass=Nytt passord
 clone_samepass=Samme som originalen
 clone_ok=Klon nå
-clone_warn=Advarsel - alle web-applikasjoner i den klonede virtuelle tjeneren vil fortsette Ã¥ bruke databasene fra den opprinnelige virtuelle tjeneren inntil konfigurasjonen deres endres manuelt.
+clone_warn=Advarsel - alle web-applikasjoner i den klonede virtuelle tjeneren vil fortsette å bruke databasene fra den opprinnelige virtuelle tjeneren inntil konfigurasjonen deres endres manuelt.
 clone_virt=Fordeler ny IPv4 adresse ..
 clone_virtrange=.. ingen IPv4 tildelingsutvalg har blitt konfigurert
 clone_virtalloc=.. fant ingen ledig IPv4 adresse
