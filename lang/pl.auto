@@ -155,7 +155,6 @@ index_themeswitchnot=Nie pytaj mnie ponownie
 index_certwarn=Ostrzeżenie o certyfikacie SSL
 index_certexpired=Ważność niektórych certyfikatów SSL serwerów wirtualnych : $1 
 index_certnearly=Ważność niektórych certyfikatów SSL serwerów wirtualnych : $1 
-index_certlets=Odświeżanie certyfikatu Let's Encrypt jest włączone dla serwerów wirtualnych $1, ale wymagany pakiet nie został zainstalowany : $2 
 index_expirywarn=Ostrzeżenie o rejestracji DNS
 index_expiryexpired=Rejestracja niektórych serwerów wirtualnych wygasła : $1 
 index_expirynearly=Wygaśnięcia rejestracji DNS niektórych serwerów wirtualnych : $1 

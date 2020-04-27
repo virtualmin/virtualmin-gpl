@@ -42,7 +42,6 @@ index_themeswitchnot=Frag mich nicht noch einmal
 index_certwarn=Warnung zum SSL-Zertifikat
 index_certexpired=Die SSL-Zertifikate einiger virtueller Server sind abgelaufen : $1 
 index_certnearly=Die SSL-Zertifikate einiger virtueller Server laufen bald ab : $1 
-index_certlets=Lassen Sie uns die Erneuerung der Verschlüsselungszertifizierung für virtuelle $1 -Server aktivieren, aber das erforderliche Paket ist nicht installiert : $2 
 index_expirywarn=Warnung zur DNS-Registrierung
 index_expiryexpired=Die DNS-Registrierungen einiger virtueller Server sind abgelaufen : $1 
 index_expirynearly=Die DNS-Registrierungen einiger virtueller Server laufen bald ab : $1 

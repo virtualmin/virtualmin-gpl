@@ -84,7 +84,6 @@ index_themeswitchnot=不要再問我
 index_certwarn=SSL證書警告
 index_certexpired=某些虛擬服務器的SSL證書已過期： $1
 index_certnearly=某些虛擬服務器的SSL證書即將到期： $1
-index_certlets=讓我們為 $1個虛擬服務器啟用證書續訂，但未安裝必需的軟件包： $2
 index_expirywarn=DNS註冊警告
 index_expiryexpired=某些虛擬服務器的DNS註冊已過期： $1
 index_expirynearly=某些虛擬服務器的DNS註冊即將到期： $1

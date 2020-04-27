@@ -7,7 +7,6 @@ index_fpmrestart=Reinicie el servidor PHP-FPM
 index_fpmstopdesc=El servidor de la versión PHP-FPM $1 se está ejecutando actualmente. Haga clic en este botón para detenerlo, lo que deshabilitará todos los sitios web PHP que usan esta versión de FPM.
 index_fpmstart=Inicie el servidor PHP-FPM
 index_fpmstartdesc=El servidor PHP-FPM versión $1 no se está ejecutando. Haga clic en este botón para iniciarlo, que es necesario para todos los sitios web PHP que usan esta versión de FPM.
-index_certlets=La renovación de la certificación Let's Encrypt está habilitada para los servidores virtuales $1, pero el paquete requerido no está instalado : $2 
 index_expirywarn=Advertencia de registro de DNS
 index_expiryexpired=Los registros DNS de algunos servidores virtuales han caducado : $1 
 index_expirynearly=Los registros DNS de algunos servidores virtuales están a punto de caducar : $1 

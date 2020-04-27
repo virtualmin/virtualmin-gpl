@@ -84,7 +84,6 @@ index_themeswitchnot=Bana Bir Daha Sorma
 index_certwarn=SSL Sertifikası Uyarısı
 index_certexpired=Bazı sanal sunucuların SSL sertifikalarının süresi doldu : $1 
 index_certnearly=Bazı sanal sunucuların SSL sertifikalarının geçerlilik süresi dolmak üzere : $1 
-index_certlets=$1 sanal sunucuları için sertifika yenilemeyi şifreleyelim, ancak gerekli paket kurulu değil : $2 
 index_expirywarn=DNS Kayıt Uyarısı
 index_expiryexpired=Bazı sanal sunucuların DNS kayıtlarının süresi doldu : $1 
 index_expirynearly=Bazı sanal sunucuların DNS kayıtlarının süresi dolmak üzere : $1 

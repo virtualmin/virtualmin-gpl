@@ -208,7 +208,6 @@ index_themeswitchnot=Neptej se mě znovu
 index_certwarn=Upozornění na certifikát SSL
 index_certexpired=Platnost certifikátů SSL některých virtuálních serverů vypršela : $1 
 index_certnearly=Platnost certifikátů SSL některých virtuálních serverů brzy vyprší : $1 
-index_certlets=Obnovení certifikace šifrování je povoleno pro virtuální servery $1, ale požadovaný balíček není nainstalován : $2 
 index_expirywarn=Upozornění na registraci DNS
 index_expiryexpired=Platnost registrací DNS některých virtuálních serverů vypršela : $1 
 index_expirynearly=Platnost registrací DNS některých virtuálních serverů brzy vyprší : $1 

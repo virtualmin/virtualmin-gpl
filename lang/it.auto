@@ -73,7 +73,6 @@ index_themeswitchnot=Non chiedermelo più
 index_certwarn=Avviso certificato SSL
 index_certexpired=I certificati SSL di alcuni server virtuali sono scaduti : $1 
 index_certnearly=I certificati SSL di alcuni server virtuali stanno per scadere : $1 
-index_certlets=Let's Encrypt il rinnovo della certificazione è abilitato per $1 server virtuali, ma il pacchetto richiesto non è installato : $2 
 index_expirywarn=Avviso registrazione DNS
 index_expiryexpired=Le registrazioni DNS di alcuni server virtuali sono scadute : $1 
 index_expirynearly=Le registrazioni DNS di alcuni server virtuali stanno per scadere : $1 
