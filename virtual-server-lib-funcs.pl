@@ -13824,7 +13824,7 @@ if ($config{'dns'}) {
 						  $_->{'bootp'} }
 						&net::boot_interfaces();
 				return &text('check_eresolv2',
-					&ui_link('/net/list_dns.cgi',
+					&ui_link("$gconfig{'webprefix'}/net/list_dns.cgi",
 						 $text{'check_eresolvlist'}),
 					&ui_link($clink,
 						 $text{'newfeatures_title'})).
