@@ -157,6 +157,7 @@ if ($connectivity || $validation) {
 $phd = &public_html_dir($d);
 &$first_print("Requesting SSL certificate for ".join(" ", @dnames)." ..");
 $before = &before_letsencrypt_website($d);
+@beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 				$d, \@dnames, $staging, $size, $mode);
 &after_letsencrypt_website($d, $before);
@@ -184,11 +185,8 @@ else {
 		}
 	&save_domain($d);
 
-	# Apply any per-domain cert to Dovecot and Postfix
-	&sync_dovecot_ssl_cert($d, 1);
-	if ($d->{'virt'}) {
-		&sync_postfix_ssl_cert($d, 1);
-		}
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 	# For domains that were using the SSL cert on this domain originally but
 	# can no longer due to the cert hostname changing, break the linkage

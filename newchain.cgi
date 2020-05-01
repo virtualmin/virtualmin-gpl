@@ -60,10 +60,11 @@ elsif ($in{'mode'} == 3) {
 	}
 
 # Run the before command
-&set_domain_envs($oldd, "SSL_DOMAIN", $d);
+&set_domain_envs($d, "SSL_DOMAIN", $d);
 $merr = &making_changes();
-&reset_domain_envs($oldd);
+&reset_domain_envs($d);
 &error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
+@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Apply it, including domains that share a cert
 &set_all_null_print();
@@ -73,11 +74,8 @@ $err = &save_website_ssl_file($d, 'ca', $chain);
 $d->{'ssl_chain'} = $chain;
 &sync_combined_ssl_cert($d);
 
-# Apply any per-domain cert to Dovecot and Postfix
-&sync_dovecot_ssl_cert($d, 1);
-if ($d->{'virt'}) {
-	&sync_postfix_ssl_cert($d, 1);
-	}
+# Update other services using the cert
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 &release_lock_ssl($d);
 &save_domain($d);
@@ -89,7 +87,7 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	}
 
 # Run the after command
-&set_domain_envs($d, "SSL_DOMAIN", undef, $oldd);
+&set_domain_envs($d, "SSL_DOMAIN");
 local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);

@@ -97,6 +97,7 @@ else {
 	&obtain_lock_ssl($d);
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	@beforecerts = &get_all_domain_service_ssl_certs($d);
 	$err = &generate_self_signed_cert(
 				   $d->{'ssl_cert'}, $d->{'ssl_key'},
 				   $size, $in{'days'},
@@ -121,11 +122,8 @@ else {
 	$d->{'ssl_pass'} = undef;
 	&save_domain_passphrase($d);
 
-	# Apply any per-domain cert to Dovecot and Postfix
-	&sync_dovecot_ssl_cert($d, 1);
-	if ($d->{'virt'}) {
-		&sync_postfix_ssl_cert($d, 1);
-		}
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 	# Set permissions
 	&set_certificate_permissions($d, $d->{'ssl_cert'});

@@ -7,9 +7,16 @@ Copy the cert and key from a virtual server to some other service.
 The domain to copy the cert from is specified with the C<--domain> flag
 followed by a virtual server name. The services (like dovecot, postfix, webmin
 or usermin) to copy it to are set with the C<--service> flag, which can be
-given multiple times. The domain's certificate will be used by default for
-SSL connections to the given services, but may be over-ridden by per-domain or
-per-IP certs.
+given multiple times.
+
+If the C<--add-global> flag is given, the cert will be used as the default
+for the selected servers. But if C<--add-domain> is given, it will only be
+used for requests to the servers on the domain's hostname or IP address.
+When configured, the per-domain cert will be used in favor of the global default
+cert for each service, when a client connects using that domain name.
+
+Finally, the C<--remove-domain> flag will remove any per-domain cert for
+the service, causing the global default to be used instead.
 
 =cut
 
@@ -43,6 +50,15 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--add-global") {
+		$add_global = 1;
+		}
+	elsif ($a eq "--add-domain") {
+		$add_domain = 1;
+		}
+	elsif ($a eq "--remove-domain") {
+		$remove_domain = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -63,11 +79,41 @@ foreach my $s (@services) {
 
 # Copy to each of them
 foreach my $s (@services) {
-	&$first_print("Copying to service $s ..");
-	&$indent_print();
-	$func = "copy_".$s."_ssl_service";
-	&$func($d);
-	&$outdent_print();
+	if ($add_global) {
+		&$first_print("Copying to service $s ..");
+		&$indent_print();
+		$func = "copy_".$s."_ssl_service";
+		&$func($d);
+		&$outdent_print();
+		&$second_print(".. done");
+		}
+	elsif ($add_domain) {
+		&$first_print("Copying to service $s for $d->{'dom'} ..");
+		$func = "sync_".$s."_ssl_cert";
+		if (defined(&$func)) {
+			$ok = &$func($d, 1);
+			&$second_print($ok == 1 ? ".. done" :
+				       $ok == 0 ? ".. failed" :
+						  ".. not supported");
+			}
+		else {
+			&$second_print(".. service not supported");
+			}
+		}
+	elsif ($remove_domain) {
+		&$first_print("Removing from service $s for $d->{'dom'} ..");
+		$func = "sync_".$s."_ssl_cert";
+		if (defined(&$func)) {
+			$ok = &$func($d, 0);
+			&$second_print($ok == 1 ? ".. done" :
+				       $ok == 0 ? ".. failed" :
+						  ".. not supported");
+			}
+		else {
+			&$second_print(".. service not supported");
+			}
+		&$second_print(".. done");
+		}
 	}
 
 &save_domain($d);
@@ -81,6 +127,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Copy the cert and key from a virtual server to some other service.\n";
 print "\n";
 print "virtualmin install-service-cert --domain name\n";
+print "                                --add-global | --add-domain | --remove-domain\n";
 print "                               [--service type]+\n";
 exit(1);
 }

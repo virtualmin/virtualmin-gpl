@@ -8000,8 +8000,10 @@ else {
 	$d->{'letsencrypt_renew'} ||= 2;
 	&save_domain($d);
 
-	&sync_dovecot_ssl_cert($d, 1);
-	if ($d->{'virt'}) {
+	if ($tmpl->{'web_dovecot_ssl'}) {
+		&sync_dovecot_ssl_cert($d, 1);
+		}
+	if ($tmpl->{'web_postfix_ssl'}) {
 		&sync_postfix_ssl_cert($d, 1);
 		}
 	&break_invalid_ssl_linkages($d);

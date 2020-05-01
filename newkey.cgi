@@ -70,6 +70,7 @@ $certerr && &error(&text('newkey_ematch', $certerr));
 $merr = &making_changes();
 &reset_domain_envs($oldd);
 &error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
+@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Break SSL linkages that no longer work with this cert
 $temp = &transname();
@@ -130,11 +131,8 @@ if ($in{'newkey_mode'} != 2) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Apply any per-domain cert to Dovecot and Postfix
-&sync_dovecot_ssl_cert($d, 1);
-if ($d->{'virt'}) {
-	&sync_postfix_ssl_cert($d, 1);
-	}
+# Update other services using the cert
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 # Remove the new private key we just installed
 &release_lock_ssl($d);

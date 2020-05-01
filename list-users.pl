@@ -118,7 +118,7 @@ foreach $d (@doms) {
 				print "    Password: ",$u->{'plainpass'},"\n";
 				}
 			$pass = $u->{'pass'};
-			$disable = $pass =~ s/^\!//;
+			$disable = ($pass =~ s/^\!// ? 1 : 0);
 			print "    Encrypted password: ",$pass,"\n";
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";

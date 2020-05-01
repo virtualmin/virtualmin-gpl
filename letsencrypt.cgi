@@ -130,12 +130,7 @@ else {
 
 		# Figure out which services (webmin, postfix, etc)
 		# were using the old cert
-		my @before;
-		foreach my $svc (&get_all_service_ssl_certs($d, 0)) {
-			if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'})) {
-				push(@before, $svc);
-				}
-			}
+		@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 		# Worked .. copy to the domain
 		&obtain_lock_ssl($d);
@@ -155,11 +150,8 @@ else {
 		$d->{'letsencrypt_last_success'} = time();
 		&save_domain($d);
 
-		# Apply any per-domain cert to Dovecot and Postfix
-		&sync_dovecot_ssl_cert($d, 1);
-		if ($d->{'virt'}) {
-			&sync_postfix_ssl_cert($d, 1);
-			}
+		# Update other services using the cert
+		&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 		# For domains that were using the SSL cert on this domain
 		# originally but can no longer due to the cert hostname
@@ -186,12 +178,6 @@ else {
 
 		&release_lock_ssl($d);
 		&$second_print($text{'setup_done'});
-
-		# Update services that were using the old cert
-		foreach my $svc (@before) {
-			my $func = "copy_".$svc->{'id'}."_ssl_service";
-			&$func($d);
-			}
 
 		# Run the after command
 		&set_domain_envs($d, "SSL_DOMAIN");

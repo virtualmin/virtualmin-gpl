@@ -190,7 +190,12 @@ if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 undef(@apache::get_config_cache);
 
 # Add this IP and cert to Webmin/Usermin's SSL keys list
-&setup_domain_ipkeys($d, $tmpl);
+if ($tmpl->{'web_webmin_ssl'}) {
+	&sync_webmin_ssl_cert($d, 1);
+	}
+if ($tmpl->{'web_usermin_ssl'}) {
+	&sync_usermin_ssl_cert($d, 1);
+	}
 
 # Copy chained CA cert in from domain with same IP, if any
 $d->{'web_sslport'} = $web_sslport;
@@ -200,7 +205,9 @@ if ($chained) {
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
 # Setup in Dovecot
-&sync_dovecot_ssl_cert($d, 1);
+if ($tmpl->{'web_dovecot_ssl'}) {
+	&sync_dovecot_ssl_cert($d, 1);
+	}
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -447,30 +454,18 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		}
 	}
 
-# Changes for Webmin and Usermin
+# If anything has changed that would impact the per-domain SSL cert for
+# another server like Postfix or Webmin, re-set it up
 if ($d->{'ip'} ne $oldd->{'ip'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
-        # IP address or domain name has changed - fix per-IP/per-domain SSL cert
-	&modify_ipkeys($d, $oldd, \&get_miniserv_config,
-		       \&put_miniserv_config,
-		       \&restart_webmin_fully);
-	if (&foreign_installed("usermin")) {
-		&foreign_require("usermin");
-		&modify_ipkeys($d, $oldd,
-			       \&usermin::get_usermin_miniserv_config,
-			       \&usermin::put_usermin_miniserv_config,
-			       \&restart_usermin);
+	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
+		next if (!$svc->{'d'});
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		next if (!defined(&$func));
+		&$func($oldd, 0);
+		&$func($d, 1);
 		}
-	}
-
-# If anything has changed that would impact the Dovecot cert, re-set it up
-if ($d->{'ip'} ne $oldd->{'ip'} ||
-    $d->{'home'} ne $oldd->{'home'}) {
-	&sync_dovecot_ssl_cert($oldd, 0);
-	&sync_postfix_ssl_cert($oldd, 0);
-	&sync_dovecot_ssl_cert($d, 1);
-	&sync_postfix_ssl_cert($d, $d->{'virt'});
 	}
 
 # Update DANE DNS records
@@ -509,8 +504,9 @@ else {
 	}
 undef(@apache::get_config_cache);
 
-# Delete per-IP SSL cert
-&delete_domain_ipkeys($d);
+# Delete per-IP SSL cert, if any
+&sync_webmin_ssl_cert($d, 0);
+&sync_usermin_ssl_cert($d, 0);
 
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
@@ -871,8 +867,12 @@ if ($virt) {
 		}
 
 	# Sync cert to Dovecot and Postfix
-	&sync_dovecot_ssl_cert($d, 1);
-	&sync_postfix_ssl_cert($d, $d->{'virt'});
+	if ($tmpl->{'web_dovecot_ssl'}) {
+		&sync_dovecot_ssl_cert($d, 1);
+		}
+	if ($tmpl->{'web_postfix_ssl'}) {
+		&sync_postfix_ssl_cert($d, 1);
+		}
 
 	&$second_print($text{'setup_done'});
 	}
@@ -1248,18 +1248,14 @@ local @ips;
 if ($d->{'virt'}) {
 	push(@ips, $d->{'ip'});
 	}
-if (&get_webmin_version() >= 1.834) {
-	push(@ips, $d->{'dom'}, "*.$d->{'dom'}");
-	}
-if (@ips) {
-	push(@ipkeys, { 'ips' => \@ips,
-			'key' => $d->{'ssl_key'},
-			'cert' => $d->{'ssl_cert'},
-			'extracas' => $d->{'ssl_chain'}, });
-	&webmin::save_ipkeys(\%miniserv, \@ipkeys);
-	&$putfunc(\%miniserv);
-	&register_post_action($postfunc);
-	}
+push(@ips, $d->{'dom'}, "*.$d->{'dom'}");
+push(@ipkeys, { 'ips' => \@ips,
+		'key' => $d->{'ssl_key'},
+		'cert' => $d->{'ssl_cert'},
+		'extracas' => $d->{'ssl_chain'}, });
+&webmin::save_ipkeys(\%miniserv, \@ipkeys);
+&$putfunc(\%miniserv);
+&register_post_action($postfunc);
 return 1;
 }
 
@@ -1283,24 +1279,13 @@ foreach my $ipk (@ipkeys) {
 		}
 	}
 if (@ipkeys != @newipkeys) {
+	# Some change was found to apply
 	&webmin::save_ipkeys(\%miniserv, \@newipkeys);
 	&$putfunc(\%miniserv);
 	&register_post_action($postfunc);
-	return 1;
+	return undef;
 	}
-return 0;
-}
-
-# modify_ipkeys(&domain, &olddomain, &miniserv-getter, &miniserv-saver,
-# 		&post-action)
-# Remove and then re-add the per-IP SSL key for a domain, to pick up any
-# IP or home directory change
-sub modify_ipkeys
-{
-local ($dom, $olddom, $getfunc, $putfunc, $postfunc) = @_;
-if (&delete_ipkeys($olddom, $getfunc, $putfunc, $postfunc)) {
-	&setup_ipkeys($dom, $getfunc, $putfunc, $postfunc);
-	}
+return $text{'delete_esslnoips'};
 }
 
 # apache_ssl_directives(&domain, template)
@@ -1729,18 +1714,17 @@ local ($d, $enable) = @_;
 local $tmpl = &get_template($d->{'template'});
 
 # Check if dovecot is installed and supports this feature
-return undef if (!$tmpl->{'web_dovecot_ssl'});
-return undef if (!&foreign_installed("dovecot"));
+return -1 if (!&foreign_installed("dovecot"));
 &foreign_require("dovecot");
 my $ver = &dovecot::get_dovecot_version();
-return undef if ($ver < 2);
+return -1 if ($ver < 2);
 
 # Check if dovecot is using SSL globally
 my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
-return undef if ($sslyn !~ /yes|required/i);
+return 0 if ($sslyn !~ /yes|required/i);
 my $ssldis = &dovecot::find_value("ssl_disable", $conf);
-return undef if ($ssldis =~ /yes/i);
+return 0 if ($ssldis =~ /yes/i);
 
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
@@ -1949,6 +1933,7 @@ else {
 	}
 &unlock_file($cfile);
 &dovecot::apply_configuration() if (!$nochange);
+return 1;
 }
 
 # get_dovecot_ssl_cert(&domain)
@@ -2018,16 +2003,18 @@ sub sync_postfix_ssl_cert
 local ($d, $enable) = @_;
 local $tmpl = &get_template($d->{'template'});
 
+# Postfix only supports per-IP certs
+return 0 if (!$d->{'virt'});
+
 # Check if Postfix is in use
-return undef if ($config{'mail_system'} != 0);
-return undef if (!$tmpl->{'web_postfix_ssl'});
+return -1 if ($config{'mail_system'} != 0);
 
 # Check if using SSL globally
 &foreign_require("postfix");
 local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-return undef if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
+return 0 if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
 
 # Find the existing master file entry
 &lock_file($postfix::config{'postfix_master'});
@@ -2148,6 +2135,7 @@ foreach my $pfx ('smtp', 'submission') {
 if ($changed) {
 	&register_post_action(\&restart_mail_server);
 	}
+return 1;
 }
 
 # get_postfix_ssl_cert(&domain)
@@ -2334,15 +2322,8 @@ if (!$ok) {
 	return (0, $cert, \@dnames);
 	}
 
-# Figure out which services (webmin, postfix, etc)
-# were using the old cert
-my @before;
-foreach my $svc (&get_all_service_ssl_certs($d, 0)) {
-	if (&same_cert_file(
-	    $d->{'ssl_cert'}, $svc->{'cert'})) {
-		push(@before, $svc);
-		}
-	}
+# Figure out which services (webmin, postfix, etc) were using the old cert
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Copy into place
 &obtain_lock_ssl($d);
@@ -2353,23 +2334,11 @@ delete($d->{'letsencrypt_last_err'});
 &save_domain($d);
 &release_lock_ssl($d);
 
-# Apply any per-domain cert to Dovecot and Postfix
-&sync_dovecot_ssl_cert($d, 1);
-if ($d->{'virt'}) {
-	&sync_postfix_ssl_cert($d, 1);
-	}
-
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
 
-# Update services that were using the old cert
-foreach my $svc (@before) {
-	&push_all_print();
-	&set_all_null_print();
-	my $func = "copy_".$svc->{'id'}."_ssl_service";
-	&$func($d);
-	&pop_all_print();
-	}
+# Update services that were using the old cert, both globally and per-domain
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 # Call the post command
 &set_domain_envs($d, "SSL_DOMAIN");
@@ -2634,37 +2603,39 @@ foreach my $f ("web", "dns") {
 return @rv;
 }
 
-# setup_domain_ipkeys(&domain, [&tmpl], [service])
-# Copy the SSL cert for webmin and usermin
-sub setup_domain_ipkeys
+# sync_webmin_ssl_cert(&domain, [enable-or-disable])
+# Add or remove the SSL cert for Webmin for this domain. Returns 1 on success,
+# 0 on failure, or -1 if not supported.
+sub sync_webmin_ssl_cert
 {
-my ($d, $tmpl, $svc) = @_;
-if ((!$svc || $svc eq 'webmin') && (!$tmpl || $tmpl->{'web_webmin_ssl'})) {
-	&setup_ipkeys($d, \&get_miniserv_config, \&put_miniserv_config,
-		      \&restart_webmin_fully);
+my ($d, $enable) = @_;
+if ($enable) {
+	return &setup_ipkeys(
+		$d, \&get_miniserv_config, \&put_miniserv_config,
+		\&restart_webmin_fully);
 	}
-if ((!$svc || $svc eq 'usermin') && (!$tmpl || $tmpl->{'web_usermin_ssl'}) &&
-    &foreign_installed("usermin")) {
-	&foreign_require("usermin");
-	&setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
-		      \&usermin::put_usermin_miniserv_config,
-		      \&restart_usermin);
+else {
+	return &delete_ipkeys(
+		$d, \&get_miniserv_config, \&put_miniserv_config,
+		\&restart_webmin_fully);
 	}
 }
 
-# delete_domain_ipkeys(&domain, [service])
-# Remove the per-domain SSL cert for webmin and usermin
-sub delete_domain_ipkeys
+# sync_usermin_ssl_cert(&domain, [enable-or-disable])
+# Add or remove the SSL cert for Usermin for this domain. Returns 1 on success,
+# 0 on failure, or -1 if not supported.
+sub sync_usermin_ssl_cert
 {
-my ($d, $svc) = @_;
-if (!$svc || $svc eq 'webmin') {
-	&delete_ipkeys($d, \&get_miniserv_config,
-		       \&put_miniserv_config,
-		       \&restart_webmin_fully);
+my ($d, $enable) = @_;
+return -1 if (!&foreign_installed("usermin"));
+&foreign_require("usermin");
+if ($enable) {
+	return &setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
+		      \&usermin::put_usermin_miniserv_config,
+		      \&restart_usermin);
 	}
-if ((!$svc || $svc eq 'usermin') && &foreign_installed("usermin")) {
-	&foreign_require("usermin");
-	&delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
+else {
+	return &delete_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		       \&usermin::put_usermin_miniserv_config,
 		       \&restart_usermin);
 	}

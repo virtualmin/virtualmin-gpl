@@ -158,11 +158,31 @@ my $chain = &get_website_ssl_file($d, 'ca');
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
 	    (&same_cert_file($chain, $svc->{'ca'}) ||
-	     $svc->{'ca'} eq 'none')) {
+	     !$svc->{'ca'} || $svc->{'ca'} eq 'none')) {
 		push(@rv, $svc);
 		}
 	}
 return @rv;
+}
+
+# update_all_domain_service_ssl_certs(&domain, &certs-before)
+# Updates all services that were using this domain's SSL cert before renewal
+sub update_all_domain_service_ssl_certs
+{
+my ($d, $before) = @_;
+&push_all_print();
+&set_all_null_print();
+foreach my $svc (@$before) {
+	if ($svc->{'d'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 1) if (defined(&$func));
+		}
+	else {
+		my $func = "copy_".$svc->{'id'}."_ssl_service";
+		&$func($d) if (defined(&$func));
+		}
+	}
+&pop_all_print();
 }
 
 # ipkeys_to_domain_cert(&domain, &ipkeys)
@@ -183,7 +203,7 @@ return ( );
 }
 
 # copy_dovecot_ssl_service(&domain)
-# Copy a domain's SSL cert to Dovecot
+# Copy a domain's SSL cert to Dovecot for global use
 sub copy_dovecot_ssl_service
 {
 my ($d) = @_;
@@ -287,7 +307,7 @@ if (!&dovecot::find_value("ssl_cipher_list", $conf)) {
 }
 
 # copy_postfix_ssl_service(&domain)
-# Copy a domain's SSL cert to Postfix
+# Copy a domain's SSL cert to Postfix for global use
 sub copy_postfix_ssl_service
 {
 my ($d) = @_;

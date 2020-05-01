@@ -80,10 +80,6 @@ by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
 use the C<--fix-document-dir> flag.
 
-To copy the domain's SSL certificate to Webmin and Usermin for use by clients
-requesting this domain or it's private IP, use the C<--add-webmin-cert> flag.
-Or to remove this, use the C<--remove-webmin-cert>.
-
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
@@ -659,12 +655,15 @@ foreach $d (@doms) {
 	if (&domain_has_ssl($d) && defined($ipkeys)) {
 		if ($ipkeys) {
 			&$first_print("Setting up Webmin and Usermin cert ..");
-			&delete_domain_ipkeys($d);
-			&setup_domain_ipkeys($d);
+			&sync_webmin_ssl_cert($d, 0);
+			&sync_usermin_ssl_cert($d, 0);
+			&sync_webmin_ssl_cert($d, 1);
+			&sync_usermin_ssl_cert($d, 1);
 			}
 		else {
 			&$first_print("Removing Webmin and Usermin cert ..");
-			&delete_domain_ipkeys($d);
+			&sync_webmin_ssl_cert($d, 0);
+			&sync_usermin_ssl_cert($d, 0);
 			}
 		&$second_print(".. done");
 		}
@@ -733,7 +732,6 @@ print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert]\n";
-print "                     [--add-webmin-cert | --remove-webmin-cert]\n";
 print "                     [--sync-tlsa]\n";
 exit(1);
 }
