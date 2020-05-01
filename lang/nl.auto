@@ -26,7 +26,6 @@ index_themeswitchnot=Vraag me niet nog een keer
 index_certwarn=Waarschuwing SSL-certificaat
 index_certexpired=De SSL-certificaten van sommige virtuele servers zijn verlopen : $1 
 index_certnearly=De SSL-certificaten van sommige virtuele servers verlopen bijna : $1 
-index_certlets=Let's Encrypt-certificeringsverlenging is ingeschakeld voor virtuele servers van $1, maar het vereiste pakket is niet geïnstalleerd : $2 
 index_expirywarn=Waarschuwing DNS-registratie
 index_expiryexpired=De DNS-registraties van sommige virtuele servers zijn verlopen : $1 
 index_expirynearly=De DNS-registraties van sommige virtuele servers verlopen bijna : $1 

@@ -20,7 +20,6 @@ index_themeswitchnot=Ikke spør meg igjen
 index_certwarn=SSL-sertifikatadvarsel
 index_certexpired=Noen virtuelle serveres SSL-sertifikater er utløpt : $1 
 index_certnearly=Noen virtuelle serveres SSL-sertifikater er i ferd med å utløpe : $1 
-index_certlets=La oss kryptere fornyelse av sertifisering er aktivert for virtuelle $1 -servere, men den nødvendige pakken er ikke installert : $2 
 index_expirywarn=Advarsel om DNS-registrering
 index_expiryexpired=Noen virtuelle serveres DNS-registreringer er utløpt : $1 
 index_expirynearly=Noen virtuelle serveres DNS-registreringer er i ferd med å utløpe : $1 
