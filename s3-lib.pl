@@ -7,7 +7,7 @@ $s3_groups_uri = "http://acs.amazonaws.com/groups/global/";
 # Returns an error message if S3 cannot be used
 sub check_s3
 {
-foreach my $m ("XML::Simple", "Crypt::SSLeay", "Digest::HMAC_SHA1",
+foreach my $m ("XML::Simple", "Digest::HMAC_SHA1",
                "LWP::Protocol::https", @s3_perl_modules) {
 	eval "use $m";
 	if ($@ =~ /Can't locate/) {
@@ -16,6 +16,14 @@ foreach my $m ("XML::Simple", "Crypt::SSLeay", "Digest::HMAC_SHA1",
 	elsif ($@) {
 		return &text('s3_emodule2', "<tt>$m</tt>", "$@");
 		}
+	}
+eval "use Crypt::SSLeay";
+if ($@) {
+	eval "use Net::SSLeay";
+	}
+if ($@) {
+	return &text('s3_emodule3', "<tt>Crypt::SSLeay</tt>",
+				    "<tt>Net::SSLeay</tt>");
 	}
 return undef;
 }
