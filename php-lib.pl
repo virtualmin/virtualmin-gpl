@@ -1349,6 +1349,7 @@ $shortv =~ s/^(\d+\.\d+)\..*$/$1/g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/opt/rh/php$nodotv/lib/php.ini",
 	       "/opt/remi/php$nodotv/root/etc/php.ini",
+	       "/etc/opt/remi/php$nodotv/php.ini",
 	       "/opt/atomic/atomic-php$nodotv/root/etc/php.ini",
 	       "/etc/php.ini",
 	       $mode eq "mod_php" ? ("/etc/php$ver/apache/php.ini",
