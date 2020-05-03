@@ -1348,6 +1348,7 @@ local $shortv = $ver;
 $shortv =~ s/^(\d+\.\d+)\..*$/$1/g;
 foreach my $i ("/opt/rh/php$nodotv/root/etc/php.ini",
 	       "/opt/rh/php$nodotv/lib/php.ini",
+	       "/etc/opt/rh/rh-php$nodotv/php.ini",
 	       "/opt/remi/php$nodotv/root/etc/php.ini",
 	       "/etc/opt/remi/php$nodotv/php.ini",
 	       "/opt/atomic/atomic-php$nodotv/root/etc/php.ini",
