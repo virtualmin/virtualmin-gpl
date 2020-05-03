@@ -190,11 +190,11 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && lc($1) eq lc($d->{'dom'}) &&
 	      !$ignore{lc($_->{'from'})} } @virts;
 }
 
-# setup_mail(&domain, [no-aliases])
+# setup_mail(&domain, [no-aliases], [leave-dns])
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
-local ($d, $noaliases) = @_;
+local ($d, $noaliases, $leave_dns) = @_;
 &$first_print($text{'setup_doms'});
 &obtain_lock_mail($d);
 &complete_domain($d);
@@ -366,7 +366,7 @@ if (!$d->{'alias'} && !$d->{'aliasmail'}) {
 	}
 
 # Add domain to DKIM list
-&update_dkim_domains($d, 'setup');
+&update_dkim_domains($d, 'setup', $leave_dns);
 
 # Setup sender-dependent outgoing IP
 if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
@@ -387,11 +387,11 @@ if (!$d->{'creating'} && $config{'mail_autoconfig'} &&
 return 1;
 }
 
-# delete_mail(&domain, [preserve-remote], [leave-aliases])
+# delete_mail(&domain, [preserve-remote], [leave-aliases], [leave-dns])
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
-local ($d, $preserve, $leave_aliases) = @_;
+local ($d, $preserve, $leave_aliases, $leave_dns) = @_;
 
 &$first_print($text{'delete_doms'});
 &obtain_lock_mail($d);
@@ -552,7 +552,7 @@ if ($supports_dependent) {
 &delete_everyone_file($d);
 
 # Remove domain from DKIM list
-&update_dkim_domains($d, 'delete');
+&update_dkim_domains($d, 'delete', $leave_dns);
 
 # Remove secondary virtusers from slaves
 &sync_secondary_virtusers($d);
@@ -886,8 +886,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	if ($supports_bcc == 2) {
 		$oldrbcc = &get_domain_recipient_bcc($_[1]);
 		}
-	&delete_mail($_[1], 0, 1);
-	&setup_mail($_[0], 1);
+	&delete_mail($_[1], 0, 1, 1);
+	&setup_mail($_[0], 1, 1);
 	if ($supports_bcc) {
 		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 		&save_domain_sender_bcc($_[0], $oldbcc);
