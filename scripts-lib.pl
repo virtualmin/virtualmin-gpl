@@ -2228,6 +2228,46 @@ return 0 if (!$job);
 return 1;
 }
 
+# create_script_php_cron(&domain, full-command, phpver, mins, hours, callnow)
+# If missing, create a cron job to run some PHP command
+sub create_script_php_cron
+{
+local ($d, $cmd, $phpver, $mins, $hours, $callnow) = @_;
+return 0 if (!&foreign_check("cron"));
+&foreign_require("cron");
+$cmd =~ /^(.*)\//;
+local $dir = $1;
+local $cmd = &php_command_for_version($phpver);
+local $fullcmd = "cd $dir && $php -f $cmd >/dev/null 2>&1";
+local $job = { 'user' => $d->{'user'},
+	       'active' => 1,
+	       'command' => $fullcmd,
+	       'mins' => $mins,
+	       'hours' => $hours,
+	       'days' => '*',
+	       'months' => '*',
+	       'weekdays' => '*' };
+&cron::create_cron_job($job);
+if ($callnow) {
+	&system_logged(&command_as_user($d->{'user'}, 0, $fullcmd));
+	}
+}
+
+# delete_script_php_cron(&domain, cmd)
+# Remove the cron job that runs some PHP command
+sub delete_script_php_cron
+{
+local ($d, $cmd) = @_;
+return 0 if (!&foreign_check("cron"));
+&foreign_require("cron");
+local @jobs = &cron::list_cron_jobs();
+local ($job) = grep { $_->{'user'} eq $d->{'user'} &&
+		      $_->{'command'} =~ /-f\s+\Q$cmd\E/ } @jobs;
+return 0 if (!$job);
+&cron::delete_cron_job($job);
+return 1;
+}
+
 # list_script_upgrades(&domains)
 # Returns a list of script updates that can be done in the given domains
 sub list_script_upgrades
