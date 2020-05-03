@@ -9,6 +9,7 @@ $can = &can_edit_phpmode($d);
 $can || &error($text{'phpmode_ecannot'});
 if (!$d->{'alias'}) {
 	@modes = &supported_php_modes($d);
+	push(@modes, "none");
 	$mode = &get_domain_php_mode($d);
 	}
 $p = &domain_has_website($d);
