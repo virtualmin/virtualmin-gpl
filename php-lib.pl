@@ -807,6 +807,8 @@ if ($p ne 'web') {
 	}
 &require_apache();
 local @rv;
+push(@rv, "none");
+
 if (&get_apache_mod_php_version()) {
 	# Check for Apache PHP module
 	push(@rv, "mod_php");
@@ -850,6 +852,7 @@ else {
 	my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
 	push(@rv, "fpm") if (@okfpms);
 	}
+
 return @rv;
 }
 
@@ -860,7 +863,8 @@ sub php_mode_numbers_map
 return { 'mod_php' => 0,
 	 'cgi' => 1,
 	 'fcgid' => 2,
-	 'fpm' => 3 };
+	 'fpm' => 3,
+	 'none' => 4 };
 }
 
 # list_available_php_versions([&domain], [forcemode])

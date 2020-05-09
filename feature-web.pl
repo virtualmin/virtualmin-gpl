@@ -2834,7 +2834,8 @@ my @opts = grep { $cannums{$_->[0]} }
 		([ 0, $text{'phpmode_mod_php'} ],
 	         [ 1, $text{'phpmode_cgi'} ],
 	         [ 2, $text{'phpmode_fcgid'} ],
-	         [ 3, $text{'phpmode_fpm'} ]);
+	         [ 3, $text{'phpmode_fpm'} ],
+			[ 4, $text{'phpmode_none'} ]);
 print &ui_table_row(
     &hlink($text{'tmpl_phpmode'}, "template_phpmode"),
     &ui_radio_table("web_php_suexec", int($tmpl->{'web_php_suexec'}), \@opts));
