@@ -6,6 +6,8 @@ sub list_dynip_services
 {
 return ( { 'name' => 'dyndns',
 	   'desc' => $text{'dynip_dyndns'} },
+	 { 'name' => 'none',
+	   'desc' => $text{'dynip_none'} },
 	 { 'name' => 'external',
 	   'desc' => $text{'dynip_external'},
 	   'external' => 1, },
@@ -104,6 +106,10 @@ elsif ($config{'dynip_service'} eq 'external') {
 	else {
 		return ($ip, undef);
 		}
+	}
+elsif ($config{'dynip_service'} eq 'none') {
+	# Assume that nothing needs to be run
+	return ($ip, undef);
 	}
 else {
 	return (undef, "Unknown dynamic IP service $config{'dynip_service'}");
