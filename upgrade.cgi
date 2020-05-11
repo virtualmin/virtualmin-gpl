@@ -84,8 +84,9 @@ if ($itype eq "rpm") {
 	local $found;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=.*\/gpl(\/.*)/) {
-			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1";
+		if ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
+			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
+			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
 			}
 		}
