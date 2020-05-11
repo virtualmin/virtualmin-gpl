@@ -403,7 +403,8 @@ if ($d && !$mailbox) {
 	}
 @sgroups = &allowed_secondary_groups($d);
 foreach $f (&list_mail_plugins()) {
-	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs"));
+	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs") &&
+					  &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
 	}
 $anyother = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} ||
 	    $anyplugins ||
