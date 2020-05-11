@@ -1596,3 +1596,5 @@ Added support for MySQL 8 systems that use a different password hashing method.
 Existing GPG keys owned by the root user can now be imported as backup encrytion keys.
 ---- Changes since 6.06 ----
 Virtual servers to backup can now be selected by reseller.
+---- Changes since 6.09 ----
+Added the set-dkim API command to enable and disable DKIM.
