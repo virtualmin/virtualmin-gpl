@@ -46,7 +46,7 @@ $pub = &public_html_dir($d);
 $i = 0;
 @table = ( );
 $anydelete = 0;
-foreach $dir (@dirs) {
+foreach $dir (sort { $a->{'dir'} cmp $b->{'dir'} } @dirs) {
 	$ispub = $dir->{'dir'} eq $pub;
 	$sel = &ui_select("ver_$i", $dir->{'version'}, \@vlist);
 	push(@hiddens, [ "dir_$i", $dir->{'dir'} ]);
