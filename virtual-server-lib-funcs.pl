@@ -14722,8 +14722,9 @@ elsif ($config{'quotas'}) {
 						            $home_fstab);
 			$home_mtab->[4] &&= &quota::quota_now($home_mtab,
                                                               $home_fstab);
-			if (!($home_mtab->[4] % 2)) {
-				# User quotas are not active
+			if ($home_mtab->[4] != 3) {
+				# User quotas are not active (we need 
+				# both user and group quotas being active)
 				$nohome++;
 				}
 			else {
@@ -14758,8 +14759,9 @@ elsif ($config{'quotas'}) {
                                         $mail_mtab, $mail_fstab);
 				$mail_mtab->[4] &&= &quota::quota_now(
 					$mail_mtab, $mail_fstab);
-				if (!$mail_mtab->[4]) {
-					# Mail user quotas are not active
+				if ($mail_mtab->[4] != 3) {
+					# Mail user quotas are not active (we need 
+					# both user and group quotas being active)
 					$nomail++;
 					}
 				if ($nohome) {
