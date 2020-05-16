@@ -205,7 +205,6 @@ while(@ARGV > 0) {
 		@vbs = grep { $_ ne $v } @vbs;
 		}
 	elsif ($a eq "--incremental") {
-		&has_incremental_format() || &usage("The configured backup format does not support incremental backups");
 		&has_incremental_tar() || &usage("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
@@ -291,6 +290,9 @@ if ($keyid) {
 if ($onebyone && !$newformat) {
 	&usage("--onebyone option can only be used in conjunction ".
 	       "with --newformat");
+	}
+if ($increment) {
+	&has_incremental_format($compression) || &usage("The configured backup format does not support incremental backups");
 	}
 
 # Work out what will be backed up
@@ -416,7 +418,8 @@ foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $increment, $start_time,
 			  $size, $ok, "api", $output, $errdoms, undef, $key,
 			  undef,
-			  $separate && $newformat ? 2 : $separate ? 1 : 0);
+			  $separate && $newformat ? 2 : $separate ? 1 : 0,
+			  undef, $compression);
 	}
 &stop_running_backup($sched);
 &virtualmin_api_log(\@OLDARGV, $doms[0]);

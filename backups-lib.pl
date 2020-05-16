@@ -4354,10 +4354,14 @@ else {
 }
 
 
+# has_incremental_format([compression])
 # Returns 1 if the configured backup format supports incremental backups
 sub has_incremental_format
 {
-return $config{'compression'} != 3;
+my ($compression) = @_;
+$compression = $config{'compression'}
+	if (!defined($compression) || $compression eq '');
+return $compression != 3;
 }
 
 # Returns 1 if tar supports incremental backups
@@ -5217,12 +5221,15 @@ return $ok;
 
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
-# 		   [schedule-id], [separate-format], [allow-owner-restore])
+# 		   [schedule-id], [separate-format], [allow-owner-restore],
+# 		   [compression])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
-local ($doms, $dest, $increment, $start, $size, $ok, $mode,
-       $output, $errdoms, $user, $key, $schedid, $separate, $ownrestore) = @_;
+local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
+       $user, $key, $schedid, $separate, $ownrestore, $compression) = @_;
+$compression = $config{'compression'}
+	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
 	&make_dir($backups_log_dir, 0700);
 	}
@@ -5238,7 +5245,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'mode' => $mode,
 	       'key' => $key->{'id'},
 	       'sched' => $schedid,
-	       'compression' => $config{'compression'},
+	       'compression' => $compression,
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
 	     );
