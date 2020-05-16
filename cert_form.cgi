@@ -96,12 +96,12 @@ print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_end();
 
+# Build a list of services and their certs, and work out which ones
+# are already copied
+@already = &get_all_domain_service_ssl_certs($d);
+
 # Buttons to copy cert to Webmin
 if (&can_webmin_cert()) {
-	# Build a list of services and their certs, and work out which ones
-	# are already copied
-	@already = &get_all_domain_service_ssl_certs($d);
-
 	# Show which services are already using the cert
 	if (@already) {
 		my @a;
@@ -124,6 +124,7 @@ if (&can_webmin_cert()) {
 		}
 	%cert_already = map { $_->{'id'}, $_ } @already;
 
+	# XXX fix this!!
 	my $cert_used_wm = (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'});
 	my $cert_used_um = (&foreign_installed("usermin") && 
 							(!$cert_already{'usermin'} || $cert_already{'usermin'}->{'d'}));
@@ -448,20 +449,20 @@ if (&can_webmin_cert()) {
 	print &ui_hidden("dom", $in{'dom'});
 	print &ui_table_start($text{'cert_peripheader'}, undef, 2);
 
-	($webmina) = grep { $_->{'d'} && $_->{'id'} eq 'webmin' } @already;
-	$ipmsg = $d->{'virt'} ?
-		&text('cert_webminsvcip', $d->{'ip'}, $d->{'dom'}) :
-		&text('cert_webminsvcdom', $d->{'dom'});
-	print &ui_table_row($text{'cert_webminsvc'},
-		&ui_radio("webmin", $webmina ? 1 : 0,
-		  [ [ 1, $ipmsg ],
-		    [ 0, $text{'cert_webminsvcdef'} ] ]));
-
-	($usermina) = grep { $_->{'d'} && $_->{'id'} eq 'usermin' } @already;
-	print &ui_table_row($text{'cert_userminsvc'},
-		&ui_radio("usermin", $usermina ? 1 : 0,
-		  [ [ 1, $ipmsg ],
-		    [ 0, $text{'cert_webminsvcdef'} ] ]));
+	foreach my $st (&list_service_ssl_cert_types()) {
+		next if (!$st->{'dom'} && !$st->{'virt'});
+		next if (!$st->{'dom'} && !$d->{'virt'});
+		($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
+		$ipmsg = $d->{'virt'} && $st->{'virt'} && $st->{'dom'} ?
+			&text('cert_webminsvcip', $d->{'ip'}, $d->{'dom'}) :
+			 $d->{'virt'} && $st->{'virt'} ?
+			&text('cert_webminsvcdom', $d->{'ip'}) :
+			&text('cert_webminsvcdom', $d->{'dom'});
+		print &ui_table_row($text{'cert_'.$st->{'id'}.'svc'},
+			&ui_radio($st->{'id'}, $a ? 1 : 0,
+			  [ [ 1, $ipmsg."<br>\n" ],
+			    [ 0, $text{'cert_webminsvcdef'} ] ]));
+		}
 
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'save'} ] ]);

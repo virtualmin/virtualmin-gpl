@@ -2970,10 +2970,15 @@ cert_lets_freason=Renewal failed due to
 cert_desc9=This page allows you to select if SSL requests to Webmin, Usermin and other servers for this virtual server or its IP address, will use its SSL certificate.
 cert_webminsvc=Webmin domain cerificate enabled?
 cert_userminsvc=Usermin domain cerificate enabled?
+cert_postfixsvc=Postfix IP cerificate enabled?
+cert_dovecotsvc=Dovecot domain cerificate enabled?
 cert_peripheader=Domain service certificates
 cert_webminsvcdef=No (use default cert)
 cert_webminsvcdom=Yes (for requests to $1)
 cert_webminsvcip=Yes (for requests to $1 and $2)
+cert_eperiperr=Failed to save service certificates
+cert_eperipinst=Service $1 is not installed
+cert_eperipfail=Service $1 failed
 
 csr_title=Generating CSR
 csr_title2=Generating Certificate

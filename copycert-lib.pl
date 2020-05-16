@@ -2,7 +2,22 @@
 
 sub list_service_ssl_cert_types
 {
-return ('webmin', 'usermin', 'dovecot', 'postfix', 'proftpd');
+return ({'id' => 'webmin',
+	 'dom' => 1,
+	 'virt' => 1, },
+	{'id' => 'usermin',
+         'dom' => 1,
+         'virt' => 1, },
+	{'id' => 'dovecot',
+         'dom' => 1,
+         'virt' => 1, },
+	{'id' => 'postfix',
+         'dom' => 0,
+         'virt' => 1, },
+	{'id' => 'proftpd',
+         'dom' => 0,
+         'virt' => 0, },
+       );
 }
 
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)
@@ -79,45 +94,60 @@ if (&foreign_installed("usermin")) {
 
 if (&foreign_installed("dovecot")) {
 	# Check Dovecot certificate
-	my ($cfile, $kfile, $cafile, $ip, $dom);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, $cafile, $ip,$dom) = &get_dovecot_ssl_cert($d);
+		my ($cfile, $kfile, $cafile, $ip, $dom) =
+			&get_dovecot_ssl_cert($d);
+		if ($cfile) {
+			push(@svcs, { 'id' => 'dovecot',
+				      'cert' => $cfile,
+				      'ca' => $cafile,
+				      'prefix' => 'mail',
+				      'port' => 993,
+				      'sslports' => [ 995 ],
+				      'ip' => $ip,
+				      'dom' => $dom,
+				      'd' => $d, });
+			}
 		}
-	if (!$cfile) {
-		# Fall back to global Dovecot cert
-		&foreign_require("dovecot");
-		my $conf = &dovecot::get_config();
-		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
-			 &dovecot::find_value("ssl_cert", $conf, 0, "");
-		$cfile =~ s/^<//;
-		$cafile = &dovecot::find_value("ssl_ca", $conf);
-		$cafile =~ s/^<//;
-		}
+	# Also add global Dovecot cert
+	&foreign_require("dovecot");
+	my $conf = &dovecot::get_config();
+	my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+		    &dovecot::find_value("ssl_cert", $conf, 0, "");
+	$cfile =~ s/^<//;
+	$cafile = &dovecot::find_value("ssl_ca", $conf);
+	$cafile =~ s/^<//;
 	if ($cfile) {
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 993,
-			      'sslports' => [ 995 ],
-			      'ip' => $ip,
-			      'dom' => $dom, });
+			      'sslports' => [ 995 ]});
 		}
 	}
 
 if ($config{'mail_system'} == 0) {
 	# Check Postfix certificate
-	my ($cfile, $kfile, $cafile, $ip);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, $cafile, $ip) = &get_postfix_ssl_cert($d);
+		my ($cfile, $kfile, $cafile, $ip) = &get_postfix_ssl_cert($d);
+		if ($cfile) {
+			push(@svcs, { 'id' => 'postfix',
+				      'cert' => $cfile,
+				      'ca' => $cafile,
+				      'prefix' => 'mail',
+				      'port' => 587,
+				      'sslports' => [ 25 ],
+				      'ip' => $ip,
+				      'd' => $d, });
+			}
 		}
-	if (!$cfile) {
-		&foreign_require("postfix");
-		$cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-		$cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-		}
+	# Also add global Postfix cert
+	&foreign_require("postfix");
+	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
 	if ($cfile) {
 		push(@svcs, { 'id' => 'postfix',
 			      'cert' => $cfile,
