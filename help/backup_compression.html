@@ -1,5 +1,9 @@
 <header>Backup compression format</header>
 
+This field allows the compression type to be overridden for this backup. If
+not set, the global default format (set on the Virtualmin Configuration page)
+will be used. <p>
+
 By default, Virtualmin uses gzip compression on its backup files. However, this
 option can be used to select the space efficient (but CPU-intensive) bzip2
 format instead. You can also use un-compressed TAR format backups, which may be
@@ -12,4 +16,3 @@ the compression format (like <tt>domains.tar.gz</tt> or <tt>domains.tar</tt>).
 <p>
 
 <footer>
-

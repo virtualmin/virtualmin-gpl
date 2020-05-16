@@ -71,7 +71,7 @@ print &ui_table_row($text{'viewbackup_ownrestore'},
 # Compression format?
 if (defined($log->{'compression'})) {
 	print &ui_table_row($text{'viewbackup_compression'},
-		&compression_to_suffix($log->{'compression'}));
+		$text{'backup_compression'.$log->{'compression'}});
 	}
 
 # File format

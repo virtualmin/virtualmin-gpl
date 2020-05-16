@@ -272,8 +272,18 @@ if ($d) {
 		    &ui_yesno_radio("parent", $sched->{'parent'} ? 1 : 0));
 	}
 
+# Show compression format
+print &ui_table_row(
+	&hlink($text{'backup_compression'}, "backup_compression"),
+	&ui_radio("compression", $sched->{'compression'},
+		  [ [ '', $text{'default'} ],
+		    [ 0, $text{'backup_compression0'} ],
+		    [ 1, $text{'backup_compression1'} ],
+		    [ 2, $text{'backup_compression2'} ],
+		    [ 3, $text{'backup_compression3'} ] ]));
+
 # Show incremental option
-if (&has_incremental_tar() && &has_incremental_format()) {
+if (&has_incremental_tar()) {
 	print &ui_table_row(
 		&hlink($text{'backup_increment'}, "backup_increment"),
 		&ui_radio("increment", int($sched->{'increment'}),
