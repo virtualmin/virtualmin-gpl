@@ -249,7 +249,8 @@ return $asd;
 
 # backup_domains(file, &domains, &features, dir-format, skip-errors, &options,
 #		 home-format, &virtualmin-backups, mkdir, onebyone, as-owner,
-#		 &callback-func, incremental, on-schedule, &key, kill-running)
+#		 &callback-func, incremental, on-schedule, &key, kill-running,
+#		 compression-format)
 # Perform a backup of one or more domains into a single tar.gz file. Returns
 # an OK flag, the size of the backup file, and a list of domains for which
 # something went wrong.
@@ -257,11 +258,13 @@ sub backup_domains
 {
 local ($desturls, $doms, $features, $dirfmt, $skip, $opts, $homefmt, $vbs,
        $mkdir, $onebyone, $asowner, $cbfunc, $increment, $onsched, $key,
-       $kill) = @_;
+       $kill, $compression) = @_;
 $opts->{'skip'} = $skip;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
+$compression = $config{'compression'}
+	if (!defined($compression) || $compression eq '');
 
 # Check if the limit on running backups has been hit
 local $err = &check_backup_limits($asowner, $onsched, $desturl);
@@ -281,7 +284,7 @@ if (!&get_tar_command()) {
 	}
 
 # Check for clash between encryption and backup format
-if ($key && $config{'compression'} == 3) {
+if ($key && $compression == 3) {
 	&$first_print($text{'backup_ezipkey'});
 	return (0, 0, $doms);
 	}
@@ -617,7 +620,7 @@ local @backupfeatures = @$features;
 local $hfsuffix;
 if ($homefmt) {
 	@backupfeatures = ((grep { $_ ne "dir" } @$features), "dir");
-	$hfsuffix = &compression_to_suffix($config{'compression'});
+	$hfsuffix = &compression_to_suffix($compression);
 	}
 
 # Take a lock on the backup destination, to avoid concurrent backups to
@@ -1125,17 +1128,17 @@ if ($ok) {
 			# Work out dest file and compression command
 			local $destfile = "$d->{'dom'}.tar";
 			local $comp = "cat";
-			if ($config{'compression'} == 0) {
+			if ($compression == 0) {
 				$destfile .= ".gz";
 				$comp = &get_gzip_command().
 					" -c $config{'zip_args'}";
 				}
-			elsif ($config{'compression'} == 1) {
+			elsif ($compression == 1) {
 				$destfile .= ".bz2";
 				$comp = &get_bzip2_command().
 					" -c $config{'zip_args'}";
 				}
-			elsif ($config{'compression'} == 3) {
+			elsif ($compression == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
 				}
 
@@ -1162,7 +1165,7 @@ if ($ok) {
 			&execute_command($toucher);
 
 			# Start the tar command
-			if ($config{'compression'} == 3) {
+			if ($compression == 3) {
 				# ZIP does both archiving and compression
 				&execute_command("cd $backupdir && ".
 					 "zip -r - $d->{'dom'}_* | ".
