@@ -118,6 +118,7 @@ else {
 	@doms || $in{'all'} || @vbs || &error($text{'backup_edoms'});
 
 	# Update the schedule object
+	$sched->{'desc'} = $in{'desc'};
 	$sched->{'all'} = $in{'all'};
 	$sched->{'doms'} = join(" ", split(/\0/, $in{'doms'}));
 	if (&can_edit_plans()) {

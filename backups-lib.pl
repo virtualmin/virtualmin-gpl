@@ -14,6 +14,7 @@ if ($config{'backup_dest'}) {
 			  'mkdir' => $config{'backup_mkdir'},
 			  'errors' => $config{'backup_errors'},
 			  'increment' => $config{'backup_increment'},
+			  'compression' => $config{'backup_compression'},
 			  'strftime' => $config{'backup_strftime'},
 			  'onebyone' => $config{'backup_onebyone'},
 			  'parent' => $config{'backup_parent'},
@@ -108,6 +109,7 @@ if ($backup->{'id'} == 1) {
 	$config{'backup_mkdir'} = $backup->{'mkdir'};
 	$config{'backup_errors'} = $backup->{'errors'};
 	$config{'backup_increment'} = $backup->{'increment'};
+	$config{'backup_compression'} = $backup->{'compression'};
 	$config{'backup_strftime'} = $backup->{'strftime'};
 	$config{'backup_onebyone'} = $backup->{'onebyone'};
 	$config{'backup_parent'} = $backup->{'parent'};
@@ -5222,12 +5224,12 @@ return $ok;
 # write_backup_log(&domains, dest, incremental?, start, size, ok?,
 # 		   "cgi"|"sched"|"api", output, &errordoms, [user], [&key],
 # 		   [schedule-id], [separate-format], [allow-owner-restore],
-# 		   [compression])
+# 		   [compression], [description])
 # Record that some backup was made and succeeded or failed
 sub write_backup_log
 {
 local ($doms, $dest, $increment, $start, $size, $ok, $mode, $output, $errdoms,
-       $user, $key, $schedid, $separate, $ownrestore, $compression) = @_;
+       $user, $key, $schedid, $separate, $ownrestore, $compression, $desc) = @_;
 $compression = $config{'compression'}
 	if (!defined($compression) || $compression eq '');
 if (!-d $backups_log_dir) {
@@ -5248,6 +5250,7 @@ local %log = ( 'doms' => join(' ', map { $_->{'dom'} } @$doms),
 	       'compression' => $compression,
 	       'separate' => $separate,
 	       'ownrestore' => $ownrestore,
+	       'desc' => $desc,
 	     );
 $main::backup_log_id_count++;
 $log{'id'} = $log{'end'}."-".$$."-".$main::backup_log_id_count;

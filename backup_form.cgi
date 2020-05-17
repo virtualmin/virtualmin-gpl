@@ -75,9 +75,16 @@ $sched ||= { 'all' => 1,
 			$cbmode == 3 ? $access{'email'} : undef };
 @tds = ( "width=30% ");
 
-# Fields to select domains
 print &ui_hidden_table_start($text{'backup_headerdoms'}, "width=100%",
 			     2, "doms", 1, \@tds);
+
+# Backup description
+if ($in{'new'} || $in{'sched'}) {
+	print &ui_table_row(&hlink($text{'backup_desc'}, "backup_desc"),
+			    &ui_textbox("desc", $sched->{'desc'}, 50));
+	}
+
+# Fields to select domains
 @bak = split(/\s+/, $sched->{'doms'});
 @doms = grep { &can_backup_domain($_) } &list_domains();
 $dis1 = &js_disable_inputs([ "doms" ], [ ], "onClick");

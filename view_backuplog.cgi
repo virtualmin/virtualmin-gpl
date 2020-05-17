@@ -17,6 +17,11 @@ print &ui_hidden("log", $in{'id'});
 print &ui_table_start($text{'viewbackup_header'}, "width=100%", 4,
 		      [ "nowrap" ]);
 
+# Description, if any
+if ($log->{'desc'}) {
+	print &ui_table_row($text{'viewbackup_desc'}, $log->{'desc'}, 3);
+	}
+
 # Destination
 print &ui_table_row($text{'viewbackup_dest'},
 	&nice_backup_url($log->{'dest'}, 1), 3);
