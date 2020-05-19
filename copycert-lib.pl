@@ -392,15 +392,12 @@ if ($cadata) {
 &postfix::set_current_value("smtpd_tls_key_file", $kfile);
 &postfix::set_current_value("smtpd_tls_CAfile", $cadata ? $cafile : undef);
 if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
-	&postfix::set_current_value("smtpd_tls_security_level", 
-		&postfix::get_current_value("smtpd_tls_security_level", "nodef") || "may");
+	&postfix::set_current_value("smtpd_tls_security_level", "may");
 	if (&compare_version_numbers($postfix::postfix_version, "2.11") >= 0) {
-		&postfix::set_current_value("smtp_tls_security_level", 
-		&postfix::get_current_value("smtp_tls_security_level", "nodef") || "dane");
+		&postfix::set_current_value("smtp_tls_security_level", "dane");
 		}
 	else {
-		&postfix::set_current_value("smtp_tls_security_level", 
-		&postfix::get_current_value("smtp_tls_security_level", "nodef") || "may");
+		&postfix::set_current_value("smtp_tls_security_level", "may");
 		}
 	}
 &$second_print(&text('copycert_dsaved', "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
@@ -408,12 +405,10 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 # Make sure SSL is enabled
 &$first_print($text{'copycert_penabling'});
 if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
-	&postfix::set_current_value("smtpd_tls_security_level", 
-		&postfix::get_current_value("smtpd_tls_security_level", "nodef") || "may");
+	&postfix::set_current_value("smtpd_tls_security_level", "may");
 	}
 else {
-	&postfix::set_current_value("smtpd_use_tls", 
-		&postfix::get_current_value("smtpd_use_tls", "nodef") || "yes");
+	&postfix::set_current_value("smtpd_use_tls", "yes");
 	}
 &postfix::set_current_value("smtpd_tls_mandatory_protocols", 
 	&postfix::get_current_value("smtpd_tls_mandatory_protocols", "nodef") || "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
