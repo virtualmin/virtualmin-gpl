@@ -5867,7 +5867,7 @@ if ($config{'mail_system'} == 0) {
 				     $_->{'enabled'} } @$master;
 	if ($submission) {
 		$smtp_port = 587;
-		if ($submission->{'command'} =~ /smtpd_tls_security_level=(encrypt|may)/) {
+		if ($submission->{'command'} =~ /smtpd_sasl_auth_enable=(yes)/) {
 			$smtp_type = "STARTTLS";
 			$smtp_ssl = "yes";
 			}
