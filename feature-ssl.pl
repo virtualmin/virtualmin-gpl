@@ -189,14 +189,6 @@ if (!$d->{'name'} && $lref->[$virt->{'line'}] !~ /:\d+/) {
 	}
 undef(@apache::get_config_cache);
 
-# Add this IP and cert to Webmin/Usermin's SSL keys list
-if ($tmpl->{'web_webmin_ssl'}) {
-	&sync_webmin_ssl_cert($d, 1);
-	}
-if ($tmpl->{'web_usermin_ssl'}) {
-	&sync_usermin_ssl_cert($d, 1);
-	}
-
 # Copy chained CA cert in from domain with same IP, if any
 $d->{'web_sslport'} = $web_sslport;
 if ($chained) {
@@ -204,10 +196,8 @@ if ($chained) {
 	}
 $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 
-# Setup in Dovecot
-if ($tmpl->{'web_dovecot_ssl'}) {
-	&sync_dovecot_ssl_cert($d, 1);
-	}
+# Add cert in Webmin, Dovecot, etc..
+&enable_domain_service_ssl_certs($d);
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -504,10 +494,6 @@ else {
 	}
 undef(@apache::get_config_cache);
 
-# Delete per-IP SSL cert, if any
-&sync_webmin_ssl_cert($d, 0);
-&sync_usermin_ssl_cert($d, 0);
-
 # If any other domains were using this one's SSL cert or key, break the linkage
 foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&break_ssl_linkage($od, $d);
@@ -522,8 +508,8 @@ if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_same'});
 	}
 
-# Remove from Dovecot
-&sync_dovecot_ssl_cert($d, 0);
+# Remove from Dovecot, Webmin, etc..
+&disable_domain_service_ssl_certs($d);
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
@@ -866,13 +852,8 @@ if ($virt) {
 		&fix_options_directives($vconf, $conf, 0);
 		}
 
-	# Sync cert to Dovecot and Postfix
-	if ($tmpl->{'web_dovecot_ssl'}) {
-		&sync_dovecot_ssl_cert($d, 1);
-		}
-	if ($tmpl->{'web_postfix_ssl'}) {
-		&sync_postfix_ssl_cert($d, 1);
-		}
+	# Sync cert to Dovecot, Postfix, Webmin, etc..
+	&enable_domain_service_ssl_certs($d);
 
 	&$second_print($text{'setup_done'});
 	}

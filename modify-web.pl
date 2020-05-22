@@ -234,12 +234,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--break-ssl-cert") {
 		$breakcert = 1;
 		}
-	elsif ($a eq "--add-webmin-cert") {
-		$ipkeys = 1;
-		}
-	elsif ($a eq "--remove-webmin-cert") {
-		$ipkeys = 0;
-		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
@@ -253,7 +247,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || $fixhtmldir || $breakcert || defined($ipkeys) ||
+  defined($renew) || $fixhtmldir || $breakcert || 
 	&usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -650,22 +644,6 @@ foreach $d (@doms) {
 				&$second_print(".. done");
 				}
 			}
-		}
-
-	if (&domain_has_ssl($d) && defined($ipkeys)) {
-		if ($ipkeys) {
-			&$first_print("Setting up Webmin and Usermin cert ..");
-			&sync_webmin_ssl_cert($d, 0);
-			&sync_usermin_ssl_cert($d, 0);
-			&sync_webmin_ssl_cert($d, 1);
-			&sync_usermin_ssl_cert($d, 1);
-			}
-		else {
-			&$first_print("Removing Webmin and Usermin cert ..");
-			&sync_webmin_ssl_cert($d, 0);
-			&sync_usermin_ssl_cert($d, 0);
-			}
-		&$second_print(".. done");
 		}
 
 	if ($tlsa && $d->{'dns'}) {

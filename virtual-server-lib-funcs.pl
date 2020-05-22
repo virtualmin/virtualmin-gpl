@@ -7983,6 +7983,7 @@ my @dnames = &get_hostnames_for_ssl($d);
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
 my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames);
 &after_letsencrypt_website($d, $before);
@@ -8000,12 +8001,9 @@ else {
 	$d->{'letsencrypt_renew'} ||= 2;
 	&save_domain($d);
 
-	if ($tmpl->{'web_dovecot_ssl'}) {
-		&sync_dovecot_ssl_cert($d, 1);
-		}
-	if ($tmpl->{'web_postfix_ssl'}) {
-		&sync_postfix_ssl_cert($d, 1);
-		}
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
+
 	&break_invalid_ssl_linkages($d);
 	&sync_domain_tlsa_records($d);
 	&release_lock_ssl($d);

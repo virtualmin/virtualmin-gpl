@@ -196,7 +196,8 @@ return @rv;
 }
 
 # update_all_domain_service_ssl_certs(&domain, &certs-before)
-# Updates all services that were using this domain's SSL cert before renewal
+# Updates all services that were using this domain's SSL cert after it has
+# changed.
 sub update_all_domain_service_ssl_certs
 {
 my ($d, $before) = @_;
@@ -213,6 +214,38 @@ foreach my $svc (@$before) {
 		}
 	}
 &pop_all_print();
+}
+
+# enable_domain_service_ssl_certs(&domain)
+# To be called when SSL is enabled for a domain, to setup all per-service SSL
+# certs configured in the template that can be used.
+sub enable_domain_service_ssl_certs
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+foreach my $svc (&list_service_ssl_cert_types()) {
+	next if (!$svc->{'dom'} && !$svc->{'virt'});
+	next if (!$svc->{'dom'} && !$d->{'virt'});
+	if ($tmpl->{'web_'.$svc->{'id'}.'_ssl'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 1) if (defined(&$func));
+		}
+	}
+# XXX what about when a virtal IP is added later?
+}
+
+# disable_domain_service_ssl_certs(&domain)
+# To be called when SSL is turned off for a domain, to remove all per-service
+# SSL certs.
+sub disable_domain_service_ssl_certs
+{
+my ($d) = @_;
+foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
+	if ($svc->{'d'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 0) if (defined(&$func));
+		}
+	}
 }
 
 # ipkeys_to_domain_cert(&domain, &ipkeys)

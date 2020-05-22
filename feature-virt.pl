@@ -60,7 +60,6 @@ else {
 		}
 	}
 &build_local_ip_list();
-&sync_postfix_ssl_cert($d, 1);
 &release_lock_virt($d);
 &register_post_action(\&restart_bind) if ($config{'dns'});
 return 1;
@@ -71,7 +70,6 @@ return 1;
 sub delete_virt
 {
 local ($d) = @_;
-&sync_postfix_ssl_cert($d, 0);
 if (!$d->{'virtalready'}) {
 	&$first_print($text{'delete_virt'});
 	&obtain_lock_virt($d);
@@ -129,13 +127,6 @@ if ($d->{'ip'} ne $oldd->{'ip'} && $d->{'virt'} &&
 		&$second_print(&text('delete_novirt', $oldd->{'iface'}));
 		}
 	&build_local_ip_list();
-	if (!$d->{'ssl'}) {
-		# If IP changed, may also need to upate in Postfix config
-		# (unless SSL is enabled, in which case this happens in
-		# modify_ssl)
-		&sync_postfix_ssl_cert($oldd, 0);
-		&sync_postfix_ssl_cert($d, 1);
-		}
 	&release_lock_virt($d);
 	&register_post_action(\&restart_bind) if ($config{'dns'});
 	}
