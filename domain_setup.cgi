@@ -497,7 +497,8 @@ if (defined($in{'content'}) && !$in{'content_def'} &&
 		}
 	else {
 		# Using the virtualmin default index.html
-		&create_index_content(\%dom, $in{'content'});
+		&create_index_content(\%dom,
+			$in{'content_def'} == 2 ? "" : $in{'content'});
 		}
 	}
 
