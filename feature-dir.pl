@@ -1050,7 +1050,6 @@ else {
 sub create_index_content
 {
 local ($d, $content) = @_;
-$content ||= "managed by Virtualmin - a powerful and flexible web hosting control panel";
 
 # Remove any existing index.* files that might be used instead
 local $dest = &public_html_dir($d);
@@ -1078,8 +1077,10 @@ while(@srcs) {
 					$d, DATA, ">".$dest."/".$rf);
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
 					local %hash = %$d;
-					$hash{'CONTENT'} = &html_escape($content);
-					$hash{'CONTENT'} =~ s/\n/<br>\n/g;
+					if ($content) {
+						$hash{'CONTENT'} = &html_escape($content);
+						$hash{'CONTENT'} =~ s/\n/<br>\n/g;
+						}
 					$data = &substitute_virtualmin_template($data, \%hash);
 					}
 				&print_tempfile(DATA, $data);
