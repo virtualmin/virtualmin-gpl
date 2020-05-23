@@ -324,6 +324,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
 		}
+	elsif ($a eq "--default-content") {
+		$content = "";
+		}
 	elsif ($a eq "--no-email") {
 		$nocreationmail = 1;
 		}
@@ -876,8 +879,8 @@ if ($style && $dom{'web'}) {
 	&apply_content_style(\%dom, $style, $content);
 	&$second_print($text{'setup_done'});
 	}
-elsif ($content) {
-	# Just create index.html page with content
+elsif (defined($content)) {
+	# Just create virtualmin default index.html
 	&$first_print($text{'setup_contenting'});
 	&create_index_content(\%dom, $content);
 	&$second_print($text{'setup_done'});
@@ -946,6 +949,7 @@ print "                        [--reseller name]\n";
 if ($virtualmin_pro) {
 	print "                        [--style name]\n";
 	print "                        [--content text|filename]\n";
+	print "                        [--default-content]\n";
 	}
 if ($config{'mysql'}) {
 	print "                        [--mysql-pass password]\n";

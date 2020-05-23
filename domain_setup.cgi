@@ -489,10 +489,15 @@ if ($add_fwdto) {
 if (defined($in{'content'}) && !$in{'content_def'} &&
     &domain_has_website(\%dom)) {
 	if ($style) {
+		# Using a content style
 		&$first_print(&text('setup_styleing', $style->{'desc'}));
 		$in{'content'} =~ s/\r//g;
 		&apply_content_style(\%dom, $style, $in{'content'});
 		&$second_print($text{'setup_done'});
+		}
+	else {
+		# Using the virtualmin default index.html
+		&create_index_content(\%dom, $in{'content'});
 		}
 	}
 

@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Virtualmin - Responsive Coming Soon Template</title>
+    <meta charset="utf-8">
+    <link data-link-ref rel="apple-touch-icon" sizes="180x180" href="srv/images/favicon/apple-touch-icon.png">
+    <link data-link-ref rel="icon" type="image/png" sizes="32x32" href="srv/images/favicon/favicon-32x32.png">
+    <link data-link-ref rel="icon" type="image/png" sizes="192x192" href="srv/images/favicon/android-chrome-192x192.png">
+    <link data-link-ref rel="icon" type="image/png" sizes="16x16" href="srv/images/favicon/favicon-16x16.png">
+    <link data-link-ref crossorigin="use-credentials" rel="manifest" href="srv/images/favicon/manifest.json">
+    <link data-link-ref rel="mask-icon" href="srv/images/favicon/safari-pinned-tab.svg" color="#2d5d9d">
+    <meta name="msapplication-TileColor" content="#2d5d9d">
+    <meta data-link-ref name="msapplication-TileImage" content="srv/images/favicon/mstile-144x144.png">
+    <meta name="theme-color" content="#2d5d9d">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="srv/bundle.css" rel="stylesheet">
+    <script src="srv/scripts.js"></script>
+</head>
+
+<body onload="init()" class="text-center">
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        <header class="mb-auto">
+            <div class="veil">
+                <div class="veil-vm bg"></div>
+                <div class="veil-vm bg-white"></div>
+            </div>
+        </header>
+        <section class="container-fluid flex-grow-1 d-flex list-unstyled justify-content-center">
+            <div class="container align-self-center text-center">
+                <h1 class="error"></h1>
+                <h1 class="error-message">ERROR<br><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/$1" target="_blank"><i class="vm vm-question"></i></a></h1>
+                <h4 class="text-monospace domain"></h4>
+                <h1 class="default-title">Under Construction</h1>
+                <h5 class="message"></h5>
+                <h5 class="slogan">${CONTENT}</h5>
+            </div>
+        </section>
+        <footer class="mt-auto">
+            <nav class="container-fluid py-3">
+                <a class="d-flex justify-content-center mb-3 virtualmin-logo" href="https://virtualmin.com" target="_blank">
+                    <img src="srv/images/virtualmin.svg" alt="Virtualmin">
+                </a>
+                <ul class="d-flex list-unstyled justify-content-center">
+                    <li class="m-1">
+                        <a class="btn btn-sm btn-gray btn-round btn-icon btn-icon-vm-f" href="https://forum.virtualmin.com" target="_blank">
+                            <i class="vm vm-vm-f btn-icon-inner"></i>
+                        </a>
+                    </li>
+                    <li class="m-1">
+                        <a class="btn btn-sm btn-gray btn-round btn-icon btn-icon-twitter" href="https://twitter.com/virtualmin" target="_blank">
+                            <i class="vm vm-twitter btn-icon-inner"></i>
+                        </a>
+                    </li>
+                    <li class="m-1">
+                        <a class="btn btn-sm btn-gray btn-round btn-icon btn-icon-youtube" href="https://youtube.com/virtualmin" target="_blank">
+                            <i class="vm vm-youtube btn-icon-inner"></i>
+                        </a>
+                    </li>
+                    <li class="m-1">
+                        <a class="btn btn-sm btn-gray btn-round btn-icon btn-icon-facebook" href="https://facebook.com/virtualmin" target="_blank">
+                            <i class="vm vm-facebook btn-icon-inner"></i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex justify-content-center align-self-center text-dark mt-5 signature">Made with&nbsp;<i class="vm vm-heart text-danger"></i>&nbsp;at Virtualmin</div>
+            </nav>
+        </footer>
+    </div>
+</body>
+
+</html>
