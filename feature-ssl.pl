@@ -445,16 +445,22 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 	}
 
 # If anything has changed that would impact the per-domain SSL cert for
-# another server like Postfix or Webmin, re-set it up
+# another server like Postfix or Webmin, re-set it up as long as it is supported
+# with the new settings
 if ($d->{'ip'} ne $oldd->{'ip'} ||
+    $d->{'virt'} == $oldd->{'virt'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
+	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
 	foreach my $svc (&get_all_domain_service_ssl_certs($oldd)) {
 		next if (!$svc->{'d'});
+		my $t = $types{$svc->{'id'}};
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
 		next if (!defined(&$func));
 		&$func($oldd, 0);
-		&$func($d, 1);
+		if ($t->{'dom'} || $d->{'virt'}) {
+			&$func($d, 1);
+			}
 		}
 	}
 
