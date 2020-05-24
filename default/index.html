@@ -18,7 +18,7 @@
     <script src="srv/scripts.js"></script>
 </head>
 
-<body onload="init()" class="text-center">
+<body onload="init()" class="text-center dark">
     <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
         <header class="mb-auto">
             <div class="veil">
@@ -32,8 +32,8 @@
                 <h1 class="error-message">ERROR<br><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/$1" target="_blank"><i class="vm vm-question"></i></a></h1>
                 <h4 class="text-monospace domain"></h4>
                 <h1 class="default-title">Under Construction</h1>
-                <h5 class="message"></h5>
-                <h5 class="slogan">${IF-CONTENT}${CONTENT}${ELSE-CONTENT}managed by Virtualmin - a powerful and flexible web hosting control panel${ENDIF-CONTENT}</h5>
+                <h5 class="message">${IF-CONTENT}${CONTENT}${ENDIF-CONTENT}</h5>
+                <h5 class="slogan">managed by Virtualmin - a powerful and flexible web hosting control panel</h5>
             </div>
         </section>
         <footer class="mt-auto">
@@ -63,7 +63,7 @@
                         </a>
                     </li>
                 </ul>
-                <div class="d-flex justify-content-center align-self-center text-dark mt-5 signature">Made with&nbsp;<i class="vm vm-heart text-danger"></i>&nbsp;at Virtualmin</div>
+                <div class="d-flex justify-content-center align-self-center text-dark mt-4 signature">Made with&nbsp;<i class="vm vm-heart text-danger"></i>&nbsp;at Virtualmin</div>
             </nav>
         </footer>
     </div>

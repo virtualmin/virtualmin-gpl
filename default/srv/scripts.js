@@ -31,7 +31,9 @@ const init = function() {
         document.querySelector('.domain').innerText = query.domain || origin;
     }
     if (query.theme) {
-        document.querySelector('body').classList.add(query.theme);
+        let target = document.querySelector('body').classList;
+        target.remove('dark');
+        target.add(query.theme);
     }
     if (query.title) {
         document.querySelector('.default-title').innerText = query.title;
