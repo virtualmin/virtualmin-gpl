@@ -486,7 +486,8 @@ if ($add_fwdto) {
 	}
 
 # Copy initial website style
-if (defined($in{'content'}) && !$in{'content_def'} &&
+if (defined($in{'content'}) && 
+	(!$in{'content_def'} || $in{'content_def'} == 2) &&
     &domain_has_website(\%dom)) {
 	if ($style) {
 		# Using a content style
@@ -497,8 +498,9 @@ if (defined($in{'content'}) && !$in{'content_def'} &&
 		}
 	else {
 		# Using the virtualmin default index.html
-		&create_index_content(\%dom,
-			$in{'content_def'} == 2 ? "" : $in{'content'});
+		$in{'content'} =~ s/\r//g;
+		$in{'content'} =~ s/^\s+|\s+$//g;
+		&create_index_content(\%dom, $in{'content'});
 		}
 	}
 
