@@ -660,7 +660,7 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 
 	# Initial content
 	print &ui_table_row(&hlink($text{'form_content'},"form_content"),
-			    &ui_radio("content_def", 1,
+			    &ui_radio("content_def", 2,
 				      [ [ 1, $text{'form_content1'} ],
 					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
