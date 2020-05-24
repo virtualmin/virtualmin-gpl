@@ -14178,6 +14178,8 @@ if (&domain_has_website()) {
 					next if ($pd);
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
+					# If returned "$t" is "127.0.0.1:9000", 
+					# then extract the port number
 					if ($t && $t =~ /\S+:(\d+)/) {
 						$t = $1;
 						}
