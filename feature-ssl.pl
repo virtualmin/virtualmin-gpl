@@ -506,6 +506,12 @@ foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	&save_domain($od);
 	}
 
+# Remove from Dovecot, Webmin, etc..
+&disable_domain_service_ssl_certs($d);
+
+# Update DANE DNS records
+&sync_domain_tlsa_records($d);
+
 # If this domain was sharing a cert with another, forget about it now
 if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_cert'});
@@ -513,12 +519,6 @@ if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_chain'});
 	delete($d->{'ssl_same'});
 	}
-
-# Remove from Dovecot, Webmin, etc..
-&disable_domain_service_ssl_certs($d);
-
-# Update DANE DNS records
-&sync_domain_tlsa_records($d);
 
 &release_lock_web($d);
 return 1;
@@ -2019,7 +2019,7 @@ push(@flags, [ "smtpd_tls_security_level", "may" ]);
 push(@flags, [ "myhostname", $d->{'dom'} ]);
 
 local $changed = 0;
-foreach my $pfx ('smtp', 'submission') {
+foreach my $pfx ('smtp', 'submission', 'smtps') {
 	# Find the existing entry for the IP, and for the default service
 	local $already;
 	local $smtp;

@@ -125,6 +125,7 @@ while(@ARGV > 0) {
 	}
 $webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
 $admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+
 &get_miniserv_config(\%miniserv);
 $webmin_proto = "http";
 if ($miniserv{'ssl'}) {
@@ -141,6 +142,12 @@ if ($webmin_proto eq "https") {
 	}
 $normal_agent_wget_command = $webmin_wget_command;
 $normal_agent_wget_command =~ s/--user-agent=\S+//;
+
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	$usermin_port = $uminiserv{'port'};
+	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
@@ -5186,6 +5193,160 @@ $ssl_tests = [
 	  'cleanup' => 1 },
 	];
 
+$sslserv_tests = [
+	# Create a domain with SSL and a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ $ssl ], [ 'logrotate' ], [ 'webmin' ],
+		      [ 'allocate-ip' ],
+		      [ 'style' => 'construction' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Validate that Webmin cert works
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert works
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Postfix cert works
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn off private IP for the domain
+	{ 'command' => 'modify-domain.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'default-ip' ] ],
+	},
+
+	# Validate that Webmin cert still works with SNI
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert still works with SNI
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert still works with SNI
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-check that Postfix still works, but without the per-IP cert
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn off per-service certs
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Re-check that per-domain cert is no longer being used
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 # Shared IP address tests
 $shared_tests = [
 	# Allocate a shared IP
@@ -8219,6 +8380,7 @@ $alltests = { '_config' => $_config_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
+	      'sslserv' => $sslserv_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
 	      'parallel' => $parallel_tests,

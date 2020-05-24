@@ -138,6 +138,7 @@ $scripts_unavail_file = &cache_file_path("scriptsunavail");
 			"$module_root_directory/pro/styles",
 		      );
 $styles_unavail_file = "$module_config_directory/stylesunavail";
+$default_content_dir = "$module_root_directory/default";
 
 @reseller_maxes = ("doms", "topdoms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 @plan_maxes = ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
