@@ -89,8 +89,8 @@ if ($upgrade) {
 else {
 	# Show editable install options
 	my @dbs = domain_databases($d, [ "mysql" ]);
-	$rv .= ui_table_row("Database for WordPress tables and table prefix",
-		     ui_database_select("db", undef, \@dbs, $d, "wordpress") . ui_textbox("dbtbpref", "wp_", 5));
+	$rv .= ui_table_row("Database for WordPress tables and optional table prefix",
+		     ui_database_select("db", undef, \@dbs, $d, "wordpress") . ui_textbox("dbtbpref", undef, 2, undef, undef, "placeholder=\"wp_\""));
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
 	if (&has_wordpress_cli()) {
