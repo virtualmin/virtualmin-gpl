@@ -5226,13 +5226,13 @@ $sslserv_tests = [
 		       $webmin_proto.'://'.$test_domain.':'.
 		       $webmin_port.'/',
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Validate that Usermin cert works
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5292,11 +5292,11 @@ $sslserv_tests = [
 	{ 'command' => 'test-imap.pl',
 	  'args' => [ [ 'user', $test_domain_user ],
 		      [ 'pass', 'smeg' ],
-		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'server', $test_domain ],
 		      [ 'ssl' ] ],
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername mail.'.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5304,11 +5304,11 @@ $sslserv_tests = [
 	# Re-check that Postfix still works, but without the per-IP cert
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
-		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'server', $test_domain ],
 		      [ 'ssl' ] ],
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername mail.'.$test_domain.
+		       ' -servername '.$test_domain.
 		       ' -port 465 </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5324,11 +5324,12 @@ $sslserv_tests = [
 	},
 
 	# Re-check that per-domain cert is no longer being used
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$webmin_port.' </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'sleep' => 1,
 	},
-	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+	{ 'command' => 'openssl s_client -host '.$test_domain.
 		       ' -port '.$usermin_port.' </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
