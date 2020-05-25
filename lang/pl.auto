@@ -187,8 +187,10 @@ form_ealiasdom=Alias docelowej domeny nie został znaleziony!
 form_fwdto=Domyślny adres do przesyłania poczty
 form_park=Początkowa treść strony
 form_content=Utworzyć początkową stronę internetową?
+form_content2=Tak z domyślną treścią
 form_content0=Tak, z tekstem poniżej. ..
 form_style=Styl dla treści początkowej
+form_nostyle=&lt;Virtualmin Default&gt;
 form_showstyle=(Zapowiedź..)
 form_inputssect=Dodatkowe opcje funkcji
 setup_err=Nie udało się utworzyć serwera wirtualnego
@@ -3251,9 +3253,11 @@ scripts_rusurei=Czy na pewno chcesz zainstalować $1 w katalogu $2 ? Pliki $3 o 
 scripts_rusurehome=Ponieważ ten skrypt jest zainstalowany w katalogu WWW najwyższego poziomu serwera wirtualnego, <b>wszystkie</b> pliki w <tt>$1</tt> zostaną usunięte po odinstalowaniu!
 scripts_etitle=Zarządzaj skryptem
 scripts_idb=Korzysta z bazy danych
+scripts_idb2=Korzysta z bazy danych z prefiksem tabeli
 scripts_inewdb=(Zostanie usunięty, gdy skrypt zostanie odinstalowany)
 scripts_idbname=<a href='$1'>$2 baza danych $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=z przedrostkiem tabeli
 scripts_deregistering=Teraz wyrejestrowuję wersję $1 w wersji $2 ..
 scripts_eversion=Brakujący lub nieprawidłowo wyglądający numer wersji
 scripts_eversion2=Określona wersja nie jest dostępna

@@ -89,8 +89,8 @@ if ($upgrade) {
 else {
 	# Show editable install options
 	my @dbs = domain_databases($d, [ "mysql" ]);
-	$rv .= ui_table_row("Database for WordPress tables",
-		     ui_database_select("db", undef, \@dbs, $d, "wordpress"));
+	$rv .= ui_table_row("Database for WordPress tables and table prefix",
+		     ui_database_select("db", undef, \@dbs, $d, "wordpress") . ui_textbox("dbtbpref", "wp_", 5));
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
 	if (&has_wordpress_cli()) {
@@ -120,6 +120,7 @@ else {
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
+		 'dbtbpref' => $in->{'dbtbpref'},
 		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}",
 		 'title' => $in{'title'} };
 	}
@@ -135,9 +136,13 @@ $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/wp-login.php") {
 	return "WordPress appears to be already installed in the selected directory";
 	}
+$opts->{'dbtbpref'} =~ s/^\s+|\s+$//g;
+$opts->{'dbtbpref'} = 'wp_' if (!$opts->{'dbtbpref'});
+$opts->{'dbtbpref'} =~ /^\w+$/ || return "Database table prefix either not set or contains invalid characters";
+$opts->{'dbtbpref'} .= "_" if($opts->{'dbtbpref'} !~ /_$/);
 my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-my $clash = find_database_table($dbtype, $dbname, "wp_.*");
-$clash && return "WordPress appears to be already using the selected database (table $clash)";
+my $clash = find_database_table($dbtype, $dbname, "$opts->{'dbtbpref'}.*");
+$clash && return "WordPress appears to be already using \"$opts->{'dbtbpref'}\" database table prefix";
 return undef;
 }
 
@@ -201,6 +206,15 @@ if (&has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 			" --dbhost=".quotemeta($dbhost)." 2>&1");
 		if ($?) {
 			return (-1, "wp config create failed : $out");
+			}
+		
+		# Set db prefix
+		my $out = &run_as_domain_user($d,
+			"$wp config set table_prefix $opts->{'dbtbpref'}".
+			" --type=variable".
+			" --path=".$opts->{'dir'});
+		if ($?) {
+			return (-1, "wp config set table_prefix failed : $out");
 			}
 
 		# Do the install
@@ -270,6 +284,9 @@ else {
 			if ($l =~ /^define\(\s*'WP_AUTO_UPDATE_CORE',/) {
 				$l = "define('WP_AUTO_UPDATE_CORE', false);";
 				}
+			if ($l =~ /^\$table_prefix/) {
+				$l = "\$table_prefix = '" . $opts->{'dbtbpref'} . "';";
+				}
 			}
 		flush_file_lines_as_domain_user($d, $cfile);
 		}
@@ -308,7 +325,7 @@ my $derr = delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Remove all wp_ tables from the database
-cleanup_script_database($d, $opts->{'db'}, "wp_");
+cleanup_script_database($d, $opts->{'db'}, $opts->{'dbtbpref'});
 
 # Take out the DB
 if ($opts->{'newdb'}) {

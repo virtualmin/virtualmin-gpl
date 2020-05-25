@@ -85,6 +85,8 @@ form_proxy=Sito Web proxy su URL
 form_framefwd=Frame forwarding all'URL
 form_esubdom=Impossibile trovare il server Virtualmin del dominio padre $1 !
 form_allocmaybe=Allocare IP se il server ne aveva originariamente uno, altrimenti condiviso
+form_content2=Sì con contenuto predefinito
+form_nostyle=&lt;Virtualmin Default&gt;
 setup_err=Impossibile creare il server virtuale
 setup_eplan=Il piano selezionato non esiste o non è disponibile
 setup_evital=La funzione critica $1 non è stata creata correttamente - La creazione del server virtuale è stata interrotta.
@@ -2850,9 +2852,11 @@ scripts_iurl=URL installato
 scripts_itime=Installato su
 scripts_idir=Directory di installazione
 scripts_idb=Usa il database
+scripts_idb2=Utilizza il database con il prefisso della tabella
 scripts_inewdb=(Verrà eliminato quando lo script non è installato)
 scripts_idbname=<a href='$1'>$2 database $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=con prefisso tabella
 scripts_iuser=Login iniziale
 scripts_ipass=$1 con password $2 
 scripts_uok=Script di disinstallazione

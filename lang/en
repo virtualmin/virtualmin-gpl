@@ -3950,9 +3950,11 @@ scripts_iurl=Installed URL
 scripts_itime=Installed on
 scripts_idir=Installation directory
 scripts_idb=Uses database
+scripts_idb2=Uses database with table prefix
 scripts_inewdb=(Will be deleted when script is un-installed)
 scripts_idbname=<a href='$1'>$2 database $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=with table prefix
 scripts_iuser=Initial login
 scripts_ipass=$1 with password $2
 scripts_uok=Un-Install Script

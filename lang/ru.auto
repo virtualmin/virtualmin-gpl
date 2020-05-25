@@ -177,8 +177,10 @@ form_advanced=Расширенные настройки
 form_park=Начальный контент сайта
 form_content=Создать начальную веб-страницу?
 form_content1=нет
+form_content2=Да, с контентом по умолчанию
 form_content0=Да, с текстом ниже ..
 form_style=Стиль для начального содержания
+form_nostyle=&lt;Virtualmin по умолчанию&gt;
 form_showstyle=(Изображение..)
 form_limits=Квоты и лимиты
 form_proxysect=IP-адрес и переадресация
@@ -2458,9 +2460,11 @@ scripts_iurl=Установленный URL
 scripts_itime=Установлен на
 scripts_idir=Каталог установки
 scripts_idb=Использует базу данных
+scripts_idb2=Использует базу данных с префиксом таблицы
 scripts_inewdb=(Будет удалено, когда скрипт не установлен)
 scripts_idbname=<a href='$1'>$2 база данных $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=с префиксом таблицы
 scripts_iuser=Начальный вход
 scripts_ipass=$1 с паролем $2 
 scripts_uok=Скрипт удаления

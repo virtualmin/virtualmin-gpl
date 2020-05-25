@@ -111,8 +111,10 @@ form_advanced=Gelişmiş seçenekler
 form_park=İlk web sitesi içeriği
 form_content=İlk web sayfası oluşturulsun mu?
 form_content1=Hayır
+form_content2=Evet, varsayılan içerikle
 form_content0=Evet, aşağıdaki metinle ..
 form_style=İlk içerik için stil
+form_nostyle=&lt;Virtualmin Varsayılan&gt;
 form_showstyle=(Ön izleme..)
 form_limits=Kotalar ve limitler
 form_proxysect=IP adresi ve yönlendirme
@@ -1693,9 +1695,11 @@ scripts_urestart=Sunucuyu Yeniden Başlat
 scripts_ustart=Sunucuyu Başlat
 scripts_idir=Kurulum dizini
 scripts_idb=Veritabanı kullanır
+scripts_idb2=Tablo önekine sahip veritabanını kullanır
 scripts_inewdb=(Komut dosyası kaldırıldığında silinecektir)
 scripts_idbname=<a href='$1'>$2 veritabanı $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=tablo öneki ile
 scripts_iuser=İlk giriş
 scripts_ipass=$2 parolasıyla $1 
 scripts_upok2=Desteklenmeyen Sürüme Yükselt:

@@ -353,8 +353,10 @@ form_advanced=Opções avançadas
 form_park=Conteúdo inicial do site
 form_content=Criar página da web inicial?
 form_content1=Não
+form_content2=Sim com conteúdo padrão
 form_content0=Sim, com o texto abaixo ..
 form_style=Estilo para o conteúdo inicial
+form_nostyle=&lt;Virtualmin Default&gt;
 form_showstyle=(Visualização..)
 form_limits=Cotas e limites
 form_proxysect=Endereço IP e encaminhamento
@@ -3646,9 +3648,11 @@ scripts_iurl=URL instalado
 scripts_itime=Instalado em
 scripts_idir=Diretório de instalação
 scripts_idb=Usa banco de dados
+scripts_idb2=Usa banco de dados com prefixo de tabela
 scripts_inewdb=(Será excluído quando o script não estiver instalado)
 scripts_idbname=<a href='$1'>$2 banco de dados $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=com prefixo de tabela
 scripts_iuser=Login inicial
 scripts_ipass=$1 com senha $2 
 scripts_upok=Atualizar para a versão:

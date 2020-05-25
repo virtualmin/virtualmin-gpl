@@ -354,8 +354,10 @@ form_advanced=高度なオプション
 form_park=最初のウェブサイトのコンテンツ
 form_content=初期Webページを作成しますか？
 form_content1=番号
+form_content2=はい、デフォルトのコンテンツで
 form_content0=はい、下にテキストが表示されます。
 form_style=初期コンテンツのスタイル
+form_nostyle=&lt; Virtualminデフォルト&gt;
 form_showstyle=（プレビュー...）
 form_limits=割り当てと制限
 form_proxysect=IPアドレスと転送
@@ -3863,9 +3865,11 @@ scripts_iurl=インストールされているURL
 scripts_itime=にインストールされました
 scripts_idir=インストールディレクトリ
 scripts_idb=データベースを使用
+scripts_idb2=テーブル接頭辞付きのデータベースを使用します
 scripts_inewdb=（スクリプトがアンインストールされると削除されます）
 scripts_idbname=<a href='$1'>$2データベース $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=テーブル接頭辞付き
 scripts_iuser=初回ログイン
 scripts_ipass=$1とパスワード $2
 scripts_uok=アンインストールスクリプト

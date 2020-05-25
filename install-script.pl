@@ -118,6 +118,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--prefix-db") {
 		$dbprefix = 1;
 		}
+	elsif ($a eq "--prefix-db-table") {
+		$opts->{'dbtbpref'} = shift(@ARGV);
+		}
 	elsif ($a eq "--opt") {
 		$oname = shift(@ARGV);
 		if ($oname =~ /^(\S+)\s+(\S+)$/) {
@@ -451,6 +454,7 @@ print "                          --version number|\"latest\" [--unsupported]\n";
 print "                         [--path url-path]\n";
 print "                         [--db \"type name\"]\n";
 print "                         [--prefix-db]\n";
+print "                         [--prefix-db-table name]\n";
 print "                         [--opt \"name value\"]\n";
 print "                         [--upgrade id]\n";
 print "                         [--force-dir directory]\n";

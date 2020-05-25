@@ -97,6 +97,8 @@ form_mongrelslimit=Rails的最大Mongrel服务器进程
 form_origip=原始IP地址
 form_iface6=IPv6网络接口
 form_allocmaybe=如果服务器原来有一个，则分配IP，否则共享
+form_content2=是，默认内容
+form_nostyle=&lt; Virtualmin Default&gt;
 form_ipsect=IP地址和接口
 form_inputssect=其他功能选项
 setup_eplan=所选计划不存在或不可用
@@ -1516,9 +1518,11 @@ scripts_urestart=重新启动服务器
 scripts_ustart=启动服务器
 scripts_idir=安装目录
 scripts_idb=使用数据库
+scripts_idb2=使用具有表前缀的数据库
 scripts_inewdb=（在卸载脚本时将被删除）
 scripts_idbname=<a href='$1'>$2数据库 $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
+scripts_idbtbpref=带表前缀
 scripts_iuser=初始登录
 scripts_ipass=$1，密码为 $2
 scripts_upok2=升级到不受支持的版本：
