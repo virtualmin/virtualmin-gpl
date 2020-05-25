@@ -15,7 +15,7 @@ if (!$virtual_server_root) {
 	$0 =~ /^(.*)\//;
 	$virtual_server_root = "$1/virtual-server";
 	}
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
+foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
@@ -6192,35 +6192,6 @@ if (-r $file."_unavail") {
 return 1;
 }
 
-# virtualmin_backup_styles(file, &vbs)
-# Create a tar file of the styles directory, and of the unavailable styles
-sub virtualmin_backup_styles
-{
-local ($file, $vbs) = @_;
-&$first_print($text{'backup_vstyles_doing'});
-&execute_command("cd $module_config_directory/styles && ".
-	         &make_tar_command("cf", quotemeta($file), "."));
-&copy_source_dest($styles_unavail_file, $file."_unavail");
-&$second_print($text{'setup_done'});
-return 1;
-}
-
-# virtualmin_restore_styles(file, &vbs)
-# Extract a tar file of all third-party styles
-sub virtualmin_restore_styles
-{
-local ($file, $vbs) = @_;
-&$first_print($text{'restore_vstyles_doing'});
-&make_dir("$module_config_directory/styles", 0755);
-&execute_command("cd $module_config_directory/styles && ".
-		 &make_tar_command("xf", quotemeta($file)));
-if (-r $file."_unavail") {
-	&copy_source_dest($file."_unavail", $styles_unavail_file);
-	}
-&$second_print($text{'setup_done'});
-return 1;
-}
-
 # virtualmin_backup_chroot(file, &vbs)
 # Create a file of FTP directory restrictions
 sub virtualmin_backup_chroot
@@ -12295,7 +12266,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
-		       'reseller', 'notify', 'scripts', 'styles' )
+		       'reseller', 'notify', 'scripts', )
 		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
@@ -12335,7 +12306,6 @@ local %tmplcat = (
 	'resels' => 'setting',
 	'fields' => 'custom',
 	'links' => 'custom',
-	'styles' => 'custom',
 	'shells' => 'custom',
 	'chroot' => 'check',
 	'global' => 'custom',
@@ -12355,8 +12325,7 @@ local %nonew = ( 'history', 1,
 		 'provision', 1,
 	       );
 local %pro = ( 'resels', 1,
-	       'reseller', 1,
-	       'styles', 1 );
+	       'reseller', 1 );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
@@ -17964,13 +17933,6 @@ sub list_script_plugins
 {
 &load_plugin_libraries();
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
-}
-
-# Returns a list of all plugins that define content styles
-sub list_style_plugins
-{
-&load_plugin_libraries();
-return grep { &plugin_defined($_, "styles_list") } @plugins;
 }
 
 $done_virtual_server_lib_funcs = 1;

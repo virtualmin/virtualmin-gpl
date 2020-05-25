@@ -100,12 +100,6 @@ elsif ($type eq "scripts") {
 			     split(/\0/, $p->{'scripts'});
 	return &text('log_'.$action.'_scripts', join(" ", @scripts));
 	}
-elsif ($type eq "styles" && $action eq "add") {
-	return &text('log_add_styles', $object);
-	}
-elsif ($type eq "styles" && $action eq "enable") {
-	return $text{'log_enable_styles'};
-	}
 elsif ($type eq "database") {
 	return &text('log_'.$action.'_database', "<tt>$object</tt>",
 		     $text{'databases_'.$p->{'type'}},
