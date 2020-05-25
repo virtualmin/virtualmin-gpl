@@ -221,16 +221,6 @@ if (!$aliasdom) {
 		}
 	}
 
-# Validate initial style
-if (defined($in{'content'})) {
-	($style) = grep { $_->{'name'} eq $in{'style'} }
-		&list_available_content_styles();
-	if (!$in{'content_def'}) {
-		$in{'content'} =~ /\S/ || $style->{'nocontent'} ||
-			&error($text{'setup_econtent'});
-		}
-	}
-
 # Work out the virtual IP
 $resel = $parentdom ? $parentdom->{'reseller'} :
 	 &reseller_admin() ? $base_remote_user : $in{'reseller'};
@@ -485,22 +475,31 @@ if ($add_fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Copy initial website style
-if (defined($in{'content'}) && 
-	(!$in{'content_def'} || $in{'content_def'} == 2) &&
-    &domain_has_website(\%dom)) {
-	if ($style) {
-		# Using a content style
-		&$first_print(&text('setup_styleing', $style->{'desc'}));
-		$in{'content'} =~ s/\r//g;
-		&apply_content_style(\%dom, $style, $in{'content'});
+# Put default site content
+if ((!$in{'content_def'} || $in{'content_def'} == 2) &&
+	&domain_has_website(\%dom)) {
+	my $content = $in{'content'};
+	$content =~ s/\r//g;
+	$content =~ s/^\s+|\s+$//g;
+
+	# Copy default Virtualmin template
+	if (!$virtualmin_pro || $in{'content_def'} == 2) {
+		&$first_print($text{'setup_styleing'});
+		&create_index_content(\%dom, $content);
 		&$second_print($text{'setup_done'});
 		}
+	
+	# Create index.html file 
 	else {
-		# Using the virtualmin default index.html
-		$in{'content'} =~ s/\r//g;
-		$in{'content'} =~ s/^\s+|\s+$//g;
-		&create_index_content(\%dom, $in{'content'});
+		&$first_print($text{'setup_contenting'});
+		my $home = public_html_dir(\%dom);
+		&open_tempfile_as_domain_user(
+			\%dom, DATA, ">$home/index.html");
+		$content =~ s/\n/<br>\n/g if ($content);
+		$content = &substitute_virtualmin_template($content, \%dom);
+		&print_tempfile(DATA, $content);
+		&close_tempfile_as_domain_user(\%dom, DATA);
+		&$second_print($text{'setup_done'});
 		}
 	}
 
