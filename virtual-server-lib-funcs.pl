@@ -8160,7 +8160,7 @@ foreach my $dd (@alldoms) {
 			}
 
 		# Take down IP
-		if ($dd->{'iface'}) {
+		if ($dd->{'virt'}) {
 			&try_function("virt", "delete_virt", $dd);
 			}
 		if ($dd->{'virt6'}) {
