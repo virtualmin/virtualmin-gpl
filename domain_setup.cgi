@@ -484,11 +484,14 @@ if ((!$in{'content_def'} || $in{'content_def'} == 2) &&
 
 	# Copy default Virtualmin template
 	if (!$virtualmin_pro || $in{'content_def'} == 2) {
+		&$first_print($text{'setup_styleing'});
 		&create_index_content(\%dom, $content);
+		&$second_print($text{'setup_done'});
 		}
 	
 	# Create index.html file 
 	else {
+		&$first_print($text{'setup_contenting'});
 		my $home = public_html_dir(\%dom);
 		&open_tempfile_as_domain_user(
 			\%dom, DATA, ">$home/index.html");
@@ -496,6 +499,7 @@ if ((!$in{'content_def'} || $in{'content_def'} == 2) &&
 		$content = &substitute_virtualmin_template($content, \%dom);
 		&print_tempfile(DATA, $content);
 		&close_tempfile_as_domain_user(\%dom, DATA);
+		&$second_print($text{'setup_done'});
 		}
 	}
 
