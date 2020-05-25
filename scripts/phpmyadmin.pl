@@ -345,7 +345,11 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, "4.5") > 0) {
+if (&compare_versions($ver, "5") > 0) {
+	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
+		 "phpMyAdmin-(5\\.[0-9][0-9\\.]+)-all-languages\\.zip" );
+	}
+elsif (&compare_versions($ver, "4.5") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-(4\\.[5-9][0-9\\.]+)-all-languages\\.zip" );
 	}
