@@ -6750,7 +6750,7 @@ sub free_ip_address
 {
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
-%taken = (%taken, &domain_ip_addresses());
+%taken = (%taken, &domain_ip_addresses(), &cloudmin_ip_addresses());
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, $rn);
@@ -6809,6 +6809,25 @@ local %taken;
 foreach my $d (&list_domains()) {
 	$taken{$d->{'ip'}} = 1 if ($d->{'virt'});
 	$taken{$d->{'ip6'}} = 1 if ($d->{'virt6'});
+	}
+return %taken;
+}
+
+# cloudmin_ip_addresses()
+# Returns a hash of IPs that are assigned to any Cloudmin servers (if installed)
+sub cloudmin_ip_addresses
+{
+local %taken;
+if (&foreign_installed("server-manager")) {
+	&foreign_require("server-manager");
+	foreach my $s (&server_manager::list_managed_servers()) {
+		foreach my $ip (&server_manager::get_server_ip($s)) {
+			$taken{$ip} = 1;
+			}
+		foreach my $ip (&server_manager::get_server_ip6($s)) {
+			$taken{$ip} = 1;
+			}
+		}
 	}
 return %taken;
 }
