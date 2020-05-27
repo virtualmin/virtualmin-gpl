@@ -1078,7 +1078,9 @@ while(@srcs) {
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
 					local %hash = %$d;
 					if ($content) {
-						$hash{'CONTENT'} = &html_escape($content);
+						$hash{'CONTENT'} = $content;
+						$hash{'CONTENT'} = &html_escape($hash{'CONTENT'})
+							if ($main::webmin_script_type ne 'web');
 						$hash{'CONTENT'} =~ s/\n/<br>\n/g;
 						}
 					$data = &substitute_virtualmin_template($data, \%hash);

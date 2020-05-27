@@ -35,10 +35,8 @@ set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
 C<--fcgid>. This has no effect on scripts using the Rails framework though,
 as they always run via a Mongrel proxy.
 
-You can also replace a website's pages using one of Virtualmin's content
-styles, specified using the C<--style> parameter and a style name (which
-the C<list-styles> command can provide). If so the C<--content> parameter must also
-be given, followed by the text to use in the style-generated web pages.
+You can also replace a website's pages using Virtualmin's content style, 
+If C<--content> parameter is given, it will be used in default style web page.
 
 To enable the webmail and admin DNS entries for the selected domains
 (which redirect to Usermin and Webmin by default), the C<--webmail> flag
@@ -105,7 +103,6 @@ if (!$module_name) {
 
 # Parse command-line args
 $supports_ruby = defined(&supported_ruby_modes);
-$supports_styles = defined(&list_content_styles);
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -157,9 +154,6 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-framefwd") {
 		$framefwd = "";
-		}
-	elsif ($a eq "--style") {
-		$stylename = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
@@ -243,7 +237,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
-  $stylename || $content || defined($children) ||
+  $content || defined($children) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
@@ -262,19 +256,6 @@ if (defined($children)) {
 	&indexof("fcgid", @modes) >= 0 ||
 		&usage("The number of PHP children can only be set on systems ".
 		       "that support fcgid");
-	}
-
-# Validate style
-if ($stylename && defined(&list_content_styles)) {
-	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
-	$style || &usage("Style $stylename does not exist");
-	$content || &usage("--content followed by some initial text for the website must be specified when using --style");
-	if ($content =~ /^\//) {
-		$content = &read_file_contents($content);
-		$content || &usage("--content file does not exist");
-		}
-	$content =~ s/\r//g;
-	$content =~ s/\\n/\n/g;
 	}
 
 # Validate HTML dir
@@ -436,16 +417,11 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if ($style && !$d->{'alias'}) {
-		# Apply content style
-		&$first_print(&text('setup_styleing', $style->{'desc'}));
-		&apply_content_style($d, $style, $content);
-		&$second_print($text{'setup_done'});
-		}
-	elsif ($content && !$d->{'alias'}) {
+	if ($content && !$d->{'alias'}) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
-		&create_index_content($d, $content);
+		&create_index_content($d, 
+			$virtualmin_pro ? $content : "");
 		&$second_print($text{'setup_done'});
 		}
 
@@ -692,8 +668,7 @@ if ($supports_ruby) {
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--frametitle \"title\" ]\n";
-if ($supports_styles) {
-	print "                     [--style name]\n";
+if ($virtualmin_pro) {
 	print "                     [--content text|filename]\n";
 	}
 if (&has_webmail_rewrite($d)) {
