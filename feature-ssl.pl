@@ -1,4 +1,3 @@
-# XXX SSL cert linkage should be broken when an incompatible cert is installed
 
 sub init_ssl
 {
@@ -2396,7 +2395,9 @@ if ($chain) {
 sub update_caa_record
 {
 local ($d) = @_;
+&require_bind();
 return undef if (!$d->{'dns'});
+return undef if (&compare_version_numbers($bind8::version, "9.9.6") < 0);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
 local $info = &cert_info($d);
@@ -2596,6 +2597,9 @@ return @rv;
 sub sync_webmin_ssl_cert
 {
 my ($d, $enable) = @_;
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return -1 if (!$miniserv{'ssl'});
 if ($enable) {
 	return &setup_ipkeys(
 		$d, \&get_miniserv_config, \&put_miniserv_config,
@@ -2616,6 +2620,9 @@ sub sync_usermin_ssl_cert
 my ($d, $enable) = @_;
 return -1 if (!&foreign_installed("usermin"));
 &foreign_require("usermin");
+my %miniserv;
+&usermin::get_miniserv_config(\%miniserv);
+return -1 if (!$miniserv{'ssl'});
 if ($enable) {
 	return &setup_ipkeys($d, \&usermin::get_usermin_miniserv_config,
 		      \&usermin::put_usermin_miniserv_config,
