@@ -667,11 +667,6 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 			    &ui_textarea("content", undef, 5, 70),
 			    3, \@tds);
 
-	# Style for content
-	print &ui_table_row(&hlink($text{'form_style'}, "form_style"),
-			    &content_style_chooser("style", ""),
-			    3, \@tds);
-
 	print &ui_hidden_table_end();
 	}
 
