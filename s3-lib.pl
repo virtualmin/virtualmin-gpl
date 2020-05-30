@@ -1024,12 +1024,16 @@ return 1;
 # Run the aws command for s3 with some params, and return output
 sub call_aws_cmd
 {
-my ($akey, $params) = @_;
+my ($akey, $params, $endpoint, $endpoint_param) = @_;
+$endpoint ||= $config{'s3_endpoint'};
+if (length $endpoint) {
+	$endpoint_param = "--endpoint-url=".quotemeta("https://$endpoint");
+  }
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
 return &backquote_command(
-	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey).
+	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey)." ".$endpoint_param.
 	" ".$params." 2>&1");
 }
 
