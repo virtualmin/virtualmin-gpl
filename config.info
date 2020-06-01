@@ -148,10 +148,10 @@ collect_noall=Collect all available package updates?,1,0-Yes,1-No
 collect_fs=Filesystems to include in local disk space,3,All local filesystems,40,,,Listed filesystems (space separated)
 
 line8=Backup and restore,11
-compression=Backup compression format,1,0-gzip,1-bzip2,2-None (tar only),3-ZIP
+compression=Backup compression format,1,0-<tt>gzip</tt>,1-<tt>bzip2</tt>,2-None (<tt>tar</tt> only),3-<tt>zip</tt>
 zip_args=Extra command-line parameters for compression command,3,None
-pbzip2=Bzip2 compression command,1,0-Regular (bzip2),1-Parallel (pbzip2)
-pigz=Gzip compression command,1,0-Regular (gzip),1-Parallel (pigz)
+pbzip2=Compression command for <tt>bzip2</tt>,1,0-Regular <tt>(bzip2)</tt>,1-Parallel <tt>(pbzip2)</tt>
+pigz=Compression command for <tt>gzip</tt>,1,0-Regular <tt>(gzip)</tt>,1-Parallel <tt>(pigz)</tt>
 gzip_mysql=Compress MySQL backups?,1,1-Yes,0-No
 backup_rotated=Included old rotated logs in backups?,1,1-Yes,0-No
 max_backups=Maximum concurrent backups,3,Unlimited,5
