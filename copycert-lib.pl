@@ -231,7 +231,6 @@ foreach my $svc (&list_service_ssl_cert_types()) {
 		&$func($d, 1) if (defined(&$func));
 		}
 	}
-# XXX what about when a virtal IP is added later?
 }
 
 # disable_domain_service_ssl_certs(&domain)
