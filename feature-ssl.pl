@@ -553,6 +553,14 @@ if ($d->{'ssl_same'} && !&check_domain_certificate($d->{'dom'}, $d)) {
 	&break_ssl_linkage($d, $oldsame);
 	}
 
+# If in FPM mode update the port as well
+my $mode = &get_domain_php_mode($oldd);
+if ($mode eq "fpm") {
+	# Force port re-allocation
+	delete($d->{'php_fpm_port'});
+	&save_domain_php_mode($d, $mode);
+	}
+
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, &ssl_needs_apache_restart());

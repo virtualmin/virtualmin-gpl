@@ -4,7 +4,7 @@
  * Copyright 2020 Ilia Rostovtsev
  * Licensed under MIT
  */
- 
+
 /* jshint strict: true */
 /* jshint esversion: 6 */
 
@@ -25,15 +25,21 @@ const init = function() {
             })
             return params
         })(),
-        origin = window.location.origin
+        origin = window.location.origin,
+        bodyClassList = document.querySelector('body').classList,
+        datatime = new Date(),
+        hour = datatime.getHours(),
+        day = hour < 21 && hour >= 8 ? 1 : 0;
     if (origin && origin.includes('//') || query.domain) {
         origin = origin.split('//')[1]
         document.querySelector('.domain').innerText = query.domain || origin;
     }
     if (query.theme) {
-        let target = document.querySelector('body').classList;
-        target.remove('dark');
-        target.add(query.theme);
+        bodyClassList.remove('dark');
+        bodyClassList.add(query.theme);
+    } else if (day) {
+        bodyClassList.remove('dark');
+        bodyClassList.add('white');
     }
     if (query.title) {
         document.querySelector('.default-title').innerText = query.title;
