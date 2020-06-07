@@ -56,24 +56,22 @@ elsif ($mleft == 0) {
 	       $virtualmin_pro ? ( [ "mass", $text{'users_mass'} ] ) : ( ) ],
 	     \@links, $text{'users_none'});
 
-if ($virtualmin_pro) {
-	print &ui_hr();
-	print &ui_buttons_start();
+print &ui_hr();
+print &ui_buttons_start();
 
-	if ($d->{'mail'}) {
-		# Button to email all users
-		print &ui_buttons_row("edit_mailusers.cgi",
-		      $text{'users_mail'}, $text{'users_maildesc'},
-		      &ui_hidden("dom", $in{'dom'}));
-		}
-
-	# Button to set user defaults
-	print &ui_buttons_row("edit_defaults.cgi",
-	      $text{'users_defaults'}, $text{'users_defaultsdesc'},
+if ($d->{'mail'}) {
+	# Button to email all users
+	print &ui_buttons_row("edit_mailusers.cgi",
+	      $text{'users_mail'}, $text{'users_maildesc'},
 	      &ui_hidden("dom", $in{'dom'}));
-
-	print &ui_buttons_end();
 	}
+
+# Button to set user defaults
+print &ui_buttons_row("edit_defaults.cgi",
+      $text{'users_defaults'}, $text{'users_defaultsdesc'},
+      &ui_hidden("dom", $in{'dom'}));
+
+print &ui_buttons_end();
 
 # Make sure the left menu is showing this domain
 if (defined(&theme_select_domain)) {
