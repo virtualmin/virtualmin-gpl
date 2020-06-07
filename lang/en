@@ -717,6 +717,8 @@ users_edunix=The virtual server owner cannot be deleted
 users_noemail=None
 users_defaults=Edit New User Defaults
 users_defaultsdesc=View and edit default settings for new users in this virtual server.
+users_mailclient=Show Email Client Settings
+users_mailclientdesc=Display settings that should be used by users' email clients for this domain.
 users_all=All
 users_same=Same as admin
 
@@ -7115,4 +7117,19 @@ mysql_movedelete=Removing users and databases from original host ..
 
 dbpass_title=Update Database Password
 dbname_title=Update Database Name
+
+mailclient_title=Email Client Settings
+mailclient_header=Settings for user mail clients
+mailclient_exemail=Example user email
+mailclient_exshort=Example user short name
+mailclient_exuser=Example user IMAP/SMTP login
+mailclient_imap_host=IMAP server hostname
+mailclient_imap_port=IMAP server port
+mailclient_imap_ssl=Use SSL for IMAP?
+mailclient_pop3_host=POP3 server hostname
+mailclient_pop3_port=POP3 server port
+mailclient_smtp_host=SMTP server hostname
+mailclient_smtp_port=SMTP server port
+mailclient_smtp_ssl=Use SSL for SMTP?
+
 __norefs=1

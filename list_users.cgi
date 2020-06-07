@@ -71,6 +71,13 @@ print &ui_buttons_row("edit_defaults.cgi",
       $text{'users_defaults'}, $text{'users_defaultsdesc'},
       &ui_hidden("dom", $in{'dom'}));
 
+if ($d->{'mail'}) {
+	# Button to show mail client settings
+	print &ui_buttons_row("mailclient.cgi",
+	      $text{'users_mailclient'}, $text{'users_mailclientdesc'},
+	      &ui_hidden("dom", $in{'dom'}));
+	}
+
 print &ui_buttons_end();
 
 # Make sure the left menu is showing this domain
