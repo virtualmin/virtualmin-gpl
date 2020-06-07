@@ -3180,8 +3180,9 @@ foreach my $r ('webmail', 'admin') {
 	local $condv = "\%{HTTP_HOST} =$rhost";
 	local ($rcond) = grep { $_ eq $condv } @rcond;
 	push(@rcond, $condv) if (!$rcond);
-	local $rulev = "^(.*) $url [R]";
-	local $rrule = grep { $_ eq $rulev } @rrule;
+	local $oldrulev = "^(.*) $url [R]";
+	local $rulev = "^(?!/.well-known)(.*) $url [R]";
+	local ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
 	push(@rrule, $rulev) if (!$rrule);
 
 	# Add the ServerAlias
@@ -3242,7 +3243,9 @@ local @sa = &apache::find_directive("ServerAlias", $vconf);
 for(my $i=0; $i<@rcond; $i++) {
 	if ($rcond[$i] =~ /^\%\{HTTP_HOST\}\s+=(webmail|admin)\.\Q$d->{'dom'}\E/) {
 		splice(@rcond, $i, 1);
-		if ($rrule[$i] =~ /^\^\(\.\*\)\s+(http|https):/) {
+		my @rrw = split(/\s+/, $rrule[$i]);
+		if (($rrw[0] eq "^(.*)" || $rrw[0] eq "^(?!/.well-known)(.*)") &&
+		    $rrw[1] =~ /^(http|https):/) {
 			splice(@rrule, $i, 1);
 			}
 		$i--;
