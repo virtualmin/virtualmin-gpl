@@ -176,7 +176,7 @@ elsif ($itype eq "deb") {
 		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
 	&clean_environment();
-	open(YUM, "apt-get -y --force-yes -f install ".join(" ", @packages)." 2>&1 |");
+	open(YUM, "apt-get -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages -f install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
 		print &html_escape($_);
 		}
