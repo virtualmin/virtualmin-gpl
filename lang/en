@@ -1260,6 +1260,7 @@ delete_bind_provision=Deleting DNS zone from services host ..
 delete_bind_provision_none=.. zone was not fully set up originally
 delete_ebind_provision=.. deletion failed : $1
 delete_bindsub=Removing records from DNS zone $1 ..
+delete_ebindsub=Parent DNS zone server no longer exists!
 delete_bindslave=Deleting slave DNS zone on $1 ..
 delete_bindeslave=.. deleting from some slave servers failed :
 delete_mysqldb=Deleting MySQL database $1 ..
