@@ -30,8 +30,6 @@ if (@users) {
 		"<tt>".$users[0]->{'user'}."</tt>");
 	}
 
-print &ui_table_hr();
-
 print &ui_table_row($text{'mailclient_imap_host'},
 	"<tt>".$imap_host."</tt>");
 
