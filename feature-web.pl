@@ -3129,93 +3129,83 @@ if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_add_web_webmail_redirect", $d, $tmpl);
 	}
 &require_apache();
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 
+my $fixed = 0;
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r});
 
 	# Get directives we will be changing
-	local $conf = &apache::get_config();
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-						    $d->{'web_port'});
-	next if (!$virt);
-	local @reng = &apache::find_directive("RewriteEngine", $vconf);
-	local @rcond = &apache::find_directive("RewriteCond", $vconf);
-	local @rrule = &apache::find_directive("RewriteRule", $vconf);
-	local @sa = &apache::find_directive("ServerAlias", $vconf);
+	foreach my $port (@ports) {
+		local ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $port);
+		next if (!$virt);
+		local @reng = &apache::find_directive("RewriteEngine", $vconf);
+		local @rcond = &apache::find_directive("RewriteCond", $vconf);
+		local @rrule = &apache::find_directive("RewriteRule", $vconf);
+		local @sa = &apache::find_directive("ServerAlias", $vconf);
 
-	# Work out the URL to redirect to
-	local $url = $tmpl->{'web_'.$r.'dom'};
-	if ($url) {
-		# Sub in any template
-		$url = &substitute_domain_template($url, $d);
-		}
-	else {
-		# Work out URL
-		local ($port, $proto);
-		if ($r eq 'webmail') {
-			# From Usermin
-			if (&foreign_installed("usermin")) {
-				&foreign_require("usermin");
-				local %miniserv;
-				&usermin::get_usermin_miniserv_config(
-					\%miniserv);
-				$proto = $miniserv{'ssl'} ? 'https' : 'http';
-				$port = $miniserv{'port'};
-				}
-			# Fall back to standard defaults
-			$proto ||= "http";
-			$port ||= 20000;
+		# Work out the URL to redirect to
+		local $url = $tmpl->{'web_'.$r.'dom'};
+		if ($url) {
+			# Sub in any template
+			$url = &substitute_domain_template($url, $d);
 			}
 		else {
-			# From Webmin
-			($port, $proto) = &get_miniserv_port_proto();
+			# Work out URL
+			my ($port, $proto);
+			if ($r eq 'webmail') {
+				# From Usermin
+				if (&foreign_installed("usermin")) {
+					&foreign_require("usermin");
+					local %miniserv;
+					&usermin::get_usermin_miniserv_config(
+						\%miniserv);
+					$proto = $miniserv{'ssl'} ? 'https' : 'http';
+					$port = $miniserv{'port'};
+					}
+				# Fall back to standard defaults
+				$proto ||= "http";
+				$port ||= 20000;
+				}
+			else {
+				# From Webmin
+				($port, $proto) = &get_miniserv_port_proto();
+				}
+			$url = "$proto://$d->{'dom'}:$port/";
 			}
-		$url = "$proto://$d->{'dom'}:$port/";
+
+		# Add the mod_rewrite directives
+		local $rhost = "$r.$d->{'dom'}";
+		local ($ron) = grep { lc($_) eq "on" } @ron;
+		push(@ron, "on") if (!$ron);
+		local $condv = "\%{HTTP_HOST} =$rhost";
+		local ($rcond) = grep { $_ eq $condv } @rcond;
+		push(@rcond, $condv) if (!$rcond);
+		local $oldrulev = "^(.*) $url [R]";
+		local $rulev = "^(?!/.well-known)(.*) $url [R]";
+		local ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
+		push(@rrule, $rulev) if (!$rrule);
+
+		# Add the ServerAlias
+		local $foundsa;
+		foreach my $s (@sa) {
+			$foundsa++ if (&indexof($rhost, split(/\s+/, $s)) >= 0);
+			}
+		push(@sa, $rhost) if (!$foundsa);
+
+		# Update Apache config
+		&apache::save_directive("RewriteEngine", \@ron, $vconf, $conf);
+		&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
+		&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
+		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
+
+		$fixed++;
 		}
-
-	# Add the mod_rewrite directives
-	local $rhost = "$r.$d->{'dom'}";
-	local ($ron) = grep { lc($_) eq "on" } @ron;
-	push(@ron, "on") if (!$ron);
-	local $condv = "\%{HTTP_HOST} =$rhost";
-	local ($rcond) = grep { $_ eq $condv } @rcond;
-	push(@rcond, $condv) if (!$rcond);
-	local $oldrulev = "^(.*) $url [R]";
-	local $rulev = "^(?!/.well-known)(.*) $url [R]";
-	local ($rrule) = grep { $_ eq $rulev || $_ eq $oldrulev } @rrule;
-	push(@rrule, $rulev) if (!$rrule);
-
-	# Add the ServerAlias
-	local $foundsa;
-	foreach my $s (@sa) {
-		$foundsa++ if (&indexof($rhost, split(/\s+/, $s)) >= 0);
-		}
-	push(@sa, $rhost) if (!$foundsa);
-
-	# Update Apache config
-	&apache::save_directive("RewriteEngine", \@ron, $vconf, $conf);
-	&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
-	&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
-	&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
-
-	# Fix the Apache config for the domain so that the last RewriteCond
-	# appears just before last RewriteRule. This is needed until Webmin
-	# 1.430, as older versions always put same-named directives after
-	# each other.
-	local $lref = &read_file_lines($virt->{'file'});
-	local ($lcond, $lrule);
-	for(my $i=$virt->{'line'}; $i <= $virt->{'eline'}; $i++) {
-		if ($lref->[$i] =~ /^RewriteCond\s/) { $lcond = $i; }
-		if ($lref->[$i] =~ /^RewriteRule\s/) { $lrule = $i; }
-		}
-	if ($lcond && $lrule && @rcond > 1 && @rrule > 1) {
-		splice(@$lref, $lrule, 0, $lref->[$lcond]);
-		splice(@$lref, $lcond, 1);
-		}
-
-	# Write out config
+	}
+if ($fixed) {
 	&flush_file_lines($virt->{'file'});
-	undef(@apache::get_config_cache);
 	&register_post_action(\&restart_apache);
 	}
 }
@@ -3232,43 +3222,50 @@ if ($p && $p ne 'web') {
 
 # Get directives we will be changing
 &require_apache();
-local $conf = &apache::get_config();
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
-return 0 if (!$virt);
-local @rcond = &apache::find_directive("RewriteCond", $vconf);
-local @rrule = &apache::find_directive("RewriteRule", $vconf);
-local @sa = &apache::find_directive("ServerAlias", $vconf);
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $fixed = 0;
+foreach my $port (@ports) {
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	next if (!$virt);
+	local @rcond = &apache::find_directive("RewriteCond", $vconf);
+	local @rrule = &apache::find_directive("RewriteRule", $vconf);
+	local @sa = &apache::find_directive("ServerAlias", $vconf);
 
-# Filter out redirect rules
-for(my $i=0; $i<@rcond; $i++) {
-	if ($rcond[$i] =~ /^\%\{HTTP_HOST\}\s+=(webmail|admin)\.\Q$d->{'dom'}\E/) {
-		splice(@rcond, $i, 1);
-		my @rrw = split(/\s+/, $rrule[$i]);
-		if (($rrw[0] eq "^(.*)" || $rrw[0] eq "^(?!/.well-known)(.*)") &&
-		    $rrw[1] =~ /^(http|https):/) {
-			splice(@rrule, $i, 1);
+	# Filter out redirect rules
+	for(my $i=0; $i<@rcond; $i++) {
+		if ($rcond[$i] =~ /^\%\{HTTP_HOST\}\s+=(webmail|admin)\.\Q$d->{'dom'}\E/) {
+			splice(@rcond, $i, 1);
+			my @rrw = split(/\s+/, $rrule[$i]);
+			if (($rrw[0] eq "^(.*)" || $rrw[0] eq "^(?!/.well-known)(.*)") &&
+			    $rrw[1] =~ /^(http|https):/) {
+				splice(@rrule, $i, 1);
+				}
+			$i--;
 			}
-		$i--;
 		}
-	}
-&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
-&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
+	&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
+	&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
 
-# Fix up the ServerAlias
-local @newsa;
-foreach my $s (@sa) {
-	local @sav = split(/\s+/, $s);
-	@sav = grep { $_ ne "webmail.$d->{'dom'}" &&
-		      $_ ne "admin.$d->{'dom'}" } @sav;
-	if (@sav) {
-		push(@newsa, join(" ", @sav));
+	# Fix up the ServerAlias
+	local @newsa;
+	foreach my $s (@sa) {
+		local @sav = split(/\s+/, $s);
+		@sav = grep { $_ ne "webmail.$d->{'dom'}" &&
+			      $_ ne "admin.$d->{'dom'}" } @sav;
+		if (@sav) {
+			push(@newsa, join(" ", @sav));
+			}
 		}
+	&apache::save_directive("ServerAlias", \@newsa, $vconf, $conf);
+	$fixed++;
 	}
-&apache::save_directive("ServerAlias", \@newsa, $vconf, $conf);
 
-&flush_file_lines($virt->{'file'});
-&register_post_action(\&restart_apache);
-return 1;
+if ($fixed) {
+	&flush_file_lines($virt->{'file'});
+	&register_post_action(\&restart_apache);
+	}
+return $fixed;
 }
 
 # get_webmail_redirect_directives(&domain)
