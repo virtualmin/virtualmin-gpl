@@ -3197,8 +3197,8 @@ foreach my $r ('webmail', 'admin') {
 
 		# Update Apache config
 		&apache::save_directive("RewriteEngine", \@ron, $vconf, $conf);
-		&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf);
-		&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf);
+		&apache::save_directive("RewriteCond", \@rcond, $vconf, $conf, 1);
+		&apache::save_directive("RewriteRule", \@rrule, $vconf, $conf, 1);
 		&apache::save_directive("ServerAlias", \@sa, $vconf, $conf);
 
 		$fixed++;
