@@ -512,11 +512,16 @@ if ($newsuffix) {
 			$newdbname = &database_name($d)."_".$newsuffix;
 			}
 		$newdbdesc = $text{'databases_'.$newdbtype};
-		local ($already) = grep { $_->{'type'} eq $newdbtype &&
-					  $_->{'name'} eq $newdbname } @$dbs;
-		if ($already) {
-			# Don't offer to create if already exists
-			$newdbname = $newdbtype = $newdbdesc = undef;
+
+		# Check if an existing DB with the same name already exists,
+		# and if so add a suffix for the new DB
+		local $count = 1;
+		while(1) {
+			my ($already) = grep { $_->{'type'} eq $newdbtype &&
+				       $_->{'name'} eq $newdbname } @$dbs;
+			last if (!$already);
+			$newdbname =~ s/_(\d+)$//;
+			$newdbname .= "_".(++$count);
 			}
 		$value ||= "*".$newdbtype."_".$newdbname;
 		}
