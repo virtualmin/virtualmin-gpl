@@ -2175,9 +2175,16 @@ else {
 				$d->{'dom'}, $d->{'web_port'});
 	}
 return @rv if (!$defvirt);
+my @webmail;
+if ($p eq "web") {
+	@webmail = &get_webmail_redirect_directives($d);
+	}
 foreach my $full ("www.".$d->{'dom'},
 		  ($d->{'mail'} ? ("mail.".$d->{'dom'}) : ()),
+		  "admin.".$d->{'dom'},
+		  "webmail.".$d->{'dom'},
 		  &get_autoconfig_hostname($d)) {
+	# Is the webserver configured to serve this hostname?
 	my $virt;
 	if ($p eq "web") {
 		$virt = &get_apache_virtual($full, $d->{'web_port'});
@@ -2187,6 +2194,17 @@ foreach my $full ("www.".$d->{'dom'},
 				     $full, $d->{'web_port'});
 		}
 	next if (!$virt || $virt ne $defvirt);
+
+	# If Apache, is there an unconditional rewrite for this hostname?
+	my $found;
+	foreach my $wm (@webmail) {
+		if ($wm->[0] eq $full && $wm->[1] eq '^(.*)') {
+			$found = 1;
+			}
+		}
+	next if ($found);
+
+	# Is there a DNS entry for this hostname?
 	if ($d->{'dns'}) {
 		my @recs = &get_domain_dns_records($d);
 		my ($r) = grep { $_->{'name'} eq $full."." } @recs;

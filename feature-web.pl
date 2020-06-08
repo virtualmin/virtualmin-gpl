@@ -3272,7 +3272,8 @@ return 1;
 }
 
 # get_webmail_redirect_directives(&domain)
-# Returns the list of hostnames if a domain has webmail redirects configured
+# Returns the list of hostnames,path pairs if a domain has webmail redirects
+# configured
 sub get_webmail_redirect_directives
 {
 local ($d) = @_;
@@ -3285,11 +3286,18 @@ if ($p && $p ne 'web') {
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 return ( ) if (!$virt);
 local @rcond = &apache::find_directive("RewriteCond", $vconf);
+local @rrule = &apache::find_directive("RewriteRule", $vconf);
 local @rv;
+local $i = 0;
 foreach my $r (@rcond) {
 	if ($r =~ /^\%\{HTTP_HOST\}\s+=(\S+)/) {
-		push(@rv, $1);
+		my $rhost = $1;
+		my $rr = $rrule[$i];
+		if ($rr && $rr =~ /^(\S+)\s+(http|https):/) {
+			push(@rv, [ $rhost, $1 ]);
+			}
 		}
+	$i++;
 	}
 return @rv;
 }

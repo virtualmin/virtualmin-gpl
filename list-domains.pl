@@ -602,6 +602,11 @@ if ($multi) {
 			if ($same) {
 				print "    SSL shared with: $same->{'dom'}\n";
 				}
+			if ($multi == 1) {
+				@sslhn = &get_hostnames_for_ssl($d);
+				print "    SSL candidate hostnames: ",
+					join(" ", @sslhn),"\n";
+				}
 			if ($d->{'ssl_cert_expiry'}) {
 				print "    SSL cert expiry: ",
 				    &make_date($d->{'ssl_cert_expiry'}),"\n";
