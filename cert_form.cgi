@@ -122,7 +122,7 @@ if (&can_webmin_cert()) {
 			}
 		print "<p><b>".&text('cert_already', join(", ",@a)),"</b><p>\n";
 		}
-	%cert_already = map { $_->{'id'}, $_ } @already;
+	%cert_already = map { $_->{'id'}, $_ } grep { !$_->{'d'} } @already;
 
 	# XXX fix this!!
 	my $cert_used_wm = (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'});
