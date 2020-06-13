@@ -28,6 +28,8 @@ if (@users) {
 
 	print &ui_table_row($text{'mailclient_exuser'},
 		"<tt>".$users[0]->{'user'}."</tt>");
+
+	print &ui_table_hr();
 	}
 
 print &ui_table_row($text{'mailclient_imap_host'},
@@ -39,7 +41,13 @@ print &ui_table_row($text{'mailclient_imap_port'},
 print &ui_table_row($text{'mailclient_imap_ssl'},
 	$imap_ssl eq 'yes'? $text{'yes'} : $text{'no'});
 
+print &ui_table_row($text{'mailclient_imap_pass'},
+	$imap_enc eq 'password-encrypted' ? $text{'mailclient_imap_enc'}
+					  : $text{'mailclient_imap_plain'});
+
 if ($pop3_port) {
+	print &ui_table_hr();
+
 	print &ui_table_row($text{'mailclient_pop3_host'},
 		"<tt>".$imap_host."</tt>");
 
@@ -57,6 +65,15 @@ print &ui_table_row($text{'mailclient_smtp_port'},
 
 print &ui_table_row($text{'mailclient_smtp_ssl'},
 	$smtp_ssl eq 'yes'? $text{'yes'} : $text{'no'});
+
+print &ui_table_row($text{'mailclient_smtp_pass'},
+	$smtp_enc eq 'password-encrypted' ? $text{'mailclient_imap_enc'}
+					  : $text{'mailclient_imap_plain'});
+
+print &ui_table_row($text{'mailclient_smtp_type'},
+	$smtp_type eq "STARTTLS" ? $text{'mailclient_smtp_starttls'} :
+	$smtp_type eq "SSL" ? $text{'mailclient_smtp_ssltls'} :
+			      $text{'mailclient_smtp_plain'});
 
 print &ui_table_end();
 
