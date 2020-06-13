@@ -1,5 +1,7 @@
 # Functions for copying SSL certs to other servers
 
+# list_service_ssl_cert_types()
+# Returns a list of services to which per-domain or per-IP certs can be copied
 sub list_service_ssl_cert_types
 {
 return ({'id' => 'webmin',
