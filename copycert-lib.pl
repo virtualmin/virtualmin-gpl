@@ -189,8 +189,8 @@ my @rv;
 my $chain = &get_website_ssl_file($d, 'ca');
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
-	    (&same_cert_file($chain, $svc->{'ca'}) ||
-	     !$svc->{'ca'} || -s $svc->{'ca'} < 16 || $svc->{'ca'} eq 'none')) {
+	    (!$svc->{'ca'} || -s $svc->{'ca'} < 16 || $svc->{'ca'} eq 'none' ||
+	     &same_cert_file($chain, $svc->{'ca'}))) {
 		push(@rv, $svc);
 		}
 	}
