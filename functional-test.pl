@@ -5175,6 +5175,13 @@ $sslserv_tests = [
 		      @create_args, ],
         },
 
+	# Get the IP address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'ip-only' ],
+		      [ 'domain', $test_domain ] ],
+	  'save' => 'PRIVATE_IP',
+	},
+
 	# Force enable private SSL cert for Webmin, Usermin, etc
 	{ 'command' => 'install-service-cert.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -5183,6 +5190,17 @@ $sslserv_tests = [
 		      [ 'service', 'usermin' ],
 		      [ 'service', 'dovecot' ],
 		      [ 'service', 'postfix' ] ],
+	},
+
+	# Check that they show up in list-domains
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\('.$test_domain.'\\)',
+		      'SSL cert used by: postfix \\($PRIVATE_IP\\)',
+		      'SSL cert used by: webmin \\('.$test_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
+		    ],
 	},
 
 	# Validate that Webmin cert works
@@ -5232,6 +5250,17 @@ $sslserv_tests = [
 	{ 'command' => 'modify-domain.pl',
           'args' => [ [ 'domain', $test_domain ],
 		      [ 'default-ip' ] ],
+	},
+
+	# Check that they show up in list-domains, but by domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\('.$test_domain.'\\)',
+		      'SSL cert used by: webmin \\('.$test_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
+		    ],
+	  'antigrep' => [ 'SSL cert used by: postfix' ],
 	},
 
 	# Validate that Webmin cert still works with SNI
