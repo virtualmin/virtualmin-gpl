@@ -598,7 +598,7 @@ if ($d->{'ssl_key'}) {
 my $dchain = &get_website_ssl_file($d, 'ca');
 if ($dchain) {
 	if ($homecert) {
-		$chainfile = "$dir/$d->{'dom'}.chain";
+		$chainfile = "$dir/$d->{'dom'}.ca";
 		&lock_file($chainfile);
 		&copy_source_dest($dchain, $chainfile);
 		&unlock_file($chainfile);
@@ -649,7 +649,7 @@ if ($d->{'ssl_key'}) {
 	&unlock_file($keyfile);
 	}
 if ($d->{'ssl_chain'}) {
-	$chainfile = "$dir/$d->{'dom'}.chain";
+	$chainfile = "$dir/$d->{'dom'}.ca";
 	&lock_file($chainfile);
 	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
 	&unlock_file($chainfile);
