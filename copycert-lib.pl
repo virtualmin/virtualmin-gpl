@@ -4,22 +4,43 @@
 # Returns a list of services to which per-domain or per-IP certs can be copied
 sub list_service_ssl_cert_types
 {
-return ({'id' => 'webmin',
-	 'dom' => 1,
-	 'virt' => 1, },
-	{'id' => 'usermin',
-         'dom' => 1,
-         'virt' => 1, },
-	{'id' => 'dovecot',
-         'dom' => 1,
-         'virt' => 1, },
-	{'id' => 'postfix',
-         'dom' => 0,
-         'virt' => 1, },
-	{'id' => 'proftpd',
-         'dom' => 0,
-         'virt' => 0, },
-       );
+my @rv;
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+push(@rv, {'id' => 'webmin',
+	   'dom' => 1,
+	   'virt' => 1,
+	   'port' => $miniserv{'port'},
+	   'short' => '' });
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	my %uminiserv;
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	push(@rv, {'id' => 'usermin',
+		   'dom' => 1,
+		   'virt' => 1,
+		   'port' => $uminiserv{'port'},
+		   'short' => 'u' });
+	}
+if (&foreign_installed("dovecot")) {
+	push(@rv, {'id' => 'dovecot',
+		   'dom' => 1,
+		   'virt' => 1,
+		   'short' => 'd' });
+	}
+if ($config{'mail'} && $config{'mail_system'} == 0) {
+	push(@rv, {'id' => 'postfix',
+		   'dom' => 0,
+		   'virt' => 1,
+		   'short' => 'p' });
+	}
+if ($config{'ftp'}) {
+	push(@rv, {'id' => 'proftpd',
+		   'dom' => 0,
+		   'virt' => 0,
+		   'short' => 'f' });
+	}
+return @rv;
 }
 
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)

@@ -96,103 +96,6 @@ print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
 print &ui_table_end();
 
-# Build a list of services and their certs, and work out which ones
-# are already copied
-@already = &get_all_domain_service_ssl_certs($d);
-
-# Buttons to copy cert to Webmin
-if (&can_webmin_cert()) {
-	# Show which services are already using the cert
-	if (@already) {
-		my @a;
-		foreach my $svc (@already) {
-			if ($svc->{'ip'}) {
-				push(@a,
-				  &text('cert_already_'.$svc->{'id'}.'_ip',
-					$svc->{'ip'}));
-				}
-			elsif ($svc->{'dom'}) {
-				push(@a,
-				  &text('cert_already_'.$svc->{'id'}.'_dom',
-					$svc->{'dom'}));
-				}
-			else {
-				push(@a, $text{'cert_already_'.$svc->{'id'}});
-				}
-			}
-		print "<p><b>".&text('cert_already', join(", ",@a)),"</b><p>\n";
-		}
-	%cert_already = map { $_->{'id'}, $_ } grep { !$_->{'d'} } @already;
-
-	# XXX fix this!!
-	my $cert_used_wm = (!$cert_already{'webmin'} || $cert_already{'webmin'}->{'d'});
-	my $cert_used_um = (&foreign_installed("usermin") && 
-							(!$cert_already{'usermin'} || $cert_already{'usermin'}->{'d'}));
-	my $cert_used_dovecot = (&foreign_installed("dovecot") && !$cert_already{'dovecot'});
-	my $cert_used_postfix = ($config{'mail_system'} == 0 && !$cert_already{'postfix'});
-	my $cert_used_ftp = ($config{'ftp'} && !$cert_already{'proftpd'});
-	
-	# Don't print copy msg in case all alreay copied	
-	if ($cert_used_wm || $cert_used_um || $cert_used_dovecot ||	$cert_used_postfix || $cert_used_ftp) {
-		print &ui_hr();
-		print "<b>$text{'cert_copymsg'}</b><p>\n";
-		}
-
-	print &ui_buttons_start();
-
-	# Copy to Webmin button
-	&get_miniserv_config(\%miniserv);
-	if ($cert_used_wm) {
-		print &ui_buttons_row(
-			"copy_cert.cgi",
-			$text{'cert_copy'},
-			&text('cert_copydesc', $miniserv{'port'}),
-			&ui_hidden("dom", $in{'dom'}).
-			&ui_hidden("webmin", 1));
-		}
-
-	# Copy to Usermin, if installed
-	if ($cert_used_um) {
-		&foreign_require("usermin");
-		&usermin::get_usermin_miniserv_config(\%uminiserv);
-		print &ui_buttons_row(
-			"copy_cert.cgi",
-			$text{'cert_ucopy'},
-			&text('cert_ucopydesc', $uminiserv{'port'}),
-			&ui_hidden("dom", $in{'dom'}).
-			&ui_hidden("usermin", 1));
-		}
-
-	# Copy to Dovecot, if installed
-	if ($cert_used_dovecot) {
-		print &ui_buttons_row(
-			"copy_cert_dovecot.cgi",
-			$text{'cert_dcopy'}, $text{'cert_dcopydesc'},
-			&ui_hidden("dom", $in{'dom'}).
-			&ui_hidden("dovecot", 1));
-		}
-
-	# Copy to Postfix, if in use
-	if ($cert_used_postfix) {
-		print &ui_buttons_row(
-			"copy_cert_postfix.cgi",
-			$text{'cert_pcopy'}, $text{'cert_pcopydesc'},
-			&ui_hidden("dom", $in{'dom'}).
-			&ui_hidden("postfix", 1));
-		}
-
-	# Copy to ProFTPd, if in use
-	if ($cert_used_ftp) {
-		print &ui_buttons_row(
-			"copy_cert_proftpd.cgi",
-			$text{'cert_fcopy'}, $text{'cert_fcopydesc'},
-			&ui_hidden("dom", $in{'dom'}).
-			&ui_hidden("proftpd", 1));
-		}
-
-	print &ui_buttons_end();
-	}
-
 print &ui_tabs_end_tab();
 
 ##########################
@@ -441,8 +344,9 @@ else {
 
 print &ui_tabs_end_tab();
 
-# Per-IP or per-domain server usage
 if (&can_webmin_cert()) {
+	# Per-IP or per-domain server usage
+	@already = &get_all_domain_service_ssl_certs($d);
 	print &ui_tabs_start_tab("mode", "perip");
 	print "$text{'cert_desc9'}<p>\n";
 	print &ui_form_start("save_peripcerts.cgi", "post");
@@ -466,6 +370,25 @@ if (&can_webmin_cert()) {
 
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'save'} ] ]);
+
+	# Show which services are already using the cert globally
+	%cert_already = map { $_->{'id'}, $_ } grep { !$_->{'d'} } @already;
+	print &ui_buttons_start();
+
+	# Show copy to global buttons, as long as not already copied
+	foreach my $svc (&list_service_ssl_cert_types()) {
+		next if (!$cert_already{$svc->{'id'}});
+		my $s = $svc->{'short'};
+		print &ui_buttons_row(
+			"copy_cert.cgi",
+			$text{'cert_'.$s.'copy'},
+			&text('cert_'.$s.'copydesc', $svc->{'port'}),
+			&ui_hidden("dom", $in{'dom'}).
+			&ui_hidden($svc->{'id'}, 1));
+		}
+
+	print &ui_buttons_end();
+
 	print &ui_tabs_end_tab();
 	}
 
