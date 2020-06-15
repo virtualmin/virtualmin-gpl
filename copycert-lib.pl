@@ -101,6 +101,10 @@ if (&foreign_installed("dovecot")) {
 		my ($cfile, $kfile, $cafile, $ip, $dom) =
 			&get_dovecot_ssl_cert($d);
 		if ($cfile) {
+			if (!$cafile && &cert_file_split($cfile) > 1) {
+				# CA cert might be in the cert file
+				$cafile = $cfile;
+				}
 			push(@svcs, { 'id' => 'dovecot',
 				      'cert' => $cfile,
 				      'ca' => $cafile,
@@ -120,6 +124,10 @@ if (&foreign_installed("dovecot")) {
 	$cfile =~ s/^<//;
 	$cafile = &dovecot::find_value("ssl_ca", $conf);
 	$cafile =~ s/^<//;
+	if (!$cafile && &cert_file_split($cfile) > 1) {
+		# CA cert might be in the cert file
+		$cafile = $cfile;
+		}
 	if ($cfile) {
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
@@ -190,7 +198,7 @@ my $chain = &get_website_ssl_file($d, 'ca');
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
 	    (!$svc->{'ca'} || -s $svc->{'ca'} < 16 || $svc->{'ca'} eq 'none' ||
-	     &same_cert_file($chain, $svc->{'ca'}))) {
+	     &same_cert_file_any($chain, $svc->{'ca'}))) {
 		push(@rv, $svc);
 		}
 	}

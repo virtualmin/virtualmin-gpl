@@ -888,6 +888,38 @@ local ($d) = @_;
 return &cert_file_info($d->{'ssl_cert'}, $d);
 }
 
+# cert_file_split(file)
+# Returns a list of certs in some file
+sub cert_file_split
+{
+local ($file) = @_;
+local @rv;
+my $lref = &read_file_lines($file, 1);
+foreach my $l (@$lref) {
+	if ($l =~ /^-----BEGIN/) {
+		push(@rv, $l."\n");
+		}
+	elsif ($l =~ /\S/) {
+		$rv[$#rv] .= $l."\n";
+		}
+	}
+return @rv;
+}
+
+# cert_data_info(data)
+# Returns details of a cert in PEM text format
+sub cert_data_info
+{
+local ($data) = @_;
+local $temp = &transname();
+&open_tempfile(TEMP, ">$temp", 0, 1);
+&print_tempfile(TEMP, $data);
+&close_tempfile(TEMP);
+local $info = &cert_file_info($temp);
+&unlink_file($temp);
+return $info;
+}
+
 # cert_file_info(file, &domain)
 # Returns a hash of details of a cert in some file
 sub cert_file_info
@@ -1007,12 +1039,31 @@ sub same_cert_file
 local ($file1, $file2) = @_;
 return 1 if (!$file1 && !$file2);
 return 0 if ($file1 && !$file2 || !$file1 && $file2);
+return 1 if (&same_file($file1, $file2));
 local $info1 = &cert_file_info($file1);
 local $info2 = &cert_file_info($file2);
-return &same_file($file1, $file2) ||
-       $info1->{'modulus'} && $info2->{'modulus'} &&
+return $info1->{'modulus'} && $info2->{'modulus'} &&
        $info1->{'modulus'} eq $info2->{'modulus'} &&
        $info1->{'notafter'} eq $info2->{'notafter'};
+}
+
+# same_cert_file_any(file1, file2)
+# Checks if the modulus and expiry of the cert in file1 are the same as those
+# for any of the certs in file2.
+sub same_cert_file_any
+{
+local ($file1, $file2) = @_;
+return 1 if (!$file1 && !$file2);
+return 0 if ($file1 && !$file2 || !$file1 && $file2);
+return 1 if (&same_file($file1, $file2));
+local $info1 = &cert_file_info($file1);
+foreach my $sp (&cert_file_split($file2)) {
+	local $info2 = &cert_data_info($sp);
+	return 1 if ($info1->{'modulus'} && $info2->{'modulus'} &&
+		     $info1->{'modulus'} eq $info2->{'modulus'} &&
+		     $info1->{'notafter'} eq $info2->{'notafter'});
+	}
+return 0;
 }
 
 # check_passphrase(key-data, passphrase)
@@ -1720,6 +1771,11 @@ return 0 if ($sslyn !~ /yes|required/i);
 my $ssldis = &dovecot::find_value("ssl_disable", $conf);
 return 0 if ($ssldis =~ /yes/i);
 
+# Created combined file if needed
+if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
+	&sync_combined_ssl_cert($d);
+	}
+
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
@@ -1764,7 +1820,7 @@ if ($d->{'virt'}) {
 				  'value' => 'imap',
 				  'members' => [
 					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_cert'} },
+					  'value' => "<".$d->{'ssl_combined'} },
 					{ 'name' => 'ssl_key',
 					  'value' => "<".$d->{'ssl_key'} },
 					],
@@ -1772,11 +1828,6 @@ if ($d->{'virt'}) {
 				  'file' => $l->{'file'},
 				  'line' => $l->{'line'} + 1,
 				  'eline' => $l->{'line'} };
-			if ($chain) {
-				push(@{$imap->{'members'}},
-				     { 'name' => 'ssl_ca',
-				       'value' => "<".$chain });
-				}
 			&dovecot::save_section($conf, $imap);
 			push(@{$l->{'members'}}, $imap);
 			}
@@ -1784,21 +1835,14 @@ if ($d->{'virt'}) {
 			eval {
 				local $main::error_must_die = 1;
 				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_cert'},
+					"ssl_cert", "<".$d->{'ssl_combined'},
 					"protocol", "imap");
 				&dovecot::save_directive($l->{'members'},
 					"ssl_key", "<".$d->{'ssl_key'},
 					"protocol", "imap");
-				if ($chain) {
-					&dovecot::save_directive(
-						$l->{'members'}, "ssl_ca",
-						"<".$chain, "protocol", "imap");
-					}
-				else {
-					&dovecot::save_directive(
-						$l->{'members'}, "ssl_ca",
-						undef, "protocol", "imap");
-					}
+				&dovecot::save_directive(
+					$l->{'members'}, "ssl_ca",
+					undef, "protocol", "imap");
 				}
 			}
 		if (!$pop3) {
@@ -1806,7 +1850,7 @@ if ($d->{'virt'}) {
 				  'value' => 'pop3',
 				  'members' => [
 					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_cert'} },
+					  'value' => "<".$d->{'ssl_combined'} },
 					{ 'name' => 'ssl_key',
 					  'value' => "<".$d->{'ssl_key'} },
 					],
@@ -1814,11 +1858,6 @@ if ($d->{'virt'}) {
 				  'file' => $l->{'file'},
 				  'line' => $l->{'line'} + 1,
 				  'eline' => $l->{'line'} };
-			if ($chain) {
-				push(@{$pop3->{'members'}},
-				     { 'name' => 'ssl_ca',
-				       'value' => "<".$chain });
-				}
 			&dovecot::save_section($conf, $pop3);
 			push(@{$l->{'members'}}, $pop3);
 			}
@@ -1826,21 +1865,14 @@ if ($d->{'virt'}) {
 			eval {
 				local $main::error_must_die = 1;
 				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_cert'},
+					"ssl_cert", "<".$d->{'ssl_combined'},
 					"protocol", "pop3");
 				&dovecot::save_directive($l->{'members'},
 					"ssl_key", "<".$d->{'ssl_key'},
 					"protocol", "pop3");
-				if ($chain) {
-					&dovecot::save_directive(
-						$l->{'members'}, "ssl_ca",
-						"<".$chain, "protocol", "pop3");
-					}
-				else {
-					&dovecot::save_directive(
-						$l->{'members'}, "ssl_ca",
-						undef, "protocol", "pop3");
-					}
+				&dovecot::save_directive(
+					$l->{'members'}, "ssl_ca",
+					undef, "protocol", "pop3");
 				}
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
@@ -1875,16 +1907,11 @@ else {
 				  'value' => $n,
 				  'members' => [
 					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_cert'} },
+					  'value' => "<".$d->{'ssl_combined'} },
 					{ 'name' => 'ssl_key',
 					  'value' => "<".$d->{'ssl_key'} },
 					],
 				  'file' => $cfile };
-			if ($chain) {
-				push(@{$l->{'members'}},
-				     { 'name' => 'ssl_ca',
-				       'value' => '<'.$chain });
-				}
 			my $lref = &read_file_lines($l->{'file'}, 1);
 			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
 			&dovecot::save_section($conf, $l);
@@ -1906,17 +1933,11 @@ else {
 		# May need to update paths
 		foreach my $l (@myloc) {
 			&dovecot::save_directive($l->{'members'},
-                                        "ssl_cert", "<".$d->{'ssl_cert'});
+                                        "ssl_cert", "<".$d->{'ssl_combined'});
 			&dovecot::save_directive($l->{'members'},
                                         "ssl_key", "<".$d->{'ssl_key'});
-			if ($chain) {
-				&dovecot::save_directive($l->{'members'},
-						"ssl_ca", "<".$chain);
-				}
-			else {
-				&dovecot::save_directive($l->{'members'},
-						"ssl_ca", undef);
-				}
+			&dovecot::save_directive($l->{'members'},
+					"ssl_ca", undef);
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
@@ -1988,6 +2009,15 @@ foreach my $r (@rv) {
 	$r =~ s/^<//;
 	}
 return @rv;
+}
+
+# postfix_supports_sni()
+# Returns 1 if the installed version of Postfix supports name-based SSL certs
+sub postfix_supports_sni
+{
+return 0 if ($config{'mail_system'} != 0);
+&foreign_require("postfix");
+return $postfix::postfix_version >= 3.4;
 }
 
 # sync_postfix_ssl_cert(&domain, enable)
