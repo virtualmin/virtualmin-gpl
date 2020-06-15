@@ -61,6 +61,7 @@ index_eprocmail=El programa para filtrado de virus que necesita Procmail parece 
 index_evirus=El programa ClamAV $1 no parece estar instalado en su sistema. Ajuste la ruta en la página <a href='$2'>Configuración de módulo</a> o deshabilite esta opción.
 index_estatus=El módulo de estado del sistema y del servidor no parece estar instalado en su sistema. Instálelo o deshabilite el monitoreo de estado en la página  <a href='$2'>Configuración de módulo</a>.
 index_evirusrun2=El programa ClamAV no parece estar funcionando correctamente: $2. Cambie el programa en la página <a href='$3'>escaners de spam y virus</a> o deshabilite esta opción.
+index_etlsassl=OpenSSL no soporta procesado de certificado o hash SHA-256
 index_astart=Iniciar Apache
 index_astartdesc=El servidor de web Apache está inactivo, en consecuencia todas las páginas web de este servidor virtual están inaccesibles. Presione este botón para iniciarlo.
 index_astop=Detener Apache
@@ -472,7 +473,7 @@ setup_edenieddomain=El nombre de dominio especificdo no está permitido
 setup_edomainprefix=El nombre de dominio no necesita tener $1 al inicio
 setup_evadddomain=.. falló vadddomain : $1
 setup_fwding=Agregando alias para reenviar todo el mail a $1 ..
-setup_styleing=Aplicando estilo inicial del website '$1' ..
+setup_styleing=Aplicando estilo inicial del website ..
 setup_domaliases=Agregando aliases de mail por default ..
 setup_noquotainf0=Quota ilimitada de servidor no puede ser seleccionada ya que tiene un límite de quota de $1.
 setup_noquotainf1=Quota ilimitada de servidor no puede ser seleccionada ya que su reseller tiene un límite de quota de $1.

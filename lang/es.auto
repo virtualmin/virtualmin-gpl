@@ -5,7 +5,6 @@ index_ebinderrs=Se encontraron errores en la configuración BIND de su sistema :
 index_ebindmod=El módulo Webmin del servidor DNS BIND no está instalado en su sistema.
 index_emysql2=Los programas cliente MySQL no parecen estar instalados o no se han configurado correctamente en el módulo de <a href='$1'>base de datos MySQL</a> de Webmin. Si su sistema no usa MySQL, debería deshabilitarse en la página de <a href='$2'>configuración</a> del <a href='$2'>módulo</a> de Virtualmin.
 index_ewebalizerfile=La plantilla del archivo de configuración de Webalizer $1 no se encontró en su sistema. Es posible que deba cambiarse en el módulo <a href='$2'>Análisis de archivo de registro de Webalizer</a>.
-index_etlsassl=OpenSSL no admite el análisis de certificados o el hash SHA-256
 index_sshstopdesc=El servidor SSH se está ejecutando actualmente y acepta inicios de sesión remotos y transferencias de archivos. Haga clic en este botón para apagarlo.
 index_sshstartdesc=El servidor SSH está actualmente inactivo, lo que significa que ni los propietarios del servidor ni la <tt>root</tt> podrán iniciar sesión. Haga clic en este botón para iniciarlo.
 index_mymanage=Administrar MySQL
