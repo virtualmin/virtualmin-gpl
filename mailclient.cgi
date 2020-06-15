@@ -70,10 +70,10 @@ print &ui_table_row($text{'mailclient_smtp_pass'},
 	$smtp_enc eq 'password-encrypted' ? $text{'mailclient_imap_enc'}
 					  : $text{'mailclient_imap_plain'});
 
-print &ui_table_row($text{'mailclient_smtp_type'},
-	$smtp_type eq "STARTTLS" ? $text{'mailclient_smtp_starttls'} :
+print &ui_table_row($text{'mailclient_smtp_type'}, "<tt>".
+	($smtp_type eq "STARTTLS" ? $text{'mailclient_smtp_starttls'} :
 	$smtp_type eq "SSL" ? $text{'mailclient_smtp_ssltls'} :
-			      $text{'mailclient_smtp_plain'});
+			      $text{'mailclient_smtp_plain'}) . "</tt>");
 
 print &ui_table_end();
 
