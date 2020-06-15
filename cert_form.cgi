@@ -373,6 +373,7 @@ if (&can_webmin_cert()) {
 
 	# Show which services are already using the cert globally
 	%cert_already = map { $_->{'id'}, $_ } grep { !$_->{'d'} } @already;
+	print &ui_hr();
 	print &ui_buttons_start();
 
 	# Show copy to global buttons, as long as not already copied
