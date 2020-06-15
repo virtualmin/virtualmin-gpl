@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-=head1 get-cert.pl
+=head1 list-certs.pl
 
 Output the certificates for some or all virtual servers.
 
