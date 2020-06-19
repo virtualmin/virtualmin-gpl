@@ -28,9 +28,6 @@ else {
 @dnames || &error($text{'letsencrypt_ednames'});
 push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 
-# Always check-in main domain to certificate request
-unshift(@dnames, $d->{'dom'}) if (!grep {/^$d->{'dom'}$/} @dnames);
-
 # Filter wildcard to prevent redundancy
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
