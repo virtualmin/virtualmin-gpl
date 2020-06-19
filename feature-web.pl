@@ -2173,7 +2173,7 @@ if ($apache::httpd_modules{'core'} >= 2.4) {
 	foreach my $v (@virt) {
 		if ($v->{'words'}->[0] =~ /^(\*|_DEFAULT_)(:(\d+))?/i &&
 		    (!$3 || $3 == $web_port)) {
-			$startcount++;
+			$starcount++;
 			}
 		elsif ($v->{'words'}->[0] =~ /^(\S+)(:(\d+))?/i && $1 eq $ip &&
 		       (!$3 || $3 == $web_port)) {

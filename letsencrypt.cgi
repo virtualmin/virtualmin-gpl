@@ -25,8 +25,8 @@ else {
 		}
 	$custom_dname = join(" ", @dnames);
 	}
-push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 @dnames || &error($text{'letsencrypt_ednames'});
+push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 
 # Filter wildcard to prevent redundancy
 my $fdnames = &filter_ssl_wildcards(\@dnames);

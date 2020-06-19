@@ -19,6 +19,9 @@ $d || &error($text{'edit_egone'});
 print &ui_table_start($text{'mailclient_header'}, undef, 2);
 
 @users = grep { $_->{'email'} } &list_domain_users($d, 1, 0, 1, 1);
+if (!@users) {
+	@users = grep { $_->{'email'} } &list_domain_users($d, 0, 0, 1, 1);
+	}
 if (@users) {
 	print &ui_table_row($text{'mailclient_exemail'},
 		"<tt>".$users[0]->{'email'}."</tt>");
