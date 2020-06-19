@@ -95,7 +95,7 @@ foreach my $s (@services) {
 			&$second_print(".. service not supported");
 			}
 		elsif (!$svc->{'dom'} && !$d->{'virt'}) {
-			&$second_print(".. service not supported without a privcate IP");
+			&$second_print(".. service not supported without a private IP");
 			}
 		else {
 			$ok = &$func($d, 1);
