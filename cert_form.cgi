@@ -377,7 +377,7 @@ if (&can_webmin_cert()) {
 	# Show copy to global buttons, as long as not already copied
 	my $ui_elem_cert_types = 0;
 	foreach my $svc (&list_service_ssl_cert_types()) {
-		next if (!$cert_already{$svc->{'id'}});
+		next if ($cert_already{$svc->{'id'}});
 		if(!$ui_elem_cert_types++) {
 			print &ui_hr();
 			print &ui_buttons_start();
