@@ -373,12 +373,15 @@ if (&can_webmin_cert()) {
 
 	# Show which services are already using the cert globally
 	%cert_already = map { $_->{'id'}, $_ } grep { !$_->{'d'} } @already;
-	print &ui_hr();
-	print &ui_buttons_start();
 
 	# Show copy to global buttons, as long as not already copied
+	my $ui_elem_cert_types = 0;
 	foreach my $svc (&list_service_ssl_cert_types()) {
 		next if (!$cert_already{$svc->{'id'}});
+		if(!$ui_elem_cert_types++) {
+			print &ui_hr();
+			print &ui_buttons_start();
+			}
 		my $s = $svc->{'short'};
 		my $sf = "_$svc->{'id'}";
 		$sf = "" if ($sf =~ /^_(web|user)min$/);
@@ -390,7 +393,9 @@ if (&can_webmin_cert()) {
 			&ui_hidden($svc->{'id'}, 1));
 		}
 
-	print &ui_buttons_end();
+	if($ui_elem_cert_types) {
+		print &ui_buttons_end()
+		}
 
 	print &ui_tabs_end_tab();
 	}
