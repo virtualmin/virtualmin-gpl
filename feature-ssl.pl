@@ -2027,135 +2027,177 @@ sub sync_postfix_ssl_cert
 local ($d, $enable) = @_;
 local $tmpl = &get_template($d->{'template'});
 
-# Postfix only supports per-IP certs
-return 0 if (!$d->{'virt'});
-
 # Check if Postfix is in use
 return -1 if ($config{'mail_system'} != 0);
 
-# Check if using SSL globally
-&foreign_require("postfix");
-local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
-local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-return 0 if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
-
-# Find the existing master file entry
-&lock_file($postfix::config{'postfix_master'});
-local $master = &postfix::get_master_config();
-local $defip = &get_default_ip();
-
-# Work out which flags are needed
-local $chain = &domain_has_ssl($d) ? &get_website_ssl_file($d, 'ca') : $cafile;
-local @flags = ( [ "smtpd_tls_cert_file",
-		   &domain_has_ssl($d) ? $d->{'ssl_cert'} : $cfile ],
-		 [ "smtpd_tls_key_file",
-		   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
-push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
-push(@flags, [ "smtpd_tls_security_level", "may" ]);
-push(@flags, [ "myhostname", $d->{'dom'} ]);
-
 local $changed = 0;
-foreach my $pfx ('smtp', 'submission', 'smtps') {
-	# Find the existing entry for the IP, and for the default service
-	local $already;
-	local $smtp;
-	local @others;
-	local $lsmtp;
-	foreach my $m (@$master) {
-		if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'} &&
-		    $d->{'ip'} ne $defip) {
-			# Entry for service for the domain
-			$already = $m;
+&foreign_require("postfix");
+if ($d->{'virt'}) {
+	# Setup per-IP cert in master.cf
+
+	# Check if using SSL globally
+	local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+	local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
+	local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
+	return 0 if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
+
+	# Find the existing master file entry
+	&lock_file($postfix::config{'postfix_master'});
+	local $master = &postfix::get_master_config();
+	local $defip = &get_default_ip();
+
+	# Work out which flags are needed
+	local $chain = &domain_has_ssl($d) ? &get_website_ssl_file($d, 'ca') : $cafile;
+	local @flags = ( [ "smtpd_tls_cert_file",
+			   &domain_has_ssl($d) ? $d->{'ssl_cert'} : $cfile ],
+			 [ "smtpd_tls_key_file",
+			   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
+	push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
+	push(@flags, [ "smtpd_tls_security_level", "may" ]);
+	push(@flags, [ "myhostname", $d->{'dom'} ]);
+
+	foreach my $pfx ('smtp', 'submission', 'smtps') {
+		# Find the existing entry for the IP, and for the default service
+		local $already;
+		local $smtp;
+		local @others;
+		local $lsmtp;
+		foreach my $m (@$master) {
+			if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'} &&
+			    $d->{'ip'} ne $defip) {
+				# Entry for service for the domain
+				$already = $m;
+				}
+			if (($m->{'name'} eq $pfx || $m->{'name'} eq $defip.':'.$pfx) &&
+			    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
+				# Entry for default service
+				$smtp = $m;
+				}
+			if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
+			    $m->{'enabled'} && $1 ne $d->{'ip'} && $1 ne $defip) {
+				# Entry for some other domain
+				if ($1 eq "127.0.0.1") {
+					$lsmtp = $m;
+					}
+				else {
+					push(@others, $m);
+					}
+				}
 			}
-		if (($m->{'name'} eq $pfx || $m->{'name'} eq $defip.':'.$pfx) &&
-		    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
-			# Entry for default service
-			$smtp = $m;
-			}
-		if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
-		    $m->{'enabled'} && $1 ne $d->{'ip'} && $1 ne $defip) {
-			# Entry for some other domain
-			if ($1 eq "127.0.0.1") {
-				$lsmtp = $m;
+		next if (!$smtp);
+
+		if ($enable) {
+			# Create or update the entry
+			if (!$already) {
+				# Create based on smtp inet entry
+				$already = { %$smtp };
+				delete($already->{'line'});
+				delete($already->{'uline'});
+				$already->{'name'} = $d->{'ip'}.':'.$pfx;
+				foreach my $f (@flags) {
+					$already->{'command'} .=
+						" -o ".$f->[0]."=".$f->[1];
+					}
+				$already->{'command'} =~ s/-o smtpd_(client|helo|sender)_restrictions=\$mua_client_restrictions\s+//g;
+				&postfix::create_master($already);
+				$changed = 1;
+
+				# If the primary smtp entry isn't bound to an IP, fix it
+				# to prevent IP clashes
+				if ($smtp->{'name'} eq $pfx) {
+					$smtp->{'name'} = $defip.':'.$pfx;
+					&postfix::modify_master($smtp);
+
+					# Also add an entry to listen on 127.0.0.1
+					if (!$lsmtp) {
+						$lsmtp = { %$smtp };
+						delete($lsmtp->{'line'});
+						delete($lsmtp->{'uline'});
+						$lsmtp->{'name'} = '127.0.0.1:'.$pfx;
+						&postfix::create_master($lsmtp);
+						}
+					}
 				}
 			else {
-				push(@others, $m);
-				}
-			}
-		}
-	next if (!$smtp);
-
-	if ($enable) {
-		# Create or update the entry
-		if (!$already) {
-			# Create based on smtp inet entry
-			$already = { %$smtp };
-			delete($already->{'line'});
-			delete($already->{'uline'});
-			$already->{'name'} = $d->{'ip'}.':'.$pfx;
-			foreach my $f (@flags) {
-				$already->{'command'} .=
-					" -o ".$f->[0]."=".$f->[1];
-				}
-			$already->{'command'} =~ s/-o smtpd_(client|helo|sender)_restrictions=\$mua_client_restrictions\s+//g;
-			&postfix::create_master($already);
-			$changed = 1;
-
-			# If the primary smtp entry isn't bound to an IP, fix it
-			# to prevent IP clashes
-			if ($smtp->{'name'} eq $pfx) {
-				$smtp->{'name'} = $defip.':'.$pfx;
-				&postfix::modify_master($smtp);
-
-				# Also add an entry to listen on 127.0.0.1
-				if (!$lsmtp) {
-					$lsmtp = { %$smtp };
-					delete($lsmtp->{'line'});
-					delete($lsmtp->{'uline'});
-					$lsmtp->{'name'} = '127.0.0.1:'.$pfx;
-					&postfix::create_master($lsmtp);
+				# Update cert file paths
+				local $oldcommand = $already->{'command'};
+				foreach my $f (@flags) {
+					($already->{'command'} =~
+					  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/)
+					||
+					  ($already->{'command'} .=
+					   " -o ".$f->[0]."=".$f->[1]);
+					}
+				if ($oldcommand ne $already->{'command'}) {
+					&postfix::modify_master($already);
+					$changed = 1;
 					}
 				}
 			}
 		else {
-			# Update cert file paths
-			local $oldcommand = $already->{'command'};
-			foreach my $f (@flags) {
-				($already->{'command'} =~
-				  s/-o\s+\Q$f->[0]\E=(\S+)/-o $f->[0]=$f->[1]/)
-				||
-				  ($already->{'command'} .=
-				   " -o ".$f->[0]."=".$f->[1]);
-				}
-			if ($oldcommand ne $already->{'command'}) {
-				&postfix::modify_master($already);
+			# Remove the entry
+			if ($already) {
+				&postfix::delete_master($already);
 				$changed = 1;
 				}
-			}
-		}
-	else {
-		# Remove the entry
-		if ($already) {
-			&postfix::delete_master($already);
-			$changed = 1;
-			}
-		if (!@others && $smtp->{'name'} ne $pfx) {
-			# If the default service has an IP but this is no longer
-			# needed, remove it
-			$smtp->{'name'} = $pfx;
-			&postfix::modify_master($smtp);
-			$changed = 1;
+			if (!@others && $smtp->{'name'} ne $pfx) {
+				# If the default service has an IP but this is no longer
+				# needed, remove it
+				$smtp->{'name'} = $pfx;
+				&postfix::modify_master($smtp);
+				$changed = 1;
 
-			# Also remove 127.0.0.1 entry
-			if ($lsmtp) {
-				&postfix::delete_master($lsmtp);
+				# Also remove 127.0.0.1 entry
+				if ($lsmtp) {
+					&postfix::delete_master($lsmtp);
+					}
 				}
 			}
 		}
+	&unlock_file($postfix::config{'postfix_master'});
 	}
-&unlock_file($postfix::config{'postfix_master'});
+elsif (&postfix_supports_sni()) {
+	# Check if Postfix has an SNI map defined
+	my $maphash = &postfix::get_current_value("tls_server_sni_maps");
+	if (!$maphash) {
+		# No, so add it
+		$maphash = "hash:".&postfix::guess_config_dir()."/sni_map";
+		&postfix::set_current_value("tls_server_sni_maps", $maphash);
+		&postfix::ensure_map("tls_server_sni_maps");
+		$changed++;
+		}
 
+	# Is there an entra for this domain already?
+	my $map = &postfix::get_maps("tls_server_sni_maps");
+	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );
+	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
+	my $certstr = join(",", @certs);
+	foreach my $dname (&get_hostnames_for_ssl($d)) {
+		my ($already) = grep { $_->{'name'} eq $dname } @$map;
+		if ($enable && !$already) {
+			# Need to add
+			&postfix::create_mapping(
+				"tls_server_sni_maps",
+				{ 'name' => $dname, 'value' => $certstr });
+			}
+		elsif (!$enable && $already) {
+			# Need to remove
+			&postfix::delete_mapping(
+				"tls_server_sni_maps", $already);
+			}
+		elsif ($enable && $already) {
+			# Update existing certs
+			$already->{'value'} = $certstr;
+			&postfix::modify_mapping(
+				"tls_server_sni_maps", $already, $already);
+			}
+		}
+	&postfix::regenerate_sni_table();
+	}
+else {
+	# Cannot use per-domain or per-IP cert
+	return 0;
+	}
 if ($changed) {
 	&register_post_action(\&restart_mail_server);
 	}
@@ -2170,6 +2212,19 @@ sub get_postfix_ssl_cert
 my ($d) = @_;
 return ( ) if ($config{'mail_system'} != 0);
 &foreign_require("postfix");
+
+# First check for a per-domain cert
+if (&postfix::get_current_value("tls_server_sni_maps")) {
+	my $map = &postfix::get_maps("tls_server_sni_maps");
+	my ($already) = grep { $_->{'name'} eq $d->{'dom'} } @$map;
+	if ($already) {
+		# Found it!
+		my @certs = split(/,/, $already->{'value'});
+		return ($certs[1], $certs[0], $certs[2], undef, $d->{'dom'});
+		}
+	}
+
+# Fall back to checking for a per-IP cert
 local $master = &postfix::get_master_config();
 foreach my $m (@$master) {
 	if ($m->{'name'} eq $d->{'ip'}.':smtp' && $m->{'enabled'}) {

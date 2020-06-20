@@ -30,7 +30,7 @@ if (&foreign_installed("dovecot")) {
 	}
 if ($config{'mail'} && $config{'mail_system'} == 0) {
 	push(@rv, {'id' => 'postfix',
-		   'dom' => 0,
+		   'dom' => &postfix_supports_sni() ? 1 : 0,
 		   'virt' => 1,
 		   'short' => 'p' });
 	}
@@ -163,7 +163,8 @@ if ($config{'mail_system'} == 0) {
 	# Check Postfix certificate
 	if ($perip) {
 		# Try per-IP cert first
-		my ($cfile, $kfile, $cafile, $ip) = &get_postfix_ssl_cert($d);
+		my ($cfile, $kfile, $cafile, $ip, $dom) =
+			&get_postfix_ssl_cert($d);
 		if ($cfile) {
 			push(@svcs, { 'id' => 'postfix',
 				      'cert' => $cfile,
@@ -172,6 +173,7 @@ if ($config{'mail_system'} == 0) {
 				      'port' => 587,
 				      'sslports' => [ 25 ],
 				      'ip' => $ip,
+				      'dom' => $dom,
 				      'd' => $d, });
 			}
 		}
