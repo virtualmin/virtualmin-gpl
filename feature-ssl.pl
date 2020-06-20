@@ -1707,6 +1707,7 @@ foreach my $k ('cert', 'key', 'chain') {
 			}
 		else {
 			&copy_source_dest($samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
+			&set_ownership_permissions($d->{'uid'}, undef, undef, $d->{'ssl_'.$k});
 			}
 		}
 	}
