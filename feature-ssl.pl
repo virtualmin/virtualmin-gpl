@@ -604,6 +604,12 @@ if ($key && !-r $key) {
 	return &text('validate_esslkeyfile', "<tt>$key</tt>");
 	}
 
+# Make sure the cert is readable
+local $info = &cert_info($d);
+if (!$info || !$info->{'cn'}) {
+	return &text('validate_esslcertinfo', "<tt>$cert</tt>");
+	}
+
 # Make sure this domain or www.domain matches cert. Include aliases, because
 # in some cases the alias may be the externally visible domain
 my $match = 0;
@@ -619,7 +625,6 @@ if (!$match) {
 	}
 
 # Make sure the cert isn't expired
-local $info = &cert_info($d);
 if ($info && $info->{'notafter'}) {
 	local $notafter = &parse_notafter_date($info->{'notafter'});
 	if ($notafter < time()) {
