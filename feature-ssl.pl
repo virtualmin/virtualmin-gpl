@@ -1756,6 +1756,25 @@ if ($d->{'letsencrypt_renew'}) {
 	}
 }
 
+# hostname_under_domain(&domain, hostname)
+# Returns 1 if some hostname belongs to a domain, and not any subdomain
+sub hostname_under_domain
+{
+my ($d, $name) = @_;
+$name =~ s/\.$//;	# In case DNS record
+if ($name eq $d->{'dom'}) {
+	return 1;
+	}
+elsif ($name =~ /^([^\.]+)\.(\S+)$/ && $2 eq $d->{'dom'}) {
+	# Under the domain, but what if another domain owns it?
+	my $o = &get_domain_by("dom", $name);
+	return $o ? 0 : 1;
+	}
+else {
+	return 0;
+	}
+}
+
 # sync_dovecot_ssl_cert(&domain, [enable-or-disable])
 # If supported, configure Dovecot to use this domain's SSL cert for its IP
 sub sync_dovecot_ssl_cert
@@ -1902,12 +1921,13 @@ else {
 	# Domain has no IP, but Dovecot supports SNI in version 2
 	my @loc = grep { $_->{'name'} eq 'local_name' &&
 			 $_->{'section'} } @$conf;
-	my @sslnames = &get_hostnames_for_ssl($d);
+	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
-	my @myloc = grep { $sslnames{$_->{'value'}} } @loc;
+	my @myloc = grep { $sslnames{$_->{'value'}} ||
+			   &hostname_under_domain($d, $_->{'value'}) } @loc;
 	if ($enable && !@myloc) {
 		# Need to add
-		foreach my $n (@sslnames) {
+		foreach my $n ($d->{'dom'}, "*".$d->{'dom'}) {
 			my $l = { 'name' => 'local_name',
 				  'value' => $n,
 				  'members' => [
@@ -2004,7 +2024,7 @@ sub get_dovecot_ssl_cert_name
 my ($d, $conf) = @_;
 my @loc = grep { $_->{'name'} eq 'local_name' &&
 		 $_->{'section'} } @$conf;
-my ($l) = grep { $_->{'value'} eq $d->{'dom'} } @loc;
+my ($l) = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
 return ( ) if (!$l);
 my %mems = map { $_->{'name'}, $_->{'value'} } @{$l->{'members'}};
 return ( ) if (!$mems{'ssl_cert'});
@@ -2182,24 +2202,31 @@ elsif (&postfix_supports_sni()) {
 	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );
 	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
 	my $certstr = join(",", @certs);
-	foreach my $dname (&get_hostnames_for_ssl($d)) {
-		my ($already) = grep { $_->{'name'} eq $dname } @$map;
-		if ($enable && !$already) {
-			# Need to add
-			&postfix::create_mapping(
-				"tls_server_sni_maps",
-				{ 'name' => $dname, 'value' => $certstr });
+	if ($enable) {
+		# Add or update map entries for domain
+		foreach my $dname ($d->{'dom'}, "*".$d->{'dom'}) {
+			my ($r) = grep { $_->{'name'} eq $dname } @$map;
+			if ($enable && !$r) {
+				# Need to add
+				&postfix::create_mapping(
+				    "tls_server_sni_maps",
+				    { 'name' => $dname, 'value' => $certstr });
+				}
+			elsif ($enable && $r) {
+				# Update existing certs
+				$r->{'value'} = $certstr;
+				&postfix::modify_mapping(
+				    "tls_server_sni_maps", $r, $r);
+				}
 			}
-		elsif (!$enable && $already) {
-			# Need to remove
-			&postfix::delete_mapping(
-				"tls_server_sni_maps", $already);
-			}
-		elsif ($enable && $already) {
-			# Update existing certs
-			$already->{'value'} = $certstr;
-			&postfix::modify_mapping(
-				"tls_server_sni_maps", $already, $already);
+		}
+	else {
+		# Remove all map entries for the domain
+		foreach my $r (reverse(@$map)) {
+			if (&hostname_under_domain($d, $r->{'name'})) {
+				&postfix::delete_mapping(
+				    "tls_server_sni_maps", $r);
+				}
 			}
 		}
 	&postfix::regenerate_sni_table();
@@ -2226,7 +2253,7 @@ return ( ) if ($config{'mail_system'} != 0);
 # First check for a per-domain cert
 if (&postfix::get_current_value("tls_server_sni_maps")) {
 	my $map = &postfix::get_maps("tls_server_sni_maps");
-	my ($already) = grep { $_->{'name'} eq $d->{'dom'} } @$map;
+	my ($already) = grep { &hostname_under_domain($d, $_->{'name'}) } @$map;
 	if ($already) {
 		# Found it!
 		my @certs = split(/,/, $already->{'value'});
@@ -2320,6 +2347,17 @@ if (!$d->{'alias'}) {
 		}
 	}
 return &unique(@rv);
+}
+
+# get_hostnames_from_cert(&domain)
+# Returns a list of hostnames that the domain's cert is valid for
+sub get_hostnames_from_cert
+{
+my $info = &cert_info($d);
+return () if (!$info);
+my @rv = ( $info->{'cn'} );
+push(@rv, @{$info->{'alt'}}) if ($info->{'alt'});
+return @rv;
 }
 
 # apply_letsencrypt_cert_renewals()
