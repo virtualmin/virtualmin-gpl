@@ -5230,7 +5230,7 @@ $sslserv_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5241,7 +5241,7 @@ $sslserv_tests = [
 		      [ 'server', 'mail.'.$test_domain ],
 		      [ 'ssl' ] ],
 	},
-	{ 'command' => 'openssl s_client -host '.$test_domain.
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5305,7 +5305,7 @@ $sslserv_tests = [
 		      [ 'ssl' ] ],
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
-		       ' -servername '.$test_domain.
+		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
