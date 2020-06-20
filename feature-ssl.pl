@@ -1017,8 +1017,8 @@ close(OUT);
 foreach my $k (keys %rv) {
 	$rv{$k} =~ s/http:\|\|/http:\/\//g;
 	}
-$rv{'type'} = $rv{'o'} eq $rv{'issuer_o'} ? $text{'cert_typeself'}
-					  : $text{'cert_typereal'};
+$rv{'self'} = $rv{'o'} eq $rv{'issuer_o'} ? 1 : 0;
+$rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
 return \%rv;
 }
 
@@ -2057,24 +2057,27 @@ if ($d->{'virt'}) {
 	push(@flags, [ "myhostname", $d->{'dom'} ]);
 
 	foreach my $pfx ('smtp', 'submission', 'smtps') {
-		# Find the existing entry for the IP, and for the default service
+		# Find the existing entry for the IP and for the default service
 		local $already;
 		local $smtp;
 		local @others;
 		local $lsmtp;
 		foreach my $m (@$master) {
-			if ($m->{'name'} eq $d->{'ip'}.':'.$pfx && $m->{'enabled'} &&
+			if ($m->{'name'} eq $d->{'ip'}.':'.$pfx &&
+			    $m->{'enabled'} &&
 			    $d->{'ip'} ne $defip) {
 				# Entry for service for the domain
 				$already = $m;
 				}
-			if (($m->{'name'} eq $pfx || $m->{'name'} eq $defip.':'.$pfx) &&
+			if (($m->{'name'} eq $pfx ||
+			     $m->{'name'} eq $defip.':'.$pfx) &&
 			    $m->{'type'} eq 'inet' && $m->{'enabled'}) {
 				# Entry for default service
 				$smtp = $m;
 				}
 			if ($m->{'name'} =~ /^([0-9\.]+):\Q$pfx\E$/ &&
-			    $m->{'enabled'} && $1 ne $d->{'ip'} && $1 ne $defip) {
+			    $m->{'enabled'} && $1 ne $d->{'ip'} &&
+			    $1 ne $defip) {
 				# Entry for some other domain
 				if ($1 eq "127.0.0.1") {
 					$lsmtp = $m;
@@ -2102,18 +2105,20 @@ if ($d->{'virt'}) {
 				&postfix::create_master($already);
 				$changed = 1;
 
-				# If the primary smtp entry isn't bound to an IP, fix it
-				# to prevent IP clashes
+				# If the primary smtp entry isn't bound to an
+				# IP, fix it to prevent IP clashes
 				if ($smtp->{'name'} eq $pfx) {
 					$smtp->{'name'} = $defip.':'.$pfx;
 					&postfix::modify_master($smtp);
 
-					# Also add an entry to listen on 127.0.0.1
+					# Also add an entry to listen on
+					# 127.0.0.1
 					if (!$lsmtp) {
 						$lsmtp = { %$smtp };
 						delete($lsmtp->{'line'});
 						delete($lsmtp->{'uline'});
-						$lsmtp->{'name'} = '127.0.0.1:'.$pfx;
+						$lsmtp->{'name'} =
+							'127.0.0.1:'.$pfx;
 						&postfix::create_master($lsmtp);
 						}
 					}
@@ -2141,8 +2146,8 @@ if ($d->{'virt'}) {
 				$changed = 1;
 				}
 			if (!@others && $smtp->{'name'} ne $pfx) {
-				# If the default service has an IP but this is no longer
-				# needed, remove it
+				# If the default service has an IP but this is
+				# no longer needed, remove it
 				$smtp->{'name'} = $pfx;
 				&postfix::modify_master($smtp);
 				$changed = 1;

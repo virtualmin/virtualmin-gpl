@@ -7906,8 +7906,11 @@ if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
-    !$dom->{'disabled'} && !$dom->{'alias'}) {
-	&create_initial_letsencrypt_cert($dom);
+    !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
+	my $info = &cert_info($dom);
+	if ($info->{'self'}) {
+		&create_initial_letsencrypt_cert($dom);
+		}
 	}
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
