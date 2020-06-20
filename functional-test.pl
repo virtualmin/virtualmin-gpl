@@ -5196,7 +5196,7 @@ $sslserv_tests = [
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_domain ] ],
-	  'grep' => [ 'SSL cert used by: dovecot \\('.$test_domain.'\\)',
+	  'grep' => [ 'SSL cert used by: dovecot \\($PRIVATE_IP\\)',
 		      'SSL cert used by: postfix \\($PRIVATE_IP\\)',
 		      'SSL cert used by: webmin \\('.$test_domain.'\\)',
 		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
@@ -5337,6 +5337,20 @@ $sslserv_tests = [
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn per-service certs back on again, so we can test deletion
+	{ 'command' => 'modify-domain.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'allocate-ip' ] ],
+	},
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
 	},
 
 	# Cleanup the domain
