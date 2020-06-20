@@ -380,8 +380,10 @@ if (&can_webmin_cert()) {
 	foreach my $svc (&list_service_ssl_cert_types()) {
 		next if (!$cert_already{$svc->{'id'}});
 		my $s = $svc->{'short'};
+		my $sf = "_$svc->{'id'}";
+		$sf = "" if ($sf =~ /^_(web|user)min$/);
 		print &ui_buttons_row(
-			"copy_cert.cgi",
+			"copy_cert$sf.cgi",
 			$text{'cert_'.$s.'copy'},
 			&text('cert_'.$s.'copydesc', $svc->{'port'}),
 			&ui_hidden("dom", $in{'dom'}).
