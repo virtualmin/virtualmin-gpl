@@ -479,14 +479,15 @@ else {
 	&postfix::get_current_value("smtpd_tls_mandatory_protocols", "nodef") || "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
+my ($smtps_enabled_prior) = grep { $_->{'name'} eq 'smtps' && $_->{'enabled'} } @$master;
 my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
 my ($smtp) = grep { $_->{'name'} eq 'smtp' } @$master;
-if ($smtps && !$smtps->{'enabled'}) {
+if (!$smtps_enabled_prior && $smtps && !$smtps->{'enabled'}) {
 	# Enable existing entry
 	$smtps->{'enabled'} = 1;
 	&postfix::modify_master($smtps);
 	}
-elsif (!$smtps && $smtp) {
+elsif (!$smtps_enabled_prior && !$smtps && $smtp) {
 	# Add new smtps entry, cloned from smtp
 	$smtps = { %$smtp };
 	$smtps->{'name'} = 'smtps';
