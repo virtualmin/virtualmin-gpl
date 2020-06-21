@@ -1763,7 +1763,8 @@ sub hostname_under_domain
 {
 my ($d, $name) = @_;
 $name =~ s/\.$//;	# In case DNS record
-if ($name eq $d->{'dom'}) {
+if ($name eq $d->{'dom'} ||
+    $name eq "*.".$d->{'dom'}) {
 	return 1;
 	}
 elsif ($name =~ /^([^\.]+)\.(\S+)$/ && $2 eq $d->{'dom'}) {
@@ -1928,7 +1929,7 @@ else {
 			   &hostname_under_domain($d, $_->{'value'}) } @loc;
 	if ($enable && !@myloc) {
 		# Need to add
-		foreach my $n ($d->{'dom'}, "*".$d->{'dom'}) {
+		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
 			my $l = { 'name' => 'local_name',
 				  'value' => $n,
 				  'members' => [
@@ -2205,7 +2206,7 @@ elsif (&postfix_supports_sni()) {
 	my $certstr = join(",", @certs);
 	if ($enable) {
 		# Add or update map entries for domain
-		foreach my $dname ($d->{'dom'}, "*".$d->{'dom'}) {
+		foreach my $dname ($d->{'dom'}, "*.".$d->{'dom'}) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
 			if ($enable && !$r) {
 				# Need to add
