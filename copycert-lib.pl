@@ -325,7 +325,6 @@ if ($cfile =~ /snakeoil/) {
 	}
 $cfile ||= "$dovedir/dovecot.cert.pem";
 $kfile ||= "$dovedir/dovecot.key.pem";
-$cafile ||= "$dovedir/dovecot.key.ca";
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
@@ -337,7 +336,9 @@ $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
 &print_tempfile(CERT, $cdata,"\n");
-if ($cadata && !$v2) {
+if (!$cafile && $cadata) {
+	# No CA file is already defined in the config, so just append to the
+	# cert file
 	&print_tempfile(CERT, $cadata,"\n");
 	}
 &close_tempfile(CERT);
@@ -346,7 +347,9 @@ if ($cadata && !$v2) {
 &print_tempfile(KEY, $kdata,"\n");
 &close_tempfile(KEY);
 &set_ownership_permissions(undef, undef, 0750, $kfile);
-if ($v2) {
+if ($cafile && $cadata) {
+	# CA file already exists, and should have contents. This mode is
+	# deprecated, but can still happen with older configs
 	&open_lock_tempfile(KEY, ">$cafile");
 	&print_tempfile(KEY, $cadata,"\n");
 	&close_tempfile(KEY);
@@ -358,7 +361,9 @@ if ($v2) {
 	# 2.0 and later format
 	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
 	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
-	&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+	if ($cafile) {
+		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+		}
 	}
 else {
 	# Pre-2.0 format
