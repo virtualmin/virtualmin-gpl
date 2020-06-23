@@ -870,6 +870,9 @@ if ($virt) {
 		&fix_options_directives($vconf, $conf, 0);
 		}
 
+	# Re-save CA cert path based on actual config
+	$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca');
+
 	# Sync cert to Dovecot, Postfix, Webmin, etc..
 	&enable_domain_service_ssl_certs($d);
 
