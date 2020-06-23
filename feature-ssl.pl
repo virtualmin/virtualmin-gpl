@@ -1932,11 +1932,17 @@ else {
 		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
 			my $l = { 'name' => 'local_name',
 				  'value' => $n,
+				  'enabled' => 1,
+				  'section' => 1,
 				  'members' => [
 					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_combined'} },
+					  'value' => "<".$d->{'ssl_combined'},
+					  'enabled' => 1,
+					  'file' => $cfile, },
 					{ 'name' => 'ssl_key',
-					  'value' => "<".$d->{'ssl_key'} },
+					  'value' => "<".$d->{'ssl_key'},
+					  'enabled' => 1,
+					  'file' => $cfile, },
 					],
 				  'file' => $cfile };
 			my $lref = &read_file_lines($l->{'file'}, 1);
