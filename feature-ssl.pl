@@ -1969,11 +1969,14 @@ else {
 		# May need to update paths
 		foreach my $l (@myloc) {
 			&dovecot::save_directive($l->{'members'},
-                                        "ssl_cert", "<".$d->{'ssl_combined'});
+                                        "ssl_cert", "<".$d->{'ssl_combined'},
+					$l->{'name'}, $l->{'value'});
 			&dovecot::save_directive($l->{'members'},
-                                        "ssl_key", "<".$d->{'ssl_key'});
+                                        "ssl_key", "<".$d->{'ssl_key'},
+					$l->{'name'}, $l->{'value'});
 			&dovecot::save_directive($l->{'members'},
-					"ssl_ca", undef);
+					"ssl_ca", undef,
+					$l->{'name'}, $l->{'value'});
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
