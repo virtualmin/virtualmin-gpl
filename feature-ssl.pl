@@ -1943,9 +1943,7 @@ else {
 			 $_->{'section'} } @$conf;
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
-	print STDERR "sslnames=",join(" ", @sslnames),"\n";
 	my @myloc = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
-	print STDERR "myloc=",scalar(@myloc),"\n";
 	if ($enable && !@myloc) {
 		# Need to add
 		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
