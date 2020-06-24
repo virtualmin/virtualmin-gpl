@@ -207,16 +207,20 @@ if (&has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 		if ($?) {
 			return (-1, "wp config create failed : $out");
 			}
-		
-		# Set db prefix
-		my $out = &run_as_domain_user($d,
-			"$wp config set table_prefix $opts->{'dbtbpref'}".
-			" --type=variable".
-			" --path=".$opts->{'dir'});
-		if ($?) {
-			return (-1, "wp config set table_prefix failed : $out");
-			}
 
+		# Set db prefix, if given
+		if ($opts->{'dbtbpref'}) {
+			my $out = &run_as_domain_user($d,
+				"$wp config set table_prefix ".
+				quotemeta($opts->{'dbtbpref'}).
+				" --type=variable".
+				" --path=".$opts->{'dir'}." 2>&1");
+			if ($?) {
+				return (-1, "wp config set table_prefix ".
+					    "failed : $out");
+				}
+			}
+		
 		# Do the install
 		my $out = &run_as_domain_user($d,
 			"$wp core install --url=$d->{'dom'}$opts->{'path'}".
@@ -305,7 +309,7 @@ if (&has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 else {
 	# Return a URL to complete the install
 	my $url = script_path_url($d, $opts).
-		     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
+	     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
 	my $userurl = script_path_url($d, $opts);
 	my $rp = $opts->{'dir'};
 	$rp =~ s/^$d->{'home'}\///;
