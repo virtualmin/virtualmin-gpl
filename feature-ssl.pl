@@ -389,6 +389,8 @@ if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
 		$d->{'ssl_same'} = $sslclash->{'id'};
 		$chained = &get_website_ssl_file($sslclash, 'ca');
 		$d->{'ssl_chain'} = $chained;
+		$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
+		$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
 		}
 	else {
 		# No domain has the same cert anymore - copy the one from the
@@ -398,7 +400,8 @@ if ($d->{'ip'} ne $oldd->{'ip'} && $oldd->{'ssl_same'}) {
 	}
 if ($d->{'home'} ne $oldd->{'home'}) {
 	# Fix SSL cert file locations
-	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain') {
+	foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain', 'ssl_combined',
+		       'ssl_everything') {
 		$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//;
 		}
 	}
@@ -516,6 +519,8 @@ if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_cert'});
 	delete($d->{'ssl_key'});
 	delete($d->{'ssl_chain'});
+	delete($d->{'ssl_combined'});
+	delete($d->{'ssl_everything'});
 	delete($d->{'ssl_same'});
 	}
 
@@ -1701,6 +1706,9 @@ return 0;
 sub break_ssl_linkage
 {
 local ($d, $samed) = @_;
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
+
+# Copy the cert and key to the new owning domain's directory
 foreach my $k ('cert', 'key', 'chain') {
 	if ($d->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
@@ -1715,8 +1723,12 @@ foreach my $k ('cert', 'key', 'chain') {
 		}
 	}
 delete($d->{'ssl_same'});
+
+# Re-generate any combined cert files
 &sync_combined_ssl_cert($d);
+
 if ($d->{'web'}) {
+	# Update Apache config to point to the new cert file
 	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
 		$d->{'dom'}, $d->{'web_sslport'});
 	if ($ovirt) {
@@ -1731,6 +1743,9 @@ if ($d->{'web'}) {
 		&flush_file_lines($ovirt->{'file'});
 		}
 	}
+
+# Update any service certs for this domain
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 }
 
 # break_invalid_ssl_linkages(&domain, [&new-cert])
@@ -1928,8 +1943,9 @@ else {
 			 $_->{'section'} } @$conf;
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
-	my @myloc = grep { $sslnames{$_->{'value'}} ||
-			   &hostname_under_domain($d, $_->{'value'}) } @loc;
+	print STDERR "sslnames=",join(" ", @sslnames),"\n";
+	my @myloc = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
+	print STDERR "myloc=",scalar(@myloc),"\n";
 	if ($enable && !@myloc) {
 		# Need to add
 		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
@@ -2597,6 +2613,14 @@ elsif ($caa && $caa->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
 sub sync_combined_ssl_cert
 {
 my ($d) = @_;
+if ($d->{'ssl_same'}) {
+	# Assume parent has the combined files
+	my $sslclash = &get_domain($d->{'ssl_same'});
+	&sync_combined_ssl_cert($sslclash);
+	$d->{'ssl_combined'} = $sslclash->{'ssl_combined'};
+	$d->{'ssl_everything'} = $sslclash->{'ssl_everything'};
+	return;
+	}
 
 # Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
