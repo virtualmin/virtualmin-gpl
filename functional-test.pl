@@ -1199,6 +1199,7 @@ $script_tests = [
 		      [ 'opt', 'demo 1' ],
 		      [ 'version', 'latest' ] ],
 	  'timeout' => 300,
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1238,6 +1239,7 @@ $script_tests = [
 		      [ 'path', '/wordpress' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1271,6 +1273,7 @@ $script_tests = [
 		      [ 'db', 'mysql '.$test_domain_db.'_wp' ],
 		      [ 'newdb' ],
 		      [ 'version', 'latest' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works with it's own DB
@@ -1332,6 +1335,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1365,6 +1369,7 @@ $gplscript_tests = [
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
 		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works with it's own DB
@@ -1746,6 +1751,7 @@ $move_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Move under the target
@@ -3811,6 +3817,7 @@ $incremental_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Test that roundcube works before the backup
@@ -7404,6 +7411,7 @@ $clone_tests = [
 		      [ 'type', 'phpmyadmin' ],
 		      [ 'path', '/phpmyadmin' ],
 		      [ 'version', '3.5.8.2' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Create a dummy .htaccess file with a path
