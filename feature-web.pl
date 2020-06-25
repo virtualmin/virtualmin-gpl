@@ -1064,8 +1064,13 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	&apache::save_directive("AliasMatch",
 				[ "^/.*\$ $dis", @am ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
+	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
+	$def_tpl =~ s/Under Construction/Website Disabled/gm;
+	if ($d->{'disabled_why'}) {
+		$def_tpl =~ s/("slogan">).*?(<)/$1$d->{'disabled_why'}$2/gm;
+		}
 	local $msg = $tmpl->{'disabled_web'} eq 'none' ?
-		"<h1>Website Disabled</h1>\n" :
+		$def_tpl :
 		join("\n", split(/\t/, $tmpl->{'disabled_web'}));
 	$msg = &substitute_domain_template($msg, $d);
 	if (&is_under_directory($d->{'home'}, $dis)) {
