@@ -1065,7 +1065,7 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 				[ "^/.*\$ $dis", @am ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
-	$def_tpl =~ s/Under Construction/Website Disabled/gm;
+	$def_tpl =~ s/("default-title">).*?(<)/$1Website Disabled$2/gm;
 	if ($d->{'disabled_why'}) {
 		$def_tpl =~ s/("slogan">).*?(<)/$1$d->{'disabled_why'}$2/gm;
 		}
