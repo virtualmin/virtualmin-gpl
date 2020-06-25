@@ -1152,6 +1152,10 @@ else {
 	$ok = 0;
 	}
 &release_lock_web($_[0]);
+
+# Remove disabled template file
+local $dis_file = &public_html_dir($_[0])."/disabled_by_virtualmin.html";
+&unlink_file($dis_file) if (-r $dis_file);
 return $ok;
 }
 
