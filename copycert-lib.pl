@@ -145,11 +145,11 @@ if (&foreign_installed("dovecot")) {
 	$cfile =~ s/^<//;
 	$cafile = &dovecot::find_value("ssl_ca", $conf);
 	$cafile =~ s/^<//;
-	if (!$cafile && &cert_file_split($cfile) > 1) {
-		# CA cert might be in the cert file
-		$cafile = $cfile;
-		}
 	if ($cfile) {
+		if (!$cafile && &cert_file_split($cfile) > 1) {
+			# CA cert might be in the cert file
+			$cafile = $cfile;
+			}
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
 			      'ca' => $cafile,
