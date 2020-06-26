@@ -48,7 +48,10 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# Check for Virtualmin repo in sources.list
-	$sources_list = "/etc/apt/sources.list";
+	$sources_list = "/etc/apt/sources.list.d/virtualmin.list";
+	if	(!-r $sources_list) {
+		$sources_list = "/etc/apt/sources.list";
+		}
 	$lref = &read_file_lines($sources_list);
 	$found = 0;
 	foreach $l (@$lref) {
