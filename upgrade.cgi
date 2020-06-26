@@ -132,8 +132,8 @@ elsif ($itype eq "deb") {
 		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
 			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/$repo_version\/gpl\/(.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$repo_version/$1";
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
                         }
 		}
 	&flush_file_lines($sources_list);
@@ -202,10 +202,7 @@ else {
 		local %tinfo = &get_theme_info($mod);
 		local %info = %minfo ? %minfo : %tinfo;
 		local $current_ver = &round_hundred($info{'version'});
-		local $current_ver_number = int($current_ver);
 		local $new_ver = &round_hundred($ver);
-		local $new_ver_number = int($new_ver);
-		local $repo_version = $new_ver_number > $current_ver_number ? $new_ver_number : $current_ver_number;
 		if (%info) {
 			# Already installed .. but can we upgrade?
 			$can_upgrade = 0;
