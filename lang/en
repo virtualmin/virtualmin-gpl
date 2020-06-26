@@ -7142,4 +7142,11 @@ mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Unencrypted
 
+deftmplt_error=ERROR
+deftmplt_website_disabled=Website Disabled
+deftmplt_under_construction=Under Construction
+deftmplt_slogan=managed by Virtualmin - a powerful and flexible web hosting control panel
+deftmplt_made_with_love1=Made with
+deftmplt_made_with_love2=at Virtualmin
+
 __norefs=1

@@ -1065,10 +1065,13 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 				[ "^/.*\$ $dis", @am ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
-	$def_tpl =~ s/("default-title">).*?(<)/$1Website Disabled$2/gm;
+	local %hashtmp = %$d;
+	$hashtmp{'TMPLTTITLE'} = $text{'deftmplt_website_disabled'};
 	if ($d->{'disabled_why'}) {
-		$def_tpl =~ s/("slogan">).*?(<)/$1$d->{'disabled_why'}$2/gm;
+		$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
 		}
+	%hashtmp = populate_default_index_page(%hashtmp);
+	$def_tpl = &substitute_virtualmin_template($def_tpl, \%hashtmp);
 	local $msg = $tmpl->{'disabled_web'} eq 'none' ?
 		$def_tpl :
 		join("\n", split(/\t/, $tmpl->{'disabled_web'}));
