@@ -15730,6 +15730,20 @@ if ($escape) {
 return &substitute_template($str, \%ghash);
 }
 
+# populate_default_index_page(string, &hash)
+# Replaces defaults for default/index.html 
+# template avoiding polluting context
+sub populate_default_index_page
+{
+	my (%h) = @_;
+	$h{'TMPLTTITLE'}		= $text{'deftmplt_under_construction'} if(!$h{'TMPLTTITLE'});
+	$h{'TMPLTERROR'}		= $text{'deftmplt_error'};
+	$h{'TMPLTSLOGAN'}		= $text{'deftmplt_slogan'};
+	$h{'TMPLTMADEWITH1'}	= $text{'deftmplt_made_with_love1'};
+	$h{'TMPLTMADEWITH2'}	= $text{'deftmplt_made_with_love2'};
+	return %h;
+}
+
 # absolute_domain_path(&domain, path)
 # Converts some path to be relative to a domain, like foo.txt or bar/foo.txt or
 # ~/bar/foo.txt. Absolute paths are not converted.

@@ -1078,9 +1078,10 @@ while(@srcs) {
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
 					local %hash = %$d;
 					if ($content) {
-						$hash{'CONTENT'} = $content;
-						$hash{'CONTENT'} =~ s/\n/<br>\n/g;
+						$hash{'TMPLTCONTENT'} = $content;
+						$hash{'TMPLTCONTENT'} =~ s/\n/<br>\n/g;
 						}
+					%hash = populate_default_index_page(%hash);
 					$data = &substitute_virtualmin_template($data, \%hash);
 					}
 				&print_tempfile(DATA, $data);

@@ -48,7 +48,10 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# Check for Virtualmin repo in sources.list
-	$sources_list = "/etc/apt/sources.list";
+	$sources_list = "/etc/apt/sources.list.d/virtualmin.list";
+	if	(!-r $sources_list) {
+		$sources_list = "/etc/apt/sources.list";
+		}
 	$lref = &read_file_lines($sources_list);
 	$found = 0;
 	foreach $l (@$lref) {
@@ -132,8 +135,8 @@ elsif ($itype eq "deb") {
 		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
 			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl\/(.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/6/$1";
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
                         }
 		}
 	&flush_file_lines($sources_list);
