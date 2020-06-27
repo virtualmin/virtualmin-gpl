@@ -1718,7 +1718,8 @@ foreach my $k ('cert', 'key', 'chain') {
 			}
 		else {
 			&copy_source_dest($samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
-			&set_ownership_permissions($d->{'uid'}, undef, undef, $d->{'ssl_'.$k});
+			&set_ownership_permissions(
+				$d->{'uid'}, undef, undef, $d->{'ssl_'.$k});
 			}
 		}
 	}
@@ -1746,6 +1747,12 @@ if ($d->{'web'}) {
 
 # Update any service certs for this domain
 &update_all_domain_service_ssl_certs($d, \@beforecerts);
+
+# If Let's Encrypt was in use before, copy across renewal fields
+$d->{'letsencrypt_renew'} = $samed->{'letsencrypt_renew'};
+$d->{'letsencrypt_last'} = $samed->{'letsencrypt_last'};
+$d->{'letsencrypt_last_failure'} = $samed->{'letsencrypt_last_failure'};
+$d->{'letsencrypt_last_err'} = $samed->{'letsencrypt_last_err'};
 }
 
 # break_invalid_ssl_linkages(&domain, [&new-cert])
