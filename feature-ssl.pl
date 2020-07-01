@@ -2234,12 +2234,12 @@ elsif (&postfix_supports_sni()) {
 
 	# Is there an entra for this domain already?
 	my $map = &postfix::get_maps("tls_server_sni_maps");
-	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );
-	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
+	my @certs = ( $d->{'ssl_combined'} );
+	@certs = ( $d->{'ssl_everything'} ) if ($d->{'ssl_chain'});
 	my $certstr = join(",", @certs);
 	if ($enable) {
 		# Add or update map entries for domain
-		foreach my $dname ($d->{'dom'}, "*.".$d->{'dom'}) {
+		foreach my $dname ($d->{'dom'}, ".".$d->{'dom'}) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
 			if ($enable && !$r) {
 				# Need to add
