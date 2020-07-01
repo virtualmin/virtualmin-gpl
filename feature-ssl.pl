@@ -1789,7 +1789,8 @@ sub hostname_under_domain
 my ($d, $name) = @_;
 $name =~ s/\.$//;	# In case DNS record
 if ($name eq $d->{'dom'} ||
-    $name eq "*.".$d->{'dom'}) {
+    $name eq "*.".$d->{'dom'} ||
+    $name eq ".".$d->{'dom'}) {
 	return 1;
 	}
 elsif ($name =~ /^([^\.]+)\.(\S+)$/ && $2 eq $d->{'dom'}) {
