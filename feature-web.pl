@@ -487,6 +487,13 @@ if ($mode eq "fpm") {
 	&save_domain_php_mode($d, $mode);
 	}
 
+# Update session dir and upload path in php.ini files
+local @fixes = (
+	[ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
+	[ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
+	);
+&fix_php_ini_files($d, \@fixes);
+
 &release_lock_web($d);
 &register_post_action(\&restart_apache);
 &$second_print($text{'setup_done'});
