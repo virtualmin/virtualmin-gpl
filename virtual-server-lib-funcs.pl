@@ -14989,10 +14989,16 @@ if ($virtualmin_pro &&
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
 		my $repo = "/etc/apt/sources.list";
+		my $repo_new = "/etc/apt/sources.list.d/virtualmin.list";
 		if (!-r $repo) {
 			&$second_print(&text('check_eaptrepofile', $repo));
 			}
 		else {
+			# If it's a newish install using new path
+			if (-r $repo_new) {
+				$repo = $repo_new;
+				}
+			
 			# File exists, but does it contain the right repo line?
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
