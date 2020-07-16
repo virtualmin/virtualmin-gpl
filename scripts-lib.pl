@@ -1288,6 +1288,9 @@ foreach my $m (@mods) {
 			elsif ($mp eq "Template::Toolkit") {
 				$pkg = "libtemplate-perl";
 				}
+			elsif ($mp eq "DBD::SQLite") {
+				$pkg = "libdbd-sqlite3-perl";
+				}
 			else {
 				$mp = lc($mp);
 				$mp =~ s/::/\-/g;
