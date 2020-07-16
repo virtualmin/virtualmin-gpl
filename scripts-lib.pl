@@ -1271,14 +1271,22 @@ foreach my $m (@mods) {
 		local $mp = $m;
 		if ($software::config{'package_system'} eq 'rpm') {
 			# We can use RPM's tracking of perl dependencies
-			# to install the exact module
-			$pkg = "perl($mp)";
+			# to install the exact module.
+			# However, to make it work, we need to wrap pkg name in quotes, 
+			# like dnf install 'perl(Email::Send)' which doesn't 
+			# seem to be working correctly on underlying API.
+			# Simply build a name for it on RHEL too
+			$mp =~ s/::/\-/g;
+			$pkg = "perl-$mp";
 			}
 		elsif ($software::config{'package_system'} eq 'debian') {
 			# Most Debian package perl modules are named
 			# like libfoo-bar-perl
 			if ($mp eq "Date::Format") {
 				$pkg = "libtimedate-perl";
+				}
+			elsif ($mp eq "Template::Toolkit") {
+				$pkg = "libtemplate-perl";
 				}
 			else {
 				$mp = lc($mp);
