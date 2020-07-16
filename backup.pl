@@ -156,7 +156,8 @@ eval {
 					$sched->{'increment'},
 					1,
 					$key,
-					$sched->{'kill'});
+					$sched->{'kill'},
+					$sched->{'compression'});
 	};
 if ($@) {
 	# Perl error during backup!
@@ -200,7 +201,8 @@ foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $sched->{'increment'}, $start_time,
 			  $size, $ok, "sched", $output, $errdoms,
 			  $asd ? $asd->{'user'} : undef, $key, $sched->{'id'},
-			  $sched->{'fmt'}, $sched->{'ownrestore'});
+			  $sched->{'fmt'}, $sched->{'ownrestore'},
+			  $sched->{'compression'}, $sched->{'desc'});
 	}
 
 PREFAILED:

@@ -47,6 +47,7 @@ foreach $s (@scripts) {
 		@files = &{$script->{'files_func'}}($d, $ver, undef, undef);
 		foreach $f (grep { $_->{'url'} } @files) {
 			next if ($f->{'nofetch'});
+			next if ($f->{'virtualmin'});
 			local $url = &convert_osdn_url($f->{'url'}) ||
 				     $f->{'url'};
 			local $destfile = "$dest/$f->{'file'}";

@@ -660,15 +660,11 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 
 	# Initial content
 	print &ui_table_row(&hlink($text{'form_content'},"form_content"),
-			    &ui_radio("content_def", 1,
-				      [ [ 1, $text{'form_content1'} ] ,
+			    &ui_radio("content_def", 2,
+				      [ [ 1, $text{'form_content1'} ],
+					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
 			    &ui_textarea("content", undef, 5, 70),
-			    3, \@tds);
-
-	# Style for content
-	print &ui_table_row(&hlink($text{'form_style'}, "form_style"),
-			    &content_style_chooser("style", undef),
 			    3, \@tds);
 
 	print &ui_hidden_table_end();

@@ -190,7 +190,8 @@ if ($dests[0] eq "download:") {
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
-				       undef, $in{'increment'}, 0, $key);
+				       undef, $in{'increment'}, 0, $key, 0,
+				       $in{'compression'});
 	&cleanup_backup_limits(0, 1);
 	unlink($temp.".info");
 	unlink($temp.".dom");
@@ -247,7 +248,8 @@ else {
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
 				       $in{'onebyone'}, $cbmode == 2,
-				       undef, $in{'increment'}, undef, $key);
+				       undef, $in{'increment'}, undef, $key, 0,
+				       $in{'compression'});
 	$output = &stop_print_capture();
 	&cleanup_backup_limits(0, 1);
 	foreach $dest (@strfdests) {

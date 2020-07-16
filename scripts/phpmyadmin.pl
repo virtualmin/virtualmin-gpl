@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "4.9.5", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
+return ( "5.0.2", "4.9.5", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
 }
 
 sub script_phpmyadmin_version_desc
@@ -345,7 +345,11 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, "4.5") > 0) {
+if (&compare_versions($ver, "5") > 0) {
+	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
+		 "phpMyAdmin-(5\\.[0-9][0-9\\.]+)-all-languages\\.zip" );
+	}
+elsif (&compare_versions($ver, "4.5") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-(4\\.[5-9][0-9\\.]+)-all-languages\\.zip" );
 	}

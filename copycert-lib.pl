@@ -1,8 +1,46 @@
 # Functions for copying SSL certs to other servers
 
+# list_service_ssl_cert_types()
+# Returns a list of services to which per-domain or per-IP certs can be copied
 sub list_service_ssl_cert_types
 {
-return ('webmin', 'usermin', 'dovecot', 'postfix', 'proftpd');
+my @rv;
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+push(@rv, {'id' => 'webmin',
+	   'dom' => 1,
+	   'virt' => 1,
+	   'port' => $miniserv{'port'},
+	   'short' => '' });
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	my %uminiserv;
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	push(@rv, {'id' => 'usermin',
+		   'dom' => 1,
+		   'virt' => 1,
+		   'port' => $uminiserv{'port'},
+		   'short' => 'u' });
+	}
+if (&foreign_installed("dovecot")) {
+	push(@rv, {'id' => 'dovecot',
+		   'dom' => 1,
+		   'virt' => 1,
+		   'short' => 'd' });
+	}
+if ($config{'mail'} && $config{'mail_system'} == 0) {
+	push(@rv, {'id' => 'postfix',
+		   'dom' => &postfix_supports_sni() ? 1 : 0,
+		   'virt' => 1,
+		   'short' => 'p' });
+	}
+if ($config{'ftp'}) {
+	push(@rv, {'id' => 'proftpd',
+		   'dom' => 0,
+		   'virt' => 0,
+		   'short' => 'f' });
+	}
+return @rv;
 }
 
 # get_all_service_ssl_certs(&domain, include-per-ip-certs)
@@ -79,45 +117,70 @@ if (&foreign_installed("usermin")) {
 
 if (&foreign_installed("dovecot")) {
 	# Check Dovecot certificate
-	my ($cfile, $kfile, $cafile, $ip, $dom);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, $cafile, $ip,$dom) = &get_dovecot_ssl_cert($d);
+		my ($cfile, $kfile, $cafile, $ip, $dom) =
+			&get_dovecot_ssl_cert($d);
+		if ($cfile) {
+			if (!$cafile && &cert_file_split($cfile) > 1) {
+				# CA cert might be in the cert file
+				$cafile = $cfile;
+				}
+			push(@svcs, { 'id' => 'dovecot',
+				      'cert' => $cfile,
+				      'ca' => $cafile,
+				      'prefix' => 'mail',
+				      'port' => 993,
+				      'sslports' => [ 995 ],
+				      'ip' => $ip,
+				      'dom' => $dom,
+				      'd' => $d, });
+			}
 		}
-	if (!$cfile) {
-		# Fall back to global Dovecot cert
-		&foreign_require("dovecot");
-		my $conf = &dovecot::get_config();
-		$cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
-			 &dovecot::find_value("ssl_cert", $conf, 0, "");
-		$cfile =~ s/^<//;
-		$cafile = &dovecot::find_value("ssl_ca", $conf);
-		$cafile =~ s/^<//;
-		}
+	# Also add global Dovecot cert
+	&foreign_require("dovecot");
+	my $conf = &dovecot::get_config();
+	my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+		    &dovecot::find_value("ssl_cert", $conf, 0, "");
+	$cfile =~ s/^<//;
+	$cafile = &dovecot::find_value("ssl_ca", $conf);
+	$cafile =~ s/^<//;
 	if ($cfile) {
+		if (!$cafile && &cert_file_split($cfile) > 1) {
+			# CA cert might be in the cert file
+			$cafile = $cfile;
+			}
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 993,
-			      'sslports' => [ 995 ],
-			      'ip' => $ip,
-			      'dom' => $dom, });
+			      'sslports' => [ 995 ]});
 		}
 	}
 
 if ($config{'mail_system'} == 0) {
 	# Check Postfix certificate
-	my ($cfile, $kfile, $cafile, $ip);
 	if ($perip) {
 		# Try per-IP cert first
-		($cfile, $kfile, $cafile, $ip) = &get_postfix_ssl_cert($d);
+		my ($cfile, $kfile, $cafile, $ip, $dom) =
+			&get_postfix_ssl_cert($d);
+		if ($cfile) {
+			push(@svcs, { 'id' => 'postfix',
+				      'cert' => $cfile,
+				      'ca' => $cafile,
+				      'prefix' => 'mail',
+				      'port' => 587,
+				      'sslports' => [ 25 ],
+				      'ip' => $ip,
+				      'dom' => $dom,
+				      'd' => $d, });
+			}
 		}
-	if (!$cfile) {
-		&foreign_require("postfix");
-		$cfile = &postfix::get_real_value("smtpd_tls_cert_file");
-		$cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-		}
+	# Also add global Postfix cert
+	&foreign_require("postfix");
+	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
 	if ($cfile) {
 		push(@svcs, { 'id' => 'postfix',
 			      'cert' => $cfile,
@@ -157,8 +220,8 @@ my @rv;
 my $chain = &get_website_ssl_file($d, 'ca');
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
-	    (&same_cert_file($chain, $svc->{'ca'}) ||
-	     !$svc->{'ca'} || $svc->{'ca'} eq 'none')) {
+	    (!$svc->{'ca'} || -s $svc->{'ca'} < 16 || $svc->{'ca'} eq 'none' ||
+	     &same_cert_file_any($chain, $svc->{'ca'}))) {
 		push(@rv, $svc);
 		}
 	}
@@ -166,7 +229,8 @@ return @rv;
 }
 
 # update_all_domain_service_ssl_certs(&domain, &certs-before)
-# Updates all services that were using this domain's SSL cert before renewal
+# Updates all services that were using this domain's SSL cert after it has
+# changed.
 sub update_all_domain_service_ssl_certs
 {
 my ($d, $before) = @_;
@@ -183,6 +247,37 @@ foreach my $svc (@$before) {
 		}
 	}
 &pop_all_print();
+}
+
+# enable_domain_service_ssl_certs(&domain)
+# To be called when SSL is enabled for a domain, to setup all per-service SSL
+# certs configured in the template that can be used.
+sub enable_domain_service_ssl_certs
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+foreach my $svc (&list_service_ssl_cert_types()) {
+	next if (!$svc->{'dom'} && !$svc->{'virt'});
+	next if (!$svc->{'dom'} && !$d->{'virt'});
+	if ($tmpl->{'web_'.$svc->{'id'}.'_ssl'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 1) if (defined(&$func));
+		}
+	}
+}
+
+# disable_domain_service_ssl_certs(&domain)
+# To be called when SSL is turned off for a domain, to remove all per-service
+# SSL certs.
+sub disable_domain_service_ssl_certs
+{
+my ($d) = @_;
+foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
+	if ($svc->{'d'}) {
+		my $func = "sync_".$svc->{'id'}."_ssl_cert";
+		&$func($d, 0) if (defined(&$func));
+		}
+	}
 }
 
 # ipkeys_to_domain_cert(&domain, &ipkeys)
@@ -230,7 +325,6 @@ if ($cfile =~ /snakeoil/) {
 	}
 $cfile ||= "$dovedir/dovecot.cert.pem";
 $kfile ||= "$dovedir/dovecot.key.pem";
-$cafile ||= "$dovedir/dovecot.key.ca";
 
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
@@ -242,7 +336,9 @@ $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
 &print_tempfile(CERT, $cdata,"\n");
-if ($cadata && !$v2) {
+if (!$cafile && $cadata) {
+	# No CA file is already defined in the config, so just append to the
+	# cert file
 	&print_tempfile(CERT, $cadata,"\n");
 	}
 &close_tempfile(CERT);
@@ -251,7 +347,9 @@ if ($cadata && !$v2) {
 &print_tempfile(KEY, $kdata,"\n");
 &close_tempfile(KEY);
 &set_ownership_permissions(undef, undef, 0750, $kfile);
-if ($v2) {
+if ($cafile && $cadata) {
+	# CA file already exists, and should have contents. This mode is
+	# deprecated, but can still happen with older configs
 	&open_lock_tempfile(KEY, ">$cafile");
 	&print_tempfile(KEY, $cadata,"\n");
 	&close_tempfile(KEY);
@@ -263,7 +361,9 @@ if ($v2) {
 	# 2.0 and later format
 	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
 	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
-	&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+	if ($cafile) {
+		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+		}
 	}
 else {
 	# Pre-2.0 format
@@ -380,17 +480,19 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 else {
 	&postfix::set_current_value("smtpd_use_tls", "yes");
 	}
-&postfix::set_current_value("smtpd_tls_mandatory_protocols", "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
+&postfix::set_current_value("smtpd_tls_mandatory_protocols", 
+	&postfix::get_current_value("smtpd_tls_mandatory_protocols", "nodef") || "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
+my ($smtps_enabled_prior) = grep { $_->{'name'} eq 'smtps' && $_->{'enabled'} } @$master;
 my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
 my ($smtp) = grep { $_->{'name'} eq 'smtp' } @$master;
-if ($smtps && !$smtps->{'enabled'}) {
+if (!$smtps_enabled_prior && $smtps && !$smtps->{'enabled'}) {
 	# Enable existing entry
 	$smtps->{'enabled'} = 1;
 	&postfix::modify_master($smtps);
 	}
-elsif (!$smtps && $smtp) {
+elsif (!$smtps_enabled_prior && !$smtps && $smtp) {
 	# Add new smtps entry, cloned from smtp
 	$smtps = { %$smtp };
 	$smtps->{'name'} = 'smtps';
@@ -504,7 +606,7 @@ if ($d->{'ssl_key'}) {
 my $dchain = &get_website_ssl_file($d, 'ca');
 if ($dchain) {
 	if ($homecert) {
-		$chainfile = "$dir/$d->{'dom'}.chain";
+		$chainfile = "$dir/$d->{'dom'}.ca";
 		&lock_file($chainfile);
 		&copy_source_dest($dchain, $chainfile);
 		&unlock_file($chainfile);
@@ -555,7 +657,7 @@ if ($d->{'ssl_key'}) {
 	&unlock_file($keyfile);
 	}
 if ($d->{'ssl_chain'}) {
-	$chainfile = "$dir/$d->{'dom'}.chain";
+	$chainfile = "$dir/$d->{'dom'}.ca";
 	&lock_file($chainfile);
 	&copy_source_dest($d->{'ssl_chain'}, $chainfile);
 	&unlock_file($chainfile);

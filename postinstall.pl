@@ -162,16 +162,9 @@ if ($gconfig{'no_virtualmin_preload'}) {
 &update_miniserv_preloads($config{'preload_mode'});
 $need_restart = 1 if ($config{'preload_mode'});		# To apply .pl changes
 
-# Run in package eval mode, to avoid loading the same module twice
+# Restart Webmin if needed
 local %miniserv;
 &get_miniserv_config(\%miniserv);
-if ($virtualmin_pro && !$miniserv{'eval_package'}) {
-	$miniserv{'eval_package'} = 1;
-	$need_restart = 1;
-	}
-&put_miniserv_config(\%miniserv);
-
-# Restart Webmin if needed
 if (&check_pid_file($miniserv{'pidfile'}) && $need_restart) {
 	&restart_miniserv();
 	}

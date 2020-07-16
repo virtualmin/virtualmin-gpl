@@ -420,7 +420,7 @@ for(my $i=0; $i<$tries; $i++) {
 	my $out = &call_aws_cmd($akey,
 		[ @regionflag,
 		  "cp", $sourcefile, "s3://$bucket/$destfile", @rrsargs ]);
-	if ($?) {
+	if ($? || $out =~ /upload\s+failed/) {
 		$err = $out;
 		}
 	if (!$err && $info) {
@@ -429,7 +429,7 @@ for(my $i=0; $i<$tries; $i++) {
 		my $out = &call_aws_cmd($akey,
 		    [ @regionflag, 
 		      "cp", $temp, "s3://$bucket/$destfile.info", @rrsargs ]);
-		$err = $out if ($?);
+		$err = $out if ($? || $out =~ /upload\s+failed/);
 		}
 	if (!$err && $dom) {
 		# Upload the .dom file
@@ -438,7 +438,7 @@ for(my $i=0; $i<$tries; $i++) {
 		my $out = &call_aws_cmd($akey,
 		    [ @regionflag,
 		      "cp", $temp, "s3://$bucket/$destfile.dom", @rrsargs ]);
-		$err = $out if ($?);
+		$err = $out if ($? || $out =~ /upload\s+failed/);
 		}
 	last if (!$err);
 	}
@@ -1024,13 +1024,17 @@ return 1;
 # Run the aws command for s3 with some params, and return output
 sub call_aws_cmd
 {
-my ($akey, $params) = @_;
+my ($akey, $params, $endpoint, $endpoint_param) = @_;
+$endpoint ||= $config{'s3_endpoint'};
+if ($endpoint) {
+	$endpoint_param = "--endpoint-url=".quotemeta("https://$endpoint");
+	}
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
 return &backquote_command(
-	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey).
-	" ".$params." 2>&1");
+	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey)." ".
+	$endpoint_param." ".$params." 2>&1");
 }
 
 1;

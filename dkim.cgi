@@ -37,8 +37,7 @@ if ($dkim && $dkim->{'enabled'}) {
 	}
 else {
 	# New selector input
-	@tm = localtime(time());
-	$defsel = sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
+	$defsel = &get_default_dkim_selector();
 	print &ui_table_row($text{'dkim_selector'},
 		&ui_textbox("selector",
 			    $dkim && $dkim->{'selector'} || $defsel, 20));

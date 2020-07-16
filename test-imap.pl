@@ -29,7 +29,6 @@ if (!$module_name) {
 
 # Parse command-line args
 $server = "localhost";
-$port = 143;
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--server") {
@@ -52,6 +51,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--folder") {
 		$mailbox = shift(@ARGV);
 		}
+	elsif ($a eq "--ssl") {
+		$ssl = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -64,6 +66,7 @@ $user || &usage("No IMAP username specified");
 # Open IMAP connection
 $folder = { 'server' => $server,
 	    'port' => $port,
+	    'ssl' => $ssl,
 	    'user' => $user,
 	    'pass' => $pass,
 	    'mailbox' => $mailbox };

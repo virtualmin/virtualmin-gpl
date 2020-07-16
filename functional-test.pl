@@ -125,6 +125,7 @@ while(@ARGV > 0) {
 	}
 $webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
 $admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+
 &get_miniserv_config(\%miniserv);
 $webmin_proto = "http";
 if ($miniserv{'ssl'}) {
@@ -141,6 +142,12 @@ if ($webmin_proto eq "https") {
 	}
 $normal_agent_wget_command = $webmin_wget_command;
 $normal_agent_wget_command =~ s/--user-agent=\S+//;
+
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	&usermin::get_usermin_miniserv_config(\%uminiserv);
+	$usermin_port = $uminiserv{'port'};
+	}
 
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
@@ -224,7 +231,6 @@ $domains_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -535,7 +541,6 @@ $jail_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      [ 'enable-jail' ],
 		      @create_args, ],
@@ -606,7 +611,6 @@ $disable_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -1195,6 +1199,7 @@ $script_tests = [
 		      [ 'opt', 'demo 1' ],
 		      [ 'version', 'latest' ] ],
 	  'timeout' => 300,
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1234,6 +1239,7 @@ $script_tests = [
 		      [ 'path', '/wordpress' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'version', 'latest' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1267,6 +1273,7 @@ $script_tests = [
 		      [ 'db', 'mysql '.$test_domain_db.'_wp' ],
 		      [ 'newdb' ],
 		      [ 'version', 'latest' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works with it's own DB
@@ -1327,7 +1334,8 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.9' ] ],
+		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works
@@ -1360,7 +1368,8 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.2.9' ] ],
+		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Check that it works with it's own DB
@@ -1691,7 +1700,6 @@ $move_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'mysql' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -1703,7 +1711,6 @@ $move_tests = [
 		      [ 'prefix', 'example2' ],
 		      [ 'desc', 'Test sub-domain' ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test sub-server home page' ],
 		      @create_args, ],
 	},
@@ -1743,7 +1750,8 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.9' ] ],
+		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Move under the target
@@ -1894,7 +1902,6 @@ $movealias_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'mysql' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test old home page' ],
 		      @create_args, ],
         },
@@ -1915,7 +1922,6 @@ $movealias_tests = [
 		      [ 'desc', 'Test target domain' ],
 		      [ 'pass', 'spod' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test new home page' ],
 		      @create_args, ],
         },
@@ -1956,7 +1962,6 @@ $aliasdom_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test alias target page' ],
 		      @create_args, ],
         },
@@ -2028,7 +2033,6 @@ $aliasdom_tests = [
 	# Create a web page, and make sure it can be fetched
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test un-aliased page' ] ],
 	},
 
@@ -2161,7 +2165,6 @@ $backup_tests = [
 		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'webmin' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -2198,7 +2201,6 @@ $backup_tests = [
 		      [ 'desc', 'Test sub-domain' ],
 		      [ 'dir' ], [ $web ], [ 'logrotate' ], [ 'dns' ],
 		      [ 'mail' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
 	},
@@ -2355,7 +2357,6 @@ $mysqlbackup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -2499,7 +2500,6 @@ $mysqlbackup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
 	  'fail' => 1,
@@ -2511,7 +2511,6 @@ $mysqlbackup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      [ 'skip-warnings' ],
 		      @create_args, ],
@@ -2566,7 +2565,6 @@ $postgresbackup_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'postgres' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -2696,7 +2694,6 @@ $multibackup_tests = [
 		      [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -2733,7 +2730,6 @@ $multibackup_tests = [
 		      [ 'desc', 'Test sub-domain' ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
 	},
@@ -2871,7 +2867,6 @@ $remotebackup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3025,7 +3020,6 @@ $webminbackup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3118,7 +3112,6 @@ $s3backup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3260,7 +3253,6 @@ $rsbackup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3378,7 +3370,6 @@ $gcsbackup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3489,7 +3480,6 @@ $dropboxbackup_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3631,7 +3621,6 @@ $splitbackup_tests = [
 		      [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3668,7 +3657,6 @@ $splitbackup_tests = [
 		      [ 'desc', 'Test sub-domain' ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
 	},
@@ -3818,7 +3806,6 @@ $incremental_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'mysql' ], [ 'webmin' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -3829,7 +3816,8 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.9' ] ],
+		      [ 'version', '1.2.10' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Test that roundcube works before the backup
@@ -3847,7 +3835,6 @@ $incremental_tests = [
 	# Apply a content style change
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain', $test_domain ],
-		      [ 'style' => 'rounded' ],
 		      [ 'content' => 'New website content' ] ],
 	},
 
@@ -3931,7 +3918,6 @@ $purge_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -4419,7 +4405,6 @@ $exclude_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -4875,7 +4860,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.9\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.10\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
@@ -4982,7 +4967,6 @@ $ssl_tests = [
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'logrotate' ],
 		      [ 'allocate-ip' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL home page' ],
 		      @create_args, ],
         },
@@ -4994,7 +4978,6 @@ $ssl_tests = [
 		      [ 'parent', $test_domain ],
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
 		      [ 'parent-ip' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
 	},
@@ -5186,6 +5169,203 @@ $ssl_tests = [
 	  'cleanup' => 1 },
 	];
 
+$sslserv_tests = [
+	# Create a domain with SSL and a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ $ssl ], [ 'logrotate' ], [ 'webmin' ],
+		      [ 'allocate-ip' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Get the IP address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'ip-only' ],
+		      [ 'domain', $test_domain ] ],
+	  'save' => 'PRIVATE_IP',
+	},
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Check that they show up in list-domains
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\($PRIVATE_IP\\)',
+		      'SSL cert used by: postfix \\($PRIVATE_IP\\)',
+		      'SSL cert used by: webmin \\('.$test_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
+		    ],
+	},
+
+	# Validate that Webmin cert works
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert works
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert works
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Postfix cert works
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn off private IP for the domain
+	{ 'command' => 'modify-domain.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'default-ip' ] ],
+	},
+
+	# Check that they show up in list-domains, but by domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\('.$test_domain.'\\)',
+		      'SSL cert used by: webmin \\('.$test_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_domain.'\\)',
+		    ],
+	  'antigrep' => [ 'SSL cert used by: postfix' ],
+	},
+
+	# Validate that Webmin cert still works with SNI
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert still works with SNI
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert still works with SNI
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', $test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-check that Postfix still works, but without the per-IP cert
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', $test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn off per-service certs
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Re-check that per-domain cert is no longer being used
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	  'sleep' => 1,
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Turn per-service certs back on again, so we can test deletion
+	{ 'command' => 'modify-domain.pl',
+          'args' => [ [ 'domain', $test_domain ],
+		      [ 'allocate-ip' ] ],
+	},
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 # Shared IP address tests
 $shared_tests = [
 	# Allocate a shared IP
@@ -5206,7 +5386,6 @@ $shared_tests = [
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'logrotate' ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test shared home page' ],
 		      @create_args, ],
         },
@@ -5265,7 +5444,6 @@ $wildcard_tests = [
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
 		      [ 'logrotate' ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared home page' ],
 		      @create_args, ],
         },
@@ -5292,7 +5470,6 @@ $wildcard_tests = [
 	 	      [ 'logrotate' ],
 		      [ 'parent', $test_domain ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared sub-domain home page' ],
 		      @create_args, ],
         },
@@ -5320,7 +5497,6 @@ $wildcard_tests = [
 		      [ 'logrotate' ],
 		      [ 'parent', $test_domain ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared clash' ],
 		      [ 'skip-warnings' ],
 		      @create_args, ],
@@ -5347,7 +5523,6 @@ $wildcard_tests = [
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'logrotate' ],
 		      [ 'parent', $test_domain ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared sub-domain 2' ],
 		      @create_args, ],
         },
@@ -5366,7 +5541,6 @@ $wildcard_tests = [
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'logrotate' ],
 		      [ 'parent', $test_domain ],
 		      [ 'shared-ip', '$SHARED_IP' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test SSL shared clash' ],
 		      @create_args, ],
         },
@@ -5414,7 +5588,6 @@ $parallel_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'mail' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test serial home page' ],
 		      @create_args, ],
         },
@@ -5426,7 +5599,6 @@ $parallel_tests = [
 		      [ 'parent', $test_domain ],
 		      [ 'dir' ], [ $web ], [ 'dns' ],
 		      [ 'mail' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test parallel 1 home page' ],
 		      @create_args, ],
 	  'background' => 1,
@@ -5437,7 +5609,6 @@ $parallel_tests = [
 		      [ 'parent', $test_domain ],
 		      [ 'dir' ], [ $web ], [ 'dns' ],
 		      [ 'mail' ], [ 'mysql' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test parallel 2 home page' ],
 		      @create_args, ],
 	  'background' => 2,
@@ -5627,7 +5798,6 @@ $plugin_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -5746,7 +5916,6 @@ $web_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test web page' ],
 		      @create_args, ],
 	},
@@ -5980,7 +6149,6 @@ $ip6_tests = [
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'logrotate' ],
 		      [ 'allocate-ip6' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test IPv6 home page' ],
 		      @create_args, ],
 	},
@@ -6058,7 +6226,6 @@ $ip6_tests = [
 		      [ 'desc', 'Test IPv6 sub-domain' ],
 		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'logrotate' ],
 		      [ 'default-ip6' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test IPv6 sub-domain home page' ],
 		      @create_args, ],
 	},
@@ -6102,7 +6269,6 @@ $webrename_tests = [
 		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( [ 'virtualmin-awstats' ] ) : ( ),
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
 	},
@@ -6217,7 +6383,6 @@ $rename_tests = [
 		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( [ 'virtualmin-awstats' ] ) : ( ),
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
 	},
@@ -6331,7 +6496,6 @@ $bw_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test bandwidth page' ],
 		      @create_args, ],
 	},
@@ -6511,7 +6675,6 @@ $quota_tests = [
 		      [ 'uquota', 10*$blocks_per_mb ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test quota page' ],
 		      (grep { $_->[0] ne 'limits-from-plan' } @create_args), ],
 	},
@@ -6813,7 +6976,6 @@ $redirect_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Non-redirected web page' ],
 		      @create_args, ],
 	},
@@ -6947,7 +7109,6 @@ $admin_tests = [
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
 		      [ 'webmin' ], [ 'mail' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test web page' ],
 		      @create_args, ],
 	},
@@ -7191,7 +7352,6 @@ $clone_tests = [
 		      [ 'mysql' ], [ 'logrotate' ], [ 'webmin' ], [ 'spam' ],
 		      [ 'virus' ], [ $ssl ],
 		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test source page' ],
 		      @create_args, ],
         },
@@ -7251,6 +7411,7 @@ $clone_tests = [
 		      [ 'type', 'phpmyadmin' ],
 		      [ 'path', '/phpmyadmin' ],
 		      [ 'version', '3.5.8.2' ] ],
+	  'antigrep' => 'partially complete',
 	},
 
 	# Create a dummy .htaccess file with a path
@@ -7288,7 +7449,6 @@ $clone_tests = [
 	# Force change web content
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain', $test_clone_domain ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test clone page' ] ],
 	},
 
@@ -7432,7 +7592,6 @@ $clonesub_tests = [
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -7448,7 +7607,6 @@ $clonesub_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      [ 'spam' ], [ 'virus' ], [ $ssl ],
 		      [ 'allocate-ip' ], [ 'allocate-ip6' ],
-                      [ 'style' => 'construction' ],
                       [ 'content' => 'Test source page' ],
 		      @create_args, ],
 	},
@@ -7522,7 +7680,6 @@ $clonesub_tests = [
 	# Force change web content
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain', $test_clone_domain ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test clone page' ] ],
 	},
 
@@ -7628,7 +7785,6 @@ $hashpass_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -7834,7 +7990,6 @@ $hashpass_tests = [
 		      [ 'hashpass' ],
 		      [ 'dir' ], [ 'unix' ], [ 'mysql' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -7888,7 +8043,6 @@ $ipbackup_tests = [
 		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'webmin' ], [ 'logrotate' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -7902,7 +8056,6 @@ $ipbackup_tests = [
 		      [ 'dir' ], [ $web ], [ 'logrotate' ], [ 'dns' ],
 		      [ 'mail' ], [ $ssl ],
 		      [ 'allocate-ip' ],
-		      [ 'style' => 'construction' ],
 		      [ 'content' => 'Test sub-home page' ],
 		      @create_args, ],
 	},
@@ -8219,6 +8372,7 @@ $alltests = { '_config' => $_config_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
+	      'sslserv' => $sslserv_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
 	      'parallel' => $parallel_tests,

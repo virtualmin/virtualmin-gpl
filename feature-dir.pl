@@ -1046,18 +1046,51 @@ else {
 }
 
 # create_index_content(&domain, content)
-# Create an index.html file containing the given text
+# Copy default content files to the domain's HTML directory
 sub create_index_content
 {
 local ($d, $content) = @_;
+
+# Remove any existing index.* files that might be used instead
 local $dest = &public_html_dir($d);
 local @indexes = grep { -f $_ } glob("$dest/index.*");
 if (@indexes) {
 	&unlink_file(@indexes);
 	}
-&open_tempfile_as_domain_user($d, DESTOUT, ">$dest/index.html");
-&print_tempfile(DESTOUT, $content);
-&close_tempfile_as_domain_user($d, DESTOUT);
+
+# Find all the files to copy using a stack
+my @srcs = ( $default_content_dir );
+while(@srcs) {
+	my @newsrcs;
+	foreach my $s (@srcs) {
+		foreach my $f (glob("$s/*")) {
+			next if ($f =~ /^\./);
+			my $rf = $f;
+			$rf =~ s/^\Q$default_content_dir\E\///;
+			if (-d $f) {
+				&make_dir_as_domain_user($d, $dest."/".$rf, 0755);
+				push(@newsrcs, $f);
+				}
+			else {
+				my $data = &read_file_contents($f);
+				&open_tempfile_as_domain_user(
+					$d, DATA, ">".$dest."/".$rf);
+				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
+					local %hash = %$d;
+					if ($content) {
+						$hash{'TMPLTCONTENT'} = $content;
+						$hash{'TMPLTCONTENT'} =~ s/\n/<br>\n/g;
+						}
+					%hash = populate_default_index_page(%hash);
+					$data = &substitute_virtualmin_template($data, \%hash);
+					}
+				&print_tempfile(DATA, $data);
+				&close_tempfile_as_domain_user($d, DATA);
+				}
+			}
+		}
+	@srcs = @newsrcs;
+	}
 }
 
 # remote_dir(&domain)

@@ -190,11 +190,11 @@ return grep { $_->{'from'} =~ /\@(\S+)$/ && lc($1) eq lc($d->{'dom'}) &&
 	      !$ignore{lc($_->{'from'})} } @virts;
 }
 
-# setup_mail(&domain, [no-aliases])
+# setup_mail(&domain, [no-aliases], [leave-dns])
 # Adds a domain to the list of those accepted by the mail system
 sub setup_mail
 {
-local ($d, $noaliases) = @_;
+local ($d, $noaliases, $leave_dns) = @_;
 &$first_print($text{'setup_doms'});
 &obtain_lock_mail($d);
 &complete_domain($d);
@@ -366,7 +366,7 @@ if (!$d->{'alias'} && !$d->{'aliasmail'}) {
 	}
 
 # Add domain to DKIM list
-&update_dkim_domains($d, 'setup');
+&update_dkim_domains($d, 'setup', $leave_dns);
 
 # Setup sender-dependent outgoing IP
 if ($supports_dependent && $d->{'virt'} && $config{'dependent_mail'}) {
@@ -387,11 +387,11 @@ if (!$d->{'creating'} && $config{'mail_autoconfig'} &&
 return 1;
 }
 
-# delete_mail(&domain, [preserve-remote], [leave-aliases])
+# delete_mail(&domain, [preserve-remote], [leave-aliases], [leave-dns])
 # Removes a domain from the list of those accepted by the mail system
 sub delete_mail
 {
-local ($d, $preserve, $leave_aliases) = @_;
+local ($d, $preserve, $leave_aliases, $leave_dns) = @_;
 
 &$first_print($text{'delete_doms'});
 &obtain_lock_mail($d);
@@ -552,7 +552,7 @@ if ($supports_dependent) {
 &delete_everyone_file($d);
 
 # Remove domain from DKIM list
-&update_dkim_domains($d, 'delete');
+&update_dkim_domains($d, 'delete', $leave_dns);
 
 # Remove secondary virtusers from slaves
 &sync_secondary_virtusers($d);
@@ -886,8 +886,8 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 	if ($supports_bcc == 2) {
 		$oldrbcc = &get_domain_recipient_bcc($_[1]);
 		}
-	&delete_mail($_[1], 0, 1);
-	&setup_mail($_[0], 1);
+	&delete_mail($_[1], 0, 1, 1);
+	&setup_mail($_[0], 1, 1);
 	if ($supports_bcc) {
 		$oldbcc =~ s/\Q$_[1]->{'dom'}\E/$_[0]->{'dom'}/g;
 		&save_domain_sender_bcc($_[0], $oldbcc);
@@ -5810,15 +5810,11 @@ local ($d) = @_;
 return ( "autoconfig.".$d->{'dom'}, "autodiscover.".$d->{'dom'} );
 }
 
-# enable_email_autoconfig(&domain)
-# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
-# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
-# automatic configuration for that domain
-sub enable_email_autoconfig
+# get_email_autoconfig_imap(&domain)
+# Returns the IMAP host, port, type, ssl-flag and encryption type. Also returns
+# the POP3 port and encryption type.
+sub get_email_autoconfig_imap
 {
-local ($d) = @_;
-local @autoconfig = &get_autoconfig_hostname($d);
-
 # Work out IMAP server port and mode
 local $imap_host = "mail.$d->{'dom'}";
 local $imap_port = 143;
@@ -5852,9 +5848,17 @@ if (&foreign_installed("dovecot")) {
 		$imap_enc = "password-encrypted";
 		}
 	}
+return ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
+	$pop3_port, $pop3_enc);
+}
 
-# Work out SMTP server port and mode
-local $smtp_host = $d->{'dom'};
+# get_email_autoconfig_smtp(&domain)
+# Returns the SMTP
+sub get_email_autoconfig_smtp
+{
+local ($d) = @_;
+
+local $smtp_host = "mail.$d->{'dom'}";
 local $smtp_port = 25;
 local $smtp_type = "plain";
 local $smtp_ssl = "no";
@@ -5867,7 +5871,7 @@ if ($config{'mail_system'} == 0) {
 				     $_->{'enabled'} } @$master;
 	if ($submission) {
 		$smtp_port = 587;
-		if ($submission->{'command'} =~ /smtpd_tls_security_level=(encrypt|may)/) {
+		if ($submission->{'command'} =~ /smtpd_sasl_auth_enable=(yes)/) {
 			$smtp_type = "STARTTLS";
 			$smtp_ssl = "yes";
 			}
@@ -5890,6 +5894,23 @@ elsif ($config{'mail_system'} == 1) {
 			}
 		}
 	}
+return ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc);
+}
+
+# enable_email_autoconfig(&domain)
+# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
+# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
+# automatic configuration for that domain
+sub enable_email_autoconfig
+{
+local ($d) = @_;
+local @autoconfig = &get_autoconfig_hostname($d);
+
+# Work out mail server ports and modes
+local ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
+       $pop3_port, $pop3_enc) = &get_email_autoconfig_imap($d);
+local ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc) =
+      &get_email_autoconfig_smtp($d);
 
 # Create CGI that outputs the correct XML for the domain
 local $cgidir = &cgi_bin_dir($d);

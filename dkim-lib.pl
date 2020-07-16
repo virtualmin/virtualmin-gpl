@@ -848,11 +848,11 @@ my $init = &get_dkim_init_name();
 return 1;
 }
 
-# update_dkim_domains(&domain, action)
+# update_dkim_domains(&domain, action, [no-dns])
 # Updates the list of domains to sign mail for, if needed
 sub update_dkim_domains
 {
-my ($d, $action) = @_;
+my ($d, $action, $nodns) = @_;
 return if (&check_dkim());
 &lock_file(&get_dkim_config_file());
 my $dkim = &get_dkim_config();
@@ -873,7 +873,7 @@ my %done;
 &unlock_file(&get_dkim_config_file());
 
 # Add or remove DNS records
-if ($d->{'dns'}) {
+if ($d->{'dns'} && !$nodns) {
 	if ($action eq 'setup' || $action eq 'modify') {
 		&add_dkim_dns_records([ $d ], $dkim);
 		}
@@ -1331,6 +1331,14 @@ elsif (&get_dkim_type() eq 'gentoo') {
 elsif (&get_dkim_type() eq 'freebsd') {
 	&set_ownership_permissions("opendkim", undef, 0700, $keyfile);
 	}
+}
+
+# get_default_dkim_selector()
+# Returns a default selector based on the current month and year
+sub get_default_dkim_selector
+{
+my @tm = localtime(time());
+return sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
 }
 
 1;

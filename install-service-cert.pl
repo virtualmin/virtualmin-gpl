@@ -71,7 +71,7 @@ $d || &usage("No virtual server named $dname found");
 @services || &usage("No services to copy the cert to specified");
 
 # Do the specified services exist?
-%svcnames = map { $_, 1 } &list_service_ssl_cert_types();
+%svcnames = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
 foreach my $s (@services) {
 	$svcnames{$s} || &usage("Invalid service $s. Valid services are ".
 				join(" ", keys %svcnames));
@@ -79,6 +79,7 @@ foreach my $s (@services) {
 
 # Copy to each of them
 foreach my $s (@services) {
+	$svc = $svcnames{$s};
 	if ($add_global) {
 		&$first_print("Copying to service $s ..");
 		&$indent_print();
@@ -90,27 +91,30 @@ foreach my $s (@services) {
 	elsif ($add_domain) {
 		&$first_print("Copying to service $s for $d->{'dom'} ..");
 		$func = "sync_".$s."_ssl_cert";
-		if (defined(&$func)) {
+		if (!$svc->{'virt'} && !$svc->{'dom'}) {
+			&$second_print(".. service not supported");
+			}
+		elsif (!$svc->{'dom'} && !$d->{'virt'}) {
+			&$second_print(".. service not supported without a private IP");
+			}
+		else {
 			$ok = &$func($d, 1);
 			&$second_print($ok == 1 ? ".. done" :
 				       $ok == 0 ? ".. failed" :
 						  ".. not supported");
 			}
-		else {
-			&$second_print(".. service not supported");
-			}
 		}
 	elsif ($remove_domain) {
 		&$first_print("Removing from service $s for $d->{'dom'} ..");
 		$func = "sync_".$s."_ssl_cert";
-		if (defined(&$func)) {
+		if (!$svc->{'virt'} && !$svc->{'dom'}) {
+			&$second_print(".. service not supported");
+			}
+		else {
 			$ok = &$func($d, 0);
 			&$second_print($ok == 1 ? ".. done" :
 				       $ok == 0 ? ".. failed" :
 						  ".. not supported");
-			}
-		else {
-			&$second_print(".. service not supported");
 			}
 		&$second_print(".. done");
 		}

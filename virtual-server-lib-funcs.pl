@@ -15,7 +15,7 @@ if (!$virtual_server_root) {
 	$0 =~ /^(.*)\//;
 	$virtual_server_root = "$1/virtual-server";
 	}
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3", "styles",
+foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
@@ -6192,35 +6192,6 @@ if (-r $file."_unavail") {
 return 1;
 }
 
-# virtualmin_backup_styles(file, &vbs)
-# Create a tar file of the styles directory, and of the unavailable styles
-sub virtualmin_backup_styles
-{
-local ($file, $vbs) = @_;
-&$first_print($text{'backup_vstyles_doing'});
-&execute_command("cd $module_config_directory/styles && ".
-	         &make_tar_command("cf", quotemeta($file), "."));
-&copy_source_dest($styles_unavail_file, $file."_unavail");
-&$second_print($text{'setup_done'});
-return 1;
-}
-
-# virtualmin_restore_styles(file, &vbs)
-# Extract a tar file of all third-party styles
-sub virtualmin_restore_styles
-{
-local ($file, $vbs) = @_;
-&$first_print($text{'restore_vstyles_doing'});
-&make_dir("$module_config_directory/styles", 0755);
-&execute_command("cd $module_config_directory/styles && ".
-		 &make_tar_command("xf", quotemeta($file)));
-if (-r $file."_unavail") {
-	&copy_source_dest($file."_unavail", $styles_unavail_file);
-	}
-&$second_print($text{'setup_done'});
-return 1;
-}
-
 # virtualmin_backup_chroot(file, &vbs)
 # Create a file of FTP directory restrictions
 sub virtualmin_backup_chroot
@@ -6750,7 +6721,7 @@ sub free_ip_address
 {
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
-%taken = (%taken, &domain_ip_addresses());
+%taken = (%taken, &domain_ip_addresses(), &cloudmin_ip_addresses());
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, $rn);
@@ -6809,6 +6780,25 @@ local %taken;
 foreach my $d (&list_domains()) {
 	$taken{$d->{'ip'}} = 1 if ($d->{'virt'});
 	$taken{$d->{'ip6'}} = 1 if ($d->{'virt6'});
+	}
+return %taken;
+}
+
+# cloudmin_ip_addresses()
+# Returns a hash of IPs that are assigned to any Cloudmin servers (if installed)
+sub cloudmin_ip_addresses
+{
+local %taken;
+if (&foreign_installed("server-manager")) {
+	&foreign_require("server-manager");
+	foreach my $s (&server_manager::list_managed_servers()) {
+		foreach my $ip (&server_manager::get_server_ip($s)) {
+			$taken{$ip} = 1;
+			}
+		foreach my $ip (&server_manager::get_server_ip6($s)) {
+			$taken{$ip} = 1;
+			}
+		}
 	}
 return %taken;
 }
@@ -7916,8 +7906,11 @@ if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
-    !$dom->{'disabled'} && !$dom->{'alias'}) {
-	&create_initial_letsencrypt_cert($dom);
+    !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
+	my $info = &cert_info($dom);
+	if ($info->{'self'}) {
+		&create_initial_letsencrypt_cert($dom);
+		}
 	}
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
@@ -7983,6 +7976,7 @@ my @dnames = &get_hostnames_for_ssl($d);
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
 my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames);
 &after_letsencrypt_website($d, $before);
@@ -8000,12 +7994,9 @@ else {
 	$d->{'letsencrypt_renew'} ||= 2;
 	&save_domain($d);
 
-	if ($tmpl->{'web_dovecot_ssl'}) {
-		&sync_dovecot_ssl_cert($d, 1);
-		}
-	if ($tmpl->{'web_postfix_ssl'}) {
-		&sync_postfix_ssl_cert($d, 1);
-		}
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
+
 	&break_invalid_ssl_linkages($d);
 	&sync_domain_tlsa_records($d);
 	&release_lock_ssl($d);
@@ -8162,7 +8153,7 @@ foreach my $dd (@alldoms) {
 			}
 
 		# Take down IP
-		if ($dd->{'iface'}) {
+		if ($dd->{'virt'}) {
 			&try_function("virt", "delete_virt", $dd);
 			}
 		if ($dd->{'virt6'}) {
@@ -12297,7 +12288,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
-		       'reseller', 'notify', 'scripts', 'styles' )
+		       'reseller', 'notify', 'scripts', )
 		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
@@ -12337,7 +12328,6 @@ local %tmplcat = (
 	'resels' => 'setting',
 	'fields' => 'custom',
 	'links' => 'custom',
-	'styles' => 'custom',
 	'shells' => 'custom',
 	'chroot' => 'check',
 	'global' => 'custom',
@@ -12357,8 +12347,7 @@ local %nonew = ( 'history', 1,
 		 'provision', 1,
 	       );
 local %pro = ( 'resels', 1,
-	       'reseller', 1,
-	       'styles', 1 );
+	       'reseller', 1 );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
@@ -14180,6 +14169,11 @@ if (&domain_has_website()) {
 					next if ($pd);
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
+					# If returned "$t" is "127.0.0.1:9000", 
+					# then extract the port number
+					if ($t && $t =~ /\S+:(\d+)/) {
+						$t = $1;
+						}
 					if ($t && $t =~ /^\d+$/ && $used{$t}++) {
 						# Port is wrong!
 						&$second_print(&text('check_webphpfpmport', $conf->{'version'}, $t));
@@ -14722,8 +14716,9 @@ elsif ($config{'quotas'}) {
 						            $home_fstab);
 			$home_mtab->[4] &&= &quota::quota_now($home_mtab,
                                                               $home_fstab);
-			if (!($home_mtab->[4] % 2)) {
-				# User quotas are not active
+			if ($home_mtab->[4] != 3 && $home_mtab->[4] != 7) {
+				# User quotas are not active (we need 
+				# both user and group quotas being active)
 				$nohome++;
 				}
 			else {
@@ -14758,8 +14753,9 @@ elsif ($config{'quotas'}) {
                                         $mail_mtab, $mail_fstab);
 				$mail_mtab->[4] &&= &quota::quota_now(
 					$mail_mtab, $mail_fstab);
-				if (!$mail_mtab->[4]) {
-					# Mail user quotas are not active
+				if ($mail_mtab->[4] != 3 && $mail_mtab->[4] != 7) {
+					# Mail user quotas are not active (we need 
+					# both user and group quotas being active)
 					$nomail++;
 					}
 				if ($nohome) {
@@ -14993,10 +14989,16 @@ if ($virtualmin_pro &&
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
 		my $repo = "/etc/apt/sources.list";
+		my $repo_new = "/etc/apt/sources.list.d/virtualmin.list";
 		if (!-r $repo) {
 			&$second_print(&text('check_eaptrepofile', $repo));
 			}
 		else {
+			# If it's a newish install using new path
+			if (-r $repo_new) {
+				$repo = $repo_new;
+				}
+			
 			# File exists, but does it contain the right repo line?
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
@@ -15732,6 +15734,20 @@ if ($escape) {
 		}
 	}
 return &substitute_template($str, \%ghash);
+}
+
+# populate_default_index_page(string, &hash)
+# Replaces defaults for default/index.html 
+# template avoiding polluting context
+sub populate_default_index_page
+{
+	my (%h) = @_;
+	$h{'TMPLTTITLE'}		= $text{'deftmplt_under_construction'} if(!$h{'TMPLTTITLE'});
+	$h{'TMPLTERROR'}		= $text{'deftmplt_error'};
+	$h{'TMPLTSLOGAN'}		= $text{'deftmplt_slogan'};
+	$h{'TMPLTMADEWITH1'}	= $text{'deftmplt_made_with_love1'};
+	$h{'TMPLTMADEWITH2'}	= $text{'deftmplt_made_with_love2'};
+	return %h;
 }
 
 # absolute_domain_path(&domain, path)
@@ -17959,13 +17975,6 @@ sub list_script_plugins
 {
 &load_plugin_libraries();
 return grep { &plugin_defined($_, "scripts_list") } @plugins;
-}
-
-# Returns a list of all plugins that define content styles
-sub list_style_plugins
-{
-&load_plugin_libraries();
-return grep { &plugin_defined($_, "styles_list") } @plugins;
 }
 
 $done_virtual_server_lib_funcs = 1;
