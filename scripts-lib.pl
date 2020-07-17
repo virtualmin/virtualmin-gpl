@@ -1094,10 +1094,6 @@ foreach my $m (@mods) {
 							 $p =~ s/php5/php53/;
 						  ($p, "rh-".$p) } @vposs);
 				}
-			if ($software::update_system eq "apt" && $phpverall >= 7) {
-				# On Debian, sometimes the package is like php7.0-gd
-				push(@poss, "php".$phpverall."-".$m);
-				}
 			}
 		}
 	@poss = sort { $b cmp $a } @poss;
@@ -1105,8 +1101,10 @@ foreach my $m (@mods) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
 		$nodotverpkg =~ s/\.//;
-		my $success = $nodotverpkg =~ /^php$nodotphpvercurr/ || 
-					  $nodotverpkg !~ /php(\d)/;
+		
+		# We either need to check for success 
+		# exactly or not check it at all (permissive)
+		my $success = 1;
 		if (!@pinfo) {
 			# Not installed .. try to fetch it
 			&$first_print(&text('scripts_softwaremod',
