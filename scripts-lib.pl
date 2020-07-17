@@ -540,7 +540,7 @@ return &ui_select($name, $value,
 # message on failure.
 sub create_script_database
 {
-local ($d, $dbspec, $opts) = @_;
+my ($d, $dbspec, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 # Check limits (again)
