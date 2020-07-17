@@ -417,7 +417,7 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if ($content && !$d->{'alias'}) {
+	if (!$d->{'alias'} && $content) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
 		&create_index_content($d, 

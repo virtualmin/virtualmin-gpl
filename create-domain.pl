@@ -855,7 +855,7 @@ if ($fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-if (!$virtualmin_pro || defined($content)) {
+if (!$dom{'alias'} && (!$virtualmin_pro || defined($content))) {
 	# Just create virtualmin default index.html
 	&$first_print($text{'setup_contenting'});
 	&create_index_content(\%dom, 
