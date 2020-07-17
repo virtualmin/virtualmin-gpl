@@ -2592,7 +2592,7 @@ sub update_caa_record
 local ($d) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
-return undef if (&compare_version_numbers($bind8::version, "9.9.6") < 0);
+return undef if (&compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
 local $info = &cert_info($d);

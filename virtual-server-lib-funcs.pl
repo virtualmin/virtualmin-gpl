@@ -14716,7 +14716,7 @@ elsif ($config{'quotas'}) {
 						            $home_fstab);
 			$home_mtab->[4] &&= &quota::quota_now($home_mtab,
                                                               $home_fstab);
-			if ($home_mtab->[4] != 3) {
+			if ($home_mtab->[4] != 3 && $home_mtab->[4] != 7) {
 				# User quotas are not active (we need 
 				# both user and group quotas being active)
 				$nohome++;
@@ -14753,7 +14753,7 @@ elsif ($config{'quotas'}) {
                                         $mail_mtab, $mail_fstab);
 				$mail_mtab->[4] &&= &quota::quota_now(
 					$mail_mtab, $mail_fstab);
-				if ($mail_mtab->[4] != 3) {
+				if ($mail_mtab->[4] != 3 && $mail_mtab->[4] != 7) {
 					# Mail user quotas are not active (we need 
 					# both user and group quotas being active)
 					$nomail++;
@@ -14989,10 +14989,16 @@ if ($virtualmin_pro &&
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
 		my $repo = "/etc/apt/sources.list";
+		my $repo_new = "/etc/apt/sources.list.d/virtualmin.list";
 		if (!-r $repo) {
 			&$second_print(&text('check_eaptrepofile', $repo));
 			}
 		else {
+			# If it's a newish install using new path
+			if (-r $repo_new) {
+				$repo = $repo_new;
+				}
+			
 			# File exists, but does it contain the right repo line?
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;

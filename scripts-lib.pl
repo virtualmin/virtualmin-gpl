@@ -1045,57 +1045,69 @@ foreach my $m (@mods) {
 	# Check if the package is already installed
 	local $iok = 0;
 	local @poss;
-	local $fullphpver = &get_php_version($phpver, $d);
-	local $nodotphpver = $phpver;
-	$nodotphpver =~ s/\.//;
-	if ($software::update_system eq "csw") {
-		# On Solaris, packages are named like php52_mysql
-		@poss = ( "php".$nodotphpver."_".$m );
-		}
-	elsif ($software::update_system eq "ports") {
-		# On FreeBSD, names are like php52-mysql
-		@poss = ( "php".$nodotphpver."-".$m );
-		}
-	else {
-		@poss = ( "php".$nodotphpver."-".$m, "php-".$m );
-		if ($software::update_system eq "apt" &&
-		    $m eq "pdo_mysql") {
-			# On Debian, the pdo_mysql module is in the mysql module
-			push(@poss, "php".$nodotphpver."-mysql", "php-mysql");
+	local @allphps = map{ $_->[0] } list_available_php_versions($d);
+	local $phpvercurr = $phpver;
+	local $nodotphpvercurr = $phpvercurr;
+	$nodotphpvercurr =~ s/\.//;
+	foreach my $phpverall (@allphps) {
+		my $fullphpver = &get_php_version($phpverall, $d);
+		my $nodotphpver = $phpverall;
+		$nodotphpver =~ s/\.//;
+		my $phpverdistrobased = $software::update_system eq "apt" ? $phpverall : $nodotphpver;
+		if ($software::update_system eq "csw") {
+			# On Solaris, packages are named like php52_mysql
+			push(@poss, "php".$nodotphpver."_".$m);
 			}
-		elsif ($software::update_system eq "yum" &&
-		       ($m eq "domxml" || $m eq "dom") && $phpver >= 5) {
-			# On Redhat, the domxml module is in php-domxml
-			push(@poss, "php".$nodotphpver."-xml", "php-xml");
+		elsif ($software::update_system eq "ports") {
+			# On FreeBSD, names are like php52-mysql
+			push(@poss, "php".$nodotphpver."-".$m);
 			}
-		if ($phpver =~ /\./ && $software::update_system eq "yum") {
-			# PHP 5.3+ packages from software collections are
-			# named like php54-php-mysql or sometimes even
-			# php54-php-mysqlnd
-			unshift(@poss, "php".$nodotphpver."-php-".$m);
-			unshift(@poss, "rh-php".$nodotphpver."-php-".$m);
-			if ($m eq "mysql") {
-				unshift(@poss, "rh-php".$nodotphpver.
-					       "-php-mysqlnd");
+		else {
+			push(@poss, "php".$phpverdistrobased."-".$m, "php-".$m);
+			if ($software::update_system eq "apt" &&
+				$m eq "pdo_mysql") {
+				# On Debian, the pdo_mysql module is in the mysql module
+				push(@poss, "php".$phpverdistrobased."-mysql", "php-mysql");
+				}
+			elsif ($software::update_system eq "yum" &&
+				   ($m eq "domxml" || $m eq "dom") && $phpverall >= 5) {
+				# On Redhat, the domxml module is in php-domxml
+				push(@poss, "php".$nodotphpver."-xml", "php-xml");
+				}
+			if ($phpverall =~ /\./ && $software::update_system eq "yum") {
+				# PHP 5.3+ packages from software collections are
+				# named like php54-php-mysql or sometimes even
+				# php54-php-mysqlnd
+				unshift(@poss, "php".$nodotphpver."-php-".$m);
+				unshift(@poss, "rh-php".$nodotphpver."-php-".$m);
+				if ($m eq "mysql") {
+					unshift(@poss, "rh-php".$nodotphpver.
+							   "-php-mysqlnd");
+					}
+				}
+			elsif ($software::update_system eq "yum" &&
+				   $fullphpver =~ /^5\.3/) {
+				# If PHP 5.3 is being used, packages may start with
+				# php53- or rh-php53-
+				my @vposs = grep { /^php5-/ } @poss;
+				push(@poss, map { my $p = $_;
+							 $p =~ s/php5/php53/;
+						  ($p, "rh-".$p) } @vposs);
+				}
+			if ($software::update_system eq "apt" && $phpverall >= 7) {
+				# On Debian, sometimes the package is like php7.0-gd
+				push(@poss, "php".$phpverall."-".$m);
 				}
 			}
-		elsif ($software::update_system eq "yum" &&
-		       $fullphpver =~ /^5\.3/) {
-			# If PHP 5.3 is being used, packages may start with
-			# php53- or rh-php53-
-			my @vposs = grep { /^php5-/ } @poss;
-			push(@poss, map { my $p = $_;
-					     $p =~ s/php5/php53/;
-					  ($p, "rh-".$p) } @vposs);
-			}
-		if ($software::update_system eq "apt" && $phpver >= 7) {
-			# On Debian, sometimes the package is like php7.0-gd
-			push(@poss, "php".$phpver."-".$m);
-			}
 		}
+	@poss = sort { $b cmp $a } @poss;
 	foreach my $pkg (@poss) {
-		local @pinfo = &software::package_info($pkg);
-		if (!@pinfo || $pinfo[0] ne $pkg) {
+		my @pinfo = &software::package_info($pkg);
+		my $nodotverpkg = $pkg;
+		$nodotverpkg =~ s/\.//;
+		my $success = $nodotverpkg =~ /^php$nodotphpvercurr/ || 
+					  $nodotverpkg !~ /php(\d)/;
+		if (!@pinfo) {
 			# Not installed .. try to fetch it
 			&$first_print(&text('scripts_softwaremod',
 					    "<tt>$pkg</tt>"));
@@ -1123,15 +1135,15 @@ foreach my $m (@mods) {
 			if (@pinfo2 && $pinfo2[0] eq $newpkg) {
 				# Yep, it worked
 				&$second_print($text{'setup_done'});
-				$iok = 1;
-				push(@$installed, $m) if ($installed);
-				last;
+				
+				# Check for success
+				$iok = 1 if ($success);
+				push(@$installed, $m) if ($installed && $success);
 				}
 			}
 		else {
 			# Already installed .. we're done
-			$iok = 1;
-			last;
+			$iok = 1  if ($success);
 			}
 		}
 	if (!$iok) {
@@ -1140,7 +1152,6 @@ foreach my $m (@mods) {
 		if ($opt) { next; }
 		else { return 0; }
 		}
-
 	# Finally re-check to make sure it worked (but this is only possible
 	# in CGI mode)
 	GOTMODULE:
@@ -1271,14 +1282,25 @@ foreach my $m (@mods) {
 		local $mp = $m;
 		if ($software::config{'package_system'} eq 'rpm') {
 			# We can use RPM's tracking of perl dependencies
-			# to install the exact module
-			$pkg = "perl($mp)";
+			# to install the exact module.
+			# However, to make it work, we need to wrap pkg name in quotes,
+			# like dnf install 'perl(Email::Send)' which doesn't 	
+			# seem to be working correctly on underlying API.	
+			# Simply build a name for it on RHEL too	
+			$mp =~ s/::/\-/g;	
+			$pkg = "perl-$mp";
 			}
 		elsif ($software::config{'package_system'} eq 'debian') {
 			# Most Debian package perl modules are named
 			# like libfoo-bar-perl
 			if ($mp eq "Date::Format") {
 				$pkg = "libtimedate-perl";
+				}
+			elsif ($mp eq "Template::Toolkit") {	
+				$pkg = "libtemplate-perl";	
+				}	
+			elsif ($mp eq "DBD::SQLite") {	
+				$pkg = "libdbd-sqlite3-perl";	
 				}
 			else {
 				$mp = lc($mp);

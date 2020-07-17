@@ -476,8 +476,9 @@ if ($add_fwdto) {
 	}
 
 # Put default site content
-if ((!$in{'content_def'} || $in{'content_def'} == 2) &&
-	&domain_has_website(\%dom)) {
+if (!$dom{'alias'} &&
+	&domain_has_website(\%dom) &&
+	(!$in{'content_def'} || $in{'content_def'} == 2)) {
 	my $content = $in{'content'};
 	$content =~ s/\r//g;
 	$content =~ s/^\s+|\s+$//g;
