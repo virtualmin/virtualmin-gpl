@@ -859,8 +859,9 @@ return &indexof($mod, @mods) >= 0 ? 1 : 0;
 sub check_perl_module
 {
 local ($mod, $d) = @_;
-eval "use $mod";
-return $@ ? 0 : 1;
+local $perl = &get_perl_path();
+local $out = &backquote_command("$perl -e 'use $mod' 2>&1");
+return $? ? 0 : 1;
 }
 
 # check_python_module(mod, &domain)
