@@ -1098,8 +1098,10 @@ if (@$vbs) {
 	foreach my $v (@$vbs) {
 		local $vfile = "$backupdir/virtualmin_".$v;
 		local $vfunc = "virtualmin_backup_".$v;
-		local $ok = &$vfunc($vfile, $vbs);
-		$vcount++;
+		if (defined(&$vfunc)) {
+			&$vfunc($vfile, $vbs);
+			$vcount++;
+			}
 		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
@@ -2177,8 +2179,10 @@ if ($ok) {
 			local $vfile = "$restoredir/virtualmin_".$v;
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;
-				local $ok = &$vfunc($vfile, $vbs);
-				$vcount++;
+				if (defined(&$vfunc)) {
+					$ok = &$vfunc($vfile, $vbs);
+					$vcount++;
+					}
 				}
 			}
 		&$outdent_print();
