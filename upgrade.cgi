@@ -320,6 +320,9 @@ if ($errors) {
 	}
 else {
 	print "<b>$text{'upgrade_complete'}</b><p>\n";
+	if (defined(&theme_post_save_domains)) {
+		&theme_post_save_domains();
+		}
 	}
 
 &webmin_log("upgrade");
