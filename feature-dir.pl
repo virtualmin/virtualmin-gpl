@@ -1045,17 +1045,19 @@ else {
 	}
 }
 
-# create_index_content(&domain, content)
+# create_index_content(&domain, content, [overwrite])
 # Copy default content files to the domain's HTML directory
 sub create_index_content
 {
-local ($d, $content) = @_;
+local ($d, $content, $over) = @_;
 
 # Remove any existing index.* files that might be used instead
 local $dest = &public_html_dir($d);
-local @indexes = grep { -f $_ } glob("$dest/index.*");
-if (@indexes) {
-	&unlink_file(@indexes);
+if ($over) {
+	local @indexes = grep { -f $_ } glob("$dest/index.*");
+	if (@indexes) {
+		&unlink_file(@indexes);
+		}
 	}
 
 # Find all the files to copy using a stack
@@ -1073,8 +1075,10 @@ while(@srcs) {
 				}
 			else {
 				my $data = &read_file_contents($f);
+				my $destfile = $dest."/".$rf;
+				next if (-e $destfile && !$over);
 				&open_tempfile_as_domain_user(
-					$d, DATA, ">".$dest."/".$rf);
+					$d, DATA, ">".$destfile);
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
 					local %hash = %$d;
 					if ($content) {

@@ -421,7 +421,7 @@ foreach $d (@doms) {
 		# Just create index.html page with content
 		&$first_print($text{'setup_contenting'});
 		&create_index_content($d, 
-			$virtualmin_pro ? $content : "");
+			$virtualmin_pro ? $content : "", 1);
 		&$second_print($text{'setup_done'});
 		}
 

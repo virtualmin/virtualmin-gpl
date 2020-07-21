@@ -486,7 +486,7 @@ if (!$dom{'alias'} &&
 	# Copy default Virtualmin template
 	if (!$virtualmin_pro || $in{'content_def'} == 2) {
 		&$first_print($text{'setup_styleing'});
-		&create_index_content(\%dom, $content);
+		&create_index_content(\%dom, $content, 0);
 		&$second_print($text{'setup_done'});
 		}
 	
