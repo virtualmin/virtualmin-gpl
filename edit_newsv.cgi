@@ -117,7 +117,7 @@ if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	}
 
 # Check if spamd is running, if not offer to set it up
-if ($config{'virus'}) {
+if ($config{'spam'}) {
 	$ss = &check_spamd_status();
 	if ($ss != -1) {
 		if ($ss) {
