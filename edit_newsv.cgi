@@ -95,11 +95,19 @@ if ($config{'virus'}) {
 		}
 	}
 
+if (!$config{'spam'} && !$config{'virus'}) {
+		print &ui_table_row(undef, "<div style=\"text-align: center\">$text{'form_unavail'}</div>", 2);
+	}
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
-print &ui_hr();
-print &ui_buttons_start();
+my $ui_virus_spam_sect = (($config{'virus'} && !$config{'provision_virus_host'}) || 
+						   $config{'spam'});
+if ($ui_virus_spam_sect) {	
+	print &ui_hr();
+	print &ui_buttons_start();
+	}
 
 # Check if clamd is running, if not offer to set it up
 if ($config{'virus'} && !$config{'provision_virus_host'}) {
@@ -117,7 +125,7 @@ if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	}
 
 # Check if spamd is running, if not offer to set it up
-if ($config{'virus'}) {
+if ($config{'spam'}) {
 	$ss = &check_spamd_status();
 	if ($ss != -1) {
 		if ($ss) {
@@ -131,7 +139,7 @@ if ($config{'virus'}) {
 		}
 	}
 
-print &ui_buttons_end();
+print &ui_buttons_end() if ($ui_virus_spam_sect);
 
 &ui_print_footer("", $text{'index_return'});
 
