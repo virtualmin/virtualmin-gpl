@@ -566,6 +566,9 @@ if ($mode eq "fpm") {
 	&save_domain_php_mode($d, $mode);
 	}
 
+# Re-generate combined cert file in case cert changed
+&sync_combined_ssl_cert($d);
+
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_apache, &ssl_needs_apache_restart());
