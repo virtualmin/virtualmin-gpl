@@ -17942,25 +17942,37 @@ return $loaded;
 # fix GRUB.
 sub needs_xfs_quota_fix
 {
-return 0 if ($gconfig{'os_type'} !~ /-linux$/);	# Some other OS
-return 0 if (!$config{'quotas'});		# Quotas not even in use
-return 0 if ($config{'quota_commands'});	# Using external commands
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);				# Some other OS
+return 0 if (!$config{'quotas'});							# Quotas not even in use
+return 0 if ($config{'quota_commands'});					# Using external commands
 &require_useradmin();
-return 0 if (!$home_base);			# Don't know base dir
-return 0 if (&running_in_zone());		# Zones have no quotas
-local ($home_mtab, $home_fstab) = &mount_point($home_base);
-return 0 if (!$home_mtab || !$home_fstab);	# No mount found?
-return 0 if ($home_mtab->[2] ne "xfs");		# Other FS type
-return 0 if ($home_mtab->[0] ne "/");		# /home is not on the / FS
-return 0 if (!&quota::quota_can($home_mtab,	# Not enabled in fstab
+return 0 if (!$home_base);									# Don't know base dir
+return 0 if (&running_in_zone());							# Zones have no quotas
+my ($home_mtab, $home_fstab) = &mount_point($home_base);
+return 0 if (!$home_mtab || !$home_fstab);					# No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");						# Other FS type
+return 0 if ($home_mtab->[0] ne "/");						# /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,					# Not enabled in fstab
 				$home_fstab));
-local $now = &quota::quota_now($home_mtab, $home_fstab);
-$now -= 4 if ($now >= 4);			# Ignore XFS always bit
-return 0 if ($now);				# Already enabled in mtab
+my $now = &quota::quota_now($home_mtab, $home_fstab);
+$now -= 4 if ($now >= 4);									# Ignore XFS always bit
+return 0 if ($now);											# Already enabled in mtab
 
 # At this point, we are definite in a bad state
 my $grubfile = "/etc/default/grub";
 return 3 if (!-r $grubfile);
+
+# Check if grub default config was edited after reboot
+if (&foreign_check("webmin")) {
+    &foreign_require("webmin");
+    my $uptime     = webmin::get_system_uptime();
+    my $lastreboot = $uptime ? time() - $uptime : undef;
+    if ($lastreboot) {
+        my @grubfile_stat = stat($grubfile);
+        return 0 if ($lastreboot > $grubfile_stat[9]);
+    	}
+	}
+
 my %grub;
 &read_env_file($grubfile, \%grub);
 return 3 if (!$grub{'GRUB_CMDLINE_LINUX'});
