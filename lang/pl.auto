@@ -4931,7 +4931,6 @@ wizard_hashpass_mode=Tryb przechowywania hasła
 wizard_hashpass_mode1=Przechowuj tylko hashowane hasła
 wizard_hashpass_mode0=Przechowuj hasła w postaci zwykłego tekstu
 wizard_hashpass_warn=Ostrzeżenie - w przypadku użycia zaszyfrowanych haseł odzyskiwanie hasła dla serwerów wirtualnych nie będzie już możliwe. Ponadto hasło MySQL dla nowych serwerów będzie inne niż hasło administracyjne i będzie generowane losowo.
-wizard_egrubline=W pliku konfiguracyjnym GRUB brakuje wiersza $1 !
 backuplog_ecannot=Nie możesz przeglądać dzienników kopii zapasowych Virtualmin
 backuplog_search=Znajdź dzienniki pasujące
 backuplog_ok=Szukaj

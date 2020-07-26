@@ -10871,17 +10871,6 @@ if ($config{'allow_symlinks'} eq '') {
 		}
 	}
 
-# Check if a reboot is needed to enable Xen quotas on /
-if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
-	my $alert_text;
-	$alert_text .= "<b>$text{'licence_xfsreboot'}</b><p>\n";
-	$alert_text .= &ui_form_start(
-		"$gconfig{'webprefix'}/init/reboot.cgi");
-	$alert_text .= &ui_submit($text{'licence_xfsrebootok'});
-	$alert_text .= &ui_form_end();
-	push(@rv, $alert_text);
-	}
-
 # Suggest that the user switch themes to authentic
 my @themes = &list_themes();
 my ($theme) = grep { $_->{'dir'} eq $recommended_theme } @themes;
@@ -14780,7 +14769,18 @@ elsif ($config{'quotas'}) {
 			}
 		}
 	if ($qerr) {
-		&$second_print("<b>$qerr</b>");
+		# Check if a reboot is needed to enable XFS quotas on /
+		if (&needs_xfs_quota_fix() == 1) {
+			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
+			if (&foreign_available("init")) {
+				$reboot_msg .= ui_link("$gconfig{'webprefix'}/init/reboot.cgi", $text{'licence_xfsrebootok'});
+				$reboot_msg .= ".";
+				}
+			&$second_print($reboot_msg);
+			}
+			else {
+				&$second_print("<b>$qerr</b>");
+				}
 		}
 	elsif (!$config{'group_quotas'}) {
 		&$second_print($text{'check_nogroup'});
@@ -17933,6 +17933,44 @@ foreach my $pname (@load) {
 		}
 	}
 return $loaded;
+}
+
+# needs_xfs_quota_fix()
+# Checks if quotas are enabled on the /home filesystem in /etc/fstab but
+# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is
+# needed, 2 if GRUB needs to be configured, or 3 if we don't know how to
+# fix GRUB.
+sub needs_xfs_quota_fix
+{
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);	# Some other OS
+return 0 if (!$config{'quotas'});		# Quotas not even in use
+return 0 if ($config{'quota_commands'});	# Using external commands
+&require_useradmin();
+return 0 if (!$home_base);			# Don't know base dir
+return 0 if (&running_in_zone());		# Zones have no quotas
+local ($home_mtab, $home_fstab) = &mount_point($home_base);
+return 0 if (!$home_mtab || !$home_fstab);	# No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");		# Other FS type
+return 0 if ($home_mtab->[0] ne "/");		# /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,	# Not enabled in fstab
+				$home_fstab));
+local $now = &quota::quota_now($home_mtab, $home_fstab);
+$now -= 4 if ($now >= 4);			# Ignore XFS always bit
+return 0 if ($now);				# Already enabled in mtab
+
+# At this point, we are definite in a bad state
+my $grubfile = "/etc/default/grub";
+return 3 if (!-r $grubfile);
+my %grub;
+&read_env_file($grubfile, \%grub);
+return 3 if (!$grub{'GRUB_CMDLINE_LINUX'});
+
+# Enabled already, so just need to reboot
+return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
+	     $grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*gquota,uquota/);
+
+# Otherwise, flags need adding
+return 2;
 }
 
 # Returns a list of all plugins that define features
