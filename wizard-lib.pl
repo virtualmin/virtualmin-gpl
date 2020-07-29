@@ -442,11 +442,15 @@ if (-r $mysql::config{'my_cnf'}) {
 				}
 			}
 		}
+	my $def_msg;
+	if ($currt) {
+		$def_msg = $text{"wizard_mysize_$currt"};
+		($def_msg) = $def_msg =~ /(.*?\(\d+.+?\S*\))/;
+		}
 	print &ui_table_row($text{'wizard_mysize_type'},
 		    &ui_radio_table("mysize", $mysize,
 		      [ [ "", $text{'wizard_mysize_def'}.
-			      ($currt ? " - ".&text('wizard_mysize_deft',
-				$text{'wizard_mysize_'.$currt}) : "") ],
+			      ($def_msg ? " - $def_msg" : "") ],
 			map { [ $_, $text{'wizard_mysize_'.$_}.
 			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
 			      ] } @types ]));

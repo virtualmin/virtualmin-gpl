@@ -2597,6 +2597,8 @@ my $myver = &mysql::get_mysql_version();
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
 my $tc = &compare_versions($myver, "5.7") < 0;
+my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $myver !~ /maria/i;
+my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
 		[ "max_allowed_packet", "1M" ],
@@ -2637,13 +2639,13 @@ elsif ($size eq "medium") {
 
 		[ "key_buffer_size", "20M", "isamchk" ],
 		[ "sort_buffer_size", "20M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "20M", "myisamchk" ],
 		[ "sort_buffer_size", "20M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
@@ -2656,18 +2658,18 @@ elsif ($size eq "large") {
 		[ "myisam_sort_buffer_size", "64M" ],
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
-		[ "query_cache_size", "16M" ],
+		[ "query_cache_size", $mysql8 ? undef : "16M" ],
 		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "128M", "isamchk" ],
 		[ "sort_buffer_size", "128M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "128M", "myisamchk" ],
 		[ "sort_buffer_size", "128M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
@@ -2680,18 +2682,18 @@ elsif ($size eq "huge") {
 		[ "myisam_sort_buffer_size", "64M" ],
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
-		[ "query_cache_size", "32M" ],
+		[ "query_cache_size", $mysql8 ? undef : "32M" ],
 		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "256M", "isamchk" ],
 		[ "sort_buffer_size", "256M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "256M", "myisamchk" ],
 		[ "sort_buffer_size", "256M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 return ( );
 }
