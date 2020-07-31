@@ -2593,11 +2593,11 @@ sub list_mysql_size_settings
 {
 local ($size) = @_;
 &require_mysql();
-my $myver = &mysql::get_mysql_version();
+my ($myver, $variant) = &get_dom_remote_mysql_version();
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
 my $tc = &compare_versions($myver, "5.7") < 0;
-my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $myver !~ /maria/i;
+my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $variant ne "mariadb";
 my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
@@ -3210,7 +3210,7 @@ foreach my $mm (&list_remote_mysql_modules()) {
 return undef;
 }
 
-# require_dom_mysql(&domain)
+# require_dom_mysql([&domain])
 # Finds and loads the MySQL module for a domain
 sub require_dom_mysql
 {
@@ -3284,7 +3284,7 @@ my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "list_databases");
 }
 
-# get_dom_remote_mysql_version(&domain)
+# get_dom_remote_mysql_version([&domain])
 # Returns the MySQL server version for a domain
 sub get_dom_remote_mysql_version
 {
