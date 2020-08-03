@@ -2591,9 +2591,9 @@ return ("small", "medium", "large", "huge");
 # diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
 sub list_mysql_size_settings
 {
-local ($size) = @_;
+local ($size, $myver, $variant) = @_;
 &require_mysql();
-my ($myver, $variant) = &get_dom_remote_mysql_version();
+($myver, $variant) = &get_dom_remote_mysql_version() if (!$myver && !$variant);
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
 my $tc = &compare_versions($myver, "5.7") < 0;

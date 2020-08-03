@@ -468,7 +468,11 @@ local ($in) = @_;
 if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
+	my ($myver, $variant);
 	if ($running) {
+
+		# Get MySQL/MariaDB version and variant before stopping it
+		($myver, $variant) = &get_dom_remote_mysql_version();
 		&mysql::stop_mysql();
 		}
 
@@ -482,7 +486,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&copy_source_dest($file, $temp."_".$bf);
 		&lock_file($file);
 		}
-	foreach my $s (&list_mysql_size_settings($in->{'mysize'})) {
+	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
 				    $_->{'members'} } @$conf;
