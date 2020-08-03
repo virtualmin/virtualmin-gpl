@@ -3298,16 +3298,21 @@ else {
 	eval {
 		local $main::error_must_die = 1;
 		$rv = &foreign_call($mod, "get_remote_mysql_version");
+		$rv = undef if ($rv < 0);
 		};
 	$rv ||= eval $mod.'::mysql_version';
 	$rv ||= $mysql::mysql_version;
 	$get_dom_remote_mysql_version_cache{$mod} = $rv;
 	}
 my $variant = "mysql";
-my ($ver, $variant_) = $rv =~ /^([0-9\.]+)\-(.*)/;
+my ($ver, $variant_);
+if ($rv =~ /^([0-9\.]+)\-(.*)/) {
+	($ver, $variant_) = ($1, $2);
+	}
 if ($ver && $variant_ && 
-	($rv !~ /ubuntu/i || ($rv =~ /ubuntu/i && $rv =~ /mariadb/i && $ver > 10))) {
-	$rv      = $ver;
+    ($rv !~ /ubuntu/i || ($rv =~ /ubuntu/i && $rv =~ /mariadb/i && $ver > 10))) {
+	# Check if this looks like MariaDB
+	$rv = $ver;
 	$variant = $variant_;
 	if ($variant =~ /mariadb/i) {
 		$variant = "mariadb";
