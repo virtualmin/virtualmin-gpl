@@ -68,9 +68,10 @@ while(@ARGV > 0) {
 	}
 
 # Find the domains
-$domain || &usage("No domain to move specified");
+$domain || &usage("No domain to move specified.");
+&usage("A server cannot be moved under itself.") if ($domain eq $parentdomain);
 $parentdomain || $newuser ||
-	&usage("No destination domain or new username specified");
+	&usage("No destination domain or new username specified.");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 if ($parentdomain) {
