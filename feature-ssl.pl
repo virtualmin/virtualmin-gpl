@@ -1831,6 +1831,7 @@ if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
 
+undef(@dovecot::get_config_cache);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
