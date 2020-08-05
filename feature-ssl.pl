@@ -1831,7 +1831,6 @@ if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
 
-undef(@dovecot::get_config_cache);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
@@ -1993,18 +1992,11 @@ else {
 		}
 	elsif ($enable && @myloc) {
 		# May need to update paths
-		foreach my $l (@myloc) {
-			&dovecot::save_directive($l->{'members'},
-                                        "ssl_cert", "<".$d->{'ssl_combined'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($l->{'members'},
-                                        "ssl_key", "<".$d->{'ssl_key'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($l->{'members'},
-					"ssl_ca", undef,
-					$l->{'name'}, $l->{'value'});
-			}
-		&flush_file_lines($l->{'file'}, undef, 1);
+		# The safest is to remove the block and 
+		# then re-add a new one, containing new 
+		# format like dom.com and *.dom.com
+		sync_dovecot_ssl_cert($d, 0);
+		sync_dovecot_ssl_cert($d, 1);
 		}
 	else {
 		# Nothing to add or remove
