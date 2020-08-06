@@ -53,12 +53,16 @@ if (!$already) {
 		return &text('jailkit_emount', $err);
 		}
 	}
-foreach $f (&mount::files_to_lock()) { &lock_file($f); }
+foreach $f (&mount::files_to_lock()) {
+	&lock_file($f);
+	}
 my ($already) = grep { $_->[0] eq $jailhome } &mount::list_mounts();
 if (!$already) {
 	&mount::create_mount($jailhome, $d->{'home'}, "bind", "defaults");
 	}
-foreach $f (&mount::files_to_lock()) { &unlock_file($f); }
+foreach $f (&mount::files_to_lock()) {
+	&unlock_file($f);
+	}
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
@@ -233,7 +237,10 @@ foreach my $g (@gcreate) {
 sub copy_jailkit_files
 {
 my ($d, $dir) = @_;
+$d->{'jail'} || return $text{'jailkit_eenabled'};
 $dir ||= &domain_jailkit_dir($d);
+$dir || return $text{'jailkit_edir'};
+-d $dir || return &text('jailkit_edir2', "<tt>".&html_escape($dir)."</tt>");
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php",
 		  split(/\s+/, $config{'jail_sects'})) {
