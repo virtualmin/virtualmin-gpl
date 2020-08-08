@@ -855,11 +855,10 @@ if ($fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-if (!$dom{'alias'} && (!$virtualmin_pro || defined($content))) {
+if (!$dom{'alias'} && &domain_has_website(\%dom) && defined($content)) {
 	# Just create virtualmin default index.html
 	&$first_print($text{'setup_contenting'});
-	&create_index_content(\%dom, 
-		$virtualmin_pro ? $content : "", 0);
+	&create_index_content(\%dom, $content, 0);
 	&$second_print($text{'setup_done'});
 	}
 

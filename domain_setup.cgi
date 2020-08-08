@@ -477,23 +477,23 @@ if ($add_fwdto) {
 
 # Put default site content
 if (!$dom{'alias'} &&
-	&domain_has_website(\%dom) &&
-	(!$in{'content_def'} || $in{'content_def'} == 2)) {
+    &domain_has_website(\%dom) &&
+    ($in{'content_def'} == 0 || $in{'content_def'} == 2)) {
 	my $content = $in{'content'};
 	$content =~ s/\r//g;
-	$content =~ s/^\s+|\s+$//g;
+	$content =~ s/^\s+//g;
+	$content =~ s/\s+$//g;
 
 	# Copy default Virtualmin template
-	if (!$virtualmin_pro || $in{'content_def'} == 2) {
+	if ($in{'content_def'} == 2) {
 		&$first_print($text{'setup_styleing'});
 		&create_index_content(\%dom, $content, 0);
 		&$second_print($text{'setup_done'});
 		}
-	
-	# Create index.html file 
 	else {
+		# Create index.html file 
 		&$first_print($text{'setup_contenting'});
-		my $home = public_html_dir(\%dom);
+		my $home = &public_html_dir(\%dom);
 		&open_tempfile_as_domain_user(
 			\%dom, DATA, ">$home/index.html");
 		$content =~ s/\n/<br>\n/g if ($content);
