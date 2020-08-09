@@ -113,6 +113,7 @@ $d || &usage("No virtual server named $dname found");
 
 if ($self) {
 	# Break SSL linkages that no longer work with this cert
+	@beforecerts = &get_all_domain_service_ssl_certs($d);
 	local $newcert = { 'cn' => $subject{'cn'} || "*.$d->{'dom'}",
 			   'alt' => \@alts };
 	&break_invalid_ssl_linkages($d, $newcert);
@@ -153,6 +154,9 @@ if ($self) {
 	&release_lock_ssl($d);
 	&unlock_file($d->{'ssl_key'});
 	&unlock_file($d->{'ssl_cert'});
+
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 	# Remove SSL passphrase on other domains sharing the cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
