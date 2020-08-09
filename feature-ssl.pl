@@ -1820,6 +1820,7 @@ my $ver = &dovecot::get_dovecot_version();
 return -1 if ($ver < 2);
 
 # Check if dovecot is using SSL globally
+undef(@dovecot::get_config_cache);
 my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
 return 0 if ($sslyn !~ /yes|required/i);
@@ -1831,7 +1832,6 @@ if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
 
-undef(@dovecot::get_config_cache);
 my $cfile = &dovecot::get_config_file();
 &lock_file($cfile);
 
@@ -1890,15 +1890,12 @@ if ($d->{'virt'}) {
 		else {
 			eval {
 				local $main::error_must_die = 1;
-				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'},
-					"protocol", "imap");
-				&dovecot::save_directive($l->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'},
-					"protocol", "imap");
-				&dovecot::save_directive(
-					$l->{'members'}, "ssl_ca",
-					undef, "protocol", "imap");
+				&dovecot::save_directive($imap->{'members'},
+					"ssl_cert", "<".$d->{'ssl_combined'});
+				&dovecot::save_directive($imap->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'});
+				&dovecot::save_directive($imap->{'members'},
+					"ssl_ca", undef);
 				}
 			}
 		if (!$pop3) {
@@ -1920,15 +1917,12 @@ if ($d->{'virt'}) {
 		else {
 			eval {
 				local $main::error_must_die = 1;
-				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'},
-					"protocol", "pop3");
-				&dovecot::save_directive($l->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'},
-					"protocol", "pop3");
-				&dovecot::save_directive(
-					$l->{'members'}, "ssl_ca",
-					undef, "protocol", "pop3");
+				&dovecot::save_directive($pop3->{'members'},
+					"ssl_cert", "<".$d->{'ssl_combined'});
+				&dovecot::save_directive($pop3->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'});
+				&dovecot::save_directive($pop3->{'members'},
+					"ssl_ca", undef);
 				}
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
@@ -1994,13 +1988,13 @@ else {
 	elsif ($enable && @myloc) {
 		# May need to update paths
 		foreach my $l (@myloc) {
-			&dovecot::save_directive($l->{'members'},
+			&dovecot::save_directive($conf,
                                         "ssl_cert", "<".$d->{'ssl_combined'},
 					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($l->{'members'},
+			&dovecot::save_directive($conf,
                                         "ssl_key", "<".$d->{'ssl_key'},
 					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($l->{'members'},
+			&dovecot::save_directive($conf,
 					"ssl_ca", undef,
 					$l->{'name'}, $l->{'value'});
 			}
