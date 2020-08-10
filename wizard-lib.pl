@@ -739,6 +739,7 @@ my %dom;
 	 'prefix', $prefix,
 	 'nocreationmail', 1,
 	 'hashpass', 0,
+	 'defaultdomain', 1,
         );
 
 # Set initial features

@@ -6966,7 +6966,8 @@ if ($left != 0 && $type ne "aliasdoms") {
 	# If no limit has been hit, check the licence
 	local ($lstatus, $lexpiry, $lerr, $ldoms) = &check_licence_expired();
 	if ($ldoms) {
-		local @doms = grep { !$_->{'alias'} } &list_domains();
+		local @doms = grep { !$_->{'alias'} &&
+				     !$_->{'defaultdomain'} } &list_domains();
 		if (@doms > $ldoms) {
 			# Hit the licenced max!
 			return (0, 3, $ldoms, 0);
