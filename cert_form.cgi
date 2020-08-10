@@ -94,6 +94,21 @@ print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
 	"$text{'cert_pkcs12'}</a>",
 	);
 print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
+
+# Expiry status
+$now = time();
+$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
+if ($future <= 0) {
+	$emsg = "<font color=red>".&text('cert_expired', -$future)."</font>";
+	}
+elsif ($future < 7) {
+	$emsg = "<font color=orange>".&text('cert_expiring', $future)."</font>";
+	}
+else {
+	$emsg = &text('cert_future', $future);
+	}
+print &ui_table_row($text{'cert_etime'}, $emsg);
+
 print &ui_table_end();
 
 print &ui_tabs_end_tab();
