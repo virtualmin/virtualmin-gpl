@@ -1820,7 +1820,7 @@ my $ver = &dovecot::get_dovecot_version();
 return -1 if ($ver < 2);
 
 # Check if dovecot is using SSL globally
-undef(@dovecot::get_config_cache);
+
 my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
 return 0 if ($sslyn !~ /yes|required/i);
@@ -1945,11 +1945,15 @@ if ($d->{'virt'}) {
 	}
 else {
 	# Domain has no IP, but Dovecot supports SNI in version 2
-	my @loc = grep { $_->{'name'} eq 'local_name' &&
-			 $_->{'section'} } @$conf;
+	my $get_myloc = sub {
+		my @conf_ = &dovecot::read_config_file(&dovecot::get_config_file()) if ($_[0]);
+		my @loc = grep { $_->{'name'} eq 'local_name' &&
+			 $_->{'section'} } ($_[0] ? @conf_ : @$conf);
+		return grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
+	};
+	my @myloc = &$get_myloc();
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
-	my @myloc = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
 	if ($enable && !@myloc) {
 		# Need to add
 		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
@@ -1987,18 +1991,22 @@ else {
 		}
 	elsif ($enable && @myloc) {
 		# May need to update paths
-		foreach my $l (@myloc) {
-			&dovecot::save_directive($conf,
-                                        "ssl_cert", "<".$d->{'ssl_combined'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($conf,
-                                        "ssl_key", "<".$d->{'ssl_key'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($conf,
-					"ssl_ca", undef,
-					$l->{'name'}, $l->{'value'});
+		for my $i (0 .. $#myloc) {
+			my @mylocupd = &$get_myloc('no-cache');
+			&dovecot::save_directive(
+				$mylocupd[$i]->{'members'}, 
+				"ssl_cert", "<".$d->{'ssl_combined'}, 
+				$myloc[$i]->{'name'}, $myloc[$i]->{'value'});
+			&dovecot::save_directive(
+				$mylocupd[$i]->{'members'}, 
+				"ssl_key", "<".$d->{'ssl_key'}, 
+				$myloc[$i]->{'name'}, $myloc[$i]->{'value'});
+			&dovecot::save_directive(
+				$mylocupd[$i]->{'members'}, 
+				"ssl_ca", undef, 
+				$myloc[$i]->{'name'}, $myloc[$i]->{'value'});
+			&flush_file_lines($mylocupd[$i]->{'file'}, undef, 1);
 			}
-		&flush_file_lines($l->{'file'}, undef, 1);
 		}
 	else {
 		# Nothing to add or remove

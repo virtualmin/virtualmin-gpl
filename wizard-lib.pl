@@ -588,6 +588,12 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 sub wizard_show_done
 {
 print &ui_table_row(undef, &text('wizard_done'), 2);
+
+# If user sets up a default domain, refresh navigation menu with it
+if (defined(&theme_post_save_domain) && $in{'refresh'}) {
+	my $dom = get_domain_by("dom", $in{'refresh'});
+	&theme_post_save_domain($dom, 'create');
+	}
 }
 
 sub wizard_parse_done
@@ -726,36 +732,37 @@ $pclash && return &text('setup_eprefix3', $prefix, $pclash->{'dom'});
 
 # Create the virtual server object
 my %dom;
-%dom = ( 'id', &domain_id(),
-	 'dom', $dname,
-         'user', $user,
-         'group', $group,
-         'ugroup', $group,
-         'owner', 'Virtualmin default domain',
-         'name', 1,
-         'name6', 1,
-         'ip', $defip,
-	 'dns_ip', &get_dns_ip(),
-         'virt', 0,
-         'virtalready', 0,
-	 'ip6', $ip6,
-	 'virt6', 0,
-         'virt6already', 0,
-	 'pass', &random_password(),
-	 'quota', 0,
-	 'uquota', 0,
-	 'source', 'wizard.cgi',
-	 'template', $template,
-	 'plan', $plan->{'id'},
-	 'prefix', $prefix,
-	 'nocreationmail', 1,
-	 'hashpass', 0,
-	 'defaultdomain', 1,
+%dom = ('id', &domain_id(),
+		'dom', $dname,
+		'user', $user,
+		'group', $group,
+		'ugroup', $group,
+		'owner', 'Virtualmin default domain',
+		'name', 1,
+		'name6', 1,
+		'ip', $defip,
+		'dns_ip', &get_dns_ip(),
+		'virt', 0,
+		'virtalready', 0,
+		'ip6', $ip6,
+		'virt6', 0,
+		'virt6already', 0,
+		'pass', &random_password(),
+		'quota', 0,
+		'uquota', 0,
+		'source', 'wizard.cgi',
+		'template', $template,
+		'plan', $plan->{'id'},
+		'prefix', $prefix,
+		'nocreationmail', 1,
+		'hashpass', 0,
+		'defaultdomain', 1,
         );
 
 # Set initial features
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
+$dom{'dns'} = 1;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
