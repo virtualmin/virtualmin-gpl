@@ -588,6 +588,12 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 sub wizard_show_done
 {
 print &ui_table_row(undef, &text('wizard_done'), 2);
+
+# If user sets up a default domain, refresh navigation menu with it
+if (defined(&theme_post_save_domain) && $in{'refresh'}) {
+	my $dom = get_domain_by("dom", $in{'refresh'});
+	&theme_post_save_domain($dom, 'create');
+	}
 }
 
 sub wizard_parse_done
@@ -745,6 +751,7 @@ my %dom;
 # Set initial features
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
+$dom{'dns'} = 1;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
