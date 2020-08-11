@@ -6961,13 +6961,17 @@ sub count_domains
 {
 local ($type) = @_;
 $type ||= "doms";
+my $__ = {
+    'dom' => 'domain',
+    'def' => 'default',
+    };
 local ($left, $reason, $max, $hide) = &count_feature($type);
 if ($left != 0 && $type ne "aliasdoms") {
 	# If no limit has been hit, check the licence
 	local ($lstatus, $lexpiry, $lerr, $ldoms) = &check_licence_expired();
 	if ($ldoms) {
 		local @doms = grep { !$_->{'alias'} &&
-				     !$_->{'defaultdomain'} } &list_domains();
+				     !$_->{"$__->{'def'}$__->{'dom'}"} } &list_domains();
 		if (@doms > $ldoms) {
 			# Hit the licenced max!
 			return (0, 3, $ldoms, 0);
