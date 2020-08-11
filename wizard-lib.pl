@@ -660,26 +660,35 @@ sub wizard_show_defdom
 {
 print &ui_table_row(undef, $text{'wizard_defdom'}, 2);
 
-my $def = $ENV{'SERVER_NAME'};
-if (&check_ipaddress($def) || &check_ip6address($def)) {
-	# Try hostname instead
-	$def = &get_system_hostname();
-	if ($def !~ /\./) {
-		my $def2 = &get_system_hostname(0, 1);
-		$def = $def2 if ($def2 =~ /\./);
-		}
+my $already = &get_domain_by("defaultdomain", 1);
+if ($already) {
+	print &ui_hidden("defdom", 0);
+	print &ui_table_row(undef,
+		"<b>".&text('wizard_defdom_exists',
+			&show_domain_name($already))."</b>", 2);
 	}
-print &ui_table_row($text{'wizard_defdom_mode'},
-	&ui_radio("defdom", 1,
-		  [ [ 0, $text{'wizard_defdom0'} ],
-		    [ 1, $text{'wizard_defdom1'}." ".
-			 &ui_textbox("defhost", $def, 20) ] ]));
+else {
+	my $def = $ENV{'SERVER_NAME'};
+	if (&check_ipaddress($def) || &check_ip6address($def)) {
+		# Try hostname instead
+		$def = &get_system_hostname();
+		if ($def !~ /\./) {
+			my $def2 = &get_system_hostname(0, 1);
+			$def = $def2 if ($def2 =~ /\./);
+			}
+		}
+	print &ui_table_row($text{'wizard_defdom_mode'},
+		&ui_radio("defdom", 1,
+			  [ [ 0, $text{'wizard_defdom0'} ],
+			    [ 1, $text{'wizard_defdom1'}." ".
+				 &ui_textbox("defhost", $def, 20) ] ]));
 
-print &ui_table_row($text{'wizard_defdom_ssl'},
-	&ui_radio("defssl", 2,
-		  [ [ 0, $text{'wizard_defssl0'} ],
-		    [ 1, $text{'wizard_defssl1'} ],
-		    [ 2, $text{'wizard_defssl2'} ] ]));
+	print &ui_table_row($text{'wizard_defdom_ssl'},
+		&ui_radio("defssl", 2,
+			  [ [ 0, $text{'wizard_defssl0'} ],
+			    [ 1, $text{'wizard_defssl1'} ],
+			    [ 2, $text{'wizard_defssl2'} ] ]));
+	}
 }
 
 # wizard_parse_defdom(&in)
@@ -695,6 +704,8 @@ my $err = &valid_domain_name($dname);
 return $err if ($err);
 my $clash = &get_domain_by("dom", $dname);
 return &text('wizard_defdom_clash', $dname) if ($clash);
+my $already = &get_domain_by("defaultdomain", 1);
+return &text('wizard_defdom_already', $already->{'dom'}) if ($already);
 &lock_domain_name($dname);
 
 # Work out username / etc
