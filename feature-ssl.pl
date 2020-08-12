@@ -1988,15 +1988,12 @@ else {
 	elsif ($enable && @myloc) {
 		# May need to update paths
 		foreach my $l (@myloc) {
-			&dovecot::save_directive($conf,
-                                        "ssl_cert", "<".$d->{'ssl_combined'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($conf,
-                                        "ssl_key", "<".$d->{'ssl_key'},
-					$l->{'name'}, $l->{'value'});
-			&dovecot::save_directive($conf,
-					"ssl_ca", undef,
-					$l->{'name'}, $l->{'value'});
+			&dovecot::save_directive($l->{'members'},
+                                        "ssl_cert", "<".$d->{'ssl_combined'});
+			&dovecot::save_directive($l->{'members'},
+                                        "ssl_key", "<".$d->{'ssl_key'});
+			&dovecot::save_directive($l->{'members'},
+					"ssl_ca", undef);
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
@@ -2192,10 +2189,8 @@ if ($d->{'virt'}) {
 					  ($already->{'command'} .=
 					   " -o ".$f->[0]."=".$f->[1]);
 					}
-				if ($oldcommand ne $already->{'command'}) {
-					&postfix::modify_master($already);
-					$changed = 1;
-					}
+				&postfix::modify_master($already);
+				$changed = 1;
 				}
 			}
 		else {
