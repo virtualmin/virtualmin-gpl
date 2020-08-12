@@ -6961,10 +6961,6 @@ sub count_domains
 {
 local ($type) = @_;
 $type ||= "doms";
-my $__ = {
-    'dom' => 'domain',
-    'def' => 'default',
-    };
 local ($left, $reason, $max, $hide) = &count_feature($type);
 if ($left != 0 && $type ne "aliasdoms") {
 	# If no limit has been hit, check the licence
