@@ -5253,6 +5253,32 @@ $sslserv_tests = [
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
+	# Re-generate the cert with a different org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test 2 SSL domain' ] ],
+	},
+
+	# Validate that new Dovecot cert works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that new Postfix cert works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-generate the cert with original org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test SSL domain' ] ],
+	},
+
 	# Turn off private IP for the domain
 	{ 'command' => 'modify-domain.pl',
           'args' => [ [ 'domain', $test_domain ],
@@ -5315,6 +5341,27 @@ $sslserv_tests = [
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	
+	# Re-generate the cert with a different org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test 2 SSL domain' ] ],
+	},
+
+	# Validate that new Dovecot cert still works with SNI
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-check that new Postfix still works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Turn off per-service certs
