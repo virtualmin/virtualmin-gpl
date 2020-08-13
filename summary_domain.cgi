@@ -125,7 +125,9 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Description
-print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+if ($d->{'owner'}) {
+	print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+	}
 
 # Show domain ID
 if (&master_admin()) {
