@@ -737,7 +737,7 @@ my %dom;
 		'user', $user,
 		'group', $group,
 		'ugroup', $group,
-		'owner', 'Virtualmin default domain',
+		'owner', $text{'wizard_defdom_desc'},
 		'name', 1,
 		'name6', 1,
 		'ip', $defip,
