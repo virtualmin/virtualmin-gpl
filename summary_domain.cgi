@@ -131,7 +131,8 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Description
-if ($d->{'owner'}) {
+if ($d->{'owner'} && 
+	$d->{'owner'} ne $text{'wizard_defdom_desc'}) {
 	print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
 	}
 
