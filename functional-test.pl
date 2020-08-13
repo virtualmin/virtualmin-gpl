@@ -5182,6 +5182,12 @@ $sslserv_tests = [
 		      @create_args, ],
         },
 
+	# Install a dummy CA cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
+	},
+
 	# Get the IP address
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'ip-only' ],
