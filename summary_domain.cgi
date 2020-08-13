@@ -36,6 +36,12 @@ else {
 			    "<tt>$d->{'dom'}</tt>", undef, \@tds);
 	}
 
+# Default domain
+if ($d->{'defaultdomain'}) {
+	print &ui_table_row($text{'wizard_defdom_desc'},
+			    $text{'yes'}, undef, \@tds);
+	}
+
 # Creator
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
