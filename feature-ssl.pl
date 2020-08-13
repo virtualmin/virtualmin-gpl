@@ -1820,7 +1820,6 @@ my $ver = &dovecot::get_dovecot_version();
 return -1 if ($ver < 2);
 
 # Check if dovecot is using SSL globally
-undef(@dovecot::get_config_cache);
 my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
 return 0 if ($sslyn !~ /yes|required/i);
@@ -1888,15 +1887,12 @@ if ($d->{'virt'}) {
 			push(@{$l->{'members'}}, $imap);
 			}
 		else {
-			eval {
-				local $main::error_must_die = 1;
-				&dovecot::save_directive($imap->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'});
-				&dovecot::save_directive($imap->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'});
-				&dovecot::save_directive($imap->{'members'},
-					"ssl_ca", undef);
-				}
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_cert", "<".$d->{'ssl_combined'});
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_key", "<".$d->{'ssl_key'});
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_ca", undef);
 			}
 		if (!$pop3) {
 			$pop3 = { 'name' => 'protocol',
@@ -1915,15 +1911,12 @@ if ($d->{'virt'}) {
 			push(@{$l->{'members'}}, $pop3);
 			}
 		else {
-			eval {
-				local $main::error_must_die = 1;
-				&dovecot::save_directive($pop3->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'});
-				&dovecot::save_directive($pop3->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'});
-				&dovecot::save_directive($pop3->{'members'},
-					"ssl_ca", undef);
-				}
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_cert", "<".$d->{'ssl_combined'});
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_key", "<".$d->{'ssl_key'});
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_ca", undef);
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
 		}
