@@ -1756,6 +1756,7 @@ $d->{'letsencrypt_renew'} = $samed->{'letsencrypt_renew'};
 $d->{'letsencrypt_last'} = $samed->{'letsencrypt_last'};
 $d->{'letsencrypt_last_failure'} = $samed->{'letsencrypt_last_failure'};
 $d->{'letsencrypt_last_err'} = $samed->{'letsencrypt_last_err'};
+$d->{'ssl_cert_expiry'} = $samed->{'ssl_cert_expiry'} if ($samed->{'ssl_cert_expiry'});
 }
 
 # break_invalid_ssl_linkages(&domain, [&new-cert])
