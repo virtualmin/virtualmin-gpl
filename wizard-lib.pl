@@ -799,12 +799,11 @@ return join(" ", @warns) if (@warns);
 # Create the server
 &push_all_print();
 &set_all_null_print();
-my $err = &create_virtual_server(\%dom, undef, undef, 0, 0, $pass);
+my $err = &create_virtual_server(
+	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
 return $err if ($err);
 
-# Create initial index file
-&create_index_content(\%dom, $dom{'owner'}, 0);
 &run_post_actions_silently();
 &unlock_domain_name($dname);
 

@@ -843,22 +843,15 @@ $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
 			      $parent ? $parent->{'user'} : undef,
-			      0, 0, $parent ? undef : $pass);
+			      0, 0, $parent ? undef : $pass, $content);
 if ($err) {
 	print "$err\n";
 	exit 1;
 	}
 
 if ($fwdto) {
-	&$first_print(&text('setup_fwding', $in{'fwdto'}));
+	&$first_print(&text('setup_fwding', $fwdto));
 	&create_domain_forward(\%dom, $fwdto);
-	&$second_print($text{'setup_done'});
-	}
-
-if (!$dom{'alias'} && &domain_has_website(\%dom) && defined($content)) {
-	# Just create virtualmin default index.html
-	&$first_print($text{'setup_contenting'});
-	&create_index_content(\%dom, $content, 0);
 	&$second_print($text{'setup_done'});
 	}
 

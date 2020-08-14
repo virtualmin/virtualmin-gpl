@@ -7511,11 +7511,11 @@ return 0;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#			[no-post-actions], [password])
+#			[no-post-actions], [password], [content])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7953,6 +7953,13 @@ if ($dom->{'jail'} && !&check_jailkit_support()) {
 				     &domain_jailkit_dir($dom)));
 		}
 	&save_domain($dom);
+	}
+
+if (!$dom->{'alias'} && &domain_has_website($dom) && defined($content)) {
+	# Just create virtualmin default index.html
+	&$first_print($text{'setup_contenting'});
+	&create_index_content($dom, $content, 0);
+	&$second_print($text{'setup_done'});
 	}
 
 # Run the after creation command

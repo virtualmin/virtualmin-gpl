@@ -464,8 +464,15 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 	return;
 	}
 
+# Parse content field
+my $content = $in{'content'};
+$content =~ s/\r//g;
+$content =~ s/^\s+//g;
+$content =~ s/\s+$//g;
+
 $err = &create_virtual_server(\%dom, $parentdom, $parentuser,
-			      0, 0, $parentdom ? undef : $pass);
+			      0, 0, $parentdom ? undef : $pass,
+			      $in{'content_def'} == 2 ? $content : undef);
 &error($err) if ($err);
 
 # Create default mail forward
@@ -475,33 +482,18 @@ if ($add_fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Put default site content
-if (!$dom{'alias'} &&
-    &domain_has_website(\%dom) &&
-    ($in{'content_def'} == 0 || $in{'content_def'} == 2)) {
-	my $content = $in{'content'};
-	$content =~ s/\r//g;
-	$content =~ s/^\s+//g;
-	$content =~ s/\s+$//g;
-
-	# Copy default Virtualmin template
-	if ($in{'content_def'} == 2) {
-		&$first_print($text{'setup_styleing'});
-		&create_index_content(\%dom, $content, 0);
-		&$second_print($text{'setup_done'});
-		}
-	else {
-		# Create index.html file 
-		&$first_print($text{'setup_contenting'});
-		my $home = &public_html_dir(\%dom);
-		&open_tempfile_as_domain_user(
-			\%dom, DATA, ">$home/index.html");
-		$content =~ s/\n/<br>\n/g if ($content);
-		$content = &substitute_virtualmin_template($content, \%dom);
-		&print_tempfile(DATA, $content);
-		&close_tempfile_as_domain_user(\%dom, DATA);
-		&$second_print($text{'setup_done'});
-		}
+# Write totally custom site content
+if (!$dom{'alias'} && &domain_has_website(\%dom) && $in{'content_def'} == 0) {
+	# Create index.html file 
+	&$first_print($text{'setup_contenting'});
+	my $home = &public_html_dir(\%dom);
+	&open_tempfile_as_domain_user(
+		\%dom, DATA, ">$home/index.html");
+	$content =~ s/\n/<br>\n/g if ($content);
+	$content = &substitute_virtualmin_template($content, \%dom);
+	&print_tempfile(DATA, $content);
+	&close_tempfile_as_domain_user(\%dom, DATA);
+	&$second_print($text{'setup_done'});
 	}
 
 &run_post_actions();
