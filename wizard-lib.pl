@@ -664,16 +664,14 @@ return undef;
 # Show a form asking if the user wants to create a default virtual server
 sub wizard_show_defdom
 {
-print &ui_table_row(undef, $text{'wizard_defdom'}, 2);
-
 my $already = &get_domain_by("defaultdomain", 1);
 if ($already) {
 	print &ui_hidden("defdom", 0);
 	print &ui_table_row(undef,
-		"<b>".&text('wizard_defdom_exists',
-			&show_domain_name($already))."</b>", 2);
+		&text('wizard_defdom_exists', "<b><tt>@{[show_domain_name($already)]}</tt></b>"), 2);
 	}
 else {
+	print &ui_table_row(undef, $text{'wizard_defdom'}, 2);
 	my $def = $ENV{'SERVER_NAME'};
 	if (&check_ipaddress($def) || &check_ip6address($def)) {
 		# Try hostname instead
