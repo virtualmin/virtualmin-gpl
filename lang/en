@@ -6177,6 +6177,7 @@ wizard_defssl1=Yes, with self-signed certificate
 wizard_defssl2=Yes, with Let's Encrypt certificate
 wizard_defdom_clash=A virtual server named $1 already exists
 wizard_defdom_already=A default virtual server named $1 already exists
+wizard_defdom_desc=Host default domain
 
 backuplog_title=Backup Logs
 backuplog_ecannot=You are not allowed to view Virtualmin backup logs

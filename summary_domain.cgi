@@ -36,6 +36,12 @@ else {
 			    "<tt>$d->{'dom'}</tt>", undef, \@tds);
 	}
 
+# Default domain
+if ($d->{'defaultdomain'}) {
+	print &ui_table_row($text{'wizard_defdom_desc'},
+			    $text{'yes'}, undef, \@tds);
+	}
+
 # Creator
 print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? &text('edit_createdby', &make_date($d->{'created'},1),
@@ -125,7 +131,10 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Description
-print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+if ($d->{'owner'} && 
+	$d->{'owner'} ne $text{'wizard_defdom_desc'}) {
+	print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+	}
 
 # Show domain ID
 if (&master_admin()) {

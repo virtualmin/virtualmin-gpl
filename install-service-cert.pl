@@ -116,7 +116,6 @@ foreach my $s (@services) {
 				       $ok == 0 ? ".. failed" :
 						  ".. not supported");
 			}
-		&$second_print(".. done");
 		}
 	}
 

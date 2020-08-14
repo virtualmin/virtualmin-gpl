@@ -7995,6 +7995,13 @@ else {
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_renew'} ||= 2;
+
+	# Inject initial SSL expiry to avoid wrong "until expiry"
+	my $cert_info = &cert_info($d);
+	if ($cert_info) {
+		$d->{'ssl_cert_expiry'} = 
+			&parse_notafter_date($cert_info->{'notafter'});
+	}
 	&save_domain($d);
 
 	# Update other services using the cert
