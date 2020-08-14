@@ -1053,11 +1053,14 @@ local ($d, $content, $over) = @_;
 
 # Remove any existing index.* files that might be used instead
 local $dest = &public_html_dir($d);
+local @indexes = grep { -f $_ } glob("$dest/index.*");
 if ($over) {
-	local @indexes = grep { -f $_ } glob("$dest/index.*");
 	if (@indexes) {
 		&unlink_file(@indexes);
 		}
+	}
+else {
+	return if (@indexes);
 	}
 
 # Find all the files to copy using a stack
