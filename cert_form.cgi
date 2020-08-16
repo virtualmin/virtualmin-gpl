@@ -13,7 +13,7 @@ $d || &error($text{'edit_egone'});
 # If this domain shares a cert file with another, link to it's page
 if ($d->{'ssl_same'}) {
 	$same = &get_domain($d->{'ssl_same'});
-	print &text('cert_same', "<b>@{[show_domain_name($same)]}</b>"),"\n";
+	print &text('cert_same', &show_domain_name($same)),"\n";
 	if (&can_edit_domain($same)) {
 		print &text('cert_samelink', "cert_form.cgi?dom=$same->{'id'}");
 		}
