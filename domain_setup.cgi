@@ -466,13 +466,14 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 
 # Parse content field
 my $content = $in{'content'};
+my $contented = !defined($in{'content_def'}) || $in{'content_def'} == 2;
 $content =~ s/\r//g;
 $content =~ s/^\s+//g;
 $content =~ s/\s+$//g;
-
+$content = '' if (!defined($in{'content_def'}));
 $err = &create_virtual_server(\%dom, $parentdom, $parentuser,
-			      0, 0, $parentdom ? undef : $pass,
-			      $in{'content_def'} == 2 ? $content : undef);
+			      0, 0, $parentdom ? undef : $pass, 
+			      	$contented ? $content : undef);
 &error($err) if ($err);
 
 # Create default mail forward
@@ -483,7 +484,8 @@ if ($add_fwdto) {
 	}
 
 # Write totally custom site content
-if (!$dom{'alias'} && &domain_has_website(\%dom) && $in{'content_def'} == 0) {
+if (!$dom{'alias'} && &domain_has_website(\%dom) && 
+		(defined($in{'content_def'}) && $in{'content_def'} == 0)) {
 	# Create index.html file 
 	&$first_print($text{'setup_contenting'});
 	my $home = &public_html_dir(\%dom);
