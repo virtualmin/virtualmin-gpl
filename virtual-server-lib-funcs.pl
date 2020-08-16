@@ -7515,7 +7515,7 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
