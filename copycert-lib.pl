@@ -310,7 +310,9 @@ my $configfile = &dovecot::get_config_file();
 my $dovedir = $configfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
-my $v2 = &dovecot::find_value("ssl_cert", $conf, 2, "");
+my $v2 = &dovecot::find_value("ssl_cert", $conf, 2, "") ? 1 :
+         &dovecot::find_value("ssl_cert_file", $conf, 2, "") ? 0 :
+	 &dovecot::get_dovecot_version() >= 2 ? 1 : 0;
 my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
 	 &dovecot::find_value("ssl_cert", $conf, 0, "");
 my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
