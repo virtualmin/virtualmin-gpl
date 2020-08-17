@@ -18002,6 +18002,26 @@ return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
 return 2;
 }
 
+sub get_module_version_and_type
+{
+my ($list, $gpl) = @_;
+my ($v_major, $v_minor, $v_type) = 
+		$module_info{'version'} =~ /(\d+).(\d+)\.(\w+)/;
+if ($v_type =~ /pro/i) {
+	$v_type = " Pro";
+	} 
+else {
+	if ($gpl) {
+		$v_type = " GPL";
+		}
+	else {
+		$v_type = "";
+		}
+	}
+	return $list ? ($v_major, $v_minor, $v_type) : 
+                  "$v_major.$v_minor$v_type";
+}
+
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {
