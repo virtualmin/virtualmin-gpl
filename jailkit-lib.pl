@@ -240,7 +240,6 @@ my ($d, $dir) = @_;
 $d->{'jail'} || return $text{'jailkit_eenabled'};
 $dir ||= &domain_jailkit_dir($d);
 $dir || return $text{'jailkit_edir'};
--d $dir || return &text('jailkit_edir2', "<tt>".&html_escape($dir)."</tt>");
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php",
 		  split(/\s+/, $config{'jail_sects'})) {
