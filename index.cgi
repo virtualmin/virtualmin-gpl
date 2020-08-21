@@ -10,8 +10,7 @@ if ($redir) {
 	&redirect($redir);	
 	return;
 	}
-
-$vtitle = &text('index_versionmode', $module_info{'version'},
+$vtitle = &text('index_versionmode', get_module_version_and_type(),
 		&master_admin() ? $text{'index_mastermode'} :
 		&reseller_admin() ? $text{'index_resellermode'} :
 		$single_domain_mode ? $text{'index_mailmode'} :
