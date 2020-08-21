@@ -1097,7 +1097,7 @@ foreach my $m (@mods) {
 				}
 			}
 		}
-	@poss = sort { $b cmp $a } @poss;
+	@poss = sort { $a cmp $b } @poss;
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
@@ -1123,7 +1123,8 @@ foreach my $m (@mods) {
 				}
 			else {
 				# Show HTML output
-				&software::update_system_install($pkg);
+				my @rs = &software::update_system_install($pkg);
+				$iok = 1 if (scalar(@rs));
 				}
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
