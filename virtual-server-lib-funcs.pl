@@ -7629,14 +7629,21 @@ if ($dom->{'virt6'}) {
 	}
 delete($dom->{'creating'});
 
-if (!$nopost) {
-	&run_post_actions();
-	}
-
 # Save domain details
 &$first_print($text{'setup_save'});
 &save_domain($dom, 1);
 &$second_print($text{'setup_done'});
+
+# If mail client autoconfig is enabled globally, set it up for
+# this domain
+if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
+    &domain_has_website($dom) && !$dom->{'alias'}) {
+	&enable_email_autoconfig($dom);
+	}
+
+if (!$nopost) {
+	&run_post_actions();
+	}
 
 if (!$dom->{'nocreationmail'}) {
 	# Notify the owner via email
@@ -7860,13 +7867,6 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	&save_domain($dom);
-	}
-
-# If mail client autoconfig is enabled globally, set it up for
-# this domain
-if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
-    &domain_has_website($dom) && !$dom->{'alias'}) {
-	&enable_email_autoconfig($dom);
 	}
 
 # If this was an alias domain, notify all features in the original domain. This
