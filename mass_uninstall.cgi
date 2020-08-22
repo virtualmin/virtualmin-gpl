@@ -100,7 +100,8 @@ else {
 		print &text('massu_rusurehome', &public_html_dir($d, 1)),
 		      "<p>\n";
 		}
-	print &text('massu_sel', "<b>" . ui_text_color(join(", ", @descs) . "</b>", 'danger')),"<br>\n";
+	print &text('massu_sel', 
+		"<tt>".ui_text_color(join(", ", @descs), 'danger')."</tt>"),"<br>\n";
 	print "</p>\n";
 	print &ui_submit($text{'scripts_uok2'}, "confirm"),"\n";
 	print &ui_form_end(),"\n";

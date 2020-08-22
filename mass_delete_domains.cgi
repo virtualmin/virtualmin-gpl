@@ -59,6 +59,7 @@ if (!$in{'confirm'}) {
 		}
 	@alldel = &unique(@alldel);
 
+	print "<center>\n";
 	print &text('massdelete_rusure', scalar(@alldel),
 					 &nice_size($size)),"<br>\n";
 	if ($subs) {
@@ -73,9 +74,9 @@ if (!$in{'confirm'}) {
 		}
 	print "<p>\n";
 	@dnames = sort @dnames;
-	print &text('massdelete_doms', &nice_domains_list(\@alldel)),"<br>\n";
+	print &text('massdelete_doms', 
+		  ui_text_color(&nice_domains_list(\@alldel), 'danger')),"<br>\n";
 
-	print "<center>\n";
 	print &ui_form_start("mass_delete_domains.cgi", "post");
 	foreach $d (@doms) {
 		print &ui_hidden("d", $d->{'id'}),"\n";

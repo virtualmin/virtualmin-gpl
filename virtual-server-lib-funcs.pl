@@ -16426,7 +16426,7 @@ local @ttdoms = map { "<tt>".&show_domain_name($_)."</tt>" } @$doms;
 if (@ttdoms > 10) {
 	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
 	}
-return join(" , ", @ttdoms);
+return join(", ", @ttdoms);
 }
 
 # list_available_shells([&domain], [mail])
