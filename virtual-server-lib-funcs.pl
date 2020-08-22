@@ -8012,6 +8012,7 @@ else {
 	&save_domain($d);
 
 	# Update other services using the cert
+	undef(@dovecot::get_config_cache);
 	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 	&break_invalid_ssl_linkages($d);
