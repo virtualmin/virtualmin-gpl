@@ -1640,6 +1640,26 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 &release_lock_anything($d);
 }
 
+# find_matching_certificate_domain(&domain)
+# Check if another domain on the same IP already has a matching cert, and if so
+# return it.
+sub find_matching_certificate_domain
+{
+local ($d) = @_;
+local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
+			   $_->{'ssl'} &&
+			   $_->{'id'} ne $d->{'id'} &&
+			   !$_->{'ssl_same'} } &list_domains();
+foreach my $sslclash (@sslclashes) {
+	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
+		return $sslclash;
+		}
+	}
+return undef;
+}
+
+
+
 # find_matching_certificate(&domain)
 # For a domain with SSL being enabled, check if another domain on the same IP
 # already has a matching cert. If so, update the domain hash's cert file
@@ -1647,19 +1667,13 @@ sub find_matching_certificate
 {
 local ($d) = @_;
 return if ($config{'nolink_certs'});
-local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
-			   $_->{'ssl'} &&
-			   $_->{'id'} ne $d->{'id'} &&
-			   !$_->{'ssl_same'} } &list_domains();
-foreach my $sslclash (@sslclashes) {
-	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
-		# Found a match, so add a link to it
-		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$d->{'ssl_same'} = $sslclash->{'id'};
-		$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
-		last;
-		}
+local $sslclash = &find_matching_certificate_domain($d);
+if ($sslclash) {
+	# Found a match, so add a link to it
+	$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+	$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+	$d->{'ssl_same'} = $sslclash->{'id'};
+	$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
 	}
 }
 

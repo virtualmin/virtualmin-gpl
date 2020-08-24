@@ -28,6 +28,7 @@ $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
 $test_ssl_subdomain = "ssl.".$test_domain;
+$test_ssl2_subdomain = "ssl2.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
@@ -4982,6 +4983,19 @@ $ssl_tests = [
 		      @create_args, ],
 	},
 
+	# Create a second sub-domain with SSL on the same IP, but with no
+	# linked cert
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'desc', 'Test SSL 2 subdomain' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent-ip' ],
+		      [ 'no-link-cert' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -5017,6 +5031,13 @@ $ssl_tests = [
 		          '/domains/'.$test_ssl_subdomain.'/',
 		          'SSL cert file: '.$test_domain_home.
                           '/domains/'.$test_ssl_subdomain.'/' ],
+	},
+
+	# Check for no SSL linkage on the second domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'SSL shared with: '.$test_domain ],
 	},
 
 	# Test HTTPS get to subdomain
