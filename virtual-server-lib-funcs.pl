@@ -11252,13 +11252,37 @@ push(@enable, grep { $d->{$_} && $disabled{$_} &&
 return &unique(@enable);
 }
 
+# get_python_version()
+# Return current Python version, if instaled
+sub get_python_version
+{
+my $python_version;
+my $python_pathpath = get_python_path();
+my $out = &backquote_command("$python_pathpath --version 2>&1", 1);
+$python_version = $1 if ($out =~ /Python\s+(.*)/i);
+return $python_version;
+}
+
 # sysinfo_virtualmin()
 # Returns the OS info, Perl version and path
 sub sysinfo_virtualmin
 {
-return ( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
-	 [ $text{'sysinfo_perl'}, $] ],
-	 [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
+my @sysinfo_virtualmin;
+
+# OS and Perl info
+@sysinfo_virtualmin = 
+	( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
+      [ $text{'sysinfo_perl'}, $] ],
+      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
+
+# Python, if exists
+my $python_version = &get_python_version();
+if ($python_version) {
+	push(@sysinfo_virtualmin,
+         [ $text{'sysinfo_python'}, $python_version ],
+         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
+	}
+return @sysinfo_virtualmin;
 }
 
 # has_home_quotas()
