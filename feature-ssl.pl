@@ -912,11 +912,13 @@ local ($file) = @_;
 local @rv;
 my $lref = &read_file_lines($file, 1);
 foreach my $l (@$lref) {
-	if ($l =~ /^-----BEGIN/) {
-		push(@rv, $l."\n");
+	my $cl = $l;
+	$cl =~ s/^#.*//;
+	if ($cl =~ /^-----BEGIN/) {
+		push(@rv, $cl."\n");
 		}
-	elsif ($l =~ /\S/) {
-		$rv[$#rv] .= $l."\n";
+	elsif ($cl =~ /\S/ && @rv) {
+		$rv[$#rv] .= $cl."\n";
 		}
 	}
 return @rv;
@@ -1658,15 +1660,13 @@ foreach my $sslclash (@sslclashes) {
 return undef;
 }
 
-
-
 # find_matching_certificate(&domain)
 # For a domain with SSL being enabled, check if another domain on the same IP
 # already has a matching cert. If so, update the domain hash's cert file
 sub find_matching_certificate
 {
 local ($d) = @_;
-return if ($config{'nolink_certs'});
+return if ($config{'nolink_certs'} || $d->{'nolink_certs'});
 local $sslclash = &find_matching_certificate_domain($d);
 if ($sslclash) {
 	# Found a match, so add a link to it
