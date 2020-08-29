@@ -237,7 +237,6 @@ foreach my $g (@gcreate) {
 sub copy_jailkit_files
 {
 my ($d, $dir) = @_;
-$d->{'jail'} || return $text{'jailkit_eenabled'};
 $dir ||= &domain_jailkit_dir($d);
 $dir || return $text{'jailkit_edir'};
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",

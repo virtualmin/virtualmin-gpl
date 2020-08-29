@@ -679,10 +679,15 @@ if (defined($jail)) {
 	}
 if ($copyjail) {
 	print "Copying files into chroot jail ..\n";
-	my $err = &copy_jailkit_files($dom);
-	$d->{'jail_last_copy'} = time();
-	&save_domain($d);
-	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+	if ($d->{'jail'}) {
+		my $err = &copy_jailkit_files($dom);
+		$d->{'jail_last_copy'} = time();
+		&save_domain($d);
+		print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+		}
+	else {
+		print ".. jail not enabled\n\n";
+		}
 	}
 
 # If the plan is being applied, update features
