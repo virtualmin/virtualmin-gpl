@@ -15206,7 +15206,8 @@ if ($config{'default_procmail'} != $lastconfig{'default_procmail'}) {
 	}
 
 # Re-create API helper command
-if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
+if ($config{'api_helper'} ne $lastconfig{'api_helper'} ||
+	!&has_command(&get_api_helper_command())) {
 	&$first_print($text{'check_apicmd'});
 	local ($ok, $path) = &create_virtualmin_api_helper_command();
 	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
