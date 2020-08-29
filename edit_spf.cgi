@@ -71,15 +71,15 @@ if ($key) {
 	print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",
 				     2, "dnssec", 0, \@tds);
 	print &ui_table_row($text{'spf_public'},
-		&ui_textarea("keyline", $key->{'publictext'}, 2, 80,
+		&ui_textarea("keyline", $key->{'publictext'}, 4, 80,
 			     "off", 0, "readonly"));
 	print &ui_table_row($text{'spf_private'},
-		&ui_textarea("keyline", $key->{'privatetext'}, 10, 80,
+		&ui_textarea("private", $key->{'privatetext'}, 14, 80,
 			     "off", 0, "readonly"));
 	$dsrecs = &get_domain_dnssec_ds_records($d);
 	if (ref($dsrecs)) {
 		$dsrecstext = &dns_records_to_text(@$dsrecs);
-		$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 10, 80,
+		$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 2, 80,
 					  "off", 0, "readonly");
 		}
 	else {

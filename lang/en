@@ -4264,6 +4264,8 @@ sysinfo_os=Operating system
 sysinfo_perl=Perl version
 sysinfo_perlpath=Path to Perl
 sysinfo_php=PHP versions
+sysinfo_python=Python version
+sysinfo_pythonpath=Path to Python
 
 remote_ecannot=You are not allowed to run remote commands
 remote_eprogram=Invalid remote program name
