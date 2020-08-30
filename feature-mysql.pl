@@ -3284,13 +3284,23 @@ my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "list_databases");
 }
 
-# get_dom_remote_mysql_version([&domain])
+# get_dom_remote_mysql_version([&domain|module])
 # Returns the MySQL server version for a domain
 sub get_dom_remote_mysql_version
 {
 my ($d) = @_;
-my $mod = &require_dom_mysql($d);
+my $mod;
+if ($d && !ref($d)) {
+	# Asking for a specific module
+	$mod = $d;
+	&foreign_require($mod);
+	}
+else {
+	# Get module based on domain
+	$mod = &require_dom_mysql($d);
+	}
 my $rv;
+my $err;
 if ($get_dom_remote_mysql_version_cache{$mod}) {
 	$rv = $get_dom_remote_mysql_version_cache{$mod};
 	}
@@ -3298,11 +3308,14 @@ else {
 	eval {
 		local $main::error_must_die = 1;
 		$rv = &foreign_call($mod, "get_remote_mysql_version");
-		$rv = undef if ($rv < 0);
 		};
+	$err = $@ || ($rv < 0 ? "Failed to get version" : undef);
+	$rv = undef if ($rv < 0);
 	$rv ||= eval $mod.'::mysql_version';
 	$rv ||= $mysql::mysql_version;
-	$get_dom_remote_mysql_version_cache{$mod} = $rv;
+	if (!$err) {
+		$get_dom_remote_mysql_version_cache{$mod} = $rv;
+		}
 	}
 my $variant = "mysql";
 my ($ver, $variant_);
@@ -3318,7 +3331,7 @@ if ($ver && $variant_ &&
 		$variant = "mariadb";
 		}
 	}
-return wantarray ? ($rv, $variant) : $rv;
+return wantarray ? ($rv, $variant, $err) : $rv;
 }
 
 # get_default_mysql_module()
