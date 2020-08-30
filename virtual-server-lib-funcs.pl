@@ -2509,8 +2509,9 @@ if ($config{'mysql'}) {
 		# This can fail if MySQL is down
 		local $main::error_must_die = 1;
 		local $qpass = &mysql_escape($pass);
+		local $pf = &get_mysql_password_func($d);
 		local $rv = &execute_dom_sql($d, $mysql::master_db,
-					     "select $password_func('$qpass')");
+					     "select $pf('$qpass')");
 		$rv{'mysql'} = $rv->{'data'}->[0]->[0];
 		};
 	}

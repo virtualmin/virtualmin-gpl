@@ -9,7 +9,6 @@ if (!$mysql::config{'login'}) {
 	$mysql::authstr = &mysql::make_authstr();
 	}
 %mconfig = &foreign_config("mysql");
-$password_func = $mysql::password_func || "password";
 $mysql_user_size = $config{'mysql_user_size'} || 16;
 }
 
@@ -2358,8 +2357,21 @@ if ($d->{'mysql_enc_pass'}) {
 	}
 else {
 	local $qpass = &mysql_escape(&mysql_pass($d));
-	return "$password_func('$qpass')";
+	local $pf = &get_mysql_password_func($d);
+	return "$pf('$qpass')";
 	}
+}
+
+# get_mysq_password_func([&domain])
+# Returns the function for encrypting passwords
+sub get_mysql_password_func
+{
+my ($d) = @_;
+my $mod = &require_dom_mysql($d);
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+my $rv = eval "\$${pkg}::password_func" || "password";
+return $rv;
 }
 
 # check_mysql_login(&domain, dbname, dbuser, dbpass)
@@ -2810,7 +2822,8 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 if (!$encpass && $plainpass) {
 	# Hash password for setting
 	my $qpass = &mysql_escape($plainpass);
-	$encpass = "$password_func('$qpass')";
+	my $pf = &get_mysql_password_func($d);
+	$encpass = "$pf('$qpass')";
 	}
 if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
 	# Need to use new 'create user' command
@@ -2880,7 +2893,8 @@ my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
 if (!$encpass && $plainpass) {
 	# Hash password for insertion
 	my $qpass = &mysql_escape($plainpass);
-	$encpass = "$password_func('$qpass')";
+	my $pf = &get_mysql_password_func($d);
+	$encpass = "$pf('$qpass')";
 	}
 my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
@@ -3012,10 +3026,11 @@ if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
 	my $qpass = &mysql_escape($pass);
+	my $pf = &get_mysql_password_func();
 	eval {
 		local $main::error_must_die = 1;
 		&execute_password_change_sql(
-			undef, $user, "$password_func('$qpass')", 1, 1,
+			undef, $user, "$pf('$qpass')", 1, 1,
 			$pass);
 		};
 	if ($@) {
