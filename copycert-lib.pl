@@ -467,6 +467,8 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 	&postfix::set_current_value("smtpd_tls_security_level", "may");
 	if (&compare_version_numbers($postfix::postfix_version, "2.11") >= 0) {
 		&postfix::set_current_value("smtp_tls_security_level", "dane");
+		&postfix::set_current_value("smtp_dns_support_level", "dnssec", 1);
+		&postfix::set_current_value("smtp_host_lookup", "dns", 1);
 		}
 	else {
 		&postfix::set_current_value("smtp_tls_security_level", "may");
