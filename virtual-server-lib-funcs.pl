@@ -17521,7 +17521,7 @@ if ($dir) {
 	}
 &release_lock_ssl($d);
 if ($dir) {
-	&flush_file_lines($virt->{'file'});
+	&flush_file_lines($virt->{'file'}, undef, 1);
 	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 	}
 return undef;

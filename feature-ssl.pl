@@ -1662,7 +1662,8 @@ return undef;
 
 # find_matching_certificate(&domain)
 # For a domain with SSL being enabled, check if another domain on the same IP
-# already has a matching cert. If so, update the domain hash's cert file
+# already has a matching cert. If so, update the domain hash's cert file. This
+# can only be called at domain creation time.
 sub find_matching_certificate
 {
 local ($d) = @_;
@@ -1673,11 +1674,27 @@ if ($lnk) {
 	local $sslclash = &find_matching_certificate_domain($d);
 	if ($sslclash) {
 		# Found a match, so add a link to it
-		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$d->{'ssl_same'} = $sslclash->{'id'};
-		$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+		&link_matching_certificate($d, $sslclash, 0);
 		}
+	}
+}
+
+# link_matching_certificate(&domain, &samedomain, [save-actual-config])
+# Makes the first domain use SSL cert file owned by the second
+sub link_matching_certificate
+{
+my ($d, $sslclash, $save) = @_;
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
+$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+$d->{'ssl_same'} = $sslclash->{'id'};
+$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+if ($save) {
+	&save_website_ssl_file($d, 'cert', $d->{'ssl_cert'});
+	&save_website_ssl_file($d, 'key', $d->{'ssl_key'});
+	&save_website_ssl_file($d, 'ca', $d->{'ssl_chain'});
+	&sync_combined_ssl_cert($d);
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 	}
 }
 

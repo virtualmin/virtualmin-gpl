@@ -5033,13 +5033,6 @@ $ssl_tests = [
                           '/domains/'.$test_ssl_subdomain.'/' ],
 	},
 
-	# Check for no SSL linkage on the second domain
-	{ 'command' => 'list-domains.pl',
-	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
-		      [ 'multiline' ] ],
-	  'antigrep' => [ 'SSL shared with: '.$test_domain ],
-	},
-
 	# Test HTTPS get to subdomain
 	{ 'command' => $wget_command.'https://'.$test_ssl_subdomain,
 	  'grep' => 'Test SSL subdomain home page',
@@ -5047,6 +5040,45 @@ $ssl_tests = [
 
 	# Test SSL cert to subdomain (should be the same)
 	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	
+	# Check for no SSL linkage on the second domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'SSL shared with: '.$test_domain ],
+	  'grep' => [ 'SSL key file: '.$test_domain_home.
+		      '/domains/'.$test_ssl2_subdomain.'/',
+		      'SSL cert file: '.$test_domain_home.
+                      '/domains/'.$test_ssl2_subdomain.'/' ],
+	},
+
+	# Re-link SSL on the second domain
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'link-ssl-cert' ] ],
+	},
+
+	# Check for SSL linkage on the second domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL shared with: '.$test_domain ],
+	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
+		          '/domains/'.$test_ssl2_subdomain.'/',
+		          'SSL cert file: '.$test_domain_home.
+                          '/domains/'.$test_ssl2_subdomain.'/' ],
+	},
+	
+	# Test HTTPS get to the second subdomain
+	{ 'command' => $wget_command.'https://'.$test_ssl2_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Test SSL cert to the second subdomain (should be the same)
+	{ 'command' => 'openssl s_client -host '.$test_ssl2_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},

@@ -71,7 +71,9 @@ C<--no-letsencrypt-renew> parameter.
 
 If the domain is sharing an SSL certificate with another domain (because it's
 CN matches both of them), you can use the C<--break-ssl-cert> flag to stop
-sharing and allow this domain's cert to be re-generated.
+sharing and allow this domain's cert to be re-generated. Conversely, if the
+server isn't sharing a cert but could, the C<--link-ssl-cert> flag can be used
+to enable sharing.
 
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
@@ -228,6 +230,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--break-ssl-cert") {
 		$breakcert = 1;
 		}
+	elsif ($a eq "--link-ssl-cert") {
+		$linkcert = 1;
+		}
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
@@ -241,7 +246,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || $fixhtmldir || $breakcert || 
+  defined($renew) || $fixhtmldir || $breakcert || $linkcert ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
 
@@ -605,7 +610,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if ($d->{'ssl'} && $breakcert) {
+	if (&domain_has_ssl($d) && $breakcert) {
 		&$first_print("Breaking SSL certificate sharing ..");
 		if (!$d->{'ssl_same'}) {
 			&$second_print(".. not using a shared cert");
@@ -622,6 +627,26 @@ foreach $d (@doms) {
 			}
 		}
 
+	if (&domain_has_ssl($d) && $linkcert) {
+		&$first_print("Enabling SSL certificate sharing ..");
+		if ($d->{'ssl_same'}) {
+			my $same = &get_domain($d->{'ssl_same'});
+			&$second_print(".. already sharing a cert with ".
+				       &show_domain_name($same));
+			}
+		else {
+			my $same = &find_matching_certificate_domain($d);
+			if (!$same) {
+				&$second_print(".. no domain to link with found");
+				}
+			else {
+				&link_matching_certificate($d, $same, 1);
+				&$second_print(".. linked to ".
+					&show_domain_name($same));
+				}
+			}
+		}
+
 	if ($tlsa && $d->{'dns'}) {
 		# Resync TLSA records
 		&$first_print("Updating TLSA DNS records ..");
@@ -631,7 +656,7 @@ foreach $d (@doms) {
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert) {
+	    defined($renew) || $breakcert || $linkcert) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -684,7 +709,7 @@ print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
-print "                     [--break-ssl-cert]\n";
+print "                     [--break-ssl-cert | --link-ssl-cert]\n";
 print "                     [--sync-tlsa]\n";
 exit(1);
 }
