@@ -6154,7 +6154,7 @@ if (!$cr) {
 	}
 
 if ($changed) {
-	my $err = &post_records_change($d, $recs, $file);
+	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
 
@@ -6271,7 +6271,7 @@ if ($d->{'dns'}) {
 			}
 		}
 	if ($changed) {
-		my $err = &post_records_change($d, $recs, $file);
+		&post_records_change($d, $recs, $file);
 		&register_post_action(\&restart_bind, $d);
 		}
 	&release_lock_dns($d);
