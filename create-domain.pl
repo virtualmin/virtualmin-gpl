@@ -351,8 +351,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
 		}
-	elsif ($a eq "--no-link-cert") {
-		$nolinkcert = 1;
+	elsif ($a eq "--break-ssl-cert") {
+		$linkcert = 0;
+		}
+	elsif ($a eq "--link-ssl-cert") {
+		$linkcert = 1;
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
@@ -770,7 +773,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'jail', $jail,
 	 'mysql_module', $mysql_module,
         );
-$dom{'nolink_certs'} = 1 if ($nolinkcert);
+$dom{'nolink_certs'} = 1 if ($linkcert eq '0');
+$dom{'link_certs'} = 1 if ($linkcert eq '1');
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
 	}
@@ -944,7 +948,7 @@ print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
-print "                        [--no-link-cert]\n";
+print "                        [--break-ssl-cert | --link-ssl-cert]\n";
 exit(1);
 }
 

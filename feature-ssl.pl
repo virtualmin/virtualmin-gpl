@@ -1666,14 +1666,18 @@ return undef;
 sub find_matching_certificate
 {
 local ($d) = @_;
-return if ($config{'nolink_certs'} || $d->{'nolink_certs'});
-local $sslclash = &find_matching_certificate_domain($d);
-if ($sslclash) {
-	# Found a match, so add a link to it
-	$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-	$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-	$d->{'ssl_same'} = $sslclash->{'id'};
-	$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+local $lnk = $d->{'link_certs'} ? 1 :
+	     $d->{'nolink_certs'} ? 0 :
+	     $config{'nolink_certs'} ? 0 : 1;
+if ($lnk) {
+	local $sslclash = &find_matching_certificate_domain($d);
+	if ($sslclash) {
+		# Found a match, so add a link to it
+		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+		$d->{'ssl_same'} = $sslclash->{'id'};
+		$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+		}
 	}
 }
 
