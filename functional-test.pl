@@ -4991,7 +4991,7 @@ $ssl_tests = [
 		      [ 'parent', $test_domain ],
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
 		      [ 'parent-ip' ],
-		      [ 'no-link-cert' ],
+		      [ 'break-ssl-cert' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
 		      @create_args, ],
 	},
