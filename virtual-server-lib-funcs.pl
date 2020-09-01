@@ -3866,7 +3866,8 @@ return undef;
 # Return optional javascript to force scroll to the botton
 sub bottom_scroll_js
 {
-if ($main::force_bottom_scroll) {
+if ($main::force_bottom_scroll &&
+    $ENV{'HTTP_X_REQUESTED_WITH'} ne "XMLHttpRequest") {
 	return "<script>".
 	       "window.scrollTo(0, document.body.scrollHeight)".
 	       "</script>\n";
