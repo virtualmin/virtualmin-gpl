@@ -3880,7 +3880,7 @@ else {
 # Print functions for HTML output
 sub first_html_print { print_and_capture(@_,"<br>\n");
 		       print bottom_scroll_js(); }
-sub second_html_print { print_and_capture(@_,"<br><br>\n");
+sub second_html_print { print_and_capture(@_,"<br><br data-x-br>\n");
 		        print bottom_scroll_js(); }
 sub indent_html_print { print_and_capture("<ul>\n");
 		        print bottom_scroll_js(); }
