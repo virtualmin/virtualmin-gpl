@@ -272,7 +272,7 @@ foreach my $svc (&list_service_ssl_cert_types()) {
 sub disable_domain_service_ssl_certs
 {
 my ($d) = @_;
-foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
+foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if ($svc->{'d'}) {
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
 		&$func($d, 0) if (defined(&$func));
