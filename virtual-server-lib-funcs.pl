@@ -3866,7 +3866,8 @@ return undef;
 # Return optional javascript to force scroll to the botton
 sub bottom_scroll_js
 {
-if ($main::force_bottom_scroll) {
+if ($main::force_bottom_scroll &&
+    $ENV{'HTTP_X_REQUESTED_WITH'} ne "XMLHttpRequest") {
 	return "<script>".
 	       "window.scrollTo(0, document.body.scrollHeight)".
 	       "</script>\n";
@@ -4397,12 +4398,12 @@ if (!$to) {
 local $ctype = $template =~ /<html[^>]*>|<body[^>]*>/i ? "text/html"
 						       : "text/plain";
 local $cs = &get_charset();
-local $attach = $template =~ /[\177-\377]/ ?
-	{ 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
-		         [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
-          'data' => &mailboxes::quoted_encode($template) } :
-	{ 'headers' => [ [ 'Content-type', $ctype ] ],
-	  'data' => &entities_to_ascii($template) };
+local $attach = $template =~ /^[\000-\177]*$/ ?
+    { 'headers' => [ [ 'Content-type', $ctype ] ],
+      'data' => &entities_to_ascii($template) } :
+    { 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
+                     [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
+      'data' => &mailboxes::quoted_encode($template) };
 
 # Construct and send the email object
 local $mail = { 'headers' => [ [ 'From', $from ||
