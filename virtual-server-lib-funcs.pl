@@ -486,6 +486,24 @@ $main::domain_id_count++;
 return $rv;
 }
 
+# lock_domain(&domain|id)
+# Lock the config file for some domain
+sub lock_domain
+{
+my ($id) = @_;
+$id = $id->{'id'} if (ref($id));
+&lock_file("$domains_dir/$id");
+}
+
+# unlock_domain(&domain|id)
+# Unlock the config file for some domain
+sub unlock_domain
+{
+my ($id) = @_;
+$id = $id->{'id'} if (ref($id));
+&unlock_file("$domains_dir/$id");
+}
+
 # save_domain(&domain, [creating])
 # Write domain information to disk
 sub save_domain
