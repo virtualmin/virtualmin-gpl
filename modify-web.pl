@@ -342,7 +342,6 @@ if ($includes ne "") {
 
 # Lock them all
 foreach $d (@doms) {
-	&lock_domain($d);
 	&obtain_lock_web($d) if ($d->{'web'});
 	&obtain_lock_dns($d) if ($d->{'dns'} &&
 				 (defined($webmail) || defined($matchall)));
@@ -674,7 +673,6 @@ foreach $d (@doms) {
 	&release_lock_dns($d) if ($d->{'dns'} && 
 				  (defined($webmail) || defined($matchall)));
 	&release_lock_web($d) if ($d->{'web'});
-	&unlock_domain($d);
 	}
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
