@@ -315,7 +315,7 @@ if (!&can_create_master_servers() && &can_create_sub_servers()) {
 elsif (&can_create_master_servers()) {
 	# Can add either master or sub-server
 	if (!$cannot_add) {
-		print "<b>$limit_reason</b><p>\n" if ($limit_reason);
+		print "<b>$limit_reason</b><br><br data-x-br><p>\n" if ($limit_reason);
 		print &ui_submit($text{'index_add2'}, "add".$num);
 		print &ui_select("parentuser".$num, undef,
 			[ [ "", $text{'index_newuser'} ],
@@ -326,15 +326,17 @@ elsif (&can_create_master_servers()) {
 		print "<b>",$cannot_add,"</b><br>\n";
 		}
 	}
-if (&can_import_servers()) {
-	print &ui_submit($text{'index_import'}, "import");
-	}
-if (&can_migrate_servers()) {
-	print &ui_submit($text{'index_migrate'}, "migrate");
-	}
-if ((&can_create_master_servers() || &can_create_sub_servers()) &&
-    $virtualmin_pro && &can_create_batch()) {
-	print &ui_submit($text{'index_batch'}, "batch"),"\n";
+if ($dleft != 0) {
+	if (&can_import_servers()) {
+		print &ui_submit($text{'index_import'}, "import");
+		}
+	if (&can_migrate_servers()) {
+		print &ui_submit($text{'index_migrate'}, "migrate");
+		}
+	if ((&can_create_master_servers() || &can_create_sub_servers()) &&
+	    $virtualmin_pro && &can_create_batch()) {
+		print &ui_submit($text{'index_batch'}, "batch"),"\n";
+		}
 	}
 print "<br>\n" if (!$cannot_add);
 }
