@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
-		 "jailkit", "ports") {
+		 "jailkit", "ports", "bb") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
