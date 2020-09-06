@@ -2792,7 +2792,7 @@ elsif (!$ok) {
 	}
 &unlock_file($ssl_letsencrypt_lock);
 if (!$ok) {
-	return ($ok, join(", ", @errs), $key, $chain);
+	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
 	}
 else {
 	return ($ok, $cert, $key, $chain);
