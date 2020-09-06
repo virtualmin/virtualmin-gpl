@@ -1522,7 +1522,7 @@ local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
 if ($pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
 	}
-return &get_domain_url($d).$pp;
+return &get_domain_url($d, 1).$pp;
 }
 
 # show_template_scripts(&tmpl)
