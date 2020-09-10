@@ -2762,7 +2762,7 @@ if (!$config{'provision_dns'}) {
 	if (defined($in{'dnssec_mode'})) {
 		$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
 				    $in{'dnssec_mode'} == 1 ? undef : "yes";
-		$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
+		$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'} || 'RSASHA256';
 		$tmpl->{'dnssec_single'} = $in{'dnssec_single'};
 		}
 	}
