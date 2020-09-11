@@ -8099,7 +8099,8 @@ local @alldoms = (@aliasdoms, @subs, $d);
 foreach my $dd (@alldoms) {
 	foreach my $du (&get_domain_by("dns_subof", $dd->{'id'})) {
 		if (&indexof($du, @alldoms) < 0) {
-			# Domain is being used as a DNS parent, and user isn't being deleted
+			# Domain is being used as a DNS parent, and user isn't
+			# being deleted
 			return &text('delete_ednssubof', &show_domain_name($dd),
 							 &show_domain_name($du));
 			}
@@ -13045,6 +13046,7 @@ local (@doms, @olddoms);
 $d->{'parent'} = undef;
 $d->{'user'} = $newuser;
 $d->{'group'} = $newuser;
+$d->{'ugroup'} = $newuser;
 $d->{'pass'} = $newpass;
 &generate_domain_password_hashes($d, 1);
 if (!$d->{'mysql'}) {
@@ -13428,6 +13430,7 @@ local ($d, $parent) = @_;
 $d->{'parent'} = $parent->{'id'};
 $d->{'user'} = $parent->{'user'};
 $d->{'group'} = $parent->{'group'};
+$d->{'ugroup'} = $parent->{'ugroup'};
 $d->{'uid'} = $parent->{'uid'};
 $d->{'gid'} = $parent->{'gid'};
 $d->{'ugid'} = $parent->{'ugid'};
