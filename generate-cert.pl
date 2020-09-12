@@ -122,6 +122,7 @@ if ($self) {
 	&$first_print("Generating new self-signed certificate ..");
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	my $newfile = !-r $d->{'ssl_cert'};
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
 	&obtain_lock_ssl($d);
@@ -142,8 +143,10 @@ if ($self) {
 		&$second_print(".. failed : $err");
 		exit(1);
 		}
-	&set_certificate_permissions($d, $d->{'ssl_cert'});
-	&set_certificate_permissions($d, $d->{'ssl_key'});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_cert'});
+		&set_certificate_permissions($d, $d->{'ssl_key'});
+		}
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain
@@ -186,6 +189,7 @@ else {
 	&$first_print("Generating new certificate signing request ..");
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, 'csr');
 	$d->{'ssl_newkey'} ||= &default_certificate_file($d, 'newkey');
+	my $newfile = !-r $d->{'ssl_csr'};
 	&lock_file($d->{'ssl_csr'});
 	&lock_file($d->{'ssl_newkey'});
 	$err = &generate_certificate_request(
@@ -205,8 +209,10 @@ else {
 		&$second_print(".. failed : $err");
 		exit(1);
 		}
-	&set_certificate_permissions($d, $d->{'ssl_csr'});
-	&set_certificate_permissions($d, $d->{'ssl_newkey'});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_csr'});
+		&set_certificate_permissions($d, $d->{'ssl_newkey'});
+		}
 	&unlock_file($d->{'ssl_newkey'});
 	&unlock_file($d->{'ssl_csr'});
 	&$second_print(".. done");
