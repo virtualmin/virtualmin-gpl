@@ -5288,15 +5288,18 @@ elsif ($mode == 8) {
 
 elsif ($mode == 10) {
 	# Search for Backblaze for files matching the date pattern
-	print STDERR "base=$base\n";
-	local $files = &list_bb_files($base);
+	my $dir;
+	if ($re =~ /^(.*)\//) {
+		$dir = $1;
+		}
+	local $files = &list_bb_files($base, $dir);
 	if (!ref($files)) {
 		&$second_print(&text('backup_purgeefiles4', $files));
 		return 0;
 		}
 	foreach my $st (@$files) {
 		my $f = $st->{'name'};
-		local $ctime;
+		my $ctime;
 		if ($st->{'folder'}) {
 			# Age is age of the oldest file
 			$ctime = time();
@@ -5313,8 +5316,6 @@ elsif ($mode == 10) {
 			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
-			# XXX handle sub-folders and buckets correctly
-			print STDERR "f=$f ctime=$ctime\n";
 			$mcount++;
                         next if (!$ctime || $ctime >= $cutoff);
                         local $old = int((time() - $ctime) / (24*60*60));
