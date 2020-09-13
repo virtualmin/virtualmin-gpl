@@ -3603,6 +3603,137 @@ $dropboxbackup_tests = [
 
 $enc_dropboxbackup_tests = &convert_to_encrypted($dropboxbackup_tests);
 
+$bb_backup_prefix = "bb://virtualmin-test-backup-bucket";
+$bbbackup_tests = [
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Backup to Dropbox
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Dropbox again, to test that over-writing works
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore from Dropbox
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain from Dropbox
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Dropbox in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Backup to Dropbox in home format again, to test overwriting
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Restore from Dropbox in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix ] ],
+	},
+
+	# Backup from Dropbox one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Restore from Dropbox, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix ] ],
+	},
+
+	# Backup to Dropbox subdirectory in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix."/subdir" ] ],
+	},
+
+	# Restore from Dropbox subdirectory in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix."/subdir" ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$enc_bbbackup_tests = &convert_to_encrypted($bbbackup_tests);
+
 $splitbackup_tests = [
 	# Create a domain for the backup target
 	{ 'command' => 'create-domain.pl',
@@ -8462,6 +8593,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_gcsbackup' => $enc_gcsbackup_tests,
 	      'dropboxbackup' => $dropboxbackup_tests,
 	      'enc_dropboxbackup' => $enc_dropboxbackup_tests,
+	      'bbbackup' => $bbbackup_tests,
+	      'enc_bbbackup' => $enc_bbbackup_tests,
 	      'rsbackup' => $rsbackup_tests,
 	      'enc_rsbackup' => $enc_rsbackup_tests,
 	      'configbackup' => $configbackup_tests,

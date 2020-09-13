@@ -134,10 +134,13 @@ foreach $g (@got) {
 	my $k = $g->[0] eq 'ca' ? 'chain' : $g->[0];
 	$d->{'ssl_'.$k} ||= &default_certificate_file($d, $g->[0]);
 	&lock_file($d->{'ssl_'.$k});
+	my $newfile = !-r $d->{'ssl_'.$k};
 	&open_tempfile_as_domain_user($d, SSL, ">".$d->{'ssl_'.$k});
 	&print_tempfile(SSL, $g->[1]);
 	&close_tempfile_as_domain_user($d, SSL);
-	&set_certificate_permissions($d, $d->{'ssl_'.$k});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_'.$k});
+		}
 	&unlock_file($d->{'ssl_'.$k});
 	if ($g->[0] ne 'csr') {
 		&save_website_ssl_file($d, $g->[0], $d->{'ssl_'.$k});

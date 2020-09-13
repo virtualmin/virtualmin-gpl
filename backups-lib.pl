@@ -5286,6 +5286,61 @@ elsif ($mode == 8) {
 		}
 	}
 
+elsif ($mode == 10) {
+	# Search for Backblaze for files matching the date pattern
+	my $dir;
+	if ($re =~ /^(.*)\//) {
+		$dir = $1;
+		}
+	local $files = &list_bb_files($base, $dir);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles4', $files));
+		return 0;
+		}
+	foreach my $st (@$files) {
+		my $f = $st->{'name'};
+		my $ctime;
+		if ($st->{'folder'}) {
+			# Age is age of the oldest file
+			$ctime = time();
+			my $subfiles = &list_dropbox_files($base, $f);
+			if (ref($subfiles)) {
+				foreach my $sf (@$subfiles) {
+					$ctime = $sf->{'time'}
+					  if ($sf->{'time'} && $sf->{'time'} < $ctime);
+					}
+				}
+			}
+		else {
+			$ctime = $st->{'time'};
+			}
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
+			# Found one to delete
+			$mcount++;
+                        next if (!$ctime || $ctime >= $cutoff);
+                        local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+                                            "<tt>$f</tt>", $old));
+			my $size = $st->{'folder'} ?
+					&size_bb_directory($base, $f) :
+					$st->{'size'};
+			local $err = &delete_bb_file($base, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_dropbox_path($base, $f.".dom");
+				&delete_dropbox_path($base, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($size)));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+
 &$outdent_print();
 
 &$second_print($pcount ? &text('backup_purged', $pcount, $mcount - $pcount) :

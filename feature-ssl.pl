@@ -2562,12 +2562,14 @@ my ($d, $cert, $key, $chain) = @_;
 # Copy and save the cert
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 my $cert_text = &read_file_contents($cert);
+my $newfile = !-r $d->{'ssl_cert'};
 &lock_file($d->{'ssl_cert'});
-&unlink_file($d->{'ssl_cert'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
 &print_tempfile(CERT, $cert_text);
 &close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_cert'});
+if ($newfile) {
+	&set_certificate_permissions($d, $d->{'ssl_cert'});
+	}
 &unlock_file($d->{'ssl_cert'});
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 
@@ -2575,11 +2577,12 @@ my $cert_text = &read_file_contents($cert);
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 my $key_text = &read_file_contents($key);
 &lock_file($d->{'ssl_key'});
-&unlink_file($d->{'ssl_key'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
 &print_tempfile(CERT, $key_text);
 &close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_key'});
+if ($newfile) {
+	&set_certificate_permissions($d, $d->{'ssl_key'});
+	}
 &unlock_file($d->{'ssl_key'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
 
@@ -2592,11 +2595,12 @@ if ($chain) {
 	$chainfile = &default_certificate_file($d, 'ca');
 	$chain_text = &read_file_contents($chain);
 	&lock_file($chainfile);
-	&unlink_file_as_domain_user($d, $chainfile);
 	&open_tempfile_as_domain_user($d, CERT, ">$chainfile");
 	&print_tempfile(CERT, $chain_text);
 	&close_tempfile_as_domain_user($d, CERT);
-	&set_permissions_as_domain_user($d, 0755, $chainfile);
+	if ($newfile) {
+		&set_permissions_as_domain_user($d, 0755, $chainfile);
+		}
 	&unlock_file($chainfile);
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
 	$d->{'ssl_chain'} = $chainfile;
