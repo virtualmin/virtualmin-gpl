@@ -248,7 +248,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert ||
 	&usage("Nothing to do");
-$proxy && $framefwd && &error("Both proxying and frame forwarding cannot be enabled at once");
+$proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
 @modes = &supported_php_modes();
@@ -356,7 +356,9 @@ foreach $d (@doms) {
 
 	# Update PHP mode
 	if ($mode && !$d->{'alias'}) {
-		&save_domain_php_mode($d, $mode);
+		&$first_print("Changing PHP execution mode to $mode ..");
+		my $err = &save_domain_php_mode($d, $mode);
+		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
 	# Update PHP fCGId children

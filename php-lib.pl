@@ -66,7 +66,8 @@ return 'mod_php';
 }
 
 # save_domain_php_mode(&domain, mode, [port], [new-domain])
-# Changes the method a virtual web server uses to run PHP.
+# Changes the method a virtual web server uses to run PHP. Returns undef on
+# success or an error message on failure.
 sub save_domain_php_mode
 {
 local ($d, $mode, $port, $newdom) = @_;
@@ -78,7 +79,7 @@ local $oldmode = &get_domain_php_mode($d);
 # Work out the default PHP version for FPM
 if ($mode eq "fpm" && !$d->{'php_fpm_version'}) {
 	local @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
-	@fpms || &error("No FPM versions found!");
+	@fpms || return "No FPM versions found!";
 	my $defconf = $tmpl->{'web_phpver'} ?
 		&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
 	$defconf ||= $fpms[0];
@@ -94,7 +95,7 @@ if ($mode eq "mod_php" && $oldmode ne "mod_php") {
 # Work out source php.ini files
 local (%srcini, %subs_ini);
 local @vers = &list_available_php_versions($d, $mode);
-@vers || &error("No PHP versions found for mode $mode");
+@vers || return "No PHP versions found for mode $mode";
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;
 	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
@@ -136,8 +137,8 @@ foreach my $ver (@vers) {
 		elsif ($subs_ini) {
 			# Perform substitions on config file
 			local $inidata = &read_file_contents($srcini);
-			$inidata || &error("Failed to read $srcini, ".
-					   "or file is empty");
+			$inidata || return "Failed to read $srcini, ".
+					   "or file is empty";
 			$inidata = &substitute_virtualmin_template($inidata,$d);
 			&open_tempfile_as_domain_user(
 				$d, INIDATA, ">$inidir/php.ini");
@@ -148,8 +149,8 @@ foreach my $ver (@vers) {
 			# Just copy verbatim
 			local ($ok, $err) = &copy_source_dest_as_domain_user(
 				$d, $srcini, "$inidir/php.ini");
-			$ok || &error("Failed to copy $srcini to ".
-				      "$inidir/php.ini : $err");
+			$ok || return "Failed to copy $srcini to ".
+				      "$inidir/php.ini : $err";
 			}
 
 		# Clear any caching on file
@@ -268,8 +269,8 @@ foreach my $p (@ports) {
 					 $_->{'words'}->[0] eq $pdir."/" }
 		    &apache::find_directive_struct("Directory", $vconf);
 		if ($mode eq "fcgid") {
-			$dirstr || &error("No &lt;Directory&gt; section found ",
-					  "for mod_fcgid directives");
+			$dirstr || return "No &lt;Directory&gt; section ".
+					  "found for mod_fcgid directives";
 			push(@phpconfs, $dirstr);
 			}
 		elsif ($dirstr && !@pactions) {
@@ -519,7 +520,9 @@ if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
 &create_php_ini_link($d, $mode);
 
 &register_post_action(\&restart_apache);
-$pfound || &error("Apache virtual host was not found");
+$pfound || return "Apache virtual host was not found";
+
+return undef;
 }
 
 # set_fcgid_max_execution_time(&domain, value, [mode], [port])

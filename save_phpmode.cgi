@@ -64,8 +64,13 @@ if ($in{'ssi'} == 1) {
 $oldmode = &get_domain_php_mode($d);
 if (defined($in{'mode'}) && $oldmode ne $in{'mode'} && $can == 2) {
 	&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
-	&save_domain_php_mode($d, $in{'mode'});
-	&$second_print($text{'setup_done'});
+	my $err = &save_domain_php_mode($d, $in{'mode'});
+	if ($err) {
+		&$second_print(&text('phpmode_emoding', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	$anything++;
 	}
 

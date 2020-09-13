@@ -237,8 +237,13 @@ foreach $d (@doms) {
 	if (&can_edit_phpmode() && $in{'phpmode'} && $d->{'web'} &&
 	    !$d->{'alias'}) {
 		&$first_print($text{'massdomains_phpmoding'});
-		&save_domain_php_mode($d, $in{'phpmode'});
-		&$second_print($text{'setup_done'});
+		my $err = &save_domain_php_mode($d, $in{'phpmode'});
+		if ($err) {
+			&$second_print(&text('phpmode_emoding', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Check the PHP child processes ..
