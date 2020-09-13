@@ -19,7 +19,8 @@ flag can be used to set the SMTP authentication type, which defaults to
 C<Plain>.
 
 By default this command will use an unencrypted connection, but you can force
-a switch to SSL mode with the C<--ssl> flag. Also, the C<--port> flag followed
+use of SSL mode with the C<--ssl> flag or C<--starttls> to attempt to switch to
+SSL after the connection is made. The C<--port> flag followed
 by a port number or name can be used to have the SMTP connection made on a port
 other than the default (25 or 465).
 
@@ -76,6 +77,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ssl") {
 		$ssl = 1;
 		}
+	elsif ($a eq "--starttls") {
+		$ssl = 2;
+		}
 	elsif ($a eq "--data") {
 		$datafile = shift(@ARGV);
 		}
@@ -87,7 +91,7 @@ while(@ARGV > 0) {
 		}
 	}
 $to || &usage("No destination address specified");
-$port ||= ($ssl ? 465 : 25);
+$port ||= ($ssl == 1 ? 465 : 25);
 
 # Open SMTP connection
 &foreign_require("mailboxes");
@@ -95,19 +99,10 @@ $main::error_must_die = 1;
 eval {
 	my $h = { 'fh' => 'MAIL' };
 	&open_socket($server, $port, $h->{'fh'});
-        if ($ssl) {
-		# Switch to SSL mode
-		eval "use Net::SSLeay";
-                $@ && die($text{'link_essl'});
-                eval "Net::SSLeay::SSLeay_add_ssl_algorithms()";
-                eval "Net::SSLeay::load_error_strings()";
-                $h->{'ssl_ctx'} = Net::SSLeay::CTX_new() ||
-                        die("Failed to create SSL context");
-                $h->{'ssl_con'} = Net::SSLeay::new($h->{'ssl_ctx'}) ||
-                        die("Failed to create SSL connection");
-                Net::SSLeay::set_fd($h->{'ssl_con'}, fileno(MAIL));
-                Net::SSLeay::connect($h->{'ssl_con'}) ||
-                        die("SSL connect() failed");
+
+        if ($ssl == 1) {
+		# Switch to SSL mode right now
+		&switch_to_ssl($h);
                 }
 
 	my $callpkg = (caller(0))[0];
@@ -115,6 +110,17 @@ eval {
 
 	&mailboxes::smtp_command($h);
 	&mailboxes::smtp_command($h, "helo ".&get_system_hostname()."\r\n");
+
+	if ($ssl == 2) {
+		# Switch to SSL with STARTTLS
+		my $rv = &mailboxes::smtp_command($h, "starttls\r\n", 1);
+		if ($rv =~ /^2\d+/) {
+			&switch_to_ssl($h);
+			}
+		else {
+			$ssl = 0;
+			}
+		}
 
 	if ($user) {
 		# Login to SMTP server
@@ -130,16 +136,16 @@ eval {
 		&error("Failed to create Authen::SASL object") if (!$sasl);
 		local $conn = $sasl->client_new("smtp", &get_system_hostname());
 		local $arv = &mailboxes::smtp_command($h, "auth $auth\r\n", 1);
-		if ($arv =~ /^(334)\s+(.*)/) {
+		if ($arv =~ /^(334))(\-\S+)?\s+(.*)/) {
 			# Server says to go ahead
-			$extra = $2;
+			$extra = $3;
 			local $initial = $conn->client_start();
 			local $auth_ok;
 			if ($initial) {
 				local $enc = &encode_base64($initial);
 				$enc =~ s/\r|\n//g;
 				$arv = &mailboxes::smtp_command($h, "$enc\r\n", 1);
-				if ($arv =~ /^(\d+)\s+(.*)/) {
+				if ($arv =~ /^(\d+)(\-\S+)?\s+(.*)/) {
 					if ($1 == 235) {
 						$auth_ok = 1;
 						}
@@ -147,7 +153,7 @@ eval {
 						die("Unknown SMTP authentication response : $arv");
 						}
 					}
-				$extra = $2;
+				$extra = $3;
 				}
 			while(!$auth_ok) {
 				local $message = &decode_base64($extra);
@@ -155,14 +161,14 @@ eval {
 				local $enc = &encode_base64($return);
 				$enc =~ s/\r|\n//g;
 				$arv = &mailboxes::smtp_command($h, "$enc\r\n", 1);
-				if ($arv =~ /^(\d+)\s+(.*)/) {
+				if ($arv =~ /^(\d+)(\-\S+)?\s+(.*)/) {
 					if ($1 == 235) {
 						$auth_ok = 1;
 						}
 					elsif ($1 == 535) {
 						die("SMTP authentication failed : $arv");
 						}
-					$extra = $2;
+					$extra = $3;
 					}
 				else {
 					die("Unknown SMTP authentication response : $arv");
@@ -197,6 +203,22 @@ else {
 	print "SMTP address $to accepts RCPT\n";
 	}
 
+sub switch_to_ssl
+{
+my ($h) = @_;
+eval "use Net::SSLeay";
+$@ && die($text{'link_essl'});
+eval "Net::SSLeay::SSLeay_add_ssl_algorithms()";
+eval "Net::SSLeay::load_error_strings()";
+$h->{'ssl_ctx'} = Net::SSLeay::CTX_new() ||
+	die("Failed to create SSL context");
+$h->{'ssl_con'} = Net::SSLeay::new($h->{'ssl_ctx'}) ||
+	die("Failed to create SSL connection");
+Net::SSLeay::set_fd($h->{'ssl_con'}, fileno(MAIL));
+Net::SSLeay::connect($h->{'ssl_con'}) ||
+	die("SSL connect() failed");
+}
+
 sub usage
 {
 print "$_[0]\n\n" if ($_[0]);
@@ -205,7 +227,7 @@ print "\n";
 print "virtualmin test-smtp --to address\n";
 print "                    [--server hostname]\n";
 print "                    [--port number|name]\n";
-print "                    [--ssl]\n";
+print "                    [--ssl | --starttls]\n";
 print "                    [--from address]\n";
 print "                    [--user login --pass password]\n";
 print "                    [--auth method]\n";
