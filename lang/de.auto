@@ -2375,7 +2375,7 @@ cloud_google_oauth=OAuth2-Code von Google
 cloud_google_token=OAuth2-Token von Google
 cloud_google_longdesc=Die Einstellungen auf dieser Seite werden von Google bereitgestellt, wenn Sie auf der Seite <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> API-Zugriff auf Ihr Projekt gewähren, unter <b>APIs und Auth</b> -> <b>Anmeldeinformationen</b>.
 cloud_dropbox_longdesc=Bevor Sie ein Backup auf Dropbox erstellen können, müssen Sie zunächst <a href=http://www.virtualmin.com/dropbox-referral target=_blank>auf ihrer Website ein Konto</a> erstellen, falls Sie noch keines haben.
-cloud_bb_longdesc=Bevor Sie ein Backup auf Backblaze erstellen können, müssen Sie zunächst <a href=https://backblaze.com/ target=_blank>ein Konto erstellen</a> und dann <b>B2 Cloud Storage</b> auf dem <aktivieren b>Seite Meine Einstellungen</aktivieren>. Anschließend müssen Sie auf der Seite <b>App Keys</b> einen Anwendungsschlüssel mit allen Funktionen generieren.
+cloud_bb_longdesc=Bevor Sie ein Backup auf Backblaze erstellen können, müssen Sie zunächst <a href=https://backblaze.com/ target=_blank>ein Konto erstellen</a> und dann <b>B2 Cloud Storage</b> auf dem aktivieren <b>Seite Meine Einstellungen</b>. Anschließend müssen Sie auf der Seite <b>App Keys</b> einen Anwendungsschlüssel mit allen Funktionen generieren.
 cloud_openoauth=Beginnen Sie mit der OAuth2-Registrierung
 cloud_newoauth=OAuth2-Code von Google:
 cloud_newoauth_dropbox=OAuth2-Code von Dropbox:

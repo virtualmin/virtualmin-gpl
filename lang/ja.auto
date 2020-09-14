@@ -6732,7 +6732,7 @@ cloud_google_oauth=GoogleのOAuth2コード
 cloud_google_token=GoogleのOAuth2トークン
 cloud_google_longdesc=このページの設定は、<a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a>ページでプロジェクトへのAPIアクセスを許可したときにGoogleから提供されます、<b>APIと認証</b>-＆gt; <b>資格情報</b>。
 cloud_dropbox_longdesc=Dropboxにバックアップする前に、ウェブサイトでアカウントをまだ持っていない場合は、最初に<a href=http://www.virtualmin.com/dropbox-referral target=_blank>アカウントを作成</a>する必要があります。
-cloud_bb_longdesc=Backblazeにバックアップする前に、<a href=https://backblaze.com/ target=_blank>アカウントを作成</a>してから、<で<b>B2 Cloud Storage</�>を有効にする必要がありますb>マイ設定</b>ページ。次に、[<b>アプリキー</b>]ページですべての機能を備えたアプリケーションキーを生成する必要があります。
+cloud_bb_longdesc=Backblazeにバックアップする前に、<a href=https://backblaze.com/ target=_blank>アカウントを作成</a>してから、<で<b>B2 Cloud Storage</b>を有効にする必要がありますb>マイ設定</b>ページ。次に、[<b>アプリキー</b>]ページですべての機能を備えたアプリケーションキーを生成する必要があります。
 cloud_openoauth=OAuth2登録を開始
 cloud_newoauth=GoogleのOAuth2コード：
 cloud_newoauth_dropbox=DropboxのOAuth2コード：
