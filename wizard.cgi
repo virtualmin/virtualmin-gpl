@@ -54,7 +54,7 @@ elsif ($in{'prev'}) {
 print &ui_form_start("wizard.cgi", "post");
 print &ui_hidden("step", $in{'step'});
 if ($err) {
-	print "<b><font color=#ff0000>$err</font></b><p>\n";
+	print &ui_alert_box($err, 'warn');
 	}
 print &ui_table_start(undef, "width=100%", 2);
 
