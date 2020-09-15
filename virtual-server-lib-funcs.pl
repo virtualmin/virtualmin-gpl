@@ -8102,7 +8102,7 @@ foreach my $dd (@alldoms) {
 			# Domain is being used as a DNS parent, and user isn't
 			# being deleted
 			return &text('delete_ednssubof', &show_domain_name($dd),
-							 &show_domain_name($du));
+				     &show_domain_name($du));
 			}
 		}
 	}
