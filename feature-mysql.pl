@@ -207,7 +207,8 @@ foreach $s (@str) {
 	}
 local $qdb = &quote_mysql_database($db);
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	# Use the grant command
 	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 	}
@@ -225,7 +226,8 @@ sub remove_db_table
 {
 local ($d, $db, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
@@ -2555,7 +2557,8 @@ local ($d, $host, $user, $mailbox) = @_;
 local $conns = &get_mysql_user_connections($d, $mailbox);
 if ($conns) {
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+	    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 		# Need to use the alter user command
 		&execute_dom_sql($d, $mysql::master_db,
 			"alter user '$user'\@'$host' ".
@@ -2756,7 +2759,8 @@ sub execute_user_rename_sql
 {
 my ($d, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	# Need to alter user
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
@@ -2781,7 +2785,8 @@ sub execute_database_reassign_sql
 {
 my ($d, $db, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	# Revoke access from the old user on all hosts
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
@@ -2812,16 +2817,15 @@ if (!$encpass && $plainpass) {
 	my $qpass = &mysql_escape($plainpass);
 	$encpass = "$password_func('$qpass')";
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	# Need to use new 'create user' command
-	return ("create user '$user'\@'$host' identified by ".
+	my $native = ($variant eq "mysql" && $plainpass &&
+		      &is_domain_mysql_remote($d)) ?
+			"with mysql_native_password" : "";
+	return ("create user '$user'\@'$host' identified $native by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
 			    : "password ".$encpass));
-	}
-elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
-	my $native = &is_domain_mysql_remote($d) ?
-			"with mysql_native_password" : "";
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
@@ -2841,7 +2845,8 @@ sub get_user_deletion_sql
 my ($d, $host, $user, $dbtoo) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my @rv;
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
 	if ($host) {
 		# Host is known
 		@rv = ("drop user if exists '$user'\@'$host'");
@@ -2888,16 +2893,13 @@ my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
+	if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0 ||
+	    $variant eq "mysql" && &compare_versions($ver, "8") >= 0) {
+		# `set password` has been deprecated as per Note in
+		# https://dev.mysql.com/doc/refman/8.0/en/set-password.html
 		$sql = "alter user '$user'\@'$host' identified by ".
 			($plainpass ? "'".&mysql_escape($plainpass)."'"
 				    : $encpass);
-		}
-	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
-	       $plainpass) {
-		# Use the plaintext password wherever possible
-		$sql = "set password for '$user'\@'$host' = '".
-		       &mysql_escape($plainpass)."'";
 		}
 	elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 		$sql = "update user set authentication_string = $encpass ".
