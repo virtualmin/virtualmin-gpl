@@ -219,9 +219,10 @@ return $info;
 # Returns the most recently collected system information, or the current info
 sub get_collected_info
 {
+my ($block_cache) = @_;
 local $infostr = $config{'collect_interval'} eq 'none' ? undef :
 			&read_file_contents($collected_info_file);
-if ($infostr) {
+if ($infostr && !$block_cache) {
 	local $info = &unserialise_variable($infostr);
 	if (ref($info) eq 'HASH' && keys(%$info) > 0) {
 		return $info;
