@@ -43,6 +43,7 @@ if (!$require_useradmin++) {
 	$cannot_rehash_password = 0;
 	if ($config{'ldap'}) {
 		&foreign_require("ldap-useradmin");
+		%luconfig = &foreign_config("ldap-useradmin");
 		$usermodule = "ldap-useradmin";
 		if ($ldap_useradmin::config{'md5'} == 3 ||
 		    $ldap_useradmin::config{'md5'} == 4) {
@@ -5166,7 +5167,11 @@ foreach my $gid (keys %gids) {
 # Given a hash of used UIDs, return one that is free
 sub allocate_uid
 {
-local $uid = $uconfig{'base_uid'};
+local $uid;
+if ($usermodule eq "ldap-useradmin") {
+	$uid = $luconfig{'base_uid'};
+	}
+$uid ||= $uconfig{'base_uid'};
 while($_[0]->{$uid}) {
 	$uid++;
 	}
@@ -5177,7 +5182,11 @@ return $uid;
 # Given a hash of used GIDs, return one that is free
 sub allocate_gid
 {
-local $gid = $uconfig{'base_gid'};
+local $gid;
+if ($usermodule eq "ldap-useradmin") {
+	$gid = $luconfig{'base_gid'};
+	}
+$gid ||= $uconfig{'base_gid'};
 while($_[0]->{$gid}) {
 	$gid++;
 	}
