@@ -11278,6 +11278,15 @@ $python_version = $1 if ($out =~ /Python\s+(.*)/i);
 return $python_version;
 }
 
+# get_usermin_version()
+# Return current Usermin version, if instaled
+sub get_usermin_version
+{
+return 0 if (!&foreign_check("usermin"));
+&foreign_require("usermin");
+return &usermin::get_usermin_version();
+}
+
 # sysinfo_virtualmin()
 # Returns the OS info, Perl version and path
 sub sysinfo_virtualmin
@@ -11297,6 +11306,37 @@ if ($python_version) {
          [ $text{'sysinfo_python'}, $python_version ],
          [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
 	}
+
+if ($main::sysinfo_virtualmin_self) {
+
+	# Add Webmin version; add Usermin version, if installed
+	my %systemstatustext = &load_language('system-status');
+	push(@sysinfo_virtualmin,
+	    [ $systemstatustext{'right_webmin'}, &get_webmin_version() ] );
+	my $um_ver = &get_usermin_version();
+	if ($um_ver) {
+		push(@sysinfo_virtualmin,
+	        [ $systemstatustext{'right_usermin'}, $um_ver ] );
+		}
+
+	# Add Virtualmin version
+	push(@sysinfo_virtualmin,
+	    [ $text{'right_virtualmin'}, &get_module_version_and_type() ] );
+
+	# Add Cloudmin version, if installed
+	if (&foreign_installed("server-manager")) {
+		&foreign_require("server-manager");
+		if (defined(&server_manager::get_module_version_and_type)) {
+			my $cm_ver = &server_manager::get_module_version_and_type();
+			if ($cm_ver) {
+				my %cmtext = &load_language('server-manager');
+				push(@sysinfo_virtualmin,
+				    [ $cmtext{'right_vm2'}, $cm_ver ] );
+				}
+			}
+	}
+}
+
 return @sysinfo_virtualmin;
 }
 
