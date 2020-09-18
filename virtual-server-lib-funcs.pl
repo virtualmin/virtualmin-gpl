@@ -8237,21 +8237,15 @@ foreach my $dd (@alldoms) {
 	my $f;
 	$dd->{'deleting'} = 1;		# so that features know about delete
 	local $p = &domain_has_website($dd);
-	if (!$only) {
-		# Delete all plugins, with error handling
-		foreach $f (&list_feature_plugins()) {
-			if ($dd->{$f} && $f ne $p) {
-				&call_feature_delete($f, $dd, $preserve);
-				}
-			}
+	local @of;
+	if ($only) {
+		@of = ( "webmin" );
 		}
-	foreach $f ($only ? ( "webmin" ) : reverse(@features)) {
-		if ($f eq "web" && $p && $p ne "web") {
-			# Delete web plugin later, after dependencies have
-			# been removed
-			&call_feature_delete($p, $dd, $preserve);
-			}
-		elsif ($config{$f} && $dd->{$f} || $f eq 'unix') {
+	else {
+		@of = reverse(&list_ordered_features($d));
+		}
+	foreach $f (@of) {
+		if ($config{$f} && $dd->{$f} || $f eq 'unix') {
 			# Delete core feature
 			local @args = ( $preserve );
 			if ($f eq "mail") {
@@ -17573,7 +17567,7 @@ return $file;
 
 # list_ordered_features(&domain)
 # Returns a list of features or plugins possibly relevant to some domain,
-# in dependency order
+# in dependency order for creation.
 sub list_ordered_features
 {
 local ($d) = @_;
