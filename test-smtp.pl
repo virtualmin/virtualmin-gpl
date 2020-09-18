@@ -136,7 +136,7 @@ eval {
 		&error("Failed to create Authen::SASL object") if (!$sasl);
 		local $conn = $sasl->client_new("smtp", &get_system_hostname());
 		local $arv = &mailboxes::smtp_command($h, "auth $auth\r\n", 1);
-		if ($arv =~ /^(334))(\-\S+)?\s+(.*)/) {
+		if ($arv =~ /^(334)(\-\S+)?\s+(.*)/) {
 			# Server says to go ahead
 			$extra = $3;
 			local $initial = $conn->client_start();
