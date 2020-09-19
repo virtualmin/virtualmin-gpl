@@ -1293,14 +1293,17 @@ return undef;
 # Returns the MySQL login name for a domain
 sub mysql_user
 {
+my ($d, $renew) = @_;
 &require_mysql();
-if ($_[0]->{'parent'}) {
+if ($d->{'parent'}) {
 	# Get from parent domain
-	return &mysql_user(&get_domain($_[0]->{'parent'}), $_[1]);
+	return &mysql_user(&get_domain($d->{'parent'}), $renew);
 	}
-return $_[0]->{'mysql_user'} if (defined($_[0]->{'mysql_user'}) && !$_[1]);
-return length($_[0]->{'user'}) > $mysql_user_size ?
-	  substr($_[0]->{'user'}, 0, $mysql_user_size) : $_[0]->{'user'};
+return $d->{'mysql_user'} if (defined($d->{'mysql_user'}) && !$renew);
+my $rv = length($d->{'user'}) > $mysql_user_size ?
+	  substr($d->{'user'}, 0, $mysql_user_size) : $d->{'user'};
+$rv =~ s/\./_/g;
+return $rv;
 }
 
 # set_mysql_user(&domain, newuser)
