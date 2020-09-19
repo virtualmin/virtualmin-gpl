@@ -5810,15 +5810,11 @@ local ($d) = @_;
 return ( "autoconfig.".$d->{'dom'}, "autodiscover.".$d->{'dom'} );
 }
 
-# enable_email_autoconfig(&domain)
-# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
-# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
-# automatic configuration for that domain
-sub enable_email_autoconfig
+# get_email_autoconfig_imap(&domain)
+# Returns the IMAP host, port, type, ssl-flag and encryption type. Also returns
+# the POP3 port and encryption type.
+sub get_email_autoconfig_imap
 {
-local ($d) = @_;
-local @autoconfig = &get_autoconfig_hostname($d);
-
 # Work out IMAP server port and mode
 local $imap_host = "mail.$d->{'dom'}";
 local $imap_port = 143;
@@ -5852,9 +5848,17 @@ if (&foreign_installed("dovecot")) {
 		$imap_enc = "password-encrypted";
 		}
 	}
+return ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
+	$pop3_port, $pop3_enc);
+}
 
-# Work out SMTP server port and mode
-local $smtp_host = $d->{'dom'};
+# get_email_autoconfig_smtp(&domain)
+# Returns the SMTP
+sub get_email_autoconfig_smtp
+{
+local ($d) = @_;
+
+local $smtp_host = "mail.$d->{'dom'}";
 local $smtp_port = 25;
 local $smtp_type = "plain";
 local $smtp_ssl = "no";
@@ -5867,7 +5871,7 @@ if ($config{'mail_system'} == 0) {
 				     $_->{'enabled'} } @$master;
 	if ($submission) {
 		$smtp_port = 587;
-		if ($submission->{'command'} =~ /smtpd_tls_security_level=(encrypt|may)/) {
+		if ($submission->{'command'} =~ /smtpd_sasl_auth_enable=(yes)/) {
 			$smtp_type = "STARTTLS";
 			$smtp_ssl = "yes";
 			}
@@ -5890,6 +5894,23 @@ elsif ($config{'mail_system'} == 1) {
 			}
 		}
 	}
+return ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc);
+}
+
+# enable_email_autoconfig(&domain)
+# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
+# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
+# automatic configuration for that domain
+sub enable_email_autoconfig
+{
+local ($d) = @_;
+local @autoconfig = &get_autoconfig_hostname($d);
+
+# Work out mail server ports and modes
+local ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
+       $pop3_port, $pop3_enc) = &get_email_autoconfig_imap($d);
+local ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc) =
+      &get_email_autoconfig_smtp($d);
 
 # Create CGI that outputs the correct XML for the domain
 local $cgidir = &cgi_bin_dir($d);

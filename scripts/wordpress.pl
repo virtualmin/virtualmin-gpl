@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "5.4.1" );
+return ( "5.4.2" );
 }
 
 sub script_wordpress_category
@@ -120,6 +120,7 @@ else {
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
+		 'dbtbpref' => $in->{'dbtbpref'},
 		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}",
 		 'title' => $in{'title'} };
 	}
@@ -135,9 +136,13 @@ $opts->{'db'} || return "Missing database";
 if (-r "$opts->{'dir'}/wp-login.php") {
 	return "WordPress appears to be already installed in the selected directory";
 	}
+$opts->{'dbtbpref'} =~ s/^\s+|\s+$//g;
+$opts->{'dbtbpref'} = 'wp_' if (!$opts->{'dbtbpref'});
+$opts->{'dbtbpref'} =~ /^\w+$/ || return "Database table prefix either not set or contains invalid characters";
+$opts->{'dbtbpref'} .= "_" if($opts->{'dbtbpref'} !~ /_$/);
 my ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-my $clash = find_database_table($dbtype, $dbname, "wp_.*");
-$clash && return "WordPress appears to be already using the selected database (table $clash)";
+my $clash = find_database_table($dbtype, $dbname, "$opts->{'dbtbpref'}.*");
+$clash && return "WordPress appears to be already using \"$opts->{'dbtbpref'}\" database table prefix";
 return undef;
 }
 
@@ -203,6 +208,19 @@ if (&has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 			return (-1, "wp config create failed : $out");
 			}
 
+		# Set db prefix, if given
+		if ($opts->{'dbtbpref'}) {
+			my $out = &run_as_domain_user($d,
+				"$wp config set table_prefix ".
+				quotemeta($opts->{'dbtbpref'}).
+				" --type=variable".
+				" --path=".$opts->{'dir'}." 2>&1");
+			if ($?) {
+				return (-1, "wp config set table_prefix ".
+					    "failed : $out");
+				}
+			}
+		
 		# Do the install
 		my $out = &run_as_domain_user($d,
 			"$wp core install --url=$d->{'dom'}$opts->{'path'}".
@@ -270,6 +288,9 @@ else {
 			if ($l =~ /^define\(\s*'WP_AUTO_UPDATE_CORE',/) {
 				$l = "define('WP_AUTO_UPDATE_CORE', false);";
 				}
+			if ($l =~ /^\$table_prefix/) {
+				$l = "\$table_prefix = '" . $opts->{'dbtbpref'} . "';";
+				}
 			}
 		flush_file_lines_as_domain_user($d, $cfile);
 		}
@@ -288,7 +309,7 @@ if (&has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 else {
 	# Return a URL to complete the install
 	my $url = script_path_url($d, $opts).
-		     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
+	     ($upgrade ? "wp-admin/upgrade.php" : "wp-admin/install.php");
 	my $userurl = script_path_url($d, $opts);
 	my $rp = $opts->{'dir'};
 	$rp =~ s/^$d->{'home'}\///;
@@ -308,7 +329,7 @@ my $derr = delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
 
 # Remove all wp_ tables from the database
-cleanup_script_database($d, $opts->{'db'}, "wp_");
+cleanup_script_database($d, $opts->{'db'}, $opts->{'dbtbpref'});
 
 # Take out the DB
 if ($opts->{'newdb'}) {

@@ -1333,5 +1333,13 @@ elsif (&get_dkim_type() eq 'freebsd') {
 	}
 }
 
+# get_default_dkim_selector()
+# Returns a default selector based on the current month and year
+sub get_default_dkim_selector
+{
+my @tm = localtime(time());
+return sprintf "%4.4d%2.2d", $tm[5] + 1900, $tm[4];
+}
+
 1;
 

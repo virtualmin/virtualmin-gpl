@@ -387,6 +387,10 @@ elsif (!$d->{'dns_submode'}) {
 else {
 	# Delete records from parent zone
 	local $dnsparent = &get_domain($d->{'dns_subof'});
+	if (!$dnsparent) {
+		&$second_print($text{'delete_ebindsub'});
+		return;
+		}
 	&$first_print(&text('delete_bindsub', $dnsparent->{'dom'}));
 	&obtain_lock_dns($dnsparent);
 	&delete_parent_dnssec_ds_records($d);

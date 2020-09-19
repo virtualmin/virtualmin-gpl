@@ -48,7 +48,10 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# Check for Virtualmin repo in sources.list
-	$sources_list = "/etc/apt/sources.list";
+	$sources_list = "/etc/apt/sources.list.d/virtualmin.list";
+	if	(!-r $sources_list) {
+		$sources_list = "/etc/apt/sources.list";
+		}
 	$lref = &read_file_lines($sources_list);
 	$found = 0;
 	foreach $l (@$lref) {
@@ -84,8 +87,9 @@ if ($itype eq "rpm") {
 	local $found;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=.*\/gpl(\/.*)/) {
-			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1";
+		if ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
+			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
+			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
 			}
 		}
@@ -131,8 +135,8 @@ elsif ($itype eq "deb") {
 		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
 			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/6\/gpl\/(.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/6/$1";
+		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
+			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
                         }
 		}
 	&flush_file_lines($sources_list);
@@ -175,7 +179,7 @@ elsif ($itype eq "deb") {
 		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
 	&clean_environment();
-	open(YUM, "apt-get -y --force-yes -f install ".join(" ", @packages)." 2>&1 |");
+	open(YUM, "apt-get -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages -f install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
 		print &html_escape($_);
 		}

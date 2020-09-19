@@ -52,11 +52,14 @@ if ($opts->{'dir'}) {
 # Show DB, if we have it
 ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 if ($dbtype && $script->{'name'} !~ /^php(\S+)admin$/i) {
-	print &ui_table_row($text{'scripts_idb'},
+	print &ui_table_row($opts->{'dbtbpref'} ? 
+			$text{'scripts_idb2'} : 
+			$text{'scripts_idb'},
 		&text('scripts_idbname',
 		      "edit_database.cgi?dom=$in{'dom'}&type=$dbtype&".
 			"name=$dbname",
-		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>").
+		      $text{'databases_'.$dbtype}, "<tt>$dbname</tt>" . 
+		      ($opts->{'dbtbpref'} ? " $text{'scripts_idbtbpref'} <tt>$opts->{'dbtbpref'}</tt>" : "")).
 		($opts->{'newdb'} ? "<br>".$text{'scripts_inewdb'} : ""));
 	}
 

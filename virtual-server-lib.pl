@@ -134,10 +134,7 @@ if (!-d $script_log_directory) {
 	}
 $scripts_unavail_file = &cache_file_path("scriptsunavail");
 
-@styles_directories = ( "$module_config_directory/styles",
-			"$module_root_directory/pro/styles",
-		      );
-$styles_unavail_file = "$module_config_directory/stylesunavail";
+$default_content_dir = "$module_root_directory/default";
 
 @reseller_maxes = ("doms", "topdoms", "aliasdoms", "realdoms", "quota", "mailboxes", "aliases", "dbs", "bw");
 @plan_maxes = ("mailbox", "alias", "dbs", "doms", "aliasdoms", "realdoms", "bw",
@@ -171,9 +168,7 @@ if (!$virtualmin_pro) {
 
 @virtualmin_backups = ( 'config', 'templates',
 			$virtualmin_pro ? ( 'resellers' ) : ( ),
-			'email', 'custom', 'scripts',
-			$virtualmin_pro ? ( 'styles' ) : ( ),
-		        'scheds',
+			'email', 'custom', 'scripts', 'scheds',
 			$config{'ftp'} ? ( 'chroot' ) : ( ),
 			'mailserver' );
 

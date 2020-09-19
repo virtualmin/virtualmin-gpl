@@ -24,15 +24,20 @@ elsif (&can_backup_domain() == 3) {
 	}
 
 # Build table of backups
+$hasdesc = 0;
+foreach $s (@scheds) {
+	$hasdesc = 1 if ($s->{'desc'});
+	}
 foreach $s (@scheds) {
 	my @row;
 	push(@row, { 'type' => 'checkbox', 'name' => 'd',
-	     'value' => $s->{'id'}, 'disabled' => $s->{'id'}==1 });
+	     	     'value' => $s->{'id'}, 'disabled' => $s->{'id'}==1 });
 	@dests = &get_scheduled_backup_dests($s);
 	@nices = map { &nice_backup_url($_, 1) } @dests;
 	push(@row, &ui_link("backup_form.cgi?sched=$s->{'id'}",
 			    join("<br>\n", @nices)));
 	push(@row, &nice_backup_doms($s));
+	push(@row, &html_escape($s->{'desc'})) if ($hasdesc);
 	push(@row, $s->{'enabled'} ?
 		&text('sched_yes', &cron::when_text($s)) :
 		"<font color=#ff0000>$text{'no'}</font>");
@@ -75,6 +80,7 @@ print &ui_form_columns_table(
 	[ [ "backup_form.cgi?new=1", $text{'sched_add'} ] ],
 	undef,
 	[ "", $text{'sched_dest'}, $text{'sched_doms'},
+	  $hasdesc ? ( $text{'sched_desc'} ) : ( ),
 	  $text{'sched_enabled'},
 	  $hasinc ? ( $text{'sched_level'} ) : ( ),
 	  $hasowner ? ( $text{'sched_owner'} ) : ( ),

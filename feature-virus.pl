@@ -576,14 +576,19 @@ if ($init) {
 	# Ubuntu, Joe's or FreeBSD .. all we have to do is enable and
 	# start the daemon!
 	&$first_print(&text('clamd_start'));
-	&init::enable_at_boot($init);
-	local ($ok, $out) = &init::start_action($init);
-	if (!$ok || $out =~ /failed|error/i) {
-		&$second_print(&text('clamd_estart',
-				"<tt>".&html_escape($out)."</tt>"));
+	if (&init::action_status($init)) {
+		&init::enable_at_boot($init);
+		local ($ok, $out) = &init::start_action($init);
+		if (!$ok || $out =~ /failed|error/i) {
+			&$second_print(&text('clamd_estart',
+					"<tt>".&html_escape($out)."</tt>"));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 	else {
-		&$second_print($text{'setup_done'});
+		&$second_print(&text('clamd_einit', "<tt>$init</tt>"));
 		}
 	}
 

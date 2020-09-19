@@ -71,6 +71,10 @@ same time - the second backup will immediately fail. You can invert this
 behavior with the C<--kill-running> flag, which terminates the first backup
 and allows this one to continue.
 
+To override the default compression format set on the Virtualmin Configuration
+page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
+C<tar> or C<zip>.
+
 =cut
 
 package virtual_server;
@@ -201,7 +205,6 @@ while(@ARGV > 0) {
 		@vbs = grep { $_ ne $v } @vbs;
 		}
 	elsif ($a eq "--incremental") {
-		&has_incremental_format() || &usage("The configured backup format does not support incremental backups");
 		&has_incremental_tar() || &usage("The tar command on this system does not support incremental backups");
 		$increment = 1;
 		}
@@ -224,6 +227,14 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--kill-running") {
 		$kill = 1;
+		}
+	elsif ($a eq "--compression") {
+		my $c = shift(@ARGV);
+		$compression = $c eq "gzip" ? 0 :
+			       $c eq "bzip2" ? 1 :
+			       $c eq "tar" ? 2 :
+			       $c eq "zip" ? 3 : -1;
+		&usage("Invalid compression format $c") if ($compression < 0);
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -279,6 +290,9 @@ if ($keyid) {
 if ($onebyone && !$newformat) {
 	&usage("--onebyone option can only be used in conjunction ".
 	       "with --newformat");
+	}
+if ($increment) {
+	&has_incremental_format($compression) || &usage("The configured backup format does not support incremental backups");
 	}
 
 # Work out what will be backed up
@@ -363,7 +377,8 @@ if ($sched->{'doms'} || $sched->{'all'} || $sched->{'virtualmin'}) {
 					$increment,
 					0,
 					$key,
-					$kill);
+					$kill,
+					$compression);
 	if ($ok && !@$errdoms) {
 		&$second_print("Backup completed successfully. Final size was ".
 			       &nice_size($size));
@@ -403,7 +418,8 @@ foreach $dest (@strfdests) {
 	&write_backup_log(\@doms, $dest, $increment, $start_time,
 			  $size, $ok, "api", $output, $errdoms, undef, $key,
 			  undef,
-			  $separate && $newformat ? 2 : $separate ? 1 : 0);
+			  $separate && $newformat ? 2 : $separate ? 1 : 0,
+			  undef, $compression);
 	}
 &stop_running_backup($sched);
 &virtualmin_api_log(\@OLDARGV, $doms[0]);
@@ -442,6 +458,7 @@ if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
 print "                         [--kill-running]\n";
+print "                         [--compression gzip|bzip2|tar|zip]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
 print "Features must be specified using their short names, like web and dns.\n";

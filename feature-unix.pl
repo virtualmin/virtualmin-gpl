@@ -750,8 +750,8 @@ if ($uinfo && !$d->{'parent'}) {
 		$enc = $d->{'enc_pass'};
 		}
 	if ($d->{'backup_encpass'} &&
-	    ($enc =~ /^\$1\$/ || $d->{'backup_encpass'} !~ /^\$1\$/ ||
-	     $uinfo->{'pass'} =~ /^\$1\$/)) {
+	    ($enc =~ /^\$[1-9]\$/ || $d->{'backup_encpass'} !~ /^\$[1-9]\$/ ||
+	     $uinfo->{'pass'} =~ /^\$[1-9]\$/)) {
 		# Use saved encrypted password, if available and if either
 		# we support MD5 or the password isn't in MD5
 		$uinfo->{'pass'} = $d->{'backup_encpass'};

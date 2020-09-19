@@ -47,6 +47,10 @@ else {
 if (@logs) {
 	# Show in a table
 	@table = ( );
+	$hasdesc = 0;
+	foreach $log (@logs) {
+		$hasdesc++ if ($log->{'desc'});
+		}
 	foreach $log (sort { $b->{'start'} <=> $a->{'start'} } @logs) {
 		@dnames = &backup_log_own_domains($log);
 		next if (!@dnames);
@@ -60,6 +64,7 @@ if (@logs) {
 			 "&search=".&urlize($in{'search'})."'>".
 			 &nice_backup_url($log->{'dest'}, 1)."</a>",
 			$ddesc,
+			$hasdesc ? ( &html_escape($log->{'desc'}) ) : ( ),
 		        $log->{'user'} || "<i>root</i>",
 			&make_date($log->{'start'}),
 			&short_nice_hour_mins_secs(
@@ -74,6 +79,7 @@ if (@logs) {
 			]);
 		}
 	print &ui_columns_table([ $text{'sched_dest'}, $text{'sched_doms'},
+				  $hasdesc ? ( $text{'backuplog_desc'} ) : ( ),
 				  $text{'backuplog_who'},
 				  $text{'backuplog_when'},
 				  $text{'backuplog_len'},

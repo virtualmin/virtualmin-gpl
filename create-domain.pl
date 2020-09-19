@@ -318,9 +318,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--reseller") {
 		$resel = shift(@ARGV);
 		}
-	elsif ($a eq "--style") {
-		$stylename = shift(@ARGV);
-		}
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
 		}
@@ -682,19 +679,6 @@ else {
 	$ip6 = $alias->{'ip6'};
 	}
 
-# Validate style
-if ($stylename && defined(&list_content_styles)) {
-	($style) = grep { $_->{'name'} eq $stylename } &list_content_styles();
-	$style || &usage("Style $stylename does not exist");
-	$content || $style->{'nocontent'} || &usage("--content followed by some initial text for the website must be specified when using --style");
-	if ($content =~ /^\//) {
-		$content = &read_file_contents($content);
-		$content || &usage("--content file does not exist");
-		}
-	$content =~ s/\r//g;
-	$content =~ s/\\n/\n/g;
-	}
-
 if ($parent) {
 	# User and group IDs come from parent
 	$gid = $parent->{'gid'};
@@ -871,15 +855,11 @@ if ($fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-if ($style && $dom{'web'}) {
-	&$first_print(&text('setup_styleing', $style->{'desc'}));
-	&apply_content_style(\%dom, $style, $content);
-	&$second_print($text{'setup_done'});
-	}
-elsif ($content) {
-	# Just create index.html page with content
+if (!$virtualmin_pro || defined($content)) {
+	# Just create virtualmin default index.html
 	&$first_print($text{'setup_contenting'});
-	&create_index_content(\%dom, $content);
+	&create_index_content(\%dom, 
+		$virtualmin_pro ? $content : "");
 	&$second_print($text{'setup_done'});
 	}
 
@@ -944,7 +924,6 @@ print "                        [--db database-name]\n";
 print "                        [--fwdto email-address]\n";
 print "                        [--reseller name]\n";
 if ($virtualmin_pro) {
-	print "                        [--style name]\n";
 	print "                        [--content text|filename]\n";
 	}
 if ($config{'mysql'}) {

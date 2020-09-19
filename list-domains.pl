@@ -88,6 +88,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--file-only") {
 		$fileonly = 1;
 		}
+	elsif ($a eq "--ip-only") {
+		$iponly = 1;
+		}
 	elsif ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -594,13 +597,18 @@ if ($multi) {
 			if ($d->{'ssl_cert'}) {
 				print "    SSL cert file: $d->{'ssl_cert'}\n";
 				}
-			if ($d->{'ssl_ca'}) {
-				print "    SSL CA file: $d->{'ssl_ca'}\n";
+			if ($d->{'ssl_chain'}) {
+				print "    SSL CA file: $d->{'ssl_chain'}\n";
 				}
 			$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
 						 : undef;
 			if ($same) {
 				print "    SSL shared with: $same->{'dom'}\n";
+				}
+			if ($multi == 1) {
+				@sslhn = &get_hostnames_for_ssl($d);
+				print "    SSL candidate hostnames: ",
+					join(" ", @sslhn),"\n";
 				}
 			if ($d->{'ssl_cert_expiry'}) {
 				print "    SSL cert expiry: ",
@@ -801,6 +809,12 @@ elsif ($fileonly) {
 		print $d->{'file'},"\n";
 		}
 	}
+elsif ($iponly) {
+	# Just IP addresses
+	foreach $d (@doms) {
+		print $d->{'ip'},"\n";
+		}
+	}
 else {
 	# Just show summary table
 	$fmt = "%-30.30s %-15.15s %-30.30s\n";
@@ -818,7 +832,7 @@ print "Lists the virtual servers on this system.\n";
 print "\n";
 print "virtualmin list-domains [--multiline | --name-only | --id-only |\n";
 print "                         --simple-multiline | --user-only |\n";
-print "                         --home-only | --file-only]\n";
+print "                         --home-only | --file-only | --ip-only]\n";
 print "                        [--domain name]*\n";
 print "                        [--user name]*\n";
 print "                        [--mail-user name]*\n";

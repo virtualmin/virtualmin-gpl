@@ -196,7 +196,8 @@ return $ok;
 sub add_db_table
 {
 local ($d, $host, $db, $user) = @_;
-local @str = &mysql::table_structure($mysql::master_db, 'db');
+local $mod = &require_dom_mysql($d);
+local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
 local ($s, @fields, @yeses);
 foreach $s (@str) {
 	if ($s->{'field'} =~ /_priv$/i) {
@@ -2477,7 +2478,9 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Get the DB name max from the mysql.db table
 	&require_mysql();
-	local @str = &mysql::table_structure($mysql::master_db, "db");
+	local $mod = &require_dom_mysql($d);
+	local @str = &foreign_call($mod, "table_structure",
+				   $mysql::master_db, "db");
 	local ($dbcol) = grep { lc($_->{'field'}) eq 'db' } @str;
 	$maxlen = $dbcol && $dbcol->{'type'} =~ /\((\d+)\)/ ? $1 : 64;
 	}
@@ -3299,9 +3302,11 @@ else {
 	$get_dom_remote_mysql_version_cache{$mod} = $rv;
 	}
 my $variant = "mysql";
-if ($rv =~ /^([0-9\.]+)\-(.*)/ && $rv !~ /ubuntu/i) {
-	$rv = $1;
-	$variant = $2;
+my ($ver, $variant_) = $rv =~ /^([0-9\.]+)\-(.*)/;
+if ($ver && $variant_ && 
+	($rv !~ /ubuntu/i || ($rv =~ /ubuntu/i && $rv =~ /mariadb/i && $ver > 10))) {
+	$rv      = $ver;
+	$variant = $variant_;
 	if ($variant =~ /mariadb/i) {
 		$variant = "mariadb";
 		}

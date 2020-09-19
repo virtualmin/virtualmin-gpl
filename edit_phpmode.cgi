@@ -27,6 +27,14 @@ if (!$d->{'alias'} && $can == 2 &&
 			    &ui_radio_table("mode", $mode,
 			      [ map { [ $_, $text{'phpmode_'.$_} ] }
 				    @modes ]));
+
+	# Warn if changing mode would remove per-dir versions
+	if ($mode eq "cgi" || $mode eq "fcgid") {
+		@dirs = &list_domain_php_directories($d);
+		if (@dirs > 1) {
+			print &ui_table_row("", $text{'phpmode_dirswarn'});
+			}
+		}
 	}
 
 # PHP fcgi sub-processes

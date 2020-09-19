@@ -102,6 +102,7 @@ if (!&check_jailkit_support()) {
 	}
 
 &run_post_actions();
+&clear_links_cache($d);
 &webmin_log("limits", "domain", $d->{'dom'}, $d);
 
 &domain_redirect($d);
