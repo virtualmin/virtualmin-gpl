@@ -17622,15 +17622,20 @@ sub list_ordered_features
 local ($d) = @_;
 local @dom_features = &domain_features($d);
 local $p = &domain_has_website($d);
+local $s = &domain_has_ssl($d);
 local @rv;
 foreach my $f (@dom_features, &list_feature_plugins()) {
 	if ($f eq "web" && $p && $p ne "web") {
-		# Replace 'web' feature in ordering with plugin that provides
-		# a website.
+		# Replace website feature in ordering with website plugin
 		push(@rv, $p, "web");
 		}
-	elsif ($f eq $p && $p ne "web") {
-		# Skip website plugin feature, as it was inserted above
+	elsif ($f eq "ssl" && $s && $s ne "ssl") {
+		# Replace SSL feature in ordering with SSL plugin
+		push(@rv, $s, "ssl");
+		}
+	elsif ($f eq $p && $p ne "web" ||
+               $f eq $s && $s ne "web") {
+		# Skip website or SSL plugin feature, as it was inserted above
 		}
 	else {
 		# Some other feature
