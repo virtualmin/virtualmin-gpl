@@ -183,7 +183,7 @@ else {
 
 	# Add to the file
 	splice(@$lref, $pos, 0, "<VirtualHost $vips>",
-				@dirs,
+				(map { "    ".$_ } @dirs),
 				"</VirtualHost>");
 	&flush_file_lines($f);
 	$d->{'web_port'} = $web_port;
