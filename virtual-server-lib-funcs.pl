@@ -17634,7 +17634,7 @@ foreach my $f (@dom_features, &list_feature_plugins()) {
 		push(@rv, $s, "ssl");
 		}
 	elsif ($f eq $p && $p ne "web" ||
-               $f eq $s && $s ne "web") {
+               $f eq $s && $s ne "ssl") {
 		# Skip website or SSL plugin feature, as it was inserted above
 		}
 	else {
