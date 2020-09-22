@@ -2839,11 +2839,9 @@ elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
 			"with mysql_native_password" : "";
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
 	}
-elsif ($variant eq "mysql" && &compare_versions($ver, "8.0.4") >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'caching_sha2_password', $encpass)");
-	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
+	my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', '$plugin', $encpass)");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
@@ -2907,12 +2905,21 @@ my $rv = &execute_dom_sql($d, $mysql::master_db,
 my $flush = 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
+	my $plugin = &get_mysql_plugin($d, $mysql::master_db);
 	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0 &&
+	if ($user != 'root' && $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0 &&
 				   &compare_versions($ver, "8") < 0) {
 		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
+		}
+	elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0 && 
+           $user == 'root' && $plainpass) {
+		# Update root password which may have 
+		# various auth plugins set by default
+		$sql = "alter user '$user'\@'$host' identified $plugin by '".
+                    &mysql_escape($plainpass)."'";
+        # $flush++;
 		}
 	elsif ($forceuser) {
 		$sql = "update user set password = $encpass ".
@@ -2920,7 +2927,7 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 		$flush++;
 		}
 	elsif ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
-		$sql = "alter user '$user'\@'$host' identified by ".
+		$sql = "alter user '$user'\@'$host' identified $plugin by ".
 			($plainpass ? "'".&mysql_escape($plainpass)."'"
 				    : $encpass);
 		}
@@ -3368,6 +3375,20 @@ sub get_default_mysql_module
 my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 		 &list_remote_mysql_modules();
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
+}
+
+# get_mysql_plugin()
+# Returns the name of the default plugin used by MySQL
+sub get_mysql_plugin
+{
+my ($d, $db, $n) = @_;
+my @plugin = &execute_dom_sql($d, $db,
+                   "show variables LIKE '%default_authentication_plugin%'");
+my $plugin = $plugin[0]->{'data'}[0][1];
+if ($plugin && !$n) {
+	$plugin = " with $plugin ";
+	}
+return $plugin;
 }
 
 # move_mysql_server(&domain, new-mysql-module)
