@@ -3028,14 +3028,19 @@ else {
 if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
-	my $qpass = &mysql_escape($pass);
-	my $pf = &get_mysql_password_func();
 	eval {
+		# Directly update mysql.user
 		local $main::error_must_die = 1;
 		&execute_password_change_sql(
-			undef, $user, "$pf('$qpass')", 1, 1,
-			$pass);
+			undef, $user, undef, 1, 1, $pass);
 		};
+	if ($@) {
+		# If that didn't work, fall back to alter user or whatever
+		eval {
+			&execute_password_change_sql(
+				undef, $user, undef, 0, 0, $pass);
+			};
+		}
 	if ($@) {
 		$rv = &text('mysqlpass_echange', "$@");
 		&$second_print($rv);
