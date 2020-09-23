@@ -10138,7 +10138,7 @@ if ($config{'mysql'} && (!$d || $d->{'mysql'})) {
 	push(@rv, map { { 'name' => $_,
 			  'type' => 'mysql',
 			  'desc' => $text{'databases_mysql'},
-			  'special' => $_ =~ /^(mysql|sys|information_schema)$/ } }
+			  'special' => $_ =~ /^(mysql|sys|information_schema|performance_schema)$/ } }
 		      &list_all_mysql_databases($d));
 	}
 if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
