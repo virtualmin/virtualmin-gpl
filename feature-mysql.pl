@@ -197,7 +197,6 @@ sub add_db_table
 local ($d, $host, $db, $user) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
-local $qdb = &quote_mysql_database($db);
 local ($s, @fields, @yeses);
 foreach $s (@str) {
 	if ($s->{'field'} =~ /_priv$/i) {
@@ -206,10 +205,11 @@ foreach $s (@str) {
 		}
 	}
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
-	&execute_dom_sql($d, $mysql::master_db, "grant all on $db.* to '$user'\@'$host' with grant option");
+	&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
 	}
 else {
 	# Can update the DB table directly
@@ -225,14 +225,14 @@ sub remove_db_table
 {
 local ($d, $db, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
-	my $dbs;
-	$dbs = "*.*";
-	$dbs = "$db.*" if ($db);
+	my $dbs = "*.*";
+	$dbs = "`$qdb`.*" if ($db);
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
 		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
@@ -241,7 +241,6 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 else {
 	# Directly update DB table
 	my @c;
-	local $qdb = &quote_mysql_database($db);
 	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
 	@c || &error("remove_db_table called with no db or user");
@@ -2806,15 +2805,17 @@ sub execute_database_reassign_sql
 {
 my ($d, $db, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Revoke access from the old user on all hosts
-	local $rv = &execute_dom_sql($d, $mysql::master_db,
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
+	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $db.* from '$user'\@'$host'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $db.* from '$user'\@'$host'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all on $db.* to '$user'\@'$host' with grant option");
+		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$host'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$host'");
+		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$host' with grant option");
 		}
 	}
 else {
