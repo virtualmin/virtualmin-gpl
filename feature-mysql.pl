@@ -197,6 +197,7 @@ sub add_db_table
 local ($d, $host, $db, $user) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
+local $qdb = &quote_mysql_database($db);
 local ($s, @fields, @yeses);
 foreach $s (@str) {
 	if ($s->{'field'} =~ /_priv$/i) {
