@@ -204,11 +204,11 @@ foreach $s (@str) {
 		push(@yeses, "'Y'");
 		}
 	}
+local $qdb = &quote_mysql_database($db);
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Use the grant command
-	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on $db.* to '$user'\@'$host'");
-	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 	}
 else {
 	# Can update the DB table directly
@@ -230,14 +230,14 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 		"select host from user where user = ?", $user);
 	local $dbstr;
 	if ($db) {
-		$dbstr = '$db.*';
+		local $qdb = &quote_mysql_database($db);
+		$dbstr = "`$qdb`.*";
 		}
 	else {
-		$dbstr = '*.*';
+		$dbstr = "*.*";
 		}
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$user'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "flush privileges");
 		}
 	}
 else {
@@ -2365,16 +2365,6 @@ else {
 	}
 }
 
-# encrypt_plain_mysql_pass(&domain, plainpass)
-# Returns the encrypted MySQL password
-sub encrypt_plain_mysql_pass
-{
-my ($d, $plainpass) = @_;
-my $qpass = &mysql_escape($plainpass);
-my $pf = &get_mysql_password_func($d);
-return "$pf('$qpass')";
-}
-
 # get_mysq_password_func([&domain])
 # Returns the function for encrypting passwords
 sub get_mysql_password_func
@@ -2781,14 +2771,13 @@ sub execute_user_rename_sql
 {
 my ($d, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Need to alter user
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db,
-			"rename user '$olduser'\@'$r->[0]' to '$user'\@'$r->[0]'");
+			"rename '$olduser'\@'$r->[0]' to '$user'\@'$r->[0]'");
 		}
 	}
 else {
@@ -2811,10 +2800,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Revoke access from the old user on all hosts
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
+	local $qdb = &quote_mysql_database($db);
+	$dbstr = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $db.* from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on $db.* to '$user'\@'$host'");
-		&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
 		}
 	}
 else {
@@ -2832,23 +2822,25 @@ sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
-
-# Hash password for setting
-$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
-    if (!$encpass && $plainpass);
-$plainpass = &mysql_escape($plainpass) if ($plainpass);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.1.3") >= 0) {
+if (!$encpass && $plainpass) {
+	# Hash password for setting
+	my $qpass = &mysql_escape($plainpass);
+	my $pf = &get_mysql_password_func($d);
+	$encpass = "$pf('$qpass')";
+	}
+if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
 	# Need to use new 'create user' command
-	return ("create user '$user'\@'$host' identified $plugin by ".
-		($plainpass ? "'$plainpass'" : "password $encpass"));
+	return ("create user '$user'\@'$host' identified by ".
+		($plainpass ? "'".&mysql_escape($plainpass)."'"
+			    : "password ".$encpass));
+	}
+elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
+	my $native = &is_domain_mysql_remote($d) ?
+			"with mysql_native_password" : "";
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
-	my $changepasssql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
-	if ($plainpass) {
-		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
-		}
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql");
+	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
 	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
@@ -2865,8 +2857,7 @@ sub get_user_deletion_sql
 my ($d, $host, $user, $dbtoo) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my @rv;
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
-    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	if ($host) {
 		# Host is known
 		@rv = ("drop user if exists '$user'\@'$host'");
@@ -2904,33 +2895,37 @@ sub execute_password_change_sql
 my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
 if (!$encpass && $plainpass) {
 	# Hash password for insertion
-	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
+	my $qpass = &mysql_escape($plainpass);
+	my $pf = &get_mysql_password_func($d);
+	$encpass = "$pf('$qpass')";
 	}
-$plainpass = mysql_escape($plainpass) if ($plainpass);
 my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
 my $flush = 0;
-my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
-my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-my $mysql_mariadb_with_auth_string = 
-   $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
-   $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
-	if ($mysql_mariadb_with_auth_string) {
-		if ($plainpass) {
-			$sql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
-			} 
-		else {
-			$sql = "update user set authentication_string = $encpass ".
+	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+	if ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0 &&
+				   &compare_versions($ver, "8") < 0) {
+		$sql = "update user set authentication_string = $encpass ".
 		       "where user = '$user' and host = '$host'";
-			$flush++;
-			}
+		$flush++;
 		}
 	elsif ($forceuser) {
 		$sql = "update user set password = $encpass ".
 		       "where user = '$user' and host = '$host'";
 		$flush++;
+		}
+	elsif ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
+		$sql = "alter user '$user'\@'$host' identified by ".
+			($plainpass ? "'".&mysql_escape($plainpass)."'"
+				    : $encpass);
+		}
+	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
+	       $plainpass) {
+		# Use the plaintext password wherever possible
+		$sql = "set password for '$user'\@'$host' = '".
+		       &mysql_escape($plainpass)."'";
 		}
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
@@ -3372,20 +3367,6 @@ my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
 }
 
-# get_mysql_plugin()
-# Returns the name of the default plugin used by MySQL
-sub get_mysql_plugin
-{
-my ($d, $db, $n) = @_;
-my @plugin = &execute_dom_sql($d, $db,
-                   "show variables LIKE '%default_authentication_plugin%'");
-my $plugin = $plugin[0]->{'data'}[0][1];
-if ($plugin && $n) {
-	$plugin = " with $plugin ";
-	}
-return $plugin;
-}
-
 # move_mysql_server(&domain, new-mysql-module)
 # Update the MySQL module for a domain, by moving across all databases and
 # permissions. Prints progress, and returns 1 on success or 0 on failure.
@@ -3470,4 +3451,3 @@ return 1;
 $done_feature_script{'mysql'} = 1;
 
 1;
-
