@@ -1338,16 +1338,17 @@ delete($d->{'mysql_enc_pass'});		# Clear encrypted password, as we
 					# have a plain password now
 }
 
-# mysql_pass(&domain, [neverquote])
+# mysql_pass(&domain)
 # Returns the plain-text password for the MySQL admin for this domain
 sub mysql_pass
 {
-if ($_[0]->{'parent'}) {
+my ($d) = @_;
+if ($d->{'parent'}) {
 	# Password comes from parent domain
-	local $parent = &get_domain($_[0]->{'parent'});
+	local $parent = &get_domain($d->{'parent'});
 	return &mysql_pass($parent);
 	}
-return defined($_[0]->{'mysql_pass'}) ? $_[0]->{'mysql_pass'} : $_[0]->{'pass'};
+return $d->{'mysql_pass'} ne '' ? $d->{'mysql_pass'} : $d->{'pass'};
 }
 
 # mysql_enc_pass(&domain)
