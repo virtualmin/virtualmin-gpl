@@ -12757,6 +12757,8 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		if (!$ok || !$fok) {
 			$d->{$f} = 1;
 			}
+		$d->{'db_mysql'} = $oldd->{'db_mysql'};
+		$d->{'db_postgres'} = $oldd->{'db_postgres'};
 		}
 	elsif ($d->{$f}) {
 		# Modify some feature
