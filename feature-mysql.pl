@@ -271,7 +271,7 @@ if ($preserve && &remote_mysql($d)) {
 local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
-if ($d->{'db_mysql'}) {
+if (@dblist) {
 	&delete_mysql_database($d, @dblist);
 	}
 
