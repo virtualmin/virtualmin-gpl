@@ -1990,12 +1990,15 @@ sub quote_mysql_database
 {
 local ($db) = @_;
 
-# Prevent double quoting
-if ($db =~ /\\_/ || $db =~ /\\%/) {
-	return $db;
-	}
 $db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
+
+# Prevent double quoting
+if ($db =~ /\\_/ ||
+    $db =~ /\\%/) {
+    $db =~ s/[\\]+/\\/g;
+    return $db;
+	}
 return $db;
 }
 
