@@ -1212,12 +1212,12 @@ else {
 			my $olist = $apache::httpd_modules{'core'} >= 2.2 ?
 					" ".&get_allowed_options_list() : "";
 			local @lines = (
-				"<Directory $dir>",
-				"Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
-				"allow from all",
-				"AllowOverride All".$olist,
-				@phplines,
-				"</Directory>"
+				"    <Directory $dir>",
+				"        Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
+				"        allow from all",
+				"        AllowOverride All".$olist,
+				(map { "        ".$_ } @phplines),
+				"    </Directory>"
 				);
 			local $lref = &read_file_lines($virt->{'file'});
 			splice(@$lref, $virt->{'eline'}, 0, @lines);
