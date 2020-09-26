@@ -1984,21 +1984,24 @@ sub start_service_mysql
 return &mysql::start_mysql();
 }
 
+# unquote_mysql_database(name)
+# Returns a MySQL escaped database name like \% and \_ unescaped
+sub unquote_mysql_database
+{
+local ($db) = @_;
+$db =~ s/\\_/_/g;
+$db =~ s/\\%/%/g;
+return $db;
+}
+
 # quote_mysql_database(name)
-# Returns a mysql database name with % and _ characters escaped
+# Returns a MySQL database name with % and _ characters escaped
 sub quote_mysql_database
 {
 local ($db) = @_;
-
+$db = unquote_mysql_database($db);
 $db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
-
-# Prevent double quoting
-if ($db =~ /\\_/ ||
-    $db =~ /\\%/) {
-    $db =~ s/[\\]+/\\/g;
-    return $db;
-	}
 return $db;
 }
 
