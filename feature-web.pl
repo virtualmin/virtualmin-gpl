@@ -3123,9 +3123,9 @@ foreach my $port (@ports) {
 	if (!@proxy) {
 		local $lref = &read_file_lines($virt->{'file'});
 		splice(@$lref, $virt->{'eline'}, 0,
-		       "<Proxy *>",
-		       "allow from all",
-		       "</Proxy>");
+		       "    <Proxy *>",
+		       "        allow from all",
+		       "    </Proxy>");
 		&flush_file_lines($virt->{'file'});
 		undef(@apache::get_config_cache);
 		$added++;
