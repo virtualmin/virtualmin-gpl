@@ -787,8 +787,8 @@ else {
 				!/^\s*AliasMatch\s+\^\/\.\*\$\s/ &&
 				!/^\s*SSLProxyEngine\s/ } @lines;
 		for(my $i=0; $i<@lines; $i++) {
-			if ($lines[$i] eq "<Proxy *>" &&
-			    $lines[$i+2] eq "</Proxy>") {
+			if ($lines[$i] =~ /^\s*<Proxy \*>/ &&
+			    $lines[$i+2] =~ /^\s*<\/Proxy>/) {
 				# Take out <Proxy *> block
 				splice(@lines, $i, 3);
 				last;
