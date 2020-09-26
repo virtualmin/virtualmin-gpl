@@ -79,11 +79,18 @@ if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
 	$parent || usage("Virtual server $parentdomain does not exist.");
 	if ($d->{'parent'}) {
-		$parent->{'id'} ==$d->{'parent'} && &usage($text{'move_esame'});
+		$parent->{'id'} == $d->{'parent'} && &usage($text{'move_esame'});
 		}
 	else {
 		$parent->{'id'} == $d->{'id'} && &error($text{'move_eparent'});
 		}
+
+	# Check if parent has MySQL feature enabled too
+	&usage($text{'setup_edepmysql'})
+        if ($d->{'mysql'} && !$parent->{'mysql'});
+	# Check if parent has PostgreSQL feature enabled too
+	&usage($text{'setup_edepmysqlsub'})
+        if ($d->{'postgres'} && !$parent->{'postgres'});
 	}
 else {
 	# Validate new username

@@ -1989,8 +1989,16 @@ return &mysql::start_mysql();
 sub quote_mysql_database
 {
 local ($db) = @_;
+
 $db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
+
+# Prevent double quoting
+if ($db =~ /\\_/ ||
+    $db =~ /\\%/) {
+    $db =~ s/[\\]+/\\/g;
+    return $db;
+	}
 return $db;
 }
 
@@ -2805,17 +2813,17 @@ sub execute_database_reassign_sql
 {
 my ($d, $db, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Revoke access from the old user on all hosts
 	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
+	my $qdb = &quote_mysql_database($db);
 	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$host'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$host'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$host' with grant option");
+		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
 		}
 	}
 else {
