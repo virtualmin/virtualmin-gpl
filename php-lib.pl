@@ -1115,6 +1115,7 @@ elsif (!$p) {
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return 0 if ($mode eq "mod_php");
+local $pfound = 0;
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
@@ -1134,7 +1135,6 @@ else {
 	local @ports = ( $d->{'web_port'},
 			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	local %allvers = map { $_, 1 } @all_possible_php_versions;
-	local $pfound = 0;
 	foreach my $p (@ports) {
 		local $conf = &apache::get_config();
 		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
