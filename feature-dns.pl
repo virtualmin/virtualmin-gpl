@@ -3095,8 +3095,12 @@ if ($defip6) {
 local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
 foreach my $h (split(/\s+/, $hosts)) {
 	if (&check_ipaddress($h) ||
-	    $h =~ /^(\S+)\// && &check_ipaddress($1)) {
+	    $h =~ /^(\S+)\// && &check_ipaddress("$1")) {
 		push(@{$spf->{'ip4:'}}, $h);
+		}
+	elsif (&check_ip6address($h) ||
+	       $h =~ /^(\S+)\// && &check_ip6address("$1")) {
+		push(@{$spf->{'ip6:'}}, $h);
 		}
 	else {
 		push(@{$spf->{'a:'}}, $h);
