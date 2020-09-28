@@ -1999,7 +1999,6 @@ return $db;
 sub quote_mysql_database
 {
 local ($db) = @_;
-$db = unquote_mysql_database($db);
 $db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
 return $db;
