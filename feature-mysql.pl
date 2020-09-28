@@ -581,7 +581,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 			    "select host,db from db where user = ?", $olduser);
 			&execute_user_deletion_sql($d, undef, $olduser);
 			foreach my $r (@{$rv->{'data'}}) {
-				&add_db_table($d, $r->[0], $r->[1], $user);
+				&add_db_table($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
 				}
 			};
 		&execute_for_all_mysql_servers($pfunc);
