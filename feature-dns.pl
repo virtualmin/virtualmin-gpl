@@ -1465,11 +1465,14 @@ foreach my $od (&list_domains()) {
 		}
 	}
 
-# Clone A records
+# Clone A records with the correct IP
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
+my $domip = $d->{'dns_ip'} || $d->{'ip'};
+my $domip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@recs) {
-	if ($r->{'type'} eq 'A' && $r->{'values'}->[0] eq $d->{'ip'} &&
+	if ($r->{'type'} eq 'A' &&
+	    $r->{'values'}->[0] eq $dom &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		# Check if this record is in any sub-domain of this one
@@ -1484,7 +1487,7 @@ foreach my $r (@recs) {
 			}
 		if (!$insub) {
 			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-					      'IN', 'AAAA', $d->{'ip6'});
+					      'IN', 'AAAA', $domip6);
 			$count++;
 			}
 		}
