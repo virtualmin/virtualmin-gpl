@@ -14,11 +14,14 @@ you know exactly which server you are interested in.
 To limit the domains to those owned by a single user, the C<--user> parameter
 can be given, following by a domain owner's name. You can also limit it to
 particular server types with the C<--alias>, C<--no-alias>, C<--subserver>,
-C<--toplevel>
-and C<--subdomain> parameters. Or to only show domains with a particular feature
+C<--toplevel> and C<--subdomain> parameters.
+
+To only show domains with a particular feature
 active, use the C<--with-feature> parameter followed by a feature code like
 C<dns> or C<web>. Alternately, C<--without-feature> can be used to show
-only domains without some feature enabled.
+only domains without some feature enabled. The similar C<--with-web> and
+C<--with-ssl> flags can be used to show domains with any kind of website
+(Apache or Nginx).
 
 To limit the list to virtual servers on some plan, use the C<--plan> flag
 followed by a plan name or ID. Similarly, you can select only virtual servers
@@ -108,6 +111,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--without-feature") {
 		$without = shift(@ARGV);
+		}
+	elsif ($a eq "--with-web") {
+		$withweb = 1;
+		}
+	elsif ($a eq "--with-ssl") {
+		$withssl = 1;
 		}
 	elsif ($a eq "--alias") {
 		$must_alias = 1;
@@ -218,6 +227,12 @@ if ($parentofdom) {
 # Limit to those with/without some feature
 if ($with) {
 	@doms = grep { $_->{$with} } @doms;
+	}
+if ($withweb) {
+	@doms = grep { &domain_has_website($_) } @doms;
+	}
+if ($withssl) {
+	@doms = grep { &domain_has_ssl($_) } @doms;
 	}
 if ($without) {
 	@doms = grep { !$_->{$without} } @doms;
@@ -839,6 +854,7 @@ print "                        [--mail-user name]*\n";
 print "                        [--id number]*\n";
 print "                        [--with-feature feature]\n";
 print "                        [--without-feature feature]\n";
+print "                        [--with-web] [--with-ssl]\n";
 print "                        [--alias domain | --no-alias]\n";
 print "                        [--subserver | --toplevel | --subdomain]\n";
 print "                        [--parent domain]\n";
