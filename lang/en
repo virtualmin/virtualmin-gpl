@@ -1219,6 +1219,8 @@ edit_unalias=Convert to Sub-Server
 edit_unaliasdesc=Convert this alias server into a sub-server, so that it can have its own web pages, users and mail aliases.
 edit_changepass=Change Password
 edit_changepassdesc=Change the password for this virtual server.
+edit_change2fa=Enroll For Twofactor
+edit_change2fadesc=Enroll or configure two-factor authentication for your Virtualmin login.
 edit_changeadminpass=Change Your Password
 edit_changeadminpassdesc=Change the password for your administrator account
 edit_changeresellerpass=Change Your Password
@@ -7181,5 +7183,15 @@ deftmplt_under_construction=Under Construction
 deftmplt_slogan=managed by Virtualmin - a powerful and flexible web hosting control panel
 deftmplt_made_with_love1=Made with
 deftmplt_made_with_love2=at Virtualmin
+
+2fa_title=Two-Factor Authentication
+2fa_euser=Webmin user does not exist!
+2fa_already=You are already enrolled for two-factor authentication using provider $1 with account ID $2.
+2fa_desc=This page allows you to enable two-factor authentication for your Virtualmin account using <a href='$2' target=_blank>$1</a>. Once active, an additional authentication token will be required when logging into Virtualmin.
+2fa_ok=Enroll For Two-Factor
+2fa_cancel=Cancel Two-Factor
+2fa_header=Two-Factor Options
+2fa_err=Failed to save two-factor authentication
+2fa_enrolling=Enrolling for two-factor with $1 ...
 
 __norefs=1

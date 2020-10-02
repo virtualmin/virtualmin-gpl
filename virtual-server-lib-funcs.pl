@@ -10451,10 +10451,20 @@ sub can_show_pass
 return &master_admin() || &reseller_admin() || $config{'show_pass'};
 }
 
-# Returns 1 if the user can change his own password
+# Returns 1 if the user can change his own password. Not shown for root,
+# because this is done outside of Virtualmin.
 sub can_passwd
 {
 return &reseller_admin() || $access{'edit_passwd'};
+}
+
+# Returns 1 if the user can enroll for 2fa
+sub can_2fa
+{
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return $miniserv{'twofactor_provider'} &&
+       (&reseller_admin() || $access{'edit_passwd'});
 }
 
 # Returns 1 if the user can change a domain's external IP address
@@ -12225,7 +12235,16 @@ if (&can_passwd()) {
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},
 		    'desc' => $text{'edit_changepassdesc'},
-		    'cat' => 'server',
+		    'cat' => 'admin',
+		  });
+	}
+
+if (&can_2fa()) {
+	# Twofactor enroll button
+	push(@rv, { 'page' => 'edit_2fa.cgi',
+		    'title' => $text{'edit_change2fa'},
+		    'desc' => $text{'edit_change2fadesc'},
+		    'cat' => 'admin',
 		  });
 	}
 
