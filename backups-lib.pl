@@ -4164,7 +4164,7 @@ if ($state->{'ok'} && &can_use_cloud("dropbox")) {
 	}
 
 # Backblaze
-my $state = &cloud_backblaze_get_state();
+my $state = &cloud_bb_get_state();
 if ($state->{'ok'} && &can_use_cloud("bb")) {
 	local $st = "<table>\n";
 	$st .= "<tr> <td>$text{'backup_bbpath'}</td> <td>".
