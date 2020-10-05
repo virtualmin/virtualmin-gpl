@@ -3043,15 +3043,35 @@ if (&mysql::is_mysql_running()) {
 # Start up with skip-grants flag
 &$first_print($text{'mysqlpass_safe'});
 my $cmd = $safe." --skip-grant-tables";
-my $ver = &mysql::get_mysql_version();
 
-# Running in safe mode, command doesn't create "mysqld" directory under 
-# "/var/run" eventually resulting in DBI connect failed error on all MySQL variants
+# Running with `mysqld_safe` - when called, command doesn't create "mysqld" directory under 
+# "/var/run" eventually resulting in DBI connect failed error on all MySQL versions
+my $ver = &mysql::get_mysql_version();
 if ($ver !~ /mariadb/i) {
 	my $mysockdir = '/var/run/mysqld';
 	my $myusergrp = 'mysql';
+	my $myconf = &mysql::get_mysql_config();
+	if ($myconf) {
+		my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$myconf;
+		if ($mysqld) {
+			my $members = $mysqld->{'members'};
+
+			# Look for user
+			my $myusergrp_ = &mysql::find_value("user", $members);
+			if ($myusergrp_) {
+				$myusergrp = $myusergrp_;
+				}
+
+			# Look for socket
+			my $mysockdir_ = &mysql::find_value("socket", $members);
+			if ($mysockdir_) {
+				$mysockdir = $mysockdir_;
+				$mysockdir =~ s/^(.+)\/([^\/]+)$/$1/;
+				}
+			}
+		}
 	$cmd = "mkdir -p $mysockdir && chown $myusergrp:$myusergrp $mysockdir && $cmd";
-}
+	}
 my ($pty, $pid) = &proc::pty_process_exec($cmd, 0, 0);
 my $rv = undef;
 sleep(5);
