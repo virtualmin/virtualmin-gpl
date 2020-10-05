@@ -511,8 +511,8 @@ local $olref = &read_file_lines($ovirt->{'file'});
 local $lref = &read_file_lines($virt->{'file'});
 local @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
 foreach my $l (@lines) {
-	if ($l =~ /^ServerName/) {
-		$l = "ServerName ".$d->{'dom'};
+	if ($l =~ /^(\s*)ServerName/) {
+		$l = $1."ServerName ".$d->{'dom'};
 		}
 	}
 splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
@@ -1408,8 +1408,8 @@ if (!$ppdir && $_[1]->{'proxy_pass'}) {
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
 	foreach $d (@dirs) {
-		if ($d =~ /^\s*(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
-			$d = "$1 \"|$writelogs_cmd $_[1]->{'id'} $2\"$3";
+		if ($d =~ /^(\s*)(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
+			$d = "$1$2 \"|$writelogs_cmd $_[1]->{'id'} $3\"$4";
 			}
 		}
 	}
@@ -1491,13 +1491,14 @@ if ($virt) {
 	local %adoms = map { $_->{'dom'}, 1 } @adoms;
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
-		if ($l =~ /^\s*ServerAlias\s+(.*)/i) {
+		if ($l =~ /^(\s*)ServerAlias\s+(.*)/i) {
 			# Exclude ServerAlias entries for alias domains
-			local @sa = split(/\s+/, $1);
+			my ($indent, $sa) = ($1, $2);
+			local @sa = split(/\s+/, $sa);
 			@sa = grep { !($adoms{$_} ||
 				       /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
 			next if (!@sa);
-			$l = "ServerAlias ".join(" ", @sa);
+			$l = $indent."ServerAlias ".join(" ", @sa);
 			}
 		&print_tempfile(FILE, "$l\n");
 		}
@@ -1729,7 +1730,6 @@ if ($virt) {
 			$l =~ /^.*_alog_(.*)$/ || next;
 			my $sfx = $1;
 			&copy_source_dest($l, $alog.$sfx);
-			print STDERR "copying $l to ".$alog.$sfx."\n";
 			}
 
 		if (-r $_[1]."_elog") {
