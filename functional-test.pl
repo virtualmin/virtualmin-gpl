@@ -1256,7 +1256,7 @@ $script_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/wordpress',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http(s?)://'.$test_domain.'/wordpress',
 		    ],
 	},
 
@@ -1290,7 +1290,7 @@ $script_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/wordpress',
 		      'Database: '.$test_domain_db.'_wp ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http(s?)://'.$test_domain.'/wordpress',
 		    ],
 	},
 
@@ -1352,7 +1352,7 @@ $gplscript_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -1386,7 +1386,7 @@ $gplscript_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/roundcube',
 		      'Database: '.$test_domain_db.'_roundcube ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -1833,7 +1833,7 @@ $move_tests = [
 		      'Directory: /home/'.$test_target_domain_user.
 			'/domains/'.$test_domain.'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -5004,7 +5004,7 @@ $webmin_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Type: roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -7735,7 +7735,7 @@ $clone_tests = [
 	  'grep' => [ 'Type: phpmyadmin',
 		      'Directory: /home/'.$test_clone_domain_user.
 			'/public_html/phpmyadmin',
-		      'URL: http://'.$test_clone_domain.'/phpmyadmin',
+		      'URL: http(s?)://'.$test_clone_domain.'/phpmyadmin',
 		    ],
 	},
 
