@@ -2926,9 +2926,19 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $mysql_mariadb_with_auth_string = 
    $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
+
+# It is needed to run flush privileges to avoid
+# an error as in virtualmin/virtualmin-gpl#213
+&execute_dom_sql($d, $mysql::master_db, "flush privileges") if (!$noflush);
+
 foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	my $sql;
-	if ($mysql_mariadb_with_auth_string) {
+	if ($forceuser) {
+		$sql = "update user set password = $encpass ".
+		       "where user = '$user' and host = '$host'";
+		$flush++;
+		}
+	elsif ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
 			$sql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
 			} 
@@ -2937,11 +2947,6 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 		       "where user = '$user' and host = '$host'";
 			$flush++;
 			}
-		}
-	elsif ($forceuser) {
-		$sql = "update user set password = $encpass ".
-		       "where user = '$user' and host = '$host'";
-		$flush++;
 		}
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
@@ -2955,6 +2960,14 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	}
 if ($flush && !$noflush) {
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+	}
+
+# Update Webmin module config, if admin user is getting updated
+if (($user eq ($mysql::config{'login'} || "root")) && $plainpass) {
+	$mysql::config{'pass'} = $plainpass;
+	$mysql::mysql_pass = $plainpass;
+	&mysql::save_module_config(\%mysql::config, "mysql");
+	$mysql::authstr = &mysql::make_authstr();
 	}
 }
 
@@ -3030,6 +3043,35 @@ if (&mysql::is_mysql_running()) {
 # Start up with skip-grants flag
 &$first_print($text{'mysqlpass_safe'});
 my $cmd = $safe." --skip-grant-tables";
+
+# Running with `mysqld_safe` - when called, command doesn't create "mysqld" directory under 
+# "/var/run" eventually resulting in DBI connect failed error on all MySQL versions
+my $ver = &mysql::get_mysql_version();
+if ($ver !~ /mariadb/i) {
+	my $mysockdir = '/var/run/mysqld';
+	my $myusergrp = 'mysql';
+	my $myconf = &mysql::get_mysql_config();
+	if ($myconf) {
+		my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$myconf;
+		if ($mysqld) {
+			my $members = $mysqld->{'members'};
+
+			# Look for user
+			my $myusergrp_ = &mysql::find_value("user", $members);
+			if ($myusergrp_) {
+				$myusergrp = $myusergrp_;
+				}
+
+			# Look for socket
+			my $mysockdir_ = &mysql::find_value("socket", $members);
+			if ($mysockdir_) {
+				$mysockdir = $mysockdir_;
+				$mysockdir =~ s/^(.+)\/([^\/]+)$/$1/;
+				}
+			}
+		}
+	$cmd = "mkdir -p $mysockdir && chown $myusergrp:$myusergrp $mysockdir && $cmd";
+	}
 my ($pty, $pid) = &proc::pty_process_exec($cmd, 0, 0);
 my $rv = undef;
 sleep(5);

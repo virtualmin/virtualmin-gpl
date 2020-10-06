@@ -377,12 +377,6 @@ else {
 		local $user = $mysql::mysql_login || "root";
 		&execute_password_change_sql(undef, "root",
 			undef, 0, 0, $in->{'mypass'});
-
-		# Update Webmin
-		$mysql::config{'pass'} = $in->{'mypass'};
-		$mysql::mysql_pass = $in->{'mypass'};
-		&mysql::save_module_config(\%mysql::config, "mysql");
-		$mysql::authstr = &mysql::make_authstr();
 		}
 	}
 
