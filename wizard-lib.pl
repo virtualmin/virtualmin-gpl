@@ -351,22 +351,18 @@ else {
 sub wizard_parse_mysql
 {
 local ($in) = @_;
+local $myadmusr = "root";
 &require_mysql();
 if (&mysql::is_mysql_running() == -1) {
 	# Forcibly change the mysql password
 	if ($in->{'forcepass'}) {
 		&push_all_print();
 		&set_all_null_print();
-		my $err = &force_set_mysql_password("root", $in->{'mypass'});
+		my $err = &force_set_mysql_password($myadmusr, $in->{'mypass'});
 		&pop_all_print();
 		return $err if ($err);
 		}
 
-	# Save the password
-	$mysql::config{'pass'} = $in->{'mypass'};
-	$mysql::mysql_pass = $in->{'mypass'};
-	&mysql::save_module_config(\%mysql::config, "mysql");
-	$mysql::authstr = &mysql::make_authstr();
 	if (&mysql::is_mysql_running() <= 0) {
 		return $text{'wizard_mysql_epass'};
 		}
@@ -374,9 +370,12 @@ if (&mysql::is_mysql_running() == -1) {
 else {
 	if (!$in{'mypass_def'}) {
 		# Change in DB
-		local $user = $mysql::mysql_login || "root";
-		&execute_password_change_sql(undef, "root",
-			undef, 0, 0, $in->{'mypass'});
+		local $user = $mysql::mysql_login || $myadmusr;
+		eval {
+			&execute_password_change_sql(undef, $myadmusr,
+				undef, 0, 0, $in->{'mypass'});
+			};
+		&update_webmin_mysql_pass($myadmusr, $in->{'mypass'}) if (!$@);
 		}
 	}
 

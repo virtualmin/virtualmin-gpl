@@ -61,7 +61,6 @@ if (!$force && $user ne $mysql::config{'login'}) {
 # Force the change
 my $err = &force_set_mysql_password($user, $pass);
 if ($err) {
-	print "ERROR: ", html_tags_to_text($err), "\n";
 	exit(1);
 	}
 

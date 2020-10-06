@@ -2961,14 +2961,6 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 if ($flush && !$noflush) {
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
 	}
-
-# Update Webmin module config, if admin user is getting updated
-if (($user eq ($mysql::config{'login'} || "root")) && $plainpass) {
-	$mysql::config{'pass'} = $plainpass;
-	$mysql::mysql_pass = $plainpass;
-	&mysql::save_module_config(\%mysql::config, "mysql");
-	$mysql::authstr = &mysql::make_authstr();
-	}
 }
 
 # mysql_password_synced(&domain)
@@ -3003,6 +2995,19 @@ sub remote_mysql
 local ($d) = @_;
 my $mymod = &get_domain_mysql_module($d);
 return $mymod->{'config'}->{'host'};
+}
+
+# update_webmin_mysql_pass(user, password)
+# Update Webmin module config, if admin user is getting updated
+sub update_webmin_mysql_pass
+{
+my ($user, $pass) = @_;
+if ($user eq ($mysql::config{'login'} || "root")) {
+	$mysql::config{'pass'} = $pass;
+	$mysql::mysql_pass = $pass;
+	&mysql::save_module_config(\%mysql::config, "mysql");
+	$mysql::authstr = &mysql::make_authstr();
+	}
 }
 
 # force_set_mysql_password(user, pass)
@@ -3087,17 +3092,19 @@ else {
 if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
+
+	# First try updating password natively
 	eval {
-		# Directly update mysql.user
 		local $main::error_must_die = 1;
 		&execute_password_change_sql(
-			undef, $user, undef, 1, 1, $pass);
+			undef, $user, undef, 0, 0, $pass);
 		};
 	if ($@) {
-		# If that didn't work, fall back to alter user or whatever
+		# If above didn't work, directly update mysql.user
 		eval {
+			local $main::error_must_die = 1;
 			&execute_password_change_sql(
-				undef, $user, undef, 0, 0, $pass);
+				undef, $user, undef, 1, 1, $pass);
 			};
 		}
 	if ($@) {
@@ -3105,6 +3112,7 @@ if (!$rv) {
 		&$second_print($rv);
 		}
 	else {
+		&update_webmin_mysql_pass($user, $pass);
 		&$second_print($text{'setup_done'});
 		}
 
@@ -3112,6 +3120,7 @@ if (!$rv) {
 	&$first_print($text{'mysqlpass_kill'});
 	my $out = &backquote_logged("$mysql::config{'mysqladmin'} shutdown 2>&1 </dev/null");
 	if ($?) {
+		$out =~ s/\n/ /gm;
 		$rv = &text('mysqlpass_eshutdown', $out);
 		&$second_print($rv);
 		return $rv;
