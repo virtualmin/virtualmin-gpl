@@ -372,8 +372,7 @@ else {
 	if (!$in{'mypass_def'}) {
 		# Change in DB
 		eval {
-			&execute_password_change_sql(undef, $user,
-				undef, 0, 0, $pass);
+			&execute_password_change_sql(undef, $user, undef, $pass);
 			};
 		&update_webmin_mysql_pass($user, $pass) if (!$@);
 		}

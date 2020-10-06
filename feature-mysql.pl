@@ -419,9 +419,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
 			local $pfunc = sub {
-				&execute_password_change_sql(
-					$d, $olduser, $encpass,
-					0, 0, &mysql_pass($d));
+				&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -865,8 +863,7 @@ else {
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
 			&execute_password_change_sql(
-				$d, $user, "'".("0" x 41)."'",
-				0, 0, &random_password(16));
+				$d, $user, "'".("0" x 41)."'", &random_password(16));
 			};
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
@@ -918,8 +915,7 @@ else {
 			if ($pass) {
 				# Need to re-set plaintext password
 				&execute_password_change_sql(
-					$d, $user, undef,
-					0, 0, &mysql_pass($d));
+					$d, $user, undef, &mysql_pass($d));
 				}
 			else {
 				# Can put back old hashed password
@@ -1891,7 +1887,7 @@ else {
 				}
 			else {
 				&execute_password_change_sql(
-				    $d, $myuser, undef, 0, 0, $pass);
+				    $d, $myuser, undef, $pass);
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -2907,38 +2903,28 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [force-user-table],
-# 			      [no-flush], [plaintext-pass])
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass], [direct])
 # Update a MySQL user's password for all hosts
 sub execute_password_change_sql
 {
-my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
+my ($d, $user, $encpass, $plainpass, $direct) = @_;
 if (!$encpass && $plainpass) {
 	# Hash password for insertion
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
 	}
 $plainpass = mysql_escape($plainpass) if ($plainpass);
-my $rv = &execute_dom_sql($d, $mysql::master_db,
-		"select host from user where user = ?", $user);
-my $flush = 0;
-my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+my $error;
+my $flush;
+my $plugin;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $mysql_mariadb_with_auth_string = 
    $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
-
-# It is needed to run flush privileges to avoid
-# an error as in virtualmin/virtualmin-gpl#213
-&execute_dom_sql($d, $mysql::master_db, "flush privileges") if (!$noflush);
-
-foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+my $sql_query = sub {
+	my ($host, $plugin) = @_;
 	my $sql;
-	if ($forceuser) {
-		$sql = "update user set password = $encpass ".
-		       "where user = '$user' and host = '$host'";
-		$flush++;
-		}
-	elsif ($mysql_mariadb_with_auth_string) {
+	my $flush;
+	if ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
 			$sql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
 			} 
@@ -2951,16 +2937,54 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
 		}
-	if ($sql =~ /^set\s+password/) {
-		&execute_set_password_sql($d, $sql, $host);
+	return ($sql, $flush);
+	};
+
+if ($direct) {
+	# Get the right SQL query first
+	my $sql;
+	($sql) = &$sql_query('localhost');
+	my $d = $mysql::config{'mysql'} || 'mysql';
+	my $d_exec = "$d -D $mysql::master_db -e \"flush privileges; $sql;\"";
+	my $out = &backquote_command("$d_exec 2>&1 </dev/null");
+	if ($?) {
+		$out =~ s/\n/ /gm;
+		$error = $out;
 		}
-	else {
-		&execute_dom_sql($d, $mysql::master_db, $sql);
-		};
-	}
-if ($flush && !$noflush) {
+	} 
+else {
+	# Get list of affected hosts
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
+			"select host from user where user = ?", $user);
+
+	# Get authentication plugin
+	$plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+
+	# It is needed to run flush privileges to avoid
+	# an error as in virtualmin/virtualmin-gpl#213
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+
+	# Execute SQL for each host
+	foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+		# Get the right SQL query first
+		my $sql;
+		($sql, $flush) = &$sql_query($host, $plugin);
+
+		# Execute SQL finally
+		if ($sql =~ /^set\s+password/) {
+			&execute_set_password_sql($d, $sql, $host);
+			}
+		else {
+			&execute_dom_sql($d, $mysql::master_db, $sql);
+			};
 	}
+
+	# Flush privileges finally
+	if ($flush) {
+		&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+		}
+	}
+return $error;
 }
 
 # mysql_password_synced(&domain)
@@ -3093,27 +3117,27 @@ if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
 
-	# First try updating password natively
-	eval {
-		local $main::error_must_die = 1;
-		&execute_password_change_sql(
-			undef, $user, undef, 0, 0, $pass);
-		};
-	if ($@) {
-		# If above didn't work, directly update mysql.user
-		eval {
-			local $main::error_must_die = 1;
-			&execute_password_change_sql(
-				undef, $user, undef, 1, 1, $pass);
-			};
-		}
-	if ($@) {
-		$rv = &text('mysqlpass_echange', "$@");
+	# Update password first by running command directly
+	my $err = &execute_password_change_sql(undef, $user, undef, $pass, 1);
+	if ($err) {
+		$rv = &text('mysqlpass_echange', "$err");
 		&$second_print($rv);
 		}
 	else {
 		&update_webmin_mysql_pass($user, $pass);
-		&$second_print($text{'setup_done'});
+
+		# Update root password now for other
+		# hosts, using regular database connection
+		eval {
+			&execute_password_change_sql(undef, $user, undef, $pass);
+			};
+		if ($@) {
+			$rv = &text('mysqlpass_echange', "$err");
+			&$second_print($rv);
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Shut down again, with the mysqladmin command

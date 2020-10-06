@@ -55,7 +55,7 @@ $user || &usage("Missing --user flag, and current MySQL user is unknown");
 %lastconfig = %config;
 
 if (!$force && $user ne $mysql::config{'login'}) {
-	&usage("Warning! Changing virtual server password here is not going to update Virtualmin internal database, which is going to result in a connection error for some operations in the future. It is highly recommended to change virtual server database password using special \`virtualmin modify-database-pass\` command instead.\n");
+	&usage("Error! There is a special \`virtualmin modify-database-pass\` command for changing non-administrative, virtual server database user password.\n");
 	}
 
 # Force the change
@@ -75,7 +75,7 @@ print "Change the root MySQL password, even if the current password is unknown.\
 print "\n";
 print "virtualmin set-mysql-pass --pass password\n";
 print "                         [--user username]\n";
-print "                         [--force password change for virtual server]\n";
+print "                         [--force password change for non-administrative user]\n";
 exit(1);
 }
 
