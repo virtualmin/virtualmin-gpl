@@ -16926,7 +16926,7 @@ while(@argv) {
 		push(@qargv, "'$a'");
 		}
 	else {
-		push(@qargv, quotameta($a));
+		push(@qargv, quotemeta($a));
 		}
 	}
 if ($hide) {
