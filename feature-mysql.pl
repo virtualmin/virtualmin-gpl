@@ -190,11 +190,11 @@ if ($tmpl->{'mysql_nopass'}) {
 return $ok;
 }
 
-# add_db_table(&domain, host, db, user)
+# add_db_table(&domain, host, db, user, preserve)
 # Adds an entry to the db table, with all permission columns set to Y
 sub add_db_table
 {
-local ($d, $host, $db, $user) = @_;
+local ($d, $host, $db, $user, $preserve) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
 local ($s, @fields, @yeses);
@@ -209,12 +209,23 @@ my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
+
+	# Preserve all other domain's database permissions
+	if ($preserve) {
+		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
+			my $qddb = &quote_mysql_database($ddb->{'name'});
+			if ($qddb ne $qdb) {
+				&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+				}
+			}
+		}
+	# Update given database
 	&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
 	}
 else {
 	# Can update the DB table directly
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
-	&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+	&execute_dom_sql($d, $mysql::master_db, "insert ignore into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
 }
@@ -1362,6 +1373,18 @@ $rv =~ s/'/''/g;
 return $rv;
 }
 
+# mysql_escape_encrypted_password(string)
+# Returns an encrypted password string with quotes escaped, 
+# excluding first and last quotes, for use in SQL
+sub mysql_escape_encrypted_password
+{
+local $rv = $_[0];
+if ($rv =~ /^'\$/) {
+    $rv =~ s/(?<!^)'(?!$)/''/g;
+    }
+return $rv;
+}
+
 # mysql_size(&domain, dbname, [size-only])
 # Returns the size, number of tables in a database, and size included in a
 # domain's Unix quota.
@@ -1800,7 +1823,7 @@ else {
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser);
+				&add_db_table($d, $h, $db, $myuser, 1);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
@@ -2842,10 +2865,16 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
 
 # Hash password for setting
-$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
-    if (!$encpass && $plainpass);
+if (!$encpass && $plainpass) {
+	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
+	}
+elsif ($encpass) {
+	# Escape SHA2 encrypted password which 
+	# may contain quotes and/or double-quotes
+	$encpass = &mysql_escape_encrypted_password($encpass);
+	}
 $plainpass = &mysql_escape($plainpass) if ($plainpass);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.1.3") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'$plainpass'" : "password $encpass"));
@@ -2855,13 +2884,13 @@ elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	if ($plainpass) {
 		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
 		}
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql");
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql", "flush privileges");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass", "flush privileges");
 	}
 else {
-	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
+	return ("insert ignore into user (host, user, password) values ('$host', '$user', $encpass)");
 	}
 }
 
@@ -2912,6 +2941,11 @@ if (!$encpass && $plainpass) {
 	# Hash password for insertion
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
 	}
+elsif ($encpass) {
+	# Escape SHA2 encrypted password which 
+	# may contain quotes and/or double-quotes
+	$encpass = &mysql_escape_encrypted_password($encpass);
+	}
 $plainpass = mysql_escape($plainpass) if ($plainpass);
 my $error;
 my $flush;
@@ -2920,7 +2954,7 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $mysql_mariadb_with_auth_string = 
    $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
-my $sql_query = sub {
+my $gsql = sub {
 	my ($host, $plugin) = @_;
 	my $sql;
 	my $flush;
@@ -2943,10 +2977,10 @@ my $sql_query = sub {
 if ($direct) {
 	# Get the right SQL query first
 	my $sql;
-	($sql) = &$sql_query('localhost');
-	my $d = $mysql::config{'mysql'} || 'mysql';
-	my $d_exec = "$d -D $mysql::master_db -e \"flush privileges; $sql;\"";
-	my $out = &backquote_command("$d_exec 2>&1 </dev/null");
+	($sql) = &$gsql('localhost');
+	my $mysql_cmd = $mysql::config{'mysql'} || 'mysql';
+	my $mysql_exe = "$mysql_cmd -D $mysql::master_db -e \"flush privileges; $sql;\"";
+	my $out = &backquote_command("$mysql_exe 2>&1 </dev/null");
 	if ($?) {
 		$out =~ s/\n/ /gm;
 		$error = $out;
@@ -2968,7 +3002,7 @@ else {
 	foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 		# Get the right SQL query first
 		my $sql;
-		($sql, $flush) = &$sql_query($host, $plugin);
+		($sql, $flush) = &$gsql($host, $plugin);
 
 		# Execute SQL finally
 		if ($sql =~ /^set\s+password/) {
