@@ -190,11 +190,11 @@ if ($tmpl->{'mysql_nopass'}) {
 return $ok;
 }
 
-# add_db_table(&domain, host, db, user)
+# add_db_table(&domain, host, db, user, preserve)
 # Adds an entry to the db table, with all permission columns set to Y
 sub add_db_table
 {
-local ($d, $host, $db, $user) = @_;
+local ($d, $host, $db, $user, $preserve) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
 local ($s, @fields, @yeses);
@@ -209,12 +209,23 @@ my $qdb = &quote_mysql_database($db);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
+
+	# Preserve all other domain's database permissions
+	if ($preserve) {
+		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
+			my $qddb = &quote_mysql_database($ddb->{'name'});
+			if ($qddb ne $qdb) {
+				&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+				}
+			}
+		}
+	# Update given database
 	&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
 	}
 else {
 	# Can update the DB table directly
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
-	&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+	&execute_dom_sql($d, $mysql::master_db, "insert ignore into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
 }
@@ -419,9 +430,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
 			local $pfunc = sub {
-				&execute_password_change_sql(
-					$d, $olduser, $encpass,
-					0, 0, &mysql_pass($d));
+				&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -865,8 +874,7 @@ else {
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
 			&execute_password_change_sql(
-				$d, $user, "'".("0" x 41)."'",
-				0, 0, &random_password(16));
+				$d, $user, "'".("0" x 41)."'", &random_password(16));
 			};
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
@@ -918,8 +926,7 @@ else {
 			if ($pass) {
 				# Need to re-set plaintext password
 				&execute_password_change_sql(
-					$d, $user, undef,
-					0, 0, &mysql_pass($d));
+					$d, $user, undef, &mysql_pass($d));
 				}
 			else {
 				# Can put back old hashed password
@@ -1366,6 +1373,18 @@ $rv =~ s/'/''/g;
 return $rv;
 }
 
+# mysql_escape_encrypted_password(string)
+# Returns an encrypted password string with quotes escaped, 
+# excluding first and last quotes, for use in SQL
+sub mysql_escape_encrypted_password
+{
+local $rv = $_[0];
+if ($rv =~ /^'\$/) {
+    $rv =~ s/(?<!^)'(?!$)/''/g;
+    }
+return $rv;
+}
+
 # mysql_size(&domain, dbname, [size-only])
 # Returns the size, number of tables in a database, and size included in a
 # domain's Unix quota.
@@ -1804,7 +1823,7 @@ else {
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser);
+				&add_db_table($d, $h, $db, $myuser, 1);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
@@ -1891,7 +1910,7 @@ else {
 				}
 			else {
 				&execute_password_change_sql(
-				    $d, $myuser, undef, 0, 0, $pass);
+				    $d, $myuser, undef, $pass);
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -2846,10 +2865,16 @@ my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
 
 # Hash password for setting
-$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
-    if (!$encpass && $plainpass);
+if (!$encpass && $plainpass) {
+	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
+	}
+elsif ($encpass) {
+	# Escape SHA2 encrypted password which 
+	# may contain quotes and/or double-quotes
+	$encpass = &mysql_escape_encrypted_password($encpass);
+	}
 $plainpass = &mysql_escape($plainpass) if ($plainpass);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.1.3") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'$plainpass'" : "password $encpass"));
@@ -2859,13 +2884,13 @@ elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	if ($plainpass) {
 		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
 		}
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql");
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql", "flush privileges");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass", "flush privileges");
 	}
 else {
-	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
+	return ("insert ignore into user (host, user, password) values ('$host', '$user', $encpass)");
 	}
 }
 
@@ -2907,38 +2932,33 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [force-user-table],
-# 			      [no-flush], [plaintext-pass])
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass], [direct])
 # Update a MySQL user's password for all hosts
 sub execute_password_change_sql
 {
-my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
+my ($d, $user, $encpass, $plainpass, $direct) = @_;
 if (!$encpass && $plainpass) {
 	# Hash password for insertion
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
 	}
+elsif ($encpass) {
+	# Escape SHA2 encrypted password which 
+	# may contain quotes and/or double-quotes
+	$encpass = &mysql_escape_encrypted_password($encpass);
+	}
 $plainpass = mysql_escape($plainpass) if ($plainpass);
-my $rv = &execute_dom_sql($d, $mysql::master_db,
-		"select host from user where user = ?", $user);
-my $flush = 0;
-my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+my $error;
+my $flush;
+my $plugin;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $mysql_mariadb_with_auth_string = 
    $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
    $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
-
-# It is needed to run flush privileges to avoid
-# an error as in virtualmin/virtualmin-gpl#213
-&execute_dom_sql($d, $mysql::master_db, "flush privileges") if (!$noflush);
-
-foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+my $gsql = sub {
+	my ($host, $plugin) = @_;
 	my $sql;
-	if ($forceuser) {
-		$sql = "update user set password = $encpass ".
-		       "where user = '$user' and host = '$host'";
-		$flush++;
-		}
-	elsif ($mysql_mariadb_with_auth_string) {
+	my $flush;
+	if ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
 			$sql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
 			} 
@@ -2951,24 +2971,54 @@ foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
 		}
-	if ($sql =~ /^set\s+password/) {
-		&execute_set_password_sql($d, $sql, $host);
+	return ($sql, $flush);
+	};
+
+if ($direct) {
+	# Get the right SQL query first
+	my $sql;
+	($sql) = &$gsql('localhost');
+	my $mysql_cmd = $mysql::config{'mysql'} || 'mysql';
+	my $mysql_exe = "$mysql_cmd -D $mysql::master_db -e \"flush privileges; $sql;\"";
+	my $out = &backquote_command("$mysql_exe 2>&1 </dev/null");
+	if ($?) {
+		$out =~ s/\n/ /gm;
+		$error = $out;
 		}
-	else {
-		&execute_dom_sql($d, $mysql::master_db, $sql);
-		};
-	}
-if ($flush && !$noflush) {
+	} 
+else {
+	# Get list of affected hosts
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
+			"select host from user where user = ?", $user);
+
+	# Get authentication plugin
+	$plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+
+	# It is needed to run flush privileges to avoid
+	# an error as in virtualmin/virtualmin-gpl#213
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+
+	# Execute SQL for each host
+	foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+		# Get the right SQL query first
+		my $sql;
+		($sql, $flush) = &$gsql($host, $plugin);
+
+		# Execute SQL finally
+		if ($sql =~ /^set\s+password/) {
+			&execute_set_password_sql($d, $sql, $host);
+			}
+		else {
+			&execute_dom_sql($d, $mysql::master_db, $sql);
+			};
 	}
 
-# Update Webmin module config, if admin user is getting updated
-if (($user eq ($mysql::config{'login'} || "root")) && $plainpass) {
-	$mysql::config{'pass'} = $plainpass;
-	$mysql::mysql_pass = $plainpass;
-	&mysql::save_module_config(\%mysql::config, "mysql");
-	$mysql::authstr = &mysql::make_authstr();
+	# Flush privileges finally
+	if ($flush) {
+		&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+		}
 	}
+return $error;
 }
 
 # mysql_password_synced(&domain)
@@ -3003,6 +3053,19 @@ sub remote_mysql
 local ($d) = @_;
 my $mymod = &get_domain_mysql_module($d);
 return $mymod->{'config'}->{'host'};
+}
+
+# update_webmin_mysql_pass(user, password)
+# Update Webmin module config, if admin user is getting updated
+sub update_webmin_mysql_pass
+{
+my ($user, $pass) = @_;
+if ($user eq ($mysql::config{'login'} || "root")) {
+	$mysql::config{'pass'} = $pass;
+	$mysql::mysql_pass = $pass;
+	&mysql::save_module_config(\%mysql::config, "mysql");
+	$mysql::authstr = &mysql::make_authstr();
+	}
 }
 
 # force_set_mysql_password(user, pass)
@@ -3087,31 +3150,35 @@ else {
 if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
-	eval {
-		# Directly update mysql.user
-		local $main::error_must_die = 1;
-		&execute_password_change_sql(
-			undef, $user, undef, 1, 1, $pass);
-		};
-	if ($@) {
-		# If that didn't work, fall back to alter user or whatever
-		eval {
-			&execute_password_change_sql(
-				undef, $user, undef, 0, 0, $pass);
-			};
-		}
-	if ($@) {
-		$rv = &text('mysqlpass_echange', "$@");
+
+	# Update password first by running command directly
+	my $err = &execute_password_change_sql(undef, $user, undef, $pass, 1);
+	if ($err) {
+		$rv = &text('mysqlpass_echange', "$err");
 		&$second_print($rv);
 		}
 	else {
-		&$second_print($text{'setup_done'});
+		&update_webmin_mysql_pass($user, $pass);
+
+		# Update root password now for other
+		# hosts, using regular database connection
+		eval {
+			&execute_password_change_sql(undef, $user, undef, $pass);
+			};
+		if ($@) {
+			$rv = &text('mysqlpass_echange', "$err");
+			&$second_print($rv);
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Shut down again, with the mysqladmin command
 	&$first_print($text{'mysqlpass_kill'});
 	my $out = &backquote_logged("$mysql::config{'mysqladmin'} shutdown 2>&1 </dev/null");
 	if ($?) {
+		$out =~ s/\n/ /gm;
 		$rv = &text('mysqlpass_eshutdown', $out);
 		&$second_print($rv);
 		return $rv;
