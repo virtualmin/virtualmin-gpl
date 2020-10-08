@@ -8251,10 +8251,11 @@ foreach my $dd (@alldoms) {
 		@of = ( "webmin" );
 		}
 	else {
-		@of = reverse(&list_ordered_features($d));
+		@of = reverse(&list_ordered_features($dd));
 		}
 	foreach $f (@of) {
-		if ($config{$f} && $dd->{$f} || $f eq 'unix') {
+		if (($config{$f} || &indexof($f, @plugins) >= 0) &&
+		    $dd->{$f} || $f eq 'unix') {
 			# Delete core feature
 			local @args = ( $preserve );
 			if ($f eq "mail") {
