@@ -77,13 +77,20 @@ local $tmpl = &get_template($d->{'template'});
 local $oldmode = &get_domain_php_mode($d);
 
 # Work out the default PHP version for FPM
-if ($mode eq "fpm" && !$d->{'php_fpm_version'}) {
+if ($mode eq "fpm") {
 	local @fpms = grep { !$_->{'err'} } &list_php_fpm_configs();
 	@fpms || return "No FPM versions found!";
-	my $defconf = $tmpl->{'web_phpver'} ?
-		&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
-	$defconf ||= $fpms[0];
-	$d->{'php_fpm_version'} = $defconf->{'shortversion'};
+	my $curr = &get_php_fpm_config($d->{'php_fpm_version'});
+	if (!$curr) {
+		# Current version isn't actually valid! Fall back to default
+		delete($d->{'php_fpm_version'});
+		}
+	if (!$d->{'php_fpm_version'}) {
+		my $defconf = $tmpl->{'web_phpver'} ?
+			&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
+		$defconf ||= $fpms[0];
+		$d->{'php_fpm_version'} = $defconf->{'shortversion'};
+		}
 	}
 
 if ($mode eq "mod_php" && $oldmode ne "mod_php") {
