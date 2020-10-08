@@ -210,7 +210,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
 
-	# Preserve all other domain's database permissions
+	# Preserve all other domain's database permissions (useful on restore)
 	if ($preserve) {
 		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
 			my $qddb = &quote_mysql_database($ddb->{'name'});
@@ -2978,9 +2978,11 @@ if ($direct) {
 	# Get the right SQL query first
 	my $sql;
 	($sql) = &$gsql('localhost');
-	my $mysql_cmd = $mysql::config{'mysql'} || 'mysql';
-	my $mysql_exe = "$mysql_cmd -D $mysql::master_db -e \"flush privileges; $sql;\"";
-	my $out = &backquote_command("$mysql_exe 2>&1 </dev/null");
+	my $cmd = $mysql::config{'mysql'} || 'mysql';
+	my $qplainpass = quotemeta($plainpass);
+	$qplainpass =~ s/\\'/'/g;
+	$sql =~ s/\Q$plainpass\E/$qplainpass/;
+	my $out = &backquote_command("$cmd -D $mysql::master_db -e \"flush privileges; $sql;\" 2>&1 </dev/null");
 	if ($?) {
 		$out =~ s/\n/ /gm;
 		$error = $out;
