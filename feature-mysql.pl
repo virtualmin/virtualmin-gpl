@@ -1368,20 +1368,8 @@ return $_[0]->{'mysql_enc_pass'};
 # Returns a string with quotes escaped, for use in SQL
 sub mysql_escape
 {
-local $rv = $_[0];
+my ($rv) = @_;
 $rv =~ s/'/''/g;
-return $rv;
-}
-
-# mysql_escape_encrypted_password(string)
-# Returns an encrypted password string with quotes escaped, 
-# excluding first and last quotes, for use in SQL
-sub mysql_escape_encrypted_password
-{
-local $rv = $_[0];
-if ($rv =~ /^'\$/) {
-    $rv =~ s/(?<!^)'(?!$)/''/g;
-    }
 return $rv;
 }
 
@@ -1819,7 +1807,7 @@ else {
 		foreach $h (@hosts) {
 			&execute_user_deletion_sql($d, $h, $user);
 			&execute_user_creation_sql($d, $h, $myuser, 
-			      $encpass ? "'$encpass'" : undef,
+			      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
@@ -1906,7 +1894,7 @@ else {
 			# Change the password
 			if ($encpass && !$pass) {
 				&execute_password_change_sql(
-					$d, $myuser, "'$encpass'");
+					$d, $myuser, "'".&mysql_escape($encpass)."'");
 				}
 			else {
 				&execute_password_change_sql(
@@ -2351,7 +2339,8 @@ else {
 			&execute_user_deletion_sql($d, undef, $u->[0]);
 			foreach my $h (@$hosts) {
 				&execute_user_creation_sql($d, $h, $u->[0],
-						   "'$u->[1]'", $pmap{$u->[0]});
+					"'".&mysql_escape($u->[1])."'",
+					$pmap{$u->[0]});
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
@@ -2383,7 +2372,7 @@ sub encrypted_mysql_pass
 {
 local ($d) = @_;
 if ($d->{'mysql_enc_pass'}) {
-	return "'$d->{'mysql_enc_pass'}'";
+	return "'".&mysql_escape($d->{'mysql_enc_pass'})."'";
 	}
 else {
 	local $qpass = &mysql_escape(&mysql_pass($d));
@@ -2868,21 +2857,16 @@ my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
 if (!$encpass && $plainpass) {
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
 	}
-elsif ($encpass) {
-	# Escape SHA2 encrypted password which 
-	# may contain quotes and/or double-quotes
-	$encpass = &mysql_escape_encrypted_password($encpass);
-	}
-$plainpass = &mysql_escape($plainpass) if ($plainpass);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Need to use new 'create user' command
 	return ("create user '$user'\@'$host' identified $plugin by ".
-		($plainpass ? "'$plainpass'" : "password $encpass"));
+		($plainpass ? "'".&mysql_escape($plainpass)."'"
+			    : "password $encpass"));
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
 	my $changepasssql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
 	if ($plainpass) {
-		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
+		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
 		}
 	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql", "flush privileges");
 	}
@@ -2932,8 +2916,11 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass], [direct])
-# Update a MySQL user's password for all hosts
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass],
+# 			      [direct])
+# Update a MySQL user's password for all hosts. Plainpass is the unencrypted
+# password, and encpass is an SQL expression for the hashed password like
+# 'fda2343243a' or password('foo')
 sub execute_password_change_sql
 {
 my ($d, $user, $encpass, $plainpass, $direct) = @_;
@@ -2941,12 +2928,6 @@ if (!$encpass && $plainpass) {
 	# Hash password for insertion
 	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
 	}
-elsif ($encpass) {
-	# Escape SHA2 encrypted password which 
-	# may contain quotes and/or double-quotes
-	$encpass = &mysql_escape_encrypted_password($encpass);
-	}
-$plainpass = mysql_escape($plainpass) if ($plainpass);
 my $error;
 my $flush;
 my $plugin;
@@ -2960,11 +2941,10 @@ my $gsql = sub {
 	my $flush;
 	if ($mysql_mariadb_with_auth_string) {
 		if ($plainpass) {
-			$sql = "alter user '$user'\@'$host' identified $plugin by '$plainpass'";
+			$sql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
 			} 
 		else {
-			$sql = "update user set authentication_string = $encpass ".
-		       "where user = '$user' and host = '$host'";
+			$sql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
 			$flush++;
 			}
 		}
@@ -2979,10 +2959,8 @@ if ($direct) {
 	my $sql;
 	($sql) = &$gsql('localhost');
 	my $cmd = $mysql::config{'mysql'} || 'mysql';
-	my $qplainpass = quotemeta($plainpass);
-	$qplainpass =~ s/\\'/'/g;
-	$sql =~ s/\Q$plainpass\E/$qplainpass/;
-	my $out = &backquote_command("$cmd -D $mysql::master_db -e \"flush privileges; $sql;\" 2>&1 </dev/null");
+	my $out = &backquote_command("$cmd -D $mysql::master_db -e ".
+			quotemeta("flush privileges; $sql")." 2>&1 </dev/null");
 	if ($?) {
 		$out =~ s/\n/ /gm;
 		$error = $out;
