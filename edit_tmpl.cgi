@@ -57,8 +57,8 @@ if (!$in{'new'}) {
 	print $text{'tmpl_editmode'},"\n";
 	%isfeature = map { $_, 1 } @features;
 	print &ui_select("editmode", $in{'editmode'},
-		 [ map { [ $_, $text{'feature_'.$_} ||
-			       $text{'tmpl_editmode_'.$_} ] }
+		 [ map { [ $_, $text{'tmpl_editmode_'.$_} ||
+			       $text{'feature_'.$_} ] }
 		       @editmodes ],
 		 1, 0, 0, 0, "onChange='form.submit()'" );
 	print &ui_submit($text{'tmpl_switch'});
@@ -74,8 +74,8 @@ print &ui_hidden("new", $in{'new'}),"\n";
 print &ui_hidden("cloneof", $in{'clone'}),"\n";
 print &ui_hidden("cp", $in{'cp'}),"\n";
 print &ui_hidden("editmode", $in{'editmode'}),"\n";
-$emode = $text{'feature_'.$in{'editmode'}} ||
-	 $text{'tmpl_editmode_'.$in{'editmode'}};
+$emode = $text{'tmpl_editmode_'.$in{'editmode'}} ||
+	 $text{'feature_'.$in{'editmode'}};
 print &ui_table_start($emode, "width=100%", 2,
 		      [ "width=30%" ]);
 
