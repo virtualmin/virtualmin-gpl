@@ -1553,10 +1553,11 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_web
 {
-if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
+my ($d) = @_;
+if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# Just re-add ServerAlias entries if missing
 	&$first_print($text{'restore_apachecp2'});
-	local $alias = &get_domain($_[0]->{'alias'});
+	local $alias = &get_domain($d->{'alias'});
 	local ($pvirt, $pconf, $conf) = &get_apache_virtual($alias->{'dom'},
 						            $alias->{'web_port'});
 	if (!$pvirt) {
@@ -1574,11 +1575,11 @@ if ($_[0]->{'alias'} && $_[0]->{'alias_mode'}) {
 	return 1;
 	}
 &$first_print($text{'restore_apachecp'});
-&obtain_lock_web($_[0]);
+&obtain_lock_web($d);
 local $rv;
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
-local $tmpl = &get_template($_[0]->{'template'});
+local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+					    $d->{'web_port'});
+local $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	local $srclref = &read_file_lines($_[1]);
 	local $dstlref = &read_file_lines($virt->{'file'});
@@ -1602,18 +1603,18 @@ if ($virt) {
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
 			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
 				$dstlref->[$i] = "SuexecUserGroup ".
-				  "\"#$_[0]->{'uid'}\" \"#$_[0]->{'ugid'}\"";
+				  "\"#$d->{'uid'}\" \"#$d->{'ugid'}\"";
 				}
 			}
 		}
 
 	# Fix up any DocumentRoot or other file-related directives
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
 		local $i;
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
-				s/\Q$_[5]->{'home'}\E/$_[0]->{'home'}/g;
+				s/\Q$_[5]->{'home'}\E/$d->{'home'}/g;
 			}
 		}
 
@@ -1656,22 +1657,22 @@ if ($virt) {
 	undef(@apache::get_config_cache);
 
 	# Re-generate PHP wrappers to match this system
-	if (defined(&create_php_wrappers) && !$_[0]->{'alias'}) {
-		local $mode = &get_domain_php_mode($_[0]);
-		&create_php_wrappers($_[0], $mode);
+	if (defined(&create_php_wrappers) && !$d->{'alias'}) {
+		local $mode = &get_domain_php_mode($d);
+		&create_php_wrappers($d, $mode);
 		}
 	&$second_print($text{'setup_done'});
 
 	# Make sure the PHP execution mode is valid
 	local $mode;
-	if (!$_[0]->{'alias'}) {
+	if (!$d->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
-		$mode = &get_domain_php_mode($_[0]);
-		local @supp = &supported_php_modes($_[0]);
+		$mode = &get_domain_php_mode($d);
+		local @supp = &supported_php_modes($d);
 		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
 			# Need to fix
 			local $fix = pop(@supp);
-			&save_domain_php_mode($_[0], $fix);
+			&save_domain_php_mode($d, $fix);
 			&$second_print(&text('restore_badmode', 
 					$text{'phpmode_short_'.$mode},
 					$text{'phpmode_short_'.$fix}));
@@ -1679,48 +1680,48 @@ if ($virt) {
 		else {
 			# Looks good .. but re-save anyway, to update
 			# compatible directives
-			&save_domain_php_mode($_[0], $mode);
+			&save_domain_php_mode($d, $mode);
 			&$second_print(&text('restore_okmode',
 					$text{'phpmode_short_'.$mode}));
 			}
 		}
 
 	# Correct system-specific entries in PHP config files
-	if (!$_[0]->{'alias'} && $_[5]) {
-		local $sock = &get_php_mysql_socket($_[0]);
+	if (!$d->{'alias'} && $_[5]) {
+		local $sock = &get_php_mysql_socket($d);
 		local @fixes = (
-		  [ "session.save_path", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
-		  [ "upload_tmp_dir", $_[5]->{'home'}, $_[0]->{'home'}, 1 ],
+		  [ "session.save_path", $_[5]->{'home'}, $d->{'home'}, 1 ],
+		  [ "upload_tmp_dir", $_[5]->{'home'}, $d->{'home'}, 1 ],
 		  );
 		if ($sock ne 'none') {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
 			}
-		&fix_php_ini_files($_[0], \@fixes);
+		&fix_php_ini_files($d, \@fixes);
 		}
 
 	# Fix broken PHP extension_dir directives
-	if (($mode eq "fcgid" || $mode eq "cgi") && !$_[0]->{'alias'}) {
-		&fix_php_extension_dir($_[0]);
+	if (($mode eq "fcgid" || $mode eq "cgi") && !$d->{'alias'}) {
+		&fix_php_extension_dir($d);
 		}
 
 	# Add Require all granted directive if this system is Apache 2.4
-	&add_require_all_granted_directives($_[0], $_[0]->{'web_port'});
+	&add_require_all_granted_directives($d, $d->{'web_port'});
 
 	# Set new public_html and cgi-bin paths
-	&find_html_cgi_dirs($_[0]);
+	&find_html_cgi_dirs($d);
 
 	# Create empty log files if needed
-	&setup_apache_logs($_[0]);
+	&setup_apache_logs($d);
 
 	# Copy back log files if they were in the backup
 	if (-r $_[1]."_alog") {
 		&$first_print($text{'restore_apachelog'});
 
 		# Restore the access log
-		local $alog = &get_apache_log($_[0]->{'dom'},
-					      $_[0]->{'web_port'});
+		local $alog = &get_apache_log($d->{'dom'},
+					      $d->{'web_port'});
 		&copy_source_dest($_[1]."_alog", $alog);
-		&set_apache_log_permissions($_[0], $alog);
+		&set_apache_log_permissions($d, $alog);
 
 		# If the backup contained any rotated log files, restore them
 		&foreign_require("syslog");
@@ -1734,20 +1735,20 @@ if ($virt) {
 
 		if (-r $_[1]."_elog") {
 			# Restore the error log
-			local $elog = &get_apache_log($_[0]->{'dom'},
-						      $_[0]->{'web_port'}, 1);
+			local $elog = &get_apache_log($d->{'dom'},
+						      $d->{'web_port'}, 1);
 			&copy_source_dest($_[1]."_elog", $elog);
-			&set_apache_log_permissions($_[0], $elog);
+			&set_apache_log_permissions($d, $elog);
 			}
 		&$second_print($text{'setup_done'});
 		}
 
 	# Re-link Apache logs if needed
-	&link_apache_logs($_[0]);
+	&link_apache_logs($d);
 
 	# Fix Options lines
-	my ($virt, $vconf, $conf) = &get_apache_virtual($_[0]->{'dom'},
-							$_[0]->{'web_port'});
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+							$d->{'web_port'});
 	if ($virt) {
 		&fix_options_directives($vconf, $conf, 0);
 		}
@@ -1759,7 +1760,7 @@ else {
 	&$second_print($text{'delete_noapache'});
 	$rv = 0;
 	}
-&release_lock_web($_[0]);
+&release_lock_web($d);
 return $rv;
 }
 
