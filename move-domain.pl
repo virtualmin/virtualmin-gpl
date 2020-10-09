@@ -140,7 +140,7 @@ else {
 sub usage
 {
 print $_[0],"\n\n" if ($_[0]);
-print "Moves a virtual server under a new parent server, or converts it.\n";
+print "Moves a virtual server under a new parent server, or converts it\n";
 print "into a parent server of its own.\n";
 print "\n";
 print "virtualmin move-domain --domain domain.name\n";
