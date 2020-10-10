@@ -2472,129 +2472,156 @@ sub show_template_web
 {
 local ($tmpl) = @_;
 
-# Work out fields to disable
-local @webfields = ( "web", "web_ssl", "user_def",
-		     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
-		     "html_dir", "html_dir_def", "html_perms", "stats_mode",
-		     "stats_dir", "stats_hdir", "statspass", "statsnoedit",
-		     "alias_mode", "web_port", "web_sslport",
-		     "web_webmin_ssl", "web_usermin_ssl", "web_ssi",
-		     "web_ssi_suffix", );
-push(@webfields, "webmail", "webmaildom", "webmaildom_def",
-		 "admin", "admindom", "admindom_def");
-if (defined(&get_domain_ruby_mode)) {
-	push(@webfields, "web_ruby_suexec");
+if ($config{'web'}) {
+	# Work out fields to disable when Apache is in default mode
+	local @webfields = ( "web", "web_ssl", "user_def",
+			     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
+			     "html_dir", "html_dir_def", "html_perms",
+			     "alias_mode", "web_port", "web_sslport",
+			     "web_ssi", "web_ssi_suffix", );
+	if ($config{'webalizer'}) {
+		push(@webfields, "stats_mode", "stats_dir", "stats_hdir",
+				 "statspass", "statsnoedit");
+		}
+	if (defined(&get_domain_ruby_mode)) {
+		push(@webfields, "web_ruby_suexec");
+		}
+
+	# Apache directives
+	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
+				     0, undef, \@webfields);
+	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
+		$ndi."<br>\n".
+		&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
+					join("\n", split(/\t/, $tmpl->{'web'})),
+			     10, 60));
+
+	# Extra SSL directives
+	print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
+		&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
+			     5, 60));
+
+	# Input for logging via program. Deprecated, so don't show unless enabled
+	if ($tmpl->{'web_writelogs'}) {
+		print &ui_table_row(&hlink($text{'newweb_writelogs'},
+					   "template_writelogs"),
+			&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+		}
+
+	# Input for Apache user to add to domain's group
+	print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
+		&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
+					   $tmpl->{'web_user'} ? 1 : 0,
+		       [ [ 2, $text{'no'}."<br>" ],
+			 [ 0, $text{'newweb_userdef'}."<br>" ],
+			 [ 1, $text{'newweb_useryes'}." ".
+			      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
+							'' : $tmpl->{'web_user'}) ] ]));
+
+	# HTML sub-directory input
+	print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
+		&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
+				"$text{'default'} (<tt>public_html</tt>)<br>",
+				$text{'newweb_htmldir0'})."<br>\n".
+		("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
+	local $hdir = $tmpl->{'web_html_dir'} || "public_html";
+
+	# HTML directory permissions
+	print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
+		&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
+
+	# Alias mode
+	print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
+		&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
+			  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
+			    [ 4, $text{'tmpl_alias4'}."<br>" ],
+			    [ 2, $text{'tmpl_alias2'}."<br>" ],
+			    [ 1, $text{'tmpl_alias1'} ] ]));
+
+	# Default SSI setting
+	print &ui_table_row(
+	    &hlink($text{'tmpl_webssi'}, "template_webssi"),
+	    &ui_radio("web_ssi", $tmpl->{'web_ssi'},
+		      [ [ 1, &text('phpmode_ssi1',
+			   &ui_textbox("web_ssi_suffix",
+				       $tmpl->{'web_ssi_suffix'}, 6)) ],
+			[ 0, $text{'no'} ],
+			[ 2, $text{'phpmode_ssi2'} ] ]));
+
+	# Port for normal webserver
+	print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
+		&ui_textbox("web_port", $tmpl->{'web_port'}, 6));
+
+	# Port for SSL webserver
+	print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
+		&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
+
+	# URL port for normal webserver
+	print &ui_table_row(
+		&hlink($text{'newweb_urlport'}, "template_web_urlport"),
+		&ui_opt_textbox("web_urlport", $tmpl->{'web_urlport'}, 6,
+				$text{'newweb_sameport'}));
+
+	# URL port for SSL webserver
+	print &ui_table_row(
+		&hlink($text{'newweb_urlsslport'}, "template_web_urlsslport"),
+		&ui_opt_textbox("web_urlsslport", $tmpl->{'web_urlsslport'}, 6,
+				$text{'newweb_sameport'}));
+
+	# Disallowed SSL protocol versions
+	print &ui_table_row(
+		&hlink($text{'newweb_sslprotos'}, "template_web_sslprotos"),
+		&ui_opt_textbox("web_sslprotos", $tmpl->{'web_sslprotos'}, 30,
+				$text{'newweb_sslprotos_def'}));
+
+	if (defined(&get_domain_ruby_mode)) {
+		# Run ruby scripts as user
+		print &ui_table_row(
+		    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
+		    &ui_radio("web_ruby_suexec", int($tmpl->{'web_ruby_suexec'}),
+			      [ [ -1, $text{'phpmode_noruby'}."<br>" ],
+				[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
+				[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
+		}
 	}
 
-# Apache directives
-local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
-			     0, undef, \@webfields);
-print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
-	$ndi."<br>\n".
-	&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
-				join("\n", split(/\t/, $tmpl->{'web'})),
-		     10, 60));
+if ($config{'web'} && $config{'webalizer'}) {
+	print &ui_table_hr();
 
-# Extra SSL directives
-print &ui_table_row(&hlink($text{'tmpl_web_ssl'}, "template_web_ssl"),
-	&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
-		     5, 60));
+	# Webalizer stats sub-directory input
+	local $smode = $tmpl->{'web_stats_hdir'} ? 2 :
+		       $tmpl->{'web_stats_dir'} ? 1 : 0;
+	print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
+		&ui_radio("stats_mode", $smode,
+			  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
+			    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
+				 &ui_textbox("stats_dir",
+					     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
+			    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
+				 &ui_textbox("stats_hdir",
+					     $tmpl->{'web_stats_hdir'}, 20) ] ]));
 
-# Input for logging via program. Deprecated, so don't show unless enabled
-if ($tmpl->{'web_writelogs'}) {
-	print &ui_table_row(&hlink($text{'newweb_writelogs'},
-				   "template_writelogs"),
-		&ui_yesno_radio("writelogs", $tmpl->{'web_writelogs'} ? 1 : 0));
+	# Password-protect webalizer dir
+	print &ui_table_row(&hlink($text{'newweb_statspass'}, "template_statspass"),
+		&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
+			  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+	# Allow editing of Webalizer report
+	print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
+		&ui_radio("statsnoedit", $tmpl->{'web_stats_noedit'} ? 1 : 0,
+			  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
+
+	# Webalizer template
+	print &ui_table_row(&hlink($text{'tmpl_webalizer'},
+				   "template_webalizer"),
+	    &none_def_input("webalizer", $tmpl->{'webalizer'},
+			    $text{'tmpl_webalizersel'}, 0, 0,
+			    $text{'tmpl_webalizernone'}, [ "webalizer" ])."\n".
+	    &ui_textbox("webalizer", $tmpl->{'webalizer'} eq "none" ?
+					"" : $tmpl->{'webalizer'}, 40));
 	}
 
-# Input for Apache user to add to domain's group
-print &ui_table_row(&hlink($text{'newweb_user'}, "template_user_def"),
-	&ui_radio("user_def", $tmpl->{'web_user'} eq 'none' ? 2 :
-				   $tmpl->{'web_user'} ? 1 : 0,
-	       [ [ 2, $text{'no'}."<br>" ],
-		 [ 0, $text{'newweb_userdef'}."<br>" ],
-		 [ 1, $text{'newweb_useryes'}." ".
-		      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
-						'' : $tmpl->{'web_user'}) ] ]));
-
-# HTML sub-directory input
-print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
-	&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
-			"$text{'default'} (<tt>public_html</tt>)<br>",
-			$text{'newweb_htmldir0'})."<br>\n".
-	("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
-local $hdir = $tmpl->{'web_html_dir'} || "public_html";
-
-# HTML directory permissions
-print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
-	&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
-
-# Webalizer stats sub-directory input
-local $smode = $tmpl->{'web_stats_hdir'} ? 2 :
-	       $tmpl->{'web_stats_dir'} ? 1 : 0;
-print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
-	&ui_radio("stats_mode", $smode,
-		  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
-		    [ 1, &text('newweb_statsdir0', "<tt>$hdir</tt>")."\n".
-			 &ui_textbox("stats_dir",
-				     $tmpl->{'web_stats_dir'}, 20)."<br>" ],
-		    [ 2, &text('newweb_statsdir2', "<tt>$hdir</tt>")."\n".
-			 &ui_textbox("stats_hdir",
-				     $tmpl->{'web_stats_hdir'}, 20) ] ]));
-
-# Password-protect webalizer dir
-print &ui_table_row(&hlink($text{'newweb_statspass'}, "template_statspass"),
-	&ui_radio("statspass", $tmpl->{'web_stats_pass'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
-
-# Allow editing of Webalizer report
-print &ui_table_row(&hlink($text{'newweb_statsedit'}, "template_statsedit"),
-	&ui_radio("statsnoedit", $tmpl->{'web_stats_noedit'} ? 1 : 0,
-	          [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]));
-
-# Alias mode
-print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
-	&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
-		  [ [ 0, $text{'tmpl_alias0'}."<br>" ],
-		    [ 4, $text{'tmpl_alias4'}."<br>" ],
-		    [ 2, $text{'tmpl_alias2'}."<br>" ],
-		    [ 1, $text{'tmpl_alias1'} ] ]));
-
-# Default SSI setting
-print &ui_table_row(
-    &hlink($text{'tmpl_webssi'}, "template_webssi"),
-    &ui_radio("web_ssi", $tmpl->{'web_ssi'},
-	      [ [ 1, &text('phpmode_ssi1',
-		   &ui_textbox("web_ssi_suffix",
-			       $tmpl->{'web_ssi_suffix'}, 6)) ],
-		[ 0, $text{'no'} ],
-		[ 2, $text{'phpmode_ssi2'} ] ]));
-
-# Port for normal webserver
-print &ui_table_row(&hlink($text{'newweb_port'}, "template_web_port"),
-	&ui_textbox("web_port", $tmpl->{'web_port'}, 6));
-
-# Port for SSL webserver
-print &ui_table_row(&hlink($text{'newweb_sslport'}, "template_web_sslport"),
-	&ui_textbox("web_sslport", $tmpl->{'web_sslport'}, 6));
-
-# URL port for normal webserver
-print &ui_table_row(
-	&hlink($text{'newweb_urlport'}, "template_web_urlport"),
-	&ui_opt_textbox("web_urlport", $tmpl->{'web_urlport'}, 6,
-			$text{'newweb_sameport'}));
-
-# URL port for SSL webserver
-print &ui_table_row(
-	&hlink($text{'newweb_urlsslport'}, "template_web_urlsslport"),
-	&ui_opt_textbox("web_urlsslport", $tmpl->{'web_urlsslport'}, 6,
-			$text{'newweb_sameport'}));
-
-# Disallowed SSL protocol versions
-print &ui_table_row(
-	&hlink($text{'newweb_sslprotos'}, "template_web_sslprotos"),
-	&ui_opt_textbox("web_sslprotos", $tmpl->{'web_sslprotos'}, 30,
-                        $text{'newweb_sslprotos_def'}));
+print &ui_table_hr();
 
 # Setup matching Webmin/Usermin SSL certs
 print &ui_table_row(&hlink($text{'newweb_webmin'},
@@ -2622,7 +2649,7 @@ print &ui_table_row(&hlink($text{'newweb_postfix'},
 		  $tmpl->{'web_postfix_ssl'} ? 1 : 0,
 		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
-# Add rewrites for webmail and admin
+# Add redirects for webmail and admin
 print &ui_table_hr();
 foreach my $r ('webmail', 'admin') {
 	print &ui_table_row(&hlink($text{'newweb_'.$r},
@@ -2636,25 +2663,6 @@ foreach my $r ('webmail', 'admin') {
 				$tmpl->{'web_'.$r.'dom'}, 40,
 				$text{'newweb_webmailsame'}));
 	}
-
-if (defined(&get_domain_ruby_mode)) {
-	# Run ruby scripts as user
-	print &ui_table_row(
-	    &hlink($text{'tmpl_rubymode'}, "template_rubymode"),
-	    &ui_radio("web_ruby_suexec", int($tmpl->{'web_ruby_suexec'}),
-		      [ [ -1, $text{'phpmode_noruby'}."<br>" ],
-			[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
-			[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
-	}
-
-# Webalizer template
-print &ui_table_row(&hlink($text{'tmpl_webalizer'},
-			   "template_webalizer"),
-    &none_def_input("webalizer", $tmpl->{'webalizer'},
-		    $text{'tmpl_webalizersel'}, 0, 0,
-		    $text{'tmpl_webalizernone'}, [ "webalizer" ])."\n".
-    &ui_textbox("webalizer", $tmpl->{'webalizer'} eq "none" ?
-				"" : $tmpl->{'webalizer'}, 40));
 
 # Disabled website HTML
 print &ui_table_row(&hlink($text{'tmpl_disabled_web'},
@@ -2700,26 +2708,89 @@ local ($tmpl) = @_;
 # Save web-related settings
 $old_web_port = $web_port;
 $old_web_sslport = $web_sslport;
-$tmpl->{'web'} = &parse_none_def("web");
-if ($in{"web_mode"} == 2) {
-	$err = &check_apache_directives($in{"web"});
-	&error($err) if ($err);
-	$in{'web_ssl'} =~ s/\r?\n/\t/g;
-	$tmpl->{'web_ssl'} = $in{'web_ssl'};
-	if (defined($in{'writelogs'})) {
-		$tmpl->{'web_writelogs'} = $in{'writelogs'};
+if ($config{'web'}) {
+	$tmpl->{'web'} = &parse_none_def("web");
+	if ($in{"web_mode"} == 2) {
+		$err = &check_apache_directives($in{"web"});
+		&error($err) if ($err);
+		$in{'web_ssl'} =~ s/\r?\n/\t/g;
+		$tmpl->{'web_ssl'} = $in{'web_ssl'};
+		if (defined($in{'writelogs'})) {
+			$tmpl->{'web_writelogs'} = $in{'writelogs'};
+			}
+		if ($in{'html_dir_def'}) {
+			delete($tmpl->{'web_html_dir'});
+			}
+		else {
+			$in{'html_dir'} =~ /^\S+$/ && $in{'html_dir'} !~ /^\// &&
+			    $in{'html_dir'} !~ /\.\./ || &error($text{'newweb_ehtml'});
+			$tmpl->{'web_html_dir'} = $in{'html_dir'};
+			}
+		$in{'html_perms'} =~ /^[0-7]{3,4}$/ ||
+			&error($text{'newweb_ehtmlperms'});
+		$tmpl->{'web_html_perms'} = $in{'html_perms'};
+		if ($in{'user_def'} == 0) {
+			delete($tmpl->{'web_user'});
+			}
+		elsif ($in{'user_def'} == 2) {
+			$tmpl->{'web_user'} = 'none';
+			}
+		else {
+			defined(getpwnam($in{'user'})) || &error($text{'newweb_euser'});
+			$tmpl->{'web_user'} = $in{'user'};
+			}
+		$tmpl->{'web_alias'} = $in{'alias_mode'};
+
+		$in{'web_port'} =~ /^\d+$/ && $in{'web_port'} > 0 &&
+			$in{'web_port'} < 65536 || &error($text{'newweb_eport'});
+		$tmpl->{'web_port'} = $in{'web_port'};
+		$in{'web_sslport'} =~ /^\d+$/ && $in{'web_sslport'} > 0 &&
+			$in{'web_sslport'} < 65536 ||
+				&error($text{'newweb_esslport'});
+		$in{'web_port'} != $in{'web_sslport'} ||
+				&error($text{'newweb_esslport2'});
+		$tmpl->{'web_sslport'} = $in{'web_sslport'};
+
+		$in{'web_urlport_def'} || $in{'web_urlport'} =~ /^\d+$/ ||
+			&error($text{'newweb_eport'});
+		$tmpl->{'web_urlport'} = $in{'web_urlport_def'} ?
+						undef : $in{'web_urlport'};
+		$in{'web_urlsslport_def'} || $in{'web_urlsslport'} =~ /^\d+$/ ||
+			&error($text{'newweb_esslport'});
+		$tmpl->{'web_urlsslport'} = $in{'web_urlsslport_def'} ?
+						undef : $in{'web_urlsslport'};
+		if ($in{'web_sslprotos_def'}) {
+			$tmpl->{'web_sslprotos'} = undef;
+			}
+		else {
+			foreach my $p (split(/\s+/, $in{'web_sslprotos'})) {
+				$p =~ /^[\+\-]?(TLS|SSL)v[0-9\.]+$/ || $p eq "all" ||
+					&error($text{'newweb_esslproto'});
+				}
+			$tmpl->{'web_sslprotos'} = $in{'web_sslprotos'};
+			}
+
+		# Parse SSI setting
+		$tmpl->{'web_ssi'} = $in{'web_ssi'};
+		if ($in{'web_ssi'} == 1) {
+			$in{'web_ssi_suffix'} =~ /^\.([a-z0-9\.\_\-]+)$/i ||
+				&error($text{'phpmode_essisuffix'});
+			$tmpl->{'web_ssi_suffix'} = $in{'web_ssi_suffix'};
+			}
+
+		# Save ruby settings
+		if (defined(&get_domain_ruby_mode)) {
+			if ($in{'web_ruby_suexec'} > 0) {
+				&has_command("ruby") ||
+					&error($text{'tmpl_erubycmd'});
+				}
+			$tmpl->{'web_ruby_suexec'} = $in{'web_ruby_suexec'};
+			}
 		}
-	if ($in{'html_dir_def'}) {
-		delete($tmpl->{'web_html_dir'});
-		}
-	else {
-		$in{'html_dir'} =~ /^\S+$/ && $in{'html_dir'} !~ /^\// &&
-		    $in{'html_dir'} !~ /\.\./ || &error($text{'newweb_ehtml'});
-		$tmpl->{'web_html_dir'} = $in{'html_dir'};
-		}
-	$in{'html_perms'} =~ /^[0-7]{3,4}$/ ||
-		&error($text{'newweb_ehtmlperms'});
-	$tmpl->{'web_html_perms'} = $in{'html_perms'};
+	}
+
+if ($config{'web'} && $config{'webalizer'}) {
+	# Save webalizer options
 	delete($tmpl->{'web_stats_dir'});
 	delete($tmpl->{'web_stats_hdir'});
 	$smode = $in{'stats_mode'} == 1 ? "stats_dir" :
@@ -2731,86 +2802,31 @@ if ($in{"web_mode"} == 2) {
 		}
 	$tmpl->{'web_stats_pass'} = $in{'statspass'};
 	$tmpl->{'web_stats_noedit'} = $in{'statsnoedit'};
-	if ($in{'user_def'} == 0) {
-		delete($tmpl->{'web_user'});
-		}
-	elsif ($in{'user_def'} == 2) {
-		$tmpl->{'web_user'} = 'none';
-		}
-	else {
-		defined(getpwnam($in{'user'})) || &error($text{'newweb_euser'});
-		$tmpl->{'web_user'} = $in{'user'};
-		}
-	$tmpl->{'web_alias'} = $in{'alias_mode'};
-
-	$in{'web_port'} =~ /^\d+$/ && $in{'web_port'} > 0 &&
-		$in{'web_port'} < 65536 || &error($text{'newweb_eport'});
-	$tmpl->{'web_port'} = $in{'web_port'};
-	$in{'web_sslport'} =~ /^\d+$/ && $in{'web_sslport'} > 0 &&
-		$in{'web_sslport'} < 65536 ||
-			&error($text{'newweb_esslport'});
-	$in{'web_port'} != $in{'web_sslport'} ||
-			&error($text{'newweb_esslport2'});
-	$tmpl->{'web_sslport'} = $in{'web_sslport'};
-
-	$in{'web_urlport_def'} || $in{'web_urlport'} =~ /^\d+$/ ||
-		&error($text{'newweb_eport'});
-	$tmpl->{'web_urlport'} = $in{'web_urlport_def'} ?
-					undef : $in{'web_urlport'};
-	$in{'web_urlsslport_def'} || $in{'web_urlsslport'} =~ /^\d+$/ ||
-		&error($text{'newweb_esslport'});
-	$tmpl->{'web_urlsslport'} = $in{'web_urlsslport_def'} ?
-					undef : $in{'web_urlsslport'};
-	if ($in{'web_sslprotos_def'}) {
-		$tmpl->{'web_sslprotos'} = undef;
-		}
-	else {
-		foreach my $p (split(/\s+/, $in{'web_sslprotos'})) {
-			$p =~ /^[\+\-]?(TLS|SSL)v[0-9\.]+$/ || $p eq "all" ||
-				&error($text{'newweb_esslproto'});
-			}
-		$tmpl->{'web_sslprotos'} = $in{'web_sslprotos'};
-		}
-
-	$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
-	$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
-	$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
-	$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
-
-	# Parse SSI setting
-	$tmpl->{'web_ssi'} = $in{'web_ssi'};
-	if ($in{'web_ssi'} == 1) {
-		$in{'web_ssi_suffix'} =~ /^\.([a-z0-9\.\_\-]+)$/i ||
-			&error($text{'phpmode_essisuffix'});
-		$tmpl->{'web_ssi_suffix'} = $in{'web_ssi_suffix'};
-		}
-
-	# Parse webmail redirect
-	foreach my $r ('webmail', 'admin') {
-		$tmpl->{'web_'.$r} = $in{$r};
-		if ($in{$r.'dom_def'}) {
-			delete($tmpl->{'web_'.$r.'dom'});
-			}
-		else {
-			$in{$r.'dom'} =~ /^(http|https):\/\/\S+$/ ||
-				&error($text{'newweb_e'.$r.'dom'});
-			$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
-			}
-		}
-
-	# Save ruby settings
-	if (defined(&get_domain_ruby_mode)) {
-		if ($in{'web_ruby_suexec'} > 0) {
-			&has_command("ruby") ||
-				&error($text{'tmpl_erubycmd'});
-			}
-		$tmpl->{'web_ruby_suexec'} = $in{'web_ruby_suexec'};
+	$tmpl->{'webalizer'} = &parse_none_def("webalizer");
+	if ($in{"webalizer_mode"} == 2) {
+		-r $in{'webalizer'} || &error($text{'tmpl_ewebalizer'});
 		}
 	}
-$tmpl->{'webalizer'} = &parse_none_def("webalizer");
-if ($in{"webalizer_mode"} == 2) {
-	-r $in{'webalizer'} || &error($text{'tmpl_ewebalizer'});
+
+# Save options to setup per-service SSL certs
+$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
+$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
+$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
+		
+# Parse webmail redirect
+foreach my $r ('webmail', 'admin') {
+	$tmpl->{'web_'.$r} = $in{$r};
+	if ($in{$r.'dom_def'}) {
+		delete($tmpl->{'web_'.$r.'dom'});
+		}
+	else {
+		$in{$r.'dom'} =~ /^(http|https):\/\/\S+$/ ||
+			&error($text{'newweb_e'.$r.'dom'});
+		$tmpl->{'web_'.$r.'dom'} = $in{$r.'dom'};
+		}
 	}
+
 $tmpl->{'disabled_web'} = &parse_none_def("disabled_web");
 if ($in{'disabled_url_mode'} == 2) {
 	$in{'disabled_url'} =~ /^(http|https):\/\/\S+/ ||
