@@ -2851,7 +2851,7 @@ sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-my $plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+my $plugin = &get_mysql_plugin($d, 1);
 
 # Hash password for setting
 if (!$encpass && $plainpass) {
@@ -2972,7 +2972,7 @@ else {
 			"select host from user where user = ?", $user);
 
 	# Get authentication plugin
-	$plugin = &get_mysql_plugin($d, $mysql::master_db, 1);
+	$plugin = &get_mysql_plugin($d, 1);
 
 	# It is needed to run flush privileges to avoid
 	# an error as in virtualmin/virtualmin-gpl#213
@@ -3472,14 +3472,15 @@ my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
 }
 
-# get_mysql_plugin()
+# get_mysql_plugin(&domain, [add-with])
 # Returns the name of the default plugin used by MySQL
 sub get_mysql_plugin
 {
-my ($d, $db, $n) = @_;
-my @plugin = &execute_dom_sql($d, $db,
+my ($d, $n) = @_;
+&require_mysql();
+my $rv = &execute_dom_sql($d, $mysql::master_db,
                    "show variables LIKE '%default_authentication_plugin%'");
-my $plugin = $plugin[0]->{'data'}[0][1];
+my $plugin = $rv->{'data'}->[0]->[1];
 if ($plugin && $n) {
 	$plugin = " with $plugin ";
 	}
