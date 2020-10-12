@@ -2619,9 +2619,9 @@ if ($config{'web'} && $config{'webalizer'}) {
 			    $text{'tmpl_webalizernone'}, [ "webalizer" ])."\n".
 	    &ui_textbox("webalizer", $tmpl->{'webalizer'} eq "none" ?
 					"" : $tmpl->{'webalizer'}, 40));
-	}
 
-print &ui_table_hr();
+	print &ui_table_hr();
+	}
 
 # Setup matching Webmin/Usermin SSL certs
 print &ui_table_row(&hlink($text{'newweb_webmin'},
