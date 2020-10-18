@@ -12,11 +12,17 @@ spam filtering enabled can be selected with C<--all-domains>.
 The following parameters control what happens to messages identified as spam :
 
 C<--spam-delete> Delete all spam mail.
+
 C<--spam-deliver> Deliver to user's mailbox normally.
+
 C<--spam-mailfile> Write to user's C<~/mail/spam> file in mbox format.
+
 C<--spam-maildir> Write to user's C<~/Maildir/.spam> file in Maildir format.
+
 C<--spam-file> Write to the file following this parameter, which must be relative to the user's home directory.
+
 C<--spam-email> Forward to the email address following this parameter.
+
 C<--spam-dest> Write to the absolute file following the parameter.
 
 A similar set of options exist for virus filtering, but starting with C<--virus>
