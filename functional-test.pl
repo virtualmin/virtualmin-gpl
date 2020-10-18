@@ -6614,14 +6614,37 @@ $rename_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test rename domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
-		      [ 'logrotate' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ], [ 'dns' ],
+		      [ 'mail' ], [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      [ 'logrotate' ], [ 'allocate-ip' ],
 		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
+	},
+
+	# Install a dummy CA cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
+	},
+
+	# Get the IP address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'ip-only' ],
+		      [ 'domain', $test_domain ] ],
+	  'save' => 'PRIVATE_IP',
+	},
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
 	},
 
 	# Create a mailbox
@@ -6665,7 +6688,7 @@ $rename_tests = [
 
 	# Make sure DNS works
 	{ 'command' => 'host '.$test_rename_domain,
-	  'grep' => &get_default_ip(),
+	  'grep' => '$PRIVATE_IP',
 	},
 
 	# Make sure website works
@@ -6700,6 +6723,17 @@ $rename_tests = [
 	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
 	  'fail' => 1 },
 	) : ( ),
+
+	# Check that service certs still show up
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\($PRIVATE_IP\\)',
+		      'SSL cert used by: postfix \\($PRIVATE_IP\\)',
+		      'SSL cert used by: webmin \\('.$test_rename_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_rename_domain.'\\)',
+		    ],
+	},
 
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
