@@ -242,3 +242,4 @@ show_mailuser=1
 php_fpm_port=8000
 b2_cmd=b2
 dnssec_alg=RSASHA256
+php_session_age=7

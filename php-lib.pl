@@ -2143,5 +2143,40 @@ $apache_mod_php_version_cache = $major;
 return $major;
 }
 
+# cleanup_php_sessions(&domain, dry-run)
+# Remove old PHP session files for some domain
+sub cleanup_php_sessions
+{
+my ($d, $dryrun) = @_;
+
+# Find the session files dir from php config
+my $etc = "$d->{'home'}/etc";
+&foreign_require("phpini");
+my $pconf = &phpini::get_config("$etc/php.ini");
+my $tmp = &phpini::find_value("session.save_path", $pconf);
+$tmp ||= $d->{'home'}."/tmp";
+
+# Look for session files that are too old
+my $days = $config{'php_session_age'} || 7;
+my $cutoff = time() - $days * 24 * 60 * 60;
+my @rv;
+opendir(DIR, $tmp) || return ();
+foreach my $f (readdir(DIR)) {
+	next if ($f !~ /^sess_/);
+	my @st = stat($tmp."/".$f);
+	next if (!@st);
+	if ($st[9] < $cutoff) {
+		push(@rv, $tmp."/".$f);
+		}
+	}
+closedir(DIR);
+
+# Delete any found
+if (!$dryrun) {
+	&unlink_file_as_domain_user($d, @rv);
+	}
+return @rv;
+}
+
 1;
 
