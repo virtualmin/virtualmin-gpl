@@ -2349,7 +2349,6 @@ restore_mailuser=Bare gjenopprett bruker:
 restore_dirchown=Tilbakestill fil-eierskap
 restore_reuid=Omfordel UIDer og GID?
 restore_fix=Bare re-importer detaljer for tjener?
-restore_only=Bare opprett tjenere med valgte funksjoner?
 restore_delete=Slett og gjenopprett virtuelle tjenere?
 restore_virtualmin=Virtualmin innstillinger som skal gjenopprettes
 restore_dnswholefile=Gjenopprett alt i DNS sonefil

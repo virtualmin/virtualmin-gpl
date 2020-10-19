@@ -1619,7 +1619,6 @@ restore_mailuser=Restaurer seulement utilisateur:
 restore_dirchown=Rétablir le propriétaire des fichiers
 restore_reuid=Réaffecter UIDs et GID?
 restore_fix=Il suffit de ré-importer les détails du serveur?
-restore_only=Créer des serveurs avec les fonctions sélectionnées seulement?
 restore_delete=Supprimer et re-créer des serveurs virtuels?
 restore_virtualmin=Paramètres Virtualmin à restaurer
 restore_dnswholefile=Restaurer tout dans le fichier de zone DNS
