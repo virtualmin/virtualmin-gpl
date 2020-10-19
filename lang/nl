@@ -2227,7 +2227,6 @@ restore_mailuser=Alleen gebruiker herstellen :
 restore_dirchown=Reset file eigenaarschap
 restore_reuid=Opnieuw toewijzen van UIDs en GID?
 restore_fix=Alleen server details opnieuw importeren?
-restore_only=Alleen servers maken met de geselecteerde opties?
 restore_virtualmin=Virtualmin instellingen om te herstellen
 restore_dnswholefile=Herstel alles in de DNS zone file
 restore_newip=IP adres voor herstelde servers
