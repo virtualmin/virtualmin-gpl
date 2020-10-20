@@ -232,6 +232,8 @@ $domains_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -288,10 +290,18 @@ $domains_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
+	# Check PostgreSQL login
 	$config{'postgres'} ?
 		&postgresql_login_commands($test_domain_user, 'smeg',
 					   $test_domain_db, $test_domain_home)
 		: ( ),
+
+	# Check AWstats login
+	&indexof('virtualmin-awstats', @plugins) >= 0 ? (
+		{ 'command' => $wget_command.'http://'.$test_domain_user.':smeg@'.$test_domain.'/cgi-bin/awstats.pl',
+		  'grep' => 'AWStats',
+		},
+		) : ( ),
 
 	# Check PHP execution
 	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
@@ -401,6 +411,24 @@ $domains_tests = [
 		      'Bandwidth limit: 666', ],
 	},
 
+	# Check new FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':newpass@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check new IMAP and POP3 for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
 	# Check new Webmin password
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
@@ -409,6 +437,17 @@ $domains_tests = [
 		       '--password newpass '.
 		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
+
+	# Check new MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Check new AWstats password
+	&indexof('virtualmin-awstats', @plugins) >= 0 ? (
+		{ 'command' => $wget_command.'http://'.$test_domain_user.':newpass@'.$test_domain.'/cgi-bin/awstats.pl',
+		  'grep' => 'AWStats',
+		},
+		) : ( ),
 
 	# Create a sub-server
 	{ 'command' => 'create-domain.pl',
@@ -6079,7 +6118,7 @@ $plugin_tests = [
 		  'grep' => 'awstats.pl '.$test_domain
 		},
 
-		# Turn off mailman feature
+		# Turn off AWstats feature
 		{ 'command' => 'disable-feature.pl',
 		  'args' => [ [ 'domain', $test_domain ],
 			      [ 'virtualmin-awstats' ] ]
