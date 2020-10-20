@@ -2692,7 +2692,7 @@ else {
 	}
 }
 
-# recursive_disk_usage_mtime(directory, [only-gid], [levels])
+# recursive_disk_usage_mtime(directory, [only-gid], [levels], [&inodes-map])
 # Returns the number of bytes taken up by all files in some directory,
 # and the most recent modification time. The size is based on the filesystem's
 # block size, not the file lengths in bytes.

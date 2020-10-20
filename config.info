@@ -130,7 +130,7 @@ spam_trap_black=Add senders of spam sent to <tt>spamtrap</tt> to blacklist?,1,2-
 ham_trap_white=Add senders of non-spam sent to <tt>hamtrap</tt> to whitelist?,1,2-Global,1-Domain level,0-No
 lookup_domain_serial=Lookup domain for incoming email,1,0-In parallel,1-One at a time
 
-line4.8=Quota commands,11
+line4.8=Disk quotas,11
 quota_commands=Use external commands to get and set quotas?,1,1-Yes,0-No
 quota_set_user_command=Command to set a user's quota,3,Use standard programs
 quota_set_group_command=Command to set a group's quota,3,Use standard programs
@@ -138,6 +138,7 @@ quota_list_users_command=Command to list user quotas,3,Use standard programs
 quota_list_groups_command=Command to list group quotas,3,Use standard programs
 quota_get_user_command=Command to get a user's quota,3,Use standard programs
 quota_get_group_command=Command to get a group's quota,3,Use standard programs
+quota_dirs=Additional directories to search for files in,9,60,3,\t
 
 line7=Status collection,11
 collect_interval=Interval between status collection job runs,10,none-Never run,Minutes
