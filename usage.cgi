@@ -90,7 +90,7 @@ foreach my $edir (split(/\t+/, $config{'quota_dirs'})) {
 print &ui_tabs_start_tab("mode", "homes");
 my $msg = $config{'quota_dirs'} ? $text{'usage_dirheader2'}
 			        : $text{'usage_dirheader'};
-$msg .= "<p></p>$text{'usage_dirdesc'}\n";
+$msg .= " $text{'usage_dirdesc'}\n";
 &usage_table(\@dirusage, $text{'usage_dir'}, 0, $msg, $text{'usage_sizegid'});
 print &ui_tabs_end_tab();
 
