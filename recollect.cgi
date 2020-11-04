@@ -9,7 +9,7 @@ require './virtual-server-lib.pl';
 if (&foreign_check("system-status")) {
 	&foreign_require("system-status");
 	if ($system_status::config{'collect_interval'} ne 'none') {
-		&system_status::scheduled_collect_system_info();
+		&system_status::scheduled_collect_system_info(1);
 		}
 	}
 
