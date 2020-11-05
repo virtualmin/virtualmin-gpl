@@ -12,12 +12,19 @@ if ($in{'parent'}) {
 	# Get the selected parent domain object
 	$parent = &get_domain($in{'parent'});
 	if ($d->{'parent'}) {
-		$parent->{'id'} ==$d->{'parent'} && &error($text{'move_esame'});
+		$parent->{'id'} == $d->{'parent'} && &error($text{'move_esame'});
 		}
 	else {
 		$parent->{'id'} == $d->{'id'} && &error($text{'move_eparent'});
 		}
 	&can_config_domain($parent) || &error($text{'move_ecannot2'});
+
+	# Check if parent has MySQL feature enabled too
+	&error($text{'setup_edepmysql'})
+        if ($d->{'mysql'} && !$parent->{'mysql'});
+	# Check if parent has PostgreSQL feature enabled too
+	&error($text{'setup_edepmysqlsub'})
+        if ($d->{'postgres'} && !$parent->{'postgres'});
 	}
 else {
 	# Turning into a parent domain - check the username for clashes

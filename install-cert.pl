@@ -114,6 +114,7 @@ $passok = &check_passphrase($checkkey, $d->{'ssl_pass'} || $newpass);
 $passok || &usage("Private key is password-protected, but either none was entered or the password was incorrect");
 $err = &check_cert_key_match($checkcert, $checkkey);
 $err && &usage("Certificate problems found : $err");
+@beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Break SSL linkages that no longer work with this cert
 ($gotcert) = grep { $_->[0] eq 'cert' } @got;
@@ -130,15 +131,19 @@ if ($gotcert) {
 &$first_print("Installing new SSL files ..");
 $changed = 0;
 foreach $g (@got) {
-	$d->{'ssl_'.$g->[0]} ||= &default_certificate_file($d, $g->[0]);
-	&lock_file($d->{'ssl_'.$g->[0]});
-	&open_tempfile_as_domain_user($d, SSL, ">".$d->{'ssl_'.$g->[0]});
+	my $k = $g->[0] eq 'ca' ? 'chain' : $g->[0];
+	$d->{'ssl_'.$k} ||= &default_certificate_file($d, $g->[0]);
+	&lock_file($d->{'ssl_'.$k});
+	my $newfile = !-r $d->{'ssl_'.$k};
+	&open_tempfile_as_domain_user($d, SSL, ">".$d->{'ssl_'.$k});
 	&print_tempfile(SSL, $g->[1]);
 	&close_tempfile_as_domain_user($d, SSL);
-	&set_certificate_permissions($d, $d->{'ssl_'.$g->[0]});
-	&unlock_file($d->{'ssl_'.$g->[0]});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_'.$k});
+		}
+	&unlock_file($d->{'ssl_'.$k});
 	if ($g->[0] ne 'csr') {
-		&save_website_ssl_file($d, $g->[0], $d->{'ssl_'.$g->[0]});
+		&save_website_ssl_file($d, $g->[0], $d->{'ssl_'.$k});
 		}
 	}
 &sync_combined_ssl_cert($d);
@@ -167,6 +172,9 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 	$od->{'ssl_pass'} = $d->{'ssl_pass'};
 	&save_domain_passphrase($od);
 	}
+
+# Update other services using the cert
+&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);

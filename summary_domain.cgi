@@ -27,6 +27,7 @@ print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 
 # Domain name (with link), user and group
 if ($d->{'web'}) {
+	my $url = &get_domain_url($d, 1);
 	print &ui_table_row($text{'edit_domain'},
 	    "<tt>".&ui_link($url, $d->{'dom'}, undef, "target=_blank")."</tt>",
 	    undef, \@tds);
@@ -34,6 +35,12 @@ if ($d->{'web'}) {
 else {
 	print &ui_table_row($text{'edit_domain'},
 			    "<tt>$d->{'dom'}</tt>", undef, \@tds);
+	}
+
+# Default domain
+if ($d->{'defaultdomain'}) {
+	print &ui_table_row($text{'wizard_defdom_desc'},
+			    $text{'yes'}, undef, \@tds);
 	}
 
 # Creator
@@ -125,7 +132,10 @@ if (!$aliasdom && $d->{'dir'}) {
 	}
 
 # Description
-print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+if ($d->{'owner'} && 
+	$d->{'owner'} ne $text{'wizard_defdom_desc'}) {
+	print &ui_table_row($text{'edit_owner'}, $d->{'owner'}, 3, \@tds);
+	}
 
 # Show domain ID
 if (&master_admin()) {

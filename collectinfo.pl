@@ -54,4 +54,13 @@ if ($config{'check_ports'} == 2) {
 		}
 	}
 
+# Cleanup session files for domains with a website
+if ($config{'php_session_age'}) {
+	foreach my $d (grep { &domain_has_website($_) } &list_domains()) {
+		my @f = &cleanup_php_sessions($d, 0);
+		foreach my $f (@f) {
+			}
+		}
+	}
+
 &run_post_actions_silently();

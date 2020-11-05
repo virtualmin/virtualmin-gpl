@@ -40,6 +40,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		$user = shift(@ARGV);
 		}
+	elsif ($a eq "--force") {
+		$force = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -51,24 +54,18 @@ $pass || &usage("Missing --pass flag");
 $user || &usage("Missing --user flag, and current MySQL user is unknown");
 %lastconfig = %config;
 
+if (!$force && $user ne $mysql::config{'login'}) {
+	&usage("Error! There is a special \`virtualmin modify-database-pass\` command for changing non-administrative, virtual server database user password.\n");
+	}
+
 # Force the change
 my $err = &force_set_mysql_password($user, $pass);
 if ($err) {
-	print "ERROR: $err\n";
 	exit(1);
-	}
-
-# Update the local config
-if ($user eq $mysql::config{'login'}) {
-	$mysql::config{'pass'} = $pass;
-	$mysql::mysql_pass = $pass;
-	&mysql::save_module_config(\%mysql::config, "mysql");
-	$mysql::authstr = &mysql::make_authstr();
 	}
 
 &run_post_actions();
 &virtualmin_api_log(\@OLDARGV);
-print "OK\n";
 exit(0);
 
 sub usage
@@ -78,6 +75,7 @@ print "Change the root MySQL password, even if the current password is unknown.\
 print "\n";
 print "virtualmin set-mysql-pass --pass password\n";
 print "                         [--user username]\n";
+print "                         [--force password change for non-administrative user]\n";
 exit(1);
 }
 

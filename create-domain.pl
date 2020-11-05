@@ -351,6 +351,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
 		}
+	elsif ($a eq "--break-ssl-cert") {
+		$linkcert = 0;
+		}
+	elsif ($a eq "--link-ssl-cert") {
+		$linkcert = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -767,6 +773,8 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'jail', $jail,
 	 'mysql_module', $mysql_module,
         );
+$dom{'nolink_certs'} = 1 if ($linkcert eq '0');
+$dom{'link_certs'} = 1 if ($linkcert eq '1');
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
 	}
@@ -843,23 +851,15 @@ $config{'pre_command'} = $precommand if ($precommand);
 $config{'post_command'} = $postcommand if ($postcommand);
 $err = &create_virtual_server(\%dom, $parent,
 			      $parent ? $parent->{'user'} : undef,
-			      0, 0, $parent ? undef : $pass);
+			      0, 0, $parent ? undef : $pass, $content);
 if ($err) {
 	print "$err\n";
 	exit 1;
 	}
 
 if ($fwdto) {
-	&$first_print(&text('setup_fwding', $in{'fwdto'}));
+	&$first_print(&text('setup_fwding', $fwdto));
 	&create_domain_forward(\%dom, $fwdto);
-	&$second_print($text{'setup_done'});
-	}
-
-if (!$virtualmin_pro || defined($content)) {
-	# Just create virtualmin default index.html
-	&$first_print($text{'setup_contenting'});
-	&create_index_content(\%dom, 
-		$virtualmin_pro ? $content : "");
 	&$second_print($text{'setup_done'});
 	}
 
@@ -948,6 +948,7 @@ print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
+print "                        [--break-ssl-cert | --link-ssl-cert]\n";
 exit(1);
 }
 

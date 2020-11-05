@@ -113,6 +113,7 @@ $d || &usage("No virtual server named $dname found");
 
 if ($self) {
 	# Break SSL linkages that no longer work with this cert
+	@beforecerts = &get_all_domain_service_ssl_certs($d);
 	local $newcert = { 'cn' => $subject{'cn'} || "*.$d->{'dom'}",
 			   'alt' => \@alts };
 	&break_invalid_ssl_linkages($d, $newcert);
@@ -121,6 +122,7 @@ if ($self) {
 	&$first_print("Generating new self-signed certificate ..");
 	$d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 	$d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
+	my $newfile = !-r $d->{'ssl_cert'};
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
 	&obtain_lock_ssl($d);
@@ -141,8 +143,10 @@ if ($self) {
 		&$second_print(".. failed : $err");
 		exit(1);
 		}
-	&set_certificate_permissions($d, $d->{'ssl_cert'});
-	&set_certificate_permissions($d, $d->{'ssl_key'});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_cert'});
+		&set_certificate_permissions($d, $d->{'ssl_key'});
+		}
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain
@@ -153,6 +157,9 @@ if ($self) {
 	&release_lock_ssl($d);
 	&unlock_file($d->{'ssl_key'});
 	&unlock_file($d->{'ssl_cert'});
+
+	# Update other services using the cert
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 
 	# Remove SSL passphrase on other domains sharing the cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
@@ -182,6 +189,7 @@ else {
 	&$first_print("Generating new certificate signing request ..");
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, 'csr');
 	$d->{'ssl_newkey'} ||= &default_certificate_file($d, 'newkey');
+	my $newfile = !-r $d->{'ssl_csr'};
 	&lock_file($d->{'ssl_csr'});
 	&lock_file($d->{'ssl_newkey'});
 	$err = &generate_certificate_request(
@@ -201,8 +209,10 @@ else {
 		&$second_print(".. failed : $err");
 		exit(1);
 		}
-	&set_certificate_permissions($d, $d->{'ssl_csr'});
-	&set_certificate_permissions($d, $d->{'ssl_newkey'});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_csr'});
+		&set_certificate_permissions($d, $d->{'ssl_newkey'});
+		}
 	&unlock_file($d->{'ssl_newkey'});
 	&unlock_file($d->{'ssl_csr'});
 	&$second_print(".. done");

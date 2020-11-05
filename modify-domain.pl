@@ -47,6 +47,7 @@ DNS records managed by Virtualmin will be updated.
 If your system supports chroot jails with Jailkit, the C<--enable-jail>
 flag can be used to force all commands run by the domain to execute in
 a jail. Conversely, this can be turned off with the C<--disable-jail> flag.
+To re-sync files in the Jail, use the C<--copy-jail> flag.
 
 If you have configured additional remote (or local) MySQL servers, you can
 change the one used by this domain with the C<--mysql-server> flag followed
@@ -268,6 +269,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--disable-jail") {
 		$jail = 0;
+		}
+	elsif ($a eq "--copy-jail") {
+		$copyjail = 1;
 		}
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
@@ -672,6 +676,18 @@ if (defined($jail)) {
 	$d->{'jail'} = $jail if (!$err);
 	&save_domain($dom);
 	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+	}
+if ($copyjail) {
+	print "Copying files into chroot jail ..\n";
+	if ($d->{'jail'}) {
+		my $err = &copy_jailkit_files($dom);
+		$d->{'jail_last_copy'} = time();
+		&save_domain($d);
+		print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+		}
+	else {
+		print ".. jail not enabled\n\n";
+		}
 	}
 
 # If the plan is being applied, update features

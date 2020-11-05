@@ -68,9 +68,10 @@ while(@ARGV > 0) {
 	}
 
 # Find the domains
-$domain || &usage("No domain to move specified");
+$domain || &usage("No domain to move specified.");
+&usage("A server cannot be moved under itself.") if ($domain eq $parentdomain);
 $parentdomain || $newuser ||
-	&usage("No destination domain or new username specified");
+	&usage("No destination domain or new username specified.");
 $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 if ($parentdomain) {
@@ -78,11 +79,18 @@ if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
 	$parent || usage("Virtual server $parentdomain does not exist.");
 	if ($d->{'parent'}) {
-		$parent->{'id'} ==$d->{'parent'} && &usage($text{'move_esame'});
+		$parent->{'id'} == $d->{'parent'} && &usage($text{'move_esame'});
 		}
 	else {
 		$parent->{'id'} == $d->{'id'} && &error($text{'move_eparent'});
 		}
+
+	# Check if parent has MySQL feature enabled too
+	&usage($text{'setup_edepmysql'})
+        if ($d->{'mysql'} && !$parent->{'mysql'});
+	# Check if parent has PostgreSQL feature enabled too
+	&usage($text{'setup_edepmysqlsub'})
+        if ($d->{'postgres'} && !$parent->{'postgres'});
 	}
 else {
 	# Validate new username
@@ -132,7 +140,7 @@ else {
 sub usage
 {
 print $_[0],"\n\n" if ($_[0]);
-print "Moves a virtual server under a new parent server, or converts it.\n";
+print "Moves a virtual server under a new parent server, or converts it\n";
 print "into a parent server of its own.\n";
 print "\n";
 print "virtualmin move-domain --domain domain.name\n";

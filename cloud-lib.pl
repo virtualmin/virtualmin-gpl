@@ -19,6 +19,10 @@ if ($virtualmin_pro) {
 		    'prefix' => [ 'dropbox' ],
 		    'desc' => $text{'cloud_dropboxdesc'},
 		    'longdesc' => $text{'cloud_dropbox_longdesc'} });
+	push(@rv, { 'name' => 'bb',
+		    'prefix' => [ 'bb' ],
+		    'desc' => $text{'cloud_bbdesc'},
+		    'longdesc' => $text{'cloud_bb_longdesc'} });
 	}
 return @rv;
 }
@@ -509,6 +513,60 @@ delete($config{'dropbox_token'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+}
+
+######## Functions for Backblaze ########
+
+sub cloud_bb_get_state
+{
+if ($config{'bb_keyid'}) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_baccount',
+				 "<tt>$config{'bb_keyid'}</tt>"),
+	       };
+	}
+else {
+	return { 'ok' => 0 };
+	}
+}
+
+sub cloud_bb_show_inputs
+{
+my $rv;
+
+# Backblaze application key ID
+$rv .= &ui_table_row($text{'cloud_bb_keyid'},
+	&ui_textbox("bb_keyid", $config{'bb_keyid'}, 60));
+
+# Backblaze application key
+$rv .= &ui_table_row($text{'cloud_bb_key'},
+	&ui_textbox("bb_key", $config{'bb_key'}, 60));
+
+return $rv;
+}
+
+sub cloud_bb_parse_inputs
+{
+$in{'bb_keyid'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekeyid'});
+$in{'bb_key'} =~ /^[A-Za-z0-9\/]+$/ || &error($text{'cloud_bb_ekey'});
+
+# If key changed, re-login using the b2 command
+if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
+    $in{'bb_key'} ne $config{'bb_key'}) {
+	my ($out, $err) = &run_bb_command("authorize-account",
+					  [$in{'bb_keyid'}, $in{'bb_key'}]);
+	if ($err) {
+		&error(&text('cloud_bb_elogin',
+			     "<tt>".&html_escape($err)."</tt>"));
+		}
+	$config{'bb_keyid'} = $in{'bb_keyid'};
+	$config{'bb_key'} = $in{'bb_key'};
+	&lock_file($module_config_file);
+	&save_module_config();
+	&unlock_file($module_config_file);
+	}
+
+return undef;
 }
 
 1;

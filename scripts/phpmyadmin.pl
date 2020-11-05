@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "5.0.2", "4.9.5", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
+return ( "5.0.4", "4.9.7", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
 }
 
 sub script_phpmyadmin_version_desc
@@ -48,7 +48,7 @@ return ( 5 );
 
 sub script_phpmyadmin_php_modules
 {
-return ("mysql");
+return ("mysql", "json");
 }
 
 sub script_phpmyadmin_php_optional_modules
@@ -70,7 +70,8 @@ local @rv;
 	push(@rv, "phpMyAdmin requires a MySQL database");
 
 # Check for PHP 5.2+ or 5.3+, if needed
-my $wantver = &compare_versions($ver, "4.5") > 0 ? 5.5 :
+my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 :
+	      &compare_versions($ver, "4.5") > 0 ? 5.5 :
 	      &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
 	      &compare_versions($ver, "3.1") > 0 ? 5.2 : undef;
 if ($wantver) {

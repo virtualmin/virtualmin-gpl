@@ -168,10 +168,6 @@ if ($crmode == 1) {
 	print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
 			    &ui_yesno_radio("fix", 0));
 
-	# Limit features to those in backup
-	print &ui_table_row(&hlink($text{'restore_only'}, "restore_only"),
-			    &ui_yesno_radio("only", 0));
-
 	# Delete before restoring
 	print &ui_table_row(&hlink($text{'restore_delete'}, "restore_delete"),
 			    &ui_yesno_radio("delete_existing", 0));

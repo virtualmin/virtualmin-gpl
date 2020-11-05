@@ -73,7 +73,9 @@ local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'ssl' => $ssl,
 		'alarm' => $tmpl->{'statustimeout'},
 		'tmpl' => $tmpl->{'statustmpl'},
-		'page' => '/' };
+		'page' => '/',
+		'virtualmin' => $d->{'id'},
+	      };
 return $serv;
 }
 
@@ -96,6 +98,7 @@ local $serv = { 'id' => $d->{'id'}."_sslcert",
 		'nosched' => 0,
 		'alarm' => $tmpl->{'statustimeout'},
 		'tmpl' => $tmpl->{'statustmpl'},
+		'virtualmin' => $d->{'id'},
 	      };
 return $serv;
 }

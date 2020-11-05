@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
-		 "jailkit", "ports") {
+		 "jailkit", "ports", "bb") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -43,6 +43,7 @@ if (!$require_useradmin++) {
 	$cannot_rehash_password = 0;
 	if ($config{'ldap'}) {
 		&foreign_require("ldap-useradmin");
+		%luconfig = &foreign_config("ldap-useradmin");
 		$usermodule = "ldap-useradmin";
 		if ($ldap_useradmin::config{'md5'} == 3 ||
 		    $ldap_useradmin::config{'md5'} == 4) {
@@ -484,6 +485,24 @@ sub domain_id
 local $rv = time().$$.$main::domain_id_count;
 $main::domain_id_count++;
 return $rv;
+}
+
+# lock_domain(&domain|id)
+# Lock the config file for some domain
+sub lock_domain
+{
+my ($id) = @_;
+$id = $id->{'id'} if (ref($id));
+&lock_file("$domains_dir/$id");
+}
+
+# unlock_domain(&domain|id)
+# Unlock the config file for some domain
+sub unlock_domain
+{
+my ($id) = @_;
+$id = $id->{'id'} if (ref($id));
+&unlock_file("$domains_dir/$id");
 }
 
 # save_domain(&domain, [creating])
@@ -2509,8 +2528,9 @@ if ($config{'mysql'}) {
 		# This can fail if MySQL is down
 		local $main::error_must_die = 1;
 		local $qpass = &mysql_escape($pass);
+		local $pf = &get_mysql_password_func($d);
 		local $rv = &execute_dom_sql($d, $mysql::master_db,
-					     "select $password_func('$qpass')");
+					     "select $pf('$qpass')");
 		$rv{'mysql'} = $rv->{'data'}->[0]->[0];
 		};
 	}
@@ -3865,7 +3885,8 @@ return undef;
 # Return optional javascript to force scroll to the botton
 sub bottom_scroll_js
 {
-if ($main::force_bottom_scroll) {
+if ($main::force_bottom_scroll &&
+    $ENV{'HTTP_X_REQUESTED_WITH'} ne "XMLHttpRequest") {
 	return "<script>".
 	       "window.scrollTo(0, document.body.scrollHeight)".
 	       "</script>\n";
@@ -3878,7 +3899,7 @@ else {
 # Print functions for HTML output
 sub first_html_print { print_and_capture(@_,"<br>\n");
 		       print bottom_scroll_js(); }
-sub second_html_print { print_and_capture(@_,"<p>\n");
+sub second_html_print { print_and_capture(@_,"<br><br data-x-br>\n");
 		        print bottom_scroll_js(); }
 sub indent_html_print { print_and_capture("<ul>\n");
 		        print bottom_scroll_js(); }
@@ -4396,12 +4417,12 @@ if (!$to) {
 local $ctype = $template =~ /<html[^>]*>|<body[^>]*>/i ? "text/html"
 						       : "text/plain";
 local $cs = &get_charset();
-local $attach = $template =~ /[\177-\377]/ ?
-	{ 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
-		         [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
-          'data' => &mailboxes::quoted_encode($template) } :
-	{ 'headers' => [ [ 'Content-type', $ctype ] ],
-	  'data' => &entities_to_ascii($template) };
+local $attach = $template =~ /^[\000-\177]*$/ ?
+    { 'headers' => [ [ 'Content-type', $ctype ] ],
+      'data' => &entities_to_ascii($template) } :
+    { 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
+                     [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
+      'data' => &mailboxes::quoted_encode($template) };
 
 # Construct and send the email object
 local $mail = { 'headers' => [ [ 'From', $from ||
@@ -5146,7 +5167,11 @@ foreach my $gid (keys %gids) {
 # Given a hash of used UIDs, return one that is free
 sub allocate_uid
 {
-local $uid = $uconfig{'base_uid'};
+local $uid;
+if ($usermodule eq "ldap-useradmin") {
+	$uid = $luconfig{'base_uid'};
+	}
+$uid ||= $uconfig{'base_uid'};
 while($_[0]->{$uid}) {
 	$uid++;
 	}
@@ -5157,7 +5182,11 @@ return $uid;
 # Given a hash of used GIDs, return one that is free
 sub allocate_gid
 {
-local $gid = $uconfig{'base_gid'};
+local $gid;
+if ($usermodule eq "ldap-useradmin") {
+	$gid = $luconfig{'base_gid'};
+	}
+$gid ||= $uconfig{'base_gid'};
 while($_[0]->{$gid}) {
 	$gid++;
 	}
@@ -6966,7 +6995,10 @@ if ($left != 0 && $type ne "aliasdoms") {
 	# If no limit has been hit, check the licence
 	local ($lstatus, $lexpiry, $lerr, $ldoms) = &check_licence_expired();
 	if ($ldoms) {
-		local @doms = grep { !$_->{'alias'} } &list_domains();
+		local $donedef = 0;
+		local @doms = grep { !$_->{'alias'} &&
+				     (!$_->{'defaultdomain'} || $donedef++) }
+				   &list_domains();
 		if (@doms > $ldoms) {
 			# Hit the licenced max!
 			return (0, 3, $ldoms, 0);
@@ -7508,11 +7540,11 @@ return 0;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#			[no-post-actions], [password])
+#			[no-post-actions], [password], [content])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7626,14 +7658,21 @@ if ($dom->{'virt6'}) {
 	}
 delete($dom->{'creating'});
 
-if (!$nopost) {
-	&run_post_actions();
-	}
-
 # Save domain details
 &$first_print($text{'setup_save'});
 &save_domain($dom, 1);
 &$second_print($text{'setup_done'});
+
+# If mail client autoconfig is enabled globally, set it up for
+# this domain
+if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
+    &domain_has_website($dom) && !$dom->{'alias'}) {
+	&enable_email_autoconfig($dom);
+	}
+
+if (!$nopost) {
+	&run_post_actions();
+	}
 
 if (!$dom->{'nocreationmail'}) {
 	# Notify the owner via email
@@ -7859,13 +7898,6 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	&save_domain($dom);
 	}
 
-# If mail client autoconfig is enabled globally, set it up for
-# this domain
-if ($config{'mail_autoconfig'} && $dom->{'mail'} &&
-    &domain_has_website($dom) && !$dom->{'alias'}) {
-	&enable_email_autoconfig($dom);
-	}
-
 # If this was an alias domain, notify all features in the original domain. This
 # is useful for things like awstats, which need to add the alias domain to those
 # supported for the main site.
@@ -7952,6 +7984,13 @@ if ($dom->{'jail'} && !&check_jailkit_support()) {
 	&save_domain($dom);
 	}
 
+if (!$dom->{'alias'} && &domain_has_website($dom) && defined($content)) {
+	# Just create virtualmin default index.html
+	&$first_print($text{'setup_contenting'});
+	&create_index_content($dom, $content, 0);
+	&$second_print($text{'setup_done'});
+	}
+
 # Run the after creation command
 if (!$nopost) {
 	&run_post_actions();
@@ -7992,6 +8031,13 @@ else {
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_renew'} ||= 2;
+
+	# Inject initial SSL expiry to avoid wrong "until expiry"
+	my $cert_info = &cert_info($d);
+	if ($cert_info) {
+		$d->{'ssl_cert_expiry'} = 
+			&parse_notafter_date($cert_info->{'notafter'});
+	}
 	&save_domain($d);
 
 	# Update other services using the cert
@@ -8062,9 +8108,10 @@ local @alldoms = (@aliasdoms, @subs, $d);
 foreach my $dd (@alldoms) {
 	foreach my $du (&get_domain_by("dns_subof", $dd->{'id'})) {
 		if (&indexof($du, @alldoms) < 0) {
-			# Domain is being used as a DNS parent, and user isn't being deleted
+			# Domain is being used as a DNS parent, and user isn't
+			# being deleted
 			return &text('delete_ednssubof', &show_domain_name($dd),
-							 &show_domain_name($du));
+				     &show_domain_name($du));
 			}
 		}
 	}
@@ -8199,21 +8246,16 @@ foreach my $dd (@alldoms) {
 	my $f;
 	$dd->{'deleting'} = 1;		# so that features know about delete
 	local $p = &domain_has_website($dd);
-	if (!$only) {
-		# Delete all plugins, with error handling
-		foreach $f (&list_feature_plugins()) {
-			if ($dd->{$f} && $f ne $p) {
-				&call_feature_delete($f, $dd, $preserve);
-				}
-			}
+	local @of;
+	if ($only) {
+		@of = ( "webmin" );
 		}
-	foreach $f ($only ? ( "webmin" ) : reverse(@features)) {
-		if ($f eq "web" && $p && $p ne "web") {
-			# Delete web plugin later, after dependencies have
-			# been removed
-			&call_feature_delete($p, $dd, $preserve);
-			}
-		elsif ($config{$f} && $dd->{$f} || $f eq 'unix') {
+	else {
+		@of = reverse(&list_ordered_features($dd));
+		}
+	foreach $f (@of) {
+		if (($config{$f} || &indexof($f, @plugins) >= 0) &&
+		    $dd->{$f} || $f eq 'unix') {
 			# Delete core feature
 			local @args = ( $preserve );
 			if ($f eq "mail") {
@@ -10097,7 +10139,7 @@ if ($config{'mysql'} && (!$d || $d->{'mysql'})) {
 	push(@rv, map { { 'name' => $_,
 			  'type' => 'mysql',
 			  'desc' => $text{'databases_mysql'},
-			  'special' => $_ =~ /^(mysql|sys|information_schema)$/ } }
+			  'special' => $_ =~ /^(mysql|sys|information_schema|performance_schema)$/ } }
 		      &list_all_mysql_databases($d));
 	}
 if ($config{'postgres'} && (!$d || $d->{'postgres'})) {
@@ -10410,10 +10452,20 @@ sub can_show_pass
 return &master_admin() || &reseller_admin() || $config{'show_pass'};
 }
 
-# Returns 1 if the user can change his own password
+# Returns 1 if the user can change his own password. Not shown for root,
+# because this is done outside of Virtualmin.
 sub can_passwd
 {
 return &reseller_admin() || $access{'edit_passwd'};
+}
+
+# Returns 1 if the user can enroll for 2fa
+sub can_2fa
+{
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return $miniserv{'twofactor_provider'} &&
+       (&reseller_admin() || $access{'edit_passwd'});
 }
 
 # Returns 1 if the user can change a domain's external IP address
@@ -10871,17 +10923,6 @@ if ($config{'allow_symlinks'} eq '') {
 		}
 	}
 
-# Check if a reboot is needed to enable Xen quotas on /
-if (&needs_xfs_quota_fix() == 1 && &foreign_available("init")) {
-	my $alert_text;
-	$alert_text .= "<b>$text{'licence_xfsreboot'}</b><p>\n";
-	$alert_text .= &ui_form_start(
-		"$gconfig{'webprefix'}/init/reboot.cgi");
-	$alert_text .= &ui_submit($text{'licence_xfsrebootok'});
-	$alert_text .= &ui_form_end();
-	push(@rv, $alert_text);
-	}
-
 # Suggest that the user switch themes to authentic
 my @themes = &list_themes();
 my ($theme) = grep { $_->{'dir'} eq $recommended_theme } @themes;
@@ -11246,13 +11287,77 @@ push(@enable, grep { $d->{$_} && $disabled{$_} &&
 return &unique(@enable);
 }
 
+# get_python_version()
+# Return current Python version, if instaled
+sub get_python_version
+{
+my $python_version;
+my $python_pathpath = get_python_path();
+my $out = &backquote_command("$python_pathpath --version 2>&1", 1);
+$python_version = $1 if ($out =~ /Python\s+(.*)/i);
+return $python_version;
+}
+
+# get_usermin_version()
+# Return current Usermin version, if instaled
+sub get_usermin_version
+{
+return 0 if (!&foreign_check("usermin"));
+&foreign_require("usermin");
+return &usermin::get_usermin_version();
+}
+
 # sysinfo_virtualmin()
 # Returns the OS info, Perl version and path
 sub sysinfo_virtualmin
 {
-return ( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
-	 [ $text{'sysinfo_perl'}, $] ],
-	 [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
+my @sysinfo_virtualmin;
+
+# OS and Perl info
+@sysinfo_virtualmin = 
+	( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
+      [ $text{'sysinfo_perl'}, $] ],
+      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
+
+# Python, if exists
+my $python_version = &get_python_version();
+if ($python_version) {
+	push(@sysinfo_virtualmin,
+         [ $text{'sysinfo_python'}, $python_version ],
+         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
+	}
+
+if ($main::sysinfo_virtualmin_self) {
+
+	# Add Webmin version; add Usermin version, if installed
+	my %systemstatustext = &load_language('system-status');
+	push(@sysinfo_virtualmin,
+	    [ $systemstatustext{'right_webmin'}, &get_webmin_version() ] );
+	my $um_ver = &get_usermin_version();
+	if ($um_ver) {
+		push(@sysinfo_virtualmin,
+	        [ $systemstatustext{'right_usermin'}, $um_ver ] );
+		}
+
+	# Add Virtualmin version
+	push(@sysinfo_virtualmin,
+	    [ $text{'right_virtualmin'}, &get_module_version_and_type() ] );
+
+	# Add Cloudmin version, if installed
+	if (&foreign_installed("server-manager")) {
+		&foreign_require("server-manager");
+		if (defined(&server_manager::get_module_version_and_type)) {
+			my $cm_ver = &server_manager::get_module_version_and_type();
+			if ($cm_ver) {
+				my %cmtext = &load_language('server-manager');
+				push(@sysinfo_virtualmin,
+				    [ $cmtext{'right_vm2'}, $cm_ver ] );
+				}
+			}
+	}
+}
+
+return @sysinfo_virtualmin;
 }
 
 # has_home_quotas()
@@ -12131,7 +12236,16 @@ if (&can_passwd()) {
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},
 		    'desc' => $text{'edit_changepassdesc'},
-		    'cat' => 'server',
+		    'cat' => 'admin',
+		  });
+	}
+
+if (&can_2fa()) {
+	# Twofactor enroll button
+	push(@rv, { 'page' => 'edit_2fa.cgi',
+		    'title' => $text{'edit_change2fa'},
+		    'desc' => $text{'edit_change2fadesc'},
+		    'cat' => 'admin',
 		  });
 	}
 
@@ -12663,6 +12777,8 @@ if (&indexof($f, @features) >= 0 && $config{$f}) {
 		if (!$ok || !$fok) {
 			$d->{$f} = 1;
 			}
+		$d->{'db_mysql'} = $oldd->{'db_mysql'};
+		$d->{'db_postgres'} = $oldd->{'db_postgres'};
 		}
 	elsif ($d->{$f}) {
 		# Modify some feature
@@ -12995,6 +13111,7 @@ local (@doms, @olddoms);
 $d->{'parent'} = undef;
 $d->{'user'} = $newuser;
 $d->{'group'} = $newuser;
+$d->{'ugroup'} = $newuser;
 $d->{'pass'} = $newpass;
 &generate_domain_password_hashes($d, 1);
 if (!$d->{'mysql'}) {
@@ -13378,6 +13495,7 @@ local ($d, $parent) = @_;
 $d->{'parent'} = $parent->{'id'};
 $d->{'user'} = $parent->{'user'};
 $d->{'group'} = $parent->{'group'};
+$d->{'ugroup'} = $parent->{'ugroup'};
 $d->{'uid'} = $parent->{'uid'};
 $d->{'gid'} = $parent->{'gid'};
 $d->{'ugid'} = $parent->{'ugid'};
@@ -14780,7 +14898,18 @@ elsif ($config{'quotas'}) {
 			}
 		}
 	if ($qerr) {
-		&$second_print("<b>$qerr</b>");
+		# Check if a reboot is needed to enable XFS quotas on /
+		if (&needs_xfs_quota_fix() == 1) {
+			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
+			if (&foreign_available("init")) {
+				$reboot_msg .= ui_link("$gconfig{'webprefix'}/init/reboot.cgi", $text{'licence_xfsrebootok'});
+				$reboot_msg .= ".";
+				}
+			&$second_print($reboot_msg);
+			}
+			else {
+				&$second_print("<b>$qerr</b>");
+				}
 		}
 	elsif (!$config{'group_quotas'}) {
 		&$second_print($text{'check_nogroup'});
@@ -15165,7 +15294,8 @@ if ($config{'default_procmail'} != $lastconfig{'default_procmail'}) {
 	}
 
 # Re-create API helper command
-if ($config{'api_helper'} ne $lastconfig{'api_helper'}) {
+if ($config{'api_helper'} ne $lastconfig{'api_helper'} ||
+	!&has_command(&get_api_helper_command())) {
 	&$first_print($text{'check_apicmd'});
 	local ($ok, $path) = &create_virtualmin_api_helper_command();
 	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
@@ -16409,7 +16539,7 @@ local @ttdoms = map { "<tt>".&show_domain_name($_)."</tt>" } @$doms;
 if (@ttdoms > 10) {
 	@ttdoms = ( @ttdoms[0..9], &text('index_dmore', @ttdoms-10) );
 	}
-return join(" , ", @ttdoms);
+return join(", ", @ttdoms);
 }
 
 # list_available_shells([&domain], [mail])
@@ -16750,6 +16880,7 @@ foreach my $f (@features) {
 sub obtain_lock_anything
 {
 local ($d) = @_;
+&lock_domain($d);
 # Assume that we are about to do something important, and so don't want to be
 # killed by a SIGPIPE triggered by a browser cancel.
 $SIG{'PIPE'} = 'ignore';
@@ -16760,6 +16891,7 @@ $SIG{'TERM'} = 'ignore';
 sub release_lock_anything
 {
 local ($d) = @_;
+&unlock_domain($d);
 }
 
 # virtualmin_api_log(&argv, [&domain], [&suppress-flags])
@@ -16795,7 +16927,7 @@ while(@argv) {
 		push(@qargv, "'$a'");
 		}
 	else {
-		push(@qargv, quotameta($a));
+		push(@qargv, quotemeta($a));
 		}
 	}
 if ($hide) {
@@ -17478,7 +17610,7 @@ if ($dir) {
 	}
 &release_lock_ssl($d);
 if ($dir) {
-	&flush_file_lines($virt->{'file'});
+	&flush_file_lines($virt->{'file'}, undef, 1);
 	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 	}
 return undef;
@@ -17506,21 +17638,26 @@ return $file;
 
 # list_ordered_features(&domain)
 # Returns a list of features or plugins possibly relevant to some domain,
-# in dependency order
+# in dependency order for creation.
 sub list_ordered_features
 {
 local ($d) = @_;
 local @dom_features = &domain_features($d);
 local $p = &domain_has_website($d);
+local $s = &domain_has_ssl($d);
 local @rv;
 foreach my $f (@dom_features, &list_feature_plugins()) {
 	if ($f eq "web" && $p && $p ne "web") {
-		# Replace 'web' feature in ordering with plugin that provides
-		# a website.
+		# Replace website feature in ordering with website plugin
 		push(@rv, $p, "web");
 		}
-	elsif ($f eq $p && $p ne "web") {
-		# Skip website plugin feature, as it was inserted above
+	elsif ($f eq "ssl" && $s && $s ne "ssl") {
+		# Replace SSL feature in ordering with SSL plugin
+		push(@rv, $s, "ssl");
+		}
+	elsif ($f eq $p && $p ne "web" ||
+               $f eq $s && $s ne "ssl") {
+		# Skip website or SSL plugin feature, as it was inserted above
 		}
 	else {
 		# Some other feature
@@ -17933,6 +18070,82 @@ foreach my $pname (@load) {
 		}
 	}
 return $loaded;
+}
+
+# needs_xfs_quota_fix()
+# Checks if quotas are enabled on the /home filesystem in /etc/fstab but
+# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is
+# needed, 2 if GRUB needs to be configured, or 3 if we don't know how to
+# fix GRUB.
+sub needs_xfs_quota_fix
+{
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);             # Some other OS
+return 0 if (!$config{'quotas'});                           # Quotas not even in use
+return 0 if ($config{'quota_commands'});                    # Using external commands
+&require_useradmin();
+return 0 if (!$home_base);                                  # Don't know base dir
+return 0 if (&running_in_zone());                           # Zones have no quotas
+my ($home_mtab, $home_fstab) = &mount_point($home_base);
+return 0 if (!$home_mtab || !$home_fstab);                  # No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");                     # Other FS type
+return 0 if ($home_mtab->[0] ne "/");                       # /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,                 # Not enabled in fstab
+				$home_fstab));
+my $now = &quota::quota_now($home_mtab, $home_fstab);
+$now -= 4 if ($now >= 4);                                   # Ignore XFS always bit
+return 0 if ($now);                                         # Already enabled in mtab
+
+# At this point, we are definite in a bad state
+my $grubfile = "/etc/default/grub";
+return 3 if (!-r $grubfile);
+
+# Check if grub default config was edited after reboot
+if (&foreign_check("webmin")) {
+	&foreign_require("webmin");
+	my $uptime     = webmin::get_system_uptime();
+	my $lastreboot = $uptime ? time() - $uptime : undef;
+	if ($lastreboot) {
+		my @grubfile_stat = stat($grubfile);
+		return 0 if ($lastreboot > $grubfile_stat[9]);
+		}
+	}
+
+my %grub;
+&read_env_file($grubfile, \%grub);
+return 3 if (!$grub{'GRUB_CMDLINE_LINUX'});
+
+# Enabled already, so just need to reboot
+return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
+	     $grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*gquota,uquota/);
+
+# Otherwise, flags need adding
+return 2;
+}
+
+sub get_module_version_and_type
+{
+my ($list, $gpl) = @_;
+my $mver = $module_info{'version'};
+my ($v_major, $v_minor, $v_type);
+if ($mver =~ /(\d+)\.(\d+)\.(\w+)/) {
+	($v_major, $v_minor, $v_type) = ($1, $2, $3);
+	}
+else {
+	return $mver;
+	}
+if ($v_type =~ /pro/i) {
+	$v_type = " Pro";
+	} 
+else {
+	if ($gpl) {
+		$v_type = " GPL";
+		}
+	else {
+		$v_type = "";
+		}
+	}
+	return $list ? ($v_major, $v_minor, $v_type) : 
+                  "$v_major.$v_minor$v_type";
 }
 
 # Returns a list of all plugins that define features

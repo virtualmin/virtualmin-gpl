@@ -259,7 +259,7 @@ for(my $i=0; $i<$tries; $i++) {
 	while(defined($buf = &read_http_connection($h, 1024))) {
 		$out .= $buf;
 		}
-	&close_http_connection($out);
+	&close_http_connection($h);
 
 	if ($line !~ /\S/) {
 		$err = "Empty response to HTTP request. Headers were : $htext";

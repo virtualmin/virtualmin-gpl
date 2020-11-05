@@ -540,7 +540,7 @@ return &ui_select($name, $value,
 # message on failure.
 sub create_script_database
 {
-local ($d, $dbspec, $opts) = @_;
+my ($d, $dbspec, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $dbspec, 2);
 
 # Check limits (again)
@@ -859,8 +859,9 @@ return &indexof($mod, @mods) >= 0 ? 1 : 0;
 sub check_perl_module
 {
 local ($mod, $d) = @_;
-eval "use $mod";
-return $@ ? 0 : 1;
+local $perl = &get_perl_path();
+local $out = &backquote_command("$perl -e 'use $mod' 2>&1");
+return $? ? 0 : 1;
 }
 
 # check_python_module(mod, &domain)
@@ -1053,6 +1054,7 @@ foreach my $m (@mods) {
 		my $fullphpver = &get_php_version($phpverall, $d);
 		my $nodotphpver = $phpverall;
 		$nodotphpver =~ s/\.//;
+		my $phpverdistrobased = $software::update_system eq "apt" ? $phpverall : $nodotphpver;
 		if ($software::update_system eq "csw") {
 			# On Solaris, packages are named like php52_mysql
 			push(@poss, "php".$nodotphpver."_".$m);
@@ -1062,11 +1064,11 @@ foreach my $m (@mods) {
 			push(@poss, "php".$nodotphpver."-".$m);
 			}
 		else {
-			push(@poss, "php".$nodotphpver."-".$m, "php-".$m);
+			push(@poss, "php".$phpverdistrobased."-".$m, "php-".$m);
 			if ($software::update_system eq "apt" &&
 				$m eq "pdo_mysql") {
 				# On Debian, the pdo_mysql module is in the mysql module
-				push(@poss, "php".$nodotphpver."-mysql", "php-mysql");
+				push(@poss, "php".$phpverdistrobased."-mysql", "php-mysql");
 				}
 			elsif ($software::update_system eq "yum" &&
 				   ($m eq "domxml" || $m eq "dom") && $phpverall >= 5) {
@@ -1093,19 +1095,17 @@ foreach my $m (@mods) {
 							 $p =~ s/php5/php53/;
 						  ($p, "rh-".$p) } @vposs);
 				}
-			if ($software::update_system eq "apt" && $phpverall >= 7) {
-				# On Debian, sometimes the package is like php7.0-gd
-				push(@poss, "php".$phpverall."-".$m);
-				}
 			}
 		}
-	@poss = sort { $b cmp $a } @poss;
+	@poss = sort { $a cmp $b } @poss;
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
 		$nodotverpkg =~ s/\.//;
-		my $success = $nodotverpkg =~ /^php$nodotphpvercurr/ || 
-					  $nodotverpkg !~ /php(\d)/;
+		
+		# We either need to check for success 
+		# exactly or not check it at all (permissive)
+		my $success = 1;
 		if (!@pinfo) {
 			# Not installed .. try to fetch it
 			&$first_print(&text('scripts_softwaremod',
@@ -1123,7 +1123,8 @@ foreach my $m (@mods) {
 				}
 			else {
 				# Show HTML output
-				&software::update_system_install($pkg);
+				my @rs = &software::update_system_install($pkg);
+				$iok = 1 if (scalar(@rs));
 				}
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
@@ -1281,14 +1282,25 @@ foreach my $m (@mods) {
 		local $mp = $m;
 		if ($software::config{'package_system'} eq 'rpm') {
 			# We can use RPM's tracking of perl dependencies
-			# to install the exact module
-			$pkg = "perl($mp)";
+			# to install the exact module.
+			# However, to make it work, we need to wrap pkg name in quotes,
+			# like dnf install 'perl(Email::Send)' which doesn't 	
+			# seem to be working correctly on underlying API.	
+			# Simply build a name for it on RHEL too	
+			$mp =~ s/::/\-/g;	
+			$pkg = "perl-$mp";
 			}
 		elsif ($software::config{'package_system'} eq 'debian') {
 			# Most Debian package perl modules are named
 			# like libfoo-bar-perl
 			if ($mp eq "Date::Format") {
 				$pkg = "libtimedate-perl";
+				}
+			elsif ($mp eq "Template::Toolkit") {	
+				$pkg = "libtemplate-perl";	
+				}	
+			elsif ($mp eq "DBD::SQLite") {	
+				$pkg = "libdbd-sqlite3-perl";	
 				}
 			else {
 				$mp = lc($mp);
@@ -1510,7 +1522,7 @@ local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
 if ($pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
 	}
-return &get_domain_url($d).$pp;
+return &get_domain_url($d, 1).$pp;
 }
 
 # show_template_scripts(&tmpl)

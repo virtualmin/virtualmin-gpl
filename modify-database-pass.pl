@@ -104,6 +104,6 @@ print "\n";
 local $types = join("|", @database_features);
 print "virtualmin modify-database-pass --domain name\n";
 print "                                --type $types\n";
-print "                                --user new-name\n";
+print "                                --pass new password\n";
 exit(1);
 }

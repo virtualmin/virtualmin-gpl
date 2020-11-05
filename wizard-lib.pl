@@ -21,7 +21,7 @@ return ( "intro",
 	 $config{'mysql'} ? ( "mysql", "mysize" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
 	 "hashpass",
-	 &needs_xfs_quota_fix() ? ( "xfs" ) : ( ),
+	 "defdom",
 	 "done" );
 }
 
@@ -351,22 +351,19 @@ else {
 sub wizard_parse_mysql
 {
 local ($in) = @_;
+local $pass = $in->{'mypass'};
+local $user = $mysql::mysql_login || 'root';
 &require_mysql();
 if (&mysql::is_mysql_running() == -1) {
 	# Forcibly change the mysql password
 	if ($in->{'forcepass'}) {
 		&push_all_print();
 		&set_all_null_print();
-		my $err = &force_set_mysql_password("root", $in->{'mypass'});
+		my $err = &force_set_mysql_password($user, $pass);
 		&pop_all_print();
 		return $err if ($err);
 		}
 
-	# Save the password
-	$mysql::config{'pass'} = $in->{'mypass'};
-	$mysql::mysql_pass = $in->{'mypass'};
-	&mysql::save_module_config(\%mysql::config, "mysql");
-	$mysql::authstr = &mysql::make_authstr();
 	if (&mysql::is_mysql_running() <= 0) {
 		return $text{'wizard_mysql_epass'};
 		}
@@ -374,15 +371,10 @@ if (&mysql::is_mysql_running() == -1) {
 else {
 	if (!$in{'mypass_def'}) {
 		# Change in DB
-		local $user = $mysql::mysql_login || "root";
-		&execute_password_change_sql(undef, "root",
-			undef, 0, 0, $in->{'mypass'});
-
-		# Update Webmin
-		$mysql::config{'pass'} = $in->{'mypass'};
-		$mysql::mysql_pass = $in->{'mypass'};
-		&mysql::save_module_config(\%mysql::config, "mysql");
-		$mysql::authstr = &mysql::make_authstr();
+		eval {
+			&execute_password_change_sql(undef, $user, undef, $pass);
+			};
+		&update_webmin_mysql_pass($user, $pass) if (!$@);
 		}
 	}
 
@@ -443,11 +435,15 @@ if (-r $mysql::config{'my_cnf'}) {
 				}
 			}
 		}
+	my $def_msg;
+	if ($currt) {
+		$def_msg = $text{"wizard_mysize_$currt"};
+		($def_msg) = $def_msg =~ /(.*?\(\d+.+?\S*\))/;
+		}
 	print &ui_table_row($text{'wizard_mysize_type'},
 		    &ui_radio_table("mysize", $mysize,
 		      [ [ "", $text{'wizard_mysize_def'}.
-			      ($currt ? " - ".&text('wizard_mysize_deft',
-				$text{'wizard_mysize_'.$currt}) : "") ],
+			      ($def_msg ? " - $def_msg" : "") ],
 			map { [ $_, $text{'wizard_mysize_'.$_}.
 			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
 			      ] } @types ]));
@@ -465,7 +461,11 @@ local ($in) = @_;
 if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
+	my ($myver, $variant);
 	if ($running) {
+
+		# Get MySQL/MariaDB version and variant before stopping it
+		($myver, $variant) = &get_dom_remote_mysql_version();
 		&mysql::stop_mysql();
 		}
 
@@ -479,7 +479,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&copy_source_dest($file, $temp."_".$bf);
 		&lock_file($file);
 		}
-	foreach my $s (&list_mysql_size_settings($in->{'mysize'})) {
+	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
 				    $_->{'members'} } @$conf;
@@ -580,6 +580,12 @@ $tmpl->{'dns_ns'} = join(" ", @secns);
 sub wizard_show_done
 {
 print &ui_table_row(undef, &text('wizard_done'), 2);
+
+# If user sets up a default domain, refresh navigation menu with it
+if (defined(&theme_post_save_domain) && $in{'refresh'}) {
+	my $dom = get_domain_by("dom", $in{'refresh'});
+	&theme_post_save_domain($dom, 'create');
+	}
 }
 
 sub wizard_parse_done
@@ -587,6 +593,8 @@ sub wizard_parse_done
 return undef;	# Always works
 }
 
+# wizard_show_hashpass()
+# Ask the user if he wants to enable storage of hashed passwords only
 sub wizard_show_hashpass
 {
 print &ui_table_row(undef, $text{'wizard_hashpass'}, 2);
@@ -599,6 +607,8 @@ print &ui_table_row($text{'wizard_hashpass_mode'},
 print &ui_table_row(undef, "<b>$text{'wizard_hashpass_warn'}</b>", 2);
 }
 
+# wizard_parse_hashpass(&in)
+# Parse the hashed password setting
 sub wizard_parse_hashpass
 {
 local ($in) = @_;
@@ -642,51 +652,151 @@ if ($in->{'hashpass'} && &foreign_check("usermin")) {
 return undef;
 }
 
-sub wizard_show_xfs
+# wizard_show_defdom()
+# Show a form asking if the user wants to create a default virtual server
+sub wizard_show_defdom
 {
-print &ui_table_row(undef, $text{'wizard_xfs'}, 2);
+my $already = &get_domain_by("defaultdomain", 1);
+if ($already) {
+	print &ui_hidden("defdom", 0);
+	print &ui_table_row(undef,
+		&text('wizard_defdom_exists', "<b><tt>@{[show_domain_name($already)]}</tt></b>"), 2);
+	}
+else {
+	print &ui_table_row(undef, $text{'wizard_defdom'}, 2);
+	my $def = $ENV{'SERVER_NAME'};
+	if (&check_ipaddress($def) || &check_ip6address($def)) {
+		# Try hostname instead
+		$def = &get_system_hostname();
+		if ($def !~ /\./) {
+			my $def2 = &get_system_hostname(0, 1);
+			$def = $def2 if ($def2 =~ /\./);
+			}
+		}
+	print &ui_table_row($text{'wizard_defdom_mode'},
+		&ui_radio("defdom", 1,
+			  [ [ 0, $text{'wizard_defdom0'} ],
+			    [ 1, $text{'wizard_defdom1'}." ".
+				 &ui_textbox("defhost", $def, 20) ] ]));
 
-local $xfs = &needs_xfs_quota_fix();
-if ($xfs == 1) {
-	print &ui_table_row(undef, $text{'wizard_xfsreboot'}, 2);
-	}
-elsif ($xfs == 2) {
-	print &ui_table_row($text{'wizard_xfsgrub'},
-		&ui_radio("enable", 1,
-			  [ [ 0, $text{'wizard_xfsgrub0'} ],
-			    [ 1, $text{'wizard_xfsgrub1'} ] ]));
-	}
-elsif ($xfs == 3) {
-	print &ui_table_row(undef, $text{'wizard_xfsnoidea'}, 2);
+	print &ui_table_row($text{'wizard_defdom_ssl'},
+		&ui_radio("defssl", 2,
+			  [ [ 0, $text{'wizard_defssl0'} ],
+			    [ 1, $text{'wizard_defssl1'} ],
+			    [ 2, $text{'wizard_defssl2'} ] ]));
 	}
 }
 
-sub wizard_parse_xfs
+# wizard_parse_defdom(&in)
+# Create a default virtual server, if requested
+sub wizard_parse_defdom
 {
-local ($in) = @_;
-if ($in{'enable'}) {
-	# Update the grub config file source
-	my $grubfile = "/etc/default/grub";
-	my %grub;
-	&read_env_file($grubfile, \%grub) ||
-		return &text('wizard_egrubfile', "<tt>$grubfile</tt>");
-	my $v = $grub{'GRUB_CMDLINE_LINUX'};
-	$v || return &text('wizard_egrubline', "<tt>GRUB_CMDLINE_LINUX</tt>");
-	if ($v =~ /rootflags=(\S+)/) {
-		$v =~ s/rootflags=(\S+)/rootflags=$1,uquota,gquota/;
+my ($in) = @_;
+return undef if (!$in->{'defdom'});
+
+# Validate the domain name
+my $dname = $in->{'defhost'};
+my $err = &valid_domain_name($dname);
+return $err if ($err);
+my $clash = &get_domain_by("dom", $dname);
+return &text('wizard_defdom_clash', $dname) if ($clash);
+my $already = &get_domain_by("defaultdomain", 1);
+return &text('wizard_defdom_already', $already->{'dom'}) if ($already);
+&lock_domain_name($dname);
+
+# Work out username / etc
+my ($user, $try1, $try2) = &unixuser_name($dname);
+$user || return &text('setup_eauto', $try1, $try2);
+my ($group, $gtry1, $gtry2) = &unixgroup_name($dname, $user);
+$group || return &text('setup_eauto2', $try1, $try2);
+my $defip = &get_default_ip();
+my $defip6 = &get_default_ip6();
+my $template = &get_init_template();
+my $plan = &get_default_plan();
+
+# Work out prefix if needed, and check it
+my $prefix ||= &compute_prefix($dname, $group, undef, 1);
+$prefix =~ /^[a-z0-9\.\-]+$/i || return $text{'setup_eprefix'};
+my $pclash = &get_domain_by("prefix", $prefix);
+$pclash && return &text('setup_eprefix3', $prefix, $pclash->{'dom'});
+
+# Create the virtual server object
+my %dom;
+%dom = ('id', &domain_id(),
+		'dom', $dname,
+		'user', $user,
+		'group', $group,
+		'ugroup', $group,
+		'owner', $text{'wizard_defdom_desc'},
+		'name', 1,
+		'name6', 1,
+		'ip', $defip,
+		'dns_ip', &get_dns_ip(),
+		'virt', 0,
+		'virtalready', 0,
+		'ip6', $ip6,
+		'virt6', 0,
+		'virt6already', 0,
+		'pass', &random_password(),
+		'quota', 0,
+		'uquota', 0,
+		'source', 'wizard.cgi',
+		'template', $template,
+		'plan', $plan->{'id'},
+		'prefix', $prefix,
+		'nocreationmail', 1,
+		'hashpass', 0,
+		'defaultdomain', 1,
+        );
+
+# Set initial features
+$dom{'dir'} = 1;
+$dom{'unix'} = 1;
+$dom{'dns'} = 1;
+my $webf = &domain_has_website();
+my $sslf = &domain_has_ssl();
+$dom{$webf} = 1;
+if ($in->{'defssl'}) {
+	$dom{$sslf} = 1;
+	if ($in->{'defssl'} == 2) {
+		$dom{'auto_letsencrypt'} = 1;
 		}
 	else {
-		$v .= " rootflags=uquota,gquota";
+		$dom{'auto_letsencrypt'} = 0;
 		}
-	$grub{'GRUB_CMDLINE_LINUX'} = $v;
-	&write_env_file($grubfile, \%grub);
-
-	# Generate a new actual config file
-	&copy_source_dest("/boot/grub2/grub.cfg", "/boot/grub2/grub.cfg.orig");
-	my $out = &backquote_logged(
-		"grub2-mkconfig -o /boot/grub2/grub.cfg 2>&1 </dev/null");
-	$? && return "<tt>".&html_escape($out)."</tt>";
 	}
+
+# Fill in other default fields
+&set_limits_from_plan(\%dom, $plan);
+&set_capabilities_from_plan(\%dom, $plan);
+$dom{'emailto'} = $dom{'user'}.'@'.&get_system_hostname();
+$dom{'db'} = &database_name(\%dom);
+&set_featurelimits_from_plan(\%dom, $plan);
+&set_chained_features(\%dom, undef);
+&set_provision_features(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
+$dom{'home'} = &server_home_directory(\%dom, undef);
+&complete_domain(\%dom);
+
+# Check for various clashes
+$derr = &virtual_server_depends(\%dom);
+return $derr if ($derr);
+$cerr = &virtual_server_clashes(\%dom);
+return $cerr if ($cerr);
+my @warns = &virtual_server_warnings(\%dom);
+return join(" ", @warns) if (@warns);
+
+# Create the server
+&push_all_print();
+&set_all_null_print();
+my $err = &create_virtual_server(
+	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
+&pop_all_print();
+return $err if ($err);
+
+&run_post_actions_silently();
+&unlock_domain_name($dname);
+
 return undef;
 }
 
@@ -708,44 +818,6 @@ sub get_uname_arch
 local $out = &backquote_command("uname -m");
 $out =~ s/\s+//g;
 return $out;
-}
-
-# needs_xfs_quota_fix()
-# Checks if quotas are enabled on the /home filesystem in /etc/fstab but
-# not for real in /etc/mtab. Returns 0 if all is OK, 1 if just a reboot is
-# needed, 2 if GRUB needs to be configured, or 3 if we don't know how to
-# fix GRUB.
-sub needs_xfs_quota_fix
-{
-return 0 if ($gconfig{'os_type'} !~ /-linux$/);	# Some other OS
-return 0 if (!$config{'quotas'});		# Quotas not even in use
-return 0 if ($config{'quota_commands'});	# Using external commands
-&require_useradmin();
-return 0 if (!$home_base);			# Don't know base dir
-return 0 if (&running_in_zone());		# Zones have no quotas
-local ($home_mtab, $home_fstab) = &mount_point($home_base);
-return 0 if (!$home_mtab || !$home_fstab);	# No mount found?
-return 0 if ($home_mtab->[2] ne "xfs");		# Other FS type
-return 0 if ($home_mtab->[0] ne "/");		# /home is not on the / FS
-return 0 if (!&quota::quota_can($home_mtab,	# Not enabled in fstab
-				$home_fstab));
-local $now = &quota::quota_now($home_mtab, $home_fstab);
-$now -= 4 if ($now >= 4);			# Ignore XFS always bit
-return 0 if ($now);				# Already enabled in mtab
-
-# At this point, we are definite in a bad state
-my $grubfile = "/etc/default/grub";
-return 3 if (!-r $grubfile);
-my %grub;
-&read_env_file($grubfile, \%grub);
-return 3 if (!$grub{'GRUB_CMDLINE_LINUX'});
-
-# Enabled already, so just need to reboot
-return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
-	     $grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*gquota,uquota/);
-
-# Otherwise, flags need adding
-return 2;
 }
 
 1;

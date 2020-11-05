@@ -28,6 +28,7 @@ $ENV{'ftp_proxy'} = undef;
 
 $test_domain = "example.com";	# Never really exists
 $test_ssl_subdomain = "ssl.".$test_domain;
+$test_ssl2_subdomain = "ssl2.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
@@ -231,6 +232,8 @@ $domains_tests = [
 		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
+			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
@@ -287,10 +290,18 @@ $domains_tests = [
 	{ 'command' => 'mysql -u '.$test_domain_user.' -psmeg '.$test_domain_db.' -e "select version()"',
 	},
 
+	# Check PostgreSQL login
 	$config{'postgres'} ?
 		&postgresql_login_commands($test_domain_user, 'smeg',
 					   $test_domain_db, $test_domain_home)
 		: ( ),
+
+	# Check AWstats login
+	&indexof('virtualmin-awstats', @plugins) >= 0 ? (
+		{ 'command' => $wget_command.'http://'.$test_domain_user.':smeg@'.$test_domain.'/cgi-bin/awstats.pl',
+		  'grep' => 'AWStats',
+		},
+		) : ( ),
 
 	# Check PHP execution
 	{ 'command' => 'echo "<?php phpinfo(); ?>" >~'.
@@ -400,6 +411,24 @@ $domains_tests = [
 		      'Bandwidth limit: 666', ],
 	},
 
+	# Check new FTP login
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':newpass@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Check new IMAP and POP3 for admin mailbox
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+	{ 'command' => 'test-pop3.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'newpass' ],
+		      [ 'server', &get_system_hostname() ] ],
+	},
+
 	# Check new Webmin password
 	{ 'command' => $wget_command.'--user-agent=Webmin '.
 		       ($webmin_proto eq "https" ? '--no-check-certificate '
@@ -408,6 +437,17 @@ $domains_tests = [
 		       '--password newpass '.
 		       $webmin_proto.'://localhost:'.$webmin_port.'/',
 	},
+
+	# Check new MySQL login
+	{ 'command' => 'mysql -u '.$test_domain_user.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Check new AWstats password
+	&indexof('virtualmin-awstats', @plugins) >= 0 ? (
+		{ 'command' => $wget_command.'http://'.$test_domain_user.':newpass@'.$test_domain.'/cgi-bin/awstats.pl',
+		  'grep' => 'AWStats',
+		},
+		) : ( ),
 
 	# Create a sub-server
 	{ 'command' => 'create-domain.pl',
@@ -1255,7 +1295,7 @@ $script_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/wordpress',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http(s?)://'.$test_domain.'/wordpress',
 		    ],
 	},
 
@@ -1289,7 +1329,7 @@ $script_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/wordpress',
 		      'Database: '.$test_domain_db.'_wp ',
-		      'URL: http://'.$test_domain.'/wordpress',
+		      'URL: http(s?)://'.$test_domain.'/wordpress',
 		    ],
 	},
 
@@ -1334,7 +1374,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.10' ] ],
+		      [ 'version', '1.2.12' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1351,7 +1391,7 @@ $gplscript_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -1368,7 +1408,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.2.10' ] ],
+		      [ 'version', '1.2.12' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1385,7 +1425,7 @@ $gplscript_tests = [
 		      'Directory: /home/'.$test_domain_user.
 			'/public_html/roundcube',
 		      'Database: '.$test_domain_db.'_roundcube ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -1750,7 +1790,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.10' ] ],
+		      [ 'version', '1.2.12' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1832,7 +1872,7 @@ $move_tests = [
 		      'Directory: /home/'.$test_target_domain_user.
 			'/domains/'.$test_domain.'/public_html/roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -3602,6 +3642,137 @@ $dropboxbackup_tests = [
 
 $enc_dropboxbackup_tests = &convert_to_encrypted($dropboxbackup_tests);
 
+$bb_backup_prefix = "bb://virtualmin-test-backup-bucket";
+$bbbackup_tests = [
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Backup to Dropbox
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Dropbox again, to test that over-writing works
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore from Dropbox
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain from Dropbox
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Dropbox in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Backup to Dropbox in home format again, to test overwriting
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Restore from Dropbox in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix ] ],
+	},
+
+	# Backup from Dropbox one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix ] ],
+	},
+
+	# Restore from Dropbox, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix ] ],
+	},
+
+	# Backup to Dropbox subdirectory in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $bb_backup_prefix."/subdir" ] ],
+	},
+
+	# Restore from Dropbox subdirectory in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $bb_backup_prefix."/subdir" ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$enc_bbbackup_tests = &convert_to_encrypted($bbbackup_tests);
+
 $splitbackup_tests = [
 	# Create a domain for the backup target
 	{ 'command' => 'create-domain.pl',
@@ -3816,7 +3987,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.10' ] ],
+		      [ 'version', '1.2.12' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -4860,7 +5031,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.10\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.12\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
@@ -4872,7 +5043,7 @@ $webmin_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Type: roundcube',
 		      'Database: '.$test_domain_db.' ',
-		      'URL: http://'.$test_domain.'/roundcube',
+		      'URL: http(s?)://'.$test_domain.'/roundcube',
 		    ],
 	},
 
@@ -4982,6 +5153,19 @@ $ssl_tests = [
 		      @create_args, ],
 	},
 
+	# Create a second sub-domain with SSL on the same IP, but with no
+	# linked cert
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'desc', 'Test SSL 2 subdomain' ],
+		      [ 'parent', $test_domain ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'parent-ip' ],
+		      [ 'break-ssl-cert' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
 	# Test DNS lookup
 	{ 'command' => 'host '.$test_domain,
 	  'antigrep' => &get_default_ip(),
@@ -5026,6 +5210,45 @@ $ssl_tests = [
 
 	# Test SSL cert to subdomain (should be the same)
 	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	
+	# Check for no SSL linkage on the second domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => [ 'SSL shared with: '.$test_domain ],
+	  'grep' => [ 'SSL key file: '.$test_domain_home.
+		      '/domains/'.$test_ssl2_subdomain.'/',
+		      'SSL cert file: '.$test_domain_home.
+                      '/domains/'.$test_ssl2_subdomain.'/' ],
+	},
+
+	# Re-link SSL on the second domain
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'link-ssl-cert' ] ],
+	},
+
+	# Check for SSL linkage on the second domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl2_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL shared with: '.$test_domain ],
+	  'antigrep' => [ 'SSL key file: '.$test_domain_home.
+		          '/domains/'.$test_ssl2_subdomain.'/',
+		          'SSL cert file: '.$test_domain_home.
+                          '/domains/'.$test_ssl2_subdomain.'/' ],
+	},
+	
+	# Test HTTPS get to the second subdomain
+	{ 'command' => $wget_command.'https://'.$test_ssl2_subdomain,
+	  'grep' => 'Test SSL subdomain home page',
+	},
+
+	# Test SSL cert to the second subdomain (should be the same)
+	{ 'command' => 'openssl s_client -host '.$test_ssl2_subdomain.
 		       ' -port 443 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
@@ -5182,6 +5405,12 @@ $sslserv_tests = [
 		      @create_args, ],
         },
 
+	# Install a dummy CA cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
+	},
+
 	# Get the IP address
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'ip-only' ],
@@ -5253,6 +5482,32 @@ $sslserv_tests = [
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
+	# Re-generate the cert with a different org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test 2 SSL domain' ] ],
+	},
+
+	# Validate that new Dovecot cert works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that new Postfix cert works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-generate the cert with original org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test SSL domain' ] ],
+	},
+
 	# Turn off private IP for the domain
 	{ 'command' => 'modify-domain.pl',
           'args' => [ [ 'domain', $test_domain ],
@@ -5315,6 +5570,27 @@ $sslserv_tests = [
 		       ' -servername mail.'.$test_domain.
 		       ' -port 465 </dev/null',
 	  'antigrep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+	
+	# Re-generate the cert with a different org
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'o', 'Test 2 SSL domain' ] ],
+	},
+
+	# Validate that new Dovecot cert still works with SNI
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Re-check that new Postfix still works
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -servername mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'antigrep' => [ 'O=Test 2 SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Turn off per-service certs
@@ -5842,7 +6118,7 @@ $plugin_tests = [
 		  'grep' => 'awstats.pl '.$test_domain
 		},
 
-		# Turn off mailman feature
+		# Turn off AWstats feature
 		{ 'command' => 'disable-feature.pl',
 		  'args' => [ [ 'domain', $test_domain ],
 			      [ 'virtualmin-awstats' ] ]
@@ -6377,14 +6653,37 @@ $rename_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test rename domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
-		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
-		      [ 'logrotate' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ], [ 'dns' ],
+		      [ 'mail' ], [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      [ 'logrotate' ], [ 'allocate-ip' ],
 		      $virtualmin_pro ? ( [ 'status' ] ) : ( ),
 		      &indexof('virtualmin-awstats', @plugins) >= 0 ?
 			( [ 'virtualmin-awstats' ] ) : ( ),
 		      [ 'content' => 'Test rename page' ],
 		      @create_args, ],
+	},
+
+	# Install a dummy CA cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ca', $module_root_directory.'/lets-encrypt-*.pem.txt' ] ],
+	},
+
+	# Get the IP address
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'ip-only' ],
+		      [ 'domain', $test_domain ] ],
+	  'save' => 'PRIVATE_IP',
+	},
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
 	},
 
 	# Create a mailbox
@@ -6428,7 +6727,7 @@ $rename_tests = [
 
 	# Make sure DNS works
 	{ 'command' => 'host '.$test_rename_domain,
-	  'grep' => &get_default_ip(),
+	  'grep' => '$PRIVATE_IP',
 	},
 
 	# Make sure website works
@@ -6463,6 +6762,17 @@ $rename_tests = [
 	{ 'command' => 'ls /var/log/virtualmin/'.$test_domain.'_error_log',
 	  'fail' => 1 },
 	) : ( ),
+
+	# Check that service certs still show up
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'SSL cert used by: dovecot \\($PRIVATE_IP\\)',
+		      'SSL cert used by: postfix \\($PRIVATE_IP\\)',
+		      'SSL cert used by: webmin \\('.$test_rename_domain.'\\)',
+		      'SSL cert used by: usermin \\('.$test_rename_domain.'\\)',
+		    ],
+	},
 
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
@@ -7498,7 +7808,7 @@ $clone_tests = [
 	  'grep' => [ 'Type: phpmyadmin',
 		      'Directory: /home/'.$test_clone_domain_user.
 			'/public_html/phpmyadmin',
-		      'URL: http://'.$test_clone_domain.'/phpmyadmin',
+		      'URL: http(s?)://'.$test_clone_domain.'/phpmyadmin',
 		    ],
 	},
 
@@ -8356,6 +8666,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_gcsbackup' => $enc_gcsbackup_tests,
 	      'dropboxbackup' => $dropboxbackup_tests,
 	      'enc_dropboxbackup' => $enc_dropboxbackup_tests,
+	      'bbbackup' => $bbbackup_tests,
+	      'enc_bbbackup' => $enc_bbbackup_tests,
 	      'rsbackup' => $rsbackup_tests,
 	      'enc_rsbackup' => $enc_rsbackup_tests,
 	      'configbackup' => $configbackup_tests,

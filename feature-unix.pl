@@ -105,7 +105,8 @@ eval {
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "create_user", \%uinfo);
 	&foreign_call($usermodule, "made_changes");
-	if ($config{'other_doms'}) {
+	if ($config{'other_users'} || $config{'other_doms'}) {
+		&create_domain_home_directory($_[0], \%uinfo);
 		&foreign_call($usermodule, "other_modules",
 			      "useradmin_create_user", \%uinfo);
 		}

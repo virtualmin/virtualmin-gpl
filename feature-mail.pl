@@ -2692,7 +2692,7 @@ else {
 	}
 }
 
-# recursive_disk_usage_mtime(directory, [only-gid], [levels])
+# recursive_disk_usage_mtime(directory, [only-gid], [levels], [&inodes-map])
 # Returns the number of bytes taken up by all files in some directory,
 # and the most recent modification time. The size is based on the filesystem's
 # block size, not the file lengths in bytes.
@@ -6154,7 +6154,7 @@ if (!$cr) {
 	}
 
 if ($changed) {
-	my $err = &post_records_change($d, $recs, $file);
+	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
 
@@ -6271,7 +6271,7 @@ if ($d->{'dns'}) {
 			}
 		}
 	if ($changed) {
-		my $err = &post_records_change($d, $recs, $file);
+		&post_records_change($d, $recs, $file);
 		&register_post_action(\&restart_bind, $d);
 		}
 	&release_lock_dns($d);

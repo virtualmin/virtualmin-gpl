@@ -197,6 +197,7 @@ my $canvposs = foreign_available("package-updates");
 if (!$data->{'noupdates'} && $hasvposs && $canvposs && @vposs) {
 	my $html = &ui_form_start("$gconfig{'webprefix'}/package-updates/update.cgi");
 	$html .= &ui_hidden("redirdesc", $text{'right_sysinfo'});
+	$html .= &ui_hidden("confirm", 1);
 	$html .= &text(@vposs > 1 ? 'right_upcount' : 'right_upcount1',
 		       scalar(@vposs),
 		       $gconfig{'webprefix'} . '/package-updates/index.cgi?mode=updates')."<p>\n";

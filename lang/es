@@ -2022,7 +2022,6 @@ restore_mailuser=Solo restaurar usuario:
 restore_dirchown=Restablecer propietario del archivo
 restore_reuid=Reasignar UIDs y GID?
 restore_fix=Re-importar detales del servidor?
-restore_only=Solo crear servidores virtuales para las opciones seleccionadas?
 restore_virtualmin=Opciones de Virtualmin a restaurar
 restore_dnswholefile=Restaurar todo en archivo de zona de DNS
 restore_newip=Dirección IP para servidores restaurados

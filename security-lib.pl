@@ -117,9 +117,21 @@ sub unlink_file_as_domain_user
 {
 my ($d, @files) = @_;
 return 1 if (&is_readonly_mode());
-local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @files)." 2>&1";
-local ($out, $ex) = &run_as_domain_user($d, $cmd);
-return $ex ? 0 : 1;
+while(@files) {
+	my @del;
+	if (@files > 100) {
+		@del = @files[0..99];
+		@files = @files[100..$#files];
+		}
+	else {
+		@del = @files;
+		@files = ( );
+		}
+	local $cmd = "rm -rf ".join(" ", map { quotemeta($_) } @del)." 2>&1";
+	local ($out, $ex) = &run_as_domain_user($d, $cmd);
+	return 0 if ($ex);
+	}
+return 1;
 }
 
 # unlink_logged_as_domain_user(&domain, file, ...)

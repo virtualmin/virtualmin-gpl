@@ -1465,11 +1465,14 @@ foreach my $od (&list_domains()) {
 		}
 	}
 
-# Clone A records
+# Clone A records with the correct IP
 my $count = 0;
 my $withdot = $d->{'dom'}.".";
+my $domip = $d->{'dns_ip'} || $d->{'ip'};
+my $domip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@recs) {
-	if ($r->{'type'} eq 'A' && $r->{'values'}->[0] eq $d->{'ip'} &&
+	if ($r->{'type'} eq 'A' &&
+	    $r->{'values'}->[0] eq $domip &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
 		# Check if this record is in any sub-domain of this one
@@ -1484,7 +1487,7 @@ foreach my $r (@recs) {
 			}
 		if (!$insub) {
 			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-					      'IN', 'AAAA', $d->{'ip6'});
+					      'IN', 'AAAA', $domip6);
 			$count++;
 			}
 		}
@@ -2762,7 +2765,7 @@ if (!$config{'provision_dns'}) {
 	if (defined($in{'dnssec_mode'})) {
 		$tmpl->{'dnssec'} = $in{'dnssec_mode'} == 0 ? "none" :
 				    $in{'dnssec_mode'} == 1 ? undef : "yes";
-		$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'};
+		$tmpl->{'dnssec_alg'} = $in{'dnssec_alg'} || 'RSASHA256';
 		$tmpl->{'dnssec_single'} = $in{'dnssec_single'};
 		}
 	}
@@ -3095,8 +3098,12 @@ if ($defip6) {
 local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
 foreach my $h (split(/\s+/, $hosts)) {
 	if (&check_ipaddress($h) ||
-	    $h =~ /^(\S+)\// && &check_ipaddress($1)) {
+	    $h =~ /^(\S+)\// && &check_ipaddress("$1")) {
 		push(@{$spf->{'ip4:'}}, $h);
+		}
+	elsif (&check_ip6address($h) ||
+	       $h =~ /^(\S+)\// && &check_ip6address("$1")) {
+		push(@{$spf->{'ip6:'}}, $h);
 		}
 	else {
 		push(@{$spf->{'a:'}}, $h);
@@ -4021,10 +4028,15 @@ my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
 return (0, "No DNS registrar found for domain")
 	if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
 return (0, "Whois command did not report expiry date")
-	if ($out !~ /Expiry\s+Date:\s+(\d+)\-(\d+)\-(\d+)/i);
+	if ($out !~ /Expiry\s+Date:\s+(\d+)\-(\d+)\-(\d+)T(\d+):(\d+):(\d+)([a-z]+)/i);
 local $tm;
 eval {
-	$tm = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+	if ($7 eq "Z") {
+		$tm = timegm($4, $5, $6, $3, $2-1, $1-1900);
+		}
+	else {
+		$tm = timelocal($4, $5, $6, $3, $2-1, $1-1900);
+		}
 	};
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);

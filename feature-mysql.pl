@@ -9,7 +9,6 @@ if (!$mysql::config{'login'}) {
 	$mysql::authstr = &mysql::make_authstr();
 	}
 %mconfig = &foreign_config("mysql");
-$password_func = $mysql::password_func || "password";
 $mysql_user_size = $config{'mysql_user_size'} || 16;
 }
 
@@ -191,11 +190,11 @@ if ($tmpl->{'mysql_nopass'}) {
 return $ok;
 }
 
-# add_db_table(&domain, host, db, user)
+# add_db_table(&domain, host, db, user, preserve)
 # Adds an entry to the db table, with all permission columns set to Y
 sub add_db_table
 {
-local ($d, $host, $db, $user) = @_;
+local ($d, $host, $db, $user, $preserve) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
 local ($s, @fields, @yeses);
@@ -205,16 +204,28 @@ foreach $s (@str) {
 		push(@yeses, "'Y'");
 		}
 	}
-local $qdb = &quote_mysql_database($db);
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+my $qdb = &quote_mysql_database($db);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
-	&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
+
+	# Preserve all other domain's database permissions (useful on restore)
+	if ($preserve) {
+		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
+			my $qddb = &quote_mysql_database($ddb->{'name'});
+			if ($qddb ne $qdb) {
+				&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+				}
+			}
+		}
+	# Update given database
+	&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
 	}
 else {
 	# Can update the DB table directly
 	&execute_dom_sql($d, $mysql::master_db, "delete from db where host = '$host' and db = '$qdb' and user = '$user'");
-	&execute_dom_sql($d, $mysql::master_db, "insert into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
+	&execute_dom_sql($d, $mysql::master_db, "insert ignore into db (host, db, user, ".join(", ", @fields).") values ('$host', '$qdb', '$user', ".join(", ", @yeses).")");
 	&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
 	}
 }
@@ -225,26 +236,22 @@ sub remove_db_table
 {
 local ($d, $db, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+my $qdb = &quote_mysql_database($db);
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
-	local $dbstr;
-	if ($db) {
-		local $qdb = &quote_mysql_database($db);
-		$dbstr = "`$qdb`.*";
-		}
-	else {
-		$dbstr = "*.*";
-		}
+	my $dbs = "*.*";
+	$dbs = "`$qdb`.*" if ($db);
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$user'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
 		}
 	}
 else {
 	# Directly update DB table
 	my @c;
-	local $qdb = &quote_mysql_database($db);
 	push(@c, "(db = '$db' or db = '$qdb')") if ($db);
 	push(@c, "user = '$user'") if ($user);
 	@c || &error("remove_db_table called with no db or user");
@@ -275,7 +282,7 @@ if ($preserve && &remote_mysql($d)) {
 local @users = &list_domain_users($d, 1, 1, 1, 0);
 
 # First remove the databases
-if ($d->{'db_mysql'}) {
+if (@dblist) {
 	&delete_mysql_database($d, @dblist);
 	}
 
@@ -423,9 +430,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 		&$first_print($text{'save_mysqlpass'});
 		if (&mysql_user_exists($d)) {
 			local $pfunc = sub {
-				&execute_password_change_sql(
-					$d, $olduser, $encpass,
-					0, 0, &mysql_pass($d));
+				&execute_password_change_sql($d, $olduser, $encpass, &mysql_pass($d));
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
@@ -585,7 +590,7 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 			    "select host,db from db where user = ?", $olduser);
 			&execute_user_deletion_sql($d, undef, $olduser);
 			foreach my $r (@{$rv->{'data'}}) {
-				&add_db_table($d, $r->[0], $r->[1], $user);
+				&add_db_table($d, $r->[0], &unquote_mysql_database($r->[1]), $user);
 				}
 			};
 		&execute_for_all_mysql_servers($pfunc);
@@ -869,8 +874,7 @@ else {
 	if ($oldpass = &mysql_user_exists($d)) {
 		local $dfunc = sub {
 			&execute_password_change_sql(
-				$d, $user, "'".("0" x 41)."'",
-				0, 0, &random_password(16));
+				$d, $user, "'".("0" x 41)."'", &random_password(16));
 			};
 		&execute_for_all_mysql_servers($dfunc);
 		$d->{'disabled_oldmysql'} = $oldpass;
@@ -922,8 +926,7 @@ else {
 			if ($pass) {
 				# Need to re-set plaintext password
 				&execute_password_change_sql(
-					$d, $user, undef,
-					0, 0, &mysql_pass($d));
+					$d, $user, undef, &mysql_pass($d));
 				}
 			else {
 				# Can put back old hashed password
@@ -1294,14 +1297,17 @@ return undef;
 # Returns the MySQL login name for a domain
 sub mysql_user
 {
+my ($d, $renew) = @_;
 &require_mysql();
-if ($_[0]->{'parent'}) {
+if ($d->{'parent'}) {
 	# Get from parent domain
-	return &mysql_user(&get_domain($_[0]->{'parent'}), $_[1]);
+	return &mysql_user(&get_domain($d->{'parent'}), $renew);
 	}
-return $_[0]->{'mysql_user'} if (defined($_[0]->{'mysql_user'}) && !$_[1]);
-return length($_[0]->{'user'}) > $mysql_user_size ?
-	  substr($_[0]->{'user'}, 0, $mysql_user_size) : $_[0]->{'user'};
+return $d->{'mysql_user'} if (defined($d->{'mysql_user'}) && !$renew);
+my $rv = length($d->{'user'}) > $mysql_user_size ?
+	  substr($d->{'user'}, 0, $mysql_user_size) : $d->{'user'};
+$rv =~ s/\./_/g;
+return $rv;
 }
 
 # set_mysql_user(&domain, newuser)
@@ -1338,16 +1344,17 @@ delete($d->{'mysql_enc_pass'});		# Clear encrypted password, as we
 					# have a plain password now
 }
 
-# mysql_pass(&domain, [neverquote])
+# mysql_pass(&domain)
 # Returns the plain-text password for the MySQL admin for this domain
 sub mysql_pass
 {
-if ($_[0]->{'parent'}) {
+my ($d) = @_;
+if ($d->{'parent'}) {
 	# Password comes from parent domain
-	local $parent = &get_domain($_[0]->{'parent'});
+	local $parent = &get_domain($d->{'parent'});
 	return &mysql_pass($parent);
 	}
-return defined($_[0]->{'mysql_pass'}) ? $_[0]->{'mysql_pass'} : $_[0]->{'pass'};
+return $d->{'mysql_pass'} ne '' ? $d->{'mysql_pass'} : $d->{'pass'};
 }
 
 # mysql_enc_pass(&domain)
@@ -1361,7 +1368,7 @@ return $_[0]->{'mysql_enc_pass'};
 # Returns a string with quotes escaped, for use in SQL
 sub mysql_escape
 {
-local $rv = $_[0];
+my ($rv) = @_;
 $rv =~ s/'/''/g;
 return $rv;
 }
@@ -1800,11 +1807,11 @@ else {
 		foreach $h (@hosts) {
 			&execute_user_deletion_sql($d, $h, $user);
 			&execute_user_creation_sql($d, $h, $myuser, 
-			      $encpass ? "'$encpass'" : undef,
+			      $encpass ? "'".&mysql_escape($encpass)."'" :undef,
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser);
+				&add_db_table($d, $h, $db, $myuser, 1);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
@@ -1887,11 +1894,11 @@ else {
 			# Change the password
 			if ($encpass && !$pass) {
 				&execute_password_change_sql(
-					$d, $myuser, "'$encpass'");
+					$d, $myuser, "'".&mysql_escape($encpass)."'");
 				}
 			else {
 				&execute_password_change_sql(
-				    $d, $myuser, undef, 0, 0, $pass);
+				    $d, $myuser, undef, $pass);
 				}
 			}
 		if (join(" ", @$dbs) ne join(" ", @$olddbs)) {
@@ -1984,8 +1991,18 @@ sub start_service_mysql
 return &mysql::start_mysql();
 }
 
+# unquote_mysql_database(name)
+# Returns a MySQL escaped database name like \% and \_ unescaped
+sub unquote_mysql_database
+{
+local ($db) = @_;
+$db =~ s/\\_/_/g;
+$db =~ s/\\%/%/g;
+return $db;
+}
+
 # quote_mysql_database(name)
-# Returns a mysql database name with % and _ characters escaped
+# Returns a MySQL database name with % and _ characters escaped
 sub quote_mysql_database
 {
 local ($db) = @_;
@@ -2322,7 +2339,8 @@ else {
 			&execute_user_deletion_sql($d, undef, $u->[0]);
 			foreach my $h (@$hosts) {
 				&execute_user_creation_sql($d, $h, $u->[0],
-						   "'$u->[1]'", $pmap{$u->[0]});
+					"'".&mysql_escape($u->[1])."'",
+					$pmap{$u->[0]});
 				&set_mysql_user_connections($d, $h, $u->[0], 1);
 				}
 			}
@@ -2354,12 +2372,35 @@ sub encrypted_mysql_pass
 {
 local ($d) = @_;
 if ($d->{'mysql_enc_pass'}) {
-	return "'$d->{'mysql_enc_pass'}'";
+	return "'".&mysql_escape($d->{'mysql_enc_pass'})."'";
 	}
 else {
 	local $qpass = &mysql_escape(&mysql_pass($d));
-	return "$password_func('$qpass')";
+	local $pf = &get_mysql_password_func($d);
+	return "$pf('$qpass')";
 	}
+}
+
+# encrypt_plain_mysql_pass(&domain, plainpass)
+# Returns the encrypted MySQL password
+sub encrypt_plain_mysql_pass
+{
+my ($d, $plainpass) = @_;
+my $qpass = &mysql_escape($plainpass);
+my $pf = &get_mysql_password_func($d);
+return "$pf('$qpass')";
+}
+
+# get_mysq_password_func([&domain])
+# Returns the function for encrypting passwords
+sub get_mysql_password_func
+{
+my ($d) = @_;
+my $mod = &require_dom_mysql($d);
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+my $rv = eval "\$${pkg}::password_func" || "password";
+return $rv;
 }
 
 # check_mysql_login(&domain, dbname, dbuser, dbpass)
@@ -2591,12 +2632,14 @@ return ("small", "medium", "large", "huge");
 # diff my-large.cnf my-huge.cnf  | grep ">" | grep -v "#" | grep = | perl -ne 'print "[ \"$1\", \"$2\" ],\n" if (/(\S+)\s*=\s*(\S+)/)'
 sub list_mysql_size_settings
 {
-local ($size) = @_;
+local ($size, $myver, $variant) = @_;
 &require_mysql();
-my $myver = &mysql::get_mysql_version();
+($myver, $variant) = &get_dom_remote_mysql_version() if (!$myver && !$variant);
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
 my $tc = &compare_versions($myver, "5.7") < 0;
+my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $variant ne "mariadb";
+my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
 		[ "max_allowed_packet", "1M" ],
@@ -2637,13 +2680,13 @@ elsif ($size eq "medium") {
 
 		[ "key_buffer_size", "20M", "isamchk" ],
 		[ "sort_buffer_size", "20M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "20M", "myisamchk" ],
 		[ "sort_buffer_size", "20M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
@@ -2656,18 +2699,18 @@ elsif ($size eq "large") {
 		[ "myisam_sort_buffer_size", "64M" ],
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
-		[ "query_cache_size", "16M" ],
+		[ "query_cache_size", $mysql8 ? undef : "16M" ],
 		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "128M", "isamchk" ],
 		[ "sort_buffer_size", "128M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "128M", "myisamchk" ],
 		[ "sort_buffer_size", "128M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
@@ -2680,18 +2723,18 @@ elsif ($size eq "huge") {
 		[ "myisam_sort_buffer_size", "64M" ],
 		[ "thread_stack", undef ],
 		[ "thread_cache_size", "8" ],
-		[ "query_cache_size", "32M" ],
+		[ "query_cache_size", $mysql8 ? undef : "32M" ],
 		[ "thread_concurrency", $tc ? "8" : undef ],
 
 		[ "key_buffer_size", "256M", "isamchk" ],
 		[ "sort_buffer_size", "256M", "isamchk" ],
-		[ "read_buffer", "2M", "isamchk" ],
-		[ "write_buffer", "2M", "isamchk" ],
+		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
 
 		[ "key_buffer_size", "256M", "myisamchk" ],
 		[ "sort_buffer_size", "256M", "myisamchk" ],
-		[ "read_buffer", "2M", "myisamchk" ],
-		[ "write_buffer", "2M", "myisamchk" ]);
+		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
+		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
 	}
 return ( );
 }
@@ -2754,13 +2797,14 @@ sub execute_user_rename_sql
 {
 my ($d, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Need to alter user
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
 	foreach my $r (@{$rv->{'data'}}) {
 		&execute_dom_sql($d, $mysql::master_db,
-			"rename '$olduser'\@'$r->[0]' to '$user'\@'$r->[0]'");
+			"rename user '$olduser'\@'$r->[0]' to '$user'\@'$r->[0]'");
 		}
 	}
 else {
@@ -2779,15 +2823,17 @@ sub execute_database_reassign_sql
 {
 my ($d, $db, $olduser, $user) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Revoke access from the old user on all hosts
-	local $rv = &execute_dom_sql($d, $mysql::master_db,
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $olduser);
-	local $qdb = &quote_mysql_database($db);
-	$dbstr = "`$qdb`.*";
+	my $qdb = &quote_mysql_database($db);
+	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbstr from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all privileges on `$qdb`.* to '$user'\@'$host'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
 		}
 	}
 else {
@@ -2805,30 +2851,30 @@ sub get_user_creation_sql
 {
 my ($d, $host, $user, $encpass, $plainpass) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my $plugin = &get_mysql_plugin($d, 1);
+
+# Hash password for setting
 if (!$encpass && $plainpass) {
-	# Hash password for setting
-	my $qpass = &mysql_escape($plainpass);
-	$encpass = "$password_func('$qpass')";
+	$encpass = &encrypt_plain_mysql_pass($d, $plainpass) 
 	}
-if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 	# Need to use new 'create user' command
-	return ("create user '$user'\@'$host' identified by ".
+	return ("create user '$user'\@'$host' identified $plugin by ".
 		($plainpass ? "'".&mysql_escape($plainpass)."'"
-			    : "password ".$encpass));
-	}
-elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 && $plainpass) {
-	my $native = &is_domain_mysql_remote($d) ?
-			"with mysql_native_password" : "";
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "alter user '$user'\@'$host' identified $native by '".&mysql_escape($plainpass)."'");
+			    : "password $encpass"));
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject, plugin, authentication_string) values ('$host', '$user', '', '', '', '', 'mysql_native_password', $encpass)");
+	my $changepasssql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
+	if ($plainpass) {
+		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
+		}
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql", "flush privileges");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
-	return ("insert into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass");
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass", "flush privileges");
 	}
 else {
-	return ("insert into user (host, user, password) values ('$host', '$user', $encpass)");
+	return ("insert ignore into user (host, user, password) values ('$host', '$user', $encpass)");
 	}
 }
 
@@ -2839,7 +2885,8 @@ sub get_user_deletion_sql
 my ($d, $host, $user, $dbtoo) = @_;
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my @rv;
-if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
+if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
+    $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	if ($host) {
 		# Host is known
 		@rv = ("drop user if exists '$user'\@'$host'");
@@ -2869,57 +2916,89 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [force-user-table],
-# 			      [no-flush], [plaintext-pass])
-# Update a MySQL user's password for all hosts
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass],
+# 			      [direct])
+# Update a MySQL user's password for all hosts. Plainpass is the unencrypted
+# password, and encpass is an SQL expression for the hashed password like
+# 'fda2343243a' or password('foo')
 sub execute_password_change_sql
 {
-my ($d, $user, $encpass, $forceuser, $noflush, $plainpass) = @_;
+my ($d, $user, $encpass, $plainpass, $direct) = @_;
 if (!$encpass && $plainpass) {
 	# Hash password for insertion
-	my $qpass = &mysql_escape($plainpass);
-	$encpass = "$password_func('$qpass')";
+	$encpass = &encrypt_plain_mysql_pass($d, $plainpass);
 	}
-my $rv = &execute_dom_sql($d, $mysql::master_db,
-		"select host from user where user = ?", $user);
-my $flush = 0;
-foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+my $error;
+my $flush;
+my $plugin;
+my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+my $mysql_mariadb_with_auth_string = 
+   $variant eq "mariadb" && &compare_versions($ver, "10.2") >= 0 ||
+   $variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0;
+my $gsql = sub {
+	my ($host, $plugin) = @_;
 	my $sql;
-	my ($ver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($variant eq "mariadb" && &compare_versions($ver, "10.3") >= 0) {
-		$sql = "alter user '$user'\@'$host' identified by ".
-			($plainpass ? "'".&mysql_escape($plainpass)."'"
-				    : $encpass);
-		}
-	elsif ($variant eq "mysql" && &compare_versions($ver, "8") >= 0 &&
-	       $plainpass) {
-		# Use the plaintext password wherever possible
-		$sql = "set password for '$user'\@'$host' = '".
-		       &mysql_escape($plainpass)."'";
-		}
-	elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
-		$sql = "update user set authentication_string = $encpass ".
-		       "where user = '$user' and host = '$host'";
-		$flush++;
-		}
-	elsif ($forceuser) {
-		$sql = "update user set password = $encpass ".
-		       "where user = '$user' and host = '$host'";
-		$flush++;
+	my $flush;
+	if ($mysql_mariadb_with_auth_string) {
+		if ($plainpass) {
+			$sql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
+			} 
+		else {
+			$sql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
+			$flush++;
+			}
 		}
 	else {
 		$sql = "set password for '$user'\@'$host' = $encpass";
 		}
-	if ($sql =~ /^set\s+password/) {
-		&execute_set_password_sql($d, $sql, $host);
+	return ($sql, $flush);
+	};
+
+if ($direct) {
+	# Get the right SQL query first
+	my $sql;
+	($sql) = &$gsql('localhost');
+	my $cmd = $mysql::config{'mysql'} || 'mysql';
+	my $out = &backquote_command("$cmd -D $mysql::master_db -e ".
+			quotemeta("flush privileges; $sql")." 2>&1 </dev/null");
+	if ($?) {
+		$out =~ s/\n/ /gm;
+		$error = $out;
 		}
-	else {
-		&execute_dom_sql($d, $mysql::master_db, $sql);
-		};
-	}
-if ($flush && !$noflush) {
+	} 
+else {
+	# Get list of affected hosts
+	my $rv = &execute_dom_sql($d, $mysql::master_db,
+			"select host from user where user = ?", $user);
+
+	# Get authentication plugin
+	$plugin = &get_mysql_plugin($d, 1);
+
+	# It is needed to run flush privileges to avoid
+	# an error as in virtualmin/virtualmin-gpl#213
 	&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+
+	# Execute SQL for each host
+	foreach my $host (&unique(map { $_->[0] } @{$rv->{'data'}})) {
+		# Get the right SQL query first
+		my $sql;
+		($sql, $flush) = &$gsql($host, $plugin);
+
+		# Execute SQL finally
+		if ($sql =~ /^set\s+password/) {
+			&execute_set_password_sql($d, $sql, $host);
+			}
+		else {
+			&execute_dom_sql($d, $mysql::master_db, $sql);
+			};
 	}
+
+	# Flush privileges finally
+	if ($flush) {
+		&execute_dom_sql($d, $mysql::master_db, "flush privileges");
+		}
+	}
+return $error;
 }
 
 # mysql_password_synced(&domain)
@@ -2954,6 +3033,19 @@ sub remote_mysql
 local ($d) = @_;
 my $mymod = &get_domain_mysql_module($d);
 return $mymod->{'config'}->{'host'};
+}
+
+# update_webmin_mysql_pass(user, password)
+# Update Webmin module config, if admin user is getting updated
+sub update_webmin_mysql_pass
+{
+my ($user, $pass) = @_;
+if ($user eq ($mysql::config{'login'} || "root")) {
+	$mysql::config{'pass'} = $pass;
+	$mysql::mysql_pass = $pass;
+	&mysql::save_module_config(\%mysql::config, "mysql");
+	$mysql::authstr = &mysql::make_authstr();
+	}
 }
 
 # force_set_mysql_password(user, pass)
@@ -2994,6 +3086,35 @@ if (&mysql::is_mysql_running()) {
 # Start up with skip-grants flag
 &$first_print($text{'mysqlpass_safe'});
 my $cmd = $safe." --skip-grant-tables";
+
+# Running with `mysqld_safe` - when called, command doesn't create "mysqld" directory under 
+# "/var/run" eventually resulting in DBI connect failed error on all MySQL versions
+my $ver = &mysql::get_mysql_version();
+if ($ver !~ /mariadb/i) {
+	my $mysockdir = '/var/run/mysqld';
+	my $myusergrp = 'mysql';
+	my $myconf = &mysql::get_mysql_config();
+	if ($myconf) {
+		my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$myconf;
+		if ($mysqld) {
+			my $members = $mysqld->{'members'};
+
+			# Look for user
+			my $myusergrp_ = &mysql::find_value("user", $members);
+			if ($myusergrp_) {
+				$myusergrp = $myusergrp_;
+				}
+
+			# Look for socket
+			my $mysockdir_ = &mysql::find_value("socket", $members);
+			if ($mysockdir_) {
+				$mysockdir = $mysockdir_;
+				$mysockdir =~ s/^(.+)\/([^\/]+)$/$1/;
+				}
+			}
+		}
+	$cmd = "mkdir -p $mysockdir && chown $myusergrp:$myusergrp $mysockdir && $cmd";
+	}
 my ($pty, $pid) = &proc::pty_process_exec($cmd, 0, 0);
 my $rv = undef;
 sleep(5);
@@ -3009,25 +3130,35 @@ else {
 if (!$rv) {
 	# Change the password
 	&$first_print(&text('mysqlpass_change', $user));
-	my $qpass = &mysql_escape($pass);
-	eval {
-		local $main::error_must_die = 1;
-		&execute_password_change_sql(
-			undef, $user, "$password_func('$qpass')", 1, 1,
-			$pass);
-		};
-	if ($@) {
-		$rv = &text('mysqlpass_echange', "$@");
+
+	# Update password first by running command directly
+	my $err = &execute_password_change_sql(undef, $user, undef, $pass, 1);
+	if ($err) {
+		$rv = &text('mysqlpass_echange', "$err");
 		&$second_print($rv);
 		}
 	else {
-		&$second_print($text{'setup_done'});
+		&update_webmin_mysql_pass($user, $pass);
+
+		# Update root password now for other
+		# hosts, using regular database connection
+		eval {
+			&execute_password_change_sql(undef, $user, undef, $pass);
+			};
+		if ($@) {
+			$rv = &text('mysqlpass_echange', "$err");
+			&$second_print($rv);
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Shut down again, with the mysqladmin command
 	&$first_print($text{'mysqlpass_kill'});
 	my $out = &backquote_logged("$mysql::config{'mysqladmin'} shutdown 2>&1 </dev/null");
 	if ($?) {
+		$out =~ s/\n/ /gm;
 		$rv = &text('mysqlpass_eshutdown', $out);
 		&$second_print($rv);
 		return $rv;
@@ -3208,7 +3339,7 @@ foreach my $mm (&list_remote_mysql_modules()) {
 return undef;
 }
 
-# require_dom_mysql(&domain)
+# require_dom_mysql([&domain])
 # Finds and loads the MySQL module for a domain
 sub require_dom_mysql
 {
@@ -3282,13 +3413,23 @@ my $mod = &require_dom_mysql($d);
 return &foreign_call($mod, "list_databases");
 }
 
-# get_dom_remote_mysql_version(&domain)
+# get_dom_remote_mysql_version([&domain|module])
 # Returns the MySQL server version for a domain
 sub get_dom_remote_mysql_version
 {
 my ($d) = @_;
-my $mod = &require_dom_mysql($d);
+my $mod;
+if ($d && !ref($d)) {
+	# Asking for a specific module
+	$mod = $d;
+	&foreign_require($mod);
+	}
+else {
+	# Get module based on domain
+	$mod = &require_dom_mysql($d);
+	}
 my $rv;
+my $err;
 if ($get_dom_remote_mysql_version_cache{$mod}) {
 	$rv = $get_dom_remote_mysql_version_cache{$mod};
 	}
@@ -3297,21 +3438,29 @@ else {
 		local $main::error_must_die = 1;
 		$rv = &foreign_call($mod, "get_remote_mysql_version");
 		};
+	$err = $@ || ($rv < 0 ? "Failed to get version" : undef);
+	$rv = undef if ($rv < 0);
 	$rv ||= eval $mod.'::mysql_version';
 	$rv ||= $mysql::mysql_version;
-	$get_dom_remote_mysql_version_cache{$mod} = $rv;
+	if (!$err) {
+		$get_dom_remote_mysql_version_cache{$mod} = $rv;
+		}
 	}
 my $variant = "mysql";
-my ($ver, $variant_) = $rv =~ /^([0-9\.]+)\-(.*)/;
+my ($ver, $variant_);
+if ($rv =~ /^([0-9\.]+)\-(.*)/) {
+	($ver, $variant_) = ($1, $2);
+	}
 if ($ver && $variant_ && 
-	($rv !~ /ubuntu/i || ($rv =~ /ubuntu/i && $rv =~ /mariadb/i && $ver > 10))) {
-	$rv      = $ver;
+    ($rv !~ /ubuntu/i || ($rv =~ /ubuntu/i && $rv =~ /mariadb/i && $ver > 10))) {
+	# Check if this looks like MariaDB
+	$rv = $ver;
 	$variant = $variant_;
 	if ($variant =~ /mariadb/i) {
 		$variant = "mariadb";
 		}
 	}
-return wantarray ? ($rv, $variant) : $rv;
+return wantarray ? ($rv, $variant, $err) : $rv;
 }
 
 # get_default_mysql_module()
@@ -3321,6 +3470,21 @@ sub get_default_mysql_module
 my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 		 &list_remote_mysql_modules();
 return $def ? $def->{'minfo'}->{'dir'} : 'mysql';
+}
+
+# get_mysql_plugin(&domain, [add-with])
+# Returns the name of the default plugin used by MySQL
+sub get_mysql_plugin
+{
+my ($d, $n) = @_;
+&require_mysql();
+my $rv = &execute_dom_sql($d, $mysql::master_db,
+                   "show variables LIKE '%default_authentication_plugin%'");
+my $plugin = $rv->{'data'}->[0]->[1];
+if ($plugin && $n) {
+	$plugin = " with $plugin ";
+	}
+return $plugin;
 }
 
 # move_mysql_server(&domain, new-mysql-module)

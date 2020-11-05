@@ -130,7 +130,7 @@ spam_trap_black=Add senders of spam sent to <tt>spamtrap</tt> to blacklist?,1,2-
 ham_trap_white=Add senders of non-spam sent to <tt>hamtrap</tt> to whitelist?,1,2-Global,1-Domain level,0-No
 lookup_domain_serial=Lookup domain for incoming email,1,0-In parallel,1-One at a time
 
-line4.8=Quota commands,11
+line4.8=Disk quotas,11
 quota_commands=Use external commands to get and set quotas?,1,1-Yes,0-No
 quota_set_user_command=Command to set a user's quota,3,Use standard programs
 quota_set_group_command=Command to set a group's quota,3,Use standard programs
@@ -138,6 +138,7 @@ quota_list_users_command=Command to list user quotas,3,Use standard programs
 quota_list_groups_command=Command to list group quotas,3,Use standard programs
 quota_get_user_command=Command to get a user's quota,3,Use standard programs
 quota_get_group_command=Command to get a group's quota,3,Use standard programs
+quota_dirs=Additional directories to search for files in,9,60,3,\t
 
 line7=Status collection,11
 collect_interval=Interval between status collection job runs,10,none-Never run,Minutes
@@ -165,6 +166,7 @@ tar_cmd=Full path to <tt>tar</tt> command,3,Detect automatically
 tar_args=Additonal parameters to <tt>tar</tt> command,0
 ssh_args=Additonal parameters to <tt>ssh</tt> and <tt>scp</tt> commands,0
 aws_cmd=Full path to <tt>aws</tt> command for S3 operations,3,Not installed
+b2_cmd=Full path to <tt>b2</tt> command for Backblaze,0
 delete_logs=Remove logs when deleting scheduled backups?,1,1-Yes,0-No
 home_backup=Users' backup directory under home,0
 
@@ -172,6 +174,7 @@ line9=PHP options,11
 fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Time in seconds
 php_paths=Additional locations for PHP commands,9,60,3,\t
 php_fpm_port=Base port number for FPM servers,0
+php_session_age=Cleanup PHP session files after,3,Never cleanup,6,,days
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic

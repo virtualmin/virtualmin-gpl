@@ -64,11 +64,11 @@ if (-r "$d->{'home'}/$phd") {
 	}
 @dirs = sort { $a cmp $b } @dirs;
 foreach $dir (@dirs) {
-	local $path = "$d->{'home'}/$dir";
-	local $levels = $dir eq "domains" || $dir eq "homes" ||
+	my $path = "$d->{'home'}/$dir";
+	my $levels = $dir eq "domains" || $dir eq "homes" ||
 			$dir eq "." || $dir eq $phd ? 0 : undef;
-	($dirusage) = &recursive_disk_usage_mtime($path, undef, $levels);
-	($dirgid) = &recursive_disk_usage_mtime($path, $d->{'gid'}, $levels);
+	my ($dirusage) = &recursive_disk_usage_mtime($path, undef, $levels);
+	my ($dirgid) = &recursive_disk_usage_mtime($path, $d->{'gid'}, $levels);
 	if (-d $path && $dir ne ".") {
 		push(@dirusage, [ $dir, &nice_size($dirgid), $dirusage ]);
 		}
@@ -79,9 +79,19 @@ foreach $dir (@dirs) {
 	}
 push(@dirusage, [ "<i>$text{'usage_others'}</i>", &nice_size($othersgid), $others ]);
 closedir(DIR);
+
+# Add an extra directories outside the home
+foreach my $edir (split(/\t+/, $config{'quota_dirs'})) {
+	my $path = &substitute_domain_template($edir, $d);
+	my ($dirgid) = &recursive_disk_usage_mtime($path, $d->{'gid'}, undef);
+	push(@dirusage, [ $path, &nice_size($dirgid), $dirgid ]);
+	}
+
 print &ui_tabs_start_tab("mode", "homes");
-&usage_table(\@dirusage, $text{'usage_dir'}, 0, $text{'usage_dirheader'},
-	     $text{'usage_sizegid'});
+my $msg = $config{'quota_dirs'} ? $text{'usage_dirheader2'}
+			        : $text{'usage_dirheader'};
+$msg .= " $text{'usage_dirdesc'}\n";
+&usage_table(\@dirusage, $text{'usage_dir'}, 0, $msg, $text{'usage_sizegid'});
 print &ui_tabs_end_tab();
 
 # Show usage by top 10 mail users, in all domains
@@ -147,15 +157,15 @@ print &ui_tabs_end(1);
 
 sub usage_table
 {
-local ($list, $type, $max, $title, $type2) = @_;
-local @table;
+my ($list, $type, $max, $title, $type2) = @_;
+my @table;
 
 # Make the data
 my $i = 0;
 my $total = 0;
 foreach my $l (sort { $b->[@$b-1] <=> $a->[@$a-1] } @$list) {
-	local @rest = @$l;
-	local $sz = pop(@rest);
+	my @rest = @$l;
+	my $sz = pop(@rest);
 	push(@table, [ @rest, &nice_size($sz) ]);
 	$i++;
 	last if ($max && $i > $max);

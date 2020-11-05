@@ -194,7 +194,8 @@ $plans_dir = "$module_config_directory/plans";
 
 $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = (5, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9,
-		      "7.0", 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9);
+		      "7.0", 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9,
+		      "8.0");
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 $max_php_fcgid_children = 20;
 $s3_upload_tries = $config{'upload_tries'} || 3;
@@ -202,6 +203,7 @@ $rs_upload_tries = $config{'upload_tries'} || 3;
 $ftp_upload_tries = $config{'upload_tries'} || 3;
 $gcs_upload_tries = $config{'upload_tries'} || 3;
 $dropbox_upload_tries = $config{'upload_tries'} || 3;
+$rr_upload_tries = $config{'upload_tries'} || 1;
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
 			'gid' => "$module_config_directory/map.gid",

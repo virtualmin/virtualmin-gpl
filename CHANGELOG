@@ -1602,3 +1602,14 @@ The compression format can now be selected on a per-backup basis.
 Scheduled backups can have a descriptive comment for recording their purpose, which is also displayed in backup logs.
 Per-domain SSL certifcates can now be setup in Postfix, if running version 3.4 or later.
 Updated the SSL Certificate page to allow more control over per-domain certs for Webmin, Usermin, Postfix and Dovecot.
+---- Changes since 6.12 ----
+Added support for backing up to BackBlaze.
+Added a cron job to clean up old PHP session files.
+Fixes to creation and update of per-domain Dovecot SSL certs.
+Improved the template page for website options when Nginx is in use.
+Better handle PHP FPM package upgrades done after domains are created.
+Massively improved support for MySQL / MariaDB user and password management.
+Improved and preserved indentation for Apache configs.
+Fixes for IPv6 addresses in SPF and default DNS records.
+Fixed bugs caused by removing domain features in the wrong order.
+Improved locking for domain database files to prevent overwriting.

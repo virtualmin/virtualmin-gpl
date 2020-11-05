@@ -450,7 +450,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 # another server like Postfix or Webmin, re-set it up as long as it is supported
 # with the new settings
 if ($d->{'ip'} ne $oldd->{'ip'} ||
-    $d->{'virt'} == $oldd->{'virt'} ||
+    $d->{'virt'} != $oldd->{'virt'} ||
     $d->{'dom'} ne $oldd->{'dom'} ||
     $d->{'home'} ne $oldd->{'home'}) {
 	my %types = map { $_->{'id'}, $_ } &list_service_ssl_cert_types();
@@ -565,6 +565,9 @@ if ($mode eq "fpm") {
 	delete($d->{'php_fpm_port'});
 	&save_domain_php_mode($d, $mode);
 	}
+
+# Re-generate combined cert file in case cert changed
+&sync_combined_ssl_cert($d);
 
 &release_lock_web($d);
 &$second_print($text{'setup_done'});
@@ -909,11 +912,13 @@ local ($file) = @_;
 local @rv;
 my $lref = &read_file_lines($file, 1);
 foreach my $l (@$lref) {
-	if ($l =~ /^-----BEGIN/) {
-		push(@rv, $l."\n");
+	my $cl = $l;
+	$cl =~ s/^#.*//;
+	if ($cl =~ /^-----BEGIN/) {
+		push(@rv, $cl."\n");
 		}
-	elsif ($l =~ /\S/) {
-		$rv[$#rv] .= $l."\n";
+	elsif ($cl =~ /\S/ && @rv) {
+		$rv[$#rv] .= $cl."\n";
 		}
 	}
 return @rv;
@@ -1637,26 +1642,59 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 &release_lock_anything($d);
 }
 
-# find_matching_certificate(&domain)
-# For a domain with SSL being enabled, check if another domain on the same IP
-# already has a matching cert. If so, update the domain hash's cert file
-sub find_matching_certificate
+# find_matching_certificate_domain(&domain)
+# Check if another domain on the same IP already has a matching cert, and if so
+# return it.
+sub find_matching_certificate_domain
 {
 local ($d) = @_;
-return if ($config{'nolink_certs'});
 local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
 			   $_->{'ssl'} &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
 foreach my $sslclash (@sslclashes) {
 	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
-		# Found a match, so add a link to it
-		$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
-		$d->{'ssl_key'} = $sslclash->{'ssl_key'};
-		$d->{'ssl_same'} = $sslclash->{'id'};
-		$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
-		last;
+		return $sslclash;
 		}
+	}
+return undef;
+}
+
+# find_matching_certificate(&domain)
+# For a domain with SSL being enabled, check if another domain on the same IP
+# already has a matching cert. If so, update the domain hash's cert file. This
+# can only be called at domain creation time.
+sub find_matching_certificate
+{
+local ($d) = @_;
+local $lnk = $d->{'link_certs'} ? 1 :
+	     $d->{'nolink_certs'} ? 0 :
+	     $config{'nolink_certs'} ? 0 : 1;
+if ($lnk) {
+	local $sslclash = &find_matching_certificate_domain($d);
+	if ($sslclash) {
+		# Found a match, so add a link to it
+		&link_matching_certificate($d, $sslclash, 0);
+		}
+	}
+}
+
+# link_matching_certificate(&domain, &samedomain, [save-actual-config])
+# Makes the first domain use SSL cert file owned by the second
+sub link_matching_certificate
+{
+my ($d, $sslclash, $save) = @_;
+my @beforecerts = &get_all_domain_service_ssl_certs($d);
+$d->{'ssl_cert'} = $sslclash->{'ssl_cert'};
+$d->{'ssl_key'} = $sslclash->{'ssl_key'};
+$d->{'ssl_same'} = $sslclash->{'id'};
+$d->{'ssl_chain'} = &get_website_ssl_file($sslclash, 'ca');
+if ($save) {
+	&save_website_ssl_file($d, 'cert', $d->{'ssl_cert'});
+	&save_website_ssl_file($d, 'key', $d->{'ssl_key'});
+	&save_website_ssl_file($d, 'ca', $d->{'ssl_chain'});
+	&sync_combined_ssl_cert($d);
+	&update_all_domain_service_ssl_certs($d, \@beforecerts);
 	}
 }
 
@@ -1753,6 +1791,7 @@ $d->{'letsencrypt_renew'} = $samed->{'letsencrypt_renew'};
 $d->{'letsencrypt_last'} = $samed->{'letsencrypt_last'};
 $d->{'letsencrypt_last_failure'} = $samed->{'letsencrypt_last_failure'};
 $d->{'letsencrypt_last_err'} = $samed->{'letsencrypt_last_err'};
+$d->{'ssl_cert_expiry'} = $samed->{'ssl_cert_expiry'} if ($samed->{'ssl_cert_expiry'});
 }
 
 # break_invalid_ssl_linkages(&domain, [&new-cert])
@@ -1884,18 +1923,12 @@ if ($d->{'virt'}) {
 			push(@{$l->{'members'}}, $imap);
 			}
 		else {
-			eval {
-				local $main::error_must_die = 1;
-				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'},
-					"protocol", "imap");
-				&dovecot::save_directive($l->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'},
-					"protocol", "imap");
-				&dovecot::save_directive(
-					$l->{'members'}, "ssl_ca",
-					undef, "protocol", "imap");
-				}
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_cert", "<".$d->{'ssl_combined'});
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_key", "<".$d->{'ssl_key'});
+			&dovecot::save_directive($imap->{'members'},
+				"ssl_ca", undef);
 			}
 		if (!$pop3) {
 			$pop3 = { 'name' => 'protocol',
@@ -1914,18 +1947,12 @@ if ($d->{'virt'}) {
 			push(@{$l->{'members'}}, $pop3);
 			}
 		else {
-			eval {
-				local $main::error_must_die = 1;
-				&dovecot::save_directive($l->{'members'},
-					"ssl_cert", "<".$d->{'ssl_combined'},
-					"protocol", "pop3");
-				&dovecot::save_directive($l->{'members'},
-					"ssl_key", "<".$d->{'ssl_key'},
-					"protocol", "pop3");
-				&dovecot::save_directive(
-					$l->{'members'}, "ssl_ca",
-					undef, "protocol", "pop3");
-				}
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_cert", "<".$d->{'ssl_combined'});
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_key", "<".$d->{'ssl_key'});
+			&dovecot::save_directive($pop3->{'members'},
+				"ssl_ca", undef);
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
 		}
@@ -1991,14 +2018,11 @@ else {
 		# May need to update paths
 		foreach my $l (@myloc) {
 			&dovecot::save_directive($l->{'members'},
-                                        "ssl_cert", "<".$d->{'ssl_combined'},
-					$l->{'name'}, $l->{'value'});
+                                        "ssl_cert", "<".$d->{'ssl_combined'});
 			&dovecot::save_directive($l->{'members'},
-                                        "ssl_key", "<".$d->{'ssl_key'},
-					$l->{'name'}, $l->{'value'});
+                                        "ssl_key", "<".$d->{'ssl_key'});
 			&dovecot::save_directive($l->{'members'},
-					"ssl_ca", undef,
-					$l->{'name'}, $l->{'value'});
+					"ssl_ca", undef);
 			}
 		&flush_file_lines($l->{'file'}, undef, 1);
 		}
@@ -2194,10 +2218,8 @@ if ($d->{'virt'}) {
 					  ($already->{'command'} .=
 					   " -o ".$f->[0]."=".$f->[1]);
 					}
-				if ($oldcommand ne $already->{'command'}) {
-					&postfix::modify_master($already);
-					$changed = 1;
-					}
+				&postfix::modify_master($already);
+				$changed = 1;
 				}
 			}
 		else {
@@ -2427,9 +2449,11 @@ foreach my $d (&list_domains()) {
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 21 days of expiry
+	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
-	my $renew = $age >= $d->{'letsencrypt_renew'} * 30 * 24 * 60 * 60 ||
-		    $expiry && $expiry - time() < 21 * 24 * 60 * 60;
+	my $rf = rand() * 3600;
+	my $renew = $age >= $d->{'letsencrypt_renew'} * 30 * $day + $rf ||
+		    $expiry && $expiry - time() < 21 * $day + $rf;
 	next if (!$renew);
 
 	# Don't even attempt now if the lock is being held
@@ -2538,12 +2562,14 @@ my ($d, $cert, $key, $chain) = @_;
 # Copy and save the cert
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 my $cert_text = &read_file_contents($cert);
+my $newfile = !-r $d->{'ssl_cert'};
 &lock_file($d->{'ssl_cert'});
-&unlink_file($d->{'ssl_cert'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
 &print_tempfile(CERT, $cert_text);
 &close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_cert'});
+if ($newfile) {
+	&set_certificate_permissions($d, $d->{'ssl_cert'});
+	}
 &unlock_file($d->{'ssl_cert'});
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 
@@ -2551,11 +2577,12 @@ my $cert_text = &read_file_contents($cert);
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 my $key_text = &read_file_contents($key);
 &lock_file($d->{'ssl_key'});
-&unlink_file($d->{'ssl_key'});
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
 &print_tempfile(CERT, $key_text);
 &close_tempfile_as_domain_user($d, CERT);
-&set_certificate_permissions($d, $d->{'ssl_key'});
+if ($newfile) {
+	&set_certificate_permissions($d, $d->{'ssl_key'});
+	}
 &unlock_file($d->{'ssl_key'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
 
@@ -2568,11 +2595,12 @@ if ($chain) {
 	$chainfile = &default_certificate_file($d, 'ca');
 	$chain_text = &read_file_contents($chain);
 	&lock_file($chainfile);
-	&unlink_file_as_domain_user($d, $chainfile);
 	&open_tempfile_as_domain_user($d, CERT, ">$chainfile");
 	&print_tempfile(CERT, $chain_text);
 	&close_tempfile_as_domain_user($d, CERT);
-	&set_permissions_as_domain_user($d, 0755, $chainfile);
+	if ($newfile) {
+		&set_permissions_as_domain_user($d, 0755, $chainfile);
+		}
 	&unlock_file($chainfile);
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
 	$d->{'ssl_chain'} = $chainfile;
@@ -2592,7 +2620,7 @@ sub update_caa_record
 local ($d) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
-return undef if (&compare_version_numbers($bind8::version, "9.9.6") < 0);
+return undef if (&compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
 local $info = &cert_info($d);
@@ -2768,7 +2796,7 @@ elsif (!$ok) {
 	}
 &unlock_file($ssl_letsencrypt_lock);
 if (!$ok) {
-	return ($ok, join(", ", @errs), $key, $chain);
+	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
 	}
 else {
 	return ($ok, $cert, $key, $chain);

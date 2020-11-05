@@ -508,6 +508,22 @@ foreach my $desturl (@$desturls) {
 			next;
 			}
 		}
+	elsif ($mode == 10) {
+		# Connect to Backblaze and create the bucket
+		local $buckets = &list_bb_buckets();
+		if (!ref($buckets)) {
+			&$first_print($buckets);
+			next;
+			}
+		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
+		if (!$already) {
+			local $err = &create_bb_bucket($server);
+			if ($err) {
+				&$first_print($err);
+				next;
+				}
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -1022,14 +1038,16 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				$err = &rs_upload_object($rsh, $server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
-			elsif ($mode == 7 || $mode == 8) {
-				# Via Google or Dropbox upload
+			elsif ($mode == 7 || $mode == 8 || $mode == 10) {
+				# Via Google, Dropbox or Backblaze upload
 				&$first_print($text{'backup_upload'.$mode});
-				local $dfpath = $path ? $path."/".$df : $df;
-				local $func = $mode == 7 ? \&upload_gcs_file
-							: \&upload_dropbox_file;
-				local $tries = $mode == 7 ? $gcs_upload_tries
-						  : $dropbox_upload_tries;
+				my $dfpath = $path ? $path."/".$df : $df;
+				my $func = $mode == 7 ? \&upload_gcs_file :
+					   $mode == 8 ? \&upload_dropbox_file :
+							\&upload_bb_file;
+				my $tries = $mode == 7 ? $gcs_upload_tries :
+					    $mode == 8 ? $dropbox_upload_tries :
+							 $rr_upload_tries;
 				$err = &$func($server, $dfpath, "$dest/$df",
 					      $tries);
 				$err = &$func($server, $dfpath.".info",
@@ -1098,8 +1116,10 @@ if (@$vbs) {
 	foreach my $v (@$vbs) {
 		local $vfile = "$backupdir/virtualmin_".$v;
 		local $vfunc = "virtualmin_backup_".$v;
-		local $ok = &$vfunc($vfile, $vbs);
-		$vcount++;
+		if (defined(&$vfunc)) {
+			&$vfunc($vfile, $vbs);
+			$vcount++;
+			}
 		}
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
@@ -1609,14 +1629,17 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	elsif ($ok && ($mode == 7 || $mode == 8) && (@destfiles || !$dirfmt)) {
-		# Upload to Google cloud storage or Dropbox
+	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10) &&
+	       (@destfiles || !$dirfmt)) {
+		# Upload to Google cloud storage, Dropbox or Backblaze
 		local $err;
 		&$first_print($text{'backup_upload'.$mode});
-		local $func = $mode == 7 ? \&upload_gcs_file
-					 : \&upload_dropbox_file;
-		local $tries = $mode == 7 ? $gcs_upload_tries
-					  : $dropbox_upload_tries;
+		local $func = $mode == 7 ? \&upload_gcs_file :
+			      $mode == 8 ? \&upload_dropbox_file :
+					   \&upload_bb_file;
+		local $tries = $mode == 7 ? $gcs_upload_tries :
+			       $mode == 8 ? $dropbox_upload_tries :
+					    $rr_upload_tries;
 		local $infotemp = &transname();
 		local $domtemp = &transname();
 		if ($dirfmt) {
@@ -1948,6 +1971,7 @@ if ($mode > 0) {
 		      $mode == 7 ? $text{'restore_downloadgc'} :
 		      $mode == 8 ? $text{'restore_downloaddb'} :
 		      $mode == 9 ? $text{'restore_downloadwebmin'} :
+		      $mode == 10 ? $text{'restore_downloadbb'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local $cerr = &check_s3();
@@ -2177,8 +2201,10 @@ if ($ok) {
 			local $vfile = "$restoredir/virtualmin_".$v;
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;
-				local $ok = &$vfunc($vfile, $vbs);
-				$vcount++;
+				if (defined(&$vfunc)) {
+					$ok = &$vfunc($vfile, $vbs);
+					$vcount++;
+					}
 				}
 			}
 		&$outdent_print();
@@ -3543,8 +3569,8 @@ elsif ($mode == 6) {
 		return $err if ($err);
 		}
 	}
-elsif ($mode == 7 || $mode == 8) {
-	# Download from Google cloud storage or Dropbox
+elsif ($mode == 7 || $mode == 8 || $mode == 10) {
+	# Download from Google cloud storage, Dropbox or Backblaze
 	local $files;
 	local $func;
 	if ($mode == 7) {
@@ -3554,31 +3580,42 @@ elsif ($mode == 7 || $mode == 8) {
 		$files = [ map { $_->{'name'} } @$files ];
 		$func = \&download_gcs_file;
 		}
-	elsif ($mode == 8) {
-		# Get files under dir from Dropbox. These have to be converted
-		# to be relative to the top-level dir, as that's how GCS behaves
-		# and what subsequent code expects. Also, Dropbox allows files
-		# at the top level, unlike other storage providers.
+	elsif ($mode == 8 || $mode == 10) {
+		# Get files under dir from Dropbox or Backblaze. These have to
+		# be converted to be relative to the top-level dir, as that's
+		# how GCS behaves and what subsequent code expects.
 		my $fullpath;
 		my $prepend;
+		my $pathdir;
 		if ($path =~ /\.(gz|zip|bz2)$/i) {
 			# A file was requested - list only the parent dir
-			my $pathdir = $path =~ /^(.*)\// ? $1 : "";
+			$pathdir = $path =~ /^(.*)\// ? $1 : "";
 			$fullpath = "/".$server.
 				    ($server && $pathdir ? "/" : "").$pathdir;
 			$prepend = ($pathdir ? $pathdir."/" : "");
 			}
 		else {
 			# Assume source is a dir
+			$pathdir = $path;
 			$fullpath = "/".$server.($server ? "/" : "").$path;
 			$prepend = ($path ? $path."/" : "");
 			}
-		$files = &list_dropbox_files($fullpath);
-		return "Failed to list $fullpath : $files" if (!ref($files));
-		$files = [ map { my $n = $_->{'path_display'};
-				 $n =~ s/^.*\///;
-			         $prepend.$n } @$files ];
-		$func = \&download_dropbox_file;
+		if ($mode == 8) {
+			# For Dropbox, need to prepend directory under bucket
+			$files = &list_dropbox_files($fullpath);
+			return "Failed to list $fullpath : $files" if (!ref($files));
+			$files = [ map { my $n = $_->{'path_display'};
+					 $n =~ s/^.*\///;
+					 $prepend.$n } @$files ];
+			$func = \&download_dropbox_file;
+			}
+		else {
+			# For Backblaze, it's already prepended
+			$files = &list_bb_files($server, $pathdir);
+			return "Failed to list $pathdir : $files" if (!ref($files));
+			$files = [ map { $_->{'name'} } @$files ];
+			$func = \&download_bb_file;
+			}
 		}
 	local $pathslash = $path ? $path."/" : "";
 	if ($infoonly) {
@@ -3749,8 +3786,8 @@ return $rv;
 # parse_backup_url(string)
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
-# 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin), login,
-# password, host, path and port
+# 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin,
+# 10 for Backblaze), login, password, host, path and port
 sub parse_backup_url
 {
 local ($url) = @_;
@@ -3818,6 +3855,16 @@ elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
 	@rv = (8, undef, undef, $1, $3, undef);
 	}
+elsif ($url =~ /^bb:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Backblaze bucket
+	my $st = &cloud_bb_get_state();
+	if ($st->{'ok'}) {
+		@rv = (10, undef, undef, $1, $3, undef);
+		}
+	else {
+		@rv = (-1, "Backblaze has not been configured");
+		}
+	}
 elsif ($url eq "download:") {
 	@rv = (4, undef, undef, undef, undef, undef);
 	}
@@ -3882,6 +3929,11 @@ elsif ($proto == 8) {
 	}
 elsif ($proto == 9) {
 	$rv = &text('backup_nicewebmin', "<tt>$path</tt>", "<tt>$host</tt>");
+	}
+elsif ($proto == 10) {
+	$rv = $path ?
+		&text('backup_nicebbp', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicebb', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;
@@ -4111,6 +4163,18 @@ if ($state->{'ok'} && &can_use_cloud("dropbox")) {
 	push(@opts, [ 8, $text{'backup_mode8'}, $st ]);
 	}
 
+# Backblaze
+my $state = &cloud_bb_get_state();
+if ($state->{'ok'} && &can_use_cloud("bb")) {
+	local $st = "<table>\n";
+	$st .= "<tr> <td>$text{'backup_bbpath'}</td> <td>".
+	       &ui_textbox($name."_bbpath", $mode != 10 ? undef :
+					    $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 10, $text{'backup_mode10'}, $st ]);
+	}
+
 if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 4, $text{'backup_mode4'},
@@ -4253,6 +4317,13 @@ elsif ($mode == 8 && &can_use_cloud("dropbox")) {
 	($in{$name.'_dbpath'} =~ /^\// || $in{$name.'_dbpath'} =~ /\/$/) &&
 		&error($text{'backup_edbpath2'});
 	return "dropbox://".$in{$name.'_dbpath'};
+	}
+elsif ($mode == 10 && &can_use_cloud("bb")) {
+	# Backblaze
+	$in{$name.'_bbpath'} =~ /^\S+$/i || &error($text{'backup_ebbpath'});
+	($in{$name.'_bbpath'} =~ /^\// || $in{$name.'_bbpath'} =~ /\/$/) &&
+		&error($text{'backup_ebbpath2'});
+	return "bb://".$in{$name.'_bbpath'};
 	}
 elsif ($mode == 9) {
 	# Webmin server
@@ -4710,12 +4781,14 @@ elsif (($mode == 1 || $mode == 2 || $mode == 9) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7) && $host =~ /%/) {
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
+       $host =~ /%/) {
 	# S3 / Rackspace / GCS bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7) && $path =~ /%/) {
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
+       $path =~ /%/) {
 	# S3 / Rackspace / GCS filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
@@ -5213,6 +5286,61 @@ elsif ($mode == 8) {
 		}
 	}
 
+elsif ($mode == 10) {
+	# Search for Backblaze for files matching the date pattern
+	my $dir;
+	if ($re =~ /^(.*)\//) {
+		$dir = $1;
+		}
+	local $files = &list_bb_files($base, $dir);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles4', $files));
+		return 0;
+		}
+	foreach my $st (@$files) {
+		my $f = $st->{'name'};
+		my $ctime;
+		if ($st->{'folder'}) {
+			# Age is age of the oldest file
+			$ctime = time();
+			my $subfiles = &list_dropbox_files($base, $f);
+			if (ref($subfiles)) {
+				foreach my $sf (@$subfiles) {
+					$ctime = $sf->{'time'}
+					  if ($sf->{'time'} && $sf->{'time'} < $ctime);
+					}
+				}
+			}
+		else {
+			$ctime = $st->{'time'};
+			}
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
+			# Found one to delete
+			$mcount++;
+                        next if (!$ctime || $ctime >= $cutoff);
+                        local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+                                            "<tt>$f</tt>", $old));
+			my $size = $st->{'folder'} ?
+					&size_bb_directory($base, $f) :
+					$st->{'size'};
+			local $err = &delete_bb_file($base, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_dropbox_path($base, $f.".dom");
+				&delete_dropbox_path($base, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($size)));
+				$pcount++;
+				}
+			}
+		}
+	}
+
+
 &$outdent_print();
 
 &$second_print($pcount ? &text('backup_purged', $pcount, $mcount - $pcount) :
@@ -5691,6 +5819,10 @@ foreach my $sfx ("", ".info", ".dom") {
 		else {
 			$err = &delete_dropbox_path($spath);
 			}
+		}
+	elsif ($proto == 10) {
+		# Backblaze bucket file
+		$err = &delete_bb_file($host, $spath);
 		}
 	else {
 		return "Deletion of remote backups is not supported yet";

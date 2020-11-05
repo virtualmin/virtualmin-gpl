@@ -140,10 +140,10 @@ if (&foreign_installed("dovecot")) {
 	# Also add global Dovecot cert
 	&foreign_require("dovecot");
 	my $conf = &dovecot::get_config();
-	my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+	my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
 		    &dovecot::find_value("ssl_cert", $conf, 0, "");
 	$cfile =~ s/^<//;
-	$cafile = &dovecot::find_value("ssl_ca", $conf);
+	$cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
 	$cafile =~ s/^<//;
 	if ($cfile) {
 		if (!$cafile && &cert_file_split($cfile) > 1) {
@@ -219,7 +219,8 @@ my ($d) = @_;
 my @rv;
 my $chain = &get_website_ssl_file($d, 'ca');
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
-	if (&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) &&
+	if ((&same_cert_file($d->{'ssl_cert'}, $svc->{'cert'}) ||
+	     &same_cert_file($d->{'ssl_combined'}, $svc->{'cert'})) &&
 	    (!$svc->{'ca'} || -s $svc->{'ca'} < 16 || $svc->{'ca'} eq 'none' ||
 	     &same_cert_file_any($chain, $svc->{'ca'}))) {
 		push(@rv, $svc);
@@ -272,7 +273,7 @@ foreach my $svc (&list_service_ssl_cert_types()) {
 sub disable_domain_service_ssl_certs
 {
 my ($d) = @_;
-foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
+foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	if ($svc->{'d'}) {
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
 		&$func($d, 0) if (defined(&$func));
@@ -310,12 +311,14 @@ my $configfile = &dovecot::get_config_file();
 my $dovedir = $configfile;
 $dovedir =~ s/\/([^\/]+)$//;
 my $conf = &dovecot::get_config();
-my $v2 = &dovecot::find_value("ssl_cert", $conf, 2);
-my $cfile = &dovecot::find_value("ssl_cert_file", $conf) ||
+my $v2 = &dovecot::find_value("ssl_cert", $conf, 2, "") ? 1 :
+         &dovecot::find_value("ssl_cert_file", $conf, 2, "") ? 0 :
+	 &dovecot::get_dovecot_version() >= 2 ? 1 : 0;
+my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
 	 &dovecot::find_value("ssl_cert", $conf, 0, "");
-my $kfile = &dovecot::find_value("ssl_key_file", $conf) ||
+my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
 	 &dovecot::find_value("ssl_key", $conf, 0, "");
-my $cafile = &dovecot::find_value("ssl_ca", $conf);
+my $cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
 $cfile =~ s/^<//;
 $kfile =~ s/^<//;
 $cafile =~ s/^<//;
@@ -359,16 +362,16 @@ if ($cafile && $cadata) {
 # Update config with correct files
 if ($v2) {
 	# 2.0 and later format
-	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile);
-	&dovecot::save_directive($conf, "ssl_key", "<".$kfile);
+	&dovecot::save_directive($conf, "ssl_cert", "<".$cfile, "");
+	&dovecot::save_directive($conf, "ssl_key", "<".$kfile, "");
 	if ($cafile) {
-		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile);
+		&dovecot::save_directive($conf, "ssl_ca", "<".$cafile, "");
 		}
 	}
 else {
 	# Pre-2.0 format
-	&dovecot::save_directive($conf, "ssl_cert_file", $cfile);
-	&dovecot::save_directive($conf, "ssl_key_file", $kfile);
+	&dovecot::save_directive($conf, "ssl_cert_file", $cfile, "");
+	&dovecot::save_directive($conf, "ssl_key_file", $kfile, "");
 	}
 &$second_print(&text($cadata ? 'copycert_dsaved2' : 'copycert_dsaved',
 		     "<tt>$cfile</tt>", "<tt>$kfile</tt>"));
@@ -376,26 +379,26 @@ else {
 # Make sure SSL is enabled
 &$first_print($text{'copycert_denabling'});
 if (&dovecot::find("ssl_disable", $conf, 2)) {
-	&dovecot::save_directive($conf, "ssl_disable", "no");
+	&dovecot::save_directive($conf, "ssl_disable", "no", "");
 	}
 else {
-	&dovecot::save_directive($conf, "ssl", "yes");
+	&dovecot::save_directive($conf, "ssl", "yes", "");
 	}
 if (&dovecot::get_dovecot_version() < 2) {
 	# Add imaps and pop3s protocols ..
-	$protos = &dovecot::find_value("protocols", $conf);
+	$protos = &dovecot::find_value("protocols", $conf, 0, "");
 	@protos = split(/\s+/, $protos);
 	%protos = map { $_, 1 } @protos;
 	push(@protos, "imaps") if (!$protos{'imaps'} && $protos{'imap'});
 	push(@protos, "pop3s") if (!$protos{'pop3s'} && $protos{'pop3'});
-	&dovecot::save_directive($conf, "protocols", join(" ", @protos));
+	&dovecot::save_directive($conf, "protocols", join(" ", @protos), "");
 	}
 
 # Enable PCI-compliant ciphers
 &foreign_require("webmin");
-if (!&dovecot::find_value("ssl_cipher_list", $conf)) {
+if (!&dovecot::find_value("ssl_cipher_list", $conf, 0, "")) {
 	&dovecot::save_directive($conf, "ssl_cipher_list",
-				 $webmin::strong_ssl_ciphers);
+				 $webmin::strong_ssl_ciphers, "");
 	}
 
 &flush_file_lines();
@@ -465,6 +468,8 @@ if (&compare_version_numbers($postfix::postfix_version, "2.3") >= 0) {
 	&postfix::set_current_value("smtpd_tls_security_level", "may");
 	if (&compare_version_numbers($postfix::postfix_version, "2.11") >= 0) {
 		&postfix::set_current_value("smtp_tls_security_level", "dane");
+		&postfix::set_current_value("smtp_dns_support_level", "dnssec", 1);
+		&postfix::set_current_value("smtp_host_lookup", "dns", 1);
 		}
 	else {
 		&postfix::set_current_value("smtp_tls_security_level", "may");

@@ -45,6 +45,7 @@ if (!$in{'self'}) {
 	&obtain_lock_ssl($d);
 	$d->{'ssl_csr'} ||= &default_certificate_file($d, "csr");
 	$d->{'ssl_newkey'} ||= &default_certificate_file($d, "newkey");
+	my $newfile = !-r $d->{'ssl_csr'};
 	&lock_file($d->{'ssl_csr'});
 	&lock_file($d->{'ssl_newkey'});
 	$err = &generate_certificate_request(
@@ -60,8 +61,10 @@ if (!$in{'self'}) {
 		$d,
 		$in{'hash'});
 	&error($err) if ($err);
-	&set_certificate_permissions($d, $d->{'ssl_newkey'});
-	&set_certificate_permissions($d, $d->{'ssl_csr'});
+	if ($newfile) {
+		&set_certificate_permissions($d, $d->{'ssl_newkey'});
+		&set_certificate_permissions($d, $d->{'ssl_csr'});
+		}
 	&unlock_file($d->{'ssl_newkey'});
 	&unlock_file($d->{'ssl_csr'});
 	&release_lock_ssl($d);

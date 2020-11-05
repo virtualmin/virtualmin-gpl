@@ -58,9 +58,7 @@ if ($d->{'mysql'} && &master_admin()) {
 # Start tabs for various options, if appropriate
 @tabs = ( [ "list", $text{'databases_tablist'} ] );
 if (!$d->{'parent'}) {
-	if ($virtualmin_pro) {
-		push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
-		}
+	push(@tabs, [ "usernames", $text{'databases_tabusernames'} ]);
 	}
 if (@pass_features) {
 	push(@tabs, [ "passwords", $text{'databases_tabpasswords'} ]);
@@ -134,7 +132,7 @@ elsif ($dleft == 0) {
 print &ui_tabs_end_tab() if (@tabs > 1);
 
 # Show form to change database usernames
-if (!$d->{'parent'} && $virtualmin_pro) {
+if (!$d->{'parent'}) {
 	print &ui_tabs_start_tab("databasemode", "usernames") if (@tabs > 1);
 	print "$text{'databases_desc2'}<p>\n";
 	print &ui_form_start("save_dbname.cgi");

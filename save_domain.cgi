@@ -285,15 +285,25 @@ if (!$d->{'disabled'}) {
 			$d->{$f} = $newdom{$f};
 			}
 		}
+	my $oldcount = 0;
+	my $newcount = 0;
 	foreach $f (&list_feature_plugins()) {
+		$oldcount++ if ($d->{$f});
 		$d->{$f} = $newdom{$f};
+		$newcount++ if ($d->{$f});
 		}
-	foreach $f (&list_ordered_features($d)) {
+	my @of = &list_ordered_features($d);
+	if ($oldcount > $newcount) {
+		# Features were removed, so call the setup/delete functions
+		# in reverse order
+		@of = reverse(@of);
+		}
+	foreach $f (@of) {
 		&call_feature_func($f, $d, $oldd);
 		}
 	}
 else {
-	# Only modify unix if disabled
+	# Only modify unix if domain is disabled
 	if ($d->{'unix'}) {
 		&modify_unix($d, $oldd);
 		}

@@ -464,8 +464,16 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 	return;
 	}
 
+# Parse content field
+my $content = $in{'content'};
+my $contented = !defined($in{'content_def'}) || $in{'content_def'} == 2;
+$content =~ s/\r//g;
+$content =~ s/^\s+//g;
+$content =~ s/\s+$//g;
+$content = '' if (!defined($in{'content_def'}));
 $err = &create_virtual_server(\%dom, $parentdom, $parentuser,
-			      0, 0, $parentdom ? undef : $pass);
+			      0, 0, $parentdom ? undef : $pass, 
+			      	$contented ? $content : undef);
 &error($err) if ($err);
 
 # Create default mail forward
@@ -475,32 +483,19 @@ if ($add_fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
-# Put default site content
-if ((!$in{'content_def'} || $in{'content_def'} == 2) &&
-	&domain_has_website(\%dom)) {
-	my $content = $in{'content'};
-	$content =~ s/\r//g;
-	$content =~ s/^\s+|\s+$//g;
-
-	# Copy default Virtualmin template
-	if (!$virtualmin_pro || $in{'content_def'} == 2) {
-		&$first_print($text{'setup_styleing'});
-		&create_index_content(\%dom, $content);
-		&$second_print($text{'setup_done'});
-		}
-	
+# Write totally custom site content
+if (!$dom{'alias'} && &domain_has_website(\%dom) && 
+		(defined($in{'content_def'}) && $in{'content_def'} == 0)) {
 	# Create index.html file 
-	else {
-		&$first_print($text{'setup_contenting'});
-		my $home = public_html_dir(\%dom);
-		&open_tempfile_as_domain_user(
-			\%dom, DATA, ">$home/index.html");
-		$content =~ s/\n/<br>\n/g if ($content);
-		$content = &substitute_virtualmin_template($content, \%dom);
-		&print_tempfile(DATA, $content);
-		&close_tempfile_as_domain_user(\%dom, DATA);
-		&$second_print($text{'setup_done'});
-		}
+	&$first_print($text{'setup_contenting'});
+	my $home = &public_html_dir(\%dom);
+	&open_tempfile_as_domain_user(
+		\%dom, DATA, ">$home/index.html");
+	$content =~ s/\n/<br>\n/g if ($content);
+	$content = &substitute_virtualmin_template($content, \%dom);
+	&print_tempfile(DATA, $content);
+	&close_tempfile_as_domain_user(\%dom, DATA);
+	&$second_print($text{'setup_done'});
 	}
 
 &run_post_actions();

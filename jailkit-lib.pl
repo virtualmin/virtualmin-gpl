@@ -53,12 +53,16 @@ if (!$already) {
 		return &text('jailkit_emount', $err);
 		}
 	}
-foreach $f (&mount::files_to_lock()) { &lock_file($f); }
+foreach $f (&mount::files_to_lock()) {
+	&lock_file($f);
+	}
 my ($already) = grep { $_->[0] eq $jailhome } &mount::list_mounts();
 if (!$already) {
 	&mount::create_mount($jailhome, $d->{'home'}, "bind", "defaults");
 	}
-foreach $f (&mount::files_to_lock()) { &unlock_file($f); }
+foreach $f (&mount::files_to_lock()) {
+	&unlock_file($f);
+	}
 
 # Modify the domain user's home dir and shell
 &require_useradmin();
@@ -115,7 +119,12 @@ if (!$uinfo) {
 	}
 my $olduinfo = { %$uinfo };
 if ($uinfo->{'shell'} =~ /\/jk_chrootsh$/) {
-	$uinfo->{'shell'} = $d->{'unjailed_shell'};
+	my $tmpl = &get_template($d->{'template'});
+	my $defshell = $tmpl->{'ushell'};
+	if ($defshell eq 'none' || !$defshell) {
+		$defshell = &default_available_shell('owner');
+		}
+	$uinfo->{'shell'} = $d->{'unjailed_shell'} || $defshell;
 	}
 if ($uinfo->{'home'} =~ s/^\Q$dir\E\/\.//) {
 	&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -234,6 +243,7 @@ sub copy_jailkit_files
 {
 my ($d, $dir) = @_;
 $dir ||= &domain_jailkit_dir($d);
+$dir || return $text{'jailkit_edir'};
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php",
 		  split(/\s+/, $config{'jail_sects'})) {
