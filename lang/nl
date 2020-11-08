@@ -1733,7 +1733,6 @@ check_eget_user=Externe quota opdrachten zijn aangezet, maar de opdracht om een 
 check_eget_group=Externe quota opdrachten zijn aangezet, maar de opdracht om een enkele groep's quota op te vragen bestaat niet
 check_quotacommands=Externe quota opdrachten zullen worden gebruikt voor virtuele servers en mailboxen.
 check_eclamd=U heeft geselecteerd om de <tt>clamdscan</tt> voor virus scannen te gebruiken, maar de <tt>clamd</tt> server waarmee het moet communiceren is niet aan het werk
-check_eresolv2=Het lijkt erop dat DHCP word gebruikt om uw netwerk interfaces dynamisch te configureren, hierdoor kunnen de DNS servers worden ingesteld met de instellingen die aangeleverd worden door de DHCP server. Het gebruik van een statisch IP adres word ten zeerste aangeraden voor Virtualmin.
 check_evirusspam=Virus scannen kan niet worden aangezet zonder spam filteren
 check_preload=Updaten van Virtualmin bibliotheek vooraf geladen instellingen ..
 check_collect=Updaten van status met verzamelen van taken ..

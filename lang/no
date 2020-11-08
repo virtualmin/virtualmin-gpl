@@ -1793,7 +1793,6 @@ check_eget_user=Eksterne kvote-kommandoer er aktivert, men kommandoen for å hen
 check_eget_group=Eksterne kvote-kommandoer er aktivert, men kommandoen for å hente en enkelt gruppes kvote finnes ikke
 check_quotacommands=Eksterne kvote-kommandoer vil bli brukt for virtuelle tjenere og postbokser.
 check_eclamd=Du har valgt å bruke <tt>clamdscan</tt> for virus scanning, men <tt>clamd</tt> tjeneren som denne snakker med, kjører ikke.
-check_eresolv2=Det ser ut til at DHCP bruker til å konfigurere nettverkskortene dine dynamisk. Dette kan medfære at DNS innstillinger kan bli satt basert på innstillinger fra DHCP tjeneren. Det er sterkt anbefalt å bruke statiske IP adresser i Virtualmin.
 check_evirusspam=Virus scanning kan ikke aktiveres uten søppelpost filtrering
 check_preload=Oppdaterer Virtualmin library pre-load innstillinger ..
 check_collect=Oppdaterer statusinnsamlings jobb ..
