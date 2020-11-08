@@ -1588,6 +1588,7 @@ usage_dirheader2=Datenträgernutzung durch Dateien und Verzeichnisse unter dem H
 usage_dirdesc=Die <b>Spaltenkontingentgröße</b> ist der Speicherplatz, der dem virtuellen Server <b>zugewiesen</b> wird, während die <b>Größe</b> der Speicherplatz ist, der von allen Dateien in jedem Verzeichnis belegt wird.
 usage_userheader=Festplattennutzung durch Mail- / FTP-Benutzer auf diesem Server und allen Subservern.
 usage_subheader=Festplattennutzung durch alle Subserver.
+usage_others=Andere Dateien zu Hause
 usage_sizegid=Kontingentgröße
 usage_dbheader=Festplattennutzung durch die Datenbank auf diesem Server und allen Subservern.
 usage_tabsubs=Nach Subserver

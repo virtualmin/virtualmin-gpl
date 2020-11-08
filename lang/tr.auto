@@ -2181,6 +2181,7 @@ massu_sel=Seçilen komut dosyaları: $1
 usage_summaryheader=Disk kullanımı ve bu sanal sunucu için sınırların özeti.
 usage_dirheader2=Bu sunucunun ana sayfası ve diğer paylaşılan dizinler altındaki dosyalar ve dizinler tarafından disk kullanımı.
 usage_dirdesc=Sütun <b>Kota Boyutu</b>, sanal sunucuya hesaplanan disk alanıdır, <b>Boyut</b> ise her dizindeki tüm dosyalar tarafından tüketilen alandır.
+usage_others=Evdeki diğer dosyalar
 usage_showall=Herkes için disk kullanımını göster.
 usage_tabsummary=genel bakış
 usage_tabhomes=Giriş dizini

@@ -4426,7 +4426,6 @@ usage_dirheader=Diskbruk for filer og kataloger under denne tjenerens hjemmekata
 usage_dir=Katalog
 usage_userheader=Disk-bruk per e-post / FTP brukere for denne tjeneren og alle under-tjenere.
 usage_subheader=Diskbruk for alle undertjenere.
-usage_others=Hjem
 usage_size=Størrelse
 usage_sizegid=Kvote størrelse
 usage_user=Brukernavn

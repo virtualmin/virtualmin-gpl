@@ -2907,7 +2907,6 @@ usage_dirheader=本服务器主目录下文件和目录的磁盘使用情况。
 usage_dir=目录
 usage_userheader=本服务器和所有子服务器中邮件和FTP用户的磁盘使用情况。
 usage_subheader=所有子服务器的磁盘使用情况。
-usage_others=主目录
 usage_size=大小
 usage_sizegid=限额大小
 usage_user=用户名

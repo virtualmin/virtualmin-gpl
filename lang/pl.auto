@@ -3994,6 +3994,7 @@ massu_rusurehome=Ponieważ jeden ze skryptów jest zainstalowany w katalogu WWW 
 massu_sel=Wybrane skrypty: $1 
 usage_dirheader2=Wykorzystanie dysku przez pliki i katalogi w katalogu domowym tego serwera i innych współdzielonych katalogach.
 usage_dirdesc=<b>Rozmiar przydziału</b> kolumny to miejsce na dysku przypisane do serwera wirtualnego, a <b>rozmiar</b> to miejsce zajmowane przez wszystkie pliki w każdym katalogu.
+usage_others=Inne pliki w domu
 usage_max=Pokazano tylko najlepsze $1.
 webmin_alog=Dziennik dostępu Apache dla $1 
 webmin_elog=Dziennik błędów Apache dla $1 

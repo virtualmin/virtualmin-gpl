@@ -3719,7 +3719,6 @@ usage_dirheader=Uso del disco por archivos y directorios bajo el home de este se
 usage_dir=Directorio
 usage_userheader=Uso del disco por usuarios de mail / FTP en este servidor y todos los sub-servidores.
 usage_subheader=Uso del disco por todos los sub-servidores.
-usage_others=Home
 usage_size=Tamaño
 usage_sizegid=Tamaño del quota
 usage_user=Nombre de usuario

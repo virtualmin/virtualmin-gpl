@@ -839,7 +839,6 @@ usage_dirheader=Użycie dysku przez pliki i katalogi w katalogu domowym tego ser
 usage_dir=Katalog
 usage_userheader=Użycie dysku przez użytkowników e-mail / FTP na tym serwerze i wszystkich sub-serwerach.
 usage_subheader=Użycie dysku przez wszystkie sub-serwery
-usage_others=Katalog domowy
 usage_size=Rozmiar
 usage_sizegid=Rozmiar przydziału
 usage_user=Nazwa użytkownika

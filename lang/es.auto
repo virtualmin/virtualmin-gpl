@@ -1114,6 +1114,7 @@ umass_separatorcomma=Coma
 umass_separatortab=Lengüeta
 usage_dirheader2=Uso de disco por archivos y directorios en el inicio de este servidor y otros directorios compartidos.
 usage_dirdesc=<b>Tamaño de cuota de</b> columna es el espacio en disco contabilizado para el servidor virtual, mientras que <b>Tamaño</b> es el espacio consumido por todos los archivos en cada directorio.
+usage_others=Otros archivos en casa
 usage_showall=Mostrar el uso del disco para todos.
 newquotacheck_esupport=La comprobación de cuotas no es compatible ni requerida por sus sistemas de archivos
 phpmode_fpm=FPM (ejecutar como propietario del servidor virtual)

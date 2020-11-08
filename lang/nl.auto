@@ -653,6 +653,7 @@ pass_dbsync=Waarschuwing: als u het beheerderswachtwoord van dit domein wijzigt,
 pass_hashpass=Alleen hash-wachtwoord opslaan voor dit domein?
 usage_dirheader2=Schijfgebruik door bestanden en mappen onder het huis van deze server en andere gedeelde mappen.
 usage_dirdesc=<b>Kolomquotagrootte</b> is de schijfruimte die wordt geboekt op de virtuele server, terwijl <b>Grootte</b> de ruimte is die wordt gebruikt door alle bestanden in elke map.
+usage_others=Andere bestanden in huis
 usage_showall=Toon schijfgebruik voor iedereen.
 newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of vereist door uw bestandssystemen
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)

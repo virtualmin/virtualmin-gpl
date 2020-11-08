@@ -3245,7 +3245,6 @@ usage_quota=Festplattenkontingent
 usage_susage=Festplattenbenutzung
 usage_sdb=Größe der Datenbanken
 usage_dir=Verzeichnis
-usage_others=Home
 usage_size=Größe
 usage_user=Benutzername
 usage_sub=Sub-Server

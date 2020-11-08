@@ -4180,7 +4180,6 @@ usage_dirheader=Harddisk gebruik van files en directory's onder deze server's ho
 usage_dir=Directory
 usage_userheader=Harddisk gebruik van email/FTP gebruikers in deze server en alle sub-servers.
 usage_subheader=Harddisk gebruik van alle sub-servers.
-usage_others=Home
 usage_size=Grote
 usage_sizegid=Quota Grote
 usage_user=Gebruikersnaam

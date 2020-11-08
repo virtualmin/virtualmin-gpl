@@ -407,6 +407,7 @@ spam_scanner4=Ekstern server skanner
 pass_dbsync=Advarsel - å endre dette domenets administrasjonspassord vil også oppdatere passordet som trengs for å koble til databasene.
 usage_dirheader2=Diskbruk av filer og kataloger under denne serverens hjem og andre delte kataloger.
 usage_dirdesc=Kolonnen <b>Kvote Størrelse</b> er diskplass sto til den virtuelle serveren, mens <b>Størrelse</b> er plass fortært av alle filer i hver katalog.
+usage_others=Andre filer i hjemmet
 newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene dine
 phpmode_fpm=FPM (kjøres som virtuell servereier)
 phpmode_short_fpm=FPM

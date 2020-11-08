@@ -1926,6 +1926,7 @@ massu_rusurehome=由於其中一個腳本已安裝到虛擬服務器的頂級Web
 massu_sel=所選腳本： $1
 usage_dirheader2=該服務器主目錄和其他共享目錄下的文件和目錄的磁盤使用情況。
 usage_dirdesc=列<b>配額大小</b>是虛擬服務器所佔的磁盤空間，而<b>大小</b>是每個目錄中所有文件佔用的空間。
+usage_others=家裡的其他文件
 usage_showall=顯示所有磁盤的使用情況。
 webmin_phpini2=$1的PHP $2配置
 newquotacheck_esupport=文件系統不支持或不需要配額檢查

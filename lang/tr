@@ -2652,7 +2652,6 @@ usage_dirheader=Klasörlere göre
 usage_dir=Klasör
 usage_userheader=E-posta / FTP Kullanýcýlarýna göre
 usage_subheader=Alt-sunuculara göre
-usage_others=Anaklasör
 usage_size=Boyut
 usage_sizegid=Kota Boyutu
 usage_user=Kullanýcý

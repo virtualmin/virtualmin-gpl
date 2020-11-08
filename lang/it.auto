@@ -3649,6 +3649,7 @@ usage_dirheader2=Utilizzo del disco da parte di file e directory nella home page
 usage_dirdesc=Column <b>Quota Size</b> è lo spazio su disco conteggiato nel server virtuale, mentre <b>Size</b> è lo spazio occupato da tutti i file in ciascuna directory.
 usage_dir=elenco
 usage_userheader=Utilizzo del disco da parte degli utenti di posta / FTP in questo server e in tutti i server secondari.
+usage_others=Altri file in casa
 usage_max=Viene visualizzato solo il primo $1.
 usage_showall=Mostra l'utilizzo del disco per tutti.
 usage_dom=Dominio
