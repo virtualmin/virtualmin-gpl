@@ -6699,11 +6699,15 @@ sub scp_copy
 local ($src, $dest, $pass, $err, $port, $asuser) = @_;
 if ($src =~ /\s/) {
 	my ($host, $path) = split(/:/, $src, 2);
-	$src = $host.":".quotemeta($path);
+	if ($path) {
+		$src = $host.":".quotemeta($path);
+		}
 	}
 if ($dest =~ /\s/) {
 	my ($host, $path) = split(/:/, $dest, 2);
-	$dest = $host.":".quotemeta($path);
+	if ($path) {
+		$dest = $host.":".quotemeta($path);
+		}
 	}
 local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
