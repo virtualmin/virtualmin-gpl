@@ -1134,6 +1134,7 @@ if ($mode eq "fpm") {
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&create_php_fpm_pool($d);
+		$pfound++;
 		}
 	}
 else {

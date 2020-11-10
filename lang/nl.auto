@@ -167,6 +167,7 @@ check_enetmask6=IPv6 netmask $1 is niet geldig - het zou een getal moeten zijn, 
 check_dependentok=Postfix is geconfigureerd om uitgaande IP-adressen per domein te ondersteunen.
 check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per domein.
 check_dependentesupport=Postfix ondersteunt uitgaande IP-adressen per domein, maar is momenteel niet geconfigureerd om dit te doen. Dit kan worden ingesteld in de module <a href='$1'>Postfix Mailserver</a>.
+check_eresolv2=Virtualmin is geconfigureerd om DNS-zones in te stellen, maar dit systeem is niet ingesteld om zichzelf als DNS-server te gebruiken. Voeg ofwel 127.0.0.1 toe aan $1, zet de BIND-functie op de $2-pagina uit, of schakel de <b>Check resolv.conf-</b> optie uit op de Virtualmin-configuratiepagina.
 check_eresolv3=Het lijkt erop dat DHCP wordt gebruikt om uw netwerkinterfaces dynamisch te configureren, waardoor de DNS-servers kunnen worden ingesteld op basis van de instellingen van de DHCP-server. Het gebruik van een statisch IP-adres wordt sterk aanbevolen bij Virtualmin.
 check_eresolvlist=lijst met DNS-servers
 check_dnsmissing=Het systeem lijkt geen DNS-servers te hebben geconfigureerd. Het standaardgedrag van het gebruik van een lokale DNS-server zou echter nog steeds moeten werken.
@@ -650,6 +651,9 @@ spam_bounce=Stuiter terug naar de afzender
 spam_queue=Wachtrij voor latere levering
 pass_dbsync=Waarschuwing: als u het beheerderswachtwoord van dit domein wijzigt, wordt ook het wachtwoord bijgewerkt dat nodig is om verbinding te maken met de databases.
 pass_hashpass=Alleen hash-wachtwoord opslaan voor dit domein?
+usage_dirheader2=Schijfgebruik door bestanden en mappen onder het huis van deze server en andere gedeelde mappen.
+usage_dirdesc=<b>Kolomquotagrootte</b> is de schijfruimte die wordt geboekt op de virtuele server, terwijl <b>Grootte</b> de ruimte is die wordt gebruikt door alle bestanden in elke map.
+usage_others=Andere bestanden in huis
 usage_showall=Toon schijfgebruik voor iedereen.
 newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of vereist door uw bestandssystemen
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)

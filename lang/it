@@ -1184,7 +1184,6 @@ usage_susage=Spazio disco usato
 usage_sdb=Dimensione database
 usage_spercent=Percentuale quota usata
 usage_subheader=Uso disco da tutti i sub-server
-usage_others=Home
 usage_size=Dimenzione
 usage_sizegid=Dimensione quota
 usage_user=Nome utente
