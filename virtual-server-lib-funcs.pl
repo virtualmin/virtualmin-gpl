@@ -16880,7 +16880,7 @@ foreach my $f (@features) {
 sub obtain_lock_anything
 {
 local ($d) = @_;
-&lock_domain($d);
+&lock_domain($d) if ($d && $d->{'id'});
 # Assume that we are about to do something important, and so don't want to be
 # killed by a SIGPIPE triggered by a browser cancel.
 $SIG{'PIPE'} = 'ignore';
@@ -16888,10 +16888,11 @@ $SIG{'TERM'} = 'ignore';
 }
 
 # release_lock_anything(&domain)
+# Called by the various release_lock_* functions
 sub release_lock_anything
 {
 local ($d) = @_;
-&unlock_domain($d);
+&unlock_domain($d) if ($d && $d->{'id'});
 }
 
 # virtualmin_api_log(&argv, [&domain], [&suppress-flags])
