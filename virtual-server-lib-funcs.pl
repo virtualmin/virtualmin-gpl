@@ -3897,11 +3897,11 @@ else {
 }
 
 # Print functions for HTML output
-sub first_html_print { print_and_capture(@_,"<br>\n");
+sub first_html_print { print_and_capture("<span data-first-print>@_</span>","<br>\n");
 		       print bottom_scroll_js(); }
-sub second_html_print { print_and_capture(@_,"<br><br data-x-br>\n");
+sub second_html_print { print_and_capture("<span data-second-print>@_</span>","<br><br data-x-br>\n");
 		        print bottom_scroll_js(); }
-sub indent_html_print { print_and_capture("<ul>\n");
+sub indent_html_print { print_and_capture("<ul data-indent-print>\n");
 		        print bottom_scroll_js(); }
 sub outdent_html_print { print_and_capture("</ul>\n");
 		         print bottom_scroll_js(); }
