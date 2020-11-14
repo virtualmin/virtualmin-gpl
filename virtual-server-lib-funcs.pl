@@ -6711,7 +6711,6 @@ if ($dest =~ /\s|\(|\)/) {
 	}
 local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
-print STDERR "cmd=$cmd\n";
 &run_ssh_command($cmd, $pass, $err, $asuser);
 }
 
