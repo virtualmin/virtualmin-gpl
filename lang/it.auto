@@ -2947,6 +2947,7 @@ scripts_userpass=L'accesso iniziale all'amministrazione è $1 con la password $2
 scripts_useronly=Il login di amministrazione iniziale è $1.
 scripts_passonly=La password di amministrazione iniziale è $1.
 scripts_passmode=Login iniziale per lo script
+scripts_passmode4=Password iniziale per lo script
 scripts_passmodedef1=Stesso nome utente e password del dominio
 scripts_passmode1=Nome utente $1 e password $2 
 scripts_passmodedef2=Stessa password del server virtuale

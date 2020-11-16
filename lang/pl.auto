@@ -3302,6 +3302,7 @@ scripts_installgem=Instalowanie pakietu Ruby Gems ..
 scripts_mmax=(Maksymalnie $1)
 scripts_sitelink=Więcej informacji na temat używania tego skryptu można znaleźć na stronie <a href='$1' target=_blank>$1</a>.
 scripts_userpass=Początkowy login administratora to $1 z hasłem $2.
+scripts_passmode4=Początkowe hasło do skryptu
 scripts_epassmodeuser=Niepoprawny login do skryptu - tylko litery, cyfry i znaki. - _ może być użyty
 scripts_addover=Przesłanianie proxy dla ścieżki $1 ..
 scripts_delproxy=Usuwanie proxy dla ścieżki $1 ..

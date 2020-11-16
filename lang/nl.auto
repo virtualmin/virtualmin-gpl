@@ -564,6 +564,7 @@ scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
 scripts_cats=Categorieën
+scripts_passmode4=Eerste wachtwoord voor script
 scripts_needpackages=Controleren op $1 vereiste pakketten.
 scripts_epackages=.. pakketinstallatie wordt niet ondersteund op dit systeem!
 scripts_installpackage=$1 installeren. ..

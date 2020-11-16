@@ -120,26 +120,64 @@ if ($ok) {
 
 	# Show custom login and password
 	if (!$sinfo && defined(&{$script->{'passmode_func'}})) {
-		$passmode = &{$script->{'passmode_func'}}($d, $ver);
+		($passmode, $passlenreq, $passpattern) = &{$script->{'passmode_func'}}($d, $ver);
 		}
+
+	# If script has password length requirement
+	my $dompass = $d->{'pass'};
+	my $dompass_bad = 0;
+
+	# If password length doesn't fit, generate new one
+	if ($passlenreq && length($dompass) < $passlenreq) {
+		$dompass_bad = 1;
+		$dompass = &random_password();
+		}
+
+	my $dompass_req;
+	# If there is a pattern set, test it and pass to HTML5 tag
+	if ($passpattern) {
+		$dompass_bad = 1 if ($dompass !~ /$passpattern/);
+		$passpattern = " pattern=\"".&quote_escape($passpattern)."\"";
+		}
+	if ($passlenreq) {
+		$dompass_req = "required minlength=\"".int($passlenreq)."\"$passpattern";
+		}
+	my $passmodepassfield =
+		$dompass_bad ?
+			&ui_textbox("passmodepass", $dompass, 20, undef, undef, $dompass_req ) :
+			&ui_password("passmodepass", $dompass, 20);
 	if ($passmode == 1) {
-		# Can choose login and password
-		print &ui_table_row($text{'scripts_passmode'},
-		      &ui_radio("passmode_def", 1,
-			[ [ 1, $text{'scripts_passmodedef1'}."<br>" ],
-			  [ 0, &text('scripts_passmode1',
-			     &ui_textbox("passmodeuser", $d->{'user'}, 20),
-			     &ui_password("passmodepass", $d->{'pass'}, 20)) ]
-			]));
+		if ($dompass_bad) {
+			# Can choose login and password (with requirements)
+			print &ui_table_row($text{'scripts_passmode'},
+			      &ui_textbox("passmodeuser", $d->{'user'}, 20) .
+				  $passmodepassfield);
+			}
+		else {
+			# Can choose login and password
+			print &ui_table_row($text{'scripts_passmode'},
+			      &ui_radio("passmode_def", 1,
+				[ [ 1, $text{'scripts_passmodedef1'}."<br>" ],
+				  [ 0, &text('scripts_passmode1',
+				     &ui_textbox("passmodeuser", $d->{'user'}, 20),
+				     $passmodepassfield) ]
+				]));
+			}
 		}
 	elsif ($passmode == 2) {
-		# Can choose only password
-		print &ui_table_row($text{'scripts_passmode'},
-		      &ui_radio("passmode_def", 1,
-			[ [ 1, $text{'scripts_passmodedef2'}."<br>" ],
-			  [ 0, &text('scripts_passmode2',
-			     &ui_password("passmodepass", $d->{'pass'}, 20)) ]
-			]));
+		if ($dompass_bad) {
+			# Can choose only password (with requirements)
+			print &ui_table_row($text{'scripts_passmode4'}, $passmodepassfield);
+			}
+		else {
+			# Can choose only password
+			print &ui_table_row($text{'scripts_passmode'},
+			      &ui_radio("passmode_def", 1,
+				[ [ 1, $text{'scripts_passmodedef2'}."<br>" ],
+				  [ 0, &text('scripts_passmode2',
+				     $passmodepassfield) ]
+				]));
+			}
 		}
 	elsif ($passmode == 3) {
 		# Can choose only login

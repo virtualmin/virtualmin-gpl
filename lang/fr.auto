@@ -1724,6 +1724,7 @@ scripts_idb2=Utilise la base de données avec le préfixe de table
 scripts_idbtbpref=avec préfixe de table
 scripts_deregistering=Désenregistrement de la version $1 $2 ..
 scripts_cats=Les catégories
+scripts_passmode4=Mot de passe initial pour le script
 newnotify_title=Propriétaires du serveur de messagerie
 newnotify_desc=Cette page peut être utilisée pour envoyer des e-mails aux propriétaires des serveurs virtuels sélectionnés, par exemple pour annoncer des temps d'arrêt du système, des mises à niveau ou d'autres modifications de service. Les sous-postes suivants peuvent être utilisés dans le corps et l'objet du message:
 newnotify_header=Options de messagerie pour les propriétaires de serveurs

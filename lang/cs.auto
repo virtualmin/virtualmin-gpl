@@ -3074,6 +3074,7 @@ scripts_userpass=Počáteční přihlašovací jméno pro správu je $1 s heslem
 scripts_useronly=Počáteční přihlašovací přihlašovací jméno je $1.
 scripts_passonly=Počáteční heslo pro správu je $1.
 scripts_passmode=Počáteční přihlášení skriptu
+scripts_passmode4=Počáteční heslo pro skript
 scripts_passmodedef1=Stejné uživatelské jméno a heslo jako doména
 scripts_passmode1=Uživatelské jméno $1 a heslo $2 
 scripts_passmodedef2=Stejné heslo jako virtuální server
