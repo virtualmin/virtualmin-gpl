@@ -123,24 +123,27 @@ if ($ok) {
 		($passmode, $passlenreq, $passpattern) = &{$script->{'passmode_func'}}($d, $ver);
 		}
 
-	# If script has password length requirement
 	my $dompass = $d->{'pass'};
 	my $dompass_bad = 0;
 
-	# If password length doesn't fit, generate new one
+	# If script has password length requirement
 	if ($passlenreq && length($dompass) < $passlenreq) {
+		# If password length doesn't fit, generate new one
 		$dompass_bad = 1;
-		$dompass = &random_password();
+		$dompass = &random_password($passlenreq);
 		}
 
-	my $dompass_req;
+	
 	# If there is a pattern set, test it and pass to HTML5 tag
 	if ($passpattern) {
 		$dompass_bad = 1 if ($dompass !~ /$passpattern/);
 		$passpattern = " pattern=\"".&quote_escape($passpattern)."\"";
 		}
+
+	# If password length requirement is set
+	my $dompass_req;
 	if ($passlenreq) {
-		$dompass_req = "required minlength=\"".int($passlenreq)."\"$passpattern";
+		$dompass_req = " required minlength=\"".int($passlenreq)."\"$passpattern";
 		}
 	my $passmodepassfield =
 		$dompass_bad ?
