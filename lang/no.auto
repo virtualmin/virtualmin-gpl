@@ -343,6 +343,7 @@ scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
+scripts_passmode4=Opprinnelig passord for skript
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python
 links_phpini3=PHP-FPM-konfigurasjon

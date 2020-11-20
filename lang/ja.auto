@@ -3960,6 +3960,7 @@ scripts_userpass=最初の管理ログインは $1、パスワードは $2です
 scripts_useronly=初期管理ログインは $1です。
 scripts_passonly=初期管理パスワードは $1です。
 scripts_passmode=スクリプトの初期ログイン
+scripts_passmode4=スクリプトの初期パスワード
 scripts_passmodedef1=ドメインと同じユーザー名とパスワード
 scripts_passmode1=ユーザー名 $1とパスワード $2
 scripts_passmodedef2=仮想サーバーと同じパスワード

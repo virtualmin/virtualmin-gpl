@@ -1774,6 +1774,7 @@ scripts_userpass=İlk yönetim oturumu $2 parolasıyla $1.
 scripts_useronly=İlk yönetim oturumu $1.
 scripts_passonly=İlk yönetim şifresi $1.
 scripts_passmode=Komut dosyası için ilk oturum açma
+scripts_passmode4=Komut dosyası için ilk şifre
 scripts_passmodedef1=Alan adıyla aynı kullanıcı adı ve şifre
 scripts_passmode1=$1 kullanıcı adı ve $2 şifresi
 scripts_passmodedef2=Sanal sunucu ile aynı şifre

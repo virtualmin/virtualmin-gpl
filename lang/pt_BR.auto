@@ -3742,6 +3742,7 @@ scripts_userpass=O logon de administração inicial é $1 com a senha $2.
 scripts_useronly=O logon de administração inicial é $1.
 scripts_passonly=A senha de administração inicial é $1.
 scripts_passmode=Login inicial para script
+scripts_passmode4=Senha inicial para script
 scripts_passmodedef1=Mesmo nome de usuário e senha que o domínio
 scripts_passmode1=Nome de usuário $1 e senha $2 
 scripts_passmodedef2=A mesma senha do servidor virtual

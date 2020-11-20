@@ -1283,6 +1283,7 @@ scripts_find=Finden Sie passende Skripte:
 scripts_installgem=Ruby Gems-Paket installieren ..
 scripts_mmax=(Höchstens $1)
 scripts_sitelink=Weitere Informationen zur Verwendung dieses Skripts finden Sie unter <a href='$1' target=_blank>$1</a>.
+scripts_passmode4=Anfangskennwort für das Skript
 scripts_unsupdesc=Mit diesem Formular können Sie eine Skriptversion installieren, die nicht von Virtualmin getestet wurde oder nicht mehr unterstützt wird. Beachten Sie, dass dies möglicherweise nicht funktioniert und sogar andere Seiten des virtuellen Servers beschädigen kann.
 scripts_addover=Überschreiben des Proxys für Pfad $1 ..
 scripts_delproxy=Proxy für Pfad $1 entfernen ..

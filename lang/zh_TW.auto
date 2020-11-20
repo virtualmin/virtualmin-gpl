@@ -1576,6 +1576,7 @@ scripts_userpass=初始管理登錄為 $1，密碼為 $2。
 scripts_useronly=初始管理登錄為 $1。
 scripts_passonly=初始管理密碼為 $1。
 scripts_passmode=腳本的初始登錄
+scripts_passmode4=腳本的初始密碼
 scripts_passmodedef1=用戶名和密碼與域相同
 scripts_passmode1=用戶名 $1和密碼 $2
 scripts_passmodedef2=與虛擬服務器的密碼相同
