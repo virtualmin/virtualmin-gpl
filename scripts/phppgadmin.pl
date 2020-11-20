@@ -19,7 +19,7 @@ return "A browser-based PostgreSQL database management interface.";
 # script_phppgadmin_versions()
 sub script_phppgadmin_versions
 {
-return ( "5.6.0" );
+return ( "7.13.0" );
 }
 
 sub script_phppgadmin_release
@@ -200,13 +200,17 @@ return (1, "phpPgAdmin directory deleted.");
 sub script_phppgadmin_latest
 {
 local ($ver) = @_;
-return ( "http://phppgadmin.sourceforge.net/doku.php?id=download",,
-	 "phpPgAdmin-([0-9\\.]+).tar.bz2" );
+return ( "https://github.com/phppgadmin/phppgadmin/tags",
+	 sub { my ($d, $v) = @_;
+	       $d =~ /REL_([0-9\.\-]+)/ || return ();
+	       my $rv = $1;
+	       $rv =~ s/\-/\./g;
+	       return ($rv); } );
 }
 
 sub script_phppgadmin_site
 {
-return 'http://phppgadmin.sourceforge.net/';
+return 'https://github.com/phppgadmin/phppgadmin';
 }
 
 sub script_phppgadmin_gpl
