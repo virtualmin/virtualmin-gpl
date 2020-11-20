@@ -216,8 +216,9 @@ foreach my $ver (@vers) {
 
 # Call plugin-specific function to perform webserver setup
 if ($p ne 'web') {
-	return &plugin_call($p, "feature_save_web_php_mode",
-			    $d, $mode, $port, $newdom);
+	my $err = &plugin_call($p, "feature_save_web_php_mode",
+			       $d, $mode, $port, $newdom);
+	return $err;
 	}
 &require_apache();
 
