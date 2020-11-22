@@ -245,8 +245,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	my $dbs = "*.*";
 	$dbs = "`$qdb`.*" if ($db);
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+		eval {
+			local $main::error_must_die = 1;
+			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+			}
 		}
 	}
 else {
@@ -2831,9 +2834,12 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	my $qdb = &quote_mysql_database($db);
 	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+		eval {
+			local $main::error_must_die = 1;
+			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+			}
 		}
 	}
 else {
