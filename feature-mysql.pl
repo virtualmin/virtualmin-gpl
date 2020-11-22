@@ -1272,7 +1272,7 @@ foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
-					    $userpasses{$uname});
+					    $userpasses{$uname}, 1);
 		}
 	}
 
@@ -1779,7 +1779,7 @@ else {
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass) = @_;
+local ($d, $dbs, $user, $pass, $encpass, $restored) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Create on provisioning server
@@ -1814,7 +1814,7 @@ else {
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser, 1);
+				&add_db_table($d, $h, $db, $myuser, $restored);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
