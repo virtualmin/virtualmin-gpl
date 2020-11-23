@@ -245,8 +245,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	my $dbs = "*.*";
 	$dbs = "`$qdb`.*" if ($db);
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+		eval {
+			local $main::error_must_die = 1;
+			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+			}
 		}
 	}
 else {
@@ -1269,7 +1272,7 @@ foreach my $uname (keys %userdbs) {
 	my @grant = grep { $created{$_} } @{$userdbs{$uname}};
 	if (@grant) {
 		&create_mysql_database_user($d, \@grant, $uname, undef,
-					    $userpasses{$uname});
+					    $userpasses{$uname}, 1);
 		}
 	}
 
@@ -1776,7 +1779,7 @@ else {
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass) = @_;
+local ($d, $dbs, $user, $pass, $encpass, $restored) = @_;
 &require_mysql();
 if ($d->{'provision_mysql'}) {
 	# Create on provisioning server
@@ -1811,7 +1814,7 @@ else {
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser, 1);
+				&add_db_table($d, $h, $db, $myuser, $restored);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
@@ -2831,9 +2834,12 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	my $qdb = &quote_mysql_database($db);
 	my $dbs = "`$qdb`.*";
 	foreach my $r (@{$rv->{'data'}}) {
-		&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
-		&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+		eval {
+			local $main::error_must_die = 1;
+			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+			}
 		}
 	}
 else {
