@@ -2,6 +2,9 @@
 # This script gets copied to each domain's CGI directory to output the
 # correct SMTP and IMAP server details.
 
+# For internal version checking
+$AUTOCONFIG_VERSION = 1.0;
+
 # These variables get replaced when the script is copied
 $OWNER = '';		# Bob's website
 $USER = '';		# bob
