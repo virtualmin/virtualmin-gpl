@@ -263,9 +263,16 @@ if ($hasmailfile && $config{'show_mailuser'}) {
 
 if ($hasextra) {
 	# Show extra email addresses
+	@extra = @{$user->{'extraemail'}};
+	foreach $e (@extra) {
+		if ($e =~ /^(\S*)\@(\S+)$/) {
+			local ($eu, $ed) = ($1, $2);
+			$ed = &show_domain_name($ed);
+			$e = $eu."\@".$ed;
+			}
+		}
 	print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
-			    &ui_textarea("extra",
-				join("\n", @{$user->{'extraemail'}}), 5, 50),
+			    &ui_textarea("extra", join("\n", @extra), 5, 50),
 			    2, \@tds);
 	}
 
