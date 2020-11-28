@@ -1808,9 +1808,9 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		$rv->{'err'} = $text{'php_fpmnodir'};
 		next;
 		}
-	my ($bestdir) = grep { /\Q$rv->{'version'}\E/ ||
-			       /\Q$rv->{'pkgversion'}\E/ ||
-			       /\Q$rv->{'shortversion'}\E/ } @verdirs;
+	my ($bestdir) = grep { /(php|\/)\Q$rv->{'version'}\E\// ||
+			       /(php|\/)\Q$rv->{'pkgversion'}\E\// ||
+			       /(php|\/)\Q$rv->{'shortversion'}\E\// } @verdirs;
 	$bestdir ||= $verdirs[0];
 	$rv->{'dir'} = $bestdir;
 
