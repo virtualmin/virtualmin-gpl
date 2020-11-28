@@ -9,6 +9,7 @@ $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
+@already = &get_all_domain_service_ssl_certs($d);
 
 # If this domain shares a cert file with another, link to it's page
 if ($d->{'ssl_same'}) {
@@ -77,6 +78,25 @@ if (@others) {
 							  : "view_domain.cgi";
 			      "<a href='$l?dom=$_->{'id'}'>".
 			        &show_domain_name($_)."</a>" } @others ]), 3);
+	}
+
+# Current usage
+if (@already) {
+	my @msgs;
+	foreach my $svc (@already) {
+		if ($svc->{'ip'}) {
+			push(@msgs, &text('cert_already_'.$svc->{'id'}.'_ip',
+					  $svc->{'ip'}));
+			}
+		elsif ($svc->{'dom'}) {
+			push(@msgs, &text('cert_already_'.$svc->{'id'}.'_dom',
+					  $svc->{'dom'}));
+			}
+		else {
+			push(@msgs, $text{'cert_already_'.$svc->{'id'}});
+			}
+		}
+	print &ui_table_row($text{'cert_svcs'}, join(", ", @msgs), 3);
 	}
 
 # Links to download
@@ -361,7 +381,6 @@ print &ui_tabs_end_tab();
 
 if (&can_webmin_cert()) {
 	# Per-IP or per-domain server usage
-	@already = &get_all_domain_service_ssl_certs($d);
 	print &ui_tabs_start_tab("mode", "perip");
 	print "$text{'cert_desc9'}<p>\n";
 	print &ui_form_start("save_peripcerts.cgi", "post");
