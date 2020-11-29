@@ -3466,6 +3466,9 @@ if ($ver && $variant_ &&
 	if ($variant =~ /mariadb/i) {
 		$variant = "mariadb";
 		}
+	else {
+		$variant = "mysql";
+		}
 	}
 return wantarray ? ($rv, $variant, $err) : $rv;
 }
