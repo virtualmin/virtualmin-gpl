@@ -3162,7 +3162,8 @@ if (!$rv) {
 
 	# Shut down again, with the mysqladmin command
 	&$first_print($text{'mysqlpass_kill'});
-	my $out = &backquote_logged("$mysql::config{'mysqladmin'} shutdown 2>&1 </dev/null");
+	my $mysql_shutdown = $mysql::config{'mysqladmin'} || 'mysqladmin';
+	my $out = &backquote_logged("$mysql_shutdown shutdown 2>&1 </dev/null");
 	if ($?) {
 		$out =~ s/\n/ /gm;
 		$rv = &text('mysqlpass_eshutdown', $out);
