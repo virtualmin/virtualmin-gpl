@@ -3921,15 +3921,21 @@ sub indent_text_print { $indent_text .= "    "; }
 sub outdent_text_print { $indent_text = substr($indent_text, 4); }
 sub html_tags_to_text
 {
-local ($rv) = @_;
+local ($rv, $disallow_newlines, $allow_links) = @_;
+my $newline = "\n";
+if ($disallow_newlines) {
+	$newline = " " if ($disallow_newlines);
+	$rv =~ s/\n/ /g;
+	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
-$rv =~ s/<a[^>]*>|<\/a>//g;
+$rv =~ s/<a[^>]*>|<\/a>//g if (!$allow_links);
 $rv =~ s/<pre>|<\/pre>//g;
-$rv =~ s/<br>|<br\s[^>]*>/\n/g;
-$rv =~ s/<p>|<p\s[^>]*>/\n\n/g;
+$rv =~ s/<br>|<br\s[^>]*>/$newline/g;
+$rv =~ s/<p>|<\/p>/$newline$newline/g;
+$rv =~ s/<p>|<p\s[^>]*>/$newline$newline/g;
 $rv = &entities_to_ascii($rv);
 return $rv;
 }
