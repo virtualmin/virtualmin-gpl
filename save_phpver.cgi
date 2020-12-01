@@ -46,7 +46,8 @@ else {
 &release_lock_web($d);
 $mode = &get_domain_php_mode($d);
 if ($mode ne "mod_php" && $mode ne "fpm") {
-	&save_domain_php_mode($d, $mode);
+	my $err = &save_domain_php_mode($d, $mode);
+	&error($err) if ($err);
 	}
 &clear_links_cache($d);
 &run_post_actions();
