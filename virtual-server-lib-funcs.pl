@@ -4423,10 +4423,11 @@ if (!$to) {
 local $ctype = $template =~ /<html[^>]*>|<body[^>]*>/i ? "text/html"
 						       : "text/plain";
 local $cs = &get_charset();
+$ctype .= '; charset='.$cs;
 local $attach = $template =~ /^[\000-\177]*$/ ?
     { 'headers' => [ [ 'Content-type', $ctype ] ],
       'data' => &entities_to_ascii($template) } :
-    { 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
+    { 'headers' => [ [ 'Content-Type', $ctype ],
                      [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
       'data' => &mailboxes::quoted_encode($template) };
 

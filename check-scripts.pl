@@ -208,14 +208,11 @@ if (@errs) {
 		exit(1);
 		}
 	else {
-		$mail = { 'headers' =>
-			[ [ 'From', &get_global_from_address() ],
-			  [ 'To', "jcameron\@webmin.com" ],
-			  [ 'Subject', "Virtualmin script errors" ] ],
-			'attach' =>
-			[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
-			    'data' => $body } ] };
-		&mailboxes::send_mail($mail);
+		&mailboxes::send_text_mail(&get_global_from_address(),
+					   "jcameron\@webmin.com",
+					   undef,
+					   "Virtualmin script errors",
+					   $body);
 		}
 	}
 

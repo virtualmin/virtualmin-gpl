@@ -246,14 +246,11 @@ if ($sched->{'email'} && $has_mailboxes &&
 	$output_header .= "\n";
 	$output = $output_header.$output;
 
-	$mail = { 'headers' => [ [ 'From', &get_global_from_address() ],
-				 [ 'Subject', &html_tags_to_text($subject) ],
-				 [ 'To', $sched->{'email'} ] ],
-		  'attach'  => [ { 'headers' => [ [ 'Content-type',
-						    'text/plain' ] ],
-				   'data' => &entities_to_ascii($output) } ]
-		};
-	&mailboxes::send_mail($mail);
+	&mailboxes::send_text_mail(&get_global_from_address(),
+				   $sched->{'email'},
+				   undef,
+				   &html_tags_to_text($subject),
+				   &entities_to_ascii($output));
 	}
 
 # Send email to domain owners too, if selected
@@ -279,17 +276,13 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 			$subject = &text('backup_donesubject', $host, $dest);
 			}
 
-		$mail = {
-		  'headers' =>
-			[ [ 'From', &get_global_from_address($edoms[0]) ],
-			  [ 'Subject', &html_tags_to_text($subject) ],
-			  [ 'To', $email ] ],
-		  'attach'  =>
-			[ { 'headers' => [ [ 'Content-type', 'text/plain' ] ],
-			    'data' => &entities_to_ascii($eoutput) } ]
-			};
 		if ($eoutput) {
-			&mailboxes::send_mail($mail);
+			&mailboxes::send_text_mail(
+				&get_global_from_address($edoms[0]),
+				$email,
+				undef,
+				&html_tags_to_text($subject),
+				&entities_to_ascii($eoutput));
 			}
 		}
 	}

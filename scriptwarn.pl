@@ -124,18 +124,17 @@ foreach my $u (@updates) {
 sub send_scriptwarn_email
 {
 local ($text, $emailto, $d) = @_;
-local $mail = { 'headers' => [ [ 'From', &get_global_from_address($d) ],
-			       [ 'To', join(", ", &unique(@$emailto)) ],
-			       [ 'Subject', $text{'scriptwarn_subject'} ],
-			       [ 'Content-type', 'text/plain' ] ],
-		'body' => $text };
 if ($debug_mode) {
 	print STDERR "Sending to ",join(", ", @$emailto),"\n";
 	print STDERR "Sending from ",&get_global_from_address($d),"\n";
 	print STDERR $text,"\n";
 	}
 else {
-	&mailboxes::send_mail($mail);
+	&mailboxes::send_text_mail(&get_global_from_address($d),
+				   join(", ", &unique(@$emailto)),
+				   undef,
+				   $text{'scriptwarn_subject'},
+				   $text);
 	}
 }
 
