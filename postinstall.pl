@@ -403,6 +403,9 @@ foreach my $d (&list_domains()) {
 		}
 	}
 
+# Update any domains with a new autoconfig.cgi script
+&update_all_autoconfig_cgis();
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
