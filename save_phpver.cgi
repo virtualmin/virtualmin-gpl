@@ -27,8 +27,9 @@ else {
 	for($i=0; defined($in{"dir_$i"}); $i++) {
 		if ($in{"ver_$i"} ne $curr{$in{"dir_$i"}}) {
 			$updated = 1;
-			&save_domain_php_directory($d, $in{"dir_$i"},
+			$err = &save_domain_php_directory($d, $in{"dir_$i"},
 						       $in{"ver_$i"});
+			&error($err) if ($err);
 			}
 		}
 
@@ -39,8 +40,9 @@ else {
 		$in{'newdir'} =~ /^(http|https|ftp):/ &&
 			&error($text{'phpver_enewdir'});
 		$updated = 1;
-		&save_domain_php_directory($d, &public_html_dir($d)."/".
+		$err = &save_domain_php_directory($d, &public_html_dir($d)."/".
 					       $in{'newdir'}, $in{'newver'});
+		&error($err) if ($err);
 		}
 	}
 &release_lock_web($d);

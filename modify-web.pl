@@ -377,12 +377,17 @@ foreach $d (@doms) {
 
 	# Update PHP version
 	if ($version && !$d->{'alias'}) {
-		&save_domain_php_directory($d, &public_html_dir($d), $version);
-		my $dommode = $mode || &get_domain_php_mode($d);
-		if ($dommode ne "mod_php" && $dommode ne "fpm") {
-			&save_domain_php_mode($d, $dommode);
+		&$first_print("Changing PHP version to $version ..");
+		my $err = &save_domain_php_directory($d, &public_html_dir($d),
+						     $version);
+		if (!$err) {
+			my $dommode = $mode || &get_domain_php_mode($d);
+			if ($dommode ne "mod_php" && $dommode ne "fpm") {
+				$err = &save_domain_php_mode($d, $dommode);
+				}
+			&clear_links_cache($d);
 			}
-		&clear_links_cache($d);
+		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
 	# Update Ruby mode

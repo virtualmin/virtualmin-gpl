@@ -77,8 +77,10 @@ elsif ($dir !~ /^\//) {
 # Make the change
 &obtain_lock_web($d);
 &set_all_null_print();
-&save_domain_php_directory($d, $dir, $version);
-&save_domain_php_mode($d, $mode);
+$err = &save_domain_php_directory($d, $dir, $version);
+&usage($err) if ($err);
+$err = &save_domain_php_mode($d, $mode);
+&usage($err) if ($err);
 &release_lock_web($d);
 &clear_links_cache($d);
 &refresh_webmin_user($d);

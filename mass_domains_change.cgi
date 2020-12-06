@@ -268,9 +268,14 @@ foreach $d (@doms) {
 	if (&can_edit_phpver() && $in{'phpver'} && $d->{'web'} &&
 	    !$d->{'alias'}) {
 		&$first_print($text{'massdomains_phpvering'});
-		&save_domain_php_directory($d, &public_html_dir($d),
-					   $in{'phpver'});
-		&$second_print($text{'setup_done'});
+		my $err = &save_domain_php_directory($d, &public_html_dir($d),
+					             $in{'phpver'});
+		if ($err) {
+			&$second_print(&text('massdomains_ephpvering', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Change the shell

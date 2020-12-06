@@ -931,8 +931,8 @@ if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
 $vers = [ sort { $a <=> $b } @$vers ];
-local $ok = &save_domain_php_directory($d, $dirpath, $vers->[0]);
-return $ok ? $vers->[0] : undef;
+local $err = &save_domain_php_directory($d, $dirpath, $vers->[0]);
+return $err ? undef : $vers->[0];
 }
 
 # clear_php_version(&domain, &sinfo)

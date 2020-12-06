@@ -4465,6 +4465,7 @@ massdomains_scannering=Updating virus scanning program ..
 massdomains_phpver=Default PHP version
 massdomains_phpchildren=PHP FCGId sub-processes
 massdomains_phpvering=Changing default PHP version ..
+massdomains_ephpvering=.. failed to change version : $1
 massdomains_phpchildrening=Changing PHP FCGId sub-processes ..
 massdomains_phpmode=PHP execution mode
 massdomains_phpmoding=Changing PHP execution mode ..

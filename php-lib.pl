@@ -520,8 +520,9 @@ local @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
 	# Restore PHP version from before mod_php
-	&save_domain_php_directory($d, &public_html_dir($d),
+	my $err = &save_domain_php_directory($d, &public_html_dir($d),
 				   $d->{'last_php_version'}, 1);
+	return $err if ($err);
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
@@ -1106,8 +1107,8 @@ return @rv;
 
 # save_domain_php_directory(&domain, dir, phpversion, [skip-ini-copy])
 # Sets up a directory to run PHP scripts with a specific version of PHP.
-# Should only be called on domains in cgi or fcgid mode! Returns 1 if the
-# directory version was set OK, 0 if not (because the virtualhost couldn't
+# Should only be called on domains in cgi or fcgid mode! Returns undef on
+# success, or an error message on failure (ie. because the virtualhost couldn't
 # be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
@@ -1118,18 +1119,18 @@ if ($p && $p ne 'web') {
 			    $d, $dir, $ver);
 	}
 elsif (!$p) {
-	return 0;
+	return "Virtual server does not have a website!";
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
-return 0 if ($mode eq "mod_php");
+return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
 local $pfound = 0;
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
 	# Since it will be on the same port, no Apache changes are needed.
 	my $phd = &public_html_dir($d);
-	$dir eq $phd || return 0;
+	$dir eq $phd || return "Public HTML directory not found";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
@@ -1235,7 +1236,7 @@ else {
 			}
 		$any++;
 		}
-	return 0 if (!$any);
+	return "No Apache virtualhosts found" if (!$any);
 	}
 
 # Make sure we have all the wrapper scripts
@@ -1254,8 +1255,8 @@ if (!$noini) {
 	}
 
 &register_post_action(\&restart_apache);
-$pfound || &error("Apache virtual host was not found");
-return 1;
+$pfound || return "Apache virtual host was not found";
+return undef;
 }
 
 # delete_domain_php_directory(&domain, dir)
