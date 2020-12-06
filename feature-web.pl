@@ -1553,7 +1553,7 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_web
 {
-my ($d) = @_;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# Just re-add ServerAlias entries if missing
 	&$first_print($text{'restore_apachecp2'});
@@ -1565,9 +1565,9 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 		return 0;
 		}
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	local $srclref = &read_file_lines($_[1], 1);
+	local $srclref = &read_file_lines($file, 1);
 	push(@sa, @$srclref);
-	&unflush_file_lines($_[1]);
+	&unflush_file_lines($file);
 	@sa = &unique(@sa);
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 	&flush_file_lines($pvirt->{'file'});
@@ -1581,7 +1581,7 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_port'});
 local $tmpl = &get_template($d->{'template'});
 if ($virt) {
-	local $srclref = &read_file_lines($_[1]);
+	local $srclref = &read_file_lines($file);
 	local $dstlref = &read_file_lines($virt->{'file'});
 
 	# Extract old logging-based directives before we change them, so they
@@ -1597,7 +1597,7 @@ if ($virt) {
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 
-	if ($_[3]->{'reuid'}) {
+	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
 		local $i;
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
@@ -1609,12 +1609,12 @@ if ($virt) {
 		}
 
 	# Fix up any DocumentRoot or other file-related directives
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
+	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 		local $i;
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
-				s/\Q$_[5]->{'home'}\E/$d->{'home'}/g;
+				s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			}
 		}
 
@@ -1687,11 +1687,11 @@ if ($virt) {
 		}
 
 	# Correct system-specific entries in PHP config files
-	if (!$d->{'alias'} && $_[5]) {
+	if (!$d->{'alias'} && $oldd) {
 		local $sock = &get_php_mysql_socket($d);
 		local @fixes = (
-		  [ "session.save_path", $_[5]->{'home'}, $d->{'home'}, 1 ],
-		  [ "upload_tmp_dir", $_[5]->{'home'}, $d->{'home'}, 1 ],
+		  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
+		  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  );
 		if ($sock ne 'none') {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
@@ -1714,30 +1714,30 @@ if ($virt) {
 	&setup_apache_logs($d);
 
 	# Copy back log files if they were in the backup
-	if (-r $_[1]."_alog") {
+	if (-r $file."_alog") {
 		&$first_print($text{'restore_apachelog'});
 
 		# Restore the access log
 		local $alog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'});
-		&copy_source_dest($_[1]."_alog", $alog);
+		&copy_source_dest($file."_alog", $alog);
 		&set_apache_log_permissions($d, $alog);
 
 		# If the backup contained any rotated log files, restore them
 		&foreign_require("syslog");
-		my @alogs = grep { $_ ne $_[1] }
-				 &syslog::all_log_files($_[1]."_alog");
+		my @alogs = grep { $_ ne $file }
+				 &syslog::all_log_files($file."_alog");
 		foreach my $l (@alogs) {
 			$l =~ /^.*_alog_(.*)$/ || next;
 			my $sfx = $1;
 			&copy_source_dest($l, $alog.$sfx);
 			}
 
-		if (-r $_[1]."_elog") {
+		if (-r $file."_elog") {
 			# Restore the error log
 			local $elog = &get_apache_log($d->{'dom'},
 						      $d->{'web_port'}, 1);
-			&copy_source_dest($_[1]."_elog", $elog);
+			&copy_source_dest($file."_elog", $elog);
 			&set_apache_log_permissions($d, $elog);
 			}
 		&$second_print($text{'setup_done'});
