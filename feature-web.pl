@@ -1686,6 +1686,25 @@ if ($virt) {
 			}
 		}
 
+	# If the restored config contains php_value entires but this system
+	# doesn't support mod_php, remove them
+	my @modes = &supported_php_modes($d);
+	if (&indexof("mod_php", @modes) < 0) {
+		my @ports = ( $d->{'web_port'},
+			      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		foreach my $p (@ports) {
+			my ($virt, $vconf, $conf) = &get_apache_virtual(
+							$d->{'dom'}, $p);
+			next if (!$virt);
+			&apache::save_directive(
+				"php_value", [ ], $vconf, $conf);
+			&apache::save_directive(
+				"php_admin_value", [ ], $vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			}
+		&register_post_action(\&restart_apache);
+		}
+
 	# Correct system-specific entries in PHP config files
 	if (!$d->{'alias'} && $oldd) {
 		local $sock = &get_php_mysql_socket($d);
