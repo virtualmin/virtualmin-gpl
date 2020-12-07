@@ -10981,6 +10981,22 @@ if (@expired || @nearly) {
 	push(@rv, $cert_text);
 	}
 
+# Check for invalid SSL cert files
+my @badcert;
+foreach my $d (&list_domains()) {
+	next if (!&domain_has_ssl($d));
+	my $cerr = &validate_cert_format($d->{'ssl_cert'}, 'cert');
+	my $kerr = &validate_cert_format($d->{'ssl_key'}, 'key');
+	if ($cerr) {
+		push(@rv, &text('index_certinvalid', &show_domain_name($d),
+			"<tt>".&html_escape($d->{'ssl_cert'})."</tt>", $cerr));
+		}
+	elsif ($kerr) {
+		push(@rv, &text('index_keyinvalid', &show_domain_name($d),
+			"<tt>".&html_escape($d->{'ssl_key'})."</tt>", $kerr));
+		}
+	}
+
 # Check for impending DNS registrar expiry
 my (@expired, @nearly);
 foreach my $d (&list_domains()) {

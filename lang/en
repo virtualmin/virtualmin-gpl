@@ -251,6 +251,8 @@ index_certnearly=Some virtual servers' SSL certificates are about to expire : $1
 index_expirywarn=DNS Registration Warning
 index_expiryexpired=Some virtual servers' DNS registrations have expired : $1
 index_expirynearly=Some virtual servers' DNS registrations are about to expire : $1
+index_certinvalid=The SSL certificate file $2 for $1 is invalid : $3
+index_keyinvalid=The SSL key file $2 for $1 is invalid : $3
 
 form_title=Create Virtual Server
 form_title2=Create Virtual Sub-Server
