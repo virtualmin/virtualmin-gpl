@@ -108,7 +108,7 @@ $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-&domain_has_ssl($d) ||
+&domain_has_website($d) ||
 	&usage("Virtual server $dname does not have SSL enabled");
 
 if ($self) {
