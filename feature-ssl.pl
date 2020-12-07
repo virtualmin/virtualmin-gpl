@@ -948,10 +948,10 @@ local %rv;
 local $_;
 local $cmd = "openssl x509 -in ".quotemeta($file)." -issuer -subject -enddate -startdate -text";
 if ($d && &is_under_directory($d->{'home'}, $file)) {
-	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." |");
+	open(OUT, &command_as_user($d->{'user'}, 0, $cmd)." 2>/dev/null |");
 	}
 else {
-	open(OUT, $cmd." |");
+	open(OUT, $cmd." 2>/dev/null |");
 	}
 while(<OUT>) {
 	s/\r|\n//g;
