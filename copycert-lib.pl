@@ -489,9 +489,13 @@ else {
 	&postfix::get_current_value("smtpd_tls_mandatory_protocols", "nodef") || "!SSLv2, !SSLv3, !TLSv1, !TLSv1.1");
 &lock_file($postfix::config{'postfix_master'});
 my $master = &postfix::get_master_config();
-my ($smtps_enabled_prior) = grep { $_->{'name'} eq 'smtps' && $_->{'enabled'} } @$master;
-my ($smtps) = grep { $_->{'name'} eq 'smtps' } @$master;
-my ($smtp) = grep { $_->{'name'} eq 'smtp' } @$master;
+my ($smtps_enabled_prior) = grep {
+	($_->{'name'} eq 'smtps' || $_->{'name'} eq '127.0.0.1:smtps') &&
+	$_->{'enabled'} } @$master;
+my ($smtps) = grep { $_->{'name'} eq 'smtps' ||
+		     $_->{'name'} eq '127.0.0.1:smtps' } @$master;
+my ($smtp) = grep { $_->{'name'} eq 'smtp' ||
+		    $_->{'name'} eq '127.0.0.1:smtp' } @$master;
 if (!$smtps_enabled_prior && $smtps && !$smtps->{'enabled'}) {
 	# Enable existing entry
 	$smtps->{'enabled'} = 1;
