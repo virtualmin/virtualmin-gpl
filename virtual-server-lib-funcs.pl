@@ -7962,7 +7962,7 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	    &domain_has_ssl($target) &&
 	    !$target->{'letsencrypt_dname'} &&
 	    ($tinfo = &cert_info($target)) &&
-	    $tinfo->{'issuer_cn'} =~ /Let's\s+Encrypt/i) {
+	    &is_letsencrypt_cert($tinfo)) {
 		&$first_print(&text('setup_letsaliases',
 				    &show_domain_name($target),
 				    &show_domain_name($dom)));

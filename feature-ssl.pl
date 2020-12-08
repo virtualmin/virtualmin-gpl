@@ -2418,6 +2418,19 @@ push(@rv, @{$info->{'alt'}}) if ($info->{'alt'});
 return @rv;
 }
 
+# is_letsencrypt_cert(&info|&domain)
+# Returns 1 if a cert info looks like it comes from Let's Encrypt
+sub is_letsencrypt_cert
+{
+my ($info) = @_;
+if ($info->{'dom'} && $info->{'id'}) {
+	# Looks like a virtual server
+	$info = &cert_info($info);
+	}
+return $info && ($info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ||
+		 $info->{'issuer_o'} =~ /Let's\s+Encrypt/i);
+}
+
 # apply_letsencrypt_cert_renewals()
 # Check all domains that need a new Let's Encrypt cert
 sub apply_letsencrypt_cert_renewals
@@ -2435,7 +2448,7 @@ foreach my $d (&list_domains()) {
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 
 	# Is the current cert even from Let's Encrypt?
-	next if ($info->{'issuer_cn'} !~ /Let's\s+Encrypt/i);
+	next if (!&is_letsencrypt_cert($info));
 
 	# Figure out when the cert was last renewed. This is the max of the
 	# date in the cert and the time recorded in Virtualmin
@@ -2624,7 +2637,7 @@ return undef if (&compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
 local $info = &cert_info($d);
-local $lets = $info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ? 1 : 0;
+local $lets = &is_letsencrypt_cert($info) ? 1 : 0;
 if (!$caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
