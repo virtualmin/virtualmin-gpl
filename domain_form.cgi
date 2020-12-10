@@ -665,7 +665,8 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 				      [ [ 1, $text{'form_content1'} ],
 					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
-			    &ui_textarea("content", undef, 5, 70),
+			    &ui_textarea("content", undef, 5, 70, undef, undef,
+                             "placeholder=\"$text{'deftmplt_slogan'}\""),
 			    3, \@tds);
 
 	print &ui_hidden_table_end();
