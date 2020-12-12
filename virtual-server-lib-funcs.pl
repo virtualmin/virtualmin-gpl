@@ -12099,10 +12099,15 @@ if (($d->{'spam'} && $config{'spam'} ||
 	}
 
 if (&domain_has_website($d) && &can_edit_phpmode()) {
-	# Website / PHP options button
+	# Website / PHP options buttons
+	push(@rv, { 'page' => 'edit_website.cgi',
+		    'title' => $text{'edit_website'},
+		    'desc' => $text{'edit_websitedesc'},
+		    'cat' => 'server',
+		  });
 	push(@rv, { 'page' => 'edit_phpmode.cgi',
-		    'title' => $text{'edit_phpmode'},
-		    'desc' => $text{'edit_phpmodedesc'},
+		    'title' => $text{'edit_php'},
+		    'desc' => $text{'edit_phpdesc'},
 		    'cat' => 'server',
 		  });
 	}
