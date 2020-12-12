@@ -2253,15 +2253,21 @@ if ($d->{'virt'}) {
 elsif (&postfix_supports_sni()) {
 	# Check if Postfix has an SNI map defined
 	my $maphash = &postfix::get_current_value("tls_server_sni_maps");
+	my $mapfile;
 	if (!$maphash) {
 		# No, so add it
-		$maphash = "hash:".&postfix::guess_config_dir()."/sni_map";
+		$mapfile = &postfix::guess_config_dir()."/sni_map";
+		$maphash = "hash:".$mapfile;
 		&postfix::set_current_value("tls_server_sni_maps", $maphash);
 		&postfix::ensure_map("tls_server_sni_maps");
 		$changed++;
 		}
+	else {
+		($mapfile) = &postfix::get_maps_files($maphash);
+		}
 
 	# Is there an entra for this domain already?
+	&lock_file($mapfile);
 	my $map = &postfix::get_maps("tls_server_sni_maps");
 	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );
 	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
@@ -2293,6 +2299,7 @@ elsif (&postfix_supports_sni()) {
 				}
 			}
 		}
+	&unlock_file($mapfile);
 	&postfix::regenerate_sni_table();
 	}
 else {
