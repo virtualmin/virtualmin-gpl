@@ -561,12 +561,25 @@ if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
 		}
 	$config{'bb_keyid'} = $in{'bb_keyid'};
 	$config{'bb_key'} = $in{'bb_key'};
-	&lock_file($module_config_file);
-	&save_module_config();
-	&unlock_file($module_config_file);
 	}
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 
 return undef;
+}
+
+# cloud_bb_clear()
+# Reset the Backblaze account to the default
+sub cloud_bb_clear
+{
+delete($config{'bb_key'});
+delete($config{'bb_keyid'});
+delete($config{'cloud_bb_owner'});
+delete($config{'cloud_bb_reseller'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 }
 
 1;
