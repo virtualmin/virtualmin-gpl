@@ -988,7 +988,8 @@ else {
 		return $text{'validate_ewebphpsuexec'};
 		}
 
-	# Make sure a <Directory> exists for the document root
+	# Make sure a <Directory> exists for the document root, and that
+	# DocumentRoot is valid
 	if (!$d->{'alias'}) {
 		local $pdir = &public_html_dir($d);
 		local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
@@ -997,7 +998,12 @@ else {
 		if (!$dir) {
 			return &text('validate_ewebdir', $pdir);
 			}
+		local $root = &apache::find_directive("DocumentRoot", $vconf);
+		if ($root ne $pdir && $root ne $pdir."/") {
+			return &text('validate_ewebroot', $pdir);
+			}
 		}
+
 
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
 	my $ip6addr;
