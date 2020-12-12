@@ -1855,20 +1855,26 @@ return -1 if (!&foreign_installed("dovecot"));
 my $ver = &dovecot::get_dovecot_version();
 return -1 if ($ver < 2);
 
+my $cfile = &dovecot::get_config_file();
+&lock_file($cfile);
+
 # Check if dovecot is using SSL globally
 my $conf = &dovecot::get_config();
 my $sslyn = &dovecot::find_value("ssl", $conf);
-return 0 if ($sslyn !~ /yes|required/i);
+if ($sslyn !~ /yes|required/i) {
+	&unlock_file($cfile);
+	return 0;
+	}
 my $ssldis = &dovecot::find_value("ssl_disable", $conf);
-return 0 if ($ssldis =~ /yes/i);
+if ($ssldis =~ /yes/i) {
+	&unlock_file($cfile);
+	return 0;
+	}
 
 # Created combined file if needed
 if (!$d->{'ssl_combined'} && !-r $d->{'ssl_combined'}) {
 	&sync_combined_ssl_cert($d);
 	}
-
-my $cfile = &dovecot::get_config_file();
-&lock_file($cfile);
 
 local $chain = &get_website_ssl_file($d, "ca");
 local $nochange = 0;
