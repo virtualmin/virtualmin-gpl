@@ -663,7 +663,7 @@ foreach $d (@doms) {
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert || $linkcert) {
+	    defined($renew) || $breakcert || $linkcert || $fixhtmldir) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
