@@ -6094,6 +6094,8 @@ elsif ($p) {
 				  "$cgidir/autoconfig.cgi");
 			push(@sc, "/autodiscover/autodiscover.xml ".
 				  "$cgidir/autoconfig.cgi");
+			push(@sc, "/autodiscover/autodiscover.json ".
+				  "$cgidir/autoconfig.cgi");
 			&apache::save_directive("ScriptAlias", \@sc,
 						$vconf, $conf);
 			}
