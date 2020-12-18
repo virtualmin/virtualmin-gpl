@@ -17986,14 +17986,14 @@ if ($showoutput) {
 	}
 if ($rok != 0) {
 	if ($deletemode == 2) {
-		&$second_print(&text('transfer_erestoring2', $rerr,
+		&$second_print(&text('transfer_erestoring3', "<pre>".$rerr."</pre>",
 				     $remotetemp, $desthost));
 		}
 	elsif ($deletemode == 1) {
-		&$second_print(&text('transfer_erestoring1', $rerr));
+		&$second_print(&text('transfer_erestoring2', "<pre>".$rerr."</pre>"));
 		}
 	else {
-		&$second_print(&text('transfer_erestoring', $rerr));
+		&$second_print(&text('transfer_erestoring', "<pre>".$rerr."</pre>"));
 		}
 	if ($deletemode != 2) {
 		&execute_command_via_ssh($desthost, $destpass,
