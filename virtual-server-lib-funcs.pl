@@ -17149,8 +17149,13 @@ if ($config{'scriptwarn_url'} && !$main::calling_get_virtualmin_url) {
 	$rv =~ s/\/$//;
 	$main::calling_get_virtualmin_url = 0;
 	}
+elsif (defined(&get_webmin_email_url)) {
+	# Use new standard function
+	return &get_webmin_email_url(undef, undef, 0, $d->{'dom'});
+	}
 else {
 	# Work out from miniserv
+	# XXX remove this after get_webmin_email_url is widely available
 	local %miniserv;
 	&get_miniserv_config(\%miniserv);
 	local $proto = $miniserv{'ssl'} ? 'https' : 'http';
