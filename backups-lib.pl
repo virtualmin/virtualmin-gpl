@@ -2299,6 +2299,19 @@ if ($ok) {
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
 				}
+			local $oldssl = $d->{'backup_ssl_type'};
+			if (!$oldssl && $d->{'ssl'}) {
+				$oldssl = 'ssl';
+				}
+			elsif (!$oldssl && $d->{'virtualmin-nginx-ssl'}) {
+				$oldssl = 'virtualmin-nginx-ssl';
+				}
+			if ($oldssl &&
+			    &indexof($oldssl, @config_features, @plugins) < 0) {
+				$d->{$oldssl} = 0;
+				my $newssl = &domain_has_ssl();
+				$d->{$newssl} = 1 if ($newssl);
+				}
 
 			local ($parentdom, $parentuser);
 			if ($d->{'parent'}) {

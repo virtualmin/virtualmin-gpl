@@ -5728,6 +5728,7 @@ else {
 
 # Record webserver type
 $_[0]->{'backup_web_type'} = &domain_has_website($_[0]);
+$_[0]->{'backup_ssl_type'} = &domain_has_ssl($_[0]);
 
 &save_domain($_[0]);
 
