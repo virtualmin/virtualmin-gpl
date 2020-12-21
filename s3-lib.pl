@@ -547,6 +547,7 @@ if (&can_use_aws_cmd($akey, $skey)) {
 	# Use the aws command
 	my $out = &call_aws_cmd($akey, [ "ls" ]);
 	return $out if ($?);
+	my @rv;
 	foreach my $l (split(/\r?\n/, $out)) {
 		my ($date, $time, $file) = split(/\s+/, $l, 4);
 		push(@rv, { 'Name' => $file,
