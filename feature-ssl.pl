@@ -1908,25 +1908,35 @@ if ($d->{'virt'}) {
 			       'members' => [],
 			       'file' => $cfile };
 			my $lref = &read_file_lines($l->{'file'}, 1);
-			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
+			$l->{'line'} = scalar(@$lref);
+			$l->{'eline'} = $l->{'line'} + 1;
 			&dovecot::save_section($conf, $l);
 			push(@$conf, $l);
 			}
+		my $created = 0;
 		if (!$imap) {
 			$imap = { 'name' => 'protocol',
 				  'value' => 'imap',
 				  'members' => [
 					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_combined'} },
+					  'value' => "<".$d->{'ssl_combined'},
+					},
 					{ 'name' => 'ssl_key',
-					  'value' => "<".$d->{'ssl_key'} },
+					  'value' => "<".$d->{'ssl_key'},
+					},
 					],
 				  'indent' => 1,
+				  'enabled' => 1,
+				  'sectionname' => 'local',
+				  'sectionvalue' => $d->{'ip'},
 				  'file' => $l->{'file'},
 				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} };
+				  'eline' => $l->{'line'} + 0 };
 			&dovecot::save_section($conf, $imap);
 			push(@{$l->{'members'}}, $imap);
+			push(@$conf, $imap);
+			$l->{'eline'} = $imap->{'eline'}+1;
+			$created++;
 			}
 		else {
 			&dovecot::save_directive($imap->{'members'},
@@ -1946,11 +1956,16 @@ if ($d->{'virt'}) {
 					  'value' => "<".$d->{'ssl_key'} },
 					],
 				  'indent' => 1,
+				  'enabled' => 1,
+				  'sectionname' => 'local',
+				  'sectionvalue' => $d->{'ip'},
 				  'file' => $l->{'file'},
 				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} };
+				  'eline' => $l->{'line'} + 0 };
 			&dovecot::save_section($conf, $pop3);
 			push(@{$l->{'members'}}, $pop3);
+			push(@$conf, $pop3);
+			$created++;
 			}
 		else {
 			&dovecot::save_directive($pop3->{'members'},
@@ -1961,6 +1976,12 @@ if ($d->{'virt'}) {
 				"ssl_ca", undef);
 			}
 		&flush_file_lines($imap->{'file'}, undef, 1);
+		if ($created) {
+			# Current Dovecot config code doesn't set lines
+			# properly when adding sections, so re-read the whole
+			# config on the next pass
+			@dovecot::get_config_cache = ( );
+			}
 		}
 	else {
 		# Doesn't need one, either because SSL isn't enabled or the
