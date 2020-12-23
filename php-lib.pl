@@ -1757,8 +1757,9 @@ my @rv;
 my %donever;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		   (map { my $v = $_; $v =~ s/\.//g;
-			  ("php$v-php-fpm", "php$v-fpm", "php${v}w-fpm",
-			   "rh-php$v-php-fpm", "php$_-fpm") }
+			  ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
+			   "rh-php${v}-php-fpm", "php${_}-fpm",
+			   "php${v}u-fpm") }
 		        @all_possible_php_versions)) {
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
