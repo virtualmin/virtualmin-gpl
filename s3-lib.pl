@@ -549,7 +549,7 @@ if (&can_use_aws_cmd($akey, $skey)) {
 	return $out if ($?);
 	my @rv;
 	foreach my $l (split(/\r?\n/, $out)) {
-		my ($date, $time, $file) = split(/\s+/, $l, 4);
+		my ($date, $time, $file) = split(/\s+/, $l, 3);
 		push(@rv, { 'Name' => $file,
 			    'CreationDate' => $date."T".$time.".000Z" });
 		}
