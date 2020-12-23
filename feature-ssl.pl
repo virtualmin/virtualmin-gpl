@@ -1901,6 +1901,7 @@ if ($d->{'virt'}) {
 
 	if ($enable) {
 		# Needs a cert for the IP
+		# XXX use create_section rather than save_section when available
 		if (!$l) {
 			$l = { 'name' => 'local',
 			       'value' => $d->{'ip'},
