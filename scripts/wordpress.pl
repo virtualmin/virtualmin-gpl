@@ -35,7 +35,7 @@ return ( 5 );
 
 sub script_wordpress_php_modules
 {
-return ("mysql", "gd");
+return ("mysql", "gd", "json");
 }
 
 sub script_wordpress_php_optional_modules
