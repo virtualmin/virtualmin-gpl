@@ -5004,6 +5004,7 @@ newquotacheck_udoing=Checking user quotas on $1 ..
 newquotacheck_gdoing=Check group quotas on $1 ..
 
 phpmode_title=Website Options
+phpmode_title2=PHP Options
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
 phpmode_header=Website and PHP options
 phpmode_mode=PHP script execution mode
@@ -5017,6 +5018,7 @@ phpmode_short_fcgid=FCGId
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Warning - Switching away from CGI or FCGId modes will remove any per-directory PHP version selections.
 phpmode_err=Failed to save website options
+phpmode_err2=Failed to save PHP options
 phpmode_suexec=Run CGI scripts as domain owner?
 phpmode_esuexec=The <b>CGI wrapper</b> option cannot be selected unless <b>Run CGI scripts as domain owner</b> is selected
 phpmode_emodsuexec=The <b>Run CGI scripts as domain owner</b> option cannot be enabled unless the Apache <tt>mod_suexec</tt> module is installed
