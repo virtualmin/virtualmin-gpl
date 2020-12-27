@@ -207,6 +207,7 @@ index_mass=Update Geselecteerde
 index_mass_all=Update Alle Virtuele Servers
 index_disable=Geselecteerden Uitschakelen
 index_enable=Geselecteerden Aanzetten
+
 index_backup=Backup Virtuele Servers
 index_backupdesc=Klik op deze knop om onmiddellijk een een backup uit te voeren. Er zal een formulier getoond worden waar u kunt aangeven welke servers gebackupt moeten worden, welke eigenschappen moeten worden opgeslagen en waar de backup naar toe moet.
 index_sched=Geplande Backup
@@ -219,6 +220,7 @@ index_backuplog=Backup Logs
 index_backuplogdesc=Laat alle logs zien waar u permissie op heeft om te maken, of via de Virtualmin UI, opdracht regel of middels een planning.
 index_dmore=$1 meer ..
 index_virtualminconfig=Virtualmin Configuratie
+
 form_title=Virtuele Server Aanmaken
 form_title2=Virtuele Sub-Server Aanmaken
 form_title3=Alias Server Aanmaken
@@ -325,6 +327,7 @@ form_limits=Quota's en limieten
 form_proxysect=IP adres en doorsturen
 form_ipsect=IP adres en interfaces
 form_inputssect=Extra opties
+
 setup_err=Mislukt om een virtuele server te maken
 setup_eplan=Geselecteerde plan bestaat niet of is niet beschikbaar
 setup_evital=De kritische eigenschap $1 is niet juist gemaakt - Virtuele server aanmaken is gestopt.
@@ -449,6 +452,7 @@ setup_efwdtomail=Een standaard email doorstuur adres kan alleen worden ingevuld 
 setup_econtent=Geen aanvankelijke website tekst ingevuld
 setup_edefip=Nieuwe virtuele server heeft geen IP adres! Misschien kon Virtualmin niet het standaard IP adres vinden van het systeem.
 setup_qmailme=Deze domein naam kan niet gebruikt worden voor Qmail, omdat het dezelfde naam is als de server's hostnaam $1 (van de <tt>control/me</tt> file)
+
 setup_title=Virtuele Server Opzetten
 setup_group=Aanmaken van administratie groep $1 ..
 setup_user=Aanmaken van een administratie gebruiker $1 ..
@@ -590,8 +594,10 @@ setup_warnings2=De volgende mogelijke problemen bij het modificeren van deze vir
 setup_warnrusure=Weet u zeker dat u wilt doorgaan ?
 setup_warnok1=Ja, Maak Virtuele Server
 setup_warnok2=Ja, Modificeer Virtuele Server
+
 indom=In domein $1
 equotacommand=Quota opdracht $1 mislukt : $2
+
 users_ecannot=U bent niet bevoegd om gebruikers in dit domein te bewerken
 users_ecannot2=U bent niet bevoegd om locale gebruikers te bewerken
 users_emailbox=De domein eigenaars mailbox kan niet worden bewerkt
@@ -646,6 +652,7 @@ users_defaults=Bewerk Nieuwe Gebruiker Standaarden
 users_defaultsdesc=Bekijk en bewerk de standaard instellingen voor de nieuwe gebruikers in deze virtuele server.
 users_all=Alles
 users_same=Zelfde als admin
+
 user_create=Gebruiker Aanmaken
 user_createweb=FTP Gebruiker Aanmaken
 user_edit=Bewerk Gebruiker
@@ -764,6 +771,7 @@ user_lastlogin_pop3=POP3 (email ophalen)
 user_lastlogin_imap=IMAP (email ophalen)
 user_lastlogin_smtp=SMTP (email versturen)
 user_lastlogin_never=Er zijn nog geen login's opgenomen
+
 aliases_ecannot=U bent niet bevoegd om aliassen te bewerken in dit domein
 aliases_title=Email Aliassen
 aliases_name=Naam
@@ -802,6 +810,7 @@ aliases_reply=Auto-antwoord met bericht $1
 aliases_emass=Handmatig aliassen bewerken.
 aliases_hide=Verberg speciale aliassen.
 aliases_show=Toon speciale aliassen.
+
 alias_create=Mail Alias Aanmaken
 alias_edit=Bewerk Email Alias
 alias_header=Email doorstuur alias details
@@ -884,18 +893,22 @@ alias_psel=Op datum
 alias_estart=Ongeldige automatische antwoord start datum
 alias_eend=Ongeldige automatische antwoord eind datum
 alias_aopts=Automatische antwoord opties
+
 stop_ecannot=U bent niet bevoegd om services te stoppen
 stop_err=Mislukt om service te stoppen
 stop_title=Gestopte Service
 stop_done=De service voor $1 is succesvol gestopt.
+
 start_ecannot=U bent niet bevoegd om services te starten
 start_err=Mislukt om de service te starten
 start_title=Gestarte Service
 start_done=De service voor $1 is succesvol gestart.
+
 restart_ecannot=U bent niet bevoegd om services te herstarten
 restart_err=Mislukt om services te herstarten
 restart_title=Herstarten Service
 restart_done=De service voor $1 is gestopt en succesvol herstart.
+
 bstop_err=Mislukt om BIND te stoppen
 bstop_epid=Proces is niet langer in werking
 mstop_err=Mislukt om email server te stoppen
@@ -906,6 +919,7 @@ fstart_err=Mislukt om FTP server te starten
 fstop_edown=Niet aan het werk
 fstop_ekill=Stoppen mislukt : $1
 fstart_eup=Reeds aan het werk
+
 edit_title=Bewerk Virtuele Server
 edit_title2=Bewerk Virtuele Sub-Server
 edit_title3=Bewerk Alias Server
@@ -1062,8 +1076,6 @@ edit_switch=Overschakelen Naar Server's Admin
 edit_switchdesc=Automatisch inloggen bij Webmin als eigenaar voor deze virtuele server, zonder invullen van zijn wachtwoord.
 edit_spamvirus=Spam en Virus Aflevering
 edit_spamvirusdesc=Configureer de aflever methoden voor spam en virussen die gedetecteerd worden in de email wat verstuurd word naar deze virtuele server.
-edit_phpmode=Website Opties
-edit_phpmodedesc=Configureer de instellingen gerelateerd aan deze virtuele server's website, zoals loggen en de PHP executie mode.
 edit_phpver=PHP Versies
 edit_phpverdesc=Selecteer de PHP versie om te gebruiken, en configureer verschillen versies voor verschillende directory's.
 edit_spf=DNS Opties
@@ -1113,6 +1125,7 @@ edit_mailoptsdesc=Configureer de instellingen gerelateerd aan de email voor deze
 edit_connect=Controleer Verbindingen
 edit_connectdesc=Valideer dat van deze virtuele server de website, DNS domein en email server toegankelijk zijn vanaf het Internet.
 edit_psearch=Sub-Servers Lijst
+
 delete_title=Verwijder Server
 delete_rusure2=Weet u zeker dat u de virtuele server $1 wilt verwijderen, waar $2 files op staan? De volgende extra's zullen worden verwijdert :
 delete_rusure3=Weet u zeker dat u de virtuele server $1 wilt verwijderen? De volgende extra's zullen worden verwijdert :
@@ -1180,6 +1193,7 @@ delete_nostatus=.. niet gevonden!
 delete_mxs=Verwijderen van secondaire email servers $1 ..
 delete_dom=Verwijder sub-server $1 ..
 delete_aliasfailure=.. $1 alias verwijderen mislukte : $2
+
 save_err=Mislukt om server te modificeren
 save_title=Server Opslaan
 save_equota=Ontbrekende of ongeldige totale quota
@@ -1287,8 +1301,10 @@ save_plan=Verander plan naar <i>$1</i> ..
 save_edomainquota=De totale harddisk quota van de server moet niet verlaagd worden naar $2, omdat het huidige harddisk gebruik reeds $1 is.
 save_euserquota=De server administrator's harddisk quota moet niet verlaagd worden naar $2, omdat het huidige harddisk gebruik reeds $1 is.
 save_aliasusers=De functie die word uitgeschakeld is in gebruik door de volgende alias server : $1
+
 luser_err=Mislukt om locale mailbox op te slaan
 luser_etaken=Een gebruiker met dezelfde naam bestaat reeds
+
 acl_warn=Waarschuwing! Als een Webmin gebruiker gemaakt word door Virtualmin zullen deze instellingen automatisch overschreven worden.
 acl_domains=Domeinen die deze gebruiker mag beheren
 acl_all=Alle domeinen
@@ -1300,12 +1316,15 @@ acl_local=Mag locale gebruikers bewerken?
 acl_stop=Mag services starten en stoppen?
 acl_only=Alleen voor zichzelf
 acl_lim=Beperkte toegang
+
 other=Andere...
+
 search_title=Zoek Resultaten
 search_none=Er zijn geen virtuele servers gevonden waarin $1 voorkwam.
 search_nonef=Er zijn geen virtuele servers gevonden die de $1 optie gebruiken.
 search_results=Gevonden $2 virtuele servers die overeenkomen met $1 ..
 search_resultsf=Gevonden $2 virtuele servers die de optie $1 gebruiken ..
+
 import_title=Importeer Virtuele Server
 import_desc1=Dit formulier kan gebruikt worden om een bestaand domein naar uw systeem over te halen en onder controle van Virtualmin te brengen. Mailboxen en aliassen voor de domein naam, alle bestaande Apache virtuele server en DNS domeinen zullen automatisch gedetecteerd worden. U kunt ook de naam ingeven voor een database voor dit domein als die al bestaat.
 import_desc2=Het wachtwoord veld moet ingevuld zijn met het huidige administrator gebruikers wachtwoord, indien u dit weet. Virtualmin moet het wachtwoord weten van iedere virtuele server omdat dit gebruikt word tijdens het opzetten van MySQL of PostgreSQL databases in de toekomst.
@@ -1328,6 +1347,7 @@ import_show=Laat Zien Wat Word Geïmporteerd ..
 import_regexp=Vind mailbox gebruiker met
 import_regexpg=Primaire groep
 import_regexpr=Overeenkomende regexp
+
 import_err=Importeren mislukt
 import_eexists=Het gespecificeerde domein word al beheerd door Virtualmin
 import_enoip=Het gespecificeerde IP adres is niet actief op uw systeem.
@@ -1381,14 +1401,18 @@ import_auto=Automatisch
 import_ehome=Ontbrekende of ongeldige home directory
 import_eregexp=Ontbrekende reguliere uitdrukking voor gebruikers
 import_updating=Updaten van gebruikers overeenkomend met $1 ..
+
 acheck_ename=Er ontbreekt een Server-Naam richtlijn
 acheck_edom=Geen van de Server-Naam of Server-Alias richtlijnen bevatten $DOM
 acheck_edoc=Er ontbreekt een Document-Root richtlijn
+
 fcheck_euser=Ontbrekende Gebruiker richtlijn
 fcheck_egroup=Ontbrekende Groep richtlijn
 fcheck_euserex=Unix gebruiker $1 in de Gebruikers richtlijn bestaat niet
 fcheck_egroupex=Unix groep $1 in de Groep richtlijn bestaat niet
+
 lcheck_epost=Ontbrekend postrotatie script, die Apache moet herladen
+
 disable_title=Uitschakelen Server
 disable_rusure2=Weet u zeker dat u de virtuele server $1 wilt uitschakelen? Zijn $2 zullen worden uitgeschakeld.
 disable_undo=Alle bovenstaande acties kunnen worden omgedraaid zonder verlies van data wanneer de server weer word aangezet.
@@ -1423,6 +1447,7 @@ disable_status=De-activeer website status monitoren ..
 disable_statusssl=De-activeer SSL website status monitoren ..
 disable_users=Op slot zetten van gebruikers email accounten ..
 disable_why=Reden voor uitschakelen:
+
 enable_title=Aanzetten Server
 enable_rusure2=Weet u zeker dat u de virtuele server $1 opnieuw wilt aanzetten? Zijn $2 zullen worden hersteld naar hun originele staat toen ze aanstonden.
 enable_ok=Ja, Aanzetten
@@ -1443,6 +1468,7 @@ enable_emaking=De opdracht voor aanzetten ontbreekt : $1
 enable_status=Heractiveer de website status monitoring ..
 enable_statusssl=Heractiveer de SSL website status monitoring ..
 enable_users=Van slot halen van het email gebruikers accounts ..
+
 mail_usubject=Mailbox gemaakt
 mail_dsubject=Virtuele server aangemaakt
 mail_upsubject=Mailbox ge-update
@@ -1450,12 +1476,14 @@ mail_rsubject=Reseller account gemaakt
 mail_file=Lezen mislukt van de template file $1 : $2
 mail_system=email is niet ingesteld in Virtualmin
 mail_ok=email verstuurd naar $1
+
 afile_ecannot=U bent niet bevoegd om de alias toevoeg files te bewerken
 afile_eread=Lezen mislukt van de alias toevoeg file $1 als gebruiker $2 : $3
 afile_title=Bewerk Adres File
 afile_desc=Gebruik het tekst veld hieronder om de adressen in de file $1 te bewerken.
 afile_undo=Veranderingen Ongedaan Maken
 afile_ewrite=Schrijven mislukt naar adressen file $1 als gebruiker $2 : $3
+
 rfile_title=Bewerk Auto-antwoord File
 rfile_ecannot=U bent niet bevoegd om de auto-antwoord files te bewerken
 rfile_eread=Lezen mislukt van de auto-antwoord file $1 als gebruiker $2 : $3
@@ -1471,6 +1499,7 @@ rfile_secs=seconden
 rfile_ereplies=Ontbrekende antwoord tracking log file
 rfile_eperiod=Ontbrekend of ongeldig aantal seconden tussen antwoorden
 rfile_ewrite=Schrijven mislukt naar de auto-antwoord file $1 als gebruiker $2 : $3
+
 ffile_title=Bewerk Filter File
 ffile_ecannot=U bent niet bevoegd om de filter files te bewerken
 ffile_eread=Lezen is mislukt van de filter file $1 als gebruiker $2 : $3
@@ -1488,6 +1517,7 @@ ffile_err=Mislukt om filter file op te slaan
 ffile_ematch=Ontbrekende overeenkomst
 ffile_eaction=Ontbrekend doorstuur adres
 ffile_ewrite=Schrijven is mislukt van de filter file $1 als gebruiker $2 : $3
+
 newweb_title=Apache Website Template
 newweb_ecannot=U bent niet bevoegd om de website template te bewerken
 newweb_desc=Gebruik dit formulier om de template van de Apache richtlijnen te bewerken, die gebruikt word om websites te maken door Virtualmin. De volgende substituties zullen worden gedaan wanneer de site word gemaakt vanaf de template :
@@ -1524,6 +1554,7 @@ newweb_admin=Omleiden van <tt>admin.${DOM}</tt> naar Virtualmin?
 newweb_admindom=URL voor <tt>admin</tt> doorsturen
 newweb_ewebmaildom=Ontbrekende of ongeldige URL webmail omleiding
 newweb_eadmindom=Ontbrekende of ongeldige URL voor admin doorsturen
+
 newftp_title=ProFTPd Server Template
 newftp_ecannot=U bent niet bevoegd om de ProFTPd template te bewerken
 newftp_desc=Gebruik dit formulier om de template ProFTPd richtlijnen te bewerken die worden gebruikt voor virtuele FTP server gemaakt door Virtualmin. De volgende zaken zullen worden gedaan wanneer de site word gemaakt van de template :
@@ -1533,6 +1564,7 @@ newftp_dir=Anonieme FTP subdirectory maken
 newftp_dir0=Directory onder de home
 newftp_dir0suf=(Moet overeenkomen met de &lt;Anoniem&gt; sectie hierboven)
 newftp_edir=Ontbrekende of ongeldige anonieme FTP subdirectory
+
 newdns_title=BIND DNS Template
 newdns_ecannot=U bent niet bevoegd om de DNS template te bewerken
 newdns_desc=Gebruik dit formulier om de template BIND richtlijnen te bewerken die worden geplaatst in de DNS domeinen door Virtualmin (wanneer niet in automatische mode). De volgende zaken zullen worden gemaakt wanneer het domein word gemaakt van de template :
@@ -1550,6 +1582,7 @@ newdns_noview=Top niveau (niet in ieder overzicht)
 newdns_enamedconf=Er zijn geen geldige BIND named.conf richtlijnen gevonden
 newdns_ensip=Extra naamserver $1 is een IP adres in plaats van een hostnaam
 newdns_enshost=Extra naamserver $1 bestaat niet
+
 sub_DOM=De domein naam, zoals <tt>foo.com</tt>
 sub_HOME=De domein gebruikers home directory, zoals <tt>/home/foo</tt>
 sub_USER=De administratie gebruiker die het domein bezit, zoals <tt>foo</tt>
@@ -1571,19 +1604,23 @@ sub_NAME=Reseller's Virtualmin login
 sub_RPLAINPASS=Reseller's wachtwoord
 sub_EMAIL=Reseller's contact email adres
 sub_WEBMINURL=URL om in te loggen bij Virtualmin
+
 newuser_title=Nieuwe Mailbox Email
 newuser_ecannot=U bent niet bevoegd om de nieuwe mailbox email template te bewerken
 newuser_desc2=Gebruik dit formulier om de template voor het email bericht te bewerken dat verstuurd kan worden naar een nieuwe email/FTP gebruiker nadat het gemaakt is. De volgende zaken zullen in de tekst worden gezet :
 newuser_header=Nieuwe mailbox email berichten details
 newuser_docs=Uitleg en substituties
+
 newupdate_title=Update Mailbox Email
 newupdate_ecannot=U bent niet bevoegd om de ge-update mailbox email template te bewerken
 newupdate_desc2=Gebruik dit formulier om de template voor het email bericht te bewerken dat verstuurd kan worden naar een email/FTP gebruiker nadat het ge-update is. De volgende zaken zullen in de tekst worden gezet :
 newupdate_header=Ge-update mailbox email berichten details
+
 newlocal_title=Nieuwe Lokale Mailbox Email
 newlocal_ecannot=U bent niet bevoegd om de nieuwe locale mailbox email template te bewerken
 newlocal_desc2=Gebruik dit formulier om de template te bewerken voor de email berichten die gestuurd kunnen worden naar een nieuwe mailbox gebruiker nadat het gemaakt is. De volgende zaken zullen worden gedaan met de tekst :
 newlocal_header=Nieuwe lokale mailbox email berichten details
+
 newdom_title=Nieuwe Virtuele Server Email
 newdom_ecannot=U bent niet bevoegd om de server email template te bewerken
 newdom_desc=Gebruik dit formulier om de template file $1 te bewerken voor het email bericht dat zal worden gestuurd naar een nieuwe virtuele server eigenaar nadat dit gemaakt is. De volgende zaken zullen worden gedaan met de tekst :
@@ -1596,14 +1633,17 @@ newdom_to=Stuur een email naar
 newdom_mailbox=Gebruikers mailbox
 newdom_owner=Virtuele server eigenaar
 newdom_reseller=Virtuele server reseller
+
 newsubdom_title=Nieuwe Virtuele Sub-Server Email
 newsubdom_ecannot=U bent niet bevoegd om de nieuwe sub-server email template te bewerken
 newsubdom_desc=Gebruik dit formulier om de template file $1 te bewerken voor het email bericht dat verstuurd word naar de eigenaar van een nieuwe virtuele server, nadat die aangemaakt is. De volgende zaken zullen worden geplaatst in de tekst :
 newsubdom_descdis=Gebruik dit formulier om de template file $1 te bewerken voor het email bericht dat verstuurd word naar de eigenaar van een nieuwe virtuele sub-server nadat die aangemaakt is, indien deze optie is aangezet in de Virtualmin Configuratie pagina. De volgende zaken zullen worden geplaatst in de tekst :
 newreseller_header=Nieuwe reseller email berichten details
+
 newreseller_title=Nieuwe Reseller Email
 newreseller_ecannot=U bent niet bevoegd de nieuwe reseller email template te bewerken
 newreseller_desc2=Gebruik dit formulier om de template te bewerken voor het email bericht dat gestuurd kan worden naar een nieuw reseller account wanneer dit aangemaakt word. De volgende zaken kunnen gedaan worden met de tekst :
+
 feature_web=Apache website
 feature_dns=BIND DNS domein
 feature_mysql=MySQL database
@@ -1621,11 +1661,13 @@ feature_virt6=IPv6 adres
 feature_spam=Spam filter
 feature_virus=Virus filter
 feature_status=Status monitoren
+
 bandwidth_web=Website verkeer
 bandwidth_ftp=FTP overdrachten
 bandwidth_mail=Email overdracht
 bandwidth_backup=Backups gemaakt
 bandwidth_restore=Backups hersteld
+
 losing_web=Alle Apache richtlijnen in de virtuele host zal worden verwijdert.
 losing_dns=Alle DNS records in de domein en iedere BIND optie zal worden verwijdert.
 losing_mysql=Alle MySQL databases, alle tabellen en de server's MySQL login zullen worden verwijdert.
@@ -1643,6 +1685,7 @@ losing_logrotate=De Logrotatie configuratie voor deze virtuele server's log file
 losing_spam=De SpamAssassin configuratie voor deze virtuele server zal worden verwijdert.
 losing_virus=De Procmail ingang om virussen te filteren voor deze virtuele server zal worden verwijdert.
 losing_status=De Webmin status monitor voor deze virtuele server website zal worden verwijdert.
+
 check_title=Controleer Configuratie
 check_desc=De status van uw systeem is gecontroleerd om er zeker van te zijn dat alle actieve aangezette zaken beschikbaar zijn, dat de email server goed geconfigureerd is en dat de quota's actief zijn ..
 check_netok=Webmin's Netwerk Configuratie module is geinstalleerd en word ondersteund.
@@ -1767,12 +1810,15 @@ check_ehomebase=De home basis directory $1 is geen absoluut pad. Dit kan worden 
 check_ehomebase2=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina.
 check_ehomeformat=Het home directory-formaat $1 bevat geen gebruikersnaam of domein naam. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina.
 check_ehomestyle=De home directory stijl is ingesteld op "Alleen basis directory", wat onbruikbaar is in Virtualmin. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina.
+
 checkmap_enone=Er zijn geen map bronnen gevonden in de <a href='$1'>Postfix configuratie</a>
 checkmap_esupport=De map bronnen <tt>$1</tt> word niet ondersteund door Postfix - U moet waarschijnlijk de Postfix bibliotheken installeren of het her-compileren
 checkmap_eaccess=De bron map <tt>$1</tt> kan niet worden gebruikt : $2
 checkmap_efile=Deze map soort word niet ondersteund door Webmin - alleen mappen die files gebruiken zoals <tt>hash</tt> en <tt>regexp</tt> kunnen worden gebruikt
+
 allwebmin_ecannot=U bent niet bevoegd om alle Webmin gebruikers te updaten
 allwebmin_title=Webmin Gebruikers Updaten
+
 log_create_user=Aangemaakte mailbox $1@$2
 log_modify_user=Gemodificeerde mailbox $1@$2
 log_delete_user=Verwijderd mailbox $1@$2
@@ -1954,6 +2000,7 @@ log_enable_dkim=Aanzetten van Domeinsleutel Identificeer Mail
 log_disable_dkim=Uitzetten van Domeinsleutel Identificeer Mail
 log_validate=Geplande validatie instellingen opslaan
 log_quotas=Quota monitor instellingen opslaan
+
 backup_title=Backup Virtuele Servers
 backup_title2=Bewerk Geplande Backup
 backup_title3=Maak Geplande Backup
@@ -2048,6 +2095,7 @@ backup_niceupload=ge-uploade file
 backup_senabled1=Virtualmin's geplande backup is aangezet voor alle virtuele servers.
 backup_senabled0=Virtualmin's geplande backup is aangezet voor $1 virtuele servers.
 backup_sdisabled=Virtualmin's geplande backup is uitgezet.
+
 backup_err=Backup mislukt
 backup_err2=Mislukt om geplande backup op te slaan
 backup_ecannot=U bent niet bevoegd om backups te maken
@@ -2099,6 +2147,7 @@ backup_emode=Geen geldige backup bestemming mode geselecteerd
 backup_es3nopath=U moet een file naam specificeren wanneer u een backup maakt naar een enkele file op S3
 backup_copy=Kopiëren naar bestaande bestemming $1 ..
 backup_copyfailed=.. kopiëren mislukte : $1
+
 backup_dirtar=Maak een TAR file van de home directory ..
 backup_dirtarinc=Maken van een incrementele TAR file van de home directory ..
 backup_dirtarfailed=.. TAR mislukt! $1
@@ -2210,6 +2259,7 @@ backup_vmailserver_none=.. niet geinstalleerd
 backup_vmailserver_postgrey=Grijze lijst instellingen opslaan ..
 backup_vmailserver_doing=Mail server configuratie opslaan ..
 backup_vmailserver_supp=.. server word niet ondersteund
+
 restore_title=Herstel Virtuele Servers
 restore_header=Opties voor herstellen backup
 restore_src=Herstel bron
@@ -2226,6 +2276,7 @@ restore_fix=Alleen server details opnieuw importeren?
 restore_virtualmin=Virtualmin instellingen om te herstellen
 restore_dnswholefile=Herstel alles in de DNS zone file
 restore_newip=IP adres voor herstelde servers
+
 restore_ecannot=U bent niet bevoegd om backups te herstellen
 restore_esched=Geselecteerde backup planning bestaat niet!
 restore_err=Herstellen is mislukt
@@ -2282,6 +2333,7 @@ restore_phpmodsnone=.. er waren geen PHP modules nodig om te installeren
 restore_es3info=Geen backup file voor $1 is gevonden op S3.
 restore_phpbad=Waarschuwing - De volgende scripts gebruiken PHP versies die niet beschikbaar zijn op dit systeem :
 restore_phpbad2=$1 - $2 - Versie $3
+
 restore_unixuser=Updaten van administratie wachtwoord en quota's ..
 restore_dirtar=Uitpakken TAR file van home directory ..
 restore_dirtarfailed=.. mislukt! $1
@@ -2351,6 +2403,7 @@ restore_vmailserver_dkim=Herstellen van DKIM instellingen ..
 restore_vmailserver_none=.. word niet ondersteund op bron systeem
 restore_vmailserver_already=.. uitgeschakeld laten
 restore_vmailserver_grey=Herstellen van grijze-lijst instellingen ..
+
 limits_title=Server Eigenaar Limieten
 limits_header=Virtualmin limieten voor server eigenaar
 limits_header2=Toegestane mogelijkheden en eigenschappen
@@ -2411,6 +2464,7 @@ limits_shell_nologin=Geen login
 limits_shell_ftp=Alleen FTP
 limits_shell_ssh=SSH en FTP
 limits_unshell=Gebruikt onbekende shell $1
+
 rename_title=Verander Domein Naam
 rename_header=Virtuele server domein naam wijzig opties
 rename_domain=Oude domein naam
@@ -2451,6 +2505,7 @@ rename_ehome2=Geen nieuwe home directory ingevuld
 rename_ehome3=Nieuwe home directory bestaat reeds
 rename_ehome4=Hoofd van de nieuwe home directory bestaat niet
 rename_scripts=Updaten van paden in script database ..
+
 cert_title=Beheer SSL Certificaat
 cert_desc2=Deze sectie laat de details zien van het SSL certificaat wat op dit moment word gebruikt door deze virtuele server.
 cert_desc1=Dit formulier kan gebruikt worden om een "certificaat onderteken aanvraag" (CSR) te maken en een privé sleutel voor deze server. De resulterende CSR kan worden toegevoegd aan een certificaat autoriteit (CA) die dan een getekend certificaat zal terug sturen om te plakken in het volgende formulier op deze pagina.
@@ -2516,6 +2571,7 @@ cert_dcopy=Kopieer naar Dovecot
 cert_dcopydesc=Gebruik dit certificaat in Dovecot voor SSL-beschermde IMAP en POP3 verbindingen.
 cert_pcopy=Kopieer naar Postfix
 cert_pcopydesc=Gebruik dit certificaat in Postfix voor SSL-beschermde SMTP verbindingen voor email cliënten.
+
 csr_title=Genereren CSR
 csr_title2=Genereren Certificaat
 csr_err=Mislukt om CSR te genereren
@@ -2526,12 +2582,14 @@ csr_csr=De CRS voor deze virtuele server opgeslagen in $1, is :
 csr_key=De nieuwe privé sleutel voor deze virtuele server opgeslagen in $1, is :
 csr_selfing=zelf ondertekend certificaat en prive sleutel aan het genereren ..
 csr_csring=Ondertekening aanvraag en prive sleutel aan het genereren ..
+
 newkey_title=Installeren Certificaat
 newkey_err=Mislukt om certificaat te installeren
 newkey_ecert2=Ontbrekende of ongeldig ondertekend SSL certificaat : $1
 newkey_enewkey2=Ontbrekende of ongeldig SSL privé sleutel : $1
 newkey_epass=Privé sleutel is met wachtwoord beschermd, of er was niets ingevuld of het wachtwoord is fout.
 newkey_ematch=Certificaat probleem gedetecteerd : $1
+
 newbw_title=Bandbreedte Monitoren
 newbw_desc=Deze pagina kan gebruikt worden om het bandbreedte account aan te zetten voor virtuele servers, om server eigenaars en de master administrator op de hoogte te brengen indien een server zijn toegestane limieten overschrijd.
 newbw_active=Bandbreedte monitor actief?
@@ -2598,9 +2656,11 @@ newbw_resetdesc=Deze knop opent een formulier waarmee u het  opnieuw genereren v
 newbw_return=bandbreedte monitor formulier
 newbw_mailout=Uitgaande email in bandbreedte gebruik toevoegen?
 newbw_mailall=Relais email aan bandbreedte gebruik toevoegen?
+
 newframe_title=Frame-Doorstuur HTML
 newframe_ecannot=U bent niet bevoegd om de frame-doorstuur HTML template te bewerken
 newframe_desc=Gebruik dit formulier om de template HTML pagina te bewerken die word gebruikt voor frame doorgestuurde websites. De volgende zaken zullen worden gedaan wanneer de pagina word gemaakt vanaf de template :
+
 frame_title=Doorsturen Frame Instellingen
 frame_header=Instellingen om frame-doorstuur HTML te genereren
 frame_enabled=Frame doorsturen aanzetten?
@@ -2612,14 +2672,17 @@ frame_desc=Dit formulier kan gebruikt worden om de frame-doorstuur file $1 te up
 frame_err=Mislukt om doorstuur frame instellingen op te slaan
 frame_eurl=Ontbrekende of ongeldige URL
 frame_gen=Her-genereer frame-doorstuur HTML ..
+
 proxy_title=Website Proxy Instellingen
 proxy_enabled=Proxying aangezet?
 proxy_url=Proxy naar URL
 proxy_header=Instellingen voor proxying naar andere website
 proxy_desc=Dit formulier kan gebruikt worden om de URL aan te zetten en te configureren waarmee alle aanvragen naar deze virtuele server's website worden doorgestuurd.
+
 expframe_title=Doorsturen Frame HTML
 expframe_desc=Dit formulier kan worden gebruikt om handmatig de frame-doorstuur file $1 te updaten voor deze virtuele server.
 expframe_ewrite=Mislukt om te schrijven naar de frame-doorstuur file $1 als gebruiker $2 : $3
+
 newtmpl_title=Server Templates
 newtmpl_name=Template
 newtmpl_skel=Skeleton directory
@@ -2638,6 +2701,7 @@ newtmpl_scripts=Scripts
 newtmpl_delete=Verwijder Geselecteerde Templates
 newtmpl_created=Aangemaakt op
 newtmpl_init=Virtualmin installatie
+
 tmpl_title1=Maak Server Template
 tmpl_title2=Bewerk Server Template
 tmpl_title3=Kloon Server Template
@@ -2938,6 +3002,7 @@ tmpl_availyes=Beschikbaar?
 tmpl_deletewarn=Weet u zeker dat u deze server template wilt verwijderen? Dit kan niet meer ongedaan worden gemaakt.
 tmpl_deleteusers=De template is op dit moment in gebruik door $1 virtuele servers.
 tmpl_deleteconfirm=Verwijder Template
+
 newplugin_title=Plugin Modules
 newplugin_desc=Plugins zijn Webmin modules die extra mogelijkheden geven aan server en mailboxen van Virtualmin. Anders dan de kern opties, die kunnen apart geinstalleerd worden en eventueel geschreven zijn door derde-partij ontwikkelaars.
 newplugin_desc3=Alleen de aangevinkte plugins in de lijst hieronder zijn op dit moment actief. Indien een plugin geactiveerd is kunnen de opties gekozen worden wanneer u een virtuele server maakt of bewerkt.
@@ -2954,6 +3019,7 @@ newplugin_count=Domeinen
 newplugin_acts=Acties
 newplugin_conf=Configureer
 newplugin_open=Open
+
 bwgraph_title=Bandbreedte Gebruik
 bwgraph_none=Er zijn nog geen bandbreedte statistieken verzameld.
 bwgraph_mode=Hoe te bekijken:
@@ -2972,8 +3038,10 @@ bwgraph_mago_month=Laat statistieken zien van de maand :
 bwgraph_mago_year=Laat statistieken zien van het jaar :
 bwgraph_mago_=Laat statistieken zien van de periode :
 bwgraph_mok=Bekijk
+
 plugconfig_title=Plugin Configuratie
 plugconfig_dir=Voor plugin $1
+
 newfields_title=Eigen Velden
 newfields_descr=Dit formulier kan gebruikt worden om extra velden te maken die getoond worden wanneer er virtuele servers gemaakt of bewerkt worden.
 newfields_name=Veld naam
@@ -2996,14 +3064,17 @@ newfields_visible=Zichtbaar voor
 newfields_visible0=Alle gebruikers
 newfields_visible1=Alleen bewerkbaar door de master administrator
 newfields_visible2=Alleen de master administrator
+
 ldap_emod=Ontbrekende Perl module $1 die nodig is voor de verbinding naar de LDAP
 ldap_econn=Verbinden mislukt met de LDAP server $1 poort $2
 ldap_elogin=Bind is mislukt naar de LDAP server $1 als $2 : $3
+
 mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
+
 databases_title=Bewerk Databases
 databases_hosted=Alle databases op dit systeem worden gehost op de remote MySQL server $1.
 databases_none=Deze virtuele server heeft nog geen databases.
@@ -3047,6 +3118,7 @@ databases_desc5=Dit formulier geeft een lijst van remote hosts die mogen verbind
 databases_ahosts=Toegestane hosts voor $1
 databases_hosts_mysql=U mag zaken invullen zoals hostnamen, IP adressen, of netwerk adressen zoals <tt>192.168.1.%</tt>
 databases_hosts_fmt=Iedere hostnaam of IP moet worden ingevuld op een aparte regel.
+
 database_title1=Maak Database
 database_title2=Bewerk Database
 database_header=Database details
@@ -3074,6 +3146,7 @@ database_collate=Vergelijking volgorde voor nieuwe database
 database_encoding=Coderen voor een nieuwe database
 database_opts=Extra opties voor $1
 database_edbdef=U bent niet bevoegd om de standaard database te verwijderen voor een domein.
+
 vfile_title=Bewerk auto-antwoord file
 vfile_ecannot=U bent niet bevoegd om de auto-antwoord files te bewerken
 vfile_desc=Gebruikt het tekst gebied hieronder om het auto-antwoord bericht in $1 te bewerken.
@@ -3092,11 +3165,13 @@ vfile_etime=Ontbrekende of ongeldige tijd om afzender aan te herinneren
 vfile_enum=Ontbrekende of ongeldig aantal antwoorden om te versturen
 vfile_edir=Ontbrekende of niet bestaande log directory
 vfile_eother=Ontbrekend Van : adres voor antwoord
+
 reemail_title=Verstuur Opnieuw Inschrijf Email
 reemail_dis=De inschrijvings email kan niet verstuurd worden naar deze server eigenaar omdat dit uitgeschakeld is in de server's template.
 reemail_desc=Deze pagina kan gebruikt worden om opnieuw de email te sturen die origineel verstuurd was toen de virtuele server werd gemaakt.
 reemail_to=Server eigenaars email adres :
 reemail_ok=Verstuur Nu
+
 newips_title=Verander IP Adressen
 newips_ecannot=U bent niet bevoegd om de IP adressen te veranderen
 newips_desc=Met deze pagina kunt u het IP adres veranderen van alle niet private IP virtuele servers die gebruik maken van een specifiek adres. Dit moet u doen indien u zojuist het primaire IP adres van dit systeem heeft geupdate.
@@ -3112,6 +3187,7 @@ newips_dom=Veranderen van IP adres voor $1 ..
 newips_servers=Servers om te updaten
 newips_all=Alle servers
 newips_sel=Alleen geselecteerde ..
+
 newip_title=Verander IP adres
 newip_header=Nieuw virtueel IP adres
 newip_ecannot=U bent niet bevoegd om het IP adres te veranderen voor deze server
@@ -3141,6 +3217,7 @@ newip_virtaddr=Behoud privé adres
 newip_virtaddr2=Privé adres toewijzen
 newip_virtaddr3=Gebruik privé adres
 newip_convert=Converteer Prive Adres naar Gedeeld Adres
+
 newip_new=Nieuw IP adres
 newip_err=Mislukt om IP adres te veranderen
 newip_eip=Ontbrekende of ongeldige nieuwe adres
@@ -3151,6 +3228,7 @@ newip_eclash6=De virtuele server $1 gebruikt reeds het nieuwe IPv6 adres
 newip_edefault=Het nieuwe adres is hetzelfde als het het standaard adres voor niet-virtuele servers
 newip_eused=Het nieuwe adres is reeds in gebruik door het systeem
 newip_eused6=Het nieuwe IPv6 adres word reeds gebruikt door het systeem
+
 newresels_title=Reseller Accounts
 newresels_intro=Een reseller is een login die nieuwe hoofd Virtualmin servers kan maken, behoudens de limieten die gedefinieerd zijn door de master administrator. De limieten kunnen inhouden totale harddisk quota, mailboxen en databases die aan een reseller server kan worden toegewezen.
 newresels_name=Gebruikersnaam
@@ -3165,11 +3243,13 @@ newresels_return=resellers lijst
 newresels_delete=Verwijder Geselecteerde Resellers
 newresels_disable=Geselecteerde op Slot Zetten
 newresels_enable=Geselecteerde van Slot Halen
+
 dresels_err=Mislukt om resellers te verwijderen
 dresels_err2=Mislukt op resellers op slot te zetten
 dresels_err3=Mislukt om resellers van slot te halen
 dresels_enone=Niets geselecteerd
 dresels_egone=Één van de geselecteerde resellers bestaat niet
+
 resel_title1=Maak Reseller
 resel_title2=Bewerk Reseller
 resel_header=Reseller account details
@@ -3241,6 +3321,7 @@ resel_edefns=Naamserver '$1' is niet geldig
 resel_clone=Kloon Reseller
 resel_domsopts=Domeinen zonder eigenaar
 resel_domssel=In bezit van deze reseller
+
 licence_err=Er is een probleem ontdekt met uw Virtualmin licentie :
 licence_soon=Opgelet - Uw Virtualmin licentie zal expireren in $1 dagen.
 licence_soon2=Opgelet - Uw Virtualmin licentie zal expireren in $1 uren.
@@ -3256,8 +3337,10 @@ licence_goterr=.. er is een probleem ontdekt : $1
 licence_ecannot=U bent niet bevoegd om de Virtualmin licentie te controleren
 licence_maxdoms=Uw systeem licentie is geldig voor $1 servers, maar u heeft er $2.
 licence_maxservers=Uw serie nummer is alleen geldig voor $1 servers, maar is gebruikt voor $2.
+
 config_deftheme=Globale Webmin standaard
 config_oldtheme=Oude Webmin thema
+
 scripts_title=Installatie Scripts
 scripts_longdesc=Omschrijving
 scripts_overall=Waardering
@@ -3420,6 +3503,7 @@ scripts_deleted=Handmatig verwijdert
 scripts_inophp=Webserver ondersteuning voor PHP is nodig
 scripts_inocgi=Webserver ondersteuning voor CGI scripts is nodig
 scripts_inoapache=Alleen de Apache webserver word ondersteund
+
 newnotify_title=Email Server Eigenaars
 newnotify_desc=Deze pagina kan gebruikt worden om een email te sturen naar de eigenaars van de geselecteerde virtuele servers, bijvoorbeeld om vermelding te maken van het systeem uit-tijd, upgraden of andere service wijzigingen. De volgende zaken kunnen worden gebruikt in het berichten body en onderwerp :
 newnotify_header=Opties voor email naar server eigenaars
@@ -3438,6 +3522,7 @@ newnotify_edoms=Geen servers geselecteerd
 newnotify_attach=Optioneel de bijgevoegde file
 newnotify_admins=Ook extra administrators in geselecteerde domein e-mailen
 newnotify_nomany=Iedere domein eigenaar maar 1x emailen
+
 mailusers_title=Email Alle Mailboxen
 mailusers_desc=Dit formulier kan gebruikt worden om email te versturen naar alle mailboxen in dit domein, of die u geselecteerd heeft. De volgende zaken kunnen worden gebruikt in de berichten body en onderwerp :
 mailusers_header=Opties voor email naar alle mailboxen
@@ -3446,16 +3531,19 @@ mailusers_all=Alles
 mailusers_sel=Alleen geselecteerden ..
 mailusers_err=Emailen naar mailboxen mislukt
 mailusers_eto=Geen mailboxen geselecteerd
+
 view_title=Virtuele Server Details
 view_title2=Virtuele Sub-Server Details
 view_title3=Alias Server Details
 view_title4=Virtuele Sub-Domein Details
 view_features=Aangezette opties
 view_return=server details
+
 summary_title=Virtuele Server Overzicht
 summary_title2=Virtuele Sub-Server Overzicht
 summary_title3=Alias Server Overzicht
 summary_title4=Virtuele Sub-Domein Overzicht
+
 migrate_title=Migreer Virtuele Server
 migrate_desc=Met deze pagina kunt u een nieuwe virtuele server maken door een backup te migreren die gemaakt is met een concurrerende backup van een website. De configuratie voor alle ondersteunende extra's zullen uit de backup gehaald worden, en geconverteerd worden voor gebruik door Virtualmin. De gehele inhoud van de domein directory zal worden gekopieerd in de home directory van de nieuwe gebruiker.
 migrate_file=Bron backup file
@@ -3501,6 +3589,7 @@ migrate_downloaded=.. gedownload $1
 migrate_validating=Valideren van migratie file ..
 migrate_edownload=.. download mislukt : $1
 migrate_evalidate=.. validatie mislukte : $1
+
 newscripts_title=Installatie Scripts
 newscripts_desc=Deze pagina staat u toe om installatie scripts toe te voegen die gemaakt zijn door andere leveranciers, en om aan te geven welke scripts beschikbaar zijn voor de domein eigenaars.
 newscripts_header=Installatie script toevoegen
@@ -3575,6 +3664,7 @@ newscripts_elnone=Geen scripts geselecteerd
 newscripts_desc6=Op dit tabblad worden alle scripts getoond die geïnstalleerd staan op alle virtuele servers op dit systeem. Om een script te de-installeren hoeft u alleen maar te klikken op de naam in de lijst.
 newscripts_dom=Domein naam
 newscripts_noneyet=Er zijn nog geen scripts geinstalleerd op de virtuele servers.
+
 addscripts_err=Mislukt om het installatie script toe te voegen
 addscripts_elocal=Locale file bestaat niet
 addscripts_eupload=Er is geen file geselecteerd om te uploaden
@@ -3585,6 +3675,7 @@ addscripts_title=Installatie Script Toevoegen
 addscripts_done=$1 installatie scripts zijn succesvol toegevoegd van de gespecificeerde file.
 addscripts_done1=Het installatie script $1 is succesvol toegevoegd vanaf de gespecificeerde file.
 addscripts_enone=De gespecificeerde file bevat geen enkel installatie script!
+
 sysinfo_apache=Apache versie
 sysinfo_bind=BIND versie
 sysinfo_postfix=Postfix versie
@@ -3602,9 +3693,11 @@ sysinfo_os=Besturingssysteem
 sysinfo_perl=Perl versie
 sysinfo_perlpath=Pad naar Perl
 sysinfo_php=PHP versie
+
 remote_ecannot=U bent niet bevoegd om op afstand opdrachten uit te voeren
 remote_eprogram=Ongeldig remote programma naam
 remote_eprogram2=Remote programma $1 bestaat niet
+
 newquotas_title=Harddisk Quota Monitoren
 newquotas_ecannot=U bent niet bevoegd om harddisk quota monitoren op te zetten
 newquotas_desc=Met deze pagina kunt u een automatische email notificatie opzetten wanneer een virtuele server over- of zijn harddisk quota dicht benaderd. Omdat groep quota's is aangezet, dit kan alleen gebeuren indien een server teveel data in één van zijn databases heeft staan, omdat de database grote niet word afgedwongen door Unix harddisk quota's.
@@ -3633,6 +3726,7 @@ newquotas_mailbox=Ook email en FTP gebruiker quota's controleren?
 newquotas_mailbox_send=Breng email en FTP gebruikers op de hoogte?
 newquotas_users=Ook admins een bericht sturen indien de quota word overschreden?
 newquotas_msg=Template voor email naar email en FTP gebruikers
+
 mass_title=Modificeer Diverse Gebruikers
 mass_desc=Met dit formulier kunt u in 1X de geselecteerde instellingen veranderen voor de $1 gekozen gebruikers in deze virtuele server.
 mass_header=Gebruiker instelling om te updaten
@@ -3675,6 +3769,7 @@ mass_eplain=.. niet mogelijk voor dit soort gebruiker.
 mass_disable1=.. aanzetten gebruiker.
 mass_disable2=.. uitzetten gebruiker.
 mass_updateemail=Stuur email naar de ge-updaten gebruikers?
+
 defaults_title=Bewerk Gebruiker Standaarden
 defaults_header=Standaards voor nieuwe gebruiker in deze virtuele server
 defaults_quota=Home directory quota
@@ -3686,6 +3781,7 @@ defaults_equota=Ontbrekende of ongeldige home directory quota
 defaults_emquota=Ontbrekende of ongeldige email file quota
 defaults_eqquota=Ontbrekende of ongeldige email server quota
 defaults_below=Hieronder gedefinieerd ..
+
 links_dns=DNS Domein
 links_mysql=MySQL Database
 links_mysqls=MySQL Databases
@@ -3703,6 +3799,7 @@ links_elog=Apache Fouten Log
 links_flog=ProFTPd Log
 links_phpini=PHP Configuratie
 links_phpini2=PHP $1 Configuratie
+
 massscript_err=Mislukt om scripts te upgraden
 massscript_enone=Geen virtuele server geselecteerd
 massscript_enone2=Geen van de geselecteerde servers hebben het script geinstalleerd
@@ -3722,6 +3819,7 @@ massscript_utype=Operatie
 massscript_upgrade=Upgrade
 massscript_update=Update
 massscript_ok=Upgrade Scripts Nu
+
 massdelete_title=Verwijder Virtuele Servers
 massdelete_rusure=Weet u zeker dat u de $1 geselecteerde servers wilt verwijderen ? $2 aan data in hun home directory zal worden verwijdert.
 massdelete_err=Mislukt om virtuele servers te verwijderen
@@ -3732,6 +3830,7 @@ massdelete_dbs=$1 databases die $2 aan data bevatten zullen ook verwijdert worde
 massdelete_ok=Verwijder Servers Nu
 massdelete_doms=Servers om te verwijderen : $1
 massdelete_doing=Verwijder server $1 ..
+
 massdomains_title=Update Virtuele Servers
 massdomains_headerq=Quota en bandbreedte veranderingen
 massdomains_headerf=Optie veranderingen aangezet
@@ -3790,6 +3889,7 @@ massdomains_enaerr=Mislukt om servers aan te zetten
 massdomains_enarusure=Weet u zeker dat u de $1 geselecteerde servers wilt aanzetten? Zij zullen terug keren naar de staat waarin zij waren toen ze werden uitgeschakeld.
 massdomains_enaok=Nu Servers Aanzetten
 massdomains_enadoms=Servers om aan te zetten : $1
+
 newmxs_title=Secundaire Email Servers
 newmxs_header=Automatische secundaire email servers
 newmxs_servers=Servers om op te zetten als secundaire MXs
@@ -3817,6 +3917,7 @@ newmxs_removing=Verwijderen van secundaire domein op $1 ..
 newmxs_syncing=Toegestane mailboxen aan het updaten voor doorschakelen ..
 newmxs_esynced=.. sommige mislukte : $1
 newmxs_synced=.. klaar op $1
+
 ddatabases_title=Verwijder Databases
 ddatabases_edb=$1 database $2 bestaan niet langer!
 ddatabases_edbdef=U bent niet bevoegd om de standaard $1 database te verwijderen $2 .
@@ -3826,6 +3927,7 @@ ddatabases_dbs=Databases om te verwijderen: $1
 ddatabases_err=Mislukt om databases te verwijderen
 ddatabases_enone=Niets geselecteerd
 ddatabases_ok=Verwijder Nu
+
 admins_title=Extra Administrators
 admins_name=Admin inlog
 admins_desc=Omschrijving
@@ -3837,6 +3939,7 @@ admins_ecannot=U bent niet bevoegd om extra administrator's te beheren
 admins_return=Lijst met extra administratoren
 admins_delete=Verwijder Geselecteerde Administrator's
 admins_more=$1 meer ..
+
 admin_title1=Extra Administrator Aanmaken
 admin_title2=Bewerk Extra Administrator
 admin_header=Details van de extra administrator
@@ -3861,9 +3964,11 @@ admin_doms=Virtuele servers van beheerders
 admin_doms1=Alles waar de top-niveau server eigenaar van is
 admin_doms0=Alleen die hieronder geselecteerd zijn ..
 admin_edoms=Er zijn geen virtuele servers geselecteerd om toe te staan
+
 dadmins_err=De extra administrators verwijderen is mislukt
 dadmins_enone=Niets geselecteerd
 dadmins_egone=Administrator bestaat niet langer
+
 move_title=Verplaats Virtuele Server
 move_ecannot=U bent niet bevoegd om deze server te verplaatsen
 move_ecannot2=U bent niet bevoegd een domein naar deze server te verplaatsen
@@ -3884,6 +3989,7 @@ move_newpass=Wachtwoord indien converteren naar hoofd
 move_failed=.. mislukt! Bekijk het fouten bericht hierboven voor de reden.
 move_euserclash=Een gebruiker met de naam $1 bestaat reeds in de virtuele server die geconverteerd word.
 move_euserclash2=Een gebruiker met de naam $1 bestaat reeds
+
 newvalidate_title=Valideer Virtuele Servers
 newvalidate_ecannot=U bent niet bevoegd om servers te valideren
 newvalidate_header=Server validatie opties
@@ -3913,6 +4019,7 @@ newvalidate_desc3=Op deze pagina kunt u file eigenaarschap repareren voor sommig
 newvalidate_fixservers=Virtuele server om te repareren
 newvalidate_fix=Repareer Permissies Nu
 newvalidate_header3=Permissie reparatie opties
+
 validate_edir=Home directory $1 bestaat niet
 validate_ediruser=Home directory $1 hoort bij $2 in plaats van $3
 validate_edirgroup=Home directory $1 hoort bij groep $2 in plaats van $3
@@ -3981,6 +4088,7 @@ validate_espamcall=Procmail configuratie file $1 roept SpamAssassin niet op
 validate_evirus=ClamAV word niet aangesproken in de server's procmail configuratie file
 validate_estatusweb=Geen status monitor voor website gevonden
 validate_estatusssl=Geen status monitor voor SSL website gevonden
+
 tscripts_title=Template Installatie Scripts
 tscripts_sub=Voor template $1
 tscripts_what=Scripts om te installeren voor nieuwe virtuele servers :
@@ -4001,6 +4109,7 @@ tscripts_eversion=Ontbrekende of ongeldig versie nummer in rij $1
 tscripts_edb=Ontbrekende of ongeldige database naam in rij $1
 tscripts_edb2=Database naam in rij $1 bevat geen enkele toevoeging (zoals ${DB})
 tscripts_enone=Geen template scripts ingevuld
+
 spam_title=Spam en Virus aflevering
 spam_ecannot=U bent niet bevoegd om spam en virus aflevering te configureren
 spam_virus=Bestemming voor virus emails
@@ -4044,6 +4153,7 @@ spam_procmail=Toestaan aan mailbox gebruikers om email filters te configureren?
 spam_trap=Maak <tt>spamtrap</tt> en <tt>hamtrap</tt> email aliassen?
 spam_trapcannot=Niet beschikbaar omdat conflicterende alias bestaat
 spam_prov=Cloudmin Services systeem $1
+
 cat_objects=Server Objecten
 cat_server=Server Configuratie
 cat_admin=Administratie Opties
@@ -4061,6 +4171,7 @@ cat_email=Email Berichten
 cat_ip=Adressen en Netwerken
 cat_check=Limieten en Validatie
 cat_custom=Systeem Aanpassingen
+
 pass_title=Verander Wachtwoord
 pass_ecannot=U bent niet bevoegd om het wachtwoord te veranderen voor dit domein
 pass_ecannot2=U moet een domein specificeren om daarvan het wachtwoord te veranderen
@@ -4076,11 +4187,14 @@ pass_eresel=Kon de reseller niet vinden!
 pass_eadmin=Kon de administrator niet vinden!
 pass_changing=Wijzigen van reseller wachtwoord ..
 pass_changing2=Wijzigen van administrator wachtwoord ..
+
 dbname_err=Mislukt om database gebruikers namen te veranderen
 dbname_euser=Ontbrekende of ongeldige gebruikersnaam
 dbname_esame=Oude en nieuwe gebruikers naam is hetzelfde
 dbname_eclash=Een database gebruiker met dezelfde naam bestaat reeds
+
 dbpass_err=Mislukt om database wachtwoord te veranderen
+
 cmass_title=Batch Maken Servers
 cmass_ecannot=U bent niet bevoegd om servers te maken met een batch file
 cmass_header=Maak in 1 keer aan aantal servers met een batch file
@@ -4119,6 +4233,7 @@ cmass_eipmust=Automatische IP toewijzing is verplicht voor deze template
 cmass_emustparent=U bent niet bevoegd om een top-niveau virtuele server aan te maken - er moet een hoofd domein worden gespecificeerd
 cmass_ecanparent=U bent niet bevoegd om de hoofd virtuele server $1 te beheren
 cmass_eparpar=De hoofd server $1 is geen top-niveau server
+
 umass_title=Batch Gemaakte Gebruikers
 umass_header=Maak meerdere email en FTP gebruikers met een batch file
 umass_err=Batch mislukt om gebruikers aan te maken
@@ -4142,6 +4257,7 @@ umass_separator=Batch veld afscheider
 umass_separatorcolon=Dubbele punt :
 umass_separatorcomma=Komma ,
 umass_separatortab=Tab
+
 amass_title=Batch Maak Aliassen
 amass_header=Maak diverse email aliassen tegelijk met een batch file
 amass_help=Op deze pagina kunt u diverse email aliassen tegelijk maken met een tekst file, Iedere regel moet het volgende formaat hebben (lees de help file voor deze pagina):
@@ -4159,6 +4275,7 @@ amass_ebounce=De afkets bestemming kan niet worden gecombineerd met een andere b
 amass_done=Aangemaakte email alias $1
 amass_eclash=Een alias met dezelfde naam bestaat reeds
 amass_eunknown=Onbekende alias bestemming $1
+
 massu_title=De-Installatie Scripts
 massu_err=Mislukt om scripts te de-installeren
 massu_enone=Niets geselecteerd
@@ -4166,6 +4283,7 @@ massu_rusure=Weet u zeker dat u de $1 geselecteerde scripts wilt de-installeren,
 massu_rusuredb=De data van $1 databases zal ook worden verwijdert.
 massu_rusurehome=Omdat 1 van de scripts is geinstalleerd in de virtuele server's top-niveau web directory, zullen <b>alle</b> files onder <tt>$1</tt> worden verwijdert indien deze de-installatie word uitgevoerd.
 massu_sel=Geselecteerde scripts: $1
+
 usage_title=Harddisk Gebruik
 usage_summaryheader=Opsomming van harddisk gebruik en limieten voor deze virtuele server.
 usage_quota=Harddisk Quota
@@ -4192,11 +4310,13 @@ usage_tabhomes=Home directory
 usage_tabusers=Door gebruiker
 usage_tabsubs=Door sub-server
 usage_tabdbs=Door database
+
 webmin_alog=Apache toegangs log voor $1
 webmin_elog=Apache fouten log voor $1
 webmin_flog=ProFTPd log voor $1
 webmin_phpini=PHP configuratie voor $1
 webmin_phpini2=PHP $2 configuratie voor $1
+
 newquotacheck_title=Controleer Harddisk Quota's
 newquotacheck_ecannot=U bent niet bevoegd om harddisk quota's te controleren.
 newquotacheck_header=Harddisk quota controle opties
@@ -4211,6 +4331,7 @@ newquotacheck_ok=Controleer Nu
 newquotacheck_enone=Geen file systemen geselecteerd!
 newquotacheck_udoing=Controleer gebruikers quota's op $1 ..
 newquotacheck_gdoing=Controleer groep quota's op $1 ..
+
 phpmode_title=Website Opties
 phpmode_ecannot=U bent niet bevoegd om website opties te bewerken voor deze virtuele server
 phpmode_header=Website en PHP opties
@@ -4266,6 +4387,7 @@ phpmode_ehtmldir=Ontbrekende of ongeldige sub-directory voor website documenten
 phpmode_ehtmldir2=Een sub-directory voor website documenten mag niet beginnen of eindigen met een /
 phpmode_ehtmldir3=Het volgende kan niet worden geplaatst in de sub-directory voor website documenten ..
 phpmode_ehtmldir4=De documenten subdirectory van de website kan niet onder <tt>domeinen</tt> staan, omdat deze directory is gereserveerd voor sub-servers.
+
 spf_title=DNS Opties
 spf_ecannot=U bent niet bevoegd om DNS opties te bewerken
 spf_enable=Aanzetten van SPF ..
@@ -4293,6 +4415,7 @@ spf_default=Zelfde als echt adres ($1)
 spf_default2=Zelfde als echte adres
 spf_public=DNSSEC publieke sleutel
 spf_private=DNSEC prive sleutel
+
 s3_emodule=De Perl module $1 die nodig is om te communiceren met Amazon's S3 service is niet geinstalleerd
 s3_elist=Lijst maken van S3 buckets is mislukt : $1
 s3_elistfiles=Lijst maken van S3 files is mislukt : $1
@@ -4302,14 +4425,17 @@ s3_ecreate=Mislukt om S3 bucket te maken : $1
 s3_einfo=Uploaden van de informatie file is mislukt : $1
 s3_edom=Domein file uploaden mislukte : $1
 s3_elist2=Lijst maken van S3 bucket is mislukt : $1
+
 tdelete_err=Mislukt om templates te verwijderen
 tdelete_enone=Niets geselecteerd
 tdelete_title=Verwijder Server Templates
 tdelete_warn=Weet u zeker dat u de volgende geselecteerde server templates wilt verwijderen? : $1
 tdelete_confirm=Verwijder Templates
 tdelete_users2=Deze zijn op dit moment in gebruik door de virtuele servers : $1
+
 switch_ecannot=U bent niet bevoegd om over te schakelen naar de admin van dit domein
 switch_eadmin=De gespecificeerde extra administrator bestaat niet !
+
 newlinks_title=Eigen Links
 newlinks_descr=Dit formulier kan gebruikt worden om links te maken die beschikbaar zijn in het linker menu wanneer een virtuele server word geselecteerd. De volgende zaken kunnen worden gebruikt in de URL en Link titel :
 newlinks_desc=Link titel
@@ -4336,6 +4462,7 @@ newlinks_any=Alles
 newlinks_add=Toevoegen van een nieuwe eigen link.
 newlinks_none=Er zijn nog geen eigen links gedefinieerd.
 newlinks_return=eigen links
+
 elink_title1=Maak Eigen Link
 elink_title2=Bewerk Eigen Link
 elink_header1=Custom link details
@@ -4350,6 +4477,7 @@ elink_feature=Virtuele servers met opties
 elink_err=Mislukt om eigen link op te slaan
 elink_edesc=Ontbrekende link titel
 elink_eurl=Ontbrekende of ongeldige URL - spaties zijn niet toegestaan.
+
 postsave_title=Virtuele Server Modificatie
 postsave_done=De virtuele server $1 is succesvol geupdate. Gebruik de links hieronder om verder te gaan en het te beheren.
 postsave_edit=Bewerk virtuele server instellingen.
@@ -4358,6 +4486,7 @@ postsave_users=Beheer email en FTP gebruikers.
 postsave_aliases=Beheer email aliassen en auto-antwoord.
 postsave_databases=Beheer en maak databases.
 postsave_index=Bekijk al uw Virtualmin virtuele servers.
+
 showpass_title=Virtuele Server Wachtwoord
 showpass_user=Administratie login
 showpass_pass=Administratie wachtwoord
@@ -4367,6 +4496,7 @@ showpass_ecannot=U bent niet bevoegd om het virtuele server wachtwoord te bekijk
 showpass_egone=Gebruiker bestaat niet !
 showpass_dbuser=Gebruikersnaam voor $1
 showpass_dbpass=Wachtwoord voor $1
+
 phpver_title=PHP Versies
 phpver_dir=Website subdirectory
 phpver_ver=Versie
@@ -4379,6 +4509,7 @@ phpver_err=Mislukt om PHP versies op te slaan
 phpver_enewdir=Ongeldige website subdirectory - het moet lijken op <tt>myapp</tt> of <tt>programs/myapp</tt>
 phpver_derr=Mislukt om PHP versies te verwijderen
 phpver_enone=Niets geselecteerd
+
 html_title=Bewerk Web Pagina's
 html_edit=Bewerk bestaande file :
 html_editok=Bewerk
@@ -4401,11 +4532,13 @@ html_upload=Upload file :
 html_uploadok=Upload
 html_apply=Gebruik de inhoud stijl :
 html_styleok=Vervang Files
+
 upload_err=Mislukt om file te uploaden
 upload_enone=Geen file geselecteerd om te uploaden
 upload_enone2=Geen filenaam gevonden !
 upload_title=Ge-uploaden File
 upload_done=De file $1 in totaal $2 is succesvol ge-upload naar uw web pagina directory.
+
 sharedips_title=Gedeelde IP adressen
 newsharedips_title=Gedeelde IP Adressen
 sharedips_header=IP adressen die gedeeld zijn door de virtuele servers
@@ -4427,6 +4560,7 @@ sharedips_missing=Hoofd interface $1 bestaat niet !
 sharedips_eboot=Het vinden van de configuratie die gebruikt word tijdens booten is mislukt voor dit IP adres
 sharedips_ebootreal=IP adres is niet virtueel
 sharedips_eactives=Het vinden van een actieve configuratie voor dit IP adres is mislukt
+
 newdynip_title=Dynamische IP Update
 newdynip_enabled=Dynamische update aangezet?
 newdynip_service=Dynamische DNS service
@@ -4449,7 +4583,9 @@ newdynip_off=Dynamische IP updaten is uitgeschakeld. Veranderingen aan het syste
 newdynip_never=Nog niet ge-update
 newdynip_notify=Email IP update berichten naar
 newdynip_none=Niemand
+
 newdynip_eext=Mislukt om het externe zichtbare IP adres te vinden.
+
 dynip_dyndns=DynDNS
 style_title=Gebruik Inhoud Stijl
 style_rusure=Weet u zeker dat u de web pagina's wilt vervangen voor deze virtuele server met deze opnieuw gegenereerde pagina's van inhoud stijl $1 ?
@@ -4458,6 +4594,7 @@ style_content=Aanvankelijke website inhoud tekst
 style_ok=Gebruik Stijl
 style_doing=Vervangen van website inhoud met stijl $1 ..
 style_egone=Stijl bestaat niet of is niet beschikbaar
+
 newstyles_title=Inhoud Stijlen
 newstyles_desc1=Met dit formulier kunt stijlen installeren die gemaakt zijn door derde-partij ontwikkelaars.
 newstyles_header=Installeer nieuwe stijl
@@ -4481,6 +4618,7 @@ newstyles_desc3=Selecteer een derde-partij stijl inhoud van de lijst hieronder o
 newstyles_dstyle=Stijl om te verwijderen
 newstyles_del=Verwijder Nu
 newstyles_edelete=Geselecteerde stijl inhoud bestaat niet langer!
+
 addstyle_title=Installeer Stijl
 addstyle_err=Mislukt om de nieuwe stijl te installeren
 addstyle_ecomp=Dit is geen stijl archief file
@@ -4490,9 +4628,11 @@ addstyle_efiles=Stijl archief bevat geen files!
 addstyle_done=Software van derde met stijl $1 is succesvol geinstalleerd. Wanneer het word gebruikt door een website zal het $2 HTML en image files aanmaken.
 addstyle_ecmd=De uitpak opdracht $1 is niet geinstalleerd
 addstyle_ecmdfailed=Opdracht om uit te pakken is mislukt : $1
+
 thumb_estyle=Stijl bestaat niet
 thumb_title=Stijl Voorbeeld
 thumb_ethumb=De inhoud van stijl $1 heeft geen voorbeeld plaatje.
+
 upgrade_title=Upgraden naar Virtualmin Pro
 newupgrade_title=Upgraden naar Virtualmin Pro
 upgrade_desc1=Indien u veel plezier heeft met het gebruik van Virtualmin GPL en nog meer functies wilt hebben kunt u het upgraden naar de PRO versie, deze pagina kan worden gebruikt om automatisch het upgrade proces uit te voeren. De stappen om dit te doen zijn :
@@ -4533,6 +4673,7 @@ upgrade_update=Beschikbare pakketten updaten vanaf APT ..
 upgrade_debs=Upgraden van Virtualmin Debian pakketten : $1
 upgrade_yumclear=Opruimen van YUM cache ..
 upgrade_etypematch=Upgraden is niet mogelijk als het Virtualmin installatie type <tt>$1</tt> is en Webmin <tt>$2</tt> is
+
 maillog_title=Zoek Email Log
 maillog_desc=Dit formulier kan gebruikt worden om in de email logs te zoeken naar berichten die overeenkomen met bepaalde eigenschappen om uit te zoeken wat ermee gebeurde. Alle velden zijn optioneel en indien niet aangevinkt zullen ze niet worden meegenomen met de zoekactie.
 maillog_header=Zoek condities
@@ -4569,6 +4710,7 @@ maillog_ok1=Virtualmin heeft nog niet uw email server log cache file geïnitiali
 maillog_showspam=Laat spam zien?
 maillog_showvirus=Laat virussen zien?
 maillog_bad=Uitsluitingen
+
 viewmaillog_err=Mislukt om berichten van het log te laten zien
 viewmaillog_egone=Niet langer in log !
 viewmaillog_title=Ge-logde Email Berichten
@@ -4588,6 +4730,7 @@ viewmaillog_file=Volledig bestemming pad
 viewmaillog_relay=Uitgaande email relais
 viewmaillog_status=Email server aflever status
 viewmaillog_size=Berichten grote
+
 bwreset_title=Herberekenen van Bandbreedte Statistieken
 bwreset_header=Opties voor herberekenen bandbreedte
 bwreset_date=Her berekenen vanaf datum
@@ -4609,6 +4752,7 @@ bwreset_doing=Reset de bandbreedte tellers voor de geselecteerde servers en extr
 bwreset_done=.. klaar.
 bwreset_running=Herberekenen van de bandbreedte statistieken van de log files ..
 bwreset_started=.. proces is gestart. Dit kan diverse uren duren indien u gekozen heeft om het proces opnieuw te doen voor de logs over een langere periode of grote aantallen domeinen.
+
 massg_title=Upgrade Scripts
 massg_rusure=Weet u zeker dat u de $1 geselecteerde scripts wilt upgraden naar hun laatste versie?
 massg_ok=Upgrade Nu
@@ -4618,6 +4762,7 @@ massg_fromto=Upgraden van $1 naar $2
 massg_stay=Blijf bij $1
 massg_doing=Upgraden $1 naar versie $2 ..
 massg_edeleted=Script $1 is handmatig verwijdert en kan daarom niet worden ge-upgrade!
+
 aedit_title=Aliassen Handmatig Bewerken
 aedit_header=Maak meerdere email aliassen met een batch file
 aedit_help=Op deze pagina kunt u diverse aliassen tegelijk bewerken, maken en verwijderen, om voor iedere alias één regel met tekst aan te maken. Iedere regel moet het volgende formaat hebben (lees de help file voor deze pagina):
@@ -4629,6 +4774,7 @@ aedit_doing=Updaten van email aliassen ..
 aedit_complete=.. klaar ($1 gemaakt, $3 gemodificeerd, $4 verwijdert, $2 fouten).
 aedit_etwice=Een alias met dezelfde naam komt al meerdere keren voor in de lijst
 aedit_eauto=Automatisch antwoorden kan niet worden opgezet indien u aliassen handmatig bewerkt
+
 exclude_title=Uitgesloten Directory's
 exclude_header=Backup de uitzondering opties
 exclude_dirs=Directory's onder de home om over te slaan
@@ -4636,6 +4782,7 @@ exclude_desc=Standaard zal Virtualmin alle data van de servers's home directory 
 exclude_err=Mislukt om de uitgesloten directory's op te slaan
 exclude_eabs=Directory '$1' kan geen absoluut pad zijn
 exclude_edot=Directory '$1' mag niet het volgende bevatten ..
+
 balancers_title=Proxy Paden
 balancers_ecannot=U bent niet bevoegd om proxy paden te bewerken voor dit domein
 balancers_esupport=Het domein of systeem heeft geen support voor proxies
@@ -4650,6 +4797,7 @@ balancers_return=Lijst met proxy paden
 balancers_derr=Mislukt om proxy paden te verwijderen
 balancers_denone=Niets geselecteerd
 balancers_none2=Geen proxying
+
 balancer_create=Proxy Pad Aanmaken
 balancer_edit=Bewerk Proxy Pad
 balancer_egone=Het geselecteerde proxy pad bestaat niet langer
@@ -4668,6 +4816,7 @@ balancer_eurls=Geen bestemming's URL's ingevuld
 balancer_script=Gebruikt door installatie script
 balancer_scriptver=Script versie
 balancer_none=Gebruik geen proxy voor dit pad - houd het lokaal
+
 scriptwarn_header=De volgende scripts die beheerd worden door Virtualmin hebben nieuwe versies beschikbaar :
 scriptwarn_header2=De volgende scripts die beheerd worden door Virtualmin hebben nieuwe versies beschikbaar in de \nvirtuele server $1 :
 scriptwarn_script=Script naam
@@ -4677,6 +4826,7 @@ scriptwarn_dom=Domein naam
 scriptwarn_where3=Upgrades kunnen gedaan worden in Virtualmin, op iedere domein pagina of op allemaal tegelijk : \n$1
 scriptwarn_where2=Upgrades kunnen uitgevoerd worden in Virtualmin, op de pagina : \n$1
 scriptwarn_subject=Virtualmin script upgrades beschikbaar
+
 quotawarn_subject=Virtualmin Gebruiker Harddisk Quota Monitor
 quotawarn_body=De volgende Virtualmin servers hebben hun limiet bereikt of zitten\nbijna aan hun harddisk quota :
 quotawarn_body2=De volgende Virtualmin gebruikers hebben hun limiet bereikt of zitten\nbijna aan hun harddisk quota :
@@ -4687,6 +4837,7 @@ quotawarn_usage=Gebruik
 quotawarn_status=Status
 quotawarn_reached=Bereikt $1 %
 quotawarn_over=Over de quota
+
 history_title=Systeem Statistieken
 history_ecannot=U bent niet bevoegd om de historische systeem statistieken te bekijken
 history_year=1 jaar
@@ -4752,6 +4903,7 @@ history_type_email=Email berichten
 history_type_cpu=CPU gebruik
 history_type_virt=Virtualmin tellingen
 history_type_system=Systeem statistieken
+
 sv_title=Spam en Virus Scannen
 newsv_title=Spam en Virus Scannen
 sv_ecannot=U bent niet bevoegd om de spam en virus scanner te bewerken
@@ -4786,6 +4938,7 @@ sv_title5=Spam Filter Server Aanzetten
 sv_sdisabling=Uitzetten van SpamAssassin filter server ..
 sv_senabling=Configureren en aanzetten van de SpamAssassin filter server ..
 sv_swarning=Waarschuwing! Virtualmin is geconfigureerd om het server filter te gebruiken, maar het SpamAssassin server proces werkt niet meer.
+
 features_title=Extra's en Plugins
 newfeatures_title=Functies en Plugins
 features_ecannot=U bent niet bevoegd om de aangezette extra's te bewerken
@@ -4797,6 +4950,7 @@ features_desc=Met deze pagina kunt u de kern opties en plugins selecteren die be
 features_used=Toon domeinen
 features_err=Mislukt om de aangezette extra's op te slaan
 features_return=Lijst met extra's en plugins
+
 clamd_copyconf=Aanmaken van de ClamAV configuratie file $1 ..
 clamd_esrcfile=.. bron file overeenkomstig $1 is niet gevonden!
 clamd_esrcalready=.. bestaat reeds
@@ -4817,18 +4971,21 @@ clamd_ekillmsg=Killen mislukt van het ClamAV virus scannen server proces : $1
 spamd_estartmsg=De SpamAssassin filter server kon niet worden gestart
 spamd_estopmsg=De SpamAssassin filter server is niet aan het werk
 spamd_ekillmsg=Killen mislukt van SpamAssassin filter server processen : $1
+
 spamd_boot=SpamAssassin server aanzetten tijdens booten ..
 spamd_start=Starten van SpamAssassin server ..
 spamd_startfailed=.. mislukt om te starten : $1
 spamd_unboot=SpamAssassin server uitzetten tijdens booten ..
 spamd_unbootact=.. geen boot actie gevonden!
 spamd_stop=Stoppen van SpamAssassin server ..
+
 chain_err=Mislukt om CA certificaat op te slaan
 chain_efile=Certificaat file bestaat niet
 chain_ecert=Ongeldige certificaat file : $1
 chain_emode1=U bent niet bevoegd om een een andere file op de server te selecteren!
 chain_eupload=Geen certificaat file geselecteerd om te uploaden
 chain_epaste=Er is geen certificaten tekst ingevuld
+
 stopscript_title=Stop Rails Server
 stopscript_egone=Script bestaat niet langer !
 stopscript_doing=Rails server proces uitschakelen voor $1 ..
@@ -4837,6 +4994,7 @@ startscript_title=Start Rails Server
 startscript_doing=Rails server proces opstarten voor $1 ..
 startscript_failed=.. mislukte : $1
 restartscript_title=Herstart Rails Server
+
 newshells_title=Custom Shell's
 newshells_descr=Met deze pagina kunt u shells naar behoefte veranderen die beschikbaar zijn voor virtuele server administrators en email / FTP gebruikers zodat ze voldoen aan de site's eisen. Eigen shells worden vaak gebruikt om toegangs rechten te geven aan gebruikers van FTP, SSH of andere service's.
 newshells_defs=Beschikbare shells voor admins en mailboxen :
@@ -4858,6 +5016,7 @@ newshells_emailboxes=Er zijn geen shells geselecteerd voor mailboxen
 newshells_eownerdef=Precies één shell moet de standaard zijn voor domein administrators.
 newshells_emailboxdef=Precies één shell moet de standaard zijn voor mailboxen
 newshells_id=Toegang
+
 shells_mailbox=Alleen email
 shells_mailbox2=Geen toegang
 shells_mailboxftp=Email en FTP
@@ -4871,12 +5030,15 @@ shells_ftp2=FTP
 shells_ssh=Email, FTP en SSH
 shells_ssh2=FTP en SSH
 shells_none=&lt;Geen shell&gt;
+
 nicetime_days=$1 dagen, $2 uren, $3 : $4 minuten
 nicetime_hours=$1 uren, $2 : $3 minuten
 nicetime_mins=$1 minuten, $2 seconden
 nicetime_secs=$1 seconden
+
 bcc_epostfix=Er is geen BCC mapping file opgezet in uw Postfix configuratie!
 bcc_emailserver=Uw email server ondersteund geen BCC-en
+
 mail_title=Email Instelling
 mail_header=Virtual server zijn email-gerelateerde instellingen
 mail_bcc=BCC uitgaande email naar
@@ -4887,6 +5049,7 @@ mail_ebcc=Ontbrekend of ongeldig BCC adres
 mail_bccing=Alles BCC-en en verstuur de email naar $1 ..
 mail_nobcc=De BCC uitschakelen van versturen email
 mail_bccoff=Laat BCC-en bij email versturen uitgeschakeld.
+
 nf_header=De volgende nieuwe opties zijn beschikbaar in $1 ..
 nf_desc=Optie
 nf_html=Omschrijving
@@ -4896,6 +5059,7 @@ nf_and=$1 en $2
 nf_seen=Verstop Nieuwe Opties
 nf_try=Bekijk dit ..
 nf_ver=(Versie $1)
+
 chroot_title=FTP Directory Beperkingen
 newchroot_title=FTP Directory Beperkingen
 newchroot_desc=Met deze pagina kunt u configureren op welke directory's gebruikers toegang hebben of kunnen inloggen via FTP. Beperkingen toevoegen aan de eigenaars van de geselecteerde virtuele servers, en al hun gebruikers met FTP toegang. Server eigenaars die geen overeenkomende beperkingen hebben zullen wel alle files zien buiten hun eigen home, echter zullen geen permissie hebben om toegang te krijgen tot andere virtuele servers directory's.
@@ -4916,6 +5080,7 @@ chroot_eneg=De virtuele servers home directory optie kan niet worden geselecteer
 chroot_edom=Kon geen virtuele server vinden voor groep $1
 chroot_edir=Ontbrekende of ongeldige directory in rij $1
 chroot_saving=Updaten FTP server configuratie ..
+
 res_elinux=Bron limieten worden alleen ondersteund in Linux
 res_elinuxconf=De bron Limieten configuratie file $1 is niet gevonden
 res_epamssh=De PAM service voor SSH kon niet worden gevonden, dus de verificatie van de bron limieten is niet compleet.
@@ -4936,6 +5101,7 @@ res_secs=seconden
 res_time=Maximum CPU tijd per proces
 res_etime=Ontbrekende of ongeldige maximum CPU tijd per proces
 res_etime2=Maximum CPU tijd per proces moet 1 minuut of meer zijn
+
 sched_title=Geplande Backups
 sched_ecannot=U bent niet bevoegd om geplande backups te beheren
 sched_yes=Ja, $1
@@ -4957,16 +5123,19 @@ sched_actions=Acties
 sched_now=Backup ..
 sched_restore=Herstel ..
 sched_return=geplande backups
+
 cron_special=Simpele planning
 cron_complex=Complexe planning
 cron_cron=Cron specificatie
 cron_title=Selecteer planning
 cron_ok=OK
 cron_ehidden=Er is geen complexe planning geselecteerd
+
 dsched_err=Mislukt om geplande backups te verwijderen
 dsched_enone=Niets geselecteerd
 dsched_egone=De backup met ID $1 bestaat niet langer
 dsched_ecannot=U bent niet bevoegd om de backup met ID $1 te beheren
+
 dbhosts_err=Mislukt om remote database hosts te veranderen
 dbhosts_enone=Geen hostnamen of IP adressen ingevuld
 dbhosts_ehost='$1' is geen geldige hostnaam of uitdrukking
@@ -4974,6 +5143,7 @@ dbhosts_title=Update Database Hosts
 dbhosts_doing=Toegestane instellingen van $1 database hosts naar $2 ..
 dbhosts_failed=.. mislukt : $1
 dbhosts_done=.. zet voor $1 en andere gebruikers met database toegang.
+
 newglobal_title=Globale Variabelen
 newglobal_desc=De variabelen gedefinieerd op deze pagina kunnen worden gebruikt in ieder domein of gebruikers-niveau template in Virtualmin. Om een variabel toe te voegen kunt u gewoon de naam en waarde invullen op een lege regel aan de onderkant van de tabel. Om te verwijderen moet u de veldnaam leeg maken. Om een variabel tijdelijk uit te zetten het vinkje weghalen in de box bij de kolom.
 newglobal_ecannot=U bent niet bevoegd om globale variabelen te bewerken
@@ -4982,20 +5152,24 @@ newglobal_name=Variabelen naam
 newglobal_value=Variabele waarde
 newglobal_err=Mislukt om globale variabelen op te slaan
 newglobal_ename=Ongeldige variabelen naam in rij $1 - alleen letters, nummers en een laag streepje  _ zijn toegestaan
+
 spamtrap_already=Spam trap aliassen bestaan reeds voor deze virtuele server
 spamtrap_clash=Spam trap aliassen kunnen niet gemaakt worden omdat de volgende conflicterende aliassen reeds bestaan : $1
 spamtrap_noaliases=Er bestaan nog geen spam trap aliassen voor deze virtuele server
+
 unsub_title=Converteer Sub-Domein
 unsub_rusure=Weet u zeker dat u dit sub-domein wilt converteren naar een sub-server? De web inhoud zal blijven zoals het is en iedere DNS record zal worden verplaats naar zijn eigen domein.
 unsub_ok=Converteer naar Sub-Server
 unsub_doing=Converteer $1 naar sub-server ..
 unsub_failed=.. conversie mislukte!
+
 unalias_title=Converteer Alias Server
 unalias_err=Mislukt om de alias server te converteren
 unalias_rusure=Weet u zeker dat u deze alias virtuele server wilt converteren naar een sub-server? Hij zal dan niet langer de web pagina's die gericht zijn naar de oude virtuele server afhandelen, maar kan dan wel zijn eigen web pagina's, mailboxen en email aliassen hebben.
 unalias_ok=Converteer naar Sub-Server
 unalias_doing=Converteren van $1 naar sub-server ..
 unalias_failed=.. conversie mislukten !
+
 connect_echeck=Mislukt om de verbindingen te controleren
 connect_eempty=Geen reactie van de verbinding controle
 connect_ecannot=U bent niet bevoegd de verbinding te controleren voor deze virtuele server
@@ -5020,6 +5194,7 @@ cfix_ssl=Wees er zeker van dat uw webserver aan het werk is en dat poort 443 nie
 cfix_smtptimeout=Controleer of uw systeem firewall poort 25 blokkeert.
 cfix_smtp=wees er zeker van dat uw systeem email server aan het werk is en luistert op de externe netwerk interface.
 cfix_smtpto=Wees er zeker van dat uw email server geconfigureerd is om email voor dit domein te accepteren.
+
 plans_title=Account Plannen
 newplan_title=Account plannen
 plans_name=Plan naam
@@ -5040,6 +5215,7 @@ plans_setdef=Zet standaard plan naar :
 plans_nodef=Geen - gebruik de eerste in de lijst
 plans_savedef=Verander Standaard
 plans_esetdef=Geselecteerd plan bestaat niet of is niet beschikbaar voor u
+
 plan_title1=Maak Account Plan
 plan_title2=Bewerk Account Plan
 plan_header1=Basis plan details
@@ -5061,9 +5237,11 @@ plan_scripts=Toegestane scripts
 plan_scriptsall=Alles behalve die globaal uitgeschakeld zijn
 plan_scriptsopts=Alle scripts
 plan_scriptssel=Toegestaan
+
 dplans_err=Mislukt om plannen te verwijderen
 dplans_enone=Niets geselecteerd
 dplans_eall=Er moet op zijn minst 1 plan bestaan
+
 postgrey_title=Email Grijze-lijst
 newpostgrey_title=Email Grijze-lijst
 postgrey_epostfix=Postgrey kan alleen worden gebruikt in samenwerking met de Postfix email server.
@@ -5116,6 +5294,7 @@ postgrey_title4=Installeer Postgrey
 postgrey_installing=Installeren van het Postgrey pakket ..
 postgrey_installfailed=.. installatie mislukte!
 postgrey_installed=.. installatie volledig succesvol
+
 editgrey_titleclients=Bewerk Witte-lijst Client
 editgrey_titlerecipients=Bewerk Witte-lijst Ontvanger
 creategrey_titleclients=Client aan Witte-Lijst Toevoegen
@@ -5130,8 +5309,10 @@ editgrey_gone=Witte-lijst ingang bestaat niet langer!
 editgrey_err=Mislukt om witte-lijst ingang op te slaan
 editgrey_evalueclients=Ontbrekende of ongeldig lijkende email server IP adres of hostnaam
 editgrey_evaluerecipients=Ontbrekende of ongeldig lijkende ontvanger email adres
+
 delgrey_err=Mislukt om witte-lijst ingangen te verwijderen
 delgrey_enone=Niets geselecteerd
+
 copycert_title=Kopieer SSL Certificaat
 copycert_ecannot=U bent niet bevoegd deze virtuele server's SSL certificaat te kopiëren.
 copycert_webmindir=Kopieer certificaat en sleutel naar $1 ..
@@ -5148,6 +5329,7 @@ copycert_ecert=Geen SSL certificaat data gevonden
 copycert_ekey=Geen SSL sleutel data gevonden
 copycert_psaving=Kopiëren van certificaat en sleutel naar Postfix files ..
 copycert_penabling=SSL aanzetten in de Postfix configuratie ..
+
 wizard_title=Pre-Installatie Wizard
 wizard_next=Volgende
 wizard_prev=Vorige
@@ -5219,6 +5401,7 @@ wizard_hashpass=Virtualmin geeft u de mogelijkheid voor het opslaan van platte t
 wizard_hashpass_mode=Wachtwoord opslag mode
 wizard_hashpass_mode1=Alleen versleutelde wachtwoorden opslaan
 wizard_hashpass_mode0=Platte tekst wachtwoorden opslaan
+
 backuplog_title=Backup Logs
 backuplog_ecannot=U bent niet bevoegd om de Virtualmin backup log's te bekijken.
 backuplog_search=Vind logs overeenkomend
@@ -5237,6 +5420,7 @@ backuplog_doms=$1 domeinen
 backuplog_part=Gedeeltelijk
 backuplog_nodoms=Geen domeinen
 backuplog_return=Backup log lijsten
+
 viewbackup_title=Bekijk Backup Log
 viewbackup_eid=Ontbrekende of ongeldige backup ID !
 viewbackup_egone=Ge-logde backup bestaat niet !
@@ -5265,6 +5449,7 @@ viewbackup_failure=Mislukt
 viewbackup_partial=Gedeeltelijk compleet
 viewbackup_restore=Herstel Deze Backup
 viewbackup_ecannot=U bent niet bevoegd om deze backup log te bekijken
+
 redirects_title=Website Omleidingen
 redirects_ecannot=U bent niet bevoegd om website omleidingen voor dit domein te bewerken
 redirects_eweb=Deze virtuele server ondersteund geen omleidingen
@@ -5279,6 +5464,7 @@ redirects_type=Type
 redirects_alias=Alias naar directory
 redirects_redirect=Omleiding naar URL
 redirects_dest=Bestemming
+
 redirect_egone=Omleiding bestaat niet langer!
 redirect_create=Maak Website Omleiding
 redirect_edit=Bewerk Website Omleidingen
@@ -5295,9 +5481,11 @@ redirect_eurl=Ontbrekende of ongeldige bestemmings URL
 redirect_edir=Niet-absolute bestemmings directory
 redirect_edir3=Ontbrekende bestemming directory
 redirect_edir2=Bestemmings directory moet onder $1 zitten
+
 newchangelog_title=Nieuwe Optie Log
 newchangelog_ecannot=U bent niet bevoegd om de optie log te bekijken
 newchangelog_desc=Deze pagina toont een lijst met alle belangrijke veranderingen in Virtualmin versies die geinstalleerd zijn op uw systeem, tot aan de huidige release.
+
 dkim_title=Domein-Sleutel Identificeer Email
 dkim_title1=Aanzetten van Domein-Sleutel Identificeer Email
 dkim_title2=Uitzetten van Domein-Sleutel Identificeer Email
@@ -5321,10 +5509,12 @@ dkim_eselector=Ontbrekende of ongeldige keuze - het moet een geldige DNS record 
 dkim_eselfile=.. sleutel file $1 bestaat reeds!
 dkim_extra=Extra domeinen om te ondertekenen
 dkim_eextra=Ongeldig extra domein $1
+
 dkim_title4=Installeer DKIM
 dkim_installing=Het DKIM filter pakket aan het installeren ..
 dkim_installfailed=.. installatie is mislukt!
 dkim_installed=.. installatie is succesvol afgerond
+
 dkim_newkey=Genereer privé sleutel in de file $1 ..
 dkim_enewkey=.. prive sleutel mislukte : $1
 dkim_pubkey=Uitpakken van publieke sleutel vanuit de privé sleutel in $1 ..
@@ -5350,6 +5540,7 @@ dkim_undns=Verwijder DKIM records van het DNS domein $1 ..
 dkim_dnsremoved=.. succesvol verwijderd
 dkim_dnsalreadygone=.. is reeds weg
 dkim_records=DNS records voor extra domeinen
+
 provision_title=Cloudmin Service Client
 provision_ecannot=U bent niet bevoegd de Cloudmin service client op te zetten
 provision_header=Cloudmin service client opties
@@ -5396,12 +5587,14 @@ provision_espamtest=.. ondersteunend systeem $1 kan niet worden gebruikt : $2
 provision_spamgot=.. gebruik systeem $1
 provision_spamunsetup=Stop het gebruik van een spam filter systeem ..
 provision_espamunsetup=.. mislukt : $1
+
 provision_emysqldbcheck=Service fouten controle van de MySQL database : $1
 provision_emysqldb=MySQL database $1 bestaat reeds op de service host
 provision_emysqlcheck=Service fouten controle van de MySQL inlog : $1
 provision_emysql=De MySQL inlog $1 bestaat reeds op de service host
 provision_ednscheck=Service fouten controle van DNS zone : $1
 provision_edns=DNS zone $1 bestaat reeds op de service host
+
 records_title=DNS Records
 records_ecannot=U bent niet bevoegd om DNS records te bewerken
 records_name=Record naam
@@ -5443,6 +5636,7 @@ records_evalueptr=Waarde moet een DNS naam zijn en eindigen met een punt.
 records_comment=Commentaar
 records_manual=Handmatig Records Bewerken
 records_epost=Records zijn niet volledig verwijdert : $1
+
 record_title1=DNS Record Aanmaken
 record_title2=DNS Record Bewerken
 record_egone=Record bestaat niet langer!
@@ -5468,6 +5662,7 @@ record_ecname=De Naam Alias record $1 heeft dezelfde naam als een bestaande reco
 record_eunder=DNS record $1 kan niet worden bewerkt omdat het niet staat onder $2
 record_defttl=Standaard cache tijd
 record_epost=Record is niet volledig opgeslagen : $1
+
 clone_err=Virtuele server klonen mislukten.
 clone_object=Nieuwe virtuele server instellingen aanmaken ..
 clone_clash=Controleren van conflicten en afhankelijkheid's problemen ..
@@ -5543,16 +5738,19 @@ clone_ssl=Apache SSL richtlijnen aan het kopieeren ..
 clone_newip=IP adres voor de kloon
 clone_alloc=Nieuw IP toewijzen
 clone_vip=Gebruik adres
+
 mrecords_title=Bewerk DNS Records
 mrecords_ecannot=U bent niet bevoegd om handmatig DNS records te bewerken.
 mrecords_desc=Op deze pagina kunt u handmatig alle DNS records modificeren van het domein, in het BIND configuratie formaat.
 mrecords_err=Mislukt om DNS records op te slaan
 mrecords_enone=Niets ingevuld!
 mrecords_evalidate=Validatie mislukte : $1
+
 mxv_unsupported=Alleen Sendmail en Postfix worden ondersteund voor relais beperkingen.
 mxv_rrm=De richtlijn $1 is niet ingesteld in de Postfix configuratie.
 mxv_eaccess=De spam controle (access_db) optie is niet aangezet in de Sendmail configuratie.
 mxv_eaccessfile=De spam controle (access_db) file $1 bestaat nog niet.
+
 fixperms_err=Permissies repareren is mislukt
 fixperms_edoms=Er zijn geen virtuele servers geselecteerd
 fixperms_title=Permissies Repareren

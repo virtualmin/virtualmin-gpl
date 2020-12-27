@@ -221,6 +221,7 @@ index_mass=選択を更新
 index_mass_all=すべての仮想サーバーを更新
 index_disable=選択を無効にする
 index_enable=選択を有効にする
+
 index_backup=バックアップ仮想サーバー
 index_backupdesc=このボタンをクリックして、すぐにバックアップを実行します。バックアップするサーバー、保存する機能、バックアップ先を選択するためのフォームが表示されます。
 index_sched=スケジュールされたバックアップ
@@ -252,6 +253,7 @@ index_expiryexpired=一部の仮想サーバーのDNS登録の有効期限が切
 index_expirynearly=一部の仮想サーバーのDNS登録の有効期限が近づいています： $1
 index_certinvalid=$1のSSL証明書ファイル $2が無効です： $3
 index_keyinvalid=$1のSSLキーファイル $2が無効です： $3
+
 form_title=仮想サーバーを作成
 form_title2=仮想サブサーバーを作成
 form_title3=エイリアスサーバーの作成
@@ -362,6 +364,7 @@ form_limits=割り当てと制限
 form_proxysect=IPアドレスと転送
 form_ipsect=IPアドレスとインターフェース
 form_inputssect=追加機能オプション
+
 setup_err=仮想サーバーの作成に失敗しました
 setup_eplan=選択したプランは存在しないか、利用できません
 setup_evital=重要な機能 $1が正しく作成されませんでした-仮想サーバーの作成が停止しました。
@@ -500,6 +503,7 @@ setup_edefip=新しい仮想サーバーにはIPアドレスがありません�
 setup_qmailme=このドメイン名はサーバーのホスト名$1（ <tt>control /me</tt> ファイルから）と同じであるため、Qmailには使用できません
 setup_eslashpass=バックスラッシュを含むパスワードはMySQLではサポートされていません
 setup_etmpl=選択したテンプレートの使用は許可されていません
+
 setup_title=仮想サーバーのセットアップ
 setup_group=管理グループ $1を作成しています ..
 setup_user=管理ユーザー $1を作成しています ..
@@ -654,8 +658,10 @@ setup_ejail=..刑務所が失敗しました： $1
 setup_jailed=.. jailディレクトリは $1になりました
 setup_letsaliases=$1が $2を含むように、Let's Encrypt証明書を再要求しています。
 setup_eletsaliases=..失敗しました： $1
+
 indom=ドメイン $1内
 equotacommand=クォータコマンド $1が失敗しました： $2
+
 users_ecannot=このドメインのユーザーを編集することはできません
 users_ecannot2=ローカルユーザーの編集は許可されていません
 users_emailbox=ドメイン所有者のユーザーは編集できません
@@ -714,6 +720,7 @@ users_mailclient=メールクライアント設定を表示
 users_mailclientdesc=このドメインのユーザーのメールクライアントで使用する必要がある表示設定。
 users_all=すべて
 users_same=管理者と同じ
+
 user_create=ユーザーを作成
 user_createweb=FTPユーザーの作成
 user_edit=ユーザーを編集
@@ -850,6 +857,7 @@ user_lastlogin_imap=IMAP（メールの取得）
 user_lastlogin_smtp=SMTP（メール送信）
 user_lastlogin_never=ログインはまだ記録されていません
 user_noforward=転送されたメールに自動返信しますか？
+
 aliases_ecannot=このドメインのエイリアスの編集は許可されていません
 aliases_indom=ドメイン $2の $1エイリアス
 aliases_title=メールエイリアス
@@ -889,6 +897,7 @@ aliases_reply=メッセージ $1で自動返信
 aliases_emass=エイリアスを手動で編集します。
 aliases_hide=特別なエイリアスを非表示にします。
 aliases_show=特別なエイリアスを表示します。
+
 alias_create=メールエイリアスの作成
 alias_edit=メールエイリアスを編集
 alias_egone=メールエイリアスは存在しません
@@ -973,18 +982,22 @@ alias_psel=日付
 alias_estart=自動返信開始日が無効です
 alias_eend=自動返信の終了日が無効です
 alias_aopts=自動返信オプション
+
 stop_ecannot=サービスを停止することはできません
 stop_err=サービスを停止できませんでした
 stop_title=停止されたサービス
 stop_done=$1のサービスは正常に停止されました。
+
 start_ecannot=サービスを開始することはできません
 start_err=サービスを開始できませんでした
 start_title=サービス開始
 start_done=$1のサービスは正常に開始されました。
+
 restart_ecannot=サービスを再開することはできません
 restart_err=サービスを再開できませんでした
 restart_title=再開したサービス
 restart_done=$1のサービスは停止され、正常に再起動されました。
+
 bstop_err=BINDを停止できませんでした
 bstop_epid=プロセスは実行されていません
 mstop_err=メールサーバーの停止に失敗しました
@@ -995,6 +1008,7 @@ fstart_err=FTPサーバーの起動に失敗しました
 fstop_edown=走っていない
 fstop_ekill=キルに失敗しました： $1
 fstart_eup=既に実行中
+
 edit_title=仮想サーバーの編集
 edit_title2=仮想サブサーバーを編集
 edit_title3=エイリアスサーバーの編集
@@ -1168,8 +1182,10 @@ edit_switch=サーバーの管理者に切り替え
 edit_switchdesc=パスワードを入力しなくても、この仮想サーバーの所有者としてWebminに自動的にログインします。
 edit_spamvirus=スパムとウイルスの配信
 edit_spamvirusdesc=この仮想サーバーに送信される電子メールで検出されたスパムおよびウイルスの配信方法を構成します。
-edit_phpmode=ウェブサイトのオプション
-edit_phpmodedesc=ロギングやPHP実行モードなど、この仮想サーバーのWebサイトに関連する設定を構成します。
+edit_website=ウェブサイトのオプション
+edit_websitedesc=ロギングやHTMLディレクトリなど、この仮想サーバーのWebサイトに関連する設定を構成します
+edit_php=PHPオプション
+edit_phpdesc=この仮想サーバーでPHPスクリプトを実行する方法に関連する設定を構成します。
 edit_phpver=PHPバージョン
 edit_phpverdesc=使用するPHPのバージョンを選択し、ディレクトリごとに異なるバージョンを構成します。
 edit_spf=DNSオプション
@@ -1227,6 +1243,7 @@ edit_domdkimdesc=この仮想サーバーのみに構成されたDomainKey設定
 edit_connect=接続を確認する
 edit_connectdesc=この仮想サーバーのWebサイト、DNSドメイン、およびメールサーバーがインターネットの残りの部分からアクセスできることを確認します。
 edit_psearch=サブサーバーの一覧表示
+
 delete_title=サーバーを削除
 delete_rusure2=$2個のファイルがある仮想サーバー $1を削除してもよろしいですか？次の機能は削除されます：
 delete_rusure3=仮想サーバー $1を削除してもよろしいですか？次の機能は削除されます：
@@ -1301,6 +1318,7 @@ delete_dom=サブサーバー $1を削除しています ..
 delete_aliasfailure=.. $1エイリアスの削除に失敗しました： $2
 delete_ednssubof=仮想サーバー $1にはサーバー $2のDNSレコードが含まれているため、削除できません
 delete_esslnoips=ドメインのSSL証明書が見つかりません
+
 save_err=サーバーの変更に失敗しました
 save_title=サーバーを保存
 save_equota=合計割り当てがないか無効です
@@ -1411,8 +1429,10 @@ save_euserquota=現在のディスク使用量は既に $1であるため、サ�
 save_aliasusers=無効にされている機能は、次のエイリアスサーバーで使用されています： $1
 save_erquota=この仮想サーバーのディスククォータは、クォータ制限のあるリセラー $1が所有しているため、無制限に設定できません
 save_erbw=この仮想サーバーは帯域幅制限のあるリセラー $1が所有しているため、帯域幅制限を無制限に設定することはできません
+
 luser_err=ローカルユーザーを保存できませんでした
 luser_etaken=同じ名前のユーザーが既に存在します
+
 acl_warn=警告！ Virtualminによって作成されたWebminユーザーの場合、これらの設定は自動的に上書きされる可能性があります。
 acl_domains=このユーザーが管理できるドメイン
 acl_all=すべてのドメイン
@@ -1425,12 +1445,15 @@ acl_local=ローカルユーザーを編集できますか？
 acl_stop=サービスを開始および停止できますか？
 acl_only=自分だけ
 acl_lim=アクセスを制限する
+
 other=その他. ..
+
 search_title=の検索結果
 search_none=$1を含む仮想サーバーは見つかりませんでした。
 search_nonef=機能 $1を使用している仮想サーバーが見つかりませんでした。
 search_results=$1に一致する $2仮想サーバーが見つかりました。
 search_resultsf=機能 $1を使用している $2仮想サーバーが見つかりました。
+
 import_title=仮想サーバーのインポート
 import_desc1=このフォームは、Virtualminの制御下でシステム上の既存のドメインを表示するために使用できます。ドメイン名、既存のApache仮想サーバー、DNSドメインのメールボックスとエイリアスは自動的に検出されます。存在する場合は、ドメインに関連付けるデータベースの名前を入力することもできます。
 import_desc2=パスワードがわかっている場合は、パスワードフィールドに管理ユーザーの現在のパスワードを入力する必要があります。 Virtualminは、将来のMySQLまたはPostgreSQLデータベースのセットアップ時に使用するために、各仮想サーバーのパスワードを知る必要があります。
@@ -1459,6 +1482,7 @@ import_regexpg=一次グループ
 import_regexpr=一致する正規表現
 import_emysql_user=MySQLユーザー名がありません
 import_emysql_user2=指定されたMySQLユーザーは存在しません
+
 import_err=インポートに失敗しました
 import_eexists=指定されたドメインはすでにVirtualminによって管理されています
 import_euserclash=仮想サーバー $1は選択したユーザー名をすでに使用しています
@@ -1514,14 +1538,18 @@ import_auto=自動
 import_ehome=ホームディレクトリがないか、無効です
 import_eregexp=ユーザーの正規表現がありません
 import_updating=$1..に一致するユーザーを更新しています
+
 acheck_ename=ServerNameディレクティブがありません
 acheck_edom=ServerNameまたはServerAliasディレクティブのいずれにも$DOMが含まれていません
 acheck_edoc=DocumentRootディレクティブがありません
+
 fcheck_euser=ユーザーディレクティブがありません
 fcheck_egroup=欠落グループディレクティブ
 fcheck_euserex=UserディレクティブのUnixユーザー $1は存在しません
 fcheck_egroupex=グループディレクティブのUnixグループ $1は存在しません
+
 lcheck_epost=Apacheをリロードする必要があるpostrotateスクリプトがありません
+
 disable_title=サーバーを無効にする
 disable_rusure2=仮想サーバー $1を無効にしてもよろしいですか？その $2は無効になります。
 disable_undo=サーバーが再度有効になった場合、上記のアクションはすべて取り消され、データは失われません。
@@ -1558,6 +1586,7 @@ disable_users=メールユーザーのアカウントをロックする ..
 disable_why=無効にする理由
 disable_subservers=サブサーバーも無効にしますか？
 disable_doing=仮想サーバー $1を無効にしています ..
+
 enable_title=サーバーを有効にする
 enable_rusure2=仮想サーバー $1を再度有効にしてもよろしいですか？その $2は元の有効な状態に復元されます。
 enable_ok=はい、有効にします
@@ -1580,6 +1609,7 @@ enable_statusssl=SSLウェブサイトステータスモニタリングを再ア
 enable_users=メールユーザーのアカウントのロック解除 ..
 enable_subservers=サブサーバーも有効にしますか？
 enable_doing=仮想サーバー $1を有効にしています ..
+
 mail_usubject=メールボックスが作成されました
 mail_dsubject=作成された仮想サーバー
 mail_upsubject=メールボックスを更新しました
@@ -1587,12 +1617,14 @@ mail_rsubject=作成されたリセラーアカウント
 mail_file=テンプレートファイル $1の読み取りに失敗しました： $2
 mail_system=Virtualminでメールがセットアップされていない
 mail_ok=$1にメールを送信しました
+
 afile_ecannot=エイリアスインクルードファイルの編集は許可されていません
 afile_eread=ユーザー $2としてエイリアスインクルードファイル $1を読み取れませんでした： $3
 afile_title=アドレスファイルの編集
 afile_desc=以下のテキスト領域を使用して、ファイル $1のアドレスを編集してください。
 afile_undo=変更を元に戻します
 afile_ewrite=ユーザー $2としてアドレスファイル $1への書き込みに失敗しました： $3
+
 rfile_title=自動返信ファイルを編集
 rfile_ecannot=自動返信ファイルの編集は許可されていません
 rfile_eread=自動返信ファイル $1をユーザー $2として読み取れませんでした： $3
@@ -1608,6 +1640,7 @@ rfile_secs=秒
 rfile_ereplies=返信追跡ログファイルがありません
 rfile_eperiod=応答間の秒数がないか無効です
 rfile_ewrite=ユーザー $2として自動返信ファイル $1への書き込みに失敗しました： $3
+
 ffile_title=フィルターファイルの編集
 ffile_ecannot=フィルターファイルの編集は許可されていません
 ffile_eread=ユーザー $2としてフィルターファイル $1を読み取れませんでした： $3
@@ -1625,6 +1658,7 @@ ffile_err=フィルターファイルを保存できませんでした
 ffile_ematch=一致がありません
 ffile_eaction=転送先アドレスがありません
 ffile_ewrite=ユーザー $2としてフィルターファイル $1への書き込みに失敗しました： $3
+
 newweb_title=Apacheウェブサイトテンプレート
 newweb_ecannot=ウェブサイトテンプレートの編集は許可されていません
 newweb_desc=このフォームを使用して、Virtualminによって作成されたWebサイトで使用されるテンプレートApacheディレクティブを編集します。テンプレートからサイトが作成されると、次の置換が行われます。
@@ -1669,6 +1703,7 @@ newweb_admin=<tt>admin.${DOM}</tt>リダイレクトしますか？
 newweb_admindom=<tt>admin</tt>リダイレクトのURL
 newweb_ewebmaildom=ウェブメールリダイレクトのURLが見つからないか無効です
 newweb_eadmindom=管理リダイレクトのURLがないか無効です
+
 newftp_title=ProFTPDサーバーテンプレート
 newftp_ecannot=ProFTPDテンプレートの編集は許可されていません
 newftp_desc=このフォームを使用して、Virtualminによって作成された仮想FTPサーバーに使用されるテンプレートProFTPDディレクティブを編集します。テンプレートからサイトが作成されると、次の置換が行われます。
@@ -1678,6 +1713,7 @@ newftp_dir=作成する匿名FTPサブディレクトリ
 newftp_dir0=家の下のディレクトリ
 newftp_dir0suf=（上記の＆lt; Anonymous＆gt;セクションと一致する必要があります）
 newftp_edir=匿名FTPサブディレクトリがないか、無効です
+
 newdns_title=BIND DNSテンプレート
 newdns_ecannot=DNSテンプレートの編集は許可されていません
 newdns_desc=このフォームを使用して、Virtualminによって作成されたDNSドメインに配置されるテンプレートBINDディレクティブを編集します（自動モードでない場合）。テンプレートからドメインが作成されると、次の置換が行われます。
@@ -1695,6 +1731,7 @@ newdns_noview=トップレベル（どのビューにもありません）
 newdns_enamedconf=有効なBIND named.confディレクティブが入力されていません
 newdns_ensip=追加のネームサーバー $1はホスト名ではなくIPアドレスです
 newdns_enshost=追加のネームサーバー $1は存在しません
+
 sub_DOM=<tt>foo.com</tt>などのドメイン名
 sub_HOME=<tt>/home/foo</tt> 」などのドメインユーザーのホームディレクトリ
 sub_USER=<tt>foo</tt>などのドメインを所有する管理ユーザー
@@ -1716,19 +1753,23 @@ sub_NAME=リセラーのVirtualminログイン
 sub_RPLAINPASS=リセラーのパスワード
 sub_EMAIL=販売代理店の連絡先メールアドレス
 sub_WEBMINURL=VirtualminにログインするためのURL
+
 newuser_title=新しいメールボックスのメール
 newuser_ecannot=新しいユーザーのメールテンプレートの編集は許可されていません
 newuser_desc2=このフォームを使用して、作成後に新しいメール/ FTPユーザーに送信できる電子メールメッセージのテンプレートを編集します。次の置換がテキストに対して行われます。
 newuser_header=新規ユーザーのメールメッセージの詳細
 newuser_docs=説明と代用
+
 newupdate_title=更新されたメールボックスのメール
 newupdate_ecannot=更新されたユーザーのメールテンプレートを編集することはできません
 newupdate_desc2=このフォームを使用して、更新後にメール/ FTPユーザーに送信できるメールメッセージのテンプレートを編集します。次の置換がテキストに対して行われます。
 newupdate_header=ユーザーのメールメッセージの詳細を更新
+
 newlocal_title=新しいローカルメールボックスのメール
 newlocal_ecannot=新しいローカルユーザーのメールテンプレートの編集は許可されていません
 newlocal_desc2=このフォームを使用して、作成後に新しいローカルユーザーに送信できる電子メールメッセージのテンプレートを編集します。次の置換がテキストに対して行われます。
 newlocal_header=新しいローカルユーザーのメールメッセージの詳細
+
 newdom_title=新しい仮想サーバーのメール
 newdom_ecannot=新しいサーバーのメールテンプレートを編集することはできません
 newdom_desc=このフォームを使用して、作成後に新しい仮想サーバーの所有者に送信される電子メールメッセージのテンプレートファイル $1を編集します。次の置換がテキストに対して行われます。
@@ -1741,14 +1782,17 @@ newdom_to=にメールを送信
 newdom_mailbox=ユーザーのメールボックス
 newdom_owner=仮想サーバーの所有者
 newdom_reseller=仮想サーバーリセラー
+
 newsubdom_title=新しい仮想サブサーバーのメール
 newsubdom_ecannot=新しいサブサーバーのメールテンプレートを編集することはできません
 newsubdom_desc=このフォームを使用して、新しい仮想サブサーバーの作成後に所有者に送信される電子メールメッセージのテンプレートファイル $1を編集します。次の置換がテキストに対して行われます。
 newsubdom_descdis=この機能を[Virtualmin Configuration]ページで有効にした場合、このフォームを使用して、作成後に新しい仮想サブサーバーの所有者に送信される電子メールメッセージのテンプレートファイル $1を編集します。次の置換がテキストに対して行われます。
 newreseller_header=新しいリセラーのメールメッセージの詳細
+
 newreseller_title=新しいリセラーのメール
 newreseller_ecannot=新しい販売パートナーのメールテンプレートを編集することはできません
 newreseller_desc2=このフォームを使用して、作成後に新しいリセラーアカウントに送信できる電子メールメッセージのテンプレートを編集します。次の置換がテキストに対して行われます。
+
 feature_web=Apacheウェブサイト
 feature_dns=BIND DNSドメイン
 feature_mysql=MySQLデータベース
@@ -1766,11 +1810,13 @@ feature_virt6=IPv6アドレス
 feature_spam=スパムフィルタリング
 feature_virus=ウイルスフィルタリング
 feature_status=状態監視
+
 bandwidth_web=ウェブサイトのトラフィック
 bandwidth_ftp=FTP転送
 bandwidth_mail=メールを転送しました
 bandwidth_backup=作成されたバックアップ
 bandwidth_restore=バックアップが復元されました
+
 losing_web=仮想ホスト内のすべてのApacheディレクティブが削除されます。
 losing_dns=ドメイン内のすべてのDNSレコードとすべてのBINDオプションが削除されます。
 losing_mysql=すべてのMySQLデータベース、すべてのテーブル、およびサーバーのMySQLログインが削除されます。
@@ -1788,6 +1834,7 @@ losing_logrotate=仮想サーバーのログファイルのLogrotate構成が削
 losing_spam=この仮想サーバーのSpamAssassin設定は削除されます。
 losing_virus=この仮想サーバーのウイルスをフィルタリングするためのProcmailエントリは削除されます。
 losing_status=この仮想サーバーのWebサイトのWebminステータスモニターが削除されます。
+
 check_title=構成の確認
 check_desc=システムのステータスをチェックして、有効になっているすべての機能が使用可能であること、メールサーバーが適切に構成されていること、割り当てがアクティブであることを確認しています。
 check_netok=Webminのネットワーク構成モジュールがインストールおよびサポートされています。
@@ -1952,13 +1999,16 @@ check_eaptrepofile=APTリポジトリ設定ファイル $1は存在しません�
 check_aptrepook=Virtualmin APTリポジトリが正しく構成されている
 check_aptrepowrong=APTリポジトリ設定ファイル $1に間違ったシリアル番号のライセンスキーが含まれています！
 check_aptrepomissing=リポジトリ設定ファイル $1は、software.virtualmin.com！を参照していません。
+
 checkmap_enone=<a href='$1'>Postfix構成</a>でマップソースが見つかりませんでした
 checkmap_esupport=マップソース<tt>$1</tt>はPostfixでサポートされていません-Postfixライブラリをインストールするか、再コンパイルする必要があるかもしれません
 checkmap_eaccess=マップソース<tt>$1</tt>は使用できません： $2
 checkmap_efile=マップタイプはこのバージョンのWebminではサポートされていません- <tt>hash</tt>や<tt>regexp</tt>などのファイルを使用するマップのみ使用できます
 check_eqmailldap=Qmail+LDAPサポートはVirtualmin 6.00で削除されました
+
 allwebmin_ecannot=すべてのWebminユーザーを更新することはできません
 allwebmin_title=Webminユーザーの更新
+
 log_create_user=作成されたユーザー $1 @ $2
 log_modify_user=変更されたユーザー $1 @ $2
 log_delete_user=ユーザー $1 @ $2を削除しました
@@ -1998,6 +2048,8 @@ log_unalias_domain=仮想サーバー $1をエイリアスからサブサーバ�
 log_spam_domain=サーバー $1のスパムおよびウイルス配信の変更
 log_spf_domain=サーバー $1のDNSオプションを変更しました
 log_phpmode_domain=サーバー $1のWebサイトオプションを変更しました
+log_website_domain=サーバー $1のWebサイトオプションを変更しました
+log_php_domain=サーバー $1のPHPオプションを変更しました
 log_phpver_domain=サーバー $1のPHPバージョンを変更しました
 log_initial_domain=サーバー $1のユーザーデフォルトを変更しました
 log_limits_domain=サーバー $1の所有者制限を変更しました
@@ -2165,6 +2217,7 @@ log_enable_ratelimit=メールレート制限を有効にしました
 log_disable_ratelimit=無効なメールレート制限
 log_modify_ratelimit=メールレート制限の更新
 log_wizard=インストールウィザードの手順： $1
+
 backup_title=バックアップ仮想サーバー
 backup_title2=スケジュールされたバックアップの編集
 backup_title3=スケジュールされたバックアップを作成する
@@ -2305,6 +2358,7 @@ backup_senabled0=Virtualminのスケジュールバックアップが $1仮想�
 backup_sdisabled=Virtualminのスケジュールバックアップは無効になっています。
 backup_key=キーでバックアップを暗号化する
 backup_nokey=署名も暗号化もしない
+
 backup_err=バックアップに失敗しました
 backup_err2=スケジュールされたバックアップを保存できませんでした
 backup_ecannot=バックアップの実行は許可されていません
@@ -2381,6 +2435,7 @@ backup_copyfailed=..コピーに失敗しました： $1
 backup_ekey=選択したバックアップキーは存在しません！
 backup_ekeycannot=選択したバックアップキーの使用は許可されていません
 backup_eownrestore=仮想サーバーの所有者が復元できるのは、署名されたバックアップのみです
+
 backup_dirtar=ホームディレクトリのTARファイルを作成しています ..
 backup_dirtarinc=ホームディレクトリの増分TARファイルを作成しています ..
 backup_dirtarfailed=.. TARが失敗しました！ $1
@@ -2523,6 +2578,7 @@ backup_arun=バックアップ後のコマンドを実行しています ..
 backup_brunfailed=..失敗しました。バックアップは続行されません。
 backup_arunfailed=..失敗しました！
 backup_efeature=..機能 $1が失敗しました
+
 restore_title=仮想サーバーの復元
 restore_header=バックアップを復元するためのオプション
 restore_src=ソースを復元
@@ -2545,6 +2601,7 @@ restore_virtualmin=復元するVirtualmin設定
 restore_dnswholefile=DNSゾーンファイルのすべてを復元する
 restore_newip=復元されたサーバーのIPv4アドレス
 restore_newip6=復元されたサーバーのIPv6アドレス
+
 restore_ecannot=バックアップの復元は許可されていません
 restore_esched=選択したバックアップスケジュールは存在しません！
 restore_err=復元に失敗しました
@@ -2616,6 +2673,7 @@ restore_phpbad=警告-次のスクリプトは、このシステムでは利用�
 restore_phpbad2=$1- $2-バージョン $3
 restore_euid=UID $1はこのシステムですでに使用されています
 restore_egid=GID $1はこのシステムですでに使用されています
+
 restore_unixuser=管理パスワードとクォータの更新 ..
 restore_unixsame=..レプリケーションモードで元のLDAPサーバー $1へのリストアをスキップ
 restore_dirtar=ホームディレクトリのTARファイルを抽出しています ..
@@ -2700,6 +2758,7 @@ restore_vmailserver_grey=グレイリスト設定の復元 ..
 restore_vmailserver_missing=..このシステムでは構成されていない
 restore_ereseller=リセラー $1は存在しません
 restore_eparent=元の親仮想サーバー $1は存在しません
+
 limits_title=サーバー所有者の制限
 limits_header=サーバー所有者のVirtualmin制限
 limits_header2=許可されている機能と機能
@@ -2765,6 +2824,7 @@ limits_unshell=不明なシェル $1を使用しています
 limits_jail=Chroot刑務所ドメインUnixユーザー？
 limits_ejailon=chroot刑務所の有効化に失敗しました： $1
 limits_ejailoff=chroot刑務所の無効化に失敗しました： $1
+
 rename_title=ドメイン名を変更
 rename_header=仮想サーバーのドメイン名変更オプション
 rename_domain=古いドメイン名
@@ -2808,6 +2868,7 @@ rename_ehome3=新しいホームディレクトリは既に存在します
 rename_ehome4=新しいホームディレクトリの親が存在しません
 rename_scripts=スクリプトデータベースのパスを更新しています ..
 rename_eparentuser=ユーザー名はトップレベルのサーバーでのみ変更できます
+
 cert_title=SSL証明書
 cert_desc2=このセクションには、この仮想サーバーで現在使用されているSSL証明書の詳細が表示されます。
 cert_desc1=このフォームを使用して、この仮想サーバーの証明書署名要求（CSR）と秘密鍵を作成できます。結果のCSRは、このページの2番目のフォームに貼り付けるための署名済み証明書を返す認証局（CA）に送信できます。
@@ -2947,6 +3008,7 @@ cert_webminsvcip=はい（$1および $2への要求の場合）
 cert_eperiperr=サービス証明書を保存できませんでした
 cert_eperipinst=サービス $1がインストールされていません
 cert_eperipfail=サービス $1が失敗しました
+
 csr_title=CSRの生成
 csr_title2=証明書を生成しています
 csr_err=CSRの生成に失敗しました
@@ -2957,6 +3019,7 @@ csr_csr=この仮想サーバーのCSRは $1に保存されています：
 csr_key=この仮想サーバーの新しい秘密キーは $1に保存されています：
 csr_selfing=自己署名証明書と秘密鍵の生成 ..
 csr_csring=署名リクエストと秘密鍵の生成 ..
+
 newkey_title=証明書のインストール
 newkey_err=証明書をインストールできませんでした
 newkey_ecert2=署名されたSSL証明書が見つからないか無効です： $1
@@ -2972,6 +3035,7 @@ newkey_enewkeyfilehome=秘密鍵ファイル $1は仮想サーバーのホーム
 newkey_apache=新しい証明書とキーを使用するようにWebサーバーを構成しています ..
 newkey_enewkeycsr=署名リクエストと同時に生成されたSSLキーが見つかりませんでした！
 newkey_ekeysame=CSRで生成されたキーへのパスを入力しないでください。代わりに、[<b>署名済み証明書を適用</b>]タブを使用してください。
+
 newbw_title=帯域幅の監視
 newbw_desc=このページを使用して、仮想サーバーの帯域幅アカウンティングを有効にし、サーバーが許可された帯域幅を超えたときにサーバーの所有者とマスター管理者に通知することができます。
 newbw_active=帯域幅監視はアクティブですか？
@@ -3038,9 +3102,11 @@ newbw_resetdesc=このボタンをクリックすると、一部またはすべ�
 newbw_return=帯域幅監視フォーム
 newbw_mailout=送信メールを帯域幅の使用に含めますか？
 newbw_mailall=中継された電子メールを帯域幅の使用に含めますか？
+
 newframe_title=フレーム転送HTML
 newframe_ecannot=フレーム転送HTMLテンプレートの編集は許可されていません
 newframe_desc=このフォームを使用して、フレーム転送されたWebサイトで使用されるテンプレートHTMLページを編集します。テンプレートからページが作成されると、次の置換が行われます。
+
 frame_title=転送フレーム設定
 frame_header=フレーム転送HTMLを生成するための設定
 frame_enabled=フレーム転送は有効ですか？
@@ -3052,14 +3118,17 @@ frame_desc=このフォームを使用して、この仮想サーバーのフレ
 frame_err=転送フレーム設定を保存できませんでした
 frame_eurl=URLがないか無効です
 frame_gen=フレーム転送HTMLの再生成 ..
+
 proxy_title=ウェブサイトのプロキシ設定
 proxy_enabled=プロキシは有効ですか？
 proxy_url=URLへのプロキシ
 proxy_header=他のウェブサイトへのプロキシの設定
 proxy_desc=このフォームを使用して、この仮想サーバーのWebサイトへのすべての要求が転送されるURLを有効にして構成できます。
+
 expframe_title=転送フレームHTML
 expframe_desc=このフォームを使用して、この仮想サーバーのフレーム転送ファイル $1を手動で更新できます。
 expframe_ewrite=ユーザー $2としてフレーム転送ファイル $1への書き込みに失敗しました： $3
+
 newtmpl_title=サーバーテンプレート
 newtmpl_name=テンプレート
 newtmpl_skel=スケルトンディレクトリ
@@ -3080,6 +3149,7 @@ newtmpl_created=作成日
 newtmpl_init=Virtualminインストール
 newtmpl_name0=デフォルトの設定
 newtmpl_name1=サブサーバーの設定
+
 tmpl_title1=サーバーテンプレートの作成
 tmpl_title2=サーバーテンプレートの編集
 tmpl_title3=サーバーテンプレートの複製
@@ -3439,6 +3509,7 @@ tmpl_autoconfignone=自動生成
 tmpl_eautoconfig=Thunderbirdの自動設定XMLに＆lt; clientConfig＆gt;がありません鬼ごっこ。
 tmpl_outlook_autoconfig=Outlook自動構成XML
 tmpl_outlook_eautoconfig=Outlook自動設定XMLに＆lt; Autodiscover＆gt;がありません鬼ごっこ。
+
 newplugin_title=プラグインモジュール
 newplugin_desc=プラグインは、Virtualminに追加のサーバーおよびユーザー機能を提供するWebminモジュールです。コア機能とは異なり、それらは個別にインストールして、サードパーティの開発者が作成できます。
 newplugin_desc3=以下のリストで実際にチェックされているプラグインのみが現在アクティブです。プラグインがアクティブになると、仮想サーバーを作成または編集するときにプラグインが有効にする機能を選択できます。
@@ -3455,6 +3526,7 @@ newplugin_count=ドメイン
 newplugin_acts=行動
 newplugin_conf=構成、設定
 newplugin_open=開いた
+
 bwgraph_title=帯域幅の使用
 bwgraph_none=帯域幅の使用統計はまだ収集されていません。
 bwgraph_enable=$1ページをチェックして、統計収集が有効になっていることを確認してください。
@@ -3474,8 +3546,10 @@ bwgraph_mago_month=月の統計を表示：
 bwgraph_mago_year=年の統計を表示：
 bwgraph_mago_=期間の統計を表示：
 bwgraph_mok=公演
+
 plugconfig_title=プラグイン構成
 plugconfig_dir=プラグイン $1の場合
+
 newfields_title=カスタムフィールド
 newfields_descr=このフォームを使用して、仮想サーバーを作成および編集するときに表示される追加フィールドを作成できます。
 newfields_name=フィールド名
@@ -3499,14 +3573,17 @@ newfields_visible=に表示されます
 newfields_visible0=すべてのユーザー
 newfields_visible1=すべてのユーザー（RO）
 newfields_visible2=マスター管理者
+
 ldap_emod=LDAPへの接続に必要なPerlモジュール $1がありません
 ldap_econn=LDAPサーバー $1ポート $2に接続できませんでした
 ldap_elogin=LDAPサーバー $1に $2としてバインドできませんでした： $3
+
 mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
+
 databases_title=データベースを編集
 databases_indom=ドメイン $2の $1データベース
 databases_hosted=このドメインのすべてのデータベースは、リモートMySQLサーバー $1でホストされています。
@@ -3563,6 +3640,7 @@ databases_remotenew=新しいMySQLホスト
 databases_remoteok=データベースを移動する
 databases_warn=警告！現在インストールされているスクリプトやアプリケーションは、新しいホストシステムを使用するように更新されません。
 databases_moving=MySQLデータベースを $1から $2に移動しています. ..
+
 database_title1=データベースを作成
 database_title2=データベースを編集
 database_header=データベースの詳細
@@ -3590,6 +3668,7 @@ database_collate=新しいデータベースの照合順序
 database_encoding=新しいデータベースのエンコーディング
 database_opts=$1の追加オプション
 database_edbdef=ドメインのデフォルトデータベースを削除することはできません
+
 vfile_title=自動応答ファイルを編集
 vfile_ecannot=自動応答ファイルの編集は許可されていません
 vfile_desc=下のテキスト領域を使用して、 $1の自動応答メッセージを編集します。
@@ -3608,11 +3687,13 @@ vfile_etime=送信者を記憶するための時間がないか、または無�
 vfile_enum=送信する返信がないか無効な数
 vfile_edir=存在しないか存在しないログディレクトリ
 vfile_eother=From：返信用のアドレスがありません
+
 reemail_title=登録メールを再送信
 reemail_dis=サインアップメールはサーバーのテンプレートで無効になっているため、このサーバーの所有者に送信できません。
 reemail_desc=このページは、仮想サーバーの作成時に最初に送信された電子メールを再送信するために使用できます。
 reemail_to=サーバー所有者のメールアドレス：
 reemail_ok=今すぐ送る
+
 newips_title=IPアドレスの変更
 newips_ecannot=IPアドレスの変更は許可されていません
 newips_desc=このページでは、指定されたアドレスを使用しているすべての非専用IP仮想サーバーのIPアドレスを変更できます。これは、システムのプライマリIPアドレスを更新した直後の場合に行う必要があります。
@@ -3641,6 +3722,7 @@ newips_mode0=実際の住所
 newips_mode1=DNSレコードで使用される外部アドレス
 newips6_eold=古いIPv6アドレスの形式が正しくありません
 newips6_enew=新しいIPv6アドレスの形式が正しくありません
+
 newip_title=IPアドレスの変更
 newip_header=新しい仮想IPアドレス
 newip_ecannot=このサーバーのIPアドレスを変更することはできません
@@ -3674,6 +3756,7 @@ newip_virtaddr=専用アドレスを保持
 newip_virtaddr2=専用アドレスを割り当てる
 newip_virtaddr3=専用アドレスを使用
 newip_convert=専用アドレスを共有に変換
+
 newip_new=新しいIPアドレス
 newip_err=IPアドレスを変更できませんでした
 newip_eip=新しい住所がないか無効です
@@ -3684,6 +3767,7 @@ newip_eclash6=仮想サーバー $1はすでに新しいIPv6アドレスを使�
 newip_edefault=新しいアドレスは、非仮想サーバーのデフォルトと同じです
 newip_eused=新しいアドレスはすでにシステムで使用されています
 newip_eused6=新しいIPv6アドレスはすでにシステムで使用されています
+
 newresels_title=リセラーアカウント
 newresels_intro=リセラーは、マスター管理者が定義した制限に従って、新しい親Virtualminサーバーを作成できるログインです。その後、総ディスククォータ、リセラーのサーバーを割り当てることができるユーザーとデータベースにさらに制限を課すことができます。
 newresels_name=ユーザー名
@@ -3698,11 +3782,13 @@ newresels_return=リセラーリスト
 newresels_delete=選択したリセラーを削除
 newresels_disable=選択をロック
 newresels_enable=選択をロック解除
+
 dresels_err=リセラーを削除できませんでした
 dresels_err2=リセラーをロックできませんでした
 dresels_err3=リセラーのロックを解除できませんでした
 dresels_enone=何も選択されていません
 dresels_egone=選択したリセラーの1つが存在しません
+
 resel_title1=リセラーを作成
 resel_title2=リセラーを編集
 resel_header=販売代理店アカウントの詳細
@@ -3790,6 +3876,7 @@ resel_domssel=このリセラーが所有
 resel_equnlimit=仮想サーバー $1は無制限のディスククォータを持っているため、このリセラーに割り当てることはできませんが、リセラーには制限があります
 resel_ebwunlimit=仮想サーバー $1には帯域幅の割り当てが無制限であるため、このリセラーに割り当てることはできませんが、リセラーには制限があります
 resel_ebefore=変更コマンドが失敗する前： $1
+
 licence_err=Virtualminライセンスで問題が検出されました：
 licence_soon=注意-Virtualminライセンスは $1日で期限切れになります。
 licence_soon2=注意-Virtualminライセンスは $1時間後に期限切れになります。
@@ -3818,8 +3905,10 @@ licence_fixlinksok=シンボリックリンクのアクセス許可を修正す�
 licence_fixlinksignore=安全でないシンボリックリンクを許可する
 licence_xfsreboot=ルートファイルシステムでXFSクォータを有効にするには、システムを再起動する必要があります。これが完了するまで、Virtualminはクォータがアクティブであることを検出せず、ディスク使用量に制限を仮想サーバーまたはユーザーに適用することは不可能です。
 licence_xfsrebootok=今すぐ再起動
+
 config_deftheme=グローバルWebminデフォルト
 config_oldtheme=古いWebminテーマ
+
 scripts_title=スクリプトをインストールする
 scripts_longdesc=説明文
 scripts_overall=評価
@@ -3999,6 +4088,7 @@ scripts_packagecount=.. $1個の新しいパッケージをインストールし
 scripts_packageall=..すべてのパッケージがすでにインストールされています
 scripts_abandoned2=警告：このスクリプトは、元の作成者によってサポートされていません。
 scripts_abandoned1=警告：このスクリプトのバージョン $1は、元の作成者によってサポートされていません。
+
 newnotify_title=メールサーバーの所有者
 newnotify_desc=このページを使用して、選択した仮想サーバーの所有者に電子メールを送信できます。たとえば、システムのダウンタイム、アップグレード、またはその他のサービスの変更を通知できます。メッセージの本文と件名には次の置換を使用できます。
 newnotify_header=サーバー所有者への電子メールのオプション
@@ -4018,6 +4108,7 @@ newnotify_attach=オプションの添付ファイル
 newnotify_admins=選択したドメインの追加の管理者にもメールを送信しますか？
 newnotify_users=選択したドメインで電子メールを使用しますか？
 newnotify_nomany=各ドメイン所有者に一度だけメールを送信する
+
 mailusers_title=すべてのメールボックスにメールを送信
 mailusers_desc=このフォームを使用して、このドメインのすべてのユーザー、または選択したユーザーにメールを送信できます。メッセージの本文と件名には次の置換を使用できます。
 mailusers_header=すべてのユーザーへのメールのオプション
@@ -4026,16 +4117,19 @@ mailusers_all=すべて
 mailusers_sel=選択しただけ ..
 mailusers_err=ユーザーにメールを送信できませんでした
 mailusers_eto=ユーザーが選択されていません
+
 view_title=仮想サーバーの詳細
 view_title2=仮想サブサーバーの詳細
 view_title3=エイリアスサーバーの詳細
 view_title4=仮想サブドメインの詳細
 view_features=有効な機能
 view_return=サーバーの詳細
+
 summary_title=仮想サーバーの概要
 summary_title2=仮想サブサーバーの概要
 summary_title3=エイリアスサーバーの概要
 summary_title4=仮想サブドメインの概要
+
 migrate_title=仮想サーバーを移行する
 migrate_desc=このページでは、競合他社の製品によって作成されたバックアップファイルを移行して、新しい仮想サーバーを作成できます。サポートされているすべての機能の構成がバックアップから抽出され、Virtualminで使用できるように変換されます。ドメインのディレクトリのすべての内容が、新しいユーザーのホームディレクトリにコピーされます。
 migrate_file=ソースバックアップファイル
@@ -4083,6 +4177,7 @@ migrate_downloaded=..ダウンロードされた $1
 migrate_validating=移行ファイルを検証しています. ..
 migrate_edownload=..ダウンロードに失敗しました： $1
 migrate_evalidate=..検証に失敗しました： $1
+
 newscripts_title=スクリプトインストーラー
 newscripts_desc=このページでは、他のベンダーが作成したスクリプトインストーラーを追加したり、ドメイン所有者が使用できるスクリプトを制御したりできます。
 newscripts_header=スクリプトインストーラーを追加する
@@ -4157,6 +4252,7 @@ newscripts_elnone=スクリプトが選択されていません
 newscripts_desc6=このタブには、このシステムのすべての仮想サーバーにインストールされているすべてのスクリプトが一覧表示されます。単一のスクリプトをアップグレードまたはアンインストールするには、リストでその名前をクリックします。
 newscripts_dom=ドメイン名
 newscripts_noneyet=どの仮想サーバーにもまだスクリプトがインストールされていません。
+
 addscripts_err=スクリプトインストーラーの追加に失敗しました
 addscripts_elocal=ローカルファイルが存在しません
 addscripts_eupload=アップロードするファイルが選択されていません
@@ -4167,6 +4263,7 @@ addscripts_title=スクリプトインストーラーの追加
 addscripts_done=$1スクリプトインストーラーは、指定されたファイルから正常に追加されました。
 addscripts_done1=指定されたファイルからスクリプトインストーラー $1が正常に追加されました。
 addscripts_enone=指定されたファイルにはスクリプトインストーラーが含まれていません！
+
 sysinfo_apache=Apacheバージョン
 sysinfo_bind=BINDバージョン
 sysinfo_postfix=Postfixバージョン
@@ -4186,9 +4283,11 @@ sysinfo_perlpath=Perlへのパス
 sysinfo_php=PHPバージョン
 sysinfo_python=Pythonバージョン
 sysinfo_pythonpath=Pythonへのパス
+
 remote_ecannot=リモートコマンドの実行は許可されていません
 remote_eprogram=無効なリモートプログラム名
 remote_eprogram2=リモートプログラム $1は存在しません
+
 newquotas_title=ディスククォータの監視
 newquotas_ecannot=ディスククォータの監視を設定することはできません
 newquotas_desc=このページでは、仮想サーバーがディスククォータを超えたとき、またはディスククォータに近づいたときに、自動電子メール通知を設定できます。グループクォータが有効になっているため、データベースのサイズはUnixのディスククォータによって強制されないため、サーバーのいずれかのデータベースにデータが多すぎる場合にのみ発生します。
@@ -4219,6 +4318,7 @@ newquotas_mailbox=メールとFTPのユーザークォータも確認します�
 newquotas_mailbox_send=メールおよびFTPユーザーに通知しますか？
 newquotas_users=クォータを超えている管理者にも通知しますか？
 newquotas_msg=メールからFTPおよびFTPユーザーへのテンプレート
+
 mass_title=複数のユーザーを変更
 mass_desc=このページでは、この仮想サーバーで選択した $1人のユーザーの選択した設定を一度に変更できます。
 mass_header=更新するユーザー設定
@@ -4261,6 +4361,7 @@ mass_eplain=..このタイプのユーザーには不可能です。
 mass_disable1=..有効なユーザー。
 mass_disable2=..無効なユーザー。
 mass_updateemail=更新されたユーザーにメールを送信しますか？
+
 defaults_title=ユーザーデフォルトの編集
 defaults_header=この仮想サーバーの新しいユーザーのデフォルト
 defaults_quota=ホームディレクトリクォータ
@@ -4272,6 +4373,7 @@ defaults_equota=ホームディレクトリクォータがないか、無効で�
 defaults_emquota=メールファイルの割り当てがないか、無効です
 defaults_eqquota=メールサーバーの割り当てがないか、無効です
 defaults_below=以下で定義されます。
+
 links_dns=DNSドメイン
 links_mysql=MySQLデータベース
 links_mysqls=MySQLデータベース
@@ -4290,6 +4392,7 @@ links_flog=ProFTPDログ
 links_phpini=PHPの設定
 links_phpini2=PHP $1の設定
 links_phpini3=PHP-FPM設定
+
 massscript_err=スクリプトのアップグレードに失敗しました
 massscript_enone=仮想サーバーが選択されていません
 massscript_enone2=選択したサーバーにはスクリプトがインストールされていません
@@ -4309,6 +4412,7 @@ massscript_utype=操作
 massscript_upgrade=アップグレードする
 massscript_update=更新
 massscript_ok=今すぐスクリプトをアップグレード
+
 massdelete_title=仮想サーバーを削除する
 massdelete_rusure=選択した $1サーバーを削除してもよろしいですか？ホームディレクトリ内のデータの $2が削除されます。
 massdelete_err=仮想サーバーを削除できませんでした
@@ -4320,6 +4424,7 @@ massdelete_ok=今すぐサーバーを削除
 massdelete_preserve=リモートでホストされている機能を保持する
 massdelete_doms=削除するサーバー： $1
 massdelete_doing=サーバー $1を削除しています ..
+
 massdomains_title=仮想サーバーの更新
 massdomains_headerq=割り当てと帯域幅の変更
 massdomains_headerf=有効な機能の変更
@@ -4380,6 +4485,7 @@ massdomains_enaerr=サーバーを有効にできませんでした
 massdomains_enarusure=選択した $1仮想サーバーを有効にしてもよろしいですか？無効になる前の状態に戻ります。
 massdomains_enaok=今すぐサーバーを有効にする
 massdomains_enadoms=有効にするサーバー： $1
+
 newmxs_title=セカンダリメールサーバー
 newmxs_header=自動セカンダリメールサーバー
 newmxs_servers=セカンダリMXとしてセットアップするサーバー
@@ -4407,6 +4513,7 @@ newmxs_removing=$1のセカンダリドメインを削除しています. ..
 newmxs_syncing=中継が許可されたユーザーの更新 ..
 newmxs_esynced=..失敗しました： $1
 newmxs_synced=.. $1で完了
+
 newmysqls_title=MySQLサーバー
 newmysqls_ecannot=追加のMySQLサーバーの編集は許可されていません
 newmysqls_host=サーバーのホスト名
@@ -4448,6 +4555,7 @@ newmysqls_edelete=ローカルサーバーは削除できません
 newmysqls_edefault=デフォルトのサーバーは削除できません
 newmysqls_eprovision=Cloudmin Servicesによって作成されたサーバーは削除できません
 newmysqls_einuse=$1ドメインで使用されているサーバーは削除できません
+
 ddatabases_title=データベースを削除
 ddatabases_edb=$1データベース $2は存在しません！
 ddatabases_edbdef=デフォルトの $1データベース $2を削除することはできません
@@ -4457,6 +4565,7 @@ ddatabases_dbs=削除するデータベース： $1
 ddatabases_err=データベースを削除できませんでした
 ddatabases_enone=何も選択されていません
 ddatabases_ok=今すぐ削除
+
 admins_title=追加の管理者
 admins_name=管理者ログイン
 admins_desc=説明文
@@ -4468,6 +4577,7 @@ admins_ecannot=追加の管理者を管理することはできません
 admins_return=追加管理者のリスト
 admins_delete=選択した管理者を削除
 admins_more=％あともう1つ ..
+
 admin_title1=追加管理者を作成
 admin_title2=追加管理者を編集
 admin_header=追加管理者の詳細
@@ -4492,9 +4602,11 @@ admin_doms=管理者の仮想サーバー
 admin_doms1=すべてトップレベルのサーバーが所有
 admin_doms0=以下で選択したもののみ
 admin_edoms=選択できる仮想サーバーがありません
+
 dadmins_err=追加の管理者を削除できませんでした
 dadmins_enone=何も選択されていません
 dadmins_egone=管理者は存在しません
+
 move_title=仮想サーバーを移動
 move_ecannot=このサーバーの移動は許可されていません
 move_ecannot2=このサーバーへのドメインの移動は許可されていません
@@ -4517,6 +4629,7 @@ move_newpass=親に変換する場合のパスワード
 move_failed=..失敗しました！理由については、上記のエラーメッセージを参照してください。
 move_euserclash=$1という名前のユーザーは、変換中の仮想サーバーに既に存在します
 move_euserclash2=$1という名前のユーザーは既に存在します
+
 newvalidate_title=仮想サーバーを検証する
 newvalidate_ecannot=サーバーの検証は許可されていません
 newvalidate_header=サーバー検証オプション
@@ -4547,6 +4660,7 @@ newvalidate_fixservers=修正する仮想サーバー
 newvalidate_subservers=サブサーバーも修正しますか？
 newvalidate_fix=今すぐ権限を修正
 newvalidate_header3=権限修正オプション
+
 validate_edir=ホームディレクトリ $1は存在しません
 validate_ediruser=ホームディレクトリ $1は $3ではなく $2が所有しています
 validate_edirgroup=ホームディレクトリ $1は、 $3ではなくグループ $2が所有しています
@@ -4586,6 +4700,7 @@ validate_ewebphpconfig=PHP構成エラーがバージョン $1で見つかりま
 validate_ewebuid=SuExecユーザーは $1に設定されていますが、仮想サーバーのUIDは $2です
 validate_ewebgid=SuExecグループは $1に設定されていますが、仮想サーバーのGIDは $2です
 validate_ewebdir=Apache＆lt; Directory＆gt;がありませんHTMLディレクトリ $1のブロック
+validate_ewebroot=Apache DocumentRootがHTMLディレクトリ $1に設定されていません
 validate_ewebipv6=アドレス $1のIPv6 DNSレコード $2は存在しますが、この仮想サーバーではIPv6が有効になっていません
 validate_ewebipv6virt=アドレス $1のIPv6 DNSレコードが存在しますが、この仮想サーバーのApache構成にはIPv6アドレスがありません
 validate_ewebip=このドメインのApache仮想ホストはIPv4アドレスとポート $1を使用しません
@@ -4630,6 +4745,7 @@ validate_espamcall=Procmail構成ファイル $1はSpamAssassinを呼び出し�
 validate_evirus=ClamAVはサーバーのprocmail構成ファイルで呼び出されません
 validate_estatusweb=ウェブサイトのステータスモニターが見つかりません
 validate_estatusssl=SSL Webサイトのステータスモニターが見つかりません
+
 tscripts_title=テンプレートスクリプトインストーラー
 tscripts_sub=テンプレート $1
 tscripts_what=新しい仮想サーバー用にインストールするスクリプト：
@@ -4650,6 +4766,7 @@ tscripts_eversion=行 $1にバージョン番号がないか、無効です
 tscripts_edb=行 $1にデータベース名がないか、無効です
 tscripts_edb2=行 $1のデータベース名には、置換（${DB}など）が含まれていません
 tscripts_enone=テンプレートスクリプトが入力されていません
+
 spam_title=スパムとウイルスの配信
 spam_ecannot=スパムとウイルスの配信を設定することはできません
 spam_virus=ウイルスメールの宛先
@@ -4700,6 +4817,7 @@ spam_prov=Cloudminサービスシステム $1
 spam_exitcode=割り当てを超過したユーザーがメールを受信したとき
 spam_bounce=送信者に戻る
 spam_queue=後で配信するためのキュー
+
 cat_objects=サーバーオブジェクト
 cat_server=サーバー構成
 cat_admin=管理オプション
@@ -4717,6 +4835,7 @@ cat_email=メール設定
 cat_ip=アドレスとネットワーク
 cat_check=制限と検証
 cat_custom=システムのカスタマイズ
+
 pass_title=パスワードを変更する
 pass_ecannot=このドメインのパスワードを変更することはできません
 pass_ecannot2=パスワードを変更するドメインを指定する必要があります
@@ -4734,11 +4853,14 @@ pass_eadmin=管理者が見つかりませんでした！
 pass_changing=販売代理店パスワードの変更 ..
 pass_changing2=管理者パスワードの変更 ..
 pass_hashpass=このドメインのハッシュされたパスワードのみを保存しますか？
+
 dbname_err=データベースのユーザー名を変更できませんでした
 dbname_euser=ユーザー名がないか無効です
 dbname_esame=古いユーザー名と新しいユーザー名は同じです
 dbname_eclash=同じ名前のデータベースユーザーが既に存在します
+
 dbpass_err=データベースのパスワードを変更できませんでした
+
 cmass_title=サーバーのバッチ作成
 cmass_ecannot=バッチファイルからサーバーを作成することはできません
 cmass_header=バッチファイルから複数のサーバーを作成する
@@ -4777,6 +4899,7 @@ cmass_eipmust=このテンプレートには自動IP割り当てが必須です
 cmass_emustparent=トップレベルの仮想サーバーを作成することはできません-親ドメインを指定する必要があります
 cmass_ecanparent=親仮想サーバー $1の管理は許可されていません
 cmass_eparpar=親サーバー $1はトップレベルサーバーではありません
+
 umass_title=ユーザーのバッチ作成
 umass_header=バッチファイルから複数のメールユーザーとFTPユーザーを作成する
 umass_err=ユーザーの一括作成に失敗しました
@@ -4800,6 +4923,7 @@ umass_separator=バッチフィールドセパレータ
 umass_separatorcolon=コロン：
 umass_separatorcomma=コンマ 、
 umass_separatortab=タブ
+
 amass_title=エイリアスのバッチ作成
 amass_header=バッチファイルから複数のメールエイリアスを作成する
 amass_help=このページでは、テキストファイルから次の形式で複数のメールエイリアスを一度に作成できます（詳細については、このページのヘルプを参照してください）。
@@ -4817,6 +4941,7 @@ amass_ebounce=バウンス先を他の宛先と組み合わせることはでき
 amass_done=メールエイリアス $1を作成しました
 amass_eclash=同じ名前のエイリアスが既に存在します
 amass_eunknown=不明なエイリアス宛先 $1
+
 massu_title=スクリプトのアンインストール
 massu_err=スクリプトをアンインストールできませんでした
 massu_enone=何も選択されていません
@@ -4824,6 +4949,7 @@ massu_rusure=$2のディスク容量を使用する $1選択スクリプトを�
 massu_rusuredb=$1データベースのデータも削除されます。
 massu_rusurehome=スクリプトの1つが仮想サーバーの最上位のWebディレクトリにインストールされるため、アンインストールすると、<tt>$1</tt>の下の<b>すべての</b>ファイルが削除されます！
 massu_sel=選択されたスクリプト： $1
+
 usage_title=ディスクの使用状況
 usage_summaryheader=この仮想サーバーのディスク使用量と制限の概要。
 usage_quota=ディスククォータ
@@ -4854,11 +4980,13 @@ usage_tabhomes=ホームディレクトリ
 usage_tabusers=ユーザーごと
 usage_tabsubs=サブサーバーごと
 usage_tabdbs=データベースごと
+
 webmin_alog=$1のApacheアクセスログ
 webmin_elog=$1のApacheエラーログ
 webmin_flog=$1のProFTPDログ
 webmin_phpini=$1のPHP構成
 webmin_phpini2=$1のPHP $2構成
+
 newquotacheck_title=ディスククォータの確認
 newquotacheck_ecannot=ディスククォータを確認することはできません。
 newquotacheck_esupport=クォータチェックはサポートされていないか、ファイルシステムでは必要ありません
@@ -4874,7 +5002,9 @@ newquotacheck_ok=今すぐ確認
 newquotacheck_enone=ファイルシステムが選択されていません！
 newquotacheck_udoing=$1のユーザークォータをチェックしています. ..
 newquotacheck_gdoing=$1のグループクォータを確認してください。
+
 phpmode_title=ウェブサイトのオプション
+phpmode_title2=PHPオプション
 phpmode_ecannot=この仮想サーバーのWebサイトオプションを構成することはできません
 phpmode_header=ウェブサイトとPHPオプション
 phpmode_mode=PHPスクリプト実行モード
@@ -4888,6 +5018,7 @@ phpmode_short_fcgid=FCGId
 phpmode_short_fpm=FPM
 phpmode_dirswarn=警告-CGIまたはFCGIdモードから切り替えると、ディレクトリごとのPHPバージョンの選択が削除されます。
 phpmode_err=ウェブサイトオプションを保存できませんでした
+phpmode_err2=PHPオプションの保存に失敗しました
 phpmode_suexec=ドメイン所有者としてCGIスクリプトを実行しますか？
 phpmode_esuexec=<b>CGIスクリプトをドメイン所有者として実行</b>を選択しない限り、<b>CGIラッパー</b>オプションは選択できません
 phpmode_emodsuexec=Apache <tt>mod_suexec</tt>モジュールがインストールされていない限り、 <b>ドメイン所有者としてCGIスクリプトを実行する</b>オプションを有効にすることはできません
@@ -4947,6 +5078,9 @@ phpmode_ehtmldir3=ウェブサイトドキュメントのサブディレクト�
 phpmode_ehtmldir4=ウェブサイトドキュメントのサブディレクトリはサブサーバー用に予約されているため、<tt>ドメイン</tt>の下に置くことはできません
 phpmode_ssloff=SSLサイトへのリダイレクトを削除しています. ..
 phpmode_sslon=SSLサイトへのリダイレクトを追加しています ..
+
+website_header=ウェブサイトのオプション
+
 spf_title=DNSオプション
 spf_ecannot=DNSオプションの編集は許可されていません
 spf_enable=SPFを有効にする ..
@@ -4995,6 +5129,7 @@ spf_disabletlsa=TLSAレコードの削除 ..
 spf_etlsa=..このシステムではサポートされていません： $1
 spf_synctlsa=TLSAレコードの更新 ..
 spf_esynctlsa=..このドメインには見つかりません
+
 s3_emodule=AmazonのS3サービスとの通信に必要なPerlモジュール $1がインストールされていません
 s3_emodule2=AmazonのS3サービスとの通信に必要なPerlモジュール $1をロードできませんでした： $2
 s3_emodule3=AmazonのS3サービスとの通信に必要なPerlモジュール $1または $2がインストールされていません
@@ -5009,14 +5144,17 @@ s3_elist2=S3バケットのリストに失敗しました： $1
 s3_einfo2=$1を読み取れませんでした： $2
 s3_eputacl=バケットACLを保存できませんでした： $1
 s3_eputlifecycle=バケットのライフサイクルを保存できませんでした： $1
+
 tdelete_err=テンプレートを削除できませんでした
 tdelete_enone=何も選択されていません
 tdelete_title=サーバーテンプレートの削除
 tdelete_warn=次の選択したサーバーテンプレートを削除してもよろしいですか： $1
 tdelete_confirm=テンプレートを削除する
 tdelete_users2=それらは現在仮想サーバーによって使用されています： $1
+
 switch_ecannot=このドメインの管理者に切り替えることはできません
 switch_eadmin=指定された追加の管理者は存在しません！
+
 newlinks_title=カスタムリンク
 newlinks_descr=このフォームを使用して、仮想サーバーを選択したときに左側のメニューで使用できるリンクを作成できます。次の置換は、URLおよびリンクタイトルで使用できます。
 newlinks_desc=リンクのタイトル
@@ -5043,6 +5181,7 @@ newlinks_any=どれか
 newlinks_add=新しいカスタムリンクを追加します。
 newlinks_none=カスタムリンクはまだ定義されていません。
 newlinks_return=カスタムリンク
+
 elink_title1=カスタムリンクを作成
 elink_title2=カスタムリンクを編集
 elink_header1=カスタムリンクの詳細
@@ -5057,6 +5196,7 @@ elink_feature=機能を備えた仮想サーバー
 elink_err=カスタムリンクを保存できませんでした
 elink_edesc=リンクのタイトルがありません
 elink_eurl=URLがないか無効です-スペースは使用できません
+
 postsave_title=仮想サーバーが変更されました
 postsave_done=仮想サーバー $1は正常に更新されました。引き続き管理するには、以下のリンクを使用してください。
 postsave_edit=仮想サーバーの設定を編集します。
@@ -5065,6 +5205,7 @@ postsave_users=メールおよびFTPユーザーを管理します。
 postsave_aliases=メールエイリアスと自動返信を管理します。
 postsave_databases=データベースを管理および作成します。
 postsave_index=Virtualmin仮想サーバーをすべて表示します。
+
 showpass_title=仮想サーバーのパスワード
 showpass_user=管理ログイン
 showpass_pass=管理パスワード
@@ -5074,6 +5215,7 @@ showpass_ecannot=仮想サーバーのパスワードを表示することはで
 showpass_egone=ユーザーは存在しません！
 showpass_dbuser=$1のユーザー名
 showpass_dbpass=$1のパスワード
+
 phpver_title=PHPバージョン
 phpver_dir=ウェブサイトのサブディレクトリ
 phpver_ver=バージョン
@@ -5087,6 +5229,7 @@ phpver_err=PHPバージョンの保存に失敗しました
 phpver_enewdir=無効なウェブサイトのサブディレクトリ-のようでなければなりません<tt>myapp</tt>か、 <tt>programs /myapp</tt> 」
 phpver_derr=PHPバージョンの削除に失敗しました
 phpver_enone=何も選択されていません
+
 html_title=Webページを編集する
 html_edit=既存のファイルを編集：
 html_editok=編集する
@@ -5109,11 +5252,13 @@ html_upload=ファイルをアップロードする：
 html_uploadok=アップロードする
 html_apply=コンテンツスタイルを使用：
 html_styleok=ファイルを置き換える
+
 upload_err=ファイルをアップロードできませんでした
 upload_enone=アップロードするファイルが選択されていません
 upload_enone2=ファイル名が見つかりません！
 upload_title=アップロードされたファイル
 upload_done=合計 $2のファイル $1がWebページディレクトリに正常にアップロードされました。
+
 sharedips_title=共有IPアドレス
 newsharedips_title=共有IPアドレス
 sharedips_header=仮想サーバーによって共有されるIPアドレス
@@ -5139,6 +5284,7 @@ sharedips_missing=親インターフェース $1は存在しません！
 sharedips_eboot=IPアドレスの起動時設定が見つかりませんでした
 sharedips_ebootreal=IPアドレスは仮想ではありません
 sharedips_eactives=IPアドレスのアクティブな構成が見つかりませんでした
+
 newdynip_title=動的IP更新
 newdynip_enabled=動的更新は有効ですか？
 newdynip_service=動的DNSサービス
@@ -5161,8 +5307,10 @@ newdynip_off=動的IP更新が無効になっています。システムのIPア
 newdynip_never=まだ更新されていません
 newdynip_notify=にIPアップデート通知をメールで送信
 newdynip_none=だれも
+
 newdynip_eext=外部から見えるIPアドレスの計算に失敗しました
 newdynip_eexternal=外部スクリプトモードでは、実行するスクリプトへのフルパスを入力する必要があります
+
 dynip_dyndns=DynDNS
 dynip_external=外部スクリプト ..
 dynip_none=サービスを更新しないでください
@@ -5173,6 +5321,7 @@ style_content=最初のウェブサイトコンテンツテキスト
 style_ok=スタイルを使用
 style_doing=Webサイトのコンテンツをスタイル $1に置き換えています ..
 style_egone=スタイルが存在しないか、利用できません
+
 newstyles_title=コンテンツスタイル
 newstyles_desc1=このフォームでは、サードパーティの開発者が作成したスタイルをインストールできます。
 newstyles_header=新しいスタイルをインストール
@@ -5196,6 +5345,7 @@ newstyles_desc3=以下のリストからサードパーティのコンテンツ�
 newstyles_dstyle=削除するスタイル
 newstyles_del=今すぐ削除
 newstyles_edelete=選択したコンテンツスタイルは存在しません！
+
 addstyle_title=インストールスタイル
 addstyle_err=新しいスタイルをインストールできませんでした
 addstyle_ecomp=スタイルアーカイブファイルではありません
@@ -5205,9 +5355,11 @@ addstyle_efiles=スタイルアーカイブにはファイルが含まれてい�
 addstyle_done=サードパーティのコンテンツスタイル $1は正常にインストールされました。 Webサイトで使用すると、HTMLおよび画像ファイルの $2が作成されます。
 addstyle_ecmd=アーカイブ解除コマンド $1がインストールされていません
 addstyle_ecmdfailed=アーカイブ解除コマンドが失敗しました： $1
+
 thumb_estyle=スタイルは存在しません
 thumb_title=スタイルプレビュー
 thumb_ethumb=コンテンツスタイル $1にはプレビュー画像がありません。
+
 upgrade_title=Virtualmin Proにアップグレード
 newupgrade_title=Virtualmin Proにアップグレード
 upgrade_desc1=Virtualmin GPLの使用を楽しんでいて、Proバージョンに次のステップに進みたい場合は、このページを使用して、アップグレードプロセスを自動的に実行できます。これを行う手順は次のとおりです。
@@ -5248,6 +5400,7 @@ upgrade_update=APTから利用可能なパッケージを更新しています .
 upgrade_debs=Virtualmin Debianパッケージのアップグレード： $1
 upgrade_yumclear=YUMキャッシュのクリア ..
 upgrade_etypematch=Virtualminのインストールタイプがあるようアップグレードすることはできません<tt>$1</tt>が、Webminのは<tt>$2</tt>
+
 maillog_title=メールログを検索
 maillog_desc=このフォームを使用して、メールログで特定の条件に一致するメッセージを検索し、それらに何が起こったかを確認できます。すべてのフィールドはオプションであり、空のままにしておくと比較のためにスキップされます。
 maillog_header=検索条件
@@ -5284,6 +5437,7 @@ maillog_ok1=Virtualminはまだメールサーバーのログキャッシュフ�
 maillog_showspam=スパムを表示しますか？
 maillog_showvirus=ウイルスを表示しますか？
 maillog_bad=除外
+
 viewmaillog_err=ログに記録されたメッセージを表示できませんでした
 viewmaillog_egone=ログにはもうありません！
 viewmaillog_title=記録された電子メールメッセージ
@@ -5303,6 +5457,7 @@ viewmaillog_file=完全な宛先パス
 viewmaillog_relay=送信メールリレー
 viewmaillog_status=メールサーバーの配信ステータス
 viewmaillog_size=メッセージサイズ
+
 bwreset_title=帯域幅統計の再計算
 bwreset_header=帯域幅の再計算のオプション
 bwreset_date=再計算する日付
@@ -5324,6 +5479,7 @@ bwreset_doing=選択したサーバーと機能の帯域幅カウントのリセ
 bwreset_done=..完了。
 bwreset_running=ログファイルから帯域幅統計情報を再生成しています ..
 bwreset_started=..プロセスが開始されました。長期間または多数のドメインのログを再処理することを選択した場合、これには数時間かかることがあります。
+
 massg_title=アップグレードスクリプト
 massg_rusure=選択した $1スクリプトを最新バージョンにアップグレードしてもよろしいですか？
 massg_ok=今すぐアップグレード
@@ -5333,6 +5489,7 @@ massg_fromto=$1から $2にアップグレードしています
 massg_stay=$1に留まる
 massg_doing=$1をバージョン $2にアップグレードしています. ..
 massg_edeleted=スクリプト $1は手動で削除されているため、アップグレードできません！
+
 aedit_title=エイリアスを手動で編集する
 aedit_header=バッチファイルから複数のメールエイリアスを作成する
 aedit_help=このページでは、複数のエイリアスをテキスト行として編集することにより、一度に複数のエイリアスを編集、作成、および削除できます。各行の形式は次のとおりです（詳細については、このページのヘルプを参照してください）。
@@ -5344,6 +5501,7 @@ aedit_doing=メールエイリアスの更新 ..
 aedit_complete=..完了（$1作成、 $3変更、 $4削除、 $2エラー）。
 aedit_etwice=同じ名前のエイリアスが複数回リストされています
 aedit_eauto=エイリアスを手動で編集するときに自動返信を設定できない
+
 exclude_title=除外されたディレクトリとDB
 exclude_header=バックアップ除外オプション
 exclude_dirs=スキップする家の下のディレクトリ
@@ -5354,6 +5512,7 @@ exclude_err=除外されたディレクトリを保存できませんでした
 exclude_eabs=ディレクトリ '$1'は絶対パスにすることはできません
 exclude_edot=ディレクトリ '$1'に..を含めることはできません。
 exclude_edb=データベース名 '$1'は無効です
+
 balancers_title=プロキシパス
 balancers_ecannot=このドメインのプロキシパスを編集することはできません
 balancers_esupport=ドメインまたはシステムはプロキシをサポートしていません
@@ -5368,6 +5527,7 @@ balancers_return=プロキシパスのリスト
 balancers_derr=プロキシパスを削除できませんでした
 balancers_denone=何も選択されていません
 balancers_none2=プロキシなし
+
 balancer_create=プロキシパスを作成
 balancer_edit=プロキシパスを編集
 balancer_egone=選択したプロキシパスは存在しません
@@ -5386,6 +5546,7 @@ balancer_eurls=リンク先URLが入力されていません
 balancer_script=スクリプトインストーラーで使用
 balancer_scriptver=スクリプトバージョン
 balancer_none=このパスをプロキシしない-代わりにローカルで提供
+
 scriptwarn_header=Virtualminによって管理される次のスクリプトには、新しいバージョンが用意されています。
 scriptwarn_header2=Virtualminによって管理される次のスクリプトは、仮想サーバー $1で新しいバージョンを利用できます：
 scriptwarn_script=スクリプト名
@@ -5395,6 +5556,7 @@ scriptwarn_dom=ドメイン名
 scriptwarn_where3=アップグレードはVirtualmin、各ドメインの[スクリプトのインストール]ページ、または次の場所で一度に実行できます：\n $1
 scriptwarn_where2=アップグレードはVirtualminの次のページで実行できます：\n $1
 scriptwarn_subject=Virtualminスクリプトのアップグレードが利用可能
+
 quotawarn_subject=Virtualminユーザーディスククォータの監視
 quotawarn_body=次のVirtualminサーバーは、\nディスククォータの制限に達したか、近づいています：
 quotawarn_body2=次のVirtualminユーザーは、\nディスククォータの制限に達したか、近づいています：
@@ -5407,6 +5569,7 @@ quotawarn_reached=$1％に達しました
 quotawarn_over=割り当て超過
 quotawarn_suffixdom=Virtualminから $1に送信
 quotawarn_suffixuser=Virtualminから $1に送信
+
 history_title=システム統計
 history_ecannot=過去のシステム統計を表示することはできません
 history_year=1年
@@ -5477,6 +5640,7 @@ history_type_email=メールメッセージ
 history_type_cpu=CPU使用率
 history_type_virt=Virtualminカウント
 history_type_system=システム統計
+
 sv_title=スパムとウイルスのスキャン
 newsv_title=スパムとウイルスのスキャン
 sv_ecannot=スパムおよびウイルススキャンの編集は許可されていません
@@ -5511,6 +5675,7 @@ sv_title5=スパムフィルタリングサーバーを有効にする
 sv_sdisabling=SpamAssassinフィルタリングサーバーの無効化 ..
 sv_senabling=SpamAssassinフィルタリングサーバーの設定と有効化 ..
 sv_swarning=警告！ Virtualminはサーバーフィルターを使用するように構成されていますが、SpamAssassinサーバープロセスは実行されていません
+
 features_title=機能とプラグイン
 newfeatures_title=機能とプラグイン
 features_ecannot=有効な機能を編集することはできません
@@ -5522,6 +5687,7 @@ features_desc=このページでは、仮想サーバーで使用できるコア
 features_used=ドメインを表示
 features_err=有効な機能を保存できませんでした
 features_return=機能とプラグインのリスト
+
 clamd_copyconf=ClamAV構成ファイル $1を作成しています ..
 clamd_esrcfile=.. $1に一致するソースファイルが見つかりませんでした！
 clamd_esrcalready=.. もう存在している
@@ -5543,18 +5709,21 @@ clamd_ekillmsg=ClamAVウイルススキャンサーバープロセスの終了�
 spamd_estartmsg=SpamAssassinフィルターサーバーを起動できませんでした
 spamd_estopmsg=SpamAssassinフィルターサーバーが実行されていません
 spamd_ekillmsg=SpamAssassinフィルターサーバープロセスを強制終了できませんでした： $1
+
 spamd_boot=起動時にSpamAssassinサーバーを有効にする ..
 spamd_start=SpamAssassinサーバーを起動しています. ..
 spamd_startfailed=..起動に失敗しました： $1
 spamd_unboot=起動時にSpamAssassinサーバーを無効にする ..
 spamd_unbootact=..起動時のアクションが見つかりません！
 spamd_stop=SpamAssassinサーバーを停止しています. ..
+
 chain_err=CA証明書を保存できませんでした
 chain_efile=証明書ファイルが存在しません
 chain_ecert=無効な証明書ファイル： $1
 chain_emode1=サーバー上の別のファイルを選択することはできません！
 chain_eupload=アップロードされた証明書ファイルが選択されていません
 chain_epaste=証明書のテキストが入力されていません
+
 stopscript_title=サーバーを停止
 stopscript_egone=スクリプトはもう存在しません！
 stopscript_doing=$1のサーバープロセスをシャットダウンしています。
@@ -5563,6 +5732,7 @@ startscript_title=サーバーを起動
 startscript_doing=$1のサーバープロセスを起動しています。
 startscript_failed=..失敗しました： $1
 restartscript_title=サーバーを再起動
+
 newshells_title=カスタムシェル
 newshells_descr=このページでは、サイトのニーズを満たすために、仮想サーバー管理者とメール/ FTPユーザーが使用できるシェルをカスタマイズできます。カスタムシェルは、ユーザーにFTP、SSH、またはその他のサービスへのアクセスを許可するためによく使用されます。
 newshells_defs=管理者とメールボックスで利用可能なシェル：
@@ -5587,6 +5757,7 @@ newshells_eownerdef=正確に1つのシェルがドメイン管理者のデフ�
 newshells_emailboxdef=正確に1つのシェルがメールボックスのデフォルトでなければなりません
 newshells_eresellerdef=正確に1つのシェルがリセラーのデフォルトでなければなりません
 newshells_id=アクセス
+
 shells_mailbox=メールのみ
 shells_mailbox2=アクセスなし
 shells_mailboxftp=メールとFTP
@@ -5602,12 +5773,15 @@ shells_ftp2=FTPのみ
 shells_ssh=メール、FTP、SSH
 shells_ssh2=FTPおよびSSH
 shells_none=＆lt;シェルなし＆gt;
+
 nicetime_days=$1日、 $2時間、 $3:$4分
 nicetime_hours=$1時間、 $2:$3分
 nicetime_mins=$1分、 $2秒
 nicetime_secs=$1秒
+
 bcc_epostfix=Postfix構成でBCCマッピングファイルがセットアップされていません！
 bcc_emailserver=メールサーバーはBCCingをサポートしていません
+
 mail_title=メール設定
 mail_header=仮想サーバーのメール関連設定
 mail_bcc=BCCへの送信メール
@@ -5638,6 +5812,7 @@ mail_nothing=変更はありませんでした！
 mail_ecloudid=選択したクラウドメールフィルターのIDを指定する必要があります
 mail_url=現在のフィルタリングプロバイダーのURL
 mail_mx=現在のMXレコード
+
 nf_header=次の新機能は $1で利用できます。
 nf_desc=特徴
 nf_html=説明文
@@ -5647,6 +5822,7 @@ nf_and=$1と $2
 nf_seen=新機能を非表示
 nf_try=それを試してみてください ..
 nf_ver=（バージョン $1）
+
 chroot_title=FTPディレクトリの制限
 newchroot_title=FTPディレクトリの制限
 newchroot_desc=このページでは、FTP経由でログインするユーザーがアクセスできるディレクトリを設定できます。制限は、選択した仮想サーバーの所有者、およびFTPアクセスを持つすべてのユーザーに適用されます。一致する制限のないサーバーの所有者は、自分の家の外のファイルを表示できますが、通常、アクセス許可によって他の仮想サーバーのディレクトリにアクセスできなくなります。
@@ -5667,6 +5843,7 @@ chroot_eneg=行 $1で<b>[サーバーを除くすべて]</b>がオンになっ�
 chroot_edom=グループ $1の仮想サーバーが見つかりませんでした
 chroot_edir=行 $1にディレクトリがないか、無効です
 chroot_saving=FTPサーバー構成の更新 ..
+
 res_elinux=リソース制限はLinuxでのみサポートされています
 res_elinuxconf=リソース制限構成ファイル $1が見つかりませんでした
 res_epamssh=SSHのPAMサービスが見つからなかったため、リソース制限の検証が完了していません
@@ -5687,6 +5864,7 @@ res_secs=秒
 res_time=プロセスあたりの最大CPU時間
 res_etime=プロセスごとの最大CPU時間がないか、無効です
 res_etime2=プロセスごとの最大CPU時間は1分以上である必要があります
+
 sched_title=スケジュールされたバックアップ
 sched_ecannot=スケジュールされたバックアップを管理することはできません
 sched_yes=はい、 $1
@@ -5717,17 +5895,20 @@ sched_now=バックアップ ..
 sched_restore=戻す ..
 sched_return=スケジュールされたバックアップ
 sched_logs=バックアップログ. ..
+
 cron_special=簡単なスケジュール
 cron_complex=複雑なスケジュール
 cron_cron=Cronの仕様
 cron_title=スケジュールを選択
 cron_ok=OK
 cron_ehidden=複雑なスケジュールが選択されていません
+
 dsched_err=スケジュールされたバックアップを削除できませんでした
 dsched_enone=何も選択されていません
 dsched_egone=ID $1のバックアップは存在しません
 dsched_erunning=ID $1のバックアップは実行されていません
 dsched_ecannot=ID $1のバックアップの管理は許可されていません
+
 dbhosts_err=リモートデータベースホストの変更に失敗しました
 dbhosts_enone=ホスト名またはIPアドレスが入力されていません
 dbhosts_ehost=「$1」は有効なホスト名または式ではありません
@@ -5735,6 +5916,7 @@ dbhosts_title=データベースホストの更新
 dbhosts_doing=許可された $1データベースホストを $2に設定します。
 dbhosts_failed=..失敗しました： $1
 dbhosts_done=..データベースにアクセスできる $1およびその他のユーザーに設定します
+
 newglobal_title=グローバル変数
 newglobal_desc=このページで定義された変数は、Virtualminの任意のドメインまたはユーザーレベルのテンプレートで使用できます。変数を追加するには、テーブルの下部にある空の行に名前と値を入力します。削除するには、その名前フィールドをクリアします。変数を一時的に無効にするには、有効な列のボックスをオフにします。
 newglobal_ecannot=グローバル変数の編集は許可されていません
@@ -5743,20 +5925,24 @@ newglobal_name=変数名
 newglobal_value=変数値
 newglobal_err=グローバル変数を保存できませんでした
 newglobal_ename=行 $1の変数名が無効です-使用できるのは文字、数字、アンダースコアのみです
+
 spamtrap_already=この仮想サーバーにはスパムトラップエイリアスが既に存在します
 spamtrap_clash=次の競合するエイリアスが既に存在するため、スパムトラップエイリアスを作成できません： $1
 spamtrap_noaliases=この仮想サーバーにはスパムトラップエイリアスが存在しません
+
 unsub_title=サブドメインを変換
 unsub_rusure=このサブドメインをサブサーバーに変換してもよろしいですか？そのWebコンテンツは影響を受けず、DNSレコードは独自のドメインに移動されます。
 unsub_ok=サブサーバーに変換
 unsub_doing=$1をサブサーバーに変換しています. ..
 unsub_failed=..変換に失敗しました！
+
 unalias_title=エイリアスサーバーの変換
 unalias_err=エイリアスサーバーの変換に失敗しました
 unalias_rusure=このエイリアス仮想サーバーをサブサーバーに変換してもよろしいですか？古いターゲット仮想サーバーのWebページを提供しなくなりますが、独自のWebコンテンツ、メールボックス、およびメールエイリアスを持つことができます。
 unalias_ok=サブサーバーに変換
 unalias_doing=$1をサブサーバーに変換しています. ..
 unalias_failed=..変換に失敗しました！
+
 connect_echeck=接続を確認できませんでした
 connect_eempty=接続チェックから応答がありません
 connect_ecannot=この仮想サーバーの接続を確認することはできません
@@ -5781,6 +5967,7 @@ cfix_ssl=システムのWebサーバーが実行中であること、ポート44
 cfix_smtptimeout=システムのファイアウォールがポート25をブロックしているかどうかを確認します。
 cfix_smtp=システムのメールサーバーが実行中で、外部ネットワークインターフェースでリッスンしていることを確認します。
 cfix_smtpto=メールサーバーがこのドメインのメールを受け付けるように設定されていることを確認してください。
+
 plans_title=アカウントプラン
 newplan_title=アカウントプラン
 plans_name=プラン名
@@ -5801,6 +5988,7 @@ plans_setdef=デフォルトの計画を次のように設定します。
 plans_nodef=なし-リストの最初に使用
 plans_savedef=デフォルトを変更
 plans_esetdef=選択したプランは存在しないか、利用できません
+
 plan_title1=アカウントプランを作成
 plan_title2=アカウントプランの編集
 plan_header1=基本プラン詳細
@@ -5822,9 +6010,11 @@ plan_scripts=許可されたスクリプト
 plan_scriptsall=世界中で無効になっているものを除くすべて
 plan_scriptsopts=すべてのスクリプト
 plan_scriptssel=許可される
+
 dplans_err=プランを削除できませんでした
 dplans_enone=何も選択されていません
 dplans_eall=少なくとも1つのプランが存在する必要があります
+
 postgrey_title=メールグレイリスト
 newpostgrey_title=メールグレイリスト
 postgrey_epostfix=PostgreyはPostfixメールサーバーと組み合わせてのみ使用できます
@@ -5877,6 +6067,7 @@ postgrey_title4=Postgreyをインストールする
 postgrey_installing=Postgreyパッケージのインストール ..
 postgrey_installfailed=.. インストールに失敗しました！
 postgrey_installed=..インストールが正常に完了しました
+
 editgrey_titleclients=ホワイトリストに登録されたクライアントを編集
 editgrey_titlerecipients=ホワイトリストに登録された受信者を編集
 creategrey_titleclients=ホワイトリストに登録されたクライアントを追加
@@ -5892,8 +6083,10 @@ editgrey_err=ホワイトリストエントリを保存できませんでした
 editgrey_evalueclients=メールサーバーのIPアドレスまたはホスト名が見つからないか、無効に見える
 editgrey_eregexp=無効な正規表現： $1
 editgrey_evaluerecipients=受信者のメールアドレスが見つからないか、無効に見える
+
 delgrey_err=ホワイトリストエントリを削除できませんでした
 delgrey_enone=何も選択されていません
+
 copycert_title=SSL証明書をコピー
 copycert_ecannot=この仮想サーバーのSSL証明書をコピーすることはできません
 copycert_webmindir=証明書とキーを $1にコピーしています ..
@@ -5915,6 +6108,7 @@ copycert_penabling=Postfix設定でSSLを有効にする ..
 copycert_fsaving=証明書とキーをProFTPDファイルにコピーしています ..
 copycert_fsaving2=証明書、キー、CAをProFTPDファイルにコピーしています ..
 copycert_fenabling=ProFTPD構成でSSLを有効にする ..
+
 wizard_title=インストール後のウィザード
 wizard_ecannot=インストール後のウィザードの実行は許可されていません
 wizard_next=次
@@ -6015,6 +6209,7 @@ wizard_defssl2=はい、Let's Encrypt証明書を使用
 wizard_defdom_clash=$1という名前の仮想サーバーは既に存在します
 wizard_defdom_already=$1という名前のデフォルトの仮想サーバーはすでに存在します
 wizard_defdom_desc=ホストのデフォルトドメイン
+
 backuplog_title=バックアップログ
 backuplog_ecannot=Virtualminバックアップログの表示は許可されていません
 backuplog_search=一致するログを検索
@@ -6037,6 +6232,7 @@ backuplog_part=部分的
 backuplog_nodoms=ドメインなし
 backuplog_return=バックアップログリスト
 backuplg_esched=スケジュールされたバックアップは存在しません！
+
 viewbackup_title=バックアップログの表示
 viewbackup_eid=バックアップIDがないか、無効です！
 viewbackup_egone=ログに記録されたバックアップは存在しません！
@@ -6077,6 +6273,7 @@ viewbackup_key=はい、キー $1を使用
 viewbackup_sched=スケジュールされたバックアップから
 viewbackup_gone=ID $1（削除済み）
 viewbackup_ownrestore=所有者は復元できますか？
+
 dbackup_err=バックアップを削除できませんでした
 dbackup_title=バックアップを削除
 dbackup_rusure=この $2ドメインのバックアップを $3の合計 $1から削除してもよろしいですか？
@@ -6084,6 +6281,7 @@ dbackup_confirm=今すぐ削除
 dbackup_doing=$1からバックアップを削除しています ..
 dbackup_done=..正常に削除されました
 dbackup_failed=..失敗しました： $1
+
 redirects_title=ウェブサイトのリダイレクト
 redirects_ecannot=このドメインのウェブサイトのリダイレクトを編集することはできません
 redirects_eweb=この仮想サーバーはリダイレクトをサポートしていません
@@ -6098,6 +6296,7 @@ redirects_type=タイプ
 redirects_alias=ディレクトリのエイリアス
 redirects_redirect=URLにリダイレクト
 redirects_dest=先
+
 redirect_egone=リダイレクトはもう存在しません！
 redirect_create=ウェブサイトのリダイレクトを作成
 redirect_edit=ウェブサイトのリダイレクトを編集
@@ -6122,9 +6321,11 @@ redirect_edir=非絶対宛先ディレクトリー
 redirect_edir3=宛先ディレクトリ $1がありません
 redirect_edir2=宛先ディレクトリは $1の下にある必要があります
 redirect_ecode=無効なHTTPステータスコード
+
 newchangelog_title=新機能ログ
 newchangelog_ecannot=新しい機能のログを表示することはできません
 newchangelog_desc=このページには、現在のリリースまでの、システムにインストールされているすべてのVirtualminバージョンのすべての主要な変更が一覧表示されます。
+
 dkim_title=DomainKeys識別メール
 dkim_title1=DomainKeys識別メールを有効にする
 dkim_title2=DomainKeysで識別されたメールを無効にする
@@ -6152,10 +6353,12 @@ dkim_extra=署名するドメイン
 dkim_eextra=無効な追加ドメイン $1
 dkim_eexclude=無効な除外ドメイン $1
 dkim_exclude=ドメインに署名しない
+
 dkim_title4=DKIMをインストールする
 dkim_installing=DKIMフィルターパッケージのインストール ..
 dkim_installfailed=.. インストールに失敗しました！
 dkim_installed=..インストールが正常に完了しました
+
 dkim_newkey=ファイル $1に秘密鍵を生成しています ..
 dkim_enewkey=..秘密鍵が失敗しました： $1
 dkim_pubkey=$1の秘密鍵から公開鍵を抽出しています. ..
@@ -6185,6 +6388,7 @@ dkim_records=ドメインのDKIM DNSレコード
 dkim_pubkeypem=PEM形式のDKIM公開鍵
 dkim_privkeypem=PEM形式のDKIM秘密鍵
 dkim_esize=DKIMキーのサイズは512ビット以上の数である必要があります
+
 newautoconfig_title=メールクライアントの構成
 autoconfig_ecannot=メールクライアント構成の編集は許可されていません
 autoconfig_header=クライアントの自動構成オプション
@@ -6196,6 +6400,7 @@ autoconfig_enable=$1仮想サーバーのメールクライアント自動設定
 autoconfig_disable=$1仮想サーバーのメールクライアント自動設定を無効にしています ..
 autoconfig_failed=$1の失敗： $2
 autoconfig_enabled_global=メールの自動構成設定を保存しました。
+
 newretention_title=メールボックスのクリーンアップ
 retention_ecannot=メールボックスのクリーンアップを構成することはできません
 retention_header=メールボックスの自動クリーンアップオプション
@@ -6211,6 +6416,7 @@ retention_folders=でのメッセージのクリーンアップ
 retention_folders0=すべてのユーザーフォルダ
 retention_folders1=受信トレイのみ
 retention_desc=このページでは、Virtualminにドメイン所有者とメールユーザーのメールボックスから古いメールメッセージを自動的に削除させることができます。
+
 provision_title=Cloudminサービスクライアント
 provision_ecannot=Cloudminサービスクライアントのセットアップは許可されていません
 provision_header=Cloudminサービスのクライアントオプション
@@ -6258,12 +6464,14 @@ provision_espamtest=..提供されたシステム $1は使用できません： 
 provision_spamgot=..システム $1を使用
 provision_spamunsetup=スパムフィルタリングシステムの使用の停止 ..
 provision_espamunsetup=..失敗しました： $1
+
 provision_emysqldbcheck=MySQLデータベースのサービスエラーチェック： $1
 provision_emysqldb=MySQLデータベース $1はサービスホストにすでに存在します
 provision_emysqlcheck=MySQLログインをチェックするサービスエラー： $1
 provision_emysql=MySQLログイン $1はすでにサービスホストに存在します
 provision_ednscheck=DNSゾーンをチェックするサービスエラー： $1
 provision_edns=DNSゾーン $1はサービスホストに既に存在します
+
 records_title=DNSレコード
 records_ecannot=DNSレコードの編集は許可されていません
 records_name=レコード名
@@ -6316,6 +6524,7 @@ records_comment=コメント
 records_manual=レコードを手動で編集する
 records_epost=レコードは完全には削除されませんでした： $1
 records_viewdesc=この仮想サーバーのDNSドメインは、Virtualminシステムによってホストされていません。ドメインが他の場所でホストされている場合は、以下のレコードを使用して、Webサイトと電子メールが正しく機能することを確認する必要があります。
+
 record_title1=DNSレコードを作成する
 record_title2=DNSレコードを編集
 record_egone=レコードはもう存在しません！
@@ -6345,6 +6554,7 @@ record_defttl=デフォルトのキャッシュ時間
 record_epost=レコードは完全には保存されませんでした： $1
 record_esservice=見当たらない、または無効に見えるサービス名
 record_esproto=無効なサービスプロトコル
+
 clone_err=仮想サーバーのクローンに失敗しました
 clone_eclash=同じ名前の仮想サーバーが既に存在します
 clone_eclash2=同じ名前のユーザーが既に存在します
@@ -6425,6 +6635,7 @@ clone_ssl=Apache SSLディレクティブのコピー ..
 clone_newip=クローンのIPアドレス
 clone_alloc=新しいIPを割り当てる
 clone_vip=住所を使用
+
 mrecords_title=DNSレコードを編集する
 mrecords_ecannot=DNSレコードを手動で編集することはできません
 mrecords_desc=このページでは、ドメイン内のすべてのDNSレコードをBIND構成形式で手動で変更できます。
@@ -6432,16 +6643,19 @@ mrecords_err=DNSレコードを保存できませんでした
 mrecords_enone=何も入っていない！
 mrecords_evalidate=検証に失敗しました： $1
 mrecords_validate=新しいレコードを検証しますか？
+
 mxv_unsupported=リレーの制限は、SendmailとPostfixのみがサポートされています
 mxv_rrm=$1ディレクティブがPostfix構成で設定されていません
 mxv_eaccess=スパム制御（access_db）機能がSendmail構成で有効になっていません
 mxv_eaccessfile=スパム制御（access_db）ファイル $1はまだ存在しません
+
 fixperms_err=権限を修正できませんでした
 fixperms_edoms=仮想サーバーが選択されていません
 fixperms_title=権限の修正
 fixperms_dom=$1のファイルの所有権と権限を修正しています. ..
 fixperms_edir=..ホームディレクトリがありません
 fixperms_failed=..失敗しました： $1
+
 bkeys_title=バックアップ暗号化キー
 bkeys_key=GPGキーID
 bkeys_delete=選択したキーを削除
@@ -6463,6 +6677,7 @@ bkeys_eused2=キー $2は $1へのスケジュールされたバックアップ�
 bkeys_rusure=選択した $1個のバックアップ暗号化キーを削除してもよろしいですか？
 bkeys_rusuerlogs=これらのキーは $1以前のバックアップを暗号化するために使用されました。これらのキーがなければ復元できません。
 bkeys_all=ドメイン所有者にキーの使用を許可しますか？
+
 bkey_create=暗号化キーを作成する
 bkey_edit=暗号化キーを編集
 bkey_ecannot=この暗号化キーの編集は許可されていません
@@ -6499,11 +6714,13 @@ bkey_rusuerlogs=このキーは $1以前のバックアップを暗号化する�
 bkey_edescclash=同じ説明のGPGキーがすでに存在します
 bkey_eemailclash=同じメールアドレスのGPGキーがすでに存在します
 bkey_download=キーをダウンロード
+
 hashtype_crypt=Unix DES暗号
 hashtype_md5=MD5ハッシュ
 hashtype_unix=システムのデフォルトのハッシュタイプ
 hashtype_mysql=MySQLパスワードハッシュ
 hashtype_digest=Webダイジェスト認証ハッシュ
+
 fixsymlinks_title=シンボリックリンクのアクセス許可を修正する
 fixsymlinks_ecannot=シンボリックリンクの権限を修正することはできません
 fixsymlinks_doing=安全でないシンボリックリンクを防止するためにすべての仮想サーバーを更新する ..
@@ -6516,10 +6733,12 @@ fixsymlinks_doms=問題のある<tt>.htaccess</tt>ファイルがで見つかり
 fixsymlinks_ok=Accessファイルを修正する
 fixsymlinks_htdoing=<tt>.htaccess</tt>ファイルのオプションの修正 ..
 fixsymlinks_htdone=.. $2ドメインの $1ファイルを修正
+
 fixmodphp_title=PHP権限を修正する
 fixmodphp_ecannot=PHP権限を修正することはできません
 fixmodphp_doing=無効になっているときにmod_phpを使用しないようにすべての仮想サーバーを更新する ..
 fixmodphp_done=..修正された $1ドメイン
+
 buckets_title=Amazon S3バケット
 buckets_ecannot=S3バケットの管理は許可されていません
 buckets_eaccounts=S3へのスケジュールされたバックアップはまだ作成されておらず、デフォルトのS3キーは設定されていません。
@@ -6531,6 +6750,7 @@ buckets_created=作成日
 buckets_location=ロケーション
 buckets_add=新しいS3バケットを作成します。
 buckets_return=バケットのリスト
+
 bucket_title1=S3バケットを作成する
 bucket_title2=S3バケットを編集
 bucket_eagone=アカウントが存在しません！
@@ -6575,6 +6795,7 @@ bucket_eldays=ライフサイクル $1の日数がないか、数値ではあり
 bucket_elday=ライフサイクル $1の日付がないか、数値ではありません
 bucket_elmonth=ライフサイクル $1に月がないか、数値ではありません
 bucket_elyear=ライフサイクル $1に年がないか数値がありません
+
 ratelimit_title=メールレート制限
 ratelimit_eos=このオペレーティングシステムではメールのレート制限はサポートされていません
 ratelimit_econfig=milter-greylist設定ファイル $1は存在しません
@@ -6603,6 +6824,7 @@ ratelimit_enum=メッセージ数は数値でなければなりません
 ratelimit_etime=期間は数値でなければなりません
 ratelimit_socket=ソケットファイルを調整しています ..
 ratelimit_etwice=ドメイン $1は2回選択されています
+
 ratelimit_title4=メールレート制限をインストールする
 ratelimit_installing=メールレート制限パッケージのインストール ..
 ratelimit_installfailed=.. インストールに失敗しました！
@@ -6623,6 +6845,7 @@ ratelimit_h=時間
 ratelimit_d=日々
 ratelimit_w=週間
 ratelimit_y=年
+
 transfer_title=仮想サーバーの転送
 transfer_err=サーバーを転送できませんでした
 transfer_ecannot=仮想サーバーの転送は許可されていません
@@ -6675,6 +6898,7 @@ transfer_disabling=このシステムで $1を無効にしています ..
 transfer_ereplication=ドメインの複製と削除の両方を同時に有効にすることはできません
 transfer_ehost=宛先ホスト名がありません
 transfer_ehost2=宛先ホスト名を解決できません
+
 domdkim_title=DomainKeyオプション
 domdkim_header=このサーバーのDomainKeyオプション
 domdkim_key=PEM形式のDKIM秘密鍵
@@ -6690,6 +6914,7 @@ domdkim_ekey=無効なキー形式： $1
 domdkim_egen=新しいキーの生成に失敗しました： $1
 domdkim_enabled=DKIMは現在有効になっていません
 domdkim_records=DKIM DNSレコード
+
 clouds_title=クラウドストレージプロバイダー
 clouds_name=プロバイダー名
 clouds_state=現在の状態
@@ -6699,6 +6924,7 @@ clouds_unconf=まだ構成されていません
 clouds_return=プロバイダーのリスト
 clouds_nusers=$1バックアップで使用
 clouds_nousers=どのバックアップでも使用されていません
+
 cloud_s3desc=アマゾンS3
 cloud_rsdesc=Rackspace Cloudファイル
 cloud_googledesc=Google Cloud Storage
@@ -6764,6 +6990,7 @@ cloud_bb_key=APIキー
 cloud_bb_ekeyid=見当たらないか無効に見えるAPIキーID
 cloud_bb_ekey=見当たらない、または無効に見えるAPIキー
 cloud_bb_elogin=Backblazeへのログインに失敗しました： $1
+
 left_virtualmin=Virtualmin
 left_master=マスター管理者
 left_reseller=リセラー
@@ -6775,6 +7002,7 @@ left_master2=Cloudminマスター管理者
 left_login=ログイン： $1
 left_level=レベル1
 left_generic=仮想サーバーを作成
+
 right_statusheader=状態
 right_sysinfoheader=プログラム
 right_virtheader=Virtualminカウント
@@ -6838,6 +7066,7 @@ right_quota=ディスク使用量と割り当て
 right_bw=帯域幅の使用と制限
 right_of=$2のうち $1
 right_sysinfo=システムインフォメーション
+
 assoc_title=機能の関連付けと関連付け解除
 assoc_desc=このページで有効または無効になっている機能は、システム構成ファイルを更新しません。代わりに、ドメインが持つと期待する機能のVirtualminのデータベースのみが変更されます。これを使用して、手動でセットアップされた機能をインポートしたり、構成を切断して、仮想サーバーが削除されても保持されるようにすることができます。
 assoc_header=機能の関連付けの設定
@@ -6845,6 +7074,7 @@ assoc_features=Virtualminに知られている機能
 assoc_validate=保存する前に成功した検証が必要ですか？
 assoc_err=機能を関連付けることができませんでした
 assoc_evalidate=$1の検証に失敗しました： $2
+
 running_title=バックアップの実行
 running_stop=選択したバックアップを停止
 running_started=開始
@@ -6856,6 +7086,7 @@ running_cron=スケジュールされたバックアップ
 running_link=<a href='$1'>スケジュールされたバックアップ</a>ページにアクセスして、定期的にバックグラウンドで実行されるバックアップを作成するか、<a href='$2'>バックアップログ</a>ページにアクセスしてバックアップを確認しますすでに完了しています。
 running_err=バックアップを停止できませんでした
 running_enone=何も選択されていません！
+
 recovery_title=パスワード復旧
 recovery_msg1=$1の現在のパスワードを $2に送信してもよろしいですか？
 recovery_msg2=$1の新しいランダムパスワードを生成して $2に送信してもよろしいですか？
@@ -6865,6 +7096,7 @@ recovery_body1=ログイン $2のメールアカウント $3のパスワード�
 recovery_body2=ログイン $2のメールアカウント $3の新しいランダムパスワードが生成されました： $1
 recovery_sending=$1にパスワード再設定メールを送信しています. ..
 recovery_failed=..失敗しました： $1
+
 letsencrypt_err=証明書をリクエストできませんでした
 letsencrypt_title=証明書をリクエスト
 letsencrypt_doing2=Let's Encryptから $1の証明書を要求しています ..
@@ -6884,12 +7116,14 @@ letsencrypt_conncheck=$1の外部接続を確認しています ..
 letsencrypt_connerrs=..エラーが見つかりました。これにより、Let's Encryptが証明書を発行できなくなります。
 letsencrypt_connok=..問題は見つかりませんでした
 letsencrypt_validcheck=$1の構成を検証しています. ..
+
 php_fpmrestart=PHP-FPMサーバーを再起動しています. ..
 php_fpmnoinit=..起動アクションが見つかりません！
 php_fpmeinit=..失敗しました： $1
 php_fpmnodir=FPM構成ディレクトリが見つかりません
 php_fpmnoinit2=FPMサーバーの起動アクションが見つかりません
 php_fpmnomod=Apacheモジュール $1がないか、有効になっていません
+
 jailkit_ecmd=Jailkitコマンド $1がシステムで見つかりませんでした-<i>jailkit</i>パッケージがインストールされていない可能性がありますか？
 jailkit_einit=刑務所の初期化に失敗しました： $1
 jailkit_elinux=JailkitはLinuxシステムでのみサポートされています
@@ -6900,6 +7134,7 @@ jailkit_emkdir=ディレクトリの作成に失敗しました： $1
 jailkit_eumount=バインドホームディレクトリのマウント解除に失敗しました： $1
 jailkit_eenabled=このドメインではChroot刑務所が有効になっていません
 jailkit_edir=chroot jailディレクトリが見つかりません！
+
 mysqlpass_shutdown=MySQLサーバーをシャットダウンしています ..
 mysqlpass_eshutdown=..シャットダウンに失敗しました： $1
 mysqlpass_startup=MySQLサーバーを起動しています. ..
@@ -6911,6 +7146,7 @@ mysqlpass_esafe=..起動に失敗しました： $1
 mysqlpass_change=ユーザー $1のパスワードを変更しています ..
 mysqlpass_echange=..パスワードの変更に失敗しました： $1
 mysqlpass_kill=認証を無効にしてMySQLサーバーを停止する ..
+
 kill_failed=キルに失敗しました： $1
 kill_still=まだ実行されています！
 kill_done=殺された
@@ -6920,6 +7156,7 @@ kill_port=ポート
 kill_cmd=サーバーコマンド
 kill_result=結果
 kill_subject=Virtualminサーバープロセスの監視
+
 mysql_rsock=ソケットファイル $1
 mysql_rhostport=リモートホスト $1ポート $2
 mysql_rhost=リモートホスト $1
@@ -6928,8 +7165,10 @@ mysql_rlocal=ローカルサーバー
 mysql_movebackup=元のホスト上のユーザーとデータベースのバックアップ ..
 mysql_moverestore=新しいホストでのユーザーとデータベースの復元 ..
 mysql_movedelete=元のホストからユーザーとデータベースを削除しています ..
+
 dbpass_title=データベースパスワードの更新
 dbname_title=データベース名を更新
+
 mailclient_title=メールクライアント設定
 mailclient_header=ユーザーメールクライアントの設定
 mailclient_exemail=ユーザーのメールの例
@@ -6951,6 +7190,7 @@ mailclient_smtp_type=SMTP暗号化タイプ
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=暗号化されていません
+
 deftmplt_error=エラー
 deftmplt_website_disabled=無効なウェブサイト
 deftmplt_under_construction=工事中
@@ -6959,6 +7199,7 @@ deftmplt_slogan2=ドメイン所有者は、このWebサイトを管理するた
 deftmplt_made_with_love1=で作った
 deftmplt_made_with_love2=Virtualminで
 deftmplt_made_with_love_disclamer=* Virtualmin社は、このサーバーによって配信されるコンテンツについて責任を負いません
+
 2fa_title=二要素認証
 2fa_euser=Webminユーザーは存在しません！
 2fa_already=アカウントID $2のプロバイダー $1を使用した2要素認証に既に登録されています。

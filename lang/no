@@ -209,6 +209,7 @@ index_mass=Oppdater valgte
 index_mass_all=Oppdater alle virtuelle tjenere
 index_disable=Deaktiver valgte
 index_enable=Aktiver valgte
+
 index_backup=Sikkerhetskopier virtuell tjener
 index_backupdesc=Klikk på denne knappen for å utføre en sikkerhetskopi umiddelbart. Et skjema for å velge hvilke tjenere og funksjoner som skal sikkerhetskopieres, og hvor sikkerhetskopien skal lagres, vil bli vist.
 index_sched=Tidsplanlagt sikkerhetskopi
@@ -225,6 +226,7 @@ index_buckets=Amazon S3 Buckets
 index_bucketsdesc=Vis S3 buckets som brukes til backup, og tillat at migrering til Glacier kan konfigureres.
 index_dmore=$1 mer ..
 index_virtualminconfig=Virtualmin konfigurasjon
+
 form_title=Opprett virtuell tjener
 form_title2=Opprett virtuell under-tjener
 form_title3=Opprett alias tjener
@@ -332,6 +334,7 @@ form_limits=Kvoter og begrensinger
 form_proxysect=IP adresse og videresending
 form_ipsect=IP adresse og grensesnitt
 form_inputssect=Innstillinger for ekstra funksjoner
+
 setup_err=Kunne ikke opprette virtuell tjener
 setup_eplan=Valgt plan finnes ikke eller den er ikke tilgjengelig
 setup_evital=Kritisk funksjon $1 ble ikke korrekt opprettet - Oppretting av virtuell tjener stoppet.
@@ -464,6 +467,7 @@ setup_efwdtomail=En standard videresendingsadresse for e-post kan bare angis der
 setup_econtent=Ingen initiell tekst for nettsted angitt
 setup_edefip=Ny virtuell tjener har ingen IP adresse! Kanskje Virtualmin ikke klarte å finne ut systemets standard IP.
 setup_qmailme=Dette domenet kan ikke brukes til Qmail, siden det er det samme som tjenerens vertsnavn $1 (fra filen <tt>control/me</tt>)
+
 setup_title=Setter opp virtuell tjener
 setup_group=Oppretter administrasjonsgruppe $1 ..
 setup_user=Oppretter administrasjonsbruker $1 ..
@@ -606,8 +610,10 @@ setup_warnings2=Følgende mulige problemer ble oppdaget ved endring av denne vir
 setup_warnrusure=Er du sikker på at du ønsker å fortsette?
 setup_warnok1=Ja, opprett virtuell tjener
 setup_warnok2=Ja, endre virtuell tjener
+
 indom=I domene $1
 equotacommand=Kvote-kommando $1 feilet : $2
+
 users_ecannot=Du har ikke lov til å redigere brukere i dette domenet
 users_ecannot2=Du har ikke lov til å redigere lokale brukere
 users_emailbox=Domene-eierens postboks kan ikke redigeres
@@ -663,6 +669,7 @@ users_defaults=Rediger standardverdier for ny bruker
 users_defaultsdesc=Vis og rediger innstillinger for nye brukere på denne virtuelle tjeneren.
 users_all=Alle
 users_same=Samme som admin
+
 user_create=Opprett postboks
 user_createweb=Opprett FTP bruker
 user_edit=Rediger postboks
@@ -788,6 +795,7 @@ user_lastlogin_pop3=POP3 (henter e-post)
 user_lastlogin_imap=IMAP (henter e-post)
 user_lastlogin_smtp=SMTP (sender e-post)
 user_lastlogin_never=Ingen innlogginger loggført enda
+
 aliases_ecannot=Du har ikke lov til å redigere aliaser i dette domenet
 aliases_indom=$1 aliaser i domene $2
 aliases_title=E-post aliaser
@@ -827,6 +835,7 @@ aliases_reply=Autosvar med melding $1
 aliases_emass=Rediger aliaser manuelt
 aliases_hide=Skjul spesial aliaser.
 aliases_show=Vis spesial aliaser.
+
 alias_create=Opprett e-post alias
 alias_edit=Rediger e-post alias
 alias_egone=E-post alias finnes ikke lenger
@@ -910,18 +919,22 @@ alias_psel=På dato
 alias_estart=Ugyldig startdato for automatisk svar
 alias_eend=Ugyldig sluttdato for automatisk svar
 alias_aopts=Innstillinger for automatiske svar
+
 stop_ecannot=Du har ikke lov til å starte tjenester
 stop_err=Kunne ikke stoppe tjeneste
 stop_title=Stoppet tjeneste
 stop_done=Tjenesten for $1 er stoppet.
+
 start_ecannot=Du har ikke lov til å starte tjenester
 start_err=Kunne ikke starte tjeneste
 start_title=Startet tjeneste
 start_done=Tjenesten for $1 er startet.
+
 restart_ecannot=Du har ikke lov til å omstarte tjenester
 restart_err=Kunne ikke omstarte tjeneste
 restart_title=Omstartet tjeneste
 restart_done=Tjenesten for $1 er stoppet og omstartet OK.
+
 bstop_err=Kunne ikke stoppe BIND
 bstop_epid=Prosessen kjører ikke lenger
 mstop_err=Kunne ikke stoppe e-post tjener
@@ -932,6 +945,7 @@ fstart_err=Kunne ikke starte FTP tjener
 fstop_edown=Kjører ikke
 fstop_ekill=Kill feilet : $1
 fstart_eup=Kjører allerede
+
 edit_title=Rediger virtuell tjener
 edit_title2=Rediger virtuell under-tjener
 edit_title3=Rediger Alias tjener
@@ -1093,8 +1107,6 @@ edit_switch=Bytt til tjenerens admin
 edit_switchdesc=Logg inn automatisk på Webmin som eier av denne virtuelle tjeneren, uten å behøve å skrive inn passordet.
 edit_spamvirus=Levering av søppelpost og virus
 edit_spamvirusdesc=Konfigurer leveringsmetoder for søppelpost og virus oppdaget i e-post sendt til denne virtuelle tjeneren.
-edit_phpmode=Innstillinger for nettsted
-edit_phpmodedesc=Konfigurer innstillinger relatert til denne virtuelle tjenerens nettsted, som f.eks logging og PHP eksekveringsmodus.
 edit_phpver=PHP versjoner
 edit_phpverdesc=Velg hvilken PHP versjon som skal brukes, og konfigurer forskjellige versjoner fo uilike kataloger.
 edit_spf=DNS innstillinger
@@ -1148,6 +1160,7 @@ edit_mailoptsdesc=Konfigurer e-post relaterte innstillniger for denne virtuelle 
 edit_connect=Sjekk forbindelse
 edit_connectdesc=Valider at denne virtuelle tjenerens nettsted, DNS domene og e-post tjener kan nås fra Internet.
 edit_psearch=Vis under-tjenere
+
 delete_title=Slett tjener
 delete_rusure2=Er du sikker på at du ønsker å slette den virtuelle tjeneren $1, som har $2 filer? Følgende funksjoner vil bli slettet :
 delete_rusure3=Er du sikker på at du ønsker å slette den virtuelle tjeneren $1. Følgende funksjoner vil bli slettet :
@@ -1215,6 +1228,7 @@ delete_nostatus=.. ikke funnet!
 delete_mxs=Fjerner sekundære e-post tjenere $1 ..
 delete_dom=Sletter under-tjener $1 ..
 delete_aliasfailure=.. $1 alias sletting feilet : $2
+
 save_err=Kunne ikke endre tjener
 save_title=Lagre tjener
 save_equota=Manglende eller ugyldig total kvote
@@ -1325,8 +1339,10 @@ save_euserquota=Tjener-administratorens diskkvote bør ikke reduseres til $2, si
 save_aliasusers=Funksjonen som deaktiveres er i bruk av følgende alias tjenere : $1
 save_erquota=Disk-kvotegrensen for denne virtuelle tjeneren kan ikke være ubegrenset, siden den eies av forhandler $1 som har en diskkvotegrense
 save_erbw=Båndbreddegrensen for denne virtuelle tjeneren kan ikke være ubegrenset, siden den eies av forhandler $1 som har en båndbreddegrense
+
 luser_err=Kunne ikke lagre lokal postboks
 luser_etaken=En bruker mde samme navn finnes allerede
+
 acl_warn=Advarsel! For en Webmin bruker opprettet av Virtualmin, kan disse innstillingene bli overstyrt automatisk.
 acl_domains=Domener denne  brukeren kan administrere
 acl_all=Alle domener
@@ -1338,12 +1354,15 @@ acl_local=Kan redigere lokale brukere
 acl_stop=Kan starte og stoppe tjenester?
 acl_only=Kun for seg selv
 acl_lim=Begrens tilgang
+
 other=Annen...
+
 search_title=Søkeresultat
 search_none=Fant ingen virtuelle tjenere som inneholder $1.
 search_nonef=Fant ingen virtuelle tjenere som bruker funksjonen $1.
 search_results=Fant $2 virtuelle tjenere som stemmer med $1 ..
 search_resultsf=Fant $2 virtuelle tjenere som bruker funksjonen $1 ..
+
 import_title=Importer virtuell tjener
 import_desc1=Dette skjemaet kan brukes til å bringe et eksisterende domene på systemet ditt inn under Webmins kontroll. Postbokser og aliaser for domenenavnet, enhver eksisterende Apache virtuell tjener og DNS domenet vil bli oppdaget automatisk. Du kan også angi navn på en database som skal tilknyttes domenet, dersom dette er ønskelig.
 import_desc2=Passordfeltet må fylles ut med administrasjonsbrukerens gjeldende passord, dersom du vet dette. Virtualmin må vite hver virtuelle tjeners passord, for fremtidig bruk ved oppsett av MySQL og PostgreSQL databaser.
@@ -1372,6 +1391,7 @@ import_regexpg=Primær gruppe
 import_regexpr=Matcher regexp
 import_emysql_user=Mangler MySQL brukernavn
 import_emysql_user2=Angitt MySQL bruker finnes ikke
+
 import_err=Import feilet
 import_eexists=Det angitte domenet administreres allerede av Virtualmin
 import_enoip=Den angitte IP adressen er ikke aktiv på ditt system.
@@ -1425,14 +1445,18 @@ import_auto=Automatisk
 import_ehome=Manglende eller ugyldig hjemmekatalog
 import_eregexp=Manglende regulært uttrykk for brukere
 import_updating=Oppdaterer brukere som stemmer med $1 ..
+
 acheck_ename=Mangler et ServerName direktiv
 acheck_edom=Ingen av ServerName eller ServerAlias direktivene inneholder $DOM
 acheck_edoc=Mangler et DocumentRoot direktiv
+
 fcheck_euser=Mangler User direktiv
 fcheck_egroup=Mangler Group direktiv
 fcheck_euserex=Unix brukeren $1 i User direktivet finnes ikke
 fcheck_egroupex=Unix gruppen $1 i Group direktivet finnes ikke
+
 lcheck_epost=Manglende postrotate script for omlasting av Apache
+
 disable_title=Deaktiver tjener
 disable_rusure2=Er du sikker på at du ønsker å deaktivere den virtuelle tjeneren $1? Dens $2 vil bli deaktivert.
 disable_undo=Alle ovenstående handlinger vil bli reversert uten tap av data når og om tjeneren blir re-aktivert.
@@ -1469,6 +1493,7 @@ disable_users=Låser e-post brukeres konti ..
 disable_why=Årsak til deaktivering:
 disable_subservers=Deaktiver også under-tjenere?
 disable_doing=Deaktiverer virtuell tjener $1 ..
+
 enable_title=Aktiver tjener
 enable_rusure2=Er du sikker på at du ønsker å re-aktivere den virtuelle tjeneren $1? Dens $2 vil gjenopprettes til deres opprinnelige aktiverte tilstander.
 enable_ok=Ja, aktiver den
@@ -1491,6 +1516,7 @@ enable_statusssl=Re-aktiverer statusovervåking for SSL nettstedet ..
 enable_users=Låser opp e-post brukeres kontoer ..
 enable_subservers=Aktiver også under-tjenere?
 enable_doing=Aktiverer virtuell tjener $1 ..
+
 mail_usubject=Postboks opprettet
 mail_dsubject=Virtuell tjener opprettet
 mail_upsubject=Postboks oppdatert
@@ -1498,12 +1524,14 @@ mail_rsubject=Forhandler konto opprettet
 mail_file=kunne ikke lese malfilen $1 : $2
 mail_system=e-post er ikke satt opp i Virtualmin
 mail_ok=e-post sendt til $1
+
 afile_ecannot=Du ha ikke lov til å redigere alias include filer
 afile_eread=Kunne ikke lese alias include fil $1 som bruker $2 : $3
 afile_title=Rediger adressefil
 afile_desc=Bruk tekstområdet nedenfor til å redigere adressene i filen $1.
 afile_undo=Gjør om endringer
 afile_ewrite=Kunne ikke skrive til adressefil $1 som bruker $2 : $3
+
 rfile_title=Rediger Autosvar fil
 rfile_ecannot=Du har ikke tilgang til å redigere autosvar filer
 rfile_eread=Kunne ikke lese autosvar fil $1 som bruker $2: $3
@@ -1519,6 +1547,7 @@ rfile_secs=sekunder
 rfile_ereplies=Manglende logg-fil for sporing av svar
 rfile_eperiod=Manglende eller ugyldig antall sekunder mellom svar
 rfile_ewrite=Kunne ikke skrive til autosvar-filen $1 som bruker $2 : $3
+
 ffile_title=Rediger filter regel
 ffile_ecannot=Du har ikke lov til å redigere filter regler
 ffile_eread=Kunne ikke lese filterfilen $1 som bruker $2 : $3
@@ -1536,6 +1565,7 @@ ffile_err=Kunne ikke lagre filter fil
 ffile_ematch=Manglende match
 ffile_eaction=Manglende adresse for videresending
 ffile_ewrite=Kunne ikke skrive til filterfilen $1 som bruker $2 : $3
+
 newweb_title=Mal for Apache nettsted
 newweb_ecannot=Du har ikke lov til å redigere malen for nettstedet
 newweb_desc=Bruk dette skjemaet til å redigere mal for Apache direktiver som brukes for nettsteder som opprettes av Virtualmin. Følgende erstatninger vil bli gjort når et nettsted opprettes fra malen :
@@ -1575,6 +1605,7 @@ newweb_admin=Rediriger <tt>admin.domain</tt> til Virtualmin?
 newweb_admindom=URL for <tt>admin</tt> redirigering
 newweb_ewebmaildom=Manglende eller ugyldig URL for webmail redirigering
 newweb_eadmindom=Manglende eller ugyldig URL for admin redirigering
+
 newftp_title=ProFTPd tjener-mal
 newftp_ecannot=Du har ikke lov til å redigere ProFTPd malen
 newftp_desc=Bruk dette skjemaet til å redigere mal ProFTPd direktivene som skal brukes av virtuelle tjenere opprettet av Virtualmin. Følgende erstatninger vil bli utført når nettstedet opprettes fra malen :
@@ -1584,6 +1615,7 @@ newftp_dir=Anonym FTP underkatalog som skal opprettes
 newftp_dir0=Katalog under hjemmekatalog
 newftp_dir0suf=(Må stemme med &lt;Anonym&gt; seksjonen ovenfor)
 newftp_edir=Manglende eller ugyldig underkatalog for anonym FTP
+
 newdns_title=BIND DNS mal
 newdns_ecannot=Du har ikke lov til å redigere DNS malen
 newdns_desc=Bruk dette skjemaet til å rediger mal for BIND direktiver som vil bli plassert i DNS domener opprettet av Virtualmin (når den ikke er i automatisk modus). Følgende erstatninger vil bli gjort når domenet opprettes fra malen :
@@ -1601,6 +1633,7 @@ newdns_noview=Topp-nivå (ikke i noen visning)
 newdns_enamedconf=Ingen gyldige BIND named.conf direktiver ble angitt
 newdns_ensip=Ekstra navnetjener $1 er en IP adresse i stedet for et vertsnavn
 newdns_enshost=Ekstra navnetjener $1 finnes ikke
+
 sub_DOM=Domenenavnet, som f.eks. <tt>foo.com</tt>
 sub_HOME=Domenebrukerens hjemmekatalog som f.eks. <tt>/home/foo</tt>
 sub_USER=Administrasjonsbrukeren som eier domenet, som f.eks <tt>foo</tt>
@@ -1622,19 +1655,23 @@ sub_NAME=Forhandlerens Virtualmin bruker
 sub_RPLAINPASS=Leverandørs passord
 sub_EMAIL=Leverandør kontakt e-post adresse
 sub_WEBMINURL=URL for innlogging til Virtualmin
+
 newuser_title=Ny postboks e-post
 newuser_ecannot=Du har ikke lov til å redigere malen for melding om ny postboks
 newuser_desc2=Bruk dette skjemaet til å redigere malen for e-post meldingen som kan sendes til en ny e-post/FTP-bruker etter at denne er opprettet. Følgende erstatninger kan brukes i teksten :
 newuser_header=Detaljer for melding om ny postboks
 newuser_docs=Forklaringer og erstatninger
+
 newupdate_title=Oppdatert postboks e-post
 newupdate_ecannot=Du har ikke lov til å redigere malen for e-post om oppdatert postboks
 newupdate_desc2=Her kan du redigere malen for e-post meldingen som kan sendes til en e-post/FTP bruker etter at den er oppdatert. Følgende erstatninger vli bli gjort i teksten :
 newupdate_header=Detaljer for melding om oppdatert postboks
+
 newlocal_title=Melding om ny lokal postboks
 newlocal_ecannot=Du har ikke lov til å redigere malen for ny lokal postboks
 newlocal_desc2=Bruk dette skjemaet til å redigere malen for e-postmeldingen som kan sendes til en ny lokal posboks-bruker når denne opprettes. Følgende erstatninger vil bli gjort i teksten :
 newlocal_header=Detaljer for ny lokal postboks e-post melding
+
 newdom_title=Ny virtuell tjener e-post
 newdom_ecannot=Du har ikke lov til å redigere mal for epost om ny tjener
 newdom_desc=Bruk dette skjemaet til å redigere malfilen $1 for e-post meldingen som sendes til eier av ny virtuell tjener etter at tjeneren er opprettet. Følgende erstatninger vil bli gjort i teksten :
@@ -1647,14 +1684,17 @@ newdom_to=Send e-post til
 newdom_mailbox=Brukers postboks
 newdom_owner=Eier av virtuell tjener
 newdom_reseller=Virtuell tjener forhandler
+
 newsubdom_title=Ny Virtuell under-tjener e-post
 newsubdom_ecannot=Du har ikke lov til å redigere mal for melding om ny under-tjener e-post
 newsubdom_desc=Bruk dette skjemaet til å redigere mal-filen $1 for e-post meldingen som sendes til eieren av en ny virtuell tjener etter at den er opprettet. Følgende erstatninger vil bli gjort i teksten :
 newsubdom_descdis=Bruk dette skjemaet til å redigere mal-filen $1 for e-post meldingen som sendes til eieren av en ny virtuell under-tjener etter at den er opprettet, dersom denne funksjonaliteten er aktivert i Virtualmins konfigurasjon. Følgende erstatninger til bli gjort i teksten :
 newreseller_header=Detaljer for melding til nye forhandlere
+
 newreseller_title=Ny forhandler e-post
 newreseller_ecannot=Du har ikke lov til å redigere malen for melding til nye forhandlere
 newreseller_desc2=Bruk dette skjemaet til å redigere mal for e-post meldingen som sendes til en ny forhandler-konto etter at den er opprettet. Følgende erstatninger vil bli gjort i teksten :
+
 feature_web=Apache nettsted
 feature_dns=BIND DNS domene
 feature_mysql=MySQL database
@@ -1672,11 +1712,13 @@ feature_virt6=IPv6 adresse
 feature_spam=Filtrering av søppelpost
 feature_virus=Virus filtrering
 feature_status=Statusovervåking
+
 bandwidth_web=Nettsted trafikk
 bandwidth_ftp=FTP overføringer
 bandwidth_mail=E-post overført
 bandwidth_backup=Sikkerhetskopier utført
 bandwidth_restore=Sikkerhetskopier gjenopprettet
+
 losing_web=Alle Apache direktiver i den virtuelle verten vil bli fjernet.
 losing_dns=Alle DNS oppføringer i domenet og alle BIND innstillinger vil bli slettet.
 losing_mysql=Alle MySQL databaser, alle tabeller og tjenerens MySQL bruker vil bli slettet.
@@ -1694,6 +1736,7 @@ losing_logrotate=Logrotate konfigurasjonen for den virtuelle tjenerens loggfiler
 losing_spam=SpamAssassin konfigurasjonen for denne virtuelle tjeneren vil bli slettet.
 losing_virus=Procmail oppfølringen for filtrering av virus for denne tjeneren vil bli fjernet.
 losing_status=Webmin statusovervåkeren for denne virtuelle tjenerens nettsted vil bli slettet.
+
 check_title=Sjekker konfigurasjon
 check_desc=Sjekker status på systemet ditt, for å være sikker på at alle aktiverte funksjoner er tilgjengelige, at e-post tjeneren er riktig konfigurert og at kvoter er aktive ..
 check_netok=Webmind Nettverkskonfigurasjons modul er installert og støttet.
@@ -1827,12 +1870,15 @@ check_ehomebase=Bae-katalogen for hjemmekataloger $1 er ikke en absolutt sti. De
 check_ehomebase2=Basekatalogen $1 for hjemmekataloger er ikke en absolutt sti. Dette kan endres på <a href='$2'>konfigurasjonssiden for modulen Brukere og grupper</a>.
 check_ehomeformat=Hjemmekatalog formatet $1 inneholder ikke brukernavn eller domenenavn. Dette kan korrigeres på <a href='$2'>Virtualmins konfigurasjonsside</a>.
 check_ehomestyle=Stil for hjemmekatalog er satt til "Bare base-katalog", denne kan ikke brukes med Virtualmin. Denne kan endres på <a href='$2'>modulkonfigurasjonssiden for modulen Brukere og grupper</a>.
+
 checkmap_enone=Ingen tilordnings-kilder ble funnet i <a href='$1'>Postfix konfigurasjonen</a>
 checkmap_esupport=Tilordnings-kilden <tt>$1</tt> støttes ikke av Postfix - det kan hende du må installere Postfix biblioteker for den, eller rekompilere
 checkmap_eaccess=Tilordningskilden <tt>$1</tt> kan ikke brukes : $2
 checkmap_efile=TIlordningsfilen støttes ikke av denne Webmin versjonen - du kan kun benytte tilordningsfiler av typen <tt>hash</tt> og <tt>regexp</tt>
+
 allwebmin_ecannot=Du har ikke lov til å oppdatere alle Webmin brukere
 allwebmin_title=Oppdaterer Webmin brukere
+
 log_create_user=Opprettet postboks $1@$2
 log_modify_user=Endret pstboks $1@$2
 log_delete_user=Slettet postboks $1@$2
@@ -2030,6 +2076,7 @@ log_install_ratelimit=Installerte rate-begrensings tjener
 log_enable_ratelimit=Aktiverte begrensing av e-post rate
 log_disable_ratelimit=Deaktiverte begrensing av e-post rate
 log_modify_ratelimit=Oppdaterte e-post rate begrensing
+
 backup_title=Sikkerhetskopier virtuelle tjenere
 backup_title2=Rediger tidsplanlagt backup
 backup_title3=Opprett tidsplanlagt sikkerhetskopi
@@ -2139,6 +2186,7 @@ backup_senabled0=Virtualmins tidsplanlagte sikkerhetskopiering er aktivert for $
 backup_sdisabled=Virtualmins tidsplanlagte sikkerhetskopi er deaktivert
 backup_key=Krypter sikkerhetskopi med nøkkel
 backup_nokey=Ikke signer eller krypter
+
 backup_err=Sikkerhetskopiering feilet
 backup_err2=Kunne ikke lagre tidsplanlagt sikkerhetskopi
 backup_ecannot=Du har ikke lov til å utføre sikkerhetskopier
@@ -2200,6 +2248,7 @@ backup_copy=Kopierer til ekstra mål $1 ..
 backup_copyfailed=.. kopering feilet : $1
 backup_ekey=Den valgte sikkerhetskopi-nøkkelen finnes ikke!
 backup_ekeycannot=Du har ikke tilgang til å bruke den valgte sikkerhetskopi-nøkkelen
+
 backup_dirtar=Oppretter TAR fil av hjemmekatalogen ..
 backup_dirtarinc=Oppretter inkrementell TAR fil av hjemmekatalogen ..
 backup_dirtarfailed=.. TAR feilet! $1
@@ -2328,6 +2377,7 @@ backup_brun=Kjører pre-backup kommando ..
 backup_arun=Kjører post-backup kommando ..
 backup_brunfailed=.. feilet. Sikkerhetskopieringen vil ikke fortsette.
 backup_arunfailed=.. feilet!
+
 restore_title=Gjenopprett virtuelle tjenere
 restore_header=Innstillinger for gjenoppretting av sikkerhetskopi
 restore_src=Gjenopprett kilde
@@ -2350,6 +2400,7 @@ restore_virtualmin=Virtualmin innstillinger som skal gjenopprettes
 restore_dnswholefile=Gjenopprett alt i DNS sonefil
 restore_newip=IP-adresse for gjenopprettede tjenere
 restore_newip6=IPv6 adresse for gjenopprettede tjenere
+
 restore_ecannot=Du har ikke lov til å gjenopprette sikkerhetskopier
 restore_esched=Valgt tidsplan for sikkerhetskopi finnes ikke!
 restore_err=Gjenoppretting feilet
@@ -2413,6 +2464,7 @@ restore_phpmodsnone=.. ingen PHP moduler behøver å installeres
 restore_es3info=Fant ingen sikkerhetskopifil for $1 på $3.
 restore_phpbad=ADVARSEL - Følgende script brukte PHP versjoner som ikke er tilgjengelige på dette systemet :
 restore_phpbad2=$1 - $2 - Versjon $3
+
 restore_unixuser=Oppdaterer administrasjons-passord og kvoter ..
 restore_dirtar=Pakker ut TAR fil for hjemmekatalog ..
 restore_dirtarfailed=.. feilet! $1
@@ -2486,6 +2538,7 @@ restore_vmailserver_already=.. lar stå deaktivert
 restore_vmailserver_grey=Gjenoppretter innstillinger for grålisting ..
 restore_ereseller=Forhandler $1 finnes ikke
 restore_eparent=Opprinnelig overordnet virtuell tjener $1 finnes ikke
+
 limits_title=Grenser for tjener-eiere
 limits_header=Virtualmin begrensinger for tjener-eier
 limits_header2=Tillatte egenskaper og funksjoner
@@ -2547,6 +2600,7 @@ limits_shell_nologin=Ingen innlogging
 limits_shell_ftp=Kun FTP
 limits_shell_ssh=SSH og FTP
 limits_unshell=Bruker ukjent skall $1
+
 rename_title=Endre domenenavn
 rename_header=Innstillinger for endring av domenenavn for virtuell tjener
 rename_domain=Gammelt domenenavn
@@ -2588,6 +2642,7 @@ rename_ehome2=Ingen ny hjemmekatalog angitt
 rename_ehome3=Ny hjemmekatalog finnes allerede
 rename_ehome4=Overordnet katalog for ny hjemmekatalog finnes ikke
 rename_scripts=Oppdaterer stier i script-database ..
+
 cert_title=Administrer SSL sertifikat
 cert_desc2=Her kan du se detaljer om SSL sertifikatet som brukes av denne virtuelle tjeneren.
 cert_desc1=Dette skjematt kan brukes til å opprette en sertifikatsignerings-forespørsel (CSR) og privat nøkkel for denne virtuelle tjeneren. Den resulterende CSR kan sendes til en sertifikatautoritet (CA), som vil returnere et signert sertifikat for å lime inn i det andre skjemaet på denne siden.
@@ -2668,6 +2723,7 @@ cert_pcopy=Kopier til Postfix
 cert_pcopydesc=Bruk dette sertifikatet i Postfix for SSL-beskyttede SMTP forbindelser for e-post klienter.
 cert_desc7=Dette skjemaet brukes når du har mottatt et signert sertifikat fra din CA, som svar på en sertifikatforespørsel generert vha. Virtualmin.
 cert_header7=Detaljer for signert sertifikat
+
 csr_title=Genererer CSR
 csr_title2=Genererer sertifikat
 csr_err=Kunne ikke generere CSR
@@ -2678,6 +2734,7 @@ csr_csr=CSR for denne virtuelle tjeneren, lagret i $1, er :
 csr_key=Den nye private nøkkelen for denne virtuelle tjeneren, lagret i $1, er :
 csr_selfing=Genererer selv-signert sertifikat og privat nøkkel ..
 csr_csring=Genererer signeringsforespørsel og privat nøkkel ..
+
 newkey_title=Installerer sertifikat
 newkey_err=Kunne ikke installere sertifikat
 newkey_ecert2=Manglende eller ugyldig signert SSL sertifikat : $1
@@ -2693,6 +2750,7 @@ newkey_enewkeyfilehome=Fil med privatnøkkel $1 må ligge under den virtuelle tj
 newkey_apache=Konfigurerer webtjener til å bruke nytt sertifikat og nøkkel ..
 newkey_enewkeycsr=Fant ingen SSL nøkkel som var generert på samme tidspunkt som en signeringsforespørsel!
 newkey_ekeysame=Ikke skriv inn stien til nøkkelen som ble generert med en CA - bruk fanen <b>Bruk signert sertifikat</b> i stedet.
+
 newbw_title=Båndbredde overvåking
 newbw_desc=Denne siden kan brukes til å bokføre bruk av båndbredde for virtuelle tjenere, å gi beskjed til tjener-eiere og master administrator når en tjener overskrider tillatt båndbredde.
 newbw_active=Båndbredde overvåking aktiv?
@@ -2759,9 +2817,11 @@ newbw_resetdesc=Denne knappen åpner et skjema som tvinger gjennom regenerering 
 newbw_return=skjema for båndsbreddeovervåking
 newbw_mailout=Ta med utgående e-post i båndbreddebruk?
 newbw_mailall=Ta med videresendt e-post i båndbredde-bruk?
+
 newframe_title=Ramme-videresending HTML
 newframe_ecannot=Du har ikke lov til å redigere HTML-malen for ramme-videresending
 newframe_desc=Bruk dette skjemaet til å redigere mal for HTML-siden som vil bli brukt av ramme-videresendte nettsteder. Følgende erstatninger vil bli gjort når siden opprettes fra malen :
+
 frame_title=Innstillinger for videresendings-ramme
 frame_header=Innstillinger for generering av HTML for ramme-videresending
 frame_enabled=Ramme-videresending aktivert?
@@ -2773,14 +2833,17 @@ frame_desc=Her kan du oppdatere ramme-videresendings filen $1 for denne virtuell
 frame_err=Kunne ikke lagre endringer for ramme-videresending
 frame_eurl=Manglende eller ugyldig URL
 frame_gen=Re-genererer HTML for ramme-videresending ..
+
 proxy_title=Nettsted proxy innstillinger
 proxy_enabled=Proxying aktivert?
 proxy_url=Proxy til URL
 proxy_header=Innstillinger for proxying til annet nettsted
 proxy_desc=Dette skjemaet kan brukes til å aktivere og konfigurere URLen som alle forespørsler til dette nettstedet, videresendes til.
+
 expframe_title=HTML for videresendings-ramme
 expframe_desc=Dette skjemaet kan brukes til å manuelt oppdatere ramme-videresendings filen $1 for denne virtuelle tjeneren.
 expframe_ewrite=Kunne ikke skrive ramme-videresendings fil $1 som bruker $2 : $3
+
 newtmpl_title=Tjener maler
 newtmpl_name=Mal
 newtmpl_skel=Skal/mal katalog
@@ -2799,6 +2862,7 @@ newtmpl_scripts=Script
 newtmpl_delete=Slett valgte maler
 newtmpl_created=Opprettet
 newtmpl_init=Virtualmin installering
+
 tmpl_title1=Opprett tjener-mal
 tmpl_title2=Rediger tjener maler
 tmpl_title3=Klon tjenermal
@@ -3124,6 +3188,7 @@ tmpl_autoconfignone=Automatisk generert
 tmpl_eautoconfig=XML for Thunderbird autokonfigurasjon mangler en &lt;clientConfig&gt; tag.
 tmpl_outlook_autoconfig=XML for Outlook autokonfigurasjon
 tmpl_outlook_eautoconfig=XML for Thunderbird autokonfigurasjon mangler en &lt;Autodiscover&gt; tag.
+
 newplugin_title=Tilleggsmoduler
 newplugin_desc=Tillegg er Webmin moduler som leverer ekstra tjener- og postboks-funksjoner for Virtualmin. Til forskjell fra kjerne-funksjonene, kan disse installeres separat, og utvikles av tredjeparts utviklere.
 newplugin_desc3=Bare de tilleggene som er huket av i listen nedenfor er aktive for øyeblikket. Så snart et tillegg er aktivert kan funksjonene de inneholder velges når du oppretter eller redigerer en virtuell tjener.
@@ -3140,6 +3205,7 @@ newplugin_count=Domener
 newplugin_acts=Handlinger
 newplugin_conf=Konfigurer
 newplugin_open=Åpne
+
 bwgraph_title=Båndbreddebruk
 bwgraph_none=Ingen statistikk for båndbreddebruk er samlet inn enda.
 bwgraph_mode=Visningsmodus:
@@ -3158,8 +3224,10 @@ bwgraph_mago_month=Vis statistikk for måned:
 bwgraph_mago_year=Vis statistikk for år:
 bwgraph_mago_=Vis statistikk for periode:
 bwgraph_mok=Vis
+
 plugconfig_title=Tillegg konfigurasjon
 plugconfig_dir=For tillegg $1
+
 newfields_title=Egendefinerte felt
 newfields_descr=Dette skjemaet kan brukes til å opprette ekstra felt som vises når du oppretter og redigerer virtuelle tjenere.
 newfields_name=Feltnavn
@@ -3182,14 +3250,17 @@ newfields_visible=Synlig for
 newfields_visible0=Alle brukere
 newfields_visible1=Bare redigerbar av master admin
 newfields_visible2=Bare master admin
+
 ldap_emod=Mangler Perl modulen $1 som er nødvendig for tilkobling til LDAP
 ldap_econn=Kunne ikke koble til LDAP tjener $1 port $2
 ldap_elogin=Kunne ikke bind til LDAP tjener $1 som $2 : $3
+
 mail_system_0=Postfix
 mail_system_1=Sendmail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
+
 databases_title=Rediger databaser
 databases_indom=$1 databaser i domene $2
 databases_hosted=Alle databaser på dette systemet kjøres på MySQL tjeneren $1.
@@ -3238,6 +3309,7 @@ databases_hosts_fmt=Hvert vertsnavn eller IP må angis på adskilte linjer.
 databases_ierr=Kunne ikke importere databaser
 databases_eimysql=Databasen $1 er intern for MySQL
 databases_eipostgres=Databasen $1 er en PostgreSQL mal
+
 database_title1=Opprett database
 database_title2=Rediger database
 database_header=Database detaljer
@@ -3265,6 +3337,7 @@ database_collate=Sorteringsoppsett for nye databaser
 database_encoding=Tegnkoding for ny database
 database_opts=Ekstra innstillinger for $1
 database_edbdef=Du har ikke lov til å slette standard databasen for domenet
+
 vfile_title=Rediger Autoresponder fil
 vfile_ecannot=Du har ikke lov til å redigere autoresponder filer
 vfile_desc=Bruk tekstområdet nedenfor for å redigere autoresponder meldingen i $1.
@@ -3283,11 +3356,13 @@ vfile_etime=Manglende eller ugyldig tid å huske avsender
 vfile_enum=Manglende eller ugyldig antall svar å sende
 vfile_edir=Manglende eller ikke-eksisterende logg-katalog
 vfile_eother=Manglende Fra: adresse for svar
+
 reemail_title=Send registrerings e-post på nytt
 reemail_dis=Registrerings e-post kan ikke sendes til denne tjenerens eier, siden den er deaktivert i tjenerens mal.
 reemail_desc=Denne siden kan brukes til å sende på nytt den meldingen som opprinnelig ble sendt når den virtuelle tjeneren ble opprettet.
 reemail_to=Tjener-eiers e-post adresse:
 reemail_ok=Send nå
+
 newips_title=Endre IP adresser
 newips_ecannot=Du har ikke lov til å endre IP adresser
 newips_desc=Denne siden lar deg endre IP-adressen til alle ikke-private IP virtuelle tjenere som bruker en spesifikk adresse. Dett bør gjøres når du har oppdatert systemets primære IP-adresse.
@@ -3308,6 +3383,7 @@ newips_sel=Kun valgte ..
 newips_also=Globale innstillinger som skal oppdateres
 newips_masterip=Slave DNS sone master IP adresse
 newips_slaves=Gjenoppretter slave DNS-soner for å endre master IP-adresse fra $1 til $2 ..
+
 newip_title=Endre IP adresse
 newip_header=Ny virtuell IP adresse
 newip_ecannot=Du har ikke lov til å endre IP adressen for denne tjeneren
@@ -3341,6 +3417,7 @@ newip_virtaddr=Behold privat adresse
 newip_virtaddr2=Tildel privat adresse
 newip_virtaddr3=Bruk privat adresse
 newip_convert=Konverter privat adresse til delt
+
 newip_new=Ny IP adresse
 newip_err=Kunne ikke endre IP adresse
 newip_eip=Manglende eller ugyldig ny adresse
@@ -3351,6 +3428,7 @@ newip_eclash6=Den virtuelle tjeneren $1 bruker allerede den nye IPv6 adressen
 newip_edefault=Den nye adressen er den samme som standardadressen for ikke-virtuelle tjenere
 newip_eused=Den nye adressen er allerede i bruk av systemet
 newip_eused6=Den nye IPv6 adressen er allerede i bruk av systemet
+
 newresels_title=Forhandler konti
 newresels_intro=En forhandler er en bruker som kan opprette nye overordnede Virtualmin tjenere, men underlagt de begrensinger som er definert av master administratoren. Videre begrensinger kan så gjøres gjeldende på total diskbruk, postbokser og databaser som en forhandlers tjenere kan tildeles.
 newresels_name=Brukernavn
@@ -3365,11 +3443,13 @@ newresels_return=forhandler liste
 newresels_delete=Slett valgte forhandlere
 newresels_disable=Lås valgte
 newresels_enable=Lås opp valgte
+
 dresels_err=Kunne ikke slette forhandlere
 dresels_err2=Kunne ikke låse forhandlere
 dresels_err3=Kunne ikke låse opp forhandlere
 dresels_enone=Ingen valgt
 dresels_egone=En av de valgte forhandlerene finnes ikke
+
 resel_title1=Opprett forhandler
 resel_title2=Rediger forhandler
 resel_header=Forhandler kontodetaljer
@@ -3450,6 +3530,7 @@ resel_domsopts=Ikke-eide domener
 resel_domssel=Eid av denne forhandleren
 resel_equnlimit=Den virtuelle tjeneren $1 jkan ikke tilordnes denne forhandleren, siden den har ubegrenset dik-kvote, men forhandleren har en grense,
 resel_ebwunlimit=Den virtuelle tjeneren $1 jkan ikke tilordnes denne forhandleren, siden den har ubegrenset båndbredde, men forhandleren har en grense,
+
 licence_err=Det ble funnet et problem med Virtualmin lisensen din :
 licence_soon=Merk - din Virtualmin lisens vil utløpe om $1 dager.
 licence_soon2=Merk - din Virtualmin lisens vil utløpe om $1 timer.
@@ -3475,8 +3556,10 @@ licence_fixlinks=Virtualmin har oppdaget at $1 domener på systemet ditt er konf
 licence_fixlinks2=ADVARSEL : Å fikse denne innstillingen vil bryte alle virtuelle tjenere som ha innhold eller applikasjoner under symbolske lenker til andre kataloger.
 licence_fixlinksok=Fiks tillatelser for symbolske lenker
 licence_fixlinksignore=Tillat usikre symbolske lenker
+
 config_deftheme=Global Webmin standard
 config_oldtheme=Gammelt Webmin tema
+
 scripts_title=Installer script
 scripts_longdesc=Beskrivelse
 scripts_overall=Rangering
@@ -3650,6 +3733,7 @@ scripts_packagecount=.. installerte $1 nye pakker
 scripts_packageall=.. alle pakker er allerede installert
 scripts_abandoned2=ADVARSEL : Dette scriptet støttes ikke lenger av dets opprinnelige forfatter.
 scripts_abandoned1=ADVARSEL : Versjon $1 av dette scriptet støttes ikke lenger av dets opprinnelige forfatter.
+
 newnotify_title=E-post tjener eiere
 newnotify_desc=Denne siden kan brukes til å sende e-post til eierne av de valgte virtuelle tjenerene, f.eks. for å gi beskjed om nedetid, oppgraderinger og andre tjeneste-endringer. Følgende erstatninger kan brukes i meldingsteksten og i emnet:
 newnotify_header=Innstillinger for e-post til tjener-eiere
@@ -3669,6 +3753,7 @@ newnotify_attach=Valgfri vedlagt fil
 newnotify_admins=Send også e-post til ekstra administratorer i valgte domener?
 newnotify_users=Send også e-post til postbokser i valgte domener?
 newnotify_nomany=Bare send e-post til hver domene-eier en gang
+
 mailusers_title=E-post til alle postbokser
 mailusers_desc=Dette skjemaet kan brukes til å sende e-post til alle postbokser i dette domenet, eller til de du velger. Følgende erstatninger kan brukes i meldingsteksten og i emnet:
 mailusers_header=Innstillinger for e-post til alle postbokser
@@ -3677,16 +3762,19 @@ mailusers_all=Alle
 mailusers_sel=Kun valgte ..
 mailusers_err=Kunne ikke sende e-post til postbokser
 mailusers_eto=Ingen postbokser valgt
+
 view_title=Detaljer for virtuell tjener
 view_title2=Detaljer for virtuell under-tjener
 view_title3=Detaljer for alias tjener
 view_title4=Detaljer for virtuelt under-domene
 view_features=Aktiverte funksjoner
 view_return=tjener detaljer
+
 summary_title=Virtuell tjener oversikt
 summary_title2=Virtuell under-tjener oversikt
 summary_title3=Alias-tjener oversikt
 summary_title4=Virtuelt under-domene oversikt
+
 migrate_title=Migrer virtuell tjener
 migrate_desc=Denne siden lar deg opprette en ny virtuell tjener ved å migrere en sikkerhetskopi-fil opprettet av et konkurrerende produkt. Konfigurasjon for alle støttede funksjoner vil bli hentet fra sikkerhetskopien, og konvertert for bruk av Virtualmin. Alt innhold i domenets katalog vil bli kopiert til hjemmekatalogen til den nye brukeren.
 migrate_file=Kilde backup-fil
@@ -3734,6 +3822,7 @@ migrate_downloaded=.. lastet ned $1
 migrate_validating=Validerer migreringsfil ..
 migrate_edownload=.. nedlasting feilet : $1
 migrate_evalidate=.. validering feilet : $1
+
 newscripts_title=Script installerere
 newscripts_desc=Her kan du legge til script installerere opprettet av andre leverandører, og kontrollere hvilke script som er tilgjengelige for domene-eiere.
 newscripts_header=Legg til script installerer
@@ -3808,6 +3897,7 @@ newscripts_elnone=Ingen script valgt
 newscripts_desc6=Denne fanen viser alle script som er installert på alle virtuelle tjenere på dette systemet. For å oppgradere eller avinstallere et enkelt script klikker du på scriptets navn i listen.
 newscripts_dom=Domenenavn
 newscripts_noneyet=Ingen script er installert på noen virtuelle tjenere enda.
+
 addscripts_err=Kunne ikke legge til script installer
 addscripts_elocal=Lokal fil finnes ikke
 addscripts_eupload=Ingen fil valgt for opplasting
@@ -3818,6 +3908,7 @@ addscripts_title=Legg til Script installerer
 addscripts_done=$1 script installerere ble lagt til fra den angitte filen
 addscripts_done1=Script installereren $1 ble lagt til fra den angitte filen
 addscripts_enone=Den angitte filen inneholder ingen script installerere!
+
 sysinfo_apache=Apache versjon
 sysinfo_bind=BIND versjon
 sysinfo_postfix=Postfix versjon
@@ -3835,9 +3926,11 @@ sysinfo_os=Operativsystem
 sysinfo_perl=Perl versjon
 sysinfo_perlpath=Sti til Perl
 sysinfo_php=PHP versjon
+
 remote_ecannot=Du har ikke lov til å kjøre eksterne kommandoer
 remote_eprogram=Ugyldig eksternt program navn
 remote_eprogram2=Eksternt program $1 finnes ikke
+
 newquotas_title=Overvåking av disk-kvoter
 newquotas_ecannot=Du har ikke lov til å sette opp overvåking av disk-kvote
 newquotas_desc=Denne siden lar deg sette opp automatisk e-post beskjed når en virtuell tjener overskrider eller nærmer seg diskkvoten sin. Siden gruppe-kvoter er aktivert, kan dette bare skje når en tjener har for mye data i en av dens databaser, siden databasestørrelser ikke kontrolleres av Unix diskkvoter.
@@ -3868,6 +3961,7 @@ newquotas_mailbox=Sjekk også kvoter for e-post og FTP brukere
 newquotas_mailbox_send=Beskjed til e-post og FTP brukere?
 newquotas_users=Gi også beskjed til administratorer hvem som er over kvoten?
 newquotas_msg=Mal for e-post til e-post og FTP brukere
+
 mass_title=Endre flere brukere
 mass_desc=Denne siden lar deg endre valgte innstillinger for de $1 valgte brukerne i denne virtuelle tjeneren.
 mass_header=Brukerinnstillinger som skal oppdateres
@@ -3910,6 +4004,7 @@ mass_eplain=.. ikke mulig for denne brukertypen.
 mass_disable1=.. aktivert bruker.
 mass_disable2=.. deaktivert bruker.
 mass_updateemail=Send e-post til oppdaterte brukere?
+
 defaults_title=Rediger standardverdier for brukere
 defaults_header=Standardverdier for nye brukere på denne virtuell tjeneren
 defaults_quota=Hjemmekatalog kvote
@@ -3921,6 +4016,7 @@ defaults_equota=Manglende eller ugyldig hjemmekatalog kvote
 defaults_emquota=Manglende eller ugyldig epost-fil kvote
 defaults_eqquota=Manglende eller ugyldig e-post tjener kvote
 defaults_below=Definert nedenfor ..
+
 links_dns=DNS domene
 links_mysql=MySQL database
 links_mysqls=MySQL databaser
@@ -3938,6 +4034,7 @@ links_elog=Apache feillogg
 links_flog=ProFTPd logg
 links_phpini=PHP konfigurasjon
 links_phpini2=PHP $1 konfigurasjon
+
 massscript_err=Kunne ikke oppgradere script
 massscript_enone=Ingen virtuelle tjenere valgt
 massscript_enone2=Ingen av de valgte tjenerene har scriptet installert
@@ -3957,6 +4054,7 @@ massscript_utype=Handling
 massscript_upgrade=Oppgrader
 massscript_update=Oppdater
 massscript_ok=Oppgrader script nå
+
 massdelete_title=Slett virtuelle tjenere
 massdelete_rusure=Er du sikker på at du ønsker å slette de $1 valgte tjenerene? $2 med data i deres hjemmekataloger vil bli slettet.
 massdelete_err=Kunne ikke slette virtuelle tjenere
@@ -3967,6 +4065,7 @@ massdelete_dbs=$1 databaser som inneholder $2 med data vil også bli slettet.
 massdelete_ok=Slett tjenere nå
 massdelete_doms=Tjenere som skal slettes: $1
 massdelete_doing=Sletter tjener $1 ..
+
 massdomains_title=Oppdater virtuelle tjenere
 massdomains_headerq=Kvote og båndbredde-endringer
 massdomains_headerf=Aktiverte funksjonsendringer
@@ -4026,6 +4125,7 @@ massdomains_enaerr=Kunne ikke aktivere tjenere
 massdomains_enarusure=Er du sikker på at du ønsker å aktivere de $1 valgte tjenerene? De vil bli satt tilbake til den tilstanden de var i før de ble deaktivert.
 massdomains_enaok=Aktivere tjenere nå
 massdomains_enadoms=Tjenere som skal aktiveres: $1
+
 newmxs_title=Sekundære e-post tjenere
 newmxs_header=Automatiske sekundære e-post tjenere
 newmxs_servers=Tjenere smo skal settes opp som sekundære MX tjenere
@@ -4053,6 +4153,7 @@ newmxs_removing=Fjerner sekundært domene på $1 ..
 newmxs_syncing=Oppdaterer tillatte postbokser for videresending ..
 newmxs_esynced=.. noen feilet : $1
 newmxs_synced=.. ferdig $1
+
 ddatabases_title=Slett databaser
 ddatabases_edb=$1 database $2 finnes ikke lenger!
 ddatabases_edbdef=Du har ikke lov til å fjerne standard $1 database $2
@@ -4062,6 +4163,7 @@ ddatabases_dbs=Databaser som skal slettes: $1
 ddatabases_err=Kunne ikke slette databaser
 ddatabases_enone=Ingen valgt
 ddatabases_ok=Slett nå
+
 admins_title=Ekstra administratorer
 admins_name=Admin brukernavn
 admins_desc=Beskrivelse
@@ -4073,6 +4175,7 @@ admins_ecannot=Du har ikke lov til å administrere ekstra administratorer
 admins_return=liste over ekstra administratorer
 admins_delete=Slett valgte administratorer
 admins_more=$1 mer ..
+
 admin_title1=Opprett Ekstra Administrator
 admin_title2=Rediger ekstra administrator
 admin_header=Detaljer for ekstra administrator
@@ -4097,9 +4200,11 @@ admin_doms=Administrators virtuelle tjenere
 admin_doms1=Alle eid av topp-nivå tjener
 admin_doms0=Kun de som er valgt nedenfor ..
 admin_edoms=Det ble ikke valgt noen tjenere som skulle tillates
+
 dadmins_err=Kunne ikke slette ekstra administratorer
 dadmins_enone=Ingen valgt
 dadmins_egone=Administrator finnes ikke lenger
+
 move_title=Flytt virtuell tjener
 move_ecannot=Du har ikke lov til å flytte denne tjeneren
 move_ecannot2=Du har ikke lov til å flytte et domene til denne tjeneren
@@ -4120,6 +4225,7 @@ move_newpass=Passord dersom det konverteres til overordnet
 move_failed=.. feilet! Sjekk feilmeldingene ovenfor for å finne årsaken
 move_euserclash=En bruker med navn $1 finne allerede i den virtuelle tjeneren som blir konvertert
 move_euserclash2=En bruker med navn $1 finnes allerede
+
 newvalidate_title=Valider virtuelle tjenere
 newvalidate_ecannot=Du har ikke lov til å validere tjenere
 newvalidate_header=Innstillinger for tjener-validering
@@ -4149,6 +4255,7 @@ newvalidate_desc3=Denne siden lar deg fikse fil-eierskap på noen eller alle vir
 newvalidate_fixservers=Virtuelle tjenere som skal fikses
 newvalidate_fix=Fiks tillatelser nå
 newvalidate_header3=Innstillinger for tillatelses-fiks
+
 validate_edir=Hjemmekatalogen $1 finnes ikke
 validate_ediruser=Hjemmekatalogen $1 er eid av $2 i stedet for $3
 validate_edirgroup=Hjemmekatalogen $1 er eid av gruppen $2 i stedet for $3
@@ -4220,6 +4327,7 @@ validate_espamcall=Procmal konfigurasjonsfilen $1 kaller ikke SpamAssassin
 validate_evirus=ClamAV kalles ikke i tjenerens procmaikl konfigurasjonsfil
 validate_estatusweb=Ingen status monitor for nettstedet funnet
 validate_estatusssl=Ingen status monitor for SSL nettstedet funnet
+
 tscripts_title=Mal-script installerere
 tscripts_sub=For mal $1
 tscripts_what=Script som skal installeres for nye virtuelle tjenere:
@@ -4240,6 +4348,7 @@ tscripts_eversion=Manglende eller ugyldig versionsnummer i rad $1
 tscripts_edb=Manglende eller ugyldig databasenavn i rad $1
 tscripts_edb2=Databasenavn i rad $1 inneholder ikke noen erstatninger (som ${DB})
 tscripts_enone=Ingen mail-script angitt
+
 spam_title=Levering av søppelpost og virus
 spam_ecannot=Du har ikke lov til å konfigurere spam- og virus-levering
 spam_virus=Mål for virus meldinger
@@ -4289,6 +4398,7 @@ spam_prov=Cloudmin tjenester system $1
 spam_exitcode=Når en over-kvoten bruker mottar e-post
 spam_bounce=Send tilbake til avsender
 spam_queue=Legg i kø for levering seinere
+
 cat_objects=Tjener objekter
 cat_server=Tjener konfigurasjon
 cat_admin=Administrasjonsinnstillinger
@@ -4306,6 +4416,7 @@ cat_email=E-post meldinger
 cat_ip=Adresser og nettverk
 cat_check=Begrensinger og validering
 cat_custom=System tilpassing
+
 pass_title=Endre passord
 pass_ecannot=Du har ikke lov til å endre passord for dette domenet
 pass_ecannot2=Du må angi et domene som passordet skal endres for
@@ -4322,11 +4433,14 @@ pass_eadmin=Kunne ikke finne administrator!
 pass_changing=Endrer forhandler passord ..
 pass_changing2=Endrer administrator passord
 pass_hashpass=Lagre kun hashede passord for dette domenet?
+
 dbname_err=Kunne ikke endre database brukernavn
 dbname_euser=Manglende eller ugyldig brukernavn
 dbname_esame=Gamle og nye brukernavn er identiske
 dbname_eclash=En databasebruker med samme navn finnes allerede
+
 dbpass_err=Kunne ikke endre databasepassord
+
 cmass_title=Opprett tjenere i bunke
 cmass_ecannot=Du har ikke lov til å opprette tjenere fra en batch fil
 cmass_header=Opprett flere tjenere fra batchfil $1
@@ -4365,6 +4479,7 @@ cmass_eipmust=Automatisk IP tildeling er obligatorisk for denne malen
 cmass_emustparent=Du har ikke lov til å opprette tjenere på topp-nivp - du må oppgi et overordnet domene.
 cmass_ecanparent=Du har ikke lov til å administrere overordnet virtuell tjener $1
 cmass_eparpar=Overordnet tjener $1 er ikke en topp-nivå tjener
+
 umass_title=Bunke-opprett brukere
 umass_header=Opprett flere e-post og FTP brukere fra bunkefil
 umass_err=Kunne ikke masse-opprette brukere
@@ -4388,6 +4503,7 @@ umass_separator=Bunke feiltskilletegn
 umass_separatorcolon=Kolon :
 umass_separatorcomma=Komma ,
 umass_separatortab=Tab
+
 amass_title=Batch opprett aliaser
 amass_header=Opprett flere e-post aliaser fra batch fil
 amass_help=Denne siden lar deg opprette flere e-post aliaser på en gang fra en tekstfil, på følgende format (les hjelpesiden for denne siden for mer info):
@@ -4405,6 +4521,7 @@ amass_ebounce=Bounce-destinasjon kan ikke kombineres med noen andre
 amass_done=Opprettet e-post alias $1
 amass_eclash=Et alias med samme navn finnes allerede
 amass_eunknown=Ukjent alias mål $1
+
 massu_title=Avinstaller script
 massu_err=Kunne ikke avinstallere script
 massu_enone=Ingen valgt
@@ -4412,6 +4529,7 @@ massu_rusure=Er du sikker på at du ønsker å avinstallere de $1 valgte scripte
 massu_rusuredb=Data fra $1 databaser vil også bli slettet.
 massu_rusurehome=Siden ett av scriptene er installert i den virtuelle tjenerens topp-mivå web-katalog, vil <b>alle</b> filer uder <tt>$1</tt> bli slettet når det avinstalleres!
 massu_sel=Valgte script: $1
+
 usage_title=Diskbruk
 usage_summaryheader=Oversikt over diskbruk og grenser for denne virtuelle tjeneren.
 usage_quota=Disk-kvote
@@ -4439,11 +4557,13 @@ usage_tabhomes=Hjemmekatalog
 usage_tabusers=Per bruker
 usage_tabsubs=Per under-tjener
 usage_tabdbs=Per database
+
 webmin_alog=Apache brukslogg for $1
 webmin_elog=Apache feillogg for $1
 webmin_flog=ProFTPd logg for $1
 webmin_phpini=PHP konfigurasjon for $1
 webmin_phpini2=PHP $2 konfigurasjon for $1
+
 newquotacheck_title=Sjekk diskkvoter
 newquotacheck_ecannot=Du har ikke tilgang til å sjekke diskkvoter.
 newquotacheck_header=Innstillinger for sjekk av disk-kvote
@@ -4458,6 +4578,7 @@ newquotacheck_ok=Sjekk nå
 newquotacheck_enone=Ingen filsystemer valgt!
 newquotacheck_udoing=Sjekker bruker-kvoter på $1 ..
 newquotacheck_gdoing=Sjekk gruppe-kvoter på $1 ..
+
 phpmode_title=Nettsted innstillinger
 phpmode_ecannot=Du har ikke lov til å konfigurere innstillinger for nettsted for denne virtuelle tjeneren
 phpmode_header=Nettsted og PHP innstillinger
@@ -4521,6 +4642,7 @@ phpmode_ehtmldir=Manglende eller ugyldig nettsted underkatalog for dokumenter
 phpmode_ehtmldir2=Nettstedets dokument underkatalog kan ikke starte eller slutte med /
 phpmode_ehtmldir3=Nettstedets dokument underkatalog kan ikke kan ikke inneholde ..
 phpmode_ehtmldir4=Nettstedets dokument underkatalog kan ikke være under <tt>domains</tt>, siden den katalogen er reservert for under-tjenere
+
 spf_title=DNS innstillinger
 spf_ecannot=Du har ikke lov til å redigere DNS innstillinger
 spf_enable=Aktiverer SPF ..
@@ -4550,6 +4672,7 @@ spf_default=Samme som faktisk adresse ($1)
 spf_default2=Samme som faktisk adresse
 spf_public=DNSSEC offentlig nøkkel
 spf_private=DNSSEC privat nøkkel
+
 s3_emodule=Perl modulen $1 som er nødvendig for kommunikasjon med Amazons S3 tjeneste, er ikke installert
 s3_elist=Kunne ikke liste S3 buckets : $1
 s3_elistfiles=Kunne ikke liste S3 filer : $1
@@ -4562,14 +4685,17 @@ s3_elist2=Kunne ikke liste S3 bucket : $1
 s3_einfo2=Kunne ikke lese $1 : $2
 s3_eputacl=Kunne ikke lagre bucket ACL : $1
 s3_eputlifecycle=Kunne ikke lagre bucket livssyklus : $1
+
 tdelete_err=Kunne ikke slette maler
 tdelete_enone=Ingen valgt
 tdelete_title=Slett tjener maler
 tdelete_warn=Er du sikker på at du ønsker å slette følgende valgte tjener-maler : $1
 tdelete_confirm=Slett maler
 tdelete_users2=De brukes for øyeblikket av virtuelle tjenere : $1
+
 switch_ecannot=Du har ikke lov til å bytte til admin for dette domenet
 switch_eadmin=Den angitte ekstra administratoren finnes ikke!
+
 newlinks_title=Egendefinerte lenker
 newlinks_descr=Dette skjemaet kan brukes til å opprette en lenke som er tilgjengelig i venstre meny når en virtuell tjener velges. Følgende erstatninger kan brukes i URL og i lenketittelen:
 newlinks_desc=Lenke tittel
@@ -4596,6 +4722,7 @@ newlinks_any=Alle
 newlinks_add=Legg til ny egendefinert lenke.
 newlinks_none=Ingen egendefinerte lenker er definert enda.
 newlinks_return=egendefinerte lenker
+
 elink_title1=Opprett egendefinert lenke
 elink_title2=Rediger egendefinert lenke
 elink_header1=Detaljer for egendefinert lenke
@@ -4610,6 +4737,7 @@ elink_feature=Virtuelle tjenere med funksjon
 elink_err=Kunne ikke lagre egendefinert lenke
 elink_edesc=Manglende lenketittel
 elink_eurl=Manglende eller ugyldig URL - ingen mellomrom er tillatt
+
 postsave_title=Virtuell tjener endret
 postsave_done=Den virtuelle tjeneren $1 er oppdatert. Bruk lenkene nedenfor for å fortsette med administrasjon av den.
 postsave_edit=Rediger innstillinger for virtuell tjener.
@@ -4618,6 +4746,7 @@ postsave_users=Administret e-post og FTP brukere.
 postsave_aliases=Administrer e-post aliaser og autosvar.
 postsave_databases=Administrer og opprett databaser.
 postsave_index=Vis alle dine Virtualmin virtuelle tjenere.
+
 showpass_title=Virtuell tjener passord
 showpass_user=Administrasjons-bruker
 showpass_pass=Administrasjonspassord
@@ -4627,6 +4756,7 @@ showpass_ecannot=Du har ikke lov til å se passord for virtuelle tjenere
 showpass_egone=Bruker finnes ikke!
 showpass_dbuser=Brukernavn for $1
 showpass_dbpass=Passord for $1
+
 phpver_title=PHP versjoner
 phpver_dir=Nettsted underkatalog
 phpver_ver=Versjon
@@ -4640,6 +4770,7 @@ phpver_err=Kunne ikke lagre PHP versjoner
 phpver_enewdir=Ugyldig nettsted underkatalog - må være lig <tt>myapp</tt> eller <tt>programs/myapp</tt>
 phpver_derr=Kunne ikke fjerne PHP versjoner
 phpver_enone=Ingen valgt
+
 html_title=Rediger websider
 html_edit=Rediger eksisterende fil:
 html_editok=Rediger
@@ -4662,11 +4793,13 @@ html_upload=Last opp fil:
 html_uploadok=Last opp
 html_apply=Bruk innholdsstil:
 html_styleok=Erstatt filer
+
 upload_err=Kunne ikke laste opp fil
 upload_enone=Ingen fil valgt for opplasting
 upload_enone2=Ikke noe filnavn funnet!
 upload_title=Opplastet fil
 upload_done=Filen $1 på totalt $2 har blitt lastet opp til din nettside-katalog
+
 sharedips_title=Delte IP adresser
 newsharedips_title=Delte IP adresser
 sharedips_header=IP adresser delt av virtuelle tjenere
@@ -4692,6 +4825,7 @@ sharedips_missing=Overordnet grensesnitt $1 finnes ikke!
 sharedips_eboot=Kunne ikke finne oppstarts-konfigurasjon for IP adresse
 sharedips_ebootreal=IP adresse er ikke virtuell
 sharedips_eactives=Kunne ikke finne aktiv konfigurasjon for IP-adresse
+
 newdynip_title=Dynamisk IP oppdatering
 newdynip_enabled=Dynamisk oppdatering aktivert?
 newdynip_service=Dynamisk DNS tjeneste
@@ -4714,7 +4848,9 @@ newdynip_off=Dynamisk IP oppdatering er deaktivert. Endringer på systemets IP a
 newdynip_never=Ikke oppdatert enda
 newdynip_notify=Send beskjeder om IP oppdateringer til
 newdynip_none=Ingen
+
 newdynip_eext=Klarte ikke å finne ut eksternt synlig IP-adresse
+
 dynip_dyndns=DynDNS
 style_title=Bruk innholdsstil
 style_rusure=Er du sikker på at du ønsker å erstatte web-sidene for denne virtuelle tjeneren med de som genereres av innsholdsstilen  $1?
@@ -4723,6 +4859,7 @@ style_content=Tekst for initielt nettsted-innhold
 style_ok=Bruk stil
 style_doing=Erstatter nettstedets innhold med stilen $1 ..
 style_egone=Stilen finnes ikke eller den er ikke tilgjengelig
+
 newstyles_title=Innholdsstiler
 newstyles_desc1=Her kan du  installere stiler laget av tredje-parts utviklere.
 newstyles_header=Installer ny stil
@@ -4746,6 +4883,7 @@ newstyles_desc3=Velg en tredje-parts innholdsstil som skal fjernes, fra listen n
 newstyles_dstyle=Stil som skal slettes
 newstyles_del=Slett nå
 newstyles_edelete=Valgt innholds-stil finnes ikke lenger!
+
 addstyle_title=Installer stil
 addstyle_err=Kunne ikke installere ny stil
 addstyle_ecomp=Ikke en stilarkiv fil
@@ -4755,9 +4893,11 @@ addstyle_efiles=Stilarkivet inneholder ikke noen filer?
 addstyle_done=Tredje-parts innholdsstil $1 er installert. Når denne brukes av nettsteder, vil den opprette $2 av HTML og bildefiler
 addstyle_ecmd=Utpakkings kommandoen $1 er ikke installert
 addstyle_ecmdfailed=Utpakkingskommando feilet : $1
+
 thumb_estyle=Stilen finnes ikke
 thumb_title=Stil forhåndsvisning
 thumb_ethumb=Innholdsstilen $1 har ikke et forhåndsvisningsbilde
+
 upgrade_title=Oppgrader til Virtualmin Pro
 newupgrade_title=Oppgrader til Virtualmin Pro
 upgrade_desc1=Dersom du er fornøyd med Virtualmin GPL og ønsker å prøve Pro versjonen, kan du bruke denne siden til å oppgradere automatisk. Dette består av følgende steg:
@@ -4798,6 +4938,7 @@ upgrade_update=Oppdaterer tilgjengelige pakker fra APT ..
 upgrade_debs=Oppgraderer Virtualmin Debian pakker : $1
 upgrade_yumclear=Tømmer YUM cacher ..
 upgrade_etypematch=Oppgradering er ikke mulig siden Virtualmins installasjonstype er <tt>$1</tt> mens Webmins er <tt>$2</tt>
+
 maillog_title=Søk i e-post logg
 maillog_desc=Dette skjemaet kan brukes til å søke i e-post loggene etter meldinger som matcher visse betingelser, for å finne ut hva som er skjedd med dem. Alle felt er valgfrie, og vil bli utelatt i søket dersom de er tomme.
 maillog_header=Søkebetingelser
@@ -4834,6 +4975,7 @@ maillog_ok1=Virtualmin har ikke initialisert logg-cache filen for e-post tjenere
 maillog_showspam=Vis søppelpost?
 maillog_showvirus=Vis viruser?
 maillog_bad=Ekskluderinger
+
 viewmaillog_err=Kunne ikke vise loggført melding
 viewmaillog_egone=Ikke lenger i logg!
 viewmaillog_title=Loggførst e-post melding
@@ -4853,6 +4995,7 @@ viewmaillog_file=Full mål-ti
 viewmaillog_relay=Utgående e-post relé
 viewmaillog_status=E-post tjener leveringsstatus
 viewmaillog_size=Meldingsstørrelse
+
 bwreset_title=Beregn båndbredde statistikk på nytt
 bwreset_header=Innstillinger for re-beregning av båndbredde
 bwreset_date=Dato det skal re-beregnes fra
@@ -4874,6 +5017,7 @@ bwreset_doing=Nullstiller båndbredde tellere for valgte tjenere og funksjoner .
 bwreset_done=.. ferdig.
 bwreset_running=Re-genererer båndbredde statistikk fra loggfiler ..
 bwreset_started=.. prosess startet. Dette kan ta flere timer dersom du ha valgt å re-behandle logger for en lang tidsperiode eller for et stort antall domener.
+
 massg_title=Oppgrader script
 massg_rusure=Er du sikker på at du ønsker å oppgradere de $1 valgte scriptene til deres siste versjoner?
 massg_ok=Oppgrader nå
@@ -4883,6 +5027,7 @@ massg_fromto=Oppgraderer fra $1 til $2
 massg_stay=Beholder $1
 massg_doing=Oppgraderer $1 til versjon $2 ..
 massg_edeleted=Script $1 er blitt slettet manuelt og kan derfor ikke oppgraderes!
+
 aedit_title=Rediger aliaser manuelt
 aedit_header=Opprett flere e-post aliaser fra batch fil
 aedit_help=Denne siden lar deg redigere, opprette og slette flere aliaser på en gang,ved å legge hvert alias inn smo en linje med tekst. Hver linje har følgende format (les hjelp for denne siden for mer informasjon):
@@ -4894,6 +5039,7 @@ aedit_doing=Oppdaterer e-post aliaser ..
 aedit_complete=.. done ($1 opprettet, $3 endret, $4 slettet, $2 feil).
 aedit_etwice=Et alias med samme navn er listet mer enn en gang
 aedit_eauto=Automatiske svar kan ikke settes opp når du redigerer aliaser manuelt
+
 exclude_title=Ekskluderte kataloger
 exclude_header=Innstillinger for sikkerhetskopi ekskluderinger
 exclude_dirs=Kataloger under hjemmekatalog som skal hoppes over
@@ -4901,6 +5047,7 @@ exclude_desc=Som standard vil Virtualmin ta med alle data i en tjeners hjemmekat
 exclude_err=Kunne ikke lagre ekskluderte kataloger
 exclude_eabs=Katalog '$1' kan ikke være en absolutt sti
 exclude_edot=Katalog '$1' kan ikke inneholde ..
+
 balancers_title=Proxy stier
 balancers_ecannot=Du har ikke lov til å redigere proxy stier for dette domenet
 balancers_esupport=Domenet eller systemet støtter ikke proxies
@@ -4915,6 +5062,7 @@ balancers_return=liste over proxy stier
 balancers_derr=Kunne ikke slette proxy stier
 balancers_denone=Ingen valgt
 balancers_none2=Ingen proxying
+
 balancer_create=Opprett proxy sti
 balancer_edit=Rediger Proxy sti
 balancer_egone=Den valgte proxy stien finnes ikke lenger.
@@ -4933,6 +5081,7 @@ balancer_eurls=Ingen mål-URLer angitt
 balancer_script=Brukt av script installerer
 balancer_scriptver=Script versjon
 balancer_none=Ikke proxy for denne stien - betjen lokalt i stedet
+
 scriptwarn_header=Følgende script, som administreres av Virtualmin, har nye versjoner tilgjengelig :
 scriptwarn_header2=Følgende scripts, som administreres av Virtualmin, har nye versjoner tilgjengelig, i\nden virtuelle tjeneren $1 :
 scriptwarn_script=Script navn
@@ -4942,6 +5091,7 @@ scriptwarn_dom=Domenenavn
 scriptwarn_where3=Oppgraderinger kan utføres i Virtualmin, på hvert domenes Installer Script side, eller alle på en gang på :\n$1
 scriptwarn_where2=Oppgraderinger kan utføres i Virtualmin, på siden :\n$1
 scriptwarn_subject=Virtualmin script oppgraderinger tilgjengelig
+
 quotawarn_subject=Virtualmin overvåking av brukeres diskkvote
 quotawarn_body=Følgende Virtualmin tjenere har nådd eller er i nærheten av sin tildelte disk-kvote:
 quotawarn_body2=Følgende Virtualmin brukere har nådd eller nærmer seg\nsin disk-kvote:
@@ -4954,6 +5104,7 @@ quotawarn_reached=Nådd $1 %
 quotawarn_over=Over kvote
 quotawarn_suffixdom=Sendt av Virtualmin: $1
 quotawarn_suffixuser=Sendt av Virtualmin: $1
+
 history_title=Systemstatistikk
 history_ecannot=Du har ikke lov til å se historisk systemstatistikk
 history_year=1 år
@@ -5024,6 +5175,7 @@ history_type_email=E-post meldinger
 history_type_cpu=BPU bruk
 history_type_virt=Virtualmin tellere
 history_type_system=System statistikk
+
 sv_title=Spam og virus skanning
 newsv_title=Spam og Virus scanning
 sv_ecannot=Du har ikke lov til å redigere søppelpost- og virus-scanning
@@ -5058,6 +5210,7 @@ sv_title5=Aktiver Spam filtrerings-tjener
 sv_sdisabling=Deaktiverer SpamAssassin filtreringstjener ..
 sv_senabling=Konfigurerer og aktiverer SpamAssassin filtrerings-tjener ..
 sv_swarning=Advarsel! Virtualmin er konfigurert til å bruke tjener-filteret, men SpamAssassin tjener-prosessen kjører ikke lenger
+
 features_title=Funksjoner og tillegg
 newfeatures_title=Funksjoner og tillegg
 features_ecannot=Du har ikke lov til å redigere aktiverte funksjoner
@@ -5069,6 +5222,7 @@ features_desc=Denne siden lar deg velge hvilke kjernefunksjoner og tillegg som e
 features_used=Vis domener
 features_err=Kunne ikke lagre aktiverte funksjoner
 features_return=liste over funksjoner og tillegg
+
 clamd_copyconf=Oppretter ClamAV konfigurasjonsfil $1 ..
 clamd_esrcfile=.. kildefil som passer med $1 ble ikke funnet!
 clamd_esrcalready=.. finnes allerede
@@ -5089,18 +5243,21 @@ clamd_ekillmsg=Kunne ikke stoppe ClamAV antiviruser-tjener prosessene : $1
 spamd_estartmsg=SpamAssassin filter-tjeneren kunne ikke startes
 spamd_estopmsg=SpamAssassin filter-tjeneren kjører ikke
 spamd_ekillmsg=Kunne ikke stoppe SpamAssassin filter tjener prosesser : $1
+
 spamd_boot=Aktiverer SpamAssassin tjener ved oppstart ..
 spamd_start=Starter SpamAssassin tjener ..
 spamd_startfailed=.. kunne ikke starte : $1
 spamd_unboot=Deaktiverer  SpamAssassin tjener ved oppstart ..
 spamd_unbootact=.. ingen oppstartshandling funnet!
 spamd_stop=Stopper  SpamAssassin tjener ..
+
 chain_err=Kunne ikke lagre CA sertifikat
 chain_efile=Sertifikatfil finnes ikke
 chain_ecert=Ugyldig sertifikatfil : $1
 chain_emode1=Du har ikke lov til å velge en annen fil på tjeneren!
 chain_eupload=Ingen opplastet sertifikatfil valgt
 chain_epaste=Det ble ikke skrevet inn noen sertifikat tekst
+
 stopscript_title=Stopp Rails tjener
 stopscript_egone=Script fines ikke lenger!
 stopscript_doing=Stopper Rails tjenerprosess for $1 ..
@@ -5109,6 +5266,7 @@ startscript_title=Start Rails tjener
 startscript_doing=Starter opp Rails tjenerprosess for $1 ..
 startscript_failed=.. feilet : $1
 restartscript_title=Omstart Rails tjener
+
 newshells_title=Egendefinerte skall
 newshells_descr=Her kan du definere hvilke kommandoskall som er tilgjengelige for virtuell-tjener administratorer og e-post/FTP brukere. Egendefinerte kommandoskall brukes ofte til å gi brukere tilgang til FTP, SSH eller andre tjenester.
 newshells_defs=Tilgjengelige skall for admins og postbokser :
@@ -5130,6 +5288,7 @@ newshells_emailboxes=Ingen skall ble valgt for postbokser
 newshells_eownerdef=Du må velge nøyaktig ett skall som standard for domene-administratorer
 newshells_emailboxdef=Du må velge nøyaktig ett skall som standard for postbokser
 newshells_id=Tilgang
+
 shells_mailbox=Kun e-post
 shells_mailbox2=Ingen tilgang
 shells_mailboxftp=E-post og FTP
@@ -5145,12 +5304,15 @@ shells_ftp2=FTP
 shells_ssh=E-post, FTP og SSH
 shells_ssh2=FTP og SSH
 shells_none=&lt;Ingen skall&gt;
+
 nicetime_days=$1 dager, $2 timer, $3:$4 minutter
 nicetime_hours=$1 timer, $2:$3 minutter
 nicetime_mins=$1 minutter, $2 sekunder
 nicetime_secs=$1 sekunder
+
 bcc_epostfix=Det er ikke satt opp noen BCC mapping-fil i din Postfix-konfigurasjon!
 bcc_emailserver=Din e-post-tjener støtter ikke blindkopier
+
 mail_title=E-post innstillinger
 mail_header=E-post relaterte innstillinger for virtuell tjener
 mail_bcc=Blindkopier utgående e-post til
@@ -5171,6 +5333,7 @@ mail_dependent1=Virtuell tjeners adresse $1
 mail_dependenting1=Konfigurerer utgående SMTP tilkoblinger på IP-adresse $1 ..
 mail_dependenting0=Setter tilbakje utgående SMTP tilkoblinger til systemets standardadresse ..
 mail_bccsupport=Ikke for øyeblikket aktivert i din <a href='$1'>Postfix konfigurasjon</a>
+
 nf_header=Følgende nye funksjoner er tilgjengelige i $1 ..
 nf_desc=Funksjon
 nf_html=Beskrivelse
@@ -5180,6 +5343,7 @@ nf_and=$1 og $2
 nf_seen=Skjul nye funksjoner
 nf_try=Prøv ..
 nf_ver=(Versjon $1)
+
 chroot_title=FTP katalogbegrensinger
 newchroot_title=FTP katalogbegrensinger
 newchroot_desc=Denne siden lar deg konfigurere hvilke kataloger brukere som logger inn via FTP, får tilgang til. Begrensingene gjelder for eierne av de valgte virtuelle tjenerene, og alle deres brukere med FTP-tilgang. Tjener-eiere som ikke har noen matchende begrensinger, vil kunne få tilgang til filer utenfor sitt hjemmeområde, men tillatelser vil normalt sett forhindre dem fra tilgang til andre virtuelle tjeneres kataloger.
@@ -5200,6 +5364,7 @@ chroot_eneg=Den virtuelle tjenerens hjemme-katalog innstilling kan ikke velges n
 chroot_edom=Kunne ikke finne virtuell tjener for gruppen $1
 chroot_edir=Manglende eller ugyldig katalog i rad $1
 chroot_saving=Oppdaterer FTP tjener konfigurasjon
+
 res_elinux=Ressurs-begrensinger støttes bare på Linux
 res_elinuxconf=Konfigurasjonsfilen $1 for ressursbegrensinger ble ikke funnet
 res_epamssh=Fant ikke PAM tjenesten for SSH, så verifisering av ressurs-begrensinger er ikke komplett
@@ -5220,6 +5385,7 @@ res_secs=sekunder
 res_time=Maks. CPU-tid per prosess
 res_etime=Manglende eller ugyldig maks. CPU-tid per prosess
 res_etime2=Maks. CPU-tid per prosess må være 1 minutt eller mer
+
 sched_title=Tidsplanlagte sikkerhetskopier
 sched_ecannot=Du har ikke lov til å administrere tidsplanlagte sikkerhetskopier
 sched_yes=Ja, $1
@@ -5243,16 +5409,19 @@ sched_actions=Handlinger
 sched_now=Sikkerhetskopier..
 sched_restore=Gjenopprett..
 sched_return=tidsplanlagte sikkerhetskopier
+
 cron_special=Enkel tidsplan
 cron_complex=Kompleks tidsplan
 cron_cron=Cron spesifikasjon
 cron_title=Velg tidsplan
 cron_ok=OK
 cron_ehidden=Fant ingen kompleks tidsplan
+
 dsched_err=Kunne ikke slette tidsplanlagte sikkerhetskopier
 dsched_enone=Ingen valgt
 dsched_egone=Sikkerhetskopien med ID $1 finnes ikke lenger
 dsched_ecannot=Du har ikke lov til å administrere sikkerhetskopien med ID $1
+
 dbhosts_err=Kunne ikke endre eksterne database-verter
 dbhosts_enone=Ingen vertsnavn eller IP adresser oppgitt
 dbhosts_ehost='$1' er ikke et gyldig vertsnavn eller uttrykk
@@ -5260,6 +5429,7 @@ dbhosts_title=Oppdater databaseverter
 dbhosts_doing=Setter tillatte $1 databaseverter til $2 ..
 dbhosts_failed=.. feilet : $1
 dbhosts_done=.. satt for $1 og andre brukere med databasetilgang.
+
 newglobal_title=Globale variabler
 newglobal_desc=Variablene definert på denne siden kan brukes i alle domene- eller brukernivå-maler i Virtualmin. For å legge til en variabel fyller du ut navnet og verdien i den tomme raden nederst i tabellen. For å fjerne en variabel tømmer du variabelens navnefelt. For å deaktivere en variabel midlertidig tar du vekk haken i kolonnen Aktivert.
 newglobal_ecannot=Du har ikke lov til å redigere globale variabler
@@ -5268,20 +5438,24 @@ newglobal_name=Variabelnavn
 newglobal_value=Variabel verdi
 newglobal_err=Kunne ikke lagre globale variabler
 newglobal_ename=Ugyldig variabelnavn i rad $1 - kun bokstaver, sifre og understreking er tillatt
+
 spamtrap_already=Spam trap aliaser finnes allerede for denne virtuelle tjeneren
 spamtrap_clash=Spam trap aliaser kan ikke opprettes, siden følgende motstridende aliaser allerede finnes : $1
 spamtrap_noaliases=Spam trap aliaser finnes ikke for denne virtuelle tjeneren
+
 unsub_title=Konverter under-domene
 unsub_rusure=Er du sikker på at du ønsker å konvertere dette under-domenet til en under-tjener? Domenets web-innhold vil ikke bli påvirket, men alle DNS oppføringer vil bli flyttet til deres eget domene.
 unsub_ok=Konverter til under-tjener
 unsub_doing=Konverterer $1 til under-tjener ..
 unsub_failed=.. konvertering feilet!
+
 unalias_title=Konverter alias tjener
 unalias_err=Kunne ikke konvertere alias tjener
 unalias_rusure=Er du sikker på at du ønsker å konvertere denne alias virtuelle tjeneren til en under-tjener. Den vil ikke lenger betjener web-sidene for den gamle mål-tjeneren, men kan ha sitt eget web-innhold, egne postbokser og e-post aliaser.
 unalias_ok=Konverter til under-tjener
 unalias_doing=Konverterer $1 til under-tjener ..
 unalias_failed=.. konvertering feilet!
+
 connect_echeck=Kunne ikke teste forbindelse
 connect_eempty=Ingen svar fra forbindelses-sjekk
 connect_ecannot=Du har ikke lov til å sjekke forbindelse for denne vrtuelle tjeneren
@@ -5306,6 +5480,7 @@ cfix_ssl=Forsikre deg om at systemets web-tjener kjører, at port 443 ikke blokk
 cfix_smtptimeout=Sjekk omm brannmuren på systemet ditt blokkerer port 25.
 cfix_smtp=Sjekk at systemets e-post tjener kjører og lytter på det eksterne nettverks-grensesnittet.
 cfix_smtpto=Sjekk at e-post tjeneren din er konfigurert til å motta e-post for dette domenet.
+
 plans_title=Kontoplaner
 newplan_title=Kontoplaner
 plans_name=Plan navn
@@ -5326,6 +5501,7 @@ plans_setdef=Sett standard plan til:
 plans_nodef=Ingen - bruk første i listen
 plans_savedef=Endre standard
 plans_esetdef=Valgt plan finnes ikke eller den er ikke tilgjengelig for deg
+
 plan_title1=Opprett kontoplan
 plan_title2=Rediger kontoplan
 plan_header1=Detaljer for grunnleggende plan
@@ -5347,9 +5523,11 @@ plan_scripts=Tillatte script
 plan_scriptsall=Alle unntatt de som er deaktivert globalt
 plan_scriptsopts=Alle script
 plan_scriptssel=Tillatt
+
 dplans_err=Kunne ikke slette planer
 dplans_enone=Ingen valgt
 dplans_eall=Det må finnes minst én plan
+
 postgrey_title=E-post grålisting
 newpostgrey_title=E-post grålisting
 postgrey_epostfix=Postgrey kan kun brukes sammen med e-post tjeneren Postfix
@@ -5402,6 +5580,7 @@ postgrey_title4=Installer Postgrey
 postgrey_installing=Installerer Postgrey pakken ..
 postgrey_installfailed=.. installasjon feilet!
 postgrey_installed=.. installasjon fullført
+
 editgrey_titleclients=Rediger hvitlistet klient
 editgrey_titlerecipients=Rediger hvitlistet mottaker
 creategrey_titleclients=Ny hvitlistet klient
@@ -5416,8 +5595,10 @@ editgrey_gone=Hvitliste oppføring finnes ikke lenger!
 editgrey_err=Kunne ikke lagre hvitliste oppføring
 editgrey_evalueclients=Manglende eller tilsynelatende ugyldig e-post tjener IP adresse eller vertsnavn
 editgrey_evaluerecipients=Manglende eller tilsynelatende ugyldig mottakers e-post adresse
+
 delgrey_err=Kunne ikke slette hvitliste oppføringer
 delgrey_enone=Ingen valgt
+
 copycert_title=Kopier SSL sertifikat
 copycert_ecannot=Du har ikke lov til å kopiere denne virtuelle tjenerens SSL sertifikat
 copycert_webmindir=Kopierer sertifikat og nøkkel til $1 ..
@@ -5435,6 +5616,7 @@ copycert_ecert=Fant ingen SSL sertifikat data
 copycert_ekey=Fant ingen SSL nøkkel data
 copycert_psaving=Kopierer sertifikat og nøkkel til Postfix filer ..
 copycert_penabling=Aktiverer SSL i Postfix konfigurasjonen ..
+
 wizard_title=Post-installasjons veiviser
 wizard_ecannot=Du har ikke lov til å kjøre post-installasjons-veiviseren
 wizard_next=Neste
@@ -5508,6 +5690,7 @@ wizard_hashpass_mode=Metode for lagring av passord
 wizard_hashpass_mode1=Lagre bare hashede passord
 wizard_hashpass_mode0=Lagre vanlig-tekst passord
 wizard_hashpass_warn=Warning - when hashed passwords are used, password recovery for virtual servers will no longer be possible. In addition, the MySQL password for new servers will different from the administration password, and will be randomly generated.
+
 backuplog_title=Sikkerhetskopi logger
 backuplog_ecannot=Du har ikke tilgang til å se Virtualmin sikkerhetskopi-logger
 backuplog_search=Finn logger som stemmer med
@@ -5526,6 +5709,7 @@ backuplog_doms=$1 domener
 backuplog_part=Delvis
 backuplog_nodoms=Ingen domener
 backuplog_return=liste over sikkerhetskopi-logger
+
 viewbackup_title=Vis sikkerhetskopi-logg
 viewbackup_eid=Manglende eller ugyldig sikkerhetskopi ID
 viewbackup_egone=Loggført sikkerhetskopi finnes ikke!
@@ -5559,6 +5743,7 @@ viewbackup_enc=Kryptert sikkerhetskopi?
 viewbackup_nopro=Ja, men kryptering støttes ikke
 viewbackup_nokey=Jan, men med manglende nøkkel $1
 viewbackup_key=Ja, med nøkkel $1
+
 redirects_title=Nettsted redirigeringer
 redirects_ecannot=Du har ikke lov til å redigere nettsted-redirigeringer for dette domenet
 redirects_eweb=Denne virtuelle tjeneren har ikke noe nettsted
@@ -5573,6 +5758,7 @@ redirects_type=Type
 redirects_alias=Alias til katalog
 redirects_redirect=Rediriger til URL
 redirects_dest=Mål
+
 redirect_egone=Redirigering finnes ikke lenger!
 redirect_create=Opprett nettsted redirigering
 redirect_edit=Rediger nettsted redirigering
@@ -5589,9 +5775,11 @@ redirect_eurl=Manglende eller ugyldig mål URL
 redirect_edir=Manglende eller ikke-absolutt mål-katalog
 redirect_edir3=Mangler mål-katalog $1
 redirect_edir2=Mål-katalog må være under $1
+
 newchangelog_title=Logg for nye funksjoner
 newchangelog_ecannot=Du har ikke lov til å se logg for nye funksjoner
 newchangelog_desc=Denne siden viser alle viktige endringer i alle Virtualmin versjoner installert på systemet ditt, opp til gjeldende versjon.
+
 dkim_title=DomainKeys identifisert e-post
 dkim_title1=Aktiver DomainKeys identifisert e-post
 dkim_title2=Deaktiver DomainKeys identifisert e-post
@@ -5619,10 +5807,12 @@ dkim_extra=Ekstra domener det skal signeres for
 dkim_eextra=Ugyldig ekstra domene $1
 dkim_eexclude=Ugyldig ekskludert domene $1
 dkim_exclude=Signer aldri for domenene
+
 dkim_title4=Installer DKIM
 dkim_installing=Installerer DKIM filter pakke ..
 dkim_installfailed=.. installasjon feilet!
 dkim_installed=.. installasjon fullført
+
 dkim_newkey=Genererer privat nøkkel i filen $1 ..
 dkim_enewkey=.. privat nøkkel feilet : $1
 dkim_pubkey=Trekker ut offentlig nøkkel fra privat nøkkel i $1 ..
@@ -5650,6 +5840,7 @@ dkim_dnsremoved=.. fjernet
 dkim_dnsalreadygone=.. allerede borte
 dkim_records=DNS oppføringer for ekstra domener
 dkim_esize=DKIM nøkkelstørrelse må være et tall på minst 512 bits
+
 newautoconfig_title=E-post klient konfigurasjon
 autoconfig_ecannot=Du har ikke tilgang til å redigere e-post klient konfigurasjon
 autoconfig_header=Innstillinger for klient autokonfigurasjon
@@ -5660,6 +5851,7 @@ autoconfig_edoms=Det finnes ingen virtuelle tjenere med e-post aktivert!
 autoconfig_enable=Aktiverer e-post klient autokonfigurasjon for $1 virtuelle tjenere ..
 autoconfig_disable=Deaktiverer e-post klient autokonfigurasjon for $1 virtuelle tjenere ..
 autoconfig_failed=Feilet for $1 : $2
+
 provision_title=Klient for Cloudmin tjenester
 provision_ecannot=Du har ikke tilgang til å sette opp klient for Cloudmin tjenester
 provision_header=Innstillinger for klient for Cloudmin tjenester
@@ -5706,12 +5898,14 @@ provision_espamtest=.. angitt system kan ikke brukes : $2
 provision_spamgot=.. bruker system $1
 provision_spamunsetup=Stopper bruk av system for søppelpostfiltrering ..
 provision_espamunsetup=.. feilet : $1
+
 provision_emysqldbcheck=Tjenestefeil ved sjekking av MySQL database : $1
 provision_emysqldb=MySQL databasen $1 finnes allerede på tjeneste-verten
 provision_emysqlcheck=Tjenestefeil ved sjekking av MySQL bruker : $1
 provision_emysql=MySQL bruker $1 finnes allerede på tjeneste verten
 provision_ednscheck=Tjeneste-feil ved sjekk av DNS-sone : $1
 provision_edns=DNS sonen $1 finnes allerede på tjeneste verten
+
 records_title=DNS oppføringer
 records_ecannot=Du har ikke tilgang til å redigere DNS oppføringer
 records_name=Oppføring navn
@@ -5763,6 +5957,7 @@ records_comment=Kommentar
 records_manual=Rediger oppføringer manuelt
 records_epost=Oppføringer ble ikke fullstendig slettet : $1
 records_viewdesc=Denne virtuelle tjenerens DNS-domene hostes ikke av ditt Virtualmin system. Dersom domenet hostes andre steder, bør du legge inn oppføringene nedenfor til å forsikre deg om at nettsted og e-post fungerer korrekt.
+
 record_title1=Opprett DNS oppføring
 record_title2=Rediger DNS oppføring
 record_egone=Oppføringen finnes ikke lenger!
@@ -5788,6 +5983,7 @@ record_ecname=Name Alias oppføringen $1 har det samme navnet som en eksisterend
 record_eunder=DNS oppføringen $1 kan ikke redigeres, siden den ikke er under $2
 record_defttl=Standard cache tid
 record_epost=Oppføringen ble ikke fullstendig lagret : $1
+
 clone_err=Kunne ikke klone virtuell tjener
 clone_object=Oppretter innstillinger for ny virtuell tjener
 clone_clash=Ser etter konflikter og avhengighetsproblemer ..
@@ -5865,6 +6061,7 @@ clone_ssl=Kopierer Apache SSL direktiver ..
 clone_newip=IP adresse for klone
 clone_alloc=Tildel ny IP
 clone_vip=Bruk adresse
+
 mrecords_title=Rediger DNS oppføringer
 mrecords_ecannot=Du har ikke tilgang til å redigere DNS oppføringer manuelt
 mrecords_desc=Denne siden lar deg manuelt endre alle DNS-oppføringer i domenet, på BIND konfigurasjonsformat.
@@ -5872,14 +6069,17 @@ mrecords_err=Kunne ikke lagre DNS oppføringer
 mrecords_enone=Ingenting angitt!
 mrecords_evalidate=Validering feilet : $1
 mrecords_validate=Valider nye oppføringer?
+
 mxv_unsupported=Kun Sendmail og Postfix støtter begrensing av videresending
 mxv_rrm=$1 direktivet var ikke satt i Postfix konfigurasjonen
 mxv_eaccess=Søppelpost-kontroll (access_db) funksjonaliteten er ikke aktivert i Sendmail konfigurasjonen.
 mxv_eaccessfile=Søppelpost-kontroll (access_db) filen $1 finnes ikke enda
+
 fixperms_err=Kunne ikke fikse tillatelser
 fixperms_edoms=Ingen virtuelle tjenere valgt
 fixperms_title=Fikser tillatelser
 fixperms_dom=Fikser fil-eierskap og -tillatelser for $1 ..
+
 bkeys_title=Backup krypteringsnøkler
 bkeys_key=GPG nøkkel ID
 bkeys_delete=Slett valgte nøkler
@@ -5901,6 +6101,7 @@ bkeys_eused2=Nøkkelen $2 brukes av en tidsplanlagt sikkerhetskopi til $1
 bkeys_rusure=Er du sikker på at du ønsker å slette de $1 valgte sikkerhetskopi krypteringsnøklene?
 bkeys_rusuerlogs=Disse nøklene er brukt til å kryptere $1 tidligere sikkerhetskopier. Sikkerhetskopiene vi likke kunne gjenopprettes uten disse nøklene.
 bkeys_all=Tillat domeneeiere å bruke nøkkelen?
+
 bkey_create=Opprett krypteringsnøkkel
 bkey_edit=Rediger krypteringsnøkkel
 bkey_ecannot=Du har ikke tilgang til å redigere denne krypteringsnøkkelen
@@ -5935,11 +6136,13 @@ bkey_ok=Slett nå
 bkey_rusuerlogs=Denne nøkkelen har blitt brukt til å kryptere $1 tidligere sikkerhetskopier. Disse vil ikke kunne gjenopprettes uten denne nøkkelen.
 bkey_edescclash=En GPG nøkkel med samme beskrivelse finnes allerede
 bkey_eemailclash=En GPG nøkkel med samme e-post adresse finnes allerede
+
 hashtype_crypt=Unix DES crypt
 hashtype_md5=MD5 hash
 hashtype_unix=System standard hash type
 hashtype_mysql=MySQL passord hash
 hashtype_digest=Web digest autentisering hash
+
 fixsymlinks_title=Fiks tillatelser for symbolske lenker
 fixsymlinks_ecannot=Du har ikke tilgang til å fikse tillatelser på symbolske lenker
 fixsymlinks_doing=Oppdaterer alle virtuelle tjenere for å forhindre usikre symbolske lenker ..
@@ -5952,10 +6155,12 @@ fixsymlinks_doms=Problematiske <tt>.htaccess</tt> filer ble funnet i :
 fixsymlinks_ok=Fiks Aksess filer
 fixsymlinks_htdoing=Fikser innstillinger i <tt>.htaccess</tt> filer ..
 fixsymlinks_htdone=.. fikset $1 filer i $2 domener
+
 fixmodphp_title=Fiks PHP tillatelser
 fixmodphp_ecannot=Du har ikke lov til å fikse PHP tillatelser
 fixmodphp_doing=Oppdaterer alle virtuelle tjenere til å forhindre bruk av mod_php når den er deaktivert ..
 fixmodphp_done=.. fikset $1 domener
+
 buckets_title=Amazon S3 Buckets
 buckets_ecannot=Du har ikke lov til å administrere S3 buckets
 buckets_eaccounts=Ingen tidsplanlagte sikkerhetskopier til S3 er opprettet enda, og ingen standard S3 nøkler er satt.
@@ -5967,6 +6172,7 @@ buckets_created=Opprettet
 buckets_location=Plassering
 buckets_add=Opprett en ny S3 bucket
 buckets_return=liste med buckets
+
 bucket_title1=Opprett S3 Bucket
 bucket_title2=Rediger S3 Bucket
 bucket_eagone=Kontoen finnes ikke!
@@ -6011,6 +6217,7 @@ bucket_eldays=Manglende eller ikke-numerisk antall dager i livssyklus $1
 bucket_elday=Manglende eller ikke-numerisk dag i livssyklus $1
 bucket_elmonth=Manglende eller ikke-numerisk måned i livssyklus $1
 bucket_elyear=Manglende eller ikke-numerisk år i livssyklus $1
+
 ratelimit_title=E-post rate begrensing
 ratelimit_eos=E-post rate begrensing støttes ikke på dette operativ-systemet
 ratelimit_econfig=Milter-greylist konfigurasjonsfilen $1 finnes ikke
@@ -6039,6 +6246,7 @@ ratelimit_enum=Meldings-antall må være et tall
 ratelimit_etime=Tids-periode må være et tall
 ratelimit_socket=Justerer socket-fil ..
 ratelimit_etwice=Domenet $1 er valgt to ganger
+
 ratelimit_title4=Installer e-post rate begrensing
 ratelimit_installing=Installerer pakken for e-post rate begrensing ..
 ratelimit_installfailed=.. installering feilet!
@@ -6059,6 +6267,7 @@ ratelimit_h=timer
 ratelimit_d=dager
 ratelimit_w=uker
 ratelimit_y=år
+
 transfer_title=Overfør virtuell tjener
 transfer_err=Kunne ikke overføre tjener
 transfer_ecannot=Du har ikke lov til å overføre virtuelle tjenere
