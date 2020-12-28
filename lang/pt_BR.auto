@@ -220,6 +220,7 @@ index_mass=Atualização selecionada
 index_mass_all=Atualizar todos os servidores virtuais
 index_disable=Desativar selecionado
 index_enable=Ativar selecionado
+
 index_backup=Servidores virtuais de backup
 index_backupdesc=Clique neste botão para executar um backup imediato. Um formulário para escolher quais servidores fazer backup, quais recursos salvar e para onde fazer backup serão exibidos.
 index_sched=Backup agendado
@@ -251,6 +252,7 @@ index_expiryexpired=Alguns registros DNS de servidores virtuais expiraram : $1
 index_expirynearly=Os registros DNS de alguns servidores virtuais estão prestes a expirar : $1 
 index_certinvalid=O arquivo de certificado SSL $2 para $1 é inválido : $3 
 index_keyinvalid=O arquivo de chave SSL $2 para $1 é inválido : $3 
+
 form_title=Criar servidor virtual
 form_title2=Criar sub-servidor virtual
 form_title3=Criar servidor de alias
@@ -361,6 +363,7 @@ form_limits=Cotas e limites
 form_proxysect=Endereço IP e encaminhamento
 form_ipsect=Endereço IP e interfaces
 form_inputssect=Opções de recursos adicionais
+
 setup_err=Falha ao criar servidor virtual
 setup_eplan=O plano selecionado não existe ou não está disponível
 setup_evital=O recurso crítico $1 não foi criado corretamente - a criação do servidor virtual foi interrompida.
@@ -499,6 +502,7 @@ setup_edefip=Novo servidor virtual não tem endereço IP! Talvez o Virtualmin n�
 setup_qmailme=Este nome de domínio não pode ser usado para o Qmail, pois é o mesmo que o nome do host $1 do servidor (do arquivo <tt>control/me</tt>)
 setup_eslashpass=Senhas contendo uma barra invertida não são suportadas pelo MySQL
 setup_etmpl=Você não tem permissão para usar o modelo selecionado
+
 setup_title=Configurando o servidor virtual
 setup_group=Criando o grupo de administração $1 ..
 setup_user=Criando usuário de administração $1 ..
@@ -653,7 +657,9 @@ setup_ejail=.. prisão falhou : $1
 setup_jailed=.. o diretório da cadeia agora é $1 
 setup_letsaliases=Solicitando novamente o Criptografar o certificado para $1 para incluir $2 ..
 setup_eletsaliases=.. falhou : $1 
+
 equotacommand=Falha no comando da cota $1 : $2 
+
 users_ecannot=Você não tem permissão para editar usuários neste domínio
 users_ecannot2=Você não tem permissão para editar usuários locais
 users_emailbox=O usuário do proprietário do domínio não pode ser editado
@@ -698,6 +704,7 @@ users_defaultsdesc=Veja e edite as configurações padrão para novos usuários 
 users_mailclient=Mostrar configurações do cliente de email
 users_mailclientdesc=Exibir configurações que devem ser usadas pelos clientes de email dos usuários para este domínio.
 users_same=Igual ao admin
+
 user_create=Criar usuário
 user_createweb=Criar usuário FTP
 user_chrootwarn=Aviso: como as restrições do diretório FTP não estão ativadas, esse usuário também terá acesso ao conteúdo da web do servidor de nível superior.
@@ -786,6 +793,7 @@ user_lastlogin_pop3=POP3 (buscando e-mail)
 user_lastlogin_smtp=SMTP (enviando email)
 user_lastlogin_never=Nenhum logon registrado ainda
 user_noforward=Responder automaticamente ao email encaminhado?
+
 aliases_ecannot=Você não tem permissão para editar aliases neste domínio
 aliases_indom=$1 aliases no domínio $2 
 aliases_title=Aliases de Correio
@@ -821,6 +829,7 @@ aliases_reply=Resposta automática com a mensagem $1
 aliases_emass=Edite aliases manualmente.
 aliases_hide=Ocultar aliases especiais.
 aliases_show=Mostrar aliases especiais.
+
 alias_egone=O alias de email não existe mais
 alias_type2=Endereços no arquivo ..
 alias_type3=Escreva no arquivo ..
@@ -869,18 +878,22 @@ alias_efrom=Endereço ausente de:
 alias_efile=O arquivo anexado $1 para resposta automática não existe
 alias_eautotextfile=Os arquivos de resposta automática não podem ser inseridos, a menos que seja exibida uma mensagem.
 alias_ebefore=Falha no comando de pré-modificação do alias : $1 
+
 stop_ecannot=Você não tem permissão para parar os serviços
 stop_err=Falha ao parar o serviço
 stop_title=Serviço Interrompido
 stop_done=O serviço para $1 foi interrompido com sucesso.
+
 start_ecannot=Você não tem permissão para iniciar serviços
 start_err=Falha ao iniciar o serviço
 start_title=Serviço iniciado
 start_done=O serviço para $1 foi iniciado com sucesso.
+
 restart_ecannot=Você não tem permissão para reiniciar serviços
 restart_err=Falha ao reiniciar o serviço
 restart_title=Serviço reiniciado
 restart_done=O serviço para $1 foi parado e reiniciado com sucesso.
+
 bstop_err=Falha ao parar o BIND
 bstop_epid=O processo não está mais em execução
 mstop_err=Falha ao parar o servidor de email
@@ -891,6 +904,7 @@ fstart_err=Falha ao iniciar o servidor FTP
 fstop_edown=Não está em execução
 fstop_ekill=Falha na matança : $1 
 fstart_eup=Já correndo
+
 edit_title=Editar servidor virtual
 edit_title2=Editar sub-servidor virtual
 edit_title3=Editar servidor de alias
@@ -1025,8 +1039,10 @@ edit_adminsdesc=Visualize e edite contas de administrador adicionais para este s
 edit_switch=Alternar para o administrador do servidor
 edit_switchdesc=Faça login automaticamente no Webmin como o proprietário deste servidor virtual, sem precisar digitar sua senha.
 edit_spamvirusdesc=Configure os métodos de entrega para spam e vírus detectados no email enviado para este servidor virtual.
-edit_phpmode=Opções do site
-edit_phpmodedesc=Defina as configurações relacionadas ao site deste servidor virtual, como o log e o modo de execução do PHP.
+edit_website=Opções do site
+edit_websitedesc=Defina as configurações relacionadas ao site deste servidor virtual, como registro e o diretório HTML
+edit_php=Opções PHP
+edit_phpdesc=Defina as configurações relacionadas a como os scripts PHP são executados para este servidor virtual.
 edit_phpver=Versões do PHP
 edit_phpverdesc=Selecione a versão do PHP a ser usada e configure versões diferentes para diretórios diferentes.
 edit_spfdesc=Configure opções relacionadas ao DNS para este servidor virtual, como o registro (Sender Policy Framework).
@@ -1073,6 +1089,7 @@ edit_domdkim=Opções de DomainKey
 edit_domdkimdesc=Configurações do DomainKey para apenas este servidor virtual.
 edit_connect=Verificar conectividade
 edit_connectdesc=Verifique se o site, o domínio DNS e o servidor de correio desse servidor virtual podem ser acessados pelo restante da Internet.
+
 delete_title=Excluir servidor
 delete_rusure2=Tem certeza de que deseja excluir o servidor virtual $1, que possui $2 de arquivos? Os seguintes recursos serão excluídos :
 delete_rusure3=Tem certeza de que deseja excluir o servidor virtual $1 ? Os seguintes recursos serão excluídos :
@@ -1147,6 +1164,7 @@ delete_dom=Excluindo o sub-servidor $1 ..
 delete_aliasfailure=.. A exclusão do alias $1 falhou : $2 
 delete_ednssubof=O servidor virtual $1 não pode ser excluído, pois contém registros DNS para o servidor $2 
 delete_esslnoips=Nenhum certificado SSL encontrado para o domínio
+
 save_err=Falha ao modificar o servidor
 save_title=Salvar servidor
 save_equota=Cota total ausente ou inválida
@@ -1253,15 +1271,20 @@ save_euserquota=A cota de disco do administrador do servidor não deve ser reduz
 save_aliasusers=O recurso que está sendo desativado está em uso pelos seguintes servidores de alias : $1 
 save_erquota=A cota de disco para este servidor virtual não pode ser definida como ilimitada, pois pertence ao revendedor $1 que possui um limite de cota
 save_erbw=O limite de largura de banda para este servidor virtual não pode ser definido como ilimitado, pois pertence ao revendedor $1 que possui um limite de largura de banda
+
 luser_err=Falha ao salvar o usuário local
 luser_etaken=Um usuário com o mesmo nome já existe
+
 acl_migrate=Pode migrar backups?
+
 other=De outros. ..
+
 search_title=Procurar Resultados
 search_none=Nenhum servidor virtual contendo $1 foi encontrado.
 search_nonef=Nenhum servidor virtual usando o recurso $1 foi encontrado.
 search_results=Encontrados $2 servidores virtuais correspondentes a $1 ..
 search_resultsf=Encontrados $2 servidores virtuais usando o recurso $1 ..
+
 import_title=Importar servidor virtual
 import_desc1=Este formulário pode ser usado para colocar um domínio existente no seu sistema sob o controle do Virtualmin. Caixas de correio e aliases para o nome de domínio, qualquer servidor virtual Apache existente e domínio DNS serão detectados automaticamente. Você também pode inserir o nome de um banco de dados para associar ao domínio, se houver algum.
 import_desc2=O campo da senha deve ser preenchido com a senha atual do usuário da administração, se você a souber. O Virtualmin precisa saber a senha de cada servidor virtual, para uso na configuração de bancos de dados MySQL ou PostgreSQL no futuro.
@@ -1290,6 +1313,7 @@ import_regexpg=Grupo primário
 import_regexpr=Regexp correspondente
 import_emysql_user=Nome de usuário MySQL ausente
 import_emysql_user2=O usuário MySQL especificado não existe
+
 import_err=Falha na importação
 import_eexists=O domínio especificado já é gerenciado pelo Virtualmin
 import_euserclash=O servidor virtual $1 já está usando o nome de usuário selecionado
@@ -1345,14 +1369,18 @@ import_auto=Automático
 import_ehome=Diretório inicial ausente ou inválido
 import_eregexp=Expressão regular ausente para usuários
 import_updating=Atualizando usuários correspondentes a $1 ..
+
 acheck_ename=Falta uma diretiva ServerName
 acheck_edom=Nenhuma das diretivas ServerName ou ServerAlias contém $DOM
 acheck_edoc=Falta uma diretiva DocumentRoot
+
 fcheck_euser=Diretiva de usuário ausente
 fcheck_egroup=Diretiva de grupo ausente
 fcheck_euserex=O usuário Unix $1 na diretiva Usuário não existe
 fcheck_egroupex=O grupo Unix $1 na diretiva de grupo não existe
+
 lcheck_epost=Falta script pós-rotação, que deve recarregar o Apache
+
 disable_title=Desativar servidor
 disable_rusure2=Tem certeza de que deseja desativar o servidor virtual $1 ? Seu $2 será desativado.
 disable_undo=Todas as ações acima serão revertidas sem perda de dados se e quando o servidor for reativado.
@@ -1389,6 +1417,7 @@ disable_users=Bloqueando contas de usuários de email.
 disable_why=Motivo para desativar
 disable_subservers=Desativar também sub-servidores?
 disable_doing=Desativando o servidor virtual $1 ..
+
 enable_title=Ativar servidor
 enable_rusure2=Tem certeza de que deseja reativar o servidor virtual $1 ? Seu $2 será restaurado para seus estados originais ativados.
 enable_ok=Sim, ative
@@ -1411,6 +1440,7 @@ enable_statusssl=Reativando o monitoramento de status do site SSL.
 enable_users=Desbloqueando contas de usuários de email.
 enable_subservers=Também habilitar sub-servidores?
 enable_doing=Ativando o servidor virtual $1 ..
+
 mail_usubject=Caixa postal criada
 mail_dsubject=Servidor virtual criado
 mail_upsubject=Caixa de correio atualizada
@@ -1418,12 +1448,14 @@ mail_rsubject=Conta de revendedor criada
 mail_file=falha ao ler o arquivo de modelo $1 : $2 
 mail_system=o email não está configurado no Virtualmin
 mail_ok=email enviado para $1 
+
 afile_ecannot=Você não tem permissão para editar alias incluir arquivos
 afile_eread=Falha ao ler o alias inclui o arquivo $1 como usuário $2 : $3 
 afile_title=Editar arquivo de endereço
 afile_desc=Use a área de texto abaixo para editar os endereços no arquivo $1.
 afile_undo=Desfazer mudanças
 afile_ewrite=Falha ao gravar no arquivo de endereços $1 como usuário $2 : $3 
+
 rfile_title=Editar arquivo de resposta automática
 rfile_ecannot=Você não tem permissão para editar arquivos de resposta automática
 rfile_eread=Falha ao ler o arquivo de resposta automática $1 como usuário $2 : $3 
@@ -1439,6 +1471,7 @@ rfile_secs=segundos
 rfile_ereplies=Arquivo de log de rastreamento de resposta ausente
 rfile_eperiod=Número de segundos ausente ou inválido entre as respostas
 rfile_ewrite=Falha ao gravar no arquivo de resposta automática $1 como usuário $2 : $3 
+
 ffile_title=Editar arquivo de filtro
 ffile_ecannot=Você não tem permissão para editar arquivos de filtro
 ffile_eread=Falha ao ler o arquivo de filtro $1 como usuário $2 : $3 
@@ -1456,6 +1489,7 @@ ffile_err=Falha ao salvar o arquivo de filtro
 ffile_ematch=Falta partida
 ffile_eaction=Endereço de encaminhamento ausente
 ffile_ewrite=Falha ao gravar no filtro $1 como usuário $2 : $3 
+
 newweb_title=Modelo de site do Apache
 newweb_ecannot=Você não tem permissão para editar o modelo do site
 newweb_desc=Use este formulário para editar as diretivas do Apache modelo que serão usadas para sites criados pelo Virtualmin. As seguintes substituições serão feitas quando o site for criado a partir do modelo :
@@ -1500,6 +1534,7 @@ newweb_admin=Redirecionar <tt>admin.${DOM}</tt>?
 newweb_admindom=URL para redirecionamento <tt>admin</tt>
 newweb_ewebmaildom=URL ausente ou inválido para redirecionamento de webmail
 newweb_eadmindom=URL ausente ou inválido para redirecionamento de administrador
+
 newftp_title=Modelo de servidor ProFTPD
 newftp_ecannot=Você não tem permissão para editar o modelo ProFTPD
 newftp_desc=Use este formulário para editar as diretivas ProFTPD do modelo que serão usadas para servidores FTP virtuais criados pelo Virtualmin. As seguintes subestações serão feitas quando o site for criado a partir do modelo :
@@ -1509,6 +1544,7 @@ newftp_dir=Subdiretório FTP anônimo para criar
 newftp_dir0=Diretório em casa
 newftp_dir0suf=(Deve corresponder à seção &lt;Anônimo&gt; acima)
 newftp_edir=Subdiretório FTP anônimo ausente ou inválido
+
 newdns_title=Modelo DNS BIND
 newdns_ecannot=Você não tem permissão para editar o modelo DNS
 newdns_desc=Use este formulário para editar as diretrizes de modelo BIND que serão colocadas nos domínios DNS criados pelo Virtualmin (quando não estiverem no modo automático). As seguintes subestações serão feitas quando o domínio for criado a partir do modelo :
@@ -1526,6 +1562,7 @@ newdns_noview=Nível superior (não em nenhuma visualização)
 newdns_enamedconf=Nenhuma diretiva BIND named.conf válida foi inserida
 newdns_ensip=Servidor de nomes adicional $1 é um endereço IP em vez de um nome de host
 newdns_enshost=Servidor de nomes adicional $1 não existe
+
 sub_DOM=O nome do domínio, como <tt>foo.com</tt>
 sub_HOME=O diretório inicial do usuário do domínio, como <tt>/home/foo</tt>
 sub_USER=O usuário de administração que possui o domínio, como <tt>foo</tt>
@@ -1547,19 +1584,23 @@ sub_NAME=Login do Virtualmin do revendedor
 sub_RPLAINPASS=Senha do revendedor
 sub_EMAIL=Endereço de e-mail de contato do revendedor
 sub_WEBMINURL=URL para fazer login no Virtualmin
+
 newuser_title=Novo email da caixa de correio
 newuser_ecannot=Você não tem permissão para editar o novo modelo de email do usuário
 newuser_desc2=Use este formulário para editar o modelo da mensagem de email que pode ser enviada para um novo usuário de email / FTP após a criação. As seguintes subestações serão feitas no texto :
 newuser_header=Detalhes da mensagem de email do novo usuário
 newuser_docs=Explicação e substituições
+
 newupdate_title=Email de caixa de correio atualizado
 newupdate_ecannot=Você não tem permissão para editar o modelo de email de usuário atualizado
 newupdate_desc2=Use este formulário para editar o modelo da mensagem de email que pode ser enviada a um usuário de email / FTP após a atualização. As seguintes subestações serão feitas no texto :
 newupdate_header=Detalhes atualizados da mensagem de email do usuário
+
 newlocal_title=Novo email da caixa de correio local
 newlocal_ecannot=Você não tem permissão para editar o novo modelo de email de usuário local
 newlocal_desc2=Use este formulário para editar o modelo da mensagem de email que pode ser enviada para um novo usuário local após a criação. As seguintes subestações serão feitas no texto :
 newlocal_header=Novos detalhes da mensagem de email do usuário local
+
 newdom_title=Novo email do servidor virtual
 newdom_ecannot=Você não tem permissão para editar o novo modelo de email do servidor
 newdom_desc=Use este formulário para editar o arquivo de modelo $1 da mensagem de email que será enviada para um novo proprietário do servidor virtual após a criação. As seguintes subestações serão feitas no texto :
@@ -1572,14 +1613,17 @@ newdom_to=Enviar um email a
 newdom_mailbox=Caixa de correio do usuário
 newdom_owner=Proprietário do servidor virtual
 newdom_reseller=Revendedor de servidor virtual
+
 newsubdom_title=Novo email do sub-servidor virtual
 newsubdom_ecannot=Você não tem permissão para editar o novo modelo de email do sub-servidor
 newsubdom_desc=Use este formulário para editar o arquivo de modelo $1 da mensagem de email que será enviada ao proprietário de um novo sub-servidor virtual após a criação. As seguintes subestações serão feitas no texto :
 newsubdom_descdis=Use este formulário para editar o arquivo de modelo $1 da mensagem de email que seria enviada ao proprietário de um novo sub-servidor virtual após a criação, se esse recurso estiver ativado na página Configuração do Virtualmin. As seguintes subestações serão feitas no texto :
 newreseller_header=Novos detalhes da mensagem de e-mail do revendedor
+
 newreseller_title=Novo email do revendedor
 newreseller_ecannot=Você não tem permissão para editar o novo modelo de email do revendedor
 newreseller_desc2=Use este formulário para editar o modelo da mensagem de email que pode ser enviada para uma nova conta de revendedor depois que ela é criada. As seguintes subestações serão feitas no texto :
+
 feature_web=Site do Apache
 feature_dns=Domínio DNS BIND
 feature_mysql=Banco de dados MySQL
@@ -1597,11 +1641,13 @@ feature_virt6=Endereço IPv6
 feature_spam=Filtragem de spam
 feature_virus=Filtragem de vírus
 feature_status=Monitoramento de status
+
 bandwidth_web=Tráfego do site
 bandwidth_ftp=Transferências FTP
 bandwidth_mail=Correio transferido
 bandwidth_backup=Backups feitos
 bandwidth_restore=Backups restaurados
+
 losing_web=Todas as diretivas Apache no host virtual serão removidas.
 losing_dns=Todos os registros DNS no domínio e quaisquer opções BIND serão excluídos.
 losing_mysql=Todos os bancos de dados MySQL, todas as tabelas e o login MySQL do servidor serão excluídos.
@@ -1619,6 +1665,7 @@ losing_logrotate=A configuração Logrotate para os arquivos de log do servidor 
 losing_spam=A configuração do SpamAssassin para este servidor virtual será excluída.
 losing_virus=A entrada do Procmail para filtrar vírus para este servidor virtual será removida.
 losing_status=O monitor de status do Webmin para o site deste servidor virtual será excluído.
+
 check_title=Verificando a configuração
 check_desc=O status do seu sistema está sendo verificado para garantir que todos os recursos ativados estejam disponíveis, que o servidor de correio esteja configurado corretamente e que as cotas estejam ativas.
 check_netok=O módulo de configuração de rede do Webmin está instalado e é suportado.
@@ -1782,13 +1829,16 @@ check_eaptrepofile=O arquivo de configuração do repositório APT $1 não exist
 check_aptrepook=O repositório Virtualmin APT está configurado corretamente
 check_aptrepowrong=O arquivo de configuração do repositório APT $1 contém o número de série errado da chave de licença!
 check_aptrepomissing=O arquivo de configuração do repositório $1 não se refere a software.virtualmin.com!
+
 checkmap_enone=Nenhuma fonte de mapa foi encontrada na <a href='$1'>configuração do Postfix</a>
 checkmap_esupport=A origem do mapa <tt>$1</tt> não é suportada pelo Postfix - talvez você precise instalar as bibliotecas do Postfix ou recompilar
 checkmap_eaccess=A origem do mapa <tt>$1</tt> não pode ser usada : $2 
 checkmap_efile=O tipo de mapa não é suportado por esta versão do Webmin - apenas mapas usando arquivos como <tt>hash</tt> e <tt>regexp</tt> podem ser usados
 check_eqmailldap=O suporte Qmail+LDAP foi removido no Virtualmin 6.00
+
 allwebmin_ecannot=Você não tem permissão para atualizar todos os usuários Webmin
 allwebmin_title=Atualizando usuários do Webmin
+
 log_create_user=Usuário criado $1 @ $2 
 log_modify_user=Usuário modificado $1 @ $2 
 log_delete_user=Usuário excluído $1 @ $2 
@@ -1828,6 +1878,8 @@ log_unalias_domain=Servidor virtual convertido $1 de um alias para um sub-servid
 log_spam_domain=Entrega de spam e vírus alterada para o servidor $1 
 log_spf_domain=Opções de DNS alteradas para o servidor $1 
 log_phpmode_domain=Opções de site alteradas para o servidor $1 
+log_website_domain=Opções do site alteradas para o servidor $1 
+log_php_domain=Opções de PHP alteradas para o servidor $1 
 log_phpver_domain=Versões PHP alteradas para o servidor $1 
 log_initial_domain=Padrões de usuário alterados para o servidor $1 
 log_limits_domain=Limites de proprietário alterados para o servidor $1 
@@ -1995,6 +2047,7 @@ log_enable_ratelimit=Limitação de taxa de correio ativada
 log_disable_ratelimit=Limitação de taxa de correio desabilitada
 log_modify_ratelimit=Limitação de taxa de correio atualizada
 log_wizard=Etapa do Assistente para Instalação : $1 
+
 backup_title=Servidores virtuais de backup
 backup_title2=Editar backup agendado
 backup_title3=Criar backup agendado
@@ -2135,6 +2188,7 @@ backup_senabled0=O backup agendado do Virtualmin foi ativado para $1 servidores 
 backup_sdisabled=O backup agendado do Virtualmin foi desativado.
 backup_key=Criptografar backup com chave
 backup_nokey=Não assine ou criptografe
+
 backup_err=Falha no backup
 backup_err2=Falha ao salvar o backup agendado
 backup_ecannot=Você não tem permissão para executar backups
@@ -2211,6 +2265,7 @@ backup_copyfailed=.. cópia falhou : $1
 backup_ekey=A chave de backup selecionada não existe!
 backup_ekeycannot=Você não tem permissão para usar a chave de backup selecionada
 backup_eownrestore=Somente backups assinados podem ser restaurados pelos proprietários do servidor virtual
+
 backup_dirtar=Criando arquivo TAR do diretório inicial ..
 backup_dirtarinc=Criando arquivo TAR incremental do diretório inicial ..
 backup_dirtarfailed=.. TAR falhou! $1 
@@ -2352,6 +2407,7 @@ backup_arun=Executando o comando pós-backup.
 backup_brunfailed=.. falhou. O backup não continuará.
 backup_arunfailed=.. falhou!
 backup_efeature=.. o recurso $1 falhou
+
 restore_title=Restaurar servidores virtuais
 restore_header=Opções para restaurar o backup
 restore_src=Restaurar fonte
@@ -2374,6 +2430,7 @@ restore_virtualmin=Configurações do Virtualmin para restaurar
 restore_dnswholefile=Restaurar tudo no arquivo de zona DNS
 restore_newip=Endereço IPv4 para servidores restaurados
 restore_newip6=Endereço IPv6 para servidores restaurados
+
 restore_ecannot=Você não tem permissão para restaurar backups
 restore_esched=O agendamento de backup selecionado não existe!
 restore_err=Falha na restauração
@@ -2445,6 +2502,7 @@ restore_phpbad=AVISO - Os scripts a seguir usavam versões PHP que não estão d
 restore_phpbad2=$1 - $2 - Versão $3 
 restore_euid=O UID $1 já está em uso neste sistema
 restore_egid=O GID $1 já está em uso neste sistema
+
 restore_unixuser=Atualizando senha e cotas de administração.
 restore_unixsame=.. ignorando a restauração no servidor LDAP original $1 no modo de replicação
 restore_dirtar=Extraindo arquivo TAR do diretório inicial ..
@@ -2529,6 +2587,7 @@ restore_vmailserver_grey=Restaurando configurações de lista de cinza.
 restore_vmailserver_missing=.. não configurado neste sistema
 restore_ereseller=O revendedor $1 não existe
 restore_eparent=O servidor virtual pai original $1 não existe
+
 limits_title=Limites do proprietário do servidor
 limits_header=Limites do Virtualmin para o proprietário do servidor
 limits_header2=Recursos e recursos permitidos
@@ -2594,6 +2653,7 @@ limits_unshell=Usando shell desconhecido $1
 limits_jail=Chroot prisão domínio usuário Unix?
 limits_ejailon=Falha ao ativar a prisão do chroot : $1 
 limits_ejailoff=Falha ao desativar a prisão do chroot : $1 
+
 rename_title=Alterar nome de domínio
 rename_header=Opções de alteração de nome de domínio do servidor virtual
 rename_domain=Nome de domínio antigo
@@ -2637,6 +2697,7 @@ rename_ehome3=Já existe um novo diretório inicial
 rename_ehome4=O pai do novo diretório inicial não existe
 rename_scripts=Atualizando caminhos no banco de dados de scripts.
 rename_eparentuser=O nome de usuário pode ser alterado apenas para servidores de nível superior
+
 cert_title=Certificado SSL
 cert_desc2=Esta seção mostra os detalhes do certificado SSL atualmente sendo usado por este servidor virtual.
 cert_desc1=Este formulário pode ser usado para criar uma solicitação de assinatura de certificado (CSR) e uma chave privada para este servidor virtual. O CSR resultante pode ser enviado a uma autoridade de certificação (CA) que retornará um certificado assinado para colar no segundo formulário desta página.
@@ -2776,6 +2837,7 @@ cert_webminsvcip=Sim (para solicitações para $1 e $2)
 cert_eperiperr=Falha ao salvar certificados de serviço
 cert_eperipinst=O serviço $1 não está instalado
 cert_eperipfail=O serviço $1 falhou
+
 csr_title=Gerando CSR
 csr_title2=Gerando certificado
 csr_err=Falha ao gerar CSR
@@ -2786,6 +2848,7 @@ csr_csr=O CSR deste servidor virtual, salvo em $1, é :
 csr_key=A nova chave privada para este servidor virtual, salva em $1, é :
 csr_selfing=Gerando certificado autoassinado e chave privada.
 csr_csring=Gerando solicitação de assinatura e chave privada.
+
 newkey_title=Instalando certificado
 newkey_err=Falha ao instalar o certificado
 newkey_ecert2=Certificado SSL assinado ausente ou inválido : $1 
@@ -2801,6 +2864,7 @@ newkey_enewkeyfilehome=O arquivo de chave privada $1 deve estar no diretório in
 newkey_apache=Configurando o servidor da web para usar novo certificado e chave.
 newkey_enewkeycsr=Nenhuma chave SSL gerada ao mesmo tempo que uma solicitação de assinatura foi encontrada!
 newkey_ekeysame=Não insira o caminho para a chave gerada com um CSR; em vez disso, use a guia <b>Aplicar certificado assinado</b>.
+
 newbw_title=Monitoramento de largura de banda
 newbw_desc=Esta página pode ser usada para habilitar a contabilidade de largura de banda para servidores virtuais, para notificar os proprietários do servidor e o administrador principal quando um servidor exceder sua largura de banda permitida.
 newbw_active=Monitoramento de largura de banda ativo?
@@ -2867,9 +2931,11 @@ newbw_resetdesc=Este botão abre um formulário para forçar a re-geração de e
 newbw_return=formulário de monitoramento de largura de banda
 newbw_mailout=Incluir email de saída no uso da largura de banda?
 newbw_mailall=Incluir email retransmitido no uso da largura de banda?
+
 newframe_title=HTML de encaminhamento de quadros
 newframe_ecannot=Você não tem permissão para editar o modelo HTML de encaminhamento de quadros
 newframe_desc=Use este formulário para editar a página HTML do modelo que será usada pelos sites encaminhados por quadros. As seguintes subestações serão feitas quando a página for criada a partir do modelo :
+
 frame_title=Configurações do quadro de encaminhamento
 frame_header=Configurações para gerar HTML de encaminhamento de quadros
 frame_enabled=Encaminhamento de quadro ativado?
@@ -2881,14 +2947,17 @@ frame_desc=Este formulário pode ser usado para atualizar o arquivo de encaminha
 frame_err=Falha ao salvar as configurações do quadro de encaminhamento
 frame_eurl=URL ausente ou inválido
 frame_gen=Como gerar novamente o HTML de encaminhamento de quadros.
+
 proxy_title=Configurações de proxy do site
 proxy_enabled=Proxy ativado?
 proxy_url=Proxy para URL
 proxy_header=Configurações para proxy para outro site
 proxy_desc=Este formulário pode ser usado para habilitar e configurar o URL para o qual todas as solicitações para o site deste servidor virtual são encaminhadas.
+
 expframe_title=HTML do quadro de encaminhamento
 expframe_desc=Este formulário pode ser usado para atualizar manualmente o arquivo de encaminhamento de quadros $1 para este servidor virtual.
 expframe_ewrite=Falha ao gravar no arquivo de encaminhamento de quadros $1 como usuário $2 : $3 
+
 newtmpl_title=Modelos de servidor
 newtmpl_name=Modelo
 newtmpl_skel=Diretório esqueleto
@@ -2907,6 +2976,7 @@ newtmpl_delete=Excluir modelos selecionados
 newtmpl_init=Instalação do Virtualmin
 newtmpl_name0=Configurações padrão
 newtmpl_name1=Configurações para sub-servidores
+
 tmpl_title1=Criar modelo de servidor
 tmpl_title2=Editar modelo de servidor
 tmpl_title3=Modelo de servidor clone
@@ -3265,6 +3335,7 @@ tmpl_autoconfignone=Gerado automaticamente
 tmpl_eautoconfig=O XML de configuração automática do Thunderbird está ausente na tag &lt;clientConfig&gt;.
 tmpl_outlook_autoconfig=XML de configuração automática do Outlook
 tmpl_outlook_eautoconfig=O XML de configuração automática do Outlook está ausente em uma tag &lt;Autodiscover&gt;.
+
 newplugin_title=Módulos de plug-in
 newplugin_desc=Plugins são módulos Webmin que forneceram recursos adicionais de servidor e usuário para o Virtualmin. Ao contrário dos principais recursos, eles podem ser instalados separadamente e gravados por desenvolvedores de terceiros.
 newplugin_desc3=Somente os plug-ins realmente verificados na lista abaixo estão ativos no momento. Depois que um plug-in é ativado, o recurso habilitado pode ser selecionado ao criar ou editar um servidor virtual.
@@ -3281,6 +3352,7 @@ newplugin_count=Domínios
 newplugin_acts=Ações
 newplugin_conf=Configurar
 newplugin_open=Aberto
+
 bwgraph_title=Uso da largura de banda
 bwgraph_none=Nenhuma estatística de uso de largura de banda foi coletada ainda.
 bwgraph_enable=Verifique a página $1 para garantir que a coleção de estatísticas esteja ativada.
@@ -3295,8 +3367,10 @@ bwgraph_mago_week=Mostrar estatísticas da semana:
 bwgraph_mago_month=Mostrar estatísticas para o mês:
 bwgraph_mago_year=Mostrar estatísticas para o ano:
 bwgraph_mago_=Mostrar estatísticas para o período:
+
 plugconfig_title=Configuração de plugins
 plugconfig_dir=Para o plugin $1 
+
 newfields_title=Os campos personalizados
 newfields_descr=Este formulário pode ser usado para criar campos adicionais que são exibidos ao criar e editar servidores virtuais.
 newfields_name=Nome do campo
@@ -3320,14 +3394,17 @@ newfields_visible=Visível para
 newfields_visible0=Todos os usuários
 newfields_visible1=Todos os usuários (RO)
 newfields_visible2=Administrador principal
+
 ldap_emod=Falta o módulo Perl $1 necessário para conectar-se ao LDAP
 ldap_econn=Falha ao conectar ao servidor LDAP $1 porta $2 
 ldap_elogin=Falha ao ligar ao servidor LDAP $1 como $2 : $3 
+
 mail_system_0=Postfix
 mail_system_1=Enviar correio
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
+
 databases_indom=$1 bancos de dados no domínio $2 
 databases_mysql=MySQL
 databases_postgres=PostgreSQL
@@ -3349,6 +3426,7 @@ databases_remotenew=Novo host MySQL
 databases_remoteok=Mover bancos de dados
 databases_warn=ATENÇÃO! Quaisquer scripts ou aplicativos instalados atualmente NÃO serão atualizados para usar o novo sistema host.
 databases_moving=Movendo bancos de dados MySQL de $1 para $2 ..
+
 database_title1=Criar banco de dados
 database_title2=Editar banco de dados
 database_header=Detalhes do banco de dados
@@ -3374,6 +3452,7 @@ database_collate=Ordem de agrupamento para novo banco de dados
 database_encoding=Codificação para novo banco de dados
 database_opts=Opções adicionais para $1 
 database_edbdef=Você não tem permissão para excluir o banco de dados padrão de um domínio
+
 vfile_title=Editar arquivo de resposta automática
 vfile_ecannot=Você não tem permissão para editar arquivos de resposta automática
 vfile_desc=Use a área de texto abaixo para editar a mensagem do autoresponder em $1.
@@ -3392,11 +3471,13 @@ vfile_etime=Tempo ausente ou inválido para lembrar o remetente
 vfile_enum=Número de respostas ausente ou inválido para enviar
 vfile_edir=Diretório de log ausente ou inexistente
 vfile_eother=Falta de: endereço para resposta
+
 reemail_title=Reenviar email de inscrição
 reemail_dis=O email de inscrição não pode ser enviado ao proprietário deste servidor, pois está desativado no modelo do servidor.
 reemail_desc=Esta página pode ser usada para reenviar o email que foi originalmente enviado quando o servidor virtual foi criado.
 reemail_to=Endereço de e-mail do proprietário do servidor:
 reemail_ok=Envie agora
+
 newips_title=Alterar endereços IP
 newips_ecannot=Você não tem permissão para alterar endereços IP
 newips_desc=Esta página permite alterar o endereço IP de todos os servidores virtuais IP não dedicados que estão usando um endereço especificado. Isso deve ser feito se você acabou de atualizar o endereço IP principal no sistema.
@@ -3425,6 +3506,7 @@ newips_mode0=Endereço real
 newips_mode1=Endereço externo usado nos registros DNS
 newips6_eold=Endereço IPv6 antigo não está no formato correto
 newips6_enew=O novo endereço IPv6 não está no formato correto
+
 newip_title=Alterar endereço IP
 newip_header=Novo endereço IP virtual
 newip_ecannot=Você não tem permissão para alterar o endereço IP deste servidor
@@ -3458,6 +3540,7 @@ newip_virtaddr=Manter endereço dedicado
 newip_virtaddr2=Alocar endereço dedicado
 newip_virtaddr3=Usar endereço dedicado
 newip_convert=Converter endereço dedicado em compartilhado
+
 newip_new=Novo endereço IP
 newip_err=Falha ao alterar o endereço IP
 newip_eip=Novo endereço ausente ou inválido
@@ -3468,6 +3551,7 @@ newip_eclash6=O servidor virtual $1 já está usando o novo endereço IPv6
 newip_edefault=O novo endereço é igual ao padrão para servidores não virtuais
 newip_eused=O novo endereço já está sendo usado pelo sistema
 newip_eused6=O novo endereço IPv6 já está sendo usado pelo sistema
+
 newresels_title=Contas de revendedor
 newresels_intro=Um revendedor é um login que pode criar novos servidores Virtualmin principais, sujeito aos limites definidos pelo administrador principal. Outros limites podem ser impostos à cota total de disco, usuários e bancos de dados aos quais os servidores de um revendedor podem ser alocados.
 newresels_name=Nome do usuário
@@ -3482,11 +3566,13 @@ newresels_return=lista de revendedores
 newresels_delete=Excluir revendedores selecionados
 newresels_disable=Bloquear selecionado
 newresels_enable=Desbloquear selecionado
+
 dresels_err=Falha ao excluir revendedores
 dresels_err2=Falha ao bloquear revendedores
 dresels_err3=Falha ao desbloquear revendedores
 dresels_enone=Nenhum selecionado
 dresels_egone=Um dos revendedores selecionados não existe
+
 resel_title1=Criar revendedor
 resel_title2=Editar revendedor
 resel_header=Detalhes da conta do revendedor
@@ -3574,6 +3660,7 @@ resel_domssel=Propriedade deste revendedor
 resel_equnlimit=O servidor virtual $1 não pode ser atribuído a este revendedor, pois possui uma cota de disco ilimitada, mas o revendedor tem um limite
 resel_ebwunlimit=O servidor virtual $1 não pode ser atribuído a este revendedor, pois possui uma cota de largura de banda ilimitada, mas o revendedor tem um limite
 resel_ebefore=Antes do comando de modificação falhar : $1 
+
 licence_err=Foi detectado um problema com sua licença do Virtualmin :
 licence_soon=Aviso - Sua licença do Virtualmin expirará em $1 dias.
 licence_soon2=Aviso - Sua licença do Virtualmin expirará em $1 horas.
@@ -3602,8 +3689,10 @@ licence_fixlinksok=Corrigir permissões de link simbólico
 licence_fixlinksignore=Permitir links simbólicos não seguros
 licence_xfsreboot=Seu sistema deve ser reiniciado para habilitar cotas XFS no sistema de arquivos raiz. Até que isso seja feito, o Virtualmin não detectará cotas como ativas e será impossível aplicar limites no uso do disco a servidores ou usuários virtuais.
 licence_xfsrebootok=Reinicie agora
+
 config_deftheme=Padrão global de Webmin
 config_oldtheme=Tema antigo do Webmin
+
 scripts_title=Instalar scripts
 scripts_longdesc=Descrição
 scripts_overall=Avaliação
@@ -3778,6 +3867,7 @@ scripts_packagecount=.. instalou $1 novos pacotes
 scripts_packageall=.. todos os pacotes já estão instalados
 scripts_abandoned2=AVISO: Este script não é mais suportado por seu autor original.
 scripts_abandoned1=AVISO: A versão $1 deste script não é mais suportada por seu autor original.
+
 newnotify_title=Proprietários do servidor de email
 newnotify_desc=Essa página pode ser usada para enviar email aos proprietários dos servidores virtuais selecionados, por exemplo, para anunciar o tempo de inatividade do sistema, atualizações ou outras alterações de serviço. As seguintes subestações podem ser usadas no corpo e no assunto da mensagem:
 newnotify_header=Opções de email para proprietários de servidores
@@ -3797,6 +3887,7 @@ newnotify_attach=Arquivo anexado opcional
 newnotify_admins=Também enviar e-mails para administradores extras em domínios selecionados?
 newnotify_users=Enviar email para userd nos domínios selecionados?
 newnotify_nomany=Enviar apenas um e-mail a cada proprietário do domínio uma vez
+
 mailusers_title=Enviar todas as caixas de correio por e-mail
 mailusers_desc=Este formulário pode ser usado para enviar email a todos os usuários deste domínio ou àqueles que você selecionou. As seguintes subestações podem ser usadas no corpo e no assunto da mensagem:
 mailusers_header=Opções de email para todos os usuários
@@ -3805,16 +3896,19 @@ mailusers_all=Todos
 mailusers_sel=Somente selecionado ..
 mailusers_err=Falha ao enviar e-mail aos usuários
 mailusers_eto=Nenhum usuário selecionado
+
 view_title=Detalhes do servidor virtual
 view_title2=Detalhes do sub-servidor virtual
 view_title3=Detalhes do servidor de alias
 view_title4=Detalhes do subdomínio virtual
 view_features=Recursos ativados
 view_return=detalhes do servidor
+
 summary_title=Resumo do servidor virtual
 summary_title2=Resumo do Sub-Servidor Virtual
 summary_title3=Resumo do Alias Server
 summary_title4=Resumo do Subdomínio Virtual
+
 migrate_title=Migrar servidor virtual
 migrate_desc=Esta página permite criar um novo servidor virtual migrando um arquivo de backup criado pelo produto de um concorrente. A configuração de todos os recursos suportados será extraída do backup e convertida para uso pelo Virtualmin. Todo o conteúdo do diretório do domínio será copiado para o diretório inicial do novo usuário.
 migrate_file=Arquivo de backup de origem
@@ -3862,6 +3956,7 @@ migrate_downloaded=.. baixado $1
 migrate_validating=Validando arquivo de migração ..
 migrate_edownload=.. download falhou : $1 
 migrate_evalidate=.. falha na validação : $1 
+
 newscripts_title=Instaladores de scripts
 newscripts_desc=Esta página permite adicionar instaladores de scripts criados por outros fornecedores e controlar quais scripts estão disponíveis para proprietários de domínio.
 newscripts_header=Adicionar instalador de script
@@ -3936,6 +4031,7 @@ newscripts_elnone=Nenhum script selecionado
 newscripts_desc6=Essa guia lista todos os scripts instalados em todos os servidores virtuais neste sistema. Para atualizar ou desinstalar um único script, clique em seu nome na lista.
 newscripts_dom=Nome do domínio
 newscripts_noneyet=Nenhum script foi instalado em nenhum servidor virtual ainda.
+
 addscripts_err=Falha ao adicionar instalador de script
 addscripts_eupload=Nenhum arquivo para upload selecionado
 addscripts_eurl=URL ausente ou inválido
@@ -3944,6 +4040,7 @@ addscripts_efile=Nome de arquivo do script inválido $1
 addscripts_title=Adicionar instalador de scripts
 addscripts_done1=O instalador do script $1 foi adicionado com sucesso do arquivo especificado.
 addscripts_enone=O arquivo especificado não contém nenhum instalador de script!
+
 sysinfo_apache=Versão Apache
 sysinfo_bind=Versão BIND
 sysinfo_postfix=Versão Postfix
@@ -3963,9 +4060,11 @@ sysinfo_perlpath=Caminho para Perl
 sysinfo_php=Versões do PHP
 sysinfo_python=Versão Python
 sysinfo_pythonpath=Caminho para Python
+
 remote_ecannot=Você não tem permissão para executar comandos remotos
 remote_eprogram=Nome de programa remoto inválido
 remote_eprogram2=O programa remoto $1 não existe
+
 newquotas_title=Monitoramento de cota de disco
 newquotas_ecannot=Você não tem permissão para configurar o monitoramento de cotas de disco
 newquotas_desc=Esta página permite configurar a notificação automática por email quando um servidor virtual exceder ou se aproximar de sua cota de disco. Como as cotas de grupo estão ativadas, isso só pode acontecer quando um servidor tiver muitos dados em um de seus bancos de dados, pois os tamanhos dos bancos de dados não são impostos pelas cotas de disco do Unix.
@@ -3994,6 +4093,7 @@ newquotas_warnlist=Limiares
 newquotas_mailbox=Verifique também as cotas de usuários de correio e FTP?
 newquotas_users=Notificar também os administradores que estão acima da cota?
 newquotas_msg=Modelo de email para usuários de email e FTP
+
 mass_title=Modificar vários usuários
 mass_desc=Esta página permite alterar as configurações selecionadas para os $1 usuários escolhidos neste servidor virtual de uma só vez.
 mass_header=Configurações do usuário a serem atualizadas
@@ -4033,6 +4133,7 @@ mass_eplain=.. não é possível para este tipo de usuário.
 mass_disable1=.. usuário habilitado.
 mass_disable2=.. usuário desativado.
 mass_updateemail=Enviar email para usuários atualizados?
+
 defaults_title=Editar padrões do usuário
 defaults_header=Padrões para novos usuários neste servidor virtual
 defaults_tmpl=Padrão (do modelo)
@@ -4042,6 +4143,7 @@ defaults_err=Falha ao salvar os padrões do usuário
 defaults_emquota=Cota de arquivo de mensagens ausente ou inválida
 defaults_eqquota=Cota do servidor de correio ausente ou inválida
 defaults_below=Definido abaixo ..
+
 links_dns=Domínio DNS
 links_mysql=Banco de Dados MySQL
 links_mysqls=Bancos de dados MySQL
@@ -4057,6 +4159,7 @@ links_flog=Registro ProFTPD
 links_phpini=Configuração PHP
 links_phpini2=Configuração do PHP $1 
 links_phpini3=Configuração PHP-FPM
+
 massscript_err=Falha ao atualizar scripts
 massscript_enone=Nenhum servidor virtual selecionado
 massscript_enone2=Nenhum dos servidores selecionados possui o script instalado
@@ -4076,6 +4179,7 @@ massscript_utype=Operação
 massscript_upgrade=Melhoria
 massscript_update=Atualizar
 massscript_ok=Atualizar scripts agora
+
 massdelete_title=Excluir servidores virtuais
 massdelete_rusure=Tem certeza de que deseja excluir os $1 servidores selecionados? $2 dos dados em seus diretórios pessoais serão excluídos.
 massdelete_err=Falha ao excluir servidores virtuais
@@ -4087,6 +4191,7 @@ massdelete_ok=Excluir servidores agora
 massdelete_preserve=Preservar recursos hospedados remotamente
 massdelete_doms=Servidores a serem excluídos: $1 
 massdelete_doing=Excluindo o servidor $1 ..
+
 massdomains_title=Atualizar servidores virtuais
 massdomains_headerq=Alterações de cota e largura de banda
 massdomains_headerf=Alterações de recursos ativados
@@ -4145,6 +4250,7 @@ massdomains_enaerr=Falha ao ativar servidores
 massdomains_enarusure=Tem certeza de que deseja ativar os $1 servidores virtuais selecionados? Eles serão devolvidos ao estado em que estavam antes de serem desativados.
 massdomains_enaok=Ativar servidores agora
 massdomains_enadoms=Servidores para ativar: $1 
+
 newmxs_title=Servidores de Correio Secundário
 newmxs_header=Servidores de correio secundário automáticos
 newmxs_servers=Servidores para configurar como MXs secundários
@@ -4172,6 +4278,7 @@ newmxs_removing=Removendo o domínio secundário em $1 ..
 newmxs_syncing=Atualizando usuários permitidos para retransmissão ..
 newmxs_esynced=.. alguns falharam : $1 
 newmxs_synced=.. feito em $1 
+
 newmysqls_title=Servidores MySQL
 newmysqls_ecannot=Você não tem permissão para editar servidores MySQL adicionais
 newmysqls_host=Nome do host do servidor
@@ -4213,10 +4320,12 @@ newmysqls_edelete=O servidor local não pode ser removido
 newmysqls_edefault=O servidor padrão não pode ser removido
 newmysqls_eprovision=Um servidor criado pelo Cloudmin Services não pode ser removido
 newmysqls_einuse=Um servidor em uso por $1 domínios não pode ser removido
+
 ddatabases_title=Excluir bancos de dados
 ddatabases_edbdef=Você não tem permissão para remover o banco de dados $1 padrão $2 
 ddatabases_rusure2=Tem certeza de que deseja excluir os $1 bancos de dados selecionados? $2 tabelas contendo $3 de dados serão excluídas para sempre.
 ddatabases_rusure3=Tem certeza de que deseja excluir os $1 bancos de dados selecionados? Eles não contêm nenhuma tabela.
+
 admins_title=Administradores extras
 admins_doms=Servidores virtuais
 admins_none=Nenhum administrador extra foi criado ainda.
@@ -4225,6 +4334,7 @@ admins_ecannot=Você não tem permissão para gerenciar administradores extras
 admins_return=lista de administradores extras
 admins_delete=Excluir administradores selecionados
 admins_more=%mais 1 ..
+
 admin_title1=Criar Administrador Extra
 admin_title2=Editar Administrador Extra
 admin_header=Detalhes do administrador extra
@@ -4244,9 +4354,11 @@ admin_doms=Servidores virtuais do administrador
 admin_doms1=Todos pertencentes ao servidor de nível superior
 admin_doms0=Somente os selecionados abaixo ..
 admin_edoms=Não há servidores virtuais para permitir selecionados
+
 dadmins_err=Falha ao excluir administradores extras
 dadmins_enone=Nenhum selecionado
 dadmins_egone=O administrador não existe mais
+
 move_title=Mover servidor virtual
 move_ecannot=Você não tem permissão para mover este servidor
 move_ecannot2=Você não tem permissão para mover um domínio para este servidor
@@ -4269,6 +4381,7 @@ move_newpass=Senha se estiver convertendo para pai
 move_failed=.. falhou! Veja as mensagens de erro acima pelo motivo.
 move_euserclash=Um usuário chamado $1 já existe no servidor virtual que está sendo convertido
 move_euserclash2=Um usuário chamado $1 já existe
+
 newvalidate_title=Validar servidores virtuais
 newvalidate_ecannot=Você não tem permissão para validar servidores
 newvalidate_header=Opções de validação do servidor
@@ -4299,6 +4412,7 @@ newvalidate_fixservers=Servidores virtuais para corrigir
 newvalidate_subservers=Também conserta sub-servidores?
 newvalidate_fix=Corrigir permissões agora
 newvalidate_header3=Permissões para corrigir opções
+
 validate_ediruser=O diretório inicial $1 pertence a $2 em vez de $3 
 validate_edirgroup=O diretório inicial $1 pertence ao grupo $2 em vez de $3 
 validate_esubdir=O subdiretório $1 no diretório inicial não existe
@@ -4337,6 +4451,7 @@ validate_ewebphpconfig=Foram encontrados erros de configuração do PHP na vers�
 validate_ewebuid=O usuário SuExec está definido como $1, mas o UID do servidor virtual é $2 
 validate_ewebgid=O grupo SuExec está definido como $1, mas o GID do servidor virtual é $2 
 validate_ewebdir=Bloco Apache &lt;Directory&gt; ausente para o diretório HTML $1 
+validate_ewebroot=O Apache DocumentRoot não está configurado para o diretório HTML $1 
 validate_ewebipv6=Existe um registro DNS IPv6 $2 com endereço $1, mas este servidor virtual não tem o IPv6 ativado
 validate_ewebipv6virt=Existe um registro DNS IPv6 com endereço $1, mas a configuração do Apache deste servidor virtual não possui um endereço IPv6
 validate_ewebip=O host virtual Apache para este domínio não usa o endereço IPv4 e a porta $1 
@@ -4381,6 +4496,7 @@ validate_espamcall=O arquivo de configuração do Procmail $1 não chama SpamAss
 validate_evirus=O ClamAV não é chamado no arquivo de configuração procmail do servidor
 validate_estatusweb=Nenhum monitor de status para o site encontrado
 validate_estatusssl=Nenhum monitor de status para o site SSL encontrado
+
 tscripts_title=Instaladores de script de modelo
 tscripts_sub=Para o modelo $1 
 tscripts_what=Scripts a serem instalados para novos servidores virtuais:
@@ -4401,6 +4517,7 @@ tscripts_eversion=Número de versão ausente ou inválida na linha $1
 tscripts_edb=Nome de banco de dados ausente ou inválido na linha $1 
 tscripts_edb2=O nome do banco de dados na linha $1 não contém nenhuma subestação (como ${DB})
 tscripts_enone=Nenhum script de modelo inserido
+
 spam_title=Entrega de Spam e Vírus
 spam_ecannot=Você não tem permissão para configurar a entrega de spam e vírus
 spam_virus=Destino para emails de vírus
@@ -4451,6 +4568,7 @@ spam_prov=Sistema de serviços Cloudmin $1
 spam_exitcode=Quando um usuário com excesso de cota recebe email
 spam_bounce=Voltar ao remetente
 spam_queue=Fila para entrega posterior
+
 cat_objects=Objetos de servidor
 cat_server=Configuração do servidor
 cat_admin=Opções de administração
@@ -4468,6 +4586,7 @@ cat_email=Configurações de email
 cat_ip=Endereços e Redes
 cat_check=Limites e validação
 cat_custom=Personalização do sistema
+
 pass_ecannot=Você não tem permissão para alterar a senha deste domínio
 pass_ecannot2=Você deve especificar um domínio para alterar a senha para
 pass_dbsync=Aviso - alterar a senha de administração deste domínio também atualizará a senha necessária para conectar-se aos seus bancos de dados.
@@ -4480,9 +4599,11 @@ pass_eadmin=Não foi possível encontrar o administrador!
 pass_changing=Alterando a senha do revendedor ..
 pass_changing2=Alterando a senha do administrador ..
 pass_hashpass=Armazenar apenas a senha com hash para este domínio?
+
 dbname_err=Falha ao alterar nomes de usuários do banco de dados
 dbname_euser=Nome de usuário ausente ou inválido
 dbname_esame=Nomes de usuário antigos e novos são os mesmos
+
 cmass_title=Criar servidores em lote
 cmass_ecannot=Você não tem permissão para criar servidores a partir de um arquivo em lote
 cmass_header=Crie vários servidores a partir do arquivo em lotes
@@ -4521,6 +4642,7 @@ cmass_eipmust=A alocação automática de IP é obrigatória para este modelo
 cmass_emustparent=Você não tem permissão para criar servidores virtuais de nível superior - um domínio pai deve ser especificado
 cmass_ecanparent=Você não tem permissão para gerenciar o servidor virtual pai $1 
 cmass_eparpar=O servidor pai $1 não é um servidor de nível superior
+
 umass_title=Criar usuários em lote
 umass_header=Crie vários usuários de email e FTP a partir do arquivo em lotes
 umass_err=Falha ao criar usuários em lote
@@ -4544,6 +4666,7 @@ umass_separator=Separador de campos em lote
 umass_separatorcolon=Dois pontos :
 umass_separatorcomma=Vírgula,
 umass_separatortab=Aba
+
 amass_title=Aliases de criação em lote
 amass_header=Crie vários aliases de email a partir do arquivo em lotes
 amass_help=Esta página permite criar vários aliases de email de uma vez a partir de um arquivo de texto, no seguinte formato (leia a ajuda desta página para obter mais informações):
@@ -4561,6 +4684,7 @@ amass_ebounce=O destino de rejeição não pode ser combinado com nenhum outro
 amass_done=Alias de e-mail criado $1 
 amass_eclash=Já existe um alias com o mesmo nome
 amass_eunknown=Destino de alias desconhecido $1 
+
 massu_title=Desinstalar scripts
 massu_err=Falha ao desinstalar scripts
 massu_enone=Nenhum selecionado
@@ -4568,6 +4692,7 @@ massu_rusure=Tem certeza de que deseja desinstalar os $1 scripts selecionados, q
 massu_rusuredb=Os dados de $1 bancos de dados também serão excluídos.
 massu_rusurehome=Como um dos scripts é instalado no diretório da web de nível superior do servidor virtual, <b>todos os arquivos</b> em <tt>$1</tt> serão excluídos quando não forem instalados!
 massu_sel=Scripts selecionados: $1 
+
 usage_title=Uso de disco
 usage_summaryheader=Resumo do uso do disco e limites para este servidor virtual.
 usage_quota=Cota de disco
@@ -4598,11 +4723,13 @@ usage_tabhomes=Diretório inicial
 usage_tabusers=Por usuário
 usage_tabsubs=Por sub-servidor
 usage_tabdbs=Por banco de dados
+
 webmin_alog=Log de acesso do Apache para $1 
 webmin_elog=Log de erros do Apache para $1 
 webmin_flog=Log do ProFTPD para $1 
 webmin_phpini=Configuração do PHP para $1 
 webmin_phpini2=Configuração do PHP $2 para $1 
+
 newquotacheck_title=Verificar cotas de disco
 newquotacheck_ecannot=Você não tem permissão para verificar cotas de disco.
 newquotacheck_esupport=A verificação de cota não é suportada ou requerida pelos seus sistemas de arquivos
@@ -4618,7 +4745,9 @@ newquotacheck_ok=Verifique agora
 newquotacheck_enone=Nenhum sistema de arquivos selecionado!
 newquotacheck_udoing=Verificando cotas de usuário em $1 ..
 newquotacheck_gdoing=Verifique as cotas do grupo em $1 ..
+
 phpmode_title=Opções do site
+phpmode_title2=Opções PHP
 phpmode_ecannot=Você não tem permissão para configurar opções de sites para este servidor virtual
 phpmode_header=Opções de site e PHP
 phpmode_mode=Modo de execução de script PHP
@@ -4632,6 +4761,7 @@ phpmode_short_fcgid=FCGId
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Aviso - A mudança dos modos CGI ou FCGId removerá todas as seleções de versão do PHP por diretório.
 phpmode_err=Falha ao salvar as opções do site
+phpmode_err2=Falha ao salvar opções de PHP
 phpmode_suexec=Executar scripts CGI como proprietário do domínio?
 phpmode_esuexec=A opção <b>CGI wrapper</b> não pode ser selecionada, a menos que <b>Executar scripts CGI como proprietário do domínio</b> esteja selecionado
 phpmode_emodsuexec=A opção <b>Executar scripts CGI como proprietário do domínio</b> não pode ser ativada, a menos que o módulo Apache <tt>mod_suexec</tt> esteja instalado
@@ -4691,6 +4821,9 @@ phpmode_ehtmldir3=O subdiretório de documentos do site não pode conter ..
 phpmode_ehtmldir4=O subdiretório de documentos do site não pode estar em <tt>domínios</tt>, pois esse diretório está reservado para sub-servidores
 phpmode_ssloff=Removendo o redirecionamento para o site SSL.
 phpmode_sslon=Adicionando redirecionamento ao site SSL.
+
+website_header=Opções do site
+
 spf_title=Opções de DNS
 spf_ecannot=Você não tem permissão para editar opções de DNS
 spf_enable=Ativando o SPF ..
@@ -4739,6 +4872,7 @@ spf_disabletlsa=Removendo registros TLSA ..
 spf_etlsa=.. não suportado neste sistema : $1 
 spf_synctlsa=Atualizando registros TLSA.
 spf_esynctlsa=.. nenhum encontrado para este domínio
+
 s3_emodule=O módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon não está instalado
 s3_emodule2=Não foi possível carregar o módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon : $2 
 s3_emodule3=Os módulos Perl $1 ou $2 necessários para se comunicar com o serviço S3 da Amazon não estão instalados
@@ -4753,14 +4887,17 @@ s3_elist2=Falha ao listar o intervalo S3 : $1
 s3_einfo2=Falha ao ler $1 : $2 
 s3_eputacl=Falha ao salvar a ACL do bloco : $1 
 s3_eputlifecycle=Falha ao salvar o ciclo de vida do bucket : $1 
+
 tdelete_err=Falha ao excluir modelos
 tdelete_enone=Nenhum selecionado
 tdelete_title=Excluir modelos de servidor
 tdelete_warn=Tem certeza de que deseja excluir os seguintes modelos de servidor selecionados : $1 
 tdelete_confirm=Excluir modelos
 tdelete_users2=Atualmente, eles estão em uso por servidores virtuais : $1 
+
 switch_ecannot=Você não tem permissão para mudar para o administrador deste domínio
 switch_eadmin=O administrador extra especificado não existe!
+
 newlinks_title=Links personalizados
 newlinks_descr=Este formulário pode ser usado para criar um link que está disponível no menu esquerdo quando um servidor virtual é selecionado. As seguintes subestações podem ser usadas no URL e no título do link :
 newlinks_desc=Título do link
@@ -4787,6 +4924,7 @@ newlinks_any=Qualquer
 newlinks_add=Adicione um novo link personalizado.
 newlinks_none=Nenhum link personalizado foi definido ainda.
 newlinks_return=links personalizados
+
 elink_title1=Criar link personalizado
 elink_title2=Editar link personalizado
 elink_header1=Detalhes do link personalizado
@@ -4801,6 +4939,7 @@ elink_feature=Servidores virtuais com recurso
 elink_err=Falha ao salvar o link personalizado
 elink_edesc=Título do link ausente
 elink_eurl=URL ausente ou inválido - nenhum espaço é permitido
+
 postsave_title=Servidor virtual modificado
 postsave_done=O servidor virtual $1 foi atualizado com sucesso. Use os links abaixo para continuar gerenciando.
 postsave_edit=Edite as configurações do servidor virtual.
@@ -4809,6 +4948,7 @@ postsave_users=Gerenciar usuários de email e FTP.
 postsave_aliases=Gerenciar aliases de correio e respostas automáticas.
 postsave_databases=Gerenciar e criar bancos de dados.
 postsave_index=Mostre todos os seus servidores virtuais Virtualmin.
+
 showpass_title=Senha do servidor virtual
 showpass_user=Login da administração
 showpass_pass=Senha de administração
@@ -4818,6 +4958,7 @@ showpass_ecannot=Você não tem permissão para visualizar senhas do servidor vi
 showpass_egone=Usuário não existe!
 showpass_dbuser=Nome de usuário para $1 
 showpass_dbpass=Senha para $1 
+
 phpver_title=Versões do PHP
 phpver_dir=Subdiretório do site
 phpver_ver=Versão
@@ -4831,6 +4972,7 @@ phpver_err=Falha ao salvar versões do PHP
 phpver_enewdir=Subdiretório inválido do site - deve ser como <tt>myapp</tt> ou <tt>programs/myapp</tt>
 phpver_derr=Falha ao remover versões do PHP
 phpver_enone=Nenhum selecionado
+
 html_title=Editar páginas da Web
 html_edit=Edite o arquivo existente:
 html_editok=Editar
@@ -4853,11 +4995,13 @@ html_upload=Subir arquivo:
 html_uploadok=Envio
 html_apply=Use o estilo do conteúdo:
 html_styleok=Substituir arquivos
+
 upload_err=Falha ao fazer upload do arquivo
 upload_enone=Nenhum arquivo selecionado para upload
 upload_enone2=Nenhum nome de arquivo encontrado!
 upload_title=Arquivo enviado
 upload_done=O arquivo $1, totalizando $2, foi carregado com sucesso no diretório de páginas da web.
+
 sharedips_title=Endereços IP compartilhados
 newsharedips_title=Endereços IP compartilhados
 sharedips_header=Endereços IP compartilhados por servidores virtuais
@@ -4883,6 +5027,7 @@ sharedips_missing=A interface pai $1 não existe!
 sharedips_eboot=Falha ao encontrar a configuração de tempo de inicialização para o endereço IP
 sharedips_ebootreal=Endereço IP não é virtual
 sharedips_eactives=Falha ao encontrar a configuração ativa do endereço IP
+
 newdynip_title=Atualização dinâmica de IP
 newdynip_enabled=Atualização dinâmica ativada?
 newdynip_service=Serviço DNS dinâmico
@@ -4905,8 +5050,10 @@ newdynip_off=A atualização dinâmica de IP foi desativada. Alterações no end
 newdynip_never=Ainda não atualizado
 newdynip_notify=Enviar por email notificações de atualização de IP para
 newdynip_none=Ninguém
+
 newdynip_eext=Falha ao calcular o endereço IP visível externamente
 newdynip_eexternal=No modo de script externo, o caminho completo para um script a ser executado deve ser inserido
+
 dynip_dyndns=DynDNS
 dynip_external=Script externo ..
 dynip_none=Não atualize nenhum serviço
@@ -4917,6 +5064,7 @@ style_content=Texto inicial do conteúdo do site
 style_ok=Usar estilo
 style_doing=Substituindo o conteúdo do site pelo estilo $1 ..
 style_egone=O estilo não existe ou não está disponível
+
 newstyles_title=Estilos de conteúdo
 newstyles_desc1=Este formulário permite instalar estilos criados por desenvolvedores de terceiros.
 newstyles_header=Instale um novo estilo
@@ -4940,6 +5088,7 @@ newstyles_desc3=Selecione um estilo de conteúdo de terceiros na lista abaixo pa
 newstyles_dstyle=Estilo a excluir
 newstyles_del=Excluir agora
 newstyles_edelete=O estilo de conteúdo selecionado não existe mais!
+
 addstyle_title=Estilo de instalação
 addstyle_err=Falha ao instalar o novo estilo
 addstyle_ecomp=Não é um arquivo de estilo
@@ -4949,9 +5098,11 @@ addstyle_efiles=O arquivo de estilos não contém nenhum arquivo!
 addstyle_done=O estilo de conteúdo de terceiros $1 foi instalado com sucesso. Quando usado por um site, ele cria $2 de arquivos de imagem e HTML.
 addstyle_ecmd=O comando de desarquivamento $1 não está instalado
 addstyle_ecmdfailed=Falha no comando de desarquivamento : $1 
+
 thumb_estyle=O estilo não existe
 thumb_title=Visualização de estilo
 thumb_ethumb=O estilo do conteúdo $1 não tem uma imagem de visualização.
+
 upgrade_title=Atualize para o Virtualmin Pro
 newupgrade_title=Atualize para o Virtualmin Pro
 upgrade_desc1=Se você gostou do Virtualmin GPL e deseja dar o próximo passo para a versão Pro, esta página pode ser usada para executar o processo de atualização automaticamente. As etapas para fazer isso são :
@@ -4992,6 +5143,7 @@ upgrade_update=Atualizando pacotes disponíveis do APT ..
 upgrade_debs=Atualizando pacotes Debian do Virtualmin : $1 
 upgrade_yumclear=Limpando caches YUM ..
 upgrade_etypematch=A atualização não é possível, pois o tipo de instalação do Virtualmin é <tt>$1</tt>, mas o Webmin é <tt>$2</tt>
+
 maillog_title=Pesquisar log de email
 maillog_desc=Este formulário pode ser usado para pesquisar nos logs de correio por mensagens que correspondam a algumas condições, para descobrir o que aconteceu com eles. Todos os campos são opcionais e serão ignorados para fins de comparação se deixados em branco.
 maillog_header=Condições de pesquisa
@@ -5028,6 +5180,7 @@ maillog_ok1=O Virtualmin ainda não inicializou o arquivo de cache do log do ser
 maillog_showspam=Mostrar spam?
 maillog_showvirus=Mostrar vírus?
 maillog_bad=Exclusões
+
 viewmaillog_err=Falha ao exibir a mensagem registrada
 viewmaillog_egone=Não está mais no log!
 viewmaillog_title=Mensagem de email registrada
@@ -5047,6 +5200,7 @@ viewmaillog_file=Caminho de destino completo
 viewmaillog_relay=Retransmissão de email de saída
 viewmaillog_status=Status de entrega do servidor de email
 viewmaillog_size=Tamanho da mensagem
+
 bwreset_title=Recalcular estatísticas da largura de banda
 bwreset_header=Opções para recálculo da largura de banda
 bwreset_date=Data para calcular novamente a partir de
@@ -5068,6 +5222,7 @@ bwreset_doing=Redefinir a largura de banda conta para servidores e recursos sele
 bwreset_done=.. feito.
 bwreset_running=Gerando novamente estatísticas de largura de banda a partir de arquivos de log.
 bwreset_started=.. processo iniciado. Isso pode levar várias horas se você tiver optado por processar novamente os logs por um longo período ou por um grande número de domínios.
+
 massg_title=Scripts de atualização
 massg_rusure=Tem certeza de que deseja atualizar os scripts $1 selecionados para as versões mais recentes?
 massg_ok=Atualize agora
@@ -5077,6 +5232,7 @@ massg_fromto=Atualizando de $1 para $2
 massg_stay=Permanecendo com $1 
 massg_doing=Atualizando $1 para a versão $2 ..
 massg_edeleted=O script $1 foi excluído manualmente e, portanto, não pode ser atualizado!
+
 aedit_title=Editar aliases manualmente
 aedit_header=Crie vários aliases de email a partir do arquivo em lotes
 aedit_help=Esta página permite editar, criar e excluir vários aliases de uma só vez, editando cada um como uma linha de texto. Cada linha tem o seguinte formato (leia a ajuda desta página para obter mais informações):
@@ -5088,6 +5244,7 @@ aedit_doing=Atualizando aliases de email.
 aedit_complete=.. concluído ($1 criado, $3 modificado, $4 excluído, $2 erros).
 aedit_etwice=Um alias com o mesmo nome é listado mais de uma vez
 aedit_eauto=As respostas automáticas não podem ser configuradas ao editar aliases manualmente
+
 exclude_title=Diretórios e DBs excluídos
 exclude_header=Opções de exclusão de backup
 exclude_dirs=Diretórios em casa para pular
@@ -5098,6 +5255,7 @@ exclude_err=Falha ao salvar diretórios excluídos
 exclude_eabs=O diretório '$1' não pode ser um caminho absoluto
 exclude_edot=O diretório '$1' não pode conter.
 exclude_edb=O nome do banco de dados '$1' é inválido
+
 balancers_title=Caminhos de proxy
 balancers_ecannot=Você não tem permissão para editar caminhos de proxy para este domínio
 balancers_esupport=O domínio ou sistema não suporta proxies
@@ -5112,6 +5270,7 @@ balancers_return=lista de caminhos de proxy
 balancers_derr=Falha ao excluir caminhos do proxy
 balancers_denone=Nenhum selecionado
 balancers_none2=Sem proxy
+
 balancer_create=Criar caminho de proxy
 balancer_edit=Editar caminho do proxy
 balancer_egone=O caminho do proxy selecionado não existe mais
@@ -5130,6 +5289,7 @@ balancer_eurls=Nenhum URL de destino inserido
 balancer_script=Usado pelo instalador de scripts
 balancer_scriptver=Versão do script
 balancer_none=Não faça proxy para esse caminho - sirva localmente
+
 scriptwarn_header=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis :
 scriptwarn_header2=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis, no \nvirtual servidor $1  :
 scriptwarn_script=Nome do script
@@ -5139,6 +5299,7 @@ scriptwarn_dom=Nome do domínio
 scriptwarn_where3=As atualizações podem ser feitas no Virtualmin, na página Instalar scripts de cada domínio ou de uma só vez em: \n $1 
 scriptwarn_where2=As atualizações podem ser feitas no Virtualmin, na página: \n $1 
 scriptwarn_subject=Atualizações de script do Virtualmin disponíveis
+
 quotawarn_subject=Monitoramento de cota de disco de usuário do Virtualmin
 quotawarn_body=Os seguintes servidores Virtualmin atingiram ou estão se aproximando \nseus limites de cota de disco:
 quotawarn_body2=Os seguintes usuários do Virtualmin atingiram ou estão se aproximando \nseus limites de cota de disco:
@@ -5151,6 +5312,7 @@ quotawarn_reached=Atingido $1 %
 quotawarn_over=Acima da cota
 quotawarn_suffixdom=Enviado pelo Virtualmin em: $1 
 quotawarn_suffixuser=Enviado pelo Virtualmin em: $1 
+
 history_title=Estatísticas do sistema
 history_ecannot=Você não tem permissão para visualizar estatísticas históricas do sistema
 history_year=1 ano
@@ -5217,6 +5379,7 @@ history_type_email=Mensagens de email
 history_type_cpu=Utilização da CPU
 history_type_virt=O Virtualmin conta
 history_type_system=Estatísticas do sistema
+
 sv_title=Verificação de spam e vírus
 newsv_title=Verificação de spam e vírus
 sv_ecannot=Você não tem permissão para editar a verificação de spam e vírus
@@ -5251,6 +5414,7 @@ sv_title5=Ativar servidor de filtragem de spam
 sv_sdisabling=Desativando o servidor de filtragem SpamAssassin.
 sv_senabling=Configurando e ativando o servidor de filtragem SpamAssassin.
 sv_swarning=Atenção! O Virtualmin está configurado para usar o filtro do servidor, mas o processo do servidor SpamAssassin não está mais em execução
+
 features_title=Recursos e plugins
 newfeatures_title=Recursos e plugins
 features_ecannot=Você não tem permissão para editar recursos habilitados
@@ -5262,6 +5426,7 @@ features_desc=Esta página permite selecionar os principais recursos e plug-ins 
 features_used=Mostrar domínios
 features_err=Falha ao salvar os recursos ativados
 features_return=lista de recursos e plugins
+
 clamd_copyconf=Criando o arquivo de configuração do ClamAV $1 ..
 clamd_esrcfile=.. o arquivo de origem correspondente a $1 não foi encontrado!
 clamd_esrcalready=.. já existe
@@ -5283,18 +5448,21 @@ clamd_ekillmsg=Falha ao eliminar os processos do servidor de verificação de v�
 spamd_estartmsg=O servidor de filtro SpamAssassin não pôde ser iniciado
 spamd_estopmsg=O servidor de filtro SpamAssassin não está sendo executado
 spamd_ekillmsg=Falha ao eliminar processos do servidor de filtro SpamAssassin : $1 
+
 spamd_boot=Habilitando o servidor SpamAssassin no momento da inicialização.
 spamd_start=Iniciando o servidor SpamAssassin ..
 spamd_startfailed=.. falha ao iniciar : $1 
 spamd_unboot=Desativando o servidor SpamAssassin no momento da inicialização.
 spamd_unbootact=.. nenhuma ação de inicialização encontrada!
 spamd_stop=Parando o servidor SpamAssassin ..
+
 chain_err=Falha ao salvar o certificado da CA
 chain_efile=O arquivo de certificado não existe
 chain_ecert=Arquivo de certificado inválido : $1 
 chain_emode1=Você não tem permissão para selecionar um arquivo diferente no servidor!
 chain_eupload=Nenhum arquivo de certificado carregado selecionado
 chain_epaste=Nenhum texto de certificado inserido
+
 stopscript_title=Parar servidor
 stopscript_egone=O script não existe mais!
 stopscript_doing=Encerrando o processo do servidor para $1 ..
@@ -5303,6 +5471,7 @@ startscript_title=Iniciar servidor
 startscript_doing=Iniciando o processo do servidor para $1 ..
 startscript_failed=.. falhou : $1 
 restartscript_title=Reinicie o servidor
+
 newshells_title=Shell personalizados
 newshells_descr=Esta página permite personalizar os shells disponíveis para administradores de servidores virtuais e usuários de email/FTP para atender às necessidades do seu site. Os shells personalizados são frequentemente usados para conceder aos usuários acesso ao FTP, SSH ou outros serviços.
 newshells_defs=Shell disponíveis para administradores e caixas de correio :
@@ -5327,6 +5496,7 @@ newshells_eownerdef=Exatamente um shell deve ser o padrão para administradores 
 newshells_emailboxdef=Exatamente um shell deve ser o padrão para caixas de correio
 newshells_eresellerdef=Exatamente um shell deve ser o padrão para revendedores
 newshells_id=Acesso
+
 shells_mailbox=Somente email
 shells_mailbox2=Sem acesso
 shells_mailboxftp=Email e FTP
@@ -5342,12 +5512,15 @@ shells_ftp2=Somente FTP
 shells_ssh=Email, FTP e SSH
 shells_ssh2=FTP e SSH
 shells_none=&lt;Sem casca&gt;
+
 nicetime_days=$1 dias, $2 horas, $3:$4 minutos
 nicetime_hours=$1 horas, $2:$3 minutos
 nicetime_mins=$1 minutos, $2 segundos
 nicetime_secs=$1 segundos
+
 bcc_epostfix=Nenhum arquivo de mapeamento BCC está configurado na sua configuração do Postfix!
 bcc_emailserver=Seu servidor de email não suporta BCCing
+
 mail_title=Configurações de email
 mail_rbcc=E-mail de entrada da Cco para
 mail_err=Falha ao salvar as configurações de email
@@ -5374,6 +5547,7 @@ mail_nothing=Nenhuma alteração foi feita!
 mail_ecloudid=Um ID deve ser especificado para o filtro de correio na nuvem selecionado
 mail_url=URL atual do provedor de filtragem
 mail_mx=Registros MX atuais
+
 nf_header=Os seguintes novos recursos estão disponíveis em $1 ..
 nf_desc=Característica
 nf_html=Descrição
@@ -5383,6 +5557,7 @@ nf_and=$1 e $2
 nf_seen=Ocultar novos recursos
 nf_try=Tente ..
 nf_ver=(Versão 1)
+
 chroot_title=Restrições ao diretório FTP
 newchroot_title=Restrições ao diretório FTP
 newchroot_desc=Esta página permite configurar quais diretórios os usuários que efetuam login via FTP podem acessar. Restrições se aplicam aos proprietários de servidores virtuais selecionados e a todos os usuários com acesso FTP. Os proprietários de servidores que não possuem nenhuma restrição correspondente poderão ver arquivos fora de suas casas, embora as permissões geralmente os impeçam de acessar os diretórios de outros servidores virtuais.
@@ -5403,6 +5578,7 @@ chroot_eneg=A opção de diretório inicial do servidor virtual não pode ser se
 chroot_edom=Não foi possível encontrar o servidor virtual para o grupo $1 
 chroot_edir=Diretório ausente ou inválido na linha $1 
 chroot_saving=Atualizando a configuração do servidor FTP.
+
 res_elinux=Os limites de recursos são suportados apenas no Linux
 res_elinuxconf=O arquivo de configuração de limites de recurso $1 não foi encontrado
 res_epamssh=Não foi possível encontrar o serviço PAM para SSH, portanto, a verificação dos limites de recursos não está concluída
@@ -5423,6 +5599,7 @@ res_secs=segundos
 res_time=Tempo máximo de CPU por processo
 res_etime=Tempo máximo de CPU ausente ou inválido por processo
 res_etime2=O tempo máximo da CPU por processo deve ser de 1 minuto ou mais
+
 sched_title=Backups agendados
 sched_ecannot=Você não tem permissão para gerenciar backups agendados
 sched_yes=Sim $1 
@@ -5453,23 +5630,27 @@ sched_now=Cópia de segurança ..
 sched_restore=Restaurar ..
 sched_return=backups agendados
 sched_logs=Logs de backup ..
+
 cron_special=Horário simples
 cron_complex=Horário complexo
 cron_cron=Especificação Cron
 cron_title=Selecionar agendamento
 cron_ok=Está bem
 cron_ehidden=Nenhuma programação complexa foi selecionada
+
 dsched_err=Falha ao excluir backups agendados
 dsched_enone=Nenhum selecionado
 dsched_egone=O backup com o ID $1 não existe mais
 dsched_erunning=O backup com o ID $1 não está mais em execução
 dsched_ecannot=Você não tem permissão para gerenciar o backup com o ID $1 
+
 dbhosts_err=Falha ao alterar hosts do banco de dados remoto
 dbhosts_enone=Nenhum nome de host ou endereço IP digitado
 dbhosts_ehost='$1' não é um nome de host ou expressão válido
 dbhosts_title=Atualizar hosts do banco de dados
 dbhosts_failed=.. falhou : $1 
 dbhosts_done=.. definido para $1 e outros usuários com acesso ao banco de dados.
+
 newglobal_title=Variáveis globais
 newglobal_desc=As variáveis definidas nesta página podem ser usadas em qualquer domínio ou modelo no nível do usuário no Virtualmin. Para adicionar uma variável, basta preencher o nome e o valor na linha vazia na parte inferior da tabela. Para remover um, limpe seu campo de nome. Para desativar temporariamente uma variável, desmarque sua caixa na coluna ativada.
 newglobal_ecannot=Você não tem permissão para editar variáveis globais
@@ -5478,20 +5659,24 @@ newglobal_name=Nome variável
 newglobal_value=Valor variável
 newglobal_err=Falha ao salvar variáveis globais
 newglobal_ename=Nome de variável inválido na linha $1 - somente letras, números e sublinhado são permitidos
+
 spamtrap_already=Os aliases de interceptação de spam já existem para este servidor virtual
 spamtrap_clash=Os aliases de interceptação de spam não podem ser criados, pois os seguintes aliases conflitantes já existem : $1 
 spamtrap_noaliases=Os aliases de interceptação de spam não existem para este servidor virtual
+
 unsub_title=Converter subdomínio
 unsub_rusure=Tem certeza de que deseja converter este subdomínio em um sub-servidor? Seu conteúdo da web não será afetado e quaisquer registros DNS serão movidos para seu próprio domínio.
 unsub_ok=Converter em sub-servidor
 unsub_doing=Convertendo $1 em sub-servidor.
 unsub_failed=.. falha na conversão!
+
 unalias_title=Converter servidor de alias
 unalias_err=Falha ao converter o servidor de alias
 unalias_rusure=Tem certeza de que deseja converter esse servidor virtual de alias em um sub-servidor? Ele não servirá mais as páginas da web do servidor virtual de destino antigo, mas poderá ter seu próprio conteúdo da web, caixas de correio e aliases de correio.
 unalias_ok=Converter em sub-servidor
 unalias_doing=Convertendo $1 em sub-servidor.
 unalias_failed=.. falha na conversão!
+
 connect_echeck=Falha ao verificar a conectividade
 connect_eempty=Nenhuma resposta da verificação de conectividade
 connect_ecannot=Você não tem permissão para verificar a conectividade deste servidor virtual
@@ -5516,6 +5701,7 @@ cfix_ssl=Verifique se o servidor da web do sistema está em execução, se a por
 cfix_smtptimeout=Verifique se o firewall do seu sistema está bloqueando a porta 25.
 cfix_smtp=Verifique se o servidor de correio do sistema está em execução e escutando na interface de rede externa.
 cfix_smtpto=Verifique se o servidor de email está configurado para aceitar emails para este domínio.
+
 plans_title=Planos de conta
 newplan_title=Planos de conta
 plans_name=Nome do plano
@@ -5536,6 +5722,7 @@ plans_setdef=Defina o plano padrão para:
 plans_nodef=Nenhum - use primeiro na lista
 plans_savedef=Alterar padrão
 plans_esetdef=O plano selecionado não existe ou não está disponível para você
+
 plan_title1=Criar plano de conta
 plan_title2=Editar plano de conta
 plan_header1=Detalhes básicos do plano
@@ -5557,9 +5744,11 @@ plan_scripts=Scripts permitidos
 plan_scriptsall=Todos, exceto os desativados globalmente
 plan_scriptsopts=Todos os scripts
 plan_scriptssel=Permitido
+
 dplans_err=Falha ao excluir planos
 dplans_enone=Nenhum selecionado
 dplans_eall=Pelo menos um plano deve existir
+
 postgrey_title=Lista de emails cinza
 newpostgrey_title=Lista de emails cinza
 postgrey_epostfix=O Postgrey só pode ser usado em conjunto com o servidor de correio Postfix
@@ -5612,6 +5801,7 @@ postgrey_title4=Instale o Postgrey
 postgrey_installing=Instalando o pacote Postgrey ..
 postgrey_installfailed=.. Instalação falhada!
 postgrey_installed=.. instalação concluída com sucesso
+
 editgrey_titleclients=Editar cliente da lista de permissões
 editgrey_titlerecipients=Editar destinatário da lista de permissões
 creategrey_titleclients=Adicionar cliente na lista de permissões
@@ -5627,8 +5817,10 @@ editgrey_err=Falha ao salvar a entrada da lista de permissões
 editgrey_evalueclients=Endereço IP ou nome de host do servidor de correio ausente ou com aparência inválida
 editgrey_eregexp=Expressão regular inválida : $1 
 editgrey_evaluerecipients=Endereço de e-mail do destinatário ausente ou com aparência inválida
+
 delgrey_err=Falha ao excluir entradas da lista de permissões
 delgrey_enone=Nenhum selecionado
+
 copycert_title=Copiar certificado SSL
 copycert_ecannot=Você não tem permissão para copiar o certificado SSL deste servidor virtual
 copycert_webmindir=Copiando certificado e chave para $1 ..
@@ -5650,6 +5842,7 @@ copycert_penabling=Ativando o SSL na configuração do Postfix.
 copycert_fsaving=Copiando certificado e chave para arquivos ProFTPD.
 copycert_fsaving2=Copiando certificado, chave e CA para arquivos ProFTPD.
 copycert_fenabling=Ativando o SSL na configuração do ProFTPD.
+
 wizard_title=Assistente de pós-instalação
 wizard_ecannot=Você não tem permissão para executar o assistente de pós-instalação
 wizard_cancel=Cancelar
@@ -5736,6 +5929,7 @@ wizard_defssl2=Sim, com o certificado Let's Encrypt
 wizard_defdom_clash=Jáexiste um servidor virtual chamado $1 
 wizard_defdom_already=Jáexiste um servidor virtual padrão chamado $1 
 wizard_defdom_desc=Domínio padrão do host
+
 backuplog_title=Logs de backup
 backuplog_ecannot=Você não tem permissão para visualizar logs de backup do Virtualmin
 backuplog_search=Localizar registros correspondentes
@@ -5758,6 +5952,7 @@ backuplog_part=Parcial
 backuplog_nodoms=Nenhum domínio
 backuplog_return=lista de log de backup
 backuplg_esched=O backup agendado não existe!
+
 viewbackup_title=Exibir log de backup
 viewbackup_eid=ID de backup ausente ou inválido!
 viewbackup_egone=O backup registrado não existe!
@@ -5798,6 +5993,7 @@ viewbackup_key=Sim, com a chave $1
 viewbackup_sched=Do backup agendado
 viewbackup_gone=ID $1 (excluído)
 viewbackup_ownrestore=Proprietários podem restaurar?
+
 dbackup_err=Falha ao excluir o backup
 dbackup_title=Excluir backup
 dbackup_rusure=Tem certeza de que deseja excluir este backup de $2 domínios de $3 totalizando $1 ?
@@ -5805,6 +6001,7 @@ dbackup_confirm=Excluir agora
 dbackup_doing=Excluindo backup de $1 ..
 dbackup_done=.. Apagado com sucesso
 dbackup_failed=.. falhou : $1 
+
 redirects_title=Redirecionamentos de site
 redirects_ecannot=Você não tem permissão para editar redirecionamentos de site para este domínio
 redirects_eweb=Este servidor virtual não suporta redirecionamentos
@@ -5816,6 +6013,7 @@ redirects_derr=Falha ao excluir redirecionamentos de site
 redirects_type=Tipo
 redirects_redirect=Redirecionar para URL
 redirects_dest=Destino
+
 redirect_egone=O redirecionamento não existe mais!
 redirect_create=Redirecionamento de criação de site
 redirect_edit=Editar redirecionamento de site
@@ -5840,9 +6038,11 @@ redirect_edir=Diretório de destino não absoluto
 redirect_edir3=Diretório de destino ausente $1 
 redirect_edir2=O diretório de destino deve estar abaixo de $1 
 redirect_ecode=Código de status HTTP inválido
+
 newchangelog_title=Registro de Novos Recursos
 newchangelog_ecannot=Você não tem permissão para visualizar o novo log de recursos
 newchangelog_desc=Esta página lista todas as principais alterações em todas as versões do Virtualmin instaladas no seu sistema, até a versão atual.
+
 dkim_title=Correio Identificado de DomainKeys
 dkim_title1=Habilitar correio identificado por DomainKeys
 dkim_title2=Desativar correio identificado de teclas de domínio
@@ -5870,10 +6070,12 @@ dkim_extra=Domínios para assinar
 dkim_eextra=Domínio adicional inválido $1 
 dkim_eexclude=Domínio excluído inválido $1 
 dkim_exclude=Nunca assine domínios
+
 dkim_title4=Instale o DKIM
 dkim_installing=Instalando o pacote de filtros DKIM.
 dkim_installfailed=.. Instalação falhada!
 dkim_installed=.. instalação concluída com sucesso
+
 dkim_newkey=Gerando chave privada no arquivo $1 ..
 dkim_enewkey=.. chave privada falhou : $1 
 dkim_pubkey=Extraindo chave pública de chave privada em $1 ..
@@ -5903,6 +6105,7 @@ dkim_records=Registros DNS DKIM para domínios
 dkim_pubkeypem=Chave pública DKIM no formato PEM
 dkim_privkeypem=Chave privada DKIM no formato PEM
 dkim_esize=O tamanho da chave DKIM deve ser um número de pelo menos 512 bits
+
 newautoconfig_title=Configuração do cliente de email
 autoconfig_ecannot=Você não tem permissão para editar a configuração do cliente de email
 autoconfig_header=Opções de configuração automática do cliente
@@ -5914,6 +6117,7 @@ autoconfig_enable=Habilitando a configuração automática do cliente de email p
 autoconfig_disable=Desativando a configuração automática do cliente de email para $1 servidores virtuais.
 autoconfig_failed=Falha no $1 : $2 
 autoconfig_enabled_global=Configurações de configuração automática de email salvas.
+
 newretention_title=Limpeza da caixa de correio
 retention_ecannot=Você não tem permissão para limpar a caixa de correio configurada
 retention_header=Opções de limpeza automática de caixa de correio
@@ -5929,6 +6133,7 @@ retention_folders=Mensagens de limpeza em
 retention_folders0=Todas as pastas do usuário
 retention_folders1=Somente a caixa de entrada
 retention_desc=Esta página permite que o Virtualmin exclua automaticamente automaticamente as mensagens de email antigas das caixas de correio dos proprietários de domínio e usuários de email.
+
 provision_title=Cliente de serviços Cloudmin
 provision_ecannot=Você não tem permissão para configurar o cliente de serviços Cloudmin
 provision_header=Opções do cliente de serviços Cloudmin
@@ -5976,12 +6181,14 @@ provision_espamtest=.. o sistema fornecido $1 não pode ser usado : $2
 provision_spamgot=.. usando o sistema $1 
 provision_spamunsetup=Interrompendo o uso do sistema de filtragem de spam.
 provision_espamunsetup=.. falhou : $1 
+
 provision_emysqldbcheck=Erro de serviços ao verificar o banco de dados MySQL : $1 
 provision_emysqldb=O banco de dados MySQL $1 já existe no host de serviços
 provision_emysqlcheck=Erro de serviços ao verificar o login do MySQL : $1 
 provision_emysql=O login do MySQL $1 já existe no host de serviços
 provision_ednscheck=Erro de serviços na verificação da zona DNS : $1 
 provision_edns=A zona DNS $1 já existe no host de serviços
+
 records_title=Registros DNS
 records_ecannot=Você não tem permissão para editar registros DNS
 records_name=Nome do registro
@@ -6034,6 +6241,7 @@ records_comment=Comente
 records_manual=Editar registros manualmente
 records_epost=Os registros não foram totalmente excluídos : $1 
 records_viewdesc=O domínio DNS deste servidor virtual não é hospedado pelo seu sistema Virtualmin. Se o domínio estiver hospedado em outro lugar, os registros abaixo deverão ser usados para garantir que o site e o email funcionem corretamente.
+
 record_title1=Criar registro DNS
 record_title2=Editar registro DNS
 record_egone=O registro não existe mais!
@@ -6063,6 +6271,7 @@ record_defttl=Tempo de cache padrão
 record_epost=O registro não foi totalmente salvo : $1 
 record_esservice=Nome de serviço ausente ou com aparência inválida
 record_esproto=Protocolo de serviço inválido
+
 clone_err=Falha ao clonar o servidor virtual
 clone_eclash=Já existe um servidor virtual com o mesmo nome
 clone_eclash2=Um usuário com o mesmo nome já existe
@@ -6137,6 +6346,7 @@ clone_ssl=Copiando diretivas SSL do Apache ..
 clone_newip=Endereço IP para clone
 clone_alloc=Alocar novo IP
 clone_vip=Usar endereço
+
 mrecords_title=Editar registros DNS
 mrecords_ecannot=Você não tem permissão para editar manualmente registros DNS
 mrecords_desc=Esta página permite modificar manualmente todos os registros DNS no domínio, no formato de configuração BIND.
@@ -6144,16 +6354,19 @@ mrecords_err=Falha ao salvar registros DNS
 mrecords_enone=Nada entrou!
 mrecords_evalidate=Falha na validação : $1 
 mrecords_validate=Validar novos registros?
+
 mxv_unsupported=Somente Sendmail e Postfix são suportados para restringir a retransmissão
 mxv_rrm=A diretiva $1 não está definida na configuração do Postfix
 mxv_eaccess=O recurso de controle de spam (access_db) não está ativado na configuração do Sendmail
 mxv_eaccessfile=O arquivo de controle de spam (access_db) $1 ainda não existe
+
 fixperms_err=Falha ao corrigir permissões
 fixperms_edoms=Nenhum servidor virtual selecionado
 fixperms_title=Fixação de permissões
 fixperms_dom=Corrigindo propriedade e permissões de arquivo para $1 ..
 fixperms_edir=.. não possui um diretório inicial
 fixperms_failed=.. falhou : $1 
+
 bkeys_title=Chaves de criptografia de backup
 bkeys_key=ID da chave GPG
 bkeys_delete=Excluir chaves selecionadas
@@ -6175,6 +6388,7 @@ bkeys_eused2=A chave $2 está em uso por um backup agendado para $1
 bkeys_rusure=Tem certeza de que deseja excluir as $1 chaves de criptografia de backup selecionadas?
 bkeys_rusuerlogs=Essas chaves foram usadas para criptografar $1 backups anteriores, que não podem ser restaurados sem eles.
 bkeys_all=Permitir que os proprietários de domínio usem a chave?
+
 bkey_create=Criar chave de criptografia
 bkey_edit=Editar chave de criptografia
 bkey_ecannot=Você não tem permissão para editar esta chave de criptografia
@@ -6211,11 +6425,13 @@ bkey_rusuerlogs=Essa chave foi usada para criptografar $1 backups anteriores, qu
 bkey_edescclash=Já existe uma chave GPG com a mesma descrição
 bkey_eemailclash=Já existe uma chave GPG com o mesmo endereço de email
 bkey_download=Chave de Download
+
 hashtype_crypt=Unix DES crypt
 hashtype_md5=Hash MD5
 hashtype_unix=Tipo de hash padrão do sistema
 hashtype_mysql=Hash de senha do MySQL
 hashtype_digest=Hash de autenticação de resumo da Web
+
 fixsymlinks_title=Corrigir permissões de link simbólico
 fixsymlinks_ecannot=Você não tem permissão para corrigir permissões de link simbólico
 fixsymlinks_doing=Atualizando todos os servidores virtuais para evitar links simbólicos inseguros.
@@ -6228,10 +6444,12 @@ fixsymlinks_doms=Arquivos problemáticos <tt>.htaccess</tt> foram encontrados em
 fixsymlinks_ok=Corrigir arquivos de acesso
 fixsymlinks_htdoing=Opções de correção nos arquivos <tt>.htaccess</tt> ..
 fixsymlinks_htdone=.. $1 arquivos corrigidos em $2 domínios
+
 fixmodphp_title=Corrigir permissões do PHP
 fixmodphp_ecannot=Você não tem permissão para corrigir permissões PHP
 fixmodphp_doing=Atualizando todos os servidores virtuais para impedir o uso do mod_php quando desativado.
 fixmodphp_done=.. $1 domínios corrigidos
+
 buckets_title=Caçambas Amazon S3
 buckets_ecannot=Você não tem permissão para gerenciar buckets S3
 buckets_eaccounts=Ainda não foram criados backups agendados para o S3 e nenhuma chave S3 padrão foi definida.
@@ -6243,6 +6461,7 @@ buckets_created=Criado em
 buckets_location=Localização
 buckets_add=Crie um novo bucket S3.
 buckets_return=lista de baldes
+
 bucket_title1=Criar bucket S3
 bucket_title2=Editar intervalo S3
 bucket_eagone=Conta não existe!
@@ -6287,6 +6506,7 @@ bucket_eldays=Número de dias ausente ou não numérico no ciclo de vida $1
 bucket_elday=Dia ausente ou não numérico no ciclo de vida $1 
 bucket_elmonth=Mês ausente ou não numérico no ciclo de vida $1 
 bucket_elyear=Ano ausente ou não numérico no ciclo de vida $1 
+
 ratelimit_title=Limitação de taxa de correio
 ratelimit_eos=A limitação da taxa de email não é suportada neste sistema operacional
 ratelimit_econfig=O arquivo de configuração milter-greylist $1 não existe
@@ -6315,6 +6535,7 @@ ratelimit_enum=A contagem de mensagens deve ser um número
 ratelimit_etime=O período de tempo deve ser um número
 ratelimit_socket=Ajustando arquivo de soquete ..
 ratelimit_etwice=O domínio $1 foi selecionado duas vezes
+
 ratelimit_title4=Instalar limite de taxa de correio
 ratelimit_installing=Instalando o pacote limitador de taxa de email.
 ratelimit_installfailed=.. Instalação falhada!
@@ -6335,6 +6556,7 @@ ratelimit_h=horas
 ratelimit_d=dias
 ratelimit_w=semanas
 ratelimit_y=anos
+
 transfer_title=Transferir servidor virtual
 transfer_err=Falha ao transferir o servidor
 transfer_ecannot=Você não tem permissão para transferir servidores virtuais
@@ -6387,6 +6609,7 @@ transfer_disabling=Desativando $1 neste sistema.
 transfer_ereplication=A replicação e a exclusão do domínio não podem ser ativadas ao mesmo tempo
 transfer_ehost=Nome do host de destino ausente
 transfer_ehost2=O nome do host de destino não pode ser resolvido
+
 domdkim_title=Opções de DomainKey
 domdkim_header=Opções de DomainKey para este servidor
 domdkim_key=Chave privada DKIM no formato PEM
@@ -6402,6 +6625,7 @@ domdkim_ekey=Formato de chave inválido : $1
 domdkim_egen=Falha ao gerar nova chave : $1 
 domdkim_enabled=DKIM não está ativado no momento
 domdkim_records=Registros DNS DKIM
+
 clouds_title=Provedores de armazenamento em nuvem
 clouds_name=Nome do provedor
 clouds_state=Estado atual
@@ -6411,6 +6635,7 @@ clouds_unconf=Ainda não configurado
 clouds_return=lista de fornecedores
 clouds_nusers=Usado por $1 backups
 clouds_nousers=Não usado por nenhum backup
+
 cloud_s3desc=Amazon S3
 cloud_rsdesc=Arquivos da Rackspace Cloud
 cloud_googledesc=Google Cloud Storage
@@ -6476,6 +6701,7 @@ cloud_bb_key=Chave API
 cloud_bb_ekeyid=ID de chave de API ausente ou com aparência inválida
 cloud_bb_ekey=Chave de API ausente ou com aparência inválida
 cloud_bb_elogin=Falha no login no Backblaze : $1 
+
 left_virtualmin=Virtualmin
 left_master=Administrador principal
 left_reseller=Revendedor
@@ -6487,6 +6713,7 @@ left_master2=Admin principal do Cloudmin
 left_login=Login: $1 
 left_level=Nível 1
 left_generic=Criar servidor virtual
+
 right_statusheader=Status
 right_sysinfoheader=Programas
 right_virtheader=Contagens do Virtualmin
@@ -6550,6 +6777,7 @@ right_quota=Uso e cota de disco
 right_bw=Uso e limite de largura de banda
 right_of=$1 de $2 
 right_sysinfo=informação do sistema
+
 assoc_title=Recursos associados e não associados
 assoc_desc=Os recursos ativados ou desativados nesta página não atualizarão nenhum arquivo de configuração do sistema - apenas o banco de dados de recursos do Virtualmin que ele espera que um domínio tenha será alterado. Isso pode ser usado para importar um recurso que foi configurado manualmente ou para desconectar uma configuração para que seja preservada quando um servidor virtual for excluído.
 assoc_header=Configurações de associação de recursos
@@ -6557,6 +6785,7 @@ assoc_features=Recursos conhecidos pelo Virtualmin
 assoc_validate=Requer validação bem-sucedida antes de salvar?
 assoc_err=Falha ao associar recursos
 assoc_evalidate=Falha na validação para $1 : $2 
+
 running_title=Execução de backups
 running_stop=Interromper backups selecionados
 running_started=Começou às
@@ -6568,6 +6797,7 @@ running_cron=Backup agendado
 running_link=Visite a página <a href='$1'>backups agendados</a> para criar backups executados em segundo plano regularmente, ou a página <a href='$2'>logs de backup</a> para ver os backups que já foram concluídas.
 running_err=Falha ao parar os backups
 running_enone=Nenhum selecionado!
+
 recovery_title=Recuperar Senha
 recovery_msg1=Tem certeza de que deseja enviar a senha atual para $1 a $2 ?
 recovery_msg2=Tem certeza de que deseja gerar uma nova senha aleatória para $1 e enviá-la para $2 ?
@@ -6577,6 +6807,7 @@ recovery_body1=A senha da sua conta de email $3 com o login $2 é : $1
 recovery_body2=Uma nova senha aleatória para sua conta de email $3 com login $2 foi gerada : $1 
 recovery_sending=Enviando email de recuperação de senha para $1 ..
 recovery_failed=.. falhou : $1 
+
 letsencrypt_err=Falha ao solicitar certificado
 letsencrypt_title=Solicitar certificado
 letsencrypt_doing2=Solicitando um certificado para $1 do Let's Encrypt ..
@@ -6596,12 +6827,14 @@ letsencrypt_conncheck=Verificando a conectividade externa para $1 ..
 letsencrypt_connerrs=.. foram encontrados erros, o que impedirá o Let's Encrypt de emitir um certificado :
 letsencrypt_connok=.. Não foram encontrados problemas
 letsencrypt_validcheck=Validando configuração para $1 ..
+
 php_fpmrestart=Reiniciando o servidor PHP-FPM ..
 php_fpmnoinit=.. nenhuma ação de inicialização encontrada!
 php_fpmeinit=.. falhou : $1 
 php_fpmnodir=Nenhum diretório de configuração do FPM encontrado
 php_fpmnoinit2=Nenhuma ação de inicialização do servidor FPM encontrada
 php_fpmnomod=O módulo Apache $1 está ausente ou não está ativado
+
 jailkit_ecmd=O comando Jailkit $1 não foi encontrado no seu sistema - talvez o pacote <i>jailkit</i> não esteja instalado?
 jailkit_einit=Falha ao inicializar a prisão : $1 
 jailkit_elinux=O Jailkit é suportado apenas em sistemas Linux
@@ -6612,6 +6845,7 @@ jailkit_emkdir=Falha ao criar o diretório : $1
 jailkit_eumount=Falha ao desmontar o diretório inicial de ligação : $1 
 jailkit_eenabled=Chroot jail não está habilitado para este domínio
 jailkit_edir=Nenhum diretório chroot jail encontrado!
+
 mysqlpass_shutdown=Desligando o servidor MySQL ..
 mysqlpass_eshutdown=.. falha no desligamento : $1 
 mysqlpass_startup=Iniciando o servidor MySQL ..
@@ -6623,6 +6857,7 @@ mysqlpass_esafe=.. inicialização falhou : $1
 mysqlpass_change=Alterando a senha do usuário $1 ..
 mysqlpass_echange=.. falha na alteração da senha : $1 
 mysqlpass_kill=Parando o servidor MySQL com autenticação desativada ..
+
 kill_failed=Falha na matança : $1 
 kill_still=Ainda correndo!
 kill_done=Morto
@@ -6632,6 +6867,7 @@ kill_port=Porta
 kill_cmd=Comando do servidor
 kill_result=Resultado
 kill_subject=Monitoramento de processo do servidor Virtualmin
+
 mysql_rsock=Arquivo de soquete $1 
 mysql_rhostport=Host remoto $1 porta $2 
 mysql_rhost=Host remoto $1 
@@ -6640,8 +6876,10 @@ mysql_rlocal=Servidor local
 mysql_movebackup=Fazendo backup de usuários e bancos de dados no host original.
 mysql_moverestore=Restaurando usuários e bancos de dados no novo host.
 mysql_movedelete=Removendo usuários e bancos de dados do host original.
+
 dbpass_title=Atualizar senha do banco de dados
 dbname_title=Atualizar nome do banco de dados
+
 mailclient_title=Configurações do cliente de email
 mailclient_header=Configurações para clientes de email do usuário
 mailclient_exemail=Exemplo de email do usuário
@@ -6663,6 +6901,7 @@ mailclient_smtp_type=Tipo de criptografia SMTP
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Não criptografado
+
 deftmplt_error=ERRO
 deftmplt_website_disabled=Website desativado
 deftmplt_under_construction=Em construção
@@ -6671,6 +6910,7 @@ deftmplt_slogan2=um proprietário de domínio deve fazer login no painel de cont
 deftmplt_made_with_love1=Feito com
 deftmplt_made_with_love2=na Virtualmin
 deftmplt_made_with_love_disclamer=* A empresa Virtualmin não é responsável pelo conteúdo entregue por este servidor
+
 2fa_title=Autenticação de dois fatores
 2fa_euser=O usuário Webmin não existe!
 2fa_already=Você já está inscrito para autenticação de dois fatores usando o provedor $1 com ID de conta $2.

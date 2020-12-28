@@ -82,6 +82,7 @@ index_mass=Aktualizuj wybrane
 index_mass_all=Aktualizuj wszystkie wirtualne serwery
 index_disable=Wyłącz wybrane
 index_enable=Włącz wybrane
+
 index_backup=Kopia zapasowa wirtualnych serwerów
 index_backupdesc=Kliknij na ten przycisk, aby natychmiast wykonać kopię zapasową. Zostanie wyświetlony formularz z wyborem, których serwerów wykonać kopię zapasową oraz opcje zapisu kopii.
 index_sched=Harmonogram kopii zapasowej
@@ -90,6 +91,7 @@ index_restore=Przywróć kopię
 index_backuplog=Logi kopii zapasowych
 index_backuplogdesc=Wyświetla logi wszystkich kopii zapasowych do których tworzenia i modyfikowania masz uprawnienia.
 index_virtualminconfig=Konfiguracja Virtualmina
+
 form_title=Utwórz wirtualny serwer
 form_title2=Utwórz wirtualny sub-serwer
 form_title3=Utwórz alias serwera
@@ -168,6 +170,7 @@ form_content1=Nie
 form_limits=Przydziały i limity
 form_proxysect=Adres IP i przekierowanie
 form_ipsect=Adres IP i interfejsy
+
 setup_eip=Brakujący lub niepoprawny adres IP
 setup_eip6=Brakujący lub niepoprawny adres IPv6
 setup_eauto=Nie można automatycznie znaleźć wolnej nazwy administratora (obydwie nazwy $1 i $2 są już zajęte)
@@ -196,6 +199,7 @@ setup_edbname=Brakująca lub nieprawidłowa nazwa bazy danych
 setup_edbname2=Nazwa bazy danych musi  zaczynać się na $1
 setup_econtent=Nie wpisano początkowego tekstu strony www
 setup_edefip=Nowy wirtualny serwer nie ma adresu IP! Możliwe, że Virtualmin nie mógł działać na domyślnym systemowym IP.
+
 setup_title=Konfiguracja serwera wirtualnego
 setup_group=Tworzenie grupy administracyjnej $1 ..
 setup_eusergroups=.. błąd : $1
@@ -256,7 +260,9 @@ setup_warnok1=Tak, utwórz serwer wirtualny
 setup_warnok2=Tak, zmodyfikuj serwer wirtualny
 setup_mailrestart=Restartowanie serwera mailowego
 setup_mailrestarterr=.. restart nie powiódł się : $1
+
 indom=W domenie $1
+
 users_title=Użytkownicy e-maila i FTP
 users_title2=Użytkownicy FTP
 users_ll_never=Nigdy
@@ -265,17 +271,23 @@ users_ftp=Login FTP?
 users_delete=Usuń wybranych użytkowników
 users_ednone=Nic nie wybrano
 users_dtitle=Usuń użytkowników
+
 user_deleteok=Usuń
 user_faction=Działanie
+
 aliases_title=Aliasy e-maila
 aliases_cmt=Opis
 aliases_delete=Usuń wybrane aliasy
 aliases_ednone=Nic nie wybrano
+
 alias_cmt=Opis
 alias_domain=Domena
 alias_complexmode=Tryb zawaansowany
+
 stop_title=Usługa zatrzymana
+
 start_title=Usługa uruchomiona
+
 edit_title=Edytuj wirtualny serwer
 edit_title2=Edytuj wirtualny sub-serwer
 edit_title3=Edytuj alias serwera
@@ -325,7 +337,6 @@ edit_scripts=Instaluj skrypty
 edit_html=Edycja stron Web
 edit_admins=Zarządzanie ekstra adminami
 edit_adminsdesc=Wyświetl i edytuj dodatkowe konta administratora dla tego wirtualnego serwera.
-edit_phpmode=Opcje strony web
 edit_phpver=Wersje PHP
 edit_spf=Opcje DNS
 edit_records=Rekordy DNS
@@ -343,9 +354,12 @@ edit_limitsect=Przydziały i limity
 edit_featuresect=Włączone funkcje
 edit_showpass=Pokaż..
 edit_psearch=Lista sub-serwerów
+
 delete_title=Usuń serwer
+
 save_title=Zapisz serwer
 save_dok=Tak, zapisz
+
 acl_warn=Uwaga! Dla użytkowników Webmina utworzonych przez Virtualmin to ustawienie może zostać automatycznie nadpisane.
 acl_domains=Domeny, którymi ten użytkownik może zarządzać
 acl_all=Wszystkie domeny
@@ -357,25 +371,37 @@ acl_local=Może edytować lokalnych użytkowników?
 acl_stop=Może uruchamiać i zatrzymywać usługi?
 acl_only=Tylko dla siebie
 acl_lim=Ograniczenia dostępu
+
 other=Inne...
+
 search_title=Wyniki wyszukiwania
 search_none=Nie znaleziono wirtualnych serwerów dla $1.
 search_nonef=Nie znaleziono wirtualnych serwerów używających funkcji $1.
 search_results=Znaleziono $2 wirtualne serwery $1 ..
 search_resultsf=Znaleziono $2 wirtualne serwery używających funkcji $1 ..
+
 import_title=Importuj serwer wirtualny
 import_dom=Nazwa domeny
+
 acheck_ename=Brakująca dyrektywa ServerName
 acheck_edom=Brak dyrektyw ServerName lub ServerAlias zawartych w $DOM
 acheck_edoc=Brakująca dyrektywa DocumentRoot
+
 disable_title=Wyłącz serwer
+
 enable_title=Włącz serwer
 enable_ok=Tak, włącz
+
 afile_undo=Cofnij zmiany
+
 rfile_undo=Cofnij zmiany
+
 newweb_title=Szablon Apache dla stron
+
 newftp_title=Szablon serwera ProFTPd
+
 newdns_title=Szablon BIND DNS
+
 feature_web=Strona web Apache
 feature_mysql=Baza danych MySQL
 feature_postgres=Baza danych PostgreSQL
@@ -384,6 +410,7 @@ feature_virt=Wirtualny adres IP
 feature_virt6=Adres IPv6
 feature_spam=Filtrowanie spamu
 feature_virus=Filtrowanie wirusów
+
 check_title=Sprawdzanie konfiguracji
 check_desc=Twój serwer jest sprawdzany, czy wszystkie włączone funkcje są dostępne, poprawność konfiguracji serwera mailowego i aktywności przydziałów ..
 check_lowmemory=Twój system ma tylko $1 pamięci, minimalna rekomendowana pamięć dla Virtualmin to $2.
@@ -414,19 +441,23 @@ check_packageerr=Wybrany menadżer pakietów nie może być użyty : $1
 check_packageok=Wybrany menadżer pakietów i aktualizacje są zainstalowane.
 check_apicmdok=.. utworzono <tt>$1</tt>
 check_apicmderr=.. błąd : $1
+
 log_disable_domain=Wyłączono serwer wirtualny $1
 log_add_scripts=Dodano instalator skryptu $1
 log_disable_scripts=Wyłączono instalator skryptu $1
 log_enable_scripts=Włączono instalator skryptu $1
 log_enable_spamd=Włączono serwer SpamAssassin
 log_disable_spamd=Wyłączono serwer SpamAssassin
+
 backup_title=Kopia zapasowa serwerów wirtualnych
 backup_title2=Edytuj harmonogram kopii zapasowej
 backup_title3=Utwórz harmonogram kopii zapasowej
 backup_save=Zapisz harmonogram
 backup_disabled=Wyłączone
+
 backup_vconfig=Konfiguracja Virtualmina
 backup_vconfig_doing=Zapisywanie konfiguracji Virtualmin ..
+
 limits_title=Limity właściciela serwera
 limits_header=Ograniczenia Virtualmin dla właściciela serwera
 limits_header2=Dozwolone możliwości i funkcje
@@ -480,7 +511,9 @@ limits_edit_records=Może edytować rekordy DNS
 limits_shell=Dozwolony typ logowania
 limits_shell_ftp=Tylko FTP
 limits_shell_ssh=SSH i FTP
+
 rename_ehome=Nie masz uprawnień do zmiany katalogu domowego
+
 cert_title=Zarządzanie certyfikatem SSL
 cert_desc2=W tej sekcji wyświetlane są szczegóły aktualnie używanego certyfikatu SSL na tym wirtualnym serwerze.
 cert_desc1=Ten formularz tworzy Certificate Signing Request (CSR) i klucz prywatny dla tego wirtualnego serwera. CSR może być wysłany do CA, który odeśle podpisany certyfikat do wklejenia na następnej stronie.
@@ -516,9 +549,12 @@ cert_already_dovecot=Dovecot
 cert_copy=Kopiuj do Webmina
 cert_dcopy=Kopiuj do Dovecot
 cert_pcopy=Kopiuj do Postfix
+
 newbw_hours=godzin
 newbw_header2=Wiadomości e-mail
+
 frame_ok=Zapisz i zastosuj
+
 newtmpl_title=Szablony serwera
 newtmpl_name=Szablon
 newtmpl_web=Apache?
@@ -533,6 +569,7 @@ newtmpl_delete=Usuń wybrane szablony
 newtmpl_created=Utworzony
 newtmpl_init=przy instalacji Virtualmin
 newtmpl_name0=Domyślne ustawienia
+
 tmpl_name=Nazwa szablonu
 tmpl_dns_record_@=Nazwa domeny
 tmpl_mysqlpat=Szablon
@@ -544,9 +581,12 @@ tmpl_cnext=Utwórz i dalej
 tmpl_snext=Zapisz i dalej
 tmpl_below=Wybrane poniżej ..
 tmpl_avail0=Wybrane poniżej ..
+
 newplugin_acts=Działania
+
 plugconfig_title=Konfiguracja wtyczki
 plugconfig_dir=Dla wtyczki $1
+
 databases_title=Edytuj bazy danych
 databases_indom=$1 baz danych w domenie $2
 databases_db=Nazwa bazy danych
@@ -565,18 +605,27 @@ databases_tabusernames=Nazwy użytkowników
 databases_tabpasswords=Hasła
 databases_tabimport=Import bazy danych
 databases_tabhosts=Zdalne hosty
+
 database_name=Nazwa bazy danych
 database_ok=Usuń
+
 reemail_title=Ponownie wysyłanie e-maila rejestacyjnego
+
 newips_title=Zmień adresy IP
 newips_ecannot=Nie masz uprawnień do zmiany adresów IP
+
 newip_ecannot=Nie masz uprawnień do zmiany adresu IP tego serwera
+
 newresels_desc=Opis
+
 dresels_enone=Nic nie wybrano
+
 resel_logodef=Domyślna globalna
 resel_logonone=Brak
 resel_logourl=Z URL
+
 licence_doing=Ponowne sprawdzanie twojej licencji Virtualmin ..
+
 scripts_title=Zainstaluj skrypty
 scripts_longdesc=Opis
 scripts_overall=Ocena
@@ -673,11 +722,14 @@ scripts_packagecount=.. zainstalowano $1 nowych pakietów
 scripts_packageall=.. wszystkie pakiety już są zainstalowane
 scripts_abandoned2=UWAGA : Ten skrypt nie jest już wspierany przez oryginalnego autora.
 scripts_abandoned1=UWAGA : Wersja $1 tego skryptu nie jest już wspierana przez oryginalnego autora.
+
 summary_title=Podsumowanie wirtualnego serwera
 summary_title2=Podsumowanie wirtualnego sub-serwera
 summary_title3=Podsumowanie aliasu serwera
 summary_title4=Podsumowanie wirtualnej sub-domeny
+
 migrate_webmin=Utworzyć użytkownika Webmin?
+
 newscripts_title=Instalatory skryptów
 newscripts_header=Dodaj instalator skryptów
 newscripts_srcinst=Źródło instalatora
@@ -718,6 +770,7 @@ newscripts_lall=Wszystkie dostępne
 newscripts_lsel=Tylko wybrane ..
 newscripts_elnone=Nie wybrano skryptów
 newscripts_dom=Nazwa domeny
+
 addscripts_err=Błąd dodawania instalatora skryptu
 addscripts_elocal=Plik lokalny nie istnieje
 addscripts_eupload=Nie wybrano pliku do wysłania
@@ -728,11 +781,14 @@ addscripts_title=Dodaj instalator skryptu
 addscripts_done=Instalatory skryptu $1 zostały dodany z określonego pliku.
 addscripts_done1=Instalator skryptu $1 został dodany z określonego pliku.
 addscripts_enone=Ten plik nie zawiera żadnych instalatorów skryptu
+
 newquotas_addr=Adresy
 newquotas_whenno=Wyłączone
 newquotas_ok=Zapisz i zastosuj
+
 mass_tempdisable1=Włącz użytkownika
 mass_tempdisable2=Wyłącz użytkownika
+
 links_dns=Domena DNS
 links_mysql=Baza danych MySQL
 links_mysqls=Bazy danych MySQL
@@ -750,12 +806,17 @@ links_elog=Logi błędów Apache
 links_flog=Logi ProFTPd
 links_phpini=Konfiguracja PHP
 links_phpini2=Konfiguracja PHP $1
+
 massdelete_enone=Nic nie wybrano
+
 massdomains_enablebutton=Włącz serwery
 massdomains_plan=Plan konta
+
 newmxs_failed=.. błąd : $1
+
 ddatabases_enone=Nic nie wybrano
 ddatabases_ok=Usuń
+
 admins_title=Ekstra administratorzy
 admins_name=Login admina
 admins_desc=Opis
@@ -767,6 +828,7 @@ admins_ecannot=Nie masz uprawnień do zarządzania ekstra administratorami
 admins_return=listy ekstra administratorów
 admins_delete=Usuń wybranych administratorów
 admins_more=$1 więcej ..
+
 admin_title1=Tworzenie ekstra administratora
 admin_title2=Edycja ekstra administratora
 admin_header=Szczegóły ekstra administratora
@@ -791,14 +853,18 @@ admin_doms=Administratorzy wirtualnych serwerów
 admin_doms1=Wszyscy właściciele serwerów najwyższego poziomu
 admin_doms0=Tylko wybrani poniżej ..
 admin_edoms=Nie wybrano dozwolonych wirtualnych serwerów
+
 dadmins_enone=Nic nie wybrano
+
 move_title=Przenieś wirtualny serwer
 move_ecannot=Nie masz uprawnień do przeniesienia tego serwera
 move_ecannot2=Nie masz uprawnień do przeniesienia domeny do tego serwera
 move_desc=Ta strona pozwoli ci skonwertować ten serwer na sub-serwer w istniejącej domenie. Bądź ostrożny, po tej operacji utracisz hasła, przydziały dysku oraz transferu, zostaną one zastąpione ustawieniami serwera nadrzędnego.
 move_ok=Przenieś
+
 tscripts_version=Wersja
 tscripts_db=Nazwa bazy danych
+
 cat_server=Konfiguracja serwera
 cat_admin=Opcje administracyjne
 cat_create=Tworzenie sub-serwera
@@ -815,6 +881,7 @@ cat_email=Wiadomości Email
 cat_ip=Adresy i sieci
 cat_check=Limity i walidacja
 cat_custom=Dostosowanie systemu
+
 pass_title=Zmiana hasła
 pass_ecannot=Nie masz uprawnień do zmiany hasła dla tej domeny
 pass_header1=Zmiana hasła wirtualnego serwera
@@ -827,7 +894,9 @@ pass_enew1=Nie wpisano nowego hasła
 pass_enew2=Nowe hasła nie pasują do siebie
 pass_eadmin=Nie można znaleźć administratora!
 pass_changing2=Zmienianie hasła administratora
+
 massu_enone=Nic nie wybrano
+
 usage_title=Użycie dysku
 usage_summaryheader=Podsumowanie użycia dysku i limitów dla tego serwera wirtualnego.
 usage_quota=Przydział dysku
@@ -854,11 +923,13 @@ usage_tabhomes=Katalog domowy
 usage_tabusers=Przez użytkownika
 usage_tabsubs=Przez sub-serwer
 usage_tabdbs=Przez bazę danych
+
 newquotacheck_title=Sprawdzanie przydziałów dysku
 newquotacheck_who=Sprawdź przydziały dla
 newquotacheck_users=Użytkownicy
 newquotacheck_ok=Sprawdź teraz
 newquotacheck_udoing=Sprawdzanie przydziałów użytkownika na $1 ..
+
 phpmode_title=Opcje strony web
 phpmode_header=Opcje strony web i PHP
 phpmode_mode=Tryb wykonywania skryptu PHP
@@ -890,25 +961,37 @@ phpmode_elog=Plik dziennika błędów serwera web
 phpmode_htmldir=Pod katalog plików web
 phpmode_logerr=.. błąd : $1
 phpmode_htmldirerr=.. błąd : $1
+
 spf_default=Taki sam jak prawdziwy adres ($1)
 spf_default2=Taki sam jak prawdziwy adres
+
 tdelete_enone=Nic nie wybrano
+
 showpass_dbuser=Nazwa użytkownika dla $1
 showpass_dbpass=Hasło dla $1
+
 phpver_ver=Wersja
 phpver_ecannot=Nie masz uprawnień do zmiany wersji PHP
 phpver_eavail2=W twoim systemie zainstalowany jest tylko PHP w wersji $1, więc nie jest możliwy wybór innych wersji dla każdego katalogu.
 phpver_enone=Nic nie wybrano
+
 html_dok=Usuń
+
 upload_err=Błąd wysyłania pliku
 upload_enone2=Nie znaleziono nazwy pliku!
 upload_title=Przesyłanie pliku
+
 sharedips_ok=Zapisz
+
 newdynip_ok=Zapisz i zastosuj
+
 dynip_dyndns=DynDNS
+
 newstyles_desc=Opis
 newstyles_del=Usuń
+
 addstyle_title=Instalacja stylu
+
 addstyle_err=Błąd instalacji nowego stylu
 addstyle_ecomp=Nie jest to plik archiwum stylu
 addstyle_euncomp=Błąd wypakowywania archiwum stylu : $1
@@ -917,6 +1000,7 @@ addstyle_efiles=Archiwum stylu nie zawiera żadnych plików!
 addstyle_done=Styl $1 został zainstalowany. Gdy jest używany zostanie utworzone $2 plików HTML i grafik.
 addstyle_ecmd=Polecenie rozpakowania $1 nie jest zainstalowane
 addstyle_ecmdfailed=Błąd polecenie rozpakowania : $1
+
 upgrade_title=Uaktualnienie do Virtualmin Pro
 newupgrade_title=Uaktualnienie do Virtualmin Pro
 upgrade_desc1=Jeżeli podoba ci się używanie Virtualmin GPL i chcesz uaktualnić go do wersji Pro, to ta strona pozwoli ci na przeprowadzenie procesu uaktualnienia automatycznie. Musisz wykonać następujące kroki :
@@ -937,36 +1021,51 @@ upgrade_schedok=.. gotowe. Aktualizacje zostaną automatycznie zainstalowane.
 upgrade_theme=Włączanie szablonu <i>$1</i> ..
 upgrade_rpms=Aktualizacja pakietów RPM Virtualmin : $1
 upgrade_yumclear=Czyszczenie pamięci podręcznej YUM ..
+
 maillog_ecannot=Nie masz uprawnień do wyszukiwania e-maila na tej domenie
 viewmaillog_none=Brak
+
 massg_enone=Nic nie wybrano
+
 aedit_done=Zmodyfikowano alias e-mail $1
 aedit_deleted=Usunięto alias e-mail $1
 aedit_doing=Aktualizowanie aliasów e-mail ..
 aedit_complete=.. gotowe ($1 utworzono, $3 zmodyfikowano, $4 usunięto, $2 błędy).
+
 exclude_title=Wyłączone katalogi
+
 balancers_delete=Usuń wybrane proxy
 balancers_denone=Nic nie wybrano
+
 scriptwarn_script=Nazwa skryptu
 scriptwarn_oldver=Stara wersja
 scriptwarn_ver=Nowa wersja
 scriptwarn_dom=Nazwa domeny
+
 quotawarn_status=Stan
+
 history_day=1 dzień
 history_days=$1 dni
 history_type_email=Wiadomości e-mail
 history_type_system=Statystyki systemu
+
 sv_enable=Włącz serwer ClamAV
 sv_enabledok=.. wszystko gotowe
 sv_senable=Włącz serwer SpamAssassin
+
 features_title=Funkcje i wtyczki
+
 features_name=Funkcja lub wtyczka
 features_type=Źródło
 features_plugin=Wtyczka
 features_used=Pokaż domeny
+
 clamd_estop=.. błąd : $1
+
 startscript_failed=.. błąd : $1
+
 newshells_desc=Opis
+
 shells_mailbox=Tylko e-mail
 shells_mailbox2=Brak dostępu
 shells_mailboxftp=E-mail i FTP
@@ -977,10 +1076,12 @@ shells_ftp=E-mail i FTP
 shells_ftp2=Tylko FTP
 shells_ssh=Email, FTP i SSH
 shells_ssh2=FTP i SSH
+
 nicetime_days=$1 dni, $2 godzin, $3:$4 minut
 nicetime_hours=$1 godzin, $2:$3 minut
 nicetime_mins=$1 minut, $2 sekund
 nicetime_secs=$1 sekund
+
 nf_header=Następujące nowe funkcje są dostępne w $1 ..
 nf_desc=Funkcja
 nf_html=Opis
@@ -989,28 +1090,37 @@ nf_and=$1 i $2
 nf_seen=Ukryj nowe funkcje
 nf_try=Wypróbuj ..
 nf_ver=(Wersja $1)
+
 sched_yes=Tak, $1
 sched_delete=Usuń wybrane harmonogramy
 sched_disable=Wyłącz wybrane
 sched_enable=Włącz wybrane
 sched_actions=Działania
+
 dsched_enone=Nic nie wybrano
+
 dbhosts_failed=.. błąd : $1
+
 plans_title=Plany konta
 newplan_title=Plany konta
 plans_doms=Domeny
 plans_delete=Usuń wybrane plany
 plans_return=listy planów
+
 plan_apply=Zapisz i zastosuj
 plan_clone=Klonuj
 plan_scripts=Dozwolone skrypty
 plan_scriptsall=Wszystkie globalnie włączone
 plan_scriptsopts=Wszystkie skrypty
 plan_scriptssel=Dozwolone
+
 dplans_enone=Nic nie wybrano
+
 postgrey_delete=Usuń wybrane
 postgrey_cmts=Opis
+
 delgrey_enone=Nic nie wybrano
+
 wizard_title=Kreator po-instalacyjny
 wizard_ecannot=Nie masz uprawnień do uruchomienia kreatora po-instalacyjnego
 wizard_next=Dalej
@@ -1043,36 +1153,52 @@ wizard_mysql_empty=Ustaw hasło MySQL
 wizard_title_mysize=Rozmiar bazy danych MySQL
 wizard_mysize_def=Pozostaw domyślne ustawienia
 wizard_title_done=Wszystko gotowe
+
 backuplog_title=Dziennik kopii zapasowej
 backuplog_when=Uruchomiono
+
 redirects_title=Przekierowania web
 redirects_delete=Usuń wybrane przekierowania
 redirects_denone=Nic nie wybrano
 redirects_type=Typ
+
 newchangelog_title=Dziennik nowych funkcji
 newchangelog_desc=Ta strona zawiera listę wszystkich najważniejszych zmian w Virtualmin we wszystkich zainstalowanych wersjach na tym systemie.
+
 dkim_install=Instaluj
+
 dkim_installfailed=.. Instalacja nie powiodła się!
+
 autoconfig_enabled=Włączyć automatyczną konfigurację klienta mailowego?
+
 provision_title=Klient usług Cloudmin
 provision_limit=$1 $2
 provision_evirusunsetup=.. błąd : $1
 provision_espamunsetup=.. błąd : $1
+
 records_delete=Usuń wybrane rekordy
 records_enone=Nic nie wybrano
+
 fixperms_failed=.. błąd : $1
+
 bkeys_delete=Usuń wybrane klucze
 bkeys_desc=Opis
 bkeys_enone=Nic nie wybrano
+
 bkey_ok=Usuń
+
 fixmodphp_title=Naprawa uprawnień PHP
 fixmodphp_ecannot=Nie możesz naprawiać uprawnień PHP
 fixmodphp_doing=Aktualizacja wszystkich serwerów wirtualnych, aby zapobiec wykorzystaniu mod_php gdy ten jest wyłączony ..
 fixmodphp_done=.. naprawiono $1 domen
+
 buckets_created=Utworzony
+
 bucket_dok=Usuń
+
 transfer_title=Transfer wirtualnego serwera
 transfer_subs=I sub-serwery
+
 left_virtualmin=Virtualmin
 left_master=Główny admin
 left_user=Właściciel serwera
@@ -1082,6 +1208,7 @@ left_master2=Główny admin Cloudmin
 left_login=Login: $1
 left_level=Poziom: $1
 left_generic=Utwórz wirtualny serwer
+
 right_statusheader=Stan
 right_sysinfoheader=Programy
 right_virtheader=Virtualmin w liczbach
@@ -1137,6 +1264,8 @@ right_faliases=Aliasów e-mail
 right_quota=Użycie dysku i limity
 right_bw=Zużycie transferu i limit
 right_of=$1 z $2
+
 running_cmd=API Virtualmin
 running_enone=Nic nie wybrano!
+
 recovery_failed=.. błąd : $1

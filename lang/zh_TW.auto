@@ -64,6 +64,7 @@ index_delete_all=刪除所有虛擬服務器
 index_mass_all=更新所有虛擬服務器
 index_disable=禁用選擇
 index_enable=啟用選定
+
 index_scheds=預定備份
 index_schedsdesc=單擊此按鈕以顯示現有計劃備份的列表，並添加新備份或管理現有備份。
 index_running=運行備份
@@ -89,6 +90,7 @@ index_expiryexpired=某些虛擬服務器的DNS註冊已過期： $1
 index_expirynearly=某些虛擬服務器的DNS註冊即將到期： $1
 index_certinvalid=$1的SSL證書文件 $2無效： $3
 index_keyinvalid=$1的SSL密鑰文件 $2無效： $3
+
 form_enomore=您無權再創建任何類型的虛擬服務器
 form_generic_aliasmail=$1的別名，帶有自己的電子郵件
 form_reseller=由經銷商擁有
@@ -103,6 +105,7 @@ form_content2=是的，下面有默認模板和內容
 form_content0=是的，內容如下
 form_ipsect=IP地址和接口
 form_inputssect=其他功能選項
+
 setup_eplan=所選計劃不存在或不可用
 setup_evital=無法正確創建關鍵功能 $1-暫停了虛擬服務器的創建。
 setup_edomain4=您已經託管了該域
@@ -160,6 +163,7 @@ setup_edefip=新的虛擬服務器沒有IP地址！也許Virtualmin無法計算�
 setup_qmailme=此域名不能用於Qmail，因為它與服務器的主機名 $1相同（來自<tt>control/me</tt>文件）
 setup_eslashpass=MySQL不支持包含反斜杠的密碼
 setup_etmpl=您無權使用所選模板
+
 setup_usermail2=為管理用戶創建別名。
 setup_usermail3=為管理用戶創建郵箱。
 setup_eusermail2=..別名失敗： $1
@@ -226,7 +230,9 @@ setup_ejail=..監獄失敗： $1
 setup_jailed=..監獄目錄現在為 $1
 setup_letsaliases=重新請求讓我們加密 $1的證書以包含 $2 ..
 setup_eletsaliases=..失敗： $1
+
 users_indom=域 $2中的 $1個用戶
+
 users_indomsub=域 $2中的 $1用戶（$3包括子域）
 users_title2=FTP用戶
 users_pop3f=FTP登錄
@@ -237,6 +243,7 @@ users_dlist=要刪除的用戶： $1
 users_mailclient=顯示電子郵件客戶端設置
 users_mailclientdesc=顯示該域的用戶電子郵件客戶端應使用的設置。
 users_same=與管理員相同
+
 user_createweb=創建FTP用戶
 user_editweb=編輯FTP用戶
 user_chrootwarn=警告：由於未啟用FTP目錄限制，因此該用戶也將有權訪問頂級服務器的Web內容。
@@ -287,12 +294,14 @@ user_lastlogin_imap=IMAP（獲取電子郵件）
 user_lastlogin_smtp=SMTP（發送電子郵件）
 user_lastlogin_never=尚未記錄登錄
 user_noforward=自動回復轉發的電子郵件？
+
 aliases_indom=域 $2中的 $1別名
 aliases_mass=批量創建別名。
 aliases_type13=域 $1中的所有人
 aliases_emass=手動編輯別名。
 aliases_hide=隱藏特殊別名。
 aliases_show=顯示特殊別名。
+
 alias_egone=郵件別名不再存在
 alias_type13=域中的每個人 ..
 alias_etype1f=您無權轉發電子郵件至“$1”
@@ -308,6 +317,7 @@ alias_psel=時間到了
 alias_estart=自動回復開始日期無效
 alias_eend=自動回复結束日期無效
 alias_aopts=自動回複選項
+
 edit_xndomain=真實DNS域名
 edit_dbuser=對於 $2 : $1
 edit_id=域ID
@@ -347,6 +357,10 @@ edit_history=系統統計
 edit_lang=改變語言
 edit_filemin=文件管理器
 edit_filemindesc=瀏覽和編輯此虛擬服務器的網站目錄中的文件。
+edit_website=網站選項
+edit_websitedesc=配置與此虛擬服務器的網站相關的設置，例如日誌記錄和HTML目錄
+edit_php=PHP選項
+edit_phpdesc=配置與如何為此虛擬服務器運行PHP腳本相關的設置。
 edit_records=DNS記錄
 edit_recordsdesc=創建，編輯和刪除此虛擬服務器的DNS記錄。
 edit_viewrecords=建議的DNS記錄
@@ -374,6 +388,7 @@ edit_domdkimdesc=僅為此虛擬服務器配置的DomainKey設置。
 edit_connect=檢查連通性
 edit_connectdesc=驗證可以從Internet的其餘部分訪問此虛擬服務器的網站，DNS域和郵件服務器。
 edit_psearch=列出子服務器
+
 delete_mailboxes2=郵件/ FTP用戶-將刪除 $1個用戶，包括其所有郵件文件和主目錄。
 delete_mailboxes3=郵件別名- $1郵件別名將被刪除。
 delete_preserve=保留遠程託管的功能（$1）
@@ -400,6 +415,7 @@ delete_statussslcert=正在刪除SSL證書的狀態監視器。
 delete_aliasfailure=.. $1別名刪除失敗： $2
 delete_ednssubof=無法刪除虛擬服務器 $1，因為它包含服務器 $2的DNS記錄
 delete_esslnoips=找不到域的SSL證書
+
 save_ednsip=外部IP地址丟失或無效
 save_mysqlpass_provision=更改服務主機上的MySQL密碼 ..
 save_emysqlpass_provision=..密碼更改錯誤： $1
@@ -435,17 +451,22 @@ save_euserquota=服務器管理員的磁盤配額不應降低到 $2，因為當�
 save_aliasusers=以下別名服務器正在使用禁用的功能： $1
 save_erquota=無法將此虛擬服務器的磁盤配額設置為無限，因為它由具有配額限制的經銷商 $1擁有
 save_erbw=無法將此虛擬服務器的帶寬限制設置為無限制，因為該虛擬服務器由具有帶寬限制的經銷商 $1擁有
+
 acl_migrate=可以遷移備份嗎？
+
 search_nonef=找不到使用功能 $1的虛擬服務器。
 search_resultsf=使用功能 $1..找到了 $2虛擬服務器。
+
 import_encpass=Unix用戶的當前密碼
 import_eencpass=沒有現有的Unix用戶可以從中復制密碼
 import_db_mysql_user=MySQL用戶名
 import_db_mysql_same=與管理用戶相同
 import_emysql_user=缺少MySQL用戶名
 import_emysql_user2=指定的MySQL用戶不存在
+
 import_euserclash=虛擬服務器 $1已在使用所選的用戶名
 import_egroupclash=虛擬服務器 $1已在使用所選的組名
+
 disable_mysqluser_provision=在服務主機上鎖定MySQL用戶的密碼。
 disable_emysqluser_provision=..鎖定錯誤： $1
 disable_bind_provision=重命名服務主機上的DNS區域以將其禁用 ..
@@ -453,12 +474,14 @@ disable_ebind_provision=..重命名失敗： $1
 disable_bindnosub=..不適用於子域
 disable_subservers=還禁用子服務器？
 disable_doing=禁用虛擬服務器 $1 ..
+
 enable_mysql_provision=在服務主機上恢復MySQL用戶的密碼 ..
 enable_emysql_provision=..還原失敗： $1
 enable_bind_provision=將DNS區域重命名為服務主機上的原始名稱。
 enable_bindnosub=..子域不需要
 enable_subservers=還啟用子服務器嗎？
 enable_doing=啟用虛擬服務器 $1 ..
+
 newweb_urlport=虛擬主機的外部端口號
 newweb_urlsslport=SSL虛擬主機的外部端口號
 newweb_sameport=與真實端口相同
@@ -474,11 +497,15 @@ newweb_admin=重定向<tt>admin。${DOM}</tt>？
 newweb_admindom=<tt>admin</tt>重定向的URL
 newweb_ewebmaildom=用於Webmail重定向的URL丟失或無效
 newweb_eadmindom=管理員重定向網址缺失或無效
+
 newdns_ensip=附加名稱服務器 $1是IP地址而不是主機名
 newdns_enshost=其他名稱服務器 $1不存在
+
 feature_virt6=IPv6地址
+
 bandwidth_backup=進行備份
 bandwidth_restore=備份已還原
+
 check_lowmemory=您的系統只有 $1的內存，低於Virtualmin建議的最小值 $2。
 check_lowgmemory=您的系統是具有 $1內存的VM，但是保證的限制僅為 $2。這低於Virtualmin建議的最小值 $3，並可能導致間歇性的內存分配失敗。
 check_okmemory=您的系統具有 $1的內存，該內存等於或大於Virtualmin建議的最小最小值 $2。
@@ -588,11 +615,13 @@ check_eaptrepofile=APT存儲庫配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存儲庫配置正確
 check_aptrepowrong=APT存儲庫配置文件 $1包含錯誤的許可證密鑰序列號！
 check_aptrepomissing=存儲庫配置文件 $1不引用software.virtualmin.com！
+
 checkmap_enone=在<a href='$1'>Postfix配置</a>中未找到地圖源。
 checkmap_esupport=Postfix不支持地圖源<tt>$1</tt>-您可能需要為其安裝Postfix庫或重新編譯
 checkmap_eaccess=映射源<tt>$1</tt>無法使用： $2
 checkmap_efile=此版本的Webmin不支持地圖類型-只能使用使用<tt>hash</tt>和<tt>regexp</tt>之類的文件的地圖
 check_eqmailldap=Qmail+LDAP支持已在Virtualmin 6.00中刪除
+
 log_disable_resels=已鎖定 $1個轉銷商
 log_enable_resels=未鎖定的 $1轉銷商
 log_breakcert_domain=停止共享服務器 $1的SSL證書
@@ -604,6 +633,8 @@ log_fixttl_domain=更改了虛擬服務器 $1上的DNS TTL
 log_unsub_domain=將虛擬服務器 $1從子域轉換為子服務器
 log_unalias_domain=將虛擬服務器 $1從別名轉換為子服務器
 log_spf_domain=服務器 $1的DNS選項已更改
+log_website_domain=更改服務器 $1的網站選項
+log_php_domain=更改服務器 $1的PHP選項
 log_res_domain=服務器 $1的資源限制已更改
 log_newipshared_domain=將服務器 $1的IP地址轉換為共享
 log_exclude_domain=更新了服務器 $1的排除的備份目錄
@@ -703,6 +734,7 @@ log_enable_ratelimit=啟用郵件速率限制
 log_disable_ratelimit=禁用郵件速率限制
 log_modify_ratelimit=更新了郵件速率限制
 log_wizard=安裝嚮導步驟： $1
+
 backup_title3=創建計劃的備份
 backup_desc=備份說明
 backup_odom=對於域所有者 $1
@@ -781,6 +813,7 @@ backup_nicedownload=下載文件
 backup_niceupload=上傳的文件
 backup_key=用密鑰加密備份
 backup_nokey=不要簽名或加密
+
 backup_ecannot2=您不可以安排備份
 backup_edestext=備份到單個文件應具有tar.gz或zip之類的擴展名
 backup_eserver1a=FTP服務器主機名無法解析
@@ -822,6 +855,7 @@ backup_copyfailed=..複製失敗： $1
 backup_ekey=所選的備份密鑰不存在！
 backup_ekeycannot=您不允許使用所選的備份密鑰
 backup_eownrestore=虛擬服務器所有者只能還原已簽名的備份
+
 backup_dirtarinc=創建主目錄..的增量TAR文件。
 backup_dirzipfailed=.. ZIP失敗！ $1
 backup_dirzip=正在創建主目錄的ZIP文件 ..
@@ -919,6 +953,7 @@ backup_arun=運行後備份命令 ..
 backup_brunfailed=..失敗了。備份將不會繼續。
 backup_arunfailed=..失敗了！
 backup_efeature=..功能 $1失敗
+
 restore_key=使用密鑰解密
 restore_nokey=備份未加密
 restore_madeat=備份於
@@ -927,6 +962,7 @@ restore_dirdelete=刪除不在備份中的文件
 restore_delete=刪除並重新創建虛擬服務器？
 restore_newip=還原服務器的IPv4地址
 restore_newip6=還原服務器的IPv6地址
+
 restore_esched=所選的備份計劃不存在！
 restore_eunsafe=您無權還原功能 $1
 restore_ecannotdom=您無權還原域 $1
@@ -964,6 +1000,7 @@ restore_phpbad=警告-以下腳本使用了此系統上不可用的PHP版本：
 restore_phpbad2=$1- $2-版本 $3
 restore_euid=UID $1已在此系統上使用
 restore_egid=GID $1已在此系統上使用
+
 restore_unixsame=..在復制模式下跳過還原到原始LDAP服務器 $1的操作
 restore_dirsame=..在復制模式下跳過還原到原始NFS服務器 $1的操作
 restore_edirspace=..警告-此備份包含 $1的文件，但是您的系統只有 $2的可用 ..
@@ -1010,6 +1047,7 @@ restore_vmailserver_grey=恢復灰名單設置 ..
 restore_vmailserver_missing=..未在此系統上配置
 restore_ereseller=轉銷商 $1不存在
 restore_eparent=原始父虛擬服務器 $1不存在
+
 limits_header2=允許的功能和特性
 limits_header3=其他限制
 limits_migrate=可以遷移備份嗎？
@@ -1032,6 +1070,7 @@ limits_edit_records=可以編輯DNS記錄
 limits_jail=Chroot監獄域Unix用戶？
 limits_ejailon=無法啟用chroot監獄： $1
 limits_ejailoff=無法禁用chroot監獄： $1
+
 rename_xndomain=國際域名
 rename_home2=新目錄 $1
 rename_prefix=更改郵箱名稱前綴？
@@ -1053,6 +1092,7 @@ rename_ehome3=新的主目錄已經存在
 rename_ehome4=新主目錄的父目錄不存在
 rename_scripts=更新腳本數據庫中的路徑 ..
 rename_eparentuser=只能為頂級服務器更改用戶名
+
 cert_desc6=此表單可用於創建自簽名證書，該證書可立即使用，但不會被瀏覽器接受為有效證書。
 cert_csrwarn=警告- $1中的簽名請求和 $2中的私鑰已經存在，並且將通過生成新的CSR被覆蓋。
 cert_keywarn=警告- $1中的證書和 $2中的私鑰已經存在，並且將通過生成新密鑰而被覆蓋。
@@ -1164,8 +1204,10 @@ cert_webminsvcip=是（對於 $1和 $2的請求）
 cert_eperiperr=保存服務證書失敗
 cert_eperipinst=未安裝服務 $1
 cert_eperipfail=服務 $1失敗
+
 csr_selfing=生成自簽名證書和私鑰 ..
 csr_csring=生成簽名請求和私鑰 ..
+
 newkey_ecert2=丟失或無效的簽名SSL證書： $1
 newkey_enewkey2=SSL私鑰缺失或無效： $1
 newkey_savingcert=正在保存證書 ..
@@ -1179,16 +1221,19 @@ newkey_enewkeyfilehome=私鑰文件 $1必須在虛擬服務器的主目錄下
 newkey_apache=配置Web服務器以使用新證書和密鑰 ..
 newkey_enewkeycsr=找不到與簽名請求同時生成的SSL密鑰！
 newkey_ekeysame=不要輸入CSR生成的密鑰的路徑-而是使用<b>“應用簽名證書”</b>標籤。
+
 newbw_step=收集之間的小時數
 newbw_backup=在使用中包括備份傳輸嗎？
 newbw_estep=收集之間的小時數必須為1到24之間的數字
 newbw_allunder=所有虛擬服務器都在其帶寬限制內。
 newbw_mailout=在帶寬使用情況中包括傳出電子郵件？
 newbw_mailall=在帶寬使用中包括中繼電子郵件嗎？
+
 newtmpl_created=創建於
 newtmpl_init=Virtualmin安裝
 newtmpl_name0=默認設置
 newtmpl_name1=子服務器的設置
+
 tmpl_title5=刪除服務器模板
 tmpl_init=最初為頂級服務器選擇的模板？
 tmpl_initsub=最初為子服務器選擇的模板？
@@ -1354,6 +1399,7 @@ tmpl_autoconfignone=自動產生
 tmpl_eautoconfig=Thunderbird自動配置XML缺少&lt;clientConfig&gt;標記。
 tmpl_outlook_autoconfig=Outlook自動配置XML
 tmpl_outlook_eautoconfig=Outlook自動配置XML缺少&lt;Autodiscover&gt;標記。
+
 newplugin_desc3=僅在下面列表中實際選中的那些插件當前處於活動狀態。激活插件後，便可以在創建或編輯虛擬服務器時選擇啟用的功能。
 newplugin_name=插件名稱
 newplugin_version=版
@@ -1362,6 +1408,7 @@ newplugin_count=域
 newplugin_acts=動作
 newplugin_conf=配置
 newplugin_open=打開
+
 bwgraph_enable=檢查 $1頁面以確保啟用了統計信息收集。
 bwgraph_mode_4=服務器超出限制
 bwgraph_returnparent=頂級服務器的帶寬使用情況
@@ -1370,6 +1417,7 @@ bwgraph_mago_month=顯示月份的統計信息：
 bwgraph_mago_year=顯示年份的統計信息：
 bwgraph_mago_=顯示期間的統計信息：
 bwgraph_mok=顯示
+
 newfields_type11=是/否（默認否）
 newfields_show=在服務器列表中？
 newfields_show2=顯示
@@ -1377,6 +1425,7 @@ newfields_visible=可見到
 newfields_visible0=全部用戶
 newfields_visible1=所有使用者（RO）
 newfields_visible2=主管理員
+
 databases_indom=域 $2中的 $1個數據庫
 databases_hosted=該域的所有數據庫都託管在遠程MySQL服務器 $1上。
 databases_newuser=改成
@@ -1397,6 +1446,7 @@ databases_remotenew=新的MySQL主機
 databases_remoteok=移動數據庫
 databases_warn=警告！當前安裝的任何腳本或應用程序都不會更新為使用新的主機系統。
 databases_moving=將MySQL數據庫從 $1移到 $2 ..
+
 database_manage=管理數據庫
 database_host=託管在系統上
 database_scripts=腳本使用
@@ -1405,9 +1455,11 @@ database_collate=新數據庫的整理順序
 database_encoding=編碼新數據庫
 database_opts=$1的其他選項
 database_edbdef=您不允許刪除域的默認數據庫
+
 reemail_desc=此頁面可用於重新發送創建虛擬服務器時最初發送的電子郵件。
 reemail_to=服務器所有者的電子郵件地址：
 reemail_ok=現在發送
+
 newips_old6=要更新的服務器的IPv6地址
 newips_new6=新的IPv6地址
 newips_none2=沒有選擇虛擬服務器，或者係統上沒有虛擬服務器。
@@ -1422,6 +1474,7 @@ newips_mode0=真實地址
 newips_mode1=DNS記錄中使用的外部地址
 newips6_eold=舊的IPv6地址格式不正確
 newips6_enew=新的IPv6地址格式不正確
+
 newip_old6=當前的IPv6地址
 newip_new6=新的IPv6地址
 newip_virt6off=不要使用IPv6
@@ -1438,13 +1491,17 @@ newip_virtaddr=保留專用地址
 newip_virtaddr2=分配專用地址
 newip_virtaddr3=使用專用地址
 newip_convert=將專用地址轉換為共享地址
+
 newip_eip6=缺少或無效的新IPv6地址
 newip_eclash6=虛擬服務器 $1已在使用新的IPv6地址
 newip_eused6=系統已經使用了新的IPv6地址
+
 newresels_disable=鎖定選定
 newresels_enable=解鎖選定
+
 dresels_err2=無法鎖定轉銷商
 dresels_err3=無法解鎖轉銷商
+
 resel_header2=轉銷商的限額
 resel_header3=允許的功能和域
 resel_header4=IP地址和DNS選項
@@ -1492,6 +1549,7 @@ resel_domssel=由該經銷商擁有
 resel_equnlimit=無法將虛擬服務器 $1分配給該代理商，因為它具有無限的磁盤配額，但是代理商具有限制
 resel_ebwunlimit=無法將虛擬服務器 $1分配給該代理商，因為它具有無限的帶寬配額，但是代理商具有限制
 resel_ebefore=修改命令失敗之前： $1
+
 licence_soon=注意-您的Virtualmin許可證將在 $1天內過期。
 licence_soon2=注意-您的Virtualmin許可證將在 $1小時後過期。
 licence_renew=可以在<a target=_blank href='$1'>$1</a>購買續訂
@@ -1514,6 +1572,7 @@ licence_fixlinksok=修復符號鏈接權限
 licence_fixlinksignore=允許不安全的符號鏈接
 licence_xfsreboot=必須重新引導系統才能在根文件系統上啟用XFS配額。在完成此操作之前，Virtualmin將不會檢測到配額處於活動狀態，並且不可能將磁盤使用限制應用於虛擬服務器或用戶。
 licence_xfsrebootok=馬上重啟
+
 scripts_nomatch=沒有腳本與您的搜索匹配。
 scripts_ipartial=部分安裝錯誤
 scripts_idstatus=安裝狀態
@@ -1618,13 +1677,16 @@ scripts_packagecount=..安裝了 $1個新軟件包
 scripts_packageall=..所有軟件包都已安裝
 scripts_abandoned2=警告：該腳本的原始作者不再支持。
 scripts_abandoned1=警告：其原始作者不再支持此腳本的版本 $1。
+
 newnotify_admins=還通過電子郵件向選定域中的其他管理員發送電子郵件嗎？
 newnotify_users=還在選定域中使用過電子郵件嗎？
 newnotify_nomany=僅向每個域所有者發送一次電子郵件
+
 summary_title=虛擬服務器摘要
 summary_title2=虛擬子服務器摘要
 summary_title3=別名服務器摘要
 summary_title4=虛擬子域摘要
+
 migrate_directadmin=DirectAdmin備份
 migrate_plesk9=Plesk 9+備份
 migrate_plesk=Plesk 8備份
@@ -1641,6 +1703,7 @@ migrate_downloaded=..下載了 $1
 migrate_validating=驗證遷移文件 ..
 migrate_edownload=..下載失敗： $1
 migrate_evalidate=..驗證失敗： $1
+
 newscripts_core=虛擬分鐘
 newscripts_custom=第三方
 newscripts_plugin=插入
@@ -1657,6 +1720,7 @@ newscripts_wemail=發送升級通知至
 newscripts_wowner=虛擬服務器所有者
 newscripts_wreseller=虛擬服務器經銷商
 newscripts_wother=電子郵件地址
+
 newscripts_wheader=腳本升級通知選項
 newscripts_werr=保存升級通知失敗
 newscripts_ewother=缺少或無效的電子郵件地址來通知
@@ -1684,8 +1748,10 @@ newscripts_elnone=未選擇腳本
 newscripts_desc6=此選項卡列出了此系統上所有虛擬服務器之間安裝的所有腳本。要升級或卸載單個腳本，請在列表中單擊其名稱。
 newscripts_dom=域名
 newscripts_noneyet=尚未將腳本安裝到任何虛擬服務器中。
+
 sysinfo_python=Python版本
 sysinfo_pythonpath=Python之路
+
 newquotas_desc3=您也可以選擇將接近或超過其配額的郵件和FTP用戶通知。
 newquotas_nobody=沒有人
 newquotas_addr=地址
@@ -1703,12 +1769,15 @@ newquotas_mailbox=還檢查郵件和FTP用戶配額嗎？
 newquotas_mailbox_send=通知郵件和FTP用戶？
 newquotas_users=還會通知超過配額的管理員？
 newquotas_msg=發送給郵件和FTP用戶的電子郵件模板
+
 mass_shell=登錄權限
 mass_setshell=更改登錄權限 ..
 mass_shelldone=..設置為 $1
 mass_shellbad=..選擇的外殼不可用
+
 links_phpini2=PHP $1配置
 links_phpini3=PHP-FPM配置
+
 massscript_enone3=所選服務器均未安裝可升級到所選版本的腳本
 massscript_efetch=..無法下載文件： $1
 massscript_ecommands=..缺少必需的命令： $1
@@ -1720,7 +1789,9 @@ massscript_utype=運作方式
 massscript_upgrade=升級
 massscript_update=更新資料
 massscript_ok=立即升級腳本
+
 massdelete_preserve=保留遠程託管的功能
+
 massdomains_plan=帳戶計劃
 massdomains_scanner=病毒掃描程序
 massdomains_scannering=更新病毒掃描程序 ..
@@ -1736,11 +1807,13 @@ massdomains_enaerr=無法啟用服務器
 massdomains_enarusure=您確定要啟用 $1個選定的虛擬服務器嗎？他們將返回到被禁用之前的狀態。
 massdomains_enaok=立即啟用服務器
 massdomains_enadoms=要啟用的服務器： $1
+
 newmxs_none2=<a href='$1'>Webmin服務器索引</a>模塊中尚未定義可用的服務器。
 newmxs_saveadd=保存並將現有域添加到新的輔助域
 newmxs_syncing=更新允許的用戶進行中繼 ..
 newmxs_esynced=..一些失敗： $1
 newmxs_synced=..在 $1上完成
+
 newmysqls_title=MySQL服務器
 newmysqls_ecannot=您無權編輯其他MySQL服務器
 newmysqls_host=服務器主機名
@@ -1782,10 +1855,13 @@ newmysqls_edelete=本地服務器無法刪除
 newmysqls_edefault=無法刪除默認服務器
 newmysqls_eprovision=由Cloudmin Services創建的服務器無法刪除
 newmysqls_einuse=無法刪除 $1域正在使用的服務器
+
 ddatabases_edbdef=您不允許刪除默認的 $1數據庫 $2
+
 admins_doms=虛擬服務器
 admins_domsall=所有
 admins_more=還有 $1 ..
+
 admin_header2=允許的功能
 admin_header3=允許的虛擬服務器
 admin_email=聯絡電子郵件地址
@@ -1795,11 +1871,13 @@ admin_doms=管理員的虛擬服務器
 admin_doms1=全部歸頂級服務器所有
 admin_doms0=僅以下選擇的那些 ..
 admin_edoms=沒有允許選擇的虛擬服務器
+
 move_ecannot2=您不允許將域移到該服務器
 move_desc3=該頁面允許您更改別名服務器的目標，以便將任何Web或電子郵件訪問都轉發到新選擇的域。
 move_target2=新別名目標
 move_euserclash=正在轉換的虛擬服務器中已經存在一個名為 $1的用戶
 move_euserclash2=名為 $1的用戶已存在
+
 newvalidate_header2=預定的驗證選項
 newvalidate_desc2=該頁面用於設置虛擬服務器和Virtualmin配置的自動計劃驗證。
 newvalidate_return=確認表格
@@ -1816,6 +1894,7 @@ newvalidate_fixservers=要修復的虛擬服務器
 newvalidate_subservers=還修復子服務器？
 newvalidate_fix=立即修復權限
 newvalidate_header3=權限修復選項
+
 validate_euserhome=管理用戶 $1具有主目錄 $3，但應為 $2
 validate_euid=管理用戶 $1的UID為 $3，但域的UID為 $2
 validate_egid=管理組 $1的GID為 $3，但域的GID為 $2
@@ -1843,6 +1922,7 @@ validate_ewebphpconfig=在版本 $1中發現PHP配置錯誤： $2
 validate_ewebuid=SuExec用戶設置為 $1，但是虛擬服務器的UID為 $2
 validate_ewebgid=SuExec組設置為 $1，但是虛擬服務器的GID為 $2
 validate_ewebdir=HTML目錄 $1缺少Apache &lt;Directory&gt;塊
+validate_ewebroot=Apache DocumentRoot未設置為HTML目錄 $1
 validate_ewebipv6=存在具有地址 $1的IPv6 DNS記錄 $2，但是此虛擬服務器未啟用IPv6
 validate_ewebipv6virt=存在地址為 $1的IPv6 DNS記錄，但是此虛擬服務器的Apache配置沒有IPv6地址
 validate_ewebip=該域的Apache虛擬主機不使用IPv4地址和端口 $1
@@ -1857,10 +1937,12 @@ validate_emysqlmod=MySQL Webmin模塊 $1不存在！
 validate_emysqlcheck=無法檢查服務主機上的MySQL登錄： $1
 validate_emysqldbcheck=無法在服務主機 $2上檢查MySQL數據庫 $1
 validate_emysqluserhost=服務主機報告在 $1上找到MySQL登錄名，但Virtualmin期望 $2
+
 tscripts_version=版
 tscripts_latest=最新可用
 tscripts_exact=總是
 tscripts_eversion=第 $1行中缺少版本號或版本號無效
+
 spam_elevel=刪除垃圾郵件的得分必須是大於零的整數
 spam_level=如果分數高於垃圾郵件，則刪除垃圾郵件
 spam_nolevel=不要刪除
@@ -1882,6 +1964,7 @@ spam_prov=Cloudmin服務系統 $1
 spam_exitcode=當超額配額用戶收到電子郵件時
 spam_bounce=退回發件人
 spam_queue=排隊等待以後交貨
+
 cat_dns=域名註冊
 cat_links=自訂連結
 cat_add=添加服務器
@@ -1890,16 +1973,19 @@ cat_email=電郵設定
 cat_ip=地址和網絡
 cat_check=限制和驗證
 cat_custom=系統定制
+
 pass_dbsync=警告-更改此域的管理密碼也會更新連接到其數據庫所需的密碼。
 pass_eadmin=找不到管理員！
 pass_changing2=更改管理員密碼 ..
 pass_hashpass=僅存儲該域的哈希密碼？
+
 cmass_ecannot=不允許從批處理文件創建服務器
 cmass_plan=規劃父域
 cmass_ealias=別名目標服務器 $1不存在
 cmass_emustparent=不允許您創建頂級虛擬服務器-必須指定父域
 cmass_ecanparent=不允許管理父虛擬服務器 $1
 cmass_eparpar=父服務器 $1不是頂級服務器
+
 umass_formatftp=<tt>ftp-flag</tt>的可能選項為：<br>0-不允許FTP登錄<br> 1-常規FTP登錄<br>2-非法FTP登錄<br> 3-網站FTP用戶
 umass_formatemail=<tt>電子郵件標誌</tt>的可能選項為：<br>0-無電子郵件地址<br> 1-啟用電子郵件
 umass_eshell=找不到適合指定FTP模式的外殼
@@ -1910,6 +1996,7 @@ umass_separator=批處理字段分隔符
 umass_separatorcolon=冒號：
 umass_separatorcomma=逗號，
 umass_separatortab=標籤
+
 amass_title=批量創建別名
 amass_header=從批處理文件創建多個電子郵件別名
 amass_help=該頁面允許您從文本文件中以以下格式一次創建多個電子郵件別名（有關更多信息，請參閱此頁面的幫助）：
@@ -1927,20 +2014,27 @@ amass_ebounce=退回目的地不能與其他任何目的地合併
 amass_done=已創建電子郵件別名 $1
 amass_eclash=具有相同名稱的別名
 amass_eunknown=未知別名目標 $1
+
 massu_rusurehome=由於其中一個腳本已安裝到虛擬服務器的頂級Web目錄中，因此<tt>$1</tt>下的<b>所有</b>文件在卸載時將被刪除！
 massu_sel=所選腳本： $1
+
 usage_dirheader2=該服務器主目錄和其他共享目錄下的文件和目錄的磁盤使用情況。
 usage_dirdesc=列<b>配額大小</b>是虛擬服務器所佔的磁盤空間，而<b>大小</b>是每個目錄中所有文件佔用的空間。
 usage_others=家裡的其他文件
 usage_showall=顯示所有磁盤的使用情況。
+
 webmin_phpini2=$1的PHP $2配置
+
 newquotacheck_esupport=文件系統不支持或不需要配額檢查
+
+phpmode_title2=PHP選項
 phpmode_fpm=FPM（以虛擬服務器所有者身份運行）
 phpmode_short_mod_php=Apache <tt>mod_php</tt>
 phpmode_short_cgi=CGI包裝器
 phpmode_short_fcgid=聯合會
 phpmode_short_fpm=FPM
 phpmode_dirswarn=警告-退出CGI或FCGId模式將刪除所有按目錄的PHP版本選擇。
+phpmode_err2=無法保存PHP選項
 phpmode_children=PHP FCGId子流程
 phpmode_echildren=PHP子流程的數量必須在1到 $1之間
 phpmode_maxtime=最大PHP腳本運行時間
@@ -1994,6 +2088,9 @@ phpmode_ehtmldir3=網站文檔子目錄不能包含 ..
 phpmode_ehtmldir4=網站文檔子目錄不能位於<tt>域</tt>下，因為該目錄是為子服務器保留的
 phpmode_ssloff=刪除重定向到SSL網站 ..
 phpmode_sslon=添加重定向到SSL網站 ..
+
+website_header=網站選項
+
 spf_ecannot=您無權編輯DNS選項
 spf_dmarcchange=正在更新DMARC記錄 ..
 spf_header2=DNSSEC區域密鑰
@@ -2022,6 +2119,7 @@ spf_disabletlsa=刪除TLSA記錄 ..
 spf_etlsa=..在此系統上不支持： $1
 spf_synctlsa=更新TLSA記錄 ..
 spf_esynctlsa=..找不到此域
+
 s3_emodule2=無法加載與Amazon的S3服務通信所需的Perl模塊 $1 : $2
 s3_emodule3=未安裝與Amazon的S3服務通信所需的Perl模塊 $1或 $2
 s3_elistfiles=無法列出S3文件： $1
@@ -2031,16 +2129,19 @@ s3_edom=無法上傳域文件： $1
 s3_einfo2=無法讀取 $1 : $2
 s3_eputacl=無法保存存儲段ACL： $1
 s3_eputlifecycle=無法保存存儲桶生命週期： $1
+
 tdelete_title=刪除服務器模板
 tdelete_warn=您確定要刪除以下選定的服務器模板： $1
 tdelete_confirm=刪除模板
 tdelete_users2=虛擬服務器當前正在使用它們： $1
+
 newlinks_nocat2=沒有
 newlinks_tmpl=對於模板
 newlinks_any=任何
 newlinks_add=添加一個新的自定義鏈接。
 newlinks_none=尚未定義自定義鏈接。
 newlinks_return=自定義鏈接
+
 elink_title1=創建自定義鏈接
 elink_title2=編輯自定義鏈接
 elink_header1=自定義鏈接詳細信息
@@ -2055,16 +2156,20 @@ elink_feature=具有功能的虛擬服務器
 elink_err=保存自定義鏈接失敗
 elink_edesc=缺少鏈接標題
 elink_eurl=URL缺失或無效-不允許有空格
+
 showpass_useru=IMAP / POP3 / FTP登錄
 showpass_passu=密碼
 showpass_ecannot=您無權查看虛擬服務器密碼
 showpass_egone=用戶不存在！
 showpass_dbuser=$1的用戶名
 showpass_dbpass=$1的密碼
+
 phpver_eavail2=您的系統僅安裝了PHP版本 $1，因此無法為每個目錄選擇不同的版本。
 phpver_emodphp=該虛擬服務器正在為PHP使用<tt>mod_php</tt>執行模式，因此不允許按目錄選擇版本。
 phpver_save=保存版本
+
 html_textok=編輯為文字
+
 sharedips_def6=默認共享IPv6地址
 sharedips_alloc=分配新的共享IPv4地址
 sharedips_ip6s=任何服務器的共享IPv6地址
@@ -2075,15 +2180,19 @@ sharedips_missing=父接口 $1不存在！
 sharedips_eboot=找不到IP地址的啟動時間配置
 sharedips_ebootreal=IP地址不是虛擬的
 sharedips_eactives=無法找到IP地址的活動配置
+
 newdynip_eext=無法計算外部可見的IP地址
 newdynip_eexternal=在外部腳本模式下，必須輸入要運行的腳本的完整路徑
+
 dynip_external=外部腳本 ..
 dynip_none=不更新任何服務
+
 newstyles_tabdelete=刪除樣式
 newstyles_desc3=從下面的列表中選擇一個第三方內容樣式以將其刪除。 Virtualmin內置的樣式無法刪除。使用該樣式的任何網站均不受影響。
 newstyles_dstyle=刪除樣式
 newstyles_del=立即刪除
 newstyles_edelete=選定的內容樣式不再存在！
+
 upgrade_eamazon=此許可證密鑰不能用於升級
 upgrade_eyumrepo=Virtualmin已從RPM安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
 upgrade_eyumlist=在YUM的可用軟件包列表中找不到 $1 RPM軟件包。也許您當前的存儲庫之一不起作用？
@@ -2094,9 +2203,11 @@ upgrade_update=從APT更新可用的軟件包。
 upgrade_debs=升級Virtualmin Debian軟件包： $1
 upgrade_yumclear=清除YUM緩存 ..
 upgrade_etypematch=無法升級，因為Virtualmin的安裝類型為<tt>$1</tt>，而Webmin的安裝類型為<tt>$2</tt>
+
 maillog_showspam=顯示垃圾郵件？
 maillog_showvirus=顯示病毒？
 maillog_bad=排除項目
+
 massg_title=升級腳本
 massg_rusure=您確定要將 $1選定的腳本升級到其最新版本嗎？
 massg_ok=現在升級
@@ -2106,6 +2217,7 @@ massg_fromto=從 $1升級到 $2
 massg_stay=住 $1
 massg_doing=將 $1升級到版本 $2 ..
 massg_edeleted=腳本 $1已被手動刪除，因此無法升級！
+
 aedit_title=手動編輯別名
 aedit_header=從批處理文件創建多個電子郵件別名
 aedit_help=通過此頁面，您可以一次編輯，創建和刪除多個別名，方法是將每個別名編輯為一行文本。每行具有以下格式（有關更多信息，請參閱此頁面的幫助）：
@@ -2117,6 +2229,7 @@ aedit_doing=更新電子郵件別名 ..
 aedit_complete=..完成（已創建 $1，已修改 $3，已刪除 $4，錯誤 $2）。
 aedit_etwice=具有相同名稱的別名被多次列出
 aedit_eauto=手動編輯別名時無法設置自動答复
+
 exclude_title=排除的目錄和數據庫
 exclude_header=備份排除選項
 exclude_dirs=目錄下跳
@@ -2127,6 +2240,7 @@ exclude_err=無法保存排除的目錄
 exclude_eabs=目錄“$1”不能是絕對路徑
 exclude_edot=目錄'$1'不能包含 ..
 exclude_edb=數據庫名稱“$1”無效
+
 balancers_title=代理路徑
 balancers_ecannot=您無權編輯此域的代理路徑
 balancers_esupport=域或系統不支持代理
@@ -2141,6 +2255,7 @@ balancers_return=代理路徑列表
 balancers_derr=刪除代理路徑失敗
 balancers_denone=未選擇
 balancers_none2=沒有代理
+
 balancer_create=創建代理路徑
 balancer_edit=編輯代理路徑
 balancer_egone=所選的代理路徑不再存在
@@ -2159,6 +2274,7 @@ balancer_eurls=沒有輸入目標網址
 balancer_script=由腳本安裝程序使用
 balancer_scriptver=腳本版本
 balancer_none=不要代理此路徑-而是在本地投放
+
 scriptwarn_header=Virtualmin管理的以下腳本具有可用的新版本：
 scriptwarn_header2=由Virtualmin管理的以下腳本在\n虛擬服務器 $1中具有可用的新版本：
 scriptwarn_script=腳本名稱
@@ -2168,6 +2284,7 @@ scriptwarn_dom=域名
 scriptwarn_where3=可以在Virtualmin中，每個域的“安裝腳本”頁面上進行升級，也可以一次在所有位置上進行升級：\n $1
 scriptwarn_where2=可以在Virtualmin的頁面上進行升級：\n $1
 scriptwarn_subject=Virtualmin腳本升級可用
+
 quotawarn_subject=Virtualmin用戶磁盤配額監控
 quotawarn_body=以下Virtualmin服務器已達到或正在接近其磁盤配額限制：
 quotawarn_body2=以下Virtualmin用戶已達到或正在接近其磁盤配額限制：
@@ -2180,6 +2297,7 @@ quotawarn_reached=已達到 $1％
 quotawarn_over=超過配額
 quotawarn_suffixdom=由Virtualmin在 $1發送
 quotawarn_suffixuser=由Virtualmin在 $1發送
+
 history_title=系統統計
 history_ecannot=您無權查看歷史系統統計信息
 history_year=1年
@@ -2250,6 +2368,7 @@ history_type_email=電郵訊息
 history_type_cpu=CPU利用率
 history_type_virt=Virtualmin計數
 history_type_system=系統統計
+
 sv_title=垃圾郵件和病毒掃描
 newsv_title=垃圾郵件和病毒掃描
 sv_ecannot=您無權編輯垃圾郵件和病毒掃描
@@ -2284,6 +2403,7 @@ sv_title5=啟用垃圾郵件過濾服務器
 sv_sdisabling=禁用SpamAssassin過濾服務器 ..
 sv_senabling=配置並啟用SpamAssassin過濾服務器 ..
 sv_swarning=警告！ Virtualmin配置為使用服務器過濾器，但SpamAssassin服務器進程不再運行
+
 features_title=功能和插件
 newfeatures_title=功能和插件
 features_ecannot=您無權編輯已啟用的功能
@@ -2295,6 +2415,7 @@ features_desc=該頁面允許您選擇虛擬服務器可以使用的核心功能
 features_used=顯示域名
 features_err=無法保存已啟用的功能
 features_return=功能和插件列表
+
 clamd_copyconf=創建ClamAV配置文件 $1 ..
 clamd_esrcfile=找不到與 $1匹配的..源文件！
 clamd_esrcalready=.. 已經存在
@@ -2316,18 +2437,21 @@ clamd_ekillmsg=無法殺死ClamAV病毒掃描服務器進程： $1
 spamd_estartmsg=無法啟動SpamAssassin過濾器服務器
 spamd_estopmsg=SpamAssassin篩選器服務器未運行
 spamd_ekillmsg=無法殺死SpamAssassin過濾器服務器進程： $1
+
 spamd_boot=在啟動時啟用SpamAssassin服務器。
 spamd_start=正在啟動SpamAssassin服務器 ..
 spamd_startfailed=..無法啟動： $1
 spamd_unboot=在啟動時禁用SpamAssassin服務器。
 spamd_unbootact=..找不到啟動時動作！
 spamd_stop=正在停止SpamAssassin服務器 ..
+
 chain_err=保存CA證書失敗
 chain_efile=證書文件不存在
 chain_ecert=無效的證書文件： $1
 chain_emode1=不允許您在服務器上選擇其他文件！
 chain_eupload=未選擇上傳的證書文件
 chain_epaste=未輸入證書文字
+
 stopscript_title=停止服務器
 stopscript_egone=腳本不再存在！
 stopscript_doing=正在關閉 $1的服務器進程。
@@ -2336,6 +2460,7 @@ startscript_title=啟動服務器
 startscript_doing=正在啟動 $1的服務器進程。
 startscript_failed=..失敗： $1
 restartscript_title=重新啟動服務器
+
 newshells_title=定制殼
 newshells_descr=該頁面允許您自定義虛擬服務器管理員和郵件/ FTP用戶可用的外殼，以滿足您站點的需求。自定義外殼程序通常用於授予用戶訪問FTP，SSH或其他服務的權限。
 newshells_defs=管理員和郵箱可用的外殼：
@@ -2360,6 +2485,7 @@ newshells_eownerdef=對於域管理員，僅一個外殼必須是默認外殼
 newshells_emailboxdef=郵箱必須是默認的一個外殼
 newshells_eresellerdef=經銷商必須默認使用一個外殼
 newshells_id=訪問
+
 shells_mailbox=僅電子郵件
 shells_mailbox2=無法進入
 shells_mailboxftp=電子郵件和FTP
@@ -2375,12 +2501,15 @@ shells_ftp2=僅FTP
 shells_ssh=電子郵件，FTP和SSH
 shells_ssh2=FTP和SSH
 shells_none=&lt;無殼&gt;
+
 nicetime_days=$1天， $2小時， $3:$4分鐘
 nicetime_hours=$1小時， $2:$3分鐘
 nicetime_mins=$1分鐘， $2秒
 nicetime_secs=$1秒
+
 bcc_epostfix=您的Postfix配置中未設置BCC映射文件！
 bcc_emailserver=您的郵件服務器不支持密件抄送
+
 mail_title=電郵設定
 mail_header=虛擬服務器電子郵件相關設置
 mail_bcc=密件抄送外發電子郵件至
@@ -2411,6 +2540,7 @@ mail_nothing=沒有進行任何更改！
 mail_ecloudid=必須為所選的雲郵件過濾器指定一個ID
 mail_url=當前過濾提供者的URL
 mail_mx=當前的MX記錄
+
 nf_header=$1..提供了以下新功能。
 nf_desc=特徵
 nf_html=描述
@@ -2420,6 +2550,7 @@ nf_and=$1和 $2
 nf_seen=隱藏新功能
 nf_try=嘗試一下 ..
 nf_ver=（版本 $1）
+
 chroot_title=FTP目錄限制
 newchroot_title=FTP目錄限制
 newchroot_desc=該頁面允許您配置通過FTP登錄的用戶可以訪問哪些目錄。限制適用於所選虛擬服務器的所有者及其所有具有FTP訪問權限的用戶。沒有任何匹配限制的服務器所有者將能夠在其家外看到文件，儘管權限通常會阻止它們訪問其他虛擬服務器的目錄。
@@ -2440,6 +2571,7 @@ chroot_eneg=在 $1行中選中<b>除服務器以外的所有文件</b>時，無�
 chroot_edom=找不到組 $1的虛擬服務器
 chroot_edir=第 $1行中缺少目錄或目錄無效
 chroot_saving=更新FTP服務器配置 ..
+
 res_elinux=資源限制僅在Linux上受支持
 res_elinuxconf=找不到資源限製配置文件 $1
 res_epamssh=找不到用於SSH的PAM服務，因此資源限制的驗證未完成
@@ -2460,6 +2592,7 @@ res_secs=秒
 res_time=每個進程的最大CPU時間
 res_etime=每個進程的最大CPU時間丟失或無效
 res_etime2=每個進程的最大CPU時間必須為1分鐘或更長
+
 sched_title=預定備份
 sched_ecannot=您無權管理預定備份
 sched_yes=是， $1
@@ -2490,17 +2623,20 @@ sched_now=備份 ..
 sched_restore=恢復 ..
 sched_return=計劃備份
 sched_logs=備份日誌
+
 cron_special=簡單的時間表
 cron_complex=複雜的時間表
 cron_cron=Cron規格
 cron_title=選擇時間表
 cron_ok=好
 cron_ehidden=沒有選擇複雜的時間表
+
 dsched_err=刪除計劃的備份失敗
 dsched_enone=未選擇
 dsched_egone=ID為 $1的備份不再存在
 dsched_erunning=ID為 $1的備份不再運行
 dsched_ecannot=您無權管理ID為 $1的備份
+
 dbhosts_err=更改遠程數據庫主機失敗
 dbhosts_enone=沒有輸入主機名或IP地址
 dbhosts_ehost='$1'不是有效的主機名或表達式
@@ -2508,6 +2644,7 @@ dbhosts_title=更新數據庫主機
 dbhosts_doing=將允許的 $1數據庫主機設置為 $2 ..
 dbhosts_failed=..失敗： $1
 dbhosts_done=..為 $1和其他具有數據庫訪問權限的用戶設置。
+
 newglobal_title=全局變量
 newglobal_desc=在此頁面上定義的變量可以在Virtualmin中的任何域或用戶級模板中使用。要添加變量，只需在表底部的空白行中填寫名稱和值。要刪除一個，請清除其名稱字段。要臨時禁用變量，請在啟用列中取消選中其複選框。
 newglobal_ecannot=您無權編輯全局變量
@@ -2516,20 +2653,24 @@ newglobal_name=變量名
 newglobal_value=可變值
 newglobal_err=保存全局變量失敗
 newglobal_ename=第 $1行中的變量名稱無效-僅允許使用字母，數字和下劃線
+
 spamtrap_already=該虛擬服務器已經存在垃圾郵件陷阱別名
 spamtrap_clash=無法創建垃圾郵件陷阱別名，因為已經存在以下衝突的別名： $1
 spamtrap_noaliases=該虛擬服務器不存在垃圾郵件陷阱別名
+
 unsub_title=轉換子域
 unsub_rusure=您確定要將此子域轉換為子服務器嗎？它的Web內容將不受影響，任何DNS記錄都將移入其自己的域中。
 unsub_ok=轉換為子服務器
 unsub_doing=將 $1轉換為子服務器 ..
 unsub_failed=..轉換失敗！
+
 unalias_title=轉換別名服務器
 unalias_err=轉換別名服務器失敗
 unalias_rusure=您確定要將此別名虛擬服務器轉換為子服務器嗎？它不再為舊目標虛擬服務器的網頁提供服務，而是可以擁有自己的Web內容，郵箱和郵件別名。
 unalias_ok=轉換為子服務器
 unalias_doing=將 $1轉換為子服務器 ..
 unalias_failed=..轉換失敗！
+
 connect_echeck=無法檢查連接
 connect_eempty=連接檢查無響應
 connect_ecannot=您無權檢查此虛擬服務器的連接
@@ -2554,6 +2695,7 @@ cfix_ssl=確保系統的Web服務器正在運行，端口443沒有被防火牆�
 cfix_smtptimeout=檢查系統的防火牆是否阻塞了端口25。
 cfix_smtp=確保系統的郵件服務器正在運行並且正在外部網絡接口上偵聽。
 cfix_smtpto=確保您的郵件服務器配置為接受該域的電子郵件。
+
 plans_title=帳戶計劃
 newplan_title=帳戶計劃
 plans_name=計劃名稱
@@ -2574,6 +2716,7 @@ plans_setdef=將默認計劃設置為：
 plans_nodef=無-在清單中優先使用
 plans_savedef=更改默認值
 plans_esetdef=所選計劃不存在或不可用
+
 plan_title1=創建客戶計劃
 plan_title2=修改客戶計劃
 plan_header1=基本計劃詳情
@@ -2595,9 +2738,11 @@ plan_scripts=允許的腳本
 plan_scriptsall=除了全球禁用的人
 plan_scriptsopts=所有腳本
 plan_scriptssel=允許的
+
 dplans_err=刪除計劃失敗
 dplans_enone=未選擇
 dplans_eall=至少必須存在一個計劃
+
 postgrey_title=電子郵件灰名單
 newpostgrey_title=電子郵件灰名單
 postgrey_epostfix=Postgrey只能與Postfix郵件服務器一起使用
@@ -2650,6 +2795,7 @@ postgrey_title4=安裝Postgrey
 postgrey_installing=安裝Postgrey軟件包 ..
 postgrey_installfailed=.. 安裝失敗！
 postgrey_installed=..安裝成功完成
+
 editgrey_titleclients=編輯列入白名單的客戶端
 editgrey_titlerecipients=編輯列入白名單的收件人
 creategrey_titleclients=添加列入白名單的客戶端
@@ -2665,8 +2811,10 @@ editgrey_err=無法保存白名單條目
 editgrey_evalueclients=郵件服務器IP地址或主機名丟失或外觀無效
 editgrey_eregexp=無效的正則表達式： $1
 editgrey_evaluerecipients=收件人電子郵件地址缺失或外觀無效
+
 delgrey_err=刪除白名單條目失敗
 delgrey_enone=未選擇
+
 copycert_title=複製SSL證書
 copycert_ecannot=不允許您複製此虛擬服務器的SSL證書
 copycert_webmindir=將證書和密鑰複製到 $1 ..
@@ -2688,6 +2836,7 @@ copycert_penabling=在Postfix配置中啟用SSL。
 copycert_fsaving=將證書和密鑰複製到ProFTPD文件 ..
 copycert_fsaving2=將證書，密鑰和CA複製到ProFTPD文件中。
 copycert_fenabling=在ProFTPD配置中啟用SSL。
+
 wizard_title=安裝後嚮導
 wizard_ecannot=您無權運行安裝後嚮導
 wizard_next=下一個
@@ -2788,6 +2937,7 @@ wizard_defssl2=是的，使用“讓我們加密”證書
 wizard_defdom_clash=名為 $1的虛擬服務器已存在
 wizard_defdom_already=名為 $1的默認虛擬服務器已存在
 wizard_defdom_desc=主機默認域
+
 backuplog_title=備份日誌
 backuplog_ecannot=您無權查看Virtualmin備份日誌
 backuplog_search=查找匹配的日誌
@@ -2810,6 +2960,7 @@ backuplog_part=部分的
 backuplog_nodoms=沒有網域
 backuplog_return=備份日誌清單
 backuplg_esched=預定備份不存在！
+
 viewbackup_title=查看備份日誌
 viewbackup_eid=備份ID丟失或無效！
 viewbackup_egone=記錄的備份不存在！
@@ -2850,6 +3001,7 @@ viewbackup_key=是的，使用密鑰 $1
 viewbackup_sched=從計劃的備份
 viewbackup_gone=ID $1（已刪除）
 viewbackup_ownrestore=車主可以還原嗎？
+
 dbackup_err=刪除備份失敗
 dbackup_title=刪除備份
 dbackup_rusure=您確定要從總計 $1的 $3中刪除此 $2域的備份嗎？
@@ -2857,6 +3009,7 @@ dbackup_confirm=立即刪除
 dbackup_doing=正在從 $1..刪除備份
 dbackup_done=..成功刪除
 dbackup_failed=..失敗： $1
+
 redirects_title=網站重定向
 redirects_ecannot=您無權編輯此域的網站重定向
 redirects_eweb=該虛擬服務器不支持重定向
@@ -2871,6 +3024,7 @@ redirects_type=類型
 redirects_alias=目錄別名
 redirects_redirect=重定向到URL
 redirects_dest=目的地
+
 redirect_egone=重定向已不存在！
 redirect_create=創建網站重定向
 redirect_edit=編輯網站重定向
@@ -2895,9 +3049,11 @@ redirect_edir=非絕對目標目錄
 redirect_edir3=缺少目標目錄 $1
 redirect_edir2=目標目錄必須在 $1下
 redirect_ecode=無效的HTTP狀態代碼
+
 newchangelog_title=新功能日誌
 newchangelog_ecannot=您無權查看新功能日誌
 newchangelog_desc=本頁列出了系統上安裝的所有Virtualmin版本中的所有主要更改，直至最新版本。
+
 dkim_title=域密鑰標識的郵件
 dkim_title1=啟用DomainKeys標識的郵件
 dkim_title2=禁用DomainKeys標識的郵件
@@ -2925,10 +3081,12 @@ dkim_extra=要註冊的域名
 dkim_eextra=無效的其他域 $1
 dkim_eexclude=無效的排除域 $1
 dkim_exclude=永遠不要註冊域名
+
 dkim_title4=安裝DKIM
 dkim_installing=安裝DKIM過濾器包 ..
 dkim_installfailed=.. 安裝失敗！
 dkim_installed=..安裝成功完成
+
 dkim_newkey=在文件 $1..中生成私鑰
 dkim_enewkey=..私鑰失敗： $1
 dkim_pubkey=從 $1..中的私鑰中提取公鑰。
@@ -2958,6 +3116,7 @@ dkim_records=域的DKIM DNS記錄
 dkim_pubkeypem=PEM格式的DKIM公鑰
 dkim_privkeypem=PEM格式的DKIM私鑰
 dkim_esize=DKIM密鑰大小必須為至少512位的數字
+
 newautoconfig_title=郵件客戶端配置
 autoconfig_ecannot=您無權編輯郵件客戶端配置
 autoconfig_header=客戶端自動配置選項
@@ -2969,6 +3128,7 @@ autoconfig_enable=為 $1虛擬服務器啟用郵件客戶端自動配置。
 autoconfig_disable=為 $1虛擬服務器禁用郵件客戶端自動配置。
 autoconfig_failed=$1失敗： $2
 autoconfig_enabled_global=已保存的郵件自動配置設置。
+
 newretention_title=郵箱清理
 retention_ecannot=您不允許配置郵箱清理
 retention_header=自動郵箱清理選項
@@ -2984,6 +3144,7 @@ retention_folders=中的清除消息
 retention_folders0=所有用戶文件夾
 retention_folders1=只有收件箱
 retention_desc=此頁面使您可以讓Virtualmin自動從域所有者和郵件用戶的郵箱中刪除舊的電子郵件。
+
 provision_title=Cloudmin Services客戶
 provision_ecannot=不允許您設置Cloudmin服務客戶端
 provision_header=Cloudmin服務客戶端選項
@@ -3031,12 +3192,14 @@ provision_espamtest=..提供的系統 $1無法使用： $2
 provision_spamgot=..使用系統 $1
 provision_spamunsetup=停止使用垃圾郵件過濾系統 ..
 provision_espamunsetup=..失敗： $1
+
 provision_emysqldbcheck=服務錯誤檢查MySQL數據庫： $1
 provision_emysqldb=服務主機上已經存在MySQL數據庫 $1
 provision_emysqlcheck=服務錯誤檢查MySQL登錄： $1
 provision_emysql=服務主機上已經存在MySQL登錄 $1
 provision_ednscheck=服務錯誤檢查DNS區域： $1
 provision_edns=DNS區域 $1已存在於服務主機上
+
 records_title=DNS記錄
 records_ecannot=您無權編輯DNS記錄
 records_name=記錄名稱
@@ -3089,6 +3252,7 @@ records_comment=評論
 records_manual=手動編輯記錄
 records_epost=記錄未完全刪除： $1
 records_viewdesc=您的Virtualmin系統未託管此虛擬服務器的DNS域。如果域託管在其他地方，則應使用以下記錄來確保網站和電子郵件正常運行。
+
 record_title1=創建DNS記錄
 record_title2=編輯DNS記錄
 record_egone=記錄不再存在！
@@ -3118,6 +3282,7 @@ record_defttl=默認緩存時間
 record_epost=記錄未完全保存： $1
 record_esservice=服務名稱缺失或外觀無效
 record_esproto=服務協議無效
+
 clone_err=克隆虛擬服務器失敗
 clone_eclash=具有相同名稱的虛擬服務器已存在
 clone_eclash2=具有相同名稱的用戶已存在
@@ -3198,6 +3363,7 @@ clone_ssl=複製Apache SSL指令 ..
 clone_newip=克隆的IP地址
 clone_alloc=分配新的IP
 clone_vip=使用地址
+
 mrecords_title=編輯DNS記錄
 mrecords_ecannot=您無權手動編輯DNS記錄
 mrecords_desc=該頁面允許您以BIND配置格式手動修改域中的所有DNS記錄。
@@ -3205,16 +3371,19 @@ mrecords_err=保存DNS記錄失敗
 mrecords_enone=什麼都沒輸入！
 mrecords_evalidate=驗證失敗： $1
 mrecords_validate=驗證新記錄？
+
 mxv_unsupported=僅支持Sendmail和Postfix來限制中繼
 mxv_rrm=在Postfix配置中未設置 $1指令
 mxv_eaccess=在Sendmail配置中未啟用垃圾郵件控制（access_db）功能
 mxv_eaccessfile=垃圾郵件控件（access_db）文件 $1尚不存在
+
 fixperms_err=修復權限失敗
 fixperms_edoms=未選擇虛擬服務器
 fixperms_title=修復權限
 fixperms_dom=修復 $1..的文件所有權和權限
 fixperms_edir=..沒有主目錄
 fixperms_failed=..失敗： $1
+
 bkeys_title=備份加密密鑰
 bkeys_key=GPG密鑰ID
 bkeys_delete=刪除所選鍵
@@ -3236,6 +3405,7 @@ bkeys_eused2=計劃到 $1的備份正在使用密鑰 $2
 bkeys_rusure=您確定要刪除 $1選擇的備份加密密鑰嗎？
 bkeys_rusuerlogs=這些密鑰已用於加密 $1以前的備份，沒有它們將無法還原。
 bkeys_all=允許域所有者使用密鑰？
+
 bkey_create=創建加密密鑰
 bkey_edit=編輯加密密鑰
 bkey_ecannot=您無權編輯此加密密鑰
@@ -3272,11 +3442,13 @@ bkey_rusuerlogs=此密鑰已用於加密 $1以前的備份，如果沒有它，�
 bkey_edescclash=具有相同描述的GPG密鑰已存在
 bkey_eemailclash=具有相同電子郵件地址的GPG密鑰已存在
 bkey_download=下載密鑰
+
 hashtype_crypt=Unix DES加密
 hashtype_md5=MD5哈希
 hashtype_unix=系統默認哈希類型
 hashtype_mysql=MySQL密碼哈希
 hashtype_digest=Web摘要認證哈希
+
 fixsymlinks_title=修復符號鏈接權限
 fixsymlinks_ecannot=您無權修復符號鏈接權限
 fixsymlinks_doing=更新所有虛擬服務器以防止不安全的符號鏈接 ..
@@ -3289,10 +3461,12 @@ fixsymlinks_doms=在以下位置發現有問題的<tt>.htaccess</tt>文件：
 fixsymlinks_ok=修復訪問文件
 fixsymlinks_htdoing=<tt>.htaccess</tt>文件中的修復選項。
 fixsymlinks_htdone=..修復了 $2域中的 $1文件
+
 fixmodphp_title=修復PHP權限
 fixmodphp_ecannot=您無權修復PHP權限
 fixmodphp_doing=更新所有虛擬服務器以防止在禁用時使用mod_php。
 fixmodphp_done=..固定的 $1域
+
 buckets_title=亞馬遜S3桶
 buckets_ecannot=您無權管理S3存儲桶
 buckets_eaccounts=尚未創建到S3的計劃備份，也未設置默認的S3密鑰。
@@ -3304,6 +3478,7 @@ buckets_created=創建於
 buckets_location=位置
 buckets_add=創建一個新的S3存儲桶。
 buckets_return=鏟斗清單
+
 bucket_title1=創建S3存儲桶
 bucket_title2=編輯S3存儲桶
 bucket_eagone=帳戶不存在！
@@ -3348,6 +3523,7 @@ bucket_eldays=生命週期中缺少或非數字的天數 $1
 bucket_elday=生命週期中缺少或非數字日 $1
 bucket_elmonth=生命週期中缺少或非數字月份 $1
 bucket_elyear=生命週期中缺少或非數字年份 $1
+
 ratelimit_title=郵件速率限制
 ratelimit_eos=此操作系統不支持電子郵件速率限制
 ratelimit_econfig=milter-greylist配置文件 $1不存在
@@ -3376,6 +3552,7 @@ ratelimit_enum=郵件數必須為數字
 ratelimit_etime=時間段必須為數字
 ratelimit_socket=調整套接字文件 ..
 ratelimit_etwice=域 $1已被選擇兩次
+
 ratelimit_title4=安裝郵件速率限制
 ratelimit_installing=安裝電子郵件速率限製程序包 ..
 ratelimit_installfailed=.. 安裝失敗！
@@ -3396,6 +3573,7 @@ ratelimit_h=小時
 ratelimit_d=天
 ratelimit_w=週
 ratelimit_y=年份
+
 transfer_title=傳輸虛擬服務器
 transfer_err=傳輸服務器失敗
 transfer_ecannot=不允許您傳輸虛擬服務器
@@ -3448,6 +3626,7 @@ transfer_disabling=在此系統上禁用 $1 ..
 transfer_ereplication=無法同時啟用域的複制和刪除
 transfer_ehost=缺少目標主機名
 transfer_ehost2=無法解析目標主機名
+
 domdkim_title=DomainKey選項
 domdkim_header=此服務器的DomainKey選項
 domdkim_key=PEM格式的DKIM私鑰
@@ -3463,6 +3642,7 @@ domdkim_ekey=無效的密鑰格式： $1
 domdkim_egen=生成新密鑰失敗： $1
 domdkim_enabled=當前未啟用DKIM
 domdkim_records=DKIM DNS記錄
+
 clouds_title=雲存儲提供商
 clouds_name=提供商名稱
 clouds_state=當前狀態
@@ -3472,6 +3652,7 @@ clouds_unconf=尚未配置
 clouds_return=供應商列表
 clouds_nusers=由 $1備份使用
 clouds_nousers=未由任何備份使用
+
 cloud_s3desc=亞馬遜S3
 cloud_rsdesc=Rackspace雲文件
 cloud_googledesc=谷歌云存儲
@@ -3537,6 +3718,7 @@ cloud_bb_key=API密鑰
 cloud_bb_ekeyid=缺少或外觀無效的API密鑰ID
 cloud_bb_ekey=API密鑰缺失或外觀無效
 cloud_bb_elogin=登錄到Backblaze失敗： $1
+
 left_virtualmin=虛擬分鐘
 left_master=主管理員
 left_reseller=轉銷商
@@ -3548,6 +3730,7 @@ left_master2=Cloudmin主管理員
 left_login=登錄名： $1
 left_level=1級
 left_generic=創建虛擬服務器
+
 right_statusheader=狀態
 right_sysinfoheader=程式
 right_virtheader=Virtualmin計數
@@ -3611,6 +3794,7 @@ right_quota=磁盤使用率和配額
 right_bw=帶寬使用和限制
 right_of=$2中的 $1
 right_sysinfo=系統信息
+
 assoc_title=關聯和解除關聯功能
 assoc_desc=在此頁面上啟用或禁用的功能將不會更新任何系統配置文件-而是，僅Virtualmin期望域具有的功能數據庫會被更改。這可用於導入已手動設置的功能，或斷開連接的配置，以便在刪除虛擬服務器時保留該配置。
 assoc_header=功能關聯設置
@@ -3618,6 +3802,7 @@ assoc_features=Virtualmin已知的功能
 assoc_validate=需要成功驗證才能保存？
 assoc_err=無法關聯功能
 assoc_evalidate=$1的驗證失敗： $2
+
 running_title=運行備份
 running_stop=停止選定的備份
 running_started=開始於
@@ -3629,6 +3814,7 @@ running_cron=預定備份
 running_link=訪問<a href='$1'>預定備份</a>頁面以創建定期在後台運行的備份，或訪問<a href='$2'>備份日誌</a>頁面以查看備份已經完成。
 running_err=無法停止備份
 running_enone=未選擇！
+
 recovery_title=恢復密碼
 recovery_msg1=您確定要將 $1的當前密碼發送到 $2嗎？
 recovery_msg2=您確定要為 $1生成一個新的隨機密碼並將其發送到 $2嗎？
@@ -3638,6 +3824,7 @@ recovery_body1=登錄名為 $2的電子郵件帳戶 $3的密碼為： $1
 recovery_body2=已為您的電子郵件帳戶 $3（登錄名為 $2）生成了新的隨機密碼： $1
 recovery_sending=正在將密碼恢復電子郵件發送到 $1 ..
 recovery_failed=..失敗： $1
+
 letsencrypt_err=申請證書失敗
 letsencrypt_title=索取證書
 letsencrypt_doing2=從“讓我們加密..”請求 $1的證書
@@ -3657,12 +3844,14 @@ letsencrypt_conncheck=正在檢查 $1的外部連接 ..
 letsencrypt_connerrs=..錯誤被發現，這將阻止Let's Encrypt頒發證書：
 letsencrypt_connok=..沒發現問題
 letsencrypt_validcheck=驗證 $1..的配置
+
 php_fpmrestart=重新啟動PHP-FPM服務器 ..
 php_fpmnoinit=..找不到啟動動作！
 php_fpmeinit=..失敗： $1
 php_fpmnodir=找不到FPM配置目錄
 php_fpmnoinit2=找不到FPM服務器啟動操作
 php_fpmnomod=Apache模塊 $1丟失或未啟用
+
 jailkit_ecmd=在您的系統上找不到Jailkit命令 $1-也許未安裝<i>jailkit</i>軟件包？
 jailkit_einit=無法初始化監獄： $1
 jailkit_elinux=Jailkit僅在Linux系統上受支持
@@ -3673,6 +3862,7 @@ jailkit_emkdir=無法創建目錄： $1
 jailkit_eumount=無法卸載綁定主目錄： $1
 jailkit_eenabled=未為該域啟用Chroot監獄
 jailkit_edir=找不到chroot監獄目錄！
+
 mysqlpass_shutdown=關閉MySQL服務器 ..
 mysqlpass_eshutdown=..關機失敗： $1
 mysqlpass_startup=正在啟動MySQL服務器 ..
@@ -3684,6 +3874,7 @@ mysqlpass_esafe=..啟動失敗： $1
 mysqlpass_change=更改用戶 $1的密碼。
 mysqlpass_echange=..密碼更改失敗： $1
 mysqlpass_kill=在禁用身份驗證的情況下停止MySQL服務器 ..
+
 kill_failed=殺死失敗： $1
 kill_still=仍在運行！
 kill_done=被殺
@@ -3693,6 +3884,7 @@ kill_port=港口
 kill_cmd=服務器命令
 kill_result=結果
 kill_subject=Virtualmin服務器進程監視
+
 mysql_rsock=套接字文件 $1
 mysql_rhostport=遠程主機 $1端口 $2
 mysql_rhost=遠程主機 $1
@@ -3701,8 +3893,10 @@ mysql_rlocal=本地服務器
 mysql_movebackup=在原始主機上備份用戶和數據庫。
 mysql_moverestore=在新主機上還原用戶和數據庫。
 mysql_movedelete=從原始主機中刪除用戶和數據庫。
+
 dbpass_title=更新數據庫密碼
 dbname_title=更新數據庫名稱
+
 mailclient_title=電子郵件客戶端設置
 mailclient_header=用戶郵件客戶端的設置
 mailclient_exemail=用戶電子郵件示例
@@ -3724,6 +3918,7 @@ mailclient_smtp_type=SMTP加密類型
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=未加密
+
 deftmplt_error=錯誤
 deftmplt_website_disabled=網站已禁用
 deftmplt_under_construction=正在施工
@@ -3732,6 +3927,7 @@ deftmplt_slogan2=域所有者必須登錄控制面板才能管理此網站
 deftmplt_made_with_love1=用
 deftmplt_made_with_love2=在Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin公司對此服務器提供的內容概不負責
+
 2fa_title=兩要素認證
 2fa_euser=Webmin用戶不存在！
 2fa_already=您已經使用提供者 $1和帳戶ID $2註冊了兩因素身份驗證。
