@@ -1613,3 +1613,5 @@ Improved and preserved indentation for Apache configs.
 Fixes for IPv6 addresses in SPF and default DNS records.
 Fixed bugs caused by removing domain features in the wrong order.
 Improved locking for domain database files to prevent overwriting.
+---- Changes since 6.14 ----
+Consolidated all PHP options into a single page, and moved website options to it's own page in the UI.

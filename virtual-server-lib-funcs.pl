@@ -12113,16 +12113,6 @@ if (&domain_has_website($d) && &can_edit_phpmode()) {
 		  });
 	}
 
-if (&domain_has_website($d) && &can_edit_phpver() &&
-    defined(&list_available_php_versions)) {
-	# PHP directory versions button
-	push(@rv, { 'page' => 'edit_phpver.cgi',
-		    'title' => $text{'edit_phpver'},
-		    'desc' => $text{'edit_phpverdesc'},
-		    'cat' => 'server',
-		  });
-	}
-
 if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
     &can_edit_spf($d)) {
 	# SPF settings button

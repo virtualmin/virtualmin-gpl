@@ -5078,6 +5078,13 @@ phpmode_ehtmldir3=The website documents sub-directory cannot contain ..
 phpmode_ehtmldir4=The website documents sub-directory cannot be under <tt>domains</tt>, as that directory is reserved for sub-servers
 phpmode_ssloff=Removing redirect to SSL site ..
 phpmode_sslon=Adding redirect to SSL site ..
+phpmode_version=PHP version
+phpmode_versions=PHP versions
+phpmode_enabled=Enabled?
+phpmode_versionone=(Only version available for this mode)
+phpmode_deldir=Removing PHP directory $1 ..
+phpmode_adddir=Adding PHP directory $1 on version $2 ..
+phpmode_savedir=Updating PHP directory $1 to version $2 ..
 
 website_header=Website options
 
@@ -5216,19 +5223,10 @@ showpass_egone=User does not exist!
 showpass_dbuser=Username for $1
 showpass_dbpass=Password for $1
 
-phpver_title=PHP Versions
 phpver_dir=Website subdirectory
 phpver_ver=Version
-phpver_ecannot=You are not allowed to change PHP versions
-phpver_eavail2=Your system only has PHP version $1 installed, so selecting a different version for each directory is not possible.
-phpver_emodphp=This virtual server is using the <tt>mod_php</tt> execution mode for PHP, such does not allow per-directory version selection.
 phpver_pub=Default HTML directory
-phpver_delete=Remove Selected
-phpver_save=Save Versions
-phpver_err=Failed to save PHP versions
 phpver_enewdir=Invalid website subdirectory - must be like <tt>myapp</tt> or <tt>programs/myapp</tt>
-phpver_derr=Failed to remove PHP versions
-phpver_enone=None selected
 
 html_title=Edit Web Pages
 html_edit=Edit existing file:

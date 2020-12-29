@@ -62,6 +62,98 @@ if (!$d->{'alias'} &&
 			    $text{'rfile_secs'});
 	}
 
+# PHP versions
+if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
+	# Build versions list
+	@avail = &list_available_php_versions($d, $mode);
+	@vlist = ( );
+	foreach my $v (@avail) {
+		if ($v->[1]) {
+			my $fullver = &get_php_version($v->[1], $d);
+			push(@vlist, [ $v->[0], $fullver ]);
+			}
+		else {
+			push(@vlist, $v->[0]);
+			}
+		}
+
+	# Get current versions and directories
+	@dirs = &list_domain_php_directories($d);
+	$pub = &public_html_dir($d);
+
+	if (@avail <= 1) {
+		# System has only one version
+		$fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
+					  : $avail[0]->[0];
+		print &ui_table_row($text{'phpmode_version'},
+			$fullver." ".$text{'phpmode_versionone'});
+		}
+	elsif ($mode eq "fpm" && @dirs == 1) {
+		# Only one version can be set
+		print &ui_table_row(
+			&hlink($text{'phpmode_version'}, "phpmode_version"),
+			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist));
+		print &ui_hidden("dir_0", $dirs[0]->{'dir'});
+		print &ui_hidden("d", $dirs[0]->{'dir'});
+		}
+	else {
+		# Multiple versions can be selected for different directories
+		$i = 0;
+		@table = ( );
+		$anydelete = 0;
+		foreach $dir (sort { $a->{'dir'} cmp $b->{'dir'} } @dirs) {
+			$ispub = $dir->{'dir'} eq $pub;
+			$sel = &ui_select("ver_$i", $dir->{'version'}, \@vlist);
+			print &ui_hidden("dir_$i", $dir->{'dir'});
+			print &ui_hidden("oldver_$i", $dir->{'version'});
+			if ($ispub) {
+				# Can only change version for public html
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'disabled' => 1,
+					  'checked' => 1, },
+					"<i>$text{'phpver_pub'}</i>",
+					$sel
+					]);
+				}
+			elsif (substr($dir->{'dir'}, 0, length($pub)) eq $pub) {
+				# Show directory relative to public_html
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'checked' => 1, },
+					"<tt>".substr($dir->{'dir'}, length($pub)+1)."</tt>",
+					$sel
+					]);
+				$anydelete++;
+				}
+			else {
+				# Show full path
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'checked' => 1, },
+					"<tt>$dir->{'dir'}</tt>",
+					$sel
+					]);
+				$anydelete++;
+				}
+			$i++;
+			}
+		push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
+				 'value' => "new", },
+			       &ui_textbox("dir_new", undef, 30),
+			       &ui_select("ver_new", undef, \@vlist),
+			     ]);
+		@heads = ( $text{'phpmode_enabled'},, $text{'phpver_dir'},
+			   $text{'phpver_ver'} );
+		print &ui_table_row(
+			&hlink($text{'phpmode_versions'}, "phpmode_versions"),
+			&ui_columns_table(\@heads, 100, \@table));
+		}
+	}
+
 print &ui_hidden_table_end();
 
 # Show PHP information
