@@ -68,8 +68,10 @@ if (defined($in{'children_def'}) &&
 
 # Save max PHP run time (in both Apache and PHP configs)
 $max = $in{'maxtime_def'} ? 0 : $in{'maxtime'};
+$oldmax = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
+			   : &get_php_max_execution_time($d);
 if (defined($in{'maxtime_def'}) &&
-    &get_fcgid_max_execution_time($d) != $max) {
+    $oldmax != $max) {
 	&$first_print($max ? &text('phpmode_maxing', $max)
 			   : $text{'phpmode_nomax'});
 	&set_fcgid_max_execution_time($d, $max);

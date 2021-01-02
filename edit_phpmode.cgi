@@ -57,8 +57,8 @@ if (!$d->{'alias'} &&
 	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
 				: &get_php_max_execution_time($d);
 	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
-			    &ui_opt_textbox("maxtime", $max, 5,
-					    $text{'form_unlimit'})." ".
+			    &ui_opt_textbox("maxtime", $max == 0 ? undef : $max,
+					    5, $text{'form_unlimit'})." ".
 			    $text{'rfile_secs'});
 	}
 
