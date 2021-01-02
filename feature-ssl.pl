@@ -1302,7 +1302,9 @@ return $data;
 # Add the per-IP/domain SSL key for some domain
 sub setup_ipkeys
 {
-local ($d, $getfunc, $putfunc, $postfunc) = @_;
+my ($d, $getfunc, $putfunc, $postfunc) = @_;
+my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
+my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
 &foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
@@ -1311,7 +1313,7 @@ local @ips;
 if ($d->{'virt'}) {
 	push(@ips, $d->{'ip'});
 	}
-push(@ips, $d->{'dom'}, "*.$d->{'dom'}");
+push(@ips, @dnames);
 push(@ipkeys, { 'ips' => \@ips,
 		'key' => $d->{'ssl_key'},
 		'cert' => $d->{'ssl_cert'},
@@ -1326,7 +1328,7 @@ return 1;
 # Remove the per-IP/domain SSL key for some domain
 sub delete_ipkeys
 {
-local ($d, $getfunc, $putfunc, $postfunc) = @_;
+my ($d, $getfunc, $putfunc, $postfunc) = @_;
 &foreign_require("webmin");
 local %miniserv;
 &$getfunc(\%miniserv);
@@ -1821,24 +1823,33 @@ if ($d->{'letsencrypt_renew'}) {
 	}
 }
 
-# hostname_under_domain(&domain, hostname)
+# hostname_under_domain(&domain|&domains, hostname)
 # Returns 1 if some hostname belongs to a domain, and not any subdomain
 sub hostname_under_domain
 {
 my ($d, $name) = @_;
-$name =~ s/\.$//;	# In case DNS record
-if ($name eq $d->{'dom'} ||
-    $name eq "*.".$d->{'dom'} ||
-    $name eq ".".$d->{'dom'}) {
-	return 1;
-	}
-elsif ($name =~ /^([^\.]+)\.(\S+)$/ && $2 eq $d->{'dom'}) {
-	# Under the domain, but what if another domain owns it?
-	my $o = &get_domain_by("dom", $name);
-	return $o ? 0 : 1;
+if (ref($d) eq 'ARRAY') {
+	# Under any of the domains?
+	foreach my $dd (@$d) {
+		return 1 if (&hostname_under_domain($dd, $name));
+		}
+	return 0;
 	}
 else {
-	return 0;
+	$name =~ s/\.$//;	# In case DNS record
+	if ($name eq $d->{'dom'} ||
+	    $name eq "*.".$d->{'dom'} ||
+	    $name eq ".".$d->{'dom'}) {
+		return 1;
+		}
+	elsif ($name =~ /^([^\.]+)\.(\S+)$/ && $2 eq $d->{'dom'}) {
+		# Under the domain, but what if another domain owns it?
+		my $o = &get_domain_by("dom", $name);
+		return $o ? 0 : 1;
+		}
+	else {
+		return 0;
+		}
 	}
 }
 
@@ -2007,18 +2018,7 @@ else {
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
 	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
-
-	# Find existing local_name blocks for hostnames under any domains
-	# related to this virtual server
-	my @myloc;
-	foreach my $l (@locs) {
-		foreach my $sd (@doms) {
-			if (&hostname_under_domain($sd, $l->{'value'})) {
-				push(@myloc, $l);
-				last;
-				}
-			}
-		}
+	my @myloc = grep { &hostname_under_domain(\@doms, $l->{'value'}) } @loc;
 	if ($enable && !@myloc) {
 		# Need to add
 		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
@@ -2307,9 +2307,11 @@ elsif (&postfix_supports_sni()) {
 	my @certs = ( $d->{'ssl_key'}, $d->{'ssl_cert'} );
 	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
 	my $certstr = join(",", @certs);
+	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
 	if ($enable) {
 		# Add or update map entries for domain
-		foreach my $dname ($d->{'dom'}, ".".$d->{'dom'}) {
+		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
+		foreach my $dname (@dnames) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
 			if ($enable && !$r) {
 				# Need to add
@@ -2328,7 +2330,7 @@ elsif (&postfix_supports_sni()) {
 	else {
 		# Remove all map entries for the domain
 		foreach my $r (reverse(@$map)) {
-			if (&hostname_under_domain($d, $r->{'name'})) {
+			if (&hostname_under_domain(\@doms, $r->{'name'})) {
 				&postfix::delete_mapping(
 				    "tls_server_sni_maps", $r);
 				}
