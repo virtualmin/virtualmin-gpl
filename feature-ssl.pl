@@ -2006,10 +2006,23 @@ else {
 			 $_->{'section'} } @$conf;
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
-	my @myloc = grep { &hostname_under_domain($d, $_->{'value'}) } @loc;
+	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
+
+	# Find existing local_name blocks for hostnames under any domains
+	# related to this virtual server
+	my @myloc;
+	foreach my $l (@locs) {
+		foreach my $sd (@doms) {
+			if (&hostname_under_domain($sd, $l->{'value'})) {
+				push(@myloc, $l);
+				last;
+				}
+			}
+		}
 	if ($enable && !@myloc) {
 		# Need to add
-		foreach my $n ($d->{'dom'}, "*.".$d->{'dom'}) {
+		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
+		foreach my $n (@dnames) {
 			my $l = { 'name' => 'local_name',
 				  'value' => $n,
 				  'enabled' => 1,

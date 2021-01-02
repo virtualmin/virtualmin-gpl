@@ -5405,6 +5405,16 @@ $sslserv_tests = [
 		      @create_args, ],
         },
 
+	# Create an alias as well
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'alias', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test alias-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
 	# Install a dummy CA cert
 	{ 'command' => 'install-cert.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -5556,6 +5566,19 @@ $sslserv_tests = [
 	},
 	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
 		       ' -servername '.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert still works with SNI on the alias
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', $test_subdomain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_subdomain.
+		       ' -servername '.$test_subdomain.
 		       ' -port 993 </dev/null',
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
