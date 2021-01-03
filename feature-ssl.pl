@@ -2048,7 +2048,6 @@ else {
 		# May need to add or update
 		foreach my $n (@dnames) {
 			my ($l) = grep { $_->{'value'} eq $n } @loc;
-			print STDERR "n=$n l=$l\n";
 			if ($l) {
 				# Already exists, so update paths
 				&dovecot::save_directive($l->{'members'},
@@ -2093,7 +2092,6 @@ else {
 	if (@delloc) {
 		# Remove those to delete
 		foreach my $l (reverse(@delloc)) {
-			print STDERR "l=$l->{'value'}\n";
 			my $lref = &read_file_lines($l->{'file'});
 			splice(@$lref, $l->{'line'},
 			       $l->{'eline'}-$l->{'line'}+1);
@@ -2338,33 +2336,43 @@ elsif (&postfix_supports_sni()) {
 	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
 	my $certstr = join(",", @certs);
 	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
-	if ($enable) {
+	my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) }
+			 grep { !$_->{'deleting'} } @doms;
+	my @mymaps = grep { &hostname_under_domain(\@doms,$_->{'name'}) } @$map;
+	my @delmaps;
+	if (!$enable) {
+		# Deleting them all
+		@delmaps = @mymaps;
+		}
+	else {
 		# Add or update map entries for domain
-		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) }
-				 grep { !$_->{'deleting'} } @doms;
 		foreach my $dname (@dnames) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
-			if ($enable && !$r) {
+			if (!$r) {
 				# Need to add
 				&postfix::create_mapping(
 				    "tls_server_sni_maps",
 				    { 'name' => $dname, 'value' => $certstr });
 				}
-			elsif ($enable && $r) {
+			else {
 				# Update existing certs
 				$r->{'value'} = $certstr;
 				&postfix::modify_mapping(
 				    "tls_server_sni_maps", $r, $r);
 				}
 			}
-		}
-	else {
-		# Remove all map entries for the domain
-		foreach my $r (reverse(@$map)) {
-			if (&hostname_under_domain(\@doms, $r->{'name'})) {
-				&postfix::delete_mapping(
-				    "tls_server_sni_maps", $r);
+		# Remove those no longer needed
+		foreach my $r (@mymaps) {
+			my ($n) =  grep { $l->{'name'} eq $_ } @dnames;
+			if (!$n) {
+				push(@delmaps, $r);
 				}
+			}
+		}
+	if (@delmaps) {
+		# Remove un-needed map entries
+		foreach my $r (reverse(@delmaps)) {
+			&postfix::delete_mapping("tls_server_sni_maps", $r);
 			}
 		}
 	&unlock_file($mapfile);

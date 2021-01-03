@@ -8226,6 +8226,7 @@ foreach my $dd (@alldoms) {
 
 	# If this is an alias domain, notify the target that it is being
 	# deleted. This allows things like extra awstats symlinks to be removed
+	$dd->{'deleting'} = 1;		# so that features know about delete
 	if (!$only && $dd->{'alias'}) {
 		local $aliasdom = &get_domain($dd->{'alias'});
 		foreach my $f (@features) {
@@ -8253,7 +8254,6 @@ foreach my $dd (@alldoms) {
 	# Delete all features (or just 'webmin' if un-importing). Any
 	# failures are ignored!
 	my $f;
-	$dd->{'deleting'} = 1;		# so that features know about delete
 	local $p = &domain_has_website($dd);
 	local @of;
 	if ($only) {
