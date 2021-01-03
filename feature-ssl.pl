@@ -225,6 +225,24 @@ if (!$d->{'creating'} && $generated && $d->{'auto_letsencrypt'} &&
 return 1;
 }
 
+# setup_alias_ssl(&alias-target, &domain)
+# Called when a domain with SSL gets an alias
+sub setup_alias_ssl
+{
+my ($aliasd, $d) = @_;
+my @certs = &get_all_domain_service_ssl_certs($aliasd);
+&update_all_domain_service_ssl_certs($aliasd, \@certs);
+}
+
+# delete_alias_ssl(&alias-target, &domain)
+# Called when a domain with SSL loses an alias
+sub delete_alias_ssl
+{
+my ($aliasd, $d) = @_;
+my @certs = &get_all_domain_service_ssl_certs($aliasd);
+&update_all_domain_service_ssl_certs($aliasd, \@certs);
+}
+
 # modify_ssl(&domain, &olddomain)
 sub modify_ssl
 {
@@ -2018,58 +2036,70 @@ else {
 	my @sslnames = &get_hostnames_from_cert($d);
 	my %sslnames = map { $_, 1 } @sslnames;
 	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
-	my @myloc = grep { &hostname_under_domain(\@doms, $l->{'value'}) } @loc;
-	if ($enable && !@myloc) {
-		# Need to add
-		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
+	my @myloc = grep { &hostname_under_domain(\@doms, $_->{'value'}) } @loc;
+	my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) }
+			 grep { !$_->{'deleting'} } @doms;
+	my @delloc;
+	if (!$enable) {
+		# All existing local_name blocks are being removed
+		@delloc = @myloc;
+		}
+	else {
+		# May need to add or update
 		foreach my $n (@dnames) {
-			my $l = { 'name' => 'local_name',
-				  'value' => $n,
-				  'enabled' => 1,
-				  'section' => 1,
-				  'members' => [
-					{ 'name' => 'ssl_cert',
-					  'value' => "<".$d->{'ssl_combined'},
+			my ($l) = grep { $_->{'value'} eq $n } @loc;
+			print STDERR "n=$n l=$l\n";
+			if ($l) {
+				# Already exists, so update paths
+				&dovecot::save_directive($l->{'members'},
+					"ssl_cert", "<".$d->{'ssl_combined'});
+				&dovecot::save_directive($l->{'members'},
+					"ssl_key", "<".$d->{'ssl_key'});
+				&dovecot::save_directive($l->{'members'},
+					"ssl_ca", undef);
+				}
+			else {
+				# Need to add
+				my $l = { 'name' => 'local_name',
+					  'value' => $n,
 					  'enabled' => 1,
-					  'file' => $cfile, },
-					{ 'name' => 'ssl_key',
-					  'value' => "<".$d->{'ssl_key'},
-					  'enabled' => 1,
-					  'file' => $cfile, },
-					],
-				  'file' => $cfile };
-			my $lref = &read_file_lines($l->{'file'}, 1);
-			$l->{'line'} = $l->{'eline'} = scalar(@$lref);
-			&dovecot::save_section($conf, $l);
-			push(@$conf, $l);
-			&flush_file_lines($l->{'file'}, undef, 1);
+					  'section' => 1,
+					  'members' => [
+						{ 'name' => 'ssl_cert',
+						  'value' => "<".$d->{'ssl_combined'},
+						  'enabled' => 1,
+						  'file' => $cfile, },
+						{ 'name' => 'ssl_key',
+						  'value' => "<".$d->{'ssl_key'},
+						  'enabled' => 1,
+						  'file' => $cfile, },
+						],
+					  'file' => $cfile };
+				my $lref = &read_file_lines($l->{'file'}, 1);
+				$l->{'line'} = $l->{'eline'} = scalar(@$lref);
+				&dovecot::save_section($conf, $l);
+				push(@$conf, $l);
+				&flush_file_lines($l->{'file'}, undef, 1);
+				}
+			}
+		# Find old entries to remove
+		foreach my $l (@myloc) {
+			my ($n) =  grep { $l->{'value'} eq $_ } @dnames;
+			if (!$n) {
+				push(@delloc, $l);
+				}
 			}
 		}
-	elsif (!$enable && @myloc) {
-		# Need to remove
-		foreach my $l (reverse(@myloc)) {
+	if (@delloc) {
+		# Remove those to delete
+		foreach my $l (reverse(@delloc)) {
+			print STDERR "l=$l->{'value'}\n";
 			my $lref = &read_file_lines($l->{'file'});
 			splice(@$lref, $l->{'line'},
 			       $l->{'eline'}-$l->{'line'}+1);
 			&flush_file_lines($l->{'file'});
 			}
 		undef(@dovecot::get_config_cache);
-		}
-	elsif ($enable && @myloc) {
-		# May need to update paths
-		foreach my $l (@myloc) {
-			&dovecot::save_directive($l->{'members'},
-                                        "ssl_cert", "<".$d->{'ssl_combined'});
-			&dovecot::save_directive($l->{'members'},
-                                        "ssl_key", "<".$d->{'ssl_key'});
-			&dovecot::save_directive($l->{'members'},
-					"ssl_ca", undef);
-			}
-		&flush_file_lines($l->{'file'}, undef, 1);
-		}
-	else {
-		# Nothing to add or remove
-		$nochange = 1;
 		}
 	}
 &unlock_file($cfile);
@@ -2310,7 +2340,8 @@ elsif (&postfix_supports_sni()) {
 	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
 	if ($enable) {
 		# Add or update map entries for domain
-		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) } @doms;
+		my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) }
+				 grep { !$_->{'deleting'} } @doms;
 		foreach my $dname (@dnames) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
 			if ($enable && !$r) {
@@ -2449,7 +2480,8 @@ foreach my $full ("www.".$d->{'dom'},
 if (!$d->{'alias'}) {
 	# Add aliases of this domain that have SSL enabled
 	foreach my $alias (&get_domain_by("alias", $d->{'id'})) {
-		if (&domain_has_website($alias) && !$alias->{'disabled'}) {
+		if (&domain_has_website($alias) && !$alias->{'disabled'} &&
+		    !$alias->{'deleting'}) {
 			push(@rv, &get_hostnames_for_ssl($alias));
 			}
 		}
