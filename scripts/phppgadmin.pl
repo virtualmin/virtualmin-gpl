@@ -32,11 +32,6 @@ sub script_phppgadmin_category
 return "Database";
 }
 
-sub script_phppgadmin_php_vers
-{
-return ( 5 );
-}
-
 sub script_phppgadmin_php_modules
 {
 return ("pgsql");

@@ -57,11 +57,6 @@ sub script_roundcube_dbs
 return ("mysql");
 }
 
-sub script_roundcube_php_vers
-{
-return ( 5 );
-}
-
 sub script_roundcube_release
 {
 return 3;	# For folders path fix
