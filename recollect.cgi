@@ -9,12 +9,12 @@ require './virtual-server-lib.pl';
 if (&foreign_check("system-status")) {
 	&foreign_require("system-status");
 	if ($system_status::config{'collect_interval'} ne 'none') {
-		&system_status::scheduled_collect_system_info(1);
+		&system_status::scheduled_collect_system_info('manual');
 		}
 	}
 
 # Refresh Virtualmin-specific info
-$info = &collect_system_info(1);
+$info = &collect_system_info('manual');
 if ($info) {
 	&save_collected_info($info);
 	}
