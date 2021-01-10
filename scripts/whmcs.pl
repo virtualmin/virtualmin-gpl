@@ -42,6 +42,11 @@ sub script_whmcs_category
 return "Commerce";
 }
 
+sub script_whmcs_php_vers
+{
+return ( 5 );
+}
+
 # script_whmcs_depends(&domain, version)
 sub script_whmcs_depends
 {

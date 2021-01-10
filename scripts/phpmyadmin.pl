@@ -41,6 +41,11 @@ sub script_phpmyadmin_category
 return "Database";
 }
 
+sub script_phpmyadmin_php_vers
+{
+return ( 5 );
+}
+
 sub script_phpmyadmin_php_modules
 {
 return ("mysql", "json");
