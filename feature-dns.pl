@@ -507,6 +507,16 @@ local @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
 local $myip = $bconfig{'this_ip'} ||
 	      &to_ipaddress(&get_system_hostname());
 &$first_print(&text('setup_bindslave', $slaves));
+if (!$myip) {
+	# IP lookup failed
+	&$second_print($text{'setup_ebindslaveip2'});
+	return;
+	}
+if ($myip =~ /^127\.0/) {
+	# Looks like a local network, which can't be correct
+	&$second_print(&text('setup_ebindslaveip', $myip));
+	return;
+	}
 local @slaveerrs = &bind8::create_on_slaves(
 	$d->{'dom'}, $myip, undef, [ split(/\s+/, $slaves) ],
 	$d->{'dns_view'} || $tmpl->{'dns_view'},
