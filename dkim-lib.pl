@@ -1253,20 +1253,24 @@ else {
 			}
 		$i++;
 		}
+	my $keyfile = $dkim_config;
+	$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
+	my $keyline = "$d->{'id'}\t$d->{'dom'}:$dkim->{'selector'}:$keyfile";
 	if ($kidx < 0 && $key) {
 		# Need to add
-		my $keyfile = $dkim_config;
-		$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
 		&open_lock_tempfile(PRIVKEY, ">$keyfile");
 		&print_tempfile(PRIVKEY, $key);
 		&close_tempfile(PRIVKEY);
 		&set_dkim_keyfile_permissions($keyfile);
-		push(@$klref, "$d->{'id'}\t$d->{'dom'}:".
-			      "$dkim->{'selector'}:$keyfile");
+		push(@$klref, $keyline);
 		}
 	elsif ($kidx >= 0 && !$key) {
 		# Need to remove
 		splice(@$klref, $kidx, 1);
+		}
+	elsif ($kidx >= 0 && $key) {
+		# Need to update
+		$klref->[$kidx] = $keyline;
 		}
 	&flush_file_lines($keyfile);
 	&unlock_file($keyfile);
