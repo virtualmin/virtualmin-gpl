@@ -2736,7 +2736,9 @@ if (!$caa && $lets) {
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
-elsif ($caa && $caa->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
+elsif ($caa &&
+       $caa->{'values'}->[1] eq 'issuewild' &&
+       $caa->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
 	# Need to remove the record
 	&pre_records_change($d);
 	&bind8::delete_record($file, $caa);
