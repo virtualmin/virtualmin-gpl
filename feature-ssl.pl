@@ -2720,15 +2720,15 @@ if ($chain) {
 # Update the CAA record for Let's Encrypt if needed
 sub update_caa_record
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
 return undef if (&compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
-local ($caa) = grep { $_->{'type'} eq 'CAA' } @$recs;
-local $info = &cert_info($d);
-local $lets = &is_letsencrypt_cert($info) ? 1 : 0;
-if (!$caa && $lets) {
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
+my $info = &cert_info($d);
+my $lets = &is_letsencrypt_cert($info) ? 1 : 0;
+if (!@caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
 	&bind8::create_record($file, "@", undef, "IN",
@@ -2736,12 +2736,12 @@ if (!$caa && $lets) {
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
-elsif ($caa &&
-       $caa->{'values'}->[1] eq 'issuewild' &&
-       $caa->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
+elsif (@caa == 1 &&
+       $caa[0]->{'values'}->[1] eq 'issuewild' &&
+       $caa[0]->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
 	# Need to remove the record
 	&pre_records_change($d);
-	&bind8::delete_record($file, $caa);
+	&bind8::delete_record($file, $caa[0]);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
