@@ -2979,6 +2979,39 @@ sub ssl_needs_apache_restart
 return $apache::httpd_modules{'core'} >= 2.4 ? 0 : 1;
 }
 
+# ssl_certificate_directories(&domain)
+# Returns dirs relative to the domain's home needed for SSL certs
+sub ssl_certificate_directories
+{
+my ($d) = @_;
+my @paths;
+foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
+	push(@paths, &default_certificate_file($d, $t));
+	if ($d->{'ssl_'.$t}) {
+		push(@paths, $d->{'ssl_'.$t});
+		}
+	}
+my @rv;
+foreach my $p (&unique(@paths)) {
+	$p =~ s/^\Q$d->{'home'}\E\///;
+	if ($p =~ /^(.*)\//) {
+		push(@rv, $1);
+		}
+	}
+return @rv;
+}
+
+# create_ssl_certificate_directories(&domain)
+# Create all dirs needed for SSL certs
+sub create_ssl_certificate_directories
+{
+my ($d) = @_;
+foreach my $dir (&ssl_certificate_directories($d)) {
+	my $path = "$d->{'home'}/$dir";
+	&create_standard_directory_for_domain($d, $path, '700');
+	}
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;
