@@ -1569,6 +1569,7 @@ if (!-r $certtemp || !-r $keytemp || $rv) {
 	}
 
 # Save as domain owner
+&create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, CERT, ">$certfile");
 &print_tempfile(CERT, &read_file_contents($certtemp));
 &close_tempfile_as_domain_user($d, CERT);
@@ -1610,6 +1611,7 @@ if (!$ok) {
 	}
 
 # Copy into place
+&create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, KEY, ">$keyfile");
 &print_tempfile(KEY, &read_file_contents($keytemp));
 &close_tempfile_as_domain_user($d, KEY);
@@ -2667,6 +2669,7 @@ $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 my $cert_text = &read_file_contents($cert);
 my $newfile = !-r $d->{'ssl_cert'};
 &lock_file($d->{'ssl_cert'});
+&create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
 &print_tempfile(CERT, $cert_text);
 &close_tempfile_as_domain_user($d, CERT);
@@ -2764,6 +2767,7 @@ if ($d->{'ssl_same'}) {
 # Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
 &lock_file($combfile);
+&create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
 &print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
 if (-r $d->{'ssl_chain'}) {

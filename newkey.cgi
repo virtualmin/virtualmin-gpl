@@ -83,6 +83,7 @@ $newcertinfo = &cert_file_info($temp);
 
 # Make sure Apache is setup to use the right key files
 &obtain_lock_ssl($d);
+&create_ssl_certificate_directories($d);
 &$first_print($text{'newkey_apache'});
 if ($in{'cert_mode'} == 2) {
 	$d->{'ssl_cert'} = $in{'certfile'};
