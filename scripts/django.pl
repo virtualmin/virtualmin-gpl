@@ -68,7 +68,10 @@ $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
 	local $pyver = $1;
-	if ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
+	if ($ver >= 3.1 && &compare_versions($pyver, "3.6") < 0) {
+		push(@rv, "Django 3.1 requires Python 3.6 or later");
+		}
+	elsif ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
 		push(@rv, "Django 1.7 requires Python 2.7 or later");
 		}
 	elsif ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
