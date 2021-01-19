@@ -195,7 +195,7 @@ return @files;
 sub script_django_commands
 {
 local ($d, $ver, $opts) = @_;
-return ($config{'python_cmd'} || "python", "fuser");
+return (&get_python_path(), "fuser");
 }
 
 # script_django_install(&domain, version, &opts, &files, &upgrade-info)
@@ -221,7 +221,7 @@ if ($dbtype) {
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 
 # Create target dir
 if (!-d $opts->{'dir'}) {
@@ -700,7 +700,7 @@ if ($opts->{'logfile'}) {
 sub get_django_start_cmd
 {
 my ($d, $opts) = @_;
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib/python $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
 return $cmd;
 }
