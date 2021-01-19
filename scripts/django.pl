@@ -63,7 +63,7 @@ local ($d, $ver) = @_;
 local @rv;
 
 # Check for python, and required version
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
