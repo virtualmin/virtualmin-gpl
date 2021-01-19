@@ -1392,7 +1392,7 @@ if (&foreign_installed("software")) {
 		$canpkgs = 1;
 		}
 	}
-
+my $python = &get_python_path();
 foreach my $m (@mods) {
 	next if (&check_python_module($m, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
@@ -1421,14 +1421,22 @@ foreach my $m (@mods) {
 			push(@pkgs, "python-psycopg", "python-psycopg2");
 			}
 		else {
-			push(@pkgs, "python-".$mp);
+			my $python_package = "python";
+			if ($python =~ /python3/i) {
+				$python_package = "python3";
+				}
+			push(@pkgs, "$python_package-$mp");
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'rpm') {
 		# For YUM, naming is less standard .. the MySQLdb package
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
-			push(@pkgs, "MySQL-python");
+			my $mysql_python_package = "MySQL-python";
+			if ($python =~ /python3/i) {
+				$mysql_python_package = "python3-mysql";
+				}
+			push(@pkgs, $mysql_python_package);
 			}
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");
@@ -1442,7 +1450,11 @@ foreach my $m (@mods) {
 			}
 		else {
 			$mp = lc($mp);
-			push(@pkgs, "python-".$mp);
+			my $python_package = "python";
+			if ($python =~ /python3/i) {
+				$python_package = "python3";
+				}
+			push(@pkgs, "$python_package-$mp");
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'pkgadd') {
