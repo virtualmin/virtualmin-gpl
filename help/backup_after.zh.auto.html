@@ -1,1 +1,1 @@
-<header>备份后运行的命令</header>如果设置了该选项，则按计划运行备份后，将以<tt>root用户</tt>身份运行输入的命令或脚本。这对于卸载要写入备份的可移动或远程文件系统或清理旧的备份文件很有用。 <p><footer>
+<header>备份后运行的命令</header>如果设置了该选项，则按计划运行备份后，将以<tt>root</tt>身份运行输入的命令或脚本。这对于卸载要写入备份的可移动或远程文件系统或清理旧的备份文件很有用。<p>该命令可以通过以<tt>BACKUP_</tt>开头的环境变量来发现有关备份的信息，例如<dl><dt><tt>BACKUP_DOMAIN_NAMES</tt><dd>正在备份的所有虚拟服务器的名称。<p><dt> <tt>BACKUP_DEST</tt><dd>目标目录或URL。<p><dt> <tt>BACKUP_FEATURES</tt><dd>备份中包含的所有Virtualmin功能的名称。如果<tt>BACKUP_ALL</tt>设置为1，则包含所有功能。<p><dt> <tt>BACKUP_STATUS</tt><dd>如果备份成功，则设置为1，否则为0。<p></dl><footer>
