@@ -19,7 +19,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 sub script_django_versions
 {
 # XXX 1.10.3 release doesn't support "syncdb" 
-return ( "1.9.7", "1.7.11", "1.4.22" );
+return ( "3.1.5", "1.9.7", "1.7.11", "1.4.22" );
 }
 
 sub script_django_can_upgrade
@@ -63,12 +63,15 @@ local ($d, $ver) = @_;
 local @rv;
 
 # Check for python, and required version
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
 	local $pyver = $1;
-	if ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
+	if ($ver >= 3.1 && &compare_versions($pyver, "3.6") < 0) {
+		push(@rv, "Django 3.1 requires Python 3.6 or later");
+		}
+	elsif ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
 		push(@rv, "Django 1.7 requires Python 2.7 or later");
 		}
 	elsif ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
@@ -195,7 +198,7 @@ return @files;
 sub script_django_commands
 {
 local ($d, $ver, $opts) = @_;
-return ($config{'python_cmd'} || "python", "fuser");
+return (&get_python_path(), "fuser");
 }
 
 # script_django_install(&domain, version, &opts, &files, &upgrade-info)
@@ -221,7 +224,7 @@ if ($dbtype) {
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 
 # Create target dir
 if (!-d $opts->{'dir'}) {
@@ -700,7 +703,7 @@ if ($opts->{'logfile'}) {
 sub get_django_start_cmd
 {
 my ($d, $opts) = @_;
-my $python = &has_command($config{'python_cmd'} || "python");
+my $python = &get_python_path();
 my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib/python $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
 return $cmd;
 }
