@@ -1416,9 +1416,14 @@ foreach my $m (@mods) {
 		if ($mp eq "svn") {
 			push(@pkgs, "python-subversion");
 			}
-		elsif ($mp eq "psycopg") {
-			# Try to install old and new versions on Debian
-			push(@pkgs, "python-psycopg", "python-psycopg2");
+		elsif ($mp eq "psycopg2") {
+			push(@pkgs, ($python =~ /python3/i ? 
+				         "python3-psycopg2" :
+				         "python-psycopg2"));
+			}
+		elsif ($m eq "MySQLdb" &&
+			   $python =~ /python3/i) {
+			push(@pkgs, "python3-mysqldb");
 			}
 		else {
 			my $python_package = "python";
@@ -1432,18 +1437,18 @@ foreach my $m (@mods) {
 		# For YUM, naming is less standard .. the MySQLdb package
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
-			my $mysql_python_package = "MySQL-python";
-			if ($python =~ /python3/i) {
-				$mysql_python_package = "python3-mysql";
-				}
-			push(@pkgs, $mysql_python_package);
+			push(@pkgs, ($python =~ /python3/i ?
+				         "python3-mysql" :
+				         "MySQL-python"));
 			}
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");
 			}
-		elsif ($mp eq "psycopg") {
+		elsif ($mp eq "psycopg2") {
 			# Try to install old and new versions
-			push(@pkgs, "python-psycopg", "python-psycopg2");
+			push(@pkgs, ($python =~ /python3/i ? 
+				         "python3-psycopg2" :
+				         "python-psycopg2"));
 			}
 		elsif ($m eq "svn") {
 			push(@pkgs, "subversion-python");
