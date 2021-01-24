@@ -670,7 +670,8 @@ if ($extramods{'at'} && $_[0]->{'unix'} && !$chroot) {
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
 		       'users' => $_[0]->{'user'},
-		       'allow' => 0 );
+		       'allow' => 0,
+		       'stop' => 0, );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "at")
 		if (!$hasmods{'at'});
 	push(@mods, "at");
