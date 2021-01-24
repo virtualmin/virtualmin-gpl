@@ -18,8 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-# XXX 1.10.3 release doesn't support "syncdb" 
-return ( "3.1.5", "1.9.7", "1.7.11", "1.4.22" );
+return ( "3.1.5", "2.2.17", "1.11.29" );
 }
 
 sub script_django_can_upgrade
@@ -51,8 +50,7 @@ sub script_django_python_modules
 {
 local ($d, $ver, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" :
-		       $ver >= 1.6 ? "psycopg2" : "psycopg" );
+return ( "setuptools", $dbtype eq "mysql" ? "MySQLdb" : "psycopg2" );
 }
 
 # script_django_depends(&domain, version)
@@ -67,18 +65,12 @@ my $python = &get_python_path();
 $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
-	local $pyver = $1;
-	if ($ver >= 3.1 && &compare_versions($pyver, "3.6") < 0) {
+	my $pyver = $1;
+	if ($ver >= 2.2 && &compare_versions($pyver, "3.6") < 0) {
 		push(@rv, "Django 3.1 requires Python 3.6 or later");
 		}
-	elsif ($ver >= 1.7 && &compare_versions($pyver, "2.7") < 0) {
-		push(@rv, "Django 1.7 requires Python 2.7 or later");
-		}
-	elsif ($ver >= 1.5 && &compare_versions($pyver, "2.6.5") < 0) {
-		push(@rv, "Django 1.5 requires Python 2.6.5 or later");
-		}
 	elsif (&compare_versions($pyver, "2.6") < 0) {
-		push(@rv, "Django 1.4 requires Python 2.6 or later");
+		push(@rv, "Django 1.11 requires Python 2.6 or later");
 		}
 	}
 else {
@@ -150,7 +142,7 @@ else {
 	$in->{'dir_def'} || $in->{'dir'} =~ /\S/ && $in->{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
 	local $dir = $in->{'dir_def'} ? $hdir : "$hdir/$in->{'dir'}";
-	$in{'project'} =~ /^[a-z0-9]+$/ ||
+	$in{'project'} =~ /^[a-zA-Z0-9]+$/ ||
 		return "Project name can only contain letters and numbers";
 	local ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
@@ -173,7 +165,7 @@ if (-r "$opts->{'dir'}/django.fcgi") {
 	}
 $opts->{'project'} ||
 	return "Missing initial project name";
-$opts->{'project'} =~ /^[a-z0-9]+$/ ||
+$opts->{'project'} =~ /^[a-zA-Z0-9]+$/ ||
 	return "Project name can only contain letters and numbers";
 return undef;
 }
@@ -189,8 +181,8 @@ local @files = (
 	   'file' => "Django-$ver.tar.gz",
 	   'url' => "http://www.djangoproject.com/download/$ver/tarball/" },
 	 { 'name' => "flup",
-	   'file' => "flup-1.0.tar.gz",
-	   'url' => "http://www.saddi.com/software/flup/dist/flup-1.0.tar.gz" },
+	   'file' => "flup-1.0.2.tar.gz",
+	   'url' => "http://www.saddi.com/software/flup/dist/flup-1.0.2.tar.gz" },
 	);
 return @files;
 }
@@ -264,7 +256,7 @@ if ($?) {
 local $err = &extract_script_archive($files->{'flup'}, $temp, $d);
 $err && return (0, "Failed to extract flup source : $err");
 local $out = &run_as_domain_user($d, 
-	"cp -r ".quotemeta("$temp/flup-1.0/flup").
+	"cp -r ".quotemeta("$temp/flup-1.0.2/flup").
 	" ".quotemeta("$opts->{'dir'}/lib/python"));
 if ($?) {
 	return (0, "flup source copy failed : ".
@@ -292,34 +284,17 @@ if (!$upgrade) {
 	-r $sfile || return (-1, "Project settings file $sfile was not found");
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
-	my $pdbtype = $dbtype eq "mysql" ? "mysql" :
-		      $ver >= 1.6 ? "postgresql_psycopg2" : "postgresql";
+	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql_psycopg2";
 	my ($engine, $gotname, $gotuser, $gotpass, $gothost);
 	foreach my $l (@$lref) {
-		# Django 1.1 style variables
-		if ($l =~ /DATABASE_ENGINE\s*=/) {
-			$l = "DATABASE_ENGINE = '$pdbtype'";
-			}
-		if ($l =~ /DATABASE_NAME\s*=/) {
-			$l = "DATABASE_NAME = '$dbname'";
-			}
-		if ($l =~ /DATABASE_USER\s*=/) {
-			$l = "DATABASE_USER = '$dbuser'";
-			}
-		if ($l =~ /DATABASE_PASSWORD\s*=/) {
-			$l = "DATABASE_PASSWORD = '".
-			     &php_quotemeta($dbpass, 1)."'";
-			}
-		if ($l =~ /DATABASE_HOST\s*=/) {
-			$l = "DATABASE_HOST = '$dbhost'";
-			}
+	
+		# Update Django variables
 		if ($l =~ /INSTALLED_APPS\s*=\s*\(/ &&
 		    $lref->[$i+1] !~ /django.contrib.admin/) {
 			splice(@$lref, $i+1, 0,
 			       "    'django.contrib.admin',");
 			}
 
-		# Django 1.2 variables
 		if ($l =~ /'ENGINE':/) {
 			$l = "        'ENGINE': 'django.db.backends.$pdbtype',";
 			$engine = $i;
@@ -380,175 +355,62 @@ if (!$upgrade) {
 	# Initialize the DB
 	local $pwd = &get_current_dir();
 	chdir($pdir);
-	if ($ver < 1.9) {
-		# Input is 'yes', username, email, password, password again
-		local $icmd = &command_as_user($d->{'user'}, 0,
-					       "$python manage.py syncdb");
-		&foreign_require("proc", "proc-lib.pl");
-		$ENV{'LANG'} = 'en_US';	# Needed because manage.py chokes with
-					# the default locale
-		local ($fh, $fpid) = &proc::pty_process_exec($icmd);
-		chdir($pwd);
-		local $out;
-		$domuser =~ s/[\.\@\-]/_/g;
-		foreach my $w ([ "yes.no", "yes" ],
-			       [ "Username", $domuser ],
-			       [ "E-?mail address", $d->{'emailto_addr'} ],
-			       [ "Password", $dompass ],
-			       [ "Password", $dompass ]) {
-			local $rv = &wait_for($fh, $w->[0]);
-			if ($rv < 0) {
-				return (-1,
-				   "Database initialization failed at $w->[0] : ".
-				   "<pre>".&html_escape($wait_for_input)."</pre>");
-				}
-			&sysprint($fh, $w->[1]."\n");
-			$out .= $wait_for_input;
-			}
-		&wait_for($fh, 'EOF');		# Wait till done
-		close($fh);
-		waitpid($fpid, 0);
-		local $ex = $?;
-		if ($ex || $out =~ /error/i) {
-			return (-1, "Database initialization failed : ".
-				    "<pre>".&html_escape($out)."</pre>");
-			}
-		}
-	else {
-		# Use new migrate command
-		local $out = &run_as_domain_user($d,
-				"$python manage.py migrate 2>&1");
-		chdir($pwd);
-		if ($?) {
-			return (-1, "DB initialization install failed : ".
-				   "<pre>".&html_escape($out)."</pre>");
-			}
-
+	# Use new migrate command
+	local $out = &run_as_domain_user($d,
+			"$python manage.py migrate 2>&1");
+	chdir($pwd);
+	if ($?) {
+		return (-1, "DB initialization install failed : ".
+			   "<pre>".&html_escape($out)."</pre>");
 		}
 	}
 
-if ($ver < 1.9) {
-	# Create python fcgi wrapper script
-	local $wrapper = "$opts->{'dir'}/django.fcgi";
-	if (!-r $wrapper) {
-		&open_tempfile_as_domain_user($d, WRAPPER, ">$wrapper");
-		&print_tempfile(WRAPPER, "#!$python\n");
-		&print_tempfile(WRAPPER, "import sys, os\n");
-		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/lib/python\")\n");
-		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}\")\n");
-		&print_tempfile(WRAPPER, "sys.path.insert(0, \"$opts->{'dir'}/$opts->{'project'}\")\n");
-		&print_tempfile(WRAPPER, "os.chdir(\"$opts->{'dir'}\")\n");
-		&print_tempfile(WRAPPER, "os.environ['DJANGO_SETTINGS_MODULE'] = \"$opts->{'project'}.settings\"\n");
-		&print_tempfile(WRAPPER, "from django.core.servers.fastcgi import runfastcgi\n");
-		&print_tempfile(WRAPPER, "runfastcgi(method=\"threaded\", daemonize=\"false\")\n");
-		&close_tempfile_as_domain_user($d, WRAPPER);
-		&set_permissions_as_domain_user($d, 0755, $wrapper);
-		}
-
-	# Link to django dir inside egg, which is needed for some reason
-	my ($egg) = glob("$opts->{'dir'}/lib/python/Django-*.egg");
-	$egg =~ s/^.*\/lib\/python\///;
-	&symlink_file_as_domain_user($d, "$egg/django",
-				     "$opts->{'dir'}/lib/python/django");
-
-	# Add <Location> block to Apache config
-	local $conf = &apache::get_config();
-	local @ports = ( $d->{'web_port'},
-			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	foreach my $port (@ports) {
-		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-		next if (!$virt);
-		local @locs = &apache::find_directive_struct("Location", $vconf);
-		local ($loc) = grep { $_->{'words'}->[0] eq $opts->{'path'} } @locs;
-		next if ($loc);
-		local $reldir = $opts->{'dir'};
-		$reldir =~ s/^\Q$d->{'home'}\/\E//;
-		local $loc = { 'name' => 'Location',
-			       'value' => $opts->{'path'},
-			       'type' => 1,
-			       'members' => [
-				{ 'name' => 'AddHandler',
-				  'value' => 'fcgid-script .fcgi' },
-				{ 'name' => 'RewriteEngine',
-				  'value' => 'On' },
-				{ 'name' => 'RewriteCond',
-				  'value' =>
-					'%{REQUEST_FILENAME} !django.fcgi|/media/|/static/' },
-				{ 'name' => 'RewriteRule',
-				  'value' => "$reldir(.*) django.fcgi/\$1 [L]" },
-				]
-			     };
-		&apache::save_directive_struct(undef, $loc, $vconf, $conf);
-		&flush_file_lines($virt->{'file'});
-		}
-
-	# Add /media and /static/admin aliases to Apache config
-	local @paths;
-	push(@paths, $opts->{'path'} eq '/' ? "/media/"
-					    : "$opts->{'path'}/media/");
-	push(@paths, $opts->{'path'} eq '/' ? "/static/admin/"
-					    : "$opts->{'path'}/static/admin/");
-	local $mdir = "$opts->{'dir'}/lib/python/django/contrib/admin/static/admin/";
-	foreach my $path (@paths) {
-		foreach my $port (@ports) {
-			local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-			next if (!$virt);
-			local @al = &apache::find_directive("Alias", $vconf);
-			local ($media) = grep { $_ =~ /^\Q$path\E\s/ } @al;
-			next if ($media);
-			push(@al, "$path $mdir");
-			&apache::save_directive("Alias", \@al, $vconf, $conf);
-			&flush_file_lines($virt->{'file'});
-			}
-		}
+# Django 1.9+ uses a server process
+my $port;
+if ($upgrade) {
+	$port = $opts->{'port'};
 	}
 else {
-	# Django 1.9+ uses a server process
-	my $port;
-	if ($upgrade) {
-		$port = $opts->{'port'};
+	$port = &allocate_mongrel_port(undef, 1);
+	$opts->{'port'} = $port;
+	}
+$opts->{'logfile'} ||= "$opts->{'dir'}/runserver.log";
+
+# Create an init script
+my $cmd = &get_django_start_cmd($d, $opts);
+my $userd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+if (&foreign_installed("init") && $userd &&
+    $userd->{'unix'} && !$upgrade) {
+	my $killcmd = "kill -9 `fuser $opts->{'logfile'}`";
+	&foreign_require("init");
+	my $opts = { };
+	if ($init::init_mode eq 'upstart' ||
+	    $init::init_mode eq 'systemd') {
+		# Init system will background it
+		$opts->{'fork'} = 0;
 		}
 	else {
-		$port = &allocate_mongrel_port(undef, 1);
-		$opts->{'port'} = $port;
+		$cmd .= "&";
 		}
-	$opts->{'logfile'} ||= "$opts->{'dir'}/runserver.log";
-
-	# Create an init script
-	my $cmd = &get_django_start_cmd($d, $opts);
-	my $userd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
-	if (&foreign_installed("init") && $userd &&
-	    $userd->{'unix'} && !$upgrade) {
-		my $killcmd = "kill -9 `fuser $opts->{'logfile'}`";
-		&foreign_require("init");
-		my $opts = { };
-		if ($init::init_mode eq 'upstart' ||
-		    $init::init_mode eq 'systemd') {
-			# Init system will background it
-			$opts->{'fork'} = 0;
-			}
-		else {
-			$cmd .= "&";
-			}
-		&init::enable_at_boot(
-			"django-$d->{'dom'}-$port",
-			"Start Django server for $d->{'dom'}",
-			&command_as_user($userd->{'user'}, 0, $cmd),
-			&command_as_user($userd->{'user'}, 0, $killcmd),
-			undef,
-			$opts,
-			);
-		}
-
-
-	# Start the server process
-	&run_as_domain_user($d, $cmd, 1);
-
-	if (!$upgrade) {
-		# Configure Apache to proxy to it
-		&setup_mongrel_proxy($d, $opts->{'path'}, $port);
-		}
+	&init::enable_at_boot(
+		"django-$d->{'dom'}-$port",
+		"Start Django server for $d->{'dom'}",
+		&command_as_user($userd->{'user'}, 0, $cmd),
+		&command_as_user($userd->{'user'}, 0, $killcmd),
+		undef,
+		$opts,
+		);
 	}
+
+
+# Start the server process
+&run_as_domain_user($d, $cmd, 1);
+
+if (!$upgrade) {
+	# Configure Apache to proxy to it
+	&setup_mongrel_proxy($d, $opts->{'path'}, $port);
+	}
+
 
 &register_post_action(\&restart_apache);
 
