@@ -2363,9 +2363,9 @@ elsif (&postfix_supports_sni()) {
 				    "tls_server_sni_maps", $r, $r);
 				}
 			}
-		# Remove those no longer needed
+		# Identify those no longer needed
 		foreach my $r (@mymaps) {
-			my ($n) =  grep { $l->{'name'} eq $_ } @dnames;
+			my ($n) =  grep { $r->{'name'} eq $_ } @dnames;
 			if (!$n) {
 				push(@delmaps, $r);
 				}
