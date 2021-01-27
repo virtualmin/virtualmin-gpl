@@ -1684,8 +1684,8 @@ return undef;
 
 # find_matching_certificate(&domain)
 # For a domain with SSL being enabled, check if another domain on the same IP
-# already has a matching cert. If so, update the domain hash's cert file. This
-# can only be called at domain creation time.
+# with the same owner already has a matching cert. If so, update the domain
+# hash's cert file. This can only be called at domain creation time.
 sub find_matching_certificate
 {
 local ($d) = @_;
@@ -1694,7 +1694,7 @@ local $lnk = $d->{'link_certs'} ? 1 :
 	     $config{'nolink_certs'} ? 0 : 1;
 if ($lnk) {
 	local $sslclash = &find_matching_certificate_domain($d);
-	if ($sslclash) {
+	if ($sslclash && $sslclash->{'user'} eq $d->{'user'}) {
 		# Found a match, so add a link to it
 		&link_matching_certificate($d, $sslclash, 0);
 		}

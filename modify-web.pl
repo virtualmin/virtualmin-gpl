@@ -646,6 +646,9 @@ foreach $d (@doms) {
 			if (!$same) {
 				&$second_print(".. no domain to link with found");
 				}
+			elsif ($same->{'user'} ne $d->{'user'}) {
+				&$second_print(".. domain $same->{'dom'} to link with has a different owner");
+				}
 			else {
 				&link_matching_certificate($d, $same, 1);
 				&$second_print(".. linked to ".
