@@ -2559,7 +2559,7 @@ if ($ok) {
 				$d->{'ip'} = $ipinfo->{'ip'};
 				$d->{'virt'} = $ipinfo->{'virt'};
 				$d->{'virtalready'} = $ipinfo->{'virtalready'};
-				$d->{'netmask'} = $netmaskinfo->{'netmask'};
+				$d->{'netmask'} = $ipinfo->{'netmask'};
 				if ($ipinfo->{'mode'} == 2) {
 					# Re-allocate an IP, as we might be
 					# doing several domains
