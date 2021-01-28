@@ -7801,15 +7801,11 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		&setup_script_packages($script, $d, $ver);
 
 		# Check PHP version
-		local $phpvfunc = $script->{'php_vers_func'};
 		local $phpver;
-		if (defined(&$phpvfunc)) {
-			local @vers = &$phpvfunc($dom, $ver);
-			$phpver = &setup_php_version($dom, \@vers,
-						     $opts->{'path'});
+		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+			$phpver = &setup_php_version($dom, [5],$opts->{'path'});
 			if (!$phpver) {
-				&$second_print(&text('setup_scriptphpver',
-						     join(" ", @vers)));
+				&$second_print($text{'scripts_ephpvers2'});
 				next;
 				}
 			$opts->{'phpver'} = $phpver;

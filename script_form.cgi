@@ -37,18 +37,16 @@ $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 	&can_unsupported_scripts() ||
 		&error($text{'scripts_eversion2'});
 
-# Check PHP version
+# Check that the domain has a PHP version
 $ok = 1;
-$phpvfunc = $script->{'php_vers_func'};
-if (defined(&$phpvfunc)) {
-	@vers = &$phpvfunc($d, $ver);
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	@gotvers = grep { local $v = $_; local $_;
 			  &check_php_version($d, $v) }
-			&expand_php_versions($d, \@vers);
+			&expand_php_versions($d, [5]);
 	@gotvers = sort { &get_php_version($b, $d) <=>
                           &get_php_version($a, $d) } @gotvers;
 	if (!@gotvers) {
-		print &text('scripts_ephpvers', join(" or ", @vers)),"<p>\n";
+		print $text{'scripts_ephpvers2'},"<p>\n";
 		$ok = 0;
 		}
 	}

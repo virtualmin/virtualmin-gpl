@@ -314,18 +314,15 @@ $merr = &making_changes();
 &obtain_lock_cron($d);
 
 # Check PHP version
-$phpvfunc = $script->{'php_vers_func'};
-if (defined(&$phpvfunc)) {
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	&$first_print("Checking PHP version ..");
-	@vers = &$phpvfunc($d, $ver);
-	$phpver = &setup_php_version($d, \@vers, $opts->{'path'});
+	$phpver = &setup_php_version($d, [5], $opts->{'path'});
 	if (!$phpver) {
-		&$second_print(".. version ",join(" or ", @vers),
-			       " of PHP is required, but not available");
+		&$second_print(".. no PHP version found!");
 		exit(1);
 		}
 	else {
-		&$second_print(".. done");
+		&$second_print(".. using PHP version $phpver");
 		}
 	$opts->{'phpver'} = $phpver;
 	}
