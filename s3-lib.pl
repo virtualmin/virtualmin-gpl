@@ -969,7 +969,7 @@ while(defined($buf = &read_http_connection($h, 1024))) {
 &close_http_connection($h);
 
 if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-	return (0, "Upload failed : $line");
+	return (0, "Upload failed : $line\nTry installing aws-cli");
 	}
 elsif (!$rheader{'etag'}) {
 	return (0, "Response missing etag header : $out");
