@@ -22,9 +22,10 @@ if (!@oldplans) {
 	}
 
 # If this is a new install, set dns_ip to * by default to use the externally
-# detected IP for DNS records
+# detected IP for DNS records, and cache it.
 if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	$config{'dns_ip'} = '*';
+	&get_external_ip_address();
 	&save_module_config();
 	}
 

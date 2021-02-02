@@ -53,7 +53,16 @@ local ($out, $error);
 &http_download($host, $port, $page, \$out, \$error, undef, $ssl,
 	       undef, undef, 5, 0, 1);
 $out =~ s/\r|\n//g;
-return $error ? undef : $out;
+if ($error) {
+	# Fall back to last cached value
+	return $config{'external_ip_cache'};
+	}
+if ($config{'external_ip_cache'} ne $out) {
+	# Cache it for future calls
+	$config{'external_ip_cache'} = $out;
+	&save_module_config();
+	}
+return $out;
 }
 
 # update_dynip_service()
