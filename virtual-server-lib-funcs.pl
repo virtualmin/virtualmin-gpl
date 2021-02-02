@@ -14507,7 +14507,7 @@ if ($config{'mysql'}) {
 			}
 		else {
 			my ($v, $var) = &get_dom_remote_mysql_version();
-			&$second_print(&text('check_mysqlok'.$var, $v));
+			&$second_print(&text('check_mysqlok', $v));
 			}
 		}
 

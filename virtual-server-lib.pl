@@ -11,6 +11,16 @@ if (&indexof($module_root_directory, @INC) < 0) {
 use Time::Local;
 %access = &get_module_acl();
 
+# Use MariaDB in text strings if appropriate
+my $mysql_module_version = &read_file_contents(
+	"$config_directory/mysql/version"); 
+chop($mysql_module_version);
+if ($mysql_module_version =~ /mariadb/i) {
+	foreach my $t (keys %text) {
+		$text{$t} =~ s/MySQL/MariaDB/g if ($t !~ /^newmysqls_ver/);
+		}
+	}
+
 if (!defined($config{'init_template'})) {
 	$config{'init_template'} = 0;
 	}
