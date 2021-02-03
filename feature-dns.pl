@@ -53,7 +53,7 @@ if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
 	$dnsparent = &get_domain($d->{'subdom'});
 	}
-elsif (!$d->{'alias'} && $tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
+elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     (&get_domain_by("parent", $d->{'parent'}),
