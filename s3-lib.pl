@@ -969,10 +969,10 @@ while(defined($buf = &read_http_connection($h, 1024))) {
 &close_http_connection($h);
 
 if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-	return (0, "Upload failed : $line\nTry installing aws-cli");
+	return (0, "Upload failed : $line \n\nTry installing `awscli` package using package manager");
 	}
 elsif (!$rheader{'etag'}) {
-	return (0, "Response missing etag header : $out");
+	return (0, "Response missing etag header : $out \n\nTry installing `awscli` package using package manager");
 	}
 
 $rheader{'etag'} =~ s/^"(.*)"$/$1/;
