@@ -1,12 +1,12 @@
 # Functions for collecting general system info
 
-# collect_system_info([manual-refesh])
+# collect_system_info([manual-refesh-no-cache])
 # Returns a hash reference containing system information
 sub collect_system_info
 {
 my ($manual) = @_;
 &foreign_require("system-status");
-local $info = &system_status::get_collected_info();
+local $info = &system_status::get_collected_info($manual);
 
 # Memory may come from a custom command
 if ($config{'mem_cmd'}) {
