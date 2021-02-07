@@ -83,7 +83,7 @@ if (defined($in{'maxtime_def'}) &&
 # Update PHP versions
 @avail = &list_available_php_versions($d, $mode);
 if (&can_edit_phpver($d) && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
-    @avail > 1) {
+    @avail > 1 && $oldmode eq $mode) {
 	my %enabled = map { $_, 1 } split(/\0/, $in{'d'});
 	my $phd = &public_html_dir($d);
 	for(my $i=0; defined($in{"dir_".$i}); $i++) {
