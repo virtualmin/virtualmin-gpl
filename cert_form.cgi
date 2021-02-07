@@ -49,87 +49,103 @@ print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
 # Details of current cert
 print &ui_tabs_start_tab("mode", "current");
-print "$text{'cert_desc2'}<p>\n";
-print &ui_table_start($text{'cert_header2'}, undef, 4);
 
-print &ui_table_row($text{'cert_incert'}, "<tt>$d->{'ssl_cert'}</tt>", 3);
-print &ui_table_row($text{'cert_inkey'}, "<tt>$d->{'ssl_key'}</tt>", 3);
+if ($d->{'ssl_cert'}) {
+	print "$text{'cert_desc2'}<p>\n";
+	print &ui_table_start($text{'cert_header2'}, undef, 4);
+	print &ui_table_row($text{'cert_incert'},
+			    "<tt>$d->{'ssl_cert'}</tt>", 3);
+	print &ui_table_row($text{'cert_inkey'},
+			    "<tt>$d->{'ssl_key'}</tt>", 3);
 
-$info = &cert_info($d);
-$chain = &get_website_ssl_file($d, 'ca');
-foreach $i (@cert_attributes) {
-	next if ($i eq 'modulus' || $i eq 'exponent');
-	$v = $info->{$i};
-	if (ref($v)) {
-		print &ui_table_row($text{'cert_'.$i},
-			&ui_links_row($v), 3);
-		}
-	elsif ($v) {
-		print &ui_table_row($text{'cert_'.$i}, $v);
-		}
-	}
-
-# Other domains using same cert, such as via wildcards or UCC
-@others = grep { &domain_has_ssl($_) } &get_domain_by("ssl_same", $d->{'id'});
-if (@others) {
-	print &ui_table_row($text{'cert_also'},
-		&ui_links_row([
-			map { $l = &can_config_domain($_) ? "edit_domain.cgi"
-							  : "view_domain.cgi";
-			      "<a href='$l?dom=$_->{'id'}'>".
-			        &show_domain_name($_)."</a>" } @others ]), 3);
-	}
-
-# Current usage
-if (@already) {
-	my @msgs;
-	foreach my $svc (@already) {
-		if ($svc->{'ip'}) {
-			push(@msgs, &text('cert_already_'.$svc->{'id'}.'_ip',
-					  $svc->{'ip'}));
+	$info = &cert_info($d);
+	$chain = &get_website_ssl_file($d, 'ca');
+	foreach $i (@cert_attributes) {
+		next if ($i eq 'modulus' || $i eq 'exponent');
+		$v = $info->{$i};
+		if (ref($v)) {
+			print &ui_table_row($text{'cert_'.$i},
+				&ui_links_row($v), 3);
 			}
-		elsif ($svc->{'dom'}) {
-			push(@msgs, &text('cert_already_'.$svc->{'id'}.'_dom',
-					  $svc->{'dom'}));
-			}
-		else {
-			push(@msgs, $text{'cert_already_'.$svc->{'id'}});
+		elsif ($v) {
+			print &ui_table_row($text{'cert_'.$i}, $v);
 			}
 		}
-	print &ui_table_row($text{'cert_svcs'}, join(", ", @msgs), 3);
-	}
 
-# Links to download
-@dlinks = (
-	"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
-	"$text{'cert_pem'}</a>",
-	"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
-	"$text{'cert_pkcs12'}</a>",
-	);
-print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-@dlinks = (
-	"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
-	"$text{'cert_pem'}</a>",
-	"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
-	"$text{'cert_pkcs12'}</a>",
-	);
-print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
+	# Other domains using same cert, such as via wildcards or UCC
+	@others = grep { &domain_has_ssl($_) }
+		       &get_domain_by("ssl_same", $d->{'id'});
+	if (@others) {
+		my @links;
+		foreach my $d (@others) {
+			my $l = &can_config_domain($d) ? "edit_domain.cgi"
+						       : "view_domain.cgi";
+			push(@links, "<a href='$l?dom=$_->{'id'}'>".
+				     &show_domain_name($_)."</a>");
+			}
+		print &ui_table_row($text{'cert_also'},
+				    &ui_links_row(\@links));
+		}
 
-# Expiry status
-$now = time();
-$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
-if ($future <= 0) {
-	$emsg = "<font color=red>".&text('cert_expired', -$future)."</font>";
-	}
-elsif ($future < 7) {
-	$emsg = "<font color=orange>".&text('cert_expiring', $future)."</font>";
+	# Current usage
+	if (@already) {
+		my @msgs;
+		foreach my $svc (@already) {
+			my $m;
+			if ($svc->{'ip'}) {
+				$m = &text('cert_already_'.$svc->{'id'}.'_ip',
+					   $svc->{'ip'});
+				}
+			elsif ($svc->{'dom'}) {
+				$m = &text('cert_already_'.$svc->{'id'}.'_dom',
+					   $svc->{'dom'});
+				}
+			else {
+				$m = $text{'cert_already_'.$svc->{'id'}};
+				}
+			push(@msgs, $m);
+			}
+		print &ui_table_row($text{'cert_svcs'}, join(", ", @msgs), 3);
+		}
+
+	# Links to download
+	@dlinks = (
+		"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
+		"$text{'cert_pem'}</a>",
+		"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
+		"$text{'cert_pkcs12'}</a>",
+		);
+	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
+	@dlinks = (
+		"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
+		"$text{'cert_pem'}</a>",
+		"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
+		"$text{'cert_pkcs12'}</a>",
+		);
+	print &ui_table_row($text{'cert_kdownload'},
+			    &ui_links_row(\@dlinks), 3);
+
+	# Expiry status
+	$now = time();
+	$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
+	if ($future <= 0) {
+		$emsg = "<font color=red>".
+			&text('cert_expired', -$future)."</font>";
+		}
+	elsif ($future < 7) {
+		$emsg = "<font color=orange>".
+			&text('cert_expiring', $future)."</font>";
+		}
+	else {
+		$emsg = &text('cert_future', $future);
+		}
+	print &ui_table_row($text{'cert_etime'}, $emsg);
+	print &ui_table_end();
 	}
 else {
-	$emsg = &text('cert_future', $future);
+	# No cert yet! Perhaps a domain without SSL that has no cert yet
+	print "<p>",$text{'cert_noneyet'},"</p>\n";
 	}
-print &ui_table_row($text{'cert_etime'}, $emsg);
-
-print &ui_table_end();
 
 print &ui_tabs_end_tab();
 

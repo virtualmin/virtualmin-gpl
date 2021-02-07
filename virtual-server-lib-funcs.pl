@@ -12009,7 +12009,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if (&domain_has_ssl($d) && $d->{'dir'} && &can_edit_ssl()) {
+if ($d->{'dir'} && &can_edit_ssl()) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},

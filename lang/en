@@ -2874,6 +2874,7 @@ cert_title=SSL Certificate
 cert_desc2=This section shows the details of the SSL certificate currently being used by this virtual server.
 cert_desc1=This form can be used to create a certificate signing request (CSR) and private key for this virtual server. The resulting CSR can be submitting to a certificate authority (CA) who will return a signed certificate for pasting into the second form on this page.
 cert_desc6=This form can be used to create a self-signed certificate, which can be used immediately, but will not be accepted as valid by browsers.
+cert_noneyet=This virtual server does not have an SSL certificate yet. Use one of the tabs on this page to generate a cert and key.
 cert_csrwarn=Warning - a signing request in $1 and private key in $2 already exist, and will be over-written by generating a new CSR.
 cert_keywarn=Warning - a certificate in $1 and private key in $2 already exist, and will be over-written by generating a new key.
 cert_header1=Generate CSR and private key
