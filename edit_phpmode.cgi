@@ -65,8 +65,8 @@ if (!$d->{'alias'} &&
 # PHP versions
 if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 	# Build versions list
-	@avail = &list_available_php_versions($d, $mode);
-	@vlist = ( );
+	my @avail = &list_available_php_versions($d, $mode);
+	my @vlist = ( );
 	foreach my $v (@avail) {
 		if ($v->[1]) {
 			my $fullver = &get_php_version($v->[1], $d);
@@ -162,6 +162,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 				     2, "phpinfo", 0, [ "width=30%" ]);
 
 	# PHP versions
+	my @vlist = ( );
 	foreach $phpver (&list_available_php_versions($d)) {
 		my $fullver = $phpver->[1] ? &get_php_version($phpver->[1], $d)
 					   : $phpver->[0];
