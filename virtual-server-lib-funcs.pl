@@ -14494,7 +14494,7 @@ if ($config{'mysql'}) {
 		# Only MySQL client is needed
 		&foreign_installed("mysql") ||
 			return &text('index_emysql2', "/mysql/", $clink);
-		&$second_print($text{'check_mysqlok2'});
+		&$second_print($text{'check_mysqlok'});
 		}
 	else {
 		# MySQL server is needed
