@@ -28,14 +28,6 @@ if (!$d->{'alias'} && $can == 2 &&
 			    &ui_radio_table("mode", $mode,
 			      [ map { [ $_, $text{'phpmode_'.$_} ] }
 				    @modes ]));
-
-	# Warn if changing mode would remove per-dir versions
-	if ($mode eq "cgi" || $mode eq "fcgid") {
-		@dirs = &list_domain_php_directories($d);
-		if (@dirs > 1) {
-			print &ui_table_row("", $text{'phpmode_dirswarn'});
-			}
-		}
 	}
 
 # PHP fcgi sub-processes
@@ -66,8 +58,8 @@ if (!$d->{'alias'} &&
 # PHP versions
 if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 	# Build versions list
-	@avail = &list_available_php_versions($d, $mode);
-	@vlist = ( );
+	my @avail = &list_available_php_versions($d, $mode);
+	my @vlist = ( );
 	foreach my $v (@avail) {
 		if ($v->[1]) {
 			my $fullver = &get_php_version($v->[1], $d);
@@ -152,6 +144,14 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 		print &ui_table_row(
 			&hlink($text{'phpmode_versions'}, "phpmode_versions"),
 			&ui_columns_table(\@heads, 100, \@table));
+
+		# Warn if changing mode would remove per-dir versions
+		if ($mode eq "cgi" || $mode eq "fcgid") {
+			@dirs = &list_domain_php_directories($d);
+			if (@dirs > 1) {
+				print &ui_table_row("", &ui_text_color($text{'phpmode_dirswarn'}, 'warn'));
+				}
+			}
 		}
 	}
 
@@ -163,6 +163,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 				     2, "phpinfo", 0, [ "width=30%" ]);
 
 	# PHP versions
+	my @vlist = ( );
 	foreach $phpver (&list_available_php_versions($d)) {
 		my $fullver = $phpver->[1] ? &get_php_version($phpver->[1], $d)
 					   : $phpver->[0];
