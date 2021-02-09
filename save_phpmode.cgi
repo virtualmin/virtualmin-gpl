@@ -44,13 +44,19 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 $mode = $oldmode = &get_domain_php_mode($d);
 if (defined($in{'mode'}) && $oldmode ne $in{'mode'} && $can == 2) {
 	&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
-	my $err = &save_domain_php_mode($d, $in{'mode'});
-	if ($err) {
-		&$second_print(&text('phpmode_emoding', $err));
+	@modes = &supported_php_modes($d);
+	if (&indexof($in{'mode'}, @modes) < 0) {
+		&$second_print($text{'phpmode_emode'});
 		}
 	else {
-		&$second_print($text{'setup_done'});
-		$mode = $in{'mode'};
+		my $err = &save_domain_php_mode($d, $in{'mode'});
+		if ($err) {
+			&$second_print(&text('phpmode_emoding', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			$mode = $in{'mode'};
+			}
 		}
 	$anything++;
 	}

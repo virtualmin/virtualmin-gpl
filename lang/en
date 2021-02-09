@@ -5035,6 +5035,7 @@ phpmode_nomax=Removing limit on maximum PHP script run time ..
 phpmode_emaxtime=Missing or invalid maximum PHP script run time
 phpmode_moding=Changing PHP execution mode to $1 ..
 phpmode_emoding=.. change failed : $1
+phpmode_emode=.. selected mode is not supported on this system!
 phpmode_kidding=Changing number of PHP sub-processes to $1 ..
 phpmode_nokids=Disabling PHP sub-processes ..
 phpmode_rmoding=Changing Ruby execution mode to $1 ..

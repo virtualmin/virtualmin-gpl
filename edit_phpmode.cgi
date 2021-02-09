@@ -23,6 +23,7 @@ print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 if (!$d->{'alias'} && $can == 2 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 	# PHP execution mode
+	push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 			    &ui_radio_table("mode", $mode,
 			      [ map { [ $_, $text{'phpmode_'.$_} ] }
