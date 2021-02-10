@@ -101,9 +101,14 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 			# This directory can be disabled
 			&$first_print(&text('phpmode_deldir',
 				"<tt>".&html_escape($sd)."</tt>"));
-			&delete_domain_php_directory($d, $in{"dir_".$i});
-			&$second_print($text{'setup_done'});
-			$anything++;
+			if ($sd) {
+				&delete_domain_php_directory($d, $in{"dir_".$i});
+				&$second_print($text{'setup_done'});
+				$anything++;
+				}
+			else {
+				&$second_print($text{'phpmode_edeldir'});
+				}
 			}
 		elsif ($in{"ver_$i"} ne $in{"oldver_$i"}) {
 			# Directory version can be updated

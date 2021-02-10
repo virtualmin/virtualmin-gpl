@@ -5086,6 +5086,7 @@ phpmode_versions=PHP versions
 phpmode_enabled=Enabled
 phpmode_versionone=(Only version available for this mode)
 phpmode_deldir=Removing PHP directory $1 ..
+phpmode_edeldir=.. primary directory cannot be removed!
 phpmode_adddir=Adding PHP directory $1 on version $2 ..
 phpmode_savedir=Updating PHP directory $1 to version $2 ..
 
