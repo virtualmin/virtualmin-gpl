@@ -177,7 +177,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 		$errs = &check_php_configuration($d, $phpver->[0],$phpver->[1]);
 		if ($errs) {
 			print &ui_table_row(&text('phpmode_errs', $phpver->[0]),
-			    "<font color=red>".&html_escape($errs)."</font>");
+				&ui_text_color($errs, 'danger'));
 			}
 		}
 
