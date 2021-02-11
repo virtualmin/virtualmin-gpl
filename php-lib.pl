@@ -1098,6 +1098,7 @@ foreach my $dir (@dirs) {
 				push(@rv, { 'dir' => $dir->{'words'}->[0],
 					    'version' => $1,
 					    'mode' => $mode });
+				last;
 				}
 			}
 		}
