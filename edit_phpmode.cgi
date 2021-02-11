@@ -94,10 +94,8 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 		$i = 0;
 		@table = ( );
 		$anydelete = 0;
-		my $ispub_done = 0;
 		foreach $dir (sort { $a->{'dir'} cmp $b->{'dir'} } @dirs) {
 			$ispub = $dir->{'dir'} eq $pub;
-			next if ($ispub && $ispub_done);
 			$sel = &ui_select("ver_$i", $dir->{'version'}, \@vlist);
 			print &ui_hidden("dir_$i", $dir->{'dir'});
 			print &ui_hidden("oldver_$i", $dir->{'version'});
@@ -111,7 +109,6 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 					"<i>$text{'phpver_pub'}</i>",
 					$sel
 					]);
-				$ispub_done++;
 				}
 			elsif (substr($dir->{'dir'}, 0, length($pub)) eq $pub) {
 				# Show directory relative to public_html
