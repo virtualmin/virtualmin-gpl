@@ -3880,14 +3880,12 @@ resel_ebwunlimit=The virtual server $1 cannot be assigned to this reseller, as i
 resel_ebefore=Before modification command failed : $1
 
 licence_err=A problem was detected with your Virtualmin license :
-licence_soon=Notice - Your Virtualmin license will expire in $1 days.
-licence_soon2=Notice - Your Virtualmin license will expire in $1 hours.
+licence_soon=Notice : Your Virtualmin license will expire in $1 days.
+licence_soon2=Notice : Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$1</a>
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
-licence_ok2=.. license is OK! It is valid for $1 Virtualmin domains, and for use on $2 systems.
-licence_ok3=.. license is OK! It is valid for $1 Virtualmin domains, and for use on $2 systems until $3.
 licence_warn=However, a temporary problem occurred during this license check : $1.
 licence_unlimited=unlimited
 licence_goterr=.. a problem was detected : $1

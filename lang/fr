@@ -2204,7 +2204,6 @@ scripts_ereturn=informations de script
 scripts_edep=Ce script ne peut pas être installé, comme ce serveur virtuel ne répond pas à ses exigences : $1
 scripts_ecommands=Ce script ne peut pas être installé, car il nécessite les commandes suivantes : <tt>$1</tt>
 scripts_eweb=Scripts peuvent être installés seulement dans les serveurs virtuels avec un répertoire d'accueil et le site Web
-scripts_ephpvers=Ce script ne peut pas être installé, car il nécessite la version de PHP $1.
 scripts_return=liste des scripts
 scripts_edownload=Téléchargement $2 manqué : $1
 scripts_edownload2=Téléchargement $1 n'est pas un fichier d'archive - peut-être une page d'erreur
@@ -2650,19 +2649,10 @@ spf_private=DNSSEC clé privée
 
 newlinks_nocat2=Aucun
 
-phpver_title=Versions PHP
 phpver_dir=Sous-répertoire du site
 phpver_ver=Version
-phpver_ecannot=Vous n'êtes pas autorisé à modifier les versions de PHP
-phpver_eavail2=Votre système ne dispose que d'une version PHP $1 installé, ainsi la sélection d'une version différente pour chaque répertoire est impossible.
-phpver_emodphp=Ce serveur virtuel utilise le mode d'exécution <tt>mod_php</tt> pour PHP, tel ne permet pas la sélection de version par répertoire.
 phpver_pub=Répertoire HTML par défaut
-phpver_delete=Supprimer la sélection
-phpver_save=Enregistrer Versions
-phpver_err=Impossible d'enregistrer les versions de PHP
 phpver_enewdir=Invalide sous-répertoire du site Web - doit être comme <tt>monapp</tt> ou <tt>programmes/monapp</tt>
-phpver_derr=Impossible de supprimer les versions de PHP
-phpver_enone=Aucun sélectionné
 
 addstyle_err=Echec lors de l'installation d'un nouveau style
 addstyle_done=Le style de contenu tiers $1 a été installé avec succès. Lorsqu'il est utilisé par un site Web, il sera créé $2 fichiers HTML et images.

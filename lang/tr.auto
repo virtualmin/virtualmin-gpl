@@ -202,6 +202,8 @@ setup_esslca=.. sertifika yetkilisi dosyası geçerli değil : $1
 setup_esslusermin=Usermin kurulu değil
 setup_ftpuser=ProFTPD kullanıcısı $1 sunucu grubuna ekleniyor ..
 setup_bind_provision=Hizmet ana bilgisayarına yeni DNS bölgesi ekleniyor ..
+setup_ebindslaveip2=.. bu sistem için IP adresini belirleyemedi. IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
+setup_ebindslaveip=.. bu sistem için geçerli bir IP adresi belirleyemedi ($1 aldı). IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
 setup_ebind_provision=.. oluşturma başarısız : $1 
 setup_bind_provisioned=.. $1 'de oluşturuldu
 setup_ebindpid=.. başarısız oldu : $1 
@@ -618,8 +620,7 @@ check_dnsok3=BIND DNS etki alanları bir hizmet ana bilgisayarında barındırı
 check_etlsa=TLSA DNS kayıtları sisteminizde oluşturulamaz: $1.
 check_tlsaok=TLSA DNS kayıtları yeni alanlara eklenecek.
 check_dnsmaster=Ancak, varsayılan ana DNS sunucusu $1 tam etki alanı adı değil.
-check_mysqlokmysql=MySQL $1 yüklü ve çalışıyor.
-check_mysqlokmariadb=MariaDB $1 yüklü ve çalışıyor.
+check_mysqlok=MySQL $1 yüklendi ve çalışıyor.
 check_mysqlok2=MySQL istemci programları bir servis ana bilgisayarı ile kullanılmak üzere kurulur.
 check_mysqlnopass=MySQL kurulu ve çalışıyor, ancak ayarlanmış bir <tt>root</tt> şifresi yok! <b>Bu,<a href='$1'> MySQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
 check_postgresnopass=PostgreSQL kurulu ve çalışıyor fakat ayarlanmış bir <tt>$2</tt> şifre yok! <b>Bu,<a href='$1'> PostgreSQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
@@ -1221,6 +1222,7 @@ rename_eparentuser=Kullanıcı adı yalnızca üst düzey sunucular için deği�
 
 cert_desc2=Bu bölüm, şu anda bu sanal sunucu tarafından kullanılmakta olan SSL sertifikasının ayrıntılarını göstermektedir.
 cert_desc6=Bu form, hemen kullanılabilen ancak tarayıcılar tarafından geçerli olarak kabul edilmeyen kendinden imzalı bir sertifika oluşturmak için kullanılabilir.
+cert_noneyet=Bu sanal sunucunun henüz bir SSL sertifikası yok. Sertifika ve anahtar oluşturmak için bu sayfadaki sekmelerden birini kullanın.
 cert_csrwarn=Uyarı - $1 'de imzalama isteği ve $2 'de özel anahtar zaten var ve yeni bir CSR oluşturularak üzerine yazılacak.
 cert_keywarn=Uyarı - $1 'deki bir sertifika ve $2 'deki özel anahtar zaten var ve yeni bir anahtar oluşturularak üzerine yazılacak.
 cert_header6=Kendinden imzalı sertifika ve anahtar oluşturma
@@ -1730,8 +1732,6 @@ resel_ebefore=Değiştirme komutu başarısız olmadan önce : $1
 licence_soon=Uyarı - Virtualmin lisansınızın süresi $1 gün içinde dolacak.
 licence_soon2=Uyarı - Virtualmin lisansınızın süresi $1 saat içinde dolacak.
 licence_renew=Yenileme <a target=_blank href='$1'>$1</a> adresinden satın alınabilir
-licence_ok2=.. lisans tamam! $1 Virtualmin etki alanları ve $2 sistemlerinde kullanım için geçerlidir.
-licence_ok3=.. lisans tamam! $1 Virtualmin etki alanları ve $3 'e kadar $2 sistemlerde kullanım için geçerlidir.
 licence_warn=Ancak, bu lisans denetimi sırasında geçici bir sorun oluştu: $1.
 licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
@@ -1770,7 +1770,7 @@ scripts_ereturn=script bilgisi
 scripts_ecommands=Bu komut dosyası, aşağıdaki komutları gerektirdiği için yüklenemiyor: <tt>$1</tt>
 scripts_eweb=Komut dosyaları yalnızca giriş dizini ve web sitesi bulunan sanal sunuculara yüklenebilir
 scripts_emissing=Komut dosyası yok!
-scripts_ephpvers=$1 PHP sürümü gerektirdiğinden bu komut dosyası yüklenemiyor.
+scripts_ephpvers2=PHP sürümü bulunamadığı için bu komut dosyası yüklenemez
 scripts_edownload3=$1 yüklemesi eksik bir arşiv dosyası : $2 
 scripts_faking=$1 sürüm $2 'de sahte yükleme ..
 scripts_egone=Komut dosyası artık mevcut değil!
@@ -2318,6 +2318,7 @@ phpmode_nomax=Maksimum PHP komut dosyası çalışma süresindeki sınır kaldı
 phpmode_emaxtime=Eksik veya geçersiz maksimum PHP komut dosyası çalışma süresi
 phpmode_moding=PHP yürütme modunu $1 olarak değiştiriyoruz.
 phpmode_emoding=.. değişiklik başarısız oldu : $1 
+phpmode_emode=.. seçilen mod bu sistemde desteklenmiyor!
 phpmode_kidding=PHP alt işlem sayısının $1 olarak değiştirilmesi.
 phpmode_nokids=PHP alt işlemlerinin devre dışı bırakılması ..
 phpmode_rmoding=Ruby yürütme modunu $1 olarak değiştiriyoruz.
@@ -2363,6 +2364,14 @@ phpmode_ehtmldir3=Web sitesi belgeleri alt dizini içeremez ..
 phpmode_ehtmldir4=Web sitesi belgeleri alt dizini, <tt>etki alanları</tt> altında olamaz, çünkü bu dizin alt sunucular için ayrılmıştır
 phpmode_ssloff=SSL sitesine yönlendirme kaldırılıyor ..
 phpmode_sslon=SSL sitesine yönlendirme ekleniyor ..
+phpmode_version=PHP sürümü
+phpmode_versions=PHP sürümleri
+phpmode_enabled=Etkin
+phpmode_versionone=(Bu mod için yalnızca sürüm mevcuttur)
+phpmode_deldir=PHP dizini $1 kaldırılıyor ..
+phpmode_edeldir=.. birincil dizin kaldırılamaz!
+phpmode_adddir=$2 sürümüne $1 PHP dizini ekleniyor ..
+phpmode_savedir=PHP dizini $1 $2 sürümüne güncelleniyor ..
 
 website_header=Web sitesi seçenekleri
 
@@ -2473,19 +2482,10 @@ showpass_egone=Kullanıcı yok!
 showpass_dbuser=$1 için kullanıcı adı
 showpass_dbpass=$1 için şifre
 
-phpver_title=PHP Sürümleri
 phpver_dir=Web sitesi alt dizini
 phpver_ver=versiyon
-phpver_ecannot=PHP sürümlerini değiştirme izniniz yok
-phpver_eavail2=Sisteminizde yalnızca PHP sürümü $1 yüklü olduğundan, her dizin için farklı bir sürüm seçmek mümkün değildir.
-phpver_emodphp=Bu sanal sunucu, PHP için <tt>mod_php</tt> yürütme modunu kullanıyor, bu dizin başına sürüm seçimine izin vermiyor.
 phpver_pub=Varsayılan HTML dizini
-phpver_delete=Seçilenleri Kaldır
-phpver_save=Sürümleri Kaydet
-phpver_err=PHP sürümleri kaydedilemedi
 phpver_enewdir=Geçersiz web sitesi alt dizini - <tt>myapp</tt> veya <tt>programlar/myapp</tt> gibi olmalıdır
-phpver_derr=PHP sürümleri kaldırılamadı
-phpver_enone=Hiçbiri seçilmedi
 
 html_title=Web Sayfalarını Düzenle
 html_edit=Mevcut dosyayı düzenle:

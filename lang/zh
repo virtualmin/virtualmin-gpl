@@ -2408,7 +2408,6 @@ scripts_upversion=当前版本号
 scripts_iok=立即安装
 scripts_edep=该脚本无法安装，因为本虚拟服务器不符合其要求：$1
 scripts_eweb=脚本只能安装在带有用户主目录和网站的虚拟服务器上
-scripts_ephpvers=该脚本无法安装，因为它需要PHP版本$1。
 scripts_return=脚本列表
 scripts_edownload=下载$2失败：$1
 scripts_edownload2=下载的$1不是一个归档文件 - 可能是页面错误
@@ -3139,16 +3138,10 @@ showpass_title=虚拟服务器密码
 showpass_user=管理员账号名
 showpass_pass=管理员密码
 
-phpver_title=PHP版本
 phpver_dir=网站子目录
 phpver_ver=版本
-phpver_ecannot=你不允许修改PHP版本
 phpver_pub=缺省HTML目录
-phpver_delete=删除所选中的
-phpver_err=保存PHP版本失败
 phpver_enewdir=无效的网站子目录
-phpver_derr=删除PHP版本失败
-phpver_enone=没有选中
 
 html_title=编辑网页
 html_edit=编辑已存在文件：

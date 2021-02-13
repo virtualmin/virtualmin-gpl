@@ -2976,7 +2976,6 @@ licence_renew=Una renovación puede comprarse a <a target=_new href='$1'>$1</a>
 licence_recheck=Re-chequear el estado de licencia
 licence_title=Re-chequear licencia
 licence_doing=Ahora re-chequeando su licencia de Virtualmin ..
-licence_ok2=.. la licencia es correcta! Es válida para $1 dominios Virtualmin y para uso en $2 sistemas.
 licence_warn=Sin embargo, ha ocurrido un problema temporario al chequear la licencia : $1.
 licence_unlimited=ilimitado
 licence_goterr=.. se ha detectado un problema : $1
@@ -3023,7 +3022,6 @@ scripts_ereturn=información del script
 scripts_edep=Ese script no puede ser instalado, ya que este servidor no cumple con los requisitos necesarios : $1
 scripts_ecommands=Este script no puede ser instalado, ya que requiere los siguientes comandos : <tt>$1</tt>
 scripts_eweb=Los scripts sólo pueden ser instaladas en servidores virtuales con un directorio home y un website
-scripts_ephpvers=Esta script no puede ser instalado, ya que requiere la versión de PHP $1.
 scripts_return=Lista de scripts
 scripts_edownload=Bajada de $2 falló : $1
 scripts_edownload2=Bajada de $1 no es un archivo - tal vez una página de error
@@ -3977,17 +3975,10 @@ showpass_user=Logueo de adminsitración
 showpass_pass=Contrasea de administración
 showpass_ecannot=Noestá autorizado a ver contraseñas de servidor virtual
 
-phpver_title=Versiones de PHP
 phpver_dir=Subdirectorio de Website
 phpver_ver=Versión
-phpver_ecannot=No está autorizado a cambiar versiones de PHP
 phpver_pub=Directorio HTML por default
-phpver_delete=Remover seleccionados
-phpver_save=Guardar versiones
-phpver_err=Falla al guardar versiones de PHP
 phpver_enewdir=Subdirectorio de website inválido
-phpver_derr=Falla al remover versiones de PHP
-phpver_enone=Ninguno seleccionado
 
 html_title=Editar páginas web
 html_edit=Editar archivo existente:

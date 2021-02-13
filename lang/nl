@@ -3329,8 +3329,6 @@ licence_renew=Een verlenging kan worden aangeschaft bij <a target=_new href='$1'
 licence_recheck=Her-controleer Licentie Status
 licence_title=Her-Controleer Licentie
 licence_doing=Nu uw Virtualmin licentie opnieuw controleren ..
-licence_ok2=.. licentie is OK! Het is geldig voor $1 Virtualmin domeinen, en voor gebruik op $2 systemen.
-licence_ok3=.. licentie is OK ! Het is geldig voor $1 Virtualmin domeinen en voor gebruik op $2 systemen tot $3.
 licence_warn=Maar er was een tijdelijk probleem tijdens deze licentie controle : $1.
 licence_unlimited=Ongelimiteerd
 licence_goterr=.. er is een probleem ontdekt : $1
@@ -3377,7 +3375,6 @@ scripts_ereturn=script informatie
 scripts_edep=Dit script kan niet worden geinstalleerd, omdat deze virtuele server niet voldoet aan de eisen : $1
 scripts_ecommands=Dit script kan niet worden geinstalleerd, omdat het de volgende opdrachten nodig heeft : <tt>$1</tt>
 scripts_eweb=Scripts kunnen alleen geinstalleerd worden in virtuele servers met een home directory en website
-scripts_ephpvers=Dit script kan niet worden geinstalleerd, omdat het PHP versie $1 nodig heeft.
 scripts_return=lijst met scripts
 scripts_edownload=Download van $2 mislukt : $1
 scripts_edownload2=Download van $1 is geen archief file - maar misschien een fouten pagina
@@ -4497,18 +4494,10 @@ showpass_egone=Gebruiker bestaat niet !
 showpass_dbuser=Gebruikersnaam voor $1
 showpass_dbpass=Wachtwoord voor $1
 
-phpver_title=PHP Versies
 phpver_dir=Website subdirectory
 phpver_ver=Versie
-phpver_ecannot=U bent niet bevoegd om PHP versies te bewerken
-phpver_eavail2=Uw systeem heeft alleen maar PHP versie $1 geinstalleerd, daarom kunt u niet verschillende versies voor iedere directory selecteren.
 phpver_pub=Standaard HTML directory
-phpver_delete=Verwijder Geselecteerden
-phpver_save=Versies Opslaan
-phpver_err=Mislukt om PHP versies op te slaan
 phpver_enewdir=Ongeldige website subdirectory - het moet lijken op <tt>myapp</tt> of <tt>programs/myapp</tt>
-phpver_derr=Mislukt om PHP versies te verwijderen
-phpver_enone=Niets geselecteerd
 
 html_title=Bewerk Web Pagina's
 html_edit=Bewerk bestaande file :

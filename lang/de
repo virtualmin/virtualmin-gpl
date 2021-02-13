@@ -2633,8 +2633,6 @@ resel_defns1=System Standard
 resel_edefnsip=Nameserver '$1' ist eine IP-Adress, kein Hostname
 resel_edefns=Nameserver '$1' ist ungültig
 
-licence_ok2=.. Lizenz ist OK! Es ist gültig für $1 Virtualmin Domänen und für den Einsatz auf $2 Systeme.
-licence_ok3=.. Lizenz ist OK! Es ist gültig für $1 Virtualmin Domänen und für den Einsatz auf $2 bis $3 Systeme.
 licence_unlimited=unlimitiert
 licence_goterr=.. ein Problem wurde erkannt : $1
 licence_maxdoms=Ihr System ist für nur $1 Server lizenziert, aber Sie haben $2.
@@ -2670,7 +2668,6 @@ scripts_upversion=Aktuelle Versionsnummer
 scripts_iok=Installiere jetzt
 scripts_ereturn=Skript-Informationen
 scripts_ecommands=Das Skript kann nicht installiert werden, da die folgenden Befehle <tt>$1</tt> benötigt werden
-scripts_ephpvers=Dieses Skript kann nicht installiert werden, da es PHP Version $1 benötigt.
 scripts_return=Liste der Skripte
 scripts_edownload=Download von $2 fehlgeschlagen : $1
 scripts_eurl=Nicht unterstützte URL $1
@@ -3481,18 +3478,10 @@ showpass_egone=Benutzer existiert nicht!
 showpass_dbuser=Benutzername für $1
 showpass_dbpass=Passwort für $1
 
-phpver_title=PHP-Versionen
 phpver_dir=Webseite Unterverzeichnis
 phpver_ver=Version
-phpver_ecannot=Es ist Ihnen nicht erlaubt die PHP-Version zu ändern
-phpver_eavail2=Ihr System hat nur PHP Version $1 installiert. Wählen einer anderen Version für jedes Verzeichnis ist nicht möglich.
 phpver_pub=Standard HTML Verzeichnis
-phpver_delete=Lösche ausgewählte
-phpver_save=Speichere Versionen
-phpver_err=Fehlgeschlagen PHP-Version zu speichern
 phpver_enewdir=Ungültiges Webseiten Unterverzeichnis - muss wie <tt>myapp</ tt> oder <tt>Programme/myapp</tt>sein
-phpver_derr=Fehlgeschlagen PHP-Versionen zu löschen
-phpver_enone=Keine ausgewählt
 
 html_title=Editiere Webseite
 html_edit=Editiere existierende Datei:

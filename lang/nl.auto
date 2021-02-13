@@ -55,6 +55,8 @@ setup_etmpl=U mag de geselecteerde sjabloon niet gebruiken
 
 setup_ewebphpmode=PHP-uitvoeringsmodus $1 is geselecteerd, maar wordt niet ondersteund op dit systeem!
 setup_esslusermin=Usermin is niet geïnstalleerd
+setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet het IP-adres instellen in de BIND DNS Server-module.
+setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
 setup_usermindown=.. momenteel niet actief
 setup_logrotatealready=.. al ingeschakeld voor logbestand $1 
@@ -186,8 +188,7 @@ check_webphplocalfixed=Beperkte FPM-serverversie $2 tot localhost voor $1 domein
 check_webadminfixed=Niet-ondersteunde richtlijn $1 verwijderd van $2 Apache-websites.
 check_etlsa=TLSA DNS-records kunnen niet worden gemaakt op uw systeem: $1.
 check_tlsaok=TLSA DNS-records worden toegevoegd aan nieuwe domeinen.
-check_mysqlokmysql=MySQL $1 is geïnstalleerd en actief.
-check_mysqlokmariadb=MariaDB $1 is geïnstalleerd en actief.
+check_mysqlok=MySQL $1 is geïnstalleerd en actief.
 check_enetmask6=IPv6 netmask $1 is niet geldig - het zou een getal moeten zijn, zoals 64
 check_dependentok=Postfix is geconfigureerd om uitgaande IP-adressen per domein te ondersteunen.
 check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per domein.
@@ -391,6 +392,7 @@ rename_euserclash=Er bestaat al een gebruiker met dezelfde naam
 rename_ednssub=De volgende DNS-subdomeinen gebruiken het zonebestand van deze server : $1 
 rename_eparentuser=De gebruikersnaam kan alleen worden gewijzigd voor servers op het hoogste niveau
 
+cert_noneyet=Deze virtuele server heeft nog geen SSL-certificaat. Gebruik een van de tabbladen op deze pagina om een certificaat en sleutel te genereren.
 cert_incert=SSL-certificaatbestand
 cert_inkey=SSL-privésleutelbestand
 cert_cert0=Geplakte tekst
@@ -608,6 +610,7 @@ licence_xfsreboot=Uw systeem moet opnieuw worden opgestart om XFS-quota op het r
 licence_xfsrebootok=Herstart nu
 
 scripts_emissing=Script bestaat niet!
+scripts_ephpvers2=Dit script kan niet worden geïnstalleerd omdat er geen PHP-versies zijn gevonden
 scripts_egone=Script bestaat niet meer!
 scripts_idb2=Gebruikt database met tabelvoorvoegsel
 scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
@@ -731,6 +734,7 @@ phpmode_short_fpm=FPM
 phpmode_dirswarn=Waarschuwing - Als u overschakelt van de CGI- of FCGId-modi, worden alle PHP-versieselecties per map verwijderd.
 phpmode_err2=Het opslaan van PHP-opties is mislukt
 phpmode_emoding=.. wijziging mislukt : $1 
+phpmode_emode=.. geselecteerde modus wordt niet ondersteund op dit systeem!
 phpmode_vers=PHP-versies geïnstalleerd
 phpmode_novers=Geen versies gevonden!
 phpmode_errs=Configuratiefouten voor PHP $1 
@@ -745,6 +749,14 @@ phpmode_defwebsort=Ja (maar alleen omdat het eerst alfabetisch is)
 phpmode_sslredir=Alle verzoeken omleiden naar SSL-site?
 phpmode_ssloff=Doorverwijzing naar SSL-site verwijderen.
 phpmode_sslon=Omleiding toevoegen aan SSL-site.
+phpmode_version=PHP-versie
+phpmode_versions=PHP-versies
+phpmode_enabled=Ingeschakeld
+phpmode_versionone=(Alleen versie beschikbaar voor deze modus)
+phpmode_deldir=PHP-directory $1 verwijderen ..
+phpmode_edeldir=.. primaire map kan niet worden verwijderd!
+phpmode_adddir=PHP-directory $1 toevoegen aan versie $2 ..
+phpmode_savedir=PHP-directory $1 bijwerken naar versie $2 ..
 
 website_header=Website-opties
 
@@ -775,8 +787,6 @@ s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3
 s3_einfo2=Kan $1 : $2 niet lezen
 s3_eputacl=Kan bucket-ACL niet opslaan : $1 
 s3_eputlifecycle=Kan bucketlevenscyclus niet opslaan : $1 
-
-phpver_emodphp=Deze virtuele server gebruikt de <tt>mod_php</tt> -uitvoeringsmodus voor PHP, dit staat geen selectie per mapversie toe.
 
 sharedips_def6=Standaard gedeeld IPv6-adres
 sharedips_ip6s=Gedeelde IPv6-adressen voor alle servers

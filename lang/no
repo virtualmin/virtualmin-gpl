@@ -3538,8 +3538,6 @@ licence_renew=Du kan kjøpe fornyelse på <a target=_new href='$1'>$1</a>
 licence_recheck=Sjekk lisensstatus på nytt
 licence_title=Sjekk lisens på nytt
 licence_doing=Sjekker nå Virtualmin lisensen din på nytt ..
-licence_ok2=.. lisensen er OK! Den er gyldig for $1 Virtualmin domener, og for bruk på $2 systemer.
-licence_ok3=. lisensen er OK! Den er gyldig for $1 Virtualmin domener, og for bruk på $2 systemer frem til $3.
 licence_warn=Det oppstod imidlertid et midlertidig problem under denne lisens-sjekken : $1.
 licence_unlimited=ubegrenset
 licence_goterr=.. oppdaget et problem : $1
@@ -3596,7 +3594,6 @@ scripts_ereturn=script informasjon
 scripts_edep=Dette scriptet kan ikke installeres, siden denne virtuelle tjeneren ikke tilfredstiller kravene til scriptet : $1
 scripts_ecommands=Dette scriptet kan ikke installeres, siden det krever følgende kommandoer : <tt>$1</tt>
 scripts_eweb=Script kan bare installeres på virtuelle tjenere som har en hjemmekatalog og et nettsted
-scripts_ephpvers=Dette scriptet kan ikke installeres, da det krever PHP versjon $1.
 scripts_return=liste over script
 scripts_edownload=Nedlasting av $2 feilet : $1
 scripts_edownload2=Nedlasting av $1 er ikke en arkiv-fil - kanskje en feil-side
@@ -4757,19 +4754,10 @@ showpass_egone=Bruker finnes ikke!
 showpass_dbuser=Brukernavn for $1
 showpass_dbpass=Passord for $1
 
-phpver_title=PHP versjoner
 phpver_dir=Nettsted underkatalog
 phpver_ver=Versjon
-phpver_ecannot=Du har ikke lov til å endre PHP versjoner
-phpver_eavail2=Systemet ditt har kun PHP versjon $1 installert, så det er ikke mulig å velge forskjellig versjon for hver katalog.
-phpver_emodphp=Denne virtuelle tjeneren bruker <tt>mod_php</tt> eksekveringsmodus for PHP, og tillater derfor ikke per-katalog versjonsvalg.
 phpver_pub=Standard HTML katalog
-phpver_delete=Fjern valgte
-phpver_save=Lagre versjoner
-phpver_err=Kunne ikke lagre PHP versjoner
 phpver_enewdir=Ugyldig nettsted underkatalog - må være lig <tt>myapp</tt> eller <tt>programs/myapp</tt>
-phpver_derr=Kunne ikke fjerne PHP versjoner
-phpver_enone=Ingen valgt
 
 html_title=Rediger websider
 html_edit=Rediger eksisterende fil:

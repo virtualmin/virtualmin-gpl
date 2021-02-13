@@ -40,6 +40,8 @@ setup_etmpl=Du har ikke lov til å bruke den valgte malen
 
 setup_ewebphpmode=PHP-utførelsesmodus $1 ble valgt, men støttes ikke på dette systemet!
 setup_esslusermin=Usermin er ikke installert
+setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du må angi IP-adressen i BIND DNS Server-modulen.
+setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
 setup_usermindown=.. kjører foreløpig ikke
 setup_logrotatealready=.. allerede aktivert for loggfil $1 
@@ -124,8 +126,7 @@ check_webphplocalfixed=Begrenset FPM-serverversjon $2 til localhost for $1 domen
 check_webadminfixed=Ikke-støttet $1 -direktiv ble fjernet fra $2 Apache-nettsteder.
 check_etlsa=TLSA DNS-poster kan ikke opprettes på systemet ditt: $1.
 check_tlsaok=TLSA DNS-poster vil bli lagt til nye domener.
-check_mysqlokmysql=MySQL $1 er installert og kjører.
-check_mysqlokmariadb=MariaDB $1 er installert og kjører.
+check_mysqlok=MySQL $1 er installert og kjører.
 check_eresolv2=Virtualmin er konfigurert til å konfigurere DNS-soner, men dette systemet er ikke konfigurert for å bruke seg selv som en DNS-server. Enten legg til 127.0.0.1 til $1, slå av BIND-funksjonen på $2-siden, eller deaktiver alternativet <b>Kontroller resolv.conf</b> på Virtualmin-konfigurasjonssiden.
 check_eresolv3=Det ser ut til at DHCP blir brukt til å dynamisk konfigurere nettverksgrensesnittene, noe som kan føre til at DNS-serverne blir satt ut basert på innstillinger levert av DHCP-serveren. Det anbefales sterkt å bruke en statisk IP-adresse med Virtualmin.
 check_eresolvlist=liste over DNS-servere
@@ -247,6 +248,7 @@ limits_ejailoff=Kunne ikke deaktivere chroot fengsel : $1
 rename_ednssub=Følgende DNS-underdomener bruker denne serverens sonefil : $1 
 rename_eparentuser=Brukernavnet kan bare endres for servere på toppnivå
 
+cert_noneyet=Denne virtuelle serveren har ikke et SSL-sertifikat ennå. Bruk en av fanene på denne siden for å generere et sertifikat og en nøkkel.
 cert_tablets=La oss kryptere
 cert_tabperip=Tjenestesertifikater
 cert_etime=Tid til utløpet
@@ -381,6 +383,7 @@ licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter 
 licence_xfsrebootok=Starte på nytt nå
 
 scripts_emissing=Manus eksisterer ikke!
+scripts_ephpvers2=Dette skriptet kan ikke installeres, da ingen PHP-versjoner ble funnet
 scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
@@ -473,12 +476,21 @@ phpmode_short_fpm=FPM
 phpmode_dirswarn=Advarsel - Hvis du skifter fra CGI- eller FCGId-modus, fjernes alle PHP-versjoner per katalog.
 phpmode_err2=Kunne ikke lagre PHP-alternativer
 phpmode_emoding=.. endring mislyktes : $1 
+phpmode_emode=.. valgt modus støttes ikke på dette systemet!
 phpmode_vers=PHP-versjoner installert
 phpmode_novers=Ingen versjoner funnet!
 phpmode_errs=Konfigurasjonsfeil for PHP $1 
 phpmode_sslredir=Viderekoble alle forespørsler til SSL-nettstedet?
 phpmode_ssloff=Fjerner viderekoblingen til SSL-siden ..
 phpmode_sslon=Legger til viderekobling til SSL-side ..
+phpmode_version=PHP-versjon
+phpmode_versions=PHP-versjoner
+phpmode_enabled=Aktivert
+phpmode_versionone=(Bare versjon tilgjengelig for denne modusen)
+phpmode_deldir=Fjerner PHP-katalogen $1 ..
+phpmode_edeldir=.. primær katalog kan ikke fjernes!
+phpmode_adddir=Legger til PHP-katalog $1 på versjon $2 ..
+phpmode_savedir=Oppdaterer PHP-katalogen $1 til versjon $2 ..
 
 website_header=Nettstedsalternativer
 

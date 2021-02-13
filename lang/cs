@@ -930,7 +930,6 @@ resel_eemail=Neplatná kontaktní emailová adresa
 resel_edefip=Neplatná nebo chybějící IP adresa
 resel_edefip2=IP adresa není na tomto systému zatím aktivní
 
-licence_ok2=.. licence je v pořádku! Je validní pro $1 Virtualmin domény a pro použití na $2 systémech.
 licence_unlimited=neomezená
 
 scripts_longdesc=Popis

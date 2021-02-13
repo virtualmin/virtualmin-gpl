@@ -111,6 +111,8 @@ setup_esslkey=.. el archivo de clave no es válido : $1
 setup_esslca=.. el archivo de la autoridad del certificado no es válido : $1
 setup_esslusermin=Usermin no está instalado
 setup_bind_provision=Agregar nueva zona DNS en el host de servicios.
+setup_ebindslaveip2=.. no pudo determinar la dirección IP para este sistema. Deberá configurar la IP en el módulo BIND DNS Server.
+setup_ebindslaveip=.. no pudo determinar una dirección IP válida para este sistema (obtuvo $1). Deberá configurar la IP en el módulo BIND DNS Server.
 setup_ebind_provision=.. creación fallida : $1
 setup_bind_provisioned=.. creado en $1
 setup_ebindpid=.. fallido : $1
@@ -365,8 +367,7 @@ check_webadminfixed=Se eliminó la directiva $1 no compatible de $2 sitios web d
 check_dnsok3=Los dominios DNS BIND se alojarán en un host de servicios.
 check_etlsa=Los registros DNS de TLSA no se pueden crear en su sistema: $1.
 check_tlsaok=Los registros DNS de TLSA se agregarán a nuevos dominios.
-check_mysqlokmysql=MySQL $1 está instalado y ejecutándose.
-check_mysqlokmariadb=MariaDB $1 está instalado y ejecutándose.
+check_mysqlok=MySQL $1 está instalado y en ejecución.
 check_mysqlok2=Los programas de cliente MySQL se instalan para usar con un host de servicios.
 check_enetmask6=La máscara de red IPv6 $1 no es válida; debe ser un número, como 64
 check_iface6=Las direcciones IPv6 están disponibles, usando la interfaz $1.
@@ -648,6 +649,7 @@ rename_emade=El comando posterior al cambio de nombre falló : $1
 rename_ednssub=Los siguientes subdominios DNS están utilizando el archivo de zona de este servidor : $1
 rename_eparentuser=El nombre de usuario solo se puede cambiar para servidores de nivel superior
 
+cert_noneyet=Este servidor virtual aún no tiene certificado SSL. Utilice una de las pestañas de esta página para generar un certificado y una clave.
 cert_tabperip=Certificados de servicio
 cert_etime=Tiempo hasta el vencimiento
 cert_expired=Caducó hace $1 días.
@@ -953,7 +955,6 @@ resel_equnlimit=El servidor virtual $1 no se puede asignar a este distribuidor, 
 resel_ebwunlimit=El servidor virtual $1 no se puede asignar a este distribuidor, ya que tiene una cuota de ancho de banda ilimitada, pero el distribuidor tiene un límite
 resel_ebefore=Antes de que fallara el comando de modificación : $1
 
-licence_ok3=.. licencia está bien! Es válido para dominios de $1 de Virtualmin y para su uso en sistemas de $2 hasta $3.
 licence_goterr2=.. fecha de vencimiento no válida : $1
 licence_ipchanged=La dirección IP principal de su sistema parece haber cambiado de $1 a $2. Los servidores virtuales que usan la dirección anterior pueden ser inalcanzables o servir el contenido web incorrecto.
 licence_changeip=Actualizar direcciones IP incorrectas
@@ -969,6 +970,7 @@ licence_xfsreboot=Su sistema debe reiniciarse para habilitar las cuotas XFS en e
 licence_xfsrebootok=Reinicie ahora
 
 scripts_emissing=¡El guión no existe!
+scripts_ephpvers2=Este script no se puede instalar, ya que no se encontraron versiones de PHP
 scripts_edownload3=La descarga de $1 es un archivo de archivo incompleto : $2
 scripts_faking=Instalación falsa de $1 versión $2 ..
 scripts_idb2=Utiliza una base de datos con prefijo de tabla
@@ -1210,6 +1212,7 @@ phpmode_maxing=Cambiar el tiempo máximo de ejecución de script PHP a $1 segund
 phpmode_nomax=Eliminando el límite de tiempo máximo de ejecución de script PHP.
 phpmode_emaxtime=Tiempo de ejecución de script PHP máximo faltante o no válido
 phpmode_emoding=.. cambio fallido : $1 
+phpmode_emode=.. ¡el modo seleccionado no es compatible con este sistema!
 phpmode_header2=Información PHP
 phpmode_mods=Módulos para PHP $1
 phpmode_novers=No se encontraron versiones!
@@ -1246,6 +1249,14 @@ phpmode_ehtmldir3=El subdirectorio de documentos del sitio web no puede contener
 phpmode_ehtmldir4=El subdirectorio de documentos del sitio web no puede estar bajo <tt>domains</tt>, ya que ese directorio está reservado para los servidores
 phpmode_ssloff=Eliminando la redirección al sitio SSL.
 phpmode_sslon=Agregar redireccionamiento al sitio SSL.
+phpmode_version=Versión PHP
+phpmode_versions=Versiones PHP
+phpmode_enabled=Activado
+phpmode_versionone=(Única versión disponible para este modo)
+phpmode_deldir=Eliminando el directorio PHP $1 ..
+phpmode_edeldir=.. ¡El directorio principal no se puede eliminar!
+phpmode_adddir=Añadiendo el directorio PHP $1 en la versión $2 ..
+phpmode_savedir=Actualizando el directorio PHP $1 a la versión $2 ..
 
 website_header=Opciones de sitios web
 
@@ -1314,9 +1325,6 @@ showpass_passu=Contraseña
 showpass_egone=¡El usuario no existe!
 showpass_dbuser=Nombre de usuario por $1
 showpass_dbpass=Contraseña por $1
-
-phpver_eavail2=Su sistema solo tiene instalada la versión PHP $1, por lo que no es posible seleccionar una versión diferente para cada directorio.
-phpver_emodphp=Este servidor virtual está utilizando el modo de ejecución <tt>mod_php</tt> para PHP, por lo que no permite la selección de versión por directorio.
 
 sharedips_def6=Dirección IPv6 compartida predeterminada
 sharedips_alloc=Asignar una nueva dirección IPv4 compartida

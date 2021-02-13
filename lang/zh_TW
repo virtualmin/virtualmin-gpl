@@ -2408,7 +2408,6 @@ scripts_upversion=當前版本號
 scripts_iok=立即安裝
 scripts_edep=該腳本無法安裝，因為本虛擬服務器不符合其要求：$1
 scripts_eweb=腳本只能安裝在帶有用戶主目錄和網站的虛擬服務器上
-scripts_ephpvers=該腳本無法安裝，因為它需要PHP版本$1。
 scripts_return=腳本列表
 scripts_edownload=下載$2失敗：$1
 scripts_edownload2=下載的$1不是一個歸檔文件 - 可能是頁面錯誤
@@ -3139,16 +3138,10 @@ showpass_title=虛擬服務器密碼
 showpass_user=管理員賬號名
 showpass_pass=管理員密碼
 
-phpver_title=PHP版本
 phpver_dir=網站子目錄
 phpver_ver=版本
-phpver_ecannot=你不允許修改PHP版本
 phpver_pub=缺省HTML目錄
-phpver_delete=刪除所選中的
-phpver_err=保存PHP版本失敗
 phpver_enewdir=無效的網站子目錄
-phpver_derr=刪除PHP版本失敗
-phpver_enone=沒有選中
 
 html_title=編輯網頁
 html_edit=編輯已存在文件：

@@ -971,9 +971,6 @@ showpass_dbuser=Nazwa użytkownika dla $1
 showpass_dbpass=Hasło dla $1
 
 phpver_ver=Wersja
-phpver_ecannot=Nie masz uprawnień do zmiany wersji PHP
-phpver_eavail2=W twoim systemie zainstalowany jest tylko PHP w wersji $1, więc nie jest możliwy wybór innych wersji dla każdego katalogu.
-phpver_enone=Nic nie wybrano
 
 html_dok=Usuń
 

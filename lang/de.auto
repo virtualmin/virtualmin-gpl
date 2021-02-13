@@ -136,6 +136,8 @@ setup_esslca=.. Zertifizierungsstellendatei ist ungültig : $1
 setup_esslusermin=Usermin ist nicht installiert
 setup_ftpuser=Hinzufügen des ProFTPD-Benutzers $1 zur Servergruppe.
 setup_bind_provision=Hinzufügen einer neuen DNS-Zone auf dem Diensthost.
+setup_ebindslaveip2=.. konnte die IP-Adresse für dieses System nicht ermitteln. Sie müssen die IP im BIND DNS Server-Modul festlegen.
+setup_ebindslaveip=.. konnte keine gültige IP-Adresse für dieses System ermitteln ($1 erhalten). Sie müssen die IP im BIND DNS Server-Modul festlegen.
 setup_bindslavepids=Slave-DNS-Server neu starten.
 setup_bindeslave=.. einige Slave-Server ausgefallen
 setup_bindsub=Hinzufügen von Einträgen zur DNS-Zone $1 ..
@@ -487,8 +489,7 @@ check_webphplocalfixed=Begrenzte FPM-Serverversion $2 auf localhost für $1 -Dom
 check_webadminfixed=Nicht unterstützte $1 -Direktive von $2 Apache-Websites entfernt.
 check_etlsa=TLSA-DNS-Einträge können auf Ihrem System nicht erstellt werden: $1.
 check_tlsaok=TLSA-DNS-Einträge werden neuen Domänen hinzugefügt.
-check_mysqlokmysql=MySQL $1 ist installiert und läuft.
-check_mysqlokmariadb=MariaDB $1 ist installiert und läuft.
+check_mysqlok=MySQL $1 ist installiert und läuft.
 check_ifacezone=Die Netzwerkschnittstelle wird bei der Erstellung des virtuellen Servers automatisch erkannt.
 check_noquotas=Festplattenkontingente wurden in der Modulkonfiguration deaktiviert.
 check_emysqlsync=Die Synchronisierung zwischen Unix- und MySQL-Benutzern ist im <a href='$1'>MySQL-Datenbank</a> -Modul aktiviert. Dies ist nicht erforderlich, da Virtualmin bei Bedarf MySQL-Konten für Domänenbesitzer erstellt und daher deaktiviert werden muss.
@@ -944,6 +945,7 @@ rename_eparentuser=Der Benutzername kann nur für Server der obersten Ebene geä
 
 cert_desc2=In diesem Abschnitt werden die Details des SSL-Zertifikats angezeigt, das derzeit von diesem virtuellen Server verwendet wird.
 cert_desc6=Mit diesem Formular kann ein selbstsigniertes Zertifikat erstellt werden, das sofort verwendet werden kann, von Browsern jedoch nicht als gültig akzeptiert wird.
+cert_noneyet=Dieser virtuelle Server verfügt noch nicht über ein SSL-Zertifikat. Verwenden Sie eine der Registerkarten auf dieser Seite, um ein Zertifikat und einen Schlüssel zu generieren.
 cert_csrwarn=Warnung - Eine Signaturanforderung in $1 und ein privater Schlüssel in $2 sind bereits vorhanden und werden durch Generieren einer neuen CSR überschrieben.
 cert_keywarn=Warnung - Ein Zertifikat in $1 und ein privater Schlüssel in $2 sind bereits vorhanden und werden durch Generieren eines neuen Schlüssels überschrieben.
 cert_header6=Generieren Sie ein selbstsigniertes Zertifikat und einen Schlüssel
@@ -1331,6 +1333,7 @@ scripts_istatus0=Nieder
 scripts_edep=Dieses Skript kann nicht installiert werden, da dieser virtuelle Server seine Anforderungen nicht erfüllt : $1 
 scripts_eweb=Skripte können nur auf virtuellen Servern mit einem Home-Verzeichnis und einer Website installiert werden
 scripts_emissing=Skript existiert nicht!
+scripts_ephpvers2=Dieses Skript kann nicht installiert werden, da keine PHP-Versionen gefunden wurden
 scripts_edownload2=Der Download von $1 ist keine Archivdatei - möglicherweise eine Fehlerseite
 scripts_edownload3=Der Download von $1 ist eine unvollständige Archivdatei : $2 
 scripts_rusure=Möchten Sie das Skript $1 Version $2 wirklich deinstallieren? Alle Dateien unter <tt>$3</tt> werden gelöscht ($4).
@@ -1723,6 +1726,7 @@ phpmode_nomax=Aufhebung des Limits für die maximale Laufzeit von PHP-Skripten.
 phpmode_emaxtime=Fehlende oder ungültige maximale Laufzeit des PHP-Skripts
 phpmode_moding=Ändern des PHP-Ausführungsmodus auf $1 ..
 phpmode_emoding=.. Änderung fehlgeschlagen : $1 
+phpmode_emode=.. Der ausgewählte Modus wird auf diesem System nicht unterstützt!
 phpmode_kidding=Ändern der Anzahl der PHP-Unterprozesse in $1 ..
 phpmode_nokids=Deaktivieren von PHP-Unterprozessen.
 phpmode_rmoding=Ändern des Ruby-Ausführungsmodus auf $1 ..
@@ -1754,6 +1758,14 @@ phpmode_ehtmldir3=Das Unterverzeichnis der Website-Dokumente darf nicht enthalte
 phpmode_ehtmldir4=Das Unterverzeichnis der Website-Dokumente darf sich nicht unter <tt>Domains</tt> befinden, da dieses Verzeichnis für Subserver reserviert ist
 phpmode_ssloff=Umleitung zur SSL-Site entfernen.
 phpmode_sslon=Hinzufügen einer Weiterleitung zur SSL-Site.
+phpmode_version=PHP-Version
+phpmode_versions=PHP-Versionen
+phpmode_enabled=aktiviert
+phpmode_versionone=(Nur Version für diesen Modus verfügbar)
+phpmode_deldir=PHP-Verzeichnis $1 entfernen ..
+phpmode_edeldir=.. Primärverzeichnis kann nicht entfernt werden!
+phpmode_adddir=Hinzufügen des PHP-Verzeichnisses $1 in Version $2 ..
+phpmode_savedir=Aktualisieren des PHP-Verzeichnisses $1 auf Version $2 ..
 
 website_header=Website-Optionen
 
@@ -1826,8 +1838,6 @@ postsave_done=Der virtuelle Server $1 wurde erfolgreich aktualisiert. Verwenden 
 postsave_aliases=Verwalten von Mail-Aliasen und automatischen Antworten.
 
 showpass_ecannot=Sie dürfen keine Kennwörter für virtuelle Server anzeigen
-
-phpver_emodphp=Dieser virtuelle Server verwendet den Ausführungsmodus <tt>mod_php</tt> für PHP, sodass die Auswahl der Version pro Verzeichnis nicht möglich ist.
 
 html_drusure=Möchten Sie die Webseite $1 mit einer Größe von $2 wirklich löschen?
 html_apply=Verwenden Sie den Inhaltsstil:

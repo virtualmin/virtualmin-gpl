@@ -182,6 +182,8 @@ setup_esslca=..证书颁发机构文件无效： $1
 setup_esslusermin=未安装Usermin
 setup_ftpuser=将ProFTPD用户 $1添加到服务器的组 ..
 setup_bind_provision=在服务主机上添加新的DNS区域 ..
+setup_ebindslaveip2=..无法确定该系统的IP地址。您将需要在BIND DNS服务器模块中设置IP。
+setup_ebindslaveip=..无法确定该系统的有效IP地址（获取 $1）。您将需要在BIND DNS服务器模块中设置IP。
 setup_ebind_provision=..创建失败： $1
 setup_bind_provisioned=..在 $1上创建
 setup_ebindpid=..失败： $1
@@ -541,8 +543,7 @@ check_dnsok3=BIND DNS域将托管在服务主机上。
 check_etlsa=无法在系统 $1上创建TLSA DNS记录。
 check_tlsaok=TLSA DNS记录将添加到新域。
 check_dnsmaster=但是，默认的主DNS服务器 $1不是完全合格的域名。
-check_mysqlokmysql=MySQL $1已安装并正在运行。
-check_mysqlokmariadb=MariaDB $1已安装并正在运行。
+check_mysqlok=MySQL $1已安装并正在运行。
 check_mysqlok2=已安装MySQL客户端程序以与服务主机一起使用。
 check_mysqlnopass=MySQL已安装并正在运行，但未设置任何<tt>root</tt>密码！ <b>应立即在<a href='$1'> MySQL数据库</a>模块</b>中对此进行更改。
 check_postgresnopass=PostgreSQL已安装并正在运行，但未设置任何<tt>$2</tt>密码！ <b>应立即在<a href='$1'> PostgreSQL数据库</a>模块</b>中对此进行更改。
@@ -1094,6 +1095,7 @@ rename_scripts=更新脚本数据库中的路径 ..
 rename_eparentuser=只能为顶级服务器更改用户名
 
 cert_desc6=此表单可用于创建自签名证书，该证书可立即使用，但不会被浏览器接受为有效证书。
+cert_noneyet=该虚拟服务器尚没有SSL证书。使用此页面上的选项卡之一生成证书和密钥。
 cert_csrwarn=警告- $1中的签名请求和 $2中的私钥已经存在，并且将通过生成新的CSR被覆盖。
 cert_keywarn=警告- $1中的证书和 $2中的私钥已经存在，并且将通过生成新密钥而被覆盖。
 cert_header6=生成自签名证书和密钥
@@ -1553,8 +1555,6 @@ resel_ebefore=修改命令失败之前： $1
 licence_soon=注意-您的Virtualmin许可证将在 $1天内过期。
 licence_soon2=注意-您的Virtualmin许可证将在 $1小时后过期。
 licence_renew=可以在<a target=_blank href='$1'>$1</a>购买续订
-licence_ok2=..许可证还可以！它对 $1 Virtualmin域有效，并在 $2系统上使用。
-licence_ok3=..许可证还可以！它对 $1 Virtualmin域有效，并且可在 $2系统上使用，直到 $3。
 licence_warn=但是，此许可证检查期间发生了一个临时问题： $1。
 licence_unlimited=无限
 licence_goterr2=..无效的到期日期： $1
@@ -1590,6 +1590,7 @@ scripts_istatus0=下
 scripts_ereturn=脚本信息
 scripts_ecommands=无法安装此脚本，因为它需要以下命令：<tt>$1</tt>
 scripts_emissing=脚本不存在！
+scripts_ephpvers2=无法安装此脚本，因为未找到PHP版本
 scripts_edownload3=$1的下载是不完整的存档文件： $2
 scripts_faking=伪装 $1版本 $2 ..
 scripts_egone=脚本不再存在！
@@ -2043,6 +2044,7 @@ phpmode_nomax=取消最大PHP脚本运行时间限制
 phpmode_emaxtime=缺少或无效的最大PHP脚本运行时间
 phpmode_moding=将PHP执行模式更改为 $1 ..
 phpmode_emoding=..更改失败： $1
+phpmode_emode=..本系统不支持所选模式！
 phpmode_kidding=将PHP子进程数更改为 $1 ..
 phpmode_nokids=禁用PHP子进程 ..
 phpmode_rmoding=将Ruby执行模式更改为 $1 ..
@@ -2088,6 +2090,14 @@ phpmode_ehtmldir3=网站文档子目录不能包含 ..
 phpmode_ehtmldir4=网站文档子目录不能位于<tt>域</tt>下，因为该目录是为子服务器保留的
 phpmode_ssloff=删除重定向到SSL网站 ..
 phpmode_sslon=添加重定向到SSL网站 ..
+phpmode_version=PHP版本
+phpmode_versions=PHP版本
+phpmode_enabled=已启用
+phpmode_versionone=（仅此模式可用的版本）
+phpmode_deldir=删除PHP目录 $1 ..
+phpmode_edeldir=..主目录无法删除！
+phpmode_adddir=在版本 $2上添加PHP目录 $1 ..
+phpmode_savedir=将PHP目录 $1更新到版本 $2 ..
 
 website_header=网站选项
 
@@ -2163,10 +2173,6 @@ showpass_ecannot=您无权查看虚拟服务器密码
 showpass_egone=用户不存在！
 showpass_dbuser=$1的用户名
 showpass_dbpass=$1的密码
-
-phpver_eavail2=您的系统仅安装了PHP版本 $1，因此无法为每个目录选择不同的版本。
-phpver_emodphp=该虚拟服务器正在为PHP使用<tt>mod_php</tt>执行模式，因此不允许按目录选择版本。
-phpver_save=保存版本
 
 html_textok=编辑为文字
 
