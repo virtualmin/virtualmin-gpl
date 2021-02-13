@@ -13,6 +13,10 @@ By default incoming email will not be checked for a valid DKIM signature
 unless the C<--verify> flag is given. To turn off verification, use the 
 C<--no-verify> flag instead.
 
+Virtualmin enables DKIM for all virtual servers with email and DNS features, but
+you can add extra domains to sign for with the C<--add-dkim> flag followed by a
+domain name. Similarly you can remove an extra domain with the C<--remove-extra> flag.
+
 =cut
 
 package virtual_server;
@@ -57,6 +61,16 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-verify") {
 		$verify = 0;
 		}
+	elsif ($a eq "--add-extra") {
+		$extra = shift(@ARGV);
+		$err = &valid_domain_name($extra);
+		$err && &usage("Invalid extra domain name : $err");
+		push(@addextra, $extra);
+		}
+	elsif ($a eq "--remove-extra") {
+		$extra = shift(@ARGV);
+		push(@delextra, $extra);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -72,6 +86,13 @@ $dkim ||= { 'selector' => &get_default_dkim_selector(),
 $dkim->{'enabled'} = $enabled if (defined($enabled));
 $dkim->{'selector'} = $selector if (defined($selector));
 $dkim->{'verify'} = $verify if (defined($verify));
+foreach my $e (@addextra) {
+	push(@{$dkim->{'extra'}}, $e);
+	}
+foreach my $e (@delextra) {
+	$dkim->{'extra'} = [ grep { $_ ne $e } @{$dkim->{'extra'}} ];
+	}
+$dkim->{'extra'} = [ &unique(@{$dkim->{'extra'}}) ];
 
 if ($dkim->{'enabled'}) {
 	# Turn on DKIM, or change settings
@@ -107,6 +128,8 @@ print "virtualmin set-dkim [--enable | --disable]\n";
 print "                    [--select name]\n";
 print "                    [--size bits]\n";
 print "                    [--verify | --no-verify]\n";
+print "                    [--add-extra domain]*\n";
+print "                    [--remove-extra domain]*\n";
 exit(1);
 }
 

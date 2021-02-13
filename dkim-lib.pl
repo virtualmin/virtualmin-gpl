@@ -395,7 +395,11 @@ my ($dkim, $newkey, $size) = @_;
 &$first_print($text{'dkim_domains'});
 my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
 my @doms = grep { $_->{'dns'} && $_->{'mail'} } @alldoms;
-if (@doms) {
+if (@doms && @{$dkim->{'extra'}}) {
+	&$second_print(&text('dkim_founddomains3', scalar(@doms),
+			     scalar(@{$dkim->{'extra'}})));
+	}
+elsif (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
 elsif (@{$dkim->{'extra'}}) {
