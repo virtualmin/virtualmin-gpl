@@ -955,6 +955,8 @@ resel_equnlimit=El servidor virtual $1 no se puede asignar a este distribuidor, 
 resel_ebwunlimit=El servidor virtual $1 no se puede asignar a este distribuidor, ya que tiene una cuota de ancho de banda ilimitada, pero el distribuidor tiene un límite
 resel_ebefore=Antes de que fallara el comando de modificación : $1
 
+licence_ok2=.. la licencia es <i>válida</i>. Es válido para dominios $1 Virtualmin y para su uso en sistemas $2.
+licence_ok3=.. la licencia es <i>válida</i>. Es válido para dominios de $1 Virtualmin y para su uso en sistemas $2 hasta $3.
 licence_goterr2=.. fecha de vencimiento no válida : $1
 licence_ipchanged=La dirección IP principal de su sistema parece haber cambiado de $1 a $2. Los servidores virtuales que usan la dirección anterior pueden ser inalcanzables o servir el contenido web incorrecto.
 licence_changeip=Actualizar direcciones IP incorrectas

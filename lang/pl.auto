@@ -3305,6 +3305,8 @@ licence_soon2=Uwaga - Twoja licencja Virtualmin wygaśnie za $1 godzin.
 licence_renew=Przedłużenie można kupić w <a target=_blank href='$1'>$1</a>
 licence_recheck=Ponownie sprawdź stan licencji
 licence_title=Sprawdź ponownie licencję
+licence_ok2=.. licencja jest <i>ważna</i>. Jest ważny dla domen Virtualmin $1 i do użytku w systemach $2.
+licence_ok3=.. licencja jest <i>ważna</i>. Jest ważny dla domen Virtualmin $1 i do użytku w systemach $2 do $3.
 licence_warn=Wystąpił jednak tymczasowy problem podczas sprawdzania licencji: $1.
 licence_unlimited=bez limitu
 licence_goterr=.. wykryto problem : $1 

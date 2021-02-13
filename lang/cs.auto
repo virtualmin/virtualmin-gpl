@@ -3001,6 +3001,8 @@ licence_renew=Obnovení lze zakoupit na adrese <a target=_blank href='$1'>$1</a>
 licence_recheck=Znovu zkontrolujte stav licence
 licence_title=Znovu zkontrolujte licenci
 licence_doing=Nyní znovu ověřte svou licenci Virtualmin ..
+licence_ok2=.. licence je <i>platná</i>. Platí pro domény $1 Virtualmin a pro použití v systémech $2.
+licence_ok3=.. licence je <i>platná</i>. Platí pro domény $1 Virtualmin a pro použití v systémech $2 do $3.
 licence_warn=Během této kontroly licence však došlo k dočasnému problému: $1.
 licence_goterr=.. byl zjištěn problém : $1 
 licence_goterr2=.. neplatné datum vypršení platnosti : $1 

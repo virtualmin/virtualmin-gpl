@@ -1555,6 +1555,8 @@ resel_ebefore=修改命令失败之前： $1
 licence_soon=注意-您的Virtualmin许可证将在 $1天内过期。
 licence_soon2=注意-您的Virtualmin许可证将在 $1小时后过期。
 licence_renew=可以在<a target=_blank href='$1'>$1</a>购买续订
+licence_ok2=..许可证<i>有效</i>。它对 $1 Virtualmin域有效，并在 $2系统上使用。
+licence_ok3=..许可证<i>有效</i>。它对 $1 Virtualmin域有效，并且可在 $2系统上使用，直到 $3。
 licence_warn=但是，此许可证检查期间发生了一个临时问题： $1。
 licence_unlimited=无限
 licence_goterr2=..无效的到期日期： $1

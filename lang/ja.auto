@@ -3886,6 +3886,8 @@ licence_renew=更新は<a target=_blank href='$1'>$1</a>で購入できます
 licence_recheck=ライセンスステータスの再確認
 licence_title=ライセンスを再確認
 licence_doing=Virtualminライセンスを再確認します。
+licence_ok2=..ライセンスは<i>有効</i>です。これは、 $1 Virtualminドメイン、および $2システムでの使用に有効です。
+licence_ok3=..ライセンスは<i>有効</i>です。これは、 $1 Virtualminドメイン、および $3までの $2システムでの使用に有効です。
 licence_warn=ただし、このライセンスチェック中に一時的な問題が発生しました： $1。
 licence_unlimited=無制限
 licence_goterr=..問題が検出されました： $1

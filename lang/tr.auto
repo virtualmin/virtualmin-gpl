@@ -1732,6 +1732,8 @@ resel_ebefore=Değiştirme komutu başarısız olmadan önce : $1
 licence_soon=Uyarı - Virtualmin lisansınızın süresi $1 gün içinde dolacak.
 licence_soon2=Uyarı - Virtualmin lisansınızın süresi $1 saat içinde dolacak.
 licence_renew=Yenileme <a target=_blank href='$1'>$1</a> adresinden satın alınabilir
+licence_ok2=.. lisans <i>geçerlidir</i>. $1 Virtualmin etki alanları için ve $2 sistemlerinde kullanım için geçerlidir.
+licence_ok3=.. lisans <i>geçerlidir</i>. $1 Virtualmin etki alanları için ve $3 'e kadar $2 sistemlerinde kullanım için geçerlidir.
 licence_warn=Ancak, bu lisans denetimi sırasında geçici bir sorun oluştu: $1.
 licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 

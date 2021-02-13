@@ -1307,6 +1307,8 @@ licence_renew=Eine Verlängerung kann unter <a target=_blank href='$1'>$1</a> er
 licence_recheck=Überprüfen Sie den Lizenzstatus erneut
 licence_title=Lizenz erneut prüfen
 licence_doing=Überprüfen Sie jetzt Ihre Virtualmin-Lizenz erneut.
+licence_ok2=.. Lizenz ist <i>gültig</i>. Es gilt für $1 Virtualmin-Domänen und für die Verwendung auf $2 -Systemen.
+licence_ok3=.. Lizenz ist <i>gültig</i>. Es gilt für $1 Virtualmin-Domänen und für die Verwendung auf $2 -Systemen bis $3.
 licence_warn=Bei dieser Lizenzprüfung ist jedoch ein vorübergehendes Problem aufgetreten: $1.
 licence_goterr2=.. ungültiges Ablaufdatum : $1 
 licence_ecannot=Sie dürfen die Virtualmin-Lizenz nicht erneut überprüfen

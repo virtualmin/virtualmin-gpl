@@ -595,6 +595,8 @@ resel_equnlimit=De virtuele server $1 kan niet worden toegewezen aan deze resell
 resel_ebwunlimit=De virtuele server $1 kan niet worden toegewezen aan deze reseller, omdat deze een onbeperkt bandbreedte-quotum heeft, maar de reseller heeft een limiet
 resel_ebefore=Voordat de wijzigingsopdracht is mislukt : $1 
 
+licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen.
+licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
 licence_goterr2=.. ongeldige vervaldatum : $1 
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen

@@ -3670,6 +3670,8 @@ licence_renew=É possível adquirir uma renovação em <a target=_blank href='$1
 licence_recheck=Verifique novamente o status da licença
 licence_title=Verificar novamente a licença
 licence_doing=Agora, verifique novamente sua licença do Virtualmin.
+licence_ok2=.. a licença é <i>válida</i>. É válido para $1 domínios Virtualmin e para uso em sistemas $2.
+licence_ok3=.. a licença é <i>válida</i>. É válido para $1 domínios Virtualmin e para uso em $2 sistemas até $3.
 licence_warn=No entanto, ocorreu um problema temporário durante esta verificação de licença: $1.
 licence_unlimited=ilimitado
 licence_goterr=.. um problema foi detectado : $1 

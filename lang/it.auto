@@ -2880,6 +2880,8 @@ resel_ebwunlimit=Il server virtuale $1 non può essere assegnato a questo rivend
 resel_ebefore=Prima del comando di modifica non riuscito : $1 
 
 licence_renew=Un rinnovo può essere acquistato all'indirizzo <a target=_blank href='$1'>$1</a>
+licence_ok2=.. la licenza è <i>valida</i>. È valido per i domini $1 Virtualmin e per l'uso sui sistemi $2.
+licence_ok3=.. la licenza è <i>valida</i>. È valido per i domini $1 Virtualmin e per l'uso sui sistemi $2 fino al $3.
 licence_warn=Tuttavia, durante questo controllo della licenza si è verificato un problema temporaneo: $1.
 licence_goterr2=.. data di scadenza non valida : $1 
 licence_maxdoms=Il tuo sistema è concesso in licenza solo per server $1, ma hai $2.
