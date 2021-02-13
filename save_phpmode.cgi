@@ -101,7 +101,7 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 			# This directory can be disabled
 			&$first_print(&text('phpmode_deldir',
 				"<tt>".&html_escape($sd)."</tt>"));
-			if ($sd ne $phd) {
+			if ($in{"dir_".$i} ne $phd) {
 				&delete_domain_php_directory($d, $in{"dir_".$i});
 				&$second_print($text{'setup_done'});
 				$anything++;
