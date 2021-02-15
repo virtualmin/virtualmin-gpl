@@ -393,6 +393,7 @@ setup_eowner=Description cannot contain the : character
 setup_euser2=Missing or invalid administrator username
 setup_eroot=The usernames <tt>$1</tt> cannot be used as the virtual server administrator
 setup_eroot2=The group names <tt>$1</tt> cannot be used as the virtual server administrator
+setup_eremoteuser=Username cannot be the same as the current Virtualmin login
 setup_egroup=An administration group named $1 already exists
 setup_egroup2=Missing or invalid mailbox administration group name
 setup_egroup3=The selected group for the administration user must be different from the group $1 created for users

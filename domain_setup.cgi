@@ -107,6 +107,8 @@ if (!$parentuser) {
 		}
 	&indexof($user, @banned_usernames) < 0 ||
 		&error(&text('setup_eroot', join(" ", @banned_usernames)));
+	($user eq $remote_user || $user eq $base_remote_user) &&
+		&error($text{'setup_eremoteuser'});
 
 	if (!$in{'email_def'}) {
 		$in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
