@@ -3578,7 +3578,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "ssl_expiry") {
 			# SSL cert expiry
-			if (!&domain_has_ssl($d)) {
+			if (!&domain_has_ssl_cert($d)) {
 				push(@cols, "");
 				}
 			elsif ($d->{'ssl_cert_expiry'}) {
@@ -7963,7 +7963,8 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	local $target = &get_domain($dom->{'alias'});
 	local $tinfo;
 	if ($target &&
-	    &domain_has_ssl($target) &&
+	    &domain_has_website($target) &&
+	    &domain_has_ssl_cert($target) &&
 	    !$target->{'letsencrypt_dname'} &&
 	    ($tinfo = &cert_info($target)) &&
 	    &is_letsencrypt_cert($tinfo)) {
@@ -10988,7 +10989,7 @@ if (@expired || @nearly) {
 # Check for invalid SSL cert files
 my @badcert;
 foreach my $d (&list_domains()) {
-	next if (!&domain_has_ssl($d));
+	next if (!&domain_has_ssl_cert($d));
 	my $cerr = &validate_cert_format($d->{'ssl_cert'}, 'cert');
 	my $kerr = &validate_cert_format($d->{'ssl_key'}, 'key');
 	if ($cerr) {

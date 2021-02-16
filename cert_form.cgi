@@ -77,7 +77,7 @@ if ($d->{'ssl_cert'}) {
 		}
 
 	# Other domains using same cert, such as via wildcards or UCC
-	@others = grep { &domain_has_ssl($_) }
+	@others = grep { &domain_has_ssl_cert($_) }
 		       &get_domain_by("ssl_same", $d->{'id'});
 	if (@others) {
 		my @links;

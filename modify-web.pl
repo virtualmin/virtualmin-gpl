@@ -617,7 +617,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (&domain_has_ssl($d) && $breakcert) {
+	if (&domain_has_ssl_cert($d) && $breakcert) {
 		&$first_print("Breaking SSL certificate sharing ..");
 		if (!$d->{'ssl_same'}) {
 			&$second_print(".. not using a shared cert");
@@ -634,7 +634,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (&domain_has_ssl($d) && $linkcert) {
+	if (&domain_has_ssl_cert($d) && $linkcert) {
 		&$first_print("Enabling SSL certificate sharing ..");
 		if ($d->{'ssl_same'}) {
 			my $same = &get_domain($d->{'ssl_same'});

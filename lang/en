@@ -1420,6 +1420,7 @@ save_unfixcustomlog=Disabling logging via program ..
 save_unfixerrorlog=Disabling error logging via program ..
 save_status=Changing hostname and email in website status monitor ..
 save_statusssl=Changing hostname and email in SSL website status monitor ..
+save_statussslcert=Changing email in SSL certificate status monitor ..
 save_etemplate=Invalid template selected
 save_fixvirts=Changing domain name in mail aliases ..
 save_aliascopy0=Switching to catchall alias mode ..

@@ -2197,7 +2197,8 @@ if ($d->{'virt'}) {
 	local $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
 	local $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 	local $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
-	return 0 if ($enable && (!$cfile || !$kfile) && !&domain_has_ssl($d));
+	return 0 if ($enable && (!$cfile || !$kfile) &&
+		     !&domain_has_ssl_cert($d));
 
 	# Find the existing master file entry
 	&lock_file($postfix::config{'postfix_master'});
@@ -2205,11 +2206,14 @@ if ($d->{'virt'}) {
 	local $defip = &get_default_ip();
 
 	# Work out which flags are needed
-	local $chain = &domain_has_ssl($d) ? &get_website_ssl_file($d, 'ca') : $cafile;
+	local $chain = &domain_has_ssl_cert($d) ?
+			&get_website_ssl_file($d, 'ca') : $cafile;
 	local @flags = ( [ "smtpd_tls_cert_file",
-			   &domain_has_ssl($d) ? $d->{'ssl_cert'} : $cfile ],
+			   &domain_has_ssl_cert($d) ?
+				$d->{'ssl_cert'} : $cfile ],
 			 [ "smtpd_tls_key_file",
-			   &domain_has_ssl($d) ? $d->{'ssl_key'} : $kfile ] );
+			   &domain_has_ssl_cert($d) ?
+				$d->{'ssl_key'} : $kfile ] );
 	push(@flags, [ "smtpd_tls_CAfile", $chain ]) if ($chain);
 	push(@flags, [ "smtpd_tls_security_level", "may" ]);
 	push(@flags, [ "myhostname", $d->{'dom'} ]);
@@ -2531,7 +2535,7 @@ sub apply_letsencrypt_cert_renewals
 {
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
-	next if (!&domain_has_ssl($d) || !$d->{'letsencrypt_renew'});
+	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
 
 	# Is the domain enabled?
 	next if ($d->{'disabled'});

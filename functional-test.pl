@@ -5672,7 +5672,7 @@ $nossl_tests = [
 		      [ 'desc', 'Test SSL domain' ],
 		      [ 'pass', 'smeg' ],
 		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
-		      [ 'logrotate' ],
+		      [ 'logrotate' ], [ 'webmin' ], [ 'mail' ],
 		      [ 'allocate-ip' ],
 		      [ 'generate-ssl-cert' ],
 		      [ 'content' => 'Test SSL home page' ],
@@ -5689,6 +5689,59 @@ $nossl_tests = [
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_domain ] ],
 	  'grep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Validate that Webmin cert works
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert works
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert works
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Postfix cert works
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Test generation of a new self-signed cert

@@ -26,29 +26,31 @@ return 0;
 # Creates a new status monitor for this domain's website
 sub setup_status
 {
+my ($d) = @_;
+
 &$first_print($text{'setup_status'});
 &require_status();
-local $tmpl = &get_template($_[0]->{'template'});
+local $tmpl = &get_template($d->{'template'});
 
 # Create website monitor
-local $serv = &make_monitor($_[0], 0);
+local $serv = &make_monitor($d, 0);
 &status::save_service($serv);
 &$second_print($text{'setup_done'});
 
-if (&domain_has_ssl($_[0])) {
+if (&domain_has_ssl($d)) {
 	# Add SSL website monitor too
 	&$first_print($text{'setup_statusssl'});
-	local $serv = &make_monitor($_[0], 1);
+	local $serv = &make_monitor($d, 1);
 	&status::save_service($serv);
 	&$second_print($text{'setup_done'});
+	}
 
+if (&domain_has_ssl_cert($d) && $tmpl->{'statussslcert'}) {
 	# Add SSL cert monitor
-	if ($tmpl->{'statussslcert'}) {
-		&$first_print($text{'setup_statussslcert'});
-		local $certserv = &make_sslcert_monitor($_[0]);
-		&status::save_service($certserv);
-		&$second_print($text{'setup_done'});
-		}
+	&$first_print($text{'setup_statussslcert'});
+	local $certserv = &make_sslcert_monitor($d);
+	&status::save_service($certserv);
+	&$second_print($text{'setup_done'});
 	}
 return 1;
 }
@@ -123,18 +125,20 @@ return join(",", @rv);
 # Possible update the hostname of the web server
 sub modify_status
 {
-if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
-    $_[0]->{'emailto'} ne $_[1]->{'emailto'}) {
+my ($d, $oldd) = @_;
+&require_status();
+
+if ($d->{'dom'} ne $oldd->{'dom'} ||
+    $d->{'emailto'} ne $oldd->{'emailto'}) {
 	# Update HTTP monitor
 	&$first_print($text{'save_status'});
-	&require_status();
-	local $serv = &status::get_service($_[0]->{'id'}."_web");
-	local $host = $_[0]->{'dns'} ? "www.".$_[0]->{'dom'}
-				     : &get_domain_http_hostname($_[0]);
+	local $serv = &status::get_service($d->{'id'}."_web");
+	local $host = $d->{'dns'} ? "www.".$d->{'dom'}
+				     : &get_domain_http_hostname($d);
 	if ($serv) {
 		$serv->{'host'} = $host;
 		$serv->{'desc'} = "Website $host";
-		$serv->{'email'} = &monitor_email($_[0]);
+		$serv->{'email'} = &monitor_email($d);
 		&status::save_service($serv);
 		&$second_print($text{'setup_done'});
 		}
@@ -142,24 +146,28 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 		&$second_print($text{'delete_nostatus'});
 		}
 
-	if (&domain_has_ssl($_[0])) {
-		# Update HTTPS monitor and cert monitor
-		&$first_print($text{'save_statusssl'});
-		&require_status();
-		local $certserv =&status::get_service($_[0]->{'id'}."_sslcert");
+	if (&domain_has_ssl_cert($d)) {
+		# Update cert monitor
+		local $certserv = &status::get_service($d->{'id'}."_sslcert");
 		if ($certserv) {
+			&$first_print($text{'save_statussslcert'});
 			$certserv->{'url'} =
-				'https://'.$host.':'.$_[0]->{'web_sslport'}.'/',
+				'https://'.$host.':'.$d->{'web_sslport'}.'/',
 			$certserv->{'desc'} = "SSL cert $host";
-			$certserv->{'email'} = $_[0]->{'emailto'};
+			$certserv->{'email'} = $d->{'emailto'};
 			&status::save_service($certserv);
+			&$second_print($text{'setup_done'});
 			}
+		}
 
-		local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	if (&domain_has_ssl($d)) {
+		# Update HTTPS monitor
+		&$first_print($text{'save_statusssl'});
+		local $serv = &status::get_service($d->{'id'}."_ssl");
 		if ($serv) {
 			$serv->{'host'} = $host;
 			$serv->{'desc'} = "Website $host (SSL)";
-			$serv->{'email'} = $_[0]->{'emailto'};
+			$serv->{'email'} = $d->{'emailto'};
 			&status::save_service($serv);
 			&$second_print($text{'setup_done'});
 			}
@@ -168,25 +176,18 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} ||
 			}
 		}
 	}
-if (&domain_has_ssl($_[0]) && !&domain_has_ssl($_[1])) {
+
+if (&domain_has_ssl($d) && !&domain_has_ssl($oldd)) {
 	# Turned on SSL .. add monitor
-	&require_status();
 	&$first_print($text{'setup_status'});
-	local $serv = &make_monitor($_[0], 1);
+	local $serv = &make_monitor($d, 1);
 	&status::save_service($serv);
-	local $certserv = &make_sslcert_monitor($_[0]);
-	&status::save_service($certserv);
 	&$second_print($text{'setup_done'});
 	}
-elsif (!&domain_has_ssl($_[0]) && &domain_has_ssl($_[1])) {
-	# Turned off SSL .. remove monitor
-	&require_status();
+elsif (!&domain_has_ssl($d) && &domain_has_ssl($oldd)) {
+	# Turned off SSL .. remove monitor (but not the cert monitor)
 	&$first_print($text{'delete_statusssl'});
-	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
-	if ($certserv) {
-		&status::delete_service($certserv);
-		}
-	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	local $serv = &status::get_service($d->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
 		&$second_print($text{'setup_done'});
@@ -195,16 +196,26 @@ elsif (!&domain_has_ssl($_[0]) && &domain_has_ssl($_[1])) {
 		&$second_print($text{'delete_nostatus'});
 		}
 	}
+
+if (&domain_has_ssl_cert($d) && !&domain_has_ssl_cert($oldd)) {
+	# Added a cert ... add monitor
+	&$first_print($text{'setup_status'});
+	local $certserv = &make_sslcert_monitor($d);
+	&status::save_service($certserv);
+	&$second_print($text{'setup_done'});
+	}
 }
 
 # delete_status(&domain)
 # Just delete the status monitor for this domain
 sub delete_status
 {
+my ($d) = @_;
+
 # Remove HTTP status monitor
 &$first_print($text{'delete_status'});
 &require_status();
-local $serv = &status::get_service($_[0]->{'id'}."_web");
+local $serv = &status::get_service($d->{'id'}."_web");
 if ($serv) {
 	&status::delete_service($serv);
 	&$second_print($text{'setup_done'});
@@ -213,10 +224,10 @@ else {
 	&$second_print($text{'delete_nostatus'});
 	}
 
-if (&domain_has_ssl($_[0])) {
+if (&domain_has_ssl($d)) {
 	# Remove HTTPS status monitor
 	&$first_print($text{'delete_statusssl'});
-	local $serv = &status::get_service($_[0]->{'id'}."_ssl");
+	local $serv = &status::get_service($d->{'id'}."_ssl");
 	if ($serv) {
 		&status::delete_service($serv);
 		&$second_print($text{'setup_done'});
@@ -224,9 +235,12 @@ if (&domain_has_ssl($_[0])) {
 	else {
 		&$second_print($text{'delete_nostatus'});
 		}
+	}
 
+if (&domain_has_ssl_cert($d)) {
+	# Remove SSL cert monitor
 	&$first_print($text{'delete_statussslcert'});
-	local $certserv = &status::get_service($_[0]->{'id'}."_sslcert");
+	local $certserv = &status::get_service($d->{'id'}."_sslcert");
 	if ($certserv) {
 		&status::delete_service($certserv);
 		}

@@ -399,7 +399,7 @@ my $hfile = "$module_config_directory/transfer-hosts";
 
 # Create combined cert files for domains with SSL
 foreach my $d (&list_domains()) {
-	if (&domain_has_ssl($d)) {
+	if (&domain_has_ssl_cert($d)) {
 		&sync_combined_ssl_cert($d);
 		}
 	}
