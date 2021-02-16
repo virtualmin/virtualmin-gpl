@@ -5665,6 +5665,105 @@ $sslserv_tests = [
 	  'cleanup' => 1 },
 	];
 
+$nossl_tests = [
+	# Create a domain without SSL and a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'allocate-ip' ],
+		      [ 'generate-ssl-cert' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Test SSL cert info
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \*.'.$test_domain ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Test generation of a new self-signed cert
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Test SSL cert info
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin' ],
+	},
+
+	# Test generation of a CSR
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'csr' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Testing listing of keys, certs and CSR
+	{ 'command' => 'list-certs.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => [ 'BEGIN CERTIFICATE', 'END CERTIFICATE',
+		      'BEGIN (RSA )?PRIVATE KEY', 'END (RSA )?PRIVATE KEY',
+		      'BEGIN CERTIFICATE REQUEST', 'END CERTIFICATE REQUEST' ],
+	},
+
+	# Test re-installation of the cert and key
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'cert', $test_domain_cert ],
+		      [ 'key', $test_domain_key ] ],
+	},
+
+	# Enable SSL, which should use the generated cert
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ $ssl ] ],
+	},
+
+	# Test generated SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
+		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 # Shared IP address tests
 $shared_tests = [
 	# Allocate a shared IP
@@ -8707,6 +8806,7 @@ $alltests = { '_config' => $_config_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
+	      'nossl' => $nossl_tests,
 	      'sslserv' => $sslserv_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,
