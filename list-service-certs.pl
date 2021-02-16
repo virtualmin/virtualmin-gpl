@@ -44,8 +44,8 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
-&domain_has_ssl($d) ||
-	&usage("Virtual server $dname does not have SSL enabled");
+&domain_has_ssl_cert($d) ||
+	&usage("Virtual server $dname does not have an SSL cert");
 @svcs = &get_all_domain_service_ssl_certs($d);
 
 if ($multiline) {

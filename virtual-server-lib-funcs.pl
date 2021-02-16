@@ -7553,7 +7553,7 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7936,13 +7936,18 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 		}
 	}
 
+# If an SSL cert wasn't generated because SSL wasn't enabled, do one now
+if (!&domain_has_ssl($dom) && $config{'always_ssl'}) {
+	&generate_default_certificate($dom);
+	}
+
 # Attempt to request a let's encrypt cert. This has to be done after the
 # initial setup and when Apache has been restarted, so that it can serve the
 # new website.
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
 	}
-if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
+if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
@@ -17569,6 +17574,14 @@ foreach my $p (&list_feature_plugins()) {
 return undef;
 }
 
+# domain_has_ssl_cert(&domain)
+# Returns 1 if a domain has an SSL cert file, even if not used
+sub domain_has_ssl_cert
+{
+my ($d) = @_;
+return $d->{'ssl_cert'} && -r $d->{'ssl_cert'} ? 1 : 0;
+}
+
 # get_website_log(&domain, [error-log])
 # Returns the access or error log for a domain's website. May come from a plugin
 sub get_website_log
@@ -17608,7 +17621,7 @@ local $p = &domain_has_website($d);
 if ($p eq "web") {
 	&restart_apache(@args);
 	}
-else {
+elsif ($p) {
 	&plugin_call($p, "feature_restart_web", @args);
 	}
 }
@@ -17617,50 +17630,72 @@ else {
 # Configure the webserver for some domain to use a file as the SSL cert or key
 sub save_website_ssl_file
 {
-local ($d, $type, $file) = @_;
-local $p = &domain_has_website($d);
-if ($p ne "web") {
-	return &plugin_call($p, "feature_save_web_ssl_file", $d, $type, $file);
-	}
-&obtain_lock_ssl($d);
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_sslport'});
-if (!$virt) {
+my ($d, $type, $file) = @_;
+if (&domain_has_ssl($d)) {
+	# Update the actual webserver config
+	my $p = &domain_has_website($d);
+	if ($p ne "web") {
+		return &plugin_call($p, "feature_save_web_ssl_file",
+				    $d, $type, $file);
+		}
+	&obtain_lock_ssl($d);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+							   $d->{'web_sslport'});
+	if (!$virt) {
+		&release_lock_ssl($d);
+		return "No virtual host found for ".
+		       "$d->{'dom'}:$d->{'web_sslport'}";
+		}
+	my $dir = $type eq 'cert' ? "SSLCertificateFile" :
+		     $type eq 'key' ? "SSLCertificateKeyFile" :
+		     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+	if ($dir) {
+		&apache::save_directive($dir, $file ? [ $file ] : [ ],
+					$vconf, $conf);
+		}
 	&release_lock_ssl($d);
-	return "No virtual host found for $d->{'dom'}:$d->{'web_sslport'}";
+	if ($dir) {
+		&flush_file_lines($virt->{'file'}, undef, 1);
+		&register_post_action(\&restart_apache,
+				      &ssl_needs_apache_restart());
+		}
+	return undef;
 	}
-local $dir = $type eq 'cert' ? "SSLCertificateFile" :
-	     $type eq 'key' ? "SSLCertificateKeyFile" :
-	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
-if ($dir) {
-	&apache::save_directive($dir, $file ? [ $file ] : [ ], $vconf, $conf);
+else {
+	# Just update the domain object
+	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+	$d->{$k} = $file;
+	return undef;
 	}
-&release_lock_ssl($d);
-if ($dir) {
-	&flush_file_lines($virt->{'file'}, undef, 1);
-	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
-	}
-return undef;
 }
 
 # get_website_ssl_file(&domain, "cert"|"key"|"ca")
 # Looks up the SSL cert, key or chained CA file for some domain
 sub get_website_ssl_file
 {
-local ($d, $type) = @_;
-local $p = &domain_has_website($d);
-if ($p ne "web") {
-        return &plugin_call($p, "feature_get_web_ssl_file", $d, $type);
-        }
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
-return undef if (!$virt);
-local $dir = $type eq 'cert' ? "SSLCertificateFile" :
-	     $type eq 'key' ? "SSLCertificateKeyFile" :
-	     $type eq 'ca' || $type eq 'chain' ? "SSLCACertificateFile" : undef;
-return undef if (!$dir);
-local ($file) = &apache::find_directive($dir, $vconf);
-return $file;
+my ($d, $type) = @_;
+if (&domain_has_ssl($d)) {
+	# Get from the actual Apache config
+	my $p = &domain_has_website($d);
+	if ($p ne "web") {
+		return &plugin_call($p, "feature_get_web_ssl_file", $d, $type);
+		}
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+						    $d->{'web_sslport'});
+	return undef if (!$virt);
+	my $dir = $type eq 'cert' ? "SSLCertificateFile" :
+		     $type eq 'key' ? "SSLCertificateKeyFile" :
+		     $type eq 'ca' || $type eq 'chain' ? "SSLCACertificateFile"
+						       : undef;
+	return undef if (!$dir);
+	my ($file) = &apache::find_directive($dir, $vconf);
+	return $file;
+	}
+else {
+	# Use the domain object
+	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+	return $d->{$k};
+	}
 }
 
 # list_ordered_features(&domain)

@@ -38,7 +38,7 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  &can_edit_letsencrypt() ?
+	  &can_edit_letsencrypt() && &domain_has_website($d) ?
 		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
 		( ),
 	  &can_webmin_cert() ?
@@ -51,7 +51,11 @@ print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 print &ui_tabs_start_tab("mode", "current");
 
 if ($d->{'ssl_cert'}) {
-	print "$text{'cert_desc2'}<p>\n";
+	print "<p>$text{'cert_desc2'}</p>\n";
+	if (!&domain_has_ssl($d)) {
+		print "<p>$text{'cert_hasnossl'}</p>\n";
+		}
+
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
 	print &ui_table_row($text{'cert_incert'},
 			    "<tt>$d->{'ssl_cert'}</tt>", 3);
@@ -125,21 +129,23 @@ if ($d->{'ssl_cert'}) {
 	print &ui_table_row($text{'cert_kdownload'},
 			    &ui_links_row(\@dlinks), 3);
 
-	# Expiry status
-	$now = time();
-	$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
-	if ($future <= 0) {
-		$emsg = "<font color=red>".
-			&text('cert_expired', -$future)."</font>";
+	# Expiry status, if we have it
+	if ($d->{'ssl_cert_expiry'}) {
+		$now = time();
+		$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
+		if ($future <= 0) {
+			$emsg = "<font color=red>".
+				&text('cert_expired', -$future)."</font>";
+			}
+		elsif ($future < 7) {
+			$emsg = "<font color=orange>".
+				&text('cert_expiring', $future)."</font>";
+			}
+		else {
+			$emsg = &text('cert_future', $future);
+			}
+		print &ui_table_row($text{'cert_etime'}, $emsg);
 		}
-	elsif ($future < 7) {
-		$emsg = "<font color=orange>".
-			&text('cert_expiring', $future)."</font>";
-		}
-	else {
-		$emsg = &text('cert_future', $future);
-		}
-	print &ui_table_row($text{'cert_etime'}, $emsg);
 	print &ui_table_end();
 	}
 else {
@@ -307,90 +313,95 @@ print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 # Let's encrypt tab
-&foreign_require("webmin");
-$err = &webmin::check_letsencrypt();
-print &ui_tabs_start_tab("mode", "lets");
-print "$text{'cert_desc8'}<p>\n";
-
-if ($err) {
-	print &text('cert_elets', $err),"<p>\n";
-	if (&master_admin() &&
-	    defined(&webmin::get_letsencrypt_install_message)) {
-		my $msg = &webmin::get_letsencrypt_install_message(
-			"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
-			$text{'cert_title'});
-		print $msg,"<p>\n";
-		}
-	}
-else {
-	$phd = &public_html_dir($d);
-	print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
-
-	print &ui_form_start("letsencrypt.cgi");
-	print &ui_hidden("dom", $in{'dom'});
-	print &ui_table_start(undef, undef, 2);
-
-	# Domain names to request cert for
-	@defnames = &get_hostnames_for_ssl($d);
-	$dis1 = &js_disable_inputs([ "dname" ], [ ], "onClick");
-	$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
-	$wildcb = "";
+if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 	&foreign_require("webmin");
-	if ($webmin::letsencrypt_cmd) {
-		$wildcb = "<br>".&ui_checkbox("dwild", 1, $text{'cert_dwild'},
-					      $d->{'letsencrypt_dwild'});
+	$err = &webmin::check_letsencrypt();
+	print &ui_tabs_start_tab("mode", "lets");
+	print "$text{'cert_desc8'}<p>\n";
+
+	if ($err) {
+		print &text('cert_elets', $err),"<p>\n";
+		if (&master_admin() &&
+		    defined(&webmin::get_letsencrypt_install_message)) {
+			my $msg = &webmin::get_letsencrypt_install_message(
+				"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
+				$text{'cert_title'});
+			print $msg,"<p>\n";
+			}
 		}
-	print &ui_table_row($text{'cert_dnamefor'},
-		&ui_radio_table("dname_def", 
-		      $d->{'letsencrypt_dname'} ? 0 : 1,
-		      [ [ 1, $text{'cert_dnamedef'},
-			  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
-			[ 0, $text{'cert_dnamesel'},
-			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
-				       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
+	else {
+		$phd = &public_html_dir($d);
+		print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
 
-	# Setup automatic renewal?
-	print &ui_table_row($text{'cert_letsrenew'},
-		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
-				$text{'cert_letsnotrenew'}));
+		print &ui_form_start("letsencrypt.cgi");
+		print &ui_hidden("dom", $in{'dom'});
+		print &ui_table_start(undef, undef, 2);
 
-	# Test connectivity first?
-	if (defined(&check_domain_connectivity)) {
-		print &ui_table_row($text{'cert_connectivity'},
-			&ui_radio("connectivity", 1,
+		# Domain names to request cert for
+		@defnames = &get_hostnames_for_ssl($d);
+		$dis1 = &js_disable_inputs([ "dname" ], [ ], "onClick");
+		$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
+		$wildcb = "";
+		&foreign_require("webmin");
+		if ($webmin::letsencrypt_cmd) {
+			$wildcb = "<br>".&ui_checkbox(
+				"dwild", 1, $text{'cert_dwild'},
+				$d->{'letsencrypt_dwild'});
+			}
+		print &ui_table_row($text{'cert_dnamefor'},
+			&ui_radio_table("dname_def", 
+			      $d->{'letsencrypt_dname'} ? 0 : 1,
+			      [ [ 1, $text{'cert_dnamedef'},
+				  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
+				[ 0, $text{'cert_dnamesel'},
+				  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
+					       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
+
+		# Setup automatic renewal?
+		print &ui_table_row($text{'cert_letsrenew'},
+			&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
+					$text{'cert_letsnotrenew'}));
+
+		# Test connectivity first?
+		if (defined(&check_domain_connectivity)) {
+			print &ui_table_row($text{'cert_connectivity'},
+				&ui_radio("connectivity", 1,
 				  [ [ 2, $text{'cert_connectivity2'} ],
 				    [ 1, $text{'cert_connectivity1'} ],
 				    [ 0, $text{'cert_connectivity0'} ] ]));
-		}
-
-	# Recent renewal details
-	if ($d->{'letsencrypt_last'}) {
-		$ago = (time() - $d->{'letsencrypt_last'}) / (30*24*60*60);
-		print &ui_table_row($text{'cert_letsage'},
-			&text('cert_letsmonths', sprintf("%.2f", $ago)));
-		}
-	if ($d->{'letsencrypt_last_success'}) {
-		print &ui_table_row($text{'cert_lets_success'},
-			&make_date($d->{'letsencrypt_last_success'}));
-		}
-	if ($d->{'letsencrypt_last_failure'} &&
-	    $d->{'letsencrypt_last_failure'} > $d->{'letsencrypt_last_success'}) {
-		print &ui_table_row($text{'cert_lets_failure'},
-			"<font color=red>".
-			&make_date($d->{'letsencrypt_last_failure'}).
-			"</font>");
-
-		if ($d->{'letsencrypt_last_err'}) {
-			my $err = $d->{'letsencrypt_last_err'};
-			$err =~ s/\t/\n/g;
-			print &ui_table_row($text{'cert_lets_freason'},
-				"<font color=red>".$err."</font>");
 			}
-		}
 
-	print &ui_table_end();
-	print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
-			     [ 'only', $text{'cert_letsonly'} ] ]);
+		# Recent renewal details
+		if ($d->{'letsencrypt_last'}) {
+			$ago = (time() - $d->{'letsencrypt_last'}) /
+			       (30*24*60*60);
+			print &ui_table_row($text{'cert_letsage'},
+				&text('cert_letsmonths', sprintf("%.2f",$ago)));
+			}
+		if ($d->{'letsencrypt_last_success'}) {
+			print &ui_table_row($text{'cert_lets_success'},
+				&make_date($d->{'letsencrypt_last_success'}));
+			}
+		if ($d->{'letsencrypt_last_failure'} &&
+		    $d->{'letsencrypt_last_failure'} >
+		      $d->{'letsencrypt_last_success'}) {
+			print &ui_table_row($text{'cert_lets_failure'},
+				"<font color=red>".
+				&make_date($d->{'letsencrypt_last_failure'}).
+				"</font>");
+
+			if ($d->{'letsencrypt_last_err'}) {
+				my $err = $d->{'letsencrypt_last_err'};
+				$err =~ s/\t/\n/g;
+				print &ui_table_row($text{'cert_lets_freason'},
+					"<font color=red>".$err."</font>");
+				}
+			}
+
+		print &ui_table_end();
+		print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
+				     [ 'only', $text{'cert_letsonly'} ] ]);
+		}
 	}
 
 print &ui_tabs_end_tab();
