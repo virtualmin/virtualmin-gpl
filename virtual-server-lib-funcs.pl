@@ -7937,7 +7937,9 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 	}
 
 # If an SSL cert wasn't generated because SSL wasn't enabled, do one now
-if (!&domain_has_ssl($dom) && $config{'always_ssl'}) {
+my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
+					       : $config{'always_ssl'};
+if (!&domain_has_ssl($dom) && $always_ssl) {
 	&generate_default_certificate($dom);
 	}
 
@@ -12014,7 +12016,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if ($d->{'dir'} && &can_edit_ssl()) {
+if ($d->{'dir'} && &can_edit_ssl() && !$d->{'alias'}) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},

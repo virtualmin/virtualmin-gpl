@@ -1078,6 +1078,8 @@ return 0 if ($file1 && !$file2 || !$file1 && $file2);
 return 1 if (&same_file($file1, $file2));
 local $info1 = &cert_file_info($file1);
 local $info2 = &cert_file_info($file2);
+return 1 if (!$info1 && !$info2);
+return 0 if ($info1 && !$info2 || !$info1 && $info2);
 return $info1->{'modulus'} && $info2->{'modulus'} &&
        $info1->{'modulus'} eq $info2->{'modulus'} &&
        $info1->{'notafter'} eq $info2->{'notafter'};

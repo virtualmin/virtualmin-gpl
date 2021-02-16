@@ -109,6 +109,8 @@ foreach $g (@got) {
 		$checkkey = $g->[1];
 		}
 	}
+$checkcert && $checkkey || &usage("Both a cert and key must either already ".
+				  "exist, or be supplied on the command line");
 $passok = &check_passphrase($checkkey, $d->{'ssl_pass'} || $newpass);
 $passok || &usage("Private key is password-protected, but either none was entered or the password was incorrect");
 $err = &check_cert_key_match($checkcert, $checkkey);

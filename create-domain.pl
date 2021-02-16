@@ -357,6 +357,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--link-ssl-cert") {
 		$linkcert = 1;
 		}
+	elsif ($a eq "--generate-ssl-cert") {
+		$always_ssl = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -775,6 +778,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
         );
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = 1 if ($linkcert eq '1');
+$dom{'always_ssl'} = $always_ssl if (defined($always_ssl));
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
 	}
@@ -949,6 +953,7 @@ print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
 print "                        [--break-ssl-cert | --link-ssl-cert]\n";
+print "                        [--generate-ssl-cert]\n";
 exit(1);
 }
 
