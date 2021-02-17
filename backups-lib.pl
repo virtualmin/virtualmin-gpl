@@ -3352,7 +3352,7 @@ if ($doms) {
 		if ($d->{'missing'} && $d->{'reseller'} &&
 		    defined(&get_reseller) &&
 		    (!$conts->{'virtualmin'} ||
-		     &indexof('reseller', @{$conts->{'virtualmin'}}) < 0)) {
+		     &indexof('resellers', @{$conts->{'virtualmin'}}) < 0)) {
 			foreach my $rname (split(/\s+/, $d->{'reseller'})) {
 				my $resel = &get_reseller($rname);
 				if (!$resel) {

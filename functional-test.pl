@@ -5666,7 +5666,7 @@ $sslserv_tests = [
 	];
 
 $nossl_tests = [
-	# Create a domain without SSL and a private IP
+	# Create a domain without SSL, but with a private IP and a cert
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test SSL domain' ],
@@ -5689,6 +5689,26 @@ $nossl_tests = [
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_domain ] ],
 	  'grep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Try removing the cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-cert' ] ],
+	},
+
+	# Test that it's gone
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'antigrep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Bring it back
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'o' => 'Test SSL domain' ],
+		      [ 'self' ] ],
 	},
 
 	# Force enable private SSL cert for Webmin, Usermin, etc
@@ -5802,6 +5822,13 @@ $nossl_tests = [
 	{ 'command' => 'enable-feature.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
 		      [ $ssl ] ],
+	},
+
+	# Try removing the cert, which will fail
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-cert' ] ],
+	  'fail' => 1,
 	},
 
 	# Test generated SSL cert
