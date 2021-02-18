@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
-		 "jailkit", "ports", "bb") {
+		 "jailkit", "ports", "bb", "dnscloud") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -7939,8 +7939,9 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 # If an SSL cert wasn't generated because SSL wasn't enabled, do one now
 my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
 					       : $config{'always_ssl'};
+my $generated;
 if (!&domain_has_ssl($dom) && $always_ssl) {
-	&generate_default_certificate($dom);
+	$generated = &generate_default_certificate($dom);
 	}
 
 # Attempt to request a let's encrypt cert. This has to be done after the
@@ -7954,7 +7955,14 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
 		&create_initial_letsencrypt_cert($dom);
+		$generated++;
 		}
+	}
+
+# Update service certs and DANE DNS records if a new cert was generated
+if ($generated) {
+	&enable_domain_service_ssl_certs($d);
+	&sync_domain_tlsa_records($d);
 	}
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
@@ -12445,6 +12453,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
    $config{'mysql'} ? ( 'mysqls' ) : ( ),
+   'dnsclouds',
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -12481,12 +12490,14 @@ local %tmplcat = (
 	'autoconfig' => 'email',
 	'retention' => 'email',
 	'mysqls' => 'setting',
+	'dnsclouds' => 'ip',
 	);
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,
 		 'dkim', 1,
 		 'ratelimit', 1,
 		 'provision', 1,
+		 'dnsclouds', 1,
 	       );
 local %pro = ( 'resels', 1,
 	       'reseller', 1 );

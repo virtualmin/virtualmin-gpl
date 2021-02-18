@@ -7229,4 +7229,15 @@ rcert_esame=Other virtual servers are sharing the certificate with this one, so 
 rcert_esame2=This virtual server is sharing the certificate with another server, so it cannot be removed
 rcert_eservice=Other services are using the certificate belonging to this server
 
+dnsclouds_title=Cloud DNS Providers
+dnsclouds_name=Provider name
+dnsclouds_url=Website
+dnsclouds_state=Current state
+dnsclouds_users=Used by
+dnsclouds_nusers=$1 servers
+dnsclouds_nousers=No servers
+
+dnscloud_eaws=The <tt>aws</tt> command is needed to use Amazon's Route 53 service
+dnscloud_53account=Using access key $1
+
 __norefs=1
