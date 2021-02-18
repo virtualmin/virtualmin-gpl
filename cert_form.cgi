@@ -50,7 +50,7 @@ print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 # Details of current cert
 print &ui_tabs_start_tab("mode", "current");
 
-if ($d->{'ssl_cert'}) {
+if (&domain_has_ssl_cert($d)) {
 	print "<p>$text{'cert_desc2'}</p>\n";
 	if (!&domain_has_ssl($d)) {
 		print "<p>$text{'cert_hasnossl'}</p>\n";
@@ -147,6 +147,16 @@ if ($d->{'ssl_cert'}) {
 		print &ui_table_row($text{'cert_etime'}, $emsg);
 		}
 	print &ui_table_end();
+
+	if (!&domain_has_ssl($d) && !@already && !$d->{'ssl_same'}) {
+		print &ui_hr();
+		print &ui_buttons_start();
+		print &ui_buttons_row("remove_cert.cgi",
+				      $text{'cert_remove'},
+				      $text{'cert_removedesc'},
+				      &ui_hidden("dom", $in{'dom'}));
+		print &ui_buttons_end();
+		}
 	}
 else {
 	# No cert yet! Perhaps a domain without SSL that has no cert yet

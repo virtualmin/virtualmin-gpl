@@ -92,6 +92,7 @@ $d || &usage("No virtual server named $dname found");
 $remove && (@got || $usenewkey || $newpass) &&
 	&usage("--remove-cert cannot be combined with any other options");
 
+my $oldd = { %$d };
 if ($remove) {
 	# Validate that the cert isn't in use
 	&domain_has_ssl_cert($d) ||
@@ -112,11 +113,14 @@ if ($remove) {
 	&$first_print("Removing SSL certificate and key ..");
 	foreach my $k ('cert', 'key', 'chain', 'combined', 'everything') {
 		if ($d->{'ssl_'.$k}) {
-			&unlink_file_as_domain_user($d, $d->{'ssl_'.$k});
+			&unlink_logged_as_domain_user($d, $d->{'ssl_'.$k});
 			delete($d->{'ssl_'.$k});
 			}
 		}
 	delete($d->{'ssl_pass'});
+	foreach $f (&domain_features($d), &list_feature_plugins()) {
+		&call_feature_func($f, $d, $oldd);
+		}
 	&save_domain($d);
 	&$second_print(".. done");
 	}
@@ -206,6 +210,9 @@ else {
 	$d->{'ssl_pass'} = $passok == 2 ? $newpass : undef;
 	&save_domain_passphrase($d);
 
+	foreach $f (&domain_features($d), &list_feature_plugins()) {
+		&call_feature_func($f, $d, $oldd);
+		}
 	&save_domain($d);
 
 	# Copy SSL directives to domains using same cert
