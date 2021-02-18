@@ -3811,7 +3811,7 @@ if (!$config{'tlsa_records'} && !$force && !@oldrecs) {
 
 # Work out which TLSA records are needed
 my @need;
-if ($d->{'ssl'}) {
+if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
 	# SSL website
 	my $chain = &get_website_ssl_file($d, 'ca');
 	push(@need, &create_tlsa_dns_record(
