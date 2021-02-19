@@ -659,7 +659,9 @@ if ($config{'mail_system'} == 0) {
 					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
-	&postfix::set_current_value("milter_protocol", 2);
+	if (!&postfix::get_current_value("milter_protocol")) {
+		&postfix::set_current_value("milter_protocol", 2);
+		}
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters !~ /\Q$newmilter\E/) {
 		$milters = $milters ? $milters.",".$newmilter : $newmilter;
