@@ -25,8 +25,14 @@ foreach my $c (@clouds) {
                 $state->{'ok'} ? $state->{'desc'} :
                   "<font color=red>$text{'clouds_unconf'}</font>",
                 $users ]);
+	$any++ if ($state->{'ok'});
 	}
 print &ui_columns_end();
+
+if ($any) {
+	print "<p>",&text('dnsclouds_tmpl',
+			  "edit_tmpl.cgi?id=0&editmode=dns"),"</p>\n";
+	}
 
 &ui_print_footer("", $text{'index_return'});
 

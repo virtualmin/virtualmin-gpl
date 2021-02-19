@@ -40,4 +40,9 @@ print &ui_table_row($text{'provision_features'},
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
+if ($config{'provision_dns'}) {
+	print "<p>",&text('dnsclouds_tmpl',
+			  "edit_tmpl.cgi?id=0&editmode=dns"),"</p>\n";
+	}
+
 &ui_print_footer("", $text{'index_return'});

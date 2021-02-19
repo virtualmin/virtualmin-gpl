@@ -2494,6 +2494,25 @@ print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
 	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
 		        $text{'yes'}, 0, 0, $text{'no'}));
 
+# Where to create zones?
+my @clouds = ( [ "", $text{'dns_cloud_def'} ] );
+if ($config{'provision_dns'}) {
+	push(@clouds, [ "services", $text{'dns_cloud_services'} ]);
+	}
+foreach my $c (&list_dns_clouds()) {
+	my $sfunc = "dnscloud_".$c->{'name'}."_get_state";
+	my $s = &$sfunc($c);
+	if ($s->{'ok'}) {
+		push(@clouds, [ $c->{'name'}, $c->{'desc'} ]);
+		}
+	}
+if (@clouds > 1) {
+	splice(@clouds, 1, 0, [ "local", $text{'dns_cloud_local'} ]);
+	}
+print &ui_table_row(&hlink($text{'tmpl_dns_cloud'},
+                           "template_dns_cloud"),
+	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds));
+
 print &ui_table_hr();
 
 # Master NS hostnames
@@ -2752,6 +2771,9 @@ $tmpl->{'dns_dmarcextra'} = $in{'dns_dmarcextra'};
 # Save sub-domain DNS mode
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 		     $in{'dns_sub_mode'} == 1 ? undef : "yes";
+
+# Save cloud provider
+$tmpl->{'dns_cloud'} = $in{'dns_cloud'};
 
 if (!$config{'provision_dns'}) {
 	# Save named.conf

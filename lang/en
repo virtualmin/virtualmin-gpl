@@ -3388,6 +3388,10 @@ tmpl_dmarcextra=Extra DMARC options
 tmpl_edmarcpct=Percentage of messages must be an integer between 0 and 100
 tmpl_edns=No DNS records entered
 tmpl_dns_sub=Add sub-domain DNS records to parent domain?
+tmpl_dns_cloud=Create new DNS zones on
+dns_cloud_def=&lt;Choose automatically&gt;
+dns_cloud_services=Cloudmin Services
+dns_cloud_local=Local files
 tmpl_clone=Clone Template
 tmpl_mailgroup=Secondary group for mail users
 tmpl_ftpgroup=Secondary group for FTP users
@@ -7244,8 +7248,10 @@ dnsclouds_nusers=$1 servers
 dnsclouds_nousers=No servers
 dnsclouds_ecannot=You are not allowed to manage Cloud DNS providers
 dnsclouds_return=cloud DNS providers
+dnsclouds_tmpl=The default provider for new DNS zones can be set on the <a href='$1'>server template</a> page.
 
 dnscloud_eaws=The <tt>aws</tt> command is needed to use Amazon's Route 53 service
+dnscloud_eperl=The Perl module <tt>$1</tt> is missing
 dnscloud_53account=Using access key $1
 dnscloud_title=Cloud DNS Provider
 dnscloud_echeck=Provider $1 cannot be used on this system : $2

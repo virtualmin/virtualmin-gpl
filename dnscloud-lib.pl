@@ -22,6 +22,8 @@ sub dnscloud_route53_check
 {
 return $text{'dnscloud_eaws'} if (!$config{'aws_cmd'} ||
 				  !&has_command($config{'aws_cmd'}));
+eval "use JSON::PP";
+return &text('dnscloud_eperl', 'JSON::PP') if ($@);
 return undef;
 }
 
@@ -100,6 +102,21 @@ delete($config{'route53_skey'});
 &save_module_config();
 &unlock_file($module_config_file);
 }
+
+# call_route53_cmd(akey, params, region)
+# Run the aws command for route53 with some params, and return output
+sub call_route53_cmd
+{
+my ($akey, $params, $region) = @_;
+$region ||= $config{'route53_location'};
+if (ref($params)) {
+	$params = join(" ", map { quotemeta($_) } @$params);
+	}
+return &backquote_command(
+	"TZ=GMT $config{'aws_cmd'} route53 --profile=".quotemeta($akey)." ".
+	"--region ".quotemeta($region)." ".$params." 2>&1");
+}
+
 
 
 

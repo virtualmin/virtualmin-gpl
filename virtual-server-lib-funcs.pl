@@ -8856,6 +8856,7 @@ push(@rv, { 'id' => 0,
 	    'dns_dmarcrua' => $config{'bind_dmarcrua'},
 	    'dns_dmarcextra' => $config{'bind_dmarcextra'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
+	    'dns_cloud' => $config{'bind_cloud'},
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_mx' => $config{'bind_mx'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
@@ -9159,6 +9160,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_dmarcextra'} = $tmpl->{'dns_dmarcextra'};
 	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
 							   : $tmpl->{'dns_sub'};
+	$config{'bind_cloud'} = $tmpl->{'dns_cloud'};
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
 						   : $tmpl->{'dns_master'};
 	$config{'bind_mx'} = $tmpl->{'dns_mx'} eq 'none' ? undef
