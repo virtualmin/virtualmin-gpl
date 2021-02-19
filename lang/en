@@ -6933,6 +6933,7 @@ domdkim_records=DKIM DNS records
 
 clouds_title=Cloud Storage Providers
 clouds_name=Provider name
+clouds_url=Website
 clouds_state=Current state
 clouds_users=Backup users
 clouds_ecannot=You are not allowed to edit cloud storage providers
@@ -6960,6 +6961,7 @@ cloud_s3_location=Location for new buckets
 cloud_title=Edit Cloud Provider
 cloud_header=Cloud storage provider options
 cloud_provider=Provider name
+cloud_url=Provider's website
 cloud_es3_endpoint=S3 compatible server must be a valid hostname
 cloud_es3_chunk=Upload chunk size must be a positive number
 cloud_egone=Unknown cloud storage provider!

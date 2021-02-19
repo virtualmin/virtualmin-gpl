@@ -36,6 +36,9 @@ print &ui_table_start($text{'cloud_header'}, undef, 2);
 # Cloud provider name
 print &ui_table_row($text{'cloud_provider'},
 		    $prov->{'desc'});
+print &ui_table_row($text{'cloud_url'},
+		    &ui_link($prov->{'url'}, $prov->{'url'}, undef,
+			     "target=_blank"));
 
 # Provider options
 $ifunc = "cloud_".$prov->{'name'}."_show_inputs";
