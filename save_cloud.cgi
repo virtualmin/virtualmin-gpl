@@ -13,6 +13,7 @@ if ($in{'clear'}) {
 	# Clear all cloud settings for this provider, to force re-enrollment
 	$cfunc = "cloud_".$prov->{'name'}."_clear";
 	&$cfunc();
+	&webmin_log("clear", "cloud", $in{'name'});
 	&redirect("list_clouds.cgi");
 	}
 else {

@@ -985,17 +985,18 @@ sub s3_list_locations
 {
 my ($akey, $skey) = @_;
 return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
-	"ap-east-1", "ap-south-1", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2",
-	"ap-northeast-1", "ca-central-1", "eu-central-1", "eu-west-1", "eu-west-2",
-	"eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1");
+	"ap-east-1", "ap-south-1", "ap-northeast-2", "ap-southeast-1",
+	"ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1",
+	"eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1",
+	"me-south-1", "sa-east-1");
 }
 
-# can_use_aws_cmd(access-key, secret-key)
+# can_use_aws_cmd(access-key, secret-key, [default-zone])
 # Returns 1 if the aws command is installed and can be used for uploads and
 # downloads
 sub can_use_aws_cmd
 {
-my ($akey, $skey) = @_;
+my ($akey, $skey, $zone) = @_;
 return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
 return $can_use_aws_cmd_cache{$akey}
 	if (defined($can_use_aws_cmd_cache{$akey}));
@@ -1007,16 +1008,22 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	&open_tempfile(TEMP, ">$temp");
 	&print_tempfile(TEMP, $akey,"\n");
 	&print_tempfile(TEMP, $skey,"\n");
-	&print_tempfile(TEMP, "\n");
+	&print_tempfile(TEMP, $zone,"\n");
 	&print_tempfile(TEMP, "\n");
 	&close_tempfile(TEMP);
 	$out = &backquote_command(
 		"$config{'aws_cmd'} configure --profile=".quotemeta($akey).
 		" <$temp 2>&1");
-	if ($?) {
+	my $ex = $?;
+	if (!$ex) {
+		# Test again to make sure it worked
+		&call_aws_cmd($akey, "ls");
+		$ex = $?;
+		}
+	if ($ex) {
 		# Profile setup failed!
-		return 0;
 		$can_use_aws_cmd_cache{$akey} = 0;
+		return 0;
 		}
 	}
 $can_use_aws_cmd_cache{$akey} = 1;

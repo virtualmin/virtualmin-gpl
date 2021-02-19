@@ -2221,6 +2221,10 @@ log_enable_ratelimit=Enabled mail rate limiting
 log_disable_ratelimit=Disabled mail rate limiting
 log_modify_ratelimit=Updated mail rate limiting
 log_wizard=Install Wizard step : $1
+log_save_cloud=Updated cloud backup provider $1
+log_clear_cloud=Cleared cloud backup provider $1
+log_save_dnscloud=Updated cloud DNS provider $1
+log_clear_dnscloud=Cleared cloud DNS provider $1
 
 backup_title=Backup Virtual Servers
 backup_title2=Edit Scheduled Backup
@@ -7236,8 +7240,22 @@ dnsclouds_state=Current state
 dnsclouds_users=Used by
 dnsclouds_nusers=$1 servers
 dnsclouds_nousers=No servers
+dnsclouds_ecannot=You are not allowed to manage Cloud DNS providers
+dnsclouds_return=cloud DNS providers
 
 dnscloud_eaws=The <tt>aws</tt> command is needed to use Amazon's Route 53 service
 dnscloud_53account=Using access key $1
+dnscloud_title=Cloud DNS Provider
+dnscloud_echeck=Provider $1 cannot be used on this system : $2
+dnscloud_header=DNS provider options
+dnscloud_provider=DNS provider name
+dnscloud_url=DNS provider's website
+dnscloud_users=Used by virtual servers
+dnscloud_nousers=None yet
+dnscloud_route53_location=Default zone location
+dnscloud_err=Failed to save cloud DNS provider
+dnscloud_egone=Provider does not exist!
+dnscloud_eaws=AWS credentials are not valid
+dnscloud_clear=Delete Credentials
 
 __norefs=1

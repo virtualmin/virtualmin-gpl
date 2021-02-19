@@ -99,5 +99,10 @@ print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     &can_manual_dns() ?
 			( [ 'manual', $text{'records_manual'} ] ) : ( ), ]);
 
+# Make sure the left menu is showing this domain
+if (defined(&theme_select_domain)) {
+	&theme_select_domain($d);
+	}
+
 &ui_print_footer(&domain_footer_link($d),
 		 "", $text{'index_return'});
