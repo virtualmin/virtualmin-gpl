@@ -65,15 +65,15 @@ elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 		}
 	}
 
-if ($d->{'provision_dns'}) {
-	# Create on provisioning server
-	&$first_print($text{'setup_bind_provision'});
-	local $info = { 'domain' => $d->{'dom'} };
+# Create domain info object
+my $info;
+if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
+	$info = { 'domain' => $d->{'dom'} };
 	if (@extra_slaves) {
 		$info->{'slave'} = [ grep { $_ } map { &to_ipaddress($_) }
 						     @extra_slaves ];
 		}
-	local $temp = &transname();
+	my $temp = &transname();
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	$d->{'dns_submode'} = 0;	# Adding to existing domain not
@@ -84,8 +84,13 @@ if ($d->{'provision_dns'}) {
 	else {
 		&create_standard_records($temp, $d, $ip);
 		}
-	local @recs = &bind8::read_zone_file($temp, $d->{'dom'});
+	my @recs = &bind8::read_zone_file($temp, $d->{'dom'});
 	$info->{'record'} = [ &records_to_text($d, \@recs) ];
+	}
+
+if ($d->{'provision_dns'}) {
+	# Create on provisioning server
+	&$first_print($text{'setup_bind_provision'});
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
 	if (!$ok || $msg !~ /host=(\S+)/) {
@@ -95,6 +100,20 @@ if ($d->{'provision_dns'}) {
 	$d->{'provision_dns_host'} = $1;
 	&$second_print(&text('setup_bind_provisioned',
 			     $d->{'provision_dns_host'}));
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Create on Cloud DNS service
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+	my $cfunc = "dnscloud_".$ctype."_create_domain";
+	my ($ok, $msg) = &$cfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('setup_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	&$second_print($text{'setup_done'});
 	}
 elsif (!$dnsparent) {
 	# Creating a new real zone
@@ -317,7 +336,23 @@ sub delete_dns
 {
 local ($d) = @_;
 &require_bind();
-if ($d->{'provision_dns'}) {
+if ($d->{'dns_cloud'}) {
+	# Delete from Cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('delete_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'} };
+	my $dfunc = "dnscloud_".$ctype."_delete_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('delete_ebind_cloud', $msg));
+		return 0;
+		}
+	delete($d->{'dns_cloud_id'});
+	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'provision_dns'}) {
 	# Delete from provisioning server
 	&$first_print($text{'delete_bind_provision'});
 	if ($d->{'provision_dns_host'}) {

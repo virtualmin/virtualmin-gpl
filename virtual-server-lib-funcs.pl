@@ -18226,6 +18226,37 @@ else {
                   "$v_major.$v_minor$v_type";
 }
 
+# set_provision_features(&domain)
+# Set the provision_* and cloud_* fields in a domain based on what
+# provisioning features are currently configured globally and in the template,
+# to indicate that they should be created remotely.
+sub set_provision_features
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+foreach my $f (&list_provision_features()) {
+	if ($f eq "dns") {
+		# Template has an option to control where DNS is hosted
+		if ($tmpl->{'dns_cloud'} eq 'services') {
+			$d->{'provision_dns'} = 1;
+			}
+		elsif ($tmpl->{'dns_cloud'} eq 'local') {
+			$d->{'provision_dns'} = 0;
+			}
+		elsif ($tmpl->{'dns_cloud'} eq '') {
+			$d->{'provision_dns'} = 1 if ($config{'provision_dns'});
+			}
+		else {
+			$d->{'dns_cloud'} = $tmpl->{'dns_cloud'};
+			}
+		}
+	elsif ($config{'provision_'.$f}) {
+		# Only option is cloudmin services
+		$d->{'provision_'.$f} = 1;
+		}
+	}
+}
+
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {

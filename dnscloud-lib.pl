@@ -103,18 +103,61 @@ delete($config{'route53_skey'});
 &unlock_file($module_config_file);
 }
 
-# call_route53_cmd(akey, params, region)
+# dnscloud_route53_create_domain(&domain, &info)
+# Create a new DNS zone with amazon's route53
+sub dnscloud_route53_create_domain
+{
+my ($d, $info) = @_;
+my $ref = &generate_route53_ref();
+my $rv = &call_route53_cmd(
+	[ 'create-hosted-zone',
+	  '--name', $info->{'domain'}, '--caller-reference', $ref ],
+	undef, 1);
+if (!ref($rv)) {
+	return (0, $rv);
+	}
+# Add the records
+return (1, $rv->{'HostedZone'}->{'Id'});
+}
+
+# dnscloud_route53_delete_domain(&domain, &info)
+# Delete a DNS zone on amazon's route53
+sub dnscloud_route53_delete_domain
+{
+my ($d, $info) = @_;
+my $rv = &call_route53_cmd(
+	[ 'delete-hosted-zone',
+	  '--id', $info->{'id'} ],
+	undef, 1);
+return ref($rv) ? (1, $rv) : (0, $rv);
+}
+
+# call_route53_cmd(akey, params, [region], [parse-json])
 # Run the aws command for route53 with some params, and return output
 sub call_route53_cmd
 {
-my ($akey, $params, $region) = @_;
+my ($params, $region, $json) = @_;
+my $akey = $config{'route53_akey'};
 $region ||= $config{'route53_location'};
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
-return &backquote_command(
+my $out = &backquote_command(
 	"TZ=GMT $config{'aws_cmd'} route53 --profile=".quotemeta($akey)." ".
 	"--region ".quotemeta($region)." ".$params." 2>&1");
+if (!$? && $json) {
+	eval "use JSON::PP";
+	my $coder = JSON::PP->new->pretty;
+	eval {
+		$out = $coder->decode($out);
+		};
+	}
+return $out;
+}
+
+sub generate_route53_ref
+{
+return time().$$.(++$generate_route53_ref_count);
 }
 
 
