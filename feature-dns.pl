@@ -67,6 +67,7 @@ elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 
 # Create domain info object
 my $info;
+my @inforecs;
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	$info = { 'domain' => $d->{'dom'} };
 	if (@extra_slaves) {
@@ -84,8 +85,8 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	else {
 		&create_standard_records($temp, $d, $ip);
 		}
-	my @recs = &bind8::read_zone_file($temp, $d->{'dom'});
-	$info->{'record'} = [ &records_to_text($d, \@recs) ];
+	@inforecs = &bind8::read_zone_file($temp, $d->{'dom'});
+	$info->{'record'} = [ &records_to_text($d, \@inforecs) ];
 	}
 
 if ($d->{'provision_dns'}) {
@@ -107,6 +108,7 @@ elsif ($d->{'dns_cloud'}) {
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
+	$info->{'recs'} = \@inforecs;
 	my ($ok, $msg, $location) = &$cfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('setup_ebind_cloud', $msg));
@@ -718,7 +720,11 @@ if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	&modify_records_domain_name($recs, $file,
 				    $oldd->{'dom'}, $d->{'dom'});
 	}
-elsif ($d->{'dom'} ne $oldd->{'dom'} && !$d->{'provision_dns'}) {
+elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
+	# Domain name has changed .. rename on cloud provider
+	# XXX
+	}
+elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
 	local $z = &get_bind_zone($zdom->{'dom'});
 	if (!$z) {
