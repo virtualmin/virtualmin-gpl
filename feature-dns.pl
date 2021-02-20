@@ -722,7 +722,20 @@ if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 	# Domain name has changed .. rename on cloud provider
-	# XXX
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('save_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'olddomain' => $oldd->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $rfunc = "dnscloud_".$ctype."_rename_domain";
+	my ($ok, $msg) = &$rfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('save_bind_ecloud', $err));
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
@@ -2340,12 +2353,14 @@ foreach my $r (@$recs) {
 		# Fix mail server in MX record
 		$r->{'values'}->[1] =~ s/$olddom/$newdom/;
 		}
-	&bind8::modify_record($fn, $r, $r->{'name'},
-			      $r->{'ttl'}, $r->{'class'},
-			      $r->{'type'},
-			      &join_record_values($r,
-				$r->{'eline'} == $r->{'line'}),
-			      $r->{'comment'});
+	if ($fn) {
+		&bind8::modify_record($fn, $r, $r->{'name'},
+				      $r->{'ttl'}, $r->{'class'},
+				      $r->{'type'},
+				      &join_record_values($r,
+					$r->{'eline'} == $r->{'line'}),
+				      $r->{'comment'});
+		}
 	}
 }
 

@@ -109,15 +109,16 @@ sub dnscloud_route53_create_domain
 {
 my ($d, $info) = @_;
 my $ref = &generate_route53_ref();
+my $location = $info->{'location'} || $config{'route53_location'};
 my $rv = &call_route53_cmd(
 	[ 'create-hosted-zone',
 	  '--name', $info->{'domain'}, '--caller-reference', $ref ],
 	undef, 1);
 return (0, $rv) if (!ref($rv));
 $info->{'id'} = $rv->{'HostedZone'}->{'Id'};
-$info->{'location'} = $config{'route53_location'};
+$info->{'location'} = $location;
 my ($ok, $err) = &dnscloud_route53_put_records($d, $info);
-return (1, $rv->{'HostedZone'}->{'Id'}, $config{'route53_location'});
+return (1, $rv->{'HostedZone'}->{'Id'}, $location);
 }
 
 # dnscloud_route53_delete_domain(&domain, &info)
@@ -137,6 +138,28 @@ my $rv = &call_route53_cmd(
 	  '--id', $info->{'id'} ],
 	$info->{'location'}, 1);
 return ref($rv) ? (1, $rv) : (0, $rv);
+}
+
+# dnscloud_route53_create_domain(&domain, &info)
+# Rename a domain on route53 by deleting and re-creating it
+sub dnscloud_route53_rename_domain
+{
+my ($d, $info) = @_;
+
+# Get current records, and fix them
+my ($ok, $recs) = &dnscloud_route53_get_records($d, $info);
+return (0, $recs) if (!$ok);
+&modify_records_domain_name(
+	$recs, undef, $info->{'olddomain'}, $info->{'domain'});
+
+# Delete the old domain
+my ($ok, $err) = &dnscloud_route53_delete_domain($d, $info);
+return (0, $err) if (!$ok);
+
+# Create the new one with the original records
+$info->{'recs'} = $recs;
+my ($ok, $err) = &dnscloud_route53_create_domain($d, $info);
+return ($ok, $err);
 }
 
 # dnscloud_route53_get_records(&domain, &info)
