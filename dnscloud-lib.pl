@@ -113,11 +113,9 @@ my $rv = &call_route53_cmd(
 	[ 'create-hosted-zone',
 	  '--name', $info->{'domain'}, '--caller-reference', $ref ],
 	undef, 1);
-if (!ref($rv)) {
-	return (0, $rv);
-	}
+return (0, $rv) if (!ref($rv));
 # Add the records
-return (1, $rv->{'HostedZone'}->{'Id'});
+return (1, $rv->{'HostedZone'}->{'Id'}, $config{'route53_location'});
 }
 
 # dnscloud_route53_delete_domain(&domain, &info)
@@ -128,7 +126,89 @@ my ($d, $info) = @_;
 my $rv = &call_route53_cmd(
 	[ 'delete-hosted-zone',
 	  '--id', $info->{'id'} ],
-	undef, 1);
+	$info->{'location'}, 1);
+return ref($rv) ? (1, $rv) : (0, $rv);
+}
+
+# dnscloud_route53_get_records(&domain, &info)
+# Returns records for a domain in Webmin's format
+sub dnscloud_route53_get_records
+{
+my ($d, $info) = @_;
+my $rv = &call_route53_cmd(
+	[ 'list-resource-record-sets',
+	  '--hosted-zone-id', $info->{'id'} ],
+	$info->{'location'}, 1);
+return (0, $rv) if (!ref($rv));
+my @recs;
+foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
+	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
+		push(@recs, { 'name' => $rrs->{'Name'},
+			      'realname' => $rrs->{'Name'},
+			      'class' => 'IN',
+			      'type' => $rrs->{'Type'},
+			      'ttl' => int($rrs->{'TTL'}),
+			      'values' => [ split(/\s+/, $rr->{'Value'}) ] });
+		}
+	}
+return (1, \@recs);
+}
+
+# dnscloud_route53_put_records(&domain, &info)
+# Updates records for a domain in Webmin's format
+sub dnscloud_route53_put_records
+{
+my ($d, $info) = @_;
+my $recs = $info->{'recs'};
+my ($ok, $oldrecs) = &dnscloud_route53_get_records($d, $info);
+return ($ok, $oldrecs) if (!$ok);
+
+# Create an op to delete all existing records (apart from NS and SOA) and 
+# re-add the new ones
+my $js = { 'Changes' => [] };
+my %keep = map { $_->{'name'}."/".$_->{'type'}, 1 } @$recs;
+foreach my $r (@$oldrecs) {
+	next if ($r->{'type'} eq 'NS');
+	next if ($keep{$r->{'name'}."/".$r->{'type'}});
+	push(@{$js->{'Changes'}},
+	     { 'Action' => 'DELETE',
+	       'ResourceRecordSet' => {
+	         'Name' => $r->{'name'},
+		 'Type' => $r->{'type'},
+		 'TTL' => int($r->{'ttl'}),
+		 'ResourceRecords' => [
+		   { 'Value' => join(" ", @{$r->{'values'}}) },
+		 ]
+	       }
+	     });
+	}
+foreach my $r (@$recs) {
+	next if ($r->{'type'} eq 'NS');
+	push(@{$js->{'Changes'}},
+	     { 'Action' => 'UPSERT',
+	       'ResourceRecordSet' => {
+	         'Name' => $r->{'name'},
+		 'Type' => $r->{'type'},
+		 'TTL' => int($r->{'ttl'} || 86400),
+		 'ResourceRecords' => [
+		   { 'Value' => join(" ", @{$r->{'values'}}) },
+		 ]
+	       }
+	     });
+	}
+
+# Write the JSON to a temp file for calling the API
+my $temp = &transname();
+eval "use JSON::PP";
+my $coder = JSON::PP->new->pretty;
+&open_tempfile(JSON, ">$temp");
+&print_tempfile(JSON, $coder->encode($js));
+&close_tempfile(JSON);
+my $rv = &call_route53_cmd(
+	[ 'change-resource-record-sets',
+	  '--hosted-zone-id', $info->{'id'},
+	  '--change-batch', 'file://'.$temp ],
+	$info->{'location'}, 1);
 return ref($rv) ? (1, $rv) : (0, $rv);
 }
 

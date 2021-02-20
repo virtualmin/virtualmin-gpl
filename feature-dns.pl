@@ -107,12 +107,13 @@ elsif ($d->{'dns_cloud'}) {
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
-	my ($ok, $msg) = &$cfunc($d, $info);
+	my ($ok, $msg, $location) = &$cfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('setup_ebind_cloud', $msg));
 		return 0;
 		}
 	$d->{'dns_cloud_id'} = $msg;
+	$d->{'dns_cloud_location'} = $location;
 	&$second_print($text{'setup_done'});
 	}
 elsif (!$dnsparent) {
@@ -342,7 +343,8 @@ if ($d->{'dns_cloud'}) {
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('delete_bind_cloud', $cloud->{'desc'}));
 	my $info = { 'domain' => $d->{'dom'},
-		     'id' => $d->{'dns_cloud_id'} };
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
 	my $dfunc = "dnscloud_".$ctype."_delete_domain";
 	my ($ok, $msg) = &$dfunc($d, $info);
 	if (!$ok) {
@@ -350,6 +352,7 @@ if ($d->{'dns_cloud'}) {
 		return 0;
 		}
 	delete($d->{'dns_cloud_id'});
+	delete($d->{'dns_cloud_location'});
 	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'provision_dns'}) {
@@ -3055,10 +3058,12 @@ sub get_domain_dns_records_and_file
 local ($d) = @_;
 &require_bind();
 local $bind8::config{'short_names'} = 0;
-if ($d->{'provision_dns'}) {
-	# Download to temp file, and read it
-	local $temp = &transname();
-	local $abstemp = $temp;
+
+# Create a temp file for writing downloaded records
+local ($temp, $abstemp);
+if ($d->{'dns_cloud'} || $d->{'provision_dns'}) {
+	$temp = &transname();
+	$abstemp = $temp;
 	local $chroot = &bind8::get_chroot();
 	if ($chroot && $chroot ne "/") {
 		# Actual temp file needs to be under chroot dir
@@ -3069,6 +3074,35 @@ if ($d->{'provision_dns'}) {
 			&make_dir($absdir, 0755, 1);
 			}
 		}
+	}
+
+if ($d->{'dns_cloud'}) {
+	# Fetch from the cloud provider and write to temp file
+	my $ctype = $d->{'dns_cloud'};
+	my $gfunc = "dnscloud_".$ctype."_get_records";
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my ($ok, $recs) = &$gfunc($d, $info);
+	return ($recs) if (!$ok);
+	local $lnum = 0;
+	foreach my $rec (@$recs) {
+		&bind8::create_record($temp, $rec->{'name'},
+			$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
+			&join_record_values($rec, 1),
+			$rec->{'comment'});
+		$rec->{'line'} = $lnum;
+		$rec->{'eline'} = $lnum;
+		$rec->{'num'} = $lnum;
+		$rec->{'file'} = $temp;
+		$rec->{'rootfile'} = $abstemp;
+		$lnum++;
+		}
+	&set_record_ids($recs);
+	return ($recs, $temp);
+	}
+elsif ($d->{'provision_dns'}) {
+	# Fetch from cloudmin services and write to temp file
 	local $info = { 'domain' => $d->{'dom'},
 			'host' => $d->{'provision_dns_host'} };
 	my ($ok, $msg) = &provision_api_call(
@@ -3329,6 +3363,20 @@ if ($d->{'provision_dns'}) {
 		return "Error from provisioning server updating records : $msg";
 		}
 	}
+elsif ($d->{'dns_cloud'}) {
+	# Upload records to cloud DNS provider
+	local $ctype = $d->{'dns_cloud'};
+	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	local $info = { 'domain' => $d->{'dom'},
+		         'id' => $d->{'dns_cloud_id'},
+		         'location' => $d->{'dns_cloud_location'},
+			 'recs' => \@newrecs };
+	my $pfunc = "dnscloud_".$ctype."_put_records";
+	my ($ok, $msg) = &$pfunc($d, $info);
+	if (!$ok) {
+		return "Failed to update DNS records : $msg";
+		}
+	}
 
 # Un-freeeze the zone
 &after_records_change($d);
@@ -3344,6 +3392,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		local $recs;
 		if ($ad->{'provision_dns'}) {
 			# On provisioning server
+			# XXX also dns cloud
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
 			local $bind8::config{'chroot'} = undef;
