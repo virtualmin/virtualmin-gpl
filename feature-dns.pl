@@ -1996,7 +1996,8 @@ return $z;
 sub restart_bind
 {
 local ($d) = @_;
-local $p = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $p = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+	      : $config{'provision_dns'} || &default_dns_cloud();
 if ($p) {
 	# Hosted on a provisioning server, so nothing to do
 	return 1;
@@ -2043,7 +2044,7 @@ return $rv;
 sub reload_bind_records
 {
 local ($d) = @_;
-if ($d->{'provision_dns'}) {
+if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
 	return undef;
 	}
@@ -2064,20 +2065,33 @@ return $rv;
 sub check_dns_clash
 {
 local ($d, $field) = @_;
-if ($d->{'provision_dns'}) {
-	# Check on remote provisioning server
-	if (!$field || $field eq 'dom') {
+if (!$field || $field eq 'dom') {
+	if ($d->{'provision_dns'}) {
+		# Check on remote provisioning server
 		my ($ok, $msg) = &provision_api_call(
 			"check-dns-zone", { 'domain' => $d->{'dom'} });
 		return &text('provision_ednscheck', $msg) if (!$ok);
 		if ($msg =~ /host=/) {
-			return &text('provision_edns', $d->{'db'});
+			return &text('provision_edns', $d->{'dom'});
 			}
 		}
-	}
-else {
-	# Check locally
-	if (!$field || $field eq 'dom') {
+	elsif ($d->{'dns_cloud'}) {
+		# Check on cloud provider
+		my $ctype = $d->{'dns_cloud'};
+		my $tfunc = "dnscloud_".$ctype."_check_domain";
+		my $info = { 'domain' => $d->{'dom'} };
+		my ($ok, $err) = &$tfunc($d, $info);
+		if (!$ok && $err) {
+			# Failed lookup
+			return &text('setup_ednscloudclash', $err);
+			}
+		elsif ($ok) {
+			# Already exists
+			return $text{'setup_dnscloudclash'};
+			}
+		}
+	else {
+		# Check locally
 		local ($czone) = &get_bind_zone($d->{'dom'});
 		return $czone ? 1 : 0;
 		}
@@ -2458,7 +2472,7 @@ return { 'wholefile' => $in->{'dns_wholefile'} };
 sub sysinfo_dns
 {
 &require_bind();
-if ($config{'provision_dns'}) {
+if ($config{'provision_dns'} || &default_dns_cloud()) {
 	# No local BIND in provisioning mode
 	return ( );
 	}
@@ -2474,7 +2488,7 @@ return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
 sub startstop_dns
 {
 local ($typestatus) = @_;
-if ($config{'provision_dns'}) {
+if ($config{'provision_dns'} || &default_dns_cloud()) {
 	# Cannot start or stop when remote
 	return ();
 	}
@@ -3090,7 +3104,11 @@ sub get_domain_dns_file
 local ($d) = @_;
 if ($d->{'provision_dns'}) {
 	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
-	       "for provisioning domains");
+	       "for cloudmin services domains");
+	}
+if ($d->{'dns_cloud'}) {
+	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
+	       "for cloud hosted domains");
 	}
 &require_bind();
 local $z;
@@ -4079,7 +4097,8 @@ sub obtain_lock_dns
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
 &obtain_lock_anything($d);
-local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+		 : $config{'provision_dns'} || &default_dns_cloud();
 
 # Lock records file
 if ($d && !$prov) {
@@ -4125,7 +4144,8 @@ sub release_lock_dns
 {
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
-local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+		 : $config{'provision_dns'} || &default_dns_cloud();
 
 # Unlock records file
 if ($d && !$prov) {

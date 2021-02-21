@@ -71,7 +71,7 @@ else {
 	}
 
 if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
-    !$d->{'provision_dns'} && defined($in{'dnssec'})) {
+    !$d->{'provision_dns'} && !$d->{'dns_cloud'} && defined($in{'dnssec'})) {
 	# Turn DNSSEC on or off
 	&pre_records_change($d);
 	my $key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));

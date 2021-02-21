@@ -13917,7 +13917,7 @@ if (&foreign_check("proc")) {
 
 if ($config{'dns'}) {
 	# Make sure BIND is installed
-	if ($config{'provision_dns'}) {
+	if ($config{'provision_dns'} || &default_dns_cloud()) {
 		# Only BIND module is needed
 		&foreign_check("bind8") ||
 			return $text{'index_ebindmod'};

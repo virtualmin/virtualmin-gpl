@@ -663,6 +663,8 @@ setup_ejail=.. jail failed : $1
 setup_jailed=.. jail directory is now $1
 setup_letsaliases=Re-requesting Let's Encrypt certificate for $1 to include $2 ..
 setup_eletsaliases=.. failed : $1
+setup_ednscloudclash=Failed to check for clash on DNS cloud provider : $1
+setup_dnscloudclash=DNS zone already exists on cloud provider
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2

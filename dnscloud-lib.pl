@@ -1,11 +1,25 @@
 # Functions for DNS cloud providers
 
+# list_dns_clouds()
+# Returns a list of supported cloud DNS providers
 sub list_dns_clouds
 {
 return ( { 'name' => 'route53',
 	   'desc' => 'Amazon Route 53',
 	   'url' => 'https://aws.amazon.com/route53/' },
        );
+}
+
+# default_dns_cloud()
+# Returns the DNS cloud provider used by default for new domains
+sub default_dns_cloud
+{
+my $tmpl = &get_template(0);
+return undef if (!$tmpl->{'dns_cloud'} || $tmpl->{'dns_cloud'} eq 'local' ||
+		 $tmpl->{'dns_cloud'} eq 'services');
+my ($cloud) = grep { $_->{'name'} eq $tmpl->{'dns_cloud'} }
+		   &list_dns_clouds();
+return $cloud;
 }
 
 # dns_uses_cloud(&domain, &cloud)
@@ -164,7 +178,24 @@ my $rninfo = { 'id' => $info->{'id'},
 return &dnscloud_route53_rename_domain($d, $rninfo);
 }
 
-# dnscloud_route53_create_domain(&domain, &info)
+# dnscloud_route53_check_domain(&domain, &info)
+# Returns 1 if a domain already exists on route53, under the configured account
+sub dnscloud_route53_check_domain
+{
+my ($d, $info) = @_;
+my $rv = &call_route53_cmd(
+	[ 'list-hosted-zones' ],
+	undef, 1);
+return 0 if (!ref($rv));
+foreach my $h (@{$rv->{'HostedZones'}}) {
+	if ($h->{'name'} eq $info->{'domain'}.".") {
+		return 1;
+		}
+	}
+return 0;
+}
+
+# dnscloud_route53_rename_domain(&domain, &info)
 # Rename a domain on route53 by deleting and re-creating it
 sub dnscloud_route53_rename_domain
 {
