@@ -302,14 +302,11 @@ my $coder = JSON::PP->new->pretty;
 &open_tempfile(JSON, ">$temp");
 &print_tempfile(JSON, $coder->encode($js));
 &close_tempfile(JSON);
-use Data::Dumper;
-print STDERR Dumper($js);
 my $rv = &call_route53_cmd(
 	[ 'change-resource-record-sets',
 	  '--hosted-zone-id', $info->{'id'},
 	  '--change-batch', 'file://'.$temp ],
 	$info->{'location'}, 1);
-print STDERR Dumper($rv);
 return ref($rv) ? (1, $rv) : (0, $rv);
 }
 
