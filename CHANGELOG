@@ -1616,3 +1616,4 @@ Improved locking for domain database files to prevent overwriting.
 ---- Changes since 6.14 ----
 Consolidated all PHP options into a single page, and moved website options to it's own page in the UI.
 SSL certicates can now be generated and managed for virtual servers even when they don't have the SSL feature enabled.
+Added the Cloud DNS Providers page, for configuring Virtualmin to use Route53 to host DNS rather than doing it locally.
