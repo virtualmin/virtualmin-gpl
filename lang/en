@@ -1576,6 +1576,8 @@ disable_postgres=De-activating PostgreSQL user ..
 disable_bind=Renaming DNS zone to disable it ..
 disable_bind_provision=Renaming DNS zone on services host to disable it ..
 disable_ebind_provision=.. rename failed : $1
+disable_bind_cloud=Disabling DNS zone on $1 ..
+disable_ebind_cloud=.. failed : $1
 disable_bindnosub=.. not possible for sub-domains
 disable_ealready=Virtual server is already disabled
 disable_emaking=Before disable command failed : $1
@@ -1619,6 +1621,8 @@ enable_statusssl=Re-activating SSL website status monitoring ..
 enable_users=Un-locking mail users' accounts ..
 enable_subservers=Also enable sub-servers?
 enable_doing=Enabling virtual server $1 ..
+enable_bind_cloud=Enabling DNS zone on $1 ..
+enable_ebind_cloud=.. failed : $1
 
 mail_usubject=Mailbox created
 mail_dsubject=Virtual server created

@@ -1636,13 +1636,14 @@ if (!$recs) {
 	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
-if (!$d->{'provision_dns'} && $file) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && $file) {
+	# Make sure file exists
 	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
 		if (!-r $absfile);
 	}
-if (!$d->{'provision_dns'} && !$d->{'dns_submode'}) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	# Make sure it is a master
 	local $zone = &get_bind_zone($d->{'dom'});
 	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$zone);
@@ -1749,7 +1750,8 @@ if (!$d->{'dns_submode'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'dns_submode'} && !$recsonly) {
+    !$d->{'provision_dns'} && !$d->{'cloud_dns'} && !$d->{'dns_submode'} &&
+    !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
 		local @errs = &bind8::check_zone_records($z);
@@ -1800,6 +1802,24 @@ if ($d->{'provision_dns'}) {
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Lock on cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('disable_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $dfunc = "dnscloud_".$ctype."_disable_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('disable_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	&$second_print($text{'setup_done'});
+	return 1;
 	}
 else {
 	# Lock locally
@@ -1873,6 +1893,24 @@ if ($d->{'provision_dns'}) {
 		&$second_print(&text('disable_ebind_provision', $msg));
 		return 0;
 		}
+	&$second_print($text{'setup_done'});
+	return 1;
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Unlock on cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('enable_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $dfunc = "dnscloud_".$ctype."_enable_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('enable_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
@@ -3411,9 +3449,8 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local $file;
 		local $recs;
-		if ($ad->{'provision_dns'}) {
+		if ($ad->{'provision_dns'} || $d->{'cloud_dns'}) {
 			# On provisioning server
-			# XXX also dns cloud
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
 			local $bind8::config{'chroot'} = undef;

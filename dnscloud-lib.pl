@@ -140,6 +140,30 @@ my $rv = &call_route53_cmd(
 return ref($rv) ? (1, $rv) : (0, $rv);
 }
 
+# dnscloud_route53_disable_domain(&domain, &info)
+# Disable a DNS zone on amazon's route53, by renaming it
+sub dnscloud_route53_disable_domain
+{
+my ($d, $info) = @_;
+my $rninfo = { 'id' => $info->{'id'},
+	       'location' => $info->{'location'},
+	       'olddomain' => $info->{'domain'},
+	       'domain' => $info->{'domain'}.'.disabled' };
+return &dnscloud_route53_rename_domain($d, $rninfo);
+}
+
+# dnscloud_route53_enable_domain(&domain, &info)
+# Enable a DNS zone on amazon's route53, by renaming it back
+sub dnscloud_route53_enable_domain
+{
+my ($d, $info) = @_;
+my $rninfo = { 'id' => $info->{'id'},
+	       'location' => $info->{'location'},
+	       'domain' => $info->{'domain'},
+	       'olddomain' => $info->{'domain'}.'.disabled' };
+return &dnscloud_route53_rename_domain($d, $rninfo);
+}
+
 # dnscloud_route53_create_domain(&domain, &info)
 # Rename a domain on route53 by deleting and re-creating it
 sub dnscloud_route53_rename_domain
