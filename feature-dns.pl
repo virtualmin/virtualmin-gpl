@@ -270,7 +270,7 @@ elsif (!$dnsparent) {
 	&$second_print($text{'setup_done'});
 
 	# If DNSSEC was requested, set it up
-	if ($tmpl->{'dnssec'} eq 'yes') {
+	if ($tmpl->{'dnssec'} eq 'yes' && &can_domain_dnssec($d)) {
 		&$first_print($text{'setup_dnssec'});
 		$err = &enable_domain_dnssec($d);
 		if (!$err) {
@@ -2078,16 +2078,27 @@ if (!$field || $field eq 'dom') {
 	elsif ($d->{'dns_cloud'}) {
 		# Check on cloud provider
 		my $ctype = $d->{'dns_cloud'};
+		my ($cloud) = grep { $_->{'name'} eq $ctype }
+				   &list_dns_clouds();
+		if (!$cloud) {
+			return $text{'setup_ednscloudexists'};
+			}
+		my $sfunc = "dnscloud_".$ctype."_get_state";
+		my $state = &$sfunc($cloud);
+		if (!$state->{'ok'}) {
+			return &text('setup_ednscloudstate', $cloud->{'desc'});
+			}
 		my $tfunc = "dnscloud_".$ctype."_check_domain";
 		my $info = { 'domain' => $d->{'dom'} };
 		my ($ok, $err) = &$tfunc($d, $info);
 		if (!$ok && $err) {
 			# Failed lookup
-			return &text('setup_ednscloudclash', $err);
+			return &text('setup_ednscloudclash',
+				     $cloud->{'desc'}, $err);
 			}
 		elsif ($ok) {
 			# Already exists
-			return $text{'setup_dnscloudclash'};
+			return &text('setup_dnscloudclash', $cloud->{'desc'});
 			}
 		}
 	else {
@@ -2130,30 +2141,35 @@ if (!-r $absfile) {
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
 	&copy_write_as_domain_user($d, $absfile, $file);
-	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-	@keys = grep { ref($_) &&
-		       $_->{'privatefile'} &&
-		       $_->{'publicfile'} } @keys;
-	my $i = 0;
-	my %kinfo;
-	foreach my $key (@keys) {
-		foreach my $t ('private', 'public') {
-			&copy_write_as_domain_user(
-				$d, $key->{$t.'file'},
-				$file.'_dnssec_'.$t.'_'.$i);
-			$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
-			$kinfo{$t.'_'.$i} = $1;
+
+	# Also save DNSSEC keys, if possible
+	if (&can_domain_dnssec($d)) {
+		my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		@keys = grep { ref($_) &&
+			       $_->{'privatefile'} &&
+			       $_->{'publicfile'} } @keys;
+		my $i = 0;
+		my %kinfo;
+		foreach my $key (@keys) {
+			foreach my $t ('private', 'public') {
+				&copy_write_as_domain_user(
+					$d, $key->{$t.'file'},
+					$file.'_dnssec_'.$t.'_'.$i);
+				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
+				$kinfo{$t.'_'.$i} = $1;
+				}
+			$i++;
 			}
-		$i++;
+		&write_file($file."_dnssec_keyinfo", \%kinfo);
 		}
-	&write_file($file."_dnssec_keyinfo", \%kinfo);
 	}
 else {
 	# Extract the appropriate records
 	local $bind8::chroot = "/";	# So that create_record will write to the backup file
 	$recs = &filter_domain_dns_records($d, $recs);
 	foreach my $rec (@$recs) {
-		next if ($rec->{'name'} eq '$ttl' || $rec->{'name'} eq '$generate');
+		next if ($rec->{'name'} eq '$ttl' ||
+			 $rec->{'name'} eq '$generate');
 		&bind8::create_record($file, $rec->{'name'},
 			$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
 			&join_record_values($rec, 1),
@@ -2215,7 +2231,7 @@ else {
 	&flush_file_lines($absfile);
 	}
 
-if (!$d->{'dns_submode'}) {
+if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
@@ -3417,7 +3433,7 @@ if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0) {
 
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
-    !$d->{'provision_dns'}) {
+    &can_domain_dnssec($d)) {
 	# Re-sign too
 	$z ||= &get_bind_zone($d->{'dom'});
 	eval {
@@ -3740,6 +3756,14 @@ return $str =~ /^(\d+)s$/i ? $1 :
        $str =~ /^(\d+)h$/i ? $1*3600 :
        $str =~ /^(\d+)d$/i ? $1*86400 :
        $str =~ /^(\d+)w$/i ? $1*7*86400 : $str;
+}
+
+# can_domain_dnssec(&domain)
+# Returns 1 if DNSSEC can be setup for a domain
+sub can_domain_dnssec
+{
+my ($d) = @_;
+return $d->{'provision_dns'} || $d->{'dns_cloud'} ? 0 : 1;
 }
 
 # disable_domain_dnssec(&domain)

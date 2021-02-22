@@ -442,24 +442,34 @@ foreach $d (@doms) {
 
 	# Enable or disable DNSSEC
 	if (defined($dnssec)) {
-		&pre_records_change($d);
-		$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-		if ($dnssec && !$key) {
-			# Enable it
-			&$first_print($text{'spf_enablednssec'});
-			$err = &enable_domain_dnssec($d);
-			&$second_print($err || $text{'setup_done'});
-			$changed++;
+		if (&can_domain_dnssec($d)) {
+			# DNSSEC is supported for this domain
+			&pre_records_change($d);
+			$key = &bind8::get_dnssec_key(
+				&get_bind_zone($d->{'dom'}));
+			if ($dnssec && !$key) {
+				# Enable it
+				&$first_print($text{'spf_enablednssec'});
+				$err = &enable_domain_dnssec($d);
+				&$second_print($err || $text{'setup_done'});
+				$changed++;
+				}
+			elsif (!$dnssec && $key) {
+				# Disable it
+				&$first_print($text{'spf_disablednssec'});
+				$err = &disable_domain_dnssec($d);
+				&$second_print($err || $text{'setup_done'});
+				$changed++;
+				}
+			# Records may have changed, so re-read
+			($recs, $file) = &get_domain_dns_records_and_file($d);
 			}
-		elsif (!$dnssec && $key) {
-			# Disable it
-			&$first_print($text{'spf_disablednssec'});
-			$err = &disable_domain_dnssec($d);
-			&$second_print($err || $text{'setup_done'});
-			$changed++;
+		else {
+			# Not supported on remote providers
+			&$first_print($dnssec ? $text{'spf_enablednssec'}
+					      : $text{'spf_disablednssec'});
+			&$second_print($text{'spf_ednssecsupport'});
 			}
-		# Records may have changed, so re-read
-		($recs, $file) = &get_domain_dns_records_and_file($d);
 		}
 
 	# Create or remove TLSA records
