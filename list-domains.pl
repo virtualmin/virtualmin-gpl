@@ -650,6 +650,20 @@ if ($multi) {
 				}
 			}
 
+		# Show provisioned features
+		foreach my $f (&list_provision_features()) {
+			my $mode = "Local";
+			if ($d->{'provision_'.$f}) {
+				$mode = "Cloudmin Services";
+				}
+			elsif ($f eq "dns" && $d->{'dns_cloud'}) {
+				my ($cloud) = grep { $_->{'name'} eq
+					$d->{'dns_cloud'} } &list_dns_clouds();
+				$mode = "Cloud DNS Provider $cloud->{'desc'}";
+				}
+			print "    Provisioning for ${f}: $mode\n";
+			}
+
 		# Show DNS SPF mode
 		if ($config{'dns'} && $d->{'dns'} && !$d->{'dns_submode'} &&
 		    $multi == 1) {
