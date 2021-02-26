@@ -1239,11 +1239,11 @@ else {
 		}
 
 	# Find domain's entry in key table
-	my $keyfile = $conf->{'KeyTable'};
-	$keyfile =~ s/^[a-z]+://;
-	$newfile = !-r $keyfile;
-	&lock_file($keyfile);
-	my $klref = &read_file_lines($keyfile);
+	my $keytablefile = $conf->{'KeyTable'};
+	$keytablefile =~ s/^[a-z]+://;
+	$newfile = !-r $keytablefile;
+	&lock_file($keytablefile);
+	my $klref = &read_file_lines($keytablefile);
 	if (!@$klref) {
 		# Add entry for the default key
 		push(@$klref, "default\t%:$dkim->{'selector'}:".
@@ -1278,10 +1278,10 @@ else {
 		# Need to update
 		$klref->[$kidx] = $keyline;
 		}
-	&flush_file_lines($keyfile);
-	&unlock_file($keyfile);
+	&flush_file_lines($keytablefile);
+	&unlock_file($keytablefile);
 	if ($newfile) {
-		&set_ownership_permissions(undef, undef, 0755, $keyfile);
+		&set_ownership_permissions(undef, undef, 0755, $keytablefile);
 		}
 	}
 &$second_print($text{'setup_done'});
