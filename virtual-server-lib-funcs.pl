@@ -7961,8 +7961,8 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 
 # Update service certs and DANE DNS records if a new cert was generated
 if ($generated) {
-	&enable_domain_service_ssl_certs($d);
-	&sync_domain_tlsa_records($d);
+	&enable_domain_service_ssl_certs($dom);
+	&sync_domain_tlsa_records($dom);
 	}
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
@@ -15928,6 +15928,7 @@ sub populate_default_index_page
 sub absolute_domain_path
 {
 local ($d, $path) = @_;
+$d->{'home'} || &error("absolute_domain_path called for $path without a home directory!");
 if ($path =~ /^\//) {
 	# Already absolute
 	return $path;
