@@ -5691,6 +5691,16 @@ $nossl_tests = [
 	  'grep' => [ 'SSL cert file:', 'SSL key file:' ],
 	},
 
+	# Remove from other services before removing the cert
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
 	# Try removing the cert
 	{ 'command' => 'install-cert.pl',
 	  'args' => [ [ 'domain', $test_domain ],
