@@ -1400,7 +1400,10 @@ else {
 	push(@dirs, "SSLProtocol ".join(" ", "all", map { "-".$_ } @tls));
 	}
 if ($tmpl->{'web_ssl'} ne 'none') {
-	push(@dirs, split(/\t+/, $tmpl->{'web_ssl'}));
+	local $ssl_dirs = $tmpl->{'web_ssl'};
+	$ssl_dirs =~ s/\t/\n/g;
+	$ssl_dirs = &substitute_domain_template($ssl_dirs, $d);
+	push(@dirs, split(/\n/, $ssl_dirs));
 	}
 return @dirs;
 }
