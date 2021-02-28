@@ -7278,7 +7278,7 @@ dnscloud_nousers=None yet
 dnscloud_route53_location=Default zone location
 dnscloud_err=Failed to save cloud DNS provider
 dnscloud_egone=Provider does not exist!
-dnscloud_eaws=AWS credentials are not valid
+dnscloud_eawscreds=AWS credentials are not valid
 dnscloud_clear=Delete Credentials
 
 __norefs=1
