@@ -31,6 +31,7 @@ form_rmysql=MySQL-databaseserver
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 
+setup_eremoteuser=Brukernavnet kan ikke være det samme som den nåværende Virtualmin-innloggingen
 setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha en Unix-bruker
 setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktivert
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
@@ -40,6 +41,8 @@ setup_etmpl=Du har ikke lov til å bruke den valgte malen
 
 setup_ewebphpmode=PHP-utførelsesmodus $1 ble valgt, men støttes ikke på dette systemet!
 setup_esslusermin=Usermin er ikke installert
+setup_bind_cloud=Legger til ny DNS-sone ved hjelp av $1 ..
+setup_ebind_cloud=.. mislyktes : $1 
 setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
@@ -52,6 +55,10 @@ setup_ejail=.. fengsel mislyktes : $1
 setup_jailed=.. fengselskatalogen er nå $1 
 setup_letsaliases=Be om på nytt la oss kryptere sertifikat for $1 for å inkludere $2.
 setup_eletsaliases=.. mislyktes : $1 
+setup_ednscloudexists=Valgt DNS-skyleverandør eksisterer ikke!
+setup_ednscloudstate=DNS-skyleverandør $1 er ikke klar til bruk
+setup_ednscloudclash=Kunne ikke se etter sammenstøt med DNS-skyleverandør $1 : $2 
+setup_dnscloudclash=DNS-sone eksisterer allerede hos skyleverandør $1 
 
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_mailclient=Vis innstillinger for e-postklient
@@ -93,6 +100,8 @@ edit_domdkim=DomainKey-alternativer
 edit_domdkimdesc=Konfigurerte DomainKey-innstillinger for akkurat denne virtuelle serveren.
 
 delete_preserve=Bevar funksjoner eksternt vert ($1)
+delete_bind_cloud=Slette DNS-sone fra $1 ..
+delete_ebind_cloud=.. sletting mislyktes : $1 
 delete_ebindsub=Overordnet DNS-soneserver eksisterer ikke lenger!
 delete_mysqlpreserve=.. bevare eksterne databaser på $1 
 delete_remoteuser=.. bevarer brukeren på fjernsystemet $1 
@@ -100,10 +109,20 @@ delete_homepreserve=.. bevare katalog montert fra $1
 delete_ednssubof=Virtuell server $1 kan ikke slettes, siden den inneholder DNS-poster for server $2 
 delete_esslnoips=Ingen SSL-sertifikater funnet for domene
 
+save_bind_cloud=Endrer DNS-domenenavn på $1 ..
+save_bind_ecloud=.. mislyktes : $1 
+save_statussslcert=Endrer e-post i SSL-sertifikatstatusovervåker ..
+
 acl_migrate=Kan migrere sikkerhetskopier?
 
 import_euserclash=Den virtuelle serveren $1 bruker allerede det valgte brukernavnet
 import_egroupclash=Den virtuelle serveren $1 bruker allerede det valgte gruppenavnet
+
+disable_bind_cloud=Deaktiverer DNS-sone på $1 ..
+disable_ebind_cloud=.. mislyktes : $1 
+
+enable_bind_cloud=Aktiverer DNS-sone på $1 ..
+enable_ebind_cloud=.. mislyktes : $1 
 
 newweb_sslprotos=Apache SSL-protokoller å tillate
 newweb_sslprotos_def=Ikke tillat alle usikre protokoller
@@ -145,6 +164,7 @@ check_aptrepomissing=Arkivets konfigurasjonsfil $1 refererer ikke til software.v
 check_eqmailldap=Qmail+LDAP-støtte er fjernet i Virtualmin 6.00
 
 log_breakcert_domain=Slutt å dele SSL-sertifikat for server $1 
+log_rcert_domain=Slettet SSL-sertifikat for server $1 
 log_website_domain=Endrede nettstedsalternativer for server $1 
 log_php_domain=Endrede PHP-alternativer for server $1 
 log_domdkim_domain=Endret DomainKey for server $1 
@@ -155,6 +175,10 @@ log_kill_scheds=Stoppet $1 planlagte sikkerhetskopier
 log_copycert_proftpd=Kopiert SSL-sertifikat til ProFTPD
 log_retention=Oppdaterte innstillinger for oppretting av postkasse
 log_wizard=Install Wizard trinn : $1 
+log_save_cloud=Oppdatert leverandør av sikkerhetskopier av sky $1 
+log_clear_cloud=Fjernet leverandør av sikkerhetskopier i skyen $1 
+log_save_dnscloud=Oppdatert sky DNS-leverandør $1 
+log_clear_dnscloud=Fjernet sky-DNS-leverandør $1 
 
 backup_desc=Beskrivelse av sikkerhetskopien
 backup_reseller=Begrens til servere som eies av forhandleren
@@ -219,6 +243,10 @@ backup_deletingwebmin=Slette fil $1 via Webmin, som er $2 dager gammel ..
 backup_edelwebmin=.. Webmin sletting mislyktes : $1 
 backup_efeature=.. funksjon%% mislyktes
 
+restore_contents=Kontrollerer innholdet i sikkerhetskopien ..
+restore_gotcontents2=.. fant $1 virtuelle servere og $2 globale virtualmin-innstillinger
+restore_gotcontents=.. fant $1 virtuelle servere
+
 restore_erecreate=.. oppretting av manglende server mislyktes : $1 
 restore_disabledomain=Deaktiver virtuell server $1 på nytt.
 restore_downloadgc=Laster ned arkiv fra Google Cloud Storage ..
@@ -248,6 +276,7 @@ limits_ejailoff=Kunne ikke deaktivere chroot fengsel : $1
 rename_ednssub=Følgende DNS-underdomener bruker denne serverens sonefil : $1 
 rename_eparentuser=Brukernavnet kan bare endres for servere på toppnivå
 
+cert_hasnossl=Advarsel - denne virtuelle serveren har ikke et SSL-nettsted aktivert ennå. Ethvert SSL-sertifikat kan bare brukes til andre tjenester.
 cert_noneyet=Denne virtuelle serveren har ikke et SSL-sertifikat ennå. Bruk en av fanene på denne siden for å generere et sertifikat og en nøkkel.
 cert_tablets=La oss kryptere
 cert_tabperip=Tjenestesertifikater
@@ -255,6 +284,8 @@ cert_etime=Tid til utløpet
 cert_expired=Utløpt $1 dag siden!
 cert_expiring=Utløper om $1 dager
 cert_future=$1 dager til utløpet
+cert_remove=Slett SSL-sertifikat
+cert_removedesc=Siden SSL-sertifikatet til denne virtuelle serveren ikke er i bruk, kan det slettes permanent ved å klikke på denne knappen.
 cert_svcs=Brukt av tjenester
 cert_ecerts=Sertifikatet inneholder ingen BEGIN/END-blokker
 cert_eoutside=Sertifikatet inneholder en END-blokk uten samsvarende BEGIN
@@ -338,6 +369,10 @@ tmpl_dmarcskip=Ingen sett
 tmpl_dmarcyes=Ja, med policy nedenfor
 tmpl_dmarcextra=Ekstra DMARC-alternativer
 tmpl_edmarcpct=Prosentdel av meldinger må være et helt tall mellom 0 og 100
+tmpl_dns_cloud=Opprett nye DNS-soner på
+dns_cloud_def=&lt; Velg automatisk &gt;
+dns_cloud_services=Cloudmin-tjenester
+dns_cloud_local=Lokale filer
 tmpl_php_fpm=Flere FPM-bassengalternativer
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
@@ -510,6 +545,7 @@ spf_addrecs=Legger til $1 DNS-poster ..
 spf_ttl=Setter standard TTL til $1 ..
 spf_enablednssec=Oppretter DNSSEC nøkkel og poster ..
 spf_disablednssec=Fjerner DNSSEC-poster ..
+spf_ednssecsupport=.. DNSSEC kan ikke administreres for dette domenet
 spf_enabletlsa=Oppretter TLSA-poster ..
 spf_disabletlsa=Fjerner TLSA-poster ..
 spf_etlsa=.. støttes ikke på dette systemet : $1 
@@ -620,6 +656,7 @@ redirect_http=Ikke-SSL nettsted
 redirect_https=SSL nettsted
 redirect_ecode=Ugyldig HTTP-statuskode
 
+dkim_founddomains3=.. fant $1 servere og $2 ekstra domener
 dkim_pubkeypem=DKIM offentlig nøkkel i PEM-format
 dkim_privkeypem=DKIM privat nøkkel i PEM-format
 
@@ -684,6 +721,7 @@ domdkim_records=DKIM DNS-poster
 
 clouds_title=Cloud Storage Providers
 clouds_name=Tilbyderens navn
+clouds_url=Nettsted
 clouds_state=Nåværende situasjon
 clouds_users=Sikkerhetskopibrukere
 clouds_ecannot=Du har ikke lov til å redigere leverandører av skylagring
@@ -711,6 +749,7 @@ cloud_s3_location=Plassering for nye bøtter
 cloud_title=Rediger Cloud Provider
 cloud_header=Alternativer for leverandør av skylagring
 cloud_provider=Tilbyderens navn
+cloud_url=Leverandørens nettsted
 cloud_es3_endpoint=S3-kompatibel server må være et gyldig vertsnavn
 cloud_es3_chunk=Last opp delestørrelse må være et positivt tall
 cloud_egone=Ukjent leverandør av skylagring!
@@ -962,9 +1001,6 @@ deftmplt_error=FEIL
 deftmplt_website_disabled=Nettstedet er deaktivert
 deftmplt_under_construction=Under konstruksjon
 deftmplt_slogan=administrert av Virtualmin - et kraftig og fleksibelt kontrollpanel for webhotell
-deftmplt_slogan2=en domeneeier må logge på kontrollpanelet for å administrere dette nettstedet
-deftmplt_made_with_love1=Laget med
-deftmplt_made_with_love2=hos Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin-selskapet er ikke ansvarlig for innholdet som leveres av denne serveren
 
 2fa_title=Tofaktorautentisering
@@ -976,3 +1012,37 @@ deftmplt_made_with_love_disclamer=* Virtualmin-selskapet er ikke ansvarlig for i
 2fa_header=To-faktor alternativer
 2fa_err=Kunne ikke lagre tofaktorautentisering
 2fa_enrolling=Registrerer deg for to-faktor med $1. ..
+
+rcert_err=Kunne ikke slette sertifikatet
+rcert_ecert=Virtuell server har ikke noe sertifikat å fjerne
+rcert_essl=Sertifikatet kan ikke fjernes fra en virtuell server med SSL aktivert
+rcert_esame=Andre virtuelle servere deler sertifikatet med dette, så det kan ikke fjernes
+rcert_esame2=Denne virtuelle serveren deler sertifikatet med en annen server, så det kan ikke fjernes
+rcert_eservice=Andre tjenester bruker sertifikatet som tilhører denne serveren
+
+dnsclouds_title=Cloud DNS-leverandører
+dnsclouds_name=Leverandørens navn
+dnsclouds_url=Nettsted
+dnsclouds_state=Nåværende tilstand
+dnsclouds_users=Brukt av
+dnsclouds_nusers=$1 servere
+dnsclouds_nousers=Ingen servere
+dnsclouds_ecannot=Du har ikke lov til å administrere Cloud DNS-leverandører
+dnsclouds_return=DNS-leverandører i skyen
+dnsclouds_tmpl=Standardleverandøren for nye DNS-soner kan angis på siden <a href='$1'>servermal</a>.
+
+dnscloud_eaws=Kommandoen <tt>aws</tt> er nødvendig for å bruke Amazons Route 53-tjeneste
+dnscloud_eperl=Perl-modulen <tt>$1</tt> mangler
+dnscloud_53account=Bruker tilgangsnøkkel $1 
+dnscloud_title=Cloud DNS-leverandør
+dnscloud_echeck=Leverandør $1 kan ikke brukes på dette systemet : $2 
+dnscloud_header=Alternativer for DNS-leverandør
+dnscloud_provider=DNS-leverandørens navn
+dnscloud_url=DNS-leverandørens nettsted
+dnscloud_users=Brukt av virtuelle servere
+dnscloud_nousers=Ingen enda
+dnscloud_route53_location=Standard soneplassering
+dnscloud_err=Kunne ikke lagre sky DNS-leverandør
+dnscloud_egone=Leverandør eksisterer ikke!
+dnscloud_eawscreds=AWS-legitimasjon er ikke gyldig
+dnscloud_clear=Slett legitimasjon
