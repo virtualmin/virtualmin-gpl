@@ -1001,6 +1001,9 @@ deftmplt_error=FEIL
 deftmplt_website_disabled=Nettstedet er deaktivert
 deftmplt_under_construction=Under konstruksjon
 deftmplt_slogan=administrert av Virtualmin - et kraftig og fleksibelt kontrollpanel for webhotell
+deftmplt_slogan2=domeneeier kan logge på kontrollpanelet for å administrere dette nettstedet
+deftmplt_made_with_love1=Drevet av
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin-selskapet er ikke ansvarlig for innholdet som leveres av denne serveren
 
 2fa_title=Tofaktorautentisering

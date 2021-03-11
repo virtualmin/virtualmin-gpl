@@ -4407,6 +4407,9 @@ deftmplt_error=ERREUR
 deftmplt_website_disabled=site Web désactivé
 deftmplt_under_construction=En construction
 deftmplt_slogan=géré par Virtualmin - un panneau de contrôle d'hébergement Web puissant et flexible
+deftmplt_slogan2=le propriétaire du domaine peut se connecter au panneau de contrôle pour gérer ce site Web
+deftmplt_made_with_love1=Alimenté par
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* La société Virtualmin n'est pas responsable du contenu fourni par ce serveur
 
 2fa_title=Authentification à deux facteurs

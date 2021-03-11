@@ -5948,6 +5948,9 @@ deftmplt_error=CHYBA
 deftmplt_website_disabled=Web zakázán
 deftmplt_under_construction=Ve výstavbě
 deftmplt_slogan=spravuje Virtualmin - výkonný a flexibilní ovládací panel webhostingu
+deftmplt_slogan2=vlastník domény se může přihlásit do ovládacího panelu a spravovat tento web
+deftmplt_made_with_love1=Poháněno
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Společnost Virtualmin nenese odpovědnost za obsah dodávaný tímto serverem
 
 2fa_title=Dvoufaktorové ověřování

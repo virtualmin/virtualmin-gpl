@@ -4489,6 +4489,9 @@ deftmplt_error=HATA
 deftmplt_website_disabled=Web Sitesi Devre Dışı
 deftmplt_under_construction=İnşaat halinde
 deftmplt_slogan=Virtualmin tarafından yönetilen - güçlü ve esnek bir web barındırma kontrol paneli
+deftmplt_slogan2=alan sahibi, bu web sitesini yönetmek için kontrol paneline giriş yapabilir
+deftmplt_made_with_love1=Tarafından desteklenmektedir
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin şirketi, bu sunucu tarafından sağlanan içerikten sorumlu değildir
 
 2fa_title=İki Faktörlü Kimlik Doğrulama

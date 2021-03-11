@@ -6084,6 +6084,9 @@ deftmplt_error=BŁĄD
 deftmplt_website_disabled=Strona Internetowa Wyłączona
 deftmplt_under_construction=W budowie
 deftmplt_slogan=zarządzany przez Virtualmin - potężny i elastyczny panel sterowania hostingu
+deftmplt_slogan2=właściciel domeny może zalogować się do panelu sterowania, aby zarządzać tą witryną
+deftmplt_made_with_love1=Obsługiwane przez
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Firma Virtualmin nie ponosi odpowiedzialności za treści dostarczane przez ten serwer
 
 2fa_title=Uwierzytelnianie dwuskładnikowe

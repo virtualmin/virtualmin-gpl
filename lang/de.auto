@@ -2847,6 +2847,9 @@ deftmplt_error=ERROR
 deftmplt_website_disabled=Webseite deaktiviert
 deftmplt_under_construction=Im Bau
 deftmplt_slogan=verwaltet von Virtualmin - einem leistungsstarken und flexiblen Webhosting-Kontrollfeld
+deftmplt_slogan2=Der Domaininhaber kann sich beim Control Panel anmelden, um diese Website zu verwalten
+deftmplt_made_with_love1=Unterstützt von
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Das Unternehmen Virtualmin ist nicht verantwortlich für die von diesem Server bereitgestellten Inhalte
 
 2fa_title=Zwei-Faktor-Authentifizierung

@@ -5812,6 +5812,9 @@ deftmplt_error=ОШИБКА
 deftmplt_website_disabled=Сайт отключен
 deftmplt_under_construction=В разработке
 deftmplt_slogan=управляется Virtualmin - мощной и гибкой панелью управления веб-хостинга
+deftmplt_slogan2=владелец домена может войти в панель управления для управления этим сайтом
+deftmplt_made_with_love1=Питаться от
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Компания Virtualmin не несет ответственности за контент, предоставляемый этим сервером.
 
 2fa_title=Двухфакторная аутентификация

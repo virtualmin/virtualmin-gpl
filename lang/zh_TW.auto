@@ -3966,6 +3966,9 @@ deftmplt_error=錯誤
 deftmplt_website_disabled=網站已禁用
 deftmplt_under_construction=正在施工
 deftmplt_slogan=由Virtualmin管理-功能強大且靈活的Web託管控制面板
+deftmplt_slogan2=域所有者可以登錄控制面板來管理此網站
+deftmplt_made_with_love1=供電
+deftmplt_made_with_love2=虛擬分鐘
 deftmplt_made_with_love_disclamer=* Virtualmin公司對此服務器提供的內容概不負責
 
 2fa_title=兩要素認證

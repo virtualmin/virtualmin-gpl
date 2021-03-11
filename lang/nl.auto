@@ -1570,6 +1570,9 @@ deftmplt_error=FOUT
 deftmplt_website_disabled=Website uitgeschakeld
 deftmplt_under_construction=In opbouw
 deftmplt_slogan=beheerd door Virtualmin - een krachtig en flexibel webhosting-configuratiescherm
+deftmplt_slogan2=domeineigenaar kan inloggen op het configuratiescherm om deze website te beheren
+deftmplt_made_with_love1=Aangedreven door
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Het bedrijf Virtualmin is niet verantwoordelijk voor de inhoud die door deze server wordt geleverd
 
 2fa_title=Twee-factorenauthenticatie
