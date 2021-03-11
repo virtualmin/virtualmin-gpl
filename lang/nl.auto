@@ -42,6 +42,7 @@ setup_eforceunder=Je mag alleen domeinen maken onder $1
 setup_evirt6alloc2=Kan virtueel IPv6-adres niet toewijzen uit resellerbereik
 setup_evirtalloc3=Geen IP-toewijzingsbereiken gedefinieerd!
 setup_evirt6alloc3=Geen IPv6-toewijzingsbereiken gedefinieerd!
+setup_eremoteuser=De gebruikersnaam kan niet hetzelfde zijn als de huidige aanmelding bij Virtualmin
 setup_edepunix2=Een website kan niet worden ingeschakeld zonder een beheerder
 setup_edepunixdir=Een virtuele server op het hoogste niveau met een thuisrichting moet een Unix-gebruiker hebben
 setup_edepdnssub2=DNS kan niet worden uitgeschakeld terwijl het subdomein het nog steeds heeft ingeschakeld
@@ -55,6 +56,8 @@ setup_etmpl=U mag de geselecteerde sjabloon niet gebruiken
 
 setup_ewebphpmode=PHP-uitvoeringsmodus $1 is geselecteerd, maar wordt niet ondersteund op dit systeem!
 setup_esslusermin=Usermin is niet geïnstalleerd
+setup_bind_cloud=Nieuwe DNS-zone toevoegen met $1 ..
+setup_ebind_cloud=.. mislukt : $1 
 setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
@@ -68,6 +71,10 @@ setup_ejail=.. gevangenis mislukt : $1
 setup_jailed=.. gevangenis directory is nu $1 
 setup_letsaliases=Opnieuw een Let's Encrypt-certificaat aanvragen voor $1 om $2 op te nemen.
 setup_eletsaliases=.. mislukt : $1 
+setup_ednscloudexists=Geselecteerde DNS-cloudprovider bestaat niet!
+setup_ednscloudstate=DNS-cloudprovider $1 is niet klaar voor gebruik
+setup_ednscloudclash=Controle op clash op DNS-cloudprovider $1 : $2 is mislukt
+setup_dnscloudclash=DNS-zone bestaat al op cloudprovider $1 
 
 users_indom=$1 gebruikers in domein $2 
 
@@ -130,6 +137,8 @@ edit_domdkim=DomainKey-opties
 edit_domdkimdesc=Configureerde DomainKey-instellingen voor alleen deze virtuele server.
 
 delete_preserve=Functies behouden die op afstand worden gehost ($1)
+delete_bind_cloud=DNS-zone verwijderen uit $1 ..
+delete_ebind_cloud=.. verwijderen mislukt : $1 
 delete_ebindsub=Ouder DNS-zoneserver bestaat niet meer!
 delete_mysqlpreserve=.. met behoud van externe databases op $1 
 delete_remoteuser=.. gebruiker behouden op extern systeem $1 
@@ -137,7 +146,10 @@ delete_homepreserve=.. behouden van directory aangekoppeld van $1
 delete_ednssubof=Virtuele server $1 kan niet worden verwijderd, omdat deze DNS-records voor server $2 bevat
 delete_esslnoips=Geen SSL-certificaat gevonden voor domein
 
+save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
+save_bind_ecloud=.. mislukt : $1 
 save_mailto=Aliassen bijwerken voor contactadres.
+save_statussslcert=E-mailadres wijzigen in SSL-certificaatstatusmonitor.
 save_erquota=Het schijfquotum voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat het eigendom is van reseller $1 met een quotumlimiet
 save_erbw=De bandbreedtelimiet voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat deze eigendom is van reseller $1 die een bandbreedtelimiet heeft
 
@@ -153,11 +165,15 @@ import_emysql_user2=De opgegeven MySQL-gebruiker bestaat niet
 import_euserclash=De virtuele server $1 gebruikt al de geselecteerde gebruikersnaam
 import_egroupclash=De virtuele server $1 gebruikt al de geselecteerde groepsnaam
 
+disable_bind_cloud=DNS-zone uitschakelen op $1 ..
+disable_ebind_cloud=.. mislukt : $1 
 disable_subservers=Subservers ook uitschakelen?
 disable_doing=Virtuele server $1 uitschakelen. ..
 
 enable_subservers=Ook subservers inschakelen?
 enable_doing=Virtuele server $1 inschakelen. ..
+enable_bind_cloud=DNS-zone inschakelen op $1 ..
+enable_ebind_cloud=.. mislukt : $1 
 
 newweb_urlport=Extern poortnummer voor virtuele hosts
 newweb_urlsslport=Extern poortnummer voor virtuele SSL-hosts
@@ -211,6 +227,7 @@ check_aptrepomissing=Het repository-configuratiebestand $1 verwijst niet naar so
 check_eqmailldap=Qmail+LDAP-ondersteuning is verwijderd in Virtualmin 6.00
 
 log_breakcert_domain=Stop met delen van SSL-certificaat voor server $1 
+log_rcert_domain=SSL-certificaat voor server $1 verwijderd
 log_transfer_domain=Overgedragen virtuele server $1 naar een ander systeem
 log_fixttl_domain=De DNS TTL gewijzigd op virtuele server $1 
 log_website_domain=Website-opties gewijzigd voor server $1 
@@ -237,6 +254,10 @@ log_enable_ratelimit=Ingeschakelde e-mailsnelheid beperken
 log_disable_ratelimit=Uitgeschakelde e-mailsnelheidsbeperking
 log_modify_ratelimit=Bijgewerkte limiet voor e-mail
 log_wizard=Stap Installatiewizard : $1 
+log_save_cloud=Bijgewerkte cloudback-upprovider $1 
+log_clear_cloud=Cloudback-upprovider $1 gewist
+log_save_dnscloud=Bijgewerkte cloud DNS-provider $1 
+log_clear_dnscloud=Cloud DNS-provider $1 gewist
 
 backup_desc=Back-upbeschrijving
 backup_selplan=Geselecteerde plannen ..
@@ -349,6 +370,9 @@ restore_dirhomes=Herstel de directory <tt>homes</tt>
 restore_dirdelete=Verwijder bestanden die niet in de back-up staan
 restore_delete=Virtuele servers verwijderen en opnieuw maken?
 restore_newip6=IPv6-adres voor herstelde servers
+restore_contents=Inhoud van de back-up controleren. ..
+restore_gotcontents2=.. $1 virtuele servers en $2 globale virtualmin-instellingen gevonden
+restore_gotcontents=.. $1 virtuele servers gevonden
 
 restore_rerrors=Deze back-up kan niet worden hersteld vanwege de volgende fouten : $1 
 restore_rerrors2=Er zijn enkele fouten gevonden in deze back-up : $1 
@@ -392,6 +416,7 @@ rename_euserclash=Er bestaat al een gebruiker met dezelfde naam
 rename_ednssub=De volgende DNS-subdomeinen gebruiken het zonebestand van deze server : $1 
 rename_eparentuser=De gebruikersnaam kan alleen worden gewijzigd voor servers op het hoogste niveau
 
+cert_hasnossl=Waarschuwing - deze virtuele server heeft nog geen SSL-website ingeschakeld. Elk SSL-certificaat kan alleen voor andere services worden gebruikt.
 cert_noneyet=Deze virtuele server heeft nog geen SSL-certificaat. Gebruik een van de tabbladen op deze pagina om een certificaat en sleutel te genereren.
 cert_incert=SSL-certificaatbestand
 cert_inkey=SSL-privésleutelbestand
@@ -406,6 +431,8 @@ cert_etime=Tijd tot verstrijken
 cert_expired=$1 dagen geleden verlopen!
 cert_expiring=Verloopt over $1 dagen
 cert_future=$1 dagen tot de vervaldatum
+cert_remove=SSL-certificaat verwijderen
+cert_removedesc=Omdat het SSL-certificaat van deze virtuele server niet in gebruik is, kan het permanent worden verwijderd door op deze knop te klikken.
 cert_svcs=Gebruikt door services
 cert_desc5a=Het geselecteerde bestand kan meerdere CA-certificaten in PEM-indeling bevatten, de een na de ander.
 cert_ecerts=Certificaat bevat geen BEGIN/END-blokken
@@ -520,6 +547,10 @@ tmpl_dmarcskip=Geen ingesteld
 tmpl_dmarcyes=Ja, met onderstaand beleid
 tmpl_dmarcextra=Extra DMARC-opties
 tmpl_edmarcpct=Het percentage berichten moet een geheel getal zijn tussen 0 en 100
+tmpl_dns_cloud=Maak nieuwe DNS-zones op
+dns_cloud_def=&lt; Automatisch kiezen &gt;
+dns_cloud_services=Cloudmin-diensten
+dns_cloud_local=Lokale bestanden
 tmpl_domalias_type2=Virtualmin-sjabloon
 tmpl_edomaliastmpl=Ontbrekende sjabloon voor aliasdomeinvoorvoegsel
 tmpl_webssi=Sta server-side standaard toe?
@@ -778,6 +809,7 @@ spf_addrecs=$1 DNS-records toevoegen.
 spf_ttl=Standaard TTL instellen op $1 ..
 spf_enablednssec=DNSSEC-sleutel en -records maken.
 spf_disablednssec=DNSSEC-records verwijderen. ..
+spf_ednssecsupport=.. DNSSEC kan niet worden beheerd voor dit domein
 spf_enabletlsa=TLSA-records maken. ..
 spf_disabletlsa=TLSA-records verwijderen. ..
 spf_etlsa=.. niet ondersteund op dit systeem : $1 
@@ -934,6 +966,7 @@ dkim_eexclude=Ongeldig uitgesloten domein $1
 dkim_exclude=Teken nooit voor domeinen
 
 dkim_ednsexclude=.. domein is uitgesloten van DKIM
+dkim_founddomains3=.. $1 servers en $2 extra domeinen gevonden
 dkim_pubkeypem=DKIM openbare sleutel in PEM-formaat
 dkim_privkeypem=DKIM privésleutel in PEM-formaat
 dkim_esize=De grootte van de DKIM-sleutel moet een aantal van minimaal 512 bits zijn
@@ -1257,6 +1290,7 @@ domdkim_records=DKIM DNS-records
 
 clouds_title=Cloud Storage Providers
 clouds_name=Provider naam
+clouds_url=Website
 clouds_state=Huidige toestand
 clouds_users=Back-up van gebruikers
 clouds_ecannot=Het is niet toegestaan cloudopslagproviders te bewerken
@@ -1284,6 +1318,7 @@ cloud_s3_location=Locatie voor nieuwe emmers
 cloud_title=Bewerk Cloud Provider
 cloud_header=Opties voor cloudopslagproviders
 cloud_provider=Provider naam
+cloud_url=Website van de aanbieder
 cloud_es3_endpoint=De S3-compatibele server moet een geldige hostnaam zijn
 cloud_es3_chunk=Grootte van upload-brok moet een positief getal zijn
 cloud_egone=Onbekende cloudopslagprovider!
@@ -1535,9 +1570,9 @@ deftmplt_error=FOUT
 deftmplt_website_disabled=Website uitgeschakeld
 deftmplt_under_construction=In opbouw
 deftmplt_slogan=beheerd door Virtualmin - een krachtig en flexibel webhosting-configuratiescherm
-deftmplt_slogan2=een domeineigenaar moet inloggen op het configuratiescherm om deze website te beheren
-deftmplt_made_with_love1=Gemaakt met
-deftmplt_made_with_love2=bij Virtualmin
+deftmplt_slogan2=domeineigenaar kan inloggen op het configuratiescherm om deze website te beheren
+deftmplt_made_with_love1=Aangedreven door
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Het bedrijf Virtualmin is niet verantwoordelijk voor de inhoud die door deze server wordt geleverd
 
 2fa_title=Twee-factorenauthenticatie
@@ -1549,3 +1584,37 @@ deftmplt_made_with_love_disclamer=* Het bedrijf Virtualmin is niet verantwoordel
 2fa_header=Twee-factor-opties
 2fa_err=Opslaan van tweefactorauthenticatie is mislukt
 2fa_enrolling=Inschrijven voor twee factoren met $1. ..
+
+rcert_err=Certificaat kan niet worden verwijderd
+rcert_ecert=Virtuele server heeft geen certificaat om te verwijderen
+rcert_essl=Certificaat kan niet worden verwijderd van een virtuele server waarop SSL is ingeschakeld
+rcert_esame=Andere virtuele servers delen het certificaat met deze, dus het kan niet worden verwijderd
+rcert_esame2=Deze virtuele server deelt het certificaat met een andere server, dus het kan niet worden verwijderd
+rcert_eservice=Andere services gebruiken het certificaat dat bij deze server hoort
+
+dnsclouds_title=Cloud DNS-providers
+dnsclouds_name=Provider naam
+dnsclouds_url=Website
+dnsclouds_state=Huidige toestand
+dnsclouds_users=Gebruikt door
+dnsclouds_nusers=$1 servers
+dnsclouds_nousers=Geen servers
+dnsclouds_ecannot=U mag geen Cloud DNS-providers beheren
+dnsclouds_return=cloud DNS-providers
+dnsclouds_tmpl=De standaardprovider voor nieuwe DNS-zones kan worden ingesteld op de pagina <a href='$1'>serversjabloon</a>.
+
+dnscloud_eaws=Het <tt>aws</tt> -commando is nodig om de Route 53-service van Amazon te gebruiken
+dnscloud_eperl=De Perl-module <tt>$1</tt> ontbreekt
+dnscloud_53account=Met behulp van toegangssleutel $1 
+dnscloud_title=Cloud DNS-provider
+dnscloud_echeck=Provider $1 kan niet worden gebruikt op dit systeem : $2 
+dnscloud_header=DNS-provider opties
+dnscloud_provider=DNS-provider naam
+dnscloud_url=Website van DNS-provider
+dnscloud_users=Gebruikt door virtuele servers
+dnscloud_nousers=Nog geen
+dnscloud_route53_location=Standaard zonelocatie
+dnscloud_err=Opslaan van DNS-provider in de cloud is mislukt
+dnscloud_egone=Aanbieder bestaat niet!
+dnscloud_eawscreds=AWS-inloggegevens zijn niet geldig
+dnscloud_clear=Verwijder referenties

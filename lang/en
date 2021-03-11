@@ -7232,9 +7232,9 @@ deftmplt_error=ERROR
 deftmplt_website_disabled=Website Disabled
 deftmplt_under_construction=Under Construction
 deftmplt_slogan=managed by Virtualmin - a powerful and flexible web hosting control panel
-deftmplt_slogan2=a domain owner must login to control panel for managing this website
-deftmplt_made_with_love1=Made with
-deftmplt_made_with_love2=at Virtualmin
+deftmplt_slogan2=domain owner may login to the control panel to manage this website
+deftmplt_made_with_love1=Powered by
+deftmplt_made_with_love2=Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin company is not responsible for the content delivered by this server
 
 2fa_title=Two-Factor Authentication
