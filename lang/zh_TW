@@ -3058,7 +3058,6 @@ newquotacheck_gdoing=正在檢查$1上用戶組的限額 ..
 
 phpmode_title=網站選項
 phpmode_ecannot=你不允許配置該虛擬服務器的網站選項
-phpmode_header=網站和PHP選項
 phpmode_mode=PHP腳本執行模式
 phpmode_mod_php=Apache <tt>mod_php</tt>（以Apache用戶運行）
 phpmode_cgi=CGI包裝器（以虛擬服務器所有者運行） 

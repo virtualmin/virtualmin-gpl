@@ -2548,6 +2548,7 @@ newquotacheck_udoing=Vérification des quotas d'utilisateurs sur $1 ..
 newquotacheck_gdoing=Vérifiez les quotas de groupe sur $1 ..
 
 phpmode_title2=Options PHP
+phpmode_header=Options PHP pour ce domaine
 phpmode_fpm=FPM (exécuté en tant que propriétaire de serveur virtuel)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Avertissement - Le passage des modes CGI ou FCGId supprimera toutes les sélections de version PHP par répertoire.

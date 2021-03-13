@@ -931,7 +931,6 @@ newquotacheck_ok=Sprawdź teraz
 newquotacheck_udoing=Sprawdzanie przydziałów użytkownika na $1 ..
 
 phpmode_title=Opcje strony web
-phpmode_header=Opcje strony web i PHP
 phpmode_mode=Tryb wykonywania skryptu PHP
 phpmode_mod_php=Apache <tt>mod_php</tt> (uruchomione jako użytkownik Apache)
 phpmode_cgi=CGI wrapper (uruchomione jako właściciel wirtualnego serwera)

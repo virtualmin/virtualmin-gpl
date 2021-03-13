@@ -2329,6 +2329,7 @@ webmin_phpini2=$1 için PHP $2 yapılandırması
 newquotacheck_esupport=Kota denetimi dosya sistemleriniz tarafından desteklenmiyor veya gerekli değil
 
 phpmode_title2=PHP Seçenekleri
+phpmode_header=Bu etki alanı için PHP seçenekleri
 phpmode_fcgid=FCGId (sanal sunucu sahibi olarak çalıştır)
 phpmode_fpm=FPM (sanal sunucu sahibi olarak çalıştır)
 phpmode_short_mod_php=Apache <tt>mod_php</tt>

@@ -4171,6 +4171,7 @@ newquotacheck_gdoing=Sprawdź przydziały grupowe w $1 ..
 
 phpmode_title2=Opcje PHP
 phpmode_ecannot=Nie możesz konfigurować opcji strony internetowej dla tego serwera wirtualnego
+phpmode_header=Opcje PHP dla tej domeny
 phpmode_fpm=FPM (uruchamiany jako właściciel serwera wirtualnego)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Ostrzeżenie - przełączenie z trybów CGI lub FCGId spowoduje usunięcie wybranych wersji PHP dla poszczególnych katalogów.

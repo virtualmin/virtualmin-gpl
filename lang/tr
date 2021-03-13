@@ -2799,7 +2799,6 @@ newquotacheck_gdoing=Check group quotas on $1 ..
 
 phpmode_title=Website Secenekleri
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
-phpmode_header=Website and PHP options
 phpmode_mode=PHP script execution mode
 phpmode_mod_php=Apache <tt>mod_php</tt> (run as Apache's user)
 phpmode_cgi=CGI wrapper (run as virtual server owner)

@@ -1740,6 +1740,7 @@ newquotacheck_gdoing=Überprüfen Sie die Gruppenkontingente für $1 ..
 
 phpmode_title2=PHP-Optionen
 phpmode_ecannot=Sie dürfen keine Website-Optionen für diesen virtuellen Server konfigurieren
+phpmode_header=PHP-Optionen für diese Domain
 phpmode_mode=Ausführungsmodus für PHP-Skripte
 phpmode_mod_php=Apache <tt>mod_php</tt> (als Apache-Benutzer ausführen)
 phpmode_cgi=CGI-Wrapper (als Eigentümer eines virtuellen Servers ausgeführt)

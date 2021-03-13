@@ -762,6 +762,7 @@ usage_showall=Toon schijfgebruik voor iedereen.
 newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of vereist door uw bestandssystemen
 
 phpmode_title2=PHP-opties
+phpmode_header=PHP-opties voor dit domein
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Waarschuwing - Als u overschakelt van de CGI- of FCGId-modi, worden alle PHP-versieselecties per map verwijderd.

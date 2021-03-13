@@ -4331,7 +4331,6 @@ newquotacheck_gdoing=Controleer groep quota's op $1 ..
 
 phpmode_title=Website Opties
 phpmode_ecannot=U bent niet bevoegd om website opties te bewerken voor deze virtuele server
-phpmode_header=Website en PHP opties
 phpmode_mode=PHP script executie mode
 phpmode_mod_php=Apache <tt>mod_php</tt> (uitvoeren als Apache gebruiker)
 phpmode_cgi=CGI wrapper (uitvoeren als virtuele server eigenaar)

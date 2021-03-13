@@ -2062,6 +2062,7 @@ webmin_phpini2=$1的PHP $2配置
 newquotacheck_esupport=文件系統不支持或不需要配額檢查
 
 phpmode_title2=PHP選項
+phpmode_header=該域的PHP選項
 phpmode_fpm=FPM（以虛擬服務器所有者身份運行）
 phpmode_short_mod_php=Apache <tt>mod_php</tt>
 phpmode_short_cgi=CGI包裝器

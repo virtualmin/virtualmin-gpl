@@ -4578,7 +4578,6 @@ newquotacheck_gdoing=Sjekk gruppe-kvoter på $1 ..
 
 phpmode_title=Nettsted innstillinger
 phpmode_ecannot=Du har ikke lov til å konfigurere innstillinger for nettsted for denne virtuelle tjeneren
-phpmode_header=Nettsted og PHP innstillinger
 phpmode_mode=PHP script eksekveringsmodus
 phpmode_mod_php=Apache <tt>mod_php</tt> (kjør som Apaches bruker)
 phpmode_cgi=CGI wrapper (kjør som virtuell tjeners eier)

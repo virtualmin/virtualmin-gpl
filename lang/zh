@@ -3058,7 +3058,6 @@ newquotacheck_gdoing=正在检查$1上用户组的限额 ..
 
 phpmode_title=网站选项
 phpmode_ecannot=你不允许配置该虚拟服务器的网站选项
-phpmode_header=网站和PHP选项
 phpmode_mode=PHP脚本执行模式
 phpmode_mod_php=Apache <tt>mod_php</tt>（以Apache用户运行）
 phpmode_cgi=CGI包装器（以虚拟服务器所有者运行） 

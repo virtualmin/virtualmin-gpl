@@ -3872,7 +3872,6 @@ newquotacheck_gdoing=Chequear quotas de grupo en $1 ..
 
 phpmode_title=Opciones de Website
 phpmode_ecannot=No está autorizado a configurar opciones de website para este servidor virtual
-phpmode_header=Opciones del website y de PHP
 phpmode_mode=Modo de ejecución de scripts de PHP
 phpmode_mod_php=Apache <tt>mod_php</tt> (ejecutar como usuario de Apache)
 phpmode_cgi=CGI wrapper (ejecutar como dueño del servidor virtual)

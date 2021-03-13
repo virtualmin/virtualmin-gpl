@@ -1236,6 +1236,7 @@ usage_showall=Mostrar el uso del disco para todos.
 newquotacheck_esupport=La comprobación de cuotas no es compatible ni requerida por sus sistemas de archivos
 
 phpmode_title2=Opciones PHP
+phpmode_header=Opciones de PHP para este dominio
 phpmode_fpm=FPM (ejecutar como propietario del servidor virtual)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Advertencia: cambiar de los modos CGI o FCGId eliminará cualquier selección de versión de PHP por directorio.

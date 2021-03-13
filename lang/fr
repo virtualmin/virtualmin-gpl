@@ -2555,7 +2555,6 @@ umass_separatortab=Tab
 
 phpmode_title=Options du Site Web
 phpmode_ecannot=Vous n'êtes pas autorisé à configurer les options de site pour ce serveur virtuel
-phpmode_header=Options Site Web et PHP
 phpmode_mode=PHP script Mode d'exécution
 phpmode_mod_php=Apache <tt>mod_php</tt> (fonctionner comme utilisateur d'Apache)
 phpmode_cgi=CGI wrapper (exécuter en tant que propriétaire du serveur virtuel)

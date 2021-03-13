@@ -508,6 +508,7 @@ usage_others=Andre filer i hjemmet
 newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene dine
 
 phpmode_title2=PHP-alternativer
+phpmode_header=PHP-alternativer for dette domenet
 phpmode_fpm=FPM (kjøres som virtuell servereier)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Advarsel - Hvis du skifter fra CGI- eller FCGId-modus, fjernes alle PHP-versjoner per katalog.
