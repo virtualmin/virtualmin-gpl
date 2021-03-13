@@ -2347,7 +2347,7 @@ elsif (&postfix_supports_sni()) {
 	push(@certs, $d->{'ssl_chain'}) if ($d->{'ssl_chain'});
 	my $certstr = join(",", @certs);
 	my @doms = ( $d, &get_domain_by("alias", $d->{'id'}) );
-	my @dnames = map { ($_->{'dom'}, "*.".$_->{'dom'}) }
+	my @dnames = map { ($_->{'dom'}, ".".$_->{'dom'}) }
 			 grep { !$_->{'deleting'} } @doms;
 	my @mymaps = grep { &hostname_under_domain(\@doms,$_->{'name'}) } @$map;
 	my @delmaps;
