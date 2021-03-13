@@ -1707,7 +1707,7 @@ if ($virt) {
 				"php_value", [ ], $vconf, $conf);
 			&apache::save_directive(
 				"php_admin_value", [ ], $vconf, $conf);
-			&flush_file_lines($virt->{'file'});
+			&flush_file_lines($virt->{'file'}, undef, 1);
 			}
 		&register_post_action(\&restart_apache);
 		}
