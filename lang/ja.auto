@@ -1812,6 +1812,7 @@ newreseller_ecannot=新しい販売パートナーのメールテンプレート
 newreseller_desc2=このフォームを使用して、作成後に新しいリセラーアカウントに送信できる電子メールメッセージのテンプレートを編集します。次の置換がテキストに対して行われます。
 
 feature_web=Apacheウェブサイト
+feature_ssl=ApacheSSLWebサイト
 feature_dns=BIND DNSドメイン
 feature_mysql=MySQLデータベース
 feature_postgres=PostgreSQLデータベース
@@ -1819,7 +1820,6 @@ feature_webalizer=Webalizerレポート
 feature_mail=ドメインのメール
 feature_unix=管理ユーザー
 feature_dir=ホームディレクトリ
-feature_ssl=SSLウェブサイト
 feature_webmin=Webminログイン
 feature_ftp=ProFTPD仮想FTP
 feature_logrotate=ログファイルのローテーション

@@ -608,6 +608,7 @@ newreseller_title=Courriel du nouveau revendeur
 newreseller_ecannot=Vous n'êtes pas autorisé à modifier le nouveau modèle d'e-mail de revendeur
 newreseller_desc2=Utilisez ce formulaire pour modifier le modèle du message électronique qui peut être envoyé à un nouveau compte revendeur après sa création. Les sous-positions suivantes seront apportées au texte :
 
+feature_ssl=Site Web Apache SSL
 feature_virt=Adresse IP virtuelle
 feature_virus=Filtrage des virus
 feature_status=Surveillance de l'état

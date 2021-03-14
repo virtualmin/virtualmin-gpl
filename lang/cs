@@ -471,7 +471,6 @@ feature_webalizer=Webalizer reporty
 feature_mail=Doménový email
 feature_unix=Administrační uživatel
 feature_dir=Domovský adresář
-feature_ssl=SSL web
 feature_webmin=Webmin přihlášení
 feature_logrotate=Rotace log souborů
 feature_virt=Virtuální IP adresa

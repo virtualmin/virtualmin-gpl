@@ -1248,7 +1248,6 @@ feature_webalizer=Webalizer raporlama
 feature_mail=Alanadý için e-posta
 feature_unix=Unix kullanýcýsý
 feature_dir=Anaklasör
-feature_ssl=SSL web sitesi
 feature_webmin=Webmin logini
 feature_ftp=ProFTPd sunucu
 feature_logrotate=Log dosyasý çevirimi

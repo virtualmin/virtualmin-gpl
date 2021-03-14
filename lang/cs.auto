@@ -1366,6 +1366,7 @@ newreseller_title=Nový e-mail pro distributory
 newreseller_ecannot=Není dovoleno upravovat novou e-mailovou šablonu distributora
 newreseller_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, kterou lze po vytvoření odeslat do nového účtu distributora. K textu budou provedeny následující podskupiny :
 
+feature_ssl=Web Apache SSL
 feature_ftp=ProFTPD virtuální FTP
 feature_virt6=IPv6 adresa
 feature_status=Sledování stavu

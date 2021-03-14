@@ -898,7 +898,6 @@ feature_webalizer=Отчётность Webalizer
 feature_mail=Почта для домена
 feature_unix=Unix пользователь
 feature_dir=Домашняя директория
-feature_ssl=SSL вебсайт
 feature_webmin=Логин ZTL
 feature_ftp=FTP сервер
 feature_logrotate=Ротация log-файла

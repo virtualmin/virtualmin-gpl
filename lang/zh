@@ -1319,7 +1319,6 @@ feature_webalizer=Webalizer报告
 feature_mail=域邮件
 feature_unix=管理员用户
 feature_dir=用户主目录
-feature_ssl=SSL网站
 feature_webmin=Webmin账号
 feature_ftp=ProFTPd服务器
 feature_logrotate=日志文件轮换

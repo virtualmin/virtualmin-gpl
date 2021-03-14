@@ -596,6 +596,7 @@ newreseller_title=Yeni Bayi E-postası
 newreseller_ecannot=Yeni satıcı e-posta şablonunu düzenlemenize izin verilmiyor
 newreseller_desc2=Oluşturulduktan sonra yeni bir bayi hesabına gönderilebilecek e-posta iletisi şablonunu düzenlemek için bu formu kullanın. Metne aşağıdaki alt bölümler yapılacaktır :
 
+feature_ssl=Apache SSL web sitesi
 feature_virt6=IPv6 adresi
 
 bandwidth_backup=Yapılan yedeklemeler

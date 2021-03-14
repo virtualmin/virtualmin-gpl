@@ -1367,7 +1367,6 @@ feature_webalizer=Webalizer-Statistik
 feature_mail=E-Mail für Domaine
 feature_unix=Unixbenutzer
 feature_dir=Heimat-Verzeichnis
-feature_ssl=SSL-Webseite
 feature_webmin=Webmin-Benutzer
 feature_ftp=ProFTPd-Server
 feature_logrotate=Log-Datei-Rotation

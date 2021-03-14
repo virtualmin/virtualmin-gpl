@@ -351,6 +351,7 @@ newweb_eadmindom=Falta la URL o no es válida para la redirección del administr
 newdns_ensip=El servidor de nombres adicional $1 es una dirección IP en lugar de un nombre de host
 newdns_enshost=El servidor de nombres adicional $1 no existe
 
+feature_ssl=Sitio web de Apache SSL
 feature_virt6=Dirección IPv6
 
 check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2.

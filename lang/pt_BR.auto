@@ -1643,6 +1643,7 @@ newreseller_ecannot=Você não tem permissão para editar o novo modelo de email
 newreseller_desc2=Use este formulário para editar o modelo da mensagem de email que pode ser enviada para uma nova conta de revendedor depois que ela é criada. As seguintes subestações serão feitas no texto :
 
 feature_web=Site do Apache
+feature_ssl=Site SSL Apache
 feature_dns=Domínio DNS BIND
 feature_mysql=Banco de dados MySQL
 feature_postgres=Banco de dados PostgreSQL
@@ -1650,7 +1651,6 @@ feature_webalizer=Relatórios do Webalizer
 feature_mail=Correio para o domínio
 feature_unix=Usuário de administração
 feature_dir=Diretório inicial
-feature_ssl=Site SSL
 feature_webmin=Login do Webmin
 feature_ftp=FTP virtual ProFTPD
 feature_logrotate=Rotação do arquivo de log

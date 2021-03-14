@@ -130,6 +130,8 @@ newweb_esslproto=SSL-protokoller må være som SSLv3 eller TLSv1.1, eventuelt fo
 newweb_dovecot=Vil du konfigurere Dovecot til å bruke samme SSL-sertifikat?
 newweb_postfix=Vil du konfigurere Postfix til å bruke samme SSL-sertifikat?
 
+feature_ssl=Apache SSL-nettsted
+
 check_ewebdefphpmode2=PHP-utførelsesmodus $1 ble valgt i standardmal, men støttes ikke på dette systemet. Endre standard til $2.
 check_webnosuexec=SuExec kan ikke brukes til å kjøre PHP-skript i CGI- eller FCGId-modus : $1 
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 

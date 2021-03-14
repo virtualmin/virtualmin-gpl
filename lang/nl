@@ -1652,7 +1652,6 @@ feature_webalizer=Webalizer rapportage
 feature_mail=Email voor domein
 feature_unix=Administratie gebruiker
 feature_dir=Home directory
-feature_ssl=SSL website
 feature_webmin=Webmin login
 feature_ftp=ProFTPd virtuele FTP
 feature_logrotate=Log file rotatie

@@ -519,6 +519,7 @@ newweb_eadmindom=管理员重定向网址缺失或无效
 newdns_ensip=附加名称服务器 $1是IP地址而不是主机名
 newdns_enshost=其他名称服务器 $1不存在
 
+feature_ssl=Apache SSL网站
 feature_virt6=IPv6地址
 
 bandwidth_backup=进行备份

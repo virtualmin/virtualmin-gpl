@@ -1092,6 +1092,7 @@ newreseller_title=Email nuovo rivenditore
 newreseller_ecannot=Non è consentito modificare il nuovo modello e-mail del rivenditore
 newreseller_desc2=Utilizzare questo modulo per modificare il modello per il messaggio e-mail che può essere inviato a un nuovo account rivenditore dopo che è stato creato. Le seguenti sottostazioni verranno eseguite nel testo :
 
+feature_ssl=Sito Web Apache SSL
 losing_web=Tutte le direttive Apache nell'host virtuale verranno rimosse.
 losing_dns=Tutti i record DNS nel dominio e tutte le opzioni BIND verranno eliminati.
 losing_mysql=Tutti i database MySQL, tutte le tabelle e il login MySQL del server verranno eliminati.

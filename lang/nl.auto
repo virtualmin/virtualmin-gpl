@@ -184,6 +184,8 @@ newweb_esslproto=SSL-protocollen moeten vergelijkbaar zijn met SSLv3 of TLSv1.1,
 newweb_dovecot=Dovecot configureren om hetzelfde SSL-certificaat te gebruiken?
 newweb_postfix=Postfix configureren om hetzelfde SSL-certificaat te gebruiken?
 
+feature_ssl=Apache SSL-website
+
 check_defip6=Het standaard IPv6-adres voor virtuele servers is $1.
 check_ewebdefphpmode2=PHP-uitvoeringsmodus $1 is geselecteerd in de standaardsjabloon, maar wordt niet ondersteund op dit systeem. De standaard wijzigen in $2.
 check_ewebapacheversion=Virtualmin kon de versie van Apache op uw systeem niet uitwerken

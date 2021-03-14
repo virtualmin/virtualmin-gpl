@@ -1812,6 +1812,7 @@ newreseller_ecannot=You are not allowed to edit the new reseller email template
 newreseller_desc2=Use this form to edit the template for the email message that can be sent to a new reseller account after it is created. The following substitions will be done to the text :
 
 feature_web=Apache website
+feature_ssl=Apache SSL website
 feature_dns=BIND DNS domain
 feature_mysql=MySQL database
 feature_postgres=PostgreSQL database
@@ -1819,7 +1820,6 @@ feature_webalizer=Webalizer reporting
 feature_mail=Mail for domain
 feature_unix=Administration user
 feature_dir=Home directory
-feature_ssl=SSL website
 feature_webmin=Webmin login
 feature_ftp=ProFTPD virtual FTP
 feature_logrotate=Log file rotation

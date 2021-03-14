@@ -1432,6 +1432,7 @@ newreseller_title=Nowy adres e-mail sprzedawcy
 newreseller_ecannot=Nie możesz edytować nowego szablonu wiadomości e-mail odsprzedawcy
 newreseller_desc2=Ten formularz służy do edytowania szablonu wiadomości e-mail, która może zostać wysłana na nowe konto sprzedawcy po jego utworzeniu. W tekście zostaną wykonane następujące podstacje :
 
+feature_ssl=Witryna Apache SSL
 feature_dns=BIND domena DNS
 feature_webalizer=Raportowanie przez Webalizer
 feature_mail=Poczta dla domeny

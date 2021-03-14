@@ -1703,7 +1703,6 @@ feature_webalizer=Webalizer rapportering
 feature_mail=E-post for domene
 feature_unix=Administrasjonsbruker
 feature_dir=Hjemmekatalog
-feature_ssl=SSL nettsted
 feature_webmin=Webmin bruker
 feature_ftp=ProFTP virtuell FTP
 feature_logrotate=Loggfil-rotasjon

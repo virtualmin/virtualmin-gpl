@@ -1238,7 +1238,6 @@ feature_webalizer=Statistiques d'accès Webalizer
 feature_mail=Courrier pour le domaine
 feature_unix=Utilisateur Unix
 feature_dir=Répertoire utilisateur
-feature_ssl=Site Web SSL
 feature_webmin=Login Webmin
 feature_ftp=serveur ProFTPd
 feature_logrotate=Rotation des fichiers log

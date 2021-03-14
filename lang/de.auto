@@ -477,6 +477,8 @@ newreseller_title=Neue Reseller-E-Mail
 newreseller_ecannot=Sie dürfen die neue E-Mail-Vorlage des Wiederverkäufers nicht bearbeiten
 newreseller_desc2=Verwenden Sie dieses Formular, um die Vorlage für die E-Mail-Nachricht zu bearbeiten, die nach ihrer Erstellung an ein neues Reseller-Konto gesendet werden kann. Die folgenden Substitutionen werden für den Text vorgenommen :
 
+feature_ssl=Apache SSL-Website
+
 losing_spam=Die SpamAssassin-Konfiguration für diesen virtuellen Server wird gelöscht.
 losing_virus=Der Procmail-Eintrag zum Filtern von Viren für diesen virtuellen Server wird entfernt.
 losing_status=Der Webmin-Statusmonitor für die Website dieses virtuellen Servers wird gelöscht.

@@ -1485,7 +1485,6 @@ feature_webalizer=Informes Webalizer
 feature_mail=Cuentas de mail y alias
 feature_unix=Usuario Unix
 feature_dir=Directorio base
-feature_ssl=Sitio web SSL
 feature_webmin=Conexión Webmin
 feature_ftp=Servidor ProFTPd
 feature_logrotate=Rotación de archivos de bitácora
