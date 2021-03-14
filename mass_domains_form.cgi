@@ -61,7 +61,9 @@ if ($anyqb) {
 # Feature enable/disable
 print &ui_hidden_table_start($text{'massdomains_headerf'}, "width=100%", 2,
 			     "features", 0);
-foreach $f (@opt_features) {
+my @opt_features_ = @opt_features;
+features_sort(\@opt_features_, \@opt_features_);
+foreach $f (@opt_features_) {
 	if (&can_use_feature($f)) {
 		print &ui_table_row($text{'edit_'.$f},
 			&ui_radio($f, 2, [ [ 2, $text{'massdomains_leave'} ],
@@ -71,7 +73,9 @@ foreach $f (@opt_features) {
 			1, \@tds);
 		}
 	}
-foreach $f (&list_feature_plugins()) {
+my @list_feature_plugins = &list_feature_plugins();
+features_sort(\@list_feature_plugins, \@list_feature_plugins);
+foreach $f (@list_feature_plugins) {
 	if (&can_use_feature($f)) {
 		$label = &plugin_call($f, "feature_label", 1);
 		print &ui_table_row($label,
@@ -125,12 +129,16 @@ if (&can_edit_limits($doms[0])) {
 		}
 	# Allowed features
 	@opts = ( );
+	@opts_order = ( );
 	foreach $f (@opt_features, "virt") {
+		push(@opts_order, $f);
 		push(@opts, [ $f, $text{'feature_'.$f} ]);
 		}
 	foreach $f (&list_feature_plugins()) {
+		push(@opts_order, $f);
 		push(@opts, [ $f, &plugin_call($f, "feature_name") ]);
 		}
+	features_sort(\@opts, \@opts_order);
 	print &ui_table_row($text{'massdomains_features'},
 		&ui_radio("features_def", 2,
 			[ [ 2, $text{'massdomains_features2'}."<br>" ],
