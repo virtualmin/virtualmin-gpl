@@ -379,7 +379,7 @@ if (!$d->{'disabled'}) {
 				    $label);
 			}
 		}
-	features_sort(\@grid, \@grid_order_initial, 'grid');
+	features_sort(\@grid, \@grid_order_initial);
 
 	my @grid_left = @grid;
 	my $grid_tnum = scalar(@grid);

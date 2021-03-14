@@ -11749,12 +11749,12 @@ elsif ($fmt == 5) {
 return undef;
 }
 
-# features_sort(\@features_values, \@features_order, [grouped-by-two])
+# features_sort(\@features_values, \@features_order)
 # Sorts features based on given pre-sorted list,
 # and fills unlisted based on initial sorting
 sub features_sort
 {
-my ($features_values, $features_order, $grouped_by_two) = @_;
+my ($features_values, $features_order) = @_;
 my @order_manual =
    ('unix', 'dir',
     'dns', 'virtualmin-slavedns', 'virtualmin-powerdns',
@@ -11798,20 +11798,9 @@ for my $i (0 .. $#order_manual) {
 	push(@ordered, $__) if ($__);
 }
 
-# Grid like ordering by two
+# Combine both and modify original
 my @ordered_combined = (@ordered, @unordered);
-my @ordered_combined_grouped_by_two;
-if ($grouped_by_two) {
-	for my $i (0 .. $#ordered_combined) {
-		push(@ordered_combined_grouped_by_two, $ordered[$i]) if ($ordered[$i]);
-		push(@ordered_combined_grouped_by_two, $unordered[$i]) if ($unordered[$i]);
-		}
-	@$features_values = @ordered_combined_grouped_by_two;
-	}
-
-else {
-	@$features_values = @ordered_combined;
-	}
+@$features_values = @ordered_combined;
 }
 
 # feature_links(&domain)
