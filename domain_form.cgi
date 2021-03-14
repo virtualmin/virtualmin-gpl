@@ -252,7 +252,7 @@ if ($config{'plan_auto'}) {
 	@def_features = grep { $config{$_} == 1 || $config{$_} == 3 }
 			     @dom_features;
 	@fplugins = &list_feature_plugins();
-	# push(@def_features, grep { !$plugins_inactive{$_} } @fplugins);
+	push(@def_features, grep { !$plugins_inactive{$_} } @fplugins);
 	}
 
 # Generate Javascript for plan change
