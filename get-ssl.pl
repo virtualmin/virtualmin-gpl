@@ -54,14 +54,14 @@ $d || &usage("Virtual server $dname does not exist");
 
 # Get either the CA or actual cert
 if ($chain) {
-	$cfile = &get_website_ssl_file($d, "ca");
-	$cfile || &usage("Virtual server does not have a CA certificate");
-	$info = &cert_file_info($cfile, $d);
+	$cafile = &get_website_ssl_file($d, "ca");
+	$cafile || &usage("Virtual server does not have a CA certificate");
+	$info = &cert_file_info($cafile, $d);
 	}
 else {
 	$info = &cert_info($d);
-	$info || &usage("No SSL certificate found");
 	}
+$info || &usage("No SSL certificate found");
 
 foreach $i (@cert_attributes) {
 	$v = $info->{$i};
