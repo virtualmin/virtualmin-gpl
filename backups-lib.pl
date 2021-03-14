@@ -2697,6 +2697,7 @@ if ($ok) {
 			foreach my $f (&list_provision_features()) {
 				$d->{'provision_'.$f} = 0;
 				}
+			delete($d->{'dns_cloud'});
 			&set_provision_features($d);
 
 			# Check for clashes
