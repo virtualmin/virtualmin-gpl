@@ -740,6 +740,8 @@ validate_ewebroot=Apache DocumentRoot is niet ingesteld op HTML-directory $1
 validate_ewebipv6=Er bestaat een IPv6 DNS-record $2 met adres $1, maar voor deze virtuele server is IPv6 niet ingeschakeld
 validate_ewebipv6virt=Er bestaat een IPv6 DNS-record met adres $1, maar de Apache-configuratie van deze virtuele server heeft geen IPv6-adres
 validate_esslcertinfo=SSL-certificaatbestand kan niet worden geparseerd
+validate_esslcainfo=SSL CA-bestand $1 kan niet worden geparseerd
+validate_esslcamatch=SSL CA-certificaat voor $1/$2 komt niet overeen met de uitgever van het SSL-certificaat $1/$2 
 validate_esslexpired=Het SSL-certificaat voor deze virtuele server is verlopen op $1 
 validate_emysqlmod=MySQL Webmin-module $1 bestaat niet!
 
