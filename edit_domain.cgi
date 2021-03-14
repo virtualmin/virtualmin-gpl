@@ -324,8 +324,9 @@ if ($fields) {
 if (!$d->{'disabled'}) {
 	# Show features for this domain
 	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-				     "feature", 0);
+				     "feature", 1);
 	@grid = ( );
+	@grid_order_initial = ( );
 	$i = 0;
 	foreach my $f (&list_possible_domain_features($d)) {
 		# Don't show features that are always enabled, if currently set
@@ -344,12 +345,14 @@ if (!$d->{'disabled'}) {
 		local $txt = $parentdom ? $text{'edit_sub'.$f} : undef;
 		$txt ||= $text{'edit_'.$f};
 		if (!&can_use_feature($f)) {
+			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f."_dis", 1, undef,
 						$d->{$f}, undef, 1).
 				    &ui_hidden($f, $d->{$f}).
 				    " <b>".&hlink($txt, $f)."</b>");
 			}
 		else {
+			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
 				    " <b>".&hlink($txt, $f)."</b>");
 			}
@@ -360,23 +363,32 @@ if (!$d->{'disabled'}) {
 					$parentdom, $aliasdom, $subdom));
 
 		$label = &plugin_call($f, "feature_label", 1);
-		$label = "<b>$label</b>";
+		$label = " <b>$label</b>";
 		$hlink = &plugin_call($f, "feature_hlink");
 		$label = &hlink($label, $hlink, $f) if ($hlink);
 		if (!&can_use_feature($f)) {
+			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f."_dis", 1, "",
 						 $d->{$f}, undef, 1).
 				    &ui_hidden($f, $d->{$f}).
 				    $label);
 			}
 		else {
+			push(@grid_order_initial, $f);
 			push(@grid, &ui_checkbox($f, 1, "", $d->{$f}).
 				    $label);
 			}
 		}
+	features_sort(\@grid, \@grid_order_initial, 'grid');
 
-	$ftable = &ui_grid_table(\@grid, 2, 100,
-			[ "align=left", "align=left" ]);
+	my @grid_left = @grid;
+	my $grid_tnum = scalar(@grid);
+	my @grid_right = splice(@grid_left, ($grid_tnum / 2) + ($grid_tnum % 2 ? 1 : 0));
+	my $style_force_no_border = 'style="border:0 !important;"';
+	my $style_flex_cnt = 'style="display: flex; align-items: flex-start; justify-content: center;"';
+	my $lgftable = &ui_grid_table(\@grid_left, 1, undef, undef, $style_force_no_border);
+	my $rgftable = &ui_grid_table(\@grid_right, 1, undef, undef, $style_force_no_border);
+	my $ftable = "<div $style_flex_cnt>" . ($lgftable .$rgftable) . "</div>";
 	print &ui_table_row(undef, $ftable, 2);
 	print &ui_hidden_table_end("feature");
 	}

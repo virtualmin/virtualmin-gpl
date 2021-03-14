@@ -11749,6 +11749,71 @@ elsif ($fmt == 5) {
 return undef;
 }
 
+# features_sort(\@features_values, \@features_order, [grouped-by-two])
+# Sorts features based on given pre-sorted list,
+# and fills unlisted based on initial sorting
+sub features_sort
+{
+my ($features_values, $features_order, $grouped_by_two) = @_;
+my @order_manual =
+   ('unix', 'dir',
+    'dns', 'virtualmin-slavedns', 'virtualmin-powerdns',
+    'web', 'ssl',
+    'virtualmin-nginx', 'virtualmin-nginx-ssl',
+    'mysql', 'postgres', 'virtualmin-sqlite', 'virtualmin-oracle',
+    'mail', 'spam', 'virus',
+    'virtualmin-mailrelay', 'virtualmin-mailman', 'virtualmin-signup',
+    'logrotate',
+    'status', 'webalizer',
+    'webmin',
+    'virtualmin-awstats',
+    'virtualmin-notes', 'virtualmin-google-analytics',
+    'virtualmin-init',
+    'virtualmin-dav', 'virtualmin-registrar',
+    'virtualmin-disable',
+    'virtualmin-git', 'virtualmin-svn',
+    'virtualmin-messageoftheday',
+    'virtualmin-htpasswd',
+    'ftp', 'virtualmin-vsftpd',
+    'virtualmin-support',
+    );
+my @order_initial = @{$features_order};
+my %ordered_;
+my @ordered;
+my @unordered;
+for my $i (0 .. $#order_initial) {
+
+	# Store all features
+	$ordered_{$order_initial[$i]} = $features_values->[$i];
+
+	# Unordered keys
+	if (! grep( /^$order_initial[$i]$/, @order_manual ) ) {
+		push(@unordered, $features_values->[$i]);
+		}
+	}
+
+# Sort ordered based on manual sorting
+for my $i (0 .. $#order_manual) {
+	my $__ = $ordered_{$order_manual[$i]};
+	push(@ordered, $__) if ($__);
+}
+
+# Grid like ordering by two
+my @ordered_combined = (@ordered, @unordered);
+my @ordered_combined_grouped_by_two;
+if ($grouped_by_two) {
+	for my $i (0 .. $#ordered_combined) {
+		push(@ordered_combined_grouped_by_two, $ordered[$i]) if ($ordered[$i]);
+		push(@ordered_combined_grouped_by_two, $unordered[$i]) if ($unordered[$i]);
+		}
+	@$features_values = @ordered_combined_grouped_by_two;
+	}
+
+else {
+	@$features_values = @ordered_combined;
+	}
+}
+
 # feature_links(&domain)
 # Returns a list of links for editing specific features within a domain, such
 # as the DNS zone, apache config and so on. Includes plugins.
