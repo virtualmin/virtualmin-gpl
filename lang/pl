@@ -405,7 +405,6 @@ newdns_title=Szablon BIND DNS
 feature_web=Strona web Apache
 feature_mysql=Baza danych MySQL
 feature_postgres=Baza danych PostgreSQL
-feature_ssl=Strona web SSL
 feature_virt=Wirtualny adres IP
 feature_virt6=Adres IPv6
 feature_spam=Filtrowanie spamu

@@ -130,6 +130,8 @@ newweb_esslproto=SSL-protokoller må være som SSLv3 eller TLSv1.1, eventuelt fo
 newweb_dovecot=Vil du konfigurere Dovecot til å bruke samme SSL-sertifikat?
 newweb_postfix=Vil du konfigurere Postfix til å bruke samme SSL-sertifikat?
 
+feature_ssl=Apache SSL-nettsted
+
 check_ewebdefphpmode2=PHP-utførelsesmodus $1 ble valgt i standardmal, men støttes ikke på dette systemet. Endre standard til $2.
 check_webnosuexec=SuExec kan ikke brukes til å kjøre PHP-skript i CGI- eller FCGId-modus : $1 
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 
@@ -494,6 +496,8 @@ validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1
 validate_ewebipv6=En IPv6 DNS-post $2 med adresse $1 eksisterer, men denne virtuelle serveren har ikke IPv6 aktivert
 validate_ewebipv6virt=Det finnes en IPv6 DNS-post med adresse $1, men denne virtuelle serverens Apache-konfigurasjon har ikke en IPv6-adresse
 validate_esslcertinfo=SSL-sertifikatfil kunne ikke analyseres
+validate_esslcainfo=SSL CA-fil $1 kunne ikke analyseres
+validate_esslcamatch=SSL CA-sertifisering for $1/$2 samsvarer ikke med utstederen av SSL-sertifikatet $1/$2 
 validate_esslexpired=SSL-sertifikatet for denne virtuelle serveren gikk ut på $1 
 validate_emysqlmod=MySQL Webmin-modul $1 eksisterer ikke!
 

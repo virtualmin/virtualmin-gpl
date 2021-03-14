@@ -1366,6 +1366,7 @@ newreseller_title=Nový e-mail pro distributory
 newreseller_ecannot=Není dovoleno upravovat novou e-mailovou šablonu distributora
 newreseller_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, kterou lze po vytvoření odeslat do nového účtu distributora. K textu budou provedeny následující podskupiny :
 
+feature_ssl=Web Apache SSL
 feature_ftp=ProFTPD virtuální FTP
 feature_virt6=IPv6 adresa
 feature_status=Sledování stavu
@@ -3722,6 +3723,8 @@ validate_esslcert=Ve virtuálním hostiteli Apache nebyl zadán žádný soubor 
 validate_esslcertfile=Soubor certifikátu SSL $1 neexistuje
 validate_esslkeyfile=Soubor klíče SSL $1 neexistuje
 validate_esslcertinfo=Soubor certifikátu SSL nelze analyzovat
+validate_esslcainfo=Soubor SSL CA $1 nelze analyzovat
+validate_esslcamatch=Certifikát SSL CA pro $1/$2 neodpovídá vydavateli certifikátu SSL $1/$2 
 validate_essldom=Certifikát SSL pro tento virtuální server neodpovídá $1 nebo $2. Místo toho se shoduje s názvy hostitelů : $3 
 validate_esslexpired=Platnost certifikátu SSL pro tento virtuální server vypršela dne $1 
 validate_esslfirst=Certifikát SSL prvního virtuálního hostitele Apache SSL na $4 neodpovídá $1 nebo $2. Místo toho se shoduje s názvy hostitelů : $3 

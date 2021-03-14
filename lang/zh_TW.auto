@@ -519,6 +519,7 @@ newweb_eadmindom=管理員重定向網址缺失或無效
 newdns_ensip=附加名稱服務器 $1是IP地址而不是主機名
 newdns_enshost=其他名稱服務器 $1不存在
 
+feature_ssl=Apache SSL網站
 feature_virt6=IPv6地址
 
 bandwidth_backup=進行備份
@@ -1962,6 +1963,8 @@ validate_ewebipv6virt=存在地址為 $1的IPv6 DNS記錄，但是此虛擬服�
 validate_ewebip=該域的Apache虛擬主機不使用IPv4地址和端口 $1
 validate_ewebip6=該域的Apache虛擬主機不使用IPv6地址和端口 $1
 validate_esslcertinfo=無法解析SSL證書文件
+validate_esslcainfo=無法解析SSL CA文件 $1
+validate_esslcamatch=$1/$2的SSL CA證書與SSL證書 $1/$2的頒發者不匹配
 validate_essldom=此虛擬服務器的SSL證書與 $1或 $2不匹配。而是匹配主機名： $3
 validate_esslexpired=此虛擬服務器的SSL證書已在 $1上過期
 validate_esslfirst=$4上的第一個Apache SSL虛擬主機的SSL證書與 $1或 $2不匹配。而是匹配主機名： $3

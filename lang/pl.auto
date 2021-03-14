@@ -1432,6 +1432,7 @@ newreseller_title=Nowy adres e-mail sprzedawcy
 newreseller_ecannot=Nie możesz edytować nowego szablonu wiadomości e-mail odsprzedawcy
 newreseller_desc2=Ten formularz służy do edytowania szablonu wiadomości e-mail, która może zostać wysłana na nowe konto sprzedawcy po jego utworzeniu. W tekście zostaną wykonane następujące podstacje :
 
+feature_ssl=Witryna Apache SSL
 feature_dns=BIND domena DNS
 feature_webalizer=Raportowanie przez Webalizer
 feature_mail=Poczta dla domeny
@@ -3938,6 +3939,8 @@ validate_esslcert=Brak pliku certyfikatu SSL na hoście wirtualnym Apache
 validate_esslcertfile=Plik certyfikatu SSL $1 nie istnieje
 validate_esslkeyfile=Plik klucza SSL $1 nie istnieje
 validate_esslcertinfo=Nie można przeanalizować pliku certyfikatu SSL
+validate_esslcainfo=Nie można przeanalizować pliku SSL CA $1 
+validate_esslcamatch=Certyfikat SSL CA dla $1/$2 nie jest zgodny z wystawcą certyfikatu SSL $1/$2 
 validate_essldom=Certyfikat SSL dla tego wirtualnego serwera nie jest zgodny z $1 lub $2. Zamiast tego pasuje do nazw hostów : $3 
 validate_esslexpired=Certyfikat SSL dla tego wirtualnego serwera wygasł w dniu $1 
 validate_esslfirst=Certyfikat SSL dla pierwszego wirtualnego hosta Apache SSL na $4 nie pasuje do $1 lub $2. Zamiast tego pasuje do nazw hostów : $3 

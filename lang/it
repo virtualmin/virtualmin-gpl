@@ -751,7 +751,6 @@ feature_webalizer=Rapporto Webalizer
 feature_mail=Mail per dominio
 feature_unix=Utente amministrazione
 feature_dir=Home directory
-feature_ssl=Sito web SSL
 feature_webmin=Webmin login
 feature_ftp=ProFTPd FTP virtuale
 feature_logrotate=Rotazione file log

@@ -608,6 +608,7 @@ newreseller_title=Courriel du nouveau revendeur
 newreseller_ecannot=Vous n'êtes pas autorisé à modifier le nouveau modèle d'e-mail de revendeur
 newreseller_desc2=Utilisez ce formulaire pour modifier le modèle du message électronique qui peut être envoyé à un nouveau compte revendeur après sa création. Les sous-positions suivantes seront apportées au texte :
 
+feature_ssl=Site Web Apache SSL
 feature_virt=Adresse IP virtuelle
 feature_virus=Filtrage des virus
 feature_status=Surveillance de l'état
@@ -2401,6 +2402,8 @@ validate_esslcert=Aucun fichier de certificat SSL spécifié dans l'hôte virtue
 validate_esslcertfile=Le fichier de certificat SSL $1 n'existe pas
 validate_esslkeyfile=Le fichier de clés SSL $1 n'existe pas
 validate_esslcertinfo=Le fichier de certificat SSL n'a pas pu être analysé
+validate_esslcainfo=Le fichier d'autorité de certification SSL $1 n'a pas pu être analysé
+validate_esslcamatch=Le certificat SSL CA pour $1/$2 ne correspond pas à l'émetteur du certificat SSL $1/$2 
 validate_essldom=Le certificat SSL pour ce serveur virtuel ne correspond pas à $1 ou $2. Au lieu de cela, il correspond aux noms d'hôte : $3 
 validate_esslexpired=Le certificat SSL pour ce serveur virtuel a expiré le $1 
 validate_esslfirst=Le certificat SSL du premier hôte virtuel Apache SSL sur $4 ne correspond pas à $1 ou $2. Au lieu de cela, il correspond aux noms d'hôte : $3 

@@ -351,6 +351,7 @@ newweb_eadmindom=Falta la URL o no es válida para la redirección del administr
 newdns_ensip=El servidor de nombres adicional $1 es una dirección IP en lugar de un nombre de host
 newdns_enshost=El servidor de nombres adicional $1 no existe
 
+feature_ssl=Sitio web de Apache SSL
 feature_virt6=Dirección IPv6
 
 check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2.
@@ -1188,6 +1189,8 @@ validate_ewebipv6virt=Existe un registro DNS IPv6 con la dirección $1, pero la 
 validate_ewebip=El host virtual de Apache para este dominio no usa la dirección IPv4 y el puerto $1
 validate_ewebip6=El host virtual de Apache para este dominio no usa la dirección IPv6 y el puerto $1
 validate_esslcertinfo=El archivo del certificado SSL no se pudo analizar
+validate_esslcainfo=No se pudo analizar el archivo de CA SSL $1 
+validate_esslcamatch=El certificado de CA SSL para $1/$2 no coincide con el emisor del certificado SSL $1/$2 
 validate_essldom=El certificado SSL para este servidor virtual no coincide con $1 o $2. En cambio, coincide con los nombres de host : $3
 validate_esslexpired=El certificado SSL para este servidor virtual expiró en $1
 validate_esslfirst=El certificado SSL para el primer host virtual Apache SSL en $4 no coincide con $1 o $2. En cambio, coincide con los nombres de host : $3
