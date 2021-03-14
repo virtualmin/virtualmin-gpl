@@ -28,6 +28,8 @@ index_certinvalid=SSL-sertifikatfilen $2 for $1 er ugyldig : $3
 index_keyinvalid=SSL-nøkkelfilen $2 for $1 er ugyldig : $3 
 
 form_rmysql=MySQL-databaseserver
+form_web=Sett opp Apache-nettstedet?
+form_ssl=Sett opp Apache SSL-nettsted?
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 

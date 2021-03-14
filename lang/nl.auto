@@ -35,6 +35,8 @@ index_keyinvalid=Het SSL-sleutelbestand $2 voor $1 is ongeldig : $3
 
 form_generic_aliasmail=Alias van $1, met eigen e-mailadres
 form_rmysql=MySQL-databaseserver
+form_web=Apache-website instellen?
+form_ssl=Apache SSL-website instellen?
 form_content2=Ja, met standaardsjabloon en inhoud hieronder
 form_content0=Ja, met onderstaande inhoud
 

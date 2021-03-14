@@ -163,7 +163,9 @@ index_certinvalid=Plik certyfikatu SSL $2 dla $1 jest nieprawidłowy : $3
 index_keyinvalid=Plik kluczy SSL $2 dla $1 jest nieprawidłowy : $3 
 
 form_rmysql=Serwer bazy danych MySQL
+form_web=Skonfigurować witrynę Apache?
 form_ftp=Czy skonfigurować wirtualny FTP oparty na IP?
+form_ssl=Skonfigurować witrynę Apache SSL?
 form_status=Czy skonfigurować monitorowanie stanu?
 form_name1=Na podstawie nazwy
 form_name0=Oparte na IP
