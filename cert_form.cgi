@@ -83,11 +83,11 @@ if (&domain_has_ssl_cert($d)) {
 		    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
 		     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
 			print &ui_table_row(undef,
-			    "<font color=red>".
-			    &text('validate_esslcamatch',
-				  $cainfo->{'o'}, $cainfo->{'cn'},
-				  $info->{'issuer_o'}, $info->{'issuer_cn'}).
-			    "</font>", 4);
+			    &ui_text_color(
+			      &text('validate_esslcamatch',
+			     	    $cainfo->{'o'}, $cainfo->{'cn'},
+				    $info->{'issuer_o'}, $info->{'issuer_cn'}),
+			      "danger"), 4);
 			}
 		}
 
