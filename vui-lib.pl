@@ -163,4 +163,21 @@ return $rv;
 
 }
 
+# vui_features_sorted_grid(\@grid)
+# Returns HTML for grid, formatted
+# the way that it preserves the order   
+sub vui_features_sorted_grid
+{
+my ($grid) = @_;
+my @grid = @{$grid};
+my @grid_left = @grid;
+my $grid_tnum = scalar(@grid);
+my @grid_right = splice(@grid_left, ($grid_tnum / 2) + ($grid_tnum % 2 ? 1 : 0));
+my $style_force_no_border = 'style="border:0 !important;"';
+my $style_flex_cnt = 'style="display: flex; align-items: flex-start; justify-content: center;"';
+my $lgftable = &ui_grid_table(\@grid_left, 1, undef, undef, $style_force_no_border);
+my $rgftable = &ui_grid_table(\@grid_right, 1, undef, undef, $style_force_no_border);
+return "<div class=\"vui_features_sorted_grid\" $style_flex_cnt>" . ($lgftable . $rgftable) . "</div>";
+}
+
 1;
