@@ -170,6 +170,7 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 
 		print "<p>",&text('save_rusure',"<tt>$d->{'dom'}</tt>"),"<p>\n";
 		print "<ul>\n";
+		features_sort(\@losing, \@losing);
 		foreach $f (@losing) {
 			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
 						 : undef;
