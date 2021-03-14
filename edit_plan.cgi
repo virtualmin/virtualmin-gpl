@@ -86,17 +86,29 @@ $ftable = &ui_radio('featurelimits_def', $dis,
 		    [ [ 1, $text{'tmpl_featauto'}, $dis1 ],
 		      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 @grid = ( );
+@grid_order = ( );
 foreach my $f (@opt_features, "virt") {
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox("featurelimits", $f,
-				 $text{'feature_'.$f} || $f,
+				 "&nbsp;".($text{'feature_'.$f} || $f),
 				 $flimits{$f}, undef, $dis));
 	}
 foreach my $f (&list_feature_plugins()) {
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox("featurelimits", $f,
-			 &plugin_call($f, "feature_name"), $flimits{$f},
+			 "&nbsp;".&plugin_call($f, "feature_name"), $flimits{$f},
 			 undef, $dis));
 	}
-$ftable .= &ui_grid_table(\@grid, 2).
+features_sort(\@grid, \@grid_order);
+my @grid_left = @grid;
+my $grid_tnum = scalar(@grid);
+my @grid_right = splice(@grid_left, ($grid_tnum / 2) + ($grid_tnum % 2 ? 1 : 0));
+my $style_force_no_border = 'style="border:0 !important;"';
+my $style_flex_cnt = 'style="display: flex; align-items: flex-start; justify-content: center;"';
+my $lgftable = &ui_grid_table(\@grid_left, 1, undef, undef, $style_force_no_border);
+my $rgftable = &ui_grid_table(\@grid_right, 1, undef, undef, $style_force_no_border);
+my $ui_grid_tbl = "<div $style_flex_cnt>" . ($lgftable .$rgftable) . "</div>";
+$ftable .= $ui_grid_tbl.
 	   &ui_links_row([ &select_all_link("featurelimits"),
 			   &select_invert_link("featurelimits") ]);
 print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
@@ -123,7 +135,7 @@ $etable = &ui_radio('capabilities_def', $dis,
 @grid = ( );
 foreach my $ed (@edit_limits) {
 	push(@grid, &ui_checkbox("capabilities", $ed,
-				 $text{'limits_edit_'.$ed} || $ed,
+				 "&nbsp;".($text{'limits_edit_'.$ed} || $ed),
 				 $caps{$ed}, undef, $dis));
 	}
 $etable .= &ui_grid_table(\@grid, 2).
