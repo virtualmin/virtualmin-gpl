@@ -76,6 +76,21 @@ if (&domain_has_ssl_cert($d)) {
 			}
 		}
 
+	# Warn if the CA is wrong
+	if ($chain) {
+		my $cainfo = &cert_file_info($chain, $d);
+		if ($cainfo &&
+		    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
+		     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
+			print &ui_table_row(undef,
+			    "<font color=red>".
+			    &text('validate_esslcamatch',
+				  $cainfo->{'o'}, $cainfo->{'cn'},
+				  $info->{'issuer_o'}, $info->{'issuer_cn'}).
+			    "</font>", 4);
+			}
+		}
+
 	# Other domains using same cert, such as via wildcards or UCC
 	@others = grep { &domain_has_ssl_cert($_) }
 		       &get_domain_by("ssl_same", $d->{'id'});
@@ -146,6 +161,7 @@ if (&domain_has_ssl_cert($d)) {
 			}
 		print &ui_table_row($text{'cert_etime'}, $emsg);
 		}
+
 	print &ui_table_end();
 
 	if (!&domain_has_ssl($d) && !@already && !$d->{'ssl_same'}) {
