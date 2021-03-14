@@ -72,6 +72,7 @@ if (@resels && &master_admin()) {
 # Show checkboxes for features
 print &ui_table_hr();
 @grid = ( );
+@grid_order = ( );
 foreach $f (@opt_features) {
 	# Don't allow access to features that this user hasn't been
 	# granted for his subdomains.
@@ -85,6 +86,7 @@ foreach $f (@opt_features) {
 		}
 
 	local $txt = $text{'form_'.$f};
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
 			  !$config{$f} && defined($config{$f}))." ".
 		    "<b>".&hlink($txt, $f)."</b>");
@@ -99,11 +101,19 @@ foreach $f (&list_feature_plugins()) {
 	$label = &plugin_call($f, "feature_label", 0);
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".
 		    "<b>$label</b>");
 	}
-$ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "width=30% align=left", "width=70% align=left" ]);
+features_sort(\@grid, \@grid_order);
+my @grid_left = @grid;
+my $grid_tnum = scalar(@grid);
+my @grid_right = splice(@grid_left, ($grid_tnum / 2) + ($grid_tnum % 2 ? 1 : 0));
+my $style_force_no_border = 'style="border:0 !important;"';
+my $style_flex_cnt = 'style="display: flex; align-items: flex-start; justify-content: center;"';
+my $lgftable = &ui_grid_table(\@grid_left, 1, undef, undef, $style_force_no_border);
+my $rgftable = &ui_grid_table(\@grid_right, 1, undef, undef, $style_force_no_border);
+my $ftable = "<div $style_flex_cnt>" . ($lgftable .$rgftable) . "</div>";
 print &ui_table_row(undef, $ftable, 2);
 
 print &ui_table_end();
