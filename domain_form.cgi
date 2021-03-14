@@ -523,8 +523,9 @@ if ($fields) {
 
 # Show checkboxes for features
 print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-			     "feature", 0);
+			     "feature", 1);
 @grid = ( );
+@grid_order_initial = ( );
 $i = 0;
 $can_website = 0;
 foreach $f (@dom_features) {
@@ -546,8 +547,9 @@ foreach $f (@dom_features) {
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1).
-		    "<b>".&hlink($txt, $f)."</b>");
+		    " <b>".&hlink($txt, $f)."</b>");
 	}
 
 # Show checkboxes for plugins
@@ -560,16 +562,24 @@ foreach $f (@fplugins) {
 	$can_website = 1 if (&plugin_call($f, "feature_provides_web"));
 
 	$label = &plugin_call($f, "feature_label", 0);
-	$label = "<b>$label</b>";
+	$label = " <b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f}).$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}
 	}
-$ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "align=left", "align=left" ]);
+features_sort(\@grid, \@grid_order_initial);
+my @grid_left = @grid;
+my $grid_tnum = scalar(@grid);
+my @grid_right = splice(@grid_left, ($grid_tnum / 2) + ($grid_tnum % 2 ? 1 : 0));
+my $style_force_no_border = 'style="border:0 !important;"';
+my $style_flex_cnt = 'style="display: flex; align-items: flex-start; justify-content: center;"';
+my $lgftable = &ui_grid_table(\@grid_left, 1, undef, undef, $style_force_no_border);
+my $rgftable = &ui_grid_table(\@grid_right, 1, undef, undef, $style_force_no_border);
+my $ftable = "<div $style_flex_cnt>" . ($lgftable .$rgftable) . "</div>";
 print &ui_table_row(undef, $ftable, 4);
 print &ui_hidden_table_end("feature");
 
