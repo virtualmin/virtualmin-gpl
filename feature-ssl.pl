@@ -658,6 +658,21 @@ if ($info && $info->{'notafter'}) {
 		}
 	}
 
+# Make sure the CA matches the cert
+my $cafile = &get_website_ssl_file($d, "ca");
+if ($cafile) {
+	my $cainfo = &cert_file_info($cafile, $d);
+	if (!$cainfo || !$cainfo->{'cn'}) {
+		return &text('validate_esslcainfo', "<tt>$cafile</tt>");
+		}
+	if ($cainfo->{'o'} ne $info->{'issuer_o'} ||
+	    $cainfo->{'cn'} ne $info->{'issuer_cn'}) {
+		return &text('validate_esslcamatch',
+			     $cainfo->{'o'}, $cainfo->{'cn'},
+			     $info->{'issuer_o'}, $info->{'issuer_cn'});
+		}
+	}
+
 # Make sure the first virtualhost on this IP serves the same cert, unless
 # SNI is enabled
 &require_apache();
