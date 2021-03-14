@@ -74,6 +74,18 @@ $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
 
+@other_webmin_pages = ( 'cert_form', 'edit_spf', 'edit_domain',
+			'edit_domdkim', 'edit_limits', 'edit_mail',
+			'edit_phpmode', 'edit_spam', 'edit_spf',
+			'edit_website', 'list_users', 'list_aliases',
+			'list_databases', 'list_scripts', 'rename_form',
+			'move_form', 'transfer_form', 'clone_form',
+			'newip_form', 'pro/edit_res', 'list_admins',
+			'pro/list_balancers', 'list_redirects',
+			'list_records', 'view_records', 'usage',
+			'reemail', 'pro/maillog', 'disable_domain',
+			'assoc_form', 'pro/edit_html' );
+
 # Parse command-line args
 $web = 'web';
 $ssl = 'ssl';
@@ -5064,6 +5076,15 @@ $webmin_tests = [
 	  'grep' => [ '<body', '</body>', 'RoundCube directory deleted' ],
 	  'antigrep' => [ 'Error', 'failed' ],
 	},
+
+	# Test other per-domain pages
+	(map {
+		my $page = $_.".cgi";
+		{ 'command' => $webmin_wget_command.
+			       "${webmin_proto}://localhost:${webmin_port}/virtual-server/${page}?dom=\$DOMAIN_ID",
+		  'antigrep' => [ 'Error', 'failed' ],
+		}
+		} @other_webmin_pages),
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
