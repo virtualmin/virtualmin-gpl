@@ -65,41 +65,33 @@ if (&domain_has_ssl_cert($d)) {
 	$info = &cert_info($d);
 	$chain = &get_website_ssl_file($d, 'ca');
 	
-	# Warn if the CA is wrong
-	my $check_ssl_ca = sub {
-	if ($check_ssl_ca_done) {
-		return;
-		}
-	if ($chain) {
-		my $cainfo = &cert_file_info($chain, $d);
-		if ($cainfo &&
-		    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
-		     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
-			print &ui_table_row('',
-			    &ui_text_color(
-			      "&nbsp;* ".&text('validate_esslcamatch',
-			     	    $cainfo->{'o'}, $cainfo->{'cn'},
-				    $info->{'issuer_o'}, $info->{'issuer_cn'}),
-			      "danger"), 3);
-			$check_ssl_ca_done++;
-			}
-		}
-	};
-	
+	my $validate_esslcamatch;
 	foreach $i (@cert_attributes) {
 		next if ($i eq 'modulus' || $i eq 'exponent');
 		$v = $info->{$i};
 		if (ref($v)) {
 			print &ui_table_row($text{'cert_'.$i},
 				&ui_links_row($v), 3);
-			if ($i eq 'type') {
-				&$check_ssl_ca();
-				}
 			}
 		elsif ($v) {
 			print &ui_table_row($text{'cert_'.$i}, $v);
-			if ($i eq 'type') {
-				&$check_ssl_ca();
+			}
+
+		# Warn if the CA is wrong
+		if ($i eq 'type' && !$validate_esslcamatch) {
+			if ($chain) {
+				my $cainfo = &cert_file_info($chain, $d);
+				if ($cainfo &&
+				    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
+				     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
+					print &ui_table_row('',
+					    &ui_text_color(
+					      "&nbsp;* ".&text('validate_esslcamatch',
+					     	    $cainfo->{'o'}, $cainfo->{'cn'},
+						    $info->{'issuer_o'}, $info->{'issuer_cn'}),
+					      "danger"), 3);
+					$validate_esslcamatch++;
+					}
 				}
 			}
 		}
