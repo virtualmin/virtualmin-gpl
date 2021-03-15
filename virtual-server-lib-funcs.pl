@@ -10975,6 +10975,16 @@ foreach my $d (&list_domains()) {
 	next if (!@st);
 	next if ($d->{'ssl_cert_expiry_cache'} != $st[9]);
 
+	# Skip this if the cert isn't being used
+	next if (!&domain_has_ssl_cert($d));
+	my $anyuse;
+	$anyuse++ if (&domain_has_ssl($d));
+	if (!$anyuse) {
+		my @svcs = &get_all_domain_service_ssl_certs($d);
+		$anyuse++ if (@svcs);
+		}
+	next if (!$anyuse);
+
 	# Check if at or near expiry
 	if ($d->{'ssl_cert_expiry'} < $now) {
 		push(@expired, $d);
