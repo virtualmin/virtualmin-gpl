@@ -3778,6 +3778,8 @@ history_degrees=Grad
 history_type_email=E-Mail Nachrichten
 history_type_cpu=CPU-Auslastung
 history_type_system=Systemstatistik
+history_stat_greycount=Greygelistete E-Mails pro Minute
+history_type_virt=Virtualmin Zähler
 
 sv_title=Spam und Virus Scanning
 newsv_title=Spam und Virus scannen
