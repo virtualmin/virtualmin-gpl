@@ -2018,6 +2018,7 @@ cert_dcopy=Kopiere zu Dovecot
 cert_pcopy=Kopiere zu Postfix
 cert_pcopydesc=Benutze dieses Zertifikat in Postfix für SSL-geschützten SMTP-Verbindungen von Mail-Clients.
 cert_header7=Signierte Zertifikate Details
+cert_tablets=Let's Encrypt
 
 csr_title=Erzeuge CSR
 csr_title2=Erzeuge Zertifikat

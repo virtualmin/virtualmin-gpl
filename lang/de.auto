@@ -980,7 +980,6 @@ cert_keywarn=Warnung - Ein Zertifikat in $1 und ein privater Schlüssel in $2 si
 cert_header6=Generieren Sie ein selbstsigniertes Zertifikat und einen Schlüssel
 cert_esconf=Virtualmin konnte die Datei <tt>openssl.cnf</tt> auf Ihrem System nicht finden, die zum Generieren eines Zertifikats mit zusätzlichen Domänennamen erforderlich ist
 cert_ccn=Name der Zertifizierungsstelle
-cert_tablets=Verschlüsseln wir
 cert_tabperip=Service-Zertifikate
 cert_etime=Zeit bis zum Ablauf
 cert_expired=% Vor 1 Tagen abgelaufen!
