@@ -1999,12 +1999,10 @@ history_stat_quotaused=Festplattenkontingent verwendet
 history_stat_aliases=Anzahl der Mail-Aliase
 history_stat_mailcount=Lieferung pro Minute
 history_stat_bouncecount=Pro Minute abgeprallt
-history_stat_greycount=E-Mail grau aufgelistet pro Minute
 history_stat_ratecount=E-Mail-Rate pro Minute begrenzt
 history_stat_bin=Festplatten-E / A liest
 history_none=Es wurden noch keine historischen Systemstatistiken aufgezeichnet.
 history_logscale=Skalierung der vertikalen Achse
-history_type_virt=Virtualmin zählt
 
 sv_desc=Die auf dieser Seite festgelegten Spam- und Virenscanoptionen werden auf alle virtuellen Server mit aktivierter Filterung angewendet. Alle Einstellungen pro Server werden überschrieben.
 sv_none=Noch keine
