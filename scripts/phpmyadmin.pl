@@ -70,10 +70,7 @@ local @rv;
 	push(@rv, "phpMyAdmin requires a MySQL database");
 
 # Check for PHP 5.2+ or 5.3+, if needed
-my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 :
-	      &compare_versions($ver, "4.5") > 0 ? 5.5 :
-	      &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
-	      &compare_versions($ver, "3.1") > 0 ? 5.2 : undef;
+my $wantver = &script_phpmyadmin_php_fullver($d, $ver, $sinfo);
 if ($wantver) {
 	local $phpv = &get_php_version($phpver || 5, $d);
 	if (!$phpv) {
@@ -94,6 +91,16 @@ if (&compare_versions($ver, "4.2.3") >= 0 &&
 	}
 
 return @rv;
+}
+
+sub script_phpmyadmin_php_fullver
+{
+my ($d, $ver, $sinfo) = @_;
+my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 :
+	      &compare_versions($ver, "4.5") > 0 ? 5.5 :
+	      &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
+	      &compare_versions($ver, "3.1") > 0 ? 5.2 : undef;
+return $wantver;
 }
 
 # script_phpmyadmin_params(&domain, version, &upgrade-info)

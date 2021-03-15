@@ -51,6 +51,11 @@ local ($d, $ver) = @_;
 return ( );
 }
 
+sub script_phppgadmin_php_fullver
+{
+return 7.2;
+}
+
 # script_phppgadmin_params(&domain, version, &upgrade-info)
 # Returns HTML for table rows for options for installing PHP-NUKE
 sub script_phppgadmin_params

@@ -51,16 +51,23 @@ return ( 5 );
 sub script_whmcs_depends
 {
 local ($d, $ver, $sinfo, $phpver) = @_;
-if ($ver >= 7) {
+local $wantver = &script_whmcs_php_fullver($d, $ver, $sinfo);
+if ($wantver) {
 	local $phpv = &get_php_version($phpver || 5, $d);
 	if (!$phpv) {
 		return ("Could not work out exact PHP version");
 		}
-	if (&compare_versions($phpv, "5.6") < 0) {
-		return ("WHMCS requires PHP version 5.6 or later");
+	if (&compare_versions($phpv, $wantver) < 0) {
+		return ("WHMCS requires PHP version $wantver or later");
 		}
 	}
 return ( );
+}
+
+sub script_whmcs_php_fullver
+{
+local ($d, $ver, $sinfo) = @_;
+return $ver >= 7 ? 5.6 : undef;
 }
 
 sub script_whmcs_php_modules
