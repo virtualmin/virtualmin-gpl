@@ -59,16 +59,23 @@ sub script_wordpress_depends
 my ($d, $ver, $sinfo, $phpver) = @_;
 my @rv;
 
-# Check for PHP 5.6.20+
+# Check for PHP
+my $wantver = &script_wordpress_php_fullver($d, $ver, $sinfo);
 my $phpv = get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
 	}
-elsif (&compare_versions($phpv, "5.6.20") < 0) {
-	push(@rv, "Wordpress requires PHP version 5.6.20 or later");
+elsif (&compare_versions($phpv, $wantver) < 0) {
+	push(@rv, "Wordpress requires PHP version $wantver or later");
 	}
 
 return @rv;
+}
+
+sub script_wordpress_php_fullver
+{
+my ($d, $ver, $sinfo) = @_;
+return "5.6.20";
 }
 
 # script_wordpress_params(&domain, version, &upgrade-info)
