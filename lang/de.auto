@@ -297,8 +297,6 @@ edit_bw_disable=Deaktivieren, wenn die Bandbreite überschritten wird?
 edit_bwdis=(Wird deaktiviert, wenn das Limit überschritten wird)
 edit_balancerdesc=Verwalten Sie Proxy-URL-Pfade unter der Website dieses Servers zu einem oder mehreren separaten Webservern, z. B. anderen Webservern oder Mongrel-Instanzen.
 edit_redirectsdesc=Bearbeiten Sie Weiterleitungen für URL-Pfade unter der Website dieses Servers zu anderen Domänen oder Verzeichnissen.
-edit_lang=Sprache ändern
-edit_filemin=Dateimanager
 edit_filemindesc=Durchsuchen und bearbeiten Sie Dateien im Website-Verzeichnis dieses virtuellen Servers.
 edit_adminsdesc=Anzeigen und Bearbeiten zusätzlicher Administratorkonten für diesen virtuellen Server.
 edit_switchdesc=Melden Sie sich automatisch bei Webmin als Eigentümer dieses virtuellen Servers an, ohne sein Kennwort eingeben zu müssen.
@@ -2654,7 +2652,6 @@ left_owner=Systembesitzer
 left_master2=Cloudmin Master Admin
 left_login=Login: $1 
 left_level=Level 1
-left_generic=Erstellen Sie einen virtuellen Server
 
 right_statusheader=Status
 right_sysinfoheader=Programme
@@ -2799,16 +2796,6 @@ mysqlpass_esafe=.. Start fehlgeschlagen : $1
 mysqlpass_change=Ändern des Passworts für Benutzer $1 ..
 mysqlpass_echange=.. Passwortänderung fehlgeschlagen : $1 
 mysqlpass_kill=Stoppen des MySQL-Servers mit deaktivierter Authentifizierung.
-
-kill_failed=Tötung fehlgeschlagen : $1 
-kill_still=Funktioniert immer noch!
-kill_done=Getötet
-kill_header=Die folgenden unerwarteten Serverprozesse wurden erkannt :
-kill_user=Nutzername
-kill_port=Hafen
-kill_cmd=Serverbefehl
-kill_result=Ergebnis
-kill_subject=Prozessüberwachung des Virtualmin-Servers
 
 mysql_rsock=Socket-Datei $1 
 mysql_rhostport=Remote-Host $1 Port $2 
