@@ -935,6 +935,8 @@ edit_mailopts=E-Mail Einstellungen
 edit_mailoptsdesc=Konfiguriert Einstellungen im Zusammenhang mit E-Mail für diesen virtuellen Server.
 edit_connect=Prüfe Verbindung
 edit_psearch=Liste der Sub-Server
+edit_lang=Sprache ändern
+edit_filemin=Dateimanager
 
 delete_title=Server löschen
 delete_rusure2=Sind Sie sicher, daß Sie den virtuellen Server $1, welcher $2 Dateien hat, löschen wollen? Die folgenden damit verbundenen Dienste werden ebenfalls gelöscht :
@@ -4540,3 +4542,15 @@ bucket_eldays=Fehlende oder nicht numerische Anzahl an Tagen im Lebenszyklus $1
 bucket_elday=Fehlender oder nicht numerischer Tag im Lebenszyklus $1
 bucket_elmonth=Fehlender oder nicht-numerischer Monat in Lifecycle $1
 bucket_elyear=Fehlendes oder nicht-numerisches Jahr in Lifecycle $1
+
+kill_failed=Killen fehlgeschlagen: $1 
+kill_still=Funktioniert immer noch!
+kill_done=gekillt
+kill_header=Die folgenden unerwarteten Serverprozesse wurden erkannt:
+kill_user=Nutzername
+kill_port=Port
+kill_cmd=Serverbefehl
+kill_result=Ergebnis
+kill_subject=Prozessüberwachung des Virtualmin-Servers
+
+left_generic=Virtuellen Server erstellen
