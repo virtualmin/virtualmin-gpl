@@ -429,9 +429,9 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 		print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
 				     [ 'only', $text{'cert_letsonly'} ] ]);
 		}
+	print &ui_tabs_end_tab();
 	}
 
-print &ui_tabs_end_tab();
 
 if (&can_webmin_cert()) {
 	# Per-IP or per-domain server usage
