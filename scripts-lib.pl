@@ -2453,6 +2453,22 @@ if ($copydir) {
 		last if ($out !~ /permission\s+denied/i);
 		}
 
+	# Check if source contains any index.* files
+	if (-d $path) {
+		my @srcidx = glob("$path/index.*");
+		@srcidx = sort { $a cmp $b }
+			       map { s/^\Q$path\E\///; $_ } @srcidx;
+		my @dstidx = glob("$copydir/index.*");
+		@dstidx = sort { $a cmp $b }
+			       map { s/^\Q$copydir\E\///; $_ } @dstidx;
+		my @dstdel = grep { &indexof($_, @srcidx) < 0 } @dstidx;
+		foreach my $dd (@dstdel) {
+			if (-f "$copydir/$dd") {
+				&unlink_file_as_domain_user($d, "$copydir/$dd");
+				}
+			}
+		}
+
 	local $out;
 	if (-f $path) {
 		# Copy one file
