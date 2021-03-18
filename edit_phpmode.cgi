@@ -78,8 +78,7 @@ if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
 		# System has only one version
 		$fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
 					  : $avail[0]->[0];
-		print &ui_table_row($text{'phpmode_version'},
-			$fullver." ".$text{'phpmode_versionone'});
+		print &ui_table_row($text{'phpmode_version'}, $fullver);
 		}
 	elsif ($mode eq "fpm" && @dirs == 1) {
 		# Only one version can be set
