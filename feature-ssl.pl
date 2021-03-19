@@ -904,6 +904,10 @@ if ($virt) {
 	# Add Require all granted directive if this system is Apache 2.4
 	&add_require_all_granted_directives($d, $d->{'web_sslport'});
 
+	# If the restored config contains php_value entires but this system
+	# doesn't support mod_php, remove them
+	&fix_mod_php_directives($d, $d->{'web_sslport'});
+
 	# Fix Options lines
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 							$d->{'web_sslport'});
