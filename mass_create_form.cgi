@@ -72,6 +72,7 @@ if (@resels && &master_admin()) {
 # Show checkboxes for features
 print &ui_table_hr();
 @grid = ( );
+@grid_order = ( );
 foreach $f (@opt_features) {
 	# Don't allow access to features that this user hasn't been
 	# granted for his subdomains.
@@ -85,6 +86,7 @@ foreach $f (@opt_features) {
 		}
 
 	local $txt = $text{'form_'.$f};
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1, undef,
 			  !$config{$f} && defined($config{$f}))." ".
 		    "<b>".&hlink($txt, $f)."</b>");
@@ -99,12 +101,12 @@ foreach $f (&list_feature_plugins()) {
 	$label = &plugin_call($f, "feature_label", 0);
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox($f, 1, "", !$inactive{$f})." ".
 		    "<b>$label</b>");
 	}
-$ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "width=30% align=left", "width=70% align=left" ]);
-print &ui_table_row(undef, $ftable, 2);
+features_sort(\@grid, \@grid_order);
+print &ui_table_row(undef, &vui_features_sorted_grid(\@grid), 2);
 
 print &ui_table_end();
 print &ui_form_end([ [ "create", $text{'create'} ] ]);

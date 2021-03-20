@@ -39,7 +39,9 @@ if (!$in{'confirm'}) {
 		}
 
 	print "<ul>\n";
-	foreach $f (@features) {
+	my @features_ = @features;
+	features_sort(\@features_, \@features_);
+	foreach $f (@features_) {
 		if ($d->{$f} && ($config{$f} || $f eq 'unix')) {
 			my $msg = $d->{'parent'} ? $text{"sublosing_$f"}
 						 : undef;
@@ -47,7 +49,9 @@ if (!$in{'confirm'}) {
 			print "<li>",$text{'feature_'.$f}," - ",$msg,"<br>\n";
 			}
 		}
-	foreach $f (&list_feature_plugins()) {
+	my @list_feature_plugins = &list_feature_plugins();
+	features_sort(\@list_feature_plugins, \@list_feature_plugins);
+	foreach $f (@list_feature_plugins) {
 		if ($d->{$f}) {
 			print "<li>",&plugin_call($f, "feature_name")," - ",
 			     &plugin_call($f, "feature_losing"),"<br>\n";

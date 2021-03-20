@@ -86,17 +86,21 @@ $ftable = &ui_radio('featurelimits_def', $dis,
 		    [ [ 1, $text{'tmpl_featauto'}, $dis1 ],
 		      [ 0, $text{'tmpl_below'}, $dis2 ] ])."<br>\n";
 @grid = ( );
+@grid_order = ( );
 foreach my $f (@opt_features, "virt") {
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox("featurelimits", $f,
-				 $text{'feature_'.$f} || $f,
+				 "&nbsp;".($text{'feature_'.$f} || $f),
 				 $flimits{$f}, undef, $dis));
 	}
 foreach my $f (&list_feature_plugins()) {
+	push(@grid_order, $f);
 	push(@grid, &ui_checkbox("featurelimits", $f,
-			 &plugin_call($f, "feature_name"), $flimits{$f},
+			 "&nbsp;".&plugin_call($f, "feature_name"), $flimits{$f},
 			 undef, $dis));
 	}
-$ftable .= &ui_grid_table(\@grid, 2).
+features_sort(\@grid, \@grid_order);
+$ftable .= &vui_features_sorted_grid(\@grid) .
 	   &ui_links_row([ &select_all_link("featurelimits"),
 			   &select_invert_link("featurelimits") ]);
 print &ui_table_row(&hlink($text{'tmpl_featurelimits'},
@@ -123,7 +127,7 @@ $etable = &ui_radio('capabilities_def', $dis,
 @grid = ( );
 foreach my $ed (@edit_limits) {
 	push(@grid, &ui_checkbox("capabilities", $ed,
-				 $text{'limits_edit_'.$ed} || $ed,
+				 "&nbsp;".($text{'limits_edit_'.$ed} || $ed),
 				 $caps{$ed}, undef, $dis));
 	}
 $etable .= &ui_grid_table(\@grid, 2).

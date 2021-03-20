@@ -523,8 +523,9 @@ if ($fields) {
 
 # Show checkboxes for features
 print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-			     "feature", 0);
+			     "feature", 1);
 @grid = ( );
+@grid_order_initial = ( );
 $i = 0;
 $can_website = 0;
 foreach $f (@dom_features) {
@@ -546,8 +547,9 @@ foreach $f (@dom_features) {
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1).
-		    "<b>".&hlink($txt, $f)."</b>");
+		    " <b>".&hlink($txt, $f)."</b>");
 	}
 
 # Show checkboxes for plugins
@@ -560,17 +562,17 @@ foreach $f (@fplugins) {
 	$can_website = 1 if (&plugin_call($f, "feature_provides_web"));
 
 	$label = &plugin_call($f, "feature_label", 0);
-	$label = "<b>$label</b>";
+	$label = " <b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f}).$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}
 	}
-$ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "align=left", "align=left" ]);
-print &ui_table_row(undef, $ftable, 4);
+features_sort(\@grid, \@grid_order_initial);
+print &ui_table_row(undef, &vui_features_sorted_grid(\@grid), 4);
 print &ui_hidden_table_end("feature");
 
 # Show section for extra plugin options
