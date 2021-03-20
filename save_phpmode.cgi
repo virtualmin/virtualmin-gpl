@@ -35,7 +35,7 @@ if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
 	}
 
 # Start telling the user what is being done
-&ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title'}, "");
+&ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title2'}, "");
 &obtain_lock_web($d);
 &obtain_lock_dns($d);
 &obtain_lock_logrotate($d) if ($d->{'logrotate'});
