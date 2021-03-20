@@ -891,11 +891,11 @@ if ($mode eq "fpm") {
 	my @rv;
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
-		my $cmd = &php_command_for_version($ver);
+		my $cmd = &php_command_for_version($ver, 0);
 		if (!$cmd && $ver =~ /^5\./) {
 			# Try just PHP version 5
 			$ver = 5;
-			$cmd = &php_command_for_version($ver);
+			$cmd = &php_command_for_version($ver, 0);
 			}
 		$cmd ||= &has_command("php");
 		if ($cmd) {
@@ -922,7 +922,7 @@ if ($d) {
 
 # For CGI and fCGId modes, check which PHP commands exist
 foreach my $v (@all_possible_php_versions) {
-	my $phpn = &php_command_for_version($v);
+	my $phpn = &php_command_for_version($v, 1);
 	$vercmds{$v} = $phpn if ($phpn);
 	}
 
@@ -970,42 +970,55 @@ if (!$d) {
 return @rv;
 }
 
-# php_command_for_version(ver)
+# php_command_for_version(ver, [cgi-mode])
 # Given a version like 5.4 or 5, returns the full path to the PHP executable
 sub php_command_for_version
 {
-my ($v) = @_;
-if (!$php_command_for_version_cache{$v}) {
-	my $phpn;
+my ($v, $cgimode) = @_;
+$cgimode ||= 0;
+if (!$php_command_for_version_cache{$v,$cgimode}) {
+	my @opts;
 	if ($gconfig{'os_type'} eq 'solaris') {
 		# On Solaris with CSW packages, php-cgi is in a directory named
 		# after the PHP version
-		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
+		push(@opts, "/opt/csw/php$v/bin/php-cgi");
 		}
-	$phpn ||= &has_command("php$v-cgi") || &has_command("php-cgi$v") ||
-		  &has_command("php$v");
+	push(@opts, "php$v-cgi", "php-cgi$v", "php$v");
 	my $nodotv = $v;
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
 		# For a version like 5.4, check for binaries like php54 and
 		# /opt/rh/php54/root/usr/bin/php
-		$phpn ||= &has_command("php$nodotv-cgi") ||
-			  &has_command("php-cgi$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php") ||
-			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
-			  &has_command("/opt/remi/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("php$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/php$nodotv/bin/php") ||
-			  &has_command(glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
+		push(@opts, "php$nodotv-cgi",
+			    "php-cgi$nodotv",
+			    "/opt/rh/php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/atomic/atomic-php$nodotv/root/usr/bin/php",
+			    "/opt/rh/php$nodotv/bin/php-cgi",
+			    "/opt/remi/php$nodotv/root/usr/bin/php-cgi",
+			    "php$nodotv",
+			    "/opt/rh/php$nodotv/root/usr/bin/php",
+			    "/opt/rh/rh-php$nodotv/root/usr/bin/php",
+			    "/opt/rh/php$nodotv/bin/php",
+			    glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
 		}
-	$php_command_for_version_cache{$v} = $phpn;
+	if ($cgimode == 1) {
+		# Only include -cgi commands
+		@opts = grep { /-cgi/ } @opts;
+		}
+	elsif ($cgimode == 2) {
+		# Skip -cgi commands
+		@opts = grep { !/-cgi/ } @opts;
+		}
+	my $phpn;
+	foreach my $o (@opts) {
+		$phpn = &has_command($o);
+		last if ($phpn);
+		}
+	$php_command_for_version_cache{$v,$cgimode} = $phpn;
 	}
-return $php_command_for_version_cache{$v};
+return $php_command_for_version_cache{$v,$cgimode};
 }
 
 # get_php_version(number|command, [&domain])
