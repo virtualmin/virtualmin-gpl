@@ -20,7 +20,7 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_table_start($text{'website_header'}, "width=100%", 2);
 
 # HTML directory
-if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ && $p eq 'web') {
+if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 	print &ui_table_row(&hlink($text{'phpmode_htmldir'}, 'htmldir'),
 		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
 	}
