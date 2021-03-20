@@ -111,7 +111,7 @@ print &ui_hidden_table_start($text{'limits_header2'}, "width=100%", 2,
 # Capabilities when editing a server
 @grid = ( );
 foreach $ed (@edit_limits) {
-	push(@grid, &ui_checkbox("edit", $ed, $text{'limits_edit_'.$ed} || $ed, $d->{"edit_$ed"}));
+	push(@grid, &ui_checkbox("edit", $ed, "&nbsp;".($text{'limits_edit_'.$ed} || $ed), $d->{"edit_$ed"}));
 	}
 $etable .= &ui_grid_table(\@grid, 2);
 print &ui_table_row(&hlink($text{'limits_edit'}, "limits_edit"), $etable);
@@ -120,6 +120,7 @@ print &ui_table_hr();
 
 # Allowed features
 @grid = ( );
+@grid_order = ( );
 foreach $f (@opt_features, "virt") {
 	next if (!&can_use_feature($f));
 	if ($config{$f} == 3) {
@@ -127,15 +128,18 @@ foreach $f (@opt_features, "virt") {
 		# bother showing it here
 		next;
 		}
-	push(@grid, &ui_checkbox("features", $f, $text{'feature_'.$f} || $f, $d->{"limit_$f"}));
+	push(@grid_order, $f);
+	push(@grid, &ui_checkbox("features", $f, "&nbsp;".($text{'feature_'.$f} || $f), $d->{"limit_$f"}));
 	}
 foreach $f (&list_feature_plugins()) {
 	next if (!&can_use_feature($f));
-	push(@grid, &ui_checkbox("features", $f, &plugin_call($f, "feature_name"), $d->{"limit_$f"}));
+	push(@grid_order, $f);
+	push(@grid, &ui_checkbox("features", $f, "&nbsp;".&plugin_call($f, "feature_name"), $d->{"limit_$f"}));
 	}
-$ftable = &ui_grid_table(\@grid, 2);
+
+features_sort(\@grid, \@grid_order);
 print &ui_table_row(&hlink($text{'limits_features'}, "limits_features"),
-		    $ftable);
+		    &vui_features_sorted_grid(\@grid));
 
 if (defined(&list_scripts)) {
 	# Allowed scripts

@@ -16,6 +16,7 @@ print &ui_form_start("save_newfeatures.cgi", "post");
 print "$text{'features_desc'}<p>\n";
 
 # Add rows for core features
+@table_order_initial = ( );
 $n = 0;
 foreach $f (@features) {
 	local @acts;
@@ -26,6 +27,7 @@ foreach $f (@features) {
 	if ($vital) {
 		# Some features are *never* disabled, but may be not checked
 		# by default
+		push(@table_order_initial, $f);
 		push(@table, [
 			ui_img("images/tick.gif", "Enabled"),
 			$text{'feature_'.$f},
@@ -39,6 +41,7 @@ foreach $f (@features) {
 		}
 	else {
 		# Other features can be disabled
+		push(@table_order_initial, $f);
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'fmods',
 			  'value' => $f, 'checked' => $config{$f} != 0,
@@ -78,6 +81,7 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			print &ui_columns_row([ "<hr>" ],
 					      [ "colspan=".(scalar(@tds)+1) ]);
 			}
+		push(@table_order_initial, $m->{'dir'});
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'mods',
 			  'value' => $m->{'dir'},
@@ -102,6 +106,7 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	}
 
 # Actually generate the table
+features_sort(\@table, \@table_order_initial);
 print &ui_form_columns_table(
 	"save_newfeatures.cgi",
 	[ [ "save", $text{'save'} ] ],

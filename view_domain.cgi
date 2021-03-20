@@ -218,17 +218,18 @@ if ($d->{'disabled'}) {
 else {
 	print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
 				     "feature", 0);
-	@grid = ( );
-	$i = 0;
-	foreach $f (@features) {
+	my @grid = ( );
+	my @grid_order = ( );
+	foreach my $f (@features) {
+		push(@grid_order, $f) if ($d->{$f});
 		push(@grid, $text{'feature_'.$f}) if ($d->{$f});
 		}
-	foreach $f (&list_feature_plugins()) {
+	foreach my $f (&list_feature_plugins()) {
+		push(@grid_order, $f) if ($d->{$f});
 		push(@grid, &plugin_call($f, "feature_label", 1)) if ($d->{$f});
 		}
-	$featmsg .= &ui_grid_table(\@grid, 2, 100,
-				   [ "width=30%", "width=70%" ]);
-	print &ui_table_row(undef, $featmsg);
+	features_sort(\@grid, \@grid_order);
+	print &ui_table_row(undef, &vui_features_sorted_grid(\@grid));
 	print &ui_hidden_table_end("feature");
 	}
 

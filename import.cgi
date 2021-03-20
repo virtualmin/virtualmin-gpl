@@ -611,7 +611,9 @@ else {
 		}
 
 	# Check for plugin features
-	foreach $f (&list_feature_plugins()) {
+	my @list_feature_plugins = &list_feature_plugins();
+	features_sort(\@list_feature_plugins, \@list_feature_plugins);
+	foreach $f (@list_feature_plugins) {
 		$pname = &plugin_call($f, "feature_name");
 		if (&plugin_call($f, "feature_import", $in{'dom'},
 				 $user || $in{'user'},
