@@ -14358,10 +14358,6 @@ if (&domain_has_website()) {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
 		}
 
-	# Report on supported PHP modes
-	my @supp = &supported_php_modes();
-	&$second_print(&text('check_webphpmodes', join(" ", @supp)));
-
 	# Check for PHP-FPM support
 	my @fpms = &list_php_fpm_configs();
 	if (!@fpms) {
@@ -14457,6 +14453,10 @@ if (&domain_has_website()) {
 				&restart_php_fpm_server($conf);
 				}
 			}
+
+		# Report on supported PHP modes
+		my @supp = &supported_php_modes();
+		&$second_print(&text('check_webphpmodes', join(" ", @supp)));
 		}
 
 	# Check for any unsupported mod_php directives
