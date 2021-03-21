@@ -4528,7 +4528,7 @@ if ($d && $d->{'reseller'} && defined(&get_reseller) && $config{'from_reseller'}
 	local $resel = &get_reseller($r[0]);
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		# Reseller has an email .... but is it valid for this system?
-		my $rs = $resel->{'acl'}->{'email'};
+		my ($rs) = &extract_address_parts($resel->{'acl'}->{'email'});
 		my ($rsmbox, $rsdom) = split(/\@/, $rs);
 		my $rsd = &get_domain_by("dom", $rsdom);
 		if ($rsd || $rsdom eq &get_system_hostname() ||
@@ -8051,7 +8051,7 @@ else {
 	$d->{'letsencrypt_dname'} = '';
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
-	$d->{'letsencrypt_renew'} ||= 2;
+	$d->{'letsencrypt_renew'} = 1 if ($d->{'letsencrypt_renew'} eq '');
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	my $cert_info = &cert_info($d);
