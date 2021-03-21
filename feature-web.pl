@@ -1912,6 +1912,11 @@ local ($d, $subdir, $rename) = @_;
 local $p = &domain_has_website($d);
 local $path = $d->{'home'}."/".$subdir;
 local $oldpath = $d->{'public_html_path'};
+if ($rename && (&is_under_directory($oldpath, $path) ||
+		&is_under_directory($path, $oldpath))) {
+	return "The old and new HTML directories cannot be sub-directories of ".
+	       "each other";
+	}
 if (-f $path) {
 	return "The HTML directory cannot be a file";
 	}
