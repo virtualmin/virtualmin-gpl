@@ -414,6 +414,7 @@ if (!$d->{'alias'}) {
 	foreach my $sd (&virtual_server_directories($d)) {
 		next if ($sd->[0] eq 'virtualmin-backup' ||   # Not all domains
 			 $sd->[0] eq $home_virtualmin_backup);
+		next if ($sd->[2] eq 'ssl' && !&domain_has_ssl_cert($d));
 		if (!-d "$d->{'home'}/$sd->[0]") {
 			# Dir is missing
 			return &text('validate_esubdir',
@@ -962,15 +963,15 @@ my $tmpl = &get_template($d->{'template'});
 my $perms = $tmpl->{'web_html_perms'};
 my @rv;
 if (!$d->{'subdom'} && !$d->{'alias'}) {
-	push(@rv, [ &public_html_dir($d, 1), $perms ]);
-	push(@rv, [ &cgi_bin_dir($d, 1), $perms ]);
+	push(@rv, [ &public_html_dir($d, 1), $perms, 'html' ]);
+	push(@rv, [ &cgi_bin_dir($d, 1), $perms, 'cgi' ]);
 	}
-push(@rv, [ 'logs', '750' ]);
-push(@rv, [ $config{'homes_dir'}, '755' ]);
+push(@rv, [ 'logs', '750', 'logs' ]);
+push(@rv, [ $config{'homes_dir'}, '755', 'homes' ]);
 if (!$d->{'parent'}) {
-	push(@rv, [ $home_virtualmin_backup, '700' ]);
+	push(@rv, [ $home_virtualmin_backup, '700', 'backup' ]);
 	}
-push(@rv, map { [ $_, '700' ] } &ssl_certificate_directories($d));
+push(@rv, map { [ $_, '700', 'ssl' ] } &ssl_certificate_directories($d));
 return @rv;
 }
 
