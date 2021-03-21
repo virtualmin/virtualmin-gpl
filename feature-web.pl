@@ -1902,13 +1902,13 @@ else {
 	}
 }
 
-# set_public_html_dir(&domain, sub-dir)
+# set_public_html_dir(&domain, sub-dir, rename-dir?)
 # Sets the HTML directory for a virtual server, by updating the DocumentRoot
 # and <Directory> block. Returns undef on success or an error message on
 # failure.
 sub set_public_html_dir
 {
-local ($d, $subdir) = @_;
+local ($d, $subdir, $rename) = @_;
 local $p = &domain_has_website($d);
 local $path = $d->{'home'}."/".$subdir;
 local $oldpath = $d->{'public_html_path'};
@@ -1916,32 +1916,41 @@ if (-f $path) {
 	return "The HTML directory cannot be a file";
 	}
 if ($p ne "web") {
+	# Call other webserver plugin's API
 	my $err = &plugin_call($p, "feature_set_web_public_html_dir",
 			       $d, $subdir);
 	return $err if ($err);
-	$d->{'public_html_dir'} = $subdir;
-	$d->{'public_html_path'} = $path;
-	return undef;
 	}
-local @ports = ( $d->{'web_port'},
-		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-foreach my $p (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
-	next if (!$virt);
-	&apache::save_directive("DocumentRoot", [ $path ], $vconf, $conf);
-	local @dirs = &apache::find_directive_struct("Directory", $vconf);
-	local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
-			      $_->{'words'}->[0] eq $oldpath."/" } @dirs;
-	$dir ||= $dirs[0];
-	$dir || return "No existing Directory block found!";
-	local $olddir = { %$dir };
-	$dir->{'value'} = $path;
-	&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
-	&flush_file_lines($virt->{'file'});
+else {
+	# Do it for Apache
+	local @ports = ( $d->{'web_port'},
+			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	foreach my $p (@ports) {
+		local ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $p);
+		next if (!$virt);
+		&apache::save_directive(
+			"DocumentRoot", [ $path ], $vconf, $conf);
+		local @dirs = &apache::find_directive_struct(
+			"Directory", $vconf);
+		local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
+				      $_->{'words'}->[0] eq $oldpath."/"} @dirs;
+		$dir ||= $dirs[0];
+		$dir || return "No existing Directory block found!";
+		local $olddir = { %$dir };
+		$dir->{'value'} = $path;
+		&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
+		&flush_file_lines($virt->{'file'});
+		}
 	}
 $d->{'public_html_dir'} = $subdir;
 $d->{'public_html_path'} = $path;
 &register_post_action(\&restart_apache);
+if ($rename) {
+	# Also rename the directory
+	my $ok = &rename_as_domain_user($d, $oldpath, $path);
+	return "Failed to rename $oldpath to $path" if (!$ok);
+	}
 return undef;
 }
 

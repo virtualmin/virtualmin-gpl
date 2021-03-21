@@ -78,7 +78,9 @@ to enable sharing.
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
-use the C<--fix-document-dir> flag.
+use the C<--fix-document-dir> flag. If you want the directory to be renames
+as well as updated in the webserver configuration, use the
+C<--move-document-dir> flag.
 
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
@@ -189,6 +191,10 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--document-dir") {
 		$htmldir = shift(@ARGV);
+		}
+	elsif ($a eq "--move-document-dir") {
+		$htmldir = shift(@ARGV);
+		$htmldirmove = 1;
 		}
 	elsif ($a eq "--fix-document-dir") {
 		$fixhtmldir = 1;
@@ -540,7 +546,7 @@ foreach $d (@doms) {
 	if ($htmldir && !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 		# Change HTML directory
 		&$first_print("Changing documents directory to $htmldir ..");
-		$err = &set_public_html_dir($d, $htmldir);
+		$err = &set_public_html_dir($d, $htmldir, $htmldirmove);
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
@@ -714,7 +720,9 @@ print "                     [--includes extension | --no-includes]\n";
 print "                     [--default-website]\n";
 print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
-print "                     [--document-dir subdirectory | --fix-document-dir]\n";
+print "                     [--document-dir subdirectory |\n";
+print "                      --move-document-dir subdirectory |\n";
+print "                      --fix-document-dir]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
