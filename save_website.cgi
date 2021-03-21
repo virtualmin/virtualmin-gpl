@@ -168,7 +168,7 @@ if (defined($in{'htmldir'}) &&
     !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
     $d->{'public_html_dir'} ne $in{'htmldir'}) {
 	&$first_print($text{'phpmode_setdir'});
-	$err = &set_public_html_dir($d, $in{'htmldir'});
+	$err = &set_public_html_dir($d, $in{'htmldir'}, $in{'htmlrename'});
 	&$second_print(!$err ? $text{'setup_done'}
                              : &text('phpmode_htmldirerr', $err));
 	$anything++;

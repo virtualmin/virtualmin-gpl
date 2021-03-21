@@ -5102,6 +5102,7 @@ phpmode_evirt=Website options cannot be edited, as no Apache virtual host for $1
 phpmode_alog=Webserver access log file
 phpmode_elog=Webserver error log file
 phpmode_htmldir=Website documents sub-directory
+phpmode_rename=Rename current directory if changed?
 phpmode_sslredir=Redirect all requests to SSL site?
 phpmode_setalog=Changing webserver access log ..
 phpmode_logerr=.. failed : $1

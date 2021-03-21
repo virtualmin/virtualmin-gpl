@@ -22,7 +22,8 @@ print &ui_table_start($text{'website_header'}, "width=100%", 2);
 # HTML directory
 if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 	print &ui_table_row(&hlink($text{'phpmode_htmldir'}, 'htmldir'),
-		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
+		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20)."<br>\n".
+		&ui_checkbox("htmlrename", 1, $text{'phpmode_rename'}, 0));
 	}
 
 # Redirect non-SSL to SSL?
