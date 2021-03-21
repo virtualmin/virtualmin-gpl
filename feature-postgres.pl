@@ -807,8 +807,24 @@ local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
 local @missing;
 foreach my $db (@_[1..$#_]) {
 	if (&indexof($db, @dblist) >= 0) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'},
-			"drop database ".&postgresql::quote_table($db));
+		eval {
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"drop database ".&postgresql::quote_table($db).
+				" with force");
+			};
+		if ($@) {
+			# Force command not supported, fall back to regular
+			# drop with cleanup of connections
+			eval {
+				&postgresql::execute_sql_logged(
+					$qconfig{'basedb'},
+					"revoke connection on database ".
+					&postgresql::quote_table($db).
+					" from public");
+				};
+			&postgresql::execute_sql_logged($qconfig{'basedb'},
+				"drop database ".&postgresql::quote_table($db));
+			}
 		if (defined(&postgresql::delete_database_backup_job)) {
 			&postgresql::delete_database_backup_job($db);
 			}
