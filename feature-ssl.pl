@@ -110,7 +110,7 @@ local $web_sslport = $d->{'web_sslport'} || $tmpl->{'web_sslport'} || 443;
 &require_apache();
 &obtain_lock_web($d);
 local $conf = &apache::get_config();
-$d->{'letsencrypt_renew'} = 2;		# Default let's encrypt renewal
+$d->{'letsencrypt_renew'} = 1;		# Default let's encrypt renewal
 
 # Find out if this domain will share a cert with another
 &find_matching_certificate($d);
@@ -1690,7 +1690,7 @@ $main::got_lock_ssl-- if ($main::got_lock_ssl);
 
 # find_matching_certificate_domain(&domain)
 # Check if another domain on the same IP already has a matching cert, and if so
-# return it.
+# return it (or a list of matches)
 sub find_matching_certificate_domain
 {
 local ($d) = @_;
@@ -1698,12 +1698,13 @@ local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
 			   $_->{'ssl'} &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
+local @rv;
 foreach my $sslclash (@sslclashes) {
 	if (&check_domain_certificate($d->{'dom'}, $sslclash)) {
-		return $sslclash;
+		push(@rv, $sslclash);
 		}
 	}
-return undef;
+return wantarray ? @rv : $rv[0];
 }
 
 # find_matching_certificate(&domain)
@@ -1717,10 +1718,15 @@ local $lnk = $d->{'link_certs'} ? 1 :
 	     $d->{'nolink_certs'} ? 0 :
 	     $config{'nolink_certs'} ? 0 : 1;
 if ($lnk) {
-	local $sslclash = &find_matching_certificate_domain($d);
-	if ($sslclash && $sslclash->{'user'} eq $d->{'user'}) {
-		# Found a match, so add a link to it
-		&link_matching_certificate($d, $sslclash, 0);
+	local @sames = grep { $_->{'user'} eq $d->{'user'} }
+			    &find_matching_certificate_domain($d);
+	if (@sames) {
+		($same) = grep { !$_->{'parent'} } @sames;
+		$same ||= $sames[0];
+		if ($same) {
+			# Found a match, so add a link to it
+			&link_matching_certificate($d, $sslclash, 0);
+			}
 		}
 	}
 }
@@ -2585,8 +2591,7 @@ foreach my $d (&list_domains()) {
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
-	my $renew = $age >= $d->{'letsencrypt_renew'} * 30 * $day + $rf ||
-		    $expiry && $expiry - time() < 21 * $day + $rf;
+	my $renew = $expiry && $expiry - time() < 21 * $day + $rf;
 	next if (!$renew);
 
 	# Don't even attempt now if the lock is being held
