@@ -33,19 +33,11 @@ push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
 
-$in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
-	&error($text{'letsencrypt_erenew'});
-
 if ($in{'only'}) {
 	# Just update renewal date and domains
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
-	if ($in{'renew_def'}) {
-		delete($d->{'letsencrypt_renew'});
-		}
-	else {
-		$d->{'letsencrypt_renew'} = $in{'renew'};
-		}
+	$d->{'letsencrypt_renew'} = $in{'renew'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -141,12 +133,7 @@ else {
 		# Save renewal state
 		$d->{'letsencrypt_dname'} = $custom_dname;
 		$d->{'letsencrypt_dwild'} = $in{'dwild'};
-		if ($in{'renew_def'}) {
-			delete($d->{'letsencrypt_renew'});
-			}
-		else {
-			$d->{'letsencrypt_renew'} = $in{'renew'};
-			}
+		$d->{'letsencrypt_renew'} = $in{'renew'};
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
 		&save_domain($d);

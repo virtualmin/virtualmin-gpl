@@ -385,9 +385,9 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 					       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
 
 		# Setup automatic renewal?
-		print &ui_table_row($text{'cert_letsrenew'},
-			&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
-					$text{'cert_letsnotrenew'}));
+		print &ui_table_row($text{'cert_letsrenew2'},
+			&ui_yesno_radio("renew",
+					$d->{'letsencrypt_renew'} ? 1 : 0));
 
 		# Test connectivity first?
 		if (defined(&check_domain_connectivity)) {

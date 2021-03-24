@@ -12,7 +12,7 @@ flag, which can be given multiple times. Or you can force use of the default
 SSL hostname list with C<--default-hosts>.
 
 If the optional C<--renew> flag is given, automatic renewal will be configured
-for the specified number of months in the future.
+to occur when the certificate is close to expiry.
 
 To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
@@ -59,9 +59,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--renew") {
-		$renew = shift(@ARGV);
-		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
-		    &usage("--renew must be followed by a number of months");
+		if ($ARGV[0] =~ /^[0-9\.]+$/) {
+			# Ignore months flag now
+			shift(@ARGV);
+			}
+		$renew = 1;
 		}
 	elsif  ($a eq "--size") {
 		$size = shift(@ARGV);
@@ -177,12 +179,7 @@ else {
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
-	if ($renew) {
-		$d->{'letsencrypt_renew'} = $renew;
-		}
-	else {
-		delete($d->{'letsencrypt_renew'});
-		}
+	$d->{'letsencrypt_renew'} = $renew;
 	&save_domain($d);
 
 	# Update other services using the cert
@@ -225,7 +222,7 @@ print "\n";
 print "virtualmin generate-letsencrypt-cert --domain name\n";
 print "                                    [--host hostname]*\n";
 print "                                    [--default-hosts]\n";
-print "                                    [--renew months]\n";
+print "                                    [--renew]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
