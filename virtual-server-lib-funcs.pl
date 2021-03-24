@@ -4529,13 +4529,19 @@ if ($d && $d->{'reseller'} && defined(&get_reseller) && $config{'from_reseller'}
 	local $resel = &get_reseller($r[0]);
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		# Reseller has an email .... but is it valid for this system?
-		my ($rs) = &extract_address_parts($resel->{'acl'}->{'email'});
-		my ($rsmbox, $rsdom) = split(/\@/, $rs);
-		my $rsd = &get_domain_by("dom", $rsdom);
-		if ($rsd || $rsdom eq &get_system_hostname() ||
-		    $config{'from_reseller'} == 2) {
-			# Yes - safe to use
-			$rv = $rs;
+		if ($resel->{'acl'}->{'from'}) {
+			# Custom from address set
+			$rv = $resel->{'acl'}->{'from'};
+			}
+		else {
+			my ($rs) = &extract_address_parts($resel->{'acl'}->{'email'});
+			my ($rsmbox, $rsdom) = split(/\@/, $rs);
+			my $rsd = &get_domain_by("dom", $rsdom);
+			if ($rsd || $rsdom eq &get_system_hostname() ||
+			    $config{'from_reseller'} == 2) {
+				# Yes - safe to use
+				$rv = $rs;
+				}
 			}
 		}
 	}
