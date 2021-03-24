@@ -4262,7 +4262,8 @@ if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
 	foreach my $r (split(/\s+/, $d->{'reseller'})) {
 		local $resel = &get_reseller($r);
 		if ($resel && $resel->{'acl'}->{'email'}) {
-			push(@ccs, $resel->{'acl'}->{'email'});
+			push(@ccs, &extract_address_parts(
+				$resel->{'acl'}->{'email'}));
 			}
 		}
 	}
