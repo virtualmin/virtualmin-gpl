@@ -1693,7 +1693,7 @@ if ($virt) {
 			}
 		}
 
-	# If the restored config contains php_value entires but this system
+	# If the restored config contains php_value entries but this system
 	# doesn't support mod_php, remove them
 	&fix_mod_php_directives($d, $d->{'web_port'});
 
