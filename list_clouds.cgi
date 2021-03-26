@@ -5,7 +5,7 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &can_cloud_providers() || &error($text{'clouds_ecannot'});
 
-&ui_print_header(undef, $text{'clouds_title'}, "", "clouds");
+&ui_print_header(undef, $text{'clouds_title'}, "", undef);
 
 @provs = &list_cloud_providers();
 print &ui_columns_start([ $text{'clouds_name'},
