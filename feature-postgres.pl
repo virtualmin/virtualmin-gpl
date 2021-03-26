@@ -808,6 +808,7 @@ local @missing;
 foreach my $db (@_[1..$#_]) {
 	if (&indexof($db, @dblist) >= 0) {
 		eval {
+			local $main::error_must_die = 1;
 			&postgresql::execute_sql_logged($qconfig{'basedb'},
 				"drop database ".&postgresql::quote_table($db).
 				" with force");
@@ -816,6 +817,7 @@ foreach my $db (@_[1..$#_]) {
 			# Force command not supported, fall back to regular
 			# drop with cleanup of connections
 			eval {
+				local $main::error_must_die = 1;
 				&postgresql::execute_sql_logged(
 					$qconfig{'basedb'},
 					"revoke connection on database ".
