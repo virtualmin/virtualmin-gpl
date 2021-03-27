@@ -660,7 +660,7 @@ if ($info && $info->{'notafter'}) {
 
 # Make sure the CA matches the cert
 my $cafile = &get_website_ssl_file($d, "ca");
-if ($cafile) {
+if ($cafile && !&self_signed_cert($d)) {
 	my $cainfo = &cert_file_info($cafile, $d);
 	if (!$cainfo || !$cainfo->{'cn'}) {
 		return &text('validate_esslcainfo', "<tt>$cafile</tt>");
