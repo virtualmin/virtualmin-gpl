@@ -2341,8 +2341,6 @@ cert_ewebminver=Solamente versiones superiores a Webmin  1.780 soportan la encri
 cert_dnamefor=Solicitar certificado para
 cert_dnamedef=Dominios asociados con este servidor
 cert_dnamesel=Nombres de dominio que se muestran aquí
-cert_letsrenew=Meses entre las renovaciones automáticas
-cert_letsnotrenew=Renovar solo manualmente
 cert_letsage=Tiempo transcurrido desde la última renovación.
 cert_letsmonths=$1 meses
 
