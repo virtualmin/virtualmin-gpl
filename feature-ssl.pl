@@ -1721,11 +1721,11 @@ if ($lnk) {
 	local @sames = grep { $_->{'user'} eq $d->{'user'} }
 			    &find_matching_certificate_domain($d);
 	if (@sames) {
-		($same) = grep { !$_->{'parent'} } @sames;
+		my ($same) = grep { !$_->{'parent'} } @sames;
 		$same ||= $sames[0];
 		if ($same) {
 			# Found a match, so add a link to it
-			&link_matching_certificate($d, $sslclash, 0);
+			&link_matching_certificate($d, $same, 0);
 			}
 		}
 	}
