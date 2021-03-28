@@ -1676,7 +1676,7 @@ if ($virt) {
 	if (!$d->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
 		$mode = &get_domain_php_mode($d);
-		local @supp = &supported_php_modes($d);
+		local @supp = &supported_php_modes();
 		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
 			# Need to fix
 			local $fix = pop(@supp);
