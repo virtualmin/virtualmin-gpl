@@ -91,11 +91,17 @@ foreach $d (&list_domains()) {
 		$sfname =~ s/^\.//;
 		$sfname =~ s/\/$//;
 		}
+	elsif ($sdmode == 4 || $sdmode == 6) {
+		$sfname = $sdpath;
+		}
 	local ($vdmode, $vdpath) = &get_domain_virus_delivery($d);
 	if ($vdmode == 1 && $vdpath =~ /^\Q$fd\E\/(.+)$/) {
 		$vfname = lc($1);
 		$vfname =~ s/^\.//;
 		$vfname =~ s/\/$//;
+		}
+	elsif ($vdmode == 4 || $vdmode == 6) {
+		$vfname = $vdpath;
 		}
 	print STDERR "$d->{'dom'}: spam=$sfname virus=$vfname trash=$tfname\n" if ($debug);
 
