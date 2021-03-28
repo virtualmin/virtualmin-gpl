@@ -11,7 +11,9 @@ foreach my $m ("XML::Simple", "Digest::HMAC_SHA1",
                "LWP::Protocol::https", @s3_perl_modules) {
 	eval "use $m";
 	if ($@ =~ /Can't locate/) {
-		return &text('s3_emodule', "<tt>$m</tt>");
+		return &text('s3_emodule', "<tt>$m</tt>") .
+			&vui_install_mod_perl_link(
+				$m, "list_buckets.cgi", $text{'index_buckets'});
 		}
 	elsif ($@) {
 		return &text('s3_emodule2', "<tt>$m</tt>", "$@");
@@ -23,7 +25,9 @@ if ($@) {
 	}
 if ($@) {
 	return &text('s3_emodule3', "<tt>Crypt::SSLeay</tt>",
-				    "<tt>Net::SSLeay</tt>");
+				    "<tt>Net::SSLeay</tt>") .
+			&vui_install_mod_perl_link(
+				'Net::SSLeay', "list_buckets.cgi", $text{'index_buckets'});
 	}
 return undef;
 }
