@@ -5897,14 +5897,11 @@ elsif ($config{'mail_system'} == 1) {
 return ($smtp_host, $smtp_port, $smtp_type, $smtp_ssl, $smtp_enc);
 }
 
-# enable_email_autoconfig(&domain)
-# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
-# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
-# automatic configuration for that domain
-sub enable_email_autoconfig
+# enable_cgi_autoconfig(&domain)
+# Create or update the CGI script used for email autoconfig
+sub enable_cgi_autoconfig
 {
 local ($d) = @_;
-local @autoconfig = &get_autoconfig_hostname($d);
 
 # Work out mail server ports and modes
 local ($imap_host, $imap_port, $imap_type, $imap_ssl, $imap_enc,
@@ -6011,35 +6008,49 @@ if ($idx >= 0) {
 &flush_file_lines_as_domain_user($d, $autocgi);
 &set_ownership_permissions(undef, undef, 0755, $autocgi);
 &unlock_file($autocgi);
+}
+
+# enable_email_autoconfig(&domain)
+# Sets up an autoconfig.domain.com server alias and DNS entry, and configures
+# /mail/config-v1.1.xml?emailaddress=foo@domain.com to return XML for
+# automatic configuration for that domain
+sub enable_email_autoconfig
+{
+my ($d) = @_;
+
+# Create the CGI script
+my $err = &enable_cgi_autoconfig($d);
+return $err if ($err);
 
 # Add ServerAlias and redirect if missing
-local $p = &domain_has_website($d);
+my @autoconfig = &get_autoconfig_hostname($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne "web") {
 	# Call plugin, like Nginx
-	local $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 1);
+	my $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 1);
 	return $err if ($err);
 	}
 elsif ($p) {
 	# Add to Apache config
 	&obtain_lock_web($d);
 	&require_apache();
-	local @ports = ( $d->{'web_port'},
+	my @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	local $any;
-	local $found;
+	my $any;
+	my $found;
 	foreach my $p (@ports) {
-		local ($virt, $vconf, $conf) =
+		my ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
 		$found++;
 
 		# Add ServerAlias
 		foreach my $autoconfig (@autoconfig) {
-			local @sa = &apache::find_directive(
+			my @sa = &apache::find_directive(
 					"ServerAlias", $vconf);
-			local $found;
+			my $found;
 			foreach my $sa (@sa) {
-				local @saw = split(/\s+/, $sa);
+				my @saw = split(/\s+/, $sa);
 				$found++ if (&indexoflc($autoconfig,@saw) >= 0);
 				}
 			if (!$found) {
@@ -6052,8 +6063,8 @@ elsif ($p) {
 			}
 
 		# Add redirect to thunderbird CGI
-		local @rd = &apache::find_directive("Redirect", $vconf);
-		local ($found_thunderbird, $found_outlook);
+		my @rd = &apache::find_directive("Redirect", $vconf);
+		my ($found_thunderbird, $found_outlook);
 		foreach my $rd (@rd) {
 			if ($rd =~ /^\/mail\/config-v1.1.xml\s/) {
 				$found_thunderbird = 1;
@@ -6069,14 +6080,14 @@ elsif ($p) {
 			}
 
 		# Add ScriptAlias to outlook CGI
-		local @sc = &apache::find_directive("ScriptAlias", $vconf);
+		my @sc = &apache::find_directive("ScriptAlias", $vconf);
 		foreach my $sc (@sc) {
 			if ($sc =~ /^\/AutoDiscover\/AutoDiscover.xml\s/i) {
 				$found_outlook = 1;
                                 }
 			}
 		if (!$found_outlook) {
-			local $cgidir = &cgi_bin_dir($d);
+			my $cgidir = &cgi_bin_dir($d);
 			push(@sc, "/AutoDiscover/AutoDiscover.xml ".
 				  "$cgidir/autoconfig.cgi");
 			push(@sc, "/Autodiscover/Autodiscover.xml ".
@@ -6110,13 +6121,39 @@ if ($d->{'dns'}) {
 return undef;
 }
 
+# get_autoconfig_cgi_version(([&domain])
+# Returns the version number for the autoconfig.cgi script in a domain, or
+# the global one if no domain was given
+sub get_autoconfig_cgi_version
+{
+my ($d) = @_;
+my $autocgi;
+if ($d) {
+	my $cgidir = &cgi_bin_dir($d);
+	$autocgi = "$cgidir/autoconfig.cgi";
+	return undef if (!-r $autocgi);
+	}
+else {
+	$autocgi = "$module_root_directory/autoconfig.cgi";
+	}
+my $lref = &read_file_lines($autocgi, 1);
+my $rv = 0;	# Old version of the file with no version number
+foreach my $l (@$lref) {
+	if ($l =~ /^\$AUTOCONFIG_VERSION\s*=\s*(\S+);/) {
+		$rv = $1;
+		}
+	}
+&unflush_file_lines($autocgi);
+return $rv;
+}
+
 # enable_dns_autoconfig(&domain, autoconfig-hostname, [force-file])
 # Add the DNS records needed for email autoconfig
 sub enable_dns_autoconfig
 {
-local ($d, $autoconfig, $forcefile) = @_;
+my ($d, $autoconfig, $forcefile) = @_;
 &obtain_lock_dns($d);
-local ($recs, $file);
+my ($recs, $file);
 if ($forcefile) {
 	&require_bind();
 	$file = $forcefile;
@@ -6129,11 +6166,11 @@ $file || return "No DNS zone for $d->{'dom'} found";
 $autoconfig .= ".";
 
 # Add A record for IPv4
-local $changed = 0;
-local ($cr) = grep { $_->{'name'} eq $autoconfig &&
+my $changed = 0;
+my ($cr) = grep { $_->{'name'} eq $autoconfig &&
 		     $_->{'type'} eq 'CNAME' } @$recs;
 if (!$cr) {
-	local ($r) = grep { $_->{'name'} eq $autoconfig &&
+	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'A' } @$recs;
 	if (!$r) {
 		my $ip = $d->{'dns_ip'} || $d->{'ip'};
@@ -6143,7 +6180,7 @@ if (!$cr) {
 		}
 
 	# Add AAAA record for IPv6
-	local ($r) = grep { $_->{'name'} eq $autoconfig &&
+	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'AAAA' } @$recs;
 	if (!$r && $d->{'ip6'}) {
 		my $ip = $d->{'ip6'};
@@ -6166,37 +6203,37 @@ return undef;
 # Delete the DNS entry, ServerAlias and Redirect for mail auto-config
 sub disable_email_autoconfig
 {
-local ($d) = @_;
-local @autoconfig = &get_autoconfig_hostname($d);
+my ($d) = @_;
+my @autoconfig = &get_autoconfig_hostname($d);
 
 # Remove ServerAlias and redirect if they exist
-local $p = &domain_has_website($d);
+my $p = &domain_has_website($d);
 if ($p && $p ne "web") {
 	# Call plugin, like Nginx
-	local $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 0);
+	my $err = &plugin_call($p, "feature_save_web_autoconfig", $d, 0);
 	return $err if ($err);
 	}
 elsif ($p) {
 	# Remove from Apache config
 	&require_apache();
 	&obtain_lock_web($d);
-	local @ports = ( $d->{'web_port'},
+	my @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	local $any;
-	local $foundvirt;
+	my $any;
+	my $foundvirt;
 	foreach my $p (@ports) {
-		local ($virt, $vconf, $conf) =
+		my ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
 		$foundvirt++;
 
 		# Remove ServerAlias
 		foreach my $autoconfig (@autoconfig) {
-			local @sa = &apache::find_directive("ServerAlias", $vconf);
-			local $found;
+			my @sa = &apache::find_directive("ServerAlias", $vconf);
+			my $found;
 			foreach my $sa (@sa) {
-				local @saw = split(/\s+/, $sa);
-				local $idx = &indexoflc($autoconfig, @saw);
+				my @saw = split(/\s+/, $sa);
+				my $idx = &indexoflc($autoconfig, @saw);
 				if ($idx >= 0) {
 					splice(@saw, $idx, 1);
 					$sa = join(" ", @saw);
@@ -6213,9 +6250,9 @@ elsif ($p) {
 			}
 
 		# Remove redirect to CGI for Thunderbird
-		local ($found_thunderbird, $found_outlook);
-		local @rd = &apache::find_directive("Redirect", $vconf);
-		local @newrd = @rd;
+		my ($found_thunderbird, $found_outlook);
+		my @rd = &apache::find_directive("Redirect", $vconf);
+		my @newrd = @rd;
 		foreach my $rd (@rd) {
 			if ($rd =~ /^(\/.well-known\/autoconfig)?\/mail\/config-v1.1.xml\s/) {
 				@newrd = grep { $_ ne $rd } @newrd;
@@ -6228,8 +6265,8 @@ elsif ($p) {
 			}
 
 		# Remove alias to CGI for Outlook
-		local @sc = &apache::find_directive("ScriptAlias", $vconf);
-		local @newsc = @sc;
+		my @sc = &apache::find_directive("ScriptAlias", $vconf);
+		my @newsc = @sc;
 		foreach my $sc (@sc) {
 			if ($sc =~ /^\/AutoDiscover\/AutoDiscover.xml\s/i) {
 				@newsc = grep { $_ ne $sc } @newsc;
@@ -6256,13 +6293,13 @@ elsif ($p) {
 if ($d->{'dns'}) {
 	# Remove DNS entry
 	&obtain_lock_dns($d);
-	local ($recs, $file) = &get_domain_dns_records_and_file($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
 	if (!$file) {
 		&release_lock_dns($d);
 		return "No DNS zone for $d->{'dom'} found";
 		}
-	local $changed = 0;
-	local %adots = map { $_.".", 1 } @autoconfig;
+	my $changed = 0;
+	my %adots = map { $_.".", 1 } @autoconfig;
 	foreach my $r (reverse(@$recs)) {
 		if ($r->{'type'} =~ /^(A|AAAA)$/ &&
 		    $adots{$r->{'name'}}) {
@@ -6352,6 +6389,23 @@ return <<'EOF';
   </Response>
 </Autodiscover>
 EOF
+}
+
+# update_all_autoconfig_cgis()
+# For all domains with autoconfig enabled, update the CGI script if needed
+sub update_all_autoconfig_cgis
+{
+my @doms = grep { $_->{'mail'} && &domain_has_website($_) && !$_->{'alias'} }
+	        &list_domains();
+my $globalver = &get_autoconfig_cgi_version();
+foreach my $d (@doms) {
+	my $ver = &get_autoconfig_cgi_version($d);
+	next if (!defined($ver));
+	if ($ver ne $globalver) {
+		# Need to re-setup for this domain
+		&enable_cgi_autoconfig($d);
+		}
+	}
 }
 
 # list_cloud_mail_providers([&domain], [id])

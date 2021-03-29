@@ -168,9 +168,9 @@ local $rv = { 'name' => $name,
 	      'status_server_func' => "script_${name}_status_server",
 	      'files_func' => "script_${name}_files",
 	      'php_vars_func' => "script_${name}_php_vars",
-	      'php_vers_func' => "script_${name}_php_vers",
 	      'php_mods_func' => "script_${name}_php_modules",
 	      'php_opt_mods_func' => "script_${name}_php_optional_modules",
+	      'php_fullver_func' => "script_${name}_php_fullver",
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
@@ -931,8 +931,8 @@ if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
 $vers = [ sort { $a <=> $b } @$vers ];
-local $ok = &save_domain_php_directory($d, $dirpath, $vers->[0]);
-return $ok ? $vers->[0] : undef;
+local $err = &save_domain_php_directory($d, $dirpath, $vers->[0]);
+return $err ? undef : $vers->[0];
 }
 
 # clear_php_version(&domain, &sinfo)
@@ -1392,7 +1392,7 @@ if (&foreign_installed("software")) {
 		$canpkgs = 1;
 		}
 	}
-
+my $python = &get_python_path();
 foreach my $m (@mods) {
 	next if (&check_python_module($m, $d) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
@@ -1416,33 +1416,50 @@ foreach my $m (@mods) {
 		if ($mp eq "svn") {
 			push(@pkgs, "python-subversion");
 			}
-		elsif ($mp eq "psycopg") {
-			# Try to install old and new versions on Debian
-			push(@pkgs, "python-psycopg", "python-psycopg2");
+		elsif ($mp eq "psycopg2") {
+			push(@pkgs, ($python =~ /python3/i ? 
+				         "python3-psycopg2" :
+				         "python-psycopg2"));
+			}
+		elsif ($m eq "MySQLdb" &&
+			   $python =~ /python3/i) {
+			push(@pkgs, "python3-mysqldb");
 			}
 		else {
-			push(@pkgs, "python-".$mp);
+			my $python_package = "python";
+			if ($python =~ /python3/i) {
+				$python_package = "python3";
+				}
+			push(@pkgs, "$python_package-$mp");
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'rpm') {
 		# For YUM, naming is less standard .. the MySQLdb package
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
-			push(@pkgs, "MySQL-python");
+			push(@pkgs, ($python =~ /python3/i ?
+				         "python3-mysql" :
+				         "MySQL-python"));
 			}
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");
 			}
-		elsif ($mp eq "psycopg") {
+		elsif ($mp eq "psycopg2") {
 			# Try to install old and new versions
-			push(@pkgs, "python-psycopg", "python-psycopg2");
+			push(@pkgs, ($python =~ /python3/i ? 
+				         "python3-psycopg2" :
+				         "python-psycopg2"));
 			}
 		elsif ($m eq "svn") {
 			push(@pkgs, "subversion-python");
 			}
 		else {
 			$mp = lc($mp);
-			push(@pkgs, "python-".$mp);
+			my $python_package = "python";
+			if ($python =~ /python3/i) {
+				$python_package = "python3";
+				}
+			push(@pkgs, "$python_package-$mp");
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'pkgadd') {
@@ -2264,7 +2281,7 @@ return 0 if (!&foreign_check("cron"));
 &foreign_require("cron");
 $cmd =~ /^(.*)\//;
 local $dir = $1;
-local $cmd = &php_command_for_version($phpver);
+local $cmd = &php_command_for_version($phpver, 2);
 local $fullcmd = "cd $dir && $php -f $cmd >/dev/null 2>&1";
 local $job = { 'user' => $d->{'user'},
 	       'active' => 1,
@@ -3068,8 +3085,13 @@ return @fixed;
 sub get_python_path
 {
 return &has_command($config{'python_cmd'}) ||
-       &has_command("python") ||
-       &has_command("python3") ||
+       &has_command("python3") || &has_command("python30") ||
+       &has_command("python3.9") || &has_command("python39") ||
+       &has_command("python3.8") || &has_command("python38") ||
+       &has_command("python3.7") || &has_command("python37") ||
+       &has_command("python3.6") || &has_command("python36") ||
+       &has_command("python2.7") || &has_command("python27") ||
+       &has_command("python2.6") || &has_command("python26") ||
        "python";
 }
 

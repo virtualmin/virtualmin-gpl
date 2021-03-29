@@ -12,7 +12,7 @@ flag, which can be given multiple times. Or you can force use of the default
 SSL hostname list with C<--default-hosts>.
 
 If the optional C<--renew> flag is given, automatic renewal will be configured
-for the specified number of months in the future.
+to occur when the certificate is close to expiry.
 
 To have Virtualmin attempt to verify external Internet connectivity to your
 domain before requesting the certificate, use the C<--check-first> flag. This
@@ -59,9 +59,11 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--renew") {
-		$renew = shift(@ARGV);
-		$renew =~ /^[0-9\.]+$/ && $renew > 0 ||
-		    &usage("--renew must be followed by a number of months");
+		if ($ARGV[0] =~ /^[0-9\.]+$/) {
+			# Ignore months flag now
+			shift(@ARGV);
+			}
+		$renew = 1;
 		}
 	elsif  ($a eq "--size") {
 		$size = shift(@ARGV);
@@ -89,8 +91,8 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-&domain_has_ssl($d) ||
-	&usage("Virtual server $dname does not have SSL enabled");
+&domain_has_website($d) ||
+	&usage("Virtual server $dname does not have a website enabled");
 if (!@dnames) {
 	# No hostnames specified
 	if ($defdnames || !$d->{'letsencrypt_dname'}) {
@@ -177,12 +179,7 @@ else {
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
-	if ($renew) {
-		$d->{'letsencrypt_renew'} = $renew;
-		}
-	else {
-		delete($d->{'letsencrypt_renew'});
-		}
+	$d->{'letsencrypt_renew'} = $renew;
 	&save_domain($d);
 
 	# Update other services using the cert
@@ -194,7 +191,7 @@ else {
 
 	# Copy SSL directives to domains using same cert
 	foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
-		next if (!&domain_has_ssl($od));
+		next if (!&domain_has_ssl_cert($od));
 		$od->{'ssl_cert'} = $d->{'ssl_cert'};
 		$od->{'ssl_key'} = $d->{'ssl_key'};
 		$od->{'ssl_newkey'} = $d->{'ssl_newkey'};
@@ -225,7 +222,7 @@ print "\n";
 print "virtualmin generate-letsencrypt-cert --domain name\n";
 print "                                    [--host hostname]*\n";
 print "                                    [--default-hosts]\n";
-print "                                    [--renew months]\n";
+print "                                    [--renew]\n";
 print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";

@@ -605,44 +605,45 @@ if ($multi) {
 			}
 
 		# Show SSL cert
-		if ($d->{'ssl'}) {
-			if ($d->{'ssl_key'}) {
-				print "    SSL key file: $d->{'ssl_key'}\n";
-				}
-			if ($d->{'ssl_cert'}) {
-				print "    SSL cert file: $d->{'ssl_cert'}\n";
-				}
-			if ($d->{'ssl_chain'}) {
-				print "    SSL CA file: $d->{'ssl_chain'}\n";
-				}
-			$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
-						 : undef;
-			if ($same) {
-				print "    SSL shared with: $same->{'dom'}\n";
-				}
-			if ($multi == 1) {
-				@sslhn = &get_hostnames_for_ssl($d);
-				print "    SSL candidate hostnames: ",
-					join(" ", @sslhn),"\n";
-				}
-			if ($d->{'ssl_cert_expiry'}) {
-				print "    SSL cert expiry: ",
-				    &make_date($d->{'ssl_cert_expiry'}),"\n";
-				}
-			if ($d->{'letsencrypt_renew'}) {
-				print "    Lets Encrypt renewal: ",
-				    $d->{'letsencrypt_renew'}, " months\n";
-				print "    Lets Encrypt cert issued: ",
-				    &make_date($d->{'letsencrypt_last'}),"\n";
-				}
-			if ($d->{'letsencrypt_dname'}) {
-				print "    Lets Encrypt domain: ",
-				    $d->{'letsencrypt_dname'},"\n";
-				}
+		if ($d->{'ssl_key'}) {
+			print "    SSL key file: $d->{'ssl_key'}\n";
+			}
+		if ($d->{'ssl_cert'}) {
+			print "    SSL cert file: $d->{'ssl_cert'}\n";
+			}
+		if ($d->{'ssl_chain'}) {
+			print "    SSL CA file: $d->{'ssl_chain'}\n";
+			}
+		$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
+					 : undef;
+		if ($same) {
+			print "    SSL shared with: $same->{'dom'}\n";
+			}
+		if ($multi == 1) {
+			@sslhn = &get_hostnames_for_ssl($d);
+			print "    SSL candidate hostnames: ",
+				join(" ", @sslhn),"\n";
+			}
+		if ($d->{'ssl_cert_expiry'}) {
+			print "    SSL cert expiry: ",
+			    &make_date($d->{'ssl_cert_expiry'}),"\n";
+			}
+		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
+			print "    Lets Encrypt renewal: ",
+			    ($d->{'letsencrypt_renew'} ? "Enabled"
+						       : "Disabled"),"\n";
+			}
+		if ($d->{'letsencrypt_last'}) {
+			print "    Lets Encrypt cert issued: ",
+			    &make_date($d->{'letsencrypt_last'}),"\n";
+			}
+		if ($d->{'letsencrypt_dname'}) {
+			print "    Lets Encrypt domain: ",
+			    $d->{'letsencrypt_dname'},"\n";
 			}
 
 		# Show SSL cert usage by other services
-		if ($d->{'ssl'} && $multi == 1) {
+		if ($multi == 1) {
 			foreach my $svc (&get_all_domain_service_ssl_certs($d)) {
 				print "    SSL cert used by: ",
 				      $svc->{'id'},
@@ -650,6 +651,20 @@ if ($multi) {
 				       $svc->{'ip'} ? " ($svc->{'ip'})" : ""),
 				      "\n";
 				}
+			}
+
+		# Show provisioned features
+		foreach my $f (&list_provision_features()) {
+			my $mode = "Local";
+			if ($d->{'provision_'.$f}) {
+				$mode = "Cloudmin Services";
+				}
+			elsif ($f eq "dns" && $d->{'dns_cloud'}) {
+				my ($cloud) = grep { $_->{'name'} eq
+					$d->{'dns_cloud'} } &list_dns_clouds();
+				$mode = "Cloud DNS Provider $cloud->{'desc'}";
+				}
+			print "    Provisioning for ${f}: $mode\n";
 			}
 
 		# Show DNS SPF mode

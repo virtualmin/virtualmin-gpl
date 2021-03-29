@@ -341,14 +341,16 @@ local %extramods = map { $_, $avail{$_} }
 			@extramods;
 
 # Grant access to BIND module if needed
-if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'}) {
+if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'} &&
+    !$_[0]->{'dns_cloud'}) {
 	# Allow user to manage just their domains
 	push(@mods, "bind8");
 	local %acl = ( 'noconfig' => 1,
 		       'zones' => join(" ",
 				    map { $_->{'dom'} }
 				     grep { $_->{'dns'} &&
-				       !$_->{'provision_dns'} } @doms),
+				            !$_->{'provision_dns'} &&
+					    !$_->{'cloud_dns'} } @doms),
 		       'dir' => &resolve_links($_[0]->{'home'}),
 		       'master' => 0,
 		       'slave' => 0,
@@ -670,7 +672,8 @@ if ($extramods{'at'} && $_[0]->{'unix'} && !$chroot) {
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
 		       'users' => $_[0]->{'user'},
-		       'allow' => 0 );
+		       'allow' => 0,
+		       'stop' => 0, );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "at")
 		if (!$hasmods{'at'});
 	push(@mods, "at");

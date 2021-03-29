@@ -6,7 +6,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'autoconfig_err'});
 
-@doms = grep { $_->{'mail'} && &domain_has_website($_) && !$_->{'alias'} } &list_domains();
+@doms = grep { $_->{'mail'} && &domain_has_website($_) && !$_->{'alias'} }
+	     &list_domains();
 
 &ui_print_unbuffered_header(undef, $text{'newautoconfig_title'}, "");
 

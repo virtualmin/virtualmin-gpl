@@ -27,6 +27,9 @@ if (!$parent) {
 		&indexof($in{'user'}, @banned_usernames) < 0 ||
 			&error(&text('setup_eroot',
 					  join(" ", @banned_usernames)));
+		($in{'user'} eq $remote_user ||
+		 $in{'user'} eq $base_remote_user) &&
+			&error($text{'setup_eremoteuser'});
 		$clash = &get_domain_by("user", $in{'user'});
 		$clash && &error(&text('import_euserclash',
 				       &show_domain_name($clash)));
@@ -608,7 +611,9 @@ else {
 		}
 
 	# Check for plugin features
-	foreach $f (&list_feature_plugins()) {
+	my @list_feature_plugins = &list_feature_plugins();
+	features_sort(\@list_feature_plugins, \@list_feature_plugins);
+	foreach $f (@list_feature_plugins) {
 		$pname = &plugin_call($f, "feature_name");
 		if (&plugin_call($f, "feature_import", $in{'dom'},
 				 $user || $in{'user'},

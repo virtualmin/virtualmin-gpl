@@ -5,5 +5,21 @@ the backup is run on schedule. This can be useful for un-mounting removable
 or remote filesystems to which the backup was be written, or cleaning up
 old backup files. <p>
 
-<footer>
+The command can discover information about the backup via environment variables
+starting with <tt>BACKUP_</tt> , like:
 
+<dl>
+<dt><tt>BACKUP_DOMAIN_NAMES</tt>
+<dd>Names of all the virtual servers being backed up.<p>
+
+<dt><tt>BACKUP_DEST</tt>
+<dd>The destination directory or URL.<p>
+
+<dt><tt>BACKUP_FEATURES</tt>
+<dd>Names of all Virtualmin features included in the backup. If <tt>BACKUP_ALL</tt> is set to 1, all features are included.<p>
+
+<dt><tt>BACKUP_STATUS</tt>
+<dd>Set to 1 if the backup succeeded, 0 if not.<p>
+</dl>
+
+<footer>

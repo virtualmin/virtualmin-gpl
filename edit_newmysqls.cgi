@@ -31,7 +31,8 @@ foreach my $mm (&list_remote_mysql_modules()) {
 			$text{'newmysqls_cm'} : $text{'newmysqls_man'},
 		$vstr,
 		&ui_link("/$mm->{'minfo'}->{'dir'}", $text{'newmysqls_open'}),
-		], \@tds, "d", $mm->{'minfo'}->{'dir'});
+		], \@tds, "d", $mm->{'minfo'}->{'dir'}, 0, 
+		   $mm->{'config'}->{'virtualmin_provision'} ? 1 : 0);
 	}
 print &ui_columns_end();
 print &ui_form_end([ [ undef, $text{'newmysqls_delete'} ],

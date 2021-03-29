@@ -64,6 +64,7 @@ index_delete_all=Tüm Sanal Sunucuları Sil
 index_mass_all=Tüm Sanal Sunucuları Güncelle
 index_disable=Seçilenleri Devre Dışı Bırak
 index_enable=Seçilenleri Etkinleştir
+
 index_scheds=Zamanlanmış Yedeklemeler
 index_schedsdesc=Mevcut zamanlanmış yedeklemelerin bir listesini görüntülemek ve yenilerini eklemek veya var olanları yönetmek için bu düğmeyi tıklatın.
 index_running=Yedekleri Çalıştırma
@@ -87,6 +88,9 @@ index_certnearly=Bazı sanal sunucuların SSL sertifikalarının geçerlilik sü
 index_expirywarn=DNS Kayıt Uyarısı
 index_expiryexpired=Bazı sanal sunucuların DNS kayıtlarının süresi doldu : $1 
 index_expirynearly=Bazı sanal sunucuların DNS kayıtlarının süresi dolmak üzere : $1 
+index_certinvalid=$1 için $2 SSL sertifika dosyası geçersiz : $3 
+index_keyinvalid=$1 için $2 SSL anahtar dosyası geçersiz : $3 
+
 form_title4=Sanal Alt Etki Alanı Oluşturma
 form_enomore=Herhangi bir türde daha fazla sanal sunucu oluşturmanıza izin verilmiyor
 form_genericmode=Yeni sanal sunucu türü:
@@ -98,6 +102,8 @@ form_generic_subdom=$1 alt alanı
 form_reseller=Satıcıya ait
 form_rmysql=MySQL veritabanı sunucusu
 form_noreseller=&lt;Yok&gt;
+form_web=Apache web sitesi kurulsun mu?
+form_ssl=Apache SSL web sitesi kurulsun mu?
 form_passf=Parola
 form_passa=Tekrar
 form_plan=Hesap planı
@@ -111,15 +117,13 @@ form_advanced=Gelişmiş seçenekler
 form_park=İlk web sitesi içeriği
 form_content=İlk web sayfası oluşturulsun mu?
 form_content1=Hayır
-form_content2=Evet, varsayılan içerikle
-form_content0=Evet, aşağıdaki metinle ..
-form_style=İlk içerik için stil
-form_nostyle=&lt;Virtualmin Varsayılan&gt;
-form_showstyle=(Ön izleme..)
+form_content2=Evet, varsayılan şablon ve aşağıdaki içerikle
+form_content0=Evet, aşağıdaki içerikle
 form_limits=Kotalar ve limitler
 form_proxysect=IP adresi ve yönlendirme
 form_ipsect=IP adresi ve arayüzler
 form_inputssect=Ek özellik seçenekleri
+
 setup_eplan=Seçilen plan mevcut değil veya mevcut değil
 setup_evital=$1 kritik özelliği düzgün oluşturulmadı - Sanal sunucu oluşturma işlemi durduruldu.
 setup_edomain4=Bu alanı zaten barındırıyorsunuz
@@ -134,6 +138,7 @@ setup_evirt6tmpl2=Seçilen şablon için IPv6 ayırma kullanılmalıdır
 setup_eauto2=Otomatik olarak seçilen ücretsiz bir yönetim grubu adı bulunamadı (hem $1 hem de $2 zaten var)
 setup_eroot=<tt>$1</tt> kullanıcı adları sanal sunucu yöneticisi olarak kullanılamaz
 setup_eroot2=<tt>$1</tt> grup adları sanal sunucu yöneticisi olarak kullanılamaz
+setup_eremoteuser=Kullanıcı adı, mevcut Virtualmin oturumu ile aynı olamaz
 setup_eunixclash1=$1 adında bir unix kullanıcısı var - farklı bir yönetim kullanıcı adı seçmeyi deneyin
 setup_eunixclash2=$1 adında bir unix grubu zaten var - farklı bir yönetim kullanıcı adı seçmeyi deneyin
 setup_eunixclash3=UID $1 olan bir unix kullanıcısı zaten var
@@ -181,6 +186,7 @@ setup_edefip=Yeni sanal sunucunun IP adresi yok! Belki de Virtualmin sistemin va
 setup_qmailme=Bu etki alanı adı, sunucunun $1 ana bilgisayar adıyla aynı olduğundan (<tt>control/me</tt> dosyasından) Qmail için kullanılamaz
 setup_eslashpass=Ters eğik çizgi içeren şifreler MySQL tarafından desteklenmez
 setup_etmpl=Seçilen şablonu kullanma izniniz yok
+
 setup_usermail2=Yönetim kullanıcısı için takma adlar oluşturuluyor ..
 setup_usermail3=Yönetici kullanıcı için posta kutusu oluşturuluyor ..
 setup_eusermail2=.. takma adlar başarısız oldu : $1 
@@ -199,6 +205,10 @@ setup_esslca=.. sertifika yetkilisi dosyası geçerli değil : $1
 setup_esslusermin=Usermin kurulu değil
 setup_ftpuser=ProFTPD kullanıcısı $1 sunucu grubuna ekleniyor ..
 setup_bind_provision=Hizmet ana bilgisayarına yeni DNS bölgesi ekleniyor ..
+setup_bind_cloud=$1 kullanılarak yeni DNS bölgesi ekleniyor ..
+setup_ebind_cloud=.. başarısız oldu : $1 
+setup_ebindslaveip2=.. bu sistem için IP adresini belirleyemedi. IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
+setup_ebindslaveip=.. bu sistem için geçerli bir IP adresi belirleyemedi ($1 aldı). IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
 setup_ebind_provision=.. oluşturma başarısız : $1 
 setup_bind_provisioned=.. $1 'de oluşturuldu
 setup_ebindpid=.. başarısız oldu : $1 
@@ -249,7 +259,13 @@ setup_ejail=.. hapishane başarısız oldu : $1
 setup_jailed=.. hapishane dizini artık $1 
 setup_letsaliases=$2 için $2 'yi ekleyelim.
 setup_eletsaliases=.. başarısız oldu : $1 
+setup_ednscloudexists=Seçilen DNS bulut sağlayıcısı mevcut değil!
+setup_ednscloudstate=$1 DNS bulut sağlayıcısı kullanıma hazır değil
+setup_ednscloudclash=DNS bulut sağlayıcısı $1 : $2 'de çakışma kontrol edilemedi
+setup_dnscloudclash=DNS bölgesi $1 bulut sağlayıcısında zaten mevcut
+
 equotacommand=$1 kota komutu başarısız oldu : $2 
+
 users_indom=$2 alan adında $1 kullanıcı
 users_indomsub=$2 alan adında $1 kullanıcı (alt alanlar dahil $3)
 users_title2=FTP Kullanıcıları
@@ -262,6 +278,7 @@ users_dlist=Silinecek kullanıcılar : $1
 users_mailclient=E-posta İstemcisi Ayarlarını Göster
 users_mailclientdesc=Bu alan adı için kullanıcıların e-posta istemcileri tarafından kullanılması gereken ekran ayarları.
 users_same=Yönetici ile aynı
+
 user_createweb=FTP Kullanıcısı Oluştur
 user_editweb=FTP Kullanıcısını Düzenle
 user_chrootwarn=Uyarı: FTP dizini kısıtlamaları etkinleştirilmediğinden, bu kullanıcının en üst düzey sunucunun web içeriğine de erişimi olacaktır.
@@ -316,12 +333,14 @@ user_lastlogin_imap=IMAP (e-posta alınıyor)
 user_lastlogin_smtp=SMTP (e-posta gönderme)
 user_lastlogin_never=Henüz hiçbir giriş kaydedilmedi
 user_noforward=Yönlendirilen e-postaya otomatik yanıt verilsin mi?
+
 aliases_indom=$2 alan adında $1 takma ad
 aliases_mass=Toplu takma adlar oluşturun.
 aliases_type13=$1 alan adındaki herkes
 aliases_emass=Takma adları manuel olarak düzenleyin.
 aliases_hide=Özel takma adları gizleyin.
 aliases_show=Özel takma adları göster.
+
 alias_egone=Posta takma adı artık mevcut değil
 alias_type13=Alan adındaki herkes ..
 alias_etype1f=E-postayı '1 $' a yönlendirmenize izin verilmiyor
@@ -339,6 +358,7 @@ alias_psel=Tarihinde
 alias_estart=Geçersiz otomatik yanıt başlangıç tarihi
 alias_eend=Geçersiz otomatik yanıt bitiş tarihi
 alias_aopts=Otomatik cevaplama seçenekleri
+
 edit_title2=Sanal Alt Sunucuyu Düzenle
 edit_title3=Takma Ad Sunucusunu Düzenle
 edit_title4=Sanal Alt Etki Alanını Düzenle
@@ -389,6 +409,10 @@ edit_html=Web Sayfalarını Düzenle
 edit_htmldesc=Bu sanal sunucunun web sitesi için HTML web sayfaları oluşturun ve düzenleyin.
 edit_filemin=Dosya Yöneticisi
 edit_filemindesc=Bu sanal sunucunun web sitesi dizinindeki dosyalara göz atın ve dosyaları düzenleyin.
+edit_website=Web Sitesi Seçenekleri
+edit_websitedesc=Günlük kaydı ve HTML dizini gibi bu sanal sunucunun web sitesiyle ilgili ayarları yapılandırın
+edit_php=PHP Seçenekleri
+edit_phpdesc=Bu sanal sunucu için PHP betiklerinin nasıl çalıştırılacağına ilişkin ayarları yapılandırın.
 edit_phpver=PHP Sürümleri
 edit_phpverdesc=Kullanılacak PHP sürümünü seçin ve farklı dizinler için farklı sürümleri yapılandırın.
 edit_records=DNS Kayıtları
@@ -424,6 +448,7 @@ edit_domdkimdesc=Yalnızca bu sanal sunucu için yapılandırılmış DomainKey 
 edit_connect=Bağlantıyı Kontrol Edin
 edit_connectdesc=Bu sanal sunucunun web sitesine, DNS etki alanına ve posta sunucusuna İnternet'in geri kalanından erişilebildiğini doğrulayın.
 edit_psearch=Alt Sunucuları Listele
+
 delete_mailboxes2=Posta / FTP kullanıcıları - Tüm posta dosyaları ve ev dizinleri dahil olmak üzere $1 kullanıcı silinecek.
 delete_mailboxes3=Posta takma adları - $1 posta takma adı silinecek.
 delete_preserve=Uzaktan barındırılan özellikleri koru ($1)
@@ -431,6 +456,8 @@ delete_apachelog=Apache günlük dosyaları siliniyor ..
 delete_bind_provision=Hizmet ana bilgisayarından DNS bölgesi siliniyor ..
 delete_bind_provision_none=.. bölge başlangıçta tam olarak kurulmamış
 delete_ebind_provision=.. silme başarısız oldu : $1 
+delete_bind_cloud=DNS bölgesi $1 'den siliniyor ..
+delete_ebind_cloud=.. silinemedi : $1 
 delete_ebindsub=Üst DNS bölge sunucusu artık mevcut değil!
 delete_mysqldb_provision=Hizmetler ana bilgisayarındaki $1 MySQL veritabanını silme ..
 delete_emysqldb_provision=.. silme başarısız oldu : $1 
@@ -450,6 +477,7 @@ delete_statussslcert=SSL sertifikası için durum monitörü kaldırılıyor ..
 delete_aliasfailure=.. $1 takma ad silinemedi : $2 
 delete_ednssubof=$1 sanal sunucusu, $2 sunucusu için DNS kayıtları içerdiğinden silinemiyor
 delete_esslnoips=Alan adı için SSL sertifikası bulunamadı
+
 save_ednsip=Eksik veya geçersiz harici IP adresi
 save_mysqlpass_provision=Hizmetler ana bilgisayarında MySQL parolasını değiştirme ..
 save_emysqlpass_provision=.. şifre değiştirme hatası : $1 
@@ -466,6 +494,8 @@ save_dns2_ezone=Yeniden adlandırılacak DNS bölgesi bulunamadı!
 save_dnsip6=DNS etki alanındaki IPv6 adresini değiştirme ..
 save_dnsip6on=IPv6 DNS kayıtları ekleniyor ..
 save_dnsip6off=IPv6 DNS kayıtları kaldırılıyor ..
+save_bind_cloud=$1 üzerinde DNS alan adı değiştiriliyor ..
+save_bind_ecloud=.. başarısız oldu : $1 
 save_mailunalias1=Hedef alan adından kopyalanan posta takma adları kaldırılıyor.
 save_mailunalias2=Catchall posta takma adı kaldırılıyor ..
 save_mailto=İletişim adresi için takma ad güncelleniyor.
@@ -475,6 +505,7 @@ save_webalizerhome=Webalizer yapılandırmasında giriş dizini güncelleniyor.
 save_logrotatehome=Logrotate yapılandırmasında giriş dizini güncelleniyor.
 save_logrotateuser=Logrotate yapılandırmasında kullanıcı ve grup güncelleniyor.
 save_nologrotatecreate=.. gerekli değil
+save_statussslcert=SSL sertifika durum monitöründe e-postayı değiştirme ..
 save_fixvirts=Posta takma adlarındaki alan adını değiştirme ..
 save_aliascopy0=Catchall takma adı moduna geçiliyor.
 save_aliascopy1=Takma ad kopyalama moduna geçiliyor.
@@ -486,30 +517,41 @@ save_euserquota=Geçerli disk kullanımı zaten $1 olduğundan sunucu yöneticis
 save_aliasusers=Devre dışı bırakılan özellik aşağıdaki takma ad sunucuları tarafından kullanılıyor : $1 
 save_erquota=Bu sanal sunucunun disk kotası, kota sınırı olan $1 satıcısına ait olduğu için sınırsız olarak ayarlanamıyor
 save_erbw=Bu sanal sunucunun bant genişliği sınırı, bant genişliği sınırı olan $1 satıcısına ait olduğundan sınırsız olarak ayarlanamıyor
+
 acl_migrate=Yedekleri taşıyabilir mi?
+
 search_nonef=$1 özelliğini kullanan hiçbir sanal sunucu bulunamadı.
 search_resultsf=$1 özelliğini kullanan $2 sanal sunucu bulundu.
+
 import_encpass=Kullanıcının geçerli şifresini Unix
 import_eencpass=Şifreyi kopyalamak için mevcut Unix kullanıcısı yok
 import_db_mysql_user=MySQL kullanıcı adı
 import_db_mysql_same=Yönetici kullanıcı ile aynı
 import_emysql_user=MySQL kullanıcı adı eksik
 import_emysql_user2=Belirtilen MySQL kullanıcısı mevcut değil
+
 import_euserclash=$1 sanal sunucusu zaten seçilen kullanıcı adını kullanıyor
 import_egroupclash=$1 sanal sunucusu zaten seçilen grup adını kullanıyor
+
 disable_mysqluser_provision=MySQL kullanıcı parolasını hizmetler ana bilgisayarında kilitleme ..
 disable_emysqluser_provision=.. kilitleme hatası : $1 
 disable_bind_provision=Devre dışı bırakmak için hizmetler ana bilgisayarındaki DNS bölgesi yeniden adlandırılıyor ..
 disable_ebind_provision=.. yeniden adlandırma başarısız oldu : $1 
+disable_bind_cloud=$1 üzerinde DNS bölgesi devre dışı bırakılıyor ..
+disable_ebind_cloud=.. başarısız oldu : $1 
 disable_bindnosub=.. alt alanlar için mümkün değil
 disable_subservers=Ayrıca alt sunucular devre dışı bırakılsın mı?
 disable_doing=$1 sanal sunucusunu devre dışı bırakma.
+
 enable_mysql_provision=Hizmetler ana bilgisayarında MySQL kullanıcı parolasını geri yükleme ..
 enable_emysql_provision=.. geri yükleme başarısız : $1 
 enable_bind_provision=Hizmetler ana bilgisayarında DNS bölgesini orijinal adıyla yeniden adlandırma ..
 enable_bindnosub=.. alt alanlar için gerekli değildir
 enable_subservers=Alt sunucular da etkinleştirilsin mi?
 enable_doing=$1 sanal sunucusu etkinleştiriliyor.
+enable_bind_cloud=$1 üzerinde DNS bölgesi etkinleştiriliyor ..
+enable_ebind_cloud=.. başarısız oldu : $1 
+
 mail_rsubject=Bayi hesabı oluşturuldu
 newweb_userdef=Evet, Apache kullanıcısını otomatik olarak bul
 newweb_urlport=Sanal ana makineler için harici bağlantı noktası numarası
@@ -527,29 +569,41 @@ newweb_admin=<tt>admin.${DOM}</tt> yönlendirilsin mi?
 newweb_admindom=<tt>yönetici</tt> yönlendirmesi için URL
 newweb_ewebmaildom=Web postası yönlendirmesi için eksik veya geçersiz URL
 newweb_eadmindom=Yönetici yönlendirmesi için eksik veya geçersiz URL
+
 newdns_ensip=$1 ek ad sunucusu, ana bilgisayar adı yerine bir IP adresidir
 newdns_enshost=$1 ek ad sunucusu mevcut değil
+
 sub_EMAILTO=Sunucunun <tt>foo@bar.com</tt> gibi bir e-posta adresi içermesi
 sub_NAME=Satıcının Virtualmin girişi
 sub_RPLAINPASS=Satıcının şifresi
 sub_EMAIL=Satıcının iletişim e-posta adresi
 sub_WEBMINURL=Virtualmin'e giriş yapmak için URL
+
 newuser_desc2=Yeni bir posta / FTP kullanıcısına oluşturulduktan sonra gönderilebilecek e-posta mesajının şablonunu düzenlemek için bu formu kullanın. Metne aşağıdaki alt bölümler yapılacaktır :
 newuser_header=Yeni kullanıcı e-posta mesajı ayrıntıları
 newuser_docs=Açıklama ve oyuncu değişikliği
+
 newupdate_desc2=Güncellendikten sonra posta / FTP kullanıcısına gönderilebilen e-posta iletisi şablonunu düzenlemek için bu formu kullanın. Metne aşağıdaki alt bölümler yapılacaktır :
 newupdate_header=Güncellenmiş kullanıcı e-posta mesajı ayrıntıları
+
 newlocal_desc2=Yeni bir yerel kullanıcıya oluşturulduktan sonra gönderilebilecek e-posta iletisi şablonunu düzenlemek için bu formu kullanın. Metne aşağıdaki alt bölümler yapılacaktır :
 newlocal_header=Yeni yerel kullanıcı e-posta mesajı ayrıntıları
+
 newdom_sending=Eposta gönder?
 newdom_bcc=Ayrıca
+
 newreseller_header=Yeni bayi e-posta mesajı ayrıntıları
+
 newreseller_title=Yeni Bayi E-postası
 newreseller_ecannot=Yeni satıcı e-posta şablonunu düzenlemenize izin verilmiyor
 newreseller_desc2=Oluşturulduktan sonra yeni bir bayi hesabına gönderilebilecek e-posta iletisi şablonunu düzenlemek için bu formu kullanın. Metne aşağıdaki alt bölümler yapılacaktır :
+
+feature_ssl=Apache SSL web sitesi
 feature_virt6=IPv6 adresi
+
 bandwidth_backup=Yapılan yedeklemeler
 bandwidth_restore=Yedekler geri yüklendi
+
 check_lowmemory=Sisteminizde yalnızca $1 bellek var, bu da Virtualmin tarafından önerilen minimum $2 değerinin altında.
 check_lowgmemory=Sisteminiz $1 belleğe sahip bir sanal makinedir, ancak garanti edilen sınır yalnızca $2 'dir. Bu, Virtualmin tarafından önerilen minimum $3 değerinin altındadır ve aralıklı bellek ayırma hatalarına neden olabilir.
 check_okmemory=Sisteminizde $1 bellek var, bu değer Virtualmin tarafından önerilen minimum $2 değerinde veya üstünde.
@@ -585,8 +639,7 @@ check_dnsok3=BIND DNS etki alanları bir hizmet ana bilgisayarında barındırı
 check_etlsa=TLSA DNS kayıtları sisteminizde oluşturulamaz: $1.
 check_tlsaok=TLSA DNS kayıtları yeni alanlara eklenecek.
 check_dnsmaster=Ancak, varsayılan ana DNS sunucusu $1 tam etki alanı adı değil.
-check_mysqlokmysql=MySQL $1 yüklü ve çalışıyor.
-check_mysqlokmariadb=MariaDB $1 yüklü ve çalışıyor.
+check_mysqlok=MySQL $1 yüklendi ve çalışıyor.
 check_mysqlok2=MySQL istemci programları bir servis ana bilgisayarı ile kullanılmak üzere kurulur.
 check_mysqlnopass=MySQL kurulu ve çalışıyor, ancak ayarlanmış bir <tt>root</tt> şifresi yok! <b>Bu,<a href='$1'> MySQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
 check_postgresnopass=PostgreSQL kurulu ve çalışıyor fakat ayarlanmış bir <tt>$2</tt> şifre yok! <b>Bu,<a href='$1'> PostgreSQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
@@ -613,7 +666,7 @@ check_eget_user=Harici kota komutları etkin, ancak tek bir kullanıcının kota
 check_eget_group=Harici kota komutları etkin, ancak tek bir grubun kotasını alma komutu mevcut değil
 check_quotacommands=Harici kota komutları sanal sunucular ve posta kutuları için kullanılacaktır.
 check_eclamd=Virüs taraması için <tt>istiridye tarağı</tt> kullanmayı seçtiniz, ancak konuştuğu <tt>istiridye</tt> sunucusu çalışmıyor
-check_eresolv2=Virtualmin, DNS bölgelerini ayarlamak için yapılandırılmıştır, ancak bu sistem kendisini DNS sunucusu olarak kullanacak şekilde ayarlanmamıştır. Ya $1 'e 127.0.0.1 ekleyin veya $2 sayfasındaki BIND özelliğini kapatın.
+check_eresolv2=Virtualmin, DNS bölgelerini ayarlamak için yapılandırıldı, ancak bu sistem kendisini bir DNS sunucusu olarak kullanacak şekilde ayarlanmadı. $1'e 127.0.0.1 ekleyin, $2 sayfasındaki BIND özelliğini kapatın veya Virtualmin Yapılandırma sayfasındaki <b>Check resolv.conf</b> seçeneğini devre dışı bırakın.
 check_eresolv3=DHCP'nin ağ arabirimlerinizi dinamik olarak yapılandırmak için kullanıldığı anlaşılıyor, bu da DNS sunucularının DHCP sunucusu tarafından sağlanan ayarlara göre ayarlanmasına neden olabilir. Virtualmin ile statik bir IP adresi kullanılması önemle tavsiye edilir.
 check_eresolvlist=DNS sunucularının listesi
 check_dnsmissing=Sistemin yapılandırılmış DNS sunucusu yok gibi görünüyor. Ancak, yerel bir DNS sunucusu kullanmanın varsayılan davranışı yine de çalışmalıdır.
@@ -664,23 +717,28 @@ check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
 check_aptrepowrong=$1 APT veri havuzu yapılandırma dosyası lisans anahtarının seri numarasını yanlış içeriyor!
 check_aptrepomissing=$1 havuz yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
+
 checkmap_enone=<a href='$1'>Postfix yapılandırmasında</a> harita kaynağı bulunamadı
 checkmap_esupport=<tt>$1</tt> harita kaynağı Postfix tarafından desteklenmiyor - bunun için Postfix kütüphanelerini kurmanız veya yeniden derlemeniz gerekebilir
 checkmap_eaccess=Harita kaynağı <tt>$1</tt> kullanılamaz : $2 
 checkmap_efile=Harita türü bu Webmin sürümü tarafından desteklenmiyor - yalnızca <tt>hash</tt> ve <tt>regexp</tt> gibi dosyaları kullanan haritalar kullanılabilir
 check_eqmailldap=Qmail+LDAP desteği Virtualmin 6.00'da kaldırıldı
+
 log_disable_resels=Kilitli $1 satıcı
 log_enable_resels=Kilitsiz $1 satıcı
 log_modify_users=$2 kullanıcısından $1 kullanıcı değiştirildi
 log_breakcert_domain=$1 sunucusu için SSL sertifikasını paylaşmayı durdur
 log_newcsr_domain=$1 sunucusu için yeni SSL CSR oluşturuldu
 log_newself_domain=$1 sunucusu için yeni SSL kendinden imzalı sertifika oluşturuldu
+log_rcert_domain=$1 sunucusu için SSL sertifikası silindi
 log_dbhosts_domain=$1 sanal sunucusu için uzak veritabanı ana bilgisayarlarını değiştirme
 log_transfer_domain=$1 sanal sunucusu başka bir sisteme aktarıldı
 log_fixttl_domain=$1 sanal sunucusunda DNS TTL'si değiştirildi
 log_unsub_domain=$1 sanal sunucusu alt etki alanından alt sunucuya dönüştürüldü
 log_unalias_domain=$1 sanal sunucusunu bir takma addan alt sunucuya dönüştürdü
 log_spf_domain=$1 sunucusu için DNS seçenekleri değiştirildi
+log_website_domain=$1 sunucusu için web sitesi seçenekleri değiştirildi
+log_php_domain=$1 sunucusu için PHP seçenekleri değiştirildi
 log_phpver_domain=$1 sunucusu için PHP sürümleri değiştirildi
 log_res_domain=$1 sunucusu için kaynak sınırları değişti
 log_newip_domain=$1 sunucusu için IP adresi değişti
@@ -797,6 +855,11 @@ log_enable_ratelimit=Etkin posta hızı sınırlaması
 log_disable_ratelimit=Devre dışı bırakılmış posta ücreti sınırlaması
 log_modify_ratelimit=Güncellenmiş posta ücreti sınırlaması
 log_wizard=Yükleme Sihirbazı adımı : $1 
+log_save_cloud=$1 bulut yedekleme sağlayıcısı güncellendi
+log_clear_cloud=$1 bulut yedekleme sağlayıcısı temizlendi
+log_save_dnscloud=$1 bulut DNS sağlayıcısı güncellendi
+log_clear_dnscloud=$1 bulut DNS sağlayıcısı temizlendi
+
 backup_title3=Zamanlanmış Yedek Oluştur
 backup_desc=Yedek açıklama
 backup_odom=Alan adı $1 için
@@ -884,6 +947,7 @@ backup_senabled0=$1 sanal sunucu için Virtualmin'in zamanlanmış yedeklemesi e
 backup_sdisabled=Virtualmin'in zamanlanmış yedeklemesi devre dışı bırakıldı.
 backup_key=Anahtar ile yedeklemeyi şifrele
 backup_nokey=İmzalama veya şifreleme
+
 backup_ecannot2=Yedekleme zamanlamanıza izin verilmiyor
 backup_edestext=Tek bir dosya yedeklemesinde tar.gz veya zip gibi bir uzantı bulunmalıdır
 backup_eserver1a=FTP sunucusu ana bilgisayar adı çözülemiyor
@@ -928,6 +992,7 @@ backup_copyfailed=.. kopya başarısız oldu : $1
 backup_ekey=Seçilen yedek anahtar mevcut değil!
 backup_ekeycannot=Seçilen yedek anahtarı kullanma izniniz yok
 backup_eownrestore=Yalnızca imzalı yedeklemeler sanal sunucu sahipleri tarafından geri yüklenebilir
+
 backup_dirtarinc=Giriş dizininin artan TAR dosyası yaratılıyor.
 backup_dirzipfailed=.. ZIP başarısız! $1 
 backup_dirzip=Giriş dizininin ZIP dosyası oluşturuluyor ..
@@ -1028,6 +1093,7 @@ backup_arun=Yedekleme sonrası komutu çalıştırılıyor ..
 backup_brunfailed=.. başarısız oldu. Yedekleme devam etmeyecek.
 backup_arunfailed=.. başarısız oldu!
 backup_efeature=.. $1 özelliği başarısız oldu
+
 restore_key=Anahtarını kullanarak şifresini çöz
 restore_nokey=Yedek şifreli değil
 restore_madeat=Yedekleme yapıldı
@@ -1036,6 +1102,10 @@ restore_dirdelete=Yedekte bulunmayan dosyaları silme
 restore_delete=Sanal sunucular silinsin mi ve yeniden oluşturulsun mu?
 restore_newip=Geri yüklenen sunucular için IPv4 adresi
 restore_newip6=Geri yüklenen sunucular için IPv6 adresi
+restore_contents=Yedeklemenin içeriği kontrol ediliyor ..
+restore_gotcontents2=.. $1 sanal sunucu ve $2 genel virtualmin ayarı bulundu
+restore_gotcontents=.. $1 sanal sunucu buldu
+
 restore_esched=Seçilen yedekleme programı mevcut değil!
 restore_eunsafe=$1 özelliğini geri yüklemenize izin verilmiyor
 restore_ecannotdom=$1 alan adını geri yüklemenize izin verilmiyor
@@ -1073,6 +1143,7 @@ restore_phpbad=UYARI - Aşağıdaki komut dosyaları, bu sistemde bulunmayan PHP
 restore_phpbad2=$1 - $2 - Sürüm $3 
 restore_euid=$1 UID'si bu sistemde zaten kullanılıyor
 restore_egid=$1 GID bu sistemde zaten kullanılıyor
+
 restore_unixsame=.. çoğaltma modunda $1 orijinal LDAP sunucusuna geri yükleme atlanıyor
 restore_dirsame=.. çoğaltma modunda $1 orijinal NFS sunucusuna geri yükleme atlanıyor
 restore_edirspace=.. uyarı - bu yedekleme $1 dosya içeriyor, ancak sisteminizde yalnızca $2 boş alan var ..
@@ -1123,6 +1194,7 @@ restore_vmailserver_grey=Gri liste ayarlarını geri yükleme ..
 restore_vmailserver_missing=.. bu sistemde yapılandırılmamış
 restore_ereseller=$1 satıcısı mevcut değil
 restore_eparent=$1 orijinal üst sanal sunucusu mevcut değil
+
 limits_header2=İzin verilen yetenekler ve özellikler
 limits_header3=Diğer kısıtlamalar
 limits_migrate=Yedekleri taşıyabilir mi?
@@ -1152,6 +1224,7 @@ limits_unshell=$1 bilinmeyen kabuk kullanma
 limits_jail=Chroot jail domain Unix kullanıcısı mısınız?
 limits_ejailon=Kök hapishanesi etkinleştirilemedi : $1 
 limits_ejailoff=Kök hapishanesi devre dışı bırakılamadı : $1 
+
 rename_xndomain=Uluslararası alan adı
 rename_home2=Yeni dizin $1 
 rename_prefix=Posta kutusu adı öneki değiştirilsin mi?
@@ -1173,8 +1246,11 @@ rename_ehome3=Yeni giriş dizini zaten var
 rename_ehome4=Yeni giriş dizininin üst öğesi yok
 rename_scripts=Komut dosyası veritabanındaki yollar güncelleniyor.
 rename_eparentuser=Kullanıcı adı yalnızca üst düzey sunucular için değiştirilebilir
+
 cert_desc2=Bu bölüm, şu anda bu sanal sunucu tarafından kullanılmakta olan SSL sertifikasının ayrıntılarını göstermektedir.
 cert_desc6=Bu form, hemen kullanılabilen ancak tarayıcılar tarafından geçerli olarak kabul edilmeyen kendinden imzalı bir sertifika oluşturmak için kullanılabilir.
+cert_hasnossl=Uyarı - bu sanal sunucunun henüz etkinleştirilmiş bir SSL web sitesi yok. Herhangi bir SSL sertifikası yalnızca diğer hizmetler için kullanılabilir.
+cert_noneyet=Bu sanal sunucunun henüz bir SSL sertifikası yok. Sertifika ve anahtar oluşturmak için bu sayfadaki sekmelerden birini kullanın.
 cert_csrwarn=Uyarı - $1 'de imzalama isteği ve $2 'de özel anahtar zaten var ve yeni bir CSR oluşturularak üzerine yazılacak.
 cert_keywarn=Uyarı - $1 'deki bir sertifika ve $2 'deki özel anahtar zaten var ve yeni bir anahtar oluşturularak üzerine yazılacak.
 cert_header6=Kendinden imzalı sertifika ve anahtar oluşturma
@@ -1204,10 +1280,13 @@ cert_etime=Son kullanma tarihine kadar geçen süre
 cert_expired=$1 gün önce süresi doldu!
 cert_expiring=$1 gün içinde sona eriyor
 cert_future=Sürenin dolmasına $1 gün kaldı
+cert_remove=SSL Sertifikasını Sil
+cert_removedesc=Bu sanal sunucunun SSL sertifikası kullanımda olmadığı için bu buton tıklanarak kalıcı olarak silinebilir.
 cert_pem=PEM biçimi
 cert_pkcs12=PKCS12 biçimi
 cert_pkcs7=PKCS7 biçimi
 cert_also=Alan adları tarafından da kullanılır
+cert_svcs=Hizmetler tarafından kullanılıyor
 cert_edownload=SSL sertifikası bulunamadı!
 cert_edownload2=SSL anahtarı bulunamadı!
 cert_eformat=İstenen sertifika biçimi çalıştırılamadı
@@ -1267,8 +1346,7 @@ cert_dnamefor=İçin sertifika isteyin
 cert_dnamedef=Bu sunucuyla ilişkili alanlar
 cert_dnamesel=Burada listelenen alan adları
 cert_dwild=Ayrıca joker karakter sertifikası ister misiniz?
-cert_letsrenew=Otomatik yenileme arasındaki aylar
-cert_letsnotrenew=Yalnızca manuel olarak yenile
+cert_letsrenew2=Sertifika otomatik olarak yenilensin mi?
 cert_connectivity=Önce bağlantı kontrol edilsin mi?
 cert_connectivity2=Test bağlantısı
 cert_connectivity1=Alan adını doğrula
@@ -1290,8 +1368,10 @@ cert_webminsvcip=Evet ($1 ve $2 istekleri için)
 cert_eperiperr=Hizmet sertifikaları kaydedilemedi
 cert_eperipinst=$1 hizmeti yüklü değil
 cert_eperipfail=$1 hizmeti başarısız oldu
+
 csr_selfing=Kendinden imzalı sertifika ve özel anahtar oluşturuluyor.
 csr_csring=İmzalama isteği ve özel anahtar oluşturuluyor.
+
 newkey_ecert2=Eksik veya geçersiz imzalı SSL sertifikası : $1 
 newkey_enewkey2=Eksik veya geçersiz SSL özel anahtarı : $1 
 newkey_savingcert=Sertifika kaydediliyor ..
@@ -1305,6 +1385,7 @@ newkey_enewkeyfilehome=$1 özel anahtar dosyası sanal sunucunun ana dizininin a
 newkey_apache=Web sunucusunu yeni sertifika ve anahtar kullanacak şekilde yapılandırma.
 newkey_enewkeycsr=İmzalama isteği ile aynı anda hiçbir SSL anahtarı oluşturulmadı!
 newkey_ekeysame=CSR ile oluşturulan anahtarın yolunu girmeyin; bunun yerine <b>İmzalı Sertifika Uygula</b> sekmesini kullanın.
+
 newbw_step=Koleksiyon saatleri
 newbw_backup=Yedek aktarımlar kullanıma dahil edilsin mi?
 newbw_maxdays=Bant genişliği verilerinin saklanacağı gün sayısı
@@ -1321,12 +1402,14 @@ newbw_resetdesc=Bu düğme, bazı veya tüm özellikler ve sanal sunucular için
 newbw_return=bant genişliği izleme formu
 newbw_mailout=Giden e-postaları bant genişliği kullanımına dahil edilsin mi?
 newbw_mailall=Geçişli e-postaları bant genişliği kullanımına dahil edilsin mi?
+
 newtmpl_add1=Boş bir şablon oluşturun.
 newtmpl_add2=Varsayılan ayarlardan bir şablon oluşturun.
 newtmpl_created=Oluşturma tarihi
 newtmpl_init=Virtualmin kurulumu
 newtmpl_name0=Varsayılan ayarları
 newtmpl_name1=Alt Sunucular için Ayarlar
+
 tmpl_title4=Varsayılan Sunucu Şablonunu Kopyala
 tmpl_title5=Sunucu Şablonunu Sil
 tmpl_default=Varsayılan ayarlardan
@@ -1438,6 +1521,10 @@ tmpl_dmarcskip=Hiçbiri ayarlanmadı
 tmpl_dmarcyes=Evet, aşağıdaki politika ile
 tmpl_dmarcextra=Ekstra DMARC seçenekleri
 tmpl_edmarcpct=İletilerin yüzdesi 0 ile 100 arasında bir tam sayı olmalıdır
+tmpl_dns_cloud=Yeni DNS bölgeleri oluştur
+dns_cloud_def=&lt; Otomatik olarak seç &gt;
+dns_cloud_services=Cloudmin Hizmetleri
+dns_cloud_local=Yerel dosyalar
 tmpl_ownergroup=Alan adı sahipleri için ikincil grup
 tmpl_domalias_type2=Virtualmin şablonu
 tmpl_edomaliastmpl=Takma ad alan adı öneki için eksik şablon
@@ -1508,6 +1595,7 @@ tmpl_autoconfignone=Otomatik olarak oluşturuldu
 tmpl_eautoconfig=Thunderbird otomatik yapılandırma XML'sinde bir &lt;clientConfig&gt; etiketi eksik.
 tmpl_outlook_autoconfig=Outlook otomatik yapılandırma XML
 tmpl_outlook_eautoconfig=Outlook otomatik yapılandırma XML'sinde bir &lt;Autodiscover&gt; etiketi eksik.
+
 newplugin_desc3=Yalnızca aşağıdaki listede gerçekten kontrol edilen eklentiler şu anda etkindir. Bir eklenti etkinleştirildikten sonra, sanal sunucu oluştururken veya düzenlerken etkinleştirdiği özellik seçilebilir.
 newplugin_name=Eklenti adı
 newplugin_version=versiyon
@@ -1516,6 +1604,7 @@ newplugin_count=Alanlar
 newplugin_acts=Hareketler
 newplugin_conf=Yapılandır
 newplugin_open=Açık
+
 bwgraph_enable=İstatistik koleksiyonunun etkinleştirildiğinden emin olmak için $1 sayfasını kontrol edin.
 bwgraph_mode_4=Sınır aşan sunucular
 bwgraph_returnparent=üst düzey sunucu için bant genişliği kullanımı
@@ -1524,6 +1613,7 @@ bwgraph_mago_month=Aylık istatistikleri göster:
 bwgraph_mago_year=Yıl için istatistikleri göster:
 bwgraph_mago_=Dönem istatistiklerini göster:
 bwgraph_mok=Göstermek
+
 newfields_type11=Evet/Hayır (Varsayılan Hayır)
 newfields_show=Sunucu listesinde mi?
 newfields_show2=Göstermek
@@ -1531,6 +1621,7 @@ newfields_visible=Görünür
 newfields_visible0=Tüm kullanıcılar
 newfields_visible1=Tüm kullanıcılar (RO)
 newfields_visible2=Ana yönetici
+
 databases_indom=$2 etki alanındaki $1 veritabanı
 databases_hosted=Bu etki alanı için tüm veritabanları $1 uzak MySQL sunucusunda barındırılıyor.
 databases_canadd0=Sınırlarınıza bağlı olarak $1 ek veritabanı eklenebilir.
@@ -1565,6 +1656,7 @@ databases_remotenew=Yeni MySQL ana bilgisayarı
 databases_remoteok=Veritabanlarını Taşı
 databases_warn=UYARI! Şu anda yüklü olan komut dosyaları veya uygulamalar yeni ana bilgisayar sistemini kullanacak şekilde güncellenmeyecektir.
 databases_moving=MySQL veritabanlarını $1 'den $2 'ye taşıma.
+
 database_manage=Veritabanını Yönet
 database_host=Sistemde barındırılıyor
 database_scripts=Komut dosyaları tarafından kullanılır
@@ -1573,9 +1665,11 @@ database_collate=Yeni veritabanı için harmanlama sırası
 database_encoding=Yeni veritabanı için kodlama
 database_opts=$1 için ek seçenekler
 database_edbdef=Bir alan adı için varsayılan veritabanını silme izniniz yok
+
 reemail_desc=Bu sayfa, sanal sunucu oluşturulduğunda orijinal olarak gönderilen e-postayı yeniden göndermek için kullanılabilir.
 reemail_to=Sunucu sahibinin e-posta adresi:
 reemail_ok=Şimdi gönder
+
 newips_old6=Güncellenecek sunucuların IPv6 adresi
 newips_new6=Yeni IPv6 adresi
 newips_none2=Hiçbir sanal sunucu seçilmedi veya sisteminizde yok.
@@ -1590,6 +1684,7 @@ newips_mode0=Gerçek adres
 newips_mode1=DNS kayıtlarında kullanılan harici adres
 newips6_eold=Eski IPv6 adresi doğru biçimde değil
 newips6_enew=Yeni IPv6 adresi doğru biçimde değil
+
 newip_old6=Mevcut IPv6 adresi
 newip_new6=Yeni IPv6 adresi
 newip_virt6off=IPv6 kullanmayın
@@ -1607,18 +1702,24 @@ newip_virtaddr=Adanmış adresi sakla
 newip_virtaddr2=Özel adres tahsis edin
 newip_virtaddr3=Özel adres kullanın
 newip_convert=Adanmış Adresi Paylaşılana Dönüştür
+
 newip_eip6=Eksik veya geçersiz yeni IPv6 adresi
 newip_eclash6=$1 sanal sunucusu zaten yeni IPv6 adresini kullanıyor
 newip_eused6=Yeni IPv6 adresi sistem tarafından zaten kullanılıyor
+
 newresels_disable=Seçileni Kilitle
 newresels_enable=Seçilenin Kilidini Aç
+
 dresels_err2=Bayiler kilitlenemedi
 dresels_err3=Bayilerin kilidi açılamadı
+
 resel_header2=Satıcının sınırları
 resel_header3=İzin verilen özellikler ve alanlar
 resel_header4=IP adresi ve DNS seçenekleri
 resel_header5=Logo ve diğer ayarlar
 resel_unix=Bayi için FTP/SSH hesabı oluşturulsun mu?
+resel_from=Bayi e-postaları için adresten
+resel_fromdef=Yukarıdaki ile aynı
 resel_subdom=Sanal sunucuları etki alanı altında olmaya zorlamak istiyor musunuz?
 resel_esubdom=Eksik veya geçersiz zorunlu alan adı
 resel_anydom=Herhangi bir alana izin ver
@@ -1636,6 +1737,7 @@ resel_migrate=Yedekleri taşıyabilir mi?
 resel_create=Bayi oluşturabilir ve düzenleyebilir mi?
 resel_hide=Sunucu sahiplerinden sınırlar gizlensin mi?
 resel_ranges6=IPv6 ayırma aralıkları
+resel_efrom=Adresten geçersiz e-posta
 resel_defip6=Ad tabanlı sunucular için IPv6 adresi
 resel_sharedips=Paylaşılan IP adreslerinden seçim yapabilir mi?
 resel_defdnsip=Ad tabanlı sunucular için harici IP adresi
@@ -1662,11 +1764,12 @@ resel_domssel=Bu satıcının sahibi
 resel_equnlimit=$1 sanal sunucusu, sınırsız disk kotasına sahip olduğundan, ancak satıcının bir sınırı olduğundan bu satıcıya atanamıyor
 resel_ebwunlimit=$1 sanal sunucusu, sınırsız bant genişliği kotasına sahip olduğundan, ancak satıcının bir sınırı olduğundan bu satıcıya atanamıyor
 resel_ebefore=Değiştirme komutu başarısız olmadan önce : $1 
+
 licence_soon=Uyarı - Virtualmin lisansınızın süresi $1 gün içinde dolacak.
 licence_soon2=Uyarı - Virtualmin lisansınızın süresi $1 saat içinde dolacak.
 licence_renew=Yenileme <a target=_blank href='$1'>$1</a> adresinden satın alınabilir
-licence_ok2=.. lisans tamam! $1 Virtualmin etki alanları ve $2 sistemlerinde kullanım için geçerlidir.
-licence_ok3=.. lisans tamam! $1 Virtualmin etki alanları ve $3 'e kadar $2 sistemlerde kullanım için geçerlidir.
+licence_ok2=.. lisans <i>geçerlidir</i>. $1 Virtualmin etki alanları için ve $2 sistemlerinde kullanım için geçerlidir.
+licence_ok3=.. lisans <i>geçerlidir</i>. $1 Virtualmin etki alanları için ve $3 'e kadar $2 sistemlerinde kullanım için geçerlidir.
 licence_warn=Ancak, bu lisans denetimi sırasında geçici bir sorun oluştu: $1.
 licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
@@ -1684,6 +1787,7 @@ licence_fixlinksok=Sembolik Bağlantı İzinlerini Düzelt
 licence_fixlinksignore=Güvenli Olmayan Sembolik Bağlantılara İzin Ver
 licence_xfsreboot=Kök dosya sisteminde XFS kotalarını etkinleştirmek için sisteminizin yeniden başlatılması gerekir. Bu yapılıncaya kadar, Virtualmin kotaların etkin olduğunu algılamaz ve sanal sunuculara veya kullanıcılara disk kullanımıyla ilgili sınırlar uygulamak imkansızdır.
 licence_xfsrebootok=Şimdi yeniden başlat
+
 scripts_overall=Değerlendirme
 scripts_noexisting=Bu sanal sunucuya henüz komut dosyası yüklenmedi.
 scripts_nomatch=Aramanızla eşleşen komut dosyası yok.
@@ -1704,7 +1808,7 @@ scripts_ereturn=script bilgisi
 scripts_ecommands=Bu komut dosyası, aşağıdaki komutları gerektirdiği için yüklenemiyor: <tt>$1</tt>
 scripts_eweb=Komut dosyaları yalnızca giriş dizini ve web sitesi bulunan sanal sunuculara yüklenebilir
 scripts_emissing=Komut dosyası yok!
-scripts_ephpvers=$1 PHP sürümü gerektirdiğinden bu komut dosyası yüklenemiyor.
+scripts_ephpvers2=PHP sürümü bulunamadığı için bu komut dosyası yüklenemez
 scripts_edownload3=$1 yüklemesi eksik bir arşiv dosyası : $2 
 scripts_faking=$1 sürüm $2 'de sahte yükleme ..
 scripts_egone=Komut dosyası artık mevcut değil!
@@ -1774,6 +1878,7 @@ scripts_userpass=İlk yönetim oturumu $2 parolasıyla $1.
 scripts_useronly=İlk yönetim oturumu $1.
 scripts_passonly=İlk yönetim şifresi $1.
 scripts_passmode=Komut dosyası için ilk oturum açma
+scripts_passmode4=Komut dosyası için ilk şifre
 scripts_passmodedef1=Alan adıyla aynı kullanıcı adı ve şifre
 scripts_passmode1=$1 kullanıcı adı ve $2 şifresi
 scripts_passmodedef2=Sanal sunucu ile aynı şifre
@@ -1812,17 +1917,22 @@ scripts_packagecount=.. $1 yeni paket kuruldu
 scripts_packageall=.. tüm paketler zaten kurulu
 scripts_abandoned2=UYARI: Bu komut dosyası artık orijinal yazarı tarafından desteklenmemektedir.
 scripts_abandoned1=UYARI: Bu komut dosyasının $1 sürümü artık orijinal yazarı tarafından desteklenmiyor.
+
 newnotify_admins=Ayrıca seçili alan adlarında fazladan yöneticiye e-posta gönderilsin mi?
 newnotify_users=Ayrıca seçili alan adlarında userd'ye e-posta gönder
 newnotify_nomany=Her alan sahibine yalnızca bir kez e-posta gönderin
+
 mailusers_desc=Bu form, bu alan adındaki tüm kullanıcılara veya seçtiğiniz kullanıcılara e-posta göndermek için kullanılabilir. İleti gövdesinde ve öznede aşağıdaki alt bölümler kullanılabilir:
+
 view_title2=Sanal Alt Sunucu Ayrıntıları
 view_title3=Takma Ad Sunucusu Ayrıntıları
 view_title4=Sanal Alt Alan Ayrıntıları
+
 summary_title=Sanal Sunucu Özeti
 summary_title2=Sanal Alt Sunucu Özeti
 summary_title3=Takma Ad Sunucusu Özeti
 summary_title4=Sanal Alt Alan Özeti
+
 migrate_directadmin=DirectAdmin yedekleme
 migrate_ensim=Ensim yedekleme
 migrate_plesk9=Plesk 9+ yedekleme
@@ -1840,6 +1950,7 @@ migrate_downloaded=.. $1 indirildi
 migrate_validating=Taşıma dosyası doğrulanıyor ..
 migrate_edownload=.. indirme başarısız : $1 
 migrate_evalidate=.. doğrulama başarısız : $1 
+
 newscripts_core=Virtualmin
 newscripts_custom=Üçüncü parti
 newscripts_plugin=Eklenti
@@ -1862,6 +1973,7 @@ newscripts_wemail=Adresine yükseltme bildirimleri gönderin
 newscripts_wowner=Sanal sunucu sahipleri
 newscripts_wreseller=Sanal sunucu satıcıları
 newscripts_wother=E
+
 newscripts_wheader=Komut dosyası yükseltme bildirim seçenekleri
 newscripts_werr=Yeni sürüme geçiş bildirimleri kaydedilemedi
 newscripts_ewother=Bildirilecek eksik veya geçersiz e-posta adresi
@@ -1889,8 +2001,10 @@ newscripts_elnone=Seçili komut dosyası yok
 newscripts_desc6=Bu sekme, bu sistemdeki tüm sanal sunucularda yüklü olan tüm komut dosyalarını listeler. Tek bir komut dosyasını yükseltmek veya kaldırmak için listedeki adını tıklatın.
 newscripts_dom=Alan adı
 newscripts_noneyet=Henüz hiçbir sanal sunucuya komut dosyası yüklenmedi.
+
 sysinfo_python=Python sürümü
 sysinfo_pythonpath=Python Yolu
+
 newquotas_desc3=Ayrıca kotalarına yaklaşan veya kotalarını aşan posta ve FTP kullanıcılarının da bildirilmesini seçebilirsiniz.
 newquotas_nobody=Kimse
 newquotas_addr=Adresler
@@ -1908,6 +2022,7 @@ newquotas_mailbox=Ayrıca posta ve FTP kullanıcı kotalarını kontrol et?
 newquotas_mailbox_send=Posta ve FTP kullanıcılarına bildirilsin mi?
 newquotas_users=Ayrıca kotayı aşmış yöneticilere bildirilsin mi?
 newquotas_msg=Posta ve FTP kullanıcılarına e-posta şablonu
+
 mass_tempdisable1=Kullanıcıyı etkinleştir
 mass_tempdisable2=Kullanıcıyı devre dışı bırak
 mass_shell=Giriş izinleri
@@ -1915,10 +2030,12 @@ mass_setshell=Giriş izinleri değiştiriliyor.
 mass_shelldone=.. $1 olarak ayarlandı
 mass_shellbad=.. seçili kabuk mevcut değil
 mass_updateemail=Güncellenmiş kullanıcılara e-posta gönderilsin mi?
+
 links_flog=ProFTPD Günlüğü
 links_phpini=PHP Yapılandırması
 links_phpini2=PHP $1 Yapılandırması
 links_phpini3=PHP-FPM Yapılandırması
+
 massscript_enone3=Seçilen sunucuların hiçbirinde, seçilen sürüme yükseltilebilen komut dosyaları yüklü değil
 massscript_efetch=.. dosya indirilemedi : $1 
 massscript_ecommands=.. gerekli komutlar eksik : $1 
@@ -1930,7 +2047,9 @@ massscript_utype=Operasyon
 massscript_upgrade=Yükselt
 massscript_update=Güncelleme
 massscript_ok=Komut Dosyalarını Şimdi Yükselt
+
 massdelete_preserve=Uzaktan barındırılan özellikleri koru
+
 massdomains_headerq=Kota ve bant genişliği değişiklikleri
 massdomains_headerf=Etkin özellik değişiklikleri
 massdomains_headerl=Sahip sınırlarındaki değişiklikler
@@ -1947,6 +2066,7 @@ massdomains_scannering=Virüs tarama programı güncelleniyor ..
 massdomains_phpver=Varsayılan PHP sürümü
 massdomains_phpchildren=PHP FCGId alt işlemleri
 massdomains_phpvering=Varsayılan PHP sürümü değiştiriliyor.
+massdomains_ephpvering=.. sürümü değiştirilemedi : $1 
 massdomains_phpchildrening=PHP FCGId alt işlemlerini değiştirme ..
 massdomains_phpmode=PHP yürütme modu
 massdomains_phpmoding=PHP yürütme modunu değiştirme ..
@@ -1963,11 +2083,13 @@ massdomains_enaerr=Sunucular etkinleştirilemedi
 massdomains_enarusure=Seçilen $1 sanal sunucuyu etkinleştirmek istediğinizden emin misiniz? Engelli olmadan önce bulundukları duruma geri gönderilecekler.
 massdomains_enaok=Sunucuları Şimdi Etkinleştir
 massdomains_enadoms=Etkinleştirilecek sunucular: $1 
+
 newmxs_none2=<a href='$1'>Webmin Sunucuları Dizini</a> modülünde henüz kullanılabilir hiçbir sunucu tanımlanmadı.
 newmxs_saveadd=Kaydet ve mevcut alan adlarını yeni ikincil öğelere ekle
 newmxs_syncing=İzin verilen kullanıcılar geçiş için güncelleniyor.
 newmxs_esynced=.. bazıları başarısız oldu : $1 
 newmxs_synced=.. $1 tarihinde yapıldı
+
 newmysqls_title=MySQL Sunucuları
 newmysqls_ecannot=Ek MySQL sunucularını düzenlemenize izin verilmiyor
 newmysqls_host=Sunucu ana bilgisayar adı
@@ -2009,10 +2131,13 @@ newmysqls_edelete=Yerel sunucu kaldırılamıyor
 newmysqls_edefault=Varsayılan sunucu kaldırılamaz
 newmysqls_eprovision=Cloudmin Services tarafından oluşturulan bir sunucu kaldırılamaz
 newmysqls_einuse=$1 alan adı tarafından kullanılan bir sunucu kaldırılamıyor
+
 ddatabases_edbdef=Varsayılan $1 veritabanını $2 kaldırmanıza izin verilmiyor
+
 admins_doms=Sanal sunucular
 admins_domsall=Herşey
 admins_more=$1 tane daha ..
+
 admin_header2=İzin verilen fonksiyonlar
 admin_header3=İzin verilen sanal sunucular
 admin_email=İletişim e-posta adresi
@@ -2024,11 +2149,13 @@ admin_doms=Yöneticinin sanal sunucuları
 admin_doms1=Tümünün en üst düzey sunucuya ait olması
 admin_doms0=Sadece aşağıda seçilenler ..
 admin_edoms=Seçilmesine izin verilecek sanal sunucu yok
+
 move_ecannot2=Bir etki alanını bu sunucuya taşıma izniniz yok
 move_desc3=Bu sayfa, diğer ad sunucusunun hedefini değiştirmenize olanak tanır, böylece tüm web veya e-posta erişimi yeni seçilen etki alanına yönlendirilir.
 move_target2=Yeni takma ad hedefi
 move_euserclash=Dönüştürülen sanal sunucuda $1 adlı bir kullanıcı zaten var
 move_euserclash2=$1 adlı bir kullanıcı zaten var
+
 newvalidate_header2=Zamanlanmış doğrulama seçenekleri
 newvalidate_desc2=Bu sayfa, sanal sunucuların otomatik zamanlanmış doğrulamasını ve Virtualmin yapılandırmasını ayarlamak içindir.
 newvalidate_return=doğrulama formu
@@ -2045,6 +2172,7 @@ newvalidate_fixservers=Düzeltilecek sanal sunucular
 newvalidate_subservers=Alt sunucular da düzeltilsin mi?
 newvalidate_fix=İzinleri Şimdi Düzelt
 newvalidate_header3=İzin düzeltme seçenekleri
+
 validate_euserhome=$1 yönetim kullanıcısının $3 giriş dizini var, ancak $2 olmalıdır
 validate_euid=$1 yönetim kullanıcısının UID $3 'ü var, ancak etki alanının UID'si $2 
 validate_egid=$1 yönetim grubunda GID $3 var, ancak etki alanının GID'si $2 
@@ -2072,6 +2200,7 @@ validate_ewebphpconfig=PHP yapılandırma hataları $1 : $2 sürümünde bulundu
 validate_ewebuid=SuExec kullanıcısı $1 olarak ayarlandı, ancak sanal sunucunun UID'si $2 
 validate_ewebgid=SuExec grubu $1 olarak ayarlandı, ancak sanal sunucunun GID'si $2 
 validate_ewebdir=$1 HTML dizini için Apache &lt;Directory&gt; bloğu eksik
+validate_ewebroot=Apache DocumentRoot, $1 HTML dizini olarak ayarlanmamış
 validate_ewebipv6=$1 adresine sahip $2 IPv6 DNS kaydı var, ancak bu sanal sunucuda IPv6 etkin değil
 validate_ewebipv6virt=$1 adresine sahip bir IPv6 DNS kaydı var, ancak bu sanal sunucunun Apache yapılandırmasının bir IPv6 adresi yok
 validate_ewebip=Bu etki alanı için Apache sanal ana bilgisayarı IPv4 adresini ve $1 bağlantı noktasını kullanmıyor
@@ -2080,6 +2209,8 @@ validate_esslcert=Apache sanal ana bilgisayarında SSL sertifika dosyası belirt
 validate_esslcertfile=$1 SSL sertifika dosyası mevcut değil
 validate_esslkeyfile=$1 SSL anahtar dosyası mevcut değil
 validate_esslcertinfo=SSL sertifika dosyası ayrıştırılamadı
+validate_esslcainfo=$1 SSL CA dosyası ayrıştırılamadı
+validate_esslcamatch=$1/$2 için SSL CA sertifikası, $3/$4 SSL sertifikasını veren kuruluşla eşleşmiyor
 validate_essldom=Bu sanal sunucunun SSL sertifikası $1 veya $2 ile eşleşmiyor. Bunun yerine, ana bilgisayar adlarıyla eşleşir : $3 
 validate_esslexpired=Bu sanal sunucunun SSL sertifikasının süresi $1 
 validate_esslfirst=$4 üzerindeki ilk Apache SSL sanal ana makinesinin SSL sertifikası $1 veya $2 ile eşleşmiyor. Bunun yerine, ana bilgisayar adlarıyla eşleşir : $3 
@@ -2093,10 +2224,12 @@ validate_emysqlcheck=Hizmetler ana bilgisayarında MySQL girişi kontrol edileme
 validate_emysqldbcheck=Hizmetler ana bilgisayarında $1 MySQL veritabanı denetlenemedi : $2 
 validate_emysqluserhost=Hizmet ana bilgisayarı MySQL girişinin $1 üzerinde bulunduğunu bildirdi ancak Virtualmin $2 bekleniyor
 validate_epostgresuser=PostgreSQL $1 girişi mevcut değil
+
 tscripts_version=versiyon
 tscripts_latest=En son kullanılabilir
 tscripts_exact=Her zaman
 tscripts_eversion=$1 satırında eksik veya geçersiz sürüm numarası
+
 spam_elevel=Adresindeki spam'i silme puanı sıfırdan büyük bir tam sayı olmalıdır
 spam_level=Puanın üstündeyse spam'ı sil
 spam_nolevel=Silme
@@ -2123,6 +2256,7 @@ spam_prov=Cloudmin Services sistemi $1
 spam_exitcode=Bir kota kullanıcısı e-posta aldığında
 spam_bounce=Gönderene geri dön
 spam_queue=Daha sonra teslim edilmek üzere kuyruk
+
 cat_services=Hizmetler
 cat_logs=Günlükler ve Raporlar
 cat_webmin=Webmin Modülleri
@@ -2134,10 +2268,12 @@ cat_email=e mail ayarları
 cat_ip=Adresler ve Ağ Oluşturma
 cat_check=Sınırlar ve Doğrulama
 cat_custom=Sistem Özelleştirme
+
 pass_dbsync=Uyarı - bu alan adının yönetim şifresini değiştirmek, veritabanlarına bağlanmak için gereken şifreyi de güncelleyecektir.
 pass_eadmin=Yönetici bulunamadı!
 pass_changing2=Yönetici şifresi değiştiriliyor.
 pass_hashpass=Bu etki alanı için yalnızca karma şifreyi sakla?
+
 cmass_ecannot=Bir toplu iş dosyasından sunucu oluşturmanıza izin verilmiyor
 cmass_help=Bu sayfa, aşağıdaki formatta bir metin dosyasından aynı anda birden fazla sanal sunucu oluşturmanıza olanak tanır (daha fazla bilgi için bu sayfanın yardımını okuyun):
 cmass_format=domain: description: şifre: [kullanıcı adı]: [üst-domain]: [ip-address]: [ad-domain]
@@ -2146,6 +2282,7 @@ cmass_ealias=$1 takma adı hedef sunucusu mevcut değil
 cmass_emustparent=Üst düzey sanal sunucular oluşturmanıza izin verilmiyor - bir üst etki alanı belirtilmelidir
 cmass_ecanparent=$1 üst sanal sunucusunu yönetmenize izin verilmiyor
 cmass_eparpar=$1 üst sunucusu üst düzey bir sunucu değil
+
 umass_help=Bu sayfa, aşağıdaki formatta bir metin dosyasından aynı anda birden fazla posta / FTP kullanıcısı oluşturmanıza olanak tanır (daha fazla bilgi için bu sayfanın yardımını okuyun):
 umass_help2=Yalnızca tek bir kullanıcı oluşturmak istiyorsanız, bunun yerine <a href='$1'>burayı tıklayın</a>.
 umass_format=kullanıcı adı: Gerçek_İsim: şifre: ftp-bayrak: email-bayrak: kota: [ekstralar]: [ileri]: [veritabanları]
@@ -2159,6 +2296,7 @@ umass_separator=Toplu alan ayırıcı
 umass_separatorcolon=Kolon  :
 umass_separatorcomma=Virgül,
 umass_separatortab=çıkıntı
+
 amass_title=Toplu Takma Adlar Oluşturma
 amass_header=Toplu iş dosyasından birden çok e-posta takma adı oluşturma
 amass_help=Bu sayfa, aşağıdaki formatta bir metin dosyasından aynı anda birden çok e-posta takma adı oluşturmanıza olanak tanır (daha fazla bilgi için bu sayfanın yardımını okuyun):
@@ -2176,19 +2314,29 @@ amass_ebounce=Hemen çıkma hedefi başka herhangi biriyle birleştirilemez
 amass_done=Oluşturulan e-posta takma adı $1 
 amass_eclash=Aynı ada sahip bir takma ad zaten var
 amass_eunknown=Bilinmeyen takma ad hedefi $1 
+
 massu_rusurehome=Komut dosyalarından biri sanal sunucunun üst düzey web dizinine yüklendiğinden, <tt>$1</tt> altındaki <b>tüm</b> dosyalar kaldırıldığında silinir!
 massu_sel=Seçilen komut dosyaları: $1 
+
 usage_summaryheader=Disk kullanımı ve bu sanal sunucu için sınırların özeti.
+usage_dirheader2=Bu sunucunun ana sayfası ve diğer paylaşılan dizinler altındaki dosyalar ve dizinler tarafından disk kullanımı.
+usage_dirdesc=Sütun <b>Kota Boyutu</b>, sanal sunucuya hesaplanan disk alanıdır, <b>Boyut</b> ise her dizindeki tüm dosyalar tarafından tüketilen alandır.
+usage_others=Evdeki diğer dosyalar
 usage_showall=Herkes için disk kullanımını göster.
 usage_tabsummary=genel bakış
 usage_tabhomes=Giriş dizini
 usage_tabusers=Kullanıcı tarafından
 usage_tabsubs=Alt sunucuya göre
 usage_tabdbs=Veritabanına göre
+
 webmin_flog=$1 için ProFTPD günlüğü
 webmin_phpini=$1 için PHP yapılandırması
 webmin_phpini2=$1 için PHP $2 yapılandırması
+
 newquotacheck_esupport=Kota denetimi dosya sistemleriniz tarafından desteklenmiyor veya gerekli değil
+
+phpmode_title2=PHP Seçenekleri
+phpmode_header=Bu etki alanı için PHP seçenekleri
 phpmode_fcgid=FCGId (sanal sunucu sahibi olarak çalıştır)
 phpmode_fpm=FPM (sanal sunucu sahibi olarak çalıştır)
 phpmode_short_mod_php=Apache <tt>mod_php</tt>
@@ -2196,6 +2344,7 @@ phpmode_short_cgi=CGI sarıcı
 phpmode_short_fcgid=FCGId
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Uyarı - CGI veya FCGId modlarından geçiş yapmak, dizin başına PHP sürüm seçimlerini kaldıracaktır.
+phpmode_err2=PHP seçenekleri kaydedilemedi
 phpmode_suexec=Alan adı sahibi olarak CGI komut dosyaları çalıştırılsın mı?
 phpmode_esuexec=<b>CGI komut dosyalarını etki alanı sahibi olarak çalıştır</b> seçilmedikçe <b>CGI sarmalayıcı</b> seçeneği seçilemez
 phpmode_emodsuexec=Apache <tt>mod_suexec</tt> modülü kurulmadığı sürece <b>CGI komut dosyalarını etki alanı sahibi olarak çalıştır</b> seçeneği etkinleştirilemez
@@ -2210,6 +2359,7 @@ phpmode_nomax=Maksimum PHP komut dosyası çalışma süresindeki sınır kaldı
 phpmode_emaxtime=Eksik veya geçersiz maksimum PHP komut dosyası çalışma süresi
 phpmode_moding=PHP yürütme modunu $1 olarak değiştiriyoruz.
 phpmode_emoding=.. değişiklik başarısız oldu : $1 
+phpmode_emode=.. seçilen mod bu sistemde desteklenmiyor!
 phpmode_kidding=PHP alt işlem sayısının $1 olarak değiştirilmesi.
 phpmode_nokids=PHP alt işlemlerinin devre dışı bırakılması ..
 phpmode_rmoding=Ruby yürütme modunu $1 olarak değiştiriyoruz.
@@ -2243,6 +2393,7 @@ phpmode_evirt=$1 bağlantı noktası $2 için Apache sanal ana makinesi bulunmad
 phpmode_alog=Web sunucusu erişim günlük dosyası
 phpmode_elog=Web sunucusu hata günlük dosyası
 phpmode_htmldir=Web sitesi belgeleri alt dizini
+phpmode_rename=Değiştirilirse mevcut dizini yeniden adlandır?
 phpmode_sslredir=Tüm istekler SSL sitesine yönlendirilsin mi?
 phpmode_setalog=Web sunucusu erişim günlüğü değiştiriliyor.
 phpmode_logerr=.. başarısız oldu : $1 
@@ -2255,6 +2406,17 @@ phpmode_ehtmldir3=Web sitesi belgeleri alt dizini içeremez ..
 phpmode_ehtmldir4=Web sitesi belgeleri alt dizini, <tt>etki alanları</tt> altında olamaz, çünkü bu dizin alt sunucular için ayrılmıştır
 phpmode_ssloff=SSL sitesine yönlendirme kaldırılıyor ..
 phpmode_sslon=SSL sitesine yönlendirme ekleniyor ..
+phpmode_version=PHP sürümü
+phpmode_versions=PHP sürümleri
+phpmode_enabled=Etkin
+phpmode_versionone=(Bu mod için yalnızca sürüm mevcuttur)
+phpmode_deldir=PHP dizini $1 kaldırılıyor ..
+phpmode_edeldir=.. birincil dizin kaldırılamaz!
+phpmode_adddir=$2 sürümüne $1 PHP dizini ekleniyor ..
+phpmode_savedir=PHP dizini $1 $2 sürümüne güncelleniyor ..
+
+website_header=Web sitesi seçenekleri
+
 spf_ecannot=DNS seçeneklerini düzenleme izniniz yok
 spf_dmarcchange=DMARC kaydı güncelleniyor ..
 spf_header2=DNSSEC bölge anahtarları
@@ -2278,11 +2440,13 @@ spf_addrecs=$1 DNS kaydı ekleniyor ..
 spf_ttl=Varsayılan TTL ayarı $1 olarak ayarlandı.
 spf_enablednssec=DNSSEC anahtarı ve kayıtları oluşturma ..
 spf_disablednssec=DNSSEC kayıtları kaldırılıyor ..
+spf_ednssecsupport=.. DNSSEC, bu etki alanı için yönetilemez
 spf_enabletlsa=TLSA kayıtları oluşturuluyor ..
 spf_disabletlsa=TLSA kayıtlarının silinmesi ..
 spf_etlsa=.. bu sistemde desteklenmiyor : $1 
 spf_synctlsa=TLSA kayıtları güncelleniyor.
 spf_esynctlsa=.. bu alan adı için hiçbiri bulunamadı
+
 s3_emodule2=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 Perl modülü yüklenemedi : $2 
 s3_emodule3=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 veya $2 Perl modülleri kurulu değil
 s3_elistfiles=S3 dosyaları listelenemedi : $1 
@@ -2292,11 +2456,14 @@ s3_edom=Alan adı dosyası yüklenemedi : $1
 s3_einfo2= $1 : $2 okunamadı
 s3_eputacl=Grup EKL'si kaydedilemedi : $1 
 s3_eputlifecycle=Grup yaşam döngüsü kaydedilemedi : $1 
+
 tdelete_title=Sunucu Şablonlarını Sil
 tdelete_warn=Aşağıdaki seçilen sunucu şablonlarını silmek istediğinizden emin misiniz : $1 
 tdelete_confirm=Şablonları Sil
 tdelete_users2=Şu anda sanal sunucular tarafından kullanılıyor : $1 
+
 switch_eadmin=Belirtilen ekstra yönetici mevcut değil!
+
 newlinks_title=Özel Bağlantılar
 newlinks_descr=Bu form, bir sanal sunucu seçildiğinde sol menüde bulunan bir bağlantı oluşturmak için kullanılabilir. URL ve bağlantı başlığında aşağıdaki alt bölümler kullanılabilir :
 newlinks_desc=Bağlantı başlığı
@@ -2323,6 +2490,7 @@ newlinks_any=Hiç
 newlinks_add=Yeni bir özel bağlantı ekleyin.
 newlinks_none=Henüz hiçbir özel bağlantı tanımlanmadı.
 newlinks_return=özel bağlantılar
+
 elink_title1=Özel Bağlantı Oluştur
 elink_title2=Özel Bağlantıyı Düzenle
 elink_header1=Özel bağlantı ayrıntıları
@@ -2337,6 +2505,7 @@ elink_feature=Özelliğe sahip sanal sunucular
 elink_err=Özel bağlantı kaydedilemedi
 elink_edesc=Bağlantı başlığı eksik
 elink_eurl=Eksik veya geçersiz URL - boşluğa izin verilmiyor
+
 postsave_title=Sanal Sunucu Değiştirildi
 postsave_done=$1 sanal sunucusu başarıyla güncellendi. Yönetmeye devam etmek için aşağıdaki bağlantıları kullanın.
 postsave_edit=Sanal sunucu ayarlarını düzenleyin.
@@ -2345,6 +2514,7 @@ postsave_users=Posta ve FTP kullanıcılarını yönetme.
 postsave_aliases=Posta takma adlarını ve otomatik uygulamalarını yönetin.
 postsave_databases=Veritabanlarını yönetin ve oluşturun.
 postsave_index=Tüm Virtualmin sanal sunucularınızı gösterin.
+
 showpass_title=Sanal Sunucu Şifresi
 showpass_user=Yönetim girişi
 showpass_pass=Yönetim şifresi
@@ -2354,19 +2524,12 @@ showpass_ecannot=Sanal sunucu şifrelerini görüntüleme izniniz yok
 showpass_egone=Kullanıcı yok!
 showpass_dbuser=$1 için kullanıcı adı
 showpass_dbpass=$1 için şifre
-phpver_title=PHP Sürümleri
+
 phpver_dir=Web sitesi alt dizini
 phpver_ver=versiyon
-phpver_ecannot=PHP sürümlerini değiştirme izniniz yok
-phpver_eavail2=Sisteminizde yalnızca PHP sürümü $1 yüklü olduğundan, her dizin için farklı bir sürüm seçmek mümkün değildir.
-phpver_emodphp=Bu sanal sunucu, PHP için <tt>mod_php</tt> yürütme modunu kullanıyor, bu dizin başına sürüm seçimine izin vermiyor.
 phpver_pub=Varsayılan HTML dizini
-phpver_delete=Seçilenleri Kaldır
-phpver_save=Sürümleri Kaydet
-phpver_err=PHP sürümleri kaydedilemedi
 phpver_enewdir=Geçersiz web sitesi alt dizini - <tt>myapp</tt> veya <tt>programlar/myapp</tt> gibi olmalıdır
-phpver_derr=PHP sürümleri kaldırılamadı
-phpver_enone=Hiçbiri seçilmedi
+
 html_title=Web Sayfalarını Düzenle
 html_edit=Mevcut dosyayı düzenle:
 html_editok=Düzenle
@@ -2389,11 +2552,13 @@ html_upload=Dosya yükleme:
 html_uploadok=Yükleme
 html_apply=İçerik stilini kullan:
 html_styleok=Dosyaları Değiştir
+
 upload_err=Dosya yüklenemedi
 upload_enone=Yüklenecek dosya seçilmedi
 upload_enone2=Dosya adı bulunamadı!
 upload_title=Yüklenen Dosya
 upload_done=$1 toplam $2 dosyası web sayfaları dizininize başarıyla yüklendi.
+
 sharedips_title=Paylaşılan IP Adresleri
 newsharedips_title=Paylaşılan IP Adresleri
 sharedips_header=Sanal sunucular tarafından paylaşılan IP adresleri
@@ -2419,6 +2584,7 @@ sharedips_missing=$1 ebeveyn arayüzü mevcut değil!
 sharedips_eboot=IP adresi için önyükleme zamanı yapılandırması bulunamadı
 sharedips_ebootreal=IP adresi sanal değil
 sharedips_eactives=IP adresi için etkin yapılandırma bulunamadı
+
 newdynip_title=Dinamik IP Güncellemesi
 newdynip_enabled=Dinamik güncelleme etkin mi?
 newdynip_service=Dinamik DNS servisi
@@ -2441,8 +2607,10 @@ newdynip_off=Dinamik IP güncellemesi devre dışı bırakıldı. Sistemin IP ad
 newdynip_never=Henüz güncellenmedi
 newdynip_notify=IP güncelleme bildirimlerini
 newdynip_none=Kimse
+
 newdynip_eext=Harici olarak görünen IP adresi çalıştırılamadı
 newdynip_eexternal=Harici komut dosyası modunda, çalıştırılacak komut dosyasının tam yolu girilmelidir
+
 dynip_dyndns=DynDNS
 dynip_external=Harici komut dosyası ..
 dynip_none=Hiçbir hizmeti güncelleme
@@ -2453,6 +2621,7 @@ style_content=İlk web sitesi içerik metni
 style_ok=Stili Kullan
 style_doing=Web sitesi içeriğini $1 stiliyle değiştirme.
 style_egone=Stil mevcut değil veya mevcut değil
+
 newstyles_title=İçerik Stilleri
 newstyles_desc1=Bu form, üçüncü taraf geliştiriciler tarafından oluşturulan stilleri yüklemenizi sağlar.
 newstyles_header=Yeni stil yükle
@@ -2476,6 +2645,7 @@ newstyles_desc3=Kaldırmak için aşağıdaki listeden bir üçüncü taraf içe
 newstyles_dstyle=Silinecek stil
 newstyles_del=Şimdi sil
 newstyles_edelete=Seçilen içerik stili artık mevcut değil!
+
 addstyle_title=Yükleme Stili
 addstyle_err=Yeni stil yüklenemedi
 addstyle_ecomp=Stil arşiv dosyası değil
@@ -2485,9 +2655,11 @@ addstyle_efiles=Stil arşivi dosya içermiyor!
 addstyle_done=$1 üçüncü taraf içerik stili başarıyla yüklendi. Bir web sitesi tarafından kullanıldığında, HTML ve resim dosyalarının $2 'sini oluşturur.
 addstyle_ecmd=$1 arşivini kaldırma komutu yüklü değil
 addstyle_ecmdfailed=Arşivden çıkma komutu başarısız oldu : $1 
+
 thumb_estyle=Stil mevcut değil
 thumb_title=Stil Önizleme
 thumb_ethumb=$1 içerik stilinin önizleme resmi yok.
+
 upgrade_title=Virtualmin Pro'ya yükseltin
 newupgrade_title=Virtualmin Pro'ya yükseltin
 upgrade_desc1=Virtualmin GPL kullanmaktan hoşlanıyorsanız ve Pro sürümüne bir sonraki adımı atmak istiyorsanız, bu sayfa yükseltme işlemini otomatik olarak gerçekleştirmek için kullanılabilir. Bunu yapmak için adımlar şunlardır :
@@ -2528,6 +2700,7 @@ upgrade_update=APT'deki mevcut paketler güncelleniyor.
 upgrade_debs=Virtualmin Debian paketlerini yükseltme : $1 
 upgrade_yumclear=YUM önbelleklerini temizleme ..
 upgrade_etypematch=Virtualmin'in yükleme türü <tt>$1</tt> olduğundan, Webmin'in <tt>$2</tt> olduğundan yükseltme mümkün değil
+
 maillog_title=Posta Günlüğünde Ara
 maillog_desc=Bu form, posta koşullarında bazı koşullarla eşleşen iletileri aramak, kendilerine ne olduğunu bulmak için kullanılabilir. Tüm alanlar isteğe bağlıdır ve boş bırakılırsa karşılaştırma amacıyla atlanır.
 maillog_header=Arama koşulları
@@ -2564,6 +2737,7 @@ maillog_ok1=Virtualmin henüz posta sunucusu günlük önbellek dosyanızı baş
 maillog_showspam=Spam gösterilsin mi?
 maillog_showvirus=Virüsler gösterilsin mi?
 maillog_bad=İstisnalar
+
 viewmaillog_err=Kayıtlı mesaj gösterilemedi
 viewmaillog_egone=Artık girişte değil!
 viewmaillog_title=Kayıtlı E-posta Mesajı
@@ -2583,6 +2757,7 @@ viewmaillog_file=Tam hedef yolu
 viewmaillog_relay=Giden e-posta geçişi
 viewmaillog_status=Posta sunucusu teslim durumu
 viewmaillog_size=Mesaj boyutu
+
 bwreset_title=Bant Genişliği İstatistiklerini Yeniden Hesaplama
 bwreset_header=Bant genişliği yeniden hesaplama seçenekleri
 bwreset_date=Yeniden hesaplanma tarihi
@@ -2604,6 +2779,7 @@ bwreset_doing=Seçilen sunucular ve özellikler için bant genişliği sayılar�
 bwreset_done=.. bitti.
 bwreset_running=Günlük dosyalarından bant genişliği istatistiklerini yeniden oluşturma ..
 bwreset_started=.. süreç başladı. Günlükleri uzun süre veya çok sayıda alanda yeniden işlemeyi seçtiyseniz, bu işlem birkaç saat sürebilir.
+
 massg_title=Yükseltme Komut Dosyaları
 massg_rusure=Seçilen $1 komut dosyasını en son sürümlerine yükseltmek istediğinizden emin misiniz?
 massg_ok=Hemen Yükselt
@@ -2613,6 +2789,7 @@ massg_fromto=$1 'den $2 'ye yükseltme
 massg_stay=$1 ile kalıyor
 massg_doing=$1, $2 sürümüne yükseltiliyor.
 massg_edeleted=$1 komut dosyası el ile silindi ve bu nedenle yükseltilemez!
+
 aedit_title=Takma Adları Manuel Olarak Düzenleme
 aedit_header=Toplu iş dosyasından birden çok e-posta takma adı oluşturma
 aedit_help=Bu sayfa, her birini bir metin satırı olarak düzenleyerek aynı anda birden çok takma adı düzenlemenize, oluşturmanıza ve silmenize olanak tanır. Her satır aşağıdaki biçime sahiptir (daha fazla bilgi için bu sayfanın yardımını okuyun):
@@ -2624,6 +2801,7 @@ aedit_doing=E-posta takma adları güncelleniyor ..
 aedit_complete=.. tamamlandı ($1 oluşturuldu, $3 değiştirildi, $4 silindi, $2 hata).
 aedit_etwice=Aynı ada sahip bir takma ad bir kereden fazla listeleniyor
 aedit_eauto=Takma adları elle düzenlerken otomatik yanıtlar ayarlanamaz
+
 exclude_title=Hariç Tutulan Dizinler ve DB'ler
 exclude_header=Yedekleme hariç tutma seçenekleri
 exclude_dirs=Atlamak için ev altındaki dizinler
@@ -2634,6 +2812,7 @@ exclude_err=Hariç tutulan dizinler kaydedilemedi
 exclude_eabs='$1' dizini mutlak bir yol olamaz
 exclude_edot='$1' dizini içeremez ..
 exclude_edb='$1' veritabanı adı geçersiz
+
 balancers_title=Proxy Yolları
 balancers_ecannot=Bu etki alanı için proxy yollarını düzenleme izniniz yok
 balancers_esupport=Etki alanı veya sistem proxy'leri desteklemiyor
@@ -2648,6 +2827,7 @@ balancers_return=proxy yolları listesi
 balancers_derr=Proxy yolları silinemedi
 balancers_denone=Hiçbiri seçilmedi
 balancers_none2=Proxy yok
+
 balancer_create=Proxy Yolu Oluştur
 balancer_edit=Proxy Yolunu Düzenle
 balancer_egone=Seçilen proxy yolu artık mevcut değil
@@ -2666,6 +2846,7 @@ balancer_eurls=Hedef URL girilmedi
 balancer_script=Betik yükleyici tarafından kullanılır
 balancer_scriptver=Komut dosyası sürümü
 balancer_none=Bu yol için proxy kullanma - bunun yerine yerel olarak sunma
+
 scriptwarn_header=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının yeni sürümleri vardır :
 scriptwarn_header2=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının \nvirtual $1 sunucusunda yeni sürümleri vardır :
 scriptwarn_script=Komut dosyası adı
@@ -2675,6 +2856,7 @@ scriptwarn_dom=Alan adı
 scriptwarn_where3=Yükseltmeler Virtualmin'de, her alanın Komut Dosyalarını Yükle sayfasında veya hepsinde aynı anda yapılabilir: \n $1 
 scriptwarn_where2=Yükseltmeler sayfada Virtualmin'de yapılabilir: \n $1 
 scriptwarn_subject=Virtualmin script yükseltmeleri mevcut
+
 quotawarn_subject=Virtualmin Kullanıcı Disk Kotası İzleme
 quotawarn_body=Aşağıdaki Virtualmin sunucuları disk kotası sınırlarına ulaştı veya yaklaşıyor:
 quotawarn_body2=Aşağıdaki Virtualmin kullanıcıları disk kotası sınırlarına ulaştı veya yaklaşıyor:
@@ -2687,6 +2869,7 @@ quotawarn_reached=$1 % 'e ulaştı
 quotawarn_over=Kota aşımı
 quotawarn_suffixdom=Virtualmin tarafından gönderildi: $1 
 quotawarn_suffixuser=Virtualmin tarafından gönderildi: $1 
+
 history_title=Sistem İstatistikleri
 history_ecannot=Geçmiş sistem istatistiklerini görüntüleme izniniz yok
 history_year=1 yıl
@@ -2757,6 +2940,7 @@ history_type_email=E-posta mesajları
 history_type_cpu=CPU kullanımı
 history_type_virt=Virtualmin sayıları
 history_type_system=Sistem istatistikleri
+
 sv_title=Spam ve Virüs Taraması
 newsv_title=Spam ve Virüs Taraması
 sv_ecannot=Spam ve virüs taramasını düzenleme izniniz yok
@@ -2791,6 +2975,7 @@ sv_title5=Spam Filtreleme Sunucusunu Etkinleştir
 sv_sdisabling=SpamAssassin filtreleme sunucusunu devre dışı bırakma ..
 sv_senabling=SpamAssassin filtreleme sunucusunu yapılandırma ve etkinleştirme ..
 sv_swarning=Uyarı! Virtualmin sunucu filtresini kullanacak şekilde yapılandırılmış, ancak SpamAssassin sunucu işlemi artık çalışmıyor
+
 features_title=Özellikler ve Eklentiler
 newfeatures_title=Özellikler ve Eklentiler
 features_ecannot=Etkin özellikleri düzenleme izniniz yok
@@ -2802,6 +2987,7 @@ features_desc=Bu sayfa, sanal sunucular tarafından kullanılabilecek temel öze
 features_used=Alan adlarını göster
 features_err=Etkin özellikler kaydedilemedi
 features_return=özelliklerin ve eklentilerin listesi
+
 clamd_copyconf=$1 ClamAV yapılandırma dosyası oluşturuluyor ..
 clamd_esrcfile=.. $1 ile eşleşen kaynak dosya bulunamadı!
 clamd_esrcalready=.. zaten var
@@ -2823,18 +3009,21 @@ clamd_ekillmsg=ClamAV virüs tarama sunucusu süreçleri öldürülemedi : $1
 spamd_estartmsg=SpamAssassin filtre sunucusu başlatılamadı
 spamd_estopmsg=SpamAssassin filtre sunucusu çalışmıyor
 spamd_ekillmsg=SpamAssassin filtre sunucusu süreçleri öldürülemedi : $1 
+
 spamd_boot=SpamAssassin sunucusunu önyükleme zamanında etkinleştiriyor ..
 spamd_start=SpamAssassin sunucusu başlatılıyor ..
 spamd_startfailed=.. başlatılamadı : $1 
 spamd_unboot=SpamAssassin sunucusunu önyükleme zamanında devre dışı bırakma ..
 spamd_unbootact=.. önyükleme zamanı eylemi bulunamadı!
 spamd_stop=SpamAssassin sunucusu durduruluyor ..
+
 chain_err=CA sertifikası kaydedilemedi
 chain_efile=Sertifika dosyası mevcut değil
 chain_ecert=Geçersiz sertifika dosyası : $1 
 chain_emode1=Sunucuda farklı bir dosya seçmenize izin verilmiyor!
 chain_eupload=Yüklenen sertifika dosyası seçilmedi
 chain_epaste=Sertifika metni girilmedi
+
 stopscript_title=Sunucuyu Durdur
 stopscript_egone=Komut dosyası artık mevcut değil!
 stopscript_doing=$1 için sunucu işlemi kapatılıyor.
@@ -2843,6 +3032,7 @@ startscript_title=Sunucuyu Başlat
 startscript_doing=$1 için sunucu işlemi başlatılıyor.
 startscript_failed=.. başarısız oldu : $1 
 restartscript_title=Sunucuyu Yeniden Başlat
+
 newshells_title=Özel Kabuklar
 newshells_descr=Bu sayfa, sanal sunucu yöneticileri ve posta/FTP kullanıcıları tarafından kullanılabilen kabukları sitenizin gereksinimlerini karşılayacak şekilde özelleştirmenizi sağlar. Özel kabuklar genellikle kullanıcılara FTP, SSH veya diğer hizmetlere erişim izni vermek için kullanılır.
 newshells_defs=Yöneticiler ve posta kutuları için kullanılabilir mermiler :
@@ -2867,6 +3057,7 @@ newshells_eownerdef=Etki alanı yöneticileri için tam olarak bir kabuk varsay�
 newshells_emailboxdef=Posta kutuları için tam olarak bir kabuk varsayılan olmalıdır
 newshells_eresellerdef=Satıcılar için tam olarak bir kabuk varsayılan olmalıdır
 newshells_id=Giriş
+
 shells_mailbox=Yalnızca e-posta
 shells_mailbox2=Erişim yok
 shells_mailboxftp=E-posta ve FTP
@@ -2882,12 +3073,15 @@ shells_ftp2=Yalnızca FTP
 shells_ssh=E-posta, FTP ve SSH
 shells_ssh2=FTP ve SSH
 shells_none=&lt;Kabuk yok&gt;
+
 nicetime_days=$1 gün, $2 saat, $3:$4 dakika
 nicetime_hours=$1 saat, $2:$3 dakika
 nicetime_mins=$1 dakika, $2 saniye
 nicetime_secs=$1 saniye
+
 bcc_epostfix=Postfix yapılandırmanızda BCC eşleme dosyası ayarlanmadı!
 bcc_emailserver=Posta sunucunuz BCCing'i desteklemiyor
+
 mail_title=e mail ayarları
 mail_header=Sanal sunucu e-postasıyla ilgili ayarlar
 mail_bcc=İçin BCC giden e-postası
@@ -2918,6 +3112,7 @@ mail_nothing=Hiç değişiklik yapılmadı!
 mail_ecloudid=Seçilen bulut posta filtresi için bir kimlik belirtilmelidir
 mail_url=Geçerli filtreleme sağlayıcısının URL'si
 mail_mx=Mevcut MX kayıtları
+
 nf_header=$1 'de aşağıdaki yeni özellikler kullanılabilir.
 nf_desc=özellik
 nf_html=Açıklama
@@ -2927,6 +3122,7 @@ nf_and=$1 ve $2
 nf_seen=Yeni Özellikleri Gizle
 nf_try=Dene ..
 nf_ver=(Versiyon 1)
+
 chroot_title=FTP Dizini Kısıtlamaları
 newchroot_title=FTP Dizini Kısıtlamaları
 newchroot_desc=Bu sayfa, FTP aracılığıyla giriş yapan kullanıcıların hangi dizinlere erişebileceğini yapılandırmanızı sağlar. Kısıtlamalar, seçilen sanal sunucuların sahipleri ve FTP erişimi olan tüm kullanıcıları için geçerlidir. Eşleştirme kısıtlaması olmayan sunucu sahipleri, izinleri genellikle diğer sanal sunucuların dizinlerine erişmelerini engelleyecek olsa da, evlerinin dışındaki dosyaları görebilir.
@@ -2947,6 +3143,7 @@ chroot_eneg=$1 satırında <b>Sunucu hariç tümü</b> işaretlendiğinde sanal 
 chroot_edom=$1 grubu için sanal sunucu bulunamadı
 chroot_edir=$1 satırında eksik veya geçersiz dizin
 chroot_saving=FTP sunucusu yapılandırması güncelleniyor.
+
 res_elinux=Kaynak sınırları yalnızca Linux'ta desteklenir
 res_elinuxconf=$1 kaynak sınırları yapılandırma dosyası bulunamadı
 res_epamssh=SSH için PAM hizmeti bulunamadı, bu nedenle kaynak sınırlarının doğrulanması tamamlanmadı
@@ -2967,6 +3164,7 @@ res_secs=saniye
 res_time=İşlem başına maksimum CPU süresi
 res_etime=İşlem başına eksik veya geçersiz maksimum CPU süresi
 res_etime2=İşlem başına maksimum CPU süresi 1 dakika veya daha fazla olmalıdır
+
 sched_title=Zamanlanmış Yedeklemeler
 sched_ecannot=Zamanlanmış yedeklemeleri yönetme izniniz yok
 sched_yes=Evet, $1 
@@ -2997,17 +3195,20 @@ sched_now=Destek olmak ..
 sched_restore=Onarmak ..
 sched_return=zamanlanmış yedeklemeler
 sched_logs=Yedekleme günlükleri ..
+
 cron_special=Basit zamanlama
 cron_complex=Karmaşık program
 cron_cron=Cron özellikleri
 cron_title=Program Seçin
 cron_ok=tamam
 cron_ehidden=Hiçbir karmaşık program seçilmedi
+
 dsched_err=Zamanlanmış yedeklemeler silinemedi
 dsched_enone=Hiçbiri seçilmedi
 dsched_egone=$1 kimliğine sahip yedekleme artık mevcut değil
 dsched_erunning=$1 kimliğine sahip yedekleme artık çalışmıyor
 dsched_ecannot=$1 kimliğiyle yedeklemeyi yönetme izniniz yok
+
 dbhosts_err=Uzak veritabanı ana makineleri değiştirilemedi
 dbhosts_enone=Girilen ana bilgisayar adı veya IP adresi yok
 dbhosts_ehost='$1' geçerli bir ana makine adı veya ifade değil
@@ -3015,6 +3216,7 @@ dbhosts_title=Veritabanı Ana Bilgisayarlarını Güncelle
 dbhosts_doing=$1 veritabanı ana bilgisayarlarına $2 olarak ayarlandı.
 dbhosts_failed=.. başarısız oldu : $1 
 dbhosts_done=.. $1 ve veritabanı erişimi olan diğer kullanıcılar için ayarlanmıştır.
+
 newglobal_title=Global Değişkenler
 newglobal_desc=Bu sayfada tanımlanan değişkenler, Virtualmin içindeki herhangi bir etki alanında veya kullanıcı düzeyinde şablonda kullanılabilir. Değişken eklemek için tablonun altındaki boş satıra ad ve değeri girmeniz yeterlidir. Birini kaldırmak için ad alanını temizleyin. Bir değişkeni geçici olarak devre dışı bırakmak için etkin sütundaki kutunun işaretini kaldırın.
 newglobal_ecannot=Global değişkenleri düzenleme izniniz yok
@@ -3023,20 +3225,24 @@ newglobal_name=Değişken ismi
 newglobal_value=Değişken değer
 newglobal_err=Global değişkenler kaydedilemedi
 newglobal_ename=$1 satırında geçersiz değişken adı - yalnızca harf, sayı ve alt çizgiye izin verilir
+
 spamtrap_already=Bu sanal sunucu için spam tuzak takma adları zaten var
 spamtrap_clash=Aşağıdaki çakışan diğer adlar zaten mevcut olduğundan spam tuzağı takma adları oluşturulamıyor : $1 
 spamtrap_noaliases=Bu sanal sunucu için spam tuzak takma adları yok
+
 unsub_title=Alt Etki Alanını Dönüştür
 unsub_rusure=Bu alt etki alanını bir alt sunucuya dönüştürmek istediğinizden emin misiniz? Web içeriği etkilenmeyecek ve DNS kayıtları kendi alanlarına taşınacaktır.
 unsub_ok=Alt Sunucuya Dönüştür
 unsub_doing=$1, alt sunucuya dönüştürülüyor ..
 unsub_failed=.. dönüştürülemedi!
+
 unalias_title=Takma Ad Sunucusunu Dönüştür
 unalias_err=Takma ad sunucusu dönüştürülemedi
 unalias_rusure=Bu takma ad sanal sunucusunu bir alt sunucuya dönüştürmek istediğinizden emin misiniz? Artık eski hedef sanal sunucunun web sayfalarını sunmayacak, ancak kendi web içeriği, posta kutuları ve posta takma adları olabilir.
 unalias_ok=Alt Sunucuya Dönüştür
 unalias_doing=$1, alt sunucuya dönüştürülüyor ..
 unalias_failed=.. dönüştürülemedi!
+
 connect_echeck=Bağlantı kontrol edilemedi
 connect_eempty=Bağlantı kontrolünden yanıt yok
 connect_ecannot=Bu sanal sunucunun bağlantısını kontrol etmenize izin verilmiyor
@@ -3061,6 +3267,7 @@ cfix_ssl=Sisteminizin web sunucusunun çalıştığından, 443 numaralı bağlan
 cfix_smtptimeout=Sisteminizin güvenlik duvarının 25 numaralı bağlantı noktasını engelleyip engellemediğini kontrol edin.
 cfix_smtp=Sisteminizin posta sunucusunun harici ağ arayüzünde çalıştığından ve dinlediğinden emin olun.
 cfix_smtpto=Posta sunucunuzun bu alan adı için e-posta kabul edecek şekilde yapılandırıldığından emin olun.
+
 plans_title=Hesap Planları
 newplan_title=Hesap Planları
 plans_name=Plan adı
@@ -3081,6 +3288,7 @@ plans_setdef=Varsayılan planı şu şekilde ayarlayın:
 plans_nodef=Yok - listede ilk kullan
 plans_savedef=Varsayılanı Değiştir
 plans_esetdef=Seçilen plan mevcut değil veya sizin için mevcut değil
+
 plan_title1=Hesap Planı Oluştur
 plan_title2=Hesap Planını Düzenle
 plan_header1=Temel plan ayrıntıları
@@ -3102,9 +3310,11 @@ plan_scripts=İzin verilen komut dosyaları
 plan_scriptsall=Küresel olarak engelliler hariç hepsi
 plan_scriptsopts=Tüm komut dosyaları
 plan_scriptssel=İzin
+
 dplans_err=Planlar silinemedi
 dplans_enone=Hiçbiri seçilmedi
 dplans_eall=En az bir plan olmalı
+
 postgrey_title=E-posta Gri Listesi
 newpostgrey_title=E-posta Gri Listesi
 postgrey_epostfix=Postgrey yalnızca Postfix posta sunucusuyla birlikte kullanılabilir
@@ -3157,6 +3367,7 @@ postgrey_title4=Postgrey'i Yükle
 postgrey_installing=Postgrey paketini yükleme ..
 postgrey_installfailed=.. yükleme başarısız!
 postgrey_installed=.. kurulum başarıyla tamamlandı
+
 editgrey_titleclients=Beyaz Listeye Alınmış İstemciyi Düzenle
 editgrey_titlerecipients=Beyaz Listeye Alınmış Alıcıyı Düzenle
 creategrey_titleclients=Beyaz Listeye Eklenen İstemci Ekle
@@ -3172,8 +3383,10 @@ editgrey_err=Beyaz liste girişi kaydedilemedi
 editgrey_evalueclients=Eksik veya geçersiz görünen posta sunucusu IP adresi veya ana bilgisayar adı
 editgrey_eregexp=Geçersiz normal ifade : $1 
 editgrey_evaluerecipients=Eksik veya geçersiz görünen alıcı e-posta adresi
+
 delgrey_err=Beyaz liste girişleri silinemedi
 delgrey_enone=Hiçbiri seçilmedi
+
 copycert_title=SSL Sertifikasını Kopyala
 copycert_ecannot=Bu sanal sunucunun SSL sertifikasını kopyalamanıza izin verilmiyor
 copycert_webmindir=Sertifika ve anahtar $1 'e kopyalanıyor.
@@ -3195,6 +3408,7 @@ copycert_penabling=Postfix yapılandırmasında SSL etkinleştiriliyor.
 copycert_fsaving=Sertifika ve anahtar ProFTPD dosyalarına kopyalanıyor.
 copycert_fsaving2=ProFTPD dosyalarına sertifika, anahtar ve CA kopyalanıyor ..
 copycert_fenabling=ProFTPD yapılandırmasında SSL etkinleştiriliyor.
+
 wizard_title=Kurulum Sonrası Sihirbazı
 wizard_ecannot=Yükleme sonrası sihirbazını çalıştırma izniniz yok
 wizard_next=Sonraki
@@ -3295,6 +3509,7 @@ wizard_defssl2=Evet, Let's Encrypt sertifikasıyla
 wizard_defdom_clash=$1 adında bir sanal sunucu zaten var
 wizard_defdom_already=$1 adında varsayılan bir sanal sunucu zaten var
 wizard_defdom_desc=Varsayılan alan adı
+
 backuplog_title=Yedekleme Günlükleri
 backuplog_ecannot=Virtualmin yedekleme günlüklerini görüntüleme izniniz yok
 backuplog_search=Eşleşen günlükleri bulma
@@ -3317,6 +3532,7 @@ backuplog_part=Kısmi
 backuplog_nodoms=Alan yok
 backuplog_return=yedek günlük listesi
 backuplg_esched=Zamanlanmış yedekleme mevcut değil!
+
 viewbackup_title=Yedekleme Günlüğünü Görüntüle
 viewbackup_eid=Eksik veya geçersiz yedek kimlik!
 viewbackup_egone=Kayıtlı yedekleme mevcut değil!
@@ -3357,6 +3573,7 @@ viewbackup_key=Evet, $1 anahtarıyla
 viewbackup_sched=Zamanlanmış yedeklemeden
 viewbackup_gone=$1 kimliği (silindi)
 viewbackup_ownrestore=Sahipleri geri yükleyebilir?
+
 dbackup_err=Yedek silinemedi
 dbackup_title=Yedeği Sil
 dbackup_rusure=Bu $2 alan yedeklemesini $3 toplam $1 'den silmek istediğinizden emin misiniz?
@@ -3364,6 +3581,7 @@ dbackup_confirm=Şimdi sil
 dbackup_doing=$1 kullanıcısından yedek siliniyor.
 dbackup_done=.. başarıyla silindi
 dbackup_failed=.. başarısız oldu : $1 
+
 redirects_title=Web Sitesi Yönlendirmeleri
 redirects_ecannot=Bu alan adı için web sitesi yönlendirmelerini düzenleme izniniz yok
 redirects_eweb=Bu sanal sunucu yönlendirmeleri desteklemiyor
@@ -3378,6 +3596,7 @@ redirects_type=tip
 redirects_alias=Dizine takma ad
 redirects_redirect=URL'ye yönlendir
 redirects_dest=Hedef
+
 redirect_egone=Yönlendirme artık mevcut değil!
 redirect_create=Web Sitesi Yönlendirmesi Oluştur
 redirect_edit=Web Sitesi Yönlendirmesini Düzenle
@@ -3402,9 +3621,11 @@ redirect_edir=Mutlak olmayan hedef dizin
 redirect_edir3=$1 eksik hedef dizini
 redirect_edir2=Hedef dizin $1 'in altında olmalıdır
 redirect_ecode=Geçersiz HTTP durum kodu
+
 newchangelog_title=Yeni Özellik Günlüğü
 newchangelog_ecannot=Yeni özellik günlüğünü görüntüleme izniniz yok
 newchangelog_desc=Bu sayfa, geçerli sürüme kadar sisteminizde yüklü olan tüm Virtualmin sürümlerindeki tüm büyük değişiklikleri listeler.
+
 dkim_title=DomainKeys Tanımlı Posta
 dkim_title1=DomainKeys Tanımlı Postasını Etkinleştir
 dkim_title2=DomainKeys Tanımlı Postasını Devre Dışı Bırak
@@ -3432,10 +3653,12 @@ dkim_extra=İmzalanacak alanlar
 dkim_eextra=$1 geçersiz ek alan adı
 dkim_eexclude=Geçersiz hariç tutulan alan $1 
 dkim_exclude=Asla alan adları için oturum açma
+
 dkim_title4=DKIM'i yükle
 dkim_installing=DKIM filtre paketini takma ..
 dkim_installfailed=.. yükleme başarısız!
 dkim_installed=.. kurulum başarıyla tamamlandı
+
 dkim_newkey=$1 dosyasında özel anahtar oluşturuluyor ..
 dkim_enewkey=.. özel anahtar başarısız oldu : $1 
 dkim_pubkey=$1 içindeki özel anahtardan ortak anahtar çıkarılıyor.
@@ -3457,6 +3680,7 @@ dkim_unboot=Önyükleme zamanında DKIM filtresini devre dışı bırakma ..
 dkim_domains=DKIM'yi etkinleştirmek için sanal sunucular bulmak ..
 dkim_founddomains=.. $1 sunucu bulundu
 dkim_founddomains2=.. DNS ve e-posta etkinleştirilmiş hiçbir sanal sunucu bulunamadı, ancak $1 ekstra alan adı etkinleştirildi
+dkim_founddomains3=.. $1 sunucu ve $2 ekstra alan buldu
 dkim_nodomains=.. DNS ve e-posta etkin sunucu bulunamadı!
 dkim_undns=DKIM kayıtları $1 DNS etki alanından kaldırılıyor.
 dkim_dnsremoved=.. başarıyla kaldırıldı
@@ -3465,6 +3689,7 @@ dkim_records=Etki alanları için DKIM DNS kayıtları
 dkim_pubkeypem=PEM formatında DKIM ortak anahtarı
 dkim_privkeypem=PEM formatında DKIM özel anahtarı
 dkim_esize=DKIM anahtar boyutu en az 512 bit olmalıdır
+
 newautoconfig_title=Posta İstemcisi Yapılandırması
 autoconfig_ecannot=Posta istemcisi yapılandırmasını düzenleme izniniz yok
 autoconfig_header=İstemci otomatik yapılandırma seçenekleri
@@ -3476,6 +3701,7 @@ autoconfig_enable=$1 sanal sunucu için posta istemcisi otomatik yapılandırmas
 autoconfig_disable=$1 sanal sunucusu için posta istemcisi otomatik yapılandırması devre dışı bırakılıyor.
 autoconfig_failed=$1 başarısız oldu : $2 
 autoconfig_enabled_global=Kayıtlı posta otomatik yapılandırma ayarları.
+
 newretention_title=Posta Kutusu Temizleme
 retention_ecannot=Posta kutusu temizlemesini yapılandırmanıza izin verilmiyor
 retention_header=Otomatik posta kutusu temizleme seçenekleri
@@ -3491,6 +3717,7 @@ retention_folders=Mesajları temizleme
 retention_folders0=Tüm kullanıcı klasörleri
 retention_folders1=Yalnızca Gelen Kutusu
 retention_desc=Bu sayfa, Virtualmin'in eski e-posta mesajlarını alan adı sahiplerinin ve posta kullanıcılarının posta kutularından otomatik olarak silmesini sağlar.
+
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor
 provision_header=Cloudmin hizmetleri istemci seçenekleri
@@ -3538,12 +3765,14 @@ provision_espamtest=.. verilen $1 sistemi kullanılamıyor : $2
 provision_spamgot=.. $1 sistemini kullanarak
 provision_spamunsetup=Spam filtreleme sisteminin kullanımını durdurma.
 provision_espamunsetup=.. başarısız oldu : $1 
+
 provision_emysqldbcheck=Hizmetler hata denetimi MySQL veritabanı : $1 
 provision_emysqldb=$1 MySQL veritabanı hizmetler ana bilgisayarında zaten var
 provision_emysqlcheck=Hizmetler MySQL giriş denetimi hatası : $1 
 provision_emysql=MySQL $1 girişi hizmetler ana bilgisayarında zaten var
 provision_ednscheck=DNS bölgesi denetlenirken hata oluştu : $1 
 provision_edns=$1 DNS bölgesi hizmet ana bilgisayarında zaten var
+
 records_title=DNS Kayıtları
 records_ecannot=DNS kayıtlarını düzenleme izniniz yok
 records_name=Kayıt adı
@@ -3596,6 +3825,7 @@ records_comment=Yorum Yap
 records_manual=Kayıtları Manuel Olarak Düzenleme
 records_epost=Kayıtlar tamamen silinmedi : $1 
 records_viewdesc=Bu sanal sunucunun DNS etki alanı, Virtualmin sisteminiz tarafından barındırılmıyor. Alan adı başka bir yerde barındırılıyorsa, web sitesi ve e-postanın düzgün çalıştığından emin olmak için aşağıdaki kayıtlar kullanılmalıdır.
+
 record_title1=DNS Kaydı Oluştur
 record_title2=DNS Kaydını Düzenle
 record_egone=Kayıt artık mevcut değil!
@@ -3625,6 +3855,7 @@ record_defttl=Varsayılan önbellek süresi
 record_epost=Kayıt tam olarak kaydedilmedi : $1 
 record_esservice=Eksik veya geçersiz görünen hizmet adı
 record_esproto=Geçersiz hizmet protokolü
+
 clone_err=Sanal sunucu kopyalanamadı
 clone_eclash=Aynı ada sahip bir sanal sunucu zaten var
 clone_eclash2=Aynı ada sahip bir kullanıcı zaten var
@@ -3705,6 +3936,7 @@ clone_ssl=Apache SSL yönergelerinin kopyalanması ..
 clone_newip=Klon için IP adresi
 clone_alloc=Yeni IP tahsis edin
 clone_vip=Adresi kullan
+
 mrecords_title=DNS Kayıtlarını Düzenle
 mrecords_ecannot=DNS kayıtlarını manuel olarak düzenleme izniniz yok
 mrecords_desc=Bu sayfa, etki alanındaki tüm DNS kayıtlarını BIND yapılandırma biçiminde el ile değiştirmenize olanak tanır.
@@ -3712,16 +3944,19 @@ mrecords_err=DNS kayıtları kaydedilemedi
 mrecords_enone=Hiçbir şey girmedi!
 mrecords_evalidate=Doğrulama başarısız oldu : $1 
 mrecords_validate=Yeni kayıtlar doğrulansın mı?
+
 mxv_unsupported=Geçişi kısıtlamak için yalnızca Sendmail ve Postfix desteklenir
 mxv_rrm=$1 yönergesi Postfix yapılandırmasında ayarlanmadı
 mxv_eaccess=Spam kontrolü (access_db) özelliği Sendmail yapılandırmasında etkin değil
 mxv_eaccessfile=$1 spam denetimi (access_db) dosyası henüz yok
+
 fixperms_err=İzinler düzeltilemedi
 fixperms_edoms=Hiçbir sanal sunucu seçilmedi
 fixperms_title=İzinleri Düzeltme
 fixperms_dom=$1 için dosya sahipliği ve izinleri düzeltildi.
 fixperms_edir=.. bir giriş dizini yok
 fixperms_failed=.. başarısız oldu : $1 
+
 bkeys_title=Yedek Şifreleme Anahtarları
 bkeys_key=GPG anahtar kimliği
 bkeys_delete=Seçilen Anahtarları Sil
@@ -3743,6 +3978,7 @@ bkeys_eused2=$2 anahtarı $1 için zamanlanmış bir yedekleme tarafından kulla
 bkeys_rusure=Seçilen $1 yedek şifreleme anahtarını silmek istediğinizden emin misiniz?
 bkeys_rusuerlogs=Bu anahtarlar, önceki $1 yedeklemeleri şifrelemek için kullanılmıştır; bunlar, bunlar olmadan geri yüklenemez.
 bkeys_all=Alan adı sahiplerinin anahtarı kullanmasına izin verilsin mi?
+
 bkey_create=Şifreleme Anahtarı Oluştur
 bkey_edit=Şifreleme Anahtarını Düzenle
 bkey_ecannot=Bu şifreleme anahtarını düzenlemenize izin verilmiyor
@@ -3779,11 +4015,13 @@ bkey_rusuerlogs=Bu anahtar, onsuz geri alınamayacak olan $1 önceki yedeklemeyi
 bkey_edescclash=Aynı açıklamaya sahip bir GPG anahtarı zaten var
 bkey_eemailclash=Aynı e-posta adresine sahip bir GPG anahtarı zaten var
 bkey_download=İndirme Anahtarı
+
 hashtype_crypt=Unix DES crypt
 hashtype_md5=MD5 karması
 hashtype_unix=Sistem varsayılan karma türü
 hashtype_mysql=MySQL şifre karması
 hashtype_digest=Web özet kimlik doğrulama karması
+
 fixsymlinks_title=Sembolik Bağlantı İzinlerini Düzelt
 fixsymlinks_ecannot=Sembolik bağlantı izinlerini düzeltme izniniz yok
 fixsymlinks_doing=Güvenli olmayan sembolik bağlantıları önlemek için tüm sanal sunucular güncelleniyor.
@@ -3796,10 +4034,12 @@ fixsymlinks_doms=Sorunlu <tt>.htaccess</tt> dosyaları bulundu :
 fixsymlinks_ok=Erişim Dosyalarını Onar
 fixsymlinks_htdoing=<tt>.htaccess</tt> dosyalarındaki seçenekleri düzeltme.
 fixsymlinks_htdone=.. $2 alan adında $1 dosya düzeltildi
+
 fixmodphp_title=PHP İzinlerini Düzelt
 fixmodphp_ecannot=PHP izinlerini düzeltme izniniz yok
 fixmodphp_doing=Devre dışı bırakıldığında mod_php kullanımını önlemek için tüm sanal sunucular güncelleniyor.
 fixmodphp_done=.. $1 alan adı düzeltildi
+
 buckets_title=Amazon S3 Kovaları
 buckets_ecannot=S3 gruplarını yönetmenize izin verilmiyor
 buckets_eaccounts=Henüz S3 için zamanlanmış yedek oluşturulmadı ve varsayılan S3 anahtarı ayarlanmadı.
@@ -3811,6 +4051,7 @@ buckets_created=Oluşturma tarihi
 buckets_location=yer
 buckets_add=Yeni bir S3 grubu oluşturun.
 buckets_return=kovaların listesi
+
 bucket_title1=S3 Kovası Oluştur
 bucket_title2=S3 Kovasını Düzenle
 bucket_eagone=Hesap mevcut değil!
@@ -3855,6 +4096,7 @@ bucket_eldays=$1 yaşam döngüsünde eksik veya sayısal olmayan gün sayısı
 bucket_elday=$1 yaşam döngüsünde eksik veya sayısal olmayan gün
 bucket_elmonth=$1 yaşam döngüsünde eksik veya sayısal olmayan ay
 bucket_elyear=$1 yaşam döngüsünde eksik veya sayısal olmayan yıl
+
 ratelimit_title=Mail Rate Limitleme
 ratelimit_eos=E-posta hızı sınırlaması bu işletim sisteminde desteklenmiyor
 ratelimit_econfig=$1 milter-greylist yapılandırma dosyası mevcut değil
@@ -3883,6 +4125,7 @@ ratelimit_enum=Mesaj sayısı bir sayı olmalıdır
 ratelimit_etime=Süre bir sayı olmalıdır
 ratelimit_socket=Soket dosyası ayarlanıyor ..
 ratelimit_etwice=$1 alan adı iki kez seçildi
+
 ratelimit_title4=Posta Ücreti Sınırlamasını Yükleme
 ratelimit_installing=E-posta hızı sınırlama paketi yükleniyor.
 ratelimit_installfailed=.. yükleme başarısız!
@@ -3903,6 +4146,7 @@ ratelimit_h=saatler
 ratelimit_d=günler
 ratelimit_w=haftalar
 ratelimit_y=yıl
+
 transfer_title=Sanal Sunucuyu Aktar
 transfer_err=Sunucu aktarılamadı
 transfer_ecannot=Sanal sunucuları aktarmanıza izin verilmiyor
@@ -3955,6 +4199,7 @@ transfer_disabling=Bu sistemde $1 devre dışı bırakılıyor.
 transfer_ereplication=Alan adının hem kopyalanması hem de silinmesi aynı anda etkinleştirilemez
 transfer_ehost=Hedef ana bilgisayar adı eksik
 transfer_ehost2=Hedef ana bilgisayar adı çözülemiyor
+
 domdkim_title=DomainKey Seçenekleri
 domdkim_header=Bu sunucu için DomainKey seçenekleri
 domdkim_key=PEM formatında DKIM özel anahtarı
@@ -3970,8 +4215,10 @@ domdkim_ekey=Geçersiz anahtar biçimi : $1
 domdkim_egen=Yeni anahtar oluşturulamadı : $1 
 domdkim_enabled=DKIM şu anda etkin değil
 domdkim_records=DKIM DNS kayıtları
+
 clouds_title=Bulut Depolama Sağlayıcıları
 clouds_name=Sağlayıcı adı
+clouds_url=İnternet sitesi
 clouds_state=Şu anki durum
 clouds_users=Yedek kullanıcılar
 clouds_ecannot=Bulut depolama sağlayıcılarını düzenleme izniniz yok
@@ -3979,6 +4226,7 @@ clouds_unconf=Henüz yapılandırılmadı
 clouds_return=sağlayıcıların listesi
 clouds_nusers=$1 yedek tarafından kullanılır
 clouds_nousers=Hiçbir yedekleme tarafından kullanılmaz
+
 cloud_s3desc=Amazon S3
 cloud_rsdesc=Rackspace Bulut Dosyaları
 cloud_googledesc=Google Cloud Storage
@@ -3998,6 +4246,7 @@ cloud_s3_location=Yeni kovaların konumu
 cloud_title=Bulut Sağlayıcısını Düzenle
 cloud_header=Bulut depolama sağlayıcı seçenekleri
 cloud_provider=Sağlayıcı adı
+cloud_url=Sağlayıcının web sitesi
 cloud_es3_endpoint=S3 uyumlu sunucu geçerli bir ana bilgisayar adı olmalıdır
 cloud_es3_chunk=Yükleme yığın boyutu pozitif bir sayı olmalıdır
 cloud_egone=Bilinmeyen bulut depolama sağlayıcısı!
@@ -4044,6 +4293,7 @@ cloud_bb_key=API anahtarı
 cloud_bb_ekeyid=Eksik veya geçersiz görünen API anahtar kimliği
 cloud_bb_ekey=Eksik veya geçersiz görünen API anahtarı
 cloud_bb_elogin=Backblaze'e giriş başarısız oldu : $1 
+
 left_virtualmin=Virtualmin
 left_master=Ana yönetici
 left_reseller=Bayi
@@ -4055,6 +4305,7 @@ left_master2=Cloudmin ana yöneticisi
 left_login=Giriş: $1 
 left_level=Seviye 1
 left_generic=Sanal Sunucu Oluşturun
+
 right_statusheader=durum
 right_sysinfoheader=Programlar
 right_virtheader=Virtualmin Sayımları
@@ -4096,7 +4347,7 @@ right_quotayours=Tüm üst düzey sanal sunucularınız gösterilir.
 right_quotaall=Tüm üst düzey sanal sunucular gösteriliyor ..
 right_quota10=Yalnızca en iyi 10 sunucu gösteriliyor ..
 right_quotamax=Yalnızca en iyi $1 sunucu gösteriliyor ..
-right_out=$1 / $2 
+right_out=$1/$2 
 right_header3=Sanal Sunucu Bilgileri
 right_login=olarak giriş yaptı
 right_from=Adresinden giriş yapıldı
@@ -4118,6 +4369,7 @@ right_quota=Disk kullanımı ve kota
 right_bw=Bant genişliği kullanımı ve sınırı
 right_of=$2 üzerinden $1 
 right_sysinfo=sistem bilgisi
+
 assoc_title=İlişkilendirme ve İlişkilendirme Özellikleri
 assoc_desc=Bu sayfada etkinleştirilen veya devre dışı bırakılan özellikler herhangi bir sistem yapılandırma dosyasını güncellemez; bunun yerine, yalnızca Virtualmin'in bir etki alanının olmasını beklediği özellikler veritabanı değiştirilir. Bu, manuel olarak ayarlanan bir özelliği içe aktarmak veya bir sanal sunucu silindiğinde korunacak şekilde bir yapılandırmanın bağlantısını kesmek için kullanılabilir.
 assoc_header=Özellik ilişkilendirme ayarları
@@ -4125,6 +4377,7 @@ assoc_features=Virtualmin tarafından bilinen özellikler
 assoc_validate=Kaydetmeden önce başarılı bir doğrulama gerekli mi?
 assoc_err=Özellikler ilişkilendirilemedi
 assoc_evalidate= $1 : $2 için doğrulama başarısız oldu
+
 running_title=Yedekleri Çalıştırma
 running_stop=Seçili Yedeklemeleri Durdurma
 running_started=Başlangıç
@@ -4136,6 +4389,7 @@ running_cron=Zamanlanmış yedekleme
 running_link=Düzenli bir programda arka planda çalışan yedeklemeler oluşturmak için <a href='$1'>planlanmış yedeklemeler</a> sayfasını veya yedeklemeleri görmek için <a href='$2'>yedek günlükleri</a> sayfasını ziyaret edin zaten tamamlanmış.
 running_err=Yedeklemeler durdurulamadı
 running_enone=Hiçbiri seçilmedi!
+
 recovery_title=Şifre kurtarma
 recovery_msg1=$1 için geçerli şifreyi $2 adresine göndermek istediğinizden emin misiniz?
 recovery_msg2=$1 için yeni bir rastgele şifre oluşturmak ve $2 'ye göndermek istediğinizden emin misiniz?
@@ -4145,6 +4399,7 @@ recovery_body1=$2 girişli $3 e-posta hesabınızın şifresi : $1
 recovery_body2=$2 girişli $3 e-posta hesabınız için yeni bir rastgele şifre oluşturuldu : $1 
 recovery_sending=$1 adresine şifre kurtarma e-postası gönderiliyor.
 recovery_failed=.. başarısız oldu : $1 
+
 letsencrypt_err=Sertifika istenemedi
 letsencrypt_title=Sertifika İste
 letsencrypt_doing2=Let's Encrypt'ten $1 için sertifika isteniyor.
@@ -4164,12 +4419,14 @@ letsencrypt_conncheck=$1 için harici bağlantı kontrol ediliyor.
 letsencrypt_connerrs=.. Let's Encrypt'in bir sertifika vermesini engelleyecek hatalar bulundu :
 letsencrypt_connok=.. sorun bulunamadı
 letsencrypt_validcheck=$1 için yapılandırma doğrulanıyor.
+
 php_fpmrestart=PHP-FPM sunucusu yeniden başlatılıyor ..
 php_fpmnoinit=.. önyükleme eylemi bulunamadı!
 php_fpmeinit=.. başarısız oldu : $1 
 php_fpmnodir=FPM yapılandırma dizini bulunamadı
 php_fpmnoinit2=FPM sunucusu önyükleme eylemi bulunamadı
 php_fpmnomod=$1 apache modülü eksik veya etkin değil
+
 jailkit_ecmd=$1 Jailkit komutu sisteminizde bulunamadı - belki <i>jailkit</i> paketi yüklü değil?
 jailkit_einit=Hapis başlatılamadı : $1 
 jailkit_elinux=Jailkit yalnızca Linux sistemlerinde desteklenir
@@ -4180,6 +4437,7 @@ jailkit_emkdir=Dizin oluşturulamadı : $1
 jailkit_eumount=Bağlama ana dizini bağlantısı kesilemedi : $1 
 jailkit_eenabled=Bu etki alanı için Chroot hapsi etkinleştirilmedi
 jailkit_edir=Chroot hapishane dizini bulunamadı!
+
 mysqlpass_shutdown=MySQL sunucusu kapatılıyor ..
 mysqlpass_eshutdown=.. kapatma başarısız : $1 
 mysqlpass_startup=MySQL sunucusu başlatılıyor ..
@@ -4191,6 +4449,7 @@ mysqlpass_esafe=.. başlangıç başarısız : $1
 mysqlpass_change=$1 kullanıcısı için parola değiştirme.
 mysqlpass_echange=.. şifre değişikliği başarısız : $1 
 mysqlpass_kill=MySQL sunucusunu kimlik doğrulama devre dışı bırakıldığında durdurma ..
+
 kill_failed=Öldürme başarısız oldu : $1 
 kill_still=Hala koşuyor!
 kill_done=Öldürülen
@@ -4200,6 +4459,7 @@ kill_port=Liman
 kill_cmd=Sunucu komutu
 kill_result=Sonuç
 kill_subject=Virtualmin sunucu süreç izleme
+
 mysql_rsock=Soket dosyası $1 
 mysql_rhostport=Uzak ana bilgisayar $1 bağlantı noktası $2 
 mysql_rhost=Uzak ana bilgisayar $1 
@@ -4208,8 +4468,10 @@ mysql_rlocal=Yerel sunucu
 mysql_movebackup=Orijinal ana bilgisayarda kullanıcıları ve veritabanlarını yedekleme.
 mysql_moverestore=Yeni ana bilgisayarda kullanıcıları ve veritabanlarını geri yükleme.
 mysql_movedelete=Kullanıcıları ve veritabanlarını orijinal ana bilgisayardan kaldırma.
+
 dbpass_title=Veritabanı Parolasını Güncelleyin
 dbname_title=Veritabanı Adını Güncelle
+
 mailclient_title=E-posta İstemcisi Ayarları
 mailclient_header=Kullanıcı posta istemcileri için ayarlar
 mailclient_exemail=Örnek kullanıcı e-postası
@@ -4231,12 +4493,16 @@ mailclient_smtp_type=SMTP şifreleme türü
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=şifresiz
+
 deftmplt_error=HATA
 deftmplt_website_disabled=Web Sitesi Devre Dışı
 deftmplt_under_construction=İnşaat halinde
 deftmplt_slogan=Virtualmin tarafından yönetilen - güçlü ve esnek bir web barındırma kontrol paneli
-deftmplt_made_with_love1=İle yapılan
-deftmplt_made_with_love2=Virtualmin'de
+deftmplt_slogan2=alan sahibi, bu web sitesini yönetmek için kontrol paneline giriş yapabilir
+deftmplt_made_with_love1=Tarafından desteklenmektedir
+deftmplt_made_with_love2=Virtualmin
+deftmplt_made_with_love_disclamer=* Virtualmin şirketi, bu sunucu tarafından sağlanan içerikten sorumlu değildir
+
 2fa_title=İki Faktörlü Kimlik Doğrulama
 2fa_euser=Webmin kullanıcısı mevcut değil!
 2fa_already=$2 hesap kimliği ile $1 sağlayıcısını kullanarak iki faktörlü kimlik doğrulamaya zaten kaydoldunuz.
@@ -4246,3 +4512,37 @@ deftmplt_made_with_love2=Virtualmin'de
 2fa_header=İki Faktörlü Seçenekler
 2fa_err=İki faktörlü kimlik doğrulama kaydedilemedi
 2fa_enrolling=$1 ile iki faktörlü kayıt yapılıyor. ..
+
+rcert_err=Sertifika silinemedi
+rcert_ecert=Sanal sunucunun kaldırılacak sertifikası yok
+rcert_essl=SSL etkinleştirilmiş bir sanal sunucudan sertifika kaldırılamaz
+rcert_esame=Diğer sanal sunucular bununla sertifikayı paylaşıyor, bu nedenle kaldırılamaz
+rcert_esame2=Bu sanal sunucu, sertifikayı başka bir sunucuyla paylaşıyor, bu nedenle kaldırılamaz
+rcert_eservice=Diğer hizmetler bu sunucuya ait sertifikayı kullanıyor
+
+dnsclouds_title=Cloud DNS Sağlayıcıları
+dnsclouds_name=Sağlayıcı adı
+dnsclouds_url=İnternet sitesi
+dnsclouds_state=Şu anki durum
+dnsclouds_users=Tarafından kullanılan
+dnsclouds_nusers=$1 sunucu
+dnsclouds_nousers=Sunucu yok
+dnsclouds_ecannot=Cloud DNS sağlayıcılarını yönetmenize izin verilmiyor
+dnsclouds_return=bulut DNS sağlayıcıları
+dnsclouds_tmpl=Yeni DNS bölgeleri için varsayılan sağlayıcı, <a href='$1'>sunucu şablonu</a> sayfasında ayarlanabilir.
+
+dnscloud_eaws=Amazon'un Route 53 hizmetini kullanmak için <tt>aws</tt> komutu gereklidir
+dnscloud_eperl=Perl modülü <tt>$1</tt> eksik
+dnscloud_53account=$1 erişim anahtarı kullanılıyor
+dnscloud_title=Cloud DNS Sağlayıcısı
+dnscloud_echeck=Sağlayıcı $1 bu sistemde kullanılamaz : $2 
+dnscloud_header=DNS sağlayıcı seçenekleri
+dnscloud_provider=DNS sağlayıcı adı
+dnscloud_url=DNS sağlayıcısının web sitesi
+dnscloud_users=Sanal sunucular tarafından kullanılıyor
+dnscloud_nousers=Henüz yok
+dnscloud_route53_location=Varsayılan bölge konumu
+dnscloud_err=Bulut DNS sağlayıcısı kaydedilemedi
+dnscloud_egone=Sağlayıcı mevcut değil!
+dnscloud_eawscreds=AWS kimlik bilgileri geçerli değil
+dnscloud_clear=Kimlik Bilgilerini Sil

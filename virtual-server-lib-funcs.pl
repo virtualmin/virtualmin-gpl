@@ -22,7 +22,7 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
-		 "jailkit", "ports", "bb") {
+		 "jailkit", "ports", "bb", "dnscloud") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -3578,7 +3578,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			}
 		elsif ($c eq "ssl_expiry") {
 			# SSL cert expiry
-			if (!&domain_has_ssl($d)) {
+			if (!&domain_has_ssl_cert($d)) {
 				push(@cols, "");
 				}
 			elsif ($d->{'ssl_cert_expiry'}) {
@@ -3897,11 +3897,11 @@ else {
 }
 
 # Print functions for HTML output
-sub first_html_print { print_and_capture(@_,"<br>\n");
+sub first_html_print { print_and_capture("<span data-first-print>@_</span>","<br>\n");
 		       print bottom_scroll_js(); }
-sub second_html_print { print_and_capture(@_,"<br><br data-x-br>\n");
+sub second_html_print { print_and_capture("<span data-second-print>@_</span>","<br><br data-x-br>\n");
 		        print bottom_scroll_js(); }
-sub indent_html_print { print_and_capture("<ul>\n");
+sub indent_html_print { print_and_capture("<ul data-indent-print>\n");
 		        print bottom_scroll_js(); }
 sub outdent_html_print { print_and_capture("</ul>\n");
 		         print bottom_scroll_js(); }
@@ -3921,15 +3921,21 @@ sub indent_text_print { $indent_text .= "    "; }
 sub outdent_text_print { $indent_text = substr($indent_text, 4); }
 sub html_tags_to_text
 {
-local ($rv) = @_;
+local ($rv, $disallow_newlines, $allow_links) = @_;
+my $newline = "\n";
+if ($disallow_newlines) {
+	$newline = " " if ($disallow_newlines);
+	$rv =~ s/\n/ /g;
+	}
 $rv =~ s/<tt>|<\/tt>//g;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
-$rv =~ s/<a[^>]*>|<\/a>//g;
+$rv =~ s/<a[^>]*>|<\/a>//g if (!$allow_links);
 $rv =~ s/<pre>|<\/pre>//g;
-$rv =~ s/<br>|<br\s[^>]*>/\n/g;
-$rv =~ s/<p>|<p\s[^>]*>/\n\n/g;
+$rv =~ s/<br>|<br\s[^>]*>/$newline/g;
+$rv =~ s/<p>|<\/p>/$newline$newline/g;
+$rv =~ s/<p>|<p\s[^>]*>/$newline$newline/g;
 $rv = &entities_to_ascii($rv);
 return $rv;
 }
@@ -4256,7 +4262,8 @@ if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
 	foreach my $r (split(/\s+/, $d->{'reseller'})) {
 		local $resel = &get_reseller($r);
 		if ($resel && $resel->{'acl'}->{'email'}) {
-			push(@ccs, $resel->{'acl'}->{'email'});
+			push(@ccs, &extract_address_parts(
+				$resel->{'acl'}->{'email'}));
 			}
 		}
 	}
@@ -4417,9 +4424,7 @@ if (!$to) {
 local $ctype = $template =~ /<html[^>]*>|<body[^>]*>/i ? "text/html"
 						       : "text/plain";
 local $cs = &get_charset();
-local $attach = $template =~ /^[\000-\177]*$/ ?
-    { 'headers' => [ [ 'Content-type', $ctype ] ],
-      'data' => &entities_to_ascii($template) } :
+local $attach =
     { 'headers' => [ [ 'Content-Type', $ctype.'; charset='.$cs ],
                      [ 'Content-Transfer-Encoding', 'quoted-printable' ] ],
       'data' => &mailboxes::quoted_encode($template) };
@@ -4524,13 +4529,19 @@ if ($d && $d->{'reseller'} && defined(&get_reseller) && $config{'from_reseller'}
 	local $resel = &get_reseller($r[0]);
 	if ($resel && $resel->{'acl'}->{'email'}) {
 		# Reseller has an email .... but is it valid for this system?
-		my $rs = $resel->{'acl'}->{'email'};
-		my ($rsmbox, $rsdom) = split(/\@/, $rs);
-		my $rsd = &get_domain_by("dom", $rsdom);
-		if ($rsd || $rsdom eq &get_system_hostname() ||
-		    $config{'from_reseller'} == 2) {
-			# Yes - safe to use
-			$rv = $rs;
+		if ($resel->{'acl'}->{'from'}) {
+			# Custom from address set
+			$rv = $resel->{'acl'}->{'from'};
+			}
+		else {
+			my ($rs) = &extract_address_parts($resel->{'acl'}->{'email'});
+			my ($rsmbox, $rsdom) = split(/\@/, $rs);
+			my $rsd = &get_domain_by("dom", $rsdom);
+			if ($rsd || $rsdom eq &get_system_hostname() ||
+			    $config{'from_reseller'} == 2) {
+				# Yes - safe to use
+				$rv = $rs;
+				}
 			}
 		}
 	}
@@ -5724,6 +5735,7 @@ else {
 
 # Record webserver type
 $_[0]->{'backup_web_type'} = &domain_has_website($_[0]);
+$_[0]->{'backup_ssl_type'} = &domain_has_ssl($_[0]);
 
 &save_domain($_[0]);
 
@@ -6697,13 +6709,17 @@ return 1;
 sub scp_copy
 {
 local ($src, $dest, $pass, $err, $port, $asuser) = @_;
-if ($src =~ /\s/) {
+if ($src =~ /\s|\(|\)/) {
 	my ($host, $path) = split(/:/, $src, 2);
-	$src = $host.":".quotemeta($path);
+	if ($path) {
+		$src = $host.":".quotemeta($path);
+		}
 	}
-if ($dest =~ /\s/) {
+if ($dest =~ /\s|\(|\)/) {
 	my ($host, $path) = split(/:/, $dest, 2);
-	$dest = $host.":".quotemeta($path);
+	if ($path) {
+		$dest = $host.":".quotemeta($path);
+		}
 	}
 local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 	     quotemeta($src)." ".quotemeta($dest);
@@ -7544,7 +7560,7 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7792,15 +7808,11 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		&setup_script_packages($script, $d, $ver);
 
 		# Check PHP version
-		local $phpvfunc = $script->{'php_vers_func'};
 		local $phpver;
-		if (defined(&$phpvfunc)) {
-			local @vers = &$phpvfunc($dom, $ver);
-			$phpver = &setup_php_version($dom, \@vers,
-						     $opts->{'path'});
+		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+			$phpver = &setup_php_version($dom, [5],$opts->{'path'});
 			if (!$phpver) {
-				&$second_print(&text('setup_scriptphpver',
-						     join(" ", @vers)));
+				&$second_print($text{'scripts_ephpvers2'});
 				next;
 				}
 			$opts->{'phpver'} = $phpver;
@@ -7931,18 +7943,33 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 		}
 	}
 
+# If an SSL cert wasn't generated because SSL wasn't enabled, do one now
+my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
+					       : $config{'always_ssl'};
+my $generated;
+if (!&domain_has_ssl($dom) && $always_ssl) {
+	$generated = &generate_default_certificate($dom);
+	}
+
 # Attempt to request a let's encrypt cert. This has to be done after the
 # initial setup and when Apache has been restarted, so that it can serve the
 # new website.
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
 	}
-if ($dom->{'auto_letsencrypt'} && &domain_has_ssl($dom) &&
+if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
 		&create_initial_letsencrypt_cert($dom);
+		$generated++;
 		}
+	}
+
+# Update service certs and DANE DNS records if a new cert was generated
+if ($generated) {
+	&enable_domain_service_ssl_certs($dom);
+	&sync_domain_tlsa_records($dom);
 	}
 
 # For a new alias domain, if the target has a Let's Encrypt cert for all
@@ -7951,10 +7978,11 @@ if ($dom->{'alias'} && &domain_has_website($dom)) {
 	local $target = &get_domain($dom->{'alias'});
 	local $tinfo;
 	if ($target &&
-	    &domain_has_ssl($target) &&
+	    &domain_has_website($target) &&
+	    &domain_has_ssl_cert($target) &&
 	    !$target->{'letsencrypt_dname'} &&
 	    ($tinfo = &cert_info($target)) &&
-	    $tinfo->{'issuer_cn'} =~ /Let's\s+Encrypt/i) {
+	    &is_letsencrypt_cert($tinfo)) {
 		&$first_print(&text('setup_letsaliases',
 				    &show_domain_name($target),
 				    &show_domain_name($dom)));
@@ -8030,7 +8058,7 @@ else {
 	$d->{'letsencrypt_dname'} = '';
 	$d->{'letsencrypt_dwild'} = 0;
 	$d->{'letsencrypt_last'} = time();
-	$d->{'letsencrypt_renew'} ||= 2;
+	$d->{'letsencrypt_renew'} = 1 if ($d->{'letsencrypt_renew'} eq '');
 
 	# Inject initial SSL expiry to avoid wrong "until expiry"
 	my $cert_info = &cert_info($d);
@@ -8217,6 +8245,7 @@ foreach my $dd (@alldoms) {
 
 	# If this is an alias domain, notify the target that it is being
 	# deleted. This allows things like extra awstats symlinks to be removed
+	$dd->{'deleting'} = 1;		# so that features know about delete
 	if (!$only && $dd->{'alias'}) {
 		local $aliasdom = &get_domain($dd->{'alias'});
 		foreach my $f (@features) {
@@ -8244,7 +8273,6 @@ foreach my $dd (@alldoms) {
 	# Delete all features (or just 'webmin' if un-importing). Any
 	# failures are ignored!
 	my $f;
-	$dd->{'deleting'} = 1;		# so that features know about delete
 	local $p = &domain_has_website($dd);
 	local @of;
 	if ($only) {
@@ -8835,6 +8863,7 @@ push(@rv, { 'id' => 0,
 	    'dns_dmarcrua' => $config{'bind_dmarcrua'},
 	    'dns_dmarcextra' => $config{'bind_dmarcextra'},
 	    'dns_sub' => $config{'bind_sub'} || "none",
+	    'dns_cloud' => $config{'bind_cloud'},
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_mx' => $config{'bind_mx'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
@@ -9138,6 +9167,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'bind_dmarcextra'} = $tmpl->{'dns_dmarcextra'};
 	$config{'bind_sub'} = $tmpl->{'dns_sub'} eq 'none' ? undef
 							   : $tmpl->{'dns_sub'};
+	$config{'bind_cloud'} = $tmpl->{'dns_cloud'};
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
 						   : $tmpl->{'dns_master'};
 	$config{'bind_mx'} = $tmpl->{'dns_mx'} eq 'none' ? undef
@@ -9368,6 +9398,7 @@ if (!$tmpl->{'default'}) {
 	local $p;
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
+		    "web_webmail", "web_admin",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
@@ -9397,6 +9428,7 @@ if (!$tmpl->{'default'}) {
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
 				next if ($p eq "php" && $k =~ /^php_fpm/);
+				next if ($p eq "web" && $k =~ /^web_(webmail|admin)/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
 					$tmpl->{$k} = $def->{$k};
@@ -10950,6 +10982,16 @@ foreach my $d (&list_domains()) {
 	next if (!@st);
 	next if ($d->{'ssl_cert_expiry_cache'} != $st[9]);
 
+	# Skip this if the cert isn't being used
+	next if (!&domain_has_ssl_cert($d));
+	my $anyuse;
+	$anyuse++ if (&domain_has_ssl($d));
+	if (!$anyuse) {
+		my @svcs = &get_all_domain_service_ssl_certs($d);
+		$anyuse++ if (@svcs);
+		}
+	next if (!$anyuse);
+
 	# Check if at or near expiry
 	if ($d->{'ssl_cert_expiry'} < $now) {
 		push(@expired, $d);
@@ -10969,6 +11011,22 @@ if (@expired || @nearly) {
 				    &domain_ssl_page_links(\@nearly));
 		}
 	push(@rv, $cert_text);
+	}
+
+# Check for invalid SSL cert files
+my @badcert;
+foreach my $d (&list_domains()) {
+	next if (!&domain_has_ssl_cert($d));
+	my $cerr = &validate_cert_format($d->{'ssl_cert'}, 'cert');
+	my $kerr = &validate_cert_format($d->{'ssl_key'}, 'key');
+	if ($cerr) {
+		push(@rv, &text('index_certinvalid', &show_domain_name($d),
+			"<tt>".&html_escape($d->{'ssl_cert'})."</tt>", $cerr));
+		}
+	elsif ($kerr) {
+		push(@rv, &text('index_keyinvalid', &show_domain_name($d),
+			"<tt>".&html_escape($d->{'ssl_key'})."</tt>", $kerr));
+		}
 	}
 
 # Check for impending DNS registrar expiry
@@ -11708,6 +11766,60 @@ elsif ($fmt == 5) {
 return undef;
 }
 
+# features_sort(\@features_values, \@features_order)
+# Sorts features based on given pre-sorted list,
+# and fills unlisted based on initial sorting
+sub features_sort
+{
+my ($features_values, $features_order) = @_;
+my @order_manual =
+   ('unix', 'dir',
+    'dns', 'virtualmin-slavedns', 'virtualmin-powerdns',
+    'web', 'ssl',
+    'virtualmin-nginx', 'virtualmin-nginx-ssl',
+    'mysql', 'postgres', 'virtualmin-sqlite', 'virtualmin-oracle',
+    'mail', 'spam', 'virus',
+    'virtualmin-mailrelay', 'virtualmin-mailman', 'virtualmin-signup',
+    'logrotate',
+    'status', 'webalizer',
+    'webmin',
+    'virtualmin-awstats',
+    'virtualmin-notes', 'virtualmin-google-analytics',
+    'virtualmin-init',
+    'virtualmin-dav', 'virtualmin-registrar',
+    'virtualmin-disable',
+    'virtualmin-git', 'virtualmin-svn',
+    'virtualmin-messageoftheday',
+    'virtualmin-htpasswd',
+    'ftp', 'virtualmin-vsftpd',
+    'virtualmin-support',
+    );
+my @order_initial = @{$features_order};
+my %ordered_;
+my @ordered;
+my @unordered;
+for my $i (0 .. $#order_initial) {
+
+	# Store all features
+	$ordered_{$order_initial[$i]} = $features_values->[$i];
+
+	# Unordered keys
+	if (! grep( /^$order_initial[$i]$/, @order_manual ) ) {
+		push(@unordered, $features_values->[$i]);
+		}
+	}
+
+# Sort ordered based on manual sorting
+for my $i (0 .. $#order_manual) {
+	my $__ = $ordered_{$order_manual[$i]};
+	push(@ordered, $__) if ($__);
+}
+
+# Combine both and modify original
+my @ordered_combined = (@ordered, @unordered);
+@$features_values = @ordered_combined;
+}
+
 # feature_links(&domain)
 # Returns a list of links for editing specific features within a domain, such
 # as the DNS zone, apache config and so on. Includes plugins.
@@ -11986,7 +12098,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 		}
 	}
 
-if (&domain_has_ssl($d) && $d->{'dir'} && &can_edit_ssl()) {
+if ($d->{'dir'} && &can_edit_ssl() && !$d->{'alias'}) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
 		    'title' => $text{'edit_cert'},
@@ -12073,20 +12185,15 @@ if (($d->{'spam'} && $config{'spam'} ||
 	}
 
 if (&domain_has_website($d) && &can_edit_phpmode()) {
-	# Website / PHP options button
-	push(@rv, { 'page' => 'edit_phpmode.cgi',
-		    'title' => $text{'edit_phpmode'},
-		    'desc' => $text{'edit_phpmodedesc'},
+	# Website / PHP options buttons
+	push(@rv, { 'page' => 'edit_website.cgi',
+		    'title' => $text{'edit_website'},
+		    'desc' => $text{'edit_websitedesc'},
 		    'cat' => 'server',
 		  });
-	}
-
-if (&domain_has_website($d) && &can_edit_phpver() &&
-    defined(&list_available_php_versions)) {
-	# PHP directory versions button
-	push(@rv, { 'page' => 'edit_phpver.cgi',
-		    'title' => $text{'edit_phpver'},
-		    'desc' => $text{'edit_phpverdesc'},
+	push(@rv, { 'page' => 'edit_phpmode.cgi',
+		    'title' => $text{'edit_php'},
+		    'desc' => $text{'edit_phpdesc'},
 		    'cat' => 'server',
 		  });
 	}
@@ -12410,13 +12517,16 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    &has_home_quotas() && !&has_quota_commands() && &has_quotacheck() ?
 	( 'quotacheck' ) : ( ),
    $virtualmin_pro ? ( 'mxs' ) : ( ),
-   'validate', 'chroot', 'global', 'changelog',
+   'validate',
+   &has_ftp_chroot() ? ( 'chroot' ) : ( ),
+   'global', 'changelog',
    $virtualmin_pro ? ( ) : ( 'upgrade' ),
    $config{'mail_system'} == 0 ? ( 'postgrey' ) : ( ),
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
    $config{'mysql'} ? ( 'mysqls' ) : ( ),
+   'dnsclouds',
    );
 local %tmplcat = (
 	'features' => 'setting',
@@ -12453,12 +12563,14 @@ local %tmplcat = (
 	'autoconfig' => 'email',
 	'retention' => 'email',
 	'mysqls' => 'setting',
+	'dnsclouds' => 'ip',
 	);
 local %nonew = ( 'history', 1,
 		 'postgrey', 1,
 		 'dkim', 1,
 		 'ratelimit', 1,
 		 'provision', 1,
+		 'dnsclouds', 1,
 	       );
 local %pro = ( 'resels', 1,
 	       'reseller', 1 );
@@ -13876,7 +13988,7 @@ if (&foreign_check("proc")) {
 
 if ($config{'dns'}) {
 	# Make sure BIND is installed
-	if ($config{'provision_dns'}) {
+	if ($config{'provision_dns'} || &default_dns_cloud()) {
 		# Only BIND module is needed
 		&foreign_check("bind8") ||
 			return $text{'index_ebindmod'};
@@ -14253,10 +14365,6 @@ if (&domain_has_website()) {
 		&$second_print("<b>$text{'check_webphpnovers'}</b>");
 		}
 
-	# Report on supported PHP modes
-	my @supp = &supported_php_modes();
-	&$second_print(&text('check_webphpmodes', join(" ", @supp)));
-
 	# Check for PHP-FPM support
 	my @fpms = &list_php_fpm_configs();
 	if (!@fpms) {
@@ -14352,6 +14460,10 @@ if (&domain_has_website()) {
 				&restart_php_fpm_server($conf);
 				}
 			}
+
+		# Report on supported PHP modes
+		my @supp = &supported_php_modes();
+		&$second_print(&text('check_webphpmodes', join(" ", @supp)));
 		}
 
 	# Check for any unsupported mod_php directives
@@ -14474,7 +14586,7 @@ if ($config{'mysql'}) {
 		# Only MySQL client is needed
 		&foreign_installed("mysql") ||
 			return &text('index_emysql2', "/mysql/", $clink);
-		&$second_print($text{'check_mysqlok2'});
+		&$second_print($text{'check_mysqlok'});
 		}
 	else {
 		# MySQL server is needed
@@ -14487,7 +14599,7 @@ if ($config{'mysql'}) {
 			}
 		else {
 			my ($v, $var) = &get_dom_remote_mysql_version();
-			&$second_print(&text('check_mysqlok'.$var, $v));
+			&$second_print(&text('check_mysqlok', $v));
 			}
 		}
 
@@ -15872,11 +15984,12 @@ return &substitute_template($str, \%ghash);
 sub populate_default_index_page
 {
 	my (%h) = @_;
-	$h{'TMPLTTITLE'}		= $text{'deftmplt_under_construction'} if(!$h{'TMPLTTITLE'});
+	$h{'TMPLTTITLE'}		= $text{'deftmplt_under_construction'} if (!$h{'TMPLTTITLE'});
 	$h{'TMPLTERROR'}		= $text{'deftmplt_error'};
-	$h{'TMPLTSLOGAN'}		= $text{'deftmplt_slogan'};
+	$h{'TMPLTSLOGAN'}		= $text{'deftmplt_slogan2'} if (!$h{'TMPLTSLOGAN'});
 	$h{'TMPLTMADEWITH1'}	= $text{'deftmplt_made_with_love1'};
 	$h{'TMPLTMADEWITH2'}	= $text{'deftmplt_made_with_love2'};
+	$h{'TMPLTMADEWITH3'}	= $text{'deftmplt_made_with_love_disclamer'};
 	return %h;
 }
 
@@ -15886,6 +15999,7 @@ sub populate_default_index_page
 sub absolute_domain_path
 {
 local ($d, $path) = @_;
+$d->{'home'} || &error("absolute_domain_path called for $path without a home directory!");
 if ($path =~ /^\//) {
 	# Already absolute
 	return $path;
@@ -16880,7 +16994,7 @@ foreach my $f (@features) {
 sub obtain_lock_anything
 {
 local ($d) = @_;
-&lock_domain($d);
+&lock_domain($d) if ($d && $d->{'id'});
 # Assume that we are about to do something important, and so don't want to be
 # killed by a SIGPIPE triggered by a browser cancel.
 $SIG{'PIPE'} = 'ignore';
@@ -16888,10 +17002,11 @@ $SIG{'TERM'} = 'ignore';
 }
 
 # release_lock_anything(&domain)
+# Called by the various release_lock_* functions
 sub release_lock_anything
 {
 local ($d) = @_;
-&unlock_domain($d);
+&unlock_domain($d) if ($d && $d->{'id'});
 }
 
 # virtualmin_api_log(&argv, [&domain], [&suppress-flags])
@@ -17114,8 +17229,13 @@ if ($config{'scriptwarn_url'} && !$main::calling_get_virtualmin_url) {
 	$rv =~ s/\/$//;
 	$main::calling_get_virtualmin_url = 0;
 	}
+elsif (defined(&get_webmin_email_url)) {
+	# Use new standard function
+	return &get_webmin_email_url(undef, undef, 0, $d->{'dom'});
+	}
 else {
 	# Work out from miniserv
+	# XXX remove this after get_webmin_email_url is widely available
 	local %miniserv;
 	&get_miniserv_config(\%miniserv);
 	local $proto = $miniserv{'ssl'} ? 'https' : 'http';
@@ -17542,6 +17662,14 @@ foreach my $p (&list_feature_plugins()) {
 return undef;
 }
 
+# domain_has_ssl_cert(&domain)
+# Returns 1 if a domain has an SSL cert file, even if not used
+sub domain_has_ssl_cert
+{
+my ($d) = @_;
+return $d->{'ssl_cert'} && -r $d->{'ssl_cert'} ? 1 : 0;
+}
+
 # get_website_log(&domain, [error-log])
 # Returns the access or error log for a domain's website. May come from a plugin
 sub get_website_log
@@ -17581,7 +17709,7 @@ local $p = &domain_has_website($d);
 if ($p eq "web") {
 	&restart_apache(@args);
 	}
-else {
+elsif ($p) {
 	&plugin_call($p, "feature_restart_web", @args);
 	}
 }
@@ -17590,50 +17718,72 @@ else {
 # Configure the webserver for some domain to use a file as the SSL cert or key
 sub save_website_ssl_file
 {
-local ($d, $type, $file) = @_;
-local $p = &domain_has_website($d);
-if ($p ne "web") {
-	return &plugin_call($p, "feature_save_web_ssl_file", $d, $type, $file);
-	}
-&obtain_lock_ssl($d);
-local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-						   $d->{'web_sslport'});
-if (!$virt) {
+my ($d, $type, $file) = @_;
+if (&domain_has_ssl($d)) {
+	# Update the actual webserver config
+	my $p = &domain_has_website($d);
+	if ($p ne "web") {
+		return &plugin_call($p, "feature_save_web_ssl_file",
+				    $d, $type, $file);
+		}
+	&obtain_lock_ssl($d);
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+							   $d->{'web_sslport'});
+	if (!$virt) {
+		&release_lock_ssl($d);
+		return "No virtual host found for ".
+		       "$d->{'dom'}:$d->{'web_sslport'}";
+		}
+	my $dir = $type eq 'cert' ? "SSLCertificateFile" :
+		     $type eq 'key' ? "SSLCertificateKeyFile" :
+		     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+	if ($dir) {
+		&apache::save_directive($dir, $file ? [ $file ] : [ ],
+					$vconf, $conf);
+		}
 	&release_lock_ssl($d);
-	return "No virtual host found for $d->{'dom'}:$d->{'web_sslport'}";
+	if ($dir) {
+		&flush_file_lines($virt->{'file'}, undef, 1);
+		&register_post_action(\&restart_apache,
+				      &ssl_needs_apache_restart());
+		}
+	return undef;
 	}
-local $dir = $type eq 'cert' ? "SSLCertificateFile" :
-	     $type eq 'key' ? "SSLCertificateKeyFile" :
-	     $type eq 'ca' ? "SSLCACertificateFile" : undef;
-if ($dir) {
-	&apache::save_directive($dir, $file ? [ $file ] : [ ], $vconf, $conf);
+else {
+	# Just update the domain object
+	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+	$d->{$k} = $file;
+	return undef;
 	}
-&release_lock_ssl($d);
-if ($dir) {
-	&flush_file_lines($virt->{'file'}, undef, 1);
-	&register_post_action(\&restart_apache, &ssl_needs_apache_restart());
-	}
-return undef;
 }
 
 # get_website_ssl_file(&domain, "cert"|"key"|"ca")
 # Looks up the SSL cert, key or chained CA file for some domain
 sub get_website_ssl_file
 {
-local ($d, $type) = @_;
-local $p = &domain_has_website($d);
-if ($p ne "web") {
-        return &plugin_call($p, "feature_get_web_ssl_file", $d, $type);
-        }
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
-return undef if (!$virt);
-local $dir = $type eq 'cert' ? "SSLCertificateFile" :
-	     $type eq 'key' ? "SSLCertificateKeyFile" :
-	     $type eq 'ca' || $type eq 'chain' ? "SSLCACertificateFile" : undef;
-return undef if (!$dir);
-local ($file) = &apache::find_directive($dir, $vconf);
-return $file;
+my ($d, $type) = @_;
+if (&domain_has_ssl($d)) {
+	# Get from the actual Apache config
+	my $p = &domain_has_website($d);
+	if ($p ne "web") {
+		return &plugin_call($p, "feature_get_web_ssl_file", $d, $type);
+		}
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+						    $d->{'web_sslport'});
+	return undef if (!$virt);
+	my $dir = $type eq 'cert' ? "SSLCertificateFile" :
+		     $type eq 'key' ? "SSLCertificateKeyFile" :
+		     $type eq 'ca' || $type eq 'chain' ? "SSLCACertificateFile"
+						       : undef;
+	return undef if (!$dir);
+	my ($file) = &apache::find_directive($dir, $vconf);
+	return $file;
+	}
+else {
+	# Use the domain object
+	my $k = $type eq 'ca' ? 'ssl_chain' : 'ssl_'.$type;
+	return $d->{$k};
+	}
 }
 
 # list_ordered_features(&domain)
@@ -17946,14 +18096,14 @@ if ($showoutput) {
 	}
 if ($rok != 0) {
 	if ($deletemode == 2) {
-		&$second_print(&text('transfer_erestoring2', $rerr,
+		&$second_print(&text('transfer_erestoring3', "<pre>".$rerr."</pre>",
 				     $remotetemp, $desthost));
 		}
 	elsif ($deletemode == 1) {
-		&$second_print(&text('transfer_erestoring1', $rerr));
+		&$second_print(&text('transfer_erestoring2', "<pre>".$rerr."</pre>"));
 		}
 	else {
-		&$second_print(&text('transfer_erestoring', $rerr));
+		&$second_print(&text('transfer_erestoring', "<pre>".$rerr."</pre>"));
 		}
 	if ($deletemode != 2) {
 		&execute_command_via_ssh($desthost, $destpass,
@@ -18146,6 +18296,37 @@ else {
 	}
 	return $list ? ($v_major, $v_minor, $v_type) : 
                   "$v_major.$v_minor$v_type";
+}
+
+# set_provision_features(&domain)
+# Set the provision_* and cloud_* fields in a domain based on what
+# provisioning features are currently configured globally and in the template,
+# to indicate that they should be created remotely.
+sub set_provision_features
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+foreach my $f (&list_provision_features()) {
+	if ($f eq "dns") {
+		# Template has an option to control where DNS is hosted
+		if ($tmpl->{'dns_cloud'} eq 'services') {
+			$d->{'provision_dns'} = 1;
+			}
+		elsif ($tmpl->{'dns_cloud'} eq 'local') {
+			$d->{'provision_dns'} = 0;
+			}
+		elsif ($tmpl->{'dns_cloud'} eq '') {
+			$d->{'provision_dns'} = 1 if ($config{'provision_dns'});
+			}
+		else {
+			$d->{'dns_cloud'} = $tmpl->{'dns_cloud'};
+			}
+		}
+	elsif ($config{'provision_'.$f}) {
+		# Only option is cloudmin services
+		$d->{'provision_'.$f} = 1;
+		}
+	}
 }
 
 # Returns a list of all plugins that define features

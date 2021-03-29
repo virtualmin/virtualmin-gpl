@@ -6,21 +6,26 @@ sub list_cloud_providers
 {
 my @rv = ( { 'name' => 's3',
 	     'prefix' => [ 's3', 's3rrs' ],
+	     'url' => 'https://aws.amazon.com/s3/',
 	     'desc' => $text{'cloud_s3desc'} },
 	   { 'name' => 'rs',
 	     'prefix' => [ 'rs' ],
+	     'url' => 'https://www.rackspace.com/openstack/public/files',
 	     'desc' => $text{'cloud_rsdesc'} } );
 if ($virtualmin_pro) {
 	push(@rv, { 'name' => 'google',
 		    'prefix' => [ 'gcs' ],
+		    'url' => 'https://cloud.google.com/storage',
 		    'desc' => $text{'cloud_googledesc'},
 		    'longdesc' => $text{'cloud_google_longdesc'} });
 	push(@rv, { 'name' => 'dropbox',
 		    'prefix' => [ 'dropbox' ],
+		    'url' => 'https://www.dropbox.com/',
 		    'desc' => $text{'cloud_dropboxdesc'},
 		    'longdesc' => $text{'cloud_dropbox_longdesc'} });
 	push(@rv, { 'name' => 'bb',
 		    'prefix' => [ 'bb' ],
+		    'url' => 'https://www.backblaze.com/',
 		    'desc' => $text{'cloud_bbdesc'},
 		    'longdesc' => $text{'cloud_bb_longdesc'} });
 	}
@@ -561,12 +566,25 @@ if ($in{'bb_keyid'} ne $config{'bb_keyid'} ||
 		}
 	$config{'bb_keyid'} = $in{'bb_keyid'};
 	$config{'bb_key'} = $in{'bb_key'};
-	&lock_file($module_config_file);
-	&save_module_config();
-	&unlock_file($module_config_file);
 	}
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 
 return undef;
+}
+
+# cloud_bb_clear()
+# Reset the Backblaze account to the default
+sub cloud_bb_clear
+{
+delete($config{'bb_key'});
+delete($config{'bb_keyid'});
+delete($config{'cloud_bb_owner'});
+delete($config{'cloud_bb_reseller'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
 }
 
 1;

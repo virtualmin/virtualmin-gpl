@@ -91,6 +91,8 @@ if (-r $virtualmin_yum_repo) {
 
 # Update Debian repo
 $sources_list = "/etc/apt/sources.list";
+$sources_list_new = "/etc/apt/sources.list.d/virtualmin.list";
+$sources_list = $sources_list_new if (-r $sources_list_new);
 if (-r $sources_list) {
 	&$first_print("Updating Virtualmin APT repository ..");
 	&lock_file($sources_list);

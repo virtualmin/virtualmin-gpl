@@ -395,7 +395,11 @@ my ($dkim, $newkey, $size) = @_;
 &$first_print($text{'dkim_domains'});
 my @alldoms = grep { &indexof($_->{'dom'}, @{$dkim->{'exclude'}}) < 0 } &list_domains();
 my @doms = grep { $_->{'dns'} && $_->{'mail'} } @alldoms;
-if (@doms) {
+if (@doms && @{$dkim->{'extra'}}) {
+	&$second_print(&text('dkim_founddomains3', scalar(@doms),
+			     scalar(@{$dkim->{'extra'}})));
+	}
+elsif (@doms) {
 	&$second_print(&text('dkim_founddomains', scalar(@doms)));
 	}
 elsif (@{$dkim->{'extra'}}) {
@@ -655,7 +659,9 @@ if ($config{'mail_system'} == 0) {
 					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
-	&postfix::set_current_value("milter_protocol", 2);
+	if (!&postfix::get_current_value("milter_protocol")) {
+		&postfix::set_current_value("milter_protocol", 2);
+		}
 	my $milters = &postfix::get_current_value("smtpd_milters");
 	if ($milters !~ /\Q$newmilter\E/) {
 		$milters = $milters ? $milters.",".$newmilter : $newmilter;
@@ -1233,11 +1239,11 @@ else {
 		}
 
 	# Find domain's entry in key table
-	my $keyfile = $conf->{'KeyTable'};
-	$keyfile =~ s/^[a-z]+://;
-	$newfile = !-r $keyfile;
-	&lock_file($keyfile);
-	my $klref = &read_file_lines($keyfile);
+	my $keytablefile = $conf->{'KeyTable'};
+	$keytablefile =~ s/^[a-z]+://;
+	$newfile = !-r $keytablefile;
+	&lock_file($keytablefile);
+	my $klref = &read_file_lines($keytablefile);
 	if (!@$klref) {
 		# Add entry for the default key
 		push(@$klref, "default\t%:$dkim->{'selector'}:".
@@ -1253,25 +1259,29 @@ else {
 			}
 		$i++;
 		}
+	my $keyfile = $dkim_config;
+	$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
+	my $keyline = "$d->{'id'}\t$d->{'dom'}:$dkim->{'selector'}:$keyfile";
 	if ($kidx < 0 && $key) {
 		# Need to add
-		my $keyfile = $dkim_config;
-		$keyfile =~ s/\/([^\/]+)$/\/$d->{'id'}.dkim-key/;
 		&open_lock_tempfile(PRIVKEY, ">$keyfile");
 		&print_tempfile(PRIVKEY, $key);
 		&close_tempfile(PRIVKEY);
 		&set_dkim_keyfile_permissions($keyfile);
-		push(@$klref, "$d->{'id'}\t$d->{'dom'}:".
-			      "$dkim->{'selector'}:$keyfile");
+		push(@$klref, $keyline);
 		}
 	elsif ($kidx >= 0 && !$key) {
 		# Need to remove
 		splice(@$klref, $kidx, 1);
 		}
-	&flush_file_lines($keyfile);
-	&unlock_file($keyfile);
+	elsif ($kidx >= 0 && $key) {
+		# Need to update
+		$klref->[$kidx] = $keyline;
+		}
+	&flush_file_lines($keytablefile);
+	&unlock_file($keytablefile);
 	if ($newfile) {
-		&set_ownership_permissions(undef, undef, 0755, $keyfile);
+		&set_ownership_permissions(undef, undef, 0755, $keytablefile);
 		}
 	}
 &$second_print($text{'setup_done'});

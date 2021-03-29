@@ -245,7 +245,7 @@ my ($d, $dir) = @_;
 $dir ||= &domain_jailkit_dir($d);
 $dir || return $text{'jailkit_edir'};
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
-		  "editors", "netutils", "php",
+		  "editors", "netutils", "php", "logbasics",
 		  split(/\s+/, $config{'jail_sects'})) {
 	my $cmd = "jk_init -f -j ".quotemeta($dir)." ".$sect;
 	my ($out, $err);

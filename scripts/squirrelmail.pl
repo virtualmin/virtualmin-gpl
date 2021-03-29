@@ -42,6 +42,11 @@ sub script_squirrelmail_php_vers
 return ( 5 );
 }
 
+sub script_squirrelmail_php_fullver
+{
+return 5;
+}
+
 sub script_squirrelmail_abandoned
 {
 return 1;

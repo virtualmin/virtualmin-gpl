@@ -5,7 +5,8 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'letsencrypt_err'});
 $d = &get_domain($in{'dom'});
-&can_edit_domain($d) && &can_edit_ssl() && &can_edit_letsencrypt() ||
+&can_edit_domain($d) && &can_edit_ssl() && &can_edit_letsencrypt() &&
+    &domain_has_website($d) ||
 	&error($text{'edit_ecannot'});
 $d->{'disabled'} && &error($text{'letsencrypt_eenabled'});
 
@@ -32,19 +33,11 @@ push(@dnames, "*.".$d->{'dom'}) if ($in{'dwild'});
 my $fdnames = &filter_ssl_wildcards(\@dnames);
 @dnames = @$fdnames;
 
-$in{'renew_def'} || $in{'renew'} =~ /^\d+(\.\d+)?$/ ||
-	&error($text{'letsencrypt_erenew'});
-
 if ($in{'only'}) {
 	# Just update renewal date and domains
 	$d->{'letsencrypt_dname'} = $custom_dname;
 	$d->{'letsencrypt_dwild'} = $in{'dwild'};
-	if ($in{'renew_def'}) {
-		delete($d->{'letsencrypt_renew'});
-		}
-	else {
-		$d->{'letsencrypt_renew'} = $in{'renew'};
-		}
+	$d->{'letsencrypt_renew'} = $in{'renew'};
 	&save_domain($d);
 	&redirect("cert_form.cgi?dom=$d->{'id'}");
 	}
@@ -140,12 +133,7 @@ else {
 		# Save renewal state
 		$d->{'letsencrypt_dname'} = $custom_dname;
 		$d->{'letsencrypt_dwild'} = $in{'dwild'};
-		if ($in{'renew_def'}) {
-			delete($d->{'letsencrypt_renew'});
-			}
-		else {
-			$d->{'letsencrypt_renew'} = $in{'renew'};
-			}
+		$d->{'letsencrypt_renew'} = $in{'renew'};
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
 		&save_domain($d);
@@ -160,7 +148,7 @@ else {
 
 		# Copy SSL directives to domains using same cert
 		foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
-			next if (!&domain_has_ssl($od));
+			next if (!&domain_has_ssl_cert($od));
 			$od->{'ssl_cert'} = $d->{'ssl_cert'};
 			$od->{'ssl_key'} = $d->{'ssl_key'};
 			$od->{'ssl_newkey'} = $d->{'ssl_newkey'};

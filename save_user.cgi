@@ -284,12 +284,14 @@ else {
 			&error(&text('user_eextra5', $e));
 			}
 		local ($eu, $ed) = ($1, $2);
+		$ed = &parse_domain_name($ed);
 		local $edom = &get_domain_by("dom", $ed);
 		$edom && $edom->{'mail'} || &error(&text('user_eextra2', $ed));
 		&can_edit_domain($edom) || $oldextra{$e} ||
 			&error(&text('user_eextra3', $ed));
 		!$edom->{'alias'} || !$edom->{'aliascopy'} ||
 			&error(&text('user_eextra7', $ed));
+		$e = $eu."\@".$ed;
 		$donextra{lc($e)}++ && &error(&text('user_eextra6', $e));
 		}
 	$user->{'extraemail'} = \@extra;

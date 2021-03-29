@@ -161,6 +161,7 @@ index_mass=Aggiornamenti selezionati
 index_mass_all=Aggiorna tutti i server virtuali
 index_disable=Disabilita selezionati
 index_enable=Abilita selezionati
+
 index_backup=Salvataggio server virtuali
 index_backupdesc=Clicca questo bottone per iniziare un salvataggio immediato. Con la possibilità di scegliere il server, le configurazioni e la destinazione del salvataggio.
 index_sched=Salvataggio programmato
@@ -172,6 +173,7 @@ index_restoredesc=Clicca questo bottone per ripristinare un salvataggio preceden
 index_backuplog=Salvataggio logs
 index_dmore=$1 altro ..
 index_virtualminconfig=Configurazione Virtualmin
+
 form_title=Creare server virtuale
 form_title2=Creare sub-server virtuale
 form_title3=Creare alias server
@@ -205,9 +207,7 @@ form_exgroup=Gruppo esistente
 form_mail=Accettare mail per dominio?
 form_unix=Creare amministratore server?
 form_dir=Creare directory home?
-form_web=Configurare sito web per il dominio?
 form_ftp=Configura FTP virtuale basato sull'IP?
-form_ssl=Configurare anche sito web SSL?
 form_dns=Configurare zone DNS?
 form_mysql=Creare login MySQL?
 form_postgres=Creare login PostgresSQL?
@@ -267,14 +267,13 @@ form_advanced=Opzioni avanzate
 form_park=Inizializzare contenuti sito web
 form_content=Creare pagina web iniziale?
 form_content1=No
-form_content0=Si, con testo sottostante ..
-form_style=Style per contenuti iniziali
-form_showstyle=(Vista allargata..)
 form_limits=Quote e limiti
 form_proxysect=Indirizzo IP ed inoltro
 form_ipsect=Indirizzo IP e interfacce
 form_inputssect=Opzioni configurazione aggiuntive
+
 indom=Nel dominio $1
+
 users_ecannot=Non hai i permessi per modificare gli utenti in questo dominio
 users_ecannot2=Non hai i permessi per modificare gli utenti locali
 users_title=Utenti Mail e FTP
@@ -303,6 +302,7 @@ users_dtitle=Cancella utenti
 users_dconfirm=Si, cancellali
 users_defaults=Modifica predefiniti nuovo utente
 users_all=Tutti
+
 user_create=Crea casella di posta
 user_createweb=Crea utente FTP
 user_edit=Modifica casella di posta
@@ -350,8 +350,10 @@ user_spamquota=Attenzione! Questo utente è $1 dentro della sua quota disco. Fil
 user_spamquota2=Attenzione! Questo utente ha raggiunto la sua quota disco. Filtro spam disabilitato.
 user_auto=Invia risposta automatica
 user_switch=Login a Usermin
+
 aliases_add=Aggiungi un alias a questo dominio.
 aliases_cadd=Aggiungi un alias avanzato.
+
 alias_create=Crea alias mail
 alias_edit=Modifica alias mail
 alias_header=Dettagli inoltro agli alias mail
@@ -425,14 +427,18 @@ alias_psel=In data
 alias_estart=Data inizio risposta automatica non valida
 alias_eend=Scadenza risposta automatica non valida
 alias_aopts=Opzioni di risposta automatica
+
 bstop_err=Arresto BIND fallito
+
 mstop_err=Fallimento arresto mail server
 mstart_err=Fallimento avvio mail server
+
 fstop_err=Arresto fallito server FTP
 fstart_err=Avvio server FTP fallito
 fstop_edown=Non avviato
 fstop_ekill=Terminazione fallita: $1
 fstart_eup=Già avviato
+
 edit_title=Modifica server virtuale
 edit_title2=Modifica sub-server virtuale
 edit_title3=Modifica alias server
@@ -551,7 +557,6 @@ edit_scripts=Installa script
 edit_html=Modifica pagine web
 edit_admins=Gestione extra amministratori
 edit_spamvirus=Consegna spam e virus
-edit_phpmode=Opzioni sito web
 edit_phpver=Versioni PHP
 edit_phpverdesc=Seleziona la versione di PHP da usare e configura le differenti versioni per le varie directory.
 edit_spf=Opzioni DNS
@@ -584,6 +589,7 @@ edit_maillogdesc=Cerca log mail per questo server virtuale
 edit_mailopts=Parametri email
 edit_mailoptsdesc=Configura i parametri relativi alle mail per quest server virtuale
 edit_connect=Controlla connettività
+
 delete_title=Cancella server
 delete_rusure2=Sei sicuro di voler eliminare il server virtuale di $1, che ha $2 file? Le seguenti caratteristiche verranno eliminate:
 delete_rusure3=Sei sicuro di voler eliminare il server virtuale di $1? Le seguenti caratteristiche verranno eliminate:
@@ -630,6 +636,7 @@ delete_statusssl=Rimozione monitoraggio per il sito web SSL ..
 delete_nostatus=.. non trovato!
 delete_mxs=Rimozione mail server secondari $1 ..
 delete_dom=Cancellazione sub-server $1 ..
+
 acl_warn=Attenzione! Queste configurazioni possono essere automaticamente sovrascritte per un utente Webmin creato da Virtualmin.
 acl_domains=Domini gestibili dall'utente
 acl_all=Tutti i domini
@@ -641,13 +648,18 @@ acl_local=Posso modificare gli utenti locali?
 acl_stop=Posso avviare e fermare i servizi?
 acl_only=Solo per se stesso
 acl_lim=Limiti di accesso
+
 other=Altre...
+
 import_group=Gruppo per casella di posta utenti
+
 import_webmin2=Creeremo un utente Webmin $1 per gestire questo dominio.
 import_home=Home directory
+
 acheck_ename=Direttiva ServerName mancante
 acheck_edom=Nessuna direttiva tra ServerName o ServerAlias contiene $DOM
 acheck_edoc=Direttiva DocumentRoot mancante
+
 disable_title=Disabilita server
 disable_ok=Si, disabilitalo
 disable_unix=Bloccaggio amministrazione password utenti ..
@@ -670,12 +682,15 @@ disable_and=$1 e $2
 disable_nothing=Questo dominio non ha caratteristiche che sono configurate per essere disattivate!
 disable_users=Bloccaggio account utenti mail ..
 disable_why=Ragioni disabilitazione:
+
 mail_usubject=Casella creata
 mail_upsubject=Casella aggiornata
+
 afile_ecannot=Non hai i permessi per modificare i file degli alias
 afile_title=Modifica indirizzo file
 afile_desc=Usa l'area di testo qui sotto per modificare gli indirizzi nel file $1.
 afile_undo=Annulla cambiamenti
+
 ffile_title=Modifica file filtro
 ffile_ecannot=Non hai i permessi per modificare i file di filtro
 ffile_from=da
@@ -688,6 +703,7 @@ ffile_what1=corrispondenti
 ffile_err=Salvataggio file filtro fallito
 ffile_ematch=Corrispondenza mancante
 ffile_eaction=Indirizzo inoltro mancante
+
 newweb_title=Template sito web Apache
 newweb_undo=Annulla
 newweb_useryes=Si, è un utente Apache
@@ -701,10 +717,12 @@ newweb_sslport=Numero porta per host virtuali SSL
 newweb_webmin=Configurare Webmin per usare un certificato SSL per l'IP?
 newweb_usermin=Configurare Usermin per usare un certificato SSL per l'IP?
 newweb_webmailsame=Usa nome dominio
+
 newftp_title=ProFTPd Server Template
 newftp_undo=Annulla
 newftp_err=Salvataggio template per ProFTPd fallito
 newftp_dir0=Directory sotto home
+
 newdns_ecannot=Non hai il permesso per modificare il template DNS
 newdns_replace1=Usa solo i record nei nuovi domini
 newdns_err=Salvataggio template DNS fallito
@@ -713,13 +731,16 @@ newdns_ens=Un record NS per il dominio deve esistere nel template
 newdns_edom=Un record A o MX deve esistere nel template per il dominio
 newdns_view=Crea un nuovo dominio in vista
 newdns_enamedconf=Direttiva inserita in named.conf di BIND non valida
+
 newlocal_title=Nuova casella email locale
 newlocal_header=Dettagli  messaggi nuova casella email locale
+
 newdom_title=Nuova email per il server virtuale
 newdom_subject=Oggetto
 newdom_sending=Invia email?
 newdom_to=Invia email a
 newdom_mailbox=Casella mail utente
+
 feature_web=Sito web Apache
 feature_dns=Dominio DNS BIND
 feature_mysql=MySQL database
@@ -728,7 +749,6 @@ feature_webalizer=Rapporto Webalizer
 feature_mail=Mail per dominio
 feature_unix=Utente amministrazione
 feature_dir=Home directory
-feature_ssl=Sito web SSL
 feature_webmin=Webmin login
 feature_ftp=ProFTPd FTP virtuale
 feature_logrotate=Rotazione file log
@@ -737,20 +757,24 @@ feature_virt6=Indirizzo IPv6
 feature_spam=Filtro Spam
 feature_virus=Filtro virus
 feature_status=Monitoraggio stato
+
 bandwidth_web=Traffico sito web
 bandwidth_ftp=Trasferimenti FTP
 bandwidth_mail=Trasferimenti mail
 bandwidth_backup=Modalità salvataggio
 bandwidth_restore=Ripristino salvataggi
+
 check_dnsok2=Il server DNS BIND è installato.
 check_done=.. il tuo sistema è pronto per usare Virtualmin
 check_ealias_maps=È stato trovato un problema con la mappa degli alias di Postfix: $1
 check_ebcc_maps=È stato trovato un problema con la mappa dei mittenti BCC di Postfix: $1
+
 log_modify_alias=Alias mail $1 modificato
 log_modify_domain=Server virtuale $1 modificato
 log_modify_domains=Server virtuale $1 aggiornato
 log_modify_admin=Extra amministratore $1 modificato
 log_modify_plan=Piano account $1 modificato
+
 backup_odom=Per i proprietari del dominio $1
 backup_oresel=Per reseller $1
 backup_headerdoms=Server virtuali
@@ -791,9 +815,11 @@ backup_nices3=Amazon S3 bucket $1
 backup_nicedownload=downloaded file
 backup_niceupload=uploaded file
 backup_sdisabled=I salvataggi programmati di Virtualmin sono stati disabilitati.
+
 backup_partial=Il salvataggio è parzialmente completo. Il file avrà dimensione $1.
 backup_partial2=Server virtuali che hanno fallito:
 backup_partialsubject=Salvataggio di Virtualmin su $1 parzialmente completo
+
 backup_proftpdcp=Copia la configurazione del server virtuali di ProFTPd
 backup_mysqldump=Dumpind database MySQL S1 ..
 backup_mysqldumpfailed=.. dump fallito! $1
@@ -816,6 +842,7 @@ backup_purgeefiles=.. elenco fallito file S3 : $1
 backup_purgeelistdir=.. fallimento apertura directory FTP: $1
 backup_purgeelisttimes=.. elenco server FTP di $1 non include file
 backup_purgeesshls=.. elenco fallito directory via SSH : $1
+
 limits_create=Posso creare il nuovo server?
 limits_create_1=Si, incluso il nuovo server genitore
 limits_create_2=Solo sotto questo server
@@ -848,6 +875,7 @@ limits_edit_html=Può usare l'editor per le pagine web
 limits_edit_mail=Può modificare i parametri email
 limits_edit_allowedhosts=Può modificare i database degli host remoti
 limits_edit_passwd=Può cambiare le password dei domini
+
 rename_domain=Vecchio nome dominio
 rename_new=Nuovo nome dominio
 rename_home=Cambiare directory home?
@@ -859,14 +887,17 @@ rename_enew=Nuovo nome dominio non valido o mancante
 rename_esame=Il nome del dominio non è stato cambiato
 rename_ecannot=Non hai i permessi per rinominare i domini
 rename_ehome=Non hai i permessi per cambiare la directory home
+
 cert_alt=Nomi altri domini
 cert_download=Scarica certificato
 cert_edownload=Nessun certificato SSL trovato!
 cert_chain0=Nessuno necessario
+
 newkey_title=Installazione certificato
 newkey_err=Installazione certificato fallita
 newkey_enewkey2=Chiave privata SSL mancante o non valida: $1
 newkey_ematch=Problema scansione certificato: $1
+
 newbw_title=Monitoraggio larghezza di banda
 newbw_active=Monitoraggio larghezza banda attivo?
 newbw_email=Invia anche email a
@@ -891,10 +922,12 @@ newbw_month=Mese
 newbw_servers0=Tutti i server
 newbw_servers2=Tutti tranne i server selezionati ..
 newbw_unknown=(Sconosciuto)
+
 frame_enabled=Abilitare il frame d'inoltro?
 frame_ok=Salva ed applica
 frame_err=Salvataggio parametri frame d'inoltro fallito
 frame_eurl=URL mancante o non valido
+
 tmpl_name=Nome template
 tmpl_dnsrecords=Record indirizzi per nuovi domini
 tmpl_dns_record_@=Nome dominio
@@ -926,6 +959,7 @@ tmpl_nnext=Prossimo
 tmpl_nprev=Precedente
 tmpl_cnext=Crea e prossimo
 tmpl_deleteconfirm=Cancella template
+
 newplugin_title=Moduli plugin
 newplugin_mods=Moduli plugin abilitati
 newplugin_emod=Il plugin $1 non può essere usato: $2
@@ -939,6 +973,7 @@ newplugin_def=Predefinito?
 newplugin_acts=Azioni
 newplugin_conf=Configura
 newplugin_open=Apri
+
 bwgraph_title=Uso larghezza di banda
 bwgraph_mode=Modalità visualizzazione:
 bwgraph_mode_0one=Limiti ed uso
@@ -952,6 +987,7 @@ bwgraph_mago_month=Visualizza statistiche per mese:
 bwgraph_mago_year=Visualizza statistiche per anno:
 bwgraph_mago_=Visualizza statistiche per periodo:
 bwgraph_mok=Visualizza
+
 newfields_title=Campi personalizzati
 newfields_name=Campo nome
 newfields_desc=Etichetta
@@ -967,6 +1003,7 @@ newfields_type7=Si/No
 newfields_type8=Password
 newfields_type9=Menu..
 newfields_type10=Box testo
+
 databases_title=Modifica database
 databases_type=Tipo database
 databases_postgres=PostgreSQL
@@ -978,6 +1015,7 @@ databases_tabusernames=Nome utenti
 databases_tabpasswords=Passwords
 databases_tabimport=Importa database
 databases_tabhosts=Host remoti
+
 newip_header=Nuovo indirizzo IP virtuale
 newip_ecannot=Non hai i permessi per cambiare l'indirizzo IP per questo server
 newip_old=Indirizzo IP corrente
@@ -989,6 +1027,7 @@ newip_eport=Porta HTTP non valida o mancante
 newip_esslport=Porta HTTP (SSL) non valida o mancante
 newip_current=Indirizzo corrente
 newip_dom=Aggiorna indirizzo IP nel server virtuale $1
+
 newip_new=Nuovo indirizzo IP
 newip_err=Cambio indirizzo IP fallito
 newip_eip=Nuovo indirizzo non valido o mancante
@@ -996,21 +1035,22 @@ newip_eip6=Nuovo indirizzo IPv6 non valido o mancante
 newip_eclash=Il server virtuale $1 usa già il nuovo indirizzo
 newip_eused=Il nuovo indirizzo è già in uso nel sistema
 newip_eused6=Il nuovo indirizzo IPv6 è già in uso nel sistema
+
 dresels_err=Cancellazione resellers fallita
 dresels_err2=Blocco resellers fallito
 dresels_err3=Sblocco resellers fallito
 dresels_enone=Nessuno selezionato
+
 licence_err=È stato trovato un problema con la tua licenza di Virtualmin:
 licence_soon=Notizia - La tua licenza di Virtualmin scadrà tra $1 giorni.
 licence_soon2=Notizia - La tua licenza di Virtualmin scadrà tra $1 ore.
 licence_recheck=Ricontrolla stato licenza
 licence_title=Ricontrolla licenza
 licence_doing=Ricontrollo della tua licenza di Virtualmin ..
-licence_ok2=.. licenza OK! È valida per $1 domini di Virtualmin e per $2 sistemi.
-licence_ok3=.. licenza OK! È valida per $1 domini di Virtualmin e da $2 a $3 sistemi
 licence_unlimited=illimitata
 licence_goterr=.. un problema trovato: $1
 licence_ecannot=Non hai i permessi per ricontrollare la licenza di Virtualmin
+
 addscripts_err=Aggiunta del file di installazione fallita
 addscripts_elocal=Il file locale non esiste
 addscripts_eupload=Nessun file da caricare selezionato
@@ -1021,6 +1061,7 @@ addscripts_title=Aggiungi script di installazione
 addscripts_done=Il file di installazione $1 è stato correttamente aggiunto dal file specificato.
 addscripts_done1=Il file di installazione $1 è stato correttamente aggiunto dal file specificato.
 addscripts_enone=Il file specificato non contiene file di installazione!
+
 defaults_title=Modifica utente predefinito
 defaults_quota=Quota directory home
 defaults_tmpl=Predefinito (da template)
@@ -1031,6 +1072,7 @@ defaults_equota=Quota directory home mancante o non valida
 defaults_emquota=Quota file mail mancante o non valida
 defaults_eqquota=Quota server mail mancante o non valida
 defaults_below=Definite qui sotto ..
+
 links_mysql=MySQL Database
 links_mysqls=MySQL Databases
 links_postgres=PostgreSQL Database
@@ -1044,6 +1086,7 @@ links_spam=SpamAssassin
 links_flog=ProFTPd Log
 links_phpini=Configurazione PHP
 links_phpini2=Configurazione PHP $1
+
 massdomains_headerf=Abilita cambio configurazione
 massdomains_feat=Configurazione '$1'
 massdomains_enable=Abilita
@@ -1063,6 +1106,7 @@ massdomains_ecannotdisable=.. non hai i permessi per disabilitare questo dominio
 massdomains_enaerr=Abilitazione server fallita
 massdomains_enaok=Abilita server ora
 massdomains_enadoms=Server da abilitare: $1
+
 newmxs_title=Mail server secondari
 newmxs_err=Salvataggio mail server secondario fallito
 newmxs_email=L'email non sono abilitate nel sistema
@@ -1078,6 +1122,7 @@ newmxs_dom=Aggiornamento server virtuale $1
 newmxs_adding=Aggiunta dominio secondario su $1 ..
 newmxs_failed=.. fallito: $1
 newmxs_removing=Rimozione dominio secondario su $1 ..
+
 ddatabases_title=Cancellare database
 ddatabases_rusure2=Sei sicuro di voler eliminare il database $1 selezionato? Verranno cancellati $2 tabelle contenenti $3 record.
 ddatabases_rusure3=Sei sicuro di voler eliminare il database $1 selezionato? Esso non conteniene tabelle.
@@ -1085,6 +1130,7 @@ ddatabases_dbs=Database da cancellare: $1
 ddatabases_err=Cancellazione database fallita
 ddatabases_enone=Nessuno selezionato
 ddatabases_ok=Cancellare ora
+
 admins_title=Extra amministratori
 admins_name=Login amministratore
 admins_desc=Descrizione
@@ -1096,6 +1142,7 @@ admins_ecannot=Non sei autorizzato a gestire gli extra amministratori
 admins_return=lista degli extra amministratori
 admins_delete=Cancella gli amministratori selezionati
 admins_more=$1 oltre ..
+
 admin_title1=Crea un extra amministratore
 admin_title2=Modifica un extra amministratore
 admin_header=Dettagli dell'extra amministratore
@@ -1120,6 +1167,7 @@ admin_doms=Amministratore dei server virtuali
 admin_doms1=Tutte le proprietà server di livello superiore
 admin_doms0=Solo quelli selezionati qui sotto ..
 admin_edoms=Nessun server virtuale da assegnare selezionato
+
 move_title=Sposta server virtuale
 move_header=Opzioni spostamento server virtuale
 move_target=Nuovo server genitore
@@ -1127,7 +1175,9 @@ move_ok=Sposta ora
 move_up=&lt;Converti a genitore&gt;
 move_failed=.. fallito! Guarda il messaggio sottostante per vederne ler ragioni.
 move_euserclash2=Un utente chiamato $1 già esiste
+
 validate_edir=Home directory $1 inesistente
+
 tscripts_sub=Per template $1
 tscripts_none=Nessuno
 tscripts_name=Script
@@ -1135,7 +1185,9 @@ tscripts_version=Versione
 tscripts_latest=Ultimi disponibili
 tscripts_exact=Sempre
 tscripts_path=Percorso URL
+
 tscripts_other=Altri database..
+
 cat_objects=Oggetti Server
 cat_server=Configurazione Server
 cat_admin=Opzioni Amministrative
@@ -1153,6 +1205,7 @@ cat_email=Messaggi Email
 cat_ip=Indirizzi IP e Networking
 cat_check=Limiti e Validazione
 cat_custom=Personalizzazioni del sistema
+
 pass_title=Cambia password
 pass_ecannot=Non hai i permessi per cambiare la password per questo dominio
 pass_ecannot2=Devi specificare un dominio per il quale modificare la password
@@ -1168,15 +1221,19 @@ pass_eresel=Impossibile trovare reseller!
 pass_eadmin=Impossibile trovare amministratore!
 pass_changing=Cambio password reseller ..
 pass_changing2=Cambio password amministratore ..
+
 dbname_euser=Nome utente mancante o non valido
 dbname_esame=Vecchio e nuovo nome utente sono gli stessi
+
 dbpass_err=Cambiamento password database fallito
+
 umass_doing=Creazione utenti da $1 ..
 umass_euname=Nome utente mancante
 umass_eextra=Questo utente non può avere altri indirizzi email
 umass_edb=Database $1 inesistenti in questo dominio
 umass_done=Utento $1 creato
 umass_encpass=Password già criptate?
+
 usage_title=Uso disco
 usage_quota=Quota disco
 usage_squota=Quota disco permessa
@@ -1184,7 +1241,6 @@ usage_susage=Spazio disco usato
 usage_sdb=Dimensione database
 usage_spercent=Percentuale quota usata
 usage_subheader=Uso disco da tutti i sub-server
-usage_others=Home
 usage_size=Dimenzione
 usage_sizegid=Dimensione quota
 usage_user=Nome utente
@@ -1196,6 +1252,7 @@ usage_tabhomes=Home directory
 usage_tabusers=Da utente
 usage_tabsubs=Da sub-server
 usage_tabdbs=Da database
+
 newquotacheck_title=Controlla quote disco
 newquotacheck_ecannot=Non hai i permessi per controllare le quote disco.
 newquotacheck_header=Opzioni controllo quota disco
@@ -1208,6 +1265,7 @@ newquotacheck_ok=Controlla ora
 newquotacheck_enone=Nessun filesystem selezionato!
 newquotacheck_udoing=Controllo quote utente su $1 ..
 newquotacheck_gdoing=Controllo quote gruppo su $1 ..
+
 newlinks_title=Collegamenti personalizzati
 newlinks_desc=Titolo collegamento
 newlinks_url=Indirizzo destinazione
@@ -1230,15 +1288,20 @@ newlinks_tmpl=Per template
 newlinks_any=Qualsiasi
 newlinks_add=Aggiungi un nuovo collegamento personalizzato.
 newlinks_return=collegamenti personalizzati
+
 postsave_title=Server virtuale modificato
+
 postsave_edit=Modifica parametri server virtuale.
 postsave_view=Vedi parametri server virtuali.
 postsave_users=Gestione utenti mail e FTP.
 postsave_databases=Gestione e creazione database.
 postsave_index=Mostra tutti i tuoi server virtuali di Virtualmin.
+
 showpass_passu=Password
+
 sharedips_title=Indirizzi IP condivisi
 sharedips_ok=Salva
+
 newdynip_title=Aggiornamento IP dinamico
 newdynip_user=Login per il servizio
 newdynip_pass=Password per il servizio
@@ -1247,8 +1310,11 @@ newdynip_auto=Sorgente dell'indirizzo IP
 newdynip_auto1=Indirizzo visibile da internet
 newdynip_ecannot=Non hai i permessi per aggiornare la configurazione dell'IP dinamico
 newdynip_ehost=Hostname non valido o mancante
+
 dynip_dyndns=DynDNS
+
 addstyle_title=Installa stile
+
 addstyle_err=Installazione nuovo stile fallita
 addstyle_ecomp=Non è un archivio di stile
 addstyle_euncomp=Estrazione dello stile $1 fallita
@@ -1257,6 +1323,7 @@ addstyle_efiles=L'archivio di stile non contiene alcun file!
 addstyle_done=Lo stile di terze parti $1 è stato installato con successo. Quando è usato da un sito web, potrà creare $2 pagine HTML o immagini.
 addstyle_ecmd=Il comando di decompressione $1 non è installato
 addstyle_ecmdfailed=Comando di decompressione $1 fallito
+
 maillog_header=Condizioni ricerca
 maillog_end=Scadenza
 maillog_dest=Indirizzo destinazione
@@ -1267,6 +1334,7 @@ maillog_action=Destinazione
 maillog_auto=Invio risposta automatica
 maillog_bounce=Rifiuto da $1
 maillog_bad=Esclusioni
+
 aedit_title=Modifica alias manualmente
 aedit_header=Crea alias email multipli da file batch
 aedit_help=Questa pagina consente di modificare, creare e cancellare gli alias contemporaneamente, modificandoli come una riga di testo. Ogni linea ha il seguente formato (leggere l'aiuto per questa pagina per maggiori dettagli):
@@ -1278,10 +1346,13 @@ aedit_doing=Aggiorna alias email ..
 aedit_complete=.. done ($1 creato, $3 modificato, $4 cancellato, $2 errori).
 aedit_etwice=Un alias con lo stesso nome è elencato più di una volta
 aedit_eauto=Le risposte automatiche non possono essere configurate quando si modifica manualmente un alias
+
 balancers_title=Percorso proxy
 balancers_urls=Indirizzi di destinazione
 balancers_used=Per script
+
 balancer_auto=Seleziona automaticamente
+
 history_ecannot=Non hai i permessi per vedere la storia delle statistiche del sistema
 history_month=1 mese
 history_months=$1 mesi
@@ -1299,6 +1370,7 @@ history_mbsec=MB per secondi
 history_kbsec=kB per secondi
 history_logscale0=Lineare
 history_logscale1=Logaritmica
+
 features_title=Parametri e plugins
 features_name=Parametro e plugin
 features_type=Sorgente
@@ -1306,12 +1378,15 @@ features_feature=Core
 features_plugin=Plugin
 features_used=Mostra domini
 features_err=Salvataggio parametri abilitati fallito
+
 features_return=lista dei parametri e dei plugins
+
 clamd_copyconf=Crea file $1 di configurazione di ClamAV ..
 clamd_esrcalready=.. già esistente
 clamd_initalready=.. già fatto
 clamd_estart=.. avvio fallito: $1
 clamd_estop=.. fallito: $1
+
 shells_mailbox=Solo email
 shells_mailbox2=Nessun accesso
 shells_mailboxftp=Email e FTP
@@ -1325,10 +1400,13 @@ shells_ftp2=FTP
 shells_ssh=Email, FTP e SSH
 shells_ssh2=FTP e SSH
 shells_none=&lt;No shell&gt;
+
 nicetime_days=$1 giorni, $2 ore, $3:$4 minuti
 nicetime_hours=$1 ore, $2:$3 minuti
 nicetime_mins=$1 minuti, $2 secondi
+
 bcc_emailserver=Il tuo mail server non supporta il BCCing
+
 nf_header=Le seguenti nuove opzioni sono disponibili in $1 ..
 nf_desc=Parametro
 nf_html=Descrizione
@@ -1338,25 +1416,30 @@ nf_and=$1 e $2
 nf_seen=Nascondi nuove opzioni
 nf_try=Provalo ..
 nf_ver=(Versione $1)
+
 chroot_title=Restrizioni directory FTP
 chroot_who=Applica al server ed ai sub-server
 chroot_root=Tutti i file del sistema
 chroot_home=Directory principale dell'utente
 chroot_path=Altra directory $1
 chroot_saving=Aggiornamento configurazione server FTP ..
+
 dsched_err=Cancellazione salvataggio programmato fallita
 dsched_enone=Nessuno selezionato
 dsched_egone=Il salvataggio con ID $1 non esiste
 dsched_ecannot=Non hai i permessi per gestire il salvataggio con ID $1
+
 dbhosts_err=Cambio host remoto del database fallito
 dbhosts_title=Aggiornamento host database
 dbhosts_failed=.. fallito: $1
+
 newglobal_title=Variabili globali
 newglobal_ecannot=Non hai il permesso per modificare le variabili globali
 newglobal_enabled=Abilitare?
 newglobal_name=Nome variabile
 newglobal_value=Valore variabile
 newglobal_err=Salvataggio variabili globali fallito
+
 plans_title=Piani account
 newplan_title=Piani account
 plans_name=Nome piano
@@ -1373,6 +1456,7 @@ plans_ecannot=Non hai i permessi per gestire i piani
 plans_return=Lista piani
 plans_nodef=Nessuno - usa il primo della lista
 plans_savedef=Cambia predefiniti
+
 plan_title1=Crea account piano
 plan_title2=Modifica account piano
 plan_header1=Dettagli piano base
@@ -1387,9 +1471,11 @@ plan_eresellers=Nessun reseller selezionato
 plan_ename=Nome piano mancante
 plan_clone=Clona
 plan_scriptssel=Permesso
+
 dplans_err=Cancellazione piani fallita
 dplans_enone=Nessuno selezionato
 dplans_eall=Almeno un piano deve esistere
+
 postgrey_install=Installa Postgrey ora
 postgrey_initdone=.. abilitato
 postgrey_initalready=.. già abilitato
@@ -1415,13 +1501,18 @@ postgrey_re=Regexp?
 postgrey_installing=Installazione pacchetto Postgrey ..
 postgrey_installfailed=.. installazione completata con successo
 postgrey_installed=.. installazione fallita!
+
 editgrey_cmts=Commenti addizionali
+
 delgrey_enone=Nessuno selezionato
+
 backuplog_title=Log salvataggio
 backuplog_when=Iniziato
 backuplog_size=Dimensione finale
+
 redirect_egone=Reindirizzamento inesistente!
 redirect_dest=Destinazione
 redirect_dir=Directory su questo sistema
+
 newchangelog_title=Log nuove funzionalità
 newchangelog_ecannot=Non hai il permesso per vedere il log delle nuove funzionalità

@@ -58,7 +58,7 @@ print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
 # DNSSEC enabled
 &require_bind();
 if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
-    !$d->{'provision_dns'}) {
+    &can_domain_dnssec($d)) {
 	$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 	print &ui_table_row(&hlink($text{'spf_dnssec'}, 'spf_dnssec'),
 			    &ui_yesno_radio("dnssec", $key ? 1 : 0));

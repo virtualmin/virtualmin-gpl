@@ -11,7 +11,9 @@ foreach my $m ("XML::Simple", "Digest::HMAC_SHA1",
                "LWP::Protocol::https", @s3_perl_modules) {
 	eval "use $m";
 	if ($@ =~ /Can't locate/) {
-		return &text('s3_emodule', "<tt>$m</tt>");
+		return &text('s3_emodule', "<tt>$m</tt>") .
+			&vui_install_mod_perl_link(
+				$m, "list_buckets.cgi", $text{'index_buckets'});
 		}
 	elsif ($@) {
 		return &text('s3_emodule2', "<tt>$m</tt>", "$@");
@@ -23,7 +25,9 @@ if ($@) {
 	}
 if ($@) {
 	return &text('s3_emodule3', "<tt>Crypt::SSLeay</tt>",
-				    "<tt>Net::SSLeay</tt>");
+				    "<tt>Net::SSLeay</tt>") .
+			&vui_install_mod_perl_link(
+				'Net::SSLeay', "list_buckets.cgi", $text{'index_buckets'});
 	}
 return undef;
 }
@@ -547,8 +551,9 @@ if (&can_use_aws_cmd($akey, $skey)) {
 	# Use the aws command
 	my $out = &call_aws_cmd($akey, [ "ls" ]);
 	return $out if ($?);
+	my @rv;
 	foreach my $l (split(/\r?\n/, $out)) {
-		my ($date, $time, $file) = split(/\s+/, $l, 4);
+		my ($date, $time, $file) = split(/\s+/, $l, 3);
 		push(@rv, { 'Name' => $file,
 			    'CreationDate' => $date."T".$time.".000Z" });
 		}
@@ -968,10 +973,10 @@ while(defined($buf = &read_http_connection($h, 1024))) {
 &close_http_connection($h);
 
 if ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-	return (0, "Upload failed : $line");
+	return (0, "Upload failed : $line \n\nTry installing `awscli` package using package manager");
 	}
 elsif (!$rheader{'etag'}) {
-	return (0, "Response missing etag header : $out");
+	return (0, "Response missing etag header : $out \n\nTry installing `awscli` package using package manager");
 	}
 
 $rheader{'etag'} =~ s/^"(.*)"$/$1/;
@@ -983,16 +988,19 @@ return (1, $rheader{'etag'});
 sub s3_list_locations
 {
 my ($akey, $skey) = @_;
-return ( "us-west-1", "us-west-2", "EU", "ap-southeast-1", "ap-southeast-2",
-	 "ap-south-1", "ap-northeast-1", "sa-east-1", "eu-central-1" );
+return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
+	"ap-east-1", "ap-south-1", "ap-northeast-2", "ap-southeast-1",
+	"ap-southeast-2", "ap-northeast-1", "ca-central-1", "eu-central-1",
+	"eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1",
+	"me-south-1", "sa-east-1");
 }
 
-# can_use_aws_cmd(access-key, secret-key)
+# can_use_aws_cmd(access-key, secret-key, [default-zone])
 # Returns 1 if the aws command is installed and can be used for uploads and
 # downloads
 sub can_use_aws_cmd
 {
-my ($akey, $skey) = @_;
+my ($akey, $skey, $zone) = @_;
 return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
 return $can_use_aws_cmd_cache{$akey}
 	if (defined($can_use_aws_cmd_cache{$akey}));
@@ -1004,16 +1012,22 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	&open_tempfile(TEMP, ">$temp");
 	&print_tempfile(TEMP, $akey,"\n");
 	&print_tempfile(TEMP, $skey,"\n");
-	&print_tempfile(TEMP, "\n");
+	&print_tempfile(TEMP, $zone,"\n");
 	&print_tempfile(TEMP, "\n");
 	&close_tempfile(TEMP);
 	$out = &backquote_command(
 		"$config{'aws_cmd'} configure --profile=".quotemeta($akey).
 		" <$temp 2>&1");
-	if ($?) {
+	my $ex = $?;
+	if (!$ex) {
+		# Test again to make sure it worked
+		&call_aws_cmd($akey, "ls");
+		$ex = $?;
+		}
+	if ($ex) {
 		# Profile setup failed!
-		return 0;
 		$can_use_aws_cmd_cache{$akey} = 0;
+		return 0;
 		}
 	}
 $can_use_aws_cmd_cache{$akey} = 1;

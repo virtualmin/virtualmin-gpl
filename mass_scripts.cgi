@@ -84,16 +84,12 @@ if ($in{'confirm'}) {
 		&obtain_lock_web($d);
 		&obtain_lock_cron($d);
 
-		# Setup PHP version
-		$phpvfunc = $script->{'php_vers_func'};
+		# Check if we have PHP
 		local $phpver;
-		if (defined(&$phpvfunc)) {
-			@vers = &$phpvfunc($d, $ver);
-			$phpver = &setup_php_version($d, \@vers,
-						     $opts->{'path'});
+		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+			$phpver = &setup_php_version($d, [5], $opts->{'path'});
 			if (!$phpver) {
-				&$second_print(&text('scripts_ephpvers',
-					     join(" ", @vers)));
+				&$second_print($text{'scripts_ephpvers2'});
 				next;
 				}
 			}

@@ -13,7 +13,7 @@ if (!$d->{'alias'}) {
 	}
 $p = &domain_has_website($d);
 
-&ui_print_header(&domain_in($d), $text{'phpmode_title'}, "");
+&ui_print_header(&domain_in($d), $text{'phpmode_title2'}, "");
 
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
@@ -23,18 +23,11 @@ print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 if (!$d->{'alias'} && $can == 2 &&
     ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 	# PHP execution mode
+	push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
 	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 			    &ui_radio_table("mode", $mode,
 			      [ map { [ $_, $text{'phpmode_'.$_} ] }
 				    @modes ]));
-
-	# Warn if changing mode would remove per-dir versions
-	if ($mode eq "cgi" || $mode eq "fcgid") {
-		@dirs = &list_domain_php_directories($d);
-		if (@dirs > 1) {
-			print &ui_table_row("", $text{'phpmode_dirswarn'});
-			}
-		}
 	}
 
 # PHP fcgi sub-processes
@@ -57,100 +50,108 @@ if (!$d->{'alias'} &&
 	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
 				: &get_php_max_execution_time($d);
 	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
-			    &ui_opt_textbox("maxtime", $max, 5,
-					    $text{'form_unlimit'})." ".
+			    &ui_opt_textbox("maxtime", $max == 0 ? undef : $max,
+					    5, $text{'form_unlimit'})." ".
 			    $text{'rfile_secs'});
 	}
 
-# Ruby execution mode
-if (defined(&supported_ruby_modes)) {
-	@rubys = &supported_ruby_modes($d);
-	if (!$d->{'alias'} && @rubys && $can == 2 &&
-	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_ruby_mode"))) {
-		print &ui_table_row(
-			&hlink($text{'phpmode_rubymode'}, "rubymode"),
-			&ui_radio_table("rubymode", &get_domain_ruby_mode($d),
-				  [ [ "", $text{'phpmode_noruby'} ],
-				    map { [ $_, $text{'phpmode_'.$_} ] }
-					@rubys ]));
+# PHP versions
+if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
+	# Build versions list
+	my @avail = &list_available_php_versions($d, $mode);
+	my @vlist = ( );
+	foreach my $v (@avail) {
+		if ($v->[1]) {
+			my $fullver = &get_php_version($v->[1], $d);
+			push(@vlist, [ $v->[0], $fullver ]);
+			}
+		else {
+			push(@vlist, $v->[0]);
+			}
 		}
-	}
 
-# Write logs via program. Don't show unless enabled.
-if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2 &&
-    &get_writelogs_status($d) && $p eq 'web') {
-	print &ui_table_row(
-		&hlink($text{'newweb_writelogs'}, "template_writelogs"),
-		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));
-	}
+	# Get current versions and directories
+	@dirs = &list_domain_php_directories($d);
+	$pub = &public_html_dir($d);
 
-# Match all sub-domains
-if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
-	print &ui_table_row(&hlink($text{'phpmode_matchall'}, "matchall"),
-		    &ui_yesno_radio("matchall", &get_domain_web_star($d)));
-	}
-
-# Server-side includes
-if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_ssi")) {
-	($ssi, $suffix) = &get_domain_web_ssi($d);
-	$suffix = ".shtml" if ($ssi != 1);
-	print &ui_table_row(&hlink($text{'phpmode_ssi'}, "phpmode_ssi"),
-	    &ui_radio("ssi", $ssi,
-		      [ [ 1, &text('phpmode_ssi1',
-				   &ui_textbox("suffix", $suffix, 6)) ],
-			[ 0, $text{'no'} ],
-			$ssi == 2 ? ( [ 2, $text{'phpmode_ssi2'} ] )
-				  : ( ) ]));
-	}
-
-# Default website for its IP
-if (!$d->{'alias'} || $d->{'alias_mode'} != 1 &&
-    ($p eq 'web' || &plugin_defined($p, "feature_get_web_default_website"))) {
-	$defweb = &is_default_website($d);
-	$defd = &find_default_website($d);
-	$defno = $defd ? &text('phpmode_defno', $defd->{'dom'}) : $text{'no'};
-	if (&can_default_website($d) && !$defweb) {
-		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
-			&ui_radio("defweb", $defweb,
-				  [ [ 1, $text{'yes'} ], [ 0, $defno ] ]));
+	if (@avail <= 1) {
+		# System has only one version
+		$fullver = $avail[0]->[1] ? &get_php_version($avail[0]->[1], $d)
+					  : $avail[0]->[0];
+		print &ui_table_row($text{'phpmode_version'}, $fullver);
+		}
+	elsif ($mode eq "fpm" && @dirs == 1) {
+		# Only one version can be set
+		print &ui_table_row(
+			&hlink($text{'phpmode_version'}, "phpmode_version"),
+			&ui_select("ver_0", $dirs[0]->{'version'}, \@vlist));
+		print &ui_hidden("dir_0", $dirs[0]->{'dir'});
+		print &ui_hidden("d", $dirs[0]->{'dir'});
 		}
 	else {
-		print &ui_table_row(&hlink($text{'phpmode_defweb'}, "defweb"),
-			$defweb == 1 ? $text{'yes'} :
-			$defweb == 2 ? $text{'phpmode_defwebsort'} :
-				       $defno);
-		}
-	}
+		# Multiple versions can be selected for different directories
+		$i = 0;
+		@table = ( );
+		$anydelete = 0;
+		foreach $dir (sort { $a->{'dir'} cmp $b->{'dir'} } @dirs) {
+			$ispub = $dir->{'dir'} eq $pub;
+			$sel = &ui_select("ver_$i", $dir->{'version'}, \@vlist);
+			print &ui_hidden("dir_$i", $dir->{'dir'});
+			print &ui_hidden("oldver_$i", $dir->{'version'});
+			if ($ispub) {
+				# Can only change version for public html
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'disabled' => 1,
+					  'checked' => 1, },
+					"<i>$text{'phpver_pub'}</i>",
+					$sel
+					]);
+				}
+			elsif (substr($dir->{'dir'}, 0, length($pub)) eq $pub) {
+				# Show directory relative to public_html
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'checked' => 1, },
+					"<tt>".substr($dir->{'dir'}, length($pub)+1)."</tt>",
+					$sel
+					]);
+				$anydelete++;
+				}
+			else {
+				# Show full path
+				push(@table, [
+					{ 'type' => 'checkbox', 'name' => 'd',
+					  'value' => $i,
+					  'checked' => 1, },
+					"<tt>$dir->{'dir'}</tt>",
+					$sel
+					]);
+				$anydelete++;
+				}
+			$i++;
+			}
+		push(@table, [ { 'type' => 'checkbox', 'name' => 'd',
+				 'value' => "new", },
+			       &ui_textbox("dir_new", undef, 30),
+			       &ui_select("ver_new", undef, \@vlist),
+			     ]);
+		@heads = ( $text{'phpmode_enabled'},, $text{'phpver_dir'},
+			   $text{'phpver_ver'} );
+		print &ui_table_row(
+			&hlink($text{'phpmode_versions'}, "phpmode_versions"),
+			&ui_columns_table(\@heads, 100, \@table));
 
-# Log file locations
-if (!$d->{'alias'} && &can_log_paths() &&
-    ($p eq 'web' || &plugin_defined($p, "feature_change_web_access_log"))) {
-	$alog = &get_website_log($d, 0);
-	if ($alog) {
-		print &ui_table_row(&hlink($text{'phpmode_alog'}, 'accesslog'),
-			&ui_textbox("alog", $alog, 60));
+		# Warn if changing mode would remove per-dir versions
+		if ($mode eq "cgi" || $mode eq "fcgid") {
+			@dirs = &list_domain_php_directories($d);
+			if (@dirs > 1) {
+				print &ui_table_row("", &ui_text_color($text{'phpmode_dirswarn'}, 'warn'));
+				}
+			}
 		}
-	$elog = &get_website_log($d, 1);
-	if ($elog) {
-		print &ui_table_row(&hlink($text{'phpmode_elog'}, 'errorlog'),
-			&ui_textbox("elog", $elog, 60));
-		}
-	}
-
-# HTML directory
-if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ && $p eq 'web') {
-	print &ui_table_row(&hlink($text{'phpmode_htmldir'}, 'htmldir'),
-		&ui_textbox("htmldir", $d->{'public_html_dir'}, 20));
-	}
-
-# Redirect non-SSL to SSL?
-if (&domain_has_ssl($d) && &can_edit_redirect() && &has_web_redirects($d)) {
-	my @redirects = map { &remove_wellknown_redirect($_) }
-			    &list_redirects($d);
-	my ($defredir) = grep { $_->{'path'} eq '/' &&
-			        $_->{'http'} && !$_->{'https'} } @redirects;
-	print &ui_table_row(&hlink($text{'phpmode_sslredir'}, 'sslredir'),
-		&ui_yesno_radio("sslredir", $defredir ? 1 : 0));
 	}
 
 print &ui_hidden_table_end();
@@ -161,6 +162,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 				     2, "phpinfo", 0, [ "width=30%" ]);
 
 	# PHP versions
+	my @vlist = ( );
 	foreach $phpver (&list_available_php_versions($d)) {
 		my $fullver = $phpver->[1] ? &get_php_version($phpver->[1], $d)
 					   : $phpver->[0];
@@ -174,7 +176,7 @@ if (defined(&list_php_modules) && !$d->{'alias'}) {
 		$errs = &check_php_configuration($d, $phpver->[0],$phpver->[1]);
 		if ($errs) {
 			print &ui_table_row(&text('phpmode_errs', $phpver->[0]),
-			    "<font color=red>".&html_escape($errs)."</font>");
+				&ui_text_color($errs, 'danger'));
 			}
 		}
 

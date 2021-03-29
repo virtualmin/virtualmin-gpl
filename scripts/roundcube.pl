@@ -25,7 +25,7 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "1.4.9", "1.2.12" );
+return ( "1.4.11", "1.2.13" );
 }
 
 sub script_roundcube_version_desc
@@ -71,7 +71,7 @@ sub script_roundcube_depends
 {
 local ($d, $ver, $sinfo, $phpver) = @_;
 local @rv;
-my $wantver = $ver >= 0.9 ? "5.3.7" : 5.2;
+my $wantver = &script_roundcube_php_fullver($d, $ver, $sinfo);
 local $phpv = &get_php_version($phpver || 5, $d);
 if (!$phpv) {
 	push(@rv, "Could not work out exact PHP version");
@@ -80,6 +80,12 @@ elsif (&compare_versions($phpv, $wantver) < 0) {
 	push(@rv, "Roundcube $ver requires PHP version $wantver or later");
 	}
 return @rv;
+}
+
+sub script_roundcube_php_fullver
+{
+local ($d, $ver, $sinfo, $phpver) = @_;
+return $ver >= 0.9 ? "5.3.7" : 5.2;
 }
 
 # script_roundcube_php_vars(&domain)

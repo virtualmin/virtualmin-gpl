@@ -99,7 +99,8 @@ else {
 		local $url = "http://$urlhost$port/";
 		if ($apache::httpd_modules{'mod_proxy'} &&
 		    $tmpl->{'web_alias'} == 2) {
-			push(@dirs, "ProxyPass / $url",
+			push(@dirs, "ProxyPass /.well-known/acme-challenge/ !",
+				    "ProxyPass / $url",
 				    "ProxyPassReverse / $url");
 			$proxying = 1;
 			}
@@ -988,7 +989,8 @@ else {
 		return $text{'validate_ewebphpsuexec'};
 		}
 
-	# Make sure a <Directory> exists for the document root
+	# Make sure a <Directory> exists for the document root, and that
+	# DocumentRoot is valid
 	if (!$d->{'alias'}) {
 		local $pdir = &public_html_dir($d);
 		local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
@@ -997,7 +999,12 @@ else {
 		if (!$dir) {
 			return &text('validate_ewebdir', $pdir);
 			}
+		local $root = &apache::find_directive("DocumentRoot", $vconf);
+		if ($root ne $pdir && $root ne $pdir."/") {
+			return &text('validate_ewebroot', $pdir);
+			}
 		}
+
 
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
 	my $ip6addr;
@@ -1074,6 +1081,7 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
 	local %hashtmp = %$d;
 	$hashtmp{'TMPLTTITLE'} = $text{'deftmplt_website_disabled'};
+	$hashtmp{'TMPLTSLOGAN'} = $text{'deftmplt_slogan'};
 	if ($d->{'disabled_why'}) {
 		$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
 		}
@@ -1553,7 +1561,7 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_web
 {
-my ($d) = @_;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# Just re-add ServerAlias entries if missing
 	&$first_print($text{'restore_apachecp2'});
@@ -1565,9 +1573,9 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 		return 0;
 		}
 	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	local $srclref = &read_file_lines($_[1], 1);
+	local $srclref = &read_file_lines($file, 1);
 	push(@sa, @$srclref);
-	&unflush_file_lines($_[1]);
+	&unflush_file_lines($file);
 	@sa = &unique(@sa);
 	&apache::save_directive("ServerAlias", \@sa, $pconf, $conf);
 	&flush_file_lines($pvirt->{'file'});
@@ -1581,7 +1589,7 @@ local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_port'});
 local $tmpl = &get_template($d->{'template'});
 if ($virt) {
-	local $srclref = &read_file_lines($_[1]);
+	local $srclref = &read_file_lines($file);
 	local $dstlref = &read_file_lines($virt->{'file'});
 
 	# Extract old logging-based directives before we change them, so they
@@ -1597,7 +1605,7 @@ if ($virt) {
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
 
-	if ($_[3]->{'reuid'}) {
+	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
 		local $i;
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
@@ -1609,12 +1617,12 @@ if ($virt) {
 		}
 
 	# Fix up any DocumentRoot or other file-related directives
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
+	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 		local $i;
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
-				s/\Q$_[5]->{'home'}\E/$d->{'home'}/g;
+				s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
 			}
 		}
 
@@ -1668,7 +1676,7 @@ if ($virt) {
 	if (!$d->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
 		$mode = &get_domain_php_mode($d);
-		local @supp = &supported_php_modes($d);
+		local @supp = &supported_php_modes();
 		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
 			# Need to fix
 			local $fix = pop(@supp);
@@ -1686,12 +1694,16 @@ if ($virt) {
 			}
 		}
 
+	# If the restored config contains php_value entries but this system
+	# doesn't support mod_php, remove them
+	&fix_mod_php_directives($d, $d->{'web_port'});
+
 	# Correct system-specific entries in PHP config files
-	if (!$d->{'alias'} && $_[5]) {
+	if (!$d->{'alias'} && $oldd) {
 		local $sock = &get_php_mysql_socket($d);
 		local @fixes = (
-		  [ "session.save_path", $_[5]->{'home'}, $d->{'home'}, 1 ],
-		  [ "upload_tmp_dir", $_[5]->{'home'}, $d->{'home'}, 1 ],
+		  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
+		  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  );
 		if ($sock ne 'none') {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
@@ -1714,30 +1726,30 @@ if ($virt) {
 	&setup_apache_logs($d);
 
 	# Copy back log files if they were in the backup
-	if (-r $_[1]."_alog") {
+	if (-r $file."_alog") {
 		&$first_print($text{'restore_apachelog'});
 
 		# Restore the access log
 		local $alog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'});
-		&copy_source_dest($_[1]."_alog", $alog);
+		&copy_source_dest($file."_alog", $alog);
 		&set_apache_log_permissions($d, $alog);
 
 		# If the backup contained any rotated log files, restore them
 		&foreign_require("syslog");
-		my @alogs = grep { $_ ne $_[1] }
-				 &syslog::all_log_files($_[1]."_alog");
+		my @alogs = grep { $_ ne $file }
+				 &syslog::all_log_files($file."_alog");
 		foreach my $l (@alogs) {
 			$l =~ /^.*_alog_(.*)$/ || next;
 			my $sfx = $1;
 			&copy_source_dest($l, $alog.$sfx);
 			}
 
-		if (-r $_[1]."_elog") {
+		if (-r $file."_elog") {
 			# Restore the error log
 			local $elog = &get_apache_log($d->{'dom'},
 						      $d->{'web_port'}, 1);
-			&copy_source_dest($_[1]."_elog", $elog);
+			&copy_source_dest($file."_elog", $elog);
 			&set_apache_log_permissions($d, $elog);
 			}
 		&$second_print($text{'setup_done'});
@@ -1891,46 +1903,60 @@ else {
 	}
 }
 
-# set_public_html_dir(&domain, sub-dir)
+# set_public_html_dir(&domain, sub-dir, rename-dir?)
 # Sets the HTML directory for a virtual server, by updating the DocumentRoot
 # and <Directory> block. Returns undef on success or an error message on
 # failure.
 sub set_public_html_dir
 {
-local ($d, $subdir) = @_;
+local ($d, $subdir, $rename) = @_;
 local $p = &domain_has_website($d);
 local $path = $d->{'home'}."/".$subdir;
 local $oldpath = $d->{'public_html_path'};
+if ($rename && (&is_under_directory($oldpath, $path) ||
+		&is_under_directory($path, $oldpath))) {
+	return "The old and new HTML directories cannot be sub-directories of ".
+	       "each other";
+	}
 if (-f $path) {
 	return "The HTML directory cannot be a file";
 	}
 if ($p ne "web") {
+	# Call other webserver plugin's API
 	my $err = &plugin_call($p, "feature_set_web_public_html_dir",
 			       $d, $subdir);
 	return $err if ($err);
-	$d->{'public_html_dir'} = $subdir;
-	$d->{'public_html_path'} = $path;
-	return undef;
 	}
-local @ports = ( $d->{'web_port'},
-		 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-foreach my $p (@ports) {
-	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
-	next if (!$virt);
-	&apache::save_directive("DocumentRoot", [ $path ], $vconf, $conf);
-	local @dirs = &apache::find_directive_struct("Directory", $vconf);
-	local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
-			      $_->{'words'}->[0] eq $oldpath."/" } @dirs;
-	$dir ||= $dirs[0];
-	$dir || return "No existing Directory block found!";
-	local $olddir = { %$dir };
-	$dir->{'value'} = $path;
-	&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
-	&flush_file_lines($virt->{'file'});
+else {
+	# Do it for Apache
+	local @ports = ( $d->{'web_port'},
+			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	foreach my $p (@ports) {
+		local ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $p);
+		next if (!$virt);
+		&apache::save_directive(
+			"DocumentRoot", [ $path ], $vconf, $conf);
+		local @dirs = &apache::find_directive_struct(
+			"Directory", $vconf);
+		local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
+				      $_->{'words'}->[0] eq $oldpath."/"} @dirs;
+		$dir ||= $dirs[0];
+		$dir || return "No existing Directory block found!";
+		local $olddir = { %$dir };
+		$dir->{'value'} = $path;
+		&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
+		&flush_file_lines($virt->{'file'});
+		}
 	}
 $d->{'public_html_dir'} = $subdir;
 $d->{'public_html_path'} = $path;
 &register_post_action(\&restart_apache);
+if ($rename) {
+	# Also rename the directory
+	my $ok = &rename_as_domain_user($d, $oldpath, $path);
+	return "Failed to rename $oldpath to $path" if (!$ok);
+	}
 return undef;
 }
 
@@ -4585,9 +4611,29 @@ foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
 return $changed;
 }
 
+# fix_mod_php_directives(&domain, port)
+# Remove php_value directives if not supported by this system
+sub fix_mod_php_directives
+{
+my ($d, $port) = @_;
+my @modes = &supported_php_modes($d);
+if (&indexof("mod_php", @modes) < 0) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
+	if ($virt) {
+		&apache::save_directive(
+			"php_value", [ ], $vconf, $conf);
+		&apache::save_directive(
+			"php_admin_value", [ ], $vconf, $conf);
+		&flush_file_lines($virt->{'file'}, undef, 1);
+		&register_post_action(\&restart_apache);
+		}
+	}
+
+}
+
 # fix_options_template(&tmpl, [ignore-version]))
-# If some template has Options lines for the web setting that are a mix of + and non+,
-# fix them up
+# If some template has Options lines for the web setting that are a mix of +
+# and non+, fix them up
 sub fix_options_template
 {
 my ($tmpl, $ignore) = @_;

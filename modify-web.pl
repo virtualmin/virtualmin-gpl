@@ -65,9 +65,9 @@ referencing this domain with the C<--url-port> flag. For SSL websites, you can
 also use the C<--ssl-url-port> flag.
 
 If the domain's SSL certificate was requested from Let's Encrypt, you can
-turn on automatic renewal with the C<--letsencrypt-renew> flag followed by
-a number of months. Alternately, renewal can be disabled with the 
-C<--no-letsencrypt-renew> parameter.
+turn on automatic renewal when close to expiry with the C<--letsencrypt-renew>
+flag. Alternately, renewal can be disabled with the C<--no-letsencrypt-renew>
+parameter.
 
 If the domain is sharing an SSL certificate with another domain (because it's
 CN matches both of them), you can use the C<--break-ssl-cert> flag to stop
@@ -78,7 +78,9 @@ to enable sharing.
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
-use the C<--fix-document-dir> flag.
+use the C<--fix-document-dir> flag. If you want the directory to be renames
+as well as updated in the webserver configuration, use the
+C<--move-document-dir> flag.
 
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
@@ -190,6 +192,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--document-dir") {
 		$htmldir = shift(@ARGV);
 		}
+	elsif ($a eq "--move-document-dir") {
+		$htmldir = shift(@ARGV);
+		$htmldirmove = 1;
+		}
 	elsif ($a eq "--fix-document-dir") {
 		$fixhtmldir = 1;
 		}
@@ -220,12 +226,15 @@ while(@ARGV > 0) {
 		$multiline = 1;
 		}
 	elsif ($a eq "--letsencrypt-renew") {
-		$renew = shift(@ARGV);
-		$renew =~ /^\d+(\.\d+)?$/ && $renew > 0 ||
-		    &usage("--letsencrypt-renew must be followed by a number of months");
+		if ($ARGV[0] =~ /^\d+(\.\d+)?$/) {
+			# Followed by a number of months, which is no longer
+			# needed
+			shift(@ARGV);
+			}
+		$renew = 1;
 		}
 	elsif ($a eq "--no-letsencrypt-renew") {
-		$renew = "";
+		$renew = 0;
 		}
 	elsif ($a eq "--break-ssl-cert") {
 		$breakcert = 1;
@@ -377,12 +386,17 @@ foreach $d (@doms) {
 
 	# Update PHP version
 	if ($version && !$d->{'alias'}) {
-		&save_domain_php_directory($d, &public_html_dir($d), $version);
-		my $dommode = $mode || &get_domain_php_mode($d);
-		if ($dommode ne "mod_php" && $dommode ne "fpm") {
-			&save_domain_php_mode($d, $dommode);
+		&$first_print("Changing PHP version to $version ..");
+		my $err = &save_domain_php_directory($d, &public_html_dir($d),
+						     $version);
+		if (!$err) {
+			my $dommode = $mode || &get_domain_php_mode($d);
+			if ($dommode ne "mod_php" && $dommode ne "fpm") {
+				$err = &save_domain_php_mode($d, $dommode);
+				}
+			&clear_links_cache($d);
 			}
-		&clear_links_cache($d);
+		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
 	# Update Ruby mode
@@ -535,7 +549,7 @@ foreach $d (@doms) {
 	if ($htmldir && !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
 		# Change HTML directory
 		&$first_print("Changing documents directory to $htmldir ..");
-		$err = &set_public_html_dir($d, $htmldir);
+		$err = &set_public_html_dir($d, $htmldir, $htmldirmove);
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
@@ -602,17 +616,12 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (defined($renew) && $d->{'letsencrypt_last'}) {
+	if (defined($renew)) {
 		# Change let's encrypt renewal period
-		if ($renew) {
-			$d->{'letsencrypt_renew'} = $renew;
-			}
-		else {
-			delete($d->{'letsencrypt_renew'});
-			}
+		$d->{'letsencrypt_renew'} = $renew;
 		}
 
-	if (&domain_has_ssl($d) && $breakcert) {
+	if (&domain_has_ssl_cert($d) && $breakcert) {
 		&$first_print("Breaking SSL certificate sharing ..");
 		if (!$d->{'ssl_same'}) {
 			&$second_print(".. not using a shared cert");
@@ -629,7 +638,7 @@ foreach $d (@doms) {
 			}
 		}
 
-	if (&domain_has_ssl($d) && $linkcert) {
+	if (&domain_has_ssl_cert($d) && $linkcert) {
 		&$first_print("Enabling SSL certificate sharing ..");
 		if ($d->{'ssl_same'}) {
 			my $same = &get_domain($d->{'ssl_same'});
@@ -637,9 +646,18 @@ foreach $d (@doms) {
 				       &show_domain_name($same));
 			}
 		else {
-			my $same = &find_matching_certificate_domain($d);
+			# Find a cert to link with, ideally a parent with the same owner
+			my @sames = &find_matching_certificate_domain($d);
+			my ($same) = grep { $_->{'user'} eq $d->{'user'} &&
+					    !$_->{'parent'} } @sames;
 			if (!$same) {
+				($same) = grep { $_->{'user'} eq $d->{'user'} } @sames;
+				}
+			if (!@sames) {
 				&$second_print(".. no domain to link with found");
+				}
+			elsif (!$same) {
+				&$second_print(".. no domain with the same owner to link with found");
 				}
 			else {
 				&link_matching_certificate($d, $same, 1);
@@ -658,7 +676,7 @@ foreach $d (@doms) {
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert || $linkcert) {
+	    defined($renew) || $breakcert || $linkcert || $fixhtmldir) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -706,11 +724,13 @@ print "                     [--includes extension | --no-includes]\n";
 print "                     [--default-website]\n";
 print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
-print "                     [--document-dir subdirectory | --fix-document-dir]\n";
+print "                     [--document-dir subdirectory |\n";
+print "                      --move-document-dir subdirectory |\n";
+print "                      --fix-document-dir]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
-print "                     [--letsencrypt-renew months | --no-letsencrypt-renew]\n";
+print "                     [--letsencrypt-renew | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert | --link-ssl-cert]\n";
 print "                     [--sync-tlsa]\n";
 exit(1);

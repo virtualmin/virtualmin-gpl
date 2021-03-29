@@ -182,6 +182,7 @@ index_mass=Aktualizace byla vybrána
 index_mass_all=Aktualizujte všechny virtuální servery
 index_disable=Zakázat vybrané
 index_enable=Povolit vybrané
+
 index_backup=Zálohujte virtuální servery
 index_backupdesc=Klepnutím na toto tlačítko provedete okamžitou zálohu. Zobrazí se formulář pro výběr serverů, které se mají zálohovat, jaké funkce uložit a kam se mají zálohovat.
 index_sched=Plánované zálohování
@@ -211,6 +212,9 @@ index_certnearly=Platnost certifikátů SSL některých virtuálních serverů b
 index_expirywarn=Upozornění na registraci DNS
 index_expiryexpired=Platnost registrací DNS některých virtuálních serverů vypršela : $1 
 index_expirynearly=Platnost registrací DNS některých virtuálních serverů brzy vyprší : $1 
+index_certinvalid=Soubor certifikátu SSL $2 pro $1 je neplatný : $3 
+index_keyinvalid=Soubor klíče SSL $2 pro $1 je neplatný : $3 
+
 form_title=Vytvořte virtuální server
 form_title2=Vytvořte virtuální sub-server
 form_title3=Vytvořte server Alias
@@ -239,9 +243,9 @@ form_crgroup=Stejné jako skupina pro uživatele pošty
 form_exgroup=Existující skupina
 form_mail=Přijímáte poštu pro doménu?
 form_unix=Vytvořit správce serveru?
-form_web=Nastavit web pro doménu?
+form_web=Nastavit web Apache?
 form_ftp=Nastavit virtuální FTP založené na IP?
-form_ssl=Nastavit také web SSL?
+form_ssl=Nastavit web Apache SSL?
 form_dns=Nastavit zónu DNS?
 form_mysql=Vytvořit databázi MySQL?
 form_postgres=Vytvořit PostgresSQL databázi?
@@ -299,13 +303,11 @@ form_advanced=Pokročilé možnosti
 form_park=Počáteční obsah webových stránek
 form_content=Vytvořit počáteční webovou stránku?
 form_content1=Ne
-form_content2=Ano s výchozím obsahem
-form_content0=Ano, s textem níže ..
-form_style=Styl pro počáteční obsah
-form_nostyle=&lt;Virtualmin Default&gt;
-form_showstyle=(Náhled..)
+form_content2=Ano, s výchozí šablonou a obsahem níže
+form_content0=Ano, s obsahem níže
 form_proxysect=IP adresa a přeposílání
 form_inputssect=Další možnosti funkcí
+
 setup_err=Vytvoření virtuálního serveru se nezdařilo
 setup_eplan=Vybraný plán neexistuje nebo není k dispozici
 setup_evital=Kritická funkce $1 nebyla správně vytvořena - tvorba virtuálního serveru byla zastavena.
@@ -331,6 +333,7 @@ setup_eauto2=Zadaný automaticky vybraný název administrační skupiny nebyl n
 setup_euser2=Chybějící nebo neplatné uživatelské jméno správce
 setup_eroot=Uživatelská jména <tt>$1</tt> nelze použít jako správce virtuálního serveru
 setup_eroot2=Názvy skupin <tt>$1</tt> nelze použít jako správce virtuálního serveru
+setup_eremoteuser=Uživatelské jméno nemůže být stejné jako aktuální přihlášení k Virtualmin
 setup_edns=Doména DNS $1 je již hostována vaším serverem DNS
 setup_eunix=Uživatel unixu s názvem $3 nebo skupina s názvem $4 již existuje - zkuste vybrat jiné uživatelské jméno pro správu
 setup_eunixclash1=Uživatel unixu s názvem $1 již existuje - zkuste vybrat jiné uživatelské jméno pro správu
@@ -413,6 +416,7 @@ setup_edefip=Nový virtuální server nemá IP adresu! Možná Virtualmin nedok�
 setup_qmailme=Tento název domény nelze použít pro Qmail, protože je stejný jako název hostitele serveru $1 (ze souboru <tt>control/me</tt>)
 setup_eslashpass=Hesla obsahující zpětné lomítko MySQL nepodporuje
 setup_etmpl=Vybranou šablonu nemáte povoleno
+
 setup_title=Nastavení virtuálního serveru
 setup_eusermail2=.. aliasy se nezdařily : $1 
 setup_eusermail3=.. poštovní schránka se nezdařila : $1 
@@ -442,7 +446,11 @@ setup_proftpdfailed=.. selhalo : $1
 setup_ftpuser=Přidání uživatele ProFTPD $1 do skupiny serveru ..
 setup_bind=Přidání nové zóny DNS ..
 setup_bind_provision=Přidání nové zóny DNS na hostitele služeb.
+setup_bind_cloud=Přidání nové zóny DNS pomocí $1 ..
+setup_ebind_cloud=.. selhalo : $1 
 setup_bindslave=Přidání zóny slave na $1 ..
+setup_ebindslaveip2=.. se nepodařilo určit IP adresu tohoto systému. Budete muset nastavit IP v modulu BIND DNS Server.
+setup_ebindslaveip=.. se nepodařilo určit platnou IP adresu pro tento systém (dostal $1). Budete muset nastavit IP v modulu BIND DNS Server.
 setup_ebind_provision=.. vytvoření se nezdařilo : $1 
 setup_bind_provisioned=.. vytvořeno na $1 
 setup_eslave=.. selhalo! $1 
@@ -555,7 +563,13 @@ setup_ejail=.. vězení se nezdařilo : $1
 setup_jailed=.. adresář vězení je nyní $1 
 setup_letsaliases=Znovu žádám o šifrování certifikátu pro $1, aby zahrnovalo $2 ..
 setup_eletsaliases=.. selhalo : $1 
+setup_ednscloudexists=Vybraný poskytovatel cloudu DNS neexistuje!
+setup_ednscloudstate=Poskytovatel cloudu DNS $1 není připraven k použití
+setup_ednscloudclash=Nepodařilo se zkontrolovat střet s poskytovatelem cloudu DNS $1 : $2 
+setup_dnscloudclash=Zóna DNS již existuje u poskytovatele cloudu $1 
+
 equotacommand=Příkaz kvóty $1 selhal : $2 
+
 users_ecannot=V této doméně nemáte dovoleno upravovat uživatele
 users_ecannot2=Není dovoleno upravovat místní uživatele
 users_emailbox=Uživatel vlastníka domény nelze upravovat
@@ -597,6 +611,7 @@ users_mailclient=Zobrazit nastavení e-mailového klienta
 users_mailclientdesc=Nastavení zobrazení, která by měli používat e-mailoví klienti uživatelů pro tuto doménu.
 users_all=Všechno
 users_same=Stejné jako admin
+
 user_createweb=Vytvořit FTP uživatele
 user_edit=Upravit uživatele
 user_editweb=Upravit FTP uživatele
@@ -700,7 +715,9 @@ user_lastlogin_imap=IMAP (načítání e-mailu)
 user_lastlogin_smtp=SMTP (odesílání e-mailů)
 user_lastlogin_never=Zatím nejsou zaznamenána žádná přihlášení
 user_noforward=Autoreply na přeposílání e-mailů?
+
 aliases_indom=$1 aliasy v doméně $2 
+
 alias_egone=Alias pošty již neexistuje
 alias_etype1f=Není dovoleno předávat e-maily na '$1'
 alias_eeveryone=Doména, kterou chcete předat všem, neexistuje
@@ -708,18 +725,22 @@ alias_eloop=E-mailový alias nemůže předávat poštu sám sobě
 alias_everyone=Přeposlat všem v doméně?
 alias_everyoneyes=Odeslat všem uživatelům
 alias_elocaluser=Místní uživatel '$1' neexistuje
+
 stop_ecannot=Nemáte povoleno zastavit služby
 stop_err=Nepodařilo se zastavit službu
 stop_title=Zastavena služba
 stop_done=Služba pro $1 byla úspěšně zastavena.
+
 start_ecannot=Není dovoleno spustit služby
 start_err=Nepodařilo se spustit službu
 start_title=Zahájena služba
 start_done=Služba pro $1 byla úspěšně spuštěna.
+
 restart_ecannot=Není dovoleno restartovat služby
 restart_err=Nepodařilo se znovu spustit službu
 restart_title=Restarted Service
 restart_done=Služba pro $1 byla zastavena a úspěšně restartována.
+
 mstop_err=Poštovní server se nepodařilo zastavit
 mstart_err=Spuštění poštovního serveru se nezdařilo
 mstop_edown=Sendmail již není spuštěn
@@ -728,6 +749,7 @@ fstart_err=Spuštění serveru FTP se nezdařilo
 fstop_edown=Nefunguje
 fstop_ekill=Zabití selhalo : $1 
 fstart_eup=Již běží
+
 edit_title=Upravit virtuální server
 edit_title2=Upravit virtuální pod-server
 edit_title3=Upravit server Alias
@@ -873,8 +895,10 @@ edit_switch=Přepněte na správce serveru
 edit_switchdesc=Automaticky se přihlaste k Webmin jako vlastník tohoto virtuálního serveru, aniž byste museli zadávat své heslo.
 edit_spamvirus=Doručení spamu a virů
 edit_spamvirusdesc=Nakonfigurujte způsoby doručování spamu a virů detekovaných v e-mailu odeslaném na tento virtuální server.
-edit_phpmode=Možnosti webových stránek
-edit_phpmodedesc=Nakonfigurujte nastavení související s webovou stránkou tohoto virtuálního serveru, například protokolování a režim provádění PHP.
+edit_website=Možnosti webových stránek
+edit_websitedesc=Nakonfigurujte nastavení související s webem tohoto virtuálního serveru, například protokolování a adresář HTML
+edit_php=Možnosti PHP
+edit_phpdesc=Nakonfigurujte nastavení související s provozováním skriptů PHP pro tento virtuální server.
 edit_phpver=Verze PHP
 edit_phpverdesc=Vyberte verzi PHP, kterou chcete použít, a nakonfigurujte různé verze pro různé adresáře.
 edit_spfdesc=Nakonfigurujte pro tento virtuální server možnosti související s DNS, například záznam (Sender Policy Framework).
@@ -922,6 +946,7 @@ edit_domdkimdesc=Konfigurováno nastavení DomainKey právě pro tento virtuáln
 edit_connect=Zkontrolujte připojení
 edit_connectdesc=Ověřte, že web tohoto virtuálního serveru, doména DNS a poštovní server jsou přístupné ze zbytku Internetu.
 edit_psearch=Seznam dílčích serverů
+
 delete_title=Smazat server
 delete_rusure2=Opravdu chcete odstranit virtuální server $1, který obsahuje $2 souborů? Budou odstraněny následující funkce :
 delete_mailboxes=Uživatelé a aliasy pošty / FTP - Uživatelé $1 a $2 e-mailové aliasy budou odstraněny, včetně všech jejich poštovních souborů a domovských adresářů.
@@ -939,6 +964,8 @@ delete_bind=Mazání zóny DNS ..
 delete_bind_provision=Mazání zóny DNS od hostitele služeb.
 delete_bind_provision_none=.. zóna nebyla původně zcela nastavena
 delete_ebind_provision=.. odstranění se nezdařilo : $1 
+delete_bind_cloud=Mazání zóny DNS z $1 ..
+delete_ebind_cloud=.. mazání se nezdařilo : $1 
 delete_bindsub=Odebírání záznamů ze zóny DNS $1 ..
 delete_ebindsub=Nadřazený server zóny DNS již neexistuje!
 delete_bindslave=Mazání zóny DNS slave na $1 ..
@@ -990,6 +1017,7 @@ delete_dom=Mazání podserveru $1 ..
 delete_aliasfailure=.. Smazání aliasu $1 se nezdařilo : $2 
 delete_ednssubof=Virtuální server $1 nelze odstranit, protože obsahuje záznamy DNS pro server $2 
 delete_esslnoips=Pro doménu nebyl nalezen žádný certifikát SSL
+
 save_title=Uložit server
 save_mysqlpass_provision=Změna hesla MySQL na hostiteli služeb ..
 save_emysqlpass_provision=.. chyba změny hesla : $1 
@@ -1006,6 +1034,8 @@ save_dns2_ezone=Zóna DNS pro přejmenování nebyla nalezena!
 save_dnsip6=Změna adresy IPv6 v doméně DNS ..
 save_dnsip6on=Přidávání záznamů DNS IPv6 ..
 save_dnsip6off=Odstraňování záznamů DNS IPv6 ..
+save_bind_cloud=Změna názvu domény DNS na $1 ..
+save_bind_ecloud=.. selhalo : $1 
 save_mailunalias1=Odstraňování aliasů pošty zkopírovaných z cílové domény.
 save_mailunalias2=Odstraňování aliasů typu catchall ..
 save_mailto=Aktualizace aliasu pro kontaktní adresu.
@@ -1022,6 +1052,7 @@ save_unfixcustomlog=Zakázání protokolování pomocí programu ..
 save_unfixerrorlog=Zakázání protokolování chyb pomocí programu ..
 save_status=Změna názvu hostitele a e-mailu ve sledování stavu webových stránek.
 save_statusssl=Změna názvu hostitele a e-mailu ve sledování stavu webových stránek SSL.
+save_statussslcert=Změna e-mailu ve sledování stavu certifikátu SSL ..
 save_aliasip=Změna adresy IP serveru alias $1 na $2 ..
 save_applyplan=Změna plánu na <i>$1</i> a použití nových limitů.
 save_plan=Změna plánu na <i>$1</i> ..
@@ -1030,13 +1061,18 @@ save_euserquota=Disková kvóta správce serveru by neměla být snížena na $2
 save_aliasusers=Zakázanou funkci používají následující aliasové servery : $1 
 save_erquota=Kvóta disku pro tento virtuální server nemůže být nastavena na neomezenou, protože je ve vlastnictví distributora $1, který má limit kvóty
 save_erbw=Limit šířky pásma pro tento virtuální server nelze nastavit na neomezený, protože je ve vlastnictví distributora $1, který má limit šířky pásma
+
 luser_err=Uložení místního uživatele se nezdařilo
 luser_etaken=Uživatel se stejným názvem již existuje
+
 acl_migrate=Lze migrovat zálohy?
+
 other=Jiný. ..
+
 search_nonef=Nebyly nalezeny žádné virtuální servery využívající funkci $1.
 search_results=Nalezeno $2 virtuálních serverů odpovídající $1 ..
 search_resultsf=Nalezené virtuální servery $2 využívající funkci $1 ..
+
 import_title=Importovat virtuální server
 import_desc1=Tento formulář lze použít k převedení existující domény ve vašem systému pod kontrolu Virtualmin. Poštovní schránky a aliasy pro název domény, veškerý existující virtuální server Apache a doména DNS budou automaticky detekovány. Můžete také zadat název databáze, kterou chcete přiřadit k doméně, pokud existuje.
 import_desc2=Pole hesla by mělo být vyplněno aktuálním heslem administrátora, pokud ho znáte. Virtualmin musí znát heslo každého virtuálního serveru, aby mohl být použit v budoucnu při nastavování databází MySQL nebo PostgreSQL.
@@ -1059,6 +1095,7 @@ import_regexpg=Primární skupina
 import_regexpr=Odpovídající regexp
 import_emysql_user=Chybí uživatelské jméno MySQL
 import_emysql_user2=Zadaný uživatel MySQL neexistuje
+
 import_err=Import se nezdařil
 import_eexists=Zadanou doménu již spravuje Virtualmin
 import_euserclash=Virtuální server $1 již používá vybrané uživatelské jméno
@@ -1104,11 +1141,14 @@ import_noplugin=Plugin $1 není pro doménu nastaven.
 import_auto=Automatický
 import_eregexp=Chybí regulární výraz pro uživatele
 import_updating=Aktualizace uživatelů odpovídající $1 ..
+
 fcheck_euser=Chybí směrnice uživatele
 fcheck_egroup=Směrnice o chybějící skupině
 fcheck_euserex=Uživatel Unix $1 v Uživatelské směrnici neexistuje
 fcheck_egroupex=Unixová skupina $1 ve směrnici o skupině neexistuje
+
 lcheck_epost=Chybí skript pro skript, který by měl znovu načíst Apache
+
 disable_title=Zakázat server
 disable_rusure2=Opravdu chcete zakázat virtuální server $1 ? Jeho $2 bude deaktivováno.
 disable_undo=Všechny výše uvedené akce budou zrušeny bez ztráty dat, pokud a kdy je server znovu povolen.
@@ -1124,6 +1164,8 @@ disable_postgres=Deaktivace uživatele PostgreSQL.
 disable_bind=Přejmenováním zóny DNS ji deaktivujete.
 disable_bind_provision=Přejmenování zóny DNS na hostiteli služeb pro její deaktivaci.
 disable_ebind_provision=.. přejmenování selhalo : $1 
+disable_bind_cloud=Zakázání zóny DNS na $1 ..
+disable_ebind_cloud=.. selhalo : $1 
 disable_bindnosub=.. není možné pro subdomény
 disable_ealready=Virtuální server je již zakázán
 disable_emaking=Před příkazem pro zakázání se nezdařil : $1 
@@ -1142,6 +1184,7 @@ disable_users=Zamykání účtů uživatelů pošty.
 disable_why=Důvod deaktivace
 disable_subservers=Zakázat také dílčí servery?
 disable_doing=Zakázání virtuálního serveru $1 ..
+
 enable_title=Povolit server
 enable_rusure2=Opravdu chcete znovu povolit virtuální server $1 ? Jeho $2 bude obnoveno do původních povolených stavů.
 enable_ok=Ano, povolit
@@ -1163,6 +1206,9 @@ enable_statusssl=Opětovná aktivace monitorování stavu webových stránek SSL
 enable_users=Odblokování účtů uživatelů pošty.
 enable_subservers=Povolit také dílčí servery?
 enable_doing=Povolení virtuálního serveru $1 ..
+enable_bind_cloud=Povolení zóny DNS na $1 ..
+enable_ebind_cloud=.. selhalo : $1 
+
 mail_usubject=Poštovní schránka byla vytvořena
 mail_dsubject=Virtuální server byl vytvořen
 mail_upsubject=Poštovní schránka byla aktualizována
@@ -1170,8 +1216,10 @@ mail_rsubject=Účet prodejce byl vytvořen
 mail_file=Nepodařilo se přečíst soubor šablony $1 : $2 
 mail_system=e-mail není nastaven ve Virtualmin
 mail_ok=e-mail byl odeslán na $1 
-rfile_desc=Pomocí textové oblasti níže upravte autoreply zprávu v $1. Zpráva může obsahovat makra $ SUBJECT, $ FROM, $ TO, $ DATE a $ BODY, které budou při aktivaci autoreply rozšířeny.
+
+rfile_desc=Pomocí textové oblasti níže upravte autoreply zprávu v $1. Zpráva může obsahovat makra $SUBJECT, $FROM, $TO, $DATE a $BODY, které budou při aktivaci autoreply rozšířeny.
 rfile_desc2=Můžete také nastavit záhlaví pošty, která přidávají nebo nahrazují výchozí nastavení použitá v autoreply tak, že zadáte řádky jako: <br><tt> Od: foo@bar.com </tt><br> <tt>Předmět: Na dovolené</tt> <br> v horní části zprávy, oddělené od těla jediným prázdným řádkem.
+
 ffile_title=Upravit soubor filtru
 ffile_ecannot=Není dovoleno upravovat soubory filtru
 ffile_eread=Nepodařilo se přečíst soubor filtru $1 jako uživatele $2 : $3 
@@ -1189,6 +1237,7 @@ ffile_err=Uložení souboru filtru se nezdařilo
 ffile_ematch=Chybějící zápas
 ffile_eaction=Chybí adresa pro přesměrování
 ffile_ewrite=Zápis do filtrovacího souboru $1 jako uživatele $2 : $3 se nezdařil
+
 newweb_title=Šablona webové stránky Apache
 newweb_ecannot=Není dovoleno upravovat šablonu webu
 newweb_desc=Pomocí tohoto formuláře můžete upravit šablony direktiv Apache, které budou použity pro weby vytvořené Virtualmin. Po vytvoření webu ze šablony budou provedeny následující substituce :
@@ -1233,6 +1282,7 @@ newweb_admin=Přesměrováváte <tt>admin.${DOM}</tt>?
 newweb_admindom=URL pro přesměrování <tt>admin</tt>
 newweb_ewebmaildom=Chybějící nebo neplatná adresa URL pro přesměrování na webmail
 newweb_eadmindom=Chybějící nebo neplatná adresa URL pro přesměrování správce
+
 newftp_title=Šablona serveru ProFTPD
 newftp_ecannot=Není dovoleno upravovat šablonu ProFTPD
 newftp_desc=Pomocí tohoto formuláře můžete upravit šablony ProFTPD šablony, které budou použity pro virtuální FTP servery vytvořené Virtualmin. Po vytvoření webu ze šablony budou provedeny následující podskupiny :
@@ -1242,6 +1292,7 @@ newftp_dir=Vytvořit anonymní podadresář FTP
 newftp_dir0=Adresář pod domovem
 newftp_dir0suf=(Musí odpovídat části &lt;Anonymous&gt; výše)
 newftp_edir=Chybějící nebo neplatný anonymní podadresář FTP
+
 newdns_title=Šablona BIND DNS
 newdns_ecannot=Není dovoleno upravovat šablonu DNS
 newdns_desc=Pomocí tohoto formuláře můžete upravit šablony BIND šablony, které budou umístěny v doménách DNS vytvořených Virtualmin (pokud nejsou v automatickém režimu). Po vytvoření domény ze šablony budou provedeny následující podskupiny :
@@ -1259,6 +1310,7 @@ newdns_noview=Nejvyšší úroveň (v žádném zobrazení)
 newdns_enamedconf=Nebyly zadány žádné platné směrnice BIND named.conf
 newdns_ensip=Další jmenný server $1 je adresa IP namísto názvu hostitele
 newdns_enshost=Další jmenný server $1 neexistuje
+
 sub_DOM=Název domény, například <tt>foo.com</tt>
 sub_IP=IP adresa přiřazená virtuálnímu serveru, například <tt>192.168.1.1</tt>
 sub_FTP=Pokud je pro nového uživatele povolen přístup FTP, nastavte hodnotu 1
@@ -1274,19 +1326,23 @@ sub_NAME=Přihlašovací údaje virtuálního prodejce
 sub_RPLAINPASS=Heslo prodejce
 sub_EMAIL=Kontaktní e-mailová adresa prodejce
 sub_WEBMINURL=URL pro přihlášení do Virtualmin
+
 newuser_title=Nová e-mailová schránka
 newuser_ecannot=Není dovoleno upravovat novou šablonu e-mailu uživatele
 newuser_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, kterou lze po vytvoření odeslat novému uživateli pošty / FTP. K textu budou provedeny následující podskupiny :
 newuser_header=Podrobnosti o nové e-mailové zprávě uživatele
 newuser_docs=Vysvětlení a náhrady
+
 newupdate_title=Aktualizovaný e-mail schránky
 newupdate_ecannot=Není dovoleno upravovat aktualizovanou šablonu e-mailu uživatele
 newupdate_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, kterou lze po aktualizaci odeslat uživateli pošty / FTP. K textu budou provedeny následující podskupiny :
 newupdate_header=Aktualizované podrobnosti o e-mailové zprávě uživatele
+
 newlocal_title=Nový e-mail místní poštovní schránky
 newlocal_ecannot=Není dovoleno upravovat novou šablonu e-mailu místního uživatele
 newlocal_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, která může být odeslána po vytvoření nového místního uživatele. K textu budou provedeny následující podskupiny :
 newlocal_header=Nové podrobnosti e-mailové zprávy místního uživatele
+
 newdom_title=Nový e-mail virtuálního serveru
 newdom_ecannot=Není dovoleno upravovat novou šablonu e-mailu serveru
 newdom_desc=Pomocí tohoto formuláře můžete upravit soubor šablony $1 pro e-mailovou zprávu, která bude po vytvoření odeslána novému vlastníkovi virtuálního serveru. K textu budou provedeny následující podskupiny :
@@ -1299,19 +1355,25 @@ newdom_to=Odeslat e-mail na adresu
 newdom_mailbox=Poštovní schránka uživatele
 newdom_owner=Vlastník virtuálního serveru
 newdom_reseller=Prodejce virtuálních serverů
+
 newsubdom_title=Nový virtuální e-mail na podserver
 newsubdom_ecannot=Není dovoleno upravovat novou e-mailovou šablonu podserveru
 newsubdom_desc=Pomocí tohoto formuláře můžete upravit soubor šablony $1 pro e-mailovou zprávu, která bude po vytvoření odeslána vlastníkovi nového virtuálního podserveru. K textu budou provedeny následující podskupiny :
 newsubdom_descdis=Pomocí tohoto formuláře můžete upravit soubor šablony $1 pro e-mailovou zprávu, která by se po vytvoření odeslala vlastníkovi nového virtuálního sub-serveru, pokud byla tato funkce povolena na stránce Konfigurace Virtualmin. K textu budou provedeny následující podskupiny :
 newreseller_header=Podrobnosti o nové e-mailové zprávě prodejce
+
 newreseller_title=Nový e-mail pro distributory
 newreseller_ecannot=Není dovoleno upravovat novou e-mailovou šablonu distributora
 newreseller_desc2=Pomocí tohoto formuláře můžete upravit šablonu e-mailové zprávy, kterou lze po vytvoření odeslat do nového účtu distributora. K textu budou provedeny následující podskupiny :
+
+feature_ssl=Web Apache SSL
 feature_ftp=ProFTPD virtuální FTP
 feature_virt6=IPv6 adresa
 feature_status=Sledování stavu
+
 bandwidth_backup=Zálohy byly vytvořeny
 bandwidth_restore=Zálohy byly obnoveny
+
 losing_web=Všechny direktivy Apache ve virtuálním hostiteli budou odstraněny.
 losing_dns=Všechny záznamy DNS v doméně a všechny možnosti BIND budou smazány.
 losing_webalizer=Plánované generování zprávy založené na protokolech webu bude vypnuto.
@@ -1324,6 +1386,7 @@ losing_logrotate=Konfigurace Logrotate pro soubory protokolu virtuálního serve
 losing_spam=Konfigurace SpamAssassinu pro tento virtuální server bude odstraněna.
 losing_virus=Položka Procmail pro filtrování virů pro tento virtuální server bude odstraněna.
 losing_status=Monitor stavu webmin pro web tohoto virtuálního serveru bude odstraněn.
+
 check_title=Kontrola konfigurace
 check_netok=Je nainstalován a podporován modul Webmin's Network Configuration.
 check_lowmemory=Váš systém má pouze $1 paměti, což je pod doporučeným minimem Virtualmin $2.
@@ -1361,8 +1424,7 @@ check_dnsok3=Domény BIND DNS budou hostovány na hostiteli služeb.
 check_etlsa=Ve vašem systému nelze vytvořit záznamy DNS TLSA: $1.
 check_tlsaok=Záznamy DNS TLSA budou přidány do nových domén.
 check_dnsmaster=Výchozí hlavní server DNS $1 však není plně kvalifikovaný název domény.
-check_mysqlokmysql=MySQL $1 je nainstalován a spuštěn.
-check_mysqlokmariadb=MariaDB $1 je nainstalována a spuštěna.
+check_mysqlok=MySQL $1 je nainstalován a běží.
 check_mysqlok2=Klientské programy MySQL jsou nainstalovány pro použití s hostitelem služeb.
 check_postgresok=PostgreSQL je nainstalován a spuštěn.
 check_webalizerok=Je nainstalován webalizátor.
@@ -1412,7 +1474,7 @@ check_epbzip2ver=Vybrali jste paralelní kompresi bzip2, ale vyžaduje to <tt>pb
 check_eset_user=Příkazy externí kvóty jsou povoleny, ale příkaz k nastavení kvóty uživatele není definován nebo neexistuje
 check_eset_group=Příkazy externí kvóty jsou povoleny, ale příkaz k nastavení kvóty skupiny není definován nebo neexistuje
 check_quotacommands=Příkazy externí kvóty budou použity pro virtuální servery a poštovní schránky.
-check_eresolv2=Virtualmin je nakonfigurován pro nastavení zón DNS, ale tento systém není nastaven, aby se používal jako server DNS. Buď přidejte 127.0.0.1 k $1, nebo vypněte funkci BIND na stránce $2.
+check_eresolv2=Virtualmin je nakonfigurován k nastavení zón DNS, ale tento systém není nastaven tak, aby se sám používal jako server DNS. Buď přidejte 127.0.0.1 k $1, vypněte funkci BIND na stránce $2, nebo deaktivujte možnost <b>Zkontrolovat resolv.conf</b> na stránce Konfigurace Virtualmin.
 check_eresolv3=Zdá se, že DHCP se používá k dynamické konfiguraci síťových rozhraní, která mohou způsobit nastavení serverů DNS na základě nastavení poskytnutých serverem DHCP. U Virtualmin se důrazně doporučuje používat statickou IP adresu.
 check_eresolvlist=seznam serverů DNS
 check_dnsmissing=Zdá se, že systém nemá nakonfigurován žádný server DNS. Výchozí chování používání místního serveru DNS by však mělo stále fungovat.
@@ -1457,11 +1519,13 @@ check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
 check_aptrepowrong=Konfigurační soubor úložiště APT $1 obsahuje nesprávné sériové číslo licenčního klíče!
 check_aptrepomissing=Konfigurační soubor úložiště $1 neodkazuje na software.virtualmin.com!
+
 checkmap_enone=V <a href='$1'>konfiguraci Postfixu nebyly nalezeny žádné zdroje map</a>
 checkmap_esupport=Zdroj mapy <tt>$1</tt> není podporován Postfixem - možná budete muset pro něj nainstalovat Postfix knihovny nebo znovu kompilovat
 checkmap_eaccess=Zdroj mapy <tt>$1</tt> nelze použít : $2 
 checkmap_efile=Tato mapa Webmin nepodporuje typ mapy - lze použít pouze mapy používající soubory jako <tt>hash</tt> a <tt>regexp</tt>
 check_eqmailldap=Podpora Qmail+LDAP byla ve Virtualmin 6.00 odstraněna
+
 log_create_user=Vytvořený uživatel $1 @ $2 
 log_modify_user=Upravený uživatel $1 @ $2 
 log_delete_user=Smazaný uživatel $1 @ $2 
@@ -1489,6 +1553,7 @@ log_newkey_domain=Nainstalován nový certifikát SSL pro server $1
 log_breakcert_domain=Zastavte sdílení certifikátu SSL pro server $1 
 log_newcsr_domain=Vygenerováno nové SSL CSR pro server $1 
 log_newself_domain=Byl vygenerován nový certifikát SSL s vlastním podpisem pro server $1 
+log_rcert_domain=Smazaný certifikát SSL pro server $1 
 log_dbname_domain=Změněno přihlašovací jméno pro virtuální server $1 
 log_dbpass_domain=Změněno heslo databáze pro virtuální server $1 
 log_dbhosts_domain=Změňte hostitele vzdálené databáze pro virtuální server $1 
@@ -1501,6 +1566,8 @@ log_unalias_domain=Převeden virtuální server $1 z aliasu na sub-server
 log_spam_domain=Změnil se doručování spamu a virů na server $1 
 log_spf_domain=Změněné možnosti DNS pro server $1 
 log_phpmode_domain=Změněné možnosti webových stránek pro server $1 
+log_website_domain=Změněné možnosti webu pro server $1 
+log_php_domain=Změněné možnosti PHP pro server $1 
 log_phpver_domain=Změněné verze PHP pro server $1 
 log_initial_domain=Změněné výchozí hodnoty pro server $1 
 log_limits_domain=Změněny limity vlastníka pro server $1 
@@ -1660,6 +1727,11 @@ log_enable_ratelimit=Povoleno omezení rychlosti pošty
 log_disable_ratelimit=Zakázáno omezení rychlosti pošty
 log_modify_ratelimit=Aktualizováno omezení rychlosti pošty
 log_wizard=Krok průvodce instalací : $1 
+log_save_cloud=Aktualizovaný poskytovatel cloudových záloh $1 
+log_clear_cloud=Poskytovatel zálohování v cloudu vymazán $1 
+log_save_dnscloud=Aktualizovaný cloudový poskytovatel DNS $1 
+log_clear_dnscloud=Poskytovatel vymazaného cloudového DNS $1 
+
 backup_desc=Popis zálohy
 backup_plan=Limit na servery podle plánu
 backup_anyplan=Jakýkoli plán
@@ -1715,6 +1787,7 @@ backup_nicebb=Kbelík backblaze $1
 backup_nicebbp=$2 v bloku Backblaze $1 
 backup_key=Šifrovat zálohu pomocí klíče
 backup_nokey=Nepodepisujte ani nešifrujte
+
 backup_edestext=Záloha do jednoho souboru by měla mít příponu jako tar.gz nebo zip
 backup_eserver1a=Název hostitele FTP serveru nelze přeložit
 backup_eserver2a=Název hostitele SSH nelze přeložit
@@ -1751,6 +1824,7 @@ backup_copyfailed=.. kopie se nezdařila : $1
 backup_ekey=Vybraný záložní klíč neexistuje!
 backup_ekeycannot=Vybraný záložní klíč nemáte povoleno
 backup_eownrestore=Vlastníci virtuálních serverů mohou obnovit pouze podepsané zálohy
+
 backup_dirzipfailed=.. ZIP selhal! $1 
 backup_apachecp2=Kopírování aliasu Apache ..
 backup_emptydomain=.. některé podrobnosti o doméně chybí!
@@ -1819,6 +1893,7 @@ backup_arun=Spouští příkaz po zálohování.
 backup_brunfailed=.. selhalo. Záloha nebude pokračovat.
 backup_arunfailed=.. selhalo!
 backup_efeature=.. funkce $1 selhala
+
 restore_title=Obnovte virtuální servery
 restore_header=Možnosti obnovení zálohy
 restore_src=Obnovte zdroj
@@ -1839,6 +1914,10 @@ restore_fix=Chcete znovu importovat podrobnosti o serveru?
 restore_delete=Odstranit a znovu vytvořit virtuální servery?
 restore_dnswholefile=Obnovte vše v souboru zóny DNS
 restore_newip6=Adresa IPv6 pro obnovené servery
+restore_contents=Kontrola obsahu zálohy ..
+restore_gotcontents2=.. nalezeno $1 virtuálních serverů a $2 globální nastavení virtuálních min
+restore_gotcontents=.. nalezeno $1 virtuálních serverů
+
 restore_ecannot=Není dovoleno obnovit zálohy
 restore_esched=Vybraný plán zálohování neexistuje!
 restore_err=Obnovení selhalo
@@ -1910,6 +1989,7 @@ restore_phpbad=UPOZORNĚNÍ - Následující skripty používaly verze PHP, kter
 restore_phpbad2=$1 - $2 - verze $3 
 restore_euid=UID $1 se v tomto systému již používá
 restore_egid=GID $1 se v tomto systému již používá
+
 restore_unixuser=Aktualizace hesla a kvót pro správu.
 restore_unixsame=.. přeskočení obnovení na původní server LDAP $1 v režimu replikace
 restore_dirsame=.. přeskočení obnovení na původní server NFS $1 v režimu replikace
@@ -1987,6 +2067,7 @@ restore_vmailserver_grey=Obnovení nastavení greylistingu ..
 restore_vmailserver_missing=.. není v tomto systému nakonfigurováno
 restore_ereseller=Prodejce $1 neexistuje
 restore_eparent=Původní nadřazený virtuální server $1 neexistuje
+
 limits_title=Limity vlastníka serveru
 limits_header=Limity Virtualmin pro vlastníka serveru
 limits_header2=Povolené funkce a funkce
@@ -2032,6 +2113,7 @@ limits_unshell=Použití neznámého shellu $1
 limits_jail=Chroot vězení domény Unix uživatel?
 limits_ejailon=Nepodařilo se povolit chroot vězení : $1 
 limits_ejailoff=Nepodařilo se zakázat chroot vězení : $1 
+
 rename_title=Změnit název domény
 rename_header=Možnosti změny názvu domény virtuálního serveru
 rename_domain=Staré doménové jméno
@@ -2069,8 +2151,11 @@ rename_ehome3=Nový domovský adresář již existuje
 rename_ehome4=Nadřazený nový domovský adresář neexistuje
 rename_scripts=Aktualizace cest v databázi skriptů.
 rename_eparentuser=Uživatelské jméno lze změnit pouze u serverů nejvyšší úrovně
+
 cert_desc1=Tento formulář lze použít k vytvoření žádosti o podpis certifikátu (CSR) a soukromého klíče pro tento virtuální server. Výsledný CSR může být odeslán certifikační autoritě (CA), která vrátí podepsaný certifikát pro vložení do druhého formuláře na této stránce.
 cert_desc6=Tento formulář lze použít k vytvoření self-signed certifikátu, který lze použít okamžitě, ale prohlížeče nebudou akceptovány jako platné.
+cert_hasnossl=Varování - tento virtuální server ještě nemá povolený web SSL. Libovolný certifikát SSL lze použít pouze pro jiné služby.
+cert_noneyet=Tento virtuální server ještě nemá certifikát SSL. Pomocí jedné z karet na této stránce vygenerujte certifikát a klíč.
 cert_csrwarn=Upozornění - žádost o podpis v $1 a soukromý klíč v $2 již existují a budou přepsány vygenerováním nového CSR.
 cert_keywarn=Upozornění - certifikát v $1 a soukromý klíč v $2 již existují a budou přepsány vygenerováním nového klíče.
 cert_header6=Vygenerujte certifikát a klíč podepsaný uživatelem
@@ -2094,7 +2179,10 @@ cert_etime=Čas do vypršení platnosti
 cert_expired=Platnost vypršela před 1 dnem!
 cert_expiring=Platnost vyprší za $1 dní
 cert_future=$1 dny do vypršení platnosti
+cert_remove=Odstranit certifikát SSL
+cert_removedesc=Protože se certifikát SSL tohoto virtuálního serveru nepoužívá, lze jej trvale odstranit kliknutím na toto tlačítko.
 cert_also=Používá se také podle domén
+cert_svcs=Využíváno službami
 cert_edownload2=Nebyl nalezen žádný klíč SSL!
 cert_chain3=Vložený text certifikátu
 cert_desc5=Pokud certifikát SSL vašeho virtuálního serveru pochází z certifikační autority, která není známa hlavním prohlížečům, možná budete muset tento certifikát nahrát pomocí tohoto formuláře.
@@ -2145,8 +2233,7 @@ cert_dnamefor=Vyžádejte si certifikát pro
 cert_dnamedef=Domény přidružené k tomuto serveru
 cert_dnamesel=Zde jsou uvedena jména domén
 cert_dwild=Také požádat o zástupný certifikát?
-cert_letsrenew=Měsíce mezi automatickou obnovou
-cert_letsnotrenew=Obnovujte pouze ručně
+cert_letsrenew2=Automaticky obnovit certifikát?
 cert_connectivity=Nejprve zkontrolujte připojení?
 cert_connectivity2=Otestujte připojení
 cert_connectivity1=Ověření domény
@@ -2168,6 +2255,7 @@ cert_webminsvcip=Ano (pro žádosti do $1 a $2)
 cert_eperiperr=Uložení servisních certifikátů se nezdařilo
 cert_eperipinst=Služba $1 není nainstalována
 cert_eperipfail=Služba $1 se nezdařila
+
 csr_title=Generování CSR
 csr_title2=Generování certifikátu
 csr_err=Generování CSR se nezdařilo
@@ -2178,6 +2266,7 @@ csr_csr=CSR pro tento virtuální server, uložený v $1, je :
 csr_key=Nový soukromý klíč pro tento virtuální server, uložený v $1, je :
 csr_selfing=Generování certifikátu podepsaného vlastním uživatelem a soukromého klíče.
 csr_csring=Generuje se žádost o podpis a soukromý klíč.
+
 newkey_title=Instalace certifikátu
 newkey_err=Instalace certifikátu se nezdařila
 newkey_ecert2=Chybějící nebo neplatný podepsaný certifikát SSL : $1 
@@ -2193,6 +2282,7 @@ newkey_enewkeyfilehome=Soubor soukromého klíče $1 musí být v domovském adr
 newkey_apache=Konfigurace webového serveru pro použití nového certifikátu a klíče.
 newkey_enewkeycsr=Ve chvíli, kdy byla nalezena žádost o podpis, nebyl vygenerován žádný klíč SSL!
 newkey_ekeysame=Nezadávejte cestu ke klíči generovanému pomocí CSR - místo toho použijte kartu <b>Použít podepsaný certifikát</b>.
+
 newbw_title=Monitorování šířky pásma
 newbw_desc=Tuto stránku lze použít k povolení účtování šířky pásma pro virtuální servery, k upozornění vlastníků serverů a hlavního správce, když server překročí povolenou šířku pásma.
 newbw_active=Sledování šířky pásma je aktivní?
@@ -2258,9 +2348,11 @@ newbw_resetdesc=Toto tlačítko otevře formulář pro vynucení opětného gene
 newbw_return=formulář pro monitorování šířky pásma
 newbw_mailout=Zahrnout odchozí e-mail do využití šířky pásma?
 newbw_mailall=Zahrnout přenášený e-mail do využití šířky pásma?
+
 newframe_title=Předávání rámců HTML
 newframe_ecannot=Není dovoleno upravovat šablonu HTML pro předávání snímků
 newframe_desc=Tento formulář slouží k úpravě stránky HTML šablony, která bude použita webovými stránkami s předáváním rámců. Po vytvoření stránky ze šablony budou provedeny následující podskupiny :
+
 frame_title=Nastavení předávání rámců
 frame_header=Nastavení pro generování HTML pro předávání snímků
 frame_enabled=Předávání rámců povoleno?
@@ -2272,14 +2364,17 @@ frame_desc=Tento formulář lze použít k aktualizaci souboru pro předávání
 frame_err=Uložení nastavení rámce pro předávání se nezdařilo
 frame_eurl=Chybí nebo neplatná adresa URL
 frame_gen=Znovu generuje HTML pro předávání snímků.
+
 proxy_title=Nastavení proxy webu
 proxy_enabled=Proxylování povoleno?
 proxy_url=Proxy na URL
 proxy_header=Nastavení pro proxy na jiný web
 proxy_desc=Tento formulář lze použít k povolení a konfiguraci adresy URL, na kterou jsou předávány všechny požadavky na web tohoto virtuálního serveru.
+
 expframe_title=Předávání rámců HTML
 expframe_desc=Tento formulář lze použít k ruční aktualizaci souboru pro předávání snímků $1 pro tento virtuální server.
 expframe_ewrite=Nepodařilo se zapsat do souboru pro předávání snímků $1 jako uživatele $2 : $3 
+
 newtmpl_title=Šablony serveru
 newtmpl_name=Šablona
 newtmpl_skel=Adresář kostry
@@ -2299,6 +2394,7 @@ newtmpl_created=Vytvořeno dne
 newtmpl_init=Instalace Virtualmin
 newtmpl_name0=Výchozí nastavení
 newtmpl_name1=Nastavení pro dílčí servery
+
 tmpl_title1=Vytvoření šablony serveru
 tmpl_title2=Upravit šablonu serveru
 tmpl_title3=Šablona klonovacího serveru
@@ -2516,6 +2612,10 @@ tmpl_dmarcextra=Extra DMARC možnosti
 tmpl_edmarcpct=Procento zpráv musí být celé číslo mezi 0 a 100
 tmpl_edns=Nebyly zadány žádné záznamy DNS
 tmpl_dns_sub=Přidat záznamy DNS v jiné doméně do nadřazené domény?
+tmpl_dns_cloud=Vytvořit nové zóny DNS na
+dns_cloud_def=&lt; Vybrat automaticky &gt;
+dns_cloud_services=Cloudové služby
+dns_cloud_local=Místní soubory
 tmpl_clone=Klonovat šablonu
 tmpl_mailgroup=Sekundární skupina pro uživatele pošty
 tmpl_ftpgroup=Sekundární skupina pro uživatele FTP
@@ -2650,6 +2750,7 @@ tmpl_autoconfignone=Automaticky generováno
 tmpl_eautoconfig=Thunderbird autoconfiguration XML postrádá značku &lt;clientConfig&gt;.
 tmpl_outlook_autoconfig=Automatická konfigurace aplikace Outlook XML
 tmpl_outlook_eautoconfig=Autokonfigurační XML aplikace Outlook nemá značku &lt;Autodiscover&gt;.
+
 newplugin_title=Moduly plug-in
 newplugin_desc=Pluginy jsou moduly Webmin, které pro Virtualmin poskytovaly další funkce serveru a uživatele. Na rozdíl od základních funkcí mohou být instalovány samostatně a psány vývojáři třetích stran.
 newplugin_desc3=Aktuálně aktivní jsou pouze ty pluginy, které jsou skutečně zkontrolovány v níže uvedeném seznamu. Po aktivaci pluginu je možné při vytváření nebo úpravách virtuálního serveru vybírat funkci, kterou umožňuje.
@@ -2665,10 +2766,13 @@ newplugin_def=Výchozí?
 newplugin_count=Domény
 newplugin_conf=Konfigurovat
 newplugin_open=otevřeno
+
 bwgraph_enable=Na stránce $1 zkontrolujte, zda je povolen sběr statistik.
 bwgraph_returnparent=Využití šířky pásma pro server nejvyšší úrovně
+
 plugconfig_title=Konfigurace pluginu
 plugconfig_dir=Pro plugin $1 
+
 newfields_title=Vlastní pole
 newfields_descr=Tento formulář lze použít k vytvoření dalších polí, která se zobrazí při vytváření a úpravách virtuálních serverů.
 newfields_name=Název pole
@@ -2691,14 +2795,17 @@ newfields_visible=Viditelné pro
 newfields_visible0=Všichni uživatelé
 newfields_visible1=Všichni uživatelé (RO)
 newfields_visible2=Master admin
+
 ldap_emod=Chybí modul Perl $1 potřebný pro připojení k LDAP
 ldap_econn=Nepodařilo se připojit k serveru LDAP $1 port $2 
 ldap_elogin=Nepodařilo se navázat na server LDAP $1 jako $2 : $3 
+
 mail_system_0=Postfix
 mail_system_1=Poslat mail
 mail_system_2=Qmail
 mail_system_4=Qmail+LDAP
 mail_system_5=Qmail+VPOPMail
+
 databases_indom=Databáze v doméně $1 
 databases_hosted=Všechny databáze pro tuto doménu jsou hostovány na vzdáleném serveru MySQL $1.
 databases_ilist=Databáze, které server vlastní
@@ -2726,6 +2833,7 @@ databases_remotenew=Nový hostitel MySQL
 databases_remoteok=Přesunout databáze
 databases_warn=VAROVÁNÍ! Všechny aktuálně nainstalované skripty nebo aplikace NEBUDOU aktualizovány, aby používaly nový hostitelský systém.
 databases_moving=Přesouvání databází MySQL z $1 do $2 ..
+
 database_title2=Upravit databázi
 database_disc=Odpojte se se serverem
 database_host=Hostováno v systému
@@ -2736,6 +2844,7 @@ database_title3=Smazat databázi
 database_title4=Odpojte databázi
 database_collate=Pořadí řazení pro novou databázi
 database_edbdef=Není dovoleno odstranit výchozí databázi domény
+
 vfile_title=Upravit soubor automatických odpovědí
 vfile_ecannot=Není dovoleno upravovat soubory automatických odpovědí
 vfile_desc=Pomocí textové oblasti níže upravte zprávu autoresponder v $1.
@@ -2754,6 +2863,7 @@ vfile_etime=Chybějící nebo neplatný čas na zapamatování odesílatele
 vfile_enum=Chybí nebo je neplatný počet odpovědí k odeslání
 vfile_edir=Chybějící nebo neexistující adresář protokolu
 vfile_eother=Chybí od: adresa pro odpověď
+
 newips_desc=Tato stránka umožňuje změnit IP adresu všech neurčených IP virtuálních serverů, které používají zadanou adresu. To by se mělo provést, pokud jste právě aktualizovali primární IP adresu v systému.
 newips_header=Možnosti změny IP adresy
 newips_old=IPv4 adresa serverů pro aktualizaci
@@ -2777,6 +2887,7 @@ newips_mode0=Skutečná adresa
 newips_mode1=Externí adresa použitá v DNS záznamech
 newips6_eold=Stará adresa IPv6 není ve správném formátu
 newips6_enew=Nová adresa IPv6 není ve správném formátu
+
 newip_desc=Tato stránka umožňuje změnit vyhrazenou virtuální adresu IP pro tento server, pokud ji má. Virtuální rozhraní bude také aktualizováno, proto nezapomeňte zadat adresu, která je ve stejné podsíti jako primární rozhraní systému. Na této stránce můžete také aktualizovat porty, které web pro tento virtuální server používá.
 newip_desc2=Tato stránka umožňuje změnit sdílenou IP adresu, kterou tento server používá, a aktualizovat porty, které používá jeho web. IP lze změnit pouze v případě, že je k dispozici více než jedna možnost, například pokud je ve vlastnictví prodejce, který má vlastní adresu.
 newip_old6=Aktuální IPv6 adresa
@@ -2805,6 +2916,7 @@ newip_virtaddr=Udržujte vyhrazenou adresu
 newip_virtaddr2=Přidělte vyhrazenou adresu
 newip_virtaddr3=Použijte vyhrazenou adresu
 newip_convert=Převést vyhrazenou adresu na sdílenou
+
 newip_eip=Chybějící nebo neplatná nová adresa
 newip_eip6=Chybějící nebo neplatná nová adresa IPv6
 newip_esame=Nová adresa je stejná jako stará
@@ -2813,6 +2925,7 @@ newip_eclash6=Virtuální server $1 již používá novou adresu IPv6
 newip_edefault=Nová adresa je stejná jako výchozí adresa u ne virtuálních serverů
 newip_eused=Nová adresa je již používána systémem
 newip_eused6=Systém již používá novou adresu IPv6
+
 newresels_title=Účty prodejce
 newresels_intro=Prodejce je přihlašovací jméno, které může vytvářet nové nadřazené servery Virtualmin, s výhradou omezení definovaných hlavním správcem. Na celkovou diskovou kvótu, uživatele a databáze, které mohou být přiděleny servery distributora, pak mohou být uložena další omezení.
 newresels_doms=Servery
@@ -2825,11 +2938,13 @@ newresels_return=seznam prodejců
 newresels_delete=Odstranit vybrané prodejce
 newresels_disable=Zámek byl vybrán
 newresels_enable=Odblokování vybrané
+
 dresels_err=Smazání prodejců se nezdařilo
 dresels_err2=Zablokování prodejců se nezdařilo
 dresels_err3=Zablokování prodejců se nezdařilo
 dresels_enone=Nebyl vybrán žádný
 dresels_egone=Jeden z vybraných prodejců neexistuje
+
 resel_title1=Vytvořit prodejce
 resel_title2=Upravit prodejce
 resel_header=Podrobnosti o účtu prodejce
@@ -2841,6 +2956,8 @@ resel_name=Uživatelské jméno prodejce
 resel_pass=Heslo pro uživatelské jméno
 resel_lock=Účet je dočasně uzamčen?
 resel_unix=Vytvořit účet FTP/SSH pro distributora?
+resel_from=Z adresy pro e-maily prodejců
+resel_fromdef=Stejné jako výše
 resel_subdom=Vynutit, aby virtuální servery byly pod doménou?
 resel_esubdom=Chybějící nebo neplatná nucená doména
 resel_anydom=Povolit libovolnou doménu
@@ -2882,6 +2999,7 @@ resel_demo=Omezit na demo režim pouze pro čtení?
 resel_hide=Skrýt limity od vlastníků serveru?
 resel_ranges=Rozsahy přidělování IPv4
 resel_ranges6=Rozsahy přidělování IPv6
+resel_efrom=Neplatný e-mail z adresy
 resel_defip=Adresa IPv4 pro servery založené na jménech
 resel_defip6=Adresa IPv6 pro servery založené na jménech
 resel_sharedips=Lze vybrat ze sdílených IP adres?
@@ -2909,6 +3027,7 @@ resel_domssel=Vlastněno tímto prodejcem
 resel_equnlimit=Virtuální server $1 nelze tomuto distributorovi přiřadit, protože má neomezenou diskovou kvótu, ale distributor má limit
 resel_ebwunlimit=Virtuální server $1 nelze tomuto distributorovi přiřadit, protože má neomezenou kvótu šířky pásma, ale distributor má limit
 resel_ebefore=Před selháním příkazu k úpravě : $1 
+
 licence_err=Byl zjištěn problém s vaší licencí Virtualmin :
 licence_soon=Upozornění - Platnost vaší licence Virtualmin vyprší za $1 dní.
 licence_soon2=Upozornění - Platnost vaší licence Virtualmin vyprší za $1 hodiny.
@@ -2916,7 +3035,8 @@ licence_renew=Obnovení lze zakoupit na adrese <a target=_blank href='$1'>$1</a>
 licence_recheck=Znovu zkontrolujte stav licence
 licence_title=Znovu zkontrolujte licenci
 licence_doing=Nyní znovu ověřte svou licenci Virtualmin ..
-licence_ok3=.. licence je v pořádku! Platí pro domény $1 Virtualmin a pro použití v systémech $2 do $3.
+licence_ok2=.. licence je <i>platná</i>. Platí pro domény $1 Virtualmin a pro použití v systémech $2.
+licence_ok3=.. licence je <i>platná</i>. Platí pro domény $1 Virtualmin a pro použití v systémech $2 do $3.
 licence_warn=Během této kontroly licence však došlo k dočasnému problému: $1.
 licence_goterr=.. byl zjištěn problém : $1 
 licence_goterr2=.. neplatné datum vypršení platnosti : $1 
@@ -2935,8 +3055,10 @@ licence_fixlinksok=Opravte oprávnění pro symbolické propojení
 licence_fixlinksignore=Povolit nebezpečné symboly
 licence_xfsreboot=Aby bylo možné povolit kvóty XFS v kořenovém souborovém systému, musí být váš systém restartován. Dokud to nebude provedeno, Virtualmin nezjistí kvóty jako aktivní a nebude možné aplikovat omezení využití disku na virtuální servery nebo uživatele.
 licence_xfsrebootok=Restartujte nyní
+
 config_deftheme=Výchozí globální webmin
 config_oldtheme=Staré téma Webmin
+
 scripts_title=Nainstalujte skripty
 scripts_overall=Hodnocení
 scripts_desc=Pomocí tohoto formuláře lze snadno nainstalovat nebo upgradovat různé skripty webových stránek třetích stran do webového adresáře tohoto virtuálního serveru.
@@ -2972,7 +3094,7 @@ scripts_edep=Tento skript nelze nainstalovat, protože tento virtuální server 
 scripts_ecommands=Tento skript nelze nainstalovat, protože vyžaduje následující příkazy: <tt>$1</tt>
 scripts_eweb=Skripty lze instalovat pouze na virtuální servery s domovským adresářem a webovou stránkou
 scripts_emissing=Skript neexistuje!
-scripts_ephpvers=Tento skript nelze nainstalovat, protože vyžaduje verzi PHP $1.
+scripts_ephpvers2=Tento skript nelze nainstalovat, protože nebyly nalezeny žádné verze PHP
 scripts_return=seznam skriptů
 scripts_edownload=Stahování $2 se nezdařilo : $1 
 scripts_edownload2=Stahování $1 není archivní soubor - možná chybová stránka
@@ -3074,6 +3196,7 @@ scripts_userpass=Počáteční přihlašovací jméno pro správu je $1 s heslem
 scripts_useronly=Počáteční přihlašovací přihlašovací jméno je $1.
 scripts_passonly=Počáteční heslo pro správu je $1.
 scripts_passmode=Počáteční přihlášení skriptu
+scripts_passmode4=Počáteční heslo pro skript
 scripts_passmodedef1=Stejné uživatelské jméno a heslo jako doména
 scripts_passmode1=Uživatelské jméno $1 a heslo $2 
 scripts_passmodedef2=Stejné heslo jako virtuální server
@@ -3112,6 +3235,7 @@ scripts_packagecount=.. nainstaloval $1 nové balíčky
 scripts_packageall=.. všechny balíčky jsou již nainstalovány
 scripts_abandoned2=UPOZORNĚNÍ: Tento skript již není podporován původním autorem.
 scripts_abandoned1=VAROVÁNÍ: Verze $1 tohoto skriptu již není podporována jeho původním autorem.
+
 newnotify_title=Majitelé e-mailových serverů
 newnotify_desc=Tuto stránku lze použít k zasílání e-mailů majitelům vybraných virtuálních serverů, například k oznámení výpadků systému, upgradů nebo jiných změn služeb. V těle a předmětu zprávy mohou být použity následující rozvodny:
 newnotify_header=Možnosti pro e-mail majitelům serveru
@@ -3131,19 +3255,23 @@ newnotify_attach=Nepovinný připojený soubor
 newnotify_admins=Také e-mailem další administrátory ve vybraných doménách?
 newnotify_users=Také poslat e-mail uživateli ve vybraných doménách?
 newnotify_nomany=Každému vlastníkovi domény pošlete e-mail pouze jednou
+
 mailusers_desc=Tento formulář lze použít k odeslání e-mailu všem uživatelům v této doméně nebo vybraným uživatelům. V těle a předmětu zprávy mohou být použity následující rozvodny:
 mailusers_header=Možnosti e-mailu všem uživatelům
 mailusers_to=Poštovní schránky na e-mail
 mailusers_err=Nepodařilo se odeslat e-mail uživatelům
 mailusers_eto=Nebyli vybráni žádní uživatelé
+
 view_title2=Podrobnosti o virtuálním sub-serveru
 view_title3=Podrobnosti serveru Alias
 view_title4=Podrobnosti o virtuální doméně
 view_return=podrobnosti serveru
+
 summary_title=Shrnutí virtuálního serveru
 summary_title2=Shrnutí virtuálního sub-serveru
 summary_title3=Shrnutí serveru Alias
 summary_title4=Souhrn virtuální subdomény
+
 migrate_title=Migrace virtuálního serveru
 migrate_desc=Tato stránka umožňuje vytvořit nový virtuální server migrací záložního souboru vytvořeného produktem konkurenta. Konfigurace všech podporovaných funkcí bude extrahována ze zálohy a převedena pro použití Virtualmin. Veškerý obsah adresáře domény bude zkopírován do domovského adresáře nového uživatele.
 migrate_file=Zdrojový záložní soubor
@@ -3187,6 +3315,7 @@ migrate_downloaded=.. staženo $1
 migrate_validating=Ověření souboru migrace ..
 migrate_edownload=.. stahování se nezdařilo : $1 
 migrate_evalidate=.. ověření se nezdařilo : $1 
+
 newscripts_title=Instalační programy skriptů
 newscripts_desc=Tato stránka vám umožňuje přidat instalační programy skriptů vytvořené jinými dodavateli a určit, které skripty jsou dostupné vlastníkům domény.
 newscripts_header=Přidat instalátor skriptů
@@ -3258,6 +3387,7 @@ newscripts_elnone=Nebyly vybrány žádné skripty
 newscripts_desc6=Na této kartě jsou uvedeny všechny skripty nainstalované na všech virtuálních serverech v tomto systému. Chcete-li upgradovat nebo odinstalovat jeden skript, klikněte na jeho název v seznamu.
 newscripts_dom=Doménové jméno
 newscripts_noneyet=Na žádné virtuální servery zatím nebyly nainstalovány žádné skripty.
+
 sysinfo_apache=Verze Apache
 sysinfo_bind=VELKÁ verze
 sysinfo_postfix=Postfix verze
@@ -3277,9 +3407,11 @@ sysinfo_perlpath=Cesta k Perlu
 sysinfo_php=PHP verze
 sysinfo_python=Verze v Pythonu
 sysinfo_pythonpath=Cesta k Pythonu
+
 remote_ecannot=Není dovoleno spouštět vzdálené příkazy
 remote_eprogram=Neplatný název vzdáleného programu
 remote_eprogram2=Vzdálený program $1 neexistuje
+
 newquotas_title=Sledování diskových kvót
 newquotas_ecannot=Není dovoleno nastavit sledování diskových kvót
 newquotas_desc=Tato stránka umožňuje nastavit automatické upozornění e-mailem, když virtuální server překročí nebo se blíží své diskové kvótě. Protože jsou povoleny skupinové kvóty, může k tomu dojít pouze v případě, že server má v jedné ze svých databází příliš mnoho dat, protože velikosti databází nejsou vynucovány diskovými kvótami Unix.
@@ -3310,6 +3442,7 @@ newquotas_mailbox=Zkontrolujte také poštovní a FTP uživatelské kvóty?
 newquotas_mailbox_send=Upozornit uživatele pošty a FTP?
 newquotas_users=Také upozornit administrátory, kteří překročili kvótu?
 newquotas_msg=Šablona pro uživatele elektronické pošty a FTP
+
 mass_desc=Tato stránka umožňuje změnit vybraná nastavení pro vybrané uživatele $1 na tomto virtuálním serveru najednou.
 mass_header=Uživatelské nastavení pro aktualizaci
 mass_mquota=Kvóta poštovního souboru
@@ -3329,6 +3462,7 @@ mass_emailquota=.. není pro tohoto uživatele definováno.
 mass_setmquota=Nastavení kvóty poštovního souboru ..
 mass_setdisable=Aktualizace dočasného deaktivace ..
 mass_eplain=.. není možné pro tento typ uživatele.
+
 defaults_title=Upravit výchozí nastavení uživatele
 defaults_header=Výchozí nastavení pro nové uživatele na tomto virtuálním serveru
 defaults_tmpl=Výchozí (ze šablony)
@@ -3338,6 +3472,7 @@ defaults_err=Uložení výchozích nastavení uživatele se nezdařilo
 defaults_emquota=Chybějící nebo neplatná kvóta souboru pošty
 defaults_eqquota=Chybějící nebo neplatná kvóta poštovního serveru
 defaults_below=Definováno níže ..
+
 links_webalizer=Webalizer Report
 links_spam=Konfigurace SpamAssassinu
 links_alog=Protokol přístupu Apache
@@ -3346,6 +3481,7 @@ links_flog=Protokol ProFTPD
 links_phpini=PHP konfigurace
 links_phpini2=Konfigurace PHP $1 
 links_phpini3=Konfigurace PHP-FPM
+
 massscript_err=Aktualizace skriptů se nezdařila
 massscript_enone=Nebyly vybrány žádné virtuální servery
 massscript_enone2=Žádný z vybraných serverů nemá nainstalovaný skript
@@ -3365,7 +3501,9 @@ massscript_utype=Úkon
 massscript_upgrade=Vylepšit
 massscript_update=Aktualizace
 massscript_ok=Upgradujte skripty nyní
+
 massdelete_preserve=Zachovat funkce hostované na dálku
+
 massdomains_title=Aktualizujte virtuální servery
 massdomains_headerq=Změny kvót a šířky pásma
 massdomains_headerf=Povolené změny funkcí
@@ -3394,6 +3532,7 @@ massdomains_scannering=Aktualizace antivirového programu.
 massdomains_phpver=Výchozí verze PHP
 massdomains_phpchildren=Dílčí procesy PHP FCGId
 massdomains_phpvering=Změna výchozí verze PHP ..
+massdomains_ephpvering=.. se nepodařilo změnit verzi : $1 
 massdomains_phpchildrening=Změna dílčích procesů PHP FCGId ..
 massdomains_phpmode=Režim provádění PHP
 massdomains_phpmoding=Změna režimu provádění PHP ..
@@ -3403,6 +3542,7 @@ massdomains_disrusure=Opravdu chcete zakázat vybrané virtuální servery $1 ? 
 massdomains_why=Důvod deaktivace:
 massdomains_enarusure=Opravdu chcete povolit vybrané virtuální servery $1 ? Než budou zdravotně postiženi, vrátí se do stavu, ve kterém byli.
 massdomains_enaok=Povolit servery nyní
+
 newmxs_title=Sekundární poštovní servery
 newmxs_header=Automatické sekundární poštovní servery
 newmxs_servers=Servery pro nastavení jako sekundární MX
@@ -3430,6 +3570,7 @@ newmxs_removing=Odstraňování sekundární domény na $1 ..
 newmxs_syncing=Aktualizace povolených uživatelů pro předávání.
 newmxs_esynced=.. některé selhaly : $1 
 newmxs_synced=.. provedeno na $1 
+
 newmysqls_title=Servery MySQL
 newmysqls_ecannot=Není dovoleno upravovat další servery MySQL
 newmysqls_host=Název hostitele serveru
@@ -3471,12 +3612,15 @@ newmysqls_edelete=Lokální server nelze odstranit
 newmysqls_edefault=Výchozí server nelze odstranit
 newmysqls_eprovision=Server vytvořený službami Cloudmin Services nelze odebrat
 newmysqls_einuse=Server používaný doménami $1 nelze odebrat
+
 ddatabases_edb=Databáze $1 již neexistuje!
 ddatabases_edbdef=Není dovoleno odebrat výchozí databázi $1 $2 
 ddatabases_rusure2=Opravdu chcete odstranit vybrané databáze $1 ? Tabulky $2 obsahující $3 dat budou navždy smazány.
+
 admins_doms=Virtuální servery
 admins_domsall=Všechno
 admins_more=$1 další ..
+
 admin_header2=Povolené funkce
 admin_header3=Povolené virtuální servery
 admin_none=Žádná sada
@@ -3484,9 +3628,11 @@ admin_doms=Virtuální servery správce
 admin_doms1=Všechny jsou vlastněny serverem nejvyšší úrovně
 admin_doms0=Pouze ty vybrané níže ..
 admin_edoms=Vybrané nejsou žádné virtuální servery
+
 dadmins_err=Smazání dalších správců se nezdařilo
 dadmins_enone=Nebyl vybrán žádný
 dadmins_egone=Správce již neexistuje
+
 move_title=Přesunout virtuální server
 move_ecannot=Není dovoleno přesunout tento server
 move_ecannot2=Nemáte povoleno přesunout doménu na tento server
@@ -3509,6 +3655,7 @@ move_newpass=Při převodu na nadřazené heslo
 move_failed=.. selhalo! Podívejte se na výše uvedené chybové zprávy z důvodu důvodu.
 move_euserclash=Uživatel s názvem $1 již na převáděném virtuálním serveru existuje
 move_euserclash2=Uživatel s názvem $1 již existuje
+
 newvalidate_title=Ověřte virtuální servery
 newvalidate_ecannot=Není dovoleno ověřovat servery
 newvalidate_header=Možnosti ověření serveru
@@ -3538,6 +3685,7 @@ newvalidate_fixservers=Virtuální servery opravit
 newvalidate_subservers=Opravit také dílčí servery?
 newvalidate_fix=Opravte oprávnění nyní
 newvalidate_header3=Možnosti oprav oprávnění
+
 validate_euserhome=Uživatel administrace $1 má domovský adresář $3, ale měl by to být $2 
 validate_eenc=Šifrované heslo pro uživatele Unix $1 neodpovídá virtuálnímu serveru
 validate_eenc2=Skryté heslo pro uživatele Unix $1 neodpovídá virtuálnímu serveru
@@ -3567,6 +3715,7 @@ validate_ewebphpconfig=Chyby konfigurace PHP byly nalezeny ve verzi $1 : $2
 validate_ewebuid=Uživatel SuExec je nastaven na $1, ale UID virtuálního serveru je $2 
 validate_ewebgid=Skupina SuExec je nastavena na $1, ale GID virtuálního serveru je $2 
 validate_ewebdir=Chybí blok Apache &lt;adresář&gt; pro adresář HTML $1 
+validate_ewebroot=Apache DocumentRoot není nastaven na adresář HTML $1 
 validate_ewebipv6=Existuje záznam DNS IPv6 $2 s adresou $1, ale tento virtuální server nemá povolen protokol IPv6
 validate_ewebipv6virt=Existuje záznam DNS IPv6 s adresou $1, ale konfigurace Apache tohoto virtuálního serveru nemá adresu IPv6.
 validate_ewebip=Virtuální hostitel Apache pro tuto doménu nepoužívá adresu IPv4 a port $1 
@@ -3576,6 +3725,8 @@ validate_esslcert=Ve virtuálním hostiteli Apache nebyl zadán žádný soubor 
 validate_esslcertfile=Soubor certifikátu SSL $1 neexistuje
 validate_esslkeyfile=Soubor klíče SSL $1 neexistuje
 validate_esslcertinfo=Soubor certifikátu SSL nelze analyzovat
+validate_esslcainfo=Soubor SSL CA $1 nelze analyzovat
+validate_esslcamatch=Certifikát SSL CA pro $1/$2 neodpovídá vydavateli certifikátu SSL $3/$4 
 validate_essldom=Certifikát SSL pro tento virtuální server neodpovídá $1 nebo $2. Místo toho se shoduje s názvy hostitelů : $3 
 validate_esslexpired=Platnost certifikátu SSL pro tento virtuální server vypršela dne $1 
 validate_esslfirst=Certifikát SSL prvního virtuálního hostitele Apache SSL na $4 neodpovídá $1 nebo $2. Místo toho se shoduje s názvy hostitelů : $3 
@@ -3606,6 +3757,7 @@ validate_espamcall=Konfigurační soubor Procmail $1 nevolá SpamAssassin
 validate_evirus=ClamAV není volán v konfiguračním souboru procmail serveru
 validate_estatusweb=Nebyl nalezen žádný monitor stavu webových stránek
 validate_estatusssl=Nebyl nalezen žádný monitor stavu webových stránek SSL
+
 tscripts_title=Instalační programy skriptů šablon
 tscripts_sub=Pro šablonu $1 
 tscripts_what=Skripty k instalaci pro nové virtuální servery:
@@ -3625,6 +3777,7 @@ tscripts_epath=Chybějící nebo neplatná cesta URL v řádku $1
 tscripts_eversion=Chybějící nebo neplatné číslo verze v řádku $1 
 tscripts_edb2=Název databáze v řádku $1 neobsahuje žádné substituce (například ${DB})
 tscripts_enone=Nebyly zadány žádné skripty šablon
+
 spam_title=Doručení spamu a virů
 spam_ecannot=Není dovoleno konfigurovat doručování spamu a virů
 spam_virus=Cíl pro e-mailové viry
@@ -3674,6 +3827,7 @@ spam_prov=Systém Cloudmin Services $1
 spam_exitcode=Když uživatel s překročením kvóty obdrží e-mail
 spam_bounce=Odskočit zpět k odesílateli
 spam_queue=Fronta pro pozdější doručení
+
 pass_ecannot=Není dovoleno měnit heslo pro tuto doménu
 pass_ecannot2=Chcete-li změnit heslo, musíte zadat doménu
 pass_dbsync=Varování - změna hesla pro správu této domény také aktualizuje heslo potřebné pro připojení k jeho databázím.
@@ -3685,10 +3839,12 @@ pass_eadmin=Nepodařilo se najít administrátora!
 pass_changing=Změna hesla distributora ..
 pass_changing2=Změna hesla správce ..
 pass_hashpass=Ukládat pouze hashované heslo pro tuto doménu?
+
 dbname_err=Nepodařilo se změnit uživatelská jména databáze
 dbname_euser=Chybějící nebo neplatné uživatelské jméno
 dbname_esame=Stará a nová uživatelská jména jsou stejná
 dbname_eclash=Uživatel databáze se stejným názvem již existuje
+
 cmass_title=Dávkové vytvoření serverů
 cmass_ecannot=Není dovoleno vytvářet servery z dávkového souboru
 cmass_header=Vytvořit více serverů z dávkového souboru
@@ -3719,6 +3875,7 @@ cmass_eipmust=Pro tuto šablonu je povinné automatické přidělování IP
 cmass_emustparent=Není dovoleno vytvářet virtuální servery nejvyšší úrovně - musí být zadána nadřazená doména
 cmass_ecanparent=Nemáte oprávnění spravovat nadřazený virtuální server $1 
 cmass_eparpar=Nadřazený server $1 není serverem nejvyšší úrovně
+
 umass_doing=Vytváření uživatelů z $1 ..
 umass_euname=Chybí uživatelské jméno
 umass_eextra=Tento uživatel nemůže mít další e-mailové adresy
@@ -3733,12 +3890,14 @@ umass_separator=Oddělovač dávkového pole
 umass_separatorcolon=Dvojtečka  :
 umass_separatorcomma=Čárka,
 umass_separatortab=Tab
+
 massu_title=Odinstalovat skripty
 massu_err=Nepodařilo se odinstalovat skripty
 massu_enone=Nebyl vybrán žádný
 massu_rusure=Opravdu chcete odinstalovat vybrané skripty $1, které používají $2 místa na disku?
 massu_rusurehome=Protože je jeden ze skriptů nainstalován do webového adresáře nejvyšší úrovně virtuálního serveru, budou <b>všechny</b> soubory pod <tt>$1</tt> odstraněny, pokud nebudou nainstalovány!
 massu_sel=Vybrané skripty: $1 
+
 usage_title=Využití disku
 usage_summaryheader=Shrnutí využití disku a omezení pro tento virtuální server.
 usage_quota=Disková kvóta
@@ -3746,9 +3905,11 @@ usage_squota=Povolená disková kvóta
 usage_susage=Využité místo na disku
 usage_spercent=Procento použité kvóty
 usage_dirheader=Využití disku soubory a adresáři pod domovským serverem.
+usage_dirheader2=Využití disku soubory a adresáři v domovských a jiných sdílených adresářích tohoto serveru.
+usage_dirdesc=<b>Velikost kvóty</b> sloupce je místo na disku připisované virtuálnímu serveru, zatímco <b>velikost</b> je místo spotřebované všemi soubory v každém adresáři.
 usage_dir=Adresář
 usage_subheader=Využití disku všemi sub-servery.
-usage_others=Domov
+usage_others=Ostatní soubory doma
 usage_size=Velikost
 usage_sizegid=Velikost kvóty
 usage_sub=Sub-Server
@@ -3762,7 +3923,9 @@ usage_tabsummary=Přehled
 usage_tabusers=Podle uživatele
 usage_tabsubs=Sub-server
 usage_tabdbs=Podle databáze
+
 webmin_alog=Protokol přístupu Apache pro $1 
+
 newquotacheck_title=Zkontrolujte diskové kvóty
 newquotacheck_ecannot=Není dovoleno kontrolovat diskové kvóty.
 newquotacheck_esupport=Váš systém souborů nepodporuje ani nevyžaduje kontrolu kvót
@@ -3777,9 +3940,11 @@ newquotacheck_ok=Zkontrolovat nyní
 newquotacheck_enone=Nebyly vybrány žádné souborové systémy!
 newquotacheck_udoing=Kontrola uživatelských kvót na $1 ..
 newquotacheck_gdoing=Zkontrolujte skupinové kvóty na $1 ..
+
 phpmode_title=Možnosti webových stránek
+phpmode_title2=Možnosti PHP
 phpmode_ecannot=Není povoleno konfigurovat možnosti webu pro tento virtuální server
-phpmode_header=Možnosti webových stránek a PHP
+phpmode_header=Možnosti PHP pro tuto doménu
 phpmode_mode=Režim provádění skriptu PHP
 phpmode_mod_php=Apache <tt>mod_php</tt> (spustit jako uživatel Apache)
 phpmode_cgi=CGI wrapper (běží jako vlastník virtuálního serveru)
@@ -3791,6 +3956,7 @@ phpmode_short_fcgid=FCGId
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Varování - Přepnutí z režimů CGI nebo FCGId odstraní všechny výběry verzí PHP v adresáři.
 phpmode_err=Možnosti webu se nepodařilo uložit
+phpmode_err2=Uložení možností PHP se nezdařilo
 phpmode_suexec=Spouštět CGI skripty jako vlastník domény?
 phpmode_esuexec=Možnost <b>Obal CGI</b> nelze vybrat, pokud není vybrána možnost <b>Spustit skripty CGI jako vlastník domény</b>
 phpmode_emodsuexec=Možnost <b>Spustit skripty CGI jako vlastník domény</b> nelze povolit, pokud není nainstalován modul Apache <tt>mod_suexec</tt>
@@ -3805,6 +3971,7 @@ phpmode_nomax=Odstranění limitu maximální doby běhu skriptu PHP ..
 phpmode_emaxtime=Chybějící nebo neplatná maximální doba běhu skriptu PHP
 phpmode_moding=Změna režimu provádění PHP na $1 ..
 phpmode_emoding=.. změna se nezdařila : $1 
+phpmode_emode=.. vybraný režim není v tomto systému podporován!
 phpmode_kidding=Změna počtu podprocesů PHP na $1 ..
 phpmode_nokids=Zakázání dílčích procesů PHP.
 phpmode_rmoding=Změna režimu provádění Ruby na $1 ..
@@ -3837,6 +4004,7 @@ phpmode_evirt=Možnosti webových stránek nelze upravovat, protože nebyl nalez
 phpmode_alog=Soubor protokolu přístupu webového serveru
 phpmode_elog=Soubor protokolu chyb webového serveru
 phpmode_htmldir=Podadresář dokumentů webových stránek
+phpmode_rename=Přejmenovat aktuální adresář, pokud byl změněn?
 phpmode_sslredir=Přesměrovat všechny požadavky na web SSL?
 phpmode_setalog=Změna protokolu přístupu webového serveru.
 phpmode_logerr=.. selhalo : $1 
@@ -3849,6 +4017,17 @@ phpmode_ehtmldir3=Podadresář dokumentů webových stránek nemůže obsahovat.
 phpmode_ehtmldir4=Podadresář dokumentů webových stránek nemůže být pod <tt>doménami</tt>, protože tento adresář je vyhrazen pro dílčí servery
 phpmode_ssloff=Odstraňování přesměrování na web SSL.
 phpmode_sslon=Přidání přesměrování na web SSL.
+phpmode_version=Verze PHP
+phpmode_versions=Verze PHP
+phpmode_enabled=Povoleno
+phpmode_versionone=(Pro tento režim je k dispozici pouze verze)
+phpmode_deldir=Odebrání adresáře PHP $1 ..
+phpmode_edeldir=.. primární adresář nelze odstranit!
+phpmode_adddir=Přidání adresáře PHP $1 ve verzi $2 ..
+phpmode_savedir=Aktualizace adresáře PHP $1 na verzi $2 ..
+
+website_header=Možnosti webových stránek
+
 spf_ecannot=Není dovoleno upravovat možnosti DNS
 spf_enable=Povolení SPF ..
 spf_disable=Deaktivace SPF ..
@@ -3883,25 +4062,30 @@ spf_addrecs=Přidávání záznamů DNS $1 ..
 spf_ttl=Nastavení výchozího TTL na $1 ..
 spf_enablednssec=Vytváření klíče a záznamů DNSSEC ..
 spf_disablednssec=Odstraňování záznamů DNSSEC ..
+spf_ednssecsupport=.. DNSSEC nelze pro tuto doménu spravovat
 spf_enabletlsa=Vytváření záznamů TLSA ..
 spf_disabletlsa=Odstraňování záznamů TLSA ..
 spf_etlsa=.. není v tomto systému podporováno : $1 
 spf_synctlsa=Aktualizace záznamů TLSA ..
 spf_esynctlsa=.. pro tuto doménu nebylo nalezeno žádné
+
 s3_emodule2=Modul Perl $1 potřebný pro komunikaci se službou Amazon S3 nelze načíst : $2 
 s3_emodule3=Moduly Perl $1 nebo $2 potřebné pro komunikaci se službou Amazon S3 nejsou nainstalovány
 s3_edom=Nepodařilo se nahrát soubor domény : $1 
 s3_einfo2=Nepodařilo se přečíst $1 : $2 
 s3_eputacl=Uložení ACL kbelíku se nezdařilo : $1 
 s3_eputlifecycle=Uložení životního cyklu segmentu se nezdařilo : $1 
+
 tdelete_err=Šablony se nepodařilo smazat
 tdelete_enone=Nebyl vybrán žádný
 tdelete_title=Odstraňte šablony serveru
 tdelete_warn=Opravdu chcete odstranit následující vybrané šablony serverů : $1 
 tdelete_confirm=Smazat šablony
 tdelete_users2=Virtuální servery jsou aktuálně používány : $1 
+
 switch_ecannot=Není dovoleno přepnout na správce této domény
 switch_eadmin=Zadaný zvláštní správce neexistuje!
+
 newlinks_title=Vlastní odkazy
 newlinks_descr=Tento formulář lze použít k vytvoření odkazu, který je k dispozici v nabídce vlevo, když je vybrán virtuální server. V adrese URL a názvu odkazu lze použít následující podskupiny :
 newlinks_desc=Název odkazu
@@ -3928,6 +4112,7 @@ newlinks_any=Žádný
 newlinks_add=Přidejte nový vlastní odkaz.
 newlinks_none=Dosud nebyly definovány žádné vlastní odkazy.
 newlinks_return=vlastní odkazy
+
 elink_title1=Vytvořit vlastní odkaz
 elink_title2=Upravit vlastní odkaz
 elink_header1=Detaily vlastního odkazu
@@ -3942,6 +4127,7 @@ elink_feature=Virtuální servery s funkcí
 elink_err=Uložení vlastního odkazu se nezdařilo
 elink_edesc=Chybí název odkazu
 elink_eurl=Chybějící nebo neplatná adresa URL - nejsou povoleny žádné mezery
+
 postsave_title=Virtuální server upraven
 postsave_done=Virtuální server $1 byl úspěšně aktualizován. Pokračujte ve správě pomocí níže uvedených odkazů.
 postsave_edit=Upravit nastavení virtuálního serveru.
@@ -3949,6 +4135,7 @@ postsave_view=Zobrazení nastavení virtuálního serveru.
 postsave_users=Správa uživatelů pošty a FTP.
 postsave_aliases=Spravujte e-mailové aliasy a automatické odpovědi.
 postsave_index=Zobrazit všechny virtuální servery Virtualmin.
+
 showpass_title=Heslo virtuálního serveru
 showpass_user=Přihlášení administrace
 showpass_pass=Heslo pro správu
@@ -3957,19 +4144,12 @@ showpass_ecannot=Není dovoleno zobrazit hesla virtuálního serveru
 showpass_egone=Uživatel neexistuje!
 showpass_dbuser=Uživatelské jméno pro $1 
 showpass_dbpass=Heslo pro $1 
-phpver_title=Verze PHP
+
 phpver_dir=Podadresář webových stránek
 phpver_ver=Verze
-phpver_ecannot=Není dovoleno měnit verze PHP
-phpver_eavail2=Váš systém má nainstalovanou pouze verzi PHP $1, takže výběr jiné verze pro každý adresář není možný.
-phpver_emodphp=Tento virtuální server používá spouštěcí režim <tt>mod_php</tt> pro PHP, což neumožňuje výběr verze adresáře.
 phpver_pub=Výchozí adresář HTML
-phpver_delete=Odstranit vybrané
-phpver_save=Uložit verze
-phpver_err=Uložení verzí PHP se nezdařilo
 phpver_enewdir=Neplatný podadresář webových stránek - musí být jako <tt>myapp</tt> nebo <tt>programy/myapp</tt>
-phpver_derr=Odstranění verzí PHP se nezdařilo
-phpver_enone=Nebyl vybrán žádný
+
 html_title=Úpravy webových stránek
 html_edit=Upravit existující soubor:
 html_editok=Upravit
@@ -3991,10 +4171,12 @@ html_upload=Nahrát soubor:
 html_uploadok=nahrát
 html_apply=Použít styl obsahu:
 html_styleok=Nahrazení souborů
+
 upload_err=Nahrání souboru se nezdařilo
 upload_enone=Nebyl vybrán žádný soubor k nahrání
 upload_enone2=Nebyl nalezen žádný název souboru!
 upload_done=Soubor $1 v celkovém $2 byl úspěšně nahrán do adresáře vašich webových stránek.
+
 sharedips_title=Sdílené IP adresy
 newsharedips_title=Sdílené IP adresy
 sharedips_header=IP adresy sdílené virtuálními servery
@@ -4017,6 +4199,7 @@ sharedips_ealloc=V rozsahu přidělení $1 nebyly nalezeny žádné bezplatné a
 sharedips_missing=Nadřazené rozhraní $1 neexistuje!
 sharedips_eboot=Nepodařilo se najít konfiguraci spouštěcího času pro IP adresu
 sharedips_eactives=Nepodařilo se najít aktivní konfiguraci pro IP adresu
+
 newdynip_title=Dynamická aktualizace IP
 newdynip_enabled=Dynamická aktualizace povolena?
 newdynip_service=Dynamická služba DNS
@@ -4038,8 +4221,10 @@ newdynip_off=Dynamická aktualizace IP byla deaktivována. Změny IP adresy syst
 newdynip_never=Dosud neaktualizováno
 newdynip_notify=Odeslat e-mailem oznámení o aktualizaci IP
 newdynip_none=Nikdo
+
 newdynip_eext=Zpracování externě viditelné adresy IP se nezdařilo
 newdynip_eexternal=V režimu externího skriptu musí být zadána úplná cesta ke spuštěnému skriptu
+
 dynip_dyndns=DynDNS
 dynip_external=Externí skript ..
 dynip_none=Neaktualizujte žádnou službu
@@ -4050,6 +4235,7 @@ style_content=Počáteční text obsahu webu
 style_ok=Použijte styl
 style_doing=Nahrazení obsahu webových stránek stylem $1 ..
 style_egone=Styl neexistuje nebo není k dispozici
+
 newstyles_title=Styly obsahu
 newstyles_desc1=Tento formulář umožňuje instalaci stylů vytvořených vývojáři třetích stran.
 newstyles_header=Nainstalujte nový styl
@@ -4070,9 +4256,11 @@ newstyles_tabdelete=Smazat styl
 newstyles_desc3=Ze seznamu níže vyberte styl obsahu třetí strany, který chcete odebrat. Styly vestavěné do Virtualmin nelze odstranit. Žádné webové stránky používající styl nebudou provedeny.
 newstyles_dstyle=Styl, který chcete odstranit
 newstyles_edelete=Vybraný styl obsahu již neexistuje!
+
 thumb_estyle=Styl neexistuje
 thumb_title=Náhled stylu
 thumb_ethumb=Styl obsahu $1 nemá obrázek náhledu.
+
 upgrade_title=Upgradujte na Virtualmin Pro
 newupgrade_title=Upgradujte na Virtualmin Pro
 upgrade_desc1=Pokud jste si užili používání Virtualmin GPL a chcete učinit další krok k verzi Pro, můžete tuto stránku použít k automatickému provedení procesu upgradu. Postupujte takto :
@@ -4111,12 +4299,14 @@ upgrade_update=Aktualizace dostupných balíčků z APT ..
 upgrade_debs=Upgradování balíčků Virtualmin Debian : $1 
 upgrade_yumclear=Vymazání mezipaměti YUM ..
 upgrade_etypematch=Upgradování není možné, protože typ instalace Virtualmin je <tt>$1</tt>, ale Webmin's je <tt>$2</tt>
+
 maillog_desc=Tento formulář lze použít k vyhledání zpráv v poštovních protokolech, které odpovídají určitým podmínkám, a zjistit, co se s nimi stalo. Všechna pole jsou volitelná a pokud budou ponechána prázdná, budou pro účely srovnání přeskočena.
 maillog_any=&lt;Jakákoli doména&gt;
 maillog_date=datum
 maillog_auto=Automatická odpověď byla odeslána
 maillog_bounce=Odskočeno pro $1 
 maillog_bad=Vyloučení
+
 viewmaillog_err=Nepodařilo se zobrazit přihlášenou zprávu
 viewmaillog_egone=Už ne v protokolu!
 viewmaillog_title=Přihlášená e-mailová zpráva
@@ -4136,6 +4326,7 @@ viewmaillog_file=Úplná cílová cesta
 viewmaillog_relay=Odchozí e-mailové relé
 viewmaillog_status=Stav doručení poštovního serveru
 viewmaillog_size=Velikost zprávy
+
 massg_title=Upgradujte skripty
 massg_rusure=Opravdu chcete upgradovat vybrané skripty $1 na jejich nejnovější verze?
 massg_ok=Vylepšit nyní
@@ -4145,11 +4336,13 @@ massg_fromto=Upgradování z $1 na $2
 massg_stay=Zůstat u $1 
 massg_doing=Upgradování $1 na verzi $2 ..
 massg_edeleted=Skript $1 byl ručně smazán, a proto jej nelze upgradovat!
+
 exclude_dbs=Databáze a tabulky k přeskočení
 exclude_dbdesc=Na každém řádku zadejte název <tt>databáze</tt> nebo <tt>database.table</tt>.
 exclude_eabs=Adresář '$1' nemůže být absolutní cestou
 exclude_edot=Adresář '$1' nemůže obsahovat ..
 exclude_edb=Název databáze '$1' je neplatný
+
 scriptwarn_header=Následující skripty spravované Virtualminem mají k dispozici nové verze :
 scriptwarn_header2=Následující skripty spravované Virtualminem mají k dispozici nové verze na \nvirtual serveru $1  :
 scriptwarn_script=Jméno skriptu
@@ -4158,6 +4351,7 @@ scriptwarn_ver=Nová verze
 scriptwarn_where3=Upgradování lze provést ve Virtualmin, na stránce Instalovat skripty v každé doméně nebo najednou na: \n $1 
 scriptwarn_where2=Upgradování lze provést ve Virtualmin na stránce: \n $1 
 scriptwarn_subject=K dispozici jsou aktualizace skriptů Virtualmin
+
 quotawarn_subject=Sledování kvóty uživatelských disků Virtualmin
 quotawarn_body=Následující servery Virtualmin dosáhly nebo se blíží k \ ~ limitům diskových kvót:
 quotawarn_body2=Následující uživatelé Virtualmin dosáhli nebo se blíží \njejich limitů diskových kvót:
@@ -4170,6 +4364,7 @@ quotawarn_reached=Dosaženo $1 %
 quotawarn_over=kvóta překročena
 quotawarn_suffixdom=Odeslal Virtualmin v: $1 
 quotawarn_suffixuser=Odeslal Virtualmin v: $1 
+
 history_title=Statistiky systému
 history_ecannot=Není dovoleno prohlížet historické statistiky systému
 history_year=1 rok
@@ -4240,6 +4435,7 @@ history_type_email=E-mailové zprávy
 history_type_cpu=Využití CPU
 history_type_virt=Virtualmin se počítá
 history_type_system=Statistiky systému
+
 sv_title=Skenování spamu a virů
 newsv_title=Skenování spamu a virů
 sv_ecannot=Není dovoleno upravovat skenování spamu a virů
@@ -4274,6 +4470,7 @@ sv_title5=Povolit server pro filtrování spamu
 sv_sdisabling=Zakázání filtrovacího serveru SpamAssassin ..
 sv_senabling=Konfigurace a povolení filtrovacího serveru SpamAssassin ..
 sv_swarning=Varování! Virtualmin je nakonfigurován pro použití filtru serveru, ale proces serveru SpamAssassin již není spuštěn
+
 features_title=Funkce a pluginy
 newfeatures_title=Funkce a pluginy
 features_name=Funkce nebo Plugin
@@ -4283,6 +4480,7 @@ features_plugin=Zapojit
 features_desc=Tato stránka umožňuje vybrat základní funkce a doplňky, které jsou k dispozici pro použití na virtuálních serverech. Zaškrtávací políčko v prvním sloupci určuje, zda je vůbec k dispozici, zatímco pole ve sloupci <b>Výchozí</b> určuje, zda je ve výchozím nastavení povoleno.
 features_used=Zobrazit domény
 features_return=seznam funkcí a pluginů
+
 clamd_copyconf=Vytváření konfiguračního souboru ClamAV $1 ..
 clamd_esrcfile=.. zdrojový soubor odpovídající $1 nebyl nalezen!
 clamd_esrcalready=.. již existuje
@@ -4304,13 +4502,16 @@ clamd_ekillmsg=Nepodařilo se zabít procesy na serveru pro skenování virů Cl
 spamd_estartmsg=Filtrovací server SpamAssassin nelze spustit
 spamd_estopmsg=Filtrovací server SpamAssassin není spuštěn
 spamd_ekillmsg=Nepodařilo se zabít procesy filtrovacího serveru SpamAssassin : $1 
+
 spamd_boot=Povolení serveru SpamAssassin v době spuštění.
 spamd_start=Spuštění serveru SpamAssassin ..
 spamd_startfailed=.. se nepodařilo spustit : $1 
 spamd_unboot=Zakázání serveru SpamAssassin v době spuštění.
 spamd_unbootact=.. nebyla nalezena žádná akce při spuštění!
 spamd_stop=Zastavení serveru SpamAssassin ..
+
 chain_epaste=Nebyl zadán žádný text certifikátu
+
 stopscript_title=Zastavte server
 stopscript_egone=Skript již neexistuje!
 stopscript_doing=Ukončení procesu serveru pro $1 ..
@@ -4319,6 +4520,7 @@ startscript_title=Spusťte server
 startscript_doing=Spuštění procesu serveru pro $1 ..
 startscript_failed=.. selhalo : $1 
 restartscript_title=Restartujte server
+
 newshells_title=Vlastní skořápky
 newshells_descr=Tato stránka umožňuje přizpůsobit prostředí dostupné správcům virtuálních serverů a uživatelům pošty/FTP tak, aby vyhovovaly potřebám vašeho webu. Vlastní prostředí se často používá k udělení přístupu uživatelů k FTP, SSH nebo jiným službám.
 newshells_defs=Dostupné skořápky pro administrátory a poštovní schránky :
@@ -4341,6 +4543,7 @@ newshells_eownerdef=Přesně jeden shell musí být výchozí pro správce domé
 newshells_emailboxdef=Přesně jedna schránka musí být výchozí pro poštovní schránky
 newshells_eresellerdef=Přesně jeden shell musí být výchozí pro distributory
 newshells_id=Přístup
+
 shells_mailbox=Pouze e-mail
 shells_mailbox2=Žádný přístup
 shells_mailboxftp=E-mail a FTP
@@ -4356,10 +4559,12 @@ shells_ftp2=Pouze FTP
 shells_ssh=E-mail, FTP a SSH
 shells_ssh2=FTP a SSH
 shells_none=&lt;Žádná skořápka&gt;
+
 nicetime_days=$1 dny, $2 hodiny, $3:$4 minuty
 nicetime_hours=$1 hodiny, $2:$3 minuty
 nicetime_mins=$1 minuty, $2 sekund
 nicetime_secs=$1 sekund
+
 mail_header=Nastavení související s e-mailem virtuálního serveru
 mail_bcc=BCC odchozí e-mail na adresu
 mail_rbcc=BCC příchozí e-mail do
@@ -4389,6 +4594,7 @@ mail_nothing=Nebyly provedeny žádné změny!
 mail_ecloudid=Pro vybraný filtr cloudové pošty musí být zadáno ID
 mail_url=Adresa URL aktuálního poskytovatele filtrování
 mail_mx=Aktuální záznamy MX
+
 nf_header=Následující nové funkce jsou k dispozici v $1 ..
 nf_desc=Vlastnosti
 nf_vm=Virtualmin
@@ -4397,6 +4603,7 @@ nf_and=$1 a $2
 nf_seen=Skrýt nové funkce
 nf_try=Zkus to ..
 nf_ver=(Verze $1)
+
 chroot_title=Omezení adresáře FTP
 newchroot_title=Omezení adresáře FTP
 newchroot_desc=Tato stránka umožňuje konfigurovat, ke kterým adresářům se uživatelé přihlašující se přes FTP mohou dostat. Omezení se týkají vlastníků vybraných virtuálních serverů a všech jejich uživatelů s přístupem FTP. Majitelé serverů, kteří nemají žádné odpovídající omezení, budou moci zobrazit soubory mimo své domovy, ačkoli oprávnění jim obecně zabrání v přístupu k adresářům jiných virtuálních serverů.
@@ -4414,6 +4621,7 @@ chroot_err=Uložení omezení adresáře FTP se nezdařilo
 chroot_edom=Nelze najít virtuální server pro skupinu $1 
 chroot_edir=Chybějící nebo neplatný adresář v řádku $1 
 chroot_saving=Aktualizace konfigurace FTP serveru.
+
 res_elinux=Limity zdrojů jsou podporovány pouze v systému Linux
 res_elinuxconf=Konfigurační soubor limitů prostředků $1 nebyl nalezen
 res_epamssh=Službu PAM pro SSH nebylo možné najít, takže ověření limitů zdrojů není dokončeno
@@ -4433,6 +4641,7 @@ res_secs=sekundy
 res_time=Maximální doba CPU na proces
 res_etime=Chybějící nebo neplatný maximální čas CPU na proces
 res_etime2=Maximální doba CPU na proces musí být 1 minuta nebo více
+
 sched_title=Plánované zálohy
 sched_ecannot=Nemáte oprávnění spravovat plánované zálohy
 sched_yes=Ano, $1 
@@ -4462,23 +4671,27 @@ sched_now=Záloha ..
 sched_restore=Obnovit ..
 sched_return=naplánované zálohy
 sched_logs=Zálohovací protokoly ..
+
 cron_special=Jednoduchý rozvrh
 cron_complex=Složitý plán
 cron_cron=Cron specifikace
 cron_title=Vyberte Plán
 cron_ok=OK
 cron_ehidden=Nebyl vybrán žádný složitý plán
+
 dsched_err=Odstranění naplánovaných záloh se nezdařilo
 dsched_enone=Nebyl vybrán žádný
 dsched_egone=Záloha s ID $1 již neexistuje
 dsched_erunning=Záloha s ID $1 již není spuštěna
 dsched_ecannot=Nemáte oprávnění spravovat zálohu pomocí ID $1 
+
 dbhosts_err=Změna hostitelů vzdálené databáze se nezdařila
 dbhosts_ehost='$1' není platný název hostitele nebo výraz
 dbhosts_title=Aktualizovat hostitele databáze
 dbhosts_doing=Nastavení povolených hostitelů databáze $1 na $2 ..
 dbhosts_failed=.. selhalo : $1 
 dbhosts_done=.. nastavit pro $1 a další uživatele s přístupem do databáze.
+
 newglobal_title=Globální proměnné
 newglobal_desc=Proměnné definované na této stránce lze použít ve kterékoli doméně nebo šabloně na úrovni uživatele ve Virtualmin. Chcete-li přidat proměnnou, stačí vyplnit prázdný název a hodnotu do prázdného řádku v dolní části tabulky. Chcete-li jedno odebrat, zrušte jeho jméno. Chcete-li proměnnou dočasně zakázat, zrušte její zaškrtnutí ve sloupci povoleném.
 newglobal_ecannot=Není dovoleno upravovat globální proměnné
@@ -4487,20 +4700,24 @@ newglobal_name=Název proměnné
 newglobal_value=Proměnná hodnota
 newglobal_err=Nepodařilo se uložit globální proměnné
 newglobal_ename=Neplatný název proměnné v řádku $1 - jsou povolena pouze písmena, čísla a podtržítko
+
 spamtrap_already=Pro tento virtuální server již existují aliasy spamové pasti
 spamtrap_clash=Nelze vytvořit aliasy nevyžádané pošty, protože již existují následující konfliktní aliasy : $1 
 spamtrap_noaliases=Pro tento virtuální server neexistují aliasy nevyžádané pošty
+
 unsub_title=Převést subdoménu
 unsub_rusure=Opravdu chcete převést tuto subdoménu na sub-server? Jeho webový obsah nebude proveden a všechny záznamy DNS budou přesunuty do jejich vlastní domény.
 unsub_ok=Převést na sub-server
 unsub_doing=Převádí $1 na sub-server ..
 unsub_failed=.. převod selhal!
+
 unalias_title=Převést server Alias
 unalias_err=Nepodařilo se převést aliasový server
 unalias_rusure=Opravdu chcete převést tento alias virtuální server na sub-server? Již nebude obsluhovat webové stránky starého cílového virtuálního serveru, ale může mít svůj vlastní webový obsah, poštovní schránky a e-mailové aliasy.
 unalias_ok=Převést na sub-server
 unalias_doing=Převádí $1 na sub-server ..
 unalias_failed=.. převod selhal!
+
 connect_echeck=Nepodařilo se zkontrolovat připojení
 connect_eempty=Žádná odpověď při kontrole připojení
 connect_ecannot=Není dovoleno kontrolovat připojení tohoto virtuálního serveru
@@ -4524,6 +4741,7 @@ cfix_ssl=Ujistěte se, že je spuštěn webový server vašeho systému, port 44
 cfix_smtptimeout=Zkontrolujte, zda brána firewall vašeho systému blokuje port 25.
 cfix_smtp=Ujistěte se, že poštovní server vašeho systému běží a poslouchá na externím síťovém rozhraní.
 cfix_smtpto=Zkontrolujte, zda je váš poštovní server nakonfigurován pro příjem e-mailů pro tuto doménu.
+
 newplan_title=Plány účtů
 plans_name=Název plánu
 plans_quota=Disková kvóta
@@ -4539,6 +4757,7 @@ plans_setdef=Nastavit výchozí plán na:
 plans_nodef=Žádné - použijte první v seznamu
 plans_savedef=Změnit výchozí
 plans_esetdef=Vybraný plán neexistuje nebo není k dispozici
+
 plan_header1=Základní podrobnosti plánu
 plan_header2=Povolené funkce virtuálního serveru
 plan_header3=Povolené funkce
@@ -4558,9 +4777,11 @@ plan_scripts=Povolené skripty
 plan_scriptsall=Všichni kromě těch globálně postižených
 plan_scriptsopts=Všechny skripty
 plan_scriptssel=Povoleno
+
 dplans_err=Plány se nepodařilo smazat
 dplans_enone=Nebyl vybrán žádný
 dplans_eall=Musí existovat alespoň jeden plán
+
 postgrey_title=E-mail Greylisting
 newpostgrey_title=E-mail Greylisting
 postgrey_epostfix=Postgrey lze použít pouze ve spojení s poštovním serverem Postfix
@@ -4611,6 +4832,7 @@ postgrey_title4=Nainstalujte Postgrey
 postgrey_installing=Instalace balíčku Postgrey ..
 postgrey_installfailed=.. instalace selhala!
 postgrey_installed=.. instalace byla úspěšně dokončena
+
 editgrey_titleclients=Upravit povoleného klienta
 editgrey_titlerecipients=Upravit Whitelisted Recipient
 creategrey_titleclients=Přidat klienta ze seznamu povolených
@@ -4625,8 +4847,10 @@ editgrey_err=Uložení bílé listiny se nezdařilo
 editgrey_evalueclients=Chybějící nebo neplatně vypadající adresa IP poštovního serveru nebo název hostitele
 editgrey_eregexp=Neplatný regulární výraz : $1 
 editgrey_evaluerecipients=Chybí nebo neplatná e-mailová adresa příjemce
+
 delgrey_err=Smazání whitelist záznamů se nezdařilo
 delgrey_enone=Nebyl vybrán žádný
+
 copycert_title=Kopírovat certifikát SSL
 copycert_ecannot=Není dovoleno kopírovat SSL certifikát tohoto virtuálního serveru
 copycert_webmindir=Kopírování certifikátu a klíče do $1 ..
@@ -4648,6 +4872,7 @@ copycert_penabling=Povolení SSL v konfiguraci Postfixu.
 copycert_fsaving=Kopírování certifikátu a klíče do souborů ProFTPD ..
 copycert_fsaving2=Kopírování certifikátu, klíče a CA do souborů ProFTPD ..
 copycert_fenabling=Povolení SSL v konfiguraci ProFTPD.
+
 wizard_title=Průvodce po instalaci
 wizard_ecannot=Není dovoleno spustit průvodce po instalaci
 wizard_next=další
@@ -4742,6 +4967,7 @@ wizard_defssl2=Ano, pomocí certifikátu Pojďme šifrovat
 wizard_defdom_clash=Virtuální server s názvem $1 již existuje
 wizard_defdom_already=Výchozí virtuální server s názvem $1 již existuje
 wizard_defdom_desc=Hostujte výchozí doménu
+
 backuplog_title=Zálohovací protokoly
 backuplog_ecannot=Není dovoleno prohlížet záložní protokoly Virtualmin
 backuplog_search=Najít protokoly odpovídající
@@ -4762,6 +4988,7 @@ backuplog_part=Částečný
 backuplog_nodoms=Žádné domény
 backuplog_return=výpis protokolu záloh
 backuplg_esched=Plánovaná záloha neexistuje!
+
 viewbackup_title=Zobrazit záložní protokol
 viewbackup_eid=Chybějící nebo neplatný záložní ID!
 viewbackup_egone=Protokolovaná záloha neexistuje!
@@ -4802,6 +5029,7 @@ viewbackup_key=Ano, s klíčem $1
 viewbackup_sched=Z plánovaného zálohování
 viewbackup_gone=ID $1 (smazáno)
 viewbackup_ownrestore=Majitelé mohou obnovit?
+
 dbackup_err=Zálohování se nepodařilo smazat
 dbackup_title=Odstranit zálohu
 dbackup_rusure=Opravdu chcete smazat tuto zálohu domén $2 z $3 celkem $1 ?
@@ -4809,6 +5037,7 @@ dbackup_confirm=Smazat
 dbackup_doing=Mazání zálohy z $1 ..
 dbackup_done=.. úspěšně smazáno
 dbackup_failed=.. selhalo : $1 
+
 redirects_title=Přesměrování webových stránek
 redirects_ecannot=Není dovoleno upravovat přesměrování webových stránek pro tuto doménu
 redirects_eweb=Tento virtuální server nepodporuje přesměrování
@@ -4823,6 +5052,7 @@ redirects_type=Typ
 redirects_alias=Alias do adresáře
 redirects_redirect=Přesměrovat na URL
 redirects_dest=Destinace
+
 redirect_egone=Přesměrování již neexistuje!
 redirect_create=Vytvořit přesměrování webových stránek
 redirect_edit=Upravit přesměrování webových stránek
@@ -4847,9 +5077,11 @@ redirect_edir=Adresář, který není absolutní
 redirect_edir3=Chybí cílový adresář $1 
 redirect_edir2=Cílový adresář musí být pod $1 
 redirect_ecode=Neplatný stavový kód HTTP
+
 newchangelog_title=Nový protokol funkcí
 newchangelog_ecannot=Není dovoleno zobrazit nový protokol funkcí
 newchangelog_desc=Tato stránka obsahuje seznam všech hlavních změn ve všech verzích Virtualmin nainstalovaných ve vašem systému, až po aktuální verzi.
+
 dkim_title=Identifikovaná pošta DomainKeys
 dkim_title1=Povolit MailKeys Identified Mail
 dkim_title2=Zakázat identifikovanou poštu DomainKeys
@@ -4877,10 +5109,12 @@ dkim_extra=Domény k přihlášení
 dkim_eextra=Neplatná další doména $1 
 dkim_eexclude=Neplatná vyloučená doména $1 
 dkim_exclude=Nikdy nepodepisujte domény
+
 dkim_title4=Nainstalujte DKIM
 dkim_installing=Instalace balíčku filtrů DKIM ..
 dkim_installfailed=.. instalace selhala!
 dkim_installed=.. instalace byla úspěšně dokončena
+
 dkim_newkey=Generování soukromého klíče v souboru $1 ..
 dkim_enewkey=.. soukromý klíč selhal : $1 
 dkim_pubkey=Extrahování veřejného klíče ze soukromého klíče v $1 ..
@@ -4902,6 +5136,7 @@ dkim_unboot=Deaktivace DKIM filtru při spuštění
 dkim_domains=Hledání virtuálních serverů pro povolení DKIM pro ..
 dkim_founddomains=.. nalezeno $1 serverů
 dkim_founddomains2=.. nebyly nalezeny žádné virtuální servery s povoleným DNS a e-mailem, ale povolující další domény $1 
+dkim_founddomains3=.. nalezeno $1 serverů a $2 domén navíc
 dkim_nodomains=.. nebyly nalezeny žádné servery s povoleným DNS i e-mailem!
 dkim_undns=Odebírání záznamů DKIM z domény DNS $1 ..
 dkim_dnsremoved=.. úspěšně odstraněn
@@ -4910,6 +5145,7 @@ dkim_records=DKIM DNS záznamy pro domény
 dkim_pubkeypem=Veřejný klíč DKIM ve formátu PEM
 dkim_privkeypem=Soukromý klíč DKIM ve formátu PEM
 dkim_esize=Velikost klíče DKIM musí být počet alespoň 512 bitů
+
 newautoconfig_title=Konfigurace poštovního klienta
 autoconfig_ecannot=Není dovoleno upravovat konfiguraci poštovního klienta
 autoconfig_header=Možnosti automatické konfigurace klienta
@@ -4921,6 +5157,7 @@ autoconfig_enable=Povolení automatické konfigurace poštovního klienta pro vi
 autoconfig_disable=Zakázání automatické konfigurace poštovního klienta pro virtuální servery $1 ..
 autoconfig_failed=Selhalo pro $1 : $2 
 autoconfig_enabled_global=Nastavení automatické konfigurace uložené pošty.
+
 newretention_title=Vyčištění poštovní schránky
 retention_ecannot=Není povoleno nakonfigurovat čištění poštovní schránky
 retention_header=Možnosti automatického čištění poštovní schránky
@@ -4936,6 +5173,7 @@ retention_folders=Vyčištění zpráv v
 retention_folders0=Všechny uživatelské složky
 retention_folders1=Pouze doručené
 retention_desc=Tato stránka umožňuje, aby Virtualmin automaticky mazal staré e-mailové zprávy z poštovních schránek vlastníků domény a uživatelů pošty.
+
 provision_title=Klient služeb Cloudmin
 provision_ecannot=Není dovoleno nastavovat klienta služeb Cloudmin
 provision_header=Možnosti klienta služby Cloudmin
@@ -4983,12 +5221,14 @@ provision_espamtest=.. nelze použít dodaný systém $1 : $2
 provision_spamgot=.. pomocí systému $1 
 provision_spamunsetup=Ukončení používání systému filtrování spamu.
 provision_espamunsetup=.. selhalo : $1 
+
 provision_emysqldbcheck=Chyba při kontrole služeb MySQL databáze : $1 
 provision_emysqldb=MySQL databáze $1 již existuje na hostiteli služeb
 provision_emysqlcheck=Chyba při kontrole služeb MySQL přihlášení : $1 
 provision_emysql=MySQL přihlášení $1 již existuje na hostiteli služeb
 provision_ednscheck=Chyba služeb při kontrole zóny DNS : $1 
 provision_edns=Zóna DNS $1 již na hostiteli služeb existuje
+
 records_title=Záznamy DNS
 records_ecannot=Není dovoleno upravovat záznamy DNS
 records_name=Název záznamu
@@ -5041,6 +5281,7 @@ records_comment=Komentář
 records_manual=Ručně upravte záznamy
 records_epost=Záznamy nebyly úplně vymazány : $1 
 records_viewdesc=Doména DNS tohoto virtuálního serveru není hostována vaším systémem Virtualmin. Pokud je doména hostována jinde, měly by se níže uvedené záznamy použít k zajištění toho, aby web a e-mail správně fungovaly.
+
 record_title1=Vytvořit záznam DNS
 record_title2=Upravit záznam DNS
 record_egone=Záznam již neexistuje!
@@ -5070,6 +5311,7 @@ record_defttl=Výchozí doba mezipaměti
 record_epost=Záznam nebyl úplně uložen : $1 
 record_esservice=Chybějící nebo neplatně vypadající název služby
 record_esproto=Neplatný servisní protokol
+
 clone_err=Klonování virtuálního serveru se nezdařilo
 clone_eclash=Virtuální server se stejným názvem již existuje
 clone_eclash2=Uživatel se stejným názvem již existuje
@@ -5150,6 +5392,7 @@ clone_ssl=Kopírování směrnic Apache SSL ..
 clone_newip=IP adresa pro klon
 clone_alloc=Přidělte novou IP
 clone_vip=Použijte adresu
+
 mrecords_title=Upravit záznamy DNS
 mrecords_ecannot=Není dovoleno ručně upravovat záznamy DNS
 mrecords_desc=Tato stránka umožňuje ručně upravit všechny záznamy DNS v doméně v konfiguračním formátu BIND.
@@ -5157,16 +5400,19 @@ mrecords_err=Uložení záznamů DNS se nezdařilo
 mrecords_enone=Nic nevstoupilo!
 mrecords_evalidate=Ověření se nezdařilo : $1 
 mrecords_validate=Ověření nových záznamů?
+
 mxv_unsupported=Pro omezení přenosu jsou podporovány pouze Sendmail a Postfix
 mxv_rrm=Direktiva $1 není nastavena v konfiguraci Postfixu
 mxv_eaccess=Funkce kontroly nevyžádané pošty (access_db) není v konfiguraci Sendmail povolena
 mxv_eaccessfile=Soubor kontroly nevyžádané pošty (access_db) $1 zatím neexistuje
+
 fixperms_err=Oprávnění se nezdařilo
 fixperms_edoms=Nebyly vybrány žádné virtuální servery
 fixperms_title=Oprava oprávnění
 fixperms_dom=Oprava vlastnictví souboru a oprávnění pro $1 ..
 fixperms_edir=.. nemá domovský adresář
 fixperms_failed=.. selhalo : $1 
+
 bkeys_title=Zálohovací šifrovací klíče
 bkeys_key=ID klíče GPG
 bkeys_delete=Odstranit vybrané klíče
@@ -5188,6 +5434,7 @@ bkeys_eused2=Klíč $2 používá plánovaná záloha na $1
 bkeys_rusure=Opravdu chcete smazat vybrané záložní šifrovací klíče $1 ?
 bkeys_rusuerlogs=Tyto klíče byly použity k šifrování předchozích záloh před $1, které bez nich nelze obnovit.
 bkeys_all=Povolit majitelům domény používat klíč?
+
 bkey_create=Vytvořit šifrovací klíč
 bkey_edit=Upravit šifrovací klíč
 bkey_ecannot=Není dovoleno upravovat tento šifrovací klíč
@@ -5224,11 +5471,13 @@ bkey_rusuerlogs=Tento klíč byl použit k šifrování předchozích záloh př
 bkey_edescclash=Klíč GPG se stejným popisem již existuje
 bkey_eemailclash=Klíč GPG se stejnou e-mailovou adresou již existuje
 bkey_download=Klíč ke stažení
+
 hashtype_crypt=Unix DES krypta
 hashtype_md5=MD5 hash
 hashtype_unix=Výchozí typ hash systému
 hashtype_mysql=MySQL heslo hash
 hashtype_digest=Hash ověřování webového digestu
+
 fixsymlinks_title=Opravte oprávnění pro symbolické propojení
 fixsymlinks_ecannot=Není dovoleno opravovat oprávnění k symbolickým odkazům
 fixsymlinks_doing=Aktualizace všech virtuálních serverů, aby se zabránilo nebezpečným symbolickým odkazům.
@@ -5241,10 +5490,12 @@ fixsymlinks_doms=Problematické soubory <tt>.htaccess</tt> byly nalezeny v :
 fixsymlinks_ok=Oprava přístupových souborů
 fixsymlinks_htdoing=Opravy možností v souborech <tt>.htaccess</tt> ..
 fixsymlinks_htdone=.. opraveno $1 souborů v doménách $2 
+
 fixmodphp_title=Oprava oprávnění PHP
 fixmodphp_ecannot=Není dovoleno opravovat oprávnění PHP
 fixmodphp_doing=Aktualizace všech virtuálních serverů, aby se zabránilo deaktivaci mod_php.
 fixmodphp_done=.. opraveno $1 domén
+
 buckets_title=Amazon S3 Buckets
 buckets_ecannot=Není dovoleno spravovat kbelíky S3
 buckets_eaccounts=Dosud nebyly vytvořeny žádné plánované zálohy na S3 a nebyly nastaveny žádné výchozí klíče S3.
@@ -5256,6 +5507,7 @@ buckets_created=Vytvořeno dne
 buckets_location=Umístění
 buckets_add=Vytvořte nový kbelík S3.
 buckets_return=seznam kbelíků
+
 bucket_title1=Vytvořte kbelík S3
 bucket_title2=Upravit S3 Bucket
 bucket_eagone=Účet neexistuje!
@@ -5300,6 +5552,7 @@ bucket_eldays=Chybějící nebo nečíselný počet dní v životním cyklu $1
 bucket_elday=Chybějící nebo nečíselný den v životním cyklu $1 
 bucket_elmonth=Chybějící nebo nečíselný měsíc v životním cyklu $1 
 bucket_elyear=Chybějící nebo nečíselný rok v životním cyklu $1 
+
 ratelimit_title=Omezení rychlosti pošty
 ratelimit_eos=V tomto operačním systému není podporována rychlost e-mailu
 ratelimit_econfig=Konfigurační soubor milter-greylist $1 neexistuje
@@ -5328,6 +5581,7 @@ ratelimit_enum=Počet zpráv musí být číslo
 ratelimit_etime=Časové období musí být číslo
 ratelimit_socket=Úprava souboru soketu ..
 ratelimit_etwice=Doména $1 byla vybrána dvakrát
+
 ratelimit_title4=Nainstalujte omezení rychlosti pošty
 ratelimit_installing=Instalace balíčku omezujícího rychlost e-mailu.
 ratelimit_installfailed=.. instalace selhala!
@@ -5348,6 +5602,7 @@ ratelimit_h=hodin
 ratelimit_d=dny
 ratelimit_w=týdny
 ratelimit_y=let
+
 transfer_title=Přeneste virtuální server
 transfer_err=Nepodařilo se přenést server
 transfer_ecannot=Není dovoleno přenášet virtuální servery
@@ -5400,6 +5655,7 @@ transfer_disabling=Zakázání $1 v tomto systému.
 transfer_ereplication=Nelze současně povolit replikaci ani odstranění domény
 transfer_ehost=Chybí cílové jméno hostitele
 transfer_ehost2=Cílový název hostitele nelze vyřešit
+
 domdkim_title=Možnosti DomainKey
 domdkim_header=Možnosti DomainKey pro tento server
 domdkim_key=Soukromý klíč DKIM ve formátu PEM
@@ -5415,8 +5671,10 @@ domdkim_ekey=Neplatný formát klíče : $1
 domdkim_egen=Generování nového klíče se nezdařilo : $1 
 domdkim_enabled=DKIM není aktuálně povoleno
 domdkim_records=Záznamy DNS DKIM
+
 clouds_title=Poskytovatelé cloudového úložiště
 clouds_name=Jméno poskytovatele
+clouds_url=webová stránka
 clouds_state=Aktuální stav
 clouds_users=Zálohování uživatelů
 clouds_ecannot=Není dovoleno upravovat poskytovatele cloudového úložiště
@@ -5424,6 +5682,7 @@ clouds_unconf=Dosud nenakonfigurováno
 clouds_return=seznam poskytovatelů
 clouds_nusers=Používá zálohy $1 
 clouds_nousers=Nepoužívá žádné zálohy
+
 cloud_s3desc=Amazon S3
 cloud_rsdesc=Cloudové soubory Rackspace
 cloud_googledesc=Google Cloud Storage
@@ -5443,6 +5702,7 @@ cloud_s3_location=Místo pro nové kbelíky
 cloud_title=Upravit poskytovatele cloudu
 cloud_header=Možnosti poskytovatele cloudového úložiště
 cloud_provider=Jméno poskytovatele
+cloud_url=Web poskytovatele
 cloud_es3_endpoint=Server kompatibilní s S3 musí být platný název hostitele
 cloud_es3_chunk=Velikost nahraného kusu musí být kladné číslo
 cloud_egone=Neznámý poskytovatel cloudového úložiště!
@@ -5489,6 +5749,7 @@ cloud_bb_key=Klíč API
 cloud_bb_ekeyid=Chybějící nebo neplatně vypadající ID klíče API
 cloud_bb_ekey=Chybějící nebo neplatně vypadající klíč API
 cloud_bb_elogin=Přihlášení k Backblaze se nezdařilo : $1 
+
 left_virtualmin=Virtualmin
 left_master=Master admin
 left_reseller=Překupník
@@ -5500,6 +5761,7 @@ left_master2=Cloudmin master admin
 left_login=Přihlášení: $1 
 left_level=Úroveň 1
 left_generic=Vytvořte virtuální server
+
 right_statusheader=Postavení
 right_sysinfoheader=Programy
 right_virtheader=Virtualmin se počítá
@@ -5563,6 +5825,7 @@ right_quota=Využití disku a kvóta
 right_bw=Využití a omezení šířky pásma
 right_of=$1 z $2 
 right_sysinfo=systémové informace
+
 assoc_title=Funkce přidružení a odpojení
 assoc_desc=Funkce povolené nebo zakázané na této stránce neaktualizují žádné konfigurační soubory systému - místo toho se změní pouze databáze funkcí Virtualmin, u nichž se očekává, že bude mít doménu. To lze použít k importu funkce, která byla nastavena ručně, nebo k odpojení konfigurace tak, aby byla zachována při odstranění virtuálního serveru.
 assoc_header=Nastavení přidružení funkcí
@@ -5570,6 +5833,7 @@ assoc_features=Funkce známé Virtualmin
 assoc_validate=Vyžadovat úspěšné ověření před uložením?
 assoc_err=Nepodařilo se přiřadit funkce
 assoc_evalidate=Ověření se nezdařilo pro $1 : $2 
+
 running_title=Spouštění záloh
 running_stop=Zastavit vybrané zálohy
 running_started=Začal v
@@ -5581,6 +5845,7 @@ running_cron=Plánované zálohování
 running_link=Přejděte na stránku <a href='$1'>naplánované zálohy</a> a vytvořte zálohy, které běží na pozadí podle pravidelného plánu, nebo stránku <a href='$2'>zálohy</a> a podívejte se na zálohy které již byly dokončeny.
 running_err=Zastavení záloh se nezdařilo
 running_enone=Žádné vybrané!
+
 recovery_title=Obnovit heslo
 recovery_msg1=Opravdu chcete poslat aktuální heslo pro $1 až $2 ?
 recovery_msg2=Opravdu chcete vygenerovat nové náhodné heslo pro $1 a odeslat ho $2 ?
@@ -5590,6 +5855,7 @@ recovery_body1=Heslo pro váš e-mailový účet $3 s přihlášením $2 je : $1
 recovery_body2=Bylo vygenerováno nové náhodné heslo pro váš e-mailový účet $3 s přihlášením $2 : $1 
 recovery_sending=Odesílání e-mailu pro obnovení hesla na $1 ..
 recovery_failed=.. selhalo : $1 
+
 letsencrypt_err=Nepodařilo se požádat o certifikát
 letsencrypt_title=Vyžádat certifikát
 letsencrypt_doing2=Vyžádání certifikátu pro $1 od Let's Encrypt ..
@@ -5609,12 +5875,14 @@ letsencrypt_conncheck=Kontrola externí konektivity pro $1 ..
 letsencrypt_connerrs=.. byly nalezeny chyby, které zabrání Let's Encrypt ve vydávání certifikátu :
 letsencrypt_connok=.. nebyly nalezeny žádné problémy
 letsencrypt_validcheck=Ověření konfigurace pro $1 ..
+
 php_fpmrestart=Restartování serveru PHP-FPM ..
 php_fpmnoinit=.. nebyla nalezena žádná akce při spuštění!
 php_fpmeinit=.. selhalo : $1 
 php_fpmnodir=Nebyl nalezen žádný konfigurační adresář FPM
 php_fpmnoinit2=Nebyla nalezena žádná akce spuštění serveru FPM
 php_fpmnomod=Modul Apache $1 chybí nebo není povolen
+
 jailkit_ecmd=Příkaz Jailkit $1 nebyl ve vašem systému nalezen - možná není nainstalován balíček <i>jailkit</i>?
 jailkit_einit=Nepodařilo se inicializovat vězení : $1 
 jailkit_elinux=Program Jailkit je podporován pouze v systémech Linux
@@ -5625,6 +5893,7 @@ jailkit_emkdir=Nepodařilo se vytvořit adresář : $1
 jailkit_eumount=Nepodařilo se odpojit domovský adresář vazby : $1 
 jailkit_eenabled=Chroot vězení není pro tuto doménu povoleno
 jailkit_edir=Nebyl nalezen žádný adresář chroot jail!
+
 mysqlpass_shutdown=Vypíná se server MySQL ..
 mysqlpass_eshutdown=.. vypnutí se nezdařilo : $1 
 mysqlpass_startup=Spuštění MySQL serveru ..
@@ -5636,6 +5905,7 @@ mysqlpass_esafe=.. spuštění se nezdařilo : $1
 mysqlpass_change=Změna hesla pro uživatele $1 ..
 mysqlpass_echange=.. změna hesla se nezdařila : $1 
 mysqlpass_kill=Zastavení serveru MySQL s deaktivací ověřování.
+
 kill_failed=Zabití selhalo : $1 
 kill_still=Stále běží!
 kill_done=Zabil
@@ -5645,6 +5915,7 @@ kill_port=Přístav
 kill_cmd=Příkaz serveru
 kill_result=Výsledek
 kill_subject=Monitorování procesů serveru Virtualmin
+
 mysql_rsock=Soubor soketu $1 
 mysql_rhostport=Vzdálený hostitel $1 port $2 
 mysql_rhost=Vzdálený hostitel $1 
@@ -5653,8 +5924,10 @@ mysql_rlocal=Lokální server
 mysql_movebackup=Zálohování uživatelů a databází na původním hostiteli.
 mysql_moverestore=Obnova uživatelů a databází na novém hostiteli.
 mysql_movedelete=Odebírání uživatelů a databází z původního hostitele.
+
 dbpass_title=Aktualizujte heslo databáze
 dbname_title=Aktualizujte název databáze
+
 mailclient_title=Nastavení e-mailového klienta
 mailclient_header=Nastavení pro poštovní klienty uživatelů
 mailclient_exemail=Příklad uživatelského e-mailu
@@ -5676,12 +5949,16 @@ mailclient_smtp_type=Typ šifrování SMTP
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Nešifrované
+
 deftmplt_error=CHYBA
 deftmplt_website_disabled=Web zakázán
 deftmplt_under_construction=Ve výstavbě
 deftmplt_slogan=spravuje Virtualmin - výkonný a flexibilní ovládací panel webhostingu
-deftmplt_made_with_love1=Vyrobeno s
-deftmplt_made_with_love2=ve společnosti Virtualmin
+deftmplt_slogan2=vlastník domény se může přihlásit do ovládacího panelu a spravovat tento web
+deftmplt_made_with_love1=Poháněno
+deftmplt_made_with_love2=Virtualmin
+deftmplt_made_with_love_disclamer=* Společnost Virtualmin nenese odpovědnost za obsah dodávaný tímto serverem
+
 2fa_title=Dvoufaktorové ověřování
 2fa_euser=Uživatel Webmin neexistuje!
 2fa_already=Již jste zaregistrováni pro dvoufaktorové ověřování pomocí poskytovatele $1 s ID účtu $2.
@@ -5691,3 +5968,37 @@ deftmplt_made_with_love2=ve společnosti Virtualmin
 2fa_header=Dvoufaktorové možnosti
 2fa_err=Uložení dvoufaktorového ověřování se nezdařilo
 2fa_enrolling=Registrace pro dvoufaktorový s $1. ..
+
+rcert_err=Smazání certifikátu se nezdařilo
+rcert_ecert=Virtuální server nemá žádný certifikát k odebrání
+rcert_essl=Certifikát nelze odebrat z virtuálního serveru s povoleným SSL
+rcert_esame=Jiné virtuální servery sdílejí certifikát s tímto, takže jej nelze odebrat
+rcert_esame2=Tento virtuální server sdílí certifikát s jiným serverem, takže jej nelze odebrat
+rcert_eservice=Jiné služby používají certifikát patřící tomuto serveru
+
+dnsclouds_title=Poskytovatelé cloudových DNS
+dnsclouds_name=Jméno poskytovatele
+dnsclouds_url=webová stránka
+dnsclouds_state=Aktuální stav
+dnsclouds_users=Používá
+dnsclouds_nusers=$1 serverů
+dnsclouds_nousers=Žádné servery
+dnsclouds_ecannot=Nemáte oprávnění spravovat poskytovatele cloudových DNS
+dnsclouds_return=poskytovatelé cloudových DNS
+dnsclouds_tmpl=Výchozí poskytovatel pro nové zóny DNS lze nastavit na stránce <a href='$1'>šablony serveru</a>.
+
+dnscloud_eaws=Příkaz <tt>aws</tt> je nutný pro použití služby Amazon Route 53
+dnscloud_eperl=Chybí modul Perl <tt>$1</tt>
+dnscloud_53account=Pomocí přístupového klíče $1 
+dnscloud_title=Poskytovatel cloudových DNS
+dnscloud_echeck=Poskytovatele $1 nelze v tomto systému použít : $2 
+dnscloud_header=Možnosti poskytovatele DNS
+dnscloud_provider=Název poskytovatele DNS
+dnscloud_url=Web poskytovatele DNS
+dnscloud_users=Používá se virtuálními servery
+dnscloud_nousers=Ještě žádný
+dnscloud_route53_location=Výchozí umístění zóny
+dnscloud_err=Nepodařilo se uložit poskytovatele cloudových DNS
+dnscloud_egone=Poskytovatel neexistuje!
+dnscloud_eawscreds=Pověření AWS nejsou platná
+dnscloud_clear=Smazat pověření

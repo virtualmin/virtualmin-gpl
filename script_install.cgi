@@ -128,12 +128,10 @@ $merr = &making_changes();
 &obtain_lock_cron($d);
 
 # Setup PHP version
-$phpvfunc = $script->{'php_vers_func'};
-if (defined(&$phpvfunc)) {
-	@vers = &$phpvfunc($d, $ver);
-	$phpver = &setup_php_version($d, \@vers, $opts->{'path'});
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	$phpver = &setup_php_version($d, [5], $opts->{'path'});
 	if (!$phpver) {
-		&error(&text('scripts_ephpvers', join(" ", @vers)));
+		&error($text{'scripts_ephpvers2'});
 		}
 	$opts->{'phpver'} = $phpver;
 	}

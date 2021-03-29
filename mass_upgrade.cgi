@@ -50,21 +50,8 @@ if ($in{'confirm'}) {
 			next;
 			}
 
-		# Setup PHP version
 		&$indent_print();
-		$phpvfunc = $script->{'php_vers_func'};
-		local $phpver;
-		if (defined(&$phpvfunc)) {
-			@vers = &$phpvfunc($d, $ver);
-			$phpver = &setup_php_version($d, \@vers,
-						     $opts->{'path'});
-			if (!$phpver) {
-				&$second_print(&text('scripts_ephpvers',
-					     join(" ", @vers)));
-				next;
-				}
-			}
-
+		local $phpver = $sinfo->{'opts'}->{'phpver'};
 		if ($derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver)) {
 			# Failed depends
 			&$second_print(&text('massscript_edep', $derr));

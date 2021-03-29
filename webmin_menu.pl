@@ -87,6 +87,7 @@ if (@doms > $config{'display_max'} && $config{'display_max'}) {
 		       'name' => 'dname',
 		       'icon' => '/'.$module_name.'/images/ok.png',
 		       'value' => $d ? $d->{'dom'} : '',
+		       'domid' => $d ? $d->{'id'} : '',
 		       'size' => 15 };
 	push(@rv, $dfield);
 	}

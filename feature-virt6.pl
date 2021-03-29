@@ -40,7 +40,7 @@ if (!$d->{'virt6already'}) {
 &release_lock_virt($d);
 
 # Add IPv6 reverse entry, if possible
-if ($config{'dns'} && !$d->{'provision_dns'}) {
+if ($config{'dns'} && !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	&require_bind();
 	local $ip6 = $d->{'ip6'};
 	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);
@@ -100,7 +100,7 @@ if (!$d->{'virt6already'}) {
 &release_lock_virt($d);
 
 # Remove IPv6 reverse address, if defined
-if ($config{'dns'} && !$d->{'provision_dns'}) {
+if ($config{'dns'} && !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	&require_bind();
 	local $ip6 = $d->{'ip6'};
 	local ($revconf, $revfile, $revrec) = &bind8::find_reverse($ip6);

@@ -1,5 +1,7 @@
 index_title2=Contas de e-mail
+
 indom=Domínio $1
+
 users_title=E-mail e usuários FTP
 users_title2=Usuários FTP
 users_domain=Domínio
@@ -14,6 +16,7 @@ users_delete=Apagar usuários selecionados
 users_batch2=Criar contas por lista
 users_dconfirm=Sim, apagar eles
 users_all=Todos
+
 user_edit=Editar usuário
 user_editweb=Editar usuário FTP
 user_header=Detalhes da conta de e-mail
@@ -62,10 +65,12 @@ user_period=Tempo mínimo entre respostas automáticas
 user_ehomeexists=Diretório home deve ser um diretório existente para os usuários do site FTP
 user_lastlogin=Último login
 user_lastlogin_imap=IMAP (fetching email)
+
 aliases_cmt=Descrição
 aliases_add=Adicionar um apelido.
 aliases_delete=Apagar aliases selecionados
 aliases_canadd0=Com base em seus limites, $1 aliases podem ser adicionadas
+
 alias_create=Criar apelido de e-mail
 alias_edit=Editar apelido de e-mail
 alias_header=Detalhes do encaminhamento
@@ -102,6 +107,7 @@ alias_psel=Na data
 alias_estart=Data de início inválida
 alias_eend=Data de termino inválido
 alias_aopts=Opções avançadas
+
 edit_header=Detalhes do servidor
 edit_domain=Domínio
 edit_user=Nome de administrador
@@ -152,10 +158,12 @@ edit_featuresect=Recursos ativos
 edit_showpass=Mostra..
 edit_mailopts=Configuração do email
 edit_psearch=Lista Sub-servidores
+
 save_mysqlpass=Alterar senha MySQL ..
 save_dok=Sim, salve agora
 save_mail=Alterar nome de domínio de e-mail ..
 save_mailalias=Atualizando email alias para o domínio ..
+
 acl_warn=Atenção! Para um usuário Webmin criado por Virtualmin, essas configurações podem ser automaticamente anulados.
 acl_domains=Domínios que este usuário pode gerenciar
 acl_all=Todos os domínios
@@ -167,16 +175,22 @@ acl_local=Pode editar usuários locais?
 acl_stop=Pode iniciar e parar serviços?
 acl_only=Apenas os seus
 acl_lim=Limitar o acesso?
+
 check_webphpnovers=Não foram encontrados versões do PHP em seu sistema!
+
 backup_mailusers=Salvando e-mail e usuários FTP
+
 newtmpl_cust=Personalizado
 newtmpl_created=Criado em
+
 tmpl_for_users=Proprietário
+
 bwgraph_mode_0one=Limite e uso
 bwgraph_mode_2=Por data
 bwgraph_mode_3=Por mês
 bwgraph_mode_4=Servidores acima do limite
 bwgraph_mok=Mostrar
+
 databases_title=Editar banco de dados
 databases_hosted=Todos os bancos de dados deste sistema estão hospedados no servidor MySQL remoto $1.
 databases_none=Este servidor virtual não tem nenhum banco de dados ainda.
@@ -212,57 +226,75 @@ databases_tabhosts=Host remoto
 databases_desc5=Esse formulário lista hosts remotos que são permitidos para se conectar a bancos de dados pertencentes a esse servidor virtual, e todos os servidores sub-. Estas se aplicam ao proprietário do domínio e quaisquer outros usuários de caixas de correio com acesso MySQL.
 databases_ahosts=Hosts permitido para $1
 databases_hosts_fmt=Cada nome ou IP deve ser digitado em uma linha separada.
+
 database_size=Espaço ocupado
 database_tables=Número de tabelas
+
 scripts_uok2=Desinstalar agora
 scripts_uok=Desinstalar aplicativo
 scripts_unsupname=Aplicativos para instalar
 scripts_unsupver=Versão
 scripts_unsupdesc=Este formulário permite que você instale uma versão do script que não foi testado por Virtualmin, ou não é mais suportado. Esteja ciente de que isso pode não funcionar, e poderia até quebrar outras páginas no servidor virtual.
+
 addscripts_elocal=Arquivo local não existe
 addscripts_done=$1 instaladores de script foi adicionado com sucesso a partir do arquivo especificado.
+
 newquotas_nobody=Ninguém
 newquotas_mailbox_send=Notificar e-mail e usuários FTP ?
+
 mass_quota=Espaço em disco
 mass_set=Alterar para ..
 mass_email=Endereço de email principal habilitado
+
 defaults_quota=Espaço em disco
 defaults_equota=Cota de diretório ausente ou inválido
+
 links_web=Configurar site
 links_website=Pré visualizar site
 links_ssl=Configurar SSL para site
+
 massdomains_quota=Estaço total do servidor
 massdomains_phpver=Versão do PHP
+
 ddatabases_edb=$1 banco de dados $2 não existe mais!
 ddatabases_dbs=Bases de dados para apagar: $1
 ddatabases_err=Falha ao excluir bancos de dados
 ddatabases_enone=Nenhum selecionado
 ddatabases_ok=Apagar agora
+
 admins_name=Login
 admins_desc=Descrição
 admins_domsall=Todos
+
 admin_header2=Permitir funções
 admin_pass=Senha para o usuário
 admin_desc=Nome real ou descrição
 admin_email=E-mail de contato
 admin_create=Pode criar servidores virtuais?
+
 validate_edir=Diretório $1 não existe
+
 pass_title=Alterar senha
 pass_header2=Modificar sua senha
 pass_new1=Nova senha
 pass_new2=Nova senha novamente
 pass_ok=Modificar
 dbname_eclash=Um usuário de banco de dados com o mesmo nome já existe
+
 dbpass_err=Falha ao alterar as senhas de banco de dados
+
 history_stat_memused=Memória usada
 history_stat_quotalimit=Quota total atribuído
 history_stat_quotaused=Quota usada
 history_stat_users=Número de e-mail e usuários FTP
+
 mail_header=Virtual Server e-mail configurações relacionadas
 mail_bcc=BCC email de saída para
 mail_bcc1=Nada - apenas entregar aos destinatários
 mail_bcc0=Endereço de e-mail adicional $1
-dbhosts_doing=Definir permissão $1 banco de dados $ 1 para US $ 2 ..
+
+dbhosts_doing=Definir permissão $1 banco de dados $1 para US $2 ..
+
 wizard_next=Próximo
 wizard_prev=Anterior
 wizard_title_intro=Introdução
@@ -277,9 +309,11 @@ wizard_title_mysize=Tamanho do Banco MySQL
 wizard_title_done=Tudo feito
 wizard_hashpass_mode=Guardar senhas como
 wizard_hashpass_mode0=Guardar senhas em texto-puro
+
 redirects_add=Adicionar um redirecionamento
 redirects_denone=Nenhum selecionado
 redirects_alias=Alias para diretório
+
 clone_dir=Cópia conteúdo diretório home
 clone_edir=.. falha em copiar : $1
 clone_dns=Cópia registros DNS ..

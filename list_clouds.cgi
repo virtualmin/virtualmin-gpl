@@ -5,10 +5,11 @@ require './virtual-server-lib.pl';
 &ReadParse();
 &can_cloud_providers() || &error($text{'clouds_ecannot'});
 
-&ui_print_header(undef, $text{'clouds_title'}, "", "clouds");
+&ui_print_header(undef, $text{'clouds_title'}, "", undef);
 
 @provs = &list_cloud_providers();
 print &ui_columns_start([ $text{'clouds_name'},
+			  $text{'clouds_url'},
 			  $text{'clouds_state'},
 			  $text{'clouds_users'} ]);
 @allbackups = &list_scheduled_backups();
@@ -20,6 +21,7 @@ foreach my $p (@provs) {
 	$state = &$sfunc($p);
 	print &ui_columns_row([
 		&ui_link("edit_cloud.cgi?name=$p->{'name'}", $p->{'desc'}),
+		&ui_link($p->{'url'}, $p->{'url'}, undef, "target=_blank"),
 		$state->{'ok'} ? $state->{'desc'} :
 		  "<font color=red>$text{'clouds_unconf'}</font>",
 		$users ]);

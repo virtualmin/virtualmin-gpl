@@ -7,6 +7,9 @@ Output SSL certificate information for a domain.
 Given a domain name with the C<--domain> flag, this command outputs 
 information about the SSL certificate currently in use by that virtual server.
 
+If the C<--chain> flag is given, details of the CA certificate will be
+shown instead (if there is one).
+
 =cut
 
 package virtual_server;
@@ -34,6 +37,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--chain") {
+		$chain = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -43,10 +49,18 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
-&domain_has_ssl($d) ||
-	&usage("Virtual server $dname does not have SSL enabled");
+&domain_has_ssl_cert($d) ||
+	&usage("Virtual server $dname does not have an SSL cert");
 
-$info = &cert_info($d);
+# Get either the CA or actual cert
+if ($chain) {
+	$cafile = &get_website_ssl_file($d, "ca");
+	$cafile || &usage("Virtual server does not have a CA certificate");
+	$info = &cert_file_info($cafile, $d);
+	}
+else {
+	$info = &cert_info($d);
+	}
 $info || &usage("No SSL certificate found");
 
 foreach $i (@cert_attributes) {
@@ -67,6 +81,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Displays SSL certificate information for some domain.\n";
 print "\n";
 print "virtualmin get-ssl --domain name\n";
+print "                  [--chain]\n";
 exit(1);
 }
 

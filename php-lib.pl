@@ -216,8 +216,9 @@ foreach my $ver (@vers) {
 
 # Call plugin-specific function to perform webserver setup
 if ($p ne 'web') {
-	return &plugin_call($p, "feature_save_web_php_mode",
-			    $d, $mode, $port, $newdom);
+	my $err = &plugin_call($p, "feature_save_web_php_mode",
+			       $d, $mode, $port, $newdom);
+	return $err;
 	}
 &require_apache();
 
@@ -519,8 +520,9 @@ local @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
 	# Restore PHP version from before mod_php
-	&save_domain_php_directory($d, &public_html_dir($d),
+	my $err = &save_domain_php_directory($d, &public_html_dir($d),
 				   $d->{'last_php_version'}, 1);
+	return $err if ($err);
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
@@ -893,11 +895,11 @@ if ($mode eq "fpm") {
 	my @rv;
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
-		my $cmd = &php_command_for_version($ver);
+		my $cmd = &php_command_for_version($ver, 0);
 		if (!$cmd && $ver =~ /^5\./) {
 			# Try just PHP version 5
 			$ver = 5;
-			$cmd = &php_command_for_version($ver);
+			$cmd = &php_command_for_version($ver, 0);
 			}
 		$cmd ||= &has_command("php");
 		if ($cmd) {
@@ -924,7 +926,7 @@ if ($d) {
 
 # For CGI and fCGId modes, check which PHP commands exist
 foreach my $v (@all_possible_php_versions) {
-	my $phpn = &php_command_for_version($v);
+	my $phpn = &php_command_for_version($v, 1);
 	$vercmds{$v} = $phpn if ($phpn);
 	}
 
@@ -972,42 +974,55 @@ if (!$d) {
 return @rv;
 }
 
-# php_command_for_version(ver)
+# php_command_for_version(ver, [cgi-mode])
 # Given a version like 5.4 or 5, returns the full path to the PHP executable
 sub php_command_for_version
 {
-my ($v) = @_;
-if (!$php_command_for_version_cache{$v}) {
-	my $phpn;
+my ($v, $cgimode) = @_;
+$cgimode ||= 0;
+if (!$php_command_for_version_cache{$v,$cgimode}) {
+	my @opts;
 	if ($gconfig{'os_type'} eq 'solaris') {
 		# On Solaris with CSW packages, php-cgi is in a directory named
 		# after the PHP version
-		$phpn = &has_command("/opt/csw/php$v/bin/php-cgi");
+		push(@opts, "/opt/csw/php$v/bin/php-cgi");
 		}
-	$phpn ||= &has_command("php$v-cgi") || &has_command("php-cgi$v") ||
-		  &has_command("php$v");
+	push(@opts, "php$v-cgi", "php-cgi$v", "php$v");
 	my $nodotv = $v;
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
 		# For a version like 5.4, check for binaries like php54 and
 		# /opt/rh/php54/root/usr/bin/php
-		$phpn ||= &has_command("php$nodotv-cgi") ||
-			  &has_command("php-cgi$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("/opt/atomic/atomic-php$nodotv/root/usr/bin/php") ||
-			  &has_command("/opt/rh/php$nodotv/bin/php-cgi") ||
-			  &has_command("/opt/remi/php$nodotv/root/usr/bin/php-cgi") ||
-			  &has_command("php$nodotv") ||
-			  &has_command("/opt/rh/php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/rh-php$nodotv/root/usr/bin/php");
-			  &has_command("/opt/rh/php$nodotv/bin/php") ||
-			  &has_command(glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
+		push(@opts, "php$nodotv-cgi",
+			    "php-cgi$nodotv",
+			    "/opt/rh/php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/rh/rh-php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/atomic/atomic-php$nodotv/root/usr/bin/php-cgi",
+			    "/opt/atomic/atomic-php$nodotv/root/usr/bin/php",
+			    "/opt/rh/php$nodotv/bin/php-cgi",
+			    "/opt/remi/php$nodotv/root/usr/bin/php-cgi",
+			    "php$nodotv",
+			    "/opt/rh/php$nodotv/root/usr/bin/php",
+			    "/opt/rh/rh-php$nodotv/root/usr/bin/php",
+			    "/opt/rh/php$nodotv/bin/php",
+			    glob("/opt/phpfarm/inst/bin/php-cgi-$v.*"));
 		}
-	$php_command_for_version_cache{$v} = $phpn;
+	if ($cgimode == 1) {
+		# Only include -cgi commands
+		@opts = grep { /-cgi/ } @opts;
+		}
+	elsif ($cgimode == 2) {
+		# Skip -cgi commands
+		@opts = grep { !/-cgi/ } @opts;
+		}
+	my $phpn;
+	foreach my $o (@opts) {
+		$phpn = &has_command($o);
+		last if ($phpn);
+		}
+	$php_command_for_version_cache{$v,$cgimode} = $phpn;
 	}
-return $php_command_for_version_cache{$v};
+return $php_command_for_version_cache{$v,$cgimode};
 }
 
 # get_php_version(number|command, [&domain])
@@ -1100,6 +1115,7 @@ foreach my $dir (@dirs) {
 				push(@rv, { 'dir' => $dir->{'words'}->[0],
 					    'version' => $1,
 					    'mode' => $mode });
+				last;
 				}
 			}
 		}
@@ -1109,8 +1125,8 @@ return @rv;
 
 # save_domain_php_directory(&domain, dir, phpversion, [skip-ini-copy])
 # Sets up a directory to run PHP scripts with a specific version of PHP.
-# Should only be called on domains in cgi or fcgid mode! Returns 1 if the
-# directory version was set OK, 0 if not (because the virtualhost couldn't
+# Should only be called on domains in cgi or fcgid mode! Returns undef on
+# success, or an error message on failure (ie. because the virtualhost couldn't
 # be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
@@ -1121,23 +1137,24 @@ if ($p && $p ne 'web') {
 			    $d, $dir, $ver);
 	}
 elsif (!$p) {
-	return 0;
+	return "Virtual server does not have a website!";
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
-return 0 if ($mode eq "mod_php");
+return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
 local $pfound = 0;
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
 	# Since it will be on the same port, no Apache changes are needed.
 	my $phd = &public_html_dir($d);
-	$dir eq $phd || return 0;
+	$dir eq $phd || return "Public HTML directory not found";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&create_php_fpm_pool($d);
+		$pfound++;
 		}
 	}
 else {
@@ -1237,7 +1254,7 @@ else {
 			}
 		$any++;
 		}
-	return 0 if (!$any);
+	return "No Apache virtualhosts found" if (!$any);
 	}
 
 # Make sure we have all the wrapper scripts
@@ -1256,8 +1273,8 @@ if (!$noini) {
 	}
 
 &register_post_action(\&restart_apache);
-$pfound || &error("Apache virtual host was not found");
-return 1;
+$pfound || return "Apache virtual host was not found";
+return undef;
 }
 
 # delete_domain_php_directory(&domain, dir)
@@ -1758,8 +1775,9 @@ my @rv;
 my %donever;
 foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		   (map { my $v = $_; $v =~ s/\.//g;
-			  ("php$v-php-fpm", "php$v-fpm", "php${v}w-fpm",
-			   "rh-php$v-php-fpm", "php$_-fpm") }
+			  ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
+			   "rh-php${v}-php-fpm", "php${_}-fpm",
+			   "php${v}u-fpm") }
 		        @all_possible_php_versions)) {
 	my @pinfo = &software::package_info($pname);
 	next if (!@pinfo || !$pinfo[0]);
@@ -1810,9 +1828,9 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		$rv->{'err'} = $text{'php_fpmnodir'};
 		next;
 		}
-	my ($bestdir) = grep { /\Q$rv->{'version'}\E/ ||
-			       /\Q$rv->{'pkgversion'}\E/ ||
-			       /\Q$rv->{'shortversion'}\E/ } @verdirs;
+	my ($bestdir) = grep { /(php|\/)\Q$rv->{'version'}\E\// ||
+			       /(php|\/)\Q$rv->{'pkgversion'}\E\// ||
+			       /(php|\/)\Q$rv->{'shortversion'}\E\// } @verdirs;
 	$bestdir ||= $verdirs[0];
 	$rv->{'dir'} = $bestdir;
 

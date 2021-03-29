@@ -523,8 +523,9 @@ if ($fields) {
 
 # Show checkboxes for features
 print &ui_hidden_table_start($text{'edit_featuresect'}, "width=100%", 2,
-			     "feature", 0);
+			     "feature", 1);
 @grid = ( );
+@grid_order_initial = ( );
 $i = 0;
 $can_website = 0;
 foreach $f (@dom_features) {
@@ -546,8 +547,9 @@ foreach $f (@dom_features) {
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", $config{$f} == 1).
-		    "<b>".&hlink($txt, $f)."</b>");
+		    " <b>".&hlink($txt, $f)."</b>");
 	}
 
 # Show checkboxes for plugins
@@ -560,17 +562,17 @@ foreach $f (@fplugins) {
 	$can_website = 1 if (&plugin_call($f, "feature_provides_web"));
 
 	$label = &plugin_call($f, "feature_label", 0);
-	$label = "<b>$label</b>";
+	$label = " <b>$label</b>";
 	$hlink = &plugin_call($f, "feature_hlink");
 	$label = &hlink($label, $hlink, $f) if ($hlink);
+	push(@grid_order_initial, $f);
 	push(@grid, &ui_checkbox($f, 1, "", !$plugins_inactive{$f}).$label);
 	if (&plugin_call($f, "feature_inputs_show", undef)) {
 		push(@input_plugins, $f);
 		}
 	}
-$ftable = &ui_grid_table(\@grid, 2, 100,
-	[ "align=left", "align=left" ]);
-print &ui_table_row(undef, $ftable, 4);
+features_sort(\@grid, \@grid_order_initial);
+print &ui_table_row(undef, &vui_features_sorted_grid(\@grid), 4);
 print &ui_hidden_table_end("feature");
 
 # Show section for extra plugin options
@@ -665,12 +667,13 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 				      [ [ 1, $text{'form_content1'} ],
 					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
-			    &ui_textarea("content", undef, 5, 70),
+			    &ui_textarea("content", undef, 5, 70, undef, undef,
+			                 "placeholder=\"$text{'deftmplt_slogan2'}\" data-placeholder=\"$text{'deftmplt_slogan2'}\""),
 			    3, \@tds);
 
 	print &ui_hidden_table_end();
+	print '<script>var content_def_radios = document.querySelectorAll("input[type=radio][name=\'content_def\']"), content_textarea = document.querySelector("textarea[name=\'content\']"), content_textarea_def_placeholder = content_textarea.getAttribute(\'data-placeholder\'); function content_def_event(event) { if ( this.value == 1 ) { content_textarea.style.display = "none"; } else { content_textarea.style.display = "inline-block"; } content_textarea.placeholder = this.value == 2 ? content_textarea_def_placeholder : content_textarea.placeholder = ""; } Array.prototype.forEach.call(content_def_radios, function(radio) { radio.removeEventListener("change", content_def_event); radio.addEventListener("change", content_def_event); });</script>';
 	}
-
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
 	print "<script>select_template($deftmpl->{'id'});</script>\n";

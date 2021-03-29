@@ -9,6 +9,7 @@ $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_ssl() || &error($text{'edit_ecannot'});
 &foreign_require("webmin");
 &ui_print_header(&domain_in($d), $text{'cert_title'}, "");
+@already = &get_all_domain_service_ssl_certs($d);
 
 # If this domain shares a cert file with another, link to it's page
 if ($d->{'ssl_same'}) {
@@ -37,7 +38,7 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  &can_edit_letsencrypt() ?
+	  &can_edit_letsencrypt() && &domain_has_website($d) ?
 		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
 		( ),
 	  &can_webmin_cert() ?
@@ -48,68 +49,136 @@ print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || "current", 1);
 
 # Details of current cert
 print &ui_tabs_start_tab("mode", "current");
-print "$text{'cert_desc2'}<p>\n";
-print &ui_table_start($text{'cert_header2'}, undef, 4);
 
-print &ui_table_row($text{'cert_incert'}, "<tt>$d->{'ssl_cert'}</tt>", 3);
-print &ui_table_row($text{'cert_inkey'}, "<tt>$d->{'ssl_key'}</tt>", 3);
-
-$info = &cert_info($d);
-$chain = &get_website_ssl_file($d, 'ca');
-foreach $i (@cert_attributes) {
-	next if ($i eq 'modulus' || $i eq 'exponent');
-	$v = $info->{$i};
-	if (ref($v)) {
-		print &ui_table_row($text{'cert_'.$i},
-			&ui_links_row($v), 3);
+if (&domain_has_ssl_cert($d)) {
+	print "<p>$text{'cert_desc2'}</p>\n";
+	if (!&domain_has_ssl($d)) {
+		print "<p>$text{'cert_hasnossl'}</p>\n";
 		}
-	elsif ($v) {
-		print &ui_table_row($text{'cert_'.$i}, $v);
+
+	print &ui_table_start($text{'cert_header2'}, undef, 4);
+	print &ui_table_row($text{'cert_incert'},
+			    "<tt>$d->{'ssl_cert'}</tt>", 3);
+	print &ui_table_row($text{'cert_inkey'},
+			    "<tt>$d->{'ssl_key'}</tt>", 3);
+
+	$info = &cert_info($d);
+	$chain = &get_website_ssl_file($d, 'ca');
+	
+	foreach $i (@cert_attributes) {
+		next if ($i eq 'modulus' || $i eq 'exponent');
+		$v = $info->{$i};
+		if (ref($v)) {
+			print &ui_table_row($text{'cert_'.$i},
+				&ui_links_row($v), 3);
+			}
+		elsif ($v) {
+			print &ui_table_row($text{'cert_'.$i}, $v);
+			}
+
+		# Warn if the CA is wrong
+		if ($i eq 'type' && $chain) {
+			my $cainfo = &cert_file_info($chain, $d);
+			if ($cainfo &&
+			    ($cainfo->{'o'} ne $info->{'issuer_o'} ||
+			     $cainfo->{'cn'} ne $info->{'issuer_cn'})) {
+				print &ui_table_row('',
+				    &ui_text_color(
+				      "&nbsp;* ".&text('validate_esslcamatch',
+					    $cainfo->{'o'}, $cainfo->{'cn'},
+					    $info->{'issuer_o'}, $info->{'issuer_cn'}),
+				      "danger"), 3);
+				}
+			}
 		}
-	}
 
-# Other domains using same cert, such as via wildcards or UCC
-@others = grep { &domain_has_ssl($_) } &get_domain_by("ssl_same", $d->{'id'});
-if (@others) {
-	print &ui_table_row($text{'cert_also'},
-		&ui_links_row([
-			map { $l = &can_config_domain($_) ? "edit_domain.cgi"
-							  : "view_domain.cgi";
-			      "<a href='$l?dom=$_->{'id'}'>".
-			        &show_domain_name($_)."</a>" } @others ]), 3);
-	}
+	# Other domains using same cert, such as via wildcards or UCC
+	@others = grep { &domain_has_ssl_cert($_) }
+		       &get_domain_by("ssl_same", $d->{'id'});
+	if (@others) {
+		my @links;
+		foreach my $d (@others) {
+			my $l = &can_config_domain($d) ? "edit_domain.cgi"
+						       : "view_domain.cgi";
+			push(@links, "<a href='$l?dom=$_->{'id'}'>".
+				     &show_domain_name($_)."</a>");
+			}
+		print &ui_table_row($text{'cert_also'},
+				    &ui_links_row(\@links));
+		}
 
-# Links to download
-@dlinks = (
-	"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
-	"$text{'cert_pem'}</a>",
-	"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
-	"$text{'cert_pkcs12'}</a>",
-	);
-print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
-@dlinks = (
-	"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
-	"$text{'cert_pem'}</a>",
-	"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
-	"$text{'cert_pkcs12'}</a>",
-	);
-print &ui_table_row($text{'cert_kdownload'}, &ui_links_row(\@dlinks), 3);
+	# Current usage
+	if (@already) {
+		my @msgs;
+		foreach my $svc (@already) {
+			my $m;
+			if ($svc->{'ip'}) {
+				$m = &text('cert_already_'.$svc->{'id'}.'_ip',
+					   $svc->{'ip'});
+				}
+			elsif ($svc->{'dom'}) {
+				$m = &text('cert_already_'.$svc->{'id'}.'_dom',
+					   $svc->{'dom'});
+				}
+			else {
+				$m = $text{'cert_already_'.$svc->{'id'}};
+				}
+			push(@msgs, $m);
+			}
+		print &ui_table_row($text{'cert_svcs'}, join(", ", @msgs), 3);
+		}
 
-# Expiry status
-$now = time();
-$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
-if ($future <= 0) {
-	$emsg = "<font color=red>".&text('cert_expired', -$future)."</font>";
-	}
-elsif ($future < 7) {
-	$emsg = "<font color=orange>".&text('cert_expiring', $future)."</font>";
+	# Links to download
+	@dlinks = (
+		"<a href='download_cert.cgi/cert.pem?dom=$in{'dom'}'>".
+		"$text{'cert_pem'}</a>",
+		"<a href='download_cert.cgi/cert.p12?dom=$in{'dom'}'>".
+		"$text{'cert_pkcs12'}</a>",
+		);
+	print &ui_table_row($text{'cert_download'}, &ui_links_row(\@dlinks), 3);
+	@dlinks = (
+		"<a href='download_key.cgi/key.pem?dom=$in{'dom'}'>".
+		"$text{'cert_pem'}</a>",
+		"<a href='download_key.cgi/key.p12?dom=$in{'dom'}'>".
+		"$text{'cert_pkcs12'}</a>",
+		);
+	print &ui_table_row($text{'cert_kdownload'},
+			    &ui_links_row(\@dlinks), 3);
+
+	# Expiry status, if we have it
+	if ($d->{'ssl_cert_expiry'}) {
+		$now = time();
+		$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
+		if ($future <= 0) {
+			$emsg = "<font color=red>".
+				&text('cert_expired', -$future)."</font>";
+			}
+		elsif ($future < 7) {
+			$emsg = "<font color=orange>".
+				&text('cert_expiring', $future)."</font>";
+			}
+		else {
+			$emsg = &text('cert_future', $future);
+			}
+		print &ui_table_row($text{'cert_etime'}, $emsg);
+		}
+
+	print &ui_table_end();
+
+	if (!&domain_has_ssl($d) && !@already && !$d->{'ssl_same'}) {
+		print &ui_hr();
+		print &ui_buttons_start();
+		print &ui_buttons_row("remove_cert.cgi",
+				      $text{'cert_remove'},
+				      $text{'cert_removedesc'},
+				      &ui_hidden("dom", $in{'dom'}));
+		print &ui_buttons_end();
+		}
 	}
 else {
-	$emsg = &text('cert_future', $future);
+	# No cert yet! Perhaps a domain without SSL that has no cert yet
+	print "<p>",$text{'cert_noneyet'},"</p>\n";
 	}
-print &ui_table_row($text{'cert_etime'}, $emsg);
-
-print &ui_table_end();
 
 print &ui_tabs_end_tab();
 
@@ -271,97 +340,101 @@ print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 # Let's encrypt tab
-&foreign_require("webmin");
-$err = &webmin::check_letsencrypt();
-print &ui_tabs_start_tab("mode", "lets");
-print "$text{'cert_desc8'}<p>\n";
-
-if ($err) {
-	print &text('cert_elets', $err),"<p>\n";
-	if (&master_admin() &&
-	    defined(&webmin::get_letsencrypt_install_message)) {
-		my $msg = &webmin::get_letsencrypt_install_message(
-			"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
-			$text{'cert_title'});
-		print $msg,"<p>\n";
-		}
-	}
-else {
-	$phd = &public_html_dir($d);
-	print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
-
-	print &ui_form_start("letsencrypt.cgi");
-	print &ui_hidden("dom", $in{'dom'});
-	print &ui_table_start(undef, undef, 2);
-
-	# Domain names to request cert for
-	@defnames = &get_hostnames_for_ssl($d);
-	$dis1 = &js_disable_inputs([ "dname" ], [ ], "onClick");
-	$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
-	$wildcb = "";
+if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 	&foreign_require("webmin");
-	if ($webmin::letsencrypt_cmd) {
-		$wildcb = "<br>".&ui_checkbox("dwild", 1, $text{'cert_dwild'},
-					      $d->{'letsencrypt_dwild'});
+	$err = &webmin::check_letsencrypt();
+	print &ui_tabs_start_tab("mode", "lets");
+	print "$text{'cert_desc8'}<p>\n";
+
+	if ($err) {
+		print &text('cert_elets', $err),"<p>\n";
+		if (&master_admin() &&
+		    defined(&webmin::get_letsencrypt_install_message)) {
+			my $msg = &webmin::get_letsencrypt_install_message(
+				"/$module_name/cert_form.cgi?dom=$d->{'id'}&mode=$in{'mode'}",
+				$text{'cert_title'});
+			print $msg,"<p>\n";
+			}
 		}
-	print &ui_table_row($text{'cert_dnamefor'},
-		&ui_radio_table("dname_def", 
-		      $d->{'letsencrypt_dname'} ? 0 : 1,
-		      [ [ 1, $text{'cert_dnamedef'},
-			  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
-			[ 0, $text{'cert_dnamesel'},
-			  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
-				       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
+	else {
+		$phd = &public_html_dir($d);
+		print &text('cert_letsdesc', "<tt>$phd</tt>"),"<p>\n";
 
-	# Setup automatic renewal?
-	print &ui_table_row($text{'cert_letsrenew'},
-		&ui_opt_textbox("renew", $d->{'letsencrypt_renew'}, 5,
-				$text{'cert_letsnotrenew'}));
+		print &ui_form_start("letsencrypt.cgi");
+		print &ui_hidden("dom", $in{'dom'});
+		print &ui_table_start(undef, undef, 2);
 
-	# Test connectivity first?
-	if (defined(&check_domain_connectivity)) {
-		print &ui_table_row($text{'cert_connectivity'},
-			&ui_radio("connectivity", 1,
+		# Domain names to request cert for
+		@defnames = &get_hostnames_for_ssl($d);
+		$dis1 = &js_disable_inputs([ "dname" ], [ ], "onClick");
+		$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
+		$wildcb = "";
+		&foreign_require("webmin");
+		if ($webmin::letsencrypt_cmd) {
+			$wildcb = "<br>".&ui_checkbox(
+				"dwild", 1, $text{'cert_dwild'},
+				$d->{'letsencrypt_dwild'});
+			}
+		print &ui_table_row($text{'cert_dnamefor'},
+			&ui_radio_table("dname_def", 
+			      $d->{'letsencrypt_dname'} ? 0 : 1,
+			      [ [ 1, $text{'cert_dnamedef'},
+				  join("<br>\n", map { "<tt>$_</tt>" } @defnames), $dis1 ],
+				[ 0, $text{'cert_dnamesel'},
+				  &ui_textarea("dname", join("\n", split(/\s+/, $d->{'letsencrypt_dname'})), 5, 60,
+					       undef, $d->{'letsencrypt_dname'} ? 0 : 1).$wildcb, $dis0 ] ]));
+
+		# Setup automatic renewal?
+		print &ui_table_row($text{'cert_letsrenew2'},
+			&ui_yesno_radio("renew",
+					$d->{'letsencrypt_renew'} ? 1 : 0));
+
+		# Test connectivity first?
+		if (defined(&check_domain_connectivity)) {
+			print &ui_table_row($text{'cert_connectivity'},
+				&ui_radio("connectivity", 1,
 				  [ [ 2, $text{'cert_connectivity2'} ],
 				    [ 1, $text{'cert_connectivity1'} ],
 				    [ 0, $text{'cert_connectivity0'} ] ]));
-		}
-
-	# Recent renewal details
-	if ($d->{'letsencrypt_last'}) {
-		$ago = (time() - $d->{'letsencrypt_last'}) / (30*24*60*60);
-		print &ui_table_row($text{'cert_letsage'},
-			&text('cert_letsmonths', sprintf("%.2f", $ago)));
-		}
-	if ($d->{'letsencrypt_last_success'}) {
-		print &ui_table_row($text{'cert_lets_success'},
-			&make_date($d->{'letsencrypt_last_success'}));
-		}
-	if ($d->{'letsencrypt_last_failure'} &&
-	    $d->{'letsencrypt_last_failure'} > $d->{'letsencrypt_last_success'}) {
-		print &ui_table_row($text{'cert_lets_failure'},
-			"<font color=red>".
-			&make_date($d->{'letsencrypt_last_failure'}).
-			"</font>");
-
-		if ($d->{'letsencrypt_last_err'}) {
-			my $err = $d->{'letsencrypt_last_err'};
-			$err =~ s/\t/\n/g;
-			print &ui_table_row($text{'cert_lets_freason'},
-				"<font color=red>".$err."</font>");
 			}
-		}
 
-	print &ui_table_end();
-	print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
-			     [ 'only', $text{'cert_letsonly'} ] ]);
+		# Recent renewal details
+		if ($d->{'letsencrypt_last'}) {
+			$ago = (time() - $d->{'letsencrypt_last'}) /
+			       (30*24*60*60);
+			print &ui_table_row($text{'cert_letsage'},
+				&text('cert_letsmonths', sprintf("%.2f",$ago)));
+			}
+		if ($d->{'letsencrypt_last_success'}) {
+			print &ui_table_row($text{'cert_lets_success'},
+				&make_date($d->{'letsencrypt_last_success'}));
+			}
+		if ($d->{'letsencrypt_last_failure'} &&
+		    $d->{'letsencrypt_last_failure'} >
+		      $d->{'letsencrypt_last_success'}) {
+			print &ui_table_row($text{'cert_lets_failure'},
+				"<font color=red>".
+				&make_date($d->{'letsencrypt_last_failure'}).
+				"</font>");
+
+			if ($d->{'letsencrypt_last_err'}) {
+				my $err = $d->{'letsencrypt_last_err'};
+				$err =~ s/\t/\n/g;
+				print &ui_table_row($text{'cert_lets_freason'},
+					"<font color=red>".$err."</font>");
+				}
+			}
+
+		print &ui_table_end();
+		print &ui_form_end([ [ undef, $text{'cert_letsok'} ],
+				     [ 'only', $text{'cert_letsonly'} ] ]);
+		}
+	print &ui_tabs_end_tab();
 	}
 
-print &ui_tabs_end_tab();
 
 if (&can_webmin_cert()) {
 	# Per-IP or per-domain server usage
-	@already = &get_all_domain_service_ssl_certs($d);
 	print &ui_tabs_start_tab("mode", "perip");
 	print "$text{'cert_desc9'}<p>\n";
 	print &ui_form_start("save_peripcerts.cgi", "post");

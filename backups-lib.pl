@@ -2299,6 +2299,19 @@ if ($ok) {
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
 				}
+			local $oldssl = $d->{'backup_ssl_type'};
+			if (!$oldssl && $d->{'ssl'}) {
+				$oldssl = 'ssl';
+				}
+			elsif (!$oldssl && $d->{'virtualmin-nginx-ssl'}) {
+				$oldssl = 'virtualmin-nginx-ssl';
+				}
+			if ($oldssl &&
+			    &indexof($oldssl, @config_features, @plugins) < 0) {
+				$d->{$oldssl} = 0;
+				my $newssl = &domain_has_ssl();
+				$d->{$newssl} = 1 if ($newssl);
+				}
 
 			local ($parentdom, $parentuser);
 			if ($d->{'parent'}) {
@@ -2546,7 +2559,7 @@ if ($ok) {
 				$d->{'ip'} = $ipinfo->{'ip'};
 				$d->{'virt'} = $ipinfo->{'virt'};
 				$d->{'virtalready'} = $ipinfo->{'virtalready'};
-				$d->{'netmask'} = $netmaskinfo->{'netmask'};
+				$d->{'netmask'} = $ipinfo->{'netmask'};
 				if ($ipinfo->{'mode'} == 2) {
 					# Re-allocate an IP, as we might be
 					# doing several domains
@@ -2684,6 +2697,7 @@ if ($ok) {
 			foreach my $f (&list_provision_features()) {
 				$d->{'provision_'.$f} = 0;
 				}
+			delete($d->{'dns_cloud'});
 			&set_provision_features($d);
 
 			# Check for clashes
@@ -3339,7 +3353,7 @@ if ($doms) {
 		if ($d->{'missing'} && $d->{'reseller'} &&
 		    defined(&get_reseller) &&
 		    (!$conts->{'virtualmin'} ||
-		     &indexof('reseller', @{$conts->{'virtualmin'}}) < 0)) {
+		     &indexof('resellers', @{$conts->{'virtualmin'}}) < 0)) {
 			foreach my $rname (split(/\s+/, $d->{'reseller'})) {
 				my $resel = &get_reseller($rname);
 				if (!$resel) {

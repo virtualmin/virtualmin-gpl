@@ -74,6 +74,18 @@ $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 		 [ 'no-slaves' ],
 	  	 [ 'no-secondaries' ] );
 
+@other_webmin_pages = ( 'cert_form', 'edit_spf', 'edit_domain',
+			'edit_domdkim', 'edit_limits', 'edit_mail',
+			'edit_phpmode', 'edit_spam', 'edit_spf',
+			'edit_website', 'list_users', 'list_aliases',
+			'list_databases', 'list_scripts', 'rename_form',
+			'move_form', 'transfer_form', 'clone_form',
+			'newip_form', 'pro/edit_res', 'list_admins',
+			'pro/list_balancers', 'list_redirects',
+			'list_records', 'view_records', 'usage',
+			'reemail', 'pro/maillog', 'disable_domain',
+			'assoc_form', 'pro/edit_html' );
+
 # Parse command-line args
 $web = 'web';
 $ssl = 'ssl';
@@ -1374,7 +1386,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.12' ] ],
+		      [ 'version', '1.2.13' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1408,7 +1420,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.2.12' ] ],
+		      [ 'version', '1.2.13' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1790,7 +1802,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.12' ] ],
+		      [ 'version', '1.2.13' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -3987,7 +3999,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.12' ] ],
+		      [ 'version', '1.2.13' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -5031,7 +5043,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.12\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.13\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
@@ -5064,6 +5076,15 @@ $webmin_tests = [
 	  'grep' => [ '<body', '</body>', 'RoundCube directory deleted' ],
 	  'antigrep' => [ 'Error', 'failed' ],
 	},
+
+	# Test other per-domain pages
+	(map {
+		my $page = $_.".cgi";
+		{ 'command' => $webmin_wget_command.
+			       "${webmin_proto}://localhost:${webmin_port}/virtual-server/${page}?dom=\$DOMAIN_ID",
+		  'antigrep' => [ 'Error', 'failed' ],
+		}
+		} @other_webmin_pages),
 
 	# Delete the domain
 	{ 'command' => $webmin_wget_command.
@@ -5405,6 +5426,16 @@ $sslserv_tests = [
 		      @create_args, ],
         },
 
+	# Create an alias as well
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'alias', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test alias-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
 	# Install a dummy CA cert
 	{ 'command' => 'install-cert.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -5560,6 +5591,19 @@ $sslserv_tests = [
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
+	# Validate that Dovecot cert still works with SNI on the alias
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', $test_subdomain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_subdomain.
+		       ' -servername '.$test_subdomain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
 	# Re-check that Postfix still works, but without the per-IP cert
 	{ 'command' => 'test-smtp.pl',
 	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
@@ -5634,6 +5678,195 @@ $sslserv_tests = [
 		      [ 'service', 'usermin' ],
 		      [ 'service', 'dovecot' ],
 		      [ 'service', 'postfix' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+$nossl_tests = [
+	# Create a domain without SSL, but with a private IP and a cert
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ], [ 'webmin' ], [ 'mail' ],
+		      [ 'allocate-ip' ],
+		      [ 'generate-ssl-cert' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Test SSL cert info
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: \*.'.$test_domain ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Remove from other services before removing the cert
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Try removing the cert
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-cert' ] ],
+	},
+
+	# Test that it's gone
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'antigrep' => [ 'SSL cert file:', 'SSL key file:' ],
+	},
+
+	# Bring it back
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'o' => 'Test SSL domain' ],
+		      [ 'self' ] ],
+	},
+
+	# Force enable private SSL cert for Webmin, Usermin, etc
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'webmin' ],
+		      [ 'service', 'usermin' ],
+		      [ 'service', 'dovecot' ],
+		      [ 'service', 'postfix' ] ],
+	},
+
+	# Validate that Webmin cert works
+	{ 'command' => $wget_command.'--user-agent=Webmin '.
+		       ($webmin_proto eq "https" ? '--no-check-certificate '
+						 : '').
+		       '--user '.$test_domain_user.' '.
+		       '--password smeg '.
+		       $webmin_proto.'://'.$test_domain.':'.
+		       $webmin_port.'/',
+	},
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$webmin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Usermin cert works
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port '.$usermin_port.' </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Dovecot cert works
+	{ 'command' => 'test-imap.pl',
+	  'args' => [ [ 'user', $test_domain_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 993 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Validate that Postfix cert works
+	{ 'command' => 'test-smtp.pl',
+	  'args' => [ [ 'to', $test_domain_user.'@'.$test_domain ],
+		      [ 'server', 'mail.'.$test_domain ],
+		      [ 'ssl' ] ],
+	},
+	{ 'command' => 'openssl s_client -host mail.'.$test_domain.
+		       ' -port 465 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Test generation of a new self-signed cert
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'self' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Test SSL cert info
+	{ 'command' => 'get-ssl.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin' ],
+	},
+
+	# Test generation of a CSR
+	{ 'command' => 'generate-cert.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'csr' ],
+		      [ 'size', 1024 ],
+		      [ 'days', 365 ],
+		      [ 'cn', $test_domain ],
+		      [ 'c', 'US' ],
+		      [ 'st', 'California' ],
+		      [ 'l', 'Santa Clara' ],
+		      [ 'o', 'Virtualmin' ],
+		      [ 'ou', 'Testing' ],
+		      [ 'email', 'example@'.$test_domain ],
+		      [ 'alt', 'test_subdomain' ] ],
+	},
+
+	# Testing listing of keys, certs and CSR
+	{ 'command' => 'list-certs.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	  'grep' => [ 'BEGIN CERTIFICATE', 'END CERTIFICATE',
+		      'BEGIN (RSA )?PRIVATE KEY', 'END (RSA )?PRIVATE KEY',
+		      'BEGIN CERTIFICATE REQUEST', 'END CERTIFICATE REQUEST' ],
+	},
+
+	# Test re-installation of the cert and key
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'cert', $test_domain_cert ],
+		      [ 'key', $test_domain_key ] ],
+	},
+
+	# Enable SSL, which should use the generated cert
+	{ 'command' => 'enable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ $ssl ] ],
+	},
+
+	# Try removing the cert, which will fail
+	{ 'command' => 'install-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-cert' ] ],
+	  'fail' => 1,
+	},
+
+	# Test generated SSL cert
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'C=US', 'ST=California', 'L=Santa Clara',
+		      'O=Virtualmin', 'OU=Testing', 'CN='.$test_domain ],
 	},
 
 	# Cleanup the domain
@@ -8684,6 +8917,7 @@ $alltests = { '_config' => $_config_tests,
 	      'webmin' => $webmin_tests,
 	      'remote' => $remote_tests,
 	      'ssl' => $ssl_tests,
+	      'nossl' => $nossl_tests,
 	      'sslserv' => $sslserv_tests,
 	      'shared' => $shared_tests,
 	      'wildcard' => $wildcard_tests,

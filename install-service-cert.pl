@@ -66,7 +66,7 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-&domain_has_ssl($d) ||
+&domain_has_ssl_cert($d) ||
 	&usage("Virtual server $dname does not have SSL enabled");
 @services || &usage("No services to copy the cert to specified");
 

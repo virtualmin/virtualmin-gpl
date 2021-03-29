@@ -22,9 +22,10 @@ if (!@oldplans) {
 	}
 
 # If this is a new install, set dns_ip to * by default to use the externally
-# detected IP for DNS records
+# detected IP for DNS records, and cache it.
 if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	$config{'dns_ip'} = '*';
+	&get_external_ip_address();
 	&save_module_config();
 	}
 
@@ -61,20 +62,6 @@ $cerr = &html_tags_to_text(&check_virtual_server_config());
 #if ($cerr) {
 #	print STDERR "Warning: Module Configuration problem detected: $cerr\n";
 #	}
-
-if ($virtualmin_pro) {
-	# Convert all existing domains with PHP to use new per-version .inis,
-	# if they don't exist yet
-	foreach my $d (&list_domains()) {
-		next if (!$d->{'web'} || !$d->{'dir'});
-		local $mode = &get_domain_php_mode($d);
-		next if ($mode eq "mod_php" && $mode ne "fpm");
-		if (!-r "$d->{'home'}/etc/php4/php.ini" &&
-		    !-r "$d->{'home'}/etc/php5/php.ini") {
-			&save_domain_php_mode($d, $mode);
-			}
-		}
-	}
 
 # Set resellers on sub-servers
 if (defined(&sync_parent_resellers)) {
@@ -398,10 +385,13 @@ my $hfile = "$module_config_directory/transfer-hosts";
 
 # Create combined cert files for domains with SSL
 foreach my $d (&list_domains()) {
-	if (&domain_has_ssl($d)) {
+	if (&domain_has_ssl_cert($d)) {
 		&sync_combined_ssl_cert($d);
 		}
 	}
+
+# Update any domains with a new autoconfig.cgi script
+&update_all_autoconfig_cgis();
 
 # Run any needed actions, like server restarts
 &run_post_actions_silently();

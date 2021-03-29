@@ -53,7 +53,7 @@ if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
 	$dnsparent = &get_domain($d->{'subdom'});
 	}
-elsif (!$d->{'alias'} && $tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
+elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     (&get_domain_by("parent", $d->{'parent'}),
@@ -65,15 +65,16 @@ elsif (!$d->{'alias'} && $tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
 		}
 	}
 
-if ($d->{'provision_dns'}) {
-	# Create on provisioning server
-	&$first_print($text{'setup_bind_provision'});
-	local $info = { 'domain' => $d->{'dom'} };
+# Create domain info object
+my $info;
+my @inforecs;
+if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
+	$info = { 'domain' => $d->{'dom'} };
 	if (@extra_slaves) {
 		$info->{'slave'} = [ grep { $_ } map { &to_ipaddress($_) }
 						     @extra_slaves ];
 		}
-	local $temp = &transname();
+	my $temp = &transname();
 	local $bind8::config{'auto_chroot'} = undef;
 	local $bind8::config{'chroot'} = undef;
 	$d->{'dns_submode'} = 0;	# Adding to existing domain not
@@ -84,8 +85,13 @@ if ($d->{'provision_dns'}) {
 	else {
 		&create_standard_records($temp, $d, $ip);
 		}
-	local @recs = &bind8::read_zone_file($temp, $d->{'dom'});
-	$info->{'record'} = [ &records_to_text($d, \@recs) ];
+	@inforecs = &bind8::read_zone_file($temp, $d->{'dom'});
+	$info->{'record'} = [ &records_to_text($d, \@inforecs) ];
+	}
+
+if ($d->{'provision_dns'}) {
+	# Create on provisioning server
+	&$first_print($text{'setup_bind_provision'});
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
 	if (!$ok || $msg !~ /host=(\S+)/) {
@@ -95,6 +101,22 @@ if ($d->{'provision_dns'}) {
 	$d->{'provision_dns_host'} = $1;
 	&$second_print(&text('setup_bind_provisioned',
 			     $d->{'provision_dns_host'}));
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Create on Cloud DNS service
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+	my $cfunc = "dnscloud_".$ctype."_create_domain";
+	$info->{'recs'} = \@inforecs;
+	my ($ok, $msg, $location) = &$cfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('setup_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	$d->{'dns_cloud_location'} = $location;
+	&$second_print($text{'setup_done'});
 	}
 elsif (!$dnsparent) {
 	# Creating a new real zone
@@ -248,7 +270,7 @@ elsif (!$dnsparent) {
 	&$second_print($text{'setup_done'});
 
 	# If DNSSEC was requested, set it up
-	if ($tmpl->{'dnssec'} eq 'yes') {
+	if ($tmpl->{'dnssec'} eq 'yes' && &can_domain_dnssec($d)) {
 		&$first_print($text{'setup_dnssec'});
 		$err = &enable_domain_dnssec($d);
 		if (!$err) {
@@ -317,7 +339,25 @@ sub delete_dns
 {
 local ($d) = @_;
 &require_bind();
-if ($d->{'provision_dns'}) {
+if ($d->{'dns_cloud'}) {
+	# Delete from Cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('delete_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $dfunc = "dnscloud_".$ctype."_delete_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('delete_ebind_cloud', $msg));
+		return 0;
+		}
+	delete($d->{'dns_cloud_id'});
+	delete($d->{'dns_cloud_location'});
+	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'provision_dns'}) {
 	# Delete from provisioning server
 	&$first_print($text{'delete_bind_provision'});
 	if ($d->{'provision_dns_host'}) {
@@ -507,6 +547,16 @@ local @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
 local $myip = $bconfig{'this_ip'} ||
 	      &to_ipaddress(&get_system_hostname());
 &$first_print(&text('setup_bindslave', $slaves));
+if (!$myip) {
+	# IP lookup failed
+	&$second_print($text{'setup_ebindslaveip2'});
+	return;
+	}
+if ($myip =~ /^127\.0/) {
+	# Looks like a local network, which can't be correct
+	&$second_print(&text('setup_ebindslaveip', $myip));
+	return;
+	}
 local @slaveerrs = &bind8::create_on_slaves(
 	$d->{'dom'}, $myip, undef, [ split(/\s+/, $slaves) ],
 	$d->{'dns_view'} || $tmpl->{'dns_view'},
@@ -670,7 +720,24 @@ if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	&modify_records_domain_name($recs, $file,
 				    $oldd->{'dom'}, $d->{'dom'});
 	}
-elsif ($d->{'dom'} ne $oldd->{'dom'} && !$d->{'provision_dns'}) {
+elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
+	# Domain name has changed .. rename on cloud provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('save_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'olddomain' => $oldd->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $rfunc = "dnscloud_".$ctype."_rename_domain";
+	my ($ok, $msg) = &$rfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('save_bind_ecloud', $err));
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
 	local $z = &get_bind_zone($zdom->{'dom'});
 	if (!$z) {
@@ -1569,13 +1636,14 @@ if (!$recs) {
 	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
-if (!$d->{'provision_dns'} && $file) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && $file) {
+	# Make sure file exists
 	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
 	return &text('validate_ednsfile2', "<tt>$absfile</tt>")
 		if (!-r $absfile);
 	}
-if (!$d->{'provision_dns'} && !$d->{'dns_submode'}) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	# Make sure it is a master
 	local $zone = &get_bind_zone($d->{'dom'});
 	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$zone);
@@ -1682,7 +1750,8 @@ if (!$d->{'dns_submode'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'dns_submode'} && !$recsonly) {
+    !$d->{'provision_dns'} && !$d->{'cloud_dns'} && !$d->{'dns_submode'} &&
+    !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
 		local @errs = &bind8::check_zone_records($z);
@@ -1733,6 +1802,24 @@ if ($d->{'provision_dns'}) {
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Lock on cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('disable_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $dfunc = "dnscloud_".$ctype."_disable_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('disable_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
+	&$second_print($text{'setup_done'});
+	return 1;
 	}
 else {
 	# Lock locally
@@ -1806,6 +1893,24 @@ if ($d->{'provision_dns'}) {
 		&$second_print(&text('disable_ebind_provision', $msg));
 		return 0;
 		}
+	&$second_print($text{'setup_done'});
+	return 1;
+	}
+elsif ($d->{'dns_cloud'}) {
+	# Unlock on cloud DNS provider
+	my $ctype = $d->{'dns_cloud'};
+	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
+	&$first_print(&text('enable_bind_cloud', $cloud->{'desc'}));
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my $dfunc = "dnscloud_".$ctype."_enable_domain";
+	my ($ok, $msg) = &$dfunc($d, $info);
+	if (!$ok) {
+		&$second_print(&text('enable_ebind_cloud', $msg));
+		return 0;
+		}
+	$d->{'dns_cloud_id'} = $msg;
 	&$second_print($text{'setup_done'});
 	return 1;
 	}
@@ -1891,7 +1996,8 @@ return $z;
 sub restart_bind
 {
 local ($d) = @_;
-local $p = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $p = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+	      : $config{'provision_dns'} || &default_dns_cloud();
 if ($p) {
 	# Hosted on a provisioning server, so nothing to do
 	return 1;
@@ -1938,7 +2044,7 @@ return $rv;
 sub reload_bind_records
 {
 local ($d) = @_;
-if ($d->{'provision_dns'}) {
+if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
 	return undef;
 	}
@@ -1959,20 +2065,44 @@ return $rv;
 sub check_dns_clash
 {
 local ($d, $field) = @_;
-if ($d->{'provision_dns'}) {
-	# Check on remote provisioning server
-	if (!$field || $field eq 'dom') {
+if (!$field || $field eq 'dom') {
+	if ($d->{'provision_dns'}) {
+		# Check on remote provisioning server
 		my ($ok, $msg) = &provision_api_call(
 			"check-dns-zone", { 'domain' => $d->{'dom'} });
 		return &text('provision_ednscheck', $msg) if (!$ok);
 		if ($msg =~ /host=/) {
-			return &text('provision_edns', $d->{'db'});
+			return &text('provision_edns', $d->{'dom'});
 			}
 		}
-	}
-else {
-	# Check locally
-	if (!$field || $field eq 'dom') {
+	elsif ($d->{'dns_cloud'}) {
+		# Check on cloud provider
+		my $ctype = $d->{'dns_cloud'};
+		my ($cloud) = grep { $_->{'name'} eq $ctype }
+				   &list_dns_clouds();
+		if (!$cloud) {
+			return $text{'setup_ednscloudexists'};
+			}
+		my $sfunc = "dnscloud_".$ctype."_get_state";
+		my $state = &$sfunc($cloud);
+		if (!$state->{'ok'}) {
+			return &text('setup_ednscloudstate', $cloud->{'desc'});
+			}
+		my $tfunc = "dnscloud_".$ctype."_check_domain";
+		my $info = { 'domain' => $d->{'dom'} };
+		my ($ok, $err) = &$tfunc($d, $info);
+		if (!$ok && $err) {
+			# Failed lookup
+			return &text('setup_ednscloudclash',
+				     $cloud->{'desc'}, $err);
+			}
+		elsif ($ok) {
+			# Already exists
+			return &text('setup_dnscloudclash', $cloud->{'desc'});
+			}
+		}
+	else {
+		# Check locally
 		local ($czone) = &get_bind_zone($d->{'dom'});
 		return $czone ? 1 : 0;
 		}
@@ -2011,30 +2141,35 @@ if (!-r $absfile) {
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
 	&copy_write_as_domain_user($d, $absfile, $file);
-	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-	@keys = grep { ref($_) &&
-		       $_->{'privatefile'} &&
-		       $_->{'publicfile'} } @keys;
-	my $i = 0;
-	my %kinfo;
-	foreach my $key (@keys) {
-		foreach my $t ('private', 'public') {
-			&copy_write_as_domain_user(
-				$d, $key->{$t.'file'},
-				$file.'_dnssec_'.$t.'_'.$i);
-			$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
-			$kinfo{$t.'_'.$i} = $1;
+
+	# Also save DNSSEC keys, if possible
+	if (&can_domain_dnssec($d)) {
+		my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		@keys = grep { ref($_) &&
+			       $_->{'privatefile'} &&
+			       $_->{'publicfile'} } @keys;
+		my $i = 0;
+		my %kinfo;
+		foreach my $key (@keys) {
+			foreach my $t ('private', 'public') {
+				&copy_write_as_domain_user(
+					$d, $key->{$t.'file'},
+					$file.'_dnssec_'.$t.'_'.$i);
+				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
+				$kinfo{$t.'_'.$i} = $1;
+				}
+			$i++;
 			}
-		$i++;
+		&write_file($file."_dnssec_keyinfo", \%kinfo);
 		}
-	&write_file($file."_dnssec_keyinfo", \%kinfo);
 	}
 else {
 	# Extract the appropriate records
 	local $bind8::chroot = "/";	# So that create_record will write to the backup file
 	$recs = &filter_domain_dns_records($d, $recs);
 	foreach my $rec (@$recs) {
-		next if ($rec->{'name'} eq '$ttl' || $rec->{'name'} eq '$generate');
+		next if ($rec->{'name'} eq '$ttl' ||
+			 $rec->{'name'} eq '$generate');
 		&bind8::create_record($file, $rec->{'name'},
 			$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
 			&join_record_values($rec, 1),
@@ -2096,7 +2231,7 @@ else {
 	&flush_file_lines($absfile);
 	}
 
-if (!$d->{'dns_submode'}) {
+if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
@@ -2286,12 +2421,14 @@ foreach my $r (@$recs) {
 		# Fix mail server in MX record
 		$r->{'values'}->[1] =~ s/$olddom/$newdom/;
 		}
-	&bind8::modify_record($fn, $r, $r->{'name'},
-			      $r->{'ttl'}, $r->{'class'},
-			      $r->{'type'},
-			      &join_record_values($r,
-				$r->{'eline'} == $r->{'line'}),
-			      $r->{'comment'});
+	if ($fn) {
+		&bind8::modify_record($fn, $r, $r->{'name'},
+				      $r->{'ttl'}, $r->{'class'},
+				      $r->{'type'},
+				      &join_record_values($r,
+					$r->{'eline'} == $r->{'line'}),
+				      $r->{'comment'});
+		}
 	}
 }
 
@@ -2351,7 +2488,7 @@ return { 'wholefile' => $in->{'dns_wholefile'} };
 sub sysinfo_dns
 {
 &require_bind();
-if ($config{'provision_dns'}) {
+if ($config{'provision_dns'} || &default_dns_cloud()) {
 	# No local BIND in provisioning mode
 	return ( );
 	}
@@ -2367,7 +2504,7 @@ return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
 sub startstop_dns
 {
 local ($typestatus) = @_;
-if ($config{'provision_dns'}) {
+if ($config{'provision_dns'} || &default_dns_cloud()) {
 	# Cannot start or stop when remote
 	return ();
 	}
@@ -2483,6 +2620,25 @@ print &ui_table_row(&hlink($text{'tmpl_dns_sub'},
                            "template_dns_sub"),
 	&none_def_input("dns_sub", $tmpl->{'dns_sub'},
 		        $text{'yes'}, 0, 0, $text{'no'}));
+
+# Where to create zones?
+my @clouds = ( [ "", $text{'dns_cloud_def'} ] );
+if ($config{'provision_dns'}) {
+	push(@clouds, [ "services", $text{'dns_cloud_services'} ]);
+	}
+foreach my $c (&list_dns_clouds()) {
+	my $sfunc = "dnscloud_".$c->{'name'}."_get_state";
+	my $s = &$sfunc($c);
+	if ($s->{'ok'}) {
+		push(@clouds, [ $c->{'name'}, $c->{'desc'} ]);
+		}
+	}
+if (@clouds > 1) {
+	splice(@clouds, 1, 0, [ "local", $text{'dns_cloud_local'} ]);
+	}
+print &ui_table_row(&hlink($text{'tmpl_dns_cloud'},
+                           "template_dns_cloud"),
+	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds));
 
 print &ui_table_hr();
 
@@ -2743,6 +2899,9 @@ $tmpl->{'dns_dmarcextra'} = $in{'dns_dmarcextra'};
 $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 		     $in{'dns_sub_mode'} == 1 ? undef : "yes";
 
+# Save cloud provider
+$tmpl->{'dns_cloud'} = $in{'dns_cloud'};
+
 if (!$config{'provision_dns'}) {
 	# Save named.conf
 	$tmpl->{'namedconf'} = &parse_none_def("namedconf");
@@ -2961,7 +3120,11 @@ sub get_domain_dns_file
 local ($d) = @_;
 if ($d->{'provision_dns'}) {
 	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
-	       "for provisioning domains");
+	       "for cloudmin services domains");
+	}
+if ($d->{'dns_cloud'}) {
+	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
+	       "for cloud hosted domains");
 	}
 &require_bind();
 local $z;
@@ -2988,10 +3151,12 @@ sub get_domain_dns_records_and_file
 local ($d) = @_;
 &require_bind();
 local $bind8::config{'short_names'} = 0;
-if ($d->{'provision_dns'}) {
-	# Download to temp file, and read it
-	local $temp = &transname();
-	local $abstemp = $temp;
+
+# Create a temp file for writing downloaded records
+local ($temp, $abstemp);
+if ($d->{'dns_cloud'} || $d->{'provision_dns'}) {
+	$temp = &transname();
+	$abstemp = $temp;
 	local $chroot = &bind8::get_chroot();
 	if ($chroot && $chroot ne "/") {
 		# Actual temp file needs to be under chroot dir
@@ -3002,6 +3167,35 @@ if ($d->{'provision_dns'}) {
 			&make_dir($absdir, 0755, 1);
 			}
 		}
+	}
+
+if ($d->{'dns_cloud'}) {
+	# Fetch from the cloud provider and write to temp file
+	my $ctype = $d->{'dns_cloud'};
+	my $gfunc = "dnscloud_".$ctype."_get_records";
+	my $info = { 'domain' => $d->{'dom'},
+		     'id' => $d->{'dns_cloud_id'},
+		     'location' => $d->{'dns_cloud_location'} };
+	my ($ok, $recs) = &$gfunc($d, $info);
+	return ($recs) if (!$ok);
+	local $lnum = 0;
+	foreach my $rec (@$recs) {
+		&bind8::create_record($temp, $rec->{'name'},
+			$rec->{'ttl'}, $rec->{'class'}, $rec->{'type'},
+			&join_record_values($rec, 1),
+			$rec->{'comment'});
+		$rec->{'line'} = $lnum;
+		$rec->{'eline'} = $lnum;
+		$rec->{'num'} = $lnum;
+		$rec->{'file'} = $temp;
+		$rec->{'rootfile'} = $abstemp;
+		$lnum++;
+		}
+	&set_record_ids($recs);
+	return ($recs, $temp);
+	}
+elsif ($d->{'provision_dns'}) {
+	# Fetch from cloudmin services and write to temp file
 	local $info = { 'domain' => $d->{'dom'},
 			'host' => $d->{'provision_dns_host'} };
 	my ($ok, $msg) = &provision_api_call(
@@ -3239,7 +3433,7 @@ if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0) {
 
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
-    !$d->{'provision_dns'}) {
+    &can_domain_dnssec($d)) {
 	# Re-sign too
 	$z ||= &get_bind_zone($d->{'dom'});
 	eval {
@@ -3262,6 +3456,20 @@ if ($d->{'provision_dns'}) {
 		return "Error from provisioning server updating records : $msg";
 		}
 	}
+elsif ($d->{'dns_cloud'}) {
+	# Upload records to cloud DNS provider
+	local $ctype = $d->{'dns_cloud'};
+	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	local $info = { 'domain' => $d->{'dom'},
+		         'id' => $d->{'dns_cloud_id'},
+		         'location' => $d->{'dns_cloud_location'},
+			 'recs' => \@newrecs };
+	my $pfunc = "dnscloud_".$ctype."_put_records";
+	my ($ok, $msg) = &$pfunc($d, $info);
+	if (!$ok) {
+		return "Failed to update DNS records : $msg";
+		}
+	}
 
 # Un-freeeze the zone
 &after_records_change($d);
@@ -3275,7 +3483,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local $file;
 		local $recs;
-		if ($ad->{'provision_dns'}) {
+		if ($ad->{'provision_dns'} || $d->{'cloud_dns'}) {
 			# On provisioning server
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
@@ -3550,6 +3758,14 @@ return $str =~ /^(\d+)s$/i ? $1 :
        $str =~ /^(\d+)w$/i ? $1*7*86400 : $str;
 }
 
+# can_domain_dnssec(&domain)
+# Returns 1 if DNSSEC can be setup for a domain
+sub can_domain_dnssec
+{
+my ($d) = @_;
+return $d->{'provision_dns'} || $d->{'dns_cloud'} ? 0 : 1;
+}
+
 # disable_domain_dnssec(&domain)
 # Remove all DNSSEC records for a domain
 sub disable_domain_dnssec
@@ -3801,7 +4017,7 @@ if (!$config{'tlsa_records'} && !$force && !@oldrecs) {
 
 # Work out which TLSA records are needed
 my @need;
-if ($d->{'ssl'}) {
+if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
 	# SSL website
 	my $chain = &get_website_ssl_file($d, 'ca');
 	push(@need, &create_tlsa_dns_record(
@@ -3905,7 +4121,8 @@ sub obtain_lock_dns
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
 &obtain_lock_anything($d);
-local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+		 : $config{'provision_dns'} || &default_dns_cloud();
 
 # Lock records file
 if ($d && !$prov) {
@@ -3951,7 +4168,8 @@ sub release_lock_dns
 {
 local ($d, $conftoo) = @_;
 return if (!$config{'dns'});
-local $prov = $d ? $d->{'provision_dns'} : $config{'provision_dns'};
+local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
+		 : $config{'provision_dns'} || &default_dns_cloud();
 
 # Unlock records file
 if ($d && !$prov) {

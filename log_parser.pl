@@ -142,6 +142,9 @@ elsif ($type eq "postgrey") {
 			     &html_escape($object));
 		}
 	}
+elsif ($type eq "cloud" || $type eq "dnscloud") {
+	return &text('log_'.$action.'_'.$type, "<tt>".$object."</tt>");
+	}
 elsif ($type eq "link") {
 	return &text('log_'.$action.'_link', &html_escape($p->{'desc'}));
 	}

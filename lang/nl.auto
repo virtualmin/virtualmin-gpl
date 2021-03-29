@@ -12,6 +12,7 @@ index_fpmstopdesc=De server PHP-FPM versie $1 wordt momenteel uitgevoerd. Klik o
 index_fpmstart=Start PHP-FPM-server
 index_fpmstartdesc=De PHP-FPM-versie $1 -server is niet actief. Klik op deze knop om het te starten, wat vereist is voor alle PHP-websites die deze FPM-versie gebruiken.
 index_rewizard=Voer de installatiewizard opnieuw uit
+
 index_running=Back-ups maken
 index_runningdesc=Toon alle geplande back-ups die momenteel actief zijn, zodat ze kunnen worden geannuleerd.
 index_bkeys=Back-upversleutelingssleutels
@@ -29,14 +30,21 @@ index_certnearly=De SSL-certificaten van sommige virtuele servers verlopen bijna
 index_expirywarn=Waarschuwing DNS-registratie
 index_expiryexpired=De DNS-registraties van sommige virtuele servers zijn verlopen : $1 
 index_expirynearly=De DNS-registraties van sommige virtuele servers verlopen bijna : $1 
+index_certinvalid=Het SSL-certificaatbestand $2 voor $1 is ongeldig : $3 
+index_keyinvalid=Het SSL-sleutelbestand $2 voor $1 is ongeldig : $3 
+
 form_generic_aliasmail=Alias van $1, met eigen e-mailadres
 form_rmysql=MySQL-databaseserver
-form_content2=Ja met standaardinhoud
-form_nostyle=&lt;Virtualmin Standaard&gt;
+form_web=Apache-website instellen?
+form_ssl=Apache SSL-website instellen?
+form_content2=Ja, met standaardsjabloon en inhoud hieronder
+form_content0=Ja, met onderstaande inhoud
+
 setup_eforceunder=Je mag alleen domeinen maken onder $1 
 setup_evirt6alloc2=Kan virtueel IPv6-adres niet toewijzen uit resellerbereik
 setup_evirtalloc3=Geen IP-toewijzingsbereiken gedefinieerd!
 setup_evirt6alloc3=Geen IPv6-toewijzingsbereiken gedefinieerd!
+setup_eremoteuser=De gebruikersnaam kan niet hetzelfde zijn als de huidige aanmelding bij Virtualmin
 setup_edepunix2=Een website kan niet worden ingeschakeld zonder een beheerder
 setup_edepunixdir=Een virtuele server op het hoogste niveau met een thuisrichting moet een Unix-gebruiker hebben
 setup_edepdnssub2=DNS kan niet worden uitgeschakeld terwijl het subdomein het nog steeds heeft ingeschakeld
@@ -47,8 +55,13 @@ setup_eemail4=Het e-mailadres voor contact mag niet in het domein zijn dat wordt
 setup_eprefix4=Het voorvoegsel van de gebruikersnaam mag niet beginnen of eindigen met. of -
 setup_eslashpass=Wachtwoorden met een backslash worden niet ondersteund door MySQL
 setup_etmpl=U mag de geselecteerde sjabloon niet gebruiken
+
 setup_ewebphpmode=PHP-uitvoeringsmodus $1 is geselecteerd, maar wordt niet ondersteund op dit systeem!
 setup_esslusermin=Usermin is niet geïnstalleerd
+setup_bind_cloud=Nieuwe DNS-zone toevoegen met $1 ..
+setup_ebind_cloud=.. mislukt : $1 
+setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet het IP-adres instellen in de BIND DNS Server-module.
+setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
 setup_usermindown=.. momenteel niet actief
 setup_logrotatealready=.. al ingeschakeld voor logbestand $1 
@@ -60,10 +73,17 @@ setup_ejail=.. gevangenis mislukt : $1
 setup_jailed=.. gevangenis directory is nu $1 
 setup_letsaliases=Opnieuw een Let's Encrypt-certificaat aanvragen voor $1 om $2 op te nemen.
 setup_eletsaliases=.. mislukt : $1 
+setup_ednscloudexists=Geselecteerde DNS-cloudprovider bestaat niet!
+setup_ednscloudstate=DNS-cloudprovider $1 is niet klaar voor gebruik
+setup_ednscloudclash=Controle op clash op DNS-cloudprovider $1 : $2 is mislukt
+setup_dnscloudclash=DNS-zone bestaat al op cloudprovider $1 
+
 users_indom=$1 gebruikers in domein $2 
+
 users_indomsub=$1 gebruikers in domein $2 ($3 inclusief subdomeinen)
 users_mailclient=Instellingen voor e-mailclient weergeven
 users_mailclientdesc=Weergave-instellingen die moeten worden gebruikt door de e-mailclients van gebruikers voor dit domein.
+
 user_chrootwarn=Waarschuwing: omdat FTP-directorybeperkingen niet zijn ingeschakeld, heeft deze gebruiker ook toegang tot de webinhoud van de hoogste server.
 user_recovery=Adres voor wachtwoordherstel
 user_norecovery=Geen ingesteld
@@ -82,9 +102,12 @@ user_echarset=Tekenset moet lijken op UTF-8 of iso-8859-1
 user_remailbut=Verzend aanmeldings-e-mail opnieuw
 user_sendrecover=Wachtwoord herstellen
 user_noforward=Automatisch antwoord op doorgestuurde e-mail?
+
 aliases_indom=$1 aliassen in domein $2 
+
 alias_egone=E-mailalias bestaat niet meer
 alias_etype1f=Je mag geen e-mail doorsturen naar '$1'
+
 edit_id=Domein-ID
 edit_linkdom=Domeinnaam voor gebruik in links
 edit_nolinkdom=Deze domeinnaam
@@ -102,6 +125,10 @@ edit_aliasmail=Met eigen e-mail
 edit_lang=Verander taal
 edit_filemin=Bestandsbeheer
 edit_filemindesc=Blader door en bewerk bestanden in de websitemap van deze virtuele server.
+edit_website=Website-opties
+edit_websitedesc=Configureer instellingen met betrekking tot de website van deze virtuele server, zoals logboekregistratie en de HTML-directory
+edit_php=PHP-opties
+edit_phpdesc=Configureer instellingen met betrekking tot hoe PHP-scripts worden uitgevoerd voor deze virtuele server.
 edit_viewrecords=Voorgestelde DNS-records
 edit_viewrecordsdesc=Voorgestelde DNS-records voor deze virtuele server weergeven.
 edit_transfer=Breng virtuele server over
@@ -110,29 +137,46 @@ edit_change2fa=Schrijf u in voor Twofactor
 edit_change2fadesc=Schrijf u in of configureer tweefactorauthenticatie voor uw Virtualmin-login.
 edit_domdkim=DomainKey-opties
 edit_domdkimdesc=Configureerde DomainKey-instellingen voor alleen deze virtuele server.
+
 delete_preserve=Functies behouden die op afstand worden gehost ($1)
+delete_bind_cloud=DNS-zone verwijderen uit $1 ..
+delete_ebind_cloud=.. verwijderen mislukt : $1 
 delete_ebindsub=Ouder DNS-zoneserver bestaat niet meer!
 delete_mysqlpreserve=.. met behoud van externe databases op $1 
 delete_remoteuser=.. gebruiker behouden op extern systeem $1 
 delete_homepreserve=.. behouden van directory aangekoppeld van $1 
 delete_ednssubof=Virtuele server $1 kan niet worden verwijderd, omdat deze DNS-records voor server $2 bevat
 delete_esslnoips=Geen SSL-certificaat gevonden voor domein
+
+save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
+save_bind_ecloud=.. mislukt : $1 
 save_mailto=Aliassen bijwerken voor contactadres.
+save_statussslcert=E-mailadres wijzigen in SSL-certificaatstatusmonitor.
 save_erquota=Het schijfquotum voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat het eigendom is van reseller $1 met een quotumlimiet
 save_erbw=De bandbreedtelimiet voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat deze eigendom is van reseller $1 die een bandbreedtelimiet heeft
+
 acl_migrate=Kunnen back-ups migreren?
+
 import_encpass=Unix huidig wachtwoord van de gebruiker
 import_eencpass=Er bestaat geen bestaande Unix-gebruiker om het wachtwoord van te kopiëren
 import_db_mysql_user=MySQL-gebruikersnaam
 import_db_mysql_same=Hetzelfde als administratiegebruiker
 import_emysql_user=MySQL-gebruikersnaam ontbreekt
 import_emysql_user2=De opgegeven MySQL-gebruiker bestaat niet
+
 import_euserclash=De virtuele server $1 gebruikt al de geselecteerde gebruikersnaam
 import_egroupclash=De virtuele server $1 gebruikt al de geselecteerde groepsnaam
+
+disable_bind_cloud=DNS-zone uitschakelen op $1 ..
+disable_ebind_cloud=.. mislukt : $1 
 disable_subservers=Subservers ook uitschakelen?
 disable_doing=Virtuele server $1 uitschakelen. ..
+
 enable_subservers=Ook subservers inschakelen?
 enable_doing=Virtuele server $1 inschakelen. ..
+enable_bind_cloud=DNS-zone inschakelen op $1 ..
+enable_ebind_cloud=.. mislukt : $1 
+
 newweb_urlport=Extern poortnummer voor virtuele hosts
 newweb_urlsslport=Extern poortnummer voor virtuele SSL-hosts
 newweb_sameport=Hetzelfde als echte poort
@@ -141,6 +185,9 @@ newweb_sslprotos_def=Sta alle onveilige protocollen niet toe
 newweb_esslproto=SSL-protocollen moeten vergelijkbaar zijn met SSLv3 of TLSv1.1, optioneel voorafgegaan door een -
 newweb_dovecot=Dovecot configureren om hetzelfde SSL-certificaat te gebruiken?
 newweb_postfix=Postfix configureren om hetzelfde SSL-certificaat te gebruiken?
+
+feature_ssl=Apache SSL-website
+
 check_defip6=Het standaard IPv6-adres voor virtuele servers is $1.
 check_ewebdefphpmode2=PHP-uitvoeringsmodus $1 is geselecteerd in de standaardsjabloon, maar wordt niet ondersteund op dit systeem. De standaard wijzigen in $2.
 check_ewebapacheversion=Virtualmin kon de versie van Apache op uw systeem niet uitwerken
@@ -161,12 +208,12 @@ check_webphplocalfixed=Beperkte FPM-serverversie $2 tot localhost voor $1 domein
 check_webadminfixed=Niet-ondersteunde richtlijn $1 verwijderd van $2 Apache-websites.
 check_etlsa=TLSA DNS-records kunnen niet worden gemaakt op uw systeem: $1.
 check_tlsaok=TLSA DNS-records worden toegevoegd aan nieuwe domeinen.
-check_mysqlokmysql=MySQL $1 is geïnstalleerd en actief.
-check_mysqlokmariadb=MariaDB $1 is geïnstalleerd en actief.
+check_mysqlok=MySQL $1 is geïnstalleerd en actief.
 check_enetmask6=IPv6 netmask $1 is niet geldig - het zou een getal moeten zijn, zoals 64
 check_dependentok=Postfix is geconfigureerd om uitgaande IP-adressen per domein te ondersteunen.
 check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per domein.
 check_dependentesupport=Postfix ondersteunt uitgaande IP-adressen per domein, maar is momenteel niet geconfigureerd om dit te doen. Dit kan worden ingesteld in de module <a href='$1'>Postfix Mailserver</a>.
+check_eresolv2=Virtualmin is geconfigureerd om DNS-zones in te stellen, maar dit systeem is niet ingesteld om zichzelf als DNS-server te gebruiken. Voeg ofwel 127.0.0.1 toe aan $1, zet de BIND-functie op de $2-pagina uit, of schakel de <b>Check resolv.conf-</b> optie uit op de Virtualmin-configuratiepagina.
 check_eresolv3=Het lijkt erop dat DHCP wordt gebruikt om uw netwerkinterfaces dynamisch te configureren, waardoor de DNS-servers kunnen worden ingesteld op basis van de instellingen van de DHCP-server. Het gebruik van een statisch IP-adres wordt sterk aanbevolen bij Virtualmin.
 check_eresolvlist=lijst met DNS-servers
 check_dnsmissing=Het systeem lijkt geen DNS-servers te hebben geconfigureerd. Het standaardgedrag van het gebruik van een lokale DNS-server zou echter nog steeds moeten werken.
@@ -180,10 +227,15 @@ check_eaptrepofile=Het APT-repository-configuratiebestand $1 bestaat niet!
 check_aptrepook=De Virtualmin APT-repository is correct geconfigureerd
 check_aptrepowrong=Het APT-repository-configuratiebestand $1 bevat het verkeerde serienummer van de licentiesleutel!
 check_aptrepomissing=Het repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
+
 check_eqmailldap=Qmail+LDAP-ondersteuning is verwijderd in Virtualmin 6.00
+
 log_breakcert_domain=Stop met delen van SSL-certificaat voor server $1 
+log_rcert_domain=SSL-certificaat voor server $1 verwijderd
 log_transfer_domain=Overgedragen virtuele server $1 naar een ander systeem
 log_fixttl_domain=De DNS TTL gewijzigd op virtuele server $1 
+log_website_domain=Website-opties gewijzigd voor server $1 
+log_php_domain=PHP-opties gewijzigd voor server $1 
 log_domdkim_domain=DomainKey gewijzigd voor server $1 
 log_assoc_domain=Wijzig de bijbehorende functies voor server $1 
 log_mail_domain=E-mailinstellingen gewijzigd voor server $1 
@@ -206,6 +258,11 @@ log_enable_ratelimit=Ingeschakelde e-mailsnelheid beperken
 log_disable_ratelimit=Uitgeschakelde e-mailsnelheidsbeperking
 log_modify_ratelimit=Bijgewerkte limiet voor e-mail
 log_wizard=Stap Installatiewizard : $1 
+log_save_cloud=Bijgewerkte cloudback-upprovider $1 
+log_clear_cloud=Cloudback-upprovider $1 gewist
+log_save_dnscloud=Bijgewerkte cloud DNS-provider $1 
+log_clear_dnscloud=Cloud DNS-provider $1 gewist
+
 backup_desc=Back-upbeschrijving
 backup_selplan=Geselecteerde plannen ..
 backup_reseller=Beperk tot servers die eigendom zijn van de wederverkoper
@@ -252,6 +309,7 @@ backup_nicebb=Backblaze-emmer $1
 backup_nicebbp=$2 in Backblaze-bucket $1 
 backup_key=Versleutel back-up met sleutel
 backup_nokey=Onderteken of codeer niet
+
 backup_edestext=Een back-up naar een enkel bestand moet een extensie hebben zoals tar.gz of zip
 backup_eserver9=Ontbrekende of ongeldige Webmin-server
 backup_eserver9a=Hostnaam van webmin-server kan niet worden omgezet
@@ -277,6 +335,7 @@ backup_ersnopath=U moet een bestandsnaam opgeven wanneer u een back-up maakt naa
 backup_ekey=De geselecteerde back-upsleutel bestaat niet!
 backup_ekeycannot=U mag de geselecteerde back-upsleutel niet gebruiken
 backup_eownrestore=Alleen ondertekende back-ups kunnen worden hersteld door eigenaren van virtuele servers
+
 backup_emptydomain=.. sommige domeingegevens ontbreken!
 backup_deleteddom=Van virtuele server $1 kan geen back-up worden gemaakt omdat deze is verwijderd!
 backup_ebackupdirlock=.. tijdelijke back-up directory $1 is vergrendeld door proces $2 
@@ -308,12 +367,17 @@ backup_arun=Post-backupopdracht uitvoeren. ..
 backup_brunfailed=.. mislukt. De back-up gaat niet door.
 backup_arunfailed=.. mislukt!
 backup_efeature=.. functie $1 is mislukt
+
 restore_key=Ontsleutelen met sleutel
 restore_nokey=Back-up is niet versleuteld
 restore_dirhomes=Herstel de directory <tt>homes</tt>
 restore_dirdelete=Verwijder bestanden die niet in de back-up staan
 restore_delete=Virtuele servers verwijderen en opnieuw maken?
 restore_newip6=IPv6-adres voor herstelde servers
+restore_contents=Inhoud van de back-up controleren. ..
+restore_gotcontents2=.. $1 virtuele servers en $2 globale virtualmin-instellingen gevonden
+restore_gotcontents=.. $1 virtuele servers gevonden
+
 restore_rerrors=Deze back-up kan niet worden hersteld vanwege de volgende fouten : $1 
 restore_rerrors2=Er zijn enkele fouten gevonden in deze back-up : $1 
 restore_wcontinue=Individuele virtuele serverfouten negeren?
@@ -329,6 +393,7 @@ restore_downloadbb=Archief downloaden van Backblaze ..
 restore_downloadwebmin=Archief downloaden van de Webmin-server.
 restore_euid=UID $1 wordt al gebruikt op dit systeem
 restore_egid=GID $1 wordt al gebruikt op dit systeem
+
 restore_unixsame=.. het terugzetten naar de oorspronkelijke LDAP-server $1 in replicatiemodus overslaan
 restore_dirsame=.. het terugzetten naar de oorspronkelijke NFS-server $1 in replicatiemodus overslaan
 restore_edirspace=.. waarschuwing - deze back-up bevat $1 van bestanden, maar uw systeem heeft slechts $2 gratis ..
@@ -344,14 +409,19 @@ restore_vmailserver_ratelimit=Instellingen voor snelheidsbeperking herstellen. .
 restore_vmailserver_missing=.. niet geconfigureerd op dit systeem
 restore_ereseller=Reseller $1 bestaat niet
 restore_eparent=Originele virtuele bovenliggende server $1 bestaat niet
+
 limits_migrate=Kunnen back-ups migreren?
 limits_ipfollow=Subservers nemen IP-adres over van ouder?
 limits_jail=Chroot gevangenisdomein Unix-gebruiker?
 limits_ejailon=Kan chroot-gevangenis niet inschakelen : $1 
 limits_ejailoff=Kan chroot-gevangenis niet uitschakelen : $1 
+
 rename_euserclash=Er bestaat al een gebruiker met dezelfde naam
 rename_ednssub=De volgende DNS-subdomeinen gebruiken het zonebestand van deze server : $1 
 rename_eparentuser=De gebruikersnaam kan alleen worden gewijzigd voor servers op het hoogste niveau
+
+cert_hasnossl=Waarschuwing - deze virtuele server heeft nog geen SSL-website ingeschakeld. Elk SSL-certificaat kan alleen voor andere services worden gebruikt.
+cert_noneyet=Deze virtuele server heeft nog geen SSL-certificaat. Gebruik een van de tabbladen op deze pagina om een certificaat en sleutel te genereren.
 cert_incert=SSL-certificaatbestand
 cert_inkey=SSL-privésleutelbestand
 cert_cert0=Geplakte tekst
@@ -365,6 +435,9 @@ cert_etime=Tijd tot verstrijken
 cert_expired=$1 dagen geleden verlopen!
 cert_expiring=Verloopt over $1 dagen
 cert_future=$1 dagen tot de vervaldatum
+cert_remove=SSL-certificaat verwijderen
+cert_removedesc=Omdat het SSL-certificaat van deze virtuele server niet in gebruik is, kan het permanent worden verwijderd door op deze knop te klikken.
+cert_svcs=Gebruikt door services
 cert_desc5a=Het geselecteerde bestand kan meerdere CA-certificaten in PEM-indeling bevatten, de een na de ander.
 cert_ecerts=Certificaat bevat geen BEGIN/END-blokken
 cert_eoutside=Certificaat bevat een END-blok zonder een bijpassende BEGIN
@@ -402,8 +475,7 @@ cert_dnamefor=Certificaat aanvragen voor
 cert_dnamedef=Domeinen die aan deze server zijn gekoppeld
 cert_dnamesel=Domeinnamen die hier worden vermeld
 cert_dwild=Ook wildcard certificaat aanvragen?
-cert_letsrenew=Maanden tussen automatische verlenging
-cert_letsnotrenew=Alleen handmatig verlengen
+cert_letsrenew2=Certificaat automatisch verlengen?
 cert_connectivity=Controleer eerst de connectiviteit?
 cert_connectivity2=Connectiviteit testen
 cert_connectivity1=Domein valideren
@@ -425,6 +497,7 @@ cert_webminsvcip=Ja (voor verzoeken aan $1 en $2)
 cert_eperiperr=Kan servicecertificaten niet opslaan
 cert_eperipinst=Service $1 is niet geïnstalleerd
 cert_eperipfail=Service $1 is mislukt
+
 newkey_savingcert=Certificaat opslaan. ..
 newkey_savingkey=Privésleutel opslaan. ..
 newkey_ecertfile=Kan certificaatbestand $1 niet lezen
@@ -434,8 +507,10 @@ newkey_enewkeyfilehome=Het privésleutelbestand $1 moet zich in de basismap van 
 newkey_apache=Webserver configureren om een nieuw certificaat en nieuwe sleutel te gebruiken.
 newkey_enewkeycsr=Geen SSL-sleutel gegenereerd op hetzelfde moment dat een ondertekeningsverzoek werd gevonden!
 newkey_ekeysame=Voer niet het pad in naar de sleutel die is gegenereerd met een CSR - gebruik in plaats daarvan het tabblad <b>Ondertekend certificaat toepassen</b>.
+
 newtmpl_name0=Standaard instellingen
 newtmpl_name1=Instellingen voor subservers
+
 tmpl_exclude=Directory's om uit te sluiten van back-ups
 tmpl_exdirs=Lijst directories ..
 tmpl_web_ssl=Extra richtlijnen voor SSL-websites
@@ -475,6 +550,10 @@ tmpl_dmarcskip=Geen ingesteld
 tmpl_dmarcyes=Ja, met onderstaand beleid
 tmpl_dmarcextra=Extra DMARC-opties
 tmpl_edmarcpct=Het percentage berichten moet een geheel getal zijn tussen 0 en 100
+tmpl_dns_cloud=Maak nieuwe DNS-zones op
+dns_cloud_def=&lt; Automatisch kiezen &gt;
+dns_cloud_services=Cloudmin-diensten
+dns_cloud_local=Lokale bestanden
 tmpl_domalias_type2=Virtualmin-sjabloon
 tmpl_edomaliastmpl=Ontbrekende sjabloon voor aliasdomeinvoorvoegsel
 tmpl_webssi=Sta server-side standaard toe?
@@ -495,8 +574,11 @@ tmpl_autoconfignone=Automatisch gegenereerde
 tmpl_eautoconfig=Bij de XML voor automatische configuratie van Thunderbird ontbreekt een &lt;clientConfig&gt; -tag.
 tmpl_outlook_autoconfig=XML voor automatische configuratie van Outlook
 tmpl_outlook_eautoconfig=In de XML voor automatische configuratie van Outlook ontbreekt een &lt;Autodiscover&gt; -tag.
+
 bwgraph_enable=Controleer de $1 -pagina om ervoor te zorgen dat het verzamelen van statistieken is ingeschakeld.
+
 newfields_type11=Ja/Nee (standaard Nee)
+
 databases_indom=$1 databases in domein $2 
 databases_desc3h=Dit formulier kan worden gebruikt om de primaire databasewachtwoorden voor deze virtuele server te wijzigen.
 databases_ierr=Kan databases niet importeren
@@ -510,6 +592,7 @@ databases_remotenew=Nieuwe MySQL-host
 databases_remoteok=Verplaats databases
 databases_warn=WAARSCHUWING! Alle scripts of applicaties die momenteel zijn geïnstalleerd, worden NIET bijgewerkt om het nieuwe hostsysteem te gebruiken.
 databases_moving=MySQL-databases verplaatsen van $1 naar $2 ..
+
 newips_old6=IPv6-adres van te updaten servers
 newips_none2=Er zijn geen virtuele servers geselecteerd of er bestaan er geen op uw systeem.
 newips_none3=Er hoeven geen virtuele servers te worden bijgewerkt!
@@ -523,11 +606,15 @@ newips_mode0=Echt adres
 newips_mode1=Extern adres gebruikt in DNS-records
 newips6_eold=Oud IPv6-adres heeft niet de juiste indeling
 newips6_enew=Nieuw IPv6-adres heeft niet de juiste indeling
+
 newip_urlport=Poort voor gebruik in HTTP-URL's
 newip_urlsslport=Poort voor gebruik in HTTPS-URL's
 newip_sameport=Hetzelfde als echte poort
 newip_dom6=IP-adressen bijwerken in virtuele server $1 
+
 resel_unix=FTP/SSH-account aanmaken voor reseller?
+resel_from=Van adres voor e-mails van wederverkopers
+resel_fromdef=Hetzelfde als hierboven
 resel_max_topdoms=Maximale servers op het hoogste niveau
 resel_unlimit2=Onbeperkt voor sommige domeinen
 resel_emax_topdoms=Ontbrekend of ongeldig maximumaantal servers op het hoogste niveau
@@ -535,6 +622,7 @@ resel_eclash2=Er bestaat al een unix-gebruiker met dezelfde naam
 resel_migrate=Kunnen back-ups migreren?
 resel_create=Kunnen resellers worden gemaakt en bewerkt?
 resel_ranges6=IPv6-toewijzingsbereiken
+resel_efrom=Ongeldig e-mailadres van adres
 resel_defip6=IPv6-adres voor op naam gebaseerde servers
 resel_sharedips=Kunt u kiezen uit gedeelde IP-adressen?
 resel_defdnsip=Extern IP-adres voor op naam gebaseerde servers
@@ -543,6 +631,9 @@ resel_edefdnsip=Ontbrekend of ongeldig extern IP-adres
 resel_equnlimit=De virtuele server $1 kan niet worden toegewezen aan deze reseller, omdat deze een onbeperkt schijfquotum heeft, maar de reseller heeft een limiet
 resel_ebwunlimit=De virtuele server $1 kan niet worden toegewezen aan deze reseller, omdat deze een onbeperkt bandbreedte-quotum heeft, maar de reseller heeft een limiet
 resel_ebefore=Voordat de wijzigingsopdracht is mislukt : $1 
+
+licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen.
+licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
 licence_goterr2=.. ongeldige vervaldatum : $1 
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen
@@ -556,13 +647,16 @@ licence_fixlinksok=Herstel symbolische koppelingsrechten
 licence_fixlinksignore=Sta onveilige symbolische links toe
 licence_xfsreboot=Uw systeem moet opnieuw worden opgestart om XFS-quota op het rootbestandssysteem mogelijk te maken. Zolang dit niet is gedaan, detecteert Virtualmin geen quota als actief en is het onmogelijk om limieten voor schijfgebruik op virtuele servers of gebruikers toe te passen.
 licence_xfsrebootok=Herstart nu
+
 scripts_emissing=Script bestaat niet!
+scripts_ephpvers2=Dit script kan niet worden geïnstalleerd omdat er geen PHP-versies zijn gevonden
 scripts_egone=Script bestaat niet meer!
 scripts_idb2=Gebruikt database met tabelvoorvoegsel
 scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
 scripts_cats=Categorieën
+scripts_passmode4=Eerste wachtwoord voor script
 scripts_needpackages=Controleren op $1 vereiste pakketten.
 scripts_epackages=.. pakketinstallatie wordt niet ondersteund op dit systeem!
 scripts_installpackage=$1 installeren. ..
@@ -572,16 +666,25 @@ scripts_packagecount=.. $1 nieuwe pakketten geïnstalleerd
 scripts_packageall=.. alle pakketten zijn al geïnstalleerd
 scripts_abandoned2=WAARSCHUWING: dit script wordt niet langer ondersteund door de oorspronkelijke auteur.
 scripts_abandoned1=WAARSCHUWING: Versie $1 van dit script wordt niet langer ondersteund door de oorspronkelijke auteur.
+
 newnotify_users=Ook e-mailen in geselecteerde domeinen?
+
 migrate_directadmin=DirectAdmin-back-up
 migrate_ip6=IPv6-adres van nieuwe server
+
 sysinfo_python=Python-versie
 sysinfo_pythonpath=Pad naar Python
+
 newquotas_nobody=Niemand
 newquotas_addr=Adressen
+
 links_phpini3=PHP-FPM-configuratie
+
 massdelete_preserve=Behoud functies die op afstand worden gehost
+
 massdomains_plan=Accountplan
+massdomains_ephpvering=.. kan versie $1 niet wijzigen
+
 newmysqls_title=MySQL-servers
 newmysqls_ecannot=Het is niet toegestaan om extra MySQL-servers te bewerken
 newmysqls_host=Hostnaam van de server
@@ -623,9 +726,12 @@ newmysqls_edelete=De lokale server kan niet worden verwijderd
 newmysqls_edefault=De standaardserver kan niet worden verwijderd
 newmysqls_eprovision=Een server die is gemaakt door Cloudmin Services kan niet worden verwijderd
 newmysqls_einuse=Een server die wordt gebruikt door $1 -domeinen, kan niet worden verwijderd
+
 move_desc3=Op deze pagina kunt u de bestemming van een aliaserver wijzigen, zodat elke web- of e-mailtoegang wordt doorgestuurd naar het nieuw geselecteerde domein.
 move_target2=Nieuw aliasdoel
+
 newvalidate_subservers=Ook subservers repareren?
+
 validate_euserhome=Beheerder $1 heeft de thuismap $3, maar deze moet $2 zijn
 validate_eport=Poort $1 wordt gebruikt door $2 om onverwachte server '$3' uit te voeren
 validate_ednsa6=DNS-zone heeft geen AAAA-records
@@ -636,11 +742,15 @@ validate_ednsmx=E-mail is ingeschakeld voor dit domein, maar geen van de MX-reco
 validate_ednsnotype=DNS-zone voor domein $1 heeft geen type!
 validate_ednstype=DNS-zone voor domein $1 heeft het type $2 in plaats van $3 
 validate_ewebphpconfig=Er zijn PHP-configuratiefouten gevonden in versie $1 : $2 
+validate_ewebroot=Apache DocumentRoot is niet ingesteld op HTML-directory $1 
 validate_ewebipv6=Er bestaat een IPv6 DNS-record $2 met adres $1, maar voor deze virtuele server is IPv6 niet ingeschakeld
 validate_ewebipv6virt=Er bestaat een IPv6 DNS-record met adres $1, maar de Apache-configuratie van deze virtuele server heeft geen IPv6-adres
 validate_esslcertinfo=SSL-certificaatbestand kan niet worden geparseerd
+validate_esslcainfo=SSL CA-bestand $1 kan niet worden geparseerd
+validate_esslcamatch=SSL CA-certificaat voor $1/$2 komt niet overeen met de uitgever van het SSL-certificaat $3/$4 
 validate_esslexpired=Het SSL-certificaat voor deze virtuele server is verlopen op $1 
 validate_emysqlmod=MySQL Webmin-module $1 bestaat niet!
+
 spam_trashclear=Prullenbak automatisch verwijderen?
 spam_etrashsize=Ontbrekende of ongeldige maximale prullenbakgrootte
 spam_etrashdays=Ontbrekende of ongeldige maximale prullenbak
@@ -648,14 +758,25 @@ spam_scanner4=Externe serverscanner
 spam_exitcode=Wanneer een gebruiker met een te hoog quotum e-mail ontvangt
 spam_bounce=Stuiter terug naar de afzender
 spam_queue=Wachtrij voor latere levering
+
 pass_dbsync=Waarschuwing: als u het beheerderswachtwoord van dit domein wijzigt, wordt ook het wachtwoord bijgewerkt dat nodig is om verbinding te maken met de databases.
 pass_hashpass=Alleen hash-wachtwoord opslaan voor dit domein?
+
+usage_dirheader2=Schijfgebruik door bestanden en mappen onder het huis van deze server en andere gedeelde mappen.
+usage_dirdesc=<b>Kolomquotagrootte</b> is de schijfruimte die wordt geboekt op de virtuele server, terwijl <b>Grootte</b> de ruimte is die wordt gebruikt door alle bestanden in elke map.
+usage_others=Andere bestanden in huis
 usage_showall=Toon schijfgebruik voor iedereen.
+
 newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of vereist door uw bestandssystemen
+
+phpmode_title2=PHP-opties
+phpmode_header=PHP-opties voor dit domein
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)
 phpmode_short_fpm=FPM
 phpmode_dirswarn=Waarschuwing - Als u overschakelt van de CGI- of FCGId-modi, worden alle PHP-versieselecties per map verwijderd.
+phpmode_err2=Het opslaan van PHP-opties is mislukt
 phpmode_emoding=.. wijziging mislukt : $1 
+phpmode_emode=.. geselecteerde modus wordt niet ondersteund op dit systeem!
 phpmode_vers=PHP-versies geïnstalleerd
 phpmode_novers=Geen versies gevonden!
 phpmode_errs=Configuratiefouten voor PHP $1 
@@ -667,9 +788,21 @@ phpmode_ssioff=Server-side uitschakelen omvat ..
 phpmode_ssierr=.. mislukt : $1 
 phpmode_essisuffix=Ongeldige serverzijde bevat achtervoegsel - moet zijn als <tt>.shtml</tt>
 phpmode_defwebsort=Ja (maar alleen omdat het eerst alfabetisch is)
+phpmode_rename=Hernoem de huidige map als deze is gewijzigd?
 phpmode_sslredir=Alle verzoeken omleiden naar SSL-site?
 phpmode_ssloff=Doorverwijzing naar SSL-site verwijderen.
 phpmode_sslon=Omleiding toevoegen aan SSL-site.
+phpmode_version=PHP-versie
+phpmode_versions=PHP-versies
+phpmode_enabled=Ingeschakeld
+phpmode_versionone=(Alleen versie beschikbaar voor deze modus)
+phpmode_deldir=PHP-directory $1 verwijderen ..
+phpmode_edeldir=.. primaire map kan niet worden verwijderd!
+phpmode_adddir=PHP-directory $1 toevoegen aan versie $2 ..
+phpmode_savedir=PHP-directory $1 bijwerken naar versie $2 ..
+
+website_header=Website-opties
+
 spf_dmarcchange=DMARC-record bijwerken.
 spf_ip6=Toegestane IPv6-adressen van afzenders
 spf_eip6='$1' is geen geldig IPv6-adres
@@ -686,40 +819,51 @@ spf_addrecs=$1 DNS-records toevoegen.
 spf_ttl=Standaard TTL instellen op $1 ..
 spf_enablednssec=DNSSEC-sleutel en -records maken.
 spf_disablednssec=DNSSEC-records verwijderen. ..
+spf_ednssecsupport=.. DNSSEC kan niet worden beheerd voor dit domein
 spf_enabletlsa=TLSA-records maken. ..
 spf_disabletlsa=TLSA-records verwijderen. ..
 spf_etlsa=.. niet ondersteund op dit systeem : $1 
 spf_synctlsa=TLSA-records bijwerken.
 spf_esynctlsa=.. geen gevonden voor dit domein
+
 s3_emodule2=De Perl-module $1 die nodig is om te communiceren met de S3-service van Amazon kan niet worden geladen : $2 
 s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3-service van Amazon, zijn niet geïnstalleerd
 s3_einfo2=Kan $1 : $2 niet lezen
 s3_eputacl=Kan bucket-ACL niet opslaan : $1 
 s3_eputlifecycle=Kan bucketlevenscyclus niet opslaan : $1 
-phpver_emodphp=Deze virtuele server gebruikt de <tt>mod_php</tt> -uitvoeringsmodus voor PHP, dit staat geen selectie per mapversie toe.
+
 sharedips_def6=Standaard gedeeld IPv6-adres
 sharedips_ip6s=Gedeelde IPv6-adressen voor alle servers
 sharedips_def6none=Geen geconfigureerd op dit systeem
 sharedips_eip6='$1' is geen geldig IPv6-adres
+
 newdynip_eexternal=In de externe scriptmodus moet het volledige pad naar een uit te voeren script worden ingevoerd
+
 dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
+
 exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.
 exclude_edb=Databasenaam '$1' is ongeldig
+
 quotawarn_suffixdom=Verzonden door Virtualmin op: $1 
 quotawarn_suffixuser=Verzonden door Virtualmin op: $1 
+
 history_stat_memtotal=Geheugenlimiet
 history_stat_swaptotal=Ruimtegrens wisselen
 history_stat_memcached=Buffercache gebruikt
 history_stat_memburst=Barstbare limiet
 history_stat_ratecount=E-mailtarief beperkt per minuut
+
 clamd_einit=.. opstartactie $1 bestaat niet!
+
 newshells_reseller=Tussenpersoon?
 newshells_eresellers=Er zijn geen schelpen geselecteerd voor wederverkopers
 newshells_eresellerdef=Precies één shell moet de standaard zijn voor resellers
+
 shells_mailboxscp=E-mail en SCP
 shells_mailboxscp2=Alleen SCP
+
 mail_rbcc=BCC inkomende e-mail naar
 mail_rbccing=BCCing van alle inkomende e-mail naar $1 ..
 mail_norbcc=Het uitschakelen van de BCC van inkomende e-mail
@@ -740,6 +884,7 @@ mail_nothing=Er zijn geen wijzigingen aangebracht!
 mail_ecloudid=Er moet een ID worden opgegeven voor het geselecteerde cloudmailfilter
 mail_url=URL van huidige filterprovider
 mail_mx=Huidige MX-records
+
 sched_allplan=Op plan $1 
 sched_allplans=Op $1 -abonnementen
 sched_allreseller=Eigendom van reseller $1 
@@ -749,13 +894,17 @@ sched_enable=Schakel geselecteerd in
 sched_desc=Omschrijving
 sched_inc2=Volledig (geen update)
 sched_logs=Back-uplogboeken. ..
+
 dsched_erunning=De back-up met ID $1 wordt niet meer uitgevoerd
+
 editgrey_eregexp=Ongeldige reguliere expressie : $1 
+
 copycert_dsaved2=.. schreef certificaat en CA in $1, en toets $2 in
 copycert_psaving2=Certificaat, sleutel en CA kopiëren naar Postfix-bestanden.
 copycert_fsaving=Certificaat en sleutel kopiëren naar ProFTPD-bestanden.
 copycert_fsaving2=Certificaat, sleutel en CA kopiëren naar ProFTPD-bestanden.
 copycert_fenabling=SSL inschakelen in ProFTPD-configuratie.
+
 wizard_ecannot=Het is niet toegestaan de post-installatiewizard uit te voeren
 wizard_virusnew=Als uw systeem domeinen gaat hosten die een grote hoeveelheid e-mail zullen ontvangen, kan het scannen van inkomende berichten op virussen een hoge CPU-belasting genereren. Omdat er wordt gescand met de ClamAV-scanserver <tt>clamd</tt>, zal deze RAM verbruiken, zelfs wanneer geen e-mail wordt verwerkt. Als uw systeem geen e-mail host, kan virusscanning worden uitgeschakeld.
 wizard_virusmsg=Virusscanning inschakelen met ClamAV?
@@ -785,10 +934,12 @@ wizard_defssl2=Ja, met het Let's Encrypt-certificaat
 wizard_defdom_clash=Er bestaat al een virtuele server met de naam $1 
 wizard_defdom_already=Er bestaat al een standaard virtuele server met de naam $1 
 wizard_defdom_desc=Host standaard domein
+
 backuplog_sched=Logboeken weergeven van geplande back-up naar $1 ..
 backuplog_desc=Omschrijving
 backuplog_incr=Type
 backuplg_esched=Geplande back-up bestaat niet!
+
 viewbackup_desc=Originele back-upbeschrijving
 viewbackup_inc2=Vol zonder stapsgewijs opnieuw in te stellen
 viewbackup_compression=Compressie-indeling
@@ -801,6 +952,7 @@ viewbackup_key=Ja, met sleutel $1
 viewbackup_sched=Van geplande back-up
 viewbackup_gone=ID $1 (verwijderd)
 viewbackup_ownrestore=Eigenaren kunnen herstellen?
+
 dbackup_err=Kan back-up niet verwijderen
 dbackup_title=Back-up verwijderen
 dbackup_rusure=Weet u zeker dat u deze back-up van $2 domeinen van $3 in totaal $1 wilt verwijderen?
@@ -808,6 +960,7 @@ dbackup_confirm=Verwijder nu
 dbackup_doing=Back-up verwijderen van $1 ..
 dbackup_done=.. met succes verwijderd
 dbackup_failed=.. mislukt : $1 
+
 redirect_code=HTTP-omleidingstype
 redirect_301=Permanent (301)
 redirect_302=Tijdelijk (302)
@@ -816,14 +969,18 @@ redirect_proto=Omleiding inschakelen voor
 redirect_http=Niet-SSL-website
 redirect_https=SSL-website
 redirect_ecode=Ongeldige HTTP-statuscode
+
 dkim_size=Grootte van nieuwe DKIM-sleutel
 dkim_bits=stukjes
 dkim_eexclude=Ongeldig uitgesloten domein $1 
 dkim_exclude=Teken nooit voor domeinen
+
 dkim_ednsexclude=.. domein is uitgesloten van DKIM
+dkim_founddomains3=.. $1 servers en $2 extra domeinen gevonden
 dkim_pubkeypem=DKIM openbare sleutel in PEM-formaat
 dkim_privkeypem=DKIM privésleutel in PEM-formaat
 dkim_esize=De grootte van de DKIM-sleutel moet een aantal van minimaal 512 bits zijn
+
 newautoconfig_title=Configuratie van e-mailclient
 autoconfig_ecannot=Het is niet toegestaan de e-mailclientconfiguratie te bewerken
 autoconfig_header=Clientconfiguratie-opties
@@ -835,6 +992,7 @@ autoconfig_enable=Automatische clientconfiguratie van e-mail inschakelen voor $1
 autoconfig_disable=Automatische configuratie van e-mailclient uitschakelen voor $1 virtuele servers.
 autoconfig_failed=Mislukt voor $1 : $2 
 autoconfig_enabled_global=Opgeslagen instellingen voor automatische configuratie van e-mail.
+
 newretention_title=Mailbox opschonen
 retention_ecannot=Het is niet toegestaan mailboxopschoning te configureren
 retention_header=Opties voor het automatisch opschonen van mailboxen
@@ -850,7 +1008,9 @@ retention_folders=Berichten opschonen in
 retention_folders0=Alle gebruikersmappen
 retention_folders1=Alleen de Inbox
 retention_desc=Op deze pagina kunt u Virtualmin automatisch oude e-mailberichten laten verwijderen uit de mailboxen van domeineigenaren en mailgebruikers.
+
 provision_nolimit=onbeperkt
+
 records_typesrv=Servicebestand
 records_valuesrv1=Prioriteit
 records_evaluesrv1=Prioriteit moet een nummer zijn
@@ -862,18 +1022,23 @@ records_valuesrv4=Target hostnaam
 records_evaluesrv4=Ongeldige DNS-naam voor doelhostnaam
 records_valuespf=Afzender toegestaan vanaf specificatie
 records_viewdesc=Het DNS-domein van deze virtuele server wordt niet gehost door uw Virtualmin-systeem. Als het domein ergens anders wordt gehost, moeten de onderstaande records worden gebruikt om ervoor te zorgen dat de website en e-mail correct werken.
+
 record_sservice=Service naam
 record_sproto=Serviceprotocol
 record_esservice=Ontbrekende of ongeldig ogende servicenaam
 record_esproto=Ongeldig serviceprotocol
+
 clone_eclash=Er bestaat al een virtuele server met dezelfde naam
 clone_eclash2=Er bestaat al een gebruiker met dezelfde naam
 clone_epass=Geen wachtwoord ingevoerd voor nieuwe ouder-server
 clone_scripts=Geïnstalleerde scriptlogboeken kopiëren.
 clone_mysqlprefix2=.. in plaats daarvan met de nieuwe databasenaam $1 
+
 mrecords_validate=Nieuwe records valideren?
+
 fixperms_edir=.. heeft geen homedirectory
 fixperms_failed=.. mislukt : $1 
+
 bkeys_title=Back-upversleutelingssleutels
 bkeys_key=GPG-sleutel-ID
 bkeys_delete=Geselecteerde toetsen verwijderen
@@ -895,6 +1060,7 @@ bkeys_eused2=Sleutel $2 wordt gebruikt door een geplande back-up naar $1
 bkeys_rusure=Weet u zeker dat u de $1 geselecteerde back-upversleutelingssleutels wilt verwijderen?
 bkeys_rusuerlogs=Deze sleutels zijn gebruikt om $1 eerdere back-ups te versleutelen, die zonder deze niet meer kunnen worden hersteld.
 bkeys_all=Domeineigenaren toestaan sleutel te gebruiken?
+
 bkey_create=Maak een versleutelingssleutel
 bkey_edit=Coderingssleutel bewerken
 bkey_ecannot=U mag deze coderingssleutel niet bewerken
@@ -931,11 +1097,13 @@ bkey_rusuerlogs=Deze sleutel is gebruikt om $1 eerdere back-ups te versleutelen,
 bkey_edescclash=Er bestaat al een GPG-sleutel met dezelfde beschrijving
 bkey_eemailclash=Er bestaat al een GPG-sleutel met hetzelfde e-mailadres
 bkey_download=Sleutel downloaden
+
 hashtype_crypt=Unix DES crypt
 hashtype_md5=MD5 hasj
 hashtype_unix=Systeem standaard hashtype
 hashtype_mysql=MySQL-wachtwoord-hash
 hashtype_digest=Web-digest authenticatie-hash
+
 fixsymlinks_title=Herstel symbolische koppelingsrechten
 fixsymlinks_ecannot=Het is niet toegestaan symbolische koppelingsrechten te herstellen
 fixsymlinks_doing=Updaten van alle virtuele servers om onveilige symbolische links te voorkomen.
@@ -948,10 +1116,12 @@ fixsymlinks_doms=Er zijn problematische <tt>.htaccess</tt> -bestanden gevonden i
 fixsymlinks_ok=Toegangsbestanden repareren
 fixsymlinks_htdoing=Bevestigingsopties in <tt>.htaccess</tt> -bestanden.
 fixsymlinks_htdone=.. $1 bestanden in $2 domeinen gerepareerd
+
 fixmodphp_title=Fix PHP-machtigingen
 fixmodphp_ecannot=Het is niet toegestaan om PHP-permissies te herstellen
 fixmodphp_doing=Updaten van alle virtuele servers om het gebruik van mod_php te voorkomen wanneer uitgeschakeld.
 fixmodphp_done=.. $1 domeinen opgelost
+
 buckets_title=Amazon S3-emmers
 buckets_ecannot=U mag geen S3-buckets beheren
 buckets_eaccounts=Er zijn nog geen geplande back-ups naar S3 gemaakt en er zijn geen standaard S3-sleutels ingesteld.
@@ -963,6 +1133,7 @@ buckets_created=Gemaakt op
 buckets_location=Plaats
 buckets_add=Maak een nieuwe S3-bucket.
 buckets_return=lijst met emmers
+
 bucket_title1=Maak een S3-bucket
 bucket_title2=S3-bucket bewerken
 bucket_eagone=Account bestaat niet!
@@ -1007,6 +1178,7 @@ bucket_eldays=Ontbrekend of niet-numeriek aantal dagen in levenscyclus $1
 bucket_elday=Ontbrekende of niet-numerieke dag in levenscyclus $1 
 bucket_elmonth=Ontbrekende of niet-numerieke maand in levenscyclus $1 
 bucket_elyear=Ontbrekend of niet-numeriek jaar in levenscyclus $1 
+
 ratelimit_title=Mail Rate Limiting
 ratelimit_eos=E-mailsnelheidsbeperking wordt niet ondersteund op dit besturingssysteem
 ratelimit_econfig=Het milter-greylist-configuratiebestand $1 bestaat niet
@@ -1035,6 +1207,7 @@ ratelimit_enum=Het aantal berichten moet een nummer zijn
 ratelimit_etime=Tijdsperiode moet een getal zijn
 ratelimit_socket=Socketbestand aanpassen ..
 ratelimit_etwice=Domein $1 is tweemaal geselecteerd
+
 ratelimit_title4=Installeer Mail Rate Limiting
 ratelimit_installing=Het pakket voor e-mailsnelheidsbeperking installeren.
 ratelimit_installfailed=.. installatie mislukt!
@@ -1055,6 +1228,7 @@ ratelimit_h=uren
 ratelimit_d=dagen
 ratelimit_w=weken
 ratelimit_y=jaar
+
 transfer_title=Breng virtuele server over
 transfer_err=Kan server niet overzetten
 transfer_ecannot=Het is niet toegestaan om virtuele servers over te zetten
@@ -1107,6 +1281,7 @@ transfer_disabling=$1 wordt uitgeschakeld op dit systeem.
 transfer_ereplication=Zowel replicatie als verwijdering van het domein kunnen niet tegelijkertijd worden ingeschakeld
 transfer_ehost=Ontbrekende bestemmingshostnaam
 transfer_ehost2=Bestemmingshostnaam kan niet worden omgezet
+
 domdkim_title=DomainKey-opties
 domdkim_header=DomainKey-opties voor deze server
 domdkim_key=DKIM privésleutel in PEM-formaat
@@ -1122,8 +1297,10 @@ domdkim_ekey=Ongeldige sleutelindeling : $1
 domdkim_egen=Kan nieuwe sleutel niet genereren : $1 
 domdkim_enabled=DKIM is momenteel niet ingeschakeld
 domdkim_records=DKIM DNS-records
+
 clouds_title=Cloud Storage Providers
 clouds_name=Provider naam
+clouds_url=Website
 clouds_state=Huidige toestand
 clouds_users=Back-up van gebruikers
 clouds_ecannot=Het is niet toegestaan cloudopslagproviders te bewerken
@@ -1131,6 +1308,7 @@ clouds_unconf=Nog niet geconfigureerd
 clouds_return=lijst met providers
 clouds_nusers=Gebruikt door $1 back-ups
 clouds_nousers=Wordt niet gebruikt door back-ups
+
 cloud_s3desc=Amazon S3
 cloud_rsdesc=Rackspace Cloud Files
 cloud_googledesc=Google Cloud Storage
@@ -1150,6 +1328,7 @@ cloud_s3_location=Locatie voor nieuwe emmers
 cloud_title=Bewerk Cloud Provider
 cloud_header=Opties voor cloudopslagproviders
 cloud_provider=Provider naam
+cloud_url=Website van de aanbieder
 cloud_es3_endpoint=De S3-compatibele server moet een geldige hostnaam zijn
 cloud_es3_chunk=Grootte van upload-brok moet een positief getal zijn
 cloud_egone=Onbekende cloudopslagprovider!
@@ -1196,6 +1375,7 @@ cloud_bb_key=API sleutel
 cloud_bb_ekeyid=Ontbrekende of ongeldig uitziende API-sleutel-ID
 cloud_bb_ekey=Ontbrekende of ongeldig uitziende API-sleutel
 cloud_bb_elogin=Inloggen op Backblaze is mislukt : $1 
+
 left_virtualmin=Virtualmin
 left_master=Master admin
 left_reseller=Tussenpersoon
@@ -1207,6 +1387,7 @@ left_master2=Cloudmin hoofdbeheerder
 left_login=Inloggen: $1 
 left_level=Niveau 1
 left_generic=Maak een virtuele server
+
 right_statusheader=Toestand
 right_sysinfoheader=Programma's
 right_virtheader=Virtualmin telt
@@ -1270,6 +1451,7 @@ right_quota=Schijfgebruik en quota
 right_bw=Bandbreedte gebruik en limiet
 right_of=$1 van $2 
 right_sysinfo=systeem informatie
+
 assoc_title=Associate en Dis-Associate functies
 assoc_desc=Functies die op deze pagina zijn in- of uitgeschakeld, werken geen systeemconfiguratiebestanden bij - in plaats daarvan wordt alleen de Virtualmin-database met functies gewijzigd die naar verwachting een domein zal hebben. Dit kan worden gebruikt om een functie die handmatig is ingesteld te importeren of om een configuratie te verbreken, zodat deze behouden blijft wanneer een virtuele server wordt verwijderd.
 assoc_header=Instellingen voor functie-associatie
@@ -1277,6 +1459,7 @@ assoc_features=Functies bekend bij Virtualmin
 assoc_validate=Succesvolle validatie vereisen voordat u opslaat?
 assoc_err=Kan functies niet koppelen
 assoc_evalidate=Validatie is mislukt voor $1 : $2 
+
 running_title=Back-ups maken
 running_stop=Stop geselecteerde back-ups
 running_started=Begon bij
@@ -1288,6 +1471,7 @@ running_cron=Geplande back-up
 running_link=Bezoek de pagina <a href='$1'>geplande back-ups</a> om back-ups te maken die regelmatig op de achtergrond worden uitgevoerd, of de pagina <a href='$2'>back-uplogboeken</a> om back-ups te zien die al zijn voltooid.
 running_err=Kan back-ups niet stoppen
 running_enone=Geen geselecteerd!
+
 recovery_title=Wachtwoord herstellen
 recovery_msg1=Weet u zeker dat u het huidige wachtwoord voor $1 naar $2 wilt verzenden?
 recovery_msg2=Weet u zeker dat u een nieuw willekeurig wachtwoord voor $1 wilt genereren en dit naar $2 wilt verzenden?
@@ -1297,6 +1481,7 @@ recovery_body1=Het wachtwoord voor uw e-mailaccount $3 met login $2 is : $1
 recovery_body2=Er is een nieuw willekeurig wachtwoord voor uw e-mailaccount $3 met login $2 gegenereerd : $1 
 recovery_sending=E-mail voor wachtwoordherstel verzenden naar $1 ..
 recovery_failed=.. mislukt : $1 
+
 letsencrypt_err=Certificaat aanvragen is mislukt
 letsencrypt_title=Certificaat aanvragen
 letsencrypt_doing2=Een certificaat voor $1 aanvragen bij Let's Encrypt ..
@@ -1316,12 +1501,14 @@ letsencrypt_conncheck=Externe connectiviteit controleren op $1 ..
 letsencrypt_connerrs=.. er zijn fouten gevonden die kunnen voorkomen dat Let's Encrypt een certificaat afgeeft :
 letsencrypt_connok=.. geen problemen gevonden
 letsencrypt_validcheck=Configuratie valideren voor $1 ..
+
 php_fpmrestart=De PHP-FPM-server opnieuw opstarten.
 php_fpmnoinit=.. geen opstartactie gevonden!
 php_fpmeinit=.. mislukt : $1 
 php_fpmnodir=Geen FPM-configuratiemap gevonden
 php_fpmnoinit2=Geen opstartactie voor FPM-server gevonden
 php_fpmnomod=Apache-module $1 ontbreekt of is niet ingeschakeld
+
 jailkit_ecmd=De Jailkit-opdracht $1 is niet gevonden op uw systeem - misschien is het <i>jailkit</i> -pakket niet geïnstalleerd?
 jailkit_einit=Kan gevangenis niet initialiseren : $1 
 jailkit_elinux=Jailkit wordt alleen ondersteund op Linux-systemen
@@ -1332,6 +1519,7 @@ jailkit_emkdir=Kan map niet maken : $1
 jailkit_eumount=Kan bindingshoofdmap niet ontkoppelen : $1 
 jailkit_eenabled=Chroot jail is niet ingeschakeld voor dit domein
 jailkit_edir=Geen chroot jail-directory gevonden!
+
 mysqlpass_shutdown=MySQL-server afsluiten. ..
 mysqlpass_eshutdown=.. afsluiten mislukt : $1 
 mysqlpass_startup=MySQL-server opstarten.
@@ -1343,6 +1531,7 @@ mysqlpass_esafe=.. opstarten mislukt : $1
 mysqlpass_change=Het wachtwoord wijzigen voor gebruiker $1 ..
 mysqlpass_echange=.. wachtwoordwijziging mislukt : $1 
 mysqlpass_kill=De MySQL-server stoppen met uitgeschakelde authenticatie.
+
 kill_failed=Kill mislukt : $1 
 kill_still=Nog steeds aan het rennen!
 kill_done=Gedood
@@ -1352,6 +1541,7 @@ kill_port=Haven
 kill_cmd=Serveropdracht
 kill_result=Resultaat
 kill_subject=Monitoring van Virtualmin-serverprocessen
+
 mysql_rsock=Socketbestand $1 
 mysql_rhostport=Externe host $1 poort $2 
 mysql_rhost=Externe host $1 
@@ -1360,8 +1550,10 @@ mysql_rlocal=Lokale server
 mysql_movebackup=Een back-up maken van gebruikers en databases op de oorspronkelijke host.
 mysql_moverestore=Gebruikers en databases herstellen op nieuwe host.
 mysql_movedelete=Gebruikers en databases verwijderen van de oorspronkelijke host.
+
 dbpass_title=Database-wachtwoord bijwerken
 dbname_title=Databasenaam bijwerken
+
 mailclient_title=Instellingen e-mailclient
 mailclient_header=Instellingen voor e-mailclients van gebruikers
 mailclient_exemail=Voorbeeld e-mailadres van gebruiker
@@ -1383,12 +1575,16 @@ mailclient_smtp_type=Type SMTP-codering
 mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Onversleuteld
+
 deftmplt_error=FOUT
 deftmplt_website_disabled=Website uitgeschakeld
 deftmplt_under_construction=In opbouw
 deftmplt_slogan=beheerd door Virtualmin - een krachtig en flexibel webhosting-configuratiescherm
-deftmplt_made_with_love1=Gemaakt met
-deftmplt_made_with_love2=bij Virtualmin
+deftmplt_slogan2=domeineigenaar kan inloggen op het configuratiescherm om deze website te beheren
+deftmplt_made_with_love1=Aangedreven door
+deftmplt_made_with_love2=Virtualmin
+deftmplt_made_with_love_disclamer=* Het bedrijf Virtualmin is niet verantwoordelijk voor de inhoud die door deze server wordt geleverd
+
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!
 2fa_already=U bent al ingeschreven voor tweefactorauthenticatie met provider $1 met account-ID $2.
@@ -1398,3 +1594,37 @@ deftmplt_made_with_love2=bij Virtualmin
 2fa_header=Twee-factor-opties
 2fa_err=Opslaan van tweefactorauthenticatie is mislukt
 2fa_enrolling=Inschrijven voor twee factoren met $1. ..
+
+rcert_err=Certificaat kan niet worden verwijderd
+rcert_ecert=Virtuele server heeft geen certificaat om te verwijderen
+rcert_essl=Certificaat kan niet worden verwijderd van een virtuele server waarop SSL is ingeschakeld
+rcert_esame=Andere virtuele servers delen het certificaat met deze, dus het kan niet worden verwijderd
+rcert_esame2=Deze virtuele server deelt het certificaat met een andere server, dus het kan niet worden verwijderd
+rcert_eservice=Andere services gebruiken het certificaat dat bij deze server hoort
+
+dnsclouds_title=Cloud DNS-providers
+dnsclouds_name=Provider naam
+dnsclouds_url=Website
+dnsclouds_state=Huidige toestand
+dnsclouds_users=Gebruikt door
+dnsclouds_nusers=$1 servers
+dnsclouds_nousers=Geen servers
+dnsclouds_ecannot=U mag geen Cloud DNS-providers beheren
+dnsclouds_return=cloud DNS-providers
+dnsclouds_tmpl=De standaardprovider voor nieuwe DNS-zones kan worden ingesteld op de pagina <a href='$1'>serversjabloon</a>.
+
+dnscloud_eaws=Het <tt>aws</tt> -commando is nodig om de Route 53-service van Amazon te gebruiken
+dnscloud_eperl=De Perl-module <tt>$1</tt> ontbreekt
+dnscloud_53account=Met behulp van toegangssleutel $1 
+dnscloud_title=Cloud DNS-provider
+dnscloud_echeck=Provider $1 kan niet worden gebruikt op dit systeem : $2 
+dnscloud_header=DNS-provider opties
+dnscloud_provider=DNS-provider naam
+dnscloud_url=Website van DNS-provider
+dnscloud_users=Gebruikt door virtuele servers
+dnscloud_nousers=Nog geen
+dnscloud_route53_location=Standaard zonelocatie
+dnscloud_err=Opslaan van DNS-provider in de cloud is mislukt
+dnscloud_egone=Aanbieder bestaat niet!
+dnscloud_eawscreds=AWS-inloggegevens zijn niet geldig
+dnscloud_clear=Verwijder referenties

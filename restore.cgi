@@ -152,6 +152,10 @@ if ($crmode == 1) {
 		}
 	}
 
+&ui_print_unbuffered_header(undef, $text{'restore_title'}, "");
+
+# Check what's in the backup
+&$first_print($text{'restore_contents'});
 ($cont, $contdoms) = &backup_contents($src, 1, $key, $d);
 if ($log && ref($cont)) {
 	# Limit to domains in the backup that the user has access to
@@ -165,13 +169,11 @@ if ($log && ref($cont)) {
 		$contdoms = [ grep { $dnames{$_->{'dom'}} } @$contdoms ];
 		}
 	}
-if (!$in{'confirm'}) {
-	# See what is in the tar file or directory, to show the user
-	ref($cont) || &error(&text('restore_efile', $cont));
-	(keys %$cont) || &error($text{'restore_enone'});
-	}
-else {
-	# Find the selected domains, in preparation for actual restore
+ref($cont) || &error(&text('restore_efile', $cont));
+(keys %$cont) || &error($text{'restore_enone'});
+
+if ($in{'confirm'}) {
+	# Find the selected domain objects, in preparation for actual restore
 	$gotvbs = 0;
 	foreach $d (split(/\0/, $in{'dom'})) {
 		if ($d eq "virtualmin") {
@@ -196,17 +198,21 @@ else {
 	@doms || @vbs || &error($text{'restore_edoms'});
 	}
 
-if ($in{'confirm'}) {
-	&ui_print_unbuffered_header(undef, $text{'restore_title'}, "");
+# Show contents summary to the user
+$contcount = 0;
+$vbscount = 0;
+foreach my $dname (keys %$cont) {
+	if ($dname eq "virtualmin") {
+		$vbscount += scalar(@{$cont->{$dname}});
+		}
+	else {
+		$contcount++;
+		}
 	}
-else {
-	&ui_print_header(undef, $text{'restore_title'}, "");
-	}
+&$second_print(&text($vbscount ? 'restore_gotcontents2'
+			       : 'restore_gotcontents', $contcount, $vbscount));
 
 if (!$in{'confirm'}) {
-	# Tell the user what will be done
-	print &text('restore_from', $nice),"<p>\n";
-
 	# Check for missing features
 	@missing = &missing_restore_features($cont, $contdoms);
 	@critical = grep { $_->{'critical'} } @missing;
@@ -237,6 +243,9 @@ if (!$in{'confirm'}) {
 		    join(", ", &unique(map { $_->{'desc'} } @criticalerrs))),
 		    "</b><p>\n";
 		}
+
+	# Tell the user what will be done
+	print &text('restore_from', $nice),"<p>\n";
 
 	print &ui_form_start("restore.cgi", "form-data");
 	print &ui_hidden("origsrc", $origsrc);

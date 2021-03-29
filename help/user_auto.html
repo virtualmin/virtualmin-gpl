@@ -4,12 +4,18 @@ When this option is checked, any email to this user will trigger an automatic
 reply containing the text entered into the adjacent text box. 
 The text can include additional email headers at the top, like :
 <pre>
-Subject: Your autoreply subject
-Cc: foo@bar.com
+<span translate="no">Subject:</span> Your autoreply subject
+<span translate="no">Cc:</span> <span translate="no">foo@bar.com</span>
 
 This is your autoreply message.
 Have a nice day!
 </pre>
+
+To send an HTML autoreply, start the message with a <tt>&lt;html&gt;</tt> tag. <p>
+
+Content from the original message can be included in the reply using variables
+like <tt>$SUBJECT</tt>, <tt>$TO</tt> and <tt>$FROM</tt>. <p>
+
 
 <footer>
 

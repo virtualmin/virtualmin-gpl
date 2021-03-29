@@ -1,12 +1,12 @@
 # Functions for collecting general system info
 
-# collect_system_info([manual-refesh])
+# collect_system_info([manual-refesh-no-cache])
 # Returns a hash reference containing system information
 sub collect_system_info
 {
 my ($manual) = @_;
 &foreign_require("system-status");
-local $info = &system_status::get_collected_info();
+local $info = &system_status::get_collected_info($manual);
 
 # Memory may come from a custom command
 if ($config{'mem_cmd'}) {
@@ -179,7 +179,7 @@ $info->{'vposs'} = \@vposs;
 
 # SSL certificate expiries
 foreach my $d (@doms) {
-	if (!&domain_has_ssl($d)) {
+	if (!&domain_has_ssl_cert($d)) {
 		# Doesn't even have SSL, so clear cache fields
 		if ($d->{'ssl_cert_expiry'}) {
 			delete($d->{'ssl_cert_expiry_cache'});
@@ -219,10 +219,10 @@ return $info;
 # Returns the most recently collected system information, or the current info
 sub get_collected_info
 {
-my ($block_cache) = @_;
+my ($no_cache) = @_;
 local $infostr = $config{'collect_interval'} eq 'none' ? undef :
 			&read_file_contents($collected_info_file);
-if ($infostr && !$block_cache) {
+if ($infostr && $no_cache ne 'no-cache') {
 	local $info = &unserialise_variable($infostr);
 	if (ref($info) eq 'HASH' && keys(%$info) > 0) {
 		return $info;

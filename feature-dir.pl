@@ -126,28 +126,36 @@ sub create_standard_directories
 {
 local ($d) = @_;
 foreach my $dir (&virtual_server_directories($d)) {
-	local $path = "$d->{'home'}/$dir->[0]";
-	&lock_file($path);
-	if (&has_domain_user($d)) {
-		# Do creation as domain owner
-		if (!-d $path) {
-			&make_dir_as_domain_user($d, $path, oct($dir->[1]), 1);
-			}
-		&set_permissions_as_domain_user($d, oct($dir->[1]), $path);
+	my $path = "$d->{'home'}/$dir->[0]";
+	&create_standard_directory_for_domain($d, $path, $dir->[1]);
+	}
+}
+
+# create_standard_directory_for_domain(&domain, path, perms)
+# Create one directory that should be owned by the domain user
+sub create_standard_directory_for_domain
+{
+my ($d, $path, $perm) = @_;
+&lock_file($path);
+if (&has_domain_user($d)) {
+	# Do creation as domain owner
+	if (!-d $path) {
+		&make_dir_as_domain_user($d, $path, oct($perm), 1);
 		}
-	else {
-		# Need to run as root
-		if (!-d $path) {
-			&make_dir($path, oct($dir->[1]), 1);
-			}
-		&set_ownership_permissions(undef, undef, oct($dir->[1]), $path);
-		if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
-			&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
-						   undef, $path);
-			}
+	&set_permissions_as_domain_user($d, oct($perm), $path);
+	}
+else {
+	# Need to run as root
+	if (!-d $path) {
+		&make_dir($path, oct($perm), 1);
 		}
-	&unlock_file($path);
-        }
+	&set_ownership_permissions(undef, undef, oct($perm), $path);
+	if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
+					   undef, $path);
+		}
+	}
+&unlock_file($path);
 }
 
 # modify_dir(&domain, &olddomain)
@@ -406,6 +414,7 @@ if (!$d->{'alias'}) {
 	foreach my $sd (&virtual_server_directories($d)) {
 		next if ($sd->[0] eq 'virtualmin-backup' ||   # Not all domains
 			 $sd->[0] eq $home_virtualmin_backup);
+		next if ($sd->[2] eq 'ssl' && !&domain_has_ssl_cert($d));
 		if (!-d "$d->{'home'}/$sd->[0]") {
 			# Dir is missing
 			return &text('validate_esubdir',
@@ -949,17 +958,21 @@ foreach my $user (&list_domain_users($d, 1, 1, 1, 1)) {
 # Returns a list of sub-directories that need to be created for virtual servers
 sub virtual_server_directories
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local $perms = $tmpl->{'web_html_perms'};
-return ( $d->{'subdom'} || $d->{'alias'} ? ( ) :
-		( [ &public_html_dir($d, 1), $perms ] ),
-         $d->{'subdom'} || $d->{'alias'} ? ( ) :
-		( [ &cgi_bin_dir($d, 1), $perms ] ),
-         [ 'logs', '750' ],
-         [ $config{'homes_dir'}, '755' ],
-	 $d->{'parent'} ? ( ) :
-		( [ $home_virtualmin_backup, '700' ] ) );
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $perms = $tmpl->{'web_html_perms'};
+my @rv;
+if (!$d->{'subdom'} && !$d->{'alias'}) {
+	push(@rv, [ &public_html_dir($d, 1), $perms, 'html' ]);
+	push(@rv, [ &cgi_bin_dir($d, 1), $perms, 'cgi' ]);
+	}
+push(@rv, [ 'logs', '750', 'logs' ]);
+push(@rv, [ $config{'homes_dir'}, '755', 'homes' ]);
+if (!$d->{'parent'}) {
+	push(@rv, [ $home_virtualmin_backup, '700', 'backup' ]);
+	}
+push(@rv, map { [ $_, '700', 'ssl' ] } &ssl_certificate_directories($d));
+return @rv;
 }
 
 # create_server_tmp(&domain)
