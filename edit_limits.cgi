@@ -175,6 +175,11 @@ print &ui_table_row(&hlink($text{'limits_demo'}, "limits_demo"),
 	&ui_radio("demo", $d->{'demo'} ? 1 : 0,
 	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
+# Hide Webmin Modules category for domain owners
+print &ui_table_row($text{'limits_nocatwebmin'},
+	&ui_radio("nocatwebmin", $d->{'webmin_nocat_modules'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
 if (&can_webmin_modules()) {
 	# Extra Webmin modules
 	print &ui_table_row(&hlink($text{'limits_modules'}, "limits_modules"),

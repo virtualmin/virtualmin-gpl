@@ -147,6 +147,7 @@ if ($d) {
 	my @cats = &unique(map { $_->{'cat'} } @buts);
 	foreach my $c (@cats) {
                 next if ($c eq 'objects' || $c eq 'create');
+                next if ($c eq 'webmin' && $d->{'webmin_nocat_modules'});
                 my @incat = grep { $_->{'cat'} eq $c } @buts;
 		my $cmenu = { 'type' => 'cat',
 			      'id' => 'cat_'.$c,
