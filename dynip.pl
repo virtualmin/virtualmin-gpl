@@ -27,6 +27,10 @@ if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 	# Talk to the dynamic IP service, as our IP has changed or we
 	# haven't reported in for a month
 	($ip, $err) = &update_dynip_service();
+	if (!$err && $ip && !&check_ipaddress($ip)) {
+		# Got an response, but it's not a valid IP
+		$err = "Invalid response : $ip";
+		}
 	if ($err) {
 		# Failed .. tell the user
 		if ($config{'dynip_email'}) {
