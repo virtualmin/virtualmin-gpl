@@ -47,6 +47,7 @@ foreach $f (@opt_features, "virt", &list_feature_plugins()) {
 	next if ($config{$f} == 3);
 	$d->{"limit_".$f} = $sel_features{$f};
 	}
+$d->{'webmin_nocat_modules'} = $in{'nocatwebmin'};
 if (&can_webmin_modules()) {
 	$d->{'webmin_modules'} = $in{'modules'};
 	}
