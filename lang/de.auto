@@ -946,6 +946,7 @@ limits_ipfollow=Sub-Server erben IP-Adresse vom übergeordneten?
 limits_mongrels=Maximale Serverprozesse für Rails
 limits_emongrels=Fehlende oder ungültige Anzahl von Rails-Serverprozessen - muss mindestens 1 sein
 limits_demo=Auf schreibgeschützten Demo-Modus beschränken?
+limits_nocatwebmin=Blenden Sie die Kategorie der Webmin-Module im Menü aus
 limits_edit_forward=Kann Weiterleitungen und Proxys bearbeiten
 limits_edit_redirect=Kann Website-Weiterleitungen bearbeiten
 limits_edit_sched=Kann Backups planen
@@ -2886,3 +2887,5 @@ dnscloud_err=Fehler beim Speichern des Cloud-DNS-Anbieters
 dnscloud_egone=Anbieter existiert nicht!
 dnscloud_eawscreds=AWS-Anmeldeinformationen sind ungültig
 dnscloud_clear=Anmeldeinformationen löschen
+
+install_mod_perl_link=Verwenden Sie die Seite <a href='$1'>Perl-Module</a> in Webmin, um sie zu installieren

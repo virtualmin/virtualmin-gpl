@@ -1017,6 +1017,7 @@ restore_logrotatecpshared=.. pas nécessaire en cas de partage
 restore_vmailserver_missing=.. non configuré sur ce système
 
 limits_migrate=Peut migrer des sauvegardes?
+limits_nocatwebmin=Masquer la catégorie des modules Webmin dans le menu
 limits_jail=Chroot jail domain Unix user?
 limits_ejailon=Impossible d'activer la prison chroot : $1 
 limits_ejailoff=Impossible de désactiver la prison chroot : $1 
@@ -4464,3 +4465,5 @@ dnscloud_err=Échec de l'enregistrement du fournisseur DNS cloud
 dnscloud_egone=Le fournisseur n'existe pas!
 dnscloud_eawscreds=Les informations d'identification AWS ne sont pas valides
 dnscloud_clear=Supprimer les informations d'identification
+
+install_mod_perl_link=Utilisez la page <a href='$1'>Modules Perl</a> de Webmin pour l'installer

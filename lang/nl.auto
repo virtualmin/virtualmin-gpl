@@ -412,6 +412,7 @@ restore_eparent=Originele virtuele bovenliggende server $1 bestaat niet
 
 limits_migrate=Kunnen back-ups migreren?
 limits_ipfollow=Subservers nemen IP-adres over van ouder?
+limits_nocatwebmin=Verberg de categorie Webmin-modules in het menu
 limits_jail=Chroot gevangenisdomein Unix-gebruiker?
 limits_ejailon=Kan chroot-gevangenis niet inschakelen : $1 
 limits_ejailoff=Kan chroot-gevangenis niet uitschakelen : $1 
@@ -1628,3 +1629,5 @@ dnscloud_err=Opslaan van DNS-provider in de cloud is mislukt
 dnscloud_egone=Aanbieder bestaat niet!
 dnscloud_eawscreds=AWS-inloggegevens zijn niet geldig
 dnscloud_clear=Verwijder referenties
+
+install_mod_perl_link=Gebruik de <a href='$1'>Perl Modules</a> pagina in Webmin om het te installeren

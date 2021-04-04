@@ -650,6 +650,7 @@ restore_eparent=El servidor virtual principal original $1 no existe
 limits_migrate=¿Se pueden migrar copias de seguridad?
 limits_safeunder=¿Permitir sub-servidores bajo los dominios de otros usuarios?
 limits_ipfollow=¿Los sub-servidores heredan la dirección IP del padre?
+limits_nocatwebmin=Ocultar la categoría de módulos de Webmin en el menú
 limits_edit_dnsip=Puede cambiar la dirección IP externa
 limits_edit_redirect=Puede editar redirecciones de sitios web
 limits_edit_restore=Puede restaurar copias de seguridad
@@ -2640,3 +2641,5 @@ dnscloud_err=No se pudo guardar el proveedor de DNS en la nube
 dnscloud_egone=¡El proveedor no existe!
 dnscloud_eawscreds=Las credenciales de AWS no son válidas
 dnscloud_clear=Eliminar credenciales
+
+install_mod_perl_link=Utilice la página <a href='$1'>Módulos Perl</a> en Webmin para instalarlo

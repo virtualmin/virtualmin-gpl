@@ -2640,6 +2640,7 @@ limits_ipfollow=Os sub-servidores herdam o endereço IP do pai?
 limits_mongrels=Processos máximos de servidor para Rails
 limits_emongrels=Número ausente ou inválido de processos do servidor Rails - deve ser pelo menos 1
 limits_demo=Limitar ao modo de demonstração somente leitura?
+limits_nocatwebmin=Esconder a categoria de módulos Webmin no menu
 limits_modules=Módulos Webmin extras
 limits_etable=Funções permitidas para servidores
 limits_edit_domain=Pode editar servidor virtual
@@ -6996,3 +6997,5 @@ dnscloud_err=Falha ao salvar provedor de DNS em nuvem
 dnscloud_egone=Provedor não existe!
 dnscloud_eawscreds=As credenciais da AWS não são válidas
 dnscloud_clear=Excluir credenciais
+
+install_mod_perl_link=Use a página <a href='$1'>Módulos Perl</a> no Webmin para instalá-lo
