@@ -858,7 +858,7 @@ if ($d) {
 		}
 	}
 else {
-	# Do anyt FPM versions exist?
+	# Do any FPM versions exist?
 	my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
 	push(@rv, "fpm") if (@okfpms);
 	}
@@ -1885,8 +1885,8 @@ return @rv;
 }
 
 # get_php_fpm_socket_file(&domain, [dont-make-dir])
-# Returns the path to the per-domain PHP-FPM socket file. Creates the directory
-# if needed.
+# Returns the path to the default per-domain PHP-FPM socket file. Creates the
+# directory if needed.
 sub get_php_fpm_socket_file
 {
 my ($d, $nomkdir) = @_;
@@ -1913,6 +1913,62 @@ my $rv = &allocate_free_tcp_port(\%used, $base);
 $rv || &error("Failed to allocate FPM port starting at $base");
 $d->{'php_fpm_port'} = $rv;
 return $rv;
+}
+
+# get_domain_php_fpm_port(&domain)
+# Returns a status code (0=error, 1=port, 2=file) and the actual TCP port or
+# socket file used for FPM
+sub get_domain_php_fpm_port
+{
+my ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	if (!&plugin_defined($p, "feature_get_domain_php_fpm_port")) {
+		return (-1, "Not supported by plugin $p");
+		}
+	return &plugin_call($p, "feature_get_domain_php_fpm_port");
+	}
+else {
+	&require_apache();
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+							$d->{'web_port'});
+	return (0, "No Apache virtualhost found") if (!$virt);
+
+	# What port is Apache on?
+	my $webport;
+	foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
+		if ($p =~ /fcgi:\/\/localhost:(\d+)/ ||
+		    $p =~ /unix:([^\|]+)/) {
+			$webport = $1;
+			}
+		}
+	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+		next if ($f->{'words'}->[0] ne '\.php$');
+		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
+			if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+			    $h =~ /proxy:unix:([^\|]+)/) {
+				$webport = $1;
+				}
+			}
+		}
+	return (0, "No FPM SetHandler or ProxyPassMatch directive found")
+		if (!$webport);
+
+	# Which port is the FPM server actually using?
+	my $fpmport;
+	my $listen = &get_php_fpm_config_value($d, "listen");
+	if ($listen =~ /^\S+:(\d+)$/ ||
+	    $listen =~ /^(\d+)$/ ||
+	    $listen =~ /^(\/\S+)$/) {
+		$fpmport = $1;
+		}
+	return (0, "No listen directive found in FPM config") if (!$fpmport);
+
+	if ($fpmport ne $webport) {
+		return (0, "Apache config port $webport does not match FPM config $fpmport");
+		}
+	return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
+	}
 }
 
 # list_php_fpm_pools(&conf)

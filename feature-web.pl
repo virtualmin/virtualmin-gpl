@@ -968,6 +968,14 @@ else {
 			}
 		}
 
+	# Validate the FPM port
+	if ($mode eq "fpm") {
+		my ($ok, $port) = &get_domain_php_fpm_port($d);
+		if ($ok == 0) {
+			return &text('validate_ewebphpfpmport', $port);
+			}
+		}
+
 	# If there are suexec directives, validate them
 	local ($suexec) = &apache::find_directive_struct(
 		"SuexecUserGroup", $vconf);
