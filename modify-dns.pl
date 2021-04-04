@@ -49,8 +49,11 @@ flag can be used to set the TTL for all records in the domain.
 You can also add or remove slave DNS servers for this domain, assuming that
 they have already been setup in Webmin's BIND DNS Server module. To add a
 specific slave host, use the C<--add-slave> flag followed by a hostname. Or to
-add them all, use the C<--add-all-slaves> flag. To remove a single slave host,
-use the C<--remove-slave> command followed by a hostname.
+add them all, use the C<--add-all-slaves> flag.
+
+To remove a single slave host, use the C<--remove-slave> command followed by a
+hostname. Or to remove any slave hosts that are no longer valid (ie. because
+they were removed from Webmin), use the C<--sync-all-slaves> flag.
 
 If your system is on an internal network and made available to the Internet
 via a router doing NAT, the IP address of a domain in DNS may be different
@@ -185,6 +188,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--add-all-slaves") {
 		$addallslaves = 1;
 		}
+	elsif ($a eq "--sync-all-slaves") {
+		$syncallslaves = 1;
+		}
 	elsif ($a eq "--enable-dnssec") {
 		$dnssec = 1;
 		}
@@ -211,7 +217,7 @@ while(@ARGV > 0) {
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
-  defined($tlsa) || &usage("Nothing to do");
+  defined($tlsa) || $syncallslaves || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -523,6 +529,14 @@ foreach $d (@doms) {
 		&delete_zone_on_slaves($d, join(" ", @delslaves));
 		}
 
+	# Remove slaves that are no longer valid
+	if ($syncallslaves) {
+		my @ds = split(/\s+/, $d->{'dns_slave'});
+		my %slavenames = map { $_->{'host'}, $_ } @slaveservers;
+		@ds = grep { $slavename{$_} } @ds;
+		$d->{'dns_slave'} = join(" ", @ds);
+		}
+
 	&$outdent_print();
 	&save_domain($d);
 	&release_lock_dns($d);
@@ -558,7 +572,7 @@ print "                     [--add-record-with-ttl \"name type TTL value\"]\n";
 print "                     [--remove-record \"name type value\"]\n";
 print "                     [--ttl seconds | --all-ttl seconds]\n";
 print "                     [--add-slave hostname]* | [--add-all-slaves]\n";
-print "                     [--remove-slave hostname]*\n";
+print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
