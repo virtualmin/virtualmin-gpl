@@ -3030,7 +3030,7 @@ foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
 	}
 my @rv;
 foreach my $p (&unique(@paths)) {
-	$p =~ s/^\Q$d->{'home'}\E\///;
+	$p =~ s/^\Q$d->{'home'}\E\/// || next;
 	if ($p =~ /^(.*)\//) {
 		push(@rv, $1);
 		}
