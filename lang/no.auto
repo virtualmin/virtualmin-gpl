@@ -273,6 +273,7 @@ restore_logrotatecpshared=.. ikke nødvendig når det deles
 restore_vmailserver_missing=.. ikke konfigurert på dette systemet
 
 limits_migrate=Kan migrere sikkerhetskopier?
+limits_nocatwebmin=Skjul kategorien Webmin-moduler i menyen
 limits_jail=Chroot fengsel domene Unix bruker?
 limits_ejailon=Kunne ikke aktivere chroot fengsel : $1 
 limits_ejailoff=Kunne ikke deaktivere chroot fengsel : $1 
@@ -1059,3 +1060,5 @@ dnscloud_err=Kunne ikke lagre sky DNS-leverandør
 dnscloud_egone=Leverandør eksisterer ikke!
 dnscloud_eawscreds=AWS-legitimasjon er ikke gyldig
 dnscloud_clear=Slett legitimasjon
+
+install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den

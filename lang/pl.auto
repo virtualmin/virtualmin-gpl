@@ -2364,6 +2364,7 @@ limits_safeunder=Zezwolić na serwery podrzędne w domenach innych użytkownikó
 limits_ipfollow=Serwery podrzędne dziedziczą adres IP od nadrzędnego?
 limits_mongrels=Maksymalna liczba procesów serwera dla Railsów
 limits_emongrels=Brakująca lub niepoprawna liczba procesów serwera Rails - musi wynosić co najmniej 1
+limits_nocatwebmin=Ukryj kategorię modułów Webmin w menu
 limits_shell_nologin=Bez logowania
 limits_unshell=Używanie nieznanej powłoki $1 
 limits_jail=Użytkownik uniksowej domeny Chroot dla więzienia?
@@ -6141,3 +6142,5 @@ dnscloud_err=Nie udało się zapisać dostawcy DNS w chmurze
 dnscloud_egone=Dostawca nie istnieje!
 dnscloud_eawscreds=Poświadczenia AWS są nieprawidłowe
 dnscloud_clear=Usuń dane logowania
+
+install_mod_perl_link=Użyj strony <a href='$1'>Perl Modules</a> w Webmin, aby go zainstalować

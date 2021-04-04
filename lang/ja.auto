@@ -2811,6 +2811,7 @@ limits_ipfollow=サブサーバーは親からIPアドレスを継承します�
 limits_mongrels=Railsの最大サーバープロセス数
 limits_emongrels=Railsサーバープロセスの欠落または無効な数-少なくとも1でなければなりません
 limits_demo=読み取り専用デモモードに制限しますか？
+limits_nocatwebmin=メニューでWebminモジュールカテゴリを非表示にする
 limits_modules=追加のWebminモジュール
 limits_etable=サーバーに許可された機能
 limits_edit_domain=仮想サーバーを編集できます
@@ -7285,3 +7286,5 @@ dnscloud_err=クラウドDNSプロバイダーの保存に失敗しました
 dnscloud_egone=プロバイダーが存在しません！
 dnscloud_eawscreds=AWS認証情報が無効です
 dnscloud_clear=資格情報を削除する
+
+install_mod_perl_link=Webminの<ahref = '$1'>Perl Modules</ahref>ページを使用してインストールします

@@ -2084,6 +2084,7 @@ limits_safeunder=Povolit dílčí servery pod doménami jiných uživatelů?
 limits_ipfollow=Sub-servery zdědí IP adresu od nadřazené?
 limits_mongrels=Maximální serverové procesy pro Rails
 limits_emongrels=Chybějící nebo neplatný počet procesů serveru Rails - musí být alespoň 1
+limits_nocatwebmin=V nabídce skryjte kategorii modulů Webmin
 limits_modules=Extra moduly Webmin
 limits_etable=Povolené funkce pro servery
 limits_edit_users=Může spravovat uživatele
@@ -6002,3 +6003,5 @@ dnscloud_err=Nepodařilo se uložit poskytovatele cloudových DNS
 dnscloud_egone=Poskytovatel neexistuje!
 dnscloud_eawscreds=Pověření AWS nejsou platná
 dnscloud_clear=Smazat pověření
+
+install_mod_perl_link=K jeho instalaci použijte stránku <a href='$1'>Perl Modules</a> ve Webminu

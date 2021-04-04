@@ -1083,6 +1083,7 @@ limits_safeunder=允許子服務器位於其他用戶的域下嗎？
 limits_ipfollow=子服務器從父服務器繼承IP地址？
 limits_mongrels=Rails的最大服務器進程
 limits_emongrels=丟失或無效的Rails服務器進程數-必須至少為1
+limits_nocatwebmin=在菜單中隱藏Webmin模塊類別
 limits_edit_dnsip=可以更改外部IP地址
 limits_edit_redirect=可以編輯網站重定向
 limits_edit_restore=可以還原備份
@@ -4023,3 +4024,5 @@ dnscloud_err=無法保存雲DNS提供商
 dnscloud_egone=提供者不存在！
 dnscloud_eawscreds=AWS憑證無效
 dnscloud_clear=刪除憑證
+
+install_mod_perl_link=使用Webmin中的<a href='$1'>Perl模塊</a>頁面進行安裝

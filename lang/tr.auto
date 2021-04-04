@@ -1202,6 +1202,7 @@ limits_safeunder=Diğer kullanıcıların alan adları altında alt sunuculara i
 limits_ipfollow=Alt sunucular IP adresini üst öğeden mi devralır?
 limits_mongrels=Rails için maksimum sunucu işlemleri
 limits_emongrels=Eksik veya geçersiz sayıda Rails sunucu işlemi - en az 1 olmalıdır
+limits_nocatwebmin=Menüde Webmin modülleri kategorisini gizle
 limits_edit_dnsip=Harici IP adresini değiştirebilir
 limits_edit_redirect=Web sitesi yönlendirmelerini düzenleyebilir
 limits_edit_restore=Yedekleri geri yükleyebilir
@@ -4546,3 +4547,5 @@ dnscloud_err=Bulut DNS sağlayıcısı kaydedilemedi
 dnscloud_egone=Sağlayıcı mevcut değil!
 dnscloud_eawscreds=AWS kimlik bilgileri geçerli değil
 dnscloud_clear=Kimlik Bilgilerini Sil
+
+install_mod_perl_link=Yüklemek için Webmin'deki <a href='$1'>Perl Modülleri</a> sayfasını kullanın
