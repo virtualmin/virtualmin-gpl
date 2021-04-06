@@ -18,7 +18,19 @@ print "$text{'features_desc'}<p>\n";
 # Add rows for core features
 @table_order_initial = ( );
 $n = 0;
-foreach $f (@features) {
+my @features_local = @features;
+
+# Opt-out certain features if not
+# enabled in Webmin Users module
+my %features_exclude_check = ('mysql' => 'mysql',
+                              'postgres' => 'postgresql');
+foreach my $mod (keys %features_exclude_check) {
+	if (!&foreign_available($features_exclude_check{$mod})) {
+		@features_local = grep {$_ ne $mod} @features_local;
+		}
+	}
+
+foreach my $f (@features_local) {
 	local @acts;
 	push(@acts, ui_link("search.cgi?field=$f&what=1",
 		                $text{'features_used'}));
