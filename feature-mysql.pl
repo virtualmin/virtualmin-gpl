@@ -12,6 +12,11 @@ if (!$mysql::config{'login'}) {
 $mysql_user_size = $config{'mysql_user_size'} || 16;
 }
 
+sub check_module_mysql
+{
+return &foreign_available("mysql");
+}
+
 # check_depends_mysql(&dom)
 # Ensure that a sub-server has a parent server with MySQL enabled
 sub check_depends_mysql

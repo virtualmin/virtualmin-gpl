@@ -6,6 +6,11 @@ $postgresql::use_global_login = 1;
 %qconfig = &foreign_config("postgresql");
 }
 
+sub check_module_postgres
+{
+return &foreign_available("postgresql");
+}
+
 # check_depends_postgres(&dom)
 # Ensure that a sub-server has a parent server with MySQL enabled
 sub check_depends_postgres
