@@ -1199,9 +1199,11 @@ else {
 		}
 	&unlink_file($pass_script);
 	}
-&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
+my $pps_file = @pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'};
+&lock_file($pps_file);
 &apache::save_directive("SSLPassPhraseDialog", \@pps, $conf, $conf);
 &flush_file_lines();
+&unlock_file($pps_file);
 &register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 }
 
