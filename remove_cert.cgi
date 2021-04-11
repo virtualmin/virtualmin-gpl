@@ -26,6 +26,7 @@ foreach my $k ('cert', 'key', 'chain', 'combined', 'everything') {
 		}
 	}
 delete($d->{'ssl_pass'});
+&set_all_null_print();
 foreach $f (&domain_features($d), &list_feature_plugins()) {
 	&call_feature_func($f, $d, $oldd);
 	}
