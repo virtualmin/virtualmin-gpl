@@ -12374,6 +12374,9 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 	my %faccess = &get_module_acl(undef, 'filemin');
 	my @ap = split(/\s+/, $faccess{'allowed_paths'});
 	if (@ap == 1) {
+		if ($ap[0] eq '$HOME') {
+			$ap[0] = $d->{'home'};
+			}
 		$phd =~ s/^\Q$ap[0]\E//;
 		}
 	push(@rv, { 'page' => 'index.cgi?path='.&urlize($phd),
