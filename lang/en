@@ -475,6 +475,7 @@ setup_ealiaslimit=Missing or invalid aliases limit
 setup_edbslimit=Missing or invalid databases limit
 setup_ebwlimit=Missing or invalid bandwidth limit
 setup_epass=Missing administration password
+setup_epassvalid=Invalid password : $1
 setup_epassagain=Passwords do not match
 setup_eusername=The username $1 is not valid : $2
 setup_eusername2=The username $1 does not begin with a letter

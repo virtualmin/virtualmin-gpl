@@ -194,7 +194,7 @@ if (!$parentuser) {
 	if (defined($pass)) {
 		local $fakeuser = { 'user' => $user, 'plainpass' => $pass };
 		$err = &check_password_restrictions($fakeuser, $in{'webmin'});
-		&error($err) if ($err);
+		&error(&text('setup_epassvalid', $err)) if ($err);
 		}
 	}
 if (!$aliasdom) {
