@@ -354,6 +354,8 @@ local ($in) = @_;
 local $pass = $in->{'mypass'};
 local $user = $mysql::mysql_login || 'root';
 &require_mysql();
+$mysql::mysql_pass = $pass;
+$mysql::authstr = &mysql::make_authstr();
 if (&mysql::is_mysql_running() == -1) {
 	# Forcibly change the mysql password
 	if ($in->{'forcepass'}) {
