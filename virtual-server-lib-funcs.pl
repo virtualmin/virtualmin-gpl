@@ -12374,7 +12374,8 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 	my %faccess = &get_module_acl(undef, 'filemin');
 	my @ap = split(/\s+/, $faccess{'allowed_paths'});
 	if (@ap == 1) {
-		if ($ap[0] eq '$HOME') {
+		if ($ap[0] eq '$HOME' &&
+			$base_remote_user eq $d->{'user'}) {
 			$ap[0] = $d->{'home'};
 			}
 		$phd =~ s/^\Q$ap[0]\E//;
