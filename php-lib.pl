@@ -387,7 +387,8 @@ foreach my $p (@ports) {
 		$files = $f if ($f->{'words'}->[0] eq '\.php$');
 		}
 	if ($mode eq "fpm" && ($apache::httpd_modules{'core'} < 2.4 || @oldppm)) {
-		# Use a proxy directive for older Apache or if this is what's already in use
+		# Use a proxy directive for older Apache or if this is what's
+		# already in use
 		local $phd = $phpconfs[0]->{'words'}->[0];
 		if (-r $fsock) {
 			# Use existing socket file, since it presumably works
@@ -1919,47 +1920,101 @@ if ($p ne 'web') {
 		}
 	return &plugin_call($p, "feature_get_domain_php_fpm_port");
 	}
-else {
-	&require_apache();
-	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
-							$d->{'web_port'});
-	return (0, "No Apache virtualhost found") if (!$virt);
 
-	# What port is Apache on?
-	my $webport;
-	foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
-		if ($p =~ /fcgi:\/\/localhost:(\d+)/ ||
-		    $p =~ /unix:([^\|]+)/) {
+# Find the Apache virtualhost
+&require_apache();
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						$d->{'web_port'});
+return (0, "No Apache virtualhost found") if (!$virt);
+
+# What port is Apache on?
+my $webport;
+foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
+	if ($p =~ /fcgi:\/\/localhost:(\d+)/ ||
+	    $p =~ /unix:([^\|]+)/) {
+		$webport = $1;
+		}
+	}
+foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+	next if ($f->{'words'}->[0] ne '\.php$');
+	foreach my $h (&apache::find_directive("SetHandler",
+					       $f->{'members'})) {
+		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+		    $h =~ /proxy:unix:([^\|]+)/) {
 			$webport = $1;
 			}
 		}
+	}
+return (0, "No FPM SetHandler or ProxyPassMatch directive found")
+	if (!$webport);
+
+# Which port is the FPM server actually using?
+my $fpmport;
+my $listen = &get_php_fpm_config_value($d, "listen");
+if ($listen =~ /^\S+:(\d+)$/ ||
+    $listen =~ /^(\d+)$/ ||
+    $listen =~ /^(\/\S+)$/) {
+	$fpmport = $1;
+	}
+return (0, "No listen directive found in FPM config") if (!$fpmport);
+
+if ($fpmport ne $webport) {
+	return (0, "Apache config port $webport does not ".
+		   "match FPM config $fpmport");
+	}
+return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
+}
+
+# save_domain_php_fpm_port(&domain, port|socket)
+# Update the TCP port or socket used for FPM for a domain. Returns undef on
+# success or an error message on failure.
+sub save_domain_php_fpm_port
+{
+my ($d, $socket) = @_;
+my $p = &domain_has_website($d);
+if ($p ne 'web') {
+	if (!&plugin_defined($p, "feature_save_domain_php_fpm_port")) {
+		return "Not supported by plugin $p";
+		}
+	return &plugin_call($p, "feature_save_domain_php_fpm_port");
+	}
+
+# First update the Apache config
+&require_apache();
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $found = 0;
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
-		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
-			if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
-			    $h =~ /proxy:unix:([^\|]+)/) {
-				$webport = $1;
+		my @sh = &apache::find_directive("SetHandler",
+                                                 $f->{'members'});
+		for(my $i=0; $i<@sh; $i++) {
+			if ($sh[$i] =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+			    $sh[$i] =~ /proxy:unix:([^\|]+)/) {
+				# Found the directive to update
+				if ($socket =~ /^\d+$/) {
+					$sh[$i] = "proxy:fcgi://localhost:".$socket;
+					}
+				else {
+					$sh[$i] = "proxy:unix:".$socket;
+					}
+				$found++;
 				}
 			}
 		}
-	return (0, "No FPM SetHandler or ProxyPassMatch directive found")
-		if (!$webport);
-
-	# Which port is the FPM server actually using?
-	my $fpmport;
-	my $listen = &get_php_fpm_config_value($d, "listen");
-	if ($listen =~ /^\S+:(\d+)$/ ||
-	    $listen =~ /^(\d+)$/ ||
-	    $listen =~ /^(\/\S+)$/) {
-		$fpmport = $1;
-		}
-	return (0, "No listen directive found in FPM config") if (!$fpmport);
-
-	if ($fpmport ne $webport) {
-		return (0, "Apache config port $webport does not match FPM config $fpmport");
-		}
-	return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
 	}
+$found || return "No Apache VirtualHost containing an FPM SetHandler found";
+&register_post_action(\&restart_apache);
+
+# Second update the FPM server port
+my $conf = &get_php_fpm_config($d);
+&save_php_fpm_config_value($d, "listen", $socket);
+&register_post_action(\&restart_php_fpm_server, $conf);
+
+return undef;
 }
 
 # list_php_fpm_pools(&conf)

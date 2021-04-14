@@ -245,6 +245,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
+	elsif ($a eq "--php-fpm-port") {
+		$fpmport = 1;
+		}
+	elsif ($a eq "--php-fpm-socket") {
+		$fpmsock = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -397,6 +403,27 @@ foreach $d (@doms) {
 			&clear_links_cache($d);
 			}
 		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
+	# Update FPM socket
+	if (($fpmport || $fpmsock) && !$d->{'alias'}) {
+		my $ps;
+		if ($fpmport) {
+			$ps = &get_php_fpm_socket_port($d);
+			}
+		else {
+			$ps = &get_php_fpm_socket_file($d);
+			}
+		&$first_print("Changing FPM ".($fpmport ? "port" : "socket").
+			      " to ".$ps." ..");
+		my $currmode = $mode || &get_domain_php_mode($d);
+		if ($currmode ne "fpm") {
+			&$second_print(".. not in FPM mode");
+			}
+		else {
+			my $err = &save_domain_php_fpm_port($d, $ps);
+			&$second_print($err ? " .. failed : $err" : ".. done");
+			}
 		}
 
 	# Update Ruby mode
@@ -707,6 +734,7 @@ print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
 print "                     [--php-children number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--php-timeout seconds | --no-php-timeout]\n";
+print "                     [--php-fpm-port | --php-fpm-socket]\n";
 if ($supports_ruby) {
 	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
 	}
