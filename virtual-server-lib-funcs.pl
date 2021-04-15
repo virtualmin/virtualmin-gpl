@@ -14428,13 +14428,17 @@ if (&domain_has_website()) {
 		@fpms = sort { &compare_versions($a->{'shortversion'}, $b->{'shortversion'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
+			# Check if an FPM version is stored, but doesn't exist
 			next if (!$d->{'php_fpm_version'});
 			local $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
 			local ($f) = grep { $_->{'shortversion'} eq $d->{'php_fpm_version'} } @fpms;
 			next if ($f);
+
+			# Find the existing version just above the one that
+			# was stored, or alternately the highest available
 			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $d->{'php_fpm_version'}) > 0 } @fpms;
-			next if (!$nf);
+			$nf ||= $fpms[$#fpms];
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
 			push(@fpmfixed, $d);
