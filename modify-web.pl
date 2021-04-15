@@ -11,6 +11,10 @@ using the C<--domain> or C<--all-domains> parameters.
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
 parameter followed by one of C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
 
+When using FPM mode, you can configure Apache to use a socket file
+for communication with the FPM server with the C<--php-fpm-socket> flag.
+Or switch back to using a TCP port with the C<--php-fpm-port> flag.
+
 The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. To disable this, the
 C<--no-proxy> parameter must be given.
