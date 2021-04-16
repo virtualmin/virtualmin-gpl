@@ -315,10 +315,12 @@ if ($multi) {
 		if ($tmpl) {
 			print "    Template: $tmpl->{'name'}\n";
 			}
-		print "    Plan ID: $d->{'plan'}\n";
-		$plan = &get_plan($d->{'plan'});
-		if ($plan) {
-			print "    Plan: $plan->{'name'}\n";
+		if ($d->{'plan'} ne '') {
+			print "    Plan ID: $d->{'plan'}\n";
+			$plan = &get_plan($d->{'plan'});
+			if ($plan) {
+				print "    Plan: $plan->{'name'}\n";
+				}
 			}
 		print "    Username: $d->{'user'}\n";
 		print "    User ID: $d->{'uid'}\n";

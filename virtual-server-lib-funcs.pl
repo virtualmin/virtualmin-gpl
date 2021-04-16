@@ -3552,7 +3552,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "plan") {
 			# Account plan
 			my $p;
-			if ($d->{'plan'} && defined(&get_plan) &&
+			if ($d->{'plan'} ne '' && defined(&get_plan) &&
 			    ($p = &get_plan($d->{'plan'}))) {
 				push(@cols, $p->{'name'});
 				}
