@@ -43,10 +43,11 @@ else {
 	}
 if ($ARGV[2]) {
 	$newpass = $ARGV[2];
-} else {
+	}
+else {
 	print "New password: ";
 	chop($newpass = <STDIN>);
-}
+	}
 if (!$username) {
 	&error_exit("No username given");
 	}
