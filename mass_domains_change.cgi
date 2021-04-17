@@ -309,6 +309,7 @@ foreach $d (@doms) {
                             &html_escape($plan->{'name'})));
 			}
 		$d->{'plan'} = $plan->{'id'};
+		&set_plan_on_children($d);
 		&$second_print($text{'setup_done'});
 		if ($d->{'unix'}) {
 			# To apply any quota change

@@ -402,9 +402,9 @@ foreach my $p (@ports) {
 		}
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
 		# Can use a FilesMatch block with SetHandler inside instead
+		$fport = &get_php_fpm_socket_port($d);
 		my $wanth = 'proxy:fcgi://localhost:'.$fport;
 		if (!$files) {
-			$fport = &get_php_fpm_socket_port($d);
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
 				   'value' => '\.php$',
@@ -2004,6 +2004,9 @@ foreach my $p (@ports) {
 				$found++;
 				}
 			}
+		&apache::save_directive(
+			"SetHandler", \@sh, $f->{'members'}, $conf);
+		&flush_file_lines($virt->{'file'});
 		}
 	}
 $found || return "No Apache VirtualHost containing an FPM SetHandler found";

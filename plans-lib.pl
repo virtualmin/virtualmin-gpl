@@ -231,6 +231,31 @@ foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 	}
 }
 
+# set_plan_on_children(&domain)
+# Given a top-level server, copy it's plan to all children. Or if given a 
+# sub-server, copy the plan from it's parent.
+sub set_plan_on_children
+{
+my ($d) = @_;
+if ($d->{'parent'}) {
+	# Copy from parent
+	my $parent = &get_domain($d->{'parent'});
+	if ($parent && $d->{'plan'} ne $parent->{'plan'}) {
+		$d->{'plan'} = $parent->{'plan'};
+		&save_domain($d);
+		}
+	}
+else {
+	# Copy to children
+	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
+		if ($sd->{'plan'} ne $d->{'plan'}) {
+			$sd->{'plan'} = $d->{'plan'};
+			&save_domain($sd);
+			}
+		}
+	}
+}
+
 # set_limits_from_plan(&domain, &plan)
 # Set initial owner limits on a domain from the given plan
 sub set_limits_from_plan

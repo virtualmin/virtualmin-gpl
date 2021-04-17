@@ -265,8 +265,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || $fixhtmldir || $breakcert || $linkcert ||
-	&usage("Nothing to do");
+  defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
+  $fpmsock || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
