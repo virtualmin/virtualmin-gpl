@@ -522,9 +522,7 @@ sub script_whmcs_latest
 {
 local ($ver) = @_;
 return ( "https://docs.whmcs.com/Release_Notes",
-	 &compare_versions($ver, 7) < 0 ?
-		"Version_(6\\.[0-9\.]+)_Release" :
-		"Version_([0-9\.]+)_Release" );
+	     "Version_([0-9\.]+)_Release" );
 }
 
 sub script_whmcs_site
