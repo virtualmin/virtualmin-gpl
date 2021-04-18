@@ -518,15 +518,12 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
-
-#sub script_whmcs_latest
-#{
-#local ($ver) = @_;
-#local $sfx = $ver =~ /^(\d+)\.(\d+)\.(\d+)$/ ? ".$3" : "";
-#return ( "http://www.whmcs.com/whats-new/#download",
-#	 "WHMCS\\s+V(\\S+)\\s+Stable",
-#	 undef, $sfx );
-#}
+sub script_whmcs_latest
+{
+local ($ver) = @_;
+return ( "https://docs.whmcs.com/Release_Notes",
+	     "Version_([0-9\.]+)_Release" );
+}
 
 sub script_whmcs_site
 {
