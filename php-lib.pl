@@ -2045,9 +2045,18 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-my $port = &get_php_fpm_socket_port($d);
-if ($port =~ /^\d+$/) {
-	$port = "localhost:".$port;
+my $oldlisten = &get_php_fpm_config_value($d, "listen");
+my $port;
+if ($oldlisten && $oldlisten =~ /^\//) {
+	# Was a socket file before
+	$port = &get_php_fpm_socket_file($d);
+	}
+else {
+	# Was a port before, or not set at all
+	$port = &get_php_fpm_socket_port($d);
+	if ($port =~ /^\d+$/) {
+		$port = "localhost:".$port;
+		}
 	}
 &lock_file($file);
 if (-r $file) {
