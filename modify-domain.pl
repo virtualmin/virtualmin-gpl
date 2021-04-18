@@ -622,6 +622,7 @@ if ($plan) {
 		&set_featurelimits_from_plan($dom, $plan);
 		&set_capabilities_from_plan($dom, $plan);
 		}
+	&set_plan_on_children($dom);
 	}
 
 # Update the IP in alias domains too

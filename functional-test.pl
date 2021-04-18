@@ -390,6 +390,26 @@ $domains_tests = [
 		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
 		},
+
+		# Switch to an FPM socket file
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'php-fpm-socket' ] ],
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'sleep' => 1,
+		},
+
+		# Switch back to an FPM port
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'php-fpm-port' ] ],
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+		  'grep' => 'uid=[0-9]+\\('.$test_domain_user.'\\)',
+		  'sleep' => 1,
+		},
 		) : ( ),
 
 	# Disable a feature

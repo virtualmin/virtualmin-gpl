@@ -2609,7 +2609,7 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmx'}, "template_dns_mx"),
 
 # Option for view to add to, for BIND 9
 if (@views || $tmpl->{'dns_view'}) {
-	print &ui_table_row($text{'newdns_view'},
+	print &ui_table_row(&hlink($text{'newdns_view'}, "template_dns_view"),
 		&ui_select("view", $tmpl->{'dns_view'},
 			[ [ "", $text{'newdns_noview'} ],
 			  map { [ $_->{'values'}->[0] ] } @views ]));

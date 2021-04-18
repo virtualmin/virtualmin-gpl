@@ -266,6 +266,7 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 			    &html_escape($plan->{'name'})),"<br>\n";
 		}
 	$d->{'plan'} = $plan->{'id'};
+	&set_plan_on_children($d);
 	print $text{'setup_done'},"<p>\n";
 	}
 

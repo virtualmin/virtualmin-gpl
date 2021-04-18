@@ -13172,6 +13172,11 @@ for(my $i=0; $i<@doms; $i++) {
 	delete($doms[$i]->{'email'});
         }
 
+# Set plan based on new parent
+for(my $i=0; $i<@doms; $i++) {
+	&set_plan_on_children($doms[$i]);
+	}
+
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {

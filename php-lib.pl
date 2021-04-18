@@ -34,7 +34,7 @@ if ($virt) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
 			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
-			    $h =~ /proxy:fcgi:/) {
+			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
 			}
@@ -402,9 +402,9 @@ foreach my $p (@ports) {
 		}
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
 		# Can use a FilesMatch block with SetHandler inside instead
+		$fport = &get_php_fpm_socket_port($d);
 		my $wanth = 'proxy:fcgi://localhost:'.$fport;
 		if (!$files) {
-			$fport = &get_php_fpm_socket_port($d);
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
 				   'value' => '\.php$',
@@ -1918,7 +1918,7 @@ if ($p ne 'web') {
 	if (!&plugin_defined($p, "feature_get_domain_php_fpm_port")) {
 		return (-1, "Not supported by plugin $p");
 		}
-	return &plugin_call($p, "feature_get_domain_php_fpm_port");
+	return &plugin_call($p, "feature_get_domain_php_fpm_port", $d);
 	}
 
 # Find the Apache virtualhost
@@ -1976,7 +1976,7 @@ if ($p ne 'web') {
 	if (!&plugin_defined($p, "feature_save_domain_php_fpm_port")) {
 		return "Not supported by plugin $p";
 		}
-	return &plugin_call($p, "feature_save_domain_php_fpm_port");
+	return &plugin_call($p, "feature_save_domain_php_fpm_port", $d,$socket);
 	}
 
 # First update the Apache config
@@ -1999,11 +1999,15 @@ foreach my $p (@ports) {
 					$sh[$i] = "proxy:fcgi://localhost:".$socket;
 					}
 				else {
-					$sh[$i] = "proxy:unix:".$socket;
+					$sh[$i] = "proxy:unix:".$socket.
+						  "|fcgi://localhost";
 					}
 				$found++;
 				}
 			}
+		&apache::save_directive(
+			"SetHandler", \@sh, $f->{'members'}, $conf);
+		&flush_file_lines($virt->{'file'});
 		}
 	}
 $found || return "No Apache VirtualHost containing an FPM SetHandler found";
@@ -2041,9 +2045,18 @@ my ($d) = @_;
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-my $port = &get_php_fpm_socket_port($d);
-if ($port =~ /^\d+$/) {
-	$port = "localhost:".$port;
+my $oldlisten = &get_php_fpm_config_value($d, "listen");
+my $port;
+if ($oldlisten && $oldlisten =~ /^\//) {
+	# Was a socket file before
+	$port = &get_php_fpm_socket_file($d);
+	}
+else {
+	# Was a port before, or not set at all
+	$port = &get_php_fpm_socket_port($d);
+	if ($port =~ /^\d+$/) {
+		$port = "localhost:".$port;
+		}
 	}
 &lock_file($file);
 if (-r $file) {
