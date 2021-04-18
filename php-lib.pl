@@ -1999,7 +1999,8 @@ foreach my $p (@ports) {
 					$sh[$i] = "proxy:fcgi://localhost:".$socket;
 					}
 				else {
-					$sh[$i] = "proxy:unix:".$socket;
+					$sh[$i] = "proxy:unix:".$socket.
+						  "|fcgi://localhost";
 					}
 				$found++;
 				}
