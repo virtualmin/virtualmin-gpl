@@ -1918,7 +1918,7 @@ if ($p ne 'web') {
 	if (!&plugin_defined($p, "feature_get_domain_php_fpm_port")) {
 		return (-1, "Not supported by plugin $p");
 		}
-	return &plugin_call($p, "feature_get_domain_php_fpm_port");
+	return &plugin_call($p, "feature_get_domain_php_fpm_port", $d);
 	}
 
 # Find the Apache virtualhost
@@ -1976,7 +1976,7 @@ if ($p ne 'web') {
 	if (!&plugin_defined($p, "feature_save_domain_php_fpm_port")) {
 		return "Not supported by plugin $p";
 		}
-	return &plugin_call($p, "feature_save_domain_php_fpm_port");
+	return &plugin_call($p, "feature_save_domain_php_fpm_port", $d,$socket);
 	}
 
 # First update the Apache config
