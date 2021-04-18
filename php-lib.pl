@@ -34,7 +34,7 @@ if ($virt) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
 			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
-			    $h =~ /proxy:fcgi:/) {
+			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
 			}
