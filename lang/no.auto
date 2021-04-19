@@ -38,6 +38,7 @@ setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha
 setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktivert
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
 setup_edeppostgressub=En topptjener må ha PostgreSQL aktivert hvis noen under-servere gjør det
+setup_epassvalid=Ugyldig passord : $1 
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
 setup_etmpl=Du har ikke lov til å bruke den valgte malen
 
@@ -393,7 +394,7 @@ newfields_type11=Ja/Nei (standard nei)
 
 databases_tabremote=MySQL Server Host
 databases_desc6=Denne siden lar deg velge hvilken ekstern MySQL-server som skal brukes til å være vert for databaser for dette domenet.
-databases_desc6a=Det er imidlertid ikke definert noen ytterligere MySQL-servere. Du kan legge til en på <a href='$1'>MySQL-servere</a> -siden.
+databases_desc6a=Imidlertid er ingen ytterligere MySQL-servere definert ennå. Du kan legge til en på siden <a href='$1'>Databaseservere</a>.
 databases_remoteold=Nåværende MySQL-vert
 databases_remotenew=Ny MySQL-vert
 databases_remoteok=Flytt databaser
@@ -443,8 +444,8 @@ massdelete_preserve=Bevar funksjoner eksternt vert
 
 massdomains_ephpvering=.. mislyktes i å endre versjon : $1 
 
-newmysqls_title=MySQL-servere
-newmysqls_ecannot=Du har ikke lov til å redigere flere MySQL-servere
+newmysqls_title=Databaseservere
+newmysqls_ecannot=Du har ikke lov til å redigere flere databaseservere
 newmysqls_host=Serververtsnavn
 newmysqls_doms=Brukt av
 newmysqls_actions=handlinger
@@ -461,8 +462,8 @@ newmysqls_makedef=Gjør valgt standard
 newmysqls_local=Lokal server
 newmysqls_none=Ingen domener
 newmysqls_dcount=$1 virtuelle servere
-newmysqls_header=Nye MySQL serveralternativer
-newmysqls_formhost=Koble til MySQL-serveren
+newmysqls_header=Nye alternativer for databaseserver
+newmysqls_formhost=Koble til databaseserver
 newmysqls_remote=Ekstern vert
 newmysqls_sock=Lokal socket-fil
 newmysqls_nohost=Standard lokal server
@@ -470,9 +471,9 @@ newmysqls_port=Koble til TCP-porten
 newmysqls_portdef=MySQL standard (3306)
 newmysqls_user=Logg inn med brukernavn
 newmysqls_pass=Logg inn med passord
-newmysqls_err=Kunne ikke legge til MySQL-serveren
+newmysqls_err=Kunne ikke legge til databaseserver
 newmysqls_ehost=Manglende eller ugyldig serververtsnavn
-newmysqls_eip=Ekstern MySQL-server må legges inn som et vertsnavn, ikke en IP-adresse
+newmysqls_eip=Ekstern server må oppgis som vertsnavn, ikke som IP-adresse
 newmysqls_esock=Manglende eller ikke-absolutt stikkontakt
 newmysqls_eport=Manglende eller ikke-numerisk portnummer
 newmysqls_euser=Mangler brukernavn
@@ -497,6 +498,7 @@ validate_ednsns2=DNS-sone har ingen NS-poster
 validate_ednsns=NS-post $1 kan ikke løses til en IP-adresse
 validate_ednsip6=DNS-posten $1 løser seg til IPv6-adressen $2 i stedet for den virtuelle serverens IPv6-adresse $3 
 validate_ewebphpconfig=PHP-konfigurasjonsfeil ble funnet i versjon $1 : $2 
+validate_ewebphpfpmport=PHP FPM-konfigurasjonsfeil funnet : $1 
 validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1 
 validate_ewebipv6=En IPv6 DNS-post $2 med adresse $1 eksisterer, men denne virtuelle serveren har ikke IPv6 aktivert
 validate_ewebipv6virt=Det finnes en IPv6 DNS-post med adresse $1, men denne virtuelle serverens Apache-konfigurasjon har ikke en IPv6-adresse
