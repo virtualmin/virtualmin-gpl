@@ -111,7 +111,7 @@ if (!$mailbox) {
 		if ($user->{'unix'} && $user->{'change'}) {
 			local $tm = timelocal(gmtime($user->{'change'} *
 						     60*60*24));
-			$pwfield .= &text('user_lastch', &make_date($tm, 1));
+			$pwfield .= "&nbsp;&nbsp;".&text('user_lastch', &make_date($tm, 1));
 			}
 		}
 	if (!$user->{'alwaysplain'}) {
