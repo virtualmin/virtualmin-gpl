@@ -36,7 +36,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	$script = $smap{$sinfo->{'name'}};
 	($status, $canup) = &describe_script_status($sinfo, $script);
 	$upcount += $canup;
-	$path = $sinfo->{'opts'}->{'path'};
+	$path = $sinfo->{'opts'}->{'path_real'} || $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
 	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
 		$dbdesc = &text('scripts_idbname2',
