@@ -1403,6 +1403,7 @@ scripts_deleted=Manuell gelöscht
 scripts_inocgi=Webserver-Unterstützung für CGI-Skripte ist erforderlich
 scripts_abandoned2=WARNUNG: Dieses Skript wird vom ursprünglichen Autor nicht mehr unterstützt.
 scripts_abandoned1=WARNUNG: Version $1 dieses Skripts wird vom ursprünglichen Autor nicht mehr unterstützt.
+scripts_discontinued=Abgesetzt
 
 newnotify_title=E-Mail-Server-Besitzer
 newnotify_desc=Auf dieser Seite können Sie E-Mails an die Eigentümer der ausgewählten virtuellen Server senden, um beispielsweise Systemausfälle, Upgrades oder andere Serviceänderungen anzukündigen. Die folgenden Unterpositionen können im Nachrichtentext und im Betreff verwendet werden:

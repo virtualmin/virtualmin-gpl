@@ -90,10 +90,11 @@ foreach my $d (@doms) {
 			$opts = $sinfo->{'opts'};
 			print "$sinfo->{'id'}\n";
 			print "    Domain: $d->{'dom'}\n";
-			print "    Type: $script->{'name'}\n";
+			print "    Type: ".($script->{'name'} || $sinfo->{'name'})."\n";
 			print "    Manually deleted: ",
 			      ($script->{'deleted'} ? "Yes" : "No"),"\n";
-			print "    Description: $script->{'desc'}\n";
+			print "    Description: ".($script->{'desc'} ||
+			                          "$sinfo->{'name'} ($text{'scripts_discontinued'})")."\n";
 			print "    Version: $sinfo->{'version'}\n";
 			print "    Installed: ",&make_date($sinfo->{'time'}),"\n";
 			if ($sinfo->{'desc'}) {
@@ -138,16 +139,17 @@ foreach my $d (@doms) {
 		if (@doms > 1) {
 			print "Scripts in domain $d->{'dom'} :\n"; 
 			}
-		$fmt = "%-20.20s %-20.20s %-10.10s %-25.25s\n";
+		$fmt = "%-20.20s %-30.30s %-10.10s %-25.25s\n";
 		printf $fmt, "ID", "Description", "Version", "URL path";
-		printf $fmt, ("-" x 20), ("-" x 20), ("-" x 10), ("-" x 25);
+		printf $fmt, ("-" x 20), ("-" x 30), ("-" x 10), ("-" x 25);
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});
 			$path = $sinfo->{'url'};
 			$path =~ s/^(http|https):\/\/([^\/]+)//;
 			$path ||= $sinfo->{'path'};
 			printf $fmt, $sinfo->{'id'},
-				     $script->{'desc'},
+				     ($script->{'desc'} ||
+				     "$sinfo->{'name'} ($text{'scripts_discontinued'})"),
 				     $sinfo->{'version'},
 				     $path;
 			}

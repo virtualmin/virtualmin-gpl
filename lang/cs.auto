@@ -3237,6 +3237,7 @@ scripts_packagecount=.. nainstaloval $1 nové balíčky
 scripts_packageall=.. všechny balíčky jsou již nainstalovány
 scripts_abandoned2=UPOZORNĚNÍ: Tento skript již není podporován původním autorem.
 scripts_abandoned1=VAROVÁNÍ: Verze $1 tohoto skriptu již není podporována jeho původním autorem.
+scripts_discontinued=Přerušeno
 
 newnotify_title=Majitelé e-mailových serverů
 newnotify_desc=Tuto stránku lze použít k zasílání e-mailů majitelům vybraných virtuálních serverů, například k oznámení výpadků systému, upgradů nebo jiných změn služeb. V těle a předmětu zprávy mohou být použity následující rozvodny:

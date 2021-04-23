@@ -56,18 +56,19 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	if ($sinfo->{'partial'}) {
 		$desc = "<i>$desc</i>";
 		}
+	my $desc_full = $script->{'desc'} ? "<a href='edit_script.cgi?dom=$in{'dom'}&".
+		 "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $sinfo->{'id'} },
-		"<a href='edit_script.cgi?dom=$in{'dom'}&".
-		 "script=$sinfo->{'id'}'>$desc</a>",
+		  'value' => $sinfo->{'id'}, 'disabled' => !$script->{'desc'} },
+		$desc_full,
 		$script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
 		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
 		$dbdesc,
-		$status,
+		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') : $status,
 		]);
 	}
 

@@ -3904,6 +3904,7 @@ scripts_packagecount=.. instalou $1 novos pacotes
 scripts_packageall=.. todos os pacotes já estão instalados
 scripts_abandoned2=AVISO: Este script não é mais suportado por seu autor original.
 scripts_abandoned1=AVISO: A versão $1 deste script não é mais suportada por seu autor original.
+scripts_discontinued=Interrompido
 
 newnotify_title=Proprietários do servidor de email
 newnotify_desc=Essa página pode ser usada para enviar email aos proprietários dos servidores virtuais selecionados, por exemplo, para anunciar o tempo de inatividade do sistema, atualizações ou outras alterações de serviço. As seguintes subestações podem ser usadas no corpo e no assunto da mensagem:
