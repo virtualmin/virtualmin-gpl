@@ -4333,7 +4333,7 @@ records_valuetxt=Text Eintrag
 records_typesoa=Start der Domain
 records_typedefttl=Standard Cache Zeiten
 records_comment=Kommentar
-records_manual=Mauelles Editieren von Einträgen
+records_manual=Manuelles Editieren von Einträgen
 records_epost=Einräge wurden nicht vollständigt gelöscht : $1
 
 record_title1=Erstelle DNS Eintrag
