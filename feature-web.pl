@@ -2978,6 +2978,14 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 		&ui_textarea("php_fpm",
 			$tmpl->{'php_fpm'} eq 'none' ? '' :
 			join("\n", split(/\t/, $tmpl->{'php_fpm'})), 5, 80));
+
+	# Use socket file or TCP port?
+	print &ui_table_row(
+		&hlink($text{'tmpl_php_sock'}, "template_php_sock"),
+		&ui_radio("php_sock", $tmpl->{'php_sock'},
+		  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
+		    [ 0, $text{'tmpl_php_sock0'} ],
+		    [ 1, $text{'tmpl_php_sock1'} ] ]));
 	}
 }
 
@@ -3046,6 +3054,7 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 	else {
 		$tmpl->{'php_fpm'} = 'none';
 		}
+	$tmpl->{'php_sock'} = $in{'php_sock'};
 	}
 }
 

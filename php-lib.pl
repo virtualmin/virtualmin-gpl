@@ -1981,6 +1981,7 @@ if ($p ne 'web') {
 
 # First update the Apache config
 &require_apache();
+&obtain_lock_web($d);
 my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my $found = 0;
@@ -2010,6 +2011,7 @@ foreach my $p (@ports) {
 		&flush_file_lines($virt->{'file'});
 		}
 	}
+&release_lock_web($d);
 $found || return "No Apache VirtualHost containing an FPM SetHandler found";
 &register_post_action(\&restart_apache);
 

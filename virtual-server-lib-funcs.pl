@@ -8836,6 +8836,7 @@ push(@rv, { 'id' => 0,
 	    'web_admindom' => $config{'web_admindom'},
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'php_fpm' => $config{'php_fpm'} || "none",
+	    'php_sock' => $config{'php_sock'} || 0,
 	    'web_php_suexec' => int($config{'php_suexec'}),
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
@@ -9130,6 +9131,7 @@ if ($tmpl->{'id'} == 0) {
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
 				$tmpl->{'php_fpm'};
+	$config{'php_sock'} = $tmpl->{'php_sock'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
@@ -9410,7 +9412,7 @@ if (!$tmpl->{'default'}) {
 		    "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
-		    "logrotate", "disabled_web", "disabled_url",
+		    "logrotate", "disabled_web", "disabled_url", "php_sock",
 		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
@@ -9427,7 +9429,7 @@ if (!$tmpl->{'default'}) {
 			local $k;
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
-				next if ($p eq "php" && $k =~ /^php_fpm/);
+				next if ($p eq "php" && $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" && $k =~ /^web_(webmail|admin)/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
