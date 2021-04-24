@@ -5417,6 +5417,7 @@ upgrade_serial=Serial number
 upgrade_key=License key
 upgrade_ok=Upgrade Now
 upgrade_err=Failed to upgrade to Virtualmin Pro
+upgrade_epackages=No packages to install found!
 upgrade_eserial=Missing or invalid-looking serial number
 upgrade_ekey=Missing or invalid-looking license key
 upgrade_eamazon=This license key cannot be used for upgrades

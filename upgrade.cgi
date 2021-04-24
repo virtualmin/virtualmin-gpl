@@ -55,7 +55,7 @@ elsif ($itype eq "deb") {
 	$lref = &read_file_lines($sources_list);
 	$found = 0;
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com/) {
+		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com/) {
 			$found = 1;
 			}
 		}
@@ -89,7 +89,7 @@ if ($itype eq "rpm") {
 	foreach my $l (@$lref) {
 		if ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
 			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
-			$l = "baseurl=http://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
+			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
 			}
 		}
@@ -115,6 +115,8 @@ if ($itype eq "rpm") {
 			push(@packages, $p->{'name'});
 			}
 		}
+	@packages || &error($text{'upgrade_epackages'});
+
 	&$first_print(&text('upgrade_rpms',
 		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
@@ -132,11 +134,11 @@ elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
+		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
+			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
 			}
-		elsif ($l =~ /^deb\s+http:\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
-			$l = "deb http://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
+		elsif ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
+			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
                         }
 		}
 	&flush_file_lines($sources_list);
@@ -175,6 +177,8 @@ elsif ($itype eq "deb") {
 				}
 			}
 		}
+	@packages || &error($text{'upgrade_epackages'});
+
 	&$first_print(&text('upgrade_debs',
 		join(" ", map { "<tt>$_</tt>" } @packages)));
 	print "<pre>";
