@@ -67,7 +67,7 @@ return ( );
 sub script_whmcs_php_fullver
 {
 local ($d, $ver, $sinfo) = @_;
-return $ver >= 7 ? 7.3 : undef;
+return &compare_versions($ver, 8) >= 0 ? 7.2 : 5.6;
 }
 
 sub script_whmcs_php_modules
