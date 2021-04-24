@@ -1919,6 +1919,7 @@ scripts_packagecount=.. $1 yeni paket kuruldu
 scripts_packageall=.. tüm paketler zaten kurulu
 scripts_abandoned2=UYARI: Bu komut dosyası artık orijinal yazarı tarafından desteklenmemektedir.
 scripts_abandoned1=UYARI: Bu komut dosyasının $1 sürümü artık orijinal yazarı tarafından desteklenmiyor.
+scripts_discontinued=Üretimden kaldırıldı
 
 newnotify_admins=Ayrıca seçili alan adlarında fazladan yöneticiye e-posta gönderilsin mi?
 newnotify_users=Ayrıca seçili alan adlarında userd'ye e-posta gönder

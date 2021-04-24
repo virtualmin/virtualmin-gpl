@@ -1718,6 +1718,7 @@ scripts_packagecount=..安装了 $1个新软件包
 scripts_packageall=..所有软件包都已安装
 scripts_abandoned2=警告：该脚本的原始作者不再支持。
 scripts_abandoned1=警告：其原始作者不再支持此脚本的版本 $1。
+scripts_discontinued=已停产
 
 newnotify_admins=还通过电子邮件向选定域中的其他管理员发送电子邮件吗？
 newnotify_users=还在选定域中使用过电子邮件吗？

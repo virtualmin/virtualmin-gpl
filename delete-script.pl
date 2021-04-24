@@ -104,6 +104,11 @@ if ($dereg) {
 	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 else {
+	# If script installer is discontinued
+	if (!defined(&{$script->{'uninstall_func'}})) {
+		print "You cannot uninstall discontinued script.\nTry --deregister flag to remove it from database, however actual uninstallation can only be done manually.\n";
+		exit(1);
+	}
 	# Remove it
 	&$first_print(&text('scripts_uninstalling', $script->{'desc'},
 						    $sinfo->{'version'}));

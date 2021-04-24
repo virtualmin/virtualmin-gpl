@@ -3451,6 +3451,7 @@ scripts_epackages=.. instalacja pakietu nie jest obsługiwana w tym systemie!
 scripts_installpackage=Instalowanie $1 ..
 scripts_failedpackage=.. nie powiodło się. Późniejsze kroki instalacji tego skryptu mogą się nie powieść.
 scripts_gotpackage=.. już zainstalowane
+scripts_discontinued=Przerwane
 
 newnotify_title=Właściciele serwerów e-mail
 newnotify_desc=Ta strona może służyć do wysyłania wiadomości e-mail do właścicieli wybranych serwerów wirtualnych, na przykład w celu informowania o przestojach systemu, aktualizacjach lub innych zmianach usług. W treści i temacie wiadomości można zastosować następujące podstacje:

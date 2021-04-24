@@ -75,7 +75,7 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo) {
 
 # Check for files in the script's directory
 $found = 0;
-if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
+if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'} && !$opts->{'nofcount'}) {
 	opendir(DESTDIR, $opts->{'dir'});
 	foreach $f (readdir(DESTDIR)) {
 		if ($f ne "." && $f ne ".." && $f !~ /^(index|welcome)\./) {

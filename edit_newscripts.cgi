@@ -282,18 +282,19 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 	if ($sinfo->{'partial'}) {
 		$desc = "<i>$desc</i>";
 		}
+	my $desc_full = $script->{'desc'} ? "<a href='edit_script.cgi?dom=$d->{'id'}&".
+            "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
 	$path = $sinfo->{'opts'}->{'path'};
 	$status = &describe_script_status($sinfo, $script);
 	push(@all_table,
 	     [ &show_domain_name($d),
-	       "<a href='edit_script.cgi?dom=$d->{'id'}&".
-                 "script=$sinfo->{'id'}'>$desc</a>",
+	       $desc_full,
 	       $script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
 	       $sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
-	       $status,
+	       !$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') : $status,
 	     ]);
 	}
 print &ui_columns_table(
