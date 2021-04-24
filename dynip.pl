@@ -60,7 +60,6 @@ if ($ip && $ip ne $oldip) {
 	if ($oldip) {
 		&set_all_null_print();
 		$dc = &update_all_domain_ip_addresses($ip, $oldip);
-		&run_post_actions();
 
 		# Also change shared IP
 		@shared = &list_shared_ips();
@@ -69,6 +68,11 @@ if ($ip && $ip ne $oldip) {
 			$shared[$idx] = $ip;
 			&save_shared_ips(@shared);
 			}
+
+		# Update any DNS slaves that were replicating from this IP
+		&update_dns_slave_ip_addresses($ip, $oldip);
+
+		&run_post_actions();
 		}
 
 	if ($config{'dynip_email'}) {
