@@ -481,12 +481,11 @@ if (!$virt) {
 if (defined(&create_php_wrappers)) {
 	&create_php_wrappers($d);
 	}
+
+# Force FPM port re-allocation and re-setup of PHP mode
 my $mode = &get_domain_php_mode($oldd);
-if ($mode eq "fpm") {
-	# Force port re-allocation
-	delete($d->{'php_fpm_port'});
-	&save_domain_php_mode($d, $mode);
-	}
+delete($d->{'php_fpm_port'});
+&save_domain_php_mode($d, $mode);
 
 # Update session dir and upload path in php.ini files
 local @fixes = (
