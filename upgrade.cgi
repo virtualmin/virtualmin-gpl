@@ -135,10 +135,10 @@ elsif ($itype eq "deb") {
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
 		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
-			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$1";
+			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$2";
 			}
 		elsif ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
-			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$1/$2";
+			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$2/$3";
                         }
 		}
 	&flush_file_lines($sources_list);
