@@ -402,9 +402,17 @@ foreach my $p (@ports) {
 		}
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
 		# Can use a FilesMatch block with SetHandler inside instead
-		$fport = &get_php_fpm_socket_port($d);
-		my $wanth = 'proxy:fcgi://localhost:'.$fport;
+		my $wanth;
+		if ($tmpl->{'php_sock'}) {
+			my $fsock = &get_php_fpm_socket_file($d);
+			$wanth = 'proxy:unix:'.$fsock."|fcgi://localhost";
+			}
+		else {
+			my $fport = &get_php_fpm_socket_port($d);
+			$wanth = 'proxy:fcgi://localhost:'.$fport;
+			}
 		if (!$files) {
+			# Add a new FilesMatch block with the socket
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
 				   'value' => '\.php$',
@@ -414,11 +422,15 @@ foreach my $p (@ports) {
 					},
 				   ],
 				 };
-			&apache::save_directive_struct(undef, $files, $vconf, $conf);
+			&apache::save_directive_struct(
+				undef, $files, $vconf, $conf);
 			}
-		else {
-			# Add the SetHandler directive
-			&apache::save_directive("SetHandler", [$wanth], $files->{'members'}, $conf);
+		elsif (!&apache::find_directive("SetHandler",
+						$files->{'members'})) {
+			# Add the SetHandler directive to the FilesMatch block
+			# if missing
+			&apache::save_directive("SetHandler", [$wanth],
+						$files->{'members'}, $conf);
 			}
 		}
 	else {
@@ -2044,22 +2056,20 @@ return @rv;
 sub create_php_fpm_pool
 {
 my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 my $oldlisten = &get_php_fpm_config_value($d, "listen");
-my $port;
-if ($oldlisten && $oldlisten =~ /^\//) {
-	# Was a socket file before
-	$port = &get_php_fpm_socket_file($d);
+my $mode;
+if ($oldlisten) {
+	$mode = $oldlisten =~ /^\// ? 1 : 0;
 	}
 else {
-	# Was a port before, or not set at all
-	$port = &get_php_fpm_socket_port($d);
-	if ($port =~ /^\d+$/) {
-		$port = "localhost:".$port;
-		}
+	$mode = $tmpl->{'php_sock'};
 	}
+my $port = $mode ? &get_php_fpm_socket_file($d) : &get_php_fpm_socket_port($d);
+$port = "localhost:".$port if ($port =~ /^\d+$/);
 &lock_file($file);
 if (-r $file) {
 	# Fix up existing one, in case user or group changed
@@ -2072,20 +2082,20 @@ else {
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
 	$defchildren = 9999 if ($defchildren eq "none" || !$defchildren);
-	&open_tempfile(CONF, ">$file");
-	&print_tempfile(CONF, "[$d->{'id'}]\n");
-	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
-	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
-	&print_tempfile(CONF, "listen = ",$port,"\n");
-	&print_tempfile(CONF, "pm = dynamic\n");
-	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
-	&print_tempfile(CONF, "pm.start_servers = 1\n");
-	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
-	&print_tempfile(CONF, "pm.max_spare_servers = 5\n");
 	local $tmp = &create_server_tmp($d);
-	&print_tempfile(CONF, "php_admin_value[upload_tmp_dir] = $tmp\n");
-	&print_tempfile(CONF, "php_admin_value[session.save_path] = $tmp\n");
-	&close_tempfile(CONF);
+	my $lref = &read_file_lines($file);
+	@$lref = ( "[$d->{'id'}]",
+		   "user = ".$d->{'user'},
+		   "group = ".$d->{'ugroup'},
+		   "listen = ".$port,
+		   "pm = dynamic", 
+		   "pm.max_children = $defchildren",
+		   "pm.start_servers = 1",
+		   "pm.min_spare_servers = 1",
+		   "pm.max_spare_servers = 5",
+	   	   "php_admin_value[upload_tmp_dir] = $tmp",
+		   "php_admin_value[session.save_path] = $tmp" );
+	&flush_file_lines($file);
 
 	# Add / override custom options (with substitution)
 	if ($tmpl->{'php_fpm'} ne 'none') {
