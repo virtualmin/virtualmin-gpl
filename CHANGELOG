@@ -1617,3 +1617,5 @@ Improved locking for domain database files to prevent overwriting.
 Consolidated all PHP options into a single page, and moved website options to it's own page in the UI.
 SSL certicates can now be generated and managed for virtual servers even when they don't have the SSL feature enabled.
 Added the Cloud DNS Providers page, for configuring Virtualmin to use Route53 to host DNS rather than doing it locally.
+---- Changes since 6.15 ----
+PHP-FPM using socket files instead of TCP ports is now fully supported, using the modify-web API command.
