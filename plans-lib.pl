@@ -216,7 +216,7 @@ foreach my $ltmpl (&list_templates()) {
 	$planmap{$tmpl->{'id'}} = $plan;
 	}
 
-# For each top-level domain, map it's template to the created plan
+# For each top-level domain, map its template to the created plan
 foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 	if ($d->{'plan'} eq '' || !&get_plan($d->{'plan'})) {
 		local $plan = $planmap{$d->{'template'}};
@@ -232,8 +232,8 @@ foreach my $d (grep { !$_->{'parent'} } &list_domains()) {
 }
 
 # set_plan_on_children(&domain)
-# Given a top-level server, copy it's plan to all children. Or if given a 
-# sub-server, copy the plan from it's parent.
+# Given a top-level server, copy its plan to all children. Or if given a 
+# sub-server, copy the plan from its parent.
 sub set_plan_on_children
 {
 my ($d) = @_;
