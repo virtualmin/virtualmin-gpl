@@ -5774,7 +5774,6 @@ chain_epaste=No certificate text entered
 stopscript_title=Stop Server
 stopscript_egone=Script no longer exists!
 stopscript_doing=Shutting down the server process for $1 ..
-stopscript_done=.. done. The script's URL will no longer work until it is started again.
 startscript_title=Start Server
 startscript_doing=Starting up the server process for $1 ..
 startscript_failed=.. failed : $1

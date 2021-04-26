@@ -379,6 +379,9 @@ dns_cloud_def=&lt; Velg automatisk &gt;
 dns_cloud_services=Cloudmin-tjenester
 dns_cloud_local=Lokale filer
 tmpl_php_fpm=Flere FPM-bassengalternativer
+tmpl_php_sock=FPM-serverforbindelse
+tmpl_php_sock0=TCP-port
+tmpl_php_sock1=Unix-sokkelfil
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
 tmpl_editmode_php=PHP-alternativer
@@ -573,6 +576,8 @@ newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal k
 
 dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
+
+upgrade_epackages=Fant ingen pakker å installere!
 
 exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.
@@ -943,6 +948,7 @@ php_fpmeinit=.. mislyktes : $1
 php_fpmnodir=Ingen FPM-konfigurasjonskatalog funnet
 php_fpmnoinit2=Ingen FPM-serveroppstarthandling funnet
 php_fpmnomod=Apache-modulen $1 mangler eller er ikke aktivert
+php_fpmeconfig=Ingen FPM-konfigurasjon funnet for domenet!
 
 jailkit_ecmd=Jailkit-kommandoen $1 ble ikke funnet på systemet ditt - kanskje <i>jailkit</i> pakken er ikke installert?
 jailkit_einit=Kunne ikke initialisere fengselet : $1 

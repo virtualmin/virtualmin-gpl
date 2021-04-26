@@ -853,6 +853,9 @@ tmpl_phpatleast=Al menos
 tmpl_phpatmost=A lo sumo
 tmpl_webssi=¿Permitir incluir del lado del servidor de forma predeterminada?
 tmpl_php_fpm=Opciones adicionales de agrupación de FPM
+tmpl_php_sock=Conexión al servidor FPM
+tmpl_php_sock0=Puerto TCP
+tmpl_php_sock1=Archivo de socket Unix
 tmpl_statussslcert=Validar certificado SSL?
 tmpl_statussslcert1=Verificar fecha de vencimiento
 tmpl_statussslcert2=Verificar fecha de vencimiento y nombre de dominio
@@ -1398,6 +1401,7 @@ newstyles_dstyle=Estilo para borrar
 newstyles_del=Elimina ahora
 newstyles_edelete=¡El estilo de contenido seleccionado ya no existe!
 
+upgrade_epackages=¡No se encontraron paquetes para instalar!
 upgrade_eyumlist=El paquete de $1 RPM no se encontró en la lista de paquetes disponibles de YUM. ¿Quizás uno de sus repositorios actuales no funciona?
 upgrade_etypematch=La actualización no es posible ya que el tipo de instalación de Virtualmin es de <tt>$1</tt> pero el de Webmin es de <tt>$2</tt>
 
@@ -2524,6 +2528,7 @@ php_fpmeinit=.. fallido : $1
 php_fpmnodir=No se encontró el directorio de configuración de FPM
 php_fpmnoinit2=No se encontró ninguna acción de arranque del servidor FPM
 php_fpmnomod=Falta el módulo de Apache $1 o no está habilitado
+php_fpmeconfig=¡No se encontró ninguna configuración de FPM para el dominio!
 
 jailkit_ecmd=El comando Jailkit $1 no se encontró en su sistema, ¿tal vez el paquete <i>jailkit</i> no está instalado?
 jailkit_einit=Error al inicializar la cárcel : $1

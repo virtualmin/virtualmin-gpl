@@ -5245,7 +5245,6 @@ chain_epaste=Det ble ikke skrevet inn noen sertifikat tekst
 stopscript_title=Stopp Rails tjener
 stopscript_egone=Script fines ikke lenger!
 stopscript_doing=Stopper Rails tjenerprosess for $1 ..
-stopscript_done=.. ferdig. Scriptets URL vil ikke virke før scriptet er startet på nytt.
 startscript_title=Start Rails tjener
 startscript_doing=Starter opp Rails tjenerprosess for $1 ..
 startscript_failed=.. feilet : $1

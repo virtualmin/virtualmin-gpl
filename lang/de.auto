@@ -1159,6 +1159,9 @@ tmpl_phpchildrennone=Keiner
 tmpl_webssi=Serverseitige Includes standardmäßig zulassen?
 tmpl_phpverdef=Höchste verfügbare
 tmpl_php_fpm=Zusätzliche FPM-Pooloptionen
+tmpl_php_sock=FPM-Serververbindung
+tmpl_php_sock0=TCP-Port
+tmpl_php_sock1=Unix-Socket-Datei
 tmpl_statustimeout=Zeitlimit für HTTP-Prüfung
 tmpl_statussslcert1=Überprüfen Sie das Ablaufdatum
 tmpl_statussslcert2=Überprüfen Sie das Ablaufdatum und den Domainnamen
@@ -1941,6 +1944,7 @@ thumb_title=Stilvorschau
 thumb_ethumb=Der Inhaltsstil $1 hat kein Vorschaubild.
 
 upgrade_desc1=Wenn Ihnen die Verwendung der Virtualmin-GPL gefallen hat und Sie den nächsten Schritt zur Pro-Version ausführen möchten, können Sie auf dieser Seite den Aktualisierungsvorgang automatisch ausführen. Die Schritte dazu sind :
+upgrade_epackages=Keine zu installierenden Pakete gefunden!
 upgrade_esharedroot=Ihr Webmin-Stammverzeichnis $1 wird von mehreren Systemen gemeinsam genutzt - Modulaktualisierungen sind nicht zulässig
 upgrade_eyumlist=Das $1 RPM-Paket wurde nicht in der Liste der verfügbaren Pakete von YUM gefunden. Vielleicht funktioniert eines Ihrer aktuellen Repositorys nicht?
 
@@ -2780,6 +2784,7 @@ php_fpmeinit=.. fehlgeschlagen : $1
 php_fpmnodir=Kein FPM-Konfigurationsverzeichnis gefunden
 php_fpmnoinit2=Keine FPM-Server-Startaktion gefunden
 php_fpmnomod=Das Apache-Modul $1 fehlt oder ist nicht aktiviert
+php_fpmeconfig=Keine FPM-Konfiguration für Domain gefunden!
 
 jailkit_ecmd=Der Jailkit-Befehl $1 wurde auf Ihrem System nicht gefunden - möglicherweise ist das <i>jailkit</i> -Paket nicht installiert?
 jailkit_einit=Gefängnis konnte nicht initialisiert werden : $1 

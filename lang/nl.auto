@@ -560,6 +560,9 @@ tmpl_domalias_type2=Virtualmin-sjabloon
 tmpl_edomaliastmpl=Ontbrekende sjabloon voor aliasdomeinvoorvoegsel
 tmpl_webssi=Sta server-side standaard toe?
 tmpl_php_fpm=Extra FPM-poolopties
+tmpl_php_sock=FPM-serververbinding
+tmpl_php_sock0=TCP-poort
+tmpl_php_sock1=Unix socket-bestand
 tmpl_editmode_web=Website voor domein
 tmpl_editmode_ssl=SSL-website voor domein
 tmpl_editmode_autoconfig=Automatische configuratie van e-mailclient
@@ -845,6 +848,8 @@ newdynip_eexternal=In de externe scriptmodus moet het volledige pad naar een uit
 
 dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
+
+upgrade_epackages=Geen pakketten gevonden om te installeren!
 
 exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.
@@ -1512,6 +1517,7 @@ php_fpmeinit=.. mislukt : $1
 php_fpmnodir=Geen FPM-configuratiemap gevonden
 php_fpmnoinit2=Geen opstartactie voor FPM-server gevonden
 php_fpmnomod=Apache-module $1 ontbreekt of is niet ingeschakeld
+php_fpmeconfig=Geen FPM-configuratie gevonden voor domein!
 
 jailkit_ecmd=De Jailkit-opdracht $1 is niet gevonden op uw systeem - misschien is het <i>jailkit</i> -pakket niet geïnstalleerd?
 jailkit_einit=Kan gevangenis niet initialiseren : $1 

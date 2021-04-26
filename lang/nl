@@ -4974,7 +4974,6 @@ chain_epaste=Er is geen certificaten tekst ingevuld
 stopscript_title=Stop Rails Server
 stopscript_egone=Script bestaat niet langer !
 stopscript_doing=Rails server proces uitschakelen voor $1 ..
-stopscript_done=.. klaar. Het URL script zal niet eerder gaan werken dan dat het opnieuw gestart word.
 startscript_title=Start Rails Server
 startscript_doing=Rails server proces opstarten voor $1 ..
 startscript_failed=.. mislukte : $1

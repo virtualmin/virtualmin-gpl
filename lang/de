@@ -3859,7 +3859,6 @@ chain_epaste=Kein Zertifikatstext eingegeben
 stopscript_title=Stoppe Rails Server
 stopscript_egone=Skript existiert nicht länger!
 stopscript_doing=Fahre den Rails Server Prozess für $1 herunter ..
-stopscript_done=.. fertig. Die Skript URL wird nicht länger arbeiten, bist dieser wieder neu gestartet wurde.
 startscript_title=Starte Rails Server
 startscript_doing=Starte den Rails Server Prozess für $1 ..
 startscript_failed=.. fehlgeschlagen : $1
