@@ -7173,6 +7173,7 @@ php_fpmeinit=.. failed : $1
 php_fpmnodir=No FPM configuration directory found
 php_fpmnoinit2=No FPM server bootup action found
 php_fpmnomod=Apache module $1 is missing or not enabled
+php_fpmeconfig=No FPM configuration found for domain!
 
 jailkit_ecmd=The Jailkit command $1 was not found on your system - maybe the <i>jailkit</i> package is not installed?
 jailkit_einit=Failed to initialize jail : $1
