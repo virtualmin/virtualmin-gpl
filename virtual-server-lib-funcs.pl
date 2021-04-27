@@ -12186,18 +12186,22 @@ if (($d->{'spam'} && $config{'spam'} ||
 		  });
 	}
 
-if (&domain_has_website($d) && &can_edit_phpmode()) {
+if (&domain_has_website($d)) {
 	# Website / PHP options buttons
-	push(@rv, { 'page' => 'edit_website.cgi',
-		    'title' => $text{'edit_website'},
-		    'desc' => $text{'edit_websitedesc'},
-		    'cat' => 'server',
-		  });
-	push(@rv, { 'page' => 'edit_phpmode.cgi',
-		    'title' => $text{'edit_php'},
-		    'desc' => $text{'edit_phpdesc'},
-		    'cat' => 'server',
-		  });
+	if (&can_edit_phpmode()) {
+		push(@rv, { 'page' => 'edit_website.cgi',
+			    'title' => $text{'edit_website'},
+			    'desc' => $text{'edit_websitedesc'},
+			    'cat' => 'server',
+			  });
+		}
+	if (&can_edit_phpmode() || &can_edit_phpver()) {
+		push(@rv, { 'page' => 'edit_phpmode.cgi',
+			    'title' => $text{'edit_php'},
+			    'desc' => $text{'edit_phpdesc'},
+			    'cat' => 'server',
+			  });
+		}
 	}
 
 if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
