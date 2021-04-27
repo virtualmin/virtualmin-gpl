@@ -19,16 +19,13 @@ return "A browser-based MySQL database management interface.";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "5.1.0", "4.9.7", "4.4.15.10", "4.0.10.20", "3.5.8.2" );
+return ( "5.1.0", "4.9.7" );
 }
 
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "4.5") >= 0 ? "$ver (Latest)" :
-       &compare_versions($ver, "4.4") >= 0 ? "$ver (Stable)" :
-       &compare_versions($ver, "4.0") >= 0 ? "$ver (Old)" :
-					     "$ver (Un-supported)";
+return &compare_versions($ver, "5") >= 0 ? "$ver" : "$ver (LTS)";
 }
 
 sub script_phpmyadmin_release
@@ -48,7 +45,8 @@ return ( 5 );
 
 sub script_phpmyadmin_php_modules
 {
-return ("mysql", "json");
+return ("mysql", "json", "mbstring", "session",
+        "zip", "gd", "openssl", "xml");
 }
 
 sub script_phpmyadmin_php_optional_modules
