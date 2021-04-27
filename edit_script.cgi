@@ -89,7 +89,7 @@ if (defined(&$sfunc)) {
 	if ($pids[0] >= 0) {
 		print &ui_table_row($text{'scripts_istatus'},
 		    @pids ?
-		      &ui_text_color("$text{'scripts_istatus1'} <tt>($pids[0])</tt>", "success") :
+		      &ui_text_color($text{'scripts_istatus1'}, "success") :
 		      &ui_text_color($text{'scripts_istatus0'}, "danger"));
 		$gotstatus = 1;
 		}
