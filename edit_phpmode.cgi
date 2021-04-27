@@ -6,7 +6,8 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 $can = &can_edit_phpmode($d);
-$can || &error($text{'phpmode_ecannot'});
+$canv = &can_edit_phpver($d);
+$can || $canv || &error($text{'phpmode_ecannot'});
 if (!$d->{'alias'}) {
 	@modes = &supported_php_modes($d);
 	$mode = &get_domain_php_mode($d);
@@ -20,43 +21,46 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
-if (!$d->{'alias'} && $can == 2 &&
-    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
-	# PHP execution mode
-	push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
-	print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
-			    &ui_radio_table("mode", $mode,
-			      [ map { [ $_, $text{'phpmode_'.$_} ] }
-				    @modes ]));
-	}
+if ($can) {
+	if (!$d->{'alias'} && $can == 2 &&
+	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
+		# PHP execution mode
+		push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
+		print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
+				    &ui_radio_table("mode", $mode,
+				      [ map { [ $_, $text{'phpmode_'.$_} ] }
+					    @modes ]));
+		}
 
-# PHP fcgi sub-processes
-if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2 &&
-    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
-	$children = &get_domain_php_children($d);
-	if ($children > 0) {
-		print &ui_table_row(&hlink($text{'phpmode_children'},
-					   "phpmode_children"),
+	# PHP fcgi sub-processes
+	if (!$d->{'alias'} && &indexof("fcgid", @modes) >= 0 && $can == 2 &&
+	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
+		$children = &get_domain_php_children($d);
+		if ($children > 0) {
+			print &ui_table_row(&hlink($text{'phpmode_children'},
+						   "phpmode_children"),
 				    &ui_opt_textbox("children", $children || '',
 					 5, $text{'tmpl_phpchildrennone'}));
+			}
+		}
+
+	# PHP max execution time, for fcgi mode
+	if (!$d->{'alias'} &&
+	    (&indexof("fcgid", @modes) >= 0 || &indexof("fpm", @modes) >= 0) &&
+	    ($p eq 'web' ||
+	     &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
+		$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
+					: &get_php_max_execution_time($d);
+		print &ui_table_row(
+			&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
+			&ui_opt_textbox("maxtime", $max == 0 ? undef : $max,
+					5, $text{'form_unlimit'})." ".
+				    	$text{'rfile_secs'});
 		}
 	}
 
-# PHP max execution time, for fcgi mode
-if (!$d->{'alias'} &&
-    (&indexof("fcgid", @modes) >= 0 || &indexof("fpm", @modes) >= 0) &&
-    ($p eq 'web' ||
-     &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
-	$max = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
-				: &get_php_max_execution_time($d);
-	print &ui_table_row(&hlink($text{'phpmode_maxtime'}, "phpmode_maxtime"),
-			    &ui_opt_textbox("maxtime", $max == 0 ? undef : $max,
-					    5, $text{'form_unlimit'})." ".
-			    $text{'rfile_secs'});
-	}
-
 # PHP versions
-if (&can_edit_phpver($d) && !$d->{'alias'} && $mode ne "mod_php") {
+if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 	# Build versions list
 	my @avail = &list_available_php_versions($d, $mode);
 	my @vlist = ( );
