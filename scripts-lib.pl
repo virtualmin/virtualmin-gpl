@@ -1752,11 +1752,12 @@ local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array, $formdata) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'} || 80;
+local $port = $d->{'web_sslport'} || $d->{'web_port'} || 80;
+local $usessl = $port == 443 ? 1 : 0;
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
-local $h = &make_http_connection($ip, $port, 0, "POST", $page);
+local $h = &make_http_connection($ip, $port, $usessl, "POST", $page);
 $gconfig{'http_proxy'} = $oldproxy;
 if (!ref($h)) {
 	$$err = $h;
@@ -1829,7 +1830,7 @@ local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'} || 80;
+local $port = $d->{'web_sslport'} || $d->{'web_port'} || 80;
 
 # Build headers
 local @headers;
@@ -1934,7 +1935,7 @@ if ($rcode >= 300 && $rcode < 400) {
 
 	# Download from the new URL
 	if ($host eq &get_domain_http_hostname($d) &&
-	    $port eq ($d->{'web_port'} || 80)) {
+	    $port eq ($d->{'web_sslport'} || $d->{'web_port'} || 80)) {
 		# Same domain, so use Virtualmin's function
 		&get_http_connection($d, $page, $dest, $error, $cbfunc, $ssl,
 				     undef, undef, 0, $osdn, 0, $headers);
@@ -2241,7 +2242,7 @@ local $job = { 'user' => $d->{'user'},
 if ($callnow) {
 	# Fetch the URL now
 	local ($host, $port, $page, $ssl) = &parse_http_url($url);
-	if ($host eq $d->{'dom'} && $port == ($d->{'web_port'} || 80)) {
+	if ($host eq $d->{'dom'} && $port == ($d->{'web_sslport'} || $d->{'web_port'} || 80)) {
 		# On this domain .. can use internal function which handles
 		# use of internal IP
 		local ($out, $err);
