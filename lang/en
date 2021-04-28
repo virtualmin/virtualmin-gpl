@@ -4126,8 +4126,8 @@ scripts_failedpackage=.. failed. Later steps in the installation of this script 
 scripts_gotpackage=.. already installed
 scripts_packagecount=.. installed $1 new packages
 scripts_packageall=.. all packages are already installed
-scripts_abandoned2=WARNING : This script is no longer supported by its original author.
-scripts_abandoned1=WARNING : Version $1 of this script is no longer supported by its original author.
+scripts_abandoned2=This script is no longer supported and will not receive security updates.
+scripts_abandoned1=Version $1 of this script is no longer supported and will not receive security updates.
 scripts_discontinued=Discontinued
 
 newnotify_title=Email Server Owners

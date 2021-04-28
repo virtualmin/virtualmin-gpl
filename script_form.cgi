@@ -63,12 +63,10 @@ if ($ok) {
 	$afunc = $script->{'abandoned_func'};
 	$abandoned = defined(&$afunc) && &$afunc($ver);
 	if ($abandoned == 2) {
-		print "<font color=red><b>",
-			&text('scripts_abandoned2'),"</b></font><p>\n";
+		print &ui_alert_box($text{'scripts_abandoned2'}, 'warn');
 		}
 	elsif ($abandoned == 1) {
-		print "<font color=red><b>",
-			&text('scripts_abandoned1', $ver),"</b></font><p>\n";
+		print &ui_alert_box(&text('scripts_abandoned1', $ver), 'warn');
 		}
 	
 	# Show install options form
