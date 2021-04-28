@@ -1752,8 +1752,11 @@ local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array, $formdata) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_sslport'} || $d->{'web_port'} || 80;
-local $usessl = $port == 443 ? 1 : 0;
+
+# Use SSL whenever possible
+my $sslport = ($d->{'web_sslport'} && $d->{'ssl'}) ? $d->{'web_sslport'} : undef;
+my $port = $sslport || $d->{'web_port'} || 80;
+my $usessl = $port == $d->{'web_sslport'} ? 1 : 0;
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
