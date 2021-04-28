@@ -3120,8 +3120,8 @@ scripts_failedpackage=.. fallito. I passaggi successivi nell'installazione di qu
 scripts_gotpackage=.. già installato
 scripts_packagecount=.. installati $1 nuovi pacchetti
 scripts_packageall=.. tutti i pacchetti sono già installati
-scripts_abandoned2=ATTENZIONE: questo script non è più supportato dal suo autore originale.
-scripts_abandoned1=ATTENZIONE: la versione $1 di questo script non è più supportata dal suo autore originale.
+scripts_abandoned2=Questo script non è più supportato e non riceverà aggiornamenti di sicurezza.
+scripts_abandoned1=La versione $1 di questo script non è più supportata e non riceverà aggiornamenti di sicurezza.
 scripts_discontinued=Interrotto
 
 newnotify_title=Proprietari del server di posta elettronica

@@ -1404,8 +1404,8 @@ scripts_gemfailed=.. Gem Installation fehlgeschlagen : $1
 scripts_gemlink=Verknüpfen des Gem-Befehls $1 mit der neuen Version $2 ..
 scripts_deleted=Manuell gelöscht
 scripts_inocgi=Webserver-Unterstützung für CGI-Skripte ist erforderlich
-scripts_abandoned2=WARNUNG: Dieses Skript wird vom ursprünglichen Autor nicht mehr unterstützt.
-scripts_abandoned1=WARNUNG: Version $1 dieses Skripts wird vom ursprünglichen Autor nicht mehr unterstützt.
+scripts_abandoned2=Dieses Skript wird nicht mehr unterstützt und erhält keine Sicherheitsupdates.
+scripts_abandoned1=Version $1 dieses Skripts wird nicht mehr unterstützt und erhält keine Sicherheitsupdates.
 scripts_discontinued=Abgesetzt
 
 newnotify_title=E-Mail-Server-Besitzer

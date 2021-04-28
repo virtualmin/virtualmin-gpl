@@ -669,8 +669,8 @@ scripts_failedpackage=.. mislukt. Latere stappen in de installatie van dit scrip
 scripts_gotpackage=.. al geïnstalleerd
 scripts_packagecount=.. $1 nieuwe pakketten geïnstalleerd
 scripts_packageall=.. alle pakketten zijn al geïnstalleerd
-scripts_abandoned2=WAARSCHUWING: dit script wordt niet langer ondersteund door de oorspronkelijke auteur.
-scripts_abandoned1=WAARSCHUWING: Versie $1 van dit script wordt niet langer ondersteund door de oorspronkelijke auteur.
+scripts_abandoned2=Dit script wordt niet langer ondersteund en ontvangt geen beveiligingsupdates.
+scripts_abandoned1=Versie $1 van dit script wordt niet langer ondersteund en ontvangt geen beveiligingsupdates.
 scripts_discontinued=Stopgezet
 
 newnotify_users=Ook e-mailen in geselecteerde domeinen?

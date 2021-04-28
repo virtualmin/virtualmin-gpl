@@ -1845,6 +1845,8 @@ scripts_idbtbpref=avec préfixe de table
 scripts_deregistering=Désenregistrement de la version $1 $2 ..
 scripts_cats=Les catégories
 scripts_passmode4=Mot de passe initial pour le script
+scripts_abandoned2=Ce script n'est plus pris en charge et ne recevra pas de mises à jour de sécurité.
+scripts_abandoned1=La version $1 de ce script n'est plus prise en charge et ne recevra pas de mises à jour de sécurité.
 scripts_discontinued=Discontinué
 
 newnotify_title=Propriétaires du serveur de messagerie

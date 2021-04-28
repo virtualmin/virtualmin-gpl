@@ -2335,8 +2335,6 @@ scripts_failedpackage=.. échoué. Les étapes ultérieures de l'installation de
 scripts_gotpackage=.. déjà installé
 scripts_packagecount=.. installés $1 nouveaux paquets
 scripts_packageall=.. tous les paquets sont déjà installés
-scripts_abandoned2=AVERTISSEMENT: Ce script n'est pas plus pris en charge par son auteur original.
-scripts_abandoned1=AVERTISSEMENT: Version $1 de ce script n'est pas plus pris en charge par son auteur original.
 
 view_features=Fonctions activées
 

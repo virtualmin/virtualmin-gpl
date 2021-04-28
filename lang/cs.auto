@@ -3238,8 +3238,8 @@ scripts_failedpackage=.. selhalo. Pozdější kroky při instalaci tohoto skript
 scripts_gotpackage=.. už nainstalováno
 scripts_packagecount=.. nainstaloval $1 nové balíčky
 scripts_packageall=.. všechny balíčky jsou již nainstalovány
-scripts_abandoned2=UPOZORNĚNÍ: Tento skript již není podporován původním autorem.
-scripts_abandoned1=VAROVÁNÍ: Verze $1 tohoto skriptu již není podporována jeho původním autorem.
+scripts_abandoned2=Tento skript již není podporován a nebude dostávat aktualizace zabezpečení.
+scripts_abandoned1=Verze $1 tohoto skriptu již není podporována a nebude dostávat aktualizace zabezpečení.
 scripts_discontinued=Přerušeno
 
 newnotify_title=Majitelé e-mailových serverů

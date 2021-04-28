@@ -1040,8 +1040,8 @@ scripts_inocgi=Se necesita soporte de servidor web para scripts CGI
 scripts_inoapache=Solo se admite el servidor web Apache
 scripts_needpackages=Comprobando los paquetes requeridos de $1.
 scripts_failedpackage=.. ha fallado. Los pasos posteriores en la instalación de este script pueden fallar.
-scripts_abandoned2=ADVERTENCIA: Este script ya no es compatible con su autor original.
-scripts_abandoned1=ADVERTENCIA: La versión $1 de este script ya no es compatible con su autor original.
+scripts_abandoned2=Este script ya no es compatible y no recibirá actualizaciones de seguridad.
+scripts_abandoned1=La versión $1 de este script ya no es compatible y no recibirá actualizaciones de seguridad.
 scripts_discontinued=Interrumpido
 
 newnotify_admins=¿También enviar correos electrónicos a administradores adicionales en dominios seleccionados?

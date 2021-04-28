@@ -3454,6 +3454,8 @@ scripts_epackages=.. instalacja pakietu nie jest obsługiwana w tym systemie!
 scripts_installpackage=Instalowanie $1 ..
 scripts_failedpackage=.. nie powiodło się. Późniejsze kroki instalacji tego skryptu mogą się nie powieść.
 scripts_gotpackage=.. już zainstalowane
+scripts_abandoned2=Ten skrypt nie jest już obsługiwany i nie będzie otrzymywać aktualizacji zabezpieczeń.
+scripts_abandoned1=Wersja $1 tego skryptu nie jest już obsługiwana i nie będzie otrzymywać aktualizacji zabezpieczeń.
 scripts_discontinued=Przerwane
 
 newnotify_title=Właściciele serwerów e-mail

@@ -3905,8 +3905,8 @@ scripts_failedpackage=.. falhou. Etapas posteriores na instalação deste script
 scripts_gotpackage=.. já instalado
 scripts_packagecount=.. instalou $1 novos pacotes
 scripts_packageall=.. todos os pacotes já estão instalados
-scripts_abandoned2=AVISO: Este script não é mais suportado por seu autor original.
-scripts_abandoned1=AVISO: A versão $1 deste script não é mais suportada por seu autor original.
+scripts_abandoned2=Este script não é mais compatível e não receberá atualizações de segurança.
+scripts_abandoned1=A versão $1 deste script não é mais compatível e não receberá atualizações de segurança.
 scripts_discontinued=Interrompido
 
 newnotify_title=Proprietários do servidor de email

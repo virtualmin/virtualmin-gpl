@@ -4126,8 +4126,8 @@ scripts_failedpackage=..失敗しました。このスクリプトのインス�
 scripts_gotpackage=..すでにインストールされています
 scripts_packagecount=.. $1個の新しいパッケージをインストールしました
 scripts_packageall=..すべてのパッケージがすでにインストールされています
-scripts_abandoned2=警告：このスクリプトは、元の作成者によってサポートされていません。
-scripts_abandoned1=警告：このスクリプトのバージョン $1は、元の作成者によってサポートされていません。
+scripts_abandoned2=このスクリプトはサポートされなくなり、セキュリティ更新プログラムを受信しなくなります。
+scripts_abandoned1=このスクリプトのバージョン $1はサポートされなくなり、セキュリティ更新プログラムを受信しません。
 scripts_discontinued=製造中止
 
 newnotify_title=メールサーバーの所有者

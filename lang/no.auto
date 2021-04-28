@@ -437,6 +437,8 @@ scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
 scripts_passmode4=Opprinnelig passord for skript
+scripts_abandoned2=Dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
+scripts_abandoned1=Versjon $1 av dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
 scripts_discontinued=Utgått
 
 sysinfo_python=Python-versjon
