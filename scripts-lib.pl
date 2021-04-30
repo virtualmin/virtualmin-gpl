@@ -1830,7 +1830,9 @@ local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_sslport'} || $d->{'web_port'} || 80;
+my $usessl = &domain_has_ssl($d);
+my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'}  || 80;
+$ssl = $usessl;
 
 # Build headers
 local @headers;
