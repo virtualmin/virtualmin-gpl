@@ -70,7 +70,7 @@ local @rv;
 # Check for PHP 5.2+ or 5.3+, if needed
 my $wantver = &script_phpmyadmin_php_fullver($d, $ver, $sinfo);
 if ($wantver) {
-	local $phpv = &get_php_version($phpver || 5, $d);
+	local $phpv = &get_domain_php_version($d);
 	if (!$phpv) {
 		push(@rv, "Could not work out exact PHP version");
 		}
