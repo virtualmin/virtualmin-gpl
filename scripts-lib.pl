@@ -2776,7 +2776,7 @@ if (defined(&{$script->{'dbs_func'}})) {
 	}
 
 # Check for required commands
-push(@rv, map { &text('scripts_icommand', $_) }
+push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
       &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));
 
 # Check for webserver CGI or PHP support
