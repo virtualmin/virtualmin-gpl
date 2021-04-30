@@ -74,7 +74,7 @@ if ($wantver) {
 	if (!$phpv) {
 		push(@rv, "Could not work out exact PHP version");
 		}
-	elsif ($phpv < $wantver) {
+	elsif (&compare_versions($phpv, $wantver) == -1) {
 		push(@rv, "phpMyAdmin requires PHP version $wantver or later");
 		}
 	}
@@ -94,10 +94,7 @@ return @rv;
 sub script_phpmyadmin_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
-my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 :
-	      &compare_versions($ver, "4.5") > 0 ? 5.5 :
-	      &compare_versions($ver, "4.1.1") > 0 ? 5.3 :
-	      &compare_versions($ver, "3.1") > 0 ? 5.2 : undef;
+my $wantver = &compare_versions($ver, "5.0") > 0 ? 7.1 : 5.6;
 return $wantver;
 }
 
