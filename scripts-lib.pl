@@ -2298,6 +2298,32 @@ if ($callnow) {
 	}
 }
 
+# check_script_php_depends(&domain, &check)
+# Check if PHP version/mode needed for the script installer fits requirements
+sub check_script_php_depends
+{
+my ($d, $chk) = @_;
+my $mode = &get_domain_php_mode($d);
+my $phpv = &get_domain_php_version($d);
+if (defined($chk->{'forbidden_mode'}) && $mode eq $chk->{'forbidden_mode'}) {
+	return "$chk->{'name'} PHP scripts cannot be executed in <tt>$chk->{'forbidden_mode'}</tt> mode";
+	}
+elsif (!$phpv) {
+	return "Cannot work out virtual server exact PHP version";
+	}
+elsif (defined($chk->{'min'}) &&
+      &compare_versions($phpv, $chk->{'min'}) == -1) {
+	my ($ver) = $chk->{'min'} =~ /^(\d+.\d+|\d+)/;
+	return "$chk->{'name'} requires PHP version $ver or later";
+	}
+elsif (defined($chk->{'max'}) &&
+      &compare_versions($phpv, $chk->{'max'}) == 1) {
+	my ($ver) = $chk->{'max'} =~ /^(\d+.\d+|\d+)/;
+	return "$chk->{'name'} requires PHP version $ver or older";
+	}
+return undef;
+}
+
 # delete_script_php_cron(&domain, cmd)
 # Remove the cron job that runs some PHP command
 sub delete_script_php_cron
