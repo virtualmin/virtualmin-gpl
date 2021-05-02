@@ -124,6 +124,8 @@ foreach $script (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'install_versions'}};
 	next if (!@vers);	# No allowed versions!
+	$afunc = $script->{'abandoned_func'};
+	next if (defined(&$afunc) && &$afunc());	# No longer installable
 	if (@vers > 1) {
 		$vsel = &ui_select("ver_".$script->{'name'},
 		    undef,
