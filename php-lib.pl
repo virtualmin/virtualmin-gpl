@@ -40,6 +40,8 @@ if ($virt) {
 			}
 		}
 
+	# Look for an action, possibly in a directory, that runs the FCGI
+	# wrapper for PHP scripts
 	local @actions = &apache::find_directive("Action", $vconf);
 	local $pdir = &public_html_dir($d);
 	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
@@ -56,9 +58,22 @@ if ($virt) {
 				}
 			}
 		}
+
+	# Look for an action that runs PHP via the CGI wrapper
 	foreach my $a (@actions) {
 		if ($a =~ /^application\/x-httpd-php[0-9\.]+\s+\/cgi-bin\/php\S+\.cgi/) {
 			return 'cgi';
+			}
+		}
+
+	# Look for a mapping from PHP scripts to plain text for 'none' mode
+	if ($dir) {
+		local @types = &apache::find_directive(
+				"AddType", $dir->{'members'});
+		foreach my $t (@types) {
+			if ($t =~ /text\/plain\s+\.php/) {
+				return 'none';
+				}
 			}
 		}
 	}
@@ -93,7 +108,7 @@ if ($mode eq "fpm") {
 		}
 	}
 
-if ($mode eq "mod_php" && $oldmode ne "mod_php") {
+if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	# Save the PHP version for later recovery
 	local $oldver = &get_domain_php_version($d, $oldmode);
 	$d->{'last_php_version'} = $oldver;
@@ -223,7 +238,7 @@ if ($p ne 'web') {
 &require_apache();
 
 # Create wrapper scripts
-if ($mode ne "mod_php" && $mode ne "fpm") {
+if ($mode ne "mod_php" && $mode ne "fpm" && $mode ne "none") {
 	&create_php_wrappers($d, $mode);
 	}
 
@@ -304,11 +319,11 @@ foreach my $p (@ports) {
 		# Remove all Action and AddType directives for suexec PHP
 		local $phpconf = $phpstr->{'members'};
 		local @actions = &apache::find_directive("Action", $phpconf);
-		@actions = grep { $_ !~ /^application\/x-httpd-php\d+/ }
+		@actions = grep { !/^application\/x-httpd-php\d+/ }
 				@actions;
 		local @types = &apache::find_directive("AddType", $phpconf);
-		@types = grep { $_ !~ /^application\/x-httpd-php\d+/ }
-			      @types;
+		@types = grep { !/^application\/x-httpd-php\d+/ &&
+				!/\.php[0-9\.]*$/ } @types;
 
 		# Remove all AddHandler and FCGIWrapper directives for fcgid
 		local @handlers = &apache::find_directive("AddHandler",
@@ -342,6 +357,12 @@ foreach my $p (@ports) {
 			foreach my $v (@avail) {
 				push(@wrappers, "$fdest/php$v.fcgi .php$v");
 				}
+			}
+		elsif ($mode eq "none") {
+			foreach my $v (@avail) {
+				push(@types, "text/plain .php$v");
+				}
+			push(@types, "text/plain .php");
 			}
 		if ($mode eq "cgi" || $mode eq "mod_php") {
 			foreach my $v (@avail) {
@@ -530,9 +551,10 @@ foreach my $p (@ports) {
 	}
 
 local @vlist = map { $_->[0] } &list_available_php_versions($d);
-if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
+if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
+    $d->{'last_php_version'} &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
-	# Restore PHP version from before mod_php
+	# Restore PHP version from before mod_php or none modes
 	my $err = &save_domain_php_directory($d, &public_html_dir($d),
 				   $d->{'last_php_version'}, 1);
 	return $err if ($err);
@@ -832,6 +854,7 @@ if ($p ne 'web') {
 	}
 &require_apache();
 local @rv;
+push(@rv, "none");	# Turn off PHP entirely
 if (&get_apache_mod_php_version()) {
 	# Check for Apache PHP module
 	push(@rv, "mod_php");

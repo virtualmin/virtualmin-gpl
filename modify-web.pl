@@ -9,7 +9,7 @@ virtual servers. Like other scripts, the servers to change are selecting
 using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
-parameter followed by one of C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
+parameter followed by one of C<none>, C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
 
 When using FPM mode, you can configure Apache to use a socket file
 for communication with the FPM server with the C<--php-fpm-socket> flag.
