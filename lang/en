@@ -4118,6 +4118,7 @@ scripts_gemlink=Linking Gem command $1 to new version $2 ..
 scripts_deleted=Manually deleted
 scripts_inophp=Webserver support for PHP is needed
 scripts_inocgi=Webserver support for CGI scripts is needed
+scripts_iphpneed=PHP is disabled for this virtual server
 scripts_inoapache=Only the Apache webserver is supported
 scripts_needpackages=Checking for $1 required packages ..
 scripts_epackages=.. package installation is not supported on this system!

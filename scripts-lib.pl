@@ -2757,6 +2757,14 @@ sub check_script_depends
 local ($script, $d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
+# If the script uses PHP, make sure it's enabled for the domain
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	local $mode = &get_domain_php_mode($d);
+	if ($mode eq "none") {
+		push(@rv, $text{'scripts_iphpneed'});
+		}
+	}
+
 # Call script's depends function
 if (defined(&{$script->{'depends_func'}})) {
 	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo, $phpver));
