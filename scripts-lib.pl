@@ -3029,10 +3029,7 @@ sub disable_script_php_timeout
 {
 local ($d) = @_;
 local $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php") {
-	return undef;
-	}
-elsif ($mode eq "fcgid") {
+if ($mode eq "fcgid") {
 	local $max = &get_fcgid_max_execution_time($d);
 	return undef if (!$max);
 	&set_fcgid_max_execution_time($d, 9999);
