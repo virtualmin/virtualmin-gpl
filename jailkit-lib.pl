@@ -89,8 +89,9 @@ $uinfo->{'home'} = $dir."/.".$d->{'home'};
 # Set chroot for all domains' PHP-FPM configs
 foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 	my $mode = &get_domain_php_mode($pd);
-	next if ($mode ne "fpm");
-	&save_php_fpm_config_value($pd, "chroot", $dir);
+	if ($mode eq "fpm") {
+		&save_php_fpm_config_value($pd, "chroot", $dir);
+		}
 	}
 
 return undef;
@@ -107,8 +108,9 @@ my $dir = &domain_jailkit_dir($d);
 # Turn off chroot for all domains' PHP-FPM configs
 foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 	my $mode = &get_domain_php_mode($pd);
-	next if ($mode ne "fpm");
-	&save_php_fpm_config_value($pd, "chroot", undef);
+	if ($mode eq "fpm") {
+		&save_php_fpm_config_value($pd, "chroot", undef);
+		}
 	}
 
 # Switch back the user's shell and home dir

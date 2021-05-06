@@ -911,6 +911,7 @@ local ($d, $mode) = @_;
 if ($d) {
 	$mode ||= &get_domain_php_mode($d);
 	}
+return () if ($mode eq "none");
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
@@ -1114,11 +1115,15 @@ if ($mode eq "mod_php") {
 		}
 	}
 elsif ($mode eq "fpm") {
-	# Version is store in the domain's config
+	# Version is stored in the domain's config
 	# XXX get from the actual port
 	return ( { 'dir' => &public_html_dir($d),
 		   'version' => $d->{'php_fpm_version'},
 		   'mode' => $mode } );
+	}
+elsif ($mode eq "none") {
+	# No PHP, so no directories
+	return ( );
 	}
 
 # Find directories with either FCGIWrapper or AddType directives, and check

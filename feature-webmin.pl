@@ -843,7 +843,7 @@ if ($extramods{'phpini'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (grep { $_->{'web'} } @doms) {
 		my $mode = &get_domain_php_mode($sd);
-		if ($mode ne "mod_php" && $mode ne "fpm") {
+		if ($mode ne "mod_php" && $mode ne "fpm" && $mode ne "none") {
 			# Allow access to .ini files
 			foreach my $ini (&list_domain_php_inis($sd)) {
 				local @st = stat($ini->[1]);
