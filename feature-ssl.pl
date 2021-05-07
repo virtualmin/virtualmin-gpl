@@ -2590,10 +2590,11 @@ foreach my $d (&list_domains()) {
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 21 days of expiry
+	my $before = $config{'renew_letsencrypt'} || 21;
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
-	my $renew = $expiry && $expiry - time() < 21 * $day + $rf;
+	my $renew = $expiry && $expiry - time() < $before * $day + $rf;
 	next if (!$renew);
 
 	# Don't even attempt now if the lock is being held
