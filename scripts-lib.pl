@@ -3169,5 +3169,46 @@ $cmd =~ s/-cgi//;
 return $cmd;
 }
 
+# build_pro_scripts_list()
+# Builds a list of Virtualmin Pro scripts for inclusion to GPL package
+sub build_pro_scripts_list
+{
+my @scripts_pro_list;
+my @scripts = map { &get_script($_) } &list_scripts();
+@scripts = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
+foreach my $script (@scripts) {
+	my @vers = grep { &can_script_version($script, $_) }
+		     @{$script->{'install_versions'}};
+	next if (!@vers);
+
+	# Do not add GPL scripts
+	next if ($script->{'dir'} !~ /$scripts_directories[3]/);
+
+	push(@scripts_pro_list, 
+	    { 'version' => $vers[0],
+	      'desc' => $script->{'desc'},
+	      'longdesc' => $script->{'longdesc'},
+	      'categories' => $script->{'categories'},
+	      'pro' => 1
+	      },
+	    );
+	}
+my $scripts_pro_file = "$scripts_directories[2]/scripts-pro.info";
+my $fh = "SCRIPTS";
+&open_tempfile($fh, ">$scripts_pro_file");
+&print_tempfile($fh, &serialise_variable(\@scripts_pro_list));
+&close_tempfile($fh);
+}
+
+# load_pro_scripts_list() 
+# Returns a pre-built list of install scripts which are only available in Virtualmin Pro
+sub load_pro_scripts_list
+{
+my $scripts_pro_file = "$scripts_directories[2]/scripts-pro.info";
+my $scripts = &unserialise_variable(&read_file_contents($scripts_pro_file));
+return $scripts if ($scripts && scalar(@{$scripts}) > 0);
+return undef;
+}
+
 1;
 

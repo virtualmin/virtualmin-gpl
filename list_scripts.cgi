@@ -117,42 +117,72 @@ if ($in{'search'}) {
 			  join(" ", @{$_->{'categories'}}) =~ /\Q$search\E/i } @scripts;
 	}
 
+my $pro_scripts_list_ads =
+	(!$virtualmin_pro && !$in{'search'} && !$config{'scripts_ads'});
+
+# Advertise Pro scripts only to GPL users
+if ($pro_scripts_list_ads) {
+	my $scripts_pro = &load_pro_scripts_list();
+	@scripts = (@scripts, @{$scripts_pro})
+		if ($scripts_pro);
+	$pro_scripts_list_ads = 0
+		if (!$scripts_pro);
+	}
+
 # Build table of available scripts
 @table = ( );
-foreach $script (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) }
-		      @scripts) {
+my @scripts_sorted =
+	sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
+if ($pro_scripts_list_ads) {
+	@scripts_sorted =
+		sort { lc($a->{'pro'}) cmp lc($b->{'pro'}) } @scripts;
+	}
+
+foreach $script (@scripts_sorted) {
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'install_versions'}};
-	next if (!@vers);	# No allowed versions!
-	if (@vers > 1) {
-		$vsel = &ui_select("ver_".$script->{'name'},
-		    undef,
-		    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
-			  @vers ]);
+	next if (!@vers && !$script->{'pro'});	# No allowed versions!
+	if (!$script->{'pro'}) {
+		if (@vers > 1) {
+			$vsel = &ui_select("ver_".$script->{'name'},
+			    undef,
+			    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
+				  @vers ]);
+			}
+		else {
+			$vsel = ($script->{'vdesc'}->{$vers[0]} ||
+				 $vers[0]).
+				&ui_hidden("ver_".$script->{'name'},
+					   $vers[0]);
+			}
 		}
-	else {
-		$vsel = ($script->{'vdesc'}->{$vers[0]} ||
-			 $vers[0]).
-			&ui_hidden("ver_".$script->{'name'},
-				   $vers[0]);
-		}
-	push(@table, [
+	my @script_data = (
+	    $script->{'pro'} ? undef :
 	    { 'type' => 'radio', 'name' => 'script',
 	      'value' => $script->{'name'},
 	      'checked' => $in{'search'} && @scripts == 1 },
 	    $script->{'site'} ? "<a href='$script->{'site'}' target=_blank>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
+	    $script->{'pro'} ? $script->{'version'} : 
 	    $vsel." ".
 	    "<input type=image name=fast ".
 	      "value=\"".&quote_escape($script->{'name'})."\" ".
 	      "src=images/ok.gif ".
 	      "onClick='form.fhidden.value=\"$script->{'name'}\"'>",
 	    $script->{'longdesc'},
-	    join(", ", @{$script->{'categories'}}),
-	    ]);
+	    join(", ", @{$script->{'categories'}})
+	    );
+	push(@script_data, ($script->{'pro'} ? 'Pro' : 'GPL'))
+		if ($pro_scripts_list_ads);
+	push(@table, \@script_data);
 	}
 
 # Show table of available scripts
+my @cols = ( "", $text{'scripts_name'}, $text{'scripts_ver'},
+	      $text{'scripts_longdesc'}, $text{'scripts_cats'});
+push(@cols, $text{'scripts_can'})
+	if ($pro_scripts_list_ads);
+
 print &ui_form_columns_table(
 	"script_form.cgi",
 	[ [ undef, $text{'scripts_ok'} ] ],
@@ -160,8 +190,7 @@ print &ui_form_columns_table(
 	undef,
 	[ [ "dom", $in{'dom'} ],
 	  [ "fhidden", "" ] ],
-	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
-	      $text{'scripts_longdesc'}, $text{'scripts_cats'}, ],
+	\@cols,
 	100,
 	\@table,
 	undef,

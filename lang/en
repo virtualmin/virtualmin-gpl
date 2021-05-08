@@ -4130,6 +4130,7 @@ scripts_packageall=.. all packages are already installed
 scripts_abandoned2=This script is no longer supported and will not receive security updates.
 scripts_abandoned1=Version $1 of this script is no longer supported and will not receive security updates.
 scripts_discontinued=Discontinued
+scripts_can=Available in
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:
