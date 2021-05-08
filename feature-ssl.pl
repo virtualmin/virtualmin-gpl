@@ -1257,6 +1257,7 @@ local %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
 		   'newkey' => '(RSA |EC )?PRIVATE KEY' );
 local $h = $headers{$type};
 $h || return "Unknown SSL file type $type";
+($data) = &extract_cert_parameters($data);
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
 local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
 local $end = quotemeta("-----END ").$h.quotemeta("-----");
@@ -1272,6 +1273,26 @@ for(my $i=1; $i<$#lines; $i++) {
 	}
 @lines > 4 || return "Data only has ".scalar(@lines)." lines";
 return undef;
+}
+
+# extract_cert_parameters(cert-text)
+# Given a cert text that might contain a -----BEGIN EC PARAMETERS----- block,
+# return the rest of the file and that block if it exists
+sub extract_cert_parameters
+{
+my ($data) = @_;
+local @lines = grep { /\S/ } split(/\r?\n/, $data);
+my $l = 0;
+my $p = "";
+if ($lines[0] =~ /-----BEGIN\s+(\S+)\s+PARAMETERS-----/) {
+	$p .= $lines[0]."\n";
+	while($lines[++$l] !~ /--END\s+(\S+)\s+PARAMETERS-----/) {
+		$p .= $lines[$l]."\n";
+		}
+	$p .= $lines[$l]."\n";
+	$l++;
+	}
+return (join("\n", @lines[$l..$#lines])."\n", $p);
 }
 
 # cert_pem_data(&domain)
