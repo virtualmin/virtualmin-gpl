@@ -662,6 +662,7 @@ scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
 scripts_cats=Categorieën
 scripts_passmode4=Eerste wachtwoord voor script
+scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server
 scripts_needpackages=Controleren op $1 vereiste pakketten.
 scripts_epackages=.. pakketinstallatie wordt niet ondersteund op dit systeem!
 scripts_installpackage=$1 installeren. ..
@@ -738,6 +739,7 @@ move_target2=Nieuw aliasdoel
 
 newvalidate_subservers=Ook subservers repareren?
 
+validate_esslfile=SSL $1 -bestand is niet geldig : $2 
 validate_euserhome=Beheerder $1 heeft de thuismap $3, maar deze moet $2 zijn
 validate_eport=Poort $1 wordt gebruikt door $2 om onverwachte server '$3' uit te voeren
 validate_ednsa6=DNS-zone heeft geen AAAA-records
@@ -779,7 +781,9 @@ newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of verei
 phpmode_title2=PHP-opties
 phpmode_header=PHP-opties voor dit domein
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)
+phpmode_none=Gehandicapt
 phpmode_short_fpm=FPM
+phpmode_short_none=Gehandicapt
 phpmode_dirswarn=Waarschuwing - Als u overschakelt van de CGI- of FCGId-modi, worden alle PHP-versieselecties per map verwijderd.
 phpmode_err2=Het opslaan van PHP-opties is mislukt
 phpmode_emoding=.. wijziging mislukt : $1 
