@@ -115,6 +115,7 @@ local $disfunc = "script_${name}_disabled";
 local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
 local $overlapfunc = "script_${name}_overlap";
+local $migratedfunc = "script_${name}_migrated";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -190,6 +191,7 @@ local $rv = { 'name' => $name,
 	      'nocheck' => $disabled == 2,
 	      'minversion' => $unavail{$name."_minversion"},
 	      'abandoned_func' => "script_${name}_abandoned",
+	      'migrated_func' => "script_${name}_migrated",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
@@ -201,6 +203,9 @@ if (defined(&$vdfunc)) {
 			 @{$rv->{'install_versions'}}) {
 		$rv->{'vdesc'}->{$ver} = &$vdfunc($ver);
 		}
+	}
+if (defined(&$migratedfunc)) {
+	$rv->{'migrated'} = 1;
 	}
 return $rv;
 }
@@ -3181,12 +3186,11 @@ foreach my $script (@scripts) {
 	my @vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'install_versions'}};
 	next if (!@vers);
-
-	# Do not add GPL scripts
-	next if ($script->{'dir'} !~ /$scripts_directories[3]/);
-
+	next if ($script->{'dir'} !~ /$scripts_directories[3]/ &&
+	        !$script->{'migrated'});
 	push(@scripts_pro_list, 
 	    { 'version' => $vers[0],
+	      'name' => $script->{'name'},
 	      'desc' => $script->{'desc'},
 	      'longdesc' => $script->{'longdesc'},
 	      'categories' => $script->{'categories'},

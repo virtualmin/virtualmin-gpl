@@ -99,28 +99,33 @@ print &ui_table_end();
 
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
-@vers = sort { $a <=> $b }
-	     grep { &compare_versions($_, $sinfo->{'version'}, $script) > 0 &&
-		    &can_script_version($script, $_) }
-		  @{$script->{'versions'}};
-$canupfunc = $script->{'can_upgrade_func'};
+
+if (!$script->{'migrated'} || $virtualmin_pro) {
+	@vers = sort { $a <=> $b }
+		     grep { &compare_versions($_, $sinfo->{'version'}, $script) > 0 &&
+			    &can_script_version($script, $_) }
+			  @{$script->{'versions'}};
+	$canupfunc = $script->{'can_upgrade_func'};
+	if (!$sinfo->{'deleted'}) {
+		if (defined(&$canupfunc)) {
+			@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+			}
+		if (@vers) {
+			# Upgrade button
+			print "&nbsp;&nbsp;\n";
+			print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
+			print &ui_select("version", $vers[$#vers],
+					 [ map { [ $_ ] } @vers ]),"\n";
+			}
+		elsif (&can_unsupported_scripts()) {
+			# Upgrade to un-supported version
+			print "&nbsp;&nbsp;\n";
+			print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
+			print &ui_textbox("version", undef, 15),"\n";
+			}
+		}
+	}
 if (!$sinfo->{'deleted'}) {
-	if (defined(&$canupfunc)) {
-		@vers = grep { &$canupfunc($sinfo, $_) } @vers;
-		}
-	if (@vers) {
-		# Upgrade button
-		print "&nbsp;&nbsp;\n";
-		print &ui_submit($text{'scripts_upok'}, "upgrade"),"\n";
-		print &ui_select("version", $vers[$#vers],
-				 [ map { [ $_ ] } @vers ]),"\n";
-		}
-	elsif (&can_unsupported_scripts()) {
-		# Upgrade to un-supported version
-		print "&nbsp;&nbsp;\n";
-		print &ui_submit($text{'scripts_upok2'}, "upgrade"),"\n";
-		print &ui_textbox("version", undef, 15),"\n";
-		}
 	if ($gotstatus) {
 		print "&nbsp;&nbsp;\n";
 		if (@pids) {

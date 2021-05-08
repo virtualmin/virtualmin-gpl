@@ -395,4 +395,9 @@ return $wp if (!$cli);
 return $cli." ".$wp;
 }
 
+sub script_wordpress_migrated
+{
+return 1;
+}
+
 1;

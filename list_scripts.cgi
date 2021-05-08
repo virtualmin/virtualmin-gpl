@@ -35,7 +35,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	# Check if a newer version exists
 	$script = $smap{$sinfo->{'name'}};
 	($status, $canup) = &describe_script_status($sinfo, $script);
-	$upcount += $canup;
+	$upcount += $canup if (!$script->{'migrated'} || $virtualmin_pro);
 	$path = $sinfo->{'opts'}->{'path_real'} || $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
 	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
@@ -68,7 +68,11 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
 		$dbdesc,
-		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') : $status,
+		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
+		                     ($script->{'migrated'} && !$virtualmin_pro) ?
+		                     	&ui_link("http://www.virtualmin.com/shop",
+		                     		$text{'scripts_gpl_to_pro'}, undef, " target=_blank") :
+		                     $status,
 		]);
 	}
 
@@ -123,14 +127,20 @@ my $pro_scripts_list_ads =
 # Advertise Pro scripts only to GPL users
 if ($pro_scripts_list_ads) {
 	my $scripts_pro = &load_pro_scripts_list();
-	@scripts = (@scripts, @{$scripts_pro})
+	push(@scripts, @{$scripts_pro})
 		if ($scripts_pro);
 	$pro_scripts_list_ads = 0
 		if (!$scripts_pro);
 	}
 
+# Check out migrate scripts for GPL users
+if (!$virtualmin_pro) {
+	@scripts = grep { !$_->{'migrated'} } @scripts;
+	}
+
 # Build table of available scripts
 @table = ( );
+my @scripts_added;
 my @scripts_sorted =
 	sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
 if ($pro_scripts_list_ads) {
@@ -142,6 +152,7 @@ foreach $script (@scripts_sorted) {
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'install_versions'}};
 	next if (!@vers && !$script->{'pro'});	# No allowed versions!
+	next if (grep (/^$script->{'name'}$/, @scripts_added));
 	if (!$script->{'pro'}) {
 		if (@vers > 1) {
 			$vsel = &ui_select("ver_".$script->{'name'},
@@ -175,6 +186,7 @@ foreach $script (@scripts_sorted) {
 	push(@script_data, ($script->{'pro'} ? 'Pro' : 'GPL'))
 		if ($pro_scripts_list_ads);
 	push(@table, \@script_data);
+	push(@scripts_added, $script->{'name'});
 	}
 
 # Show table of available scripts

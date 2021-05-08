@@ -30,6 +30,11 @@ else {
 	&ui_print_header(&domain_in($d), $text{'scripts_intitle'}, "");
 	}
 
+# Check if the script can be installed
+if ($script->{'migrated'} && !$virtualmin_pro) {
+	&error($text{'scripts_eavail'});
+	}
+
 # Validate version number
 $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 &indexof($ver, @{$script->{'versions'}}) >= 0 ||

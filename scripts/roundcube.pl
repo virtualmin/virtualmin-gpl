@@ -385,10 +385,15 @@ return ( "http://roundcube.net/download/",
 
 sub script_roundcube_site
 {
-return 'http://www.roundcube.net/';
+return 'https://www.roundcube.net/';
 }
 
 sub script_roundcube_gpl
+{
+return 1;
+}
+
+sub script_roundcube_migrated
 {
 return 1;
 }
