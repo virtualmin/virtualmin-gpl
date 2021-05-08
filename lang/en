@@ -4709,6 +4709,7 @@ validate_edirgroup=Home directory $1 is owned by group $2 instead of $3
 validate_esubdir=Sub-directory $1 under home directory does not exist
 validate_esubdiruser=Sub-directory $1 under home directory is owned by $2 instead of $3
 validate_esubdirgroup=Sub-directory $1 under home directory is owned by group $2 instead of $3
+validate_esslfile=SSL $1 file is not valid : $2
 validate_euser=Administration user $1 does not exist
 validate_euserhome=Administration user $1 has home directory $3, but it should be $2
 validate_euid=Administration user $1 has UID $3, but the domain's UID is $2
