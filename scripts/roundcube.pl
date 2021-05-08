@@ -11,7 +11,7 @@ return ( "php" );
 
 sub script_roundcube_longdesc
 {
-return "RoundCube Webmail is a browser-based multilingual IMAP client with an application-like user interface.";
+return "RoundCube Webmail is a browser-based multilingual IMAP client with an application-like user interface";
 }
 
 # script_roundcube_versions()

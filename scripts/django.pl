@@ -12,7 +12,7 @@ return ( "python", "apache", "proxy" );
 
 sub script_django_longdesc
 {
-return "Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design.";
+return "Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design";
 }
 
 # script_django_versions()

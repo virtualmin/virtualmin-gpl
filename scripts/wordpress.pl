@@ -14,7 +14,7 @@ return ( "php" );
 
 sub script_wordpress_longdesc
 {
-return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability.";
+return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability";
 }
 
 # script_wordpress_versions()
