@@ -3175,6 +3175,7 @@ sub build_pro_scripts_list
 {
 my @scripts_pro_list;
 my @scripts = map { &get_script($_) } &list_scripts();
+@scripts = grep { $_->{'avail'} } @scripts;
 @scripts = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
 foreach my $script (@scripts) {
 	my @vers = grep { &can_script_version($script, $_) }
