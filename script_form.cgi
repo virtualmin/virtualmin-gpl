@@ -31,7 +31,7 @@ else {
 	}
 
 # Check if the script can be installed
-if ($script->{'migrated'} && !$virtualmin_pro) {
+if (script_migrated_disallowed($script->{'migrated'})) {
 	&error($text{'scripts_eavail'});
 	}
 

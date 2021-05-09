@@ -100,7 +100,7 @@ print &ui_table_end();
 # Show un-install and upgrade buttons
 print &ui_submit($text{'scripts_uok'}, "uninstall"),"\n";
 
-if (!$script->{'migrated'} || $virtualmin_pro) {
+if (!script_migrated_disallowed($script->{'migrated'})) {
 	@vers = sort { $a <=> $b }
 		     grep { &compare_versions($_, $sinfo->{'version'}, $script) > 0 &&
 			    &can_script_version($script, $_) }
