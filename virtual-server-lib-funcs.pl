@@ -14528,7 +14528,7 @@ if (&domain_has_website()) {
 				local $main::error_must_die = 1;
 				local $mode = &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
-				    $mode ne "fpm") {
+				    $mode ne "fpm" && $mode ne "none") {
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
 					}
