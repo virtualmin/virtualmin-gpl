@@ -71,6 +71,7 @@ if ($availonly) {
 if ($multi) {
 	# Show each script on a separate line
 	foreach $script (@scripts) {
+		next if (&script_migrated_disallowed($script->{'migrated'}));
 		print "$script->{'name'}\n";
 		print "    Name: $script->{'desc'}\n";
 		$cats = $script->{'categories'};
@@ -104,6 +105,7 @@ else {
 	printf $fmt, "Name", "Versions", "Available?";
 	printf $fmt, ("-" x 30), ("-" x 30), ("-" x 10);
 	foreach $script (@scripts) {
+		next if (&script_migrated_disallowed($script->{'migrated'}));
 		printf $fmt, $script->{'desc'},
 			     join(" ", @{$script->{'versions'}}),
 			     $script->{'avail'} ? "Yes" : "No";
