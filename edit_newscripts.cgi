@@ -53,6 +53,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 			lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 		      @scripts) {
 	next if (script_migrated_disallowed($script->{'migrated'}));
+	next if (!$script->{'enabled'});
 	$cat = $script->{'category'} || $text{'scripts_nocat'};
 	if ($cat ne $lastcat) {
 		push(@table, [ { 'type' => 'group',
