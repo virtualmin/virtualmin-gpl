@@ -52,6 +52,7 @@ foreach $s (&list_scripts()) {
 foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 			lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 		      @scripts) {
+	next if (script_migrated_disallowed($script->{'migrated'}));
 	$cat = $script->{'category'} || $text{'scripts_nocat'};
 	if ($cat ne $lastcat) {
 		push(@table, [ { 'type' => 'group',
@@ -60,12 +61,10 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		}
 	@v = sort { &compare_versions($b, $a, $script) } @{$script->{'versions'}};
 	@v = map { [ $_, $script->{'vdesc'}->{$_} || $_ ] } @v;
-	my $migrated = script_migrated_disallowed($script->{'migrated'});
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
-		  'disabled' => $migrated ? 1 : 0,
-		  'checked' => $migrated ? 0 : $script->{'avail_only'} },
+		  'checked' => $script->{'avail_only'} },
 		$script->{'site'} ? 
 			"<a href='$script->{'site'}' target=_blank>".
 			"$script->{'desc'}</a>" : $script->{'desc'},
