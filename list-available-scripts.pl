@@ -67,6 +67,7 @@ if ($availonly) {
 	}
 
 @scripts = grep { $_->{'enabled'} } @scripts;
+@scripts = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
 
 if ($multi) {
 	# Show each script on a separate line
