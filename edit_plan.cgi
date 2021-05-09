@@ -150,6 +150,7 @@ if (defined(&list_scripts)) {
 	foreach $s (@scripts) {
 		$script = &get_script($s);
 		next if (!$script->{'enabled'});
+		next if (&script_migrated_disallowed($script->{'migrated'}));
 		$scriptname{$s} = $script->{'desc'} if ($script);
 		}
 	@scripts = grep { $scriptname{$_} } @scripts;
