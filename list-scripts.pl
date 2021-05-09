@@ -91,12 +91,14 @@ foreach my $d (@doms) {
 			print "$sinfo->{'id'}\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Type: ".($script->{'name'} || $sinfo->{'name'})."\n";
-			print "    Manually deleted: ",
-			      ($script->{'deleted'} ? "Yes" : "No"),"\n";
 			print "    Description: ".($script->{'desc'} ||
 			                          "$sinfo->{'name'} ($text{'scripts_discontinued'})")."\n";
 			print "    Version: $sinfo->{'version'}\n";
 			print "    Installed: ",&make_date($sinfo->{'time'}),"\n";
+			print "    Manually deleted: ",
+			      ($script->{'deleted'} ? "Yes" : "No"),"\n";
+			print "    Available: No, this script is now only available in Virtualmin Pro","\n"
+			              if (&script_migrated_disallowed($script->{'migrated'}));
 			if ($sinfo->{'desc'}) {
 				print "    Details: $sinfo->{'desc'}\n";
 				}

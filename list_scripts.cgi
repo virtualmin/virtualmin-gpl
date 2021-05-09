@@ -35,7 +35,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	# Check if a newer version exists
 	$script = $smap{$sinfo->{'name'}};
 	($status, $canup) = &describe_script_status($sinfo, $script);
-	$upcount += $canup if (!$script->{'migrated'} || $virtualmin_pro);
+	$upcount += $canup if (!script_migrated_disallowed($script->{'migrated'}));
 	$path = $sinfo->{'opts'}->{'path_real'} || $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
 	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
@@ -69,10 +69,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		  $path,
 		$dbdesc,
 		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
-		                     ($script->{'migrated'} && !$virtualmin_pro) ?
-		                     	&ui_link("http://www.virtualmin.com/shop",
-		                     		$text{'scripts_gpl_to_pro'}, undef, " target=_blank") :
-		                     $status,
+		                     script_migrated_status($status, $script->{'migrated'}, $canup),
 		]);
 	}
 

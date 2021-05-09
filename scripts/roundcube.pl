@@ -393,10 +393,5 @@ sub script_roundcube_gpl
 return 1;
 }
 
-sub script_roundcube_migrated
-{
-return 1;
-}
-
 1;
 

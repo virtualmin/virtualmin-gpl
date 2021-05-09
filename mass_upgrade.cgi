@@ -39,7 +39,7 @@ if ($in{'confirm'}) {
 		$opts = $sinfo->{'opts'};
 
 		# Check if script migrated to Pro and cannot be upgraded anymore
-		if ($script->{'migrated'} && !$virtualmin_pro) {
+		if (script_migrated_disallowed($script->{'migrated'})) {
 			$ver = $sinfo->{'version'};
 			}
 
@@ -119,7 +119,7 @@ else {
 	foreach $sinfo (@sinfos) {
 		$script = $scriptmap{$sinfo->{'id'}};
 		$ver = $vermap{$sinfo->{'id'}};
-		$ver = 0 if ($script->{'migrated'} && !$virtualmin_pro);
+		$ver = 0 if (script_migrated_disallowed($script->{'migrated'}));
 		print "<tr>\n";
 		print "<td>$script->{'desc'}</td>\n";
 		print "<td>&nbsp;-&nbsp;</td>\n";

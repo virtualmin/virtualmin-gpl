@@ -52,6 +52,8 @@ foreach $s (&list_scripts()) {
 foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 			lc($a->{'desc'}) cmp lc($b->{'desc'}) }
 		      @scripts) {
+	next if (script_migrated_disallowed($script->{'migrated'}));
+	next if (!$script->{'enabled'});
 	$cat = $script->{'category'} || $text{'scripts_nocat'};
 	if ($cat ne $lastcat) {
 		push(@table, [ { 'type' => 'group',
@@ -60,12 +62,10 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		}
 	@v = sort { &compare_versions($b, $a, $script) } @{$script->{'versions'}};
 	@v = map { [ $_, $script->{'vdesc'}->{$_} || $_ ] } @v;
-	my $migrated = ($script->{'migrated'} && !$virtualmin_pro);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
-		  'disabled' => $migrated ? 1 : 0,
-		  'checked' => $migrated ? 0 : $script->{'avail_only'} },
+		  'checked' => $script->{'avail_only'} },
 		$script->{'site'} ? 
 			"<a href='$script->{'site'}' target=_blank>".
 			"$script->{'desc'}</a>" : $script->{'desc'},
@@ -144,7 +144,7 @@ foreach $d (&list_domains()) {
 foreach $sname (grep { $used{$_} } @scriptnames) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
-		if ($script->{'migrated'} && !$virtualmin_pro) {
+		if (script_migrated_disallowed($script->{'migrated'})) {
 			next;
 			}
 		if (&compare_versions($v, $minversion{$sname}, $script) > 0) {
@@ -290,7 +290,7 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 	my $desc_full = $script->{'desc'} ? "<a href='edit_script.cgi?dom=$d->{'id'}&".
             "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
 	$path = $sinfo->{'opts'}->{'path'};
-	$status = &describe_script_status($sinfo, $script);
+	($status, $canup) = &describe_script_status($sinfo, $script);
 	push(@all_table,
 	     [ &show_domain_name($d),
 	       $desc_full,
@@ -300,10 +300,7 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
 	       !$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
-	                            ($script->{'migrated'} && !$virtualmin_pro) ?
-		                     	&ui_link("http://www.virtualmin.com/shop",
-		                     		$text{'scripts_gpl_to_pro'}, undef, " target=_blank") :
-		                     	$status,
+	                            script_migrated_status($status, $script->{'migrated'}, $canup),
 	     ]);
 	}
 print &ui_columns_table(

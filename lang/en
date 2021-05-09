@@ -4132,6 +4132,7 @@ scripts_abandoned1=Version $1 of this script is no longer supported and will not
 scripts_discontinued=Discontinued
 scripts_can=Available in
 scripts_gpl_to_pro=Now only available in Pro
+scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

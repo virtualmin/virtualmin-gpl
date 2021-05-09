@@ -3174,6 +3174,27 @@ $cmd =~ s/-cgi//;
 return $cmd;
 }
 
+# script_migrated_disallowed()
+# Check if given script migrated from GPL
+sub script_migrated_disallowed
+{
+my ($migrated) = @_;
+return $migrated && !$virtualmin_pro
+}
+
+# script_migrated_status()
+# If script cannot be installed or upgraded anymore
+# because of migration display appropriate message
+sub script_migrated_status
+{
+my ($status, $migrated, $can_upgrade) = @_;
+return script_migrated_disallowed($script->{'migrated'}) ?
+         &ui_link("http://www.virtualmin.com/shop",
+           $text{'scripts_gpl_to_pro'.($can_upgrade ? "_upgrade" : "").''}, 
+             ($can_upgrade ? " text-warning" : ""), " target=_blank") :
+           $status;
+}
+
 # build_pro_scripts_list()
 # Builds a list of Virtualmin Pro scripts for inclusion to GPL package
 sub build_pro_scripts_list
@@ -3188,7 +3209,7 @@ foreach my $script (@scripts) {
 	next if (!@vers);
 	next if ($script->{'dir'} !~ /$scripts_directories[3]/ &&
 	        !$script->{'migrated'});
-	push(@scripts_pro_list, 
+	push(@scripts_pro_list,
 	    { 'version' => $vers[0],
 	      'name' => $script->{'name'},
 	      'desc' => $script->{'desc'},
