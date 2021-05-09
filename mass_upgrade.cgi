@@ -38,6 +38,11 @@ if ($in{'confirm'}) {
 		$ver = $vermap{$sinfo->{'id'}};
 		$opts = $sinfo->{'opts'};
 
+		# Check if script migrated to Pro and cannot be upgraded anymore
+		if ($script->{'migrated'} && !$virtualmin_pro) {
+			$ver = $sinfo->{'version'};
+			}
+
 		# Install needed packages
 		&setup_script_packages($script, $d, $ver);
 
@@ -114,6 +119,7 @@ else {
 	foreach $sinfo (@sinfos) {
 		$script = $scriptmap{$sinfo->{'id'}};
 		$ver = $vermap{$sinfo->{'id'}};
+		$ver = 0 if ($script->{'migrated'} && !$virtualmin_pro);
 		print "<tr>\n";
 		print "<td>$script->{'desc'}</td>\n";
 		print "<td>&nbsp;-&nbsp;</td>\n";

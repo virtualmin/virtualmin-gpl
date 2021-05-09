@@ -18,7 +18,7 @@ return ( "php" );
 
 sub script_whmcs_longdesc
 {
-return "WHMCS is an all-in-one client management, billing & support solution for online businesses.";
+return "WHMCS is an all-in-one client management, billing & support solution for online businesses";
 }
 
 # script_whmcs_versions()

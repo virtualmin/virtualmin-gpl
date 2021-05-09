@@ -437,6 +437,7 @@ scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
 scripts_passmode4=Opprinnelig passord for skript
+scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_abandoned2=Dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
 scripts_abandoned1=Versjon $1 av dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
 scripts_discontinued=Utgått
@@ -497,6 +498,7 @@ move_target2=Nytt aliasmål
 
 newvalidate_subservers=Fikser du også under-servere?
 
+validate_esslfile=SSL $1 -fil er ikke gyldig : $2 
 validate_euserhome=Administrasjonsbruker $1 har hjemmekatalog $3, men den skal være $2 
 validate_eport=Port $1 brukes av $2 for å kjøre uventet server '$3'
 validate_ednsa6=DNS-sone har ingen AAAA-poster
@@ -527,7 +529,9 @@ newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene 
 phpmode_title2=PHP-alternativer
 phpmode_header=PHP-alternativer for dette domenet
 phpmode_fpm=FPM (kjøres som virtuell servereier)
+phpmode_none=Funksjonshemmet
 phpmode_short_fpm=FPM
+phpmode_short_none=Funksjonshemmet
 phpmode_dirswarn=Advarsel - Hvis du skifter fra CGI- eller FCGId-modus, fjernes alle PHP-versjoner per katalog.
 phpmode_err2=Kunne ikke lagre PHP-alternativer
 phpmode_emoding=.. endring mislyktes : $1 

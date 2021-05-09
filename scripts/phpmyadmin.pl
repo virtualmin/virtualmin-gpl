@@ -13,7 +13,7 @@ return ( "php" );
 # script_phpmyadmin_longdesc()
 sub script_phpmyadmin_longdesc
 {
-return "A browser-based MySQL database management interface.";
+return "A browser-based MySQL database management interface";
 }
 
 # script_phpmyadmin_versions()

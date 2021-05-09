@@ -60,10 +60,12 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		}
 	@v = sort { &compare_versions($b, $a, $script) } @{$script->{'versions'}};
 	@v = map { [ $_, $script->{'vdesc'}->{$_} || $_ ] } @v;
+	my $migrated = ($script->{'migrated'} && !$virtualmin_pro);
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $script->{'name'},
-		  'checked' => $script->{'avail_only'} },
+		  'disabled' => $migrated ? 1 : 0,
+		  'checked' => $migrated ? 0 : $script->{'avail_only'} },
 		$script->{'site'} ? 
 			"<a href='$script->{'site'}' target=_blank>".
 			"$script->{'desc'}</a>" : $script->{'desc'},
@@ -142,6 +144,9 @@ foreach $d (&list_domains()) {
 foreach $sname (grep { $used{$_} } @scriptnames) {
 	$script = &get_script($sname);
 	foreach $v (@{$script->{'versions'}}) {
+		if ($script->{'migrated'} && !$virtualmin_pro) {
+			next;
+			}
 		if (&compare_versions($v, $minversion{$sname}, $script) > 0) {
 			push(@opts, [ "$sname $v", "$script->{'desc'} $v" ]);
 			}
@@ -294,7 +299,11 @@ foreach $as (sort { $a->[0]->{'dom'} cmp $b->[0]->{'dom'} } @all_scripts) {
 	       $sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
-	       !$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') : $status,
+	       !$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
+	                            ($script->{'migrated'} && !$virtualmin_pro) ?
+		                     	&ui_link("http://www.virtualmin.com/shop",
+		                     		$text{'scripts_gpl_to_pro'}, undef, " target=_blank") :
+		                     	$status,
 	     ]);
 	}
 print &ui_columns_table(

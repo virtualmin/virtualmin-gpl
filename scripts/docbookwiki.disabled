@@ -12,7 +12,7 @@ return ( "php" );
 
 sub script_docbookwiki_longdesc
 {
-return "DocBook Wiki is a web application that is used to display and to edit online DocBook documents.";
+return "DocBook Wiki is a web application that is used to display and to edit online DocBook documents";
 }
 
 # script_docbookwiki_versions()

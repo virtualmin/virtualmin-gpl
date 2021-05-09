@@ -14,7 +14,7 @@ return ( "php" );
 
 sub script_wordpress_longdesc
 {
-return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability.";
+return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability";
 }
 
 # script_wordpress_versions()
@@ -393,6 +393,11 @@ return $wp if (!$opts);
 my $cli = &get_php_cli_command($opts->{'phpver'});
 return $wp if (!$cli);
 return $cli." ".$wp;
+}
+
+sub script_wordpress_migrated
+{
+return 1;
 }
 
 1;
