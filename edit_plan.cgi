@@ -149,8 +149,10 @@ if (defined(&list_scripts)) {
 	@scripts = &list_scripts();
 	foreach $s (@scripts) {
 		$script = &get_script($s);
+		next if (!$script->{'enabled'});
 		$scriptname{$s} = $script->{'desc'} if ($script);
 		}
+	@scripts = grep { $scriptname{$_} } @scripts;
 	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
 	$stable .= &ui_multi_select("scripts",
 		[ map { [ $_, $scriptname{$_} ] }

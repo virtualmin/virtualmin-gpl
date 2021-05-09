@@ -66,6 +66,8 @@ if ($availonly) {
 	@scripts = grep { $_->{'avail'} } @scripts;
 	}
 
+@scripts = grep { $_->{'enabled'} } @scripts;
+
 if ($multi) {
 	# Show each script on a separate line
 	foreach $script (@scripts) {
