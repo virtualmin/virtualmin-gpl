@@ -13757,12 +13757,29 @@ if (!$d->{'parent'}) {
 		}
 	}
 
-# Find any domains aliases to this one, excluding child domains
+# Find any domains aliases to this one, excluding child domains since they
+# were covered above
 my @aliases = &get_domain_by("alias", $d->{'id'});
 my @aliases = grep { $_->{'parent'} != $d->{'id'} } @aliases;
 foreach my $ad (@aliases) {
 	my %oldad = %$ad;
 	push(@oldaliases, \%oldad);
+	if ($user) {
+		$ad->{'email'} =~ s/^\Q$ad->{'user'}\E\@/$user\@/g;
+		$ad->{'emailto'} =~ s/^\Q$ad->{'user'}\E\@/$user\@/g;
+		$ad->{'user'} = $user;
+		}
+	if ($dom) {
+		$ad->{'email'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+		$ad->{'emailto'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+		}
+	if ($home) {
+		&change_home_directory($ad,
+				       &server_home_directory($ad, $d));
+		}
+	if ($group) {
+		$ad->{'group'} = $group;
+		}
 	}
 
 # Check for domain name clash, where the domain, user or group have changed
