@@ -48,14 +48,10 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# Check for Virtualmin repo in sources.list
-	$sources_list = "/etc/apt/sources.list.d/virtualmin.list";
-	if	(!-r $sources_list) {
-		$sources_list = "/etc/apt/sources.list";
-		}
-	$lref = &read_file_lines($sources_list);
+	$lref = &read_file_lines($virtualmin_apt_repo);
 	$found = 0;
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com/) {
+		if ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host/) {
 			$found = 1;
 			}
 		}
@@ -134,17 +130,20 @@ elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
 	my $apt_auth_dir = '/etc/apt/auth.conf.d';
 	my $apt_auth_can = -d $apt_auth_dir;
+	my $apt_auth_prot = $apt_auth_can ? 'https' : undef;
 	my $apt_old_auth = !$apt_auth_can ? "$in{'serial'}:$in{'key'}\@" : "";
-	$lref = &read_file_lines($sources_list);
+	$lref = &read_file_lines($virtualmin_apt_repo);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
-			$l = "deb $1://$apt_old_auth$upgrade_virtualmin_host/$2";
+		if ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
+			my $protocol = $apt_auth_prot || $1;
+			$l = "deb $protocol://$apt_old_auth$upgrade_virtualmin_host/$2";
 			}
-		elsif ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
-			$l = "deb $1://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
+		elsif ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/vm\/(\d)\/gpl\/(.*)/) {
+			my $protocol = $apt_auth_prot || $1;
+			$l = "deb $protocol://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
 			}
 		}
-	&flush_file_lines($sources_list);
+	&flush_file_lines($virtualmin_apt_repo);
 
 	# Add auth credentials for Pro repos in a separate dedicated file
 	if ($apt_auth_can) {

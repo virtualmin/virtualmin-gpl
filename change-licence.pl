@@ -76,7 +76,7 @@ if (-r $virtualmin_yum_repo) {
 	local $found = 0;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=(http|https|ftp):\/\/([^:]+):([^\@]+)\@(software.virtualmin.com.*)$/) {
+		if ($l =~ /^baseurl=(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
 			$l = "baseurl=".$1."://".$serial.":".$key."\@".$4;
 			$found++;
 			}
@@ -86,30 +86,41 @@ if (-r $virtualmin_yum_repo) {
 	if ($found) {
 		&execute_command("yum clean all");
 		}
-	&$second_print($found ? ".. done" : ".. no lines for software.virtualmin.com found!");
+	&$second_print($found ? ".. done" : ".. no lines for $upgrade_virtualmin_host found!");
 	}
 
 # Update Debian repo
-$sources_list = "/etc/apt/sources.list";
-$sources_list_new = "/etc/apt/sources.list.d/virtualmin.list";
-$sources_list = $sources_list_new if (-r $sources_list_new);
-if (-r $sources_list) {
+my $apt_auth_dir = '/etc/apt/auth.conf.d';
+my $apt_auth_can = -d $apt_auth_dir;
+if (-r $virtualmin_apt_repo) {
 	&$first_print("Updating Virtualmin APT repository ..");
-	&lock_file($sources_list);
+	&lock_file($virtualmin_apt_repo);
 	local $found = 0;
-	local $lref = &read_file_lines($sources_list);
+	local $lref = &read_file_lines($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^deb\s+(http|https|ftp):\/\/([^:]+):([^\@]+)\@(software.virtualmin.com.*)$/) {
-			$l = "deb ".$1."://".$serial.":".$key."\@".$4;
+		if ($l !~ /\/gpl\// &&
+		   ($l =~ /^deb\s+(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
+			$l =~ /^deb\s+(http|https|ftp):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
+			if ($apt_auth_can) {
+				$l = "deb https://".$4;
+				}
+			else {
+				$l = "deb ".$1."://".$serial.":".$key."\@".$4;
+				}
 			$found++;
 			}
 		}
-	&flush_file_lines($sources_list);
-	&unlock_file($sources_list);
+	&flush_file_lines($virtualmin_apt_repo);
+	&unlock_file($virtualmin_apt_repo);
+	if ($apt_auth_can) {
+		&write_file_contents(
+		    "$apt_auth_dir/virtualmin.conf",
+		    "machine $upgrade_virtualmin_host login $serial password $key\n");
+		}
 	if ($found) {
 		&execute_command("apt-get update");
 		}
-	&$second_print($found ? ".. done" : ".. no lines for software.virtualmin.com found!");
+	&$second_print($found ? ".. done" : ".. no lines for $upgrade_virtualmin_host found!");
 	}
 
 # Update Webmin updates file
@@ -119,7 +130,7 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
 	&lock_file($webmin::module_config_file);
 	@upsource = split(/\t/, $webmin::config{'upsource'});
 	foreach $u (@upsource) {
-		if ($u =~ /^(http|https|ftp):\/\/([^:]+):([^\@]+)\@(software.virtualmin.com.*)$/) {
+		if ($u =~ /^(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
 			$u = $1."://".$serial.":".$key."\@".$4;
 			}
 		}
@@ -136,12 +147,13 @@ if ($webmin::config{'upsource'} =~ /\Q$upgrade_virtualmin_host\E/) {
            'LicenseKey' => $key );
 &write_env_file($virtualmin_license_file, \%lfile);
 &unlock_file($virtualmin_license_file);
-if ($status == 0 && !$nocheck) {
+if ($status == 0) {
 	# Update the status file
-	&read_file($licence_status, \%licence);
-	&update_licence_from_site(\%licence);
-	&write_file($licence_status, \%licence);
-
+	if (!$nocheck) {
+		&read_file($licence_status, \%licence);
+		&update_licence_from_site(\%licence);
+		&write_file($licence_status, \%licence);
+		}
 	&$second_print(".. done");
 	}
 else {
