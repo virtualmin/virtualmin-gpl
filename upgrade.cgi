@@ -132,16 +132,26 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
+	my $apt_auth_dir = '/etc/apt/auth.conf.d';
+	my $apt_auth_can = -d $apt_auth_dir;
+	my $apt_old_auth = !$apt_auth_can ? "$in{'serial'}:$in{'key'}\@" : "";
 	$lref = &read_file_lines($sources_list);
 	foreach $l (@$lref) {
 		if ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/gpl\/(.*)/) {
-			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/$2";
+			$l = "deb $1://$apt_old_auth$upgrade_virtualmin_host/$2";
 			}
 		elsif ($l =~ /^deb\s+(http|https):\/\/software\.virtualmin\.com\/vm\/(\d)\/gpl\/(.*)/) {
-			$l = "deb $1://$in{'serial'}:$in{'key'}\@software.virtualmin.com/vm/$2/$3";
-                        }
+			$l = "deb $1://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
+			}
 		}
 	&flush_file_lines($sources_list);
+
+	# Add auth credentials for Pro repos in a separate dedicated file
+	if ($apt_auth_can) {
+		&write_file_contents(
+		    "$apt_auth_dir/virtualmin.conf",
+		    "machine $upgrade_virtualmin_host login $in{'serial'} password $in{'key'}\n");
+		}
 
 	# Force refresh of packages
 	&$first_print($text{'upgrade_update'});
