@@ -37,10 +37,14 @@ sub script_roundcube_php_modules
 {
 local ($d, $ver, $phpver, $opts) = @_;
 local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
-local @modules = ( "xml", "zip", "dom", "iconv", "mbstring",
-                   "openssl", "sockets" );
+local @modules = ( "xml", "zip", "dom", "iconv", "mbstring" );
 push(@modules, $dbtype eq "mysql" ? "mysql" : "pgsql");
 return @modules;
+}
+
+sub script_roundcube_php_optional_modules
+{
+return ( "openssl", "sockets" );
 }
 
 sub script_roundcube_dbs

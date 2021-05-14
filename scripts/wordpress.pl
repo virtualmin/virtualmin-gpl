@@ -35,17 +35,19 @@ return ( 5 );
 
 sub script_wordpress_php_modules
 {
-return ("mysql", "gd", "json");
+return ( "mysql", "gd", "json", "xml" );
 }
 
 sub script_wordpress_php_optional_modules
 {
-return ("curl");
+return ( "curl", "ssh2", "date", "tokenizer",
+         "hash", "imagick", "iconv", "mbstring",
+         "openssl", "posix", "sockets" );
 }
 
 sub script_wordpress_dbs
 {
-return ("mysql");
+return ( "mysql" );
 }
 
 sub script_wordpress_release
