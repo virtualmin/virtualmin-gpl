@@ -167,9 +167,8 @@ if ($d && &has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 	}
 my @files = ( { 'name' => "source",
 	   'file' => "wordpress-$ver.zip",
-	   'url' => "http://wordpress.org/latest.zip",
-	   'virtualmin' => 1,
-	   'nocache' => 1 } );
+	   'url' => "http://wordpress.org/wordpress-$ver.zip",
+	   'virtualmin' => 1 } );
 return @files;
 }
 
