@@ -7810,7 +7810,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		# Check PHP version
 		local $phpver;
 		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-			$phpver = &setup_php_version($dom, [5],$opts->{'path'});
+			$phpver = &setup_php_version($dom, $script, $ver,
+						     $opts->{'path'});
 			if (!$phpver) {
 				&$second_print($text{'scripts_ephpvers2'});
 				next;
