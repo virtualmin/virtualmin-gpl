@@ -2750,11 +2750,27 @@ sub check_script_depends
 local ($script, $d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
-# If the script uses PHP, make sure it's enabled for the domain
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	# If the script uses PHP, make sure it's enabled for the domain
 	local $mode = &get_domain_php_mode($d);
 	if ($mode eq "none") {
 		push(@rv, $text{'scripts_iphpneed'});
+		}
+
+	# Also check the PHP version
+	my $minfunc = $script->{'php_fullver_func'};
+	my $maxfunc = $script->{'php_maxver_func'};
+	if (defined(&$minfunc)) {
+		my $minver = &$minfunc($d, $ver, $sinfo);
+		if (&compare_versions($phpver, $minver) < 0) {
+			return &text('scripts_iphpfullver', $minver, $phpver);
+			}
+		}
+	if (defined(&$maxfunc)) {
+		my $maxver = &$maxfunc($d, $ver, $sinfo);
+		if (&compare_versions($phpver, $maxver) < 0) {
+			return &text('scripts_iphpmaxver', $maxver, $phpver);
+			}
 		}
 	}
 
