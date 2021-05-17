@@ -1,0 +1,19 @@
+<header>SSH public key</header>
+
+This field can be used to grant SSH access authenticated via a public key
+to the new virtual server's Unix user. The options are : <p>
+
+<dl>
+<dt><b>No default key</b>
+<dd>Don't setup an SSH key. Only logins with a password will be allowed. <p>
+
+<dt><b>Generate public and private keys</b>
+<dd>Create a new SSH key pair for this virtual server, and allow logins using
+    that key. The server owner should copy the private key after creation.<p>
+
+<dt><b>Use public key below</b>
+<dd>SSH logins will be allowed using the private key that corresponds to the
+    public key entered in the text box below.<p>
+</dl>
+
+<footer>

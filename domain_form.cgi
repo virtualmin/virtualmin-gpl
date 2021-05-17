@@ -209,6 +209,14 @@ if (!$parentuser) {
 	print &ui_table_row(&hlink($text{'form_pass'}, "password"),
 		&new_password_input("vpass"),
 		undef, \@tds);
+
+	# SSH public key for Unix user
+	print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
+		&ui_radio("sshkey_mode", 0,
+			  [ [ 0, $text{'form_sshkey0'} ],
+			    [ 1, $text{'form_sshkey1'} ],
+			    [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
+		&ui_textarea("sshkey", undef, 3, 60), undef, \@tds);
 	}
 
 # Generate Javascript for template change

@@ -18268,21 +18268,21 @@ return $loaded;
 # fix GRUB.
 sub needs_xfs_quota_fix
 {
-return 0 if ($gconfig{'os_type'} !~ /-linux$/);             # Some other OS
-return 0 if (!$config{'quotas'});                           # Quotas not even in use
-return 0 if ($config{'quota_commands'});                    # Using external commands
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);     # Some other OS
+return 0 if (!$config{'quotas'});                   # Quotas not even in use
+return 0 if ($config{'quota_commands'});            # Using external commands
 &require_useradmin();
-return 0 if (!$home_base);                                  # Don't know base dir
-return 0 if (&running_in_zone());                           # Zones have no quotas
+return 0 if (!$home_base);                          # Don't know base dir
+return 0 if (&running_in_zone());                   # Zones have no quotas
 my ($home_mtab, $home_fstab) = &mount_point($home_base);
-return 0 if (!$home_mtab || !$home_fstab);                  # No mount found?
-return 0 if ($home_mtab->[2] ne "xfs");                     # Other FS type
-return 0 if ($home_mtab->[0] ne "/");                       # /home is not on the / FS
-return 0 if (!&quota::quota_can($home_mtab,                 # Not enabled in fstab
+return 0 if (!$home_mtab || !$home_fstab);          # No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");             # Other FS type
+return 0 if ($home_mtab->[0] ne "/");               # /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,         # Not enabled in fstab
 				$home_fstab));
 my $now = &quota::quota_now($home_mtab, $home_fstab);
-$now -= 4 if ($now >= 4);                                   # Ignore XFS always bit
-return 0 if ($now);                                         # Already enabled in mtab
+$now -= 4 if ($now >= 4);                           # Ignore XFS always bit
+return 0 if ($now);                                 # Already enabled in mtab
 
 # At this point, we are definite in a bad state
 my $grubfile = "/etc/default/grub";
@@ -18309,6 +18309,49 @@ return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
 
 # Otherwise, flags need adding
 return 2;
+}
+
+# create_domain_ssh_key(&domain)
+# Creates an SSH public and private key for a domain, and returns the public 
+# key and an error message.
+sub create_domain_ssh_key
+{
+my ($d) = @_;
+return (undef, $text{'setup_esshkeydir'}) if (!$d->{'dir'} || !$d->{'unix'});
+return (undef, $text{'setup_esshsshd'}) if (!&foreign_installed("sshd"));
+my $sshdir = $d->{'home'}."/.ssh";
+my %oldpubs = map { $_, 1 } glob("$sshdir/*.pub");
+&foreign_require("sshd");
+my $cmd = $sshd::config{'keygen_path'}." -P \"\"";
+$cmd = &command_as_user($d->{'user'}, 0, $cmd);
+my $out;
+my $inp = "\n";
+&execute_command($cmd, \$inp, \$out, \$out);
+if ($?) {
+	return (undef, $out);
+	}
+my @newpubs = grep { !$oldpubs{$_} } glob("$sshdir/*.pub");
+return (undef, $text{'setup_esshnopub'}) if (!@newpubs);
+return (&read_file_contents($newpubs[0]), undef);
+}
+
+# save_domain_ssh_pubkey(&domain, pubkey)
+# Adds an SSH public key to the authorized keys file
+sub save_domain_ssh_pubkey
+{
+my ($d, $pubkey) = @_;
+return $text{'setup_esshkeydir'} if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+if (!-d $sshdir) {
+	&make_dir_as_domain_user($d, $sshdir, 0700);
+	}
+my $sshfile = $sshdir."/authorized_keys";
+my $ex = -e $sshfile;
+&open_tempfile_as_domain_user($d, SSHFILE, ">>$sshfile");
+&print_tempfile(SSHFILE, $pubkey."\n");
+&close_tempfile_as_domain_user($d, SSHFILE);
+&set_permissions_as_domain_user($d, 0600, $sshfile) if (!$ex);
+return undef;
 }
 
 sub get_module_version_and_type
