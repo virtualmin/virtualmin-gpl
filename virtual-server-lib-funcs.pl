@@ -18331,6 +18331,9 @@ if ($?) {
 	return (undef, $out);
 	}
 my @newpubs = grep { !$oldpubs{$_} } glob("$sshdir/*.pub");
+foreach my $pkeyfile (@newpubs) {
+	&set_permissions_as_domain_user($d, 0600, $pkeyfile);
+	}
 return (undef, $text{'setup_esshnopub'}) if (!@newpubs);
 return (&read_file_contents($newpubs[0]), undef);
 }
