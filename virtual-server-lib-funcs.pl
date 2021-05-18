@@ -18346,12 +18346,11 @@ if (!-d $sshdir) {
 	&make_dir_as_domain_user($d, $sshdir, 0700);
 	}
 my $sshfile = $sshdir."/authorized_keys";
-my $sshfile_def = $sshdir."/id_rsa.pub";
+my $ex = -e $sshfile;
 &open_tempfile_as_domain_user($d, SSHFILE, ">>$sshfile");
 &print_tempfile(SSHFILE, $pubkey."\n");
 &close_tempfile_as_domain_user($d, SSHFILE);
-&set_permissions_as_domain_user($d, 0600, $sshfile) if (-e $sshfile);
-&set_permissions_as_domain_user($d, 0600, $sshfile_def) if (-e $sshfile_def);
+&set_permissions_as_domain_user($d, 0600, $sshfile) if (!$ex);
 return undef;
 }
 
