@@ -149,6 +149,7 @@ if (!$anything) {
 	}
 
 &save_domain($d);
+&refresh_webmin_user($d);
 &release_lock_logrotate($d) if ($d->{'logrotate'});
 &release_lock_dns($d);
 &release_lock_web($d);
