@@ -100,7 +100,7 @@ if ($d->{'ip6'} && !$aliasdom) {
 	}
 
 # Plan, if any
-if ($d->{'plan'}) {
+if ($d->{'plan'} ne '') {
 	$plan = &get_plan($d->{'plan'});
 	print &ui_table_row($text{'edit_plan'}, $plan->{'name'}, undef, \@tds);
 	}

@@ -34,10 +34,20 @@ else {
 	print "Username: ";
 	chop($username = <STDIN>);
 	}
-print "Old password: ";
-chop($oldpass = <STDIN>);
-print "New password: ";
-chop($newpass = <STDIN>);
+if ($ARGV[1]) {
+	$oldpass = $ARGV[1];
+	}
+else {
+	print "Old password: ";
+	chop($oldpass = <STDIN>);
+	}
+if ($ARGV[2]) {
+	$newpass = $ARGV[2];
+	}
+else {
+	print "New password: ";
+	chop($newpass = <STDIN>);
+	}
 if (!$username) {
 	&error_exit("No username given");
 	}

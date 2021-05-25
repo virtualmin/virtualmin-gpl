@@ -634,6 +634,29 @@ if (@delslaves) {
 &register_post_action(\&restart_bind, $d);
 }
 
+# update_dns_slave_ip_addresses(ip, old-ip, [&doms])
+# Update all DNS slave servers for a change in master IP. May print stuff.
+sub update_dns_slave_ip_addresses
+{
+my ($ip, $oldip, $doms) = @_;
+$doms ||= [ &list_domains() ];
+&require_bind();
+my @bdoms = grep { $_->{'dns'} && $_->{'dns_slave'} ne '' } @$doms;
+my $oldmasterip = $bconfig{'this_ip'} ||
+                  &to_ipaddress(&get_system_hostname());
+if ($oldmasterip eq $oldip && $oldip ne $ip) {
+	if ($bconfig{'this_ip'} eq $oldip) {
+		$bconfig{'this_ip'} = $ip;
+		&save_module_config(\%bconfig, "bind8");
+		}
+	foreach my $d (@bdoms) {
+		my $oldslaves = $d->{'dns_slave'};
+		&delete_zone_on_slaves($d);
+		&create_zone_on_slaves($d, $oldslaves);
+		}
+	}
+}
+
 # exists_on_slave(zone-name, &slave)
 # Returns "OK" if some zone exists on the given DNS slave, undef if not, or
 # an error message otherwise.
@@ -2609,7 +2632,7 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmx'}, "template_dns_mx"),
 
 # Option for view to add to, for BIND 9
 if (@views || $tmpl->{'dns_view'}) {
-	print &ui_table_row($text{'newdns_view'},
+	print &ui_table_row(&hlink($text{'newdns_view'}, "template_dns_view"),
 		&ui_select("view", $tmpl->{'dns_view'},
 			[ [ "", $text{'newdns_noview'} ],
 			  map { [ $_->{'values'}->[0] ] } @views ]));

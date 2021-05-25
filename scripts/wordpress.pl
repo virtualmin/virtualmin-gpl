@@ -14,13 +14,13 @@ return ( "php" );
 
 sub script_wordpress_longdesc
 {
-return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability.";
+return "A semantic personal publishing platform with a focus on aesthetics, web standards, and usability";
 }
 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "5.7" );
+return ( "5.7.2" );
 }
 
 sub script_wordpress_category
@@ -35,17 +35,19 @@ return ( 5 );
 
 sub script_wordpress_php_modules
 {
-return ("mysql", "gd", "json");
+return ( "mysql", "gd", "json", "xml" );
 }
 
 sub script_wordpress_php_optional_modules
 {
-return ("curl");
+return ( "curl", "ssh2", "date", "tokenizer",
+         "hash", "imagick", "iconv", "mbstring",
+         "openssl", "posix", "sockets" );
 }
 
 sub script_wordpress_dbs
 {
-return ("mysql");
+return ( "mysql" );
 }
 
 sub script_wordpress_release
@@ -165,9 +167,8 @@ if ($d && &has_wordpress_cli($opts) && !$opts->{'nocli'}) {
 	}
 my @files = ( { 'name' => "source",
 	   'file' => "wordpress-$ver.zip",
-	   'url' => "http://wordpress.org/latest.zip",
-	   'virtualmin' => 1,
-	   'nocache' => 1 } );
+	   'url' => "http://wordpress.org/wordpress-$ver.zip",
+	   'virtualmin' => 1 } );
 return @files;
 }
 

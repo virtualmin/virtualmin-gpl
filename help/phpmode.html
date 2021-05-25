@@ -6,10 +6,15 @@ the virtual server. The former is faster as it means that no additional
 processes need to be started to execute PHP code, but less secure as scripts
 read and write files as a user other than the domain owner. <p>
 
-If your system supports it, the <b>FCGId</b> option is the best, as it runs
-PHP scripts quickly and as the domain owner. Otherwise, unless your system is
-heavily loaded or security between users is not an issue, the
+If your system supports it, the <b>FPM</b> or <b>FCGId</b> options are the best,
+as they run PHP scripts quickly and as the domain owner. Otherwise, unless your
+system is heavily loaded or security between users is not an issue, the
 <b>CGI wrapper</b> option is recommended. <p>
+
+The <tt>mod_php</tt> mode is not recommended, as the small gain in performance
+should be balanced against the lack of security between virtual servers.
+Finally, the <b>Disabled</b> mode can be used to turn off PHP scripts entirely.
+<p>
 
 <footer>
 

@@ -152,8 +152,11 @@ if (defined(&list_scripts)) {
 	@scripts = &list_scripts();
 	foreach $s (@scripts) {
 		$script = &get_script($s);
+		next if (!$script->{'enabled'});
+		next if (&script_migrated_disallowed($script->{'migrated'}));
 		$scriptname{$s} = $script->{'desc'} if ($script);
 		}
+	@scripts = grep { $scriptname{$_} } @scripts;
 	@scripts = sort { lc($scriptname{$a}) cmp lc($scriptname{$b}) }@scripts;
 	$stable .= &ui_multi_select("scripts",
 		[ map { [ $_, $scriptname{$_} ] }
@@ -173,6 +176,11 @@ print &ui_hidden_table_start($text{'limits_header3'}, "width=100%", 2,
 # Demo mode
 print &ui_table_row(&hlink($text{'limits_demo'}, "limits_demo"),
 	&ui_radio("demo", $d->{'demo'} ? 1 : 0,
+	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+# Hide Webmin Modules category for domain owners
+print &ui_table_row($text{'limits_nocatwebmin'},
+	&ui_radio("nocatwebmin", $d->{'webmin_nocat_modules'} ? 1 : 0,
 	       [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
 
 if (&can_webmin_modules()) {

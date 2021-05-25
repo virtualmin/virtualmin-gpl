@@ -130,26 +130,12 @@ if ($in{'setold'}) {
 	}
 
 # Update master IP on slave zones
-if ($in{'masterip'}) {
-	&require_bind();
-	$oldmasterip = $bconfig{'this_ip'} ||
-		       &to_ipaddress(&get_system_hostname());
-	@bdoms = grep { $_->{'dns'} && $_->{'dns_slave'} ne '' } @doms;
-	if ($oldmasterip eq $in{'old'} && @bdoms && !$in{'new_def'}) {
-		&$first_print(&text('newips_slaves', $in{'old'}, $in{'new'}));
-		if ($bconfig{'this_ip'} eq $in{'old'}) {
-			$bconfig{'this_ip'} = $in{'new'};
-			&save_module_config(\%bconfig, "bind8");
-			}
-		&$indent_print();
-		foreach $d (@bdoms) {
-			$oldslaves = $d->{'dns_slave'};
-			&delete_zone_on_slaves($d);
-			&create_zone_on_slaves($d, $oldslaves);
-			}
-		&$outdent_print();
-		&$second_print($text{'setup_done'});
-		}
+if ($in{'masterip'} && !$in{'new_def'}) {
+	&$first_print(&text('newips_slaves', $in{'old'}, $in{'new'}));
+	&$indent_print();
+	&update_dns_slave_ip_addresses($in{'new'}, $in{'old'}, \@doms);
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
 	}
 
 &run_post_actions();

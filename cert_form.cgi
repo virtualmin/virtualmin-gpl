@@ -41,7 +41,7 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 	  &can_edit_letsencrypt() && &domain_has_website($d) ?
 		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
 		( ),
-	  &can_webmin_cert() ?
+	  &can_webmin_cert() && &domain_has_ssl_cert($d) ?
 		( [ "perip", $text{'cert_tabperip'}, $prog."perip" ] ) :
 		( ),
 	);
@@ -433,7 +433,7 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 	}
 
 
-if (&can_webmin_cert()) {
+if (&can_webmin_cert() && &domain_has_ssl_cert($d)) {
 	# Per-IP or per-domain server usage
 	print &ui_tabs_start_tab("mode", "perip");
 	print "$text{'cert_desc9'}<p>\n";

@@ -183,7 +183,7 @@ print $js;
 
 # Show plan, with option to change
 if (!$parentdom) {
-	$plan = &get_plan($d->{'plan'});
+	$plan = $d->{'plan'} eq '' ? undef : &get_plan($d->{'plan'});
 	$label = &hlink($text{'edit_plan'}, "plan");
 	if (@plans) {
 		# Can select one

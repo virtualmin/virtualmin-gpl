@@ -4370,7 +4370,6 @@ chain_epaste=No se ingresó un texto de certificado.
 stopscript_title=Detener el servidor Rails
 stopscript_egone=El script no existe mas!
 stopscript_doing=Apagando los procesos del servidor Rails para $1 ..
-stopscript_done=.. hecho. La URL del script no funcionará mas a menos que sea arrancada nuevamente.
 startscript_title=Arranca el servidor Rails
 startscript_doing=Arrancando los procesos del servidor Rails para $1 ..
 startscript_failed=.. falla : $1

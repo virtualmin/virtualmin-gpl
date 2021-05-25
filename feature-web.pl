@@ -481,12 +481,11 @@ if (!$virt) {
 if (defined(&create_php_wrappers)) {
 	&create_php_wrappers($d);
 	}
+
+# Force FPM port re-allocation and re-setup of PHP mode
 my $mode = &get_domain_php_mode($oldd);
-if ($mode eq "fpm") {
-	# Force port re-allocation
-	delete($d->{'php_fpm_port'});
-	&save_domain_php_mode($d, $mode);
-	}
+delete($d->{'php_fpm_port'});
+&save_domain_php_mode($d, $mode);
 
 # Update session dir and upload path in php.ini files
 local @fixes = (
@@ -965,6 +964,14 @@ else {
 				return &text('validate_ewebphpconfig',
 					     $ver->[0], $errs);
 				}
+			}
+		}
+
+	# Validate the FPM port
+	if ($mode eq "fpm") {
+		my ($ok, $port) = &get_domain_php_fpm_port($d);
+		if ($ok == 0) {
+			return &text('validate_ewebphpfpmport', $port);
 			}
 		}
 
@@ -2971,6 +2978,14 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 		&ui_textarea("php_fpm",
 			$tmpl->{'php_fpm'} eq 'none' ? '' :
 			join("\n", split(/\t/, $tmpl->{'php_fpm'})), 5, 80));
+
+	# Use socket file or TCP port?
+	print &ui_table_row(
+		&hlink($text{'tmpl_php_sock'}, "template_php_sock"),
+		&ui_radio("php_sock", $tmpl->{'php_sock'},
+		  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
+		    [ 0, $text{'tmpl_php_sock0'} ],
+		    [ 1, $text{'tmpl_php_sock1'} ] ]));
 	}
 }
 
@@ -3039,6 +3054,7 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 	else {
 		$tmpl->{'php_fpm'} = 'none';
 		}
+	$tmpl->{'php_sock'} = $in{'php_sock'};
 	}
 }
 

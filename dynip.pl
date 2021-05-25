@@ -27,6 +27,10 @@ if ($oldip ne $newip || $oldwhen < time()-28*24*60*60) {
 	# Talk to the dynamic IP service, as our IP has changed or we
 	# haven't reported in for a month
 	($ip, $err) = &update_dynip_service();
+	if (!$err && $ip && !&check_ipaddress($ip)) {
+		# Got an response, but it's not a valid IP
+		$err = "Invalid response : $ip";
+		}
 	if ($err) {
 		# Failed .. tell the user
 		if ($config{'dynip_email'}) {
@@ -56,7 +60,6 @@ if ($ip && $ip ne $oldip) {
 	if ($oldip) {
 		&set_all_null_print();
 		$dc = &update_all_domain_ip_addresses($ip, $oldip);
-		&run_post_actions();
 
 		# Also change shared IP
 		@shared = &list_shared_ips();
@@ -65,6 +68,11 @@ if ($ip && $ip ne $oldip) {
 			$shared[$idx] = $ip;
 			&save_shared_ips(@shared);
 			}
+
+		# Update any DNS slaves that were replicating from this IP
+		&update_dns_slave_ip_addresses($ip, $oldip);
+
+		&run_post_actions();
 		}
 
 	if ($config{'dynip_email'}) {

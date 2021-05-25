@@ -13,7 +13,7 @@ return ( "php" );
 # script_phppgadmin_longdesc()
 sub script_phppgadmin_longdesc
 {
-return "A browser-based PostgreSQL database management interface.";
+return "A browser-based PostgreSQL database management interface";
 }
 
 # script_phppgadmin_versions()

@@ -19,6 +19,12 @@ print "$text{'features_desc'}<p>\n";
 @table_order_initial = ( );
 $n = 0;
 foreach $f (@features) {
+	# Skip features for modules that aren't enabled in Webmin
+	my $cfunc = "check_module_".$f;
+	if (!$config{$f} && defined(&$cfunc) && !&$cfunc()) {
+		next;
+		}
+
 	local @acts;
 	push(@acts, ui_link("search.cgi?field=$f&what=1",
 		                $text{'features_used'}));

@@ -30,6 +30,10 @@ index_keyinvalid=SSL-nøkkelfilen $2 for $1 er ugyldig : $3
 form_rmysql=MySQL-databaseserver
 form_web=Sett opp Apache-nettstedet?
 form_ssl=Sett opp Apache SSL-nettsted?
+form_sshkey=SSH offentlig nøkkel
+form_sshkey0=Ingen standardnøkkel
+form_sshkey1=Generer private og offentlige nøkler
+form_sshkey2=Bruk offentlig nøkkel nedenfor ..
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 
@@ -38,6 +42,7 @@ setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha
 setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktivert
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
 setup_edeppostgressub=En topptjener må ha PostgreSQL aktivert hvis noen under-servere gjør det
+setup_epassvalid=Ugyldig passord : $1 
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
 setup_etmpl=Du har ikke lov til å bruke den valgte malen
 
@@ -50,6 +55,12 @@ setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systeme
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
 setup_usermindown=.. kjører foreløpig ikke
 setup_logrotatealready=.. allerede aktivert for loggfil $1 
+setup_sshkey1=Genererer SSH private og offentlige nøkler ..
+setup_sshkey2=Autoriserer SSH offentlig nøkkel ..
+setup_esshkeydir=Virtuell server trenger en katalog og Unix-bruker
+setup_esshsshd=SSH-server er ikke installert
+setup_esshnopub=Ingen offentlige nøkkelfiler ble opprettet!
+setup_esshkey=.. nøkkelgenerering mislyktes : $1 
 setup_mailrestart=Start e-postserveren på nytt ..
 setup_mailrestarterr=.. omstart mislyktes : $1 
 setup_jail=Setter opp chroot fengsel ..
@@ -273,6 +284,7 @@ restore_logrotatecpshared=.. ikke nødvendig når det deles
 restore_vmailserver_missing=.. ikke konfigurert på dette systemet
 
 limits_migrate=Kan migrere sikkerhetskopier?
+limits_nocatwebmin=Skjul kategorien Webmin-moduler i menyen
 limits_jail=Chroot fengsel domene Unix bruker?
 limits_ejailon=Kunne ikke aktivere chroot fengsel : $1 
 limits_ejailoff=Kunne ikke deaktivere chroot fengsel : $1 
@@ -377,6 +389,9 @@ dns_cloud_def=&lt; Velg automatisk &gt;
 dns_cloud_services=Cloudmin-tjenester
 dns_cloud_local=Lokale filer
 tmpl_php_fpm=Flere FPM-bassengalternativer
+tmpl_php_sock=FPM-serverforbindelse
+tmpl_php_sock0=TCP-port
+tmpl_php_sock1=Unix-sokkelfil
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
 tmpl_editmode_php=PHP-alternativer
@@ -392,7 +407,7 @@ newfields_type11=Ja/Nei (standard nei)
 
 databases_tabremote=MySQL Server Host
 databases_desc6=Denne siden lar deg velge hvilken ekstern MySQL-server som skal brukes til å være vert for databaser for dette domenet.
-databases_desc6a=Det er imidlertid ikke definert noen ytterligere MySQL-servere. Du kan legge til en på <a href='$1'>MySQL-servere</a> -siden.
+databases_desc6a=Imidlertid er ingen ytterligere MySQL-servere definert ennå. Du kan legge til en på siden <a href='$1'>Databaseservere</a>.
 databases_remoteold=Nåværende MySQL-vert
 databases_remotenew=Ny MySQL-vert
 databases_remoteok=Flytt databaser
@@ -432,6 +447,15 @@ scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
 scripts_passmode4=Opprinnelig passord for skript
+scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
+scripts_iphpfullver=PHP-versjon $1 eller nyere kreves, men denne virtuelle serveren bruker versjon $2 
+scripts_iphpmaxver=PHP-versjon under $1 kreves, men denne virtuelle serveren bruker versjon $2 
+scripts_abandoned2=Dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
+scripts_abandoned1=Versjon $1 av dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
+scripts_discontinued=Utgått
+scripts_can=Tilgjengelig i
+scripts_gpl_to_pro=Nå bare tilgjengelig i Pro
+scripts_gpl_to_pro_upgrade=Oppgradering for dette skriptet er nå bare tilgjengelig i Pro
 
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python
@@ -442,8 +466,8 @@ massdelete_preserve=Bevar funksjoner eksternt vert
 
 massdomains_ephpvering=.. mislyktes i å endre versjon : $1 
 
-newmysqls_title=MySQL-servere
-newmysqls_ecannot=Du har ikke lov til å redigere flere MySQL-servere
+newmysqls_title=Databaseservere
+newmysqls_ecannot=Du har ikke lov til å redigere flere databaseservere
 newmysqls_host=Serververtsnavn
 newmysqls_doms=Brukt av
 newmysqls_actions=handlinger
@@ -460,8 +484,8 @@ newmysqls_makedef=Gjør valgt standard
 newmysqls_local=Lokal server
 newmysqls_none=Ingen domener
 newmysqls_dcount=$1 virtuelle servere
-newmysqls_header=Nye MySQL serveralternativer
-newmysqls_formhost=Koble til MySQL-serveren
+newmysqls_header=Nye alternativer for databaseserver
+newmysqls_formhost=Koble til databaseserver
 newmysqls_remote=Ekstern vert
 newmysqls_sock=Lokal socket-fil
 newmysqls_nohost=Standard lokal server
@@ -469,9 +493,9 @@ newmysqls_port=Koble til TCP-porten
 newmysqls_portdef=MySQL standard (3306)
 newmysqls_user=Logg inn med brukernavn
 newmysqls_pass=Logg inn med passord
-newmysqls_err=Kunne ikke legge til MySQL-serveren
+newmysqls_err=Kunne ikke legge til databaseserver
 newmysqls_ehost=Manglende eller ugyldig serververtsnavn
-newmysqls_eip=Ekstern MySQL-server må legges inn som et vertsnavn, ikke en IP-adresse
+newmysqls_eip=Ekstern server må oppgis som vertsnavn, ikke som IP-adresse
 newmysqls_esock=Manglende eller ikke-absolutt stikkontakt
 newmysqls_eport=Manglende eller ikke-numerisk portnummer
 newmysqls_euser=Mangler brukernavn
@@ -489,6 +513,7 @@ move_target2=Nytt aliasmål
 
 newvalidate_subservers=Fikser du også under-servere?
 
+validate_esslfile=SSL $1 -fil er ikke gyldig : $2 
 validate_euserhome=Administrasjonsbruker $1 har hjemmekatalog $3, men den skal være $2 
 validate_eport=Port $1 brukes av $2 for å kjøre uventet server '$3'
 validate_ednsa6=DNS-sone har ingen AAAA-poster
@@ -496,6 +521,7 @@ validate_ednsns2=DNS-sone har ingen NS-poster
 validate_ednsns=NS-post $1 kan ikke løses til en IP-adresse
 validate_ednsip6=DNS-posten $1 løser seg til IPv6-adressen $2 i stedet for den virtuelle serverens IPv6-adresse $3 
 validate_ewebphpconfig=PHP-konfigurasjonsfeil ble funnet i versjon $1 : $2 
+validate_ewebphpfpmport=PHP FPM-konfigurasjonsfeil funnet : $1 
 validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1 
 validate_ewebipv6=En IPv6 DNS-post $2 med adresse $1 eksisterer, men denne virtuelle serveren har ikke IPv6 aktivert
 validate_ewebipv6virt=Det finnes en IPv6 DNS-post med adresse $1, men denne virtuelle serverens Apache-konfigurasjon har ikke en IPv6-adresse
@@ -518,7 +544,9 @@ newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene 
 phpmode_title2=PHP-alternativer
 phpmode_header=PHP-alternativer for dette domenet
 phpmode_fpm=FPM (kjøres som virtuell servereier)
+phpmode_none=Funksjonshemmet
 phpmode_short_fpm=FPM
+phpmode_short_none=Funksjonshemmet
 phpmode_dirswarn=Advarsel - Hvis du skifter fra CGI- eller FCGId-modus, fjernes alle PHP-versjoner per katalog.
 phpmode_err2=Kunne ikke lagre PHP-alternativer
 phpmode_emoding=.. endring mislyktes : $1 
@@ -569,6 +597,8 @@ newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal k
 
 dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
+
+upgrade_epackages=Fant ingen pakker å installere!
 
 exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.
@@ -939,6 +969,7 @@ php_fpmeinit=.. mislyktes : $1
 php_fpmnodir=Ingen FPM-konfigurasjonskatalog funnet
 php_fpmnoinit2=Ingen FPM-serveroppstarthandling funnet
 php_fpmnomod=Apache-modulen $1 mangler eller er ikke aktivert
+php_fpmeconfig=Ingen FPM-konfigurasjon funnet for domenet!
 
 jailkit_ecmd=Jailkit-kommandoen $1 ble ikke funnet på systemet ditt - kanskje <i>jailkit</i> pakken er ikke installert?
 jailkit_einit=Kunne ikke initialisere fengselet : $1 
@@ -1012,8 +1043,8 @@ deftmplt_website_disabled=Nettstedet er deaktivert
 deftmplt_under_construction=Under konstruksjon
 deftmplt_slogan=administrert av Virtualmin - et kraftig og fleksibelt kontrollpanel for webhotell
 deftmplt_slogan2=domeneeier kan logge på kontrollpanelet for å administrere dette nettstedet
-deftmplt_made_with_love1=Drevet av
-deftmplt_made_with_love2=Virtualmin
+deftmplt_made_with_love1=Drevet med
+deftmplt_made_with_love2=av Virtualmin
 deftmplt_made_with_love_disclamer=* Virtualmin-selskapet er ikke ansvarlig for innholdet som leveres av denne serveren
 
 2fa_title=Tofaktorautentisering
@@ -1059,3 +1090,5 @@ dnscloud_err=Kunne ikke lagre sky DNS-leverandør
 dnscloud_egone=Leverandør eksisterer ikke!
 dnscloud_eawscreds=AWS-legitimasjon er ikke gyldig
 dnscloud_clear=Slett legitimasjon
+
+install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den

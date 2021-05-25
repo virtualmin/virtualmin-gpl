@@ -1,10 +1,9 @@
-[![Gratipay](https://img.shields.io/gratipay/project/Virtualmin.svg)](https://gratipay.com/Virtualmin/)
-
-# Virtualmin
+## Virtualmin
 
 Virtualmin virtual-server web hosting control panel module for Webmin.
 
-![Virtualmin system dashboard](http://i.imgur.com/D62KLjU.png)
+
+[![Quick UI overview 2021](https://user-images.githubusercontent.com/4426533/114315538-120fc880-9b08-11eb-9cd6-b6a5f8420235.png)](https://www.youtube.com/watch?v=daYG6O4AsEw&feature=emb_logo)
 
 Virtualmin is a full-featured open source web hosting control panel for Linux and \*BSD systems. This is the core virtual-server module, and there are a couple dozen additional plugins for Virtualmin, to provide additional features, like nginx support, SQLite and Oracle database support, support for other DNS and mail servers, etc. You'll need a full LAMP (or LEMP) stack, plus Webmin, to make this useful. There is an easy to use install script available from [Virtualmin.com](https://www.virtualmin.com/download) that will install everything you need on supported platforms (CentOS, Ubuntu, and Debian, at this time).
 
@@ -35,17 +34,17 @@ Virtualmin includes the following features (and more):
 
 Virtualmin has been under consistent development since ~2003, averaging a new release every couple of months.
 
-# Getting Support
+### Getting Support
 
 Virtualmin has active forums at https://www.virtualmin.com/forum
 
 For commercial support, Virtualmin Professional subscriptions are available starting at $6/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. is also available at hourly or project rates.
 
-# Reporting Bugs
+### Reporting Bugs
 
 Bugs can be reported here at github in the issue tracker or at the ticket tracker on Virtualmin.com.
 
-# Extending Virtualmin
+### Extending Virtualmin
 
 The best way to extend Virtualmin is usually through plugins. Virtualmin plugins are merely Webmin modules, with a few extra files, and some hooks into the Virtualmin API. Webmin module development is documented in the [Webmin Wiki](http://doxfer.webmin.com/Webmin/ModuleDevelopment), and lots of example plugins exist in our other repos (e.g. virtualmin-nginx is a good example of extending core functionality with plugins).
 

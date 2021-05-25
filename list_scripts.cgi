@@ -35,8 +35,8 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	# Check if a newer version exists
 	$script = $smap{$sinfo->{'name'}};
 	($status, $canup) = &describe_script_status($sinfo, $script);
-	$upcount += $canup;
-	$path = $sinfo->{'opts'}->{'path'};
+	$upcount += $canup if (!script_migrated_disallowed($script->{'migrated'}));
+	$path = $sinfo->{'opts'}->{'path_real'} || $sinfo->{'opts'}->{'path'};
 	($dbtype, $dbname) = split(/_/, $sinfo->{'opts'}->{'db'}, 2);
 	if ($dbtype && $dbname && $script->{'name'} !~ /^php(\S+)admin$/i) {
 		$dbdesc = &text('scripts_idbname2',
@@ -56,18 +56,20 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 	if ($sinfo->{'partial'}) {
 		$desc = "<i>$desc</i>";
 		}
+	my $desc_full = $script->{'desc'} ? "<a href='edit_script.cgi?dom=$in{'dom'}&".
+		 "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $sinfo->{'id'} },
-		"<a href='edit_script.cgi?dom=$in{'dom'}&".
-		 "script=$sinfo->{'id'}'>$desc</a>",
+		  'value' => $sinfo->{'id'}, 'disabled' => !$script->{'desc'} },
+		$desc_full,
 		$script->{'vdesc'}->{$sinfo->{'version'}} ||
 		  $sinfo->{'version'},
 		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,
 		$dbdesc,
-		$status,
+		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
+		                     script_migrated_status($status, $script->{'migrated'}, $canup),
 		]);
 	}
 
@@ -116,42 +118,80 @@ if ($in{'search'}) {
 			  join(" ", @{$_->{'categories'}}) =~ /\Q$search\E/i } @scripts;
 	}
 
+my $pro_scripts_list_ads =
+	(!$virtualmin_pro && !$in{'search'} && !$config{'scripts_ads'});
+
+# Advertise Pro scripts only to GPL users
+if ($pro_scripts_list_ads) {
+	my $scripts_pro = &load_pro_scripts_list();
+	push(@scripts, @{$scripts_pro})
+		if ($scripts_pro);
+	$pro_scripts_list_ads = 0
+		if (!$scripts_pro);
+	}
+
+# Check out migrate scripts for GPL users
+if (!$virtualmin_pro) {
+	@scripts = grep { !$_->{'migrated'} } @scripts;
+	}
+
 # Build table of available scripts
 @table = ( );
-foreach $script (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) }
-		      @scripts) {
+my @scripts_added;
+my @scripts_sorted =
+	sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
+if ($pro_scripts_list_ads) {
+	@scripts_sorted =
+		sort { lc($a->{'pro'}) cmp lc($b->{'pro'}) } @scripts;
+	}
+
+foreach $script (@scripts_sorted) {
 	@vers = grep { &can_script_version($script, $_) }
 		     @{$script->{'install_versions'}};
-	next if (!@vers);	# No allowed versions!
-	if (@vers > 1) {
-		$vsel = &ui_select("ver_".$script->{'name'},
-		    undef,
-		    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
-			  @vers ]);
+	next if (!@vers && !$script->{'pro'});	# No allowed versions!
+	next if (grep (/^$script->{'name'}$/, @scripts_added));
+	if (!$script->{'pro'}) {
+		if (@vers > 1) {
+			$vsel = &ui_select("ver_".$script->{'name'},
+			    undef,
+			    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
+				  @vers ]);
+			}
+		else {
+			$vsel = ($script->{'vdesc'}->{$vers[0]} ||
+				 $vers[0]).
+				&ui_hidden("ver_".$script->{'name'},
+					   $vers[0]);
+			}
 		}
-	else {
-		$vsel = ($script->{'vdesc'}->{$vers[0]} ||
-			 $vers[0]).
-			&ui_hidden("ver_".$script->{'name'},
-				   $vers[0]);
-		}
-	push(@table, [
+	my @script_data = (
+	    $script->{'pro'} ? undef :
 	    { 'type' => 'radio', 'name' => 'script',
 	      'value' => $script->{'name'},
 	      'checked' => $in{'search'} && @scripts == 1 },
 	    $script->{'site'} ? "<a href='$script->{'site'}' target=_blank>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
+	    $script->{'pro'} ? $script->{'version'} : 
 	    $vsel." ".
 	    "<input type=image name=fast ".
 	      "value=\"".&quote_escape($script->{'name'})."\" ".
 	      "src=images/ok.gif ".
 	      "onClick='form.fhidden.value=\"$script->{'name'}\"'>",
 	    $script->{'longdesc'},
-	    join(", ", @{$script->{'categories'}}),
-	    ]);
+	    join(", ", @{$script->{'categories'}})
+	    );
+	push(@script_data, ($script->{'pro'} ? 'Pro' : 'GPL'))
+		if ($pro_scripts_list_ads);
+	push(@table, \@script_data);
+	push(@scripts_added, $script->{'name'});
 	}
 
 # Show table of available scripts
+my @cols = ( "", $text{'scripts_name'}, $text{'scripts_ver'},
+	      $text{'scripts_longdesc'}, $text{'scripts_cats'});
+push(@cols, $text{'scripts_can'})
+	if ($pro_scripts_list_ads);
+
 print &ui_form_columns_table(
 	"script_form.cgi",
 	[ [ undef, $text{'scripts_ok'} ] ],
@@ -159,8 +199,7 @@ print &ui_form_columns_table(
 	undef,
 	[ [ "dom", $in{'dom'} ],
 	  [ "fhidden", "" ] ],
-	[ "", $text{'scripts_name'}, $text{'scripts_ver'},
-	      $text{'scripts_longdesc'}, $text{'scripts_cats'}, ],
+	\@cols,
 	100,
 	\@table,
 	undef,

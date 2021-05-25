@@ -3725,8 +3725,6 @@ scripts_failedpackage=.. feilet. Seinere steg i installasjonen av dette scripte 
 scripts_gotpackage=.. allerede installert
 scripts_packagecount=.. installerte $1 nye pakker
 scripts_packageall=.. alle pakker er allerede installert
-scripts_abandoned2=ADVARSEL : Dette scriptet støttes ikke lenger av dets opprinnelige forfatter.
-scripts_abandoned1=ADVARSEL : Versjon $1 av dette scriptet støttes ikke lenger av dets opprinnelige forfatter.
 
 newnotify_title=E-post tjener eiere
 newnotify_desc=Denne siden kan brukes til å sende e-post til eierne av de valgte virtuelle tjenerene, f.eks. for å gi beskjed om nedetid, oppgraderinger og andre tjeneste-endringer. Følgende erstatninger kan brukes i meldingsteksten og i emnet:
@@ -5245,7 +5243,6 @@ chain_epaste=Det ble ikke skrevet inn noen sertifikat tekst
 stopscript_title=Stopp Rails tjener
 stopscript_egone=Script fines ikke lenger!
 stopscript_doing=Stopper Rails tjenerprosess for $1 ..
-stopscript_done=.. ferdig. Scriptets URL vil ikke virke før scriptet er startet på nytt.
 startscript_title=Start Rails tjener
 startscript_doing=Starter opp Rails tjenerprosess for $1 ..
 startscript_failed=.. feilet : $1

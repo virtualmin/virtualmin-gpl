@@ -75,7 +75,7 @@ if (defined(&{$script->{'check_func'}}) && !$sinfo) {
 
 # Check for files in the script's directory
 $found = 0;
-if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'}) {
+if (-d $opts->{'dir'} && !$sinfo && !$in{'confirm'} && !$opts->{'nofcount'}) {
 	opendir(DESTDIR, $opts->{'dir'});
 	foreach $f (readdir(DESTDIR)) {
 		if ($f ne "." && $f ne ".." && $f !~ /^(index|welcome)\./) {
@@ -129,7 +129,7 @@ $merr = &making_changes();
 
 # Setup PHP version
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-	$phpver = &setup_php_version($d, [5], $opts->{'path'});
+	$phpver = &setup_php_version($d, $script, $ver, $opts->{'path'});
 	if (!$phpver) {
 		&error($text{'scripts_ephpvers2'});
 		}

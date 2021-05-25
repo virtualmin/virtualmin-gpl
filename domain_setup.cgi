@@ -194,7 +194,7 @@ if (!$parentuser) {
 	if (defined($pass)) {
 		local $fakeuser = { 'user' => $user, 'plainpass' => $pass };
 		$err = &check_password_restrictions($fakeuser, $in{'webmin'});
-		&error($err) if ($err);
+		&error(&text('setup_epassvalid', $err)) if ($err);
 		}
 	}
 if (!$aliasdom) {
@@ -498,6 +498,34 @@ if (!$dom{'alias'} && &domain_has_website(\%dom) &&
 	&print_tempfile(DATA, $content);
 	&close_tempfile_as_domain_user(\%dom, DATA);
 	&$second_print($text{'setup_done'});
+	}
+
+# Setup SSH public key if one was given
+if ($in{'sshkey_mode'} == 1) {
+	# Generate a keypair for the user
+	&$first_print($text{'setup_sshkey1'});
+	($sshkey, $err) = &create_domain_ssh_key(\%dom);
+	if (!$err) {
+		$err = &save_domain_ssh_pubkey(\%dom, $sshkey);
+		}
+	if ($err) {
+		&$second_print(&text('setup_esshkey', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+elsif ($in{'sshkey_mode'} == 2) {
+	# Use only the given public key
+	&$first_print($text{'setup_sshkey2'});
+	$in{'sshkey'} =~ s/\r|\n/ /g;
+	$err = &save_domain_ssh_pubkey(\%dom, $in{'sshkey'});
+	if ($err) {
+		&$second_print(&text('setup_esshkey', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 &run_post_actions();

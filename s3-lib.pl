@@ -726,27 +726,39 @@ return undef;
 sub s3_delete_bucket
 {
 my ($akey, $skey, $bucket, $norecursive) = @_;
-&require_s3();
-my $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-
-if (!$norecursive) {
-	# Get and delete files first
-	my $files = &s3_list_files($akey, $skey, $bucket);
-	return $files if (!ref($files));
-	foreach my $f (@$files) {
-		my $err = &s3_delete_file($akey, $skey,
-					     $bucket, $f->{'Key'});
-		return $err if ($err);
-		}
+$bucket || return "Missing bucket parameter to s3_delete_bucket";
+if (&can_use_aws_cmd($akey, $skey, $bucket)) {
+	# Use the aws command to delete the whole bucket
+	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
+	my $out = &call_aws_cmd($akey,
+		[ @regionflag,
+		  "rm", "s3://$bucket", "--recursive" ]);
+	return $? ? $out : undef;
 	}
+else {
+	# Call the HTTP API directly
+	&require_s3();
+	my $conn = &make_s3_connection($akey, $skey);
+	return $text{'s3_econn'} if (!$conn);
 
-my $response = $conn->delete_bucket($bucket);
-if ($response->http_response->code < 200 ||
-    $response->http_response->code >= 300) {
-        return &text('s3_edelete', &extract_s3_message($response));
-        }
-return undef;
+	if (!$norecursive) {
+		# Get and delete files first
+		my $files = &s3_list_files($akey, $skey, $bucket);
+		return $files if (!ref($files));
+		foreach my $f (@$files) {
+			my $err = &s3_delete_file($akey, $skey,
+						     $bucket, $f->{'Key'});
+			return $err if ($err);
+			}
+		}
+
+	my $response = $conn->delete_bucket($bucket);
+	if ($response->http_response->code < 200 ||
+	    $response->http_response->code >= 300) {
+		return &text('s3_edelete', &extract_s3_message($response));
+		}
+	return undef;
+	}
 }
 
 # s3_download(access-key, secret-key, bucket, file, destfile, tries)

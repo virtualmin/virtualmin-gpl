@@ -5866,6 +5866,14 @@ my ($sched, $doms, $status) = @_;
 foreach my $k (keys %$sched) {
 	$ENV{'BACKUP_'.uc($k)} = $sched->{$k};
 	}
+if ($sched->{'strftime'}) {
+	# Expand out date-based paths
+	foreach my $k (keys %$sched) {
+		if ($k eq 'dest' || $k =~ /^dest\d+$/) {
+			$ENV{'BACKUP_'.uc($k)} = &backup_strftime($sched->{$k});
+			}
+		}
+	}
 $ENV{'BACKUP_DOMAIN_NAMES'} = join(" ", map { $_->{'dom'} } @$doms);
 $ENV{'BACKUP_STATUS'} = $status if (defined($status));
 }

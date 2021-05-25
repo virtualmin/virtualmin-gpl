@@ -393,6 +393,8 @@ else {
 sub validate_dir
 {
 local ($d) = @_;
+
+# Make sure home dir exists and has the correct owner
 if (!-d $d->{'home'}) {
 	return &text('validate_edir', "<tt>$d->{'home'}</tt>");
 	}
@@ -410,7 +412,9 @@ if ($d->{'gid'} && $st[5] != $d->{'gid'} && $st[5] != $d->{'ugid'} &&
 	return &text('validate_edirgroup', "<tt>$d->{'home'}</tt>",
 		     $owner, $d->{'group'})
 	}
+
 if (!$d->{'alias'}) {
+	# Make sure common sub-directories exist
 	foreach my $sd (&virtual_server_directories($d)) {
 		next if ($sd->[0] eq 'virtualmin-backup' ||   # Not all domains
 			 $sd->[0] eq $home_virtualmin_backup);
@@ -438,6 +442,19 @@ if (!$d->{'alias'}) {
 			}
 		}
 	}
+
+# Make sure cert files are valid
+if (!$d->{'ssl_same'} && &domain_has_ssl_cert($d)) {
+	foreach my $t ('key', 'cert', 'ca') {
+		my $file = &get_website_ssl_file($d, $t);
+		next if (!$file);
+		my $err = &validate_cert_format($file, $t);
+		if ($err) {
+			return &text('validate_esslfile', $t, $err);
+			}
+		}
+	}
+
 return undef;
 }
 

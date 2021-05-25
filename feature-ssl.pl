@@ -1199,9 +1199,11 @@ else {
 		}
 	&unlink_file($pass_script);
 	}
-&lock_file(@pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'});
+my $pps_file = @pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'};
+&lock_file($pps_file);
 &apache::save_directive("SSLPassPhraseDialog", \@pps, $conf, $conf);
 &flush_file_lines();
+&unlock_file($pps_file);
 &register_post_action(\&restart_apache, &ssl_needs_apache_restart());
 }
 
@@ -1255,6 +1257,7 @@ local %headers = ( 'key' => '(RSA |EC )?PRIVATE KEY',
 		   'newkey' => '(RSA |EC )?PRIVATE KEY' );
 local $h = $headers{$type};
 $h || return "Unknown SSL file type $type";
+($data) = &extract_cert_parameters($data);
 local @lines = grep { /\S/ } split(/\r?\n/, $data);
 local $begin = quotemeta("-----BEGIN ").$h.quotemeta("-----");
 local $end = quotemeta("-----END ").$h.quotemeta("-----");
@@ -1270,6 +1273,26 @@ for(my $i=1; $i<$#lines; $i++) {
 	}
 @lines > 4 || return "Data only has ".scalar(@lines)." lines";
 return undef;
+}
+
+# extract_cert_parameters(cert-text)
+# Given a cert text that might contain a -----BEGIN EC PARAMETERS----- block,
+# return the rest of the file and that block if it exists
+sub extract_cert_parameters
+{
+my ($data) = @_;
+local @lines = grep { /\S/ } split(/\r?\n/, $data);
+my $l = 0;
+my $p = "";
+if ($lines[0] =~ /-----BEGIN\s+(\S+)\s+PARAMETERS-----/) {
+	$p .= $lines[0]."\n";
+	while($lines[++$l] !~ /--END\s+(\S+)\s+PARAMETERS-----/) {
+		$p .= $lines[$l]."\n";
+		}
+	$p .= $lines[$l]."\n";
+	$l++;
+	}
+return (join("\n", @lines[$l..$#lines])."\n", $p);
 }
 
 # cert_pem_data(&domain)
@@ -2588,10 +2611,11 @@ foreach my $d (&list_domains()) {
 
 	# Is it time? Either the user-chosen number of months has passed, or
 	# the cert is within 21 days of expiry
+	my $before = $config{'renew_letsencrypt'} || 21;
 	my $day = 24 * 60 * 60;
 	my $age = time() - $ltime;
 	my $rf = rand() * 3600;
-	my $renew = $expiry && $expiry - time() < 21 * $day + $rf;
+	my $renew = $expiry && $expiry - time() < $before * $day + $rf;
 	next if (!$renew);
 
 	# Don't even attempt now if the lock is being held
@@ -3030,7 +3054,7 @@ foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
 	}
 my @rv;
 foreach my $p (&unique(@paths)) {
-	$p =~ s/^\Q$d->{'home'}\E\///;
+	$p =~ s/^\Q$d->{'home'}\E\/// || next;
 	if ($p =~ /^(.*)\//) {
 		push(@rv, $1);
 		}

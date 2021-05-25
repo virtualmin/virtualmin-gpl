@@ -30,6 +30,11 @@ else {
 	&ui_print_header(&domain_in($d), $text{'scripts_intitle'}, "");
 	}
 
+# Check if the script can be installed
+if (script_migrated_disallowed($script->{'migrated'})) {
+	&error($text{'scripts_eavail'});
+	}
+
 # Validate version number
 $ver =~ /^\S+$/ || &error($text{'scripts_eversion'});
 &indexof($ver, @{$script->{'versions'}}) >= 0 ||
@@ -63,12 +68,10 @@ if ($ok) {
 	$afunc = $script->{'abandoned_func'};
 	$abandoned = defined(&$afunc) && &$afunc($ver);
 	if ($abandoned == 2) {
-		print "<font color=red><b>",
-			&text('scripts_abandoned2'),"</b></font><p>\n";
+		print &ui_alert_box($text{'scripts_abandoned2'}, 'warn');
 		}
 	elsif ($abandoned == 1) {
-		print "<font color=red><b>",
-			&text('scripts_abandoned1', $ver),"</b></font><p>\n";
+		print &ui_alert_box(&text('scripts_abandoned1', $ver), 'warn');
 		}
 	
 	# Show install options form

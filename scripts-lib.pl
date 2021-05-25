@@ -115,6 +115,7 @@ local $disfunc = "script_${name}_disabled";
 local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
 local $overlapfunc = "script_${name}_overlap";
+local $migratedfunc = "script_${name}_migrated";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -171,6 +172,7 @@ local $rv = { 'name' => $name,
 	      'php_mods_func' => "script_${name}_php_modules",
 	      'php_opt_mods_func' => "script_${name}_php_optional_modules",
 	      'php_fullver_func' => "script_${name}_php_fullver",
+	      'php_maxver_func' => "script_${name}_php_maxver",
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
@@ -190,6 +192,7 @@ local $rv = { 'name' => $name,
 	      'nocheck' => $disabled == 2,
 	      'minversion' => $unavail{$name."_minversion"},
 	      'abandoned_func' => "script_${name}_abandoned",
+	      'migrated_func' => "script_${name}_migrated",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
@@ -201,6 +204,9 @@ if (defined(&$vdfunc)) {
 			 @{$rv->{'install_versions'}}) {
 		$rv->{'vdesc'}->{$ver} = &$vdfunc($ver);
 		}
+	}
+if (defined(&$migratedfunc)) {
+	$rv->{'migrated'} = 1;
 	}
 return $rv;
 }
@@ -903,15 +909,28 @@ if (&indexof(5, @rv) >= 0) {
 return sort { $b <=> $a } &unique(@rv);
 }
 
-# setup_php_version(&domain, &versions, path)
+# setup_php_version(&domain, &script, version, path)
 # Checks if one of the given PHP versions is available for the domain.
 # If not, sets up a per-directory version if possible.
 sub setup_php_version
 {
-local ($d, $vers, $path) = @_;
-$vers = [ &expand_php_versions($d, $vers) ];
+local ($d, $script, $scriptver, $path) = @_;
 
-# Find the best matching directory
+# Figure out which PHP versions the script supports
+my @vers = map { &get_php_version($_->[0]) } &list_available_php_versions($d);
+my $minfunc = $script->{'php_fullver_func'};
+my $maxfunc = $script->{'php_maxver_func'};
+if (defined(&$minfunc)) {
+	my $minver = &$minfunc($d, $scriptver);
+	@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
+	}
+if (defined(&$maxfunc)) {
+	my $maxver = &$maxfunc($d, $scriptver);
+	@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+	}
+return undef if (!@vers);
+
+# Find the best matching directory with a PHP version set
 local $dirpath = &public_html_dir($d).$path;
 local @dirs = &list_domain_php_directories($d);
 local $bestdir;
@@ -923,16 +942,16 @@ foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 	}
 $bestdir || &error("Could not find PHP version for $dirpath");
 
-if (&indexof($bestdir->{'version'}, @$vers) >= 0) {
+if (&indexof($bestdir->{'version'}, @vers) >= 0) {
 	# The best match dir supports one of the PHP versions .. so we are OK!
 	return $bestdir->{'version'};
 	}
 
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
-$vers = [ sort { $a <=> $b } @$vers ];
-local $err = &save_domain_php_directory($d, $dirpath, $vers->[0]);
-return $err ? undef : $vers->[0];
+@vers = sort { &compare_versions($a, $b) } @vers;
+local $err = &save_domain_php_directory($d, $dirpath, $vers[0]);
+return $err ? undef : $vers[0];
 }
 
 # clear_php_version(&domain, &sinfo)
@@ -1752,11 +1771,12 @@ local ($d, $page, $params, $out, $err, $headers,
        $returnheaders, $returnheaders_array, $formdata) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'} || 80;
+my $usessl = &domain_has_ssl($d);
+my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
-local $h = &make_http_connection($ip, $port, 0, "POST", $page);
+local $h = &make_http_connection($ip, $port, $usessl, "POST", $page);
 $gconfig{'http_proxy'} = $oldproxy;
 if (!ref($h)) {
 	$$err = $h;
@@ -1829,7 +1849,9 @@ local ($d, $page, $dest, $error, $cbfunc, $ssl, $user, $pass,
        $timeout, $osdn, $nocache, $headers) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
-local $port = $d->{'web_port'} || 80;
+my $usessl = &domain_has_ssl($d);
+my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'}  || 80;
+$ssl = $usessl;
 
 # Build headers
 local @headers;
@@ -1934,7 +1956,7 @@ if ($rcode >= 300 && $rcode < 400) {
 
 	# Download from the new URL
 	if ($host eq &get_domain_http_hostname($d) &&
-	    $port eq ($d->{'web_port'} || 80)) {
+	    $port eq ($d->{'web_sslport'} || $d->{'web_port'} || 80)) {
 		# Same domain, so use Virtualmin's function
 		&get_http_connection($d, $page, $dest, $error, $cbfunc, $ssl,
 				     undef, undef, 0, $osdn, 0, $headers);
@@ -2241,7 +2263,7 @@ local $job = { 'user' => $d->{'user'},
 if ($callnow) {
 	# Fetch the URL now
 	local ($host, $port, $page, $ssl) = &parse_http_url($url);
-	if ($host eq $d->{'dom'} && $port == ($d->{'web_port'} || 80)) {
+	if ($host eq $d->{'dom'} && $port == ($d->{'web_sslport'} || $d->{'web_port'} || 80)) {
 		# On this domain .. can use internal function which handles
 		# use of internal IP
 		local ($out, $err);
@@ -2728,6 +2750,30 @@ sub check_script_depends
 local ($script, $d, $ver, $sinfo, $phpver) = @_;
 local @rv;
 
+if (&indexof("php", @{$script->{'uses'}}) >= 0) {
+	# If the script uses PHP, make sure it's enabled for the domain
+	local $mode = &get_domain_php_mode($d);
+	if ($mode eq "none") {
+		push(@rv, $text{'scripts_iphpneed'});
+		}
+
+	# Also check the PHP version
+	my $minfunc = $script->{'php_fullver_func'};
+	my $maxfunc = $script->{'php_maxver_func'};
+	if (defined(&$minfunc)) {
+		my $minver = &$minfunc($d, $ver, $sinfo);
+		if (&compare_versions($phpver, $minver) < 0) {
+			return &text('scripts_iphpfullver', $minver, $phpver);
+			}
+		}
+	if (defined(&$maxfunc)) {
+		my $maxver = &$maxfunc($d, $ver, $sinfo);
+		if (&compare_versions($phpver, $maxver) < 0) {
+			return &text('scripts_iphpmaxver', $maxver, $phpver);
+			}
+		}
+	}
+
 # Call script's depends function
 if (defined(&{$script->{'depends_func'}})) {
 	push(@rv, grep { $_ } &{$script->{'depends_func'}}($d, $ver, $sinfo, $phpver));
@@ -2747,7 +2793,7 @@ if (defined(&{$script->{'dbs_func'}})) {
 	}
 
 # Check for required commands
-push(@rv, map { &text('scripts_icommand', $_) }
+push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
       &check_script_required_commands($d, $script, $ver, $sinfo->{'opts'}));
 
 # Check for webserver CGI or PHP support
@@ -2992,10 +3038,7 @@ sub disable_script_php_timeout
 {
 local ($d) = @_;
 local $mode = &get_domain_php_mode($d);
-if ($mode eq "mod_php") {
-	return undef;
-	}
-elsif ($mode eq "fcgid") {
+if ($mode eq "fcgid") {
 	local $max = &get_fcgid_max_execution_time($d);
 	return undef if (!$max);
 	&set_fcgid_max_execution_time($d, 9999);
@@ -3133,6 +3176,68 @@ local $cmd = $p5->[1];
 $cmd ||= &has_command("php5") || &has_command("php");
 $cmd =~ s/-cgi//;
 return $cmd;
+}
+
+# script_migrated_disallowed()
+# Check if given script migrated from GPL
+sub script_migrated_disallowed
+{
+my ($migrated) = @_;
+return $migrated && !$virtualmin_pro
+}
+
+# script_migrated_status()
+# If script cannot be installed or upgraded anymore
+# because of migration display appropriate message
+sub script_migrated_status
+{
+my ($status, $migrated, $can_upgrade) = @_;
+return script_migrated_disallowed($script->{'migrated'}) ?
+         &ui_link("http://www.virtualmin.com/shop",
+           $text{'scripts_gpl_to_pro'.($can_upgrade ? "_upgrade" : "").''}, 
+             ($can_upgrade ? " text-warning" : ""), " target=_blank") :
+           $status;
+}
+
+# build_pro_scripts_list()
+# Builds a list of Virtualmin Pro scripts for inclusion to GPL package
+sub build_pro_scripts_list
+{
+my @scripts_pro_list;
+my @scripts = map { &get_script($_) } &list_scripts();
+@scripts = grep { $_->{'avail'} } @scripts;
+@scripts = sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
+foreach my $script (@scripts) {
+	my @vers = grep { &can_script_version($script, $_) }
+		     @{$script->{'install_versions'}};
+	next if (!@vers);
+	next if ($script->{'dir'} !~ /$scripts_directories[3]/ &&
+	        !$script->{'migrated'});
+	push(@scripts_pro_list,
+	    { 'version' => $vers[0],
+	      'name' => $script->{'name'},
+	      'desc' => $script->{'desc'},
+	      'longdesc' => $script->{'longdesc'},
+	      'categories' => $script->{'categories'},
+	      'pro' => 1
+	      },
+	    );
+	}
+my $scripts_pro_file = "$scripts_directories[2]/scripts-pro.info";
+my $fh = "SCRIPTS";
+&open_tempfile($fh, ">$scripts_pro_file");
+&print_tempfile($fh, &serialise_variable(\@scripts_pro_list));
+&close_tempfile($fh);
+}
+
+# load_pro_scripts_list() 
+# Returns a pre-built list of install scripts which are only available in Virtualmin Pro
+sub load_pro_scripts_list
+{
+my $scripts_pro_file = "$scripts_directories[2]/scripts-pro.info";
+my $scripts = &unserialise_variable(&read_file_contents($scripts_pro_file));
+return $scripts if ($scripts && scalar(@{$scripts}) > 0);
+return undef;
 }
 
 1;

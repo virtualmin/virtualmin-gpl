@@ -9,7 +9,11 @@ virtual servers. Like other scripts, the servers to change are selecting
 using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
-parameter followed by one of C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
+parameter followed by one of C<none>, C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
+
+When using FPM mode, you can configure Apache to use a socket file
+for communication with the FPM server with the C<--php-fpm-socket> flag.
+Or switch back to using a TCP port with the C<--php-fpm-port> flag.
 
 The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. To disable this, the
@@ -245,6 +249,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 1;
 		}
+	elsif ($a eq "--php-fpm-port") {
+		$fpmport = 1;
+		}
+	elsif ($a eq "--php-fpm-socket") {
+		$fpmsock = 1;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -255,8 +265,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
-  defined($renew) || $fixhtmldir || $breakcert || $linkcert ||
-	&usage("Nothing to do");
+  defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
+  $fpmsock || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -397,6 +407,27 @@ foreach $d (@doms) {
 			&clear_links_cache($d);
 			}
 		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+
+	# Update FPM socket
+	if (($fpmport || $fpmsock) && !$d->{'alias'}) {
+		my $ps;
+		if ($fpmport) {
+			$ps = &get_php_fpm_socket_port($d);
+			}
+		else {
+			$ps = &get_php_fpm_socket_file($d);
+			}
+		&$first_print("Changing FPM ".($fpmport ? "port" : "socket").
+			      " to ".$ps." ..");
+		my $currmode = $mode || &get_domain_php_mode($d);
+		if ($currmode ne "fpm") {
+			&$second_print(".. not in FPM mode");
+			}
+		else {
+			my $err = &save_domain_php_fpm_port($d, $ps);
+			&$second_print($err ? " .. failed : $err" : ".. done");
+			}
 		}
 
 	# Update Ruby mode
@@ -707,6 +738,7 @@ print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
 print "                     [--php-children number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--php-timeout seconds | --no-php-timeout]\n";
+print "                     [--php-fpm-port | --php-fpm-socket]\n";
 if ($supports_ruby) {
 	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
 	}

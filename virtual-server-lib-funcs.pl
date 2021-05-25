@@ -3552,7 +3552,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 		elsif ($c eq "plan") {
 			# Account plan
 			my $p;
-			if ($d->{'plan'} && defined(&get_plan) &&
+			if ($d->{'plan'} ne '' && defined(&get_plan) &&
 			    ($p = &get_plan($d->{'plan'}))) {
 				push(@cols, $p->{'name'});
 				}
@@ -7810,7 +7810,8 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		# Check PHP version
 		local $phpver;
 		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-			$phpver = &setup_php_version($dom, [5],$opts->{'path'});
+			$phpver = &setup_php_version($dom, $script, $ver,
+						     $opts->{'path'});
 			if (!$phpver) {
 				&$second_print($text{'scripts_ephpvers2'});
 				next;
@@ -8836,6 +8837,7 @@ push(@rv, { 'id' => 0,
 	    'web_admindom' => $config{'web_admindom'},
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'php_fpm' => $config{'php_fpm'} || "none",
+	    'php_sock' => $config{'php_sock'} || 0,
 	    'web_php_suexec' => int($config{'php_suexec'}),
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
@@ -9130,6 +9132,7 @@ if ($tmpl->{'id'} == 0) {
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
 				$tmpl->{'php_fpm'};
+	$config{'php_sock'} = $tmpl->{'php_sock'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
@@ -9410,7 +9413,7 @@ if (!$tmpl->{'default'}) {
 		    "mailgroup", "ftpgroup", "dbgroup",
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
-		    "logrotate", "disabled_web", "disabled_url",
+		    "logrotate", "disabled_web", "disabled_url", "php_sock",
 		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
@@ -9427,7 +9430,7 @@ if (!$tmpl->{'default'}) {
 			local $k;
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
-				next if ($p eq "php" && $k =~ /^php_fpm/);
+				next if ($p eq "php" && $k =~ /^php_(fpm|sock)/);
 				next if ($p eq "web" && $k =~ /^web_(webmail|admin)/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
@@ -12184,18 +12187,22 @@ if (($d->{'spam'} && $config{'spam'} ||
 		  });
 	}
 
-if (&domain_has_website($d) && &can_edit_phpmode()) {
+if (&domain_has_website($d)) {
 	# Website / PHP options buttons
-	push(@rv, { 'page' => 'edit_website.cgi',
-		    'title' => $text{'edit_website'},
-		    'desc' => $text{'edit_websitedesc'},
-		    'cat' => 'server',
-		  });
-	push(@rv, { 'page' => 'edit_phpmode.cgi',
-		    'title' => $text{'edit_php'},
-		    'desc' => $text{'edit_phpdesc'},
-		    'cat' => 'server',
-		  });
+	if (&can_edit_phpmode()) {
+		push(@rv, { 'page' => 'edit_website.cgi',
+			    'title' => $text{'edit_website'},
+			    'desc' => $text{'edit_websitedesc'},
+			    'cat' => 'server',
+			  });
+		}
+	if (&can_edit_phpmode() || &can_edit_phpver()) {
+		push(@rv, { 'page' => 'edit_phpmode.cgi',
+			    'title' => $text{'edit_php'},
+			    'desc' => $text{'edit_phpdesc'},
+			    'cat' => 'server',
+			  });
+		}
 	}
 
 if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
@@ -12374,6 +12381,10 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 	my %faccess = &get_module_acl(undef, 'filemin');
 	my @ap = split(/\s+/, $faccess{'allowed_paths'});
 	if (@ap == 1) {
+		if ($ap[0] eq '$HOME' &&
+		    $base_remote_user eq $d->{'user'}) {
+			$ap[0] = $d->{'home'};
+			}
 		$phd =~ s/^\Q$ap[0]\E//;
 		}
 	push(@rv, { 'page' => 'index.cgi?path='.&urlize($phd),
@@ -13168,6 +13179,11 @@ for(my $i=0; $i<@doms; $i++) {
 	delete($doms[$i]->{'email'});
         }
 
+# Set plan based on new parent
+for(my $i=0; $i<@doms; $i++) {
+	&set_plan_on_children($doms[$i]);
+	}
+
 # Save the domain objects
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
@@ -13742,12 +13758,29 @@ if (!$d->{'parent'}) {
 		}
 	}
 
-# Find any domains aliases to this one, excluding child domains
+# Find any domains aliases to this one, excluding child domains since they
+# were covered above
 my @aliases = &get_domain_by("alias", $d->{'id'});
 my @aliases = grep { $_->{'parent'} != $d->{'id'} } @aliases;
 foreach my $ad (@aliases) {
 	my %oldad = %$ad;
 	push(@oldaliases, \%oldad);
+	if ($user) {
+		$ad->{'email'} =~ s/^\Q$ad->{'user'}\E\@/$user\@/g;
+		$ad->{'emailto'} =~ s/^\Q$ad->{'user'}\E\@/$user\@/g;
+		$ad->{'user'} = $user;
+		}
+	if ($dom) {
+		$ad->{'email'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+		$ad->{'emailto'} =~ s/\@$d->{'dom'}$/\@$dom/gi;
+		}
+	if ($home) {
+		&change_home_directory($ad,
+				       &server_home_directory($ad, $d));
+		}
+	if ($group) {
+		$ad->{'group'} = $group;
+		}
 	}
 
 # Check for domain name clash, where the domain, user or group have changed
@@ -14393,6 +14426,8 @@ if (&domain_has_website()) {
 				foreach my $p (@pools) {
 					my $pd = &get_domain($p);
 					next if ($pd);
+					my ($ok) = &get_domain_php_fpm_port($d);
+					next if (!$ok);	# Don't fix if broken
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
 					# If returned "$t" is "127.0.0.1:9000", 
@@ -14424,13 +14459,17 @@ if (&domain_has_website()) {
 		@fpms = sort { &compare_versions($a->{'shortversion'}, $b->{'shortversion'}) } @fpms;
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} } &list_domains()) {
+			# Check if an FPM version is stored, but doesn't exist
 			next if (!$d->{'php_fpm_version'});
 			local $mode = &get_domain_php_mode($d);
 			next if ($mode ne "fpm");
 			local ($f) = grep { $_->{'shortversion'} eq $d->{'php_fpm_version'} } @fpms;
 			next if ($f);
+
+			# Find the existing version just above the one that
+			# was stored, or alternately the highest available
 			local ($nf) = grep { &compare_versions($_->{'shortversion'}, $d->{'php_fpm_version'}) > 0 } @fpms;
-			next if (!$nf);
+			$nf ||= $fpms[$#fpms];
 			$d->{'php_fpm_version'} = $nf->{'shortversion'};
 			&save_domain($d);
 			push(@fpmfixed, $d);
@@ -14507,7 +14546,7 @@ if (&domain_has_website()) {
 				local $main::error_must_die = 1;
 				local $mode = &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
-				    $mode ne "fpm") {
+				    $mode ne "fpm" && $mode ne "none") {
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
 					}
@@ -18229,21 +18268,21 @@ return $loaded;
 # fix GRUB.
 sub needs_xfs_quota_fix
 {
-return 0 if ($gconfig{'os_type'} !~ /-linux$/);             # Some other OS
-return 0 if (!$config{'quotas'});                           # Quotas not even in use
-return 0 if ($config{'quota_commands'});                    # Using external commands
+return 0 if ($gconfig{'os_type'} !~ /-linux$/);     # Some other OS
+return 0 if (!$config{'quotas'});                   # Quotas not even in use
+return 0 if ($config{'quota_commands'});            # Using external commands
 &require_useradmin();
-return 0 if (!$home_base);                                  # Don't know base dir
-return 0 if (&running_in_zone());                           # Zones have no quotas
+return 0 if (!$home_base);                          # Don't know base dir
+return 0 if (&running_in_zone());                   # Zones have no quotas
 my ($home_mtab, $home_fstab) = &mount_point($home_base);
-return 0 if (!$home_mtab || !$home_fstab);                  # No mount found?
-return 0 if ($home_mtab->[2] ne "xfs");                     # Other FS type
-return 0 if ($home_mtab->[0] ne "/");                       # /home is not on the / FS
-return 0 if (!&quota::quota_can($home_mtab,                 # Not enabled in fstab
+return 0 if (!$home_mtab || !$home_fstab);          # No mount found?
+return 0 if ($home_mtab->[2] ne "xfs");             # Other FS type
+return 0 if ($home_mtab->[0] ne "/");               # /home is not on the / FS
+return 0 if (!&quota::quota_can($home_mtab,         # Not enabled in fstab
 				$home_fstab));
 my $now = &quota::quota_now($home_mtab, $home_fstab);
-$now -= 4 if ($now >= 4);                                   # Ignore XFS always bit
-return 0 if ($now);                                         # Already enabled in mtab
+$now -= 4 if ($now >= 4);                           # Ignore XFS always bit
+return 0 if ($now);                                 # Already enabled in mtab
 
 # At this point, we are definite in a bad state
 my $grubfile = "/etc/default/grub";
@@ -18270,6 +18309,49 @@ return 1 if ($grub{'GRUB_CMDLINE_LINUX'} =~ /rootflags=\S*uquota,gquota/ ||
 
 # Otherwise, flags need adding
 return 2;
+}
+
+# create_domain_ssh_key(&domain)
+# Creates an SSH public and private key for a domain, and returns the public 
+# key and an error message.
+sub create_domain_ssh_key
+{
+my ($d) = @_;
+return (undef, $text{'setup_esshkeydir'}) if (!$d->{'dir'} || !$d->{'unix'});
+return (undef, $text{'setup_esshsshd'}) if (!&foreign_installed("sshd"));
+my $sshdir = $d->{'home'}."/.ssh";
+my %oldpubs = map { $_, 1 } glob("$sshdir/*.pub");
+&foreign_require("sshd");
+my $cmd = $sshd::config{'keygen_path'}." -P \"\"";
+$cmd = &command_as_user($d->{'user'}, 0, $cmd);
+my $out;
+my $inp = "\n";
+&execute_command($cmd, \$inp, \$out, \$out);
+if ($?) {
+	return (undef, $out);
+	}
+my @newpubs = grep { !$oldpubs{$_} } glob("$sshdir/*.pub");
+return (undef, $text{'setup_esshnopub'}) if (!@newpubs);
+return (&read_file_contents($newpubs[0]), undef);
+}
+
+# save_domain_ssh_pubkey(&domain, pubkey)
+# Adds an SSH public key to the authorized keys file
+sub save_domain_ssh_pubkey
+{
+my ($d, $pubkey) = @_;
+return $text{'setup_esshkeydir'} if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+if (!-d $sshdir) {
+	&make_dir_as_domain_user($d, $sshdir, 0700);
+	}
+my $sshfile = $sshdir."/authorized_keys";
+my $ex = -e $sshfile;
+&open_tempfile_as_domain_user($d, SSHFILE, ">>$sshfile");
+&print_tempfile(SSHFILE, $pubkey."\n");
+&close_tempfile_as_domain_user($d, SSHFILE);
+&set_permissions_as_domain_user($d, 0600, $sshfile) if (!$ex);
+return undef;
 }
 
 sub get_module_version_and_type

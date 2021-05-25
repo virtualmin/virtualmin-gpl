@@ -34,12 +34,14 @@ if ($virt) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
 			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
-			    $h =~ /proxy:fcgi:/) {
+			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
 			}
 		}
 
+	# Look for an action, possibly in a directory, that runs the FCGI
+	# wrapper for PHP scripts
 	local @actions = &apache::find_directive("Action", $vconf);
 	local $pdir = &public_html_dir($d);
 	local ($dir) = grep { $_->{'words'}->[0] eq $pdir ||
@@ -56,9 +58,22 @@ if ($virt) {
 				}
 			}
 		}
+
+	# Look for an action that runs PHP via the CGI wrapper
 	foreach my $a (@actions) {
 		if ($a =~ /^application\/x-httpd-php[0-9\.]+\s+\/cgi-bin\/php\S+\.cgi/) {
 			return 'cgi';
+			}
+		}
+
+	# Look for a mapping from PHP scripts to plain text for 'none' mode
+	if ($dir) {
+		local @types = &apache::find_directive(
+				"AddType", $dir->{'members'});
+		foreach my $t (@types) {
+			if ($t =~ /text\/plain\s+\.php/) {
+				return 'none';
+				}
 			}
 		}
 	}
@@ -93,7 +108,7 @@ if ($mode eq "fpm") {
 		}
 	}
 
-if ($mode eq "mod_php" && $oldmode ne "mod_php") {
+if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	# Save the PHP version for later recovery
 	local $oldver = &get_domain_php_version($d, $oldmode);
 	$d->{'last_php_version'} = $oldver;
@@ -223,7 +238,7 @@ if ($p ne 'web') {
 &require_apache();
 
 # Create wrapper scripts
-if ($mode ne "mod_php" && $mode ne "fpm") {
+if ($mode ne "mod_php" && $mode ne "fpm" && $mode ne "none") {
 	&create_php_wrappers($d, $mode);
 	}
 
@@ -304,11 +319,11 @@ foreach my $p (@ports) {
 		# Remove all Action and AddType directives for suexec PHP
 		local $phpconf = $phpstr->{'members'};
 		local @actions = &apache::find_directive("Action", $phpconf);
-		@actions = grep { $_ !~ /^application\/x-httpd-php\d+/ }
+		@actions = grep { !/^application\/x-httpd-php\d+/ }
 				@actions;
 		local @types = &apache::find_directive("AddType", $phpconf);
-		@types = grep { $_ !~ /^application\/x-httpd-php\d+/ }
-			      @types;
+		@types = grep { !/^application\/x-httpd-php\d+/ &&
+				!/\.php[0-9\.]*$/ } @types;
 
 		# Remove all AddHandler and FCGIWrapper directives for fcgid
 		local @handlers = &apache::find_directive("AddHandler",
@@ -342,6 +357,12 @@ foreach my $p (@ports) {
 			foreach my $v (@avail) {
 				push(@wrappers, "$fdest/php$v.fcgi .php$v");
 				}
+			}
+		elsif ($mode eq "none") {
+			foreach my $v (@avail) {
+				push(@types, "text/plain .php$v");
+				}
+			push(@types, "text/plain .php");
 			}
 		if ($mode eq "cgi" || $mode eq "mod_php") {
 			foreach my $v (@avail) {
@@ -387,7 +408,8 @@ foreach my $p (@ports) {
 		$files = $f if ($f->{'words'}->[0] eq '\.php$');
 		}
 	if ($mode eq "fpm" && ($apache::httpd_modules{'core'} < 2.4 || @oldppm)) {
-		# Use a proxy directive for older Apache or if this is what's already in use
+		# Use a proxy directive for older Apache or if this is what's
+		# already in use
 		local $phd = $phpconfs[0]->{'words'}->[0];
 		if (-r $fsock) {
 			# Use existing socket file, since it presumably works
@@ -401,9 +423,17 @@ foreach my $p (@ports) {
 		}
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
 		# Can use a FilesMatch block with SetHandler inside instead
-		my $wanth = 'proxy:fcgi://localhost:'.$fport;
+		my $wanth;
+		if ($tmpl->{'php_sock'}) {
+			my $fsock = &get_php_fpm_socket_file($d);
+			$wanth = 'proxy:unix:'.$fsock."|fcgi://localhost";
+			}
+		else {
+			my $fport = &get_php_fpm_socket_port($d);
+			$wanth = 'proxy:fcgi://localhost:'.$fport;
+			}
 		if (!$files) {
-			$fport = &get_php_fpm_socket_port($d);
+			# Add a new FilesMatch block with the socket
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
 				   'value' => '\.php$',
@@ -413,11 +443,15 @@ foreach my $p (@ports) {
 					},
 				   ],
 				 };
-			&apache::save_directive_struct(undef, $files, $vconf, $conf);
+			&apache::save_directive_struct(
+				undef, $files, $vconf, $conf);
 			}
-		else {
-			# Add the SetHandler directive
-			&apache::save_directive("SetHandler", [$wanth], $files->{'members'}, $conf);
+		elsif (!&apache::find_directive("SetHandler",
+						$files->{'members'})) {
+			# Add the SetHandler directive to the FilesMatch block
+			# if missing
+			&apache::save_directive("SetHandler", [$wanth],
+						$files->{'members'}, $conf);
 			}
 		}
 	else {
@@ -517,9 +551,10 @@ foreach my $p (@ports) {
 	}
 
 local @vlist = map { $_->[0] } &list_available_php_versions($d);
-if ($mode ne "mod_php" && $oldmode eq "mod_php" && $d->{'last_php_version'} &&
+if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
+    $d->{'last_php_version'} &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
-	# Restore PHP version from before mod_php
+	# Restore PHP version from before mod_php or none modes
 	my $err = &save_domain_php_directory($d, &public_html_dir($d),
 				   $d->{'last_php_version'}, 1);
 	return $err if ($err);
@@ -819,8 +854,7 @@ if ($p ne 'web') {
 	}
 &require_apache();
 local @rv;
-push(@rv, "none");
-
+push(@rv, "none");	# Turn off PHP entirely
 if (&get_apache_mod_php_version()) {
 	# Check for Apache PHP module
 	push(@rv, "mod_php");
@@ -852,19 +886,9 @@ if ($suexec) {
 		push(@rv, "fcgid");
 		}
 	}
-if ($d) {
-	# Does this domain's FPM version exist?
-	if (&get_php_fpm_config($d)) {
-		# Check for php-fpm install
-		push(@rv, "fpm");
-		}
-	}
-else {
-	# Do anyt FPM versions exist?
-	my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
-	push(@rv, "fpm") if (@okfpms);
-	}
-
+# Do any FPM versions exist?
+my @okfpms = grep { !$_->{'err'} } &list_php_fpm_configs();
+push(@rv, "fpm") if (@okfpms);
 return @rv;
 }
 
@@ -875,8 +899,7 @@ sub php_mode_numbers_map
 return { 'mod_php' => 0,
 	 'cgi' => 1,
 	 'fcgid' => 2,
-	 'fpm' => 3,
-	 'none' => 4 };
+	 'fpm' => 3 };
 }
 
 # list_available_php_versions([&domain], [forcemode])
@@ -888,6 +911,7 @@ local ($d, $mode) = @_;
 if ($d) {
 	$mode ||= &get_domain_php_mode($d);
 	}
+return () if ($mode eq "none");
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
@@ -1091,11 +1115,15 @@ if ($mode eq "mod_php") {
 		}
 	}
 elsif ($mode eq "fpm") {
-	# Version is store in the domain's config
+	# Version is stored in the domain's config
 	# XXX get from the actual port
 	return ( { 'dir' => &public_html_dir($d),
 		   'version' => $d->{'php_fpm_version'},
 		   'mode' => $mode } );
+	}
+elsif ($mode eq "none") {
+	# No PHP, so no directories
+	return ( );
 	}
 
 # Find directories with either FCGIWrapper or AddType directives, and check
@@ -1889,8 +1917,8 @@ return @rv;
 }
 
 # get_php_fpm_socket_file(&domain, [dont-make-dir])
-# Returns the path to the per-domain PHP-FPM socket file. Creates the directory
-# if needed.
+# Returns the path to the default per-domain PHP-FPM socket file. Creates the
+# directory if needed.
 sub get_php_fpm_socket_file
 {
 my ($d, $nomkdir) = @_;
@@ -1919,6 +1947,122 @@ $d->{'php_fpm_port'} = $rv;
 return $rv;
 }
 
+# get_domain_php_fpm_port(&domain)
+# Returns a status code (0=error, 1=port, 2=file) and the actual TCP port or
+# socket file used for FPM
+sub get_domain_php_fpm_port
+{
+my ($d) = @_;
+local $p = &domain_has_website($d);
+if ($p ne 'web') {
+	if (!&plugin_defined($p, "feature_get_domain_php_fpm_port")) {
+		return (-1, "Not supported by plugin $p");
+		}
+	return &plugin_call($p, "feature_get_domain_php_fpm_port", $d);
+	}
+
+# Find the Apache virtualhost
+&require_apache();
+my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
+						$d->{'web_port'});
+return (0, "No Apache virtualhost found") if (!$virt);
+
+# What port is Apache on?
+my $webport;
+foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
+	if ($p =~ /fcgi:\/\/localhost:(\d+)/ ||
+	    $p =~ /unix:([^\|]+)/) {
+		$webport = $1;
+		}
+	}
+foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+	next if ($f->{'words'}->[0] ne '\.php$');
+	foreach my $h (&apache::find_directive("SetHandler",
+					       $f->{'members'})) {
+		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+		    $h =~ /proxy:unix:([^\|]+)/) {
+			$webport = $1;
+			}
+		}
+	}
+return (0, "No FPM SetHandler or ProxyPassMatch directive found")
+	if (!$webport);
+
+# Which port is the FPM server actually using?
+my $fpmport;
+my $listen = &get_php_fpm_config_value($d, "listen");
+if ($listen =~ /^\S+:(\d+)$/ ||
+    $listen =~ /^(\d+)$/ ||
+    $listen =~ /^(\/\S+)$/) {
+	$fpmport = $1;
+	}
+return (0, "No listen directive found in FPM config") if (!$fpmport);
+
+if ($fpmport ne $webport) {
+	return (0, "Apache config port $webport does not ".
+		   "match FPM config $fpmport");
+	}
+return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
+}
+
+# save_domain_php_fpm_port(&domain, port|socket)
+# Update the TCP port or socket used for FPM for a domain. Returns undef on
+# success or an error message on failure.
+sub save_domain_php_fpm_port
+{
+my ($d, $socket) = @_;
+my $p = &domain_has_website($d);
+if ($p ne 'web') {
+	if (!&plugin_defined($p, "feature_save_domain_php_fpm_port")) {
+		return "Not supported by plugin $p";
+		}
+	return &plugin_call($p, "feature_save_domain_php_fpm_port", $d,$socket);
+	}
+
+# First update the Apache config
+&require_apache();
+&obtain_lock_web($d);
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $found = 0;
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
+		next if ($f->{'words'}->[0] ne '\.php$');
+		my @sh = &apache::find_directive("SetHandler",
+                                                 $f->{'members'});
+		for(my $i=0; $i<@sh; $i++) {
+			if ($sh[$i] =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+			    $sh[$i] =~ /proxy:unix:([^\|]+)/) {
+				# Found the directive to update
+				if ($socket =~ /^\d+$/) {
+					$sh[$i] = "proxy:fcgi://localhost:".$socket;
+					}
+				else {
+					$sh[$i] = "proxy:unix:".$socket.
+						  "|fcgi://localhost";
+					}
+				$found++;
+				}
+			}
+		&apache::save_directive(
+			"SetHandler", \@sh, $f->{'members'}, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
+	}
+&release_lock_web($d);
+$found || return "No Apache VirtualHost containing an FPM SetHandler found";
+&register_post_action(\&restart_apache);
+
+# Second update the FPM server port
+my $conf = &get_php_fpm_config($d);
+&save_php_fpm_config_value($d, "listen", $socket);
+&register_post_action(\&restart_php_fpm_server, $conf);
+
+return undef;
+}
+
 # list_php_fpm_pools(&conf)
 # Returns a list of all pool IDs for some FPM config
 sub list_php_fpm_pools
@@ -1940,13 +2084,20 @@ return @rv;
 sub create_php_fpm_pool
 {
 my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-my $port = &get_php_fpm_socket_port($d);
-if ($port =~ /^\d+$/) {
-	$port = "localhost:".$port;
+my $oldlisten = &get_php_fpm_config_value($d, "listen");
+my $mode;
+if ($oldlisten) {
+	$mode = $oldlisten =~ /^\// ? 1 : 0;
 	}
+else {
+	$mode = $tmpl->{'php_sock'};
+	}
+my $port = $mode ? &get_php_fpm_socket_file($d) : &get_php_fpm_socket_port($d);
+$port = "localhost:".$port if ($port =~ /^\d+$/);
 &lock_file($file);
 if (-r $file) {
 	# Fix up existing one, in case user or group changed
@@ -1959,20 +2110,20 @@ else {
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
 	$defchildren = 9999 if ($defchildren eq "none" || !$defchildren);
-	&open_tempfile(CONF, ">$file");
-	&print_tempfile(CONF, "[$d->{'id'}]\n");
-	&print_tempfile(CONF, "user = ",$d->{'user'},"\n");
-	&print_tempfile(CONF, "group = ",$d->{'ugroup'},"\n");
-	&print_tempfile(CONF, "listen = ",$port,"\n");
-	&print_tempfile(CONF, "pm = dynamic\n");
-	&print_tempfile(CONF, "pm.max_children = $defchildren\n");
-	&print_tempfile(CONF, "pm.start_servers = 1\n");
-	&print_tempfile(CONF, "pm.min_spare_servers = 1\n");
-	&print_tempfile(CONF, "pm.max_spare_servers = 5\n");
 	local $tmp = &create_server_tmp($d);
-	&print_tempfile(CONF, "php_admin_value[upload_tmp_dir] = $tmp\n");
-	&print_tempfile(CONF, "php_admin_value[session.save_path] = $tmp\n");
-	&close_tempfile(CONF);
+	my $lref = &read_file_lines($file);
+	@$lref = ( "[$d->{'id'}]",
+		   "user = ".$d->{'user'},
+		   "group = ".$d->{'ugroup'},
+		   "listen = ".$port,
+		   "pm = dynamic",
+		   "pm.max_children = $defchildren",
+		   "pm.start_servers = 1",
+		   "pm.min_spare_servers = 1",
+		   "pm.max_spare_servers = 5",
+	   	   "php_admin_value[upload_tmp_dir] = $tmp",
+		   "php_admin_value[session.save_path] = $tmp" );
+	&flush_file_lines($file);
 
 	# Add / override custom options (with substitution)
 	if ($tmpl->{'php_fpm'} ne 'none') {

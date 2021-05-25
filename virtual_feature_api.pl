@@ -354,6 +354,20 @@ sub feature_delete_web_php_directory
 {
 }
 
+# feature_get_domain_php_fpm_port(&domain)
+# Returns a status code (0=error, 1=port, 2=file) and the actual TCP port or
+# socket file used for FPM
+sub feature_get_domain_php_fpm_port
+{
+}
+
+# feature_save_domain_php_fpm_port(&domain, port|socket)
+# Update the TCP port or socket used for FPM for a domain. Returns undef on
+# success or an error message on failure.
+sub feature_save_domain_php_fpm_port
+{
+}
+
 # feature_get_fcgid_max_execution_time(&domain)
 # Returns the max execution time for FastCGI scripts in this domain
 sub feature_get_fcgid_max_execution_time

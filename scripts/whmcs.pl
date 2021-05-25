@@ -1,8 +1,8 @@
 
 $whmcs_api_key = "jCteD6q91a3";
 $whmcs_api_host = "www.whmcs.com";
-$whmcs_api_port = 80;
-$whmcs_api_ssl = 0;
+$whmcs_api_port = 443;
+$whmcs_api_ssl = 1;
 $whmcs_api_prefix = "/licenseapi/validate.php";
 
 # script_whmcs_desc()
@@ -18,13 +18,13 @@ return ( "php" );
 
 sub script_whmcs_longdesc
 {
-return "WHMCS is an all-in-one client management, billing & support solution for online businesses.";
+return "WHMCS is an all-in-one client management, billing & support solution for online businesses";
 }
 
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "6.3.2", "7.7.1" );
+return ( "8.1.3", "8.0.5", "7.10.3" );
 }
 
 sub script_whmcs_gpl
@@ -67,12 +67,18 @@ return ( );
 sub script_whmcs_php_fullver
 {
 local ($d, $ver, $sinfo) = @_;
-return $ver >= 7 ? 5.6 : undef;
+return &compare_versions($ver, 8) >= 0 ? 7.2 : 5.6;
 }
 
 sub script_whmcs_php_modules
 {
-return ("mysql", "curl", "gd");
+return ("mysql", "curl", "gd", "pdo_mysql", "intl", "json",
+	    "mbstring", "gmp", "openssl", "bcmath", "iconv", "xml");
+}
+
+sub script_whmcs_php_vars
+{
+return ( [ 'memory_limit', '128M', '+' ] );
 }
 
 sub script_whmcs_dbs
@@ -166,10 +172,8 @@ $io || return "No ionCube loader for your operating system and CPU ".
 
 # Validate the licence
 local $params = "key=".&urlize($whmcs_api_key).
-	        "&licensekey=".&urlize($opts->{'licensekey'}).
-	        "&domain=".&urlize($d->{'dom'}).
-	        "&ipaddress=".&urlize($d->{'ip'}).
-	        "&directory=".&urlize($opts->{'dir'});
+	        "&licensekey=".&urlize($opts->{'licensekey'});
+
 local ($out, $err);
 &http_download($whmcs_api_host, $whmcs_api_port, $whmcs_api_prefix."?".$params,
 	       \$out, \$err, undef, $whmcs_api_ssl, undef, undef, undef, 0, 1);
@@ -514,14 +518,12 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
-#sub script_whmcs_latest
-#{
-#local ($ver) = @_;
-#local $sfx = $ver =~ /^(\d+)\.(\d+)\.(\d+)$/ ? ".$3" : "";
-#return ( "http://www.whmcs.com/whats-new/#download",
-#	 "WHMCS\\s+V(\\S+)\\s+Stable",
-#	 undef, $sfx );
-#}
+sub script_whmcs_latest
+{
+local ($ver) = @_;
+return ( "https://docs.whmcs.com/Release_Notes",
+	     "Version_([0-9\.]+)_Release" );
+}
 
 sub script_whmcs_site
 {

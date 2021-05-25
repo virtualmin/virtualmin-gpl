@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Show all MySQL and PostgreSQL databases owned by this domain
+# Update the remote MySQL server used by this domain
 
 require './virtual-server-lib.pl';
 &ReadParse();

@@ -717,8 +717,6 @@ scripts_idbneedor=$1 lub $2
 scripts_needpackages=Sprawdzanie $1 wymaganych pakietów ..
 scripts_packagecount=.. zainstalowano $1 nowych pakietów
 scripts_packageall=.. wszystkie pakiety już są zainstalowane
-scripts_abandoned2=UWAGA : Ten skrypt nie jest już wspierany przez oryginalnego autora.
-scripts_abandoned1=UWAGA : Wersja $1 tego skryptu nie jest już wspierana przez oryginalnego autora.
 
 summary_title=Podsumowanie wirtualnego serwera
 summary_title2=Podsumowanie wirtualnego sub-serwera

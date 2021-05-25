@@ -83,7 +83,7 @@ foreach my $d (@doms) {
 	# Check if this domain even makes sense
 	next if (!&domain_has_website($d) || $d->{'alias'});
 	$mode = &get_domain_php_mode($d);
-	next if ($mode eq "mod_php");
+	next if ($mode eq "mod_php" || $mode eq "none");
 
 	# Get the ini files
 	@inis = sort { $b->[0] <=> $a->[0] } &list_domain_php_inis($d);

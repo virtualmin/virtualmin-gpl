@@ -360,6 +360,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--generate-ssl-cert") {
 		$always_ssl = 1;
 		}
+	elsif ($a eq "--generate-ssh-key") {
+		$sshmode = 1;
+		}
+	elsif ($a eq "--use-ssh-key") {
+		$sshmode = 2;
+		$sshkey = shift(@ARGV);
+		if ($sshkey =~ /^\//) {
+			$sshkey = &read_file_contents($sshkey);
+			}
+		$sshkey =~ /\S/ || &usage("--use-ssh-key must be followed by a key file or data");
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -867,6 +878,33 @@ if ($fwdto) {
 	&$second_print($text{'setup_done'});
 	}
 
+if ($sshmode == 1) {
+	# Generate and use a key
+	&$first_print($text{'setup_sshkey1'});
+	($sshkey, $err) = &create_domain_ssh_key(\%dom);
+	if (!$err) {
+		$err = &save_domain_ssh_pubkey(\%dom, $sshkey);
+		}
+	if ($err) {
+		&$second_print(&text('setup_esshkey', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+elsif ($sshmode == 2) {
+	# Just use an existing key
+	&$first_print($text{'setup_sshkey2'});
+	$sshkey =~ s/\r|\n/ /g;
+	$err = &save_domain_ssh_pubkey(\%dom, $sshkey);
+	if ($err) {
+		&$second_print(&text('setup_esshkey', $err));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 &virtualmin_api_log(\@OLDARGV, \%dom, $dom{'hashpass'} ? [ "pass" ] : [ ]);
 &run_post_actions_silently();
 &unlock_domain_name($domain);
@@ -954,6 +992,7 @@ print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
 print "                        [--break-ssl-cert | --link-ssl-cert]\n";
 print "                        [--generate-ssl-cert]\n";
+print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";
 exit(1);
 }
 
