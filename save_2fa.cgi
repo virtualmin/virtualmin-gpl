@@ -25,8 +25,12 @@ if ($user->{'twofactor_provider'}) {
 	# Also cancel in Usermin, if setup
 	if (&foreign_installed("usermin")) {
 		&foreign_require("usermin");
-		if (defined(&usermin::save_user_twofactor)) {
-			&usermin::save_user_twofactor($user->{'name'});
+		&foreign_require("webmin");
+		if (defined(&webmin::save_user_twofactor)) {
+			my %miniserv;
+			&usermin::get_usermin_miniserv_config(\%miniserv);
+			&webmin::save_user_twofactor(
+				$user->{'name'}, \%miniserv);
 			&usermin::reload_usermin_miniserv();
 			}
 		}
@@ -75,9 +79,14 @@ else {
 		# Also setup in Usermin, if supported
 		if (&foreign_installed("usermin")) {
 			&foreign_require("usermin");
-			if (defined(&usermin::save_user_twofactor)) {
-				&usermin::save_user_twofactor(
+			&foreign_require("webmin");
+			if (defined(&webmin::save_user_twofactor)) {
+				my %miniserv;
+				&usermin::get_usermin_miniserv_config(
+					\%miniserv);
+				&webmin::save_user_twofactor(
 					$user->{'name'},
+					\%miniserv,
 					$user->{'twofactor_provider'},
 					$user->{'twofactor_id'},
 					$user->{'twofactor_apikey'});
