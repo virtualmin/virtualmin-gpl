@@ -1621,3 +1621,5 @@ Added the Cloud DNS Providers page, for configuring Virtualmin to use Route53 to
 PHP-FPM using socket files instead of TCP ports is now fully supported, using the modify-web API command.
 ---- Changes since 6.16 ----
 Added a field to the virtual server creation page to use an existing SSH key for logins, or generate a new key.
+Two-factor authentication for Usermin is setup for domain owners at the same time as Virtualmin.
+Added the create-login-link API command to login as a domain owner without a password.
