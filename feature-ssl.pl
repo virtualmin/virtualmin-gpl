@@ -1718,7 +1718,7 @@ sub find_matching_certificate_domain
 {
 local ($d) = @_;
 local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
-			   $_->{'ssl'} &&
+			   &domain_has_ssl($_) &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
 local @rv;
