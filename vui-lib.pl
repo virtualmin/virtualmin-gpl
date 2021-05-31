@@ -205,4 +205,27 @@ if (&foreign_available('cpan')) {
 return $rv;
 }
 
+=head2 vui_make_and
+
+Joins multiple words with command and 'and' where needed
+
+=cut
+sub vui_make_and
+{
+my @w = @_;
+if (@w == 0) {
+	return "";
+	}
+elsif (@w == 1) {
+	return $w[0];
+	}
+elsif (@w == 2) {
+	return &text('nf_and', $w[0], $w[1]);
+	}
+else {
+	my $f = pop(@w);
+	return &text('nf_and', join(", ", @w), $f);
+	}
+}
+
 1;

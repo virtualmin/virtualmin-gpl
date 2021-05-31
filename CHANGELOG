@@ -1624,3 +1624,4 @@ Added a field to the virtual server creation page to use an existing SSH key for
 If needed, Virtualmin will configure the exact PHP version required to run scripts when installed.
 Two-factor authentication for Usermin is setup for domain owners at the same time as Virtualmin.
 Added the create-login-link API command to login as a domain owner without a password.
+Massively simplified the SSL Certificate page for services certificates.
