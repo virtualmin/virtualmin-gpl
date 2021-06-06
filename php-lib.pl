@@ -1059,8 +1059,17 @@ if (exists($get_php_version_cache{$cmd})) {
 	return $get_php_version_cache{$cmd};
 	}
 if ($cmd !~ /^\//) {
-	local ($phpn) = grep { $_->[0] == $cmd }
+	# A number was given .. find the matching command
+	my $shortcmd = $cmd;
+	$shortcmd =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
+	local ($phpn) = grep { $_->[0] == $cmd ||
+			       $_->[0] == $shortcmd }
 			     &list_available_php_versions($d);
+	if (!$phpn && $cmd =~ /^5\./) {
+		# Also try just version '5'
+		($phpn) = grep { $_->[0] == 5 }
+			       &list_available_php_versions($d);
+		}
 	if (!$phpn && $cmd == 5) {
 		# If the system ONLY has PHP 7, consider it compatible with
 		# PHP major version 5
