@@ -928,6 +928,7 @@ if (defined(&$maxfunc)) {
 	my $maxver = &$maxfunc($d, $scriptver);
 	@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
 	}
+print STDERR "vers=",join(" ", @vers),"\n";
 return undef if (!@vers);
 
 # Find the best matching directory with a PHP version set
@@ -942,7 +943,9 @@ foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 	}
 $bestdir || &error("Could not find PHP version for $dirpath");
 
-if (&indexof($bestdir->{'version'}, @vers) >= 0) {
+my $bestver = &get_php_version($bestdir->{'version'});
+if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
+    &indexof($bestver, @vers) >= 0) {
 	# The best match dir supports one of the PHP versions .. so we are OK!
 	return $bestdir->{'version'};
 	}

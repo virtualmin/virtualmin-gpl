@@ -1125,7 +1125,6 @@ if ($mode eq "mod_php") {
 	}
 elsif ($mode eq "fpm") {
 	# Version is stored in the domain's config
-	# XXX get from the actual port
 	return ( { 'dir' => &public_html_dir($d),
 		   'version' => $d->{'php_fpm_version'},
 		   'mode' => $mode } );
