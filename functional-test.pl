@@ -8007,7 +8007,7 @@ $clone_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'phpmyadmin' ],
 		      [ 'path', '/phpmyadmin' ],
-		      [ 'version', '3.5.8.2' ] ],
+		      [ 'version', '4.9.7' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
