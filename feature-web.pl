@@ -3141,7 +3141,8 @@ local ($d, $tmpl, $port) = @_;
 my $err;
 
 &require_apache();
-my $mode = &template_to_php_mode($tmpl);
+my $mode = $d->{'default_php_mode'} || &template_to_php_mode($tmpl);
+delete($d->{'default_php_mode'});
 my @supp = &supported_php_modes();
 if (&indexof($mode, @supp) < 0) {
 	$err = &text('setup_ewebphpmode', $mode);

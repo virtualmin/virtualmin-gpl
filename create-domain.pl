@@ -371,6 +371,9 @@ while(@ARGV > 0) {
 			}
 		$sshkey =~ /\S/ || &usage("--use-ssh-key must be followed by a key file or data");
 		}
+	elsif ($a eq "--mode") {
+		$phpmode = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -722,6 +725,13 @@ if ($myserver) {
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 
+# Validate PHP mode
+if ($phpmode) {
+	my @supp = &supported_php_modes();
+	&indexof($phpmode, @supp) >= 0 ||
+		&usage("The selected PHP exection mode cannot be used");
+	}
+
 # Work out prefix if needed, and check it
 $prefix ||= &compute_prefix($domain, $group, $parent, 1);
 $prefix =~ /^[a-z0-9\.\-]+$/i || &usage($text{'setup_eprefix'});
@@ -786,6 +796,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'auto_letsencrypt', $letsencrypt,
 	 'jail', $jail,
 	 'mysql_module', $mysql_module,
+	 'default_php_mode', $phpmode,
         );
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = 1 if ($linkcert eq '1');
