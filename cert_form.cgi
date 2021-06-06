@@ -162,30 +162,16 @@ if (&domain_has_ssl_cert($d)) {
 
 	print &ui_table_end();
 
-	print &ui_hr();
+	my $ui_hr;
 	print &ui_buttons_start();
 
 	if (!&domain_has_ssl($d) && !@already && !$d->{'ssl_same'}) {
+		print &ui_hr() if (!$ui_hr++);
 		# Show button to remove SSL cert
 		print &ui_buttons_row("remove_cert.cgi",
 				      $text{'cert_remove'},
 				      $text{'cert_removedesc'},
 				      &ui_hidden("dom", $in{'dom'}));
-		}
-
-	# Show button to copy to global
-	my @gmissing;
-	foreach my $st (&list_service_ssl_cert_types()) {
-		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;
-		push(@gmissing, $st) if (!$a);
-		}
-	if (@gmissing) {
-		print &ui_buttons_row(
-			"copy_cert_all.cgi",
-			$text{'cert_copyall2'},
-			&text('cert_copyall2desc',
-			    &vui_make_and(map { $_->{'desc'} } @gmissing)),
-			&ui_hidden("dom", $in{'dom'}));
 		}
 
 	# Show button to copy to per-service, if any are missing
@@ -197,6 +183,7 @@ if (&domain_has_ssl_cert($d)) {
 		push(@smissing, $st) if (!$a);
 		}
 	if (@smissing) {
+		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"peripcerts.cgi",
 			$text{'cert_copyall'},
@@ -206,6 +193,21 @@ if (&domain_has_ssl_cert($d)) {
 			&ui_hidden("enable", 1));
 		}
 
+	# Show button to copy to global
+	my @gmissing;
+	foreach my $st (&list_service_ssl_cert_types()) {
+		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;
+		push(@gmissing, $st) if (!$a);
+		}
+	if (@gmissing) {
+		print &ui_hr() if (!$ui_hr++);
+		print &ui_buttons_row(
+			"copy_cert_all.cgi",
+			$text{'cert_copyall2'},
+			&text('cert_copyall2desc',
+			    &vui_make_and(map { $_->{'desc'} } @gmissing)),
+			&ui_hidden("dom", $in{'dom'}));
+		}
 	print &ui_buttons_end();
 	}
 else {
