@@ -437,7 +437,7 @@ $domains_tests = [
 	# Switch PHP mode to one that works
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'mode', $supports_cgi ? 'cgi' : 'fpm' ] ],
+		      [ 'default-mode' ] ],
 	},
 
 	# Check that script runs now
