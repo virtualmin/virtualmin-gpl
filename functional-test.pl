@@ -412,6 +412,40 @@ $domains_tests = [
 		},
 		) : ( ),
 
+	# Switch PHP mode to None
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'none' ] ],
+	},
+
+	# Validate PHP mode
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: none' ],
+	},
+
+	# Check PHP scripts don't run
+	{ 'command' => 'echo "<?php print 22222+22222; ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'antigrep' => '44444',
+	  'grep' => '22222\+22222',
+	},
+
+	# Switch PHP mode to one that works
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', $supports_cgi ? 'cgi' : 'fpm' ] ],
+	},
+
+	# Check that script runs now
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => '44444',
+	  'antigrep' => '22222\+22222',
+	},
+
 	# Disable a feature
 	{ 'command' => 'disable-feature.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
