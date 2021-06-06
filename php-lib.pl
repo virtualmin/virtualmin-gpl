@@ -117,7 +117,7 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 # Work out source php.ini files
 local (%srcini, %subs_ini);
 local @vers = &list_available_php_versions($d, $mode);
-@vers || return "No PHP versions found for mode $mode";
+$mode eq "none" || @vers || return "No PHP versions found for mode $mode";
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;
 	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
