@@ -1440,7 +1440,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1474,7 +1474,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1856,7 +1856,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -4044,6 +4044,7 @@ $incremental_tests = [
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'mysql' ], [ 'webmin' ], [ 'logrotate' ],
 		      [ 'content' => 'Test home page' ],
+		      [ 'mode', 'fcgid' ],
 		      @create_args, ],
         },
 
@@ -4053,7 +4054,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -5097,7 +5098,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.13\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.16\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
@@ -5127,7 +5128,7 @@ $webmin_tests = [
 	# Un-install the script
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/unscript_install.cgi?dom=\$DOMAIN_ID\\&confirm=1\\&script=\$SCRIPT_ID",
-	  'grep' => [ '<body', '</body>', 'RoundCube directory deleted' ],
+	  'grep' => [ '<body', '</body>', 'RoundCube directory and tables deleted' ],
 	  'antigrep' => [ 'Error', 'failed' ],
 	},
 
