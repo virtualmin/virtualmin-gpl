@@ -928,7 +928,6 @@ if (defined(&$maxfunc)) {
 	my $maxver = &$maxfunc($d, $scriptver);
 	@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
 	}
-print STDERR "vers=",join(" ", @vers),"\n";
 return undef if (!@vers);
 
 # Find the best matching directory with a PHP version set
