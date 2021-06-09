@@ -89,6 +89,7 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			{ 'type' => 'checkbox', 'name' => 'mods',
 			  'value' => $m->{'dir'},
 			  'checked' => $plugins{$m->{'dir'}},
+			  'tags' => "onClick='this.closest(\"tr\").querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
 			},
 			&plugin_call($m->{'dir'}, "feature_name") ||
 			  $m->{'dir'},
@@ -99,6 +100,7 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 									: "-",
 			{ 'type' => 'checkbox', 'name' => 'active',
 			  'value' => $m->{'dir'},
+			  'disabled' => !$plugins{$m->{'dir'}},
 			  'checked' => !$inactive{$m->{'dir'}},
 			},
 			&ui_links_row(\@acts)
