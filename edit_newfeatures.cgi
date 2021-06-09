@@ -50,7 +50,7 @@ foreach $f (@features) {
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'fmods',
 			  'value' => $f, 'checked' => $config{$f} != 0,
-			  'tags' => "onClick='this.parentElement.parentElement.querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
+			  'tags' => "onClick='this.closest(\"tr\").querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
 			},
 			$text{'feature_'.$f},
 			$text{'features_feature'},
