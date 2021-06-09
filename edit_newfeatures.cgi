@@ -17,7 +17,6 @@ print "$text{'features_desc'}<p>\n";
 
 # Add rows for core features
 @table_order_initial = ( );
-$n = 0;
 foreach $f (@features) {
 	# Skip features for modules that aren't enabled in Webmin
 	my $cfunc = "check_module_".$f;
@@ -51,7 +50,7 @@ foreach $f (@features) {
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'fmods',
 			  'value' => $f, 'checked' => $config{$f} != 0,
-			  'tags' => "onClick='form.factive[$n].disabled = !this.checked;'",
+			  'tags' => "onClick='this.parentElement.parentElement.querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
 			},
 			$text{'feature_'.$f},
 			$text{'features_feature'},
@@ -63,13 +62,11 @@ foreach $f (@features) {
 			&ui_links_row(\@acts)
 			]);
 		}
-	$n++;
 	}
 
 # Add rows for all plugins
 %plugins = map { $_, 1 } @plugins;
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
-$n = 0;
 foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	$mdir = &module_root_directory($m->{'dir'});
 	if (-r "$mdir/virtual_feature.pl") {
@@ -107,7 +104,6 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			&ui_links_row(\@acts)
 			]);
 		push(@hiddens, [ "allplugins", $m->{'dir'} ]);
-		$n++;
 		}
 	}
 
