@@ -34,7 +34,7 @@ foreach $f (@features) {
 		# by default
 		push(@table_order_initial, $f);
 		push(@table, [
-			ui_img("images/tick.gif", "Enabled"),
+			{ 'type' => 'checkbox', 'checked' => 1, 'disabled' => 1 },
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			get_module_version_and_type(),
