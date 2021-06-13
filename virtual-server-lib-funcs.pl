@@ -7962,7 +7962,7 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
-		&create_initial_letsencrypt_cert($dom);
+		&create_initial_letsencrypt_cert($dom, 1);
 		$generated++;
 		}
 	}
@@ -8033,16 +8033,28 @@ local $merr = &made_changes();
 return undef;
 }
 
-# create_initial_letsencrypt_cert(&domain)
+# create_initial_letsencrypt_cert(&domain, [validate-first])
 # Create the initial default let's encrypt cert for a domain which has just
 # had SSL enabled. May print stuff.
 sub create_initial_letsencrypt_cert
 {
-local ($d) = @_;
+local ($d, $valid) = @_;
 &foreign_require("webmin");
 my @dnames = &get_hostnames_for_ssl($d);
 &$first_print(&text('letsencrypt_doing2',
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
+if ($valid) {
+	my @errs = &validate_letsencrypt_config($d);
+	if (@errs) {
+		&$second_print($text{'letsencrypt_evalid'});
+		return 0;
+		}
+	@errs = &check_domain_connectivity($d, { 'mail' => 1, 'ssl' => 1 });
+	if (@errs) {
+		&$second_print($text{'letsencrypt_econnect'});
+		return 0;
+		}
+	}
 my $phd = &public_html_dir($d);
 my $before = &before_letsencrypt_website($d);
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
@@ -8067,7 +8079,7 @@ else {
 	if ($cert_info) {
 		$d->{'ssl_cert_expiry'} = 
 			&parse_notafter_date($cert_info->{'notafter'});
-	}
+		}
 	&save_domain($d);
 
 	# Update other services using the cert

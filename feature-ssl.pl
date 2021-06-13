@@ -219,7 +219,7 @@ else {
 # the first time
 if (!$d->{'creating'} && $generated && $d->{'auto_letsencrypt'} &&
     !$d->{'disabled'}) {
-	&create_initial_letsencrypt_cert($d);
+	&create_initial_letsencrypt_cert($d, 1);
 	}
 
 return 1;
