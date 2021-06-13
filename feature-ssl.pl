@@ -809,6 +809,9 @@ if ($virt) {
 		&copy_write_as_domain_user($d, $key, $file."_key");
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf,1);
+	if (!$ca) {
+		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf,1);
+		}
 	if ($ca) {
 		&copy_write_as_domain_user($d, $ca, $file."_ca");
 		}
@@ -887,6 +890,9 @@ if ($virt) {
 		&unlock_file($key);
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
+	if (!$ca) {
+		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
+		}
 	if ($ca && -r $file."_ca") {
 		&lock_file($ca);
 		&set_ownership_permissions(

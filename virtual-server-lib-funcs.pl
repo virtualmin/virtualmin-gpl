@@ -17789,6 +17789,14 @@ if (&domain_has_ssl($d)) {
 	my $dir = $type eq 'cert' ? "SSLCertificateFile" :
 		     $type eq 'key' ? "SSLCertificateKeyFile" :
 		     $type eq 'ca' ? "SSLCACertificateFile" : undef;
+	if ($dir eq "SSLCACertificateFile") {
+		# Check for the alternate directive
+		my ($oldfile) = &apache::find_directive(
+			"SSLCertificateChainFile", $vconf);
+		if ($oldfile) {
+			$dir = "SSLCertificateChainFile";
+			}
+		}
 	if ($dir) {
 		&apache::save_directive($dir, $file ? [ $file ] : [ ],
 					$vconf, $conf);
@@ -17829,6 +17837,11 @@ if (&domain_has_ssl($d)) {
 						       : undef;
 	return undef if (!$dir);
 	my ($file) = &apache::find_directive($dir, $vconf);
+	if (!$file && $dir eq "SSLCACertificateFile") {
+		# Check for the alternate directive
+		$dir = "SSLCertificateChainFile";
+		($file) = &apache::find_directive($dir, $vconf);
+		}
 	return $file;
 	}
 else {
