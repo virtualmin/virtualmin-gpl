@@ -758,6 +758,7 @@ $dom{'dns'} = 1;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
+$dom{'no_default_service_certs'} = 1 if ($in->{'defssl'} != 2);
 if ($in->{'defssl'}) {
 	$dom{$sslf} = 1;
 	if ($in->{'defssl'} == 2) {
