@@ -570,5 +570,10 @@ my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib
 return $cmd;
 }
 
+sub script_django_migrated
+{
+return 1;
+}
+
 1;
 
