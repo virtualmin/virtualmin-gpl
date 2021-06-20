@@ -14450,7 +14450,8 @@ if (&domain_has_website()) {
 						}
 					if ($t && $t =~ /^\d+$/ && $used{$t}++) {
 						# Port is wrong!
-						&$second_print(&text('check_webphpfpmport', $conf->{'version'}, $t));
+						&$second_print(&text('check_webphpfpmport',
+							$conf->{'version'}, $t));
 						while($used{$t}) {
 							$t = &increase_fpm_port($t) || 9001;
 							}
@@ -14560,8 +14561,10 @@ if (&domain_has_website()) {
 				local $mode = &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
 				    $mode ne "fpm" && $mode ne "none") {
+					&obtain_lock_web($d);
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
+					&release_lock_web($d);
 					}
 				};
 			}
