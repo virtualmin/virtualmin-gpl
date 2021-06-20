@@ -5,9 +5,13 @@
 Executes another API command over multiple servers.
 
 Some Virtualmin API commands can only run on a single domain at a time, so this
-command exists as a wrapper to loop over multiple domains easily.
+command exists as a wrapper to loop over multiple domains easily. It can be
+run like : C<virtualmin run-api-command --user foo modify-web --mode cgi>
 
-XXX add --test flag and example
+Flags to select the domains to operate on must be given before the command
+to run. All flags after the command will be passed to each invocation of it.
+You can see the final commands without running them by adding the C<--test>
+flag.
 
 By default it will operate on all virtual servers, but you can choose specific
 servers with the C<--domain> flag which can be given multiple times. Or
@@ -133,6 +137,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--disabled") { $disabled = 1; }
 	elsif ($a eq "--enabled") { $disabled = 0; }
+	elsif ($a eq "--test") {
+		$testmode = 1;
+		}
 	elsif ($a !~ /^-/) {
 		# Found the command - stop parsing
 		$apicmd = $a;
@@ -239,16 +246,21 @@ elsif ($disabled eq '0') {
 @doms || &usage("No matching virtual servers found");
 foreach my $d (@doms) {
 	$cmd = "virtualmin ".$apicmd." --domain $d->{'dom'} ".
-	       join(" ", map { quotemeta($_) } @ARGV);
-	print "Running $cmd ..\n";
-	&open_execute_command(OUT, $cmd, 1);
-	while(<OUT>) {
-		print $_;
+	       join(" ", map { &quotameta_ifneeded($_) } @ARGV);
+	if ($testmode) {
+		print "Would run $cmd ..\n";
 		}
-	$ok = close(OUT);
-	$ok = 0 if ($?);
-	print !$ok ? ".. failed!\n" : ".. done\n";
-	print "\n";
+	else {
+		print "Running $cmd ..\n";
+		&open_execute_command(OUT, $cmd, 1);
+		while(<OUT>) {
+			print $_;
+			}
+		$ok = close(OUT);
+		$ok = 0 if ($?);
+		print !$ok ? ".. failed!\n" : ".. done\n";
+		print "\n";
+		}
 	}
 
 sub usage
@@ -272,8 +284,13 @@ if ($virtualmin_pro) {
 	print "                           [--reseller name | --no-reseller |\n";
 	print "                            --any-reseller]\n";
 	}
+print "                           [--test]\n";
 print "                           command [flags]\n";
 exit(1);
 }
 
-
+sub quotameta_ifneeded
+{
+my ($cmd) = @_;
+return $cmd =~ /[ \t;&<>()]/ ? quotemeta($cmd) : $cmd;
+}
