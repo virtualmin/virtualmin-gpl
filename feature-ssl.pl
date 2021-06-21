@@ -1421,6 +1421,22 @@ if (@ipkeys != @newipkeys) {
 return $text{'delete_esslnoips'};
 }
 
+# apache_combined_cert()
+# Returns 1 if Apache should be pointed to the combined SSL cert file
+sub apache_combined_cert
+{
+&require_apache();
+if ($config{'combined_cert'} == 2) {
+	return 1;
+	}
+elsif ($config{'combined_cert'} == 1) {
+	return 0;
+	}
+else {
+	return &compare_versions($apache::httpd_modules{'core'}, "2.4.8") >= 0;
+	}
+}
+
 # apache_ssl_directives(&domain, template)
 # Returns extra Apache directives needed for SSL
 sub apache_ssl_directives
@@ -1429,7 +1445,12 @@ local ($d, $tmpl) = @_;
 &require_apache();
 local @dirs;
 push(@dirs, "SSLEngine on");
-push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+if (&apache_combined_cert()) {
+	push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+	}
+else {
+	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
+	}
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 if ($d->{'ssl_chain'}) {
 	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
@@ -1852,8 +1873,14 @@ if ($d->{'web'}) {
 	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
 		$d->{'dom'}, $d->{'web_sslport'});
 	if ($ovirt) {
-		&apache::save_directive("SSLCertificateFile",
-			[ $d->{'ssl_cert'} ], $ovconf, $conf);
+		if (&apache_combined_cert()) {
+			&apache::save_directive("SSLCertificateFile",
+				[ $d->{'ssl_combined'} ], $ovconf, $conf);
+			}
+		else {
+			&apache::save_directive("SSLCertificateFile",
+				[ $d->{'ssl_cert'} ], $ovconf, $conf);
+			}
 		&apache::save_directive("SSLCertificateKeyFile",
 			$d->{'ssl_key'} ? [ $d->{'ssl_key'} ] : [ ],
 			$ovconf, $conf);
