@@ -49,11 +49,13 @@ local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 
 # Find the DNS domain that this could be placed under
 local $dnsparent;
+local $dns_submode = defined($d->{'dns_submode'}) ? $d->{'dns_submode'} :
+			$tmpl->{'dns_sub'} eq 'yes' ? 1 : 0;
 if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
 	$dnsparent = &get_domain($d->{'subdom'});
 	}
-elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
+elsif ($dns_submode && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     (&get_domain_by("parent", $d->{'parent'}),
@@ -455,7 +457,7 @@ else {
 	&post_records_change($dnsparent, \@recs);
 	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
-	$d->{'dns_submode'} = 0;
+	delete($d->{'dns_submode'});
 	}
 &register_post_action(\&restart_bind, $d);
 return 1;
@@ -4281,6 +4283,52 @@ eval {
 	};
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);
+}
+
+# save_dns_submode(&domain, enabled?)
+# Move this domain into or out of it's parent DNS domain
+sub save_dns_submode
+{
+my ($d, $enabled) = @_;
+if ($d->{'dns_submode'} && !$enabled) {
+	# Move out to it's own DNS zone file
+	&require_bind();
+	&obtain_lock_dns($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	my @srecs;
+	my $withdot = $d->{'dom'}.".";
+	foreach my $r (@$recs) {
+		if ($r->{'name'} eq $withdot ||
+		    $r->{'name'} =~ /\.$withdot$/) {
+			push(@srecs, $r);
+			}
+		}
+	&delete_dns($d);
+	$d->{'dns_submode'} = 0;
+	delete($d->{'dns_subof'});
+	&setup_dns($d);
+	&pre_records_change($d);
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	foreach my $r (@srecs) {
+		my ($a) = grep { $_->{'name'} eq $r->{'name'} &&
+				 $_->{'type'} eq $r->{'type'} } @$recs;
+		if (!$a) {
+			# Add record that was in the sub-domain
+			my $str = &join_record_values($r);
+			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+					      'IN', $r->{'type'}, $str);
+			}
+		}
+	&post_records_change($d, $recs);
+	&release_lock_dns($d);
+	&register_post_action(\&restart_bind, $d);
+	return undef;
+	}
+elsif (!$d->{'dns_submode'} && $enabled) {
+	# Move into the parent DNS zone file (if possible)
+	return "Not implemented";
+	}
+return undef;
 }
 
 $done_feature_script{'dns'} = 1;

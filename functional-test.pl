@@ -29,6 +29,7 @@ $ENV{'ftp_proxy'} = undef;
 $test_domain = "example.com";	# Never really exists
 $test_ssl_subdomain = "ssl.".$test_domain;
 $test_ssl2_subdomain = "ssl2.".$test_domain;
+$test_dns_subdomain = "dns.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
@@ -8919,6 +8920,112 @@ if (!$config{'rs_user'} || !$config{'rs_key'}) {
 	$rs_tests = [ { 'command' => 'echo No default Rackspace access or secret key defined on this system' } ];
 	}
 
+$dns_tests = [
+	# Create a domain with DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-domain that should share the DNS zone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'desc', 'Test subdomain' ],
+		      [ 'dir' ], [ 'dns' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'parent' => $test_domain ],
+		      @create_args, ],
+        },
+
+	# Validate DNS sub-domain was created
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Add a record to both domains
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing1 A 1.2.3.4' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'add-record', 'testing2 A 1.2.3.4' ] ],
+	},
+
+	# Validate that they were created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Split the sub-domain into it's own zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'disable-subdomain' ] ],
+	},
+
+	# Validate the split
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'antigrep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Move the sub-domain back into the parent zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'enable-subdomain' ] ],
+	},
+
+	# Validate the move
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -8994,6 +9101,7 @@ $alltests = { '_config' => $_config_tests,
 	      'exclude' => $exclude_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
+	      'dns' => $dns_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
