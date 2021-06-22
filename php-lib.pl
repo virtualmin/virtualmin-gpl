@@ -1989,7 +1989,13 @@ foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 					       $f->{'members'})) {
 		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
 		    $h =~ /proxy:unix:([^\|]+)/) {
-			$webport = $1;
+			my $webport2 = $1;
+			if ($webport && $webport != $webports) {
+				return (0, "Port $webport in ProxyPassMatch ".
+					   "is different from port $webport2 ".
+					   "in FilesMatch");
+				}
+			$webport ||= $webport2;
 			}
 		}
 	}
