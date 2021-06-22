@@ -384,7 +384,8 @@ sub script_roundcube_latest
 {
 local ($ver) = @_;
 return ( "http://roundcube.net/download/",
-         "roundcubemail-([0-9\\.]+)-complete.tar.gz");
+         $ver >= 1.4 ? "roundcubemail-([0-9\\.]+)-complete.tar.gz"
+		     : "roundcubemail-(1\\.3\\.[0-9\\.]+)-complete.tar.gz" );
 }
 
 sub script_roundcube_site
