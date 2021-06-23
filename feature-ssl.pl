@@ -1446,10 +1446,10 @@ local ($d, $tmpl) = @_;
 local @dirs;
 push(@dirs, "SSLEngine on");
 if (&apache_combined_cert()) {
-	push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
 	}
 else {
-	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
+	push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
 	}
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 if ($d->{'ssl_chain'}) {
