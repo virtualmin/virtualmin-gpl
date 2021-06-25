@@ -57,14 +57,7 @@ if ($d->{'subdom'}) {
 	}
 elsif ($dns_submode && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
-	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
-			     (&get_domain_by("parent", $d->{'parent'}),
-			      &get_domain($d->{'parent'}))) {
-		if (!$pd->{'dns_submode'} && &under_parent_domain($d, $pd)) {
-			$dnsparent = $pd;
-			last;
-			}
-		}
+	$dnsparent = &find_parent_dns_domain($d);
 	}
 
 # Create domain info object
@@ -4290,43 +4283,78 @@ return ($tm);
 sub save_dns_submode
 {
 my ($d, $enabled) = @_;
-if ($d->{'dns_submode'} && !$enabled) {
-	# Move out to it's own DNS zone file
-	&require_bind();
-	&obtain_lock_dns($d);
-	my ($recs, $file) = &get_domain_dns_records_and_file($d);
-	my @srecs;
-	my $withdot = $d->{'dom'}.".";
-	foreach my $r (@$recs) {
-		if ($r->{'name'} eq $withdot ||
-		    $r->{'name'} =~ /\.$withdot$/) {
-			push(@srecs, $r);
-			}
+if ($d->{'dns_submode'} && $enabled ||
+    !$d->{'dns_submode'} && !$enabled) {
+	# Nothing to do
+	print STDERR "Nothing to do in dns_submode\n";
+	return undef;
+	}
+
+# Get the current records
+&require_bind();
+&obtain_lock_dns($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my @srecs;
+my $withdot = $d->{'dom'}.".";
+foreach my $r (@$recs) {
+	if (($r->{'name'} eq $withdot ||
+	     $r->{'name'} =~ /\.$withdot$/) &&
+	    $r->{'type'} !~ /SOA|NS|NSEC/) {
+		push(@srecs, $r);
 		}
+	}
+
+if ($d->{'dns_submode'} && !$enabled) {
+	# Delete the old records, then setup in a new zone file
 	&delete_dns($d);
 	$d->{'dns_submode'} = 0;
 	delete($d->{'dns_subof'});
 	&setup_dns($d);
-	&pre_records_change($d);
-	($recs, $file) = &get_domain_dns_records_and_file($d);
-	foreach my $r (@srecs) {
-		my ($a) = grep { $_->{'name'} eq $r->{'name'} &&
-				 $_->{'type'} eq $r->{'type'} } @$recs;
-		if (!$a) {
-			# Add record that was in the sub-domain
-			my $str = &join_record_values($r);
-			&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-					      'IN', $r->{'type'}, $str);
-			}
-		}
-	&post_records_change($d, $recs);
-	&release_lock_dns($d);
-	&register_post_action(\&restart_bind, $d);
-	return undef;
 	}
 elsif (!$d->{'dns_submode'} && $enabled) {
-	# Move into the parent DNS zone file (if possible)
-	return "Not implemented";
+	# Move into the parent DNS zone file, if allowed
+	my $dnsparent = &find_parent_dns_domain($d);
+	if (!$dnsparent) {
+		&release_lock_dns($d);
+		return "No suitable parent DNS domain found";
+		}
+	&delete_dns($d);
+	$d->{'dns_submode'} = 1;
+	&setup_dns($d);
+	}
+
+# Add all the records that were in the old zone
+&pre_records_change($d);
+($recs, $file) = &get_domain_dns_records_and_file($d);
+foreach my $r (@srecs) {
+	my ($a) = grep { $_->{'name'} eq $r->{'name'} &&
+			 $_->{'type'} eq $r->{'type'} } @$recs;
+	if (!$a) {
+		# Add record that was in the sub-domain
+		my $str = &join_record_values($r);
+		&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+				      'IN', $r->{'type'}, $str);
+		}
+	}
+&post_records_change($d, $recs);
+&release_lock_dns($d);
+&register_post_action(\&restart_bind, $d);
+&save_domain($d);
+return undef;
+}
+
+# find_parent_dns_domain(&domain)
+# Find a domain with the same owner that's a candidate as a parent DNS zone
+sub find_parent_dns_domain
+{
+my ($d) = @_;
+foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
+		     (&get_domain_by("parent", $d->{'parent'}),
+		      &get_domain($d->{'parent'}))) {
+	if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
+	    &under_parent_domain($d, $pd)) {
+		return $pd;
+		}
 	}
 return undef;
 }
