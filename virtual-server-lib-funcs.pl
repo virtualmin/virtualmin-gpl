@@ -13676,16 +13676,6 @@ if ($dom) {
 	$clash && return $text{'rename_eclash'};
 	}
 
-# If this domain has any DNS sub-domains, disallow the rename
-if ($d->{'dns'}) {
-	my @dnssub = grep { $_->{'dns'} }
-			  &get_domain_by("dns_subof", $d->{'id'});
-	if (@dnssub) {
-		return &text('rename_ednssub',
-			join(" ", map { &show_domain_name($_) } @dnssub));
-		}
-	}
-
 # Validate username, home directory and prefix
 if ($d->{'parent'}) {
 	# Sub-servers don't have a separate user
@@ -13713,6 +13703,21 @@ elsif ($prefix) {
 my $group;
 if ($prefix) {
 	$group = $user || $d->{'user'};
+	}
+
+# If the domain name is being changed and there are any DNS sub-domains
+# which share the same zone file, split them out into their own files
+if ($dom && $d->{'dns'} && !$d->{'dns_submode'}) {
+	my @dnssub = grep { $_->{'dns'} }
+			  &get_domain_by("dns_subof", $d->{'id'});
+	if (@dnssub) {
+		&$first_print($text{'rename_dnssub'});
+		&$indent_print();
+		foreach my $sd (@dnssub) {
+			&save_dns_submode($sd, 0);
+			}
+		&$outdent_print();
+		}
 	}
 
 # Update the domain object with the new domain name and username
@@ -13746,7 +13751,7 @@ if ($group) {
 	$d->{'prefix'} = $prefix;
 	}
 
-# Find any sub-domain objects and update them
+# Find any sub-server objects and update them
 if (!$d->{'parent'}) {
 	my @subs = &get_domain_by("parent", $d->{'id'});
 	foreach my $sd (@subs) {

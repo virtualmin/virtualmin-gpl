@@ -9020,9 +9020,34 @@ $dns_tests = [
 	  'grep' => [ 'testing2' ],
 	},
 
+	# Rename the parent domain so that the sub-domain no longer matches
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'new-domain', $test_rename_domain ] ],
+	},
+
+	# Check that the sub-domain is now separate
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'antigrep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
-	  'args' => [ [ 'domain', $test_domain ] ],
+	  'args' => [ [ 'user', $test_domain_user ] ],
 	  'cleanup' => 1 },
 	];
 

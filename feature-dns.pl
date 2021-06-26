@@ -463,7 +463,7 @@ sub clone_dns
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_dns'});
 if ($d->{'dns_submode'}) {
-	# Record cloning not supported for DNS sub-domains
+	# Record cloning not needed for DNS sub-domains
 	&$second_print($text{'clone_dnssub'});
 	return 1;
 	}
@@ -674,9 +674,7 @@ local ($d, $oldd) = @_;
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
 	# Converting from a sub-domain to top-level .. just delete and re-create
-	&delete_dns($oldd);
-	delete($d->{'dns_submode'});
-	&setup_dns($d);
+	&save_dns_submode($d, 0);
 	return 1;
 	}
 if ($d->{'alias'} && $oldd->{'alias'} &&
@@ -4299,7 +4297,7 @@ my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
 	if (($r->{'name'} eq $withdot ||
 	     $r->{'name'} =~ /\.$withdot$/) &&
-	    $r->{'type'} !~ /SOA|NS|NSEC/) {
+	    $r->{'type'} !~ /SOA|NS|NSEC/i) {
 		push(@srecs, $r);
 		}
 	}
