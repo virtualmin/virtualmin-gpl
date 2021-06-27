@@ -3057,15 +3057,21 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 	}
 }
 
-# list_php_wrapper_templates()
+# list_php_wrapper_templates([only-installed])
 # Returns the list of template names for PHP wrappers, based on the installed
 # PHP versions
 sub list_php_wrapper_templates
 {
-my @vers = &list_available_php_versions();
+my ($only) = @_;
+my @vers;
+if ($only) {
+	@vers = map { $_->[0] } &list_available_php_versions();
+	}
+push(@vers, @all_possible_php_versions);
+@vers = &unique(@vers);
 my @rv;
-push(@rv, map { "php".$_->[0]."cgi" } @vers);
-push(@rv, map { "php".$_->[0]."fcgi" } @vers);
+push(@rv, map { "php".$_."cgi" } @vers);
+push(@rv, map { "php".$_."fcgi" } @vers);
 return @rv;
 }
 
@@ -3074,7 +3080,7 @@ return @rv;
 sub show_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (&unique(&list_php_wrapper_templates())) {
+foreach my $w (&unique(&list_php_wrapper_templates(1))) {
 	local $ndi = &none_def_input($w, $tmpl->{$w},
 				     $text{'tmpl_wrapperbelow'}, 0, 0,
 				     $text{'tmpl_wrappernone'}, [ $w ]);
@@ -3093,7 +3099,7 @@ foreach my $w (&unique(&list_php_wrapper_templates())) {
 sub parse_template_phpwrappers
 {
 local ($tmpl) = @_;
-foreach my $w (&unique(&list_php_wrapper_templates())) {
+foreach my $w (&unique(&list_php_wrapper_templates(1))) {
 	$w =~ /^php([0-9\.]+)(cgi|fcgi)/ || next;
 	local ($v, $t) = ($1, $2);
 	if ($in{$w."_mode"} == 0) {
