@@ -4284,7 +4284,6 @@ my ($d, $enabled) = @_;
 if ($d->{'dns_submode'} && $enabled ||
     !$d->{'dns_submode'} && !$enabled) {
 	# Nothing to do
-	print STDERR "Nothing to do in dns_submode\n";
 	return undef;
 	}
 
