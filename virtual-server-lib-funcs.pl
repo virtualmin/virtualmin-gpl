@@ -4199,8 +4199,10 @@ for(my $i=1; $i<=10; $i++) {
 
 # Add secondary mail servers
 local %ids = map { $_, 1 } split(/\s+/, $d->{'mx_servers'});
-local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
-$hash{'mx_slaves'} = join(" ", map { $_->{'host'} } @servers);
+if (%ids) {
+	local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
+	$hash{'mx_slaves'} = join(" ", map { $_->{'host'} } @servers);
+	}
 
 # Add secondary nameservers
 if ($config{'dns'}) {
@@ -12951,7 +12953,7 @@ return $d->{'alias'} && $d->{'aliasmail'} ? @aliasmail_features :
 # Returns the objects for servers used as secondary MXs
 sub list_mx_servers
 {
-if (&foreign_check("servers")) {
+if (&foreign_check("servers") && $config{'mx_servers'}) {
 	&foreign_require("servers");
 	local %servers = map { $_->{'id'}, $_ } &servers::list_servers();
 	local @rv;
