@@ -71,8 +71,5 @@ print &ui_form_end([
 		     [ "parse", $text{'wizard_next'} ],
 		   ], "100%");
 
-&ui_print_footer("", $text{'index_return'});
-
-
 1;
 
