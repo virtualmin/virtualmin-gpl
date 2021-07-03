@@ -351,9 +351,9 @@ else {
 sub wizard_parse_mysql
 {
 local ($in) = @_;
-local $pass = $in->{'mypass'};
-local $user = $mysql::mysql_login || 'root';
 &require_mysql();
+local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
+local $user = $mysql::mysql_login || 'root';
 $mysql::mysql_pass = $pass;
 $mysql::authstr = &mysql::make_authstr();
 if (&mysql::is_mysql_running() == -1) {
@@ -414,6 +414,7 @@ print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 
 &require_mysql();
 if (-r $mysql::config{'my_cnf'}) {
+	# Show options to change MySQL limits based on RAM
 	local $mem = &get_real_memory_size();
 	local $mysize = $config{'mysql_size'} || "";
 	local $recsize;
@@ -449,6 +450,18 @@ if (-r $mysql::config{'my_cnf'}) {
 			map { [ $_, $text{'wizard_mysize_'.$_}.
 			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
 			      ] } @types ]));
+
+	# Show option to increase max packet size
+	my ($sect) = grep { $_->{'name'} eq "mysqld" &&
+			    $_->{'members'} } @$conf;
+	my $pack = &mysql::find_value("max_allowed_packet", $sect->{'members'});
+	$pack ||= "64M";
+	if (&php_value_diff($pack, "1G") < 0) {
+		print &ui_table_row($text{'wizard_mysize_pack'},
+			&ui_radio("pack", 1,
+				  [ [ 1, $text{'wizard_mysize_pack1'} ],
+				    [ 0, $text{'wizard_mysize_pack0'} ] ]));
+		}
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
@@ -460,7 +473,7 @@ sub wizard_parse_mysize
 {
 local ($in) = @_;
 &require_mysql();
-if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
+if (($in->{'mysize'} || $in->{'pack'}) && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
 	my ($myver, $variant);
@@ -471,7 +484,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&mysql::stop_mysql();
 		}
 
-	# Adjust my.cnf
+	# Copy my.cnf in preparation for fixing it
 	my $temp = &transname();
 	my $conf = &mysql::get_mysql_config();
 	my @files = &unique(map { $_->{'file'} } @$conf);
@@ -481,20 +494,36 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&copy_source_dest($file, $temp."_".$bf);
 		&lock_file($file);
 		}
-	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
-		my $sname = $s->[2] || "mysqld";
-		my ($sect) = grep { $_->{'name'} eq $sname &&
+
+	# Apply size-based settings
+	if ($in->{'mysize'}) {
+		foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
+			my $sname = $s->[2] || "mysqld";
+			my ($sect) = grep { $_->{'name'} eq $sname &&
+					    $_->{'members'} } @$conf;
+			if ($sect) {
+				&mysql::save_directive($conf, $sect, $s->[0],
+						       $s->[1] ? [ $s->[1] ] : [ ]);
+				}
+			}
+		$config{'mysql_size'} = $in->{'mysize'};
+		}
+
+	# Adjust max packet size
+	if ($in->{'pack'}) {
+		my ($sect) = grep { $_->{'name'} eq "mysqld" &&
 				    $_->{'members'} } @$conf;
 		if ($sect) {
-			&mysql::save_directive($conf, $sect, $s->[0],
-					       $s->[1] ? [ $s->[1] ] : [ ]);
+			&mysql::save_directive(
+				$conf, $sect, "max_allowed_packet", [ "1G" ]);
 			}
 		}
+
+	# Write out the config files
 	foreach my $file (@files) {
 		&flush_file_lines($file, undef, 1);
 		&unlock_file($file);
 		}
-	$config{'mysql_size'} = $in->{'mysize'};
 
 	# Start it up again
 	if ($running) {
