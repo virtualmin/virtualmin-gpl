@@ -56,7 +56,7 @@ print &ui_table_row($text{'cloud_useby'},
 if (@users) {
 	@grid = map { &ui_link("list_records.cgi?dom=".&urlize($_->{'id'}),
 			       &show_domain_name($_)) } @users;
-	$utable = &ui_grid(\@grid, undef, 4);
+	$utable = &ui_grid_table(\@grid, 4);
 	}
 else {
 	$utable = $text{'dnscloud_nousers'};
