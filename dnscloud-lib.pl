@@ -96,8 +96,10 @@ else {
 $config{'route53_location'} = $in->{'route53_location'};
 
 # Validate that they work
-&can_use_aws_cmd($in->{'route53_akey'}, $in->{'route53_skey'},
-	 $in->{'route53_location'}) || &error($text{'dnscloud_eawscreds'});
+delete($can_use_aws_cmd_cache{$in->{'route53_akey'}});
+my ($ok, $err) = &can_use_aws_cmd($in->{'route53_akey'}, $in->{'route53_skey'},
+				  $in->{'route53_location'});
+$ok || &error(&text('dnscloud_eawscreds', $err));
 
 &lock_file($module_config_file);
 &save_module_config();

@@ -1015,9 +1015,13 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 sub can_use_aws_cmd
 {
 my ($akey, $skey, $zone) = @_;
-return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
-return $can_use_aws_cmd_cache{$akey}
-	if (defined($can_use_aws_cmd_cache{$akey}));
+if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'})) {
+	return wantarray ? (0, "The aws command is not installed") : 0;
+	}
+if (defined($can_use_aws_cmd_cache{$akey})) {
+	return wantarray ? @{$can_use_aws_cmd_cache{$akey}}
+			 : $can_use_aws_cmd_cache{$akey}->[0];
+	}
 my $out = &call_aws_cmd($akey, "ls");
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
@@ -1035,17 +1039,17 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	my $ex = $?;
 	if (!$ex) {
 		# Test again to make sure it worked
-		&call_aws_cmd($akey, "ls");
+		$out = &call_aws_cmd($akey, "ls");
 		$ex = $?;
 		}
 	if ($ex) {
 		# Profile setup failed!
-		$can_use_aws_cmd_cache{$akey} = 0;
-		return 0;
+		$can_use_aws_cmd_cache{$akey} = [0, $out];
+		return wantarray ? (0, $out) : 0;
 		}
 	}
-$can_use_aws_cmd_cache{$akey} = 1;
-return 1;
+$can_use_aws_cmd_cache{$akey} = [1, undef];
+return wantarray ? (1, undef) : 1;
 }
 
 # call_aws_cmd(akey, params)
