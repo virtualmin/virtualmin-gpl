@@ -118,8 +118,11 @@ if ($in->{'s3_endpoint_def'}) {
 	delete($config{'s3_endpoint'});
 	}
 else {
-	&to_ipaddress($in->{'s3_endpoint'}) ||
+	my ($host, $port) = split(/:/, $in->{'s3_endpoint'});
+	&to_ipaddress($host) ||
 		&error($text{'cloud_es3_endpoint'});
+	!$port || $port =~ /^\d+$/ ||
+		&error($text{'cloud_es3_endport'});
 	$config{'s3_endpoint'} = $in->{'s3_endpoint'};
 	}
 
