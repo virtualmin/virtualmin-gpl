@@ -914,7 +914,9 @@ sub make_s3_connection
 my ($akey, $skey, $endpoint) = @_;
 $endpoint ||= $config{'s3_endpoint'};
 &require_s3();
-return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
+my $endport;
+($endpoint, $endport) = split(/:/, $endpoint);
+return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport);
 }
 
 # s3_part_upload(&s3-connection, bucket, endpoint, sourcefile, destfile,
