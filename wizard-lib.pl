@@ -483,7 +483,6 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&lock_file($file);
 		}
 
-	if ($in->{'mysize'}) {
 	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
