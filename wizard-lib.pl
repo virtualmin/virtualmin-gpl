@@ -450,18 +450,6 @@ if (-r $mysql::config{'my_cnf'}) {
 			map { [ $_, $text{'wizard_mysize_'.$_}.
 			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
 			      ] } @types ]));
-
-	# Show option to increase max packet size
-	my ($sect) = grep { $_->{'name'} eq "mysqld" &&
-			    $_->{'members'} } @$conf;
-	my $pack = &mysql::find_value("max_allowed_packet", $sect->{'members'});
-	$pack ||= "64M";
-	if (&php_value_diff($pack, "1G") < 0) {
-		print &ui_table_row($text{'wizard_mysize_pack'},
-			&ui_radio("pack", 1,
-				  [ [ 1, $text{'wizard_mysize_pack1'} ],
-				    [ 0, $text{'wizard_mysize_pack0'} ] ]));
-		}
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
@@ -473,7 +461,7 @@ sub wizard_parse_mysize
 {
 local ($in) = @_;
 &require_mysql();
-if (($in->{'mysize'} || $in->{'pack'}) && -r $mysql::config{'my_cnf'}) {
+if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 	# Stop MySQL
 	local $running = &mysql::is_mysql_running();
 	my ($myver, $variant);
@@ -495,25 +483,26 @@ if (($in->{'mysize'} || $in->{'pack'}) && -r $mysql::config{'my_cnf'}) {
 		&lock_file($file);
 		}
 
-	# Apply size-based settings
 	if ($in->{'mysize'}) {
-		foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
-			my $sname = $s->[2] || "mysqld";
-			my ($sect) = grep { $_->{'name'} eq $sname &&
-					    $_->{'members'} } @$conf;
-			if ($sect) {
-				&mysql::save_directive($conf, $sect, $s->[0],
-						       $s->[1] ? [ $s->[1] ] : [ ]);
-				}
-			}
-		$config{'mysql_size'} = $in->{'mysize'};
-		}
-
-	# Adjust max packet size
-	if ($in->{'pack'}) {
-		my ($sect) = grep { $_->{'name'} eq "mysqld" &&
+	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
+		my $sname = $s->[2] || "mysqld";
+		my ($sect) = grep { $_->{'name'} eq $sname &&
 				    $_->{'members'} } @$conf;
 		if ($sect) {
+			&mysql::save_directive($conf, $sect, $s->[0],
+					       $s->[1] ? [ $s->[1] ] : [ ]);
+			}
+		}
+	$config{'mysql_size'} = $in->{'mysize'};
+
+	# Adjust max packet size if default is too small
+	my ($sect) = grep { $_->{'name'} eq "mysqld" &&
+			    $_->{'members'} } @$conf;
+	if ($sect) {
+		my $pack = &mysql::find_value(
+			"max_allowed_packet", $sect->{'members'});
+		$pack ||= "64M";
+		if (&php_value_diff($pack, "1G") < 0) {
 			&mysql::save_directive(
 				$conf, $sect, "max_allowed_packet", [ "1G" ]);
 			}
