@@ -14,8 +14,8 @@ $cloud || &error($text{'dnscloud_egone'});
 $sfunc = "dnscloud_".$cloud->{'name'}."_get_state";
 $state = &$sfunc($p);
 
-if ($prov->{'longdesc'}) {
-	print $prov->{'longdesc'},"<p>\n";
+if ($cloud->{'longdesc'}) {
+	print $cloud->{'longdesc'},"<p>\n";
 	}
 
 # First check if provider can be used
@@ -23,7 +23,7 @@ my $cfunc = "dnscloud_".$cloud->{'name'}."_check";
 if (defined(&$cfunc)) {
 	my $err = &$cfunc();
 	if ($err) {
-		print &text('dnscloud_echeck', $prov->{'desc'}, $err),"<p>\n";
+		print &text('dnscloud_echeck', $cloud->{'desc'}, $err),"<p>\n";
 		&ui_print_footer("dnsclouds.cgi", $text{'dnsclouds_return'});
 		return;
 		}

@@ -309,12 +309,6 @@ if ($config{'google_oauth'}) {
 		             "<tt>$config{'google_oauth'}</tt>");
 	}
 
-# OAuth2 token
-if ($config{'google_token'}) {
-	$rv .= &ui_table_row($text{'cloud_google_token'},
-		             "<tt>$config{'google_token'}</tt>");
-	}
-
 return $rv;
 }
 

@@ -4,10 +4,13 @@
 # Returns a list of supported cloud DNS providers
 sub list_dns_clouds
 {
-return ( { 'name' => 'route53',
-	   'desc' => 'Amazon Route 53',
-	   'url' => 'https://aws.amazon.com/route53/' },
-       );
+my @rv = ( { 'name' => 'route53',
+	     'desc' => 'Amazon Route 53',
+	     'url' => 'https://aws.amazon.com/route53/' } );
+if (defined(&list_pro_dns_clouds)) {
+	push(@rv, &list_pro_dns_clouds());
+	}
+return @rv;
 }
 
 # default_dns_cloud()
@@ -55,7 +58,7 @@ return { 'ok' => 0 };
 }
 
 # dnscloud_route53_show_inputs()
-# Show fields for selecting 
+# Show fields for entering credentials for AWS
 sub dnscloud_route53_show_inputs
 {
 my $rv;
