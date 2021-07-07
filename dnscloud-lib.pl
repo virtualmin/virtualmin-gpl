@@ -97,8 +97,8 @@ $config{'route53_location'} = $in->{'route53_location'};
 
 # Validate that they work
 delete($can_use_aws_cmd_cache{$in->{'route53_akey'}});
-my ($ok, $err) = &can_use_aws_cmd($in->{'route53_akey'}, $in->{'route53_skey'},
-				  $in->{'route53_location'});
+my ($ok, $err) = &can_use_aws_route53_cmd(
+    $in->{'route53_akey'}, $in->{'route53_skey'}, $in->{'route53_location'});
 $ok || &error(&text('dnscloud_eawscreds', $err));
 
 &lock_file($module_config_file);
@@ -127,6 +127,7 @@ my ($d, $info) = @_;
 my $ref = &generate_route53_ref();
 my $location = $info->{'location'} || $config{'route53_location'};
 my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
 	[ 'create-hosted-zone',
 	  '--name', $info->{'domain'}, '--caller-reference', $ref ],
 	undef, 1);
@@ -150,6 +151,7 @@ my ($ok, $err) = &dnscloud_route53_put_records($d, $rinfo);
 return (0, $err) if (!$ok);
 
 my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
 	[ 'delete-hosted-zone',
 	  '--id', $info->{'id'} ],
 	$info->{'location'}, 1);
@@ -186,6 +188,7 @@ sub dnscloud_route53_check_domain
 {
 my ($d, $info) = @_;
 my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
 	[ 'list-hosted-zones' ],
 	undef, 1);
 return 0 if (!ref($rv));
@@ -225,6 +228,7 @@ sub dnscloud_route53_get_records
 {
 my ($d, $info) = @_;
 my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
 	[ 'list-resource-record-sets',
 	  '--hosted-zone-id', $info->{'id'} ],
 	$info->{'location'}, 1);
@@ -305,6 +309,7 @@ my $coder = JSON::PP->new->pretty;
 &print_tempfile(JSON, $coder->encode($js));
 &close_tempfile(JSON);
 my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
 	[ 'change-resource-record-sets',
 	  '--hosted-zone-id', $info->{'id'},
 	  '--change-batch', 'file://'.$temp ],
@@ -316,15 +321,11 @@ return ref($rv) ? (1, $rv) : (0, $rv);
 # Run the aws command for route53 with some params, and return output
 sub call_route53_cmd
 {
-my ($params, $region, $json) = @_;
-my $akey = $config{'route53_akey'};
+my ($akey, $params, $region, $json) = @_;
 $region ||= $config{'route53_location'};
-if (ref($params)) {
-	$params = join(" ", map { quotemeta($_) } @$params);
-	}
-my $out = &backquote_command(
-	"TZ=GMT $config{'aws_cmd'} route53 --profile=".quotemeta($akey)." ".
-	"--region ".quotemeta($region)." ".$params." 2>&1");
+$params ||= [];
+unshift(@$params, "--region", $region);
+my $out = &call_aws_cmd($akey, "route53", $params, undef);
 if (!$? && $json) {
 	eval "use JSON::PP";
 	my $coder = JSON::PP->new->pretty;
@@ -340,6 +341,13 @@ sub generate_route53_ref
 return time().$$.(++$generate_route53_ref_count);
 }
 
-
+# can_use_aws_route53_cmd(akey, skey, region)
+# Returns 1 if the aws command can be used to access route53 with the given
+# credentials and region
+sub can_use_aws_route53_cmd
+{
+my ($akey, $skey, $region) = @_;
+return &can_use_aws_cmd($akey, $skey, $zone, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
+}
 
 
