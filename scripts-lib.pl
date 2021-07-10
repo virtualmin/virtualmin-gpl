@@ -1015,9 +1015,12 @@ foreach my $m (@mods) {
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
 	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
+	local $backupinifile;
 	if (!$got) {
 		# Needs to be enabled
 		&$first_print($text{'scripts_addext'});
+		$backupinifile = &transname();
+		&copy_source_dest($inifile, $backupinifile);
 		local $lref = &read_file_lines($inifile);
 		if (@exts) {
 			# After current extensions
@@ -1170,16 +1173,18 @@ foreach my $m (@mods) {
 	if (!$iok) {
 		&$second_print($text{'scripts_esoftwaremod'});
 		&$outdent_print();
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
-	# Finally re-check to make sure it worked (but this is only possible
-	# in CGI mode)
+
+	# Finally re-check to make sure it worked
 	GOTMODULE:
 	&$outdent_print();
 	undef(%main::php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
