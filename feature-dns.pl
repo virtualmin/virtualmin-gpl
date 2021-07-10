@@ -4356,6 +4356,14 @@ foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 return undef;
 }
 
+# dns_record_key(&rec)
+# Returns a single string that represents a record for use in de-duping
+sub dns_record_key
+{
+my ($r) = @_;
+return join("/", $r->{'name'}, $r->{'type'}, ($r->{'ttl'} || 0));
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;

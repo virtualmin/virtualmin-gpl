@@ -264,10 +264,10 @@ return ($ok, $oldrecs) if (!$ok);
 # Create an op to delete all existing records (apart from NS and SOA) and 
 # re-add the new ones
 my $js = { 'Changes' => [] };
-my %keep = map { $_->{'name'}."/".$_->{'type'}, 1 } @$recs;
+my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
 	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
-	next if ($keep{$r->{'name'}."/".$r->{'type'}});
+	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
 	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
 	push(@{$js->{'Changes'}},
