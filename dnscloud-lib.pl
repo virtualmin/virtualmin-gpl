@@ -209,6 +209,11 @@ sub dnscloud_route53_rename_domain
 {
 my ($d, $info) = @_;
 
+# Check for a clash
+my $exists = &dnscloud_route53_check_domain($d, $info);
+return (0, "New domain name $info->{'domain'} already exists on Route53")
+	if ($exists);
+
 # Get current records, and fix them
 my ($ok, $recs) = &dnscloud_route53_get_records($d, $info);
 return (0, $recs) if (!$ok);
