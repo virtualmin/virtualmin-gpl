@@ -61,6 +61,11 @@ If you have configured additional remote (or local) MySQL servers, you can
 select which one this domain will use with the C<--mysql-server> flag followed
 by a hostname, hostname:port or socket file.
 
+By default, the Cloud DNS provider chosen in the specified template will be
+used. However, you can override this with the C<--cloud-dns> flag followed by
+either C<local> to host locally, C<services> to use Cloudmin services, or
+the ID of one of the supported providers like C<route53> or C<google>.
+
 =cut
 
 package virtual_server;
@@ -350,6 +355,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
+		}
+	elsif ($a eq "--cloud-dns") {
+		$clouddns = shift(@ARGV);
 		}
 	elsif ($a eq "--break-ssl-cert") {
 		$linkcert = 0;
@@ -725,6 +733,20 @@ if ($myserver) {
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 
+# Validate the Cloud DNS provider
+if (defined($clouddns)) {
+	if ($clouddns eq "services") {
+		$config{'provision_dns'} ||
+			&usage("Cloudmin Services for DNS is not enabled");
+		}
+	elsif ($clouddns ne "local") {
+		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		&indexof($clouddns, @cnames) >= 0 ||
+			&usage("Valid Cloud DNS providers are : ".
+			       join(" ", @cnames));
+		}
+	}
+
 # Validate PHP mode
 if ($phpmode) {
 	my @supp = &supported_php_modes();
@@ -797,6 +819,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'jail', $jail,
 	 'mysql_module', $mysql_module,
 	 'default_php_mode', $phpmode,
+	 'dns_cloud', $clouddns,
         );
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = 1 if ($linkcert eq '1');
@@ -1001,6 +1024,7 @@ print "                        [--letsencrypt]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
+print "                        [--cloud-dns provider|\"services\"|\"local\"]\n";
 print "                        [--break-ssl-cert | --link-ssl-cert]\n";
 print "                        [--generate-ssl-cert]\n";
 print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";

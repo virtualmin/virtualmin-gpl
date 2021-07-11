@@ -18427,17 +18427,21 @@ my $tmpl = &get_template($d->{'template'});
 foreach my $f (&list_provision_features()) {
 	if ($f eq "dns") {
 		# Template has an option to control where DNS is hosted
-		if ($tmpl->{'dns_cloud'} eq 'services') {
+		my $cloud = $d->{'dns_cloud'} || $tmpl->{'dns_cloud'};
+		if ($cloud eq 'services') {
 			$d->{'provision_dns'} = 1;
+			delete($d->{'dns_cloud'});
 			}
-		elsif ($tmpl->{'dns_cloud'} eq 'local') {
+		elsif ($cloud eq 'local') {
 			$d->{'provision_dns'} = 0;
+			delete($d->{'dns_cloud'});
 			}
-		elsif ($tmpl->{'dns_cloud'} eq '') {
+		elsif ($cloud eq '') {
 			$d->{'provision_dns'} = 1 if ($config{'provision_dns'});
+			delete($d->{'dns_cloud'});
 			}
 		else {
-			$d->{'dns_cloud'} = $tmpl->{'dns_cloud'};
+			$d->{'dns_cloud'} = $cloud;
 			}
 		}
 	elsif ($config{'provision_'.$f}) {
