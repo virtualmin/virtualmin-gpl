@@ -219,6 +219,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--cloud-dns") {
+		$clouddns = shift(@ARGV);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -227,7 +230,7 @@ while(@ARGV > 0) {
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
-  defined($tlsa) || $syncallslaves || defined($submode) ||
+  defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
   &usage("Nothing to do");
 
 # Get domains to update
@@ -266,6 +269,20 @@ if (@delslaves) {
 	foreach $s (@delslaves) {
 		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
 		$ss || &usage("No slave DNS server with hostname $s exists");
+		}
+	}
+
+# Validate the Cloud DNS provider
+if ($clouddns) {
+	if ($clouddns eq "services") {
+		$config{'provision_dns'} ||
+			&usage("Cloudmin Services for DNS is not enabled");
+		}
+	elsif ($clouddns ne "local") {
+		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		&indexof($clouddns, @cnames) >= 0 ||
+			&usage("Valid Cloud DNS providers are : ".
+			       join(" ", @cnames));
 		}
 	}
 
@@ -576,6 +593,27 @@ foreach $d (@doms) {
 		my %slavenames = map { $_->{'host'}, $_ } @slaveservers;
 		@ds = grep { $slavename{$_} } @ds;
 		$d->{'dns_slave'} = join(" ", @ds);
+		}
+
+	# Change DNS Cloud
+	if ($clouddns) {
+		if ($clouddns eq "local") {
+			&$first_print($text{'spf_dnslocal'});
+			}
+		else {
+			my ($c) = grep { $_->{'name'} eq $clouddns }
+				       &list_dns_clouds();
+			&$first_print(&text('spf_dnscloud', $c->{'name'}));
+			}
+		&$indent_print();
+		my $err = &modify_dns_cloud($d, $clouddns);
+		&$outdent_print();
+		if ($err) {
+			&$second_print(&text('spf_eclouddns', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	&$outdent_print();

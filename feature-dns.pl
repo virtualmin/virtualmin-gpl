@@ -4364,6 +4364,62 @@ my ($r) = @_;
 return join("/", $r->{'name'}, $r->{'type'}, ($r->{'ttl'} || 0));
 }
 
+# modify_dns_cloud(&domain, cloud-name)
+# Update the Cloud DNS provider for a domain, while preserving records
+sub modify_dns_cloud
+{
+my ($d, $cloud) = @_;
+return undef if ($d->{'dns_cloud'} eq $cloud);
+
+# Is the cloud provider working?
+if ($cloud ne "local") {
+	my $cfunc = "dnscloud_".$cloud."_check";
+	my $err = &$cfunc();
+	return $err if ($err);
+	my $sfunc = "dnscloud_".$cloud."_get_state";
+	my $s = &$sfunc();
+	return $s->{'desc'} if (!$s->{'ok'});
+	}
+
+# Get current records, then re-create the DNS config
+&push_all_print();
+&set_all_null_print();
+my @oldrecs = &get_domain_dns_records($d);
+&delete_dns($d);
+if ($cloud eq "local") {
+	delete($d->{'dns_cloud'});
+	}
+else {
+	$d->{'dns_cloud'} = $cloud;
+	}
+&save_domain($d);
+&setup_dns($d);
+&pop_all_print();
+
+# Delete and re-create all records
+&obtain_lock_dns($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+foreach my $r (reverse(@$recs)) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS');
+	next if (!$r->{'name'} || !$r->{'type'});
+	print STDERR "deleting record $r->{'name'}\n";
+	&bind8::delete_record($file, $r);
+	}
+foreach my $r (@oldrecs) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS');
+	next if (!$r->{'name'} || !$r->{'type'});
+	print STDERR "adding record $r->{'name'}\n";
+	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+			      $r->{'class'}, $r->{'type'},
+			      &join_record_values($r));
+	}
+my $err = &post_records_change($d, $recs);
+&release_lock_dns($d);
+return $err if ($err);
+&reload_bind_records($d);
+return undef;
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;

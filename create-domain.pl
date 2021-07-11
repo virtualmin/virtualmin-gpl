@@ -734,7 +734,7 @@ if ($myserver) {
 	}
 
 # Validate the Cloud DNS provider
-if (defined($clouddns)) {
+if ($clouddns) {
 	if ($clouddns eq "services") {
 		$config{'provision_dns'} ||
 			&usage("Cloudmin Services for DNS is not enabled");

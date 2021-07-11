@@ -44,7 +44,7 @@ return &text('dnscloud_eperl', 'JSON::PP') if ($@);
 return undef;
 }
 
-# dnscloud_route53_get_state(&cloud)
+# dnscloud_route53_get_state()
 # Returns a status object indicating if this provider is setup or not
 sub dnscloud_route53_get_state
 {
@@ -358,4 +358,4 @@ my ($akey, $skey, $region) = @_;
 return &can_use_aws_cmd($akey, $skey, $zone, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
 }
 
-
+1;

@@ -5208,6 +5208,9 @@ spf_enablesub=Moving DNS records into parent zone ..
 spf_enablesubalready=.. already there
 spf_eenablesub=.. failed : $1
 spf_disablesub=Moving DNS records out of parent zone ..
+spf_dnscloud=Moving DNS records to Cloud provider $1 ..
+spf_dnslocal=Moving DNS records to local hosting ..
+spf_eclouddns=.. failed : $1
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed
 s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2
