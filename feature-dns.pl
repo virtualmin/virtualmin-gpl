@@ -4396,24 +4396,25 @@ else {
 &setup_dns($d);
 &pop_all_print();
 
-# Delete and re-create all records
+# Delete all records that were created by default, and re-create original
+# records from before the conversion
 &obtain_lock_dns($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 foreach my $r (reverse(@$recs)) {
-	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS');
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
 	next if (!$r->{'name'} || !$r->{'type'});
-	print STDERR "deleting record $r->{'name'}\n";
 	&bind8::delete_record($file, $r);
 	}
 foreach my $r (@oldrecs) {
-	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS');
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
 	next if (!$r->{'name'} || !$r->{'type'});
-	print STDERR "adding record $r->{'name'}\n";
 	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
 			      $r->{'class'}, $r->{'type'},
 			      &join_record_values($r));
 	}
-my $err = &post_records_change($d, $recs);
+my $err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 return $err if ($err);
 &reload_bind_records($d);

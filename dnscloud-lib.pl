@@ -244,14 +244,12 @@ return (0, $rv) if (!ref($rv));
 my @recs;
 foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 	foreach my $rr (@{$rrs->{'ResourceRecords'}}) {
-		$rr->{'Value'} =~ s/^"(.*)"$/$1/
-			if ($rrs->{'Type'} =~ /TXT|SPF/);
 		push(@recs, { 'name' => $rrs->{'Name'},
 			      'realname' => $rrs->{'Name'},
 			      'class' => 'IN',
 			      'type' => $rrs->{'Type'},
 			      'ttl' => int($rrs->{'TTL'}),
-			      'values' => [ split(/\s+/, $rr->{'Value'}) ] });
+			      'values' => [ &split_quoted_string($rr->{'Value'}) ] });
 		}
 	}
 return (1, \@recs);
