@@ -4752,6 +4752,7 @@ validate_ednsip6=The DNS record $1 resolves to the IPv6 address $2 instead of th
 validate_ednsmx=This domain has email enabled, but none of the MX records $1 point to it. Either the MX records should be corrected, or the email feature disabled if mail is hosted externally.
 validate_ednsnotype=DNS zone for domain $1 has no type!
 validate_ednstype=DNS zone for domain $1 has the type $2 instead of $3
+validate_ecloud=DNS domain not found on cloud provider $1
 validate_eweb=No Apache virtual host for $1 found
 validate_ewebphp=Missing wrapper script for PHP $1 - $2
 validate_ewebphpsuexec=PHP is configured to run as the domain owner, but SuExec is not enabled!
