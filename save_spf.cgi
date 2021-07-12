@@ -97,6 +97,10 @@ if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
 &release_lock_dns($d);
 &save_domain($d);
 
+# Update DNS cloud if changed
+$err = &modify_dns_cloud($d, $in{'cloud'});
+$err && &error(&text('spf_ecloud', $err));
+
 &run_post_actions();
 
 # All done

@@ -14,6 +14,22 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 @tds = ( "width=30%" );
 print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
 
+# DNS cloud host
+my @opts = ( [ 'local', $text{'dns_cloud_local'} ] );
+push(@opts, [ 'services', $text{'dns_cloud_services'} ])
+	if ($config{'provision_dns'});
+foreach my $c (&list_dns_clouds()) {
+	my $sfunc = "dnscloud_".$c->{'name'}."_get_state";
+	my $s = &$sfunc();
+	if ($s->{'ok'}) {
+		push(@opts, [ $c->{'name'}, $c->{'desc'} ]);
+		}
+	}
+my $cloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+	    $d->{'provision_dns'} ? 'services' : 'local';
+print &ui_table_row(&hlink($text{'spf_cloud'}, 'spf_cloud'),
+		    &ui_select("cloud", $cloud, \@opts));
+
 # SPF enabled
 $spf = &get_domain_spf($d);
 $defspf = &default_domain_spf($d);
