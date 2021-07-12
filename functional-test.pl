@@ -36,6 +36,7 @@ $test_clone_domain = "exampleclone.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
+$test_cloud_domain = "cloudexample.com";
 $test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
@@ -9051,6 +9052,104 @@ $dns_tests = [
 	  'cleanup' => 1 },
 	];
 
+$googledns_tests = [
+	# Create a domain using Google DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'cloud-dns' => 'google' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'user' => $test_domain_user ],
+		      @create_args, ],
+        },
+
+	# Validate all features
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_cloud_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Add a DNS record
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'add-record', 'testing1 A 1.2.3.4' ] ],
+	},
+
+	# Validate that it was created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Disable and re-enable the DNS feature
+	{ 'command' => 'disable-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ] ],
+	},
+	{ 'command' => 'enable-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ] ],
+	},
+
+	# Validate that the record stil exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Move to local hosting
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'cloud-dns' => 'local' ] ],
+	},
+
+	# Validate that the record still exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Move back to the cloud
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'cloud-dns' => 'google' ] ],
+	},
+
+	# Validate that the record still exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Rename the domain
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'new-domain', $test_rename_domain ] ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Validate all features after the rename
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'user', $test_domain_user ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9127,6 +9226,7 @@ $alltests = { '_config' => $_config_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
 	      'dns' => $dns_tests,
+	      'googledns' => $googledns_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
