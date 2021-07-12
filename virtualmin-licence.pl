@@ -2,9 +2,9 @@
 # HTTP request to the licence CGI.
 
 $virtualmin_licence_host = "software.virtualmin.com";
-$virtualmin_licence_port = 80;
+$virtualmin_licence_port = 443;
 $virtualmin_licence_prog = "/cgi-bin/vlicence.cgi";
-$virtualmin_licence_ssl = 0;
+$virtualmin_licence_ssl = 1;
 $virtualmin_renewal_url = $config{'renewal_url'} ||
 			  "http://www.virtualmin.com/shop";
 
