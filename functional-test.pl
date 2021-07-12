@@ -9150,6 +9150,8 @@ $googledns_tests = [
 	  'cleanup' => 1 },
 	];
 
+$route53_tests = &convert_to_dnscloud($googledns_tests, "route53");
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9227,6 +9229,7 @@ $alltests = { '_config' => $_config_tests,
 	      'jail' => $jail_tests,
 	      'dns' => $dns_tests,
 	      'googledns' => $googledns_tests,
+	      'route53' => $route53_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
@@ -9544,6 +9547,28 @@ foreach my $t (@$tests) {
 		$nt->{'args'} = [ @{$nt->{'args'}},
 				  [ 'key' => $key->{'id'} ] ];
 		}
+	push(@$rv, $nt);
+	}
+return $rv;
+}
+
+# convert_to_dnscloud(&tests, cloud)
+sub convert_to_dnscloud
+{
+local ($tests, $cloud) = @_;
+local $rv = [ ];
+foreach my $t (@$tests) {
+        my $nt = { %$t };
+	my @a;
+	foreach my $a (@{$nt->{'args'}}) {
+		if ($a->[0] eq 'cloud-dns' && $a->[1] ne 'local') {
+			push(@a, [ $a->[0], $cloud ]);
+			}
+		else {
+			push(@a, $a);
+			}
+		}
+	$nt->{'args'} = \@a;
 	push(@$rv, $nt);
 	}
 return $rv;
