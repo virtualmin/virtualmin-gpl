@@ -138,6 +138,7 @@ return (0, $rv) if (!ref($rv));
 $info->{'id'} = $rv->{'HostedZone'}->{'Id'};
 $info->{'location'} = $location;
 my ($ok, $err) = &dnscloud_route53_put_records($d, $info);
+return (0, "Failed to create records : $err") if (!$ok);
 return (1, $rv->{'HostedZone'}->{'Id'}, $location);
 }
 
@@ -269,7 +270,8 @@ return ($ok, $oldrecs) if (!$ok);
 my $js = { 'Changes' => [] };
 my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
-	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
+	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA' ||
+		 $r->{'type'} eq 'DMARC');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
 	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
@@ -286,7 +288,8 @@ foreach my $r (@$oldrecs) {
 	     });
 	}
 foreach my $r (@$recs) {
-	next if ($r->{'type'} eq 'NS');
+	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA' ||
+		 $r->{'type'} eq 'DMARC');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
 	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
