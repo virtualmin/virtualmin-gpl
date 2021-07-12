@@ -1668,6 +1668,13 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	return &text('validate_ednstype', "<tt>$d->{'dom'}</tt>",
 	     "<tt>$type</tt>", "<tt>master</tt>") if ($type ne "master");
 	}
+if ($d->{'dns_cloud'}) {
+	# Make sure the cloud provider knows about it
+	my $cfunc = "dnscloud_".$d->{'dns_cloud'}."_check_domain";
+	my $info = { 'domain' => $d->{'dom'} };
+	my $ok = &$cfunc($d, $info);
+	eturn &text('validate_ecloud', $d->{'dns_cloud'}) if (!$ok);
+	}
 
 # Check for critical records, and that www.$dom and $dom resolve to the
 # expected IP address (if we have a website)
@@ -1721,12 +1728,12 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			$mxh .= ".".$d->{'dom'} if ($mxh !~ /\.$/);
 			$mxh =~ s/\.$//;
 			local $ip = &to_ipaddress($mxh);
-			if ($ip eq $d->{'ip'} ||
-			    $ip eq $d->{'dns_ip'} ||
-			    $ip eq $d->{'ip6'} ||
-			    $ip eq $d->{'dns_ip6'} ||
-			    $ip eq $defip ||
-			    $inuse{$ip}) {
+			if ($ip && ($ip eq $d->{'ip'} ||
+				    $ip eq $d->{'dns_ip'} ||
+				    $ip eq $d->{'ip6'} ||
+				    $ip eq $d->{'dns_ip6'} ||
+				    $ip eq $defip ||
+				    $inuse{$ip})) {
 				$found = $ip;
 				last;
 				}
@@ -1734,11 +1741,11 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 					       $_->{'type'} eq 'A' } @$recs;
 			if ($arec) {
 				$ip = $arec->{'values'}->[0];
-				if ($ip eq $d->{'ip'} ||
-				    $ip eq $d->{'dns_ip'} ||
-				    $ip eq $d->{'ip6'} ||
-				    $ip eq $d->{'dns_ip6'} ||
-				    $ip eq $defip) {
+				if ($ip && ($ip eq $d->{'ip'} ||
+					    $ip eq $d->{'dns_ip'} ||
+					    $ip eq $d->{'ip6'} ||
+					    $ip eq $d->{'dns_ip6'} ||
+					    $ip eq $defip)) {
 					$found = $ip;
 					last;
 					}
