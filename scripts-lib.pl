@@ -3174,31 +3174,6 @@ while($rport < 65536) {
 return $rport >= 65536 ? undef : $rport;
 }
 
-# allocate_mongrel_port([base], [number])
-# Finds ports that are not in use by any domain's script, any server or in
-# /etc/services, and returns a space-separated list of them
-sub allocate_mongrel_port
-{
-local ($base, $mongrels) = @_;
-$base ||= 3000;
-local %used;
-foreach my $d (&list_domains()) {
-	foreach my $ds (&list_domain_scripts($d)) {
-		foreach my $p (split(/\s+/, $ds->{'opts'}->{'port'})) {
-			$used{$p} = 1;
-			}
-		}
-	}
-local @rv;
-while(scalar(@rv) < $mongrels) {
-	local $rport = &allocate_free_tcp_port(\%used, $base);
-	$rport || &error("Failed to allocate port starting from $base");
-	$used{$rport}++;
-	push(@rv, $rport);
-	}
-return join(" ", @rv);
-}
-
 # get_php_cli_command(script-php-version) 
 # Returns the path to the non-CGI version of the PHP command
 sub get_php_cli_command
