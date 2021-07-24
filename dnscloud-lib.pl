@@ -6,6 +6,7 @@ sub list_dns_clouds
 {
 my @rv = ( { 'name' => 'route53',
 	     'desc' => 'Amazon Route 53',
+	     'comments' => 0,
 	     'url' => 'https://aws.amazon.com/route53/' } );
 if (defined(&list_pro_dns_clouds)) {
 	push(@rv, &list_pro_dns_clouds());

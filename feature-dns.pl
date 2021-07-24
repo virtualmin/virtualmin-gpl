@@ -751,13 +751,22 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 		     'olddomain' => $oldd->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
-	my $rfunc = "dnscloud_".$ctype."_rename_domain";
-	my ($ok, $msg) = &$rfunc($d, $info);
-	if (!$ok) {
-		&$second_print(&text('save_bind_ecloud', $err));
+	my $vfunc = "dnscloud_".$ctype."_valid_domain";
+	my $err = &$vfunc($d, $info);
+	if ($err) {
+		&$second_print(&text('setup_ebind_cloud', $err));
 		}
-	$d->{'dns_cloud_id'} = $msg;
-	&$second_print($text{'setup_done'});
+	else {
+		my $rfunc = "dnscloud_".$ctype."_rename_domain";
+		my ($ok, $msg) = &$rfunc($d, $info);
+		if (!$ok) {
+			&$second_print(&text('save_bind_ecloud', $err));
+			}
+		else {
+			$d->{'dns_cloud_id'} = $msg;
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
@@ -4378,12 +4387,25 @@ foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 return undef;
 }
 
+# dns_ttl_to_seconds(string)
+# Convert a string like 1m to a number of seconds
+sub dns_ttl_to_seconds
+{
+my ($ttl) = @_;
+$ttl = $1 if ($ttl =~ /^(\d+)s$/);
+$ttl = $1*60 if ($ttl =~ /^(\d+)m$/);
+$ttl = $1*60*60 if ($ttl =~ /^(\d+)h$/);
+$ttl = $1*24*60*60 if ($ttl =~ /^(\d+)d$/);
+return int($ttl);
+}
+
 # dns_record_key(&rec, [value-too])
 # Returns a single string that represents a record for use in de-duping
 sub dns_record_key
 {
 my ($r, $val) = @_;
-my @r = ($r->{'name'}, $r->{'type'}, ($r->{'ttl'} || 0));
+my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
+my @r = ($r->{'name'}, $r->{'type'}, $ttl);
 push(@r, @{$r->{'values'}}) if ($val);
 return join("/", @r);
 }
@@ -4513,6 +4535,16 @@ local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
 my @recs = &bind8::read_zone_file($temp, $name);
 return \@recs;
+}
+
+# supports_dns_comments(&domain)
+# Returns 1 if the DNS provider for a domain supports comments
+sub supports_dns_comments
+{
+my ($d) = @_;
+return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
+my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
+return $c && $c->{'comments'};
 }
 
 $done_feature_script{'dns'} = 1;

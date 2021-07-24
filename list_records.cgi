@@ -22,8 +22,10 @@ if ($err) {
 $recs = &filter_domain_dns_records($d, $recs);
 
 # Check if we need a comment column
-foreach $r (@$recs) {
-	$anycomment++ if ($r->{'comment'});
+if (&supports_dns_comments($d)) {
+	foreach $r (@$recs) {
+		$anycomment++ if ($r->{'comment'});
+		}
 	}
 
 print &ui_form_start("delete_records.cgi");
