@@ -4488,6 +4488,24 @@ foreach my $sfx (&list_public_dns_suffixes()) {
 return ();
 }
 
+# lookup_dns_records(name, [type])
+# Returns all DNS records matching some name and type, using the dig command.
+# Or an error string if the lookup failed.
+sub lookup_dns_records
+{
+my ($name, $type) = @_;
+&has_command("dig") || return "Missing the dig command";
+my $cmd = "dig".($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
+my $temp = &transname();
+&execute_command($cmd, undef, $temp, \$err);
+return $err if ($?);
+&require_bind();
+local $bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;
+my @recs = &bind8::read_zone_file($temp, $name);
+return \@recs;
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;
