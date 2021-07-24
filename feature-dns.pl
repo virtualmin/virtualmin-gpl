@@ -1695,7 +1695,8 @@ local $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$d->{'dns_submode'} || $got{'SOA'} || return $text{'validate_ednssoa2'};
+$d->{'dns_submode'} || $d->{'dns_cloud'} || $got{'SOA'} ||
+	return $text{'validate_ednssoa2'};
 $got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
@@ -1766,7 +1767,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 
 # Make sure the domain has NS records, and that they are resolvable
 if (!$d->{'dns_submode'}) {
-	$got{'NS'} || return $text{'validate_ednsns2'};
+	$got{'NS'} || $d->{'dns_cloud'} || return $text{'validate_ednsns2'};
 	foreach my $ns (map { $_->{'values'}->[0] }
 			    grep { $_->{'type'} eq 'NS' } @$recs) {
 		local ($arec) = grep { $_->{'name'} eq $ns &&
@@ -1779,7 +1780,7 @@ if (!$d->{'dns_submode'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'cloud_dns'} && !$d->{'dns_submode'} &&
+    !$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'} &&
     !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
