@@ -1841,6 +1841,10 @@ elsif ($d->{'dns_cloud'}) {
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
 	my $dfunc = "dnscloud_".$ctype."_disable_domain";
+	if (!defined(&$dfunc)) {
+		&$second_print($text{'disable_ebind_cloud2'});
+		return 0;
+		}
 	my ($ok, $msg) = &$dfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('disable_ebind_cloud', $msg));
@@ -1934,6 +1938,10 @@ elsif ($d->{'dns_cloud'}) {
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
 	my $dfunc = "dnscloud_".$ctype."_enable_domain";
+	if (!defined(&$dfunc)) {
+		&$second_print($text{'disable_ebind_cloud2'});
+		return 0;
+		}
 	my ($ok, $msg) = &$dfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('enable_ebind_cloud', $msg));
