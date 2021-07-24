@@ -546,6 +546,7 @@ setup_ftpuser=Adding ProFTPD user $1 to server's group ..
 setup_bind=Adding new DNS zone ..
 setup_bind_provision=Adding new DNS zone on services host ..
 setup_bind_cloud=Adding new DNS zone using $1 ..
+setup_ebind_ecloud=.. not supported : $1
 setup_ebind_cloud=.. failed : $1
 setup_bindslave=Adding slave zone on $1 ..
 setup_ebindslaveip2=.. failed to determine the IP address for this system. You will need to set the IP in the BIND DNS Server module.
@@ -7334,6 +7335,10 @@ dnscloud_cloudflare_longdesc=The settings on this page can be found on the <a ta
 dnscloud_cloudflare_eemail=Missing or invalid-looking email address
 dnscloud_cloudflare_eapikey=Missing or invalid-looking hexidecimal API key
 dnscloud_cloudflare_ecreds=Cloudflare credentials were not accepted : $1
+dnscloud_cloudflare_esfx=Domain $1 is not under a public TLD
+dnscloud_cloudflare_esfx2=Domain $1 can be only one level under TLD $2
+dnscloud_cloudflare_ens=Failed to lookup NS records : $1
+dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DNS domains be registered first.
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it
 

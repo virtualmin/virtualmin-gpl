@@ -204,6 +204,14 @@ foreach my $h (@{$rv->{'HostedZones'}}) {
 return 0;
 }
 
+# dnscloud_route53_valid_domain(&domain, &info)
+# Returns an error message if a domain cannot be hosted by Route53
+sub dnscloud_route53_valid_domain
+{
+my ($d, $info) = @_;
+return undef;
+}
+
 # dnscloud_route53_rename_domain(&domain, &info)
 # Rename a domain on route53 by deleting and re-creating it
 sub dnscloud_route53_rename_domain
