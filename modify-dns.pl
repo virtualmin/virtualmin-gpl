@@ -435,7 +435,7 @@ foreach $d (@doms) {
 		}
 
 	# Set or modify default TTL
-	if ($ttl) {
+	if ($ttl && &supports_dns_defttl($d)) {
 		&$first_print(&text('spf_ttl', $ttl));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -455,6 +455,10 @@ foreach $d (@doms) {
 			}
 		$changed++;
 		&$second_print($text{'setup_done'});
+		}
+	elsif ($ttl && !&supports_dns_defttl($d)) {
+		&$first_print(&text('spf_ttl', $ttl));
+		&$second_print($text{'spf_ettlsupport'});
 		}
 
 	# Change the TTL on any records that have one

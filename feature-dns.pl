@@ -4547,6 +4547,16 @@ my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
 return $c && $c->{'comments'};
 }
 
+# supports_dns_defttl(&domain)
+# Returns 1 if the DNS provider for a domain supports setting the default TTL
+sub supports_dns_defttl
+{
+my ($d) = @_;
+return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
+my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
+return $c && $c->{'defttl'};
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;
