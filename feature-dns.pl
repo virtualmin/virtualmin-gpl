@@ -102,6 +102,12 @@ elsif ($d->{'dns_cloud'}) {
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+	my $vfunc = "dnscloud_".$ctype."_valid_domain";
+	my $err = &$vfunc($d, $info);
+	if ($err) {
+		&$second_print(&text('setup_ebind_cloud', $err));
+		return 0;
+		}
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
 	$info->{'recs'} = \@inforecs;
 	my ($ok, $msg, $location) = &$cfunc($d, $info);
@@ -4428,6 +4434,58 @@ my $err = &post_records_change($d, $recs, $file);
 return $err if ($err);
 &reload_bind_records($d);
 return undef;
+}
+
+# list_public_dns_suffixes()
+# Returns a full list of known DNS public suffixes
+sub list_public_dns_suffixes
+{
+if (@list_public_dns_suffixes_cache) {
+	# Already in RAM
+	return @list_public_dns_suffixes_cache;
+	}
+my @st = stat($public_dns_suffix_cache);
+if (!@st || time() - $st[9] > 7*24*60*60) {
+	# Attempt to download the suffix file for the first time, or if older
+	# than a week
+	my ($host, $port, $page,$ssl) = &parse_http_url($public_dns_suffix_url);
+	&http_download($host, $port, $page, $public_dns_suffix_cache, \$err,
+		       undef, $ssl, undef, undef, 5);
+	}
+my $f = $public_dns_suffix_cache;
+$f = $public_dns_suffix_file if (!-r $f);
+my $lref = &read_file_lines($f, 1);
+foreach my $l (@$lref) {
+	$l =~ s/\/\/.*$//;
+	if ($l =~ /\S/) {
+		push(@list_public_dns_suffixes_cache, $l);
+		}
+	}
+return @list_public_dns_suffixes_cache;
+}
+
+# under_public_dns_suffix(domain)
+# If a DNS domain is under a public suffix, return the prefix and suffix.
+# Otherwise, return undef.
+sub under_public_dns_suffix
+{
+my ($dname) = @_;
+foreach my $sfx (&list_public_dns_suffixes()) {
+	if ($sfx =~ /^\*\.(\S+)$/) {
+		# Any sub-domain is a valid suffix
+		my $ssfx = $1;
+		if ($dname =~ /^(\S+)\.([^\.]+)\.\Q$ssfx\E$/) {
+			return ($1, $2.".".$sfx);
+			}
+		}
+	else {
+		# Regular suffix
+		if ($dname =~ /^(\S+)\.\Q$sfx\E$/) {
+			return ($1, $sfx);
+			}
+		}
+	}
+return ();
 }
 
 $done_feature_script{'dns'} = 1;

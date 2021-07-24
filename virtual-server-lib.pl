@@ -333,6 +333,10 @@ $recommended_theme = 'authentic-theme';
 
 $home_virtualmin_backup = $config{'home_backup'} || "virtualmin-backup";
 
+$public_dns_suffix_file = "$module_root_directory/public_suffix_list.dat";
+$public_dns_suffix_cache = "$module_var_directory/public_suffix_list.dat";
+$public_dns_suffix_url = "https://publicsuffix.org/list/public_suffix_list.dat";
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.
