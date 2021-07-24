@@ -4363,12 +4363,14 @@ foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 return undef;
 }
 
-# dns_record_key(&rec)
+# dns_record_key(&rec, [value-too])
 # Returns a single string that represents a record for use in de-duping
 sub dns_record_key
 {
-my ($r) = @_;
-return join("/", $r->{'name'}, $r->{'type'}, ($r->{'ttl'} || 0));
+my ($r, $val) = @_;
+my @r = ($r->{'name'}, $r->{'type'}, ($r->{'ttl'} || 0));
+push(@r, @{$r->{'values'}}) if ($val);
+return join("/", @r);
 }
 
 # modify_dns_cloud(&domain, cloud-name)
