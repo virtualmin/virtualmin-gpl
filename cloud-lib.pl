@@ -7,11 +7,13 @@ sub list_cloud_providers
 my @rv = ( { 'name' => 's3',
 	     'prefix' => [ 's3', 's3rrs' ],
 	     'url' => 'https://aws.amazon.com/s3/',
-	     'desc' => $text{'cloud_s3desc'} },
+	     'desc' => $text{'cloud_s3desc'},
+	     'longdesc' => $text{'cloud_s3_longdesc'} },
 	   { 'name' => 'rs',
 	     'prefix' => [ 'rs' ],
 	     'url' => 'https://www.rackspace.com/openstack/public/files',
-	     'desc' => $text{'cloud_rsdesc'} } );
+	     'desc' => $text{'cloud_rsdesc'},
+	     'longdesc' => $text{'cloud_rs_longdesc'} } );
 if ($virtualmin_pro) {
 	push(@rv, { 'name' => 'google',
 		    'prefix' => [ 'gcs' ],
