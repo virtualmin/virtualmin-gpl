@@ -36,7 +36,7 @@ Virtualmin has been under consistent development since ~2003, averaging a new re
 
 ### Getting Support
 
-Virtualmin has active forums at https://www.virtualmin.com/forum
+Virtualmin has active forums at https://forum.virtualmin.com
 
 For commercial support, Virtualmin Professional subscriptions are available starting at $6/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. is also available at hourly or project rates.
 
