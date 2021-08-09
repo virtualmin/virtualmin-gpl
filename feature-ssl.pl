@@ -2976,14 +2976,16 @@ my @errs;
 if (&domain_has_website($d) && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
+		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
+		&get_global_from_address());
 	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
     (!$mode || $mode eq "dns")) {
 	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
+		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
+		&get_global_from_address());
 	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {
