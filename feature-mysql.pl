@@ -2650,7 +2650,6 @@ my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $variant ne "mariadb";
 my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "16K" ],
-		[ "max_allowed_packet", "1M" ],
 		[ $cachedir, "4" ],
 		[ "sort_buffer_size", "64K" ],
 		[ "read_buffer_size", "256K" ],
@@ -2674,7 +2673,6 @@ if ($size eq "small") {
 	}
 elsif ($size eq "medium") {
 	return ([ "key_buffer_size", "16M" ],
-		[ "max_allowed_packet", "1M" ],
 		[ $cachedir, "64" ],
 		[ "sort_buffer_size", "512K" ],
 		[ "read_buffer_size", "256K" ],
@@ -2698,7 +2696,6 @@ elsif ($size eq "medium") {
 	}
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
-		[ "max_allowed_packet", "1M" ],
 		[ $cachedir, "256" ],
 		[ "sort_buffer_size", "1M" ],
 		[ "read_buffer_size", "1M" ],
@@ -2722,7 +2719,6 @@ elsif ($size eq "large") {
 	}
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
-		[ "max_allowed_packet", "1M" ],
 		[ $cachedir, "512" ],
 		[ "sort_buffer_size", "2M" ],
 		[ "read_buffer_size", "2M" ],
