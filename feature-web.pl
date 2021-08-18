@@ -2624,6 +2624,7 @@ if ($config{'web'} && $config{'webalizer'}) {
 	# Webalizer stats sub-directory input
 	local $smode = $tmpl->{'web_stats_hdir'} ? 2 :
 		       $tmpl->{'web_stats_dir'} ? 1 : 0;
+	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
 	print &ui_table_row(&hlink($text{'newweb_statsdir'}, "template_stats_dir"),
 		&ui_radio("stats_mode", $smode,
 			  [ [ 0, "$text{'default'} (<tt>$hdir/stats</tt>)<br>" ],
