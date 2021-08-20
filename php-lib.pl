@@ -2082,12 +2082,12 @@ foreach my $p (@ports) {
 	}
 &release_lock_web($d);
 $found || return "No Apache VirtualHost containing an FPM SetHandler found";
-&register_post_action(\&restart_apache);
 
 # Second update the FPM server port
 my $conf = &get_php_fpm_config($d);
 &save_php_fpm_config_value($d, "listen", $socket);
 &register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_apache);
 
 return undef;
 }
