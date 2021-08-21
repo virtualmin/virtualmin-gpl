@@ -76,7 +76,9 @@ if ($multi) {
 		if ($f->{'Owner'}) {
 			print "    Owner: $f->{'Owner'}->{'DisplayName'}\n";
 			}
-		print "    Last modified: $f->{'LastModified'}\n";
+		local $ctime = &s3_parse_date($f->{'LastModified'});
+		print "    Last modified: ",&make_date($ctime),"\n";
+		print "    Last modified time: ",$ctime,"\n";
 		print "    Storage class: $f->{'StorageClass'}\n";
 		print "    ETag: $f->{'ETag'}\n";
 		}
@@ -93,8 +95,9 @@ else {
 	printf $fmt, "Filename", "Size", "Last modified";
 	printf $fmt, ("-" x 35), ("-" x 12), ("-" x 30);
 	foreach $f (@$files) {
+		local $ctime = &s3_parse_date($f->{'LastModified'});
 		printf $fmt, $f->{'Key'}, &nice_size($f->{'Size'}),
-			     $f->{'LastModified'};
+			     &make_date($ctime);
 		}
 	}
 

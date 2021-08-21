@@ -74,7 +74,9 @@ if ($multi) {
 	# Full details
 	foreach $f (@$files) {
 		print $f->{'Name'},"\n";
-		print "    Created: $f->{'CreationDate'}\n";
+		local $ctime = &s3_parse_date($f->{'CreationDate'});
+		print "    Created: ",&make_date($ctime),"\n";
+		print "    Created time: ",$ctime,"\n";
 		$info = &s3_get_bucket($akey, $skey, $f->{'Name'});
 		if ($info && $info->{'location'}) {
 			print "    Location: $info->{'location'}\n";
@@ -117,7 +119,8 @@ else {
 	printf $fmt, "Bucket name", "Created";
 	printf $fmt, ("-" x 45), ("-" x 30);
 	foreach $f (@$files) {
-		printf $fmt, $f->{'Name'}, $f->{'CreationDate'};
+		local $ctime = &s3_parse_date($f->{'CreationDate'});
+		printf $fmt, $f->{'Name'}, &make_date($ctime);
 		}
 	}
 
