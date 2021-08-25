@@ -29,6 +29,12 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	&save_module_config();
 	}
 
+# If this is a new install, put Webalizer stats data files outside public_html
+if (!$config{'first_version'} && !$config{'stats_dir'} &&
+    !$config{'stats_hdir'}) {
+	$config{'stats_hdir'} = 'stats';
+	}
+
 # Fix invalid sysinfo
 if ($config{'show_sysinfo'} == 0 || $config{'show_sysinfo'} == 3) {
 	$config{'show_sysinfo'} = 1;
