@@ -4517,7 +4517,7 @@ foreach my $r (@$recips) {
 	}
 }
 
-# get_global_from_address(&domain)
+# get_global_from_address([&domain])
 # Returns the from address to use when sending email to some domain. This may
 # be the reseller's email (if set), or the system-wide default
 sub get_global_from_address
@@ -11745,6 +11745,7 @@ return $? ? &text('addstyle_ecmdfailed',
 sub get_compressed_file_size
 {
 local ($file, $key) = @_;
+return undef if ($key);	# Too expensive to decrypt and check
 my $fmt = &compression_format($file, $key);
 my @st = stat($file);
 if ($fmt == 0) {

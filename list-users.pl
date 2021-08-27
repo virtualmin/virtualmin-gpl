@@ -110,6 +110,7 @@ foreach $d (@doms) {
 		$home_bsize = &has_home_quotas() ? &quota_bsize("home") : 0;
 		$mail_bsize = &has_mail_quotas() ? &quota_bsize("mail") : 0;
 		foreach $u (@users) {
+			print "$u->{'user'}\n";
 			print "    User: " . &remove_userdom($u->{'user'}, $d),"\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Unix username: ",$u->{'user'},"\n";

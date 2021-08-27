@@ -118,6 +118,7 @@ $d->{'letsencrypt_renew'} = 1;		# Default let's encrypt renewal
 # Create a self-signed cert and key, if needed
 my $generated = &generate_default_certificate($d);
 local $chained = $d->{'ssl_chain'};
+&sync_combined_ssl_cert($d);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
@@ -1834,6 +1835,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
 	delete($d->{'ssl_chain'});	# No longer valid
+	&sync_combined_ssl_cert($d);
 	return 1;
 	}
 return 0;
