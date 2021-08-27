@@ -242,7 +242,7 @@ foreach my $nf (@rv) {
 					}
 				else {
 					# Convert to absolute path
-					$link = "$gconfig{'webprefix'}/$module_name/$link";
+					$link = "../$module_name/$link";
 					}
 				}
 			}
@@ -260,7 +260,7 @@ $rv .= "</dl>\n";
 # Button to hide new features
 if (!$showall) {
 	$rv .= &ui_form_start(
-		"$gconfig{'webprefix'}/$module_name/seen_newfeatures.cgi");
+		"../$module_name/seen_newfeatures.cgi");
 	$rv .= &ui_form_end([ [ undef, $text{'nf_seen'} ] ]);
 	}
 
