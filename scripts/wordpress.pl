@@ -41,8 +41,9 @@ return ( "mysql", "gd", "json", "xml" );
 sub script_wordpress_php_optional_modules
 {
 return ( "curl", "ssh2", "date", "tokenizer",
-         "hash", "imagick", "iconv", "mbstring",
-         "openssl", "posix", "sockets" );
+         "hash", "imagick", "pecl-imagick", 
+         "iconv", "mbstring", "openssl",
+         "posix", "sockets" );
 }
 
 sub script_wordpress_dbs

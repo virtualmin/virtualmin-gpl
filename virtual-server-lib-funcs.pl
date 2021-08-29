@@ -10873,7 +10873,7 @@ if ($status != 0) {
 	$alert_text .= $err."\n";
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("../$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10891,7 +10891,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		}
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("../$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10905,7 +10905,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/edit_newips.cgi");
+	$alert_text .= &ui_form_start("../$module_name/edit_newips.cgi");
 	$alert_text .= &ui_hidden("old", $config{'old_defip'});
 	$alert_text .= &ui_hidden("new", $defip);
 	$alert_text .= &ui_hidden("setold", 1);
@@ -10940,7 +10940,7 @@ if ($small) {
 			   $small->{'c'} || $small->{'o'},
 			   $small->{'issuer_c'} || $small->{'issuer_o'},
 			   )."</b><p>\n";
-	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/webmin/edit_ssl.cgi");
+	$alert_text .= &ui_form_start("../webmin/edit_ssl.cgi");
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
 					'create' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
@@ -10960,7 +10960,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
 		$alert_text .= &ui_form_start(
-			"$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
+			"../$module_name/fix_symlinks.cgi");
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
@@ -10982,7 +10982,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 	$switch_text .= "<b>".&text('index_themeswitch',
 				    $theme->{'desc'})."</b><p>\n";
 	$switch_text .= &ui_form_start(
-		"$gconfig{'webprefix'}/$module_name/switch_theme.cgi");
+		"../$module_name/switch_theme.cgi");
 	$switch_text .= &ui_submit($text{'index_themeswitchok'});
 	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 	$switch_text .= &ui_form_end();
@@ -11077,7 +11077,7 @@ return @rv;
 sub domain_ssl_page_links
 {
 my ($doms) = @_;
-return join(" ", map { &ui_link("/$module_name/cert_form.cgi?dom=$_->{'id'}",
+return join(" ", map { &ui_link("../$module_name/cert_form.cgi?dom=$_->{'id'}",
 				&show_domain_name($_)) } @$doms);
 }
 
@@ -14051,7 +14051,7 @@ if ($config{'dns'}) {
 	else {
 		# BIND server must be installed and usable
 		&foreign_installed("bind8", 1) == 2 ||
-			return &text('index_ebind', "/bind8/", $clink);
+			return &text('index_ebind', "../bind8/", $clink);
 
 		# Validate BIND config
 		&require_bind();
@@ -14099,7 +14099,7 @@ if ($config{'dns'}) {
 						  $_->{'bootp'} }
 						&net::boot_interfaces();
 				return &text('check_eresolv2',
-					&ui_link("$gconfig{'webprefix'}/net/list_dns.cgi",
+					&ui_link("../net/list_dns.cgi",
 						 $text{'check_eresolvlist'}),
 					&ui_link($clink,
 						 $text{'newfeatures_title'})).
@@ -15077,7 +15077,7 @@ elsif ($config{'quotas'}) {
 		if (&needs_xfs_quota_fix() == 1) {
 			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
 			if (&foreign_available("init")) {
-				$reboot_msg .= ui_link("$gconfig{'webprefix'}/init/reboot.cgi", $text{'licence_xfsrebootok'});
+				$reboot_msg .= ui_link("../init/reboot.cgi", $text{'licence_xfsrebootok'});
 				$reboot_msg .= ".";
 				}
 			&$second_print($reboot_msg);
