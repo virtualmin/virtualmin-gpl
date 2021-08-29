@@ -9058,7 +9058,7 @@ $googledns_tests = [
 	  'args' => [ [ 'domain', $test_cloud_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
 		      [ 'cloud-dns' => 'google' ],
 		      [ 'content' => 'Test home page' ],
 		      [ 'user' => $test_domain_user ],
