@@ -922,11 +922,15 @@ my $minfunc = $script->{'php_fullver_func'};
 my $maxfunc = $script->{'php_maxver_func'};
 if (defined(&$minfunc)) {
 	my $minver = &$minfunc($d, $scriptver);
-	@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
+	if ($minver) {
+		@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
+		}
 	}
 if (defined(&$maxfunc)) {
 	my $maxver = &$maxfunc($d, $scriptver);
-	@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+	if ($maxver) {
+		@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+		}
 	}
 return undef if (!@vers);
 
