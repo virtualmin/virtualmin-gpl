@@ -3819,6 +3819,10 @@ elsif ($url =~ /^ssh:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^ssh:\/\/([^:]*):(.*)\@([^\/:\@]+)(:\d+)?:(.+)$/) {
 	# SSH url with no @ in password
 	@rv = (2, $1, $2, $3, $5, $4 ? substr($4, 1) : 22);
+	if ($rv[2] =~ /^\|/) {
+		# Actually a path with / escaped to |
+		$rv[2] =~ s/\|/\//g;
+		}
 	}
 elsif ($url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:?(\/.*)$/ ||
        $url =~ /^webmin:\/\/([^:]*):(.*)\@\[([^\]]+)\](:\d+)?:(.+)$/ ||
@@ -4081,9 +4085,13 @@ $st .= "<tr> <td>$text{'backup_login'}</td> <td>".
        &ui_textbox($name."_suser", $mode == 2 ? $user : undef, 15,
 		   0, undef, $noac).
        "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_pass'}</td> <td>".
-       &ui_password($name."_spass", $mode == 2 ? $pass : undef, 15,
-		   0, undef, $noac).
+$st .= "<tr> <td>$text{'backup_pass2'}</td> <td>".
+       &ui_password($name."_spass", $mode == 2 && $pass !~ /\// ? $pass : undef,
+		    15, 0, undef, $noac).
+       "</td> </tr>\n";
+$st .= "<tr> <td>$text{'backup_pass3'}</td> <td>".
+       &ui_filebox($name."_sshkey", $mode == 2 && $pass =~ /\// ? $pass : undef,
+		    60, 0, undef, $noac).
        "</td> </tr>\n";
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
@@ -4282,7 +4290,12 @@ elsif ($mode == 2) {
 		# Strip trailing /
 		$in{$name."_spath"} =~ s/\/+$//;
 		}
-	return "ssh://".$in{$name."_suser"}.":".$in{$name."_spass"}."\@".
+	my $pass = $in{$name."_spass"};
+	if ($pass eq "") {
+		$pass = $in{$name."_sshkey"};
+		$pass =~ s/\//\|/g;
+		}
+	return "ssh://".$in{$name."_suser"}.":".$pass."\@".
 	       $in{$name."_sserver"}.":".$in{$name."_spath"};
 	}
 elsif ($mode == 3) {

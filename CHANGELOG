@@ -1625,3 +1625,4 @@ If needed, Virtualmin will configure the exact PHP version required to run scrip
 Two-factor authentication for Usermin is setup for domain owners at the same time as Virtualmin.
 Added the create-login-link API command to login as a domain owner without a password.
 Massively simplified the SSL Certificate page for services certificates.
+Added a field for entering an SSH private key file for use in backups, instead of a password.

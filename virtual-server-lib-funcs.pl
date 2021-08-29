@@ -6733,17 +6733,28 @@ local $cmd = "scp -r ".($port ? "-P $port " : "").$config{'ssh_args'}." ".
 # Returns the output, and sets the error variable ref if failed.
 sub run_ssh_command
 {
-local ($cmd, $pass, $err, $asuser) = @_;
+my ($cmd, $pass, $err, $asuser) = @_;
+if ($pass =~ /^\// && -r $pass) {
+	# Using a key file
+	my ($bin, $args) = split(/\s+/, $cmd, 2);
+	$cmd = $bin." -i ".quotemeta($pass)." ".$args;
+	$pass = undef;
+	}
 &foreign_require("proc");
 if ($asuser) {
 	$cmd = &command_as_user($asuser, 0, $cmd);
 	}
-local ($fh, $fpid) = &proc::pty_process_exec($cmd);
-local $out;
+my ($fh, $fpid) = &proc::pty_process_exec($cmd);
+my $out;
+my $nopass = 0;
 while(1) {
-	local $rv = &wait_for($fh, "password:", "yes\\/no", ".*\n");
+	my $rv = &wait_for($fh, "password:", "yes\\/no", ".*\n");
 	$out .= $wait_for_input;
 	if ($rv == 0) {
+		if (!defined($pass) || $pass eq "") {
+			$nopass = 1;
+			last;
+			}
 		syswrite($fh, "$pass\n");
 		}
 	elsif ($rv == 1) {
@@ -6754,8 +6765,11 @@ while(1) {
 		}
 	}
 close($fh);
-local $got = waitpid($fpid, 0);
-if ($? || $out =~ /permission\s+denied/i || $out =~ /connection\s+refused/i) {
+my $got = waitpid($fpid, 0);
+if ($nopass) {
+	$$err = "Password required but not supplied";
+	}
+elsif ($? || $out =~ /permission\s+denied/i || $out =~ /connection\s+refused/i) {
 	$$err = $out;
 	}
 return $out;
