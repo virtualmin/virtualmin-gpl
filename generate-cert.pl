@@ -145,6 +145,7 @@ if ($self) {
 		&set_certificate_permissions($d, $d->{'ssl_cert'});
 		&set_certificate_permissions($d, $d->{'ssl_key'});
 		}
+	&refresh_ssl_cert_expiry($d);
 	&$second_print(".. done");
 
 	# Remove any SSL passphrase on this domain

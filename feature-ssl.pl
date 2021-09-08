@@ -3110,6 +3110,20 @@ foreach my $dir (&ssl_certificate_directories($d)) {
 	}
 }
 
+# refresh_ssl_cert_expiry(&domain)
+# Update the ssl_cert_expiry field from the actual cert
+sub refresh_ssl_cert_expiry
+{
+my ($d) = @_;
+my $cert_info = &cert_info($d);
+if ($cert_info) {
+	my $expiry = &parse_notafter_date($cert_info->{'notafter'});
+	if ($expiry) {
+		$d->{'ssl_cert_expiry'} = $expiry;
+		}
+	}
+}
+
 $done_feature_script{'ssl'} = 1;
 
 1;

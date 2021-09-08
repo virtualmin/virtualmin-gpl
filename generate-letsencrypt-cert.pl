@@ -178,6 +178,7 @@ else {
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = $renew;
+	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
 	# Update other services using the cert
