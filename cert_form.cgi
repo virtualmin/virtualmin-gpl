@@ -143,9 +143,10 @@ if (&domain_has_ssl_cert($d)) {
 			    &ui_links_row(\@dlinks), 3);
 
 	# Expiry status, if we have it
-	if ($d->{'ssl_cert_expiry'}) {
+	my $expiry = &parse_notafter_date($info->{'notafter'});
+	if ($expiry) {
 		$now = time();
-		$future = int(($d->{'ssl_cert_expiry'} - $now) / (24*60*60));
+		$future = int(($expiry - $now) / (24*60*60));
 		if ($future <= 0) {
 			$emsg = "<font color=red>".
 				&text('cert_expired', -$future)."</font>";
