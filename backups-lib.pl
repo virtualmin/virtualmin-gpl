@@ -2064,6 +2064,12 @@ if ($ok) {
 		if ($cf == 4) {
 			# ZIP files are extracted with a single command
 			$reader = "unzip -l $q";
+			if (!&has_command("unzip")) {
+				&$second_print(&text('restore_zipcmd',
+						     "<tt>unzip</tt>"));
+				$ok = 0;
+				last;
+				}
 			if ($asowner && $mode == 0) {
 				# Read as domain owner, to prevent access to
 				# other files
@@ -2083,6 +2089,13 @@ if ($ok) {
 				      $cf == 2 ? "uncompress -c" :
 				      $cf == 3 ? &get_bunzip2_command()." -c" :
 						 "cat";
+			local ($compcmd) = &split_quoted_string($comp);
+			if (!&has_command($compcmd)) {
+				&$second_print(&text('restore_zipcmd',
+						     "<tt>$compcmd</tt>"));
+				$ok = 0;
+				last;
+				}
 			$reader = $catter." | ".$comp;
 			&execute_command("$reader | ".
 					 &make_tar_command("tf", "-"), undef,
@@ -3176,6 +3189,9 @@ else {
 	local $comp;
 	if ($cf == 4) {
 		# Special handling for zip
+		if (!&has_command("unzip")) {
+			return &text('restore_ezipcmd', "<tt>unzip</tt>");
+			}
 		$out = &backquote_command("unzip -l $q 2>&1");
 		}
 	else {
@@ -3190,6 +3206,10 @@ else {
 			$cf == 2 ? "uncompress -c" :
 			$cf == 3 ? &get_bunzip2_command()." -c" :
 				   "cat";
+		local ($compcmd) = &split_quoted_string($comp);
+		if (!&has_command($compcmd)) {
+			return &text('restore_ezipcmd', "<tt>$compcmd</tt>");
+			}
 		$out = &backquote_command(
 			"($catter | $comp | ".
 			&make_tar_command("tf", "-").") 2>&1");
