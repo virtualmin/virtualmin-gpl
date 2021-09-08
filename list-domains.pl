@@ -638,6 +638,8 @@ if ($multi) {
 		if ($d->{'ssl_cert_expiry'}) {
 			print "    SSL cert expiry: ",
 			    &make_date($d->{'ssl_cert_expiry'}),"\n";
+			print "    SSL cert expiry time: ",
+			    $d->{'ssl_cert_expiry'},"\n";
 			}
 		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
 			print "    Lets Encrypt renewal: ",
