@@ -5281,6 +5281,18 @@ $ssl_tests = [
                           '/domains/'.$test_ssl_subdomain.'/' ],
 	},
 
+	# Check for SSL expiry, and save it
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL cert expiry:' ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ssl-expiry-only' ] ],
+	  'save' => 'SSL_EXPIRY',
+	},
+
 	# Test HTTPS get to subdomain
 	{ 'command' => $wget_command.'https://'.$test_ssl_subdomain,
 	  'grep' => 'Test SSL subdomain home page',
@@ -5385,6 +5397,13 @@ $ssl_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin',
 		      'alt: test_subdomain' ],
+	},
+
+	# Test if expiry was updated
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ssl-expiry-only' ] ],
+	  'antigrep' => '$SSL_EXPIRY',
 	},
 
 	# Test new SSL cert via HTTP
