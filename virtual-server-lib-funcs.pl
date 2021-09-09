@@ -14399,14 +14399,7 @@ if ($config{'web'}) {
 		&flush_file_lines();
 		}
 
-	# Make sure suexec is installed, if enabled. Also check home path.
-	local $err = &check_suexec_install($tmpl);
-	if ($err) {
-		&$second_print(&text('check_webnosuexec', $err));
-		}
-	else {
-		&$second_print($text{'check_webok'});
-		}
+	&$second_print($text{'check_webok'});
 	}
 
 if (&domain_has_website()) {
