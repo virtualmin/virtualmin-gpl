@@ -6512,38 +6512,45 @@ return undef;
 sub save_domain_cloud_mail_provider
 {
 local ($d, $prov, $id) = @_;
-&require_bind();
-&obtain_lock_dns($d);
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if ($d->{'dns'}) {
+	&require_bind();
+	&obtain_lock_dns($d);
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 
-# Remove all MX records
-foreach my $r (reverse(@$recs)) {
-	if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
-		&bind8::delete_record($file, $r);
+	# Remove all MX records
+	foreach my $r (reverse(@$recs)) {
+		if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
+			&bind8::delete_record($file, $r);
+			}
 		}
+	&post_records_change($d, $recs);
+
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	if ($prov) {
+		# Add provider records
+		foreach my $r (@{$prov->{'mx'}}) {
+			&bind8::create_record($file, $d->{'dom'}.".", undef,
+					      "IN", "MX", "10 ${r}.");
+			}
+		}
+	else {
+		# Add standard records
+		&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
+		}
+	&post_records_change($d, $recs);
+	&register_post_action(\&restart_bind, $d);
+	&release_lock_dns($d);
 	}
-&post_records_change($d, $recs);
 
-($recs, $file) = &get_domain_dns_records_and_file($d);
+# Update domain object
 if ($prov) {
-	# Add provider records
-	foreach my $r (@{$prov->{'mx'}}) {
-		&bind8::create_record($file, $d->{'dom'}.".", undef,
-				      "IN", "MX", "10 ${r}.");
-		}
 	$d->{'cloud_mail_provider'} = $prov->{'name'};
 	$d->{'cloud_mail_id'} = $id;
 	}
 else {
-	# Add standard records
-	&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
 	delete($d->{'cloud_mail_provider'});
 	delete($d->{'cloud_mail_id'});
 	}
-&post_records_change($d, $recs);
-&register_post_action(\&restart_bind, $d);
-
-&release_lock_dns($d);
 
 return undef;
 }
