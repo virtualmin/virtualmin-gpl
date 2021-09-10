@@ -14108,12 +14108,11 @@ if ($config{'dns'}) {
 				my @dhcp = grep { $_->{'dhcp'} ||
 						  $_->{'bootp'} }
 						&net::boot_interfaces();
-				return &text('check_eresolv2',
+				&$second_print(
+				   &text('check_eresolv4',
 					&ui_link("../net/list_dns.cgi",
-						 $text{'check_eresolvlist'}),
-					&ui_link($clink,
-						 $text{'newfeatures_title'})).
-				     (@dhcp ? " ".$text{'check_eresolv3'} : "");
+						 $text{'check_eresolvlist'})).
+				   (@dhcp ? " ".$text{'check_eresolv3'} : ""));
 				}
 			else {
 				&$second_print($text{'check_dnsok'}." ".
