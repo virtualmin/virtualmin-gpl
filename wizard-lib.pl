@@ -501,7 +501,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		my $pack = &mysql::find_value(
 			"max_allowed_packet", $sect->{'members'});
 		if (($pack && &php_value_diff($pack, "64M") < 0) ||
-			!$pack) {
+		    !$pack) {
 			&mysql::save_directive(
 				$conf, $sect, "max_allowed_packet", [ "64M" ]);
 			}
