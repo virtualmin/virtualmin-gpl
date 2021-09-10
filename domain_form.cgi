@@ -29,7 +29,7 @@ elsif ($in{'delete'}) {
 elsif ($in{'mass'}) {
 	# Redirect to the mass server update form
 	@d = split(/\0/, $in{'d'});
-	&redirect("mass_domains_form.cgi?".join("&", map { "d=$_" } @d));
+	&redirect("pro/mass_domains_form.cgi?".join("&", map { "d=$_" } @d));
 	return;
 	}
 elsif ($in{'disable'}) {
