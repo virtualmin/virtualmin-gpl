@@ -23,7 +23,7 @@ elsif ($in{'batch'}) {
 elsif ($in{'delete'}) {
 	# Redirect to the mass server deletion form
 	@d = split(/\0/, $in{'d'});
-	&redirect("mass_delete_domains.cgi?".join("&", map { "d=$_" } @d));
+	&redirect("pro/mass_delete_domains.cgi?".join("&", map { "d=$_" } @d));
 	return;
 	}
 elsif ($in{'mass'}) {
@@ -35,13 +35,13 @@ elsif ($in{'mass'}) {
 elsif ($in{'disable'}) {
 	# Redirect to mass disable form
 	@d = split(/\0/, $in{'d'});
-	&redirect("mass_disable.cgi?".join("&", map { "d=$_" } @d));
+	&redirect("pro/mass_disable.cgi?".join("&", map { "d=$_" } @d));
 	return;
 	}
 elsif ($in{'enable'}) {
 	# Redirect to mass enable form
 	@d = split(/\0/, $in{'d'});
-	&redirect("mass_enable.cgi?".join("&", map { "d=$_" } @d));
+	&redirect("pro/mass_enable.cgi?".join("&", map { "d=$_" } @d));
 	return;
 	}
 
