@@ -184,6 +184,7 @@ $test_full_user_postgres = &postgres_username($test_full_user);
 $test_target_domain_db = 'targetdb';
 $test_domain_home = $test_domain{'home'} =
 	&server_home_directory(\%test_domain);
+$test_domain_html = $test_domain_home.'/public_html';
 $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
@@ -9171,6 +9172,94 @@ $googledns_tests = [
 
 $route53_tests = &convert_to_dnscloud($googledns_tests, "route53");
 
+$htpasswd_tests = [
+	# Create a domain with a website
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Test wget without protection
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Setup protected directory
+	{ 'command' => 'virtualmin create-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Protection test' ],
+		      [ 'path', $test_domain_html ] ],
+	  'grep' => 'Added protection for '.$test_domain_html,
+	},
+
+	# Check the directory was created
+	{ 'command' => 'virtualmin list-protected-directories',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dir-only' ] ],
+	  'grep' => $test_domain_html,
+	},
+
+	# Test wget with protection, which should now fail
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Add a user
+	{ 'command' => 'virtualmin create-protected-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'user', 'testy' ],
+		      [ 'pass', 'smeg' ] ],
+	},
+
+	# Check the user was created
+	{ 'command' => 'virtualmin list-protected-users',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'name-only' ] ],
+	  'grep' => 'testy',
+	},
+
+	# Test wget as the new user
+	{ 'command' => $wget_command.' http://testy:smeg@'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Delete the user
+	{ 'command' => 'virtualmin delete-protected-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'user', 'testy' ] ],
+	},
+
+	# Test wget as the user, which should fail now
+	{ 'command' => $wget_command.' http://testy:smeg@'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Delete the directory protection
+	{ 'command' => 'virtualmin delete-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ] ],
+	},
+
+	# Test wget works again
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9249,6 +9338,7 @@ $alltests = { '_config' => $_config_tests,
 	      'dns' => $dns_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
+	      'htpasswd' => $htpasswd_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
