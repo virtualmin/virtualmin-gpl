@@ -7963,9 +7963,9 @@ if ($dom->{'reseller'} && defined(&update_reseller_unix_groups)) {
 # If an SSL cert wasn't generated because SSL wasn't enabled, do one now
 my $always_ssl = defined($dom->{'always_ssl'}) ? $dom->{'always_ssl'}
 					       : $config{'always_ssl'};
-my $generated;
+my $generated = 0;
 if (!&domain_has_ssl($dom) && $always_ssl) {
-	$generated = &generate_default_certificate($dom);
+	$generated = &generate_default_certificate($dom) ? 1 : 0;
 	}
 
 # Attempt to request a let's encrypt cert. This has to be done after the
@@ -7979,13 +7979,13 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
 		&create_initial_letsencrypt_cert($dom, 1);
-		$generated++;
+		$generated = 2;
 		}
 	}
 
 # Update service certs and DANE DNS records if a new Let's Encrypt cert was
 # generated
-if ($generated && !$dom->{'no_default_service_certs'}) {
+if ($generated == 2 && !$dom->{'no_default_service_certs'}) {
 	&enable_domain_service_ssl_certs($dom);
 	&sync_domain_tlsa_records($dom);
 	}
