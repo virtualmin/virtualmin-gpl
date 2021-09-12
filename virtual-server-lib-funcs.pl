@@ -8065,10 +8065,13 @@ if ($valid) {
 		&$second_print($text{'letsencrypt_evalid'});
 		return 0;
 		}
-	@errs = &check_domain_connectivity($d, { 'mail' => 1, 'ssl' => 1 });
-	if (@errs) {
-		&$second_print($text{'letsencrypt_econnect'});
-		return 0;
+	if (defined(&check_domain_connectivity)) {
+		@errs = &check_domain_connectivity(
+			$d, { 'mail' => 1, 'ssl' => 1 });
+		if (@errs) {
+			&$second_print($text{'letsencrypt_econnect'});
+			return 0;
+			}
 		}
 	}
 my $phd = &public_html_dir($d);
