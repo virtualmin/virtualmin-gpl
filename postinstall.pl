@@ -276,6 +276,17 @@ if ($config{'php_vars'} =~ /^memory_limit=32M/) {
 	&save_module_config();
 	}
 
+# If the default template uses a PHP mode that isn't supported, change it
+my ($tmpl) = &list_templates();
+my $mmap = &php_mode_numbers_map();
+my @supp = &supported_php_modes();
+my %cannums = map { $mmap->{$_}, 1 } @supp;
+if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
+	# Default mode cannot be used .. change to first that can
+	$tmpl->{'web_php_suexec'} = $mmap{$supp[0]};
+	&save_template($tmpl);
+	}
+
 # Enable checking for latest scripts
 if ($config{'scriptlatest_enabled'} eq '') {
 	$config{'scriptlatest_enabled'} = 1;
