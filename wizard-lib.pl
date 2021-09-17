@@ -308,6 +308,7 @@ sub wizard_show_mysql
 if (&mysql::is_mysql_running() == -1) {
 	# Cannot even login with the current password
 	print &ui_table_row(undef, $text{'wizard_mysql4'}, 2);
+	print &ui_hidden("needchange", 1);
 
 	print &ui_table_row($text{'wizard_mysql_empty'},
 		&ui_textbox("mypass", undef, 20)."<br>\n".
@@ -315,6 +316,7 @@ if (&mysql::is_mysql_running() == -1) {
 	}
 else {
 	# Offer to change the password
+	print &ui_hidden("needchange", 0);
 	print &ui_table_row(undef, $text{'wizard_mysql'} . " " .
 			   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
 					       : $text{'wizard_mysql2'}), 2);
@@ -354,8 +356,11 @@ local ($in) = @_;
 &require_mysql();
 local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
 local $user = $mysql::mysql_login || 'root';
-$mysql::mysql_pass = $pass;
-$mysql::authstr = &mysql::make_authstr();
+if ($in->{'needchange'}) {
+	# Change the password used by subsequent code to validate that it works
+	$mysql::mysql_pass = $pass;
+	$mysql::authstr = &mysql::make_authstr();
+	}
 if (&mysql::is_mysql_running() == -1) {
 	# Forcibly change the mysql password
 	if ($in->{'forcepass'}) {
@@ -376,7 +381,13 @@ else {
 		eval {
 			&execute_password_change_sql(undef, $user, undef, $pass);
 			};
-		&update_webmin_mysql_pass($user, $pass) if (!$@);
+		if (!$@) {
+			# Update the password used by subsequent code if
+			# changing it worked
+			&update_webmin_mysql_pass($user, $pass);
+			$mysql::mysql_pass = $pass;
+			$mysql::authstr = &mysql::make_authstr();
+			}
 		}
 	}
 
