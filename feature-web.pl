@@ -229,6 +229,15 @@ else {
 	&setup_apache_logs($d, $log, $elog);
 	&link_apache_logs($d, $log, $elog);
 	$d->{'alias_mode'} = 0;
+
+	# If suexec isn't supported, setup fcgiwrap
+	if (!&supports_suexec() && &supports_fcgiwrap()) {
+		my ($ok, $port) = &setup_fcgiwrap_server($d);
+		if ($ok) {
+			# Configure Apache to use fcgiwrap for CGIs
+			$d->{'fcgiwrap_port'} = $port;
+			}
+		}
 	}
 &create_framefwd_file($d);
 &$second_print($text{'setup_done'});
@@ -403,6 +412,9 @@ else {
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
 		&delete_web_virtual_server($virt);
+		if ($d->{'fcgiwrap_port'}) {
+			&delete_fcgiwrap_server($d);
+			}
 		&$second_print($text{'setup_done'});
 
 		# Delete logs too, if outside home dir and if not a sub-domain
@@ -2511,7 +2523,8 @@ if ($config{'web'}) {
 			     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 			     "html_dir", "html_dir_def", "html_perms",
 			     "alias_mode", "web_port", "web_sslport",
-			     "web_ssi", "web_ssi_suffix", );
+			     "web_ssi", "web_ssi_suffix",
+			     &supports_fcgiwrap() ? ( "fcgiwrap" ) : ( ) );
 	if ($config{'webalizer'}) {
 		push(@webfields, "stats_mode", "stats_dir", "stats_hdir",
 				 "statspass", "statsnoedit");
@@ -2550,6 +2563,14 @@ if ($config{'web'}) {
 			 [ 1, $text{'newweb_useryes'}." ".
 			      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
 							'' : $tmpl->{'web_user'}) ] ]));
+
+	# CGI scripts execution mode
+	if (&supports_fcgiwrap()) {
+		print &ui_table_row(&hlink($text{'tmpl_web_fcgiwrap'}, "template_web_fcgiwrap"),
+			&ui_radio("fcgiwrap", $tmpl->{'web_fcgiwrap'} ? 1 : 0,
+				  [ [ 1, $text{'tmpl_web_fcgiwrap1'} ],
+				    [ 0, $text{'tmpl_web_fcgiwrap0'} ] ]));
+		}
 
 	# HTML sub-directory input
 	print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
@@ -2751,6 +2772,9 @@ if ($config{'web'}) {
 		$tmpl->{'web_ssl'} = $in{'web_ssl'};
 		if (defined($in{'writelogs'})) {
 			$tmpl->{'web_writelogs'} = $in{'writelogs'};
+			}
+		if (defined($in{'fcgiwrap'})) {
+			$tmpl->{'web_fcgiwrap'} = $in{'fcgiwrap'};
 			}
 		if ($in{'html_dir_def'}) {
 			delete($tmpl->{'web_html_dir'});
@@ -3754,6 +3778,13 @@ if ($d) {
 return 1;
 }
 
+# supports_fcgiwrap()
+# Returns 1 if fcgiwrap is supported on this system
+sub supports_fcgiwrap
+{
+return &has_command("fcgiwrap") ? 1 : 0;
+}
+
 # setup_apache_logs(&domain, [access-log, error-log])
 # Create empty Apache log files for a domain, and set their ownership
 sub setup_apache_logs
@@ -4720,6 +4751,144 @@ if (!$sn) {
 	$sn = &get_system_hostname();
 	}
 return $sn;
+}
+
+# setup_fcgiwrap_server(&domain)
+# Starts up a fcgiwrap process running as the domain user, and enables it
+# at boot time. Returns an OK flag and the port number selected to listen on.
+sub setup_fcgiwrap_server
+{
+my ($d) =  @_;
+
+# Work out socket file for fcgiwrap
+my $socketdir = "/var/fcgiwrap";
+if (!-d $socketdir) {
+	&make_dir($socketdir, 0777);
+	}
+my $domdir = "$socketdir/$d->{'id'}.sock";
+if (!-d $domdir) {
+	&make_dir($domdir, 0770);
+	}
+my $user = &get_apache_user();
+&set_ownership_permissions($user, $d->{'gid'}, undef, $domdir);
+my $port = "$domdir/socket";
+
+# Get the command
+my ($cmd, $log, $pidfile) = &get_fcgiwrap_server_command($d, $port);
+$cmd || return (0, $text{'fcgid_ecmd'});
+
+# Create init script
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+	$init::init_mode = "init";
+	}
+my $name = &init_script_fcgiwrap_name($d);
+my %cmds_abs = (
+	'echo', &has_command('echo'),
+	'cat', &has_command('cat'),
+	'chmod', &has_command('chmod'),
+	'kill', &has_command('kill'),
+	'sleep', &has_command('sleep'),
+	'fuser', &has_command('fuser'),
+	'rm', &has_command('rm'),
+	);
+if (defined(&init::enable_at_boot_as_user)) {
+	# Init system can run commands as the user
+	&init::enable_at_boot_as_user($name,
+		      "Apache fcgiwrap server for $d->{'dom'}",
+		      "$cmds_abs{'rm'} -f $port ; $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile` ; ".
+		      "$cmds_abs{'sleep'} 1 ; ".
+		      "$cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      $d->{'user'},
+		      );
+	}
+else {
+	# Older Webmin requires use of command_as_user
+	&init::enable_at_boot($name,
+		      "Apache fcgiwrap server for $d->{'dom'}",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`").
+			" ; $cmds_abs{'sleep'} 1".
+			($cmds_abs{'fuser'} ? " ; $cmds_abs{'fuser'} $port | xargs kill"
+					    : "").
+			" ; $cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      );
+	}
+$init::init_mode = $old_init_mode;
+
+# Launch it, and save the PID
+&init::start_action($name);
+
+return (1, $port);
+}
+
+# delete_fcgiwrap_server(&domain)
+# Shut down the fcgiwrap process, and delete it from starting at boot
+sub delete_fcgiwrap_server
+{
+my ($d) = @_;
+
+# Stop the server
+&foreign_require("init");
+my $name = &init_script_fcgiwrap_name($d);
+&init::stop_action($name);
+
+# Delete init script
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+        $init::init_mode = "init";
+        }
+&init::disable_at_boot($name);
+&init::delete_at_boot($name);
+$init::init_mode = $old_init_mode;
+
+# Delete socket file, if any
+if ($d->{'fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
+	my $domdir = $1;
+	&unlink_file($d->{'fcgiwrap_port'});
+	&unlink_file($domdir);
+	}
+}
+
+# get_fcgiwrap_server_command(&domain, port)
+# Returns a command to run the fcgiwrap server, log file and PID file
+sub get_fcgiwrap_server_command
+{
+my ($d, $port) = @_;
+my $cmd = &has_command("fcgiwrap");
+if ($port =~ /^\//) {
+	$cmd .= " -s unix:".$port;
+	}
+else {
+	$cmd .= " -s tcp:127.0.0.1:".$port;
+	}
+my $log = "$d->{'home'}/logs/fcgiwrap.log";
+my $piddir = "/var/fcgiwrap";
+if (!-d $piddir) {
+	&make_dir($piddir, 0777);
+	}
+my $pidfile = "$piddir/$d->{'id'}.fcgiwrap.pid";
+return ($cmd, $log, $pidfile);
+}
+
+# init_script_fcgiwrap_name(&domain)
+# Returns the name of the init script for the FCGId server
+sub init_script_fcgiwrap_name
+{
+my ($d) = @_;
+my $name = "fcgiwrap-$d->{'dom'}";
+$name =~ s/\./-/g;
+return $name;
 }
 
 $done_feature_script{'web'} = 1;

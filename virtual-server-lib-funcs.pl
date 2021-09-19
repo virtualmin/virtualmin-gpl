@@ -8845,6 +8845,7 @@ push(@rv, { 'id' => 0,
 	    'web_ssl' => $config{'apache_ssl_config'},
 	    'web_writelogs' => $config{'web_writelogs'},
 	    'web_user' => $config{'web_user'},
+	    'web_fcgiwrap' => $config{'fcgiwrap'},
 	    'web_html_dir' => $config{'html_dir'},
 	    'web_html_perms' => $config{'html_perms'} || 750,
 	    'web_stats_dir' => $config{'stats_dir'},
@@ -9139,6 +9140,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'apache_ssl_config'} = $tmpl->{'web_ssl'};
 	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
 	$config{'web_user'} = $tmpl->{'web_user'};
+	$config{'fcgiwrap'} = $tmpl->{'web_fcgiwrap'};
 	$config{'html_dir'} = $tmpl->{'web_html_dir'};
 	$config{'html_perms'} = $tmpl->{'web_html_perms'};
 	$config{'stats_dir'} = $tmpl->{'web_stats_dir'};
@@ -10669,15 +10671,20 @@ else {
 }
 
 # has_cgi_support([&domain])
-# Returns 1 if the webserver supports CGI scripts
+# Returns 1 if the webserver supports CGI scripts, 0 if not
 sub has_cgi_support
 {
 my ($d) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	# Check if Apache supports suexec or fcgiwrap
-	# XXX add fcgiwrap check
-	return &supports_suexec($d);
+	return 1 &supports_suexec($d);
+	if ($d) {
+		return $d->{'fcgiwrap_port'} ? 1 : 0;
+		}
+	else {
+		return &supports_fcgiwrap();
+		}
 	}
 elsif ($p) {
 	# Call plugin function

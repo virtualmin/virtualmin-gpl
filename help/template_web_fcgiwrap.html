@@ -1,0 +1,10 @@
+<header>Run CGI scripts using</header>
+
+When the <tt>fcgiwrap</tt> server is installed, this option allows you to select if it
+will be always used to run CGI scripts for new domains. Otherwise, <tt>suexec</tt> will
+be used if it is installed and configured correctly. <p>
+
+Fcgiwrap is generally faster to run CGI scripts, but requires that each virtual server run
+its own server process which consumes additional RAM. <p>
+
+<footer>
