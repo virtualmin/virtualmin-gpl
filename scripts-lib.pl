@@ -2810,18 +2810,16 @@ push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
 
 # Check for webserver CGI or PHP support
 local $p = &domain_has_website($d);
-if ($p && $p ne 'web') {
-	local $cancgi = &plugin_call($p, "feature_web_supports_cgi", $d);
-	local @canphp = &plugin_call($p, "feature_web_supported_php_modes", $d);
-	if (&indexof("php", @{$script->{'uses'}}) >= 0 && !@canphp) {
-		return $text{'scripts_inophp'};
-		}
-	if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !$cancgi) {
-		return $text{'scripts_inocgi'};
-		}
-	if (&indexof("apache", @{$script->{'uses'}}) >= 0) {
-		return $text{'scripts_inoapache'};
-		}
+local $cancgi = &has_cgi_support($d);
+if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !$cancgi) {
+	return $text{'scripts_inocgi'};
+	}
+if ($p ne "web" && &indexof("apache", @{$script->{'uses'}}) >= 0) {
+	return $text{'scripts_inoapache'};
+	}
+my @supp = grep { $_ ne "none" } &supported_php_modes($d);
+if (&indexof("php", @{$script->{'uses'}}) >= 0 && !@supp) {
+	return $text{'scripts_inophp'};
 	}
 
 return wantarray ? @rv : join(", ", @rv);

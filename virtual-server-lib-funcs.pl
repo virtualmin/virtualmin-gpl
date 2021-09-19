@@ -10668,6 +10668,27 @@ else {
 	}
 }
 
+# has_cgi_support([&domain])
+# Returns 1 if the webserver supports CGI scripts
+sub has_cgi_support
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Check if Apache supports suexec or fcgiwrap
+	# XXX add fcgiwrap check
+	return &supports_suexec($d);
+	}
+elsif ($p) {
+	# Call plugin function
+	return &plugin_defined($p, "feature_web_supports_cgi") &&
+	       &plugin_call($p, "feature_web_supports_cgi", $d);
+	}
+else {
+	return 0;
+	}
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not
