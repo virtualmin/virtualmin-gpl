@@ -229,18 +229,44 @@ else {
 	&setup_apache_logs($d, $log, $elog);
 	&link_apache_logs($d, $log, $elog);
 	$d->{'alias_mode'} = 0;
+	}
+&create_framefwd_file($d);
+&$second_print($text{'setup_done'});
 
+if (!$d->{'alias'}) {
 	# If suexec isn't supported, setup fcgiwrap
-	if (!&supports_suexec() && &supports_fcgiwrap()) {
+	if (($tmpl->{'web_fcgiwrap'} || !&supports_suexec()) && &supports_fcgiwrap()) {
+		&$first_print($text{'setup_fcgiwrap'});
 		my ($ok, $port) = &setup_fcgiwrap_server($d);
 		if ($ok) {
 			# Configure Apache to use fcgiwrap for CGIs
 			$d->{'fcgiwrap_port'} = $port;
+			local ($virt, $vconf, $conf) = &get_apache_virtual(
+							$d->{'dom'}, $d->{'web_port'});
+			local @dirs = &apache::find_directive_struct(
+				"Directory", $vconf);
+			local $cgid = &cgi_bin_dir($d);
+			local ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
+			if ($dir) {
+				&apache::save_directive("SetHandler",
+				  [ "proxy:unix:$port|fcgi://localhost" ],
+				  $dir->{'members'}, $conf);
+				&apache::save_directive("ProxyFCGISetEnvIf",
+				  [ "true SCRIPT_FILENAME \"$d->{'home'}%{reqenv:SCRIPT_NAME}\"" ],
+				  $dir->{'members'}, $conf);
+				&flush_file_lines($virt->{'file'});
+				&$second_print($text{'setup_done'});
+				}
+			else {
+				&$second_print(&text('setup_efcgiwrap', "$cgid not found"));
+				}
+			}
+		else {
+			&$second_print(&text('setup_efcgiwrap', $port));
 			}
 		}
 	}
-&create_framefwd_file($d);
-&$second_print($text{'setup_done'});
+
 &register_post_action(\&restart_apache);
 
 # Add the Apache user to the group for this virtual server, if missing,
@@ -412,9 +438,6 @@ else {
 		local $elog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'}, 1);
 		&delete_web_virtual_server($virt);
-		if ($d->{'fcgiwrap_port'}) {
-			&delete_fcgiwrap_server($d);
-			}
 		&$second_print($text{'setup_done'});
 
 		# Delete logs too, if outside home dir and if not a sub-domain
@@ -438,6 +461,9 @@ else {
 	&release_lock_web($d);
 	}
 &delete_php_fpm_pool($d);	# May not exist, but delete just in case
+if ($d->{'fcgiwrap_port'}) {
+	&delete_fcgiwrap_server($d);
+	}
 undef(@apache::get_config_cache);
 return 1;
 }
@@ -3782,7 +3808,8 @@ return 1;
 # Returns 1 if fcgiwrap is supported on this system
 sub supports_fcgiwrap
 {
-return &has_command("fcgiwrap") ? 1 : 0;
+&require_apache();
+return &has_command("fcgiwrap") && $apache::httpd_modules{'core'} >= 2.426 ? 1 : 0;
 }
 
 # setup_apache_logs(&domain, [access-log, error-log])
