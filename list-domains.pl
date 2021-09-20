@@ -543,6 +543,9 @@ if ($multi) {
 			$s = &get_domain_suexec($d);
 			print "    SuExec for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";
+			if ($d->{'fcgiwrap_port'}) {
+				print "    Fcgiwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
+				}
 			if ($p eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
