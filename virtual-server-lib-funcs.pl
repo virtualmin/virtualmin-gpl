@@ -7978,6 +7978,10 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
+		if ($nopost) {
+			# Need to run any pending Apache restart
+			&run_post_actions(\&restart_apache);
+			}
 		&create_initial_letsencrypt_cert($dom, 1);
 		$generated = 2;
 		}
@@ -8504,17 +8508,20 @@ sub register_post_action
 push(@main::post_actions, [ @_ ]);
 }
 
-# run_post_actions()
+# run_post_actions([&only-action])
 # Run all registered post-modification actions
 sub run_post_actions
 {
+local @only = @_;
+local %only = map { $_, 1 } @only;
 local $a;
 
 # Check if we are restarting Apache, and if so don't reload it
 local $restarting;
 foreach $a (@main::post_actions) {
-	if ($a->[0] eq \&restart_apache && $a->[1] == 1) {
-		$restarting = 1;
+	if ($a->[0] eq \&restart_apache) {
+		$a->[1] ||= 0;
+		$restarting = 1 if ($a->[1] == 1);
 		}
 	}
 if ($restarting) {
@@ -8524,6 +8531,7 @@ if ($restarting) {
 
 # Run unique actions
 local %done;
+local @newpost;
 foreach $a (@main::post_actions) {
 	# Don't run multiple times. For BIND, all restarts are considered equal
 	local $key = $a->[0] eq \&restart_bind ? $a->[0] :
@@ -8531,15 +8539,21 @@ foreach $a (@main::post_actions) {
 	     join(",", @$a);
 	next if ($done{$key}++);
 
-	# Call the restart function
+	# Skip if the caller requested specific actions
 	local ($afunc, @aargs) = @$a;
+	if (@only && !$only{$afunc}) {
+		push(@newpost, $a);
+		next;
+		}
+
+	# Call the restart function
 	local $main::error_must_die = 1;
 	eval { &$afunc(@aargs) };
 	if ($@) {
 		&$second_print(&text('setup_postfailure', "$@"));
 		}
 	}
-@main::post_actions = ( );
+@main::post_actions = @newpost;
 }
 
 # run_post_actions_silently()
