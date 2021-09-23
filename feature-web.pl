@@ -3808,8 +3808,14 @@ return 1;
 # Returns 1 if fcgiwrap is supported on this system
 sub supports_fcgiwrap
 {
+return 0 if (!&has_command("fcgiwrap"));
 &require_apache();
-return &has_command("fcgiwrap") && $apache::httpd_modules{'core'} >= 2.426 ? 1 : 0;
+if ($apache::site{'fullversion'}) {
+	return &compare_versions($apache::site{'fullversion'}, "2.4.26") >= 0;
+	}
+else {
+	return apache::httpd_modules{'core'} >= 2.426;
+	}
 }
 
 # setup_apache_logs(&domain, [access-log, error-log])
