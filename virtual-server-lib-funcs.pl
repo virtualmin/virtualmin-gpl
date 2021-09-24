@@ -14446,7 +14446,10 @@ if ($config{'web'}) {
 	&$second_print($text{'check_webok'});
 
 	# Check SuExec / CGI mode
-	if (&supports_suexec()) {
+	if (&supports_suexec() && &supports_fcgiwrap()) {
+		&$second_print($text{'check_suexecok2'});
+		}
+	elsif (&supports_suexec()) {
 		&$second_print($text{'check_suexecok'});
 		}
 	elsif (&supports_fcgiwrap()) {
