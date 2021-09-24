@@ -910,6 +910,12 @@ else {
 		&link_apache_logs($d);
 		&$second_print($text{'setup_done'});
 		}
+	if (($d->{'user'} ne $oldd->{'user'} ||
+	     $d->{'dom'} ne $oldd->{'dom'}) && $d->{'fcgiwrap_port'}) {
+		# Re-setup the fcgiwrap server
+		&delete_fcgiwrap_server($oldd);
+		&setup_fcgiwrap_server($d);
+		}
 
 	# If any other rename step fails becuase no <virtualhost> was found,
 	# the code will jump to here.
