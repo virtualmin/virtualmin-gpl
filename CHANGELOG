@@ -1626,3 +1626,5 @@ Two-factor authentication for Usermin is setup for domain owners at the same tim
 Added the create-login-link API command to login as a domain owner without a password.
 Massively simplified the SSL Certificate page for services certificates.
 Added a field for entering an SSH private key file for use in backups, instead of a password.
+---- Changes since 6.17 ----
+On systems without SuExec, fcgiwrap will be used to execute CGI scripts instead for new virtual servers.
