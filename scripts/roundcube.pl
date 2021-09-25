@@ -94,7 +94,7 @@ return @rv;
 sub script_roundcube_php_fullver
 {
 local ($d, $ver, $sinfo, $phpver) = @_;
-return $ver >= 0.9 ? "5.3.7" : 5.2;
+return $ver >= 0.9 ? "5.4.1" : 5.2;
 }
 
 # script_roundcube_params(&domain, version, &upgrade-info)
