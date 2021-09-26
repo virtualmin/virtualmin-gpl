@@ -10928,7 +10928,7 @@ if ($status != 0) {
 	$alert_text .= $err."\n";
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("../$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10946,7 +10946,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		}
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("../$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10960,7 +10960,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$alert_text .= &ui_form_start("../$module_name/edit_newips.cgi");
+	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/$module_name/edit_newips.cgi");
 	$alert_text .= &ui_hidden("old", $config{'old_defip'});
 	$alert_text .= &ui_hidden("new", $defip);
 	$alert_text .= &ui_hidden("setold", 1);
@@ -10995,7 +10995,7 @@ if ($small) {
 			   $small->{'c'} || $small->{'o'},
 			   $small->{'issuer_c'} || $small->{'issuer_o'},
 			   )."</b><p>\n";
-	$alert_text .= &ui_form_start("../webmin/edit_ssl.cgi");
+	$alert_text .= &ui_form_start("$gconfig{'webprefix'}/webmin/edit_ssl.cgi");
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
 					'create' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
@@ -11015,7 +11015,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
 		$alert_text .= &ui_form_start(
-			"../$module_name/fix_symlinks.cgi");
+			"$gconfig{'webprefix'}/$module_name/fix_symlinks.cgi");
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
@@ -11037,7 +11037,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 	$switch_text .= "<b>".&text('index_themeswitch',
 				    $theme->{'desc'})."</b><p>\n";
 	$switch_text .= &ui_form_start(
-		"../$module_name/switch_theme.cgi");
+		"$gconfig{'webprefix'}/$module_name/switch_theme.cgi");
 	$switch_text .= &ui_submit($text{'index_themeswitchok'});
 	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 	$switch_text .= &ui_form_end();
