@@ -6,7 +6,7 @@ sub wizard_redirect
 if (&master_admin() &&
     ($config{'wizard_run'} eq '' && $config{'first_version'} >= 3.69 ||
      $config{'wizard_run'} eq '0')) {
-	return "$webprefix/$module_name/wizard.cgi";
+	return "/$module_name/wizard.cgi";
 	}
 return undef;
 }
