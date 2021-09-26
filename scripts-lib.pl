@@ -2775,13 +2775,13 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	if (defined(&$minfunc)) {
 		my $minver = &$minfunc($d, $ver, $sinfo);
 		if (&compare_versions($fullver, $minver) < 0) {
-			return &text('scripts_iphpfullver', $minver, $phpver);
+			return &text('scripts_iphpfullver', $minver, $fullver);
 			}
 		}
 	if (defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
-		if (&compare_versions($fullver, $maxver) < 0) {
-			return &text('scripts_iphpmaxver', $maxver, $phpver);
+		if (&compare_versions($fullver, $maxver) > 0) {
+			return &text('scripts_iphpmaxver', $maxver, $fullver);
 			}
 		}
 	}
