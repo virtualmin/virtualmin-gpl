@@ -15326,7 +15326,7 @@ if ($virtualmin_pro &&
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /baseurl=http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
@@ -15365,7 +15365,7 @@ if ($virtualmin_pro &&
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /^deb\s+http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				if ($l =~ /^deb\s+https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
