@@ -108,23 +108,17 @@ local $rv;
 
 if ($current_theme !~ /authentic-theme/) {
 
-# Get webprefix
-my $webprefix = $gconfig{'webprefix'};
-if (defined(&get_webprefix)) {
-	$webprefix = &get_webprefix();
-	}
-
 # Xinha editor config
 $rv .= <<EOF;
 <script type="text/javascript">
-  _editor_url = "$webprefix/mailboxes/xinha/";
+  _editor_url = "@{[&get_webprefix_safe]}/mailboxes/xinha/";
   _editor_lang = "en";
 </script>
 EOF
 
 # Javascript for making the Xinha editor, depending on version
 $rv .= <<EOF;
-<script type="text/javascript" src="$webprefix/mailboxes/xinha/XinhaCore.js"></script>
+<script type="text/javascript" src="@{[&get_webprefix_safe]}/mailboxes/xinha/XinhaCore.js"></script>
 <script type="text/javascript">
 xinha_init = function()
 {
