@@ -12488,7 +12488,7 @@ local @rv;
 
 # Always start with edit/view link
 my $canconfig = &can_config_domain($d);
-local $vm = "$webprefix/$module_name";
+local $vm = "/$module_name";
 push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 				: "$vm/view_domain.cgi?dom=$d->{'id'}",
 	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
@@ -12507,7 +12507,7 @@ if (!$d->{'parent'}) {
 # Add actions and links
 foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 	if ($l->{'mod'}) {
-		$l->{'url'} = "$webprefix/$l->{'mod'}/$l->{'page'}";
+		$l->{'url'} = "/$l->{'mod'}/$l->{'page'}";
 		}
 	else {
 		$l->{'url'} = "$vm/$l->{'page'}".
@@ -12523,7 +12523,7 @@ my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 # Add preview website link, proxied via Webmin
 if (&domain_has_website($d) && &can_use_preview()) {
 	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
-	push(@rv, { 'url' => "$webprefix/$module_name/".
+	push(@rv, { 'url' => "/$module_name/".
 		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
 		    'title' => $text{'links_website'},
 		    'cat' => 'services',
@@ -12686,7 +12686,7 @@ return (\@tlinks, \@ttitles, \@ticons, \@tcats, \@tmpls);
 sub get_all_global_links
 {
 my @rv;
-my $vm = "$webprefix/$module_name";
+my $vm = "/$module_name";
 
 local $v = [ 'plugins' => \@plugins,
 	     'spam' => $config{'spam'},
@@ -12716,7 +12716,7 @@ if (&can_edit_templates()) {
 				}
 			elsif ($tlinks->[$i] =~ /^\//) {
 				# Outside virtualmin module
-				$url = $webprefix.$tlinks->[$i];
+				$url = $tlinks->[$i];
 				}
 			else {
 				# Inside virtualmin
@@ -12734,7 +12734,7 @@ if (&can_edit_templates()) {
 
 # Add module config page
 if (!$access{'noconfig'}) {
-	push(@rv, { 'url' => "$webprefix/config.cgi?$module_name",
+	push(@rv, { 'url' => "/config.cgi?$module_name",
 		    'title' => $text{'index_virtualminconfig'},
 		    'cat' => 'setting',
 		    'icon' => 'config' });
