@@ -11141,7 +11141,7 @@ return @rv;
 sub domain_ssl_page_links
 {
 my ($doms) = @_;
-return join(" ", map { &ui_link("../$module_name/cert_form.cgi?dom=$_->{'id'}",
+return join(" ", map { &ui_link("@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$_->{'id'}",
 				&show_domain_name($_)) } @$doms);
 }
 
@@ -14164,7 +14164,7 @@ if ($config{'dns'}) {
 						&net::boot_interfaces();
 				&$second_print(
 				   &text('check_eresolv4',
-					&ui_link("../net/list_dns.cgi",
+					&ui_link("@{[&get_webprefix_safe()]}/net/list_dns.cgi",
 						 $text{'check_eresolvlist'})).
 				   (@dhcp ? " ".$text{'check_eresolv3'} : ""));
 				}
@@ -15144,7 +15144,7 @@ elsif ($config{'quotas'}) {
 		if (&needs_xfs_quota_fix() == 1) {
 			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
 			if (&foreign_available("init")) {
-				$reboot_msg .= ui_link("../init/reboot.cgi", $text{'licence_xfsrebootok'});
+				$reboot_msg .= ui_link("@{[&get_webprefix_safe()]}/init/reboot.cgi", $text{'licence_xfsrebootok'});
 				$reboot_msg .= ".";
 				}
 			&$second_print($reboot_msg);
