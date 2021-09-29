@@ -1418,7 +1418,6 @@ backup_sshserver=Serveur SSH
 backup_s3path=Bucket et chemin
 backup_path=Fichier sur le serveur
 backup_login=Connectez-vous en tant qu'utilisateur
-backup_pass=Avec le mot de passe
 backup_mailfiles2=Inclure les fichiers de courrier
 backup_dirlogs=Inclure les fichiers journaux
 backup_feature_unix=Mot de passe et quota de l'utilisateur Unix

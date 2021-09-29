@@ -2063,7 +2063,6 @@ backup_ftpserver=FTP server
 backup_sshserver=SSH server
 backup_path=File op server
 backup_login=Login als gebruiker
-backup_pass=met wachtwoord
 backup_mailfiles2=Inclusief email files
 backup_dirlogs=Inclusief log directory
 backup_feature_unix=Administratie gebruikers wachtwoord, quota en Cron taken
@@ -3331,7 +3330,6 @@ licence_unlimited=Ongelimiteerd
 licence_goterr=.. er is een probleem ontdekt : $1
 licence_ecannot=U bent niet bevoegd om de Virtualmin licentie te controleren
 licence_maxdoms=Uw systeem licentie is geldig voor $1 servers, maar u heeft er $2.
-licence_maxservers=Uw serie nummer is alleen geldig voor $1 servers, maar is gebruikt voor $2.
 
 config_deftheme=Globale Webmin standaard
 config_oldtheme=Oude Webmin thema
