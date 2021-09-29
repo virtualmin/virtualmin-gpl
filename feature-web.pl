@@ -609,7 +609,7 @@ return 1;
 sub modify_web
 {
 my ($d, $oldd, $alias, $oldalias) = @_;
-rv $rv = 0;
+my $rv = 0;
 &require_apache();
 
 # Special case - converting an alias domain into a non-alias, or changing the
