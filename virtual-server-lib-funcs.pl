@@ -10848,6 +10848,9 @@ sub check_licence_site
 return (0) if (!&require_licence());
 local $id = &get_licence_hostid();
 
+my %serial;
+&read_env_file($virtualmin_license_file, \%serial);
+
 local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
 	&licence_scheduled($id, undef, undef, &get_vps_type());
 if ($status == 0 && $doms) {
@@ -10862,7 +10865,7 @@ if ($status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
-		$err = &text('licence_maxservers', $max_servers, $servers);
+		$err = &text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
