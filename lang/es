@@ -1810,7 +1810,6 @@ backup_sshserver=Servidor SSH
 backup_s3path=Bucket y ruta
 backup_path=archivo en servidor
 backup_login=Conectase como usuario
-backup_pass=con contraseña
 backup_mailfiles2=Archivos de inclusión de mail
 backup_dirlogs=Incluir los logs de directorio
 backup_feature_unix=Contraseña y límite de espacio del usuario Unix
@@ -2976,7 +2975,6 @@ licence_unlimited=ilimitado
 licence_goterr=.. se ha detectado un problema : $1
 licence_ecannot=No está autorizado a re-chequear la licencia de Virtualmin
 licence_maxdoms=La licencia de su sistema es solo para $1 servidores, pero usted tiene $2.
-licence_maxservers=Su número de serie esta licenciado para $1 servidores, pero está siendo utilizado en $2.
 
 config_deftheme=Webmin global por defecto
 config_oldtheme=Viejo tema del Webmin

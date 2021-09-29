@@ -11,12 +11,6 @@ if (&indexof($module_root_directory, @INC) < 0) {
 use Time::Local;
 %access = &get_module_acl();
 
-# Get webprefix
-$webprefix = $gconfig{'webprefix'};
-if (defined(&get_webprefix)) {
-	$webprefix = &get_webprefix();
-	}
-
 # Use MariaDB in text strings if appropriate
 my $mysql_module_version = &read_file_contents(
 	"$config_directory/mysql/version"); 

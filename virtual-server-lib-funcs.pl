@@ -33,6 +33,15 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		}
 	}
 
+# Wrapper function to get webprefix safely
+sub get_webprefix_safe
+{
+if (defined(&get_webprefix)) {
+	return &get_webprefix();
+	}
+return $gconfig{'webprefix'};
+}
+
 # require_useradmin([no-quotas])
 sub require_useradmin
 {
@@ -10839,6 +10848,9 @@ sub check_licence_site
 return (0) if (!&require_licence());
 local $id = &get_licence_hostid();
 
+my %serial;
+&read_env_file($virtualmin_license_file, \%serial);
+
 local ($status, $expiry, $err, $doms, $max_servers, $servers, $autorenew) =
 	&licence_scheduled($id, undef, undef, &get_vps_type());
 if ($status == 0 && $doms) {
@@ -10853,7 +10865,7 @@ if ($status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
-		$err = &text('licence_maxservers', $max_servers, $servers);
+		$err = &text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>");
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);
@@ -10928,7 +10940,7 @@ if ($status != 0) {
 	$alert_text .= $err."\n";
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("$webprefix/$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10946,7 +10958,7 @@ elsif ($expirytime && $expirytime - time() < 7*24*60*60 && !$autorenew) {
 		}
 	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
 	if (&can_recheck_licence()) {
-		$alert_text .= &ui_form_start("$webprefix/$module_name/licence.cgi");
+		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
 		$alert_text .= &ui_form_end();
 		}
@@ -10960,7 +10972,7 @@ if ($config{'old_defip'} && $defip && $config{'old_defip'} ne $defip) {
 	$alert_text .= "<b>".&text('licence_ipchanged',
 			   "<tt>$config{'old_defip'}</tt>",
 			   "<tt>$defip</tt>")."</b><p>\n";
-	$alert_text .= &ui_form_start("$webprefix/$module_name/edit_newips.cgi");
+	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/edit_newips.cgi");
 	$alert_text .= &ui_hidden("old", $config{'old_defip'});
 	$alert_text .= &ui_hidden("new", $defip);
 	$alert_text .= &ui_hidden("setold", 1);
@@ -10995,7 +11007,7 @@ if ($small) {
 			   $small->{'c'} || $small->{'o'},
 			   $small->{'issuer_c'} || $small->{'issuer_o'},
 			   )."</b><p>\n";
-	$alert_text .= &ui_form_start("$webprefix/webmin/edit_ssl.cgi");
+	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi");
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
 					'create' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
@@ -11015,7 +11027,7 @@ if ($config{'allow_symlinks'} eq '') {
 		$alert_text .= "<b>".&text('licence_fixlinks', scalar(@fixdoms))."<p>".
 		             $text{'licence_fixlinks2'}."</b><p>\n";
 		$alert_text .= &ui_form_start(
-			"$webprefix/$module_name/fix_symlinks.cgi");
+			"@{[&get_webprefix_safe()]}/$module_name/fix_symlinks.cgi");
 		$alert_text .= &ui_submit($text{'licence_fixlinksok'}, undef);
 		$alert_text .= &ui_submit($text{'licence_fixlinksignore'}, 'ignore');
 		$alert_text .= &ui_form_end();
@@ -11037,7 +11049,7 @@ if ($theme && $current_theme !~ /$recommended_theme/ &&
 	$switch_text .= "<b>".&text('index_themeswitch',
 				    $theme->{'desc'})."</b><p>\n";
 	$switch_text .= &ui_form_start(
-		"$webprefix/$module_name/switch_theme.cgi");
+		"@{[&get_webprefix_safe()]}/$module_name/switch_theme.cgi");
 	$switch_text .= &ui_submit($text{'index_themeswitchok'});
 	$switch_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
 	$switch_text .= &ui_form_end();
@@ -11132,7 +11144,7 @@ return @rv;
 sub domain_ssl_page_links
 {
 my ($doms) = @_;
-return join(" ", map { &ui_link("../$module_name/cert_form.cgi?dom=$_->{'id'}",
+return join(" ", map { &ui_link("@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$_->{'id'}",
 				&show_domain_name($_)) } @$doms);
 }
 
@@ -12488,7 +12500,7 @@ local @rv;
 
 # Always start with edit/view link
 my $canconfig = &can_config_domain($d);
-local $vm = "$webprefix/$module_name";
+local $vm = "/$module_name";
 push(@rv, { 'url' => $canconfig ? "$vm/edit_domain.cgi?dom=$d->{'id'}"
 				: "$vm/view_domain.cgi?dom=$d->{'id'}",
 	    'title' => $canconfig ? $text{'edit_title'} : $text{'view_title'},
@@ -12507,7 +12519,7 @@ if (!$d->{'parent'}) {
 # Add actions and links
 foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 	if ($l->{'mod'}) {
-		$l->{'url'} = "$webprefix/$l->{'mod'}/$l->{'page'}";
+		$l->{'url'} = "/$l->{'mod'}/$l->{'page'}";
 		}
 	else {
 		$l->{'url'} = "$vm/$l->{'page'}".
@@ -12523,7 +12535,7 @@ my %catmap = map { $_->{'catname'}, $_->{'cat'} } @rv;
 # Add preview website link, proxied via Webmin
 if (&domain_has_website($d) && &can_use_preview()) {
 	local $pt = $d->{'web_port'} == 80 ? "" : ":$d->{'web_port'}";
-	push(@rv, { 'url' => "$webprefix/$module_name/".
+	push(@rv, { 'url' => "/$module_name/".
 		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
 		    'title' => $text{'links_website'},
 		    'cat' => 'services',
@@ -12686,7 +12698,7 @@ return (\@tlinks, \@ttitles, \@ticons, \@tcats, \@tmpls);
 sub get_all_global_links
 {
 my @rv;
-my $vm = "$webprefix/$module_name";
+my $vm = "/$module_name";
 
 local $v = [ 'plugins' => \@plugins,
 	     'spam' => $config{'spam'},
@@ -12716,7 +12728,7 @@ if (&can_edit_templates()) {
 				}
 			elsif ($tlinks->[$i] =~ /^\//) {
 				# Outside virtualmin module
-				$url = $webprefix.$tlinks->[$i];
+				$url = $tlinks->[$i];
 				}
 			else {
 				# Inside virtualmin
@@ -12734,7 +12746,7 @@ if (&can_edit_templates()) {
 
 # Add module config page
 if (!$access{'noconfig'}) {
-	push(@rv, { 'url' => "$webprefix/config.cgi?$module_name",
+	push(@rv, { 'url' => "/config.cgi?$module_name",
 		    'title' => $text{'index_virtualminconfig'},
 		    'cat' => 'setting',
 		    'icon' => 'config' });
@@ -14155,7 +14167,7 @@ if ($config{'dns'}) {
 						&net::boot_interfaces();
 				&$second_print(
 				   &text('check_eresolv4',
-					&ui_link("../net/list_dns.cgi",
+					&ui_link("@{[&get_webprefix_safe()]}/net/list_dns.cgi",
 						 $text{'check_eresolvlist'})).
 				   (@dhcp ? " ".$text{'check_eresolv3'} : ""));
 				}
@@ -15135,7 +15147,7 @@ elsif ($config{'quotas'}) {
 		if (&needs_xfs_quota_fix() == 1) {
 			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
 			if (&foreign_available("init")) {
-				$reboot_msg .= ui_link("../init/reboot.cgi", $text{'licence_xfsrebootok'});
+				$reboot_msg .= ui_link("@{[&get_webprefix_safe()]}/init/reboot.cgi", $text{'licence_xfsrebootok'});
 				$reboot_msg .= ".";
 				}
 			&$second_print($reboot_msg);
@@ -15326,7 +15338,7 @@ if ($virtualmin_pro &&
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /baseurl=http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
@@ -15365,7 +15377,7 @@ if ($virtualmin_pro &&
 			my $lref = &read_file_lines($repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /^deb\s+http:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				if ($l =~ /^deb\s+https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;

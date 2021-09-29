@@ -1540,7 +1540,6 @@ backup_ftpserver=FTP 服務器
 backup_sshserver=SSH 服務器
 backup_path=服務器上的文件
 backup_login=登錄用戶
-backup_pass=密碼
 backup_mailfiles2=包含郵件文件
 backup_dirlogs=包含日志目錄
 backup_feature_unix=管理員用戶密碼，限額和Cron 任務 

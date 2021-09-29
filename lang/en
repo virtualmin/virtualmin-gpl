@@ -3955,7 +3955,7 @@ licence_goterr=.. a problem was detected : $1
 licence_goterr2=.. invalid expiry date : $1
 licence_ecannot=You are not allowed to re-check the Virtualmin license
 licence_maxdoms=Your system is licensed for only $1 servers, but you have $2.
-licence_maxservers=Your serial number is licensed for only $1 servers, but is being used on $2.
+licence_maxservers2=Your serial number $3 is licensed for only $1 server, but is being used on $2.
 licence_ipchanged=Your system's primary IP address appears to have changed from $1 to $2. Virtual servers using the old address may be unreachable or serve the wrong web content.
 licence_changeip=Update Incorrect IP Addresses
 licence_smallcert=Your system is using an SSL certificate that is only $1 bits long, which is smaller than the recommended size of 2048 bits. This certificate was issued by $4 to $3 for the domain $2.
@@ -5454,7 +5454,7 @@ thumb_ethumb=The content style $1 does not have a preview image.
 upgrade_title=Upgrade to Virtualmin Pro
 newupgrade_title=Upgrade to Virtualmin Pro
 upgrade_desc1=If you have enjoyed using Virtualmin GPL and want to take the next step to the Pro version, this page can be used to perform the upgrade process automatically. The steps to do this are :
-upgrade_step1=Go to <a href='$1'>$1</a> and purchase a license for Virtualmin Pro.
+upgrade_step1=Go to <a target='_blank' href='$1'>$1</a> and purchase a license for Virtualmin Pro.
 upgrade_step2=Enter your serial number and license key in the form below.
 upgrade_step3=Click the <b>Upgrade</b> button. This will download all of the latest Virtualmin modules, and add them to your Webmin install. All of your existing settings will be left un-changed, and no other software installed.
 upgrade_header=Virtualmin Pro license
