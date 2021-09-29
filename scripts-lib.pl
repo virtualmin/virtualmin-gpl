@@ -1014,7 +1014,6 @@ foreach my $m (@mods) {
 		}
 
 	# Configure the domain's php.ini to load it, if needed
-	&$indent_print();
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
@@ -1058,14 +1057,12 @@ foreach my $m (@mods) {
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
-		&$outdent_print();
 		&$second_print($text{'scripts_esoftware'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
 	&foreign_require("software");
 	if (!defined(&software::update_system_install)) {
-		&$outdent_print();
 		&$second_print($text{'scripts_eupdate'});
 		if ($opt) { next; }
 		else { return 0; }
@@ -1126,34 +1123,17 @@ foreach my $m (@mods) {
 			}
 		}
 	@poss = sort { $a cmp $b } @poss;
+	my @newpkgs;
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
 		$nodotverpkg =~ s/\.//;
 		
-		# We either need to check for success 
-		# exactly or not check it at all (permissive)
-		my $success = 1;
 		if (!@pinfo) {
 			# Not installed .. try to fetch it
-			&$first_print(&text('scripts_softwaremod',
-					    "<tt>$pkg</tt>"));
-			if ($first_print eq \&null_print) {
-				# Suppress output
-				&capture_function_output(
-				    \&software::update_system_install, $pkg);
-				}
-			elsif ($first_print eq \&first_text_print) {
-				# Make output text
-				local $out = &capture_function_output(
-				    \&software::update_system_install, $pkg);
-				print &html_tags_to_text($out);
-				}
-			else {
-				# Show HTML output
-				my @rs = &software::update_system_install($pkg);
-				$iok = 1 if (scalar(@rs));
-				}
+			my ($out, $rs) = &capture_function_output(
+				\&software::update_system_install, $pkg);
+			$iok = 1 if (scalar(@$rs));
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
 				# Real package name is different
@@ -1162,21 +1142,22 @@ foreach my $m (@mods) {
 			local @pinfo2 = &software::package_info($newpkg);
 			if (@pinfo2 && $pinfo2[0] eq $newpkg) {
 				# Yep, it worked
-				&$second_print($text{'setup_done'});
-				
-				# Check for success
-				$iok = 1 if ($success);
-				push(@$installed, $m) if ($installed && $success);
+				$iok = 1;
+				push(@newpkgs, $m);
 				}
 			}
 		else {
 			# Already installed .. we're done
-			$iok = 1  if ($success);
+			$iok = 1;
 			}
 		}
-	if (!$iok) {
-		&$second_print($text{'scripts_esoftwaremod'});
-		&$outdent_print();
+	push(@$installed, @newpkgs) if ($installed);
+	if ($iok) {
+		&$second_print(&text('scripts_phpmoddone',
+			       "<tt>".join(" ", @newpkgs)."</tt>"));
+		}
+	else {
+		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
@@ -1184,7 +1165,6 @@ foreach my $m (@mods) {
 
 	# Finally re-check to make sure it worked
 	GOTMODULE:
-	&$outdent_print();
 	undef(%main::php_modules);
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
