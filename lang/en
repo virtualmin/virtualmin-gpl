@@ -4076,6 +4076,7 @@ scripts_noini=.. could not find global php.ini file
 scripts_noini2=.. could not find domain's php.ini file
 scripts_softwaremod=Installing package $1 ..
 scripts_esoftwaremod=.. failed to install!
+scripts_phpmodinst=Installing module from software packages ..
 scripts_phpmoddone=.. successfully installed module from package $1
 scripts_phpmodfailed=.. failed to install module from $1 possible packages
 scripts_esoftware=.. the Software Packages Webmin module is not installed!
