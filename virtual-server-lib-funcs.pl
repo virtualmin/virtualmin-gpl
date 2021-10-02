@@ -22,7 +22,8 @@ foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
 		 "postgrey", "wizard", "security", "json", "redirects", "ftp",
 		 "dkim", "provision", "stats", "bkeys", "rs", "cron",
 		 "ratelimit", "cloud", "google", "gcs", "dropbox", "copycert",
-		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro") {
+		 "jailkit", "ports", "bb", "dnscloud", "dnscloudpro",
+		 "smtpcloud") {
 	my $libfile = "$virtual_server_root/pro/$lib-lib.pl";
 	if (!-r $libfile) {
 		$libfile = "$virtual_server_root/$lib-lib.pl";
@@ -12619,6 +12620,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
+   $config{'mail'} && $virtualmin_pro ? ( 'smtpclouds' ) : ( ),
    $config{'mysql'} ? ( 'mysqls' ) : ( ),
    'dnsclouds',
    );
@@ -12656,6 +12658,7 @@ local %tmplcat = (
 	'provision' => 'setting',
 	'autoconfig' => 'email',
 	'retention' => 'email',
+	'smtpclouds' => 'email',
 	'mysqls' => 'setting',
 	'dnsclouds' => 'ip',
 	);
@@ -12664,10 +12667,12 @@ local %nonew = ( 'history', 1,
 		 'dkim', 1,
 		 'ratelimit', 1,
 		 'provision', 1,
+		 'smtpclouds', 1,
 		 'dnsclouds', 1,
 	       );
 local %pro = ( 'resels', 1,
-	       'reseller', 1 );
+	       'reseller', 1,
+	       'smtpclouds', 1, );
 local @tlinks = map { ($pro{$_} ? "pro/" : "").
 		      ($nonew{$_} ? "${_}.cgi" : "edit_new${_}.cgi") } @tmpls;
 local @ttitles = map { $nonew{$_} ? $text{"${_}_title"}
