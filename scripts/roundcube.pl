@@ -76,21 +76,6 @@ sub script_roundcube_release
 return 3;	# For folders path fix
 }
 
-sub script_roundcube_depends
-{
-local ($d, $ver, $sinfo, $phpver) = @_;
-local @rv;
-my $wantver = &script_roundcube_php_fullver($d, $ver, $sinfo);
-local $phpv = &get_php_version($phpver || 5, $d);
-if (!$phpv) {
-	push(@rv, "Could not work out exact PHP version");
-	}
-elsif (&compare_versions($phpv, $wantver) < 0) {
-	push(@rv, "Roundcube $ver requires PHP version $wantver or later");
-	}
-return @rv;
-}
-
 sub script_roundcube_php_fullver
 {
 local ($d, $ver, $sinfo, $phpver) = @_;

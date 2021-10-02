@@ -47,23 +47,6 @@ sub script_whmcs_php_vers
 return ( 5 );
 }
 
-# script_whmcs_depends(&domain, version)
-sub script_whmcs_depends
-{
-local ($d, $ver, $sinfo, $phpver) = @_;
-local $wantver = &script_whmcs_php_fullver($d, $ver, $sinfo);
-if ($wantver) {
-	local $phpv = &get_php_version($phpver || 5, $d);
-	if (!$phpv) {
-		return ("Could not work out exact PHP version");
-		}
-	if (&compare_versions($phpv, $wantver) < 0) {
-		return ("WHMCS requires PHP version $wantver or later");
-		}
-	}
-return ( );
-}
-
 sub script_whmcs_php_fullver
 {
 local ($d, $ver, $sinfo) = @_;

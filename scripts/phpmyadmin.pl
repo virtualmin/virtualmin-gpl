@@ -67,18 +67,6 @@ local @rv;
 &has_domain_databases($d, [ "mysql" ], 1) ||
 	push(@rv, "phpMyAdmin requires a MySQL database");
 
-# Check for PHP 5.2+ or 5.3+, if needed
-my $wantver = &script_phpmyadmin_php_fullver($d, $ver, $sinfo);
-if ($wantver) {
-	my $phpv = &get_php_version($phpver || 5, $d);
-	if (!$phpv) {
-		push(@rv, "Could not work out exact PHP version");
-		}
-	elsif (&compare_versions($phpv, $wantver) < 0) {
-		push(@rv, "phpMyAdmin requires PHP version $wantver or later");
-		}
-	}
-
 # Check for latest MySQL
 if (&compare_versions($ver, "4.2.3") >= 0 &&
     defined(&get_dom_remote_mysql_version)) {

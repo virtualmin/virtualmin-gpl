@@ -56,25 +56,6 @@ sub script_wordpress_release
 return 5;	# Fix format of wp-config.php
 }
 
-# script_wordpress_depends(&domain, version)
-sub script_wordpress_depends
-{
-my ($d, $ver, $sinfo, $phpver) = @_;
-my @rv;
-
-# Check for PHP
-my $wantver = &script_wordpress_php_fullver($d, $ver, $sinfo);
-my $phpv = get_php_version($phpver || 5, $d);
-if (!$phpv) {
-	push(@rv, "Could not work out exact PHP version");
-	}
-elsif (&compare_versions($phpv, $wantver) < 0) {
-	push(@rv, "Wordpress requires PHP version $wantver or later");
-	}
-
-return @rv;
-}
-
 sub script_wordpress_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
