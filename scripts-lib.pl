@@ -1122,7 +1122,7 @@ foreach my $m (@mods) {
 				}
 			}
 		}
-	@poss = sort { $a cmp $b } @poss;
+	@poss = sort { $a cmp $b } &unique(@poss);
 	my @newpkgs;
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
@@ -2752,13 +2752,16 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	my $minfunc = $script->{'php_fullver_func'};
 	my $maxfunc = $script->{'php_maxver_func'};
 	my $fullver = &get_php_version($phpver, $d);
-	if (defined(&$minfunc)) {
+	if (!$fullver && $mode ne "none") {
+		push(@rv, $text{'scripts_iphpnover'});
+		}
+	if ($fullver && defined(&$minfunc)) {
 		my $minver = &$minfunc($d, $ver, $sinfo);
 		if (&compare_versions($fullver, $minver) < 0) {
 			return &text('scripts_iphpfullver', $minver, $fullver);
 			}
 		}
-	if (defined(&$maxfunc)) {
+	if ($fullver && defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
 		if (&compare_versions($fullver, $maxver) > 0) {
 			return &text('scripts_iphpmaxver', $maxver, $fullver);

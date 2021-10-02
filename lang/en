@@ -4144,6 +4144,7 @@ scripts_deleted=Manually deleted
 scripts_inophp=Webserver support for PHP is needed
 scripts_inocgi=Webserver support for CGI scripts is needed
 scripts_iphpneed=PHP is disabled for this virtual server
+scripts_iphpnover=No PHP version could be found for this virtual server
 scripts_iphpfullver=PHP version $1 or later is required, but this virtual server is using version $2
 scripts_iphpmaxver=PHP version below $1 is required, but this virtual server is using version $2
 scripts_inoapache=Only the Apache webserver is supported
