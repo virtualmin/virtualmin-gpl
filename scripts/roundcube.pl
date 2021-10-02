@@ -62,7 +62,7 @@ return ([ 'memory_limit', '64M', '+' ],
         [ 'upload_max_filesize', '25M', '+' ],
         [ 'post_max_size', '25M', '+' ],
         [ 'session.auto_start', 'Off' ],
-	    [ 'mbstring.func_overload', 'Off' ]);
+	[ 'mbstring.func_overload', 'Off' ]);
 }
 
 
