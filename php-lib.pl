@@ -2151,8 +2151,8 @@ else {
 		   "pm.start_servers = 1",
 		   "pm.min_spare_servers = 1",
 		   "pm.max_spare_servers = 5",
-	   	   "php_admin_value[upload_tmp_dir] = $tmp",
-		   "php_admin_value[session.save_path] = $tmp" );
+	   	   "php_value[upload_tmp_dir] = $tmp",
+		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
 
 	# Add / override custom options (with substitution)
@@ -2249,11 +2249,20 @@ return undef;
 }
 
 # get_php_fpm_ini_value(&domain, name)
-# Returns the value of a ini setting from the domain's pool file
+# Returns the value of a PHP ini setting from the domain's pool file
 sub get_php_fpm_ini_value
 {
 my ($d, $name) = @_;
-return &get_php_fpm_config_value($d, "php_value[${name}]");
+my $k = "php_value";
+my $rv = &get_php_fpm_config_value($d, "php_value[${name}]");
+if (!defined($rv)) {
+	my $k = "php_admin_value";
+	$rv = &get_php_fpm_config_value($d, "php_admin_value[${name}]");
+	if (!defined($rv)) {
+		$k = undef;
+		}
+	}
+return wantarray ? ($rv, $k) : $rv;
 }
 
 # save_php_fpm_config_value(&domain, name, value)
@@ -2301,12 +2310,14 @@ elsif ($found < 0 && defined($value)) {
 return 1;
 }
 
-# save_php_fpm_ini_value(&domain, name, value)
+# save_php_fpm_ini_value(&domain, name, value, [admin?])
 # Adds, updates or deletes an ini setting in the domain's pool file
 sub save_php_fpm_ini_value
 {
-my ($d, $name, $value) = @_;
-return &save_php_fpm_config_value($d, "php_value[${name}]", $value);
+my ($d, $name, $value, $admin) = @_;
+my (undef, $k) = &get_php_fpm_ini_value($d, $name);
+$k ||= ($admin ? "php_admin_value" : "php_value");
+return &save_php_fpm_config_value($d, $k."[".$name."]", $value);
 }
 
 # increase_fpm_port(string)

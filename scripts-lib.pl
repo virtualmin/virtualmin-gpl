@@ -789,7 +789,7 @@ if ($mode eq "fpm") {
 				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
 				$diff eq '-' && &php_value_diff($ov, $v) > 0;
 		if ($change) {
-			&save_php_fpm_ini_value($d, $n, $v);
+			&save_php_fpm_ini_value($d, $n, $v, 1);
 			}
 		}
 	}
