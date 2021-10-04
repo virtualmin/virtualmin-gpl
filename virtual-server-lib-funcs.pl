@@ -8953,6 +8953,7 @@ push(@rv, { 'id' => 0,
 			      &entities_to_ascii($text{'mail_dsubject'}),
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
+	    'mail_cloud' => $config{'mail_cloud'},
 	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
@@ -9277,6 +9278,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
 	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
+	$config{'mail_cloud'} = $tmpl->{'mail_cloud'};
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
@@ -18524,6 +18526,14 @@ foreach my $f (&list_provision_features()) {
 		# Only option is cloudmin services
 		$d->{'provision_'.$f} = 1;
 		}
+	}
+# Check if template has an option to control cloud SMTP provider
+my $cloud = $d->{'smtp_cloud'} || $tmpl->{'mail_cloud'};
+if ($cloud eq 'local') {
+	delete($d->{'smtp_cloud'});
+	}
+else {
+	$d->{'smtp_cloud'} = $cloud;
 	}
 }
 

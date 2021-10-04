@@ -681,6 +681,9 @@ setup_ednscloudexists=Selected DNS cloud provider does not exist!
 setup_ednscloudstate=DNS cloud provider $1 is not ready for use
 setup_ednscloudclash=Failed to check for clash on DNS cloud provider $1 : $2
 setup_dnscloudclash=DNS zone already exists on cloud provider $1
+setup_mail_smtpcloud=Configuring cloud mail provider $1 ..
+setup_mail_nosmtpcloud=.. provider does not exist!
+setup_mail_esmtpcloud=.. failed : $1
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2
@@ -1343,6 +1346,7 @@ delete_dom=Deleting sub-server $1 ..
 delete_aliasfailure=.. $1 alias deletion failed : $2
 delete_ednssubof=Virtual server $1 cannot be deleted, as it contains DNS records for server $2
 delete_esslnoips=No SSL certificate found for domain
+delete_mail_smtpcloud=Removing cloud mail provider $1 ..
 
 save_err=Failed to modify server
 save_title=Save Server
@@ -3369,6 +3373,8 @@ tmpl_aliascopy1=Copy aliases from target
 tmpl_aliascopy0=Catchall forwarding
 tmpl_bccto=Default outgoing BCC address
 tmpl_ebccto=Missing or invalid default BCC address
+tmpl_mail_cloud=Default cloud mail delivery provider
+tmpl_mail_cloud_local=&lt;None - deliver directly&gt;
 tmpl_aliasfrom=Mailbox name or *
 tmpl_aliasto=Destination address
 tmpl_ealiasfrom=Invalid mailbox name in alias $1
@@ -6513,6 +6519,16 @@ retention_desc=This page allows you to have Virtualmin automatically delete old 
 
 smtpclouds_title=Cloud Mail Delivery Providers
 smtpclouds_tmpl=The default SMTP provider for new domains can be set on the <a href='$1'>server template</a> page.
+smtpclouds_ecannot=You are not allowed to edit cloud mail delivery providers
+smtpclouds_return=cloud mail delivery providers
+
+smtpcloud_eaws=The <tt>aws</tt> command is needed to use Amazon's SES service
+smtpcloud_ses_location=Default API location
+smtpcloud_ses_longdesc=The credentials on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
+smtpcloud_header=Mail delivery provider options
+smtpcloud_provider=Mail delivery provider name
+smtpcloud_url=Mail delivery provider's website
+smtpcloud_eaws_dns=Amazon SES needs a DNS zone to be enabled to verify new domains
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client
