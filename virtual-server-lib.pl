@@ -245,7 +245,7 @@ $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
-$upgrade_virtualmin_port = 80;
+$upgrade_virtualmin_port = 443;
 $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 

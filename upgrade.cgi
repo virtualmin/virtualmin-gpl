@@ -14,7 +14,7 @@ $in{'key'} =~ /^\S+$/ || &error($text{'upgrade_ekey'});
 $in{'key'} eq 'AMAZON' && &error($text{'upgrade_eamazon'});
 $in{'key'} eq 'DEMO' && &error($text{'upgrade_eamazon'});
 &http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
-	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 0,
+	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 1,
 	       $in{'serial'}, $in{'key'}, undef, 0, 1);
 if ($error =~ /401/) {
 	&error($text{'upgrade_elogin'});
@@ -201,7 +201,7 @@ else {
 	&$first_print($text{'upgrade_mods'});
 	&$indent_print();
 	&http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
-		       $upgrade_virtualmin_updates, \$uout, undef, undef, 0,
+		       $upgrade_virtualmin_updates, \$uout, undef, undef, 1,
 		       $in{'serial'}, $in{'key'}, undef, 0, 1);
 	foreach $line (split(/\r?\n/, $uout)) {
 		($mod, $ver, $path, $os_support, $desc) = split(/\t/, $line);
@@ -243,7 +243,7 @@ else {
 		($mhost, $mport, $mpage, $mssl) =
 			&parse_http_url($path, $upgrade_virtualmin_host,
 					$upgrade_virtualmin_port,
-					$upgrade_virtualmin_updates, 0);
+					$upgrade_virtualmin_updates, 1);
 		($mfile = $mpage) =~ s/^(.*)\///;
 		$mtemp = &transname($mfile);
 		$merror = undef;
@@ -291,7 +291,7 @@ else {
 	&$first_print($text{'upgrade_sched'});
 	@upsource = split(/\t/, $webmin::config{'upsource'});
 	@upsource = &unique(@upsource,
-		"http://$upgrade_virtualmin_host:$upgrade_virtualmin_port$upgrade_virtualmin_updates",
+		"https://$upgrade_virtualmin_host:$upgrade_virtualmin_port$upgrade_virtualmin_updates",
 		"http://$webmin::update_host:$webmin::update_port$webmin::update_page");
 	&lock_file($webmin::module_config_file);
 	$webmin::config{'upsource'} = join("\t", @upsource);
