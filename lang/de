@@ -3590,12 +3590,13 @@ upgrade_problems=Einige Fehler sind beim Aktualisieren Ihres System auf Virtualm
 upgrade_complete=Ihr System wurde erfolgreich nach Virtualmin Pro upgegradet!
 upgrade_theme=Aktiviere Theme <i>$1</i> ..
 upgrade_eyumrepo=Virtualmin wurde von RPM installiert, jedoch nicht über das GPL Virtualmin Repository. Upgraden ist daher zu diesem Zeitpunkt nicht möglich.
+
 upgrade_edebrepo=Virtualmin wurde von einem Debian-Paket, aber nicht mit dem GPL Virtualmin Repository. Upgrade ist zu diesem Zeitpunkt nicht möglich.
 upgrade_rpms=Upgrade Virtualmin RPM Pakete : $1
 upgrade_eyumfile=Kein Virtualmin GPL repository wurden in $1 gefunden
 upgrade_update=Aktualisiere verfügbare Pakete von APT ..
 upgrade_debs=Upgrade Virtualmin Debian Pakete : $1
-upgrade_yumclear=Lösche YUM Caches ..
+
 upgrade_etypematch=Upgraden ist nicht möglich, da der Installation Virtualmin Typ <tt>$1</tt> ist, aber Webmin <tt>$2</tt> ist
 
 maillog_title=Such Mail Log

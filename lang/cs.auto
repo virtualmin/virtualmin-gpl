@@ -581,6 +581,9 @@ setup_ednscloudexists=Vybraný poskytovatel cloudu DNS neexistuje!
 setup_ednscloudstate=Poskytovatel cloudu DNS $1 není připraven k použití
 setup_ednscloudclash=Nepodařilo se zkontrolovat střet s poskytovatelem cloudu DNS $1 : $2 
 setup_dnscloudclash=Zóna DNS již existuje u poskytovatele cloudu $1 
+setup_mail_smtpcloud=Konfigurace poskytovatele cloudové pošty $1 ..
+setup_mail_nosmtpcloud=.. poskytovatel neexistuje!
+setup_mail_esmtpcloud=.. nezdařilo se : $1
 
 equotacommand=Příkaz kvóty $1 selhal : $2 
 
@@ -1031,6 +1034,7 @@ delete_dom=Mazání podserveru $1 ..
 delete_aliasfailure=.. Smazání aliasu $1 se nezdařilo : $2 
 delete_ednssubof=Virtuální server $1 nelze odstranit, protože obsahuje záznamy DNS pro server $2 
 delete_esslnoips=Pro doménu nebyl nalezen žádný certifikát SSL
+delete_mail_smtpcloud=Odebírání poskytovatele cloudové pošty $1 ..
 
 save_title=Uložit server
 save_mysqlpass_provision=Změna hesla MySQL na hostiteli služeb ..
@@ -1528,9 +1532,6 @@ check_ehomeformat=Formát domovského adresáře $1 neobsahuje uživatelské jm�
 check_ehomestyle=Styl domovského adresáře je nastaven na "Pouze základní adresář", což je u Virtualmin nepoužitelné. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit.
 check_jailkitok=Chroot vězení jsou k dispozici v tomto systému
 check_jailkiterr=Chrootské vězení není k dispozici : $1 
-check_eyumrepofile=Konfigurační soubor úložiště Virtualmin YUM $1 neexistuje!
-check_yumrepook=Úložiště Virtualmin YUM je správně nakonfigurováno
-check_yumrepowrong=Konfigurační soubor úložiště Virtualmin YUM $1 obsahuje nesprávné sériové číslo licenčního klíče!
 check_yumrepomissing=Konfigurační soubor úložiště Virtualmin APT $1 neodkazuje na software.virtualmin.com!
 check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
@@ -2582,6 +2583,8 @@ tmpl_aliascopy1=Zkopírujte aliasy z cíle
 tmpl_aliascopy0=Catchall spedice
 tmpl_bccto=Výchozí odchozí adresa BCC
 tmpl_ebccto=Chybějící nebo neplatná výchozí adresa BCC
+tmpl_mail_cloud=Výchozí poskytovatel cloudové doručování pošty
+tmpl_mail_cloud_local=& lt; Žádné - doručovat přímo & gt;
 tmpl_aliasfrom=Název poštovní schránky nebo *
 tmpl_aliasto=Cílová adresa
 tmpl_ealiasfrom=Neplatný název poštovní schránky v aliasu $1 
@@ -3190,6 +3193,9 @@ scripts_noini=.. nemohl najít globální soubor php.ini
 scripts_noini2=.. nemohl najít soubor php.ini domény
 scripts_softwaremod=Instalace balíčku $1 ..
 scripts_esoftwaremod=.. instalace se nezdařila!
+scripts_phpmodinst=Instalace modulu ze softwarových balíků ..
+scripts_phpmoddone=.. úspěšně nainstalovaný modul z balíčku $1
+scripts_phpmodfailed=.. nepodařilo se nainstalovat modul z $1 možných balíčků
 scripts_esoftware=.. modul Webmin Software Packages Webmin není nainstalován!
 scripts_eupdate=.. automatická instalace modulu není ve vašem systému k dispozici.
 scripts_einstallmod=Modul není k dispozici ani po instalaci!
@@ -3255,6 +3261,7 @@ scripts_deleted=Ručně smazáno
 scripts_inophp=Je zapotřebí podpora webového serveru pro PHP
 scripts_inocgi=Je nutná podpora webového serveru pro skripty CGI
 scripts_iphpneed=PHP je pro tento virtuální server zakázáno
+scripts_iphpnover=Pro tento virtuální server nebyla nalezena žádná verze PHP
 scripts_iphpfullver=Je vyžadována verze PHP $1 nebo novější, ale tento virtuální server používá verzi $2 
 scripts_iphpmaxver=Je vyžadována verze PHP pod $1, ale tento virtuální server používá verzi $2 
 scripts_inoapache=Podporován je pouze webový server Apache
@@ -4343,13 +4350,13 @@ upgrade_complete=Váš systém byl úspěšně upgradován na Virtualmin Pro!
 upgrade_theme=Povolení motivu <i>$1</i> ..
 upgrade_esharedroot=Váš kořenový adresář Webmin $1 je sdílen mezi několika systémy - aktualizace modulu nejsou povoleny
 upgrade_eyumrepo=Virtualmin byl nainstalován z RPM, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
-upgrade_eyumlist=Balíček RPM $1 nebyl nalezen v seznamu dostupných balíčků od YUM. Možná jedno z vašich současných repozitářů nefunguje?
+
 upgrade_edebrepo=Virtualmin byl nainstalován z balíčku Debian, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
 upgrade_rpms=Upgradování balíčků Virtualmin RPM : $1 
 upgrade_eyumfile=V $1 nebyl nalezen žádný úložiště Virtualmin GPL
 upgrade_update=Aktualizace dostupných balíčků z APT ..
 upgrade_debs=Upgradování balíčků Virtualmin Debian : $1 
-upgrade_yumclear=Vymazání mezipaměti YUM ..
+
 upgrade_etypematch=Upgradování není možné, protože typ instalace Virtualmin je <tt>$1</tt>, ale Webmin's je <tt>$2</tt>
 
 maillog_desc=Tento formulář lze použít k vyhledání zpráv v poštovních protokolech, které odpovídají určitým podmínkám, a zjistit, co se s nimi stalo. Všechna pole jsou volitelná a pokud budou ponechána prázdná, budou pro účely srovnání přeskočena.
@@ -5224,6 +5231,19 @@ retention_folders=Vyčištění zpráv v
 retention_folders0=Všechny uživatelské složky
 retention_folders1=Pouze doručené
 retention_desc=Tato stránka umožňuje, aby Virtualmin automaticky mazal staré e-mailové zprávy z poštovních schránek vlastníků domény a uživatelů pošty.
+
+smtpclouds_title=Poskytovatelé doručování do cloudu
+smtpclouds_tmpl=Výchozího poskytovatele SMTP pro nové domény lze nastavit na stránce <a href='$1'>šablony serveru</a>.
+smtpclouds_ecannot=Nemáte oprávnění upravovat poskytovatele cloudového doručování pošty
+smtpclouds_return=poskytovatelé cloudové doručování pošty
+
+smtpcloud_eaws=K používání služby Amazon SES je potřeba příkaz <tt>aws</tt>
+smtpcloud_ses_location=Výchozí umístění API
+smtpcloud_ses_longdesc=Pověření na této stránce lze nalézt na stránce Bezpečnostní pověření vašeho účtu v <a href=https://console.aws.amazon.com/ target=_blank>konzole AWS</a>.
+smtpcloud_header=Možnosti poskytovatele doručování pošty
+smtpcloud_provider=Jméno poskytovatele doručování pošty
+smtpcloud_url=Web poskytovatele doručování pošty
+smtpcloud_eaws_dns=Amazon SES potřebuje k ověření nových domén povolení zóny DNS
 
 provision_title=Klient služeb Cloudmin
 provision_ecannot=Není dovoleno nastavovat klienta služeb Cloudmin

@@ -425,6 +425,9 @@ setup_ednscloudexists=Wybrany dostawca chmury DNS nie istnieje!
 setup_ednscloudstate=Dostawca chmury DNS $1 nie jest gotowy do użycia
 setup_ednscloudclash=Nie udało się sprawdzić kolizji u dostawcy chmury DNS $1 : $2 
 setup_dnscloudclash=Strefa DNS już istnieje u dostawcy chmury $1 
+setup_mail_smtpcloud=Konfigurowanie dostawcy poczty w chmurze $1 ..
+setup_mail_nosmtpcloud=.. dostawca nie istnieje!
+setup_mail_esmtpcloud=.. nie powiodło się : $1 
 
 equotacommand=Komenda przydziału $1 nie powiodła się : $2 
 
@@ -1000,6 +1003,7 @@ delete_dom=Usuwanie podserwera $1 ..
 delete_aliasfailure=.. Usunięcie aliasu $1 nie powiodło się : $2 
 delete_ednssubof=Nie można usunąć serwera wirtualnego $1, ponieważ zawiera on rekordy DNS dla serwera $2 
 delete_esslnoips=Nie znaleziono certyfikatu SSL dla domeny
+delete_mail_smtpcloud=Usuwanie dostawcy poczty w chmurze $1 ..
 
 save_err=Nie udało się zmodyfikować serwera
 save_equota=Brakujący lub nieprawidłowy całkowity limit
@@ -1611,9 +1615,6 @@ check_ehomeformat=Format katalogu domowego $1 nie zawiera nazwy użytkownika ani
 check_ehomestyle=Styl katalogu domowego jest ustawiony na „Po prostu katalog podstawowy”, co nie jest możliwe w Virtualmin. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>.
 check_jailkitok=W tym systemie dostępne są więzienia Chroot
 check_jailkiterr=Więzienia Chroot są niedostępne : $1 
-check_eyumrepofile=Plik konfiguracyjny repozytorium YUM Virtualmin $1 nie istnieje!
-check_yumrepook=Repozytorium Virtualmin YUM jest poprawnie skonfigurowane
-check_yumrepowrong=Plik konfiguracyjny repozytorium Virtualmin YUM $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
 check_yumrepomissing=Plik konfiguracyjny repozytorium APT Virtualmin $1 nie odnosi się do software.virtualmin.com!
 check_eaptrepofile=Plik konfiguracyjny repozytorium APT $1 nie istnieje!
 check_aptrepook=Repozytorium Virtualmin APT jest poprawnie skonfigurowane
@@ -2832,6 +2833,8 @@ tmpl_aliascopy1=Skopiuj aliasy z celu
 tmpl_aliascopy0=Przekazywanie Catchall
 tmpl_bccto=Domyślny wychodzący adres BCC
 tmpl_ebccto=Brakujący lub nieprawidłowy domyślny adres BCC
+tmpl_mail_cloud=Domyślny dostawca dostarczania poczty w chmurze
+tmpl_mail_cloud_local=&lt;Brak – dostarczaj bezpośrednio&gt;
 tmpl_aliasfrom=Nazwa skrzynki lub *
 tmpl_aliasto=Adres przeznaczenia
 tmpl_ealiasfrom=Niepoprawna nazwa skrzynki pocztowej w aliasie $1 
@@ -3436,6 +3439,9 @@ scripts_eversion2=Określona wersja nie jest dostępna
 scripts_apache=Konfigurowanie ustawień PHP serwera WWW.
 scripts_cats=Kategorie
 scripts_esoftwaremod=.. instalacja nie powiodła się!
+scripts_phpmodinst=Instalacja modułu z pakietów oprogramowania ..
+scripts_phpmoddone=.. pomyślnie zainstalowano moduł z pakietu $1 
+scripts_phpmodfailed=.. nie udało się zainstalować modułu z $1 możliwych pakietów
 scripts_esoftware=.. moduł Webmin pakietów oprogramowania nie jest zainstalowany!
 scripts_eupdate=.. automatyczna instalacja modułu nie jest dostępna w twoim systemie.
 scripts_einstallmod=Moduł nie jest dostępny nawet po instalacji!
@@ -3473,6 +3479,7 @@ scripts_deleted=Ręcznie usunięte
 scripts_inophp=Potrzebna jest obsługa PHP przez serwer WWW
 scripts_inocgi=Konieczna jest obsługa skryptów CGI przez serwer WWW
 scripts_iphpneed=PHP jest wyłączone dla tego serwera wirtualnego
+scripts_iphpnover=Nie znaleziono wersji PHP dla tego serwera wirtualnego
 scripts_iphpfullver=Wymagana jest wersja PHP $1 lub nowsza, ale ten serwer wirtualny używa wersji $2 
 scripts_iphpmaxver=Wymagana jest wersja PHP poniżej $1, ale ten serwer wirtualny używa wersji $2 
 scripts_inoapache=Obsługiwany jest tylko serwer Apache
@@ -4547,11 +4554,12 @@ upgrade_problems=Podczas aktualizacji systemu do Virtualmin Pro wystąpiły pewn
 upgrade_complete=Twój system został pomyślnie uaktualniony do Virtualmin Pro!
 upgrade_esharedroot=Twój katalog główny Webmin $1 jest współużytkowany przez wiele systemów - aktualizacje modułów są niedozwolone
 upgrade_eyumrepo=Virtualmin został zainstalowany z RPM, ale nie korzysta z repozytorium Virtualmin GPL. Aktualizacja nie jest obecnie możliwa.
-upgrade_eyumlist=Pakiet $1 RPM nie został znaleziony na liście dostępnych pakietów od YUM. Być może jedno z twoich bieżących repozytoriów nie działa?
+
 upgrade_edebrepo=Virtualmin został zainstalowany z pakietu Debian, ale nie korzysta z repozytorium GPL Virtualmin. Aktualizacja nie jest obecnie możliwa.
 upgrade_eyumfile=W $1 nie znaleziono repozytorium Virtualmin GPL
 upgrade_update=Aktualizacja dostępnych pakietów z APT ..
 upgrade_debs=Aktualizacja pakietów Debiana Virtualmin : $1 
+
 upgrade_etypematch=Aktualizacja nie jest możliwa, ponieważ typ instalacji Virtualmin to <tt>$1</tt>, ale Webmin to <tt>$2</tt>
 
 maillog_title=Wyszukaj dziennik poczty
@@ -5451,6 +5459,19 @@ retention_folders=Wiadomości czyszczenia w
 retention_folders0=Wszystkie foldery użytkownika
 retention_folders1=Tylko skrzynka odbiorcza
 retention_desc=Ta strona pozwala Virtualminowi automatycznie usuwać stare wiadomości e-mail ze skrzynek pocztowych właścicieli domen i użytkowników poczty.
+
+smtpclouds_title=Dostawcy dostarczania poczty w chmurze
+smtpclouds_tmpl=Domyślnego dostawcę SMTP dla nowych domen można ustawić na stronie <a href='$1'>szablon serwera</a>.
+smtpclouds_ecannot=Nie możesz edytować dostawców usługi dostarczania poczty w chmurze
+smtpclouds_return=dostawcy usług dostarczania poczty w chmurze
+
+smtpcloud_eaws=Do korzystania z usługi SES firmy Amazon potrzebne jest polecenie <tt>aws</tt>
+smtpcloud_ses_location=Domyślna lokalizacja API
+smtpcloud_ses_longdesc=Dane logowania na tej stronie można znaleźć na stronie Poświadczenia bezpieczeństwa swojego konta w <a href=https://console.aws.amazon.com/ target=_blank>Konsoli AWS</a>.
+smtpcloud_header=Opcje dostawcy dostarczania poczty
+smtpcloud_provider=Nazwa dostawcy poczty
+smtpcloud_url=Witryna dostawcy poczty
+smtpcloud_eaws_dns=Amazon SES wymaga włączenia strefy DNS w celu weryfikacji nowych domen
 
 provision_ecannot=Nie wolno konfigurować klienta usług Cloudmin
 provision_header=Opcje klienta usług Cloudmin

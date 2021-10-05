@@ -277,6 +277,9 @@ setup_ednscloudexists=Seçilen DNS bulut sağlayıcısı mevcut değil!
 setup_ednscloudstate=$1 DNS bulut sağlayıcısı kullanıma hazır değil
 setup_ednscloudclash=DNS bulut sağlayıcısı $1 : $2 'de çakışma kontrol edilemedi
 setup_dnscloudclash=DNS bölgesi $1 bulut sağlayıcısında zaten mevcut
+setup_mail_smtpcloud=$1 bulut posta sağlayıcısı yapılandırılıyor ..
+setup_mail_nosmtpcloud=.. sağlayıcı mevcut değil!
+setup_mail_esmtpcloud=.. başarısız oldu : $1
 
 equotacommand=$1 kota komutu başarısız oldu : $2 
 
@@ -491,6 +494,7 @@ delete_statussslcert=SSL sertifikası için durum monitörü kaldırılıyor ..
 delete_aliasfailure=.. $1 takma ad silinemedi : $2 
 delete_ednssubof=$1 sanal sunucusu, $2 sunucusu için DNS kayıtları içerdiğinden silinemiyor
 delete_esslnoips=Alan adı için SSL sertifikası bulunamadı
+delete_mail_smtpcloud=$1 bulut posta sağlayıcısı kaldırılıyor ..
 
 save_ednsip=Eksik veya geçersiz harici IP adresi
 save_mysqlpass_provision=Hizmetler ana bilgisayarında MySQL parolasını değiştirme ..
@@ -726,9 +730,6 @@ check_ehomeformat=Giriş dizini biçimi $1, kullanıcı adını veya etki alanı
 check_ehomestyle=Giriş dizini stili Virtualmin ile kullanılamayan "Sadece temel dizin" olarak ayarlanmış. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir.
 check_jailkitok=Bu sistemde krom hapishaneleri mevcuttur
 check_jailkiterr=Krom hapishaneler mevcut değil : $1 
-check_eyumrepofile=$1 Virtualmin YUM veri havuzu yapılandırma dosyası yok!
-check_yumrepook=Virtualmin YUM deposu doğru yapılandırılmış
-check_yumrepowrong=$1 Virtualmin YUM veri havuzu yapılandırma dosyası lisans anahtarının seri numarasını yanlış içeriyor!
 check_yumrepomissing=$1 Virtualmin APT veri havuzu yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
 check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
@@ -1515,6 +1516,8 @@ tmpl_aliascopy1=Takma adları hedeften kopyala
 tmpl_aliascopy0=Catchall yönlendirme
 tmpl_bccto=Varsayılan giden BCC adresi
 tmpl_ebccto=Eksik veya geçersiz varsayılan BCC adresi
+tmpl_mail_cloud=Varsayılan bulut posta dağıtım sağlayıcısı
+tmpl_mail_cloud_local=&lt;Yok - doğrudan teslim et&gt;
 tmpl_ranges_mask=Ağ Maskesi
 tmpl_ranges6=Otomatik IPv6 tahsisi için aralıklar
 tmpl_eranges_mask='$1' için eksik veya geçersiz ağ
@@ -1871,6 +1874,9 @@ scripts_noini=.. global php.ini dosyası bulunamadı
 scripts_noini2=.. alan adının php.ini dosyası bulunamadı
 scripts_softwaremod=$1 paketi yükleniyor ..
 scripts_esoftwaremod=.. yükleme başarısız!
+scripts_phpmodinst=Yazılım paketlerinden modül kurulumu ..
+scripts_phpmoddone=.. modül $1 paketinden başarıyla kuruldu
+scripts_phpmodfailed=.. $1 olası paketten modül yüklenemedi
 scripts_esoftware=.. Yazılım Paketleri Webmin modülü kurulu değil!
 scripts_eupdate=.. otomatik modül kurulumu sisteminizde mevcut değildir.
 scripts_einstallmod=Modül kurulumdan sonra bile kullanılamıyor!
@@ -1937,6 +1943,7 @@ scripts_deleted=Manuel olarak silindi
 scripts_inophp=PHP için web sunucusu desteği gerekiyor
 scripts_inocgi=CGI betikleri için web sunucusu desteği gerekiyor
 scripts_iphpneed=Bu sanal sunucu için PHP devre dışı bırakıldı
+scripts_iphpnover=Bu sanal sunucu için PHP sürümü bulunamadı
 scripts_iphpfullver=PHP sürümü $1 veya üstü gerekli, ancak bu sanal sunucu $2 sürümünü kullanıyor
 scripts_iphpmaxver=$1 'in altındaki PHP sürümü gerekli, ancak bu sanal sunucu $2 sürümünü kullanıyor
 scripts_inoapache=Yalnızca Apache web sunucusu desteklenir
@@ -2744,13 +2751,13 @@ upgrade_complete=Sisteminiz başarıyla Virtualmin Pro'ya yükseltildi!
 upgrade_theme=<i>$1</i> temasını etkinleştirme ..
 upgrade_esharedroot=$1 Webmin kök dizininiz birden çok sistem arasında paylaşılıyor - modül güncellemelerine izin verilmiyor
 upgrade_eyumrepo=Virtualmin bir RPM'den kuruldu, ancak Virtualmin GPL deposu kullanılmadı. Yükseltme şu anda mümkün değil.
-upgrade_eyumlist=$1 RPM paketi YUM'un kullanılabilir paketleri listesinde bulunamadı. Belki şu andaki depolarınızdan biri çalışmıyor?
+
 upgrade_edebrepo=Virtualmin bir Debian paketinden kurulmuştur, fakat Virtualmin GPL deposunu kullanmamaktadır. Yükseltme şu anda mümkün değil.
 upgrade_rpms=Virtualmin RPM paketlerini yükseltme : $1 
 upgrade_eyumfile=$1 içinde Virtualmin GPL deposu bulunamadı
 upgrade_update=APT'deki mevcut paketler güncelleniyor.
 upgrade_debs=Virtualmin Debian paketlerini yükseltme : $1 
-upgrade_yumclear=YUM önbelleklerini temizleme ..
+
 upgrade_etypematch=Virtualmin'in yükleme türü <tt>$1</tt> olduğundan, Webmin'in <tt>$2</tt> olduğundan yükseltme mümkün değil
 
 maillog_title=Posta Günlüğünde Ara
@@ -3768,6 +3775,19 @@ retention_folders=Mesajları temizleme
 retention_folders0=Tüm kullanıcı klasörleri
 retention_folders1=Yalnızca Gelen Kutusu
 retention_desc=Bu sayfa, Virtualmin'in eski e-posta mesajlarını alan adı sahiplerinin ve posta kullanıcılarının posta kutularından otomatik olarak silmesini sağlar.
+
+smtpclouds_title=Bulut Posta Teslimat Sağlayıcıları
+smtpclouds_tmpl=Yeni alanlar için varsayılan SMTP sağlayıcısı, <a href='$1'>sunucu şablonu</a> sayfasında ayarlanabilir.
+smtpclouds_ecannot=Bulut posta dağıtım sağlayıcılarını düzenlemenize izin verilmiyor
+smtpclouds_return=bulut posta dağıtım sağlayıcıları
+
+smtpcloud_eaws=Amazon'un SES hizmetini kullanmak için <tt>aws</tt> komutu gereklidir
+smtpcloud_ses_location=Varsayılan API konumu
+smtpcloud_ses_longdesc=Bu sayfadaki kimlik bilgileri, hesabınızın <a href=https://console.aws.amazon.com/ target=_blank>AWS Konsolu</a>'ndaki Güvenlik Kimlik Bilgileri sayfasında bulunabilir.
+smtpcloud_header=Posta dağıtım sağlayıcı seçenekleri
+smtpcloud_provider=Posta dağıtım sağlayıcı adı
+smtpcloud_url=Posta dağıtım sağlayıcısının web sitesi
+smtpcloud_eaws_dns=Amazon SES'in yeni etki alanlarını doğrulamak için etkinleştirilmesi için bir DNS bölgesine ihtiyacı var
 
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor

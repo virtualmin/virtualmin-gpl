@@ -75,6 +75,9 @@ setup_ednscloudexists=Valgt DNS-skyleverandør eksisterer ikke!
 setup_ednscloudstate=DNS-skyleverandør $1 er ikke klar til bruk
 setup_ednscloudclash=Kunne ikke se etter sammenstøt med DNS-skyleverandør $1 : $2 
 setup_dnscloudclash=DNS-sone eksisterer allerede hos skyleverandør $1 
+setup_mail_smtpcloud=Konfigurerer leverandør av sky -e -post $1 ..
+setup_mail_nosmtpcloud=.. leverandør eksisterer ikke!
+setup_mail_esmtpcloud=.. mislyktes : $1
 
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_mailclient=Vis innstillinger for e-postklient
@@ -124,6 +127,7 @@ delete_remoteuser=.. bevarer brukeren på fjernsystemet $1
 delete_homepreserve=.. bevare katalog montert fra $1 
 delete_ednssubof=Virtuell server $1 kan ikke slettes, siden den inneholder DNS-poster for server $2 
 delete_esslnoips=Ingen SSL-sertifikater funnet for domene
+delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
@@ -173,9 +177,6 @@ check_eresolvlist=liste over DNS-servere
 check_dnsmissing=Systemet ser ikke ut til å ha noen DNS-servere konfigurert. Standard oppførselen til å bruke en lokal DNS-server bør imidlertid fortsatt fungere.
 check_jailkitok=Chroot-fengsler er tilgjengelige på dette systemet
 check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1 
-check_eyumrepofile=Konfigurasjonsfilen $1 for Virtualmin YUM finnes ikke!
-check_yumrepook=Virtualmin YUM-arkivet er konfigurert riktig
-check_yumrepowrong=Konfigurasjonsfilen $1 for Virtualmin YUM-arkivet inneholder feil serienummer på lisensnøkkelen!
 check_yumrepomissing=Konfigurasjonsfilen $1 for Virtualmin APT refererer ikke til software.virtualmin.com!
 check_eaptrepofile=APT-repository konfigurasjonsfilen $1 eksisterer ikke!
 check_aptrepook=Virtualmin APT-repository er riktig konfigurert
@@ -382,6 +383,8 @@ tmpl_dnsmx=Vertsnavn for MX-post
 tmpl_dnsmxauto=Standard (<tt>e-post. ${DOM}</tt>)
 tmpl_dnsnone=Ingen ekstra poster
 tmpl_jail=Chroot fengsel nytt domene Unix brukere?
+tmpl_mail_cloud=Standard leverandør av levering av sky -e -post
+tmpl_mail_cloud_local=& lt; Ingen - lever direkte & gt;
 tmpl_owners_none=Ingen eiere
 tmpl_dnsindom=Opprette NS-poster i serverens domene?
 
@@ -461,8 +464,12 @@ scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
+scripts_phpmodinst=Installere modul fra programvarepakker ..
+scripts_phpmoddone=.. installert modul fra pakke $1
+scripts_phpmodfailed=.. klarte ikke å installere modulen fra $1 mulige pakker
 scripts_passmode4=Opprinnelig passord for skript
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
+scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren
 scripts_iphpfullver=PHP-versjon $1 eller nyere kreves, men denne virtuelle serveren bruker versjon $2 
 scripts_iphpmaxver=PHP-versjon under $1 kreves, men denne virtuelle serveren bruker versjon $2 
 scripts_abandoned2=Dette skriptet støttes ikke lenger og vil ikke motta sikkerhetsoppdateringer.
@@ -743,6 +750,19 @@ retention_folders=Opprydding av meldinger i
 retention_folders0=Alle brukermapper
 retention_folders1=Bare innboksen
 retention_desc=Denne siden lar deg Virtualmin slette gamle e-postmeldinger automatisk fra postkassene til domeneeiere og e-postbrukere.
+
+smtpclouds_title=Leverandører av Cloud Mail
+smtpclouds_tmpl=Standard SMTP -leverandør for nye domener kan angis på siden <a href='$1'>servermal</a>.
+smtpclouds_ecannot=Du har ikke tillatelse til å redigere leverandører av levering av sky -e -post
+smtpclouds_return=leverandører av leveranser til skypost
+
+smtpcloud_eaws=Kommandoen <tt>aws</tt> er nødvendig for å bruke Amazons SES -tjeneste
+smtpcloud_ses_location=Standard API -plassering
+smtpcloud_ses_longdesc=Legitimasjonen på denne siden finner du på siden Sikkerhetsopplysninger for kontoen din på <a href=https://console.aws.amazon.com/ target=_blank>AWS -konsollen</a>.
+smtpcloud_header=Alternativer for levering av e -post
+smtpcloud_provider=Leverandørens navn på e -post
+smtpcloud_url=Leverandørens nettsted for e -post
+smtpcloud_eaws_dns=Amazon SES trenger en DNS -sone for å kunne aktivere nye domener
 
 provision_nolimit=ubegrenset
 
