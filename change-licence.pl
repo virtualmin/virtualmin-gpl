@@ -7,8 +7,9 @@ Change a system's Virtualmin license key
 This program updates all files that we know contain a Virtualmin licence key
 with a new serial and key. The two required parameters are C<--serial>
 and C<--key>, which of course are followed by a valid Virtualmin Pro serial
-number and key code respectively. If these are not actually valid the
-program will refuse to apply them unless the C<--no-check> flag is given.
+number and key code respectively. If these are not actually valid, the
+program will refuse to apply them, unless the C<--no-check> flag is given. If
+GPL detection must be disabled use the C<--force-update> flag.
 
 =cut
 
@@ -42,6 +43,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-check") {
 		$nocheck = 1;
 		}
+	elsif ($a eq "--force-update") {
+		$force_update = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -53,7 +57,7 @@ $serial || &usage("No serial number specified");
 $key || &usage("No licence key specified");
 
 # Make sure it is valid
-&require_licence();
+&require_licence($force_update);
 if (!$nocheck && defined(&licence_scheduled)) {
 	&$first_print("Validating serial $serial and key $key ..");
 	$hostid = &get_licence_hostid();
@@ -69,15 +73,31 @@ if (!$nocheck && defined(&licence_scheduled)) {
 		}
 	}
 
-# Update YUM repo
+# Display a warning to GPL user trying to apply a license instead of properly upgrading
+# Can be bypassed by using --force-update flag
+my $gpl_repos_warning = "GPL repos detected. Use \`System Settings ⇾ Upgrade to Virtualmin Pro\` in UI instead to upgrade first!";
+
+# Update RHEL repo
 if (-r $virtualmin_yum_repo) {
+	my $found = 0;
+	my $lref = &read_file_lines($virtualmin_yum_repo);
+	
+	my $gpl_warning = ("@{$lref}" =~ /\/gpl\// && !$force_update);
+	&usage($gpl_repos_warning) if ($gpl_warning);
+
 	&$first_print("Updating Virtualmin repository ..");
 	&lock_file($virtualmin_yum_repo);
-	local $found = 0;
-	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
-			$l = "baseurl=https://".$serial.":".$key."\@".$4;
+		if (
+			# Pro license
+			$l =~ /^baseurl=(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
+			# GPL license
+		   ($force_update && $l =~ /^baseurl=(https?):(\/)(\/)($upgrade_virtualmin_host.*)$/)) {
+			my $host = $4;
+			if ($force_update && $l =~ /\/gpl\//) {
+				$host =~ s/gpl\///;
+				}
+			$l = "baseurl=https://".$serial.":".$key."\@".$host;
 			$found++;
 			}
 		}
@@ -91,19 +111,31 @@ if (-r $virtualmin_yum_repo) {
 
 # Update Debian repo
 if (-r $virtualmin_apt_repo) {
-	&$first_print("Updating Virtualmin APT repository ..");
-	&lock_file($virtualmin_apt_repo);
 	local $found = 0;
 	local $lref = &read_file_lines($virtualmin_apt_repo);
+	
+	my $gpl_warning = ("@{$lref}" =~ /\/gpl\// && !$force_update);
+	&usage($gpl_repos_warning) if ($gpl_warning);
+	
+	&$first_print("Updating Virtualmin APT repository ..");
+	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
-		if ($l !~ /\/gpl\// &&
-		   ($l =~ /^deb\s+(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
-			$l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
+		if (
+			# Pro license old format
+			$l =~ /^deb\s+(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
+			# Pro license new format and GPL license
+			(-d $virtualmin_apt_auth_dir && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/) ||
+			# GPL license on old systems
+			($force_update && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
+			my $host = $4;
+			if ($force_update && $l =~ /\/gpl\//) {
+				$host =~ s/gpl\///;
+				}
 			if (-d $virtualmin_apt_auth_dir) {
-				$l = "deb https://".$4;
+				$l = "deb https://".$host;
 				}
 			else {
-				$l = "deb https://".$serial.":".$key."\@".$4;
+				$l = "deb https://".$serial.":".$key."\@".$host;
 				}
 			$found++;
 			}
@@ -168,6 +200,7 @@ print "\n";
 print "virtualmin change-licence --serial number\n";
 print "                          --key id\n";
 print "                         [--no-check]\n";
+print "                         [--force-update]\n";
 exit(1);
 }
 

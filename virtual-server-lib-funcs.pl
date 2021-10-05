@@ -10727,7 +10727,8 @@ else {
 # Returns 1 if OK, 0 if not
 sub require_licence
 {
-return 0 if (!$virtualmin_pro);
+my ($force) = @_;
+return 0 if (!$virtualmin_pro && !$force);
 foreach my $ls ("$module_root_directory/virtualmin-licence.pl",
 		$config{'licence_script'}) {
 	if ($ls && -r $ls) {
