@@ -15336,16 +15336,15 @@ if ($virtualmin_pro &&
     $vserial{'SerialNumber'} ne 'GPL') {
 	if ($gconfig{'os_type'} eq 'redhat-linux') {
 		# Check the YUM config file
-		my $repo = "/etc/yum.repos.d/virtualmin.repo";
-		if (!-r $repo) {
-			&$second_print(&text('check_eyumrepofile', $repo));
+		if (!-r $virtualmin_yum_repo) {
+			&$second_print(&text('check_eyumrepofile', $virtualmin_yum_repo));
 			}
 		else {
 			# File exists, but does it contain the right repo line?
-			my $lref = &read_file_lines($repo, 1);
+			my $lref = &read_file_lines($virtualmin_yum_repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				if ($l =~ /baseurl=https?:\/\/([^:]+):([^\@]+)\@$upgrade_virtualmin_host/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
@@ -15360,31 +15359,25 @@ if ($virtualmin_pro &&
 				&$second_print($text{'check_yumrepook'});
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_yumrepowrong', $repo));
+				&$second_print(&text('check_yumrepowrong', $virtualmin_yum_repo));
 				}
 			else {
-				&$second_print(&text('check_yumrepomissing', $repo));
+				&$second_print(&text('check_yumrepomissing', $virtualmin_yum_repo));
 				}
 			}
 		}
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# Check the APT config file
-		my $repo = "/etc/apt/sources.list";
-		my $repo_new = "/etc/apt/sources.list.d/virtualmin.list";
-		if (!-r $repo) {
-			&$second_print(&text('check_eaptrepofile', $repo));
+		if (!-r $virtualmin_apt_repo) {
+			&$second_print(&text('check_eaptrepofile', $virtualmin_apt_repo));
 			}
 		else {
-			# If it's a newish install using new path
-			if (-r $repo_new) {
-				$repo = $repo_new;
-				}
-			
 			# File exists, but does it contain the right repo line?
-			my $lref = &read_file_lines($repo, 1);
+			my $lref = &read_file_lines($virtualmin_apt_repo, 1);
 			my $found = 0;
 			foreach my $l (@$lref) {
-				if ($l =~ /^deb\s+https?:\/\/([^:]+):([^\@]+)\@software.virtualmin.com/) {
+				# An old Debian format with login/pass inside of the repo file
+				if ($l =~ /^deb\s+https?:\/\/([^:]+):([^\@]+)\@$upgrade_virtualmin_host/) {
 					if ($1 eq $vserial{'SerialNumber'} &&
 					    $2 eq $vserial{'LicenseKey'}) {
 						$found = 2;
@@ -15394,15 +15387,31 @@ if ($virtualmin_pro &&
 						}
 					last;
 					}
+
+				# A new Debian format with auth in a separate file
+				if ($l =~ /^deb\s+(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/ &&
+					-r "$virtualmin_apt_auth_dir/virtualmin.conf") {
+					my $auth_conf_lines = &read_file_contents("$virtualmin_apt_auth_dir/virtualmin.conf");
+					if ($auth_conf_lines =~ /machine\s+$upgrade_virtualmin_host\s+login\s+(\S+)\s+password\s+(\S+)/gmi) {
+						if ($1 eq $vserial{'SerialNumber'} &&
+						    $2 eq $vserial{'LicenseKey'}) {
+							$found = 2;
+							}
+						else {
+							$found = 1;
+							}
+						last;
+						}
+					}
 				}
 			if ($found == 2) {
 				&$second_print($text{'check_aptrepook'});
 				}
 			elsif ($found == 1) {
-				&$second_print(&text('check_aptrepowrong', $repo));
+				&$second_print(&text('check_aptrepowrong', $virtualmin_apt_repo));
 				}
 			else {
-				&$second_print(&text('check_aptrepomissing', $repo));
+				&$second_print(&text('check_aptrepomissing', $virtualmin_apt_repo));
 				}
 			}
 		}

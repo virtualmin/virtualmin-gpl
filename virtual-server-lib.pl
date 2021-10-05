@@ -259,6 +259,7 @@ $resolve_check_page = "/cgi-bin/resolve.cgi";
 
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
+$virtualmin_apt_auth_dir = "/etc/apt/auth.conf.d";
 $virtualmin_apt_repo = -r "/etc/apt/sources.list.d/virtualmin.list" ?
                           "/etc/apt/sources.list.d/virtualmin.list" :
                           "/etc/apt/sources.list";

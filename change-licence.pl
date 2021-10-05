@@ -55,7 +55,7 @@ $key || &usage("No licence key specified");
 # Make sure it is valid
 &require_licence();
 if (!$nocheck && defined(&licence_scheduled)) {
-	&$first_print("Checking serial $serial and key $key ..");
+	&$first_print("Validating serial $serial and key $key ..");
 	$hostid = &get_licence_hostid();
 	($status, $exp, $err, $doms, $server) =
 		&licence_scheduled($hostid, $serial, $key, &get_vps_type());
@@ -71,13 +71,13 @@ if (!$nocheck && defined(&licence_scheduled)) {
 
 # Update YUM repo
 if (-r $virtualmin_yum_repo) {
-	&$first_print("Updating Virtualmin YUM repository ..");
+	&$first_print("Updating Virtualmin repository ..");
 	&lock_file($virtualmin_yum_repo);
 	local $found = 0;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
-			$l = "baseurl=".$1."://".$serial.":".$key."\@".$4;
+		if ($l =~ /^baseurl=(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/) {
+			$l = "baseurl=https://".$serial.":".$key."\@".$4;
 			$found++;
 			}
 		}
@@ -90,8 +90,6 @@ if (-r $virtualmin_yum_repo) {
 	}
 
 # Update Debian repo
-my $apt_auth_dir = '/etc/apt/auth.conf.d';
-my $apt_auth_can = -d $apt_auth_dir;
 if (-r $virtualmin_apt_repo) {
 	&$first_print("Updating Virtualmin APT repository ..");
 	&lock_file($virtualmin_apt_repo);
@@ -99,22 +97,22 @@ if (-r $virtualmin_apt_repo) {
 	local $lref = &read_file_lines($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
 		if ($l !~ /\/gpl\// &&
-		   ($l =~ /^deb\s+(http|https|ftp):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
-			$l =~ /^deb\s+(http|https|ftp):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
-			if ($apt_auth_can) {
+		   ($l =~ /^deb\s+(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
+			$l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
+			if (-d $virtualmin_apt_auth_dir) {
 				$l = "deb https://".$4;
 				}
 			else {
-				$l = "deb ".$1."://".$serial.":".$key."\@".$4;
+				$l = "deb https://".$serial.":".$key."\@".$4;
 				}
 			$found++;
 			}
 		}
 	&flush_file_lines($virtualmin_apt_repo);
 	&unlock_file($virtualmin_apt_repo);
-	if ($apt_auth_can) {
+	if (-d $virtualmin_apt_auth_dir) {
 		&write_file_contents(
-		    "$apt_auth_dir/virtualmin.conf",
+		    "$virtualmin_apt_auth_dir/virtualmin.conf",
 		    "machine $upgrade_virtualmin_host login $serial password $key\n");
 		}
 	if ($found) {
