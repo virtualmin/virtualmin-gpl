@@ -92,13 +92,14 @@ if (-r $virtualmin_yum_repo) {
 			# Pro license
 			$l =~ /^baseurl=(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
 			# GPL license
-		   ($force_update && $l =~ /^baseurl=(https?):(\/)(\/)($upgrade_virtualmin_host.*)$/)) {
-			my $host = $4;
-			if ($force_update && $l =~ /\/gpl\//) {
-				$host =~ s/gpl\///;
+			($force_update && $l =~ /^baseurl=(https?):(\/)(\/)($upgrade_virtualmin_host.*)$/)
+			) {
+				my $host = $4;
+				if ($force_update && $l =~ /\/gpl\//) {
+					$host =~ s/gpl\///;
 				}
-			$l = "baseurl=https://".$serial.":".$key."\@".$host;
-			$found++;
+				$l = "baseurl=https://".$serial.":".$key."\@".$host;
+				$found++;
 			}
 		}
 	&flush_file_lines($virtualmin_yum_repo);
@@ -126,18 +127,19 @@ if (-r $virtualmin_apt_repo) {
 			# Pro license new format and GPL license
 			(-d $virtualmin_apt_auth_dir && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/) ||
 			# GPL license on old systems
-			($force_update && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)) {
-			my $host = $4;
-			if ($force_update && $l =~ /\/gpl\//) {
-				$host =~ s/gpl\///;
-				}
-			if (-d $virtualmin_apt_auth_dir) {
-				$l = "deb https://".$host;
-				}
-			else {
-				$l = "deb https://".$serial.":".$key."\@".$host;
-				}
-			$found++;
+			($force_update && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)
+			) {
+				my $host = $4;
+				if ($force_update && $l =~ /\/gpl\//) {
+					$host =~ s/gpl\///;
+					}
+				if (-d $virtualmin_apt_auth_dir) {
+					$l = "deb https://".$host;
+					}
+				else {
+					$l = "deb https://".$serial.":".$key."\@".$host;
+					}
+				$found++;
 			}
 		}
 	&flush_file_lines($virtualmin_apt_repo);
