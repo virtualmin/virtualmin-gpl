@@ -2859,6 +2859,7 @@ if ($d->{'ssl_same'}) {
 
 # Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
+my $newfile = !-e $combfile;
 &lock_file($combfile);
 &create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
@@ -2868,11 +2869,14 @@ if (-r $d->{'ssl_chain'}) {
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($combfile);
-&set_certificate_permissions($d, $combfile);
+if ($newfile) {
+	&set_certificate_permissions($d, $combfile);
+	}
 $d->{'ssl_combined'} = $combfile;
 
 # Create file of all the certs, and the key
 my $everyfile = &default_certificate_file($d, 'everything');
+my $newfile = !-e $everyfile;
 &lock_file($everyfile);
 &open_tempfile_as_domain_user($d, COMB, ">$everyfile");
 &print_tempfile(COMB, &read_file_contents($d->{'ssl_key'})."\n");
@@ -2882,7 +2886,9 @@ if (-r $d->{'ssl_chain'}) {
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($everyfile);
-&set_certificate_permissions($d, $everyfile);
+if ($newfile) {
+	&set_certificate_permissions($d, $everyfile);
+	}
 $d->{'ssl_everything'} = $everyfile;
 }
 
