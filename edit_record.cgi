@@ -128,9 +128,11 @@ else {
 		}
 	}
 
-# Record comment
-print &ui_table_row($text{'record_comment'},
-		    &ui_textbox("comment", $r->{'comment'}, 60));
+if (&supports_dns_comments($d)) {
+	# Record comment
+	print &ui_table_row($text{'record_comment'},
+			    &ui_textbox("comment", $r->{'comment'}, 60));
+	}
 
 print &ui_table_end();
 if ($in{'type'}) {

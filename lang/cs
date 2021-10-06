@@ -589,7 +589,6 @@ backup_ftpserver=FTP server
 backup_sshserver=SSH server
 backup_path=Soubor na serveru
 backup_login=Prihlasit se jako uzivatel
-backup_pass=s heslem
 backup_mailfiles2=Zahrnout soubory s postou
 backup_dirlogs=Vcetne adresaru zaznamu udalosti
 backup_feature_unix=Heslo administarskeho uzivatele, omezeni Quota a naplanovane ulohy Cron

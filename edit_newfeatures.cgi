@@ -17,7 +17,6 @@ print "$text{'features_desc'}<p>\n";
 
 # Add rows for core features
 @table_order_initial = ( );
-$n = 0;
 foreach $f (@features) {
 	# Skip features for modules that aren't enabled in Webmin
 	my $cfunc = "check_module_".$f;
@@ -35,7 +34,7 @@ foreach $f (@features) {
 		# by default
 		push(@table_order_initial, $f);
 		push(@table, [
-			ui_img("images/tick.gif", "Enabled"),
+			{ 'type' => 'checkbox', 'checked' => 1, 'disabled' => 1 },
 			$text{'feature_'.$f},
 			$text{'features_feature'},
 			get_module_version_and_type(),
@@ -51,7 +50,7 @@ foreach $f (@features) {
 		push(@table, [
 			{ 'type' => 'checkbox', 'name' => 'fmods',
 			  'value' => $f, 'checked' => $config{$f} != 0,
-			  'tags' => "onClick='form.factive[$n].disabled = !this.checked;'",
+			  'tags' => "onClick='this.closest(\"tr\").querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
 			},
 			$text{'feature_'.$f},
 			$text{'features_feature'},
@@ -63,13 +62,11 @@ foreach $f (@features) {
 			&ui_links_row(\@acts)
 			]);
 		}
-	$n++;
 	}
 
 # Add rows for all plugins
 %plugins = map { $_, 1 } @plugins;
 %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
-$n = 0;
 foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	$mdir = &module_root_directory($m->{'dir'});
 	if (-r "$mdir/virtual_feature.pl") {
@@ -92,6 +89,7 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 			{ 'type' => 'checkbox', 'name' => 'mods',
 			  'value' => $m->{'dir'},
 			  'checked' => $plugins{$m->{'dir'}},
+			  'tags' => "onClick='this.closest(\"tr\").querySelector(\"td:nth-child(6) input\").disabled = !this.checked;'",
 			},
 			&plugin_call($m->{'dir'}, "feature_name") ||
 			  $m->{'dir'},
@@ -102,12 +100,12 @@ foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 									: "-",
 			{ 'type' => 'checkbox', 'name' => 'active',
 			  'value' => $m->{'dir'},
+			  'disabled' => !$plugins{$m->{'dir'}},
 			  'checked' => !$inactive{$m->{'dir'}},
 			},
 			&ui_links_row(\@acts)
 			]);
 		push(@hiddens, [ "allplugins", $m->{'dir'} ]);
-		$n++;
 		}
 	}
 

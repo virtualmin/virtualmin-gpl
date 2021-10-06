@@ -7,11 +7,13 @@ sub list_cloud_providers
 my @rv = ( { 'name' => 's3',
 	     'prefix' => [ 's3', 's3rrs' ],
 	     'url' => 'https://aws.amazon.com/s3/',
-	     'desc' => $text{'cloud_s3desc'} },
+	     'desc' => $text{'cloud_s3desc'},
+	     'longdesc' => $text{'cloud_s3_longdesc'} },
 	   { 'name' => 'rs',
 	     'prefix' => [ 'rs' ],
 	     'url' => 'https://www.rackspace.com/openstack/public/files',
-	     'desc' => $text{'cloud_rsdesc'} } );
+	     'desc' => $text{'cloud_rsdesc'},
+	     'longdesc' => $text{'cloud_rs_longdesc'} } );
 if ($virtualmin_pro) {
 	push(@rv, { 'name' => 'google',
 		    'prefix' => [ 'gcs' ],
@@ -118,8 +120,11 @@ if ($in->{'s3_endpoint_def'}) {
 	delete($config{'s3_endpoint'});
 	}
 else {
-	&to_ipaddress($in->{'s3_endpoint'}) ||
+	my ($host, $port) = split(/:/, $in->{'s3_endpoint'});
+	&to_ipaddress($host) ||
 		&error($text{'cloud_es3_endpoint'});
+	!$port || $port =~ /^\d+$/ ||
+		&error($text{'cloud_es3_endport'});
 	$config{'s3_endpoint'} = $in->{'s3_endpoint'};
 	}
 
@@ -304,12 +309,6 @@ $rv .= &ui_table_row($text{'cloud_google_location'},
 if ($config{'google_oauth'}) {
 	$rv .= &ui_table_row($text{'cloud_google_oauth'},
 		             "<tt>$config{'google_oauth'}</tt>");
-	}
-
-# OAuth2 token
-if ($config{'google_token'}) {
-	$rv .= &ui_table_row($text{'cloud_google_token'},
-		             "<tt>$config{'google_token'}</tt>");
 	}
 
 return $rv;

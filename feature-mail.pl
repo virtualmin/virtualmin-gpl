@@ -383,6 +383,30 @@ if (!$d->{'creating'} && $config{'mail_autoconfig'} &&
 	&enable_email_autoconfig($d);
 	}
 
+# Setup outgoing Cloud mail provider, if requested
+my $c = $d->{'smtp_cloud'};
+if ($c && defined(&list_smtp_clouds)) {
+	my ($cloud) = grep { $_->{'name'} eq $c } &list_smtp_clouds();
+	&$first_print(&text('setup_mail_smtpcloud',
+			    $cloud ? $cloud->{'desc'} : $c));
+	if (!$cloud) {
+		&$second_print($text{'setup_mail_nosmtpcloud'});
+		}
+	else {
+		my $sfunc = "smtpcloud_".$c."_create_domain";
+		my $info = { 'domain' => $d->{'dom'} };
+		my ($ok, $id) = &$sfunc($d, $info);
+		if ($ok) {
+			$d->{'smtp_cloud'} = $c;
+			$d->{'smtp_cloud_id'} = $id;
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(&text('setup_mail_esmtpcloud', $id));
+			}
+		}
+	}
+
 &release_lock_mail($d);
 return 1;
 }
@@ -556,6 +580,31 @@ if ($supports_dependent) {
 
 # Remove secondary virtusers from slaves
 &sync_secondary_virtusers($d);
+
+# Remove cloud mail provider
+my $c = $d->{'smtp_cloud'};
+if ($c && defined(&list_smtp_clouds)) {
+	my ($cloud) = grep { $_->{'name'} eq $c } &list_smtp_clouds();
+	&$first_print(&text('delete_mail_smtpcloud',
+			    $cloud ? $cloud->{'desc'} : $c));
+	if (!$cloud) {
+		&$second_print($text{'setup_mail_nosmtpcloud'});
+		}
+	else {
+		my $sfunc = "smtpcloud_".$c."_delete_domain";
+		my $info = { 'domain' => $d->{'dom'},
+			     'id' => $d->{'smtp_cloud_id'} };
+		my ($ok, $err) = &$sfunc($d, $info);
+		if ($ok) {
+			$d->{'smtp_cloud'} = $c;
+			delete($d->{'smtp_cloud_id'});
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(&text('setup_mail_esmtpcloud', $err));
+			}
+		}
+	}
 
 &release_lock_mail($d);
 return 1;
@@ -4818,6 +4867,15 @@ if ($supports_bcc) {
 		  ]));
 	}
 
+# Default Cloud SMTP provider
+if (defined(&list_smtp_clouds)) {
+	my @clouds = map { [ $_->{'name'}, $_->{'desc'} ] } &list_smtp_clouds();
+	unshift(@clouds, [ '', $text{'tmpl_mail_cloud_local'} ]);
+	print &ui_table_row(&hlink($text{'tmpl_mail_cloud'},
+				   "template_mail_cloud"),
+		&ui_select("mail_cloud", $tmpl->{'mail_cloud'}, \@clouds));
+	}
+
 print &ui_table_hr();
 
 # Default mailbox quota
@@ -4875,6 +4933,9 @@ if ($tmpl->{'mail_on'} eq 'yes') {
 $tmpl->{'mail_subject'} = $in{'subject'};
 $tmpl->{'mail_cc'} = $in{'cc'};
 $tmpl->{'mail_bcc'} = $in{'bcc'};
+if (defined($in{'mail_cloud'})) {
+	$tmpl->{'mail_cloud'} = $in{'mail_cloud'};
+	}
 
 # Save new user aliases
 if ($in{'aliases_mode'} == 0) {
@@ -6512,38 +6573,45 @@ return undef;
 sub save_domain_cloud_mail_provider
 {
 local ($d, $prov, $id) = @_;
-&require_bind();
-&obtain_lock_dns($d);
-local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if ($d->{'dns'}) {
+	&require_bind();
+	&obtain_lock_dns($d);
+	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 
-# Remove all MX records
-foreach my $r (reverse(@$recs)) {
-	if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
-		&bind8::delete_record($file, $r);
+	# Remove all MX records
+	foreach my $r (reverse(@$recs)) {
+		if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
+			&bind8::delete_record($file, $r);
+			}
 		}
+	&post_records_change($d, $recs);
+
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	if ($prov) {
+		# Add provider records
+		foreach my $r (@{$prov->{'mx'}}) {
+			&bind8::create_record($file, $d->{'dom'}.".", undef,
+					      "IN", "MX", "10 ${r}.");
+			}
+		}
+	else {
+		# Add standard records
+		&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
+		}
+	&post_records_change($d, $recs);
+	&register_post_action(\&restart_bind, $d);
+	&release_lock_dns($d);
 	}
-&post_records_change($d, $recs);
 
-($recs, $file) = &get_domain_dns_records_and_file($d);
+# Update domain object
 if ($prov) {
-	# Add provider records
-	foreach my $r (@{$prov->{'mx'}}) {
-		&bind8::create_record($file, $d->{'dom'}.".", undef,
-				      "IN", "MX", "10 ${r}.");
-		}
 	$d->{'cloud_mail_provider'} = $prov->{'name'};
 	$d->{'cloud_mail_id'} = $id;
 	}
 else {
-	# Add standard records
-	&create_mx_records($file, $d, $d->{'ip'}, $d->{'ip6'});
 	delete($d->{'cloud_mail_provider'});
 	delete($d->{'cloud_mail_id'});
 	}
-&post_records_change($d, $recs);
-&register_post_action(\&restart_bind, $d);
-
-&release_lock_dns($d);
 
 return undef;
 }

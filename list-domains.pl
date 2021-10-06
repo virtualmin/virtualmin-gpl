@@ -94,6 +94,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ip-only") {
 		$iponly = 1;
 		}
+	elsif ($a eq "--ssl-expiry-only") {
+		$expiryonly = 1;
+		}
 	elsif ($a eq "--domain") {
 		push(@domains, shift(@ARGV));
 		}
@@ -540,6 +543,9 @@ if ($multi) {
 			$s = &get_domain_suexec($d);
 			print "    SuExec for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";
+			if ($d->{'fcgiwrap_port'}) {
+				print "    Fcgiwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
+				}
 			if ($p eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
@@ -638,6 +644,8 @@ if ($multi) {
 		if ($d->{'ssl_cert_expiry'}) {
 			print "    SSL cert expiry: ",
 			    &make_date($d->{'ssl_cert_expiry'}),"\n";
+			print "    SSL cert expiry time: ",
+			    $d->{'ssl_cert_expiry'},"\n";
 			}
 		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
 			print "    Lets Encrypt renewal: ",
@@ -854,6 +862,12 @@ elsif ($iponly) {
 	# Just IP addresses
 	foreach $d (@doms) {
 		print $d->{'ip'},"\n";
+		}
+	}
+elsif ($expiryonly) {
+	# Just SSL expiry times
+	foreach $d (@doms) {
+		print $d->{'ssl_cert_expiry'},"\n" if ($d->{'ssl_cert_expiry'});
 		}
 	}
 else {

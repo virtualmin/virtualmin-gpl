@@ -1638,7 +1638,6 @@ backup_sshserver=SSH-Server
 backup_s3path=Bucket und Pfad
 backup_path=Datei auf Server
 backup_login=Anmelden als Benutzer
-backup_pass=mit Passwort
 backup_mailfiles2=Inklusive E-Maildateien
 backup_dirlogs=Inklusive Logdateiverzeichnis
 backup_feature_unix=Administrations Benutzerpasswort und Speichergrenzen (Quota)
@@ -2639,7 +2638,6 @@ resel_edefns=Nameserver '$1' ist ungültig
 licence_unlimited=unlimitiert
 licence_goterr=.. ein Problem wurde erkannt : $1
 licence_maxdoms=Ihr System ist für nur $1 Server lizenziert, aber Sie haben $2.
-licence_maxservers=Ihre Seriennummer wird für nur $1 Server lizenziert, wird aber von $2 verwendet.
 licence_changeip=Update nicht korrekte IP-Adressen
 licence_newcert=Generiere neues Zertifikat
 licence_newcsr=Neues Zertifikat anfordern
@@ -3592,12 +3590,13 @@ upgrade_problems=Einige Fehler sind beim Aktualisieren Ihres System auf Virtualm
 upgrade_complete=Ihr System wurde erfolgreich nach Virtualmin Pro upgegradet!
 upgrade_theme=Aktiviere Theme <i>$1</i> ..
 upgrade_eyumrepo=Virtualmin wurde von RPM installiert, jedoch nicht über das GPL Virtualmin Repository. Upgraden ist daher zu diesem Zeitpunkt nicht möglich.
+
 upgrade_edebrepo=Virtualmin wurde von einem Debian-Paket, aber nicht mit dem GPL Virtualmin Repository. Upgrade ist zu diesem Zeitpunkt nicht möglich.
 upgrade_rpms=Upgrade Virtualmin RPM Pakete : $1
 upgrade_eyumfile=Kein Virtualmin GPL repository wurden in $1 gefunden
 upgrade_update=Aktualisiere verfügbare Pakete von APT ..
 upgrade_debs=Upgrade Virtualmin Debian Pakete : $1
-upgrade_yumclear=Lösche YUM Caches ..
+
 upgrade_etypematch=Upgraden ist nicht möglich, da der Installation Virtualmin Typ <tt>$1</tt> ist, aber Webmin <tt>$2</tt> ist
 
 maillog_title=Such Mail Log

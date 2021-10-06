@@ -99,6 +99,7 @@ else {
 	}
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
+&refresh_ssl_cert_expiry($d);
 &save_domain($d);
 &$second_print($text{'setup_done'});
 

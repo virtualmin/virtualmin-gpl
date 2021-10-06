@@ -10,6 +10,9 @@ can be used to output more detail about each directory in a format more
 easily parsed by other programs. Or if you just want a list of directories,
 use the C<--name-only> flag.
 
+By default only the base version numbers are shown, but you can switch to
+showing the complete version with the C<--full-version> flag.
+
 =cut
 
 package virtual_server;
@@ -40,6 +43,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
+		}
+	elsif ($a eq "--full-version") {
+		$fullver = 1;
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -75,7 +81,9 @@ else {
 	printf $fmt, "Directory", "Version";
 	printf $fmt, ("-" x 70), ("-" x 7);
 	foreach $dir (@dirs) {
-		printf $fmt, $dir->{'dir'}, $dir->{'version'};
+		my $v = $fullver ? &get_php_version($dir->{'version'})
+				 : $dir->{'version'};
+		printf $fmt, $dir->{'dir'}, $v;
 		}
 	}
 
@@ -86,6 +94,7 @@ print "Lists web directories with different PHP versions in a virtual server.\n"
 print "\n";
 print "virtualmin list-php-directories --domain domain.name\n";
 print "                               [--multiline | --name-only]\n";
+print "                               [--full-version]\n";
 exit(1);
 }
 

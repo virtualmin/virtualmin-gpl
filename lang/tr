@@ -1440,7 +1440,6 @@ backup_akey=Anahtar koduna eriþ
 backup_skey=Gizli anahtar kodu
 backup_path=sunucudaki dosya
 backup_login=Giriþ yapýlacak kullanýcý
-backup_pass=þifre
 backup_mailfiles2=E-posta dosyalarýný içer
 backup_dirlogs=Log klasörünü içer
 backup_feature_unix=Unix kullanýcýsýnýn þifresi, kotasý ve zamanlandýrýlmýþ iþleri

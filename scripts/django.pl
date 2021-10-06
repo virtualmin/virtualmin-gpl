@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "3.2.2", "2.2.22", "1.11.29" );
+return ( "3.2.7", "2.2.24", "1.11.29" );
 }
 
 sub script_django_can_upgrade
@@ -568,6 +568,11 @@ my ($d, $opts) = @_;
 my $python = &get_python_path();
 my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib/python $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
 return $cmd;
+}
+
+sub script_django_migrated
+{
+return 1;
 }
 
 1;

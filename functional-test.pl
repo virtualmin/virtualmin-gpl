@@ -29,12 +29,14 @@ $ENV{'ftp_proxy'} = undef;
 $test_domain = "example.com";	# Never really exists
 $test_ssl_subdomain = "ssl.".$test_domain;
 $test_ssl2_subdomain = "ssl2.".$test_domain;
+$test_dns_subdomain = "dns.".$test_domain;
 $test_rename_domain = "examplerename.com";
 $test_target_domain = "exampletarget.com";
 $test_clone_domain = "exampleclone.com";
 $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
+$test_cloud_domain = "cloudexample.com";
 $test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
@@ -182,6 +184,7 @@ $test_full_user_postgres = &postgres_username($test_full_user);
 $test_target_domain_db = 'targetdb';
 $test_domain_home = $test_domain{'home'} =
 	&server_home_directory(\%test_domain);
+$test_domain_html = $test_domain_home.'/public_html';
 $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
@@ -411,6 +414,40 @@ $domains_tests = [
 		  'sleep' => 1,
 		},
 		) : ( ),
+
+	# Switch PHP mode to None
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'none' ] ],
+	},
+
+	# Validate PHP mode
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: none' ],
+	},
+
+	# Check PHP scripts don't run
+	{ 'command' => 'echo "<?php print 22222+22222; ?>" >~'.
+		       $test_domain_user.'/public_html/test.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'antigrep' => '44444',
+	  'grep' => '22222\+22222',
+	},
+
+	# Switch PHP mode to one that works
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'default-mode' ] ],
+	},
+
+	# Check that script runs now
+	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
+	  'grep' => '44444',
+	  'antigrep' => '22222\+22222',
+	},
 
 	# Disable a feature
 	{ 'command' => 'disable-feature.pl',
@@ -1406,7 +1443,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1440,7 +1477,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1822,7 +1859,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -4010,6 +4047,7 @@ $incremental_tests = [
 		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
 		      [ 'mysql' ], [ 'webmin' ], [ 'logrotate' ],
 		      [ 'content' => 'Test home page' ],
+		      [ 'mode', 'fcgid' ],
 		      @create_args, ],
         },
 
@@ -4019,7 +4057,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.2.13' ] ],
+		      [ 'version', '1.3.16' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -5063,7 +5101,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.2.13\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.16\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
@@ -5093,7 +5131,7 @@ $webmin_tests = [
 	# Un-install the script
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/unscript_install.cgi?dom=\$DOMAIN_ID\\&confirm=1\\&script=\$SCRIPT_ID",
-	  'grep' => [ '<body', '</body>', 'RoundCube directory deleted' ],
+	  'grep' => [ '<body', '</body>', 'RoundCube directory and tables deleted' ],
 	  'antigrep' => [ 'Error', 'failed' ],
 	},
 
@@ -5244,6 +5282,18 @@ $ssl_tests = [
                           '/domains/'.$test_ssl_subdomain.'/' ],
 	},
 
+	# Check for SSL expiry, and save it
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'SSL cert expiry:' ],
+	},
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ssl-expiry-only' ] ],
+	  'save' => 'SSL_EXPIRY',
+	},
+
 	# Test HTTPS get to subdomain
 	{ 'command' => $wget_command.'https://'.$test_ssl_subdomain,
 	  'grep' => 'Test SSL subdomain home page',
@@ -5348,6 +5398,13 @@ $ssl_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'cn: '.$test_domain, 'o: Virtualmin',
 		      'alt: test_subdomain' ],
+	},
+
+	# Test if expiry was updated
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'ssl-expiry-only' ] ],
+	  'antigrep' => '$SSL_EXPIRY',
 	},
 
 	# Test new SSL cert via HTTP
@@ -7973,7 +8030,7 @@ $clone_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'type', 'phpmyadmin' ],
 		      [ 'path', '/phpmyadmin' ],
-		      [ 'version', '3.5.8.2' ] ],
+		      [ 'version', '4.9.7' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -8884,6 +8941,325 @@ if (!$config{'rs_user'} || !$config{'rs_key'}) {
 	$rs_tests = [ { 'command' => 'echo No default Rackspace access or secret key defined on this system' } ];
 	}
 
+$dns_tests = [
+	# Create a domain with DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-domain that should share the DNS zone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'desc', 'Test subdomain' ],
+		      [ 'dir' ], [ 'dns' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'parent' => $test_domain ],
+		      @create_args, ],
+        },
+
+	# Validate DNS sub-domain was created
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Add a record to both domains
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing1 A 1.2.3.4' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'add-record', 'testing2 A 1.2.3.4' ] ],
+	},
+
+	# Validate that they were created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Split the sub-domain into it's own zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'disable-subdomain' ] ],
+	},
+
+	# Validate the split
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'antigrep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Move the sub-domain back into the parent zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'enable-subdomain' ] ],
+	},
+
+	# Validate the move
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Rename the parent domain so that the sub-domain no longer matches
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'new-domain', $test_rename_domain ] ],
+	},
+
+	# Check that the sub-domain is now separate
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'antigrep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'user', $test_domain_user ] ],
+	  'cleanup' => 1 },
+	];
+
+$googledns_tests = [
+	# Create a domain using Google DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      [ 'cloud-dns' => 'google' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'user' => $test_domain_user ],
+		      @create_args, ],
+        },
+
+	# Validate all features
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_cloud_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Add a DNS record
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'add-record', 'testing1 A 1.2.3.4' ] ],
+	},
+
+	# Validate that it was created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Disable and re-enable the DNS feature
+	{ 'command' => 'disable-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ] ],
+	},
+	{ 'command' => 'enable-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ] ],
+	},
+
+	# Validate that the record stil exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Move to local hosting
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'cloud-dns' => 'local' ] ],
+	},
+
+	# Validate that the record still exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Move back to the cloud
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'cloud-dns' => 'google' ] ],
+	},
+
+	# Validate that the record still exists
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Rename the domain
+	{ 'command' => 'rename-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'new-domain', $test_rename_domain ] ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_rename_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+
+	# Validate all features after the rename
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'user', $test_domain_user ] ],
+	  'cleanup' => 1 },
+	];
+
+$route53_tests = &convert_to_dnscloud($googledns_tests, "route53");
+
+$htpasswd_tests = [
+	# Create a domain with a website
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test web page' ],
+		      @create_args, ],
+	},
+
+	# Test wget without protection
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Setup protected directory
+	{ 'command' => 'virtualmin create-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Protection test' ],
+		      [ 'path', $test_domain_html ] ],
+	  'grep' => 'Added protection for '.$test_domain_html,
+	},
+
+	# Check the directory was created
+	{ 'command' => 'virtualmin list-protected-directories',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dir-only' ] ],
+	  'grep' => $test_domain_html,
+	},
+
+	# Test wget with protection, which should now fail
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Add a user
+	{ 'command' => 'virtualmin create-protected-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'user', 'testy' ],
+		      [ 'pass', 'smeg' ] ],
+	},
+
+	# Check the user was created
+	{ 'command' => 'virtualmin list-protected-users',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'name-only' ] ],
+	  'grep' => 'testy',
+	},
+
+	# Test wget as the new user
+	{ 'command' => $wget_command.' http://testy:smeg@'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Delete the user
+	{ 'command' => 'virtualmin delete-protected-user',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ],
+		      [ 'user', 'testy' ] ],
+	},
+
+	# Test wget as the user, which should fail now
+	{ 'command' => $wget_command.' http://testy:smeg@'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# Delete the directory protection
+	{ 'command' => 'virtualmin delete-protected-directory',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', $test_domain_html ] ],
+	},
+
+	# Test wget works again
+	{ 'command' => $wget_command.' http://'.$test_domain,
+	  'grep' => 'Test web page',
+	},
+
+	# Get rid of the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1
+        },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -8959,6 +9335,10 @@ $alltests = { '_config' => $_config_tests,
 	      'exclude' => $exclude_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
+	      'dns' => $dns_tests,
+	      'googledns' => $googledns_tests,
+	      'route53' => $route53_tests,
+	      'htpasswd' => $htpasswd_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
@@ -9276,6 +9656,28 @@ foreach my $t (@$tests) {
 		$nt->{'args'} = [ @{$nt->{'args'}},
 				  [ 'key' => $key->{'id'} ] ];
 		}
+	push(@$rv, $nt);
+	}
+return $rv;
+}
+
+# convert_to_dnscloud(&tests, cloud)
+sub convert_to_dnscloud
+{
+local ($tests, $cloud) = @_;
+local $rv = [ ];
+foreach my $t (@$tests) {
+        my $nt = { %$t };
+	my @a;
+	foreach my $a (@{$nt->{'args'}}) {
+		if ($a->[0] eq 'cloud-dns' && $a->[1] ne 'local') {
+			push(@a, [ $a->[0], $cloud ]);
+			}
+		else {
+			push(@a, $a);
+			}
+		}
+	$nt->{'args'} = \@a;
 	push(@$rv, $nt);
 	}
 return $rv;

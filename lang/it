@@ -806,7 +806,6 @@ backup_mode4=Download nel browser
 backup_mode5=Upload al server
 backup_path=File sul server
 backup_login=Login come utente
-backup_pass=con password
 backup_mailfiles2=Inclusi file mail
 backup_niceftp=$1 su server FTP $2
 backup_nicescp=$1 su server SSH $2

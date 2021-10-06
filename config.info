@@ -97,6 +97,7 @@ always_ssl=Generate SSL certificate for domains without SSL enabled?,1,1-Yes,0-N
 auto_redirect=Redirect HTTP to HTTPS by default?,1,1-Yes,0-No
 tlsa_records=Create TLSA DNS records for SSL certificates?,1,1-Yes,0-No
 nolink_certs=Share SSL certificates between domains where possible?,1,0-Yes,1-No
+combined_cert=Configure Apache to use,1,2-Combined cert and CA file,1-Cert file only,0-Decide automatically
 
 line6.5=Reseller settings (Pro Only),11
 reseller_theme=Theme for new resellers,15,theme,reseller_theme
@@ -180,7 +181,6 @@ php_session_age=Cleanup PHP session files after,3,Never cleanup,6,,days
 
 line6=Advanced options,11
 iface_base=Base number for virtual interfaces,3,Automatic
-dns_check=Check resolv.conf for this system?,1,1-Yes,0-No
 ldap_mail=Add mail attribute to LDAP users?,1,1-Yes using only <tt>mail</tt> attribute,2-Yes using <tt>mail</tt> and <tt>mailAlternateAddress</tt>,0-No
 nopostfix_extra_user=Create extra Unix user on Postfix systems when using user@domain format?,1,0-Yes,1-No
 maillog_hide=Allow searching of mail logs,1,0-Yes,1-For master admin only,2-No

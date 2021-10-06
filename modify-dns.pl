@@ -66,6 +66,10 @@ To add TLSA records (for publishing SSL certs) to selected domains, use the
 C<--enable-tlsa> flag. Similarly the C<--disable-tlsa> removes them, and the
 C<--sync-tlsa> updates them in domains where they already exist.
 
+If a virtual server is a sub-domain of another server, you can move it's DNS
+records out into a separate zone file with the C<--disable-subdomain> flag.
+Or if eligible, you can combine the zones with C<--enable-subdomain>.
+
 =cut
 
 package virtual_server;
@@ -206,8 +210,17 @@ while(@ARGV > 0) {
 	elsif ($a eq "--sync-tlsa") {
 		$tlsa = 2;
 		}
+	elsif ($a eq "--enable-subdomain") {
+		$submode = 1;
+		}
+	elsif ($a eq "--disable-subdomain") {
+		$submode = 0;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
+		}
+	elsif ($a eq "--cloud-dns") {
+		$clouddns = shift(@ARGV);
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -217,7 +230,8 @@ while(@ARGV > 0) {
 defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
-  defined($tlsa) || $syncallslaves || &usage("Nothing to do");
+  defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
+  &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -255,6 +269,20 @@ if (@delslaves) {
 	foreach $s (@delslaves) {
 		($ss) = grep { $_->{'host'} eq $s } @slaveservers;
 		$ss || &usage("No slave DNS server with hostname $s exists");
+		}
+	}
+
+# Validate the Cloud DNS provider
+if ($clouddns) {
+	if ($clouddns eq "services") {
+		$config{'provision_dns'} ||
+			&usage("Cloudmin Services for DNS is not enabled");
+		}
+	elsif ($clouddns ne "local") {
+		my @cnames = map { $_->{'name'} } &list_dns_clouds();
+		&indexof($clouddns, @cnames) >= 0 ||
+			&usage("Valid Cloud DNS providers are : ".
+			       join(" ", @cnames));
 		}
 	}
 
@@ -407,7 +435,7 @@ foreach $d (@doms) {
 		}
 
 	# Set or modify default TTL
-	if ($ttl) {
+	if ($ttl && &supports_dns_defttl($d)) {
 		&$first_print(&text('spf_ttl', $ttl));
 		if (!$recs) {
 			&pre_records_change($d);
@@ -427,6 +455,10 @@ foreach $d (@doms) {
 			}
 		$changed++;
 		&$second_print($text{'setup_done'});
+		}
+	elsif ($ttl && !&supports_dns_defttl($d)) {
+		&$first_print(&text('spf_ttl', $ttl));
+		&$second_print($text{'spf_ettlsupport'});
 		}
 
 	# Change the TTL on any records that have one
@@ -516,6 +548,36 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Move into a DNS sub-domain
+	if (defined($submode)) {
+		if ($submode == 1) {
+			# Turning on sub-domain mode
+			&$first_print($text{'spf_enablesub'});
+			if ($d->{'dns_submode'}) {
+				&$second_print($text{'spf_enablesubalready'});
+				}
+			elsif ($err = &save_dns_submode($d, 1)) {
+				&$second_print(&text('spf_eenablesub', $err));
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				}
+			}
+		else {
+			# Turning off sub-domain mode
+			&$first_print($text{'spf_disablesub'});
+			if (!$d->{'dns_submode'}) {
+				&$second_print($text{'spf_enablesubalready'});
+				}
+			elsif ($err = &save_dns_submode($d, 0)) {
+				&$second_print(&text('spf_eenablesub', $err));
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				}
+			}
+		}
+
 	if ($changed || $bumpsoa) {
 		&post_records_change($d, $recs, $file);
 		&reload_bind_records($d);
@@ -535,6 +597,27 @@ foreach $d (@doms) {
 		my %slavenames = map { $_->{'host'}, $_ } @slaveservers;
 		@ds = grep { $slavename{$_} } @ds;
 		$d->{'dns_slave'} = join(" ", @ds);
+		}
+
+	# Change DNS Cloud
+	if ($clouddns) {
+		if ($clouddns eq "local") {
+			&$first_print($text{'spf_dnslocal'});
+			}
+		else {
+			my ($c) = grep { $_->{'name'} eq $clouddns }
+				       &list_dns_clouds();
+			&$first_print(&text('spf_dnscloud', $c->{'name'}));
+			}
+		&$indent_print();
+		my $err = &modify_dns_cloud($d, $clouddns);
+		&$outdent_print();
+		if ($err) {
+			&$second_print(&text('spf_eclouddns', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	&$outdent_print();
@@ -576,6 +659,7 @@ print "                     [--remove-slave hostname]* | [--sync-all-slaves]\n";
 print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
+print "                     [--enable-subdomain | --disable-subdomain]\n";
 exit(1);
 }
 

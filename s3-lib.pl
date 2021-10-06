@@ -49,7 +49,7 @@ sub init_s3_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket, $tries, $location) = @_;
-if (&can_use_aws_cmd($akey, $skey)) {
+if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &init_s3_bucket_aws_cmd(@_);
 	}
 $tries ||= 1;
@@ -127,7 +127,7 @@ for(my $i=0; $i<$tries; $i++) {
 	last if ($got);
 
 	# If not, create it in the chosen region
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
                 [ @regionflag, "mb", "s3://$bucket" ]);
 	if ($?) {
 		$err = $out;
@@ -162,7 +162,7 @@ my ($akey, $skey, $bucket, $sourcefile, $destfile, $info, $dom, $tries,
 $tries ||= 1;
 my @st = stat($sourcefile);
 @st || return "File $sourcefile does not exist";
-if (&can_use_aws_cmd($akey, $skey)) {
+if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &s3_upload_aws_cmd(@_);
 	}
 &require_s3();
@@ -421,7 +421,7 @@ if($rrs) {
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
 		  "cp", $sourcefile, "s3://$bucket/$destfile", @rrsargs ]);
 	if ($? || $out =~ /upload\s+failed/) {
@@ -430,7 +430,7 @@ for(my $i=0; $i<$tries; $i++) {
 	if (!$err && $info) {
 		# Upload the .info file
 		my $temp = &uncat_transname(&serialise_variable($info));
-		my $out = &call_aws_cmd($akey,
+		my $out = &call_aws_s3_cmd($akey,
 		    [ @regionflag, 
 		      "cp", $temp, "s3://$bucket/$destfile.info", @rrsargs ]);
 		$err = $out if ($? || $out =~ /upload\s+failed/);
@@ -439,7 +439,7 @@ for(my $i=0; $i<$tries; $i++) {
 		# Upload the .dom file
 		my $temp = &uncat_transname(&serialise_variable(
 				&clean_domain_passwords($dom)));
-		my $out = &call_aws_cmd($akey,
+		my $out = &call_aws_s3_cmd($akey,
 		    [ @regionflag,
 		      "cp", $temp, "s3://$bucket/$destfile.dom", @rrsargs ]);
 		$err = $out if ($? || $out =~ /upload\s+failed/);
@@ -547,9 +547,9 @@ sub s3_list_buckets
 {
 &require_s3();
 my ($akey, $skey) = @_;
-if (&can_use_aws_cmd($akey, $skey)) {
+if (&can_use_aws_s3_cmd($akey, $skey)) {
 	# Use the aws command
-	my $out = &call_aws_cmd($akey, [ "ls" ]);
+	my $out = &call_aws_s3_cmd($akey, [ "ls" ]);
 	return $out if ($?);
 	my @rv;
 	foreach my $l (split(/\r?\n/, $out)) {
@@ -649,10 +649,10 @@ return $response->http_response->code == 200 ||
 sub s3_list_files
 {
 my ($akey, $skey, $bucket) = @_;
-if (&can_use_aws_cmd($akey, $skey)) {
+if (&can_use_aws_s3_cmd($akey, $skey)) {
 	# Use the aws command
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
 		  "ls", "--recursive", "s3://$bucket/" ]);
 	return $out if ($?);
@@ -683,10 +683,10 @@ else {
 sub s3_delete_file
 {
 my ($akey, $skey, $bucket, $file) = @_;
-if (&can_use_aws_cmd($akey, $skey, $bucket)) {
+if (&can_use_aws_s3_cmd($akey, $skey, $bucket)) {
 	# Use the aws command to delete a file
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
 		  "rm", "s3://$bucket/$file" ]);
 	return $? ? $out : undef;
@@ -727,10 +727,10 @@ sub s3_delete_bucket
 {
 my ($akey, $skey, $bucket, $norecursive) = @_;
 $bucket || return "Missing bucket parameter to s3_delete_bucket";
-if (&can_use_aws_cmd($akey, $skey, $bucket)) {
+if (&can_use_aws_s3_cmd($akey, $skey, $bucket)) {
 	# Use the aws command to delete the whole bucket
 	my @regionflag = &s3_region_flag($akey, $skey, $bucket);
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
 		  "rm", "s3://$bucket", "--recursive" ]);
 	return $? ? $out : undef;
@@ -768,7 +768,7 @@ sub s3_download
 {
 my ($akey, $skey, $bucket, $file, $destfile, $tries) = @_;
 $tries ||= 1;
-if (&can_use_aws_cmd($akey, $skey)) {
+if (&can_use_aws_s3_cmd($akey, $skey)) {
 	return &s3_download_aws_cmd(@_);
 	}
 &require_s3();
@@ -873,7 +873,7 @@ my $err;
 my @regionflag = &s3_region_flag($akey, $skey, $bucket);
 for(my $i=0; $i<$tries; $i++) {
 	$err = undef;
-	my $out = &call_aws_cmd($akey,
+	my $out = &call_aws_s3_cmd($akey,
 		[ @regionflag,
 		  "cp", "s3://$bucket/$file", $destfile ]);
 	if ($?) {
@@ -914,7 +914,9 @@ sub make_s3_connection
 my ($akey, $skey, $endpoint) = @_;
 $endpoint ||= $config{'s3_endpoint'};
 &require_s3();
-return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint);
+my $endport;
+($endpoint, $endport) = split(/:/, $endpoint);
+return S3::AWSAuthConnection->new($akey, $skey, undef, $endpoint, $endport);
 }
 
 # s3_part_upload(&s3-connection, bucket, endpoint, sourcefile, destfile,
@@ -1007,16 +1009,28 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 	"me-south-1", "sa-east-1");
 }
 
-# can_use_aws_cmd(access-key, secret-key, [default-zone])
+# can_use_aws_s3_cmd(access-key, secret-key, [default-zone])
+# Returns 1 if the aws command can be used to access S3
+sub can_use_aws_s3_cmd
+{
+my ($akey, $skey, $zone) = @_;
+return &can_use_aws_cmd($akey, $akey, $zone, \&call_aws_s3_cmd, "ls");
+}
+
+# can_use_aws_cmd(access-key, secret-key, [default-zone], &testfunc, cmd, ...)
 # Returns 1 if the aws command is installed and can be used for uploads and
 # downloads
 sub can_use_aws_cmd
 {
-my ($akey, $skey, $zone) = @_;
-return if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'}));
-return $can_use_aws_cmd_cache{$akey}
-	if (defined($can_use_aws_cmd_cache{$akey}));
-my $out = &call_aws_cmd($akey, "ls");
+my ($akey, $skey, $zone, $func, @cmd) = @_;
+if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'})) {
+	return wantarray ? (0, "The aws command is not installed") : 0;
+	}
+if (defined($can_use_aws_cmd_cache{$akey})) {
+	return wantarray ? @{$can_use_aws_cmd_cache{$akey}}
+			 : $can_use_aws_cmd_cache{$akey}->[0];
+	}
+my $out = &$func($akey, @cmd);
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
@@ -1033,25 +1047,34 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	my $ex = $?;
 	if (!$ex) {
 		# Test again to make sure it worked
-		&call_aws_cmd($akey, "ls");
+		$out = &$func($akey, @cmd);
 		$ex = $?;
 		}
 	if ($ex) {
 		# Profile setup failed!
-		$can_use_aws_cmd_cache{$akey} = 0;
-		return 0;
+		$can_use_aws_cmd_cache{$akey} = [0, $out];
+		return wantarray ? (0, $out) : 0;
 		}
 	}
-$can_use_aws_cmd_cache{$akey} = 1;
-return 1;
+$can_use_aws_cmd_cache{$akey} = [1, undef];
+return wantarray ? (1, undef) : 1;
 }
 
-# call_aws_cmd(akey, params)
+# call_aws_s3_cmd(akey, params, [endpoint])
+# Run the aws command for s3 with some params, and return output
+sub call_aws_s3_cmd
+{
+my ($akey, $params, $endpoint) = @_;
+$endpoint ||= $config{'s3_endpoint'};
+return &call_aws_cmd($akey, "s3", $params, $endpoint);
+}
+
+# call_aws_cmd(akey, command, params, endpoint)
 # Run the aws command for s3 with some params, and return output
 sub call_aws_cmd
 {
-my ($akey, $params, $endpoint, $endpoint_param) = @_;
-$endpoint ||= $config{'s3_endpoint'};
+my ($akey, $cmd, $params, $endpoint) = @_;
+my $endpoint_param;
 if ($endpoint) {
 	$endpoint_param = "--endpoint-url=".quotemeta("https://$endpoint");
 	}
@@ -1059,7 +1082,7 @@ if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
 return &backquote_command(
-	"TZ=GMT $config{'aws_cmd'} s3 --profile=".quotemeta($akey)." ".
+	"TZ=GMT $config{'aws_cmd'} $cmd --profile=".quotemeta($akey)." ".
 	$endpoint_param." ".$params." 2>&1");
 }
 

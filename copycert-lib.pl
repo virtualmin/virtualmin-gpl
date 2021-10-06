@@ -40,6 +40,9 @@ if ($config{'ftp'}) {
 		   'virt' => 0,
 		   'short' => 'f' });
 	}
+foreach my $rv (@rv) {
+	$rv->{'desc'} ||= $text{'cert_service_'.$rv->{'id'}};
+	}
 return @rv;
 }
 

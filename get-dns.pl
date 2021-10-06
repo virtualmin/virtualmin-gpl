@@ -68,6 +68,7 @@ if ($dsmode) {
 else {
 	@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
 	}
+@recs = grep { !&is_dnssec_record($_) } @recs;
 if ($nameonly) {
 	# Only record names
 	foreach $r (@recs) {

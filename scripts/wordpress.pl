@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "5.7.2" );
+return ( "5.8.1" );
 }
 
 sub script_wordpress_category
@@ -41,8 +41,9 @@ return ( "mysql", "gd", "json", "xml" );
 sub script_wordpress_php_optional_modules
 {
 return ( "curl", "ssh2", "date", "tokenizer",
-         "hash", "imagick", "iconv", "mbstring",
-         "openssl", "posix", "sockets" );
+         "hash", "imagick", "pecl-imagick", 
+         "iconv", "mbstring", "openssl",
+         "posix", "sockets" );
 }
 
 sub script_wordpress_dbs
@@ -53,25 +54,6 @@ return ( "mysql" );
 sub script_wordpress_release
 {
 return 5;	# Fix format of wp-config.php
-}
-
-# script_wordpress_depends(&domain, version)
-sub script_wordpress_depends
-{
-my ($d, $ver, $sinfo, $phpver) = @_;
-my @rv;
-
-# Check for PHP
-my $wantver = &script_wordpress_php_fullver($d, $ver, $sinfo);
-my $phpv = get_php_version($phpver || 5, $d);
-if (!$phpv) {
-	push(@rv, "Could not work out exact PHP version");
-	}
-elsif (&compare_versions($phpv, $wantver) < 0) {
-	push(@rv, "Wordpress requires PHP version $wantver or later");
-	}
-
-return @rv;
 }
 
 sub script_wordpress_php_fullver

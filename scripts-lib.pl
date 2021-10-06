@@ -789,7 +789,7 @@ if ($mode eq "fpm") {
 				$diff eq '+' && &php_value_diff($ov, $v) < 0 ||
 				$diff eq '-' && &php_value_diff($ov, $v) > 0;
 		if ($change) {
-			&save_php_fpm_ini_value($d, $n, $v);
+			&save_php_fpm_ini_value($d, $n, $v, 1);
 			}
 		}
 	}
@@ -922,11 +922,15 @@ my $minfunc = $script->{'php_fullver_func'};
 my $maxfunc = $script->{'php_maxver_func'};
 if (defined(&$minfunc)) {
 	my $minver = &$minfunc($d, $scriptver);
-	@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
+	if ($minver) {
+		@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
+		}
 	}
 if (defined(&$maxfunc)) {
 	my $maxver = &$maxfunc($d, $scriptver);
-	@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+	if ($maxver) {
+		@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+		}
 	}
 return undef if (!@vers);
 
@@ -942,7 +946,9 @@ foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 	}
 $bestdir || &error("Could not find PHP version for $dirpath");
 
-if (&indexof($bestdir->{'version'}, @vers) >= 0) {
+my $bestver = &get_php_version($bestdir->{'version'});
+if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
+    &indexof($bestver, @vers) >= 0) {
 	# The best match dir supports one of the PHP versions .. so we are OK!
 	return $bestdir->{'version'};
 	}
@@ -992,6 +998,7 @@ foreach my $m (@mods) {
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
+	&$indent_print();
 
 	# Find the php.ini file
 	&foreign_require("phpini");
@@ -1001,6 +1008,7 @@ foreach my $m (@mods) {
 			&get_domain_php_ini($d, $phpver);
 	if (!$inifile) {
 		# Could not find php.ini
+		&$outdent_print();
 		&$second_print($mode eq "mod_php" || $mode eq "fpm" ?
 			$text{'scripts_noini'} : $text{'scripts_noini2'});
 		if ($opt) { next; }
@@ -1008,14 +1016,16 @@ foreach my $m (@mods) {
 		}
 
 	# Configure the domain's php.ini to load it, if needed
-	&$indent_print();
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
 	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
+	local $backupinifile;
 	if (!$got) {
 		# Needs to be enabled
 		&$first_print($text{'scripts_addext'});
+		$backupinifile = &transname();
+		&copy_source_dest($inifile, $backupinifile);
 		local $lref = &read_file_lines($inifile);
 		if (@exts) {
 			# After current extensions
@@ -1116,35 +1126,19 @@ foreach my $m (@mods) {
 				}
 			}
 		}
-	@poss = sort { $a cmp $b } @poss;
+	@poss = sort { $a cmp $b } &unique(@poss);
+	my @newpkgs;
+	&$first_print($text{'scripts_phpmodinst'});
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
 		$nodotverpkg =~ s/\.//;
 		
-		# We either need to check for success 
-		# exactly or not check it at all (permissive)
-		my $success = 1;
 		if (!@pinfo) {
 			# Not installed .. try to fetch it
-			&$first_print(&text('scripts_softwaremod',
-					    "<tt>$pkg</tt>"));
-			if ($first_print eq \&null_print) {
-				# Suppress output
-				&capture_function_output(
-				    \&software::update_system_install, $pkg);
-				}
-			elsif ($first_print eq \&first_text_print) {
-				# Make output text
-				local $out = &capture_function_output(
-				    \&software::update_system_install, $pkg);
-				print &html_tags_to_text($out);
-				}
-			else {
-				# Show HTML output
-				my @rs = &software::update_system_install($pkg);
-				$iok = 1 if (scalar(@rs));
-				}
+			my ($out, $rs) = &capture_function_output(
+				\&software::update_system_install, $pkg);
+			$iok = 1 if (scalar(@$rs));
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
 				# Real package name is different
@@ -1153,31 +1147,34 @@ foreach my $m (@mods) {
 			local @pinfo2 = &software::package_info($newpkg);
 			if (@pinfo2 && $pinfo2[0] eq $newpkg) {
 				# Yep, it worked
-				&$second_print($text{'setup_done'});
-				
-				# Check for success
-				$iok = 1 if ($success);
-				push(@$installed, $m) if ($installed && $success);
+				$iok = 1;
+				push(@newpkgs, $m);
 				}
 			}
 		else {
 			# Already installed .. we're done
-			$iok = 1  if ($success);
+			$iok = 1;
 			}
 		}
-	if (!$iok) {
-		&$second_print($text{'scripts_esoftwaremod'});
-		&$outdent_print();
+	push(@$installed, @newpkgs) if ($installed);
+	if ($iok) {
+		&$second_print(&text('scripts_phpmoddone',
+			       "<tt>".join(" ", @newpkgs)."</tt>"));
+		}
+	else {
+		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
-	# Finally re-check to make sure it worked (but this is only possible
-	# in CGI mode)
+
+	# Finally re-check to make sure it worked
 	GOTMODULE:
-	&$outdent_print();
 	undef(%main::php_modules);
+	&$outdent_print();
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
@@ -2760,16 +2757,20 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	# Also check the PHP version
 	my $minfunc = $script->{'php_fullver_func'};
 	my $maxfunc = $script->{'php_maxver_func'};
-	if (defined(&$minfunc)) {
+	my $fullver = &get_php_version($phpver, $d);
+	if (!$fullver && $mode ne "none") {
+		push(@rv, $text{'scripts_iphpnover'});
+		}
+	if ($fullver && defined(&$minfunc)) {
 		my $minver = &$minfunc($d, $ver, $sinfo);
-		if (&compare_versions($phpver, $minver) < 0) {
-			return &text('scripts_iphpfullver', $minver, $phpver);
+		if (&compare_versions($fullver, $minver) < 0) {
+			return &text('scripts_iphpfullver', $minver, $fullver);
 			}
 		}
-	if (defined(&$maxfunc)) {
+	if ($fullver && defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
-		if (&compare_versions($phpver, $maxver) < 0) {
-			return &text('scripts_iphpmaxver', $maxver, $phpver);
+		if (&compare_versions($fullver, $maxver) > 0) {
+			return &text('scripts_iphpmaxver', $maxver, $fullver);
 			}
 		}
 	}
@@ -2798,18 +2799,16 @@ push(@rv, map { &text('scripts_icommand', "<tt>$_</tt>") }
 
 # Check for webserver CGI or PHP support
 local $p = &domain_has_website($d);
-if ($p && $p ne 'web') {
-	local $cancgi = &plugin_call($p, "feature_web_supports_cgi", $d);
-	local @canphp = &plugin_call($p, "feature_web_supported_php_modes", $d);
-	if (&indexof("php", @{$script->{'uses'}}) >= 0 && !@canphp) {
-		return $text{'scripts_inophp'};
-		}
-	if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !$cancgi) {
-		return $text{'scripts_inocgi'};
-		}
-	if (&indexof("apache", @{$script->{'uses'}}) >= 0) {
-		return $text{'scripts_inoapache'};
-		}
+local $cancgi = &has_cgi_support($d);
+if (&indexof("cgi", @{$script->{'uses'}}) >= 0 && !$cancgi) {
+	return $text{'scripts_inocgi'};
+	}
+if ($p ne "web" && &indexof("apache", @{$script->{'uses'}}) >= 0) {
+	return $text{'scripts_inoapache'};
+	}
+my @supp = grep { $_ ne "none" } &supported_php_modes($d);
+if (&indexof("php", @{$script->{'uses'}}) >= 0 && !@supp) {
+	return $text{'scripts_inophp'};
 	}
 
 return wantarray ? @rv : join(", ", @rv);
@@ -3193,7 +3192,7 @@ sub script_migrated_status
 {
 my ($status, $migrated, $can_upgrade) = @_;
 return script_migrated_disallowed($script->{'migrated'}) ?
-         &ui_link("http://www.virtualmin.com/shop",
+         &ui_link("https://virtualmin.com/shop/",
            $text{'scripts_gpl_to_pro'.($can_upgrade ? "_upgrade" : "").''}, 
              ($can_upgrade ? " text-warning" : ""), " target=_blank") :
            $status;

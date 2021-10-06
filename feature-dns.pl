@@ -49,20 +49,15 @@ local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 
 # Find the DNS domain that this could be placed under
 local $dnsparent;
+local $dns_submode = defined($d->{'dns_submode'}) ? $d->{'dns_submode'} :
+			$tmpl->{'dns_sub'} eq 'yes' ? 1 : 0;
 if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
 	$dnsparent = &get_domain($d->{'subdom'});
 	}
-elsif ($tmpl->{'dns_sub'} eq 'yes' && $d->{'parent'}) {
+elsif ($dns_submode && $d->{'parent'}) {
 	# Find most suitable domain with the same owner that has it's own file
-	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
-			     (&get_domain_by("parent", $d->{'parent'}),
-			      &get_domain($d->{'parent'}))) {
-		if (!$pd->{'dns_submode'} && &under_parent_domain($d, $pd)) {
-			$dnsparent = $pd;
-			last;
-			}
-		}
+	$dnsparent = &find_parent_dns_domain($d);
 	}
 
 # Create domain info object
@@ -107,6 +102,12 @@ elsif ($d->{'dns_cloud'}) {
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+	my $vfunc = "dnscloud_".$ctype."_valid_domain";
+	my $err = &$vfunc($d, $info);
+	if ($err) {
+		&$second_print(&text('setup_ebind_cloud', $err));
+		return 0;
+		}
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
 	$info->{'recs'} = \@inforecs;
 	my ($ok, $msg, $location) = &$cfunc($d, $info);
@@ -455,7 +456,7 @@ else {
 	&post_records_change($dnsparent, \@recs);
 	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
-	$d->{'dns_submode'} = 0;
+	delete($d->{'dns_submode'});
 	}
 &register_post_action(\&restart_bind, $d);
 return 1;
@@ -468,7 +469,7 @@ sub clone_dns
 local ($d, $oldd) = @_;
 &$first_print($text{'clone_dns'});
 if ($d->{'dns_submode'}) {
-	# Record cloning not supported for DNS sub-domains
+	# Record cloning not needed for DNS sub-domains
 	&$second_print($text{'clone_dnssub'});
 	return 1;
 	}
@@ -679,9 +680,7 @@ local ($d, $oldd) = @_;
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
 	# Converting from a sub-domain to top-level .. just delete and re-create
-	&delete_dns($oldd);
-	delete($d->{'dns_submode'});
-	&setup_dns($d);
+	&save_dns_submode($d, 0);
 	return 1;
 	}
 if ($d->{'alias'} && $oldd->{'alias'} &&
@@ -752,13 +751,22 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 		     'olddomain' => $oldd->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
-	my $rfunc = "dnscloud_".$ctype."_rename_domain";
-	my ($ok, $msg) = &$rfunc($d, $info);
-	if (!$ok) {
-		&$second_print(&text('save_bind_ecloud', $err));
+	my $vfunc = "dnscloud_".$ctype."_valid_domain";
+	my $err = &$vfunc($d, $info);
+	if ($err) {
+		&$second_print(&text('setup_ebind_cloud', $err));
 		}
-	$d->{'dns_cloud_id'} = $msg;
-	&$second_print($text{'setup_done'});
+	else {
+		my $rfunc = "dnscloud_".$ctype."_rename_domain";
+		my ($ok, $msg) = &$rfunc($d, $info);
+		if (!$ok) {
+			&$second_print(&text('save_bind_ecloud', $err));
+			}
+		else {
+			$d->{'dns_cloud_id'} = $msg;
+			&$second_print($text{'setup_done'});
+			}
+		}
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
@@ -1675,6 +1683,13 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	return &text('validate_ednstype', "<tt>$d->{'dom'}</tt>",
 	     "<tt>$type</tt>", "<tt>master</tt>") if ($type ne "master");
 	}
+if ($d->{'dns_cloud'}) {
+	# Make sure the cloud provider knows about it
+	my $cfunc = "dnscloud_".$d->{'dns_cloud'}."_check_domain";
+	my $info = { 'domain' => $d->{'dom'} };
+	my $ok = &$cfunc($d, $info);
+	eturn &text('validate_ecloud', $d->{'dns_cloud'}) if (!$ok);
+	}
 
 # Check for critical records, and that www.$dom and $dom resolve to the
 # expected IP address (if we have a website)
@@ -1689,7 +1704,8 @@ local $ip6 = $d->{'dns_ip6'} || $d->{'ip6'};
 foreach my $r (@$recs) {
 	$got{uc($r->{'type'})}++;
 	}
-$d->{'dns_submode'} || $got{'SOA'} || return $text{'validate_ednssoa2'};
+$d->{'dns_submode'} || $d->{'dns_cloud'} || $got{'SOA'} ||
+	return $text{'validate_ednssoa2'};
 $got{'A'} || return $text{'validate_ednsa2'};
 if ($d->{'virt6'}) {
 	$got{'AAAA'} || return $text{'validate_ednsa6'};
@@ -1728,12 +1744,12 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 			$mxh .= ".".$d->{'dom'} if ($mxh !~ /\.$/);
 			$mxh =~ s/\.$//;
 			local $ip = &to_ipaddress($mxh);
-			if ($ip eq $d->{'ip'} ||
-			    $ip eq $d->{'dns_ip'} ||
-			    $ip eq $d->{'ip6'} ||
-			    $ip eq $d->{'dns_ip6'} ||
-			    $ip eq $defip ||
-			    $inuse{$ip}) {
+			if ($ip && ($ip eq $d->{'ip'} ||
+				    $ip eq $d->{'dns_ip'} ||
+				    $ip eq $d->{'ip6'} ||
+				    $ip eq $d->{'dns_ip6'} ||
+				    $ip eq $defip ||
+				    $inuse{$ip})) {
 				$found = $ip;
 				last;
 				}
@@ -1741,11 +1757,11 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 					       $_->{'type'} eq 'A' } @$recs;
 			if ($arec) {
 				$ip = $arec->{'values'}->[0];
-				if ($ip eq $d->{'ip'} ||
-				    $ip eq $d->{'dns_ip'} ||
-				    $ip eq $d->{'ip6'} ||
-				    $ip eq $d->{'dns_ip6'} ||
-				    $ip eq $defip) {
+				if ($ip && ($ip eq $d->{'ip'} ||
+					    $ip eq $d->{'dns_ip'} ||
+					    $ip eq $d->{'ip6'} ||
+					    $ip eq $d->{'dns_ip6'} ||
+					    $ip eq $defip)) {
 					$found = $ip;
 					last;
 					}
@@ -1760,7 +1776,7 @@ if ($d->{'mail'} && $config{'mx_validate'} && !$prov) {
 
 # Make sure the domain has NS records, and that they are resolvable
 if (!$d->{'dns_submode'}) {
-	$got{'NS'} || return $text{'validate_ednsns2'};
+	$got{'NS'} || $d->{'dns_cloud'} || return $text{'validate_ednsns2'};
 	foreach my $ns (map { $_->{'values'}->[0] }
 			    grep { $_->{'type'} eq 'NS' } @$recs) {
 		local ($arec) = grep { $_->{'name'} eq $ns &&
@@ -1773,7 +1789,7 @@ if (!$d->{'dns_submode'}) {
 
 # If possible, run named-checkzone
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
-    !$d->{'provision_dns'} && !$d->{'cloud_dns'} && !$d->{'dns_submode'} &&
+    !$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'} &&
     !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'});
 	if ($z) {
@@ -1835,6 +1851,10 @@ elsif ($d->{'dns_cloud'}) {
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
 	my $dfunc = "dnscloud_".$ctype."_disable_domain";
+	if (!defined(&$dfunc)) {
+		&$second_print($text{'disable_ebind_cloud2'});
+		return 0;
+		}
 	my ($ok, $msg) = &$dfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('disable_ebind_cloud', $msg));
@@ -1928,6 +1948,10 @@ elsif ($d->{'dns_cloud'}) {
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
 	my $dfunc = "dnscloud_".$ctype."_enable_domain";
+	if (!defined(&$dfunc)) {
+		&$second_print($text{'disable_ebind_cloud2'});
+		return 0;
+		}
 	my ($ok, $msg) = &$dfunc($d, $info);
 	if (!$ok) {
 		&$second_print(&text('enable_ebind_cloud', $msg));
@@ -4281,6 +4305,256 @@ eval {
 	};
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);
+}
+
+# save_dns_submode(&domain, enabled?)
+# Move this domain into or out of it's parent DNS domain
+sub save_dns_submode
+{
+my ($d, $enabled) = @_;
+if ($d->{'dns_submode'} && $enabled ||
+    !$d->{'dns_submode'} && !$enabled) {
+	# Nothing to do
+	return undef;
+	}
+
+# Get the current records
+&require_bind();
+&obtain_lock_dns($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+my @srecs;
+my $withdot = $d->{'dom'}.".";
+foreach my $r (@$recs) {
+	if (($r->{'name'} eq $withdot ||
+	     $r->{'name'} =~ /\.$withdot$/) &&
+	    $r->{'type'} !~ /SOA|NS|NSEC/i) {
+		push(@srecs, $r);
+		}
+	}
+
+if ($d->{'dns_submode'} && !$enabled) {
+	# Delete the old records, then setup in a new zone file
+	&delete_dns($d);
+	$d->{'dns_submode'} = 0;
+	delete($d->{'dns_subof'});
+	&setup_dns($d);
+	}
+elsif (!$d->{'dns_submode'} && $enabled) {
+	# Move into the parent DNS zone file, if allowed
+	my $dnsparent = &find_parent_dns_domain($d);
+	if (!$dnsparent) {
+		&release_lock_dns($d);
+		return "No suitable parent DNS domain found";
+		}
+	&delete_dns($d);
+	$d->{'dns_submode'} = 1;
+	&setup_dns($d);
+	}
+
+# Add all the records that were in the old zone
+&pre_records_change($d);
+($recs, $file) = &get_domain_dns_records_and_file($d);
+foreach my $r (@srecs) {
+	my ($a) = grep { $_->{'name'} eq $r->{'name'} &&
+			 $_->{'type'} eq $r->{'type'} } @$recs;
+	if (!$a) {
+		# Add record that was in the sub-domain
+		my $str = &join_record_values($r);
+		&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+				      'IN', $r->{'type'}, $str);
+		}
+	}
+&post_records_change($d, $recs);
+&release_lock_dns($d);
+&register_post_action(\&restart_bind, $d);
+&save_domain($d);
+return undef;
+}
+
+# find_parent_dns_domain(&domain)
+# Find a domain with the same owner that's a candidate as a parent DNS zone
+sub find_parent_dns_domain
+{
+my ($d) = @_;
+foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
+		     (&get_domain_by("parent", $d->{'parent'}),
+		      &get_domain($d->{'parent'}))) {
+	if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
+	    &under_parent_domain($d, $pd)) {
+		return $pd;
+		}
+	}
+return undef;
+}
+
+# dns_ttl_to_seconds(string)
+# Convert a string like 1m to a number of seconds
+sub dns_ttl_to_seconds
+{
+my ($ttl) = @_;
+$ttl = $1 if ($ttl =~ /^(\d+)s$/);
+$ttl = $1*60 if ($ttl =~ /^(\d+)m$/);
+$ttl = $1*60*60 if ($ttl =~ /^(\d+)h$/);
+$ttl = $1*24*60*60 if ($ttl =~ /^(\d+)d$/);
+return int($ttl);
+}
+
+# dns_record_key(&rec, [value-too])
+# Returns a single string that represents a record for use in de-duping
+sub dns_record_key
+{
+my ($r, $val) = @_;
+my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
+my @r = ($r->{'name'}, $r->{'type'}, $ttl);
+push(@r, @{$r->{'values'}}) if ($val);
+return join("/", @r);
+}
+
+# modify_dns_cloud(&domain, cloud-name)
+# Update the Cloud DNS provider for a domain, while preserving records
+sub modify_dns_cloud
+{
+my ($d, $cloud) = @_;
+return undef if ($d->{'dns_cloud'} eq $cloud);
+
+# Is the cloud provider working?
+if ($cloud ne "local") {
+	my $cfunc = "dnscloud_".$cloud."_check";
+	my $err = &$cfunc();
+	return $err if ($err);
+	my $sfunc = "dnscloud_".$cloud."_get_state";
+	my $s = &$sfunc();
+	return $s->{'desc'} if (!$s->{'ok'});
+	}
+
+# Get current records, then re-create the DNS config
+&push_all_print();
+&set_all_null_print();
+my @oldrecs = &get_domain_dns_records($d);
+&delete_dns($d);
+if ($cloud eq "local") {
+	delete($d->{'dns_cloud'});
+	}
+else {
+	$d->{'dns_cloud'} = $cloud;
+	}
+&save_domain($d);
+&setup_dns($d);
+&pop_all_print();
+
+# Delete all records that were created by default, and re-create original
+# records from before the conversion
+&obtain_lock_dns($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+foreach my $r (reverse(@$recs)) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
+	&bind8::delete_record($file, $r);
+	}
+foreach my $r (@oldrecs) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
+	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
+			      $r->{'class'}, $r->{'type'},
+			      &join_record_values($r));
+	}
+my $err = &post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+return $err if ($err);
+&reload_bind_records($d);
+return undef;
+}
+
+# list_public_dns_suffixes()
+# Returns a full list of known DNS public suffixes
+sub list_public_dns_suffixes
+{
+if (@list_public_dns_suffixes_cache) {
+	# Already in RAM
+	return @list_public_dns_suffixes_cache;
+	}
+my @st = stat($public_dns_suffix_cache);
+if (!@st || time() - $st[9] > 7*24*60*60) {
+	# Attempt to download the suffix file for the first time, or if older
+	# than a week
+	my ($host, $port, $page,$ssl) = &parse_http_url($public_dns_suffix_url);
+	&http_download($host, $port, $page, $public_dns_suffix_cache, \$err,
+		       undef, $ssl, undef, undef, 5);
+	}
+my $f = $public_dns_suffix_cache;
+$f = $public_dns_suffix_file if (!-r $f);
+my $lref = &read_file_lines($f, 1);
+foreach my $l (@$lref) {
+	$l =~ s/\/\/.*$//;
+	if ($l =~ /\S/) {
+		push(@list_public_dns_suffixes_cache, $l);
+		}
+	}
+return @list_public_dns_suffixes_cache;
+}
+
+# under_public_dns_suffix(domain)
+# If a DNS domain is under a public suffix, return the prefix and suffix.
+# Otherwise, return undef.
+sub under_public_dns_suffix
+{
+my ($dname) = @_;
+foreach my $sfx (&list_public_dns_suffixes()) {
+	if ($sfx =~ /^\*\.(\S+)$/) {
+		# Any sub-domain is a valid suffix
+		my $ssfx = $1;
+		if ($dname =~ /^(\S+)\.([^\.]+)\.\Q$ssfx\E$/) {
+			return ($1, $2.".".$sfx);
+			}
+		}
+	else {
+		# Regular suffix
+		if ($dname =~ /^(\S+)\.\Q$sfx\E$/) {
+			return ($1, $sfx);
+			}
+		}
+	}
+return ();
+}
+
+# lookup_dns_records(name, [type])
+# Returns all DNS records matching some name and type, using the dig command.
+# Or an error string if the lookup failed.
+sub lookup_dns_records
+{
+my ($name, $type) = @_;
+&has_command("dig") || return "Missing the dig command";
+my $cmd = "dig".($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
+my $temp = &transname();
+&execute_command($cmd, undef, $temp, \$err);
+return $err if ($?);
+&require_bind();
+local $bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;
+my @recs = &bind8::read_zone_file($temp, $name);
+return \@recs;
+}
+
+# supports_dns_comments(&domain)
+# Returns 1 if the DNS provider for a domain supports comments
+sub supports_dns_comments
+{
+my ($d) = @_;
+return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
+my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
+return $c && $c->{'comments'};
+}
+
+# supports_dns_defttl(&domain)
+# Returns 1 if the DNS provider for a domain supports setting the default TTL
+sub supports_dns_defttl
+{
+my ($d) = @_;
+return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
+my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
+return $c && $c->{'defttl'};
 }
 
 $done_feature_script{'dns'} = 1;

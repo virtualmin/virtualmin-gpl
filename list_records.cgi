@@ -22,8 +22,10 @@ if ($err) {
 $recs = &filter_domain_dns_records($d, $recs);
 
 # Check if we need a comment column
-foreach $r (@$recs) {
-	$anycomment++ if ($r->{'comment'});
+if (&supports_dns_comments($d)) {
+	foreach $r (@$recs) {
+		$anycomment++ if ($r->{'comment'});
+		}
 	}
 
 print &ui_form_start("delete_records.cgi");
@@ -88,7 +90,7 @@ print &ui_columns_end();
 print &ui_links_row(\@links);
 @types = map { [ $_->{'type'}, $_->{'type'}." - ".$_->{'desc'} ] }
 	     grep { $_->{'create'} } &list_dns_record_types($d);
-if (!$gotttl) {
+if (!$gotttl && &supports_dns_defttl($d)) {
 	push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
 	}
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],

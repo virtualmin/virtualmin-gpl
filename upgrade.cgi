@@ -14,7 +14,7 @@ $in{'key'} =~ /^\S+$/ || &error($text{'upgrade_ekey'});
 $in{'key'} eq 'AMAZON' && &error($text{'upgrade_eamazon'});
 $in{'key'} eq 'DEMO' && &error($text{'upgrade_eamazon'});
 &http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
-	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 0,
+	       $upgrade_virtualmin_testpage, \$out, \$error, undef, 1,
 	       $in{'serial'}, $in{'key'}, undef, 0, 1);
 if ($error =~ /401/) {
 	&error($text{'upgrade_elogin'});
@@ -128,27 +128,22 @@ if ($itype eq "rpm") {
 	}
 elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
-	my $apt_auth_dir = '/etc/apt/auth.conf.d';
-	my $apt_auth_can = -d $apt_auth_dir;
-	my $apt_auth_prot = $apt_auth_can ? 'https' : undef;
-	my $apt_old_auth = !$apt_auth_can ? "$in{'serial'}:$in{'key'}\@" : "";
+	my $apt_old_auth = !-d $virtualmin_apt_auth_dir ? "$in{'serial'}:$in{'key'}\@" : "";
 	$lref = &read_file_lines($virtualmin_apt_repo);
 	foreach $l (@$lref) {
 		if ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
-			my $protocol = $apt_auth_prot || $1;
-			$l = "deb $protocol://$apt_old_auth$upgrade_virtualmin_host/$2";
+			$l = "deb https://$apt_old_auth$upgrade_virtualmin_host/$2";
 			}
 		elsif ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/vm\/(\d)\/gpl\/(.*)/) {
-			my $protocol = $apt_auth_prot || $1;
-			$l = "deb $protocol://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
+			$l = "deb https://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
 			}
 		}
 	&flush_file_lines($virtualmin_apt_repo);
 
 	# Add auth credentials for Pro repos in a separate dedicated file
-	if ($apt_auth_can) {
+	if (-d $virtualmin_apt_auth_dir) {
 		&write_file_contents(
-		    "$apt_auth_dir/virtualmin.conf",
+		    "$virtualmin_apt_auth_dir/virtualmin.conf",
 		    "machine $upgrade_virtualmin_host login $in{'serial'} password $in{'key'}\n");
 		}
 
@@ -206,7 +201,7 @@ else {
 	&$first_print($text{'upgrade_mods'});
 	&$indent_print();
 	&http_download($upgrade_virtualmin_host, $upgrade_virtualmin_port,
-		       $upgrade_virtualmin_updates, \$uout, undef, undef, 0,
+		       $upgrade_virtualmin_updates, \$uout, undef, undef, 1,
 		       $in{'serial'}, $in{'key'}, undef, 0, 1);
 	foreach $line (split(/\r?\n/, $uout)) {
 		($mod, $ver, $path, $os_support, $desc) = split(/\t/, $line);
@@ -248,7 +243,7 @@ else {
 		($mhost, $mport, $mpage, $mssl) =
 			&parse_http_url($path, $upgrade_virtualmin_host,
 					$upgrade_virtualmin_port,
-					$upgrade_virtualmin_updates, 0);
+					$upgrade_virtualmin_updates, 1);
 		($mfile = $mpage) =~ s/^(.*)\///;
 		$mtemp = &transname($mfile);
 		$merror = undef;
@@ -296,7 +291,7 @@ else {
 	&$first_print($text{'upgrade_sched'});
 	@upsource = split(/\t/, $webmin::config{'upsource'});
 	@upsource = &unique(@upsource,
-		"http://$upgrade_virtualmin_host:$upgrade_virtualmin_port$upgrade_virtualmin_updates",
+		"https://$upgrade_virtualmin_host:$upgrade_virtualmin_port$upgrade_virtualmin_updates",
 		"http://$webmin::update_host:$webmin::update_port$webmin::update_page");
 	&lock_file($webmin::module_config_file);
 	$webmin::config{'upsource'} = join("\t", @upsource);

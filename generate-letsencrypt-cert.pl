@@ -91,8 +91,6 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-&domain_has_website($d) ||
-	&usage("Virtual server $dname does not have a website enabled");
 if (!@dnames) {
 	# No hostnames specified
 	if ($defdnames || !$d->{'letsencrypt_dname'}) {
@@ -180,6 +178,7 @@ else {
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = $renew;
+	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
 	# Update other services using the cert

@@ -117,7 +117,9 @@ $d->{'letsencrypt_renew'} = 1;		# Default let's encrypt renewal
 
 # Create a self-signed cert and key, if needed
 my $generated = &generate_default_certificate($d);
+&refresh_ssl_cert_expiry($d);
 local $chained = $d->{'ssl_chain'};
+&sync_combined_ssl_cert($d);
 
 # Add NameVirtualHost if needed, and if there is more than one SSL site on
 # this IP address
@@ -219,7 +221,7 @@ else {
 # the first time
 if (!$d->{'creating'} && $generated && $d->{'auto_letsencrypt'} &&
     !$d->{'disabled'}) {
-	&create_initial_letsencrypt_cert($d);
+	&create_initial_letsencrypt_cert($d, 1);
 	}
 
 return 1;
@@ -809,6 +811,9 @@ if ($virt) {
 		&copy_write_as_domain_user($d, $key, $file."_key");
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf,1);
+	if (!$ca) {
+		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf,1);
+		}
 	if ($ca) {
 		&copy_write_as_domain_user($d, $ca, $file."_ca");
 		}
@@ -887,6 +892,9 @@ if ($virt) {
 		&unlock_file($key);
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
+	if (!$ca) {
+		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
+		}
 	if ($ca && -r $file."_ca") {
 		&lock_file($ca);
 		&set_ownership_permissions(
@@ -1415,6 +1423,22 @@ if (@ipkeys != @newipkeys) {
 return $text{'delete_esslnoips'};
 }
 
+# apache_combined_cert()
+# Returns 1 if Apache should be pointed to the combined SSL cert file
+sub apache_combined_cert
+{
+&require_apache();
+if ($config{'combined_cert'} == 2) {
+	return 1;
+	}
+elsif ($config{'combined_cert'} == 1) {
+	return 0;
+	}
+else {
+	return &compare_versions($apache::httpd_modules{'core'}, "2.4.8") >= 0;
+	}
+}
+
 # apache_ssl_directives(&domain, template)
 # Returns extra Apache directives needed for SSL
 sub apache_ssl_directives
@@ -1423,7 +1447,12 @@ local ($d, $tmpl) = @_;
 &require_apache();
 local @dirs;
 push(@dirs, "SSLEngine on");
-push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+if (&apache_combined_cert()) {
+	push(@dirs, "SSLCertificateFile $d->{'ssl_combined'}");
+	}
+else {
+	push(@dirs, "SSLCertificateFile $d->{'ssl_cert'}");
+	}
 push(@dirs, "SSLCertificateKeyFile $d->{'ssl_key'}");
 if ($d->{'ssl_chain'}) {
 	push(@dirs, "SSLCACertificateFile $d->{'ssl_chain'}");
@@ -1718,7 +1747,7 @@ sub find_matching_certificate_domain
 {
 local ($d) = @_;
 local @sslclashes = grep { $_->{'ip'} eq $d->{'ip'} &&
-			   $_->{'ssl'} &&
+			   &domain_has_ssl($_) &&
 			   $_->{'id'} ne $d->{'id'} &&
 			   !$_->{'ssl_same'} } &list_domains();
 local @rv;
@@ -1807,6 +1836,7 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	&unlock_file($d->{'ssl_cert'});
 	&unlock_file($d->{'ssl_key'});
 	delete($d->{'ssl_chain'});	# No longer valid
+	&sync_combined_ssl_cert($d);
 	return 1;
 	}
 return 0;
@@ -1846,8 +1876,14 @@ if ($d->{'web'}) {
 	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
 		$d->{'dom'}, $d->{'web_sslport'});
 	if ($ovirt) {
-		&apache::save_directive("SSLCertificateFile",
-			[ $d->{'ssl_cert'} ], $ovconf, $conf);
+		if (&apache_combined_cert()) {
+			&apache::save_directive("SSLCertificateFile",
+				[ $d->{'ssl_combined'} ], $ovconf, $conf);
+			}
+		else {
+			&apache::save_directive("SSLCertificateFile",
+				[ $d->{'ssl_cert'} ], $ovconf, $conf);
+			}
 		&apache::save_directive("SSLCertificateKeyFile",
 			$d->{'ssl_key'} ? [ $d->{'ssl_key'} ] : [ ],
 			$ovconf, $conf);
@@ -2823,6 +2859,7 @@ if ($d->{'ssl_same'}) {
 
 # Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
+my $newfile = !-e $combfile;
 &lock_file($combfile);
 &create_ssl_certificate_directories($d);
 &open_tempfile_as_domain_user($d, COMB, ">$combfile");
@@ -2832,11 +2869,14 @@ if (-r $d->{'ssl_chain'}) {
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($combfile);
-&set_certificate_permissions($d, $combfile);
+if ($newfile) {
+	&set_certificate_permissions($d, $combfile);
+	}
 $d->{'ssl_combined'} = $combfile;
 
 # Create file of all the certs, and the key
 my $everyfile = &default_certificate_file($d, 'everything');
+my $newfile = !-e $everyfile;
 &lock_file($everyfile);
 &open_tempfile_as_domain_user($d, COMB, ">$everyfile");
 &print_tempfile(COMB, &read_file_contents($d->{'ssl_key'})."\n");
@@ -2846,7 +2886,9 @@ if (-r $d->{'ssl_chain'}) {
 	}
 &close_tempfile_as_domain_user($d, COMB);
 &unlock_file($everyfile);
-&set_certificate_permissions($d, $everyfile);
+if ($newfile) {
+	&set_certificate_permissions($d, $everyfile);
+	}
 $d->{'ssl_everything'} = $everyfile;
 }
 
@@ -2943,14 +2985,16 @@ my @errs;
 if (&domain_has_website($d) && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging);
+		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
+		&get_global_from_address());
 	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
     (!$mode || $mode eq "dns")) {
 	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging);
+		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
+		&get_global_from_address());
 	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {
@@ -3070,6 +3114,20 @@ my ($d) = @_;
 foreach my $dir (&ssl_certificate_directories($d)) {
 	my $path = "$d->{'home'}/$dir";
 	&create_standard_directory_for_domain($d, $path, '700');
+	}
+}
+
+# refresh_ssl_cert_expiry(&domain)
+# Update the ssl_cert_expiry field from the actual cert
+sub refresh_ssl_cert_expiry
+{
+my ($d) = @_;
+my $cert_info = &cert_info($d);
+if ($cert_info) {
+	my $expiry = &parse_notafter_date($cert_info->{'notafter'});
+	if ($expiry) {
+		$d->{'ssl_cert_expiry'} = $expiry;
+		}
 	}
 }
 

@@ -117,7 +117,7 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 # Work out source php.ini files
 local (%srcini, %subs_ini);
 local @vers = &list_available_php_versions($d, $mode);
-@vers || return "No PHP versions found for mode $mode";
+$mode eq "none" || @vers || return "No PHP versions found for mode $mode";
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;
 	local $srcini = $tmpl->{'web_php_ini_'.$ver->[0]};
@@ -843,6 +843,21 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 	}
 }
 
+# set_php_fpm_ulimits(&domain, &resource-limits)
+# Update the FPM config with resource limits
+sub set_php_fpm_ulimits
+{
+my ($d, $res) = @_;
+my $conf = &get_php_fpm_config($d);
+return 0 if (!$conf);
+if ($res->{'procs'}) {
+	&save_php_fpm_config_value($d, "process.max", $res->{'procs'});
+	}
+else {
+	&save_php_fpm_config_value($d, "process.max", undef);
+	}
+}
+
 # supported_php_modes([&domain])
 # Returns a list of PHP execution modes possible for a domain
 sub supported_php_modes
@@ -899,7 +914,8 @@ sub php_mode_numbers_map
 return { 'mod_php' => 0,
 	 'cgi' => 1,
 	 'fcgid' => 2,
-	 'fpm' => 3 };
+	 'fpm' => 3,
+	 'none' => 4, };
 }
 
 # list_available_php_versions([&domain], [forcemode])
@@ -1059,8 +1075,17 @@ if (exists($get_php_version_cache{$cmd})) {
 	return $get_php_version_cache{$cmd};
 	}
 if ($cmd !~ /^\//) {
-	local ($phpn) = grep { $_->[0] == $cmd }
+	# A number was given .. find the matching command
+	my $shortcmd = $cmd;
+	$shortcmd =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
+	local ($phpn) = grep { $_->[0] == $cmd ||
+			       $_->[0] == $shortcmd }
 			     &list_available_php_versions($d);
+	if (!$phpn && $cmd =~ /^5\./) {
+		# Also try just version '5'
+		($phpn) = grep { $_->[0] == 5 }
+			       &list_available_php_versions($d);
+		}
 	if (!$phpn && $cmd == 5) {
 		# If the system ONLY has PHP 7, consider it compatible with
 		# PHP major version 5
@@ -1116,7 +1141,6 @@ if ($mode eq "mod_php") {
 	}
 elsif ($mode eq "fpm") {
 	# Version is stored in the domain's config
-	# XXX get from the actual port
 	return ( { 'dir' => &public_html_dir($d),
 		   'version' => $d->{'php_fpm_version'},
 		   'mode' => $mode } );
@@ -1981,7 +2005,13 @@ foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 					       $f->{'members'})) {
 		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
 		    $h =~ /proxy:unix:([^\|]+)/) {
-			$webport = $1;
+			my $webport2 = $1;
+			if ($webport && $webport != $webport2) {
+				return (0, "Port $webport in ProxyPassMatch ".
+					   "is different from port $webport2 ".
+					   "in FilesMatch");
+				}
+			$webport ||= $webport2;
 			}
 		}
 	}
@@ -2053,12 +2083,12 @@ foreach my $p (@ports) {
 	}
 &release_lock_web($d);
 $found || return "No Apache VirtualHost containing an FPM SetHandler found";
-&register_post_action(\&restart_apache);
 
 # Second update the FPM server port
 my $conf = &get_php_fpm_config($d);
 &save_php_fpm_config_value($d, "listen", $socket);
 &register_post_action(\&restart_php_fpm_server, $conf);
+&register_post_action(\&restart_apache);
 
 return undef;
 }
@@ -2121,8 +2151,8 @@ else {
 		   "pm.start_servers = 1",
 		   "pm.min_spare_servers = 1",
 		   "pm.max_spare_servers = 5",
-	   	   "php_admin_value[upload_tmp_dir] = $tmp",
-		   "php_admin_value[session.save_path] = $tmp" );
+	   	   "php_value[upload_tmp_dir] = $tmp",
+		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
 
 	# Add / override custom options (with substitution)
@@ -2219,11 +2249,20 @@ return undef;
 }
 
 # get_php_fpm_ini_value(&domain, name)
-# Returns the value of a ini setting from the domain's pool file
+# Returns the value of a PHP ini setting from the domain's pool file
 sub get_php_fpm_ini_value
 {
 my ($d, $name) = @_;
-return &get_php_fpm_config_value($d, "php_value[${name}]");
+my $k = "php_value";
+my $rv = &get_php_fpm_config_value($d, "php_value[${name}]");
+if (!defined($rv)) {
+	my $k = "php_admin_value";
+	$rv = &get_php_fpm_config_value($d, "php_admin_value[${name}]");
+	if (!defined($rv)) {
+		$k = undef;
+		}
+	}
+return wantarray ? ($rv, $k) : $rv;
 }
 
 # save_php_fpm_config_value(&domain, name, value)
@@ -2271,12 +2310,14 @@ elsif ($found < 0 && defined($value)) {
 return 1;
 }
 
-# save_php_fpm_ini_value(&domain, name, value)
+# save_php_fpm_ini_value(&domain, name, value, [admin?])
 # Adds, updates or deletes an ini setting in the domain's pool file
 sub save_php_fpm_ini_value
 {
-my ($d, $name, $value) = @_;
-return &save_php_fpm_config_value($d, "php_value[${name}]", $value);
+my ($d, $name, $value, $admin) = @_;
+my (undef, $k) = &get_php_fpm_ini_value($d, $name);
+$k ||= ($admin ? "php_admin_value" : "php_value");
+return &save_php_fpm_config_value($d, $k."[".$name."]", $value);
 }
 
 # increase_fpm_port(string)

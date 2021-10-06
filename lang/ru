@@ -1022,7 +1022,6 @@ backup_mode1=FTP сервер
 backup_mode2=SSH сервер
 backup_path=файл на сервере
 backup_login=Залогиниться как пользователь
-backup_pass=c паролем
 backup_mailfiles2=Включить почтовые файлы
 backup_dirlogs=Включить директорию log-ов
 backup_feature_unix=Пароль и квота Unix пользователя

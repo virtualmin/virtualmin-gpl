@@ -10,6 +10,8 @@ using the C<--domain> or C<--all-domains> parameters.
 
 To change the method Virtualmin uses to run CGI scripts, use the C<--mode>
 parameter followed by one of C<none>, C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
+Or you can use C<--default-mode> to switch to the default defined in the 
+domain's template.
 
 When using FPM mode, you can configure Apache to use a socket file
 for communication with the FPM server with the C<--php-fpm-socket> flag.
@@ -121,6 +123,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--mode") {
 		$mode = shift(@ARGV);
+		}
+	elsif ($a eq "--default-mode") {
+		$defmode = 1;
 		}
 	elsif ($a eq "--ruby-mode" && $supports_ruby) {
 		$rubymode = shift(@ARGV);
@@ -266,7 +271,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || &usage("Nothing to do");
+  $fpmsock || $defmode || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -372,6 +377,12 @@ foreach $d (@doms) {
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	&$indent_print();
+
+	# Use the default mode for this domain
+	if ($defmode) {
+		$tmpl = &get_template($d->{'template'});
+		$mode = &template_to_php_mode($tmpl);
+		}
 
 	# Update PHP mode
 	if ($mode && !$d->{'alias'}) {
@@ -734,7 +745,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-web --domain name | --all-domains\n";
-print "                     [--mode mod_php|cgi|fcgid|fpm]\n";
+print "                     [--mode mod_php|cgi|fcgid|fpm | --default-mode]\n";
 print "                     [--php-children number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--php-timeout seconds | --no-php-timeout]\n";

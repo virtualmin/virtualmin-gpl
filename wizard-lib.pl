@@ -6,7 +6,7 @@ sub wizard_redirect
 if (&master_admin() &&
     ($config{'wizard_run'} eq '' && $config{'first_version'} >= 3.69 ||
      $config{'wizard_run'} eq '0')) {
-	return "$gconfig{'webprefix'}/$module_name/wizard.cgi";
+	return "/$module_name/wizard.cgi";
 	}
 return undef;
 }
@@ -308,6 +308,7 @@ sub wizard_show_mysql
 if (&mysql::is_mysql_running() == -1) {
 	# Cannot even login with the current password
 	print &ui_table_row(undef, $text{'wizard_mysql4'}, 2);
+	print &ui_hidden("needchange", 1);
 
 	print &ui_table_row($text{'wizard_mysql_empty'},
 		&ui_textbox("mypass", undef, 20)."<br>\n".
@@ -315,6 +316,7 @@ if (&mysql::is_mysql_running() == -1) {
 	}
 else {
 	# Offer to change the password
+	print &ui_hidden("needchange", 0);
 	print &ui_table_row(undef, $text{'wizard_mysql'} . " " .
 			   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
 					       : $text{'wizard_mysql2'}), 2);
@@ -351,11 +353,14 @@ else {
 sub wizard_parse_mysql
 {
 local ($in) = @_;
-local $pass = $in->{'mypass'};
-local $user = $mysql::mysql_login || 'root';
 &require_mysql();
-$mysql::mysql_pass = $pass;
-$mysql::authstr = &mysql::make_authstr();
+local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
+local $user = $mysql::mysql_login || 'root';
+if ($in->{'needchange'}) {
+	# Change the password used by subsequent code to validate that it works
+	$mysql::mysql_pass = $pass;
+	$mysql::authstr = &mysql::make_authstr();
+	}
 if (&mysql::is_mysql_running() == -1) {
 	# Forcibly change the mysql password
 	if ($in->{'forcepass'}) {
@@ -376,7 +381,13 @@ else {
 		eval {
 			&execute_password_change_sql(undef, $user, undef, $pass);
 			};
-		&update_webmin_mysql_pass($user, $pass) if (!$@);
+		if (!$@) {
+			# Update the password used by subsequent code if
+			# changing it worked
+			&update_webmin_mysql_pass($user, $pass);
+			$mysql::mysql_pass = $pass;
+			$mysql::authstr = &mysql::make_authstr();
+			}
 		}
 	}
 
@@ -414,6 +425,7 @@ print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
 
 &require_mysql();
 if (-r $mysql::config{'my_cnf'}) {
+	# Show options to change MySQL limits based on RAM
 	local $mem = &get_real_memory_size();
 	local $mysize = $config{'mysql_size'} || "";
 	local $recsize;
@@ -471,7 +483,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&mysql::stop_mysql();
 		}
 
-	# Adjust my.cnf
+	# Copy my.cnf in preparation for fixing it
 	my $temp = &transname();
 	my $conf = &mysql::get_mysql_config();
 	my @files = &unique(map { $_->{'file'} } @$conf);
@@ -481,6 +493,7 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 		&copy_source_dest($file, $temp."_".$bf);
 		&lock_file($file);
 		}
+
 	foreach my $s (&list_mysql_size_settings($in->{'mysize'}, $myver, $variant)) {
 		my $sname = $s->[2] || "mysqld";
 		my ($sect) = grep { $_->{'name'} eq $sname &&
@@ -490,11 +503,26 @@ if ($in->{'mysize'} && -r $mysql::config{'my_cnf'}) {
 					       $s->[1] ? [ $s->[1] ] : [ ]);
 			}
 		}
+	$config{'mysql_size'} = $in->{'mysize'};
+
+	# Adjust max packet size if default is too small
+	my ($sect) = grep { $_->{'name'} eq "mysqld" &&
+			    $_->{'members'} } @$conf;
+	if ($sect) {
+		my $pack = &mysql::find_value(
+			"max_allowed_packet", $sect->{'members'});
+		if (($pack && &php_value_diff($pack, "64M") < 0) ||
+		    !$pack) {
+			&mysql::save_directive(
+				$conf, $sect, "max_allowed_packet", [ "64M" ]);
+			}
+		}
+
+	# Write out the config files
 	foreach my $file (@files) {
 		&flush_file_lines($file, undef, 1);
 		&unlock_file($file);
 		}
-	$config{'mysql_size'} = $in->{'mysize'};
 
 	# Start it up again
 	if ($running) {
@@ -682,7 +710,7 @@ else {
 				 &ui_textbox("defhost", $def, 20) ] ]));
 
 	print &ui_table_row($text{'wizard_defdom_ssl'},
-		&ui_radio("defssl", 2,
+		&ui_radio("defssl", 1,
 			  [ [ 0, $text{'wizard_defssl0'} ],
 			    [ 1, $text{'wizard_defssl1'} ],
 			    [ 2, $text{'wizard_defssl2'} ] ]));
@@ -758,6 +786,7 @@ $dom{'dns'} = 1;
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
+$dom{'no_default_service_certs'} = 1 if ($in->{'defssl'} != 2);
 if ($in->{'defssl'}) {
 	$dom{$sslf} = 1;
 	if ($in->{'defssl'} == 2) {

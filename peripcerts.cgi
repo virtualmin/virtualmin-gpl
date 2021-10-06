@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Update per-IP webmin and usermin certs
+# Update per-IP certs for all possible services
 
 require './virtual-server-lib.pl';
 &ReadParse();
@@ -13,15 +13,14 @@ $d = &get_domain($in{'dom'});
 foreach my $st (&list_service_ssl_cert_types()) {
 	next if (!$st->{'dom'} && !$st->{'virt'});
 	next if (!$st->{'dom'} && !$d->{'virt'});
-	next if (!defined($in{$st->{'id'}}));
 	($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
 	$func = "sync_".$st->{'id'}."_ssl_cert";
 	my $ok = 1;
-	if ($in{$st->{'id'}} && !$a) {
+	if ($in{'enable'} && !$a) {
 		# Need to enable per-IP cert
 		$ok = &$func($d, 1);
 		}
-	elsif (!$in{$st->{'id'}} && $a) {
+	elsif (!$in{'enable'} && $a) {
 		# Need to remove per-IP cert
 		$ok = &$func($d, 0);
 		}
