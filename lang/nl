@@ -4648,13 +4648,13 @@ upgrade_complete=Uw systeem is succesvol ge-upgrade naar Virtualmin Pro !
 upgrade_theme=Aanzetten theme <i>$1</i> ..
 upgrade_esharedroot=Uw Webmin root directory $1 is gedeeld tussen meerdere systemen - module updates zijn niet toegestaan
 upgrade_eyumrepo=Virtualmin is geinstalleerd vanuit een RPM, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
-upgrade_eyumlist=Het $1 RPM pakker is niet gevonden in de lijst met beschikbare pakketten voor YUM. Misschien is 1 van de huidige repositories niet bereikbaar?
+
 upgrade_edebrepo=Virtualmin is geinstalleerd van een Debian pakket, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
 upgrade_rpms=Upgraden van Virtualmin RPM pakketten : $1
 upgrade_eyumfile=Geen Virtualmin GPL repository is gevonden in $1
 upgrade_update=Beschikbare pakketten updaten vanaf APT ..
 upgrade_debs=Upgraden van Virtualmin Debian pakketten : $1
-upgrade_yumclear=Opruimen van YUM cache ..
+
 upgrade_etypematch=Upgraden is niet mogelijk als het Virtualmin installatie type <tt>$1</tt> is en Webmin <tt>$2</tt> is
 
 maillog_title=Zoek Email Log

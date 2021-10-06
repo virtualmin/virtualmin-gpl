@@ -255,6 +255,9 @@ setup_ednscloudexists=所选的DNS云提供商不存在！
 setup_ednscloudstate=DNS云提供程序 $1尚未准备就绪
 setup_ednscloudclash=无法检查DNS云提供程序 $1上的冲突： $2
 setup_dnscloudclash=DNS区域已存在于云提供程序 $1上
+setup_mail_smtpcloud=正在配置云邮件提供程序 $1 ..
+setup_mail_nosmtpcloud=.. 提供者不存在！
+setup_mail_esmtpcloud=.. 失败：$1
 
 users_indom=域 $2中的 $1个用户
 
@@ -442,6 +445,7 @@ delete_statussslcert=正在删除SSL证书的状态监视器。
 delete_aliasfailure=.. $1别名删除失败： $2
 delete_ednssubof=无法删除虚拟服务器 $1，因为它包含服务器 $2的DNS记录
 delete_esslnoips=找不到域的SSL证书
+delete_mail_smtpcloud=正在删除云邮件提供程序 $1 ..
 
 save_ednsip=外部IP地址丢失或无效
 save_mysqlpass_provision=更改服务主机上的MySQL密码 ..
@@ -644,9 +648,6 @@ check_ehomeformat=主目录格式 $1不包含用户名或域名。可以在<a hr
 check_ehomestyle=主目录样式设置为“仅基本目录”，Virtualmin无法使用。可以在<a href='$2'>“用户和组”模块配置</a>页上对此进行更正。
 check_jailkitok=Chroot监狱在此系统上可用
 check_jailkiterr=Chroot监狱不可用： $1
-check_eyumrepofile=Virtualmin YUM存储库配置文件 $1不存在！
-check_yumrepook=Virtualmin YUM存储库配置正确
-check_yumrepowrong=Virtualmin YUM存储库配置文件 $1包含错误的许可证密钥序列号！
 check_yumrepomissing=Virtualmin APT存储库配置文件 $1不引用software.virtualmin.com！
 check_eaptrepofile=APT存储库配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存储库配置正确
@@ -1368,6 +1369,8 @@ tmpl_aliascopy1=从目标复制别名
 tmpl_aliascopy0=赶集转发
 tmpl_bccto=默认传出密件抄送地址
 tmpl_ebccto=默认密件抄送地址缺失或无效
+tmpl_mail_cloud=默认云邮件交付提供商
+tmpl_mail_cloud_local=&lt;无 - 直接交付&gt;
 tmpl_ranges_mask=网路遮罩
 tmpl_ranges6=自动IPv6分配的范围
 tmpl_eranges_mask=“$1”的网络缺失或无效
@@ -1686,6 +1689,9 @@ scripts_upgrades=升级所选脚本
 scripts_optmod=推荐使用PHP模块 $1 ..
 scripts_noini=..找不到全局php.ini文件
 scripts_noini2=..找不到域的php.ini文件
+scripts_phpmodinst=从软件包安装模块 ..
+scripts_phpmoddone=.. 成功安装了来自包 $1 的模块
+scripts_phpmodfailed=.. 无法从 $1 个可能的包安装模块
 scripts_newer2=版本 $1存在，但无法升级到
 scripts_find=查找匹配的脚本：
 scripts_findok=搜索
@@ -1736,6 +1742,7 @@ scripts_deleted=手动删除
 scripts_inophp=需要对PHP的Web服务器支持
 scripts_inocgi=需要对CGI脚本的Web服务器支持
 scripts_iphpneed=此虚拟服务器禁用了PHP
+scripts_iphpnover=找不到此虚拟服务器的 PHP 版本
 scripts_iphpfullver=需要PHP版本 $1或更高版本，但是此虚拟服务器正在使用版本 $2
 scripts_iphpmaxver=需要低于 $1的PHP版本，但是此虚拟服务器正在使用 $2版本
 scripts_inoapache=仅支持Apache Web服务器
@@ -2296,13 +2303,13 @@ newstyles_edelete=选定的内容样式不再存在！
 upgrade_epackages=找不到要安装的软件包！
 upgrade_eamazon=此许可证密钥不能用于升级
 upgrade_eyumrepo=Virtualmin已从RPM安装，但未使用Virtualmin GPL存储库。目前无法升级。
-upgrade_eyumlist=在YUM的可用软件包列表中找不到 $1 RPM软件包。也许您当前的存储库之一不起作用？
+
 upgrade_edebrepo=Virtualmin已从Debian软件包安装，但未使用Virtualmin GPL存储库。目前无法升级。
 upgrade_rpms=升级Virtualmin RPM软件包： $1
 upgrade_eyumfile=在 $1中找不到Virtualmin GPL存储库
 upgrade_update=从APT更新可用的软件包。
 upgrade_debs=升级Virtualmin Debian软件包： $1
-upgrade_yumclear=清除YUM缓存 ..
+
 upgrade_etypematch=无法升级，因为Virtualmin的安装类型为<tt>$1</tt>，而Webmin的安装类型为<tt>$2</tt>
 
 maillog_showspam=显示垃圾邮件？
@@ -3245,6 +3252,19 @@ retention_folders=中的清除消息
 retention_folders0=所有用户文件夹
 retention_folders1=只有收件箱
 retention_desc=此页面使您可以让Virtualmin自动从域所有者和邮件用户的邮箱中删除旧的电子邮件。
+
+smtpclouds_title=云邮件交付提供商
+smtpclouds_tmpl=可以在<a href='$1'>服务器模板</a>页面上设置新域的默认 SMTP 提供商。
+smtpclouds_ecannot=您无权编辑云邮件递送提供商
+smtpclouds_return=云邮件递送提供商
+
+smtpcloud_eaws=使用亚马逊的 SES 服务需要 <tt>aws</tt> 命令
+smtpcloud_ses_location=默认 API 位置
+smtpcloud_ses_longdesc=此页面上的凭证可以在 <a href=https://console.aws.amazon.com/ target=_blank>AWS 控制台</a> 上您账户的安全凭证页面上找到。
+smtpcloud_header=邮件递送提供商选项
+smtpcloud_provider=邮件递送提供商名称
+smtpcloud_url=邮件递送提供商的网站
+smtpcloud_eaws_dns=Amazon SES 需要启用 DNS 区域来验证新域
 
 provision_title=Cloudmin Services客户
 provision_ecannot=不允许您设置Cloudmin服务客户端

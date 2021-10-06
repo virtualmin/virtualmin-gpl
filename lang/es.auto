@@ -174,6 +174,9 @@ setup_ednscloudexists=¡El proveedor de nube de DNS seleccionado no existe!
 setup_ednscloudstate=El proveedor de nube de DNS $1 no está listo para usarse
 setup_ednscloudclash=No se pudo comprobar si había conflictos en el proveedor de nube de DNS $1 : $2 
 setup_dnscloudclash=La zona DNS ya existe en el proveedor de nube $1 
+setup_mail_smtpcloud=Configurando el proveedor de correo en la nube $1 ..
+setup_mail_nosmtpcloud=.. ¡el proveedor no existe!
+setup_mail_esmtpcloud=... falló : $1 
 
 users_indom=$1 usuarios en el dominio $2
 
@@ -289,6 +292,7 @@ delete_homepreserve=.. preservando directorio montado desde $1
 delete_statussslcert=Eliminando el monitor de estado para el certificado SSL.
 delete_ednssubof=El servidor virtual $1 no se puede eliminar, ya que contiene registros DNS para el servidor $2
 delete_esslnoips=No se encontró certificado SSL para el dominio
+delete_mail_smtpcloud=Eliminando el proveedor de correo en la nube $1 ..
 
 save_ednsip=Dirección IP externa faltante o inválida
 save_mysqlpass_provision=Cambiar la contraseña de MySQL en el host de servicios.
@@ -435,9 +439,6 @@ check_ehomeformat=El formato de directorio de inicio $1 no contiene el nombre de
 check_ehomestyle=El estilo del directorio de inicio se establece en Solo directorio base, que no se puede usar con Virtualmin. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>.
 check_jailkitok=Las cárceles Chroot están disponibles en este sistema
 check_jailkiterr=Las cárceles Chroot no están disponibles : $1
-check_eyumrepofile=¡El archivo de configuración del repositorio Virtualmin YUM $1 no existe!
-check_yumrepook=El repositorio de Virtualmin YUM está configurado correctamente
-check_yumrepowrong=¡El archivo de configuración del repositorio Virtualmin YUM $1 contiene el número de serie incorrecto de la clave de licencia!
 check_yumrepomissing=¡El archivo de configuración del repositorio APT de Virtualmin $1 no hace referencia a software.virtualmin.com!
 check_eaptrepofile=¡El archivo de configuración del repositorio APT $1 no existe!
 check_aptrepook=El repositorio APT de Virtualmin está configurado correctamente
@@ -836,6 +837,8 @@ tmpl_hashtypes3=Sin tipos
 tmpl_hashtypes0=Solo seleccionado ..
 tmpl_ushelldef=Predeterminado de la página de shells personalizados
 tmpl_realdomslimit=Límite en el número de servidores sin alias
+tmpl_mail_cloud=Proveedor de entrega de correo en la nube predeterminado
+tmpl_mail_cloud_local=& lt; Ninguno: entregar directamente & gt;
 tmpl_ranges_mask=Máscara de red
 tmpl_ranges6=Rangos para la asignación automática de IPv6
 tmpl_eranges_mask=Red faltante o no válida para '$1'
@@ -1049,6 +1052,9 @@ scripts_deregistering=Ahora cancelar el registro de $1 versión $2 ..
 scripts_cats=Categorias
 scripts_noini=.. no se pudo encontrar el archivo php.ini global
 scripts_noini2=.. no se pudo encontrar el archivo php.ini del dominio
+scripts_phpmodinst=Instalación del módulo desde paquetes de software ..
+scripts_phpmoddone=.. módulo instalado correctamente del paquete $1 
+scripts_phpmodfailed=.. no se pudo instalar el módulo de $1 paquetes posibles
 scripts_newer2=La versión $1 existe pero no se puede actualizar a
 scripts_ecpan=.. el módulo CPAN Perl no está instalado en su sistema.
 scripts_optpythonmod=Se recomienda el módulo Python $1.
@@ -1063,6 +1069,7 @@ scripts_gemlink=Vincular el comando Gem $1 a la nueva versión $2 ..
 scripts_inophp=Se necesita soporte de servidor web para PHP
 scripts_inocgi=Se necesita soporte de servidor web para scripts CGI
 scripts_iphpneed=PHP está deshabilitado para este servidor virtual
+scripts_iphpnover=No se pudo encontrar ninguna versión de PHP para este servidor virtual
 scripts_iphpfullver=Se requiere la versión $1 o posterior de PHP, pero este servidor virtual usa la versión $2 
 scripts_iphpmaxver=Se requiere una versión de PHP inferior a $1, pero este servidor virtual usa la versión $2 
 scripts_inoapache=Solo se admite el servidor web Apache
@@ -1447,7 +1454,7 @@ newstyles_del=Elimina ahora
 newstyles_edelete=¡El estilo de contenido seleccionado ya no existe!
 
 upgrade_epackages=¡No se encontraron paquetes para instalar!
-upgrade_eyumlist=El paquete de $1 RPM no se encontró en la lista de paquetes disponibles de YUM. ¿Quizás uno de sus repositorios actuales no funciona?
+
 upgrade_etypematch=La actualización no es posible ya que el tipo de instalación de Virtualmin es de <tt>$1</tt> pero el de Webmin es de <tt>$2</tt>
 
 massg_edeleted=El script $1 se ha eliminado manualmente y, por lo tanto, no se puede actualizar.
@@ -2051,6 +2058,19 @@ retention_folders=Mensajes de limpieza en
 retention_folders0=Todas las carpetas de usuario
 retention_folders1=Solo la bandeja de entrada
 retention_desc=Esta página le permite hacer que Virtualmin elimine automáticamente los mensajes de correo electrónico antiguos de los buzones de los propietarios de dominio y usuarios de correo.
+
+smtpclouds_title=Proveedores de entrega de correo en la nube
+smtpclouds_tmpl=El proveedor SMTP predeterminado para nuevos dominios se puede configurar en la página <a href='$1'>plantilla de servidor</a>.
+smtpclouds_ecannot=No se le permite editar los proveedores de entrega de correo en la nube
+smtpclouds_return=proveedores de entrega de correo en la nube
+
+smtpcloud_eaws=El comando <tt>aws</tt> es necesario para utilizar el servicio SES de Amazon
+smtpcloud_ses_location=Ubicación de API predeterminada
+smtpcloud_ses_longdesc=Las credenciales de esta página se pueden encontrar en la página Credenciales de seguridad de su cuenta en la <a href=https://console.aws.amazon.com/ target=_blank>Consola de AWS</a>.
+smtpcloud_header=Opciones del proveedor de entrega de correo
+smtpcloud_provider=Nombre del proveedor de entrega de correo
+smtpcloud_url=Sitio web del proveedor de envío de correo
+smtpcloud_eaws_dns=Amazon SES necesita que se habilite una zona DNS para verificar nuevos dominios
 
 provision_title=Cliente de servicios de Cloudmin
 provision_ecannot=No tiene permiso para configurar el cliente de servicios de Cloudmin

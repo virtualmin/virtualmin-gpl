@@ -410,6 +410,9 @@ setup_ednscloudexists=Il provider di servizi cloud DNS selezionato non esiste!
 setup_ednscloudstate=Il provider di servizi cloud DNS $1 non è pronto per l'uso
 setup_ednscloudclash=Impossibile controllare l'interferenza sul provider di servizi cloud DNS $1 : $2 
 setup_dnscloudclash=La zona DNS esiste già sul provider di servizi cloud $1 
+setup_mail_smtpcloud=Configurazione del provider di posta cloud $1 ..
+setup_mail_nosmtpcloud=.. il fornitore non esiste!
+setup_mail_esmtpcloud=.. fallito : $1
 
 equotacommand=Comando quota $1 non riuscito : $2 
 
@@ -717,6 +720,7 @@ delete_statussslcert=Rimozione del monitor di stato per il certificato SSL.
 delete_aliasfailure=.. Eliminazione alias $1 non riuscita : $2 
 delete_ednssubof=Il server virtuale $1 non può essere eliminato, poiché contiene record DNS per il server $2 
 delete_esslnoips=Nessun certificato SSL trovato per il dominio
+delete_mail_smtpcloud=Rimozione del provider di posta cloud $1 ..
 
 save_err=Impossibile modificare il server
 save_title=Salva server
@@ -1281,9 +1285,6 @@ check_ehomeformat=Il formato della directory home $1 non contiene il nome utente
 check_ehomestyle=Lo stile della directory home è impostato su "Solo directory base", che è inutilizzabile con Virtualmin. Questo può essere corretto nella pagina <a href='$2'>Configurazione del modulo Utenti e gruppi</a>.
 check_jailkitok=Le jail Chroot sono disponibili su questo sistema
 check_jailkiterr=Le jail chroot non sono disponibili : $1 
-check_eyumrepofile=Il file di configurazione del repository Virtualmin YUM $1 non esiste!
-check_yumrepook=Il repository Virtualmin YUM è configurato correttamente
-check_yumrepowrong=Il file di configurazione del repository Virtualmin YUM $1 contiene il numero seriale errato della chiave di licenza!
 check_yumrepomissing=Il file di configurazione del repository APT Virtualmin $1 non fa riferimento a software.virtualmin.com!
 check_eaptrepofile=Il file di configurazione del repository APT $1 non esiste!
 check_aptrepook=Il repository APT Virtualmin è configurato correttamente
@@ -2460,6 +2461,8 @@ tmpl_aliascopy1=Copia gli alias dalla destinazione
 tmpl_aliascopy0=Inoltro Catchall
 tmpl_bccto=Indirizzo BCC in uscita predefinito
 tmpl_ebccto=Indirizzo BCC predefinito mancante o non valido
+tmpl_mail_cloud=Provider di consegna della posta cloud predefinito
+tmpl_mail_cloud_local=&lt;Nessuno - consegna direttamente&gt;
 tmpl_aliasfrom=Nome della cassetta postale o *
 tmpl_aliasto=Indirizzo di destinazione
 tmpl_ealiasfrom=Nome cassetta postale non valido in alias $1 
@@ -3071,6 +3074,9 @@ scripts_noini=.. impossibile trovare il file php.ini globale
 scripts_noini2=.. Impossibile trovare il file php.ini del dominio
 scripts_softwaremod=Installazione del pacchetto $1 ..
 scripts_esoftwaremod=.. installazione fallita!
+scripts_phpmodinst=Installazione del modulo dai pacchetti software ..
+scripts_phpmoddone=.. modulo installato con successo dal pacchetto $1
+scripts_phpmodfailed=.. impossibile installare il modulo da $1 possibili pacchetti
 scripts_esoftware=.. il modulo Webmin dei pacchetti software non è installato!
 scripts_eupdate=.. l'installazione automatica dei moduli non è disponibile sul tuo sistema.
 scripts_einstallmod=Il modulo non è disponibile anche dopo l'installazione!
@@ -3137,6 +3143,7 @@ scripts_deleted=Cancellato manualmente
 scripts_inophp=È necessario il supporto del server web per PHP
 scripts_inocgi=È necessario il supporto del server web per gli script CGI
 scripts_iphpneed=PHP è disabilitato per questo server virtuale
+scripts_iphpnover=Nessuna versione PHP trovata per questo server virtuale
 scripts_iphpfullver=È richiesta la versione PHP $1 o successiva, ma questo server virtuale utilizza la versione $2 
 scripts_iphpmaxver=È richiesta una versione PHP inferiore a $1, ma questo server virtuale utilizza la versione $2 
 scripts_inoapache=È supportato solo il server web Apache
@@ -4226,13 +4233,13 @@ upgrade_complete=Il tuo sistema è stato aggiornato con successo a Virtualmin Pr
 upgrade_theme=Abilitazione del tema <i>$1</i> ..
 upgrade_esharedroot=La directory radice Webmin $1 è condivisa tra più sistemi: gli aggiornamenti dei moduli non sono consentiti
 upgrade_eyumrepo=Virtualmin è stato installato da un RPM, ma non utilizzando il repository GPL Virtualmin. L'aggiornamento non è possibile in questo momento.
-upgrade_eyumlist=Il pacchetto $1 RPM non è stato trovato nell'elenco dei pacchetti disponibili da YUM. Forse uno dei tuoi repository attuali non funziona?
+
 upgrade_edebrepo=Virtualmin è stato installato da un pacchetto Debian, ma non usando il repository GPL Virtualmin. L'aggiornamento non è possibile in questo momento.
 upgrade_rpms=Aggiornamento dei pacchetti RPM di Virtualmin : $1 
 upgrade_eyumfile=Nessun repository GPL Virtualmin trovato in $1 
 upgrade_update=Aggiornamento dei pacchetti disponibili da APT ..
 upgrade_debs=Aggiornamento dei pacchetti Debian di Virtualmin : $1 
-upgrade_yumclear=Svuotare le cache YUM ..
+
 upgrade_etypematch=L'aggiornamento non è possibile poiché il tipo di installazione di Virtualmin è <tt>$1</tt> ma Webmin è <tt>$2</tt>
 
 maillog_title=Cerca nel registro di posta
@@ -5079,6 +5086,19 @@ retention_folders=Messaggi di pulizia in
 retention_folders0=Tutte le cartelle utente
 retention_folders1=Solo la Posta in arrivo
 retention_desc=Questa pagina consente a Virtualmin di eliminare automaticamente i vecchi messaggi e-mail dalle cassette postali dei proprietari di dominio e degli utenti di posta.
+
+smtpclouds_title=Provider di consegna della posta cloud
+smtpclouds_tmpl=Il provider SMTP predefinito per i nuovi domini può essere impostato nella pagina <a href='$1'>modello server</a>.
+smtpclouds_ecannot=Non sei autorizzato a modificare i provider di consegna della posta cloud
+smtpclouds_return=fornitori di consegna della posta cloud
+
+smtpcloud_eaws=Il comando <tt>aws</tt> è necessario per utilizzare il servizio SES di Amazon
+smtpcloud_ses_location=Posizione API predefinita
+smtpcloud_ses_longdesc=Le credenziali in questa pagina sono disponibili nella pagina Credenziali di sicurezza del tuo account nella <a href=https://console.aws.amazon.com/ target=_blank>Console AWS</a>.
+smtpcloud_header=Opzioni del provider di consegna della posta
+smtpcloud_provider=Nome del provider di consegna della posta
+smtpcloud_url=Sito web del provider di consegna della posta
+smtpcloud_eaws_dns=Amazon SES necessita di una zona DNS da abilitare per verificare nuovi domini
 
 provision_title=Client di servizi Cloudmin
 provision_ecannot=Non è consentito configurare il client dei servizi Cloudmin

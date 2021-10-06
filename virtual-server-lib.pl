@@ -245,7 +245,7 @@ $script_latest_file = "scripts.txt";
 $script_latest_key = "latest-scripts\@virtualmin.com";
 
 $upgrade_virtualmin_host = "software.virtualmin.com";
-$upgrade_virtualmin_port = 80;
+$upgrade_virtualmin_port = 443;
 $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 
@@ -259,6 +259,7 @@ $resolve_check_page = "/cgi-bin/resolve.cgi";
 
 $virtualmin_license_file = "/etc/virtualmin-license";
 $virtualmin_yum_repo = "/etc/yum.repos.d/virtualmin.repo";
+$virtualmin_apt_auth_dir = "/etc/apt/auth.conf.d";
 $virtualmin_apt_repo = -r "/etc/apt/sources.list.d/virtualmin.list" ?
                           "/etc/apt/sources.list.d/virtualmin.list" :
                           "/etc/apt/sources.list";

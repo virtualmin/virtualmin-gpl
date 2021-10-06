@@ -205,6 +205,9 @@ setup_ednscloudexists=Ausgewählter DNS-Cloud-Anbieter existiert nicht!
 setup_ednscloudstate=Der DNS-Cloud-Anbieter $1 ist nicht einsatzbereit
 setup_ednscloudclash=Fehler beim Überprüfen des DNS-Cloud-Anbieters $1 : $2 auf Kollision
 setup_dnscloudclash=Die DNS-Zone ist auf dem Cloud-Anbieter $1 bereits vorhanden
+setup_mail_smtpcloud=Konfigurieren des Cloud-Mail-Anbieters $1 ..
+setup_mail_nosmtpcloud=.. Anbieter existiert nicht!
+setup_mail_esmtpcloud=.. fehlgeschlagen  : $1
 
 users_indom=$1 Benutzer in Domain $2
 
@@ -354,6 +357,7 @@ delete_statussslcert=Statusüberwachung für SSL-Zertifikat entfernen.
 delete_aliasfailure=.. $1 Alias Löschung fehlgeschlagen : $2
 delete_ednssubof=Der virtuelle Server $1 kann nicht gelöscht werden, da er DNS-Einträge für den Server $2 enthält
 delete_esslnoips=Kein SSL-Zertifikat für Domain gefunden
+delete_mail_smtpcloud=Entfernen des Cloud-Mail-Anbieters $1 ..
 
 save_group=Administrationsgruppe ändern ..
 save_mysqlpass_provision=Ändern des MySQL-Passworts auf dem Diensthost.
@@ -575,9 +579,6 @@ check_ehomeformat=Das Ausgangsverzeichnisformat $1 enthält weder den Benutzerna
 check_ehomestyle=Der Home-Verzeichnisstil ist auf "Nur Basisverzeichnis" eingestellt, was mit Virtualmin nicht verwendet werden kann. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden.
 check_jailkitok=Chroot-Gefängnisse sind auf diesem System verfügbar
 check_jailkiterr=Chroot-Gefängnisse sind nicht verfügbar : $1
-check_eyumrepofile=Die Virtualmin YUM Repository Konfigurationsdatei $1 existiert nicht!
-check_yumrepook=Das Virtualmin YUM-Repository ist korrekt konfiguriert
-check_yumrepowrong=Die Virtualmin YUM-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
 check_yumrepomissing=Die Konfigurationsdatei $1 für das Virtualmin APT-Repository bezieht sich nicht auf software.virtualmin.com!
 check_eaptrepofile=Die APT-Repository-Konfigurationsdatei $1 existiert nicht!
 check_aptrepook=Das Virtualmin APT-Repository ist korrekt konfiguriert
@@ -1139,6 +1140,8 @@ tmpl_aliascopy=Mail-Alias-Modus für Alias-Domains
 tmpl_aliascopy1=Kopieren Sie Aliase vom Ziel
 tmpl_aliascopy0=Catchall-Weiterleitung
 tmpl_bccto=Standardmäßige ausgehende BCC-Adresse
+tmpl_mail_cloud=Standardanbieter für Cloud-Mail-Zustellung
+tmpl_mail_cloud_local=&lt;Keine - direkt liefern&gt;
 tmpl_ealiasfrombounce=Alias $1 kann nicht mit allen Adressen übereinstimmen, da Sie ausgewählt haben, E-Mails an bekannte Adressen weiterzuleiten
 tmpl_ranges=Bereiche für die automatische IP-Zuweisung
 tmpl_rangesbelow=Nachfolgend aufgeführten ..
@@ -1410,6 +1413,9 @@ scripts_udesc=Auf dieser Seite können Sie ein Skript deinstallieren oder auf di
 scripts_deregistering=Jetzt $1 Version $2 abmelden ..
 scripts_apache=Konfigurieren der Webserver-PHP-Einstellungen.
 scripts_cats=Kategorien
+scripts_phpmodinst=Modul aus Softwarepaketen installieren ..
+scripts_phpmoddone=.. erfolgreich installiertes Modul aus Paket $1
+scripts_phpmodfailed=.. konnte das Modul aus $1 möglichen Paketen nicht installieren
 scripts_einstallmod=Modul ist auch nach der Installation nicht verfügbar!
 scripts_einstallpear=Das Birnenmodul ist auch nach der Installation nicht verfügbar!
 scripts_find=Finden Sie passende Skripte:
@@ -1430,6 +1436,7 @@ scripts_gemlink=Verknüpfen des Gem-Befehls $1 mit der neuen Version $2 ..
 scripts_deleted=Manuell gelöscht
 scripts_inocgi=Webserver-Unterstützung für CGI-Skripte ist erforderlich
 scripts_iphpneed=PHP ist für diesen virtuellen Server deaktiviert
+scripts_iphpnover=Für diesen virtuellen Server konnte keine PHP-Version gefunden werden
 scripts_iphpfullver=PHP-Version $1 oder höher ist erforderlich, aber dieser virtuelle Server verwendet Version $2
 scripts_iphpmaxver=Eine PHP-Version unter $1 ist erforderlich, dieser virtuelle Server verwendet jedoch Version $2
 scripts_abandoned2=Dieses Skript wird nicht mehr unterstützt und erhält keine Sicherheitsupdates.
@@ -1991,7 +1998,6 @@ thumb_ethumb=Der Inhaltsstil $1 hat kein Vorschaubild.
 upgrade_desc1=Wenn Ihnen die Verwendung der Virtualmin-GPL gefallen hat und Sie den nächsten Schritt zur Pro-Version ausführen möchten, können Sie auf dieser Seite den Aktualisierungsvorgang automatisch ausführen. Die Schritte dazu sind :
 upgrade_epackages=Keine zu installierenden Pakete gefunden!
 upgrade_esharedroot=Ihr Webmin-Stammverzeichnis $1 wird von mehreren Systemen gemeinsam genutzt - Modulaktualisierungen sind nicht zulässig
-upgrade_eyumlist=Das $1 RPM-Paket wurde nicht in der Liste der verfügbaren Pakete von YUM gefunden. Vielleicht funktioniert eines Ihrer aktuellen Repositorys nicht?
 
 maillog_desc=Dieses Formular kann verwendet werden, um die E-Mail-Protokolle nach Nachrichten zu durchsuchen, die bestimmten Bedingungen entsprechen, um herauszufinden, was mit ihnen passiert ist. Alle Felder sind optional und werden zu Vergleichszwecken übersprungen, wenn sie leer bleiben.
 maillog_ecannot=Sie dürfen keine E-Mails nach dieser Domain durchsuchen
@@ -2387,6 +2393,19 @@ retention_folders=Bereinigungsnachrichten in
 retention_folders0=Alle Benutzerordner
 retention_folders1=Nur der Posteingang
 retention_desc=Auf dieser Seite können Sie Virtualmin veranlassen, alte E-Mail-Nachrichten automatisch aus den Postfächern von Domänenbesitzern und E-Mail-Benutzern zu löschen.
+
+smtpclouds_title=Cloud-Mail-Zustellungsanbieter
+smtpclouds_tmpl=Der Standard-SMTP-Anbieter für neue Domains kann auf der Seite <a href='$1'>Servervorlage</a> festgelegt werden.
+smtpclouds_ecannot=Sie sind nicht berechtigt, Cloud-Mail-Zustellungsanbieter zu bearbeiten
+smtpclouds_return=Anbieter von Cloud-Mail-Zustellung
+
+smtpcloud_eaws=Der Befehl <tt>aws</tt> wird benötigt, um den SES-Dienst von Amazon zu nutzen
+smtpcloud_ses_location=Standard-API-Speicherort
+smtpcloud_ses_longdesc=Die Anmeldeinformationen auf dieser Seite finden Sie auf der Seite Sicherheitsanmeldeinformationen Ihres Kontos in der <a href=https://console.aws.amazon.com/ target=_blank>AWS-Konsole</a>.
+smtpcloud_header=Optionen für den Versanddienstleister
+smtpcloud_provider=Name des E-Mail-Zustellanbieters
+smtpcloud_url=Website des Versanddienstleisters
+smtpcloud_eaws_dns=Amazon SES benötigt eine aktivierte DNS-Zone, um neue Domänen zu überprüfen
 
 provision_ecannot=Sie dürfen den Cloudmin-Dienstclient nicht einrichten
 provision_checking=Überprüfen der Anmeldung beim Diensthost $1 ..

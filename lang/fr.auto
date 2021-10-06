@@ -321,6 +321,9 @@ setup_ednscloudexists=Le fournisseur de cloud DNS sélectionné n'existe pas!
 setup_ednscloudstate=Le fournisseur de cloud DNS $1 n'est pas prêt à être utilisé
 setup_ednscloudclash=Échec de la recherche de conflit sur le fournisseur de cloud DNS $1 : $2 
 setup_dnscloudclash=La zone DNS existe déjà sur le fournisseur cloud $1 
+setup_mail_smtpcloud=Configuration du fournisseur de messagerie cloud $1 ..
+setup_mail_nosmtpcloud=.. le fournisseur n'existe pas !
+setup_mail_esmtpcloud=.. a échoué  : $1
 
 equotacommand=La commande de quota $1 a échoué : $2 
 
@@ -432,6 +435,7 @@ delete_dom=Suppression du sous-serveur $1 ..
 delete_aliasfailure=.. La suppression de l'alias $1 a échoué : $2 
 delete_ednssubof=Le serveur virtuel $1 ne peut pas être supprimé, car il contient des enregistrements DNS pour le serveur $2 
 delete_esslnoips=Aucun certificat SSL trouvé pour le domaine
+delete_mail_smtpcloud=Suppression du fournisseur de messagerie cloud $1 ..
 
 save_ednsip=Adresse IP externe manquante ou invalide
 save_group=Modification du groupe d'administration ..
@@ -755,9 +759,6 @@ check_ehomeformat=Le format du répertoire personnel $1 ne contient pas le nom d
 check_ehomestyle=Le style du répertoire personnel est défini sur "Juste répertoire de base", ce qui est inutilisable avec Virtualmin. Cela peut être corrigé sur la page <a href='$2'>Configuration du module Utilisateurs et groupes</a>.
 check_jailkitok=Les prisons Chroot sont disponibles sur ce système
 check_jailkiterr=Les prisons Chroot ne sont pas disponibles : $1 
-check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin YUM $1 n'existe pas!
-check_yumrepook=Le référentiel Virtualmin YUM est correctement configuré
-check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin YUM $1 contient le mauvais numéro de série de la clé de licence!
 check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
 check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe pas!
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
@@ -1374,6 +1375,8 @@ tmpl_aliascopy1=Copier les alias de la cible
 tmpl_aliascopy0=Transfert de fourre-tout
 tmpl_bccto=Adresse BCC sortante par défaut
 tmpl_ebccto=Adresse BCC par défaut manquante ou non valide
+tmpl_mail_cloud=Fournisseur de livraison de courrier cloud par défaut
+tmpl_mail_cloud_local=&lt;Aucun - livrer directement&gt;
 tmpl_aliasfrom=Nom de la boîte aux lettres ou *
 tmpl_aliasto=Adresse de destination
 tmpl_ealiasfrom=Nom de boîte aux lettres non valide dans l'alias $1 
@@ -1868,8 +1871,12 @@ scripts_idb2=Utilise la base de données avec le préfixe de table
 scripts_idbtbpref=avec préfixe de table
 scripts_deregistering=Désenregistrement de la version $1 $2 ..
 scripts_cats=Les catégories
+scripts_phpmodinst=Installation du module à partir des packages logiciels ..
+scripts_phpmoddone=.. module installé avec succès à partir du package $1
+scripts_phpmodfailed=.. échec de l'installation du module à partir de $1 packages possibles
 scripts_passmode4=Mot de passe initial pour le script
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
+scripts_iphpnover=Aucune version PHP n'a pu être trouvée pour ce serveur virtuel
 scripts_iphpfullver=La version PHP $1 ou ultérieure est requise, mais ce serveur virtuel utilise la version $2 
 scripts_iphpmaxver=Une version PHP inférieure à $1 est requise, mais ce serveur virtuel utilise la version $2 
 scripts_abandoned2=Ce script n'est plus pris en charge et ne recevra pas de mises à jour de sécurité.
@@ -2898,13 +2905,13 @@ upgrade_complete=Votre système a été mis à niveau avec succès vers Virtualm
 upgrade_theme=Activation du thème <i>$1</i> ..
 upgrade_esharedroot=Votre répertoire racine Webmin $1 est partagé entre plusieurs systèmes - les mises à jour de module ne sont pas autorisées
 upgrade_eyumrepo=Virtualmin a été installé à partir d'un RPM, mais n'utilise pas le référentiel Virtualmin GPL. La mise à niveau n'est pas possible pour le moment.
-upgrade_eyumlist=Le package $1 RPM est introuvable dans la liste des packages disponibles de YUM. Peut-être que l'un de vos référentiels actuels ne fonctionne pas?
+
 upgrade_edebrepo=Virtualmin a été installé à partir d'un paquet Debian, mais n'utilise pas le référentiel GPL Virtualmin. La mise à niveau n'est pas possible pour le moment.
 upgrade_rpms=Mise à niveau des packages Virtualmin RPM : $1 
 upgrade_eyumfile=Aucun référentiel GPL Virtualmin n'a été trouvé dans $1 
 upgrade_update=Mise à jour des packages disponibles depuis APT.
 upgrade_debs=Mise à niveau des packages Virtualmin Debian : $1 
-upgrade_yumclear=Effacement des caches YUM ..
+
 upgrade_etypematch=La mise à niveau n'est pas possible car le type d'installation de Virtualmin est <tt>$1</tt> mais Webmin est <tt>$2</tt>
 
 maillog_title=Rechercher dans le journal de messagerie
@@ -3769,6 +3776,19 @@ retention_folders=Messages de nettoyage dans
 retention_folders0=Tous les dossiers d'utilisateurs
 retention_folders1=Seule la boîte de réception
 retention_desc=Cette page vous permet de demander à Virtualmin de supprimer automatiquement les anciens e-mails des boîtes aux lettres des propriétaires de domaine et des utilisateurs de messagerie.
+
+smtpclouds_title=Fournisseurs de livraison de courrier en nuage
+smtpclouds_tmpl=Le fournisseur SMTP par défaut pour les nouveaux domaines peut être défini sur la page <a href='$1'>modèle de serveur</a>.
+smtpclouds_ecannot=Vous n'êtes pas autorisé à modifier les fournisseurs de messagerie cloud
+smtpclouds_return=fournisseurs de livraison de courrier en nuage
+
+smtpcloud_eaws=La commande <tt>aws</tt> est nécessaire pour utiliser le service SES d'Amazon
+smtpcloud_ses_location=Emplacement par défaut de l'API
+smtpcloud_ses_longdesc=Les informations d'identification de cette page se trouvent sur la page Informations d'identification de sécurité de votre compte sur la <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
+smtpcloud_header=Options du fournisseur de distribution de courrier
+smtpcloud_provider=Nom du fournisseur de distribution du courrier
+smtpcloud_url=Site Web du fournisseur de distribution de courrier
+smtpcloud_eaws_dns=Amazon SES a besoin d'une zone DNS à activer pour vérifier les nouveaux domaines
 
 provision_title=Client Cloudmin Services
 provision_ecannot=Vous n'êtes pas autorisé à configurer le client des services Cloudmin
