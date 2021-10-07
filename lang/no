@@ -2325,7 +2325,6 @@ backup_epurge=Manglende eller ikke-numerisk antall dager for sletting avb gamle 
 backup_epurgetime=Sletting av gamle sikkerhetskopier støttes kun nå et dato-basert mål brukes, og <b>strftime erstatninger</b> er aktivert
 backup_epurgepath=Sletting av gamle sikkerhetskopier kan ikke aktiveres, siden grunn-katalogen ikke kunne bestemmes ut fra stien til mål-katalogen. Dette må være en sti som <tt>/backup/virtualmin-%d-%m-%Y</tt>, og kan ikke være en tipp-nivå katalog.
 backup_ekey2=Du har ikke tilgang til å bruke den valgte sikkerhetskopi-nøkkelen
-backup_purging2=Sletter sikkerhetskopier fra $2 eldre enn $1 dager ..
 backup_purgenobase=.. kunne ikke finne ut grunnkatalog på bakgrunn av mål
 backup_deletingdir=Sletter katalog $1, som er $2 dager gammel ..
 backup_deletingfile=Sletter fil $1, som er $2 dager gammel ..
@@ -3539,6 +3538,7 @@ licence_unlimited=ubegrenset
 licence_goterr=.. oppdaget et problem : $1
 licence_ecannot=Du har ikke lov til å sjekke Virtualmin lisensen på nytt
 licence_maxdoms=Systemet ditt er kun lisensiert for $1 tjenere, men du har $2.
+
 licence_ipchanged=Det ser ut til systemets primære IP adresse er endret fra $1 til $2. Virtuelle tjenere som bruker den gamle adressen kan være utilgjengelige, eller de kan vise feil innhold.
 licence_changeip=Oppdater ugyldige IP adresser
 licence_smallcert=Systemet ditt bruker et SSL sertifikat som er bare $1 bits langt. Dette er mindre enn den anbefalte størrelsesn på 2048 bits. Dette sertifikatet ble utstedt av $4 til $3 for domenet $2.
@@ -4910,13 +4910,11 @@ upgrade_complete=Systemet ditt er nå oppgradert til Virtualmin Pro!
 upgrade_theme=Aktiverer tema <i>$1</i> ..
 upgrade_esharedroot=Din Webmin rot-katalog er delt mellom flere systemer, så moduloppdateringer er ikke tillatt
 upgrade_eyumrepo=Virtualmin er blitt installert fra en RPM, uten å bruke Virtualmin GPL depotet. Oppgradering er derfor ikke mulig nå.
-
 upgrade_edebrepo=Virtualmin er blitt installert fra en Debian pakke, uten å bruke Virtualmin GPL depotet. Oppgradering er derfor ikke mulig nå.
 upgrade_rpms=Oppgraderer Virtualmin RPM pakker : $1
 upgrade_eyumfile=Ingen Virtualmin GPL depot ble funnet i $1
 upgrade_update=Oppdaterer tilgjengelige pakker fra APT ..
 upgrade_debs=Oppgraderer Virtualmin Debian pakker : $1
-
 upgrade_etypematch=Oppgradering er ikke mulig siden Virtualmins installasjonstype er <tt>$1</tt> mens Webmins er <tt>$2</tt>
 
 maillog_title=Søk i e-post logg

@@ -1010,7 +1010,6 @@ upgrade_themeok=.. szablon <i>$1</i> został poprawnie zainstalowany
 upgrade_modfailed=.. instalacja nie powiodła się : $1
 upgrade_schedok=.. gotowe. Aktualizacje zostaną automatycznie zainstalowane.
 upgrade_theme=Włączanie szablonu <i>$1</i> ..
-
 upgrade_rpms=Aktualizacja pakietów RPM Virtualmin : $1
 
 maillog_ecannot=Nie masz uprawnień do wyszukiwania e-maila na tej domenie

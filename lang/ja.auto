@@ -2029,6 +2029,9 @@ check_ehomeformat=ホームディレクトリ形式 $1には、ユーザー名�
 check_ehomestyle=ホームディレクトリのスタイルは、「ベースディレクトリのみ」に設定されています。これは、Virtualminでは使用できません。これは、<a href='$2'>ユーザーとグループモジュールの構成</a>ページで修正できます。
 check_jailkitok=Chroot刑務所はこのシステムで利用可能です
 check_jailkiterr=Chroot刑務所は利用できません： $1
+check_eyumrepofile=Virtualminリポジトリ構成ファイル $1が存在しません！
+check_yumrepook=Virtualminリポジトリが正しく構成されている
+check_yumrepowrong=Virtualminリポジトリ構成ファイル $1に、間違ったシリアル番号のライセンスキーが含まれています。
 check_yumrepomissing=Virtualmin APTリポジトリ設定ファイル $1がsoftware.virtualmin.comを参照していません！
 check_eaptrepofile=APTリポジトリ設定ファイル $1は存在しません！
 check_aptrepook=Virtualmin APTリポジトリが正しく構成されている
@@ -2564,7 +2567,7 @@ backup_epurge=古いバックアップを削除するまでの日数がないか
 backup_epurgetime=古いバックアップの削除は、日付ベースの宛先が使用され、<b>strftime置換</b>が有効になっている場合にのみサポートされます
 backup_epurgepath=ベースディレクトリを宛先パスから抽出できなかったため、古いバックアップの削除を有効にできません。 <tt>/backup/virtualmin-%d-%m-%Y</tt>ようなパスである必要があり、トップレベルのディレクトリにすることはできません
 backup_ekey2=選択したバックアップキーの使用は許可されていません
-backup_purging2=$1日より古い $2からバックアップを削除しています. ..
+backup_purging3=$1日より古い $3に一致する $2からバックアップを削除しています。
 backup_purgenobase=..宛先からベースディレクトリを処理できませんでした
 backup_deletingdir=$2日前のディレクトリ $1を削除しています. ..
 backup_deletingfile=$2日前のファイル $1を削除しています. ..
@@ -3959,6 +3962,7 @@ licence_goterr2=..有効期限が無効です： $1
 licence_ecannot=Virtualminライセンスを再確認することはできません
 licence_maxdoms=システムには $1サーバーのみのライセンスがありますが、 $2があります。
 licence_maxservers2=シリアル番号 $3は $1サーバーに対してのみライセンスされていますが、 $2で使用されています。
+
 licence_ipchanged=システムのプライマリIPアドレスが $1から $2に変更されたようです。古いアドレスを使用している仮想サーバーに到達できないか、間違ったWebコンテンツを提供している可能性があります。
 licence_changeip=正しくないIPアドレスを更新する
 licence_smallcert=システムで使用されているSSL証明書の長さは $1ビットのみで、推奨サイズの2048ビットよりも小さいです。この証明書は、ドメイン $2に対して $4から $3に発行されました。
@@ -5489,13 +5493,13 @@ upgrade_complete=システムがVirtualmin Proに正常にアップグレード�
 upgrade_theme=テーマ<i>$1</i>を有効にしています. ..
 upgrade_esharedroot=Webminルートディレクトリ $1は複数のシステム間で共有されています-モジュールの更新は許可されていません
 upgrade_eyumrepo=VirtualminはRPMからインストールされましたが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
-
+upgrade_eyumlist=リポジトリから利用可能なパッケージのリストに $1RPMパッケージが見つかりませんでした。おそらく、現在のリポジトリの1つが機能していませんか？
 upgrade_edebrepo=VirtualminはDebianパッケージからインストールされていますが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
 upgrade_rpms=Virtualmin RPMパッケージのアップグレード： $1
 upgrade_eyumfile=$1にVirtualmin GPLリポジトリが見つかりませんでした
 upgrade_update=APTから利用可能なパッケージを更新しています ..
 upgrade_debs=Virtualmin Debianパッケージのアップグレード： $1
-
+upgrade_yumclear=リポジトリキャッシュのクリア ..
 upgrade_etypematch=Virtualminのインストールタイプがあるようアップグレードすることはできません<tt>$1</tt>が、Webminのは<tt>$2</tt>
 
 maillog_title=メールログを検索

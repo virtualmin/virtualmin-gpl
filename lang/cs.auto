@@ -1532,6 +1532,9 @@ check_ehomeformat=Formát domovského adresáře $1 neobsahuje uživatelské jm�
 check_ehomestyle=Styl domovského adresáře je nastaven na "Pouze základní adresář", což je u Virtualmin nepoužitelné. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit.
 check_jailkitok=Chroot vězení jsou k dispozici v tomto systému
 check_jailkiterr=Chrootské vězení není k dispozici : $1 
+check_eyumrepofile=Konfigurační soubor $1 úložiště Virtualmin neexistuje!
+check_yumrepook=Úložiště Virtualmin je správně nakonfigurováno
+check_yumrepowrong=Konfigurační soubor $1 úložiště Virtualmin obsahuje nesprávné sériové číslo licenčního klíče!
 check_yumrepomissing=Konfigurační soubor úložiště Virtualmin APT $1 neodkazuje na software.virtualmin.com!
 check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
@@ -1874,7 +1877,7 @@ backup_edests=Nebyly zadány žádné zálohy!
 backup_edownloadmany=Když se stahuje záloha, musí to být jediný cíl
 backup_eownergone=Doména vlastníka již neexistuje!
 backup_ekey2=Vybraný záložní klíč nemáte povoleno
-backup_purging2=Odstraňování záloh ze $2 starších než $1 dní ..
+backup_purging3=Mazání záloh z $2 odpovídajících $3 starších než $1 dnů ..
 backup_purgedtime=.. našel zálohy $1, ale žádná nebyla dostatečně stará
 backup_purgeegcbuckets=.. nepodařilo se zobrazit seznam segmentů Google : $1 
 backup_purgeefiles=.. se nepodařilo vypsat soubory S3 : $1 
@@ -3075,6 +3078,7 @@ licence_goterr2=.. neplatné datum vypršení platnosti : $1
 licence_ecannot=Není dovoleno znovu zkontrolovat licenci Virtualmin
 licence_maxdoms=Váš systém je licencován pouze pro servery $1, ale máte $2.
 licence_maxservers2=Vaše sériové číslo $3 je licencováno pouze pro server $1, ale používá se na $2.
+
 licence_ipchanged=Zdá se, že primární IP adresa vašeho systému se změnila z $1 na $2. Virtuální servery používající starou adresu mohou být nedostupné nebo zobrazovat nesprávný webový obsah.
 licence_changeip=Aktualizujte nesprávné adresy IP
 licence_smallcert=Váš systém používá certifikát SSL, který je dlouhý pouze $1 bitů, což je menší než doporučená velikost 2048 bitů. Tento certifikát byl vydán doménou $4 až $3 pro doménu $2.
@@ -4350,13 +4354,13 @@ upgrade_complete=Váš systém byl úspěšně upgradován na Virtualmin Pro!
 upgrade_theme=Povolení motivu <i>$1</i> ..
 upgrade_esharedroot=Váš kořenový adresář Webmin $1 je sdílen mezi několika systémy - aktualizace modulu nejsou povoleny
 upgrade_eyumrepo=Virtualmin byl nainstalován z RPM, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
-
+upgrade_eyumlist=Balíček $1 RPM nebyl v seznamu dostupných balíčků z úložiště nalezen. Možná jeden z vašich aktuálních úložišť nefunguje?
 upgrade_edebrepo=Virtualmin byl nainstalován z balíčku Debian, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
 upgrade_rpms=Upgradování balíčků Virtualmin RPM : $1 
 upgrade_eyumfile=V $1 nebyl nalezen žádný úložiště Virtualmin GPL
 upgrade_update=Aktualizace dostupných balíčků z APT ..
 upgrade_debs=Upgradování balíčků Virtualmin Debian : $1 
-
+upgrade_yumclear=Vymazání mezipaměti úložiště ..
 upgrade_etypematch=Upgradování není možné, protože typ instalace Virtualmin je <tt>$1</tt>, ale Webmin's je <tt>$2</tt>
 
 maillog_desc=Tento formulář lze použít k vyhledání zpráv v poštovních protokolech, které odpovídají určitým podmínkám, a zjistit, co se s nimi stalo. Všechna pole jsou volitelná a pokud budou ponechána prázdná, budou pro účely srovnání přeskočena.

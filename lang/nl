@@ -2218,7 +2218,6 @@ backup_started2=.. gestart.
 backup_epurge=Ontbrekende of niet-numeriek aantal dagen om oude backups te verwijderen
 backup_epurgetime=Verwijderen van oude backups word alleen ondersteund wanneer een op datum gebaseerde bestemming word gebruikt en <b>strftime toevoegingen</b> aanstaat
 backup_epurgepath=Verwijderen van oude backups kan niet worden aangezet, omdat de basis directory niet kon worden uitgepakt vanaf het opgegeven pad. Het opgegeven pad moet lijken op <tt>/backup/virtualmin-%d-%m-%Y</tt>, en mag nooit een top-niveau directory zijn.
-backup_purging2=Backup's verwijderen van $2 ouder dan $1 dagen ..
 backup_purgenobase=.. kon niet uitwerken wat de basis directory is van de bestemming
 backup_deletingdir=Verwijderen van directory $1, welke $2 dagen oud is ..
 backup_deletingfile=Verwijderen van file $1, welke $2 dagen oud is ..
@@ -4648,13 +4647,11 @@ upgrade_complete=Uw systeem is succesvol ge-upgrade naar Virtualmin Pro !
 upgrade_theme=Aanzetten theme <i>$1</i> ..
 upgrade_esharedroot=Uw Webmin root directory $1 is gedeeld tussen meerdere systemen - module updates zijn niet toegestaan
 upgrade_eyumrepo=Virtualmin is geinstalleerd vanuit een RPM, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
-
 upgrade_edebrepo=Virtualmin is geinstalleerd van een Debian pakket, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
 upgrade_rpms=Upgraden van Virtualmin RPM pakketten : $1
 upgrade_eyumfile=Geen Virtualmin GPL repository is gevonden in $1
 upgrade_update=Beschikbare pakketten updaten vanaf APT ..
 upgrade_debs=Upgraden van Virtualmin Debian pakketten : $1
-
 upgrade_etypematch=Upgraden is niet mogelijk als het Virtualmin installatie type <tt>$1</tt> is en Webmin <tt>$2</tt> is
 
 maillog_title=Zoek Email Log

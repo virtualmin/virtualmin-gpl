@@ -1285,6 +1285,9 @@ check_ehomeformat=Il formato della directory home $1 non contiene il nome utente
 check_ehomestyle=Lo stile della directory home è impostato su "Solo directory base", che è inutilizzabile con Virtualmin. Questo può essere corretto nella pagina <a href='$2'>Configurazione del modulo Utenti e gruppi</a>.
 check_jailkitok=Le jail Chroot sono disponibili su questo sistema
 check_jailkiterr=Le jail chroot non sono disponibili : $1 
+check_eyumrepofile=Il file di configurazione del repository Virtualmin $1 non esiste!
+check_yumrepook=Il repository Virtualmin è configurato correttamente
+check_yumrepowrong=Il file di configurazione del repository Virtualmin $1 contiene il numero di serie errato della chiave di licenza!
 check_yumrepomissing=Il file di configurazione del repository APT Virtualmin $1 non fa riferimento a software.virtualmin.com!
 check_eaptrepofile=Il file di configurazione del repository APT $1 non esiste!
 check_aptrepook=Il repository APT Virtualmin è configurato correttamente
@@ -1760,7 +1763,7 @@ backup_epurge=Numero di giorni mancanti o non numerici per eliminare i vecchi ba
 backup_epurgetime=L'eliminazione di vecchi backup è supportata solo quando viene utilizzata una destinazione basata sulla data e sono abilitate <b>sostituzioni strftime</b>
 backup_epurgepath=Non è possibile abilitare la cancellazione di vecchi backup, in quanto non è stato possibile estrarre la directory di base dal percorso di destinazione. Deve essere un percorso come <tt>/backup/virtualmin-%d-%m-%Y</tt> e non può essere una directory di livello superiore
 backup_ekey2=Non è consentito utilizzare la chiave di backup selezionata
-backup_purging2=Eliminazione di backup da $2 precedenti a $1 giorni ..
+backup_purging3=Eliminazione dei backup da $2 corrispondenti a $3 più vecchi di $1 giorni ..
 backup_deletingdir=Eliminazione della directory $1, che è $2 giorni ..
 backup_deletingfile=Eliminazione del file $1, che è $2 giorni precedenti.
 backup_deleted=.. eliminato $1.
@@ -2954,6 +2957,7 @@ licence_warn=Tuttavia, durante questo controllo della licenza si è verificato u
 licence_goterr2=.. data di scadenza non valida : $1 
 licence_maxdoms=Il tuo sistema è concesso in licenza solo per server $1, ma hai $2.
 licence_maxservers2=Il tuo numero di serie $3 è concesso in licenza solo per il server $1, ma è utilizzato su $2.
+
 licence_ipchanged=L'indirizzo IP primario del sistema sembra essere cambiato da $1 a $2. I server virtuali che utilizzano il vecchio indirizzo potrebbero essere irraggiungibili o servire il contenuto Web errato.
 licence_changeip=Aggiorna indirizzi IP errati
 licence_smallcert=Il sistema utilizza un certificato SSL che è lungo solo $1 bit, che è inferiore alla dimensione consigliata di 2048 bit. Questo certificato è stato rilasciato da $4 a $3 per il dominio $2.
@@ -4233,13 +4237,13 @@ upgrade_complete=Il tuo sistema è stato aggiornato con successo a Virtualmin Pr
 upgrade_theme=Abilitazione del tema <i>$1</i> ..
 upgrade_esharedroot=La directory radice Webmin $1 è condivisa tra più sistemi: gli aggiornamenti dei moduli non sono consentiti
 upgrade_eyumrepo=Virtualmin è stato installato da un RPM, ma non utilizzando il repository GPL Virtualmin. L'aggiornamento non è possibile in questo momento.
-
+upgrade_eyumlist=Il pacchetto $1 RPM non è stato trovato nell'elenco dei pacchetti disponibili dal repository. Forse uno dei tuoi attuali repository non funziona?
 upgrade_edebrepo=Virtualmin è stato installato da un pacchetto Debian, ma non usando il repository GPL Virtualmin. L'aggiornamento non è possibile in questo momento.
 upgrade_rpms=Aggiornamento dei pacchetti RPM di Virtualmin : $1 
 upgrade_eyumfile=Nessun repository GPL Virtualmin trovato in $1 
 upgrade_update=Aggiornamento dei pacchetti disponibili da APT ..
 upgrade_debs=Aggiornamento dei pacchetti Debian di Virtualmin : $1 
-
+upgrade_yumclear=Cancellazione delle cache del repository ..
 upgrade_etypematch=L'aggiornamento non è possibile poiché il tipo di installazione di Virtualmin è <tt>$1</tt> ma Webmin è <tt>$2</tt>
 
 maillog_title=Cerca nel registro di posta

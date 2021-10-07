@@ -1615,6 +1615,9 @@ check_ehomeformat=Format katalogu domowego $1 nie zawiera nazwy użytkownika ani
 check_ehomestyle=Styl katalogu domowego jest ustawiony na „Po prostu katalog podstawowy”, co nie jest możliwe w Virtualmin. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>.
 check_jailkitok=W tym systemie dostępne są więzienia Chroot
 check_jailkiterr=Więzienia Chroot są niedostępne : $1 
+check_eyumrepofile=Plik konfiguracyjny repozytorium Virtualmin $1 nie istnieje!
+check_yumrepook=Repozytorium Virtualmin jest skonfigurowane poprawnie
+check_yumrepowrong=Plik konfiguracyjny repozytorium Virtualmin $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
 check_yumrepomissing=Plik konfiguracyjny repozytorium APT Virtualmin $1 nie odnosi się do software.virtualmin.com!
 check_eaptrepofile=Plik konfiguracyjny repozytorium APT $1 nie istnieje!
 check_aptrepook=Repozytorium Virtualmin APT jest poprawnie skonfigurowane
@@ -2138,7 +2141,7 @@ backup_epurge=Brakująca lub nienumeryczna liczba dni, po której należy usuną
 backup_epurgetime=Usuwanie starych kopii zapasowych jest obsługiwane tylko wtedy, gdy jest używane miejsce docelowe oparte na dacie i włączone są <b>podstawienia strftime</b>
 backup_epurgepath=Nie można włączyć usuwania starych kopii zapasowych, ponieważ nie można wyodrębnić katalogu podstawowego ze ścieżki docelowej. Musi to być ścieżka taka jak <tt>/backup/virtualmin-%d-%m-%Y</tt> i nie może być katalogiem najwyższego poziomu
 backup_ekey2=Nie możesz używać wybranego klucza kopii zapasowej
-backup_purging2=Usuwanie kopii zapasowych z $2 starszych niż $1 dni ..
+backup_purging3=Usuwanie kopii zapasowych z $2 pasujących do $3 starszych niż $1 dni ..
 backup_purgenobase=.. nie można ustalić katalogu podstawowego z miejsca docelowego
 backup_deletingdir=Usuwanie katalogu $1, który ma $2 dni ..
 backup_deletingfile=Usuwanie pliku $1, który ma $2 dni ..
@@ -3381,6 +3384,7 @@ licence_goterr2=.. nieprawidłowa data ważności : $1
 licence_ecannot=Nie możesz ponownie sprawdzić licencji Virtualmin
 licence_maxdoms=Twój system jest licencjonowany tylko na $1 serwerów, ale masz $2.
 licence_maxservers2=Twój numer seryjny $3 jest licencjonowany tylko dla serwera $1, ale jest używany na $2.
+
 licence_ipchanged=Wygląda na to, że główny adres IP twojego systemu zmienił się z $1 na $2. Serwery wirtualne używające starego adresu mogą być nieosiągalne lub mogą wyświetlać niewłaściwe treści internetowe.
 licence_changeip=Zaktualizuj nieprawidłowe adresy IP
 licence_smallcert=Twój system używa certyfikatu SSL, który ma tylko $1 bitów, czyli mniej niż zalecany rozmiar 2048 bitów. Ten certyfikat został wydany przez $4 do $3 dla domeny $2.
@@ -4554,12 +4558,12 @@ upgrade_problems=Podczas aktualizacji systemu do Virtualmin Pro wystąpiły pewn
 upgrade_complete=Twój system został pomyślnie uaktualniony do Virtualmin Pro!
 upgrade_esharedroot=Twój katalog główny Webmin $1 jest współużytkowany przez wiele systemów - aktualizacje modułów są niedozwolone
 upgrade_eyumrepo=Virtualmin został zainstalowany z RPM, ale nie korzysta z repozytorium Virtualmin GPL. Aktualizacja nie jest obecnie możliwa.
-
+upgrade_eyumlist=Nie znaleziono pakietu $1 RPM na liście dostępnych pakietów z repozytorium. Być może jedno z Twoich obecnych repozytoriów nie działa?
 upgrade_edebrepo=Virtualmin został zainstalowany z pakietu Debian, ale nie korzysta z repozytorium GPL Virtualmin. Aktualizacja nie jest obecnie możliwa.
 upgrade_eyumfile=W $1 nie znaleziono repozytorium Virtualmin GPL
 upgrade_update=Aktualizacja dostępnych pakietów z APT ..
 upgrade_debs=Aktualizacja pakietów Debiana Virtualmin : $1 
-
+upgrade_yumclear=Czyszczenie pamięci podręcznych repozytoriów ..
 upgrade_etypematch=Aktualizacja nie jest możliwa, ponieważ typ instalacji Virtualmin to <tt>$1</tt>, ale Webmin to <tt>$2</tt>
 
 maillog_title=Wyszukaj dziennik poczty

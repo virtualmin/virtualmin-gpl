@@ -1859,6 +1859,9 @@ check_ehomeformat=O formato do diretório inicial $1 não contém o nome de usu�
 check_ehomestyle=O estilo do diretório inicial é definido como "Apenas o diretório base", que não pode ser usado com o Virtualmin. Isso pode ser corrigido na página <a href='$2'>Usuários e grupos do módulo</a>.
 check_jailkitok=Cadeias Chroot estão disponíveis neste sistema
 check_jailkiterr=As cadeias de chroot não estão disponíveis : $1 
+check_eyumrepofile=O arquivo de configuração do repositório Virtualmin $1 não existe!
+check_yumrepook=O repositório Virtualmin está configurado corretamente
+check_yumrepowrong=O arquivo de configuração do repositório Virtualmin $1 contém o número de série incorreto da chave de licença!
 check_yumrepomissing=O arquivo de configuração do repositório Virtualmin APT $1 não se refere a software.virtualmin.com!
 check_eaptrepofile=O arquivo de configuração do repositório APT $1 não existe!
 check_aptrepook=O repositório Virtualmin APT está configurado corretamente
@@ -2393,7 +2396,7 @@ backup_epurge=Número de dias ausente ou não numérico para excluir backups ant
 backup_epurgetime=A exclusão de backups antigos é suportada apenas quando um destino baseado em data é usado e as <b>substituições de tempo de espera</b> estão ativadas
 backup_epurgepath=A exclusão de backups antigos não pode ser ativada, pois o diretório base não pôde ser extraído do caminho de destino. Ele deve ser um caminho como <tt>/backup/virtualmin-%d-%m-%Y</tt> e não pode ser um diretório de nível superior
 backup_ekey2=Você não tem permissão para usar a chave de backup selecionada
-backup_purging2=Excluindo backups de $2 anteriores a $1 dias.
+backup_purging3=Excluindo backups de $2 correspondentes a $3 com mais de $1 dias ..
 backup_purgenobase=.. não foi possível elaborar o diretório base do destino
 backup_deletingdir=Excluindo o diretório $1, com $2 dias de idade.
 backup_deletingfile=Excluindo o arquivo $1, com $2 dias de idade.
@@ -3743,6 +3746,7 @@ licence_goterr2=.. prazo de validade inválido : $1
 licence_ecannot=Você não tem permissão para verificar novamente a licença do Virtualmin
 licence_maxdoms=Seu sistema está licenciado para apenas $1 servidores, mas você possui $2.
 licence_maxservers2=Seu número de série $3 está licenciado apenas para o servidor $1, mas está sendo usado em $2.
+
 licence_ipchanged=O endereço IP principal do seu sistema parece ter mudado de $1 para $2. Os servidores virtuais que usam o endereço antigo podem estar inacessíveis ou veicular o conteúdo da Web errado.
 licence_changeip=Atualizar endereços IP incorretos
 licence_smallcert=Seu sistema está usando um certificado SSL com apenas 1% de comprimento, menor que o tamanho recomendado de 2048 bits. Este certificado foi emitido por $4 a $3 para o domínio $2.
@@ -5232,13 +5236,13 @@ upgrade_complete=Seu sistema foi atualizado com sucesso para o Virtualmin Pro!
 upgrade_theme=Ativando o tema <i>$1</i> ..
 upgrade_esharedroot=Seu diretório raiz Webmin $1 é compartilhado entre vários sistemas - atualizações de módulo não são permitidas
 upgrade_eyumrepo=O Virtualmin foi instalado a partir de um RPM, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
-
+upgrade_eyumlist=O pacote RPM $1 não foi encontrado na lista de pacotes disponíveis do repositório. Talvez um de seus repositórios atuais não esteja funcionando?
 upgrade_edebrepo=O Virtualmin foi instalado a partir de um pacote Debian, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
 upgrade_rpms=Atualizando pacotes do Virtualmin RPM : $1 
 upgrade_eyumfile=Nenhum repositório Virtualmin GPL foi encontrado em $1 
 upgrade_update=Atualizando pacotes disponíveis do APT ..
 upgrade_debs=Atualizando pacotes Debian do Virtualmin : $1 
-
+upgrade_yumclear=Limpando caches de repositório ..
 upgrade_etypematch=A atualização não é possível, pois o tipo de instalação do Virtualmin é <tt>$1</tt>, mas o Webmin é <tt>$2</tt>
 
 maillog_title=Pesquisar log de email
