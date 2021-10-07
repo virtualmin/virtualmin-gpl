@@ -1379,7 +1379,7 @@ licence_warn=Bei dieser Lizenzprüfung ist jedoch ein vorübergehendes Problem a
 licence_goterr2=.. ungültiges Ablaufdatum : $1
 licence_ecannot=Sie dürfen die Virtualmin-Lizenz nicht erneut überprüfen
 licence_maxservers2=Ihre Seriennummer $3 ist nur für $1 Server lizenziert, wird aber auf $2 verwendet.
-
+licence_maxwarn=Sofern diese Seriennummer nicht vorübergehend für die Migration auf einen neuen Server verwendet wird, müssen Sie eine zusätzliche Lizenz bei <a target=_blank href='$1'>$2</a> erwerben, um Verstöße gegen die Serviceregeln auszuschließen und zu vermeiden vorzeitige Beendigung der bestehenden Lizenz.
 licence_ipchanged=Die primäre IP-Adresse Ihres Systems scheint sich von $1 auf $2 geändert zu haben. Virtuelle Server, die die alte Adresse verwenden, sind möglicherweise nicht erreichbar oder liefern den falschen Webinhalt.
 licence_smallcert=Ihr System verwendet ein SSL-Zertifikat, das nur $1 Bit lang ist und kleiner als die empfohlene Größe von 2048 Bit ist. Dieses Zertifikat wurde von $4 bis $3 für die Domain $2 ausgestellt.
 licence_smallself=Ihr System verwendet ein selbstsigniertes SSL-Zertifikat, das nur $1 Bit lang ist und kleiner als die empfohlene Größe von 2048 Bit ist. Es sollte sofort neu generiert werden.

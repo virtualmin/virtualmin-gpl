@@ -1033,7 +1033,7 @@ licence_ok2=.. la licencia es <i>válida</i>. Es válido para dominios $1 Virtua
 licence_ok3=.. la licencia es <i>válida</i>. Es válido para dominios de $1 Virtualmin y para su uso en sistemas $2 hasta $3.
 licence_goterr2=.. fecha de vencimiento no válida : $1
 licence_maxservers2=Su número de serie $3 tiene licencia solo para $1 servidor, pero se utiliza en $2.
-
+licence_maxwarn=A menos que este número de serie se utilice temporalmente para migrar a un nuevo servidor, debe comprar una licencia adicional en <a target=_blank href='$1'>$2</a> para evitar la violación de las reglas de servicio y evitar terminación anticipada de la licencia existente.
 licence_ipchanged=La dirección IP principal de su sistema parece haber cambiado de $1 a $2. Los servidores virtuales que usan la dirección anterior pueden ser inalcanzables o servir el contenido web incorrecto.
 licence_changeip=Actualizar direcciones IP incorrectas
 licence_smallcert=Su sistema está utilizando un certificado SSL de solo $1 bits de longitud, que es más pequeño que el tamaño recomendado de 2048 bits. Este certificado fue emitido por $4 a $3 para el dominio $2.

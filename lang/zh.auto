@@ -1633,7 +1633,7 @@ licence_unlimited=无限
 licence_goterr2=..无效的到期日期： $1
 licence_maxdoms=您的系统仅许可用于 $1服务器，但是您具有 $2。
 licence_maxservers2=您的序列号 $3 仅授权用于 $1 服务器，但正在 $2 上使用。
-
+licence_maxwarn=除非为了迁移到新服务器而临时使用此序列号，否则您必须在 <a target=_blank href='$1'>$2</a> 购买额外的许可证，以防止违反服务规则并避免提前终止现有许可证。
 licence_ipchanged=系统的主IP地址似乎已从 $1更改为 $2。使用旧地址的虚拟服务器可能无法访问或提供了错误的Web内容。
 licence_changeip=更新不正确的IP地址
 licence_smallcert=您的系统使用的SSL证书长度仅为 $1位，小于建议的2048位。此证书由 $4颁发给 $3的域 $2。

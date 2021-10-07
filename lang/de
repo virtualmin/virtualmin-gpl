@@ -2638,7 +2638,6 @@ resel_edefns=Nameserver '$1' ist ungültig
 licence_unlimited=unlimitiert
 licence_goterr=.. ein Problem wurde erkannt : $1
 licence_maxdoms=Ihr System ist für nur $1 Server lizenziert, aber Sie haben $2.
-
 licence_changeip=Update nicht korrekte IP-Adressen
 licence_newcert=Generiere neues Zertifikat
 licence_newcsr=Neues Zertifikat anfordern

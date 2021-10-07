@@ -459,7 +459,7 @@ licence_ok2=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domene
 licence_ok3=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domener, og for bruk på $2 -systemer til $3.
 licence_goterr2=.. ugyldig utløpsdato : $1 
 licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men brukes på $2.
-
+licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere til en ny server, må du kjøpe en tilleggslisens på <a target=_blank href='$1'>$2</a> for å forhindre brudd på tjenestereglene og unngå tidlig avslutning av eksisterende lisens.
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 

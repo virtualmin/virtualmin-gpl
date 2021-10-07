@@ -10870,6 +10870,7 @@ if ($status == 0 && $max_servers && !$err) {
 	if ($servers > $max_servers+1) {
 		$status = 1;
 		$err = &text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>");
+		$err .= " " . &text('licence_maxwarn', "https://virtualmin.com/shop/", "https://virtualmin.com/shop/");
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);

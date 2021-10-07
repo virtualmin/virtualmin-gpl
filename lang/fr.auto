@@ -1853,7 +1853,7 @@ licence_goterr2=.. date d'expiration non valide : $1
 licence_ecannot=Vous n'êtes pas autorisé à revérifier la licence Virtualmin
 licence_maxdoms=Votre système n'est autorisé que pour $1 serveurs, mais vous avez $2.
 licence_maxservers2=Votre numéro de série $3 est sous licence pour le serveur $1 uniquement, mais est utilisé sur $2.
-
+licence_maxwarn=À moins que ce numéro de série ne soit utilisé temporairement afin de migrer vers un nouveau serveur, vous devez acheter une licence supplémentaire chez <a target=_blank href='$1'>$2</a> pour éviter toute violation des règles de service et éviter résiliation anticipée de la licence existante.
 licence_ipchanged=L'adresse IP principale de votre système semble être passée de $1 à $2. Les serveurs virtuels utilisant l'ancienne adresse peuvent être inaccessibles ou servir le mauvais contenu Web.
 licence_changeip=Mettre à jour des adresses IP incorrectes
 licence_smallcert=Votre système utilise un certificat SSL qui ne fait que $1 bits, ce qui est inférieur à la taille recommandée de 2048 bits. Ce certificat a été émis par $4 à $3 pour le domaine $2.

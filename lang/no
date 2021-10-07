@@ -3538,7 +3538,6 @@ licence_unlimited=ubegrenset
 licence_goterr=.. oppdaget et problem : $1
 licence_ecannot=Du har ikke lov til å sjekke Virtualmin lisensen på nytt
 licence_maxdoms=Systemet ditt er kun lisensiert for $1 tjenere, men du har $2.
-
 licence_ipchanged=Det ser ut til systemets primære IP adresse er endret fra $1 til $2. Virtuelle tjenere som bruker den gamle adressen kan være utilgjengelige, eller de kan vise feil innhold.
 licence_changeip=Oppdater ugyldige IP adresser
 licence_smallcert=Systemet ditt bruker et SSL sertifikat som er bare $1 bits langt. Dette er mindre enn den anbefalte størrelsesn på 2048 bits. Dette sertifikatet ble utstedt av $4 til $3 for domenet $2.
