@@ -1594,7 +1594,6 @@ backup_epurge=Nombre manquant ou non-numérique de jours après lequel vous pouv
 backup_epurgetime=Suppression des anciennes sauvegardes est supportée si une destination en fonction de la date est utilisée, et <b>substitutions strftime</b> sont activées
 backup_epurgepath=Suppression des anciennes sauvegardes ne peut pas être activé, que le répertoire de base n'a pas pu être extrait du chemin de destination. Il doit être un chemin comme <tt>/backup/virtualmin-%d-%m-%Y</tt>, et ne peut pas être un répertoire de haut niveau
 backup_ekey2=Vous n'êtes pas autorisé à utiliser la clé de sauvegarde sélectionné
-backup_purging2=Suppression des sauvegardes à partir de $2 plus âgé de $1 jours ..
 backup_purgenobase=.. ne pouvait pas résoudre le répertoire de base de destination
 backup_deletingdir=Suppression de répertoire  $1, qui est âgé de $2 jours ..
 backup_deletingfile=Suppression de fichier $1, qui est âgé de $2 jours ..

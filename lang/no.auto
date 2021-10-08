@@ -177,6 +177,9 @@ check_eresolvlist=liste over DNS-servere
 check_dnsmissing=Systemet ser ikke ut til å ha noen DNS-servere konfigurert. Standard oppførselen til å bruke en lokal DNS-server bør imidlertid fortsatt fungere.
 check_jailkitok=Chroot-fengsler er tilgjengelige på dette systemet
 check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1 
+check_eyumrepofile=Konfigurasjonsfilen til Virtualmin -depotet $1 finnes ikke!
+check_yumrepook=Virtualmin -depotet er konfigurert riktig
+check_yumrepowrong=Konfigurasjonsfilen til Virtualmin -depotet $1 inneholder feil serienummer på lisensnøkkelen!
 check_yumrepomissing=Konfigurasjonsfilen $1 for Virtualmin APT refererer ikke til software.virtualmin.com!
 check_eaptrepofile=APT-repository konfigurasjonsfilen $1 eksisterer ikke!
 check_aptrepook=Virtualmin APT-repository er riktig konfigurert
@@ -259,6 +262,7 @@ backup_efeatureeval=.. sikkerhetskopi av $1 mislyktes : $2
 backup_ekilllock=En sikkerhetskopi til samme destinasjon med PID $1 er avsluttet
 backup_edesturl=Sikkerhetskopiedestinasjon $1 er ugyldig : $2 
 backup_eownergone=Eierdomenet eksisterer ikke lenger!
+backup_purging3=Sletter sikkerhetskopier fra $2 som matcher $3 eldre enn $1 dager ..
 backup_purgedtime=.. fant $1 sikkerhetskopier, men ingen var gamle nok
 backup_purgeegcbuckets=.. kunne ikke registrere Google-bøtter : $1 
 backup_purgeefiles3=.. kunne ikke registrere Google Cloud Storage-filer : $1 
@@ -455,6 +459,7 @@ licence_ok2=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domene
 licence_ok3=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domener, og for bruk på $2 -systemer til $3.
 licence_goterr2=.. ugyldig utløpsdato : $1 
 licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men brukes på $2.
+licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere til en ny server, må du kjøpe en tilleggslisens på <a target=_blank href='$1'>$2</a> for å forhindre brudd på tjenestereglene og unngå tidlig avslutning av eksisterende lisens.
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 
@@ -632,6 +637,8 @@ dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
 
 upgrade_epackages=Fant ingen pakker å installere!
+upgrade_eyumlist=$1 RPM -pakken ble ikke funnet i listen over tilgjengelige pakker fra depotet. Kanskje en av de nåværende depotene dine ikke fungerer?
+upgrade_yumclear=Rydder lagringsbuffer ..
 
 exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.

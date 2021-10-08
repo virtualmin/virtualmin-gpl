@@ -730,6 +730,9 @@ check_ehomeformat=Giriş dizini biçimi $1, kullanıcı adını veya etki alanı
 check_ehomestyle=Giriş dizini stili Virtualmin ile kullanılamayan "Sadece temel dizin" olarak ayarlanmış. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir.
 check_jailkitok=Bu sistemde krom hapishaneleri mevcuttur
 check_jailkiterr=Krom hapishaneler mevcut değil : $1 
+check_eyumrepofile=$1 Virtualmin deposu yapılandırma dosyası mevcut değil!
+check_yumrepook=Virtualmin deposu doğru şekilde yapılandırılmış
+check_yumrepowrong=Virtualmin veri havuzu yapılandırma dosyası $1, yanlış seri numarası lisans anahtarı içeriyor!
 check_yumrepomissing=$1 Virtualmin APT veri havuzu yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
 check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
@@ -1058,7 +1061,7 @@ backup_epurge=Eski yedeklemeleri silmek için eksik veya sayısal olmayan gün s
 backup_epurgetime=Eski yedeklemelerin silinmesi yalnızca tarihe dayalı bir hedef kullanıldığında ve <b>strftime ikameleri</b> etkinleştirildiğinde desteklenir
 backup_epurgepath=Temel dizin hedef yoldan çıkarılamadığından, eski yedeklemelerin silinmesi etkinleştirilemez. <tt>/backup/virtualmin-%d-%m-%Y</tt> gibi bir yol olmalı ve üst düzey bir dizin olamaz
 backup_ekey2=Seçilen yedek anahtarı kullanma izniniz yok
-backup_purging2=$1 günden daha eski $2 'den yedekler siliniyor
+backup_purging3=$1 günden eski $3 ile eşleşen $2'den yedekler siliniyor ..
 backup_purgenobase=.. ana dizini hedeften çıkaramadı
 backup_deletingdir=$2 günlük olan $1 dizini siliniyor ..
 backup_deletingfile=$2 gün olan $1 dosyası siliniyor ..
@@ -1807,6 +1810,7 @@ licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
 licence_maxdoms=Sisteminiz yalnızca $1 sunucu için lisanslanmış, ancak $2 sunucunuz var.
 licence_maxservers2=$3 seri numaranız yalnızca $1 sunucusu için lisanslanmıştır, ancak $2 üzerinde kullanılmaktadır.
+licence_maxwarn=Bu seri numarası yeni bir sunucuya geçmek için geçici olarak kullanılmadığı sürece, hizmet kurallarının ihlalini önlemek ve bundan kaçınmak için <a target=_blank href='$1'>$2</a> adresinden ek bir lisans satın almalısınız. mevcut lisansın erken feshi.
 licence_ipchanged=Sisteminizin birincil IP adresinin $1 'den $2 'ye değiştiği görülüyor. Eski adresi kullanan sanal sunuculara ulaşılamayabilir veya yanlış web içeriği sunabilir.
 licence_changeip=Hatalı IP Adreslerini Güncelleyin
 licence_smallcert=Sisteminiz, yalnızca $1 bit uzunluğunda ve önerilen 2048 bit boyutundan daha küçük bir SSL sertifikası kullanıyor. Bu sertifika, $2 alan adı için $4 ile $3 arasında verildi.
@@ -2751,13 +2755,13 @@ upgrade_complete=Sisteminiz başarıyla Virtualmin Pro'ya yükseltildi!
 upgrade_theme=<i>$1</i> temasını etkinleştirme ..
 upgrade_esharedroot=$1 Webmin kök dizininiz birden çok sistem arasında paylaşılıyor - modül güncellemelerine izin verilmiyor
 upgrade_eyumrepo=Virtualmin bir RPM'den kuruldu, ancak Virtualmin GPL deposu kullanılmadı. Yükseltme şu anda mümkün değil.
-
+upgrade_eyumlist=$1 RPM paketi, depodaki kullanılabilir paketler listesinde bulunamadı. Belki de mevcut depolarınızdan biri çalışmıyor?
 upgrade_edebrepo=Virtualmin bir Debian paketinden kurulmuştur, fakat Virtualmin GPL deposunu kullanmamaktadır. Yükseltme şu anda mümkün değil.
 upgrade_rpms=Virtualmin RPM paketlerini yükseltme : $1 
 upgrade_eyumfile=$1 içinde Virtualmin GPL deposu bulunamadı
 upgrade_update=APT'deki mevcut paketler güncelleniyor.
 upgrade_debs=Virtualmin Debian paketlerini yükseltme : $1 
-
+upgrade_yumclear=Depo önbelleklerini temizleme ..
 upgrade_etypematch=Virtualmin'in yükleme türü <tt>$1</tt> olduğundan, Webmin'in <tt>$2</tt> olduğundan yükseltme mümkün değil
 
 maillog_title=Posta Günlüğünde Ara

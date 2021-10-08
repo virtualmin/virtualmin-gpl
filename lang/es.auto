@@ -439,6 +439,9 @@ check_ehomeformat=El formato de directorio de inicio $1 no contiene el nombre de
 check_ehomestyle=El estilo del directorio de inicio se establece en Solo directorio base, que no se puede usar con Virtualmin. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>.
 check_jailkitok=Las cárceles Chroot están disponibles en este sistema
 check_jailkiterr=Las cárceles Chroot no están disponibles : $1
+check_eyumrepofile=¡El archivo de configuración del repositorio de Virtualmin $1 no existe!
+check_yumrepook=El repositorio de Virtualmin está configurado correctamente
+check_yumrepowrong=¡El archivo de configuración del repositorio de Virtualmin $1 contiene el número de serie incorrecto de la clave de licencia!
 check_yumrepomissing=¡El archivo de configuración del repositorio APT de Virtualmin $1 no hace referencia a software.virtualmin.com!
 check_eaptrepofile=¡El archivo de configuración del repositorio APT $1 no existe!
 check_aptrepook=El repositorio APT de Virtualmin está configurado correctamente
@@ -587,6 +590,7 @@ backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaura
 backup_ebackupdirlock=.. el directorio de respaldo temporal $1 está bloqueado por el proceso $2
 backup_efeatureeval=.. falló la copia de seguridad de $1 : $2 
 backup_eownergone=¡El dominio del propietario ya no existe!
+backup_purging3=Eliminando copias de seguridad de $2 coincidentes $3 anteriores a $1 días. ..
 backup_purgeefiles5=.. no pudo enumerar los archivos de Backblaze : $1 
 backup_deletingwebmin=Eliminando el archivo $1 a través de Webmin, que tiene $2 días de antigüedad.
 backup_edelwebmin=.. Falló la eliminación de Webmin : $1
@@ -1029,6 +1033,7 @@ licence_ok2=.. la licencia es <i>válida</i>. Es válido para dominios $1 Virtua
 licence_ok3=.. la licencia es <i>válida</i>. Es válido para dominios de $1 Virtualmin y para su uso en sistemas $2 hasta $3.
 licence_goterr2=.. fecha de vencimiento no válida : $1
 licence_maxservers2=Su número de serie $3 tiene licencia solo para $1 servidor, pero se utiliza en $2.
+licence_maxwarn=A menos que este número de serie se utilice temporalmente para migrar a un nuevo servidor, debe comprar una licencia adicional en <a target=_blank href='$1'>$2</a> para evitar la violación de las reglas de servicio y evitar terminación anticipada de la licencia existente.
 licence_ipchanged=La dirección IP principal de su sistema parece haber cambiado de $1 a $2. Los servidores virtuales que usan la dirección anterior pueden ser inalcanzables o servir el contenido web incorrecto.
 licence_changeip=Actualizar direcciones IP incorrectas
 licence_smallcert=Su sistema está utilizando un certificado SSL de solo $1 bits de longitud, que es más pequeño que el tamaño recomendado de 2048 bits. Este certificado fue emitido por $4 a $3 para el dominio $2.
@@ -1454,7 +1459,8 @@ newstyles_del=Elimina ahora
 newstyles_edelete=¡El estilo de contenido seleccionado ya no existe!
 
 upgrade_epackages=¡No se encontraron paquetes para instalar!
-
+upgrade_eyumlist=El paquete $1 RPM no se encontró en la lista de paquetes disponibles del repositorio. ¿Quizás uno de sus repositorios actuales no está funcionando?
+upgrade_yumclear=Borrando las memorias caché del repositorio. ..
 upgrade_etypematch=La actualización no es posible ya que el tipo de instalación de Virtualmin es de <tt>$1</tt> pero el de Webmin es de <tt>$2</tt>
 
 massg_edeleted=El script $1 se ha eliminado manualmente y, por lo tanto, no se puede actualizar.

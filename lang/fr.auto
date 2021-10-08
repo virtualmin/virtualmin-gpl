@@ -759,6 +759,9 @@ check_ehomeformat=Le format du répertoire personnel $1 ne contient pas le nom d
 check_ehomestyle=Le style du répertoire personnel est défini sur "Juste répertoire de base", ce qui est inutilisable avec Virtualmin. Cela peut être corrigé sur la page <a href='$2'>Configuration du module Utilisateurs et groupes</a>.
 check_jailkitok=Les prisons Chroot sont disponibles sur ce système
 check_jailkiterr=Les prisons Chroot ne sont pas disponibles : $1 
+check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin $1 n'existe pas !
+check_yumrepook=Le référentiel Virtualmin est correctement configuré
+check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin $1 contient le mauvais numéro de série de clé de licence !
 check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
 check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe pas!
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
@@ -1005,6 +1008,7 @@ backup_efeatureeval=.. la sauvegarde de $1 a échoué : $2
 backup_ekilllock=Une sauvegarde vers la même destination avec le PID $1 a été interrompue
 backup_edesturl=La destination de sauvegarde $1 n'est pas valide : $2 
 backup_eownergone=Le domaine propriétaire n'existe plus!
+backup_purging3=Suppression des sauvegardes de $2 correspondant à $3 datant de plus de $1 jours ..
 backup_purgeegcbuckets=.. n'a pas réussi à répertorier les compartiments Google : $1 
 backup_purgeefiles3=.. n'a pas réussi à répertorier les fichiers Google Cloud Storage : $1 
 backup_purgeefiles4=.. n'a pas réussi à répertorier les fichiers Dropbox : $1 
@@ -1849,6 +1853,7 @@ licence_goterr2=.. date d'expiration non valide : $1
 licence_ecannot=Vous n'êtes pas autorisé à revérifier la licence Virtualmin
 licence_maxdoms=Votre système n'est autorisé que pour $1 serveurs, mais vous avez $2.
 licence_maxservers2=Votre numéro de série $3 est sous licence pour le serveur $1 uniquement, mais est utilisé sur $2.
+licence_maxwarn=À moins que ce numéro de série ne soit utilisé temporairement afin de migrer vers un nouveau serveur, vous devez acheter une licence supplémentaire chez <a target=_blank href='$1'>$2</a> pour éviter toute violation des règles de service et éviter résiliation anticipée de la licence existante.
 licence_ipchanged=L'adresse IP principale de votre système semble être passée de $1 à $2. Les serveurs virtuels utilisant l'ancienne adresse peuvent être inaccessibles ou servir le mauvais contenu Web.
 licence_changeip=Mettre à jour des adresses IP incorrectes
 licence_smallcert=Votre système utilise un certificat SSL qui ne fait que $1 bits, ce qui est inférieur à la taille recommandée de 2048 bits. Ce certificat a été émis par $4 à $3 pour le domaine $2.
@@ -2905,13 +2910,13 @@ upgrade_complete=Votre système a été mis à niveau avec succès vers Virtualm
 upgrade_theme=Activation du thème <i>$1</i> ..
 upgrade_esharedroot=Votre répertoire racine Webmin $1 est partagé entre plusieurs systèmes - les mises à jour de module ne sont pas autorisées
 upgrade_eyumrepo=Virtualmin a été installé à partir d'un RPM, mais n'utilise pas le référentiel Virtualmin GPL. La mise à niveau n'est pas possible pour le moment.
-
+upgrade_eyumlist=Le package RPM $1 n'a pas été trouvé dans la liste des packages disponibles à partir du référentiel. Peut-être que l'un de vos référentiels actuels ne fonctionne pas ?
 upgrade_edebrepo=Virtualmin a été installé à partir d'un paquet Debian, mais n'utilise pas le référentiel GPL Virtualmin. La mise à niveau n'est pas possible pour le moment.
 upgrade_rpms=Mise à niveau des packages Virtualmin RPM : $1 
 upgrade_eyumfile=Aucun référentiel GPL Virtualmin n'a été trouvé dans $1 
 upgrade_update=Mise à jour des packages disponibles depuis APT.
 upgrade_debs=Mise à niveau des packages Virtualmin Debian : $1 
-
+upgrade_yumclear=Vider les caches du référentiel ..
 upgrade_etypematch=La mise à niveau n'est pas possible car le type d'installation de Virtualmin est <tt>$1</tt> mais Webmin est <tt>$2</tt>
 
 maillog_title=Rechercher dans le journal de messagerie

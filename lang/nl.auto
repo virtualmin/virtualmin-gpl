@@ -240,6 +240,9 @@ check_eresolvlist=lijst met DNS-servers
 check_dnsmissing=Het systeem lijkt geen DNS-servers te hebben geconfigureerd. Het standaardgedrag van het gebruik van een lokale DNS-server zou echter nog steeds moeten werken.
 check_jailkitok=Op dit systeem zijn Chroot-jails beschikbaar
 check_jailkiterr=Chroot-jails zijn niet beschikbaar : $1
+check_eyumrepofile=Het configuratiebestand van de Virtualmin-repository $1 bestaat niet!
+check_yumrepook=De Virtualmin-repository is correct geconfigureerd
+check_yumrepowrong=Het configuratiebestand van de Virtualmin-repository $1 bevat het verkeerde serienummer van de licentiesleutel!
 check_yumrepomissing=Het Virtualmin APT-repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
 check_eaptrepofile=Het APT-repository-configuratiebestand $1 bestaat niet!
 check_aptrepook=De Virtualmin APT-repository is correct geconfigureerd
@@ -369,6 +372,7 @@ backup_ezipkey=Versleuteling kan niet worden gebruikt met back-ups in ZIP-formaa
 backup_edesturl=Back-upbestemming $1 is ongeldig : $2
 backup_eownergone=Domein van eigenaar bestaat niet meer!
 backup_ekey2=U mag de geselecteerde back-upsleutel niet gebruiken
+backup_purging3=Back-ups verwijderen van $2 die overeenkomen met $3 ouder dan $1 dagen ..
 backup_purgedtime=.. $1 backups gevonden, maar geen enkele was oud genoeg
 backup_purgeegcbuckets=.. kan Google-buckets niet weergeven : $1
 backup_purgeefiles2=.. kon Rackspace-bestanden niet weergeven : $1
@@ -668,6 +672,7 @@ licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domei
 licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
 licence_goterr2=.. ongeldige vervaldatum : $1
 licence_maxservers2=Uw serienummer $3 heeft alleen een licentie voor $1 server, maar wordt gebruikt op $2.
+licence_maxwarn=Tenzij dit serienummer tijdelijk wordt gebruikt om naar een nieuwe server te migreren, moet u een extra licentie aanschaffen bij <a target=_blank href='$1'>$2</a> om schending van de serviceregels te voorkomen en te voorkomen voortijdige beëindiging van de bestaande licentie.
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen
 licence_smallcert=Uw systeem gebruikt een SSL-certificaat dat slechts $1 bits lang is, wat kleiner is dan de aanbevolen grootte van 2048 bits. Dit certificaat is uitgegeven door $4 tot $3 voor het domein $2.
@@ -902,6 +907,8 @@ dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
 
 upgrade_epackages=Geen pakketten gevonden om te installeren!
+upgrade_eyumlist=Het $1 RPM-pakket is niet gevonden in de lijst met beschikbare pakketten uit de repository. Misschien werkt een van uw huidige repositories niet?
+upgrade_yumclear=Opslagplaatscaches wissen ..
 
 exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.

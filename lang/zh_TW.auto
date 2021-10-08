@@ -648,6 +648,9 @@ check_ehomeformat=主目錄格式 $1不包含用戶名或域名。可以在<a hr
 check_ehomestyle=主目錄樣式設置為“ Just base directory”，這在Virtualmin中無法使用。可以在<a href='$2'>“用戶和組”模塊配置</a>頁上對此進行更正。
 check_jailkitok=Chroot監獄在此系統上可用
 check_jailkiterr=Chroot監獄不可用： $1
+check_eyumrepofile=Virtualmin 存儲庫配置文件 $1 不存在！
+check_yumrepook=Virtualmin 存儲庫配置正確
+check_yumrepowrong=Virtualmin 存儲庫配置文件 $1 包含錯誤的許可證密鑰序列號！
 check_yumrepomissing=Virtualmin APT存儲庫配置文件 $1不引用software.virtualmin.com！
 check_eaptrepofile=APT存儲庫配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存儲庫配置正確
@@ -943,7 +946,7 @@ backup_epurge=缺少或天數後刪除舊備份的天數
 backup_epurgetime=僅當使用基於日期的目標並啟用<b>strftime替換</b>時，才支持刪除舊備份
 backup_epurgepath=無法啟用舊備份的刪除，因為無法從目標路徑提取基本目錄。它必須是<tt>/backup/virtualmin-％d-％m-％Y</tt>之類的路徑，並且不能是頂級目錄
 backup_ekey2=您不允許使用所選的備份密鑰
-backup_purging2=正在從 $2天前刪除備份 $2 ..
+backup_purging3=正在從與 $3 匹配的 $2 中刪除早於 $1 天的備份 ..
 backup_purgenobase=..無法從目標位置算出基本目錄
 backup_deletingdir=刪除目錄 $1，該目錄已存在 $2天。
 backup_deletingfile=正在刪除 $2天的文件 $1 ..
@@ -1630,6 +1633,7 @@ licence_unlimited=無限
 licence_goterr2=..無效的到期日期： $1
 licence_maxdoms=您的系統僅許可用於 $1服務器，但是您具有 $2。
 licence_maxservers2=您的序列號 $3 僅授權用於 $1 服務器，但正在 $2 上使用。
+licence_maxwarn=除非為了遷移到新服務器而臨時使用此序列號，否則您必須在 <a target=_blank href='$1'>$2</a> 購買額外的許可證，以防止違反服務規則並避免提前終止現有許可證。
 licence_ipchanged=系統的主IP地址似乎已從 $1更改為 $2。使用舊地址的虛擬服務器可能無法訪問或提供了錯誤的Web內容。
 licence_changeip=更新不正確的IP地址
 licence_smallcert=您的系統使用的SSL證書長度僅為 $1位，小於建議的2048位。此證書是由 $4頒發給 $3的域 $2的。
@@ -2303,13 +2307,13 @@ newstyles_edelete=選定的內容樣式不再存在！
 upgrade_epackages=找不到要安裝的軟件包！
 upgrade_eamazon=此許可證密鑰不能用於升級
 upgrade_eyumrepo=Virtualmin已從RPM安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
-
+upgrade_eyumlist=在存儲庫的可用包列表中找不到 $1 RPM 包。也許您當前的存儲庫之一不起作用？
 upgrade_edebrepo=Virtualmin已從Debian軟件包安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
 upgrade_rpms=升級Virtualmin RPM軟件包： $1
 upgrade_eyumfile=在 $1中找不到Virtualmin GPL存儲庫
 upgrade_update=從APT更新可用的軟件包。
 upgrade_debs=升級Virtualmin Debian軟件包： $1
-
+upgrade_yumclear=清除存儲庫緩存 ..
 upgrade_etypematch=無法升級，因為Virtualmin的安裝類型為<tt>$1</tt>，而Webmin的安裝類型為<tt>$2</tt>
 
 maillog_showspam=顯示垃圾郵件？
