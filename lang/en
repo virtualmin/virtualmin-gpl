@@ -599,6 +599,7 @@ setup_virtnotdone=.. could not find any interface with IP $1 !
 setup_virt6=Adding IPv6 address $1 ..
 setup_virt6done=.. added to interface $1
 setup_done=.. done
+setup_failed=.. failed
 setup_notrun=.. not running!
 setup_quota=Setting user's quota ..
 setup_webalizer=Setting up scheduled Webalizer reporting ..
@@ -1461,6 +1462,9 @@ save_euserquota=The server administrator's disk quota should not be lowered to $
 save_aliasusers=The feature being disabled is in use by the following alias servers : $1
 save_erquota=The disk quota for this virtual server cannot be set to unlimited, as it is owned by the reseller $1 who has a quota limit
 save_erbw=The bandwidth limit for this virtual server cannot be set to unlimited, as it is owned by the reseller $1 who has a bandwidth limit
+save_installed_scripts_dbuser=Updating database username for installed scripts ..
+save_installed_scripts_dbpass=Updating database password for installed scripts ..
+save_installed_scripts_db=Updating database name for installed scripts ..
 
 luser_err=Failed to save local user
 luser_etaken=A user with the same name already exists

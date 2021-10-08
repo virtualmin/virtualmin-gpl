@@ -25,6 +25,10 @@ foreach $f (@database_features) {
 		&$cfunc($d, $in{$f."_def"} ? undef : $in{$f});
 		$mfunc = "modify_${f}";
 		&$mfunc($d, $oldd);
+
+		# Update installed scripts credentials
+		update_all_installed_scripts_database_credentials($d, 'dbpass', $in{$f})
+			if (!$update_all_installed_scripts_database_credentials++);
 		}
 	}
 

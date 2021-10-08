@@ -329,6 +329,28 @@ if ($opts->{'newdb'}) {
 return (1, "WordPress directory and tables deleted.");
 }
 
+# script_wordpress_db_conn_desc()
+# Returns a list of options for config file to update
+sub script_wordpress_db_conn_desc
+{
+my $db_conn_desc = 
+    { 'wp-config.php' => 
+        {
+           'dbpass' => 
+           {
+               'replace' => [ 'define\(\s*[\'"]DB_PASSWORD[\'"],' => "define('DB_PASSWORD', '\$dbpass');" ],
+               'func' => 'php_quotemeta',
+               'func_params' => 1,
+           },
+           'dbuser' => 
+           {
+               'replace' => [ 'define\(\s*[\'"]DB_USER[\'"],' => "define('DB_USER', '\$dbuser');" ],
+           },
+        }
+    };
+return $db_conn_desc;
+}
+
 # script_wordpress_realversion(&domain, &opts)
 # Returns the real version number of some script install, or undef if unknown
 sub script_wordpress_realversion
