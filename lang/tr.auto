@@ -1935,6 +1935,7 @@ scripts_proxyfailed=.. proxy kurulumu başarısız oldu : $1
 scripts_epartial=.. kurulum sadece kısmen tamamlandı.
 scripts_icommand=$1 komutu eksik
 scripts_idbneed=$1 veritabanı gerekiyor
+scripts_idbneed_link=<a href='$1'>$2</a> sayfasında etkinleştirilebilen,
 scripts_idbneedor=$1 yada 2
 scripts_gemver=Ruby Gems $1 sürümünden en son sürüme güncelleniyor.
 scripts_gemverfailed=.. Taşlar güncelleme başarısız : $1 

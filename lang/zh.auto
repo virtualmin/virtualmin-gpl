@@ -1734,6 +1734,7 @@ scripts_proxyfailed=..代理安装失败： $1
 scripts_epartial=..安装仅部分完成。
 scripts_icommand=缺少命令 $1
 scripts_idbneed=需要一个 $1数据库
+scripts_idbneed_link=，可以在 <a href='$1'>$2</a> 页面上启用
 scripts_idbneedor=$1或 $2
 scripts_gemver=将Ruby Gems从 $1..更新到最新版本。
 scripts_gemverfailed=..宝石更新失败： $1

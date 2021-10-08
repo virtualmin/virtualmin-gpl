@@ -698,6 +698,7 @@ scripts_phpmodinst=Module installeren vanuit softwarepakketten ..
 scripts_phpmoddone=.. succesvol geïnstalleerde module uit pakket $1
 scripts_phpmodfailed=.. kan module van $1 mogelijke pakketten niet installeren
 scripts_passmode4=Eerste wachtwoord voor script
+scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server
 scripts_iphpnover=Er is geen PHP-versie gevonden voor deze virtuele server
 scripts_iphpfullver=PHP-versie $1 of hoger is vereist, maar deze virtuele server gebruikt versie $2
