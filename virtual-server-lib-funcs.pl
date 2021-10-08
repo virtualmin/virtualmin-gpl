@@ -8047,8 +8047,16 @@ if ($dom->{'jail'} && !&check_jailkit_support()) {
 if (!$dom->{'alias'} && &domain_has_website($dom) && defined($content)) {
 	# Just create virtualmin default index.html
 	&$first_print($text{'setup_contenting'});
-	&create_index_content($dom, $content, 0);
-	&$second_print($text{'setup_done'});
+	eval {
+		local $main::error_must_die = 1;
+		&create_index_content($dom, $content, 0);
+		};
+	if ($@) {
+		&$second_print(&text('setup_econtenting', "$@"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 # Run the after creation command

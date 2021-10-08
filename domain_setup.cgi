@@ -491,13 +491,21 @@ if (!$dom{'alias'} && &domain_has_website(\%dom) &&
 	# Create index.html file 
 	&$first_print($text{'setup_contenting'});
 	my $home = &public_html_dir(\%dom);
-	&open_tempfile_as_domain_user(
-		\%dom, DATA, ">$home/index.html");
-	$content =~ s/\n/<br>\n/g if ($content);
-	$content = &substitute_virtualmin_template($content, \%dom);
-	&print_tempfile(DATA, $content);
-	&close_tempfile_as_domain_user(\%dom, DATA);
-	&$second_print($text{'setup_done'});
+	eval {
+		local $main::error_must_die = 1;
+		&open_tempfile_as_domain_user(
+			\%dom, DATA, ">$home/index.html");
+		$content =~ s/\n/<br>\n/g if ($content);
+		$content = &substitute_virtualmin_template($content, \%dom);
+		&print_tempfile(DATA, $content);
+		&close_tempfile_as_domain_user(\%dom, DATA);
+		};
+	if ($@) {
+		&$second_print(&text('setup_econtenting', "$@"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 
 # Setup SSH public key if one was given

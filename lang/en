@@ -623,6 +623,7 @@ setup_evaddaliasdomain=.. vaddaliasdomain failed : $1
 setup_fwding=Adding alias to forward all email to $1 ..
 setup_styleing=Applying initial website style ..
 setup_contenting=Creating initial website index page ..
+setup_econtenting=.. failed to create initial content : $1
 setup_sshkey1=Generating SSH private and public keys ..
 setup_sshkey2=Authorizing SSH public key ..
 setup_esshkeydir=Virtual server need a directory and Unix user
