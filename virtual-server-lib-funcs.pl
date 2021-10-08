@@ -18548,6 +18548,18 @@ else {
 	}
 }
 
+# text_html(&text)
+# Prints given only if in HTML mode
+sub text_html {
+if (defined(&get_sub_ref_name)) {
+	my $print_mode = &get_sub_ref_name($first_print);
+	if ($print_mode &&
+	    $print_mode =~ /_html_/) {
+		return &text(@_);
+		}
+	}
+}
+
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {

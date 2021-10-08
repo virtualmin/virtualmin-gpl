@@ -2789,7 +2789,10 @@ if (defined(&{$script->{'dbs_func'}})) {
 			$dbnames[0] :
 			&text('scripts_idbneedor', @dbnames[0..$#dbnames-1],
 						   $dbnames[$#dbnames]);
-		push(@rv, &text('scripts_idbneed', $dbneed));
+		push(@rv, &text('scripts_idbneed', $dbneed) .
+			(&can_edit_domain($d) ? 
+			 &text_html('scripts_idbneed_link',
+				        "edit_domain.cgi?dom=$d->{'id'}", $text{'edit_title'}) : ""));
 		}
 	}
 
