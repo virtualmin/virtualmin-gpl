@@ -466,6 +466,16 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 	return;
 	}
 
+# Check if over quota
+if ($parentdom) {
+	my $err = &check_domain_over_quota($parentdom);
+	if ($err) {
+		print "<b>",&text('setup_overquota', $err),"</b><p>\n";
+		&ui_print_footer("", $text{'index_return'});
+		return;
+		}
+	}
+
 # Parse content field
 my $content = $in{'content'};
 my $contented = !defined($in{'content_def'}) || $in{'content_def'} == 2;
