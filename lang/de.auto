@@ -1431,6 +1431,7 @@ scripts_unsupdesc=Mit diesem Formular können Sie eine Skriptversion installiere
 scripts_addover=Überschreiben des Proxys für Pfad $1 ..
 scripts_delproxy=Proxy für Pfad $1 entfernen ..
 scripts_proxyfailed=.. Proxy-Einrichtung fehlgeschlagen : $1
+scripts_idbneed_link=, die auf der Seite <a href='$1'>$2</a> aktiviert werden kann
 scripts_gemver=Aktualisieren von Ruby Gems auf die neueste Version von $1 ..
 scripts_gemverfailed=.. Edelstein-Update fehlgeschlagen : $1
 scripts_gemverfailed2=Das Gems-Update auf Version $2 schien erfolgreich zu sein, ist aber wirklich fehlgeschlagen : $1

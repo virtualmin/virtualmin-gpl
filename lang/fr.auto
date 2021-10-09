@@ -1880,6 +1880,7 @@ scripts_phpmodinst=Installation du module à partir des packages logiciels ..
 scripts_phpmoddone=.. module installé avec succès à partir du package $1
 scripts_phpmodfailed=.. échec de l'installation du module à partir de $1 packages possibles
 scripts_passmode4=Mot de passe initial pour le script
+scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
 scripts_iphpnover=Aucune version PHP n'a pu être trouvée pour ce serveur virtuel
 scripts_iphpfullver=La version PHP $1 ou ultérieure est requise, mais ce serveur virtuel utilise la version $2 

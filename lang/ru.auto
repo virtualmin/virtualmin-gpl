@@ -2723,6 +2723,7 @@ scripts_proxyfailed=.. Не удалось настроить прокси : $1
 scripts_epartial=.. установка была завершена только частично.
 scripts_icommand=Отсутствует команда $1 
 scripts_idbneed=Требуется база данных $1 
+scripts_idbneed_link=, который можно включить на странице <a href='$1'>$2</a>
 scripts_idbneedor=$1 или $2 
 scripts_gemver=Обновление Ruby Gems до последней версии с $1 ..
 scripts_gemverfailed=.. Не удалось обновить самоцветы : $1 

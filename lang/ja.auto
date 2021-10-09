@@ -4140,6 +4140,7 @@ scripts_proxyfailed=..プロキシのセットアップに失敗しました： 
 scripts_epartial=..インストールは部分的にしか完了していませんでした。
 scripts_icommand=コマンド $1がありません
 scripts_idbneed=$1データベースが必要です
+scripts_idbneed_link=、<a href='$1'>$2</a>ページで有効にできます
 scripts_idbneedor=$1または $2
 scripts_gemver=Ruby Gemsを $1から最新バージョンに更新しています ..
 scripts_gemverfailed=..宝石の更新に失敗しました： $1

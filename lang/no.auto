@@ -473,6 +473,7 @@ scripts_phpmodinst=Installere modul fra programvarepakker ..
 scripts_phpmoddone=.. installert modul fra pakke $1
 scripts_phpmodfailed=.. klarte ikke å installere modulen fra $1 mulige pakker
 scripts_passmode4=Opprinnelig passord for skript
+scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren
 scripts_iphpfullver=PHP-versjon $1 eller nyere kreves, men denne virtuelle serveren bruker versjon $2 

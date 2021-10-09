@@ -1064,6 +1064,7 @@ scripts_newer2=La versión $1 existe pero no se puede actualizar a
 scripts_ecpan=.. el módulo CPAN Perl no está instalado en su sistema.
 scripts_optpythonmod=Se recomienda el módulo Python $1.
 scripts_passmode4=Contraseña inicial para script
+scripts_idbneed_link=, que se puede habilitar en la página <a href='$1'>$2</a>
 scripts_gemver=Actualización de Ruby Gems a la última versión desde $1.
 scripts_gemverfailed=.. La actualización de gemas falló : $1
 scripts_gemverfailed2=.. La actualización de gemas a la versión $2 pareció tener éxito, pero realmente falló : $1

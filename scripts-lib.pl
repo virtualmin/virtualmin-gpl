@@ -156,6 +156,7 @@ local $rv = { 'name' => $name,
 	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",
 	      'dbs_func' => "script_${name}_dbs",
+	      'db_conn_desc_func' => "script_${name}_db_conn_desc",
 	      'params_func' => "script_${name}_params",
 	      'parse_func' => "script_${name}_parse",
 	      'check_func' => "script_${name}_check",
@@ -652,6 +653,83 @@ if (!@tables) {
 else {
 	return "Database $dbname still contains ".scalar(@tables)." tables";
 	}
+}
+
+# update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value)
+# Updates script's given database related setting option (db-username, db-password, db-name)
+# with a new value for all installed scripts under the given virtual server, in case a script
+# supports it.
+sub update_all_installed_scripts_database_credentials
+{
+my ($d, $type, $value) = @_;
+my @domain_scripts = &list_domain_scripts($d);
+my $prt;
+foreach my $script (@domain_scripts) {
+	my $sname = $script->{'name'};
+	my $sdata = &get_script($sname);
+	my $sdir = $script->{'opts'}->{'dir'};
+	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
+	if (defined(&$db_conn_desc)) {
+		# Check if a script has a description sub
+		$db_conn_desc = &{$db_conn_desc};
+		if (ref($db_conn_desc)) {
+			&$first_print($text{"save_installed_scripts_$type"}) if (!$prt++);
+			# Extract script config file(s) to operate on
+			foreach my $script_config_file (keys %{$db_conn_desc}) {
+				my $script_config_types = $db_conn_desc->{$script_config_file};
+				if (ref($script_config_types)) {
+					# Check if described type in a script file equals the one from the caller
+					my ($config_type_current) = grep {$_ eq $type} keys %{$script_config_types};
+					if ($config_type_current) {
+						&$indent_print();
+						&$first_print("$sdata->{'desc'} ..");
+						my $script_options_to_update = $script_config_types->{$config_type_current};
+						my $script_config_file_lines = read_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+						my ($replace_target, $replace_with, $value_func, @value_func_params);
+						foreach my $script_option (keys %{$script_options_to_update}) {
+							# Parse repalce
+							if ($script_option eq 'replace') {
+								$replace_target = $script_options_to_update->{$script_option}->[0];
+								$replace_with = $script_options_to_update->{$script_option}->[1];
+								}
+							# Parse optional function to run on the replacement
+							if ($script_option eq 'func') {
+								$value_func = $script_options_to_update->{$script_option};
+								}
+							# Parse optional function params
+							if ($script_option eq 'func_params') {
+								@value_func_params = split(',', $script_options_to_update->{$script_option});
+								}
+							}
+
+						# Pass new value through optional function if defined
+						if (defined(&$value_func)) {
+							$value = &$value_func($value, @value_func_params);
+						}
+
+						# Substitute final replacement based on type
+						$replace_with =~ s/\$$type/$value/;
+
+						# Run substitution if target and replacement are fine
+						my $replace_target_done;
+						if ($replace_target && $replace_with) {
+							foreach my $config_file_line (@{$script_config_file_lines}) {
+								if ($config_file_line =~ /(\s*)$replace_target/) {
+									$config_file_line = "$1$replace_with";
+									$replace_target_done++
+									}
+								}
+							}
+						flush_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+						&$second_print($text{'setup_' . ($replace_target_done ? 'done' : 'failed')});
+						&$outdent_print();
+						}
+					}
+				}
+			}
+		}
+	}
+&$second_print($text{"setup_done"}) if ($prt);
 }
 
 # setup_web_for_php(&domain, &script, php-version)
@@ -2789,7 +2867,10 @@ if (defined(&{$script->{'dbs_func'}})) {
 			$dbnames[0] :
 			&text('scripts_idbneedor', @dbnames[0..$#dbnames-1],
 						   $dbnames[$#dbnames]);
-		push(@rv, &text('scripts_idbneed', $dbneed));
+		push(@rv, &text('scripts_idbneed', $dbneed) .
+			(&can_edit_domain($d) ? 
+			 &text_html('scripts_idbneed_link',
+				        "edit_domain.cgi?dom=$d->{'id'}", $text{'edit_title'}) : ""));
 		}
 	}
 

@@ -3919,6 +3919,7 @@ scripts_proxyfailed=.. falha na configuração do proxy : $1
 scripts_epartial=.. a instalação foi apenas parcialmente concluída.
 scripts_icommand=Comando ausente $1 
 scripts_idbneed=É necessário um banco de dados $1 
+scripts_idbneed_link=, que pode ser habilitado na página <a href='$1'>$2</a>
 scripts_idbneedor=$1 ou $2
 scripts_gemver=Atualizando Ruby Gems para a versão mais recente de $1 ..
 scripts_gemverfailed=.. Falha na atualização das gemas : $1 
