@@ -11261,6 +11261,39 @@ else {
 return ($home >= $dbq ? $home-$dbq : $home, $mail, $db);
 }
 
+# check_domain_over_quota(&domain)
+# If a virtual server is over quota, return an error message
+sub check_domain_over_quota
+{
+my ($d) = @_;
+if ($d->{'parent'}) {
+	my $parent = &get_domain($d->{'parent'});
+	return &check_domain_over_quota($parent);
+	}
+if (&has_group_quotas()) {
+	# Check server group quota
+	my $bsize = &quota_bsize("home");
+	my ($homequota, $mailquota) = &get_domain_quota($d);
+	if ($d->{'quota'} && $homequota >= $d->{'quota'}) {
+		return &text('setup_overgroupquota',
+			     &nice_size($d->{'quota'}*$bsize),
+			     &show_domain_name($d));
+		}
+	}
+if (&has_home_quotas()) {
+	# Check domain owner user
+	my $bsize = &quota_bsize("home");
+	my ($homequota, $mailquota, $duser, $dbquota, $dbquota_home) =
+		&get_domain_user_quotas($d);
+	if ($d->{'uquota'} && $duser->{'uquota'} >= $d->{'uquota'}) {
+		return &text('setup_overuserquota',
+			     &nice_size($d->{'uquota'}*$bsize),
+			     $duser->{'user'});
+		}
+	}
+return undef;
+}
+
 # compute_prefix(domain-name, group, [&parent], [creating-flag])
 # Given a domain name, returns the prefix for usernames
 sub compute_prefix

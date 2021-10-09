@@ -685,6 +685,9 @@ setup_dnscloudclash=DNS zone already exists on cloud provider $1
 setup_mail_smtpcloud=Configuring cloud mail provider $1 ..
 setup_mail_nosmtpcloud=.. provider does not exist!
 setup_mail_esmtpcloud=.. failed : $1
+setup_overquota=Virtual server creation failed due to lack of quota : $1
+setup_overgroupquota=Server quota for $2 of $1 has been reached
+setup_overuserquota=Domain owner quota for $2 of $1 has been reached
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2
