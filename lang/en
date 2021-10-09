@@ -6539,6 +6539,8 @@ smtpcloud_header=Mail delivery provider options
 smtpcloud_provider=Mail delivery provider name
 smtpcloud_url=Mail delivery provider's website
 smtpcloud_eaws_dns=Amazon SES needs a DNS zone to be enabled to verify new domains
+smtpcloud_epostfix=Amazon SES cannot be configured unless Postfix is installed
+smtpcloud_esmtpuser=Failed to convert SES secret key to SMTP password
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client
