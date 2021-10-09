@@ -470,8 +470,8 @@ if (&show_virtual_server_warnings(\%dom, undef, \%in)) {
 if ($parentdom) {
 	my $err = &check_domain_over_quota($parentdom);
 	if ($err) {
-		print "<b>",&text('setup_overquota', $err),"</b><p>\n";
-		&ui_print_footer("", $text{'index_return'});
+		&error_setup();
+		&error(&text('setup_overquota', $err));
 		return;
 		}
 	}
