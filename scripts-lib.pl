@@ -675,7 +675,9 @@ foreach my $script (@domain_scripts) {
 		if (ref($db_conn_desc)) {
 			&$first_print($text{"save_installed_scripts_$type"}) if (!$prt++);
 			# Extract script config file(s) to operate on
-			foreach my $script_config_file (keys %{$db_conn_desc}) {
+			my @script_config_files = keys %{$db_conn_desc};
+			my $script_config_files_count = scalar(@script_config_files);
+			foreach my $script_config_file (@script_config_files) {
 				my $script_config_types = $db_conn_desc->{$script_config_file};
 				if (ref($script_config_types)) {
 					# Check if described type in a script file equals the one from the caller
@@ -684,7 +686,6 @@ foreach my $script (@domain_scripts) {
 						&$indent_print();
 						&$first_print("$sdata->{'desc'} ..");
 						my $script_options_to_update = $script_config_types->{$config_type_current};
-						my $script_config_file_lines = read_file_lines_as_domain_user($d, "$sdir/$script_config_file");
 						my ($replace_target, $replace_with, $value_func, @value_func_params);
 						foreach my $script_option (keys %{$script_options_to_update}) {
 							# Parse repalce
@@ -711,17 +712,32 @@ foreach my $script (@domain_scripts) {
 						$replace_with =~ s/\$$type/$value/;
 
 						# Run substitution if target and replacement are fine
-						my $replace_target_done;
-						if ($replace_target && $replace_with) {
-							foreach my $config_file_line (@{$script_config_file_lines}) {
-								if ($config_file_line =~ /(\s*)$replace_target/) {
-									$config_file_line = "$1$replace_with";
-									$replace_target_done++
+						my ($error, $success);
+						if (-r "$sdir/$script_config_file") {
+							my $script_config_file_lines = read_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+							if ($replace_target && $replace_with) {
+								foreach my $config_file_line (@{$script_config_file_lines}) {
+									if ($config_file_line =~ /(\s*)$replace_target/) {
+										$config_file_line = "$1$replace_with";
+										$success++
+										}
 									}
 								}
+							flush_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+							if ($success) {
+								$success = 
+									$script_config_files_count > 1 ?
+									   &text('save_installed_scripts_done', $script_config_file) :
+									   $text{'setup_done'};
+								}
+							else {
+								$error = &text('save_installed_scripts_err_file_lines', $script_config_file);
+								}
+						}
+						else {
+							$error = &text('save_installed_scripts_err_file', $script_config_file);
 							}
-						flush_file_lines_as_domain_user($d, "$sdir/$script_config_file");
-						&$second_print($text{'setup_' . ($replace_target_done ? 'done' : 'failed')});
+						&$second_print($error || $success);
 						&$outdent_print();
 						}
 					}
