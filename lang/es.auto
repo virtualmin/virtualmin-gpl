@@ -147,11 +147,13 @@ setup_postgresdbimport=Importando la base de datos PostgreSQL $1 ..
 setup_usermindown=.. no se está ejecutando actualmente
 setup_virt6=Agregar dirección IPv6 $1 ..
 setup_virt6done=.. agregado a la interfaz $1
+setup_failed=.. fallido
 setup_logrotatealready=.. ya está habilitado para el archivo de registro $1 
 setup_eforceunder2=Solo se le permite crear dominios de menos de $1, o cualquiera de los otros dominios que posee
 setup_esafeunder=No está permitido crear dominios de menos de $1, ya que pertenece a otro usuario.
 setup_evaddaliasdomain=.. vaddaliasdomain falló : $1
 setup_contenting=Creando la página inicial del índice del sitio web.
+setup_econtenting=.. no se pudo crear el contenido inicial : $1 
 setup_sshkey1=Generando claves SSH privadas y públicas.
 setup_sshkey2=Autorizando la clave pública SSH. ..
 setup_esshkeydir=El servidor virtual necesita un directorio y un usuario Unix
@@ -177,6 +179,9 @@ setup_dnscloudclash=La zona DNS ya existe en el proveedor de nube $1
 setup_mail_smtpcloud=Configurando el proveedor de correo en la nube $1 ..
 setup_mail_nosmtpcloud=.. ¡el proveedor no existe!
 setup_mail_esmtpcloud=... falló : $1 
+setup_overquota=La creación del servidor virtual falló debido a la falta de cuota : $1 
+setup_overgroupquota=Se alcanzó la cuota de servidor para $2 de $1 
+setup_overuserquota=Se alcanzó la cuota de propietario de dominio para $2 de $1 
 
 users_indom=$1 usuarios en el dominio $2
 
@@ -328,6 +333,12 @@ save_euserquota=La cuota de disco del administrador del servidor no debe reducir
 save_aliasusers=La característica que se deshabilita está en uso por los siguientes servidores de alias : $1
 save_erquota=La cuota de disco para este servidor virtual no se puede establecer en ilimitada, ya que es propiedad del revendedor $1 que tiene un límite de cuota
 save_erbw=El límite de ancho de banda para este servidor virtual no se puede establecer en ilimitado, ya que es propiedad del revendedor $1 que tiene un límite de ancho de banda
+save_installed_scripts_dbuser=Actualizando el nombre de usuario de la base de datos para los scripts instalados ..
+save_installed_scripts_dbpass=Actualizando la contraseña de la base de datos para los scripts instalados ..
+save_installed_scripts_db=Actualizando el nombre de la base de datos para los scripts instalados ..
+save_installed_scripts_err_file=.. fallido: no se puede leer el archivo <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. falló: no se pudieron encontrar cadenas para reemplazar en el archivo <tt>$1</tt>
+save_installed_scripts_done=.. hecho para el archivo <tt>$1</tt>
 
 acl_migrate=¿Se pueden migrar copias de seguridad?
 
@@ -2078,6 +2089,11 @@ smtpcloud_header=Opciones del proveedor de entrega de correo
 smtpcloud_provider=Nombre del proveedor de entrega de correo
 smtpcloud_url=Sitio web del proveedor de envío de correo
 smtpcloud_eaws_dns=Amazon SES necesita que se habilite una zona DNS para verificar nuevos dominios
+smtpcloud_epostfix=Amazon SES no se puede configurar a menos que Postfix esté instalado
+smtpcloud_esmtpuser=No se pudo convertir la clave secreta SES a la contraseña SMTP
+smtpcloud_egetver=Error al obtener el estado de verificación de Amazon SES : $1 
+smtpcloud_evaltok=La verificación de Amazon SES no está completa. Debe crear un registro TXT de DNS denominado $2 con el valor $1.
+smtpcloud_evaltok2=La verificación de Amazon SES no devolvió ninguna información para este dominio
 
 provision_title=Cliente de servicios de Cloudmin
 provision_ecannot=No tiene permiso para configurar el cliente de servicios de Cloudmin

@@ -163,12 +163,14 @@ setup_emysqluser_provclash=.. dieses System ist für die Verwendung des Remote-M
 setup_usermindown=.. läuft gerade nicht
 setup_virtmissing=.. übergeordnete Schnittstelle $1 existiert nicht!
 setup_virtnotdone=.. konnte keine Schnittstelle mit IP $1 finden!
+setup_failed=.. gescheitert
 setup_clashlogrotate=.. die Protokolldatei $1 wird bereits gedreht
 setup_logrotatealready=.. bereits für Protokolldatei $1 aktiviert
 setup_virus=Einrichten der Virenfilterung ..
 setup_eforceunder2=Sie dürfen nur Domains unter $1 oder eine der anderen Domains erstellen, die Sie besitzen
 setup_esafeunder=Sie dürfen keine Domains unter $1 erstellen, da diese einem anderen Benutzer gehören.
 setup_edomainprefix=Der Domainname muss zu Beginn nicht $1 enthalten
+setup_econtenting=.. konnte den anfänglichen Inhalt nicht erstellen : $1
 setup_sshkey1=Generieren von privaten und öffentlichen SSH-Schlüsseln.
 setup_sshkey2=Autorisieren des öffentlichen SSH-Schlüssels.
 setup_esshkeydir=Virtuelle Server benötigen ein Verzeichnis und einen Unix-Benutzer
@@ -208,6 +210,9 @@ setup_dnscloudclash=Die DNS-Zone ist auf dem Cloud-Anbieter $1 bereits vorhanden
 setup_mail_smtpcloud=Konfigurieren des Cloud-Mail-Anbieters $1 ..
 setup_mail_nosmtpcloud=.. Anbieter existiert nicht!
 setup_mail_esmtpcloud=.. fehlgeschlagen  : $1
+setup_overquota=Fehler beim Erstellen des virtuellen Servers aufgrund fehlender Kontingente : $1
+setup_overgroupquota=Serverkontingent für $2 von $1 wurde erreicht
+setup_overuserquota=Domaininhaberkontingent für $2 von $1 wurde erreicht
 
 users_indom=$1 Benutzer in Domain $2
 
@@ -417,6 +422,12 @@ save_euserquota=Das Festplattenkontingent des Serveradministrators sollte nicht 
 save_aliasusers=Die deaktivierte Funktion wird von den folgenden Alias-Servern verwendet : $1
 save_erquota=Das Festplattenkontingent für diesen virtuellen Server kann nicht auf unbegrenzt festgelegt werden, da es dem Reseller $1 gehört, der ein Kontingentlimit hat
 save_erbw=Das Bandbreitenlimit für diesen virtuellen Server kann nicht auf unbegrenzt festgelegt werden, da er dem Reseller $1 gehört, der ein Bandbreitenlimit hat
+save_installed_scripts_dbuser=Aktualisieren des Datenbankbenutzernamens für installierte Skripte ..
+save_installed_scripts_dbpass=Datenbankkennwort für installierte Skripte aktualisieren ..
+save_installed_scripts_db=Aktualisieren des Datenbanknamens für installierte Skripte ..
+save_installed_scripts_err_file=.. fehlgeschlagen: <tt>$1</tt>-Datei kann nicht gelesen werden
+save_installed_scripts_err_file_lines=.. fehlgeschlagen: konnte keine zu ersetzenden Zeichenfolgen in der Datei <tt>$1</tt> finden
+save_installed_scripts_done=.. fertig für <tt>$1</tt> Datei
 
 acl_migrate=Kann Backups migrieren?
 
@@ -2413,6 +2424,11 @@ smtpcloud_header=Optionen für den Versanddienstleister
 smtpcloud_provider=Name des E-Mail-Zustellanbieters
 smtpcloud_url=Website des Versanddienstleisters
 smtpcloud_eaws_dns=Amazon SES benötigt eine aktivierte DNS-Zone, um neue Domänen zu überprüfen
+smtpcloud_epostfix=Amazon SES kann nur konfiguriert werden, wenn Postfix installiert ist
+smtpcloud_esmtpuser=Konvertieren des geheimen SES-Schlüssels in ein SMTP-Passwort fehlgeschlagen
+smtpcloud_egetver=Fehler beim Abrufen des Amazon SES-Verifizierungsstatus : $1
+smtpcloud_evaltok=Die Amazon SES-Verifizierung ist nicht abgeschlossen. Sie müssen einen DNS-TXT-Eintrag namens $2 mit dem Wert $1 erstellen.
+smtpcloud_evaltok2=Die Amazon SES-Verifizierung hat keine Informationen für diese Domäne zurückgegeben!
 
 provision_ecannot=Sie dürfen den Cloudmin-Dienstclient nicht einrichten
 provision_checking=Überprüfen der Anmeldung beim Diensthost $1 ..

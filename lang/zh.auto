@@ -221,6 +221,7 @@ setup_virtmissing=..父接口 $1不存在！
 setup_virtnotdone=..找不到IP $1的任何接口！
 setup_virt6=添加IPv6地址 $1 ..
 setup_virt6done=..添加到接口 $1
+setup_failed=.. 失败的
 setup_clashlogrotate=..日志文件 $1已被旋转
 setup_logrotatealready=..已为日志文件 $1启用
 setup_eforceunder2=仅允许您在 $1下创建域，或者您拥有的任何其他域
@@ -229,6 +230,7 @@ setup_edenieddomain=不允许使用指定的域名
 setup_edomainprefix=域名的开头不必为 $1
 setup_evaddaliasdomain=.. vaddaliasdomain失败： $1
 setup_contenting=创建初始网站索引页 ..
+setup_econtenting=.. 未能创建初始内容：$1
 setup_sshkey1=生成SSH私钥和公钥 ..
 setup_sshkey2=授权SSH公钥 ..
 setup_esshkeydir=虚拟服务器需要目录和Unix用户
@@ -258,6 +260,9 @@ setup_dnscloudclash=DNS区域已存在于云提供程序 $1上
 setup_mail_smtpcloud=正在配置云邮件提供程序 $1 ..
 setup_mail_nosmtpcloud=.. 提供者不存在！
 setup_mail_esmtpcloud=.. 失败：$1
+setup_overquota=由于缺少配额，虚拟服务器创建失败 : $1
+setup_overgroupquota=已达到 $1 中 $2 的服务器配额
+setup_overuserquota=已达到 $1 中 $2 的域所有者配额
 
 users_indom=域 $2中的 $1个用户
 
@@ -485,6 +490,12 @@ save_euserquota=服务器管理员的磁盘配额不应降低到 $2，因为当�
 save_aliasusers=以下别名服务器正在使用被禁用的功能： $1
 save_erquota=无法将此虚拟服务器的磁盘配额设置为无限，因为它由具有配额限制的经销商 $1拥有
 save_erbw=此虚拟服务器的带宽限制不能设置为无限制，因为它由具有带宽限制的经销商 $1拥有
+save_installed_scripts_dbuser=更新已安装脚本的数据库用户名 ..
+save_installed_scripts_dbpass=更新已安装脚本的数据库密码 ..
+save_installed_scripts_db=更新已安装脚本的数据库名称 ..
+save_installed_scripts_err_file=.. 失败：无法读取 <tt>$1</tt> 文件
+save_installed_scripts_err_file_lines=.. 失败：在 <tt>$1</tt> 文件中找不到要替换的字符串
+save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
 
 acl_migrate=可以迁移备份吗？
 
@@ -3270,6 +3281,11 @@ smtpcloud_header=邮件递送提供商选项
 smtpcloud_provider=邮件递送提供商名称
 smtpcloud_url=邮件递送提供商的网站
 smtpcloud_eaws_dns=Amazon SES 需要启用 DNS 区域来验证新域
+smtpcloud_epostfix=除非安装了 Postfix，否则无法配置 Amazon SES
+smtpcloud_esmtpuser=无法将 SES 密钥转换为 SMTP 密码
+smtpcloud_egetver=无法获得 Amazon SES 验证状态：$1
+smtpcloud_evaltok=Amazon SES 验证未完成。您必须创建一个名为 $2 且值为 $1 的 DNS TXT 记录。
+smtpcloud_evaltok2=Amazon SES 验证未返回此域的任何信息！
 
 provision_title=Cloudmin Services客户
 provision_ecannot=不允许您设置Cloudmin服务客户端
