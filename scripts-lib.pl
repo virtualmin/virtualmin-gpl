@@ -663,7 +663,7 @@ sub update_all_installed_scripts_database_credentials
 {
 my ($d, $type, $value) = @_;
 my @domain_scripts = &list_domain_scripts($d);
-my $prt;
+my ($printed_type, $printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
@@ -673,18 +673,19 @@ foreach my $script (@domain_scripts) {
 		# Check if a script has a description sub
 		$db_conn_desc = &{$db_conn_desc};
 		if (ref($db_conn_desc)) {
-			&$first_print($text{"save_installed_scripts_$type"}) if (!$prt++);
+			&$first_print($text{"save_installed_scripts_$type"}) if (!$printed_type++);
 			# Extract script config file(s) to operate on
 			my @script_config_files = keys %{$db_conn_desc};
 			my $script_config_files_count = scalar(@script_config_files);
+			my $script_config_file_count;
 			foreach my $script_config_file (@script_config_files) {
 				my $script_config_types = $db_conn_desc->{$script_config_file};
 				if (ref($script_config_types)) {
 					# Check if described type in a script file equals the one from the caller
 					my ($config_type_current) = grep {$_ eq $type} keys %{$script_config_types};
 					if ($config_type_current) {
-						&$indent_print();
-						&$first_print("$sdata->{'desc'} ..");
+						&$indent_print() if(!$script_config_file_count++);
+						&$first_print("$sdata->{'desc'} ..") if (!$printed_name++);
 						my $script_options_to_update = $script_config_types->{$config_type_current};
 						my ($replace_target, $replace_with, $value_func, @value_func_params);
 						foreach my $script_option (keys %{$script_options_to_update}) {
@@ -737,15 +738,15 @@ foreach my $script (@domain_scripts) {
 						else {
 							$error = &text('save_installed_scripts_err_file', $script_config_file);
 							}
-						&$second_print($error || $success);
-						&$outdent_print();
+						&$first_print($error || $success);
+						&$outdent_print() if($script_config_file_count == $script_config_files_count);
 						}
 					}
 				}
 			}
 		}
 	}
-&$second_print($text{"setup_done"}) if ($prt);
+&$second_print($text{"setup_done"}) if ($printed_type);
 }
 
 # setup_web_for_php(&domain, &script, php-version)
