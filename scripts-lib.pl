@@ -655,6 +655,18 @@ else {
 	}
 }
 
+# get_script_database_credentials(&domain, &script-opts)
+# Returns database credentials for a given script under certain domain
+sub get_script_database_credentials
+{
+my ($d, $opts) = @_;
+my ($sdbtype, $sdbname) = split(/_/, $opts->{'db'}, 2);
+my $sdbhost = &get_database_host($sdbtype, $d);
+my $sdbuser = $sdbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
+my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
+return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
+}
+
 # update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, in case a script
@@ -663,7 +675,7 @@ sub update_all_installed_scripts_database_credentials
 {
 my ($d, $type, $value) = @_;
 my @domain_scripts = &list_domain_scripts($d);
-my ($printed_type, $printed_name);
+my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
@@ -685,9 +697,9 @@ foreach my $script (@domain_scripts) {
 					my ($config_type_current) = grep {$_ eq $type} keys %{$script_config_types};
 					if ($config_type_current) {
 						&$indent_print() if(!$script_config_file_count++);
-						&$first_print("$sdata->{'desc'} ..") if (!$printed_name++);
+						&$first_print("$sdata->{'desc'} ..") if (!$printed_name[$sdata->{'desc'}]), push(@printed_name, $sdata->{'desc'});
 						my $script_options_to_update = $script_config_types->{$config_type_current};
-						my ($replace_target, $replace_with, $value_func, @value_func_params);
+						my ($replace_target, $replace_with, $value_func, @value_func_params, $script_option_multi, %options_multi);
 						foreach my $script_option (keys %{$script_options_to_update}) {
 							# Parse repalce
 							if ($script_option eq 'replace') {
@@ -702,15 +714,34 @@ foreach my $script (@domain_scripts) {
 							if ($script_option eq 'func_params') {
 								@value_func_params = split(',', $script_options_to_update->{$script_option});
 								}
+							# Check if multi params must be replaced (complex replacement)
+							if ($script_option eq 'multi') {
+								$script_option_multi++;
+								}
 							}
 
 						# Pass new value through optional function if defined
 						if (defined(&$value_func)) {
 							$value = &$value_func($value, @value_func_params);
 						}
+						
+						# Prepare substitution for complex replacement for multiple
+						# options by getting other credentials from current config
+						if ($script_option_multi) {
+							my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
+							    &get_script_database_credentials($d, $script->{'opts'});
+							%options_multi = ('sdbhost' => $sdbhost,
+							                  'sdbtype' => $sdbtype,
+							                  'sdbname' => $sdbname,
+							                  'sdbuser' => $sdbuser,
+							                  'sdbpass' => $sdbpass
+							                 );
+							}
 
-						# Substitute final replacement based on type
-						$replace_with =~ s/\$$type/$value/;
+						# Construct simple replacement based on type
+						else {
+							$replace_with =~ s/\$\$s$type/$value/;
+							}
 
 						# Run substitution if target and replacement are fine
 						my ($error, $success);
@@ -718,9 +749,25 @@ foreach my $script (@domain_scripts) {
 							my $script_config_file_lines = read_file_lines_as_domain_user($d, "$sdir/$script_config_file");
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
-									if ($config_file_line =~ /(\s*)$replace_target/) {
-										$config_file_line = "$1$replace_with";
-										$success++
+									if ($config_file_line =~ /(?<spaces>\s*)(?<replace_target>$replace_target)/) {
+										if ($script_option_multi) {
+											# Construct replacement first
+											foreach my $option_multi (keys %options_multi) {
+												# Substitute with new value
+												my $option_multi_value = $options_multi{$option_multi};
+												if ($option_multi eq "s$type") {
+													$option_multi_value = $value;
+													}
+												$replace_with =~ s/\$\$$option_multi/$option_multi_value/;
+												}
+											# Perform complex replacement (multi)
+											$config_file_line = "$+{spaces}$+{replace_target}$replace_with";
+											}
+										else {
+											# Perform simple replacement
+											$config_file_line = "$+{spaces}$replace_with";
+											}
+										$success++;
 										}
 									}
 								}
