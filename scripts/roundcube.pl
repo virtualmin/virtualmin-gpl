@@ -341,6 +341,31 @@ $rp =~ s/^$d->{'home'}\///;
 return (1, "RoundCube installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
 }
 
+# script_wordpress_db_conn_desc()
+# Returns a list of options for config file to update
+sub script_roundcube_db_conn_desc
+{
+my $conn_desc =
+    {
+      'replace' => [ '\$(rcmail_config|config)\[[\'"]db_dsnw[\'"]\]\s*=\s*' =>
+                     '\'$$sdbtype://$$sdbuser:$$sdbpass@$$sdbhost/$$sdbname\';' ],
+      'func' => 'php_quotemeta',
+      'func_params' => 1,
+      'multi' => 1,
+    };
+my $db_conn_desc = 
+    { 'config/config.inc.php' => 
+        {
+           'dbtype' => $conn_desc,
+           'dbuser' => $conn_desc,
+           'dbpass' => $conn_desc,
+           'dbhost' => $conn_desc,
+           'dbname' => $conn_desc,
+        }
+    };
+return $db_conn_desc;
+}
+
 # script_roundcube_uninstall(&domain, version, &opts)
 # Un-installs a RoundCube installation, by deleting the directory and database.
 # Returns 1 on success and a message, or 0 on failure and an error

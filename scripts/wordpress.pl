@@ -338,13 +338,14 @@ my $db_conn_desc =
         {
            'dbpass' => 
            {
-               'replace' => [ 'define\(\s*[\'"]DB_PASSWORD[\'"],' => "define('DB_PASSWORD', '\$dbpass');" ],
+               'replace' => [ 'define\(\s*[\'"]DB_PASSWORD[\'"],' =>
+                              'define(\'DB_PASSWORD\', \'$$sdbpass\');' ],
                'func' => 'php_quotemeta',
                'func_params' => 1,
            },
            'dbuser' => 
            {
-               'replace' => [ 'define\(\s*[\'"]DB_USER[\'"],' => "define('DB_USER', '\$dbuser');" ],
+               'replace' => [ 'define\(\s*[\'"]DB_USER[\'"],' => "define('DB_USER', '\$\$sdbuser');" ],
            },
         }
     };

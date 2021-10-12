@@ -72,7 +72,9 @@ setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet he
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
 setup_usermindown=.. momenteel niet actief
+setup_failed=.. mislukt
 setup_logrotatealready=.. al ingeschakeld voor logbestand $1
+setup_econtenting=.. kon aanvankelijke inhoud niet maken : $1
 setup_sshkey1=SSH-privé- en openbare sleutels genereren. ..
 setup_sshkey2=Openbare SSH-sleutel autoriseren. ..
 setup_esshkeydir=Virtuele server heeft een directory en een Unix-gebruiker nodig
@@ -94,6 +96,9 @@ setup_dnscloudclash=DNS-zone bestaat al op cloudprovider $1
 setup_mail_smtpcloud=Cloudmailprovider $1 configureren ..
 setup_mail_nosmtpcloud=.. aanbieder bestaat niet!
 setup_mail_esmtpcloud=.. mislukt  : $1
+setup_overquota=Maken van virtuele server is mislukt vanwege gebrek aan quota : $1
+setup_overgroupquota=Serverquotum voor $2 van $1 is bereikt
+setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
 
 users_indom=$1 gebruikers in domein $2
 
@@ -172,6 +177,12 @@ save_mailto=Aliassen bijwerken voor contactadres.
 save_statussslcert=E-mailadres wijzigen in SSL-certificaatstatusmonitor.
 save_erquota=Het schijfquotum voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat het eigendom is van reseller $1 met een quotumlimiet
 save_erbw=De bandbreedtelimiet voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat deze eigendom is van reseller $1 die een bandbreedtelimiet heeft
+save_installed_scripts_dbuser=Database gebruikersnaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbpass=Databasewachtwoord bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_db=Databasenaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_err_file=.. mislukt : kan <tt>$1</tt> bestand niet lezen
+save_installed_scripts_err_file_lines=.. failed : kon geen strings vinden om te vervangen in <tt>$1</tt> bestand
+save_installed_scripts_done=.. klaar voor <tt>$1</tt> bestand
 
 acl_migrate=Kunnen back-ups migreren?
 
@@ -1090,6 +1101,11 @@ smtpcloud_header=Opties voor e-mailbezorger
 smtpcloud_provider=Naam van e-mailbezorger
 smtpcloud_url=Website van de e-mailbezorger
 smtpcloud_eaws_dns=Amazon SES heeft een DNS-zone nodig om nieuwe domeinen te verifiëren
+smtpcloud_epostfix=Amazon SES kan niet worden geconfigureerd tenzij Postfix is geïnstalleerd
+smtpcloud_esmtpuser=Kan geheime SES-sleutel niet converteren naar SMTP-wachtwoord
+smtpcloud_egetver=Kan Amazon SES-verificatiestatus niet verkrijgen : $1
+smtpcloud_evaltok=Amazon SES-verificatie is niet voltooid. U moet een DNS TXT-record maken met de naam $2 met de waarde $1.
+smtpcloud_evaltok2=Amazon SES-verificatie heeft geen informatie voor dit domein geretourneerd!
 
 provision_nolimit=onbeperkt
 

@@ -249,6 +249,7 @@ setup_virtdone2=.. interface associée $1
 setup_virtnotdone=.. n'a trouvé aucune interface avec l'IP $1 !
 setup_virt6=Ajout de l'adresse IPv6 $1 ..
 setup_virt6done=.. ajouté à l'interface $1 
+setup_failed=.. échoué
 setup_clashlogrotate=.. le fichier journal $1 est déjà en rotation
 setup_logrotatealready=.. déjà activé pour le fichier journal $1 
 setup_spam=Configuration du filtrage anti-spam ..
@@ -263,6 +264,7 @@ setup_evaddaliasdomain=.. échec de vaddaliasdomain : $1
 setup_fwding=Ajout d'un alias pour transférer tous les e-mails vers $1 ..
 setup_styleing=Application du style de site Web initial ..
 setup_contenting=Création de la page d'index initiale du site Web.
+setup_econtenting=.. échec de création du contenu initial  : $1
 setup_sshkey1=Génération de clés privées et publiques SSH.
 setup_sshkey2=Autorisation de la clé publique SSH.
 setup_esshkeydir=Le serveur virtuel a besoin d'un répertoire et d'un utilisateur Unix
@@ -324,6 +326,9 @@ setup_dnscloudclash=La zone DNS existe déjà sur le fournisseur cloud $1
 setup_mail_smtpcloud=Configuration du fournisseur de messagerie cloud $1 ..
 setup_mail_nosmtpcloud=.. le fournisseur n'existe pas !
 setup_mail_esmtpcloud=.. a échoué  : $1
+setup_overquota=La création du serveur virtuel a échoué en raison d'un manque de quota  : $1
+setup_overgroupquota=Le quota de serveur pour $2 sur $1 a été atteint
+setup_overuserquota=Le quota de propriétaire de domaine pour $2 sur $1 a été atteint
 
 equotacommand=La commande de quota $1 a échoué : $2 
 
@@ -503,6 +508,12 @@ save_euserquota=Le quota de disque de l'administrateur du serveur ne doit pas ê
 save_aliasusers=La fonctionnalité en cours de désactivation est utilisée par les serveurs d'alias suivants : $1 
 save_erquota=Le quota de disque pour ce serveur virtuel ne peut pas être défini sur illimité, car il appartient au revendeur $1 qui a une limite de quota
 save_erbw=La limite de bande passante pour ce serveur virtuel ne peut pas être définie sur illimitée, car elle appartient au revendeur $1 qui a une limite de bande passante
+save_installed_scripts_dbuser=Mise à jour du nom d'utilisateur de la base de données pour les scripts installés ..
+save_installed_scripts_dbpass=Mise à jour du mot de passe de la base de données pour les scripts installés ..
+save_installed_scripts_db=Mise à jour du nom de la base de données pour les scripts installés ..
+save_installed_scripts_err_file=.. échec : impossible de lire le fichier <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. a échoué : impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
+save_installed_scripts_done=.. fait pour le fichier <tt>$1</tt>
 
 acl_migrate=Peut migrer des sauvegardes?
 
@@ -3795,6 +3806,11 @@ smtpcloud_header=Options du fournisseur de distribution de courrier
 smtpcloud_provider=Nom du fournisseur de distribution du courrier
 smtpcloud_url=Site Web du fournisseur de distribution de courrier
 smtpcloud_eaws_dns=Amazon SES a besoin d'une zone DNS à activer pour vérifier les nouveaux domaines
+smtpcloud_epostfix=Amazon SES ne peut pas être configuré à moins que Postfix ne soit installé
+smtpcloud_esmtpuser=Échec de la conversion de la clé secrète SES en mot de passe SMTP
+smtpcloud_egetver=Échec de l'obtention de l'état de vérification Amazon SES  : $1
+smtpcloud_evaltok=La vérification Amazon SES n'est pas terminée. Vous devez créer un enregistrement DNS TXT nommé $2 avec la valeur $1.
+smtpcloud_evaltok2=La vérification Amazon SES n'a renvoyé aucune information pour ce domaine !
 
 provision_title=Client Cloudmin Services
 provision_ecannot=Vous n'êtes pas autorisé à configurer le client des services Cloudmin

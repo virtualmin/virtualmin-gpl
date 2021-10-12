@@ -57,7 +57,9 @@ setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du m�
 setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
 setup_usermindown=.. kjører foreløpig ikke
+setup_failed=.. mislyktes
 setup_logrotatealready=.. allerede aktivert for loggfil $1 
+setup_econtenting=.. klarte ikke å lage innledende innhold : $1
 setup_sshkey1=Genererer SSH private og offentlige nøkler ..
 setup_sshkey2=Autoriserer SSH offentlig nøkkel ..
 setup_esshkeydir=Virtuell server trenger en katalog og Unix-bruker
@@ -78,6 +80,9 @@ setup_dnscloudclash=DNS-sone eksisterer allerede hos skyleverandør $1
 setup_mail_smtpcloud=Konfigurerer leverandør av sky -e -post $1 ..
 setup_mail_nosmtpcloud=.. leverandør eksisterer ikke!
 setup_mail_esmtpcloud=.. mislyktes : $1
+setup_overquota=Virtuell serveropprettelse mislyktes på grunn av mangel på kvote : $1
+setup_overgroupquota=Serverkvoten for $2 av $1 er nådd
+setup_overuserquota=Domeneeierkvoten for $2 av $1 er nådd
 
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_mailclient=Vis innstillinger for e-postklient
@@ -132,6 +137,12 @@ delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
 save_statussslcert=Endrer e-post i SSL-sertifikatstatusovervåker ..
+save_installed_scripts_dbuser=Oppdaterer database brukernavn for installerte skript ..
+save_installed_scripts_dbpass=Oppdaterer databasepassord for installerte skript ..
+save_installed_scripts_db=Oppdaterer databasenavn for installerte skript ..
+save_installed_scripts_err_file=.. mislyktes: kan ikke lese <tt>$1</tt> filen
+save_installed_scripts_err_file_lines=.. mislyktes: kunne ikke finne strenger som skal erstattes i filen <tt>$1</tt>
+save_installed_scripts_done=.. gjort for <tt>$1</tt> fil
 
 acl_migrate=Kan migrere sikkerhetskopier?
 
@@ -771,6 +782,11 @@ smtpcloud_header=Alternativer for levering av e -post
 smtpcloud_provider=Leverandørens navn på e -post
 smtpcloud_url=Leverandørens nettsted for e -post
 smtpcloud_eaws_dns=Amazon SES trenger en DNS -sone for å kunne aktivere nye domener
+smtpcloud_epostfix=Amazon SES kan ikke konfigureres med mindre Postfix er installert
+smtpcloud_esmtpuser=Kunne ikke konvertere SES hemmelige nøkkel til SMTP -passord
+smtpcloud_egetver=Kunne ikke få Amazon SES -bekreftelsesstatus : $1
+smtpcloud_evaltok=Amazon SES -verifisering er ikke fullført. Du må opprette en DNS TXT -post med navnet $2 med verdien $1.
+smtpcloud_evaltok2=Amazon SES -verifisering returnerte ingen informasjon for dette domenet!
 
 provision_nolimit=ubegrenset
 

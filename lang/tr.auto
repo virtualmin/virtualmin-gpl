@@ -241,6 +241,7 @@ setup_virtmissing=.. $1 üst arayüzü mevcut değil!
 setup_virtnotdone=.. $1 IP ile herhangi bir arayüz bulunamadı!
 setup_virt6=IPv6 adresi $1 ekleniyor ..
 setup_virt6done=.. $1 arayüzüne eklendi
+setup_failed=.. arızalı
 setup_clashlogrotate=.. $1 günlük dosyası zaten döndürülüyor
 setup_logrotatealready=.. $1 günlük dosyası için zaten etkin
 setup_eforceunder2=Yalnızca $1 'in altında veya sahip olduğunuz diğer alan adlarından herhangi birinde alan oluşturmanıza izin verilir
@@ -250,6 +251,7 @@ setup_edomainprefix=Alan adının başında $1 olması gerekmez
 setup_evaddaliasdomain=.. vaddaliasdomain başarısız oldu : $1 
 setup_styleing=İlk web sitesi stili uygulanıyor ..
 setup_contenting=İlk web sitesi dizin sayfası oluşturuluyor ..
+setup_econtenting=.. başlangıç içeriği oluşturulamadı : $1
 setup_sshkey1=SSH özel ve genel anahtarları oluşturuluyor ..
 setup_sshkey2=SSH genel anahtarı yetkilendiriliyor ..
 setup_esshkeydir=Sanal sunucunun bir dizine ve Unix kullanıcısına ihtiyacı var
@@ -280,6 +282,9 @@ setup_dnscloudclash=DNS bölgesi $1 bulut sağlayıcısında zaten mevcut
 setup_mail_smtpcloud=$1 bulut posta sağlayıcısı yapılandırılıyor ..
 setup_mail_nosmtpcloud=.. sağlayıcı mevcut değil!
 setup_mail_esmtpcloud=.. başarısız oldu : $1
+setup_overquota=Kota eksikliği nedeniyle sanal sunucu oluşturma başarısız oldu : $1
+setup_overgroupquota=$1'in $2'si için sunucu kotasına ulaşıldı
+setup_overuserquota=$1'in $2'si için alan sahibi kotası aşıldı
 
 equotacommand=$1 kota komutu başarısız oldu : $2 
 
@@ -535,6 +540,12 @@ save_euserquota=Geçerli disk kullanımı zaten $1 olduğundan sunucu yöneticis
 save_aliasusers=Devre dışı bırakılan özellik aşağıdaki takma ad sunucuları tarafından kullanılıyor : $1 
 save_erquota=Bu sanal sunucunun disk kotası, kota sınırı olan $1 satıcısına ait olduğu için sınırsız olarak ayarlanamıyor
 save_erbw=Bu sanal sunucunun bant genişliği sınırı, bant genişliği sınırı olan $1 satıcısına ait olduğundan sınırsız olarak ayarlanamıyor
+save_installed_scripts_dbuser=Kurulu komut dosyaları için veritabanı kullanıcı adı güncelleniyor ..
+save_installed_scripts_dbpass=Kurulu komut dosyaları için veritabanı şifresi güncelleniyor ..
+save_installed_scripts_db=Kurulu komut dosyaları için veritabanı adı güncelleniyor ..
+save_installed_scripts_err_file=.. başarısız oldu : <tt>$1</tt> dosyası okunamıyor
+save_installed_scripts_err_file_lines=.. başarısız oldu : <tt>$1</tt> dosyasında değiştirilecek dizeler bulunamadı
+save_installed_scripts_done=.. <tt>$1</tt> dosyası için yapıldı
 
 acl_migrate=Yedekleri taşıyabilir mi?
 
@@ -3793,6 +3804,11 @@ smtpcloud_header=Posta dağıtım sağlayıcı seçenekleri
 smtpcloud_provider=Posta dağıtım sağlayıcı adı
 smtpcloud_url=Posta dağıtım sağlayıcısının web sitesi
 smtpcloud_eaws_dns=Amazon SES'in yeni etki alanlarını doğrulamak için etkinleştirilmesi için bir DNS bölgesine ihtiyacı var
+smtpcloud_epostfix=Amazon SES, Postfix yüklenmedikçe yapılandırılamaz
+smtpcloud_esmtpuser=SES gizli anahtarı SMTP parolasına dönüştürülemedi
+smtpcloud_egetver=Amazon SES doğrulama durumu alınamadı : $1
+smtpcloud_evaltok=Amazon SES doğrulaması tamamlanmadı. $1 değerine sahip $2 adında bir DNS TXT kaydı oluşturmalısınız.
+smtpcloud_evaltok2=Amazon SES doğrulaması, bu alan adı için herhangi bir bilgi döndürmedi!
 
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor
