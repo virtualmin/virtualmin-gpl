@@ -610,6 +610,7 @@ if (-r $ifile) {
 				   0700, $ifile);
 	}
 if ($ex || !-s $file) {
+	&unlink_file($file);
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
 					       : 'backup_dirtarfailed',
 			     "<pre>".&html_escape($out)."</pre>"));
