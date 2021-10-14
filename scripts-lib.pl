@@ -1302,9 +1302,11 @@ foreach my $m (@mods) {
 	if ($iok) {
 		&$second_print(&text('scripts_phpmoddone',
 			       "<tt>".join(" ", @newpkgs)."</tt>"));
+		&$outdent_print();
 		}
 	else {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
+		&$outdent_print();
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
