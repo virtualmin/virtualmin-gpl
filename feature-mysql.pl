@@ -63,7 +63,7 @@ if (!$field || $field eq 'db') {
 # Check for user clash
 if (!$d->{'parent'} && (!$field || $field eq 'user')) {
 	foreach my $od (@doms) {
-		if (&mysql_user($d) eq &mysql_user($od)) {
+		if (!$od->{'parent'} && &mysql_user($d) eq &mysql_user($od)) {
 			return &text('setup_emysqluserdom', &mysql_user($d),
 					&show_domain_name($od));
 			}
