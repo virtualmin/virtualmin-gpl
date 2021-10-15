@@ -85,6 +85,9 @@ $merr = &making_changes();
 $mfunc = "modify_${type}";
 &$mfunc($d, $oldd);
 
+# Update installed scripts credentials
+update_all_installed_scripts_database_credentials($d, 'dbuser', $user);
+
 # Update Webmin user, so that it logs in correctly
 &modify_webmin($d, $oldd);
 &run_post_actions();
