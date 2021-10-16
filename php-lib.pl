@@ -1194,7 +1194,6 @@ elsif (!$p) {
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
-local $pfound = 0;
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
@@ -1206,7 +1205,6 @@ if ($mode eq "fpm") {
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&create_php_fpm_pool($d);
-		$pfound++;
 		}
 	}
 else {
@@ -1219,7 +1217,6 @@ else {
 		local $conf = &apache::get_config();
 		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
-		$pfound++;
 
 		# Check for an existing <Directory> block
 		local @dirs = &apache::find_directive_struct("Directory", $vconf);
@@ -1325,7 +1322,6 @@ if (!$noini) {
 	}
 
 &register_post_action(\&restart_apache);
-$pfound || return "Apache virtual host was not found";
 return undef;
 }
 
