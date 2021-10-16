@@ -80,6 +80,9 @@ $sfunc = "set_${type}_pass";
 $mfunc = "modify_${type}";
 &$mfunc($d, $oldd);
 
+# Update installed scripts credentials only if password is updated
+update_all_installed_scripts_database_credentials($d, 'dbpass', $pass);
+
 # Update Webmin user, so that it logs in correctly
 &modify_webmin($d, $oldd);
 &run_post_actions();

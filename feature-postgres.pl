@@ -91,7 +91,7 @@ if (!$field || $field eq 'db') {
 # Check for user clash
 if (!$d->{'parent'} && (!$field || $field eq 'user')) {
 	foreach my $od (@doms) {
-		if (&postgres_user($d) eq &postgres_user($od)) {
+		if (!$od->{'parent'} && &postgres_user($d) eq &postgres_user($od)) {
 			return &text('setup_epostgresuserdom',
 				     &postgres_user($d),
 				     &show_domain_name($od));
