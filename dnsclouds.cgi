@@ -10,7 +10,7 @@ require './virtual-server-lib.pl';
 @clouds = &list_dns_clouds();
 @doms = &list_domains();
 
-my $show_list_of_pro_dnsclouds_to_gpl = &dnsclouds_pro_tip();
+&dnsclouds_pro_tip();
 
 print &ui_columns_start([ $text{'dnsclouds_name'},
                           $text{'dnsclouds_url'},
