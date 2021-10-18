@@ -94,6 +94,23 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 		}
 	}
 
+# Add the jailkit shell to /etc/shells if missing
+my $sf = "/etc/shells";
+my $lref = &read_file_lines($sf);
+my $found = 0;
+foreach my $l (@$lref) {
+	my $ll = $l;
+	$ll =~ s/#.*$//;
+	$found++ if ($ll eq $uinfo->{'shell'});
+	}
+if ($found) {
+	&unflush_file_lines($sf);
+	}
+else {
+	push(@$lref, $uinfo->{'shell'});
+	&flush_file_lines($sf);
+	}
+
 return undef;
 }
 
