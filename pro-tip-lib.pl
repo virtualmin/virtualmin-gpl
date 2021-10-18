@@ -75,7 +75,7 @@ my $form = &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_
 			      'https://www.virtualmin.com/product-category/virtualmin/') . "<p>\n".
 			&ui_hidden("tipid", $tipid) .
 			&ui_form_end([ [ undef, ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
-			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa fa-fw fa-times-circle-o' ] ], undef, 1);
+			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa fa-fw fa-check-circle-o' ] ], undef, 1);
 
 return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-smile");
 }
