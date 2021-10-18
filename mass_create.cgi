@@ -398,6 +398,7 @@ foreach $line (@lines) {
 		if ($err) {
 			&line_error(&text('setup_overquota', $err));
 			next;
+			}
 		}
 
 	# Actually do it!
