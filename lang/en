@@ -4184,11 +4184,14 @@ scripts_can=Available in
 scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
-scripts_gpl_pro_tip=Pro Feature Details
-scripts_gpl_pro_tip_hide=Dismiss Pro Feature Alert
-scripts_gpl_pro_tip_enroll=Please consider upgrading to <a target=_blank href='$1'>Virtualmin Pro</a> to get extended set of features and support development of the panel you use.
-scripts_gpl_pro_tip_list_scripts=Heads up! There are more script installers available in Virtualmin Pro version.
-scripts_gpl_pro_tip_list_scripts_hide=Hide Install Scripts Available in Pro
+scripts_gpl_pro_tip=Pro Feature
+scripts_gpl_pro_tip_hide=Hide
+scripts_gpl_pro_tip_call=Heads up!
+scripts_gpl_pro_tip_and=and
+scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to get extended set of features and support development process.
+scripts_gpl_pro_tip_list_scripts=There are more install scripts available!
+scripts_gpl_pro_tip_list_scripts_hide=Hide List of Install Scripts Available in Pro
+scripts_gpl_pro_tip_dnsclouds=$1 providers support is available!
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

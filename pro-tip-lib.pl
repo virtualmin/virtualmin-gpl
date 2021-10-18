@@ -8,6 +8,8 @@ my ($tipid) = @_;
 my %protips;
 my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
 &read_file_cached($protip_file, \%protips);
+return if ($virtualmin_pro);
+return if ($config{'no_pro_tips'});
 return !$protips{$tipid};
 }
 
@@ -26,13 +28,13 @@ $protips{$tipid} = 1;
 
 # list_scripts_pro_tip(\gpl-scripts)
 # Displays an alert for Install Scripts page
-# and its Available Scripts tab if not previously
-# dismissed (seen) by a user
+# and its Available Scripts tab with install scripts
+# available in Pro version only, if not previously
+# dismissed by a user
 sub list_scripts_pro_tip
 {
 my ($scripts) = @_;
-if ($virtualmin_pro || $in{'search'} ||
-    $config{'no_pro_tips'} || !should_show_pro_tip('list_scripts')) {
+if ($in{'search'} || !should_show_pro_tip('list_scripts')) {
 	return;
 	}
 my $pro_scripts = &unserialise_variable(&read_file_contents("$scripts_directories[2]/scripts-pro.info"));
@@ -44,12 +46,31 @@ if ($pro_scripts && scalar(@{$pro_scripts}) > 0) {
 	}
 }
 
+# dnsclouds_pro_tip
+# Displays an alert for Cloud DNS Providers page
+# with providers available in Pro version only,
+# and if not previously dismissed by a user
+sub dnsclouds_pro_tip
+{
+return if (!should_show_pro_tip('dnsclouds'));
+my @pro_dnsclouds_list = (
+	"<em>Cloudflare DNS</em>",
+	"<em>Google Cloud DNS</em>",
+	);
+my $pro_dnsclouds = join(', ', @pro_dnsclouds_list);
+$pro_dnsclouds =~ s/(.+)(,)(.+)$/$1 $text{'scripts_gpl_pro_tip_and'}$3/;
+$text{"scripts_gpl_pro_tip_dnsclouds"} = &text('scripts_gpl_pro_tip_dnsclouds', $pro_dnsclouds);
+print &alert_pro_tip('dnsclouds');
+}
+
+# alert_pro_tip(tip-id)
 # Returns an alert with given Pro tip description and dismiss button
 sub alert_pro_tip
 {
 my ($tipid) = @_;
 my $form = &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post").
-			$text{"scripts_gpl_pro_tip_$tipid"}. " " .
+			$text{"scripts_gpl_pro_tip_call"} . " " .
+			$text{"scripts_gpl_pro_tip_$tipid"} . " " .
 			&text('scripts_gpl_pro_tip_enroll',
 			      'https://www.virtualmin.com/product-category/virtualmin/') . "<p>\n".
 			&ui_hidden("tipid", $tipid) .
