@@ -118,18 +118,6 @@ if ($in{'search'}) {
 			  join(" ", @{$_->{'categories'}}) =~ /\Q$search\E/i } @scripts;
 	}
 
-my $pro_scripts_list_ads =
-	(!$virtualmin_pro && !$in{'search'} && !$config{'scripts_ads'});
-
-# Advertise Pro scripts only to GPL users
-if ($pro_scripts_list_ads) {
-	my $scripts_pro = &load_pro_scripts_list();
-	push(@scripts, @{$scripts_pro})
-		if ($scripts_pro);
-	$pro_scripts_list_ads = 0
-		if (!$scripts_pro);
-	}
-
 # Check out migrate scripts for GPL users
 if (!$virtualmin_pro) {
 	@scripts = grep { !$_->{'migrated'} } @scripts;
@@ -140,10 +128,7 @@ if (!$virtualmin_pro) {
 my @scripts_added;
 my @scripts_sorted =
 	sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @scripts;
-if ($pro_scripts_list_ads) {
-	@scripts_sorted =
-		sort { lc($a->{'pro'}) cmp lc($b->{'pro'}) } @scripts;
-	}
+my $show_list_of_pro_scripts_to_gpl = &list_scripts_pro_tip(\@scripts_sorted);
 
 foreach $script (@scripts_sorted) {
 	@vers = grep { &can_script_version($script, $_) }
@@ -181,7 +166,7 @@ foreach $script (@scripts_sorted) {
 	    join(", ", @{$script->{'categories'}})
 	    );
 	push(@script_data, ($script->{'pro'} ? 'Pro' : 'GPL'))
-		if ($pro_scripts_list_ads);
+		if ($show_list_of_pro_scripts_to_gpl);
 	push(@table, \@script_data);
 	push(@scripts_added, $script->{'name'});
 	}
@@ -190,7 +175,7 @@ foreach $script (@scripts_sorted) {
 my @cols = ( "", $text{'scripts_name'}, $text{'scripts_ver'},
 	      $text{'scripts_longdesc'}, $text{'scripts_cats'});
 push(@cols, $text{'scripts_can'})
-	if ($pro_scripts_list_ads);
+	if ($show_list_of_pro_scripts_to_gpl);
 
 print &ui_form_columns_table(
 	"script_form.cgi",
