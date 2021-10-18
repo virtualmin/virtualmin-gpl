@@ -4191,7 +4191,7 @@ scripts_gpl_pro_tip_and=and
 scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to get extended set of features and support development process.
 scripts_gpl_pro_tip_list_scripts=There are more install scripts available!
 scripts_gpl_pro_tip_list_scripts_hide=Hide List of Install Scripts Available in Pro
-scripts_gpl_pro_tip_dnsclouds=$1 providers support is available!
+scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

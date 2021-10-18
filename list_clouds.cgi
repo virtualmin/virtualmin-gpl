@@ -7,6 +7,8 @@ require './virtual-server-lib.pl';
 
 &ui_print_header(undef, $text{'clouds_title'}, "", undef);
 
+&list_clouds_pro_tip();
+
 @provs = &list_cloud_providers();
 print &ui_columns_start([ $text{'clouds_name'},
 			  $text{'clouds_url'},

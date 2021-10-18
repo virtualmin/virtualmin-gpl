@@ -59,8 +59,26 @@ my @pro_dnsclouds_list = (
 	);
 my $pro_dnsclouds = join(', ', @pro_dnsclouds_list);
 $pro_dnsclouds =~ s/(.+)(,)(.+)$/$1 $text{'scripts_gpl_pro_tip_and'}$3/;
-$text{"scripts_gpl_pro_tip_dnsclouds"} = &text('scripts_gpl_pro_tip_dnsclouds', $pro_dnsclouds);
+$text{"scripts_gpl_pro_tip_dnsclouds"} = &text('scripts_gpl_pro_tip_clouds', $pro_dnsclouds);
 print &alert_pro_tip('dnsclouds');
+}
+
+# list_clouds_pro_tip
+# Displays an alert for Cloud Storage Providers page
+# with providers available in Pro version only,
+# and if not previously dismissed by a user
+sub list_clouds_pro_tip
+{
+return if (!should_show_pro_tip('list_clouds'));
+my @pro_list_clouds_list = (
+	"<em>Google Cloud Storage</em>",
+	"<em>Dropbox</em>",
+	"<em>Backblaze</em>",
+	);
+my $pro_list_clouds = join(', ', @pro_list_clouds_list);
+$pro_list_clouds =~ s/(.+)(,)(.+)$/$1 $text{'scripts_gpl_pro_tip_and'}$3/;
+$text{"scripts_gpl_pro_tip_list_clouds"} = &text('scripts_gpl_pro_tip_clouds', $pro_list_clouds);
+print &alert_pro_tip('list_clouds');
 }
 
 # alert_pro_tip(tip-id)
