@@ -1,30 +1,8 @@
 # Functions for advertising Pro features to GPL users
 
-# should_show_pro_tip(tipid)
-# If the current user should see Pro tip for the given page
-sub should_show_pro_tip
-{
-my ($tipid) = @_;
-my %protips;
-my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
-&read_file_cached($protip_file, \%protips);
-return if ($virtualmin_pro);
-return if ($config{'no_pro_tips'});
-return !$protips{$tipid};
-}
-
-# set_seen_pro_tip(tipid)
-# Flags that the current user has seen a Pro tip for some page
-sub set_seen_pro_tip
-{
-my ($tipid) = @_;
-my %protips;
-my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
-&make_dir($newfeatures_seen_dir, 0700) if (!-d $newfeatures_seen_dir);
-&read_file_cached($protip_file, \%protips);
-$protips{$tipid} = 1;
-&write_file($protip_file, \%protips);
-}
+############################################################
+# Page related alert generators
+############################################################
 
 # list_scripts_pro_tip(\gpl-scripts)
 # Displays an alert for Install Scripts page
@@ -79,6 +57,36 @@ my $pro_list_clouds = join(', ', @pro_list_clouds_list);
 $pro_list_clouds =~ s/(.+)(,)(.+)$/$1 $text{'scripts_gpl_pro_tip_and'}$3/;
 $text{"scripts_gpl_pro_tip_list_clouds"} = &text('scripts_gpl_pro_tip_clouds', $pro_list_clouds);
 print &alert_pro_tip('list_clouds');
+}
+
+############################################################
+# API general subs
+############################################################
+
+# should_show_pro_tip(tipid)
+# If the current user should see Pro tip for the given page
+sub should_show_pro_tip
+{
+my ($tipid) = @_;
+my %protips;
+my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
+&read_file_cached($protip_file, \%protips);
+return if ($virtualmin_pro);
+return if ($config{'no_pro_tips'});
+return !$protips{$tipid};
+}
+
+# set_seen_pro_tip(tipid)
+# Flags that the current user has seen a Pro tip for some page
+sub set_seen_pro_tip
+{
+my ($tipid) = @_;
+my %protips;
+my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
+&make_dir($newfeatures_seen_dir, 0700) if (!-d $newfeatures_seen_dir);
+&read_file_cached($protip_file, \%protips);
+$protips{$tipid} = 1;
+&write_file($protip_file, \%protips);
 }
 
 # alert_pro_tip(tip-id)
