@@ -59,6 +59,14 @@ $text{"scripts_gpl_pro_tip_list_clouds"} = &text('scripts_gpl_pro_tip_clouds', $
 print &alert_pro_tip('list_clouds');
 }
 
+# demo_maillog_pro_tip()
+sub demo_maillog_pro_tip
+{
+return if (!should_show_pro_tip('demo_maillog'));
+$text{"scripts_gpl_pro_tip_demo_maillog"} = $text{'maillog_desc'};
+print &alert_pro_tip('demo_maillog', 1);
+}
+
 ############################################################
 # API general subs
 ############################################################
@@ -93,17 +101,39 @@ $protips{$tipid} = 1;
 # Returns an alert with given Pro tip description and dismiss button
 sub alert_pro_tip
 {
-my ($tipid) = @_;
+my ($tipid, $purge) = @_;
 my $form = &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post").
 			$text{"scripts_gpl_pro_tip_call"} . " " .
 			$text{"scripts_gpl_pro_tip_$tipid"} . " " .
 			&text('scripts_gpl_pro_tip_enroll',
 			      'https://www.virtualmin.com/product-category/virtualmin/') . "<p>\n".
 			&ui_hidden("tipid", $tipid) .
+			($purge ? &ui_hidden("purge", $tipid) : "") .
 			&ui_form_end([ [ undef, ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
 			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa fa-fw fa-check-circle-o' ] ], undef, 1);
 
 return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-smile");
+}
+
+# menu_link_pro_tip
+# Modifies default menu link to advertise GPL user Pro features if allowed
+sub menu_link_pro_tip
+{
+my ($demo_feature, $link_hash) = @_;
+return if (!-r "$virtual_server_root/$demo_feature.cgi");
+if (should_show_pro_tip($demo_feature)) {
+	$link_hash->{'page'} = "$demo_feature.cgi";
+	$link_hash->{'title'} = $link_hash->{'title'} .
+	  (
+	    " <span>" .
+	      "<span data-menu-link-demo>$text{'scripts_gpl_pro_tip_demo'}</span>" .
+	      "<span data-menu-link-icon-demo title='$text{'scripts_gpl_pro_tip'}'></span>" .
+	    "</span>"
+	  );
+	}
+elsif (!$virtualmin_pro) {
+	$link_hash->{'skip'} = 1;
+	}
 }
 
 # build_pro_scripts_list_for_pro_tip()

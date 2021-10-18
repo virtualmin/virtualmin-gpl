@@ -4185,10 +4185,11 @@ scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
 scripts_gpl_pro_tip=Pro Feature
+scripts_gpl_pro_tip_demo=(demo)
 scripts_gpl_pro_tip_hide=Okay, got it
-scripts_gpl_pro_tip_call=Heads up!
+scripts_gpl_pro_tip_call=Did you know!?
 scripts_gpl_pro_tip_and=and
-scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to get extended set of features and support development process.
+scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support development and <em>unlock</em> this and many other cool features.
 scripts_gpl_pro_tip_list_scripts=There are more install scripts available!
 scripts_gpl_pro_tip_list_scripts_hide=Hide List of Install Scripts Available in Pro
 scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
