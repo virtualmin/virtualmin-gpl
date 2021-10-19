@@ -2620,6 +2620,12 @@ return $info && ($info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ||
 # Check all domains that need a new Let's Encrypt cert
 sub apply_letsencrypt_cert_renewals
 {
+# Track the number of renewed lets encrypt certificates
+# Let's Encrypt has rate limit of 300 New Orders per account per 3 hours.
+# For more information: https://letsencrypt.org/docs/rate-limits/
+my $renewed_certs = 0;
+my $letsencrypt_cooldown = 3 * 60 * 60;
+
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
@@ -2656,6 +2662,13 @@ foreach my $d (&list_domains()) {
 
 	# Don't even attempt now if the lock is being held
 	next if (&test_lock($ssl_letsencrypt_lock));
+
+    if ($renewed_certs > 300) {
+            # Certificate order limit reached. Sleep for
+            # some time so we can start again.
+            sleep $letsencrypt_cooldown;
+            $renewed_certs = 0;
+    }
 
 	# Time to attempt the renewal
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
