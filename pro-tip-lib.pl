@@ -102,17 +102,16 @@ $protips{$tipid} = 1;
 sub alert_pro_tip
 {
 my ($tipid, $purge) = @_;
-my $form = &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post").
-			$text{"scripts_gpl_pro_tip_call"} . " " .
-			$text{"scripts_gpl_pro_tip_$tipid"} . " " .
+my $form = "&mdash;&nbsp;" . &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post").
+			$text{"scripts_gpl_pro_tip_$tipid"} . " <br>" .
 			&text('scripts_gpl_pro_tip_enroll',
 			      'https://www.virtualmin.com/product-category/virtualmin/') . "<p>\n".
 			&ui_hidden("tipid", $tipid) .
 			($purge ? &ui_hidden("purge", $tipid) : "") .
 			&ui_form_end([ [ undef, ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
-			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa fa-fw fa-check-circle-o' ] ], undef, 1);
+			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa2 fa-fw fa2-eye-off' ] ], undef, 1);
 
-return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-smile");
+return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-virtualmin");
 }
 
 # menu_link_pro_tip
