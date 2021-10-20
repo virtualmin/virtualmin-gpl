@@ -556,7 +556,7 @@ if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
     &indexof($d->{'last_php_version'}, @vlist) >= 0) {
 	# Restore PHP version from before mod_php or none modes
 	my $err = &save_domain_php_directory($d, &public_html_dir($d),
-				   $d->{'last_php_version'}, 1);
+				   $d->{'last_php_version'}, 1, $mode);
 	return $err if ($err);
 	}
 
@@ -1175,14 +1175,14 @@ foreach my $dir (@dirs) {
 return @rv;
 }
 
-# save_domain_php_directory(&domain, dir, phpversion, [skip-ini-copy])
+# save_domain_php_directory(&domain, dir, phpversion, [skip-ini-copy], force-mode)
 # Sets up a directory to run PHP scripts with a specific version of PHP.
 # Should only be called on domains in cgi or fcgid mode! Returns undef on
 # success, or an error message on failure (ie. because the virtualhost couldn't
 # be found, or the PHP mode was wrong)
 sub save_domain_php_directory
 {
-local ($d, $dir, $ver, $noini) = @_;
+local ($d, $dir, $ver, $noini, $force_mode) = @_;
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
 	return &plugin_call($p, "feature_save_web_php_directory",
@@ -1193,6 +1193,7 @@ elsif (!$p) {
 	}
 &require_apache();
 local $mode = &get_domain_php_mode($d);
+$mode = 'fpm' if ($force_mode eq 'fpm');
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
 
 if ($mode eq "fpm") {
