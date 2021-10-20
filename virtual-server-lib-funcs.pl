@@ -15463,14 +15463,17 @@ if ($virtualmin_pro &&
 		}
 	}
 
-# Check for disabled features that are in use
-my @doms = &list_domains();
-foreach my $f (@features) {
-	if (!$config{$f} && (!$lastconfig || $lastconfig->{$f})) {
-		my @lost = grep { $_->{$f} } @doms;
-		if (@lost) {
-			return &text('check_lostfeature', $text{'feature_'.$f},
-				     join(" ", map { $_->{'dom'} } @lost));
+# Check for disabled features that were just turned off
+if ($lastconfig) {
+	my @doms = &list_domains();
+	foreach my $f (@features) {
+		if (!$config{$f} && $lastconfig->{$f}) {
+			my @lost = grep { $_->{$f} } @doms;
+			if (@lost) {
+				return &text('check_lostfeature',
+					$text{'feature_'.$f},
+					join(" ", map { $_->{'dom'} } @lost));
+				}
 			}
 		}
 	}
