@@ -4102,7 +4102,6 @@ scripts_phpmodfailed=.. failed to install module from $1 possible packages
 scripts_esoftware=.. the Software Packages Webmin module is not installed!
 scripts_eupdate=.. automatic module installation is not available on your system.
 scripts_einstallmod=Module is not available even after installation!
-scripts_addext=Enabling module in PHP configuration ..
 scripts_gotmod=.. PHP module $1 is now available.
 scripts_nopearmod=The PHP Pear modules $1 are required, but Webmin's Pear module is not available to install them - proceeding anyway.
 scripts_nopearcmd=The PHP Pear modules $1 are required, but Pear for PHP version $2 is not installed - proceeding anyway.

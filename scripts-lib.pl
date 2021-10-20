@@ -1165,7 +1165,6 @@ foreach my $m (@mods) {
 	local $backupinifile;
 	if (!$got) {
 		# Needs to be enabled
-		&$first_print($text{'scripts_addext'});
 		$backupinifile = &transname();
 		&copy_source_dest($inifile, $backupinifile);
 		local $lref = &read_file_lines($inifile);
@@ -1192,7 +1191,6 @@ foreach my $m (@mods) {
 			}
 		undef($phpini::get_config_cache{$inifile});
 		undef(%main::php_modules);
-		&$second_print($text{'setup_done'});
 		if (&check_php_module($m, $phpver, $d) == 1) {
 			# We have it now!
 			goto GOTMODULE;
