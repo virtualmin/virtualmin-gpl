@@ -12411,13 +12411,16 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 	}
 
 # Button to show mail logs
-if ($virtualmin_pro && $config{'mail'} && $config{'mail_system'} <= 1 &&
+if ($config{'mail'} && $config{'mail_system'} <= 1 &&
     &can_view_maillog($d) && $d->{'mail'}) {
-	push(@rv, { 'page' => 'pro/maillog.cgi',
+	my %maillog_menu_link = 
+		  ( 'page' => 'pro/maillog.cgi',
 		    'title' => $text{'edit_maillog'},
 		    'desc' => $text{'edit_maillogdesc'},
 		    'cat' => 'logs',
-		  });
+		  );
+	&menu_link_pro_tip('demo_maillog', \%maillog_menu_link);
+	push(@rv, \%maillog_menu_link) if (!$maillog_menu_link{'skip'});
 	}
 
 # Button to validate connectivity

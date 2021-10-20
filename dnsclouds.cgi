@@ -9,6 +9,9 @@ require './virtual-server-lib.pl';
 
 @clouds = &list_dns_clouds();
 @doms = &list_domains();
+
+&dnsclouds_pro_tip();
+
 print &ui_columns_start([ $text{'dnsclouds_name'},
                           $text{'dnsclouds_url'},
                           $text{'dnsclouds_state'},
