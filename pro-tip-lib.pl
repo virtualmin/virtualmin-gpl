@@ -59,14 +59,6 @@ $text{"scripts_gpl_pro_tip_list_clouds"} = &text('scripts_gpl_pro_tip_clouds', $
 print &alert_pro_tip('list_clouds');
 }
 
-# demo_maillog_pro_tip()
-sub demo_maillog_pro_tip
-{
-return if (!should_show_pro_tip('demo_maillog'));
-$text{"scripts_gpl_pro_tip_demo_maillog"} = $text{'maillog_desc'};
-print &alert_pro_tip('demo_maillog', 1);
-}
-
 ############################################################
 # API general subs
 ############################################################
@@ -75,12 +67,13 @@ print &alert_pro_tip('demo_maillog', 1);
 # If the current user should see Pro tip for the given page
 sub should_show_pro_tip
 {
+return if ($virtualmin_pro);
+return if (!&master_admin());
+return if ($config{'no_pro_tips'});
 my ($tipid) = @_;
 my %protips;
 my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
 &read_file_cached($protip_file, \%protips);
-return if ($virtualmin_pro);
-return if ($config{'no_pro_tips'});
 return !$protips{$tipid};
 }
 
