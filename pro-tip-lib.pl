@@ -112,13 +112,13 @@ return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'
 sub menu_link_pro_tip
 {
 my ($demo_feature, $link_hash) = @_;
-return if (!-r "$virtual_server_root/$demo_feature.cgi");
 if (should_show_pro_tip($demo_feature)) {
-	$link_hash->{'page'} = "$demo_feature.cgi";
-	$link_hash->{'title'} = $link_hash->{'title'} .
+	$link_hash->{'page'} = undef;
+	$link_hash->{'inactive'} = 1;
+	$link_hash->{'title'} .=
 	  (
 	    " <span>" .
-	      "<span data-menu-link-demo>$text{'scripts_gpl_pro_tip_demo'}</span>" .
+	      "<small data-menu-link-demo><sub>&#128274;&nbsp;&nbsp;Pro</sub></small>" .
 	      "<span data-menu-link-icon-demo title='$text{'scripts_gpl_pro_tip'}'></span>" .
 	    "</span>"
 	  );
