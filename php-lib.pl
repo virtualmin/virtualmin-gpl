@@ -446,10 +446,8 @@ foreach my $p (@ports) {
 			&apache::save_directive_struct(
 				undef, $files, $vconf, $conf);
 			}
-		elsif (!&apache::find_directive("SetHandler",
-						$files->{'members'})) {
+		else {
 			# Add the SetHandler directive to the FilesMatch block
-			# if missing
 			&apache::save_directive("SetHandler", [$wanth],
 						$files->{'members'}, $conf);
 			}
