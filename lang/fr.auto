@@ -1906,7 +1906,6 @@ scripts_gpl_to_pro=Désormais disponible uniquement dans Pro
 scripts_gpl_to_pro_upgrade=La mise à niveau de ce script n'est désormais disponible que dans Pro
 
 scripts_gpl_pro_tip=Fonctionnalité professionnelle
-scripts_gpl_pro_tip_demo=(démo)
 scripts_gpl_pro_tip_hide=Merci, je vais réfléchir
 scripts_gpl_pro_tip_and=et
 scripts_gpl_pro_tip_enroll=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et <em>déverrouiller</em> cela et bien d'autres fonctionnalités intéressantes.

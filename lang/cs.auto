@@ -3297,7 +3297,6 @@ scripts_gpl_to_pro=Nyní k dispozici pouze v Pro
 scripts_gpl_to_pro_upgrade=Upgrade pro tento skript je nyní k dispozici pouze v Pro
 
 scripts_gpl_pro_tip=Pro funkce
-scripts_gpl_pro_tip_demo=(demo)
 scripts_gpl_pro_tip_hide=Děkuji, zvážím
 scripts_gpl_pro_tip_and=a
 scripts_gpl_pro_tip_enroll=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje a <em>odemknutí</em> této a mnoha dalších skvělých funkcí.

@@ -1779,7 +1779,6 @@ scripts_gpl_to_pro=现在仅在Pro中可用
 scripts_gpl_to_pro_upgrade=此脚本的升级现在仅在Pro中可用
 
 scripts_gpl_pro_tip=专业功能
-scripts_gpl_pro_tip_demo=（演示）
 scripts_gpl_pro_tip_hide=谢谢，我会考虑
 scripts_gpl_pro_tip_and=和
 scripts_gpl_pro_tip_enroll=请考虑购买 <a target=_blank href='$1'>Virtualmin Pro</a> 许可证以支持开发并<em>解锁</em>此功能和许多其他很酷的功能。

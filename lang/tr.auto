@@ -1979,7 +1979,6 @@ scripts_gpl_to_pro=Artık yalnızca Pro'da mevcut
 scripts_gpl_to_pro_upgrade=Bu komut dosyası için yükseltme artık yalnızca Pro'da mevcut
 
 scripts_gpl_pro_tip=Profesyonel Özellik
-scripts_gpl_pro_tip_demo=(demo)
 scripts_gpl_pro_tip_hide=Teşekkürler, değerlendireceğim
 scripts_gpl_pro_tip_and=ve
 scripts_gpl_pro_tip_enroll=Geliştirmeyi desteklemek ve bu ve diğer birçok harika özelliğin <em>kilidini açmak</em> için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.

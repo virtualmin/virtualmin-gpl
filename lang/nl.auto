@@ -731,7 +731,6 @@ scripts_gpl_to_pro=Nu alleen beschikbaar in Pro
 scripts_gpl_to_pro_upgrade=Upgrade voor dit script is nu alleen beschikbaar in Pro
 
 scripts_gpl_pro_tip=Pro-functie
-scripts_gpl_pro_tip_demo=(demo)
 scripts_gpl_pro_tip_hide=Bedankt, ik zal het overwegen
 scripts_gpl_pro_tip_and=en
 scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te <em>ontgrendelen</em>.

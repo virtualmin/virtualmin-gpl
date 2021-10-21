@@ -2767,7 +2767,6 @@ scripts_gpl_to_pro=Теперь доступно только в версии Pr
 scripts_gpl_to_pro_upgrade=Обновление для этого скрипта теперь доступно только в Pro
 
 scripts_gpl_pro_tip=Функция Pro
-scripts_gpl_pro_tip_demo=(демо)
 scripts_gpl_pro_tip_hide=Спасибо я рассмотрю
 scripts_gpl_pro_tip_and=а также
 scripts_gpl_pro_tip_enroll=Пожалуйста, подумайте о покупке лицензии <a target=_blank href='$1'>Virtualmin Pro</a> для поддержки разработки и <em>разблокировки</em> этой и многих других интересных функций.

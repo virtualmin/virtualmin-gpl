@@ -4184,7 +4184,6 @@ scripts_gpl_to_pro=Proでのみ利用可能になりました
 scripts_gpl_to_pro_upgrade=このスクリプトのアップグレードは、Proでのみ利用可能になりました
 
 scripts_gpl_pro_tip=プロ機能
-scripts_gpl_pro_tip_demo=（デモ）
 scripts_gpl_pro_tip_hide=おかげで、私は検討します
 scripts_gpl_pro_tip_and=と
 scripts_gpl_pro_tip_enroll=開発をサポートし、この機能や他の多くの優れた機能を<em>ロック解除</em>するために、<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討してください。
