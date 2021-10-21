@@ -2445,7 +2445,6 @@ scripts_esoftwaremod=..安裝失敗！
 scripts_esoftware=.. 軟件包Webmin模塊沒有安裝！
 scripts_eupdate=..你的系統不支持自動模塊安裝。
 scripts_einstallmod=安裝後模塊仍然不可用！
-scripts_addext=正在啟用PHP配置中的模塊..
 scripts_gotmod=.. PHP模塊$1現在已可用。
 scripts_nopearmod=需要PHP Pear模塊$1，但是Webmin的Pear模塊現在無法安裝這些PHP Pear模塊 - 無論如何繼續。
 scripts_nopearcmd=需要PHP Pear模塊$1，但是PHP版本$2的Pear沒有安裝 - 無論如何繼續。

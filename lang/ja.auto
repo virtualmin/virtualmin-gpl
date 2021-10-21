@@ -2043,11 +2043,11 @@ check_jailkiterr=Chroot刑務所は利用できません： $1
 check_eyumrepofile=Virtualminリポジトリ構成ファイル $1が存在しません！
 check_yumrepook=Virtualminリポジトリが正しく構成されている
 check_yumrepowrong=Virtualminリポジトリ構成ファイル $1に、間違ったシリアル番号のライセンスキーが含まれています。
-check_yumrepomissing=Virtualmin APTリポジトリ設定ファイル $1がsoftware.virtualmin.comを参照していません！
+check_yumrepomissing=Virtualminリポジトリ構成ファイル $1はsoftware.virtualmin.comを参照していません！
 check_eaptrepofile=APTリポジトリ設定ファイル $1は存在しません！
 check_aptrepook=Virtualmin APTリポジトリが正しく構成されている
 check_aptrepowrong=APTリポジトリ設定ファイル $1に間違ったシリアル番号のライセンスキーが含まれています！
-check_aptrepomissing=リポジトリ設定ファイル $1は、software.virtualmin.com！を参照していません。
+check_aptrepomissing=Virtualmin APTリポジトリ設定ファイル $1はsoftware.virtualmin.comを参照していません！
 
 checkmap_enone=<a href='$1'>Postfix構成</a>でマップソースが見つかりませんでした
 checkmap_esupport=マップソース<tt>$1</tt>はPostfixでサポートされていません-Postfixライブラリをインストールするか、再コンパイルする必要があるかもしれません
@@ -2464,11 +2464,13 @@ backup_eskey=S3秘密鍵がないか無効です
 backup_esfile=S3ファイル名に無効な文字
 backup_einconly=少なくとも1つのフルバックアップを構成していないと、増分スケジュールバックアップを作成できません
 backup_done=バックアップが完了しました。最終的なサイズは $1でした。
+backup_donepurge=バックアップは完了しましたが、削除に失敗しました。最終的なサイズは $1でした。
 backup_partial=バックアップは部分的に完了しています。最終的なサイズは $1でした。
 backup_partial2=失敗した仮想サーバー：
 backup_time=合計バックアップ時間は $1でした。
 backup_failed=バックアップに失敗しました！理由については、上記の進行状況の出力をご覧ください。
 backup_donesubject=$1から $2へのVirtualminのバックアップが完了しました
+backup_purgesubject=$1から $2でVirtualminのバックアップを完了しましたが、削除に失敗しました
 backup_partialsubject=$1から $2へのVirtualminの部分的に完了したバックアップ
 backup_failedsubject=$1から $2へのVirtualminのバックアップに失敗しました
 backup_upload=FTPサーバー $1にアーカイブをアップロードしています. ..
@@ -4100,7 +4102,6 @@ scripts_phpmodfailed=.. $1の可能なパッケージからモジュールをイ
 scripts_esoftware=..ソフトウェアパッケージWebminモジュールがインストールされていません！
 scripts_eupdate=..自動モジュールインストールは、ご使用のシステムでは使用できません。
 scripts_einstallmod=インストール後もモジュールは使用できません！
-scripts_addext=PHP構成でモジュールを有効にしています ..
 scripts_gotmod=.. PHPモジュール $1が利用可能になりました。
 scripts_nopearmod=PHP Pearモジュール $1は必須ですが、WebminのPearモジュールをインストールしてそれらをインストールすることはできません-とにかく続行します。
 scripts_nopearcmd=PHP Pearモジュール $1が必要ですが、Pear for PHPバージョン $2がインストールされていません-続行します。
@@ -4181,6 +4182,14 @@ scripts_discontinued=製造中止
 scripts_can=で利用可能
 scripts_gpl_to_pro=Proでのみ利用可能になりました
 scripts_gpl_to_pro_upgrade=このスクリプトのアップグレードは、Proでのみ利用可能になりました
+
+scripts_gpl_pro_tip=プロ機能
+scripts_gpl_pro_tip_demo=（デモ）
+scripts_gpl_pro_tip_hide=おかげで、私は検討します
+scripts_gpl_pro_tip_and=と
+scripts_gpl_pro_tip_enroll=開発をサポートし、この機能や他の多くの優れた機能を<em>ロック解除</em>するために、<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討してください。
+scripts_gpl_pro_tip_list_scripts=より多くのインストールスクリプトが利用可能です！
+scripts_gpl_pro_tip_clouds=$1プロバイダーのサポートも利用できます！
 
 newnotify_title=メールサーバーの所有者
 newnotify_desc=このページを使用して、選択した仮想サーバーの所有者に電子メールを送信できます。たとえば、システムのダウンタイム、アップグレード、またはその他のサービスの変更を通知できます。メッセージの本文と件名には次の置換を使用できます。

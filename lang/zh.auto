@@ -662,11 +662,11 @@ check_jailkiterr=Chroot监狱不可用： $1
 check_eyumrepofile=Virtualmin 存储库配置文件 $1 不存在！
 check_yumrepook=Virtualmin 存储库配置正确
 check_yumrepowrong=Virtualmin 存储库配置文件 $1 包含错误的许可证密钥序列号！
-check_yumrepomissing=Virtualmin APT存储库配置文件 $1不引用software.virtualmin.com！
+check_yumrepomissing=Virtualmin 存储库配置文件 $1 未引用 software.virtualmin.com！
 check_eaptrepofile=APT存储库配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存储库配置正确
 check_aptrepowrong=APT存储库配置文件 $1包含错误的许可证密钥序列号！
-check_aptrepomissing=存储库配置文件 $1不引用software.virtualmin.com！
+check_aptrepomissing=Virtualmin APT 存储库配置文件 $1 未引用 software.virtualmin.com！
 
 checkmap_enone=在<a href='$1'>Postfix配置</a>中未找到地图源。
 checkmap_esupport=Postfix不支持地图源<tt>$1</tt>-您可能需要为其安装Postfix库或重新编译
@@ -898,10 +898,12 @@ backup_epass2=SSH服务器密码中的无效字符-不能使用@
 backup_ebucket2=在S3存储桶名称中不能使用斜杠
 backup_esfile=S3文件名中的字符无效
 backup_einconly=除非您配置了至少一个完整备份，否则无法创建增量计划备份
+backup_donepurge=备份已完成，但删除失败。最终大小为 $1。
 backup_partial=备份部分完成。最终大小为 $1。
 backup_partial2=发生故障的虚拟服务器：
 backup_time=备份总时间为 $1。
 backup_donesubject=已完成将 $1上的Virtualmin备份到 $2
+backup_purgesubject=已完成将 $1 上的 Virtualmin 备份到 $2，但删除失败
 backup_partialsubject=将 $1上的Virtualmin部分备份到 $2
 backup_failedsubject=无法将 $1上的Virtualmin备份到 $2
 backup_upload6=将档案上传到Rackspace的Cloud Files服务 ..
@@ -1775,6 +1777,14 @@ scripts_discontinued=已停产
 scripts_can=可用于
 scripts_gpl_to_pro=现在仅在Pro中可用
 scripts_gpl_to_pro_upgrade=此脚本的升级现在仅在Pro中可用
+
+scripts_gpl_pro_tip=专业功能
+scripts_gpl_pro_tip_demo=（演示）
+scripts_gpl_pro_tip_hide=谢谢，我会考虑
+scripts_gpl_pro_tip_and=和
+scripts_gpl_pro_tip_enroll=请考虑购买 <a target=_blank href='$1'>Virtualmin Pro</a> 许可证以支持开发并<em>解锁</em>此功能和许多其他很酷的功能。
+scripts_gpl_pro_tip_list_scripts=有更多安装脚本可用！
+scripts_gpl_pro_tip_clouds=还可以支持 $1 个提供程序！
 
 newnotify_admins=还通过电子邮件向选定域中的其他管理员发送电子邮件吗？
 newnotify_users=还在选定域中使用过电子邮件吗？

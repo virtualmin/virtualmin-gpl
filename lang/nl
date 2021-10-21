@@ -3432,7 +3432,6 @@ scripts_esoftwaremod=.. mislukt om te installeren!
 scripts_esoftware=.. het Software Pakket Webmin module is niet geinstalleerd!
 scripts_eupdate=.. de automatisch module installatie is niet beschikbaar op uw systeem.
 scripts_einstallmod=Module is niet beschikbaar zelfs niet na de installatie!
-scripts_addext=Module aanzetten in de PHP configuratie ..
 scripts_gotmod=.. PHP module $1 is nu beschikbaar.
 scripts_nopearmod=De PHP Pear modules $1 zijn nodig, maar Webmin's Pear module is niet beschikbaar om hem te installeren - toch doorgaan?
 scripts_nopearcmd=De PHP Pear modules $1 zijn nodig, maar Pear voor PHP versie $2 is niet geinstalleerd - toch doorgaan?

@@ -3075,7 +3075,6 @@ scripts_esoftwaremod=.. falla al instalar!
 scripts_esoftware=.. el módulo de Webmin de paquetes de software no está instalado!
 scripts_eupdate=.. el módulo de instalación automática no está disponible en su sistema.
 scripts_einstallmod=El módulo no está disponible, ni siquiera después de la instalación!
-scripts_addext=Habilitando módulo en la configuración de PHP ..
 scripts_gotmod=.. el módulo PHP $1 está ahora disponible.
 scripts_nopearmod=Los módulos $1 de PHP Pear son requeridos, pero el módulo Pear de Webmin no está disponible para instalaros - procediendo de todas formas.
 scripts_nopearcmd=Los módulos $1 de PHP Pear son requeridos, pero Pear para la versión de PHP $2 no está instalado - procediendo de todas formas.

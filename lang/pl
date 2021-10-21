@@ -685,7 +685,6 @@ scripts_optmod=Moduł PHP $1 jest rekomendowany ..
 scripts_noini=.. nie można znaleźć globalnego pliku php.ini
 scripts_noini2=.. nie można znaleźć pliku php.ini dla domeny
 scripts_softwaremod=Instalacja pakietu $1 ..
-scripts_addext=Włączanie modułu w konfiguracji PHP ..
 scripts_needpear=Instalacja modułu PHP Pear $1 ..
 scripts_eclash=Inny skrypt jest już zainstalowany w $1.
 scripts_status=Stan

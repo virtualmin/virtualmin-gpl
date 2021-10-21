@@ -1629,11 +1629,11 @@ check_jailkiterr=Więzienia Chroot są niedostępne : $1
 check_eyumrepofile=Plik konfiguracyjny repozytorium Virtualmin $1 nie istnieje!
 check_yumrepook=Repozytorium Virtualmin jest skonfigurowane poprawnie
 check_yumrepowrong=Plik konfiguracyjny repozytorium Virtualmin $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
-check_yumrepomissing=Plik konfiguracyjny repozytorium APT Virtualmin $1 nie odnosi się do software.virtualmin.com!
+check_yumrepomissing=Plik konfiguracyjny repozytorium Virtualmin $1 nie odnosi się do software.virtualmin.com!
 check_eaptrepofile=Plik konfiguracyjny repozytorium APT $1 nie istnieje!
 check_aptrepook=Repozytorium Virtualmin APT jest poprawnie skonfigurowane
 check_aptrepowrong=Plik konfiguracyjny repozytorium APT $1 zawiera nieprawidłowy numer seryjny klucza licencyjnego!
-check_aptrepomissing=Plik konfiguracyjny repozytorium $1 nie odnosi się do software.virtualmin.com!
+check_aptrepomissing=Plik konfiguracyjny repozytorium Virtualmin APT $1 nie odnosi się do software.virtualmin.com!
 
 checkmap_enone=W <a href='$1'>konfiguracji Postfiksa nie znaleziono źródeł map</a>
 checkmap_esupport=Źródło mapy <tt>$1</tt> nie jest obsługiwane przez Postfix - może być konieczne zainstalowanie bibliotek Postfix lub ponowna kompilacja
@@ -2039,11 +2039,13 @@ backup_eskey=Brakujący lub nieprawidłowy tajny klucz S3
 backup_esfile=Niepoprawne znaki w nazwie pliku S3
 backup_einconly=Nie można utworzyć przyrostowej zaplanowanej kopii zapasowej, chyba że skonfigurowano co najmniej jedną pełną kopię zapasową
 backup_done=Tworzenie kopii zapasowej jest zakończone. Ostateczny rozmiar to $1.
+backup_donepurge=Kopia zapasowa została ukończona, ale usunięcie nie powiodło się. Ostateczny rozmiar to $1.
 backup_partial=Tworzenie kopii zapasowej jest częściowo zakończone. Ostateczny rozmiar to $1.
 backup_partial2=Serwery wirtualne, które uległy awarii :
 backup_time=Całkowity czas tworzenia kopii zapasowej wynosił $1.
 backup_failed=Tworzenie kopii zapasowej nie powiodło się! Zobacz wynik postępu powyżej, z jakiego powodu.
 backup_donesubject=Zakończono tworzenie kopii zapasowej Virtualmin na $1 do $2 
+backup_purgesubject=Ukończono tworzenie kopii zapasowej Virtualmin na $1 do $2, ale usunięcie nie powiodło się
 backup_partialsubject=Częściowo ukończona kopia zapasowa Virtualmin na $1 do $2 
 backup_failedsubject=Nie udało się wykonać kopii zapasowej Virtualmin na $1 do $2 
 backup_upload=Przesyłanie archiwum na serwer FTP $1 ..
@@ -3509,6 +3511,14 @@ scripts_discontinued=Przerwane
 scripts_can=Dostępne w
 scripts_gpl_to_pro=Teraz dostępne tylko w wersji Pro
 scripts_gpl_to_pro_upgrade=Aktualizacja tego skryptu jest teraz dostępna tylko w wersji Pro
+
+scripts_gpl_pro_tip=Profesjonalna funkcja
+scripts_gpl_pro_tip_demo=(próbny)
+scripts_gpl_pro_tip_hide=Dzięki, rozważę
+scripts_gpl_pro_tip_and=oraz
+scripts_gpl_pro_tip_enroll=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wspierać rozwój i <em>odblokować</em> tę i wiele innych fajnych funkcji.
+scripts_gpl_pro_tip_list_scripts=Dostępnych jest więcej skryptów instalacyjnych!
+scripts_gpl_pro_tip_clouds=Dostępna jest również pomoc dla $1 dostawców!
 
 newnotify_title=Właściciele serwerów e-mail
 newnotify_desc=Ta strona może służyć do wysyłania wiadomości e-mail do właścicieli wybranych serwerów wirtualnych, na przykład w celu informowania o przestojach systemu, aktualizacjach lub innych zmianach usług. W treści i temacie wiadomości można zastosować następujące podstacje:
