@@ -1036,9 +1036,9 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	# Credentials profile hasn't been setup yet
 	my $temp = &transname();
 	&open_tempfile(TEMP, ">$temp");
-	&print_tempfile(TEMP, $akey,"\n");
-	&print_tempfile(TEMP, $skey,"\n");
-	&print_tempfile(TEMP, $zone,"\n");
+	&print_tempfile(TEMP, $config{'s3_akey'}."\n");
+        &print_tempfile(TEMP, $config{'s3_skey'}."\n");
+        &print_tempfile(TEMP, $config{'s3_location'}."\n");
 	&print_tempfile(TEMP, "\n");
 	&close_tempfile(TEMP);
 	$out = &backquote_command(
