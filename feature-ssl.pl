@@ -2620,6 +2620,12 @@ return $info && ($info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ||
 # Check all domains that need a new Let's Encrypt cert
 sub apply_letsencrypt_cert_renewals
 {
+my $le_max_renewals = 300.0;
+my $le_max_time = 3*60*60;	# 3 hours
+my $last_renew_time = $config{'last_letsencrypt_mass_renewal'};
+my $now = time();
+
+my $done = 0;
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
@@ -2657,7 +2663,17 @@ foreach my $d (&list_domains()) {
 	# Don't even attempt now if the lock is being held
 	next if (&test_lock($ssl_letsencrypt_lock));
 
+	# Don't exceed the global let's encrypt rate limit
+	if ($last_renew_time) {
+		my $diff = $now - $last_renew_time;
+		if ($done > $le_max_renewals / $le_max_time * $diff / 2) {
+			# Done too much this cycle (more than half of the limit)
+			last;
+			}
+		}
+
 	# Time to attempt the renewal
+	$done++;
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	my ($subject, $body);
 	if (!$ok) {
@@ -2681,6 +2697,9 @@ foreach my $d (&list_domains()) {
 	my $from = &get_global_from_address($d);
 	&send_notify_email($from, [$d], $d, $subject, $body);
 	}
+
+$config{'last_letsencrypt_mass_renewal'} = $now;
+&save_module_config();
 }
 
 # renew_letsencrypt_cert(&domain)
