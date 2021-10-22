@@ -3653,7 +3653,6 @@ scripts_esoftwaremod=.. kunne ikke installere!
 scripts_esoftware=.. Webmin-modulen Programvarepakker er ikke installert!
 scripts_eupdate=.. automatisk modulinstallasjon er ikke tilgjengelig på systemet ditt.
 scripts_einstallmod=Modulen er ikke engang tilgjengelig etter installasjon!
-scripts_addext=Aktiverer modul i PHP konfigurasjon ..
 scripts_gotmod=.. PHP modulen $1 er nå tilgjengelig.
 scripts_nopearmod=PHP Pear modulene $1 er påkrevd, men Webmins Pear modul er ikke tilgjengelig for installasjon av disse - fortsetter allikevel.
 scripts_nopearcmd=PHP Pear modulene $1 er påkrevd, men Pear for PHP versjon $2 er ikke installert - fortsetter allikevel.

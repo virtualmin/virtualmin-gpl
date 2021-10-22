@@ -453,11 +453,11 @@ check_jailkiterr=Las cárceles Chroot no están disponibles : $1
 check_eyumrepofile=¡El archivo de configuración del repositorio de Virtualmin $1 no existe!
 check_yumrepook=El repositorio de Virtualmin está configurado correctamente
 check_yumrepowrong=¡El archivo de configuración del repositorio de Virtualmin $1 contiene el número de serie incorrecto de la clave de licencia!
-check_yumrepomissing=¡El archivo de configuración del repositorio APT de Virtualmin $1 no hace referencia a software.virtualmin.com!
+check_yumrepomissing=¡El archivo de configuración del repositorio de Virtualmin $1 no hace referencia a software.virtualmin.com!
 check_eaptrepofile=¡El archivo de configuración del repositorio APT $1 no existe!
 check_aptrepook=El repositorio APT de Virtualmin está configurado correctamente
 check_aptrepowrong=¡El archivo de configuración del repositorio APT $1 contiene el número de serie incorrecto de la clave de licencia!
-check_aptrepomissing=¡El archivo de configuración del repositorio $1 no hace referencia a software.virtualmin.com!
+check_aptrepomissing=¡El archivo de configuración del repositorio APT de Virtualmin $1 no hace referencia a software.virtualmin.com!
 
 check_eqmailldap=La compatibilidad con Qmail+LDAP se ha eliminado en Virtualmin 6.00
 
@@ -594,6 +594,8 @@ backup_eserver9a=El nombre de host del servidor Webmin no se puede resolver
 backup_ebbpath=Falta el camino de Backblaze
 backup_ebbpath2=La ruta de Backblaze no puede comenzar ni terminar con una barra
 backup_einconly=No se puede crear una copia de seguridad programada incremental a menos que tenga al menos una copia de seguridad completa configurada
+backup_donepurge=La copia de seguridad está completa, pero no se pudo borrar. El tamaño final fue $1.
+backup_purgesubject=Se completó la copia de seguridad de Virtualmin en $1 a $2, pero falló la eliminación
 backup_upload9=Subiendo archivo al servidor Webmin $1 ..
 backup_upload10=Subiendo archivo a Backblaze. ..
 backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaurar las copias de seguridad firmadas
@@ -1098,6 +1100,13 @@ scripts_discontinued=Interrumpido
 scripts_can=Disponible en
 scripts_gpl_to_pro=Ahora solo disponible en Pro
 scripts_gpl_to_pro_upgrade=La actualización para este script ahora solo está disponible en Pro
+
+scripts_gpl_pro_tip=Característica profesional
+scripts_gpl_pro_tip_hide=Gracias, lo consideraré
+scripts_gpl_pro_tip_and=y
+scripts_gpl_pro_tip_enroll=Considere comprar la licencia de <a target=_blank href='$1'>Virtualmin Pro</a> para respaldar el desarrollo y <em>desbloquear</em> esta y muchas otras funciones interesantes.
+scripts_gpl_pro_tip_list_scripts=¡Hay más scripts de instalación disponibles!
+scripts_gpl_pro_tip_clouds=¡También está disponible la asistencia para los proveedores de $1 !
 
 newnotify_admins=¿También enviar correos electrónicos a administradores adicionales en dominios seleccionados?
 newnotify_users=¿También enviar correo electrónico a userd en dominios seleccionados?

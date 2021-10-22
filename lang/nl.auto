@@ -254,11 +254,11 @@ check_jailkiterr=Chroot-jails zijn niet beschikbaar : $1
 check_eyumrepofile=Het configuratiebestand van de Virtualmin-repository $1 bestaat niet!
 check_yumrepook=De Virtualmin-repository is correct geconfigureerd
 check_yumrepowrong=Het configuratiebestand van de Virtualmin-repository $1 bevat het verkeerde serienummer van de licentiesleutel!
-check_yumrepomissing=Het Virtualmin APT-repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
+check_yumrepomissing=Het configuratiebestand van de Virtualmin-repository $1 verwijst niet naar software.virtualmin.com!
 check_eaptrepofile=Het APT-repository-configuratiebestand $1 bestaat niet!
 check_aptrepook=De Virtualmin APT-repository is correct geconfigureerd
 check_aptrepowrong=Het APT-repository-configuratiebestand $1 bevat het verkeerde serienummer van de licentiesleutel!
-check_aptrepomissing=Het repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
+check_aptrepomissing=Het configuratiebestand van de Virtualmin APT-repository $1 verwijst niet naar software.virtualmin.com!
 
 check_eqmailldap=Qmail+LDAP-ondersteuning is verwijderd in Virtualmin 6.00
 
@@ -361,6 +361,8 @@ backup_ebbpath2=Backblaze-pad kan niet beginnen of eindigen met een schuine stre
 backup_es3pathslash=De S3-bucket en het pad mogen geen backslash bevatten
 backup_es3path2=S3-bucket en -pad kunnen niet beginnen of eindigen met een schuine streep
 backup_einconly=Er kan geen incrementele geplande back-up worden gemaakt, tenzij u ten minste één volledige back-up hebt geconfigureerd
+backup_donepurge=De back-up is voltooid, maar het verwijderen is mislukt. De uiteindelijke grootte was $1.
+backup_purgesubject=Voltooide back-up van Virtualmin op $1 tot $2, maar verwijderen mislukt
 backup_upload6=Archief uploaden naar Rackspace's Cloud Files-service.
 backup_upload7=Archief uploaden naar Google Cloud Storage.
 backup_upload8=Archief uploaden naar Dropbox ..
@@ -727,6 +729,13 @@ scripts_discontinued=Stopgezet
 scripts_can=Beschikbaar in
 scripts_gpl_to_pro=Nu alleen beschikbaar in Pro
 scripts_gpl_to_pro_upgrade=Upgrade voor dit script is nu alleen beschikbaar in Pro
+
+scripts_gpl_pro_tip=Pro-functie
+scripts_gpl_pro_tip_hide=Bedankt, ik zal het overwegen
+scripts_gpl_pro_tip_and=en
+scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te <em>ontgrendelen</em>.
+scripts_gpl_pro_tip_list_scripts=Er zijn meer installatiescripts beschikbaar!
+scripts_gpl_pro_tip_clouds=Ondersteuning voor $1 providers is ook beschikbaar!
 
 newnotify_users=Ook e-mailen in geselecteerde domeinen?
 

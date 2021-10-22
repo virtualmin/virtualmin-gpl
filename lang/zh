@@ -2445,7 +2445,6 @@ scripts_esoftwaremod=..安装失败！
 scripts_esoftware=.. 软件包Webmin模块没有安装！
 scripts_eupdate=..你的系统不支持自动模块安装。
 scripts_einstallmod=安装后模块仍然不可用！
-scripts_addext=正在启用PHP配置中的模块..
 scripts_gotmod=.. PHP模块$1现在已可用。
 scripts_nopearmod=需要PHP Pear模块$1，但是Webmin的Pear模块现在无法安装这些PHP Pear模块 - 无论如何继续。
 scripts_nopearcmd=需要PHP Pear模块$1，但是PHP版本$2的Pear没有安装 - 无论如何继续。

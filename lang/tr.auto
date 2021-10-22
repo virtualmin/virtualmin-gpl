@@ -744,11 +744,11 @@ check_jailkiterr=Krom hapishaneler mevcut değil : $1
 check_eyumrepofile=$1 Virtualmin deposu yapılandırma dosyası mevcut değil!
 check_yumrepook=Virtualmin deposu doğru şekilde yapılandırılmış
 check_yumrepowrong=Virtualmin veri havuzu yapılandırma dosyası $1, yanlış seri numarası lisans anahtarı içeriyor!
-check_yumrepomissing=$1 Virtualmin APT veri havuzu yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
+check_yumrepomissing=Virtualmin veri havuzu yapılandırma dosyası $1, software.virtualmin.com'a başvurmuyor!
 check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
 check_aptrepowrong=$1 APT veri havuzu yapılandırma dosyası lisans anahtarının seri numarasını yanlış içeriyor!
-check_aptrepomissing=$1 havuz yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
+check_aptrepomissing=Virtualmin APT deposu yapılandırma dosyası $1, software.virtualmin.com'a başvurmuyor!
 
 checkmap_enone=<a href='$1'>Postfix yapılandırmasında</a> harita kaynağı bulunamadı
 checkmap_esupport=<tt>$1</tt> harita kaynağı Postfix tarafından desteklenmiyor - bunun için Postfix kütüphanelerini kurmanız veya yeniden derlemeniz gerekebilir
@@ -1009,10 +1009,12 @@ backup_epass2=SSH sunucusu şifresinde geçersiz karakterler - @ kullanılamaz
 backup_ebucket2=Eğik çizgiler S3 grup adlarında kullanılamaz
 backup_esfile=S3 dosya adında geçersiz karakterler
 backup_einconly=En az bir tam yedek yapılandırılmamışsa, artımlı bir zamanlanmış yedekleme oluşturulamaz
+backup_donepurge=Yedekleme tamamlandı, ancak silme başarısız oldu. Son boyut $1 idi.
 backup_partial=Yedekleme kısmen tamamlandı. Nihai boyut $1 idi.
 backup_partial2=Başarısız olan sanal sunucular :
 backup_time=Toplam yedekleme süresi $1 idi.
 backup_donesubject=$1 - $2 arasında Virtualmin yedeklemesi tamamlandı
+backup_purgesubject=Virtualmin'in $1'den $2'ye yedeklenmesi tamamlandı, ancak silme başarısız oldu
 backup_partialsubject=$1 ile $2 arasında Virtualmin'in kısmen tamamlanmış yedeklemesi
 backup_failedsubject=$1 ila $2 arasında Virtualmin yedeklemesi başarısız oldu
 backup_upload6=Rackspace'in Cloud Files hizmetine arşiv yükleniyor ..
@@ -1895,7 +1897,6 @@ scripts_phpmodfailed=.. $1 olası paketten modül yüklenemedi
 scripts_esoftware=.. Yazılım Paketleri Webmin modülü kurulu değil!
 scripts_eupdate=.. otomatik modül kurulumu sisteminizde mevcut değildir.
 scripts_einstallmod=Modül kurulumdan sonra bile kullanılamıyor!
-scripts_addext=PHP yapılandırmasında modül etkinleştiriliyor.
 scripts_gotmod=.. $1 PHP modülü kullanıma sunuldu.
 scripts_nopearmod=$1 PHP Pear modülleri gereklidir, ancak Webmin'in Pear modülü bunları kurmak için mevcut değildir - yine de devam etmektedir.
 scripts_nopearcmd=$1 PHP Pear modülleri gerekli, ancak PHP $2 için Pear kurulu değil - yine de devam ediyor.
@@ -1976,6 +1977,13 @@ scripts_discontinued=Üretimden kaldırıldı
 scripts_can=Uygun
 scripts_gpl_to_pro=Artık yalnızca Pro'da mevcut
 scripts_gpl_to_pro_upgrade=Bu komut dosyası için yükseltme artık yalnızca Pro'da mevcut
+
+scripts_gpl_pro_tip=Profesyonel Özellik
+scripts_gpl_pro_tip_hide=Teşekkürler, değerlendireceğim
+scripts_gpl_pro_tip_and=ve
+scripts_gpl_pro_tip_enroll=Geliştirmeyi desteklemek ve bu ve diğer birçok harika özelliğin <em>kilidini açmak</em> için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.
+scripts_gpl_pro_tip_list_scripts=Daha fazla yükleme komut dosyası var!
+scripts_gpl_pro_tip_clouds=$1 sağlayıcı desteği de mevcuttur!
 
 newnotify_admins=Ayrıca seçili alan adlarında fazladan yöneticiye e-posta gönderilsin mi?
 newnotify_users=Ayrıca seçili alan adlarında userd'ye e-posta gönder

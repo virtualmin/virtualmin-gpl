@@ -773,11 +773,11 @@ check_jailkiterr=Les prisons Chroot ne sont pas disponibles : $1
 check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin $1 n'existe pas !
 check_yumrepook=Le référentiel Virtualmin est correctement configuré
 check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin $1 contient le mauvais numéro de série de clé de licence !
-check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
+check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin $1 ne fait pas référence à software.virtualmin.com !
 check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe pas!
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
 check_aptrepowrong=Le fichier de configuration du référentiel APT $1 contient le mauvais numéro de série de la clé de licence!
-check_aptrepomissing=Le fichier de configuration du référentiel $1 ne fait pas référence à software.virtualmin.com!
+check_aptrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com !
 
 checkmap_enone=Aucune source de carte n'a été trouvée dans la <a href='$1'>configuration Postfix</a>
 checkmap_esupport=La source de carte <tt>$1</tt> n'est pas prise en charge par Postfix - vous devrez peut-être installer les bibliothèques Postfix pour cela, ou recompiler
@@ -1007,6 +1007,8 @@ backup_edbpath2=Le chemin Dropbox ne peut pas commencer ou se terminer par une b
 backup_ebbpath=Chemin Backblaze manquant
 backup_ebbpath2=Le chemin Backblaze ne peut pas commencer ou se terminer par une barre oblique
 backup_einconly=Une sauvegarde planifiée incrémentielle ne peut pas être créée sauf si vous avez configuré au moins une sauvegarde complète
+backup_donepurge=La sauvegarde est terminée, mais la suppression a échoué. La taille finale était $1.
+backup_purgesubject=Sauvegarde terminée de Virtualmin sur $1 à $2, mais la suppression a échoué
 backup_upload7=Importation d'archive dans Google Cloud Storage.
 backup_upload8=Téléchargement de l'archive sur Dropbox.
 backup_upload9=Téléchargement de l'archive sur le serveur Webmin $1 ..
@@ -1902,6 +1904,13 @@ scripts_discontinued=Discontinué
 scripts_can=Disponible en
 scripts_gpl_to_pro=Désormais disponible uniquement dans Pro
 scripts_gpl_to_pro_upgrade=La mise à niveau de ce script n'est désormais disponible que dans Pro
+
+scripts_gpl_pro_tip=Fonctionnalité professionnelle
+scripts_gpl_pro_tip_hide=Merci, je vais réfléchir
+scripts_gpl_pro_tip_and=et
+scripts_gpl_pro_tip_enroll=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et <em>déverrouiller</em> cela et bien d'autres fonctionnalités intéressantes.
+scripts_gpl_pro_tip_list_scripts=Il y a plus de scripts d'installation disponibles !
+scripts_gpl_pro_tip_clouds=La prise en charge de $1 fournisseurs est également disponible !
 
 newnotify_title=Propriétaires du serveur de messagerie
 newnotify_desc=Cette page peut être utilisée pour envoyer des e-mails aux propriétaires des serveurs virtuels sélectionnés, par exemple pour annoncer des temps d'arrêt du système, des mises à niveau ou d'autres modifications de service. Les sous-postes suivants peuvent être utilisés dans le corps et l'objet du message:

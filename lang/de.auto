@@ -593,11 +593,11 @@ check_jailkiterr=Chroot-Gefängnisse sind nicht verfügbar : $1
 check_eyumrepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht!
 check_yumrepook=Das Virtualmin-Repository ist richtig konfiguriert
 check_yumrepowrong=Die Virtualmin-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
-check_yumrepomissing=Die Konfigurationsdatei $1 für das Virtualmin APT-Repository bezieht sich nicht auf software.virtualmin.com!
+check_yumrepomissing=Die Virtualmin-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
 check_eaptrepofile=Die APT-Repository-Konfigurationsdatei $1 existiert nicht!
 check_aptrepook=Das Virtualmin APT-Repository ist korrekt konfiguriert
 check_aptrepowrong=Die APT-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
-check_aptrepomissing=Die Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
+check_aptrepomissing=Die Virtualmin APT-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
 
 checkmap_esupport=Die Kartenquelle <tt>$1</tt> wird von Postfix nicht unterstützt. Möglicherweise müssen Sie Postfix-Bibliotheken dafür installieren oder neu kompilieren
 checkmap_eaccess=Die Kartenquelle <tt>$1</tt> kann nicht verwendet werden : $2
@@ -801,8 +801,10 @@ backup_doing2=Starten der Sicherung von $1 Virtualmin-Konfigurationseinstellunge
 backup_eakey=Fehlender oder ungültiger S3-Authentifizierungsschlüssel
 backup_eskey=Fehlender oder ungültiger geheimer S3-Schlüssel
 backup_einconly=Eine inkrementelle geplante Sicherung kann nur erstellt werden, wenn Sie mindestens eine vollständige Sicherung konfiguriert haben
+backup_donepurge=Die Sicherung ist abgeschlossen, aber das Löschen ist fehlgeschlagen. Die endgültige Größe war $1.
 backup_partial=Die Sicherung ist teilweise abgeschlossen. Die endgültige Größe betrug $1.
 backup_time=Die Gesamtsicherungszeit betrug $1.
+backup_purgesubject=Sicherung von Virtualmin auf $1 bis $2 abgeschlossen, aber das Löschen ist fehlgeschlagen
 backup_partialsubject=Teilweise abgeschlossene Sicherung von Virtualmin auf $1 bis $2
 backup_upload3=Hochladen des Archivs in den S3-Dienst von Amazon.
 backup_upload6=Hochladen des Archivs in den Cloud Files-Dienst von Rackspace.
@@ -1461,6 +1463,13 @@ scripts_discontinued=Abgesetzt
 scripts_can=Verfügbar in
 scripts_gpl_to_pro=Jetzt nur in Pro verfügbar
 scripts_gpl_to_pro_upgrade=Das Upgrade für dieses Skript ist jetzt nur in Pro verfügbar
+
+scripts_gpl_pro_tip=Pro-Funktion
+scripts_gpl_pro_tip_hide=Danke, werde ich berücksichtigen
+scripts_gpl_pro_tip_and=und
+scripts_gpl_pro_tip_enroll=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und diese und viele andere coole Funktionen <em>freizuschalten</em>.
+scripts_gpl_pro_tip_list_scripts=Es sind weitere Installationsskripte verfügbar!
+scripts_gpl_pro_tip_clouds=Unterstützung für $1 Anbieter ist ebenfalls verfügbar!
 
 newnotify_title=E-Mail-Server-Besitzer
 newnotify_desc=Auf dieser Seite können Sie E-Mails an die Eigentümer der ausgewählten virtuellen Server senden, um beispielsweise Systemausfälle, Upgrades oder andere Serviceänderungen anzukündigen. Die folgenden Unterpositionen können im Nachrichtentext und im Betreff verwendet werden:

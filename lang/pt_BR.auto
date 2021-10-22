@@ -1873,11 +1873,11 @@ check_jailkiterr=As cadeias de chroot não estão disponíveis : $1
 check_eyumrepofile=O arquivo de configuração do repositório Virtualmin $1 não existe!
 check_yumrepook=O repositório Virtualmin está configurado corretamente
 check_yumrepowrong=O arquivo de configuração do repositório Virtualmin $1 contém o número de série incorreto da chave de licença!
-check_yumrepomissing=O arquivo de configuração do repositório Virtualmin APT $1 não se refere a software.virtualmin.com!
+check_yumrepomissing=O arquivo de configuração do repositório Virtualmin $1 não se refere a software.virtualmin.com!
 check_eaptrepofile=O arquivo de configuração do repositório APT $1 não existe!
 check_aptrepook=O repositório Virtualmin APT está configurado corretamente
 check_aptrepowrong=O arquivo de configuração do repositório APT $1 contém o número de série errado da chave de licença!
-check_aptrepomissing=O arquivo de configuração do repositório $1 não se refere a software.virtualmin.com!
+check_aptrepomissing=O arquivo de configuração do repositório Virtualmin APT $1 não se refere a software.virtualmin.com!
 
 checkmap_enone=Nenhuma fonte de mapa foi encontrada na <a href='$1'>configuração do Postfix</a>
 checkmap_esupport=A origem do mapa <tt>$1</tt> não é suportada pelo Postfix - talvez você precise instalar as bibliotecas do Postfix ou recompilar
@@ -2294,11 +2294,13 @@ backup_eskey=Chave secreta S3 ausente ou inválida
 backup_esfile=Caracteres inválidos no nome do arquivo S3
 backup_einconly=Um backup agendado incremental não pode ser criado, a menos que você tenha pelo menos um backup completo configurado
 backup_done=O backup está completo. O tamanho final foi de $1.
+backup_donepurge=O backup foi concluído, mas a exclusão falhou. O tamanho final era $1.
 backup_partial=O backup está parcialmente completo. O tamanho final foi de $1.
 backup_partial2=Servidores virtuais que falharam :
 backup_time=O tempo total de backup foi de $1.
 backup_failed=Falha no backup! Veja a saída do progresso acima pelo motivo.
 backup_donesubject=Backup concluído do Virtualmin em $1 a $2 
+backup_purgesubject=Backup de Virtualmin concluído em $1 a $2, mas a exclusão falhou
 backup_partialsubject=Backup parcialmente concluído do Virtualmin em $1 a $2 
 backup_failedsubject=Falha no backup do Virtualmin em $1 a $2 
 backup_upload=Carregando arquivo morto para o servidor FTP $1 ..
@@ -3882,7 +3884,6 @@ scripts_phpmodfailed=.. falhou ao instalar o módulo de $1 pacotes possíveis
 scripts_esoftware=.. o módulo Webmin de pacotes de software não está instalado!
 scripts_eupdate=.. a instalação automática do módulo não está disponível no seu sistema.
 scripts_einstallmod=O módulo não está disponível mesmo após a instalação!
-scripts_addext=Ativando o módulo na configuração do PHP.
 scripts_gotmod=.. O módulo PHP $1 está agora disponível.
 scripts_nopearmod=Os módulos PHP Pear $1 são necessários, mas o módulo Pear Webmin não está disponível para instalá-los - continuando assim mesmo.
 scripts_nopearcmd=Os módulos PHP Pear $1 são necessários, mas o Pear para PHP versão $2 não está instalado - continuando assim mesmo.
@@ -3960,6 +3961,13 @@ scripts_discontinued=Interrompido
 scripts_can=Disponível em
 scripts_gpl_to_pro=Agora disponível apenas no Pro
 scripts_gpl_to_pro_upgrade=A atualização para este script agora está disponível apenas no Pro
+
+scripts_gpl_pro_tip=Recurso Pro
+scripts_gpl_pro_tip_hide=Obrigado, vou considerar
+scripts_gpl_pro_tip_and=e
+scripts_gpl_pro_tip_enroll=Por favor, considere comprar a licença <a target=_blank href='$1'>Virtualmin Pro</a> para apoiar o desenvolvimento e <em>desbloquear</em> este e muitos outros recursos interessantes.
+scripts_gpl_pro_tip_list_scripts=Existem mais scripts de instalação disponíveis!
+scripts_gpl_pro_tip_clouds=Suporte para $1 provedores também está disponível!
 
 newnotify_title=Proprietários do servidor de email
 newnotify_desc=Essa página pode ser usada para enviar email aos proprietários dos servidores virtuais selecionados, por exemplo, para anunciar o tempo de inatividade do sistema, atualizações ou outras alterações de serviço. As seguintes subestações podem ser usadas no corpo e no assunto da mensagem:

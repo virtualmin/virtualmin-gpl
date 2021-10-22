@@ -191,11 +191,11 @@ check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1
 check_eyumrepofile=Konfigurasjonsfilen til Virtualmin -depotet $1 finnes ikke!
 check_yumrepook=Virtualmin -depotet er konfigurert riktig
 check_yumrepowrong=Konfigurasjonsfilen til Virtualmin -depotet $1 inneholder feil serienummer på lisensnøkkelen!
-check_yumrepomissing=Konfigurasjonsfilen $1 for Virtualmin APT refererer ikke til software.virtualmin.com!
+check_yumrepomissing=Konfigurasjonsfilen til Virtualmin -depotet $1 refererer ikke til software.virtualmin.com!
 check_eaptrepofile=APT-repository konfigurasjonsfilen $1 eksisterer ikke!
 check_aptrepook=Virtualmin APT-repository er riktig konfigurert
 check_aptrepowrong=APT-arkivets konfigurasjonsfil $1 inneholder feil serienummer på lisensnøkkelen!
-check_aptrepomissing=Arkivets konfigurasjonsfil $1 refererer ikke til software.virtualmin.com!
+check_aptrepomissing=Konfigurasjonsfilen Virtualmin APT -depot $1 refererer ikke til software.virtualmin.com!
 
 check_eqmailldap=Qmail+LDAP-støtte er fjernet i Virtualmin 6.00
 
@@ -261,6 +261,8 @@ backup_edbpath2=Dropbox-banen kan ikke starte eller avslutte med en skråstrek
 backup_ebbpath=Mangler Backblaze-bane
 backup_ebbpath2=Backblaze-banen kan ikke starte eller ende med en skråstrek
 backup_einconly=Det kan ikke opprettes en trinnvis planlagt sikkerhetskopi med mindre du har konfigurert minst en full sikkerhetskopi
+backup_donepurge=Sikkerhetskopieringen er fullført, men slettingen mislyktes. Endelig størrelse var $1.
+backup_purgesubject=Fullført sikkerhetskopiering av Virtualmin på $1 til $2, men sletting mislyktes
 backup_upload7=Laster opp arkiv til Google Cloud Storage ..
 backup_upload8=Laster opp arkiv til Dropbox ..
 backup_upload9=Laster opp arkiv til Webmin-server $1 ..
@@ -495,6 +497,13 @@ scripts_discontinued=Utgått
 scripts_can=Tilgjengelig i
 scripts_gpl_to_pro=Nå bare tilgjengelig i Pro
 scripts_gpl_to_pro_upgrade=Oppgradering for dette skriptet er nå bare tilgjengelig i Pro
+
+scripts_gpl_pro_tip=Pro -funksjon
+scripts_gpl_pro_tip_hide=Takk, jeg skal vurdere
+scripts_gpl_pro_tip_and=og
+scripts_gpl_pro_tip_enroll=Vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a> lisens for å støtte utvikling og <em>låse opp</em> denne og mange andre kule funksjoner.
+scripts_gpl_pro_tip_list_scripts=Det er flere installasjonsskript tilgjengelig!
+scripts_gpl_pro_tip_clouds=Støtte for $1 -leverandører er også tilgjengelig!
 
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python

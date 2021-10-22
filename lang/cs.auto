@@ -1546,11 +1546,11 @@ check_jailkiterr=Chrootské vězení není k dispozici : $1
 check_eyumrepofile=Konfigurační soubor $1 úložiště Virtualmin neexistuje!
 check_yumrepook=Úložiště Virtualmin je správně nakonfigurováno
 check_yumrepowrong=Konfigurační soubor $1 úložiště Virtualmin obsahuje nesprávné sériové číslo licenčního klíče!
-check_yumrepomissing=Konfigurační soubor úložiště Virtualmin APT $1 neodkazuje na software.virtualmin.com!
+check_yumrepomissing=Konfigurační soubor $1 úložiště Virtualmin neodkazuje na software.virtualmin.com!
 check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
 check_aptrepowrong=Konfigurační soubor úložiště APT $1 obsahuje nesprávné sériové číslo licenčního klíče!
-check_aptrepomissing=Konfigurační soubor úložiště $1 neodkazuje na software.virtualmin.com!
+check_aptrepomissing=Konfigurační soubor $1 úložiště Virtualmin APT neodkazuje na software.virtualmin.com!
 
 checkmap_enone=V <a href='$1'>konfiguraci Postfixu nebyly nalezeny žádné zdroje map</a>
 checkmap_esupport=Zdroj mapy <tt>$1</tt> není podporován Postfixem - možná budete muset pro něj nainstalovat Postfix knihovny nebo znovu kompilovat
@@ -1843,9 +1843,11 @@ backup_es3path2=Kbelík a cesta S3 nemohou začínat ani končit lomítkem
 backup_emkdir=Nepodařilo se vytvořit adresář $1 : $2 
 backup_ebucket2=Lomítka nelze použít v názvech kbelíků S3
 backup_einconly=Inkrementální plánovanou zálohu nelze vytvořit, pokud nemáte nakonfigurovanou alespoň jednu úplnou zálohu
+backup_donepurge=Zálohování je dokončeno, ale odstranění se nezdařilo. Konečná velikost byla $1.
 backup_partial=Zálohování je částečně dokončeno. Konečná velikost byla $1.
 backup_partial2=Virtuální servery, které selhaly :
 backup_donesubject=Dokončena záloha Virtualmin na $1 až $2 
+backup_purgesubject=Dokončeno zálohování Virtualmin na $1 až $2, ale odstranění se nezdařilo
 backup_partialsubject=Částečně dokončená záloha Virtualmin na $1 až $2 
 backup_failedsubject=Nepodařilo se zálohovat Virtualmin na $1 až $2 
 backup_upload6=Nahrávání archivu do cloudových služeb společnosti Rackspace.
@@ -3214,7 +3216,6 @@ scripts_phpmodfailed=.. nepodařilo se nainstalovat modul z $1 možných balíč
 scripts_esoftware=.. modul Webmin Software Packages Webmin není nainstalován!
 scripts_eupdate=.. automatická instalace modulu není ve vašem systému k dispozici.
 scripts_einstallmod=Modul není k dispozici ani po instalaci!
-scripts_addext=Povolení modulu v konfiguraci PHP.
 scripts_gotmod=.. PHP modul $1 je nyní k dispozici.
 scripts_nopearmod=Moduly PHP Pearl $1 jsou povinné, ale modul Pearl Webmin pro jejich instalaci není k dispozici - přesto pokračuje.
 scripts_nopearcmd=Jsou vyžadovány moduly PHP Pearl $1, ale Pear for PHP verze $2 není nainstalována - přesto pokračuje.
@@ -3294,6 +3295,13 @@ scripts_discontinued=Přerušeno
 scripts_can=K dispozici v
 scripts_gpl_to_pro=Nyní k dispozici pouze v Pro
 scripts_gpl_to_pro_upgrade=Upgrade pro tento skript je nyní k dispozici pouze v Pro
+
+scripts_gpl_pro_tip=Pro funkce
+scripts_gpl_pro_tip_hide=Děkuji, zvážím
+scripts_gpl_pro_tip_and=a
+scripts_gpl_pro_tip_enroll=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje a <em>odemknutí</em> této a mnoha dalších skvělých funkcí.
+scripts_gpl_pro_tip_list_scripts=K dispozici je více instalačních skriptů!
+scripts_gpl_pro_tip_clouds=K dispozici je také podpora pro $1 poskytovatelů!
 
 newnotify_title=Majitelé e-mailových serverů
 newnotify_desc=Tuto stránku lze použít k zasílání e-mailů majitelům vybraných virtuálních serverů, například k oznámení výpadků systému, upgradů nebo jiných změn služeb. V těle a předmětu zprávy mohou být použity následující rozvodny:

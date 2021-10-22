@@ -1299,11 +1299,11 @@ check_jailkiterr=Le jail chroot non sono disponibili : $1
 check_eyumrepofile=Il file di configurazione del repository Virtualmin $1 non esiste!
 check_yumrepook=Il repository Virtualmin è configurato correttamente
 check_yumrepowrong=Il file di configurazione del repository Virtualmin $1 contiene il numero di serie errato della chiave di licenza!
-check_yumrepomissing=Il file di configurazione del repository APT Virtualmin $1 non fa riferimento a software.virtualmin.com!
+check_yumrepomissing=Il file di configurazione del repository Virtualmin $1 non fa riferimento a software.virtualmin.com!
 check_eaptrepofile=Il file di configurazione del repository APT $1 non esiste!
 check_aptrepook=Il repository APT Virtualmin è configurato correttamente
 check_aptrepowrong=Il file di configurazione del repository APT $1 contiene il numero seriale errato della chiave di licenza!
-check_aptrepomissing=Il file di configurazione del repository $1 non fa riferimento a software.virtualmin.com!
+check_aptrepomissing=Il file di configurazione del repository APT di Virtualmin $1 non fa riferimento a software.virtualmin.com!
 
 checkmap_enone=Nessuna sorgente mappa trovata nella <a href='$1'>configurazione Postfix</a>
 checkmap_esupport=La fonte della mappa <tt>$1</tt> non è supportata da Postfix - potrebbe essere necessario installare le librerie Postfix per esso o ricompilare
@@ -1677,9 +1677,11 @@ backup_eskey=Chiave segreta S3 mancante o non valida
 backup_esfile=Caratteri non validi nel nome file S3
 backup_einconly=Non è possibile creare un backup pianificato incrementale se non è stato configurato almeno un backup completo
 backup_done=Il backup è completo. La dimensione finale era $1.
+backup_donepurge=Il backup è completo, ma l'eliminazione non è riuscita. La dimensione finale era $1.
 backup_time=Il tempo totale di backup è stato $1.
 backup_failed=Backup fallito! Vedere l'output di avanzamento sopra per il motivo.
 backup_donesubject=Backup completato di Virtualmin da $1 a $2 
+backup_purgesubject=Backup completato di Virtualmin da $1 a $2, ma eliminazione non riuscita
 backup_failedsubject=Backup non riuscito di Virtualmin da $1 a $2 
 backup_upload=Caricamento archivio su server FTP $1 ..
 backup_upload2=Caricamento archivio su server SSH $1 ..
@@ -3095,7 +3097,6 @@ scripts_phpmodfailed=.. impossibile installare il modulo da $1 possibili pacchet
 scripts_esoftware=.. il modulo Webmin dei pacchetti software non è installato!
 scripts_eupdate=.. l'installazione automatica dei moduli non è disponibile sul tuo sistema.
 scripts_einstallmod=Il modulo non è disponibile anche dopo l'installazione!
-scripts_addext=Modulo di abilitazione in configurazione PHP ..
 scripts_gotmod=.. Il modulo PHP $1 è ora disponibile.
 scripts_nopearmod=Sono richiesti i moduli Pear di PHP $1, ma il modulo Pear di Webmin non è disponibile per installarli, procedendo comunque.
 scripts_nopearcmd=I moduli Pear% PHP $1 sono richiesti, ma Pear per PHP versione $2 non è installato - procedendo comunque.
@@ -3176,6 +3177,13 @@ scripts_discontinued=Interrotto
 scripts_can=Disponibile in
 scripts_gpl_to_pro=Ora disponibile solo in Pro
 scripts_gpl_to_pro_upgrade=L'aggiornamento per questo script è ora disponibile solo in Pro
+
+scripts_gpl_pro_tip=Funzionalità professionale
+scripts_gpl_pro_tip_hide=Grazie, valuterò
+scripts_gpl_pro_tip_and=e
+scripts_gpl_pro_tip_enroll=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo e <em>sbloccare</em> questa e molte altre fantastiche funzioni.
+scripts_gpl_pro_tip_list_scripts=Sono disponibili più script di installazione!
+scripts_gpl_pro_tip_clouds=È disponibile anche il supporto per i provider $1!
 
 newnotify_title=Proprietari del server di posta elettronica
 newnotify_desc=Questa pagina può essere utilizzata per inviare e-mail ai proprietari dei server virtuali selezionati, ad esempio per annunciare tempi di inattività del sistema, aggiornamenti o altre modifiche al servizio. Le seguenti sottostazioni possono essere utilizzate nel corpo del messaggio e nell'oggetto:

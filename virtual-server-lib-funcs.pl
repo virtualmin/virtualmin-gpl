@@ -12248,14 +12248,22 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 		  });
 	}
 
-if ($d->{'unix'} && defined(&supports_resource_limits) &&
-    &supports_resource_limits() && &can_edit_res($d)) {
+if ($d->{'unix'} && &can_edit_res($d)) {
 	# Resource limits button
-	push(@rv, { 'page' => 'pro/edit_res.cgi',
+	my $__ =
+		  { 'page' => 'pro/edit_res.cgi',
 		    'title' => $text{'edit_res'},
 		    'desc' => $text{'edit_resdesc'},
 		    'cat' => 'admin',
-		  });
+		  };
+
+	&menu_link_pro_tip('resource_limits', $__);
+	if (!$virtualmin_pro ||
+	    (defined(&supports_resource_limits) &&
+	     &supports_resource_limits())) {
+		push(@rv, $__)
+			if (!$__->{'skip'});
+		}
 	}
 
 if (!$d->{'parent'} && &can_edit_admins($d)) {
@@ -12288,13 +12296,18 @@ if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
 		  });
 	}
 
-if (&has_proxy_balancer($d) && &can_edit_forward()) {
+if ((!$virtualmin_pro || &has_proxy_balancer($d))
+                      && &can_edit_forward()) {
 	# Proxy balance editor
-	push(@rv, { 'page' => 'pro/list_balancers.cgi',
+	my $__ =
+		  { 'page' => 'pro/list_balancers.cgi',
 		    'title' => $text{'edit_balancer'},
 		    'desc' => $text{'edit_balancerdesc'},
 		    'cat' => 'server',
-		  });
+		  };
+
+	&menu_link_pro_tip('proxy_balancer', $__);
+	push(@rv, $__) if (!$__->{'skip'});
 	}
 
 # Alias and redirects editor
@@ -12413,24 +12426,27 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 # Button to show mail logs
 if ($config{'mail'} && $config{'mail_system'} <= 1 &&
     &can_view_maillog($d) && $d->{'mail'}) {
-	my %maillog_menu_link = 
-		  ( 'page' => 'pro/maillog.cgi',
+	my $__ = 
+		  { 'page' => 'pro/maillog.cgi',
 		    'title' => $text{'edit_maillog'},
 		    'desc' => $text{'edit_maillogdesc'},
 		    'cat' => 'logs',
-		  );
-	&menu_link_pro_tip('demo_maillog', \%maillog_menu_link);
-	push(@rv, \%maillog_menu_link) if (!$maillog_menu_link{'skip'});
+		  };
+	&menu_link_pro_tip('maillog', $__);
+	push(@rv, $__)
+		if (!$__->{'skip'});
 	}
 
 # Button to validate connectivity
-if ($virtualmin_pro) {
-	push(@rv, { 'page' => 'pro/connectivity.cgi',
-		    'title' => $text{'edit_connect'},
-		    'desc' => $text{'edit_connectdesc'},
-		    'cat' => 'logs',
-		  });
-	}
+my $connectivity_menu_link =
+	  { 'page' => 'pro/connectivity.cgi',
+	    'title' => $text{'edit_connect'},
+	    'desc' => $text{'edit_connectdesc'},
+	    'cat' => 'logs',
+	  };
+&menu_link_pro_tip('connectivity', $connectivity_menu_link);
+push(@rv, $connectivity_menu_link)
+	if (!$connectivity_menu_link->{'skip'});
 
 # Link to edit excluded directories
 if (!$d->{'alias'} && &can_edit_exclude()) {
@@ -12496,14 +12512,17 @@ if (&can_2fa()) {
 	}
 
 if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
-    !$d->{'proxy_pass_mode'} &&
-    $virtualmin_pro && &can_edit_html()) {
+    !$d->{'proxy_pass_mode'} && &can_edit_html()) {
 	# Edit web pages button
-	push(@rv, { 'page' => 'pro/edit_html.cgi',
+	my $__ =
+		  { 'page' => 'pro/edit_html.cgi',
 		    'title' => $text{'edit_html'},
 		    'desc' => $text{'edit_htmldesc'},
 		    'cat' => 'services',
-		  });
+		  };
+	&menu_link_pro_tip('edit_html', $__);
+	push(@rv, $__)
+		if (!$__->{'skip'});
 	}
 
 if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
@@ -12793,6 +12812,8 @@ if (&can_edit_templates()) {
 				    'icon' => $tcodes->[$i],
 				  });
 			}
+		&global_menu_link_pro_tip(\@rv)
+			if (!$virtualmin_pro);
 		&save_links_cache("global", $v, \@rv);
 		}
 	}
