@@ -12812,6 +12812,8 @@ if (&can_edit_templates()) {
 				    'icon' => $tcodes->[$i],
 				  });
 			}
+		&global_menu_link_pro_tip(\@rv)
+			if (!$virtualmin_pro);
 		&save_links_cache("global", $v, \@rv);
 		}
 	}

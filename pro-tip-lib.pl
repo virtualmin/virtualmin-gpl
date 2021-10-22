@@ -107,13 +107,93 @@ my $form = "&mdash;&nbsp;" . &ui_form_start("@{[&get_webprefix_safe()]}/$module_
 return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-virtualmin");
 }
 
+sub global_menu_link_pro_tip
+{
+my ($global_links_hash) = @_;
+foreach my $pro_demo_feature
+(
+	# Add demo Reseller Accounts link for GPL users 
+	{ 'name' => 'newresels',
+	  'title' => $text{'newresels_title'},
+	  'cat' => 'setting'
+	},
+
+	# Add demo Cloud Mail Delivery Providers link for GPL users 
+	{ 'name' => 'smtpclouds',
+	  'title' => $text{'smtpclouds_title'},
+	  'cat' => 'email'
+	},
+
+	# Add demo Email Server Owners link for GPL users 
+	{ 'name' => 'newnotify',
+	  'title' => $text{'newnotify_title'},
+	  'cat' => 'email'
+	},
+
+	# Add demo Email Server Owners link for GPL users 
+	{ 'name' => 'newretention',
+	  'title' => $text{'newretention_title'},
+	  'cat' => 'email'
+	},
+
+	# Add demo New Reseller Email link for GPL users 
+	{ 'name' => 'newreseller',
+	  'title' => $text{'newreseller_title'},
+	  'cat' => 'email'
+	},
+
+	# Add demo Custom Links link for GPL users 
+	{ 'name' => 'newlinks',
+	  'title' => $text{'newlinks_title'},
+	  'cat' => 'custom'
+	},
+
+	# Add demo Secondary Mail Servers link for GPL users 
+	{ 'name' => 'newmxs',
+	  'title' => $text{'newmxs_title'},
+	  'cat' => 'ip'
+	},
+
+	# Add demo Disk Quota Monitoring link for GPL users 
+	{ 'name' => 'newquotas',
+	  'title' => $text{'newquotas_title'},
+	  'cat' => 'check',
+	  'skip' => !&has_home_quotas()
+	},
+
+	# Add demo Batch Create Servers link for GPL users 
+	{ 'name' => 'newcmass',
+	  'title' => $text{'cmass_title'},
+	  'cat' => 'add',
+	},
+
+	# Add demo Backup Encryption Keys link for GPL users 
+	{ 'name' => 'bkeys',
+	  'title' => $text{'bkeys_title'},
+	  'cat' => 'backup',
+	},
+
+	# Add demo Backup Encryption Keys link for GPL users 
+	{ 'name' => 'history',
+	  'icon' => 'graph',
+	  'title' => $text{'edit_history'},
+	},
+)
+{
+	&menu_link_pro_tip($pro_demo_feature->{'url'}, $pro_demo_feature);
+	delete($pro_demo_feature->{'name'});
+	push(@{$global_links_hash}, $pro_demo_feature)
+		if (!$pro_demo_feature->{'skip'});
+	}
+}
+
 # menu_link_pro_tip
 # Modifies default menu link to advertise GPL user Pro features if allowed
 sub menu_link_pro_tip
 {
 my ($demo_feature, $link_hash) = @_;
 if (should_show_pro_tip($demo_feature)) {
-	$link_hash->{'page'} = undef;
+	delete($link_hash->{'page'});
 	$link_hash->{'inactive'} = 1;
 	$link_hash->{'title'} .=
 	  (
