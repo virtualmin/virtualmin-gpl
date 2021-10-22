@@ -1862,7 +1862,7 @@ sub modify_mysql_database_user
 local ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
 &require_mysql();
 local $myuser = &mysql_username($user);
-	local $myolduser = &mysql_username($olduser);
+local $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
 	# Update on provisioning server
 	my $mymod = &get_domain_mysql_module($d);
