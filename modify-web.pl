@@ -91,6 +91,10 @@ C<--move-document-dir> flag.
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
+If your system supports Fcgiwrap for running CGI scripts, you can use the 
+C<--enable-fcgiwrap> flag to switch to it instead of using SuExec, or 
+C<--disable-fcgiwrap> to switch back.
+
 =cut
 
 package virtual_server;
@@ -260,6 +264,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-fpm-socket") {
 		$fpmsock = 1;
 		}
+	elsif ($a eq "--enable-fcgiwrap") {
+		$fcgiwrap = 1;
+		}
+	elsif ($a eq "--disable-fcgiwrap") {
+		$fcgiwrap = 0;
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -271,7 +281,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $defmode || &usage("Nothing to do");
+  $fpmsock || $defmode || defined($fcgiwrap) || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -362,6 +372,14 @@ if ($defaultwebsite && @doms > 1) {
 if ($includes ne "") {
 	$includes =~ /^\.([a-z0-9\.\_\-]+)$/i ||
 	    &usage("--includes must be followed by an extension like .html");
+	}
+
+# Validate fcgiwrap change
+if (defined($fcgiwrap)) {
+	$fcgiwrap && !&supports_fcgiwrap() &&
+		&usage("Fcgiwrap is not supported on this system");
+	!$fcgiwrap && !&supports_suexec() &&
+		&usage("Suexec is not supported on this system");
 	}
 
 # Lock them all
@@ -716,9 +734,40 @@ foreach $d (@doms) {
 		&$second_print(".. done");
 		}
 
+	if (defined($fcgiwrap)) {
+		# Turn fcgiwrap on or off
+		if ($fcgiwrap) {
+			&$first_print(
+				"Switching to fcgiwrap for CGI scripts ..");
+			if ($d->{'fcgiwrap_port'}) {
+				&$second_print(".. already enabled");
+				}
+			elsif ($err = &enable_apache_fcgiwrap($d)) {
+				&$second_print(".. failed : $err");
+				}
+			else {
+				&$second_print(
+				  ".. done, using port $d->{'fcgiwrap_port'}");
+				}
+			}
+		else {
+			&$first_print("Switching to suexec for CGI scripts ..");
+			if (!$d->{'fcgiwrap_port'}) {
+				&$second_print(".. already enabled");
+				}
+			elsif ($err = &disable_apache_fcgiwrap($d)) {
+				&$second_print(".. failed : $err");
+				}
+			else {
+				&$second_print(".. done");
+				}
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert || $linkcert || $fixhtmldir) {
+	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
+	    defined($fcgiwrap)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -775,6 +824,7 @@ print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert | --link-ssl-cert]\n";
+print "                     [--enable-fcgiwrap | --disable-fcgiwrap]\n";
 print "                     [--sync-tlsa]\n";
 exit(1);
 }
