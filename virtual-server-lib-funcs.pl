@@ -14242,7 +14242,9 @@ if ($config{'dns'}) {
 				&$second_print(
 				   &text('check_eresolv4',
 					&ui_link("@{[&get_webprefix_safe()]}/net/list_dns.cgi",
-						 $text{'check_eresolvlist'})).
+						 $text{'check_eresolvlist'}),
+					&ui_link("@{[&get_webprefix_safe()]}/$module_name/$clink",
+						 $text{'features_title'})).
 				   (@dhcp ? " ".$text{'check_eresolv3'} : ""));
 				}
 			else {
