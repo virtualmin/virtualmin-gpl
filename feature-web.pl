@@ -235,34 +235,16 @@ else {
 
 if (!$d->{'alias'}) {
 	# If suexec isn't supported, setup fcgiwrap
-	if (($tmpl->{'web_fcgiwrap'} || !&supports_suexec()) && &supports_fcgiwrap()) {
+	if (($tmpl->{'web_fcgiwrap'} || !&supports_suexec()) &&
+	    &supports_fcgiwrap()) {
 		&$first_print($text{'setup_fcgiwrap'});
-		my ($ok, $port) = &setup_fcgiwrap_server($d);
-		if ($ok) {
-			# Configure Apache to use fcgiwrap for CGIs
-			$d->{'fcgiwrap_port'} = $port;
-			local ($virt, $vconf, $conf) = &get_apache_virtual(
-							$d->{'dom'}, $d->{'web_port'});
-			local @dirs = &apache::find_directive_struct(
-				"Directory", $vconf);
-			local $cgid = &cgi_bin_dir($d);
-			local ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
-			if ($dir) {
-				&apache::save_directive("SetHandler",
-				  [ "proxy:unix:$port|fcgi://localhost" ],
-				  $dir->{'members'}, $conf);
-				&apache::save_directive("ProxyFCGISetEnvIf",
-				  [ "true SCRIPT_FILENAME \"$d->{'home'}%{reqenv:SCRIPT_NAME}\"" ],
-				  $dir->{'members'}, $conf);
-				&flush_file_lines($virt->{'file'});
-				&$second_print($text{'setup_done'});
-				}
-			else {
-				&$second_print(&text('setup_efcgiwrap', "$cgid not found"));
-				}
+		my $err = &enable_apache_fcgiwrap($d);
+		if ($err) {
+			&$second_print(&text('setup_efcgiwrap', $err));
 			}
 		else {
-			&$second_print(&text('setup_efcgiwrap', $port));
+			&$second_print(&text('setup_efcgiwrap',
+					     $d->{'fcgiwrap_port'}));
 			}
 		}
 	}
@@ -463,6 +445,7 @@ else {
 &delete_php_fpm_pool($d);	# May not exist, but delete just in case
 if ($d->{'fcgiwrap_port'}) {
 	&delete_fcgiwrap_server($d);
+	delete($d->{'fcgiwrap_port'});
 	}
 undef(@apache::get_config_cache);
 return 1;
@@ -4930,6 +4913,70 @@ my ($d) = @_;
 my $name = "fcgiwrap-$d->{'dom'}";
 $name =~ s/\./-/g;
 return $name;
+}
+
+# enable_apache_fcgiwrap(&domain)
+# Turn on fcgiwrap for running CGIs for a domain
+sub enable_apache_fcgiwrap
+{
+my ($d) = @_;
+my ($ok, $port) = &setup_fcgiwrap_server($d);
+return $port if (!$ok);
+$d->{'fcgiwrap_port'} = $port;
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	my @dirs = &apache::find_directive_struct("Directory", $vconf);
+	my $cgid = &cgi_bin_dir($d);
+	my ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
+	if ($dir) {
+		&apache::save_directive("SetHandler",
+		  [ "proxy:unix:$port|fcgi://localhost" ],
+		  $dir->{'members'}, $conf);
+		&apache::save_directive("ProxyFCGISetEnvIf",
+		  [ "true SCRIPT_FILENAME \"$d->{'home'}%{reqenv:SCRIPT_NAME}\"" ],
+		  $dir->{'members'}, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
+	else {
+		return "$cgid not found";
+		}
+	}
+&register_post_action(\&restart_apache);
+return undef;
+}
+
+# disable_apache_fcgiwrap(&domain)
+# Remove Apache directives for fcgiwrap, and shut down the fcgiwrap server
+sub disable_apache_fcgiwrap
+{
+my ($d) = @_;
+return undef if (!$d->{'fcgiwrap_port'});
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $port = $d->{'fcgiwrap_port'};
+foreach my $p (@ports) {
+        my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+        next if (!$virt);
+        my @dirs = &apache::find_directive_struct("Directory", $vconf);
+        my $cgid = &cgi_bin_dir($d);
+        my ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
+	if ($dir) {
+		my @sh = &apache::find_directive("SetHandler", $vconf);
+		@sh = grep { !/proxy:unix:\Q$port\E:/ } @sh;
+		&apache::save_directive("SetHandler", \@sh,
+					$dir->{'members'}, $conf);
+		&apache::save_directive("ProxyFCGISetEnvIf", [],
+					$dir->{'members'}, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
+	}
+&register_post_action(\&restart_apache);
+&delete_fcgiwrap_server($d);
+delete($d->{'fcgiwrap_port'});
+return undef;
 }
 
 $done_feature_script{'web'} = 1;
