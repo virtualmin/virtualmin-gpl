@@ -16,11 +16,12 @@ if (defined(&list_pro_dns_clouds)) {
 return @rv;
 }
 
-# default_dns_cloud()
+# default_dns_cloud([&template])
 # Returns the DNS cloud provider used by default for new domains
 sub default_dns_cloud
 {
-my $tmpl = &get_template(0);
+my ($tmpl) = @_;
+$tmpl ||= &get_template(0);
 return undef if (!$tmpl->{'dns_cloud'} || $tmpl->{'dns_cloud'} eq 'local' ||
 		 $tmpl->{'dns_cloud'} eq 'services');
 my ($cloud) = grep { $_->{'name'} eq $tmpl->{'dns_cloud'} }
