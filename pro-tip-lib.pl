@@ -173,8 +173,9 @@ foreach my $pro_demo_feature
 	  'cat' => 'backup',
 	},
 
-	# Add demo Backup Encryption Keys link for GPL users 
-	{ 'name' => 'history',
+	# Add demo System Statistics link for GPL users 
+	{ 'url' => "demo_history.cgi",
+	  'name' => 'history',
 	  'icon' => 'graph',
 	  'title' => $text{'edit_history'},
 	},
