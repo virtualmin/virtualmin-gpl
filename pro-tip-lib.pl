@@ -107,6 +107,9 @@ my $form = "&mdash;&nbsp;" . &ui_form_start("@{[&get_webprefix_safe()]}/$module_
 return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-virtualmin");
 }
 
+# global_menu_link_pro_tip(global-links-hash-ref)
+# Modifies global links and returns grayed out Pro
+# links for GPL users for advertising purposes
 sub global_menu_link_pro_tip
 {
 my ($global_links_hash) = @_;
@@ -173,21 +176,78 @@ foreach my $pro_demo_feature
 	  'cat' => 'backup',
 	},
 
-	# Add demo Backup Encryption Keys link for GPL users 
-	{ 'name' => 'history',
+	# Add demo System Statistics link for GPL users 
+	{ 'url' => "demo_history.cgi",
+	  'name' => 'history',
 	  'icon' => 'graph',
 	  'title' => $text{'edit_history'},
 	},
 )
 {
-	&menu_link_pro_tip($pro_demo_feature->{'url'}, $pro_demo_feature);
+	&menu_link_pro_tip($pro_demo_feature->{'name'}, $pro_demo_feature);
 	delete($pro_demo_feature->{'name'});
 	push(@{$global_links_hash}, $pro_demo_feature)
 		if (!$pro_demo_feature->{'skip'});
 	}
 }
 
-# menu_link_pro_tip
+# menu_link_pro_tips(links-hash-ref, dom-hash-ref)
+# Modifies sub-menu links and returns grayed out
+# Pro links for GPL users for advertising purposes
+sub menu_link_pro_tips
+{
+my ($links_hash, $d) = @_;
+foreach my $pro_demo_feature
+(
+	# Add demo Edit Resource Limits link for GPL users 
+	{ 'name' => 'edit_res',
+	  'title' => $text{'edit_res'},
+	  'cat' => 'admin',
+	  'skip' => !($d->{'unix'} && &can_edit_res($d))
+	},
+
+	# Add demo Proxy Paths link for GPL users 
+	{ 'name' => 'list_balancers',
+	  'title' => $text{'edit_balancer'},
+	  'cat' => 'server',
+	  'skip' => !(&can_edit_forward()),
+	},
+
+	# Add demo Search Mail Logs link for GPL users 
+	{ 'name' => 'edit_maillog',
+	  'title' => $text{'edit_maillog'},
+	  'cat' => 'logs',
+	  'skip' => !($config{'mail'} &&
+	              $config{'mail_system'} <= 1 &&
+	              $d->{'mail'}),
+	},
+
+	# Add demo Check Connectivity link for GPL users 
+	{ 'name' => 'edit_connect',
+	  'title' => $text{'edit_connect'},
+	  'cat' => 'logs',
+	},
+
+	# Add demo Edit Web Pages link for GPL users 
+	{ 'name' => 'edit_html',
+	  'title' => $text{'edit_html'},
+	  'cat' => 'services',
+	  'skip' => !(&domain_has_website($d) &&
+	              $d->{'dir'} &&
+	              !$d->{'alias'} &&
+	              !$d->{'proxy_pass_mode'} &&
+	              &can_edit_html()),
+	},
+)
+{
+	&menu_link_pro_tip($pro_demo_feature->{'name'}, $pro_demo_feature);
+	delete($pro_demo_feature->{'name'});
+	push(@{$links_hash}, $pro_demo_feature)
+		if (!$pro_demo_feature->{'skip'});
+	}
+}
+
+# menu_link_pro_tip(demo-feature-name, link-hash-ref)
 # Modifies default menu link to advertise GPL user Pro features if allowed
 sub menu_link_pro_tip
 {

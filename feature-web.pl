@@ -3822,7 +3822,7 @@ if ($apache::site{'fullversion'}) {
 	return &compare_versions($apache::site{'fullversion'}, "2.4.26") >= 0;
 	}
 else {
-	return apache::httpd_modules{'core'} >= 2.426;
+	return $apache::httpd_modules{'core'} >= 2.426;
 	}
 }
 

@@ -11,18 +11,19 @@ require './virtual-server-lib.pl';
 print virtual_server::warning_messages();
 
 &read_file("$module_config_directory/last-config", \%lastconfig);
-print "<b>$text{'check_desc'}</b><br>\n";
+print "<b>$text{'check_desc'}</b><br><p></p>\n";
 
 &$indent_print();
 $cerr = &check_virtual_server_config(\%lastconfig);
 &check_error($cerr) if ($cerr);
 &$outdent_print();
 
-print "<b>$text{'check_done'}</b><p>\n";
+print "<p></p><b>$text{'check_done'}</b><p>\n";
 
 # See if any options effecting Webmin users have changed
 if (&need_update_webmin_users_post_config(\%lastconfig)) {
 	if ($config{'post_check'}) {
+		print "<p></p>";
 		# Update all Webmin users
 		&modify_all_webmin();
 		if ($virtualmin_pro) {
@@ -31,9 +32,10 @@ if (&need_update_webmin_users_post_config(\%lastconfig)) {
 		}
 	else {
 		# Just offer to update
-		print &ui_form_start("all_webmin.cgi");
-		print "$text{'check_needupdate'}<p>\n";
-		print &ui_form_end([ [ "now", $text{'check_updatenow'} ] ]);
+		my $form = &ui_form_start("all_webmin.cgi");
+		$form .= "$text{'check_needupdate'}<p>\n";
+		$form .= &ui_form_end([ [ "now", $text{'check_updatenow'} ] ]);
+		print &ui_alert_box($form, 'warn');
 		}
 	}
 
@@ -61,7 +63,8 @@ sub check_error
 {
 print "<p>$_[0]<p>\n";
 print "</ul>\n";
-print "<b><font color=#ff0000>$text{'check_failed'}</font></b><p>\n";
+print &ui_alert_box($text{'check_failed'}, 'warn', undef, undef, ' ');
+print "<p>\n";
 &ui_print_footer("", $text{'index_return'});
 exit;
 }
