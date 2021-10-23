@@ -11,14 +11,14 @@ require './virtual-server-lib.pl';
 print virtual_server::warning_messages();
 
 &read_file("$module_config_directory/last-config", \%lastconfig);
-print "<b>$text{'check_desc'}</b><br>\n";
+print "<b>$text{'check_desc'}</b><br><p></p>\n";
 
 &$indent_print();
 $cerr = &check_virtual_server_config(\%lastconfig);
 &check_error($cerr) if ($cerr);
 &$outdent_print();
 
-print "<b>$text{'check_done'}</b><p>\n";
+print "<p></p><b>$text{'check_done'}</b><p>\n";
 
 # See if any options effecting Webmin users have changed
 if (&need_update_webmin_users_post_config(\%lastconfig)) {
@@ -61,7 +61,8 @@ sub check_error
 {
 print "<p>$_[0]<p>\n";
 print "</ul>\n";
-print "<b><font color=#ff0000>$text{'check_failed'}</font></b><p>\n";
+print &ui_alert_box($text{'check_failed'}, 'danger', undef, undef, ' ');
+print "<p>\n";
 &ui_print_footer("", $text{'index_return'});
 exit;
 }
