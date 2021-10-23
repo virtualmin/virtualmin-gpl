@@ -12524,7 +12524,7 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 		    'icon' => 'page_edit',
 		  });
 	}
-
+&menu_link_pro_tips(\@rv, $d) if (!$virtualmin_pro);
 &save_links_cache($ckey, $v, \@rv);
 return @rv;
 }
