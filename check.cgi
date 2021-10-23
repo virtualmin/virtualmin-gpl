@@ -63,7 +63,7 @@ sub check_error
 {
 print "<p>$_[0]<p>\n";
 print "</ul>\n";
-print &ui_alert_box($text{'check_failed'}, 'danger', undef, undef, ' ');
+print &ui_alert_box($text{'check_failed'}, 'warn', undef, undef, ' ');
 print "<p>\n";
 &ui_print_footer("", $text{'index_return'});
 exit;
