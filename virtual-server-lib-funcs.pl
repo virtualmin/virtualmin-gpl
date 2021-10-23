@@ -14524,23 +14524,37 @@ if ($config{'web'}) {
 	}
 
 if (&domain_has_website()) {
-	# Check PHP versions
-	local @msg;
-	local @vers = &list_available_php_versions();
-	foreach my $v (@vers) {
-		if ($v->[1]) {
-			local $realv = &get_php_version($v->[0]);
-			push(@msg, ($realv || $v->[0])." (".$v->[1].")");
-			}
-		else {
-			push(@msg, $v->[0]." (mod_php)");
-			}
-		}
-	if (@msg) {
-		&$second_print(&text('check_webphpvers', join(", ", @msg)));
+	# Report on supported PHP modes
+	my @supp = grep { $_ ne 'none' } &supported_php_modes();
+	if (@supp) {
+		&$second_print(&text('check_webphpmodes',
+				     join(" ", @supp)));
 		}
 	else {
-		&$second_print("<b>$text{'check_webphpnovers'}</b>");
+		&$second_print($text{'check_ewebphpmodes'});
+		}
+
+	# Report on PHP versions (unless it's just FPM, which we cover later)
+	local @vers = &list_available_php_versions();
+	my @othersupp = grep { !/fpm|none/ } @supp;
+	if (@othersupp) {
+		local @msg;
+		foreach my $v (@vers) {
+			if ($v->[1]) {
+				local $realv = &get_php_version($v->[0]);
+				push(@msg, ($realv ||$v->[0])." (".$v->[1].")");
+				}
+			else {
+				push(@msg, $v->[0]." (mod_php)");
+				}
+			}
+		if (@msg) {
+			&$second_print(&text('check_webphpvers',
+					     join(", ", @msg)));
+			}
+		else {
+			&$second_print("<b>$text{'check_webphpnovers'}</b>");
+			}
 		}
 
 	# Check for PHP-FPM support
@@ -14646,15 +14660,6 @@ if (&domain_has_website()) {
 				}
 			}
 
-		# Report on supported PHP modes
-		my @supp = grep { $_ ne 'none' } &supported_php_modes();
-		if (@supp) {
-			&$second_print(&text('check_webphpmodes',
-					     join(" ", @supp)));
-			}
-		else {
-			&$second_print($text{'check_ewebphpmodes'});
-			}
 		}
 
 	# Check for any unsupported mod_php directives
