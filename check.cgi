@@ -23,6 +23,7 @@ print "<p></p><b>$text{'check_done'}</b><p>\n";
 # See if any options effecting Webmin users have changed
 if (&need_update_webmin_users_post_config(\%lastconfig)) {
 	if ($config{'post_check'}) {
+		print "<p></p>";
 		# Update all Webmin users
 		&modify_all_webmin();
 		if ($virtualmin_pro) {
@@ -31,9 +32,10 @@ if (&need_update_webmin_users_post_config(\%lastconfig)) {
 		}
 	else {
 		# Just offer to update
-		print &ui_form_start("all_webmin.cgi");
-		print "$text{'check_needupdate'}<p>\n";
-		print &ui_form_end([ [ "now", $text{'check_updatenow'} ] ]);
+		my $form = &ui_form_start("all_webmin.cgi");
+		$form .= "$text{'check_needupdate'}<p>\n";
+		$form .= &ui_form_end([ [ "now", $text{'check_updatenow'} ] ]);
+		print &ui_alert_box($form, 'warn');
 		}
 	}
 
