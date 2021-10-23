@@ -14667,8 +14667,14 @@ if (&domain_has_website()) {
 			}
 
 		# Report on supported PHP modes
-		my @supp = &supported_php_modes();
-		&$second_print(&text('check_webphpmodes', join(" ", @supp)));
+		my @supp = grep { $_ ne 'none' } &supported_php_modes();
+		if (@supp) {
+			&$second_print(&text('check_webphpmodes',
+					     join(" ", @supp)));
+			}
+		else {
+			&$second_print($text{'check_ewebphpmodes'});
+			}
 		}
 
 	# Check for any unsupported mod_php directives
