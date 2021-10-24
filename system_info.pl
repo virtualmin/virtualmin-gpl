@@ -64,7 +64,7 @@ if (!$virtualmin_pro &&
 	push(@rv, { 'type' => 'warning',
 		    'level' => 'info',
 		    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
-		    	'alert_title' => 'Get Virtualmin Pro',
+		    	'alert_title' => $text{'scripts_gpl_pro_tip_title_dashboard'},
 		    	'alert_body1' => $text{'scripts_gpl_pro_tip_dashboard'} . " ",
 		    	'alert_body2' => &text('scripts_gpl_pro_tip_enroll_dashboard',
 		    	                       'https://www.virtualmin.com/product-category/virtualmin/'),
