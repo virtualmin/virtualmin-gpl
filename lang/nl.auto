@@ -228,6 +228,7 @@ check_fcgiwrapok=CGI-scripts kunnen worden uitgevoerd met fcgiwrap.
 check_webphpvers=De volgende PHP-versies zijn beschikbaar : $1
 check_webphpnovers=Er zijn geen PHP-versies gevonden op dit systeem!
 check_webphpmodes=De volgende PHP-uitvoeringsmodi zijn beschikbaar : $1
+check_ewebphpmodes=Er zijn geen PHP-uitvoeringsmodi beschikbaar!
 check_webphpversinis=PHP-versies zijn gewijzigd in $1 sinds de laatste controle. Ontbrekende php.ini-bestanden opnieuw genereren.
 check_webphpfpm=Ondersteuning voor PHP-FPM versie $1 is beschikbaar op dit systeem.
 check_webphpnofpm=PHP-FPM-ondersteuning is niet gedetecteerd : $1
@@ -731,11 +732,16 @@ scripts_gpl_to_pro=Nu alleen beschikbaar in Pro
 scripts_gpl_to_pro_upgrade=Upgrade voor dit script is nu alleen beschikbaar in Pro
 
 scripts_gpl_pro_tip=Pro-functie
-scripts_gpl_pro_tip_hide=Bedankt, ik zal het overwegen
+scripts_gpl_pro_tip_hide=Bedankt voor de heads-up
+scripts_gpl_pro_tip_hide2=Bedankt, ik zal er over nadenken
 scripts_gpl_pro_tip_and=en
-scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te <em>ontgrendelen</em>.
+scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te ontgrendelen.
 scripts_gpl_pro_tip_list_scripts=Er zijn meer installatiescripts beschikbaar!
+scripts_gpl_pro_tip_enroll_list_scripts=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en alle onderstaande installatiescripts te ontgrendelen.
 scripts_gpl_pro_tip_clouds=Ondersteuning voor $1 providers is ook beschikbaar!
+scripts_gpl_pro_tip_title_dashboard=Download Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling van het webhostingcontrolepaneel waar u van houdt te ondersteunen en om veel coole functies te ontgrendelen.
+scripts_gpl_pro_tip_dashboard=Wist je dat Virtualmin Pro tal van geweldige functies biedt die niet zijn opgenomen in de GPL-versie?
 
 newnotify_users=Ook e-mailen in geselecteerde domeinen?
 

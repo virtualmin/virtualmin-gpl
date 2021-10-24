@@ -1441,6 +1441,7 @@ check_fcgiwrapok=Skripty CGI lze spouštět pomocí příkazu fcgiwrap.
 check_webphpvers=K dispozici jsou následující verze PHP : $1 
 check_webphpnovers=V tomto systému nebyly nalezeny žádné verze PHP!
 check_webphpmodes=K dispozici jsou následující režimy provádění PHP : $1 
+check_ewebphpmodes=Nejsou k dispozici žádné režimy provádění PHP!
 check_webphpversinis=Verze PHP se od poslední kontroly změnily na $1. Regenerace chybějících souborů php.ini.
 check_webphpfpm=V tomto systému je k dispozici podpora PHP-FPM verze $1.
 check_webphpnofpm=Podpora PHP-FPM nebyla detekována : $1 
@@ -3297,11 +3298,16 @@ scripts_gpl_to_pro=Nyní k dispozici pouze v Pro
 scripts_gpl_to_pro_upgrade=Upgrade pro tento skript je nyní k dispozici pouze v Pro
 
 scripts_gpl_pro_tip=Pro funkce
-scripts_gpl_pro_tip_hide=Děkuji, zvážím
+scripts_gpl_pro_tip_hide=Díky za upozornění
+scripts_gpl_pro_tip_hide2=Děkuji, budu o tom přemýšlet
 scripts_gpl_pro_tip_and=a
-scripts_gpl_pro_tip_enroll=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje a <em>odemknutí</em> této a mnoha dalších skvělých funkcí.
+scripts_gpl_pro_tip_enroll=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje a odemknutí této a mnoha dalších skvělých funkcí.
 scripts_gpl_pro_tip_list_scripts=K dispozici je více instalačních skriptů!
+scripts_gpl_pro_tip_enroll_list_scripts=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a>, abyste podpořili vývoj a odemkli všechny níže uvedené instalační skripty.
 scripts_gpl_pro_tip_clouds=K dispozici je také podpora pro $1 poskytovatelů!
+scripts_gpl_pro_tip_title_dashboard=Získejte Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje oblíbeného ovládacího panelu webhostingu a odemknutí mnoha skvělých funkcí.
+scripts_gpl_pro_tip_dashboard=Věděli jste, že Virtualmin Pro přináší spoustu skvělých funkcí, které nejsou součástí verze GPL?
 
 newnotify_title=Majitelé e-mailových serverů
 newnotify_desc=Tuto stránku lze použít k zasílání e-mailů majitelům vybraných virtuálních serverů, například k oznámení výpadků systému, upgradů nebo jiných změn služeb. V těle a předmětu zprávy mohou být použity následující rozvodny:

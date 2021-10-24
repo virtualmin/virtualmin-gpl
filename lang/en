@@ -4185,11 +4185,16 @@ scripts_gpl_to_pro=Now only available in Pro
 scripts_gpl_to_pro_upgrade=Upgrade for this script is now only available in Pro
 
 scripts_gpl_pro_tip=Pro Feature
-scripts_gpl_pro_tip_hide=Thanks, I'll consider
+scripts_gpl_pro_tip_hide=Thanks for the heads-up
+scripts_gpl_pro_tip_hide2=Thanks, I will think about it
 scripts_gpl_pro_tip_and=and
-scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support development and <em>unlock</em> this and many other cool features.
+scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock this and many other cool features.
 scripts_gpl_pro_tip_list_scripts=There are more install scripts available!
+scripts_gpl_pro_tip_enroll_list_scripts=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock all install scripts listed below.
 scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
+scripts_gpl_pro_tip_title_dashboard=Get Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development of the web hosting control panel you love and unlock many cool features.
+scripts_gpl_pro_tip_dashboard=Did you know that Virtualmin Pro brings plenty of great features not included in GPL version?
 
 newnotify_title=Email Server Owners
 newnotify_desc=This page can be used to send email to the owners of the selected virtual servers, for example to announce system down-time, upgrades or other service alterations. The following substitions can be used in the message body and subject:

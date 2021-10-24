@@ -67,10 +67,11 @@ print &alert_pro_tip('list_clouds');
 # If the current user should see Pro tip for the given page
 sub should_show_pro_tip
 {
+my ($tipid, $ignore) = @_;
 return if ($virtualmin_pro);
 return if (!&master_admin());
-return if ($config{'no_pro_tips'});
-my ($tipid) = @_;
+return if (!$ignore &&
+            $config{'hide_pro_tips'} == 1);
 my %protips;
 my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
 &read_file_cached($protip_file, \%protips);
@@ -90,21 +91,42 @@ $protips{$tipid} = 1;
 &write_file($protip_file, \%protips);
 }
 
-# alert_pro_tip(tip-id)
+# alert_pro_tip(tip-id, optional-settings-hash-ref)
 # Returns an alert with given Pro tip description and dismiss button
 sub alert_pro_tip
 {
-my ($tipid, $purge) = @_;
-my $form = "&mdash;&nbsp;" . &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post").
-			$text{"scripts_gpl_pro_tip_$tipid"} . " <br>" .
-			&text('scripts_gpl_pro_tip_enroll',
-			      'https://www.virtualmin.com/product-category/virtualmin/') . "<p>\n".
-			&ui_hidden("tipid", $tipid) .
-			($purge ? &ui_hidden("purge", $tipid) : "") .
-			&ui_form_end([ [ undef, ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
-			                         $text{"scripts_gpl_pro_tip_hide"}), undef, undef, undef, 'fa2 fa-fw fa2-eye-off' ] ], undef, 1);
+my ($tipid, $opts) = @_;
+my $alert_title = $text{'scripts_gpl_pro_tip'};
+my $alert_body1 = $text{"scripts_gpl_pro_tip_$tipid"} . " ";
+my $alert_body2 =
+       &text(($text{"scripts_gpl_pro_tip_enroll_$tipid"} ?
+                    "scripts_gpl_pro_tip_enroll_$tipid" :
+                    'scripts_gpl_pro_tip_enroll'),
+             'https://www.virtualmin.com/product-category/virtualmin/');
+my $hide_button_text = ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
+                        $text{"scripts_gpl_pro_tip_hide"});
+my $hide_button_icon = 'fa2 fa-fw fa2-eye-off';
 
-return &ui_alert_box($form, 'success', undef, undef, $text{'scripts_gpl_pro_tip'}, " fa2 fa2-virtualmin");
+if ($opts) {
+	$alert_title = $opts->{'alert_title'}
+		if ($opts->{'alert_title'});
+	$alert_body1 = $opts->{'alert_body1'}
+		if ($opts->{'alert_body1'});
+	$alert_body2 = $opts->{'alert_body2'}
+		if ($opts->{'alert_body2'});
+	$hide_button_text = $opts->{'button_text'}
+		if ($opts->{'button_text'});
+	$hide_button_icon = $opts->{'button_icon'}
+		if ($opts->{'button_icon'});
+	}
+my $form = "&mdash;&nbsp;" .
+    &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post") .
+        $alert_body1 .
+        $alert_body2 . "<p>\n" . 
+        &ui_hidden("tipid", $tipid) .
+    &ui_form_end([ [ undef, $hide_button_text, undef, undef, undef, $hide_button_icon ] ], undef, 1);
+
+return &ui_alert_box($form, 'success', undef, undef, $alert_title, " fa2 fa2-virtualmin");
 }
 
 # global_menu_link_pro_tip(global-links-hash-ref)
@@ -248,7 +270,7 @@ foreach my $pro_demo_feature
 }
 
 # menu_link_pro_tip(demo-feature-name, link-hash-ref)
-# Modifies default menu link to advertise GPL user Pro features if allowed
+# Modifies default menu link to advertise GPL user Pro features, if allowed
 sub menu_link_pro_tip
 {
 my ($demo_feature, $link_hash) = @_;

@@ -165,6 +165,7 @@ preload_mode=
 bccs=0
 bw_nomailout=0
 show_nf=master,reseller,domain
+hide_pro_tips=0
 from_reseller=0
 collect_interval=5
 nodeniedssh=1

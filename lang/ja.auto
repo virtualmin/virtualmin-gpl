@@ -1911,6 +1911,7 @@ check_fcgiwrapok=CGIスクリプトは、fcgiwrapを使用して実行できま�
 check_webphpvers=次のPHPバージョンを使用できます： $1
 check_webphpnovers=このシステムでPHPバージョンは見つかりませんでした！
 check_webphpmodes=次のPHP実行モードを使用できます： $1
+check_ewebphpmodes=PHP実行モードは利用できません！
 check_webphpversinis=最後のチェック以降、PHPのバージョンは $1に変更されました。不足しているphp.iniファイルを再生成します。
 check_webphpfpm=このシステムでは、PHP-FPMバージョン $1のサポートを利用できます。
 check_webphpnofpm=PHP-FPMサポートが検出されませんでした： $1
@@ -4184,11 +4185,16 @@ scripts_gpl_to_pro=Proでのみ利用可能になりました
 scripts_gpl_to_pro_upgrade=このスクリプトのアップグレードは、Proでのみ利用可能になりました
 
 scripts_gpl_pro_tip=プロ機能
-scripts_gpl_pro_tip_hide=おかげで、私は検討します
+scripts_gpl_pro_tip_hide=ヘッドアップをありがとう
+scripts_gpl_pro_tip_hide2=ありがとう、私はそれについて考えます
 scripts_gpl_pro_tip_and=と
-scripts_gpl_pro_tip_enroll=開発をサポートし、この機能や他の多くの優れた機能を<em>ロック解除</em>するために、<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討してください。
+scripts_gpl_pro_tip_enroll=<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討して、開発をサポートし、この機能や他の多くの優れた機能のロックを解除してください。
 scripts_gpl_pro_tip_list_scripts=より多くのインストールスクリプトが利用可能です！
+scripts_gpl_pro_tip_enroll_list_scripts=開発をサポートし、以下にリストされているすべてのインストールスクリプトのロックを解除するには、<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討してください。
 scripts_gpl_pro_tip_clouds=$1プロバイダーのサポートも利用できます！
+scripts_gpl_pro_tip_title_dashboard=VirtualminProを入手する
+scripts_gpl_pro_tip_enroll_dashboard=<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討して、お気に入りのWebホスティングコントロールパネルの開発をサポートし、多くの優れた機能のロックを解除してください。
+scripts_gpl_pro_tip_dashboard=Virtualmin ProがGPLバージョンに含まれていない多くの優れた機能をもたらすことをご存知ですか？
 
 newnotify_title=メールサーバーの所有者
 newnotify_desc=このページを使用して、選択した仮想サーバーの所有者に電子メールを送信できます。たとえば、システムのダウンタイム、アップグレード、またはその他のサービスの変更を通知できます。メッセージの本文と件名には次の置換を使用できます。
