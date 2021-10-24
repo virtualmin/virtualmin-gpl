@@ -2050,10 +2050,8 @@ if ($d->{'virt'}) {
 				  'enabled' => 1,
 				  'sectionname' => 'local',
 				  'sectionvalue' => $d->{'ip'},
-				  'file' => $l->{'file'},
-				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} + 0 };
-			&dovecot::save_section($conf, $imap);
+				  'file' => $l->{'file'} };
+			&dovecot::create_section($conf, $imap, $l);
 			push(@{$l->{'members'}}, $imap);
 			push(@$conf, $imap);
 			$l->{'eline'} = $imap->{'eline'}+1;
@@ -2080,10 +2078,8 @@ if ($d->{'virt'}) {
 				  'enabled' => 1,
 				  'sectionname' => 'local',
 				  'sectionvalue' => $d->{'ip'},
-				  'file' => $l->{'file'},
-				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} + 0 };
-			&dovecot::save_section($conf, $pop3);
+				  'file' => $l->{'file'} };
+			&dovecot::create_section($conf, $pop3, $l);
 			push(@{$l->{'members'}}, $pop3);
 			push(@$conf, $pop3);
 			$created++;
@@ -2165,9 +2161,7 @@ else {
 						  'file' => $cfile, },
 						],
 					  'file' => $cfile };
-				my $lref = &read_file_lines($l->{'file'}, 1);
-				$l->{'line'} = $l->{'eline'} = scalar(@$lref);
-				&dovecot::save_section($conf, $l);
+				&dovecot::create_section($conf, $l);
 				push(@$conf, $l);
 				&flush_file_lines($l->{'file'}, undef, 1);
 				}
