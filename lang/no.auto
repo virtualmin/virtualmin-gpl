@@ -169,6 +169,7 @@ check_suexecok2=CGI -skript kan kjøres ved hjelp av SuExec eller fcgiwrap.
 check_suexecok=CGI -skript kan kjøres med SuExec.
 check_fcgiwrapok=CGI -skript kan kjøres ved hjelp av fcgiwrap.
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 
+check_ewebphpmodes=Ingen PHP-utførelsesmoduser er tilgjengelige!
 check_webphpversinis=PHP-versjoner har endret seg til $1 siden sist sjekk. Regenererer eventuelle manglende php.ini-filer.
 check_webphpfpm=PHP-FPM versjon $1 -støtte er tilgjengelig på dette systemet.
 check_webphpnofpm=PHP-FPM-støtte ble ikke oppdaget : $1 
@@ -499,11 +500,16 @@ scripts_gpl_to_pro=Nå bare tilgjengelig i Pro
 scripts_gpl_to_pro_upgrade=Oppgradering for dette skriptet er nå bare tilgjengelig i Pro
 
 scripts_gpl_pro_tip=Pro -funksjon
-scripts_gpl_pro_tip_hide=Takk, jeg skal vurdere
+scripts_gpl_pro_tip_hide=Takk for advarselen
+scripts_gpl_pro_tip_hide2=Takk, jeg skal tenke på det
 scripts_gpl_pro_tip_and=og
-scripts_gpl_pro_tip_enroll=Vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a> lisens for å støtte utvikling og <em>låse opp</em> denne og mange andre kule funksjoner.
+scripts_gpl_pro_tip_enroll=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen og låse opp denne og mange andre kule funksjoner.
 scripts_gpl_pro_tip_list_scripts=Det er flere installasjonsskript tilgjengelig!
-scripts_gpl_pro_tip_clouds=Støtte for $1 -leverandører er også tilgjengelig!
+scripts_gpl_pro_tip_enroll_list_scripts=Vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a> lisens for å støtte utviklingen og låse opp alle installasjonsskript som er oppført nedenfor.
+scripts_gpl_pro_tip_clouds=Støtte for $1-leverandører er også tilgjengelig!
+scripts_gpl_pro_tip_title_dashboard=Skaff deg Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen av webhotellets kontrollpanel du elsker og låse opp mange kule funksjoner.
+scripts_gpl_pro_tip_dashboard=Visste du at Virtualmin Pro har mange flotte funksjoner som ikke er inkludert i GPL -versjonen?
 
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python

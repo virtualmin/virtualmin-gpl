@@ -579,6 +579,7 @@ check_fcgiwrapok=可以使用 fcgiwrap 執行 CGI 腳本。
 check_webphpvers=提供以下PHP版本： $1
 check_webphpnovers=在該系統上找不到PHP版本！
 check_webphpmodes=可以使用以下PHP執行模式： $1
+check_ewebphpmodes=沒有可用的 PHP 執行模式！
 check_webphpversinis=自上次檢查以來，PHP版本已更改為 $1。重新生成所有丟失的php.ini文件。
 check_webphpfpm=此系統上提供了PHP-FPM版本 $1支持。
 check_webphpnofpm=未檢測到PHP-FPM支持： $1
@@ -1779,11 +1780,16 @@ scripts_gpl_to_pro=現在僅在Pro中可用
 scripts_gpl_to_pro_upgrade=此腳本的升級現在僅在Pro中可用
 
 scripts_gpl_pro_tip=專業功能
-scripts_gpl_pro_tip_hide=謝謝，我會考慮
+scripts_gpl_pro_tip_hide=感謝您的提醒
+scripts_gpl_pro_tip_hide2=謝謝，我會考慮的
 scripts_gpl_pro_tip_and=和
-scripts_gpl_pro_tip_enroll=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可證以支持開發並<em>解鎖</em>此功能和許多其他很酷的功能。
+scripts_gpl_pro_tip_enroll=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可證以支持開發並解鎖此功能和許多其他很酷的功能。
 scripts_gpl_pro_tip_list_scripts=有更多的安裝腳本可用！
+scripts_gpl_pro_tip_enroll_list_scripts=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可證以支持開發並解鎖下面列出的所有安裝腳本。
 scripts_gpl_pro_tip_clouds=還可以支持 $1 個提供程序！
+scripts_gpl_pro_tip_title_dashboard=獲取 Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可，以支持您喜愛的網絡託管控制面板的開發並解鎖許多很酷的功能。
+scripts_gpl_pro_tip_dashboard=您是否知道 Virtualmin Pro 帶來了許多 GPL 版本中未包含的強大功能？
 
 newnotify_admins=還通過電子郵件向選定域中的其他管理員發送電子郵件嗎？
 newnotify_users=還在選定域中使用過電子郵件嗎？

@@ -1516,6 +1516,7 @@ check_suexecok2=Skrypty CGI mogą być wykonywane przy użyciu SuExec lub fcgiwr
 check_suexecok=Skrypty CGI można wykonywać za pomocą SuExec.
 check_fcgiwrapok=Skrypty CGI można wykonywać za pomocą fcgiwrap.
 check_webphpmodes=Dostępne są następujące tryby wykonywania PHP : $1 
+check_ewebphpmodes=Brak dostępnych trybów wykonywania PHP!
 check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików php.ini.
 check_webphpfpm=Obsługa PHP-FPM w wersji $1 jest dostępna w tym systemie.
 check_webphpnofpm=Obsługa PHP-FPM nie została wykryta : $1 
@@ -3513,11 +3514,16 @@ scripts_gpl_to_pro=Teraz dostępne tylko w wersji Pro
 scripts_gpl_to_pro_upgrade=Aktualizacja tego skryptu jest teraz dostępna tylko w wersji Pro
 
 scripts_gpl_pro_tip=Profesjonalna funkcja
-scripts_gpl_pro_tip_hide=Dzięki, rozważę
+scripts_gpl_pro_tip_hide=Dzięki za ostrzeżenie
+scripts_gpl_pro_tip_hide2=Dzięki, pomyślę o tym
 scripts_gpl_pro_tip_and=oraz
-scripts_gpl_pro_tip_enroll=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wspierać rozwój i <em>odblokować</em> tę i wiele innych fajnych funkcji.
+scripts_gpl_pro_tip_enroll=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę i wiele innych fajnych funkcji.
 scripts_gpl_pro_tip_list_scripts=Dostępnych jest więcej skryptów instalacyjnych!
+scripts_gpl_pro_tip_enroll_list_scripts=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a> w celu wsparcia rozwoju i odblokowania wszystkich wymienionych poniżej skryptów instalacyjnych.
 scripts_gpl_pro_tip_clouds=Dostępna jest również pomoc dla $1 dostawców!
+scripts_gpl_pro_tip_title_dashboard=Uzyskaj Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój swojego ulubionego panelu sterowania hostingu i odblokować wiele fajnych funkcji.
+scripts_gpl_pro_tip_dashboard=Czy wiesz, że Virtualmin Pro oferuje wiele wspaniałych funkcji, których nie ma w wersji GPL?
 
 newnotify_title=Właściciele serwerów e-mail
 newnotify_desc=Ta strona może służyć do wysyłania wiadomości e-mail do właścicieli wybranych serwerów wirtualnych, na przykład w celu informowania o przestojach systemu, aktualizacjach lub innych zmianach usług. W treści i temacie wiadomości można zastosować następujące podstacje:

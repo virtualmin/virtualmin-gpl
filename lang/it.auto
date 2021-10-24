@@ -1171,6 +1171,7 @@ check_fcgiwrapok=Gli script CGI possono essere eseguiti utilizzando fcgiwrap.
 check_webphpvers=Sono disponibili le seguenti versioni di PHP : $1 
 check_webphpnovers=Nessuna versione di PHP trovata su questo sistema!
 check_webphpmodes=Sono disponibili le seguenti modalità di esecuzione PHP : $1 
+check_ewebphpmodes=Non sono disponibili modalità di esecuzione PHP!
 check_webphpversinis=Le versioni di PHP sono cambiate in $1 dall'ultimo controllo. Rigenerazione di eventuali file php.ini mancanti.
 check_webphpfpm=Il supporto per la versione $1 di PHP-FPM è disponibile su questo sistema.
 check_webphpnofpm=Il supporto PHP-FPM non è stato rilevato : $1 
@@ -3179,11 +3180,16 @@ scripts_gpl_to_pro=Ora disponibile solo in Pro
 scripts_gpl_to_pro_upgrade=L'aggiornamento per questo script è ora disponibile solo in Pro
 
 scripts_gpl_pro_tip=Funzionalità professionale
-scripts_gpl_pro_tip_hide=Grazie, valuterò
+scripts_gpl_pro_tip_hide=Grazie per il testa a testa
+scripts_gpl_pro_tip_hide2=Grazie, ci penserò su
 scripts_gpl_pro_tip_and=e
-scripts_gpl_pro_tip_enroll=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo e <em>sbloccare</em> questa e molte altre fantastiche funzioni.
+scripts_gpl_pro_tip_enroll=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo e sbloccare questa e molte altre fantastiche funzionalità.
 scripts_gpl_pro_tip_list_scripts=Sono disponibili più script di installazione!
+scripts_gpl_pro_tip_enroll_list_scripts=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo e sbloccare tutti gli script di installazione elencati di seguito.
 scripts_gpl_pro_tip_clouds=È disponibile anche il supporto per i provider $1!
+scripts_gpl_pro_tip_title_dashboard=Ottieni Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo del pannello di controllo dell'hosting web che ami e sbloccare molte funzioni interessanti.
+scripts_gpl_pro_tip_dashboard=Sapevi che Virtualmin Pro offre molte fantastiche funzionalità non incluse nella versione GPL?
 
 newnotify_title=Proprietari del server di posta elettronica
 newnotify_desc=Questa pagina può essere utilizzata per inviare e-mail ai proprietari dei server virtuali selezionati, ad esempio per annunciare tempi di inattività del sistema, aggiornamenti o altre modifiche al servizio. Le seguenti sottostazioni possono essere utilizzate nel corpo del messaggio e nell'oggetto:

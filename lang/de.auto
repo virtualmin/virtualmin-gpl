@@ -527,6 +527,7 @@ check_suexecok2=CGI-Skripte können mit SuExec oder fcgiwrap ausgeführt werden.
 check_suexecok=CGI-Skripte können mit SuExec ausgeführt werden.
 check_fcgiwrapok=CGI-Skripte können mit fcgiwrap ausgeführt werden.
 check_webphpmodes=Die folgenden PHP-Ausführungsmodi sind verfügbar : $1
+check_ewebphpmodes=Es sind keine PHP-Ausführungsmodi verfügbar!
 check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende php.ini-Dateien neu generieren.
 check_webphpfpm=Die Unterstützung von PHP-FPM Version $1 ist auf diesem System verfügbar.
 check_webphpnofpm=PHP-FPM-Unterstützung wurde nicht erkannt : $1
@@ -1465,11 +1466,16 @@ scripts_gpl_to_pro=Jetzt nur in Pro verfügbar
 scripts_gpl_to_pro_upgrade=Das Upgrade für dieses Skript ist jetzt nur in Pro verfügbar
 
 scripts_gpl_pro_tip=Pro-Funktion
-scripts_gpl_pro_tip_hide=Danke, werde ich berücksichtigen
+scripts_gpl_pro_tip_hide=Danke für die Warnung
+scripts_gpl_pro_tip_hide2=Danke, ich werde darüber nachdenken
 scripts_gpl_pro_tip_and=und
-scripts_gpl_pro_tip_enroll=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und diese und viele andere coole Funktionen <em>freizuschalten</em>.
+scripts_gpl_pro_tip_enroll=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und diese und viele andere coole Funktionen freizuschalten.
 scripts_gpl_pro_tip_list_scripts=Es sind weitere Installationsskripte verfügbar!
+scripts_gpl_pro_tip_enroll_list_scripts=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und alle unten aufgeführten Installationsskripte freizuschalten.
 scripts_gpl_pro_tip_clouds=Unterstützung für $1 Anbieter ist ebenfalls verfügbar!
+scripts_gpl_pro_tip_title_dashboard=Holen Sie sich Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung Ihres bevorzugten Webhosting-Control-Panels zu unterstützen und viele coole Funktionen freizuschalten.
+scripts_gpl_pro_tip_dashboard=Wussten Sie, dass Virtualmin Pro viele großartige Funktionen bietet, die nicht in der GPL-Version enthalten sind?
 
 newnotify_title=E-Mail-Server-Besitzer
 newnotify_desc=Auf dieser Seite können Sie E-Mails an die Eigentümer der ausgewählten virtuellen Server senden, um beispielsweise Systemausfälle, Upgrades oder andere Serviceänderungen anzukündigen. Die folgenden Unterpositionen können im Nachrichtentext und im Betreff verwendet werden:
