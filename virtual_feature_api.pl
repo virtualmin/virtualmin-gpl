@@ -99,6 +99,31 @@ sub feature_enable
 {
 }
 
+# feature_can_reset(&domain)
+# Should return 1 if resetting makes no sense for this feature
+# (optional, assumes yes if undefined)
+sub feature_can_reset
+{
+}
+
+# feature_check_reset(&domain)
+# Should return an error message if resetting this feature would cause loss
+# of settings. By default, Virtualmin implements a reset by turning the feature
+# off and on again, unless feature_reset is defined.
+# (optional)
+sub feature_check_reset
+{
+}
+
+# feature_reset(&domain)
+# Resets this feature to safe default settings. Ideally should preserve and
+# re-generate any customization - if not, feature_check_reset must notify the
+# user as to what will be lost.
+# (optional)
+sub feature_reset
+{
+}
+
 # feature_inputs_show([&domain])
 # Returns 1 if feature inputs should be shown for this domain, this may be
 # undef if it doesn't exist yet.
