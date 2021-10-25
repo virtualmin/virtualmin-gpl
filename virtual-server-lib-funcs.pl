@@ -13057,6 +13057,14 @@ elsif (&indexof($f, &list_feature_plugins()) >= 0) {
 	}
 }
 
+# feature_name(name, [&domain])
+# Returns a human-readable short feature name, even if it's a plugin
+sub feature_name
+{
+my ($f, $d) = @_;
+return $text{'feature_'.$f} || &plugin_call($f, "feature_name") || $f;
+}
+
 # domain_features(&dom)
 # Returns a list of possible core features for a domain
 sub domain_features
@@ -17162,10 +17170,8 @@ local @got = @_;
 local %pconfig = map { $_, 1 } &list_feature_plugins();
 local @notgot = grep { !$config{$_} && !$pconfig{$_} } @got;
 @got = grep { $config{$_} || $pconfig{$_} } @got;
-local @gotmsg = map { $text{'feature_'.$_} ||
-		      &plugin_call($_, "feature_name") || $_ } @got;
-local @notgotmsg = map { $text{'feature_'.$_} ||
-		         &plugin_call($_, "feature_name") || $_ } @notgot;
+local @gotmsg = map { &feature_name($_) } @got;
+local @notgotmsg = map { &feature_name($_) } @notgot;
 &$second_print(".. found ",join(", ", @gotmsg),".");
 if (@notgot) {
 	&$second_print("<b>However, the follow features are not supported or enabled on your system : ",join(", ", @notgotmsg).". Some functions of the migrated virtual server may not work.</b>");

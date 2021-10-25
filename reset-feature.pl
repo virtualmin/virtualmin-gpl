@@ -87,16 +87,18 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 	# Check if resetting is even possible
 	foreach $f (&list_ordered_features($d)) {
-		my $err;
+		my $can = 1;
+		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
 			my $crfunc = "can_reset_".$f;
-			$err = defined(&$crfunc) ? &$crfunc($d) : undef;
+			$can = defined(&$crfunc) ? &$crfunc($d) : 1;
 			}
 		elsif ($plugin{$f}) {
-			$err = &plugin_call($f, "feature_can_reset", $d);
+			$can = &plugin_defined($f, "feature_can_reset") ?
+				&plugin_call($f, "feature_can_reset", $d) : 1;
 			}
-		if ($err) {
-			&$second_print(".. feature $f cannot be reset : $err");
+		if (!$can) {
+			&$second_print(".. feature $fn cannot be reset");
 			next DOMAIN;
 			}
 		}
@@ -104,6 +106,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	# Check if resetting could cause any data loss
 	foreach $f (&list_ordered_features($d)) {
 		my $err;
+		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
 			my $prfunc = "check_reset_".$f;
 			$err = defined(&$prfunc) ? &$prfunc($d) : undef;
@@ -113,13 +116,13 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			}
 		if ($err) {
 			if ($fullreset) {
-				&$second_print(".. ignoring warning for $f : $err");
+				&$second_print(".. ignoring warning for $fn : $err");
 				}
 			elsif ($skipwarnings) {
-				&$second_print(".. skipping warning for $f : $err");
+				&$second_print(".. skipping warning for $fn : $err");
 				}
 			else {
-				&$second_print(".. resetting $f would cause data loss : $err");
+				&$second_print(".. resetting $fn would cause data loss : $err");
 				next DOMAIN;
 				}
 			}
