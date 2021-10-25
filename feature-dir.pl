@@ -1141,6 +1141,13 @@ my $tab = $home_mtab || $home_fstab;
 return $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i ? $tab->[1] : undef;
 }
 
+# can_reset_dir(&domain)
+# Resetting the home directory feature doesn't make any sense ever
+sub can_reset_dir
+{
+return 0;
+}
+
 $done_feature_script{'dir'} = 1;
 
 1;

@@ -85,6 +85,22 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	%newdom = %$d;
 	$oldd = { %$d };
 
+	# Check if resetting is even possible
+	foreach $f (&list_ordered_features($d)) {
+		my $err;
+		if ($feature{$f}) {
+			my $crfunc = "can_reset_".$f;
+			$err = defined(&$crfunc) ? &$crfunc($d) : undef;
+			}
+		elsif ($plugin{$f}) {
+			$err = &plugin_call($f, "feature_can_reset", $d);
+			}
+		if ($err) {
+			&$second_print(".. feature $f cannot be reset : $err");
+			next DOMAIN;
+			}
+		}
+
 	# Check if resetting could cause any data loss
 	foreach $f (&list_ordered_features($d)) {
 		my $err;
@@ -92,7 +108,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			my $prfunc = "check_reset_".$f;
 			$err = defined(&$prfunc) ? &$prfunc($d) : undef;
 			}
-		if ($plugin{$f}) {
+		elsif ($plugin{$f}) {
 			$err = &plugin_call($f, "feature_check_reset", $d);
 			}
 		if ($err) {
@@ -103,7 +119,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 				&$second_print(".. skipping warning for $f : $err");
 				}
 			else {
-				&$second_print(".. feature $f cannot be reset : $err");
+				&$second_print(".. resetting $f would cause data loss : $err");
 				next DOMAIN;
 				}
 			}
