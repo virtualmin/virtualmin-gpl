@@ -375,6 +375,29 @@ if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
 	}
 }
 
+# config_pre_load(mod-info-ref, [mod-order-ref])
+# Check if some config options are conditional,
+# and if not allowed, remove them from listing
+sub config_pre_load
+{
+my ($modconf_info, $modconf_order) = @_;
+my @forbidden_keys;
+
+# As called from config
+&foreign_require($module_name);
+
+# Do not show Pro user 'Show Pro features overview' option
+if ($virtual_server::virtualmin_pro) {
+	push(@forbidden_keys, 'hide_pro_tips');
+	}
+
+# Remove from display
+foreach my $fkey (@forbidden_keys) {
+	delete($modconf_info->{$fkey});
+	@{$modconf_order} = grep { $_ ne $fkey } @{$modconf_order}
+		if ($modconf_order);
+	}
+}
 
 1;
 
