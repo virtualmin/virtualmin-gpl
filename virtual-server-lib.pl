@@ -383,9 +383,6 @@ sub config_pre_load
 my ($modconf_info, $modconf_order) = @_;
 my @forbidden_keys;
 
-# As called from config
-&foreign_require($module_name);
-
 # Do not show Pro user 'Show Pro features overview' option
 if ($virtual_server::virtualmin_pro) {
 	push(@forbidden_keys, 'hide_pro_tips');
