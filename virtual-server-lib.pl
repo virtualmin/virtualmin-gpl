@@ -365,5 +365,16 @@ if (-e "$module_config_directory/$name" || !$module_var_directory) {
 return "$module_var_directory/$name";
 }
 
+# config_post_save
+# Clear menu links cache to pick up changes
+sub config_post_save
+{
+my ($newconf, $oldconf) = @_;
+if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
+	&clear_links_cache();
+	}
+}
+
+
 1;
 
