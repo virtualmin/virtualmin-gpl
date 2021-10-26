@@ -383,12 +383,25 @@ sub config_pre_load
 my ($modconf_info, $modconf_order) = @_;
 my @forbidden_keys;
 
-# Do not show Pro user 'Show Pro features overview' option
+# Virtualmin GPL/Pro version based config filter
 if ($virtual_server::virtualmin_pro) {
+	# Do not show Pro user 'Show Pro features overview' option
 	push(@forbidden_keys, 'hide_pro_tips');
 	}
+else {
+	# Do not show 'Reseller settings (Pro Only)' section and options in GPL
+	push(@forbidden_keys,
+	     'line6.5',
+	     'reseller_theme',
+	     'reseller_modules',
+	     'reseller_unix',
+	     'reseller_pre_command',
+	     'reseller_post_command',
+	     'from_reseller',
+	    );
+	}
 
-# Remove from display
+# Remove forbidden from display
 foreach my $fkey (@forbidden_keys) {
 	delete($modconf_info->{$fkey});
 	@{$modconf_order} = grep { $_ ne $fkey } @{$modconf_order}
