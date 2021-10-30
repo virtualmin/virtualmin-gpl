@@ -424,7 +424,7 @@ else {
 
 		# Delete logs too, if outside home dir and if not a sub-domain
 		if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
-		    !$d->{'subdom'}) {
+		    !$d->{'subdom'} && !$d->{'web_nodeletelogs'}) {
 			&$first_print($text{'delete_apachelog'});
 			local @dlogs = ($alog, glob("${alog}.*"),
 					glob("${alog}_*"), glob("${alog}-*"));
@@ -4977,6 +4977,40 @@ foreach my $p (@ports) {
 &delete_fcgiwrap_server($d);
 delete($d->{'fcgiwrap_port'});
 return undef;
+}
+
+# reset_web(&domain)
+# Turn the website feature off and on again, but preserve redirects
+sub reset_web
+{
+my ($d) = @_;
+
+# Save redirects, PHP version, PHP mode and per-directory settings
+my @redirs = &list_redirects($d);
+my $mode = &get_domain_php_mode($d);
+my @dirs = &list_domain_php_directories($d);
+
+$d->{'web'} = 0;
+$d->{'web_nodeletelogs'} = 1;
+&delete_web($d);
+$d->{'web'} = 1;
+$d->{'web_nodeletelogs'} = 0;
+&setup_web($d);
+
+# Put back redirects
+foreach my $r (@redirs) {
+	&create_redirect($d, $r);
+	}
+
+# Put back PHP mode
+&save_domain_php_mode($d, $mode);
+
+# Put back per-domain PHP versions
+if ($mode ne "none" && $mode ne "mod_php") {
+	foreach my $dir (@dirs) {
+		&save_domain_php_directory($d, $dir->{'dir'},$dir->{'version'});
+		}
+	}
 }
 
 $done_feature_script{'web'} = 1;
