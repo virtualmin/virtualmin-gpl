@@ -437,6 +437,7 @@ foreach my $p (@ports) {
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
 				   'value' => '\.php$',
+				   'words' => ['\.php$'],
 				   'members' => [
 					{ 'name' => 'SetHandler',
 					  'value' => $wanth,
