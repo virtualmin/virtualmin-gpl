@@ -480,6 +480,13 @@ $main::got_lock_virt-- if ($main::got_lock_virt);
 &release_lock_anything();
 }
 
+# can_reset_virt(&domain)
+# Resetting the virtual IP is a bad idea, as it could cause re-allocation
+sub can_reset_virt
+{
+return 0;
+}
+
 $done_feature_script{'virt'} = 1;
 
 1;

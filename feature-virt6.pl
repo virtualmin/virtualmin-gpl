@@ -465,5 +465,12 @@ foreach my $w (@w) {
 return lc(join(":", @w));
 }
 
+# can_reset_virt6(&domain)
+# Resetting the virtual IP is a bad idea, as it could cause re-allocation
+sub can_reset_virt6
+{
+return 0;
+}
+
 1;
 
