@@ -80,9 +80,15 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	&$first_print("Resetting server $d->{'dom'} ..");
 	%newdom = %$d;
 	$oldd = { %$d };
+	my @features = grep { $d->{$_} && ($feature{$_} || $plugin{$_}) }
+			    &list_ordered_features($d);
+	if (!@features) {
+		&$second_print(".. none of the selected features are enabled");
+		next DOMAIN;
+		}
 
 	# Check if resetting is even possible
-	foreach $f (&list_ordered_features($d)) {
+	foreach $f (@features) {
 		my $can = 1;
 		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
@@ -100,7 +106,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		}
 
 	# Check if resetting could cause any data loss
-	foreach $f (&list_ordered_features($d)) {
+	foreach $f (@features) {
 		my $err;
 		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
@@ -136,7 +142,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 	# Do it!
 	&$indent_print();
-	foreach $f (&list_ordered_features($d)) {
+	foreach $f (@features) {
 		if ($feature{$f}) {
 			# Core feature of Virtualmin
 			my $rfunc = "reset_".$f;
@@ -155,7 +161,17 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			}
 		if ($plugin{$f}) {
 			# Defined by a plugin
-			# XXX
+			if (&plugin_defined($f, "feature_reset")) {
+				# Call the reset function
+				&plugin_call($f, "feature_reset", $d);
+				}
+			else {
+				# Turn off and on again
+				$d->{$f} = 0;
+				&plugin_call($f, "feature_delete", $d);
+				$d->{$f} = 1;
+				&plugin_call($f, "feature_setup", $d);
+				}
 			}
 		}
 
@@ -193,8 +209,8 @@ foreach $f (@features) {
 foreach $f (&list_feature_plugins()) {
 	print "                         [--$f]\n";
 	}
-print "                        [--skip-warnings]\n";
-print "                        [--full-reset]\n";
+print "                         [--skip-warnings]\n";
+print "                         [--full-reset]\n";
 exit(1);
 }
 
