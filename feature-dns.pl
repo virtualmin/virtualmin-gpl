@@ -4557,6 +4557,37 @@ my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
 return $c && $c->{'defttl'};
 }
 
+# check_reset_dns(&domain)
+# Check for non-standard DNS records
+sub check_reset_dns
+{
+my ($d) = @_;
+return undef if ($d->{'alias'});
+
+# Get the default set of records
+my $temp = &transname();
+local $bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;
+&create_standard_records($temp, $d, $d->{'dns_ip'});
+my $defrecs = [ &bind8::read_zone_file($temp, $d->{'dom'}) ];
+
+# Compare with the actual records
+my $recs = [ &get_domain_dns_records($d) ];
+return undef if (!@$recs);
+my @doomed;
+foreach my $r (@$recs) {
+	next if (&is_dnssec_record($r));
+	my ($dr) = grep { $_->{'name'} eq $r->{'name'} &&
+			  $_->{'type'} eq $r->{'type'} } @$defrecs;
+	push(@doomed, $r) if (!$dr);
+	}
+
+if (@doomed) {
+	return &text('reset_edns', join(", ", map { $_->{'name'} } @doomed));
+	}
+return undef;
+}
+
 $done_feature_script{'dns'} = 1;
 
 1;
