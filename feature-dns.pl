@@ -4568,7 +4568,7 @@ return undef if ($d->{'alias'});
 my $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
-&create_standard_records($temp, $d, $d->{'dns_ip'});
+&create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 my $defrecs = [ &bind8::read_zone_file($temp, $d->{'dom'}) ];
 
 # Compare with the actual records
@@ -4577,13 +4577,18 @@ return undef if (!@$recs);
 my @doomed;
 foreach my $r (@$recs) {
 	next if (&is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
 	my ($dr) = grep { $_->{'name'} eq $r->{'name'} &&
 			  $_->{'type'} eq $r->{'type'} } @$defrecs;
-	push(@doomed, $r) if (!$dr);
+	if (!$dr) {
+		my $n = $r->{'name'};
+		$n =~ s/\.\Q$d->{'dom'}\E\.//;
+		push(@doomed, "$n ($r->{'type'})");
+		}
 	}
 
 if (@doomed) {
-	return &text('reset_edns', join(", ", map { $_->{'name'} } @doomed));
+	return &text('reset_edns', join(", ", @doomed));
 	}
 return undef;
 }
