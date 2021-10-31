@@ -3579,6 +3579,19 @@ foreach my $sd (@doms) {
 return 1;
 }
 
+# check_reset_mysql(&domain)
+# Returns an error message if the reset would delete any domains
+sub check_reset_mysql
+{
+my ($d) = @_;
+return undef if ($d->{'alias'});
+my @dbs = &domain_databases($d, ["mysql"]);
+if (@dbs) {
+	return &text('reset_emysql', join(" ", map { $_->{'name'} } @dbs));
+	}
+return undef;
+}
+
 $done_feature_script{'mysql'} = 1;
 
 1;

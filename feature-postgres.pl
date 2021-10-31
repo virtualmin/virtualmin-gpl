@@ -1143,6 +1143,19 @@ if (&postgresql::get_postgresql_version() < 9.5) {
 return join(" ", @rv);
 }
 
+# check_reset_postgres(&domain)
+# Returns an error message if the reset would delete any databases
+sub check_reset_postgres
+{
+my ($d) = @_;
+return undef if ($d->{'alias'});
+my @dbs = &domain_databases($d, ["postgres"]);
+if (@dbs) {
+	return &text('reset_epostgres', join(" ", map { $_->{'name'} } @dbs));
+	}
+return undef;
+}
+
 $done_feature_script{'postgres'} = 1;
 
 1;

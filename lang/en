@@ -7412,5 +7412,7 @@ dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DN
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it
 
 reset_edns=DNS records will be lost : $1
+reset_emysql=MySQL databases will be deleted : $1
+reset_epostgres=PostgreSQL databases will be deleted : $1
 
 __norefs=1
