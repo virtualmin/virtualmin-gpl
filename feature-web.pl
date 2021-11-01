@@ -5002,6 +5002,7 @@ $d->{'web_nodeletelogs'} = 0;
 
 if (!$d->{'alias'}) {
 	# Put back redirects
+	&$first_print($text{'reset_webrestore'});
 	foreach my $r (@redirs) {
 		&create_redirect($d, $r);
 		}
@@ -5016,6 +5017,7 @@ if (!$d->{'alias'}) {
 						   $dir->{'version'});
 			}
 		}
+	&$first_print($text{'setup_done'});
 	}
 }
 
