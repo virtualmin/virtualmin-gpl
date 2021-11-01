@@ -7414,5 +7414,9 @@ install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to in
 reset_edns=DNS records will be lost : $1
 reset_emysql=MySQL databases will be deleted : $1
 reset_epostgres=PostgreSQL databases will be deleted : $1
+reset_webrestore=Restoring redirects and PHP settings ..
+reset_unix=Resetting Unix user and group ..
+reset_eunixuser=.. user $1 does not exist!
+reset_eunixgroup=.. group $1 does not exist!
 
 __norefs=1

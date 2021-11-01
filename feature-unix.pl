@@ -1275,6 +1275,60 @@ local ($d) = @_;
 return &get_user_database_url();
 }
 
+# reset_unix(&domain)
+# Re-write the Unix user and group for this domain
+sub reset_unix
+{
+my ($d) = @_;
+&$first_print($text{'reset_unix'});
+my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} }
+		   &list_domain_users($d);
+my ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
+		   &list_all_groups();
+if (!$uinfo) {
+	# User does not exist! Re-create it by re-running setup
+	&$second_print(&text('reset_eunixuser', $d->{'user'}));
+	&setup_unix();
+	return;
+	}
+elsif (!$ginfo) {
+	# Group does not exist! Re-create it
+	$ginfo = { 'group', $d->{'group'},
+		   'gid', $d->{'gid'},
+		 };
+	&foreign_call($usermodule, "set_group_envs", $ginfo,
+		      'CREATE_GROUP');
+	&foreign_call($usermodule, "making_changes");
+	&foreign_call($usermodule, "create_group", $ginfo);
+	&foreign_call($usermodule, "made_changes");
+	return;
+	}
+
+# Update all key fields
+my $olduinfo = { %$uinfo };
+my $oldginfo = { %$ginfo };
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	# Update ulimits
+	my $rv = &get_domain_resource_limits($d);
+	&save_domain_resource_limits($d, $rv, 1);
+	}
+$uinfo->{'real'} = $d->{'owner'};
+$uinfo->{'home'} = $d->{'home'};
+if ($d->{'pass'} ne '' && !$d->{'disabled'}) {
+	# Re-save password, if changed
+	my $enc = &foreign_call($usermodule, "encrypt_password", $d->{'pass'});
+	if ($uinfo->{'pass'} ne $enc) {
+		$uinfo->{'pass'} = $enc;
+		$uinfo->{'plainpass'} = $d->{'pass'};
+		&set_pass_change($uinfo);
+		}
+	}
+$uinfo->{'gid'} = $d->{'ugid'} || $d->{'gid'};
+&modify_user($uinfo, $olduinfo, undef);
+&set_server_quotas($d);
+&$second_print($text{'setup_done'});
+}
+
 $done_feature_script{'unix'} = 1;
 
 1;
