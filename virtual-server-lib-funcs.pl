@@ -14203,44 +14203,7 @@ if ($config{'dns'}) {
 					   "<tt>$master</tt>");
 			}
 
-		# Make sure this server is configured to use the local BIND
-		if (&foreign_check("net") && $config{'dns_check'}) {
-			&foreign_require("net");
-			local %ips = map { $_, 1 } &active_ip_addresses();
-			local $dns = &net::get_dns_config();
-			local $hasdns;
-			foreach my $ns (@{$dns->{'nameserver'}}) {
-				$hasdns++ if ($ips{&to_ipaddress($ns)} ||
-					      $ns eq "127.0.0.1" ||
-					      $ns eq "0.0.0.0");
-				}
-			if (!@{$dns->{'nameserver'}}) {
-				# No resolv.conf at all, but this means that
-				# DNS falls back to local
-				&$second_print($text{'check_dnsmissing'}." ".
-					       $mastermsg);
-				}
-			elsif (!$hasdns) {
-				# No local nameserver
-				my @dhcp = grep { $_->{'dhcp'} ||
-						  $_->{'bootp'} }
-						&net::boot_interfaces();
-				&$second_print(
-				   &text('check_eresolv4',
-					&ui_link("@{[&get_webprefix_safe()]}/net/list_dns.cgi",
-						 $text{'check_eresolvlist'}),
-					&ui_link("@{[&get_webprefix_safe()]}/$module_name/$clink",
-						 $text{'features_title'})).
-				   (@dhcp ? " ".$text{'check_eresolv3'} : ""));
-				}
-			else {
-				&$second_print($text{'check_dnsok'}." ".
-					       $mastermsg);
-				}
-			}
-		else {
-			&$second_print($text{'check_dnsok2'}." ".$mastermsg);
-			}
+		&$second_print($text{'check_dnsok2'}." ".$mastermsg);
 
 		# Make sure TLSA records can be created
 		if ($config{'tlsa_records'}) {

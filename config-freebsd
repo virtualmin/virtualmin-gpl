@@ -149,7 +149,6 @@ stats_pass=1
 quota_commands=0
 key_size=2048
 maillog_period=30
-dns_check=1
 allow_upper=0
 delete_virts=0
 show_pass=1
