@@ -347,6 +347,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--letsencrypt") {
 		$letsencrypt = 1;
 		}
+	elsif ($a eq "--letsencrypt-always") {
+		$letsencrypt = 2;
+		}
 	elsif ($a eq "--enable-jail") {
 		$jail = 1;
 		}
