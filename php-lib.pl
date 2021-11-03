@@ -1820,7 +1820,7 @@ return ( ) if (!&foreign_installed("software"));
 return ( ) if (!defined(&software::package_info));
 my @rv;
 my %donever;
-foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
+foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm", "php8-fpm",
 		   (map { my $v = $_; $v =~ s/\.//g;
 			  ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
 			   "rh-php${v}-php-fpm", "php${_}-fpm",
@@ -1902,7 +1902,7 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		# Init script for any version as a fallback
 		my @nodot = map { my $u = $_; $u =~ s/\.//g; $u }
 				@all_possible_php_versions;
-		foreach my $init ("php-fpm", "php5-fpm", "php7-fpm",
+		foreach my $init ("php-fpm", "php5-fpm", "php7-fpm", "php8-fpm",
 				  (map { "php${_}-fpm" }
 				       @all_possible_php_versions),
 				  (map { "rh-php${_}-php-fpm" } @nodot),
