@@ -6632,6 +6632,16 @@ else {
 return undef;
 }
 
+# reset_mail(&domain)
+# Calls the email delete and setup functions, but with the options to preserve
+# aliases enabled
+sub reset_mail
+{
+my ($d) = @_;
+&delete_mail($d, 0, 1, 1);
+&setup_mail($d, 1, 1);
+}
+
 $done_feature_script{'mail'} = 1;
 
 1;
