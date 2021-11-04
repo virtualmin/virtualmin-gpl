@@ -436,14 +436,14 @@ foreach my $p (@ports) {
 			# Add a new FilesMatch block with the socket
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
-				   'value' => '\.php$',
-				   'words' => ['\.php$'],
-				   'members' => [
-					{ 'name' => 'SetHandler',
-					  'value' => $wanth,
-					},
-				   ],
-				 };
+			           'value' => '\.php$',
+			           'words' => ['\.php$'],
+			           'members' => [
+			             { 'name' => 'SetHandler',
+			               'value' => $wanth,
+			             },
+			           ],
+			         };
 			&apache::save_directive_struct(
 				undef, $files, $vconf, $conf);
 			}
