@@ -1027,6 +1027,7 @@ if (!$php_command_for_version_cache{$v,$cgimode}) {
 		push(@opts, "/opt/csw/php$v/bin/php-cgi");
 		}
 	push(@opts, "php$v-cgi", "php-cgi$v", "php$v");
+	$v =~ s/^(\d+\.\d+)\.\d+$/$1/;
 	my $nodotv = $v;
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
