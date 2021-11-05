@@ -1273,6 +1273,8 @@ if ($config{'check_apache'}) {
 		return 0;
 		}
 	}
+&apache::format_modifed_config_files()
+	if (defined(&apache::format_modifed_config_files));
 local $apachelock = "$module_config_directory/apache-restart";
 &lock_file($apachelock);
 local $pid = &get_apache_pid();
