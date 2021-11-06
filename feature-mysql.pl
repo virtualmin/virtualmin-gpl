@@ -3586,10 +3586,13 @@ sub check_reset_mysql
 my ($d) = @_;
 return undef if ($d->{'alias'});
 my @dbs = &domain_databases($d, ["mysql"]);
-if (@dbs) {
-	return &text('reset_emysql', join(" ", map { $_->{'name'} } @dbs));
+return undef if (!@dbs);
+if (@dbs == 1 && $dbs[0]->{'name'} eq $d->{'db'}) {
+	# There is just one default database .. but is it empty?
+	my @tables = &list_dom_mysql_tables($d, $dbs[0]->{'name'}, 0, 1);
+	return undef if (!@tables);
 	}
-return undef;
+return &text('reset_emysql', join(" ", map { $_->{'name'} } @dbs));
 }
 
 $done_feature_script{'mysql'} = 1;

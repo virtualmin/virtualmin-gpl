@@ -9358,6 +9358,24 @@ $reset_tests = [
 	  'grep' => [ 'www' ],
 	},
 
+	# Attempt a MySQL reset, which should be OK since there are no tables
+	# or extra DBs yet
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'mysql' ] ],
+	},
+
+	# Create one table
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.' -e "create table foo (id int(4))"',
+	},
+
+	# MySQL reset should now fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'mysql' ] ],
+	  'fail' => 1,
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
