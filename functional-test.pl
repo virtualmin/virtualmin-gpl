@@ -9319,6 +9319,45 @@ $reset_tests = [
 		      'PHP version: '.$max_php_version ],
 	},
 
+	# Add a DNS record that will be lost
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing A 1.2.3.4' ] ],
+	},
+
+	# Remove a DNS record that will be re-created
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-record', 'www A' ] ],
+	},
+
+	# Try a DNS reset that should fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dns' ] ],
+	  'fail' => 1,
+	},
+
+	# Try again, this time skipping warnings
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'skip-warnings' ],
+		      [ 'dns' ] ],
+	  'grep' => 'testing \\(A\\)',
+	},
+
+	# Check that the record is gone, and that a regular record is back
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'antigrep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'www' ],
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
