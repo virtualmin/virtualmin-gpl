@@ -9397,6 +9397,29 @@ $reset_tests = [
 	  'fail' => 1,
 	},
 
+	# Break the Unix user's password
+	{ 'command' => 'echo pog | passwd --stdin '.$test_domain_user,
+	},
+
+	# Check FTP login fails
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'grep' => 'Login incorrect',
+	  'ignorefail' => 1,
+	},
+
+	# Reset the Unix user
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'unix' ] ],
+	},
+
+	# Check FTP login works now
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
