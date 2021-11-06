@@ -84,6 +84,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			    &list_ordered_features($d);
 	if (!@features) {
 		&$second_print(".. none of the selected features are enabled");
+		$failed = 1;
 		next DOMAIN;
 		}
 
@@ -101,6 +102,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			}
 		if (!$can) {
 			&$second_print(".. feature $fn cannot be reset");
+			$failed = 1;
 			next DOMAIN;
 			}
 		}
@@ -125,6 +127,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 				}
 			else {
 				&$second_print(".. resetting $fn would cause data loss : $err");
+				$failed = 1;
 				next DOMAIN;
 				}
 			}
