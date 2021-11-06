@@ -1150,10 +1150,13 @@ sub check_reset_postgres
 my ($d) = @_;
 return undef if ($d->{'alias'});
 my @dbs = &domain_databases($d, ["postgres"]);
-if (@dbs) {
-	return &text('reset_epostgres', join(" ", map { $_->{'name'} } @dbs));
+return undef if (!@dbs);
+if (@dbs == 1 && $dbs[0]->{'name'} eq $d->{'db'}) {
+	# There is just one default database .. but is it empty?
+	my @tables = &list_postgres_tables($d, $dbs[0]->{'name'});
+	return undef if (!@tables);
 	}
-return undef;
+return &text('reset_epostgres', join(" ", map { $_->{'name'} } @dbs));
 }
 
 $done_feature_script{'postgres'} = 1;

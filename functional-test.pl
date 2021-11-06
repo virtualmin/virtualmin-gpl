@@ -9376,6 +9376,27 @@ $reset_tests = [
 	  'fail' => 1,
 	},
 
+	# Attempt a Postgres reset, which should be OK since there are no tables
+	# or extra DBs yet
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'postgres' ] ],
+	},
+
+	# Add a new Postgres DB to block the reset
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_user.'_extra2' ] ],
+	},
+
+	# Postgres reset should now fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'postgres' ] ],
+	  'fail' => 1,
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
