@@ -70,6 +70,9 @@ $ok_email_file = "$test_email_dir/ok.txt";
 $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 $supports_fpm = &indexof("fpm", &supported_php_modes()) >= 0;
 $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
+@php_versions = sort { &compare_versions($a->[0], $b->[0]) }
+		     &list_available_php_versions();
+$max_php_version = $php_versions[@php_versions-1]->[0];
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -637,7 +640,6 @@ $domains_tests = [
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
-
 	];
 
 $jail_tests = [
@@ -1326,13 +1328,7 @@ $script_tests = [
 	{ 'command' => 'set-php-directory.pl',
 	  'args' => [ [ 'domain', $test_domain ],
                       [ 'dir', '.' ],
-		      [ 'version', '7.0' ] ],
-	  'ignorefail' => 1,
-	},
-	{ 'command' => 'set-php-directory.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-                      [ 'dir', '.' ],
-		      [ 'version', '7.2' ] ],
+		      [ 'version', $max_php_version ] ],
 	  'ignorefail' => 1,
 	},
 
@@ -9260,6 +9256,75 @@ $htpasswd_tests = [
         },
 	];
 
+$reset_tests = [
+	# Create a domain with all the features
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Switch PHP mode to fCGId
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'fcgid' ] ],
+	},
+
+	# Create a redirect for /google
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google' ],
+		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Change PHP version on one directory
+	{ 'command' => 'set-php-directory.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'dir', 'foo' ],
+		      [ 'version', $max_php_version ] ],
+	},
+
+	# Reset the website feature
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'web' ] ],
+	},
+
+	# Check that the redirect still exists
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/google', 'Destination: http://www.google.com',
+		      'Type: Redirect', 'Match sub-paths: No' ],
+	},
+
+	# Check that the PHP mode is correct
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: fcgid' ],
+	},
+
+	# Check for the custom PHP version
+	{ 'command' => 'list-php-directories.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '/foo$',
+		      'PHP version: '.$max_php_version ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9339,6 +9404,7 @@ $alltests = { '_config' => $_config_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
+	      'reset' => $reset_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
