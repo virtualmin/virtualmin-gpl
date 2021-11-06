@@ -1199,7 +1199,7 @@ if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
 	# Since it will be on the same port, no Apache changes are needed.
 	my $phd = &public_html_dir($d);
-	$dir eq $phd || return "Public HTML directory not found";
+	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
