@@ -270,6 +270,19 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-fcgiwrap") {
 		$fcgiwrap = 0;
 		}
+	elsif ($a eq "--add-directive") {
+		my ($n, $v) = split(/\s+/, shift(@ARGV));
+		$n ne "" && $n ne "" ||
+			&usage("--add-directive must be followed by a ".
+			       "directive name and value");
+		push(@add_dirs, [ $n, $v ]);
+		}
+	elsif ($a eq "--remove-directive") {
+		my ($n, $v) = split(/\s+/, shift(@ARGV));
+		$n ne "" || &usage("--remove-directive must be followed by a ".
+			           "directive name and optional value");
+		push(@remove_dirs, [ $n, $v ]);
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -281,7 +294,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $defmode || defined($fcgiwrap) || &usage("Nothing to do");
+  $fpmsock || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
+	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -764,6 +778,40 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Update Apache directives
+	if ($d->{'web'} && (@add_dirs || @remove_dirs) && !$d->{'alias'}) {
+		&$first_print("Updating Apache directives ..");
+		&require_apache();
+		my @ports = ( $d->{'web_port'},
+			      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		foreach my $p (@ports) {
+			my ($virt, $vconf, $conf) =
+				&get_apache_virtual($d->{'dom'}, $p);
+			next if (!$virt);
+			foreach my $a (@add_dirs) {
+				my @old = &apache::find_directive(
+					$a->[0], $vconf);
+				push(@old, $a->[1]);
+				&apache::save_directive(
+					$a->[0], \@old, $vconf, $conf);
+				}
+			foreach my $a (@remove_dirs) {
+				my @old;
+				if ($a->[1] ne '') {
+					@old = &apache::find_directive(
+						$a->[0], $vconf);
+					@old = grep { $_ ne $a->[1] } @old;
+					}
+				&apache::save_directive(
+					$a->[0], \@old, $vconf, $conf);
+				}
+			&flush_file_lines($virt->{'file'});
+			}
+		&register_post_action(\&restart_apache);
+		&$second_print(".. added ".scalar(@add_dirs)." and removed ".
+			       scalar(@remove_dirs));
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
@@ -826,6 +874,8 @@ print "                     [--letsencrypt-renew | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert | --link-ssl-cert]\n";
 print "                     [--enable-fcgiwrap | --disable-fcgiwrap]\n";
 print "                     [--sync-tlsa]\n";
+print "                     [--add-directive \"name value\"]\n";
+print "                     [--remove-directive \"name value\"]\n";
 exit(1);
 }
 
