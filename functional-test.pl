@@ -9290,10 +9290,22 @@ $reset_tests = [
 		      [ 'version', $max_php_version ] ],
 	},
 
+	# Add a bogus Apache directive
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-directive', 'Smeg spod' ] ],
+	},
+
 	# Reset the website feature
 	{ 'command' => 'reset-feature.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'web' ] ],
+	},
+
+	# Validate to ensure that the config is now OK
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature', 'web' ] ],
 	},
 
 	# Check that the redirect still exists
@@ -9418,6 +9430,12 @@ $reset_tests = [
 	{ 'command' => $wget_command.
 		       'ftp://'.$test_domain_user.':smeg@localhost/',
 	  'antigrep' => 'Login incorrect',
+	},
+
+	# Validate all features one final time
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
 	},
 
 	# Cleanup the domain
