@@ -949,6 +949,24 @@ else {
 						    $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
+	# Do overall Apache validation, and check if there's an error in
+	# this domain's block
+	my $err = &apache::test_config();
+	if ($err && $err =~ /\s+on\s+line\s+(\d+)\s+/) {
+		my $lnum = $1;
+		my $svirt;
+		if ($d->{'ssl'}) {
+			($svirt) = &get_apache_virtual($d->{'dom'},
+						       $d->{'web_sslport'});
+			}
+		if ($lnum >= $virt->{'line'} && $lnum <= $virt->{'eline'} ||
+		    ($svirt && $lnum >= $svirt->{'line'} && $lnum <= $svirt->{'eline'})) {
+			$err =~ s/\r?\n/ /g;
+			return &text('validate_ewebconfig',
+				     "<tt>".&html_escape($err)."</tt>");
+			}
+		}
+
 	# Check IP addresses
 	if ($d->{'virt'}) {
 		local $ipp = $d->{'ip'}.":".$d->{'web_port'};
