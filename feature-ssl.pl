@@ -466,6 +466,28 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		}
 	}
 
+if ($d->{'dom'} ne $oldd->{'dom'} && &is_letsencrypt_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed ... re-request let's encrypt cert
+	&$first_print($text{'save_ssl12'});
+	if ($d->{'letsencrypt_dname'}) {
+		# Update any explicitly chosen domain names
+		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		foreach my $dn (@dnames) {
+			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
+			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
+			}
+		$d->{'letsencrypt_dname'} = join(" ", @dnames);
+		}
+	my ($ok, $err) = &renew_letsencrypt_cert($d);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('save_essl12', $err));
+		}
+	}
+
 # If anything has changed that would impact the per-domain SSL cert for
 # another server like Postfix or Webmin, re-set it up as long as it is supported
 # with the new settings
