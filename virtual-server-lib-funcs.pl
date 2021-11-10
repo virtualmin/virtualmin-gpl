@@ -10527,6 +10527,17 @@ return &ui_select($name, $ids,
 		  $sz, 1, 0, $dis);
 }
 
+# one_server_input(name, id, &domains, [disabled])
+# Returns HTML for a single-server selection field
+sub one_server_input
+{
+local ($name, $id, $doms, $dis) = @_;
+return &ui_select($name, $id,
+		  [ map { [ $_->{'id'}, &show_domain_name($_) ] }
+			sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ],
+		  1, 0, 0, $dis);
+}
+
 # can_monitor_bandwidth(&domain)
 # Returns 1 if bandwidth monitoring is enabled for some server
 sub can_monitor_bandwidth

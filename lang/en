@@ -4768,6 +4768,8 @@ newvalidate_header3=Permissions fix options
 newvalidate_desc4=WARNING! This page can be used to reset the state of features for a selected virtual server. This may cause settings to be lost as part of the process of returning features to a known good state.
 newvalidate_header4=Feature reset options
 newvalidate_reset=Reset Now
+newvalidate_resetdom=Virtual server to reset
+newvalidate_resetfeats=Features to reset
 
 validate_edir=Home directory $1 does not exist
 validate_ediruser=Home directory $1 is owned by $2 instead of $3
