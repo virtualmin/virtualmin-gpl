@@ -212,6 +212,7 @@ if [ "\$1" = "" -o "\$1" = "help" -a "\$2" = "" -o "\$1" = "--help" -a "\$2" = "
 	COMMAND=list-commands
 else
 	COMMAND=\$1
+	COMMANDINITIAL=\$COMMAND
 fi
 shift
 if [ "\$COMMAND" = "help" ]; then
@@ -228,6 +229,10 @@ for dir in $dirstr; do
 		if [ "\$help" = "1" ]; then
 			exec perldoc \$dir/\$COMMAND
 		else
+			if [[ "\$@" == "" ]]; then
+				echo "See \\`virtualmin help \$COMMANDINITIAL\\` for more details and examples"
+				echo ""
+			fi
 			exec \$dir/\$COMMAND "\$@"
 		fi
 	fi
