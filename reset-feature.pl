@@ -80,16 +80,16 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	&$first_print("Resetting server $d->{'dom'} ..");
 	%newdom = %$d;
 	$oldd = { %$d };
-	my @features = grep { $d->{$_} && ($feature{$_} || $plugin{$_}) }
+	my @dom_features = grep { $d->{$_} && ($feature{$_} || $plugin{$_}) }
 			    &list_ordered_features($d);
-	if (!@features) {
+	if (!@dom_features) {
 		&$second_print(".. none of the selected features are enabled");
 		$failed = 1;
 		next DOMAIN;
 		}
 
 	# Check if resetting is even possible
-	foreach $f (@features) {
+	foreach $f (@dom_features) {
 		my $can = 1;
 		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
@@ -108,7 +108,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 		}
 
 	# Check if resetting could cause any data loss
-	foreach $f (@features) {
+	foreach $f (@dom_features) {
 		my $err;
 		my $fn = &feature_name($f, $d);
 		if ($feature{$f}) {
@@ -145,7 +145,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 
 	# Do it!
 	&$indent_print();
-	foreach $f (@features) {
+	foreach $f (@dom_features) {
 		if ($feature{$f}) {
 			# Core feature of Virtualmin
 			my $rfunc = "reset_".$f;
