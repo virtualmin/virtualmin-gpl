@@ -7422,5 +7422,15 @@ reset_webrestore=Restoring redirects and PHP settings ..
 reset_unix=Resetting Unix user and group ..
 reset_eunixuser=.. user $1 does not exist!
 reset_eunixgroup=.. group $1 does not exist!
+reset_err=Failed to reset features
+reset_title=Resetting Features
+reset_edom=Virtual server cannot be reset
+reset_efeatures=No features to reset selected
+reset_efeatures2=No valid features to reset selected
+reset_enoreset=$1 cannot be reset
+reset_doing=Resetting $1 ..
+reset_iwarning=.. ignoring warning : $err
+reset_swarning=.. skipping warning : $err
+reset_dataloss=.. resetting would cause data loss : $err
 
 __norefs=1
