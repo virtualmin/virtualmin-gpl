@@ -164,7 +164,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 			}
 		if ($plugin{$f}) {
 			# Defined by a plugin
-			if (&plugin_defined($f, "feature_reset")) {
+			if (&plugin_defined($f, "feature_reset") && !$fullreset) {
 				# Call the reset function
 				&plugin_call($f, "feature_reset", $d);
 				}
