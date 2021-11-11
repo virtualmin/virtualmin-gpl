@@ -151,7 +151,12 @@ if (&can_use_validation() == 2) {
 			    &ui_select("features", undef,
 				       \@rfopts, 10, 1));
 
-	# XXX skip warnings?
+	# Skip warnings about data loss?
+	print &ui_table_row($text{'newvalidate_resetskip'},
+		&ui_yesno_radio("skipwarnings", 0));
+
+	print &ui_table_row($text{'newvalidate_resetonoff'},
+		&ui_yesno_radio("fullreset", 0));
 
 	print &ui_table_end();
 	print &ui_form_end([ [ undef, $text{'newvalidate_reset'} ] ]);

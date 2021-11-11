@@ -4770,6 +4770,8 @@ newvalidate_header4=Feature reset options
 newvalidate_reset=Reset Now
 newvalidate_resetdom=Virtual server to reset
 newvalidate_resetfeats=Features to reset
+newvalidate_resetskip=Continue even if settings would be lost?
+newvalidate_resetonoff=Fully reset by turning features on and off?
 
 validate_edir=Home directory $1 does not exist
 validate_ediruser=Home directory $1 is owned by $2 instead of $3
@@ -7429,8 +7431,8 @@ reset_efeatures=No features to reset selected
 reset_efeatures2=No valid features to reset selected
 reset_enoreset=$1 cannot be reset
 reset_doing=Resetting $1 ..
-reset_iwarning=.. ignoring warning : $err
-reset_swarning=.. skipping warning : $err
-reset_dataloss=.. resetting would cause data loss : $err
+reset_iwarning=.. ignoring warning : $1
+reset_swarning=.. skipping warning : $1
+reset_dataloss=.. resetting would cause data loss : $1
 
 __norefs=1
