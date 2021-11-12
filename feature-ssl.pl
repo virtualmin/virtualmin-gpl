@@ -3166,6 +3166,16 @@ if ($cert_info) {
 	}
 }
 
+# can_reset_ssl(&domain)
+# Resetting SSL on it's own doesn't make sense, since it's included in the web
+# feature reset
+sub can_reset_ssl
+{
+return 0;
+}
+
+
+
 $done_feature_script{'ssl'} = 1;
 
 1;

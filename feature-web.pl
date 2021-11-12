@@ -5004,6 +5004,7 @@ return undef;
 sub reset_web
 {
 my ($d) = @_;
+my $ssl = $d->{'ssl'};
 
 # Save redirects, PHP version, PHP mode and per-directory settings
 my (@redirs, $mode, @dirs);
@@ -5013,12 +5014,23 @@ if (!$d->{'alias'}) {
 	@dirs = &list_domain_php_directories($d);
 	}
 
+# Remove the SSL and regular websites
+if ($ssl) {
+	$d->{'ssl'} = 0;
+	&delete_ssl($d);
+	}
 $d->{'web'} = 0;
 $d->{'web_nodeletelogs'} = 1;
 &delete_web($d);
+
+# Recreate the SSL and regular websites
 $d->{'web'} = 1;
 $d->{'web_nodeletelogs'} = 0;
 &setup_web($d);
+if ($ssl) {
+	$d->{'ssl'} = 1;
+	&setup_ssl($d);
+	}
 
 if (!$d->{'alias'}) {
 	# Put back redirects
