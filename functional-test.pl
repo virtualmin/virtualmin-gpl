@@ -9262,8 +9262,8 @@ $reset_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ 'mail' ],
-		      [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ], [ 'dns' ],
+		      [ 'mail' ], [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
 		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
 		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
 		      [ 'content' => 'Test home page' ],
@@ -9281,6 +9281,14 @@ $reset_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'path', '/google' ],
 		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Create a redirect for SSL only
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/ssl' ],
+		      [ 'redirect', 'http://www.example.com' ],
+		      [ 'https' ], ],
 	},
 
 	# Change PHP version on one directory
@@ -9308,12 +9316,27 @@ $reset_tests = [
 		      [ 'feature', 'web' ] ],
 	},
 
-	# Check that the redirect still exists
+	# Check that the first redirect still exists
 	{ 'command' => 'list-redirects.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'multiline' ] ],
-	  'grep' => [ '^/google', 'Destination: http://www.google.com',
-		      'Type: Redirect', 'Match sub-paths: No' ],
+	  'grep' => [ '^/google',
+		      'Destination: http://www.google.com',
+		      'Type: Redirect',
+		      'Match sub-paths: No',
+		      'Protocols: http https$', ],
+	},
+
+	# Check that the second SSL-only redirect still exists
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ],
+		      [ 'path', '/ssl' ] ],
+	  'grep' => [ '^/ssl',
+		      'Destination: http://www.example.com',
+		      'Type: Redirect',
+		      'Match sub-paths: No',
+		      'Protocols: http$', ],
 	},
 
 	# Check that the PHP mode is correct
