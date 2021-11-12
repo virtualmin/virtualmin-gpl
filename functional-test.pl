@@ -9313,7 +9313,8 @@ $reset_tests = [
 	# Validate to ensure that the config is now OK
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'feature', 'web' ] ],
+		      [ 'feature', 'web' ],
+		      [ 'feature', 'ssl' ], ],
 	},
 
 	# Check that the first redirect still exists
