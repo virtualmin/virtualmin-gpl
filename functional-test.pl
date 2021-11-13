@@ -170,11 +170,15 @@ if (&foreign_installed("usermin")) {
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
 ($test_clone_domain_user) = &unixuser_name($test_clone_domain);
+($test_ssl_subdomain_user) = &unixuser_name($test_ssl_subdomain);
 $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
 				 undef, 1);
 $clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 				 undef, 1);
+$ssl_prefix = &compute_prefix($test_ssl_subdomain, $test_ssl_subdomain_user,
+			      undef, 1);
+
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
 		 'user' => $test_domain_user,
@@ -192,12 +196,14 @@ $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
+
 %test_rename_domain = ( 'dom' => $test_rename_domain,
 		        'prefix' => $rename_prefix,
        		        'user' => $test_rename_domain_user,
 		        'group' => $test_rename_domain_user,
 		        'template' => &get_init_template() );
 $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
+
 %test_clone_domain = ( 'dom' => $test_clone_domain,
 		       'prefix' => $clone_prefix,
        		       'user' => $test_clone_domain_user,
@@ -208,6 +214,14 @@ $test_clone_domain_home = $test_clone_domain{'home'} =
 $test_clone_domain_db = &database_name(\%test_clone_domain);
 $test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 $test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
+
+%test_ssl_subdomain = ( 'dom' => $test_ssl_subdomain,
+		        'prefix' => $ssl_prefix,
+       		        'user' => $test_ssl_subdomain_user,
+		        'group' => $test_ssl_subdomain_user,
+		        'template' => &get_init_template() );
+$test_ssl_subdomain_home = $test_ssl_subdomain{'home'} =
+	&server_home_directory(\%test_ssl_subdomain);
 
 # Create PostgreSQL password file for root logins
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -5480,7 +5494,114 @@ $ssl_tests = [
 	  'grep' => 'Test SSL home page',
 	},
 
-	# Cleanup the domain
+	# Get a shared IP address
+	{ 'command' => 'list-shared-addresses.pl --name-only | tail -1',
+	  'save' => 'SHARED_IP',
+	},
+
+	# Re-create the main domain with a shared IP
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
+		      [ 'logrotate' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Re-create the sub-domain with a different owner
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
+	# Check that there is no SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with:',
+	},
+
+	# Test SSL cert to main domain
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Test SSL cert to subdomain
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL subdomain', 'CN=(\\*\\.)?'.$test_ssl_subdomain ],
+	},
+
+	# Delete the subdomain and re-create with forced linkage
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
+	},
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'always-link-ssl-cert' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
+	# Check that there is an SSL linkage now
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'SSL shared with: '.$test_domain,
+	},
+
+	# Test SSL cert to subdomain with linkage
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Break the linkage, which should copy in the cert
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'break-ssl-cert' ] ],
+	},
+
+	# Check that there is no longer an SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with: '.$test_domain,
+	  'grep' => [ 'SSL key file: '.$test_ssl_subdomain_home.'/',
+		      'SSL cert file: '.$test_ssl_subdomain_home.'/', ],
+	},
+
+	# Test SSL cert to subdomain with copied cert
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1 },
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
