@@ -1628,4 +1628,6 @@ Massively simplified the SSL Certificate page for services certificates.
 Added a field for entering an SSH private key file for use in backups, instead of a password.
 ---- Changes since 6.17 ----
 On systems without SuExec, fcgiwrap will be used to execute CGI scripts instead for new virtual servers.
+Removed the mostly useless configuration check for 127.0.0.1 in /etc/resolv.conf.
 Added the reset-feature API command and a tab on the Validate Virtual Servers page to reset the settings for selected features of a virtual server back to their defaults.
+Added a configuration option and flag to create-domain to allow SSL linkage across domain owners.
