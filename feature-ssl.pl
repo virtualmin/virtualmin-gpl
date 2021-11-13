@@ -1787,13 +1787,17 @@ return wantarray ? @rv : $rv[0];
 # hash's cert file. This can only be called at domain creation time.
 sub find_matching_certificate
 {
-local ($d) = @_;
-local $lnk = $d->{'link_certs'} ? 1 :
-	     $d->{'nolink_certs'} ? 0 :
-	     $config{'nolink_certs'} ? 0 : 1;
+my ($d) = @_;
+my $lnk = $d->{'link_certs'} == 1 ? 1 :
+	  $d->{'link_certs'} == 2 ? 2 :
+	  $d->{'nolink_certs'} ? 0 :
+	  $config{'nolink_certs'} == 1 ? 0 :
+	  $config{'nolink_certs'} == 2 ? 2 : 1;
 if ($lnk) {
-	local @sames = grep { $_->{'user'} eq $d->{'user'} }
-			    &find_matching_certificate_domain($d);
+	my @sames = &find_matching_certificate_domain($d);
+	if ($lnk != 2) {
+		@sames = grep { $_->{'user'} eq $d->{'user'} } @sames;
+		}
 	if (@sames) {
 		my ($same) = grep { !$_->{'parent'} } @sames;
 		$same ||= $sames[0];
@@ -3173,8 +3177,6 @@ sub can_reset_ssl
 {
 return 0;
 }
-
-
 
 $done_feature_script{'ssl'} = 1;
 
