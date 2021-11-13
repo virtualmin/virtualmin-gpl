@@ -6569,6 +6569,9 @@ smtpcloud_evaltok=Amazon SES verification is not complete. You must create a DNS
 smtpcloud_evaltok2=Amazon SES verification did not return any information for this domain!
 smtpcloud_egetquota=Failed to get Amazon SES quota : $1
 smtpcloud_esandbox=Your Amazon SES account is still in sandbox mode, and so can only send email to verified domains.
+smtpcloud_ses_sandbox=SES production state
+smtpcloud_ses_inprod=Production ready
+smtpcloud_ses_insandbox=In SES Sandbox - mail delivery is limited until your <a href='$1' target=_blank>account is upgraded</a>.
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client
