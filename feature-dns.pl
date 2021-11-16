@@ -4410,12 +4410,14 @@ push(@r, @{$r->{'values'}}) if ($val);
 return join("/", @r);
 }
 
-# modify_dns_cloud(&domain, cloud-name)
+# modify_dns_cloud(&domain, cloud-name|"local"|"services")
 # Update the Cloud DNS provider for a domain, while preserving records
 sub modify_dns_cloud
 {
 my ($d, $cloud) = @_;
-return undef if ($d->{'dns_cloud'} eq $cloud);
+my $oldcloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+	       $d->{'provision_dns'} ? 'services' : 'local';
+return undef if ($oldcloud eq $cloud);
 
 # Is the cloud provider working?
 if ($cloud ne "local") {
