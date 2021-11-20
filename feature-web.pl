@@ -1476,6 +1476,10 @@ if ($tmpl->{'web_writelogs'}) {
 			}
 		}
 	}
+if ($tmpl->{'web_http2'} && &supports_http2()) {
+	# Enable HTTPv2 if supported by Apache
+	push(@dirs, "Protocols http/1.1 h2 h2c");
+	}
 return @dirs;
 }
 
@@ -3819,7 +3823,7 @@ return 1;
 }
 
 # supports_fcgiwrap()
-# Returns 1 if fcgiwrap is supported on this system
+# Returns 1 if fcgiwrap is supported by Apache on this system
 sub supports_fcgiwrap
 {
 return 0 if (!&has_command("fcgiwrap"));
@@ -3830,6 +3834,16 @@ if ($apache::site{'fullversion'}) {
 else {
 	return $apache::httpd_modules{'core'} >= 2.426;
 	}
+}
+
+# supports_http2()
+# Returns 1 if HTTPv2 is supported by Apache on this system
+sub supports_http2
+{
+&require_apache();
+return $apache::httpd_modules{'mod_http2'} &&
+       $apache::site{'fullversion'} &&
+       &compare_versions($apache::site{'fullversion'}, "2.4.17") >= 0;
 }
 
 # setup_apache_logs(&domain, [access-log, error-log])
