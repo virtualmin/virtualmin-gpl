@@ -967,7 +967,7 @@ else {
 			}
 		}
 
-	# Check IP addresses
+	# Check private IP addresses
 	if ($d->{'virt'}) {
 		local $ipp = $d->{'ip'}.":".$d->{'web_port'};
 		&indexof($ipp, @{$virt->{'words'}}) >= 0 ||
@@ -2583,7 +2583,7 @@ if ($config{'web'}) {
 		&ui_textarea("web_ssl", join("\n", split(/\t/, $tmpl->{'web_ssl'})),
 			     5, 60));
 
-	# Input for logging via program. Deprecated, so don't show unless enabled
+	# Input for logging via program. Deprecated so don't show unless enabled
 	if ($tmpl->{'web_writelogs'}) {
 		print &ui_table_row(&hlink($text{'newweb_writelogs'},
 					   "template_writelogs"),
@@ -2730,15 +2730,11 @@ print &ui_table_row(&hlink($text{'newweb_usermin'},
 # Setup Dovecot and Postfix SSL certs
 print &ui_table_row(&hlink($text{'newweb_dovecot'},
 			   "template_web_dovecot_ssl"),
-	&ui_radio("web_dovecot_ssl",
-		  $tmpl->{'web_dovecot_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("web_dovecot_ssl", $tmpl->{'web_dovecot_ssl'}));
 
 print &ui_table_row(&hlink($text{'newweb_postfix'},
 			   "template_web_postfix_ssl"),
-	&ui_radio("web_postfix_ssl",
-		  $tmpl->{'web_postfix_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("web_postfix_ssl", $tmpl->{'web_postfix_ssl'}));
 
 # Add redirects for webmail and admin
 print &ui_table_hr();
@@ -2788,6 +2784,10 @@ if ($config{'proxy_pass'} == 2) {
 				join("\n", split(/\t/, $tmpl->{'frame'})),
 				10, 60));
 	}
+
+# Enable HTTP2 for new websites
+print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
+	&ui_yesno_radio("web_http2", $tmpl->{'web_http2'}));
 }
 
 # parse_template_web(&tmpl)
@@ -2932,6 +2932,9 @@ if ($config{'proxy_pass'} == 2) {
 	# Save frame-forwarding settings
 	$tmpl->{'frame'} = &parse_none_def("frame");
 	}
+
+# Save HTTP2 option
+$tmpl->{'web_http2'} = $in{'web_http2'};
 }
 
 # postsave_template_web(&template)

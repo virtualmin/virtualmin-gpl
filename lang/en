@@ -1753,6 +1753,7 @@ newweb_admin=Redirect <tt>admin.${DOM}</tt>?
 newweb_admindom=URL for <tt>admin</tt> redirect
 newweb_ewebmaildom=Missing or invalid URL for webmail redirect
 newweb_eadmindom=Missing or invalid URL for admin redirect
+newweb_http2=Enable HTTP2 protocol for new websites?
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template

@@ -8910,6 +8910,7 @@ push(@rv, { 'id' => 0,
 	    'web_ssi_suffix' => $config{'web_ssi_suffix'},
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
+	    'web_http2' => $config{'web_http2'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -9192,6 +9193,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_webmaildom'} = $tmpl->{'web_webmaildom'};
 	$config{'web_admin'} = $tmpl->{'web_admin'};
 	$config{'web_admindom'} = $tmpl->{'web_admindom'};
+	$config{'web_http2'} = $tmpl->{'web_http2'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
@@ -9466,7 +9468,7 @@ if (!$tmpl->{'default'}) {
 	local $p;
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
-		    "web_webmail", "web_admin",
+		    "web_webmail", "web_admin", "web_http2",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
@@ -9496,7 +9498,7 @@ if (!$tmpl->{'default'}) {
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
 				next if ($p eq "php" && $k =~ /^php_(fpm|sock)/);
-				next if ($p eq "web" && $k =~ /^web_(webmail|admin)/);
+				next if ($p eq "web" && $k =~ /^web_(webmail|admin|http2)/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
 					$tmpl->{$k} = $def->{$k};
