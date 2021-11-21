@@ -3685,6 +3685,77 @@ if ($any) {
 	}
 }
 
+# get_domain_supported_http_protocols(&domain)
+# Returns an array ref of possible protocols for a domain's webserver, using the
+# Apache names, or an error message. An empty array ref indicates no support
+# for changing protocols.
+sub get_domain_supported_http_protocols
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	return &supports_http2() ? [ 'http/1.1', 'h2', 'h2c' ] : [ ];
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_get_supported_http_protocols", $d);
+	}
+else {
+	return "No website enabled for this domain";
+	}
+}
+
+# get_domain_http_protocols(&domain)
+# Returns an array ref of HTTP protocols currently enabled for a domain, or an
+# error message.
+sub get_domain_http_protocols
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+	return "No Apache virtualhost found" if (!$virt);
+	my ($prots) = &apache::find_directive("Protocols", $vconf);
+	return [ 'http/1.1' ] if (!$prots);
+	return [ split(/\s+/, $prots) ];
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_get_http_protocols", $d);
+	}
+else {
+	return "No website enabled for this domain";
+	}
+}
+
+# save_domain_http_protocols(&domain, &protocols)
+# Updates the list of supported HTTP protocols, or sets to the default if the
+# protocols list is empty. Returns undef on success or an error message on
+# failure.
+sub save_domain_http_protocols
+{
+my ($d, $prots) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	my @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	my @pdirs = ref($prots) && @$prots ? [ join(" ", @$prots) ] : [ ];
+	foreach my $p (@ports) {
+		my ($virt, $vconf, $conf) =
+			&get_apache_virtual($d->{'dom'}, $p);
+		return "No Apache virtualhost found" if (!$virt);
+		&apache::save_directive("Protocols", \@pdirs, $pconf, $conf);
+		&flush_file_lines($pvirt->{'file'});
+		}
+	&register_post_action(\&restart_apache);
+	return undef;
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_save_http_protocols", $d, $prots);
+	}
+else {
+	return "No website enabled for this domain";
+	}
+}
+
 # get_suexec_path()
 # Returns the full path to the Apache suexec command, if installed, or undef
 sub get_suexec_path
