@@ -3913,6 +3913,7 @@ sub supports_http2
 {
 &require_apache();
 return $apache::httpd_modules{'mod_http2'} &&
+       !$apache::httpd_modules{'mod_prefork'} &&
        $apache::site{'fullversion'} &&
        &compare_versions($apache::site{'fullversion'}, "2.4.17") >= 0;
 }
