@@ -613,6 +613,27 @@ sub feature_get_domain_web_config
 {
 }
 
+# feature_get_supported_http_protocols(&domain)
+# Returns an array ref of supported HTTP protocols for this domain, or an
+# empty list if protocols cannot be edited
+sub feature_get_supported_http_protocols
+{
+}
+
+# feature_get_http_protocols(&domain)
+# Returns an array ref of enabled HTTP protocols for this domain, or an error
+# message string if protocols could not be retrieved.
+sub feature_get_http_protocols
+{
+}
+
+# feature_save_http_protocols(&domain, &protocols)
+# Updates the HTTP protocols for this domain from the given array ref. Returns
+# undef on success, or an error message on failure.
+sub feature_save_http_protocols
+{
+}
+
 # feature_startstop()
 # If this feature has a server process, this function should return a hash
 # with 'status', 'desc' and 'links' keys.
