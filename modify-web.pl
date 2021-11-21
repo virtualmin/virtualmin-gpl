@@ -95,6 +95,11 @@ If your system supports Fcgiwrap for running CGI scripts, you can use the
 C<--enable-fcgiwrap> flag to switch to it instead of using SuExec, or 
 C<--disable-fcgiwrap> to switch back.
 
+If your webserver supports multiple HTTP protocols, you can use the 
+C<--protocols> flag to choose which are enabled for the website. This flag must
+be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
+the default protocols for your webserver, use the C<--default-protocols> flag.
+
 =cut
 
 package virtual_server;
@@ -283,6 +288,12 @@ while(@ARGV > 0) {
 			           "directive name and optional value");
 		push(@remove_dirs, [ $n, $v ]);
 		}
+	elsif ($a eq "--protocols") {
+		$protocols = [ split(/\s+/, shift(@ARGV)) ];
+		}
+	elsif ($a eq "--default-protocols") {
+		$protocols = [ ];
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -295,7 +306,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
-	&usage("Nothing to do");
+  $protocols || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -778,6 +789,30 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Change HTTP protocols
+	if ($protocols) {
+		if (@$protocols) {
+			&$first_print("Updating HTTP protocols to ".
+				      join(" ", @$protocols)." ..");
+			}
+		else {
+			&$first_print("Updating HTTP protocols to defaults ..");
+			}
+		$canprots = &get_domain_supported_http_protocols($d);
+		%canprots = map { $_, 1 } @$canprots;
+		@cannotprots = grep { !$canprots{$_} } @$protocols;
+		if (@cannotprots) {
+			&$second_print(".. protocol ".join(" ", @cannotprots).
+				       " is not supported");
+			}
+		elsif ($err = &save_domain_http_protocols($d, $protocols)) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+
 	# Update Apache directives
 	if ($d->{'web'} && (@add_dirs || @remove_dirs) && !$d->{'alias'}) {
 		&$first_print("Updating Apache directives ..");
@@ -876,6 +911,7 @@ print "                     [--enable-fcgiwrap | --disable-fcgiwrap]\n";
 print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
+print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 exit(1);
 }
 

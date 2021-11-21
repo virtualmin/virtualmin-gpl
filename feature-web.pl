@@ -3737,13 +3737,13 @@ my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	my @ports = ( $d->{'web_port'},
 		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
-	my @pdirs = ref($prots) && @$prots ? [ join(" ", @$prots) ] : [ ];
+	my @pdirs = ref($prots) && @$prots ? ( join(" ", @$prots) ) : ( );
 	foreach my $p (@ports) {
 		my ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		return "No Apache virtualhost found" if (!$virt);
-		&apache::save_directive("Protocols", \@pdirs, $pconf, $conf);
-		&flush_file_lines($pvirt->{'file'});
+		&apache::save_directive("Protocols", \@pdirs, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
 		}
 	&register_post_action(\&restart_apache);
 	return undef;
