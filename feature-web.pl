@@ -1478,7 +1478,7 @@ if ($tmpl->{'web_writelogs'}) {
 	}
 if ($tmpl->{'web_http2'} && &supports_http2()) {
 	# Enable HTTPv2 if supported by Apache
-	push(@dirs, "Protocols http/1.1 h2 h2c");
+	push(@dirs, "Protocols h2 h2c http/1.1");
 	}
 return @dirs;
 }
@@ -3694,7 +3694,7 @@ sub get_domain_supported_http_protocols
 my ($d) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
-	return &supports_http2() ? [ 'http/1.1', 'h2', 'h2c' ] : [ ];
+	return &supports_http2() ? [ 'h2', 'h2c', 'http/1.1' ] : [ ];
 	}
 elsif ($p) {
 	return &plugin_call($p, "feature_get_supported_http_protocols", $d);
