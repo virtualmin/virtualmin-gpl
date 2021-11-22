@@ -14579,8 +14579,6 @@ if (&domain_has_website()) {
 				foreach my $p (@pools) {
 					my $pd = &get_domain($p);
 					next if ($pd);
-					my ($ok) = &get_domain_php_fpm_port($d);
-					next if (!$ok);	# Don't fix if broken
 					my $t = get_php_fpm_pool_config_value(
 						$conf, $p, "listen");
 					# If returned "$t" is "127.0.0.1:9000", 
