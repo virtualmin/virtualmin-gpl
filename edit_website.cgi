@@ -111,6 +111,17 @@ if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2 &&
 		&ui_yesno_radio("writelogs", &get_writelogs_status($d)));
 	}
 
+# HTTP2 protocol support?
+if (!$d->{'alias'}) {
+	my $canprots = &get_domain_supported_http_protocols($d);
+	my $prots = &get_domain_http_protocols($d);
+	if (&indexof("h2", @$canprots) >= 0 && ref($prots)) {
+		print &ui_table_row(
+			&hlink($text{'phpmode_http2'}, "http2"),
+			&ui_yesno_radio("http2", &indexof("h2", @$prots) >= 0));
+		}
+	}
+
 print &ui_table_end();
 
 print &ui_form_end([ [ "save", $text{'save'} ] ]);

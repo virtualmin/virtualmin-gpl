@@ -14506,6 +14506,15 @@ if ($config{'web'}) {
 	elsif (&supports_fcgiwrap()) {
 		&$second_print($text{'check_fcgiwrapok'});
 		}
+
+	# Check HTTP2 support
+	my ($ok, $err) = &supports_http2();
+	if ($ok) {
+		&$second_print($text{'check_http2ok'});
+		}
+	else {
+		&$second_print(&text('check_http2err', $err));
+		}
 	}
 
 if (&domain_has_website()) {

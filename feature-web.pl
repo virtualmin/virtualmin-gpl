@@ -3912,10 +3912,19 @@ else {
 sub supports_http2
 {
 &require_apache();
-return $apache::httpd_modules{'mod_http2'} &&
-       !$apache::httpd_modules{'mod_prefork'} &&
-       $apache::site{'fullversion'} &&
-       &compare_versions($apache::site{'fullversion'}, "2.4.17") >= 0;
+my $err;
+if (!$apache::httpd_modules{'mod_http2'}) {
+	$err = "Missing Apache module mod_http2";
+	}
+elsif ($apache::httpd_modules{'mod_prefork'}) {
+	$err = "Incompatible Apache module mod_prefork is enabled";
+	}
+elsif (!$apache::site{'fullversion'} ||
+       &compare_versions($apache::site{'fullversion'}, "2.4.17") < 0) {
+	$err = "Apache must be at least version 2.4.17";
+	}
+my @rv = ($err ? 0 : 1, $err);
+return wantarray ? @rv : $rv[0];
 }
 
 # setup_apache_logs(&domain, [access-log, error-log])
