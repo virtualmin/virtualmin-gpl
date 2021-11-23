@@ -14,10 +14,10 @@ if (!$stream_client) {
 	$fullprog .= " -";
 	}
 
-# Feel email to clamscan
+# Feed email to clamscan
 $SIG{'PIPE'} = 'ignore';
 $clampid = open(INPUT, "|$fullprog >$temp");
-while(read(STDIN, $buf, 1024) > 0) {
+while(read(STDIN, $buf, &get_buffer_size()) > 0) {
 	print INPUT $buf;
 	}
 

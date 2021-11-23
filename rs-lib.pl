@@ -326,7 +326,7 @@ if ($srcfile =~ /^\// && -r $srcfile) {
 		}
 	else {
 		# Copy till the end of the file
-		while(read(SRCFILE, $buf, 1024) > 0) {
+		while(read(SRCFILE, $buf, &get_buffer_size()) > 0) {
 			&write_http_connection($h, $buf);
 			}
 		}
