@@ -233,7 +233,7 @@ for(my $i=0; $i<$tries; $i++) {
 		local $SIG{'PIPE'} = 'IGNORE';
 		my $buf;
 		open(BACKUP, "<".$sourcefile);
-		while(read(BACKUP, $buf, 1024) > 0) {
+		while(read(BACKUP, $buf, &get_buffer_size()) > 0) {
 			if (!&write_http_connection($h, $buf)) {
 				$writefailed = $!;
 				last;

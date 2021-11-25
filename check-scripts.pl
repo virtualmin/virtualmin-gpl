@@ -35,6 +35,9 @@ while(@ARGV) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
 		}

@@ -49,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -84,6 +87,9 @@ $merr = &making_changes();
 # Call the database change function
 $mfunc = "modify_${type}";
 &$mfunc($d, $oldd);
+
+# Update installed scripts credentials
+update_all_installed_scripts_database_credentials($d, 'dbuser', $user);
 
 # Update Webmin user, so that it logs in correctly
 &modify_webmin($d, $oldd);

@@ -70,6 +70,9 @@ $ok_email_file = "$test_email_dir/ok.txt";
 $supports_fcgid = &indexof("fcgid", &supported_php_modes()) >= 0;
 $supports_fpm = &indexof("fpm", &supported_php_modes()) >= 0;
 $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
+@php_versions = sort { &compare_versions($a->[0], $b->[0]) }
+		     &list_available_php_versions();
+$max_php_version = $php_versions[@php_versions-1]->[0];
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -167,11 +170,15 @@ if (&foreign_installed("usermin")) {
 ($test_domain_user) = &unixuser_name($test_domain);
 ($test_rename_domain_user) = &unixuser_name($test_rename_domain);
 ($test_clone_domain_user) = &unixuser_name($test_clone_domain);
+($test_ssl_subdomain_user) = &unixuser_name($test_ssl_subdomain);
 $prefix = &compute_prefix($test_domain, $test_domain_user, undef, 1);
 $rename_prefix = &compute_prefix($test_rename_domain, $test_rename_domain_user,
 				 undef, 1);
 $clone_prefix = &compute_prefix($test_clone_domain, $test_clone_domain_user,
 				 undef, 1);
+$ssl_prefix = &compute_prefix($test_ssl_subdomain, $test_ssl_subdomain_user,
+			      undef, 1);
+
 %test_domain = ( 'dom' => $test_domain,
 		 'prefix' => $prefix,
 		 'user' => $test_domain_user,
@@ -189,12 +196,14 @@ $test_full_user_home = $test_domain_home.'/homes/'.$test_user;
 $test_domain_db = &database_name(\%test_domain);
 $test_domain_cert = &default_certificate_file(\%test_domain, "cert");
 $test_domain_key = &default_certificate_file(\%test_domain, "key");
+
 %test_rename_domain = ( 'dom' => $test_rename_domain,
 		        'prefix' => $rename_prefix,
        		        'user' => $test_rename_domain_user,
 		        'group' => $test_rename_domain_user,
 		        'template' => &get_init_template() );
 $test_rename_full_user = &userdom_name($test_user, \%test_drename_omain);
+
 %test_clone_domain = ( 'dom' => $test_clone_domain,
 		       'prefix' => $clone_prefix,
        		       'user' => $test_clone_domain_user,
@@ -205,6 +214,14 @@ $test_clone_domain_home = $test_clone_domain{'home'} =
 $test_clone_domain_db = &database_name(\%test_clone_domain);
 $test_full_clone_user = &userdom_name($test_user, \%test_clone_domain);
 $test_full_clone_user_mysql = &mysql_username($test_full_clone_user);
+
+%test_ssl_subdomain = ( 'dom' => $test_ssl_subdomain,
+		        'prefix' => $ssl_prefix,
+       		        'user' => $test_ssl_subdomain_user,
+		        'group' => $test_ssl_subdomain_user,
+		        'template' => &get_init_template() );
+$test_ssl_subdomain_home = $test_ssl_subdomain{'home'} =
+	&server_home_directory(\%test_ssl_subdomain);
 
 # Create PostgreSQL password file for root logins
 $pg_pass_file = "/tmp/pgpass.txt";
@@ -637,7 +654,6 @@ $domains_tests = [
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
-
 	];
 
 $jail_tests = [
@@ -1326,13 +1342,7 @@ $script_tests = [
 	{ 'command' => 'set-php-directory.pl',
 	  'args' => [ [ 'domain', $test_domain ],
                       [ 'dir', '.' ],
-		      [ 'version', '7.0' ] ],
-	  'ignorefail' => 1,
-	},
-	{ 'command' => 'set-php-directory.pl',
-	  'args' => [ [ 'domain', $test_domain ],
-                      [ 'dir', '.' ],
-		      [ 'version', '7.2' ] ],
+		      [ 'version', $max_php_version ] ],
 	  'ignorefail' => 1,
 	},
 
@@ -5484,7 +5494,114 @@ $ssl_tests = [
 	  'grep' => 'Test SSL home page',
 	},
 
-	# Cleanup the domain
+	# Get a shared IP address
+	{ 'command' => 'list-shared-addresses.pl --name-only | tail -1',
+	  'save' => 'SHARED_IP',
+	},
+
+	# Re-create the main domain with a shared IP
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test SSL domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
+		      [ 'logrotate' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'content' => 'Test SSL home page' ],
+		      @create_args, ],
+        },
+
+	# Re-create the sub-domain with a different owner
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
+	# Check that there is no SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with:',
+	},
+
+	# Test SSL cert to main domain
+	{ 'command' => 'openssl s_client -host '.$test_domain.
+		       ' -servername '.$test_domain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Test SSL cert to subdomain
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL subdomain', 'CN=(\\*\\.)?'.$test_ssl_subdomain ],
+	},
+
+	# Delete the subdomain and re-create with forced linkage
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
+	},
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'desc', 'Test SSL subdomain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
+		      [ 'shared-ip', '$SHARED_IP' ],
+		      [ 'always-link-ssl-cert' ],
+		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
+	# Check that there is an SSL linkage now
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'grep' => 'SSL shared with: '.$test_domain,
+	},
+
+	# Test SSL cert to subdomain with linkage
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Break the linkage, which should copy in the cert
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'break-ssl-cert' ] ],
+	},
+
+	# Check that there is no longer an SSL linkage
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ],
+		      [ 'multiline' ] ],
+	  'antigrep' => 'SSL shared with: '.$test_domain,
+	  'grep' => [ 'SSL key file: '.$test_ssl_subdomain_home.'/',
+		      'SSL cert file: '.$test_ssl_subdomain_home.'/', ],
+	},
+
+	# Test SSL cert to subdomain with copied cert
+	{ 'command' => 'openssl s_client -host '.$test_ssl_subdomain.
+		       ' -servername '.$test_ssl_subdomain.
+		       ' -port 443 </dev/null',
+	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_ssl_subdomain ] ],
+	  'ignorefail' => 1,
+	  'cleanup' => 1 },
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
@@ -9260,6 +9377,218 @@ $htpasswd_tests = [
         },
 	];
 
+$reset_tests = [
+	# Create a domain with all the features
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ $ssl ], [ 'dns' ],
+		      [ 'mail' ], [ 'webalizer' ], [ 'mysql' ], [ 'logrotate' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'spam' ], [ 'virus' ], [ 'webmin' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Switch PHP mode to fCGId
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'fcgid' ] ],
+	},
+
+	# Create a redirect for /google
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/google' ],
+		      [ 'redirect', 'http://www.google.com' ] ],
+	},
+
+	# Create a redirect for SSL only
+	{ 'command' => 'create-redirect.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'path', '/ssl' ],
+		      [ 'redirect', 'http://www.example.com' ],
+		      [ 'https' ], ],
+	},
+
+	# Change PHP version on one directory
+	{ 'command' => 'set-php-directory.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+                      [ 'dir', 'foo' ],
+		      [ 'version', $max_php_version ] ],
+	},
+
+	# Add a bogus Apache directive
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-directive', 'Smeg spod' ] ],
+	},
+
+	# Reset the website feature
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'web' ] ],
+	},
+
+	# Validate to ensure that the config is now OK
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature', 'web' ],
+		      [ 'feature', 'ssl' ], ],
+	},
+
+	# Check that the first redirect still exists
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '^/google',
+		      'Destination: http://www.google.com',
+		      'Type: Redirect',
+		      'Match sub-paths: No',
+		      'Protocols: http https$', ],
+	},
+
+	# Check that the second SSL-only redirect still exists
+	{ 'command' => 'list-redirects.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ],
+		      [ 'path', '/ssl' ] ],
+	  'grep' => [ '^/ssl',
+		      'Destination: http://www.example.com',
+		      'Type: Redirect',
+		      'Match sub-paths: No',
+		      'Protocols: http$', ],
+	},
+
+	# Check that the PHP mode is correct
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: fcgid' ],
+	},
+
+	# Check for the custom PHP version
+	{ 'command' => 'list-php-directories.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'multiline' ] ],
+	  'grep' => [ '/foo$',
+		      'PHP version: '.$max_php_version ],
+	},
+
+	# Add a DNS record that will be lost
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing A 1.2.3.4' ] ],
+	},
+
+	# Remove a DNS record that will be re-created
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'remove-record', 'www A' ] ],
+	},
+
+	# Try a DNS reset that should fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dns' ] ],
+	  'fail' => 1,
+	},
+
+	# Try again, this time skipping warnings
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'skip-warnings' ],
+		      [ 'dns' ] ],
+	  'grep' => 'testing \\(A\\)',
+	},
+
+	# Check that the record is gone, and that a regular record is back
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'antigrep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'www' ],
+	},
+
+	# Attempt a MySQL reset, which should be OK since there are no tables
+	# or extra DBs yet
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'mysql' ] ],
+	},
+
+	# Create one table
+	{ 'command' => 'mysql -u '.$mysql::mysql_login.' -p'.$mysql::mysql_pass.' '.$test_domain_db.' -e "create table foo (id int(4))"',
+	},
+
+	# MySQL reset should now fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'mysql' ] ],
+	  'fail' => 1,
+	},
+
+	# Attempt a Postgres reset, which should be OK since there are no tables
+	# or extra DBs yet
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'postgres' ] ],
+	},
+
+	# Add a new Postgres DB to block the reset
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'postgres' ],
+		      [ 'name', $test_domain_user.'_extra2' ] ],
+	},
+
+	# Postgres reset should now fail
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'postgres' ] ],
+	  'fail' => 1,
+	},
+
+	# Break the Unix user's password
+	{ 'command' => 'echo pog | passwd --stdin '.$test_domain_user,
+	},
+
+	# Check FTP login fails
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'grep' => 'Login incorrect',
+	  'ignorefail' => 1,
+	},
+
+	# Reset the Unix user
+	{ 'command' => 'reset-feature.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'unix' ] ],
+	},
+
+	# Check FTP login works now
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain_user.':smeg@localhost/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Validate all features one final time
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9339,6 +9668,7 @@ $alltests = { '_config' => $_config_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
+	      'reset' => $reset_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL

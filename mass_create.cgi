@@ -392,6 +392,15 @@ foreach $line (@lines) {
 		next;
 		}
 
+	# Check for parent quotas
+	if ($parentdom) {
+		my $err = &check_domain_over_quota($parentdom);
+		if ($err) {
+			&line_error(&text('setup_overquota', $err));
+			next;
+			}
+		}
+
 	# Actually do it!
 	&set_all_null_print();
 	local $err = &create_virtual_server(\%dom, $parentdom,

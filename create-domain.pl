@@ -347,6 +347,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--letsencrypt") {
 		$letsencrypt = 1;
 		}
+	elsif ($a eq "--letsencrypt-always") {
+		$letsencrypt = 2;
+		}
 	elsif ($a eq "--enable-jail") {
 		$jail = 1;
 		}
@@ -364,6 +367,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--link-ssl-cert") {
 		$linkcert = 1;
+		}
+	elsif ($a eq "--always-link-ssl-cert") {
+		$linkcert = 2;
 		}
 	elsif ($a eq "--generate-ssl-cert") {
 		$always_ssl = 1;
@@ -402,6 +408,9 @@ while(@ARGV > 0) {
 		($f) = grep { $_->{'name'} eq $fn } @fields;
 		$f || &usage("Custom field $fn does not exist");
 		$fields{'field_'.$fn} = $fv;
+		}
+	elsif ($a eq "--help") {
+		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");
@@ -822,7 +831,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'dns_cloud', $clouddns,
         );
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
-$dom{'link_certs'} = 1 if ($linkcert eq '1');
+$dom{'link_certs'} = $linkcert if ($linkcert == 1 || $linkcert == 2);
 $dom{'always_ssl'} = $always_ssl if (defined($always_ssl));
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
@@ -894,6 +903,15 @@ if (@warns) {
 		}
 	}
 
+# Check if over quota
+if ($parent) {
+	my $err = &check_domain_over_quota($parent);
+	if ($err) {
+		print &text('setup_overquota', $err),"\n";
+		exit(6);
+		}
+	}
+
 # Do it
 print "Beginning server creation ..\n\n";
 $config{'pre_command'} = $precommand if ($precommand);
@@ -903,7 +921,7 @@ $err = &create_virtual_server(\%dom, $parent,
 			      0, 0, $parent ? undef : $pass, $content);
 if ($err) {
 	print "$err\n";
-	exit 1;
+	exit(1);
 	}
 
 if ($fwdto) {

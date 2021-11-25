@@ -43,6 +43,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--type") {
 		$type = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

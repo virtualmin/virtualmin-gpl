@@ -47,6 +47,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name") {
 		$planname = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

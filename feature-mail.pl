@@ -395,10 +395,11 @@ if ($c && defined(&list_smtp_clouds)) {
 	else {
 		my $sfunc = "smtpcloud_".$c."_create_domain";
 		my $info = { 'domain' => $d->{'dom'} };
-		my ($ok, $id) = &$sfunc($d, $info);
+		my ($ok, $id, $location) = &$sfunc($d, $info);
 		if ($ok) {
 			$d->{'smtp_cloud'} = $c;
 			$d->{'smtp_cloud_id'} = $id;
+			$d->{'smtp_cloud_location'} = $location;
 			&$second_print($text{'setup_done'});
 			}
 		else {
@@ -593,7 +594,8 @@ if ($c && defined(&list_smtp_clouds)) {
 	else {
 		my $sfunc = "smtpcloud_".$c."_delete_domain";
 		my $info = { 'domain' => $d->{'dom'},
-			     'id' => $d->{'smtp_cloud_id'} };
+			     'id' => $d->{'smtp_cloud_id'},
+			     'location' => $d->{'smtp_cloud_location'} };
 		my ($ok, $err) = &$sfunc($d, $info);
 		if ($ok) {
 			$d->{'smtp_cloud'} = $c;
@@ -1183,6 +1185,20 @@ if ($config{'mail_system'} != 5) {	# skip for vpopmail
 			}
 		}
 	}
+
+# Check cloud mail provider
+my $c = $d->{'smtp_cloud'};
+if ($c) {
+	my $vfunc = "smtpcloud_".$c."_validate_domain";
+	if (defined(&$vfunc)) {
+		my $info = { 'domain' => $d->{'dom'},
+			     'id' => $d->{'smtp_cloud_id'},
+			     'location' => $d->{'smtp_cloud_location'} };
+		my $err = &$vfunc($d, $info);
+		return $err if ($err);
+		}
+	}
+
 return undef;
 }
 
@@ -6614,6 +6630,16 @@ else {
 	}
 
 return undef;
+}
+
+# reset_mail(&domain)
+# Calls the email delete and setup functions, but with the options to preserve
+# aliases enabled
+sub reset_mail
+{
+my ($d) = @_;
+&delete_mail($d, 0, 1, 1);
+&setup_mail($d, 1, 1);
 }
 
 $done_feature_script{'mail'} = 1;

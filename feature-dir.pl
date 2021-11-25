@@ -610,6 +610,7 @@ if (-r $ifile) {
 				   0700, $ifile);
 	}
 if ($ex || !-s $file) {
+	&unlink_file($file);
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
 					       : 'backup_dirtarfailed',
 			     "<pre>".&html_escape($out)."</pre>"));
@@ -1138,6 +1139,13 @@ local ($d) = @_;
 my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
 my $tab = $home_mtab || $home_fstab;
 return $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i ? $tab->[1] : undef;
+}
+
+# can_reset_dir(&domain)
+# Resetting the home directory feature doesn't make any sense ever
+sub can_reset_dir
+{
+return 0;
 }
 
 $done_feature_script{'dir'} = 1;

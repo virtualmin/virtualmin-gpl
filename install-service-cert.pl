@@ -59,6 +59,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--remove-domain") {
 		$remove_domain = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

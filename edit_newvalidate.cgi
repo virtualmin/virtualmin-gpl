@@ -11,6 +11,7 @@ print &ui_tabs_start([ [ 'val', $text{'newvalidate_tabval'} ],
 		       &can_use_validation() == 2 ? (
 		         [ 'sched', $text{'newvalidate_tabsched'} ],
 		         [ 'fix', $text{'newvalidate_tabsfix'} ],
+		         [ 'reset', $text{'newvalidate_tabsreset'} ],
 			 ) : ( ),
 		     ],
 		     'mode', $in{'mode'} || 'val', 1);
@@ -122,6 +123,45 @@ if (&can_use_validation() == 2) {
 	print &ui_form_end([ [ undef, $text{'newvalidate_fix'} ] ]);
 
 	print &ui_tabs_end_tab('mode', 'fix');
+
+	# Start of reset feature form
+	print &ui_tabs_start_tab('mode', 'reset');
+	print "$text{'newvalidate_desc4'}<p>\n";
+	print &ui_form_start("reset_features.cgi", "post");
+	print &ui_table_start($text{'newvalidate_header4'}, undef, 2);
+
+	# Domain to reset
+	print &ui_table_row($text{'newvalidate_resetdom'},
+		&one_server_input("server", undef, \@doms));
+
+	# Features to reset
+	my @rfopts;
+	foreach my $f (@fopts) {
+		if (&indexof($f->[0], @list_feature_plugins) >= 0) {
+			$can = &plugin_defined($f->[0], "feature_can_reset") ?
+				&plugin_call($f->[0], "feature_can_reset") : 1;
+			}
+		else {
+			my $crfunc = "can_reset_".$f->[0];
+			$can = defined(&$crfunc) ? &$crfunc() : 1;
+			}
+		push(@rfopts, $f) if ($can);
+		}
+	print &ui_table_row($text{'newvalidate_resetfeats'},
+			    &ui_select("features", undef,
+				       \@rfopts, 10, 1));
+
+	# Skip warnings about data loss?
+	print &ui_table_row($text{'newvalidate_resetskip'},
+		&ui_yesno_radio("skipwarnings", 0));
+
+	print &ui_table_row($text{'newvalidate_resetonoff'},
+		&ui_yesno_radio("fullreset", 0));
+
+	print &ui_table_end();
+	print &ui_form_end([ [ undef, $text{'newvalidate_reset'} ] ]);
+
+	print &ui_tabs_end_tab('mode', 'reset');
 	}
 
 print &ui_tabs_end(1);

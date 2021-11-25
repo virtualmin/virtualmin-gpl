@@ -685,7 +685,6 @@ scripts_optmod=Moduł PHP $1 jest rekomendowany ..
 scripts_noini=.. nie można znaleźć globalnego pliku php.ini
 scripts_noini2=.. nie można znaleźć pliku php.ini dla domeny
 scripts_softwaremod=Instalacja pakietu $1 ..
-scripts_addext=Włączanie modułu w konfiguracji PHP ..
 scripts_needpear=Instalacja modułu PHP Pear $1 ..
 scripts_eclash=Inny skrypt jest już zainstalowany w $1.
 scripts_status=Stan
@@ -1010,7 +1009,6 @@ upgrade_themeok=.. szablon <i>$1</i> został poprawnie zainstalowany
 upgrade_modfailed=.. instalacja nie powiodła się : $1
 upgrade_schedok=.. gotowe. Aktualizacje zostaną automatycznie zainstalowane.
 upgrade_theme=Włączanie szablonu <i>$1</i> ..
-
 upgrade_rpms=Aktualizacja pakietów RPM Virtualmin : $1
 
 maillog_ecannot=Nie masz uprawnień do wyszukiwania e-maila na tej domenie

@@ -501,6 +501,7 @@ setup_virtdone2=.. přidružené rozhraní $1
 setup_virtnotdone=.. nemohl najít žádné rozhraní s IP $1 !
 setup_virt6=Přidání adresy IPv6 $1 ..
 setup_virt6done=.. přidáno do rozhraní $1 
+setup_failed=.. nezdařilo se
 setup_notrun=.. nefunguje!
 setup_quota=Nastavení kvóty uživatele ..
 setup_webalizer=Nastavení plánovaných přehledů Webalizer ..
@@ -525,6 +526,7 @@ setup_evaddaliasdomain=.. vaddaliasdomain selhala : $1
 setup_fwding=Přidání aliasu pro přeposílání všech e-mailů na $1 ..
 setup_styleing=Použití počátečního stylu webových stránek ..
 setup_contenting=Vytváření úvodní indexové stránky webu.
+setup_econtenting=.. nepodařilo se vytvořit počáteční obsah : $1
 setup_sshkey1=Generování soukromých a veřejných klíčů SSH ..
 setup_sshkey2=Autorizace veřejného klíče SSH ..
 setup_esshkeydir=Virtuální server potřebuje adresář a uživatele Unixu
@@ -584,6 +586,9 @@ setup_dnscloudclash=Zóna DNS již existuje u poskytovatele cloudu $1
 setup_mail_smtpcloud=Konfigurace poskytovatele cloudové pošty $1 ..
 setup_mail_nosmtpcloud=.. poskytovatel neexistuje!
 setup_mail_esmtpcloud=.. nezdařilo se : $1
+setup_overquota=Vytvoření virtuálního serveru se nezdařilo z důvodu nedostatku kvóty : $1
+setup_overgroupquota=Byla dosažena kvóta serveru pro $2 z $1
+setup_overuserquota=Byla dosažena kvóta vlastníka domény pro $2 z $1
 
 equotacommand=Příkaz kvóty $1 selhal : $2 
 
@@ -1079,6 +1084,12 @@ save_euserquota=Disková kvóta správce serveru by neměla být snížena na $2
 save_aliasusers=Zakázanou funkci používají následující aliasové servery : $1 
 save_erquota=Kvóta disku pro tento virtuální server nemůže být nastavena na neomezenou, protože je ve vlastnictví distributora $1, který má limit kvóty
 save_erbw=Limit šířky pásma pro tento virtuální server nelze nastavit na neomezený, protože je ve vlastnictví distributora $1, který má limit šířky pásma
+save_installed_scripts_dbuser=Aktualizace uživatelského jména databáze pro nainstalované skripty ..
+save_installed_scripts_dbpass=Aktualizace hesla databáze pro nainstalované skripty ..
+save_installed_scripts_db=Aktualizace názvu databáze pro nainstalované skripty ..
+save_installed_scripts_err_file=.. nezdařilo se: nelze přečíst soubor <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. nezdařilo se: v souboru <tt>$1</tt> nelze najít řetězce, které je třeba nahradit
+save_installed_scripts_done=.. hotovo pro soubor <tt>$1</tt>
 
 luser_err=Uložení místního uživatele se nezdařilo
 luser_etaken=Uživatel se stejným názvem již existuje
@@ -1430,6 +1441,7 @@ check_fcgiwrapok=Skripty CGI lze spouštět pomocí příkazu fcgiwrap.
 check_webphpvers=K dispozici jsou následující verze PHP : $1 
 check_webphpnovers=V tomto systému nebyly nalezeny žádné verze PHP!
 check_webphpmodes=K dispozici jsou následující režimy provádění PHP : $1 
+check_ewebphpmodes=Nejsou k dispozici žádné režimy provádění PHP!
 check_webphpversinis=Verze PHP se od poslední kontroly změnily na $1. Regenerace chybějících souborů php.ini.
 check_webphpfpm=V tomto systému je k dispozici podpora PHP-FPM verze $1.
 check_webphpnofpm=Podpora PHP-FPM nebyla detekována : $1 
@@ -1532,11 +1544,14 @@ check_ehomeformat=Formát domovského adresáře $1 neobsahuje uživatelské jm�
 check_ehomestyle=Styl domovského adresáře je nastaven na "Pouze základní adresář", což je u Virtualmin nepoužitelné. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit.
 check_jailkitok=Chroot vězení jsou k dispozici v tomto systému
 check_jailkiterr=Chrootské vězení není k dispozici : $1 
-check_yumrepomissing=Konfigurační soubor úložiště Virtualmin APT $1 neodkazuje na software.virtualmin.com!
+check_eyumrepofile=Konfigurační soubor $1 úložiště Virtualmin neexistuje!
+check_yumrepook=Úložiště Virtualmin je správně nakonfigurováno
+check_yumrepowrong=Konfigurační soubor $1 úložiště Virtualmin obsahuje nesprávné sériové číslo licenčního klíče!
+check_yumrepomissing=Konfigurační soubor $1 úložiště Virtualmin neodkazuje na software.virtualmin.com!
 check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
 check_aptrepowrong=Konfigurační soubor úložiště APT $1 obsahuje nesprávné sériové číslo licenčního klíče!
-check_aptrepomissing=Konfigurační soubor úložiště $1 neodkazuje na software.virtualmin.com!
+check_aptrepomissing=Konfigurační soubor $1 úložiště Virtualmin APT neodkazuje na software.virtualmin.com!
 
 checkmap_enone=V <a href='$1'>konfiguraci Postfixu nebyly nalezeny žádné zdroje map</a>
 checkmap_esupport=Zdroj mapy <tt>$1</tt> není podporován Postfixem - možná budete muset pro něj nainstalovat Postfix knihovny nebo znovu kompilovat
@@ -1829,9 +1844,11 @@ backup_es3path2=Kbelík a cesta S3 nemohou začínat ani končit lomítkem
 backup_emkdir=Nepodařilo se vytvořit adresář $1 : $2 
 backup_ebucket2=Lomítka nelze použít v názvech kbelíků S3
 backup_einconly=Inkrementální plánovanou zálohu nelze vytvořit, pokud nemáte nakonfigurovanou alespoň jednu úplnou zálohu
+backup_donepurge=Zálohování je dokončeno, ale odstranění se nezdařilo. Konečná velikost byla $1.
 backup_partial=Zálohování je částečně dokončeno. Konečná velikost byla $1.
 backup_partial2=Virtuální servery, které selhaly :
 backup_donesubject=Dokončena záloha Virtualmin na $1 až $2 
+backup_purgesubject=Dokončeno zálohování Virtualmin na $1 až $2, ale odstranění se nezdařilo
 backup_partialsubject=Částečně dokončená záloha Virtualmin na $1 až $2 
 backup_failedsubject=Nepodařilo se zálohovat Virtualmin na $1 až $2 
 backup_upload6=Nahrávání archivu do cloudových služeb společnosti Rackspace.
@@ -1874,7 +1891,7 @@ backup_edests=Nebyly zadány žádné zálohy!
 backup_edownloadmany=Když se stahuje záloha, musí to být jediný cíl
 backup_eownergone=Doména vlastníka již neexistuje!
 backup_ekey2=Vybraný záložní klíč nemáte povoleno
-backup_purging2=Odstraňování záloh ze $2 starších než $1 dní ..
+backup_purging3=Mazání záloh z $2 odpovídajících $3 starších než $1 dnů ..
 backup_purgedtime=.. našel zálohy $1, ale žádná nebyla dostatečně stará
 backup_purgeegcbuckets=.. nepodařilo se zobrazit seznam segmentů Google : $1 
 backup_purgeefiles=.. se nepodařilo vypsat soubory S3 : $1 
@@ -3075,6 +3092,7 @@ licence_goterr2=.. neplatné datum vypršení platnosti : $1
 licence_ecannot=Není dovoleno znovu zkontrolovat licenci Virtualmin
 licence_maxdoms=Váš systém je licencován pouze pro servery $1, ale máte $2.
 licence_maxservers2=Vaše sériové číslo $3 je licencováno pouze pro server $1, ale používá se na $2.
+licence_maxwarn=Pokud nebude toto sériové číslo dočasně použito k migraci na nový server, musíte si zakoupit další licenci na adrese <a target=_blank href='$1'>$2</a>, abyste vyloučili porušení pravidel služby a vyhnuli se předčasné ukončení stávající licence.
 licence_ipchanged=Zdá se, že primární IP adresa vašeho systému se změnila z $1 na $2. Virtuální servery používající starou adresu mohou být nedostupné nebo zobrazovat nesprávný webový obsah.
 licence_changeip=Aktualizujte nesprávné adresy IP
 licence_smallcert=Váš systém používá certifikát SSL, který je dlouhý pouze $1 bitů, což je menší než doporučená velikost 2048 bitů. Tento certifikát byl vydán doménou $4 až $3 pro doménu $2.
@@ -3199,7 +3217,6 @@ scripts_phpmodfailed=.. nepodařilo se nainstalovat modul z $1 možných balíč
 scripts_esoftware=.. modul Webmin Software Packages Webmin není nainstalován!
 scripts_eupdate=.. automatická instalace modulu není ve vašem systému k dispozici.
 scripts_einstallmod=Modul není k dispozici ani po instalaci!
-scripts_addext=Povolení modulu v konfiguraci PHP.
 scripts_gotmod=.. PHP modul $1 je nyní k dispozici.
 scripts_nopearmod=Moduly PHP Pearl $1 jsou povinné, ale modul Pearl Webmin pro jejich instalaci není k dispozici - přesto pokračuje.
 scripts_nopearcmd=Jsou vyžadovány moduly PHP Pearl $1, ale Pear for PHP verze $2 není nainstalována - přesto pokračuje.
@@ -3249,6 +3266,7 @@ scripts_proxyfailed=.. nastavení proxy se nezdařilo : $1
 scripts_epartial=.. instalace byla dokončena pouze částečně.
 scripts_icommand=Chybí příkaz $1 
 scripts_idbneed=Je potřeba databáze $1 
+scripts_idbneed_link=, kterou lze povolit na stránce <a href='$1'>$2</a>
 scripts_idbneedor=$1 nebo $2 
 scripts_gemver=Aktualizace Ruby Gems na nejnovější verzi od $1 ..
 scripts_gemverfailed=.. Aktualizace drahokamů selhala : $1 
@@ -3278,6 +3296,18 @@ scripts_discontinued=Přerušeno
 scripts_can=K dispozici v
 scripts_gpl_to_pro=Nyní k dispozici pouze v Pro
 scripts_gpl_to_pro_upgrade=Upgrade pro tento skript je nyní k dispozici pouze v Pro
+
+scripts_gpl_pro_tip=Pro funkce
+scripts_gpl_pro_tip_hide=Díky za upozornění
+scripts_gpl_pro_tip_hide2=Děkuji, budu o tom přemýšlet
+scripts_gpl_pro_tip_and=a
+scripts_gpl_pro_tip_enroll=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje a odemknutí této a mnoha dalších skvělých funkcí.
+scripts_gpl_pro_tip_list_scripts=K dispozici je více instalačních skriptů!
+scripts_gpl_pro_tip_enroll_list_scripts=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a>, abyste podpořili vývoj a odemkli všechny níže uvedené instalační skripty.
+scripts_gpl_pro_tip_clouds=K dispozici je také podpora pro $1 poskytovatelů!
+scripts_gpl_pro_tip_title_dashboard=Získejte Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Zvažte prosím zakoupení licence <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoje oblíbeného ovládacího panelu webhostingu a odemknutí mnoha skvělých funkcí.
+scripts_gpl_pro_tip_dashboard=Věděli jste, že Virtualmin Pro přináší spoustu skvělých funkcí, které nejsou součástí verze GPL?
 
 newnotify_title=Majitelé e-mailových serverů
 newnotify_desc=Tuto stránku lze použít k zasílání e-mailů majitelům vybraných virtuálních serverů, například k oznámení výpadků systému, upgradů nebo jiných změn služeb. V těle a předmětu zprávy mohou být použity následující rozvodny:
@@ -4350,13 +4380,13 @@ upgrade_complete=Váš systém byl úspěšně upgradován na Virtualmin Pro!
 upgrade_theme=Povolení motivu <i>$1</i> ..
 upgrade_esharedroot=Váš kořenový adresář Webmin $1 je sdílen mezi několika systémy - aktualizace modulu nejsou povoleny
 upgrade_eyumrepo=Virtualmin byl nainstalován z RPM, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
-
+upgrade_eyumlist=Balíček $1 RPM nebyl v seznamu dostupných balíčků z úložiště nalezen. Možná jeden z vašich aktuálních úložišť nefunguje?
 upgrade_edebrepo=Virtualmin byl nainstalován z balíčku Debian, ale nepoužívá úložiště Virtualmin GPL. Aktualizace není v tuto chvíli možná.
 upgrade_rpms=Upgradování balíčků Virtualmin RPM : $1 
 upgrade_eyumfile=V $1 nebyl nalezen žádný úložiště Virtualmin GPL
 upgrade_update=Aktualizace dostupných balíčků z APT ..
 upgrade_debs=Upgradování balíčků Virtualmin Debian : $1 
-
+upgrade_yumclear=Vymazání mezipaměti úložiště ..
 upgrade_etypematch=Upgradování není možné, protože typ instalace Virtualmin je <tt>$1</tt>, ale Webmin's je <tt>$2</tt>
 
 maillog_desc=Tento formulář lze použít k vyhledání zpráv v poštovních protokolech, které odpovídají určitým podmínkám, a zjistit, co se s nimi stalo. Všechna pole jsou volitelná a pokud budou ponechána prázdná, budou pro účely srovnání přeskočena.
@@ -5244,6 +5274,11 @@ smtpcloud_header=Možnosti poskytovatele doručování pošty
 smtpcloud_provider=Jméno poskytovatele doručování pošty
 smtpcloud_url=Web poskytovatele doručování pošty
 smtpcloud_eaws_dns=Amazon SES potřebuje k ověření nových domén povolení zóny DNS
+smtpcloud_epostfix=Amazon SES nelze konfigurovat, pokud není nainstalován Postfix
+smtpcloud_esmtpuser=Nepodařilo se převést tajný klíč SES na heslo SMTP
+smtpcloud_egetver=Nepodařilo se získat stav ověření Amazon SES : $1
+smtpcloud_evaltok=Ověření Amazon SES není úplné. Musíte vytvořit záznam DNS TXT s názvem $2 s hodnotou $1.
+smtpcloud_evaltok2=Ověření Amazon SES nevrátilo žádné informace pro tuto doménu!
 
 provision_title=Klient služeb Cloudmin
 provision_ecannot=Není dovoleno nastavovat klienta služeb Cloudmin

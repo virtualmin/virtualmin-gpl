@@ -436,20 +436,19 @@ foreach my $p (@ports) {
 			# Add a new FilesMatch block with the socket
 			$files = { 'name' => 'FilesMatch',
 			           'type' => 1,
-				   'value' => '\.php$',
-				   'members' => [
-					{ 'name' => 'SetHandler',
-					  'value' => $wanth,
-					},
-				   ],
-				 };
+			           'value' => '\.php$',
+			           'words' => ['\.php$'],
+			           'members' => [
+			             { 'name' => 'SetHandler',
+			               'value' => $wanth,
+			             },
+			           ],
+			         };
 			&apache::save_directive_struct(
 				undef, $files, $vconf, $conf);
 			}
-		elsif (!&apache::find_directive("SetHandler",
-						$files->{'members'})) {
+		else {
 			# Add the SetHandler directive to the FilesMatch block
-			# if missing
 			&apache::save_directive("SetHandler", [$wanth],
 						$files->{'members'}, $conf);
 			}
@@ -1028,6 +1027,7 @@ if (!$php_command_for_version_cache{$v,$cgimode}) {
 		push(@opts, "/opt/csw/php$v/bin/php-cgi");
 		}
 	push(@opts, "php$v-cgi", "php-cgi$v", "php$v");
+	$v =~ s/^(\d+\.\d+)\.\d+$/$1/;
 	my $nodotv = $v;
 	$nodotv =~ s/\.//;
 	if ($nodotv ne $v) {
@@ -1194,19 +1194,17 @@ elsif (!$p) {
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
-local $pfound = 0;
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
 	# Since it will be on the same port, no Apache changes are needed.
 	my $phd = &public_html_dir($d);
-	$dir eq $phd || return "Public HTML directory not found";
+	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&create_php_fpm_pool($d);
-		$pfound++;
 		}
 	}
 else {
@@ -1219,7 +1217,6 @@ else {
 		local $conf = &apache::get_config();
 		local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
-		$pfound++;
 
 		# Check for an existing <Directory> block
 		local @dirs = &apache::find_directive_struct("Directory", $vconf);
@@ -1325,7 +1322,6 @@ if (!$noini) {
 	}
 
 &register_post_action(\&restart_apache);
-$pfound || return "Apache virtual host was not found";
 return undef;
 }
 
@@ -1825,7 +1821,8 @@ return ( ) if (!&foreign_installed("software"));
 return ( ) if (!defined(&software::package_info));
 my @rv;
 my %donever;
-foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
+foreach my $pname ("php-fpm",
+		   (map { "php${_}-fpm" } @all_possible_short_php_versions),
 		   (map { my $v = $_; $v =~ s/\.//g;
 			  ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
 			   "rh-php${v}-php-fpm", "php${_}-fpm",
@@ -1907,7 +1904,9 @@ foreach my $pname ("php-fpm", "php5-fpm", "php7-fpm",
 		# Init script for any version as a fallback
 		my @nodot = map { my $u = $_; $u =~ s/\.//g; $u }
 				@all_possible_php_versions;
-		foreach my $init ("php-fpm", "php5-fpm", "php7-fpm",
+		foreach my $init ("php-fpm",
+				  (map { "php${_}-fpm" }
+				       @all_possible_short_php_versions),
 				  (map { "php${_}-fpm" }
 				       @all_possible_php_versions),
 				  (map { "rh-php${_}-php-fpm" } @nodot),

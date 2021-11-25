@@ -49,6 +49,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -79,6 +82,9 @@ $sfunc = "set_${type}_pass";
 &$sfunc($d, $pass);
 $mfunc = "modify_${type}";
 &$mfunc($d, $oldd);
+
+# Update installed scripts credentials only if password is updated
+update_all_installed_scripts_database_credentials($d, 'dbpass', $pass);
 
 # Update Webmin user, so that it logs in correctly
 &modify_webmin($d, $oldd);

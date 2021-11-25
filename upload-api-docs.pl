@@ -15,6 +15,9 @@ while(@ARGV) {
 	if ($a eq "--no-upload") {
 		$noupload = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

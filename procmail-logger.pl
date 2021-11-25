@@ -15,7 +15,7 @@ while(<STDIN>) {
 		}
 	last if ($from && $to);
 	}
-while(read(STDIN, $buf, 1024) > 0) {
+while(read(STDIN, $buf, &get_buffer_size()) > 0) {
 	# Eat up input
 	$size += length($buf);
 	}

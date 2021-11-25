@@ -60,6 +60,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--id-only") {
 		$idonly = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

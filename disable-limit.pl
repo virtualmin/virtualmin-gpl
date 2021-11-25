@@ -66,6 +66,9 @@ while(@ARGV > 0) {
 	       &indexof($1, @edit_limits) >= 0) {
 		$edit{$1}++;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

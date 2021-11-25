@@ -57,7 +57,9 @@ setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du m�
 setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
 setup_usermindown=.. kjører foreløpig ikke
+setup_failed=.. mislyktes
 setup_logrotatealready=.. allerede aktivert for loggfil $1 
+setup_econtenting=.. klarte ikke å lage innledende innhold : $1
 setup_sshkey1=Genererer SSH private og offentlige nøkler ..
 setup_sshkey2=Autoriserer SSH offentlig nøkkel ..
 setup_esshkeydir=Virtuell server trenger en katalog og Unix-bruker
@@ -78,6 +80,9 @@ setup_dnscloudclash=DNS-sone eksisterer allerede hos skyleverandør $1
 setup_mail_smtpcloud=Konfigurerer leverandør av sky -e -post $1 ..
 setup_mail_nosmtpcloud=.. leverandør eksisterer ikke!
 setup_mail_esmtpcloud=.. mislyktes : $1
+setup_overquota=Virtuell serveropprettelse mislyktes på grunn av mangel på kvote : $1
+setup_overgroupquota=Serverkvoten for $2 av $1 er nådd
+setup_overuserquota=Domeneeierkvoten for $2 av $1 er nådd
 
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_mailclient=Vis innstillinger for e-postklient
@@ -132,6 +137,12 @@ delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
 save_statussslcert=Endrer e-post i SSL-sertifikatstatusovervåker ..
+save_installed_scripts_dbuser=Oppdaterer database brukernavn for installerte skript ..
+save_installed_scripts_dbpass=Oppdaterer databasepassord for installerte skript ..
+save_installed_scripts_db=Oppdaterer databasenavn for installerte skript ..
+save_installed_scripts_err_file=.. mislyktes: kan ikke lese <tt>$1</tt> filen
+save_installed_scripts_err_file_lines=.. mislyktes: kunne ikke finne strenger som skal erstattes i filen <tt>$1</tt>
+save_installed_scripts_done=.. gjort for <tt>$1</tt> fil
 
 acl_migrate=Kan migrere sikkerhetskopier?
 
@@ -158,6 +169,7 @@ check_suexecok2=CGI -skript kan kjøres ved hjelp av SuExec eller fcgiwrap.
 check_suexecok=CGI -skript kan kjøres med SuExec.
 check_fcgiwrapok=CGI -skript kan kjøres ved hjelp av fcgiwrap.
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 
+check_ewebphpmodes=Ingen PHP-utførelsesmoduser er tilgjengelige!
 check_webphpversinis=PHP-versjoner har endret seg til $1 siden sist sjekk. Regenererer eventuelle manglende php.ini-filer.
 check_webphpfpm=PHP-FPM versjon $1 -støtte er tilgjengelig på dette systemet.
 check_webphpnofpm=PHP-FPM-støtte ble ikke oppdaget : $1 
@@ -177,11 +189,14 @@ check_eresolvlist=liste over DNS-servere
 check_dnsmissing=Systemet ser ikke ut til å ha noen DNS-servere konfigurert. Standard oppførselen til å bruke en lokal DNS-server bør imidlertid fortsatt fungere.
 check_jailkitok=Chroot-fengsler er tilgjengelige på dette systemet
 check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1 
-check_yumrepomissing=Konfigurasjonsfilen $1 for Virtualmin APT refererer ikke til software.virtualmin.com!
+check_eyumrepofile=Konfigurasjonsfilen til Virtualmin -depotet $1 finnes ikke!
+check_yumrepook=Virtualmin -depotet er konfigurert riktig
+check_yumrepowrong=Konfigurasjonsfilen til Virtualmin -depotet $1 inneholder feil serienummer på lisensnøkkelen!
+check_yumrepomissing=Konfigurasjonsfilen til Virtualmin -depotet $1 refererer ikke til software.virtualmin.com!
 check_eaptrepofile=APT-repository konfigurasjonsfilen $1 eksisterer ikke!
 check_aptrepook=Virtualmin APT-repository er riktig konfigurert
 check_aptrepowrong=APT-arkivets konfigurasjonsfil $1 inneholder feil serienummer på lisensnøkkelen!
-check_aptrepomissing=Arkivets konfigurasjonsfil $1 refererer ikke til software.virtualmin.com!
+check_aptrepomissing=Konfigurasjonsfilen Virtualmin APT -depot $1 refererer ikke til software.virtualmin.com!
 
 check_eqmailldap=Qmail+LDAP-støtte er fjernet i Virtualmin 6.00
 
@@ -247,6 +262,8 @@ backup_edbpath2=Dropbox-banen kan ikke starte eller avslutte med en skråstrek
 backup_ebbpath=Mangler Backblaze-bane
 backup_ebbpath2=Backblaze-banen kan ikke starte eller ende med en skråstrek
 backup_einconly=Det kan ikke opprettes en trinnvis planlagt sikkerhetskopi med mindre du har konfigurert minst en full sikkerhetskopi
+backup_donepurge=Sikkerhetskopieringen er fullført, men slettingen mislyktes. Endelig størrelse var $1.
+backup_purgesubject=Fullført sikkerhetskopiering av Virtualmin på $1 til $2, men sletting mislyktes
 backup_upload7=Laster opp arkiv til Google Cloud Storage ..
 backup_upload8=Laster opp arkiv til Dropbox ..
 backup_upload9=Laster opp arkiv til Webmin-server $1 ..
@@ -259,6 +276,7 @@ backup_efeatureeval=.. sikkerhetskopi av $1 mislyktes : $2
 backup_ekilllock=En sikkerhetskopi til samme destinasjon med PID $1 er avsluttet
 backup_edesturl=Sikkerhetskopiedestinasjon $1 er ugyldig : $2 
 backup_eownergone=Eierdomenet eksisterer ikke lenger!
+backup_purging3=Sletter sikkerhetskopier fra $2 som matcher $3 eldre enn $1 dager ..
 backup_purgedtime=.. fant $1 sikkerhetskopier, men ingen var gamle nok
 backup_purgeegcbuckets=.. kunne ikke registrere Google-bøtter : $1 
 backup_purgeefiles3=.. kunne ikke registrere Google Cloud Storage-filer : $1 
@@ -455,6 +473,7 @@ licence_ok2=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domene
 licence_ok3=.. lisensen er <i>gyldig</i>. Den er gyldig for $1 Virtualmin-domener, og for bruk på $2 -systemer til $3.
 licence_goterr2=.. ugyldig utløpsdato : $1 
 licence_maxservers2=Serienummeret ditt $3 er lisensiert for bare $1 server, men brukes på $2.
+licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere til en ny server, må du kjøpe en tilleggslisens på <a target=_blank href='$1'>$2</a> for å forhindre brudd på tjenestereglene og unngå tidlig avslutning av eksisterende lisens.
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 
@@ -468,6 +487,7 @@ scripts_phpmodinst=Installere modul fra programvarepakker ..
 scripts_phpmoddone=.. installert modul fra pakke $1
 scripts_phpmodfailed=.. klarte ikke å installere modulen fra $1 mulige pakker
 scripts_passmode4=Opprinnelig passord for skript
+scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren
 scripts_iphpfullver=PHP-versjon $1 eller nyere kreves, men denne virtuelle serveren bruker versjon $2 
@@ -478,6 +498,18 @@ scripts_discontinued=Utgått
 scripts_can=Tilgjengelig i
 scripts_gpl_to_pro=Nå bare tilgjengelig i Pro
 scripts_gpl_to_pro_upgrade=Oppgradering for dette skriptet er nå bare tilgjengelig i Pro
+
+scripts_gpl_pro_tip=Pro -funksjon
+scripts_gpl_pro_tip_hide=Takk for advarselen
+scripts_gpl_pro_tip_hide2=Takk, jeg skal tenke på det
+scripts_gpl_pro_tip_and=og
+scripts_gpl_pro_tip_enroll=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen og låse opp denne og mange andre kule funksjoner.
+scripts_gpl_pro_tip_list_scripts=Det er flere installasjonsskript tilgjengelig!
+scripts_gpl_pro_tip_enroll_list_scripts=Vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a> lisens for å støtte utviklingen og låse opp alle installasjonsskript som er oppført nedenfor.
+scripts_gpl_pro_tip_clouds=Støtte for $1-leverandører er også tilgjengelig!
+scripts_gpl_pro_tip_title_dashboard=Skaff deg Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen av webhotellets kontrollpanel du elsker og låse opp mange kule funksjoner.
+scripts_gpl_pro_tip_dashboard=Visste du at Virtualmin Pro har mange flotte funksjoner som ikke er inkludert i GPL -versjonen?
 
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python
@@ -632,6 +664,8 @@ dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
 
 upgrade_epackages=Fant ingen pakker å installere!
+upgrade_eyumlist=$1 RPM -pakken ble ikke funnet i listen over tilgjengelige pakker fra depotet. Kanskje en av de nåværende depotene dine ikke fungerer?
+upgrade_yumclear=Rydder lagringsbuffer ..
 
 exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.
@@ -763,6 +797,11 @@ smtpcloud_header=Alternativer for levering av e -post
 smtpcloud_provider=Leverandørens navn på e -post
 smtpcloud_url=Leverandørens nettsted for e -post
 smtpcloud_eaws_dns=Amazon SES trenger en DNS -sone for å kunne aktivere nye domener
+smtpcloud_epostfix=Amazon SES kan ikke konfigureres med mindre Postfix er installert
+smtpcloud_esmtpuser=Kunne ikke konvertere SES hemmelige nøkkel til SMTP -passord
+smtpcloud_egetver=Kunne ikke få Amazon SES -bekreftelsesstatus : $1
+smtpcloud_evaltok=Amazon SES -verifisering er ikke fullført. Du må opprette en DNS TXT -post med navnet $2 med verdien $1.
+smtpcloud_evaltok2=Amazon SES -verifisering returnerte ingen informasjon for dette domenet!
 
 provision_nolimit=ubegrenset
 

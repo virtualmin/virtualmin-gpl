@@ -63,7 +63,7 @@ if (!$field || $field eq 'db') {
 # Check for user clash
 if (!$d->{'parent'} && (!$field || $field eq 'user')) {
 	foreach my $od (@doms) {
-		if (&mysql_user($d) eq &mysql_user($od)) {
+		if (!$od->{'parent'} && &mysql_user($d) eq &mysql_user($od)) {
 			return &text('setup_emysqluserdom', &mysql_user($d),
 					&show_domain_name($od));
 			}
@@ -1862,7 +1862,7 @@ sub modify_mysql_database_user
 local ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
 &require_mysql();
 local $myuser = &mysql_username($user);
-	local $myolduser = &mysql_username($olduser);
+local $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
 	# Update on provisioning server
 	my $mymod = &get_domain_mysql_module($d);
@@ -3577,6 +3577,22 @@ foreach my $sd (@doms) {
 	&save_domain($sd);
 	}
 return 1;
+}
+
+# check_reset_mysql(&domain)
+# Returns an error message if the reset would delete any domains
+sub check_reset_mysql
+{
+my ($d) = @_;
+return undef if ($d->{'alias'});
+my @dbs = &domain_databases($d, ["mysql"]);
+return undef if (!@dbs);
+if (@dbs == 1 && $dbs[0]->{'name'} eq $d->{'db'}) {
+	# There is just one default database .. but is it empty?
+	my @tables = &list_dom_mysql_tables($d, $dbs[0]->{'name'}, 0, 1);
+	return undef if (!@tables);
+	}
+return &text('reset_emysql', join(" ", map { $_->{'name'} } @dbs));
 }
 
 $done_feature_script{'mysql'} = 1;

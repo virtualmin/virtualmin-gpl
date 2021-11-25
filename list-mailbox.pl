@@ -52,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--folder") {
 		$folderid = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

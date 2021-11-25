@@ -27,6 +27,9 @@ while(@ARGV) {
 	elsif ($a !~ /^\-/) {
 		push(@scripts, $a);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

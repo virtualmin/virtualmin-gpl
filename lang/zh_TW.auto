@@ -221,6 +221,7 @@ setup_virtmissing=..父接口 $1不存在！
 setup_virtnotdone=..找不到IP $1的任何接口！
 setup_virt6=正在添加IPv6地址 $1 ..
 setup_virt6done=..添加到接口 $1
+setup_failed=.. 失敗的
 setup_clashlogrotate=..日誌文件 $1已被旋轉
 setup_logrotatealready=..已為日誌文件 $1啟用
 setup_eforceunder2=僅允許您在 $1下創建域，或者您擁有的任何其他域
@@ -229,6 +230,7 @@ setup_edenieddomain=不允許使用指定的域名
 setup_edomainprefix=域名的開頭不必為 $1
 setup_evaddaliasdomain=.. vaddaliasdomain失敗： $1
 setup_contenting=創建初始網站索引頁 ..
+setup_econtenting=.. 未能創建初始內容：$1
 setup_sshkey1=生成SSH私鑰和公鑰 ..
 setup_sshkey2=授權SSH公鑰 ..
 setup_esshkeydir=虛擬服務器需要目錄和Unix用戶
@@ -258,6 +260,9 @@ setup_dnscloudclash=DNS區域已存在於雲提供程序 $1上
 setup_mail_smtpcloud=正在配置雲郵件提供程序 $1 ..
 setup_mail_nosmtpcloud=.. 提供者不存在！
 setup_mail_esmtpcloud=.. 失敗：$1
+setup_overquota=由於缺少配額，虛擬服務器創建失敗 : $1
+setup_overgroupquota=已達到 $1 中 $2 的服務器配額
+setup_overuserquota=已達到 $1 中 $2 的域所有者配額
 
 users_indom=域 $2中的 $1個用戶
 
@@ -485,6 +490,12 @@ save_euserquota=服務器管理員的磁盤配額不應降低到 $2，因為當�
 save_aliasusers=以下別名服務器正在使用禁用的功能： $1
 save_erquota=無法將此虛擬服務器的磁盤配額設置為無限，因為它由具有配額限制的經銷商 $1擁有
 save_erbw=無法將此虛擬服務器的帶寬限制設置為無限制，因為該虛擬服務器由具有帶寬限制的經銷商 $1擁有
+save_installed_scripts_dbuser=更新已安裝腳本的數據庫用戶名 ..
+save_installed_scripts_dbpass=更新已安裝腳本的數據庫密碼 ..
+save_installed_scripts_db=更新已安裝腳本的數據庫名稱 ..
+save_installed_scripts_err_file=.. 失敗：無法讀取 <tt>$1</tt> 文件
+save_installed_scripts_err_file_lines=.. 失敗：在 <tt>$1</tt> 文件中找不到要替換的字符串
+save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
 
 acl_migrate=可以遷移備份嗎？
 
@@ -568,6 +579,7 @@ check_fcgiwrapok=可以使用 fcgiwrap 執行 CGI 腳本。
 check_webphpvers=提供以下PHP版本： $1
 check_webphpnovers=在該系統上找不到PHP版本！
 check_webphpmodes=可以使用以下PHP執行模式： $1
+check_ewebphpmodes=沒有可用的 PHP 執行模式！
 check_webphpversinis=自上次檢查以來，PHP版本已更改為 $1。重新生成所有丟失的php.ini文件。
 check_webphpfpm=此系統上提供了PHP-FPM版本 $1支持。
 check_webphpnofpm=未檢測到PHP-FPM支持： $1
@@ -648,11 +660,14 @@ check_ehomeformat=主目錄格式 $1不包含用戶名或域名。可以在<a hr
 check_ehomestyle=主目錄樣式設置為“ Just base directory”，這在Virtualmin中無法使用。可以在<a href='$2'>“用戶和組”模塊配置</a>頁上對此進行更正。
 check_jailkitok=Chroot監獄在此系統上可用
 check_jailkiterr=Chroot監獄不可用： $1
-check_yumrepomissing=Virtualmin APT存儲庫配置文件 $1不引用software.virtualmin.com！
+check_eyumrepofile=Virtualmin 存儲庫配置文件 $1 不存在！
+check_yumrepook=Virtualmin 存儲庫配置正確
+check_yumrepowrong=Virtualmin 存儲庫配置文件 $1 包含錯誤的許可證密鑰序列號！
+check_yumrepomissing=Virtualmin 存儲庫配置文件 $1 未引用 software.virtualmin.com！
 check_eaptrepofile=APT存儲庫配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存儲庫配置正確
 check_aptrepowrong=APT存儲庫配置文件 $1包含錯誤的許可證密鑰序列號！
-check_aptrepomissing=存儲庫配置文件 $1不引用software.virtualmin.com！
+check_aptrepomissing=Virtualmin APT 存儲庫配置文件 $1 未引用 software.virtualmin.com！
 
 checkmap_enone=在<a href='$1'>Postfix配置</a>中未找到地圖源。
 checkmap_esupport=Postfix不支持地圖源<tt>$1</tt>-您可能需要為其安裝Postfix庫或重新編譯
@@ -884,10 +899,12 @@ backup_epass2=SSH服務器密碼中的無效字符-不能使用@
 backup_ebucket2=在S3存儲桶名稱中不能使用斜杠
 backup_esfile=S3文件名中的字符無效
 backup_einconly=除非您配置了至少一個完整備份，否則無法創建增量計劃備份
+backup_donepurge=備份已完成，但刪除失敗。最終大小為 $1。
 backup_partial=備份部分完成。最終大小為 $1。
 backup_partial2=發生故障的虛擬服務器：
 backup_time=備份總時間為 $1。
 backup_donesubject=已完成將 $1上的Virtualmin備份到 $2
+backup_purgesubject=已完成將 $1 上的 Virtualmin 備份到 $2，但刪除失敗
 backup_partialsubject=將 $1上的Virtualmin部分備份到 $2
 backup_failedsubject=無法將 $1上的Virtualmin備份到 $2
 backup_upload6=將檔案上傳到Rackspace的Cloud Files服務 ..
@@ -943,7 +960,7 @@ backup_epurge=缺少或天數後刪除舊備份的天數
 backup_epurgetime=僅當使用基於日期的目標並啟用<b>strftime替換</b>時，才支持刪除舊備份
 backup_epurgepath=無法啟用舊備份的刪除，因為無法從目標路徑提取基本目錄。它必須是<tt>/backup/virtualmin-％d-％m-％Y</tt>之類的路徑，並且不能是頂級目錄
 backup_ekey2=您不允許使用所選的備份密鑰
-backup_purging2=正在從 $2天前刪除備份 $2 ..
+backup_purging3=正在從與 $3 匹配的 $2 中刪除早於 $1 天的備份 ..
 backup_purgenobase=..無法從目標位置算出基本目錄
 backup_deletingdir=刪除目錄 $1，該目錄已存在 $2天。
 backup_deletingfile=正在刪除 $2天的文件 $1 ..
@@ -1630,6 +1647,7 @@ licence_unlimited=無限
 licence_goterr2=..無效的到期日期： $1
 licence_maxdoms=您的系統僅許可用於 $1服務器，但是您具有 $2。
 licence_maxservers2=您的序列號 $3 僅授權用於 $1 服務器，但正在 $2 上使用。
+licence_maxwarn=除非為了遷移到新服務器而臨時使用此序列號，否則您必須在 <a target=_blank href='$1'>$2</a> 購買額外的許可證，以防止違反服務規則並避免提前終止現有許可證。
 licence_ipchanged=系統的主IP地址似乎已從 $1更改為 $2。使用舊地址的虛擬服務器可能無法訪問或提供了錯誤的Web內容。
 licence_changeip=更新不正確的IP地址
 licence_smallcert=您的系統使用的SSL證書長度僅為 $1位，小於建議的2048位。此證書是由 $4頒發給 $3的域 $2的。
@@ -1730,6 +1748,7 @@ scripts_proxyfailed=..代理安裝失敗： $1
 scripts_epartial=..安裝僅部分完成。
 scripts_icommand=缺少命令 $1
 scripts_idbneed=需要一個 $1數據庫
+scripts_idbneed_link=，可以在 <a href='$1'>$2</a> 頁面上啟用
 scripts_idbneedor=$1或 $2
 scripts_gemver=從 $1..將Ruby Gems更新到最新版本。
 scripts_gemverfailed=..寶石更新失敗： $1
@@ -1759,6 +1778,18 @@ scripts_discontinued=已停產
 scripts_can=可用於
 scripts_gpl_to_pro=現在僅在Pro中可用
 scripts_gpl_to_pro_upgrade=此腳本的升級現在僅在Pro中可用
+
+scripts_gpl_pro_tip=專業功能
+scripts_gpl_pro_tip_hide=感謝您的提醒
+scripts_gpl_pro_tip_hide2=謝謝，我會考慮的
+scripts_gpl_pro_tip_and=和
+scripts_gpl_pro_tip_enroll=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可證以支持開發並解鎖此功能和許多其他很酷的功能。
+scripts_gpl_pro_tip_list_scripts=有更多的安裝腳本可用！
+scripts_gpl_pro_tip_enroll_list_scripts=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可證以支持開發並解鎖下面列出的所有安裝腳本。
+scripts_gpl_pro_tip_clouds=還可以支持 $1 個提供程序！
+scripts_gpl_pro_tip_title_dashboard=獲取 Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=請考慮購買 <a target=_blank href='$1'>Virtualmin Pro</a> 許可，以支持您喜愛的網絡託管控制面板的開發並解鎖許多很酷的功能。
+scripts_gpl_pro_tip_dashboard=您是否知道 Virtualmin Pro 帶來了許多 GPL 版本中未包含的強大功能？
 
 newnotify_admins=還通過電子郵件向選定域中的其他管理員發送電子郵件嗎？
 newnotify_users=還在選定域中使用過電子郵件嗎？
@@ -2303,13 +2334,13 @@ newstyles_edelete=選定的內容樣式不再存在！
 upgrade_epackages=找不到要安裝的軟件包！
 upgrade_eamazon=此許可證密鑰不能用於升級
 upgrade_eyumrepo=Virtualmin已從RPM安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
-
+upgrade_eyumlist=在存儲庫的可用包列表中找不到 $1 RPM 包。也許您當前的存儲庫之一不起作用？
 upgrade_edebrepo=Virtualmin已從Debian軟件包安裝，但未使用Virtualmin GPL存儲庫。目前無法升級。
 upgrade_rpms=升級Virtualmin RPM軟件包： $1
 upgrade_eyumfile=在 $1中找不到Virtualmin GPL存儲庫
 upgrade_update=從APT更新可用的軟件包。
 upgrade_debs=升級Virtualmin Debian軟件包： $1
-
+upgrade_yumclear=清除存儲庫緩存 ..
 upgrade_etypematch=無法升級，因為Virtualmin的安裝類型為<tt>$1</tt>，而Webmin的安裝類型為<tt>$2</tt>
 
 maillog_showspam=顯示垃圾郵件？
@@ -3265,6 +3296,11 @@ smtpcloud_header=郵件遞送提供商選項
 smtpcloud_provider=郵件遞送提供商名稱
 smtpcloud_url=郵件遞送提供商的網站
 smtpcloud_eaws_dns=Amazon SES 需要啟用 DNS 區域來驗證新域
+smtpcloud_epostfix=除非安裝了 Postfix，否則無法配置 Amazon SES
+smtpcloud_esmtpuser=無法將 SES 密鑰轉換為 SMTP 密碼
+smtpcloud_egetver=無法獲得 Amazon SES 驗證狀態：$1
+smtpcloud_evaltok=Amazon SES 驗證未完成。您必須創建一個名為 $2 且值為 $1 的 DNS TXT 記錄。
+smtpcloud_evaltok2=Amazon SES 驗證未返回此域的任何信息！
 
 provision_title=Cloudmin Services客戶
 provision_ecannot=不允許您設置Cloudmin服務客戶端

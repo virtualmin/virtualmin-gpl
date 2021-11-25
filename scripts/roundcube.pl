@@ -17,15 +17,13 @@ return "RoundCube Webmail is a browser-based multilingual IMAP client with an ap
 # script_roundcube_versions()
 sub script_roundcube_versions
 {
-return ( "1.4.11", "1.3.16" );
+return ( "1.5.0", "1.4.12", "1.3.17" );
 }
 
 sub script_roundcube_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "1.4") >= 0 ? "$ver" :
-       &compare_versions($ver, "1.3") >= 0 ? "$ver (LTS)" :
-					     "$ver (Un-supported)";
+return &compare_versions($ver, "1.5") >= 0 ? $ver : "$ver (LTS)";
 }
 
 sub script_roundcube_category
@@ -44,7 +42,8 @@ return @modules;
 
 sub script_roundcube_php_optional_modules
 {
-return ( "openssl", "sockets" );
+return ( "openssl", "sockets", "intl",
+         "fileinfo", "pspell", "json" );
 }
 
 sub script_roundcube_dbs
@@ -62,7 +61,7 @@ return ([ 'memory_limit', '64M', '+' ],
         [ 'upload_max_filesize', '25M', '+' ],
         [ 'post_max_size', '25M', '+' ],
         [ 'session.auto_start', 'Off' ],
-	[ 'mbstring.func_overload', 'Off' ]);
+        [ 'mbstring.func_overload', 'Off' ]);
 }
 
 
@@ -271,10 +270,10 @@ if (!$upgrade) {
 			$l = "\$${1}['virtuser_file'] = '$vuf';";
 			}
 		if ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s+=\s+array\(\s*$/) {
-			$l = "\$${1}['plugins'] = array('virtuser_file',";
+			$l = "\$${1}['plugins'] = array(\n    'virtuser_file',";
 			}
-		elsif ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s+=/) {
-			$l = "\$${1}['plugins'] = array('virtuser_file');";
+		elsif ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s*=\s*\[/) {
+			$l = "\$${1}['plugins'] = [\n    'virtuser_file',";
 			}
 		if ($l =~ /^\$(rcmail_config|config)\['db_dsnw'\]\s+=/) {
 			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
@@ -341,6 +340,31 @@ $rp =~ s/^$d->{'home'}\///;
 return (1, "RoundCube installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
 }
 
+# script_wordpress_db_conn_desc()
+# Returns a list of options for config file to update
+sub script_roundcube_db_conn_desc
+{
+my $conn_desc =
+    {
+      'replace' => [ '\$(rcmail_config|config)\[[\'"]db_dsnw[\'"]\]\s*=\s*' =>
+                     '\'$$sdbtype://$$sdbuser:$$sdbpass@$$sdbhost/$$sdbname\';' ],
+      'func' => 'php_quotemeta',
+      'func_params' => 1,
+      'multi' => 1,
+    };
+my $db_conn_desc = 
+    { 'config/config.inc.php' => 
+        {
+           'dbtype' => $conn_desc,
+           'dbuser' => $conn_desc,
+           'dbpass' => $conn_desc,
+           'dbhost' => $conn_desc,
+           'dbname' => $conn_desc,
+        }
+    };
+return $db_conn_desc;
+}
+
 # script_roundcube_uninstall(&domain, version, &opts)
 # Un-installs a RoundCube installation, by deleting the directory and database.
 # Returns 1 on success and a message, or 0 on failure and an error
@@ -369,8 +393,9 @@ sub script_roundcube_latest
 {
 local ($ver) = @_;
 return ( "http://roundcube.net/download/",
-         $ver >= 1.4 ? "roundcubemail-([0-9\\.]+)-complete.tar.gz"
-		     : "roundcubemail-(1\\.3\\.[0-9\\.]+)-complete.tar.gz" );
+         $ver >= 1.5 ? "roundcubemail-([0-9\\.]+)-complete.tar.gz" :
+         $ver >= 1.4 ? "roundcubemail-(1\\.4\\.[0-9\\.]+)-complete.tar.gz" :
+		       "roundcubemail-(1\\.3\\.[0-9\\.]+)-complete.tar.gz" );
 }
 
 sub script_roundcube_site

@@ -249,6 +249,7 @@ setup_virtdone2=.. interface associée $1
 setup_virtnotdone=.. n'a trouvé aucune interface avec l'IP $1 !
 setup_virt6=Ajout de l'adresse IPv6 $1 ..
 setup_virt6done=.. ajouté à l'interface $1 
+setup_failed=.. échoué
 setup_clashlogrotate=.. le fichier journal $1 est déjà en rotation
 setup_logrotatealready=.. déjà activé pour le fichier journal $1 
 setup_spam=Configuration du filtrage anti-spam ..
@@ -263,6 +264,7 @@ setup_evaddaliasdomain=.. échec de vaddaliasdomain : $1
 setup_fwding=Ajout d'un alias pour transférer tous les e-mails vers $1 ..
 setup_styleing=Application du style de site Web initial ..
 setup_contenting=Création de la page d'index initiale du site Web.
+setup_econtenting=.. échec de création du contenu initial  : $1
 setup_sshkey1=Génération de clés privées et publiques SSH.
 setup_sshkey2=Autorisation de la clé publique SSH.
 setup_esshkeydir=Le serveur virtuel a besoin d'un répertoire et d'un utilisateur Unix
@@ -324,6 +326,9 @@ setup_dnscloudclash=La zone DNS existe déjà sur le fournisseur cloud $1
 setup_mail_smtpcloud=Configuration du fournisseur de messagerie cloud $1 ..
 setup_mail_nosmtpcloud=.. le fournisseur n'existe pas !
 setup_mail_esmtpcloud=.. a échoué  : $1
+setup_overquota=La création du serveur virtuel a échoué en raison d'un manque de quota  : $1
+setup_overgroupquota=Le quota de serveur pour $2 sur $1 a été atteint
+setup_overuserquota=Le quota de propriétaire de domaine pour $2 sur $1 a été atteint
 
 equotacommand=La commande de quota $1 a échoué : $2 
 
@@ -503,6 +508,12 @@ save_euserquota=Le quota de disque de l'administrateur du serveur ne doit pas ê
 save_aliasusers=La fonctionnalité en cours de désactivation est utilisée par les serveurs d'alias suivants : $1 
 save_erquota=Le quota de disque pour ce serveur virtuel ne peut pas être défini sur illimité, car il appartient au revendeur $1 qui a une limite de quota
 save_erbw=La limite de bande passante pour ce serveur virtuel ne peut pas être définie sur illimitée, car elle appartient au revendeur $1 qui a une limite de bande passante
+save_installed_scripts_dbuser=Mise à jour du nom d'utilisateur de la base de données pour les scripts installés ..
+save_installed_scripts_dbpass=Mise à jour du mot de passe de la base de données pour les scripts installés ..
+save_installed_scripts_db=Mise à jour du nom de la base de données pour les scripts installés ..
+save_installed_scripts_err_file=.. échec : impossible de lire le fichier <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. a échoué : impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
+save_installed_scripts_done=.. fait pour le fichier <tt>$1</tt>
 
 acl_migrate=Peut migrer des sauvegardes?
 
@@ -664,6 +675,7 @@ check_fcgiwrapok=Les scripts CGI peuvent être exécutés à l'aide de fcgiwrap.
 check_webphpvers=Les versions PHP suivantes sont disponibles : $1 
 check_webphpnovers=Aucune version PHP n'a été trouvée sur ce système!
 check_webphpmodes=Les modes d'exécution PHP suivants sont disponibles : $1 
+check_ewebphpmodes=Aucun mode d'exécution PHP n'est disponible !
 check_webphpversinis=Les versions de PHP sont passées à $1 depuis la dernière vérification. Régénérer tous les fichiers php.ini manquants.
 check_webphpfpm=La prise en charge de PHP-FPM version $1 est disponible sur ce système.
 check_webphpnofpm=La prise en charge de PHP-FPM n'a pas été détectée : $1 
@@ -759,11 +771,14 @@ check_ehomeformat=Le format du répertoire personnel $1 ne contient pas le nom d
 check_ehomestyle=Le style du répertoire personnel est défini sur "Juste répertoire de base", ce qui est inutilisable avec Virtualmin. Cela peut être corrigé sur la page <a href='$2'>Configuration du module Utilisateurs et groupes</a>.
 check_jailkitok=Les prisons Chroot sont disponibles sur ce système
 check_jailkiterr=Les prisons Chroot ne sont pas disponibles : $1 
-check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
+check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin $1 n'existe pas !
+check_yumrepook=Le référentiel Virtualmin est correctement configuré
+check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin $1 contient le mauvais numéro de série de clé de licence !
+check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin $1 ne fait pas référence à software.virtualmin.com !
 check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe pas!
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
 check_aptrepowrong=Le fichier de configuration du référentiel APT $1 contient le mauvais numéro de série de la clé de licence!
-check_aptrepomissing=Le fichier de configuration du référentiel $1 ne fait pas référence à software.virtualmin.com!
+check_aptrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com !
 
 checkmap_enone=Aucune source de carte n'a été trouvée dans la <a href='$1'>configuration Postfix</a>
 checkmap_esupport=La source de carte <tt>$1</tt> n'est pas prise en charge par Postfix - vous devrez peut-être installer les bibliothèques Postfix pour cela, ou recompiler
@@ -993,6 +1008,8 @@ backup_edbpath2=Le chemin Dropbox ne peut pas commencer ou se terminer par une b
 backup_ebbpath=Chemin Backblaze manquant
 backup_ebbpath2=Le chemin Backblaze ne peut pas commencer ou se terminer par une barre oblique
 backup_einconly=Une sauvegarde planifiée incrémentielle ne peut pas être créée sauf si vous avez configuré au moins une sauvegarde complète
+backup_donepurge=La sauvegarde est terminée, mais la suppression a échoué. La taille finale était $1.
+backup_purgesubject=Sauvegarde terminée de Virtualmin sur $1 à $2, mais la suppression a échoué
 backup_upload7=Importation d'archive dans Google Cloud Storage.
 backup_upload8=Téléchargement de l'archive sur Dropbox.
 backup_upload9=Téléchargement de l'archive sur le serveur Webmin $1 ..
@@ -1005,6 +1022,7 @@ backup_efeatureeval=.. la sauvegarde de $1 a échoué : $2
 backup_ekilllock=Une sauvegarde vers la même destination avec le PID $1 a été interrompue
 backup_edesturl=La destination de sauvegarde $1 n'est pas valide : $2 
 backup_eownergone=Le domaine propriétaire n'existe plus!
+backup_purging3=Suppression des sauvegardes de $2 correspondant à $3 datant de plus de $1 jours ..
 backup_purgeegcbuckets=.. n'a pas réussi à répertorier les compartiments Google : $1 
 backup_purgeefiles3=.. n'a pas réussi à répertorier les fichiers Google Cloud Storage : $1 
 backup_purgeefiles4=.. n'a pas réussi à répertorier les fichiers Dropbox : $1 
@@ -1849,6 +1867,7 @@ licence_goterr2=.. date d'expiration non valide : $1
 licence_ecannot=Vous n'êtes pas autorisé à revérifier la licence Virtualmin
 licence_maxdoms=Votre système n'est autorisé que pour $1 serveurs, mais vous avez $2.
 licence_maxservers2=Votre numéro de série $3 est sous licence pour le serveur $1 uniquement, mais est utilisé sur $2.
+licence_maxwarn=À moins que ce numéro de série ne soit utilisé temporairement afin de migrer vers un nouveau serveur, vous devez acheter une licence supplémentaire chez <a target=_blank href='$1'>$2</a> pour éviter toute violation des règles de service et éviter résiliation anticipée de la licence existante.
 licence_ipchanged=L'adresse IP principale de votre système semble être passée de $1 à $2. Les serveurs virtuels utilisant l'ancienne adresse peuvent être inaccessibles ou servir le mauvais contenu Web.
 licence_changeip=Mettre à jour des adresses IP incorrectes
 licence_smallcert=Votre système utilise un certificat SSL qui ne fait que $1 bits, ce qui est inférieur à la taille recommandée de 2048 bits. Ce certificat a été émis par $4 à $3 pour le domaine $2.
@@ -1875,6 +1894,7 @@ scripts_phpmodinst=Installation du module à partir des packages logiciels ..
 scripts_phpmoddone=.. module installé avec succès à partir du package $1
 scripts_phpmodfailed=.. échec de l'installation du module à partir de $1 packages possibles
 scripts_passmode4=Mot de passe initial pour le script
+scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
 scripts_iphpnover=Aucune version PHP n'a pu être trouvée pour ce serveur virtuel
 scripts_iphpfullver=La version PHP $1 ou ultérieure est requise, mais ce serveur virtuel utilise la version $2 
@@ -1885,6 +1905,18 @@ scripts_discontinued=Discontinué
 scripts_can=Disponible en
 scripts_gpl_to_pro=Désormais disponible uniquement dans Pro
 scripts_gpl_to_pro_upgrade=La mise à niveau de ce script n'est désormais disponible que dans Pro
+
+scripts_gpl_pro_tip=Fonctionnalité professionnelle
+scripts_gpl_pro_tip_hide=Merci pour l'information
+scripts_gpl_pro_tip_hide2=merci je vais y réfléchir
+scripts_gpl_pro_tip_and=et
+scripts_gpl_pro_tip_enroll=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et déverrouiller cela et de nombreuses autres fonctionnalités intéressantes.
+scripts_gpl_pro_tip_list_scripts=Il y a plus de scripts d'installation disponibles !
+scripts_gpl_pro_tip_enroll_list_scripts=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et déverrouiller tous les scripts d'installation répertoriés ci-dessous.
+scripts_gpl_pro_tip_clouds=La prise en charge de $1 fournisseurs est également disponible !
+scripts_gpl_pro_tip_title_dashboard=Obtenez Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement du panneau de contrôle d'hébergement Web que vous aimez et déverrouiller de nombreuses fonctionnalités intéressantes.
+scripts_gpl_pro_tip_dashboard=Saviez-vous que Virtualmin Pro apporte de nombreuses fonctionnalités intéressantes non incluses dans la version GPL ?
 
 newnotify_title=Propriétaires du serveur de messagerie
 newnotify_desc=Cette page peut être utilisée pour envoyer des e-mails aux propriétaires des serveurs virtuels sélectionnés, par exemple pour annoncer des temps d'arrêt du système, des mises à niveau ou d'autres modifications de service. Les sous-postes suivants peuvent être utilisés dans le corps et l'objet du message:
@@ -2905,13 +2937,13 @@ upgrade_complete=Votre système a été mis à niveau avec succès vers Virtualm
 upgrade_theme=Activation du thème <i>$1</i> ..
 upgrade_esharedroot=Votre répertoire racine Webmin $1 est partagé entre plusieurs systèmes - les mises à jour de module ne sont pas autorisées
 upgrade_eyumrepo=Virtualmin a été installé à partir d'un RPM, mais n'utilise pas le référentiel Virtualmin GPL. La mise à niveau n'est pas possible pour le moment.
-
+upgrade_eyumlist=Le package RPM $1 n'a pas été trouvé dans la liste des packages disponibles à partir du référentiel. Peut-être que l'un de vos référentiels actuels ne fonctionne pas ?
 upgrade_edebrepo=Virtualmin a été installé à partir d'un paquet Debian, mais n'utilise pas le référentiel GPL Virtualmin. La mise à niveau n'est pas possible pour le moment.
 upgrade_rpms=Mise à niveau des packages Virtualmin RPM : $1 
 upgrade_eyumfile=Aucun référentiel GPL Virtualmin n'a été trouvé dans $1 
 upgrade_update=Mise à jour des packages disponibles depuis APT.
 upgrade_debs=Mise à niveau des packages Virtualmin Debian : $1 
-
+upgrade_yumclear=Vider les caches du référentiel ..
 upgrade_etypematch=La mise à niveau n'est pas possible car le type d'installation de Virtualmin est <tt>$1</tt> mais Webmin est <tt>$2</tt>
 
 maillog_title=Rechercher dans le journal de messagerie
@@ -3789,6 +3821,11 @@ smtpcloud_header=Options du fournisseur de distribution de courrier
 smtpcloud_provider=Nom du fournisseur de distribution du courrier
 smtpcloud_url=Site Web du fournisseur de distribution de courrier
 smtpcloud_eaws_dns=Amazon SES a besoin d'une zone DNS à activer pour vérifier les nouveaux domaines
+smtpcloud_epostfix=Amazon SES ne peut pas être configuré à moins que Postfix ne soit installé
+smtpcloud_esmtpuser=Échec de la conversion de la clé secrète SES en mot de passe SMTP
+smtpcloud_egetver=Échec de l'obtention de l'état de vérification Amazon SES  : $1
+smtpcloud_evaltok=La vérification Amazon SES n'est pas terminée. Vous devez créer un enregistrement DNS TXT nommé $2 avec la valeur $1.
+smtpcloud_evaltok2=La vérification Amazon SES n'a renvoyé aucune information pour ce domaine !
 
 provision_title=Client Cloudmin Services
 provision_ecannot=Vous n'êtes pas autorisé à configurer le client des services Cloudmin

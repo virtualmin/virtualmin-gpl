@@ -241,6 +241,7 @@ setup_virtmissing=.. $1 üst arayüzü mevcut değil!
 setup_virtnotdone=.. $1 IP ile herhangi bir arayüz bulunamadı!
 setup_virt6=IPv6 adresi $1 ekleniyor ..
 setup_virt6done=.. $1 arayüzüne eklendi
+setup_failed=.. arızalı
 setup_clashlogrotate=.. $1 günlük dosyası zaten döndürülüyor
 setup_logrotatealready=.. $1 günlük dosyası için zaten etkin
 setup_eforceunder2=Yalnızca $1 'in altında veya sahip olduğunuz diğer alan adlarından herhangi birinde alan oluşturmanıza izin verilir
@@ -250,6 +251,7 @@ setup_edomainprefix=Alan adının başında $1 olması gerekmez
 setup_evaddaliasdomain=.. vaddaliasdomain başarısız oldu : $1 
 setup_styleing=İlk web sitesi stili uygulanıyor ..
 setup_contenting=İlk web sitesi dizin sayfası oluşturuluyor ..
+setup_econtenting=.. başlangıç içeriği oluşturulamadı : $1
 setup_sshkey1=SSH özel ve genel anahtarları oluşturuluyor ..
 setup_sshkey2=SSH genel anahtarı yetkilendiriliyor ..
 setup_esshkeydir=Sanal sunucunun bir dizine ve Unix kullanıcısına ihtiyacı var
@@ -280,6 +282,9 @@ setup_dnscloudclash=DNS bölgesi $1 bulut sağlayıcısında zaten mevcut
 setup_mail_smtpcloud=$1 bulut posta sağlayıcısı yapılandırılıyor ..
 setup_mail_nosmtpcloud=.. sağlayıcı mevcut değil!
 setup_mail_esmtpcloud=.. başarısız oldu : $1
+setup_overquota=Kota eksikliği nedeniyle sanal sunucu oluşturma başarısız oldu : $1
+setup_overgroupquota=$1'in $2'si için sunucu kotasına ulaşıldı
+setup_overuserquota=$1'in $2'si için alan sahibi kotası aşıldı
 
 equotacommand=$1 kota komutu başarısız oldu : $2 
 
@@ -535,6 +540,12 @@ save_euserquota=Geçerli disk kullanımı zaten $1 olduğundan sunucu yöneticis
 save_aliasusers=Devre dışı bırakılan özellik aşağıdaki takma ad sunucuları tarafından kullanılıyor : $1 
 save_erquota=Bu sanal sunucunun disk kotası, kota sınırı olan $1 satıcısına ait olduğu için sınırsız olarak ayarlanamıyor
 save_erbw=Bu sanal sunucunun bant genişliği sınırı, bant genişliği sınırı olan $1 satıcısına ait olduğundan sınırsız olarak ayarlanamıyor
+save_installed_scripts_dbuser=Kurulu komut dosyaları için veritabanı kullanıcı adı güncelleniyor ..
+save_installed_scripts_dbpass=Kurulu komut dosyaları için veritabanı şifresi güncelleniyor ..
+save_installed_scripts_db=Kurulu komut dosyaları için veritabanı adı güncelleniyor ..
+save_installed_scripts_err_file=.. başarısız oldu : <tt>$1</tt> dosyası okunamıyor
+save_installed_scripts_err_file_lines=.. başarısız oldu : <tt>$1</tt> dosyasında değiştirilecek dizeler bulunamadı
+save_installed_scripts_done=.. <tt>$1</tt> dosyası için yapıldı
 
 acl_migrate=Yedekleri taşıyabilir mi?
 
@@ -645,6 +656,7 @@ check_fcgiwrapok=CGI betikleri fcgiwrap kullanılarak çalıştırılabilir.
 check_webphpvers=Aşağıdaki PHP sürümleri mevcuttur : $1 
 check_webphpnovers=Bu sistemde PHP sürümü bulunamadı!
 check_webphpmodes=Aşağıdaki PHP yürütme modları kullanılabilir : $1 
+check_ewebphpmodes=PHP yürütme modu yok!
 check_webphpversinis=PHP sürümleri son kontrolden beri $1 olarak değiştirildi. Eksik php.ini dosyalarını yeniden oluşturma.
 check_webphpfpm=PHP-FPM sürüm $1 desteği bu sistemde mevcut.
 check_webphpnofpm=PHP-FPM desteği tespit edilmedi : $1 
@@ -730,11 +742,14 @@ check_ehomeformat=Giriş dizini biçimi $1, kullanıcı adını veya etki alanı
 check_ehomestyle=Giriş dizini stili Virtualmin ile kullanılamayan "Sadece temel dizin" olarak ayarlanmış. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir.
 check_jailkitok=Bu sistemde krom hapishaneleri mevcuttur
 check_jailkiterr=Krom hapishaneler mevcut değil : $1 
-check_yumrepomissing=$1 Virtualmin APT veri havuzu yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
+check_eyumrepofile=$1 Virtualmin deposu yapılandırma dosyası mevcut değil!
+check_yumrepook=Virtualmin deposu doğru şekilde yapılandırılmış
+check_yumrepowrong=Virtualmin veri havuzu yapılandırma dosyası $1, yanlış seri numarası lisans anahtarı içeriyor!
+check_yumrepomissing=Virtualmin veri havuzu yapılandırma dosyası $1, software.virtualmin.com'a başvurmuyor!
 check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
 check_aptrepowrong=$1 APT veri havuzu yapılandırma dosyası lisans anahtarının seri numarasını yanlış içeriyor!
-check_aptrepomissing=$1 havuz yapılandırma dosyası software.virtualmin.com'a başvurmuyor!
+check_aptrepomissing=Virtualmin APT deposu yapılandırma dosyası $1, software.virtualmin.com'a başvurmuyor!
 
 checkmap_enone=<a href='$1'>Postfix yapılandırmasında</a> harita kaynağı bulunamadı
 checkmap_esupport=<tt>$1</tt> harita kaynağı Postfix tarafından desteklenmiyor - bunun için Postfix kütüphanelerini kurmanız veya yeniden derlemeniz gerekebilir
@@ -995,10 +1010,12 @@ backup_epass2=SSH sunucusu şifresinde geçersiz karakterler - @ kullanılamaz
 backup_ebucket2=Eğik çizgiler S3 grup adlarında kullanılamaz
 backup_esfile=S3 dosya adında geçersiz karakterler
 backup_einconly=En az bir tam yedek yapılandırılmamışsa, artımlı bir zamanlanmış yedekleme oluşturulamaz
+backup_donepurge=Yedekleme tamamlandı, ancak silme başarısız oldu. Son boyut $1 idi.
 backup_partial=Yedekleme kısmen tamamlandı. Nihai boyut $1 idi.
 backup_partial2=Başarısız olan sanal sunucular :
 backup_time=Toplam yedekleme süresi $1 idi.
 backup_donesubject=$1 - $2 arasında Virtualmin yedeklemesi tamamlandı
+backup_purgesubject=Virtualmin'in $1'den $2'ye yedeklenmesi tamamlandı, ancak silme başarısız oldu
 backup_partialsubject=$1 ile $2 arasında Virtualmin'in kısmen tamamlanmış yedeklemesi
 backup_failedsubject=$1 ila $2 arasında Virtualmin yedeklemesi başarısız oldu
 backup_upload6=Rackspace'in Cloud Files hizmetine arşiv yükleniyor ..
@@ -1058,7 +1075,7 @@ backup_epurge=Eski yedeklemeleri silmek için eksik veya sayısal olmayan gün s
 backup_epurgetime=Eski yedeklemelerin silinmesi yalnızca tarihe dayalı bir hedef kullanıldığında ve <b>strftime ikameleri</b> etkinleştirildiğinde desteklenir
 backup_epurgepath=Temel dizin hedef yoldan çıkarılamadığından, eski yedeklemelerin silinmesi etkinleştirilemez. <tt>/backup/virtualmin-%d-%m-%Y</tt> gibi bir yol olmalı ve üst düzey bir dizin olamaz
 backup_ekey2=Seçilen yedek anahtarı kullanma izniniz yok
-backup_purging2=$1 günden daha eski $2 'den yedekler siliniyor
+backup_purging3=$1 günden eski $3 ile eşleşen $2'den yedekler siliniyor ..
 backup_purgenobase=.. ana dizini hedeften çıkaramadı
 backup_deletingdir=$2 günlük olan $1 dizini siliniyor ..
 backup_deletingfile=$2 gün olan $1 dosyası siliniyor ..
@@ -1807,6 +1824,7 @@ licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
 licence_maxdoms=Sisteminiz yalnızca $1 sunucu için lisanslanmış, ancak $2 sunucunuz var.
 licence_maxservers2=$3 seri numaranız yalnızca $1 sunucusu için lisanslanmıştır, ancak $2 üzerinde kullanılmaktadır.
+licence_maxwarn=Bu seri numarası yeni bir sunucuya geçmek için geçici olarak kullanılmadığı sürece, hizmet kurallarının ihlalini önlemek ve bundan kaçınmak için <a target=_blank href='$1'>$2</a> adresinden ek bir lisans satın almalısınız. mevcut lisansın erken feshi.
 licence_ipchanged=Sisteminizin birincil IP adresinin $1 'den $2 'ye değiştiği görülüyor. Eski adresi kullanan sanal sunuculara ulaşılamayabilir veya yanlış web içeriği sunabilir.
 licence_changeip=Hatalı IP Adreslerini Güncelleyin
 licence_smallcert=Sisteminiz, yalnızca $1 bit uzunluğunda ve önerilen 2048 bit boyutundan daha küçük bir SSL sertifikası kullanıyor. Bu sertifika, $2 alan adı için $4 ile $3 arasında verildi.
@@ -1880,7 +1898,6 @@ scripts_phpmodfailed=.. $1 olası paketten modül yüklenemedi
 scripts_esoftware=.. Yazılım Paketleri Webmin modülü kurulu değil!
 scripts_eupdate=.. otomatik modül kurulumu sisteminizde mevcut değildir.
 scripts_einstallmod=Modül kurulumdan sonra bile kullanılamıyor!
-scripts_addext=PHP yapılandırmasında modül etkinleştiriliyor.
 scripts_gotmod=.. $1 PHP modülü kullanıma sunuldu.
 scripts_nopearmod=$1 PHP Pear modülleri gereklidir, ancak Webmin'in Pear modülü bunları kurmak için mevcut değildir - yine de devam etmektedir.
 scripts_nopearcmd=$1 PHP Pear modülleri gerekli, ancak PHP $2 için Pear kurulu değil - yine de devam ediyor.
@@ -1931,6 +1948,7 @@ scripts_proxyfailed=.. proxy kurulumu başarısız oldu : $1
 scripts_epartial=.. kurulum sadece kısmen tamamlandı.
 scripts_icommand=$1 komutu eksik
 scripts_idbneed=$1 veritabanı gerekiyor
+scripts_idbneed_link=<a href='$1'>$2</a> sayfasında etkinleştirilebilen,
 scripts_idbneedor=$1 yada 2
 scripts_gemver=Ruby Gems $1 sürümünden en son sürüme güncelleniyor.
 scripts_gemverfailed=.. Taşlar güncelleme başarısız : $1 
@@ -1960,6 +1978,18 @@ scripts_discontinued=Üretimden kaldırıldı
 scripts_can=Uygun
 scripts_gpl_to_pro=Artık yalnızca Pro'da mevcut
 scripts_gpl_to_pro_upgrade=Bu komut dosyası için yükseltme artık yalnızca Pro'da mevcut
+
+scripts_gpl_pro_tip=Profesyonel Özellik
+scripts_gpl_pro_tip_hide=Söylediğin için teşekkürler
+scripts_gpl_pro_tip_hide2=Teşekkürler, bunu düşüneceğim
+scripts_gpl_pro_tip_and=ve
+scripts_gpl_pro_tip_enroll=Geliştirmeyi desteklemek ve bu ve diğer birçok harika özelliğin kilidini açmak için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.
+scripts_gpl_pro_tip_list_scripts=Daha fazla yükleme komut dosyası var!
+scripts_gpl_pro_tip_enroll_list_scripts=Geliştirmeyi desteklemek ve aşağıda listelenen tüm yükleme komut dosyalarının kilidini açmak için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.
+scripts_gpl_pro_tip_clouds=$1 sağlayıcı desteği de mevcuttur!
+scripts_gpl_pro_tip_title_dashboard=Virtualmin Pro'yu edinin
+scripts_gpl_pro_tip_enroll_dashboard=Sevdiğiniz web barındırma kontrol panelinin gelişimini desteklemek ve birçok harika özelliğin kilidini açmak için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.
+scripts_gpl_pro_tip_dashboard=Virtualmin Pro'nun GPL sürümünde bulunmayan pek çok harika özellik getirdiğini biliyor muydunuz?
 
 newnotify_admins=Ayrıca seçili alan adlarında fazladan yöneticiye e-posta gönderilsin mi?
 newnotify_users=Ayrıca seçili alan adlarında userd'ye e-posta gönder
@@ -2751,13 +2781,13 @@ upgrade_complete=Sisteminiz başarıyla Virtualmin Pro'ya yükseltildi!
 upgrade_theme=<i>$1</i> temasını etkinleştirme ..
 upgrade_esharedroot=$1 Webmin kök dizininiz birden çok sistem arasında paylaşılıyor - modül güncellemelerine izin verilmiyor
 upgrade_eyumrepo=Virtualmin bir RPM'den kuruldu, ancak Virtualmin GPL deposu kullanılmadı. Yükseltme şu anda mümkün değil.
-
+upgrade_eyumlist=$1 RPM paketi, depodaki kullanılabilir paketler listesinde bulunamadı. Belki de mevcut depolarınızdan biri çalışmıyor?
 upgrade_edebrepo=Virtualmin bir Debian paketinden kurulmuştur, fakat Virtualmin GPL deposunu kullanmamaktadır. Yükseltme şu anda mümkün değil.
 upgrade_rpms=Virtualmin RPM paketlerini yükseltme : $1 
 upgrade_eyumfile=$1 içinde Virtualmin GPL deposu bulunamadı
 upgrade_update=APT'deki mevcut paketler güncelleniyor.
 upgrade_debs=Virtualmin Debian paketlerini yükseltme : $1 
-
+upgrade_yumclear=Depo önbelleklerini temizleme ..
 upgrade_etypematch=Virtualmin'in yükleme türü <tt>$1</tt> olduğundan, Webmin'in <tt>$2</tt> olduğundan yükseltme mümkün değil
 
 maillog_title=Posta Günlüğünde Ara
@@ -3788,6 +3818,11 @@ smtpcloud_header=Posta dağıtım sağlayıcı seçenekleri
 smtpcloud_provider=Posta dağıtım sağlayıcı adı
 smtpcloud_url=Posta dağıtım sağlayıcısının web sitesi
 smtpcloud_eaws_dns=Amazon SES'in yeni etki alanlarını doğrulamak için etkinleştirilmesi için bir DNS bölgesine ihtiyacı var
+smtpcloud_epostfix=Amazon SES, Postfix yüklenmedikçe yapılandırılamaz
+smtpcloud_esmtpuser=SES gizli anahtarı SMTP parolasına dönüştürülemedi
+smtpcloud_egetver=Amazon SES doğrulama durumu alınamadı : $1
+smtpcloud_evaltok=Amazon SES doğrulaması tamamlanmadı. $1 değerine sahip $2 adında bir DNS TXT kaydı oluşturmalısınız.
+smtpcloud_evaltok2=Amazon SES doğrulaması, bu alan adı için herhangi bir bilgi döndürmedi!
 
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor

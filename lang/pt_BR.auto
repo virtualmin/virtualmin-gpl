@@ -598,6 +598,7 @@ setup_virtnotdone=.. não foi possível encontrar nenhuma interface com IP $1 !
 setup_virt6=Adicionando o endereço IPv6 $1 ..
 setup_virt6done=.. adicionado à interface $1 
 setup_done=.. feito
+setup_failed=.. fracassado
 setup_notrun=.. não está funcionando!
 setup_quota=Definindo cota do usuário.
 setup_webalizer=Configurando relatórios agendados do Webalizer.
@@ -622,6 +623,7 @@ setup_evaddaliasdomain=.. vaddaliasdomain falhou : $1
 setup_fwding=Adicionando alias para encaminhar todos os emails para $1 ..
 setup_styleing=Aplicando o estilo inicial do site ..
 setup_contenting=Criando página de índice inicial do site.
+setup_econtenting=.. falhou ao criar o conteúdo inicial : $1 
 setup_sshkey1=Gerando chaves SSH privadas e públicas.
 setup_sshkey2=Autorizando a chave pública SSH ..
 setup_esshkeydir=O servidor virtual precisa de um diretório e de um usuário Unix
@@ -683,6 +685,9 @@ setup_dnscloudclash=A zona DNS já existe no provedor de nuvem $1
 setup_mail_smtpcloud=Configurando provedor de e-mail na nuvem $1 ..
 setup_mail_nosmtpcloud=.. provedor não existe!
 setup_mail_esmtpcloud=.. falhou : $1 
+setup_overquota=A criação do servidor virtual falhou devido à falta de cota : $1 
+setup_overgroupquota=A cota do servidor para $2 de $1 foi atingida
+setup_overuserquota=A cota do proprietário do domínio para $2 de $1 foi atingida
 
 equotacommand=Falha no comando da cota $1 : $2 
 
@@ -1303,6 +1308,12 @@ save_euserquota=A cota de disco do administrador do servidor não deve ser reduz
 save_aliasusers=O recurso que está sendo desativado está em uso pelos seguintes servidores de alias : $1 
 save_erquota=A cota de disco para este servidor virtual não pode ser definida como ilimitada, pois pertence ao revendedor $1 que possui um limite de cota
 save_erbw=O limite de largura de banda para este servidor virtual não pode ser definido como ilimitado, pois pertence ao revendedor $1 que possui um limite de largura de banda
+save_installed_scripts_dbuser=Atualizando nome de usuário do banco de dados para scripts instalados ..
+save_installed_scripts_dbpass=Atualizando a senha do banco de dados para scripts instalados ..
+save_installed_scripts_db=Atualizando o nome do banco de dados para scripts instalados ..
+save_installed_scripts_err_file=.. falhou: não é possível ler o arquivo <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. falhou: não foi possível encontrar strings para substituir no arquivo <tt>$1</tt>
+save_installed_scripts_done=.. feito para o arquivo <tt>$1</tt>
 
 luser_err=Falha ao salvar o usuário local
 luser_etaken=Um usuário com o mesmo nome já existe
@@ -1730,6 +1741,7 @@ check_suexecok=Os scripts CGI podem ser executados usando SuExec.
 check_fcgiwrapok=Os scripts CGI podem ser executados usando fcgiwrap.
 check_webphpvers=As seguintes versões do PHP estão disponíveis : $1 
 check_webphpmodes=Os seguintes modos de execução do PHP estão disponíveis : $1 
+check_ewebphpmodes=Nenhum modo de execução de PHP está disponível!
 check_webphpversinis=As versões do PHP foram alteradas para $1 desde a última verificação. Regenerando quaisquer arquivos php.ini ausentes.
 check_webphpfpm=O suporte à versão $1 do PHP-FPM está disponível neste sistema.
 check_webphpnofpm=O suporte ao PHP-FPM não foi detectado : $1 
@@ -1859,11 +1871,14 @@ check_ehomeformat=O formato do diretório inicial $1 não contém o nome de usu�
 check_ehomestyle=O estilo do diretório inicial é definido como "Apenas o diretório base", que não pode ser usado com o Virtualmin. Isso pode ser corrigido na página <a href='$2'>Usuários e grupos do módulo</a>.
 check_jailkitok=Cadeias Chroot estão disponíveis neste sistema
 check_jailkiterr=As cadeias de chroot não estão disponíveis : $1 
-check_yumrepomissing=O arquivo de configuração do repositório Virtualmin APT $1 não se refere a software.virtualmin.com!
+check_eyumrepofile=O arquivo de configuração do repositório Virtualmin $1 não existe!
+check_yumrepook=O repositório Virtualmin está configurado corretamente
+check_yumrepowrong=O arquivo de configuração do repositório Virtualmin $1 contém o número de série incorreto da chave de licença!
+check_yumrepomissing=O arquivo de configuração do repositório Virtualmin $1 não se refere a software.virtualmin.com!
 check_eaptrepofile=O arquivo de configuração do repositório APT $1 não existe!
 check_aptrepook=O repositório Virtualmin APT está configurado corretamente
 check_aptrepowrong=O arquivo de configuração do repositório APT $1 contém o número de série errado da chave de licença!
-check_aptrepomissing=O arquivo de configuração do repositório $1 não se refere a software.virtualmin.com!
+check_aptrepomissing=O arquivo de configuração do repositório Virtualmin APT $1 não se refere a software.virtualmin.com!
 
 checkmap_enone=Nenhuma fonte de mapa foi encontrada na <a href='$1'>configuração do Postfix</a>
 checkmap_esupport=A origem do mapa <tt>$1</tt> não é suportada pelo Postfix - talvez você precise instalar as bibliotecas do Postfix ou recompilar
@@ -2280,11 +2295,13 @@ backup_eskey=Chave secreta S3 ausente ou inválida
 backup_esfile=Caracteres inválidos no nome do arquivo S3
 backup_einconly=Um backup agendado incremental não pode ser criado, a menos que você tenha pelo menos um backup completo configurado
 backup_done=O backup está completo. O tamanho final foi de $1.
+backup_donepurge=O backup foi concluído, mas a exclusão falhou. O tamanho final era $1.
 backup_partial=O backup está parcialmente completo. O tamanho final foi de $1.
 backup_partial2=Servidores virtuais que falharam :
 backup_time=O tempo total de backup foi de $1.
 backup_failed=Falha no backup! Veja a saída do progresso acima pelo motivo.
 backup_donesubject=Backup concluído do Virtualmin em $1 a $2 
+backup_purgesubject=Backup de Virtualmin concluído em $1 a $2, mas a exclusão falhou
 backup_partialsubject=Backup parcialmente concluído do Virtualmin em $1 a $2 
 backup_failedsubject=Falha no backup do Virtualmin em $1 a $2 
 backup_upload=Carregando arquivo morto para o servidor FTP $1 ..
@@ -2393,7 +2410,7 @@ backup_epurge=Número de dias ausente ou não numérico para excluir backups ant
 backup_epurgetime=A exclusão de backups antigos é suportada apenas quando um destino baseado em data é usado e as <b>substituições de tempo de espera</b> estão ativadas
 backup_epurgepath=A exclusão de backups antigos não pode ser ativada, pois o diretório base não pôde ser extraído do caminho de destino. Ele deve ser um caminho como <tt>/backup/virtualmin-%d-%m-%Y</tt> e não pode ser um diretório de nível superior
 backup_ekey2=Você não tem permissão para usar a chave de backup selecionada
-backup_purging2=Excluindo backups de $2 anteriores a $1 dias.
+backup_purging3=Excluindo backups de $2 correspondentes a $3 com mais de $1 dias ..
 backup_purgenobase=.. não foi possível elaborar o diretório base do destino
 backup_deletingdir=Excluindo o diretório $1, com $2 dias de idade.
 backup_deletingfile=Excluindo o arquivo $1, com $2 dias de idade.
@@ -3743,6 +3760,7 @@ licence_goterr2=.. prazo de validade inválido : $1
 licence_ecannot=Você não tem permissão para verificar novamente a licença do Virtualmin
 licence_maxdoms=Seu sistema está licenciado para apenas $1 servidores, mas você possui $2.
 licence_maxservers2=Seu número de série $3 está licenciado apenas para o servidor $1, mas está sendo usado em $2.
+licence_maxwarn=A menos que este número de série seja usado temporariamente para migrar para um novo servidor, você deve comprar uma licença adicional em <a target=_blank href='$1'>$2</a> para impedir a violação das regras de serviço e evitar rescisão antecipada da licença existente.
 licence_ipchanged=O endereço IP principal do seu sistema parece ter mudado de $1 para $2. Os servidores virtuais que usam o endereço antigo podem estar inacessíveis ou veicular o conteúdo da Web errado.
 licence_changeip=Atualizar endereços IP incorretos
 licence_smallcert=Seu sistema está usando um certificado SSL com apenas 1% de comprimento, menor que o tamanho recomendado de 2048 bits. Este certificado foi emitido por $4 a $3 para o domínio $2.
@@ -3867,7 +3885,6 @@ scripts_phpmodfailed=.. falhou ao instalar o módulo de $1 pacotes possíveis
 scripts_esoftware=.. o módulo Webmin de pacotes de software não está instalado!
 scripts_eupdate=.. a instalação automática do módulo não está disponível no seu sistema.
 scripts_einstallmod=O módulo não está disponível mesmo após a instalação!
-scripts_addext=Ativando o módulo na configuração do PHP.
 scripts_gotmod=.. O módulo PHP $1 está agora disponível.
 scripts_nopearmod=Os módulos PHP Pear $1 são necessários, mas o módulo Pear Webmin não está disponível para instalá-los - continuando assim mesmo.
 scripts_nopearcmd=Os módulos PHP Pear $1 são necessários, mas o Pear para PHP versão $2 não está instalado - continuando assim mesmo.
@@ -3915,6 +3932,7 @@ scripts_proxyfailed=.. falha na configuração do proxy : $1
 scripts_epartial=.. a instalação foi apenas parcialmente concluída.
 scripts_icommand=Comando ausente $1 
 scripts_idbneed=É necessário um banco de dados $1 
+scripts_idbneed_link=, que pode ser habilitado na página <a href='$1'>$2</a>
 scripts_idbneedor=$1 ou $2
 scripts_gemver=Atualizando Ruby Gems para a versão mais recente de $1 ..
 scripts_gemverfailed=.. Falha na atualização das gemas : $1 
@@ -3944,6 +3962,18 @@ scripts_discontinued=Interrompido
 scripts_can=Disponível em
 scripts_gpl_to_pro=Agora disponível apenas no Pro
 scripts_gpl_to_pro_upgrade=A atualização para este script agora está disponível apenas no Pro
+
+scripts_gpl_pro_tip=Recurso Pro
+scripts_gpl_pro_tip_hide=Obrigado pelo aviso
+scripts_gpl_pro_tip_hide2=Obrigado, vou pensar nisso
+scripts_gpl_pro_tip_and=e
+scripts_gpl_pro_tip_enroll=Por favor, considere comprar a licença <a target=_blank href='$1'>Virtualmin Pro</a> para apoiar o desenvolvimento e desbloquear este e muitos outros recursos interessantes.
+scripts_gpl_pro_tip_list_scripts=Existem mais scripts de instalação disponíveis!
+scripts_gpl_pro_tip_enroll_list_scripts=Por favor, considere comprar a licença <a target=_blank href='$1'>Virtualmin Pro</a> para apoiar o desenvolvimento e desbloquear todos os scripts de instalação listados abaixo.
+scripts_gpl_pro_tip_clouds=Suporte para $1 provedores também está disponível!
+scripts_gpl_pro_tip_title_dashboard=Obtenha o Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Por favor, considere comprar a licença <a target=_blank href='$1'>Virtualmin Pro</a> para apoiar o desenvolvimento do painel de controle de hospedagem na web que você adora e desbloquear muitos recursos interessantes.
+scripts_gpl_pro_tip_dashboard=Você sabia que o Virtualmin Pro traz muitos recursos excelentes não incluídos na versão GPL?
 
 newnotify_title=Proprietários do servidor de email
 newnotify_desc=Essa página pode ser usada para enviar email aos proprietários dos servidores virtuais selecionados, por exemplo, para anunciar o tempo de inatividade do sistema, atualizações ou outras alterações de serviço. As seguintes subestações podem ser usadas no corpo e no assunto da mensagem:
@@ -5232,13 +5262,13 @@ upgrade_complete=Seu sistema foi atualizado com sucesso para o Virtualmin Pro!
 upgrade_theme=Ativando o tema <i>$1</i> ..
 upgrade_esharedroot=Seu diretório raiz Webmin $1 é compartilhado entre vários sistemas - atualizações de módulo não são permitidas
 upgrade_eyumrepo=O Virtualmin foi instalado a partir de um RPM, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
-
+upgrade_eyumlist=O pacote RPM $1 não foi encontrado na lista de pacotes disponíveis do repositório. Talvez um de seus repositórios atuais não esteja funcionando?
 upgrade_edebrepo=O Virtualmin foi instalado a partir de um pacote Debian, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
 upgrade_rpms=Atualizando pacotes do Virtualmin RPM : $1 
 upgrade_eyumfile=Nenhum repositório Virtualmin GPL foi encontrado em $1 
 upgrade_update=Atualizando pacotes disponíveis do APT ..
 upgrade_debs=Atualizando pacotes Debian do Virtualmin : $1 
-
+upgrade_yumclear=Limpando caches de repositório ..
 upgrade_etypematch=A atualização não é possível, pois o tipo de instalação do Virtualmin é <tt>$1</tt>, mas o Webmin é <tt>$2</tt>
 
 maillog_title=Pesquisar log de email
@@ -6243,6 +6273,11 @@ smtpcloud_header=Opções de provedor de entrega de correio
 smtpcloud_provider=Nome do provedor de entrega de correio
 smtpcloud_url=Site do provedor de entrega de correio
 smtpcloud_eaws_dns=O Amazon SES precisa que uma zona DNS seja habilitada para verificar novos domínios
+smtpcloud_epostfix=Amazon SES não pode ser configurado a menos que Postfix esteja instalado
+smtpcloud_esmtpuser=Falha ao converter a chave secreta SES em senha SMTP
+smtpcloud_egetver=Falha ao obter o status de verificação do Amazon SES : $1 
+smtpcloud_evaltok=A verificação do Amazon SES não foi concluída. Você deve criar um registro TXT DNS chamado $2 com o valor $1.
+smtpcloud_evaltok2=A verificação do Amazon SES não retornou nenhuma informação para este domínio!
 
 provision_title=Cliente de serviços Cloudmin
 provision_ecannot=Você não tem permissão para configurar o cliente de serviços Cloudmin

@@ -466,6 +466,28 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		}
 	}
 
+if ($d->{'dom'} ne $oldd->{'dom'} && &is_letsencrypt_cert($d) &&
+    !&check_domain_certificate($d->{'dom'}, $d)) {
+	# Domain name has changed ... re-request let's encrypt cert
+	&$first_print($text{'save_ssl12'});
+	if ($d->{'letsencrypt_dname'}) {
+		# Update any explicitly chosen domain names
+		my @dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+		foreach my $dn (@dnames) {
+			$dn = $d->{'dom'} if ($dn eq $oldd->{'dom'});
+			$dn =~ s/\.\Q$oldd->{'dom'}\E$/\.$d->{'dom'}/;
+			}
+		$d->{'letsencrypt_dname'} = join(" ", @dnames);
+		}
+	my ($ok, $err) = &renew_letsencrypt_cert($d);
+	if ($ok) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('save_essl12', $err));
+		}
+	}
+
 # If anything has changed that would impact the per-domain SSL cert for
 # another server like Postfix or Webmin, re-set it up as long as it is supported
 # with the new settings
@@ -1765,13 +1787,17 @@ return wantarray ? @rv : $rv[0];
 # hash's cert file. This can only be called at domain creation time.
 sub find_matching_certificate
 {
-local ($d) = @_;
-local $lnk = $d->{'link_certs'} ? 1 :
-	     $d->{'nolink_certs'} ? 0 :
-	     $config{'nolink_certs'} ? 0 : 1;
+my ($d) = @_;
+my $lnk = $d->{'link_certs'} == 1 ? 1 :
+	  $d->{'link_certs'} == 2 ? 2 :
+	  $d->{'nolink_certs'} ? 0 :
+	  $config{'nolink_certs'} == 1 ? 0 :
+	  $config{'nolink_certs'} == 2 ? 2 : 1;
 if ($lnk) {
-	local @sames = grep { $_->{'user'} eq $d->{'user'} }
-			    &find_matching_certificate_domain($d);
+	my @sames = &find_matching_certificate_domain($d);
+	if ($lnk != 2) {
+		@sames = grep { $_->{'user'} eq $d->{'user'} } @sames;
+		}
 	if (@sames) {
 		my ($same) = grep { !$_->{'parent'} } @sames;
 		$same ||= $sames[0];
@@ -2050,10 +2076,8 @@ if ($d->{'virt'}) {
 				  'enabled' => 1,
 				  'sectionname' => 'local',
 				  'sectionvalue' => $d->{'ip'},
-				  'file' => $l->{'file'},
-				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} + 0 };
-			&dovecot::save_section($conf, $imap);
+				  'file' => $l->{'file'} };
+			&dovecot::create_section($conf, $imap, $l);
 			push(@{$l->{'members'}}, $imap);
 			push(@$conf, $imap);
 			$l->{'eline'} = $imap->{'eline'}+1;
@@ -2080,10 +2104,8 @@ if ($d->{'virt'}) {
 				  'enabled' => 1,
 				  'sectionname' => 'local',
 				  'sectionvalue' => $d->{'ip'},
-				  'file' => $l->{'file'},
-				  'line' => $l->{'line'} + 1,
-				  'eline' => $l->{'line'} + 0 };
-			&dovecot::save_section($conf, $pop3);
+				  'file' => $l->{'file'} };
+			&dovecot::create_section($conf, $pop3, $l);
 			push(@{$l->{'members'}}, $pop3);
 			push(@$conf, $pop3);
 			$created++;
@@ -2165,9 +2187,7 @@ else {
 						  'file' => $cfile, },
 						],
 					  'file' => $cfile };
-				my $lref = &read_file_lines($l->{'file'}, 1);
-				$l->{'line'} = $l->{'eline'} = scalar(@$lref);
-				&dovecot::save_section($conf, $l);
+				&dovecot::create_section($conf, $l);
 				push(@$conf, $l);
 				&flush_file_lines($l->{'file'}, undef, 1);
 				}
@@ -2620,6 +2640,12 @@ return $info && ($info->{'issuer_cn'} =~ /Let's\s+Encrypt/i ||
 # Check all domains that need a new Let's Encrypt cert
 sub apply_letsencrypt_cert_renewals
 {
+my $le_max_renewals = 300.0;
+my $le_max_time = 3*60*60;	# 3 hours
+my $last_renew_time = $config{'last_letsencrypt_mass_renewal'};
+my $now = time();
+
+my $done = 0;
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
@@ -2657,7 +2683,17 @@ foreach my $d (&list_domains()) {
 	# Don't even attempt now if the lock is being held
 	next if (&test_lock($ssl_letsencrypt_lock));
 
+	# Don't exceed the global let's encrypt rate limit
+	if ($last_renew_time) {
+		my $diff = $now - $last_renew_time;
+		if ($done > $le_max_renewals / $le_max_time * $diff / 2) {
+			# Done too much this cycle (more than half of the limit)
+			last;
+			}
+		}
+
 	# Time to attempt the renewal
+	$done++;
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	my ($subject, $body);
 	if (!$ok) {
@@ -2681,6 +2717,9 @@ foreach my $d (&list_domains()) {
 	my $from = &get_global_from_address($d);
 	&send_notify_email($from, [$d], $d, $subject, $body);
 	}
+
+$config{'last_letsencrypt_mass_renewal'} = $now;
+&save_module_config();
 }
 
 # renew_letsencrypt_cert(&domain)
@@ -3129,6 +3168,14 @@ if ($cert_info) {
 		$d->{'ssl_cert_expiry'} = $expiry;
 		}
 	}
+}
+
+# can_reset_ssl(&domain)
+# Resetting SSL on it's own doesn't make sense, since it's included in the web
+# feature reset
+sub can_reset_ssl
+{
+return 0;
 }
 
 $done_feature_script{'ssl'} = 1;

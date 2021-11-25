@@ -38,11 +38,7 @@ if (!$module_name) {
 	$< == 0 || die "enable-feature.pl must be run as root";
 	}
 @OLDARGV = @ARGV;
-
-$first_print = \&first_text_print;
-$second_print = \&second_text_print;
-$indent_print = \&indent_text_print;
-$outdent_print = \&outdent_text_print;
+&set_all_text_print();
 
 # Parse command-line args
 while(@ARGV > 0) {
@@ -73,6 +69,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
+		}
+	elsif ($a eq "--help") {
+		&usage();
 		}
 	else {
 		&usage("Unknown parameter $a");

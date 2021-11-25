@@ -72,7 +72,9 @@ setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet he
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
 setup_usermindown=.. momenteel niet actief
+setup_failed=.. mislukt
 setup_logrotatealready=.. al ingeschakeld voor logbestand $1
+setup_econtenting=.. kon aanvankelijke inhoud niet maken : $1
 setup_sshkey1=SSH-privé- en openbare sleutels genereren. ..
 setup_sshkey2=Openbare SSH-sleutel autoriseren. ..
 setup_esshkeydir=Virtuele server heeft een directory en een Unix-gebruiker nodig
@@ -94,6 +96,9 @@ setup_dnscloudclash=DNS-zone bestaat al op cloudprovider $1
 setup_mail_smtpcloud=Cloudmailprovider $1 configureren ..
 setup_mail_nosmtpcloud=.. aanbieder bestaat niet!
 setup_mail_esmtpcloud=.. mislukt  : $1
+setup_overquota=Maken van virtuele server is mislukt vanwege gebrek aan quota : $1
+setup_overgroupquota=Serverquotum voor $2 van $1 is bereikt
+setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
 
 users_indom=$1 gebruikers in domein $2
 
@@ -172,6 +177,12 @@ save_mailto=Aliassen bijwerken voor contactadres.
 save_statussslcert=E-mailadres wijzigen in SSL-certificaatstatusmonitor.
 save_erquota=Het schijfquotum voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat het eigendom is van reseller $1 met een quotumlimiet
 save_erbw=De bandbreedtelimiet voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat deze eigendom is van reseller $1 die een bandbreedtelimiet heeft
+save_installed_scripts_dbuser=Database gebruikersnaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbpass=Databasewachtwoord bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_db=Databasenaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_err_file=.. mislukt : kan <tt>$1</tt> bestand niet lezen
+save_installed_scripts_err_file_lines=.. failed : kon geen strings vinden om te vervangen in <tt>$1</tt> bestand
+save_installed_scripts_done=.. klaar voor <tt>$1</tt> bestand
 
 acl_migrate=Kunnen back-ups migreren?
 
@@ -217,6 +228,7 @@ check_fcgiwrapok=CGI-scripts kunnen worden uitgevoerd met fcgiwrap.
 check_webphpvers=De volgende PHP-versies zijn beschikbaar : $1
 check_webphpnovers=Er zijn geen PHP-versies gevonden op dit systeem!
 check_webphpmodes=De volgende PHP-uitvoeringsmodi zijn beschikbaar : $1
+check_ewebphpmodes=Er zijn geen PHP-uitvoeringsmodi beschikbaar!
 check_webphpversinis=PHP-versies zijn gewijzigd in $1 sinds de laatste controle. Ontbrekende php.ini-bestanden opnieuw genereren.
 check_webphpfpm=Ondersteuning voor PHP-FPM versie $1 is beschikbaar op dit systeem.
 check_webphpnofpm=PHP-FPM-ondersteuning is niet gedetecteerd : $1
@@ -240,11 +252,14 @@ check_eresolvlist=lijst met DNS-servers
 check_dnsmissing=Het systeem lijkt geen DNS-servers te hebben geconfigureerd. Het standaardgedrag van het gebruik van een lokale DNS-server zou echter nog steeds moeten werken.
 check_jailkitok=Op dit systeem zijn Chroot-jails beschikbaar
 check_jailkiterr=Chroot-jails zijn niet beschikbaar : $1
-check_yumrepomissing=Het Virtualmin APT-repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
+check_eyumrepofile=Het configuratiebestand van de Virtualmin-repository $1 bestaat niet!
+check_yumrepook=De Virtualmin-repository is correct geconfigureerd
+check_yumrepowrong=Het configuratiebestand van de Virtualmin-repository $1 bevat het verkeerde serienummer van de licentiesleutel!
+check_yumrepomissing=Het configuratiebestand van de Virtualmin-repository $1 verwijst niet naar software.virtualmin.com!
 check_eaptrepofile=Het APT-repository-configuratiebestand $1 bestaat niet!
 check_aptrepook=De Virtualmin APT-repository is correct geconfigureerd
 check_aptrepowrong=Het APT-repository-configuratiebestand $1 bevat het verkeerde serienummer van de licentiesleutel!
-check_aptrepomissing=Het repository-configuratiebestand $1 verwijst niet naar software.virtualmin.com!
+check_aptrepomissing=Het configuratiebestand van de Virtualmin APT-repository $1 verwijst niet naar software.virtualmin.com!
 
 check_eqmailldap=Qmail+LDAP-ondersteuning is verwijderd in Virtualmin 6.00
 
@@ -347,6 +362,8 @@ backup_ebbpath2=Backblaze-pad kan niet beginnen of eindigen met een schuine stre
 backup_es3pathslash=De S3-bucket en het pad mogen geen backslash bevatten
 backup_es3path2=S3-bucket en -pad kunnen niet beginnen of eindigen met een schuine streep
 backup_einconly=Er kan geen incrementele geplande back-up worden gemaakt, tenzij u ten minste één volledige back-up hebt geconfigureerd
+backup_donepurge=De back-up is voltooid, maar het verwijderen is mislukt. De uiteindelijke grootte was $1.
+backup_purgesubject=Voltooide back-up van Virtualmin op $1 tot $2, maar verwijderen mislukt
 backup_upload6=Archief uploaden naar Rackspace's Cloud Files-service.
 backup_upload7=Archief uploaden naar Google Cloud Storage.
 backup_upload8=Archief uploaden naar Dropbox ..
@@ -369,6 +386,7 @@ backup_ezipkey=Versleuteling kan niet worden gebruikt met back-ups in ZIP-formaa
 backup_edesturl=Back-upbestemming $1 is ongeldig : $2
 backup_eownergone=Domein van eigenaar bestaat niet meer!
 backup_ekey2=U mag de geselecteerde back-upsleutel niet gebruiken
+backup_purging3=Back-ups verwijderen van $2 die overeenkomen met $3 ouder dan $1 dagen ..
 backup_purgedtime=.. $1 backups gevonden, maar geen enkele was oud genoeg
 backup_purgeegcbuckets=.. kan Google-buckets niet weergeven : $1
 backup_purgeefiles2=.. kon Rackspace-bestanden niet weergeven : $1
@@ -668,6 +686,7 @@ licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domei
 licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
 licence_goterr2=.. ongeldige vervaldatum : $1
 licence_maxservers2=Uw serienummer $3 heeft alleen een licentie voor $1 server, maar wordt gebruikt op $2.
+licence_maxwarn=Tenzij dit serienummer tijdelijk wordt gebruikt om naar een nieuwe server te migreren, moet u een extra licentie aanschaffen bij <a target=_blank href='$1'>$2</a> om schending van de serviceregels te voorkomen en te voorkomen voortijdige beëindiging van de bestaande licentie.
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen
 licence_smallcert=Uw systeem gebruikt een SSL-certificaat dat slechts $1 bits lang is, wat kleiner is dan de aanbevolen grootte van 2048 bits. Dit certificaat is uitgegeven door $4 tot $3 voor het domein $2.
@@ -693,6 +712,7 @@ scripts_phpmodinst=Module installeren vanuit softwarepakketten ..
 scripts_phpmoddone=.. succesvol geïnstalleerde module uit pakket $1
 scripts_phpmodfailed=.. kan module van $1 mogelijke pakketten niet installeren
 scripts_passmode4=Eerste wachtwoord voor script
+scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server
 scripts_iphpnover=Er is geen PHP-versie gevonden voor deze virtuele server
 scripts_iphpfullver=PHP-versie $1 of hoger is vereist, maar deze virtuele server gebruikt versie $2
@@ -710,6 +730,18 @@ scripts_discontinued=Stopgezet
 scripts_can=Beschikbaar in
 scripts_gpl_to_pro=Nu alleen beschikbaar in Pro
 scripts_gpl_to_pro_upgrade=Upgrade voor dit script is nu alleen beschikbaar in Pro
+
+scripts_gpl_pro_tip=Pro-functie
+scripts_gpl_pro_tip_hide=Bedankt voor de heads-up
+scripts_gpl_pro_tip_hide2=Bedankt, ik zal er over nadenken
+scripts_gpl_pro_tip_and=en
+scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te ontgrendelen.
+scripts_gpl_pro_tip_list_scripts=Er zijn meer installatiescripts beschikbaar!
+scripts_gpl_pro_tip_enroll_list_scripts=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en alle onderstaande installatiescripts te ontgrendelen.
+scripts_gpl_pro_tip_clouds=Ondersteuning voor $1 providers is ook beschikbaar!
+scripts_gpl_pro_tip_title_dashboard=Download Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling van het webhostingcontrolepaneel waar u van houdt te ondersteunen en om veel coole functies te ontgrendelen.
+scripts_gpl_pro_tip_dashboard=Wist je dat Virtualmin Pro tal van geweldige functies biedt die niet zijn opgenomen in de GPL-versie?
 
 newnotify_users=Ook e-mailen in geselecteerde domeinen?
 
@@ -902,6 +934,8 @@ dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
 
 upgrade_epackages=Geen pakketten gevonden om te installeren!
+upgrade_eyumlist=Het $1 RPM-pakket is niet gevonden in de lijst met beschikbare pakketten uit de repository. Misschien werkt een van uw huidige repositories niet?
+upgrade_yumclear=Opslagplaatscaches wissen ..
 
 exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.
@@ -1082,6 +1116,11 @@ smtpcloud_header=Opties voor e-mailbezorger
 smtpcloud_provider=Naam van e-mailbezorger
 smtpcloud_url=Website van de e-mailbezorger
 smtpcloud_eaws_dns=Amazon SES heeft een DNS-zone nodig om nieuwe domeinen te verifiëren
+smtpcloud_epostfix=Amazon SES kan niet worden geconfigureerd tenzij Postfix is geïnstalleerd
+smtpcloud_esmtpuser=Kan geheime SES-sleutel niet converteren naar SMTP-wachtwoord
+smtpcloud_egetver=Kan Amazon SES-verificatiestatus niet verkrijgen : $1
+smtpcloud_evaltok=Amazon SES-verificatie is niet voltooid. U moet een DNS TXT-record maken met de naam $2 met de waarde $1.
+smtpcloud_evaltok2=Amazon SES-verificatie heeft geen informatie voor dit domein geretourneerd!
 
 provision_nolimit=onbeperkt
 

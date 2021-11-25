@@ -599,6 +599,7 @@ setup_virtnotdone=.. IP $1のインターフェイスが見つかりませんで
 setup_virt6=IPv6アドレス $1を追加しています ..
 setup_virt6done=..インターフェース $1に追加
 setup_done=..完了
+setup_failed=.. 失敗した
 setup_notrun=.. 走っていない！
 setup_quota=ユーザーのクォータの設定 ..
 setup_webalizer=スケジュールされたWebalizerレポートの設定 ..
@@ -623,6 +624,7 @@ setup_evaddaliasdomain=.. vaddaliasdomainに失敗しました： $1
 setup_fwding=すべてのメールを $1に転送するためのエイリアスを追加しています ..
 setup_styleing=最初のWebサイトスタイルを適用しています ..
 setup_contenting=初期Webサイトインデックスページを作成しています ..
+setup_econtenting=..初期コンテンツの作成に失敗しました： $1
 setup_sshkey1=SSH秘密鍵と公開鍵の生成 ..
 setup_sshkey2=SSH公開鍵の承認 ..
 setup_esshkeydir=仮想サーバーにはディレクトリとUnixユーザーが必要です
@@ -684,6 +686,9 @@ setup_dnscloudclash=DNSゾーンはすでにクラウドプロバイダー $1に
 setup_mail_smtpcloud=クラウドメールプロバイダー $1の構成 ..
 setup_mail_nosmtpcloud=..プロバイダーが存在しません！
 setup_mail_esmtpcloud=..失敗しました： $1
+setup_overquota=クォータが不足しているため、仮想サーバーの作成に失敗しました： $1
+setup_overgroupquota=$1の $2のサーバークォータに達しました
+setup_overuserquota=$1の $2のドメイン所有者クォータに達しました
 
 indom=ドメイン $1内
 equotacommand=クォータコマンド $1が失敗しました： $2
@@ -1461,6 +1466,12 @@ save_euserquota=現在のディスク使用量は既に $1であるため、サ�
 save_aliasusers=無効にされている機能は、次のエイリアスサーバーで使用されています： $1
 save_erquota=この仮想サーバーのディスククォータは、クォータ制限のあるリセラー $1が所有しているため、無制限に設定できません
 save_erbw=この仮想サーバーは帯域幅制限のあるリセラー $1が所有しているため、帯域幅制限を無制限に設定することはできません
+save_installed_scripts_dbuser=インストールされたスクリプトのデータベースユーザー名を更新しています。
+save_installed_scripts_dbpass=インストールされたスクリプトのデータベースパスワードを更新しています。
+save_installed_scripts_db=インストールされたスクリプトのデータベース名を更新しています。
+save_installed_scripts_err_file=..失敗：<tt>$1</tt>ファイルを読み取れません
+save_installed_scripts_err_file_lines=..失敗：<tt>$1</tt>ファイルで置き換える文字列が見つかりませんでした
+save_installed_scripts_done=.. <tt>$1</tt>ファイルに対して完了
 
 luser_err=ローカルユーザーを保存できませんでした
 luser_etaken=同じ名前のユーザーが既に存在します
@@ -1900,6 +1911,7 @@ check_fcgiwrapok=CGIスクリプトは、fcgiwrapを使用して実行できま�
 check_webphpvers=次のPHPバージョンを使用できます： $1
 check_webphpnovers=このシステムでPHPバージョンは見つかりませんでした！
 check_webphpmodes=次のPHP実行モードを使用できます： $1
+check_ewebphpmodes=PHP実行モードは利用できません！
 check_webphpversinis=最後のチェック以降、PHPのバージョンは $1に変更されました。不足しているphp.iniファイルを再生成します。
 check_webphpfpm=このシステムでは、PHP-FPMバージョン $1のサポートを利用できます。
 check_webphpnofpm=PHP-FPMサポートが検出されませんでした： $1
@@ -2029,11 +2041,14 @@ check_ehomeformat=ホームディレクトリ形式 $1には、ユーザー名�
 check_ehomestyle=ホームディレクトリのスタイルは、「ベースディレクトリのみ」に設定されています。これは、Virtualminでは使用できません。これは、<a href='$2'>ユーザーとグループモジュールの構成</a>ページで修正できます。
 check_jailkitok=Chroot刑務所はこのシステムで利用可能です
 check_jailkiterr=Chroot刑務所は利用できません： $1
-check_yumrepomissing=Virtualmin APTリポジトリ設定ファイル $1がsoftware.virtualmin.comを参照していません！
+check_eyumrepofile=Virtualminリポジトリ構成ファイル $1が存在しません！
+check_yumrepook=Virtualminリポジトリが正しく構成されている
+check_yumrepowrong=Virtualminリポジトリ構成ファイル $1に、間違ったシリアル番号のライセンスキーが含まれています。
+check_yumrepomissing=Virtualminリポジトリ構成ファイル $1はsoftware.virtualmin.comを参照していません！
 check_eaptrepofile=APTリポジトリ設定ファイル $1は存在しません！
 check_aptrepook=Virtualmin APTリポジトリが正しく構成されている
 check_aptrepowrong=APTリポジトリ設定ファイル $1に間違ったシリアル番号のライセンスキーが含まれています！
-check_aptrepomissing=リポジトリ設定ファイル $1は、software.virtualmin.com！を参照していません。
+check_aptrepomissing=Virtualmin APTリポジトリ設定ファイル $1はsoftware.virtualmin.comを参照していません！
 
 checkmap_enone=<a href='$1'>Postfix構成</a>でマップソースが見つかりませんでした
 checkmap_esupport=マップソース<tt>$1</tt>はPostfixでサポートされていません-Postfixライブラリをインストールするか、再コンパイルする必要があるかもしれません
@@ -2450,11 +2465,13 @@ backup_eskey=S3秘密鍵がないか無効です
 backup_esfile=S3ファイル名に無効な文字
 backup_einconly=少なくとも1つのフルバックアップを構成していないと、増分スケジュールバックアップを作成できません
 backup_done=バックアップが完了しました。最終的なサイズは $1でした。
+backup_donepurge=バックアップは完了しましたが、削除に失敗しました。最終的なサイズは $1でした。
 backup_partial=バックアップは部分的に完了しています。最終的なサイズは $1でした。
 backup_partial2=失敗した仮想サーバー：
 backup_time=合計バックアップ時間は $1でした。
 backup_failed=バックアップに失敗しました！理由については、上記の進行状況の出力をご覧ください。
 backup_donesubject=$1から $2へのVirtualminのバックアップが完了しました
+backup_purgesubject=$1から $2でVirtualminのバックアップを完了しましたが、削除に失敗しました
 backup_partialsubject=$1から $2へのVirtualminの部分的に完了したバックアップ
 backup_failedsubject=$1から $2へのVirtualminのバックアップに失敗しました
 backup_upload=FTPサーバー $1にアーカイブをアップロードしています. ..
@@ -2564,7 +2581,7 @@ backup_epurge=古いバックアップを削除するまでの日数がないか
 backup_epurgetime=古いバックアップの削除は、日付ベースの宛先が使用され、<b>strftime置換</b>が有効になっている場合にのみサポートされます
 backup_epurgepath=ベースディレクトリを宛先パスから抽出できなかったため、古いバックアップの削除を有効にできません。 <tt>/backup/virtualmin-%d-%m-%Y</tt>ようなパスである必要があり、トップレベルのディレクトリにすることはできません
 backup_ekey2=選択したバックアップキーの使用は許可されていません
-backup_purging2=$1日より古い $2からバックアップを削除しています. ..
+backup_purging3=$1日より古い $3に一致する $2からバックアップを削除しています。
 backup_purgenobase=..宛先からベースディレクトリを処理できませんでした
 backup_deletingdir=$2日前のディレクトリ $1を削除しています. ..
 backup_deletingfile=$2日前のファイル $1を削除しています. ..
@@ -3959,6 +3976,7 @@ licence_goterr2=..有効期限が無効です： $1
 licence_ecannot=Virtualminライセンスを再確認することはできません
 licence_maxdoms=システムには $1サーバーのみのライセンスがありますが、 $2があります。
 licence_maxservers2=シリアル番号 $3は $1サーバーに対してのみライセンスされていますが、 $2で使用されています。
+licence_maxwarn=このシリアル番号を新しいサーバーに移行するために一時的に使用する場合を除き、サービスルールへの違反を防ぎ、回避するために、<a target=_blank href='$1'>$2</a>で追加のライセンスを購入する必要があります。既存のライセンスの早期終了。
 licence_ipchanged=システムのプライマリIPアドレスが $1から $2に変更されたようです。古いアドレスを使用している仮想サーバーに到達できないか、間違ったWebコンテンツを提供している可能性があります。
 licence_changeip=正しくないIPアドレスを更新する
 licence_smallcert=システムで使用されているSSL証明書の長さは $1ビットのみで、推奨サイズの2048ビットよりも小さいです。この証明書は、ドメイン $2に対して $4から $3に発行されました。
@@ -4085,7 +4103,6 @@ scripts_phpmodfailed=.. $1の可能なパッケージからモジュールをイ
 scripts_esoftware=..ソフトウェアパッケージWebminモジュールがインストールされていません！
 scripts_eupdate=..自動モジュールインストールは、ご使用のシステムでは使用できません。
 scripts_einstallmod=インストール後もモジュールは使用できません！
-scripts_addext=PHP構成でモジュールを有効にしています ..
 scripts_gotmod=.. PHPモジュール $1が利用可能になりました。
 scripts_nopearmod=PHP Pearモジュール $1は必須ですが、WebminのPearモジュールをインストールしてそれらをインストールすることはできません-とにかく続行します。
 scripts_nopearcmd=PHP Pearモジュール $1が必要ですが、Pear for PHPバージョン $2がインストールされていません-続行します。
@@ -4136,6 +4153,7 @@ scripts_proxyfailed=..プロキシのセットアップに失敗しました： 
 scripts_epartial=..インストールは部分的にしか完了していませんでした。
 scripts_icommand=コマンド $1がありません
 scripts_idbneed=$1データベースが必要です
+scripts_idbneed_link=、<a href='$1'>$2</a>ページで有効にできます
 scripts_idbneedor=$1または $2
 scripts_gemver=Ruby Gemsを $1から最新バージョンに更新しています ..
 scripts_gemverfailed=..宝石の更新に失敗しました： $1
@@ -4165,6 +4183,18 @@ scripts_discontinued=製造中止
 scripts_can=で利用可能
 scripts_gpl_to_pro=Proでのみ利用可能になりました
 scripts_gpl_to_pro_upgrade=このスクリプトのアップグレードは、Proでのみ利用可能になりました
+
+scripts_gpl_pro_tip=プロ機能
+scripts_gpl_pro_tip_hide=ヘッドアップをありがとう
+scripts_gpl_pro_tip_hide2=ありがとう、私はそれについて考えます
+scripts_gpl_pro_tip_and=と
+scripts_gpl_pro_tip_enroll=<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討して、開発をサポートし、この機能や他の多くの優れた機能のロックを解除してください。
+scripts_gpl_pro_tip_list_scripts=より多くのインストールスクリプトが利用可能です！
+scripts_gpl_pro_tip_enroll_list_scripts=開発をサポートし、以下にリストされているすべてのインストールスクリプトのロックを解除するには、<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討してください。
+scripts_gpl_pro_tip_clouds=$1プロバイダーのサポートも利用できます！
+scripts_gpl_pro_tip_title_dashboard=VirtualminProを入手する
+scripts_gpl_pro_tip_enroll_dashboard=<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討して、お気に入りのWebホスティングコントロールパネルの開発をサポートし、多くの優れた機能のロックを解除してください。
+scripts_gpl_pro_tip_dashboard=Virtualmin ProがGPLバージョンに含まれていない多くの優れた機能をもたらすことをご存知ですか？
 
 newnotify_title=メールサーバーの所有者
 newnotify_desc=このページを使用して、選択した仮想サーバーの所有者に電子メールを送信できます。たとえば、システムのダウンタイム、アップグレード、またはその他のサービスの変更を通知できます。メッセージの本文と件名には次の置換を使用できます。
@@ -5489,13 +5519,13 @@ upgrade_complete=システムがVirtualmin Proに正常にアップグレード�
 upgrade_theme=テーマ<i>$1</i>を有効にしています. ..
 upgrade_esharedroot=Webminルートディレクトリ $1は複数のシステム間で共有されています-モジュールの更新は許可されていません
 upgrade_eyumrepo=VirtualminはRPMからインストールされましたが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
-
+upgrade_eyumlist=リポジトリから利用可能なパッケージのリストに $1RPMパッケージが見つかりませんでした。おそらく、現在のリポジトリの1つが機能していませんか？
 upgrade_edebrepo=VirtualminはDebianパッケージからインストールされていますが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
 upgrade_rpms=Virtualmin RPMパッケージのアップグレード： $1
 upgrade_eyumfile=$1にVirtualmin GPLリポジトリが見つかりませんでした
 upgrade_update=APTから利用可能なパッケージを更新しています ..
 upgrade_debs=Virtualmin Debianパッケージのアップグレード： $1
-
+upgrade_yumclear=リポジトリキャッシュのクリア ..
 upgrade_etypematch=Virtualminのインストールタイプがあるようアップグレードすることはできません<tt>$1</tt>が、Webminのは<tt>$2</tt>
 
 maillog_title=メールログを検索
@@ -6526,6 +6556,11 @@ smtpcloud_header=メール配信プロバイダーのオプション
 smtpcloud_provider=メール配信プロバイダー名
 smtpcloud_url=メール配信プロバイダーのWebサイト
 smtpcloud_eaws_dns=Amazon SESでは、新しいドメインを確認するためにDNSゾーンを有効にする必要があります
+smtpcloud_epostfix=Postfixがインストールされていない限り、AmazonSESを設定することはできません
+smtpcloud_esmtpuser=SES秘密鍵をSMTPパスワードに変換できませんでした
+smtpcloud_egetver=Amazon SES検証ステータスの取得に失敗しました： $1
+smtpcloud_evaltok=AmazonSESの検証が完了していません。値 $1の $2という名前のDNSTXTレコードを作成する必要があります。
+smtpcloud_evaltok2=Amazon SES検証では、このドメインの情報は返されませんでした。
 
 provision_title=Cloudminサービスクライアント
 provision_ecannot=Cloudminサービスクライアントのセットアップは許可されていません

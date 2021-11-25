@@ -79,7 +79,8 @@ if ($config{'virus'}) {
 		print &ui_table_row(
 			&hlink($text{'spam_scanner'}, 'spam_scanner'),
 			&ui_radio('scanner', $mode,
-			  [ [ 0, $text{'spam_scanner0'}."<br>" ],
+			  [ $mode == 0 ?
+			      ( [ 0, $text{'spam_scanner0'}."<br>" ] ) : ( ),
 			    [ 1, $text{'spam_scanner1'}."<br>" ],
 			    [ 4, $text{'spam_scanner4'}."<br>" ],
 			    $show_stream ?

@@ -91,6 +91,15 @@ C<--move-document-dir> flag.
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
+If your system supports Fcgiwrap for running CGI scripts, you can use the 
+C<--enable-fcgiwrap> flag to switch to it instead of using SuExec, or 
+C<--disable-fcgiwrap> to switch back.
+
+If your webserver supports multiple HTTP protocols, you can use the 
+C<--protocols> flag to choose which are enabled for the website. This flag must
+be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
+the default protocols for your webserver, use the C<--default-protocols> flag.
+
 =cut
 
 package virtual_server;
@@ -260,6 +269,34 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-fpm-socket") {
 		$fpmsock = 1;
 		}
+	elsif ($a eq "--enable-fcgiwrap") {
+		$fcgiwrap = 1;
+		}
+	elsif ($a eq "--disable-fcgiwrap") {
+		$fcgiwrap = 0;
+		}
+	elsif ($a eq "--add-directive") {
+		my ($n, $v) = split(/\s+/, shift(@ARGV));
+		$n ne "" && $n ne "" ||
+			&usage("--add-directive must be followed by a ".
+			       "directive name and value");
+		push(@add_dirs, [ $n, $v ]);
+		}
+	elsif ($a eq "--remove-directive") {
+		my ($n, $v) = split(/\s+/, shift(@ARGV));
+		$n ne "" || &usage("--remove-directive must be followed by a ".
+			           "directive name and optional value");
+		push(@remove_dirs, [ $n, $v ]);
+		}
+	elsif ($a eq "--protocols") {
+		$protocols = [ split(/\s+/, shift(@ARGV)) ];
+		}
+	elsif ($a eq "--default-protocols") {
+		$protocols = [ ];
+		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -271,7 +308,8 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $defmode || &usage("Nothing to do");
+  $fpmsock || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
+  $protocols || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -362,6 +400,14 @@ if ($defaultwebsite && @doms > 1) {
 if ($includes ne "") {
 	$includes =~ /^\.([a-z0-9\.\_\-]+)$/i ||
 	    &usage("--includes must be followed by an extension like .html");
+	}
+
+# Validate fcgiwrap change
+if (defined($fcgiwrap)) {
+	$fcgiwrap && !&supports_fcgiwrap() &&
+		&usage("Fcgiwrap is not supported on this system");
+	!$fcgiwrap && !&supports_suexec() &&
+		&usage("Suexec is not supported on this system");
 	}
 
 # Lock them all
@@ -716,9 +762,98 @@ foreach $d (@doms) {
 		&$second_print(".. done");
 		}
 
+	if (defined($fcgiwrap)) {
+		# Turn fcgiwrap on or off
+		if ($fcgiwrap) {
+			&$first_print(
+				"Switching to fcgiwrap for CGI scripts ..");
+			if ($d->{'fcgiwrap_port'}) {
+				&$second_print(".. already enabled");
+				}
+			elsif ($err = &enable_apache_fcgiwrap($d)) {
+				&$second_print(".. failed : $err");
+				}
+			else {
+				&$second_print(
+				  ".. done, using port $d->{'fcgiwrap_port'}");
+				}
+			}
+		else {
+			&$first_print("Switching to suexec for CGI scripts ..");
+			if (!$d->{'fcgiwrap_port'}) {
+				&$second_print(".. already enabled");
+				}
+			elsif ($err = &disable_apache_fcgiwrap($d)) {
+				&$second_print(".. failed : $err");
+				}
+			else {
+				&$second_print(".. done");
+				}
+			}
+		}
+
+	# Change HTTP protocols
+	if ($protocols) {
+		if (@$protocols) {
+			&$first_print("Updating HTTP protocols to ".
+				      join(" ", @$protocols)." ..");
+			}
+		else {
+			&$first_print("Updating HTTP protocols to defaults ..");
+			}
+		$canprots = &get_domain_supported_http_protocols($d);
+		%canprots = map { $_, 1 } @$canprots;
+		@cannotprots = grep { !$canprots{$_} } @$protocols;
+		if (@cannotprots) {
+			&$second_print(".. protocol ".join(" ", @cannotprots).
+				       " is not supported");
+			}
+		elsif ($err = &save_domain_http_protocols($d, $protocols)) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+
+	# Update Apache directives
+	if ($d->{'web'} && (@add_dirs || @remove_dirs) && !$d->{'alias'}) {
+		&$first_print("Updating Apache directives ..");
+		&require_apache();
+		my @ports = ( $d->{'web_port'},
+			      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+		foreach my $p (@ports) {
+			my ($virt, $vconf, $conf) =
+				&get_apache_virtual($d->{'dom'}, $p);
+			next if (!$virt);
+			foreach my $a (@add_dirs) {
+				my @old = &apache::find_directive(
+					$a->[0], $vconf);
+				push(@old, $a->[1]);
+				&apache::save_directive(
+					$a->[0], \@old, $vconf, $conf);
+				}
+			foreach my $a (@remove_dirs) {
+				my @old;
+				if ($a->[1] ne '') {
+					@old = &apache::find_directive(
+						$a->[0], $vconf);
+					@old = grep { $_ ne $a->[1] } @old;
+					}
+				&apache::save_directive(
+					$a->[0], \@old, $vconf, $conf);
+				}
+			&flush_file_lines($virt->{'file'});
+			}
+		&register_post_action(\&restart_apache);
+		&$second_print(".. added ".scalar(@add_dirs)." and removed ".
+			       scalar(@remove_dirs));
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert || $linkcert || $fixhtmldir) {
+	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
+	    defined($fcgiwrap)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
@@ -775,7 +910,11 @@ print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert | --link-ssl-cert]\n";
+print "                     [--enable-fcgiwrap | --disable-fcgiwrap]\n";
 print "                     [--sync-tlsa]\n";
+print "                     [--add-directive \"name value\"]\n";
+print "                     [--remove-directive \"name value\"]\n";
+print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 exit(1);
 }
 

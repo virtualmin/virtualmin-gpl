@@ -203,6 +203,7 @@ my ($b, $wanticon) = @_;
 my $i = { 'type' => 'item',
 	  'desc' => $b->{'title'},
 	  'link' => $b->{'url'} };
+$i->{'inactive'} = 1 if ($b->{'inactive'});
 if ($b->{'icon'} && $wanticon) {
 	$i->{'icon'} = '/'.$module_name.'/images/'.$b->{'icon'}.'.png';
 	}

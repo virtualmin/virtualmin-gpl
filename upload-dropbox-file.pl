@@ -40,6 +40,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multipart") {
 		$multipart = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

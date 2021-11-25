@@ -40,6 +40,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--chain") {
 		$chain = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

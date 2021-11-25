@@ -282,6 +282,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-link-domain") {
 		$linkdname = "";
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

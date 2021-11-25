@@ -99,6 +99,31 @@ sub feature_enable
 {
 }
 
+# feature_can_reset(&domain)
+# Should return 1 if resetting makes no sense for this feature
+# (optional, assumes yes if undefined)
+sub feature_can_reset
+{
+}
+
+# feature_check_reset(&domain)
+# Should return an error message if resetting this feature would cause loss
+# of settings. By default, Virtualmin implements a reset by turning the feature
+# off and on again, unless feature_reset is defined.
+# (optional)
+sub feature_check_reset
+{
+}
+
+# feature_reset(&domain)
+# Resets this feature to safe default settings. Ideally should preserve and
+# re-generate any customization - if not, feature_check_reset must notify the
+# user as to what will be lost.
+# (optional)
+sub feature_reset
+{
+}
+
 # feature_inputs_show([&domain])
 # Returns 1 if feature inputs should be shown for this domain, this may be
 # undef if it doesn't exist yet.
@@ -585,6 +610,27 @@ sub feature_change_web_error_log
 # Returns an internal config object for the web host on some domain and port,
 # or undef if not found
 sub feature_get_domain_web_config
+{
+}
+
+# feature_get_supported_http_protocols(&domain)
+# Returns an array ref of supported HTTP protocols for this domain, or an
+# empty list if protocols cannot be edited
+sub feature_get_supported_http_protocols
+{
+}
+
+# feature_get_http_protocols(&domain)
+# Returns an array ref of enabled HTTP protocols for this domain, or an error
+# message string if protocols could not be retrieved.
+sub feature_get_http_protocols
+{
+}
+
+# feature_save_http_protocols(&domain, &protocols)
+# Updates the HTTP protocols for this domain from the given array ref. Returns
+# undef on success, or an error message on failure.
+sub feature_save_http_protocols
 {
 }
 

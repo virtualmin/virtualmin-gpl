@@ -4410,12 +4410,14 @@ push(@r, @{$r->{'values'}}) if ($val);
 return join("/", @r);
 }
 
-# modify_dns_cloud(&domain, cloud-name)
+# modify_dns_cloud(&domain, cloud-name|"local"|"services")
 # Update the Cloud DNS provider for a domain, while preserving records
 sub modify_dns_cloud
 {
 my ($d, $cloud) = @_;
-return undef if ($d->{'dns_cloud'} eq $cloud);
+my $oldcloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+	       $d->{'provision_dns'} ? 'services' : 'local';
+return undef if ($oldcloud eq $cloud);
 
 # Is the cloud provider working?
 if ($cloud ne "local") {
@@ -4555,6 +4557,42 @@ my ($d) = @_;
 return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
 my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
 return $c && $c->{'defttl'};
+}
+
+# check_reset_dns(&domain)
+# Check for non-standard DNS records
+sub check_reset_dns
+{
+my ($d) = @_;
+return undef if ($d->{'alias'});
+
+# Get the default set of records
+my $temp = &transname();
+local $bind8::config{'auto_chroot'} = undef;
+local $bind8::config{'chroot'} = undef;
+&create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
+my $defrecs = [ &bind8::read_zone_file($temp, $d->{'dom'}) ];
+
+# Compare with the actual records
+my $recs = [ &get_domain_dns_records($d) ];
+return undef if (!@$recs);
+my @doomed;
+foreach my $r (@$recs) {
+	next if (&is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
+	my ($dr) = grep { $_->{'name'} eq $r->{'name'} &&
+			  $_->{'type'} eq $r->{'type'} } @$defrecs;
+	if (!$dr) {
+		my $n = $r->{'name'};
+		$n =~ s/\.\Q$d->{'dom'}\E\.//;
+		push(@doomed, "$n ($r->{'type'})");
+		}
+	}
+
+if (@doomed) {
+	return &text('reset_edns', join(", ", @doomed));
+	}
+return undef;
 }
 
 $done_feature_script{'dns'} = 1;

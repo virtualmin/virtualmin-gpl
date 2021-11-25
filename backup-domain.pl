@@ -236,6 +236,9 @@ while(@ARGV > 0) {
 			       $c eq "zip" ? 3 : -1;
 		&usage("Invalid compression format $c") if ($compression < 0);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

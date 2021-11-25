@@ -163,12 +163,14 @@ setup_emysqluser_provclash=.. dieses System ist für die Verwendung des Remote-M
 setup_usermindown=.. läuft gerade nicht
 setup_virtmissing=.. übergeordnete Schnittstelle $1 existiert nicht!
 setup_virtnotdone=.. konnte keine Schnittstelle mit IP $1 finden!
+setup_failed=.. gescheitert
 setup_clashlogrotate=.. die Protokolldatei $1 wird bereits gedreht
 setup_logrotatealready=.. bereits für Protokolldatei $1 aktiviert
 setup_virus=Einrichten der Virenfilterung ..
 setup_eforceunder2=Sie dürfen nur Domains unter $1 oder eine der anderen Domains erstellen, die Sie besitzen
 setup_esafeunder=Sie dürfen keine Domains unter $1 erstellen, da diese einem anderen Benutzer gehören.
 setup_edomainprefix=Der Domainname muss zu Beginn nicht $1 enthalten
+setup_econtenting=.. konnte den anfänglichen Inhalt nicht erstellen : $1
 setup_sshkey1=Generieren von privaten und öffentlichen SSH-Schlüsseln.
 setup_sshkey2=Autorisieren des öffentlichen SSH-Schlüssels.
 setup_esshkeydir=Virtuelle Server benötigen ein Verzeichnis und einen Unix-Benutzer
@@ -208,6 +210,9 @@ setup_dnscloudclash=Die DNS-Zone ist auf dem Cloud-Anbieter $1 bereits vorhanden
 setup_mail_smtpcloud=Konfigurieren des Cloud-Mail-Anbieters $1 ..
 setup_mail_nosmtpcloud=.. Anbieter existiert nicht!
 setup_mail_esmtpcloud=.. fehlgeschlagen  : $1
+setup_overquota=Fehler beim Erstellen des virtuellen Servers aufgrund fehlender Kontingente : $1
+setup_overgroupquota=Serverkontingent für $2 von $1 wurde erreicht
+setup_overuserquota=Domaininhaberkontingent für $2 von $1 wurde erreicht
 
 users_indom=$1 Benutzer in Domain $2
 
@@ -417,6 +422,12 @@ save_euserquota=Das Festplattenkontingent des Serveradministrators sollte nicht 
 save_aliasusers=Die deaktivierte Funktion wird von den folgenden Alias-Servern verwendet : $1
 save_erquota=Das Festplattenkontingent für diesen virtuellen Server kann nicht auf unbegrenzt festgelegt werden, da es dem Reseller $1 gehört, der ein Kontingentlimit hat
 save_erbw=Das Bandbreitenlimit für diesen virtuellen Server kann nicht auf unbegrenzt festgelegt werden, da er dem Reseller $1 gehört, der ein Bandbreitenlimit hat
+save_installed_scripts_dbuser=Aktualisieren des Datenbankbenutzernamens für installierte Skripte ..
+save_installed_scripts_dbpass=Datenbankkennwort für installierte Skripte aktualisieren ..
+save_installed_scripts_db=Aktualisieren des Datenbanknamens für installierte Skripte ..
+save_installed_scripts_err_file=.. fehlgeschlagen: <tt>$1</tt>-Datei kann nicht gelesen werden
+save_installed_scripts_err_file_lines=.. fehlgeschlagen: konnte keine zu ersetzenden Zeichenfolgen in der Datei <tt>$1</tt> finden
+save_installed_scripts_done=.. fertig für <tt>$1</tt> Datei
 
 acl_migrate=Kann Backups migrieren?
 
@@ -516,6 +527,7 @@ check_suexecok2=CGI-Skripte können mit SuExec oder fcgiwrap ausgeführt werden.
 check_suexecok=CGI-Skripte können mit SuExec ausgeführt werden.
 check_fcgiwrapok=CGI-Skripte können mit fcgiwrap ausgeführt werden.
 check_webphpmodes=Die folgenden PHP-Ausführungsmodi sind verfügbar : $1
+check_ewebphpmodes=Es sind keine PHP-Ausführungsmodi verfügbar!
 check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende php.ini-Dateien neu generieren.
 check_webphpfpm=Die Unterstützung von PHP-FPM Version $1 ist auf diesem System verfügbar.
 check_webphpnofpm=PHP-FPM-Unterstützung wurde nicht erkannt : $1
@@ -579,11 +591,14 @@ check_ehomeformat=Das Ausgangsverzeichnisformat $1 enthält weder den Benutzerna
 check_ehomestyle=Der Home-Verzeichnisstil ist auf "Nur Basisverzeichnis" eingestellt, was mit Virtualmin nicht verwendet werden kann. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden.
 check_jailkitok=Chroot-Gefängnisse sind auf diesem System verfügbar
 check_jailkiterr=Chroot-Gefängnisse sind nicht verfügbar : $1
-check_yumrepomissing=Die Konfigurationsdatei $1 für das Virtualmin APT-Repository bezieht sich nicht auf software.virtualmin.com!
+check_eyumrepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht!
+check_yumrepook=Das Virtualmin-Repository ist richtig konfiguriert
+check_yumrepowrong=Die Virtualmin-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
+check_yumrepomissing=Die Virtualmin-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
 check_eaptrepofile=Die APT-Repository-Konfigurationsdatei $1 existiert nicht!
 check_aptrepook=Das Virtualmin APT-Repository ist korrekt konfiguriert
 check_aptrepowrong=Die APT-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
-check_aptrepomissing=Die Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
+check_aptrepomissing=Die Virtualmin APT-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
 
 checkmap_esupport=Die Kartenquelle <tt>$1</tt> wird von Postfix nicht unterstützt. Möglicherweise müssen Sie Postfix-Bibliotheken dafür installieren oder neu kompilieren
 checkmap_eaccess=Die Kartenquelle <tt>$1</tt> kann nicht verwendet werden : $2
@@ -787,8 +802,10 @@ backup_doing2=Starten der Sicherung von $1 Virtualmin-Konfigurationseinstellunge
 backup_eakey=Fehlender oder ungültiger S3-Authentifizierungsschlüssel
 backup_eskey=Fehlender oder ungültiger geheimer S3-Schlüssel
 backup_einconly=Eine inkrementelle geplante Sicherung kann nur erstellt werden, wenn Sie mindestens eine vollständige Sicherung konfiguriert haben
+backup_donepurge=Die Sicherung ist abgeschlossen, aber das Löschen ist fehlgeschlagen. Die endgültige Größe war $1.
 backup_partial=Die Sicherung ist teilweise abgeschlossen. Die endgültige Größe betrug $1.
 backup_time=Die Gesamtsicherungszeit betrug $1.
+backup_purgesubject=Sicherung von Virtualmin auf $1 bis $2 abgeschlossen, aber das Löschen ist fehlgeschlagen
 backup_partialsubject=Teilweise abgeschlossene Sicherung von Virtualmin auf $1 bis $2
 backup_upload3=Hochladen des Archivs in den S3-Dienst von Amazon.
 backup_upload6=Hochladen des Archivs in den Cloud Files-Dienst von Rackspace.
@@ -837,7 +854,7 @@ backup_epurge=Fehlende oder nicht numerische Anzahl von Tagen, um alte Sicherung
 backup_epurgetime=Das Löschen alter Sicherungen wird nur unterstützt, wenn ein datumsbasiertes Ziel verwendet wird und <b>Strftime-Ersetzungen</b> aktiviert sind
 backup_epurgepath=Das Löschen alter Sicherungen kann nicht aktiviert werden, da das Basisverzeichnis nicht aus dem Zielpfad extrahiert werden konnte. Es muss ein Pfad wie <tt>/backup/virtualmin-%d-%m-%Y</tt> sein und darf kein Verzeichnis der obersten Ebene sein
 backup_ekey2=Sie dürfen den ausgewählten Sicherungsschlüssel nicht verwenden
-backup_purging2=Löschen von Backups aus $2, die älter als $1 Tage sind.
+backup_purging3=Backups von $2 werden gelöscht, die mit $3 übereinstimmen, die älter als $1 Tage sind ..
 backup_purgenobase=.. konnte das Basisverzeichnis vom Ziel aus nicht ermitteln
 backup_purgedtime=.. $1 Backups gefunden, aber keine waren alt genug
 backup_purgeebuckets=.. S3-Buckets konnten nicht aufgelistet werden : $1
@@ -1376,6 +1393,7 @@ licence_warn=Bei dieser Lizenzprüfung ist jedoch ein vorübergehendes Problem a
 licence_goterr2=.. ungültiges Ablaufdatum : $1
 licence_ecannot=Sie dürfen die Virtualmin-Lizenz nicht erneut überprüfen
 licence_maxservers2=Ihre Seriennummer $3 ist nur für $1 Server lizenziert, wird aber auf $2 verwendet.
+licence_maxwarn=Sofern diese Seriennummer nicht vorübergehend für die Migration auf einen neuen Server verwendet wird, müssen Sie eine zusätzliche Lizenz bei <a target=_blank href='$1'>$2</a> erwerben, um Verstöße gegen die Serviceregeln auszuschließen und zu vermeiden vorzeitige Beendigung der bestehenden Lizenz.
 licence_ipchanged=Die primäre IP-Adresse Ihres Systems scheint sich von $1 auf $2 geändert zu haben. Virtuelle Server, die die alte Adresse verwenden, sind möglicherweise nicht erreichbar oder liefern den falschen Webinhalt.
 licence_smallcert=Ihr System verwendet ein SSL-Zertifikat, das nur $1 Bit lang ist und kleiner als die empfohlene Größe von 2048 Bit ist. Dieses Zertifikat wurde von $4 bis $3 für die Domain $2 ausgestellt.
 licence_smallself=Ihr System verwendet ein selbstsigniertes SSL-Zertifikat, das nur $1 Bit lang ist und kleiner als die empfohlene Größe von 2048 Bit ist. Es sollte sofort neu generiert werden.
@@ -1427,6 +1445,7 @@ scripts_unsupdesc=Mit diesem Formular können Sie eine Skriptversion installiere
 scripts_addover=Überschreiben des Proxys für Pfad $1 ..
 scripts_delproxy=Proxy für Pfad $1 entfernen ..
 scripts_proxyfailed=.. Proxy-Einrichtung fehlgeschlagen : $1
+scripts_idbneed_link=, die auf der Seite <a href='$1'>$2</a> aktiviert werden kann
 scripts_gemver=Aktualisieren von Ruby Gems auf die neueste Version von $1 ..
 scripts_gemverfailed=.. Edelstein-Update fehlgeschlagen : $1
 scripts_gemverfailed2=Das Gems-Update auf Version $2 schien erfolgreich zu sein, ist aber wirklich fehlgeschlagen : $1
@@ -1445,6 +1464,18 @@ scripts_discontinued=Abgesetzt
 scripts_can=Verfügbar in
 scripts_gpl_to_pro=Jetzt nur in Pro verfügbar
 scripts_gpl_to_pro_upgrade=Das Upgrade für dieses Skript ist jetzt nur in Pro verfügbar
+
+scripts_gpl_pro_tip=Pro-Funktion
+scripts_gpl_pro_tip_hide=Danke für die Warnung
+scripts_gpl_pro_tip_hide2=Danke, ich werde darüber nachdenken
+scripts_gpl_pro_tip_and=und
+scripts_gpl_pro_tip_enroll=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und diese und viele andere coole Funktionen freizuschalten.
+scripts_gpl_pro_tip_list_scripts=Es sind weitere Installationsskripte verfügbar!
+scripts_gpl_pro_tip_enroll_list_scripts=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und alle unten aufgeführten Installationsskripte freizuschalten.
+scripts_gpl_pro_tip_clouds=Unterstützung für $1 Anbieter ist ebenfalls verfügbar!
+scripts_gpl_pro_tip_title_dashboard=Holen Sie sich Virtualmin Pro
+scripts_gpl_pro_tip_enroll_dashboard=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung Ihres bevorzugten Webhosting-Control-Panels zu unterstützen und viele coole Funktionen freizuschalten.
+scripts_gpl_pro_tip_dashboard=Wussten Sie, dass Virtualmin Pro viele großartige Funktionen bietet, die nicht in der GPL-Version enthalten sind?
 
 newnotify_title=E-Mail-Server-Besitzer
 newnotify_desc=Auf dieser Seite können Sie E-Mails an die Eigentümer der ausgewählten virtuellen Server senden, um beispielsweise Systemausfälle, Upgrades oder andere Serviceänderungen anzukündigen. Die folgenden Unterpositionen können im Nachrichtentext und im Betreff verwendet werden:
@@ -1998,6 +2029,8 @@ thumb_ethumb=Der Inhaltsstil $1 hat kein Vorschaubild.
 upgrade_desc1=Wenn Ihnen die Verwendung der Virtualmin-GPL gefallen hat und Sie den nächsten Schritt zur Pro-Version ausführen möchten, können Sie auf dieser Seite den Aktualisierungsvorgang automatisch ausführen. Die Schritte dazu sind :
 upgrade_epackages=Keine zu installierenden Pakete gefunden!
 upgrade_esharedroot=Ihr Webmin-Stammverzeichnis $1 wird von mehreren Systemen gemeinsam genutzt - Modulaktualisierungen sind nicht zulässig
+upgrade_eyumlist=Das $1 RPM-Paket wurde in der Liste der verfügbaren Pakete aus dem Repository nicht gefunden. Vielleicht funktioniert eines Ihrer aktuellen Repositorys nicht?
+upgrade_yumclear=Repository-Caches löschen ..
 
 maillog_desc=Dieses Formular kann verwendet werden, um die E-Mail-Protokolle nach Nachrichten zu durchsuchen, die bestimmten Bedingungen entsprechen, um herauszufinden, was mit ihnen passiert ist. Alle Felder sind optional und werden zu Vergleichszwecken übersprungen, wenn sie leer bleiben.
 maillog_ecannot=Sie dürfen keine E-Mails nach dieser Domain durchsuchen
@@ -2406,6 +2439,11 @@ smtpcloud_header=Optionen für den Versanddienstleister
 smtpcloud_provider=Name des E-Mail-Zustellanbieters
 smtpcloud_url=Website des Versanddienstleisters
 smtpcloud_eaws_dns=Amazon SES benötigt eine aktivierte DNS-Zone, um neue Domänen zu überprüfen
+smtpcloud_epostfix=Amazon SES kann nur konfiguriert werden, wenn Postfix installiert ist
+smtpcloud_esmtpuser=Konvertieren des geheimen SES-Schlüssels in ein SMTP-Passwort fehlgeschlagen
+smtpcloud_egetver=Fehler beim Abrufen des Amazon SES-Verifizierungsstatus : $1
+smtpcloud_evaltok=Die Amazon SES-Verifizierung ist nicht abgeschlossen. Sie müssen einen DNS-TXT-Eintrag namens $2 mit dem Wert $1 erstellen.
+smtpcloud_evaltok2=Die Amazon SES-Verifizierung hat keine Informationen für diese Domäne zurückgegeben!
 
 provision_ecannot=Sie dürfen den Cloudmin-Dienstclient nicht einrichten
 provision_checking=Überprüfen der Anmeldung beim Diensthost $1 ..

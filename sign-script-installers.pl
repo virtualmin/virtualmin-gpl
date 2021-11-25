@@ -44,6 +44,9 @@ while(@ARGV) {
 	elsif ($a eq "--gpl-only") {
 		$gplonly = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
         else {
 		&usage("Unknown parameter $a");
                 }

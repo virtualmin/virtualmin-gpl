@@ -25,6 +25,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--force-email") {
 		$force_email = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -167,6 +170,7 @@ if ($@) {
 
 # If purging old backups, do that now
 @purges = &get_scheduled_backup_purges($sched);
+@perrs = ( );
 if ($ok || $sched->{'errors'} == 1) {
 	$i = 0;
 	$asd = $cbmode == 2 ? &get_backup_as_domain(\@doms) : undef;
@@ -175,7 +179,10 @@ if ($ok || $sched->{'errors'} == 1) {
 			$current_id = undef;
 			$pok = &purge_domain_backups(
 				$dest, $purges[$i], $start_time, $asd);
-			$ok = 0 if (!$pok);
+			if (!$pok) {
+				push(@perrs, $dest);
+				$ok = 0;
+				}
 			}
 		$i++;
 		}
@@ -215,16 +222,27 @@ if ($sched->{'email'} && $has_mailboxes &&
 	# Nice format $dest for email
 	$dest = &nice_backup_url($strfdests[0]);
 	if ($ok && !@$errdoms) {
-		$output_header .= &text('backup_done',
-					&nice_size($size))." ";
-		$subject = &text('backup_donesubject', $host, $dest);
+		if (@perrs) {
+			# Worked, but purging failed
+			$output_header .= &text('backup_donepurge',
+						&nice_size($size))." ";
+			$subject = &text('backup_donesubject', $host, $dest);
+			}
+		else {
+			# Totally worked
+			$output_header .= &text('backup_done',
+						&nice_size($size))." ";
+			$subject = &text('backup_purgesubject', $host, $dest);
+			}
 		}
 	elsif ($ok && @$errdoms) {
+		# Worked for some domains but not all
 		$output_header .= &text('backup_partial',
 					&nice_size($size))." ";
 		$subject = &text('backup_partialsubject', $host, $dest);
 		}
 	else {
+		# Completely failed
 		$output_header .= $text{'backup_failed'}." ";
 		$subject = &text('backup_failedsubject', $host, $dest);
 		}

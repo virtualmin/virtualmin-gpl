@@ -206,6 +206,8 @@ $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = ( 5, 5.2, 5.3, 5.4, 5.5, 5.6,
                               "7.0", 7.1, 7.2, 7.3, 7.4,
                               "8.0", 8.1, 8.2, 8.3, 8.4);
+@all_possible_short_php_versions =
+	&unique(map { int($_) } @all_possible_php_versions);
 @s3_perl_modules = ( "S3::AWSAuthConnection", "S3::QueryStringAuthGenerator" );
 $max_php_fcgid_children = 20;
 $s3_upload_tries = $config{'upload_tries'} || 3;
@@ -363,6 +365,50 @@ if (-e "$module_config_directory/$name" || !$module_var_directory) {
 	return "$module_config_directory/$name";
 	}
 return "$module_var_directory/$name";
+}
+
+# config_post_save
+# Clear menu links cache to pick up changes
+sub config_post_save
+{
+my ($newconf, $oldconf) = @_;
+if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
+	&clear_links_cache();
+	}
+}
+
+# config_pre_load(mod-info-ref, [mod-order-ref])
+# Check if some config options are conditional,
+# and if not allowed, remove them from listing
+sub config_pre_load
+{
+my ($modconf_info, $modconf_order) = @_;
+my @forbidden_keys;
+
+# Virtualmin GPL/Pro version based config filter
+if ($virtual_server::virtualmin_pro) {
+	# Do not show Pro user 'Show Pro features overview' option
+	push(@forbidden_keys, 'hide_pro_tips');
+	}
+else {
+	# Do not show 'Reseller settings (Pro Only)' section and options in GPL
+	push(@forbidden_keys,
+	     'line6.5',
+	     'reseller_theme',
+	     'reseller_modules',
+	     'reseller_unix',
+	     'reseller_pre_command',
+	     'reseller_post_command',
+	     'from_reseller',
+	    );
+	}
+
+# Remove forbidden from display
+foreach my $fkey (@forbidden_keys) {
+	delete($modconf_info->{$fkey});
+	@{$modconf_order} = grep { $_ ne $fkey } @{$modconf_order}
+		if ($modconf_order);
+	}
 }
 
 1;

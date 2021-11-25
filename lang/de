@@ -2724,7 +2724,6 @@ scripts_softwaremod=Installiere Pakete $1 ..
 scripts_esoftwaremod=.. fehlgeschlagen zu installieren!
 scripts_esoftware=.. das Softwarepaket Webmin-Modul ist nicht installiert!
 scripts_eupdate=.. automatische Modul-Installation ist nicht auf Ihrem System verfügbar.
-scripts_addext=Aktiviere Modul in PHP Konfiguration ..
 scripts_gotmod=.. PHP-Module $1 ist nun verfügbar.
 scripts_nopearmod=Das PHP Pear Modul $1 ist erforderlich, aber Webmins PHP Pear Version ist nicht verfügbar zum installieren - fahre trotzdem fort.
 scripts_nopearcmd=Das PHP Pear Modul $1 ist erforderlich, aber PHP Pear Version $2 ist nicht installiert - fahre trotzdem fort.
@@ -3590,13 +3589,11 @@ upgrade_problems=Einige Fehler sind beim Aktualisieren Ihres System auf Virtualm
 upgrade_complete=Ihr System wurde erfolgreich nach Virtualmin Pro upgegradet!
 upgrade_theme=Aktiviere Theme <i>$1</i> ..
 upgrade_eyumrepo=Virtualmin wurde von RPM installiert, jedoch nicht über das GPL Virtualmin Repository. Upgraden ist daher zu diesem Zeitpunkt nicht möglich.
-
 upgrade_edebrepo=Virtualmin wurde von einem Debian-Paket, aber nicht mit dem GPL Virtualmin Repository. Upgrade ist zu diesem Zeitpunkt nicht möglich.
 upgrade_rpms=Upgrade Virtualmin RPM Pakete : $1
 upgrade_eyumfile=Kein Virtualmin GPL repository wurden in $1 gefunden
 upgrade_update=Aktualisiere verfügbare Pakete von APT ..
 upgrade_debs=Upgrade Virtualmin Debian Pakete : $1
-
 upgrade_etypematch=Upgraden ist nicht möglich, da der Installation Virtualmin Typ <tt>$1</tt> ist, aber Webmin <tt>$2</tt> ist
 
 maillog_title=Such Mail Log

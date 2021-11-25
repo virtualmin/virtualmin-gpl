@@ -104,7 +104,6 @@ line7=Status verzamelen,11
 collect_interval=Interval tussen status taken verzamelen,10,none-Nooit uitvoeren,Minuten
 collect_restart=Herstart een service die als uitgeschakeld word gedetecteerd?,1,1-Ja,0-Nee
 collect_ifaces=Data verkeer grafiek voor netwerk interfaces,3,Alle Ethernet
-collect_notemp=Verzamel Harddisk en CPU temperaturen?,1,0-Ja,1-Nee
 collect_noall=Verzamel alle beschikbare pakket updates?,1,0-Ja,1-Nee
 collect_fs=File systemen om toe te voegen aan locale harddisk ruimte,3,Alle locale filesystemen,40,,,Filesystemen in lijst (spatie gescheiden)
 line8=Backup en herstellen,11

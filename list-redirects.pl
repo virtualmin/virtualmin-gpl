@@ -40,6 +40,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--path") {
+		$onlypath = shift(@ARGV);
+		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
@@ -51,7 +57,14 @@ $d || usage("Virtual server $domain does not exist");
 &has_web_redirects($d) ||
 	&usage("Virtual server $domain does not support redirects");
 
+# Get the redirect, possibly with filtering
 @redirects = &list_redirects($d);
+if ($path) {
+	$phd = &public_html_dir($d);
+	@redirects = grep { $_->{'path'} eq $path ||
+			    $_->{'path'} eq $phd.$path } @redirects;
+	}
+
 if ($multi) {
 	# Show in multi-line format
 	foreach $r (@redirects) {

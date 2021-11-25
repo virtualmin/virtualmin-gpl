@@ -2325,7 +2325,6 @@ backup_epurge=Manglende eller ikke-numerisk antall dager for sletting avb gamle 
 backup_epurgetime=Sletting av gamle sikkerhetskopier støttes kun nå et dato-basert mål brukes, og <b>strftime erstatninger</b> er aktivert
 backup_epurgepath=Sletting av gamle sikkerhetskopier kan ikke aktiveres, siden grunn-katalogen ikke kunne bestemmes ut fra stien til mål-katalogen. Dette må være en sti som <tt>/backup/virtualmin-%d-%m-%Y</tt>, og kan ikke være en tipp-nivå katalog.
 backup_ekey2=Du har ikke tilgang til å bruke den valgte sikkerhetskopi-nøkkelen
-backup_purging2=Sletter sikkerhetskopier fra $2 eldre enn $1 dager ..
 backup_purgenobase=.. kunne ikke finne ut grunnkatalog på bakgrunn av mål
 backup_deletingdir=Sletter katalog $1, som er $2 dager gammel ..
 backup_deletingfile=Sletter fil $1, som er $2 dager gammel ..
@@ -3654,7 +3653,6 @@ scripts_esoftwaremod=.. kunne ikke installere!
 scripts_esoftware=.. Webmin-modulen Programvarepakker er ikke installert!
 scripts_eupdate=.. automatisk modulinstallasjon er ikke tilgjengelig på systemet ditt.
 scripts_einstallmod=Modulen er ikke engang tilgjengelig etter installasjon!
-scripts_addext=Aktiverer modul i PHP konfigurasjon ..
 scripts_gotmod=.. PHP modulen $1 er nå tilgjengelig.
 scripts_nopearmod=PHP Pear modulene $1 er påkrevd, men Webmins Pear modul er ikke tilgjengelig for installasjon av disse - fortsetter allikevel.
 scripts_nopearcmd=PHP Pear modulene $1 er påkrevd, men Pear for PHP versjon $2 er ikke installert - fortsetter allikevel.
@@ -4910,13 +4908,11 @@ upgrade_complete=Systemet ditt er nå oppgradert til Virtualmin Pro!
 upgrade_theme=Aktiverer tema <i>$1</i> ..
 upgrade_esharedroot=Din Webmin rot-katalog er delt mellom flere systemer, så moduloppdateringer er ikke tillatt
 upgrade_eyumrepo=Virtualmin er blitt installert fra en RPM, uten å bruke Virtualmin GPL depotet. Oppgradering er derfor ikke mulig nå.
-
 upgrade_edebrepo=Virtualmin er blitt installert fra en Debian pakke, uten å bruke Virtualmin GPL depotet. Oppgradering er derfor ikke mulig nå.
 upgrade_rpms=Oppgraderer Virtualmin RPM pakker : $1
 upgrade_eyumfile=Ingen Virtualmin GPL depot ble funnet i $1
 upgrade_update=Oppdaterer tilgjengelige pakker fra APT ..
 upgrade_debs=Oppgraderer Virtualmin Debian pakker : $1
-
 upgrade_etypematch=Oppgradering er ikke mulig siden Virtualmins installasjonstype er <tt>$1</tt> mens Webmins er <tt>$2</tt>
 
 maillog_title=Søk i e-post logg

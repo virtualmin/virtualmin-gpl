@@ -48,6 +48,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--full-version") {
 		$fullver = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
