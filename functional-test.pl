@@ -1454,7 +1454,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.17' ] ],
+		      [ 'atleast-version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1488,7 +1488,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.3.17' ] ],
+		      [ 'atleast-version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1870,7 +1870,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.17' ] ],
+		      [ 'atleast-version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -4068,7 +4068,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.17' ] ],
+		      [ 'atleast-version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 

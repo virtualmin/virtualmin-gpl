@@ -86,6 +86,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--version") {
 		$ver = shift(@ARGV);
 		}
+	elsif ($a eq "--atleast-version") {
+		$ver = shift(@ARGV);
+		$atleast = 1;
+		}
 	elsif ($a eq "--unsupported") {
 		$unsupported = 1;
 		}
@@ -178,7 +182,18 @@ if ($opts->{'mongrels'} > 1 && &has_proxy_balancer($d) != 2) {
 	&usage("This virtual server does not support more than one Mongrel");
 	}
 if ($ver eq "latest") {
+	# First (highest) version
 	$ver = $vers[0];
+	}
+elsif ($atleast) {
+	# Lowest version that is at least the one asked for
+	foreach my $v (@vers) {
+		if (&compare_versions($v, $ver) >= 0) {
+			$atleastver = $v;
+			}
+		}
+	$atleastver || &usage("No version $ver or higher was found");
+	$ver = $atleastver;
 	}
 else {
 	&indexof($ver, @vers) >= 0 || $unsupported ||
