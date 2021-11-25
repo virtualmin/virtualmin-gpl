@@ -1454,7 +1454,7 @@ $gplscript_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.16' ] ],
+		      [ 'version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1488,7 +1488,7 @@ $gplscript_tests = [
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db.'_roundcube' ],
 		      [ 'newdb' ],
-		      [ 'version', '1.3.16' ] ],
+		      [ 'version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -1870,7 +1870,7 @@ $move_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.16' ] ],
+		      [ 'version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -4068,7 +4068,7 @@ $incremental_tests = [
 		      [ 'type', 'roundcube' ],
 		      [ 'path', '/roundcube' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
-		      [ 'version', '1.3.16' ] ],
+		      [ 'version', '1.3.17' ] ],
 	  'antigrep' => 'partially complete',
 	},
 
@@ -5112,7 +5112,7 @@ $webmin_tests = [
 
 	# Install a script via the web UI
 	{ 'command' => $webmin_wget_command.
-                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.16\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
+                       "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.17\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
 	  'antigrep' => [ 'Error', 'failed' ],
