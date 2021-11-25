@@ -229,7 +229,7 @@ for dir in $dirstr; do
 		if [ "\$help" = "1" ]; then
 			exec perldoc \$dir/\$COMMAND
 		else
-			if [[ "\$@" == "" ]]; then
+			if [[ "\$@" == "--help" ]]; then
 				echo "See \\`virtualmin help \$COMMANDINITIAL\\` for more details and examples"
 				echo ""
 			fi
