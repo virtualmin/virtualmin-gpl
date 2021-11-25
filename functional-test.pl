@@ -464,6 +464,7 @@ $domains_tests = [
 	{ 'command' => $wget_command.'http://'.$test_domain.'/test.php',
 	  'grep' => '44444',
 	  'antigrep' => '22222\+22222',
+	  'sleep' => 1,
 	},
 
 	# Disable a feature
