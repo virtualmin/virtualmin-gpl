@@ -4056,7 +4056,7 @@ local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 return ( ) if (!$virt);		# Cannot find our own site?
 local @rv;
 foreach my $v (&apache::find_directive_struct("VirtualHost", $conf)) {
-	if ($v->{'words'}->[0] eq $virt->{'words'}->[0]) {
+	if (&indexof($virt->{'words'}->[0], @{$v->{'words'}}) >= 0) {
 		# Matches IP .. find the domain if we can
 		local $sn = &apache::find_directive("ServerName",
 						    $v->{'members'});
