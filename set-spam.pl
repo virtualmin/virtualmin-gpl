@@ -108,6 +108,9 @@ while(@ARGV > 0) {
 			       "bounce, queue or a number");
 			}
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

@@ -43,6 +43,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--name-only") {
 		$nameonly = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

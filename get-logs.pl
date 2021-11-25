@@ -50,6 +50,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--tail") {
 		$lines = int(shift(@ARGV));
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

@@ -37,6 +37,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--file") {
 		$file = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

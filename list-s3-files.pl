@@ -51,6 +51,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--secret-key") {
 		$skey = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

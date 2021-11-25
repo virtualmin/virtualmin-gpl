@@ -294,6 +294,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-protocols") {
 		$protocols = [ ];
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

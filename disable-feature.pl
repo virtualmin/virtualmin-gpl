@@ -62,6 +62,9 @@ while(@ARGV > 0) {
 	       &indexof($1, &list_feature_plugins()) >= 0) {
 		$plugin{$1}++;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

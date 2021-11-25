@@ -100,6 +100,9 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--(sha1|sha2)$/) {
 		$ctype = $1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

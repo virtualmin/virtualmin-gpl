@@ -145,6 +145,9 @@ while(@ARGV > 0) {
 		$apicmd = $a;
 		last;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

@@ -222,6 +222,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

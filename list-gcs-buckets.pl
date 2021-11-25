@@ -44,6 +44,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--bucket") {
 		$bucket = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

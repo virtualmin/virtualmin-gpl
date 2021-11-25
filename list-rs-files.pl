@@ -52,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--container") {
 		$container = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

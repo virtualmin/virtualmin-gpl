@@ -409,6 +409,9 @@ while(@ARGV > 0) {
 		$f || &usage("Custom field $fn does not exist");
 		$fields{'field_'.$fn} = $fv;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

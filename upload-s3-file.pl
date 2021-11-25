@@ -71,6 +71,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--tries") {
 		$tries = shift(@ARGV);
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

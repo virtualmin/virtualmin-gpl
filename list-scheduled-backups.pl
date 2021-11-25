@@ -46,6 +46,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multi = 1;
 		}
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}

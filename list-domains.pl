@@ -170,6 +170,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--disabled") { $disabled = 1; }
 	elsif ($a eq "--enabled") { $disabled = 0; }
+	elsif ($a eq "--help") {
+		&usage();
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
