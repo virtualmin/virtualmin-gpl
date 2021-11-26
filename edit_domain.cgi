@@ -134,7 +134,7 @@ print &ui_hidden_table_end("basic");
 
 # Configuration settings section
 print &ui_hidden_table_start($text{'edit_headerc'}, "width=100%", 2,
-			     "config", 0, \@tds);
+			     "config", 1, \@tds);
 
 # Show username prefix, with option to change
 if (!$aliasdom && $tmpl->{'append_style'} != 6) {
