@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'alias_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_aliases() || &error($text{'aliases_ecannot'});
 
@@ -14,7 +15,6 @@ if (!$in{'new'}) {
 	$virt || &error($text{'alias_egone'});
 	%oldvirt = %$virt;
 	}
-&error_setup($text{'alias_err'});
 
 if ($in{'delete'}) {
 	# Just delete the virtuser (and the autoreply file)

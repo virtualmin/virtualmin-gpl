@@ -4037,6 +4037,7 @@ scripts_edownload2=Download of $1 is not an archive file - perhaps an error page
 scripts_edownload3=Download of $1 is an incomplete archive file : $2
 scripts_eurl=Unsupported URL $1
 scripts_ierr=Failed to install script
+scripts_uerr=Failed to uninstall script
 scripts_installing=Now installing $1 version $2 ..
 scripts_faking=Faking install of $1 version $2 ..
 scripts_failed=.. failed! See the error message above for the reason why.

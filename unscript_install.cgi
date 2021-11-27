@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'scripts_uerr'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_scripts() || &error($text{'edit_ecannot'});
 
@@ -32,8 +33,6 @@ $script = &get_script($sinfo->{'name'});
 
 if ($in{'confirm'}) {
 	# Do it
-	&error_setup($text{'scripts_uerr'});
-
 	&ui_print_unbuffered_header(&domain_in($d), $text{'scripts_utitle'}, "");
 
 	# Get locks

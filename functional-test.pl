@@ -4985,7 +4985,7 @@ $webmin_tests = [
 	# Add a user to the domain
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&new=1\\&mailuser=bob\\&real=Bob+Smeg\\&mailpass=smeg\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&tome=1\\&newmail_def=1\\&shell=/dev/null\\&recovery_def=1",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save user',
 	},
 
 	# Verify the new user exists
@@ -5003,7 +5003,7 @@ $webmin_tests = [
 	# Modify the user to enable forwarding
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&mailuser=bob\\&oldpop3=bob\\&real=Bob+Smeg\\&mailpass_def=1\\&quota_def=1\\&mquota_def=1\\&home_def=1\\&mailbox=1\\&forward=1\\&forwardto=nobody\@virtualmin.com\\&shell=/dev/null\\&remail_def=1\\&simplemode=simple\\&recovery_def=1",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save user',
 	},
 
 	# Check that forwarding is set
@@ -5017,7 +5017,7 @@ $webmin_tests = [
 	# Delete the user
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_user.cgi?dom=\$DOMAIN_ID\\&old=bob\\&unix=1\\&delete=1\\&confirm=1",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save user',
 	},
 
 	# List mail aliases in the domain
@@ -5030,7 +5030,7 @@ $webmin_tests = [
 	# Create a new alias
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&new=1\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody\@virtualmin.com",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save alias',
 	},
 
 	# Verify that the new alias exists
@@ -5050,7 +5050,7 @@ $webmin_tests = [
 	# Re-save the alias
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&simplename=sales\\&simplemode=simple\\&forward=1\\&forwardto=nobody\@webmin.com",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save alias',
 	},
 
 	# Verify that the change happened
@@ -5064,7 +5064,7 @@ $webmin_tests = [
 	# Delete the alias
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_alias.cgi?dom=\$DOMAIN_ID\\&old=sales\@${test_domain}\\&delete=1",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to save alias',
 	},
 
 	# List databases in the domain
@@ -5077,7 +5077,7 @@ $webmin_tests = [
 	# Create a new database
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&new=1\\&name=${test_domain_db}_junk\\&type=mysql",
-	  'antigrep' => 'Error',
+	  'antigrep' => 'Failed to create database',
 	},
 
 	# Verify that it was created
@@ -5101,7 +5101,6 @@ $webmin_tests = [
 	# Delete the database
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/save_database.cgi?dom=\$DOMAIN_ID\\&delete=1\\&confirm=1\\&name=${test_domain_db}_junk\\&type=mysql",
-	  'antigrep' => 'Error',
 	},
 
 	# Verify that it is gone
@@ -5123,7 +5122,7 @@ $webmin_tests = [
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/script_install.cgi?dom=\$DOMAIN_ID\\&script=roundcube\\&version=1.3.17\\&dir_def=0\\&dir=roundcube\\&passmode=\\&db=mysql_${test_domain_db}",
 	  'grep' => [ '<body', '</body>', 'Install Script', 
 		      'Now installing RoundCube' ],
-	  'antigrep' => [ 'Error', 'failed' ],
+	  'antigrep' => [ 'Failed to install script' ],
 	},
 
 	# Make sure it worked
@@ -5151,7 +5150,7 @@ $webmin_tests = [
 	{ 'command' => $webmin_wget_command.
                        "${webmin_proto}://localhost:${webmin_port}/virtual-server/unscript_install.cgi?dom=\$DOMAIN_ID\\&confirm=1\\&script=\$SCRIPT_ID",
 	  'grep' => [ '<body', '</body>', 'RoundCube directory and tables deleted' ],
-	  'antigrep' => [ 'Error', 'failed' ],
+	  'antigrep' => [ 'Failed to uninstall script' ],
 	},
 
 	# Test other per-domain pages
@@ -5159,7 +5158,7 @@ $webmin_tests = [
 		my $page = $_.".cgi";
 		{ 'command' => $webmin_wget_command.
 			       "${webmin_proto}://localhost:${webmin_port}/virtual-server/${page}?dom=\$DOMAIN_ID",
-		  'antigrep' => [ 'Error', 'failed' ],
+		  'antigrep' => [ '>Failed to' ],
 		}
 		} @other_webmin_pages),
 

@@ -4,6 +4,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'user_err'});
 if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});
 	&can_edit_domain($d) || &error($text{'users_ecannot'});
@@ -40,7 +41,6 @@ else {
 	# Construct initial user object
 	$user = &create_initial_user($d, undef, $in{'web'});
 	}
-&error_setup($text{'user_err'});
 &require_useradmin();
 
 &build_taken(\%taken, \%utaken);
