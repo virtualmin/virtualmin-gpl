@@ -231,6 +231,14 @@ close(PGPASS);
 $ENV{'PGPASSFILE'} = $pg_pass_file;
 chmod(0600, $pg_pass_file);
 
+# Get the theme for the Webmin user
+if ($webmin_user) {
+	&foreign_require("acl");
+	($uinfo) = grep { $_->{'name'} eq $webmin_user } &acl::list_users();
+	$webmin_user_theme = $uinfo ? $uinfo->{'theme'} : undef;
+	}
+$webmin_user_theme ||= $current_theme;
+
 $_config_tests = [
 	# Just validate global config
 	{ 'command' => 'check-config.pl' },
@@ -4924,7 +4932,7 @@ $webmin_tests = [
 	},
 
 	# Check left and right frames (if using the framed theme)
-	$current_theme eq "virtual-server-theme" ? (
+	$webmin_user_theme eq "virtual-server-theme" ? (
 	{ 'command' => $webmin_wget_command.
 		       "${webmin_proto}://localhost:${webmin_port}/",
 	  'grep' => [ '<frameset', '</frameset>', 'left.cgi', 'right.cgi' ],
