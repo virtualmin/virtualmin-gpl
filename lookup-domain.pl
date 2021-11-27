@@ -22,7 +22,7 @@ while(@ARGV) {
 $username || die "Missing username parameter";
 
 # Get the message size
-while($got = read(STDIN, $buf, &get_buffer_size())) {
+while($got = read(STDIN, $buf, 32768)) {
 	$size += $got;
 	}
 $margin = $size*2+5*1024*1024;
