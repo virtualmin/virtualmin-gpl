@@ -17,7 +17,7 @@ if (!$stream_client) {
 # Feed email to clamscan
 $SIG{'PIPE'} = 'ignore';
 $clampid = open(INPUT, "|$fullprog >$temp");
-while(read(STDIN, $buf, &get_buffer_size()) > 0) {
+while(read(STDIN, $buf, 32768) > 0) {
 	print INPUT $buf;
 	}
 
