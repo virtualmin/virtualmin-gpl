@@ -5215,6 +5215,7 @@ phpmode_savedir=Updating PHP directory $1 to version $2 ..
 phpmode_http2=Enable HTTP2 protocol support?
 phpmode_http2on=Enabling HTTP2 ..
 phpmode_http2off=Disabling HTTP2 ..
+phpmode_http2def=Using default HTTP2 mode..
 
 website_header=Website options
 

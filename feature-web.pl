@@ -3705,8 +3705,8 @@ else {
 }
 
 # get_domain_http_protocols(&domain)
-# Returns an array ref of HTTP protocols currently enabled for a domain, or an
-# error message.
+# Returns an array ref of HTTP protocols currently enabled for a domain, an
+# empty list if none are set, or an error message.
 sub get_domain_http_protocols
 {
 my ($d) = @_;
@@ -3715,11 +3715,37 @@ if ($p eq 'web') {
 	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 	return "No Apache virtualhost found" if (!$virt);
 	my ($prots) = &apache::find_directive("Protocols", $vconf);
-	return [ 'http/1.1' ] if (!$prots);
+	return [ ] if (!$prots);
 	return [ split(/\s+/, $prots) ];
 	}
 elsif ($p) {
 	return &plugin_call($p, "feature_get_http_protocols", $d);
+	}
+else {
+	return "No website enabled for this domain";
+	}
+}
+
+# get_default_http_protocols(&domain)
+# Returns an array ref of HTTP protocols that will be used if none are set for
+# a domain. If empty, there is no default.
+sub get_default_http_protocols
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	&require_apache();
+	my $conf = &apache::get_config();
+	my ($prots) = &apache::find_directive("Protocols", $conf);
+	return $prots ? [ split(/\s+/, $prots) ] : [ 'http/1.1' ];
+	}
+elsif ($p) {
+	if (&plugin_defined($p, "feature_default_http_protocols")) {
+		return &plugin_call($p, "feature_default_http_protocols", $d);
+		}
+	else {
+		return [ ];
+		}
 	}
 else {
 	return "No website enabled for this domain";
@@ -3743,7 +3769,7 @@ if ($p eq 'web') {
 			&get_apache_virtual($d->{'dom'}, $p);
 		return "No Apache virtualhost found" if (!$virt);
 		&apache::save_directive("Protocols", \@pdirs, $vconf, $conf);
-		&flush_file_lines($virt->{'file'});
+		&flush_file_lines($virt->{'file'}, undef, 1);
 		}
 	&register_post_action(\&restart_apache);
 	return undef;

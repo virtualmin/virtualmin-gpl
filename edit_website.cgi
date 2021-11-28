@@ -115,10 +115,24 @@ if ((!$d->{'alias'} || $d->{'alias_mode'} != 1) && $can == 2 &&
 if (!$d->{'alias'}) {
 	my $canprots = &get_domain_supported_http_protocols($d);
 	my $prots = &get_domain_http_protocols($d);
+	my $defprots = &get_default_http_protocols($d);
 	if (&indexof("h2", @$canprots) >= 0 && ref($prots)) {
+		if (@$defprots) {
+			$def = &indexof("h2", @$defprots) >= 0 ? $text{'yes'}
+							       : $text{'no'};
+			$inp = &ui_radio("http2",
+				@$prots == 0 ? 2 :
+				&indexof("h2", @$prots) >= 0 ? 1 : 0,
+				[ [ 2, $text{'default'}." ($def)" ],
+				  [ 1, $text{'yes'} ],
+				  [ 0, $text{'no'} ] ]);
+			}
+		else {
+			$inp = &ui_yesno_radio(
+				"http2", &indexof("h2", @$prots) >= 0);
+			}
 		print &ui_table_row(
-			&hlink($text{'phpmode_http2'}, "http2"),
-			&ui_yesno_radio("http2", &indexof("h2", @$prots) >= 0));
+			&hlink($text{'phpmode_http2'}, "http2"), $inp);
 		}
 	}
 
