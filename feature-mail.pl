@@ -397,7 +397,6 @@ if ($c && defined(&list_smtp_clouds)) {
 		my $info = { 'domain' => $d->{'dom'} };
 		my ($ok, $id, $location) = &$sfunc($d, $info);
 		if ($ok) {
-			$d->{'smtp_cloud'} = $c;
 			$d->{'smtp_cloud_id'} = $id;
 			$d->{'smtp_cloud_location'} = $location;
 			&$second_print($text{'setup_done'});
@@ -598,7 +597,7 @@ if ($c && defined(&list_smtp_clouds)) {
 			     'location' => $d->{'smtp_cloud_location'} };
 		my ($ok, $err) = &$sfunc($d, $info);
 		if ($ok) {
-			$d->{'smtp_cloud'} = $c;
+			delete($d->{'smtp_cloud'});
 			delete($d->{'smtp_cloud_id'});
 			&$second_print($text{'setup_done'});
 			}

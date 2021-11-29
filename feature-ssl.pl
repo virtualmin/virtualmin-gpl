@@ -659,6 +659,10 @@ local $info = &cert_info($d);
 if (!$info || !$info->{'cn'}) {
 	return &text('validate_esslcertinfo', "<tt>$cert</tt>");
 	}
+local $err = &validate_cert_format($cert, 'cert');
+if ($err) {
+	return $err;
+	}
 
 # Make sure this domain or www.domain matches cert. Include aliases, because
 # in some cases the alias may be the externally visible domain
@@ -971,14 +975,21 @@ local ($d) = @_;
 return &cert_file_info($d->{'ssl_cert'}, $d);
 }
 
-# cert_file_split(file)
+# cert_file_split(file|data)
 # Returns a list of certs in some file
 sub cert_file_split
 {
-local ($file) = @_;
-local @rv;
-my $lref = &read_file_lines($file, 1);
-foreach my $l (@$lref) {
+my ($file) = @_;
+my $data;
+if ($file =~ /^\//) {
+	$data = &read_file_contents($file);
+	}
+else {
+	$data = $file;
+	}
+my @rv;
+my @lines = split(/\r?\n/, $data);
+foreach my $l (@lines) {
 	my $cl = $l;
 	$cl =~ s/^#.*//;
 	if ($cl =~ /^-----BEGIN/) {
@@ -1311,18 +1322,18 @@ return undef;
 sub extract_cert_parameters
 {
 my ($data) = @_;
-local @lines = grep { /\S/ } split(/\r?\n/, $data);
-my $l = 0;
-my $p = "";
-if ($lines[0] =~ /-----BEGIN\s+(\S+)\s+PARAMETERS-----/) {
-	$p .= $lines[0]."\n";
-	while($lines[++$l] !~ /--END\s+(\S+)\s+PARAMETERS-----/) {
-		$p .= $lines[$l]."\n";
+my @parts = &cert_file_split($data);
+my $rv = "";
+my $params = "";
+foreach my $p (@parts) {
+	if ($p =~ /^-----BEGIN\s+(\S+)\s+PARAMETERS-----/) {
+		$params .= $p;
 		}
-	$p .= $lines[$l]."\n";
-	$l++;
+	else {
+		$rv .= $p;
+		}
 	}
-return (join("\n", @lines[$l..$#lines])."\n", $p);
+return ($rv, $params);
 }
 
 # cert_pem_data(&domain)
