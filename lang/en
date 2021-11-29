@@ -683,7 +683,7 @@ setup_ednscloudexists=Selected DNS cloud provider does not exist!
 setup_ednscloudstate=DNS cloud provider $1 is not ready for use
 setup_ednscloudclash=Failed to check for clash on DNS cloud provider $1 : $2
 setup_dnscloudclash=DNS zone already exists on cloud provider $1
-setup_mail_smtpcloud=Configuring cloud mail provider $1 ..
+setup_mail_smtpcloud=Configuring cloud mail delivery provider $1 ..
 setup_mail_nosmtpcloud=.. provider does not exist!
 setup_mail_esmtpcloud=.. failed : $1
 setup_overquota=Virtual server creation failed due to lack of quota : $1
@@ -1351,7 +1351,7 @@ delete_dom=Deleting sub-server $1 ..
 delete_aliasfailure=.. $1 alias deletion failed : $2
 delete_ednssubof=Virtual server $1 cannot be deleted, as it contains DNS records for server $2
 delete_esslnoips=No SSL certificate found for domain
-delete_mail_smtpcloud=Removing cloud mail provider $1 ..
+delete_mail_smtpcloud=Removing cloud mail delivery provider $1 ..
 
 save_err=Failed to modify server
 save_title=Save Server
