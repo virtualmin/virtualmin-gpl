@@ -205,7 +205,8 @@ if (!$parentdom) {
 
 # Show description
 print &ui_table_row($text{'edit_owner'},
-		    &ui_textbox("owner", $d->{'owner'}, 50));
+		    &ui_textbox("owner", $d->{'owner'}, 50, 0, undef,
+			  "autocomplete='off'"));
 
 if (!$parentdom) {
 	# Show owner's email address and password
