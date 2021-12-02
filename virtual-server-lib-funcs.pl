@@ -11424,25 +11424,22 @@ else {
 sub new_password_input
 {
 local ($name) = @_;
+my $attrnoauto = "autocomplete='off' autocorrect='off' spellcheck='false'";
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
-	return &ui_textbox($name, &random_password(), 21, 0, undef,
-			   "autocomplete=off");
+	return &ui_textbox($name, &random_password(), 21, 0, undef, $attrnoauto);
 	}
 elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
-	return &ui_password($name, undef, 21, 0, undef,
-			    "autocomplete=off");
+	return &ui_password($name, undef, 21, 0, undef, $attrnoauto);
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
 	return "<table>\n".
 	       "<tr><td>$text{'form_passf'}</td> ".
-	       "<td>".&ui_password($name, undef, 21, 0, undef,
-				   "autocomplete=off")."</td> </tr>\n".
+	       "<td>".&ui_password($name, undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
 	       "<tr><td>$text{'form_passa'}</td> ".
-	       "<td>".&ui_password($name."_again", undef, 21, 0, undef,
-				   "autocomplete=off")."</td> </tr>\n".
+	       "<td>".&ui_password($name."_again", undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
 	       "</table>";
 	}
 }
