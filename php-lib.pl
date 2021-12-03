@@ -2145,6 +2145,7 @@ else {
 		   "user = ".$d->{'user'},
 		   "group = ".$d->{'ugroup'},
 		   "listen = ".$port,
+		   "listen.mode = 0600",
 		   "pm = dynamic", 
 		   "pm.max_children = $defchildren",
 		   "pm.start_servers = 1",
