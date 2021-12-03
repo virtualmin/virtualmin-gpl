@@ -399,6 +399,7 @@ if ($c && defined(&list_smtp_clouds)) {
 		if ($ok) {
 			$d->{'smtp_cloud_id'} = $id;
 			$d->{'smtp_cloud_location'} = $location;
+			&update_smtpcloud_spf($d, undef);
 			&$second_print($text{'setup_done'});
 			}
 		else {
@@ -599,6 +600,7 @@ if ($c && defined(&list_smtp_clouds)) {
 		if ($ok) {
 			delete($d->{'smtp_cloud'});
 			delete($d->{'smtp_cloud_id'});
+			&update_smtpcloud_spf($d, $c);
 			&$second_print($text{'setup_done'});
 			}
 		else {

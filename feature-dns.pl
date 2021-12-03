@@ -3054,7 +3054,7 @@ sub update_smtpcloud_spf
 {
 my ($d, $oldcloud) = @_;
 my $newcloud = $d->{'smtp_cloud'};
-my $spf = &get_domain_spf();
+my $spf = &get_domain_spf($d);
 return 0 if (!$spf);
 if ($oldcloud) {
 	# Remove SPF options for old cloud
@@ -3062,6 +3062,7 @@ if ($oldcloud) {
 	my @oldspf = defined(&$sfunc) ? &$sfunc($d) : ( );
 	foreach my $s (@oldspf) {
 		my ($n, $v) = split(/:/, $s);
+		$n .= ":";
 		if ($spf->{$n}) {
 			$spf->{$n} = [ grep { $_ ne $v } @{$s->{$n}} ];
 			}
@@ -3069,17 +3070,17 @@ if ($oldcloud) {
 	}
 if ($newcloud) {
 	# Add SPF options for new cloud
-	my $sfunc = "smtpcloud_".$oldcloud."_get_spf";
 	my $sfunc = "smtpcloud_".$newcloud."_get_spf";
 	my @newspf = defined(&$sfunc) ? &$sfunc($d) : ( );
-	foreach my $s (@oldspf) {
+	foreach my $s (@newspf) {
 		my ($n, $v) = split(/:/, $s);
+		$n .= ":";
 		my @vals = $spf->{$n} ? @{$spf->{$n}} : ( );
 		@vals = &unique(@vals, $v);
 		$spf->{$n} = \@vals;
 		}
 	}
-&save_domain_spf($s, $spf);
+&save_domain_spf($d, $spf);
 }
 
 # is_domain_spf_enabled(&domain)
@@ -3399,6 +3400,22 @@ if ($d->{'ip6'} && $d->{'ip6'} ne $defip6) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;
+
+# Add SPF records for DNS cloud
+my $cloud = $d->{'smtp_cloud'};
+if ($cloud) {
+	my $sfunc = "smtpcloud_".$cloud."_get_spf";
+	if (defined(&$sfunc)) {
+		my @newspf = &$sfunc($d);
+		foreach my $s (@newspf) {
+			my ($n, $v) = split(/:/, $s);
+			$n .= ":";
+			my @vals = $spf->{$n} ? @{$spf->{$n}} : ( );
+			@vals = &unique(@vals, $v);
+			$spf->{$n} = \@vals;
+			}
+		}
+	}
 return $spf;
 }
 
