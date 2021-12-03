@@ -15264,24 +15264,6 @@ if ($config{'ldap'}) {
 		}
 	}
 
-# Check for NSCD
-if ($config{'unix'}) {
-	if (&find_byname("nscd")) {
-		local $msg;
-		if (&foreign_available("init")) {
-			&foreign_require("init");
-			if (($init::init_mode eq 'init' ||
-			     $init::init_mode eq 'upstart' ||
-			     $init::init_mode eq 'systemd') &&
-			    &init::action_status("nscd") == 2) {
-				$msg = &text('check_enscd2',
-					'../init/edit_action.cgi?0+nscd');
-				}
-			}
-		&$second_print($text{'check_enscd'}." ".$msg);
-		}
-	}
-
 # Check for conflicting other-modules calls
 if ($config{'unix'} && $config{'other_users'}) {
 	# MySQL user creation
