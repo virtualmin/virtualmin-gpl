@@ -2086,6 +2086,11 @@ $found || return "No Apache VirtualHost containing an FPM SetHandler found";
 # Second update the FPM server port
 my $conf = &get_php_fpm_config($d);
 &save_php_fpm_config_value($d, "listen", $socket);
+if ($socket =~ /^\//) {
+	# Also set correct owner for the file if switching to socket mode
+	&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
+	&save_php_fpm_config_value($d, "listen.group`", $d->{'ugroup'});
+	}
 &register_post_action(\&restart_php_fpm_server, $conf);
 &register_post_action(\&restart_apache);
 
