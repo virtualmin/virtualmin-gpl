@@ -5918,8 +5918,7 @@ my @servers = &servers::list_servers();
 my ($already) = grep { $_->{'host'} eq $server &&
 		       $_->{'port'} == $port } @servers;
 if (!$already) {
-	($already) = grep { $_->{'host'} eq $server &&
-			    $_->{'port'} == $port } @servers;
+	($already) = grep { $_->{'host'} eq $server } @servers;
 	}
 
 # Construct a server object using provided and stored info
@@ -5927,6 +5926,8 @@ $user ||= $already->{'user'} if ($already);
 $pass ||= $already->{'pass'} if ($already);
 $port ||= $already->{'port'} if ($already);
 return { 'host' => $server,
+	 'ip' => $already ? $already->{'ip'} : undef,
+	 'ip6_force' => $already ? $already->{'ip6_force'} : undef,
 	 'port' => $port || 10000,
 	 'ssl' => $already ? $already->{'ssl'} : 1,
 	 'fast' => $already ? $already->{'fast'} : 1,
