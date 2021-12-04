@@ -2133,6 +2133,10 @@ if (-r $file) {
 	&save_php_fpm_config_value($d, "user", $d->{'user'});
 	&save_php_fpm_config_value($d, "group", $d->{'ugroup'});
 	&save_php_fpm_config_value($d, "listen", $port);
+	if (&get_php_fpm_config_value($d, "listen.owner")) {
+		&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
+		&save_php_fpm_config_value($d, "listen.group", $d->{'ugroup'});
+		}
 	}
 else {
 	# Create a new file
