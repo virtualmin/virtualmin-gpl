@@ -372,9 +372,10 @@ foreach $d (@doms) {
 				$oldfailed = 1;
 				}
 			else {
-				&$second_print(".. done");
 				delete($d->{'smtp_cloud'});
 				delete($d->{'smtp_cloud_id'});
+				&update_smtpcloud_spf($d, $oldsmtp);
+				&$second_print(".. done");
 				}
 			}
 		if ($cloudsmtp && !$oldfailed) {
@@ -388,6 +389,7 @@ foreach $d (@doms) {
 				$d->{'smtp_cloud'} = $cloudsmtp;
 				$d->{'smtp_cloud_id'} = $id;
 				$d->{'smtp_cloud_location'} = $location;
+				&update_smtpcloud_spf($d, undef);
 				&$second_print(".. done");
 				}
 			else {

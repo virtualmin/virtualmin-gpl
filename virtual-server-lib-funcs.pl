@@ -11424,25 +11424,22 @@ else {
 sub new_password_input
 {
 local ($name) = @_;
+my $attrnoauto = "autocomplete='off' autocorrect='off' spellcheck='false'";
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
-	return &ui_textbox($name, &random_password(), 21, 0, undef,
-			   "autocomplete=off");
+	return &ui_textbox($name, &random_password(), 21, 0, undef, $attrnoauto);
 	}
 elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
-	return &ui_password($name, undef, 21, 0, undef,
-			    "autocomplete=off");
+	return &ui_password($name, undef, 21, 0, undef, $attrnoauto);
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
 	return "<table>\n".
 	       "<tr><td>$text{'form_passf'}</td> ".
-	       "<td>".&ui_password($name, undef, 21, 0, undef,
-				   "autocomplete=off")."</td> </tr>\n".
+	       "<td>".&ui_password($name, undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
 	       "<tr><td>$text{'form_passa'}</td> ".
-	       "<td>".&ui_password($name."_again", undef, 21, 0, undef,
-				   "autocomplete=off")."</td> </tr>\n".
+	       "<td>".&ui_password($name."_again", undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
 	       "</table>";
 	}
 }
@@ -15264,24 +15261,6 @@ if ($config{'ldap'}) {
 		else {
 			&$second_print(&text('check_ldap'));
 			}
-		}
-	}
-
-# Check for NSCD
-if ($config{'unix'}) {
-	if (&find_byname("nscd")) {
-		local $msg;
-		if (&foreign_available("init")) {
-			&foreign_require("init");
-			if (($init::init_mode eq 'init' ||
-			     $init::init_mode eq 'upstart' ||
-			     $init::init_mode eq 'systemd') &&
-			    &init::action_status("nscd") == 2) {
-				$msg = &text('check_enscd2',
-					'../init/edit_action.cgi?0+nscd');
-				}
-			}
-		&$second_print($text{'check_enscd'}." ".$msg);
 		}
 	}
 

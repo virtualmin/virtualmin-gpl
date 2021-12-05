@@ -2086,6 +2086,11 @@ $found || return "No Apache VirtualHost containing an FPM SetHandler found";
 # Second update the FPM server port
 my $conf = &get_php_fpm_config($d);
 &save_php_fpm_config_value($d, "listen", $socket);
+if ($socket =~ /^\//) {
+	# Also set correct owner for the file if switching to socket mode
+	&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
+	&save_php_fpm_config_value($d, "listen.group`", $d->{'ugroup'});
+	}
 &register_post_action(\&restart_php_fpm_server, $conf);
 &register_post_action(\&restart_apache);
 
@@ -2133,6 +2138,10 @@ if (-r $file) {
 	&save_php_fpm_config_value($d, "user", $d->{'user'});
 	&save_php_fpm_config_value($d, "group", $d->{'ugroup'});
 	&save_php_fpm_config_value($d, "listen", $port);
+	if (&get_php_fpm_config_value($d, "listen.owner")) {
+		&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
+		&save_php_fpm_config_value($d, "listen.group", $d->{'ugroup'});
+		}
 	}
 else {
 	# Create a new file
@@ -2144,6 +2153,9 @@ else {
 	@$lref = ( "[$d->{'id'}]",
 		   "user = ".$d->{'user'},
 		   "group = ".$d->{'ugroup'},
+		   "listen.owner = ".$d->{'user'},
+		   "listen.group = ".$d->{'ugroup'},
+		   "listen.mode = 0660",
 		   "listen = ".$port,
 		   "pm = dynamic", 
 		   "pm.max_children = $defchildren",
