@@ -5950,6 +5950,8 @@ mail_nothing=No changes were made!
 mail_ecloudid=An ID must be specified for the selected cloud mail filter
 mail_url=Current filtering provider's URL
 mail_mx=Current MX records
+mail_smtp_cloud=Cloud mail delivery provider
+mail_smtp_local=&lt;None - deliver directly from this system&gt;
 
 nf_header=The following new features are available in $1 ..
 nf_desc=Feature
