@@ -1632,3 +1632,4 @@ Removed the mostly useless configuration check for 127.0.0.1 in /etc/resolv.conf
 Added the reset-feature API command and a tab on the Validate Virtual Servers page to reset the settings for selected features of a virtual server back to their defaults.
 Added a configuration option and flag to create-domain to allow SSL linkage across domain owners.
 If using a supported Apache version or Nginx, HTTP2 can be enabled for individual websites or on the server templates page.
+Added support for outgoing SMTP providers like Amazon SES, so that systems with dynamic IPs can reliably send email.
