@@ -34,9 +34,6 @@ if ($supports_bcc) {
 		&$second_print($text{'setup_done'});
 		$changed++;
 		}
-	else {
-		&$second_print($text{'mail_bccoff'});
-		}
 	}
 if ($supports_bcc == 2) {
 	$rbcc = &get_domain_recipient_bcc($d);
@@ -53,9 +50,6 @@ if ($supports_bcc == 2) {
 		&save_domain_recipient_bcc($d, undef);
 		&$second_print($text{'setup_done'});
 		$changed++;
-		}
-	else {
-		&$second_print($text{'mail_rbccoff'});
 		}
 	}
 
