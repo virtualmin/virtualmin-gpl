@@ -1758,7 +1758,6 @@ check_webok=Apache er installert.
 check_webphpvers=Følgende PHP versjoner er tilgjengelige : $1
 check_webphpnovers=Ingen PHP versjoner ble funnet på dette systemet!
 check_ftpok=ProFTPd er installert.
-check_dnsok=BIND DNS tjener er installert, og systemet er konfigurert til å bruke den.
 check_dnsok2=BIND DNS tjener er installert.
 check_dnsok3=BIND DNS domener vil bli betjent fra en tjeneste-vert.
 check_dnsmaster=Standard master DNS tjener $1 er imidlertid ikke et fullt kvalifisert domenenavn.
@@ -1790,11 +1789,9 @@ check_edepwebalizer=Webalizer kan ikke aktiveres i Virtualmins <a href='$1'>modu
 check_edepssl=SSL kan ikke aktiveres i Virtualmins <a href='$1'>modulkonfigurasjon</a> hvis ikke Apache også er aktivert.
 check_eshell=Skall $1 for ikke-FTP brukere er tatt med i $2, noe som kan tillate FTP tilgang.
 check_eftpshell=Skall $1 for FTP brukere er ikke tatt med i $2, noe som kan forhindre FTP tilgang.
-check_enscd=Advarsel - Name service caching daemon (NCSD) kjører på systemet ditt. Dette kan forhindre Virtualmin i å opprette nye brukere og grupper korrekt.
 check_emysqlsync=Synkronisering mellom Unix og MySQL brukere er aktivert i <a href='$1'>MySQL Databasetjener</a> modulen.  Dette er ikke nødvendig siden Virtualmin oppretter MySQL kontoer for domene-eiere ved behov. Synkroniseringen bør derfor slås av.
 check_equotasync=Standard disk-kvoter for nye brukere er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye brukere. Du må derfor deaktivere denne i modulen <a href='$2'>Dsk kvoter</a>.
 check_egquotasync=Standard diskkvoter for nye grupper er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye domener. Dette må derfor deaktiveres i <a href='$2'>Disk kvoter</a> modulen.
-check_enscd2=Du kan deaktivere NSCD i modulen <a href='$1'>Oppstart og avstenging</a>.
 check_allwebmin=Oppdaterer alle Webmin brukere med nye innstillinger..
 check_allresel=Oppdaterer alle forhandlere med nye innstillinger..
 check_needupdate=Noen av modulkonfigurasjonsinnstillingene som påvirker hvilke moduler Webmnin brukerne har tilgang til, er endret. Klikk på knappen nedenfor for å oppdatere alle brukere med de nye tillatelsene.
@@ -3474,7 +3471,6 @@ resel_max_bw=Maks. båndbreddegrense for alle tjenere
 resel_features=Tillatte funksjoner for tjenere
 resel_err=Kunne ikke lagre forhandler
 resel_ename=Manglende eller ugyldig forhandlernavn - kun bokstaver, takk og tegnene -,_ og . er tillatt
-reset_ewebmin=Brukernavnet <tt>webmin</tt> er reservert
 resel_emax_quota=Manglende eller ugyldig maks. kvote
 resel_emax_doms=Manglende eller ugyldig maks antall tjenere
 resel_emax_aliasdoms=Manglende eller ugyldig maks. antall alias tjenere
@@ -3681,6 +3677,7 @@ scripts_epythoninst=.. automatisk installasjon av Python modul feilet
 scripts_installgem=Installerer Ruby Gems pakke ..
 scripts_mmax=(Maksimalt $1)
 scripts_sitelink=Mer informasjon om bruk av dette scriptet kan finnes på <a href='$1' target=_new>$1</a>.
+
 scripts_userpass=Den initielle administrasjonsbrukeren er $1 med passordet $2.
 scripts_useronly=Denne initielle administrasjonsbrukeren er $1.
 scripts_passonly=Det initielle administrasjonspassordet er $1.
@@ -4990,6 +4987,7 @@ bwreset_edate=Ugyldig startdato
 bwreset_efeatures=Ingen funksjoner valgt
 bwreset_edoms=Ingen virtuelle tjenere valgt
 bwreset_doing=Nullstiller båndbredde tellere for valgte tjenere og funksjoner ..
+
 bwreset_done=.. ferdig.
 bwreset_running=Re-genererer båndbredde statistikk fra loggfiler ..
 bwreset_started=.. prosess startet. Dette kan ta flere timer dersom du ha valgt å re-behandle logger for en lang tidsperiode eller for et stort antall domener.
@@ -5300,8 +5298,6 @@ mail_bccing=Blindkopierer all sendt e-post til $1 ..
 mail_nobcc=Deaktiverer blind-kopi av sendt e-post
 mail_rbccing=Blindkopierer all innkommende e-post til $1 ..
 mail_norbcc=Deaktiverer blindkopiering av innkommende e-post
-mail_bccoff=Lar blindkopiering av sendt e-post være deaktivert.
-mail_rbccoff=Lar blindkopiering av innkommende e-post stå deaktivert.
 mail_dependent=Send utgående e-post for domenet fra IP
 mail_dependent0=Systemets standard adresse
 mail_dependent1=Virtuell tjeners adresse $1

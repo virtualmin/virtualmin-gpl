@@ -1093,6 +1093,8 @@ save_ssl8=Aktualizowanie przekazywania ramek SSL ..
 save_ssl9=Aktualizowanie serwera proxy strony internetowej ..
 save_ssl10=Zmiana nazwy użytkownika w konfiguracji witryny SSL.
 save_ssl11=Ponowne generowanie samopodpisanego certyfikatu SSL ..
+save_ssl12=Żądanie certyfikatu Let's Encrypt dla nowej domeny. ..
+save_essl12=.. żądanie nie powiodło się : $1 
 save_webalizer=Aktualizowanie nazwy domeny w konfiguracji Webalizera ..
 save_webalizerhome=Aktualizowanie katalogu domowego w konfiguracji Webalizera ..
 save_webalizeruser=Aktualizowanie nazwy użytkownika w konfiguracji Webalizera ..
@@ -1121,9 +1123,6 @@ save_euserquota=Przydział dysku administratora serwera nie powinien być obniż
 save_aliasusers=Wyłączana funkcja jest używana przez następujące serwery aliasów : $1 
 save_erquota=Przydziału dysku dla tego serwera wirtualnego nie można ustawić na nieograniczony, ponieważ jest on własnością odsprzedawcy $1, który ma limit przydziału
 save_erbw=Limit przepustowości dla tego wirtualnego serwera nie może być ustawiony na nieograniczony, ponieważ jest on własnością odsprzedawcy $1, który ma limit przepustowości
-save_installed_scripts_dbuser=Aktualizacja nazwy użytkownika bazy danych dla zainstalowanych skryptów ..
-save_installed_scripts_dbpass=Aktualizacja hasła bazy danych dla zainstalowanych skryptów ..
-save_installed_scripts_db=Aktualizacja nazwy bazy danych dla zainstalowanych skryptów ..
 save_installed_scripts_err_file=.. nie powiodło się: nie można odczytać pliku <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. nie powiodło się: nie można znaleźć ciągów do zastąpienia w pliku <tt>$1</tt>
 save_installed_scripts_done=.. zrobione dla pliku <tt>$1</tt>
@@ -1376,6 +1375,7 @@ newweb_admin=Przekierować <tt>admin.${DOM}</tt>?
 newweb_admindom=Adres URL przekierowania <tt>admin</tt>
 newweb_ewebmaildom=Brakujący lub nieprawidłowy adres URL przekierowania poczty internetowej
 newweb_eadmindom=Brakujący lub nieprawidłowy adres URL przekierowania administratora
+newweb_http2=Włączyć protokół HTTP2 dla nowych stron internetowych?
 
 newftp_ecannot=Nie możesz edytować szablonu ProFTPD
 newftp_desc=Ten formularz służy do edycji szablonów dyrektyw ProFTPD, które będą używane dla wirtualnych serwerów FTP utworzonych przez Virtualmin. Podczas tworzenia witryny z szablonu zostaną wykonane następujące podstacje :
@@ -1515,6 +1515,8 @@ check_ewebphp=Plik konfiguracyjny Apache $1 zawiera $2 wiersze, które uniemożl
 check_suexecok2=Skrypty CGI mogą być wykonywane przy użyciu SuExec lub fcgiwrap.
 check_suexecok=Skrypty CGI można wykonywać za pomocą SuExec.
 check_fcgiwrapok=Skrypty CGI można wykonywać za pomocą fcgiwrap.
+check_http2ok=Apache obsługuje HTTPv2 w twoim systemie.
+check_http2err=Apache nie obsługuje HTTPv2  : $1 
 check_webphpmodes=Dostępne są następujące tryby wykonywania PHP : $1 
 check_ewebphpmodes=Brak dostępnych trybów wykonywania PHP!
 check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików php.ini.
@@ -1552,11 +1554,9 @@ check_noquotas=Przydziały dysku zostały wyłączone w konfiguracji modułu.
 check_edepwebalizer=Webalizer nie może być włączony w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to serwer WWW.
 check_edepssl=SSL nie może być włączone w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to Apache.
 check_eshell=Powłoka $1 dla użytkowników innych niż FTP jest zawarta w $2, co może umożliwić dostęp FTP.
-check_enscd=Ostrzeżenie - w systemie działa demon buforowania usługi nazw (NSCD). Może to uniemożliwić prawidłowe tworzenie nowych użytkowników i grup Unix przez Virtualmin.
 check_emysqlsync=Synchronizacja między użytkownikami Uniksa i MySQL jest włączona w module <a href='$1'>MySQL Database</a>. Nie jest to konieczne, ponieważ Virtualmin tworzy konta MySQL dla właścicieli domen w razie potrzeby, dlatego należy je wyłączyć.
 check_equotasync=Domyślne przydziały dysku dla nowych użytkowników są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych użytkowników, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>.
 check_egquotasync=Domyślne przydziały dysku dla nowych grup są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych domen, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>.
-check_enscd2=Możesz wyłączyć NSCD w module <a href='$1'>Działania związane z uruchamianiem i zamykaniem</a>.
 check_allwebmin=Aktualizowanie wszystkich użytkowników Webmin o nowe ustawienia.
 check_allresel=Aktualizowanie wszystkich sprzedawców o nowe ustawienia ..
 check_needupdate=Niektóre ustawienia konfiguracji modułów, które wpływają na moduły, do których użytkownicy Webmin mają dostęp, uległy zmianie. Kliknij przycisk poniżej, aby zaktualizować wszystkich użytkowników o nowe uprawnienia.
@@ -1588,10 +1588,6 @@ check_eget_user=Zewnętrzne polecenia przydziału są włączone, ale polecenie 
 check_eget_group=Zewnętrzne polecenia przydziału są włączone, ale polecenie uzyskania przydziału dla pojedynczej grupy nie istnieje
 check_quotacommands=Zewnętrzne polecenia przydziału będą używane dla serwerów wirtualnych i skrzynek pocztowych.
 check_eclamd=Wybrano użycie <tt>clamdscan</tt> do skanowania w poszukiwaniu wirusów, ale serwer <tt>clamd</tt>, z którym mówi, nie działa
-check_eresolv4=Virtualmin jest skonfigurowany do konfigurowania stref DNS, ale ten system nie jest skonfigurowany do używania siebie jako serwera DNS. Dodaj 127.0.0.1 do $1 lub wyłącz funkcję BIND na stronie $2.
-check_eresolv3=Wygląda na to, że DHCP jest używany do dynamicznej konfiguracji interfejsów sieciowych, co może spowodować ustawienie serwerów DNS na podstawie ustawień dostarczonych przez serwer DHCP. Używanie statycznego adresu IP jest zdecydowanie zalecane w Virtualmin.
-check_eresolvlist=lista serwerów DNS
-check_dnsmissing=Wygląda na to, że w systemie nie skonfigurowano żadnych serwerów DNS. Jednak domyślne zachowanie korzystania z lokalnego serwera DNS powinno nadal działać.
 check_evirusspam=Skanowania antywirusowego nie można włączyć bez filtrowania spamu
 check_preload=Aktualizowanie ustawień wstępnego ładowania biblioteki Virtualmin.
 check_collect=Aktualizowanie zadania gromadzenia statusu ..
@@ -3328,7 +3324,7 @@ resel_max_bw=Maksymalny limit przepustowości dla wszystkich serwerów
 resel_features=Dozwolone funkcje dla serwerów
 resel_err=Nie udało się zapisać sprzedawcy
 resel_ename=Brakująca lub nieprawidłowa nazwa sprzedawcy - tylko litery, cyfry i znaki -, _ i. są dozwolone
-reset_ewebmin=Nazwa logowania <tt>webmin</tt> jest zarezerwowana
+resel_ewebmin=Nazwa logowania <tt>webmin</tt> jest zarezerwowana
 resel_emax_quota=Brakujący lub nieprawidłowy maksymalny limit
 resel_emax_doms=Brakująca lub nieprawidłowa maksymalna liczba serwerów
 resel_emax_topdoms=Brakująca lub nieprawidłowa maksymalna liczba serwerów najwyższego poziomu
@@ -3438,6 +3434,7 @@ scripts_edownload2=Pobieranie $1 nie jest plikiem archiwum - być może stroną 
 scripts_edownload3=Pobieranie $1 jest niekompletnym plikiem archiwum : $2 
 scripts_eurl=Nieobsługiwany adres URL $1 
 scripts_ierr=Nie udało się zainstalować skryptu
+scripts_uerr=Nie udało się odinstalować skryptu
 scripts_installing=Teraz instaluję wersję $1 $2 ..
 scripts_faking=Udawana instalacja $1 w wersji $2 ..
 scripts_failed=.. nie powiodło się! Zobacz powyższy komunikat o błędzie, z jakiego powodu.
@@ -3478,6 +3475,7 @@ scripts_epythoninst=.. automatyczna instalacja modułu Python nie powiodła się
 scripts_installgem=Instalowanie pakietu Ruby Gems ..
 scripts_mmax=(Maksymalnie $1)
 scripts_sitelink=Więcej informacji na temat używania tego skryptu można znaleźć na stronie <a href='$1' target=_blank>$1</a>.
+
 scripts_userpass=Początkowy login administratora to $1 z hasłem $2.
 scripts_passmode4=Początkowe hasło do skryptu
 scripts_epassmodeuser=Niepoprawny login do skryptu - tylko litery, cyfry i znaki. - _ może być użyty
@@ -3958,6 +3956,7 @@ newvalidate_return=formularz walidacyjny
 newvalidate_tabval=Sprawdź teraz
 newvalidate_tabsched=Zaplanowana walidacja
 newvalidate_tabsfix=Napraw uprawnienia
+newvalidate_tabsreset=Resetuj funkcje
 newvalidate_sched=Zatwierdź zgodnie z harmonogramem
 newvalidate_email=Wyślij raport e-mail na adres
 newvalidate_config=Sprawdź także konfigurację Virtualmin?
@@ -3968,6 +3967,13 @@ newvalidate_fixservers=Serwery wirtualne do naprawienia
 newvalidate_subservers=Napraw także podserwery?
 newvalidate_fix=Napraw uprawnienia teraz
 newvalidate_header3=Opcje naprawy uprawnień
+newvalidate_desc4=OSTRZEŻENIE! Ta strona może służyć do resetowania stanu funkcji dla wybranego serwera wirtualnego. Może to spowodować utratę ustawień w ramach procesu przywracania funkcji do znanego dobrego stanu.
+newvalidate_header4=Opcje resetowania funkcji
+newvalidate_reset=Zresetuj teraz
+newvalidate_resetdom=Serwer wirtualny do zresetowania
+newvalidate_resetfeats=Funkcje do zresetowania
+newvalidate_resetskip=Kontynuować, nawet jeśli ustawienia zostałyby utracone?
+newvalidate_resetonoff=Całkowicie zresetować przez włączanie i wyłączanie funkcji?
 
 validate_edir=Katalog domowy $1 nie istnieje
 validate_ediruser=Katalog domowy $1 jest własnością $2 zamiast $3 
@@ -4004,6 +4010,7 @@ validate_ednsnotype=Strefa DNS dla domeny $1 nie ma typu!
 validate_ednstype=Strefa DNS dla domeny $1 ma typ $2 zamiast $3 
 validate_ecloud=Nie znaleziono domeny DNS u dostawcy chmury $1 
 validate_eweb=Nie znaleziono hosta wirtualnego Apache dla $1 
+validate_ewebconfig=Znaleziono błąd w konfiguracji hosta wirtualnego : $1
 validate_ewebphp=Brak skryptu opakowania dla PHP $1 - $2 
 validate_ewebphpsuexec=PHP jest skonfigurowany do działania jako właściciel domeny, ale SuExec nie jest włączony!
 validate_ewebphpconfig=Znaleziono błędy konfiguracji PHP w wersji $1 : $2 
@@ -4311,6 +4318,10 @@ phpmode_deldir=Usuwanie katalogu PHP $1 ..
 phpmode_edeldir=.. nie można usunąć katalogu głównego!
 phpmode_adddir=Dodawanie katalogu PHP $1 w wersji $2 ..
 phpmode_savedir=Aktualizowanie katalogu PHP $1 do wersji $2 ..
+phpmode_http2=Włączyć obsługę protokołu HTTP2?
+phpmode_http2on=Włączenie HTTP2 ..
+phpmode_http2off=Wyłączanie HTTP2 ..
+phpmode_http2def=Korzystanie z domyślnego trybu HTTP2..
 
 website_header=Opcje witryny
 
@@ -4940,8 +4951,6 @@ mail_bccing=BCCing wszystkich wysłanych wiadomości e-mail do $1 ..
 mail_nobcc=Wyłączanie BCC wysłanych wiadomości e-mail
 mail_rbccing=BCCing wszystkich przychodzących wiadomości e-mail do $1 ..
 mail_norbcc=Wyłączanie BCC przychodzących wiadomości e-mail
-mail_bccoff=Wyłączono pozostawienie BCC wysyłanych wiadomości e-mail.
-mail_rbccoff=Wyłączono wyłączanie BCC przychodzących wiadomości e-mail.
 mail_dependent=Wyślij wychodzącą wiadomość e-mail dla domeny z adresu IP
 mail_dependent0=Domyślny adres systemu
 mail_dependent1=Adres serwera wirtualnego $1 
@@ -4958,6 +4967,11 @@ mail_nothing=Nie wprowadzono żadnych zmian!
 mail_ecloudid=Dla wybranego filtra poczty w chmurze należy podać identyfikator
 mail_url=Aktualny adres URL dostawcy filtrowania
 mail_mx=Bieżące rekordy MX
+mail_smtp_cloud=Dostawca usługi dostarczania poczty w chmurze
+mail_smtp_local=&lt;Brak — dostarczaj bezpośrednio z tego systemu&gt;
+mail_smtp_cloudoff=Usuwanie dostawcy SMTP w chmurze $1 ..
+mail_smtp_cloudon=Konfigurowanie dostawcy SMTP w chmurze $1 ..
+mail_smtp_cloudfailed=.. nie powiodło się : $1 
 
 nf_date=(zainstalowany $1)
 
@@ -5508,7 +5522,11 @@ smtpcloud_esmtpuser=Nie udało się przekonwertować tajnego klucza SES na hasł
 smtpcloud_egetver=Nie udało się uzyskać statusu weryfikacji Amazon SES : $1
 smtpcloud_evaltok=Weryfikacja Amazon SES nie została zakończona. Musisz utworzyć rekord DNS TXT o nazwie $2 z wartością $1.
 smtpcloud_evaltok2=Weryfikacja Amazon SES nie zwróciła żadnych informacji dla tej domeny!
-
+smtpcloud_egetquota=Nie udało się uzyskać limitu Amazon SES : $1
+smtpcloud_esandbox=Twoje konto Amazon SES jest nadal w trybie piaskownicy, więc możesz wysyłać wiadomości e-mail tylko do zweryfikowanych domen.
+smtpcloud_ses_sandbox=Stan produkcji SES
+smtpcloud_ses_inprod=Produkcja gotowa
+smtpcloud_ses_insandbox=W SES Sandbox – dostarczanie poczty jest ograniczone do czasu <a href='$1' target=_blank>uaktualnienia konta</a>.
 provision_ecannot=Nie wolno konfigurować klienta usług Cloudmin
 provision_header=Opcje klienta usług Cloudmin
 provision_server=Mistrz usług Cloudmin
@@ -6270,3 +6288,21 @@ dnscloud_cloudflare_ens=Nie udało się wyszukać rekordów NS : $1
 dnscloud_cloudflare_ens2=Nie znaleziono rekordów NS dla $1. Cloudflare wymaga wcześniejszej rejestracji domen DNS.
 
 install_mod_perl_link=Użyj strony <a href='$1'>Perl Modules</a> w Webmin, aby go zainstalować
+
+reset_edns=Rekordy DNS zostaną utracone : $1 
+reset_emysql=Bazy danych MySQL zostaną usunięte : $1 
+reset_epostgres=Bazy danych PostgreSQL zostaną usunięte : $1 
+reset_webrestore=Przywracanie przekierowań i ustawień PHP ..
+reset_unix=Resetowanie użytkownika i grupy Unix ..
+reset_eunixuser=.. użytkownik $1 nie istnieje!
+reset_eunixgroup=.. grupa $1 nie istnieje!
+reset_err=Nie udało się zresetować funkcji
+reset_title=Resetowanie funkcji
+reset_edom=Serwer wirtualny nie może zostać zresetowany
+reset_efeatures=Nie wybrano funkcji do zresetowania
+reset_efeatures2=Nie wybrano prawidłowych funkcji do zresetowania
+reset_enoreset=$1 nie może być zresetowany
+reset_doing=Resetowanie $1 ..
+reset_iwarning=.. ignorowanie ostrzeżenia : $1 
+reset_swarning=.. pomijanie ostrzeżenia : $1 
+reset_dataloss=.. zresetowanie spowodowałoby utratę danych : $1 

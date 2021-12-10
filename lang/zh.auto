@@ -475,6 +475,8 @@ save_mailunalias2=删除全部邮件别名 ..
 save_mailto=更新联系人地址的别名。
 save_ssl10=在SSL网站配置中更改用户名。
 save_ssl11=重新生成自签名SSL证书 ..
+save_ssl12=为新域请求 Let's Encrypt 证书 ..
+save_essl12=.. 请求失败：$1
 save_webalizerhome=在Webalizer配置中更新主目录。
 save_logrotatehome=在Logrotate配置中更新主目录。
 save_logrotateuser=在Logrotate配置中更新用户和组。
@@ -490,9 +492,6 @@ save_euserquota=服务器管理员的磁盘配额不应降低到 $2，因为当�
 save_aliasusers=以下别名服务器正在使用被禁用的功能： $1
 save_erquota=无法将此虚拟服务器的磁盘配额设置为无限，因为它由具有配额限制的经销商 $1拥有
 save_erbw=此虚拟服务器的带宽限制不能设置为无限制，因为它由具有带宽限制的经销商 $1拥有
-save_installed_scripts_dbuser=更新已安装脚本的数据库用户名 ..
-save_installed_scripts_dbpass=更新已安装脚本的数据库密码 ..
-save_installed_scripts_db=更新已安装脚本的数据库名称 ..
 save_installed_scripts_err_file=.. 失败：无法读取 <tt>$1</tt> 文件
 save_installed_scripts_err_file_lines=.. 失败：在 <tt>$1</tt> 文件中找不到要替换的字符串
 save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
@@ -547,6 +546,7 @@ newweb_admin=重定向<tt>admin。${DOM}</tt>？
 newweb_admindom=<tt>admin</tt>重定向的URL
 newweb_ewebmaildom=用于Webmail重定向的URL丢失或无效
 newweb_eadmindom=管理员重定向网址缺失或无效
+newweb_http2=为新网站启用 HTTP2 协议？
 
 newdns_ensip=附加名称服务器 $1是IP地址而不是主机名
 newdns_enshost=其他名称服务器 $1不存在
@@ -576,6 +576,8 @@ check_ewebphp=Apache配置文件 $1包含 $2行，这些行阻止PHP以域所有
 check_suexecok2=CGI 脚本可以使用 SuExec 或 fcgiwrap 执行。
 check_suexecok=可以使用 SuExec 执行 CGI 脚本。
 check_fcgiwrapok=可以使用 fcgiwrap 执行 CGI 脚本。
+check_http2ok=Apache 在您的系统上支持 HTTPv2。
+check_http2err=Apache 不支持 HTTPv2  : $1
 check_webphpvers=提供以下PHP版本： $1
 check_webphpnovers=在该系统上找不到PHP版本！
 check_webphpmodes=可以使用以下PHP执行模式： $1
@@ -604,11 +606,9 @@ check_iface6=使用接口 $1可以使用IPv6地址。
 check_dependentok=Postfix配置为支持每个域的传出IP地址。
 check_dependentever=您的Postfix版本不支持每个域的传出IP地址。
 check_dependentesupport=Postfix可以支持每个域的传出IP地址，但当前未配置为支持。可以在<a href='$1'>Postfix Mailserver</a>模块中进行设置。
-check_enscd=警告-名称服务缓存守护程序（NSCD）正在您的系统上运行。这可能会阻止Virtualmin正确创建新的Unix用户和组。
 check_emysqlsync=在<a href='$1'>MySQL数据库</a>模块中启用了Unix和MySQL用户之间的同步。这是没有必要的，因为Virtualmin会在需要时为域所有者创建MySQL帐户，因此必须将其关闭。
 check_equotasync=在文件系统 $1上为新用户启用了默认磁盘配额。这是没有必要的，因为Virtualmin为新用户设置了配额，因此必须在<a href='$2'>磁盘配额</a>模块中将其禁用。
 check_egquotasync=在文件系统 $1上启用了新组的默认磁盘配额。这不是必需的，因为Virtualmin为新域设置了配额，因此必须在<a href='$2'>磁盘配额</a>模块中将其禁用。
-check_enscd2=您可以在<a href='$1'>启动和关闭操作</a>模块中禁用NSCD。
 check_allresel=使用新设置更新所有经销商。
 check_spamwhite=在<a href='$1'>Virtualmin Configuration</a>页上启用了每个域中所有邮箱的白名单，但这与<a href='$2'>spamc</a> SpamAssassin的使用不兼容。客户程序。
 check_virusok2=ClamAV已安装并假定正在运行。
@@ -617,10 +617,6 @@ check_epbzip2ver=您选择了并行bzip2压缩，但这需要<tt>pbzip2</tt>版�
 check_eget_user=启用了外部配额命令，但是获取单个用户配额的命令不存在
 check_eget_group=启用了外部配额命令，但是获取单个组配额的命令不存在
 check_eclamd=您已选择使用<tt>clamdscan</tt>进行病毒扫描，但与之通信的<tt>clamd</tt>服务器未运行
-check_eresolv4=Virtualmin 配置为设置 DNS 区域，但该系统未设置为将自身用作 DNS 服务器。将 127.0.0.1 添加到 $1，或关闭 $2 页面上的 BIND 功能。
-check_eresolv3=似乎DHCP用于动态配置您的网络接口，这可能导致DNS服务器根据DHCP服务器提供的设置进行设置。 Virtualmin强烈建议使用静态IP地址。
-check_eresolvlist=DNS服务器列表
-check_dnsmissing=系统似乎没有配置任何DNS服务器。但是，使用本地DNS服务器的默认行为仍然应该起作用。
 check_evirusspam=如果没有垃圾邮件过滤，则无法启用病毒扫描
 check_preload=更新Virtualmin库的预加载设置 ..
 check_collect=更新状态收集作业 ..
@@ -1599,6 +1595,7 @@ resel_anydom=允许任何域
 resel_max_topdoms=最大顶级服务器
 resel_unlimit2=对于某些域是无限的
 resel_none=没有
+resel_ewebmin=登录名 <tt>webmin</tt> 被保留
 resel_emax_topdoms=顶级服务器的最大数量缺失或无效
 resel_eclash2=具有相同名称的Unix用户已经存在
 resel_backups=可以备份虚拟服务器吗？
@@ -1680,6 +1677,7 @@ scripts_ecommands=无法安装此脚本，因为它需要以下命令：<tt>$1</
 scripts_emissing=脚本不存在！
 scripts_ephpvers2=无法安装此脚本，因为未找到PHP版本
 scripts_edownload3=$1的下载是不完整的存档文件： $2
+scripts_uerr=卸载脚本失败
 scripts_faking=伪装 $1版本 $2 ..
 scripts_egone=脚本不再存在！
 scripts_rusurehome=由于此脚本已安装到虚拟服务器的顶级Web目录中，因此<tt>$1</tt>下的<b>所有</b>文件在卸载时将被删除！
@@ -1726,6 +1724,7 @@ scripts_epythoninst=..自动安装Python模块失败
 scripts_installgem=安装Ruby Gems包 ..
 scripts_mmax=（最多 $1）
 scripts_sitelink=有关使用此脚本的更多信息，请参见<a href='$1' target=_blank>$1</a>。
+
 scripts_userpass=初始管理登录为 $1，密码为 $2。
 scripts_useronly=初始管理登录为 $1。
 scripts_passonly=初始管理密码为 $1。
@@ -1997,6 +1996,7 @@ newvalidate_return=确认表格
 newvalidate_tabval=立即验证
 newvalidate_tabsched=预定验证
 newvalidate_tabsfix=修复权限
+newvalidate_tabsreset=重置功能
 newvalidate_sched=如期验证
 newvalidate_email=发送电子邮件报告给
 newvalidate_config=还要检查Virtualmin配置吗？
@@ -2007,6 +2007,13 @@ newvalidate_fixservers=要修复的虚拟服务器
 newvalidate_subservers=还修复子服务器？
 newvalidate_fix=立即修复权限
 newvalidate_header3=权限修复选项
+newvalidate_desc4=警告！此页面可用于重置所选虚拟服务器的功能状态。这可能会导致设置丢失，作为将功能返回到已知良好状态的过程的一部分。
+newvalidate_header4=功能重置选项
+newvalidate_reset=立即重置
+newvalidate_resetdom=要重置的虚拟服务器
+newvalidate_resetfeats=重置功能
+newvalidate_resetskip=即使设置丢失也要继续吗？
+newvalidate_resetonoff=通过打开和关闭功能完全重置？
 
 validate_esslfile=SSL $1文件无效： $2
 validate_euserhome=管理用户 $1具有主目录 $3，但应为 $2
@@ -2031,6 +2038,7 @@ validate_ednsmx=该域已启用电子邮件，但没有MX记录 $1指向该域�
 validate_ednsnotype=域 $1的DNS区域没有类型！
 validate_ednstype=域 $1的DNS区域的类型为 $2，而不是 $3
 validate_ecloud=在云提供商 $1 上找不到 DNS 域
+validate_ewebconfig=在虚拟主机配置中发现错误：$1
 validate_ewebphp=PHP $1- $2缺少包装器脚本
 validate_ewebphpsuexec=PHP已配置为以域所有者身份运行，但未启用SuExec！
 validate_ewebphpconfig=在版本 $1中发现PHP配置错误： $2
@@ -2219,6 +2227,10 @@ phpmode_deldir=删除PHP目录 $1 ..
 phpmode_edeldir=..主目录无法删除！
 phpmode_adddir=在版本 $2上添加PHP目录 $1 ..
 phpmode_savedir=将PHP目录 $1更新到版本 $2 ..
+phpmode_http2=启用 HTTP2 协议支持？
+phpmode_http2on=启用 HTTP2 ..
+phpmode_http2off=禁用 HTTP2 ..
+phpmode_http2def=使用默认的 HTTP2 模式..
 
 website_header=网站选项
 
@@ -2660,8 +2672,6 @@ mail_bccing=密送所有发送到 $1的电子邮件。
 mail_nobcc=禁用已发送电子邮件的密件抄送
 mail_rbccing=密送所有传入的电子邮件到 $1 ..
 mail_norbcc=禁用传入电子邮件的密件抄送
-mail_bccoff=保留发送邮件的密件抄送功能。
-mail_rbccoff=保留对收到电子邮件的密件抄送。
 mail_dependent=从IP发送域的传出电子邮件
 mail_dependent0=系统默认地址
 mail_dependent1=虚拟服务器的地址 $1
@@ -2678,6 +2688,11 @@ mail_nothing=没有进行任何更改！
 mail_ecloudid=必须为所选的云邮件过滤器指定一个ID
 mail_url=当前过滤提供者的URL
 mail_mx=当前的MX记录
+mail_smtp_cloud=云邮件交付提供商
+mail_smtp_local=&lt;无 - 直接从该系统交付&gt;
+mail_smtp_cloudoff=正在删除云 SMTP 提供程序 $1 ..
+mail_smtp_cloudon=正在配置云 SMTP 提供程序 $1 ..
+mail_smtp_cloudfailed=.. 失败：$1
 
 nf_header=$1..提供了以下新功能。
 nf_desc=特征
@@ -3301,7 +3316,11 @@ smtpcloud_esmtpuser=无法将 SES 密钥转换为 SMTP 密码
 smtpcloud_egetver=无法获得 Amazon SES 验证状态：$1
 smtpcloud_evaltok=Amazon SES 验证未完成。您必须创建一个名为 $2 且值为 $1 的 DNS TXT 记录。
 smtpcloud_evaltok2=Amazon SES 验证未返回此域的任何信息！
-
+smtpcloud_egetquota=未能获得 Amazon SES 配额：$1
+smtpcloud_esandbox=您的 Amazon SES 账户仍处于沙盒模式，因此只能向经过验证的域发送电子邮件。
+smtpcloud_ses_sandbox=SES生产状态
+smtpcloud_ses_inprod=生产就绪
+smtpcloud_ses_insandbox=在 SES Sandbox 中 - 在您的<a href='$1' target=_blank>帐户升级</a>之前，邮件传送会受到限制。
 provision_title=Cloudmin Services客户
 provision_ecannot=不允许您设置Cloudmin服务客户端
 provision_header=Cloudmin服务客户端选项
@@ -4150,3 +4169,21 @@ dnscloud_cloudflare_ens=查找 NS 记录失败：$1
 dnscloud_cloudflare_ens2=未找到 $1 的 NS 记录。 Cloudflare 要求首先注册 DNS 域。
 
 install_mod_perl_link=使用Webmin中的<a href='$1'>Perl模块</a>页进行安装
+
+reset_edns=DNS 记录将丢失  : $1
+reset_emysql=MySQL 数据库将被删除：$1
+reset_epostgres=PostgreSQL 数据库将被删除  : $1
+reset_webrestore=恢复重定向和 PHP 设置 ..
+reset_unix=重置 Unix 用户和组 ..
+reset_eunixuser=.. 用户 $1 不存在！
+reset_eunixgroup=.. 组 $1 不存在！
+reset_err=无法重置功能
+reset_title=重置功能
+reset_edom=虚拟服务器无法重置
+reset_efeatures=没有要重置的功能选择
+reset_efeatures2=没有可重置所选的有效功能
+reset_enoreset=$1 无法重置
+reset_doing=正在重置 $1 ..
+reset_iwarning=.. 忽略警告：$1
+reset_swarning=.. 跳过警告：$1
+reset_dataloss=.. 重置会导致数据丢失：$1

@@ -524,6 +524,8 @@ save_mailunalias2=Catchall posta takma adı kaldırılıyor ..
 save_mailto=İletişim adresi için takma ad güncelleniyor.
 save_ssl10=SSL web sitesi yapılandırmasında kullanıcı adı değiştiriliyor.
 save_ssl11=Kendinden imzalı SSL sertifikası yeniden oluşturuluyor ..
+save_ssl12=Yeni alan adı için Let's Encrypt sertifikası isteniyor ..
+save_essl12=.. istek başarısız oldu : $1
 save_webalizerhome=Webalizer yapılandırmasında giriş dizini güncelleniyor.
 save_logrotatehome=Logrotate yapılandırmasında giriş dizini güncelleniyor.
 save_logrotateuser=Logrotate yapılandırmasında kullanıcı ve grup güncelleniyor.
@@ -540,9 +542,6 @@ save_euserquota=Geçerli disk kullanımı zaten $1 olduğundan sunucu yöneticis
 save_aliasusers=Devre dışı bırakılan özellik aşağıdaki takma ad sunucuları tarafından kullanılıyor : $1 
 save_erquota=Bu sanal sunucunun disk kotası, kota sınırı olan $1 satıcısına ait olduğu için sınırsız olarak ayarlanamıyor
 save_erbw=Bu sanal sunucunun bant genişliği sınırı, bant genişliği sınırı olan $1 satıcısına ait olduğundan sınırsız olarak ayarlanamıyor
-save_installed_scripts_dbuser=Kurulu komut dosyaları için veritabanı kullanıcı adı güncelleniyor ..
-save_installed_scripts_dbpass=Kurulu komut dosyaları için veritabanı şifresi güncelleniyor ..
-save_installed_scripts_db=Kurulu komut dosyaları için veritabanı adı güncelleniyor ..
 save_installed_scripts_err_file=.. başarısız oldu : <tt>$1</tt> dosyası okunamıyor
 save_installed_scripts_err_file_lines=.. başarısız oldu : <tt>$1</tt> dosyasında değiştirilecek dizeler bulunamadı
 save_installed_scripts_done=.. <tt>$1</tt> dosyası için yapıldı
@@ -599,6 +598,7 @@ newweb_admin=<tt>admin.${DOM}</tt> yönlendirilsin mi?
 newweb_admindom=<tt>yönetici</tt> yönlendirmesi için URL
 newweb_ewebmaildom=Web postası yönlendirmesi için eksik veya geçersiz URL
 newweb_eadmindom=Yönetici yönlendirmesi için eksik veya geçersiz URL
+newweb_http2=Yeni web siteleri için HTTP2 protokolü etkinleştirilsin mi?
 
 newdns_ensip=$1 ek ad sunucusu, ana bilgisayar adı yerine bir IP adresidir
 newdns_enshost=$1 ek ad sunucusu mevcut değil
@@ -653,6 +653,8 @@ check_ewebphp=$1 Apache yapılandırma dosyası, PHP'nin etki alanı sahibi izin
 check_suexecok2=CGI betikleri SuExec veya fcgiwrap kullanılarak yürütülebilir.
 check_suexecok=CGI betikleri SuExec kullanılarak yürütülebilir.
 check_fcgiwrapok=CGI betikleri fcgiwrap kullanılarak çalıştırılabilir.
+check_http2ok=Apache, sisteminizde HTTPv2'yi destekler.
+check_http2err=Apache, HTTPv2'yi desteklemiyor : $1
 check_webphpvers=Aşağıdaki PHP sürümleri mevcuttur : $1 
 check_webphpnovers=Bu sistemde PHP sürümü bulunamadı!
 check_webphpmodes=Aşağıdaki PHP yürütme modları kullanılabilir : $1 
@@ -681,11 +683,9 @@ check_iface6=$1 arabirimi kullanılarak IPv6 adresleri kullanılabilir.
 check_dependentok=Postfix, alan adı başına giden IP adreslerini destekleyecek şekilde yapılandırılmıştır.
 check_dependentever=Postfix sürümünüz alan adı başına giden IP adreslerini desteklemiyor.
 check_dependentesupport=Postfix, alan adı başına giden IP adreslerini destekleyebilir, ancak şu anda bunu yapmak için yapılandırılmamıştır. Bu, <a href='$1'>Postfix Posta Sunucusu</a> modülünde ayarlanabilir.
-check_enscd=Uyarı - ad hizmeti önbelleğe alma arka plan programı (NSCD) sisteminizde çalışıyor. Bu, Virtualmin'in yeni Unix kullanıcıları ve grupları oluşturmasını engelleyebilir.
 check_emysqlsync=<a href='$1'>MySQL Veritabanı</a> modülünde Unix ve MySQL kullanıcıları arasında senkronizasyon etkinleştirilir. Bu gerekli değildir, çünkü Virtualmin gerektiğinde etki alanı sahipleri için MySQL hesapları oluşturur ve bu nedenle kapatılması gerekir.
 check_equotasync=Yeni kullanıcılar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni kullanıcılar için kota belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır.
 check_egquotasync=Yeni gruplar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni etki alanları için kotalar belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır.
-check_enscd2=<a href='$1'>Önyükleme ve Kapatma Eylemleri</a> modülünde NSCD'yi devre dışı bırakabilirsiniz.
 check_allresel=Tüm satıcıları yeni ayarlarla güncelleme ..
 check_spamwhite=Her alan adındaki tüm posta kutularının beyaz listelemesi <a href='$1'>Virtualmin Configuration</a> sayfasında etkinleştirilir, ancak bu <a href='$2'>spamc</a> SpamAssassin kullanımı ile uyumlu değildir istemci programı.
 check_virusok2=ClamAV kuruldu ve çalıştığı varsayıldı.
@@ -699,10 +699,6 @@ check_eget_user=Harici kota komutları etkin, ancak tek bir kullanıcının kota
 check_eget_group=Harici kota komutları etkin, ancak tek bir grubun kotasını alma komutu mevcut değil
 check_quotacommands=Harici kota komutları sanal sunucular ve posta kutuları için kullanılacaktır.
 check_eclamd=Virüs taraması için <tt>istiridye tarağı</tt> kullanmayı seçtiniz, ancak konuştuğu <tt>istiridye</tt> sunucusu çalışmıyor
-check_eresolv4=Virtualmin, DNS bölgelerini kuracak şekilde yapılandırılmıştır, ancak bu sistem kendisini bir DNS sunucusu olarak kullanacak şekilde ayarlanmamıştır. $1'e 127.0.0.1 ekleyin veya $2 sayfasındaki BAĞLAMA özelliğini kapatın.
-check_eresolv3=DHCP'nin ağ arabirimlerinizi dinamik olarak yapılandırmak için kullanıldığı anlaşılıyor, bu da DNS sunucularının DHCP sunucusu tarafından sağlanan ayarlara göre ayarlanmasına neden olabilir. Virtualmin ile statik bir IP adresi kullanılması önemle tavsiye edilir.
-check_eresolvlist=DNS sunucularının listesi
-check_dnsmissing=Sistemin yapılandırılmış DNS sunucusu yok gibi görünüyor. Ancak, yerel bir DNS sunucusu kullanmanın varsayılan davranışı yine de çalışmalıdır.
 check_evirusspam=Virüs taraması spam filtresi olmadan etkinleştirilemez
 check_preload=Virtualmin kitaplığı önyükleme ayarları güncelleniyor ..
 check_collect=Durum toplama işi güncelleniyor ..
@@ -1775,6 +1771,7 @@ resel_anydom=Herhangi bir alana izin ver
 resel_max_topdoms=Maksimum üst düzey sunucular
 resel_unlimit2=Bazı alanlar için sınırsız
 resel_none=Yok
+resel_ewebmin=<tt>webmin</tt> oturum açma adı ayrılmıştır
 resel_emax_topdoms=Üst düzey sunucuların sayısı eksik veya geçersiz
 resel_eclash2=Aynı ada sahip bir unix kullanıcısı zaten var
 resel_backups=Sanal sunucuları yedekleyebilir mi?
@@ -1860,6 +1857,7 @@ scripts_eweb=Komut dosyaları yalnızca giriş dizini ve web sitesi bulunan sana
 scripts_emissing=Komut dosyası yok!
 scripts_ephpvers2=PHP sürümü bulunamadığı için bu komut dosyası yüklenemez
 scripts_edownload3=$1 yüklemesi eksik bir arşiv dosyası : $2 
+scripts_uerr=Komut dosyası kaldırılamadı
 scripts_faking=$1 sürüm $2 'de sahte yükleme ..
 scripts_egone=Komut dosyası artık mevcut değil!
 scripts_rusurehome=Bu komut dosyası sanal sunucunun üst düzey web dizinine yüklendiğinden, <tt>$1</tt> altındaki <b>tüm</b> dosyalar kaldırıldığında silinecek!
@@ -1926,6 +1924,7 @@ scripts_epythoninst=.. otomatik Python modülü kurulumu başarısız
 scripts_installgem=Ruby Gems paketi yükleniyor ..
 scripts_mmax=(En fazla $1)
 scripts_sitelink=Bu komut dosyasını kullanma hakkında daha fazla bilgiyi <a href='$1' target=_blank>$1</a> adresinde bulabilirsiniz.
+
 scripts_userpass=İlk yönetim oturumu $2 parolasıyla $1.
 scripts_useronly=İlk yönetim oturumu $1.
 scripts_passonly=İlk yönetim şifresi $1.
@@ -2235,6 +2234,7 @@ newvalidate_return=doğrulama formu
 newvalidate_tabval=Şimdi Doğrula
 newvalidate_tabsched=Zamanlanmış Doğrulama
 newvalidate_tabsfix=Düzeltme izinleri
+newvalidate_tabsreset=Özellikleri Sıfırla
 newvalidate_sched=Zamanında doğrula
 newvalidate_email=Adresine e-posta raporu gönder
 newvalidate_config=Ayrıca Virtualmin yapılandırması da kontrol edilsin mi?
@@ -2245,6 +2245,13 @@ newvalidate_fixservers=Düzeltilecek sanal sunucular
 newvalidate_subservers=Alt sunucular da düzeltilsin mi?
 newvalidate_fix=İzinleri Şimdi Düzelt
 newvalidate_header3=İzin düzeltme seçenekleri
+newvalidate_desc4=UYARI! Bu sayfa, seçilen bir sanal sunucu için özelliklerin durumunu sıfırlamak için kullanılabilir. Bu, özellikleri bilinen iyi duruma döndürme sürecinin bir parçası olarak ayarların kaybolmasına neden olabilir.
+newvalidate_header4=Özellik sıfırlama seçenekleri
+newvalidate_reset=Şimdi Sıfırla
+newvalidate_resetdom=Sıfırlanacak sanal sunucu
+newvalidate_resetfeats=Sıfırlanacak özellikler
+newvalidate_resetskip=Ayarlar kaybolsa bile devam edilsin mi?
+newvalidate_resetonoff=Özellikleri açıp kapatarak tamamen sıfırlansın mı?
 
 validate_esslfile=SSL $1 dosyası geçerli değil : $2 
 validate_euserhome=$1 yönetim kullanıcısının $3 giriş dizini var, ancak $2 olmalıdır
@@ -2269,6 +2276,7 @@ validate_ednsmx=Bu alan adında e-posta etkin, ancak MX kayıtlarının hiçbiri
 validate_ednsnotype=$1 alan adı için DNS bölgesinin türü yok!
 validate_ednstype=$1 alan adı için DNS bölgesi, $3 yerine $2 türüne sahip
 validate_ecloud=$1 bulut sağlayıcısında DNS etki alanı bulunamadı
+validate_ewebconfig=Sanal ana bilgisayar yapılandırmasında bir hata bulundu : $1
 validate_ewebphp=PHP $1 - $2 için eksik sarmalayıcı betiği
 validate_ewebphpsuexec=PHP etki alanı sahibi olarak çalışacak şekilde yapılandırıldı, ancak SuExec etkin değil!
 validate_ewebphpconfig=PHP yapılandırma hataları $1 : $2 sürümünde bulundu
@@ -2492,6 +2500,10 @@ phpmode_deldir=PHP dizini $1 kaldırılıyor ..
 phpmode_edeldir=.. birincil dizin kaldırılamaz!
 phpmode_adddir=$2 sürümüne $1 PHP dizini ekleniyor ..
 phpmode_savedir=PHP dizini $1 $2 sürümüne güncelleniyor ..
+phpmode_http2=HTTP2 protokolü desteği etkinleştirilsin mi?
+phpmode_http2on=HTTP2'yi etkinleştirme ..
+phpmode_http2off=HTTP2'yi devre dışı bırakmak ..
+phpmode_http2def=Varsayılan HTTP2 modunu kullanma..
 
 website_header=Web sitesi seçenekleri
 
@@ -3182,8 +3194,6 @@ mail_bccing=BCCing $1 adresine gönderilen tüm e-postalar ..
 mail_nobcc=Gönderilen e-postanın BCC'sini devre dışı bırakma
 mail_rbccing=BC gelen tüm e-postaları $1 adresine gönderiyor.
 mail_norbcc=Gelen e-postanın BCC'sini devre dışı bırakma
-mail_bccoff=Gönderilen e-postanın BCC'sinden çıkılması devre dışı bırakıldı.
-mail_rbccoff=BCC'den ayrılıyor Gelen e-postalar devre dışı bırakıldı.
 mail_dependent=IP'den alan adı için giden e-posta gönder
 mail_dependent0=Sistemin varsayılan adresi
 mail_dependent1=Sanal sunucunun adresi $1 
@@ -3200,6 +3210,11 @@ mail_nothing=Hiç değişiklik yapılmadı!
 mail_ecloudid=Seçilen bulut posta filtresi için bir kimlik belirtilmelidir
 mail_url=Geçerli filtreleme sağlayıcısının URL'si
 mail_mx=Mevcut MX kayıtları
+mail_smtp_cloud=Bulut posta dağıtım sağlayıcısı
+mail_smtp_local=&lt;Yok - doğrudan bu sistemden teslim et&gt;
+mail_smtp_cloudoff=Bulut SMTP sağlayıcısı $1 kaldırılıyor ..
+mail_smtp_cloudon=Bulut SMTP sağlayıcısı yapılandırılıyor $1 ..
+mail_smtp_cloudfailed=.. başarısız oldu : $1
 
 nf_header=$1 'de aşağıdaki yeni özellikler kullanılabilir.
 nf_desc=özellik
@@ -3823,7 +3838,11 @@ smtpcloud_esmtpuser=SES gizli anahtarı SMTP parolasına dönüştürülemedi
 smtpcloud_egetver=Amazon SES doğrulama durumu alınamadı : $1
 smtpcloud_evaltok=Amazon SES doğrulaması tamamlanmadı. $1 değerine sahip $2 adında bir DNS TXT kaydı oluşturmalısınız.
 smtpcloud_evaltok2=Amazon SES doğrulaması, bu alan adı için herhangi bir bilgi döndürmedi!
-
+smtpcloud_egetquota=Amazon SES kotası alınamadı : $1
+smtpcloud_esandbox=Amazon SES hesabınız hala korumalı alan modundadır ve bu nedenle yalnızca doğrulanmış etki alanlarına e-posta gönderebilir.
+smtpcloud_ses_sandbox=SES üretim durumu
+smtpcloud_ses_inprod=Üretime hazır
+smtpcloud_ses_insandbox=SES Sandbox'ta - posta dağıtımı <a href='$1' target=_blank>hesabınız yeni sürüme geçirilene</a> kadar sınırlıdır.
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor
 provision_header=Cloudmin hizmetleri istemci seçenekleri
@@ -4672,3 +4691,21 @@ dnscloud_cloudflare_ens=NS kayıtları aranamadı : $1
 dnscloud_cloudflare_ens2=$1 için NS kaydı bulunamadı. Cloudflare, önce DNS etki alanlarının kaydedilmesini gerektirir.
 
 install_mod_perl_link=Yüklemek için Webmin'deki <a href='$1'>Perl Modülleri</a> sayfasını kullanın
+
+reset_edns=DNS kayıtları kaybolacak : $1
+reset_emysql=MySQL veritabanları silinecek : $1
+reset_epostgres=PostgreSQL veritabanları silinecek : $1
+reset_webrestore=Yönlendirmeleri ve PHP ayarlarını geri yükleme ..
+reset_unix=Unix kullanıcısı ve grubu sıfırlanıyor ..
+reset_eunixuser=.. $1 kullanıcısı mevcut değil!
+reset_eunixgroup=.. $1 grubu mevcut değil!
+reset_err=Özellikler sıfırlanamadı
+reset_title=Özellikleri Sıfırlama
+reset_edom=Sanal sunucu sıfırlanamıyor
+reset_efeatures=Sıfırlanacak özellik yok seçili
+reset_efeatures2=Seçili sıfırlamak için geçerli özellik yok
+reset_enoreset=$1 sıfırlanamıyor
+reset_doing=$1 sıfırlanıyor ..
+reset_iwarning=.. uyarı yoksayılıyor  : $1
+reset_swarning=.. atlama uyarısı  : $1
+reset_dataloss=.. sıfırlama veri kaybına neden olur  : $1

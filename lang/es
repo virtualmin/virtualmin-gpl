@@ -1525,7 +1525,6 @@ check_dnsip2=La dirección IP por defecto se estableció en $1, que coincide con
 check_ewebactions=El módulo de Apache <tt>mod_actions</tt> o no está instalado o no está habilitado.
 check_webok=Apache está instalado.
 check_ftpok=ProFTPd está instalado.
-check_dnsok=El servidor de DNS BIND está instalado.
 check_dnsok2=Servidor BIND DNS está instalado.
 check_dnsmaster=Sin embargo, el servidor, por defecto, de DNS principal $1 no es un dominio válido.
 check_mysqlnopass=MySQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>root</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos MySQL</a></b>.
@@ -1553,8 +1552,6 @@ check_edepwebalizer=Webalizer no puede ser habilitado en la <a href='$1'>configu
 check_edepssl=SSL no puede ser habilitado en la <a href='$1'>configuración de módulo</a> de Virtualmin salvo que Apache también lo esté.
 check_eshell=El intérprete de comandos $1 para los usuarios que no son de FTP está incluído en $2, lo cual podría permitir el acceso FTP.
 check_eftpshell=El intérprete de comandos $1 para los usuarios FTP no está incluído en $2, lo cual podría evitar el acceso FTP.
-check_enscd=ATENCION - El name service caching daemon (NSCD) está corriendo en su sistema. Esto puede prevenir que Virtualmin cree correctamente usuarios y grupos.
-check_enscd2=Ud. puede deshabilitar el NSCD en el módulo <a href='$1'>Acciones de inicio y apagado</a>.
 check_allwebmin=Actualizando todos los usuarios Webmin con las nuevas configuraciones...
 check_allresel=Actualizando todos los resellers con la nueva configuración ..
 check_needupdate=Han cambiado algunos de los parámetros de la configuración de módulo que efectan a cuáles módulos los usuarios de Webmin tienen acceso. Presione el botón que se encuentra debajo para actualizar a todos los usuarios con los nuevos permisos.
@@ -1587,7 +1584,6 @@ check_eget_user=Los comandos de quota externos están habilitados, pero el coman
 check_eget_group=Los comando de quota externos están habilitados, pero el comando para obtener la quota de un solo grupo no existe
 check_quotacommands=Los comandos de quota externos van a ser utilizados para servidores virtuales y cuentas de mail.
 check_eclamd=Ha seleccionado usar <tt>clamdscan</tt> para escaneo de virus, pero el <tt>clamd</tt> el servidor al que le habla no está corriendo
-check_dnsmissing=El sistema no parece tener ningún servidor de DNS configurado. Sin embargo, la utilización de un servidor de DNS local debería seguir funcionando .
 check_evirusspam=El escaneo de virus no puede ser habilitado sin filtro antispam
 check_preload=Actualizando configuración precargada de la librería Virtualmin ..
 check_collect=Actualizando
@@ -2929,7 +2925,6 @@ resel_max_bw=Límite máximo de ancho de banda para todos los servidores
 resel_features=Características permitidas para servidores
 resel_err=Falla al guardar reseller
 resel_ename=Nombre de reseller inexistente o inválido - solo letras, números y los caracteres -,_ y . están permitidos
-reset_ewebmin=El nombre para logueo <tt>webmin</tt> está reservado
 resel_emax_quota=Quota máxima inexistente o inválida
 resel_emax_doms=Número máximo de servidores inexistente o inválido
 resel_emax_aliasdoms=Número máximo de servidores alias inexistente o inválido
@@ -3100,6 +3095,7 @@ scripts_epythoninst=.. la instalación del modo automático de Python falló
 scripts_installgem=Instalando paquete Ruby Gems ..
 scripts_mmax=(Como mucho $1)
 scripts_sitelink=Puede encontrar mas información sobre el uso de este script en <a href='$1' target=_new>$1</a>.
+
 scripts_userpass=El login de administración inicial es $1 con la contraseña $2.
 scripts_useronly=El login de administración inicial es $1.
 scripts_passonly=La contraseña para la administración inicial es $1.
@@ -4193,6 +4189,7 @@ bwreset_edate=Día de comienzo inválido
 bwreset_efeatures=Ninguna opción seleccionada
 bwreset_edoms=No han sido seleccionados servidores virtuales
 bwreset_doing=Reseteando conteo de ancho de banda para las opciones y servidores ..
+
 bwreset_done=.. hecho.
 bwreset_running=Regenerar estadísticas desde archivos de los ..
 bwreset_started=.. proceso iniciado. Esto puede llevar varias horas si seleccionó el reproceso de los logs sobre períodos largos o sobre un número alto de dominios.
@@ -4421,7 +4418,6 @@ mail_err=Falla al guardar configuración de correo
 mail_ebcc=Dirección de copia oculta inexistente o inválida
 mail_bccing=Enviando copia oculta de todos los mails enviados a $1 ..
 mail_nobcc=Deshabilitando la copia oculta de los mails enviados
-mail_bccoff=Copia oculta de todos los mails enviados deshabilitada.
 
 nf_header=Las siguientes nuevas características están disponibles en $1 ..
 nf_desc=Característica
