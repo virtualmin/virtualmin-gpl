@@ -221,6 +221,9 @@ if ($pass ne $oldpass && !$_[0]->{'parent'} &&
 			"alter user ".&postgres_uquote($olduser).
 			" with password $pass");
 		&$second_print($text{'setup_done'});
+
+		# Update all installed scripts database password which are using PostgreSQL
+		&update_all_installed_scripts_database_credentials($_[0], 'dbpass', &postgres_pass($_[0]), 'postgres');
 		}
 	else {
 		&$second_print($text{'save_nopostgres'});
@@ -282,6 +285,9 @@ elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 				" with password $pass");
 			$_[0]->{'postgres_user'} = $user;
 			&$second_print($text{'setup_done'});
+
+			# Update all installed scripts database username which are using PostgreSQL
+			&update_all_installed_scripts_database_credentials($_[0], 'dbuser', $user, 'postgres');
 			}
 		else {
 			# Cannot

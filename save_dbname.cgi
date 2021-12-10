@@ -26,10 +26,6 @@ foreach $f (@database_features) {
 		&$sfunc($d, $in{$f});
 		$cfunc = "check_${f}_clash";
 		&$cfunc($d, 'user') && error($text{'dbname_eclash'});
-
-		# Update installed scripts credentials
-		update_all_installed_scripts_database_credentials($d, 'dbuser', $in{$f})
-			if (!$update_all_installed_scripts_database_credentials++);
 		}
 	}
 
