@@ -27,8 +27,9 @@ foreach $f (@database_features) {
 		my $done = &$mfunc($d, $oldd);
 
 		# Update installed scripts credentials only if password is updated
-		if ($done) {
-			update_all_installed_scripts_database_credentials($d, 'dbpass', $in{$f})
+		if ($done || (!$done && $in{$f."_def"} && $oldd->{'mysql_pass'})) {
+			update_all_installed_scripts_database_credentials(
+			        $d, 'dbpass', $in{$f."_def"} ? $d->{'pass'} : $in{$f})
 				if (!$update_all_installed_scripts_database_credentials++);
 			}
 		}
