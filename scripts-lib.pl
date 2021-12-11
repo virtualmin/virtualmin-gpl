@@ -670,7 +670,7 @@ return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 # update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value, database-type)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, considering database type,
-# in case a scrip supports it.
+# in case installed script supports it (uses database).
 sub update_all_installed_scripts_database_credentials
 {
 my ($d, $type, $value, $dbtype) = @_;
