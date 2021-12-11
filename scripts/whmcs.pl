@@ -501,8 +501,6 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
-# script_wordpress_db_conn_desc()
-# Returns a list of options for config file to update
 sub script_whmcs_db_conn_desc
 {
 my $db_conn_desc = 
