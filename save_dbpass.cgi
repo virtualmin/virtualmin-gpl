@@ -24,13 +24,7 @@ foreach $f (@database_features) {
 		$cfunc = "set_".$f."_pass";
 		&$cfunc($d, $in{$f."_def"} ? undef : $in{$f});
 		$mfunc = "modify_${f}";
-		my $done = &$mfunc($d, $oldd);
-
-		# Update installed scripts credentials only if password is updated
-		if ($done) {
-			update_all_installed_scripts_database_credentials($d, 'dbpass', $in{$f})
-				if (!$update_all_installed_scripts_database_credentials++);
-			}
+		&$mfunc($d, $oldd);
 		}
 	}
 

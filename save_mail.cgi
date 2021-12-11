@@ -34,9 +34,6 @@ if ($supports_bcc) {
 		&$second_print($text{'setup_done'});
 		$changed++;
 		}
-	else {
-		&$second_print($text{'mail_bccoff'});
-		}
 	}
 if ($supports_bcc == 2) {
 	$rbcc = &get_domain_recipient_bcc($d);
@@ -53,9 +50,6 @@ if ($supports_bcc == 2) {
 		&save_domain_recipient_bcc($d, undef);
 		&$second_print($text{'setup_done'});
 		$changed++;
-		}
-	else {
-		&$second_print($text{'mail_rbccoff'});
 		}
 	}
 
@@ -117,6 +111,54 @@ else {
 		&$first_print(&text('mail_cloudoff'));
 		&save_domain_cloud_mail_provider($d, undef);
 		&$second_print($text{'setup_done'});
+		$changed++;
+		}
+	}
+
+# Update cloud SMTP provider
+$oldsmtp = $d->{'smtp_cloud'};
+$cloudsmtp = $in{'smtp_cloud'};
+if (defined($cloudsmtp) && $oldsmtp ne $cloudsmtp) {
+	my $oldfailed = 0;
+	my @clouds = &list_smtp_clouds();
+	if ($oldsmtp) {
+		# Turn off the old provider
+		my ($c) = grep { $_->{'name'} eq $oldsmtp } @clouds;
+		&$first_print(&text('mail_smtp_cloudoff', $c->{'desc'}));
+		my $sfunc = "smtpcloud_".$oldsmtp."_delete_domain";
+		my $info = { 'domain' => $d->{'dom'},
+			     'id' => $d->{'smtp_cloud_id'},
+			     'location' => $d->{'smtp_cloud_location'}};
+		my ($ok, $err) = &$sfunc($d, $info);
+		if ($err) {
+			&$second_print(&text('mail_smtp_cloudfailed', $err));
+			$oldfailed = 1;
+			}
+		else {
+			delete($d->{'smtp_cloud'});
+			delete($d->{'smtp_cloud_id'});
+			&update_smtpcloud_spf($d, $oldsmtp);
+			&$second_print($text{'setup_done'});
+			}
+		$changed++;
+		}
+	if ($cloudsmtp && !$oldfailed) {
+		# Setup the new provider
+		my ($c) = grep { $_->{'name'} eq $cloudsmtp } @clouds;
+		&$first_print(&text('mail_smtp_cloudon', $c->{'desc'}));
+		my $sfunc = "smtpcloud_".$cloudsmtp."_create_domain";
+		my $info = { 'domain' => $d->{'dom'} };
+		my ($ok, $id, $location) = &$sfunc($d, $info);
+		if ($ok) { 
+			$d->{'smtp_cloud'} = $cloudsmtp;
+			$d->{'smtp_cloud_id'} = $id;
+			$d->{'smtp_cloud_location'} = $location;
+			&update_smtpcloud_spf($d, undef);
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(&text('mail_smtp_cloudfailed', $id));
+			}
 		$changed++;
 		}
 	}

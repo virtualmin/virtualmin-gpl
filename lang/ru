@@ -925,7 +925,6 @@ check_desc=Проверяется статус Вашей системы: все
 check_netok=Модуль сетевых настроек ZTL установлен и поддерживается.
 check_webok=Apache установлен.
 check_ftpok=Установлен FTP сервер.
-check_dnsok=Установлен BIND DNS сервер.
 check_postgresok=Модуль PostgreSQL установлен и запущен.
 check_webalizerok=Webalizer установлен.
 check_ifaceok=Использование сетевого интерфейса $1 для виртуальных IP адресов.

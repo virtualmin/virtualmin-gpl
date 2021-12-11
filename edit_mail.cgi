@@ -55,6 +55,8 @@ if ($supports_dependent) {
 			      ]));
 	}
 
+print &ui_table_hr();
+
 # Cloud mail filter
 @provs = &list_cloud_mail_providers($d);
 $prov = &get_domain_cloud_mail_provider($d);
@@ -75,6 +77,26 @@ if ($prov) {
 
 	print &ui_table_row($text{'mail_mx'},
 		join("<br>\n", @{$prov->{'mx'}}));
+	}
+
+my @okclouds;
+if (defined(&list_smtp_clouds)) {
+	# Find usable cloud mail delivery providers
+	my @clouds = &list_smtp_clouds();
+	foreach my $c (@clouds) {
+		$sfunc = "smtpcloud_".$c->{'name'}."_get_state";
+		$s = &$sfunc();
+		push(@okclouds, $c) if ($s->{'ok'} || &smtp_uses_cloud($d, $c));
+		}
+	}
+if (@okclouds) {
+	# Cloud mail delivery provider fields
+	print &ui_table_hr();
+
+	print &ui_table_row($text{'mail_smtp_cloud'},
+		&ui_select("smtp_cloud", $d->{'smtp_cloud'},
+			[ [ "", $text{'mail_smtp_local'} ],
+			  map { [ $_->{'name'}, $_->{'desc'} ] } @okclouds ]));
 	}
 
 print &ui_table_end();

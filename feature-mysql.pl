@@ -430,6 +430,9 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 			}
 		else {
 			&$second_print($text{'setup_done'});
+
+			# Update all installed scripts database password which are using MySQL
+			&update_all_installed_scripts_database_credentials($d, 'dbpass', &mysql_pass($d), 'mysql');
 			}
 		$rv++;
 		}
@@ -442,6 +445,10 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
+
+			# Update all installed scripts database password which are using MySQL
+			&update_all_installed_scripts_database_credentials($d, 'dbpass', &mysql_pass($d), 'mysql');
+
 			$rv++;
 			}
 		else {
@@ -622,6 +629,9 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			}
 		else {
 			&$second_print($text{'setup_done'});
+
+			# Update all installed scripts database username which are using MySQL
+			&update_all_installed_scripts_database_credentials($d, 'dbuser', $user, 'mysql');
 			}
 		$rv++;
 		}
@@ -635,6 +645,10 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 				};
 			&execute_for_all_mysql_servers($pfunc);
 			&$second_print($text{'setup_done'});
+
+			# Update all installed scripts database username which are using MySQL
+			&update_all_installed_scripts_database_credentials($d, 'dbuser', $user, 'mysql');
+
 			$rv++;
 			}
 		else {
@@ -2923,8 +2937,7 @@ else {
 return @rv;
 }
 
-# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass],
-# 			      [direct])
+# execute_password_change_sql(&domain, user, password-sql, [plaintext-pass], [direct])
 # Update a MySQL user's password for all hosts. Plainpass is the unencrypted
 # password, and encpass is an SQL expression for the hashed password like
 # 'fda2343243a' or password('foo')

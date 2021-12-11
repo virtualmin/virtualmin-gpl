@@ -174,12 +174,17 @@ delete_mail_smtpcloud=Cloudmailprovider $1 verwijderen ..
 save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
 save_bind_ecloud=.. mislukt : $1
 save_mailto=Aliassen bijwerken voor contactadres.
+save_ssl12=Let's Encrypt certificaat aanvragen voor het nieuwe domein ..
+save_essl12=.. verzoek mislukt : $1
 save_statussslcert=E-mailadres wijzigen in SSL-certificaatstatusmonitor.
 save_erquota=Het schijfquotum voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat het eigendom is van reseller $1 met een quotumlimiet
 save_erbw=De bandbreedtelimiet voor deze virtuele server kan niet onbeperkt worden ingesteld, omdat deze eigendom is van reseller $1 die een bandbreedtelimiet heeft
-save_installed_scripts_dbuser=Database gebruikersnaam bijwerken voor geïnstalleerde scripts ..
-save_installed_scripts_dbpass=Databasewachtwoord bijwerken voor geïnstalleerde scripts ..
-save_installed_scripts_db=Databasenaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbuser_mysql=MySQL-gebruikersnaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbpass_mysql=MySQL-wachtwoord bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_db_mysql=MySQL-databasenaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbuser_postgres=PostgreSQL-gebruikersnaam bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_dbpass_postgres=PostgreSQL-wachtwoord bijwerken voor geïnstalleerde scripts ..
+save_installed_scripts_db_postgres=PostgreSQL-databasenaam bijwerken voor geïnstalleerde scripts ..
 save_installed_scripts_err_file=.. mislukt : kan <tt>$1</tt> bestand niet lezen
 save_installed_scripts_err_file_lines=.. failed : kon geen strings vinden om te vervangen in <tt>$1</tt> bestand
 save_installed_scripts_done=.. klaar voor <tt>$1</tt> bestand
@@ -215,6 +220,7 @@ newweb_sslprotos_def=Sta alle onveilige protocollen niet toe
 newweb_esslproto=SSL-protocollen moeten vergelijkbaar zijn met SSLv3 of TLSv1.1, optioneel voorafgegaan door een -
 newweb_dovecot=Dovecot configureren om hetzelfde SSL-certificaat te gebruiken?
 newweb_postfix=Postfix configureren om hetzelfde SSL-certificaat te gebruiken?
+newweb_http2=HTTP2-protocol inschakelen voor nieuwe websites?
 
 feature_ssl=Apache SSL-website
 
@@ -225,6 +231,8 @@ check_ewebapacheversion2=Op uw systeem wordt Apache-versie $1 uitgevoerd, maar V
 check_suexecok2=CGI-scripts kunnen worden uitgevoerd met SuExec of fcgiwrap.
 check_suexecok=CGI-scripts kunnen worden uitgevoerd met SuExec.
 check_fcgiwrapok=CGI-scripts kunnen worden uitgevoerd met fcgiwrap.
+check_http2ok=Apache ondersteunt HTTPv2 op uw systeem.
+check_http2err=Apache ondersteunt geen HTTPv2 : $1
 check_webphpvers=De volgende PHP-versies zijn beschikbaar : $1
 check_webphpnovers=Er zijn geen PHP-versies gevonden op dit systeem!
 check_webphpmodes=De volgende PHP-uitvoeringsmodi zijn beschikbaar : $1
@@ -246,10 +254,6 @@ check_enetmask6=IPv6 netmask $1 is niet geldig - het zou een getal moeten zijn, 
 check_dependentok=Postfix is geconfigureerd om uitgaande IP-adressen per domein te ondersteunen.
 check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per domein.
 check_dependentesupport=Postfix ondersteunt uitgaande IP-adressen per domein, maar is momenteel niet geconfigureerd om dit te doen. Dit kan worden ingesteld in de module <a href='$1'>Postfix Mailserver</a>.
-check_eresolv4=Virtualmin is geconfigureerd om DNS-zones in te stellen, maar dit systeem is niet ingesteld om zichzelf als DNS-server te gebruiken. Voeg 127.0.0.1 toe aan $1 of schakel de BIND-functie uit op de $2-pagina.
-check_eresolv3=Het lijkt erop dat DHCP wordt gebruikt om uw netwerkinterfaces dynamisch te configureren, waardoor de DNS-servers kunnen worden ingesteld op basis van de instellingen van de DHCP-server. Het gebruik van een statisch IP-adres wordt sterk aanbevolen bij Virtualmin.
-check_eresolvlist=lijst met DNS-servers
-check_dnsmissing=Het systeem lijkt geen DNS-servers te hebben geconfigureerd. Het standaardgedrag van het gebruik van een lokale DNS-server zou echter nog steeds moeten werken.
 check_jailkitok=Op dit systeem zijn Chroot-jails beschikbaar
 check_jailkiterr=Chroot-jails zijn niet beschikbaar : $1
 check_eyumrepofile=Het configuratiebestand van de Virtualmin-repository $1 bestaat niet!
@@ -667,6 +671,7 @@ resel_from=Van adres voor e-mails van wederverkopers
 resel_fromdef=Hetzelfde als hierboven
 resel_max_topdoms=Maximale servers op het hoogste niveau
 resel_unlimit2=Onbeperkt voor sommige domeinen
+resel_ewebmin=De loginnaam <tt>webmin</tt> is gereserveerd
 resel_emax_topdoms=Ontbrekend of ongeldig maximumaantal servers op het hoogste niveau
 resel_eclash2=Er bestaat al een unix-gebruiker met dezelfde naam
 resel_migrate=Kunnen back-ups migreren?
@@ -702,6 +707,7 @@ licence_xfsrebootok=Herstart nu
 
 scripts_emissing=Script bestaat niet!
 scripts_ephpvers2=Dit script kan niet worden geïnstalleerd omdat er geen PHP-versies zijn gevonden
+scripts_uerr=Kan script niet verwijderen
 scripts_egone=Script bestaat niet meer!
 scripts_idb2=Gebruikt database met tabelvoorvoegsel
 scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
@@ -806,7 +812,15 @@ newmysqls_einuse=Een server die wordt gebruikt door $1 -domeinen, kan niet worde
 move_desc3=Op deze pagina kunt u de bestemming van een aliaserver wijzigen, zodat elke web- of e-mailtoegang wordt doorgestuurd naar het nieuw geselecteerde domein.
 move_target2=Nieuw aliasdoel
 
+newvalidate_tabsreset=Functies resetten
 newvalidate_subservers=Ook subservers repareren?
+newvalidate_desc4=WAARSCHUWING! Deze pagina kan worden gebruikt om de status van functies voor een geselecteerde virtuele server opnieuw in te stellen. Hierdoor kunnen instellingen verloren gaan als onderdeel van het proces om functies terug te brengen naar een bekende goede staat.
+newvalidate_header4=Opties voor het resetten van functies
+newvalidate_reset=Nu resetten
+newvalidate_resetdom=Virtuele server om te resetten
+newvalidate_resetfeats=Functies om te resetten
+newvalidate_resetskip=Doorgaan, zelfs als de instellingen verloren gaan?
+newvalidate_resetonoff=Volledig resetten door functies in en uit te schakelen?
 
 validate_esslfile=SSL $1 -bestand is niet geldig : $2
 validate_euserhome=Beheerder $1 heeft de thuismap $3, maar deze moet $2 zijn
@@ -819,6 +833,7 @@ validate_ednsmx=E-mail is ingeschakeld voor dit domein, maar geen van de MX-reco
 validate_ednsnotype=DNS-zone voor domein $1 heeft geen type!
 validate_ednstype=DNS-zone voor domein $1 heeft het type $2 in plaats van $3
 validate_ecloud=DNS-domein niet gevonden op cloudprovider $1
+validate_ewebconfig=Er is een fout gevonden in de configuratie van de virtuele host : $1
 validate_ewebphpconfig=Er zijn PHP-configuratiefouten gevonden in versie $1 : $2
 validate_ewebphpfpmport=PHP FPM-configuratiefout gevonden : $1
 validate_ewebroot=Apache DocumentRoot is niet ingesteld op HTML-directory $1
@@ -881,6 +896,10 @@ phpmode_deldir=PHP-directory $1 verwijderen ..
 phpmode_edeldir=.. primaire map kan niet worden verwijderd!
 phpmode_adddir=PHP-directory $1 toevoegen aan versie $2 ..
 phpmode_savedir=PHP-directory $1 bijwerken naar versie $2 ..
+phpmode_http2=HTTP2-protocolondersteuning inschakelen?
+phpmode_http2on=HTTP2 inschakelen ..
+phpmode_http2off=HTTP2 uitschakelen ..
+phpmode_http2def=Standaard HTTP2-modus gebruiken..
 
 website_header=Website-opties
 
@@ -962,7 +981,6 @@ shells_mailboxscp2=Alleen SCP
 mail_rbcc=BCC inkomende e-mail naar
 mail_rbccing=BCCing van alle inkomende e-mail naar $1 ..
 mail_norbcc=Het uitschakelen van de BCC van inkomende e-mail
-mail_rbccoff=BCCing van inkomende e-mail uitgeschakeld laten.
 mail_dependent=Verzend uitgaande e-mail voor domein vanaf IP
 mail_dependent0=Standaardadres van het systeem
 mail_dependent1=Adres $1 van virtuele server
@@ -979,6 +997,11 @@ mail_nothing=Er zijn geen wijzigingen aangebracht!
 mail_ecloudid=Er moet een ID worden opgegeven voor het geselecteerde cloudmailfilter
 mail_url=URL van huidige filterprovider
 mail_mx=Huidige MX-records
+mail_smtp_cloud=Cloud-mailbezorgingsprovider
+mail_smtp_local=&lt;Geen - rechtstreeks vanuit dit systeem leveren&gt;
+mail_smtp_cloudoff=Cloud SMTP-provider $1 verwijderen ..
+mail_smtp_cloudon=Cloud SMTP-provider $1 configureren ..
+mail_smtp_cloudfailed=.. mislukt  : $1
 
 sched_allplan=Op plan $1
 sched_allplans=Op $1 -abonnementen
@@ -1121,6 +1144,11 @@ smtpcloud_esmtpuser=Kan geheime SES-sleutel niet converteren naar SMTP-wachtwoor
 smtpcloud_egetver=Kan Amazon SES-verificatiestatus niet verkrijgen : $1
 smtpcloud_evaltok=Amazon SES-verificatie is niet voltooid. U moet een DNS TXT-record maken met de naam $2 met de waarde $1.
 smtpcloud_evaltok2=Amazon SES-verificatie heeft geen informatie voor dit domein geretourneerd!
+smtpcloud_egetquota=Kan Amazon SES-quotum niet ophalen : $1
+smtpcloud_esandbox=Uw Amazon SES-account bevindt zich nog steeds in de sandbox-modus en kan dus alleen e-mail verzenden naar geverifieerde domeinen.
+smtpcloud_ses_sandbox=SES-productiestatus:
+smtpcloud_ses_inprod=Productie klaar
+smtpcloud_ses_insandbox=In SES Sandbox - e-mailbezorging is beperkt totdat uw <a href='$1' target=_blank>account is geüpgraded</a>.
 
 provision_nolimit=onbeperkt
 
@@ -1761,3 +1789,21 @@ dnscloud_cloudflare_ens=Kan NS-records niet opzoeken : $1
 dnscloud_cloudflare_ens2=Geen NS-records gevonden voor $1. Cloudflare vereist dat DNS-domeinen eerst worden geregistreerd.
 
 install_mod_perl_link=Gebruik de <a href='$1'>Perl Modules</a> pagina in Webmin om het te installeren
+
+reset_edns=DNS-records gaan verloren : $1
+reset_emysql=MySQL-databases worden verwijderd : $1
+reset_epostgres=PostgreSQL-databases worden verwijderd : $1
+reset_webrestore=Omleidingen en PHP-instellingen herstellen ..
+reset_unix=Unix-gebruiker en -groep resetten ..
+reset_eunixuser=.. gebruiker $1 bestaat niet!
+reset_eunixgroup=.. groep $1 bestaat niet!
+reset_err=Kan functies niet resetten
+reset_title=Functies resetten
+reset_edom=Virtuele server kan niet worden gereset
+reset_efeatures=Geen functies om te resetten geselecteerd
+reset_efeatures2=Geen geldige functies om te resetten geselecteerd
+reset_enoreset=$1 kan niet worden gereset
+reset_doing=$1 resetten ..
+reset_iwarning=.. waarschuwing negeren : $1
+reset_swarning=.. waarschuwing voor overslaan : $1
+reset_dataloss=.. resetten zou gegevensverlies veroorzaken : $1

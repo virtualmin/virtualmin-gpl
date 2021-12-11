@@ -556,6 +556,14 @@ foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
 
+# If this domain had it's own lets encrypt cert, delete any leftover files
+# for it under /etc/letsencrypt
+&foreign_require("webmin");
+if ($d->{'letsencrypt_last'} && !$d->{'ssl_same'} &&
+    defined(&webmin::cleanup_letsencrypt_files)) {
+	&webmin::cleanup_letsencrypt_files($d->{'dom'});
+	}
+
 # If this domain was sharing a cert with another, forget about it now
 if ($d->{'ssl_same'}) {
 	delete($d->{'ssl_cert'});

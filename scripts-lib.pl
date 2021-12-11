@@ -667,13 +667,13 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value)
+# update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value, database-type)
 # Updates script's given database related setting option (db-username, db-password, db-name)
-# with a new value for all installed scripts under the given virtual server, in case a script
-# supports it.
+# with a new value for all installed scripts under the given virtual server, considering database type,
+# in case a scrip supports it.
 sub update_all_installed_scripts_database_credentials
 {
-my ($d, $type, $value) = @_;
+my ($d, $type, $value, $dbtype) = @_;
 my @domain_scripts = &list_domain_scripts($d);
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
@@ -681,11 +681,12 @@ foreach my $script (@domain_scripts) {
 	my $sdata = &get_script($sname);
 	my $sdir = $script->{'opts'}->{'dir'};
 	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
-	if (defined(&$db_conn_desc)) {
+	my ($sdbtype) = split(/_/, $script->{'opts'}->{'db'}, 2);
+	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
 		$db_conn_desc = &{$db_conn_desc};
 		if (ref($db_conn_desc)) {
-			&$first_print($text{"save_installed_scripts_$type"}) if (!$printed_type++);
+			&$first_print($text{"save_installed_scripts_${type}_${dbtype}"}) if (!$printed_type++);
 			# Extract script config file(s) to operate on
 			my @script_config_files = keys %{$db_conn_desc};
 			my $script_config_files_count = scalar(@script_config_files);
