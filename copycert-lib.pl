@@ -241,13 +241,15 @@ my ($d, $before) = @_;
 &push_all_print();
 &set_all_null_print();
 foreach my $svc (@$before) {
-	if ($svc->{'d'}) {
-		my $func = "sync_".$svc->{'id'}."_ssl_cert";
-		&$func($d, 1) if (defined(&$func));
-		}
-	else {
-		my $func = "copy_".$svc->{'id'}."_ssl_service";
-		&$func($d) if (defined(&$func));
+	if ($tmpl->{'web_'.$svc->{'id'}.'_ssl'}) {
+		if ($svc->{'d'}) {
+			my $func = "sync_".$svc->{'id'}."_ssl_cert";
+			&$func($d, 1) if (defined(&$func));
+			}
+		else {
+			my $func = "copy_".$svc->{'id'}."_ssl_service";
+			&$func($d) if (defined(&$func));
+			}
 		}
 	}
 &pop_all_print();
