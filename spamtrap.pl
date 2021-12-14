@@ -249,6 +249,7 @@ foreach $d (&list_domains()) {
 sub find_user_by_email
 {
 local ($e, $users, $aliasdoms) = @_;
+$e = lc($e);
 foreach my $u (@$users) {
 	foreach my $ee ($u->{'email'}, @{$u->{'extraemail'}}) {
 		if ($ee eq $e) {
