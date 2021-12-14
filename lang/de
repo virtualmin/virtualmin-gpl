@@ -1412,7 +1412,6 @@ check_webok=Apache ist installiert.
 check_webphpvers=Die folgenden PHP Versionen sind verfügbar : $1
 check_webphpnovers=Keine PHP Versionen wurden auf Ihrem System gefunden!
 check_ftpok=ProFTPd ist installiert.
-check_dnsok=BIND DNS-Server ist installiert und das System ist konfiguriert diesen zu nutzen.
 check_dnsok2=BIND DNS-Server ist installiert.
 check_dnsok3=BIND DNS-Domains werden auf Service-Host gehostet.
 check_dnsmaster=Allerdings ist der Standard-Master-DNS-Server $1 kein Fully Qualified Domain Name.
@@ -1442,8 +1441,6 @@ check_edepwebalizer=Webalizer kann nicht in der <a href='$1'>Modulkonfiguration<
 check_edepssl=SSL kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn Apache nicht installiert ist.
 check_eshell=Die Shell $1 für Nicht-FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang möglich macht.
 check_eftpshell=Die Shell $1 für FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang unmöglich macht.
-check_enscd=Warnung - der Name Service Caching Daemon (NSCD) läuft auf Ihrem System. Dies verhindert, dass Virtualmin neue Unix Benutzer und Gruppen erstellen kann.
-check_enscd2=Sie können in dem <a href='$1'>Hochfahren und Herunterfahren Aktionen</a> Modul NSCD deaktivieren.
 check_allwebmin=Alle Webmin-Benutzer mit den neuen Einstellungen aktualisieren..
 check_needupdate=Einige der Modul-Konfigurations-Einstellungen steuern auf welche Module Webmin-Benutzer Zugriff haben. Die generelle Konfiguration hat sich geändert. Bitte klicken Sie hier um alle Benutzer mit neuen Berechtigungen auszustatten.
 check_updatenow=Update de Webmin-Benutzer
@@ -3650,6 +3647,7 @@ bwreset_eday=Fehlender oder ungültiger Tag im Monat
 bwreset_eyear=Fehlendes oder ungültiges Jahr
 bwreset_edate=Ungültiges Startdatum
 bwreset_efeatures=Keine Features ausgewählt
+
 bwreset_edoms=Keine Virtuellen Server gewählt
 bwreset_done=.. fertig.
 bwreset_running=Bandbreiten-Statistiken aus Log-Dateien neu generieren ..

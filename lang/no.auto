@@ -136,10 +136,15 @@ delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
+save_ssl12=Ber om Let's Encrypt-sertifikat for det nye domenet ..
+save_essl12=.. forespørsel mislyktes : $1
 save_statussslcert=Endrer e-post i SSL-sertifikatstatusovervåker ..
-save_installed_scripts_dbuser=Oppdaterer database brukernavn for installerte skript ..
-save_installed_scripts_dbpass=Oppdaterer databasepassord for installerte skript ..
-save_installed_scripts_db=Oppdaterer databasenavn for installerte skript ..
+save_installed_scripts_dbuser_mysql=Oppdaterer MySQL-brukernavn for installerte skript ..
+save_installed_scripts_dbpass_mysql=Oppdaterer MySQL-passord for installerte skript ..
+save_installed_scripts_db_mysql=Oppdaterer MySQL-databasenavn for installerte skript ..
+save_installed_scripts_dbuser_postgres=Oppdaterer PostgreSQL-brukernavn for installerte skript ..
+save_installed_scripts_dbpass_postgres=Oppdaterer PostgreSQL-passord for installerte skript ..
+save_installed_scripts_db_postgres=Oppdaterer PostgreSQL-databasenavn for installerte skript ..
 save_installed_scripts_err_file=.. mislyktes: kan ikke lese <tt>$1</tt> filen
 save_installed_scripts_err_file_lines=.. mislyktes: kunne ikke finne strenger som skal erstattes i filen <tt>$1</tt>
 save_installed_scripts_done=.. gjort for <tt>$1</tt> fil
@@ -161,6 +166,7 @@ newweb_sslprotos_def=Ikke tillat alle usikre protokoller
 newweb_esslproto=SSL-protokoller må være som SSLv3 eller TLSv1.1, eventuelt forhåndsinnstilt av en -
 newweb_dovecot=Vil du konfigurere Dovecot til å bruke samme SSL-sertifikat?
 newweb_postfix=Vil du konfigurere Postfix til å bruke samme SSL-sertifikat?
+newweb_http2=Vil du aktivere HTTP2-protokollen for nye nettsteder?
 
 feature_ssl=Apache SSL-nettsted
 
@@ -168,6 +174,8 @@ check_ewebdefphpmode2=PHP-utførelsesmodus $1 ble valgt i standardmal, men støt
 check_suexecok2=CGI -skript kan kjøres ved hjelp av SuExec eller fcgiwrap.
 check_suexecok=CGI -skript kan kjøres med SuExec.
 check_fcgiwrapok=CGI -skript kan kjøres ved hjelp av fcgiwrap.
+check_http2ok=Apache støtter HTTPv2 på systemet ditt.
+check_http2err=Apache støtter ikke HTTPv2 : $1
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 
 check_ewebphpmodes=Ingen PHP-utførelsesmoduser er tilgjengelige!
 check_webphpversinis=PHP-versjoner har endret seg til $1 siden sist sjekk. Regenererer eventuelle manglende php.ini-filer.
@@ -183,10 +191,6 @@ check_webadminfixed=Ikke-støttet $1 -direktiv ble fjernet fra $2 Apache-nettste
 check_etlsa=TLSA DNS-poster kan ikke opprettes på systemet ditt: $1.
 check_tlsaok=TLSA DNS-poster vil bli lagt til nye domener.
 check_mysqlok=MySQL $1 er installert og kjører.
-check_eresolv4=Virtualmin er konfigurert til å sette opp DNS -soner, men dette systemet er ikke konfigurert til å bruke seg selv som en DNS -server. Enten legg til 127.0.0.1 i $1, eller slå av BIND -funksjonen på $2 -siden.
-check_eresolv3=Det ser ut til at DHCP blir brukt til å dynamisk konfigurere nettverksgrensesnittene, noe som kan føre til at DNS-serverne blir satt ut basert på innstillinger levert av DHCP-serveren. Det anbefales sterkt å bruke en statisk IP-adresse med Virtualmin.
-check_eresolvlist=liste over DNS-servere
-check_dnsmissing=Systemet ser ikke ut til å ha noen DNS-servere konfigurert. Standard oppførselen til å bruke en lokal DNS-server bør imidlertid fortsatt fungere.
 check_jailkitok=Chroot-fengsler er tilgjengelige på dette systemet
 check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1 
 check_eyumrepofile=Konfigurasjonsfilen til Virtualmin -depotet $1 finnes ikke!
@@ -462,6 +466,7 @@ resel_unix=Opprette FTP/SSH-konto for forhandler?
 resel_from=Fra adresse for e-post fra forhandler
 resel_fromdef=Samme som ovenfor
 resel_max_topdoms=Maksimum servere på toppnivå
+resel_ewebmin=Påloggingsnavnet <tt>webmin</tt> er reservert
 resel_emax_topdoms=Manglende eller ugyldig maksimum antall toppnivå-servere
 resel_eclash2=En unix-bruker med samme navn eksisterer allerede
 resel_migrate=Kan migrere sikkerhetskopier?
@@ -479,6 +484,7 @@ licence_xfsrebootok=Starte på nytt nå
 
 scripts_emissing=Manus eksisterer ikke!
 scripts_ephpvers2=Dette skriptet kan ikke installeres, da ingen PHP-versjoner ble funnet
+scripts_uerr=Kunne ikke avinstallere skriptet
 scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
@@ -565,7 +571,15 @@ newmysqls_einuse=En server som brukes av $1 domener kan ikke fjernes
 move_desc3=Denne siden lar deg endre destinasjonen til en alias-server, slik at all tilgang til Internett eller e-post blir videresendt til det nylig valgte domenet.
 move_target2=Nytt aliasmål
 
+newvalidate_tabsreset=Tilbakestill funksjoner
 newvalidate_subservers=Fikser du også under-servere?
+newvalidate_desc4=ADVARSEL! Denne siden kan brukes til å tilbakestille funksjonstilstanden for en valgt virtuell server. Dette kan føre til at innstillinger går tapt som en del av prosessen med å returnere funksjoner til en kjent god tilstand.
+newvalidate_header4=Alternativer for tilbakestilling av funksjoner
+newvalidate_reset=Tilbakestill nå
+newvalidate_resetdom=Virtuell server som skal tilbakestilles
+newvalidate_resetfeats=Funksjoner for å tilbakestille
+newvalidate_resetskip=Vil du fortsette selv om innstillingene går tapt?
+newvalidate_resetonoff=Fullt tilbakestilt ved å slå funksjoner på og av?
 
 validate_esslfile=SSL $1 -fil er ikke gyldig : $2 
 validate_euserhome=Administrasjonsbruker $1 har hjemmekatalog $3, men den skal være $2 
@@ -575,6 +589,7 @@ validate_ednsns2=DNS-sone har ingen NS-poster
 validate_ednsns=NS-post $1 kan ikke løses til en IP-adresse
 validate_ednsip6=DNS-posten $1 løser seg til IPv6-adressen $2 i stedet for den virtuelle serverens IPv6-adresse $3 
 validate_ecloud=DNS -domenet ble ikke funnet på skyleverandøren $1
+validate_ewebconfig=Det ble funnet en feil i den virtuelle vertskonfigurasjonen : $1
 validate_ewebphpconfig=PHP-konfigurasjonsfeil ble funnet i versjon $1 : $2 
 validate_ewebphpfpmport=PHP FPM-konfigurasjonsfeil funnet : $1 
 validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1 
@@ -621,6 +636,10 @@ phpmode_deldir=Fjerner PHP-katalogen $1 ..
 phpmode_edeldir=.. primær katalog kan ikke fjernes!
 phpmode_adddir=Legger til PHP-katalog $1 på versjon $2 ..
 phpmode_savedir=Oppdaterer PHP-katalogen $1 til versjon $2 ..
+phpmode_http2=Vil du aktivere støtte for HTTP2-protokollen?
+phpmode_http2on=Aktiverer HTTP2 ..
+phpmode_http2off=Deaktiverer HTTP2 ..
+phpmode_http2def=Bruker standard HTTP2-modus..
 
 website_header=Nettstedsalternativer
 
@@ -687,6 +706,11 @@ mail_nothing=Ingen endringer ble gjort!
 mail_ecloudid=Det må spesifiseres en ID for det valgte skypostfilteret
 mail_url=Gjeldende URL-adresse for filtreringsleverandører
 mail_mx=Nåværende MX-poster
+mail_smtp_cloud=Nettskyleverandør av postlevering
+mail_smtp_local=&lt;Ingen - lever direkte fra dette systemet&gt;
+mail_smtp_cloudoff=Fjerner sky-SMTP-leverandør $1 ..
+mail_smtp_cloudon=Konfigurerer sky-SMTP-leverandør $1 ..
+mail_smtp_cloudfailed=.. mislyktes : $1
 
 sched_allplan=På plan $1 
 sched_allplans=På $1 planer
@@ -802,6 +826,11 @@ smtpcloud_esmtpuser=Kunne ikke konvertere SES hemmelige nøkkel til SMTP -passor
 smtpcloud_egetver=Kunne ikke få Amazon SES -bekreftelsesstatus : $1
 smtpcloud_evaltok=Amazon SES -verifisering er ikke fullført. Du må opprette en DNS TXT -post med navnet $2 med verdien $1.
 smtpcloud_evaltok2=Amazon SES -verifisering returnerte ingen informasjon for dette domenet!
+smtpcloud_egetquota=Kunne ikke hente Amazon SES-kvote : $1
+smtpcloud_esandbox=Amazon SES-kontoen din er fortsatt i sandkassemodus, og kan derfor bare sende e-post til bekreftede domener.
+smtpcloud_ses_sandbox=SES produksjonstilstand
+smtpcloud_ses_inprod=Produksjon klar
+smtpcloud_ses_insandbox=I SES Sandbox - postlevering er begrenset til <a href='$1' target=_blank>kontoen din er oppgradert</a>.
 
 provision_nolimit=ubegrenset
 
@@ -1194,3 +1223,21 @@ dnscloud_cloudflare_ens=Kunne ikke lete opp NS -poster : $1
 dnscloud_cloudflare_ens2=Ingen NS -poster ble funnet for $1. Cloudflare krever at DNS -domener registreres først.
 
 install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den
+
+reset_edns=DNS-poster vil gå tapt : $1
+reset_emysql=MySQL-databaser vil bli slettet : $1
+reset_epostgres=PostgreSQL-databaser vil bli slettet : $1
+reset_webrestore=Gjenoppretter omdirigeringer og PHP-innstillinger ..
+reset_unix=Tilbakestiller Unix-bruker og -gruppe ..
+reset_eunixuser=.. bruker $1 eksisterer ikke!
+reset_eunixgroup=.. gruppe $1 eksisterer ikke!
+reset_err=Kunne ikke tilbakestille funksjoner
+reset_title=Tilbakestille funksjoner
+reset_edom=Virtuell server kan ikke tilbakestilles
+reset_efeatures=Ingen funksjoner å tilbakestille er valgt
+reset_efeatures2=Ingen gyldige funksjoner å tilbakestille er valgt
+reset_enoreset=$1 kan ikke tilbakestilles
+reset_doing=Tilbakestiller $1 ..
+reset_iwarning=.. ignorerer advarsel : $1
+reset_swarning=.. hoppe advarsel  : $1
+reset_dataloss=.. tilbakestilling vil føre til tap av data : $1

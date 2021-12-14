@@ -491,7 +491,6 @@ check_desc=Kontroluji stav vaseho systemu a vyhodnocuji, zda jsou k dispozici vs
 check_defip=Vychozi IP adresa pro virtualni servery je $1.
 check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>.
 check_ewebactions=Modul Apache <tt>mod_actions</tt> buď není nainstalován nebo není povolen.
-check_dnsok=BIND DNS server je instalovan a system je nakonfigurovan pro jeho vyuzivani.
 check_dnsok2=BIND DNS server je instalovan.
 check_mysqlnopass=MySQL je nainstalován a běží, ale nemá nastaven žádné <tt>root</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze MySQL</a></b>.
 check_postgresnopass=PostgreSQL je nainstalován a běží, ale nemá nastaven žádné <tt>$2</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze PostgreSQL</a></b>.
@@ -1272,6 +1271,7 @@ bwreset_edate=Chybne pocatecni datum
 bwreset_efeatures=Nebyl vybran zadny doplnek
 bwreset_edoms=Nebyl vybran zadny virtualni server
 bwreset_doing=Resetuji citace vytizeni pro vybrane servery a jejich doplnky..
+
 bwreset_done=.. hotovo.
 bwreset_running=Re-generuji statistiky vytizeni ze souboru udalosti ..
 bwreset_started=.. proces zahajen. Tento muze trvat nekolik hodin v zavislosti na zvolene delce a mnozstvi prepocitavanych domen.

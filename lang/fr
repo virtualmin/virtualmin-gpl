@@ -1267,7 +1267,6 @@ check_netok=Le module de configuration réseau de Webmin est installé et suppor
 check_defip=L'adresse IP par défaut pour les serveurs virtuels esr $1.
 check_webok=Apache est installé.
 check_ftpok=ProFTPd est installé.
-check_dnsok=Le serveur DNS BIND est installé.
 check_dnsok2=Serveur DNS BIND est installé.
 check_postgresok=PostgreSQL est installé et en cours d'exécution.
 check_webalizerok=Webalizer est installé.
@@ -2292,6 +2291,7 @@ scripts_epythoninst=.. installation automatique du module Python a échoué
 scripts_installgem=Installation de package Ruby Gems ..
 scripts_mmax=(Tout au plus $1)
 scripts_sitelink=Plus d'informations sur l'utilisation de ce script peut être trouvé à <a href='$1' target=_blank>$1</a>.
+
 scripts_userpass=La connexion initiale d'administration est $1 avec le mot de passe $2 .
 scripts_useronly=La connexion initiale d'administration est $1 .
 scripts_passonly=Le mot de passe d'administration initial est $1 .

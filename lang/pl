@@ -420,7 +420,6 @@ check_webok=Apache jest zainstalowany.
 check_webphpvers=Następujące wersje PHP są dostępne : $1
 check_webphpnovers=Nie znaleziono wersji PHP w twoim systemie
 check_ftpok=ProFTPd jest zainstalowany.
-check_dnsok=Serwer BIND DNS jest zainstalowany, a system skonfigurowany do używania go.
 check_dnsok2=Serwer Bind DNS jest zainstalowany.
 check_webalizerok=Webalizer jest zainstalowany.
 check_ifaceok=Używanie interfejsu sieciowego $1 dla wirtualnych adresów IP.

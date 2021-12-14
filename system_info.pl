@@ -61,17 +61,22 @@ if (&need_config_check() && &can_check_config()) {
 # Suggest to GPL user to get Virtualmin Pro
 if (!$virtualmin_pro &&
     &should_show_pro_tip('dashboard', 1)) {
-	push(@rv, { 'type' => 'warning',
-		    'level' => 'info',
-		    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
-		    	'alert_title' => $text{'scripts_gpl_pro_tip_title_dashboard'},
-		    	'alert_body1' => $text{'scripts_gpl_pro_tip_dashboard'} . " ",
-		    	'alert_body2' => &text('scripts_gpl_pro_tip_enroll_dashboard',
-		    	                       'https://www.virtualmin.com/product-category/virtualmin/'),
-		    	'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
-		    	'button_icon' => 'fa fa-fw fa-heartbeat',
-		    	}) },
-		  });
+	# Do not show dashboard alert within first seven days, until things settle down
+	&foreign_require("webmin");
+	my $uptime = &webmin::get_system_uptime();
+	if (!$uptime || $uptime > 60*60*24 * 7) {
+		push(@rv, { 'type' => 'warning',
+			    'level' => 'info',
+			    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
+			        'alert_title' => $text{'scripts_gpl_pro_tip_title_dashboard'},
+			        'alert_body1' => $text{'scripts_gpl_pro_tip_dashboard'} . " ",
+			        'alert_body2' => &text('scripts_gpl_pro_tip_enroll_dashboard',
+			                               'https://www.virtualmin.com/product-category/virtualmin/'),
+			        'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
+			        'button_icon' => 'fa fa-fw fa-heartbeat',
+			    	}) },
+			  });
+		}
 	} 
 
 # Show a domain owner info about his domain, but NOT info about the system

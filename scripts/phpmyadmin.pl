@@ -49,6 +49,18 @@ return ("mysql", "json", "mbstring", "session",
         "zip", "gd", "openssl", "xml");
 }
 
+# script_phpmyadmin_php_vars()
+# Returns an array of extra PHP variables needed for this script
+sub script_phpmyadmin_php_vars
+{
+return ([ 'memory_limit', '128M', '+' ],
+        [ 'max_execution_time', 300, '+' ],
+        [ 'file_uploads', 'On' ],
+        [ 'upload_max_filesize', '1G', '+' ],
+        [ 'post_max_size', '1G', '+' ]);
+}
+
+
 sub script_phpmyadmin_php_optional_modules
 {
 my ($d, $ver, $phpver, $opts) = @_;
