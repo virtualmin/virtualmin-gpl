@@ -486,6 +486,28 @@ if ($opts->{'newdb'}) {
 return (1, "Django directory and tables deleted.");
 }
 
+sub script_django_db_conn_desc
+{
+my $db_conn_desc = 
+    { 'settings.py' =>
+        {
+           'dbpass' =>
+           {
+               'func'        => 'php_quotemeta',
+               'func_params' => 1,
+               'replace'     => [ '[\'"]PASSWORD[\'"]\s*:.*?' =>
+                                  '\'PASSWORD\': \'$$sdbpass\',' ],
+           },
+           'dbuser' =>
+           {
+               'replace'     => [ '[\'"]USER[\'"]\s*:.*?' =>
+                                  '\'USER\': \'$$sdbuser\',' ],
+           },
+        }
+    };
+return $db_conn_desc;
+}
+
 # script_django_latest(version)
 # Returns a URL and regular expression or callback func to get the version
 sub script_django_latest
