@@ -210,6 +210,7 @@ local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 local $dbhost = &get_database_host($dbtype, $d);
+local $domemail = $d->{'emailto_addr'};
 $dbhost = undef if ($dbhost eq "localhost" || $dbhost eq "127.0.0.1");
 if ($dbtype) {
 	local $dberr = &check_script_db_connection($dbtype, $dbname,
@@ -363,6 +364,14 @@ if (!$upgrade) {
 		return (-1, "DB initialization install failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
 		}
+
+	# Create Django admin user
+	chdir($pdir);
+	local $out = &run_as_domain_user($d, "echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$domuser', '$domemail', '$dompass')\" | $python manage.py shell 2>&1");
+	if ($?) {
+		return (-1, "Initial Django user creation failed : ".
+			   "<tt>".&html_escape($out)."</tt>");
+		}
 	}
 
 # Django 1.9+ uses a server process
@@ -418,7 +427,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to '$opts->{'dir'}/lib/python'.", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to <tt>$opts->{'dir'}/lib/python</tt>.", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
