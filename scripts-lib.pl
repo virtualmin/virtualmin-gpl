@@ -667,22 +667,26 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value, database-type)
+# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, considering database type,
 # in case installed script supports it (uses database).
 sub update_all_installed_scripts_database_credentials
 {
-my ($d, $type, $value, $dbtype) = @_;
+my ($d, $oldd, $type, $value, $dbtype) = @_;
 my @domain_scripts = &list_domain_scripts($d);
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
-	my $sdir = $script->{'opts'}->{'dir'};
 	my $sproject = $script->{'opts'}->{'project'};
 	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
 	my ($sdbtype) = split(/_/, $script->{'opts'}->{'db'}, 2);
+	my $sdir = $script->{'opts'}->{'dir'};
+	my ($dhome, $olddhome) = ($d->{'home'}, $oldd->{'home'});
+	if ($dhome ne $olddhome) {
+		$sdir =~ s/^\Q$olddhome\E/$dhome/;
+		}
 	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
 		$db_conn_desc = &{$db_conn_desc};
