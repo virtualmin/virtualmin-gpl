@@ -2089,7 +2089,7 @@ my $conf = &get_php_fpm_config($d);
 if ($socket =~ /^\//) {
 	# Also set correct owner for the file if switching to socket mode
 	&save_php_fpm_config_value($d, "listen.owner", $d->{'user'});
-	&save_php_fpm_config_value($d, "listen.group`", $d->{'ugroup'});
+	&save_php_fpm_config_value($d, "listen.group", $d->{'ugroup'});
 	}
 &register_post_action(\&restart_php_fpm_server, $conf);
 &register_post_action(\&restart_apache);
