@@ -680,6 +680,7 @@ foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
 	my $sdir = $script->{'opts'}->{'dir'};
+	my $sproject = $script->{'opts'}->{'project'};
 	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
 	my ($sdbtype) = split(/_/, $script->{'opts'}->{'db'}, 2);
 	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
@@ -746,8 +747,21 @@ foreach my $script (@domain_scripts) {
 
 						# Run substitution if target and replacement are fine
 						my ($error, $success);
-						if (-r "$sdir/$script_config_file") {
-							my $script_config_file_lines = read_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+
+						# Config file to run replacements on
+						my $script_config_file_path = "$sdir/$script_config_file";
+
+						# If script project is set, change config file path accordingly
+						if ($sproject) {
+							if (-r "$sdir/$sproject/$sproject/$script_config_file") {
+								$script_config_file_path = "$sdir/$sproject/$sproject/$script_config_file";
+								}
+							elsif (-r "$sdir/$sproject/$script_config_file") {
+								$script_config_file_path = "$sdir/$sproject/$script_config_file";
+								}
+							}
+						if (-r $script_config_file_path) {
+							my $script_config_file_lines = read_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
 									if ($config_file_line =~ /(?<spaces>\s*)(?<replace_target>$replace_target)/) {
@@ -772,7 +786,7 @@ foreach my $script (@domain_scripts) {
 										}
 									}
 								}
-							flush_file_lines_as_domain_user($d, "$sdir/$script_config_file");
+							flush_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($success) {
 								$success = 
 									$script_config_files_count > 1 ?
