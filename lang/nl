@@ -3405,7 +3405,7 @@ scripts_eavail=Dit script is niet beschikbaar
 scripts_eversion=Ontbrekende of ongeldig lijkend versie nummer
 scripts_eversion2=De gespecificeerde versie is niet beschikbaar
 scripts_apache=Configureer webserver PHP instellingen ..
-scripts_aalready=.. reeds gedaan.
+scripts_aalready=.. reeds gedaan
 scripts_tabexisting=Geinstalleerde Scripts
 scripts_tabnew=Beschikbare Scripts
 scripts_tabunsup=Installeer niet ondersteunde Versie
@@ -3419,15 +3419,14 @@ scripts_upgrades=Upgrade Geselecteerde Scripts
 scripts_newdb=$1 ($2, nieuwe database)
 scripts_nocat=Andere
 scripts_enosel=Niets geselecteerd
-scripts_needmod=PHP module $1 is nodig ..
-scripts_optmod=PHP module $1 word aanbevolen ..
-scripts_noini=.. kon de globale php.ini file niet vinden
-scripts_noini2=.. kon de php.ini file van het domein niet vinden
+
+scripts_noini=.. kon de globale <tt>php.ini</tt> file niet vinden
+scripts_noini2=.. kon de <tt>php.ini</tt> file van het domein niet vinden
 scripts_softwaremod=Installeren van pakket $1 ..
 scripts_esoftwaremod=.. mislukt om te installeren!
+
 scripts_esoftware=.. het Software Pakket Webmin module is niet geinstalleerd!
-scripts_eupdate=.. de automatisch module installatie is niet beschikbaar op uw systeem.
-scripts_einstallmod=Module is niet beschikbaar zelfs niet na de installatie!
+
 scripts_gotmod=.. PHP module $1 is nu beschikbaar.
 scripts_nopearmod=De PHP Pear modules $1 zijn nodig, maar Webmin's Pear module is niet beschikbaar om hem te installeren - toch doorgaan?
 scripts_nopearcmd=De PHP Pear modules $1 zijn nodig, maar Pear voor PHP versie $2 is niet geinstalleerd - toch doorgaan?

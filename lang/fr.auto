@@ -684,7 +684,7 @@ check_webphpvers=Les versions PHP suivantes sont disponibles : $1
 check_webphpnovers=Aucune version PHP n'a été trouvée sur ce système!
 check_webphpmodes=Les modes d'exécution PHP suivants sont disponibles : $1 
 check_ewebphpmodes=Aucun mode d'exécution PHP n'est disponible !
-check_webphpversinis=Les versions de PHP sont passées à $1 depuis la dernière vérification. Régénérer tous les fichiers php.ini manquants.
+check_webphpversinis=Les versions de PHP sont passées à $1 depuis la dernière vérification. Régénérer tous les fichiers <tt>php.ini</tt> manquants.
 check_webphpfpm=La prise en charge de PHP-FPM version $1 est disponible sur ce système.
 check_webphpnofpm=La prise en charge de PHP-FPM n'a pas été détectée : $1 
 check_webphpfpm2=Les versions PHP-FPM suivantes sont disponibles sur ce système : $1 
@@ -1895,7 +1895,7 @@ scripts_deregistering=Désenregistrement de la version $1 $2 ..
 scripts_cats=Les catégories
 scripts_phpmodinst=Installation du module à partir des packages logiciels ..
 scripts_phpmoddone=.. module installé avec succès à partir du package $1
-scripts_phpmodfailed=.. échec de l'installation du module à partir de $1 packages possibles
+
 scripts_passmode4=Mot de passe initial pour le script
 scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
@@ -2547,6 +2547,7 @@ tscripts_exact=Toujours
 tscripts_path=Chemin URL (comme / phpmyadmin)
 tscripts_dbtype=Type de DB
 tscripts_db=Nom de la base de données
+
 tscripts_dbdef=Base de données principale
 tscripts_other=Autre base de données ..
 tscripts_err=Échec de l'enregistrement des scripts de modèle

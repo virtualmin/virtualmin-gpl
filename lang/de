@@ -2699,7 +2699,7 @@ scripts_intitle=Installiere Skript
 scripts_eavail=Das Skript ist nicht verfügbar
 scripts_eversion=Fehlende oder ungültig ausschauende Versionsnummer
 scripts_eversion2=Die spezifizierte Version ist nicht verfügbar
-scripts_aalready=.. bereits fertig.
+scripts_aalready=.. bereits fertig
 scripts_tabexisting=Installierte Skripte
 scripts_tabnew=Verfügbare Skripte
 scripts_tabunsup=Installiere nicht unterstützte Version
@@ -2713,14 +2713,14 @@ scripts_upgrades=Upgrade ausgewählte Skripte
 scripts_newdb=$1 ($2, neue Datenbanken)
 scripts_nocat=Andere
 scripts_enosel=Keins ausgewählt
-scripts_needmod=PHP-Modul $1 wird benötigt ..
-scripts_optmod=PHP-Modul $1 ist empfohlen ..
-scripts_noini=.. konnte keine globale php.ini Datei finden
-scripts_noini2=.. konnte keine Domains php.ini Datei finden
+
+scripts_noini=.. konnte keine globale <tt>php.ini</tt> Datei finden
+scripts_noini2=.. konnte keine Domains <tt>php.ini</tt> Datei finden
 scripts_softwaremod=Installiere Pakete $1 ..
 scripts_esoftwaremod=.. fehlgeschlagen zu installieren!
+
 scripts_esoftware=.. das Softwarepaket Webmin-Modul ist nicht installiert!
-scripts_eupdate=.. automatische Modul-Installation ist nicht auf Ihrem System verfügbar.
+
 scripts_gotmod=.. PHP-Module $1 ist nun verfügbar.
 scripts_nopearmod=Das PHP Pear Modul $1 ist erforderlich, aber Webmins PHP Pear Version ist nicht verfügbar zum installieren - fahre trotzdem fort.
 scripts_nopearcmd=Das PHP Pear Modul $1 ist erforderlich, aber PHP Pear Version $2 ist nicht installiert - fahre trotzdem fort.

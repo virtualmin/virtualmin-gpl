@@ -414,7 +414,7 @@ check_webphpvers=Las siguientes versiones de PHP están disponibles : $1
 check_webphpnovers=¡No se encontraron versiones de PHP en este sistema!
 check_webphpmodes=Están disponibles los siguientes modos de ejecución de PHP : $1 
 check_ewebphpmodes=¡No hay modos de ejecución de PHP disponibles!
-check_webphpversinis=Las versiones de PHP han cambiado a $1 desde la última verificación. Regenerando cualquier archivo php.ini faltante.
+check_webphpversinis=Las versiones de PHP han cambiado a $1 desde la última verificación. Regenerando cualquier archivo <tt>php.ini</tt> faltante.
 check_webphpfpm=La versión de PHP-FPM $1 está disponible en este sistema.
 check_webphpnofpm=No se detectó el soporte de PHP-FPM : $1
 check_webphpfpm2=Las siguientes versiones de PHP-FPM están disponibles en este sistema : $1
@@ -1076,11 +1076,12 @@ scripts_idb2=Utiliza una base de datos con prefijo de tabla
 scripts_idbtbpref=con prefijo de tabla
 scripts_deregistering=Ahora cancelar el registro de $1 versión $2 ..
 scripts_cats=Categorias
-scripts_noini=.. no se pudo encontrar el archivo php.ini global
-scripts_noini2=.. no se pudo encontrar el archivo php.ini del dominio
+
+scripts_noini=.. no se pudo encontrar el archivo <tt>php.ini</tt> global
+scripts_noini2=.. no se pudo encontrar el archivo <tt>php.ini</tt> del dominio
 scripts_phpmodinst=Instalación del módulo desde paquetes de software ..
 scripts_phpmoddone=.. módulo instalado correctamente del paquete $1 
-scripts_phpmodfailed=.. no se pudo instalar el módulo de $1 paquetes posibles
+
 scripts_newer2=La versión $1 existe pero no se puede actualizar a
 scripts_ecpan=.. el módulo CPAN Perl no está instalado en su sistema.
 scripts_optpythonmod=Se recomienda el módulo Python $1.

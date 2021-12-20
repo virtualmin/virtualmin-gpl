@@ -232,6 +232,7 @@ database_tables=Número de tabelas
 
 scripts_uok2=Desinstalar agora
 scripts_uok=Desinstalar aplicativo
+
 scripts_unsupname=Aplicativos para instalar
 scripts_unsupver=Versão
 scripts_unsupdesc=Este formulário permite que você instale uma versão do script que não foi testado por Virtualmin, ou não é mais suportado. Esteja ciente de que isso pode não funcionar, e poderia até quebrar outras páginas no servidor virtual.

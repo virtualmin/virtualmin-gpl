@@ -588,7 +588,7 @@ check_webphpvers=提供以下PHP版本： $1
 check_webphpnovers=在該系統上找不到PHP版本！
 check_webphpmodes=可以使用以下PHP執行模式： $1
 check_ewebphpmodes=沒有可用的 PHP 執行模式！
-check_webphpversinis=自上次檢查以來，PHP版本已更改為 $1。重新生成所有丟失的php.ini文件。
+check_webphpversinis=自上次檢查以來，PHP版本已更改為 $1。重新生成所有丟失的<tt>php.ini</tt>文件。
 check_webphpfpm=此系統上提供了PHP-FPM版本 $1支持。
 check_webphpnofpm=未檢測到PHP-FPM支持： $1
 check_webphpfpm2=以下PHP-FPM版本在此系統上可用： $1
@@ -1708,12 +1708,12 @@ scripts_cats=分類目錄
 scripts_db=使用數據庫
 scripts_nodb=沒有
 scripts_upgrades=升級所選腳本
-scripts_optmod=推薦使用PHP模塊 $1 ..
-scripts_noini=..找不到全局php.ini文件
-scripts_noini2=..找不到域的php.ini文件
+
+scripts_noini=..找不到全局<tt>php.ini</tt>文件
+scripts_noini2=..找不到域的<tt>php.ini</tt>文件
 scripts_phpmodinst=從軟件包安裝模塊 ..
 scripts_phpmoddone=.. 成功安裝了來自包 $1 的模塊
-scripts_phpmodfailed=.. 無法從 $1 個可能的包安裝模塊
+
 scripts_newer2=版本 $1存在，但無法升級到
 scripts_find=查找匹配的腳本：
 scripts_findok=搜索

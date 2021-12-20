@@ -237,7 +237,7 @@ check_webphpvers=De volgende PHP-versies zijn beschikbaar : $1
 check_webphpnovers=Er zijn geen PHP-versies gevonden op dit systeem!
 check_webphpmodes=De volgende PHP-uitvoeringsmodi zijn beschikbaar : $1
 check_ewebphpmodes=Er zijn geen PHP-uitvoeringsmodi beschikbaar!
-check_webphpversinis=PHP-versies zijn gewijzigd in $1 sinds de laatste controle. Ontbrekende php.ini-bestanden opnieuw genereren.
+check_webphpversinis=PHP-versies zijn gewijzigd in $1 sinds de laatste controle. Ontbrekende <tt>php.ini</tt>-bestanden opnieuw genereren.
 check_webphpfpm=Ondersteuning voor PHP-FPM versie $1 is beschikbaar op dit systeem.
 check_webphpnofpm=PHP-FPM-ondersteuning is niet gedetecteerd : $1
 check_webphpfpm2=De volgende PHP-FPM-versies zijn beschikbaar op dit systeem : $1
@@ -714,9 +714,10 @@ scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
 scripts_cats=Categorieën
+
 scripts_phpmodinst=Module installeren vanuit softwarepakketten ..
 scripts_phpmoddone=.. succesvol geïnstalleerde module uit pakket $1
-scripts_phpmodfailed=.. kan module van $1 mogelijke pakketten niet installeren
+
 scripts_passmode4=Eerste wachtwoord voor script
 scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server

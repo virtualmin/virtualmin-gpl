@@ -1525,7 +1525,7 @@ check_http2ok=Apache obsługuje HTTPv2 w twoim systemie.
 check_http2err=Apache nie obsługuje HTTPv2  : $1 
 check_webphpmodes=Dostępne są następujące tryby wykonywania PHP : $1 
 check_ewebphpmodes=Brak dostępnych trybów wykonywania PHP!
-check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików php.ini.
+check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików <tt>php.ini</tt>.
 check_webphpfpm=Obsługa PHP-FPM w wersji $1 jest dostępna w tym systemie.
 check_webphpnofpm=Obsługa PHP-FPM nie została wykryta : $1 
 check_webphpfpm2=W tym systemie dostępne są następujące wersje PHP-FPM : $1 
@@ -3462,10 +3462,9 @@ scripts_cats=Kategorie
 scripts_esoftwaremod=.. instalacja nie powiodła się!
 scripts_phpmodinst=Instalacja modułu z pakietów oprogramowania ..
 scripts_phpmoddone=.. pomyślnie zainstalowano moduł z pakietu $1 
-scripts_phpmodfailed=.. nie udało się zainstalować modułu z $1 możliwych pakietów
+
 scripts_esoftware=.. moduł Webmin pakietów oprogramowania nie jest zainstalowany!
-scripts_eupdate=.. automatyczna instalacja modułu nie jest dostępna w twoim systemie.
-scripts_einstallmod=Moduł nie jest dostępny nawet po instalacji!
+
 scripts_gotmod=.. Moduł PHP $1 jest już dostępny.
 scripts_nopearmod=Wymagane są moduły PHP 1 Gruszka $1, ale moduł Gruszki Webmina nie jest dostępny do ich zainstalowania - i tak dalej.
 scripts_nopearcmd=Wymagane są moduły PHP Pear $1, ale Pear dla PHP w wersji $2 nie jest zainstalowany - i tak dalej.
@@ -4081,6 +4080,7 @@ tscripts_name=Scenariusz
 tscripts_latest=Najnowsze dostępne
 tscripts_exact=Zawsze
 tscripts_path=Ścieżka URL (jak / phpmyadmin)
+
 tscripts_dbtype=Typ DB
 tscripts_dbdef=Główna baza danych
 tscripts_other=Inna baza danych ..

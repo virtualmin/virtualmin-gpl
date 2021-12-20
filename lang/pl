@@ -665,7 +665,7 @@ scripts_uninstalling=Odinstalowuję $1 w wersji $2 ..
 scripts_uptitle=Aktualizacja skryptu
 scripts_intitle=Instalacja skryptu
 scripts_eavail=Ten skrypt nie jest dostępny
-scripts_aalready=.. już gotowe.
+scripts_aalready=.. już gotowe
 scripts_tabexisting=Zainstalowane skrypty
 scripts_tabnew=Dostępne skrypty
 scripts_tabunsup=Zainstaluj niewspieraną wersję
@@ -679,11 +679,11 @@ scripts_upgrades=Aktualizuj wybrane skrypty
 scripts_newdb=$1 ($2, nowa baza danych)
 scripts_nocat=Inne
 scripts_enosel=Nic nie wybrano
-scripts_needmod=Moduł PHP $1 jest wymagany ..
-scripts_optmod=Moduł PHP $1 jest rekomendowany ..
-scripts_noini=.. nie można znaleźć globalnego pliku php.ini
-scripts_noini2=.. nie można znaleźć pliku php.ini dla domeny
+
+scripts_noini=.. nie można znaleźć globalnego pliku <tt>php.ini</tt>
+scripts_noini2=.. nie można znaleźć pliku <tt>php.ini</tt> dla domeny
 scripts_softwaremod=Instalacja pakietu $1 ..
+
 scripts_needpear=Instalacja modułu PHP Pear $1 ..
 scripts_eclash=Inny skrypt jest już zainstalowany w $1.
 scripts_status=Stan

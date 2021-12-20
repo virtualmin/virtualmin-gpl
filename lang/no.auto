@@ -178,7 +178,7 @@ check_http2ok=Apache støtter HTTPv2 på systemet ditt.
 check_http2err=Apache støtter ikke HTTPv2 : $1
 check_webphpmodes=Følgende PHP-utførelsesmodus er tilgjengelig : $1 
 check_ewebphpmodes=Ingen PHP-utførelsesmoduser er tilgjengelige!
-check_webphpversinis=PHP-versjoner har endret seg til $1 siden sist sjekk. Regenererer eventuelle manglende php.ini-filer.
+check_webphpversinis=PHP-versjoner har endret seg til $1 siden sist sjekk. Regenererer eventuelle manglende <tt>php.ini</tt>-filer.
 check_webphpfpm=PHP-FPM versjon $1 -støtte er tilgjengelig på dette systemet.
 check_webphpnofpm=PHP-FPM-støtte ble ikke oppdaget : $1 
 check_webphpfpm2=Følgende PHP-FPM-versjoner er tilgjengelige på dette systemet : $1 
@@ -489,9 +489,10 @@ scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
+
 scripts_phpmodinst=Installere modul fra programvarepakker ..
 scripts_phpmoddone=.. installert modul fra pakke $1
-scripts_phpmodfailed=.. klarte ikke å installere modulen fra $1 mulige pakker
+
 scripts_passmode4=Opprinnelig passord for skript
 scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren

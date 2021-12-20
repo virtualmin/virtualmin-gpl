@@ -665,7 +665,7 @@ check_webphpvers=Aşağıdaki PHP sürümleri mevcuttur : $1
 check_webphpnovers=Bu sistemde PHP sürümü bulunamadı!
 check_webphpmodes=Aşağıdaki PHP yürütme modları kullanılabilir : $1 
 check_ewebphpmodes=PHP yürütme modu yok!
-check_webphpversinis=PHP sürümleri son kontrolden beri $1 olarak değiştirildi. Eksik php.ini dosyalarını yeniden oluşturma.
+check_webphpversinis=PHP sürümleri son kontrolden beri $1 olarak değiştirildi. Eksik <tt>php.ini</tt> dosyalarını yeniden oluşturma.
 check_webphpfpm=PHP-FPM sürüm $1 desteği bu sistemde mevcut.
 check_webphpnofpm=PHP-FPM desteği tespit edilmedi : $1 
 check_webphpfpm2=Bu sistemde aşağıdaki PHP-FPM sürümleri mevcuttur : $1 
@@ -1890,18 +1890,16 @@ scripts_cats=Kategoriler
 scripts_db=Veritabanını kullanma
 scripts_nodb=Yok
 scripts_upgrades=Seçilen Komut Dosyalarını Yükselt
-scripts_needmod=$1 PHP modülü gerekiyor.
-scripts_optmod=$1 PHP modülü önerilir.
-scripts_noini=.. global php.ini dosyası bulunamadı
-scripts_noini2=.. alan adının php.ini dosyası bulunamadı
+
+scripts_noini=.. global <tt>php.ini</tt> dosyası bulunamadı
+scripts_noini2=.. alan adının <tt>php.ini</tt> dosyası bulunamadı
 scripts_softwaremod=$1 paketi yükleniyor ..
 scripts_esoftwaremod=.. yükleme başarısız!
 scripts_phpmodinst=Yazılım paketlerinden modül kurulumu ..
 scripts_phpmoddone=.. modül $1 paketinden başarıyla kuruldu
-scripts_phpmodfailed=.. $1 olası paketten modül yüklenemedi
+
 scripts_esoftware=.. Yazılım Paketleri Webmin modülü kurulu değil!
-scripts_eupdate=.. otomatik modül kurulumu sisteminizde mevcut değildir.
-scripts_einstallmod=Modül kurulumdan sonra bile kullanılamıyor!
+
 scripts_gotmod=.. $1 PHP modülü kullanıma sunuldu.
 scripts_nopearmod=$1 PHP Pear modülleri gereklidir, ancak Webmin'in Pear modülü bunları kurmak için mevcut değildir - yine de devam etmektedir.
 scripts_nopearcmd=$1 PHP Pear modülleri gerekli, ancak PHP $2 için Pear kurulu değil - yine de devam ediyor.

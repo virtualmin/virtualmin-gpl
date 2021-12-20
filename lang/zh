@@ -2427,7 +2427,7 @@ scripts_uptitle=升级脚本
 scripts_intitle=安装脚本
 scripts_eavail=该脚本不可用
 scripts_apache=正在配置Apache PHP设置 ..
-scripts_aalready=.. 已完成。
+scripts_aalready=.. 已完成
 scripts_tabexisting=已安装的脚本
 scripts_tabnew=可用的脚本
 scripts_name=脚本
@@ -2437,12 +2437,12 @@ scripts_uninstalls=卸载选中的脚本
 scripts_newdb=$1 （$2，新数据库）
 scripts_nocat=其他
 scripts_enosel=没有选中
-scripts_needmod=需要PHP模块$1..
+
 scripts_softwaremod=正在安装软件包$1 ..
 scripts_esoftwaremod=..安装失败！
+
 scripts_esoftware=.. 软件包Webmin模块没有安装！
-scripts_eupdate=..你的系统不支持自动模块安装。
-scripts_einstallmod=安装后模块仍然不可用！
+
 scripts_gotmod=.. PHP模块$1现在已可用。
 scripts_nopearmod=需要PHP Pear模块$1，但是Webmin的Pear模块现在无法安装这些PHP Pear模块 - 无论如何继续。
 scripts_nopearcmd=需要PHP Pear模块$1，但是PHP版本$2的Pear没有安装 - 无论如何继续。

@@ -536,7 +536,7 @@ check_http2ok=Apache unterstützt HTTPv2 auf Ihrem System.
 check_http2err=Apache unterstützt HTTPv2 nicht : $1
 check_webphpmodes=Die folgenden PHP-Ausführungsmodi sind verfügbar : $1
 check_ewebphpmodes=Es sind keine PHP-Ausführungsmodi verfügbar!
-check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende php.ini-Dateien neu generieren.
+check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende <tt>php.ini</tt>-Dateien neu generieren.
 check_webphpfpm=Die Unterstützung von PHP-FPM Version $1 ist auf diesem System verfügbar.
 check_webphpnofpm=PHP-FPM-Unterstützung wurde nicht erkannt : $1
 check_webphpfpm2=Die folgenden PHP-FPM-Versionen sind auf diesem System verfügbar : $1
@@ -1436,10 +1436,10 @@ scripts_udesc=Auf dieser Seite können Sie ein Skript deinstallieren oder auf di
 scripts_deregistering=Jetzt $1 Version $2 abmelden ..
 scripts_apache=Konfigurieren der Webserver-PHP-Einstellungen.
 scripts_cats=Kategorien
+
 scripts_phpmodinst=Modul aus Softwarepaketen installieren ..
 scripts_phpmoddone=.. erfolgreich installiertes Modul aus Paket $1
-scripts_phpmodfailed=.. konnte das Modul aus $1 möglichen Paketen nicht installieren
-scripts_einstallmod=Modul ist auch nach der Installation nicht verfügbar!
+
 scripts_einstallpear=Das Birnenmodul ist auch nach der Installation nicht verfügbar!
 scripts_find=Finden Sie passende Skripte:
 scripts_installgem=Ruby Gems-Paket installieren ..
