@@ -1149,6 +1149,8 @@ if (defined(&$optmodfunc)) {
 	@optmods = &$optmodfunc($d, $ver, $phpver, $opts);
 	push(@mods, @optmods);
 	}
+
+my $installing;
 foreach my $m (@mods) {
 	if ($phpver >= 7 && $m eq "mysql") {
 		# PHP 7 only supports mysqli, but that's OK because most scripts
@@ -1156,10 +1158,13 @@ foreach my $m (@mods) {
 		$m = "mysqli";
 		}
 	next if (&check_php_module($m, $phpver, $d) == 1);
+	if(!$installing++) {
+		&$first_print($text{'scripts_install_phpmods_check'});
+		&$indent_print();
+		}
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
-	&$indent_print();
 
 	# Find the php.ini file
 	&foreign_require("phpini");
@@ -1169,7 +1174,6 @@ foreach my $m (@mods) {
 			&get_domain_php_ini($d, $phpver);
 	if (!$inifile) {
 		# Could not find php.ini
-		&$outdent_print();
 		&$second_print($mode eq "mod_php" || $mode eq "fpm" ?
 			$text{'scripts_noini'} : $text{'scripts_noini2'});
 		if ($opt) { next; }
@@ -1218,14 +1222,12 @@ foreach my $m (@mods) {
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
-		&$outdent_print();
 		&$second_print($text{'scripts_esoftware'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
 	&foreign_require("software");
 	if (!defined(&software::update_system_install)) {
-		&$outdent_print();
 		&$second_print($text{'scripts_eupdate'});
 		if ($opt) { next; }
 		else { return 0; }
@@ -1287,7 +1289,7 @@ foreach my $m (@mods) {
 		}
 	@poss = sort { $a cmp $b } &unique(@poss);
 	my @newpkgs;
-	&$first_print($text{'scripts_phpmodinst'});
+	# &$first_print($text{'scripts_phpmodinst'});
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
@@ -1316,14 +1318,8 @@ foreach my $m (@mods) {
 			}
 		}
 	push(@$installed, @newpkgs) if ($installed);
-	if ($iok) {
-		&$second_print(&text('scripts_phpmoddone',
-			       "<tt>".join(" ", @newpkgs)."</tt>"));
-		&$outdent_print();
-		}
-	else {
+	if (!$iok) {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
-		&$outdent_print();
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
@@ -1332,7 +1328,6 @@ foreach my $m (@mods) {
 	# Finally re-check to make sure it worked
 	GOTMODULE:
 	undef(%main::php_modules);
-	&$outdent_print();
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
@@ -1340,7 +1335,7 @@ foreach my $m (@mods) {
 		else { return 0; }
 		}
 	else {
-		&$second_print(&text('scripts_gotmod', $m));
+		&$second_print(&text('setup_done', $m));
 		}
 
 	# If we are running via mod_php or fcgid, an Apache reload is needed
@@ -1358,6 +1353,10 @@ foreach my $m (@mods) {
 	if ($mode eq "fpm") {
 		&register_post_action(\&restart_php_fpm_server);
 		}
+	}
+if ($installing) {
+	&$outdent_print();
+	&$second_print($text{'scripts_install_phpmods_check_done'});
 	}
 return 1;
 }
