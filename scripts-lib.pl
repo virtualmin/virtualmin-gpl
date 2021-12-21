@@ -764,11 +764,11 @@ foreach my $script (@domain_scripts) {
 								$script_config_file_path = "$sdir/$sproject/$script_config_file";
 								}
 							}
-						if (-r $script_config_file_path) {
-							my $script_config_file_lines = read_file_lines_as_domain_user($d, $script_config_file_path);
+						if (-w $script_config_file_path) {
+							my $script_config_file_lines = &read_file_lines($script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
-									if ($config_file_line =~ /(?<spaces>\s*)(?<replace_target>$replace_target)/) {
+									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)/) {
 										if ($script_option_multi) {
 											# Construct replacement first
 											foreach my $option_multi (keys %options_multi) {
@@ -780,17 +780,17 @@ foreach my $script (@domain_scripts) {
 												$replace_with =~ s/\$\$$option_multi/$option_multi_value/;
 												}
 											# Perform complex replacement (multi)
-											$config_file_line = "$+{spaces}$+{replace_target}$replace_with";
+											$config_file_line = "$+{before}$+{replace_target}$replace_with";
 											}
 										else {
 											# Perform simple replacement
-											$config_file_line = "$+{spaces}$replace_with";
+											$config_file_line = "$+{before}$replace_with";
 											}
 										$success++;
 										}
 									}
 								}
-							flush_file_lines_as_domain_user($d, $script_config_file_path);
+							&flush_file_lines($script_config_file_path);
 							if ($success) {
 								$success = 
 									$script_config_files_count > 1 ?
