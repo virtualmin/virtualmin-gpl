@@ -171,6 +171,7 @@ delete_ednssubof=Virtuele server $1 kan niet worden verwijderd, omdat deze DNS-r
 delete_esslnoips=Geen SSL-certificaat gevonden voor domein
 delete_mail_smtpcloud=Cloudmailprovider $1 verwijderen ..
 
+save_apache12=PHP FPM-configuratie bijwerken ..
 save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
 save_bind_ecloud=.. mislukt : $1
 save_mailto=Aliassen bijwerken voor contactadres.
@@ -714,10 +715,15 @@ scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
 scripts_cats=Categorieën
-
+scripts_needmod=Benodigde PHP $1 module installeren ..
+scripts_optmod=Aanbevolen PHP $1 module installeren ..
 scripts_phpmodinst=Module installeren vanuit softwarepakketten ..
 scripts_phpmoddone=.. succesvol geïnstalleerde module uit pakket $1
-
+scripts_phpmodfailed=.. module is niet beschikbaar in opslag
+scripts_eupdate=.. automatische module-installatie is niet beschikbaar op uw systeem
+scripts_einstallmod=.. module is geïnstalleerd maar kan niet worden geladen
+scripts_install_phpmods_check=PHP-modules controleren ..
+scripts_install_phpmods_check_done=.. controle klaar
 scripts_passmode4=Eerste wachtwoord voor script
 scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server

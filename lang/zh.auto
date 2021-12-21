@@ -463,6 +463,7 @@ save_emysqluser2_provision2=..对新用户的授予失败： $1
 save_webminreal=更新Webmin用户的真实姓名 ..
 save_apache10=在PHP配置中更新主目录。
 save_apache11=在网站配置中更新文档目录。
+save_apache12=更新 PHP FPM 配置 ..
 save_dns2_provision=更改服务主机上的DNS域名 ..
 save_dns2_ezone=未找到要重命名的DNS区域！
 save_dnsip6=更改DNS域中的IPv6地址 ..
@@ -1708,12 +1709,17 @@ scripts_cats=分类目录
 scripts_db=使用数据库
 scripts_nodb=没有
 scripts_upgrades=升级所选脚本
-
+scripts_needmod=安装所需的 PHP $1 模块 ..
+scripts_optmod=安装推荐的 PHP $1 模块 ..
 scripts_noini=..找不到全局<tt>php.ini</tt>文件
 scripts_noini2=..找不到域的<tt>php.ini</tt>文件
 scripts_phpmodinst=从软件包安装模块 ..
 scripts_phpmoddone=.. 成功安装了来自包 $1 的模块
-
+scripts_phpmodfailed=.. 模块在 repos 中不可用
+scripts_eupdate=.. 自动模块安装在您的系统上不可用
+scripts_einstallmod=.. 模块已安装但无法加载
+scripts_install_phpmods_check=检查 PHP 模块 ..
+scripts_install_phpmods_check_done=..检查完成
 scripts_newer2=版本 $1存在，但无法升级到
 scripts_find=查找匹配的脚本：
 scripts_findok=搜索

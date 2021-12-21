@@ -3063,12 +3063,9 @@ scripts_upgrades=Actualizar scripts seleccionados
 scripts_newdb=$1 ($2, nueva base de datos)
 scripts_nocat=Otros
 scripts_enosel=Ninguno seleccionado
-
 scripts_softwaremod=Instalando paquete $1 ..
 scripts_esoftwaremod=.. falla al instalar!
-
 scripts_esoftware=.. el módulo de Webmin de paquetes de software no está instalado!
-
 scripts_gotmod=.. el módulo PHP $1 está ahora disponible.
 scripts_nopearmod=Los módulos $1 de PHP Pear son requeridos, pero el módulo Pear de Webmin no está disponible para instalaros - procediendo de todas formas.
 scripts_nopearcmd=Los módulos $1 de PHP Pear son requeridos, pero Pear para la versión de PHP $2 no está instalado - procediendo de todas formas.

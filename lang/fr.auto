@@ -462,6 +462,7 @@ save_apache8=Mise à jour du transfert de trame ..
 save_apache9=Mise à jour du proxy de site Web ..
 save_apache10=Mise à jour du répertoire personnel dans la configuration PHP.
 save_apache11=Mise à jour du répertoire de documents dans la configuration du site Web.
+save_apache12=Mise à jour de la configuration PHP FPM ..
 save_dns2_provision=Modification du nom de domaine DNS sur l'hôte des services ..
 save_dns4=Ajout d'enregistrements MX au domaine DNS ..
 save_dns5=Suppression des enregistrements MX du domaine DNS.
@@ -1893,9 +1894,15 @@ scripts_idb2=Utilise la base de données avec le préfixe de table
 scripts_idbtbpref=avec préfixe de table
 scripts_deregistering=Désenregistrement de la version $1 $2 ..
 scripts_cats=Les catégories
+scripts_needmod=Installation du module PHP $1 requis ..
+scripts_optmod=Installation du module PHP $1 recommandé ..
 scripts_phpmodinst=Installation du module à partir des packages logiciels ..
 scripts_phpmoddone=.. module installé avec succès à partir du package $1
-
+scripts_phpmodfailed=.. le module n'est pas disponible dans les dépôts
+scripts_eupdate=.. l'installation automatique du module n'est pas disponible sur votre système
+scripts_einstallmod=.. le module a été installé mais ne peut pas être chargé
+scripts_install_phpmods_check=Vérification des modules PHP ..
+scripts_install_phpmods_check_done=.. vérification effectuée
 scripts_passmode4=Mot de passe initial pour le script
 scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
@@ -2547,7 +2554,6 @@ tscripts_exact=Toujours
 tscripts_path=Chemin URL (comme / phpmyadmin)
 tscripts_dbtype=Type de DB
 tscripts_db=Nom de la base de données
-
 tscripts_dbdef=Base de données principale
 tscripts_other=Autre base de données ..
 tscripts_err=Échec de l'enregistrement des scripts de modèle

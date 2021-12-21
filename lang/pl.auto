@@ -1052,6 +1052,7 @@ save_apache8=Aktualizowanie przekazywania ramek ..
 save_apache9=Aktualizowanie serwera proxy strony internetowej ..
 save_apache10=Aktualizowanie katalogu domowego w konfiguracji PHP ..
 save_apache11=Aktualizacja katalogu dokumentów w konfiguracji strony internetowej ..
+save_apache12=Aktualizacja konfiguracji PHP FPM ..
 save_dns=Zmiana adresu IP w domenie DNS ..
 save_dns2=Zmiana nazwy domeny DNS ..
 save_dns2_provision=Zmiana nazwy domeny DNS na hoście usług.
@@ -3459,12 +3460,17 @@ scripts_eversion=Brakujący lub nieprawidłowo wyglądający numer wersji
 scripts_eversion2=Określona wersja nie jest dostępna
 scripts_apache=Konfigurowanie ustawień PHP serwera WWW.
 scripts_cats=Kategorie
+scripts_needmod=Instalowanie wymaganego modułu PHP $1 ..
+scripts_optmod=Instalowanie zalecanego modułu PHP $1 ..
 scripts_esoftwaremod=.. instalacja nie powiodła się!
 scripts_phpmodinst=Instalacja modułu z pakietów oprogramowania ..
 scripts_phpmoddone=.. pomyślnie zainstalowano moduł z pakietu $1 
-
+scripts_phpmodfailed=.. moduł nie jest dostępny w repozytoriach
 scripts_esoftware=.. moduł Webmin pakietów oprogramowania nie jest zainstalowany!
-
+scripts_eupdate=.. automatyczna instalacja modułu nie jest dostępna w Twoim systemie
+scripts_einstallmod=.. moduł został zainstalowany, ale nie można go załadować
+scripts_install_phpmods_check=Sprawdzanie modułów PHP ..
+scripts_install_phpmods_check_done=.. sprawdzanie zrobione
 scripts_gotmod=.. Moduł PHP $1 jest już dostępny.
 scripts_nopearmod=Wymagane są moduły PHP 1 Gruszka $1, ale moduł Gruszki Webmina nie jest dostępny do ich zainstalowania - i tak dalej.
 scripts_nopearcmd=Wymagane są moduły PHP Pear $1, ale Pear dla PHP w wersji $2 nie jest zainstalowany - i tak dalej.
@@ -4080,7 +4086,6 @@ tscripts_name=Scenariusz
 tscripts_latest=Najnowsze dostępne
 tscripts_exact=Zawsze
 tscripts_path=Ścieżka URL (jak / phpmyadmin)
-
 tscripts_dbtype=Typ DB
 tscripts_dbdef=Główna baza danych
 tscripts_other=Inna baza danych ..

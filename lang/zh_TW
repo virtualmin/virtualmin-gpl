@@ -2437,12 +2437,9 @@ scripts_uninstalls=卸載選中的腳本
 scripts_newdb=$1 （$2，新數據庫）
 scripts_nocat=其他
 scripts_enosel=沒有選中
-
 scripts_softwaremod=正在安裝軟件包$1 ..
 scripts_esoftwaremod=..安裝失敗！
-
 scripts_esoftware=.. 軟件包Webmin模塊沒有安裝！
-
 scripts_gotmod=.. PHP模塊$1現在已可用。
 scripts_nopearmod=需要PHP Pear模塊$1，但是Webmin的Pear模塊現在無法安裝這些PHP Pear模塊 - 無論如何繼續。
 scripts_nopearcmd=需要PHP Pear模塊$1，但是PHP版本$2的Pear沒有安裝 - 無論如何繼續。

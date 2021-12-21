@@ -134,6 +134,7 @@ delete_ednssubof=Virtuell server $1 kan ikke slettes, siden den inneholder DNS-p
 delete_esslnoips=Ingen SSL-sertifikater funnet for domene
 delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 
+save_apache12=Oppdaterer PHP FPM-konfigurasjon ..
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
 save_ssl12=Ber om Let's Encrypt-sertifikat for det nye domenet ..
@@ -489,10 +490,15 @@ scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
 scripts_cats=kategorier
-
+scripts_needmod=Installerer nødvendig PHP $1-modul ..
+scripts_optmod=Installerer anbefalt PHP $1-modul ..
 scripts_phpmodinst=Installere modul fra programvarepakker ..
 scripts_phpmoddone=.. installert modul fra pakke $1
-
+scripts_phpmodfailed=.. modul er ikke tilgjengelig i repos
+scripts_eupdate=.. automatisk modulinstallasjon er ikke tilgjengelig på systemet ditt
+scripts_einstallmod=.. modulen ble installert, men kan ikke lastes
+scripts_install_phpmods_check=Sjekker PHP-moduler ..
+scripts_install_phpmods_check_done=.. sjekk ferdig
 scripts_passmode4=Opprinnelig passord for skript
 scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren

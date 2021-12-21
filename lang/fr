@@ -2254,14 +2254,11 @@ scripts_upgrades=Mise à niveau des scripts sélectionnés
 scripts_newdb=$1 ($2, nouvelle base de données)
 scripts_nocat=Autres
 scripts_enosel=Aucun sélectionné
-
 scripts_noini=.. n'a pas pu trouver le fichier <tt>php.ini</tt> global
 scripts_noini2=.. n'a pas pu trouver fichier <tt>php.ini</tt> de domaine
 scripts_softwaremod=Installation de package $1 ..
 scripts_esoftwaremod=.. échoué à installer!
-
 scripts_esoftware=.. le module Webmin des logiciels n'est pas installé!
-
 scripts_gotmod=.. PHP module $1 est maintenant disponible.
 scripts_nopearmod=Les modules PHP Pear $1 sont nécessaires, mais le module Pear de Webmin n'est pas disponible pour les installer - procéder de toute façon.
 scripts_nopearcmd=Les modules PHP Pear $1 sont nécessaires, mais Pear pour PHP version $2 n'est pas installé - procéder de toute façon.

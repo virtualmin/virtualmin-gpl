@@ -309,6 +309,7 @@ save_emysqluser2_provision=.. falló la eliminación del usuario anterior : $1
 save_emysqluser2_provision2=.. error al nuevo usuario : $1
 save_apache10=Actualización del directorio de inicio en la configuración de PHP.
 save_apache11=Actualización del directorio de documentos en la configuración del sitio web.
+save_apache12=Actualizando la configuración de PHP FPM ..
 save_dns2_provision=Cambiar el nombre de dominio DNS en el host de servicios.
 save_dns2_ezone=¡Zona DNS para renombrar no encontrada!
 save_dnsip6=Cambiar la dirección IPv6 en el dominio DNS.
@@ -1076,12 +1077,17 @@ scripts_idb2=Utiliza una base de datos con prefijo de tabla
 scripts_idbtbpref=con prefijo de tabla
 scripts_deregistering=Ahora cancelar el registro de $1 versión $2 ..
 scripts_cats=Categorias
-
+scripts_needmod=Instalando el módulo PHP $1 requerido ..
+scripts_optmod=Instalando el módulo PHP $1 recomendado ..
 scripts_noini=.. no se pudo encontrar el archivo <tt>php.ini</tt> global
 scripts_noini2=.. no se pudo encontrar el archivo <tt>php.ini</tt> del dominio
 scripts_phpmodinst=Instalación del módulo desde paquetes de software ..
 scripts_phpmoddone=.. módulo instalado correctamente del paquete $1 
-
+scripts_phpmodfailed=.. módulo no está disponible en repositorios
+scripts_eupdate=.. la instalación automática del módulo no está disponible en su sistema
+scripts_einstallmod=.. se instaló el módulo pero no se puede cargar
+scripts_install_phpmods_check=Comprobando módulos PHP ..
+scripts_install_phpmods_check_done=.. comprobación hecho
 scripts_newer2=La versión $1 existe pero no se puede actualizar a
 scripts_ecpan=.. el módulo CPAN Perl no está instalado en su sistema.
 scripts_optpythonmod=Se recomienda el módulo Python $1.

@@ -770,6 +770,7 @@ save_apache8=Aggiornamento dell'inoltro di frame ..
 save_apache9=Aggiornamento proxy del sito Web ..
 save_apache10=Aggiornamento della home directory nella configurazione di PHP.
 save_apache11=Aggiornamento della directory dei documenti nella configurazione del sito Web.
+save_apache12=Aggiornamento della configurazione di PHP FPM ..
 save_dns=Modifica dell'indirizzo IP nel dominio DNS ..
 save_dns2=Modifica del nome di dominio DNS ..
 save_dns2_provision=Modifica del nome di dominio DNS sull'host dei servizi.
@@ -3088,16 +3089,20 @@ scripts_upgrades=Aggiorna gli script selezionati
 scripts_newdb=$1 ($2, nuovo database)
 scripts_nocat=Altri
 scripts_enosel=Nessuno selezionato
-
+scripts_needmod=Installazione del modulo PHP $1 richiesto ..
+scripts_optmod=Installazione del modulo PHP $1 consigliato ..
 scripts_noini=.. impossibile trovare il file <tt>php.ini</tt> globale
 scripts_noini2=.. Impossibile trovare il file <tt>php.ini</tt> del dominio
 scripts_softwaremod=Installazione del pacchetto $1 ..
 scripts_esoftwaremod=.. installazione fallita!
 scripts_phpmodinst=Installazione del modulo dai pacchetti software ..
 scripts_phpmoddone=.. modulo installato con successo dal pacchetto $1
-
+scripts_phpmodfailed=.. il modulo non è disponibile nei repository
 scripts_esoftware=.. il modulo Webmin dei pacchetti software non è installato!
-
+scripts_eupdate=.. l'installazione automatica del modulo non è disponibile sul tuo sistema
+scripts_einstallmod=.. il modulo è stato installato ma non può essere caricato
+scripts_install_phpmods_check=Controllo dei moduli PHP ..
+scripts_install_phpmods_check_done=.. controllo fatto
 scripts_gotmod=.. Il modulo PHP $1 è ora disponibile.
 scripts_nopearmod=Sono richiesti i moduli Pear di PHP $1, ma il modulo Pear di Webmin non è disponibile per installarli, procedendo comunque.
 scripts_nopearcmd=I moduli Pear% PHP $1 sono richiesti, ma Pear per PHP versione $2 non è installato - procedendo comunque.

@@ -1396,6 +1396,7 @@ save_apache8=フレーム転送を更新しています ..
 save_apache9=ウェブサイトのプロキシを更新しています ..
 save_apache10=PHP構成のホームディレクトリを更新しています ..
 save_apache11=ウェブサイト構成のドキュメントディレクトリを更新しています. ..
+save_apache12=PHPFPM構成の更新 ..
 save_dns=DNSドメインのIPアドレスを変更しています ..
 save_dns2=DNSドメイン名の変更 ..
 save_dns2_provision=サービスホストのDNSドメイン名を変更しています ..
@@ -4093,16 +4094,20 @@ scripts_upgrades=選択したスクリプトをアップグレード
 scripts_newdb=$1（$2、新しいデータベース）
 scripts_nocat=その他
 scripts_enosel=何も選択されていません
-
+scripts_needmod=必要なPHP $1モジュールのインストール ..
+scripts_optmod=推奨されるPHP $1モジュールのインストール ..
 scripts_noini=..グローバル<tt>php.ini</tt>ファイルが見つかりませんでした
 scripts_noini2=..ドメインの<tt>php.ini</tt>ファイルが見つかりませんでした
 scripts_softwaremod=パッケージ $1をインストールしています. ..
 scripts_esoftwaremod=..インストールに失敗しました！
 scripts_phpmodinst=ソフトウェアパッケージからのモジュールのインストール ..
 scripts_phpmoddone=..パッケージ $1からモジュールが正常にインストールされました
-
+scripts_phpmodfailed=..モジュールはリポジトリで使用できません
 scripts_esoftware=..ソフトウェアパッケージWebminモジュールがインストールされていません！
-
+scripts_eupdate=..システムではモジュールの自動インストールは利用できません
+scripts_einstallmod=..モジュールはインストールされましたが、ロードできません
+scripts_install_phpmods_check=PHPモジュールのチェック ..
+scripts_install_phpmods_check_done=..チェック完了
 scripts_gotmod=.. PHPモジュール $1が利用可能になりました。
 scripts_nopearmod=PHP Pearモジュール $1は必須ですが、WebminのPearモジュールをインストールしてそれらをインストールすることはできません-とにかく続行します。
 scripts_nopearcmd=PHP Pearモジュール $1が必要ですが、Pear for PHPバージョン $2がインストールされていません-続行します。

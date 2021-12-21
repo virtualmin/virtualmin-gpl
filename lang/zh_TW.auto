@@ -463,6 +463,7 @@ save_emysqluser2_provision2=..對新用戶的授予失敗： $1
 save_webminreal=更新Webmin用戶的真實姓名 ..
 save_apache10=在PHP配置中更新主目錄。
 save_apache11=在網站配置中更新文檔目錄。
+save_apache12=更新 PHP FPM 配置 ..
 save_dns2_provision=更改服務主機上的DNS域名 ..
 save_dns2_ezone=未找到要重命名的DNS區域！
 save_dnsip6=更改DNS域中的IPv6地址 ..
@@ -1708,12 +1709,17 @@ scripts_cats=分類目錄
 scripts_db=使用數據庫
 scripts_nodb=沒有
 scripts_upgrades=升級所選腳本
-
+scripts_needmod=安裝所需的 PHP $1 模塊 ..
+scripts_optmod=安裝推薦的 PHP $1 模塊 ..
 scripts_noini=..找不到全局<tt>php.ini</tt>文件
 scripts_noini2=..找不到域的<tt>php.ini</tt>文件
 scripts_phpmodinst=從軟件包安裝模塊 ..
 scripts_phpmoddone=.. 成功安裝了來自包 $1 的模塊
-
+scripts_phpmodfailed=.. 模塊在 repos 中不可用
+scripts_eupdate=.. 自動模塊安裝在您的系統上不可用
+scripts_einstallmod=.. 模塊已安裝但無法加載
+scripts_install_phpmods_check=檢查 PHP 模塊 ..
+scripts_install_phpmods_check_done=..檢查完成
 scripts_newer2=版本 $1存在，但無法升級到
 scripts_find=查找匹配的腳本：
 scripts_findok=搜索

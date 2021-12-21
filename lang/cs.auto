@@ -1052,6 +1052,7 @@ save_emysqluser2_provision2=.. udělení nového uživatele se nezdařilo : $1
 save_webminuser=Přejmenování uživatele Webmin ..
 save_webminreal=Aktualizace skutečného jména uživatele Webminu.
 save_apache11=Aktualizace adresáře dokumentů v konfiguraci webu.
+save_apache12=Aktualizace konfigurace PHP FPM ..
 save_dns2_provision=Změna názvu domény DNS na hostiteli služeb.
 save_dns2_ezone=Zóna DNS pro přejmenování nebyla nalezena!
 save_dnsip6=Změna adresy IPv6 v doméně DNS ..
@@ -3208,16 +3209,20 @@ scripts_upgrades=Upgradujte vybrané skripty
 scripts_newdb=$1 ($2, nová databáze)
 scripts_nocat=Ostatní
 scripts_enosel=Nebyl vybrán žádný
-
+scripts_needmod=Instalace požadovaného modulu PHP $1 ..
+scripts_optmod=Instalace doporučeného modulu PHP $1 ..
 scripts_noini=.. nemohl najít globální soubor <tt>php.ini</tt>
 scripts_noini2=.. nemohl najít soubor <tt>php.ini</tt> domény
 scripts_softwaremod=Instalace balíčku $1 ..
 scripts_esoftwaremod=.. instalace se nezdařila!
 scripts_phpmodinst=Instalace modulu ze softwarových balíků ..
 scripts_phpmoddone=.. úspěšně nainstalovaný modul z balíčku $1
-
+scripts_phpmodfailed=.. modul není dostupný v repozitářích
 scripts_esoftware=.. modul Webmin Software Packages Webmin není nainstalován!
-
+scripts_eupdate=.. automatická instalace modulu není ve vašem systému dostupná
+scripts_einstallmod=.. modul byl nainstalován, ale nelze jej načíst
+scripts_install_phpmods_check=Kontrola PHP modulů ..
+scripts_install_phpmods_check_done=.. kontrola provedena
 scripts_gotmod=.. PHP modul $1 je nyní k dispozici.
 scripts_nopearmod=Moduly PHP Pearl $1 jsou povinné, ale modul Pearl Webmin pro jejich instalaci není k dispozici - přesto pokračuje.
 scripts_nopearcmd=Jsou vyžadovány moduly PHP Pearl $1, ale Pear for PHP verze $2 není nainstalována - přesto pokračuje.

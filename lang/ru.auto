@@ -814,6 +814,7 @@ save_apache8=Обновление переадресации кадров.
 save_apache9=Обновление прокси сайта
 save_apache10=Обновление домашнего каталога в конфигурации PHP.
 save_apache11=Обновление каталога документов в конфигурации сайта.
+save_apache12=Обновление конфигурации PHP FPM ..
 save_dns2_provision=Изменение DNS-имени домена на хосте сервисов.
 save_dns4=Добавление записей MX в домен DNS.
 save_dns5=Удаление MX записей из домена DNS.
@@ -2677,16 +2678,20 @@ scripts_upgrades=Обновить выбранные сценарии
 scripts_newdb=$1 ($2, новая база данных)
 scripts_nocat=другие
 scripts_enosel=Не выбрано, ничего не выбрано
-
+scripts_needmod=Установка необходимого модуля PHP $1 ..
+scripts_optmod=Установка рекомендованного модуля PHP $1 ..
 scripts_noini=.. не удалось найти глобальный файл <tt>php.ini</tt>
 scripts_noini2=.. не удалось найти файл <tt>php.ini</tt> домена
 scripts_softwaremod=Установка пакета $1 ..
 scripts_esoftwaremod=.. не удалось установить!
 scripts_phpmodinst=Установка модуля из программных пакетов ..
 scripts_phpmoddone=.. успешно установлен модуль из пакета $1 
-
+scripts_phpmodfailed=.. модуль недоступен в репозиториях
 scripts_esoftware=.. модуль программных пакетов Webmin не установлен!
-
+scripts_eupdate=.. автоматическая установка модуля недоступна в вашей системе
+scripts_einstallmod=.. модуль был установлен, но не может быть загружен
+scripts_install_phpmods_check=Проверка модулей PHP ..
+scripts_install_phpmods_check_done=.. проверка выполнена
 scripts_gotmod=.. PHP модуль $1 теперь доступен.
 scripts_nopearmod=Требуются модули PHP Pear $1, но модуль Webmin Pear недоступен для их установки - все равно происходит.
 scripts_nopearcmd=Модули PHP Pear% $1 требуются, но версия Pear for PHP $2 не установлена - все равно происходит.

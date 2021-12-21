@@ -13,7 +13,6 @@ index_aliases=Aliasů
 index_emailto=Emailová adresa
 index_list=Seznam..
 index_emysql=MySQL pravděpodobně neběží, nebo není nainstalován na Váš systém, nebo nebyl správně nastaven ve Webmin modulu <a href='$1'>Databáze MySQL</a>. Jestliže Váš systém nepoužívá MySQL, měl by být vypnut na stránce <a href='$2'>nastavení modulů</a> Virtualminu.
-
 index_epostgres=PostgreSQL pravděpodobně neběží, nebo není nainstalován na Váš systém, nebo nebyl správně nastaven ve Webmin modulu <a href='$1'>Databáze PostgreSQL</a>. Jestliže Váš systém nepoužívá PostgreSQL, měl by být vypnut na stránce <a href='$2'>nastavení modulů</a> Virtualminu.
 index_mmanage=Spravovat postovni server
 index_dstop=Ukoncit Dovecot
