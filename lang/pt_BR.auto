@@ -1319,6 +1319,7 @@ save_installed_scripts_dbpass_postgres=Atualizando a senha do PostgreSQL para sc
 save_installed_scripts_db_postgres=Atualizando o nome do banco de dados PostgreSQL para scripts instalados ..
 save_installed_scripts_err_file=.. falhou: não é possível ler o arquivo <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. falhou: não foi possível encontrar strings para substituir no arquivo <tt>$1</tt>
+save_installed_scripts_err_file_write=.. falhou: não foi possível gravar o arquivo <tt>$1</tt>
 save_installed_scripts_done=.. feito para o arquivo <tt>$1</tt>
 
 luser_err=Falha ao salvar o usuário local

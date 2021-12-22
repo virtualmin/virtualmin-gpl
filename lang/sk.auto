@@ -1477,6 +1477,7 @@ save_installed_scripts_dbpass_postgres=Aktualizácia hesla PostgreSQL pre nainš
 save_installed_scripts_db_postgres=Aktualizuje sa názov databázy PostgreSQL pre nainštalované skripty ..
 save_installed_scripts_err_file=.. zlyhalo: nemôže čítať súbor <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. zlyhalo : v súbore <tt>$1</tt> sa nepodarilo nájsť reťazce na nahradenie
+save_installed_scripts_err_file_write=.. zlyhalo: nepodarilo sa zapísať súbor <tt>$1</tt>
 save_installed_scripts_done=.. hotovo pre súbor <tt>$1</tt>
 
 luser_err=Lokálneho používateľa sa nepodarilo uložiť

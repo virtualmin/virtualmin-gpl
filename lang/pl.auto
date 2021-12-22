@@ -1132,6 +1132,7 @@ save_installed_scripts_dbpass_postgres=Aktualizacja hasła PostgreSQL dla zainst
 save_installed_scripts_db_postgres=Aktualizacja nazwy bazy danych PostgreSQL dla zainstalowanych skryptów ..
 save_installed_scripts_err_file=.. nie powiodło się: nie można odczytać pliku <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. nie powiodło się: nie można znaleźć ciągów do zastąpienia w pliku <tt>$1</tt>
+save_installed_scripts_err_file_write=.. nie powiodło się: nie można zapisać pliku <tt>$1</tt>
 save_installed_scripts_done=.. zrobione dla pliku <tt>$1</tt>
 
 luser_err=Nie udało się zapisać lokalnego użytkownika

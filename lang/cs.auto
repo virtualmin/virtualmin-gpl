@@ -1095,6 +1095,7 @@ save_installed_scripts_dbpass_postgres=Aktualizace hesla PostgreSQL pro nainstal
 save_installed_scripts_db_postgres=Aktualizace názvu databáze PostgreSQL pro nainstalované skripty ..
 save_installed_scripts_err_file=.. nezdařilo se: nelze přečíst soubor <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. nezdařilo se: v souboru <tt>$1</tt> nelze najít řetězce, které je třeba nahradit
+save_installed_scripts_err_file_write=.. selhalo: nelze zapsat soubor <tt>$1</tt>
 save_installed_scripts_done=.. hotovo pro soubor <tt>$1</tt>
 
 luser_err=Uložení místního uživatele se nezdařilo

@@ -1477,6 +1477,7 @@ save_installed_scripts_dbpass_postgres=インストールされたスクリプ�
 save_installed_scripts_db_postgres=インストールされたスクリプトのPostgreSQLデータベース名を更新しています。
 save_installed_scripts_err_file=..失敗：<tt>$1</tt>ファイルを読み取れません
 save_installed_scripts_err_file_lines=..失敗：<tt>$1</tt>ファイルで置き換える文字列が見つかりませんでした
+save_installed_scripts_err_file_write=..失敗：<tt>$1</tt>ファイルを書き込めませんでした
 save_installed_scripts_done=.. <tt>$1</tt>ファイルに対して完了
 
 luser_err=ローカルユーザーを保存できませんでした

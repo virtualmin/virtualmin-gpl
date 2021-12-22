@@ -851,6 +851,7 @@ save_installed_scripts_dbpass_postgres=Aggiornamento della password di PostgreSQ
 save_installed_scripts_db_postgres=Aggiornamento del nome del database PostgreSQL per gli script installati ..
 save_installed_scripts_err_file=.. fallito: impossibile leggere il file <tt>$1</tt>
 save_installed_scripts_err_file_lines=.. fallito: impossibile trovare le stringhe da sostituire nel file <tt>$1</tt>
+save_installed_scripts_err_file_write=.. fallito: impossibile scrivere il file <tt>$1</tt>
 save_installed_scripts_done=.. fatto per il file <tt>$1</tt>
 
 luser_err=Impossibile salvare l'utente locale

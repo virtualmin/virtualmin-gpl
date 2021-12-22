@@ -501,6 +501,7 @@ save_installed_scripts_dbpass_postgres=更新已安裝腳本的 PostgreSQL 密�
 save_installed_scripts_db_postgres=更新已安裝腳本的 PostgreSQL 數據庫名稱 ..
 save_installed_scripts_err_file=.. 失敗：無法讀取 <tt>$1</tt> 文件
 save_installed_scripts_err_file_lines=.. 失敗：在 <tt>$1</tt> 文件中找不到要替換的字符串
+save_installed_scripts_err_file_write=.. 失敗：無法寫入 <tt>$1</tt> 文件
 save_installed_scripts_done=.. 完成 <tt>$1</tt> 文件
 
 acl_migrate=可以遷移備份嗎？

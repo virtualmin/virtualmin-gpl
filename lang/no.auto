@@ -148,6 +148,7 @@ save_installed_scripts_dbpass_postgres=Oppdaterer PostgreSQL-passord for install
 save_installed_scripts_db_postgres=Oppdaterer PostgreSQL-databasenavn for installerte skript ..
 save_installed_scripts_err_file=.. mislyktes: kan ikke lese <tt>$1</tt> filen
 save_installed_scripts_err_file_lines=.. mislyktes: kunne ikke finne strenger som skal erstattes i filen <tt>$1</tt>
+save_installed_scripts_err_file_write=.. mislyktes: kunne ikke skrive <tt>$1</tt> fil
 save_installed_scripts_done=.. gjort for <tt>$1</tt> fil
 
 acl_migrate=Kan migrere sikkerhetskopier?

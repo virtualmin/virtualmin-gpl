@@ -551,6 +551,7 @@ save_installed_scripts_dbpass_postgres=Kurulu scriptler için PostgreSQL şifres
 save_installed_scripts_db_postgres=Kurulu betikler için PostgreSQL veritabanı adı güncelleniyor ..
 save_installed_scripts_err_file=.. başarısız oldu : <tt>$1</tt> dosyası okunamıyor
 save_installed_scripts_err_file_lines=.. başarısız oldu : <tt>$1</tt> dosyasında değiştirilecek dizeler bulunamadı
+save_installed_scripts_err_file_write=.. başarısız oldu : <tt>$1</tt> dosyası yazılamadı
 save_installed_scripts_done=.. <tt>$1</tt> dosyası için yapıldı
 
 acl_migrate=Yedekleri taşıyabilir mi?

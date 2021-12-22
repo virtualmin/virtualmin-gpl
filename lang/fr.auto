@@ -326,7 +326,7 @@ setup_dnscloudclash=La zone DNS existe déjà sur le fournisseur cloud $1
 setup_mail_smtpcloud=Configuration du fournisseur de messagerie cloud $1 ..
 setup_mail_nosmtpcloud=.. le fournisseur n'existe pas !
 setup_mail_esmtpcloud=.. a échoué  : $1
-setup_overquota=La création du serveur virtuel a échoué en raison d'un manque de quota  : $1
+setup_overquota=La création du serveur virtuel a échoué en raison d'un manque de quota : $1
 setup_overgroupquota=Le quota de serveur pour $2 sur $1 a été atteint
 setup_overuserquota=Le quota de propriétaire de domaine pour $2 sur $1 a été atteint
 
@@ -518,7 +518,8 @@ save_installed_scripts_dbuser_postgres=Mise à jour du nom d'utilisateur Postgre
 save_installed_scripts_dbpass_postgres=Mise à jour du mot de passe PostgreSQL pour les scripts installés ..
 save_installed_scripts_db_postgres=Mise à jour du nom de la base de données PostgreSQL pour les scripts installés ..
 save_installed_scripts_err_file=.. échec : impossible de lire le fichier <tt>$1</tt>
-save_installed_scripts_err_file_lines=.. a échoué : impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
+save_installed_scripts_err_file_lines=.. a échoué: impossible de trouver les chaînes à remplacer dans le fichier <tt>$1</tt>
+save_installed_scripts_err_file_write=.. a échoué: impossible d'écrire le fichier <tt>$1</tt>
 save_installed_scripts_done=.. fait pour le fichier <tt>$1</tt>
 
 acl_migrate=Peut migrer des sauvegardes?
@@ -607,7 +608,7 @@ newweb_admin=Rediriger <tt>admin.${DOM}</tt>?
 newweb_admindom=URL pour la redirection <tt>admin</tt>
 newweb_ewebmaildom=URL manquante ou non valide pour la redirection de messagerie Web
 newweb_eadmindom=URL manquante ou non valide pour la redirection administrateur
-newweb_http2=Activer le protocole HTTP2 pour les nouveaux sites Web ?
+newweb_http2=Activer le protocole HTTP2 pour les nouveaux sites Web?
 
 newdns_enamedconf=Aucune directive BIND nommée.conf valide n'a été entrée
 newdns_ensip=Le serveur de noms supplémentaire $1 est une adresse IP au lieu d'un nom d'hôte
@@ -680,7 +681,7 @@ check_suexecok2=Les scripts CGI peuvent être exécutés à l'aide de SuExec ou 
 check_suexecok=Les scripts CGI peuvent être exécutés à l'aide de SuExec.
 check_fcgiwrapok=Les scripts CGI peuvent être exécutés à l'aide de fcgiwrap.
 check_http2ok=Apache prend en charge HTTPv2 sur votre système.
-check_http2err=Apache ne prend pas en charge HTTPv2  : $1
+check_http2err=Apache ne prend pas en charge HTTPv2 : $1
 check_webphpvers=Les versions PHP suivantes sont disponibles : $1 
 check_webphpnovers=Aucune version PHP n'a été trouvée sur ce système!
 check_webphpmodes=Les modes d'exécution PHP suivants sont disponibles : $1 
@@ -774,14 +775,14 @@ check_ehomeformat=Le format du répertoire personnel $1 ne contient pas le nom d
 check_ehomestyle=Le style du répertoire personnel est défini sur "Juste répertoire de base", ce qui est inutilisable avec Virtualmin. Cela peut être corrigé sur la page <a href='$2'>Configuration du module Utilisateurs et groupes</a>.
 check_jailkitok=Les prisons Chroot sont disponibles sur ce système
 check_jailkiterr=Les prisons Chroot ne sont pas disponibles : $1 
-check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin $1 n'existe pas !
+check_eyumrepofile=Le fichier de configuration du référentiel Virtualmin $1 n'existe pas!
 check_yumrepook=Le référentiel Virtualmin est correctement configuré
-check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin $1 contient le mauvais numéro de série de clé de licence !
-check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin $1 ne fait pas référence à software.virtualmin.com !
+check_yumrepowrong=Le fichier de configuration du référentiel Virtualmin $1 contient le mauvais numéro de série de clé de licence!
+check_yumrepomissing=Le fichier de configuration du référentiel Virtualmin $1 ne fait pas référence à software.virtualmin.com!
 check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe pas!
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
 check_aptrepowrong=Le fichier de configuration du référentiel APT $1 contient le mauvais numéro de série de la clé de licence!
-check_aptrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com !
+check_aptrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
 
 checkmap_enone=Aucune source de carte n'a été trouvée dans la <a href='$1'>configuration Postfix</a>
 checkmap_esupport=La source de carte <tt>$1</tt> n'est pas prise en charge par Postfix - vous devrez peut-être installer les bibliothèques Postfix pour cela, ou recompiler
@@ -1923,7 +1924,7 @@ scripts_gpl_pro_tip_and=et
 scripts_gpl_pro_tip_enroll=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et déverrouiller cela et de nombreuses autres fonctionnalités intéressantes.
 scripts_gpl_pro_tip_list_scripts=Il y a plus de scripts d'installation disponibles !
 scripts_gpl_pro_tip_enroll_list_scripts=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et déverrouiller tous les scripts d'installation répertoriés ci-dessous.
-scripts_gpl_pro_tip_clouds=La prise en charge de $1 fournisseurs est également disponible !
+scripts_gpl_pro_tip_clouds=La prise en charge de $1 fournisseurs est également disponible!
 scripts_gpl_pro_tip_title_dashboard=Obtenez Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement du panneau de contrôle d'hébergement Web que vous aimez et déverrouiller de nombreuses fonctionnalités intéressantes.
 scripts_gpl_pro_tip_dashboard=Saviez-vous que Virtualmin Pro apporte de nombreuses fonctionnalités intéressantes non incluses dans la version GPL ?
@@ -2449,8 +2450,8 @@ newvalidate_header4=Options de réinitialisation des fonctionnalités
 newvalidate_reset=Réinitialiser maintenant
 newvalidate_resetdom=Serveur virtuel à réinitialiser
 newvalidate_resetfeats=Fonctionnalités à réinitialiser
-newvalidate_resetskip=Continuer même si les paramètres seraient perdus ?
-newvalidate_resetonoff=Réinitialiser complètement en activant et désactivant les fonctionnalités ?
+newvalidate_resetskip=Continuer même si les paramètres seraient perdus?
+newvalidate_resetonoff=Réinitialiser complètement en activant et désactivant les fonctionnalités?
 
 validate_edir=Le répertoire personnel $1 n'existe pas
 validate_ediruser=Le répertoire de base $1 appartient à $2 au lieu de $3 
@@ -2678,7 +2679,7 @@ phpmode_deldir=Suppression du répertoire PHP $1 ..
 phpmode_edeldir=.. le répertoire principal ne peut pas être supprimé!
 phpmode_adddir=Ajout du répertoire PHP $1 sur la version $2 ..
 phpmode_savedir=Mise à jour du répertoire PHP $1 vers la version $2 ..
-phpmode_http2=Activer la prise en charge du protocole HTTP2 ?
+phpmode_http2=Activer la prise en charge du protocole HTTP2?
 phpmode_http2on=Activer HTTP2 ..
 phpmode_http2off=Désactiver HTTP2 ..
 phpmode_http2def=Utilisation du mode HTTP2 par défaut..
@@ -2714,7 +2715,7 @@ spf_disablesub=Déplacement des enregistrements DNS hors de la zone parent ..
 spf_dnscloud=Déplacement des enregistrements DNS vers le fournisseur de cloud $1 ..
 spf_dnslocal=Déplacement des enregistrements DNS vers l'hébergement local ..
 spf_eclouddns=.. a échoué  : $1
-spf_ecloud=Échec de la mise à jour de l'hôte DNS  : $1
+spf_ecloud=Échec de la mise à jour de l'hôte DNS : $1
 
 s3_emodule=Le module Perl $1 nécessaire pour communiquer avec le service S3 d'Amazon n'est pas installé
 s3_emodule2=Le module Perl $1 nécessaire pour communiquer avec le service S3 d'Amazon n'a pas pu être chargé : $2 
@@ -2960,7 +2961,7 @@ upgrade_complete=Votre système a été mis à niveau avec succès vers Virtualm
 upgrade_theme=Activation du thème <i>$1</i> ..
 upgrade_esharedroot=Votre répertoire racine Webmin $1 est partagé entre plusieurs systèmes - les mises à jour de module ne sont pas autorisées
 upgrade_eyumrepo=Virtualmin a été installé à partir d'un RPM, mais n'utilise pas le référentiel Virtualmin GPL. La mise à niveau n'est pas possible pour le moment.
-upgrade_eyumlist=Le package RPM $1 n'a pas été trouvé dans la liste des packages disponibles à partir du référentiel. Peut-être que l'un de vos référentiels actuels ne fonctionne pas ?
+upgrade_eyumlist=Le package RPM $1 n'a pas été trouvé dans la liste des packages disponibles à partir du référentiel. Peut-être que l'un de vos référentiels actuels ne fonctionne pas?
 upgrade_edebrepo=Virtualmin a été installé à partir d'un paquet Debian, mais n'utilise pas le référentiel GPL Virtualmin. La mise à niveau n'est pas possible pour le moment.
 upgrade_rpms=Mise à niveau des packages Virtualmin RPM : $1 
 upgrade_eyumfile=Aucun référentiel GPL Virtualmin n'a été trouvé dans $1 
@@ -3849,10 +3850,10 @@ smtpcloud_url=Site Web du fournisseur de distribution de courrier
 smtpcloud_eaws_dns=Amazon SES a besoin d'une zone DNS à activer pour vérifier les nouveaux domaines
 smtpcloud_epostfix=Amazon SES ne peut pas être configuré à moins que Postfix ne soit installé
 smtpcloud_esmtpuser=Échec de la conversion de la clé secrète SES en mot de passe SMTP
-smtpcloud_egetver=Échec de l'obtention de l'état de vérification Amazon SES  : $1
+smtpcloud_egetver=Échec de l'obtention de l'état de vérification Amazon SES : $1
 smtpcloud_evaltok=La vérification Amazon SES n'est pas terminée. Vous devez créer un enregistrement DNS TXT nommé $2 avec la valeur $1.
-smtpcloud_evaltok2=La vérification Amazon SES n'a renvoyé aucune information pour ce domaine !
-smtpcloud_egetquota=Échec de l'obtention du quota Amazon SES  : $1
+smtpcloud_evaltok2=La vérification Amazon SES n'a renvoyé aucune information pour ce domaine!
+smtpcloud_egetquota=Échec de l'obtention du quota Amazon SES : $1
 smtpcloud_esandbox=Votre compte Amazon SES est toujours en mode sandbox et ne peut donc envoyer des e-mails qu'à des domaines vérifiés.
 smtpcloud_ses_sandbox=État de production SES
 smtpcloud_ses_inprod=Prêt pour la production
@@ -4618,21 +4619,21 @@ dnscloud_caccount=Utilisation du compte $1
 dnscloud_cloudflare_longdesc=Les paramètres de cette page se trouvent sur la page <a target=_blank href=https://dash.cloudflare.com/profile/api-tokens>API tokens</a> de votre tableau de bord Cloudflare.
 dnscloud_cloudflare_eemail=Adresse e-mail manquante ou invalide
 dnscloud_cloudflare_eapikey=Clé API hexadécimale manquante ou non valide
-dnscloud_cloudflare_ecreds=Les informations d'identification Cloudflare n'ont pas été acceptées  : $1
+dnscloud_cloudflare_ecreds=Les informations d'identification Cloudflare n'ont pas été acceptées : $1
 dnscloud_cloudflare_esfx=Le domaine $1 n'est pas sous un TLD public
 dnscloud_cloudflare_esfx2=Le domaine $1 ne peut avoir qu'un seul niveau sous le TLD $2
-dnscloud_cloudflare_ens=Échec de la recherche des enregistrements NS  : $1
+dnscloud_cloudflare_ens=Échec de la recherche des enregistrements NS : $1
 dnscloud_cloudflare_ens2=Aucun enregistrement NS trouvé pour $1. Cloudflare exige que les domaines DNS soient d'abord enregistrés.
 
 install_mod_perl_link=Utilisez la page <a href='$1'>Modules Perl</a> de Webmin pour l'installer
 
-reset_edns=Les enregistrements DNS seront perdus  : $1
-reset_emysql=Les bases de données MySQL seront supprimées  : $1
-reset_epostgres=Les bases de données PostgreSQL seront supprimées  : $1
+reset_edns=Les enregistrements DNS seront perdus : $1
+reset_emysql=Les bases de données MySQL seront supprimées : $1
+reset_epostgres=Les bases de données PostgreSQL seront supprimées : $1
 reset_webrestore=Restauration des redirections et des paramètres PHP ..
 reset_unix=Réinitialisation de l'utilisateur et du groupe Unix ..
-reset_eunixuser=.. l'utilisateur $1 n'existe pas !
-reset_eunixgroup=.. le groupe $1 n'existe pas !
+reset_eunixuser=.. l'utilisateur $1 n'existe pas!
+reset_eunixgroup=.. le groupe $1 n'existe pas!
 reset_err=Échec de la réinitialisation des fonctionnalités
 reset_title=Réinitialisation des fonctionnalités
 reset_edom=Le serveur virtuel ne peut pas être réinitialisé
@@ -4641,5 +4642,5 @@ reset_efeatures2=Aucune fonctionnalité valide à réinitialiser sélectionnée
 reset_enoreset=$1 ne peut pas être réinitialisé
 reset_doing=Réinitialisation de $1 ..
 reset_iwarning=.. en ignorant l'avertissement  : $1
-reset_swarning=.. avertissement ignoré  : $1
-reset_dataloss=.. la réinitialisation entraînerait une perte de données  : $1
+reset_swarning=.. avertissement ignoré : $1
+reset_dataloss=.. la réinitialisation entraînerait une perte de données : $1
