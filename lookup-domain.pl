@@ -7,10 +7,14 @@ use Socket;
 
 # Parse command line args
 $exitcode = 73;
+$port = 11000;
 while(@ARGV) {
 	my $a = shift(@ARGV);
 	if ($a eq "--exitcode") {
 		$exitcode = shift(@ARGV);
+		}
+	elsif ($a eq "--port") {
+		$port = shift(@ARGV);
 		}
 	elsif ($a !~ /^-/) {
 		$username = $a;
@@ -34,7 +38,7 @@ $connect_timed_out = 0;
 local $SIG{ALRM} = sub { $connect_timed_out = 1 };
 socket(DAEMON, PF_INET, SOCK_STREAM, getprotobyname("tcp"));
 alarm(30);
-$rv = connect(DAEMON, pack_sockaddr_in(11000, inet_aton("127.0.0.1")));
+$rv = connect(DAEMON, pack_sockaddr_in($port, inet_aton("127.0.0.1")));
 if ($rv) {
 	select(DAEMON); $| = 1; select(STDOUT);
 	print DAEMON $username,"\n";
