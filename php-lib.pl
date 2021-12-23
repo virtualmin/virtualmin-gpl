@@ -1732,6 +1732,59 @@ if (defined(&get_domain_php_mode) &&
 return $rv;
 }
 
+# fix_php_fpm_pool_file(&domain, &fixes)
+# Updates values in PHP FPM config file
+sub fix_php_fpm_pool_file
+{
+my ($d, $fixes) = @_;
+my ($mode, $rv, $conf, $file);
+if (defined(&get_domain_php_mode) &&
+    ($mode = &get_domain_php_mode($d)) &&
+    $mode eq "fpm" &&
+    &foreign_check("phpini")) {
+	&foreign_require("phpini");
+	$conf = &get_php_fpm_config($d);
+	if ($conf) {
+		$file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+		}
+	if (-r $file) {
+		&$first_print($text{'save_apache12'});
+		&unflush_file_lines($file);	# In case cached
+		undef($phpini::get_config_cache{$file});
+		my $fpmconf = &phpini::get_config($file);
+		foreach my $f (@{$fixes}) {
+			my $ov = &phpini::find_value($f->[0], $fpmconf);
+			my $nv = $ov;
+			if (!defined($f->[1])) {
+				# Always change
+				$nv = $f->[2];
+				}
+			elsif ($f->[3] && $ov =~ /\Q$f->[1]\E/) {
+				# Regexp change
+				$nv =~ s/\Q$f->[1]\E/$f->[2]/;
+				}
+			elsif (!$f->[3] && $ov eq $f->[1]) {
+				# Exact match change
+				$nv = $f->[2];
+				}
+			if ($nv ne $ov) {
+				# Update in file
+				&phpini::save_directive($fpmconf, $f->[0], $nv);
+				&flush_file_lines($file);
+				$rv++;
+				}
+			}
+		if ($rv) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print($text{'setup_failed'});
+			}
+		}
+	}
+return $rv;
+}
+
 # fix_php_extension_dir(&domain)
 # If the extension_dir in a domain's php.ini file is invalid, try to fix it
 sub fix_php_extension_dir

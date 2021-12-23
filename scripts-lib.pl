@@ -667,22 +667,26 @@ my $sdbpass = $sdbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 return ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass);
 }
 
-# update_all_installed_scripts_database_credentials(&domain, option-record-type, option-record-value, database-type)
+# update_all_installed_scripts_database_credentials(&domain, &olddomain, option-record-type, option-record-value, database-type)
 # Updates script's given database related setting option (db-username, db-password, db-name)
 # with a new value for all installed scripts under the given virtual server, considering database type,
 # in case installed script supports it (uses database).
 sub update_all_installed_scripts_database_credentials
 {
-my ($d, $type, $value, $dbtype) = @_;
+my ($d, $oldd, $type, $value, $dbtype) = @_;
 my @domain_scripts = &list_domain_scripts($d);
 my ($printed_type, @printed_name);
 foreach my $script (@domain_scripts) {
 	my $sname = $script->{'name'};
 	my $sdata = &get_script($sname);
-	my $sdir = $script->{'opts'}->{'dir'};
 	my $sproject = $script->{'opts'}->{'project'};
 	my $db_conn_desc = $sdata->{'db_conn_desc_func'};
 	my ($sdbtype) = split(/_/, $script->{'opts'}->{'db'}, 2);
+	my $sdir = $script->{'opts'}->{'dir'};
+	my ($dhome, $olddhome) = ($d->{'home'}, $oldd->{'home'});
+	if ($dhome ne $olddhome) {
+		$sdir =~ s/^\Q$olddhome\E/$dhome/;
+		}
 	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
 		$db_conn_desc = &{$db_conn_desc};
@@ -760,11 +764,11 @@ foreach my $script (@domain_scripts) {
 								$script_config_file_path = "$sdir/$sproject/$script_config_file";
 								}
 							}
-						if (-r $script_config_file_path) {
-							my $script_config_file_lines = read_file_lines_as_domain_user($d, $script_config_file_path);
+						if (-w $script_config_file_path) {
+							my $script_config_file_lines = &read_file_lines($script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
-									if ($config_file_line =~ /(?<spaces>\s*)(?<replace_target>$replace_target)/) {
+									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)/) {
 										if ($script_option_multi) {
 											# Construct replacement first
 											foreach my $option_multi (keys %options_multi) {
@@ -776,17 +780,17 @@ foreach my $script (@domain_scripts) {
 												$replace_with =~ s/\$\$$option_multi/$option_multi_value/;
 												}
 											# Perform complex replacement (multi)
-											$config_file_line = "$+{spaces}$+{replace_target}$replace_with";
+											$config_file_line = "$+{before}$+{replace_target}$replace_with";
 											}
 										else {
 											# Perform simple replacement
-											$config_file_line = "$+{spaces}$replace_with";
+											$config_file_line = "$+{before}$replace_with";
 											}
 										$success++;
 										}
 									}
 								}
-							flush_file_lines_as_domain_user($d, $script_config_file_path);
+							&flush_file_lines($script_config_file_path);
 							if ($success) {
 								$success = 
 									$script_config_files_count > 1 ?
@@ -1145,6 +1149,8 @@ if (defined(&$optmodfunc)) {
 	@optmods = &$optmodfunc($d, $ver, $phpver, $opts);
 	push(@mods, @optmods);
 	}
+
+my $installing;
 foreach my $m (@mods) {
 	if ($phpver >= 7 && $m eq "mysql") {
 		# PHP 7 only supports mysqli, but that's OK because most scripts
@@ -1152,10 +1158,13 @@ foreach my $m (@mods) {
 		$m = "mysqli";
 		}
 	next if (&check_php_module($m, $phpver, $d) == 1);
+	if(!$installing++) {
+		&$first_print($text{'scripts_install_phpmods_check'});
+		&$indent_print();
+		}
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
-	&$indent_print();
 
 	# Find the php.ini file
 	&foreign_require("phpini");
@@ -1165,7 +1174,6 @@ foreach my $m (@mods) {
 			&get_domain_php_ini($d, $phpver);
 	if (!$inifile) {
 		# Could not find php.ini
-		&$outdent_print();
 		&$second_print($mode eq "mod_php" || $mode eq "fpm" ?
 			$text{'scripts_noini'} : $text{'scripts_noini2'});
 		if ($opt) { next; }
@@ -1214,14 +1222,12 @@ foreach my $m (@mods) {
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
-		&$outdent_print();
 		&$second_print($text{'scripts_esoftware'});
 		if ($opt) { next; }
 		else { return 0; }
 		}
 	&foreign_require("software");
 	if (!defined(&software::update_system_install)) {
-		&$outdent_print();
 		&$second_print($text{'scripts_eupdate'});
 		if ($opt) { next; }
 		else { return 0; }
@@ -1283,7 +1289,7 @@ foreach my $m (@mods) {
 		}
 	@poss = sort { $a cmp $b } &unique(@poss);
 	my @newpkgs;
-	&$first_print($text{'scripts_phpmodinst'});
+	# &$first_print($text{'scripts_phpmodinst'});
 	foreach my $pkg (@poss) {
 		my @pinfo = &software::package_info($pkg);
 		my $nodotverpkg = $pkg;
@@ -1312,14 +1318,8 @@ foreach my $m (@mods) {
 			}
 		}
 	push(@$installed, @newpkgs) if ($installed);
-	if ($iok) {
-		&$second_print(&text('scripts_phpmoddone',
-			       "<tt>".join(" ", @newpkgs)."</tt>"));
-		&$outdent_print();
-		}
-	else {
+	if (!$iok) {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
-		&$outdent_print();
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
@@ -1328,7 +1328,6 @@ foreach my $m (@mods) {
 	# Finally re-check to make sure it worked
 	GOTMODULE:
 	undef(%main::php_modules);
-	&$outdent_print();
 	if (&check_php_module($m, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
@@ -1336,7 +1335,7 @@ foreach my $m (@mods) {
 		else { return 0; }
 		}
 	else {
-		&$second_print(&text('scripts_gotmod', $m));
+		&$second_print(&text('setup_done', $m));
 		}
 
 	# If we are running via mod_php or fcgid, an Apache reload is needed
@@ -1354,6 +1353,10 @@ foreach my $m (@mods) {
 	if ($mode eq "fpm") {
 		&register_post_action(\&restart_php_fpm_server);
 		}
+	}
+if ($installing) {
+	&$outdent_print();
+	&$second_print($text{'scripts_install_phpmods_check_done'});
 	}
 return 1;
 }
