@@ -501,6 +501,28 @@ if ($opts->{'newdb'}) {
 return (1, "WHMCS directory and tables deleted.");
 }
 
+sub script_whmcs_db_conn_desc
+{
+my $db_conn_desc = 
+    { 'configuration.php' =>
+        {
+           'dbpass' =>
+           {
+               'func'        => 'php_quotemeta',
+               'func_params' => 1,
+               'replace'     => [ '\$db_password\s*=' =>
+                                  '$db_password = \'$$sdbpass\';' ],
+           },
+           'dbuser' =>
+           {
+               'replace'     => [ '\$db_username\s*=' =>
+                                  '$db_username = \'$$sdbuser\';' ],
+           },
+        }
+    };
+return $db_conn_desc;
+}
+
 sub script_whmcs_latest
 {
 local ($ver) = @_;

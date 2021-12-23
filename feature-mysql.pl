@@ -432,7 +432,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database password which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, 'dbpass', &mysql_pass($d), 'mysql');
+			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
 			}
 		$rv++;
 		}
@@ -447,7 +447,7 @@ if ($encpass ne $oldencpass && !$d->{'parent'} && !$oldd->{'parent'} &&
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database password which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, 'dbpass', &mysql_pass($d), 'mysql');
+			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbpass', &mysql_pass($d), 'mysql');
 
 			$rv++;
 			}
@@ -631,7 +631,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database username which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, 'dbuser', $user, 'mysql');
+			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbuser', $user, 'mysql');
 			}
 		$rv++;
 		}
@@ -647,7 +647,7 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 			&$second_print($text{'setup_done'});
 
 			# Update all installed scripts database username which are using MySQL
-			&update_all_installed_scripts_database_credentials($d, 'dbuser', $user, 'mysql');
+			&update_all_installed_scripts_database_credentials($d, $oldd, 'dbuser', $user, 'mysql');
 
 			$rv++;
 			}

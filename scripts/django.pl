@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "3.2.9", "2.2.24", "1.11.29" );
+return ( "4.0", "3.2.10", "2.2.25", "1.11.29" );
 }
 
 sub script_django_can_upgrade
@@ -66,7 +66,10 @@ $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
 	my $pyver = $1;
-	if ($ver >= 2.2 && &compare_versions($pyver, "3.6") < 0) {
+	if ($ver >= 4.0 && &compare_versions($pyver, "3.8") < 0) {
+		push(@rv, "Django 4.0 requires Python 3.8 or later");
+		}
+	elsif ($ver >= 2.2 && &compare_versions($pyver, "3.6") < 0) {
 		push(@rv, "Django 3.1 requires Python 3.6 or later");
 		}
 	elsif (&compare_versions($pyver, "2.6") < 0) {
@@ -121,9 +124,8 @@ else {
 		     &ui_textbox("project", "myproject", 30));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", undef, 30,
-					     "At top level"));
-	$rv .= &ui_table_row("",
-	    "Warning - Django works best when installed at the top level.");
+					     "At top level&nbsp;" .
+					       &ui_help("Django works best when installed at the top level")));
 	}
 return $rv;
 }
@@ -179,10 +181,10 @@ local ($d, $ver, $opts, $upgrade) = @_;
 local @files = (
 	 { 'name' => "source",
 	   'file' => "Django-$ver.tar.gz",
-	   'url' => "http://www.djangoproject.com/download/$ver/tarball/" },
+	   'url' => "https://www.djangoproject.com/download/$ver/tarball/" },
 	 { 'name' => "flup",
 	   'file' => "flup-1.0.2.tar.gz",
-	   'url' => "http://www.saddi.com/software/flup/dist/flup-1.0.2.tar.gz" },
+	   'url' => "https://www.saddi.com/software/flup/dist/flup-1.0.2.tar.gz" },
 	);
 return @files;
 }
@@ -210,6 +212,7 @@ local ($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 local $dbuser = $dbtype eq "mysql" ? &mysql_user($d) : &postgres_user($d);
 local $dbpass = $dbtype eq "mysql" ? &mysql_pass($d) : &postgres_pass($d, 1);
 local $dbhost = &get_database_host($dbtype, $d);
+local $domemail = $d->{'emailto_addr'};
 $dbhost = undef if ($dbhost eq "localhost" || $dbhost eq "127.0.0.1");
 if ($dbtype) {
 	local $dberr = &check_script_db_connection($dbtype, $dbname,
@@ -265,8 +268,9 @@ if ($?) {
 
 if (!$upgrade) {
 	# Create the initial project
+	my $django_admin_file = $ver >= 4 ? 'django-admin' : 'django-admin.py';
 	local $icmd = "cd ".quotemeta($opts->{'dir'})." && ".
-		      "./bin/django-admin.py startproject ".
+		      "./bin/$django_admin_file startproject ".
 		      quotemeta($opts->{'project'})." 2>&1";
 	local $out = &run_as_domain_user($d, $icmd);
 	if ($?) {
@@ -285,6 +289,8 @@ if (!$upgrade) {
 	local $lref = &read_file_lines_as_domain_user($d, $sfile);
 	my $i = 0;
 	my $pdbtype = $dbtype eq "mysql" ? "mysql" : "postgresql_psycopg2";
+	my $surl = &script_path_url($d, $opts);
+	$surl =~ s/\/$//;
 	my ($engine, $gotname, $gotuser, $gotpass, $gothost);
 	foreach my $l (@$lref) {
 	
@@ -293,6 +299,13 @@ if (!$upgrade) {
 		    $lref->[$i+1] !~ /django.contrib.admin/) {
 			splice(@$lref, $i+1, 0,
 			       "    'django.contrib.admin',");
+			}
+
+		if ($ver >= 4) {
+			if ($l =~ /ALLOWED_HOSTS\s*=\s*\[/) {
+				splice(@$lref, $i+1, 0,
+				       "CSRF_TRUSTED_ORIGINS = ['$surl']");
+				}
 			}
 
 		if ($l =~ /'ENGINE':/) {
@@ -363,6 +376,14 @@ if (!$upgrade) {
 		return (-1, "DB initialization install failed : ".
 			   "<pre>".&html_escape($out)."</pre>");
 		}
+
+	# Create Django admin user
+	chdir($pdir);
+	local $out = &run_as_domain_user($d, "echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$domuser', '$domemail', '$dompass')\" | $python manage.py shell 2>&1");
+	if ($?) {
+		return (-1, "Initial Django user creation failed : ".
+			   "<tt>".&html_escape($out)."</tt>");
+		}
 	}
 
 # Django 1.9+ uses a server process
@@ -418,7 +439,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself!. Some applications may require you to set the PYTHONPATH environment variable to '$opts->{'dir'}/lib/python'.", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to <tt>$opts->{'dir'}/lib/python</tt>.", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
@@ -484,6 +505,28 @@ if ($opts->{'newdb'}) {
 	}
 
 return (1, "Django directory and tables deleted.");
+}
+
+sub script_django_db_conn_desc
+{
+my $db_conn_desc = 
+    { 'settings.py' =>
+        {
+           'dbpass' =>
+           {
+               'func'        => 'php_quotemeta',
+               'func_params' => 1,
+               'replace'     => [ '[\'"]PASSWORD[\'"]\s*:.*?' =>
+                                  '\'PASSWORD\': \'$$sdbpass\',' ],
+           },
+           'dbuser' =>
+           {
+               'replace'     => [ '[\'"]USER[\'"]\s*:.*?' =>
+                                  '\'USER\': \'$$sdbuser\',' ],
+           },
+        }
+    };
+return $db_conn_desc;
 }
 
 # script_django_latest(version)

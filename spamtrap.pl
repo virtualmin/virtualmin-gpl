@@ -94,7 +94,7 @@ foreach $d (&list_domains()) {
 		print STDERR "$d->{'dom'}: id=",
 			     "$m->{'header'}->{'message-id'}\n" if ($debug);
 		$user = undef;
-		foreach $h ('from', 'to', 'cc') {
+		foreach $h ('from', 'to', 'cc', 'resent-from','delivered-to') {
 			@sp = &mailboxes::split_addresses($m->{'header'}->{$h});
 			foreach $e (map { $_->[0] } @sp) {
 				$user ||= &find_user_by_email(
@@ -249,6 +249,7 @@ foreach $d (&list_domains()) {
 sub find_user_by_email
 {
 local ($e, $users, $aliasdoms) = @_;
+$e = lc($e);
 foreach my $u (@$users) {
 	foreach my $ee ($u->{'email'}, @{$u->{'extraemail'}}) {
 		if ($ee eq $e) {
@@ -281,6 +282,10 @@ if ($str =~ /from\s+\S+\s+\((\S+)\s+\[(\S+)\]\)/i) {
 elsif ($str =~ /from\s+\[(\S+)\]/i) {
 	# from [98.138.90.52]
 	$sender = $1;
+	}
+elsif ($str =~ /by\s+(\S+)\s+\(Postfix, from userid (\S+)\)/i) {
+	# by my.dom.ain (Postfix, from userid 1022)
+	$uname = getpwuid($2);
 	}
 if ($str =~ /Authenticated\s+sender:\s+(\S+)/i) {
 	$uname = $1;
