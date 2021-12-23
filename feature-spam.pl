@@ -1029,7 +1029,7 @@ sub get_global_quota_exitcode
 &require_spam();
 local @recipes = &procmail::get_procmailrc();
 foreach my $r (@recipes) {
-	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E\s+\-\-exitcode\s+(\d+)/) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E.*\s+\-\-exitcode\s+(\d+)/) {
 		return $1;
 		}
 	}
