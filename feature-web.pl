@@ -1769,6 +1769,7 @@ if ($virt) {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
 			}
 		&fix_php_ini_files($d, \@fixes);
+		&fix_php_fpm_pool_file($d, \@fixes);
 		}
 
 	# Fix broken PHP extension_dir directives
