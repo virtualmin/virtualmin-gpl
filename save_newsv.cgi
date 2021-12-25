@@ -41,6 +41,20 @@ if ($config{'spam'}) {
 	     &to_ipaddress($host) eq &to_ipaddress(&get_system_hostname()))) {
 		&find_byname("spamd") || &error($text{'tmpl_espamd'});
 		}
+	# Validate lookup domain port
+	if (!$in{'lookup_port_def'}) {
+		$in{'lookup_port'} =~ /^\d+$/ ||
+			&error($text{'spam_elookup_port'});
+		}
+	$oldport = $config{'lookup_domain_port'} || $lookup_domain_port;
+	$newport = $in{'lookup_port_def'} ? $lookup_domain_port
+					  : $in{'lookup_port'};
+	if ($oldport != $newport) {
+		# Check if port is in use
+		if (&indexof($newport, &list_used_tcp_ports()) >= 0) {
+			&error($text{'spam_elookup_port2'});
+			}
+		}
 	}
 if ($config{'virus'} && !$config{'provision_virus_host'}) {
 	if ($in{'scanner'} == 2) {
@@ -107,6 +121,12 @@ if ($config{'virus'} && !$config{'provision_virus_host'}) {
 # Update bounce behavior
 if ($config{'spam'} && defined($in{'exitcode'})) {
 	&save_global_quota_exitcode($in{'exitcode'});
+	}
+
+# Update lookup domain port
+if ($oldport != $newport) {
+	&save_lookup_domain_port(
+		$in{'lookup_port_def'} ? undef : $in{'lookup_port'});
 	}
 
 &release_lock_spam_all();

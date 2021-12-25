@@ -56,6 +56,12 @@ if ($config{'spam'}) {
 			      [ [ 73, $text{'spam_bounce'} ],
 			        [ 75, $text{'spam_queue'} ] ]));
 		}
+
+	# Lookup domain daemon port
+	print &ui_table_row(
+		&hlink($text{'spam_lookup_port'}, 'template_lookup_port'),
+		&ui_opt_textbox("lookup_port", $config{'lookup_domain_port'},
+				10, $text{'default'}." ($lookup_domain_port)"));
 	}
 
 # Virus scanning program

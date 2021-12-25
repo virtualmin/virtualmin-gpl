@@ -37,7 +37,7 @@ use POSIX;
 use Socket;
 
 # Parse command line
-$port = 11000;
+$port = $config{'lookup_domain_port'} || $lookup_domain_port;
 while(@ARGV) {
 	my $a = shift(@ARGV);
 	if ($a eq "--port") {

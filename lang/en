@@ -4944,6 +4944,9 @@ spam_prov=Cloudmin Services system $1
 spam_exitcode=When an over-quota user receives email
 spam_bounce=Bounce back to sender
 spam_queue=Queue for later delivery
+spam_lookup_port=Domain lookup daemon port
+spam_elookup_port=Lookup daemon port number be a number
+spam_elookup_port2=Lookup daemon port is already in use!
 
 cat_objects=Server Objects
 cat_server=Server Configuration

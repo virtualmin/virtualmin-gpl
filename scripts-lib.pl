@@ -3300,6 +3300,20 @@ return &has_command($config{'python_cmd'}) ||
        "python";
 }
 
+# list_used_tcp_ports()
+# Returns an array of TCP ports in use by lsof
+sub list_used_tcp_ports
+{
+my @rv;
+my $out = &backquote_command("lsof -i tcp -n -l -P");
+foreach my $l (split(/\r?\n/, $out)) {
+	if ($l =~ /\s+([^:]+):(\d+)\s+\(LISTEN\)/) {
+		push(@rv, $2);
+		}
+	}
+return @rv;
+}
+
 # allocate_free_tcp_port(&used-ports-map, starting-port)
 # Returns a free port number starting at the base and not in the used ports
 # map, by making probing TCP connections
@@ -3307,11 +3321,8 @@ sub allocate_free_tcp_port
 {
 my ($used, $rport) = @_;
 my $lsof = { };
-my $out = &backquote_command("lsof -i tcp -n -l -P");
-foreach my $l (split(/\r?\n/, $out)) {
-	if ($l =~ /\s+([^:]+):(\d+)\s+\(LISTEN\)/) {
-		$lsof->{$2} = 1;
-		}
+foreach my $p (&list_used_tcp_ports()) {
+	$lsof->{$p} = 1;
 	}
 while($rport < 65536) {
 	if (!$used->{$rport} &&
