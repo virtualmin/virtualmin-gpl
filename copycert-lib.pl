@@ -238,6 +238,7 @@ return @rv;
 sub update_all_domain_service_ssl_certs
 {
 my ($d, $before) = @_;
+my $tmpl = &get_template($d->{'template'});
 &push_all_print();
 &set_all_null_print();
 foreach my $svc (@$before) {
