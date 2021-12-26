@@ -5267,6 +5267,7 @@ spf_dp=DMARC policy for emails that fail SPF or DKIM
 spf_dpct=Percentage of messages to apply policy
 spf_delrecs=Deleting $1 DNS records ..
 spf_addrecs=Adding $1 DNS records ..
+spf_eaddrecs=.. a record named $1 already exists
 spf_ttl=Setting default TTL to $1 ..
 spf_ettlsupport=.. not supported by DNS provider
 spf_enablednssec=Creating DNSSEC key and records ..
