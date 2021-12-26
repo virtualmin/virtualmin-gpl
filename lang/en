@@ -3924,6 +3924,7 @@ resel_backups=Can backup virtual servers?
 resel_backups2=Schedule and make backups
 resel_backups1=Make backups only
 resel_backups0=Neither
+resel_admins=Can create and manage extra admins?
 resel_plans=Can create and edit plans?
 resel_migrate=Can migrate backups?
 resel_create=Can create and edit resellers?

@@ -3089,7 +3089,9 @@ sub can_edit_admins
 {
 local ($d) = @_;
 return $d->{'webmin'} &&
-       (&master_admin() || &reseller_admin() || $access{'edit_admins'});
+       (&master_admin() ||
+	&reseller_admin() && !$access{'noadmins'} ||
+	$access{'edit_admins'});
 }
 
 sub can_edit_spam
