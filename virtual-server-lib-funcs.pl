@@ -7340,7 +7340,7 @@ if (!$user) {
 	for (;;) {
 		my $rand_name = &substitute_pattern($pattern,
 			              {'filter' => '[^A-Za-z0-9\\-_]',
-			               'substitute' => 'datetime'});
+			               'substitute-datetime' => 1});
 		my $uname_clash = defined(getpwnam($rand_name)) ||
 		                  defined(getgrnam($rand_name)) ||
 		                  &get_domain_by("prefix", $rand_name);
