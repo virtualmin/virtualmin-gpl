@@ -3089,7 +3089,9 @@ sub can_edit_admins
 {
 local ($d) = @_;
 return $d->{'webmin'} &&
-       (&master_admin() || &reseller_admin() || $access{'edit_admins'});
+       (&master_admin() ||
+	&reseller_admin() && !$access{'noadmins'} ||
+	$access{'edit_admins'});
 }
 
 sub can_edit_spam
@@ -3140,7 +3142,9 @@ return &master_admin();
 
 sub can_edit_forward
 {
-return &master_admin() || &reseller_admin() || $access{'edit_forward'};
+return &master_admin() ||
+       &reseller_admin() && !$access{'noproxy'} ||
+       $access{'edit_forward'};
 }
 
 sub can_edit_redirect
@@ -12956,16 +12960,26 @@ if (!-d $links_cache_dir) {
 &close_tempfile(CACHEDATA);
 }
 
-# clear_links_cache([&domain])
+# clear_links_cache([&domain|user])
 # Delete all cached information for some or all domains
 sub clear_links_cache
 {
 local ($d) = @_;
 opendir(CACHEDIR, $links_cache_dir);
 foreach my $f (readdir(CACHEDIR)) {
-	if ($d && $f =~ /^\Q$d->{'id'}\E\-/ || !$d) {
-		&unlink_file("$links_cache_dir/$f");
+	my $del;
+	if (ref($d)) {
+		# Belongs to domain?
+		$del = $f =~ /^\Q$d->{'id'}\E\-/ ? 1 : 0;
 		}
+	elsif ($d) {
+		# Belongs to user?
+		$del = $f =~ /\-\Q$d\E$/ ? 1 : 0;
+		}
+	else {
+		$del = 1;
+		}
+	&unlink_file("$links_cache_dir/$f") if ($del);
 	}
 closedir(CACHEDIR);
 }

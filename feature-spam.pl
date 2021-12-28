@@ -1029,7 +1029,7 @@ sub get_global_quota_exitcode
 &require_spam();
 local @recipes = &procmail::get_procmailrc();
 foreach my $r (@recipes) {
-	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E\s+\-\-exitcode\s+(\d+)/) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E.*\s+\-\-exitcode\s+(\d+)/) {
 		return $1;
 		}
 	}
@@ -1046,9 +1046,12 @@ local ($code) = @_;
 local @recipes = &procmail::get_procmailrc();
 local $changed = 0;
 foreach my $r (@recipes) {
-	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E\s+/) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E(.*?)\s+\$LOGNAME/) {
 		# Fix call to lookup-domain to return correct exit code
-		$r->{'action'} = "VIRTUALMIN=|$domain_lookup_cmd --exitcode $code \$LOGNAME";
+		my $flags = $1;
+		$flags =~ s/\s+--exitcode\s+\d+//;
+		$flags .= " --exitcode $code";
+		$r->{'action'} = "VIRTUALMIN=|$domain_lookup_cmd".$flags." \$LOGNAME";
 		&procmail::modify_recipe($r);
 		$changed++;
 		}
@@ -1063,6 +1066,38 @@ foreach my $r (@recipes) {
 	}
 &unlock_file($procmail::procmailrc);
 return $changed ? undef : "No receipes found";
+}
+
+# save_lookup_domain_port(port)
+# Update the procmail config and the lookup domain server port
+sub save_lookup_domain_port
+{
+my ($port) = @_;
+
+# Update the procmail config
+&require_spam();
+&lock_file($procmail::procmailrc);
+my @recipes = &procmail::get_procmailrc();
+foreach my $r (@recipes) {
+	if ($r->{'action'} =~ /\Q$domain_lookup_cmd\E(.*?)\s+\$LOGNAME/) {
+		my $flags = $1;
+		$flags =~ s/\s+--port\s+\d+//;
+		if ($port) {
+			$flags .= " --port $port";
+			}
+		$r->{'action'} = "VIRTUALMIN=|$domain_lookup_cmd".$flags." \$LOGNAME";
+		&procmail::modify_recipe($r);
+		}
+	}
+&unlock_file($procmail::procmailrc);
+
+# Update the server
+&lock_file($module_config_file);
+$config{'lookup_domain_port'} = $port;
+&save_module_config();
+&unlock_file($module_config_file);
+&foreign_require("init");
+&init::restart_action("lookup-domain");
 }
 
 # update_spam_whitelist(&domain)

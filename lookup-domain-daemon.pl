@@ -36,8 +36,16 @@ $< == 0 || die "lookup-domain-daemon.pl must be run as root";
 use POSIX;
 use Socket;
 
-if (@ARGV) {
-	&usage("No parameters needed");
+# Parse command line
+$port = $config{'lookup_domain_port'} || $lookup_domain_port;
+while(@ARGV) {
+	my $a = shift(@ARGV);
+	if ($a eq "--port") {
+		$port = shift(@ARGV);
+		}
+	else {
+		&usage("Unknown parameter $a");
+		}
 	}
 
 # Attempt to open the socket
@@ -46,8 +54,8 @@ $proto || die "Failed to get tcp protocol";
 socket(MAIN, PF_INET, SOCK_STREAM, $proto) ||
 	die "Failed to create socket : $!";
 setsockopt(MAIN, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
-bind(MAIN, pack_sockaddr_in(11000, inet_aton("127.0.0.1"))) ||
-	die "Failed to bind to localhost port 11000";
+bind(MAIN, pack_sockaddr_in($port, inet_aton("127.0.0.1"))) ||
+	die "Failed to bind to localhost port $port";
 listen(MAIN, SOMAXCONN);
 
 # Split from controlling terminal

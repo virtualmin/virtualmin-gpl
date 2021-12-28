@@ -430,9 +430,22 @@ foreach $d (@doms) {
 			if ($name !~ /\.$/ && $name ne "\@") {
 				$name .= ".".$d->{'dom'}.".";
 				}
-			&bind8::create_record($file, $name, $ttl, "IN",
-					      uc($type), join(" ", @$values));
-			$changed++;
+			my $r = { 'name' => $name,
+				  'type' => $type,
+				  'ttl' => $ttl,
+				  'values' => $values };
+			my ($clash) = grep { $_->{'name'} eq $name &&
+					     &bind8::join_record_values($_) eq
+						&bind8::join_record_values($r) } @$recs;
+			if ($clash) {
+				&$second_print(&text('spf_eaddrecs', $r->{'name'}));
+				}
+			else {
+				&bind8::create_record($file, $name, $ttl, "IN",
+						      uc($type), join(" ", @$values));
+				push(@$recs, $r);
+				$changed++;
+				}
 			}
 		&$second_print($text{'setup_done'});
 		}
