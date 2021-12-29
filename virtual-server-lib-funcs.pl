@@ -11518,19 +11518,6 @@ sub sysinfo_virtualmin
 my @sysinfo_virtualmin;
 
 # OS and Perl info
-@sysinfo_virtualmin = 
-	( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
-      [ $text{'sysinfo_perl'}, $] ],
-      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
-
-# Python, if exists
-my $python_version = &get_python_version();
-if ($python_version) {
-	push(@sysinfo_virtualmin,
-         [ $text{'sysinfo_python'}, $python_version ],
-         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
-	}
-
 if ($main::sysinfo_virtualmin_self) {
 
 	# Add Webmin version; add Usermin version, if installed
@@ -11558,9 +11545,20 @@ if ($main::sysinfo_virtualmin_self) {
 				    [ $cmtext{'right_vm2'}, $cm_ver ] );
 				}
 			}
+		}
 	}
-}
 
+push(@sysinfo_virtualmin,
+	( [ $text{'sysinfo_perl'}, $] ],
+      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] ));
+
+# Python, if exists
+my $python_version = &get_python_version();
+if ($python_version) {
+	push(@sysinfo_virtualmin,
+         [ $text{'sysinfo_python'}, $python_version ],
+         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
+	}
 return @sysinfo_virtualmin;
 }
 
