@@ -1998,7 +1998,7 @@ return @rv;
 sub get_php_fpm_socket_file
 {
 my ($d, $nomkdir) = @_;
-my $base = "/var/php-fpm";
+my $base = "/var/run/php-fpm";
 if (!-d $base && !$nomkdir) {
 	&make_dir($base, 0755);
 	}
