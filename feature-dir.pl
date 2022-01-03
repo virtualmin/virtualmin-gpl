@@ -989,7 +989,10 @@ push(@rv, [ $config{'homes_dir'}, '755', 'homes' ]);
 if (!$d->{'parent'}) {
 	push(@rv, [ $home_virtualmin_backup, '700', 'backup' ]);
 	}
-push(@rv, map { [ $_, '700', 'ssl' ] } &ssl_certificate_directories($d));
+if (!$d->{'ssl_same'}) {
+	push(@rv, map { [ $_, '700', 'ssl' ] }
+		      &ssl_certificate_directories($d));
+	}
 return @rv;
 }
 
