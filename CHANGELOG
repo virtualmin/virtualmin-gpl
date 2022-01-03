@@ -1634,3 +1634,4 @@ Added a configuration option and flag to create-domain to allow SSL linkage acro
 If using a supported Apache version or Nginx, HTTP2 can be enabled for individual websites or on the server templates page.
 Added support for outgoing SMTP providers like Amazon SES, so that systems with dynamic IPs can reliably send email.
 Reseller access to rename domains, manage extra admins and configure proxies can now be restricted.
+When backing up, you can now choose to download the resulting file in the browser via a link so that the progress of the backup is properly displayed.

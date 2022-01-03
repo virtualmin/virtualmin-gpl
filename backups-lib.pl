@@ -3887,6 +3887,9 @@ elsif ($url =~ /^bb:\/\/([^\/]+)(\/(\S+))?$/) {
 elsif ($url eq "download:") {
 	@rv = (4, undef, undef, undef, undef, undef);
 	}
+elsif ($url eq "downloadlink:") {
+	@rv = (44, undef, undef, undef, undef, undef);
+	}
 elsif ($url eq "upload:") {
 	@rv = (5, undef, undef, undef, undef, undef);
 	}
@@ -3927,6 +3930,9 @@ elsif ($proto == 0) {
 	}
 elsif ($proto == 4) {
 	$rv = $text{'backup_nicedownload'};
+	}
+elsif ($proto == 44) {
+	$rv = $text{'backup_nicedownloadlink'};
 	}
 elsif ($proto == 5) {
 	$rv = $text{'backup_niceupload'};
@@ -4202,6 +4208,8 @@ if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 4, $text{'backup_mode4'},
 		      $text{'backup_mode4desc'}."<p>" ]);
+	push(@opts, [ 44, $text{'backup_mode44'},
+		      $text{'backup_mode44desc'}."<p>" ]);
 	}
 
 if (!$noupload) {
@@ -4316,6 +4324,10 @@ elsif ($mode == 3) {
 elsif ($mode == 4) {
 	# Just download
 	return "download:";
+	}
+elsif ($mode == 44) {
+	# Generate download link
+	return "downloadlink:";
 	}
 elsif ($mode == 5) {
 	# Uploaded file

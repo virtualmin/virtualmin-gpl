@@ -172,10 +172,19 @@ if (!$runsched) {
 	}
 &start_running_backup($runsched);
 
-if ($dests[0] eq "download:") {
+if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 	# Special case .. we backup to a temp file and output in the browser
-	$temp = &transname().($config{'compression'} == 0 ? ".tar.gz" :
-			      $config{'compression'} == 1 ? ".tar.bz2" :".tar");
+	my $tempfile;
+	my $sfx = &compression_to_suffix($config{'compression'});
+	if ($dests[0] eq "download:") {
+		$temp = &transname().".".$sfx;
+		}
+	else {
+		$tempfile = @doms == 1 ? $doms[0]->{'dom'}
+				       : "virtualmin-backup";
+		$tempfile .= ".".$sfx;
+		$temp = &tempname($remote_user."-".$tempfile);
+		}
 	if (@doms) {
 		# Pre-create temp file with correct permissions
 		foreach $t ($temp, $temp.".info", $temp.".dom") {
@@ -185,7 +194,14 @@ if ($dests[0] eq "download:") {
 				$doms[0]->{'uid'}, $doms[0]->{'gid'}, 0700, $t);
 			}
 		}
-	&set_all_null_print();
+	if ($dests[0] eq "download:") {
+		# Output is hidden
+		&set_all_null_print();
+		}
+	else {
+		# Show backup progress
+		&ui_print_unbuffered_header(undef, $text{'backup_title'}, "");
+		}
 	($ok, $size) = &backup_domains([ $temp ], \@doms, \@do_features,
 				       $in{'fmt'}, $in{'errors'}, \%options,
 				       $in{'fmt'} == 2, \@vbs, $in{'mkdir'},
@@ -196,7 +212,12 @@ if ($dests[0] eq "download:") {
 	unlink($temp.".info");
 	unlink($temp.".dom");
 	&run_post_actions();
-	if ($ok) {
+	if (!$ok) {
+		unlink($temp);
+		&error($text{'backup_edownloadfailed'});
+		}
+	elsif ($dests[0] eq "download:") {
+		# Just output the file
 		@st = stat($temp);
 		print "Content-type: application/octet-stream\n";
 		print "Content-length: $st[7]\n";
@@ -209,8 +230,14 @@ if ($dests[0] eq "download:") {
 		close(TEMP);
 		}
 	else {
-		unlink($temp);
-		&error($text{'backup_edownloadfailed'});
+		# Show page with a link to download
+		print "<p><b>",
+		      &ui_link("/$module_name/download_backup.cgi?file=".
+				&urlize($temp),
+			       &text('backup_downloadfile', $tempfile)),
+		      "</b><p>\n";
+		&ui_print_footer("/$module_name/list_sched.cgi",
+				 $text{'sched_return'});
 		}
 	}
 else {
