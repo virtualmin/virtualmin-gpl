@@ -2554,7 +2554,7 @@ return $ok ? undef : $err;
 }
 
 # show_template_web(&tmpl)
-# Outputs HTML for editing apache related template options
+# Outputs HTML for editing webserver related template options
 sub show_template_web
 {
 local ($tmpl) = @_;
@@ -2720,28 +2720,6 @@ if ($config{'web'} && $config{'webalizer'}) {
 	print &ui_table_hr();
 	}
 
-# Setup matching Webmin/Usermin SSL certs
-print &ui_table_row(&hlink($text{'newweb_webmin'},
-			   "template_web_webmin_ssl"),
-	&ui_radio("web_webmin_ssl",
-		  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
-
-print &ui_table_row(&hlink($text{'newweb_usermin'},
-			   "template_web_usermin_ssl"),
-	&ui_radio("web_usermin_ssl",
-		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
-
-# Setup Dovecot and Postfix SSL certs
-print &ui_table_row(&hlink($text{'newweb_dovecot'},
-			   "template_web_dovecot_ssl"),
-	&ui_yesno_radio("web_dovecot_ssl", $tmpl->{'web_dovecot_ssl'}));
-
-print &ui_table_row(&hlink($text{'newweb_postfix'},
-			   "template_web_postfix_ssl"),
-	&ui_yesno_radio("web_postfix_ssl", $tmpl->{'web_postfix_ssl'}));
-
 # Add redirects for webmail and admin
 print &ui_table_hr();
 foreach my $r ('webmail', 'admin') {
@@ -2797,7 +2775,7 @@ print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
 }
 
 # parse_template_web(&tmpl)
-# Updates apache related template options from %in
+# Updates webserver related template options from %in
 sub parse_template_web
 {
 local ($tmpl) = @_;
@@ -2908,12 +2886,6 @@ if ($config{'web'} && $config{'webalizer'}) {
 		}
 	}
 
-# Save options to setup per-service SSL certs
-$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
-$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
-$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
-$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
-		
 # Parse webmail redirect
 foreach my $r ('webmail', 'admin') {
 	$tmpl->{'web_'.$r} = $in{$r};

@@ -1567,12 +1567,22 @@ return undef;
 # Returns the default path that should be used for a cert, key or CA file
 sub default_certificate_file
 {
-local ($d, $mode) = @_;
+my ($d, $mode) = @_;
 $mode = "ca" if ($mode eq "chain");
-return $config{$mode.'_tmpl'} ?
-	    &absolute_domain_path($d,
-	     &substitute_domain_template($config{$mode.'_tmpl'}, $d)) :
-	    "$d->{'home'}/ssl.".$mode;
+my $tmpl = &get_template($d->{'template'});
+my $file = $tmpl->{'cert_'.$mode.'_tmpl'};
+if ($file eq "auto" && $mode ne "key") {
+	# Path is relative to the key file
+	my $keyfile = $tmpl->{'cert_key_tmpl'};
+	if ($keyfile && $keyfile =~ s/\/[^\/]+$//) {
+		$file = $keyfile."/ssl.".$mode;
+		}
+	else {
+		$file = undef;
+		}
+	}
+return $file ? &absolute_domain_path($d, &substitute_domain_template($file, $d))
+	     : "$d->{'home'}/ssl.".$mode;
 }
 
 # set_certificate_permissions(&domain, file)
@@ -3195,6 +3205,79 @@ if ($cert_info) {
 sub can_reset_ssl
 {
 return 0;
+}
+
+# show_template_ssl(&tmpl)
+# Outputs HTML for editing SSL related template options
+sub show_template_ssl
+{
+local ($tmpl) = @_;
+
+# Default SSL key and cert file paths
+foreach my $t ("key", "cert", "ca", "combined", "everything") {
+	my $v = $tmpl->{'cert_'.$t.'_tmpl'};
+	my $mode = $v eq "auto" ? 2 : $v ? 0 : 1;
+	my @opts = ( [ 1, $text{'newweb_cert_def'} ] );
+	if ($t ne "key") {
+		push(@opts, [ 2, $text{'newweb_cert_auto'} ]);
+		}
+	push(@opts, [ 0, $text{'newweb_cert_file'},
+		      &ui_textbox("web_cert_".$t, $mode == 0 ? $v : "", 50) ]);
+	print &ui_table_row(
+		&hlink($text{'newweb_cert_'.$t}, "config_".$t."_tmpl"),
+		&ui_radio_table("web_certmode_".$t, $mode, \@opts));
+	}
+
+print &ui_table_hr();
+
+# Setup matching Webmin/Usermin SSL certs
+print &ui_table_row(&hlink($text{'newweb_webmin'},
+			   "template_web_webmin_ssl"),
+	&ui_radio("web_webmin_ssl",
+		  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+print &ui_table_row(&hlink($text{'newweb_usermin'},
+			   "template_web_usermin_ssl"),
+	&ui_radio("web_usermin_ssl",
+		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
+		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+
+# Setup Dovecot and Postfix SSL certs
+print &ui_table_row(&hlink($text{'newweb_dovecot'},
+			   "template_web_dovecot_ssl"),
+	&ui_yesno_radio("web_dovecot_ssl", $tmpl->{'web_dovecot_ssl'}));
+
+print &ui_table_row(&hlink($text{'newweb_postfix'},
+			   "template_web_postfix_ssl"),
+	&ui_yesno_radio("web_postfix_ssl", $tmpl->{'web_postfix_ssl'}));
+}
+
+# parse_template_ssl(&tmpl)
+# Updates SSL related template options from %in
+sub parse_template_ssl
+{
+local ($tmpl) = @_;
+
+# Save key file templates
+foreach my $t ("key", "cert", "ca", "combined", "everything") {
+	my $mode = $in{'web_certmode_'.$t};
+	my $v;
+	if ($mode == 2) {
+		$v = "auto";
+		}
+	elsif ($mode == 0) {
+		$v = $in{'web_cert_'.$t};
+		$v =~ /\S/ || &error($text{'newweb_cert_efile'});
+		}
+	$tmpl->{'cert_'.$t.'_tmpl'} = $v;
+	}
+
+# Save options to setup per-service SSL certs
+$tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
+$tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
+$tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
+$tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 }
 
 $done_feature_script{'ssl'} = 1;

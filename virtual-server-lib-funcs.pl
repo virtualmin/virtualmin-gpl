@@ -9057,6 +9057,11 @@ push(@rv, { 'id' => 0,
 				$config{'tmpl_owners'},
 	    'autoconfig' => $config{'tmpl_autoconfig'} || "none",
 	    'outlook_autoconfig' => $config{'tmpl_outlook_autoconfig'} || "none",
+	    'cert_key_tmpl' => $config{'key_tmpl'},
+	    'cert_cert_tmpl' => $config{'cert_tmpl'},
+	    'cert_ca_tmpl' => $config{'ca_tmpl'},
+	    'cert_combined_tmpl' => $config{'combined_tmpl'},
+	    'cert_everything_tmpl' => $config{'everything_tmpl'},
 	  } );
 foreach my $w (&list_php_wrapper_templates()) {
 	$rv[0]->{$w} = $config{$w} || 'none';
@@ -9388,6 +9393,11 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
+	$config{'key_tmpl'} = $tmpl->{'cert_key_tmpl'};
+	$config{'cert_tmpl'} = $tmpl->{'cert_cert_tmpl'};
+	$config{'ca_tmpl'} = $tmpl->{'cert_ca_tmpl'};
+	$config{'combined_tmpl'} = $tmpl->{'cert_combined_tmpl'};
+	$config{'everything_tmpl'} = $tmpl->{'cert_everything_tmpl'};
 	foreach my $w (&list_php_wrapper_templates()) {
 		$config{$w} = $tmpl->{$w};
 		}
@@ -9488,7 +9498,7 @@ if (!$tmpl->{'default'}) {
 		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
-		    "ipfollow", "exclude",
+		    "ipfollow", "exclude", "cert",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),
@@ -16133,7 +16143,7 @@ local ($tmpl) = @_;
 local @rv = grep { $sfunc = "show_template_".$_;
                    defined(&$sfunc) &&
                     ($config{$_} || !$isfeature{$_} || $_ eq 'mail' ||
-		     $_ eq 'web' && &domain_has_website()) }
+		     $_ eq 'web' || $_ eq 'ssl') }
                  @template_features;
 if ($tmpl && $tmpl->{'id'} == 1) {
 	# For sub-servers only
