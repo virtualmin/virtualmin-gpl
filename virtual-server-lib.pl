@@ -252,7 +252,7 @@ $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 
 $connectivity_check_host = "software.virtualmin.com";
-$connectivity_check_port = 80;
+$connectivity_check_port = 443;
 $connectivity_check_page = "/cgi-bin/connectivity.cgi";
 
 $resolve_check_host = "software.virtualmin.com";
