@@ -3152,11 +3152,11 @@ sub ssl_needs_apache_restart
 return $apache::httpd_modules{'core'} >= 2.4 ? 0 : 1;
 }
 
-# ssl_certificate_directories(&domain)
+# ssl_certificate_directories(&domain, [absolute])
 # Returns dirs relative to the domain's home needed for SSL certs
 sub ssl_certificate_directories
 {
-my ($d) = @_;
+my ($d, $abs) = @_;
 my @paths;
 foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
 	push(@paths, &default_certificate_file($d, $t));
@@ -3166,7 +3166,10 @@ foreach my $t ('key', 'cert', 'chain', 'combined', 'everything') {
 	}
 my @rv;
 foreach my $p (&unique(@paths)) {
-	$p =~ s/^\Q$d->{'home'}\E\/// || next;
+	if (!$abs) {
+		# Must be relative to home dir
+		$p =~ s/^\Q$d->{'home'}\E\/// || next;
+		}
 	if ($p =~ /^(.*)\//) {
 		push(@rv, $1);
 		}
@@ -3179,9 +3182,26 @@ return @rv;
 sub create_ssl_certificate_directories
 {
 my ($d) = @_;
-foreach my $dir (&ssl_certificate_directories($d)) {
-	my $path = "$d->{'home'}/$dir";
-	&create_standard_directory_for_domain($d, $path, '700');
+foreach my $dir (&ssl_certificate_directories($d, 1)) {
+	if (&is_under_directory($d->{'home'}, $dir)) {
+		# Create in the home dir, owned by the user
+		&create_standard_directory_for_domain($d, $dir, '700');
+		}
+	else {
+		# Create elsewhere if needed
+		if (!-d $dir) {
+			if ($dir =~ /\/[^\/]*(\Q$d->{'dom'}\E|\Q$d->{'id'}\E|\Q$d->{'user'}\E)[^\/]*$/) {
+				# Dir is private to the domain
+				&make_dir($dir, 0755, 1);
+				&set_ownership_permissions(
+					$d->{'uid'}, undef, 0700, $dir);
+				}
+			else {
+				# Shared dir for all domains
+				&make_dir($dir, 0777, 1);
+				}
+			}
+		}
 	}
 }
 
