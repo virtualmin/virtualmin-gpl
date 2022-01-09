@@ -909,27 +909,29 @@ if ($virt) {
 		}
 
 	# Restore the cert and key, if any and if saved
-	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
+	local $cert = $d->{'ssl_cert'} ||
+		      &apache::find_directive("SSLCertificateFile", $vconf, 1);
 	if ($cert && -r $file."_cert") {
 		&lock_file($cert);
 		&write_ssl_file_contents($d, $cert, $file."_cert");
 		&unlock_file($cert);
 		}
-	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
+	local $key = $d->{'ssl_key'} ||
+		     &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
 	if ($key && -r $file."_key" && $key ne $cert) {
 		&lock_file($key);
 		&write_ssl_file_contents($d, $key, $file."_key");
 		&unlock_file($key);
 		}
-	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
-	if (!$ca) {
-		$ca = &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
-		}
+	local $ca = $d->{'ssl_chain'} ||
+	    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
+	    &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
 	if ($ca && -r $file."_ca") {
 		&lock_file($ca);
 		&write_ssl_file_contents($d, $ca, $file."_ca");
 		&unlock_file($ca);
 		}
+	&sync_combined_ssl_cert($d);
 
 	# Re-setup any SSL passphrase
 	&save_domain_passphrase($d);
