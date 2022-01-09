@@ -53,6 +53,14 @@ print &ui_table_row(&hlink($text{'spf_all'}, 'spf_all'),
 			         [ 1, $text{'spf_all1'} ],
 			         [ 0, $text{'spf_all0'} ] ]));
 
+# TLSA records
+$err = &check_tlsa_support();
+if (!$err) {
+	my @trecs = &get_domain_tlsa_records($d);
+	print &ui_table_row(&hlink($text{'spf_tlsa'}, 'spf_tlsa'),
+			    &ui_yesno_radio("tlsa", @trecs ? 1 : 0));
+	}
+
 # DMARC enabled
 $dmarc = &get_domain_dmarc($d);
 $defdmarc = &default_domain_dmarc($d);
