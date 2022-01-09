@@ -8351,6 +8351,26 @@ foreach my $dd (@alldoms) {
 			}
 		}
 
+	# Delete SSL key files outside the home dir
+	if (!$dd->{'ssl_same'}) {
+		foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain',
+			       'ssl_combined', 'ssl_everything') {
+			if ($dd->{$k} &&
+			    !&is_under_directory($dd->{'home'}, $dd->{$k}) &&
+			    -f $dd->{$k}) {
+				&unlink_logged($dd->{$k});
+				}
+			}
+		foreach my $dir (&ssl_certificate_directories($dd, 1)) {
+			if (!&is_under_directory($dd->{'home'}, $dir) &&
+			    -d $dir &&
+			    $dir =~ /\/[^\/]*(\Q$dd->{'dom'}\E|\Q$dd->{'id'}\E)[^\/]*$/ &&
+			    &is_empty_directory($dir)) {
+				&unlink_logged($dir);
+				}
+			}
+		}
+
 	# Delete domain file
 	&$first_print(&text('delete_domain', &show_domain_name($dd)));
 	&delete_domain($dd);
@@ -17078,6 +17098,17 @@ sub create_empty_file
 local ($file) = @_;
 &open_tempfile(EMPTY, ">$file", 0, 1);
 &close_tempfile(EMPTY);
+}
+
+# is_empty_directory(path)
+# Returns 1 if a directory contains no files
+sub is_empty_directory
+{
+my ($dir) = @_;
+opendir(EMPTYDIR, $dir) || return 0;
+my @files = grep { $_ ne "." && $_ ne ".." } readdir(EMPTYDIR);
+closedir(EMPTYDIR);
+return @files ? 0 : 1;
 }
 
 # update_miniserv_preloads(mode)
