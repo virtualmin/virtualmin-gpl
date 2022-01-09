@@ -1014,7 +1014,7 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 sub can_use_aws_s3_cmd
 {
 my ($akey, $skey, $zone) = @_;
-return &can_use_aws_cmd($akey, $akey, $zone, \&call_aws_s3_cmd, "ls");
+return &can_use_aws_cmd($akey, $skey, $zone, \&call_aws_s3_cmd, "ls");
 }
 
 # can_use_aws_cmd(access-key, secret-key, [default-zone], &testfunc, cmd, ...)
