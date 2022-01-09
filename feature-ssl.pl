@@ -912,17 +912,13 @@ if ($virt) {
 	local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 	if ($cert && -r $file."_cert") {
 		&lock_file($cert);
-		&set_ownership_permissions(
-			$d->{'uid'}, undef, undef, $file."_cert");
-		&copy_source_dest_as_domain_user($d, $file."_cert", $cert);
+		&write_ssl_file_contents($d, $cert, $file."_cert");
 		&unlock_file($cert);
 		}
 	local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
 	if ($key && -r $file."_key" && $key ne $cert) {
 		&lock_file($key);
-		&set_ownership_permissions(
-			$d->{'uid'}, undef, undef, $file."_key");
-		&copy_source_dest_as_domain_user($d, $file."_key", $key);
+		&write_ssl_file_contents($d, $key, $file."_key");
 		&unlock_file($key);
 		}
 	local $ca = &apache::find_directive("SSLCACertificateFile", $vconf, 1);
@@ -931,9 +927,7 @@ if ($virt) {
 		}
 	if ($ca && -r $file."_ca") {
 		&lock_file($ca);
-		&set_ownership_permissions(
-			$d->{'uid'}, undef, undef, $file."_ca");
-		&copy_source_dest_as_domain_user($d, $file."_ca", $ca);
+		&write_ssl_file_contents($d, $ca, $file."_ca");
 		&unlock_file($ca);
 		}
 
@@ -1348,8 +1342,14 @@ return ($rv, $params);
 # Returns a domain's cert in PEM format
 sub cert_pem_data
 {
-local ($d) = @_;
-local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_cert'});
+my ($d) = @_;
+my $data;
+if (&is_under_directory($d->{'home'}, $d->{'ssl_cert'})) {
+	$data = &read_file_contents_as_domain_user($d, $d->{'ssl_cert'});
+	}
+else {
+	$data = &read_file_contents($d, $d->{'ssl_cert'});
+	}
 $data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
 	return $1;
@@ -1361,9 +1361,15 @@ return undef;
 # Returns a domain's key in PEM format
 sub key_pem_data
 {
-local ($d) = @_;
-local $data = &read_file_contents_as_domain_user($d, $d->{'ssl_key'} ||
-						     $d->{'ssl_cert'});
+my ($d) = @_;
+my $file = $d->{'ssl_key'} || $d->{'ssl_cert'};
+my $data;
+if (&is_under_directory($d->{'home'}, $file)) {
+	$data = &read_file_contents_as_domain_user($d, $file);
+	}
+else {
+	$data = &read_file_contents($d, $file);
+	}
 $data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+RSA\s+PRIVATE\s+KEY-----)/) {
 	return $1;
@@ -1697,12 +1703,8 @@ if (!-r $certtemp || !-r $keytemp || $rv) {
 
 # Save as domain owner
 &create_ssl_certificate_directories($d);
-&open_tempfile_as_domain_user($d, CERT, ">$certfile");
-&print_tempfile(CERT, &read_file_contents($certtemp));
-&close_tempfile_as_domain_user($d, CERT);
-&open_tempfile_as_domain_user($d, KEY, ">$keyfile");
-&print_tempfile(KEY, &read_file_contents($keytemp));
-&close_tempfile_as_domain_user($d, KEY);
+&write_ssl_file_contents($d, $certfile, &read_file_contents($certtemp));
+&write_ssl_file_contents($d, $keyfile, &read_file_contents($keytemp));
 &sync_combined_ssl_cert($d);
 
 return undef;
@@ -1739,13 +1741,8 @@ if (!$ok) {
 
 # Copy into place
 &create_ssl_certificate_directories($d);
-&open_tempfile_as_domain_user($d, KEY, ">$keyfile");
-&print_tempfile(KEY, &read_file_contents($keytemp));
-&close_tempfile_as_domain_user($d, KEY);
-
-&open_tempfile_as_domain_user($d, CERT, ">$csrfile");
-&print_tempfile(CERT, &read_file_contents($csrtemp));
-&close_tempfile_as_domain_user($d, CERT);
+&write_ssl_file_contents($d, $keyfile, &read_file_contents($keytemp));
+&write_ssl_file_contents($d, $csrfile, &read_file_contents($csrtemp));
 return undef;
 }
 
@@ -1907,18 +1904,12 @@ local ($d, $samed) = @_;
 my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Copy the cert and key to the new owning domain's directory
+&create_ssl_certificate_directories($d);
 foreach my $k ('cert', 'key', 'chain') {
 	if ($d->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
-		if ($d->{'user'} eq $samed->{'user'}) {
-			&copy_source_dest_as_domain_user(
-				$d, $samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
-			}
-		else {
-			&copy_source_dest($samed->{'ssl_'.$k}, $d->{'ssl_'.$k});
-			&set_ownership_permissions(
-				$d->{'uid'}, undef, undef, $d->{'ssl_'.$k});
-			}
+		&write_ssl_file_contents(
+			$d, $d->{'ssl_'.$k}, $samed->{'ssl_'.$k});
 		}
 	}
 delete($d->{'ssl_same'});
@@ -2828,15 +2819,9 @@ my ($d, $cert, $key, $chain) = @_;
 # Copy and save the cert
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 my $cert_text = &read_file_contents($cert);
-my $newfile = !-r $d->{'ssl_cert'};
 &lock_file($d->{'ssl_cert'});
 &create_ssl_certificate_directories($d);
-&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
-&print_tempfile(CERT, $cert_text);
-&close_tempfile_as_domain_user($d, CERT);
-if ($newfile) {
-	&set_certificate_permissions($d, $d->{'ssl_cert'});
-	}
+&write_ssl_file_contents($d, $d->{'ssl_cert'}, $cert_text);
 &unlock_file($d->{'ssl_cert'});
 &save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
 
@@ -2844,12 +2829,7 @@ if ($newfile) {
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 my $key_text = &read_file_contents($key);
 &lock_file($d->{'ssl_key'});
-&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
-&print_tempfile(CERT, $key_text);
-&close_tempfile_as_domain_user($d, CERT);
-if ($newfile) {
-	&set_certificate_permissions($d, $d->{'ssl_key'});
-	}
+&write_ssl_file_contents($d, $d->{'ssl_key'}, $key_text);
 &unlock_file($d->{'ssl_key'});
 &save_website_ssl_file($d, "key", $d->{'ssl_key'});
 
@@ -2862,12 +2842,7 @@ if ($chain) {
 	$chainfile = &default_certificate_file($d, 'ca');
 	$chain_text = &read_file_contents($chain);
 	&lock_file($chainfile);
-	&open_tempfile_as_domain_user($d, CERT, ">$chainfile");
-	&print_tempfile(CERT, $chain_text);
-	&close_tempfile_as_domain_user($d, CERT);
-	if ($newfile) {
-		&set_permissions_as_domain_user($d, 0755, $chainfile);
-		}
+	&write_ssl_file_contents($d, $chainfile, $chain_text);
 	&unlock_file($chainfile);
 	$err = &save_website_ssl_file($d, 'ca', $chainfile);
 	$d->{'ssl_chain'} = $chainfile;
@@ -2927,36 +2902,26 @@ if ($d->{'ssl_same'}) {
 
 # Create file of all the certs
 my $combfile = &default_certificate_file($d, 'combined');
-my $newfile = !-e $combfile;
 &lock_file($combfile);
 &create_ssl_certificate_directories($d);
-&open_tempfile_as_domain_user($d, COMB, ">$combfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
+my $comb = &read_file_contents($d->{'ssl_cert'})."\n";
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
+	$comb .= &read_file_contents($d->{'ssl_chain'})."\n";
 	}
-&close_tempfile_as_domain_user($d, COMB);
+&write_ssl_file_contents($d, $combfile, $comb);
 &unlock_file($combfile);
-if ($newfile) {
-	&set_certificate_permissions($d, $combfile);
-	}
 $d->{'ssl_combined'} = $combfile;
 
 # Create file of all the certs, and the key
 my $everyfile = &default_certificate_file($d, 'everything');
-my $newfile = !-e $everyfile;
 &lock_file($everyfile);
-&open_tempfile_as_domain_user($d, COMB, ">$everyfile");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_key'})."\n");
-&print_tempfile(COMB, &read_file_contents($d->{'ssl_cert'})."\n");
+my $every = &read_file_contents($d->{'ssl_key'})."\n".
+	    &read_file_contents($d->{'ssl_cert'})."\n";
 if (-r $d->{'ssl_chain'}) {
-	&print_tempfile(COMB, &read_file_contents($d->{'ssl_chain'})."\n");
+	$every .= &read_file_contents($d->{'ssl_chain'})."\n";
 	}
-&close_tempfile_as_domain_user($d, COMB);
+&write_ssl_file_contents($d, $everyfile, $every);
 &unlock_file($everyfile);
-if ($newfile) {
-	&set_certificate_permissions($d, $everyfile);
-	}
 $d->{'ssl_everything'} = $everyfile;
 }
 
@@ -3188,18 +3153,10 @@ foreach my $dir (&ssl_certificate_directories($d, 1)) {
 		&create_standard_directory_for_domain($d, $dir, '700');
 		}
 	else {
-		# Create elsewhere if needed
+		# Create elsewhere if needed. Should *not* be writable by the
+		# domain user, to prevent cert deletion.
 		if (!-d $dir) {
-			if ($dir =~ /\/[^\/]*(\Q$d->{'dom'}\E|\Q$d->{'id'}\E|\Q$d->{'user'}\E)[^\/]*$/) {
-				# Dir is private to the domain
-				&make_dir($dir, 0755, 1);
-				&set_ownership_permissions(
-					$d->{'uid'}, undef, 0700, $dir);
-				}
-			else {
-				# Shared dir for all domains
-				&make_dir($dir, 0777, 1);
-				}
+			&make_dir($dir, 0700, 1);
 			}
 		}
 	}
@@ -3298,6 +3255,32 @@ $tmpl->{'web_webmin_ssl'} = $in{'web_webmin_ssl'};
 $tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
 $tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
 $tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
+}
+
+# write_ssl_file_contents(&domain, file, contents|srcfile)
+# Write out an SSL key or cert file with the correct permissions
+sub write_ssl_file_contents
+{
+my ($d, $file, $contents) = @_;
+if ($contents =~ /^\// && -r $contents) {
+	# Actually copy from a file
+	$contents = &read_file_contents($contents);
+	}
+my $newfile = !-r $file;
+if (&is_under_directory($d->{'home'}, $file)) {
+	# Assume write can be done as the domain owner
+	&open_tempfile_as_domain_user($d, KEY, ">$file");
+	&print_tempfile(KEY, $contents);
+	&close_tempfile_as_domain_user($d, KEY);
+	&set_certificate_permissions($d, $file) if ($newfile);
+	}
+else {
+	# If SSL cert is elsewhere (like /etc/ssl), write as root
+	&open_tempfile(KEY, ">$file");
+	&print_tempfile(KEY, $contents);
+	&close_tempfile(KEY);
+	&set_ownership_permissions(undef, undef, 0600, $file);
+	}
 }
 
 $done_feature_script{'ssl'} = 1;

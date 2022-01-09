@@ -37,10 +37,7 @@ elsif ($in{'mode'} == 2) {
 	$chain = &default_certificate_file($d, 'ca');
 	&lock_file($chain);
 	&unlink_file_as_domain_user($d, $chain);
-	&open_tempfile_as_domain_user($d, CERT, ">$chain");
-	&print_tempfile(CERT, $in{'upload'});
-	&close_tempfile_as_domain_user($d, CERT);
-	&set_permissions_as_domain_user($d, 0755, $chain);
+	&write_ssl_file_contents($d, $chain, $in{'upload'});
 	&unlock_file($chain);
 	}
 elsif ($in{'mode'} == 3) {
@@ -52,9 +49,7 @@ elsif ($in{'mode'} == 3) {
 	$chain = &default_certificate_file($d, 'ca');
 	&lock_file($chain);
 	&unlink_file_as_domain_user($d, $chain);
-	&open_tempfile_as_domain_user($d, CERT, ">$chain");
-	&print_tempfile(CERT, $in{'paste'});
-	&close_tempfile_as_domain_user($d, CERT);
+	&write_ssl_file_contents($d, $chain, $in{'paste'});
 	&set_permissions_as_domain_user($d, 0755, $chain);
 	&unlock_file($chain);
 	}

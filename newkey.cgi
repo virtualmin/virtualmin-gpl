@@ -111,28 +111,16 @@ $d->{'ssl_pass'} = $passok == 2 ? $in{'pass'} : undef;
 # Save the cert and private keys
 if ($in{'cert_mode'} != 2) {
 	&$first_print($text{'newkey_savingcert'});
-	my $newfile = !-r $d->{'ssl_cert'};
 	&lock_file($d->{'ssl_cert'});
-	&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_cert'}");
-	&print_tempfile(CERT, $cert);
-	&close_tempfile_as_domain_user($d, CERT);
-	if ($newfile) {
-		&set_certificate_permissions($d, $d->{'ssl_cert'});
-		}
+	&write_ssl_file_contents($d, $d->{'ssl_cert'}, $cert);
 	&unlock_file($d->{'ssl_cert'});
 	&$second_print($text{'setup_done'});
 	}
 
 if ($in{'newkey_mode'} != 2) {
 	&$first_print($text{'newkey_savingkey'});
-	my $newfile = !-r $d->{'ssl_key'};
 	&lock_file($d->{'ssl_key'});
-	&open_tempfile_as_domain_user($d, CERT, ">$d->{'ssl_key'}");
-	&print_tempfile(CERT, $newkey);
-	&close_tempfile_as_domain_user($d, CERT);
-	if ($newfile) {
-		&set_certificate_permissions($d, $d->{'ssl_key'});
-		}
+	&write_ssl_file_contents($d, $d->{'ssl_key'}, $newkey);
 	&unlock_file($d->{'ssl_key'});
 	&$second_print($text{'setup_done'});
 	}
