@@ -21,6 +21,7 @@ return ( "intro",
 	 $config{'mysql'} ? ( "mysql", "mysize" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
 	 "hashpass",
+	 "ssldir",
 	 "defdom",
 	 "done" );
 }
@@ -680,6 +681,87 @@ if ($in->{'hashpass'} && &foreign_check("usermin")) {
 	}
 
 return undef;
+}
+
+sub wizard_show_ssldir
+{
+print &ui_table_row(undef, $text{'wizard_ssldir'}, 2);
+
+my $tmpl = &get_template(0);
+my $mode;
+if ($tmpl->{'cert_key_tmpl'} &&
+    $tmpl->{'cert_cert_tmpl'} eq 'auto' &&
+    $tmpl->{'cert_ca_tmpl'} eq 'auto' &&
+    $tmpl->{'cert_combined_tmpl'} eq 'auto' &&
+    $tmpl->{'cert_everything_tmpl'} eq 'auto') {
+	# Some custom dir
+	if ($tmpl->{'cert_key_tmpl'} eq $ssl_certificate_dir) {
+		# Standard dir
+		$mode = 1;
+		}
+	else {
+		$mode = 2;
+		}
+	}
+elsif (!$tmpl->{'cert_key_tmpl'} &&
+       !$tmpl->{'cert_cert_tmpl'} &&
+       !$tmpl->{'cert_ca_tmpl'} &&
+       !$tmpl->{'cert_combined_tmpl'} &&
+       !$tmpl->{'cert_everything_tmpl'}) {
+	# Default which uses home dir
+	$mode = 0;
+	}
+else {
+	# Some other setting
+	$mode = 3;
+	}
+my @opts = ( [ 0, $text{'wizard_ssldir_mode0'} ],
+	     [ 1, &text('wizard_ssldir_mode1',
+			"<tt>$ssl_certificate_parent</tt>") ] );
+if ($mode == 2) {
+	push(@opts, [ 2, $text{'wizard_ssldir_mode2'},
+			 &ui_textbox("ssldir_custom",
+				$tmpl->{'cert_key_tmpl'}, 40) ]);
+	}
+if ($mode == 3) {
+	push(@opts, [ 3, $text{'wizard_ssldir_mode3'} ]);
+	}
+print &ui_table_row($text{'wizard_ssldir_mode'},
+	&ui_radio_table("ssldir", $mode, \@opts));
+}
+
+# wizard_parse_ssldir(&in)
+# Save SSL cert directory options
+sub wizard_parse_ssldir
+{
+my ($in) = @_;
+my @tmpls = &list_templates();
+my ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+if ($in->{'ssldir'} == 0) {
+	# Fall back to the default
+	delete($tmpl->{'cert_key_tmpl'});
+	delete($tmpl->{'cert_cert_tmpl'});
+	delete($tmpl->{'cert_ca_tmpl'});
+	delete($tmpl->{'cert_combined_tmpl'});
+	delete($tmpl->{'cert_everything_tmpl'});
+	}
+elsif ($in->{'ssldir'} == 1 || $in->{'ssldir'} == 2) {
+	if ($in->{'ssldir'} == 1) {
+		# Standard key dir
+		$tmpl->{'cert_key_tmpl'} = $ssl_certificate_dir;
+		}
+	else {
+		# Custom key template
+		$in{'ssldir_custom'} =~ /\S/ || &error($text{'wizard_essldir'});
+		}
+	$tmpl->{'cert_cert_tmpl'} = 'auto';
+	$tmpl->{'cert_ca_tmpl'} = 'auto';
+	$tmpl->{'cert_combined_tmpl'} = 'auto';
+	$tmpl->{'cert_everything_tmpl'} = 'auto';
+	}
+if ($in->{'ssldir'} != 3) {
+	&save_template($tmpl);
+	}
 }
 
 # wizard_show_defdom()

@@ -311,6 +311,10 @@ $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
 $ssl_letsencrypt_lock = "$module_var_directory/letsencrypt-lock";
 
+$ssl_certificate_parent = "/etc/ssl/virtualmin";
+
+$ssl_certificate_dir = "$ssl_certificate_parent/\${ID}";
+
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
 		    'type', 'alt', 'modulus', 'exponent');
 
