@@ -1598,7 +1598,12 @@ return $file ? &absolute_domain_path($d, &substitute_domain_template($file, $d))
 sub set_certificate_permissions
 {
 local ($d, $file) = @_;
-&set_permissions_as_domain_user($d, 0700, $file);
+if (&is_under_directory($d->{'home'}, $file)) {
+	&set_permissions_as_domain_user($d, 0700, $file);
+	}
+else {
+	&set_ownership_permissions(undef, undef, 0700, $file);
+	}
 }
 
 # check_domain_certificate(domain-name, &domain-with-cert|&cert-info)
