@@ -1,6 +1,7 @@
 
 use Time::Local;
 use POSIX;
+use feature 'state';
 
 ## Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
@@ -7335,8 +7336,8 @@ sub generate_random_available_user
 {
 my ($pattern) = @_;
 $pattern ||= 'u-[0-9]{4}';
-my $user = $main::generated_random_available_user;
-if (!$user) {
+state $user;
+if (!defined($user)) {
 	for (;;) {
 		my $rand_name = &substitute_pattern($pattern,
 			              {'filter' => '[^A-Za-z0-9\\-_]',
@@ -7346,7 +7347,6 @@ if (!$user) {
 		                  &get_domain_by("prefix", $rand_name);
 		if (!$uname_clash) {
 			$user = $rand_name;
-			$main::generated_random_available_user = $user;
 			last;
 			}
 		}
@@ -16479,10 +16479,6 @@ undef(%main::hard_mail_quota);
 undef(%main::used_mail_quota);
 undef(@useradmin::list_users_cache);
 undef(@useradmin::list_groups_cache);
-
-# Below is the list of other cached 
-# variables just to keep the record
-# $main::generated_random_available_user;
 }
 
 # list_shared_ips()
