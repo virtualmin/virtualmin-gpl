@@ -4633,14 +4633,13 @@ upgrade_sched=Konfigurowanie Webmin do automatycznej aktualizacji modułów Virt
 upgrade_schednot=.. zrobione, ale automatyczna instalacja aktualizacji nie jest włączona. Użyj modułu <a href='$1'>$2</a>, aby je włączyć.
 upgrade_file=Tworzenie pliku licencji Virtualmin ..
 upgrade_problems=Podczas aktualizacji systemu do Virtualmin Pro wystąpiły pewne błędy. Sprawdź powyższe komunikaty pod kątem możliwych przyczyn.
-upgrade_complete=Twój system został pomyślnie uaktualniony do Virtualmin Pro!
 upgrade_esharedroot=Twój katalog główny Webmin $1 jest współużytkowany przez wiele systemów - aktualizacje modułów są niedozwolone
 upgrade_eyumrepo=Virtualmin został zainstalowany z RPM, ale nie korzysta z repozytorium Virtualmin GPL. Aktualizacja nie jest obecnie możliwa.
 upgrade_eyumlist=Nie znaleziono pakietu $1 RPM na liście dostępnych pakietów z repozytorium. Być może jedno z Twoich obecnych repozytoriów nie działa?
 upgrade_edebrepo=Virtualmin został zainstalowany z pakietu Debian, ale nie korzysta z repozytorium GPL Virtualmin. Aktualizacja nie jest obecnie możliwa.
+upgrade_to_pro=Aktualizacja do Virtualmin Pro ..
 upgrade_eyumfile=W $1 nie znaleziono repozytorium Virtualmin GPL
-upgrade_update=Aktualizacja dostępnych pakietów z APT ..
-upgrade_debs=Aktualizacja pakietów Debiana Virtualmin : $1 
+upgrade_update_pkgs=Aktualizacja dostępnych pakietów. ..
 upgrade_yumclear=Czyszczenie pamięci podręcznych repozytoriów ..
 upgrade_etypematch=Aktualizacja nie jest możliwa, ponieważ typ instalacji Virtualmin to <tt>$1</tt>, ale Webmin to <tt>$2</tt>
 

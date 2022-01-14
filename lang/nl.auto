@@ -990,6 +990,8 @@ dynip_none=Update geen enkele dienst
 
 upgrade_epackages=Geen pakketten gevonden om te installeren!
 upgrade_eyumlist=Het $1 RPM-pakket is niet gevonden in de lijst met beschikbare pakketten uit de repository. Misschien werkt een van uw huidige repositories niet?
+upgrade_to_pro=Upgraden naar Virtualmin Pro ..
+upgrade_update_pkgs=Beschikbare pakketten bijwerken ..
 upgrade_yumclear=Opslagplaatscaches wissen ..
 
 exclude_dbs=Databases en tabellen om over te slaan

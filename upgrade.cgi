@@ -88,6 +88,11 @@ if ($itype eq "rpm") {
 			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
 			}
+
+		# If restarting upgrade which failed before for whatever reason
+		elsif ($l =~ /^baseurl=https:\/\/$in{'serial'}:$in{'key'}/) {
+			$found++;
+			}
 		}
 	&flush_file_lines($virtualmin_yum_repo);
 	$found || &error(&text('upgrade_eyumfile',
@@ -99,32 +104,26 @@ if ($itype eq "rpm") {
 	&$second_print($text{'setup_done'});
 
 	# Update all Virtualmin-related packages
-	&foreign_require("software");
-	foreach $p (&software::update_system_available()) {
-		if ($p->{'name'} eq 'wbm-virtualmin-multi-login' &&
-		    !&foreign_check('server-manager')) {
-			# Requires Cloudmin
-			next;
-			}
-		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
-		    $p->{'name'} =~ /^(wbm|wbt|usm|ust)-/) {
-			push(@packages, $p->{'name'});
-			}
-		}
-	@packages || &error($text{'upgrade_epackages'});
-
-	&$first_print(&text('upgrade_rpms',
-		join(" ", map { "<tt>$_</tt>" } @packages)));
-	print "<pre>";
+	my @packages = ('wbm-virtual-server');
+	my $upgrade_to_pro_output;
+	&$first_print($text{'upgrade_to_pro'});
 	&clean_environment();
 	open(YUM, "yum -y install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
-		print &html_escape($_);
+		$upgrade_to_pro_output .= &html_escape($_);
 		}
 	close(YUM);
 	$errors++ if ($?);
 	&reset_environment();
-	&$second_print($text{'setup_done'});
+	if ($?) {
+		&$second_print($text{'setup_failed'});
+		print "<pre>";
+		print $upgrade_to_pro_output;
+		print "</pre>";
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 elsif ($itype eq "deb") {
 	# GPL APT repo .. change to use the Pro one
@@ -148,53 +147,59 @@ elsif ($itype eq "deb") {
 		}
 
 	# Force refresh of packages
-	&$first_print($text{'upgrade_update'});
-	print "<pre>";
+	&$first_print($text{'upgrade_update_pkgs'});
+	my $upgrade_update_pkgs_output;
 	open(YUM, "apt-get update 2>&1 |");
 	while(<YUM>) {
-		print &html_escape($_);
+		$upgrade_update_pkgs_output .= &html_escape($_);
 		}
 	close(YUM);
-	&$second_print($text{'setup_done'});
+	if ($?) {
+		&$second_print($text{'setup_failed'});
+		print "<pre>";
+		print $upgrade_update_pkgs_output;
+		print "</pre>";
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+
+	&$first_print($text{'upgrade_to_pro'});
 
 	# Update all Virtualmin-related packages
+	my @packages;
 	&foreign_require("software");
 	foreach $p (&software::update_system_available()) {
-		if ($p->{'name'} eq 'webmin-virtualmin-multi-login' &&
-		    !&foreign_check('server-manager')) {
-			# Requires Cloudmin
-			next;
-			}
-		if ($p->{'name'} eq "webmin" || $p->{'name'} eq "usermin" ||
-		    $p->{'name'} =~ /^(webmin|usermin)-(virtualmin|virtual-server|security-updates)/) {
-			if ($p->{'name'} eq 'webmin-virtual-server') {
-				# For the Virtualmin package, select pro
-				# version explicitly so that the GPL is
-				# replaced.
-				local ($ver) = grep { !/\.gpl/ }
-					&apt_package_versions($p->{'name'});
-                                push(@packages, $ver ? $p->{'name'}."=".$ver
-						     : $p->{'name'});
-				}
-			else {
-				push(@packages, $p->{'name'});
-				}
+		if ($p->{'name'} eq 'webmin-virtual-server') {
+			# For the Virtualmin package, select pro
+			# version explicitly so that the GPL is
+			# replaced.
+			local ($ver) = grep { !/\.gpl/ }
+				&apt_package_versions($p->{'name'});
+                            push(@packages, $ver ? $p->{'name'}."=".$ver
+					     : $p->{'name'});
 			}
 		}
 	@packages || &error($text{'upgrade_epackages'});
 
-	&$first_print(&text('upgrade_debs',
-		join(" ", map { "<tt>$_</tt>" } @packages)));
-	print "<pre>";
+	my $upgrade_to_pro_output;
 	&clean_environment();
 	open(YUM, "apt-get -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages -f install ".join(" ", @packages)." 2>&1 |");
 	while(<YUM>) {
-		print &html_escape($_);
+		$upgrade_to_pro_output .= &html_escape($_);
 		}
 	close(YUM);
 	$errors++ if ($?);
 	&reset_environment();
-	&$second_print($text{'setup_done'});
+	if ($?) {
+		&$second_print($text{'setup_failed'});
+		print "<pre>";
+		print $upgrade_to_pro_output;
+		print "</pre>";
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 else {
 	# Assume wbm.gz install. Download all the Pro modules, and install them
@@ -324,17 +329,15 @@ if (&foreign_installed("package-updates")) {
 PAGEEND:
 &run_post_actions();
 if ($errors) {
-	print "<b>$text{'upgrade_problems'}</b><p>\n";
+	print "<br>" . &ui_alert_box($text{'upgrade_problems'}, 'danger');
 	}
 else {
-	print "<b>$text{'upgrade_complete'}</b><p>\n";
 	if (defined(&theme_post_save_domains)) {
 		&theme_post_save_domains();
 		}
 	}
 
 &webmin_log("upgrade");
-&ui_print_footer("", $text{'index_return'});
 
 sub apt_package_versions
 {

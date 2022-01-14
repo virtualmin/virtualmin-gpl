@@ -2389,10 +2389,9 @@ upgrade_eamazon=此许可证密钥不能用于升级
 upgrade_eyumrepo=Virtualmin已从RPM安装，但未使用Virtualmin GPL存储库。目前无法升级。
 upgrade_eyumlist=在存储库的可用包列表中找不到 $1 RPM 包。也许您当前的存储库之一不起作用？
 upgrade_edebrepo=Virtualmin已从Debian软件包安装，但未使用Virtualmin GPL存储库。目前无法升级。
-upgrade_rpms=升级Virtualmin RPM软件包： $1
+upgrade_to_pro=升级到 Virtualmin Pro ..
 upgrade_eyumfile=在 $1中找不到Virtualmin GPL存储库
-upgrade_update=从APT更新可用的软件包。
-upgrade_debs=升级Virtualmin Debian软件包： $1
+upgrade_update_pkgs=更新可用的软件� ..
 upgrade_yumclear=清除存储库缓存 ..
 upgrade_etypematch=无法升级，因为Virtualmin的安装类型为<tt>$1</tt>，而Webmin的安装类型为<tt>$2</tt>
 

@@ -720,6 +720,8 @@ dynip_none=Ikke oppdater noen tjeneste
 
 upgrade_epackages=Fant ingen pakker å installere!
 upgrade_eyumlist=$1 RPM -pakken ble ikke funnet i listen over tilgjengelige pakker fra depotet. Kanskje en av de nåværende depotene dine ikke fungerer?
+upgrade_to_pro=Oppgraderer til Virtualmin Pro ..
+upgrade_update_pkgs=Oppdaterer tilgjengelige pakker ..
 upgrade_yumclear=Rydder lagringsbuffer ..
 
 exclude_dbs=Databaser og tabeller du kan hoppe over

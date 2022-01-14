@@ -1544,6 +1544,8 @@ newstyles_edelete=¡El estilo de contenido seleccionado ya no existe!
 
 upgrade_epackages=¡No se encontraron paquetes para instalar!
 upgrade_eyumlist=El paquete $1 RPM no se encontró en la lista de paquetes disponibles del repositorio. ¿Quizás uno de sus repositorios actuales no está funcionando?
+upgrade_to_pro=Actualizando a Virtualmin Pro ..
+upgrade_update_pkgs=Actualizando paquetes disponibles ..
 upgrade_yumclear=Borrando las memorias caché del repositorio. ..
 upgrade_etypematch=La actualización no es posible ya que el tipo de instalación de Virtualmin es de <tt>$1</tt> pero el de Webmin es de <tt>$2</tt>
 

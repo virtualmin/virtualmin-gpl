@@ -5563,16 +5563,14 @@ upgrade_schedok=..完了。アップデートは自動的にインストール�
 upgrade_schednot=..完了しましたが、自動更新インストールが有効になっていません。 <a href='$1'>$2</a>モジュールを使用してオンにします。
 upgrade_file=Virtualminライセンスファイルを作成しています ..
 upgrade_problems=システムをVirtualmin Proにアップグレード中にエラーが発生しました。考えられる原因について、上記のメッセージを確認してください。
-upgrade_complete=システムがVirtualmin Proに正常にアップグレードされました！
 upgrade_theme=テーマ<i>$1</i>を有効にしています. ..
 upgrade_esharedroot=Webminルートディレクトリ $1は複数のシステム間で共有されています-モジュールの更新は許可されていません
 upgrade_eyumrepo=VirtualminはRPMからインストールされましたが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
 upgrade_eyumlist=リポジトリから利用可能なパッケージのリストに $1RPMパッケージが見つかりませんでした。おそらく、現在のリポジトリの1つが機能していませんか？
 upgrade_edebrepo=VirtualminはDebianパッケージからインストールされていますが、Virtualmin GPLリポジトリを使用していません。現在、アップグレードはできません。
-upgrade_rpms=Virtualmin RPMパッケージのアップグレード： $1
+upgrade_to_pro=VirtualminProへのアップグレード ..
 upgrade_eyumfile=$1にVirtualmin GPLリポジトリが見つかりませんでした
-upgrade_update=APTから利用可能なパッケージを更新しています ..
-upgrade_debs=Virtualmin Debianパッケージのアップグレード： $1
+upgrade_update_pkgs=利用可能なパッケージの更新 ..
 upgrade_yumclear=リポジトリキャッシュのクリア ..
 upgrade_etypematch=Virtualminのインストールタイプがあるようアップグレードすることはできません<tt>$1</tt>が、Webminのは<tt>$2</tt>
 

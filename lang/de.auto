@@ -2084,6 +2084,8 @@ upgrade_desc1=Wenn Ihnen die Verwendung der Virtualmin-GPL gefallen hat und Sie 
 upgrade_epackages=Keine zu installierenden Pakete gefunden!
 upgrade_esharedroot=Ihr Webmin-Stammverzeichnis $1 wird von mehreren Systemen gemeinsam genutzt - Modulaktualisierungen sind nicht zulässig
 upgrade_eyumlist=Das $1 RPM-Paket wurde in der Liste der verfügbaren Pakete aus dem Repository nicht gefunden. Vielleicht funktioniert eines Ihrer aktuellen Repositorys nicht?
+upgrade_to_pro=Upgrade auf Virtualmin Pro ..
+upgrade_update_pkgs=Aktualisieren verfügbarer Pakete ..
 upgrade_yumclear=Repository-Caches löschen ..
 
 maillog_desc=Dieses Formular kann verwendet werden, um die E-Mail-Protokolle nach Nachrichten zu durchsuchen, die bestimmten Bedingungen entsprechen, um herauszufinden, was mit ihnen passiert ist. Alle Felder sind optional und werden zu Vergleichszwecken übersprungen, wenn sie leer bleiben.

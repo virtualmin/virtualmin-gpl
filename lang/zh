@@ -3268,7 +3268,6 @@ upgrade_schedok=..已完成。更新文件将自动安装。
 upgrade_schednot=.. 已完成，但没有启用自动更新安装。使用<a href='$1'>$2</a>模块打开自动更新安装。
 upgrade_file=正在创建Virtualmin许可证文件..
 upgrade_problems=将你的系统升级到Virtualmin Pro时出现错误。错误原因请查看上面的信息。
-upgrade_complete=你的系统已成功升级到Virtualmin Pro！
 upgrade_theme=正在启用主题 <i>$1</i> ..
 upgrade_esharedroot=你的Webmin根目录$1被多个系统共享，不允许更新模块。
 

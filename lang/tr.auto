@@ -2827,16 +2827,14 @@ upgrade_schedok=.. bitti. Güncellemeler otomatik olarak kurulacaktır.
 upgrade_schednot=.. tamam, ancak otomatik güncelleme kurulumu etkin değil. Açmak için <a href='$1'>$2</a> modülünü kullanın.
 upgrade_file=Virtualmin lisans dosyası oluşturuluyor ..
 upgrade_problems=Sisteminizi Virtualmin Pro'ya yükseltirken bazı hatalar oluştu. Olası nedenler için lütfen yukarıdaki mesajları kontrol edin.
-upgrade_complete=Sisteminiz başarıyla Virtualmin Pro'ya yükseltildi!
 upgrade_theme=<i>$1</i> temasını etkinleştirme ..
 upgrade_esharedroot=$1 Webmin kök dizininiz birden çok sistem arasında paylaşılıyor - modül güncellemelerine izin verilmiyor
 upgrade_eyumrepo=Virtualmin bir RPM'den kuruldu, ancak Virtualmin GPL deposu kullanılmadı. Yükseltme şu anda mümkün değil.
 upgrade_eyumlist=$1 RPM paketi, depodaki kullanılabilir paketler listesinde bulunamadı. Belki de mevcut depolarınızdan biri çalışmıyor?
 upgrade_edebrepo=Virtualmin bir Debian paketinden kurulmuştur, fakat Virtualmin GPL deposunu kullanmamaktadır. Yükseltme şu anda mümkün değil.
-upgrade_rpms=Virtualmin RPM paketlerini yükseltme : $1 
+upgrade_to_pro=Virtualmin Pro'ya yükseltme ..
 upgrade_eyumfile=$1 içinde Virtualmin GPL deposu bulunamadı
-upgrade_update=APT'deki mevcut paketler güncelleniyor.
-upgrade_debs=Virtualmin Debian paketlerini yükseltme : $1 
+upgrade_update_pkgs=Mevcut paketler güncelleniyor ..
 upgrade_yumclear=Depo önbelleklerini temizleme ..
 upgrade_etypematch=Virtualmin'in yükleme türü <tt>$1</tt> olduğundan, Webmin'in <tt>$2</tt> olduğundan yükseltme mümkün değil
 

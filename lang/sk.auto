@@ -5563,16 +5563,14 @@ upgrade_schedok=.. hotový. Aktualizácie sa nainštalujú automaticky.
 upgrade_schednot=.. hotovo, ale automatická inštalácia aktualizácií nie je povolená. Na ich zapnutie použite modul <a href='$1'>$2</a>.
 upgrade_file=Vytvára sa licenčný súbor Virtualmin ..
 upgrade_problems=Pri aktualizácii vášho systému na Virtualmin Pro sa vyskytli nejaké chyby. Skontrolujte správy vyššie, aby ste zistili možné príčiny.
-upgrade_complete=Váš systém bol úspešne inovovaný na Virtualmin Pro!
 upgrade_theme=Povolenie motívu <i>$1</i> ..
 upgrade_esharedroot=Váš koreňový adresár Webmin $1 je zdieľaný medzi viacerými systémami – aktualizácie modulov nie sú povolené
 upgrade_eyumrepo=Virtualmin bol nainštalovaný z RPM, ale nepoužíva úložisko Virtualmin GPL. Aktualizácia momentálne nie je možná.
 upgrade_eyumlist=Balík $1 RPM sa nenašiel v zozname dostupných balíkov z úložiska. Možno jeden z vašich súčasných úložísk nefunguje?
 upgrade_edebrepo=Virtualmin bol nainštalovaný z balíka Debian, ale nepoužíva repozitár Virtualmin GPL. Aktualizácia momentálne nie je možná.
-upgrade_rpms=Aktualizácia balíkov Virtualmin RPM : $1
+upgrade_to_pro=Inovácia na Virtualmin Pro ..
 upgrade_eyumfile=V $1 sa nenašlo žiadne úložisko Virtualmin GPL
-upgrade_update=Aktualizácia dostupných balíkov od APT ..
-upgrade_debs=Aktualizácia balíkov Virtualmin Debian : $1
+upgrade_update_pkgs=Aktualizácia dostupných balíkov ..
 upgrade_yumclear=Vymazanie vyrovnávacej pamäte úložiska ..
 upgrade_etypematch=Aktualizácia nie je možná, pretože typ inštalácie Virtualmin je <tt>$1</tt> ale Webmin je <tt>$2</tt>
 

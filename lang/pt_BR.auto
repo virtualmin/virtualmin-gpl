@@ -5306,16 +5306,14 @@ upgrade_schedok=.. feito. As atualizações serão instaladas automaticamente.
 upgrade_schednot=.. feito, mas a instalação automática da atualização não está ativada. Use o módulo <a href='$1'>$2</a> para ativá-los.
 upgrade_file=Criando arquivo de licença do Virtualmin.
 upgrade_problems=Alguns erros ocorreram durante a atualização do seu sistema para o Virtualmin Pro. Por favor, verifique as mensagens acima para possíveis causas.
-upgrade_complete=Seu sistema foi atualizado com sucesso para o Virtualmin Pro!
 upgrade_theme=Ativando o tema <i>$1</i> ..
 upgrade_esharedroot=Seu diretório raiz Webmin $1 é compartilhado entre vários sistemas - atualizações de módulo não são permitidas
 upgrade_eyumrepo=O Virtualmin foi instalado a partir de um RPM, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
 upgrade_eyumlist=O pacote RPM $1 não foi encontrado na lista de pacotes disponíveis do repositório. Talvez um de seus repositórios atuais não esteja funcionando?
 upgrade_edebrepo=O Virtualmin foi instalado a partir de um pacote Debian, mas não usando o repositório Virtualmin GPL. A atualização não é possível no momento.
-upgrade_rpms=Atualizando pacotes do Virtualmin RPM : $1 
+upgrade_to_pro=Atualizando para o Virtualmin Pro ..
 upgrade_eyumfile=Nenhum repositório Virtualmin GPL foi encontrado em $1 
-upgrade_update=Atualizando pacotes disponíveis do APT ..
-upgrade_debs=Atualizando pacotes Debian do Virtualmin : $1 
+upgrade_update_pkgs=Atualizando pacotes disponíveis ..
 upgrade_yumclear=Limpando caches de repositório ..
 upgrade_etypematch=A atualização não é possível, pois o tipo de instalação do Virtualmin é <tt>$1</tt>, mas o Webmin é <tt>$2</tt>
 
