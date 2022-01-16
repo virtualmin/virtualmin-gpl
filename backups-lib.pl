@@ -511,7 +511,7 @@ foreach my $desturl (@$desturls) {
 	elsif ($mode == 10) {
 		# Connect to Backblaze and create the bucket
 		local $already = &get_bb_bucket($server);
-		if (!ref($already)) {
+		if ($already && !ref($already)) {
 			&$first_print($already);
 			next;
 			}
