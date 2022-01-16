@@ -4635,15 +4635,11 @@ upgrade_schedok=.. klaar. Updates zullen automatisch geinstalleerd worden.
 upgrade_schednot=.. klaar, maar automatische update installatie is niet aangezet. gebruik de <a href='$1'>$2</a> module om het aan te zetten.
 upgrade_file=Virtualmin licentie file aanmaken ..
 upgrade_problems=Er zijn een paar fouten ontstaan tijdens het upgraden van uw systeem naar Virtualmin Pro. Controleert u alstublieft het bericht hierboven wat de mogelijke oorzaken zijn geweest.
-upgrade_complete=Uw systeem is succesvol ge-upgrade naar Virtualmin Pro !
 upgrade_theme=Aanzetten theme <i>$1</i> ..
 upgrade_esharedroot=Uw Webmin root directory $1 is gedeeld tussen meerdere systemen - module updates zijn niet toegestaan
 upgrade_eyumrepo=Virtualmin is geinstalleerd vanuit een RPM, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
 upgrade_edebrepo=Virtualmin is geinstalleerd van een Debian pakket, maar gebruikt niet de Virtualmin GPL repository. Upgraden is niet mogelijk op dit moment.
-upgrade_rpms=Upgraden van Virtualmin RPM pakketten : $1
 upgrade_eyumfile=Geen Virtualmin GPL repository is gevonden in $1
-upgrade_update=Beschikbare pakketten updaten vanaf APT ..
-upgrade_debs=Upgraden van Virtualmin Debian pakketten : $1
 upgrade_etypematch=Upgraden is niet mogelijk als het Virtualmin installatie type <tt>$1</tt> is en Webmin <tt>$2</tt> is
 
 maillog_title=Zoek Email Log

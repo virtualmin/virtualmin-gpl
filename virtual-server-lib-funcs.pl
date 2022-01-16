@@ -11000,7 +11000,9 @@ if ($status != 0) {
 	# Not valid .. show message
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err."\n";
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n"
+		if ($alert_text !~ /$virtualmin_renewal_url/);
+	$alert_text =~ s/>\Q$virtualmin_renewal_url\E</>$text{'license_shop_name'}</;
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});

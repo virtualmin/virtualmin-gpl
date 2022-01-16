@@ -3990,6 +3990,7 @@ licence_err=A problem was detected with your Virtualmin license :
 licence_soon=Notice : Your Virtualmin license will expire in $1 days.
 licence_soon2=Notice : Your Virtualmin license will expire in $1 hours.
 licence_renew=A renewal can be purchased at <a target=_blank href='$1'>$1</a>
+license_shop_name=Virtualmin Shop
 licence_recheck=Re-check License Status
 licence_title=Re-Check License
 licence_doing=Now re-checking your Virtualmin license ..
@@ -5562,16 +5563,14 @@ upgrade_schedok=.. done. Updates will be automatically installed.
 upgrade_schednot=.. done, but automatic update installation is not enabled. Use the <a href='$1'>$2</a> module to turn them on.
 upgrade_file=Creating Virtualmin license file ..
 upgrade_problems=Some errors occurred while upgrading your system to Virtualmin Pro. Please check the messages above for possible causes.
-upgrade_complete=Your system has been successfully upgraded to Virtualmin Pro!
 upgrade_theme=Enabling theme <i>$1</i> ..
 upgrade_esharedroot=Your Webmin root directory $1 is shared between multiple systems - module updates are not allowed
 upgrade_eyumrepo=Virtualmin has been installed from an RPM, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
 upgrade_eyumlist=The $1 RPM package was not found in the list of available packages from repository. Perhaps one of your current repositories is not working?
 upgrade_edebrepo=Virtualmin has been installed from a Debian package, but not using the Virtualmin GPL repository. Upgrading is not possible at this time.
-upgrade_rpms=Upgrading Virtualmin RPM packages : $1
+upgrade_to_pro=Upgrading to Virtualmin Pro ..
 upgrade_eyumfile=No Virtualmin GPL repository was found in $1
-upgrade_update=Updating available packages from APT ..
-upgrade_debs=Upgrading Virtualmin Debian packages : $1
+upgrade_update_pkgs=Updating available packages ..
 upgrade_yumclear=Clearing repository caches ..
 upgrade_etypematch=Upgrading is not possible as Virtualmin's install type is <tt>$1</tt> but Webmin's is <tt>$2</tt>
 
