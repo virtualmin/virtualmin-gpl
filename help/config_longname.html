@@ -4,11 +4,9 @@ This option determines whether the domain name used in usernames that contain th
 
 In some environments, it may be easier for users to understand a username like "joeuser@virtualmin.com" for their POP/IMAP or FTP login name than "joeuser.virtualmin". <p>
 
-This field also determines how a new virtual server's prefix is computed. The
-options are :
-
+This field also determines how a new virtual server's prefix is computed. The options are:
 <dl>
-<dt><b>Full domain name</b>
+<dt><br><b>Full domain name</b>
 <dd>The prefx is always the same as the domain name.<p>
 
 <dt><b>Username or first part of domain</b>
@@ -16,8 +14,11 @@ options are :
 
 <dt><b>First part of domain</b>
 <dd>The prefix is the first part of the domain, unless another virtual server is already using that prefix. So for the domain <tt>foo.com.au</tt>, the prefix would be (in order of preference) <tt>foo</tt>, <tt>foo.com</tt> or <tt>foo.com.au</tt>. <p>
-</dl>
 
+<dt><b>Regular expression custom pattern</b>
+<dd>The prefix will be automatically generated based on custom regular expression pattern, like <tt>u-[0-9]{4}</tt> or <tt>[a-z]-[0-9]{2}</tt> or <tt>user-[0-9]{2}-${year}-${month}-${day}</tt> which will produce <tt>u-1234</tt> or <tt>x-89</tt> or <tt>user-99-2021-12-25</tt> accordingly. <p>
+</dl>
+<br><br>
 It also determines the automatically generated username for a top-level
 domain, which will be the same as the prefix. <p>
 

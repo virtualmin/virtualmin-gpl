@@ -8,10 +8,10 @@ gebruikt voor sub-servers. <p>
 In sommige omgevingen is het makkelijker voor gebruikers om een gebruikersnaam te begrijpen zoals "joeuser@virtualmin.com" voor hun POP/IMAP of FTP login naam dan "joeuser.virtualmin". <p>
 
 Dit veld bepaald ook hoe een nieuwe virtuele server voorvoegsel word gemaakt.
-De opties zijn :
+De opties zijn:
 
 <dl>
-<dt><b>Volledige domein naam</b>
+<dt><br><b>Volledige domein naam</b>
 <dd>Het voorvoegsel is altijd hetzelfde als de domein naam.<p>
 
 <dt><b>Gebruikersnaam of eerste gedeelte van het domein</b>
@@ -21,6 +21,11 @@ De opties zijn :
 <dd>Het voorvoegsel is het eerste gedeelte van het domein, of een andere virtuele server moet reeds dit voorvoegsel gebruiken. Dus voor het domein <tt>foo.com.au</tt>, het voorvoegsel word dan (in volgorde van uw voorkeur) <tt>foo</tt>, <tt>foo.com</tt> of <tt>foo.com.au</tt>. <p>
 </dl>
 
+<dt><b>Aangepast patroon voor reguliere expressies</b>
+<dd>Het voorvoegsel wordt automatisch gegenereerd op basis van een aangepast patroon voor reguliere expressies, zoals <tt>u-[0-9]{4}</tt> or <tt>[a-z]-[0-9]{2}</tt> or <tt>user-[0-9]{2}-${year}-${month}-${day}</tt> die zal produceren <tt>u-1234</tt> or <tt>x-89</tt> or <tt>user-99-2021-12-25</tt> overeenkomstig. <p>
+</dl>
+
+<br><br>
 Het bepaald ook de automatische gegenereerde gebruikersnaam voor een top-niveau domein, wat hetzelfde zal zijn
 als het voorvoegsel. <p>
 
