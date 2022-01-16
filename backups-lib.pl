@@ -510,12 +510,11 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($mode == 10) {
 		# Connect to Backblaze and create the bucket
-		local $buckets = &list_bb_buckets();
-		if (!ref($buckets)) {
-			&$first_print($buckets);
+		local $already = &get_bb_bucket($server);
+		if (!ref($already)) {
+			&$first_print($already);
 			next;
 			}
-		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
 			local $err = &create_bb_bucket($server);
 			if ($err) {
