@@ -1,6 +1,7 @@
 
 use Time::Local;
 use POSIX;
+use feature 'state';
 
 ## Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
@@ -7332,20 +7333,54 @@ else {
 	}
 }
 
+# generate_random_available_user(pattern)
+# Generates free user available to be used as
+# Unix user, group, and virtual server user
+sub generate_random_available_user
+{
+my ($pattern) = @_;
+$pattern ||= 'u-[0-9]{4}';
+state $user;
+if (!defined($user)) {
+	for (;;) {
+		my $rand_name = &substitute_pattern($pattern,
+			              {'filter' => '[^A-Za-z0-9\\-_]',
+			               'substitute-datetime' => 1});
+		my $uname_clash = defined(getpwnam($rand_name)) ||
+		                  defined(getgrnam($rand_name)) ||
+		                  &get_domain_by("prefix", $rand_name);
+		if (!$uname_clash) {
+			$user = $rand_name;
+			last;
+			}
+		}
+	}
+return $user;
+}
+
 # unixuser_name(domainname)
 # Returns a Unix username for some domain, or undef if none can be found
 sub unixuser_name
 {
-local ($dname) = @_;
-$dname =~ s/^xn(-+)//;
-$dname = &remove_numeric_prefix($dname);
-$dname =~ /^([^\.]+)/;
-local ($try1, $user) = ($1, $1);
-if (defined(getpwnam($try1)) || $config{'longname'}) {
-	$user = &remove_numeric_prefix($_[0]);
-	$try2 = $user;
-	if (defined(getpwnam($try2))) {
-		return (undef, $try1, $try2);
+my ($dname) = @_;
+my ($dname_, $config_longname, $try1, $user) = ($dname, $config{'longname'});
+
+# Extract random username based on the user pattern
+if ($config_longname && $config_longname !~ /^[0-9]$/) {
+	$user = &generate_random_available_user($config_longname);
+	}
+# Use one based on actual domain name
+else {
+	$dname =~ s/^xn(-+)//;
+	$dname = &remove_numeric_prefix($dname);
+	$dname =~ /^([^\.]+)/;
+	($try1, $user) = ($1, $1);
+	if (defined(getpwnam($try1)) || $config_longname) {
+		$user = &remove_numeric_prefix($dname_);
+		$try2 = $user;
+		if (defined(getpwnam($try2))) {
+			return (undef, $try1, $try2);
+			}
 		}
 	}
 if ($config{'username_length'} && length($user) > $config{'username_length'}) {
@@ -7362,7 +7397,9 @@ return ($user);
 # Returns a Unix group name for some domain, or undef if none can be found
 sub unixgroup_name
 {
-local ($dname, $user) = @_;
+my ($dname, $user) = @_;
+my ($dname_, $config_longname, $try1, $group) = ($dname, $config{'longname'});
+
 if ($user && $config{'groupsame'}) {
 	# Same as username where possible
 	if (!defined(getgrnam($user))) {
@@ -7370,14 +7407,21 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-$dname =~ s/^xn(-+)//;
-$dname =~ /^([^\.]+)/;
-local ($try1, $group) = ($1, $1);
-if (defined(getgrnam($try1)) || $config{'longname'}) {
-	$group = $_[0];
-	$try2 = $group;
-	if (defined(getpwnam($try))) {
-		return (undef, $try1, $try2);
+# Extract random group based on the user pattern
+if ($config_longname && $config_longname !~ /^[0-9]$/) {
+	$group = &generate_random_available_user($config_longname);
+	}
+# Use one based on actual domain name
+else {
+	$dname =~ s/^xn(-+)//;
+	$dname =~ /^([^\.]+)/;
+	($try1, $group) = ($1, $1);
+	if (defined(getgrnam($try1)) || $config{'longname'}) {
+		$group = $dname_;
+		$try2 = $group;
+		if (defined(getpwnam($try))) {
+			return (undef, $try1, $try2);
+			}
 		}
 	}
 return ($group);
@@ -11350,14 +11394,15 @@ return undef;
 sub compute_prefix
 {
 local ($name, $group, $parent, $creating) = @_;
-if ($config{'longname'} != 1) {
+my $config_longname = $config{'longname'};
+if ($config_longname != 1) {
 	$name =~ s/^xn(-+)//;	# Strip IDN part
 	}
-if ($config{'longname'} == 1) {
+if ($config_longname == 1) {
 	# Prefix is same as domain name
 	return $name;
 	}
-elsif ($group && !$parent && $config{'longname'} == 0) {
+elsif ($group && !$parent && !$config_longname) {
 	# For top-level domains, prefix is same as group name (but append a
 	# number if there's a clash)
 	my $rv = $group;
@@ -11376,26 +11421,32 @@ else {
 	local @p = split(/\./, $name);
 	local $prefix;
 	if ($creating) {
-		# First try foo, then foo.com, then foo.com.au
-		for(my $i=0; $i<@p; $i++) {
-			local $testp = join("-", @p[0..$i]);
-			local $pclash = &get_domain_by("prefix", $testp);
-			if (!$pclash) {
-				$prefix = $testp;
-				last;
-				}
+		# Extract prefix based on the user pattern
+		if ($config_longname && $config_longname !~ /^[0-9]$/) {
+			$prefix = &generate_random_available_user($config_longname);
 			}
-		# If none of those worked, append a number
-		if (!$prefix) {
-			my $i = 1;
-			while(1) {
-				local $testp = $p[0].$i;
-				local $pclash = &get_domain_by("prefix",$testp);
+		else {
+			# First try foo, then foo.com, then foo.com.au
+			for(my $i=0; $i<@p; $i++) {
+				local $testp = join("-", @p[0..$i]);
+				local $pclash = &get_domain_by("prefix", $testp);
 				if (!$pclash) {
 					$prefix = $testp;
 					last;
 					}
-				$i++;
+				}
+			# If none of those worked, append a number
+			if (!$prefix) {
+				my $i = 1;
+				while(1) {
+					local $testp = $p[0].$i;
+					local $pclash = &get_domain_by("prefix",$testp);
+					if (!$pclash) {
+						$prefix = $testp;
+						last;
+						}
+					$i++;
+					}
 				}
 			}
 		}
