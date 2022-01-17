@@ -3946,6 +3946,7 @@ resel_backups1=Make backups only
 resel_backups0=Neither
 resel_admins=Can create and manage extra admins?
 resel_rename=Can rename domains?
+resel_createdoms=Can create domains?
 resel_plans=Can create and edit plans?
 resel_proxy=Can configure proxies?
 resel_migrate=Can migrate backups?
