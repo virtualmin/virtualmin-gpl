@@ -551,6 +551,9 @@ $cdata || &error($text{'copycert_ecert'});
 $kdata || &error($text{'copycert_ekey'});
 &open_lock_tempfile(CERT, ">$cfile");
 &print_tempfile(CERT, $cdata,"\n");
+if ($cadata) {
+	&print_tempfile(CERT, $cadata,"\n");
+	}
 &close_tempfile(CERT);
 &set_ownership_permissions(undef, undef, 0700, $cfile);
 if ($cfile eq $kfile) {
