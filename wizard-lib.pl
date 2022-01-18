@@ -695,7 +695,7 @@ if ($tmpl->{'cert_key_tmpl'} &&
     $tmpl->{'cert_combined_tmpl'} eq 'auto' &&
     $tmpl->{'cert_everything_tmpl'} eq 'auto') {
 	# Some custom dir
-	if ($tmpl->{'cert_key_tmpl'} eq $ssl_certificate_dir) {
+	if ($tmpl->{'cert_key_tmpl'} eq $ssl_certificate_dir."/ssl.key") {
 		# Standard dir
 		$mode = 1;
 		}
@@ -748,7 +748,7 @@ if ($in->{'ssldir'} == 0) {
 elsif ($in->{'ssldir'} == 1 || $in->{'ssldir'} == 2) {
 	if ($in->{'ssldir'} == 1) {
 		# Standard key dir
-		$tmpl->{'cert_key_tmpl'} = $ssl_certificate_dir;
+		$tmpl->{'cert_key_tmpl'} = $ssl_certificate_dir."/ssl.key";
 		}
 	else {
 		# Custom key template
