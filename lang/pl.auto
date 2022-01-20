@@ -1516,86 +1516,86 @@ losing_spam=Konfiguracja SpamAssassin dla tego wirtualnego serwera zostanie usun
 losing_virus=Wpis Procmail do filtrowania wirusów dla tego serwera wirtualnego zostanie usunięty.
 losing_status=Monitor stanu Webmin dla strony internetowej tego wirtualnego serwera zostanie usunięty.
 
-check_netok=Moduł konfiguracji sieci Webmina jest zainstalowany i obsługiwany.
-check_lowgmemory=Twój system jest maszyną wirtualną z $1 pamięci, ale gwarantowany limit to tylko $2. Jest to mniej niż zalecane przez Virtualmin minimum $3 i może powodować przejściowe awarie alokacji pamięci.
-check_okgmemory=Twój system jest maszyną wirtualną z co najwyżej $1 pamięci, ale gwarantowanym limitem jest tylko $2. Oba są równe lub wyższe od zalecanej przez Virtualmin minimum $3.
-check_ednsip1=Zewnętrzny adres IP dla rekordów DNS jest ustawiony na $1, ale wykryty adres zewnętrzny to tak naprawdę $2. Może to spowodować, że rekordy DNS dla domen Virtualmin wskażą niewłaściwy system.
-check_ednsip2=Domyślny adres IP jest ustawiony na $1, ale wykryty adres zewnętrzny to tak naprawdę $2. Zazwyczaj jest to wynikiem zapory sieciowej NAT i należy ją poprawić na stronie <a href='$3'>konfiguracji modułu</a>.
-check_ewebsuexecbin=W twoim systemie nie znaleziono polecenia <tt>suexec</tt>.
-check_ewebsuexechome=Komenda <tt>suexec</tt> w twoim systemie jest skonfigurowana do uruchamiania skryptów tylko poniżej <tt>$2</tt>, ale katalog domowy wirtualnego serwera Virtualmin to <tt>$1</tt>. Skrypty CGI uruchomione jako właściciele domeny nie zostaną wykonane.
-check_ewebactions=Moduł Apache <tt>mod_actions</tt> nie jest zainstalowany lub nie jest włączony.
-check_ewebdefphpmode2=Tryb wykonywania PHP $1 został wybrany w domyślnym szablonie, ale nie jest obsługiwany w tym systemie. Zmiana wartości domyślnej na $2.
+check_netok=Moduł konfiguracji sieci Webmina jest zainstalowany i obsługiwany
+check_lowgmemory=Twój system jest maszyną wirtualną z $1 pamięci, ale gwarantowany limit to tylko $2. Jest to mniej niż zalecane przez Virtualmin minimum $3 i może powodować przejściowe awarie alokacji pamięci
+check_okgmemory=Twój system jest maszyną wirtualną z co najwyżej $1 pamięci, ale gwarantowanym limitem jest tylko $2. Oba są równe lub wyższe od zalecanej przez Virtualmin minimum $3
+check_ednsip1=Zewnętrzny adres IP dla rekordów DNS jest ustawiony na $1, ale wykryty adres zewnętrzny to tak naprawdę $2. Może to spowodować, że rekordy DNS dla domen Virtualmin wskażą niewłaściwy system
+check_ednsip2=Domyślny adres IP jest ustawiony na $1, ale wykryty adres zewnętrzny to tak naprawdę $2. Zazwyczaj jest to wynikiem zapory sieciowej NAT i należy ją poprawić na stronie <a href='$3'>konfiguracji modułu</a>
+check_ewebsuexecbin=W twoim systemie nie znaleziono polecenia <tt>suexec</tt>
+check_ewebsuexechome=Komenda <tt>suexec</tt> w twoim systemie jest skonfigurowana do uruchamiania skryptów tylko poniżej <tt>$2</tt>, ale katalog domowy wirtualnego serwera Virtualmin to <tt>$1</tt>. Skrypty CGI uruchomione jako właściciele domeny nie zostaną wykonane
+check_ewebactions=Moduł Apache <tt>mod_actions</tt> nie jest zainstalowany lub nie jest włączony
+check_ewebdefphpmode2=Tryb wykonywania PHP $1 został wybrany w domyślnym szablonie, ale nie jest obsługiwany w tym systemie. Zmiana wartości domyślnej na $2
 check_ewebconfig=Znaleziono błędy konfiguracji Apache : $1 
 check_ewebapacheversion=Virtualmin nie mógł wypracować wersji Apache w twoim systemie
 check_ewebapacheversion2=W systemie jest uruchomiona wersja Apache $1, ale Virtualmin wymaga wersji $2 lub nowszej
-check_ewebphp=Plik konfiguracyjny Apache $1 zawiera $2 wiersze, które uniemożliwiają działanie PHP z uprawnieniami właściciela domeny. Te linie muszą zostać usunięte.
-check_suexecok2=Skrypty CGI mogą być wykonywane przy użyciu suEXEC lub FCGI wrap.
-check_suexecok=Skrypty CGI mogą być wykonywane przy użyciu suEXEC.
-check_fcgiwrapok=Skrypty CGI można wykonywać za pomocą fcgiwrap.
-check_http2ok=Apache obsługuje HTTPv2 w twoim systemie.
+check_ewebphp=Plik konfiguracyjny Apache $1 zawiera $2 wiersze, które uniemożliwiają działanie PHP z uprawnieniami właściciela domeny. Te linie muszą zostać usunięte
+check_suexecok2=Skrypty CGI mogą być wykonywane przy użyciu suEXEC lub FCGI wrap
+check_suexecok=Skrypty CGI mogą być wykonywane przy użyciu suEXEC
+check_fcgiwrapok=Skrypty CGI można wykonywać za pomocą fcgiwrap
+check_http2ok=Apache obsługuje HTTPv2 w twoim systemie
 check_http2err=Apache nie obsługuje HTTPv2  : $1 
 check_webphpmodes=Dostępne są następujące tryby wykonywania PHP : $1 
 check_ewebphpmodes=Brak dostępnych trybów wykonywania PHP!
-check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików <tt>php.ini</tt>.
-check_webphpfpm=Obsługa PHP-FPM w wersji $1 jest dostępna w tym systemie.
+check_webphpversinis=Wersje PHP zmieniły się na $1 od ostatniego sprawdzenia. Ponowne generowanie brakujących plików <tt>php.ini</tt>
+check_webphpfpm=Obsługa PHP-FPM w wersji $1 jest dostępna w tym systemie
 check_webphpnofpm=Obsługa PHP-FPM nie została wykryta : $1 
 check_webphpfpm2=W tym systemie dostępne są następujące wersje PHP-FPM : $1 
 check_ewebphpfpm2=Nie można użyć następujących wersji PHP-FPM : $1 
-check_webphpnofpm2=W tym systemie nie znaleziono pakietów PHP-FPM.
+check_webphpnofpm2=W tym systemie nie znaleziono pakietów PHP-FPM
 check_webphpfpmport=Naprawianie kolizji portu $2 dla wersji $1 PHP-FPM
-check_webphpverfixed=Poprawiona wersja FPM dla $1 domen.
-check_webphplocalfixed=Ograniczona wersja serwera FPM $2 do localhost dla $1 domen.
-check_webadminfixed=Usunięto nieobsługiwaną dyrektywę $1 ze stron $2 Apache.
-check_dnsok3=Domeny BIND DNS będą hostowane na hoście usług.
-check_etlsa=W systemie nie można utworzyć rekordów TLSA DNS: $1.
-check_tlsaok=Rekordy DNS TLSA zostaną dodane do nowych domen.
-check_dnsmaster=Jednak domyślny główny serwer DNS $1 nie jest w pełni kwalifikowaną nazwą domeny.
-check_mysqlok=MySQL $1 jest zainstalowany i działa.
-check_mysqlok2=Programy klienckie MySQL są instalowane do użytku z hostem usług.
-check_mysqlnopass=MySQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>root</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> MySQL Database </a></b>.
-check_postgresok=PostgreSQL jest zainstalowany i działa.
-check_postgresnopass=PostgreSQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>$2</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> Baza danych PostgreSQL </a></b>.
+check_webphpverfixed=Poprawiona wersja FPM dla $1 domen
+check_webphplocalfixed=Ograniczona wersja serwera FPM $2 do localhost dla $1 domen
+check_webadminfixed=Usunięto nieobsługiwaną dyrektywę $1 ze stron $2 Apache
+check_dnsok3=Domeny BIND DNS będą hostowane na hoście usług
+check_etlsa=W systemie nie można utworzyć rekordów TLSA DNS: $1
+check_tlsaok=Rekordy DNS TLSA zostaną dodane do nowych domen
+check_dnsmaster=Jednak domyślny główny serwer DNS $1 nie jest w pełni kwalifikowaną nazwą domeny
+check_mysqlok=MySQL $1 jest zainstalowany i działa
+check_mysqlok2=Programy klienckie MySQL są instalowane do użytku z hostem usług
+check_mysqlnopass=MySQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>root</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> MySQL Database </a></b>
+check_postgresok=PostgreSQL jest zainstalowany i działa
+check_postgresnopass=PostgreSQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>$2</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> Baza danych PostgreSQL </a></b>
 check_enetmask6=Maska sieci IPv6 $1 jest nieprawidłowa - powinna być liczbą, na przykład 64
-check_ifacezone=Interfejs sieciowy zostanie wykryty automatycznie podczas tworzenia wirtualnego serwera.
-check_sendmailok=Serwer pocztowy Sendmail jest zainstalowany i skonfigurowany.
-check_postfixok=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany.
-check_dependentok=Postfix jest skonfigurowany do obsługi wychodzących adresów IP dla poszczególnych domen.
-check_dependentever=Twoja wersja Postfix nie obsługuje wychodzących adresów IP dla poszczególnych domen.
-check_dependentesupport=Postfix może obsługiwać wychodzące adresy IP dla poszczególnych domen, ale nie jest obecnie skonfigurowany do tego. Można to ustawić w module <a href='$1'>Postfix Mailserver</a>.
-check_qmailok=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany.
-check_qmailmode6=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, co może nie działać.
-check_postfixmode6=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, nie jest obsługiwany przez Postfix.
-check_vpopmailok=Serwer pocztowy Qmail z rozszerzeniami VPOPMail jest zainstalowany i skonfigurowany.
-check_nogroup=Przydziały użytkowników są włączone dla katalogów domowych i e-mailowych, ale przydziały grupowe nie. Całkowite kwoty serwerów wirtualnych nie będą egzekwowane.
-check_noquotas=Przydziały dysku zostały wyłączone w konfiguracji modułu.
-check_edepwebalizer=Webalizer nie może być włączony w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to serwer WWW.
-check_edepssl=SSL nie może być włączone w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to Apache.
-check_eshell=Powłoka $1 dla użytkowników innych niż FTP jest zawarta w $2, co może umożliwić dostęp FTP.
-check_emysqlsync=Synchronizacja między użytkownikami Uniksa i MySQL jest włączona w module <a href='$1'>MySQL Database</a>. Nie jest to konieczne, ponieważ Virtualmin tworzy konta MySQL dla właścicieli domen w razie potrzeby, dlatego należy je wyłączyć.
-check_equotasync=Domyślne przydziały dysku dla nowych użytkowników są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych użytkowników, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>.
-check_egquotasync=Domyślne przydziały dysku dla nowych grup są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych domen, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>.
-check_allwebmin=Aktualizowanie wszystkich użytkowników Webmin o nowe ustawienia.
+check_ifacezone=Interfejs sieciowy zostanie wykryty automatycznie podczas tworzenia wirtualnego serwera
+check_sendmailok=Serwer pocztowy Sendmail jest zainstalowany i skonfigurowany
+check_postfixok=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany
+check_dependentok=Postfix jest skonfigurowany do obsługi wychodzących adresów IP dla poszczególnych domen
+check_dependentever=Twoja wersja Postfix nie obsługuje wychodzących adresów IP dla poszczególnych domen
+check_dependentesupport=Postfix może obsługiwać wychodzące adresy IP dla poszczególnych domen, ale nie jest obecnie skonfigurowany do tego. Można to ustawić w module <a href='$1'>Postfix Mailserver</a>
+check_qmailok=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany
+check_qmailmode6=Serwer pocztowy Qmail jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, co może nie działać
+check_postfixmode6=Serwer pocztowy Postfix jest zainstalowany i skonfigurowany. Jednak format nazwy użytkownika na stronie szablonów serwera jest ustawiony na <b>nazwa użytkownika @ domena</b>, nie jest obsługiwany przez Postfix
+check_vpopmailok=Serwer pocztowy Qmail z rozszerzeniami VPOPMail jest zainstalowany i skonfigurowany
+check_nogroup=Przydziały użytkowników są włączone dla katalogów domowych i e-mailowych, ale przydziały grupowe nie. Całkowite kwoty serwerów wirtualnych nie będą egzekwowane
+check_noquotas=Przydziały dysku zostały wyłączone w konfiguracji modułu
+check_edepwebalizer=Webalizer nie może być włączony w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to serwer WWW
+check_edepssl=SSL nie może być włączone w konfiguracji modułu Virtualmin <a href='$1'></a>, chyba że jest to Apache
+check_eshell=Powłoka $1 dla użytkowników innych niż FTP jest zawarta w $2, co może umożliwić dostęp FTP
+check_emysqlsync=Synchronizacja między użytkownikami Uniksa i MySQL jest włączona w module <a href='$1'>MySQL Database</a>. Nie jest to konieczne, ponieważ Virtualmin tworzy konta MySQL dla właścicieli domen w razie potrzeby, dlatego należy je wyłączyć
+check_equotasync=Domyślne przydziały dysku dla nowych użytkowników są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych użytkowników, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>
+check_egquotasync=Domyślne przydziały dysku dla nowych grup są włączone w systemach plików: $1. Nie jest to konieczne, ponieważ Virtualmin ustawia przydziały dla nowych domen, dlatego należy je wyłączyć w module <a href='$2'>Przydziały dysku</a>
+check_allwebmin=Aktualizowanie wszystkich użytkowników Webmin o nowe ustawienia
 check_allresel=Aktualizowanie wszystkich sprzedawców o nowe ustawienia ..
-check_needupdate=Niektóre ustawienia konfiguracji modułów, które wpływają na moduły, do których użytkownicy Webmin mają dostęp, uległy zmianie. Kliknij przycisk poniżej, aby zaktualizować wszystkich użytkowników o nowe uprawnienia.
+check_needupdate=Niektóre ustawienia konfiguracji modułów, które wpływają na moduły, do których użytkownicy Webmin mają dostęp, uległy zmianie. Kliknij przycisk poniżej, aby zaktualizować wszystkich użytkowników o nowe uprawnienia
 check_updatenow=Zaktualizuj użytkowników Webmin
-check_current=W globalnej konfiguracji Webalizera <b>plik przyrostowy Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić go na ścieżkę względną, na przykład <tt>webalizer.current</tt>.
-check_history=W globalnej konfiguracji Webalizera <b>plik historii Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić go na ścieżkę względną, na przykład <tt>webalizer.hist</tt>.
-check_proftpd=W szablonie konfiguracji ProFTPD znaleziono błąd: $1. Należy to naprawić, edytując Ustawienia domyślne na stronie Szablony serwera.
-check_enamevirt=Opcje <b>Wszystkie serwery wirtualne Apache są oparte na nazwie</b> i <b>Domyślny adres IP dla rekordów DNS</b> nie mogą być włączone w <a href='$1'>Konfiguracja Virtualmin</a> strona.
-check_plugin=Wtyczka $1 jest zainstalowana.
-check_eldap=Wystąpił błąd podczas łączenia się z serwerem LDAP: $1. Albo LDAP musi być wyłączony na stronie <a href='$2'>konfiguracja modułu</a>, albo moduł <a href='$3'>Użytkownicy i grupy LDAP</a> musi być poprawnie skonfigurowany.
-check_eldap2=Moduł Użytkownicy i grupy LDAP jest zbyt stary, aby mógł być używany przez Virtualmin do zarządzania użytkownikami. Albo LDAP musi być wyłączony na stronie <a href='$1'>konfiguracji modułu</a>, albo moduł zaktualizowany do wersji $2.
-check_ldap=Zarządzanie użytkownikami i grupami LDAP jest poprawnie skonfigurowane.
-check_spamok=SpamAssassin i Procmail są zainstalowane i skonfigurowane do użytku.
-check_noprocmail=SpamAssassin i Procmail są zainstalowane. Jednak Twój serwer pocztowy nie jest skonfigurowany do dostarczania przy użyciu Procmail.
-check_spamglobal=SpamAssassin jest skonfigurowany do uruchamiania z globalnej konfiguracji Procmail $1, co nie jest potrzebne, ponieważ Virtualmin skonfiguruje go dla poszczególnych domen.
-check_spamwhite=Dodanie do białej listy wszystkich skrzynek pocztowych w każdej domenie jest włączone na stronie <a href='$1'>Konfiguracja Virtualmin</a>, ale jest to niezgodne z użyciem <a href='$2'>spamc</a> SpamAssassin program kliencki.
-check_virusok=ClamAV jest zainstalowany i działa.
-check_virusok2=ClamAV jest zainstalowany i zakłada się, że działa.
-check_emysqlplugin=Wtyczka użytkowników MySQL nie jest już potrzebna, ponieważ jej funkcjonalność została włączona do rdzenia Virtualmin.
-check_statusok=Moduł Status systemu i serwera jest zainstalowany i sprawdzany zgodnie z harmonogramem.
-check_statussched=Moduł Status systemu i serwera jest zainstalowany, ale nie jest skonfigurowany do sprawdzania serwerów w regularnych odstępach czasu. Należy to włączyć na stronie <a href='$1'>Zaplanowane monitorowanie</a>.
-check_ebcmd=Polecenie $1 potrzebne do utworzenia lub przywrócenia kopii zapasowych nie zostało zainstalowane.
+check_current=W globalnej konfiguracji Webalizera <b>plik przyrostowy Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić go na ścieżkę względną, na przykład <tt>webalizer.current</tt>
+check_history=W globalnej konfiguracji Webalizera <b>plik historii Webalizera</b> jest ustawiony na ścieżkę bezwzględną. Użyj modułu <a href='$1'>Webalizer</a>, aby zmienić go na ścieżkę względną, na przykład <tt>webalizer.hist</tt>
+check_proftpd=W szablonie konfiguracji ProFTPD znaleziono błąd: $1. Należy to naprawić, edytując Ustawienia domyślne na stronie Szablony serwera
+check_enamevirt=Opcje <b>Wszystkie serwery wirtualne Apache są oparte na nazwie</b> i <b>Domyślny adres IP dla rekordów DNS</b> nie mogą być włączone w <a href='$1'>Konfiguracja Virtualmin</a> strona
+check_plugin=Wtyczka $1 jest zainstalowana
+check_eldap=Wystąpił błąd podczas łączenia się z serwerem LDAP: $1. Albo LDAP musi być wyłączony na stronie <a href='$2'>konfiguracja modułu</a>, albo moduł <a href='$3'>Użytkownicy i grupy LDAP</a> musi być poprawnie skonfigurowany
+check_eldap2=Moduł Użytkownicy i grupy LDAP jest zbyt stary, aby mógł być używany przez Virtualmin do zarządzania użytkownikami. Albo LDAP musi być wyłączony na stronie <a href='$1'>konfiguracji modułu</a>, albo moduł zaktualizowany do wersji $2
+check_ldap=Zarządzanie użytkownikami i grupami LDAP jest poprawnie skonfigurowane
+check_spamok=SpamAssassin i Procmail są zainstalowane i skonfigurowane do użytku
+check_noprocmail=SpamAssassin i Procmail są zainstalowane. Jednak Twój serwer pocztowy nie jest skonfigurowany do dostarczania przy użyciu Procmail
+check_spamglobal=SpamAssassin jest skonfigurowany do uruchamiania z globalnej konfiguracji Procmail $1, co nie jest potrzebne, ponieważ Virtualmin skonfiguruje go dla poszczególnych domen
+check_spamwhite=Dodanie do białej listy wszystkich skrzynek pocztowych w każdej domenie jest włączone na stronie <a href='$1'>Konfiguracja Virtualmin</a>, ale jest to niezgodne z użyciem <a href='$2'>spamc</a> SpamAssassin program kliencki
+check_virusok=ClamAV jest zainstalowany i działa
+check_virusok2=ClamAV jest zainstalowany i zakłada się, że działa
+check_emysqlplugin=Wtyczka użytkowników MySQL nie jest już potrzebna, ponieważ jej funkcjonalność została włączona do rdzenia Virtualmin
+check_statusok=Moduł Status systemu i serwera jest zainstalowany i sprawdzany zgodnie z harmonogramem
+check_statussched=Moduł Status systemu i serwera jest zainstalowany, ale nie jest skonfigurowany do sprawdzania serwerów w regularnych odstępach czasu. Należy to włączyć na stronie <a href='$1'>Zaplanowane monitorowanie</a>
+check_ebcmd=Polecenie $1 potrzebne do utworzenia lub przywrócenia kopii zapasowych nie zostało zainstalowane
 check_epbzip2out=Wybrano równoległą kompresję bzip2, ale nie można określić numeru wersji <tt>pbzip2</tt> : $1 
 check_epbzip2ver=Wybrano równoległą kompresję bzip2, ale wymaga to <tt>pbzip2</tt> wersji $1 lub nowszej, a system ma wersję $2 
 check_eset_user=Zewnętrzne polecenia przydziału są włączone, ale polecenie ustawienia przydziału użytkownika nie jest zdefiniowane lub nie istnieje
@@ -1604,42 +1604,42 @@ check_elist_users=Zewnętrzne polecenia przydziału są włączone, ale poleceni
 check_elist_groups=Zewnętrzne polecenia przydziału są włączone, ale polecenie wyświetlenia przydziałów grup nie zostało zdefiniowane lub nie istnieje
 check_eget_user=Zewnętrzne polecenia przydziału są włączone, ale polecenie uzyskania przydziału dla jednego użytkownika nie istnieje
 check_eget_group=Zewnętrzne polecenia przydziału są włączone, ale polecenie uzyskania przydziału dla pojedynczej grupy nie istnieje
-check_quotacommands=Zewnętrzne polecenia przydziału będą używane dla serwerów wirtualnych i skrzynek pocztowych.
+check_quotacommands=Zewnętrzne polecenia przydziału będą używane dla serwerów wirtualnych i skrzynek pocztowych
 check_eclamd=Wybrano użycie <tt>clamdscan</tt> do skanowania w poszukiwaniu wirusów, ale serwer <tt>clamd</tt>, z którym mówi, nie działa
 check_evirusspam=Skanowania antywirusowego nie można włączyć bez filtrowania spamu
-check_preload=Aktualizowanie ustawień wstępnego ładowania biblioteki Virtualmin.
+check_preload=Aktualizowanie ustawień wstępnego ładowania biblioteki Virtualmin
 check_collect=Aktualizowanie zadania gromadzenia statusu ..
-check_collectoff=Wyłączam zadanie gromadzenia statusu.
-check_esendmailbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie jest obsługiwane przez serwer pocztowy Sendmail, dlatego należy je wyłączyć na stronie <a href='$1'>konfiguracji modułu</a>.
-check_eqmailbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie jest obsługiwane przez serwer poczty Qmail, dlatego należy je wyłączyć na stronie <a href='$1'>konfiguracji modułu</a>.
-check_epostfixbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie może być włączone, chyba że mapa BCC jest zdefiniowana w module <a href='$1'>Postfix Mailserver</a> lub ręcznie w pliku konfiguracyjnym Postfix. W przeciwnym razie należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a>.
-check_esendmailaddrs=Sendmail akceptuje połączenia SMTP tylko na następujących portach: $1. Wiadomości e-mail z innych systemów w Internecie nie będą akceptowane. Można to zmienić w module <a href='$2'>Sendmail Mail Server</a>.
+check_collectoff=Wyłączam zadanie gromadzenia statusu
+check_esendmailbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie jest obsługiwane przez serwer pocztowy Sendmail, dlatego należy je wyłączyć na stronie <a href='$1'>konfiguracji modułu</a>
+check_eqmailbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie jest obsługiwane przez serwer poczty Qmail, dlatego należy je wyłączyć na stronie <a href='$1'>konfiguracji modułu</a>
+check_epostfixbccs=Automatyczne BCCing wychodzących wiadomości e-mail nie może być włączone, chyba że mapa BCC jest zdefiniowana w module <a href='$1'>Postfix Mailserver</a> lub ręcznie w pliku konfiguracyjnym Postfix. W przeciwnym razie należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a>
+check_esendmailaddrs=Sendmail akceptuje połączenia SMTP tylko na następujących portach: $1. Wiadomości e-mail z innych systemów w Internecie nie będą akceptowane. Można to zmienić w module <a href='$2'>Sendmail Mail Server</a>
 check_ealias_maps=Znaleziono problem z twoimi mapami aliasów Postfix : $1 
 check_evirtual_maps=Znaleziono problem z Twoimi wirtualnymi mapami Postfix : $1 
 check_ecanonical_maps=Znaleziono problem z twoimi mapami kanonicznymi Postfix, używanymi do mapowania adresów wychodzących : $1 
 check_ebcc_maps=Znaleziono problem z mapami BCC nadawcy Postfix : $1 
-check_evad=Twoja konfiguracja Postfix ma opcję <tt>virtual_alias_domains</tt> ustawioną na <tt>$1</tt>. To zastępuje listę domen z opcji <tt>virtual_alias_maps</tt> i należy je usunąć.
-check_emydest=W konfiguracji Postfix brakuje systemowej nazwy hosta poczty <tt>$1</tt> z linii <tt>mydestination</tt>, co spowoduje odesłanie poczty. Obecna wartość to <tt>$2</tt>.
-check_elogrotateconf=Obecna konfiguracja logrotate jest nieprawidłowa: $1. Należy to naprawić, w przeciwnym razie rotacja pliku dziennika nie zostanie wykonana.
-check_espamsiteconfig=Komenda <tt>spamassassin</tt> nie obsługuje parametru <tt>--siteconfigpath</tt>, który jest wymagany przez Virtualmin. Zainstalowana wersja to $1 - zalecana jest wersja 3.0 lub nowsza.
+check_evad=Twoja konfiguracja Postfix ma opcję <tt>virtual_alias_domains</tt> ustawioną na <tt>$1</tt>. To zastępuje listę domen z opcji <tt>virtual_alias_maps</tt> i należy je usunąć
+check_emydest=W konfiguracji Postfix brakuje systemowej nazwy hosta poczty <tt>$1</tt> z linii <tt>mydestination</tt>, co spowoduje odesłanie poczty. Obecna wartość to <tt>$2</tt>
+check_elogrotateconf=Obecna konfiguracja logrotate jest nieprawidłowa: $1. Należy to naprawić, w przeciwnym razie rotacja pliku dziennika nie zostanie wykonana
+check_espamsiteconfig=Komenda <tt>spamassassin</tt> nie obsługuje parametru <tt>--siteconfigpath</tt>, który jest wymagany przez Virtualmin. Zainstalowana wersja to $1 - zalecana jest wersja 3.0 lub nowsza
 check_reserr=Limity zasobów nie są obsługiwane w systemie : $1 
 check_reswarn=Limity zasobów są obsługiwane, ale nie w pełni skonfigurowane : $1 
-check_resok=Limity zasobów są obsługiwane i poprawnie skonfigurowane.
+check_resok=Limity zasobów są obsługiwane i poprawnie skonfigurowane
 check_updateerr=Nie można użyć wybranego systemu aktualizacji pakietu : $1 
-check_packageok=Zainstalowane są wybrane systemy zarządzania pakietami i aktualizacji.
-check_apicmd=Tworzenie polecenia pomocnika API.
+check_packageok=Zainstalowane są wybrane systemy zarządzania pakietami i aktualizacji
+check_apicmd=Tworzenie polecenia pomocnika API
 check_spamlockon=Dodanie pliku blokującego do wszystkich wywołań spamassassin wszystkich domen ..
 check_spamlockoff=Usuwanie pliku blokady z wszystkich wywołań spamassassin wszystkich domen ..
-check_spamwrappercmd=Komenda procmail <tt>$1</tt> w konfiguracji Postfix nie istnieje.
-check_spamwrapperuser=Polecenie procmail <tt>$1</tt> jest własnością użytkownika $2, kiedy powinno być własnością <tt>root</tt>. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu.
-check_spamwrappergroup=Polecenie procmail <tt>$1</tt> jest własnością grupy $2, kiedy powinno być własnością <tt>root</tt>. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu.
-check_spamwrapperperms=Polecenie procmail <tt>$1</tt> ma uprawnienia $2, kiedy powinno być ustawione jako setuid i ustawione na root. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu.
+check_spamwrappercmd=Komenda procmail <tt>$1</tt> w konfiguracji Postfix nie istnieje
+check_spamwrapperuser=Polecenie procmail <tt>$1</tt> jest własnością użytkownika $2, kiedy powinno być własnością <tt>root</tt>. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu
+check_spamwrappergroup=Polecenie procmail <tt>$1</tt> jest własnością grupy $2, kiedy powinno być własnością <tt>root</tt>. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu
+check_spamwrapperperms=Polecenie procmail <tt>$1</tt> ma uprawnienia $2, kiedy powinno być ustawione jako setuid i ustawione na root. Wiadomość e-mail może nie zostać poprawnie dostarczona lub sprawdzona pod kątem spamu
 check_lostfeature=Funkcji <i>$1</i> nie można wyłączyć, ponieważ jest używana przez następujące serwery wirtualne : $2 
 check_lostplugin=Wtyczki <i>$1</i> nie można wyłączyć, ponieważ jest używana przez następujące serwery wirtualne : $2 
-check_ehomebase=Domowy katalog podstawowy $1 nie jest ścieżką bezwzględną. Można to poprawić na stronie <a href='$2'>Konfiguracja Virtualmin</a>.
-check_ehomebase2=Domowy katalog podstawowy $1 nie jest ścieżką bezwzględną. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>.
-check_ehomeformat=Format katalogu domowego $1 nie zawiera nazwy użytkownika ani nazwy domeny. Można to poprawić na stronie <a href='$2'>Konfiguracja Virtualmin</a>.
-check_ehomestyle=Styl katalogu domowego jest ustawiony na „Po prostu katalog podstawowy”, co nie jest możliwe w Virtualmin. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>.
+check_ehomebase=Domowy katalog podstawowy $1 nie jest ścieżką bezwzględną. Można to poprawić na stronie <a href='$2'>Konfiguracja Virtualmin</a>
+check_ehomebase2=Domowy katalog podstawowy $1 nie jest ścieżką bezwzględną. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>
+check_ehomeformat=Format katalogu domowego $1 nie zawiera nazwy użytkownika ani nazwy domeny. Można to poprawić na stronie <a href='$2'>Konfiguracja Virtualmin</a>
+check_ehomestyle=Styl katalogu domowego jest ustawiony na „Po prostu katalog podstawowy”, co nie jest możliwe w Virtualmin. Można to poprawić na stronie <a href='$2'>Konfiguracja modułu Użytkownicy i grupy</a>
 check_jailkitok=W tym systemie dostępne są więzienia Chroot
 check_jailkiterr=Więzienia Chroot są niedostępne : $1 
 check_eyumrepofile=Plik konfiguracyjny repozytorium Virtualmin $1 nie istnieje!

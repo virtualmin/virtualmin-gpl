@@ -651,62 +651,62 @@ feature_virt6=IPv6 adresi
 bandwidth_backup=Yapılan yedeklemeler
 bandwidth_restore=Yedekler geri yüklendi
 
-check_lowmemory=Sisteminizde yalnızca $1 bellek var, bu da Virtualmin tarafından önerilen minimum $2 değerinin altında.
-check_lowgmemory=Sisteminiz $1 belleğe sahip bir sanal makinedir, ancak garanti edilen sınır yalnızca $2 'dir. Bu, Virtualmin tarafından önerilen minimum $3 değerinin altındadır ve aralıklı bellek ayırma hatalarına neden olabilir.
-check_okmemory=Sisteminizde $1 bellek var, bu değer Virtualmin tarafından önerilen minimum $2 değerinde veya üstünde.
-check_okgmemory=Sisteminiz en fazla $1 belleğe sahip, ancak yalnızca $2 garantili bir sınıra sahip bir sanal makinedir. Bunlar Virtualmin tarafından önerilen minimum $3 değerinin üstünde ya da üzerindedir.
-check_defip6=Sanal sunucular için varsayılan IPv6 adresi $1.
-check_dnsip1=DNS kayıtları için harici IP adresi, algılanan harici adresle eşleşen $1 olarak ayarlandı.
-check_dnsip2=Varsayılan IP adresi, algılanan harici adresle eşleşen $1 olarak ayarlanmış.
-check_ednsip1=DNS kayıtları için harici IP adresi $1 olarak ayarlandı, ancak algılanan harici adres aslında $2. Bu, Virtualmin etki alanları için DNS kayıtlarının yanlış sistemi göstermesine neden olabilir.
-check_ednsip2=Varsayılan IP adresi $1 olarak ayarlanmış, ancak algılanan harici adres aslında $2. Bu genellikle bir NAT güvenlik duvarının arkasında olmanın sonucudur ve <a href='$3'>modül yapılandırması</a> sayfasında düzeltilmelidir.
-check_ewebsuexecbin=<tt>suexec</tt> komutu sisteminizde bulunamadı.
-check_ewebsuexechome=Sisteminizdeki <tt>suexec</tt> <tt>$2</tt> altındaki komut dosyalarını çalıştıracak şekilde yapılandırılmıştır, ancak Virtualmin sanal sunucusu ana dizini <tt>$1</tt> 1'dır. Etki alanı sahipleri olarak çalıştırılan CGI komut dosyaları yürütülmez.
-check_ewebdefphpmode2=$1 PHP yürütme modu varsayılan şablonda seçildi, ancak bu sistemde desteklenmiyor. Varsayılan değeri $2 olarak değiştirme.
+check_lowmemory=Sisteminizde yalnızca $1 bellek var, bu da Virtualmin tarafından önerilen minimum $2 değerinin altında
+check_lowgmemory=Sisteminiz $1 belleğe sahip bir sanal makinedir, ancak garanti edilen sınır yalnızca $2 'dir. Bu, Virtualmin tarafından önerilen minimum $3 değerinin altındadır ve aralıklı bellek ayırma hatalarına neden olabilir
+check_okmemory=Sisteminizde $1 bellek var, bu değer Virtualmin tarafından önerilen minimum $2 değerinde veya üstünde
+check_okgmemory=Sisteminiz en fazla $1 belleğe sahip, ancak yalnızca $2 garantili bir sınıra sahip bir sanal makinedir. Bunlar Virtualmin tarafından önerilen minimum $3 değerinin üstünde ya da üzerindedir
+check_defip6=Sanal sunucular için varsayılan IPv6 adresi $1
+check_dnsip1=DNS kayıtları için harici IP adresi, algılanan harici adresle eşleşen $1 olarak ayarlandı
+check_dnsip2=Varsayılan IP adresi, algılanan harici adresle eşleşen $1 olarak ayarlanmış
+check_ednsip1=DNS kayıtları için harici IP adresi $1 olarak ayarlandı, ancak algılanan harici adres aslında $2. Bu, Virtualmin etki alanları için DNS kayıtlarının yanlış sistemi göstermesine neden olabilir
+check_ednsip2=Varsayılan IP adresi $1 olarak ayarlanmış, ancak algılanan harici adres aslında $2. Bu genellikle bir NAT güvenlik duvarının arkasında olmanın sonucudur ve <a href='$3'>modül yapılandırması</a> sayfasında düzeltilmelidir
+check_ewebsuexecbin=<tt>suexec</tt> komutu sisteminizde bulunamadı
+check_ewebsuexechome=Sisteminizdeki <tt>suexec</tt> <tt>$2</tt> altındaki komut dosyalarını çalıştıracak şekilde yapılandırılmıştır, ancak Virtualmin sanal sunucusu ana dizini <tt>$1</tt> 1'dır. Etki alanı sahipleri olarak çalıştırılan CGI komut dosyaları yürütülmez
+check_ewebdefphpmode2=$1 PHP yürütme modu varsayılan şablonda seçildi, ancak bu sistemde desteklenmiyor. Varsayılan değeri $2 olarak değiştirme
 check_ewebconfig=Apache yapılandırma hataları bulundu : $1 
 check_ewebapacheversion=Virtualmin sisteminizde Apache sürümünü çalıştıramadı
 check_ewebapacheversion2=Sisteminizde Apache $1 sürümü çalışıyor, ancak Virtualmin $2 veya üstü sürüm gerektiriyor
-check_ewebphp=$1 Apache yapılandırma dosyası, PHP'nin etki alanı sahibi izinleriyle çalışmasını engelleyen $2 satır içeriyor. Bu çizgiler kaldırılmalıdır.
-check_suexecok2=CGI komut dosyaları, suEXEC veya FCGI sarma kullanılarak yürütülebilir.
-check_suexecok=CGI betikleri suEXEC kullanılarak yürütülebilir.
-check_fcgiwrapok=CGI betikleri fcgiwrap kullanılarak çalıştırılabilir.
-check_http2ok=Apache, sisteminizde HTTPv2'yi destekler.
+check_ewebphp=$1 Apache yapılandırma dosyası, PHP'nin etki alanı sahibi izinleriyle çalışmasını engelleyen $2 satır içeriyor. Bu çizgiler kaldırılmalıdır
+check_suexecok2=CGI komut dosyaları, suEXEC veya FCGI sarma kullanılarak yürütülebilir
+check_suexecok=CGI betikleri suEXEC kullanılarak yürütülebilir
+check_fcgiwrapok=CGI betikleri fcgiwrap kullanılarak çalıştırılabilir
+check_http2ok=Apache, sisteminizde HTTPv2'yi destekler
 check_http2err=Apache, HTTPv2'yi desteklemiyor : $1
 check_webphpvers=Aşağıdaki PHP sürümleri mevcuttur : $1 
 check_webphpnovers=Bu sistemde PHP sürümü bulunamadı!
 check_webphpmodes=Aşağıdaki PHP yürütme modları kullanılabilir : $1 
 check_ewebphpmodes=PHP yürütme modu yok!
-check_webphpversinis=PHP sürümleri son kontrolden beri $1 olarak değiştirildi. Eksik <tt>php.ini</tt> dosyalarını yeniden oluşturma.
-check_webphpfpm=PHP-FPM sürüm $1 desteği bu sistemde mevcut.
+check_webphpversinis=PHP sürümleri son kontrolden beri $1 olarak değiştirildi. Eksik <tt>php.ini</tt> dosyalarını yeniden oluşturma
+check_webphpfpm=PHP-FPM sürüm $1 desteği bu sistemde mevcut
 check_webphpnofpm=PHP-FPM desteği tespit edilmedi : $1 
 check_webphpfpm2=Bu sistemde aşağıdaki PHP-FPM sürümleri mevcuttur : $1 
 check_ewebphpfpm2=Aşağıdaki PHP-FPM sürümleri kullanılamaz : $1 
-check_webphpnofpm2=Bu sistemde PHP-FPM paketi bulunamadı.
+check_webphpnofpm2=Bu sistemde PHP-FPM paketi bulunamadı
 check_webphpfpmport=PHP-FPM $1 için bağlantı noktası $2 çakışması düzeltildi
-check_webphpverfixed=$1 alan adları için FPM sürümü düzeltildi.
-check_webphplocalfixed=$2 alan adlarının $2 'si için yerel ana bilgisayarla sınırlı FPM sunucusu sürümü.
-check_webadminfixed=$2 Apache web sitesinden desteklenmeyen $1 yönergesi kaldırıldı.
-check_dnsok2=BIND DNS sunucusu yüklü.
-check_dnsok3=BIND DNS etki alanları bir hizmet ana bilgisayarında barındırılacaktır.
-check_etlsa=TLSA DNS kayıtları sisteminizde oluşturulamaz: $1.
-check_tlsaok=TLSA DNS kayıtları yeni alanlara eklenecek.
-check_dnsmaster=Ancak, varsayılan ana DNS sunucusu $1 tam etki alanı adı değil.
-check_mysqlok=MySQL $1 yüklendi ve çalışıyor.
-check_mysqlok2=MySQL istemci programları bir servis ana bilgisayarı ile kullanılmak üzere kurulur.
-check_mysqlnopass=MySQL kurulu ve çalışıyor, ancak ayarlanmış bir <tt>root</tt> şifresi yok! <b>Bu,<a href='$1'> MySQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
-check_postgresnopass=PostgreSQL kurulu ve çalışıyor fakat ayarlanmış bir <tt>$2</tt> şifre yok! <b>Bu,<a href='$1'> PostgreSQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir.
+check_webphpverfixed=$1 alan adları için FPM sürümü düzeltildi
+check_webphplocalfixed=$2 alan adlarının $2 'si için yerel ana bilgisayarla sınırlı FPM sunucusu sürümü
+check_webadminfixed=$2 Apache web sitesinden desteklenmeyen $1 yönergesi kaldırıldı
+check_dnsok2=BIND DNS sunucusu yüklü
+check_dnsok3=BIND DNS etki alanları bir hizmet ana bilgisayarında barındırılacaktır
+check_etlsa=TLSA DNS kayıtları sisteminizde oluşturulamaz: $1
+check_tlsaok=TLSA DNS kayıtları yeni alanlara eklenecek
+check_dnsmaster=Ancak, varsayılan ana DNS sunucusu $1 tam etki alanı adı değil
+check_mysqlok=MySQL $1 yüklendi ve çalışıyor
+check_mysqlok2=MySQL istemci programları bir servis ana bilgisayarı ile kullanılmak üzere kurulur
+check_mysqlnopass=MySQL kurulu ve çalışıyor, ancak ayarlanmış bir <tt>root</tt> şifresi yok! <b>Bu,<a href='$1'> MySQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir
+check_postgresnopass=PostgreSQL kurulu ve çalışıyor fakat ayarlanmış bir <tt>$2</tt> şifre yok! <b>Bu,<a href='$1'> PostgreSQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir
 check_enetmask6=IPv6 netmask $1 geçerli değil - 64 gibi bir sayı olmalı
-check_iface6=$1 arabirimi kullanılarak IPv6 adresleri kullanılabilir.
-check_dependentok=Postfix, alan adı başına giden IP adreslerini destekleyecek şekilde yapılandırılmıştır.
-check_dependentever=Postfix sürümünüz alan adı başına giden IP adreslerini desteklemiyor.
-check_dependentesupport=Postfix, alan adı başına giden IP adreslerini destekleyebilir, ancak şu anda bunu yapmak için yapılandırılmamıştır. Bu, <a href='$1'>Postfix Posta Sunucusu</a> modülünde ayarlanabilir.
-check_emysqlsync=<a href='$1'>MySQL Veritabanı</a> modülünde Unix ve MySQL kullanıcıları arasında senkronizasyon etkinleştirilir. Bu gerekli değildir, çünkü Virtualmin gerektiğinde etki alanı sahipleri için MySQL hesapları oluşturur ve bu nedenle kapatılması gerekir.
-check_equotasync=Yeni kullanıcılar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni kullanıcılar için kota belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır.
-check_egquotasync=Yeni gruplar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni etki alanları için kotalar belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır.
+check_iface6=$1 arabirimi kullanılarak IPv6 adresleri kullanılabilir
+check_dependentok=Postfix, alan adı başına giden IP adreslerini destekleyecek şekilde yapılandırılmıştır
+check_dependentever=Postfix sürümünüz alan adı başına giden IP adreslerini desteklemiyor
+check_dependentesupport=Postfix, alan adı başına giden IP adreslerini destekleyebilir, ancak şu anda bunu yapmak için yapılandırılmamıştır. Bu, <a href='$1'>Postfix Posta Sunucusu</a> modülünde ayarlanabilir
+check_emysqlsync=<a href='$1'>MySQL Veritabanı</a> modülünde Unix ve MySQL kullanıcıları arasında senkronizasyon etkinleştirilir. Bu gerekli değildir, çünkü Virtualmin gerektiğinde etki alanı sahipleri için MySQL hesapları oluşturur ve bu nedenle kapatılması gerekir
+check_equotasync=Yeni kullanıcılar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni kullanıcılar için kota belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır
+check_egquotasync=Yeni gruplar için varsayılan disk kotaları dosya sistemlerinde etkinleştirilir: $1. Bu gerekli değildir, çünkü Virtualmin yeni etki alanları için kotalar belirler ve bu nedenle <a href='$2'>Disk Kotaları</a> modülünde devre dışı bırakılmalıdır
 check_allresel=Tüm satıcıları yeni ayarlarla güncelleme ..
-check_plugin=$1 eklentisi yüklendi.
-check_spamwhite=Her alan adındaki tüm posta kutularının beyaz listelemesi <a href='$1'>Virtualmin Configuration</a> sayfasında etkinleştirilir, ancak bu <a href='$2'>spamc</a> SpamAssassin kullanımı ile uyumlu değildir istemci programı.
-check_virusok2=ClamAV kuruldu ve çalıştığı varsayıldı.
+check_plugin=$1 eklentisi yüklendi
+check_spamwhite=Her alan adındaki tüm posta kutularının beyaz listelemesi <a href='$1'>Virtualmin Configuration</a> sayfasında etkinleştirilir, ancak bu <a href='$2'>spamc</a> SpamAssassin kullanımı ile uyumlu değildir istemci programı
+check_virusok2=ClamAV kuruldu ve çalıştığı varsayıldı
 check_epbzip2out=Paralel bzip2 sıkıştırmasını seçtiniz, ancak <tt>pbzip2</tt> sürüm numarası belirlenemedi : $1 
 check_epbzip2ver=Paralel bzip2 sıkıştırmasını seçtiniz, ancak bunun için <tt>pbzip2</tt> sürüm 1 veya daha yeni bir sürüm gerekiyor ve sisteminizde $2 sürüm var
 check_eset_user=Harici kota komutları etkin, ancak bir kullanıcının kotasını ayarlama komutu tanımlanmamış veya mevcut değil
@@ -715,45 +715,45 @@ check_elist_users=Harici kota komutları etkin, ancak tanımlanmamış veya mevc
 check_elist_groups=Harici kota komutları etkin, ancak grup kotalarını listeleme komutu tanımlı değil veya mevcut değil
 check_eget_user=Harici kota komutları etkin, ancak tek bir kullanıcının kotasını alma komutu mevcut değil
 check_eget_group=Harici kota komutları etkin, ancak tek bir grubun kotasını alma komutu mevcut değil
-check_quotacommands=Harici kota komutları sanal sunucular ve posta kutuları için kullanılacaktır.
+check_quotacommands=Harici kota komutları sanal sunucular ve posta kutuları için kullanılacaktır
 check_eclamd=Virüs taraması için <tt>istiridye tarağı</tt> kullanmayı seçtiniz, ancak konuştuğu <tt>istiridye</tt> sunucusu çalışmıyor
 check_evirusspam=Virüs taraması spam filtresi olmadan etkinleştirilemez
 check_preload=Virtualmin kitaplığı önyükleme ayarları güncelleniyor ..
 check_collect=Durum toplama işi güncelleniyor ..
 check_collectoff=Durum toplama işi devre dışı bırakılıyor ..
-check_esendmailbccs=Giden e-postanın otomatik BCC'si, Sendmail posta sunucusu tarafından desteklenmediğinden, <a href='$1'>modül yapılandırması</a> sayfasında kapatılması gerekir.
-check_eqmailbccs=Giden e-postanın otomatik BCC'si Qmail posta sunucusu tarafından desteklenmediği için <a href='$1'>modül yapılandırması</a> sayfasında kapatılması gerekir.
-check_epostfixbccs=<a href='$1'>Postfix Posta Sunucusu</a> modülünde veya Postfix yapılandırma dosyasında manuel olarak bir BCC haritası tanımlanmadığı sürece, giden e-postanın otomatik BCC'si etkinleştirilemez. Aksi takdirde <a href='$2'>modül yapılandırması</a> sayfasında kapatılmalıdır.
-check_esendmailaddrs=Sendmail yalnızca aşağıdaki bağlantı noktalarında SMTP bağlantılarını kabul etmektedir: $1. İnternetteki diğer sistemlerden gelen e-postalar kabul edilmeyecektir. Bu, <a href='$2'>Sendmail Posta Sunucusu</a> modülünde değiştirilebilir.
+check_esendmailbccs=Giden e-postanın otomatik BCC'si, Sendmail posta sunucusu tarafından desteklenmediğinden, <a href='$1'>modül yapılandırması</a> sayfasında kapatılması gerekir
+check_eqmailbccs=Giden e-postanın otomatik BCC'si Qmail posta sunucusu tarafından desteklenmediği için <a href='$1'>modül yapılandırması</a> sayfasında kapatılması gerekir
+check_epostfixbccs=<a href='$1'>Postfix Posta Sunucusu</a> modülünde veya Postfix yapılandırma dosyasında manuel olarak bir BCC haritası tanımlanmadığı sürece, giden e-postanın otomatik BCC'si etkinleştirilemez. Aksi takdirde <a href='$2'>modül yapılandırması</a> sayfasında kapatılmalıdır
+check_esendmailaddrs=Sendmail yalnızca aşağıdaki bağlantı noktalarında SMTP bağlantılarını kabul etmektedir: $1. İnternetteki diğer sistemlerden gelen e-postalar kabul edilmeyecektir. Bu, <a href='$2'>Sendmail Posta Sunucusu</a> modülünde değiştirilebilir
 check_ealias_maps=Postfix diğer ad haritalarınızla ilgili bir sorun bulundu : $1 
 check_evirtual_maps=Postfix sanal haritalarınızla ilgili bir sorun bulundu : $1 
 check_ecanonical_maps=Giden adres eşleme için kullanılan Postfix standart haritalarınızla ilgili bir sorun bulundu : $1 
 check_ebcc_maps=Postfix göndereninin BCC haritalarında bir sorun bulundu : $1 
-check_evad=Postfix yapılandırmanızda <tt>virtual_alias_domains</tt> seçeneği <tt>$1</tt> olarak ayarlandı. Bu, <tt>virtual_alias_maps</tt> seçeneğinden alanların listesini geçersiz kılar ve kaldırılması gerekir.
-check_emydest=Postfix yapılandırmanızda, <tt>mydestination</tt> satırında sistemin posta ana bilgisayar adı <tt>$1</tt> eksik, bu da postanın geri dönmesine neden olacak. Geçerli değer <tt>$2</tt>.
-check_elogrotateconf=Geçerli logrotate yapılandırması geçerli değil: $1. Bu düzeltilmelidir, aksi takdirde günlük dosyası döndürülmez.
-check_espamsiteconfig=<tt>spamassassin</tt> komutu, Virtualmin için gerekli olan <tt>--siteconfigpath</tt> parametresini desteklemez. Yüklü sürüm $1 - sürüm 3.0 veya üstü önerilir.
+check_evad=Postfix yapılandırmanızda <tt>virtual_alias_domains</tt> seçeneği <tt>$1</tt> olarak ayarlandı. Bu, <tt>virtual_alias_maps</tt> seçeneğinden alanların listesini geçersiz kılar ve kaldırılması gerekir
+check_emydest=Postfix yapılandırmanızda, <tt>mydestination</tt> satırında sistemin posta ana bilgisayar adı <tt>$1</tt> eksik, bu da postanın geri dönmesine neden olacak. Geçerli değer <tt>$2</tt>
+check_elogrotateconf=Geçerli logrotate yapılandırması geçerli değil: $1. Bu düzeltilmelidir, aksi takdirde günlük dosyası döndürülmez
+check_espamsiteconfig=<tt>spamassassin</tt> komutu, Virtualmin için gerekli olan <tt>--siteconfigpath</tt> parametresini desteklemez. Yüklü sürüm $1 - sürüm 3.0 veya üstü önerilir
 check_reserr=Kaynak sınırları sisteminizde desteklenmiyor : $1 
 check_reswarn=Kaynak sınırları destekleniyor, ancak tam olarak yapılandırılmamış : $1 
-check_resok=Kaynak sınırları desteklenir ve doğru yapılandırılır.
+check_resok=Kaynak sınırları desteklenir ve doğru yapılandırılır
 check_packageerr=Seçilen paket yönetim sistemi kullanılamaz : $1 
 check_updateerr=Seçilen paket güncelleme sistemi kullanılamıyor : $1 
-check_packageok=Seçilen paket yönetimi ve güncelleme sistemleri kurulur.
+check_packageok=Seçilen paket yönetimi ve güncelleme sistemleri kurulur
 check_apicmd=API yardımcı komutu oluşturuluyor ..
 check_apicmdok=.. <tt>$1</tt> oluşturdu
 check_apicmderr=.. başarısız oldu : $1 
 check_spamlockon=Tüm alan adlarının spamassassin çağrılarına lockfile ekleniyor ..
-check_spamlockoff=Lockfile tüm etki alanlarının spamassassin çağrılarından kaldırılıyor.
-check_spamwrappercmd=Postfix yapılandırmasındaki <tt>$1</tt> procmail komutu mevcut değil.
-check_spamwrapperuser=<tt>$1</tt> procmail komutu, <tt>root</tt> 'a sahip olması gerektiğinde $2 kullanıcısına aittir. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez.
-check_spamwrappergroup=<tt>$1</tt> procmail komutu, <tt>root</tt> 'a sahip olması gerektiğinde $2 grubuna aittir. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez.
-check_spamwrapperperms=<tt>$1</tt> procmail komutunun, setuid ve root olarak ayarlanması gerektiğinde $2 izni var. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez.
+check_spamlockoff=Lockfile tüm etki alanlarının spamassassin çağrılarından kaldırılıyor
+check_spamwrappercmd=Postfix yapılandırmasındaki <tt>$1</tt> procmail komutu mevcut değil
+check_spamwrapperuser=<tt>$1</tt> procmail komutu, <tt>root</tt> 'a sahip olması gerektiğinde $2 kullanıcısına aittir. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez
+check_spamwrappergroup=<tt>$1</tt> procmail komutu, <tt>root</tt> 'a sahip olması gerektiğinde $2 grubuna aittir. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez
+check_spamwrapperperms=<tt>$1</tt> procmail komutunun, setuid ve root olarak ayarlanması gerektiğinde $2 izni var. E-posta düzgün bir şekilde teslim edilemez veya spam olup olmadığı kontrol edilemez
 check_lostfeature=Aşağıdaki sanal sunucular tarafından kullanıldığından <i>$1</i> özelliği devre dışı bırakılamaz : $2 
 check_lostplugin=Aşağıdaki sanal sunucular tarafından kullanıldığından <i>$1</i> eklentisi devre dışı bırakılamaz : $2 
-check_ehomebase=$1 ana dizin, mutlak bir yol değil. Bu, <a href='$2'>Virtualmin yapılandırması</a> sayfasında düzeltilebilir.
-check_ehomebase2=$1 ana dizin, mutlak bir yol değil. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir.
-check_ehomeformat=Giriş dizini biçimi $1, kullanıcı adını veya etki alanı adını içermiyor. Bu, <a href='$2'>Virtualmin yapılandırması</a> sayfasında düzeltilebilir.
-check_ehomestyle=Giriş dizini stili Virtualmin ile kullanılamayan "Sadece temel dizin" olarak ayarlanmış. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir.
+check_ehomebase=$1 ana dizin, mutlak bir yol değil. Bu, <a href='$2'>Virtualmin yapılandırması</a> sayfasında düzeltilebilir
+check_ehomebase2=$1 ana dizin, mutlak bir yol değil. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir
+check_ehomeformat=Giriş dizini biçimi $1, kullanıcı adını veya etki alanı adını içermiyor. Bu, <a href='$2'>Virtualmin yapılandırması</a> sayfasında düzeltilebilir
+check_ehomestyle=Giriş dizini stili Virtualmin ile kullanılamayan "Sadece temel dizin" olarak ayarlanmış. Bu, <a href='$2'>Kullanıcılar ve Gruplar modülü yapılandırması</a> sayfasında düzeltilebilir
 check_jailkitok=Bu sistemde krom hapishaneleri mevcuttur
 check_jailkiterr=Krom hapishaneler mevcut değil : $1 
 check_eyumrepofile=$1 Virtualmin deposu yapılandırma dosyası mevcut değil!

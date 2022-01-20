@@ -764,7 +764,7 @@ bandwidth_mail=Trasferimenti mail
 bandwidth_backup=Modalità salvataggio
 bandwidth_restore=Ripristino salvataggi
 
-check_dnsok2=Il server DNS BIND è installato.
+check_dnsok2=Il server DNS BIND è installato
 check_done=.. il tuo sistema è pronto per usare Virtualmin
 check_ealias_maps=È stato trovato un problema con la mappa degli alias di Postfix: $1
 check_ebcc_maps=È stato trovato un problema con la mappa dei mittenti BCC di Postfix: $1

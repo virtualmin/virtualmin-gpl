@@ -403,69 +403,69 @@ newdns_enshost=El servidor de nombres adicional $1 no existe
 feature_ssl=Sitio web de Apache SSL
 feature_virt6=Dirección IPv6
 
-check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2.
-check_lowgmemory=Su sistema es una VM con $1 de memoria, pero el límite garantizado es de solo $2. Esto está por debajo del mínimo recomendado de Virtualmin de $3 y puede causar fallas intermitentes en la asignación de memoria.
-check_okmemory=Su sistema tiene $1 de memoria, que es igual o superior al mínimo recomendado de Virtualmin de $2.
-check_okgmemory=Su sistema es una máquina virtual con un máximo de $1 de memoria, pero un límite garantizado de solo $2. Ambos son iguales o superiores al mínimo recomendado de Virtualmin de $3.
-check_ednsip1=La dirección IP externa para los registros DNS se establece en $1, pero la dirección externa detectada es en realidad $2. Esto puede hacer que los registros DNS de los dominios de Virtualmin apunten al sistema incorrecto.
-check_ednsip2=La dirección IP predeterminada se establece en $1, pero la dirección externa detectada es en realidad $2. Esto suele ser el resultado de estar detrás de un firewall NAT, y debe corregirse en la página de <a href='$3'>configuración</a> del <a href='$3'>módulo</a>.
-check_ewebsuexecbin=El comando <tt>suexec</tt> no se encontró en su sistema.
-check_ewebsuexechome=El <tt>suexec</tt> en su sistema está configurado para ejecutar solo scripts por debajo de <tt>$2</tt>, pero el directorio de inicio del servidor virtual de Virtualmin es <tt>$1</tt>. Los scripts CGI ejecutados como propietarios de dominios no se ejecutarán.
-check_ewebdefphpmode2=Se seleccionó el modo de ejecución PHP $1 en la plantilla predeterminada, pero no es compatible con este sistema. Cambiar el valor predeterminado a $2.
+check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2
+check_lowgmemory=Su sistema es una VM con $1 de memoria, pero el límite garantizado es de solo $2. Esto está por debajo del mínimo recomendado de Virtualmin de $3 y puede causar fallas intermitentes en la asignación de memoria
+check_okmemory=Su sistema tiene $1 de memoria, que es igual o superior al mínimo recomendado de Virtualmin de $2
+check_okgmemory=Su sistema es una máquina virtual con un máximo de $1 de memoria, pero un límite garantizado de solo $2. Ambos son iguales o superiores al mínimo recomendado de Virtualmin de $3
+check_ednsip1=La dirección IP externa para los registros DNS se establece en $1, pero la dirección externa detectada es en realidad $2. Esto puede hacer que los registros DNS de los dominios de Virtualmin apunten al sistema incorrecto
+check_ednsip2=La dirección IP predeterminada se establece en $1, pero la dirección externa detectada es en realidad $2. Esto suele ser el resultado de estar detrás de un firewall NAT, y debe corregirse en la página de <a href='$3'>configuración</a> del <a href='$3'>módulo</a>
+check_ewebsuexecbin=El comando <tt>suexec</tt> no se encontró en su sistema
+check_ewebsuexechome=El <tt>suexec</tt> en su sistema está configurado para ejecutar solo scripts por debajo de <tt>$2</tt>, pero el directorio de inicio del servidor virtual de Virtualmin es <tt>$1</tt>. Los scripts CGI ejecutados como propietarios de dominios no se ejecutarán
+check_ewebdefphpmode2=Se seleccionó el modo de ejecución PHP $1 en la plantilla predeterminada, pero no es compatible con este sistema. Cambiar el valor predeterminado a $2
 check_ewebconfig=Se encontraron errores de configuración de Apache : $1
 check_ewebapacheversion=Virtualmin no pudo resolver la versión de Apache en su sistema
 check_ewebapacheversion2=Su sistema ejecuta Apache versión $1, pero Virtualmin requiere la versión $2 o posterior
-check_ewebphp=El archivo de configuración de Apache $1 contiene líneas de $2 que impiden que PHP se ejecute con permisos de propietario de dominio. Estas líneas deben ser eliminadas.
-check_suexecok2=Los scripts CGI se pueden ejecutar usando suEXEC o FCGI wrap.
-check_suexecok=Los scripts CGI se pueden ejecutar usando suEXEC.
-check_fcgiwrapok=Los scripts CGI se pueden ejecutar usando fcgiwrap.
-check_http2ok=Apache admite HTTPv2 en su sistema.
+check_ewebphp=El archivo de configuración de Apache $1 contiene líneas de $2 que impiden que PHP se ejecute con permisos de propietario de dominio. Estas líneas deben ser eliminadas
+check_suexecok2=Los scripts CGI se pueden ejecutar usando suEXEC o FCGI wrap
+check_suexecok=Los scripts CGI se pueden ejecutar usando suEXEC
+check_fcgiwrapok=Los scripts CGI se pueden ejecutar usando fcgiwrap
+check_http2ok=Apache admite HTTPv2 en su sistema
 check_http2err=Apache no es compatible con HTTPv2 : $1 
 check_webphpvers=Las siguientes versiones de PHP están disponibles : $1
 check_webphpnovers=¡No se encontraron versiones de PHP en este sistema!
 check_webphpmodes=Están disponibles los siguientes modos de ejecución de PHP : $1 
 check_ewebphpmodes=¡No hay modos de ejecución de PHP disponibles!
-check_webphpversinis=Las versiones de PHP han cambiado a $1 desde la última verificación. Regenerando cualquier archivo <tt>php.ini</tt> faltante.
-check_webphpfpm=La versión de PHP-FPM $1 está disponible en este sistema.
+check_webphpversinis=Las versiones de PHP han cambiado a $1 desde la última verificación. Regenerando cualquier archivo <tt>php.ini</tt> faltante
+check_webphpfpm=La versión de PHP-FPM $1 está disponible en este sistema
 check_webphpnofpm=No se detectó el soporte de PHP-FPM : $1
 check_webphpfpm2=Las siguientes versiones de PHP-FPM están disponibles en este sistema : $1
 check_ewebphpfpm2=No se pueden usar las siguientes versiones de PHP-FPM : $1
-check_webphpnofpm2=No se encontraron paquetes PHP-FPM en este sistema.
+check_webphpnofpm2=No se encontraron paquetes PHP-FPM en este sistema
 check_webphpfpmport=Arreglando el puerto $2 choque para la versión PHP-FPM $1 
-check_webphpverfixed=Versión de FPM corregida para $1 dominios.
-check_webphplocalfixed=Versión limitada del servidor FPM $2 a localhost para $1 dominios.
-check_webadminfixed=Se eliminó la directiva $1 no compatible de $2 sitios web de Apache.
-check_dnsok3=Los dominios DNS BIND se alojarán en un host de servicios.
-check_etlsa=Los registros DNS de TLSA no se pueden crear en su sistema: $1.
-check_tlsaok=Los registros DNS de TLSA se agregarán a nuevos dominios.
-check_mysqlok=MySQL $1 está instalado y en ejecución.
-check_mysqlok2=Los programas de cliente MySQL se instalan para usar con un host de servicios.
+check_webphpverfixed=Versión de FPM corregida para $1 dominios
+check_webphplocalfixed=Versión limitada del servidor FPM $2 a localhost para $1 dominios
+check_webadminfixed=Se eliminó la directiva $1 no compatible de $2 sitios web de Apache
+check_dnsok3=Los dominios DNS BIND se alojarán en un host de servicios
+check_etlsa=Los registros DNS de TLSA no se pueden crear en su sistema: $1
+check_tlsaok=Los registros DNS de TLSA se agregarán a nuevos dominios
+check_mysqlok=MySQL $1 está instalado y en ejecución
+check_mysqlok2=Los programas de cliente MySQL se instalan para usar con un host de servicios
 check_enetmask6=La máscara de red IPv6 $1 no es válida; debe ser un número, como 64
-check_iface6=Las direcciones IPv6 están disponibles, usando la interfaz $1.
-check_emysqlsync=La sincronización entre los usuarios de Unix y MySQL está habilitada en el módulo de <a href='$1'>base de datos MySQL</a>. Esto no es necesario, ya que Virtualmin crea cuentas MySQL para propietarios de dominios cuando sea necesario, por lo que debe desactivarse.
-check_equotasync=Las cuotas de disco predeterminadas para nuevos usuarios están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos usuarios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>.
-check_egquotasync=Las cuotas de disco predeterminadas para nuevos grupos están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos dominios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>.
-check_plugin=El complemento $1 está instalado.
-check_spamwhite=La lista blanca de todos los buzones de cada dominio está habilitada en la página de <a href='$1'>configuración de Virtualmin</a>, pero esto es incompatible con el uso del programa de cliente <a href='$2'>Spam Spassssin</a> de <a href='$2'>spamc</a>.
+check_iface6=Las direcciones IPv6 están disponibles, usando la interfaz $1
+check_emysqlsync=La sincronización entre los usuarios de Unix y MySQL está habilitada en el módulo de <a href='$1'>base de datos MySQL</a>. Esto no es necesario, ya que Virtualmin crea cuentas MySQL para propietarios de dominios cuando sea necesario, por lo que debe desactivarse
+check_equotasync=Las cuotas de disco predeterminadas para nuevos usuarios están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos usuarios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>
+check_egquotasync=Las cuotas de disco predeterminadas para nuevos grupos están habilitadas en los sistemas de archivos: $1. Esto no es necesario, ya que Virtualmin establece cuotas para nuevos dominios, por lo que debe deshabilitarse en el módulo <a href='$2'>Cuotas de disco</a>
+check_plugin=El complemento $1 está instalado
+check_spamwhite=La lista blanca de todos los buzones de cada dominio está habilitada en la página de <a href='$1'>configuración de Virtualmin</a>, pero esto es incompatible con el uso del programa de cliente <a href='$2'>Spam Spassssin</a> de <a href='$2'>spamc</a>
 check_epbzip2out=Ha seleccionado la compresión bzip2 paralela, pero no se pudo determinar el número de versión de <tt>pbzip2</tt>  : $1
 check_epbzip2ver=Ha seleccionado la compresión bzip2 paralela, pero esto requiere la versión <tt>pbzip2</tt> $1 o posterior, y su sistema tiene la versión $2
-check_evad=Su configuración de Postfix tiene la opción <tt>virtual_alias_domains</tt> establecida en <tt>$1</tt>. Esto anula la lista de dominios de la opción <tt>virtual_alias_maps</tt> y debe eliminarse.
-check_emydest=A su configuración de Postfix le falta el nombre <tt>$1</tt> host de correo del sistema <tt>$1</tt> de la línea <tt>mydestination</tt>, lo que hará que el correo rebote. El valor actual es <tt>$2</tt>.
+check_evad=Su configuración de Postfix tiene la opción <tt>virtual_alias_domains</tt> establecida en <tt>$1</tt>. Esto anula la lista de dominios de la opción <tt>virtual_alias_maps</tt> y debe eliminarse
+check_emydest=A su configuración de Postfix le falta el nombre <tt>$1</tt> host de correo del sistema <tt>$1</tt> de la línea <tt>mydestination</tt>, lo que hará que el correo rebote. El valor actual es <tt>$2</tt>
 check_packageerr=El sistema de administración de paquetes seleccionado no se puede usar : $1
 check_updateerr=El sistema de actualización del paquete seleccionado no se puede usar : $1
-check_packageok=Se instalan los sistemas de gestión y actualización de paquetes seleccionados.
-check_spamlockon=Agregar archivo de bloqueo a todas las llamadas de spamassassin de los dominios.
-check_spamlockoff=Eliminando el archivo de bloqueo de todas las llamadas de spamassassin de los dominios.
-check_spamwrappercmd=El comando procmail <tt>$1</tt> en la configuración de Postfix no existe.
-check_spamwrapperuser=El comando procmail <tt>$1</tt> es propiedad del usuario $2, cuando debería ser propiedad de <tt>root</tt>. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado.
-check_spamwrappergroup=El comando procmail <tt>$1</tt> es propiedad del grupo $2, cuando debería ser propiedad de <tt>root</tt>. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado.
-check_spamwrapperperms=El comando procmail <tt>$1</tt> tiene permisos de $2, cuando debe establecerse y establecerse en raíz. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado.
+check_packageok=Se instalan los sistemas de gestión y actualización de paquetes seleccionados
+check_spamlockon=Agregar archivo de bloqueo a todas las llamadas de spamassassin de los dominios
+check_spamlockoff=Eliminando el archivo de bloqueo de todas las llamadas de spamassassin de los dominios
+check_spamwrappercmd=El comando procmail <tt>$1</tt> en la configuración de Postfix no existe
+check_spamwrapperuser=El comando procmail <tt>$1</tt> es propiedad del usuario $2, cuando debería ser propiedad de <tt>root</tt>. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado
+check_spamwrappergroup=El comando procmail <tt>$1</tt> es propiedad del grupo $2, cuando debería ser propiedad de <tt>root</tt>. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado
+check_spamwrapperperms=El comando procmail <tt>$1</tt> tiene permisos de $2, cuando debe establecerse y establecerse en raíz. Es posible que el correo electrónico no se entregue correctamente o se verifique si hay correo no deseado
 check_lostfeature=La función <i>$1</i> no se puede deshabilitar, ya que la usan los siguientes servidores virtuales : $2
 check_lostplugin=El complemento <i>$1</i> no se puede deshabilitar, ya que lo usan los siguientes servidores virtuales : $2
-check_ehomebase=El directorio base de inicio $1 no es una ruta absoluta. Esto se puede corregir en la página de <a href='$2'>configuración de Virtualmin</a>.
-check_ehomebase2=El directorio base de inicio $1 no es una ruta absoluta. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>.
-check_ehomeformat=El formato de directorio de inicio $1 no contiene el nombre de usuario o el nombre de dominio. Esto se puede corregir en la página de <a href='$2'>configuración de Virtualmin</a>.
-check_ehomestyle=El estilo del directorio de inicio se establece en Solo directorio base, que no se puede usar con Virtualmin. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>.
+check_ehomebase=El directorio base de inicio $1 no es una ruta absoluta. Esto se puede corregir en la página de <a href='$2'>configuración de Virtualmin</a>
+check_ehomebase2=El directorio base de inicio $1 no es una ruta absoluta. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>
+check_ehomeformat=El formato de directorio de inicio $1 no contiene el nombre de usuario o el nombre de dominio. Esto se puede corregir en la página de <a href='$2'>configuración de Virtualmin</a>
+check_ehomestyle=El estilo del directorio de inicio se establece en Solo directorio base, que no se puede usar con Virtualmin. Esto se puede corregir en la página de <a href='$2'>configuración del módulo Usuarios y grupos</a>
 check_jailkitok=Las cárceles Chroot están disponibles en este sistema
 check_jailkiterr=Las cárceles Chroot no están disponibles : $1
 check_eyumrepofile=¡El archivo de configuración del repositorio de Virtualmin $1 no existe!

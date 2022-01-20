@@ -1517,89 +1517,89 @@ losing_status=El monitor de estado para el website de este servidor virtual ser�
 
 check_title=Verificando Configuración
 check_desc=El estado de su sistema está siendo verificado para asegurar que todas las prestaciones habilitadas están disponibles, que el servidor de mail está adecuadamente configurado y que los límites de espacio en disco están activos ...
-check_netok=El módulo de Configuración de Red de Webmin está instalado y se soporta.
+check_netok=El módulo de Configuración de Red de Webmin está instalado y se soporta
 check_defip=Dirección IP por defecto para los servidores virtual es $1
-check_defip6=La dirección por defecto IPv6 para servidores virtuales es $1.
-check_dnsip1=La dirección IP externa para los registros DNS se estableció en $1, que coincide con la dirección externa detectada .
-check_dnsip2=La dirección IP por defecto se estableció en $1, que coincide con la dirección externa detectada .
-check_ewebactions=El módulo de Apache <tt>mod_actions</tt> o no está instalado o no está habilitado.
-check_webok=Apache está instalado.
-check_ftpok=ProFTPd está instalado.
-check_dnsok2=Servidor BIND DNS está instalado.
-check_dnsmaster=Sin embargo, el servidor, por defecto, de DNS principal $1 no es un dominio válido.
-check_mysqlnopass=MySQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>root</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos MySQL</a></b>.
-check_postgresok=PostgreSQL está instalado y ejecutándose.
-check_postgresnopass=PostgreSQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>$2</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos PostgreSQl</a></b>.
-check_webalizerok=Webalizer está instalado.
-check_ifaceok=Utilizando interfaz de red $1 para las IPs virtuales.
-check_ifacezone=La interfaz de red se detectará automáticamente en el momento de creación del servidor virtual.
-check_sendmailok=El servidor de mail Sendmail está instalado y configurado.
-check_postfixok=El servidor de mail Postfix está instalado y configurado.
-check_dependentok=Postfix está configurado para soportar diferentes direcciones de IP para cada dominio.
-check_dependentever=Su versión de Postfix no es compatible con diferentes direcciones de IP para cada dominio.
-check_dependentesupport=Postfix puede soportar direcciones IP diferentes para cada dominio, pero actualmente no está configurado para hacerlo . Esto se puede configurar en el módulo del servidor de correo Postfix <a href='$1'>Postfix Mailserver</a>.
-check_qmailok=El servidor de mail Qmail está instalado y configurado.
-check_qmailmode6=El servidor de mail Qmail está instalado y configurado. Sin embargo, el formato del nombre de usuario en la página de templates del servidor está seteado como <b>usuario@dominio</b>, cosa que podría no funcionar.
-check_postfixmode6=El servidor de mail Postfix está instalado y configurado. Sin embargo, el formato de nombre de usuario en la página de templates del servidor esta seteado como <b>usuario@dominio</b> y no es soportado por Postfix.
-check_vpopmailok=El servidor de mail Qmail con las extensiones de VPOPMail está instalado y configurado.
-check_done=... su sistema está listo para ser usado por Virtualmin.
-check_failed=... su sistema está preparado para ser utilizado con Virtualmin.
-check_nogroup=Los límites de espacio de usuario están habilitados para los directorios base y de email, no así los límites de espacio de grupo. Los límites totales para un servidor virtual no serán activados.
-check_group=Tanto los límites de espacio de usuario como de grupo están habilitados para los directorios base y de email.
-check_noquotas=Las quotas de disco han sido deshabilitadas en el módulo de configuración.
-check_sslok=Apache está configurado para alojar sitios web SSL.
-check_edepwebalizer=Webalizer no puede ser habilitado en la <a href='$1'>configuración de módulo</a> de Virtualmin salvo que un servidor web también lo esté.
-check_edepssl=SSL no puede ser habilitado en la <a href='$1'>configuración de módulo</a> de Virtualmin salvo que Apache también lo esté.
-check_eshell=El intérprete de comandos $1 para los usuarios que no son de FTP está incluído en $2, lo cual podría permitir el acceso FTP.
-check_eftpshell=El intérprete de comandos $1 para los usuarios FTP no está incluído en $2, lo cual podría evitar el acceso FTP.
+check_defip6=La dirección por defecto IPv6 para servidores virtuales es $1
+check_dnsip1=La dirección IP externa para los registros DNS se estableció en $1, que coincide con la dirección externa detectada 
+check_dnsip2=La dirección IP por defecto se estableció en $1, que coincide con la dirección externa detectada 
+check_ewebactions=El módulo de Apache <tt>mod_actions</tt> o no está instalado o no está habilitado
+check_webok=Apache está instalado
+check_ftpok=ProFTPd está instalado
+check_dnsok2=Servidor BIND DNS está instalado
+check_dnsmaster=Sin embargo, el servidor, por defecto, de DNS principal $1 no es un dominio válido
+check_mysqlnopass=MySQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>root</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos MySQL</a></b>
+check_postgresok=PostgreSQL está instalado y ejecutándose
+check_postgresnopass=PostgreSQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>$2</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos PostgreSQl</a></b>
+check_webalizerok=Webalizer está instalado
+check_ifaceok=Utilizando interfaz de red $1 para las IPs virtuales
+check_ifacezone=La interfaz de red se detectará automáticamente en el momento de creación del servidor virtual
+check_sendmailok=El servidor de mail Sendmail está instalado y configurado
+check_postfixok=El servidor de mail Postfix está instalado y configurado
+check_dependentok=Postfix está configurado para soportar diferentes direcciones de IP para cada dominio
+check_dependentever=Su versión de Postfix no es compatible con diferentes direcciones de IP para cada dominio
+check_dependentesupport=Postfix puede soportar direcciones IP diferentes para cada dominio, pero actualmente no está configurado para hacerlo . Esto se puede configurar en el módulo del servidor de correo Postfix <a href='$1'>Postfix Mailserver</a>
+check_qmailok=El servidor de mail Qmail está instalado y configurado
+check_qmailmode6=El servidor de mail Qmail está instalado y configurado. Sin embargo, el formato del nombre de usuario en la página de templates del servidor está seteado como <b>usuario@dominio</b>, cosa que podría no funcionar
+check_postfixmode6=El servidor de mail Postfix está instalado y configurado. Sin embargo, el formato de nombre de usuario en la página de templates del servidor esta seteado como <b>usuario@dominio</b> y no es soportado por Postfix
+check_vpopmailok=El servidor de mail Qmail con las extensiones de VPOPMail está instalado y configurado
+check_done=... su sistema está listo para ser usado por Virtualmin
+check_failed=... su sistema está preparado para ser utilizado con Virtualmin
+check_nogroup=Los límites de espacio de usuario están habilitados para los directorios base y de email, no así los límites de espacio de grupo. Los límites totales para un servidor virtual no serán activados
+check_group=Tanto los límites de espacio de usuario como de grupo están habilitados para los directorios base y de email
+check_noquotas=Las quotas de disco han sido deshabilitadas en el módulo de configuración
+check_sslok=Apache está configurado para alojar sitios web SSL
+check_edepwebalizer=Webalizer no puede ser habilitado en la <a href='$1'>configuración de módulo</a> de Virtualmin salvo que un servidor web también lo esté
+check_edepssl=SSL no puede ser habilitado en la <a href='$1'>configuración de módulo</a> de Virtualmin salvo que Apache también lo esté
+check_eshell=El intérprete de comandos $1 para los usuarios que no son de FTP está incluído en $2, lo cual podría permitir el acceso FTP
+check_eftpshell=El intérprete de comandos $1 para los usuarios FTP no está incluído en $2, lo cual podría evitar el acceso FTP
 check_allwebmin=Actualizando todos los usuarios Webmin con las nuevas configuraciones...
 check_allresel=Actualizando todos los resellers con la nueva configuración ..
-check_needupdate=Han cambiado algunos de los parámetros de la configuración de módulo que efectan a cuáles módulos los usuarios de Webmin tienen acceso. Presione el botón que se encuentra debajo para actualizar a todos los usuarios con los nuevos permisos.
+check_needupdate=Han cambiado algunos de los parámetros de la configuración de módulo que efectan a cuáles módulos los usuarios de Webmin tienen acceso. Presione el botón que se encuentra debajo para actualizar a todos los usuarios con los nuevos permisos
 check_updatenow=Actualizar Usuarios Webmin
-check_current=En la configuración global de Webalizer, el <b>archivo incremental Webalizer</b> se establece a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.current</tt>.
-check_history=En la configuración global de Wabalizer, el <b>archivo histórico de Webalizer</b> se estableció a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.hist</tt>.
+check_current=En la configuración global de Webalizer, el <b>archivo incremental Webalizer</b> se establece a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.current</tt>
+check_history=En la configuración global de Wabalizer, el <b>archivo histórico de Webalizer</b> se estableció a una trayectoria absoluta. Utilice el módulo <a href='$1'>Webalizer</a> para cambiarlo a una trayectoria relativa, tal como <tt>webalizer.hist</tt>
 check_proftpd=Se encontró un error en la plantilla de configuración de ProFTPd : $1
-check_enamevirt=Las opciones <b>Todos los servidores virtuales Apache son basados en nombres</b> y <b>Direcciones por omisión para los registros DNS</b> no pueden estar habilitadas a la vez en la página de <a href='$1'>Configuración del módulo</a>.
-check_logrotateok=Logrotate está instalado.
-check_eldap=Un error ocurrió al contactar el servidor LDAP : $1. LDAP podría estar deshabilitado en la página de <a href='$2'>configuración del módulo</a> o bien se debe configurar correctamente el módulo de <a href='$3'>Usuarios y Grupos de LDAP </a>.
-check_eldap2=El módulo de Usuarios y Grupos de LDAP es demasiado antiguo para ser utilizado por Virtualmin para la gestión de usuarios. LDAP debe ser deshabilitado en la página de configuración del módulo <a href='$1'>, o bien actualizarse el módulo a la versión $2.
-check_ldap=La gestión de usuario y grupo LDAP se configuró correctamente.
-check_detected=Servidor de mail detecado $1.
-check_spamok=SpamAssassin y Procmail están instalados y configurados para usar.
-check_noprocmail=SpamAssasin y Procmail están instalados. Sin embargo, su servidor de mail no parece estar configurado para enviar utilinzado Procmail.
-check_spamglobal=El spamassassin esta configurado para correr desde la configuración global de Procmail $1, el cual no es necesario, ya que Virtualmin va a setearlo como básico por dominio.
-check_virusok=ClamAV está instalado y funcionando.
-check_virusok2=ClamAV está instalada y se presume que está funcionando.
-check_emysqlplugin=El plugin de usuarios de MySQL no hace mas falta, su funcionalidad fue incorporada en el core del Virtualmin.
-check_statusok=El módulo de Sistema y Estado de Servidor está instalado y chequeando en tiempo previsto.
-check_statussched=El módulo de Sistema y Estado de Servidor está instalado, pero no está seteado para chequear los servidores en una agenda programada. Esto puede ser habilitado en la página de <a href='$1'>Monitoreo programado</a>.
-check_ebcmd=El comando $1 necesario para crear o restaurar backups no está instalado.
-check_bcmdok=Todos los comandos necesarios para crear y restaurar backups están instalados.
+check_enamevirt=Las opciones <b>Todos los servidores virtuales Apache son basados en nombres</b> y <b>Direcciones por omisión para los registros DNS</b> no pueden estar habilitadas a la vez en la página de <a href='$1'>Configuración del módulo</a>
+check_logrotateok=Logrotate está instalado
+check_eldap=Un error ocurrió al contactar el servidor LDAP : $1. LDAP podría estar deshabilitado en la página de <a href='$2'>configuración del módulo</a> o bien se debe configurar correctamente el módulo de <a href='$3'>Usuarios y Grupos de LDAP </a>
+check_eldap2=El módulo de Usuarios y Grupos de LDAP es demasiado antiguo para ser utilizado por Virtualmin para la gestión de usuarios. LDAP debe ser deshabilitado en la página de configuración del módulo <a href='$1'>, o bien actualizarse el módulo a la versión $2
+check_ldap=La gestión de usuario y grupo LDAP se configuró correctamente
+check_detected=Servidor de mail detecado $1
+check_spamok=SpamAssassin y Procmail están instalados y configurados para usar
+check_noprocmail=SpamAssasin y Procmail están instalados. Sin embargo, su servidor de mail no parece estar configurado para enviar utilinzado Procmail
+check_spamglobal=El spamassassin esta configurado para correr desde la configuración global de Procmail $1, el cual no es necesario, ya que Virtualmin va a setearlo como básico por dominio
+check_virusok=ClamAV está instalado y funcionando
+check_virusok2=ClamAV está instalada y se presume que está funcionando
+check_emysqlplugin=El plugin de usuarios de MySQL no hace mas falta, su funcionalidad fue incorporada en el core del Virtualmin
+check_statusok=El módulo de Sistema y Estado de Servidor está instalado y chequeando en tiempo previsto
+check_statussched=El módulo de Sistema y Estado de Servidor está instalado, pero no está seteado para chequear los servidores en una agenda programada. Esto puede ser habilitado en la página de <a href='$1'>Monitoreo programado</a>
+check_ebcmd=El comando $1 necesario para crear o restaurar backups no está instalado
+check_bcmdok=Todos los comandos necesarios para crear y restaurar backups están instalados
 check_eset_user=Los comandos de quota externos están habilitados, pero el comando para setear quota de usuario no esta definido o no existe
 check_eset_group=Los comandos de quota externos están habilitados, pero el comando para setear quota de grupos no esta definido o no existe
 check_elist_users=Los comandos de quota externos están habilitados, pero el comando para listar quotas no está definido o no existe
 check_elist_groups=Los comandos de quota externos están habilitados, pero el comando para gruos de quotas no está definido o no existe
 check_eget_user=Los comandos de quota externos están habilitados, pero el comando para obtener la quota de un solo usuario no existe
 check_eget_group=Los comando de quota externos están habilitados, pero el comando para obtener la quota de un solo grupo no existe
-check_quotacommands=Los comandos de quota externos van a ser utilizados para servidores virtuales y cuentas de mail.
+check_quotacommands=Los comandos de quota externos van a ser utilizados para servidores virtuales y cuentas de mail
 check_eclamd=Ha seleccionado usar <tt>clamdscan</tt> para escaneo de virus, pero el <tt>clamd</tt> el servidor al que le habla no está corriendo
 check_evirusspam=El escaneo de virus no puede ser habilitado sin filtro antispam
 check_preload=Actualizando configuración precargada de la librería Virtualmin ..
 check_collect=Actualizando
 check_collectoff=Deshabilitando estado de trabajo de colección ..
-check_esendmailbccs=El BCC automático del correo saliente no es soportado por el servidor Sendmail, por lo que tiene que ser apagado en la página de <a href='$1'>configuración de módulo</a>.
-check_eqmailbccs=El BCC automático del correo saliente no es soportado por el servidor Qmail, por lo que tiene que ser apagado en la página de <a href='$1'>configuración de módulo</a>.
-check_epostfixbccs=El BCC automático del correo saliente no puede ser habilitado a menos que exista un mapa BCC definido en el módulo <a href='$1'>Postfix Mailserver</a>, o manualmente en el archivo de configuración de Postfix. De otra forma deberá ser apagado en la página de <a href='$2'>configuración de módulo</a>.
-check_esendmailaddrs=Sendmail solo está aceptando conexiones de SMTP en los siguientes puertos: $1. Mails desde otros sistemas en internet no será aceptado. Esto puede ser modificado   en el módulo <a href='$2'>Servidor de mail Sendmail</a>.
+check_esendmailbccs=El BCC automático del correo saliente no es soportado por el servidor Sendmail, por lo que tiene que ser apagado en la página de <a href='$1'>configuración de módulo</a>
+check_eqmailbccs=El BCC automático del correo saliente no es soportado por el servidor Qmail, por lo que tiene que ser apagado en la página de <a href='$1'>configuración de módulo</a>
+check_epostfixbccs=El BCC automático del correo saliente no puede ser habilitado a menos que exista un mapa BCC definido en el módulo <a href='$1'>Postfix Mailserver</a>, o manualmente en el archivo de configuración de Postfix. De otra forma deberá ser apagado en la página de <a href='$2'>configuración de módulo</a>
+check_esendmailaddrs=Sendmail solo está aceptando conexiones de SMTP en los siguientes puertos: $1. Mails desde otros sistemas en internet no será aceptado. Esto puede ser modificado   en el módulo <a href='$2'>Servidor de mail Sendmail</a>
 check_ealias_maps=Se ha encontrado un problema con los mapas de alias Postfix : $1
 check_evirtual_maps=Se encontró un problema con el mapeo virtual de Postfix : $1
 check_ecanonical_maps=Se ha encontrado un problema con los mapas de canónicos de Postfix usados para mapeo de direcciones salientes : $1
 check_ebcc_maps=Se ha encontrado un problema con los mapas de sender BCC Postifix : $1
-check_elogrotateconf=La configuración de logrotate actual no es válida : $1. Debe ser corregida o la rotación de los archivos de log no será hecha.
-check_espamsiteconfig=El comando <tt>spamassassin</tt> no soporta el parámetro <tt>--siteconfigpath</tt>, el cual es necesitado por Virtualmin. La versión instalada es $1 - se recomienda la versión 3.0 o superior.
+check_elogrotateconf=La configuración de logrotate actual no es válida : $1. Debe ser corregida o la rotación de los archivos de log no será hecha
+check_espamsiteconfig=El comando <tt>spamassassin</tt> no soporta el parámetro <tt>--siteconfigpath</tt>, el cual es necesitado por Virtualmin. La versión instalada es $1 - se recomienda la versión 3.0 o superior
 check_reserr=Los límites de recursos no son soportados en su sistema : $1
 check_reswarn=Los límites de recursos son soportados, pero no están completamente configurados : $1
-check_resok=Los límites de recursos son soportados y están configurados correctamente.
+check_resok=Los límites de recursos son soportados y están configurados correctamente
 check_apicmd=Creando comando de ayuda API ..
 check_apicmdok=.. creado <tt>$1</tt>
 check_apicmderr=.. falló : $1
