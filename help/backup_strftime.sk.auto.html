@@ -1,0 +1,126 @@
+<header>Vykonajte časové náhrady štýlu strftime v názve súboru alebo adresára</header> Ak je toto políčko začiarknuté, kódy ako %d, %m, %Y a %u je možné použiť v cieľovom súbore zálohy. Tieto budú nahradené dňom, mesiacom, rokom a dňom v týždni, keď sa vykonáva záloha. Je to užitočné, ak chcete každý deň uložiť inú zálohu, aby ste mohli vrátiť server späť na predchádzajúci dátum.<p> Niektoré z ďalších kódov, ktoré možno použiť, sú:<br><pre><font size=-1>
+ %a Skrátený názov dňa v týždni podľa kurzu
+        prenajať miestne.
+
+ %A Celý názov dňa v týždni podľa aktuálneho
+        miestne nastavenie.
+
+ %b Skrátený názov mesiaca podľa aktuálneho
+        miestne nastavenie.
+
+ %B Celý názov mesiaca podľa aktuálneho
+        miestne nastavenie.
+
+ %c Preferovaná reprezentácia dátumu a času pre
+        aktuálne miestne nastavenie.
+
+ %C Číslo storočia (rok/100) ako 2-ciferné celé číslo.
+
+ %d Deň v mesiaci ako desatinné číslo (rozsah 01
+        do 31).
+
+ %e Ako %d, deň v mesiaci ako desatinné číslo,
+        ale úvodná nula je nahradená medzerou.
+
+ %E modifikátor: použite alternatívny formát, pozri nižšie.
+
+ %G Rok ISO 8601 so storočím ako desatinným číslom.
+        Štvormiestny rok zodpovedajúci číslu týždňa podľa normy ISO
+        ber (pozri %V). Toto má rovnaký formát a hodnotu
+        ako %y, okrem prípadu, ak číslo týždňa ISO patrí
+        do predchádzajúceho alebo nasledujúceho roka sa použije tento rok
+        namiesto toho.
+
+ %g Ako %G, ale bez storočia, tj s 2 číslicami
+        rok (00-99).
+
+ %h Ekvivalentné %b.
+
+ %H Hodina ako desatinné číslo pri použití 24-hodinového formátu hodín
+        (rozsah 00 až 23).
+
+ %I Hodina ako desatinné číslo v 12-hodinovom formáte
+        (rozsah 01 až 12).
+
+ %j Deň v roku ako desatinné číslo (rozsah 001
+        až 366).
+
+ %k Hodina (24-hodinový formát) ako desatinné číslo (rozsah
+        0 až 23); pred jednotlivými číslicami je medzera.
+        (Pozri tiež %H.)
+
+ %l Hodina (12-hodinový formát) ako desatinné číslo (rozsah
+        1 až 12); pred jednotlivými číslicami je medzera.
+        (Pozri tiež %I.)
+
+ %m Mesiac ako desatinné číslo (rozsah 01 až 12).
+
+ %M Minúta ako desatinné číslo (rozsah 00 až 59).
+
+ %n Znak nového riadku.
+
+ %O modifikátor: použite alternatívny formát, pozri nižšie.
+
+ %p Buď &#39;AM&#39; alebo &#39;PM&#39; podľa daného času
+        hodnotu alebo zodpovedajúce reťazce pre aktuálny
+        miestne nastavenie. Poludnie sa považuje za „popoludní“ a polnoc ako
+        &#39;som&#39;.
+
+ %P Ako %p, ale malými písmenami: &#39;am&#39; alebo &#39;pm&#39; alebo corre
+        odpovedajúci reťazec pre aktuálne miestne nastavenie.
+
+ %r Čas v notácii ráno alebo popoludní. V POSIX
+        miestne nastavenie je ekvivalentné &#39;%I:%M:%S %p&#39;.
+
+ %R Čas v 24-hodinovom zápise (%H:%M). Pre
+        verzia vrátane sekúnd, pozri %T nižšie.
+
+ %s Počet sekúnd od epochy, tj od
+        1970-01-01 00:00:00 UTC.
+
+ %S Druhá ako desiatkové číslo (rozsah 00 až 61).
+
+ %t Znak tabulátora.
+
+ %T Čas v 24-hodinovom zápise (%H:%M:%S).
+
+ %u Deň v týždni ako desatinné číslo, rozsah 1 až 7,
+        Pondelok je 1. Pozri tiež %w.
+
+ %U Číslo týždňa aktuálneho roku ako desatinné číslo
+        číslo, rozsah 00 až 53, počnúc prvým
+        Nedeľa ako prvý deň týždňa 01. Pozri tiež %V a
+        % W.
+
+ %V Číslo týždňa podľa normy ISO 8601:1988 v aktuálnom roku
+        ako desatinné číslo, rozsah 01 až 53, kde týždeň 1
+        je prvý týždeň, ktorý má aspoň 4 dni v
+        aktuálny rok a s pondelkom ako prvým dňom
+        týždeň. Pozri tiež %U a %W.
+
+ %w Deň v týždni ako desatinné číslo, rozsah 0 až 6,
+        Nedeľa je 0. Pozri tiež %u.
+
+ %W Číslo týždňa aktuálneho roku ako desatinné číslo
+        číslo, rozsah 00 až 53, počnúc prvým
+        Pondelok ako prvý deň v týždni 01.
+
+ %x Preferované zobrazenie dátumu pre aktuálny
+        locale bez času.
+
+ %X Preferovaná časová reprezentácia pre aktuálnu
+        miestne nastavenie bez dátumu.
+
+ %y Rok ako desatinné číslo bez storočia
+        (rozsah 00 až 99).
+
+ %Y Rok ako desatinné číslo vrátane storočia.
+
+ %z Časové pásmo ako hodinový posun od GMT. Vyžaduje sa
+        vysielať dátumy v súlade s RFC822 (pomocou „%a, %d %b %Y
+        %H:%M:%S %z&quot;).
+
+ %Z Časové pásmo alebo názov alebo skratka.
+
+ %% Doslovný znak &#39;%&#39;.
+</font></pre><footer>

@@ -1561,7 +1561,6 @@ check_history=En la configuración global de Wabalizer, el <b>archivo histórico
 check_proftpd=Se encontró un error en la plantilla de configuración de ProFTPd : $1
 check_enamevirt=Las opciones <b>Todos los servidores virtuales Apache son basados en nombres</b> y <b>Direcciones por omisión para los registros DNS</b> no pueden estar habilitadas a la vez en la página de <a href='$1'>Configuración del módulo</a>.
 check_logrotateok=Logrotate está instalado.
-check_plugin=El plugin $1 se instaló correctamente.
 check_eldap=Un error ocurrió al contactar el servidor LDAP : $1. LDAP podría estar deshabilitado en la página de <a href='$2'>configuración del módulo</a> o bien se debe configurar correctamente el módulo de <a href='$3'>Usuarios y Grupos de LDAP </a>.
 check_eldap2=El módulo de Usuarios y Grupos de LDAP es demasiado antiguo para ser utilizado por Virtualmin para la gestión de usuarios. LDAP debe ser deshabilitado en la página de configuración del módulo <a href='$1'>, o bien actualizarse el módulo a la versión $2.
 check_ldap=La gestión de usuario y grupo LDAP se configuró correctamente.
@@ -2155,7 +2154,6 @@ restore_headerfeatures=Características y configuración
 restore_headeropts=Otras opciones de restauración
 restore_allfeatures=Restaurar todas las opciones
 restore_checkmode=Chequeando modo de ejecución de PHP restaurado ..
-restore_okmode=.. el modo $1 está OK para este sistema
 restore_badmode=.. el modo $1 no puede ser utilizado, cambiando a $2.
 
 limits_title=Límites del propietario del Servidor
@@ -2643,7 +2641,6 @@ tmpl_extra_prefix=Prefijo para administradores extra
 tmpl_scripts=Editar instaladores de script por default
 tmpl_dbs=Editar bases de datos por default
 tmpl_return=template
-tmpl_ephpsuexec=Los scripts de PHP no pueden ejecutarse como dueño del servidor a menos que suexec está habilitado
 tmpl_ephpcmd=Los scripts de PHP no pueden ejecutarse como dueño del servidor a menos que el comando <tt>php</tt> esté instalado
 tmpl_erubycmd=Los scripts de Ruby no pueden ejecutarse como dueño de dominio a menos que el comando <tt>ruby</tt> esté instalado
 tmpl_editmode=Editar sección de template:
@@ -3574,7 +3571,6 @@ newvalidate_ok=Validar ahora
 newvalidate_err=Falla al validar servidores
 newvalidate_edoms=No se han seleccionado servidores virtuales
 newvalidate_efeats=No hay funciones seleccionadas
-newvalidate_good=Todas las opciones OK
 newvalidate_all=Todas las características
 newvalidate_sel=Solo seleccionados ..
 newvalidate_doing=Comenzando validación de servidores virtuales seleccionados. Cualquier problema que se encuentre será mostrado en colorado ..

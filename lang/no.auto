@@ -181,9 +181,10 @@ newweb_http2=Vil du aktivere HTTP2-protokollen for nye nettsteder?
 
 feature_ssl=Apache SSL-nettsted
 
+check_ewebsuexechome=<tt>suexec</tt> kommandoen på systemet ditt er konfigurert til å bare kjøre skript under <tt>$2</tt>, men Virtualmins virtuelle serverhjemmekatalog er <tt>$1</tt>. CGI-skript som kjøres som domeneeiere vil ikke bli kjørt.
 check_ewebdefphpmode2=PHP-utførelsesmodus $1 ble valgt i standardmal, men støttes ikke på dette systemet. Endre standard til $2.
-check_suexecok2=CGI -skript kan kjøres ved hjelp av SuExec eller fcgiwrap.
-check_suexecok=CGI -skript kan kjøres med SuExec.
+check_suexecok2=CGI-skript kan kjøres ved å bruke suEXEC eller FCGI wrap.
+check_suexecok=CGI-skript kan kjøres ved hjelp av suEXEC.
 check_fcgiwrapok=CGI -skript kan kjøres ved hjelp av fcgiwrap.
 check_http2ok=Apache støtter HTTPv2 på systemet ditt.
 check_http2err=Apache støtter ikke HTTPv2 : $1
@@ -202,6 +203,8 @@ check_webadminfixed=Ikke-støttet $1 -direktiv ble fjernet fra $2 Apache-nettste
 check_etlsa=TLSA DNS-poster kan ikke opprettes på systemet ditt: $1.
 check_tlsaok=TLSA DNS-poster vil bli lagt til nye domener.
 check_mysqlok=MySQL $1 er installert og kjører.
+check_plugin=Plugin $1 er installert.
+check_packageok=De valgte pakkeadministrasjons- og oppdateringssystemene er installert.
 check_jailkitok=Chroot-fengsler er tilgjengelige på dette systemet
 check_jailkiterr=Chroot-fengsler er ikke tilgjengelige : $1 
 check_eyumrepofile=Konfigurasjonsfilen til Virtualmin -depotet $1 finnes ikke!
@@ -336,6 +339,7 @@ restore_postgresdummy=Gjenopprette PostgreSQL databaser ..
 restore_postgressameremote=.. hopper over gjenoppretting til original server $1 i replikasjonsmodus
 restore_mailuserssame=.. hopper over gjenoppretting til original LDAP-server $1 i replikasjonsmodus
 restore_logrotatecpshared=.. ikke nødvendig når det deles
+restore_okmode=.. modus $1 fungerer for dette systemet
 restore_vmailserver_missing=.. ikke konfigurert på dette systemet
 
 limits_migrate=Kan migrere sikkerhetskopier?
@@ -417,8 +421,8 @@ tmpl_exclude=Kataloger å ekskludere fra sikkerhetskopier
 tmpl_exdirs=Oppførte kataloger ..
 tmpl_web_ssl=Ekstra direktiver for SSL nettsteder
 tmpl_web_fcgiwrap=Kjør CGI -skript med
-tmpl_web_fcgiwrap1=Fcgiwrap server
-tmpl_web_fcgiwrap0=SuExec hvis mulig, fcgiwrap ellers
+tmpl_web_fcgiwrap1=FCGI wrap-server
+tmpl_web_fcgiwrap0=suEXEC hvis mulig, FCGI wrap ellers
 tmpl_logrotate_shared=Vil du dele logrotatkonfigurasjon med alle domener?
 tmpl_logrotate_shared0=Nei (Apache starter på nytt etter hvert domene)
 tmpl_logrotate_shared1=Ja (Apache starter bare én gang på nytt)
@@ -452,6 +456,7 @@ tmpl_php_fpm=Flere FPM-bassengalternativer
 tmpl_php_sock=FPM-serverforbindelse
 tmpl_php_sock0=TCP-port
 tmpl_php_sock1=Unix-sokkelfil
+tmpl_ephpsuexec=PHP-skript kan ikke kjøres som domeneeier med mindre suEXEC er aktivert
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
 tmpl_editmode_php=PHP-alternativer
@@ -492,6 +497,7 @@ resel_emax_topdoms=Manglende eller ugyldig maksimum antall toppnivå-servere
 resel_eclash2=En unix-bruker med samme navn eksisterer allerede
 resel_admins=Kan opprette og administrere ekstra administratorer?
 resel_rename=Kan du endre navn på domener?
+resel_createdoms=Kan du opprette domener?
 resel_proxy=Kan konfigurere proxyer?
 resel_migrate=Kan migrere sikkerhetskopier?
 resel_create=Kan opprette og redigere forhandlere?
@@ -602,6 +608,7 @@ newmysqls_einuse=En server som brukes av $1 domener kan ikke fjernes
 move_desc3=Denne siden lar deg endre destinasjonen til en alias-server, slik at all tilgang til Internett eller e-post blir videresendt til det nylig valgte domenet.
 move_target2=Nytt aliasmål
 
+newvalidate_good=Alle funksjoner er gode
 newvalidate_tabsreset=Tilbakestill funksjoner
 newvalidate_subservers=Fikser du også under-servere?
 newvalidate_desc4=ADVARSEL! Denne siden kan brukes til å tilbakestille funksjonstilstanden for en valgt virtuell server. Dette kan føre til at innstillinger går tapt som en del av prosessen med å returnere funksjoner til en kjent god tilstand.
@@ -621,8 +628,11 @@ validate_ednsns=NS-post $1 kan ikke løses til en IP-adresse
 validate_ednsip6=DNS-posten $1 løser seg til IPv6-adressen $2 i stedet for den virtuelle serverens IPv6-adresse $3 
 validate_ecloud=DNS -domenet ble ikke funnet på skyleverandøren $1
 validate_ewebconfig=Det ble funnet en feil i den virtuelle vertskonfigurasjonen : $1
+validate_ewebphpsuexec=PHP er konfigurert til å kjøre som domeneeier, men suEXEC er ikke aktivert!
 validate_ewebphpconfig=PHP-konfigurasjonsfeil ble funnet i versjon $1 : $2 
 validate_ewebphpfpmport=PHP FPM-konfigurasjonsfeil funnet : $1 
+validate_ewebuid=suEXEC-bruker er satt til $1, men den virtuelle serverens UID er $2
+validate_ewebgid=suEXEC-gruppen er satt til $1, men den virtuelle serverens GID er $2
 validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1 
 validate_ewebipv6=En IPv6 DNS-post $2 med adresse $1 eksisterer, men denne virtuelle serveren har ikke IPv6 aktivert
 validate_ewebipv6virt=Det finnes en IPv6 DNS-post med adresse $1, men denne virtuelle serverens Apache-konfigurasjon har ikke en IPv6-adresse
@@ -759,6 +769,9 @@ sched_inc2=Full (ingen oppdatering)
 sched_logs=Sikkerhetskopieringslogger ..
 
 dsched_erunning=Sikkerhetskopien med ID $1 kjører ikke lenger
+
+postgrey_procdone=.. begynt ferdig
+postgrey_noprocdone=.. avstengning utført
 
 editgrey_eregexp=Ugyldig vanlig uttrykk : $1 
 

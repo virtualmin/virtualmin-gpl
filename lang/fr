@@ -1293,7 +1293,6 @@ check_history=Dans la configuration globale de Webalizer, le <b>fichier historiq
 check_proftpd=Une erreur a été trouvée dans le template de configuration de ProFTPd : $1
 check_enamevirt=Les options <b>Tous les serveurs virtuels Apache sont basés sur des noms</b> et <b>Adresse IP par défaut pour les enregistrements DNS</b> ne peuvent pas être activées simultanément dans la page de <a href='$1'>Configuration du module</a>.
 check_logrotateok=Logrotate est installé.
-check_plugin=Le plugin $1 est correctement installé.
 check_eldap=Une erreur s'est produite en tentant de contacter le serveur LDAP :$1. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module <a href='$3'>Utilisateurs et groupes LDAP</a> doit être configuré correctement.
 check_eldap2=Le module Utilisateurs et Groupes LDAP est trop ancien pour être utilisé par Virtualmin. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module doit être mis à jour vers la version $2.
 check_ldap=La gestion des Utilisateurs et Groupes LDAP est correctement configurée.
@@ -1781,7 +1780,6 @@ restore_headerfeatures=Caractéristiques et paramètres
 restore_headeropts=Autres options de restauration
 restore_allfeatures=Restaurer toutes les fonctionnalités
 restore_checkmode=Vérification mode restauré d'exécution PHP ..
-restore_okmode=.. mode $1 OK pour ce système
 restore_badmode=.. mode $1 ne peut être utilisé, passage à $2.
 restore_evirt6=IPv6 adresse du serveur virtuel
 restore_vconfig_doing=Restauration de configuration Virtualmin ..

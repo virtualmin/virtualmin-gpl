@@ -430,11 +430,9 @@ check_group=Przydziały użytkowników i grup są włączone dla katalogów domo
 check_sslok=Apache jest skonfigurowany do hostowania stron SSL.
 check_eftpshell=Shell $1 dla użytkowników FTP nie jest dołączony w $2, co może uniemożliwić dostęp FTP.
 check_logrotateok=Logrotate jest zainstalowany.
-check_plugin=Wtyczka $1 jest zainstalowana.
 check_detected=Wykryto serwer mailowy $1.
 check_bcmdok=Wszystkie polecenia potrzebne do tworzenia i przywracania kopii zapasowych są dostępne.
 check_packageerr=Wybrany menadżer pakietów nie może być użyty : $1
-check_packageok=Wybrany menadżer pakietów i aktualizacje są zainstalowane.
 check_apicmdok=.. utworzono <tt>$1</tt>
 check_apicmderr=.. błąd : $1
 

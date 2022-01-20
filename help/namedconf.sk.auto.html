@@ -1,0 +1,6 @@
+<header>Ďalšie direktívy named.conf pre nové zóny</header> Keď sa vytvorí nová zóna DNS BIND, príkazy zadané do tohto textového poľa sa pridajú do sekcie zóny v konfiguračnom súbore <tt>named.conf</tt> Ak chcete obmedziť prenosy zón na vybraté adresy IP, môžete zadať napríklad nasledovné:<pre>
+allow-transfer { 
+  1.2.3.4;
+  1.2.3.10;
+};
+</pre>Túto funkciu by mali používať iba tí, ktorí sú už oboznámení s konfiguračným formátom BIND, pretože chyba môže spôsobiť, že celý váš server DNS prestane fungovať.<p><footer>

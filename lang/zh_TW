@@ -1382,7 +1382,6 @@ check_history=在Webalizer的全局配置中，<b>Webalizer歷史文件</b>被�
 check_proftpd=在ProFTPd配置模板中發現一個錯誤：$1。必須通過編輯服務器模板頁面中的缺省設置來修複。
 check_enamevirt=<b>所有Apache虛擬服務器都基于名字</b>和<b>DNS記錄使用缺省IP地址</b>不能在<a href='$1'>模塊配置</a>頁面中同時啟用。
 check_logrotateok=Logrotate已安裝。
-check_plugin=插件$1安裝成功。
 check_eldap=連接LDAP服務器時發生一個錯誤：$1。LDAP必須在<a href='$2'>模塊配置</a>頁面中禁用，或者正確配置<a href='$3'>LDAP用戶和用戶組</a>模塊。
 check_eldap2=LDAP用戶和用戶組模塊版本太舊，Virtualmin不能用它來管理用戶。LDAP必須在<a href='$1'>模塊配置</a>頁面中禁用，或者升級該模塊至版本$2。
 check_ldap=LDAP用戶和用戶組模塊配置正常。
@@ -2109,7 +2108,6 @@ tmpl_extra_prefix=其他管理員前綴
 tmpl_scripts=編輯缺省安裝腳本
 tmpl_dbs=編輯缺省數據庫
 tmpl_return=模板
-tmpl_ephpsuexec=如果suexec沒有啟用，PHP腳本不能以域所有者運行。
 tmpl_ephpcmd=如果沒有安裝<tt>php</tt>命令，PHP腳本不能作為域所有者運行
 tmpl_erubycmd=如果沒有安裝<tt>ruby</tt>命令，Ruby腳本不能作為域所有者運行
 tmpl_editmode=編輯模板項：
@@ -2820,7 +2818,6 @@ newvalidate_ok=立即驗証
 newvalidate_err=驗証服務器失敗
 newvalidate_edoms=沒有選擇虛擬服務器
 newvalidate_efeats=沒有選擇功能
-newvalidate_good=所有功能正常
 newvalidate_all=所有功能
 newvalidate_sel=僅選擇了 ..
 newvalidate_doing=正在開始驗証選中擇的虛擬服務器。所有發現的問題都顯示為紅色 ..

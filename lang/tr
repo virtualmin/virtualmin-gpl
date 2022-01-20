@@ -1311,7 +1311,6 @@ check_history=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer geçmiþ 
 check_proftpd=ProFTPd konfigürasyon þablonunda bir hata bulundu : $1. Sunucu Þablonlarý sayfasýndaki varsayýlan ayarlar düzenlenerek bu hata giderilmeli.
 check_enamevirt=<a href='$1'>Modül Yapýlandýrmasý</a> sayfasýndaki <b>Tüm Apache sanal sunucularý isim tabanlýdýr</b> ve <b>DNS kayýtlarý için varsayýlan IP adresi</b> seçeneklerinin ikisi birden etkinleþtirilemez.
 check_logrotateok=Logrotate kurulu.
-check_plugin=Plugin $1 kurulu.
 check_eldap=LDAP sunucusuna baðlanýrken hata oluþtu : $1. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da <a href='$3'>LDAP Kullanýcýlarý ve Guplarý</a> modülü doðru olarak kurulmalý.
 check_eldap2=The LDAP Kullanýcýlarý ve Gruplarý modülü kullanýcý yönetimi için Virtualmin tarafýndan kullanýlamayacak kadar eski. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da modül $2 versiyonuna yükseltilmeli.
 check_ldap=LDAP kullanýcý ve grup yönetimi uygun olarak kurulu.
@@ -1960,7 +1959,6 @@ tmpl_extra_prefix=Ek yöneticiler için önek
 tmpl_scripts=Varsayýlan Kurulum Sihirbazlarý Kurucularýný Düzenle
 tmpl_dbs=Edit Varsayýlan Veritabanlarý
 tmpl_return=þablon
-tmpl_ephpsuexec=Suexec etkinleþtirilmedikçe PHP kurulum sihirbazlarý alanadý sahibi olarak yürütülemezler
 tmpl_ephpcmd=<tt>php</tt> komutu kurulmadýkça PHP kurulum sihirbazlarý alanadý sahibi olarak yürütülemezler
 tmpl_editmode=Düzenlenecek þablon kýsmý
 tmpl_switch=Deðiþtir
@@ -2593,7 +2591,6 @@ newvalidate_ok=Þimdi Denetle
 newvalidate_err=Sunucularýn geçerlikleri denetlenemedi
 newvalidate_edoms=Hiçbir sanal sunucu seçilmemiþ
 newvalidate_efeats=Hiçbir özellik seçilmemiþ
-newvalidate_good=Tüm özellikler OK
 newvalidate_all=Tüm özellikler
 newvalidate_sel=Sadece seçili ..
 newvalidate_doing=Sanal sunucularýn geçerlik denetlemesi baþlýyor. Bulunan problemler kýrmýzýyla gösterilecekler ..
