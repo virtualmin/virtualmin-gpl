@@ -409,7 +409,6 @@ feature_spam=Filtrowanie spamu
 feature_virus=Filtrowanie wirusów
 
 check_title=Sprawdzanie konfiguracji
-check_desc=Twój serwer jest sprawdzany, czy wszystkie włączone funkcje są dostępne, poprawność konfiguracji serwera mailowego i aktywności przydziałów ..
 check_lowmemory=Twój system ma tylko $1 pamięci, minimalna rekomendowana pamięć dla Virtualmin to $2
 check_okmemory=Twój system posiada $1 pamięci, czyli więcej niż wymagana minimalna ilość dla Virtualmin, czyli $2
 check_defip=Domyślny adres IPv4 dla wirtualnego serwera to $1

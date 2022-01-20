@@ -1435,6 +1435,7 @@ losing_virus=Položka Procmail pro filtrování virů pro tento virtuální serv
 losing_status=Monitor stavu webmin pro web tohoto virtuálního serveru bude odstraněn.
 
 check_title=Kontrola konfigurace
+check_desc=Kontroluje se stav vašeho systému, aby bylo zajištěno, že všechny povolené funkce jsou dostupné a správně nakonfigurované ..
 check_netok=Je nainstalován a podporován modul Webmin's Network Configuration
 check_lowmemory=Váš systém má pouze $1 paměti, což je pod doporučeným minimem Virtualmin $2
 check_lowgmemory=Váš systém je virtuální počítač s pamětí $1, ale garantovaný limit je pouze $2. To je pod doporučeným minimem Virtualmin $3 a může to způsobit občasné selhání přidělení paměti

@@ -1161,7 +1161,7 @@ losing_virus=La voce Procmail per filtrare i virus per questo server virtuale ve
 losing_status=Il monitor di stato Webmin per il sito Web di questo server virtuale verrà eliminato.
 
 check_title=Verifica della configurazione
-check_desc=Lo stato del sistema viene verificato per garantire che tutte le funzionalità abilitate siano disponibili, che il server di posta sia configurato correttamente e che le quote siano attive
+check_desc=Lo stato del sistema è in fase di verifica per garantire che tutte le funzioni abilitate siano disponibili e configurate correttamente ..
 check_netok=Il modulo di configurazione della rete di Webmin è installato e supportato
 check_lowmemory=Il tuo sistema ha solo $1 di memoria, che è inferiore al minimo raccomandato da Virtualmin di $2
 check_lowgmemory=Il tuo sistema è una VM con $1 di memoria, ma il limite garantito è solo $2. Questo valore è inferiore al minimo consigliato da Virtualmin di $3 e può causare errori intermittenti nell'allocazione della memoria

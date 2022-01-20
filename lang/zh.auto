@@ -574,6 +574,7 @@ feature_virt6=IPv6地址
 bandwidth_backup=进行备份
 bandwidth_restore=备份已还原
 
+check_desc=正在检查您的系统状态，以确保所有启用的功能都可用并正确配置 ..
 check_lowmemory=您的系统只有 $1的内存，低于Virtualmin建议的最小值 $2。
 check_lowgmemory=您的系统是具有 $1内存的VM，但是保证的限制仅为 $2。这低于Virtualmin建议的最小值 $3，并可能导致间歇性的内存分配失败。
 check_okmemory=您的系统具有 $1的内存，该内存等于或大于Virtualmin建议的最小最小值 $2。

@@ -669,6 +669,7 @@ losing_spam=La configuration de SpamAssassin pour ce serveur virtuel sera suppri
 losing_virus=L'entrée Procmail pour filtrer les virus pour ce serveur virtuel sera supprimée.
 losing_status=Le moniteur d'état Webmin du site Web de ce serveur virtuel sera supprimé.
 
+check_desc=L'état de votre système est en cours de vérification pour s'assurer que toutes les fonctionnalités activées sont disponibles et correctement configurées ..
 check_lowmemory=Votre système n'a que $1 de mémoire, ce qui est inférieur au minimum recommandé par Virtualmin de $2
 check_lowgmemory=Votre système est une machine virtuelle avec $1 de mémoire, mais la limite garantie n'est que de $2. Ceci est inférieur au minimum recommandé par Virtualmin de $3 et peut provoquer des échecs d'allocation de mémoire intermittents
 check_okmemory=Votre système dispose de $1 de mémoire, qui est égale ou supérieure au minimum recommandé par Virtualmin de $2

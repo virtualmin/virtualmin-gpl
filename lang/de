@@ -1398,7 +1398,6 @@ losing_ftp=Alle ProFTPd-Direktiven des Virtuellen Server werden entfernt.
 losing_logrotate=Die Logrotate-Konfiguration für die Logdateien des Virtuellen Servers wird gelöscht.
 
 check_title=Überprüfe Konfiguration
-check_desc=Der Status Ihreses Systems wird nun dahingehend überprüft, dass alle ausgewählten Features verfügbar sind, der Mailserver richtig konfiguriert und ob Speicherplatzbegrenzungen aktiviert wurden ..
 check_netok=Das Netzwerk-Konfigurations-Modul von Webmin ist installiert und wird unterstützt
 check_lowmemory=Ihr System hat nur $1 an Speicher, welches unter den von Virtualmin empfohlenem Minimum von $2 ist
 check_lowgmemory=Ihr System ist eine VM mit $1 an Speicher, aber die garantierte Obergrenze ist nur $2. Dies ist unter dem Virtualmin empfohlenem Minimum von $3 und kann zu sporadischen Speicherzuweisungsfehler führen

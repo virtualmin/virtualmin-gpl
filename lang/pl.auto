@@ -1516,6 +1516,7 @@ losing_spam=Konfiguracja SpamAssassin dla tego wirtualnego serwera zostanie usun
 losing_virus=Wpis Procmail do filtrowania wirusów dla tego serwera wirtualnego zostanie usunięty.
 losing_status=Monitor stanu Webmin dla strony internetowej tego wirtualnego serwera zostanie usunięty.
 
+check_desc=Sprawdzany jest stan Twojego systemu, aby upewnić się, że wszystkie włączone funkcje są dostępne i prawidłowo skonfigurowane ..
 check_netok=Moduł konfiguracji sieci Webmina jest zainstalowany i obsługiwany
 check_lowgmemory=Twój system jest maszyną wirtualną z $1 pamięci, ale gwarantowany limit to tylko $2. Jest to mniej niż zalecane przez Virtualmin minimum $3 i może powodować przejściowe awarie alokacji pamięci
 check_okgmemory=Twój system jest maszyną wirtualną z co najwyżej $1 pamięci, ale gwarantowanym limitem jest tylko $2. Oba są równe lub wyższe od zalecanej przez Virtualmin minimum $3

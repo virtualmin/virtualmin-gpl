@@ -1348,7 +1348,6 @@ losing_virus=該虛擬服務器用于病毒過濾的Procmail配置將被刪除�
 losing_status=該虛擬服務器網站的Webmin狀態監控將被刪除。
 
 check_title=正在檢查配置
-check_desc=正在檢查你系統的狀態以保証所有啟用的功能都可用，郵件服務器配置正常，以和限額可用 ..
 check_netok=Webmin的網絡配置模塊被安裝和支持。
 check_defip=虛擬服務器的缺省IP地址是$1。
 check_ewebactions=Apache的<tt>mod_suexec</tt>模塊沒有安裝或者沒有啟用。

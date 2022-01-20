@@ -403,6 +403,7 @@ newdns_enshost=El servidor de nombres adicional $1 no existe
 feature_ssl=Sitio web de Apache SSL
 feature_virt6=Dirección IPv6
 
+check_desc=Se está verificando el estado de su sistema para garantizar que todas las funciones habilitadas estén disponibles y configuradas correctamente ..
 check_lowmemory=Su sistema tiene solo $1 de memoria, que está por debajo del mínimo recomendado de Virtualmin de $2
 check_lowgmemory=Su sistema es una VM con $1 de memoria, pero el límite garantizado es de solo $2. Esto está por debajo del mínimo recomendado de Virtualmin de $3 y puede causar fallas intermitentes en la asignación de memoria
 check_okmemory=Su sistema tiene $1 de memoria, que es igual o superior al mínimo recomendado de Virtualmin de $2

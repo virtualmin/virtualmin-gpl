@@ -530,6 +530,7 @@ losing_spam=Die SpamAssassin-Konfiguration für diesen virtuellen Server wird ge
 losing_virus=Der Procmail-Eintrag zum Filtern von Viren für diesen virtuellen Server wird entfernt.
 losing_status=Der Webmin-Statusmonitor für die Website dieses virtuellen Servers wird gelöscht.
 
+check_desc=Der Status Ihres Systems wird überprüft, um sicherzustellen, dass alle aktivierten Funktionen verfügbar und ordnungsgemäß konfiguriert sind ..
 check_defip6=Die Standard-IPv6-Adresse für virtuelle Server ist $1
 check_dnsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, was der erkannten externen Adresse entspricht
 check_ednsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen

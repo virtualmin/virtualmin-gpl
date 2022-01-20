@@ -1516,7 +1516,6 @@ losing_virus=La entrada de Procmail para filtrar virus en este servidor virtual 
 losing_status=El monitor de estado para el website de este servidor virtual será borrado.
 
 check_title=Verificando Configuración
-check_desc=El estado de su sistema está siendo verificado para asegurar que todas las prestaciones habilitadas están disponibles, que el servidor de mail está adecuadamente configurado y que los límites de espacio en disco están activos ...
 check_netok=El módulo de Configuración de Red de Webmin está instalado y se soporta
 check_defip=Dirección IP por defecto para los servidores virtual es $1
 check_defip6=La dirección por defecto IPv6 para servidores virtuales es $1

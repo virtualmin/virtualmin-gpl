@@ -487,7 +487,6 @@ losing_postgres=Všechny PostgreSQL databáze, tabulky a přihlášení budou sm
 sublosing_postgres=Všechny PostgreSQL databáze a tabulky budou smazány.
 losing_dir=Domovský adresář tohoto virtuálního serveru, obsahující všechny stránky a data, bude smazán.
 
-check_desc=Kontroluji stav vaseho systemu a vyhodnocuji, zda jsou k dispozici vsechny doplnky, napr. zda je k dispozici postovni server ci lze aplikovat omezeni Quota ..
 check_defip=Vychozi IP adresa pro virtualni servery je $1
 check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>
 check_ewebactions=Modul Apache <tt>mod_actions</tt> buď není nainstalován nebo není povolen

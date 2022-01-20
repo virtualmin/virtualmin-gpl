@@ -1262,7 +1262,6 @@ losing_ftp=Toutes les directives ProFTPd du serveur virtuel seront effacées.
 losing_logrotate=La configuration de Logrotate pour les fichiers log du serveur virtuel seront effacées.
 
 check_title=Vérification de la configuration
-check_desc=L'état de votre système est en cours de vérification pour s'assurer que toutes les fonctionnalités activées sont disponibles, que le serveur de courrier est correctement configuré, et que les quotas sont actifs ..
 check_netok=Le module de configuration réseau de Webmin est installé et supporté
 check_defip=L'adresse IP par défaut pour les serveurs virtuels esr $1
 check_webok=Apache est installé

@@ -1277,7 +1277,6 @@ losing_virus=Sanal sunucuda virüsleri filtrelemek için yapýlan Procmail kayd�
 losing_status=Sanal sunucunun webmin durum monitörü silinecek.
 
 check_title=Konfigürasyon Kontrol Ediliyor....
-check_desc=Tüm etkinleþtirilmiþ özelliklerinin (e-posta sunucusu uygun yapýlandýrýlmýþ ve kotalarý etkinleþtirilmiþ mi) kullanýlabilir olduklarýný garantilemek için sisteminizin durumu kontrol ediliyor ..
 check_netok=Webmin Að konfigürasyon modülü kurulu
 check_defip=Sanal sunucu icin varsayýlan IP adresi: $1
 check_ewebactions=Apache modülü <tt>mod_actions</tt> yüklenemedi ya da aktifleþtirilemedi

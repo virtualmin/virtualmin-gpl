@@ -1684,7 +1684,6 @@ losing_virus=De Procmail ingang om virussen te filteren voor deze virtuele serve
 losing_status=De Webmin status monitor voor deze virtuele server website zal worden verwijdert.
 
 check_title=Controleer Configuratie
-check_desc=De status van uw systeem is gecontroleerd om er zeker van te zijn dat alle actieve aangezette zaken beschikbaar zijn, dat de email server goed geconfigureerd is en dat de quota's actief zijn ..
 check_netok=Webmin's Netwerk Configuratie module is geinstalleerd en word ondersteund
 check_lowmemory=Uw systeem heeft maar $1 geheugen, dit is onder het Virtualmin aanbevolen minimum van $2
 check_lowgmemory=Uw systeem is een VM met $1 aan geheugen, echter het gegarandeerde limiet is alleen maar $2. Dit is onder het Virtualmin aanbevolen minimum van $3, en kan voor geheugen locatie fouten zorgen

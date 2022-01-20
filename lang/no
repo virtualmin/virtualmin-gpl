@@ -1735,7 +1735,6 @@ losing_virus=Procmail oppfølringen for filtrering av virus for denne tjeneren v
 losing_status=Webmin statusovervåkeren for denne virtuelle tjenerens nettsted vil bli slettet.
 
 check_title=Sjekker konfigurasjon
-check_desc=Sjekker status på systemet ditt, for å være sikker på at alle aktiverte funksjoner er tilgjengelige, at e-post tjeneren er riktig konfigurert og at kvoter er aktive ..
 check_netok=Webmind Nettverkskonfigurasjons modul er installert og støttet
 check_lowmemory=Systemet ditt har bare $1 internminne, som er under Virtualmins anbefalte grense på $2
 check_lowgmemory=Systemet ditt er en VM med $1 minne, men den garanterte grensen er bare $2. Dette er under Virtualmins anbefalte minimum på $3, og kan forårsake minnetildelingsfeil

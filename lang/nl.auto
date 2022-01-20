@@ -235,6 +235,7 @@ newweb_http2=HTTP2-protocol inschakelen voor nieuwe websites?
 
 feature_ssl=Apache SSL-website
 
+check_desc=De status van uw systeem wordt gecontroleerd om er zeker van te zijn dat alle ingeschakelde functies beschikbaar en correct zijn geconfigureerd ..
 check_defip6=Het standaard IPv6-adres voor virtuele servers is $1
 check_ewebsuexechome=De <tt>suexec</tt> op uw systeem is geconfigureerd om alleen scripts onder de <tt>$2</tt>, maar de homedirectory van de virtuele Virtualmin-server is <tt>$1</tt>. CGI-scripts die als domeineigenaren worden uitgevoerd, worden niet uitgevoerd
 check_ewebdefphpmode2=PHP-uitvoeringsmodus $1 is geselecteerd in de standaardsjabloon, maar wordt niet ondersteund op dit systeem. De standaard wijzigen in $2
