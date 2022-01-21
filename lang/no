@@ -1735,135 +1735,131 @@ losing_virus=Procmail oppfølringen for filtrering av virus for denne tjeneren v
 losing_status=Webmin statusovervåkeren for denne virtuelle tjenerens nettsted vil bli slettet.
 
 check_title=Sjekker konfigurasjon
-check_desc=Sjekker status på systemet ditt, for å være sikker på at alle aktiverte funksjoner er tilgjengelige, at e-post tjeneren er riktig konfigurert og at kvoter er aktive ..
-check_netok=Webmind Nettverkskonfigurasjons modul er installert og støttet.
-check_lowmemory=Systemet ditt har bare $1 internminne, som er under Virtualmins anbefalte grense på $2.
-check_lowgmemory=Systemet ditt er en VM med $1 minne, men den garanterte grensen er bare $2. Dette er under Virtualmins anbefalte minimum på $3, og kan forårsake minnetildelingsfeil.
-check_okmemory=Systemet ditt har $1 med minne. som er på eller over Virtualmins anbefalte grense på $2.
-check_okgmemory=Systemet ditt er en VM med maks. $1 minne, men en garantert grense på bare $2. Disse er begge på eller over Virtualmins anbefalte grense på $2.
-check_defip=Standard IP adresse for virtuelle tjenere er $1.
-check_defip6=Standard IPv6 adresse for virtuelle tjenere er $1.
-check_dnsip1=Ekstern IP adresse for DNS oppføringer er satt til $1, som matcher den oppdagede eksterne IP adressen.
-check_dnsip2=Standard IP adresse er satt til $1, som er det samme som den eksterne IP adressen.
-check_ednsip1=Ekstern IP adresse for DNS oppføringer er satt til $1, men den oppdagede eksterne adressen er faktisk $2. Det kan forårsake at DNS oppføringer for Virtualmin domenene peker til feil system.
-check_ednsip2=Standard IP adresse er satt til $1, men den oppdagede eksterne adressen er faktisk $2. Dette oppstår typisk når man ligger bak en NAT brannmur, og bør korrigeres i <a href='$3'>modulens konfigurasjon</a>.
-check_ewebsuexecbin=Suexec er aktivert i standardmalen, men kommandoen <tt>suexec</tt> ble ikke funnet på systemet.
-check_ewebsuexechome=Suexec kommandoen på systemet ditt er konfigurert til bare å kjøre script under $2, men den virtuelle tjenerens hjemmekatalog er $1. CGI og PHP script kjørt som domeneeiere vil ikke bli utført.
-check_ewebactions=Apache modulen <tt>mod_actions</tt> er enten ikke installert eller ikke aktivert.
+check_netok=Webmind Nettverkskonfigurasjons modul er installert og støttet
+check_lowmemory=Systemet ditt har bare $1 internminne, som er under Virtualmins anbefalte grense på $2
+check_lowgmemory=Systemet ditt er en VM med $1 minne, men den garanterte grensen er bare $2. Dette er under Virtualmins anbefalte minimum på $3, og kan forårsake minnetildelingsfeil
+check_okmemory=Systemet ditt har $1 med minne. som er på eller over Virtualmins anbefalte grense på $2
+check_okgmemory=Systemet ditt er en VM med maks. $1 minne, men en garantert grense på bare $2. Disse er begge på eller over Virtualmins anbefalte grense på $2
+check_defip=Standard IP adresse for virtuelle tjenere er $1
+check_defip6=Standard IPv6 adresse for virtuelle tjenere er $1
+check_dnsip1=Ekstern IP adresse for DNS oppføringer er satt til $1, som matcher den oppdagede eksterne IP adressen
+check_dnsip2=Standard IP adresse er satt til $1, som er det samme som den eksterne IP adressen
+check_ednsip1=Ekstern IP adresse for DNS oppføringer er satt til $1, men den oppdagede eksterne adressen er faktisk $2. Det kan forårsake at DNS oppføringer for Virtualmin domenene peker til feil system
+check_ednsip2=Standard IP adresse er satt til $1, men den oppdagede eksterne adressen er faktisk $2. Dette oppstår typisk når man ligger bak en NAT brannmur, og bør korrigeres i <a href='$3'>modulens konfigurasjon</a>
+check_ewebsuexecbin=Suexec er aktivert i standardmalen, men kommandoen <tt>suexec</tt> ble ikke funnet på systemet
+check_ewebactions=Apache modulen <tt>mod_actions</tt> er enten ikke installert eller ikke aktivert
 check_ewebconfig=Fant konfigurasjonsfeil i Apache : $1
 check_ewebapacheversion=Virtualmin klarte ikke å finne ut hvilken versjon av Apache som er installert på systemet ditt
 check_ewebapacheversion2=Systemet ditt kjører Apache versjon  $1, men Virtualmin krever versjon $2 eller nyere
-check_ewebphp=Apaches konfigurasjonsfil $1 inneholder $2 linjer som forhindrer PHP fra å kjøre med domeneeierens tillatelser. Disse linjene må fjernes.
-check_webok=Apache er installert.
+check_ewebphp=Apaches konfigurasjonsfil $1 inneholder $2 linjer som forhindrer PHP fra å kjøre med domeneeierens tillatelser. Disse linjene må fjernes
+check_webok=Apache er installert
 check_webphpvers=Følgende PHP versjoner er tilgjengelige : $1
 check_webphpnovers=Ingen PHP versjoner ble funnet på dette systemet!
-check_ftpok=ProFTPd er installert.
-check_dnsok2=BIND DNS tjener er installert.
-check_dnsok3=BIND DNS domener vil bli betjent fra en tjeneste-vert.
-check_dnsmaster=Standard master DNS tjener $1 er imidlertid ikke et fullt kvalifisert domenenavn.
-check_mysqlok2=MySQL klientprogrammer er installert for bruk mot en tjenestevert.
-check_mysqlnopass=MySQL er installert og kjører, men har ikke noe <tt>root</tt> passord satt! <b>Dette bør rettes opp umiddelbart i <a href='$1'>MySQL Database</a> modulen</b>.
-check_postgresok=PostgreSQL er installert og kjører.
-check_postgresnopass=PostgreSQL er installert og kjører, men det er ikke satt noe <tt>$2</tt> passord! <b>Dette bør rettes umiddelbart i <a href='$1'>PostgreSQL Database</a> modulen</b>.
-check_webalizerok=Webalizer er installert.
-check_ifaceok=Bruker nettverksgrensesnitt $1 for virtuelle IP adresser.
+check_ftpok=ProFTPd er installert
+check_dnsok2=BIND DNS tjener er installert
+check_dnsok3=BIND DNS domener vil bli betjent fra en tjeneste-vert
+check_dnsmaster=Standard master DNS tjener $1 er imidlertid ikke et fullt kvalifisert domenenavn
+check_mysqlok2=MySQL klientprogrammer er installert for bruk mot en tjenestevert
+check_mysqlnopass=MySQL er installert og kjører, men har ikke noe <tt>root</tt> passord satt! <b>Dette bør rettes opp umiddelbart i <a href='$1'>MySQL Database</a> modulen</b>
+check_postgresok=PostgreSQL er installert og kjører
+check_postgresnopass=PostgreSQL er installert og kjører, men det er ikke satt noe <tt>$2</tt> passord! <b>Dette bør rettes umiddelbart i <a href='$1'>PostgreSQL Database</a> modulen</b>
+check_webalizerok=Webalizer er installert
+check_ifaceok=Bruker nettverksgrensesnitt $1 for virtuelle IP adresser
 check_enetmask6=IPv6 nettmaske $1 er ikke gyldig - den skulle vært et tall, som f.eks. 64
-check_iface6=IPv6 adresser er tilgjengelige, ved bruk av grensesnitt $1.
-check_ifacezone=Nettverksgrensesnitt vil bli oppdaget automatisk ved opprettelsen av virtuelle tjenere.
-check_sendmailok=E-post tjener Sendmail er installert og konfigurert.
-check_postfixok=E-post tjener Postfix er installert og konfigurert.
-check_dependentok=Potfix er konfigurert til å støtte per-domene utgående IP adresser.
-check_dependentever=Din Postfix versjon støtter ikke per-domene utgående IP adresser.
-check_dependentesupport=Postfix kan støtte per-domene utgående IP adresser, men er for øyeblikket ikke konfigurert for dette. Dette kan settes opp i modulen <a href='$1'>Postfix E-post tjener</a> .
-check_qmailok=E-post tjener Qmail er installert og konfigurert.
-check_qmailmode6=E-post tjener QMail er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b>. Det er ikke sikkert at dette virker.
-check_postfixmode6=E-post tjener Postfix er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b> og dette formatet støttes ikke av Postfix.
-check_vpopmailok=E-post tjener Qmail med VPOPMail utvidelser er installert og konfigurert.
-check_done=.. systemet ditt er klart for bruk av Virtualmin.
-check_failed=.. systemet ditt er ikke klart for bruk av Virtualmin.
-check_nogroup=Brukerkvoter er aktivert for hjemme- og e-post-kataloger, men gruppekvoter er ikke aktivert. Totalt kvoter for virtuelle tjenere vil ikke bli håndhevet.
-check_group=Både bruker- og gruppe-kvoter er aktivert for hjemmekataloger og e-post.
-check_noquotas=Disk-kvoter er deaktivert i modulens konfigurasjon.
-check_sslok=Apache er konfigurert for å være vert for WWL nettsteder.
-check_edepwebalizer=Webalizer kan ikke aktiveres i Virtualmins <a href='$1'>modulkonfigurasjon</a> med mindre Apache også er aktivert.
-check_edepssl=SSL kan ikke aktiveres i Virtualmins <a href='$1'>modulkonfigurasjon</a> hvis ikke Apache også er aktivert.
-check_eshell=Skall $1 for ikke-FTP brukere er tatt med i $2, noe som kan tillate FTP tilgang.
-check_eftpshell=Skall $1 for FTP brukere er ikke tatt med i $2, noe som kan forhindre FTP tilgang.
-check_emysqlsync=Synkronisering mellom Unix og MySQL brukere er aktivert i <a href='$1'>MySQL Databasetjener</a> modulen.  Dette er ikke nødvendig siden Virtualmin oppretter MySQL kontoer for domene-eiere ved behov. Synkroniseringen bør derfor slås av.
-check_equotasync=Standard disk-kvoter for nye brukere er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye brukere. Du må derfor deaktivere denne i modulen <a href='$2'>Dsk kvoter</a>.
-check_egquotasync=Standard diskkvoter for nye grupper er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye domener. Dette må derfor deaktiveres i <a href='$2'>Disk kvoter</a> modulen.
+check_iface6=IPv6 adresser er tilgjengelige, ved bruk av grensesnitt $1
+check_ifacezone=Nettverksgrensesnitt vil bli oppdaget automatisk ved opprettelsen av virtuelle tjenere
+check_sendmailok=E-post tjener Sendmail er installert og konfigurert
+check_postfixok=E-post tjener Postfix er installert og konfigurert
+check_dependentok=Potfix er konfigurert til å støtte per-domene utgående IP adresser
+check_dependentever=Din Postfix versjon støtter ikke per-domene utgående IP adresser
+check_dependentesupport=Postfix kan støtte per-domene utgående IP adresser, men er for øyeblikket ikke konfigurert for dette. Dette kan settes opp i modulen <a href='$1'>Postfix E-post tjener</a> 
+check_qmailok=E-post tjener Qmail er installert og konfigurert
+check_qmailmode6=E-post tjener QMail er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b>. Det er ikke sikkert at dette virker
+check_postfixmode6=E-post tjener Postfix er installert og konfigurert. Brukernavnformatet på tjenerens mal-side er imidlertid satt til <b>brukernavn@domene</b> og dette formatet støttes ikke av Postfix
+check_vpopmailok=E-post tjener Qmail med VPOPMail utvidelser er installert og konfigurert
+check_done=.. systemet ditt er klart for bruk av Virtualmin
+check_failed=.. systemet ditt er ikke klart for bruk av Virtualmin
+check_nogroup=Brukerkvoter er aktivert for hjemme- og e-post-kataloger, men gruppekvoter er ikke aktivert. Totalt kvoter for virtuelle tjenere vil ikke bli håndhevet
+check_group=Både bruker- og gruppe-kvoter er aktivert for hjemmekataloger og e-post
+check_noquotas=Disk-kvoter er deaktivert i modulens konfigurasjon
+check_sslok=Apache er konfigurert for å være vert for WWL nettsteder
+check_edepwebalizer=Webalizer kan ikke aktiveres i Virtualmins <a href='$1'>modulkonfigurasjon</a> med mindre Apache også er aktivert
+check_edepssl=SSL kan ikke aktiveres i Virtualmins <a href='$1'>modulkonfigurasjon</a> hvis ikke Apache også er aktivert
+check_eshell=Skall $1 for ikke-FTP brukere er tatt med i $2, noe som kan tillate FTP tilgang
+check_eftpshell=Skall $1 for FTP brukere er ikke tatt med i $2, noe som kan forhindre FTP tilgang
+check_emysqlsync=Synkronisering mellom Unix og MySQL brukere er aktivert i <a href='$1'>MySQL Databasetjener</a> modulen.  Dette er ikke nødvendig siden Virtualmin oppretter MySQL kontoer for domene-eiere ved behov. Synkroniseringen bør derfor slås av
+check_equotasync=Standard disk-kvoter for nye brukere er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye brukere. Du må derfor deaktivere denne i modulen <a href='$2'>Dsk kvoter</a>
+check_egquotasync=Standard diskkvoter for nye grupper er aktivert på filsystemene : $1. Dette er ikke nødvendig siden Virtualmin setter kvoter for nye domener. Dette må derfor deaktiveres i <a href='$2'>Disk kvoter</a> modulen
 check_allwebmin=Oppdaterer alle Webmin brukere med nye innstillinger..
 check_allresel=Oppdaterer alle forhandlere med nye innstillinger..
-check_needupdate=Noen av modulkonfigurasjonsinnstillingene som påvirker hvilke moduler Webmnin brukerne har tilgang til, er endret. Klikk på knappen nedenfor for å oppdatere alle brukere med de nye tillatelsene.
+check_needupdate=Noen av modulkonfigurasjonsinnstillingene som påvirker hvilke moduler Webmnin brukerne har tilgang til, er endret. Klikk på knappen nedenfor for å oppdatere alle brukere med de nye tillatelsene
 check_updatenow=Oppdater Webmin brukere
-check_current=I Webalizers globale konfigurasjon er <b>Webalizer inkrementell fil</b> satt til en absolutt sti. Bruke <a href='$1'>Weablizer</a> modulen til å endre den til en relativ sti, akkurat som <tt>webalizer.current</tt>.
-check_history=I Webalizers globale konfigurasjon peker <b>Webalizer history file</b> til en absolutt sti. Bruk <a href='$1'>Webalizer</a> til å endre denne til en relativ sti, som f.eks. <tt>webalizer.hist</tt>.
-check_proftpd=Fant en feil i ProFTPd konfigurasjonsmalen : $1. Dette må rettes opp ved å redigere Standard innstillinger på siden for Tjenermaler.
-check_enamevirt=Du kan ikke aktivere både <b>Alle Apache tjenere er navne-basert</b> og <b>Standard IP adresse for DNS oppføringer</b> på <a href='$1'>Virtualmins konfigurasjonsside</a>.
-check_logrotateok=Logrotate er installert.
-check_plugin=Tillegg $1 er installert OK.
-check_eldap=Det oppstod en feil ved oppkobling mot LDAP tjener : $1. Enten må du deaktivere LDAP i <a href='$2'>modulkonfigurasjonen</a>, eller så må du sette opp modulen <a href='$3'>LDA brukere og grupper</a> korrekt.
-check_eldap2=Modulen LDAP Brukere og grupper er for gammel til at Virtualmin kan bruke den til brukeradministrasjon. Enten må du deaktivere LDAP i <a href='$1'>modulkonfigurasjonen</a>, eller så må du oppgradere modulen til versjon $2.
-check_ldap=LDAP bruker- og gruppe-administrasjon er riktig konfigurert.
-check_detected=Oppdaget e-post tjener $1.
-check_spamok=SpamAssassin og Procmail er installert og konfigurert for bruk.
-check_noprocmail=SpamAssassin og Procmail er installert. Det ser imidlertid ikke ut til at e-post tjeneren din er konfigurert til å bruke Procmail for levering.
-check_spamglobal=SpamAssassin er konfigurert til å kjøres fra den globale Procmail konfigurasjonen $1. Dette er ikke nødvendig siden Virtualmin vil sette opp denne individuelt per domene.
-check_spamwhite=Hvitlistling av alle postbokser i hvert domene er aktivert på siden <a href='$1'>Virtualmin Konfigurasjon</a>., men dette er ikke kompatibelt med bruken av SpamAssassin klientprogrammet <a href='$2'>spamc</a>.
-check_virusok=ClamAV er installert og kjører.
-check_virusok2=ClamAV er installert og antas å kjøre.
-check_emysqlplugin=Programtillegget MySQL bruker er ikke lenger nødvendig, siden denne funksjonaliteten nå er bygd inn i Virtualmin kjernen.
-check_statusok=Modulen "System og tjener-status" er installert og sjekker i hht. konfigurert tidsplan.
-check_statussched=Modulen "System og tjener-status" er installert, men er ikke satt opp til å sjekke tjenere etter en konfigurert tidsplan. Dette bør aktiveres på modulens side for <tt>Tidsplanlagt overvåking</tt>.
-check_ebcmd=Kommandoen $1, som er nødvendig for oppretting og gjenoppretting av sikkerhetskopier, er ikke installert.
+check_current=I Webalizers globale konfigurasjon er <b>Webalizer inkrementell fil</b> satt til en absolutt sti. Bruke <a href='$1'>Weablizer</a> modulen til å endre den til en relativ sti, akkurat som <tt>webalizer.current</tt>
+check_history=I Webalizers globale konfigurasjon peker <b>Webalizer history file</b> til en absolutt sti. Bruk <a href='$1'>Webalizer</a> til å endre denne til en relativ sti, som f.eks. <tt>webalizer.hist</tt>
+check_proftpd=Fant en feil i ProFTPd konfigurasjonsmalen : $1. Dette må rettes opp ved å redigere Standard innstillinger på siden for Tjenermaler
+check_enamevirt=Du kan ikke aktivere både <b>Alle Apache tjenere er navne-basert</b> og <b>Standard IP adresse for DNS oppføringer</b> på <a href='$1'>Virtualmins konfigurasjonsside</a>
+check_logrotateok=Logrotate er installert
+check_eldap=Det oppstod en feil ved oppkobling mot LDAP tjener : $1. Enten må du deaktivere LDAP i <a href='$2'>modulkonfigurasjonen</a>, eller så må du sette opp modulen <a href='$3'>LDA brukere og grupper</a> korrekt
+check_eldap2=Modulen LDAP Brukere og grupper er for gammel til at Virtualmin kan bruke den til brukeradministrasjon. Enten må du deaktivere LDAP i <a href='$1'>modulkonfigurasjonen</a>, eller så må du oppgradere modulen til versjon $2
+check_ldap=LDAP bruker- og gruppe-administrasjon er riktig konfigurert
+check_detected=Oppdaget e-post tjener $1
+check_spamok=SpamAssassin og Procmail er installert og konfigurert for bruk
+check_noprocmail=SpamAssassin og Procmail er installert. Det ser imidlertid ikke ut til at e-post tjeneren din er konfigurert til å bruke Procmail for levering
+check_spamglobal=SpamAssassin er konfigurert til å kjøres fra den globale Procmail konfigurasjonen $1. Dette er ikke nødvendig siden Virtualmin vil sette opp denne individuelt per domene
+check_spamwhite=Hvitlistling av alle postbokser i hvert domene er aktivert på siden <a href='$1'>Virtualmin Konfigurasjon</a>., men dette er ikke kompatibelt med bruken av SpamAssassin klientprogrammet <a href='$2'>spamc</a>
+check_virusok=ClamAV er installert og kjører
+check_virusok2=ClamAV er installert og antas å kjøre
+check_emysqlplugin=Programtillegget MySQL bruker er ikke lenger nødvendig, siden denne funksjonaliteten nå er bygd inn i Virtualmin kjernen
+check_statusok=Modulen "System og tjener-status" er installert og sjekker i hht. konfigurert tidsplan
+check_statussched=Modulen "System og tjener-status" er installert, men er ikke satt opp til å sjekke tjenere etter en konfigurert tidsplan. Dette bør aktiveres på modulens side for <tt>Tidsplanlagt overvåking</tt>
+check_ebcmd=Kommandoen $1, som er nødvendig for oppretting og gjenoppretting av sikkerhetskopier, er ikke installert
 check_epbzip2out=Du har valgt parallell bzip2 komprimering, men jeg kunne ikke finne versjonsnummeret for <tt>pbzip2</tt> : $1
 check_epbzip2ver=Du har valgt parallell bzip2 komprimering, men dette krever <tt>pbzip2</tt> versjon $1 eller nyere, og systemet ditt har versjon $2
-check_bcmdok=Alle kommandoer som er nødvendige for å opprette og gjenopprette sikkerhetskopier er installert.
+check_bcmdok=Alle kommandoer som er nødvendige for å opprette og gjenopprette sikkerhetskopier er installert
 check_eset_user=Eksterne kvote-kommandoer er aktivert, men kommandoen for å sette en brukers kvote er ikke definert eller den finnes ikke
 check_eset_group=Eksterne kvote-kommandoer er aktivert, men kommandoen for å sette en gruppes kvote er ikke definert eller den finnes ikke
 check_elist_users=Eksterne kvote-kommandoer er aktivert, men kommandoen for å vise bruker-kvoter er ikke definert eller den finnes ikke
 check_elist_groups=Eksterne kvote-kommandoer er aktivert, men kommandoen for å vise gruppe-kvoter er ikke definert eller den finnes ikke
 check_eget_user=Eksterne kvote-kommandoer er aktivert, men kommandoen for å hente en enkelt brukers kvote finnes ikke
 check_eget_group=Eksterne kvote-kommandoer er aktivert, men kommandoen for å hente en enkelt gruppes kvote finnes ikke
-check_quotacommands=Eksterne kvote-kommandoer vil bli brukt for virtuelle tjenere og postbokser.
-check_eclamd=Du har valgt å bruke <tt>clamdscan</tt> for virus scanning, men <tt>clamd</tt> tjeneren som denne snakker med, kjører ikke.
+check_quotacommands=Eksterne kvote-kommandoer vil bli brukt for virtuelle tjenere og postbokser
+check_eclamd=Du har valgt å bruke <tt>clamdscan</tt> for virus scanning, men <tt>clamd</tt> tjeneren som denne snakker med, kjører ikke
 check_evirusspam=Virus scanning kan ikke aktiveres uten søppelpost filtrering
 check_preload=Oppdaterer Virtualmin library pre-load innstillinger ..
 check_collect=Oppdaterer statusinnsamlings jobb ..
 check_collectoff=Deaktiverer statusinnsamlings jobb ..
-check_esendmailbccs=Automatisk blindkopi av utgående e-post støttes ikke av Sendmail tjeneren, og må derfor slås av på <a href='$1'>modulens konfigurasjonsside</a>.
+check_esendmailbccs=Automatisk blindkopi av utgående e-post støttes ikke av Sendmail tjeneren, og må derfor slås av på <a href='$1'>modulens konfigurasjonsside</a>
 check_eqmailbccs=Automatisk blindkopiering av utgående e-post støttes ikke av Qmail e-post tjeneren, og må derfor slås av i <a href='$1'>modulkonfigurasjonen</a>,
-check_epostfixbccs=Automatisk blindkopi av utgåendfe e-post kan ikke aktiveres med mindre en Blindkopi tilordning er konfigurert i <a href='$1'>Postfix e-post tjener</a> modulen, eller manuelt i Postifxs konfigurasjonsfil. Eller du må deaktivere den i <a href='$2'>modulkonfigurasjonen</a>.
-check_esendmailaddrs=Sendmail aksepterer kun SMTP forbindelser på følgende porter : $1. E-post fra andre systemer på Internet vil ikke bli akseptert. Dette kan endres i <a href='$2'>Sendmail E-post tjener</a> modulen.
+check_epostfixbccs=Automatisk blindkopi av utgåendfe e-post kan ikke aktiveres med mindre en Blindkopi tilordning er konfigurert i <a href='$1'>Postfix e-post tjener</a> modulen, eller manuelt i Postifxs konfigurasjonsfil. Eller du må deaktivere den i <a href='$2'>modulkonfigurasjonen</a>
+check_esendmailaddrs=Sendmail aksepterer kun SMTP forbindelser på følgende porter : $1. E-post fra andre systemer på Internet vil ikke bli akseptert. Dette kan endres i <a href='$2'>Sendmail E-post tjener</a> modulen
 check_ealias_maps=Fant et problem med dine Postfix alias maps : $1
 check_evirtual_maps=Fant et problem med dine Postfix virtual maps : $1
 check_ecanonical_maps=Fant et problem med dine Postfix kanoniske maps, brukt for mapping av utgående adresser : $1
 check_ebcc_maps=Fant et problem med dine Postfix avsender BCC maps : $1
-check_evad=Din Postix konfigurasjon har innstillingen <tt>virtual_alias_domains</tt> satt til <tt>$1</tt>. Dette overstyrer domenelisten fra innstillingen <tt>virtual_alias_maps</tt> og bør derfor fjernes.
-check_emydest=Postfix konfigurasjonen din mangler systemets mail vertsnavn <tt>$1</tt> fra <tt>mydestination</tt> linjen. Dette vil forårsake at e-post avvises.
-check_elogrotateconf=Gjeldende logrotate konfitgurasjon er ikke gyldig : $1. Dette må fikses, eller så vil loggfil-rotasjon ikke bli utført.
-check_espamsiteconfig=<tt>spamassassin</tt> kommandoen støtter ikke <tt>--siteconfigpath</tt> parameteren, som er nødvendig for Virtualmin. Installert versjon er $1 - versjon 3.0 eller nyere er anbefalt.
+check_evad=Din Postix konfigurasjon har innstillingen <tt>virtual_alias_domains</tt> satt til <tt>$1</tt>. Dette overstyrer domenelisten fra innstillingen <tt>virtual_alias_maps</tt> og bør derfor fjernes
+check_emydest=Postfix konfigurasjonen din mangler systemets mail vertsnavn <tt>$1</tt> fra <tt>mydestination</tt> linjen. Dette vil forårsake at e-post avvises
+check_elogrotateconf=Gjeldende logrotate konfitgurasjon er ikke gyldig : $1. Dette må fikses, eller så vil loggfil-rotasjon ikke bli utført
+check_espamsiteconfig=<tt>spamassassin</tt> kommandoen støtter ikke <tt>--siteconfigpath</tt> parameteren, som er nødvendig for Virtualmin. Installert versjon er $1 - versjon 3.0 eller nyere er anbefalt
 check_reserr=Ressursbegrensinger er ikke støttet på ditt system : $1
 check_reswarn=Ressursbegrensinger er støttet, men er ikke ferdig konfigurert : $1
-check_resok=Ressursbegrensinger er støttet og konfigurert korrekt.
+check_resok=Ressursbegrensinger er støttet og konfigurert korrekt
 check_packageerr=Det valgte pakkeadministrasjonssystemet kan ikke brukes : $1
 check_updateerr=Det valgte pakkeoppdateringssystemet kan ikke brukes : $1
-check_packageok=De valgte pakke-administrasjons og oppdateringssystemene er installert.
 check_apicmd=Oppretter API helper kommando ..
 check_apicmdok=.. opprettet <tt>$1</tt>
 check_apicmderr=.. feilet : $1
 check_spamlockon=Legg til låsefil i alle domeners spamassassin kall ..
 check_spamlockoff=Fjerner låsefil fra alle domeners spamassassin kall ..
-check_spamwrappercmd=Procmail kommandoen <tt>$1</tt>  i Postfix konfigurasjonen finnes ikke.
-check_spamwrapperuser=Procmail kommandoen <tt>$1</tt> er eid av bruker $2, når den burd vært eid av <tt>root</tt>. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost.
-check_spamwrappergroup=Procmail kommandoen <tt>$1</tt> er eid av gruppe $2, mens den skulle ha vært eid av <tt>root</tt>. Det kan hende at e-post ikke blir riktig levert, eller at den ikke blir sjekket for søppelpost.
-check_spamwrapperperms=Procmail kommandoen <tt>$1</tt> har tillatelsene $2, når den burd vært setuid og setgid til root. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost.
+check_spamwrappercmd=Procmail kommandoen <tt>$1</tt>  i Postfix konfigurasjonen finnes ikke
+check_spamwrapperuser=Procmail kommandoen <tt>$1</tt> er eid av bruker $2, når den burd vært eid av <tt>root</tt>. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost
+check_spamwrappergroup=Procmail kommandoen <tt>$1</tt> er eid av gruppe $2, mens den skulle ha vært eid av <tt>root</tt>. Det kan hende at e-post ikke blir riktig levert, eller at den ikke blir sjekket for søppelpost
+check_spamwrapperperms=Procmail kommandoen <tt>$1</tt> har tillatelsene $2, når den burd vært setuid og setgid til root. Det kan derfor være at e-post ikke blir korrekt levert eller sjekket for søppelpost
 check_lostfeature=Funksjonen <i>$1</i> kan ikke deaktiveres, siden den er i bruk i følgende virtuelle tjenere : $2
 check_lostplugin=Tillegget <i>$1</i> kan ikke deaktiveres, siden det brukes av følgende virtuelle tjenere : $2
-check_ehomebase=Bae-katalogen for hjemmekataloger $1 er ikke en absolutt sti. Dette kan endre i <a href='$2'>modulkonfigurasjonen</a> for modulen Brukere og grupper.
-check_ehomebase2=Basekatalogen $1 for hjemmekataloger er ikke en absolutt sti. Dette kan endres på <a href='$2'>konfigurasjonssiden for modulen Brukere og grupper</a>.
-check_ehomeformat=Hjemmekatalog formatet $1 inneholder ikke brukernavn eller domenenavn. Dette kan korrigeres på <a href='$2'>Virtualmins konfigurasjonsside</a>.
-check_ehomestyle=Stil for hjemmekatalog er satt til "Bare base-katalog", denne kan ikke brukes med Virtualmin. Denne kan endres på <a href='$2'>modulkonfigurasjonssiden for modulen Brukere og grupper</a>.
+check_ehomebase=Bae-katalogen for hjemmekataloger $1 er ikke en absolutt sti. Dette kan endre i <a href='$2'>modulkonfigurasjonen</a> for modulen Brukere og grupper
+check_ehomebase2=Basekatalogen $1 for hjemmekataloger er ikke en absolutt sti. Dette kan endres på <a href='$2'>konfigurasjonssiden for modulen Brukere og grupper</a>
+check_ehomeformat=Hjemmekatalog formatet $1 inneholder ikke brukernavn eller domenenavn. Dette kan korrigeres på <a href='$2'>Virtualmins konfigurasjonsside</a>
+check_ehomestyle=Stil for hjemmekatalog er satt til "Bare base-katalog", denne kan ikke brukes med Virtualmin. Denne kan endres på <a href='$2'>modulkonfigurasjonssiden for modulen Brukere og grupper</a>
 
 checkmap_enone=Ingen tilordnings-kilder ble funnet i <a href='$1'>Postfix konfigurasjonen</a>
 checkmap_esupport=Tilordnings-kilden <tt>$1</tt> støttes ikke av Postfix - det kan hende du må installere Postfix biblioteker for den, eller rekompilere
@@ -2508,7 +2504,6 @@ restore_headerfeatures=Funksjoner og innstillinger
 restore_headeropts=Andre gjenopprettings innstillinger
 restore_allfeatures=Gjenopprett alle funksjoner
 restore_checkmode=Sjekker gjenopprettet PHP eksekveringsmodus ..
-restore_okmode=.. modus $1 OK for dette systemet
 restore_badmode=.. modus $1 kan ikke brukes, bytter til $2.
 restore_evirt6=IPv6 adresse for virtuell tjener
 restore_vconfig_doing=Gjenoppretter Virtualmin konfigurasjon ..
@@ -3117,7 +3112,6 @@ tmpl_extra_prefix=Prefiks for ekstra administratorer
 tmpl_scripts=Rediger standard script installerere
 tmpl_dbs=Rediger standard databaser
 tmpl_return=mal
-tmpl_ephpsuexec=PHP-script kan ikke kjøres som domene-eiere med mindre suexec er aktivert
 tmpl_ephpcmd=PHP-script kan ikke kjøres som domene-eier med mindre <tt>php</tt> kommandoen er installert
 tmpl_erubycmd=Ruby script kan ikke kjøres som domene-eier med mindre <tt>ruby</tt> kommandoen er installert.
 tmpl_editmode=Rediger mal-seksjon:
@@ -4219,7 +4213,6 @@ newvalidate_ok=Valider nå
 newvalidate_err=Kunne ikke validere tjenere
 newvalidate_edoms=Ingen virtuelle tjenere valgt
 newvalidate_efeats=Ingen funksjoner valgt
-newvalidate_good=Alle funksjoner OK
 newvalidate_all=Alle funksjoner
 newvalidate_sel=Kun valgte ..
 newvalidate_doing=Begynner validering av valgte virtuelle tjenere. Problemer som blir funnet vil bli vist i rødt.
@@ -4265,9 +4258,6 @@ validate_ednsnotype=DNS-sone for domene $1 har ingen type!
 validate_ednstype=DNS-sone for domene $1 har typen $2 i stedet for $3
 validate_eweb=Fant ingen Apache virtuell vert for $1
 validate_ewebphp=Manglende wrapper script for PHP $1 - $2
-validate_ewebphpsuexec=PHP er konfigurert til å kjøre som domene-eier, men SuExec er ikke aktivert!
-validate_ewebuid=SuExec bruker er satt til $1, med den virtuelle tjenerens UID er $2
-validate_ewebgid=SuExec gruppe er satt til $1, men den virtuelle tjenerens GID er $2
 validate_ewebdir=Manglende Apache &lt;Directory&gt; blokk for HTML katalog $1
 validate_ewebip=Apache virtuell vert for dette domenet brukere ikke IPv4 adressen og porten $1
 validate_ewebip6=Apache virtuell vert for dette domenet bruker ikke IPv6 adressen og porten $1
@@ -5503,7 +5493,6 @@ postgrey_initdone=.. aktivert
 postgrey_initalready=.. allerede aktivert
 postgrey_proc=Starter Postgrey tjener ..
 postgrey_procfailed=.. oppstart feilet : $1
-postgrey_procdone=.. startet
 postgrey_procalready=.. kjører allerede
 postgrey_postfix=Konfigurerer Postfix til å bruke Postgrey ..
 postgrey_postfixalready=.. allerede konfigurert
@@ -5513,7 +5502,6 @@ postgrey_nopostfixdone=.. fjernet
 postgrey_nopostfixalready=.. allerede fjernet
 postgrey_noproc=Stopper Postgrey tjener ..
 postgrey_noprocfailed=.. shutdown feilet : $1
-postgrey_noprocdone=.. shutdown OK
 postgrey_noprocalready=.. kjører ikke
 postgrey_noinit=Deaktiverer Postgrey ved oppstart ..
 postgrey_noinitdone=.. deaktivert

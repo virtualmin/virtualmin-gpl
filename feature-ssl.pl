@@ -3157,7 +3157,8 @@ my ($d) = @_;
 foreach my $dir (&ssl_certificate_directories($d, 1)) {
 	if (&is_under_directory($d->{'home'}, $dir)) {
 		# Create in the home dir, owned by the user
-		&create_standard_directory_for_domain($d, $dir, '700');
+		&create_standard_directory_for_domain($d, $dir, '700')
+			if (!-d $dir);
 		}
 	else {
 		# Create elsewhere if needed. Should *not* be writable by the

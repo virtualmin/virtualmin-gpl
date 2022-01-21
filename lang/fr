@@ -1262,43 +1262,41 @@ losing_ftp=Toutes les directives ProFTPd du serveur virtuel seront effacées.
 losing_logrotate=La configuration de Logrotate pour les fichiers log du serveur virtuel seront effacées.
 
 check_title=Vérification de la configuration
-check_desc=L'état de votre système est en cours de vérification pour s'assurer que toutes les fonctionnalités activées sont disponibles, que le serveur de courrier est correctement configuré, et que les quotas sont actifs ..
-check_netok=Le module de configuration réseau de Webmin est installé et supporté.
-check_defip=L'adresse IP par défaut pour les serveurs virtuels esr $1.
-check_webok=Apache est installé.
-check_ftpok=ProFTPd est installé.
-check_dnsok2=Serveur DNS BIND est installé.
-check_postgresok=PostgreSQL est installé et en cours d'exécution.
-check_webalizerok=Webalizer est installé.
-check_ifaceok=Utilisation de l'interface réseau $1 pour les IP virtuelles.
-check_ifacezone=L'interface réseau sera détectée automatiquement à la création du serveur virtuel.
-check_sendmailok=Le serveur de courrier Sendmail est installé et configuré.
-check_postfixok=Le serveur de courrier Postfix est installé et configuré.
-check_qmailok=Le serveur de courrier Qmail est installé et configuré.
-check_done=.. votre système est prêt à utiliser Virtualmin.
-check_failed=.. votre système n'est pas prêt à utiliser Virualmin.
-check_nogroup=Les quotas utilisateurs sont activés pour les répertoires utilisateur et de courrier, mais les quotas groupe ne le sont pas. Les quotas totaux pour les serveurs virtuels ne seront pas appliqués.
-check_group=Les quotas utilisateur et groupe sont tous deux activés pour les répertoires utilisateur et de courrier.
+check_netok=Le module de configuration réseau de Webmin est installé et supporté
+check_defip=L'adresse IP par défaut pour les serveurs virtuels esr $1
+check_webok=Apache est installé
+check_ftpok=ProFTPd est installé
+check_dnsok2=Serveur DNS BIND est installé
+check_postgresok=PostgreSQL est installé et en cours d'exécution
+check_webalizerok=Webalizer est installé
+check_ifaceok=Utilisation de l'interface réseau $1 pour les IP virtuelles
+check_ifacezone=L'interface réseau sera détectée automatiquement à la création du serveur virtuel
+check_sendmailok=Le serveur de courrier Sendmail est installé et configuré
+check_postfixok=Le serveur de courrier Postfix est installé et configuré
+check_qmailok=Le serveur de courrier Qmail est installé et configuré
+check_done=.. votre système est prêt à utiliser Virtualmin
+check_failed=.. votre système n'est pas prêt à utiliser Virualmin
+check_nogroup=Les quotas utilisateurs sont activés pour les répertoires utilisateur et de courrier, mais les quotas groupe ne le sont pas. Les quotas totaux pour les serveurs virtuels ne seront pas appliqués
+check_group=Les quotas utilisateur et groupe sont tous deux activés pour les répertoires utilisateur et de courrier
 check_noquotas=Les quotas Disque ont été désactivés dans le module de configuration
-check_sslok=Apache est configuré pour servir des sites Web SSL.
-check_edepwebalizer=Webalizer ne peut être activé dans la <a href='$1'>configuration du module</a> Virtualmin si Apache ne l'est pas également.
-check_edepssl=SSL ne peut être activé dans la <a href='$1'>configuration du module</a> Virtualmin si Apache ne l'est pas également.
-check_eshell=Le shell $1 pour les utilisateurs FTP est inclus dans $2, ce qui peut autoriser l'accès FTP.
-check_eftpshell=Le shell $1 pour les utilisateurs FTP n'est pas inclus dans $2, ce qui peut empêcher l'accès FTP.
+check_sslok=Apache est configuré pour servir des sites Web SSL
+check_edepwebalizer=Webalizer ne peut être activé dans la <a href='$1'>configuration du module</a> Virtualmin si Apache ne l'est pas également
+check_edepssl=SSL ne peut être activé dans la <a href='$1'>configuration du module</a> Virtualmin si Apache ne l'est pas également
+check_eshell=Le shell $1 pour les utilisateurs FTP est inclus dans $2, ce qui peut autoriser l'accès FTP
+check_eftpshell=Le shell $1 pour les utilisateurs FTP n'est pas inclus dans $2, ce qui peut empêcher l'accès FTP
 check_allwebmin=Mise à jour de tous les utilisateurs Webmin avec les nouveaux paramètres en cours ..
-check_needupdate=Certaines des options de configuration  qui affectent l'accès des modules Webmin par les utilisateurs ont changé. Cliquez sur le bouton ci-dessous pour mettre à jour les permissions utilisateur.
+check_needupdate=Certaines des options de configuration  qui affectent l'accès des modules Webmin par les utilisateurs ont changé. Cliquez sur le bouton ci-dessous pour mettre à jour les permissions utilisateur
 check_updatenow=Mise à jour des utilisateurs Webmin
-check_current=Dans la configuration globale de Webalizer, le chemin du <b>fichier incrémental Webalizer</b> est un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le changer en chemin relatif, comme par exemple <tt>webalizer.current</tt>.
-check_history=Dans la configuration globale de Webalizer, le <b>fichier historique de Webalizer</b> est indiqué comme un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le transformer en chemin relatif, comme par exemple <tt>webalizer.hist</tt>.
+check_current=Dans la configuration globale de Webalizer, le chemin du <b>fichier incrémental Webalizer</b> est un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le changer en chemin relatif, comme par exemple <tt>webalizer.current</tt>
+check_history=Dans la configuration globale de Webalizer, le <b>fichier historique de Webalizer</b> est indiqué comme un chemin absolu. Utilisez le module <a href='$1'>Webalizer</a> pour le transformer en chemin relatif, comme par exemple <tt>webalizer.hist</tt>
 check_proftpd=Une erreur a été trouvée dans le template de configuration de ProFTPd : $1
-check_enamevirt=Les options <b>Tous les serveurs virtuels Apache sont basés sur des noms</b> et <b>Adresse IP par défaut pour les enregistrements DNS</b> ne peuvent pas être activées simultanément dans la page de <a href='$1'>Configuration du module</a>.
-check_logrotateok=Logrotate est installé.
-check_plugin=Le plugin $1 est correctement installé.
-check_eldap=Une erreur s'est produite en tentant de contacter le serveur LDAP :$1. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module <a href='$3'>Utilisateurs et groupes LDAP</a> doit être configuré correctement.
-check_eldap2=Le module Utilisateurs et Groupes LDAP est trop ancien pour être utilisé par Virtualmin. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module doit être mis à jour vers la version $2.
-check_ldap=La gestion des Utilisateurs et Groupes LDAP est correctement configurée.
-check_detected=Serveur mail détecté $1.
-check_noprocmail=SpamAssassin et Procmail sont installés. Malgré tout, votre serveur mail n'a pas l'air configuré pour exploiter Procmail.
+check_enamevirt=Les options <b>Tous les serveurs virtuels Apache sont basés sur des noms</b> et <b>Adresse IP par défaut pour les enregistrements DNS</b> ne peuvent pas être activées simultanément dans la page de <a href='$1'>Configuration du module</a>
+check_logrotateok=Logrotate est installé
+check_eldap=Une erreur s'est produite en tentant de contacter le serveur LDAP :$1. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module <a href='$3'>Utilisateurs et groupes LDAP</a> doit être configuré correctement
+check_eldap2=Le module Utilisateurs et Groupes LDAP est trop ancien pour être utilisé par Virtualmin. Soit LDAP doit être désactivé dans la page de <a href='$2'>configuration du module</a>, soit le module doit être mis à jour vers la version $2
+check_ldap=La gestion des Utilisateurs et Groupes LDAP est correctement configurée
+check_detected=Serveur mail détecté $1
+check_noprocmail=SpamAssassin et Procmail sont installés. Malgré tout, votre serveur mail n'a pas l'air configuré pour exploiter Procmail
 
 allwebmin_ecannot=Vous n'êtes pas autorisé à mettre à jour tous les utilisateurs Webmin
 allwebmin_title=Mise à jour des utilisateurs Webmin
@@ -1781,7 +1779,6 @@ restore_headerfeatures=Caractéristiques et paramètres
 restore_headeropts=Autres options de restauration
 restore_allfeatures=Restaurer toutes les fonctionnalités
 restore_checkmode=Vérification mode restauré d'exécution PHP ..
-restore_okmode=.. mode $1 OK pour ce système
 restore_badmode=.. mode $1 ne peut être utilisé, passage à $2.
 restore_evirt6=IPv6 adresse du serveur virtuel
 restore_vconfig_doing=Restauration de configuration Virtualmin ..

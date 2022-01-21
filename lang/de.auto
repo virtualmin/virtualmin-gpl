@@ -139,7 +139,7 @@ setup_usermail3=Mailbox für Administrationsbenutzer erstellen ..
 setup_eusermail2=.. Aliase fehlgeschlagen : $1
 setup_webpost=Durchführen einer anderen Apache-Konfiguration.
 setup_ewebphpmode=Der PHP-Ausführungsmodus $1 wurde ausgewählt, wird aber auf diesem System nicht unterstützt!
-setup_fcgiwrap=Starten des fcgiwrap-Servers ..
+setup_fcgiwrap=Starten des FCGIwrap-Servers ..
 setup_efcgiwrap=.. fehlgeschlagen  : $1
 setup_esslcopy=.. konnte keine virtuelle Nicht-SSL-Website finden, von der Direktiven kopiert werden konnten!
 setup_esslca=.. Zertifizierungsstellendatei ist ungültig : $1
@@ -530,80 +530,83 @@ losing_spam=Die SpamAssassin-Konfiguration für diesen virtuellen Server wird ge
 losing_virus=Der Procmail-Eintrag zum Filtern von Viren für diesen virtuellen Server wird entfernt.
 losing_status=Der Webmin-Statusmonitor für die Website dieses virtuellen Servers wird gelöscht.
 
-check_defip6=Die Standard-IPv6-Adresse für virtuelle Server ist $1.
-check_dnsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, was der erkannten externen Adresse entspricht.
-check_ednsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen.
-check_ednsip2=Die Standard-IP-Adresse ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies ist normalerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden.
-check_ewebsuexecbin=Der Befehl <tt>suexec</tt> wurde auf Ihrem System nicht gefunden.
-check_ewebsuexechome=Der Suexec-Befehl auf Ihrem System ist so konfiguriert, dass nur Skripts unter $2 ausgeführt werden. Das Ausgangsverzeichnis des virtuellen Virtualmin-Servers lautet jedoch $1. CGI-Skripte, die als Domänenbesitzer ausgeführt werden, werden nicht ausgeführt.
-check_ewebdefphpmode2=Der PHP-Ausführungsmodus $1 wurde in der Standardvorlage ausgewählt, wird auf diesem System jedoch nicht unterstützt. Ändern der Standardeinstellung in $2.
+check_desc=Der Status Ihres Systems wird überprüft, um sicherzustellen, dass alle aktivierten Funktionen verfügbar und ordnungsgemäß konfiguriert sind ..
+check_defip6=Die Standard-IPv6-Adresse für virtuelle Server ist $1
+check_dnsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, was der erkannten externen Adresse entspricht
+check_ednsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies kann dazu führen, dass DNS-Einträge für Virtualmin-Domänen auf das falsche System verweisen
+check_ednsip2=Die Standard-IP-Adresse ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies ist normalerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden
+check_ewebsuexecbin=Der Befehl <tt>suexec</tt> wurde auf Ihrem System nicht gefunden
+check_ewebsuexechome=Der <tt>suexec</tt> auf Ihrem System ist so konfiguriert, dass er nur Skripte unter <tt>$2</tt> ausführt, aber das Home-Verzeichnis des virtuellen Virtualmin-Servers ist <tt>$1</tt>. CGI-Skripte, die als Domaininhaber ausgeführt werden, werden nicht ausgeführt
+check_ewebdefphpmode2=Der PHP-Ausführungsmodus $1 wurde in der Standardvorlage ausgewählt, wird auf diesem System jedoch nicht unterstützt. Ändern der Standardeinstellung in $2
 check_ewebapacheversion=Virtualmin konnte die Version von Apache auf Ihrem System nicht ermitteln
 check_ewebapacheversion2=Auf Ihrem System wird Apache Version $1 ausgeführt, für Virtualmin ist jedoch Version $2 oder höher erforderlich
-check_ewebphp=Die Apache-Konfigurationsdatei $1 enthält $2 Zeilen, die verhindern, dass PHP mit Domänenbesitzerberechtigungen ausgeführt wird. Diese Zeilen müssen entfernt werden.
-check_suexecok2=CGI-Skripte können mit SuExec oder fcgiwrap ausgeführt werden.
-check_suexecok=CGI-Skripte können mit SuExec ausgeführt werden.
-check_fcgiwrapok=CGI-Skripte können mit fcgiwrap ausgeführt werden.
-check_http2ok=Apache unterstützt HTTPv2 auf Ihrem System.
-check_http2err=Apache unterstützt HTTPv2 nicht : $1
+check_ewebphp=Die Apache-Konfigurationsdatei $1 enthält $2 Zeilen, die verhindern, dass PHP mit Domänenbesitzerberechtigungen ausgeführt wird. Diese Zeilen müssen entfernt werden
+check_suexecok2=CGI-Skripte können mit suEXEC oder FCGIwrap ausgeführt werden
+check_suexecok=CGI-Skripte können mit suEXEC ausgeführt werden
+check_fcgiwrapok=CGI-Skripte können mit FCGIwrap ausgeführt werden
+check_http2ok=Apache unterstützt HTTP/2 auf Ihrem System
+check_http2err=Apache unterstützt HTTP/2 nicht : $1
 check_webphpmodes=Die folgenden PHP-Ausführungsmodi sind verfügbar : $1
 check_ewebphpmodes=Es sind keine PHP-Ausführungsmodi verfügbar!
-check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende <tt>php.ini</tt>-Dateien neu generieren.
-check_webphpfpm=Die Unterstützung von PHP-FPM Version $1 ist auf diesem System verfügbar.
+check_webphpversinis=PHP-Versionen wurden seit der letzten Überprüfung auf $1 geändert. Fehlende <tt>php.ini</tt>-Dateien neu generieren
+check_webphpfpm=Die Unterstützung von PHP-FPM Version $1 ist auf diesem System verfügbar
 check_webphpnofpm=PHP-FPM-Unterstützung wurde nicht erkannt : $1
 check_webphpfpm2=Die folgenden PHP-FPM-Versionen sind auf diesem System verfügbar : $1
 check_ewebphpfpm2=Die folgenden PHP-FPM-Versionen können nicht verwendet werden : $1
-check_webphpnofpm2=Auf diesem System wurden keine PHP-FPM-Pakete gefunden.
+check_webphpnofpm2=Auf diesem System wurden keine PHP-FPM-Pakete gefunden
 check_webphpfpmport=Behebung eines Konflikts zwischen Port $2 für PHP-FPM Version $1
-check_webphpverfixed=Korrigierte FPM-Version für $1 -Domains.
-check_webphplocalfixed=Begrenzte FPM-Serverversion $2 auf localhost für $1 -Domains.
-check_webadminfixed=Nicht unterstützte $1 -Direktive von $2 Apache-Websites entfernt.
-check_etlsa=TLSA-DNS-Einträge können auf Ihrem System nicht erstellt werden: $1.
-check_tlsaok=TLSA-DNS-Einträge werden neuen Domänen hinzugefügt.
-check_mysqlok=MySQL $1 ist installiert und läuft.
-check_ifacezone=Die Netzwerkschnittstelle wird bei der Erstellung des virtuellen Servers automatisch erkannt.
-check_noquotas=Festplattenkontingente wurden in der Modulkonfiguration deaktiviert.
-check_emysqlsync=Die Synchronisierung zwischen Unix- und MySQL-Benutzern ist im <a href='$1'>MySQL-Datenbank</a> -Modul aktiviert. Dies ist nicht erforderlich, da Virtualmin bei Bedarf MySQL-Konten für Domänenbesitzer erstellt und daher deaktiviert werden muss.
-check_equotasync=Standarddatenträgerkontingente für neue Benutzer sind auf den Dateisystemen aktiviert: $1. Dies ist nicht erforderlich, da Virtualmin Kontingente für neue Benutzer festlegt und daher im Modul <a href='$2'>Festplattenkontingente</a> deaktiviert werden muss.
-check_egquotasync=Standarddatenträgerkontingente für neue Gruppen sind auf den Dateisystemen aktiviert: $1. Dies ist nicht erforderlich, da Virtualmin Kontingente für neue Domänen festlegt und daher im Modul <a href='$2'>Festplattenkontingente</a> deaktiviert werden muss.
-check_allresel=Aktualisieren aller Reseller mit neuen Einstellungen.
-check_spamglobal=SpamAssassin ist so konfiguriert, dass es über die globale Procmail-Konfiguration $1 ausgeführt wird, die nicht benötigt wird, da Virtualmin sie domänenweise einrichtet.
-check_spamwhite=Die Whitelist aller Postfächer in jeder Domäne ist auf der Seite <a href='$1'>Virtualmin-Konfiguration</a> aktiviert. Dies ist jedoch nicht mit der Verwendung des SpamAssassins <a href='$2'>Spamc</a> kompatibel Client-Programm.
+check_webphpverfixed=Korrigierte FPM-Version für $1 -Domains
+check_webphplocalfixed=Begrenzte FPM-Serverversion $2 auf localhost für $1 -Domains
+check_webadminfixed=Nicht unterstützte $1 -Direktive von $2 Apache-Websites entfernt
+check_etlsa=TLSA-DNS-Einträge können auf Ihrem System nicht erstellt werden: $1
+check_tlsaok=TLSA-DNS-Einträge werden neuen Domänen hinzugefügt
+check_mysqlok=MySQL $1 ist installiert und läuft
+check_ifacezone=Die Netzwerkschnittstelle wird bei der Erstellung des virtuellen Servers automatisch erkannt
+check_noquotas=Festplattenkontingente wurden in der Modulkonfiguration deaktiviert
+check_emysqlsync=Die Synchronisierung zwischen Unix- und MySQL-Benutzern ist im <a href='$1'>MySQL-Datenbank</a> -Modul aktiviert. Dies ist nicht erforderlich, da Virtualmin bei Bedarf MySQL-Konten für Domänenbesitzer erstellt und daher deaktiviert werden muss
+check_equotasync=Standarddatenträgerkontingente für neue Benutzer sind auf den Dateisystemen aktiviert: $1. Dies ist nicht erforderlich, da Virtualmin Kontingente für neue Benutzer festlegt und daher im Modul <a href='$2'>Festplattenkontingente</a> deaktiviert werden muss
+check_egquotasync=Standarddatenträgerkontingente für neue Gruppen sind auf den Dateisystemen aktiviert: $1. Dies ist nicht erforderlich, da Virtualmin Kontingente für neue Domänen festlegt und daher im Modul <a href='$2'>Festplattenkontingente</a> deaktiviert werden muss
+check_allresel=Aktualisieren aller Reseller mit neuen Einstellungen
+check_plugin=Plugin $1 ist installiert
+check_spamglobal=SpamAssassin ist so konfiguriert, dass es über die globale Procmail-Konfiguration $1 ausgeführt wird, die nicht benötigt wird, da Virtualmin sie domänenweise einrichtet
+check_spamwhite=Die Whitelist aller Postfächer in jeder Domäne ist auf der Seite <a href='$1'>Virtualmin-Konfiguration</a> aktiviert. Dies ist jedoch nicht mit der Verwendung des SpamAssassins <a href='$2'>Spamc</a> kompatibel Client-Programm
 check_eset_user=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Festlegen des Kontingents eines Benutzers ist nicht definiert oder nicht vorhanden
 check_eset_group=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Festlegen des Kontingents einer Gruppe ist nicht definiert oder nicht vorhanden
 check_elist_users=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Auflisten von Benutzerkontingenten, die nicht definiert sind oder nicht vorhanden sind
 check_elist_groups=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Auflisten von Gruppenkontingenten ist nicht definiert oder nicht vorhanden
 check_eget_user=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Abrufen des Kontingents eines einzelnen Benutzers ist nicht vorhanden
 check_eget_group=Externe Kontingentbefehle sind aktiviert, aber der Befehl zum Abrufen des Kontingents einer einzelnen Gruppe ist nicht vorhanden
-check_quotacommands=Externe Kontingentbefehle werden für virtuelle Server und Postfächer verwendet.
+check_quotacommands=Externe Kontingentbefehle werden für virtuelle Server und Postfächer verwendet
 check_eclamd=Sie haben ausgewählt, <tt>clamdscan</tt> für das Virenscannen zu verwenden, aber der <tt>clamd</tt> -Server, mit dem gesprochen wird, wird nicht ausgeführt
-check_preload=Aktualisieren der Einstellungen für das Vorladen der Virtualmin-Bibliothek.
+check_preload=Aktualisieren der Einstellungen für das Vorladen der Virtualmin-Bibliothek
 check_collect=Statuserfassungsjob aktualisieren ..
-check_collectoff=Deaktivieren des Statuserfassungsjobs.
-check_esendmailbccs=Das automatische BCCing ausgehender E-Mails wird vom Sendmail-Mailserver nicht unterstützt und muss daher auf der Seite <a href='$1'>Modulkonfiguration</a> deaktiviert werden.
-check_eqmailbccs=Das automatische BCCing ausgehender E-Mails wird vom Qmail-Mailserver nicht unterstützt und muss daher auf der Seite <a href='$1'>Modulkonfiguration</a> deaktiviert werden.
-check_epostfixbccs=Das automatische BCCing ausgehender E-Mails kann nur aktiviert werden, wenn eine BCC-Zuordnung im Modul <a href='$1'>Postfix Mailserver</a> oder manuell in der Postfix-Konfigurationsdatei definiert ist. Andernfalls muss es auf der Seite <a href='$2'>Modulkonfiguration</a> deaktiviert werden.
-check_esendmailaddrs=Sendmail akzeptiert nur SMTP-Verbindungen an den folgenden Ports: $1. E-Mails von anderen Systemen im Internet werden nicht akzeptiert. Dies kann im Modul <a href='$2'>Sendmail Mail Server</a> geändert werden.
+check_collectoff=Deaktivieren des Statuserfassungsjobs
+check_esendmailbccs=Das automatische BCCing ausgehender E-Mails wird vom Sendmail-Mailserver nicht unterstützt und muss daher auf der Seite <a href='$1'>Modulkonfiguration</a> deaktiviert werden
+check_eqmailbccs=Das automatische BCCing ausgehender E-Mails wird vom Qmail-Mailserver nicht unterstützt und muss daher auf der Seite <a href='$1'>Modulkonfiguration</a> deaktiviert werden
+check_epostfixbccs=Das automatische BCCing ausgehender E-Mails kann nur aktiviert werden, wenn eine BCC-Zuordnung im Modul <a href='$1'>Postfix Mailserver</a> oder manuell in der Postfix-Konfigurationsdatei definiert ist. Andernfalls muss es auf der Seite <a href='$2'>Modulkonfiguration</a> deaktiviert werden
+check_esendmailaddrs=Sendmail akzeptiert nur SMTP-Verbindungen an den folgenden Ports: $1. E-Mails von anderen Systemen im Internet werden nicht akzeptiert. Dies kann im Modul <a href='$2'>Sendmail Mail Server</a> geändert werden
 check_ealias_maps=Bei Ihren Postfix-Alias-Maps wurde ein Problem festgestellt : $1
 check_evirtual_maps=Bei Ihren virtuellen Postfix-Karten wurde ein Problem festgestellt : $1
 check_ecanonical_maps=Bei Ihren kanonischen Postfix-Karten, die für die Zuordnung ausgehender Adressen verwendet werden, wurde ein Problem festgestellt : $1
 check_ebcc_maps=Bei den BCC-Karten Ihres Postfix-Absenders wurde ein Problem festgestellt : $1
-check_evad=In Ihrer Postfix-Konfiguration ist die Option <tt>virtual_alias_domains</tt> auf <tt>$1</tt> festgelegt. Dies überschreibt die Liste der Domänen aus der Option <tt>virtual_alias_maps</tt> und sollte entfernt werden.
-check_emydest=In Ihrer Postfix-Konfiguration fehlt der Mail-Hostname <tt>$1</tt> des Systems in der Zeile <tt>mydestination</tt>, wodurch die E-Mail abprallt. Der aktuelle Wert ist <tt>$2</tt>.
-check_elogrotateconf=Die aktuelle Logrotate-Konfiguration ist ungültig: $1. Dies muss behoben werden, sonst wird keine Rotation der Protokolldatei durchgeführt.
-check_espamsiteconfig=Der Befehl <tt>spamassassin</tt> unterstützt nicht den Parameter <tt>--siteconfigpath</tt>, der von Virtualmin benötigt wird. Die installierte Version ist $1 - Version 3.0 oder höher wird empfohlen.
+check_evad=In Ihrer Postfix-Konfiguration ist die Option <tt>virtual_alias_domains</tt> auf <tt>$1</tt> festgelegt. Dies überschreibt die Liste der Domänen aus der Option <tt>virtual_alias_maps</tt> und sollte entfernt werden
+check_emydest=In Ihrer Postfix-Konfiguration fehlt der Mail-Hostname <tt>$1</tt> des Systems in der Zeile <tt>mydestination</tt>, wodurch die E-Mail abprallt. Der aktuelle Wert ist <tt>$2</tt>
+check_elogrotateconf=Die aktuelle Logrotate-Konfiguration ist ungültig: $1. Dies muss behoben werden, sonst wird keine Rotation der Protokolldatei durchgeführt
+check_espamsiteconfig=Der Befehl <tt>spamassassin</tt> unterstützt nicht den Parameter <tt>--siteconfigpath</tt>, der von Virtualmin benötigt wird. Die installierte Version ist $1 - Version 3.0 oder höher wird empfohlen
 check_reserr=Ressourcenlimits werden auf Ihrem System nicht unterstützt : $1
 check_reswarn=Ressourcenlimits werden unterstützt, aber nicht vollständig konfiguriert : $1
-check_resok=Ressourcenlimits werden unterstützt und korrekt konfiguriert.
-check_spamlockon=Hinzufügen einer Sperrdatei zu den Spamassassin-Aufrufen aller Domains.
-check_spamlockoff=Entfernen der Sperrdatei aus den Spamassassin-Aufrufen aller Domains.
-check_spamwrapperuser=Der procmail-Befehl <tt>$1</tt> gehört dem Benutzer $2, wenn er dem <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft.
-check_spamwrappergroup=Der procmail-Befehl <tt>$1</tt> gehört der Gruppe $2, wenn er <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft.
-check_spamwrapperperms=Der procmail-Befehl <tt>$1</tt> verfügt über $2 -Berechtigungen, wenn er auf root gesetzt und auf root gesetzt werden soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft.
+check_resok=Ressourcenlimits werden unterstützt und korrekt konfiguriert
+check_packageok=Die ausgewählten Paketverwaltungs- und Aktualisierungssysteme werden installiert
+check_spamlockon=Hinzufügen einer Sperrdatei zu den Spamassassin-Aufrufen aller Domains
+check_spamlockoff=Entfernen der Sperrdatei aus den Spamassassin-Aufrufen aller Domains
+check_spamwrapperuser=Der procmail-Befehl <tt>$1</tt> gehört dem Benutzer $2, wenn er dem <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
+check_spamwrappergroup=Der procmail-Befehl <tt>$1</tt> gehört der Gruppe $2, wenn er <tt>root</tt> gehören soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
+check_spamwrapperperms=Der procmail-Befehl <tt>$1</tt> verfügt über $2 -Berechtigungen, wenn er auf root gesetzt und auf root gesetzt werden soll. E-Mails werden möglicherweise nicht ordnungsgemäß zugestellt oder auf Spam überprüft
 check_lostfeature=Die Funktion <i>$1</i> kann nicht deaktiviert werden, da sie von den folgenden virtuellen Servern verwendet wird : $2
-check_ehomebase=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Virtualmin-Konfiguration</a> korrigiert werden.
-check_ehomebase2=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden.
-check_ehomeformat=Das Ausgangsverzeichnisformat $1 enthält weder den Benutzernamen noch den Domänennamen. Dies kann auf der Seite <a href='$2'>Virtualmin-Konfiguration</a> korrigiert werden.
-check_ehomestyle=Der Home-Verzeichnisstil ist auf "Nur Basisverzeichnis" eingestellt, was mit Virtualmin nicht verwendet werden kann. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden.
+check_ehomebase=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Virtualmin-Konfiguration</a> korrigiert werden
+check_ehomebase2=Das Basisverzeichnis $1 ist kein absoluter Pfad. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden
+check_ehomeformat=Das Ausgangsverzeichnisformat $1 enthält weder den Benutzernamen noch den Domänennamen. Dies kann auf der Seite <a href='$2'>Virtualmin-Konfiguration</a> korrigiert werden
+check_ehomestyle=Der Home-Verzeichnisstil ist auf "Nur Basisverzeichnis" eingestellt, was mit Virtualmin nicht verwendet werden kann. Dies kann auf der Seite <a href='$2'>Modulkonfiguration für Benutzer und Gruppen</a> korrigiert werden
 check_jailkitok=Chroot-Gefängnisse sind auf diesem System verfügbar
 check_jailkiterr=Chroot-Gefängnisse sind nicht verfügbar : $1
 check_eyumrepofile=Die Virtualmin-Repository-Konfigurationsdatei $1 existiert nicht!
@@ -983,6 +986,7 @@ restore_webmin=Wiederherstellen von Webmin-ACL-Dateien.
 restore_cron=Wiederherstellen von Cron-Jobs ..
 restore_allfeatures=Stellen Sie alle Funktionen wieder her
 restore_checkmode=Überprüfen des wiederhergestellten PHP-Ausführungsmodus.
+restore_okmode=.. Modus $1 funktioniert für dieses System
 restore_badmode=.. Modus $1 kann nicht verwendet werden und wechselt zu $2.
 restore_vtemplates_doing=Vorlagen und Pläne wiederherstellen ..
 restore_vscheds_doing=Wiederherstellen geplanter Sicherungen.
@@ -1152,8 +1156,8 @@ tmpl_exclude=Verzeichnisse, die von Sicherungen ausgeschlossen werden sollen
 tmpl_exdirs=Gelistete Verzeichnisse ..
 tmpl_web_ssl=Zusätzliche Anweisungen für SSL-Websites
 tmpl_web_fcgiwrap=Ausführen von CGI-Skripten mit
-tmpl_web_fcgiwrap1=Fcgiwrap-Server
-tmpl_web_fcgiwrap0=SuExec wenn möglich, sonst fcgiwrap
+tmpl_web_fcgiwrap1=FCGIwrap-Server
+tmpl_web_fcgiwrap0=suEXEC, wenn möglich, ansonsten FCGIwrap
 tmpl_logrotate_shared=Logrotate-Konfiguration mit allen Domains teilen?
 tmpl_logrotate_shared0=Nein (Apache wird nach jeder Domain neu gestartet)
 tmpl_logrotate_shared1=Ja (Apache wird nur einmal neu gestartet)
@@ -1234,7 +1238,7 @@ tmpl_php_sock1=Unix-Socket-Datei
 tmpl_statustimeout=Zeitlimit für HTTP-Prüfung
 tmpl_statussslcert1=Überprüfen Sie das Ablaufdatum
 tmpl_statussslcert2=Überprüfen Sie das Ablaufdatum und den Domainnamen
-tmpl_ephpsuexec=PHP-Skripte können nur als Domänenbesitzer ausgeführt werden, wenn suexec aktiviert ist
+tmpl_ephpsuexec=PHP-Skripte können nicht als Domaininhaber ausgeführt werden, es sei denn, suEXEC ist aktiviert
 tmpl_ephpcmd=PHP-Skripte können nur als Domänenbesitzer ausgeführt werden, wenn der Befehl <tt>php</tt> installiert ist
 tmpl_erubycmd=Ruby-Skripte können nur als Domänenbesitzer ausgeführt werden, wenn der Befehl <tt>ruby</tt> installiert ist
 tmpl_editmode_web=Website für Domain
@@ -1381,6 +1385,7 @@ resel_backups2=Planen und erstellen Sie Backups
 resel_backups0=Weder
 resel_admins=Können zusätzliche Administratoren erstellt und verwaltet werden?
 resel_rename=Können Domänen umbenennen?
+resel_createdoms=Kann Domänen erstellen?
 resel_plans=Kann Pläne erstellen und bearbeiten?
 resel_proxy=Können Proxys konfigurieren?
 resel_migrate=Kann Backups migrieren?
@@ -1716,6 +1721,7 @@ newvalidate_header=Optionen für die Serverüberprüfung
 newvalidate_header2=Geplante Validierungsoptionen
 newvalidate_desc=Auf dieser Seite können Sie überprüfen, ob alle aktivierten Funktionen ausgewählter virtueller Server ordnungsgemäß eingerichtet sind und funktionieren.
 newvalidate_desc2=Diese Seite dient zum Einrichten der automatischen geplanten Überprüfung virtueller Server und der Virtualmin-Konfiguration.
+newvalidate_good=Alle Funktionen sind gut
 newvalidate_doing=Beginn der Validierung ausgewählter virtueller Server. Alle gefundenen Probleme werden rot angezeigt.
 newvalidate_tabsched=Geplante Validierung
 newvalidate_tabsfix=Festgelegte Berechtigungen
@@ -1754,8 +1760,11 @@ validate_ednsip6=Der DNS-Eintrag $1 wird in die IPv6-Adresse $2 anstelle der IPv
 validate_ednsmx=In dieser Domain ist E-Mail aktiviert, aber keiner der MX-Datensätze $1 zeigt darauf. Entweder sollten die MX-Einträge korrigiert oder die E-Mail-Funktion deaktiviert werden, wenn E-Mails extern gehostet werden.
 validate_ecloud=DNS-Domain beim Cloud-Anbieter $1 nicht gefunden
 validate_ewebconfig=In der Konfiguration des virtuellen Hosts wurde ein Fehler gefunden : $1
+validate_ewebphpsuexec=PHP ist so konfiguriert, dass es als Domaininhaber ausgeführt wird, aber suEXEC ist nicht aktiviert!
 validate_ewebphpconfig=PHP-Konfigurationsfehler wurden in Version $1 : $2 gefunden
 validate_ewebphpfpmport=PHP FPM Konfigurationsfehler gefunden : $1
+validate_ewebuid=suEXEC-Benutzer ist auf $1 gesetzt, aber die UID des virtuellen Servers ist $2
+validate_ewebgid=Die suEXEC-Gruppe ist auf $1 gesetzt, aber die GID des virtuellen Servers ist $2
 validate_ewebroot=Apache DocumentRoot ist nicht auf das HTML-Verzeichnis $1 festgelegt
 validate_ewebipv6=Ein IPv6-DNS-Eintrag $2 mit der Adresse $1 ist vorhanden, auf diesem virtuellen Server ist IPv6 jedoch nicht aktiviert
 validate_ewebipv6virt=Es ist ein IPv6-DNS-Eintrag mit der Adresse $1 vorhanden, aber die Apache-Konfiguration dieses virtuellen Servers hat keine IPv6-Adresse
@@ -2318,6 +2327,8 @@ postgrey_title=E-Mail Greylisting
 postgrey_epostfix=Postgrey kann nur in Verbindung mit dem Postfix-Mailserver verwendet werden
 postgrey_ecmd=Der Postgrey-Befehl $1 wurde nicht gefunden
 postgrey_installdesc=Virtualmin kann jedoch versuchen, das Postgrey-Greylisting-Paket automatisch für Sie zu installieren.
+postgrey_procdone=.. angefangen fertig
+postgrey_noprocdone=.. Herunterfahren erledigt
 postgrey_title2=Greylisting aktivieren
 postgrey_failed=Greylisting ist für dieses System nicht verfügbar : $1
 postgrey_desc=Greylist ist eine Technik zur Reduzierung von Spam, indem E-Mails zunächst abgelehnt werden, wenn ein anderer Mailserver zum ersten Mal versucht, Kontakt mit Ihrem Server aufzunehmen. Echte Mailserver werden nach einer kurzen Verzögerung erneut versucht, solche, die von Spammern betrieben werden, jedoch normalerweise nicht. Somit werden legitime E-Mails immer noch zugestellt, Spam jedoch nicht.

@@ -1277,54 +1277,52 @@ losing_virus=Sanal sunucuda virüsleri filtrelemek için yapýlan Procmail kayd�
 losing_status=Sanal sunucunun webmin durum monitörü silinecek.
 
 check_title=Konfigürasyon Kontrol Ediliyor....
-check_desc=Tüm etkinleþtirilmiþ özelliklerinin (e-posta sunucusu uygun yapýlandýrýlmýþ ve kotalarý etkinleþtirilmiþ mi) kullanýlabilir olduklarýný garantilemek için sisteminizin durumu kontrol ediliyor ..
-check_netok=Webmin Að konfigürasyon modülü kurulu.
-check_defip=Sanal sunucu icin varsayýlan IP adresi: $1.
-check_ewebactions=Apache modülü <tt>mod_actions</tt> yüklenemedi ya da aktifleþtirilemedi.
-check_webok=Apache kurulu.
-check_ftpok=ProFTPd kurulu.
-check_postgresok=PostgreSQL kurulu ve çalýþýyor.
-check_webalizerok=Webalizer kurulu.
-check_ifaceok=Sanal IP'ler için $1 að arabirimi kullanýlýyor.
-check_ifacezone=Að arabirimi sanal sunucu oluþturma sýrasýnda otomatik olarak tespit edilecek.
-check_sendmailok=E-posta sunucusu Sendmail kurulu.
-check_postfixok=E-posta sunucusu Postfix kurulu.
-check_qmailok=E-posta sunucusu Qmail kurulu.
-check_qmailmode6=E-posta sunucusu Qmail kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan çlýþmayabilir.
-check_postfixmode6=E-posta sunucusu Postfix kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan ve bu ayar Postfix tarafýndan desteklenmediði için çalýþmaz.
-check_vpopmailok=Mail sunucusu Qmail (VPOPMail uzantýlý) kurulu.
-check_done=.. ...sisteminiz Virtualmin kullanýmýna hazýr.
-check_failed=.. sisteminiz Virtualmin kullanýmýna hazýr deðil.
-check_nogroup=Anaklasörler ve e-posta klasörleri için kullanýcý kotalarý etkinleþtirildi fakat grup kotalarý etkinleþtirilmedi. Toplam sanal sunucu kotalarý zorlanmayacak.
-check_group=Anaklasörler ve e-posta klasörleri için hem kullanýcý hem de grup kotalarý etkinleþtirildi.
-check_noquotas=Disk kotalarý modül konfigürasyonunda engellenmiþ.
-check_sslok=Apache SSL web sitelerini barýndýrmak için yapýlandýrýlmýþ.
-check_edepwebalizer=Apache etkinleþtirilmedikçe Webalizer Virtualmin'in <a href='$1'>modül konfigürasyonunda</a> etkinleþtirilemez.
-check_edepssl=Apache etkinleþtirilmedikçe SSL Virtualmin'in <a href='$1'>modül konfigürasyonunda</a> etkinleþtirilemez.
-check_eshell=FTP olamayan kullanýcýlar için shell $1 $2'de dahil edilmiþ, bu sayede FTP eriþimine sahip olabilirler.
-check_eftpshell=FTP kullanýcýlarý için shell $1 $2'de dahil edilmemiþ, bu yüzden FTP eriþimleri olmayabilir.
+check_netok=Webmin Að konfigürasyon modülü kurulu
+check_defip=Sanal sunucu icin varsayýlan IP adresi: $1
+check_ewebactions=Apache modülü <tt>mod_actions</tt> yüklenemedi ya da aktifleþtirilemedi
+check_webok=Apache kurulu
+check_ftpok=ProFTPd kurulu
+check_postgresok=PostgreSQL kurulu ve çalýþýyor
+check_webalizerok=Webalizer kurulu
+check_ifaceok=Sanal IP'ler için $1 að arabirimi kullanýlýyor
+check_ifacezone=Að arabirimi sanal sunucu oluþturma sýrasýnda otomatik olarak tespit edilecek
+check_sendmailok=E-posta sunucusu Sendmail kurulu
+check_postfixok=E-posta sunucusu Postfix kurulu
+check_qmailok=E-posta sunucusu Qmail kurulu
+check_qmailmode6=E-posta sunucusu Qmail kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan çlýþmayabilir
+check_postfixmode6=E-posta sunucusu Postfix kurulu ve yapýlandýrýlmýþ. Buna raðmen sunucu þablonlarý sayfasýndaki kullanýcý ismi biçimi <b>kullanýcýismi@domain</b> þeklinde ayarlandýðýndan ve bu ayar Postfix tarafýndan desteklenmediði için çalýþmaz
+check_vpopmailok=Mail sunucusu Qmail (VPOPMail uzantýlý) kurulu
+check_done=.. ...sisteminiz Virtualmin kullanýmýna hazýr
+check_failed=.. sisteminiz Virtualmin kullanýmýna hazýr deðil
+check_nogroup=Anaklasörler ve e-posta klasörleri için kullanýcý kotalarý etkinleþtirildi fakat grup kotalarý etkinleþtirilmedi. Toplam sanal sunucu kotalarý zorlanmayacak
+check_group=Anaklasörler ve e-posta klasörleri için hem kullanýcý hem de grup kotalarý etkinleþtirildi
+check_noquotas=Disk kotalarý modül konfigürasyonunda engellenmiþ
+check_sslok=Apache SSL web sitelerini barýndýrmak için yapýlandýrýlmýþ
+check_edepwebalizer=Apache etkinleþtirilmedikçe Webalizer Virtualmin'in <a href='$1'>modül konfigürasyonunda</a> etkinleþtirilemez
+check_edepssl=Apache etkinleþtirilmedikçe SSL Virtualmin'in <a href='$1'>modül konfigürasyonunda</a> etkinleþtirilemez
+check_eshell=FTP olamayan kullanýcýlar için shell $1 $2'de dahil edilmiþ, bu sayede FTP eriþimine sahip olabilirler
+check_eftpshell=FTP kullanýcýlarý için shell $1 $2'de dahil edilmemiþ, bu yüzden FTP eriþimleri olmayabilir
 check_allwebmin=Tüm Webmin kullanýcýlarý yeni ayarlarla güncelleniyor..
-check_needupdate=Webmin kullanýcýlarýnýn hangi modüllere eriþebileceklerini etkileyen bazý modül konfigürasyonu ayarlarý deðiþtirildi. Tüm kullanýcýlarý yeni haklarla güncellemek için aþaðýdaki düðmeye basýn.
+check_needupdate=Webmin kullanýcýlarýnýn hangi modüllere eriþebileceklerini etkileyen bazý modül konfigürasyonu ayarlarý deðiþtirildi. Tüm kullanýcýlarý yeni haklarla güncellemek için aþaðýdaki düðmeye basýn
 check_updatenow=Webmin Kullanýcýlarýný Güncelle
-check_current=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer artýmlý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.current</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin.
-check_history=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer geçmiþ kayýtlarý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.hist</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin.
-check_proftpd=ProFTPd konfigürasyon þablonunda bir hata bulundu : $1. Sunucu Þablonlarý sayfasýndaki varsayýlan ayarlar düzenlenerek bu hata giderilmeli.
-check_enamevirt=<a href='$1'>Modül Yapýlandýrmasý</a> sayfasýndaki <b>Tüm Apache sanal sunucularý isim tabanlýdýr</b> ve <b>DNS kayýtlarý için varsayýlan IP adresi</b> seçeneklerinin ikisi birden etkinleþtirilemez.
-check_logrotateok=Logrotate kurulu.
-check_plugin=Plugin $1 kurulu.
-check_eldap=LDAP sunucusuna baðlanýrken hata oluþtu : $1. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da <a href='$3'>LDAP Kullanýcýlarý ve Guplarý</a> modülü doðru olarak kurulmalý.
-check_eldap2=The LDAP Kullanýcýlarý ve Gruplarý modülü kullanýcý yönetimi için Virtualmin tarafýndan kullanýlamayacak kadar eski. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da modül $2 versiyonuna yükseltilmeli.
-check_ldap=LDAP kullanýcý ve grup yönetimi uygun olarak kurulu.
-check_detected=E-posta sunucusu $1 tespit edildi.
-check_spamok=SpamAssassin ve Procmail kurulu ve kullanýma hazý.
-check_noprocmail=SpamAssassin ve Procmail kurulu. Buna raðmen e-posta sunucunuz Procmail kullanarak daðýtmaya göre yapýlandýrýlmamýþ görünüyor.
-check_spamglobal=SpamAssassin genel Procmail konfigürasyonu $1 tarafýndan çalýþtýrýlmak üzere yapýlandýrýlmýþ, ki Virtualmin alanadý baþýna mantýðýyla kuracaðý için buna ihtiyaç yok.
-check_virusok=ClamAV kurulu ve çalýþýyor.
-check_emysqlplugin=Fonksiyonlarý Virtualminin çekirdeðiyle beraber çalýþmadýðýndan MySQL kullanýcýlarý pluginine artýk gerek yok.
-check_statusok=Sistem ve Sunucu Durum modülü kurulu ve programý kontrol ediyor.
-check_statussched=Sistem ve Sunucu Durum modülü, fakat sunucuyu düzenli bir planla kontrol etmek için ayarlanmamýþ. Bu kendi <a href='$1'>Planlý Monitör</a> sayfasýndan etkinleþtirilmeli.
-check_ebcmd=Yedek oluþturma ve geri yükleme için gereken $1 komutu kurulu deðil.
-check_bcmdok=Yedek oluþturma ve geri yükleme için gereken bütün komutlar kurulu.
+check_current=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer artýmlý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.current</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin
+check_history=Webalizer'ýn genel konfigürasyonunda, the <b>Webalizer geçmiþ kayýtlarý dosyasý</b> kati dosyayoluna ayarlanmýþ. <a href='$1'>Webalizer</a> modülü aracýlýðýyla <tt>webalizer.hist</tt>'de olduðu gibi göreli dosyayoluna deðiþtirin
+check_proftpd=ProFTPd konfigürasyon þablonunda bir hata bulundu : $1. Sunucu Þablonlarý sayfasýndaki varsayýlan ayarlar düzenlenerek bu hata giderilmeli
+check_enamevirt=<a href='$1'>Modül Yapýlandýrmasý</a> sayfasýndaki <b>Tüm Apache sanal sunucularý isim tabanlýdýr</b> ve <b>DNS kayýtlarý için varsayýlan IP adresi</b> seçeneklerinin ikisi birden etkinleþtirilemez
+check_logrotateok=Logrotate kurulu
+check_eldap=LDAP sunucusuna baðlanýrken hata oluþtu : $1. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da <a href='$3'>LDAP Kullanýcýlarý ve Guplarý</a> modülü doðru olarak kurulmalý
+check_eldap2=The LDAP Kullanýcýlarý ve Gruplarý modülü kullanýcý yönetimi için Virtualmin tarafýndan kullanýlamayacak kadar eski. Ya <a href='$2'>Modül Yapýlandýrmasý</a> sayfasýndaki LDAP engellenmeli ya da modül $2 versiyonuna yükseltilmeli
+check_ldap=LDAP kullanýcý ve grup yönetimi uygun olarak kurulu
+check_detected=E-posta sunucusu $1 tespit edildi
+check_spamok=SpamAssassin ve Procmail kurulu ve kullanýma hazý
+check_noprocmail=SpamAssassin ve Procmail kurulu. Buna raðmen e-posta sunucunuz Procmail kullanarak daðýtmaya göre yapýlandýrýlmamýþ görünüyor
+check_spamglobal=SpamAssassin genel Procmail konfigürasyonu $1 tarafýndan çalýþtýrýlmak üzere yapýlandýrýlmýþ, ki Virtualmin alanadý baþýna mantýðýyla kuracaðý için buna ihtiyaç yok
+check_virusok=ClamAV kurulu ve çalýþýyor
+check_emysqlplugin=Fonksiyonlarý Virtualminin çekirdeðiyle beraber çalýþmadýðýndan MySQL kullanýcýlarý pluginine artýk gerek yok
+check_statusok=Sistem ve Sunucu Durum modülü kurulu ve programý kontrol ediyor
+check_statussched=Sistem ve Sunucu Durum modülü, fakat sunucuyu düzenli bir planla kontrol etmek için ayarlanmamýþ. Bu kendi <a href='$1'>Planlý Monitör</a> sayfasýndan etkinleþtirilmeli
+check_ebcmd=Yedek oluþturma ve geri yükleme için gereken $1 komutu kurulu deðil
+check_bcmdok=Yedek oluþturma ve geri yükleme için gereken bütün komutlar kurulu
 
 allwebmin_ecannot=Webmin kullanýcýlarýný güncellemek için izniniz yok
 allwebmin_title=Webmin kullanýcýlarý güncelleniyor
@@ -1960,7 +1958,6 @@ tmpl_extra_prefix=Ek yöneticiler için önek
 tmpl_scripts=Varsayýlan Kurulum Sihirbazlarý Kurucularýný Düzenle
 tmpl_dbs=Edit Varsayýlan Veritabanlarý
 tmpl_return=þablon
-tmpl_ephpsuexec=Suexec etkinleþtirilmedikçe PHP kurulum sihirbazlarý alanadý sahibi olarak yürütülemezler
 tmpl_ephpcmd=<tt>php</tt> komutu kurulmadýkça PHP kurulum sihirbazlarý alanadý sahibi olarak yürütülemezler
 tmpl_editmode=Düzenlenecek þablon kýsmý
 tmpl_switch=Deðiþtir
@@ -2593,7 +2590,6 @@ newvalidate_ok=Þimdi Denetle
 newvalidate_err=Sunucularýn geçerlikleri denetlenemedi
 newvalidate_edoms=Hiçbir sanal sunucu seçilmemiþ
 newvalidate_efeats=Hiçbir özellik seçilmemiþ
-newvalidate_good=Tüm özellikler OK
 newvalidate_all=Tüm özellikler
 newvalidate_sel=Sadece seçili ..
 newvalidate_doing=Sanal sunucularýn geçerlik denetlemesi baþlýyor. Bulunan problemler kýrmýzýyla gösterilecekler ..

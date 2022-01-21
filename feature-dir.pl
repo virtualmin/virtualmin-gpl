@@ -141,15 +141,15 @@ if (&has_domain_user($d)) {
 	# Do creation as domain owner
 	if (!-d $path) {
 		&make_dir_as_domain_user($d, $path, oct($perm), 1);
+		&set_permissions_as_domain_user($d, oct($perm), $path);
 		}
-	&set_permissions_as_domain_user($d, oct($perm), $path);
 	}
 else {
 	# Need to run as root
 	if (!-d $path) {
 		&make_dir($path, oct($perm), 1);
+		&set_ownership_permissions(undef, undef, oct($perm), $path);
 		}
-	&set_ownership_permissions(undef, undef, oct($perm), $path);
 	if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
 		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 					   undef, $path);

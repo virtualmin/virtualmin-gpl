@@ -434,7 +434,7 @@ setup_webpost=Provádíme další konfiguraci Apache.
 setup_ewebpost=.. konfigurace se nezdařila : $1 
 setup_ewebphpmode=Byl vybrán režim spuštění PHP $1, ale v tomto systému není podporován!
 setup_openssl=Vytváření certifikátu SSL a soukromého klíče ..
-setup_fcgiwrap=Spouštění serveru fcgiwrap ..
+setup_fcgiwrap=Spouštění FCGIwrap serveru ..
 setup_efcgiwrap=.. nezdařilo se : $1
 setup_ssl=Přidání nového virtuálního webu SSL.
 setup_esslportclash=Adresa IP $1 a port $2 používá $3 
@@ -1435,126 +1435,127 @@ losing_virus=Položka Procmail pro filtrování virů pro tento virtuální serv
 losing_status=Monitor stavu webmin pro web tohoto virtuálního serveru bude odstraněn.
 
 check_title=Kontrola konfigurace
-check_netok=Je nainstalován a podporován modul Webmin's Network Configuration.
-check_lowmemory=Váš systém má pouze $1 paměti, což je pod doporučeným minimem Virtualmin $2.
-check_lowgmemory=Váš systém je virtuální počítač s pamětí $1, ale garantovaný limit je pouze $2. To je pod doporučeným minimem Virtualmin $3 a může to způsobit občasné selhání přidělení paměti.
-check_okmemory=Váš systém má $1 paměti, která je na nebo nad doporučeným minimem Virtualmin $2.
-check_okgmemory=Váš systém je virtuální počítač s nejvýše $1 paměti, ale garantovaný limit pouze $2. Oba jsou na nebo nad doporučeným minimem Virtualmin $3.
-check_defip6=Výchozí adresa IPv6 pro virtuální servery je $1.
-check_dnsip1=Externí adresa IP pro záznamy DNS je nastavena na $1, což odpovídá zjištěné externí adrese.
-check_dnsip2=Výchozí adresa IP je nastavena na $1, což odpovídá zjištěné externí adrese.
-check_ednsip1=Externí adresa IP pro záznamy DNS je nastavena na $1, ale zjištěná externí adresa je ve skutečnosti $2. To může způsobit, že záznamy DNS pro domény Virtualmin odkazují na nesprávný systém.
-check_ewebsuexecbin=Příkaz <tt>suexec</tt> nebyl ve vašem systému nalezen.
-check_ewebsuexechome=Příkaz Suexec ve vašem systému je nakonfigurován tak, aby spouštěl skripty pouze pod $2, ale domovský adresář virtuálního serveru Virtualmin je $1. Skripty CGI spuštěné jako vlastníci domény nebudou provedeny.
-check_ewebdefphpmode2=Režim spuštění PHP $1 byl vybrán ve výchozí šabloně, ale v tomto systému není podporován. Změna výchozí hodnoty na $2.
+check_desc=Kontroluje se stav vašeho systému, aby bylo zajištěno, že všechny povolené funkce jsou dostupné a správně nakonfigurované ..
+check_netok=Je nainstalován a podporován modul Webmin's Network Configuration
+check_lowmemory=Váš systém má pouze $1 paměti, což je pod doporučeným minimem Virtualmin $2
+check_lowgmemory=Váš systém je virtuální počítač s pamětí $1, ale garantovaný limit je pouze $2. To je pod doporučeným minimem Virtualmin $3 a může to způsobit občasné selhání přidělení paměti
+check_okmemory=Váš systém má $1 paměti, která je na nebo nad doporučeným minimem Virtualmin $2
+check_okgmemory=Váš systém je virtuální počítač s nejvýše $1 paměti, ale garantovaný limit pouze $2. Oba jsou na nebo nad doporučeným minimem Virtualmin $3
+check_defip6=Výchozí adresa IPv6 pro virtuální servery je $1
+check_dnsip1=Externí adresa IP pro záznamy DNS je nastavena na $1, což odpovídá zjištěné externí adrese
+check_dnsip2=Výchozí adresa IP je nastavena na $1, což odpovídá zjištěné externí adrese
+check_ednsip1=Externí adresa IP pro záznamy DNS je nastavena na $1, ale zjištěná externí adresa je ve skutečnosti $2. To může způsobit, že záznamy DNS pro domény Virtualmin odkazují na nesprávný systém
+check_ewebsuexecbin=Příkaz <tt>suexec</tt> nebyl ve vašem systému nalezen
+check_ewebsuexechome=Příkaz <tt>suexec</tt> ve vašem systému je nakonfigurován tak, aby spouštěl pouze skripty pod <tt>$2</tt>, ale domovský adresář virtuálního serveru Virtualmin je <tt>$1</tt>. Skripty CGI spuštěné jako vlastníci domény nebudou spuštěny
+check_ewebdefphpmode2=Režim spuštění PHP $1 byl vybrán ve výchozí šabloně, ale v tomto systému není podporován. Změna výchozí hodnoty na $2
 check_ewebconfig=Byly nalezeny chyby konfigurace Apache : $1 
 check_ewebapacheversion=Virtualmin nemohl ve vašem systému zjistit verzi Apache
 check_ewebapacheversion2=Váš systém používá verzi Apache $1, ale Virtualmin vyžaduje verzi $2 nebo novější
-check_ewebphp=Konfigurační soubor Apache $1 obsahuje $2 řádky, které zabraňují spuštění PHP s oprávněními vlastníka domény. Tyto řádky musí být odstraněny.
-check_webok=Apache je nainstalován.
-check_suexecok2=Skripty CGI lze spouštět pomocí SuExec nebo fcgiwrap.
-check_suexecok=CGI skripty lze spouštět pomocí SuExec.
-check_fcgiwrapok=Skripty CGI lze spouštět pomocí příkazu fcgiwrap.
-check_http2ok=Apache podporuje HTTPv2 ve vašem systému.
-check_http2err=Apache nepodporuje HTTPv2 : $1
+check_ewebphp=Konfigurační soubor Apache $1 obsahuje $2 řádky, které zabraňují spuštění PHP s oprávněními vlastníka domény. Tyto řádky musí být odstraněny
+check_webok=Apache je nainstalován
+check_suexecok2=Skripty CGI lze spouštět pomocí suEXEC nebo FCGIwrap
+check_suexecok=CGI skripty lze spouštět pomocí suEXEC
+check_fcgiwrapok=Skripty CGI lze spouštět pomocí FCGIwrap
+check_http2ok=Apache podporuje HTTP/2 ve vašem systému
+check_http2err=Apache nepodporuje HTTP/2 : $1
 check_webphpvers=K dispozici jsou následující verze PHP : $1 
 check_webphpnovers=V tomto systému nebyly nalezeny žádné verze PHP!
 check_webphpmodes=K dispozici jsou následující režimy provádění PHP : $1 
 check_ewebphpmodes=Nejsou k dispozici žádné režimy provádění PHP!
-check_webphpversinis=Verze PHP se od poslední kontroly změnily na $1. Regenerace chybějících souborů <tt>php.ini</tt>.
-check_webphpfpm=V tomto systému je k dispozici podpora PHP-FPM verze $1.
+check_webphpversinis=Verze PHP se od poslední kontroly změnily na $1. Regenerace chybějících souborů <tt>php.ini</tt>
+check_webphpfpm=V tomto systému je k dispozici podpora PHP-FPM verze $1
 check_webphpnofpm=Podpora PHP-FPM nebyla detekována : $1 
 check_webphpfpm2=V tomto systému jsou k dispozici následující verze PHP-FPM : $1 
 check_ewebphpfpm2=Nelze použít následující verze PHP-FPM : $1 
-check_webphpnofpm2=V tomto systému nebyly nalezeny žádné balíčky PHP-FPM.
+check_webphpnofpm2=V tomto systému nebyly nalezeny žádné balíčky PHP-FPM
 check_webphpfpmport=Oprava střetu portů $2 pro PHP-FPM verze $1 
-check_webphpverfixed=Opravená verze FPM pro domény $1.
-check_webphplocalfixed=Verze serveru FPM $2 na localhost pro domény $1.
-check_webadminfixed=Z webů Apache $2 byla odebrána nepodporovaná směrnice $1.
-check_ftpok=Je nainstalován ProFTPD.
-check_dnsok3=Domény BIND DNS budou hostovány na hostiteli služeb.
-check_etlsa=Ve vašem systému nelze vytvořit záznamy DNS TLSA: $1.
-check_tlsaok=Záznamy DNS TLSA budou přidány do nových domén.
-check_dnsmaster=Výchozí hlavní server DNS $1 však není plně kvalifikovaný název domény.
-check_mysqlok=MySQL $1 je nainstalován a běží.
-check_mysqlok2=Klientské programy MySQL jsou nainstalovány pro použití s hostitelem služeb.
-check_postgresok=PostgreSQL je nainstalován a spuštěn.
-check_webalizerok=Je nainstalován webalizátor.
-check_ifaceok=Používání síťového rozhraní $1 pro virtuální IP.
+check_webphpverfixed=Opravená verze FPM pro domény $1
+check_webphplocalfixed=Verze serveru FPM $2 na localhost pro domény $1
+check_webadminfixed=Z webů Apache $2 byla odebrána nepodporovaná směrnice $1
+check_ftpok=Je nainstalován ProFTPD
+check_dnsok3=Domény BIND DNS budou hostovány na hostiteli služeb
+check_etlsa=Ve vašem systému nelze vytvořit záznamy DNS TLSA: $1
+check_tlsaok=Záznamy DNS TLSA budou přidány do nových domén
+check_dnsmaster=Výchozí hlavní server DNS $1 však není plně kvalifikovaný název domény
+check_mysqlok=MySQL $1 je nainstalován a běží
+check_mysqlok2=Klientské programy MySQL jsou nainstalovány pro použití s hostitelem služeb
+check_postgresok=PostgreSQL je nainstalován a spuštěn
+check_webalizerok=Je nainstalován webalizátor
+check_ifaceok=Používání síťového rozhraní $1 pro virtuální IP
 check_enetmask6=Maska IPv6 $1 není platná - mělo by to být číslo, například 64
-check_iface6=Dostupné jsou adresy IPv6 pomocí rozhraní $1.
-check_ifacezone=Síťové rozhraní bude detekováno automaticky v době vytvoření virtuálního serveru.
-check_sendmailok=Poštovní server Sendmail je nainstalován a nakonfigurován.
-check_postfixok=Poštovní server Postfix je nainstalován a nakonfigurován.
-check_dependentok=Postfix je nakonfigurován tak, aby podporoval odchozí IP adresy v doméně.
-check_dependentever=Verze Postfixu nepodporuje odchozí IP adresy v doméně.
-check_dependentesupport=Postfix může podporovat odchozí IP adresy v doméně, ale není aktuálně nakonfigurován. To lze nastavit v modulu <a href='$1'>Postfix Mailserver</a>.
-check_qmailok=Poštovní server Qmail je nainstalován a nakonfigurován.
-check_qmailmode6=Poštovní server Qmail je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, což nemusí fungovat.
-check_postfixmode6=Poštovní server Postfix je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, není Postfixem podporován.
-check_vpopmailok=Je nainstalován a nakonfigurován poštovní server Qmail s rozšířeními VPOPMail.
-check_failed=.. váš systém není připraven k použití Virtualmin.
-check_nogroup=Uživatelské kvóty jsou povoleny pro domácí a e-mailové adresáře, ale skupinové kvóty nejsou. Celkové kvóty virtuálního serveru nebudou vynucovány.
-check_group=Pro domovské a e-mailové adresáře jsou povoleny uživatelské i skupinové kvóty.
-check_noquotas=Diskové kvóty byly v konfiguraci modulu deaktivovány.
-check_sslok=Apache je nakonfigurován tak, aby hostoval webové stránky SSL.
-check_eshell=Prostředí $1 pro uživatele, kteří nejsou FTP, je zahrnuto v $2, což může umožnit přístup FTP.
-check_equotasync=V souborových systémech jsou povoleny výchozí diskové kvóty pro nové uživatele: $1. Není to nutné, protože Virtualmin nastavuje kvóty pro nové uživatele, a proto musí být deaktivován v modulu <a href='$2'>Diskové kvóty</a>.
-check_egquotasync=V souborových systémech jsou povoleny výchozí diskové kvóty pro nové skupiny: $1. Není to nutné, protože Virtualmin nastavuje kvóty pro nové domény, a proto musí být deaktivován v modulu <a href='$2'>Diskové kvóty</a>.
-check_needupdate=Některá nastavení konfigurace modulu, která ovlivňují, ke kterým modulům mají uživatelé Webmin přístup, se změnily. Kliknutím na tlačítko níže aktualizujete všechny uživatele o nová oprávnění.
+check_iface6=Dostupné jsou adresy IPv6 pomocí rozhraní $1
+check_ifacezone=Síťové rozhraní bude detekováno automaticky v době vytvoření virtuálního serveru
+check_sendmailok=Poštovní server Sendmail je nainstalován a nakonfigurován
+check_postfixok=Poštovní server Postfix je nainstalován a nakonfigurován
+check_dependentok=Postfix je nakonfigurován tak, aby podporoval odchozí IP adresy v doméně
+check_dependentever=Verze Postfixu nepodporuje odchozí IP adresy v doméně
+check_dependentesupport=Postfix může podporovat odchozí IP adresy v doméně, ale není aktuálně nakonfigurován. To lze nastavit v modulu <a href='$1'>Postfix Mailserver</a>
+check_qmailok=Poštovní server Qmail je nainstalován a nakonfigurován
+check_qmailmode6=Poštovní server Qmail je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, což nemusí fungovat
+check_postfixmode6=Poštovní server Postfix je nainstalován a nakonfigurován. Formát uživatelského jména na stránce šablon serveru je však nastaven na <b>uživatelské jméno @ doména</b>, není Postfixem podporován
+check_vpopmailok=Je nainstalován a nakonfigurován poštovní server Qmail s rozšířeními VPOPMail
+check_failed=.. váš systém není připraven k použití Virtualmin
+check_nogroup=Uživatelské kvóty jsou povoleny pro domácí a e-mailové adresáře, ale skupinové kvóty nejsou. Celkové kvóty virtuálního serveru nebudou vynucovány
+check_group=Pro domovské a e-mailové adresáře jsou povoleny uživatelské i skupinové kvóty
+check_noquotas=Diskové kvóty byly v konfiguraci modulu deaktivovány
+check_sslok=Apache je nakonfigurován tak, aby hostoval webové stránky SSL
+check_eshell=Prostředí $1 pro uživatele, kteří nejsou FTP, je zahrnuto v $2, což může umožnit přístup FTP
+check_equotasync=V souborových systémech jsou povoleny výchozí diskové kvóty pro nové uživatele: $1. Není to nutné, protože Virtualmin nastavuje kvóty pro nové uživatele, a proto musí být deaktivován v modulu <a href='$2'>Diskové kvóty</a>
+check_egquotasync=V souborových systémech jsou povoleny výchozí diskové kvóty pro nové skupiny: $1. Není to nutné, protože Virtualmin nastavuje kvóty pro nové domény, a proto musí být deaktivován v modulu <a href='$2'>Diskové kvóty</a>
+check_needupdate=Některá nastavení konfigurace modulu, která ovlivňují, ke kterým modulům mají uživatelé Webmin přístup, se změnily. Kliknutím na tlačítko níže aktualizujete všechny uživatele o nová oprávnění
 check_updatenow=Aktualizace uživatelů Webmin
-check_history=V globální konfiguraci Webalizeru je <b>soubor historie webového prohlížeče</b> nastaven na absolutní cestu. Pomocí modulu <a href='$1'>Webalizer</a> jej změňte na relativní cestu, například <tt>webalizer.hist</tt>.
-check_proftpd=V konfigurační šabloně ProFTPD byla nalezena chyba: $1. To je třeba opravit úpravou výchozího nastavení na stránce Šablony serveru.
-check_enamevirt=<b>Všechny virtuální servery Apache jsou založeny na jménech</b> a <b>Výchozí IP adresa pro záznamy DNS</b> nelze povolit v <a href='$1'>Virtualmin Configuration</a> stránka.
-check_logrotateok=Logrotate je nainstalován.
-check_plugin=Plugin $1 je nainstalován v pořádku.
-check_eldap=Při kontaktování serveru LDAP došlo k chybě: $1. Na stránce <a href='$2'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo musí být správně nastaven modul <a href='$3'>Uživatelé a skupiny LDAP</a>.
-check_eldap2=Modul Uživatelé a skupiny LDAP je příliš starý na to, aby jej mohl Virtualmin použít pro správu uživatelů. Na stránce <a href='$1'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo modul upgradován na verzi $2.
-check_ldap=Správa uživatelů a skupin LDAP je správně nakonfigurována.
-check_spamok=SpamAssassin a Procmail jsou nainstalovány a nakonfigurovány pro použití.
-check_noprocmail=Jsou nainstalovány programy SpamAssassin a Procmail. Zdá se však, že váš poštovní server není nakonfigurován pro doručování pomocí protokolu Procmail.
-check_spamglobal=SpamAssassin je nakonfigurován tak, aby byl spouštěn z globální konfigurace Procmail $1, což není nutné, protože Virtualmin jej nastaví pro jednotlivé domény.
-check_spamwhite=Whitelisting všech poštovních schránek v každé doméně je povolen na stránce <a href='$1'>Virtualmin Configuration</a>, ale to není kompatibilní s použitím <a href='$2'>spamc</a> SpamAssassin klientský program.
-check_virusok=ClamAV je nainstalován a spuštěn.
-check_virusok2=ClamAV je nainstalován a předpokládá se, že běží.
-check_statusok=Modul Stav systému a serveru je nainstalován a kontroluje se podle plánu.
-check_statussched=Modul Stav systému a serveru je nainstalován, ale není nastaven na kontrolu serverů v pravidelném plánu. To by mělo být povoleno na stránce <a href='$1'>Plánované monitorování</a>.
+check_history=V globální konfiguraci Webalizeru je <b>soubor historie webového prohlížeče</b> nastaven na absolutní cestu. Pomocí modulu <a href='$1'>Webalizer</a> jej změňte na relativní cestu, například <tt>webalizer.hist</tt>
+check_proftpd=V konfigurační šabloně ProFTPD byla nalezena chyba: $1. To je třeba opravit úpravou výchozího nastavení na stránce Šablony serveru
+check_enamevirt=<b>Všechny virtuální servery Apache jsou založeny na jménech</b> a <b>Výchozí IP adresa pro záznamy DNS</b> nelze povolit v <a href='$1'>Virtualmin Configuration</a> stránka
+check_logrotateok=Logrotate je nainstalován
+check_plugin=Plugin $1 je nainstalován
+check_eldap=Při kontaktování serveru LDAP došlo k chybě: $1. Na stránce <a href='$2'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo musí být správně nastaven modul <a href='$3'>Uživatelé a skupiny LDAP</a>
+check_eldap2=Modul Uživatelé a skupiny LDAP je příliš starý na to, aby jej mohl Virtualmin použít pro správu uživatelů. Na stránce <a href='$1'>konfigurace modulu</a> musí být deaktivován protokol LDAP nebo modul upgradován na verzi $2
+check_ldap=Správa uživatelů a skupin LDAP je správně nakonfigurována
+check_spamok=SpamAssassin a Procmail jsou nainstalovány a nakonfigurovány pro použití
+check_noprocmail=Jsou nainstalovány programy SpamAssassin a Procmail. Zdá se však, že váš poštovní server není nakonfigurován pro doručování pomocí protokolu Procmail
+check_spamglobal=SpamAssassin je nakonfigurován tak, aby byl spouštěn z globální konfigurace Procmail $1, což není nutné, protože Virtualmin jej nastaví pro jednotlivé domény
+check_spamwhite=Whitelisting všech poštovních schránek v každé doméně je povolen na stránce <a href='$1'>Virtualmin Configuration</a>, ale to není kompatibilní s použitím <a href='$2'>spamc</a> SpamAssassin klientský program
+check_virusok=ClamAV je nainstalován a spuštěn
+check_virusok2=ClamAV je nainstalován a předpokládá se, že běží
+check_statusok=Modul Stav systému a serveru je nainstalován a kontroluje se podle plánu
+check_statussched=Modul Stav systému a serveru je nainstalován, ale není nastaven na kontrolu serverů v pravidelném plánu. To by mělo být povoleno na stránce <a href='$1'>Plánované monitorování</a>
 check_epbzip2out=Vybrali jste paralelní kompresi bzip2, ale číslo verze <tt>pbzip2</tt> nebylo možné určit : $1 
 check_epbzip2ver=Vybrali jste paralelní kompresi bzip2, ale vyžaduje to <tt>pbzip2</tt> verze $1 nebo novější a váš systém má verzi $2 
 check_eset_user=Příkazy externí kvóty jsou povoleny, ale příkaz k nastavení kvóty uživatele není definován nebo neexistuje
 check_eset_group=Příkazy externí kvóty jsou povoleny, ale příkaz k nastavení kvóty skupiny není definován nebo neexistuje
-check_quotacommands=Příkazy externí kvóty budou použity pro virtuální servery a poštovní schránky.
+check_quotacommands=Příkazy externí kvóty budou použity pro virtuální servery a poštovní schránky
 check_evirusspam=Testování virů nelze povolit bez filtrování spamu
 check_preload=Aktualizace nastavení předběžného načtení knihovny Virtualmin ..
-check_esendmailbccs=Poštovní server Sendmail nepodporuje automatické BCC odchozí pošty, a proto musí být na stránce <a href='$1'>konfigurace modulu</a> vypnuto.
-check_eqmailbccs=Poštovní server Qmail nepodporuje automatické BCC odchozí e-maily, a proto musí být vypnuto na stránce <a href='$1'>konfigurace modulu</a>.
-check_epostfixbccs=Automatické BCC odchozí pošty nelze povolit, pokud není mapa BCC definována v modulu <a href='$1'>Postfix Mailserver</a> nebo ručně v konfiguračním souboru Postfix. Jinak musí být vypnuta na stránce <a href='$2'>konfigurace modulu</a>.
-check_esendmailaddrs=Sendmail přijímá připojení SMTP pouze na následujících portech: $1. E-mail z jiných systémů na internetu nebude přijat. To lze změnit v modulu <a href='$2'>Sendmail Mail Server</a>.
+check_esendmailbccs=Poštovní server Sendmail nepodporuje automatické BCC odchozí pošty, a proto musí být na stránce <a href='$1'>konfigurace modulu</a> vypnuto
+check_eqmailbccs=Poštovní server Qmail nepodporuje automatické BCC odchozí e-maily, a proto musí být vypnuto na stránce <a href='$1'>konfigurace modulu</a>
+check_epostfixbccs=Automatické BCC odchozí pošty nelze povolit, pokud není mapa BCC definována v modulu <a href='$1'>Postfix Mailserver</a> nebo ručně v konfiguračním souboru Postfix. Jinak musí být vypnuta na stránce <a href='$2'>konfigurace modulu</a>
+check_esendmailaddrs=Sendmail přijímá připojení SMTP pouze na následujících portech: $1. E-mail z jiných systémů na internetu nebude přijat. To lze změnit v modulu <a href='$2'>Sendmail Mail Server</a>
 check_evirtual_maps=Ve vašich virtuálních mapách Postfix byl nalezen problém : $1 
-check_evad=Vaše konfigurace Postfixu má možnost <tt>virtual_alias_domains</tt> nastavenou na <tt>$1</tt>. Toto přepíše seznam domén z možnosti <tt>virtual_alias_maps</tt> a mělo by být odstraněno.
-check_emydest=Vaše konfigurace Postfixu chybí v hostitelském řádku <tt>$1</tt> poštovní jméno hostitele <tt>mydestination</tt>, což způsobí, že se e-maily odrazí. Aktuální hodnota je <tt>$2</tt>.
-check_espamsiteconfig=Příkaz <tt>spamassassin</tt> nepodporuje parametr <tt>--siteconfigpath</tt>, který Virtualmin potřebuje. Nainstalovaná verze je $1 - doporučuje se verze 3.0 nebo novější.
+check_evad=Vaše konfigurace Postfixu má možnost <tt>virtual_alias_domains</tt> nastavenou na <tt>$1</tt>. Toto přepíše seznam domén z možnosti <tt>virtual_alias_maps</tt> a mělo by být odstraněno
+check_emydest=Vaše konfigurace Postfixu chybí v hostitelském řádku <tt>$1</tt> poštovní jméno hostitele <tt>mydestination</tt>, což způsobí, že se e-maily odrazí. Aktuální hodnota je <tt>$2</tt>
+check_espamsiteconfig=Příkaz <tt>spamassassin</tt> nepodporuje parametr <tt>--siteconfigpath</tt>, který Virtualmin potřebuje. Nainstalovaná verze je $1 - doporučuje se verze 3.0 nebo novější
 check_reserr=Ve vašem systému nejsou podporovány limity zdrojů : $1 
 check_reswarn=Limity zdrojů jsou podporovány, ale nejsou plně nakonfigurovány : $1 
-check_resok=Limity zdrojů jsou podporovány a správně nakonfigurovány.
+check_resok=Limity zdrojů jsou podporovány a správně nakonfigurovány
 check_packageerr=Vybraný systém správy balíků nelze použít : $1 
 check_updateerr=Vybraný systém aktualizace balíčku nelze použít : $1 
-check_packageok=Vybrané systémy pro správu a aktualizaci balíků jsou nainstalovány v pořádku.
-check_apicmd=Vytváření pomocného příkazu API.
+check_packageok=Vybrané systémy pro správu balíčků a aktualizace jsou nainstalovány
+check_apicmd=Vytváření pomocného příkazu API
 check_apicmdok=.. vytvořeno <tt>$1</tt>
 check_apicmderr=.. selhalo : $1 
-check_spamlockon=Přidání lockfile ke všem spamovým útokům na všechny domény.
-check_spamlockoff=Odstraňování lockfile z volání spamassassinů všech domén.
-check_spamwrappercmd=Příkaz procmail <tt>$1</tt> v konfiguraci Postfixu neexistuje.
-check_spamwrapperuser=Příkaz procmail <tt>$1</tt> je ve vlastnictví uživatele $2, když by měl být ve vlastnictví <tt>root</tt>. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu.
-check_spamwrappergroup=Příkaz procmail <tt>$1</tt> je ve vlastnictví skupiny $2, když by měl být ve vlastnictví <tt>root</tt>. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu.
-check_spamwrapperperms=Příkaz procmail <tt>$1</tt> má oprávnění $2, když by měl být nastaven na setuid a setgid na root. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu.
+check_spamlockon=Přidání lockfile ke všem spamovým útokům na všechny domény
+check_spamlockoff=Odstraňování lockfile z volání spamassassinů všech domén
+check_spamwrappercmd=Příkaz procmail <tt>$1</tt> v konfiguraci Postfixu neexistuje
+check_spamwrapperuser=Příkaz procmail <tt>$1</tt> je ve vlastnictví uživatele $2, když by měl být ve vlastnictví <tt>root</tt>. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu
+check_spamwrappergroup=Příkaz procmail <tt>$1</tt> je ve vlastnictví skupiny $2, když by měl být ve vlastnictví <tt>root</tt>. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu
+check_spamwrapperperms=Příkaz procmail <tt>$1</tt> má oprávnění $2, když by měl být nastaven na setuid a setgid na root. E-mail nemusí být správně doručen nebo zkontrolován na nevyžádanou poštu
 check_lostfeature=Funkci <i>$1</i> nelze zakázat, protože ji používají následující virtuální servery : $2 
 check_lostplugin=Plugin <i>$1</i> nelze zakázat, protože ho používají následující virtuální servery : $2 
-check_ehomebase=Domovský základní adresář $1 není absolutní cesta. To lze na stránce <a href='$2'>Virtualmin Configuration</a> opravit.
-check_ehomebase2=Domovský základní adresář $1 není absolutní cesta. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit.
-check_ehomeformat=Formát domovského adresáře $1 neobsahuje uživatelské jméno ani název domény. To lze na stránce <a href='$2'>Virtualmin Configuration</a> opravit.
-check_ehomestyle=Styl domovského adresáře je nastaven na "Pouze základní adresář", což je u Virtualmin nepoužitelné. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit.
+check_ehomebase=Domovský základní adresář $1 není absolutní cesta. To lze na stránce <a href='$2'>Virtualmin Configuration</a> opravit
+check_ehomebase2=Domovský základní adresář $1 není absolutní cesta. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit
+check_ehomeformat=Formát domovského adresáře $1 neobsahuje uživatelské jméno ani název domény. To lze na stránce <a href='$2'>Virtualmin Configuration</a> opravit
+check_ehomestyle=Styl domovského adresáře je nastaven na "Pouze základní adresář", což je u Virtualmin nepoužitelné. To lze na stránce <a href='$2'>Konfigurace modulu Uživatelé a skupiny</a> opravit
 check_jailkitok=Chroot vězení jsou k dispozici v tomto systému
 check_jailkiterr=Chrootské vězení není k dispozici : $1 
 check_eyumrepofile=Konfigurační soubor $1 úložiště Virtualmin neexistuje!
@@ -2107,7 +2108,7 @@ restore_headerfeatures=Funkce a nastavení
 restore_headeropts=Další možnosti obnovení
 restore_allfeatures=Obnovte všechny funkce
 restore_checkmode=Kontrola obnoveného režimu provádění PHP.
-restore_okmode=.. režim $1 OK pro tento systém
+restore_okmode=.. režim $1 funguje pro tento systém
 restore_badmode=.. režim $1 nelze použít, přepnutí na $2.
 restore_evirt6=Adresa IPv6 pro virtuální server
 restore_vconfig_doing=Obnovení konfigurace Virtualmin ..
@@ -2483,8 +2484,8 @@ tmpl_framebelow=HTML níže ..
 tmpl_web=Směrnice a nastavení pro nové webové stránky
 tmpl_web_ssl=Extra směrnice pro webové stránky SSL
 tmpl_web_fcgiwrap=Spusťte skripty CGI pomocí
-tmpl_web_fcgiwrap1=Server Fcgiwrap
-tmpl_web_fcgiwrap0=SuExec pokud je to možné, fcgiwrap jinak
+tmpl_web_fcgiwrap1=FCGIwrap server
+tmpl_web_fcgiwrap0=suEXEC, pokud je to možné, FCGIwrap jinak
 tmpl_ftp=Příkazy ProFTPD pro nové servery
 tmpl_ftpbelow=Směrnice níže ..
 tmpl_webbelow=Příkazy Apache níže ..
@@ -2752,7 +2753,7 @@ tmpl_statustmpl=Šablona stavového e-mailu
 tmpl_extra_prefix=Předpona pro další správce
 tmpl_scripts=Upravit výchozí instalátory skriptů
 tmpl_return=šablona
-tmpl_ephpsuexec=Skripty PHP nelze spustit jako vlastník domény, pokud není povolen soubor suexec
+tmpl_ephpsuexec=PHP skripty nelze spouštět jako vlastník domény, pokud není povolen suEXEC
 tmpl_ephpcmd=Skripty PHP nelze spustit jako vlastník domény, pokud není nainstalován příkaz <tt>php</tt>
 tmpl_erubycmd=Skripty Ruby nelze spustit jako vlastník domény, pokud není nainstalován příkaz <tt>ruby</tt>
 tmpl_editmode=Upravit sekci šablony:
@@ -3066,6 +3067,7 @@ resel_backups1=Vytvořte pouze zálohy
 resel_backups0=Ani
 resel_admins=Můžete vytvářet a spravovat další správce?
 resel_rename=Lze přejmenovat domény?
+resel_createdoms=Lze vytvářet domény?
 resel_plans=Lze vytvářet a upravovat plány?
 resel_proxy=Lze nakonfigurovat proxy?
 resel_migrate=Lze migrovat zálohy?
@@ -3771,7 +3773,7 @@ newvalidate_ok=Ověřit nyní
 newvalidate_err=Ověřování serverů se nezdařilo
 newvalidate_edoms=Nebyly vybrány žádné virtuální servery
 newvalidate_efeats=Nebyly vybrány žádné funkce
-newvalidate_good=Všechny funkce jsou v pořádku
+newvalidate_good=Všechny vlastnosti jsou dobré
 newvalidate_all=Všechny funkce
 newvalidate_sel=Pouze vybrané ..
 newvalidate_doing=Zahájení ověřování vybraných virtuálních serverů. Všechny zjištěné problémy budou zobrazeny červeně.
@@ -3825,11 +3827,11 @@ validate_ecloud=Doména DNS nebyla u poskytovatele cloudu $1 nalezena
 validate_eweb=Nebyl nalezen žádný virtuální hostitel Apache pro $1 
 validate_ewebconfig=V konfiguraci virtuálního hostitele byla nalezena chyba : $1
 validate_ewebphp=Chybí skript wrapper pro PHP $1 - $2 
-validate_ewebphpsuexec=PHP je nakonfigurováno tak, aby fungovalo jako vlastník domény, ale SuExec není povolen!
+validate_ewebphpsuexec=PHP je nakonfigurováno tak, aby běželo jako vlastník domény, ale suEXEC není povoleno!
 validate_ewebphpconfig=Chyby konfigurace PHP byly nalezeny ve verzi $1 : $2 
 validate_ewebphpfpmport=Nalezena chyba konfigurace PHP FPM : $1 
-validate_ewebuid=Uživatel SuExec je nastaven na $1, ale UID virtuálního serveru je $2 
-validate_ewebgid=Skupina SuExec je nastavena na $1, ale GID virtuálního serveru je $2 
+validate_ewebuid=Uživatel suEXEC je nastaven na $1, ale UID virtuálního serveru je $2
+validate_ewebgid=skupina suEXEC je nastavena na $1, ale GID virtuálního serveru je $2
 validate_ewebdir=Chybí blok Apache &lt;adresář&gt; pro adresář HTML $1 
 validate_ewebroot=Apache DocumentRoot není nastaven na adresář HTML $1 
 validate_ewebipv6=Existuje záznam DNS IPv6 $2 s adresou $1, ale tento virtuální server nemá povolen protokol IPv6
@@ -4932,7 +4934,7 @@ postgrey_initdone=.. povoleno
 postgrey_initalready=.. již povoleno
 postgrey_proc=Spuštění serveru Postgrey ..
 postgrey_procfailed=.. spuštění se nezdařilo : $1 
-postgrey_procdone=.. začal OK
+postgrey_procdone=.. začalo hotovo
 postgrey_procalready=.. již běží
 postgrey_postfix=Konfigurace Postfixu pro použití Postgrey ..
 postgrey_postfixalready=.. již nakonfigurováno
@@ -4942,7 +4944,7 @@ postgrey_nopostfixdone=.. odstraněn
 postgrey_nopostfixalready=.. již odstraněno
 postgrey_noproc=Zastavení serveru Postgrey ..
 postgrey_noprocfailed=.. vypnutí se nezdařilo : $1 
-postgrey_noprocdone=.. vypnutí OK
+postgrey_noprocdone=.. vypnutí hotovo
 postgrey_noprocalready=.. nefunguje
 postgrey_noinit=Zakázání Postgrey při spuštění
 postgrey_noinitdone=.. zakázáno

@@ -1684,80 +1684,77 @@ losing_virus=De Procmail ingang om virussen te filteren voor deze virtuele serve
 losing_status=De Webmin status monitor voor deze virtuele server website zal worden verwijdert.
 
 check_title=Controleer Configuratie
-check_desc=De status van uw systeem is gecontroleerd om er zeker van te zijn dat alle actieve aangezette zaken beschikbaar zijn, dat de email server goed geconfigureerd is en dat de quota's actief zijn ..
-check_netok=Webmin's Netwerk Configuratie module is geinstalleerd en word ondersteund.
-check_lowmemory=Uw systeem heeft maar $1 geheugen, dit is onder het Virtualmin aanbevolen minimum van $2.
-check_lowgmemory=Uw systeem is een VM met $1 aan geheugen, echter het gegarandeerde limiet is alleen maar $2. Dit is onder het Virtualmin aanbevolen minimum van $3, en kan voor geheugen locatie fouten zorgen.
-check_okmemory=Uw systeem heeft $1 geheugen, dit is gelijk aan of hoger dan de Virtualmin aanbevolen minimum van $2.
-check_okgmemory=Uw systeem is een VM met op zijn hoogst $1 aan geheugen, maar met een gegarandeerd limiet van alleen maar $2. Deze twee zijn gelijk aan of hoger dan de Virtualmin aanbevolen minimum van $3.
-check_defip=Standaard IP adres voor virtuele servers is $1.
-check_dnsip1=Extern IP adres voor de DNS records is gezet naar $1, wat overeenkomt met het gedetecteerde externe IP adres.
-check_dnsip2=Standaard IP adres is gezet naar $1, wat overeenkomt met het gedetecteerde externe IP adres.
-check_ednsip1=Extern IP adres voor DNS records is gezet naar $1, maar het gedetecteerde externe IP adres is $2. Dit kan ervoor zorgen dat DNS records voor Virtualmin domeinen naar het verkeerde systeem gestuurd worden.
-check_ednsip2=Standaard IP adres is gezet naar $1, maar het gedetecteerde externe IP adres is $2. Dit is typisch het resultaat van werken achter een NAT firewall, en moet gecorrigeerd worden op de <a href='$3'>module configuratie</a> pagina.
-check_ewebsuexecbin=Suexec is aangezet in de standaard template, maar de <tt>suexec</tt> opdracht is niet gevonden op uw systeem.
-check_ewebsuexechome=De Suexec opdracht op uw systeem is dusdanig geconfigureerd dat het alleen maar scripts kan laten werken onder $2, maar de Virtualmin basis directory bevind zich op $1. CGI en PHP scripts die uitgevoerd moeten worden als een domein eigenaren zullen niet worden uitgevoerd.
-check_ewebactions=De Apache module <tt>mod_actions</tt> is niet geinstalleerd of niet aangezet.
+check_netok=Webmin's Netwerk Configuratie module is geinstalleerd en word ondersteund
+check_lowmemory=Uw systeem heeft maar $1 geheugen, dit is onder het Virtualmin aanbevolen minimum van $2
+check_lowgmemory=Uw systeem is een VM met $1 aan geheugen, echter het gegarandeerde limiet is alleen maar $2. Dit is onder het Virtualmin aanbevolen minimum van $3, en kan voor geheugen locatie fouten zorgen
+check_okmemory=Uw systeem heeft $1 geheugen, dit is gelijk aan of hoger dan de Virtualmin aanbevolen minimum van $2
+check_okgmemory=Uw systeem is een VM met op zijn hoogst $1 aan geheugen, maar met een gegarandeerd limiet van alleen maar $2. Deze twee zijn gelijk aan of hoger dan de Virtualmin aanbevolen minimum van $3
+check_defip=Standaard IP adres voor virtuele servers is $1
+check_dnsip1=Extern IP adres voor de DNS records is gezet naar $1, wat overeenkomt met het gedetecteerde externe IP adres
+check_dnsip2=Standaard IP adres is gezet naar $1, wat overeenkomt met het gedetecteerde externe IP adres
+check_ednsip1=Extern IP adres voor DNS records is gezet naar $1, maar het gedetecteerde externe IP adres is $2. Dit kan ervoor zorgen dat DNS records voor Virtualmin domeinen naar het verkeerde systeem gestuurd worden
+check_ednsip2=Standaard IP adres is gezet naar $1, maar het gedetecteerde externe IP adres is $2. Dit is typisch het resultaat van werken achter een NAT firewall, en moet gecorrigeerd worden op de <a href='$3'>module configuratie</a> pagina
+check_ewebsuexecbin=Suexec is aangezet in de standaard template, maar de <tt>suexec</tt> opdracht is niet gevonden op uw systeem
+check_ewebactions=De Apache module <tt>mod_actions</tt> is niet geinstalleerd of niet aangezet
 check_ewebconfig=Er zijn Apache configuratie fouten gevonden : $1
-check_ewebphp=Apache configuratie file $1 bevat $2 regels waarmee PHP werkt met domein eigenaar permissies. Deze regels moeten worden verwijdert.
+check_ewebphp=Apache configuratie file $1 bevat $2 regels waarmee PHP werkt met domein eigenaar permissies. Deze regels moeten worden verwijdert
 check_webok=Apache is geinstalleerd
-check_ftpok=ProFTPd is geinstalleerd.
-check_dnsok2=BIND DNS server is geinstalleerd.
-check_dnsok3=BIND DNS domeinen worden gehost op een service server.
-check_dnsmaster=Echter, de standaard master DNS server $1 is geen volledige gekwalificeerde domein naam.
-check_mysqlok2=MySQL client programma's zijn geinstalleerd voor gebruik met een toelevering server.
-check_mysqlnopass=MySQL is geinstalleerd en aan het werk, maar er is nog geen <tt>root</tt> wachtwoord gezet!<b>Dit moet u onmiddellijk veranderen in de <a href='$1'>MySQL Database</a> module</b>.
-check_postgresok=PostgreSQL is geinstalleerd en aan het werk.
-check_postgresnopass=PostgreSQL is geinstalleerd en aan het werk, maar er is geen enkel <tt>$2</tt> wachtwoord gezet! <b>Dit moet onmiddellijk verandert worden in de <a href='$1'>PostgreSQL Database</a> module</b>.
+check_ftpok=ProFTPd is geinstalleerd
+check_dnsok2=BIND DNS server is geinstalleerd
+check_dnsok3=BIND DNS domeinen worden gehost op een service server
+check_dnsmaster=Echter, de standaard master DNS server $1 is geen volledige gekwalificeerde domein naam
+check_mysqlok2=MySQL client programma's zijn geinstalleerd voor gebruik met een toelevering server
+check_mysqlnopass=MySQL is geinstalleerd en aan het werk, maar er is nog geen <tt>root</tt> wachtwoord gezet!<b>Dit moet u onmiddellijk veranderen in de <a href='$1'>MySQL Database</a> module</b>
+check_postgresok=PostgreSQL is geinstalleerd en aan het werk
+check_postgresnopass=PostgreSQL is geinstalleerd en aan het werk, maar er is geen enkel <tt>$2</tt> wachtwoord gezet! <b>Dit moet onmiddellijk verandert worden in de <a href='$1'>PostgreSQL Database</a> module</b>
 check_webalizerok=Webalizer is geinstalleerd
-check_ifaceok=Gebruik netwerk interface $1 voor virtuele IP adressen.
-check_iface6=IPv6 adressen zijn beschikbaar, met gebruik van interface $1.
-check_ifacezone=De Netwerk interface zal automatisch gedetecteerd worden tijdens het maken van een virtuele server.
-check_sendmailok=Email server Sendmail is geinstalleerd en configureert.
-check_postfixok=EMail server Postfix is geinstalleerd en configureert.
-check_qmailok=Email server Qmail is geinstalleerd en configureert.
-check_qmailmode6=Email server Qmail is geinstalleerd en geconfigureerd. Echter het formaat waarmee de gebruikersnaam op de server templates pagina is ingesteld, zoals <b>gebruikersnaam@domein</b>, zal niet gaan werken.
-check_postfixmode6=Email server Postfix is geinstalleerd en geconfigureerd. Echter, het formaat van de gebruikersnaam op de server templates pagina is ingesteld op <b>gebruikersnaam@domein</b>, dit word niet ondersteund door Postfix.
-check_vpopmailok=Email server Qmail met VPOPMail extensies zijn geinstalleerd en geconfigureerd.
-check_done=.. uw systeem is klaar voor gebruik met Virtualmin.
-check_failed=.. uw systeem is niet gereed voor gebruik door Virtualmin.
-check_nogroup=Gebruikers quota's staat aan voor home en email directory's, maar groep quota's niet. Totale virtuele server quota's zullen niet worden afgedwongen.
-check_group=Zowel de gebruikers als de groepen quota's zijn aangezet voor de home en email directory's.
-check_noquotas=Harddisk quota's zijn uitgeschakeld in de module configuratie.
-check_sslok=Apache is geconfigureerd om SSL websites te hosten.
-check_edepwebalizer=Webalizer kan niet worden aangezet in de Virtualmin <a href='$1'>module configuratie</a> of het moet in Apache aanstaan.
-check_edepssl=SSL kan niet worden aangezet in de Virtualmin <a href='$1'>module configuratie</a> of het moet in Apache aanstaan.
-check_eshell=Shell $1 voor niet-FTP gebruikers is toegevoegd in $2, waardoor er FTP toegang is.
-check_eftpshell=Shell $1 voor FTP gebruikers is niet toegevoegd in $1, waardoor er geen FTP toegang zal zijn.
-check_emysqlsync=Synchronisatie tussen Unix en MySQL gebruikers is aangezet in de <a href='$1'>MySQL Database</a> module. Dit is niet nodig omdat Virtualmin zelf MySQL accounts aanmaakt voor domein eigenaren indien dit nodig is en moet daarom worden uitgezet.
-check_equotasync=Standaard harddisk quota's voor nieuwe gebruikers zijn aangezet op de filesystemen : $1. Dit is niet nodig omdat Virtualmin zelf quota's zet voor nieuwe gebruikers, en moeten dus worden uitgezet in de <a href='$2'>Harddisk Quota's</a> module.
-check_egquotasync=Standaard harddisk quota's voor nieuwe groepen zijn aangezet op de filesystemen : $1. Dit is niet nodig omdat Virtualmin zelf quota's insteld voor nieuwe domeinen, en moeten dus worden uitgezet in de <a href='$2'>Disk Quota's</a> module.
+check_ifaceok=Gebruik netwerk interface $1 voor virtuele IP adressen
+check_iface6=IPv6 adressen zijn beschikbaar, met gebruik van interface $1
+check_ifacezone=De Netwerk interface zal automatisch gedetecteerd worden tijdens het maken van een virtuele server
+check_sendmailok=Email server Sendmail is geinstalleerd en configureert
+check_postfixok=EMail server Postfix is geinstalleerd en configureert
+check_qmailok=Email server Qmail is geinstalleerd en configureert
+check_qmailmode6=Email server Qmail is geinstalleerd en geconfigureerd. Echter het formaat waarmee de gebruikersnaam op de server templates pagina is ingesteld, zoals <b>gebruikersnaam@domein</b>, zal niet gaan werken
+check_postfixmode6=Email server Postfix is geinstalleerd en geconfigureerd. Echter, het formaat van de gebruikersnaam op de server templates pagina is ingesteld op <b>gebruikersnaam@domein</b>, dit word niet ondersteund door Postfix
+check_vpopmailok=Email server Qmail met VPOPMail extensies zijn geinstalleerd en geconfigureerd
+check_done=.. uw systeem is klaar voor gebruik met Virtualmin
+check_failed=.. uw systeem is niet gereed voor gebruik door Virtualmin
+check_nogroup=Gebruikers quota's staat aan voor home en email directory's, maar groep quota's niet. Totale virtuele server quota's zullen niet worden afgedwongen
+check_group=Zowel de gebruikers als de groepen quota's zijn aangezet voor de home en email directory's
+check_noquotas=Harddisk quota's zijn uitgeschakeld in de module configuratie
+check_sslok=Apache is geconfigureerd om SSL websites te hosten
+check_edepwebalizer=Webalizer kan niet worden aangezet in de Virtualmin <a href='$1'>module configuratie</a> of het moet in Apache aanstaan
+check_edepssl=SSL kan niet worden aangezet in de Virtualmin <a href='$1'>module configuratie</a> of het moet in Apache aanstaan
+check_eshell=Shell $1 voor niet-FTP gebruikers is toegevoegd in $2, waardoor er FTP toegang is
+check_eftpshell=Shell $1 voor FTP gebruikers is niet toegevoegd in $1, waardoor er geen FTP toegang zal zijn
+check_emysqlsync=Synchronisatie tussen Unix en MySQL gebruikers is aangezet in de <a href='$1'>MySQL Database</a> module. Dit is niet nodig omdat Virtualmin zelf MySQL accounts aanmaakt voor domein eigenaren indien dit nodig is en moet daarom worden uitgezet
+check_equotasync=Standaard harddisk quota's voor nieuwe gebruikers zijn aangezet op de filesystemen : $1. Dit is niet nodig omdat Virtualmin zelf quota's zet voor nieuwe gebruikers, en moeten dus worden uitgezet in de <a href='$2'>Harddisk Quota's</a> module
+check_egquotasync=Standaard harddisk quota's voor nieuwe groepen zijn aangezet op de filesystemen : $1. Dit is niet nodig omdat Virtualmin zelf quota's insteld voor nieuwe domeinen, en moeten dus worden uitgezet in de <a href='$2'>Disk Quota's</a> module
 check_allwebmin=Updaten van alle Webmin gebruikers met de nieuwe instellingen ..
 check_allresel=Updaten van alle resellers met de nieuwe instellingen ..
-check_needupdate=Sommige van de module configuratie instellingen die effect hebben op de modules waar Webmin gebruikers toegang hebben zijn verandert. Klik op de knop hieronder om alle gebruikers te updaten met de nieuwe permissies.
+check_needupdate=Sommige van de module configuratie instellingen die effect hebben op de modules waar Webmin gebruikers toegang hebben zijn verandert. Klik op de knop hieronder om alle gebruikers te updaten met de nieuwe permissies
 check_updatenow=Update Webmin Gebruikers
-check_current=In Webalizer's globale configuratie, is de <b>Webalizer incremental file</b> gezet naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoiets als <tt>webalizer.current</tt>.
-check_history=In de Webalizer's globale configuratie, is de <b>Webalizer historie file</b> ingesteld naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoals <tt>webalizer.hist</tt>.
-check_proftpd=Er is een fout gevonden in de ProFTPd configuratie template : $1. Dit moet gerepareerd worden door de Standaard Instellingen te bewerken op de Server Templates pagina.
-check_enamevirt=De <b>Alle Apache virtuele servers op naam-gebaseerd</b> en <b>Standaard IP adres voor DNS records</b> opties kunnen niet beide aangezet staan op de <a href='$1'>Virtualmin Configuratie</a> pagina.
-check_logrotateok=Log rotatie is geinstalleerd.
-check_plugin=Plugin $1 is goed geinstalleerd.
-check_eldap=Er ontstond een fout tijdens het verbinden met de LDAP server : $1. Of de LDAP moet worden uitgezet op de <a href='$2'>module configuratie</a> pagina, of de <a href='$3'>LDAP Gebruikers en Groepen</a> module moet correct opgezet worden.
-check_eldap2=De LDAP Gebruikers en Groepen module is te oud om gebruikt te worden door Virtualmin voor gebruikers management. Of de LDAP moet worden uitgezet op de <a href='$2'>module configuratie</a> pagina, of de module moet ge-upgrade worden naar versie $2.
-check_ldap=LDAP gebruiker en groep management is goed geconfigureerd.
-check_detected=Gedetecteerde email server $1.
-check_spamok=SpamAssassin en Procmail zijn geinstalleerd en geconfigureerd voor gebruik.
-check_noprocmail=SpamAssassin en Procmail zijn geinstalleerd. Echter uw email server lijkt niet te zijn geconfigureerd om email af te kunnen leveren met gebruik van Procmail.
-check_spamglobal=SpamAssassin is geconfigureerd om te werken vanaf de globale Procmail configuratie $1, wat niet nodig is omdat Virtualmin dit instelt op een per-domein basis.
-check_spamwhite=Witte-lijsten van al de mailboxen in ieder domein is aangezet op de <a href='$1'>Virtualmin Configuratie</a> pagina, maar dit is niet compatibel met gebruik van het <a href='$2'>spamc</a> SpamAssassin client programma.
-check_virusok=ClamAV is geinstalleerd en aan het werk.
-check_virusok2=ClamAV is geinstalleerd en waarschijnlijk aan het werk.
-check_emysqlplugin=De MySQL gebruikers plugin is niet langer nodig, de complete functionaliteit is opgenomen in de Virtualmin kern.
-check_statusok=De systeem en Server Status module is geinstalleerd en word op geplande tijden gecontroleerd.
-check_statussched=De Systeem en Server Status module is geinstalleerd, maar is niet ingesteld om de servers met geplande regelmaat te controleren. Dit moet worden aangezet op de <a href='$1'>Planning en Monitor</a> pagina.
-check_ebcmd=De opdracht $1 om backups te maken en te herstellen is niet geinstalleerd.
+check_current=In Webalizer's globale configuratie, is de <b>Webalizer incremental file</b> gezet naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoiets als <tt>webalizer.current</tt>
+check_history=In de Webalizer's globale configuratie, is de <b>Webalizer historie file</b> ingesteld naar een absoluut pad. Gebruik de <a href='$1'>Webalizer</a> module om dit te veranderen naar een relatief pad, zoals <tt>webalizer.hist</tt>
+check_proftpd=Er is een fout gevonden in de ProFTPd configuratie template : $1. Dit moet gerepareerd worden door de Standaard Instellingen te bewerken op de Server Templates pagina
+check_enamevirt=De <b>Alle Apache virtuele servers op naam-gebaseerd</b> en <b>Standaard IP adres voor DNS records</b> opties kunnen niet beide aangezet staan op de <a href='$1'>Virtualmin Configuratie</a> pagina
+check_logrotateok=Log rotatie is geinstalleerd
+check_eldap=Er ontstond een fout tijdens het verbinden met de LDAP server : $1. Of de LDAP moet worden uitgezet op de <a href='$2'>module configuratie</a> pagina, of de <a href='$3'>LDAP Gebruikers en Groepen</a> module moet correct opgezet worden
+check_eldap2=De LDAP Gebruikers en Groepen module is te oud om gebruikt te worden door Virtualmin voor gebruikers management. Of de LDAP moet worden uitgezet op de <a href='$2'>module configuratie</a> pagina, of de module moet ge-upgrade worden naar versie $2
+check_ldap=LDAP gebruiker en groep management is goed geconfigureerd
+check_detected=Gedetecteerde email server $1
+check_spamok=SpamAssassin en Procmail zijn geinstalleerd en geconfigureerd voor gebruik
+check_noprocmail=SpamAssassin en Procmail zijn geinstalleerd. Echter uw email server lijkt niet te zijn geconfigureerd om email af te kunnen leveren met gebruik van Procmail
+check_spamglobal=SpamAssassin is geconfigureerd om te werken vanaf de globale Procmail configuratie $1, wat niet nodig is omdat Virtualmin dit instelt op een per-domein basis
+check_spamwhite=Witte-lijsten van al de mailboxen in ieder domein is aangezet op de <a href='$1'>Virtualmin Configuratie</a> pagina, maar dit is niet compatibel met gebruik van het <a href='$2'>spamc</a> SpamAssassin client programma
+check_virusok=ClamAV is geinstalleerd en aan het werk
+check_virusok2=ClamAV is geinstalleerd en waarschijnlijk aan het werk
+check_emysqlplugin=De MySQL gebruikers plugin is niet langer nodig, de complete functionaliteit is opgenomen in de Virtualmin kern
+check_statusok=De systeem en Server Status module is geinstalleerd en word op geplande tijden gecontroleerd
+check_statussched=De Systeem en Server Status module is geinstalleerd, maar is niet ingesteld om de servers met geplande regelmaat te controleren. Dit moet worden aangezet op de <a href='$1'>Planning en Monitor</a> pagina
+check_ebcmd=De opdracht $1 om backups te maken en te herstellen is niet geinstalleerd
 check_epbzip2out=U heeft een parallelle  bzip2 compressie gekozen, maar het versie nummer van <tt>pbzip2</tt> kon niet worden bepaald : $1
-check_epbzip2ver=U heeft een parallelle  bzip2 compressie gekozen, maar dit vereist <tt>pbzip2</tt> versie $1 of nieuwer, terwijl uw systeem versie $2 geinstalleerd heeft.
+check_epbzip2ver=U heeft een parallelle  bzip2 compressie gekozen, maar dit vereist <tt>pbzip2</tt> versie $1 of nieuwer, terwijl uw systeem versie $2 geinstalleerd heeft
 check_bcmdok=Alle opdrachten die nodig zijn om backups te maken of te herstellen zijn geinstalleerd
 check_eset_user=Externe quota opdrachten is aangezet, maar de opdracht voor een gebruikers quote is niet gedefinieerd of bestaat niet
 check_eset_group=Externe quota opdrachten is aangezet, maar de opdracht voor een groep quota is niet gedefinieerd of bestaat niet
@@ -1765,45 +1762,44 @@ check_elist_users=Externe quota opdrachten zijn aangezet, maar de opdracht om de
 check_elist_groups=Externe quota opdrachten zijn aangezet, maar de opdracht om de groep quota in een lijst te zetten is niet gedefinieerd of bestaat niet
 check_eget_user=Externe quota opdrachten zijn aangezet, maar de opdracht om een enkele gebruikers quota op te vragen bestaat niet
 check_eget_group=Externe quota opdrachten zijn aangezet, maar de opdracht om een enkele groep's quota op te vragen bestaat niet
-check_quotacommands=Externe quota opdrachten zullen worden gebruikt voor virtuele servers en mailboxen.
+check_quotacommands=Externe quota opdrachten zullen worden gebruikt voor virtuele servers en mailboxen
 check_eclamd=U heeft geselecteerd om de <tt>clamdscan</tt> voor virus scannen te gebruiken, maar de <tt>clamd</tt> server waarmee het moet communiceren is niet aan het werk
 check_evirusspam=Virus scannen kan niet worden aangezet zonder spam filteren
 check_preload=Updaten van Virtualmin bibliotheek vooraf geladen instellingen ..
 check_collect=Updaten van status met verzamelen van taken ..
 check_collectoff=Uitschakelen van status verzamelen van taken ..
-check_esendmailbccs=Automatische BCC-en van uitgaande email word niet ondersteund door de Sendmail email server, en moet daarom worden uitgezet op de <a href='$1'>module configuratie</a> pagina.
-check_eqmailbccs=Automatisch BCC-ing van uitgaande email word niet ondersteund door de Qmail mail server, en moet daarom worden uitgezet in de <a href='$1'>module configuratie</a> pagina.
-check_epostfixbccs=Automatische BCCing van uitgaande email kan niet worden aangezet totdat er een BCC map is gedefinieerd in de <a href='$1'>Postfix Mailserver</a> module, of handmatig in de Postfix configuratie file is gezet. Anders moet het worden uitgezet op de <a href='$2'>module configuratie</a> pagina.
-check_esendmailaddrs=Sendmail accepteert alleen SMTP verbindingen op de volgende poorten : $1. Email van andere systemen op het internet worden niet geaccepteerd. Dit kan worden verandert in de <a href='$2'>Sendmail Email Server</a> module.
+check_esendmailbccs=Automatische BCC-en van uitgaande email word niet ondersteund door de Sendmail email server, en moet daarom worden uitgezet op de <a href='$1'>module configuratie</a> pagina
+check_eqmailbccs=Automatisch BCC-ing van uitgaande email word niet ondersteund door de Qmail mail server, en moet daarom worden uitgezet in de <a href='$1'>module configuratie</a> pagina
+check_epostfixbccs=Automatische BCCing van uitgaande email kan niet worden aangezet totdat er een BCC map is gedefinieerd in de <a href='$1'>Postfix Mailserver</a> module, of handmatig in de Postfix configuratie file is gezet. Anders moet het worden uitgezet op de <a href='$2'>module configuratie</a> pagina
+check_esendmailaddrs=Sendmail accepteert alleen SMTP verbindingen op de volgende poorten : $1. Email van andere systemen op het internet worden niet geaccepteerd. Dit kan worden verandert in de <a href='$2'>Sendmail Email Server</a> module
 check_ealias_maps=Er is een probleem gevonden met uw Postfix alias mappen : $1
 check_evirtual_maps=Er is een probleem gevonden in uw Postfix virtuele mappen : $1
 check_ecanonical_maps=Er is een probleem gevonden met uw Postfix canonical mappen, die gebruikt worden voor uitgaande adres mapping : $1
 check_ebcc_maps=Er is een probleem gevonden met uw Postfix verzend BCC mappen : $1
-check_evad=Uw Postfix configuratie heeft de <tt>virtuele_alias_domeinen</tt> optie gezet naar <tt>$1</tt>. Dit overschrijft de lijst met domeinen van de <tt>virtuele_alias_mappen</tt> optie en moet daarom verwijderd worden.
-check_emydest=In uw Postfix configuratie ontbreekt de systeem email hostnaam <tt>$1</tt> op de <tt>mydestination</tt> regel, hierdoor kan uw email afgeketst worden.
-check_elogrotateconf=Huidige log rotatie configuratie is niet geldig : $1. Dit moet worden gemaakt, of de log file rotatie word niet uitgevoerd.
-check_espamsiteconfig=De <tt>spamassassin</tt> opdracht ondersteund niet de <tt>--siteconfigpath</tt> parameter, die nodig is voor Virtualmin. De versie die geinstalleerd is $1 - terwijl versie 3.0 of later word aanbevolen.
+check_evad=Uw Postfix configuratie heeft de <tt>virtuele_alias_domeinen</tt> optie gezet naar <tt>$1</tt>. Dit overschrijft de lijst met domeinen van de <tt>virtuele_alias_mappen</tt> optie en moet daarom verwijderd worden
+check_emydest=In uw Postfix configuratie ontbreekt de systeem email hostnaam <tt>$1</tt> op de <tt>mydestination</tt> regel, hierdoor kan uw email afgeketst worden
+check_elogrotateconf=Huidige log rotatie configuratie is niet geldig : $1. Dit moet worden gemaakt, of de log file rotatie word niet uitgevoerd
+check_espamsiteconfig=De <tt>spamassassin</tt> opdracht ondersteund niet de <tt>--siteconfigpath</tt> parameter, die nodig is voor Virtualmin. De versie die geinstalleerd is $1 - terwijl versie 3.0 of later word aanbevolen
 check_reserr=Bron limieten word niet ondersteund op uw systeem : $1
 check_reswarn=Bron limieten worden ondersteund, maar zijn niet volledig geconfigureerd : $1
-check_resok=Bron limieten worden ondersteund en zijn correct geconfigureerd.
+check_resok=Bron limieten worden ondersteund en zijn correct geconfigureerd
 check_packageerr=Het geselecteerde pakket management systeem kan niet worden gebruikt : $1
 check_updateerr=Het geselecteerde pakket update systeem kan niet worden gebruikt : $1
-check_packageok=Het geselecteerde pakket management en update systeem zijn goed geinstalleerd.
 check_apicmd=Maken van een API helper opdracht ..
 check_apicmdok=.. gemaakt <tt>$1</tt>
 check_apicmderr=. . mislukt : $1
 check_spamlockon=Toevoegen van de slot-file voor alle domeinen' spamassassin verzoeken ..
 check_spamlockoff=Verwijderen van de slot-file van alle domeinen, spamassassin verzoeken ..
-check_spamwrappercmd=De Procmail opdracht <tt>$1</tt> in de Postfix configuratie bestaat niet.
-check_spamwrapperuser=De procmail opdracht <tt>$1</tt> is nu van de gebruiker $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam.
-check_spamwrappergroup=De procmail opdracht <tt>$1</tt> is van groep $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam.
-check_spamwrapperperms=De procmail opdracht <tt>$1</tt> heeft $2 permissies, het is beter dat setuid en setgid voor de <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam.
+check_spamwrappercmd=De Procmail opdracht <tt>$1</tt> in de Postfix configuratie bestaat niet
+check_spamwrapperuser=De procmail opdracht <tt>$1</tt> is nu van de gebruiker $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
+check_spamwrappergroup=De procmail opdracht <tt>$1</tt> is van groep $2, de eigenaar kan beter <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
+check_spamwrapperperms=De procmail opdracht <tt>$1</tt> heeft $2 permissies, het is beter dat setuid en setgid voor de <tt>root</tt> zijn. Anders kan het gebeuren dat email niet juist word afgeleverd of word gecontroleerd op spam
 check_lostfeature=De optie <i>$1</i> kan niet worden uitgeschakeld, omdat het in gebruik is door de volgende virtuele servers : $2
 check_lostplugin=De plugin <i>$1</i> kan niet worden uitgeschakeld, omdat het in gebruik is door de volgende virtuele servers : $2
-check_ehomebase=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina.
-check_ehomebase2=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina.
-check_ehomeformat=Het home directory-formaat $1 bevat geen gebruikersnaam of domein naam. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina.
-check_ehomestyle=De home directory stijl is ingesteld op "Alleen basis directory", wat onbruikbaar is in Virtualmin. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina.
+check_ehomebase=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina
+check_ehomebase2=De home basis directory $1 is geen absoluut pad. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina
+check_ehomeformat=Het home directory-formaat $1 bevat geen gebruikersnaam of domein naam. Dit kan worden gecorrigeerd op de <a href='$2'>Virtualmin configuratie</a> pagina
+check_ehomestyle=De home directory stijl is ingesteld op "Alleen basis directory", wat onbruikbaar is in Virtualmin. Dit kan worden gecorrigeerd op de <a href='$2'>Gebruikers en Groepen module configuratie</a> pagina
 
 checkmap_enone=Er zijn geen map bronnen gevonden in de <a href='$1'>Postfix configuratie</a>
 checkmap_esupport=De map bronnen <tt>$1</tt> word niet ondersteund door Postfix - U moet waarschijnlijk de Postfix bibliotheken installeren of het her-compileren
@@ -2377,7 +2373,6 @@ restore_headerfeatures=Opties en instellingen
 restore_headeropts=Andere herstel opties
 restore_allfeatures=Herstel alle opties
 restore_checkmode=Controleer herstelde PHP executie mode ..
-restore_okmode=.. mode $1 OK voor dit systeem
 restore_badmode=.. mode $1 kan niet worden gebruikt, schakel over naar $2.
 restore_evirt6=IPv6 adres voor virtuele server
 restore_vconfig_doing=Herstellen van Virtualmin configuratie ..
@@ -2939,7 +2934,6 @@ tmpl_extra_prefix=Voorkeur voor extra administrators
 tmpl_scripts=Bewerk Standaard Installatie Scripts
 tmpl_dbs=Bewerk Standaard Databases
 tmpl_return=template
-tmpl_ephpsuexec=PHP scripts kunnen niet uitgevoerd worden als een domein eigenaar totdat suexec is aangezet
 tmpl_ephpcmd=PHP scripts kunnen niet uitgevoerd worden als een domein eigenaar totdat de <tt>php</tt> opdracht is geinstalleerd
 tmpl_erubycmd=Ruby scripts kunnen niet uitgevoerd worden als een domein eigenaar totdat de <tt>ruby</tt> opdracht is geinstalleerd
 tmpl_editmode=Bewerk template sectie :
@@ -3985,7 +3979,6 @@ newvalidate_ok=Valideer Nu
 newvalidate_err=Mislukt om servers te valideren
 newvalidate_edoms=Geen virtuele servers geselecteerd
 newvalidate_efeats=Geen opties geselecteerd
-newvalidate_good=Alle opties zijn OK
 newvalidate_all=Alle opties
 newvalidate_sel=Alleen de geselecteerde ..
 newvalidate_doing=Beginnen met valideren van de geselecteerde virtuele servers. Alle gevonden problemen zullen in rode tekst getoond worden ..
@@ -4028,9 +4021,6 @@ validate_ednsslave2=DNS zone controleren mislukten op de slaaf server $1 : $2
 validate_ednsip=De DNS record $1 haalt het IP adres op van $2 in plaats van de virtuele server IP $3
 validate_eweb=Geen Apache virtuele host voor $1 gevonden
 validate_ewebphp=Ontbrekend wrapper script voor PHP $1 - $2
-validate_ewebphpsuexec=PHP is geconfigureerd om te werken als de domein eigenaar, echter SuExec staat niet aan!
-validate_ewebuid=SuExec gebruiker is ingesteld naar $1, maar de virtuele servers UID is $2
-validate_ewebgid=SuExec groep is ingesteld naar $1, maar de virtuele servers GID is $2
 validate_ewebdir=Ontbrekende Apache &lt;Directory&gt; blok voor HTML directory $1
 validate_ewebip=De Apache virtuele host voor dit domein gebruikt niet het IPv4 adres en poort $1
 validate_ewebip6=De Apache virtuele host voor dit domein gebruikt niet het IPv6 adres en poort $1
@@ -5221,7 +5211,6 @@ postgrey_initdone=.. aangezet
 postgrey_initalready=.. reeds aangezet
 postgrey_proc=Starten van de Postgrey server ..
 postgrey_procfailed=.. starten mislukten : $1
-postgrey_procdone=.. OK is gestart
 postgrey_procalready=.. reeds aangezet
 postgrey_postfix=Configureren van Postfix om Postgrey te gebruiken ..
 postgrey_postfixalready=.. reeds geconfigureerd
@@ -5231,7 +5220,6 @@ postgrey_nopostfixdone=.. verwijdert
 postgrey_nopostfixalready=.. reeds verwijdert
 postgrey_noproc=Stoppen van de Postgrey server ..
 postgrey_noprocfailed=.. uitzetten mislukte : $1
-postgrey_noprocdone=.. uitzetten OK
 postgrey_noprocalready=.. niet aan het werk
 postgrey_noinit=Postgrey uitschakelen tijdens booten ..
 postgrey_noinitdone=.. uitgeschakeld
