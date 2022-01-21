@@ -2813,7 +2813,7 @@ sub can_delete_domain
 {
 local ($d) = @_;
 return &can_edit_domain($d) &&
-       (&master_admin() || &reseller_admin() ||
+       (&master_admin() || &reseller_admin() && !$access{'nodelete'} ||
 	$_[0]->{'parent'} && $access{'edit_delete'});
 }
 
