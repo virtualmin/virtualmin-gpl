@@ -5251,6 +5251,10 @@ phpmode_http2=Enable HTTP2 protocol support?
 phpmode_http2on=Enabling HTTP2 ..
 phpmode_http2off=Disabling HTTP2 ..
 phpmode_http2def=Using default HTTP2 mode..
+phpmode_phpinfo_show=Click to display information about PHP environment on your server using <tt>phpinfo()</tt> function
+phpmode_phpinfo_show_dir=Click to display information about PHP environment on your server under <tt>$1</tt> directory using <tt>phpinfo()</tt> function
+phpmode_phpinfo_ecannot=You are not allowed to view PHP information for this virtual server
+phpmode_phpinfo_dir_ecannot_dir=This virtual server doesn't have requested $1 directory under $2
 
 website_header=Website options
 
