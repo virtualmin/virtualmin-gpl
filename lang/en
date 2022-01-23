@@ -5253,6 +5253,10 @@ phpmode_http2=Enable HTTP2 protocol support?
 phpmode_http2on=Enabling HTTP2 ..
 phpmode_http2off=Disabling HTTP2 ..
 phpmode_http2def=Using default HTTP2 mode..
+phpmode_phpinfo_show=Click to display information about PHP environment on your server using <tt>phpinfo()</tt> function
+phpmode_phpinfo_show_dir=Click to display information about PHP environment on your server under <tt>$1</tt> directory using <tt>phpinfo()</tt> function
+phpmode_phpinfo_ecannot=You are not allowed to view PHP information for this virtual server
+phpmode_phpinfo_dir_ecannot_dir=This virtual server doesn't have requested $1 directory under $2
 
 website_header=Website options
 
@@ -6012,7 +6016,7 @@ chroot_active=Active?
 chroot_who=Apply to server and sub-servers
 chroot_dir=Restrict to directory
 chroot_all=All virtual servers
-chroot_gsel=Only server $1 ($2 All except server)
+chroot_gsel=Only server $1 $2 All except server
 chroot_root=All files on system
 chroot_home=Users' home directories
 chroot_path=Other directory $1
