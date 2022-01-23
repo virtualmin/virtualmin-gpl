@@ -2421,6 +2421,25 @@ if ($ok) {
 					}
 				}
 
+			# If the domain had a custom ugroup before, make sure
+			# it exists on the new system
+			if (!$parentdom && $d->{'gid'} != $d->{'ugid'} &&
+			    !getgrnam($d->{'ugroup'})) {
+				if ($skipwarnings) {
+					&$second_print(&text('restore_eugroup2',
+							     $d->{'ugroup'}));
+					$d->{'ugroup'} = $d->{'group'};
+					$d->{'ugid'} = $d->{'gid'};
+					}
+				else {
+					&$second_print(&text('restore_eugroup',
+							     $d->{'ugroup'}));
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				}
+
 			# Build maps of used UIDs and GIDs
 			local (%gtaken, %taken);
 			&build_group_taken(\%gtaken);
