@@ -15023,6 +15023,19 @@ if ($config{'spam'}) {
 			return &text('check_spamwrapperperms', $mbc[0],
 				     sprintf("%o", $st[2]));
 			}
+		# Check for safe flags
+		if ($mbc[0] =~ /\/procmail-wrapper$/) {
+			my @safe = ("-o", "-a", "\$DOMAIN", "-d", "\$LOGNAME");
+			my $ok = 1;
+			for(my $i=0; $i<@safe; $i++) {
+				$ok = 0 if ($mbc[$i+1] ne $safe[$i]);
+				}
+			$ok = 0 if (@mbc != @safe+1);
+			if (!$ok) {
+				return &text('check_spamwrapperargs',
+					$mbc, join(" ", @safe));
+				}
+			}
 		}
 	}
 
