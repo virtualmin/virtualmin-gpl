@@ -564,7 +564,8 @@ local $master = $tmaster ||
 		&get_system_hostname();
 print &ui_table_row($text{'wizard_dns_prins'},
 		    &ui_textbox("prins", $master, 40)." ".
-		    &ui_checkbox("prins_skip", 1, $text{'wizard_dns_skip'}, 0));
+		    &ui_checkbox("prins_skip", 1, $text{'wizard_dns_skip'},
+				 $config{'prins_skip'}));
 
 # Secondaries (optional)
 local @secns = split(/\s+/, $tmpl->{'dns_ns'});
@@ -607,6 +608,10 @@ foreach my $ns (split(/\s+/, $in->{'secns'})) {
 	}
 $tmpl->{'dns_ns'} = join(" ", @secns);
 &save_template($tmpl);
+
+# Save skip option
+$config{'prins_skip'} = $in{'prins_skip'};
+&save_module_config();
 }
 
 sub wizard_show_done
