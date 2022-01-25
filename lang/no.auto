@@ -117,6 +117,7 @@ edit_filemindesc=Bla gjennom og rediger filer i denne virtuelle serverens webkat
 edit_website=Nettstedsalternativer
 edit_websitedesc=Konfigurer innstillinger relatert til nettstedet til denne virtuelle serveren, for eksempel logging og HTML-katalogen
 edit_php=PHP-alternativer
+edit_php_return=Detaljer om PHP-alternativer
 edit_phpdesc=Konfigurer innstillinger relatert til hvordan PHP-skript kjøres for denne virtuelle serveren.
 edit_change2fa=Registrer deg for to faktorer
 edit_change2fadesc=Registrer eller konfigurer tofaktorautentisering for Virtualmin-påloggingen.
@@ -321,6 +322,8 @@ restore_gotcontents=.. fant $1 virtuelle servere
 
 restore_zipcmd=.. dekomprimeringskommando $1 er ikke installert
 restore_ezipcmd=Dekompresjonskommando $1 er ikke installert
+restore_eugroup=.. domeneeieren Unix-gruppen $1 eksisterer ikke
+restore_eugroup2=.. domeneeieren Unix-gruppen $1 eksisterer ikke - bytter tilbake til domenets egen gruppe
 restore_erecreate=.. oppretting av manglende server mislyktes : $1 
 restore_disabledomain=Deaktiver virtuell server $1 på nytt.
 restore_downloadgc=Laster ned arkiv fra Google Cloud Storage ..
@@ -499,6 +502,8 @@ resel_eclash2=En unix-bruker med samme navn eksisterer allerede
 resel_admins=Kan opprette og administrere ekstra administratorer?
 resel_rename=Kan du endre navn på domener?
 resel_createdoms=Kan du opprette domener?
+resel_deletedoms=Kan du slette domener?
+resel_editdoms=Kan du endre domener?
 resel_proxy=Kan konfigurere proxyer?
 resel_migrate=Kan migrere sikkerhetskopier?
 resel_create=Kan opprette og redigere forhandlere?
@@ -685,6 +690,10 @@ phpmode_http2=Vil du aktivere støtte for HTTP2-protokollen?
 phpmode_http2on=Aktiverer HTTP2 ..
 phpmode_http2off=Deaktiverer HTTP2 ..
 phpmode_http2def=Bruker standard HTTP2-modus..
+phpmode_phpinfo_show=Klikk for å vise informasjon om PHP-miljøet på serveren din ved å bruke <tt>phpinfo()</tt> funksjonen
+phpmode_phpinfo_show_dir=Klikk for å vise informasjon om PHP-miljøet på serveren din under <tt>$1</tt> katalogen ved å bruke <tt>phpinfo()</tt> funksjonen
+phpmode_phpinfo_ecannot=Du har ikke lov til å se PHP-informasjon for denne virtuelle serveren
+phpmode_phpinfo_dir_ecannot_dir=Denne virtuelle serveren har ikke forespurt katalogen $1 under $2
 
 website_header=Nettstedsalternativer
 

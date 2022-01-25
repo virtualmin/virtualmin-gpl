@@ -391,6 +391,7 @@ edit_filemindesc=Parcourez et modifiez les fichiers dans le répertoire du site 
 edit_website=Options du site Web
 edit_websitedesc=Configurer les paramètres liés au site Web de ce serveur virtuel, tels que la journalisation et le répertoire HTML
 edit_php=Options PHP
+edit_php_return=Détails des options PHP
 edit_phpdesc=Configurez les paramètres liés à la manière dont les scripts PHP sont exécutés pour ce serveur virtuel.
 edit_change2fa=S'inscrire à Twofactor
 edit_change2fadesc=Inscrivez ou configurez l'authentification à deux facteurs pour votre connexion Virtualmin.
@@ -1062,6 +1063,8 @@ restore_gotcontents=.. trouvé $1 serveurs virtuels
 
 restore_zipcmd=.. la commande de décompression $1 n'est pas installée
 restore_ezipcmd=La commande de décompression $1 n'est pas installée
+restore_eugroup=.. le groupe Unix propriétaire du domaine $1 n'existe pas
+restore_eugroup2=.. le groupe Unix du propriétaire du domaine $1 n'existe pas - retour au groupe du domaine
 restore_erecreate=.. la création du serveur manquant a échoué : $1 
 restore_downloadgc=Téléchargement d'archives à partir de Google Cloud Storage ..
 restore_downloaddb=Téléchargement de l'archive à partir de Dropbox ..
@@ -1843,6 +1846,8 @@ resel_backups0=Ni
 resel_admins=Peut créer et gérer des administrateurs supplémentaires ?
 resel_rename=Peut-on renommer des domaines ?
 resel_createdoms=Peut créer des domaines ?
+resel_deletedoms=Peut supprimer des domaines ?
+resel_editdoms=Peut modifier les domaines ?
 resel_plans=Peut créer et modifier des plans?
 resel_proxy=Peut configurer des proxys ?
 resel_migrate=Peut migrer des sauvegardes?
@@ -2713,6 +2718,10 @@ phpmode_http2=Activer la prise en charge du protocole HTTP2?
 phpmode_http2on=Activer HTTP2 ..
 phpmode_http2off=Désactiver HTTP2 ..
 phpmode_http2def=Utilisation du mode HTTP2 par défaut..
+phpmode_phpinfo_show=Cliquez pour afficher des informations sur l'environnement PHP sur votre serveur en utilisant la fonction <tt>phpinfo()</tt>
+phpmode_phpinfo_show_dir=Cliquez pour afficher des informations sur l'environnement PHP sur votre serveur sous le <tt>$1</tt> utilisant la fonction <tt>phpinfo()</tt>
+phpmode_phpinfo_ecannot=Vous n'êtes pas autorisé à afficher les informations PHP pour ce serveur virtuel
+phpmode_phpinfo_dir_ecannot_dir=Ce serveur virtuel n'a pas demandé de répertoire $1 sous $2
 
 website_header=Options du site Web
 

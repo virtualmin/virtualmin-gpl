@@ -1216,6 +1216,7 @@ edit_spamvirusdesc=Configure the delivery methods for spam and viruses detected 
 edit_website=Website Options
 edit_websitedesc=Configure settings related to this virtual server's website, such as logging and the HTML directory
 edit_php=PHP Options
+edit_php_return=PHP options details
 edit_phpdesc=Configure settings related to how PHP scripts are run for this virtual server.
 edit_phpver=PHP Versions
 edit_phpverdesc=Select the version of PHP to use, and configure different versions for different directories.
