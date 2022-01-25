@@ -6298,6 +6298,7 @@ copycert_fenabling=Enabling SSL in ProFTPD configuration ..
 wizard_title=Post-Installation Wizard
 wizard_ecannot=You are not allowed to run the post-installation wizard
 wizard_next=Next
+wizard_finish=Finish
 wizard_prev=Previous
 wizard_cancel=Cancel
 wizard_end=Return to Virtualmin
