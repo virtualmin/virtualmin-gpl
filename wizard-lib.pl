@@ -20,10 +20,11 @@ return ( "intro",
 	 "db",
 	 $config{'mysql'} ? ( "mysql", "mysize" ) : ( ),
 	 $config{'dns'} ? ( "dns" ) : ( ),
+	 "done",
 	 "hashpass",
 	 "ssldir",
 	 "defdom",
-	 "done" );
+	 "alldone" );
 }
 
 sub wizard_show_intro
@@ -612,6 +613,13 @@ sub wizard_show_done
 {
 print &ui_table_row(undef, &text('wizard_done'), 2);
 
+print &ui_table_row(undef, &text('wizard_done2'), 2);
+}
+
+sub wizard_show_alldone
+{
+print &ui_table_row(undef, &text('wizard_alldone'), 2);
+
 # If user sets up a default domain, refresh navigation menu with it
 if (defined(&theme_post_save_domain) && $in{'refresh'}) {
 	my $dom = get_domain_by("dom", $in{'refresh'});
@@ -619,7 +627,7 @@ if (defined(&theme_post_save_domain) && $in{'refresh'}) {
 	}
 }
 
-sub wizard_parse_done
+sub wizard_parse_alldone
 {
 return undef;	# Always works
 }

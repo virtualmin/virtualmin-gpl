@@ -63,10 +63,12 @@ $ffunc = "wizard_show_".$step;
 &$ffunc();
 
 print &ui_table_end();
+$cmsg = $wizard_steps[$in{'step'}] eq 'done' ? $text{'wizard_end'}
+					     : $text{'wizard_cancel'};
 print &ui_form_end([
 		     [ "prev", $text{'wizard_prev'}, undef, !$in{'step'} ],
 		     undef,
-		     [ "cancel", $text{'wizard_cancel'} ],
+		     [ "cancel", $cmsg ],
 		     undef,
 		     [ "parse", $text{'wizard_next'} ],
 		   ], "100%");
