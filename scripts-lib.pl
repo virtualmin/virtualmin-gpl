@@ -1933,7 +1933,8 @@ my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
-local $h = &make_http_connection($ip, $port, $usessl, "POST", $page);
+local $h = &make_http_connection($ip, $port, $usessl, "POST", $page,
+			 undef, undef, { 'host' => $host, 'nocheckhost' => 1 });
 $gconfig{'http_proxy'} = $oldproxy;
 if (!ref($h)) {
 	$$err = $h;
@@ -2028,7 +2029,8 @@ push(@headers, &http_connection_cookies($d));
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
 alarm($timeout || 60);
-local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers);
+local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers,
+			 undef, { 'host' => $host, 'nocheckhost' => 1 });
 alarm(0);
 $h = $main::download_timed_out if ($main::download_timed_out);
 if (!ref($h)) {
