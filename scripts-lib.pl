@@ -1978,7 +1978,7 @@ $post_http_headers = undef;
 $post_http_headers_array = undef;
 local $SIG{'ALRM'} = 'IGNORE';		# Let complete function run forever
 &complete_http_connection($d, $h, $out, $err, \&capture_http_headers, 0,
-			  $host, $port, $headers);
+			  $host, $port, $page, $headers);
 if ($returnheaders && $post_http_headers) {
 	%$returnheaders = %$post_http_headers;
 	}
@@ -2038,16 +2038,16 @@ if (!ref($h)) {
 	else { &error($h); }
 	}
 &complete_http_connection($d, $h, $dest, $error, $cbfunc, $osdn, $host, $port,
-			  $headers);
+			  $page, $headers);
 }
 
 # complete_http_connection(&domain, &handle, dest, &error, &callback, osdn,
-# 			   [host], [port], &headers)
+# 			   [host], [port], [page], &headers)
 # Once an HTTP connection is active, complete the download
 sub complete_http_connection
 {
 local ($d, $h, $dest, $error, $cbfunc, $osdn, $oldhost,
-       $oldport, $headers) = @_;
+       $oldport, $oldpage, $headers) = @_;
 
 # Kept local so that callback funcs can access them.
 local (%WebminCore::header, @WebminCore::headers);
@@ -2109,13 +2109,16 @@ if ($rcode >= 300 && $rcode < 400) {
 		# Relative to same server
 		$host = $oldhost;
 		$port = $oldport;
-		$ssl = 0;
+		$ssl = 0;	# ???
 		$page = $WebminCore::header{'location'};
 		}
-	elsif ($WebminCore::header{'location'}) {
-		# Assume relative to same dir .. not handled
-		if ($error) { $$error = "Invalid Location header $WebminCore::header{'location'}"; return; }
-		else { &error("Invalid Location header $WebminCore::header{'location'}"); }
+	elsif ($WebminCore::header{'location'} && $oldhost && $oldpage) {
+		# Assume relative to same dir
+		$host = $oldhost;
+		$port = $oldport;
+		$page = $oldpage;
+		$page =~ s/\/[^\/]+$/\//;
+		$page .= $WebminCore::header{'location'};
 		}
 	else {
 		if ($error) { $$error = "Missing Location header"; return; }
