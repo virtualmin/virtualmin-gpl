@@ -2022,6 +2022,7 @@ if ($user) {
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
 	}
+push(@headers, &http_connection_cookies($d));
 
 # Actually download it
 $main::download_timed_out = undef;
@@ -2068,6 +2069,18 @@ while(1) {
 	$WebminCore::header{lc($1)} = $2;
 	push(@WebminCore::headers, [ lc($1), $2 ]);
 	}
+
+# Parse out cookies set in the response
+foreach my $h (grep { $_->[0] eq 'set-cookie' } @WebminCore::headers) {
+	my @w = split(/;\s*/, $h->[1]);
+	if (@w && $w[0] =~ /^\S+=/) {
+		my ($cn, $cv) = split(/=/, $w[0], 2);
+		$http_connection_cookies{$d->{'id'}} ||= [ ];
+		push(@{$http_connection_cookies{$d->{'id'}}}, [ $cn, $cv ]);
+		}
+	}
+
+# Complete the download, and possibly follow a redirect
 alarm(0);
 if ($main::download_timed_out) {
 	if ($error) { $$error = $main::download_timed_out; return 0; }
@@ -2156,6 +2169,20 @@ else {
 	&$cbfunc(4) if ($cbfunc);
 	}
 &close_http_connection($h);
+}
+
+# http_connection_cookies(&domain)
+# Returns a list of array refs of Cookie headers saved from past requests
+sub http_connection_cookies
+{
+my ($d) = @_;
+my @rv;
+if ($http_connection_cookies{$d->{'id'}}) {
+	foreach my $c (@{$http_connection_cookies{$d->{'id'}}}) {
+		push(@rv, [ 'Cookie', $c->[0]."=".$c->[1] ]);
+		}
+	}
+return @rv;
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
