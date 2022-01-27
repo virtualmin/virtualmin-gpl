@@ -1947,6 +1947,9 @@ if ($headers) {
 		&write_http_connection($h, "$hd: $headers->{$hd}\r\n");
 		}
 	}
+foreach my $hd (&http_connection_cookies($d)) {
+	&write_http_connection($h, "$hd->[0]: $hd->[1]\r\n");
+	}
 if ($formdata) {
 	# Use multipart format, suiteable for file uploads
 	my $bound = time().$$;
