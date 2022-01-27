@@ -40,10 +40,10 @@ return ( "mysql", "gd", "json", "xml" );
 
 sub script_wordpress_php_optional_modules
 {
-return ( "curl", "ssh2", "date", "tokenizer",
+return ( "curl", "ssh2", "pecl-ssh2", "date",
          "hash", "imagick", "pecl-imagick", 
          "iconv", "mbstring", "openssl",
-         "posix", "sockets" );
+         "posix", "sockets", "tokenizer" );
 }
 
 sub script_wordpress_dbs
