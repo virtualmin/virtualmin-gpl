@@ -1237,11 +1237,27 @@ return $rv;
 # Returns a link to the Webmin Actions Log module
 sub links_webmin
 {
-local ($d) = @_;
+my ($d) = @_;
+my %miniserv;
+&get_miniserv_config(\%miniserv);
+return ( ) if ($miniserv{'log'} eq '0');
+my $level = &master_admin() ? 0 :
+	    &reseller_admin() ? 2 : 1;
+my $q = "uall=0&user=".&urlize($d->{'user'});
+my $search_title  = $text{'links_webminlog_user'};
+# If login name doesn't equal username in search, it's useless,
+# this is why we will search on currently selected domain name
+# in description, so it works fine for both master/reseller and
+# server owner
+if ($level != 1) {
+	$q = "uall=1&desc=".&urlize($d->{'dom'})."" if ($level != 1);
+	$search_title  = $text{'links_webminlog_dom'};
+	}
+
 return ( { 'mod' => 'webminlog',
-	   'desc' => $text{'links_webminlog'},
-	   'page' => "search.cgi?uall=0&user=".&urlize($d->{'user'}).
-		     "&mall=1&tall=2&fall=1",
+	   'desc' => $search_title,
+	   'page' => "search.cgi?$q".
+		     "&mall=1&tall=1&fall=1&search_title=$search_title&no_return=1",
 	   'cat' => 'logs',
 	 } );
 return ( );
