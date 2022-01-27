@@ -3770,7 +3770,6 @@ links_ssl=Configureer Website voor SSL
 links_webalizer=Webalizer Rapport
 links_webalizer2=Bekijk Webalizer Rapport
 links_spam=SpamAssassin Configuratie
-links_webminlog=Gelogde Webmin Acties
 links_alog=Apache Toegang Log
 links_elog=Apache Fouten Log
 links_flog=ProFTPd Log

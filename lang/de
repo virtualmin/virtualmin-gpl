@@ -2974,7 +2974,6 @@ links_ssl=Konfiguriere Webseite für SSL
 links_webalizer=Webalizer Bericht
 links_webalizer2=Zeige Webalizer Report
 links_spam=SpamAssassin Konfiguration
-links_webminlog=Geloggte Webmin Aktionen
 links_alog=Apache Access Log
 links_elog=Apache Fehler-Log
 links_flog=ProFTPd Log

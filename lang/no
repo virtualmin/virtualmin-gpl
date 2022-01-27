@@ -4003,7 +4003,6 @@ links_ssl=Konfigurer nettsted for SSL
 links_webalizer=Webalizer rapport
 links_webalizer2=Vis Webalizer rapport
 links_spam=SpamAssassin
-links_webminlog=Loggede Webmin handlinger
 links_alog=Apache brukslogg
 links_elog=Apache feillogg
 links_flog=ProFTPd logg

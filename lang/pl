@@ -788,7 +788,6 @@ links_ssl=Konfiguruj stronę www dla SSL
 links_webalizer=Webalizer
 links_webalizer2=Przeglądaj raporty Webalizer
 links_spam=Konfiguracja pamAssassin
-links_webminlog=Logi działań Webmina
 links_alog=Logi dostępu Apache
 links_elog=Logi błędów Apache
 links_flog=Logi ProFTPd
