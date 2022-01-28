@@ -16874,7 +16874,7 @@ local $want = $level == 0 ? "for_master" :
 	      $level == 1 ? "for_owner" : "for_reseller";
 local @rv;
 foreach my $p (@plugins) {
-        if (&plugin_defined($p, "theme_sections")) {
+		if (&plugin_defined($p, "theme_sections")) {
 		foreach my $s (&plugin_call($p, "theme_sections")) {
 			if ($s->{$want}) {
 				$s->{'plugin'} = $p;
@@ -16882,7 +16882,7 @@ foreach my $p (@plugins) {
 				}
 			}
 		}
-        }
+	}
 return @rv;
 }
 
