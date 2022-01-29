@@ -284,6 +284,8 @@ sub copy_jailkit_files
 my ($d, $dir) = @_;
 $dir ||= &domain_jailkit_dir($d);
 $dir || return $text{'jailkit_edir'};
+
+# Use jk_init to copy in standard file sets
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php", "logbasics",
 		  split(/\s+/, $config{'jail_sects'})) {
@@ -295,10 +297,20 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		}
 	&system_logged("chmod g-w ".quotemeta($dir)."/*");
 	}
+
+# Make sure /tmp exists
 my $tmp = "$dir/tmp";
 if (!-d $tmp) {
 	&make_dir($tmp, 01777);
 	}
+
+# Copy in timezone files
+foreach my $zdir ("/usr/share/zoneinfo") {
+	next if (!-d $zdir);
+	&make_dir($dir.$zdir, 0755, 1) if (!-d $dir.$zdir);
+	&copy_source_dest($zdir, $dir.$zdir);
+	}
+
 $d->{'jail_last_copy'} = time();
 return undef;
 }
