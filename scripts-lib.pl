@@ -454,11 +454,12 @@ foreach my $f (@files) {
 			# format, or is Perl or PHP.
 			local $fmt = &compression_format($temp);
 			local $cont;
-			if (!$fmt && $temp =~ /\.(pl|php)$/i) {
+			if (!$fmt && $temp =~ /\.(pl|php|phar)$/i) {
 				$cont = &read_file_contents($temp);
 				}
 			if (!$fmt &&
 			    $cont !~ /^\#\!\s*\S+(perl|php)/i &&
+			    $cont !~ /^\#\!\/usr\/bin\/env\s+(perl|php)/i &&
 			    $cont !~ /^\s*<\?php/i) {
 				$firsterror ||=
 					&text('scripts_edownload2', $url);
