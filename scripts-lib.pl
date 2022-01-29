@@ -1942,13 +1942,17 @@ if (!ref($h)) {
 	}
 &write_http_connection($h, "Host: $host\r\n");
 &write_http_connection($h, "User-agent: Webmin\r\n");
+my $gotcookie = 0;
 if ($headers) {
 	foreach my $hd (keys %$headers) {
 		&write_http_connection($h, "$hd: $headers->{$hd}\r\n");
+		$gotcookie++ if (lc($hd) eq 'cookie');
 		}
 	}
-foreach my $hd (&http_connection_cookies($d)) {
-	&write_http_connection($h, "$hd->[0]: $hd->[1]\r\n");
+if (!$gotcookie) {
+	foreach my $hd (&http_connection_cookies($d)) {
+		&write_http_connection($h, "$hd->[0]: $hd->[1]\r\n");
+		}
 	}
 if ($formdata) {
 	# Use multipart format, suiteable for file uploads
@@ -2023,10 +2027,14 @@ if ($user) {
 	$auth =~ tr/\r\n//d;
 	push(@headers, [ "Authorization", "Basic $auth" ]);
 	}
+my $gotcookie = 0;
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
+	$gotcookie++ if (lc($hname) eq 'cookie');
 	}
-push(@headers, &http_connection_cookies($d));
+if (!$gotcookie) {
+	push(@headers, &http_connection_cookies($d));
+	}
 
 # Actually download it
 $main::download_timed_out = undef;
