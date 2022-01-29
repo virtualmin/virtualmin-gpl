@@ -996,7 +996,6 @@ links_web=Konfigurovat web
 links_website=Náhled stránky
 links_ssl=Konfigurovat SSL web
 links_webalizer2=Zobrazit záznamy Webalizeru
-links_webminlog=Zaznamenané události Webminu
 
 massdelete_title=Smazat virtualni servery
 massdelete_rusure=Jste si jist tim, ze chcete vymazat $1 vybranych serveru? $2 dat v jejich domovskych adresarich budou vymazany take.

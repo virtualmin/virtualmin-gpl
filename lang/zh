@@ -2656,7 +2656,6 @@ links_ssl=配置网站为SSL网站
 links_webalizer=Webalizer报告
 links_webalizer2=查看Webalizer报告
 links_spam=SpamAssassin
-links_webminlog=已记入日志的Webmin操作
 links_alog=Apache访问日志
 links_elog=Apache错误日志
 links_flog=ProFTPd日志

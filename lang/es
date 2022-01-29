@@ -3373,7 +3373,6 @@ links_ssl=Configurar website para SSL
 links_webalizer=Reporte de Webalizer
 links_webalizer2=Ver el reporte de Webalizer
 links_spam=SpamAssassin
-links_webminlog=Acciones de Webmin en logs
 links_alog=Logs de acceso del Apache
 links_elog=Logs de error del Apache
 links_flog=Logs de ProFTPd

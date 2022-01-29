@@ -270,6 +270,7 @@ check_dependentever=Uw Postfix-versie ondersteunt geen uitgaande IP-adressen per
 check_dependentesupport=Postfix ondersteunt uitgaande IP-adressen per domein, maar is momenteel niet geconfigureerd om dit te doen. Dit kan worden ingesteld in de module <a href='$1'>Postfix Mailserver</a>
 check_plugin=Plug-in $1 is geïnstalleerd
 check_packageok=De geselecteerde pakketbeheer- en updatesystemen zijn geïnstalleerd
+check_spamwrapperargs=Het procmail-commando <tt>$1</tt> in de Postfix-configuratie heeft niet de verwachte vlaggen <tt>$2</tt>
 check_jailkitok=Op dit systeem zijn Chroot-jails beschikbaar
 check_jailkiterr=Chroot-jails zijn niet beschikbaar : $1
 check_eyumrepofile=Het configuratiebestand van de Virtualmin-repository $1 bestaat niet!
@@ -755,7 +756,7 @@ scripts_needmod=Benodigde PHP $1 module installeren ..
 scripts_optmod=Aanbevolen PHP $1 module installeren ..
 scripts_phpmodinst=Module installeren vanuit softwarepakketten ..
 scripts_phpmoddone=.. succesvol geïnstalleerde module uit pakket $1
-scripts_phpmodfailed=.. module is niet beschikbaar in opslag
+scripts_phpmodfailed=.. niet beschikbaar in repo's
 scripts_eupdate=.. automatische module-installatie is niet beschikbaar op uw systeem
 scripts_einstallmod=.. module is geïnstalleerd maar kan niet worden geladen
 scripts_install_phpmods_check=PHP-modules controleren ..
@@ -803,6 +804,8 @@ sysinfo_pythonpath=Pad naar Python
 newquotas_nobody=Niemand
 newquotas_addr=Adressen
 
+links_webminlog_dom=Geregistreerde domeinacties
+links_webminlog_user=Gelogde gebruikersacties
 links_phpini3=PHP-FPM-configuratie
 
 massdelete_preserve=Behoud functies die op afstand worden gehost
@@ -1085,6 +1088,8 @@ copycert_fsaving2=Certificaat, sleutel en CA kopiëren naar ProFTPD-bestanden.
 copycert_fenabling=SSL inschakelen in ProFTPD-configuratie.
 
 wizard_ecannot=Het is niet toegestaan de post-installatiewizard uit te voeren
+wizard_finish=Finish
+wizard_end=Keer terug naar Virtualmin
 wizard_virusnew=Als uw systeem domeinen gaat hosten die een grote hoeveelheid e-mail zullen ontvangen, kan het scannen van inkomende berichten op virussen een hoge CPU-belasting genereren. Omdat er wordt gescand met de ClamAV-scanserver <tt>clamd</tt>, zal deze RAM verbruiken, zelfs wanneer geen e-mail wordt verwerkt. Als uw systeem geen e-mail host, kan virusscanning worden uitgeschakeld.
 wizard_virusmsg=Virusscanning inschakelen met ClamAV?
 wizard_virus1=Ja (gebruikt ongeveer 750 MB RAM)
@@ -1098,6 +1103,8 @@ wizard_mysql_delc=(Bevat $1 tabellen)
 wizard_mysql_delanon=Anonieme MySQL-gebruiker verwijderen?
 wizard_mysql_epass=Onjuist MySQL-wachtwoord
 wizard_myrec=(AANBEVOLEN)
+wizard_done2=U kunt echter doorgaan met de wizard om optionele functies te configureren.
+wizard_alldone=Extra configuratie na installatie is nu voltooid!
 wizard_title_dns=DNS-configuratie
 wizard_title_hashpass=Wachtwoordopslag
 wizard_hashpass_warn=Waarschuwing - wanneer gehashte wachtwoorden worden gebruikt, is wachtwoordherstel voor virtuele servers niet langer mogelijk. Bovendien zal het MySQL-wachtwoord voor nieuwe servers verschillen van het beheerderswachtwoord en willekeurig worden gegenereerd.
