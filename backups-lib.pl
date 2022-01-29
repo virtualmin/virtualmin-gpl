@@ -4564,8 +4564,8 @@ if ($config{'tar_args'}) {
 		}
 	}
 $cmd .= " ".$flags;
-$cmd .= " ".$output;
-$cmd .= " ".join(" ", @files) if (@files);
+$cmd .= " ".quotemeta($output);
+$cmd .= " ".join(" ", map { quotemeta($_) } @files) if (@files);
 return $cmd;
 }
 
