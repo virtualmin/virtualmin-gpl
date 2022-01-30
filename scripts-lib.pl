@@ -3432,11 +3432,11 @@ if (defined(&$qfunc)) {
 		$need *= $f;
 		}
 	my ($usage) = &get_domain_quota($d);
-	if ($usage + $need > $q->{'quota'}) {
-		return (1, $need, $usage, $q->{'quota'});
-		}
+	my $bsize = &quota_bsize("home");
+	my $ok = $usage*$bsize + $need <= $d->{'quota'}*$bsize;
+	return ($ok, $need, $usage*$bsize, $d->{'quota'}*$bsize);
 	}
-return (1, undef);
+return (1, undef, undef, undef);
 }
 
 1;

@@ -245,9 +245,10 @@ else {
 
 if (!defined($id)) {
 	# Check for enough quota
-	($ok, $quota) = &check_script_quota($d, $script, $ver);
-	$ok || &usage("Script requires ".&nice_size($quota).
-		      " of free disk quota");
+	($ok, $need, $usage, $quota) = &check_script_quota($d, $script, $ver);
+	$ok || &usage("Script requires ".&nice_size($need).
+		      " of free disk quota, but only ".&nice_size($quota-$usage).
+		      " is available");
 	}
 
 # Fix DB name with prefix if requested

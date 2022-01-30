@@ -11322,7 +11322,7 @@ return ($homequota, $mailquota, $duserrv, $dbquota, $dbquota_home);
 # For a domain, returns the group quota used on home and mail filesystems.
 # If the db flag is set, also returns the sum of all disk space used by
 # databases on this and sub-servers. If database usage is already included
-# in the group quota for home, it is subtracted.
+# in the group quota for home, it is subtracted. All quotas are in blocks.
 sub get_domain_quota
 {
 local ($d, $dbtoo) = @_;
