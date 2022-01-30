@@ -2646,7 +2646,10 @@ if ($copydir && -e $copydir) {
 # Copy to a target dir, if requested
 if ($copydir) {
 	local $path = "$dir/$subdir";
-	($path) = glob("$dir/$subdir") if (!-e $path);
+	if (!-e $path) {
+		# Subdir might be a glob
+		($path) = glob(quotemeta($dir)."/$subdir")
+		}
 
 	# Remove files to skip copying
 	if ($skip) {
