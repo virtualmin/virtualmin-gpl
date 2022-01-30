@@ -363,7 +363,7 @@ if ($d->{'mail'}) {
 	}
 local $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
-	       "tar cfX - $xtemp . | ".
+	       "tar cfX - ".quotemeta($xtemp)." . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
 	       " tar xpf -) 2>&1");
 if ($d->{'mail'}) {
@@ -593,7 +593,7 @@ elsif ($homefmt && $compression == 1) {
 	}
 elsif ($homefmt && $compression == 3) {
 	# ZIP archive
-	$cmd = "zip -r - . -x\@$xtemp";
+	$cmd = "zip -r - . -x\@".quotemeta($xtemp);
 	}
 else {
 	# Plain tar
