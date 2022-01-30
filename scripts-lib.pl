@@ -3416,5 +3416,28 @@ return script_migrated_disallowed($script->{'migrated'}) ?
            $status;
 }
 
+# check_script_quota(&domain, &script-info, version)
+# Returns 1 if a domain has enough quota, or 0 and the amount of quota needed
+sub check_script_quota
+{
+my ($d, $script, $ver) = @_;
+my $qfunc = "script_".$script->{'name'}."_required_quota";
+if (defined(&$qfunc)) {
+	my ($need, $units) = &$qfunc($ver);
+	if ($units) {
+		$units = lc($units);
+		my $f = $units eq 'k' ? 1024 :
+			$units eq 'm' ? 1024*1024 :
+			$units eq 'g' ? 1024*1024*1024 : 1;
+		$need *= $f;
+		}
+	my ($usage) = &get_domain_quota($d);
+	if ($usage + $need > $q->{'quota'}) {
+		return (1, $need, $usage, $q->{'quota'});
+		}
+	}
+return (1, undef);
+}
+
 1;
 
