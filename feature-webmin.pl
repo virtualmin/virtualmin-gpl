@@ -292,8 +292,16 @@ sub restart_usermin
 local %miniserv;
 &usermin::get_usermin_miniserv_config(\%miniserv);
 if (&check_pid_file($miniserv{'pidfile'})) {
-	&usermin::restart_usermin_miniserv();
-	&$second_print($text{'setup_done'});
+	eval {
+		local $main::error_must_die = 1;
+		&usermin::restart_usermin_miniserv();
+		};
+	if ($@) {
+		&$second_print(&text('setup_usermindown2', "$@"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
 	}
 else {
 	&$second_print($text{'setup_usermindown'});

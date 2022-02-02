@@ -588,6 +588,7 @@ setup_webminpid2=Re-loading Webmin ..
 setup_webmindown=.. not currently running
 setup_userminpid=Re-starting Usermin ..
 setup_usermindown=.. not currently running
+setup_usermindown2=.. failed to restart Usermin : $1
 setup_doms=Adding to email domains list ..
 setup_save=Saving server details ..
 setup_virt=Adding virtual IP interface for $1 ..
