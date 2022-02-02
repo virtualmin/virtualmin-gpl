@@ -785,6 +785,7 @@ if ($extramods{'webminlog'} && $_[0]->{'webmin'}) {
 		push(@users, map { $_->{'name'} } &list_extra_admins($_[0]));
 		}
 	local %acl = ( 'users' => join(" ", @users),
+		       'mods' => $module_name,
 		       'rollback' => 0 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "webminlog")
 		if (!$hasmods{'webminlog'});
