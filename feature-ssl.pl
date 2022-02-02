@@ -1267,14 +1267,14 @@ foreach $tf ([ $certtext, $certfile ], [ $keytext, $keyfile ]) {
 	}
 # Get certificate modulus
 local $certmodout = &backquote_command(
-	"openssl x509 -noout -modulus -in $certfile 2>&1");
+	"openssl x509 -noout -modulus -in ".quotemeta($certfile)." 2>&1");
 $certmodout =~ /Modulus=([A-F0-9]+)/i ||
 	return "Certificate data is not valid : $certmodout";
 local $certmod = $1;
 
 # Get key modulus
 local $keymodout = &backquote_command(
-	"openssl rsa -noout -modulus -in $keyfile 2>&1");
+	"openssl rsa -noout -modulus -in ".quotemeta($keyfile)." 2>&1");
 $keymodout =~ /Modulus=([A-F0-9]+)/i ||
 	return "Key data is not valid : $keymodout";
 local $keymod = $1;
@@ -1700,8 +1700,8 @@ local $certtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
 local $out = &backquote_logged(
 	"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
-	"-x509 -nodes -out $certtemp -keyout $keytemp ".
-	"-days $days -config $conf -subj ".quotemeta($subject)." -utf8 2>&1");
+	"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
+	"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." -utf8 2>&1");
 local $rv = $?;
 if (!-r $certtemp || !-r $keytemp || $rv) {
 	# Failed .. return error
