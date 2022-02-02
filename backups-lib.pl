@@ -853,6 +853,13 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 			}
 		}
 
+	# At this point the .backup directory is in a tar file, so we can 
+	# remove it to save disk space
+	if ($homefmt && $backupdir &&
+	    &is_under_directory($d->{'home'}, $backupdir)) {
+		&execute_command("rm -rf ".quotemeta($backupdir));
+		}
+
 	DOMAINFAILED:
 	&enable_quotas($d);
 	DOMAINFAILED_NOQUOTAS:
