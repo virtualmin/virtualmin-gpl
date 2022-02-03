@@ -50,8 +50,8 @@ if (!$d->{'parent'}) {
 if ($d->{'mysql'} && &master_admin()) {
 	my $myhost = &get_database_host_mysql($d);
 	if ($myhost && $myhost ne 'localhost') {
-		print "<b>",&text('databases_hosted',
-				  "<tt>$myhost</tt>"),"</b><p>\n";
+		print &ui_alert_box(&text('databases_hosted',
+				  "<tt>$myhost</tt>"), 'info', undef, undef, ' ');
 		}
 	}
 
