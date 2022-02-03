@@ -291,8 +291,10 @@ if ($d->{'mysql'} && &can_edit_templates() && !$d->{'parent'}) {
 					  $_->{'desc'} ] } @mymods ]));
 
 		print &ui_table_end();
-		print &ui_form_end([ [ undef, $text{'databases_remoteok'} ] ]);
-		print "<b>$text{'databases_warn'}</b> <p>\n";
+		print &ui_form_end([ [ undef, $text{'databases_remoteok'} ],
+                             "&nbsp;&nbsp;&nbsp;&nbsp;" .
+                                &ui_text_color("<b>$text{'databases_warn'}</b>", 'warn') 
+                           ]);
 		}
 	print &ui_tabs_end_tab() if (@tabs > 1);
 	}
