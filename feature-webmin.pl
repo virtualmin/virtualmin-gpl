@@ -786,23 +786,6 @@ else {
 	@mods = grep { $_ ne "mailboxes" } @mods;
 	}
 
-if ($extramods{'webminlog'} && $_[0]->{'webmin'}) {
-	# Can view own actions, and those of extra admins
-	local @users = ( $_[0]->{'user'} );
-	if ($virtualmin_pro) {
-		push(@users, map { $_->{'name'} } &list_extra_admins($_[0]));
-		}
-	local %acl = ( 'users' => join(" ", @users),
-		       'mods' => $module_name,
-		       'rollback' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "webminlog")
-		if (!$hasmods{'webminlog'});
-	push(@mods, "webminlog");
-	}
-else {
-	@mods = grep { $_ ne "webminlog" } @mods;
-	}
-
 if ($extramods{'syslog'} && $_[0]->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
 	local @extras;
@@ -930,6 +913,24 @@ if (!$nofeatures) {
 				}
 			}
 		}
+	}
+
+if ($extramods{'webminlog'} && $_[0]->{'webmin'}) {
+	# Can view own actions, and those of extra admins. This has to be
+	# done last, to have access to the list of modules.
+	local @users = ( $_[0]->{'user'} );
+	if ($virtualmin_pro) {
+		push(@users, map { $_->{'name'} } &list_extra_admins($_[0]));
+		}
+	local %acl = ( 'users' => join(" ", @users),
+		       'mods' => join(" ", @mods),
+		       'rollback' => 0 );
+	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "webminlog")
+		if (!$hasmods{'webminlog'});
+	push(@mods, "webminlog");
+	}
+else {
+	@mods = grep { $_ ne "webminlog" } @mods;
 	}
 
 # Finally, override in settings from template Webmin group
