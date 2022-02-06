@@ -181,7 +181,7 @@ if ($in{'confirm'}) {
 			next;
 			}
 		local $dinfo = &get_domain_by("dom", $d);
-		if (!$dinfo->{'id'}) {
+		if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'})) {
 			# File is actually empty!
 			$dinfo = undef;
 			}

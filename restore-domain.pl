@@ -336,7 +336,7 @@ if ($all_doms) {
 	}
 foreach $dname (@rdoms) {
 	local $dinfo = &get_domain_by("dom", $dname);
-	if (!$dinfo->{'id'}) {
+	if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'})) {
 		# File is actually empty!
 		$dinfo = undef;
 		}
