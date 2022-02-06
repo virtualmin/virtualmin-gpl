@@ -336,7 +336,10 @@ if ($all_doms) {
 	}
 foreach $dname (@rdoms) {
 	local $dinfo = &get_domain_by("dom", $dname);
-	if (!$dinfo->{'id'}) {
+	my %dinfo_local;
+	&read_file($dinfo->{'file'}, \%dinfo_local)
+		if (-r $dinfo->{'file'});
+	if ($dinfo->{'id'} ne $dinfo_local{'id'}) {
 		# File is actually empty!
 		$dinfo = undef;
 		}
