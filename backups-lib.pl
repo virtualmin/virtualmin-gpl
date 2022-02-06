@@ -2171,7 +2171,7 @@ if ($ok) {
 	}
 
 # Make sure any domains we need to re-create have a Virtualmin info file
-foreach $d (@{$_[1]}) {
+foreach $d (@$doms) {
 	if ($d->{'missing'}) {
 		if (!-r "$restoredir/$d->{'dom'}_virtualmin") {
 			&$second_print(&text('restore_missinginfo',
