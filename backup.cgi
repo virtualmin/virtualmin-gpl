@@ -183,7 +183,7 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		$tempfile = @doms == 1 ? $doms[0]->{'dom'}
 				       : "virtualmin-backup";
 		$tempfile .= ".".$sfx;
-		$temp = &tempname($remote_user."__".$tempfile);
+		$temp = &tempname($remote_user.":".$tempfile);
 		}
 	if (@doms) {
 		# Pre-create temp file with correct permissions
