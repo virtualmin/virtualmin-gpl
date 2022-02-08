@@ -71,6 +71,7 @@ else {
 	$cmsg = $text{'wizard_cancel'};
 	}
 if ($wizard_steps[$in{'step'}] eq 'alldone') {
+	$cmsg = undef;
 	$nmsg = $text{'wizard_finish'};
 	$mtags = "style=\"font-weight: bold\"";
 	}
@@ -80,7 +81,7 @@ else {
 print &ui_form_end([
 		     [ "prev", $text{'wizard_prev'}, undef, !$in{'step'} ],
 		     undef,
-		     [ "cancel", $cmsg, undef, undef, $ctags ],
+		     $cmsg ? [ "cancel", $cmsg, undef, undef, $ctags ] : undef,
 		     undef,
 		     [ "parse", $nmsg, undef, undef, $mtags ],
 		   ], "100%");
