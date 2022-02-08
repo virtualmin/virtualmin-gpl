@@ -6361,7 +6361,7 @@ wizard_mysql_epass=Nesprávne heslo MySQL
 wizard_title_mysize=Veľkosť databázy MySQL
 wizard_mysize=MySQL je možné nakonfigurovať tak, aby využívala pamäť za výkon v závislosti od toho, koľko RAM má váš systém a ako intenzívne očakávate využitie databázy.
 wizard_mysize_type=Veľkosť konfigurácie MySQL
-
+wizard_mysize_def=Nechajte aktuálnu veľkosť
 wizard_mysize_small=Malý systém (256M) s občasným používaním MySQL
 wizard_mysize_medium=Stredný systém (512M) s pravidelným používaním MySQL
 wizard_mysize_large=Veľký systém (1G), na ktorom sa intenzívne používa MySQL

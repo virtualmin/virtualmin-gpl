@@ -1966,7 +1966,7 @@ wizard_mysql_epass=Contraseña MySQL incorrecta
 wizard_title_mysize=Tamaño de la base de datos MariaDB/MySQL 
 wizard_mysize=MariaDB/MySQL se puede configurar para cambiar el uso de la memoria por el rendimiento, dependiendo de la cantidad de RAM que tenga su sistema y de cuánto espere que se use la base de datos.
 wizard_mysize_type=Tamaño de configuración MariaDB/MySQL 
-
+wizard_mysize_def=Dejar el tamaño actual
 wizard_mysize_small=Sistema pequeño (256M) con uso poco frecuente de MariaDB/MySQL 
 wizard_mysize_medium=Sistema medio (512M) con uso regular de MariaDB/MySQL 
 wizard_mysize_large=Sistema grande (1G) en el que MariaDB/MySQL se usa mucho

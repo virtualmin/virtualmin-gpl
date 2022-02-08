@@ -6084,7 +6084,7 @@ wizard_mysql_delanon=Remover usuário anônimo do MySQL?
 wizard_mysql_epass=Senha incorreta do MySQL
 wizard_mysize=O MariaDB/MySQL pode ser configurado para trocar o uso da memória pelo desempenho, dependendo da quantidade de RAM que o seu sistema possui e da quantidade esperada de uso do banco de dados.
 wizard_mysize_type=Tamanho de configuração do MariaDB/MySQL
-
+wizard_mysize_def=Sair do tamanho atual
 wizard_mysize_small=Sistema pequeno (256M) com uso pouco frequente do MariaDB/MySQL
 wizard_mysize_medium=Sistema médio (512M) com uso regular do MariaDB/MySQL
 wizard_mysize_large=Sistema grande (1G) no qual o MariaDB/MySQL é muito usado

@@ -2395,7 +2395,7 @@ wizard_mysql_deltest=<Tt>Test</tt> MySQL-Datenbank entfernen?
 wizard_mysql_delc=(Enthält $1 Tabellen)
 wizard_mysql_delanon=Anonymen MySQL-Benutzer entfernen?
 wizard_mysql_epass=Falsches MySQL-Passwort
-
+wizard_mysize_def=Belassen Sie die aktuelle Größe
 wizard_myrec=(EMPFOHLEN)
 wizard_done2=Sie können jedoch mit dem Assistenten fortfahren, um optionale Funktionen zu konfigurieren.
 wizard_alldone=Die zusätzliche Konfiguration nach der Installation ist jetzt abgeschlossen!

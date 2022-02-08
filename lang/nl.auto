@@ -1103,7 +1103,7 @@ wizard_mysql_deltest=<tt>test</tt> MySQL-database verwijderen?
 wizard_mysql_delc=(Bevat $1 tabellen)
 wizard_mysql_delanon=Anonieme MySQL-gebruiker verwijderen?
 wizard_mysql_epass=Onjuist MySQL-wachtwoord
-
+wizard_mysize_def=Huidige maat verlaten
 wizard_myrec=(AANBEVOLEN)
 wizard_done2=U kunt echter doorgaan met de wizard om optionele functies te configureren.
 wizard_alldone=Extra configuratie na installatie is nu voltooid!

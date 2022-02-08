@@ -6361,7 +6361,7 @@ wizard_mysql_epass=不正なMySQLパスワード
 wizard_title_mysize=MariaDB/MySQLデータベースのサイズ
 wizard_mysize=MariaDB/MySQLは、システムのRAMの量とデータベースの使用量に応じて、メモリ使用量とパフォーマンスをトレードオフするように構成できます。
 wizard_mysize_type=MariaDB/MySQL構成サイズ
-
+wizard_mysize_def=現在のサイズのままにする
 wizard_mysize_small=MariaDB/MySQLの使用頻度が低い小規模システム（256M）
 wizard_mysize_medium=通常のMariaDB/MySQLを使用する中規模システム（512M）
 wizard_mysize_large=MariaDB/MySQLが頻繁に使用される大規模システム（1G）

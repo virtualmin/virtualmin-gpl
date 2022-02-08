@@ -4944,7 +4944,7 @@ wizard_mysql_epass=Password MySQL errata
 wizard_title_mysize=Dimensione del database MariaDB/MySQL
 wizard_mysize=MariaDB/MySQL può essere configurato per compensare l'uso della memoria a scopo di prestazioni, a seconda della quantità di RAM del sistema e di quanto si prevede che venga utilizzato il database.
 wizard_mysize_type=Dimensioni di configurazione di MariaDB/MySQL
-
+wizard_mysize_def=Lascia la dimensione attuale
 wizard_mysize_small=Piccolo sistema (256 M) con uso poco frequente di MariaDB/MySQL
 wizard_mysize_medium=Sistema medio (512 M) con normale utilizzo di MariaDB/MySQL
 wizard_mysize_large=Sistema di grandi dimensioni (1G) su cui MariaDB/MySQL è ampiamente utilizzato

@@ -808,7 +808,7 @@ wizard_mysql_deltest=Vil du fjerne <tt>test</tt> MySQL-database?
 wizard_mysql_delc=(Inneholder $1 tabeller)
 wizard_mysql_delanon=Vil du fjerne anonym MySQL-bruker?
 wizard_mysql_epass=Feil MySQL passord
-
+wizard_mysize_def=La gjeldende størrelse stå
 wizard_myrec=(Anbefalt)
 wizard_done2=Du kan imidlertid fortsette med veiviseren for å konfigurere valgfrie funksjoner.
 wizard_alldone=Ytterligere konfigurasjon etter installasjon er nå fullført!

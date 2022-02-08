@@ -5329,7 +5329,7 @@ wizard_mysql_delanon=Usunąć anonimowego użytkownika MySQL?
 wizard_mysql_epass=Niepoprawne hasło MySQL
 wizard_mysize=MariaDB/MySQL można skonfigurować w taki sposób, aby zmniejszało zużycie pamięci w celu zwiększenia wydajności, w zależności od ilości pamięci RAM w systemie i intensywności użycia bazy danych.
 wizard_mysize_type=Rozmiar konfiguracji MariaDB/MySQL
-
+wizard_mysize_def=Zostaw aktualny rozmiar
 wizard_mysize_small=Mały system (256M) z rzadkim użyciem MariaDB/MySQL
 wizard_mysize_medium=System średni (512M) z regularnym użyciem MariaDB/MySQL
 wizard_mysize_large=Duży system (1G), w którym MariaDB/MySQL jest intensywnie używana

@@ -5617,7 +5617,6 @@ wizard_mysql_empty=Sett MySQL passord
 wizard_title_mysize=MySQL databasestørrelse
 wizard_mysize=MySQL kan konfigureres til å bytte bort minnebruk mot ytelse, avhengig av hvor mye internminne systemet har og hvor mye databasebruk du forventer.
 wizard_mysize_type=MySQL konfigurasjonsstørrelse
-
 wizard_mysize_small=Lite system (256M) med sjelden bruk av MySQL
 wizard_mysize_medium=Middels system (512M) med jevn bruk av MySQL
 wizard_mysize_large=Stort system (1G) med mye bruk av MySQL

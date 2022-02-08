@@ -5084,7 +5084,7 @@ wizard_mysql_epass=Nesprávné heslo MySQL
 wizard_title_mysize=Velikost databáze MariaDB/MySQL
 wizard_mysize=MariaDB/MySQL lze nakonfigurovat tak, aby kompromitovalo využití paměti pro výkon, v závislosti na tom, kolik RAM má váš systém a jak silně očekáváte, že bude databáze použita.
 wizard_mysize_type=Velikost konfigurace MariaDB/MySQL
-
+wizard_mysize_def=Ponechte aktuální velikost
 wizard_mysize_small=Malý systém (256M) s občasným používáním MariaDB/MySQL
 wizard_mysize_medium=Střední systém (512M) s pravidelným používáním MariaDB/MySQL
 wizard_mysize_large=Velký systém (1G), na kterém se často používá MariaDB/MySQL

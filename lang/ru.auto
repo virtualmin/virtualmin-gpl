@@ -4948,7 +4948,7 @@ wizard_mysql_epass=Неверный пароль MySQL
 wizard_title_mysize=Размер базы данных MariaDB/MySQL
 wizard_mysize=MariaDB/MySQL может быть настроен на компромисс между использованием памяти и производительностью в зависимости от того, сколько оперативной памяти имеет ваша система и насколько сильно вы ожидаете, что база данных будет использоваться.
 wizard_mysize_type=Размер конфигурации MariaDB/MySQL
-
+wizard_mysize_def=Оставить текущий размер
 wizard_mysize_small=Небольшая система (256 МБ) с нечастым использованием MariaDB/MySQL
 wizard_mysize_medium=Средняя система (512M) с регулярным использованием MariaDB/MySQL
 wizard_mysize_large=Большая система (1G), в которой интенсивно используется MariaDB/MySQL
