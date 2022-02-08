@@ -355,6 +355,7 @@ setup_postgresdbimport=Importowanie bazy danych PostgreSQL $1 ..
 setup_postgresuser=Tworzenie logowania do PostgreSQL ..
 setup_userminpid=Ponowne uruchamianie Usermin ..
 setup_usermindown=.. obecnie nie działa
+setup_usermindown2=.. nie udało się ponownie uruchomić Usermin  : $1 
 setup_save=Zapisywanie szczegółów serwera ..
 setup_virt=Dodawanie wirtualnego interfejsu IP dla $1 ..
 setup_virtdone=.. utworzono interfejs $1 
@@ -3490,6 +3491,7 @@ scripts_idbname=<a href='$1'>$2 baza danych $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_idbtbpref=z przedrostkiem tabeli
 scripts_deregistering=Teraz wyrejestrowuję wersję $1 w wersji $2 ..
+scripts_equota=Ten skrypt wymaga $1 wolnego miejsca na dysku, ale dostępny jest tylko $2
 scripts_eversion=Brakujący lub nieprawidłowo wyglądający numer wersji
 scripts_eversion2=Określona wersja nie jest dostępna
 scripts_apache=Konfigurowanie ustawień PHP serwera WWW.
@@ -3792,7 +3794,6 @@ defaults_eqquota=Brakujący lub nieprawidłowy limit serwera pocztowego
 defaults_below=Zdefiniowane poniżej ..
 
 links_webminlog_dom=Zarejestrowane działania domeny
-links_webminlog_user=Zarejestrowane działania użytkownika
 links_phpini3=Konfiguracja PHP-FPM
 
 massscript_err=Nie udało się zaktualizować skryptów
@@ -5328,6 +5329,7 @@ wizard_mysql_delanon=Usunąć anonimowego użytkownika MySQL?
 wizard_mysql_epass=Niepoprawne hasło MySQL
 wizard_mysize=MariaDB/MySQL można skonfigurować w taki sposób, aby zmniejszało zużycie pamięci w celu zwiększenia wydajności, w zależności od ilości pamięci RAM w systemie i intensywności użycia bazy danych.
 wizard_mysize_type=Rozmiar konfiguracji MariaDB/MySQL
+
 wizard_mysize_small=Mały system (256M) z rzadkim użyciem MariaDB/MySQL
 wizard_mysize_medium=System średni (512M) z regularnym użyciem MariaDB/MySQL
 wizard_mysize_large=Duży system (1G), w którym MariaDB/MySQL jest intensywnie używana

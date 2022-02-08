@@ -145,6 +145,7 @@ setup_mysqluser_provisioned=.. creado en $1
 setup_mysqldb_provisioned=.. creado en $1
 setup_postgresdbimport=Importando la base de datos PostgreSQL $1 ..
 setup_usermindown=.. no se está ejecutando actualmente
+setup_usermindown2=.. no se pudo reiniciar Usermin : $1
 setup_virt6=Agregar dirección IPv6 $1 ..
 setup_virt6done=.. agregado a la interfaz $1
 setup_failed=.. fallido
@@ -1112,6 +1113,7 @@ scripts_faking=Instalación falsa de $1 versión $2 ..
 scripts_idb2=Utiliza una base de datos con prefijo de tabla
 scripts_idbtbpref=con prefijo de tabla
 scripts_deregistering=Ahora cancelar el registro de $1 versión $2 ..
+scripts_equota=Este script requiere $1 de cuota de disco libre, pero solo $2 está disponible
 scripts_cats=Categorias
 scripts_needmod=Instalando el módulo PHP $1 requerido ..
 scripts_optmod=Instalando el módulo PHP $1 recomendado ..
@@ -1211,7 +1213,6 @@ newquotas_users=¿También notificar a los administradores que superan la cuota?
 newquotas_msg=Plantilla para usuarios de correo electrónico a correo y FTP
 
 links_webminlog_dom=Acciones de dominio registradas
-links_webminlog_user=Acciones de usuarios registrados
 links_phpini3=Configuración PHP-FPM
 
 massscript_enone3=Ninguno de los servidores seleccionados tiene scripts instalados que se pueden actualizar a la versión seleccionada
@@ -1965,7 +1966,7 @@ wizard_mysql_epass=Contraseña MySQL incorrecta
 wizard_title_mysize=Tamaño de la base de datos MariaDB/MySQL 
 wizard_mysize=MariaDB/MySQL se puede configurar para cambiar el uso de la memoria por el rendimiento, dependiendo de la cantidad de RAM que tenga su sistema y de cuánto espere que se use la base de datos.
 wizard_mysize_type=Tamaño de configuración MariaDB/MySQL 
-wizard_mysize_def=Deje la configuración predeterminada
+
 wizard_mysize_small=Sistema pequeño (256M) con uso poco frecuente de MariaDB/MySQL 
 wizard_mysize_medium=Sistema medio (512M) con uso regular de MariaDB/MySQL 
 wizard_mysize_large=Sistema grande (1G) en el que MariaDB/MySQL se usa mucho

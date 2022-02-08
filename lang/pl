@@ -1132,7 +1132,7 @@ wizard_mysql_pass1=Pozostaw niezmienione
 wizard_mysql_pass0=Ustaw na
 wizard_mysql_empty=Ustaw hasło MySQL
 wizard_title_mysize=Rozmiar bazy danych MySQL
-wizard_mysize_def=Pozostaw domyślne ustawienia
+
 wizard_title_done=Wszystko gotowe
 
 backuplog_title=Dziennik kopii zapasowej

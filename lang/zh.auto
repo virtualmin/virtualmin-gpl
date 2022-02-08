@@ -217,6 +217,7 @@ setup_mysqldb_provisioned=..在 $1上创建
 setup_postgresdbimport=导入PostgreSQL数据库 $1 ..
 setup_webmindown=..当前未运行
 setup_usermindown=..当前未运行
+setup_usermindown2=.. 无法重新启动 Usermin  : $1
 setup_virtmissing=..父接口 $1不存在！
 setup_virtnotdone=..找不到IP $1的任何接口！
 setup_virt6=添加IPv6地址 $1 ..
@@ -1736,6 +1737,7 @@ scripts_iuser=初始登录
 scripts_ipass=$1，密码为 $2
 scripts_upok2=升级到不受支持的版本：
 scripts_deregistering=现在注销 $1版本 $2 ..
+scripts_equota=此脚本需要 $1 的可用磁盘配额，但只有 $2 可用
 scripts_eversion=版本号缺失或外观无效
 scripts_eversion2=指定的版本不可用
 scripts_tabunsup=安装不受支持的版本
@@ -1934,7 +1936,6 @@ mass_shelldone=..设置为 $1
 mass_shellbad=..选择的外壳不可用
 
 links_webminlog_dom=记录的域操作
-links_webminlog_user=记录的用户操作
 links_phpini2=PHP $1配置
 links_phpini3=PHP-FPM配置
 
@@ -3111,7 +3112,7 @@ wizard_mysql_epass=不正确的MySQL密码
 wizard_title_mysize=MariaDB/MySQL数据库大小
 wizard_mysize=可以将MariaDB/MySQL配置为在内存使用与性能之间进行权衡，这取决于系统拥有多少RAM和期望使用数据库的程度。
 wizard_mysize_type=MariaDB/MySQL配置大小
-wizard_mysize_def=保留默认设置
+
 wizard_mysize_small=小型系统（256M），很少使用MariaDB/MySQL
 wizard_mysize_medium=具有常规MariaDB/MySQL使用的中型系统（512M）
 wizard_mysize_large=大量使用MariaDB/MySQL的大型系统（1G）

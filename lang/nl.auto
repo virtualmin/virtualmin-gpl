@@ -72,6 +72,7 @@ setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet he
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
 setup_usermindown=.. momenteel niet actief
+setup_usermindown2=.. kan Usermin niet herstarten : $1
 setup_failed=.. mislukt
 setup_logrotatealready=.. al ingeschakeld voor logbestand $1
 setup_econtenting=.. kon aanvankelijke inhoud niet maken : $1
@@ -751,6 +752,7 @@ scripts_idb2=Gebruikt database met tabelvoorvoegsel
 scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
 scripts_deregistering=Nu $1 versie $2 afmelden ..
+scripts_equota=Dit script vereist $1 vrije schijfquota, maar alleen $2 is beschikbaar
 scripts_cats=Categorieën
 scripts_needmod=Benodigde PHP $1 module installeren ..
 scripts_optmod=Aanbevolen PHP $1 module installeren ..
@@ -805,7 +807,6 @@ newquotas_nobody=Niemand
 newquotas_addr=Adressen
 
 links_webminlog_dom=Geregistreerde domeinacties
-links_webminlog_user=Gelogde gebruikersacties
 links_phpini3=PHP-FPM-configuratie
 
 massdelete_preserve=Behoud functies die op afstand worden gehost
@@ -1102,6 +1103,7 @@ wizard_mysql_deltest=<tt>test</tt> MySQL-database verwijderen?
 wizard_mysql_delc=(Bevat $1 tabellen)
 wizard_mysql_delanon=Anonieme MySQL-gebruiker verwijderen?
 wizard_mysql_epass=Onjuist MySQL-wachtwoord
+
 wizard_myrec=(AANBEVOLEN)
 wizard_done2=U kunt echter doorgaan met de wizard om optionele functies te configureren.
 wizard_alldone=Extra configuratie na installatie is nu voltooid!
