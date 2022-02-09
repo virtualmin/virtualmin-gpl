@@ -336,6 +336,10 @@ if ($all_doms) {
 	}
 foreach $dname (@rdoms) {
 	local $dinfo = &get_domain_by("dom", $dname);
+	if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'} || !$dinfo->{'user'})) {
+		# File is actually empty!
+		$dinfo = undef;
+		}
 	if ($dname eq "virtualmin") {
 		$got_vbs = 1;
 		}

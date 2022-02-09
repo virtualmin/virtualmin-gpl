@@ -141,15 +141,15 @@ if (&has_domain_user($d)) {
 	# Do creation as domain owner
 	if (!-d $path) {
 		&make_dir_as_domain_user($d, $path, oct($perm), 1);
+		&set_permissions_as_domain_user($d, oct($perm), $path);
 		}
-	&set_permissions_as_domain_user($d, oct($perm), $path);
 	}
 else {
 	# Need to run as root
 	if (!-d $path) {
 		&make_dir($path, oct($perm), 1);
+		&set_ownership_permissions(undef, undef, oct($perm), $path);
 		}
-	&set_ownership_permissions(undef, undef, oct($perm), $path);
 	if ($d->{'uid'} && ($d->{'unix'} || $d->{'parent'})) {
 		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 					   undef, $path);
@@ -363,7 +363,7 @@ if ($d->{'mail'}) {
 	}
 local $err = &backquote_logged(
 	       "cd ".quotemeta($oldd->{'home'})." && ".
-	       "tar cfX - $xtemp . | ".
+	       "tar cfX - ".quotemeta($xtemp)." . | ".
 	       "(cd ".quotemeta($d->{'home'})." && ".
 	       " tar xpf -) 2>&1");
 if ($d->{'mail'}) {
@@ -593,7 +593,7 @@ elsif ($homefmt && $compression == 1) {
 	}
 elsif ($homefmt && $compression == 3) {
 	# ZIP archive
-	$cmd = "zip -r - . -x\@$xtemp";
+	$cmd = "zip -r - . -x\@".quotemeta($xtemp);
 	}
 else {
 	# Plain tar
@@ -989,7 +989,10 @@ push(@rv, [ $config{'homes_dir'}, '755', 'homes' ]);
 if (!$d->{'parent'}) {
 	push(@rv, [ $home_virtualmin_backup, '700', 'backup' ]);
 	}
-push(@rv, map { [ $_, '700', 'ssl' ] } &ssl_certificate_directories($d));
+if (!$d->{'ssl_same'}) {
+	push(@rv, map { [ $_, '700', 'ssl' ] }
+		      &ssl_certificate_directories($d));
+	}
 return @rv;
 }
 

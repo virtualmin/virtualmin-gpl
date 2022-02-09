@@ -38,9 +38,9 @@ else {
 &popup_header($text{'showpass_title'});
 
 print "<center><table>\n";
-print "<tr> <td><b>$msg1</b></td> ",
+print "<tr> <td style=\"padding-right: 10px\"><b>$msg1</b></td> ",
       "<td><tt>",&html_escape($username),"</tt></td> </tr>\n";
-print "<tr> <td><b>$msg2</b></td> ",
+print "<tr> <td style=\"padding-right: 10px\"><b>$msg2</b></td> ",
       "<td><tt>",&html_escape($pass),"</tt></td> </tr>\n";
 print "</table></center>\n";
 

@@ -137,12 +137,20 @@ while(@ARGV > 0) {
 	elsif ($a eq "--list-tests") {
 		$list_tests = 1;
 		}
+	elsif ($a eq "--template") {
+		$tmplname = shift(@ARGV);
+		$tmplname || &usage("--template must be followed by a ".
+				    "template name or ID");
+		}
 	else {
 		&usage("Unknown parameter $a");
 		}
 	}
 $webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$webmin_user --http-passwd=$webmin_pass --user-agent=Webmin ";
 $admin_webmin_wget_command = "wget -q -O - --cache=off --proxy=off --http-user=$test_admin --http-passwd=smeg --user-agent=Webmin ";
+if ($tmplname) {
+	push(@create_args, [ 'template', $tmplname ]);
+	}
 
 &get_miniserv_config(\%miniserv);
 $webmin_proto = "http";

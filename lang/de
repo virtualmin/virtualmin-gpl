@@ -1398,81 +1398,78 @@ losing_ftp=Alle ProFTPd-Direktiven des Virtuellen Server werden entfernt.
 losing_logrotate=Die Logrotate-Konfiguration für die Logdateien des Virtuellen Servers wird gelöscht.
 
 check_title=Überprüfe Konfiguration
-check_desc=Der Status Ihreses Systems wird nun dahingehend überprüft, dass alle ausgewählten Features verfügbar sind, der Mailserver richtig konfiguriert und ob Speicherplatzbegrenzungen aktiviert wurden ..
-check_netok=Das Netzwerk-Konfigurations-Modul von Webmin ist installiert und wird unterstützt.
-check_lowmemory=Ihr System hat nur $1 an Speicher, welches unter den von Virtualmin empfohlenem Minimum von $2 ist.
-check_lowgmemory=Ihr System ist eine VM mit $1 an Speicher, aber die garantierte Obergrenze ist nur $2. Dies ist unter dem Virtualmin empfohlenem Minimum von $3 und kann zu sporadischen Speicherzuweisungsfehler führen.
-check_okmemory=Ihr System hat $1 an Speicher, welches genau oder über dem Virtualmin empfohlenem Minimum von $2 liegt.
-check_okgmemory=Ihr System ist eine VM mit höchstens $1 Speicher, aber ein garantiertes Limit von nur $2. Dies sind beide sowohl auf oder oberhalb des Virtualmin empfohlendem Minimum von $3.
-check_defip=Standard IP-Adresse für Virtuellen Server ist $1.
-check_dnsip2=Standard-IP-Adresse ist auf $1 gesetzt, welches mit der erkannten externe Adresse übereinstimmt.
-check_ewebactions=Das Apache Modul <tt>mod_actions</tt> ist weder installiert noch aktiviert.
+check_netok=Das Netzwerk-Konfigurations-Modul von Webmin ist installiert und wird unterstützt
+check_lowmemory=Ihr System hat nur $1 an Speicher, welches unter den von Virtualmin empfohlenem Minimum von $2 ist
+check_lowgmemory=Ihr System ist eine VM mit $1 an Speicher, aber die garantierte Obergrenze ist nur $2. Dies ist unter dem Virtualmin empfohlenem Minimum von $3 und kann zu sporadischen Speicherzuweisungsfehler führen
+check_okmemory=Ihr System hat $1 an Speicher, welches genau oder über dem Virtualmin empfohlenem Minimum von $2 liegt
+check_okgmemory=Ihr System ist eine VM mit höchstens $1 Speicher, aber ein garantiertes Limit von nur $2. Dies sind beide sowohl auf oder oberhalb des Virtualmin empfohlendem Minimum von $3
+check_defip=Standard IP-Adresse für Virtuellen Server ist $1
+check_dnsip2=Standard-IP-Adresse ist auf $1 gesetzt, welches mit der erkannten externe Adresse übereinstimmt
+check_ewebactions=Das Apache Modul <tt>mod_actions</tt> ist weder installiert noch aktiviert
 check_ewebconfig=Apache Konfigurationsfehler wurden gefunden : $1
-check_webok=Apache ist installiert.
+check_webok=Apache ist installiert
 check_webphpvers=Die folgenden PHP Versionen sind verfügbar : $1
 check_webphpnovers=Keine PHP Versionen wurden auf Ihrem System gefunden!
-check_ftpok=ProFTPd ist installiert.
-check_dnsok2=BIND DNS-Server ist installiert.
-check_dnsok3=BIND DNS-Domains werden auf Service-Host gehostet.
-check_dnsmaster=Allerdings ist der Standard-Master-DNS-Server $1 kein Fully Qualified Domain Name.
-check_mysqlok2=MySQL-Client-Programme sind installiert für die Benutzung mit einem Service Host.
+check_ftpok=ProFTPd ist installiert
+check_dnsok2=BIND DNS-Server ist installiert
+check_dnsok3=BIND DNS-Domains werden auf Service-Host gehostet
+check_dnsmaster=Allerdings ist der Standard-Master-DNS-Server $1 kein Fully Qualified Domain Name
+check_mysqlok2=MySQL-Client-Programme sind installiert für die Benutzung mit einem Service Host
 check_mysqlnopass=MySQL ist installiert und läuft, aber kein <tt>root</tt> Passwort ist gesetzt! <b>Dies sollte sofort in dem <a href='$1'>MySQL Datenbank</a> Modul geändert werden..
-check_postgresok=PostgreSQL ist installiert und läuft.
-check_postgresnopass=PostgreSQL installiert ist und läuft, aber es ist noch kein <tt>$2</tt> Passwort gesetzt! <b>Dies sollte sofort in der <a href='$1'>PostgreSQL Datenbank geändert werden </a> Modul</b>.
-check_webalizerok=Webalizer ist installiert.
-check_ifaceok=Benutze das Netzwerkinterface $1 für virtuelle IP-Adressen.
+check_postgresok=PostgreSQL ist installiert und läuft
+check_postgresnopass=PostgreSQL installiert ist und läuft, aber es ist noch kein <tt>$2</tt> Passwort gesetzt! <b>Dies sollte sofort in der <a href='$1'>PostgreSQL Datenbank geändert werden </a> Modul</b>
+check_webalizerok=Webalizer ist installiert
+check_ifaceok=Benutze das Netzwerkinterface $1 für virtuelle IP-Adressen
 check_enetmask6=IPv6 Netzmaske $1 ist nicht gültig - es sollte eine Zahl sein, wie 64
-check_iface6=IPv6-Adressen sind verfügbar, benutze Schnittstelle $1.
-check_sendmailok=Der E-Mail-Server Sendmail ist installiert und konfiguriert.
-check_postfixok=Der E-Mail-Server Postfix ist installiert und konfiguriert.
-check_dependentok=Postfix ist konfiguriert, um pro Domain ausgehende IP-Adressen unterstützt.
-check_dependentever=Ihre Postfix-Version unterstützt nicht pro Domäne ausgehende IP-Adressen.
-check_dependentesupport=Postfix unterstützt pro Domaine ausgehende IP-Adressen, aber ist derzeit nicht konfiguriert, um es zu tun. Dies kann im Setup <a href='$1'>Postfix Mailserver</a> Modul eingestellt werden.
-check_qmailok=Der E-Mail-Server Qmail ist installiert und konfiguriert.
-check_qmailmode6=Mailserver Qmail ist installiert und konfiguriert. Der Benutzername, der in der <a href='$1'>Modulkonfiguration</a> verwendet wird, ist im Format <b>benutzername@domain</b> gespeichert. Dies wird eventuell nicht funktionieren.
-check_postfixmode6=Mailserver Postfix ist installiert und konfiguriert. Jedoch wird das Benutzername Format auf dem Server Template ist auf <b>username@domain</b> gesetzt, welches nicht von Postfix unterstützt.
-check_vpopmailok=Mailserver QMail mit VPOPMail-Erweiterung ist installiert und konfiguriert.
-check_done=.. Ihr System kann mit Virtualmin konfiguriert werden.
-check_failed=.. Ihr System kann nicht mit Virtualmin bearbeitet werden.
-check_nogroup=Benutzer-Speicherplatzbegrenzungen sind für Heimat- und E-Mail-Verzeichnisse eingerichtet, jedoch nicht für Gruppen. Die Speicherplatzbegrenzungen für die Virtuellen Server wird nicht erzwungen.
-check_group=Die Benutzer- und Gruppen-Speicherplatzbegrenzungen sind sowohl für Heimat- als auch E-Mail-Verzeichnisse aktiviert.
-check_sslok=Apache ist für SSL-Webseiten konfiguriert.
-check_edepwebalizer=Webalizer kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn ein web server nicht installiert ist.
-check_edepssl=SSL kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn Apache nicht installiert ist.
-check_eshell=Die Shell $1 für Nicht-FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang möglich macht.
-check_eftpshell=Die Shell $1 für FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang unmöglich macht.
+check_iface6=IPv6-Adressen sind verfügbar, benutze Schnittstelle $1
+check_sendmailok=Der E-Mail-Server Sendmail ist installiert und konfiguriert
+check_postfixok=Der E-Mail-Server Postfix ist installiert und konfiguriert
+check_dependentok=Postfix ist konfiguriert, um pro Domain ausgehende IP-Adressen unterstützt
+check_dependentever=Ihre Postfix-Version unterstützt nicht pro Domäne ausgehende IP-Adressen
+check_dependentesupport=Postfix unterstützt pro Domaine ausgehende IP-Adressen, aber ist derzeit nicht konfiguriert, um es zu tun. Dies kann im Setup <a href='$1'>Postfix Mailserver</a> Modul eingestellt werden
+check_qmailok=Der E-Mail-Server Qmail ist installiert und konfiguriert
+check_qmailmode6=Mailserver Qmail ist installiert und konfiguriert. Der Benutzername, der in der <a href='$1'>Modulkonfiguration</a> verwendet wird, ist im Format <b>benutzername@domain</b> gespeichert. Dies wird eventuell nicht funktionieren
+check_postfixmode6=Mailserver Postfix ist installiert und konfiguriert. Jedoch wird das Benutzername Format auf dem Server Template ist auf <b>username@domain</b> gesetzt, welches nicht von Postfix unterstützt
+check_vpopmailok=Mailserver QMail mit VPOPMail-Erweiterung ist installiert und konfiguriert
+check_done=.. Ihr System kann mit Virtualmin konfiguriert werden
+check_failed=.. Ihr System kann nicht mit Virtualmin bearbeitet werden
+check_nogroup=Benutzer-Speicherplatzbegrenzungen sind für Heimat- und E-Mail-Verzeichnisse eingerichtet, jedoch nicht für Gruppen. Die Speicherplatzbegrenzungen für die Virtuellen Server wird nicht erzwungen
+check_group=Die Benutzer- und Gruppen-Speicherplatzbegrenzungen sind sowohl für Heimat- als auch E-Mail-Verzeichnisse aktiviert
+check_sslok=Apache ist für SSL-Webseiten konfiguriert
+check_edepwebalizer=Webalizer kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn ein web server nicht installiert ist
+check_edepssl=SSL kann nicht in der <a href='$1'>Modulkonfiguration</a> von Virtualmin aktiviert werden, wenn Apache nicht installiert ist
+check_eshell=Die Shell $1 für Nicht-FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang möglich macht
+check_eftpshell=Die Shell $1 für FTP-Benutzer ist nicht in $2 enthalten, welches eventuell den FTP-Zugang unmöglich macht
 check_allwebmin=Alle Webmin-Benutzer mit den neuen Einstellungen aktualisieren..
-check_needupdate=Einige der Modul-Konfigurations-Einstellungen steuern auf welche Module Webmin-Benutzer Zugriff haben. Die generelle Konfiguration hat sich geändert. Bitte klicken Sie hier um alle Benutzer mit neuen Berechtigungen auszustatten.
+check_needupdate=Einige der Modul-Konfigurations-Einstellungen steuern auf welche Module Webmin-Benutzer Zugriff haben. Die generelle Konfiguration hat sich geändert. Bitte klicken Sie hier um alle Benutzer mit neuen Berechtigungen auszustatten
 check_updatenow=Update de Webmin-Benutzer
-check_current=In der globalen Konfiguration wurde der Pfad zur inkrementellen Datei absolut gesetzt. Benutzen Sie bitte das <a href='$1'>Webalizer-Modul</a>, um dies in einen relativen Pfad zu ändern (wie dies für die Datei <tt>webalizer.current</tt> getan wurde).
-check_history=In der globalen Webalizer-Konfiguration ist die <b>Historien-Datei</b> mit einem abolutem Pfad konfiguriert. Benutzen Sie die <a href='$1'>Modulkonfiguration</a> von Webalizer um einen relativen Pfad einzustellen, z.B. <tt>webalizer.hist</tt>.
+check_current=In der globalen Konfiguration wurde der Pfad zur inkrementellen Datei absolut gesetzt. Benutzen Sie bitte das <a href='$1'>Webalizer-Modul</a>, um dies in einen relativen Pfad zu ändern (wie dies für die Datei <tt>webalizer.current</tt> getan wurde)
+check_history=In der globalen Webalizer-Konfiguration ist die <b>Historien-Datei</b> mit einem abolutem Pfad konfiguriert. Benutzen Sie die <a href='$1'>Modulkonfiguration</a> von Webalizer um einen relativen Pfad einzustellen, z.B. <tt>webalizer.hist</tt>
 check_proftpd=Ein Fehler wurde in der ProFTPd-Konfigurationsvorlage gefunden : $1
-check_enamevirt=Die Optionen <b>Alle Vituellen Apache-Hosts sind namen-basierend</b> und <b>Standard-IP-Adresse für DNS-Records</b> können nicht gleichzeitig in der <a href='$1'>Modulkonfiguration</a> aktiviert sein.
-check_logrotateok=Logrotate ist installiert.
-check_plugin=Plugin $1 ist richtig installiert.
-check_eldap=Eine Fehler ist bei der Kontakaufnahme zum LDAP-Server aufgetreten : $1. Entweder muß LDAP in der <a href='$2'>Modulkonfiguration</a> deaktiviert werden, oder das <a href='$3'>LDAP-Benutzer und -Gruppen</a>-Modul muß erst richtig konfiguriert werden.
-check_eldap2=Das installierte LDAP-Benutzer und -Gruppen-Modul ist zu alt, um von Webmin unterstützt zu werden. Entweder muß es in der <a href='$1'>Modulkonfiguration</a> deaktiviert oder einfach auf Version $2 gebracht werden.
-check_ldap=LDAP-Benutzer und -Gruppen-Management ist korrekt eingerichtet.
-check_detected=Mailserver erkannt $1.
-check_spamok=SpamAssassin und Procmail sind installiert und grundlegend konfiguriert.
-check_noprocmail=SpamAssassin und Procmail sind installiert. Ihr Mailserver scheint jedoch nicht für die Auslieferung von E-Mails durch Procmail konfiguriert zu sein.
-check_virusok=ClamAV ist installiert und läuft.
-check_virusok2=ClamAV ist installiert und es wird vermutet, dass es läuft.
-check_emysqlplugin=Das MySQL-Benutzer-Plugin wird nicht mehr genutzt, da dessen Funktionalität komplett in Virtualmin integriert wurde.
-check_statusok=Das System- und Server-Statusmodul ist installiert und prüft in regelmäßigen Abständen das System.
-check_statussched=Das System- und Server-Statusmodul ist installiert. Es scheint jedoch nicht in regelmäßigen Abständen das System zu prüfen. Bitte stellen Sie diese Funktion auf der entsprechenden <a href='$1'>Modulkonfiguration</a> ein.
-check_ebcmd=Der Befehl $1, welcher benötigt wird um Sicherungen zu erstellen und wiederherzustellen, ist nicht installiert.
+check_enamevirt=Die Optionen <b>Alle Vituellen Apache-Hosts sind namen-basierend</b> und <b>Standard-IP-Adresse für DNS-Records</b> können nicht gleichzeitig in der <a href='$1'>Modulkonfiguration</a> aktiviert sein
+check_logrotateok=Logrotate ist installiert
+check_eldap=Eine Fehler ist bei der Kontakaufnahme zum LDAP-Server aufgetreten : $1. Entweder muß LDAP in der <a href='$2'>Modulkonfiguration</a> deaktiviert werden, oder das <a href='$3'>LDAP-Benutzer und -Gruppen</a>-Modul muß erst richtig konfiguriert werden
+check_eldap2=Das installierte LDAP-Benutzer und -Gruppen-Modul ist zu alt, um von Webmin unterstützt zu werden. Entweder muß es in der <a href='$1'>Modulkonfiguration</a> deaktiviert oder einfach auf Version $2 gebracht werden
+check_ldap=LDAP-Benutzer und -Gruppen-Management ist korrekt eingerichtet
+check_detected=Mailserver erkannt $1
+check_spamok=SpamAssassin und Procmail sind installiert und grundlegend konfiguriert
+check_noprocmail=SpamAssassin und Procmail sind installiert. Ihr Mailserver scheint jedoch nicht für die Auslieferung von E-Mails durch Procmail konfiguriert zu sein
+check_virusok=ClamAV ist installiert und läuft
+check_virusok2=ClamAV ist installiert und es wird vermutet, dass es läuft
+check_emysqlplugin=Das MySQL-Benutzer-Plugin wird nicht mehr genutzt, da dessen Funktionalität komplett in Virtualmin integriert wurde
+check_statusok=Das System- und Server-Statusmodul ist installiert und prüft in regelmäßigen Abständen das System
+check_statussched=Das System- und Server-Statusmodul ist installiert. Es scheint jedoch nicht in regelmäßigen Abständen das System zu prüfen. Bitte stellen Sie diese Funktion auf der entsprechenden <a href='$1'>Modulkonfiguration</a> ein
+check_ebcmd=Der Befehl $1, welcher benötigt wird um Sicherungen zu erstellen und wiederherzustellen, ist nicht installiert
 check_epbzip2out=Sie haben die parallele bzip2 Kompression ausgewählt, aber die Versionsnummer <tt>pbzip2</tt> konnte nicht ermittelt werden : $1
 check_epbzip2ver=Sie haben die parallele bzip2 Kompression ausgewählt, aber dies erfordert <tt>pbzip2</tt>-Version $1 oder höher und auf Ihrem System ist die Version $2
-check_bcmdok=Alle Befehle, welche benötigt werden um Sicherungen zu erstellen und wiederherzustellen, sind installiert.
+check_bcmdok=Alle Befehle, welche benötigt werden um Sicherungen zu erstellen und wiederherzustellen, sind installiert
 check_evirusspam=Virus Scan kann nicht aktiviert werden ohne Spam Filterung
 check_packageerr=Das ausgewählte Paket-Management-System kann nicht verwendet werden : $1
 check_updateerr=Das ausgewählte Paket-Update-System kann nicht genutzt werden : $1
-check_packageok=Die ausgewählte Paketverwaltung und Aktualisierungssysteme sind richtig installiert.
 check_apicmd=Erstelle API helper Befehl ..
 check_apicmdok=.. erstellt <tt>$1</tt>
 check_apicmderr=.. fehlgeschlagen : $1
-check_spamwrappercmd=Der Befehl procmail <tt>$1</tt> in der Postfix-Konfiguration existiert nicht.
+check_spamwrappercmd=Der Befehl procmail <tt>$1</tt> in der Postfix-Konfiguration existiert nicht
 check_lostplugin=Das Plugin <i>$1</i> kann nicht deaktiviert werden, da es durch die folgenden Virtuellen Server verwendet wird : $2
 
 checkmap_enone=Keine Map Quellen wurden in <a href='$1'>Postfix Konfiguration</a> gefunden
@@ -1873,7 +1870,6 @@ restore_spamcp=Stelle SpamAssassin und Procmail Konfigurationen wieder her ..
 restore_sourceheader=Quelle und Format
 restore_headerfeatures=Features und Einstellungen
 restore_headeropts=Andere Wiederherstellungsoptionen
-restore_okmode=.. Modus $1 OK für dieses System
 restore_evirt6=IPv6-Adresse für Virtuellen Server
 restore_vconfig_doing=Stelle Virtualmin Konfigurationen wieder her ..
 restore_vemail_doing=Stelle E-Mail Templates wieder her ..
@@ -2978,7 +2974,6 @@ links_ssl=Konfiguriere Webseite für SSL
 links_webalizer=Webalizer Bericht
 links_webalizer2=Zeige Webalizer Report
 links_spam=SpamAssassin Konfiguration
-links_webminlog=Geloggte Webmin Aktionen
 links_alog=Apache Access Log
 links_elog=Apache Fehler-Log
 links_flog=ProFTPd Log
@@ -3137,7 +3132,6 @@ newvalidate_ok=Validiere jetzt
 newvalidate_err=Fehlgeschlagen Server zu validieren
 newvalidate_edoms=Keine virtuellen Server ausgewählt
 newvalidate_efeats=Keine Features ausgewählt
-newvalidate_good=Alle features OK
 newvalidate_all=Alle Features
 newvalidate_sel=Nur ausgewählte ..
 newvalidate_return=Validation von
@@ -3164,9 +3158,6 @@ validate_ednsnotype=DNS Zone für Domain $1 hat keinen Typ!
 validate_ednstype=DNS Zone für Domain $1 hat als Typ $2 anstatt $3
 validate_eweb=Kein Apache virtueller Host für $1 gefunden
 validate_ewebphp=Fehlendes Wrapper Skript für PHP $1 - $2
-validate_ewebphpsuexec=PHP ist konfiguriert um als Domain Eigentümer ausgeführt zu werden, aber SuExec ist nicht aktiviert!
-validate_ewebuid=SuExec Benutzer auf $1 gesetzt, aber der Virtuelle Server UID ist $2
-validate_ewebgid=SuExec Gruppe auf $1 gesetzt, aber der Virtuelle Server GID ist $2
 validate_ewebdir=Fehlender Apache &lt;Directory&gt; Block für HTML-Verzeichnis $1
 validate_ewebip=Der Apache Virtuelle Host für diese Domain verwendet nicht die IPv4-Adresse und Port $1
 validate_ewebip6=Der Apache Virtuelle Host für diese Domain verwendet nicht die IPv6-Adresse und Port $1
@@ -3580,14 +3571,10 @@ upgrade_schedok=.. fertig. Updates werden automatisch installiert.
 upgrade_schednot=.. fertig, aber die automatische Update-Installation ist nicht aktiviert. Verwenden Sie das <a href='$1'>$2</a>-Modul, um sie einzuschalten.
 upgrade_file=Erstelle Virtualmin Lizenzdatei ..
 upgrade_problems=Einige Fehler sind beim Aktualisieren Ihres System auf Virtualmin Pro aufgetreten. Bitte überprüfen Sie die Nachrichten über mögliche Ursachen.
-upgrade_complete=Ihr System wurde erfolgreich nach Virtualmin Pro upgegradet!
 upgrade_theme=Aktiviere Theme <i>$1</i> ..
 upgrade_eyumrepo=Virtualmin wurde von RPM installiert, jedoch nicht über das GPL Virtualmin Repository. Upgraden ist daher zu diesem Zeitpunkt nicht möglich.
 upgrade_edebrepo=Virtualmin wurde von einem Debian-Paket, aber nicht mit dem GPL Virtualmin Repository. Upgrade ist zu diesem Zeitpunkt nicht möglich.
-upgrade_rpms=Upgrade Virtualmin RPM Pakete : $1
 upgrade_eyumfile=Kein Virtualmin GPL repository wurden in $1 gefunden
-upgrade_update=Aktualisiere verfügbare Pakete von APT ..
-upgrade_debs=Upgrade Virtualmin Debian Pakete : $1
 upgrade_etypematch=Upgraden ist nicht möglich, da der Installation Virtualmin Typ <tt>$1</tt> ist, aber Webmin <tt>$2</tt> ist
 
 maillog_title=Such Mail Log
@@ -3919,7 +3906,7 @@ chroot_active=Aktiv?
 chroot_who=Anwenden an Server und Sub-Server
 chroot_dir=Beschränke auf Verzeichnis
 chroot_all=Alle Virtuelle Server
-chroot_gsel=Nur Server $1 ($2 alle ausgenommen Server)
+chroot_gsel=Nur Server $1 $2 alle ausgenommen Server
 chroot_root=Alle Dateien auf System
 chroot_home=Benutzer Home-Verzeichnisse
 chroot_path=Anderes Verzeichnis $1
@@ -4017,7 +4004,6 @@ postgrey_initdone=.. aktiviert
 postgrey_initalready=.. bereits aktiviert
 postgrey_proc=Starte Postgrey Server ..
 postgrey_procfailed=.. gestartet fehlgeschlagen : $1
-postgrey_procdone=.. gestartet OK
 postgrey_procalready=.. läuft bereits
 postgrey_postfix=Konfiguriere Postfix um Postgrey zu benutzen ..
 postgrey_postfixalready=.. bereits konfiguriert
@@ -4027,7 +4013,6 @@ postgrey_nopostfixdone=.. gelöscht
 postgrey_nopostfixalready=.. bereits gelöscht
 postgrey_noproc=Stoppe Postgrey Server ..
 postgrey_noprocfailed=.. herunterfahren fehlgeschlagen : $1
-postgrey_noprocdone=.. herunterfahren OK
 postgrey_noprocalready=.. läuft nicht
 postgrey_noinit=Deaktiviere Postgrey beim Booten ..
 postgrey_noinitdone=.. deaktiviert
@@ -4113,7 +4098,6 @@ wizard_mysql_empty=Setze MySQL Passwort
 wizard_title_mysize=MySQL Datenbank-Größe
 wizard_mysize=MySQL kann so konfiguriert werden um zwischen Speichernutzung für Leistung abzuwägen, je nachdem, wie viel RAM Ihr System hat und wie stark Sie vorhaben, die Datenbank zu belasten.
 wizard_mysize_type=MySQL Konfigurationsgröße
-wizard_mysize_def=Lasse Standardeinstellungen
 wizard_mysize_small=Kleines System (256 MB) mit unregelmäßigem MySQL Gebrauch
 wizard_mysize_medium=Mittleres System (512 MB) mit regelmäßigem MySQL Gebrauch
 wizard_mysize_large=Großes System (1 GB) mit starker Nutzung von MySQL

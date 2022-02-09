@@ -1,6 +1,7 @@
 
 use Time::Local;
 use POSIX;
+use feature 'state';
 
 ## Work out where our extra -lib.pl files are, and load them
 $virtual_server_root = $module_root_directory;
@@ -2812,7 +2813,7 @@ sub can_delete_domain
 {
 local ($d) = @_;
 return &can_edit_domain($d) &&
-       (&master_admin() || &reseller_admin() ||
+       (&master_admin() || &reseller_admin() && !$access{'nodelete'} ||
 	$_[0]->{'parent'} && $access{'edit_delete'});
 }
 
@@ -7332,20 +7333,54 @@ else {
 	}
 }
 
+# generate_random_available_user(pattern)
+# Generates free user available to be used as
+# Unix user, group, and virtual server user
+sub generate_random_available_user
+{
+my ($pattern) = @_;
+$pattern ||= 'u-[0-9]{4}';
+state $user;
+if (!defined($user)) {
+	for (;;) {
+		my $rand_name = &substitute_pattern($pattern,
+			              {'filter' => '[^A-Za-z0-9\\-_]',
+			               'substitute-datetime' => 1});
+		my $uname_clash = defined(getpwnam($rand_name)) ||
+		                  defined(getgrnam($rand_name)) ||
+		                  &get_domain_by("prefix", $rand_name);
+		if (!$uname_clash) {
+			$user = $rand_name;
+			last;
+			}
+		}
+	}
+return $user;
+}
+
 # unixuser_name(domainname)
 # Returns a Unix username for some domain, or undef if none can be found
 sub unixuser_name
 {
-local ($dname) = @_;
-$dname =~ s/^xn(-+)//;
-$dname = &remove_numeric_prefix($dname);
-$dname =~ /^([^\.]+)/;
-local ($try1, $user) = ($1, $1);
-if (defined(getpwnam($try1)) || $config{'longname'}) {
-	$user = &remove_numeric_prefix($_[0]);
-	$try2 = $user;
-	if (defined(getpwnam($try2))) {
-		return (undef, $try1, $try2);
+my ($dname) = @_;
+my ($dname_, $config_longname, $try1, $user) = ($dname, $config{'longname'});
+
+# Extract random username based on the user pattern
+if ($config_longname && $config_longname !~ /^[0-9]$/) {
+	$user = &generate_random_available_user($config_longname);
+	}
+# Use one based on actual domain name
+else {
+	$dname =~ s/^xn(-+)//;
+	$dname = &remove_numeric_prefix($dname);
+	$dname =~ /^([^\.]+)/;
+	($try1, $user) = ($1, $1);
+	if (defined(getpwnam($try1)) || $config_longname) {
+		$user = &remove_numeric_prefix($dname_);
+		$try2 = $user;
+		if (defined(getpwnam($try2))) {
+			return (undef, $try1, $try2);
+			}
 		}
 	}
 if ($config{'username_length'} && length($user) > $config{'username_length'}) {
@@ -7362,7 +7397,9 @@ return ($user);
 # Returns a Unix group name for some domain, or undef if none can be found
 sub unixgroup_name
 {
-local ($dname, $user) = @_;
+my ($dname, $user) = @_;
+my ($dname_, $config_longname, $try1, $group) = ($dname, $config{'longname'});
+
 if ($user && $config{'groupsame'}) {
 	# Same as username where possible
 	if (!defined(getgrnam($user))) {
@@ -7370,14 +7407,21 @@ if ($user && $config{'groupsame'}) {
 		}
 	return (undef, $user, $user);
 	}
-$dname =~ s/^xn(-+)//;
-$dname =~ /^([^\.]+)/;
-local ($try1, $group) = ($1, $1);
-if (defined(getgrnam($try1)) || $config{'longname'}) {
-	$group = $_[0];
-	$try2 = $group;
-	if (defined(getpwnam($try))) {
-		return (undef, $try1, $try2);
+# Extract random group based on the user pattern
+if ($config_longname && $config_longname !~ /^[0-9]$/) {
+	$group = &generate_random_available_user($config_longname);
+	}
+# Use one based on actual domain name
+else {
+	$dname =~ s/^xn(-+)//;
+	$dname =~ /^([^\.]+)/;
+	($try1, $group) = ($1, $1);
+	if (defined(getgrnam($try1)) || $config{'longname'}) {
+		$group = $dname_;
+		$try2 = $group;
+		if (defined(getpwnam($try))) {
+			return (undef, $try1, $try2);
+			}
 		}
 	}
 return ($group);
@@ -8351,6 +8395,26 @@ foreach my $dd (@alldoms) {
 			}
 		}
 
+	# Delete SSL key files outside the home dir
+	if (!$dd->{'ssl_same'}) {
+		foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain',
+			       'ssl_combined', 'ssl_everything') {
+			if ($dd->{$k} &&
+			    !&is_under_directory($dd->{'home'}, $dd->{$k}) &&
+			    -f $dd->{$k}) {
+				&unlink_logged($dd->{$k});
+				}
+			}
+		foreach my $dir (&ssl_certificate_directories($dd, 1)) {
+			if (!&is_under_directory($dd->{'home'}, $dir) &&
+			    -d $dir &&
+			    $dir =~ /\/[^\/]*(\Q$dd->{'dom'}\E|\Q$dd->{'id'}\E)[^\/]*$/ &&
+			    &is_empty_directory($dir)) {
+				&unlink_logged($dir);
+				}
+			}
+		}
+
 	# Delete domain file
 	&$first_print(&text('delete_domain', &show_domain_name($dd)));
 	&delete_domain($dd);
@@ -9057,6 +9121,11 @@ push(@rv, { 'id' => 0,
 				$config{'tmpl_owners'},
 	    'autoconfig' => $config{'tmpl_autoconfig'} || "none",
 	    'outlook_autoconfig' => $config{'tmpl_outlook_autoconfig'} || "none",
+	    'cert_key_tmpl' => $config{'key_tmpl'},
+	    'cert_cert_tmpl' => $config{'cert_tmpl'},
+	    'cert_ca_tmpl' => $config{'ca_tmpl'},
+	    'cert_combined_tmpl' => $config{'combined_tmpl'},
+	    'cert_everything_tmpl' => $config{'everything_tmpl'},
 	  } );
 foreach my $w (&list_php_wrapper_templates()) {
 	$rv[0]->{$w} = $config{$w} || 'none';
@@ -9388,6 +9457,11 @@ if ($tmpl->{'id'} == 0) {
 	$config{'domalias_type'} = $tmpl->{'domalias_type'};
 	$config{'tmpl_autoconfig'} = $tmpl->{'autoconfig'};
 	$config{'tmpl_outlook_autoconfig'} = $tmpl->{'outlook_autoconfig'};
+	$config{'key_tmpl'} = $tmpl->{'cert_key_tmpl'};
+	$config{'cert_tmpl'} = $tmpl->{'cert_cert_tmpl'};
+	$config{'ca_tmpl'} = $tmpl->{'cert_ca_tmpl'};
+	$config{'combined_tmpl'} = $tmpl->{'cert_combined_tmpl'};
+	$config{'everything_tmpl'} = $tmpl->{'cert_everything_tmpl'};
 	foreach my $w (&list_php_wrapper_templates()) {
 		$config{$w} = $tmpl->{$w};
 		}
@@ -9488,7 +9562,8 @@ if (!$tmpl->{'default'}) {
 		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
-		    "ipfollow", "exclude",
+		    "ipfollow", "exclude", "cert_key_tmpl", "cert_cert_tmpl",
+		    "cert_ca_tmpl", "cert_combined_tmpl","cert_everything_tmpl",
 		    "aliascopy", "bccto", "resources", "dnssec", "avail",
 		    @plugins,
 		    &list_php_wrapper_templates(),
@@ -10969,7 +11044,9 @@ if ($status != 0) {
 	# Not valid .. show message
 	$alert_text .= "<b>".$text{'licence_err'}."</b><br>\n";
 	$alert_text .= $err."\n";
-	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n";
+	$alert_text .= &text('licence_renew', $virtualmin_renewal_url),"\n"
+		if ($alert_text !~ /$virtualmin_renewal_url/);
+	$alert_text =~ s/>\Q$virtualmin_renewal_url\E</>$text{'license_shop_name'}</;
 	if (&can_recheck_licence()) {
 		$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/licence.cgi");
 		$alert_text .= &ui_submit($text{'licence_recheck'});
@@ -11245,7 +11322,7 @@ return ($homequota, $mailquota, $duserrv, $dbquota, $dbquota_home);
 # For a domain, returns the group quota used on home and mail filesystems.
 # If the db flag is set, also returns the sum of all disk space used by
 # databases on this and sub-servers. If database usage is already included
-# in the group quota for home, it is subtracted.
+# in the group quota for home, it is subtracted. All quotas are in blocks.
 sub get_domain_quota
 {
 local ($d, $dbtoo) = @_;
@@ -11317,14 +11394,15 @@ return undef;
 sub compute_prefix
 {
 local ($name, $group, $parent, $creating) = @_;
-if ($config{'longname'} != 1) {
+my $config_longname = $config{'longname'};
+if ($config_longname != 1) {
 	$name =~ s/^xn(-+)//;	# Strip IDN part
 	}
-if ($config{'longname'} == 1) {
+if ($config_longname == 1) {
 	# Prefix is same as domain name
 	return $name;
 	}
-elsif ($group && !$parent && $config{'longname'} == 0) {
+elsif ($group && !$parent && !$config_longname) {
 	# For top-level domains, prefix is same as group name (but append a
 	# number if there's a clash)
 	my $rv = $group;
@@ -11343,26 +11421,32 @@ else {
 	local @p = split(/\./, $name);
 	local $prefix;
 	if ($creating) {
-		# First try foo, then foo.com, then foo.com.au
-		for(my $i=0; $i<@p; $i++) {
-			local $testp = join("-", @p[0..$i]);
-			local $pclash = &get_domain_by("prefix", $testp);
-			if (!$pclash) {
-				$prefix = $testp;
-				last;
-				}
+		# Extract prefix based on the user pattern
+		if ($config_longname && $config_longname !~ /^[0-9]$/) {
+			$prefix = &generate_random_available_user($config_longname);
 			}
-		# If none of those worked, append a number
-		if (!$prefix) {
-			my $i = 1;
-			while(1) {
-				local $testp = $p[0].$i;
-				local $pclash = &get_domain_by("prefix",$testp);
+		else {
+			# First try foo, then foo.com, then foo.com.au
+			for(my $i=0; $i<@p; $i++) {
+				local $testp = join("-", @p[0..$i]);
+				local $pclash = &get_domain_by("prefix", $testp);
 				if (!$pclash) {
 					$prefix = $testp;
 					last;
 					}
-				$i++;
+				}
+			# If none of those worked, append a number
+			if (!$prefix) {
+				my $i = 1;
+				while(1) {
+					local $testp = $p[0].$i;
+					local $pclash = &get_domain_by("prefix",$testp);
+					if (!$pclash) {
+						$prefix = $testp;
+						last;
+						}
+					$i++;
+					}
 				}
 			}
 		}
@@ -11518,19 +11602,6 @@ sub sysinfo_virtualmin
 my @sysinfo_virtualmin;
 
 # OS and Perl info
-@sysinfo_virtualmin = 
-	( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ],
-      [ $text{'sysinfo_perl'}, $] ],
-      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] );
-
-# Python, if exists
-my $python_version = &get_python_version();
-if ($python_version) {
-	push(@sysinfo_virtualmin,
-         [ $text{'sysinfo_python'}, $python_version ],
-         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
-	}
-
 if ($main::sysinfo_virtualmin_self) {
 
 	# Add Webmin version; add Usermin version, if installed
@@ -11558,9 +11629,27 @@ if ($main::sysinfo_virtualmin_self) {
 				    [ $cmtext{'right_vm2'}, $cm_ver ] );
 				}
 			}
+		}
 	}
-}
+my @basic_info;
+if (!&master_admin() && !$main::sysinfo_virtualmin_self) {
+	push(@basic_info,
+	    ( [ $text{'sysinfo_os'}, "$gconfig{'real_os_type'} $gconfig{'real_os_version'}" ] ) );
+	}
 
+push(@basic_info,
+    ( [ $text{'sysinfo_perl'}, $] ],
+      [ $text{'sysinfo_perlpath'}, &get_perl_path() ] ) );
+
+push(@sysinfo_virtualmin, @basic_info);
+
+# Python, if exists
+my $python_version = &get_python_version();
+if ($python_version) {
+	push(@sysinfo_virtualmin,
+         [ $text{'sysinfo_python'}, $python_version ],
+         [ $text{'sysinfo_pythonpath'}, &get_python_path() ]);
+	}
 return @sysinfo_virtualmin;
 }
 
@@ -14934,6 +15023,19 @@ if ($config{'spam'}) {
 			return &text('check_spamwrapperperms', $mbc[0],
 				     sprintf("%o", $st[2]));
 			}
+		# Check for safe flags
+		if ($mbc[0] =~ /\/procmail-wrapper$/) {
+			my @safe = ("-o", "-a", "\$DOMAIN", "-d", "\$LOGNAME");
+			my $ok = 1;
+			for(my $i=0; $i<@safe; $i++) {
+				$ok = 0 if ($mbc[$i+1] ne $safe[$i]);
+				}
+			$ok = 0 if (@mbc != @safe+1);
+			if (!$ok) {
+				return &text('check_spamwrapperargs',
+					$mbc, join(" ", @safe));
+				}
+			}
 		}
 	}
 
@@ -16128,7 +16230,7 @@ local ($tmpl) = @_;
 local @rv = grep { $sfunc = "show_template_".$_;
                    defined(&$sfunc) &&
                     ($config{$_} || !$isfeature{$_} || $_ eq 'mail' ||
-		     $_ eq 'web' && &domain_has_website()) }
+		     $_ eq 'web' || $_ eq 'ssl') }
                  @template_features;
 if ($tmpl && $tmpl->{'id'} == 1) {
 	# For sub-servers only
@@ -16772,7 +16874,7 @@ local $want = $level == 0 ? "for_master" :
 	      $level == 1 ? "for_owner" : "for_reseller";
 local @rv;
 foreach my $p (@plugins) {
-        if (&plugin_defined($p, "theme_sections")) {
+		if (&plugin_defined($p, "theme_sections")) {
 		foreach my $s (&plugin_call($p, "theme_sections")) {
 			if ($s->{$want}) {
 				$s->{'plugin'} = $p;
@@ -16780,7 +16882,7 @@ foreach my $p (@plugins) {
 				}
 			}
 		}
-        }
+	}
 return @rv;
 }
 
@@ -17062,6 +17164,17 @@ sub create_empty_file
 local ($file) = @_;
 &open_tempfile(EMPTY, ">$file", 0, 1);
 &close_tempfile(EMPTY);
+}
+
+# is_empty_directory(path)
+# Returns 1 if a directory contains no files
+sub is_empty_directory
+{
+my ($dir) = @_;
+opendir(EMPTYDIR, $dir) || return 0;
+my @files = grep { $_ ne "." && $_ ne ".." } readdir(EMPTYDIR);
+closedir(EMPTYDIR);
+return @files ? 0 : 1;
 }
 
 # update_miniserv_preloads(mode)

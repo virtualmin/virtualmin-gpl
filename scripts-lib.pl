@@ -454,11 +454,12 @@ foreach my $f (@files) {
 			# format, or is Perl or PHP.
 			local $fmt = &compression_format($temp);
 			local $cont;
-			if (!$fmt && $temp =~ /\.(pl|php)$/i) {
+			if (!$fmt && $temp =~ /\.(pl|php|phar)$/i) {
 				$cont = &read_file_contents($temp);
 				}
 			if (!$fmt &&
 			    $cont !~ /^\#\!\s*\S+(perl|php)/i &&
+			    $cont !~ /^\#\!\/usr\/bin\/env\s+(perl|php)/i &&
 			    $cont !~ /^\s*<\?php/i) {
 				$firsterror ||=
 					&text('scripts_edownload2', $url);
@@ -1933,7 +1934,8 @@ my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
-local $h = &make_http_connection($ip, $port, $usessl, "POST", $page);
+local $h = &make_http_connection($ip, $port, $usessl, "POST", $page,
+			 undef, undef, { 'host' => $host, 'nocheckhost' => 1 });
 $gconfig{'http_proxy'} = $oldproxy;
 if (!ref($h)) {
 	$$err = $h;
@@ -1941,9 +1943,16 @@ if (!ref($h)) {
 	}
 &write_http_connection($h, "Host: $host\r\n");
 &write_http_connection($h, "User-agent: Webmin\r\n");
+my $gotcookie = 0;
 if ($headers) {
 	foreach my $hd (keys %$headers) {
 		&write_http_connection($h, "$hd: $headers->{$hd}\r\n");
+		$gotcookie++ if (lc($hd) eq 'cookie');
+		}
+	}
+if (!$gotcookie) {
+	foreach my $hd (&http_connection_cookies($d)) {
+		&write_http_connection($h, "$hd->[0]: $hd->[1]\r\n");
 		}
 	}
 if ($formdata) {
@@ -1977,7 +1986,7 @@ $post_http_headers = undef;
 $post_http_headers_array = undef;
 local $SIG{'ALRM'} = 'IGNORE';		# Let complete function run forever
 &complete_http_connection($d, $h, $out, $err, \&capture_http_headers, 0,
-			  $host, $port, $headers);
+			  $host, $port, $page, $headers);
 if ($returnheaders && $post_http_headers) {
 	%$returnheaders = %$post_http_headers;
 	}
@@ -2019,15 +2028,21 @@ if ($user) {
 	$auth =~ tr/\r\n//d;
 	push(@headers, [ "Authorization", "Basic $auth" ]);
 	}
+my $gotcookie = 0;
 foreach my $hname (keys %$headers) {
 	push(@headers, [ $hname, $headers->{$hname} ]);
+	$gotcookie++ if (lc($hname) eq 'cookie');
+	}
+if (!$gotcookie) {
+	push(@headers, &http_connection_cookies($d));
 	}
 
 # Actually download it
 $main::download_timed_out = undef;
 local $SIG{ALRM} = \&download_timeout;
 alarm($timeout || 60);
-local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers);
+local $h = &make_http_connection($ip, $port, $ssl, "GET", $page, \@headers,
+			 undef, { 'host' => $host, 'nocheckhost' => 1 });
 alarm(0);
 $h = $main::download_timed_out if ($main::download_timed_out);
 if (!ref($h)) {
@@ -2035,16 +2050,16 @@ if (!ref($h)) {
 	else { &error($h); }
 	}
 &complete_http_connection($d, $h, $dest, $error, $cbfunc, $osdn, $host, $port,
-			  $headers);
+			  $page, $headers);
 }
 
 # complete_http_connection(&domain, &handle, dest, &error, &callback, osdn,
-# 			   [host], [port], &headers)
+# 			   [host], [port], [page], &headers)
 # Once an HTTP connection is active, complete the download
 sub complete_http_connection
 {
 local ($d, $h, $dest, $error, $cbfunc, $osdn, $oldhost,
-       $oldport, $headers) = @_;
+       $oldport, $oldpage, $headers) = @_;
 
 # Kept local so that callback funcs can access them.
 local (%WebminCore::header, @WebminCore::headers);
@@ -2068,6 +2083,18 @@ while(1) {
 	$WebminCore::header{lc($1)} = $2;
 	push(@WebminCore::headers, [ lc($1), $2 ]);
 	}
+
+# Parse out cookies set in the response
+foreach my $h (grep { $_->[0] eq 'set-cookie' } @WebminCore::headers) {
+	my @w = split(/;\s*/, $h->[1]);
+	if (@w && $w[0] =~ /^\S+=/) {
+		my ($cn, $cv) = split(/=/, $w[0], 2);
+		$http_connection_cookies{$d->{'id'}} ||= [ ];
+		push(@{$http_connection_cookies{$d->{'id'}}}, [ $cn, $cv ]);
+		}
+	}
+
+# Complete the download, and possibly follow a redirect
 alarm(0);
 if ($main::download_timed_out) {
 	if ($error) { $$error = $main::download_timed_out; return 0; }
@@ -2094,13 +2121,16 @@ if ($rcode >= 300 && $rcode < 400) {
 		# Relative to same server
 		$host = $oldhost;
 		$port = $oldport;
-		$ssl = 0;
+		$ssl = 0;	# ???
 		$page = $WebminCore::header{'location'};
 		}
-	elsif ($WebminCore::header{'location'}) {
-		# Assume relative to same dir .. not handled
-		if ($error) { $$error = "Invalid Location header $WebminCore::header{'location'}"; return; }
-		else { &error("Invalid Location header $WebminCore::header{'location'}"); }
+	elsif ($WebminCore::header{'location'} && $oldhost && $oldpage) {
+		# Assume relative to same dir
+		$host = $oldhost;
+		$port = $oldport;
+		$page = $oldpage;
+		$page =~ s/\/[^\/]+$/\//;
+		$page .= $WebminCore::header{'location'};
 		}
 	else {
 		if ($error) { $$error = "Missing Location header"; return; }
@@ -2156,6 +2186,20 @@ else {
 	&$cbfunc(4) if ($cbfunc);
 	}
 &close_http_connection($h);
+}
+
+# http_connection_cookies(&domain)
+# Returns a list of array refs of Cookie headers saved from past requests
+sub http_connection_cookies
+{
+my ($d) = @_;
+my @rv;
+if ($http_connection_cookies{$d->{'id'}}) {
+	foreach my $c (@{$http_connection_cookies{$d->{'id'}}}) {
+		push(@rv, [ 'Cookie', $c->[0]."=".$c->[1] ]);
+		}
+	}
+return @rv;
 }
 
 # make_file_php_writable(&domain, file, [dir-only], [owner-too])
@@ -2602,7 +2646,10 @@ if ($copydir && -e $copydir) {
 # Copy to a target dir, if requested
 if ($copydir) {
 	local $path = "$dir/$subdir";
-	($path) = glob("$dir/$subdir") if (!-e $path);
+	if (!-e $path) {
+		# Subdir might be a glob
+		($path) = glob(quotemeta($dir)."/$subdir")
+		}
 
 	# Remove files to skip copying
 	if ($skip) {
@@ -3370,6 +3417,29 @@ return script_migrated_disallowed($script->{'migrated'}) ?
            $text{'scripts_gpl_to_pro'.($can_upgrade ? "_upgrade" : "").''}, 
              ($can_upgrade ? " text-warning" : ""), " target=_blank") :
            $status;
+}
+
+# check_script_quota(&domain, &script-info, version)
+# Returns 1 if a domain has enough quota, or 0 and the amount of quota needed
+sub check_script_quota
+{
+my ($d, $script, $ver) = @_;
+my $qfunc = "script_".$script->{'name'}."_required_quota";
+if (defined(&$qfunc)) {
+	my ($need, $units) = &$qfunc($ver);
+	if ($units) {
+		$units = lc($units);
+		my $f = $units eq 'k' ? 1024 :
+			$units eq 'm' ? 1024*1024 :
+			$units eq 'g' ? 1024*1024*1024 : 1;
+		$need *= $f;
+		}
+	my ($usage) = &get_domain_quota($d);
+	my $bsize = &quota_bsize("home");
+	my $ok = $usage*$bsize + $need <= $d->{'quota'}*$bsize;
+	return ($ok, $need, $usage*$bsize, $d->{'quota'}*$bsize);
+	}
+return (1, undef, undef, undef);
 }
 
 1;

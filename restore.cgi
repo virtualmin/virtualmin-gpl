@@ -181,6 +181,10 @@ if ($in{'confirm'}) {
 			next;
 			}
 		local $dinfo = &get_domain_by("dom", $d);
+		if ($dinfo && (!$dinfo->{'id'} || !$dinfo->{'dom'})) {
+			# File is actually empty!
+			$dinfo = undef;
+			}
 		if ($dinfo) {
 			&can_edit_domain($dinfo) ||
 				&error(&text('restore_ecannotdom',

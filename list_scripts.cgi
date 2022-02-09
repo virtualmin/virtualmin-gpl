@@ -58,12 +58,13 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		}
 	my $desc_full = $script->{'desc'} ? "<a href='edit_script.cgi?dom=$in{'dom'}&".
 		 "script=$sinfo->{'id'}'>$desc</a>" : $sinfo->{'name'};
+	my $sversion = $script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'};
+	$sversion =~ s/\.$//;
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $sinfo->{'id'}, 'disabled' => !$script->{'desc'} },
 		$desc_full,
-		$script->{'vdesc'}->{$sinfo->{'version'}} ||
-		  $sinfo->{'version'},
+		$sversion,
 		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
 		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
 		  $path,

@@ -94,6 +94,27 @@ foreach my $pd ($d, &get_domain_by("parent", $d->{'id'})) {
 		}
 	}
 
+# If MySQL has a socket file, duplicate it in
+if ($config{'mysql'}) {
+	&require_mysql();
+	my $cnf = &mysql::get_mysql_config();
+	my $socket;
+	if ($cnf) {
+		my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$cnf;
+		if ($mysqld) {
+			$socket = &mysql::find_value("socket", $mysqld->{'members'});
+			}
+		}
+	if ($socket) {
+		# Got a path to copy into the chroot
+		my $socketdir = $socket;
+		$socketdir =~ s/\/[^\/]+$//;
+		&make_dir($dir.$socketdir, 0755, 1);
+		&system_logged("ln ".quotemeta($socket)." ".
+			       quotemeta($dir.$socket)." >/dev/null 2>&1");
+		}
+	}
+
 # Add the jailkit shell to /etc/shells if missing
 my $sf = "/etc/shells";
 my $lref = &read_file_lines($sf);
@@ -263,6 +284,8 @@ sub copy_jailkit_files
 my ($d, $dir) = @_;
 $dir ||= &domain_jailkit_dir($d);
 $dir || return $text{'jailkit_edir'};
+
+# Use jk_init to copy in standard file sets
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php", "logbasics",
 		  split(/\s+/, $config{'jail_sects'})) {
@@ -274,10 +297,20 @@ foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		}
 	&system_logged("chmod g-w ".quotemeta($dir)."/*");
 	}
+
+# Make sure /tmp exists
 my $tmp = "$dir/tmp";
 if (!-d $tmp) {
 	&make_dir($tmp, 01777);
 	}
+
+# Copy in timezone files
+foreach my $zdir ("/usr/share/zoneinfo") {
+	next if (!-d $zdir);
+	&make_dir($dir.$zdir, 0755, 1) if (!-d $dir.$zdir);
+	&copy_source_dest($zdir, $dir.$zdir);
+	}
+
 $d->{'jail_last_copy'} = time();
 return undef;
 }

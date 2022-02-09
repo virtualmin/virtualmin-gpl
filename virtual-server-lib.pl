@@ -252,7 +252,7 @@ $upgrade_virtualmin_testpage = "/licence-test.txt";
 $upgrade_virtualmin_updates = "/wbm/updates.txt";
 
 $connectivity_check_host = "software.virtualmin.com";
-$connectivity_check_port = 80;
+$connectivity_check_port = 443;
 $connectivity_check_page = "/cgi-bin/connectivity.cgi";
 
 $resolve_check_host = "software.virtualmin.com";
@@ -310,6 +310,10 @@ $everyone_alias_dir = "$module_config_directory/everyone";
 $ssl_passphrase_dir = "$module_config_directory/sslpass";
 
 $ssl_letsencrypt_lock = "$module_var_directory/letsencrypt-lock";
+
+$ssl_certificate_parent = "/etc/ssl/virtualmin";
+
+$ssl_certificate_dir = "$ssl_certificate_parent/\${ID}";
 
 @cert_attributes = ('cn', 'o', 'issuer_cn', 'issuer_o', 'notafter',
 		    'type', 'alt', 'modulus', 'exponent');

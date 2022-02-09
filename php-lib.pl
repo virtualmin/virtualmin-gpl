@@ -1874,25 +1874,44 @@ return ( ) if (!&foreign_installed("software"));
 return ( ) if (!defined(&software::package_info));
 my @rv;
 my %donever;
-foreach my $pname ("php-fpm",
-		   (map { "php${_}-fpm" } @all_possible_short_php_versions),
-		   (map { my $v = $_; $v =~ s/\.//g;
-			  ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
+
+# Get all interesting packages
+my @pkgnames = ("php-fpm",
+		(map { "php${_}-fpm" } @all_possible_short_php_versions),
+		(map { my $v = $_; $v =~ s/\.//g;
+		     ("php${v}-php-fpm", "php${v}-fpm", "php${v}w-fpm",
 			   "rh-php${v}-php-fpm", "php${_}-fpm",
-			   "php${v}u-fpm") }
-		        @all_possible_php_versions)) {
-	my @pinfo = &software::package_info($pname);
-	next if (!@pinfo || !$pinfo[0]);
+			   "php${v}u-fpm") } @all_possible_php_versions));
+if (&get_webmin_version() >= 1.985 ||
+    $software::config{'package_system'} eq 'debian') {
+	&software::list_packages(@pkgnames);
+	}
+else {
+	&software::list_packages();
+	}
+my %pkgs;
+for(my $i=0; $software::packages{$i,'name'}; $i++) {
+	$pkgs{$software::packages{$i,'name'}} = [
+		$software::packages{$i,'name'},
+		$software::packages{$i,'class'},
+		$software::packages{$i,'desc'},
+		$software::packages{$i,'arch'},
+		$software::packages{$i,'version'} ];
+	}
+
+foreach my $pname (@pkgnames) {
+	my $pinfo = $pkgs{$pname};
+	next if (!$pinfo);
 
 	# The php-fpm package on Ubuntu is just a meta-package
-	if ($pname eq "php-fpm" && $pinfo[3] eq "all" &&
+	if ($pname eq "php-fpm" && $pinfo->[3] eq "all" &&
 	    $gconfig{'os_type'} eq 'debian-linux') {
 		next;
 		}
 
 	# Normalize the version
 	my $rv = { 'package' => $pname };
-	$rv->{'version'} = $pinfo[4];
+	$rv->{'version'} = $pinfo->[4];
 	$rv->{'version'} =~ s/\-.*$//;
 	$rv->{'version'} =~ s/\+.*$//;
 	$rv->{'version'} =~ s/^\d+://;

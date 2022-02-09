@@ -1633,4 +1633,6 @@ Added the reset-feature API command and a tab on the Validate Virtual Servers pa
 Added a configuration option and flag to create-domain to allow SSL linkage across domain owners.
 If using a supported Apache version or Nginx, HTTP2 can be enabled for individual websites or on the server templates page.
 Added support for outgoing SMTP providers like Amazon SES, so that systems with dynamic IPs can reliably send email.
-Reseller access to rename domains, manage extra admins and configure proxies can now be restricted.
+Reseller access to rename domains, manage extra admins, configure proxies, create, delete and edit virtual servers can now be restricted.
+When backing up, you can now choose to download the resulting file in the browser via a link so that the progress of the backup is properly displayed.
+The location of SSL certificate and key files can now be configured at the template level, and a safer default location can be set in the post-install wizard.

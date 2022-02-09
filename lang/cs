@@ -487,36 +487,35 @@ losing_postgres=Všechny PostgreSQL databáze, tabulky a přihlášení budou sm
 sublosing_postgres=Všechny PostgreSQL databáze a tabulky budou smazány.
 losing_dir=Domovský adresář tohoto virtuálního serveru, obsahující všechny stránky a data, bude smazán.
 
-check_desc=Kontroluji stav vaseho systemu a vyhodnocuji, zda jsou k dispozici vsechny doplnky, napr. zda je k dispozici postovni server ci lze aplikovat omezeni Quota ..
-check_defip=Vychozi IP adresa pro virtualni servery je $1.
-check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>.
-check_ewebactions=Modul Apache <tt>mod_actions</tt> buď není nainstalován nebo není povolen.
-check_dnsok2=BIND DNS server je instalovan.
-check_mysqlnopass=MySQL je nainstalován a běží, ale nemá nastaven žádné <tt>root</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze MySQL</a></b>.
-check_postgresnopass=PostgreSQL je nainstalován a běží, ale nemá nastaven žádné <tt>$2</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze PostgreSQL</a></b>.
-check_done=.. vas system je pripraven pro pouziti Virtualminem.
-check_edepwebalizer=Webalizer nelze povolit v <a href='$1'>konfiguraci modulu</a> Virtualminu soucasne s apachem.
-check_edepssl=SSL nelze povolit v <a href='$1'>konfiguraci modulu</a> Virtualminu soucasne s apachem.
-check_eftpshell=Shell $1 pro FTP uzivatele neni zahrnut v $2, coz muze zabranit pristupu uzivatele pres FTP.
-check_emysqlsync=Synchronizace mezi Unixovými a MySQL uživateli je zapnuta v modulu <a href='$1'>Databáze MySQL</a>. To ovšem není potřeba, protože Virtualmin vytváří MySQL účty pro vlastníka domény až když jsou potřeba, takže důrazně doporučujeme tuto možnost vypnout.
+check_defip=Vychozi IP adresa pro virtualni servery je $1
+check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>
+check_ewebactions=Modul Apache <tt>mod_actions</tt> buď není nainstalován nebo není povolen
+check_dnsok2=BIND DNS server je instalovan
+check_mysqlnopass=MySQL je nainstalován a běží, ale nemá nastaven žádné <tt>root</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze MySQL</a></b>
+check_postgresnopass=PostgreSQL je nainstalován a běží, ale nemá nastaven žádné <tt>$2</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze PostgreSQL</a></b>
+check_done=.. vas system je pripraven pro pouziti Virtualminem
+check_edepwebalizer=Webalizer nelze povolit v <a href='$1'>konfiguraci modulu</a> Virtualminu soucasne s apachem
+check_edepssl=SSL nelze povolit v <a href='$1'>konfiguraci modulu</a> Virtualminu soucasne s apachem
+check_eftpshell=Shell $1 pro FTP uzivatele neni zahrnut v $2, coz muze zabranit pristupu uzivatele pres FTP
+check_emysqlsync=Synchronizace mezi Unixovými a MySQL uživateli je zapnuta v modulu <a href='$1'>Databáze MySQL</a>. To ovšem není potřeba, protože Virtualmin vytváří MySQL účty pro vlastníka domény až když jsou potřeba, takže důrazně doporučujeme tuto možnost vypnout
 check_allwebmin=Aktualizuju vsechny uzivatele Webmin s novym nastavenim ..
 check_allresel=Aktualizuju vsechny distributory s novym nastavenim
-check_current=V globalni konfiguraci Webalizeru, je polozka <b>Prirustkocy soubor Webalizeru</b> nastaven jako absollutni cesta. Pouzijte <a href='$1'>Webalizer</a> pokud jej chcete zmenit na relativni jako soucasny <tt>webalizer.current</tt>.
-check_detected=DEtekovan postovni server $1.
-check_emysqlplugin=Modul uzivatelu MySQL jiz neni potrebny. Jeho funkce byly implementovany v jadre Virtualmin.
-check_ebcmd=Prikaz $1 potrebny k vytvoreni ci obnovy ze zalohy neni instalovan.
-check_bcmdok=Vsechny prikazy potrebne pro vytvoreni a obnoveni ze zaloh jsou instalovany.
-check_elist_users=Jsou aktivovany externi prikazy Quota, ale prikaz k vypisu Quota pro uzivatele neexistuje.
-check_elist_groups=Jsou aktivovany externi prikazy Quota, ale prikaz k vypisu Quota pro skupinu neexistuje.
-check_eget_user=Jsou aktivovany externi prikazy Quota, ale prikaz k ziskani Quota pro uzivatele neexistuje.
-check_eget_group=Jsou aktivovany externi prikazy Quota, ale prikaz k ziskani Quota pro skupinu neexistuje.
-check_eclamd=Byl vybran <tt>clamdscan</tt> jako vychozi scanner viru, nicmene <tt>clamd</tt> server pravdepodobne neni cinny.
+check_current=V globalni konfiguraci Webalizeru, je polozka <b>Prirustkocy soubor Webalizeru</b> nastaven jako absollutni cesta. Pouzijte <a href='$1'>Webalizer</a> pokud jej chcete zmenit na relativni jako soucasny <tt>webalizer.current</tt>
+check_detected=DEtekovan postovni server $1
+check_emysqlplugin=Modul uzivatelu MySQL jiz neni potrebny. Jeho funkce byly implementovany v jadre Virtualmin
+check_ebcmd=Prikaz $1 potrebny k vytvoreni ci obnovy ze zalohy neni instalovan
+check_bcmdok=Vsechny prikazy potrebne pro vytvoreni a obnoveni ze zaloh jsou instalovany
+check_elist_users=Jsou aktivovany externi prikazy Quota, ale prikaz k vypisu Quota pro uzivatele neexistuje
+check_elist_groups=Jsou aktivovany externi prikazy Quota, ale prikaz k vypisu Quota pro skupinu neexistuje
+check_eget_user=Jsou aktivovany externi prikazy Quota, ale prikaz k ziskani Quota pro uzivatele neexistuje
+check_eget_group=Jsou aktivovany externi prikazy Quota, ale prikaz k ziskani Quota pro skupinu neexistuje
+check_eclamd=Byl vybran <tt>clamdscan</tt> jako vychozi scanner viru, nicmene <tt>clamd</tt> server pravdepodobne neni cinny
 check_collect=Aktualizuju ulohy sberu stavovych informaci ..
 check_collectoff=Zakazuji sber stavovych informaci ..
 check_ealias_maps=Byl nalezen problem ve vasi tabulce postovnich aliasu serveru Postfix : $1
 check_ecanonical_maps=Byl nalezen problem v tabulce kanonickeho mapovani serveru postfix v zaznamu odchozi adresy adresata : $1
 check_ebcc_maps=Byl nalezen problem ve vasi tabulce slepych kopii serveru Postfix : $1
-check_elogrotateconf=Nastaveni rotace souboru udalosti (logrotate) neni platne : $1. Bud bude opraveno nebo nebude rotace dostupna.
+check_elogrotateconf=Nastaveni rotace souboru udalosti (logrotate) neni platne : $1. Bud bude opraveno nebo nebude rotace dostupna
 
 allwebmin_ecannot=Nejste opravne upravovat vsechny uzivatele systemu Webmin
 allwebmin_title=Uprava uzivatelu Webmin
@@ -997,7 +996,6 @@ links_web=Konfigurovat web
 links_website=Náhled stránky
 links_ssl=Konfigurovat SSL web
 links_webalizer2=Zobrazit záznamy Webalizeru
-links_webminlog=Zaznamenané události Webminu
 
 massdelete_title=Smazat virtualni servery
 massdelete_rusure=Jste si jist tim, ze chcete vymazat $1 vybranych serveru? $2 dat v jejich domovskych adresarich budou vymazany take.

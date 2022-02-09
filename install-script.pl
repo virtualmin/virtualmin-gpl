@@ -243,6 +243,14 @@ else {
 	&usage("Scripts can only be installed into virtual servers with a ".
 	       "website and home directory");
 
+if (!defined($id)) {
+	# Check for enough quota
+	($ok, $need, $usage, $quota) = &check_script_quota($d, $script, $ver);
+	$ok || &usage("Script requires ".&nice_size($need).
+		      " of free disk quota, but only ".&nice_size($quota-$usage).
+		      " is available");
+	}
+
 # Fix DB name with prefix if requested
 $tmpl = &get_template($d->{'template'});
 if ($dbprefix && $dbname) {

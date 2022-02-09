@@ -29,6 +29,20 @@ if (!$config{'first_version'} && !$config{'dns_ip'}) {
 	&save_module_config();
 	}
 
+# If this is a new install, use the new SSL cert paths
+if (!$config{'first_version'}) {
+	my @tmpls = &list_templates();
+	my ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+	if (!$tmpl->{'cert_key_tmpl'}) {
+		$tmpl->{'cert_key_tmpl'} = $ssl_certificate_dir."/ssl.key";
+		$tmpl->{'cert_cert_tmpl'} = 'auto';
+		$tmpl->{'cert_ca_tmpl'} = 'auto';
+		$tmpl->{'cert_combined_tmpl'} = 'auto';
+		$tmpl->{'cert_everything_tmpl'} = 'auto';
+		&save_template($tmpl);
+		}
+	}
+
 # If this is a new install, put Webalizer stats data files outside public_html
 if (!$config{'first_version'} && !$config{'stats_dir'} &&
     !$config{'stats_hdir'}) {

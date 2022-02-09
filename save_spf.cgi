@@ -54,6 +54,29 @@ else {
 	&save_domain_spf($d, undef);
 	}
 
+# TLSA records
+if (defined($in{'tlsa'})) {
+	my @trecs = &get_domain_tlsa_records($d);
+	my $changed;
+	if ($in{'tlsa'} && !@trecs) {
+		# Need to add records
+		&pre_records_change($d);
+		&sync_domain_tlsa_records($d, 1);
+		$changed++;
+		}
+	elsif (!$in{'tlsa'} && @trecs) {
+		# Need to remove records
+		&pre_records_change($d);
+		&sync_domain_tlsa_records($d, 2);
+		$changed++;
+		}
+	if ($changed) {
+		($recs, $file) = &get_domain_dns_records_and_file($d);
+		&post_records_change($d, $recs, $file);
+		&reload_bind_records($d);
+		}
+	}
+
 $dmarc = &get_domain_dmarc($d);
 if ($in{'denabled'}) {
 	# Turn on and update DMARC record

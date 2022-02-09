@@ -510,12 +510,11 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($mode == 10) {
 		# Connect to Backblaze and create the bucket
-		local $buckets = &list_bb_buckets();
-		if (!ref($buckets)) {
-			&$first_print($buckets);
+		local $already = &get_bb_bucket($server);
+		if ($already && !ref($already)) {
+			&$first_print($already);
 			next;
 			}
-		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
 		if (!$already) {
 			local $err = &create_bb_bucket($server);
 			if ($err) {
@@ -852,6 +851,13 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		if ($fok) {
 			push(@donefeatures, $f);
 			}
+		}
+
+	# At this point the .backup directory is in a tar file, so we can 
+	# remove it to save disk space
+	if ($homefmt && $backupdir &&
+	    &is_under_directory($d->{'home'}, $backupdir)) {
+		&execute_command("rm -rf ".quotemeta($backupdir));
 		}
 
 	DOMAINFAILED:
@@ -2165,7 +2171,7 @@ if ($ok) {
 	}
 
 # Make sure any domains we need to re-create have a Virtualmin info file
-foreach $d (@{$_[1]}) {
+foreach $d (@$doms) {
 	if ($d->{'missing'}) {
 		if (!-r "$restoredir/$d->{'dom'}_virtualmin") {
 			&$second_print(&text('restore_missinginfo',
@@ -2419,6 +2425,25 @@ if ($ok) {
 				if (!$dnsparent) {
 					delete($d->{'dns_subof'});
 					delete($d->{'dns_submode'});
+					}
+				}
+
+			# If the domain had a custom ugroup before, make sure
+			# it exists on the new system
+			if (!$parentdom && $d->{'gid'} != $d->{'ugid'} &&
+			    !getgrnam($d->{'ugroup'})) {
+				if ($skipwarnings) {
+					&$second_print(&text('restore_eugroup2',
+							     $d->{'ugroup'}));
+					$d->{'ugroup'} = $d->{'group'};
+					$d->{'ugid'} = $d->{'gid'};
+					}
+				else {
+					&$second_print(&text('restore_eugroup',
+							     $d->{'ugroup'}));
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
 					}
 				}
 
@@ -3887,6 +3912,9 @@ elsif ($url =~ /^bb:\/\/([^\/]+)(\/(\S+))?$/) {
 elsif ($url eq "download:") {
 	@rv = (4, undef, undef, undef, undef, undef);
 	}
+elsif ($url eq "downloadlink:") {
+	@rv = (44, undef, undef, undef, undef, undef);
+	}
 elsif ($url eq "upload:") {
 	@rv = (5, undef, undef, undef, undef, undef);
 	}
@@ -3927,6 +3955,9 @@ elsif ($proto == 0) {
 	}
 elsif ($proto == 4) {
 	$rv = $text{'backup_nicedownload'};
+	}
+elsif ($proto == 44) {
+	$rv = $text{'backup_nicedownloadlink'};
 	}
 elsif ($proto == 5) {
 	$rv = $text{'backup_niceupload'};
@@ -4202,6 +4233,8 @@ if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 4, $text{'backup_mode4'},
 		      $text{'backup_mode4desc'}."<p>" ]);
+	push(@opts, [ 44, $text{'backup_mode44'},
+		      $text{'backup_mode44desc'}."<p>" ]);
 	}
 
 if (!$noupload) {
@@ -4316,6 +4349,10 @@ elsif ($mode == 3) {
 elsif ($mode == 4) {
 	# Just download
 	return "download:";
+	}
+elsif ($mode == 44) {
+	# Generate download link
+	return "downloadlink:";
 	}
 elsif ($mode == 5) {
 	# Uploaded file
@@ -4534,8 +4571,8 @@ if ($config{'tar_args'}) {
 		}
 	}
 $cmd .= " ".$flags;
-$cmd .= " ".$output;
-$cmd .= " ".join(" ", @files) if (@files);
+$cmd .= " ".quotemeta($output);
+$cmd .= " ".join(" ", map { quotemeta($_) } @files) if (@files);
 return $cmd;
 }
 

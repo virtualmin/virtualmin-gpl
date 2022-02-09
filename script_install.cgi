@@ -22,6 +22,12 @@ else {
 	}
 &error_setup($text{'scripts_ierr'});
 
+# Check for enough quota
+if (!$in{'upgrade'}) {
+	($ok, $need, $usage, $quota) = &check_script_quota($d, $script, $ver);
+	$ok || &error(&text('scripts_equota', &nice_size($need), &nice_size($quota-$usage)));
+	}
+
 # Validate user and pass
 if ($in{'upgrade'}) {
 	# Same as before

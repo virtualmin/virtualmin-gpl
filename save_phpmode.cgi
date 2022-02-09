@@ -163,6 +163,7 @@ if (defined(&theme_post_save_domain)) {
 
 # All done
 &webmin_log("phpmode", "domain", $d->{'dom'});
-&ui_print_footer(&domain_footer_link($d),
+&ui_print_footer("edit_phpmode.cgi?dom=$d->{'id'}", $text{'edit_php_return'},
+                 &domain_footer_link($d),
 		 "", $text{'index_return'});
 

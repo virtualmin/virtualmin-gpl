@@ -1348,7 +1348,6 @@ losing_virus=该虚拟服务器用于病毒过滤的Procmail配置将被删除�
 losing_status=该虚拟服务器网站的Webmin状态监控将被删除。
 
 check_title=正在检查配置
-check_desc=正在检查你系统的状态以保证所有启用的功能都可用，邮件服务器配置正常，以和限额可用 ..
 check_netok=Webmin的网络配置模块被安装和支持。
 check_defip=虚拟服务器的缺省IP地址是$1。
 check_ewebactions=Apache的<tt>mod_suexec</tt>模块没有安装或者没有启用。
@@ -1362,7 +1361,7 @@ check_sendmailok=邮件服务器Sendmail已安装和配置。
 check_postfixok=邮件服务器Postfix已安装和配置。
 check_qmailok=邮件服务器Qmail已安装和配置。
 check_qmailmode6=邮件服务器Qmail已安装和配置。但是，服务器模板中的用户名格式被设置成<b>username@domain</b>，可能不能工作。
-check_postfixmode6=邮件服务器Postfix已安装和配置。但是，服务器模板中的用户名格式被设置成<b>username@domain</b>，Postfix不支持这样的格式.
+check_postfixmode6=邮件服务器Postfix已安装和配置。但是，服务器模板中的用户名格式被设置成<b>username@domain</b>，Postfix不支持这样的格式
 check_vpopmailok=使用VPOPMail扩展的邮件服务器Qmail已安装和配置。
 check_done=.. 你的系统可以通过Virtualmin使用。
 check_failed=.. 你的系统不能通过Virtualmin使用。
@@ -1382,7 +1381,6 @@ check_history=在Webalizer的全局配置中，<b>Webalizer历史文件</b>被�
 check_proftpd=在ProFTPd配置模板中发现一个错误：$1。必须通过编辑服务器模板页面中的缺省设置来修复。
 check_enamevirt=<b>所有Apache虚拟服务器都基于名字</b>和<b>DNS记录使用缺省IP地址</b>不能在<a href='$1'>模块配置</a>页面中同时启用。
 check_logrotateok=Logrotate已安装。
-check_plugin=插件$1安装成功。
 check_eldap=连接LDAP服务器时发生一个错误：$1。LDAP必须在<a href='$2'>模块配置</a>页面中禁用，或者正确配置<a href='$3'>LDAP用户和用户组</a>模块。
 check_eldap2=LDAP用户和用户组模块版本太旧，Virtualmin不能用它来管理用户。LDAP必须在<a href='$1'>模块配置</a>页面中禁用，或者升级该模块至版本$2。
 check_ldap=LDAP用户和用户组模块配置正常。
@@ -2109,7 +2107,6 @@ tmpl_extra_prefix=其他管理员前缀
 tmpl_scripts=编辑缺省安装脚本
 tmpl_dbs=编辑缺省数据库
 tmpl_return=模板
-tmpl_ephpsuexec=如果suexec没有启用，PHP脚本不能以域所有者运行。
 tmpl_ephpcmd=如果没有安装<tt>php</tt>命令，PHP脚本不能作为域所有者运行
 tmpl_erubycmd=如果没有安装<tt>ruby</tt>命令，Ruby脚本不能作为域所有者运行
 tmpl_editmode=编辑模板项：
@@ -2659,7 +2656,6 @@ links_ssl=配置网站为SSL网站
 links_webalizer=Webalizer报告
 links_webalizer2=查看Webalizer报告
 links_spam=SpamAssassin
-links_webminlog=已记入日志的Webmin操作
 links_alog=Apache访问日志
 links_elog=Apache错误日志
 links_flog=ProFTPd日志
@@ -2820,7 +2816,6 @@ newvalidate_ok=立即验证
 newvalidate_err=验证服务器失败
 newvalidate_edoms=没有选择虚拟服务器
 newvalidate_efeats=没有选择功能
-newvalidate_good=所有功能正常
 newvalidate_all=所有功能
 newvalidate_sel=仅选择了 ..
 newvalidate_doing=正在开始验证选中择的虚拟服务器。所有发现的问题都显示为红色 ..
@@ -3268,7 +3263,6 @@ upgrade_schedok=..已完成。更新文件将自动安装。
 upgrade_schednot=.. 已完成，但没有启用自动更新安装。使用<a href='$1'>$2</a>模块打开自动更新安装。
 upgrade_file=正在创建Virtualmin许可证文件..
 upgrade_problems=将你的系统升级到Virtualmin Pro时出现错误。错误原因请查看上面的信息。
-upgrade_complete=你的系统已成功升级到Virtualmin Pro！
 upgrade_theme=正在启用主题 <i>$1</i> ..
 upgrade_esharedroot=你的Webmin根目录$1被多个系统共享，不允许更新模块。
 

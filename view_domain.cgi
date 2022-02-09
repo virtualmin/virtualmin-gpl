@@ -235,7 +235,8 @@ else {
 
 # Show actions for this domain, unless the theme vetos it (cause they are on
 # the left menu)
-if (!$main::basic_virtualmin_domain) {
+if (!$main::basic_virtualmin_domain &&
+    !$main::basic_virtualmin_menu) {
 	&show_domain_buttons($d);
 	}
 
