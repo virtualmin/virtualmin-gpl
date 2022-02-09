@@ -109,8 +109,8 @@ if ($oldplugins ne $config{'plugins'}) {
 # Clear cache of links
 &clear_links_cache();
 
-if (defined(&globals)) {
-	&globals('set', 'navigation-reload', 1);
+if (defined(&setvar)) {
+	&setvar('navigation-reload', 1);
 	}
 
 &run_post_actions_silently();

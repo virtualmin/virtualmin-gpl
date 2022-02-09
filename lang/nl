@@ -5333,7 +5333,6 @@ wizard_mysql_empty=MySQL wachtwoord instellen
 wizard_title_mysize=MySQL database grote
 wizard_mysize=MySQL kan zo worden geconfigureerd dat het beter omgaat met het geheugen voor een betere performance, afhankelijk van hoeveel RAM geheugen uw systeem heeft en de verwachting hoe zwaar de database gebruikt zal worden.
 wizard_mysize_type=MySQL configuratie grote
-wizard_mysize_def=Behoud de standaard instellingen
 wizard_mysize_small=Klein systeem (256M) met af en toe MySQL gebruik
 wizard_mysize_medium=Gemiddeld systeem (512M) met gemiddeld MySQL gebruik
 wizard_mysize_large=Groot systeem (1G) waarop MySQL zwaar word gebruikt

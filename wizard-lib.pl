@@ -451,18 +451,24 @@ if (-r $mysql::config{'my_cnf'}) {
 				}
 			}
 		}
+	my $recom = 'wizard_myrec';
 	my $def_msg;
 	if ($currt) {
 		$def_msg = $text{"wizard_mysize_$currt"};
-		($def_msg) = $def_msg =~ /(.*?\(\d+.+?\S*\))/;
+		($def_msg) = $def_msg =~ /.*?(\(\d+.+?\S*\))/;
 		}
+	# Initial wizard run cannot have current
+	my $can_current = ($config{'wizard_run'} && $currt);
+	# All types like 'small' 'medium' 'large' and 'huge'
+	my @types_r = map { [ $_, $text{'wizard_mysize_'.$_}.
+			        ($_ eq $recsize ? " <span data-$recom>$text{$recom}</span>" : "") ] } @types;
+	# Default type (i.e. 'Leave default settings', and will not be displayed
+	# on initial wizard run (no current yet) but will be selected on re-run)
+	my $type_def = [ "", $text{'wizard_mysize_def'}. ($def_msg ? " $def_msg" : "") ];
+	# All types depend on if wizard runs the first time or not
+	my $types_all = $can_current ? [ $type_def,  @types_r ] : [ @types_r ];
 	print &ui_table_row($text{'wizard_mysize_type'},
-		    &ui_radio_table("mysize", $mysize,
-		      [ [ "", $text{'wizard_mysize_def'}.
-			      ($def_msg ? " - $def_msg" : "") ],
-			map { [ $_, $text{'wizard_mysize_'.$_}.
-			        ($_ eq $recsize ? " $text{'wizard_myrec'}" : "")
-			      ] } @types ]));
+		    &ui_radio_table("mysize", ($can_current ? undef : $recsize), $types_all));
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
