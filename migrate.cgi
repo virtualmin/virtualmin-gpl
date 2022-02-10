@@ -153,6 +153,7 @@ if (@doms) {
 		}
 	}
 else {
+	@footer_action = &vui_footer_history_back();
 	&$second_print(&text('migrate_failed'));
 	}
 
