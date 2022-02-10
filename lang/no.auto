@@ -563,6 +563,8 @@ scripts_gpl_pro_tip_title_dashboard=Skaff deg Virtualmin Pro
 scripts_gpl_pro_tip_enroll_dashboard=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen av webhotellets kontrollpanel du elsker og låse opp mange kule funksjoner.
 scripts_gpl_pro_tip_dashboard=Visste du at Virtualmin Pro har mange flotte funksjoner som ikke er inkludert i GPL -versjonen?
 
+migrate_ok=Vellykket migrert $2 virtuell server. <a href='$1'>klikk her</a> for å administrere den.
+
 sysinfo_python=Python-versjon
 sysinfo_pythonpath=Sti til Python
 

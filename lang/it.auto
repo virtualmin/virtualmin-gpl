@@ -3304,7 +3304,7 @@ migrate_eclash=Il dominio specificato è già ospitato da Virtualmin
 migrate_euser=Nome utente mancante o non valido
 migrate_euserclash=L'utente di amministrazione specificato esiste già
 migrate_doing1=Avvio della migrazione di $1 da $2 ..
-migrate_ok=$2 server migrati correttamente. <a href='$1'>Fai clic qui</a> per gestire il nuovo server.
+migrate_ok=Migrazione riuscita di $2 server virtuale, <a href='$1'>fai clic qui</a> per gestirlo.
 migrate_failed=Impossibile migrare alcun server!
 migrate_parent=Di proprietà del proprietario del server
 migrate_parent1=Nuovo utente

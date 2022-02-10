@@ -145,7 +145,8 @@ if (&reseller_admin()) {
 
 if (@doms) {
 	$d = $doms[0];
-	&$second_print(&text('migrate_ok', "edit_domain.cgi?dom=$d->{'id'}", scalar(@doms)));
+	&$second_print(&text('migrate_ok', "edit_domain.cgi?dom=$d->{'id'}",
+	                                   "<tt>".&html_escape($in->{'dom'} || $d->{'dom'})."</tt>"));
 
 	# Call any theme post command
 	if (defined(&theme_post_save_domain)) {

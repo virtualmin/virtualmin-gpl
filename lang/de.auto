@@ -1554,6 +1554,7 @@ migrate_etmplsub=Die ausgewählte Vorlage kann nicht für Subserver verwendet we
 migrate_etmplparent=Die ausgewählte Vorlage kann nicht für Server der obersten Ebene verwendet werden
 migrate_ecannot=Sie dürfen keine Backups migrieren
 migrate_eclash=Die angegebene Domain wird bereits von Virtualmin gehostet
+migrate_ok=Der virtuelle Server $2 wurde erfolgreich migriert, <a href='$1'>klicken Sie hier</a>, um ihn zu verwalten.
 migrate_parent=Im Besitz des Serverbesitzers
 migrate_prefix=Präfix für Mail-Benutzernamen
 migrate_auto2=Wenn möglich aus dem Backup herausarbeiten

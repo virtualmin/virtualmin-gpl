@@ -3416,7 +3416,7 @@ migrate_edom=Chybějící nebo neplatný název domény
 migrate_eclash=Zadaná doména již hostuje Virtualmin
 migrate_euser=Chybějící nebo neplatné uživatelské jméno
 migrate_doing1=Zahájení migrace $1 z $2 ..
-migrate_ok=Servery $2 byly úspěšně migrovány. <a href='$1'>Klikněte sem</a> a spravujte nový server.
+migrate_ok=Virtuální server $2 byl úspěšně migrován. Chcete-li jej spravovat, <a href='$1'>klikněte sem</a>.
 migrate_failed=Nepodařilo se migrovat žádné servery!
 migrate_parent=Vlastníkem vlastníka serveru
 migrate_parent1=Nový uživatel

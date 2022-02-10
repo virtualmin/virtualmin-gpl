@@ -3783,7 +3783,6 @@ migrate_eclash=Det angitt domenet blir allerede betjent av Virtualmin
 migrate_euser=Manglende eller ugyldig brukernavn
 migrate_euserclash=Den angitte administrasjonsbrukeren finnes allerede
 migrate_doing1=Starter migrering av $1 fra $2 ..
-migrate_ok=$2 tjenere migrert. <a href='$1'>Klikk her</a> for å administrere den nye tjeneren.
 migrate_failed=Kunne ikke migrere tjenere!
 migrate_parent=Eid av tjener-eier
 migrate_parent1=Ny bruker

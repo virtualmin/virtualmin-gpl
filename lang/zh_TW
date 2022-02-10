@@ -2507,7 +2507,6 @@ migrate_eclash=指定域已經被Virtualmin管理
 migrate_euser=缺少或無效用戶名
 migrate_euserclash=指定的管理員用戶已存在
 migrate_doing1=正在從$2遷移$1 ..
-migrate_ok=成功遷移了$2個服務器。<a href='$1'>點這里</a>來管理新服務器。
 migrate_failed=遷移服務器失敗！
 migrate_parent=被服務器所有者所擁有
 migrate_parent1=新用戶

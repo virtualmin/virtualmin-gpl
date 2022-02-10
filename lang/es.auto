@@ -1182,6 +1182,7 @@ migrate_ip6=Dirección IPv6 del nuevo servidor
 migrate_etmplsub=La plantilla seleccionada no se puede usar para servidores secundarios
 migrate_etmplparent=La plantilla seleccionada no se puede usar para servidores de nivel superior
 migrate_ecannot=No tiene permiso para migrar copias de seguridad
+migrate_ok=Se migró con éxito $2 servidor virtual, <a href='$1'>haga clic aquí</a> para administrarlo.
 
 newscripts_custom=Tercero
 newscripts_tablatest=Actualizaciones del instalador

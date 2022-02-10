@@ -1856,6 +1856,7 @@ migrate_ip6=新服务器的IPv6地址
 migrate_etmplsub=所选模板不能用于子服务器
 migrate_etmplparent=所选模板不能用于顶级服务器
 migrate_ecannot=您无权迁移备份
+migrate_ok=已成功迁移 $2 个虚拟服务器，<a href='$1'>单击此处</a>进行管理。
 migrate_email=联络电子邮件地址
 migrate_auto2=如果可能的话，从备份中锻炼
 migrate_downloading=正在从 $1..下载迁移文件。

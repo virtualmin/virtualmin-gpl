@@ -4309,7 +4309,7 @@ migrate_eclash=The specified domain is already hosted by Virtualmin
 migrate_euser=Missing or invalid username
 migrate_euserclash=The specified administration user already exists
 migrate_doing1=Starting migration of $1 from $2 ..
-migrate_ok=Successfully migrated $2 servers. <a href='$1'>Click here</a> to manage the new server.
+migrate_ok=Successfully migrated $2 virtual server, <a href='$1'>click here</a> to manage it.
 migrate_failed=Failed to migrate any servers!
 migrate_parent=Owned by server owner
 migrate_parent1=New user

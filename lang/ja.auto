@@ -4309,7 +4309,7 @@ migrate_eclash=指定されたドメインはすでにVirtualminによってホ�
 migrate_euser=ユーザー名がないか無効です
 migrate_euserclash=指定された管理ユーザーは既に存在します
 migrate_doing1=$2から $1の移行を開始しています. ..
-migrate_ok=$2サーバーを正常に移行しました。新しいサーバーを管理するには、<a href='$1'>ここをクリック</a>してください。
+migrate_ok=$2仮想サーバーの移行に成功しました。<ahref = '$1'>ここをクリック</ahref>して管理してください。
 migrate_failed=サーバーの移行に失敗しました！
 migrate_parent=サーバー所有者が所有
 migrate_parent1=新しいユーザー

@@ -2060,6 +2060,7 @@ migrate_ip6=Yeni sunucunun IPv6 adresi
 migrate_etmplsub=Seçilen şablon alt sunucular için kullanılamaz
 migrate_etmplparent=Seçilen şablon üst düzey sunucular için kullanılamaz
 migrate_ecannot=Yedekleri taşıma izniniz yok
+migrate_ok=$2 sanal sunucu başarıyla taşındı, yönetmek için <a href='$1'>burayı tıklayın</a>.
 migrate_email=İletişim e-posta adresi
 migrate_auto2=Mümkünse yedeklemeden çalışma
 migrate_downloading=$1 'den taşıma dosyası indiriliyor ..

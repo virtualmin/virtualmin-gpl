@@ -2815,7 +2815,6 @@ migrate_edom=Fehlender ungültiger Domainname
 migrate_euser=Fehlender oder ungültiger Benutzername
 migrate_euserclash=Der spezifizierte Administrationsbenutzer existiert bereits
 migrate_doing1=Starte Migration von $1 von $2 ..
-migrate_ok=$2 Server erfolgreich migriert. <a href='$1'>Klicken Sie hier</a>, um den neuen Server zu verwalten.
 migrate_failed=Fehlgeschlagen jeden Server zu migrieren!
 migrate_parent1=Neuer Benutzer
 migrate_parent0=Bestehender Benutzer

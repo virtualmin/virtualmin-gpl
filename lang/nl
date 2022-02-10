@@ -3552,7 +3552,6 @@ migrate_eclash=Het gespecificeerde domein word reeds gehost door Virtualmin
 migrate_euser=Ontbrekende of ongeldige gebruikersnaam
 migrate_euserclash=De gespecificeerde administratie gebruiker bestaat reeds
 migrate_doing1=Start de migratie van $1 vanaf $2 ..
-migrate_ok=Succesvol $2 servers gemigreerd. <a href='$1'>Klik hier</a> om de nieuwe server te beheren.
 migrate_failed=Mislukt om een server te migreren !
 migrate_parent=In bezit van server eigenaar
 migrate_parent1=Nieuwe gebruiker

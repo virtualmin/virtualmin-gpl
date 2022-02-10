@@ -3177,7 +3177,6 @@ migrate_eclash=El dominio especificado ya está hosteado por Virtualmin
 migrate_euser=Nombre de usuario inexistente o inválido
 migrate_euserclash=El usuario de administración especificado ya existe
 migrate_doing1=Comenzando la migración de $1 desde $2 ..
-migrate_ok=$2 servidores migrados exitosamente. <a href='$1'>Click acá</a> para administrar el nuevo servidor.
 migrate_failed=Falla al migrar cualquier servidor!
 migrate_parent=Propiedad del dueño del servidor
 migrate_parent1=Nuevo usuario

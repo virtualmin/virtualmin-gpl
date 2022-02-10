@@ -4309,7 +4309,7 @@ migrate_eclash=Zadaná doména je už hosťovaná spoločnosťou Virtualmin
 migrate_euser=Chýbajúce alebo neplatné používateľské meno
 migrate_euserclash=Zadaný administrátor už existuje
 migrate_doing1=Spúšťa sa migrácia $1 z $2 ..
-migrate_ok=Úspešne sa migrovali servery $2. Ak chcete spravovať nový server, <a href='$1'>Kliknite sem</a>.
+migrate_ok=Virtuálny server $2 bol úspešne migrovaný. Ak ho chcete spravovať, <a href='$1'>kliknite sem</a>.
 migrate_failed=Nepodarilo sa migrovať žiadne servery!
 migrate_parent=Vlastnené vlastníkom servera
 migrate_parent1=Nový užívateľ

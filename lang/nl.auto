@@ -799,6 +799,7 @@ newnotify_users=Ook e-mailen in geselecteerde domeinen?
 
 migrate_directadmin=DirectAdmin-back-up
 migrate_ip6=IPv6-adres van nieuwe server
+migrate_ok=$2 virtuele server gemigreerd, <a href='$1'>klik hier</a> om deze te beheren.
 
 sysinfo_python=Python-versie
 sysinfo_pythonpath=Pad naar Python
