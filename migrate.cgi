@@ -149,7 +149,7 @@ if (@doms) {
 
 	# Call any theme post command
 	if (defined(&theme_post_save_domain)) {
-		&theme_post_save_domain(\%dom, 'create');
+		&theme_post_save_domain($d, 'create');
 		}
 	}
 else {
