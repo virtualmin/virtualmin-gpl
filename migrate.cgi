@@ -74,8 +74,9 @@ if (!$in{'prefix_def'}) {
 	}
 $in{'email_def'} || $in{'email'} =~ /\S/ || &error($text{'setup_eemail'});
 
-&ui_print_unbuffered_header(undef, $text{'migrate_title'}, "");
+my @footer_action = &vui_footer_history_back();
 
+&ui_print_unbuffered_header(undef, $text{'migrate_title'}, "");
 # Download the file
 $oldsrc = $src;
 $nice = &nice_backup_url($oldsrc);
@@ -113,6 +114,8 @@ elsif (&domain_name_clash($domain)) {
 	&$second_print($text{'migrate_eclash'});
 	goto DONE;
 	}
+
+@footer_action = ("", $text{'index_return'});
 &$second_print($text{'setup_done'});
 
 # Call the migration function
@@ -154,5 +157,5 @@ else {
 	}
 
 DONE:
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer(@footer_action);
 
