@@ -107,7 +107,7 @@ if ($cs != -1) {
 			    [ 0, $text{'wizard_virus0'} ] ]));
 	}
 else {
-	print &ui_table_row($text{'wizard_clamdnone'});
+	print &ui_table_row(undef, "<b>$text{'wizard_clamdnone'}</b>");
 	}
 }
 
