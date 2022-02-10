@@ -74,14 +74,13 @@ else {
 	# Full username differs
 	if ($pop3 ne $user->{'user'}) {
 		print &ui_table_row(
-			$d->{'mail'} ? &hlink($text{'user_imap'}, 'user_imap')
-				     : &hlink($text{'user_imapf'},'user_imapf'),
+			$d->{'mail'} ? &hlink($text{"user_imap$mysql_suff"}, 'user_imap')
+				     : &hlink($text{"user_imapf$mysql_suff"},'user_imapf'),
 			"<tt>$user->{'user'}</tt>");
 		}
 
-	# MySQL username differs
-	if ($user->{'mysql_user'} &&
-             $user->{'mysql_user'} ne $user->{'user'}) {
+	# Always display MySQL username
+	if ($user->{'mysql_user'}) {
 		print &ui_table_row(
 			&hlink($text{'user_mysqluser2'}, 'user_mysqluser2'),
 			"<tt>$user->{'mysql_user'}</tt>");
@@ -411,10 +410,11 @@ if ($d && !$mailbox) {
 	@dbs = grep { $_->{'users'} } &domain_databases($d);
 	}
 @sgroups = &allowed_secondary_groups($d);
-foreach $f (&list_mail_plugins()) {
+foreach my $f (&list_mail_plugins()) {
 	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs"));
 	}
-$anyother = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} ||
+my $shell_row = &can_mailbox_ftp() && !$mailbox && $user->{'unix'};
+$anyother = $shell_row ||
 	    $anyplugins ||
 	    @dbs ||
 	    @sgroups && $user->{'unix'};
@@ -424,7 +424,7 @@ if ($anyother) {
 				     "table4", 0, \@tds);
 	}
 
-if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
+if ($shell_row) {
 	# Show FTP shell field
 	print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
 		&available_shells_menu("shell", $user->{'shell'}, "mailbox",
@@ -433,13 +433,23 @@ if (&can_mailbox_ftp() && !$mailbox && $user->{'unix'}) {
 	}
 
 # Find and show all plugin features
-foreach $f (&list_mail_plugins()) {
+foreach my $f (&list_mail_plugins()) {
 	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 	print $input;
 	}
 
+# Row separators for logical clarity
+my $hrr = "<hr data-row-separator>";
+
 # Show allowed databases
 if (@dbs) {
+	if ($user->{'mysql_user'}) {
+		print &ui_table_row(undef, $hrr, 2) if ($shell_row);
+		print &ui_table_row(
+			&hlink($text{'user_mysqluser2'}, 'user_mysqluser2'),
+			"<tt>$user->{'mysql_user'}</tt>");
+		}
+	print &ui_table_row(undef, $hrr, 2) if (!$user->{'mysql_user'} && $shell_row);
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
 			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
@@ -452,6 +462,8 @@ if (@dbs) {
 
 # Show secondary groups
 if (@sgroups && $user->{'unix'}) {
+	print &ui_table_row(undef, $hrr, 2)
+		if ($shell_row || $user->{'mysql_user'} || @dbs);
 	print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
 			    &ui_select("groups", $user->{'secs'},
 				[ map { [ $_ ] } @sgroups ], 5, 1, 1),
