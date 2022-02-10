@@ -36,7 +36,7 @@ print &ui_table_row(undef,
 # Show a form to enable or disable pre-loading and lookup-domain-daemon
 sub wizard_show_memory
 {
-print &ui_table_row(undef, $text{'wizard_memory'}, 2);
+print &ui_table_row(undef, $text{'wizard_memory'}. "<p></p>", 2);
 
 local $mem = &get_uname_arch() =~ /64/ ? "40M" : "20M";
 print &ui_table_row($text{'wizard_memory_preload'},
@@ -96,7 +96,7 @@ return undef;
 # Show a form asking the user if he wants to run clamd
 sub wizard_show_virus
 {
-print &ui_table_row(undef, $text{'wizard_virusnew'}, 2);
+print &ui_table_row(undef, $text{'wizard_virusnew'} . "<p></p>", 2);
 local $cs = &check_clamd_status();
 if ($cs != -1) {
 	$cs = 2 if (!$cs && $config{'virus'});
@@ -180,7 +180,7 @@ return undef;
 # Show a form asking the user if he wants to run spamd
 sub wizard_show_spam
 {
-print &ui_table_row(undef, $text{'wizard_spam'}, 2);
+print &ui_table_row(undef, $text{'wizard_spam'} . "<p></p>", 2);
 local $cs = &check_spamd_status();
 if ($cs != -1) {
 	print &ui_table_row($text{'wizard_spamd'},
@@ -228,15 +228,11 @@ return undef;
 # Ask the user if he wants to run MySQL and/or PostgreSQL
 sub wizard_show_db
 {
-print &ui_table_row(undef, $text{'wizard_db'}, 2);
+print &ui_table_row(undef, $text{'wizard_db'}. "<p></p>", 2);
 print &ui_table_row($text{'wizard_db_mysql'},
-	&ui_radio("mysql", $config{'mysql'} ? 1 : 0,
-		  [ [ 1, $text{'wizard_db_mysql1'}."<br>" ],
-		    [ 0, $text{'wizard_db_mysql0'} ] ]));
+                    &ui_yesno_radio("mysql", $config{'mysql'}));
 print &ui_table_row($text{'wizard_db_postgres'},
-	&ui_radio("postgres", $config{'postgres'} ? 1 : 0,
-		  [ [ 1, $text{'wizard_db_postgres1'}."<br>" ],
-		    [ 0, $text{'wizard_db_postgres0'} ] ]));
+                    &ui_yesno_radio("postgres", $config{'postgres'}));
 }
 
 # Enable or disable MySQL and PostgreSQL, depending on user's selections
@@ -321,7 +317,7 @@ else {
 	print &ui_hidden("needchange", 0);
 	print &ui_table_row(undef, $text{'wizard_mysql'} . " " .
 			   ($mysql::mysql_pass ? $text{'wizard_mysql3'}
-					       : $text{'wizard_mysql2'}), 2);
+					       : $text{'wizard_mysql2'}) . "<p></p>", 2);
 	if ($mysql::mysql_pass) {
 		print &ui_table_row($text{'wizard_mysql_pass'},
 			&ui_opt_textbox("mypass", undef, 20,
@@ -423,7 +419,7 @@ return undef;
 # Show a form to select the MySQL size configuration
 sub wizard_show_mysize
 {
-print &ui_table_row(undef, $text{'wizard_mysize'}, 2);
+print &ui_table_row(undef, $text{'wizard_mysize'} . "<p></p>", 2);
 
 &require_mysql();
 if (-r $mysql::config{'my_cnf'}) {
@@ -559,7 +555,7 @@ return undef;
 sub wizard_show_dns
 {
 &require_bind();
-print &ui_table_row(undef, $text{'wizard_dns'}, 2);
+print &ui_table_row(undef, $text{'wizard_dns'} . "<p></p>", 2);
 
 # Primary nameserver
 local $tmpl = &get_template(0);
@@ -622,9 +618,9 @@ $config{'prins_skip'} = $in{'prins_skip'};
 
 sub wizard_show_done
 {
-print &ui_table_row(undef, &text('wizard_done'), 2);
+print &ui_table_row(undef, $text{'wizard_done'}, 2);
 
-print &ui_table_row(undef, &text('wizard_done2'), 2);
+print &ui_table_row(undef, $text{'wizard_done2'}, 2);
 }
 
 sub wizard_show_alldone
@@ -647,14 +643,13 @@ return undef;	# Always works
 # Ask the user if he wants to enable storage of hashed passwords only
 sub wizard_show_hashpass
 {
-print &ui_table_row(undef, $text{'wizard_hashpass'}, 2);
+print &ui_table_row(undef, "$text{'wizard_hashpass'} $text{'wizard_hashpass_warn'}<br><br>", 2);
 
 local $tmpl = &get_template(0);
 print &ui_table_row($text{'wizard_hashpass_mode'},
 	&ui_radio("hashpass", $tmpl->{'hashpass'} ? 1 : 0,
 		  [ [ 0, $text{'wizard_hashpass_mode0'}."<br>" ],
 		    [ 1, $text{'wizard_hashpass_mode1'} ] ]));
-print &ui_table_row(undef, "<b>$text{'wizard_hashpass_warn'}</b>", 2);
 }
 
 # wizard_parse_hashpass(&in)
@@ -704,7 +699,7 @@ return undef;
 
 sub wizard_show_ssldir
 {
-print &ui_table_row(undef, $text{'wizard_ssldir'}, 2);
+print &ui_table_row(undef, $text{'wizard_ssldir'} . "<p></p>", 2);
 
 my $tmpl = &get_template(0);
 my $mode;
@@ -736,7 +731,7 @@ else {
 	}
 my @opts = ( [ 0, $text{'wizard_ssldir_mode0'} ],
 	     [ 1, &text('wizard_ssldir_mode1',
-			"<tt>$ssl_certificate_parent</tt>") ] );
+			"<tt>$ssl_certificate_parent</tt>&nbsp;") ] );
 if ($mode == 2) {
 	push(@opts, [ 2, $text{'wizard_ssldir_mode2'},
 			 &ui_textbox("ssldir_custom",
@@ -794,7 +789,7 @@ if ($already) {
 		&text('wizard_defdom_exists', "<b><tt>@{[show_domain_name($already)]}</tt></b>"), 2);
 	}
 else {
-	print &ui_table_row(undef, $text{'wizard_defdom'}, 2);
+	print &ui_table_row(undef, $text{'wizard_defdom'} . "<p></p>", 2);
 	my $def = $ENV{'SERVER_NAME'};
 	if (&check_ipaddress($def) || &check_ip6address($def)) {
 		# Try hostname instead
