@@ -2311,7 +2311,6 @@ migrate_eclash=Belirtilen alanadý zaten Virtualmin tarafýndan barýndýrýlýy
 migrate_euser=Eksik veya geçersiz kullanýcý ismi
 migrate_euserclash=Belirtilen Unix kullanýcýsý zaten mevcut
 migrate_doing1=$1'in $2'den transferi baþlýyor ..
-migrate_ok=$2 sunucularý baþarýlý bir þekilde transfer edildi. Yeni sunucuyu yönetmek için <a href='$1'>buraya týklayýn</a>.
 migrate_failed=Sunucular transfere edilemedi!
 migrate_parent=Sunucu sahibine ait
 migrate_parent1=Yeni kullanýcý

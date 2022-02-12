@@ -14,7 +14,8 @@ if (&test_lock($bandwidth_dir)) {
 
 # Work out the start of the monitoring period
 $now = time();
-$day = int($now / (24*60*60));
+$oneday = 24*60*60;
+$day = int($now / $oneday);
 $start_day = &bandwidth_period_start();
 
 if ($ARGV[0]) {
@@ -56,8 +57,11 @@ foreach $d (@bwdoms) {
 	foreach $f (@bandwidth_features) {
 		local $bwfunc = "bandwidth_$f";
 		if (defined(&$bwfunc)) {
-			$bwinfo->{"last_$f"} =
-				&$bwfunc($d, $bwinfo->{"last_$f"}, $bwinfo);
+			my $l = &$bwfunc($d, $bwinfo->{"last_$f"}, $bwinfo);
+			if ($l > $now + $oneday) {
+				$l = $now;
+				}
+			$bwinfo->{"last_$f"} = $l;
 			}
 		}
 

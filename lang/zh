@@ -2507,7 +2507,6 @@ migrate_eclash=指定域已经被Virtualmin管理
 migrate_euser=缺少或无效用户名
 migrate_euserclash=指定的管理员用户已存在
 migrate_doing1=正在从$2迁移$1 ..
-migrate_ok=成功迁移了$2个服务器。<a href='$1'>点这里</a>来管理新服务器。
 migrate_failed=迁移服务器失败！
 migrate_parent=被服务器所有者所拥有
 migrate_parent1=新用户

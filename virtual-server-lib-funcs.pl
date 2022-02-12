@@ -1416,7 +1416,7 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 			# Create in core database
 			local $crfunc = "create_${dt}_database_user";
 			&$crfunc($_[1], \@dbs, $_[0]->{'user'},
-				 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'});
+				 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'}, 1);
 			}
 		elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
 			# Create in plugin database

@@ -229,4 +229,14 @@ else {
 	}
 }
 
+=head2 vui_footer_history_back
+
+Returns a link and text for `ui_print_footer` on error to go back
+
+=cut
+sub vui_footer_history_back
+{
+	return ("javascript:history.back()", $text{'error_previous'});
+}
+
 1;

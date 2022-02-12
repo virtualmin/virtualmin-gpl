@@ -799,6 +799,7 @@ newnotify_users=Ook e-mailen in geselecteerde domeinen?
 
 migrate_directadmin=DirectAdmin-back-up
 migrate_ip6=IPv6-adres van nieuwe server
+migrate_ok=$2 virtuele server gemigreerd, <a href='$1'>klik hier</a> om deze te beheren.
 
 sysinfo_python=Python-versie
 sysinfo_pythonpath=Pad naar Python
@@ -1091,12 +1092,18 @@ copycert_fenabling=SSL inschakelen in ProFTPD-configuratie.
 wizard_ecannot=Het is niet toegestaan de post-installatiewizard uit te voeren
 wizard_finish=Finish
 wizard_end=Keer terug naar Virtualmin
+wizard_memory_preload1=Ja, snellere gebruikersinterface met meer RAM gebruikt ($1)
+wizard_memory_preload0=Nee, langzamere gebruikersinterface met minder RAM-geheugen, maar meer CPU-belasting
+wizard_memory_lookup1=Ja, snellere e-mailverwerking met meer RAM-geheugen ($1)
+wizard_memory_lookup0=Nee, langzamere e-mailverwerking met minder RAM-gebruik, maar meer CPU-belasting
 wizard_virusnew=Als uw systeem domeinen gaat hosten die een grote hoeveelheid e-mail zullen ontvangen, kan het scannen van inkomende berichten op virussen een hoge CPU-belasting genereren. Omdat er wordt gescand met de ClamAV-scanserver <tt>clamd</tt>, zal deze RAM verbruiken, zelfs wanneer geen e-mail wordt verwerkt. Als uw systeem geen e-mail host, kan virusscanning worden uitgeschakeld.
 wizard_virusmsg=Virusscanning inschakelen met ClamAV?
-wizard_virus1=Ja (gebruikt ongeveer 750 MB RAM)
+wizard_virus1=Ja, gebruikt tot 2 GB RAM
 wizard_virus2=Blijf on-demand scanner gebruiken
-wizard_virus0=Nee (e-mail wordt niet gefilterd)
+wizard_virus0=Nee, e-mail wordt niet gefilterd
 wizard_eclaminuse=Virusscanning kan niet worden uitgeschakeld omdat het wordt gebruikt door $1 virtuele servers
+wizard_spamd1=Ja, snellere e-mailverwerking met meer RAM-geheugen (30M) en geen instellingen per domein
+wizard_spamd0=Nee, langzamere e-mailverwerking met minder RAM-geheugen
 wizard_mysql4=Virtualmin weet niet wat het huidige MySQL <tt>root</tt> wachtwoord is. Het moet hier worden ingesteld om Virtualmin toe te staan nieuwe MySQL-databases en gebruikers te creëren.
 wizard_mysql_forcepass=Overschrijf het <tt>root</tt> MySQL-wachtwoord zodat het overeenkomt
 wizard_mysql_deltest=<tt>test</tt> MySQL-database verwijderen?
@@ -1109,7 +1116,7 @@ wizard_done2=U kunt echter doorgaan met de wizard om optionele functies te confi
 wizard_alldone=Extra configuratie na installatie is nu voltooid!
 wizard_title_dns=DNS-configuratie
 wizard_title_hashpass=Wachtwoordopslag
-wizard_hashpass_warn=Waarschuwing - wanneer gehashte wachtwoorden worden gebruikt, is wachtwoordherstel voor virtuele servers niet langer mogelijk. Bovendien zal het MySQL-wachtwoord voor nieuwe servers verschillen van het beheerderswachtwoord en willekeurig worden gegenereerd.
+wizard_hashpass_warn=Als gehashte wachtwoorden zijn ingeschakeld, is wachtwoordherstel voor virtuele servers echter niet mogelijk, en het databasewachtwoord voor nieuwe servers zal verschillen van het beheerderswachtwoord en willekeurig worden gegenereerd.
 wizard_title_ssldir=SSL-sleutelmap
 wizard_ssldir=Virtualmin geeft u de mogelijkheid om SSL-certificaten en sleutels in de homedirectory van elke virtuele server te bewaren, of op een andere locatie onder <tt>/etc</tt>. De eerste is gemakkelijker te beheren, maar introduceert het risico dat servereigenaren ervoor kunnen zorgen dat uw webserver niet start ze verwijderen het certificaatbestand
 wizard_ssldir_mode=Locatie voor SSL-certificaten
