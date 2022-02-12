@@ -107,7 +107,7 @@ else {
 
 	# Call any theme post command
 	if (defined(&theme_post_save_domain)) {
-		&theme_post_save_domain(\%dom, 'delete');
+		&theme_post_save_domain(undef, 'delete');
 		}
 
 	&run_post_actions();

@@ -220,12 +220,18 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
 			my $qddb = &quote_mysql_database($ddb->{'name'});
 			if ($qddb ne $qdb) {
-				&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+				eval {
+					local $main::error_must_die = 1;
+					&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+					}
 				}
 			}
 		}
 	# Update given database
-	&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
+	eval {
+		local $main::error_must_die = 1;
+		&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
+		}
 	}
 else {
 	# Can update the DB table directly

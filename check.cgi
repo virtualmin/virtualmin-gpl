@@ -54,7 +54,7 @@ if (&need_update_webmin_users_post_config(\%lastconfig)) {
 
 # Call any theme post command
 if (defined(&theme_post_save_domain)) {
-	&theme_post_save_domain(\%dom, 'modify');
+	&theme_post_save_domain(undef, 'modify');
 	}
 
 &ui_print_footer("", $text{'index_return'});

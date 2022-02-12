@@ -15,6 +15,15 @@ use Time::Local;
 my $mysql_module_version = &read_file_contents(
 	"$config_directory/mysql/version"); 
 chop($mysql_module_version);
+if (!$mysql_module_version) {
+	if ($config{'mysql'}) {
+		&foreign_require("mysql");
+		if (defined(&mysql::get_mysql_version)) {
+			$mysql_module_version = &mysql::get_mysql_version();
+			&mysql::save_mysql_version($mysql_module_version);
+			}
+		}
+	}
 if ($mysql_module_version =~ /mariadb/i) {
 	foreach my $t (keys %text) {
 		$text{$t} =~ s/MySQL/MariaDB/g if ($t !~ /^newmysqls_ver/);
