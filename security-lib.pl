@@ -629,8 +629,10 @@ else {
 	else {
 		eval {
 			local $main::error_must_die = 1;
-			while(<SOURCEFILE>) {
-				&print_tempfile(DESTFILE, $_);
+			my $bs = &get_buffer_size();
+			my $buf;
+			while(read(SOURCEFILE, $buf, $bs) > 0) {
+				&print_tempfile(DESTFILE, $buf);
 				}
 			};
 		if ($@) {
