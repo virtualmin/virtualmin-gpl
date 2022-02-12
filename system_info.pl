@@ -64,7 +64,7 @@ if (!$virtualmin_pro &&
 	# Do not show dashboard alert within first seven days, until things settle down
 	&foreign_require("webmin");
 	my $uptime = &webmin::get_system_uptime();
-	if (!$uptime || $uptime > 60*60*24 * 7) {
+	if (!$uptime || $uptime > 60*60*24 * 5) {
 		push(@rv, { 'type' => 'warning',
 			    'level' => 'info',
 			    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
