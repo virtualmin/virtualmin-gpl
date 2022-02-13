@@ -15,16 +15,6 @@ if ($mode == 0) {
 	-r $src || &error($text{'migrate_efile'});
 	}
 
-# Validate other inputs
-if ($in{'dom_def'}) {
-	$domain = undef;
-	}
-else {
-	$in{'dom'} = lc(&parse_domain_name($in{'dom'}));
-	$err = &valid_domain_name($in{'dom'});
-	&error($err) if ($err);
-	$domain = $in{'dom'};
-	}
 if ($can < 3) {
 	if (!$in{'user_def'}) {
 		$in{'user'} =~ /^[a-z0-9\.\-\_]+$/i ||
@@ -105,7 +95,7 @@ elsif ($mode > 0) {
 &$first_print($text{'migrate_validating'});
 $vfunc = "migration_$in{'type'}_validate";
 ($err, $domain, $user, $pass) =
-	&$vfunc($src, $domain, $user, $parent, $prefix, $pass);
+	&$vfunc($src, undef, $user, $parent, $prefix, $pass);
 if ($err) {
 	&$second_print(&text('migrate_evalidate', $err));
 	goto DONE;

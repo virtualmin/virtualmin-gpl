@@ -27,10 +27,6 @@ print &ui_table_row($text{'migrate_type'},
 			[ map { [ $_, $text{'migrate_'.$_} ] }
 			      @migration_types ]));
 
-# Domain to extract
-print &ui_table_row($text{'migrate_dom'},
-		   &ui_opt_textbox("dom", undef, 50, $text{'migrate_auto2'}));
-
 if ($can < 3) {
 	# Username, if needed
 	print &ui_table_row($text{'migrate_user'},
