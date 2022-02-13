@@ -2624,7 +2624,7 @@ elsif ($fmt == 4) {
 	$cmd = "unzip $qfile";
 	}
 elsif ($fmt == 5) {
-	$cmd = &make_tar_command("xf", $qfile);
+	$cmd = &make_tar_command("xf", $file);
 	}
 else {
 	return "Unknown compression format";

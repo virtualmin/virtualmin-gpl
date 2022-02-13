@@ -451,7 +451,7 @@ if (-r $hometar) {
 		&make_dir($homesrc, 0755);
 		}
 	&execute_command("cd ".quotemeta($homesrc)." && ".
-			 &make_tar_command("xf", quotemeta($hometar)),
+			 &make_tar_command("xf", $hometar),
 			 undef, \$out, \$out);
 	if ($?) {
 		&$second_print(".. TAR failed : <tt>$out</tt>");

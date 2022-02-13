@@ -5767,7 +5767,7 @@ if (-d "$extra_admins_dir/$_[0]->{'id'}") {
 	# Extra admin details
 	&execute_command(
 	    "cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}").
-	    " && ".&make_tar_command("cf", quotemeta($_[1]."_admins"), "."));
+	    " && ".&make_tar_command("cf", $_[1]."_admins", "."));
 	}
 if ($config{'bw_active'}) {
 	# Bandwidth logs
@@ -5784,7 +5784,7 @@ if ($config{'bw_active'}) {
 if (-d "$script_log_directory/$_[0]->{'id'}") {
 	&execute_command(
 	    "cd ".quotemeta("$script_log_directory/$_[0]->{'id'}").
-	    " && ".&make_tar_command("cf", quotemeta($_[1]."_scripts"), "."));
+	    " && ".&make_tar_command("cf", $_[1]."_scripts", "."));
 	}
 else {
 	# Create an empty file to indicate that we have no scripts
@@ -5884,7 +5884,7 @@ foreach my $tmpl (&list_templates()) {
 # Save template scripts
 &execute_command("cp $template_scripts_dir/* $temp");
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("cf", quotemeta($file), "."));
+		 &make_tar_command("cf", $file, "."));
 &unlink_file($temp);
 
 # Save global variables file
@@ -5906,7 +5906,7 @@ foreach my $tmpl (&list_templates()) {
 		local $skelfile = $file.'_skel_'.$tmpl->{'id'};
 		&execute_command(
 		    "cd ".quotemeta($tmpl->{'skel'}).
-		    " && ".&make_tar_command("cf", quotemeta($skelfile), "."));
+		    " && ".&make_tar_command("cf", $skelfile, "."));
 		}
 	}
 
@@ -5914,7 +5914,7 @@ foreach my $tmpl (&list_templates()) {
 &make_dir($plans_dir, 0700);
 &execute_command(
     "cd ".quotemeta($plans_dir).
-    " && ".&make_tar_command("cf", quotemeta($file."_plans"), "."));
+    " && ".&make_tar_command("cf", $file."_plans", "."));
 &$second_print($text{'setup_done'});
 }
 
@@ -5929,7 +5929,7 @@ local ($file, $vbs) = @_;
 local $temp = &transname();
 mkdir($temp, 0700);
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("xf", quotemeta($file)));
+		 &make_tar_command("xf", $file));
 
 # Copy templates from backup across
 opendir(DIR, $temp);
@@ -5987,7 +5987,7 @@ foreach my $tmpl (&list_templates()) {
 if (-r $file."_plans") {
 	&execute_command(
 	    "cd ".quotemeta($plans_dir)." && ".
-	    &make_tar_command("xf", quotemeta($file."_plans")));
+	    &make_tar_command("xf", $file."_plans"));
 	}
 
 &$second_print($text{'setup_done'});
@@ -6010,13 +6010,13 @@ foreach my $sched (&list_scheduled_backups()) {
 	&write_file("$temp/$sched->{'id'}", $sched);
 	}
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("cf", quotemeta($file), "."));
+		 &make_tar_command("cf", $file, "."));
 &unlink_file($temp);
 
 # Also tar up keys dir
 if ($dokeys) {
 	&execute_command("cd ".quotemeta($backup_keys_dir)." && ".
-			 &make_tar_command("cf", quotemeta($file."_keys"),"."));
+			 &make_tar_command("cf", $file."_keys", "."));
 	}
 
 &$second_print($text{'setup_done'});
@@ -6036,7 +6036,7 @@ local $dokeys = -r $file."_keys" && defined(&list_backup_keys);
 local $temp = &transname();
 mkdir($temp, 0700);
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("xf", quotemeta($file)));
+		 &make_tar_command("xf", $file));
 
 # Delete all current non-default schedules
 foreach my $sched (&list_scheduled_backups()) {
@@ -6061,7 +6061,7 @@ if ($dokeys) {
 	local %oldkeys = map { $_->{'id'}, 1 } &list_backup_keys();
 	&make_dir($backup_keys_dir, 0700) if (!-d $backup_keys_dir);
 	&execute_command("cd ".quotemeta($backup_keys_dir)." && ".
-			 &make_tar_command("xf", quotemeta($file."_keys")));
+			 &make_tar_command("xf", $file."_keys"));
 	foreach my $key (&list_backup_keys()) {
 		if (!$oldkey{$key->{'id'}}) {
 			eval {
@@ -6098,7 +6098,7 @@ foreach my $resel (&list_resellers()) {
 		}
 	}
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("cf", quotemeta($file), "."));
+		 &make_tar_command("cf", $file, "."));
 &execute_command("rm -rf ".quotemeta($temp));
 &$second_print($text{'setup_done'});
 return 1;
@@ -6115,7 +6115,7 @@ local $temp = &transname();
 mkdir($temp, 0700);
 &require_acl();
 &execute_command("cd ".quotemeta($temp)." && ".
-		 &make_tar_command("xf", quotemeta($file)));
+		 &make_tar_command("xf", $file));
 foreach my $resel (&list_resellers()) {
 	&acl::delete_user($resel->{'name'});
 	&delete_reseller_unix_user($resel);
@@ -6155,7 +6155,7 @@ local ($file, $vbs) = @_;
 &$first_print($text{'backup_vemail_doing'});
 &execute_command(
 	"cd $module_config_directory && ".
-	&make_tar_command("cf", quotemeta($file), @all_template_files));
+	&make_tar_command("cf", $file, @all_template_files));
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -6167,7 +6167,7 @@ sub virtualmin_restore_email
 local ($file, $vbs) = @_;
 &$first_print($text{'restore_vemail_doing'});
 &execute_command("cd $module_config_directory && ".
-		 &make_tar_command("xf", quotemeta($file)));
+		 &make_tar_command("xf", $file));
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -6228,7 +6228,7 @@ local ($file, $vbs) = @_;
 &$first_print($text{'backup_vscripts_doing'});
 &make_dir("$module_config_directory/scripts", 0755);
 &execute_command("cd $module_config_directory/scripts && ".
-		 &make_tar_command("cf", quotemeta($file), "."));
+		 &make_tar_command("cf", $file, "."));
 &copy_source_dest($scripts_unavail_file, $file."_unavail");
 &$second_print($text{'setup_done'});
 return 1;
@@ -6242,7 +6242,7 @@ local ($file, $vbs) = @_;
 &$first_print($text{'restore_vscripts_doing'});
 &make_dir("$module_config_directory/scripts", 0755);
 &execute_command("cd $module_config_directory/scripts && ".
-		 &make_tar_command("xf", quotemeta($file)));
+		 &make_tar_command("xf", $file));
 if (-r $file."_unavail") {
 	&copy_source_dest($file."_unavail", $scripts_unavail_file);
 	}
@@ -6388,7 +6388,7 @@ elsif ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 	# Save Qmail dir
 	&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
-			 &make_tar_command("cf", quotemeta($file), "."));
+			 &make_tar_command("cf", $file, "."));
 	&$second_print($text{'setup_done'});
 	}
 else {
@@ -6600,7 +6600,7 @@ if ($bms eq $config{'mail_system'}) {
 	elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
 		# Un-tar qmail dir
 		&execute_command("cd $qmailadmin::config{'qmail_dir'} && ".
-				 &make_tar_command("xf", quotemeta($file)));
+				 &make_tar_command("xf", $file));
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -6673,7 +6673,7 @@ if (!$_[3]->{'fix'}) {
 		&make_dir("$extra_admins_dir/$_[0]->{'id'}", 0755);
 		&execute_command(
 		    "cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && ".
-		    &make_tar_command("xf", quotemeta($_[1]."_admins"), "."));
+		    &make_tar_command("xf", $_[1]."_admins", "."));
 		}
 	if ($config{'bw_active'} && -r $_[1]."_bw" &&
 	    !-r "$bandwidth_dir/$_[0]->{'id'}") {
@@ -6695,7 +6695,7 @@ if (!$_[3]->{'fix'}) {
 			 "cd ".quotemeta("$script_log_directory/$_[0]->{'id'}").
 			 " && ".
 			 &make_tar_command("xf",
-				quotemeta($_[1]."_scripts"), "."));
+				$_[1]."_scripts", "."));
 			}
 
 		# Fix up home dir on scripts
@@ -11934,7 +11934,7 @@ if ($dir) {
 		    &make_tar_command("xf", "-"),
 		  "cd $qdir && unzip $qfile",
 		  "cd $qdir && ".
-		    &make_tar_command("xf", $qfile),
+		    &make_tar_command("xf", $file),
 		  );
 	}
 else {
@@ -11947,7 +11947,7 @@ else {
 		  "$bunzip2 -c $qfile | ".
 		    &make_tar_command("tf", "-"),
 		  "unzip -l $qfile",
-		  &make_tar_command("tf", $qfile),
+		  &make_tar_command("tf", $file),
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";

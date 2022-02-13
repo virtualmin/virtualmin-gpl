@@ -518,8 +518,7 @@ sub extract_lxadmin_file
 return undef if (!-r $_[0]);
 local $temp = &transname();
 &make_dir($temp, 0700);
-local $qf = quotemeta($_[0]);
-&execute_command("cd $temp && ".&make_tar_command("xf", $qf));
+&execute_command("cd $temp && ".&make_tar_command("xf", $_[0]));
 return $? ? undef : $temp;
 }
 

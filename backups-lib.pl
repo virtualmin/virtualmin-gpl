@@ -2199,6 +2199,7 @@ if ($ok) {
 		&$indent_print();
 		foreach my $v (@$vbs) {
 			local $vfile = "$restoredir/virtualmin_".$v;
+			print STDERR "looking for $vfile\n";
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;
 				if (defined(&$vfunc)) {

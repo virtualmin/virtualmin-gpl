@@ -686,7 +686,7 @@ else {
 	mkdir($dir, 0700);
 	local $qf = quotemeta($file);
 	local $out = &backquote_command(
-		"cd $dir && ".&make_tar_command("xzf", $qf)." 2>&1");
+		"cd $dir && ".&make_tar_command("xzf", $file)." 2>&1");
 	if ($? && $out !~ /decompression\s+OK/i) {
 		return (0, $out);
 		}
