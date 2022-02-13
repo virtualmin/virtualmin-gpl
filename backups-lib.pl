@@ -1279,9 +1279,11 @@ if (@$vbs && ($homefmt || $dirfmt)) {
 	if ($key) {
 		$comp = $comp." | ".&backup_encryption_command($key);
 		}
+	my @vfiles = map { s/^$backupdir\///; $_ }
+			 glob("$backupdir/virtualmin_*");
 	&execute_command(
 	    "cd $backupdir && ".
-	    "(".&make_tar_command("cf", "-", "virtualmin_*").
+	    "(".&make_tar_command("cf", "-", @vfiles).
 	    " | $comp > $dest/$vdestfile) 2>&1",
 	    undef, \$out, \$out);
 	&set_ownership_permissions(undef, undef, 0600,
