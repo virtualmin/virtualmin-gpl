@@ -185,17 +185,22 @@ if (!$in{'confirm'} && !$d->{'disabled'}) {
 		print "</ul>\n";
 
 		print &check_clicks_function();
-		print "<center><form action=save_domain.cgi>\n";
+		print "<center>";
+		print &ui_form_start("save_domain.cgi", "post");
 		foreach $k (keys %in) {
 			foreach $v (split(/\0/, $in{$k})) {
 				print "<input type=hidden name=$k value='",
 				      &html_escape($v),"'>\n";
 				}
 			}
-		print "<input type=submit name=confirm ",
-		      "value='$text{'save_dok'}' ",
-		      "onClick='check_clicks(form)'>\n";
-		print "</form></center>\n";
+
+		print &ui_form_end(
+			[ [ "confirm",
+		        $text{'save_dok_rmfeatures'},
+		        undef, undef,
+		        "onClick='check_clicks(form)'" ]
+		    ]);
+		print "</center>\n";
 
 		&ui_print_footer(&domain_footer_link($d),
 			"", $text{'index_return'});

@@ -368,7 +368,6 @@ save_nopostgres=.. uzivatel PostgreSQL neexistuje!
 save_norename=.. uzivatele PostgreSQL nemohou byt prejmenovani ve verzi 7.4 a nizsi
 save_emaking=Prikaz k provedeni pred zapocetim zmen selhal : $1
 save_rusure=Jste si jisti ulozenim domeny $1? Budou smazany tyto doplnky:
-save_dok=Ano, Ulozit nyni
 save_proftpd=Probiha zmena IP adresy virtualniho serveru FTP ..
 save_proftpd2=Probiha zmena nazvu domenu ve virtualni domene FTP ..
 save_proftpd3=Probiha zmena anonymniho adresare v konfiguraci FTP ..

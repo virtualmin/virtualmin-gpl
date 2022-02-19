@@ -391,6 +391,7 @@ save_dns2_ezone=DNS-Zone zum Umbenennen nicht gefunden!
 save_bind_cloud=Ändern des DNS-Domänennamens auf $1 ..
 save_bind_ecloud=.. fehlgeschlagen : $1
 save_bindeslave=.. einige Slave-Server ausgefallen :
+save_dok_rmfeatures=Ja, jetzt speichern
 save_mailrename=Benutzer aktualisieren ..
 save_mailunalias1=Entfernen von E-Mail-Aliasnamen, die aus der Zieldomäne kopiert wurden.
 save_mailunalias2=Catchall-Mail-Alias entfernen ..

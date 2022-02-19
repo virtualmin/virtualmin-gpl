@@ -319,6 +319,7 @@ save_dnsip6on=Agregar registros DNS IPv6.
 save_dnsip6off=Eliminando registros DNS IPv6.
 save_bind_cloud=Cambiando el nombre de dominio DNS en $1 ..
 save_bind_ecloud=... falló : $1 
+save_dok_rmfeatures=Sí, ahorra ahora
 save_mailunalias1=Eliminando alias de correo copiados del dominio de destino.
 save_mailunalias2=Eliminando el alias de correo catchall.
 save_mailto=Actualización de alias para la dirección de contacto.

@@ -473,6 +473,7 @@ save_dnsip6on=添加IPv6 DNS记录 ..
 save_dnsip6off=删除IPv6 DNS记录 ..
 save_bind_cloud=更改 $1上的DNS域名 ..
 save_bind_ecloud=..失败： $1
+save_dok_rmfeatures=是的，立即保存
 save_mailunalias1=删除从目标域复制的邮件别名。
 save_mailunalias2=删除全部邮件别名 ..
 save_mailto=更新联系人地址的别名。

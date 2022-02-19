@@ -522,6 +522,7 @@ save_dnsip6on=IPv6 DNS kayıtları ekleniyor ..
 save_dnsip6off=IPv6 DNS kayıtları kaldırılıyor ..
 save_bind_cloud=$1 üzerinde DNS alan adı değiştiriliyor ..
 save_bind_ecloud=.. başarısız oldu : $1 
+save_dok_rmfeatures=Evet, şimdi kaydet
 save_mailunalias1=Hedef alan adından kopyalanan posta takma adları kaldırılıyor.
 save_mailunalias2=Catchall posta takma adı kaldırılıyor ..
 save_mailto=İletişim adresi için takma ad güncelleniyor.
