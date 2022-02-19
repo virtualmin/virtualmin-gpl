@@ -160,7 +160,6 @@ edit_mailopts=Configuração do email
 edit_psearch=Lista Sub-servidores
 
 save_mysqlpass=Alterar senha MySQL ..
-save_dok=Sim, salve agora
 save_mail=Alterar nome de domínio de e-mail ..
 save_mailalias=Atualizando email alias para o domínio ..
 

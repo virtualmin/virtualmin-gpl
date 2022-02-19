@@ -356,7 +356,6 @@ edit_psearch=Lista sub-serwerów
 delete_title=Usuń serwer
 
 save_title=Zapisz serwer
-save_dok=Tak, zapisz
 
 acl_warn=Uwaga! Dla użytkowników Webmina utworzonych przez Virtualmin to ustawienie może zostać automatycznie nadpisane.
 acl_domains=Domeny, którymi ten użytkownik może zarządzać

@@ -176,6 +176,7 @@ delete_mail_smtpcloud=Cloudmailprovider $1 verwijderen ..
 save_apache12=PHP FPM-configuratie bijwerken ..
 save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
 save_bind_ecloud=.. mislukt : $1
+save_dok_rmfeatures=Ja, sla nu op
 save_mailto=Aliassen bijwerken voor contactadres.
 save_ssl12=Let's Encrypt certificaat aanvragen voor het nieuwe domein ..
 save_essl12=.. verzoek mislukt : $1

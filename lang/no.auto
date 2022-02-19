@@ -139,6 +139,7 @@ delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 save_apache12=Oppdaterer PHP FPM-konfigurasjon ..
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
+save_dok_rmfeatures=Ja, spar nå
 save_ssl12=Ber om Let's Encrypt-sertifikat for det nye domenet ..
 save_essl12=.. forespørsel mislyktes : $1
 save_statussslcert=Endrer e-post i SSL-sertifikatstatusovervåker ..
