@@ -287,8 +287,13 @@ if (($utaken{$username} || $config{'append'}) && !$user->{'noappend'} &&
 else {
 	$user->{'user'} = $username;
 	}
-if (!$noemail && !$user->{'noprimary'}) {
-	$user->{'email'} = "$username\@$d->{'dom'}"
+if (!$user->{'noprimary'}) {
+	if ($noemail) {
+		delete($user->{'email'});
+		}
+	else {
+		$user->{'email'} = "$username\@$d->{'dom'}"
+		}
 	}
 if (defined($recovery)) {
 	$user->{'recovery'} = $recovery;
