@@ -4457,7 +4457,9 @@ sub dns_record_key
 {
 my ($r, $val) = @_;
 my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
-my @r = ($r->{'name'}, $r->{'type'}, $ttl);
+my $type = $r->{'type'};
+$type = "TXT" if ($type eq "SPF");
+my @r = ($r->{'name'}, $type, $ttl);
 push(@r, @{$r->{'values'}}) if ($val);
 return join("/", @r);
 }
