@@ -10082,7 +10082,8 @@ return @rv;
 # Returns a structure for a new mailbox user
 sub create_initial_user
 {
-local $user;
+my ($d, $notmpl, $forweb) = @_;
+my $user;
 if ($config{'mail_system'} == 5) {
 	# VPOPMail user
 	$user = { 'vpopmail' => 1,
@@ -10098,27 +10099,27 @@ else {
 	$user = { 'unix' => 1,
 		  'person' => 1 };
 	}
-if ($_[0] && !$_[1]) {
+if ($d && !$notmpl) {
 	# Initial aliases and quota come from template
-	local $tmpl = &get_template($_[0]->{'template'});
+	local $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'user_aliases'} ne 'none') {
-		$user->{'to'} = [ map { &substitute_domain_template($_, $_[0]) }
+		$user->{'to'} = [ map { &substitute_domain_template($_, $d) }
 				      split(/\t+/, $tmpl->{'user_aliases'}) ];
 		}
 	$user->{'quota'} = $tmpl->{'defmquota'};
 	$user->{'mquota'} = $tmpl->{'defmquota'};
 	}
 if (!$user->{'noprimary'}) {
-	$user->{'email'} = !$_[0] ? "newuser\@".&get_system_hostname() :
-			   $_[0]->{'mail'} ? "newuser\@$_[0]->{'dom'}" : undef;
+	$user->{'email'} = !$d ? "newuser\@".&get_system_hostname() :
+			   $d->{'mail'} ? "newuser\@$d->{'dom'}" : undef;
 	}
 $user->{'secs'} = [ ];
 $user->{'shell'} = &default_available_shell('mailbox');
 
 # Merge in configurable initial user settings
-if ($_[0]) {
+if ($d) {
 	local %init;
-	&read_file("$initial_users_dir/$_[0]->{'id'}", \%init);
+	&read_file("$initial_users_dir/$d->{'id'}", \%init);
 	foreach my $a ("email", "quota", "mquota", "qquota", "shell") {
 		$user->{$a} = $init{$a} if (defined($init{$a}));
 		}
@@ -10139,13 +10140,13 @@ if ($_[0]) {
 		}
 	}
 
-if ($_[2] && $user->{'unix'}) {
+if ($forweb && $user->{'unix'}) {
 	# This is a website management user
 	local (undef, $ftp_shell, undef, $def_shell) =
 		&get_common_available_shells();
 	$user->{'webowner'} = 1;
 	$user->{'fixedhome'} = 0;
-	$user->{'home'} = &public_html_dir($_[0]);
+	$user->{'home'} = &public_html_dir($d);
 	$user->{'noquota'} = 1;
 	$user->{'mailquota'} = 0;
 	$user->{'noprimary'} = 1;
