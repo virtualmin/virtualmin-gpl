@@ -2410,7 +2410,8 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 					       : "extra";
 		push(@rv, { 'mod' => 'syslog',
 			    'desc' => $log->[1],
-			    'page' => "save_log.cgi?view=1&".
+			    'page' => "save_log.cgi?view=1&nonavlinks=1".
+				      "&linktitle=".&urlize($log->[1])."&".
 				      "$param=".&urlize($lf),
 			    'cat' => 'logs',
 			  });
