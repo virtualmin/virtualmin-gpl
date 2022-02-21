@@ -1721,9 +1721,9 @@ if (!@hosts) {
 	if ($always == 2 ||
 	    $myconfig{'host'} && $myconfig{'host'} ne 'localhost') {
 		# Add this host too, as we are talking to a remote server
-		push(@hosts, &get_system_hostname());
-		local $myip = &to_ipaddress(&get_system_hostname());
-		push(@hosts, $myip) if ($myip);
+		local $myhost = &get_system_hostname();
+		local $myip = &to_ipaddress($myhost);
+		push(@hosts, $myip || $myhost);
 		}
 	if (&indexof("%", @hosts) >= 0) {
 		# All hosts allowed - no need for other entries
