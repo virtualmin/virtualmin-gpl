@@ -571,7 +571,8 @@ if ($lf) {
 				       : "extra";
 	push(@rv, { 'mod' => 'syslog',
 		    'desc' => $text{'links_flog'},
-		    'page' => "save_log.cgi?view=1&".
+		    'page' => "save_log.cgi?view=1&nonavlinks=1".
+			      "&linktitle=".&urlize($text{'links_flog'})."&".
 			      "$param=".&urlize($lf),
 		    'cat' => 'logs',
 		  });
