@@ -14551,7 +14551,9 @@ if ($config{'web'}) {
 	my @supp = &supported_php_modes();
 	if (&indexof($mode, @supp) < 0) {
 		my $mmap = &php_mode_numbers_map();
-		$tmpl->{'web_php_suexec'} = $mmap->{$supp[0]};
+		my ($best) = grep { $_ ne "none" } @supp;
+		$best ||= $supp[0];
+		$tmpl->{'web_php_suexec'} = $mmap->{$best};
 		&$second_print(
 			&text('check_ewebdefphpmode2', $mode, $supp[0]));
 		&save_template($tmpl);
