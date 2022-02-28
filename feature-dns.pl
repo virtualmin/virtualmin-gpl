@@ -110,14 +110,19 @@ elsif ($d->{'dns_cloud'}) {
 		}
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
 	$info->{'recs'} = \@inforecs;
-	my ($ok, $msg, $location) = &$cfunc($d, $info);
-	if (!$ok) {
+	my ($ok, $msg, $location, $err2) = &$cfunc($d, $info);
+	if ($ok == 0) {
 		&$second_print(&text('setup_ebind_cloud', $msg));
 		return 0;
 		}
 	$d->{'dns_cloud_id'} = $msg;
 	$d->{'dns_cloud_location'} = $location;
-	&$second_print($text{'setup_done'});
+	if ($ok == 1) {
+		&$second_print($text{'setup_done'});
+		}
+	else {
+		&$second_print(&text('setup_ebind_cloud2', $err2));
+		}
 	}
 elsif (!$dnsparent) {
 	# Creating a new real zone

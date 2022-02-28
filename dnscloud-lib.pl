@@ -141,8 +141,8 @@ my $rv = &call_route53_cmd(
 return (0, $rv) if (!ref($rv));
 $info->{'id'} = $rv->{'HostedZone'}->{'Id'};
 $info->{'location'} = $location;
-my ($ok, $err) = &dnscloud_route53_put_records($d, $info);
-return (0, "Failed to create records : $err") if (!$ok);
+my ($ok, $err) = &dnscloud_route53_put_records($d, $info, 1);
+return (2, "Failed to create records : $err") if (!$ok);
 return (1, $rv->{'HostedZone'}->{'Id'}, $location);
 }
 
@@ -268,11 +268,11 @@ foreach my $rrs (@{$rv->{'ResourceRecordSets'}}) {
 return (1, \@recs);
 }
 
-# dnscloud_route53_put_records(&domain, &info)
+# dnscloud_route53_put_records(&domain, &info, [ignore-fail])
 # Updates records for a domain in Webmin's format
 sub dnscloud_route53_put_records
 {
-my ($d, $info) = @_;
+my ($d, $info, $ignore) = @_;
 my $recs = $info->{'recs'};
 my ($ok, $oldrecs) = &dnscloud_route53_get_records($d, $info);
 return ($ok, $oldrecs) if (!$ok);
