@@ -676,6 +676,7 @@ print "                     [--dns-ip address | --no-dns-ip]\n";
 print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
 print "                     [--enable-subdomain | --disable-subdomain]\n";
+print "                     [--cloud-dns provider|\"local\"]\n";
 exit(1);
 }
 
