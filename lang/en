@@ -550,6 +550,7 @@ setup_bind_provision=Adding new DNS zone on services host ..
 setup_bind_cloud=Adding new DNS zone using $1 ..
 setup_ebind_ecloud=.. not supported : $1
 setup_ebind_cloud=.. failed : $1
+setup_ebind_cloud2=.. done, but some records were not created : $1
 setup_bindslave=Adding slave zone on $1 ..
 setup_ebindslaveip2=.. failed to determine the IP address for this system. You will need to set the IP in the BIND DNS Server module.
 setup_ebindslaveip=.. failed to determine a valid IP address for this system (got $1). You will need to set the IP in the BIND DNS Server module.

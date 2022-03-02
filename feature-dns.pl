@@ -4492,21 +4492,30 @@ if ($cloud ne "local") {
 &push_all_print();
 &set_all_null_print();
 my @oldrecs = &get_domain_dns_records($d);
-&delete_dns($d);
+my $ok = &delete_dns($d);
+if (!$ok) {
+	return "Failed to remove existing DNS zone";
+	}
+my $oldcloud = $d->{'dns_cloud'};
 if ($cloud eq "local") {
 	delete($d->{'dns_cloud'});
 	}
 else {
 	$d->{'dns_cloud'} = $cloud;
 	}
+$ok = &setup_dns($d);
+if (!$ok) {
+	$d->{'dns_cloud'} = $oldcloud;
+	return "Failed to setup new DNS zone";
+	}
 &save_domain($d);
-&setup_dns($d);
 &pop_all_print();
 
 # Delete all records that were created by default, and re-create original
 # records from before the conversion
 &obtain_lock_dns($d);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
+return $recs if (!ref($recs));
 foreach my $r (reverse(@$recs)) {
 	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
 		 &is_dnssec_record($r));
