@@ -59,7 +59,7 @@ while(@ARGV > 0) {
 		$url = shift(@ARGV);
 		}
 	elsif ($a eq "--alias") {
-		$dir = shift(@ARGV);
+		$webdir = shift(@ARGV);
 		}
 	elsif ($a eq "--regexp") {
 		$regexp = 1;
@@ -93,8 +93,8 @@ if ($url) {
 		&usage("The --redirect flag must be followed by a URL or ".
 		       "a URL path");
 	}
-elsif ($dir) {
-	$dir =~ /^\/\S+$/ && -d $dir ||
+elsif ($webdir) {
+	$webdir =~ /^\/\S+$/ && -d $webdir ||
 		&usage("The --alias flag must be followed by a directory");
 	}
 else {
@@ -118,8 +118,8 @@ $clash && &usage("A redirect for the path $path already exists");
 
 # Create it
 $r = { 'path' => $path,
-       'dest' => $url || $dir,
-       'alias' => $dir ? 1 : 0,
+       'dest' => $url || $webdir,
+       'alias' => $webdir ? 1 : 0,
        'regexp' => $regexp,
        'http' => $http,
        'https' => $https,
