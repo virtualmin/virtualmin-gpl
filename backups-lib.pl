@@ -265,8 +265,20 @@ $opts->{'skip'} = $skip;
 $desturls = [ $desturls ] if (!ref($desturls));
 local $backupdir;
 local $transferred_sz;
-$compression = $config{'compression'}
-	if (!defined($compression) || $compression eq '');
+
+# Work out the compression format
+if (!$dirfmt && !$homefmt) {
+	# If backing up to a single file, use the extension to determine the
+	# compression format
+	my $c = &suffix_to_compression($desturls->[0]);
+	if ($c >= 0) {
+		$compression = $c;
+		}
+	}
+if (!defined($compression) || $compression eq '') {
+	# Use global config option for compression format
+	$compression = $config{'compression'}
+	}
 
 # Check if the limit on running backups has been hit
 local $err = &check_backup_limits($asowner, $onsched, $desturl);
@@ -5911,6 +5923,17 @@ my ($c) = @_;
 return $c == 0 ? "tar.gz" :
        $c == 1 ? "tar.bz2" :
        $c == 3 ? "zip" : "tar";
+}
+
+# suffix_to_compression(filename)
+# Use the suffix of a filename to determine the compression format number
+sub suffix_to_compression
+{
+my ($file) = @_;
+return $file =~ /\.zip$/i ? 3 :
+       $file =~ /\.tar\.gz$/i ? 0 :
+       $file =~ /\.tar\.bz2$/i ? 1 :
+       $file =~ /\.tar$/i ? 2 : -1;
 }
 
 # set_backup_envs(&backup, &doms, [ok|failed])
