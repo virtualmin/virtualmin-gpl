@@ -1630,6 +1630,18 @@ while(<PASSWD>) {
 			}
 		closedir(DIR);
 		}
+	elsif (-d "$maildir/storage") {
+		# Mail directory is in mdbox format .. convert to mbox then move
+		local $temp = &transname();
+		local $out = &backquote_command("dsync -o \"mail_location=mdbox:$maildir\" backup mbox:$temp");
+		local $dstfolder = { 'file' => $crfile,
+				     'type' => $crtype };
+		local $srcfolder = { 'type' => 0,
+				     'file' => $temp };
+		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
+		&set_mailfolder_owner($dstfolder, $uinfo);
+		&unlink_file($temp);
+		}
 	elsif (!-d $mailsrc) {
 		# Assume that mail files are mbox formatted
 		opendir(DIR, $mailsrc);
