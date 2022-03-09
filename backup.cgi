@@ -175,7 +175,7 @@ if (!$runsched) {
 if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 	# Special case .. we backup to a temp file and output in the browser
 	my $tempfile;
-	my $sfx = &compression_to_suffix($config{'compression'});
+	my $sfx = &compression_to_suffix($in{'compression'});
 	if ($dests[0] eq "download:") {
 		$temp = &transname().".".$sfx;
 		}
