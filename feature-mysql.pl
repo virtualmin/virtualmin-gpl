@@ -1054,6 +1054,7 @@ sub backup_mysql
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 &require_mysql();
+my $compression = $allopts->{'dir'}->{'compression'};
 
 # Find all domain's databases
 local $tmpl = &get_template($d->{'template'});
@@ -1109,10 +1110,10 @@ foreach $db (@dbs) {
 				     "<pre>$err</pre>"));
 		$ok = 0;
 		}
-	elsif ($config{'gzip_mysql'}) {
+	elsif ($config{'gzip_mysql'} && $compression == 2) {
 		# Backup worked .. gzip the file
 		unlink($dbfile.".gz");	# Prevent malicious symlink
-		my $out = &backquote_logged(
+		my $out = &run_as_domain_user($d, 
 			&get_gzip_command()." ".quotemeta($dbfile)." 2>&1");
 		if ($?) {
 			&$second_print(&text('backup_mysqlgzipfailed',
@@ -1254,7 +1255,7 @@ foreach my $db (@dbs) {
 	if ($db->[1] =~ /(.*)\.gz$/) {
 		# Need to uncompress first
 		unlink("$1");	# To prevent malicious link overwrite
-		local $out = &backquote_logged(
+		my $out = &run_as_domain_user($d, 
 			&get_gunzip_command()." ".quotemeta($db->[1])." 2>&1");
 		if ($?) {
 			&$second_print(&text('restore_mysqlgunzipfailed',
