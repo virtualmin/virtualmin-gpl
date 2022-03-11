@@ -1630,23 +1630,45 @@ while(<PASSWD>) {
 			}
 		closedir(DIR);
 		}
-	elsif (-d "$maildir/storage") {
+	elsif (-d "$mailsrc/storage") {
 		# Mail directory is in mdbox format .. convert to mbox then move
+		local $mdtemp = &transname();
+		&copy_source_dest($mailsrc, $mdtemp);
 		local $temp = &transname();
-		local $out = &backquote_command("dsync -o \"mail_location=mdbox:$maildir\" backup mbox:$temp");
-		local $dstfolder = { 'file' => $crfile,
-				     'type' => $crtype };
-		local $srcfolder = { 'type' => 0,
-				     'file' => $temp };
-		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
-		&set_mailfolder_owner($dstfolder, $uinfo);
+		&make_dir($temp, 0755);
+		my $err;
+		&execute_command("chown -R ".quotemeta($uinfo->{'user'}).": ".quotemeta($mdtemp)." ".quotemeta($temp), undef, \$err, \$err);
+		local $out = &backquote_command("dsync -u ".quotemeta($uinfo->{'user'})." -o \"mail_location=mdbox:$mdtemp\" backup mbox:".quotemeta($temp)." 2>&1");
+		&unlink_file($mdtemp);
+		opendir(DIR, $temp);
+		while(my $mf = readdir(DIR)) {
+			next if ($mf =~ /^\./);
+			local $srcfolder = { 'type' => 0,
+					     'file' => "$temp/$mf" };
+			local $dstfolder;
+			if ($mf eq "inbox") {
+				$dstfolder = { 'file' => $crfile,
+					       'type' => $crtype };
+				}
+			else {
+				# Copying an extra folder - use
+				# Maildir++ name if dest folders are
+				# under ~/Maildir
+				$mf = ".$mf" if ($sftype);
+				$dstfolder = { 'type' => $sftype,
+					'file' => "$sfpath/$mf" };
+				}
+			&mailboxes::mailbox_move_folder($srcfolder,
+							$dstfolder);
+			&set_mailfolder_owner($dstfolder, $uinfo);
+			}
+		closedir(DIR);
 		&unlink_file($temp);
 		}
 	elsif (!-d $mailsrc) {
 		# Assume that mail files are mbox formatted
 		opendir(DIR, $mailsrc);
-		local $mf;
-		while($mf = readdir(DIR)) {
+		while(my $mf = readdir(DIR)) {
 			next if ($mf =~ /^\./);
 			local $srcfolder = { 'type' => 0,
 					     'file' => "$mailsrc/$mf" };
