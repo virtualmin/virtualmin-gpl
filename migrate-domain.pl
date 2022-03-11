@@ -238,6 +238,11 @@ if ($test_only) {
 	&$second_print(".. found domain $domain user $user password $pass");
 	exit(0);
 	}
+elsif (!$delete_existing && $domain &&
+       ($clash = &get_domain_by("dom", $domain))) {
+	&$second_print(".. the virtual server $domain already exists");
+	exit(3);
+	}
 else {
 	&$second_print(".. done");
 	}
