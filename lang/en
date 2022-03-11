@@ -6636,6 +6636,9 @@ smtpcloud_esandbox=Your Amazon SES account is still in sandbox mode, and so can 
 smtpcloud_ses_sandbox=SES production state
 smtpcloud_ses_inprod=Production ready
 smtpcloud_ses_insandbox=In SES Sandbox - mail delivery is limited until your <a href='$1' target=_blank>account is upgraded</a>.
+smtpcloud_egone=Cloud provider does not exist!
+smtpcloud_title=Cloud Mail Delivery Provider
+smtpcloud_echeck=Cloud mail delivery provider $1 cannot be used : $2
 
 provision_title=Cloudmin Services Client
 provision_ecannot=You are not allowed to setup the Cloudmin services client
