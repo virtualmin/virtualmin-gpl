@@ -279,6 +279,7 @@ if (!defined($compression) || $compression eq '') {
 	# Use global config option for compression format
 	$compression = $config{'compression'}
 	}
+$opts->{'dir'}->{'compression'} = $compression;
 
 # Check if the limit on running backups has been hit
 local $err = &check_backup_limits($asowner, $onsched, $desturl);
