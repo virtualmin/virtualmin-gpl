@@ -4594,7 +4594,8 @@ return $cmd;
 sub make_zip_command
 {
 my ($flags, $output, @files) = @_; 
-my $cmd = "zip -r ".quotemeta($output).
+my $zip = &has_command("zip") || "zip";
+my $cmd = $zip." -r ".quotemeta($output).
 	  " ".join(" ", map { quotemeta($_) } @files);
 if ($flags) {
 	$cmd .= " ".$flags;
