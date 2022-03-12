@@ -456,6 +456,7 @@ setup_bind_provision=Přidání nové zóny DNS na hostitele služeb.
 setup_bind_cloud=Přidání nové zóny DNS pomocí $1 ..
 setup_ebind_ecloud=.. není podporováno : $1
 setup_ebind_cloud=.. selhalo : $1 
+setup_ebind_cloud2=.. hotovo, ale některé záznamy nebyly vytvořeny : $1
 setup_bindslave=Přidání zóny slave na $1 ..
 setup_ebindslaveip2=.. se nepodařilo určit IP adresu tohoto systému. Budete muset nastavit IP v modulu BIND DNS Server.
 setup_ebindslaveip=.. se nepodařilo určit platnou IP adresu pro tento systém (dostal $1). Budete muset nastavit IP v modulu BIND DNS Server.
@@ -1847,8 +1848,9 @@ backup_nokey=Nepodepisujte ani nešifrujte
 backup_downloadfile=Stáhnout záložní soubor $1
 backup_edownloadfile=Chybí záložní soubor ke stažení
 backup_edownloadfile2=Záložní soubor ke stažení není absolutní cesta
-backup_edownloadfile5=Záložní soubor ke stažení neexistuje
+backup_edownloadfile7=Záložní soubor ke stažení obsahuje neplatné znaky
 backup_edownloadfile6=Záložní soubor ke stažení je ve špatném adresáři
+backup_edownloadfile5=Záložní soubor ke stažení neexistuje
 backup_edownloadfile3=Záložní soubor ke stažení není správně naformátován
 backup_edownloadfile4=Záložní soubor ke stažení vlastní jiný uživatel
 
@@ -3285,7 +3287,6 @@ scripts_epythoninst=.. automatická instalace modulu Python selhala
 scripts_installgem=Instalace balíčku Ruby Gems ..
 scripts_mmax=(Maximálně $1)
 scripts_sitelink=Další informace o používání tohoto skriptu naleznete na <a href='$1' target=_blank>$1</a>.
-
 scripts_userpass=Počáteční přihlašovací jméno pro správu je $1 s heslem $2.
 scripts_useronly=Počáteční přihlašovací přihlašovací jméno je $1.
 scripts_passonly=Počáteční heslo pro správu je $1.
@@ -5357,6 +5358,10 @@ smtpcloud_esandbox=Váš účet Amazon SES je stále v režimu sandbox, takže m
 smtpcloud_ses_sandbox=Stav výroby SES
 smtpcloud_ses_inprod=Výroba připravena
 smtpcloud_ses_insandbox=V SES Sandbox – doručování pošty je omezeno, dokud nebude váš <a href='$1' target=_blank>upgradován</a>.
+smtpcloud_egone=Poskytovatel cloudu neexistuje!
+smtpcloud_title=Cloud Mail Delivery Provider
+smtpcloud_echeck=Cloudového poskytovatele doručování pošty $1 nelze použít : $2
+
 provision_title=Klient služeb Cloudmin
 provision_ecannot=Není dovoleno nastavovat klienta služeb Cloudmin
 provision_header=Možnosti klienta služby Cloudmin

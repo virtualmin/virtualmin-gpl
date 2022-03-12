@@ -550,6 +550,7 @@ setup_bind_provision=Pridáva sa nová zóna DNS na hostiteľovi služieb ..
 setup_bind_cloud=Pridanie novej zóny DNS pomocou $1 ..
 setup_ebind_ecloud=.. nepodporované : $1
 setup_ebind_cloud=.. zlyhalo : $1
+setup_ebind_cloud2=.. hotovo, ale niektoré záznamy neboli vytvorené : $1
 setup_bindslave=Pridáva sa podriadená zóna na $1 ..
 setup_ebindslaveip2=.. nepodarilo sa určiť IP adresu pre tento systém. IP budete musieť nastaviť v module BIND DNS Server.
 setup_ebindslaveip=.. nepodarilo sa určiť platnú IP adresu pre tento systém (získané $1). IP budete musieť nastaviť v module BIND DNS Server.
@@ -2436,8 +2437,9 @@ backup_nokey=Nepodpisujte ani nešifrujte
 backup_downloadfile=Stiahnite si záložný súbor $1
 backup_edownloadfile=Chýba záložný súbor na stiahnutie
 backup_edownloadfile2=Záložný súbor na stiahnutie nie je absolútna cesta
-backup_edownloadfile5=Záložný súbor na stiahnutie neexistuje
+backup_edownloadfile7=Záložný súbor na stiahnutie obsahuje neplatné znaky
 backup_edownloadfile6=Záložný súbor na stiahnutie je v nesprávnom adresári
+backup_edownloadfile5=Záložný súbor na stiahnutie neexistuje
 backup_edownloadfile3=Záložný súbor na stiahnutie nie je správne naformátovaný
 backup_edownloadfile4=Záložný súbor na stiahnutie vlastní iný používateľ
 
@@ -4169,7 +4171,6 @@ scripts_epythoninst=.. automatická inštalácia modulu Python zlyhala
 scripts_installgem=Inštaluje sa balík Ruby Gems ..
 scripts_mmax=(Najviac $1)
 scripts_sitelink=Viac informácií o používaní tohto skriptu nájdete na <a href='$1' target=_blank>$1</a>.
-
 scripts_userpass=Počiatočné administračné prihlásenie je $1 s heslom $2.
 scripts_useronly=Počiatočné administračné prihlásenie je $1.
 scripts_passonly=Počiatočné heslo správcu je $1.
@@ -6635,6 +6636,10 @@ smtpcloud_esandbox=Váš účet Amazon SES je stále v režime karantény, takž
 smtpcloud_ses_sandbox=Stav výroby SES
 smtpcloud_ses_inprod=Výroba pripravená
 smtpcloud_ses_insandbox=V SES Sandbox - doručovanie pošty je obmedzené, kým <a href='$1' target=_blank>neinovujete váš účet</a>.
+smtpcloud_egone=Poskytovateľ cloudu neexistuje!
+smtpcloud_title=Cloud Mail Delivery Provider
+smtpcloud_echeck=Cloudového poskytovateľa doručovania pošty $1 nemožno použiť : $2
+
 provision_title=Klient služieb Cloudmin
 provision_ecannot=Nemáte povolené nastaviť klienta služieb Cloudmin
 provision_header=Možnosti klienta služieb Cloudmin

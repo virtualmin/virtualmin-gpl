@@ -195,6 +195,7 @@ setup_bind_provision=在服务主机上添加新的DNS区域 ..
 setup_bind_cloud=使用 $1..添加新的DNS区域。
 setup_ebind_ecloud=.. 不支持 : $1
 setup_ebind_cloud=..失败： $1
+setup_ebind_cloud2=.. 完成，但未创建一些记录  : $1
 setup_ebindslaveip2=..无法确定该系统的IP地址。您将需要在BIND DNS服务器模块中设置IP。
 setup_ebindslaveip=..无法确定该系统的有效IP地址（获取 $1）。您将需要在BIND DNS服务器模块中设置IP。
 setup_ebind_provision=..创建失败： $1
@@ -899,8 +900,9 @@ backup_nokey=不要签名或加密
 backup_downloadfile=下载备份文件 $1
 backup_edownloadfile=缺少要下载的备份文件
 backup_edownloadfile2=要下载的备份文件不是绝对路径
-backup_edownloadfile5=要下载的备份文件不存在
+backup_edownloadfile7=要下载的备份文件包含无效字符
 backup_edownloadfile6=要下载的备份文件位于错误的目录中
+backup_edownloadfile5=要下载的备份文件不存在
 backup_edownloadfile3=要下载的备份文件格式不正确
 backup_edownloadfile4=要下载的备份文件归其他用户所有
 
@@ -1773,7 +1775,6 @@ scripts_epythoninst=..自动安装Python模块失败
 scripts_installgem=安装Ruby Gems包 ..
 scripts_mmax=（最多 $1）
 scripts_sitelink=有关使用此脚本的更多信息，请参见<a href='$1' target=_blank>$1</a>。
-
 scripts_userpass=初始管理登录为 $1，密码为 $2。
 scripts_useronly=初始管理登录为 $1。
 scripts_passonly=初始管理密码为 $1。
@@ -3389,6 +3390,10 @@ smtpcloud_esandbox=您的 Amazon SES 账户仍处于沙盒模式，因此只能�
 smtpcloud_ses_sandbox=SES生产状态
 smtpcloud_ses_inprod=生产就绪
 smtpcloud_ses_insandbox=在 SES Sandbox 中 - 在您的<a href='$1' target=_blank>帐户升级</a>之前，邮件传送会受到限制。
+smtpcloud_egone=云提供商不存在！
+smtpcloud_title=云邮件递送提供商
+smtpcloud_echeck=无法使用云邮件传递提供程序 $1 : $2 
+
 provision_title=Cloudmin Services客户
 provision_ecannot=不允许您设置Cloudmin服务客户端
 provision_header=Cloudmin服务客户端选项

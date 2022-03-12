@@ -124,6 +124,7 @@ setup_bind_provision=Agregar nueva zona DNS en el host de servicios.
 setup_bind_cloud=Añadiendo una nueva zona DNS usando $1 ..
 setup_ebind_ecloud=.. no admitido : $1 
 setup_ebind_cloud=... falló : $1 
+setup_ebind_cloud2=.. hecho, pero no se crearon algunos registros : $1
 setup_ebindslaveip2=.. no pudo determinar la dirección IP para este sistema. Deberá configurar la IP en el módulo BIND DNS Server.
 setup_ebindslaveip=.. no pudo determinar una dirección IP válida para este sistema (obtuvo $1). Deberá configurar la IP en el módulo BIND DNS Server.
 setup_ebind_provision=.. creación fallida : $1
@@ -618,8 +619,9 @@ backup_nicedownloadlink=enlace de descarga
 backup_downloadfile=Descargar archivo de copia de seguridad $1
 backup_edownloadfile=Falta el archivo de copia de seguridad para descargar
 backup_edownloadfile2=El archivo de respaldo para descargar no es una ruta absoluta
-backup_edownloadfile5=El archivo de copia de seguridad para descargar no existe
+backup_edownloadfile7=El archivo de copia de seguridad para descargar contiene caracteres no válidos
 backup_edownloadfile6=El archivo de respaldo para descargar está en el directorio incorrecto
+backup_edownloadfile5=El archivo de copia de seguridad para descargar no existe
 backup_edownloadfile3=El archivo de copia de seguridad para descargar no tiene el formato correcto
 backup_edownloadfile4=El archivo de copia de seguridad para descargar es propiedad de otro usuario
 
@@ -2205,6 +2207,9 @@ smtpcloud_esandbox=Su cuenta de Amazon SES todavía está en modo sandbox, por l
 smtpcloud_ses_sandbox=Estado de producción de SES
 smtpcloud_ses_inprod=Listo para producción
 smtpcloud_ses_insandbox=En SES Sandbox, la entrega de correo está limitada hasta que se actualice su <a href='$1' target=_blank>cuenta</a>.
+smtpcloud_egone=¡El proveedor de la nube no existe!
+smtpcloud_title=Proveedor de entrega de correo en la nube
+smtpcloud_echeck=No se puede usar el proveedor de entrega de correo en la nube $1 : $2 
 
 provision_title=Cliente de servicios de Cloudmin
 provision_ecannot=No tiene permiso para configurar el cliente de servicios de Cloudmin

@@ -550,6 +550,7 @@ setup_bind_provision=サービスホストに新しいDNSゾーンを追加し�
 setup_bind_cloud=$1を使用して新しいDNSゾーンを追加します。
 setup_ebind_ecloud=..サポートされていません： $1
 setup_ebind_cloud=..失敗しました： $1
+setup_ebind_cloud2=..完了しましたが、一部のレコードが作成されませんでした： $1
 setup_bindslave=$1にスレーブゾーンを追加しています ..
 setup_ebindslaveip2=..このシステムのIPアドレスを特定できませんでした。 BINDDNSサーバーモジュールでIPを設定する必要があります。
 setup_ebindslaveip=..このシステムの有効なIPアドレスを特定できませんでした（$1を取得）。 BINDDNSサーバーモジュールでIPを設定する必要があります。
@@ -2436,8 +2437,9 @@ backup_nokey=署名も暗号化もしない
 backup_downloadfile=バックアップファイル $1をダウンロード
 backup_edownloadfile=ダウンロードするバックアップファイルがありません
 backup_edownloadfile2=ダウンロードするバックアップファイルは絶対パスではありません
-backup_edownloadfile5=ダウンロードするバックアップファイルが存在しません
+backup_edownloadfile7=ダウンロードするバックアップファイルに無効な文字が含まれています
 backup_edownloadfile6=ダウンロードするバックアップファイルが間違ったディレクトリにあります
+backup_edownloadfile5=ダウンロードするバックアップファイルが存在しません
 backup_edownloadfile3=ダウンロードするバックアップファイルが正しくフォーマットされていません
 backup_edownloadfile4=ダウンロードするバックアップファイルは別のユーザーが所有しています
 
@@ -4169,7 +4171,6 @@ scripts_epythoninst=..自動Pythonモジュールのインストールに失敗�
 scripts_installgem=Ruby Gemsパッケージのインストール ..
 scripts_mmax=（最大 $1）
 scripts_sitelink=このスクリプトの使用の詳細については、<a href='$1' target=_blank>$1</a>を参照してください。
-
 scripts_userpass=最初の管理ログインは $1、パスワードは $2です。
 scripts_useronly=初期管理ログインは $1です。
 scripts_passonly=初期管理パスワードは $1です。
@@ -6635,6 +6636,10 @@ smtpcloud_esandbox=Amazon SESアカウントはまだサンドボックスモー
 smtpcloud_ses_sandbox=SESの生産状態
 smtpcloud_ses_inprod=生産準備完了
 smtpcloud_ses_insandbox=SESサンドボックスの場合-<ahref = '$1'target = _blank>アカウントがアップグレードされるまで、メール配信は制限されます</ahref>。
+smtpcloud_egone=クラウドプロバイダーは存在しません！
+smtpcloud_title=クラウドメール配信プロバイダー
+smtpcloud_echeck=クラウドメール配信プロバイダー $1は使用できません： $2
+
 provision_title=Cloudminサービスクライアント
 provision_ecannot=Cloudminサービスクライアントのセットアップは許可されていません
 provision_header=Cloudminサービスのクライアントオプション
