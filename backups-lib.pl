@@ -1187,18 +1187,20 @@ if ($ok) {
 			&execute_command($toucher);
 
 			# Start the tar command
+			my @dfiles = &expand_glob_to_files(
+				$backupdir, "$d->{'dom'}_*");
 			if ($compression == 3) {
 				# ZIP does both archiving and compression
 				&execute_command("cd $backupdir && ".
-					 "zip -r - $d->{'dom'}_* | ".
-					 $writer,
-					 undef, \$out, \$err);
+				    &make_zip_command("", "-", @dfiles)." | ".
+				    $writer,
+				    undef, \$out, \$err);
 				}
 			else {
 				&execute_command(
 					"cd $backupdir && ".
 					"(".&make_tar_command(
-					    "cf", "-", "$d->{'dom'}_*")." | ".
+					    "cf", "-", @dfiles)." | ".
 					"$comp) 2>&1 | $writer",
 					undef, \$out, \$err);
 				}
@@ -1253,14 +1255,14 @@ if ($ok) {
 		if ($dest =~ /\.zip$/i) {
 			# Use zip command to archive and compress
 			&execute_command("cd $backupdir && ".
-					 "zip -r - . | $writer",
-					 undef, \$out, \$err);
+				 &make_zip_command("", "-", ".")." | $writer",
+				 undef, \$out, \$err);
 			}
 		else {
 			&execute_command("cd $backupdir && ".
-					 "(".&make_tar_command("cf", "-", ".").
-					 " | $comp) 2>&1 | $writer",
-					 undef, \$out, \$err);
+				 "(".&make_tar_command("cf", "-", ".").
+				 " | $comp) 2>&1 | $writer",
+				 undef, \$out, \$err);
 			}
 		if ($? || !-s $dest) {
 			$out ||= $err;
@@ -1292,8 +1294,7 @@ if (@$vbs && ($homefmt || $dirfmt)) {
 	if ($key) {
 		$comp = $comp." | ".&backup_encryption_command($key);
 		}
-	my @vfiles = map { s/^$backupdir\///; $_ }
-			 glob("$backupdir/virtualmin_*");
+	my @vfiles = &expand_glob_to_files($backupdir, "virtualmin_*");
 	&execute_command(
 	    "cd $backupdir && ".
 	    "(".&make_tar_command("cf", "-", @vfiles).
@@ -4592,6 +4593,19 @@ $cmd .= " ".join(" ", map { quotemeta($_) } @files) if (@files);
 return $cmd;
 }
 
+# make_zip_command(flags, output, file, ...)
+# Returns a ZIP command using the given flags writing to the given output
+sub make_zip_command
+{
+my ($flags, $output, @files) = @_; 
+my $cmd = "zip -r ".quotemeta($output).
+	  " ".join(" ", map { quotemeta($_) } @files);
+if ($flags) {
+	$cmd .= " ".$flags;
+	}
+return $cmd;
+}
+
 # get_bzip2_command()
 # Returns the full path to the bzip2-compatible command
 sub get_bzip2_command
@@ -5997,6 +6011,22 @@ return { 'host' => $server,
 	 'fast' => $already ? $already->{'fast'} : 1,
 	 'user' => $user,
 	 'pass' => $pass };
+}
+
+# expand_glob_to_files(directory, glob, ...)
+# Given a list of globs relative to some directory, return the actual files
+# also relative to that directory
+sub expand_glob_to_files
+{
+my ($dir, @globs) = @_;
+my @files;
+foreach my $g (@globs) {
+	push(@files, glob("$dir/$g"));
+	}
+foreach my $f (@files) {
+	$f =~ s/^\Q$dir\E\///;
+	}
+return @files;
 }
 
 1;
