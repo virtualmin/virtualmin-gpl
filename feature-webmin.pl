@@ -1125,7 +1125,7 @@ foreach my $admin (@admins) {
 # Create a tar file of all .acl files, for the server owner and extra admins
 sub backup_webmin
 {
-local ($d, $file, $opts) = @_;
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 &$first_print($text{'backup_webmin'});
 &require_acl();
 

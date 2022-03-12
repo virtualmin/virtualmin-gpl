@@ -1152,8 +1152,7 @@ if ($ok) {
 			local $comp = "cat";
 			if ($compression == 0) {
 				$destfile .= ".gz";
-				$comp = &get_gzip_command().
-					" -c $config{'zip_args'}";
+				$comp = &get_gzip_command();
 				}
 			elsif ($compression == 1) {
 				$destfile .= ".bz2";
@@ -1221,8 +1220,7 @@ if ($ok) {
 		# Tar up the directory into the final file
 		local $comp = "cat";
 		if ($dest =~ /\.(gz|tgz)$/i) {
-			$comp = &get_gzip_command().
-				" -c $config{'zip_args'}";
+			$comp = &get_gzip_command();
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
 			$comp = &get_bzip2_command().
@@ -1283,7 +1281,7 @@ if (@$vbs && ($homefmt || $dirfmt)) {
 	local $vdestfile;
 	local ($out, $err);
 	if (&has_command("gzip")) {
-		$comp = &get_gzip_command()." -c $config{'zip_args'}";
+		$comp = &get_gzip_command();
 		$vdestfile = "virtualmin.tar.gz";
 		}
 	else {
@@ -4635,7 +4633,9 @@ else {
 sub get_gzip_command
 {
 local $cmd = $config{'pigz'} ? 'pigz' : 'gzip';
-return &has_command($cmd) || $cmd;
+local $fullcmd = &has_command($cmd) || $cmd;
+$fullcmd .= " -c $config{'zip_args'}";
+return $fullcmd;
 }
 
 # get_gunzip_command()

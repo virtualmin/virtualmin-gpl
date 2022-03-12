@@ -584,7 +584,7 @@ if ($key && $homefmt) {
 if ($homefmt && $compression == 0) {
 	# With gzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
-	       " | ".&get_gzip_command()." -c $config{'zip_args'}";
+	       " | ".&get_gzip_command();
 	}
 elsif ($homefmt && $compression == 1) {
 	# With bzip
@@ -593,7 +593,7 @@ elsif ($homefmt && $compression == 1) {
 	}
 elsif ($homefmt && $compression == 3) {
 	# ZIP archive
-	$cmd = "zip -r - . -x\@".quotemeta($xtemp);
+	$cmd = &make_zip_command("-x\@".quotemeta($xtemp), "-", ".");
 	}
 else {
 	# Plain tar
