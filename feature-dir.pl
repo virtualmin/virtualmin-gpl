@@ -589,7 +589,7 @@ if ($homefmt && $compression == 0) {
 elsif ($homefmt && $compression == 1) {
 	# With bzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
-	       " | ".&get_bzip2_command()." -c $config{'zip_args'}";
+	       " | ".&get_bzip2_command();
 	}
 elsif ($homefmt && $compression == 3) {
 	# ZIP archive

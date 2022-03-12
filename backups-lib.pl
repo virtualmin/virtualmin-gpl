@@ -1156,8 +1156,7 @@ if ($ok) {
 				}
 			elsif ($compression == 1) {
 				$destfile .= ".bz2";
-				$comp = &get_bzip2_command().
-					" -c $config{'zip_args'}";
+				$comp = &get_bzip2_command();
 				}
 			elsif ($compression == 3) {
 				$destfile =~ s/\.tar$/\.zip/;
@@ -1223,8 +1222,7 @@ if ($ok) {
 			$comp = &get_gzip_command();
 			}
 		elsif ($dest =~ /\.(bz2|tbz2)$/i) {
-			$comp = &get_bzip2_command().
-				" -c $config{'zip_args'}";
+			$comp = &get_bzip2_command();
 			}
 
 		# Create writer command, which may run as the domain user
@@ -4609,7 +4607,9 @@ return $cmd;
 sub get_bzip2_command
 {
 local $cmd = $config{'pbzip2'} ? 'pbzip2' : 'bzip2';
-return &has_command($cmd) || $cmd;
+local $fullcmd = &has_command($cmd) || $cmd;
+$fullcmd .= " -c $config{'zip_args'}";
+return $fullcmd;
 }
 
 # get_bunzip2_command()
