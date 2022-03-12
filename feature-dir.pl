@@ -471,8 +471,7 @@ return 0;
 sub backup_dir
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
-local $compression = $opts->{'compression'} ne '' ? $opts->{'compression'}
-						  : $config{'compression'};
+local $compression = $opts->{'compression'};
 &$first_print($compression == 3 ? $text{'backup_dirzip'} :
 	      $increment == 1 ? $text{'backup_dirtarinc'}
 			      : $text{'backup_dirtar'});
