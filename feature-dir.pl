@@ -473,7 +473,7 @@ sub backup_dir
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 local $compression = $opts->{'compression'} ne '' ? $opts->{'compression'}
 						  : $config{'compression'};
-&$first_print($homefmt && $compression == 3 ? $text{'backup_dirzip'} :
+&$first_print($compression == 3 ? $text{'backup_dirzip'} :
 	      $increment == 1 ? $text{'backup_dirtarinc'}
 			      : $text{'backup_dirtar'});
 local $out;
@@ -523,7 +523,7 @@ if ($gconfig{'os_type'} eq 'solaris') {
 	}
 &open_tempfile(XTEMP, ">$xtemp");
 foreach my $x (@xlist) {
-	if ($homefmt && $compression == 3) {
+	if ($compression == 3) {
 		&print_tempfile(XTEMP, "$x\n");
 		}
 	else {
@@ -580,7 +580,9 @@ if ($key && $homefmt) {
 	$writer = &backup_encryption_command($key)." | ".$writer;
 	}
 
-# Do the backup
+# Do the backup, using a compressed format if this is the outermost archive
+# or if using ZIP. Otherwise just use tar, since there will be another level
+# of compression.
 if ($homefmt && $compression == 0) {
 	# With gzip
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
@@ -591,7 +593,7 @@ elsif ($homefmt && $compression == 1) {
 	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
 	       " | ".&get_bzip2_command();
 	}
-elsif ($homefmt && $compression == 3) {
+elsif ($compression == 3) {
 	# ZIP archive
 	$cmd = &make_zip_command("-x\@".quotemeta($xtemp), "-", ".");
 	}
