@@ -215,6 +215,7 @@ setup_bind_provision=Hizmet ana bilgisayarına yeni DNS bölgesi ekleniyor ..
 setup_bind_cloud=$1 kullanılarak yeni DNS bölgesi ekleniyor ..
 setup_ebind_ecloud=.. desteklenmiyor  : $1
 setup_ebind_cloud=.. başarısız oldu : $1 
+setup_ebind_cloud2=.. yapıldı, ancak bazı kayıtlar oluşturulmadı : $1
 setup_ebindslaveip2=.. bu sistem için IP adresini belirleyemedi. IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
 setup_ebindslaveip=.. bu sistem için geçerli bir IP adresi belirleyemedi ($1 aldı). IP'yi BIND DNS Sunucusu modülünde ayarlamanız gerekecektir.
 setup_ebind_provision=.. oluşturma başarısız : $1 
@@ -1008,8 +1009,9 @@ backup_nokey=İmzalama veya şifreleme
 backup_downloadfile=$1 yedekleme dosyasını indirin
 backup_edownloadfile=İndirilecek yedekleme dosyası eksik
 backup_edownloadfile2=İndirilecek yedekleme dosyası mutlak bir yol değil
-backup_edownloadfile5=İndirilecek yedekleme dosyası mevcut değil
+backup_edownloadfile7=İndirilecek yedekleme dosyası geçersiz karakterler içeriyor
 backup_edownloadfile6=İndirilecek yedekleme dosyası yanlış dizinde
+backup_edownloadfile5=İndirilecek yedekleme dosyası mevcut değil
 backup_edownloadfile3=İndirilecek yedekleme dosyası doğru biçimlendirilmemiş
 backup_edownloadfile4=İndirilecek yedekleme dosyası farklı bir kullanıcıya ait
 
@@ -1970,7 +1972,6 @@ scripts_epythoninst=.. otomatik Python modülü kurulumu başarısız
 scripts_installgem=Ruby Gems paketi yükleniyor ..
 scripts_mmax=(En fazla $1)
 scripts_sitelink=Bu komut dosyasını kullanma hakkında daha fazla bilgiyi <a href='$1' target=_blank>$1</a> adresinde bulabilirsiniz.
-
 scripts_userpass=İlk yönetim oturumu $2 parolasıyla $1.
 scripts_useronly=İlk yönetim oturumu $1.
 scripts_passonly=İlk yönetim şifresi $1.
@@ -3907,6 +3908,10 @@ smtpcloud_esandbox=Amazon SES hesabınız hala korumalı alan modundadır ve bu 
 smtpcloud_ses_sandbox=SES üretim durumu
 smtpcloud_ses_inprod=Üretime hazır
 smtpcloud_ses_insandbox=SES Sandbox'ta - posta dağıtımı <a href='$1' target=_blank>hesabınız yeni sürüme geçirilene</a> kadar sınırlıdır.
+smtpcloud_egone=Bulut sağlayıcı mevcut değil!
+smtpcloud_title=Bulut Posta Teslimat Sağlayıcısı
+smtpcloud_echeck=$1 bulut posta dağıtım sağlayıcısı kullanılamaz : $2
+
 provision_title=Cloudmin Services İstemcisi
 provision_ecannot=Cloudmin hizmetleri istemcisini ayarlamanıza izin verilmiyor
 provision_header=Cloudmin hizmetleri istemci seçenekleri

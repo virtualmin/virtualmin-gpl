@@ -210,6 +210,7 @@ setup_bind_provision=Ajout d'une nouvelle zone DNS sur l'hôte de services ..
 setup_bind_cloud=Ajout d'une nouvelle zone DNS à l'aide de $1 ..
 setup_ebind_ecloud=.. non pris en charge  : $1
 setup_ebind_cloud=.. échec : $1 
+setup_ebind_cloud2=.. terminé, mais certains enregistrements n'ont pas été créés  : $1
 setup_ebindslaveip2=.. n'a pas réussi à déterminer l'adresse IP de ce système. Vous devrez définir l'adresse IP dans le module BIND DNS Server.
 setup_ebindslaveip=.. n'a pas réussi à déterminer une adresse IP valide pour ce système (obtenu $1). Vous devrez définir l'adresse IP dans le module BIND DNS Server.
 setup_ebind_provision=.. la création a échoué : $1 
@@ -1022,8 +1023,9 @@ backup_nicedownloadlink=lien de téléchargement
 backup_downloadfile=Télécharger le fichier de sauvegarde $1
 backup_edownloadfile=Fichier de sauvegarde manquant à télécharger
 backup_edownloadfile2=Le fichier de sauvegarde à télécharger n'est pas un chemin absolu
-backup_edownloadfile5=Le fichier de sauvegarde à télécharger n'existe pas
+backup_edownloadfile7=Le fichier de sauvegarde à télécharger contient des caractères invalides
 backup_edownloadfile6=Le fichier de sauvegarde à télécharger est dans le mauvais répertoire
+backup_edownloadfile5=Le fichier de sauvegarde à télécharger n'existe pas
 backup_edownloadfile3=Le fichier de sauvegarde à télécharger n'est pas formaté correctement
 backup_edownloadfile4=Le fichier de sauvegarde à télécharger appartient à un autre utilisateur
 
@@ -3909,6 +3911,9 @@ smtpcloud_esandbox=Votre compte Amazon SES est toujours en mode sandbox et ne pe
 smtpcloud_ses_sandbox=État de production SES
 smtpcloud_ses_inprod=Prêt pour la production
 smtpcloud_ses_insandbox=Dans SES Sandbox, la livraison du courrier est limitée jusqu'à ce que votre <a href='$1' target=_blank>compte soit mis à niveau</a>.
+smtpcloud_egone=Le fournisseur de cloud n'existe pas !
+smtpcloud_title=Fournisseur de livraison de messagerie cloud
+smtpcloud_echeck=Le fournisseur de messagerie cloud $1 ne peut pas être utilisé  : $2
 
 provision_title=Client Cloudmin Services
 provision_ecannot=Vous n'êtes pas autorisé à configurer le client des services Cloudmin

@@ -68,6 +68,7 @@ setup_esslusermin=Usermin is niet geïnstalleerd
 setup_bind_cloud=Nieuwe DNS-zone toevoegen met $1 ..
 setup_ebind_ecloud=.. niet ondersteund  : $1
 setup_ebind_cloud=.. mislukt : $1
+setup_ebind_cloud2=.. klaar, maar sommige records zijn niet gemaakt : $1
 setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
@@ -374,8 +375,9 @@ backup_nokey=Onderteken of codeer niet
 backup_downloadfile=Download back-upbestand $1
 backup_edownloadfile=Ontbrekend back-upbestand om te downloaden
 backup_edownloadfile2=Back-upbestand om te downloaden is geen absoluut pad
-backup_edownloadfile5=Back-upbestand om te downloaden bestaat niet
+backup_edownloadfile7=Back-upbestand om te downloaden bevat ongeldige tekens
 backup_edownloadfile6=Back-upbestand om te downloaden staat in de verkeerde map
+backup_edownloadfile5=Back-upbestand om te downloaden bestaat niet
 backup_edownloadfile3=Back-upbestand om te downloaden is niet correct geformatteerd
 backup_edownloadfile4=Het te downloaden back-upbestand is eigendom van een andere gebruiker
 
@@ -1235,6 +1237,9 @@ smtpcloud_esandbox=Uw Amazon SES-account bevindt zich nog steeds in de sandbox-m
 smtpcloud_ses_sandbox=SES-productiestatus:
 smtpcloud_ses_inprod=Productie klaar
 smtpcloud_ses_insandbox=In SES Sandbox - e-mailbezorging is beperkt totdat uw <a href='$1' target=_blank>account is geüpgraded</a>.
+smtpcloud_egone=Cloudprovider bestaat niet!
+smtpcloud_title=Provider voor cloudmailbezorging
+smtpcloud_echeck=Cloudmailbezorgingsprovider $1 kan niet worden gebruikt : $2
 
 provision_nolimit=onbeperkt
 

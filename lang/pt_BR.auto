@@ -549,6 +549,7 @@ setup_bind_provision=Adicionando nova zona DNS no host de serviços ..
 setup_bind_cloud=Adicionando nova zona DNS usando $1 ..
 setup_ebind_ecloud=.. não suportado : $1 
 setup_ebind_cloud=.. falhou : $1 
+setup_ebind_cloud2=.. concluído, mas alguns registros não foram criados : $1
 setup_bindslave=Adicionando zona escrava em $1 ..
 setup_ebindslaveip2=.. não conseguiu determinar o endereço IP para este sistema. Você precisará definir o IP no módulo BIND DNS Server.
 setup_ebindslaveip=.. falhou ao determinar um endereço IP válido para este sistema (obtido $1). Você precisará definir o IP no módulo BIND DNS Server.
@@ -2267,8 +2268,9 @@ backup_nokey=Não assine ou criptografe
 backup_downloadfile=Baixe o arquivo de backup $1 
 backup_edownloadfile=Arquivo de backup ausente para download
 backup_edownloadfile2=O arquivo de backup para download não é um caminho absoluto
-backup_edownloadfile5=O arquivo de backup para download não existe
+backup_edownloadfile7=O arquivo de backup para download contém caracteres inválidos
 backup_edownloadfile6=O arquivo de backup para download está no diretório errado
+backup_edownloadfile5=O arquivo de backup para download não existe
 backup_edownloadfile3=O arquivo de backup para download não está formatado corretamente
 backup_edownloadfile4=O arquivo de backup para download pertence a um usuário diferente
 
@@ -3952,7 +3954,6 @@ scripts_epythoninst=.. falha na instalação automática do módulo Python
 scripts_installgem=Instalando o pacote Ruby Gems ..
 scripts_mmax=(No máximo $1)
 scripts_sitelink=Mais informações sobre o uso desse script podem ser encontradas em <a href='$1' target=_blank>$1</a>.
-
 scripts_userpass=O logon de administração inicial é $1 com a senha $2.
 scripts_useronly=O logon de administração inicial é $1.
 scripts_passonly=A senha de administração inicial é $1.
@@ -6353,6 +6354,10 @@ smtpcloud_esandbox=Sua conta do Amazon SES ainda está no modo sandbox e, portan
 smtpcloud_ses_sandbox=Estado de produção SES
 smtpcloud_ses_inprod=Pronto para produção
 smtpcloud_ses_insandbox=No SES Sandbox - a entrega de e-mail é limitada até que sua <a href='$1' target=_blank>conta seja atualizada</a>.
+smtpcloud_egone=O provedor de nuvem não existe!
+smtpcloud_title=Provedor de entrega de correio em nuvem
+smtpcloud_echeck=O provedor de entrega de correio na nuvem $1 não pode ser usado : $2
+
 provision_title=Cliente de serviços Cloudmin
 provision_ecannot=Você não tem permissão para configurar o cliente de serviços Cloudmin
 provision_header=Opções do cliente de serviços Cloudmin

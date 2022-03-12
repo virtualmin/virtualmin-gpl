@@ -149,6 +149,7 @@ setup_bind_provision=Hinzufügen einer neuen DNS-Zone auf dem Diensthost.
 setup_bind_cloud=Hinzufügen einer neuen DNS-Zone mit $1 ..
 setup_ebind_ecloud=.. nicht unterstützt  : $1
 setup_ebind_cloud=.. fehlgeschlagen : $1
+setup_ebind_cloud2=.. erledigt, aber einige Datensätze wurden nicht erstellt : $1
 setup_ebindslaveip2=.. konnte die IP-Adresse für dieses System nicht ermitteln. Sie müssen die IP im BIND DNS Server-Modul festlegen.
 setup_ebindslaveip=.. konnte keine gültige IP-Adresse für dieses System ermitteln ($1 erhalten). Sie müssen die IP im BIND DNS Server-Modul festlegen.
 setup_bindslavepids=Slave-DNS-Server neu starten.
@@ -806,8 +807,9 @@ backup_sdisabled=Die geplante Sicherung von Virtualmin wurde deaktiviert.
 backup_downloadfile=Sicherungsdatei $1 herunterladen
 backup_edownloadfile=Fehlende Sicherungsdatei zum Herunterladen
 backup_edownloadfile2=Die herunterzuladende Sicherungsdatei ist kein absoluter Pfad
-backup_edownloadfile5=Backup-Datei zum Download existiert nicht
+backup_edownloadfile7=Die herunterzuladende Sicherungsdatei enthält ungültige Zeichen
 backup_edownloadfile6=Die herunterzuladende Sicherungsdatei befindet sich im falschen Verzeichnis
+backup_edownloadfile5=Backup-Datei zum Download existiert nicht
 backup_edownloadfile3=Die herunterzuladende Sicherungsdatei ist nicht richtig formatiert
 backup_edownloadfile4=Die herunterzuladende Sicherungsdatei gehört einem anderen Benutzer
 
@@ -1489,7 +1491,6 @@ scripts_find=Finden Sie passende Skripte:
 scripts_installgem=Ruby Gems-Paket installieren ..
 scripts_mmax=(Höchstens $1)
 scripts_sitelink=Weitere Informationen zur Verwendung dieses Skripts finden Sie unter <a href='$1' target=_blank>$1</a>.
-
 scripts_passmode4=Anfangskennwort für das Skript
 scripts_unsupdesc=Mit diesem Formular können Sie eine Skriptversion installieren, die nicht von Virtualmin getestet wurde oder nicht mehr unterstützt wird. Beachten Sie, dass dies möglicherweise nicht funktioniert und sogar andere Seiten des virtuellen Servers beschädigen kann.
 scripts_addover=Überschreiben des Proxys für Pfad $1 ..
@@ -2554,6 +2555,10 @@ smtpcloud_esandbox=Ihr Amazon SES-Konto befindet sich noch im Sandbox-Modus und 
 smtpcloud_ses_sandbox=SES-Produktionszustand
 smtpcloud_ses_inprod=Produktionsbereit
 smtpcloud_ses_insandbox=In SES Sandbox ist die E-Mail-Zustellung eingeschränkt, bis Ihr <a href='$1' target=_blank>Konto aktualisiert wurde</a>.
+smtpcloud_egone=Cloud Anbieter existiert nicht!
+smtpcloud_title=Cloud-Mail-Zustellanbieter
+smtpcloud_echeck=Der Cloud-E-Mail-Zustellungsanbieter $1 kann nicht verwendet werden : $2
+
 provision_ecannot=Sie dürfen den Cloudmin-Dienstclient nicht einrichten
 provision_checking=Überprüfen der Anmeldung beim Diensthost $1 ..
 provision_saving=Speichern der Einstellungen der Cloudmin-Dienste.

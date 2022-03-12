@@ -339,6 +339,7 @@ setup_ftpuser=Dodanie użytkownika ProFTPD $1 do grupy serwerów.
 setup_bind_cloud=Dodawanie nowej strefy DNS przy użyciu $1 ..
 setup_ebind_ecloud=.. nieobsługiwane : $1 
 setup_ebind_cloud=.. nie powiodło się : $1 
+setup_ebind_cloud2=.. gotowe, ale niektóre rekordy nie zostały utworzone : $1 
 setup_ebindslaveip2=.. nie udało się określić adresu IP dla tego systemu. Będziesz musiał ustawić adres IP w module serwera BIND DNS.
 setup_ebindslaveip=.. nie udało się określić prawidłowego adresu IP dla tego systemu (pobrano $1). Będziesz musiał ustawić adres IP w module serwera BIND DNS.
 setup_eslaves=.. niektóre serwery podrzędne uległy awarii :
@@ -2016,8 +2017,9 @@ backup_nokey=Nie podpisuj ani nie szyfruj
 backup_downloadfile=Pobierz plik kopii zapasowej $1 
 backup_edownloadfile=Brakujący plik kopii zapasowej do pobrania
 backup_edownloadfile2=Plik kopii zapasowej do pobrania nie jest ścieżką bezwzględną
-backup_edownloadfile5=Plik kopii zapasowej do pobrania nie istnieje
+backup_edownloadfile7=Plik kopii zapasowej do pobrania zawiera nieprawidłowe znaki
 backup_edownloadfile6=Plik kopii zapasowej do pobrania znajduje się w złym katalogu
+backup_edownloadfile5=Plik kopii zapasowej do pobrania nie istnieje
 backup_edownloadfile3=Plik kopii zapasowej do pobrania nie jest poprawnie sformatowany
 backup_edownloadfile4=Plik kopii zapasowej do pobrania jest własnością innego użytkownika
 
@@ -3523,7 +3525,6 @@ scripts_epythoninst=.. automatyczna instalacja modułu Python nie powiodła się
 scripts_installgem=Instalowanie pakietu Ruby Gems ..
 scripts_mmax=(Maksymalnie $1)
 scripts_sitelink=Więcej informacji na temat używania tego skryptu można znaleźć na stronie <a href='$1' target=_blank>$1</a>.
-
 scripts_userpass=Początkowy login administratora to $1 z hasłem $2.
 scripts_passmode4=Początkowe hasło do skryptu
 scripts_epassmodeuser=Niepoprawny login do skryptu - tylko litery, cyfry i znaki. - _ może być użyty
@@ -5602,6 +5603,10 @@ smtpcloud_esandbox=Twoje konto Amazon SES jest nadal w trybie piaskownicy, więc
 smtpcloud_ses_sandbox=Stan produkcji SES
 smtpcloud_ses_inprod=Produkcja gotowa
 smtpcloud_ses_insandbox=W SES Sandbox – dostarczanie poczty jest ograniczone do czasu <a href='$1' target=_blank>uaktualnienia konta</a>.
+smtpcloud_egone=Dostawca chmury nie istnieje!
+smtpcloud_title=Dostawca usługi dostarczania poczty w chmurze
+smtpcloud_echeck=Nie można użyć dostawcy poczty w chmurze $1 : $2 
+
 provision_ecannot=Nie wolno konfigurować klienta usług Cloudmin
 provision_header=Opcje klienta usług Cloudmin
 provision_server=Mistrz usług Cloudmin

@@ -53,6 +53,7 @@ setup_esslusermin=Usermin er ikke installert
 setup_bind_cloud=Legger til ny DNS-sone ved hjelp av $1 ..
 setup_ebind_ecloud=.. støttes ikke : $1
 setup_ebind_cloud=.. mislyktes : $1 
+setup_ebind_cloud2=.. ferdig, men noen poster ble ikke opprettet : $1
 setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
@@ -280,8 +281,9 @@ backup_nicedownloadlink=nedlastingslenke
 backup_downloadfile=Last ned sikkerhetskopifilen $1
 backup_edownloadfile=Manglende sikkerhetskopifil for nedlasting
 backup_edownloadfile2=En sikkerhetskopifil for nedlasting er ikke en absolutt bane
-backup_edownloadfile5=Sikkerhetskopieringsfil for nedlasting eksisterer ikke
+backup_edownloadfile7=Sikkerhetskopien som skal lastes ned inneholder ugyldige tegn
 backup_edownloadfile6=Sikkerhetskopien som skal lastes ned er i feil katalog
+backup_edownloadfile5=Sikkerhetskopieringsfil for nedlasting eksisterer ikke
 backup_edownloadfile3=Sikkerhetskopieringsfilen for nedlasting er ikke formatert riktig
 backup_edownloadfile4=Sikkerhetskopieringsfilen for nedlasting eies av en annen bruker
 
@@ -919,6 +921,9 @@ smtpcloud_esandbox=Amazon SES-kontoen din er fortsatt i sandkassemodus, og kan d
 smtpcloud_ses_sandbox=SES produksjonstilstand
 smtpcloud_ses_inprod=Produksjon klar
 smtpcloud_ses_insandbox=I SES Sandbox - postlevering er begrenset til <a href='$1' target=_blank>kontoen din er oppgradert</a>.
+smtpcloud_egone=Skyleverandør eksisterer ikke!
+smtpcloud_title=Cloud Mail Delivery Provider
+smtpcloud_echeck=Nettskypostleveringsleverandør $1 kan ikke brukes : $2
 
 provision_nolimit=ubegrenset
 
