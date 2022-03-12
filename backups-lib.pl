@@ -4603,6 +4603,38 @@ if ($flags) {
 return $cmd;
 }
 
+# make_archive_command(compression, directory, output, file, ...)
+# Returns a command to create an archive of the given files
+sub make_archive_command
+{
+my ($compression, $dir, $out, @files) = @_;
+if ($compression == 3) {
+	return "cd ".quotemeta($dir)." && ".
+	       &make_zip_command("", $out, @files);
+	}
+else {
+	return "cd ".quotemeta($dir)." && ".
+	       &make_tar_command("cf", $out, @files);
+	}
+}
+
+# make_unarchive_command(directory, input, [@files])
+# Returns a command to extract an archive, possibly for just some files
+sub make_unarchive_command
+{
+my ($dir, $out, @files) = @_;
+my $cf = &compression_format($out);
+if ($cf == 4) {
+	my $qfiles = join(" ", map { quotemeta($_) } @files);
+	return "cd ".quotemeta($dir)." && ".
+	       "unzip -o ".quotemeta($out)." ".$qfiles;
+	}
+else {
+	return "cd ".quotemeta($dir)." && ".
+	       &make_tar_command("xf", $out, @files);
+	}
+}
+
 # get_bzip2_command()
 # Returns the full path to the bzip2-compatible command
 sub get_bzip2_command

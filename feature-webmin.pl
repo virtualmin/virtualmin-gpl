@@ -1126,6 +1126,7 @@ foreach my $admin (@admins) {
 sub backup_webmin
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+local $compression = $allopts->{'dir'}->{'compression'};
 &$first_print($text{'backup_webmin'});
 &require_acl();
 
@@ -1180,9 +1181,9 @@ if (!@files) {
 
 # Tar them all up
 local $temp = &transname();
-local $out = &backquote_command(
-	"cd $config_directory && ".
-	"tar cf ".quotemeta($temp)." ".join(" ", @files)." 2>&1");
+@files = &expand_glob_to_files($config_directory, @files);
+local $out = &backquote_command(&make_archive_command(
+		$compression, $config_directory, $temp, @files)." 2>&1");
 my $ex = $?;
 if (!$ex) {
 	&copy_write_as_domain_user($d, $temp, $file);
@@ -1208,8 +1209,7 @@ local ($d, $file, $opts) = @_;
 &require_acl();
 
 &obtain_lock_webmin($_[0]);
-local $out = &backquote_logged(
-	"cd $config_directory && tar xf ".quotemeta($file)." 2>&1");
+local $out = &make_unarchive_command($config_directory, $file);
 local $rv;
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
