@@ -4586,6 +4586,10 @@ if ($config{'tar_args'}) {
 $cmd .= " ".$flags;
 $cmd .= " ".quotemeta($output);
 $cmd .= " ".join(" ", map { quotemeta($_) } @files) if (@files);
+if (&has_no_file_changed()) {
+	# Don't fail if a file was changed while read
+	$cmd .= " --warning=no-file-changed";
+	}
 return $cmd;
 }
 
