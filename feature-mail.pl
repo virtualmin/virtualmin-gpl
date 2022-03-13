@@ -3201,9 +3201,8 @@ if (@homeless) {
 		local $file = $file."_homes_".$u->{'user'};
 		local $out;
 		local $temp = &transname();
-		&execute_command("cd ".quotemeta($u->{'home'})." && ".
-				 "tar cf ".quotemeta($temp)." .",
-				 undef, \$out, \$out);
+		local $out = &backquote_command(&make_archive_command(
+			$compression, $u->{'home'}, $temp, ".")." 2>&1");
 		if ($?) {
 			&$second_print(&text('backup_mailhomefailed',
 					     "<pre>$out</pre>"));
@@ -3417,11 +3416,8 @@ while(<UFILE>) {
 			if (!-d $uinfo->{'home'}) {
 				&create_user_home($uinfo, $d);
 				}
-			local $out;
-			&execute_command(
-				"cd ".quotemeta($uinfo->{'home'})." && ".
-				"tar xf ".quotemeta($file)." .",
-				undef, \$out, \$out);
+			local $out = &backquote_command(&make_unarchive_command(
+				$uinfo->{'home'}, $file)." 2>&1");
 			}
 		}
 	}
