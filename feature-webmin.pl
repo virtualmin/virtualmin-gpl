@@ -1209,7 +1209,7 @@ local ($d, $file, $opts) = @_;
 &require_acl();
 
 &obtain_lock_webmin($_[0]);
-local $out = &make_unarchive_command($config_directory, $file);
+local $out = &backquote_command(&make_unarchive_command($config_directory, $file)." 2>&1");
 local $rv;
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));

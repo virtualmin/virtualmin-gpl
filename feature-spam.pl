@@ -628,7 +628,7 @@ if (-r $spamrc) {
 	&copy_write_as_domain_user($d, $spamrc, $file);
 	local $temp = &transname();
 	&execute_command(&make_archive_command(
-		$compression, $spamdir, $temp, "."));
+		$compression, $spamdir, $temp, ".")." 2>&1");
 	&copy_write_as_domain_user($d, $temp, $file."_cf");
 	&unlink_file($temp);
 
@@ -656,7 +656,7 @@ local ($d, $file) = @_;
 local $spamrc = "$procmail_spam_dir/$d->{'id'}";
 local $spamdir = "$spam_config_dir/$d->{'id'}";
 &copy_source_dest($file, $spamrc);
-&execute_command(&make_unarchive_command($spamdir, $file."_cf"));
+&execute_command(&make_unarchive_command($spamdir, $file."_cf")." 2>&1");
 
 # Fix any incorrect /etc/webmin references
 my $lref = &read_file_lines($spamrc);
