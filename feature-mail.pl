@@ -2962,7 +2962,8 @@ return undef;
 # Saves all mail aliases and mailbox users for this domain
 sub backup_mail
 {
-local ($d, $file, $opts) = @_;
+local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
+local $compression = $allopts->{'dir'}->{'compression'};
 &require_mail();
 
 # Create dummy file
@@ -3106,19 +3107,10 @@ if (!&mail_under_home()) {
 		&$second_print($text{'backup_mailfilesnone'});
 		}
 	else {
-		local $mfiles = join(" ", map { quotemeta($_) } @mfiles);
 		local $out;
 		local $temp = &transname();
-		local @flags;
-		push(@flags, "--ignore-failed-read")
-			if (&has_failed_reads_tar());
-		push(@flags, "--warning=no-file-changed")
-			if (&has_no_file_changed());
-		&execute_command("cd ".quotemeta($mbase)." && ".
-				 &get_tar_command()." cf ".
-				 quotemeta($temp)." ".$mfiles." ".
-				 join(" ", @flags),
-				 undef, \$out, \$out);
+		local $out = &backquote_command(&make_archive_command(
+			$compression, $mbase, $temp, @mfiles));
 		if ($?) {
 			&$second_print(&text('backup_mailfilesfailed',
 					     "<pre>$out</pre>"));
@@ -3596,13 +3588,14 @@ if (-r $file."_files" &&
 	if ($_[2]->{'mailuser'}) {
 		# Just do one user
 		&$first_print(&text('restore_mailfiles3', $_[2]->{'mailuser'}));
-		&execute_command("cd '$xtract' && tar xf '${file}_files' '$foundmailuser' 2>&1", undef, \$out, \$out);
+		$out = &backquote_command(&make_unarchive_command(
+			$xtract, $file."_files", $foundmailuser)." 2>&1");
 		}
 	else {
 		# Do all users
 		&$first_print($text{'restore_mailfiles'});
-		&execute_command("cd '$xtract' && tar xf '${file}_files' 2>&1",
-				 undef, \$out, \$out);
+		$out = &backquote_command(&make_unarchive_command(
+			$xtract, $file."_files")." 2>&1");
 		}
 	if ($?) {
 		&$second_print(&text('backup_mailfilesfailed',
