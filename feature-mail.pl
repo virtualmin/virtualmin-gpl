@@ -3168,10 +3168,8 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 		if (@names) {
 			local $out;
 			local $temp = &transname();
-			&execute_command("cd ".quotemeta($control)." && ".
-					 "tar cf ".quotemeta($temp).
-					 " ".join(" ", @names),
-					 undef, \$out, \$out);
+			local $out = &backquote_command(&make_archive_command(
+				$compression, $control, $temp, @names)." 2>&1");
 			if ($?) {
 				&$second_print(&text('backup_emailcontrol',
 						     $out));
@@ -3742,18 +3740,17 @@ if (-r $file."_control" && &foreign_check("dovecot") &&
 		# Local dovecot specifies a control file location
 		local $control = $1;
 		&$first_print($text{'restore_mailcontrol'});
-		local $cmd = "cd ".quotemeta($control)." && ".
-                             "tar xf ".quotemeta($file."_control");
-		if ($_[2]->{'mailuser'}) {
+		local @onefiles;
+		if ($opts->{'mailuser'}) {
 			# Limit extract to one user
-			$cmd .= " ".quotemeta($_[2]->{'mailuser'});
-			local $at = &replace_atsign($_[2]->{'mailuser'});
-			if ($at ne $_[2]->{'mailuser'}) {
-				$cmd .= " ".quotemeta($at);
+			push(@onefiles, $opts->{'mailuser'});
+			local $at = &replace_atsign($opts->{'mailuser'});
+			if ($at ne $opts->{'mailuser'}) {
+				push(@onefiles, $at);
 				}
 			}
-		local $out;
-		&execute_command($cmd, undef, \$out, \$out);
+		local $out = &backquote_command(&make_unarchive_command(
+			$control, $file."_control", @onefiles)." 2>&1");
 		if ($?) {
 			&$second_print(&text('restore_emailcontrol', $out));
 			}
