@@ -7156,7 +7156,8 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Using access key $1
 cloud_rsuser=Using login $1
-cloud_s3_noawscli=It is recommended to have official AWS CLI command installed.
+cloud_s3_noawscli=It is recommended to have official AWS command line interface installed.
+cloud_s3_noawscli2=AWS command line interface is not installed!
 cloud_s3_noawscli_install=<a href='$1'>Click here</a> to have it installed automatically.
 cloud_s3_awscli_installing=Installing the AWS CLI package ..
 cloud_s3_awscli_title=Install AWS CLI
@@ -7492,7 +7493,7 @@ dnscloud_cloudflare_esfx2=Domain $1 can be only one level under TLD $2
 dnscloud_cloudflare_ens=Failed to lookup NS records : $1
 dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DNS domains be registered first.
 
-install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it
+install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
 reset_edns=DNS records will be lost : $1
 reset_emysql=MySQL databases will be deleted : $1
