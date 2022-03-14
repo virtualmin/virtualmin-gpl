@@ -29,6 +29,13 @@ if ($@) {
 			&vui_install_mod_perl_link(
 				'Net::SSLeay', "list_buckets.cgi", $text{'index_buckets'});
 	}
+if ($config{'aws_cmd'} && !&has_command($config{'aws_cmd'})) {
+	my $install_link;
+	if (&foreign_available("software")) {
+		$install_link = " " . &text('cloud_s3_noawscli_install', 'install_awscli.cgi');
+		}
+	print &ui_alert_box($text{'cloud_s3_noawscli'} . $install_link, 'warn', undef, undef, "");
+	}
 return undef;
 }
 
@@ -1025,7 +1032,7 @@ sub can_use_aws_cmd
 {
 my ($akey, $skey, $zone, $func, @cmd) = @_;
 if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'})) {
-	return wantarray ? (0, "The aws command is not installed") : 0;
+	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
 	}
 if (defined($can_use_aws_cmd_cache{$akey})) {
 	return wantarray ? @{$can_use_aws_cmd_cache{$akey}}

@@ -7156,6 +7156,11 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Using access key $1
 cloud_rsuser=Using login $1
+cloud_s3_noawscli=It is recommended to have official AWS CLI command installed.
+cloud_s3_noawscli_install=<a href='$1'>Click here</a> to have it installed automatically.
+cloud_s3_awscli_installing=Installing the AWS CLI package ..
+cloud_s3_awscli_title=Install AWS CLI
+cloud_s3_awscli_return=S3 form
 cloud_s3_akey=Default S3 login
 cloud_noneset=None set
 cloud_below=Entered below ..
