@@ -281,7 +281,8 @@ for(my $i=0; $i<$tries; $i++) {
 			}
 		}
 	elsif ($line !~ /^HTTP\/1\..\s+(200|30[0-9])(\s+|$)/) {
-		$err = "Invalid HTTP response : $line";
+		my ($out1) = split(/\r?\n/, $out);
+		$err = "Invalid HTTP response : $line : $out1";
 		}
 	elsif ($1 >= 300 && $1 < 400) {
 		# Follow the SOAP redirect
