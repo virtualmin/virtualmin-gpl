@@ -59,6 +59,9 @@ $migration_plesk = "$migration_dir/$migration_plesk_domain.plesk.txt";
 $migration_plesk_windows_domain = "sbcher.com";
 $migration_plesk_windows = "$migration_dir/$migration_plesk_windows_domain.plesk_windows.psa";
 $test_backup_file = "/tmp/$test_domain.tar.gz";
+$test_zip_backup_file = "/tmp/$test_domain.zip";
+$test_tar_backup_file = "/tmp/$test_domain.tar";
+$test_bzip2_backup_file = "/tmp/$test_domain.tar.bz2";
 $test_incremental_backup_file = "/tmp/$test_domain.incremental.tar.gz";
 $test_incremental_backup_file2 = "/tmp/$test_domain.incremental2.tar.gz";
 $test_backup_dir = "/tmp/functional-test-backups";
@@ -9605,6 +9608,136 @@ $reset_tests = [
 	  'cleanup' => 1 },
 	];
 
+$compression_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ], [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Backup to a temp file in ZIP format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_zip_backup_file ],
+		      [ 'compression', 'zip' ] ],
+	},
+
+	# Check that it's actually a ZIP
+	{ 'command' => 'file '.$test_zip_backup_file,
+	  'grep' => ['Zip archive data'],
+	},
+
+	# Backup to a temp file in tar.gz format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ],
+		      [ 'compression', 'gzip' ] ],
+	},
+
+	# Check that it's actually a tar.gz
+	{ 'command' => 'file '.$test_backup_file,
+	  'grep' => ['gzip compressed data'],
+	},
+
+	# Backup to a temp file in tar format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_tar_backup_file ],
+		      [ 'compression', 'tar' ] ],
+	},
+
+	# Check that it's actually a tar
+	{ 'command' => 'file '.$test_tar_backup_file,
+	  'grep' => ['tar archive'],
+	},
+
+	# Backup to a temp file in tar.bz2 format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_bzip2_backup_file ],
+		      [ 'compression', 'bzip2' ] ],
+	},
+
+	# Check that it's actually a tar.bz2
+	{ 'command' => 'file '.$test_bzip2_backup_file,
+	  'grep' => ['bzip2 compressed data'],
+	},
+
+	# Backup to a ZIP file, but without specifying a compression format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_zip_backup_file ] ],
+	},
+
+	# Check that it's actually a ZIP
+	{ 'command' => 'file '.$test_zip_backup_file,
+	  'grep' => ['Zip archive data'],
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore from the ZIP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_zip_backup_file ] ],
+	},
+
+	# Test HTTP get on restored file
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Backup to a directory in ZIP format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ],
+		      [ 'compression', 'zip' ] ],
+	},
+
+	# Check that it's actually a ZIP
+	{ 'command' => 'file '.$test_backup_dir.'/'.$test_domain.'.zip',
+	  'grep' => ['Zip archive data'],
+	},
+
+	# Delete web page
+	{ 'command' => 'rm -f ~'.$test_domain_user.'/public_html/index.*',
+	},
+
+	# Restore from the ZIP
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Test HTTP get on restored file
+	{ 'command' => $wget_command.'http://'.$test_domain,
+	  'grep' => 'Test home page',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -9685,6 +9818,7 @@ $alltests = { '_config' => $_config_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
 	      'reset' => $reset_tests,
+	      'compression' => $compression_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
