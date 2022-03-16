@@ -2211,7 +2211,6 @@ if ($ok) {
 		&$indent_print();
 		foreach my $v (@$vbs) {
 			local $vfile = "$restoredir/virtualmin_".$v;
-			print STDERR "looking for $vfile\n";
 			if (-r $vfile) {
 				local $vfunc = "virtualmin_restore_".$v;
 				if (defined(&$vfunc)) {
@@ -2835,11 +2834,12 @@ if ($ok) {
 				     $f eq "mail" &&
 				     &can_domain_have_users($d))) {
 					local $ffile;
-					local $p = "$backup/$d->{'dom'}.tar";
+					local $p = "$backup/$d->{'dom'}";
 					local $hft =
-					    $homeformat{"$p.gz"} ||
-					    $homeformat{"$p.bz2"}||
-					    $homeformat{$p} ||
+					    $homeformat{"$p.tar.gz"} ||
+					    $homeformat{"$p.tar.bz2"}||
+					    $homeformat{"$p.tar"} ||
+					    $homeformat{"$p.zip"} ||
 					    $homeformat{$backup};
 					if ($hft && $f eq "dir") {
 						# For a home-format backup, the
