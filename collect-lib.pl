@@ -199,7 +199,7 @@ foreach my $d (@doms) {
 	&save_domain($d);
 	}
 
-# DNS registration expiries
+# Domain registration expiries
 my $now = time();
 foreach my $d (@doms) {
 	next if (!$d->{'dns'});

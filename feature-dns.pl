@@ -4350,15 +4350,10 @@ my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
 return (0, "No DNS registrar found for domain")
 	if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
 return (0, "Whois command did not report expiry date")
-	if ($out !~ /Expiry\s+Date:\s+(\d+)\-(\d+)\-(\d+)T(\d+):(\d+):(\d+)([a-z]+)/i);
-local $tm;
+	if ($out !~ /Registr(?:y|ation)\s+Expir(?:y|ation)\s+Date:\s+(\d+)\-(\d+)\-(\d+)T(\d+):(\d+):(\d+)/i);
+my $tm;
 eval {
-	if ($7 eq "Z") {
-		$tm = timegm($4, $5, $6, $3, $2-1, $1-1900);
-		}
-	else {
-		$tm = timelocal($4, $5, $6, $3, $2-1, $1-1900);
-		}
+	$tm = timegm($6, $5, $4, $3, $2-1, $1-1900);
 	};
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);

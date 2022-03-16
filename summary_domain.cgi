@@ -139,8 +139,38 @@ if ($d->{'owner'} &&
 
 # Show domain ID
 if (&master_admin()) {
+	my $domid = "<tt>$d->{'id'}</tt>";
+	my %tinfo = &get_theme_info($current_theme);
+	if ($tinfo{'spa'} && &foreign_available('filemin')) {
+		$domid = "<a href=\"!edit $domains_dir/$d->{'id'}\">$domid</a>"
+		}
 	print &ui_table_row($text{'edit_id'},
-			    "<tt>$d->{'id'}</tt>");
+			    $domid, 3);
+	my $now = time();
+
+	# Show SSL cert expiry date and add color based on time
+	if ($d->{'ssl_cert_expiry'}) {
+		my $exp = &make_date($d->{'ssl_cert_expiry'});
+		if ($now > $d->{'ssl_cert_expiry'}) {
+			$exp = &ui_text_color($exp, 'danger');
+			}
+		elsif ($now > $d->{'ssl_cert_expiry'} - 7*24*60*60) {
+			$exp = &ui_text_color($exp, 'warn');
+			}
+		print &ui_table_row($text{'edit_ssl_exp'}, $exp, 3);
+		}
+
+	# Show domain registration expiry date and add color based on time
+	if ($d->{'whois_expiry'}) {
+		my $exp = &make_date($d->{'whois_expiry'});
+		if ($now > $d->{'whois_expiry'}) {
+			$exp = &ui_text_color($exp, 'danger');
+			}
+		elsif ($now > $d->{'whois_expiry'} - 7*24*60*60) {
+			$exp = &ui_text_color($exp, 'warn');
+			}
+		print &ui_table_row($text{'edit_whois_exp'}, $exp, 3);
+		}
 	}
 
 print &ui_table_end();
