@@ -1127,6 +1127,7 @@ sub backup_webmin
 {
 local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts, $key) = @_;
 local $compression = $allopts->{'dir'}->{'compression'};
+local $destfile = $file.".".&compression_to_suffix($compression);
 &$first_print($text{'backup_webmin'});
 &require_acl();
 
@@ -1186,7 +1187,7 @@ local $out = &backquote_command(&make_archive_command(
 		$compression, $config_directory, $temp, @files)." 2>&1");
 my $ex = $?;
 if (!$ex) {
-	&copy_write_as_domain_user($d, $temp, $file);
+	&copy_write_as_domain_user($d, $temp, $destfile);
 	}
 &unlink_file($temp);
 &unlink_file(@acltemp) if (@acltemp);
@@ -1205,11 +1206,16 @@ else {
 sub restore_webmin
 {
 local ($d, $file, $opts) = @_;
+local $srcfile = $file;
+if (!-r $srcfile) {
+	($srcfile) = glob("$file.*");
+	}
 &$first_print($text{'restore_webmin'});
 &require_acl();
 
 &obtain_lock_webmin($_[0]);
-local $out = &backquote_command(&make_unarchive_command($config_directory, $file)." 2>&1");
+local $out = &backquote_command(
+	&make_unarchive_command($config_directory, $srcfile)." 2>&1");
 local $rv;
 if ($?) {
 	&$second_print(&text('backup_webminfailed', "<pre>$out</pre>"));
