@@ -2770,6 +2770,7 @@ restore_egid=GID $1 is already in use
 restore_unixuser=Updating administration password and quotas ..
 restore_unixsame=.. skipping restore to original LDAP server $1 in replication mode
 restore_dirtar=Extracting TAR file of home directory ..
+restore_dirzip=Extracting ZIP file of home directory ..
 restore_dirsame=.. skipping restore to original NFS server $1 in replication mode
 restore_edirspace=.. warning - this backup contains $1 of files, but your system only has $2 free ..
 restore_dirtarfailed=.. failed! $1

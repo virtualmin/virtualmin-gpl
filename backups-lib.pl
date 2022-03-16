@@ -2841,21 +2841,25 @@ if ($ok) {
 					    $homeformat{"$p.tar"} ||
 					    $homeformat{"$p.zip"} ||
 					    $homeformat{$backup};
+					local @fopts;
 					if ($hft && $f eq "dir") {
 						# For a home-format backup, the
 						# backup itself is the home
 						$ffile = $hft;
+						@fopts = ( $ffile );
 						}
 					else {
 						$ffile = $restoredir."/".
 							 $d->{'dom'}."_".$f;
+						@fopts = ( $ffile, glob("$ffile.*") );
 						}
 					if ($f eq "virtualmin") {
 						# If restoring the virtualmin
 						# info, keep old feature file
 						&read_file($ffile, \%oldd);
 						}
-					if (-r $ffile) {
+					my @fany = grep { -r $_ } @fopts;
+					if (@fany) {
 						# Call the restore function
 						$fok = &$rfunc($d, $ffile,
 						     $opts->{$f}, $opts, $hft,

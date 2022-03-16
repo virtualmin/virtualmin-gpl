@@ -478,6 +478,10 @@ local $compression = $opts->{'compression'};
 local $out;
 local $cmd;
 local $gzip = $homefmt && &has_command("gzip");
+local $destfile = $file;
+if (!$homefmt) {
+	$destfile .= ".".&compression_to_suffix($compression);
+	}
 
 # Create an indicator file in the home directory showing where this backup
 # came from. This can be used when replicating to know that the home directory
@@ -559,7 +563,7 @@ if (&has_incremental_tar() && $increment != 2) {
 	}
 
 # Create the dest file with strict permissions
-local $qf = quotemeta($file);
+local $qf = quotemeta($destfile);
 local $toucher = "touch $qf && chmod 600 $qf";
 if ($asd && $homefmt) {
 	$toucher = &command_as_user($asd->{'user'}, 0, $toucher);
@@ -610,8 +614,8 @@ if (-r $ifile) {
 	&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 				   0700, $ifile);
 	}
-if ($ex || !-s $file) {
-	&unlink_file($file);
+if ($ex || !-s $destfile) {
+	&unlink_file($destfile);
 	&$second_print(&text($cmd =~ /^\S*zip/ ? 'backup_dirzipfailed'
 					       : 'backup_dirtarfailed',
 			     "<pre>".&html_escape($out)."</pre>"));
@@ -670,8 +674,14 @@ return { 'dirnohomes' => !$in{'dir_homes'},
 sub restore_dir
 {
 local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd, $key) = @_;
+local $srcfile = $file;
+if (!-r $srcfile) {
+	($srcfile) = glob("$file.*");
+	}
 
-&$first_print($text{'restore_dirtar'});
+local $cf = &compression_format($srcfile, $key);
+&$first_print($cf == 4 ? $text{'restore_dirzip'}
+	    	       : $text{'restore_dirtar'});
 
 # Check if in replication mode and restoring to the same NFS server
 my ($home_mtab, $home_fstab) = &mount_point($d->{'home'});
@@ -687,7 +697,7 @@ if ($allopts->{'repl'} && $src{'id'} && $src{'id'} eq $d->{'id'} &&
 	}
 
 # Check for free space, if possible
-my $osize = &get_compressed_file_size($file, $key);
+my $osize = &get_compressed_file_size($srcfile, $key);
 if ($osize && $config{'home_quotas'}) {
 	&foreign_require("mount");
 	my @space = &mount::disk_space(undef, $config{'home_quotas'});
@@ -746,8 +756,7 @@ if (!-e $d->{'home'}) {
 
 local $outfile = &transname();
 local $errfile = &transname();
-local $cf = &compression_format($file, $key);
-local $q = quotemeta($file);
+local $q = quotemeta($srcfile);
 local $qh = quotemeta($d->{'home'});
 local $catter;
 if ($key && $homefmt) {
