@@ -4348,13 +4348,39 @@ my $whois = &has_command("whois");
 return (0, "Missing whois command") if (!$whois);
 my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
 return (0, "No DNS registrar found for domain")
-	if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
+    if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
 return (0, "Whois command did not report expiry date")
-	if ($out !~ /Registr(?:y|ation)\s+Expir(?:y|ation)\s+Date:\s+(\d+)\-(\d+)\-(\d+)T(\d+):(\d+):(\d+)/i);
+        # google.com, google.fr, google.ru, google.sl
+    if ($out !~ /(?|paid-till:|Expir(?:y|ation|es).*?(?:Date|Time|):)\s+(?<year>\d+)\-(?<month>\d+)\-(?<day>\d+).(?<hour>\d+):(?<minute>\d+):(?<second>\d+)(?:(?<utc>(?|[a-z\s])|[+-.][0-9a-z]+))/i &&
+        # google.fi
+        $out !~ /expires[\.]+:\s+(?<day>\d+)\.(?<month>\d+)\.(?<year>\d+).(?<hour>\d+):(?<minute>\d+):(?<second>\d+)/i &&
+        # google.ml
+        $out !~ /record.*?expire.*?:\s+(?<month>\d+)\/(?<day>\d+)\/(?<year>\d+)/i &&
+        # google.it, google.sk
+        $out !~ /(?|Valid\s+Until:|Expir(?:e).*?(?:Date):)\s+(?<year>\d+)\-(?<month>\d+)\-(?<day>\d+)/i &&
+        # mit.edu
+        $out !~ /(?|Domain\s+expires:)\s+(?<day>\d+)\-(?<month>[a-z]+)\-(?<year>\d+)/i);
 my $tm;
+my $monther = sub {
+    my ($month) = @_;
+    my %months = do {
+        my $i = 1;
+        map {$_ => $i++} (qw( jan feb mar apr may jun jul aug sep oct nov dec ));
+        };
+    if ($month =~ /[a-z]/i) {
+        $month = $months{ lc($month) };
+        }
+    return $month;
+};
+
 eval {
-	$tm = timegm($6, $5, $4, $3, $2-1, $1-1900);
-	};
+    # Avoid further complexity and assume all time in GMT, as hourly
+    # precisions is not important in the end, otherwise it's possible
+    # to use `$+{utc}`, which returns either Z, .0Z, +03, +0000 or empty
+
+    # Convert month name to month number (for .edu domains)
+    $tm = timegm($+{second}, $+{minute}, $+{hour}, $+{day}, &$monther($+{month})-1, $+{year}-1900);
+    };
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);
 }
