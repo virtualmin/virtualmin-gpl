@@ -11229,26 +11229,21 @@ foreach my $d (&list_domains()) {
 # Check for impending domain registrar expiry
 my (@expired, @nearly);
 foreach my $d (&list_domains()) {
-	next if (!$d->{'dns'});
+	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
 
-	# If status collection is disabled and/or last config
-	# check was done a long time ago check the following
+	# If status collection is disabled and last
+	# config check was done a long time ago or if
+	# already expired and next hasn't been updated
+	# for the passed half an hour, then skip it
+	# considering current records to be stale	
 	if ($d->{'whois_next'}) {
-		if
-		(
-			# If collection is disabled and domain config whois records haven't been
-			# updated within next day after expected scheduled check then skip it
-			(!$config{'collect_interval'} && $now > $d->{'whois_next'} + 24*60*60) ||
-
-			# If config check was done a long time ago follow the
-			# same logic as when status collection is disabled
-			($config{'last_check'} > $d->{'whois_next'} + 24*60*60)
-		) {
+		if(($config{'collect_interval'} eq 'none' && $now > $d->{'whois_next'}) ||
+		   ($config{'collect_interval'} eq 'none' && $config{'last_check'} > $d->{'whois_next'}) ||
+		   ($config{'whois_expiry'} < $now && $now > $d->{'whois_next'} + 1800)) {
 			next;
 			}
 		}
 
-	next if (!$d->{'whois_expiry'});
 	# Tell if domain is already expired
 	if ($d->{'whois_expiry'} < $now) {
 		push(@expired, $d);
