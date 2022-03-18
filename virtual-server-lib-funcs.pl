@@ -14102,16 +14102,20 @@ return &text('rename_emaking', "<tt>$merr</tt>") if (defined($merr));
 
 if ($dom) {
 	&$first_print(&text('rename_doingdom', "<tt>$dom</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 if ($user) {
 	&$first_print(&text('rename_doinguser', "<tt>$user</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 if ($home eq 'auto') {
 	&$first_print(&text('rename_doinghome',
 		"<tt>".&server_home_directory($d, $parentdom)."</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 elsif ($home) {
 	&$first_print(&text('rename_doinghome', "<tt>$home</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 
 # Build the list of domains being changed
