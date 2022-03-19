@@ -11170,6 +11170,7 @@ my (@expired, @nearly);
 my $now = time();
 foreach my $d (&list_domains()) {
 	next if (!$d->{'ssl_cert_expiry'});
+	next if ($d->{'disabled'});
 
 	# Check if cached cert file time is valid
 	my @st = stat($d->{'ssl_cert'});
