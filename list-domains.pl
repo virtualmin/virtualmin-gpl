@@ -726,7 +726,7 @@ if ($multi) {
 
 		# DNS registrar expiry date
 		if ($d->{'whois_expiry'}) {
-			print "    DNS expiry date: ",
+			print "    Domain registration expiry: ",
 				&make_date($d->{'whois_expiry'}, 1),"\n";
 			}
 

@@ -231,10 +231,12 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		}
 	else {
 		# Show page with a link to download
+		my $fsize = -s $temp;
+		my $fsizen = &nice_size($fsize);
 		print "<p><b>",
 		      &ui_link("/$module_name/download_backup.cgi?file=".
 				&urlize($temp),
-			       &text('backup_downloadfile', $tempfile)),
+			       &text('backup_downloadfile', $tempfile) . " ($fsizen)" ),
 		      "</b><p>\n";
 		&ui_print_footer("/$module_name/list_sched.cgi",
 				 $text{'sched_return'});

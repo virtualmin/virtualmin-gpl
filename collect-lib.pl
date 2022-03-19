@@ -199,11 +199,17 @@ foreach my $d (@doms) {
 	&save_domain($d);
 	}
 
-# DNS registration expiries
+# Domain registration expiries
 my $now = time();
 foreach my $d (@doms) {
 	next if (!$d->{'dns'});
-	next if ($d->{'whois_next'} && $now < $d->{'whois_next'} && !$manual);
+	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
+
+	# If update called manually from the dashboard using refresh
+	# button return unless status collection is disabled, and if
+	# disabled allow updating records on manual run to prevent
+	# leaving stale records
+	next if ($manual && $config{'collect_interval'} ne 'none');
 	my ($exp, $err) = &get_whois_expiry($d);
 	$d->{'whois_next'} = $now + 7*24*60*60 + int(rand(24*60*60));
 	$d->{'whois_last'} = $now;

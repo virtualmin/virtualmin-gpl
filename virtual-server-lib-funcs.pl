@@ -11196,13 +11196,16 @@ foreach my $d (&list_domains()) {
 		}
 	}
 if (@expired || @nearly) {
+	my $exp;
 	my $cert_text = "<b>$text{'index_certwarn'}</b><p>\n";
 	if (@expired) {
 		$cert_text .= &text('index_certexpired',
 				    &domain_ssl_page_links(\@expired));
+		$exp++;
 		}
 	if (@nearly) {
-		$cert_text .= &text('index_certnearly',
+		my $nl = $exp ? "<br>" : "";
+		$cert_text .= $nl . &text('index_certnearly',
 				    &domain_ssl_page_links(\@nearly));
 		}
 	push(@rv, $cert_text);
@@ -11224,26 +11227,52 @@ foreach my $d (&list_domains()) {
 		}
 	}
 
-# Check for impending DNS registrar expiry
+# Check for impending domain registrar expiry
 my (@expired, @nearly);
 foreach my $d (&list_domains()) {
 	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+
+	# If status collection is disabled and last
+	# config check was done a long time ago or if
+	# already expired and next hasn't been updated
+	# for the passed half an hour, then skip it
+	# considering current records to be stale	
+	if ($d->{'whois_next'}) {
+		if(($config{'collect_interval'} eq 'none' && $now > $d->{'whois_next'}) ||
+		   ($config{'collect_interval'} eq 'none' && $config{'last_check'} > $d->{'whois_next'}) ||
+		   ($config{'whois_expiry'} < $now && $now > $d->{'whois_next'} + 1800)) {
+			next;
+			}
+		}
+
+	# Tell if domain is already expired
 	if ($d->{'whois_expiry'} < $now) {
 		push(@expired, $d);
 		}
-	elsif ($d->{'whois_expiry'} < $now + 24*60*60) {
+	# Warn 7 days before domain expiry
+	elsif ($d->{'whois_expiry'} < $now + 7*24*60*60) {
 		push(@nearly, $d);
 		}
 	}
 if (@expired || @nearly) {
-	my $expiry_text = "<b>$text{'index_expirywarn'}</b><p>\n";
+	my $exp;
 	if (@expired) {
+		my $gluechar = ", ";
+		if (scalar(@expired) == 1) {
+			$gluechar = "";
+			}
 		$expiry_text .= &text('index_expiryexpired',
-			join(" ", map { &show_domain_name($_) } @expired));
+			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @expired));
+		$exp++;
 		}
 	if (@nearly) {
-		$expiry_text .= &text('index_expirynearly',
-			join(" ", map { &show_domain_name($_) } @nearly));
+		my $gluechar = ", ";
+		if (scalar(@nearly) == 1) {
+			$gluechar = "";
+			}
+		my $nl = $exp ? "<br>" : "";
+		$expiry_text .= $nl . &text('index_expirynearly',
+			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
 		}
 	push(@rv, $expiry_text);
 	}
@@ -14074,16 +14103,20 @@ return &text('rename_emaking', "<tt>$merr</tt>") if (defined($merr));
 
 if ($dom) {
 	&$first_print(&text('rename_doingdom', "<tt>$dom</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 if ($user) {
 	&$first_print(&text('rename_doinguser', "<tt>$user</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 if ($home eq 'auto') {
 	&$first_print(&text('rename_doinghome',
 		"<tt>".&server_home_directory($d, $parentdom)."</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 elsif ($home) {
 	&$first_print(&text('rename_doinghome', "<tt>$home</tt>"));
+	&$second_print($text{'setup_done'});
 	}
 
 # Build the list of domains being changed
