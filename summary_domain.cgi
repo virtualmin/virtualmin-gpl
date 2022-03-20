@@ -21,6 +21,7 @@ $tmpl = &get_template($d->{'template'});
                                  $subdom ?    $text{'summary_title4'} :
                                  $parentdom ? $text{'summary_title2'} :
                                               $text{'summary_title'}, "");
+my %tinfo = &get_theme_info($current_theme);
 
 @tds = ( "width=30%" );
 print &ui_table_start($text{'edit_header'}, "width=100%", 4);
@@ -140,9 +141,8 @@ if ($d->{'owner'} &&
 # Show domain ID
 if (&master_admin()) {
 	my $domid = "<tt>$d->{'id'}</tt>";
-	my %tinfo = &get_theme_info($current_theme);
 	if ($tinfo{'spa'} && &foreign_available('filemin')) {
-		$domid = "<a href=\"!edit $domains_dir/$d->{'id'}\">$domid</a>"
+		$domid = "<a href=\"!view $domains_dir/$d->{'id'}/M=1/V=1/H=1\">$domid</a>"
 		}
 	print &ui_table_row($text{'edit_id'},
 			    $domid, 3);
