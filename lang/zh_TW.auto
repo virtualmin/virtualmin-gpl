@@ -89,6 +89,7 @@ index_expiryexpired=某些虛擬服務器的DNS註冊已過期： $1
 index_expirynearly=某些虛擬服務器的DNS註冊即將到期： $1
 index_certinvalid=$1的SSL證書文件 $2無效： $3
 index_keyinvalid=$1的SSL密鑰文件 $2無效： $3
+index_global_eg=例如
 
 form_enomore=您無權再創建任何類型的虛擬服務器
 form_generic_aliasmail=$1的別名，帶有自己的電子郵件
@@ -2487,7 +2488,7 @@ balancer_eurl2=目標網址缺失或無效
 balancer_eurls=沒有輸入目標網址
 balancer_script=由腳本安裝程序使用
 balancer_scriptver=腳本版本
-balancer_none=不要代理此路徑-而是在本地投放
+balancer_none=不要代理此路徑並在本地提供服務
 
 scriptwarn_header=Virtualmin管理的以下腳本具有可用的新版本：
 scriptwarn_header2=由Virtualmin管理的以下腳本在\n虛擬服務器 $1中具有可用的新版本：

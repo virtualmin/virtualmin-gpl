@@ -160,6 +160,7 @@ index_expiryexpired=Rejestracja niektórych serwerów wirtualnych wygasła : $1
 index_expirynearly=Wygaśnięcia rejestracji DNS niektórych serwerów wirtualnych : $1 
 index_certinvalid=Plik certyfikatu SSL $2 dla $1 jest nieprawidłowy : $3 
 index_keyinvalid=Plik kluczy SSL $2 dla $1 jest nieprawidłowy : $3 
+index_global_eg=np.
 
 form_rmysql=Serwer bazy danych MySQL
 form_web=Skonfigurować witrynę Apache?
@@ -4797,7 +4798,7 @@ balancer_eurl2=Brakujący lub nieprawidłowy docelowy adres URL
 balancer_eurls=Nie wprowadzono docelowych adresów URL
 balancer_script=Używany przez instalatora skryptów
 balancer_scriptver=Wersja skryptu
-balancer_none=Nie proxy dla tej ścieżki - zamiast tego serwuj lokalnie
+balancer_none=Nie używaj proxy dla tej ścieżki i zamiast tego wyświetlaj lokalnie
 
 scriptwarn_header=Następujące skrypty zarządzane przez Virtualmin mają nowe wersje :
 scriptwarn_header2=Poniższe skrypty zarządzane przez Virtualmin mają nowe wersje dostępne na \nwirtualnym serwerze $1  :

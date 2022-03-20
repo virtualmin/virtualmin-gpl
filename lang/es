@@ -4238,7 +4238,6 @@ balancer_eurl2=Destino URL inválido o inexistente
 balancer_eurls=No se han ingresado URLs de destino
 balancer_script=Usado por el instalador
 balancer_scriptver=Versión del sript
-balancer_none=No utilizar proxy para esta ruta, servir localmente
 
 scriptwarn_header=Los siguientes scripts administrados por Virtualmin tienen nuevas versiones disponibles :
 scriptwarn_header2=Los siguientes scripts administrados por Virtualmin tienen nuevas versiones disponibles en el servidor virtual $1 :

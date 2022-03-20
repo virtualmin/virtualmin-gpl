@@ -47,6 +47,7 @@ index_expiryexpired=Los registros DNS de algunos servidores virtuales han caduca
 index_expirynearly=Los registros DNS de algunos servidores virtuales están a punto de caducar : $1 
 index_certinvalid=El archivo de certificado SSL $2 para $1 no es válido : $3 
 index_keyinvalid=El archivo de claves SSL $2 para $1 no es válido : $3 
+index_global_eg=p.ej.
 
 form_reseller=Propiedad del revendedor
 form_rmysql=Servidor de base de datos MySQL
@@ -1579,6 +1580,8 @@ massg_edeleted=El script $1 se ha eliminado manualmente y, por lo tanto, no se p
 exclude_dbs=Bases de datos y tablas para omitir
 exclude_dbdesc=En cada línea, introduzca una <tt>database</tt> nombre o <tt>database.table</tt> nombre.
 exclude_edb=El nombre de la base de datos '$1' no es válido
+
+balancer_none=No utilice proxy para esta ruta y sirva localmente en su lugar
 
 scriptwarn_where3=Las actualizaciones se pueden hacer en Virtualmin, en la página Instalar scripts de cada dominio o todas a la vez en: \n $1
 

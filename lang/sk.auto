@@ -252,6 +252,7 @@ index_expiryexpired=Platnosť registrácií DNS niektorých virtuálnych servero
 index_expirynearly=Platnosť registrácií DNS niektorých virtuálnych serverov čoskoro vyprší : $1
 index_certinvalid=Súbor certifikátu SSL $2 pre $1 je neplatný : $3
 index_keyinvalid=Súbor kľúča SSL $2 pre $1 je neplatný : $3
+index_global_eg=napr.
 
 form_title=Vytvorte virtuálny server
 form_title2=Vytvorte virtuálny sub-server
@@ -5733,7 +5734,7 @@ balancer_eurl2=Chýbajúca alebo neplatná cieľová adresa URL
 balancer_eurls=Nie sú zadané žiadne cieľové adresy URL
 balancer_script=Používa ho inštalátor skriptov
 balancer_scriptver=Verzia skriptu
-balancer_none=Neposkytujte proxy pre túto cestu – namiesto toho podávajte lokálne
+balancer_none=Neposkytujte proxy pre túto cestu a namiesto toho podávajte lokálne
 
 scriptwarn_header=Nasledujúce skripty spravované Virtualminom majú k dispozícii nové verzie :
 scriptwarn_header2=Nasledujúce skripty spravované Virtualminom majú k dispozícii nové verzie na\nvirtuálnom serveri $1 :

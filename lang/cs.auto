@@ -213,6 +213,7 @@ index_expiryexpired=Platnost registrací DNS některých virtuálních serverů 
 index_expirynearly=Platnost registrací DNS některých virtuálních serverů brzy vyprší : $1 
 index_certinvalid=Soubor certifikátu SSL $2 pro $1 je neplatný : $3 
 index_keyinvalid=Soubor klíče SSL $2 pro $1 je neplatný : $3 
+index_global_eg=např.
 
 form_title=Vytvořte virtuální server
 form_title2=Vytvořte virtuální sub-server
@@ -4496,6 +4497,8 @@ exclude_dbdesc=Na každém řádku zadejte název <tt>databáze</tt> nebo <tt>da
 exclude_eabs=Adresář '$1' nemůže být absolutní cestou
 exclude_edot=Adresář '$1' nemůže obsahovat ..
 exclude_edb=Název databáze '$1' je neplatný
+
+balancer_none=Neposkytujte proxy pro tuto cestu a poskytujte místo toho místně
 
 scriptwarn_header=Následující skripty spravované Virtualminem mají k dispozici nové verze :
 scriptwarn_header2=Následující skripty spravované Virtualminem mají k dispozici nové verze na \nvirtual serveru $1  :

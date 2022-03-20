@@ -31,6 +31,7 @@ index_expiryexpired=De DNS-registraties van sommige virtuele servers zijn verlop
 index_expirynearly=De DNS-registraties van sommige virtuele servers verlopen bijna : $1
 index_certinvalid=Het SSL-certificaatbestand $2 voor $1 is ongeldig : $3
 index_keyinvalid=Het SSL-sleutelbestand $2 voor $1 is ongeldig : $3
+index_global_eg=bijv.
 
 form_generic_aliasmail=Alias van $1, met eigen e-mailadres
 form_rmysql=MySQL-databaseserver
@@ -1027,6 +1028,8 @@ upgrade_yumclear=Opslagplaatscaches wissen ..
 exclude_dbs=Databases en tabellen om over te slaan
 exclude_dbdesc=Voer op elke regel een <tt>database</tt> -naam of <tt>database.table</tt> -naam in.
 exclude_edb=Databasenaam '$1' is ongeldig
+
+balancer_none=Proxy niet voor dit pad en in plaats daarvan lokaal serveren
 
 quotawarn_suffixdom=Verzonden door Virtualmin op: $1
 quotawarn_suffixuser=Verzonden door Virtualmin op: $1

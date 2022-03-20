@@ -1323,7 +1323,6 @@ balancer_eurl2=Chybna ci neplatna cilova URL
 balancer_eurls=Nebyla zvolena zadna cilova URL
 balancer_script=Pouzito instalatorem skriptu
 balancer_scriptver=Verze skriptu
-balancer_none=Nepouzivat proxy pro tyto adresy - jsou dostupne mistne
 
 scriptwarn_dom=Název domény
 

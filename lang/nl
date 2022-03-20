@@ -4770,7 +4770,6 @@ balancer_eurl2=Ontbrekende of ongeldige bestemming URL
 balancer_eurls=Geen bestemming's URL's ingevuld
 balancer_script=Gebruikt door installatie script
 balancer_scriptver=Script versie
-balancer_none=Gebruik geen proxy voor dit pad - houd het lokaal
 
 scriptwarn_header=De volgende scripts die beheerd worden door Virtualmin hebben nieuwe versies beschikbaar :
 scriptwarn_header2=De volgende scripts die beheerd worden door Virtualmin hebben nieuwe versies beschikbaar in de \nvirtuele server $1 :

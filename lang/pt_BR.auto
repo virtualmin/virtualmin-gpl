@@ -251,6 +251,7 @@ index_expiryexpired=Alguns registros DNS de servidores virtuais expiraram : $1
 index_expirynearly=Os registros DNS de alguns servidores virtuais estão prestes a expirar : $1 
 index_certinvalid=O arquivo de certificado SSL $2 para $1 é inválido : $3 
 index_keyinvalid=O arquivo de chave SSL $2 para $1 é inválido : $3 
+index_global_eg=por exemplo.
 
 form_title=Criar servidor virtual
 form_title2=Criar sub-servidor virtual
@@ -5477,7 +5478,7 @@ balancer_eurl2=URL de destino ausente ou inválido
 balancer_eurls=Nenhum URL de destino inserido
 balancer_script=Usado pelo instalador de scripts
 balancer_scriptver=Versão do script
-balancer_none=Não faça proxy para esse caminho - sirva localmente
+balancer_none=Não faça proxy para este caminho e veicule localmente em vez disso
 
 scriptwarn_header=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis :
 scriptwarn_header2=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis, no \nvirtual servidor $1  :

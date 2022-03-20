@@ -47,6 +47,7 @@ index_expiryexpired=Die DNS-Registrierungen einiger virtueller Server sind abgel
 index_expirynearly=Die DNS-Registrierungen einiger virtueller Server laufen bald ab : $1
 index_certinvalid=Die SSL-Zertifikatdatei $2 für $1 ist ungültig : $3
 index_keyinvalid=Die SSL-Schlüsseldatei $2 für $1 ist ungültig : $3
+index_global_eg=z.B.
 
 form_enomore=Sie dürfen keine virtuellen Server mehr erstellen
 form_reseller=Im Besitz des Wiederverkäufers
@@ -2156,7 +2157,7 @@ balancers_ecannot=Sie dürfen keine Proxy-Pfade für diese Domain bearbeiten
 
 balancer_ebalancer=Fehlender oder ungültiger Balancername - nur Buchstaben und Zahlen sind zulässig
 balancer_script=Wird vom Skriptinstallationsprogramm verwendet
-balancer_none=Proxy für diesen Pfad nicht - stattdessen lokal bereitstellen
+balancer_none=Verwenden Sie keinen Proxy für diesen Pfad und stellen Sie stattdessen lokal bereit
 
 scriptwarn_where3=Upgrades können in Virtualmin auf der Seite Install Scripts jeder Domain oder auf einmal unter folgender Adresse durchgeführt werden: \n $1
 

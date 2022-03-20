@@ -5032,7 +5032,6 @@ balancer_eurl2=Manglende eller ugyldig mål URL
 balancer_eurls=Ingen mål-URLer angitt
 balancer_script=Brukt av script installerer
 balancer_scriptver=Script versjon
-balancer_none=Ikke proxy for denne stien - betjen lokalt i stedet
 
 scriptwarn_header=Følgende script, som administreres av Virtualmin, har nye versjoner tilgjengelig :
 scriptwarn_header2=Følgende scripts, som administreres av Virtualmin, har nye versjoner tilgjengelig, i\nden virtuelle tjeneren $1 :

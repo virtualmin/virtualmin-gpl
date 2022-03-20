@@ -89,6 +89,7 @@ index_expiryexpired=Bazı sanal sunucuların DNS kayıtlarının süresi doldu :
 index_expirynearly=Bazı sanal sunucuların DNS kayıtlarının süresi dolmak üzere : $1 
 index_certinvalid=$1 için $2 SSL sertifika dosyası geçersiz : $3 
 index_keyinvalid=$1 için $2 SSL anahtar dosyası geçersiz : $3 
+index_global_eg=Örneğin.
 
 form_title4=Sanal Alt Etki Alanı Oluşturma
 form_enomore=Herhangi bir türde daha fazla sanal sunucu oluşturmanıza izin verilmiyor
@@ -3005,7 +3006,7 @@ balancer_eurl2=Eksik veya geçersiz hedef URL
 balancer_eurls=Hedef URL girilmedi
 balancer_script=Betik yükleyici tarafından kullanılır
 balancer_scriptver=Komut dosyası sürümü
-balancer_none=Bu yol için proxy kullanma - bunun yerine yerel olarak sunma
+balancer_none=Bu yol için proxy yapmayın ve bunun yerine yerel olarak sunun
 
 scriptwarn_header=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının yeni sürümleri vardır :
 scriptwarn_header2=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının \nvirtual $1 sunucusunda yeni sürümleri vardır :

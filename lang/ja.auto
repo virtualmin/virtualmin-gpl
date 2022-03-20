@@ -252,6 +252,7 @@ index_expiryexpired=一部の仮想サーバーのDNS登録の有効期限が切
 index_expirynearly=一部の仮想サーバーのDNS登録の有効期限が近づいています： $1
 index_certinvalid=$1のSSL証明書ファイル $2が無効です： $3
 index_keyinvalid=$1のSSLキーファイル $2が無効です： $3
+index_global_eg=例えば
 
 form_title=仮想サーバーを作成
 form_title2=仮想サブサーバーを作成
@@ -5733,7 +5734,7 @@ balancer_eurl2=リンク先URLがないか無効です
 balancer_eurls=リンク先URLが入力されていません
 balancer_script=スクリプトインストーラーで使用
 balancer_scriptver=スクリプトバージョン
-balancer_none=このパスをプロキシしない-代わりにローカルで提供
+balancer_none=このパスをプロキシせず、代わりにローカルでサービスを提供してください
 
 scriptwarn_header=Virtualminによって管理される次のスクリプトには、新しいバージョンが用意されています。
 scriptwarn_header2=Virtualminによって管理される次のスクリプトは、仮想サーバー $1で新しいバージョンを利用できます：
