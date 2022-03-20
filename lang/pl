@@ -987,6 +987,7 @@ upgrade_title=Uaktualnienie do Virtualmin Pro
 newupgrade_title=Uaktualnienie do Virtualmin Pro
 upgrade_desc1=Jeżeli podoba ci się używanie Virtualmin GPL i chcesz uaktualnić go do wersji Pro, to ta strona pozwoli ci na przeprowadzenie procesu uaktualnienia automatycznie. Musisz wykonać następujące kroki :
 upgrade_step1=Wejdź na <a href='$1'>$1</a> i kup licencje na Virtualmin Pro.
+
 upgrade_step2=Wpisz numer seryjny i klucz licencji w formularzu poniżej.
 upgrade_step3=Kliknij na przycisk <b>Uaktualnij teraz</b>. Rozpocznie się pobieranie najnowszych modułów Virtualmin i dodawanie ich do twojego Webmina. Wszystkie już zainstalowane oprogramowanie i ustawienia zostaną zachowane.
 upgrade_header=Licencja Virtualmin Pro

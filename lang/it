@@ -34,6 +34,7 @@ index_return=lista server virtuali
 index_return2=indice modulo
 index_list=Lista..
 index_eproftpd=ll server ProFTPd non sembra essere installato sul vostro sistema, o non è ancora stato configurato correttamente in Webmin tramite il <a href='$1'>modulo ProFTPd Server </a>. Se il sistema non utilizza ProFTPd, dovrebbe essere disabilitato nella pagina di <a href='$2'>configurazione del modulo</a>.
+
 index_astart=Avvia Apache
 index_astartdesc=Il webserver Apache è attualmente spento, quindi tutte le pagine web dei server virtuali sono inaccessibili. Clicca questo bottone per avviarlo.
 index_astop=Ferma Apache

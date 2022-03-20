@@ -27,7 +27,6 @@ index_themeswitchnot=Vraag me niet nog een keer
 index_certwarn=Waarschuwing SSL-certificaat
 index_certexpired=De SSL-certificaten van sommige virtuele servers zijn verlopen : $1
 index_certnearly=De SSL-certificaten van sommige virtuele servers verlopen bijna : $1
-index_expirywarn=Waarschuwing DNS-registratie
 index_expiryexpired=De DNS-registraties van sommige virtuele servers zijn verlopen : $1
 index_expirynearly=De DNS-registraties van sommige virtuele servers verlopen bijna : $1
 index_certinvalid=Het SSL-certificaatbestand $2 voor $1 is ongeldig : $3
@@ -133,6 +132,8 @@ alias_egone=E-mailalias bestaat niet meer
 alias_etype1f=Je mag geen e-mail doorsturen naar '$1'
 
 edit_id=Domein-ID
+edit_ssl_exp=Vervaldatum domein SSL
+edit_whois_exp=Vervaldatum domeinregistratie
 edit_linkdom=Domeinnaam voor gebruik in links
 edit_nolinkdom=Deze domeinnaam
 edit_elinkdom=Domein voor gebruik in links bestaat niet!
@@ -473,6 +474,7 @@ restore_euid=UID $1 wordt al gebruikt op dit systeem
 restore_egid=GID $1 wordt al gebruikt op dit systeem
 
 restore_unixsame=.. het terugzetten naar de oorspronkelijke LDAP-server $1 in replicatiemodus overslaan
+restore_dirzip=ZIP-bestand van thuismap uitpakken ..
 restore_dirsame=.. het terugzetten naar de oorspronkelijke NFS-server $1 in replicatiemodus overslaan
 restore_edirspace=.. waarschuwing - deze back-up bevat $1 van bestanden, maar uw systeem heeft slechts $2 gratis ..
 restore_mysqldummy=MySQL-databases herstellen. ..
@@ -1548,6 +1550,12 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Toegangssleutel $1 gebruiken
 cloud_rsuser=Login $1 gebruiken
+cloud_s3_noawscli=Het wordt aanbevolen om de officiële AWS-opdrachtregelinterface te installeren.
+cloud_s3_noawscli2=AWS-opdrachtregelinterface is niet geïnstalleerd!
+cloud_s3_noawscli_install=<a href='$1'>Klik hier</a> om het automatisch te laten installeren.
+cloud_s3_awscli_installing=Het AWS CLI-pakket installeren ..
+cloud_s3_awscli_title=Installeer AWS CLI
+cloud_s3_awscli_return=S3-formulier
 cloud_s3_akey=Standaard S3-login
 cloud_noneset=Geen ingesteld
 cloud_below=Hieronder ingevoerd ..

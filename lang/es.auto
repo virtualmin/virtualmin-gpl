@@ -43,7 +43,6 @@ index_themeswitchnot=No me preguntes de nuevo
 index_certwarn=Advertencia de certificado SSL
 index_certexpired=Los certificados SSL de algunos servidores virtuales han caducado : $1
 index_certnearly=Los certificados SSL de algunos servidores virtuales están a punto de caducar : $1
-index_expirywarn=Advertencia de registro de DNS
 index_expiryexpired=Los registros DNS de algunos servidores virtuales han caducado : $1 
 index_expirynearly=Los registros DNS de algunos servidores virtuales están a punto de caducar : $1 
 index_certinvalid=El archivo de certificado SSL $2 para $1 no es válido : $3 
@@ -240,6 +239,8 @@ alias_etype1f=No está permitido reenviar correos electrónicos a '$1'
 
 edit_dbuser=Por $2 : $1 
 edit_id=ID de dominio
+edit_ssl_exp=Caducidad SSL de dominio
+edit_whois_exp=Caducidad del registro de dominio
 edit_applyplan=Aplicar límites del nuevo plan si se cambia
 edit_linkdom=Nombre de dominio para usar en enlaces
 edit_nolinkdom=Este nombre de dominio
@@ -684,6 +685,7 @@ restore_euid=UID $1 ya está en uso en este sistema
 restore_egid=GID $1 ya está en uso en este sistema
 
 restore_unixsame=.. omitiendo restaurar al servidor LDAP original $1 en modo de replicación
+restore_dirzip=Extrayendo archivo ZIP del directorio de inicio ..
 restore_dirsame=.. omitiendo la restauración al servidor NFS original $1 en modo de replicación
 restore_edirspace=.. advertencia: esta copia de seguridad contiene $1 de archivos, pero su sistema solo tiene $2 gratis.
 restore_wasmissing=.. esto fue solo una copia de seguridad incremental. <b>No se han restaurado todos los archivos, ¡primero debe restaurar la copia de seguridad completa!</b>
@@ -2593,6 +2595,12 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Usando la tecla de acceso $1
 cloud_rsuser=Usando login $1
+cloud_s3_noawscli=Se recomienda tener instalada la interfaz de línea de comandos oficial de AWS.
+cloud_s3_noawscli2=¡La interfaz de línea de comandos de AWS no está instalada!
+cloud_s3_noawscli_install=<a href='$1'>Haga clic aquí</a> para que se instale automáticamente.
+cloud_s3_awscli_installing=Instalación del paquete AWS CLI ..
+cloud_s3_awscli_title=Instalar la CLI de AWS
+cloud_s3_awscli_return=formulario S3
 cloud_s3_akey=Inicio de sesión S3 predeterminado
 cloud_noneset=Ninguno establecido
 cloud_below=Entró a continuación ..

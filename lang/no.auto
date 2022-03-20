@@ -21,7 +21,6 @@ index_themeswitchnot=Ikke spør meg igjen
 index_certwarn=SSL-sertifikatadvarsel
 index_certexpired=Noen virtuelle serveres SSL-sertifikater er utløpt : $1 
 index_certnearly=Noen virtuelle serveres SSL-sertifikater er i ferd med å utløpe : $1 
-index_expirywarn=Advarsel om DNS-registrering
 index_expiryexpired=Noen virtuelle serveres DNS-registreringer er utløpt : $1 
 index_expirynearly=Noen virtuelle serveres DNS-registreringer er i ferd med å utløpe : $1 
 index_certinvalid=SSL-sertifikatfilen $2 for $1 er ugyldig : $3 
@@ -105,6 +104,8 @@ user_noforward=Svar på videresendt e-post automatisk?
 alias_etype1f=Du har ikke lov til å videresende e-post til '$1'
 
 edit_id=Domenenavn
+edit_ssl_exp=Domene SSL utløp
+edit_whois_exp=Domeneregistrering utløper
 edit_linkdom=Domenenavn for bruk i lenker
 edit_nolinkdom=Dette domenenavnet
 edit_elinkdom=Domenet for bruk i lenker eksisterer ikke!
@@ -339,6 +340,7 @@ restore_euid=UID $1 er allerede i bruk på dette systemet
 restore_egid=GID $1 er allerede i bruk på dette systemet
 
 restore_unixsame=.. hopper over gjenoppretting til original LDAP-server $1 i replikasjonsmodus
+restore_dirzip=Trekker ut ZIP-fil av hjemmekatalog ..
 restore_dirsame=.. hopper over gjenoppretting til original NFS-server $1 i replikasjonsmodus
 restore_edirspace=.. advarsel - denne sikkerhetskopien inneholder $1 av filer, men systemet ditt har bare $2 gratis ..
 restore_mysqldummy=Gjenopprette MySQL-databaser ..
@@ -984,6 +986,12 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Bruker tilgangsnøkkel $1 
 cloud_rsuser=Bruker innlogging $1 
+cloud_s3_noawscli=Det anbefales å ha offisielt AWS kommandolinjegrensesnitt installert.
+cloud_s3_noawscli2=AWS kommandolinjegrensesnitt er ikke installert!
+cloud_s3_noawscli_install=<a href='$1'>Klikk her</a> for å få den installert automatisk.
+cloud_s3_awscli_installing=Installere AWS CLI-pakken ..
+cloud_s3_awscli_title=Installer AWS CLI
+cloud_s3_awscli_return=S3-skjema
 cloud_s3_akey=Standard S3 pålogging
 cloud_noneset=Ingen sett
 cloud_below=Oppført nedenfor ..

@@ -43,7 +43,6 @@ index_themeswitchnot=Ne me demandez plus
 index_certwarn=Avertissement de certificat SSL
 index_certexpired=Certains certificats SSL de serveurs virtuels ont expiré : $1 
 index_certnearly=Certains certificats SSL de serveurs virtuels sont sur le point d'expirer : $1 
-index_expirywarn=Avertissement d'enregistrement DNS
 index_expiryexpired=Certains enregistrements DNS de serveurs virtuels ont expiré : $1 
 index_expirynearly=Certains enregistrements DNS de serveurs virtuels sont sur le point d'expirer : $1 
 index_certinvalid=Le fichier de certificat SSL $2 pour $1 n'est pas valide : $3 
@@ -380,6 +379,8 @@ fstop_ekill=Échec de l'élimination : $1
 fstart_eup=Déjà en train de courir
 
 edit_id=ID de domaine
+edit_ssl_exp=Expiration SSL du domaine
+edit_whois_exp=Expiration de l'enregistrement du domaine
 edit_linkdom=Nom de domaine à utiliser dans les liens
 edit_nolinkdom=Ce nom de domaine
 edit_elinkdom=Le domaine à utiliser dans les liens n'existe pas!
@@ -1079,6 +1080,7 @@ restore_euid=L'UID $1 est déjà utilisé sur ce système
 restore_egid=GID $1 est déjà utilisé sur ce système
 
 restore_unixsame=.. ignorer la restauration sur le serveur LDAP d'origine $1 en mode réplication
+restore_dirzip=Extraction du fichier ZIP du répertoire personnel ..
 restore_dirsame=.. ignorer la restauration sur le serveur NFS d'origine $1 en mode réplication
 restore_edirspace=.. avertissement - cette sauvegarde contient $1 de fichiers, mais votre système ne dispose que de $2 gratuitement ..
 restore_mysqldummy=Restauration des bases de données MySQL ..
@@ -4351,6 +4353,12 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Utilisation de la clé d'accès $1 
 cloud_rsuser=Utilisation de la connexion $1 
+cloud_s3_noawscli=Il est recommandé d'installer l'interface de ligne de commande AWS officielle.
+cloud_s3_noawscli2=L'interface de ligne de commande AWS n'est pas installée !
+cloud_s3_noawscli_install=<a href='$1'>Cliquez ici</a> pour l'installer automatiquement.
+cloud_s3_awscli_installing=Installation du package AWS CLI ..
+cloud_s3_awscli_title=Installer l'interface de ligne de commande AWS
+cloud_s3_awscli_return=Formulaire S3
 cloud_s3_akey=Connexion S3 par défaut
 cloud_noneset=Aucun ensemble
 cloud_below=Entré ci-dessous ..
