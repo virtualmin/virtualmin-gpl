@@ -21,8 +21,6 @@ $tmpl = &get_template($d->{'template'});
                                  $subdom ?    $text{'summary_title4'} :
                                  $parentdom ? $text{'summary_title2'} :
                                               $text{'summary_title'}, "");
-my %tinfo = &get_theme_info($current_theme);
-
 @tds = ( "width=30%" );
 print &ui_table_start($text{'edit_header'}, "width=100%", 4);
 
@@ -187,10 +185,10 @@ if ($d->{'owner'} &&
 # Show domain ID
 if (&master_admin()) {
 	my $domid = "<tt>$d->{'id'}</tt>";
-	if ($tinfo{'spa'} && &foreign_available('filemin')) {
-		my $view_link = "!view $domains_dir/$d->{'id'}/M=1/V=1/H=1";
-		my $edit_link = "!edit $domains_dir/$d->{'id'}";
-		$domid = "<a data-view-link=\"$view_link\" data-edit-link=\"$edit_link\" href=\"$view_link\">$domid</a>"
+	if (&foreign_available('filemin')) {
+		my $efile = &urlize("$domains_dir/$d->{'id'}");
+		my $qfile = &quote_escape("$domains_dir/$d->{'id'}");
+		$domid = "<a data-dom-file=\"$qfile\" href=\"@{[&get_webprefix_safe()]}/filemin/edit_file.cgi?file=$efile\">$domid</a>";
 		}
 	print &ui_table_row($text{'edit_id'},
 			    $domid, 3);
