@@ -14593,6 +14593,11 @@ if ($config{'web'}) {
 		&save_template($tmpl);
 		}
 
+	# Complain if mod_php is the default mode
+	if ($mode eq "mod_php") {
+		&$second_print("<b>".&text('check_ewebmod_php', $mode)."</b>");
+		}
+
 	# Run Apache config check
 	local $err = &apache::test_config();
 	if ($err) {
