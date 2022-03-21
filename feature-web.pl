@@ -3908,6 +3908,13 @@ else {
 	}
 }
 
+sub supports_check_peer_name
+{
+&require_apache();
+return $apache::site{'fullversion'} &&
+       &compare_versions($apache::site{'fullversion'}, "2.4.30") >= 0;
+}
+
 # supports_http2()
 # Returns 1 if HTTPv2 is supported by Apache on this system
 sub supports_http2
