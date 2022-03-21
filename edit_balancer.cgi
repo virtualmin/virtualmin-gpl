@@ -33,13 +33,13 @@ if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 
 # URL path
 print &ui_table_row($text{'balancer_path'},
-	&ui_textbox("path", $b->{'path'}, 20));
+	&ui_textbox("path", $b->{'path'}, 20, undef, undef, " placeholder=\"$text{'index_global_eg'} /path1\""));
 
 if ($in{'new'} && $has == 2 || !$in{'new'} && $b->{'balancer'}) {
 	# Destinations
 	print &ui_table_row($text{'balancer_urls'},
 		&ui_textarea("urls", join("\n", @{$b->{'urls'}}), 5, 60,
-			     undef, $b->{'none'}));
+			     undef, $b->{'none'}, " placeholder=\"$text{'index_global_eg'} https://127.0.0.1:1234\""));
 	}
 else {
 	# Just one destination
