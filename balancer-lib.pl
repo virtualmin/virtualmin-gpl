@@ -87,12 +87,22 @@ foreach my $port (@ports) {
 		}
 	next if (!$virt);
 	local $slash = $balancer->{'path'} eq '/' ? '/' : undef;
+	local $ssl = 0;
+	foreach my $u (@{$balancer->{'urls'}}) {
+		$ssl++ if ($u =~ /^https:/i);
+		}
 	if ($balancer->{'balancer'}) {
 		# To multiple URLs
 		local $lref = &read_file_lines($virt->{'file'});
+		local @pdirs = (map { "BalancerMember $_" } @{$balancer->{'urls'}});
+		if (&supports_check_peer_name() && $ssl) {
+			push(@pdirs, "SSLProxyCheckPeerName off");
+			push(@pdirs, "SSLProxyCheckPeerCN off");
+			push(@pdirs, "SSLProxyCheckPeerExpire off");
+			}
 		splice(@$lref, $virt->{'eline'}, 0,
 		   "<Proxy balancer://$balancer->{'balancer'}>",
-		   (map { "BalancerMember $_" } @{$balancer->{'urls'}}),
+		   @pdirs,
 		   "</Proxy>",
 		   "ProxyPass $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
 		   );
