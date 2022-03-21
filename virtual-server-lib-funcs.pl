@@ -14595,7 +14595,7 @@ if ($config{'web'}) {
 
 	# Complain if mod_php is the default mode
 	if ($mode eq "mod_php") {
-		&$second_print("<b>".&text('check_ewebmod_php', $mode)."</b>");
+		&$second_print(&ui_alert_box(&text('check_ewebmod_php', $mode), 'warn', undef, undef, "", 'fa-spam'));
 		}
 
 	# Run Apache config check
