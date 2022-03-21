@@ -669,7 +669,7 @@ check_ednsip1=DNS kayıtları için harici IP adresi $1 olarak ayarlandı, ancak
 check_ednsip2=Varsayılan IP adresi $1 olarak ayarlanmış, ancak algılanan harici adres aslında $2. Bu genellikle bir NAT güvenlik duvarının arkasında olmanın sonucudur ve <a href='$3'>modül yapılandırması</a> sayfasında düzeltilmelidir
 check_ewebsuexecbin=<tt>suexec</tt> komutu sisteminizde bulunamadı
 check_ewebsuexechome=Sisteminizdeki <tt>suexec</tt> <tt>$2</tt> altındaki komut dosyalarını çalıştıracak şekilde yapılandırılmıştır, ancak Virtualmin sanal sunucusu ana dizini <tt>$1</tt> 1'dır. Etki alanı sahipleri olarak çalıştırılan CGI komut dosyaları yürütülmez
-check_ewebdefphpmode2=$1 PHP yürütme modu varsayılan şablonda seçildi, ancak bu sistemde desteklenmiyor. Varsayılan değeri $2 olarak değiştirme
+check_ewebdefphpmode2=PHP yürütme modu varsayılan şablonda <tt>$1</tt> seçildi, ancak bu sistemde desteklenmiyor ve şimdi <tt>$2</tt> olarak değiştirilecek
 check_ewebmod_php=Varsayılan PHP yürütme modu <tt>$1</tt>'dir ve önerilmez
 check_ewebconfig=Apache yapılandırma hataları bulundu : $1 
 check_ewebapacheversion=Virtualmin sisteminizde Apache sürümünü çalıştıramadı
