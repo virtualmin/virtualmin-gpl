@@ -1636,3 +1636,4 @@ Added support for outgoing SMTP providers like Amazon SES, so that systems with 
 Reseller access to rename domains, manage extra admins, configure proxies, create, delete and edit virtual servers can now be restricted.
 When backing up, you can now choose to download the resulting file in the browser via a link so that the progress of the backup is properly displayed.
 The location of SSL certificate and key files can now be configured at the template level, and a safer default location can be set in the post-install wizard.
+ZIP format backups now use ZIP for archive files inside the backup as well.
