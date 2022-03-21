@@ -1454,6 +1454,7 @@ check_ednsip1=Externí adresa IP pro záznamy DNS je nastavena na $1, ale zjišt
 check_ewebsuexecbin=Příkaz <tt>suexec</tt> nebyl ve vašem systému nalezen
 check_ewebsuexechome=Příkaz <tt>suexec</tt> ve vašem systému je nakonfigurován tak, aby spouštěl pouze skripty pod <tt>$2</tt>, ale domovský adresář virtuálního serveru Virtualmin je <tt>$1</tt>. Skripty CGI spuštěné jako vlastníci domény nebudou spuštěny
 check_ewebdefphpmode2=Režim spuštění PHP $1 byl vybrán ve výchozí šabloně, ale v tomto systému není podporován. Změna výchozí hodnoty na $2
+check_ewebmod_php=Výchozí režim provádění PHP je <tt>$1</tt>, což se nedoporučuje
 check_ewebconfig=Byly nalezeny chyby konfigurace Apache : $1 
 check_ewebapacheversion=Virtualmin nemohl ve vašem systému zjistit verzi Apache
 check_ewebapacheversion2=Váš systém používá verzi Apache $1, ale Virtualmin vyžaduje verzi $2 nebo novější

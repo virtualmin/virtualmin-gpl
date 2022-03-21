@@ -593,6 +593,7 @@ check_ednsip2=默認IP地址設置為 $1，但是檢測到的外部地址實際�
 check_ewebsuexecbin=在系統上找不到<tt>suexec</tt>命令。
 check_ewebsuexechome=您系統上的<tt>suexec</tt>命令配置為僅在<tt>$2</tt>下運行腳本，但 Virtualmin 虛擬服務器主目錄為<tt>$1</tt> 。不會執行以域所有者身份運行的 CGI 腳本。
 check_ewebdefphpmode2=在默認模板中選擇了PHP執行模式 $1，但此系統不支持該模式。將默認值更改為 $2。
+check_ewebmod_php=PHP默認執行方式為<tt>$1</tt>，不推薦
 check_ewebconfig=發現Apache配置錯誤： $1
 check_ewebapacheversion=Virtualmin無法在您的系統上計算出Apache的版本
 check_ewebapacheversion2=您的系統正在運行Apache版本 $1，但是Virtualmin需要版本 $2或更高版本

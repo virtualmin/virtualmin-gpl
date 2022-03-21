@@ -245,6 +245,7 @@ check_desc=De status van uw systeem wordt gecontroleerd om er zeker van te zijn 
 check_defip6=Het standaard IPv6-adres voor virtuele servers is $1
 check_ewebsuexechome=De <tt>suexec</tt> op uw systeem is geconfigureerd om alleen scripts onder de <tt>$2</tt>, maar de homedirectory van de virtuele Virtualmin-server is <tt>$1</tt>. CGI-scripts die als domeineigenaren worden uitgevoerd, worden niet uitgevoerd
 check_ewebdefphpmode2=PHP-uitvoeringsmodus $1 is geselecteerd in de standaardsjabloon, maar wordt niet ondersteund op dit systeem. De standaard wijzigen in $2
+check_ewebmod_php=De standaard PHP-uitvoeringsmodus is <tt>$1</tt>, wat niet wordt aanbevolen
 check_ewebapacheversion=Virtualmin kon de versie van Apache op uw systeem niet uitwerken
 check_ewebapacheversion2=Op uw systeem wordt Apache-versie $1 uitgevoerd, maar Virtualmin vereist versie $2 of hoger
 check_suexecok2=CGI-scripts kunnen worden uitgevoerd met suEXEC of FCGIwrap

@@ -544,6 +544,7 @@ check_ednsip2=Die Standard-IP-Adresse ist auf $1 festgelegt, die erkannte extern
 check_ewebsuexecbin=Der Befehl <tt>suexec</tt> wurde auf Ihrem System nicht gefunden
 check_ewebsuexechome=Der <tt>suexec</tt> auf Ihrem System ist so konfiguriert, dass er nur Skripte unter <tt>$2</tt> ausführt, aber das Home-Verzeichnis des virtuellen Virtualmin-Servers ist <tt>$1</tt>. CGI-Skripte, die als Domaininhaber ausgeführt werden, werden nicht ausgeführt
 check_ewebdefphpmode2=Der PHP-Ausführungsmodus $1 wurde in der Standardvorlage ausgewählt, wird auf diesem System jedoch nicht unterstützt. Ändern der Standardeinstellung in $2
+check_ewebmod_php=Der standardmäßige PHP-Ausführungsmodus ist <tt>$1</tt>, was nicht empfohlen wird
 check_ewebapacheversion=Virtualmin konnte die Version von Apache auf Ihrem System nicht ermitteln
 check_ewebapacheversion2=Auf Ihrem System wird Apache Version $1 ausgeführt, für Virtualmin ist jedoch Version $2 oder höher erforderlich
 check_ewebphp=Die Apache-Konfigurationsdatei $1 enthält $2 Zeilen, die verhindern, dass PHP mit Domänenbesitzerberechtigungen ausgeführt wird. Diese Zeilen müssen entfernt werden
