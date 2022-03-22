@@ -2944,7 +2944,7 @@ my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
 $cannums{int($tmpl->{'web_php_suexec'})} = 1;
 my @opts = grep { $cannums{$_->[0]} }
 		([ 4, $text{'phpmode_none'} ],
-		 [ 0, $text{'phpmode_mod_php'} ],
+		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger') ],
 	         [ 1, $text{'phpmode_cgi'} ],
 	         [ 2, $text{'phpmode_fcgid'} ],
 	         [ 3, $text{'phpmode_fpm'} ]);
