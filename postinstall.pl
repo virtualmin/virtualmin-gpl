@@ -301,6 +301,15 @@ if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
 	&save_template($tmpl);
 	}
 
+# Cache current PHP modes
+foreach my $d (grep { &domain_has_website($_) && !$d->{'alias'} }
+		    &list_domains()) {
+	if (!$d->{'php_mode'}) {
+		$d->{'php_mode'} = &get_domain_php_mode($d);
+		&save_domain($d);
+		}
+	}
+
 # Enable checking for latest scripts
 if ($config{'scriptlatest_enabled'} eq '') {
 	$config{'scriptlatest_enabled'} = 1;

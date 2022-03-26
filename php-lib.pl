@@ -233,6 +233,7 @@ foreach my $ver (@vers) {
 if ($p ne 'web') {
 	my $err = &plugin_call($p, "feature_save_web_php_mode",
 			       $d, $mode, $port, $newdom);
+	$d->{'php_mode'} = $mode if (!$err);
 	return $err;
 	}
 &require_apache();
@@ -548,6 +549,9 @@ foreach my $p (@ports) {
 
 	&flush_file_lines();
 	}
+
+# Update PHP mode cache
+$d->{'php_mode'} = $mode;
 
 local @vlist = map { $_->[0] } &list_available_php_versions($d);
 if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
