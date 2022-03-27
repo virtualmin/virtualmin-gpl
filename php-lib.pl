@@ -24,7 +24,8 @@ if ($virt) {
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	foreach my $ppm (@ppm) {
 		if ($ppm =~ /unix:\Q$fsock\E/ ||
-		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/) {
+		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/ ||
+		    $ppm =~ /fcgi:\/\/127\.0\.0\.1:\Q$fport\E/) {
 			return 'fpm';
 			}
 		}
