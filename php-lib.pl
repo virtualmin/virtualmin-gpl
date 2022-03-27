@@ -78,7 +78,12 @@ if ($virt) {
 			}
 		}
 	}
-return 'mod_php';
+
+# Fall back to mod_php, if enabled
+if (&get_apache_mod_php_version()) {
+	return 'mod_php';
+	}
+return 'none';
 }
 
 # save_domain_php_mode(&domain, mode, [port], [new-domain])
