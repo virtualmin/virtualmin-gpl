@@ -309,6 +309,13 @@ foreach my $d (grep { &domain_has_website($_) && !$d->{'alias'} }
 		&save_domain($d);
 		}
 	}
+foreach my $d (grep { $d->{'alias'} } &list_domains()) {
+	my $dd = &get_domain($d->{'alias'});
+	if ($dd && $dd->{'php_mode'}) {
+		$d->{'php_mode'} = $dd->{'php_mode'};
+		&save_domain($d);
+		}
+	}
 
 # Enable checking for latest scripts
 if ($config{'scriptlatest_enabled'} eq '') {
