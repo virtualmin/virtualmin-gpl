@@ -2944,7 +2944,7 @@ my %cannums = map { $mmap->{$_}, 1 } &supported_php_modes();
 $cannums{int($tmpl->{'web_php_suexec'})} = 1;
 my @opts = grep { $cannums{$_->[0]} }
 		([ 4, $text{'phpmode_none'} ],
-		 [ 0, $text{'phpmode_mod_php'} ],
+		 [ 0, &ui_text_color($text{'phpmode_mod_php'}, 'danger') ],
 	         [ 1, $text{'phpmode_cgi'} ],
 	         [ 2, $text{'phpmode_fcgid'} ],
 	         [ 3, $text{'phpmode_fpm'} ]);
@@ -3922,10 +3922,10 @@ sub supports_http2
 &require_apache();
 my $err;
 if (!$apache::httpd_modules{'mod_http2'}) {
-	$err = "Missing Apache module mod_http2";
+	$err = "Missing Apache <tt>mod_http2</tt> module";
 	}
 elsif ($apache::httpd_modules{'mod_prefork'}) {
-	$err = "Incompatible Apache module mod_prefork is enabled";
+	$err = "Incompatible Apache <tt>mpm_prefork</tt> module is enabled";
 	}
 elsif (!$apache::site{'fullversion'} ||
        &compare_versions($apache::site{'fullversion'}, "2.4.17") < 0) {

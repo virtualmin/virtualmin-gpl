@@ -543,7 +543,8 @@ check_ednsip1=Die externe IP-Adresse für DNS-Einträge ist auf $1 festgelegt, d
 check_ednsip2=Die Standard-IP-Adresse ist auf $1 festgelegt, die erkannte externe Adresse ist jedoch $2. Dies ist normalerweise das Ergebnis einer NAT-Firewall und sollte auf der Seite <a href='$3'>Modulkonfiguration</a> korrigiert werden
 check_ewebsuexecbin=Der Befehl <tt>suexec</tt> wurde auf Ihrem System nicht gefunden
 check_ewebsuexechome=Der <tt>suexec</tt> auf Ihrem System ist so konfiguriert, dass er nur Skripte unter <tt>$2</tt> ausführt, aber das Home-Verzeichnis des virtuellen Virtualmin-Servers ist <tt>$1</tt>. CGI-Skripte, die als Domaininhaber ausgeführt werden, werden nicht ausgeführt
-check_ewebdefphpmode2=Der PHP-Ausführungsmodus $1 wurde in der Standardvorlage ausgewählt, wird auf diesem System jedoch nicht unterstützt. Ändern der Standardeinstellung in $2
+check_ewebdefphpmode2=Der PHP-Ausführungsmodus <tt>$1</tt> wurde in der Standardvorlage ausgewählt, wird jedoch auf diesem System nicht unterstützt und wird nun in <tt>$2</tt> geändert
+check_ewebmod_php=Der standardmäßige PHP-Ausführungsmodus ist <tt>$1</tt>, was nicht empfohlen wird
 check_ewebapacheversion=Virtualmin konnte die Version von Apache auf Ihrem System nicht ermitteln
 check_ewebapacheversion2=Auf Ihrem System wird Apache Version $1 ausgeführt, für Virtualmin ist jedoch Version $2 oder höher erforderlich
 check_ewebphp=Die Apache-Konfigurationsdatei $1 enthält $2 Zeilen, die verhindern, dass PHP mit Domänenbesitzerberechtigungen ausgeführt wird. Diese Zeilen müssen entfernt werden

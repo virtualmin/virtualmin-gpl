@@ -14604,6 +14604,7 @@ if ($config{'web'}) {
 	my $tmpl = &get_template(0);
 	my $mode = &template_to_php_mode($tmpl);
 	my @supp = &supported_php_modes();
+	my $modupd;
 	if (&indexof($mode, @supp) < 0) {
 		my $mmap = &php_mode_numbers_map();
 		my ($best) = grep { $_ ne "none" } @supp;
@@ -14612,11 +14613,12 @@ if ($config{'web'}) {
 		&$second_print(
 			&text('check_ewebdefphpmode2', $mode, $supp[0]));
 		&save_template($tmpl);
+		$modupd++
 		}
 
-	# Complain if mod_php is the default mode
-	if ($mode eq "mod_php") {
-		&$second_print("<b>".&text('check_ewebmod_php', $mode)."</b>");
+	# Complain if mod_php is the default mode, unless force reset above 
+	if ($mode eq "mod_php" && !$modupd) {
+		&$second_print(&ui_alert_box(&text('check_ewebmod_php', $mode), 'warn', undef, undef, "", 'fa-spam'));
 		}
 
 	# Run Apache config check

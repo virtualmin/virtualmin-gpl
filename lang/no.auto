@@ -189,7 +189,8 @@ feature_ssl=Apache SSL-nettsted
 
 check_desc=Statusen til systemet ditt blir sjekket for å sikre at alle aktiverte funksjoner er tilgjengelige og riktig konfigurert ..
 check_ewebsuexechome=<tt>suexec</tt> kommandoen på systemet ditt er konfigurert til å bare kjøre skript under <tt>$2</tt>, men Virtualmins virtuelle serverhjemmekatalog er <tt>$1</tt>. CGI-skript som kjøres som domeneeiere vil ikke bli kjørt
-check_ewebdefphpmode2=PHP-utførelsesmodus $1 ble valgt i standardmal, men støttes ikke på dette systemet. Endre standard til $2
+check_ewebdefphpmode2=PHP-utførelsesmodus <tt>$1</tt> ble valgt i standardmalen, men støttes ikke på dette systemet, og vil nå endres til <tt>$2</tt>
+check_ewebmod_php=Standard PHP-utførelsesmodus er <tt>$1</tt>, som ikke anbefales
 check_suexecok2=CGI-skript kan kjøres med suEXEC eller FCGIwrap
 check_suexecok=CGI-skript kan kjøres ved hjelp av suEXEC
 check_fcgiwrapok=CGI-skript kan kjøres ved hjelp av FCGIwrap

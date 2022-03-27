@@ -26,9 +26,16 @@ if ($can) {
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 		# PHP execution mode
 		push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
+		my $dmode = sub {
+			my ($mode) = @_;
+			if ($mode eq 'mod_php') {
+				return &ui_text_color($text{'phpmode_'.$mode}, 'danger');
+				}
+			return $text{'phpmode_'.$mode};
+			};
 		print &ui_table_row(&hlink($text{'phpmode_mode'}, "phpmode"),
 				    &ui_radio_table("mode", $mode,
-				      [ map { [ $_, $text{'phpmode_'.$_} ] }
+				      [ map { [ $_, &$dmode($_) ] }
 					    @modes ]));
 		}
 

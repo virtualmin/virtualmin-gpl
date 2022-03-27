@@ -418,7 +418,8 @@ check_ednsip1=La dirección IP externa para los registros DNS se establece en $1
 check_ednsip2=La dirección IP predeterminada se establece en $1, pero la dirección externa detectada es en realidad $2. Esto suele ser el resultado de estar detrás de un firewall NAT, y debe corregirse en la página de <a href='$3'>configuración</a> del <a href='$3'>módulo</a>
 check_ewebsuexecbin=El comando <tt>suexec</tt> no se encontró en su sistema
 check_ewebsuexechome=El <tt>suexec</tt> en su sistema está configurado para ejecutar solo scripts por debajo de <tt>$2</tt>, pero el directorio de inicio del servidor virtual de Virtualmin es <tt>$1</tt>. Los scripts CGI ejecutados como propietarios de dominios no se ejecutarán
-check_ewebdefphpmode2=Se seleccionó el modo de ejecución PHP $1 en la plantilla predeterminada, pero no es compatible con este sistema. Cambiar el valor predeterminado a $2
+check_ewebdefphpmode2=El modo de ejecución de PHP <tt>$1</tt> se seleccionó en la plantilla predeterminada, pero no es compatible con este sistema y ahora se cambiará a <tt>$2</tt>
+check_ewebmod_php=El modo de ejecución predeterminado de PHP es <tt>$1</tt>, que no se recomienda
 check_ewebconfig=Se encontraron errores de configuración de Apache : $1
 check_ewebapacheversion=Virtualmin no pudo resolver la versión de Apache en su sistema
 check_ewebapacheversion2=Su sistema ejecuta Apache versión $1, pero Virtualmin requiere la versión $2 o posterior

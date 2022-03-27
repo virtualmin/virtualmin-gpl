@@ -592,7 +592,8 @@ check_ednsip1=DNS记录的外部IP地址设置为 $1，但是检测到的外部�
 check_ednsip2=默认IP地址设置为 $1，但是检测到的外部地址实际上是 $2。这通常是由于位于NAT防火墙后面而导致的，因此应在<a href='$3'>模块配置</a>页上进行更正。
 check_ewebsuexecbin=在系统上找不到<tt>suexec</tt>命令。
 check_ewebsuexechome=您系统上的<tt>suexec</tt>命令配置为仅在<tt>$2</tt>下运行脚本，但 Virtualmin 虚拟服务器主目录为<tt>$1</tt> 。不会执行以域所有者身份运行的 CGI 脚本。
-check_ewebdefphpmode2=在默认模板中选择了PHP执行模式 $1，但此系统不支持该模式。将默认值更改为 $2。
+check_ewebdefphpmode2=PHP执行模式在默认模板中选择了<tt>$1</tt> ，但本系统不支持，现在改成<tt>$2</tt>
+check_ewebmod_php=PHP默认执行方式为<tt>$1</tt>，不推荐
 check_ewebconfig=发现Apache配置错误： $1
 check_ewebapacheversion=Virtualmin无法在您的系统上计算出Apache的版本
 check_ewebapacheversion2=您的系统正在运行Apache版本 $1，但是Virtualmin需要版本 $2或更高版本
