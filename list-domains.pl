@@ -36,6 +36,10 @@ can use the C<--any-reseller> option.
 To show only domains that are enabled, use the C<--enabled> flag. To show
 only disabled domains, use C<--disabled> instead.
 
+To limit the output to domains using a particular PHP execution mode, use
+the C<--php-mode> flag followed by one of C<none>, C<cgi>, C<fcgid>, C<fpm>
+or C<mod_php>.
+
 To find the domain that contains a mailbox, use the C<--mail-user> flag
 followed by the full mailbox username (as used by FTP and IMAP).
 
@@ -170,6 +174,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--disabled") { $disabled = 1; }
 	elsif ($a eq "--enabled") { $disabled = 0; }
+	elsif ($a eq "--php-mode") {
+		$php_mode = shift(@ARGV);
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -267,6 +274,12 @@ if ($disabled eq '1') {
 	}
 elsif ($disabled eq '0') {
 	@doms = grep { !$_->{'disabled'} } @doms;
+	}
+
+# Limit by PHP mode
+if ($php_mode) {
+	@doms = grep { $_->{'php_mode'} &&
+		       $_->{'php_mode'} eq $php_mode } @doms;
 	}
 
 if ($multi) {
@@ -916,6 +929,7 @@ print "                        [--parent domain]\n";
 print "                        [--plan ID|name]\n";
 print "                        [--template ID|name]\n";
 print "                        [--disabled | --enabled]\n";
+print "                        [--php-mode cgi|fcgid|fpm|mod_php]\n";
 if ($virtualmin_pro) {
 	print "                        [--reseller name | --no-reseller |\n";
 	print "                         --any-reseller]\n";
