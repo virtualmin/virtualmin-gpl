@@ -572,6 +572,9 @@ if ($multi) {
 					}
 				}
 			}
+		elsif (!$d->{'alias'} && $multi == 2 && $d->{'php_mode'}) {
+			print "    PHP execution mode: $d->{'php_mode'}\n";
+			}
 		if (!$d->{'alias'} &&
 		    &domain_has_website($d) &&
 		    defined(&get_domain_php_children) && $multi == 1) {
