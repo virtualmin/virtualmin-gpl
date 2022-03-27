@@ -11277,6 +11277,27 @@ if (@expired || @nearly) {
 	push(@rv, $expiry_text);
 	}
 
+# Check for active but un-used mod_php
+my @supp = &supported_php_modes();
+if (&indexof("mod_php", @supp) >= 0 && &master_admin()) {
+	# Available, but is it used?
+	my $count = 0;
+	foreach my $d (&list_domains()) {
+		if ($d->{'php_mode'} && $d->{'php_mode'} eq 'mod_php') {
+			$count++;
+			}
+		}
+	if (!$count) {
+		my $mod_text = "<b>".&text('index_disable_mod_php')."</b><p>\n";
+		$mod_text .= &ui_form_start(
+			"@{[&get_webprefix_safe()]}/$module_name/disable_mod_php.cgi");
+		$mod_text .= &ui_submit($text{'index_disable_mod_phpok'});
+		$mod_text .= &ui_submit($text{'index_themeswitchnot'}, "cancel");
+		$mod_text .= &ui_form_end();
+		push(@rv, $mod_text);
+		}
+	}
+
 return @rv;
 }
 
