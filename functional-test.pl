@@ -376,6 +376,13 @@ $domains_tests = [
 		  'grep' => [ 'PHP execution mode: cgi' ],
 		},
 
+		# Validate PHP mode cache
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'simple-multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: cgi' ],
+		},
+
 		# Check PHP running via CGI
 		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
@@ -399,6 +406,13 @@ $domains_tests = [
 		  'grep' => [ 'PHP execution mode: fcgid' ],
 		},
 
+		# Validate PHP mode cache
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'simple-multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: fcgid' ],
+		},
+
 		# Check PHP running via fCGId
 		{ 'command' => 'echo "<?php system(\'id -a\'); ?>" >~'.
 			       $test_domain_user.'/public_html/test.php',
@@ -418,6 +432,13 @@ $domains_tests = [
 		# Validate PHP mode
 		{ 'command' => 'list-domains.pl',
 		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ] ],
+		  'grep' => [ 'PHP execution mode: fpm' ],
+		},
+
+		# Validate PHP mode cache
+		{ 'command' => 'list-domains.pl',
+		  'args' => [ [ 'simple-multiline' ],
 			      [ 'domain', $test_domain ] ],
 		  'grep' => [ 'PHP execution mode: fpm' ],
 		},
@@ -460,6 +481,13 @@ $domains_tests = [
 	# Validate PHP mode
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP execution mode: none' ],
+	},
+
+	# Validate PHP mode cache
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'simple-multiline' ],
 		      [ 'domain', $test_domain ] ],
 	  'grep' => [ 'PHP execution mode: none' ],
 	},
