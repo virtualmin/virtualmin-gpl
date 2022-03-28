@@ -11278,8 +11278,8 @@ if (@expired || @nearly) {
 	}
 
 # Check for active but un-used mod_php
-my @supp = &supported_php_modes();
-if (&indexof("mod_php", @supp) >= 0 && &master_admin()) {
+if (&master_admin() && !$config{'mod_php_ok'} && $config{'web'} &&
+    &get_apache_mod_php_version()) {
 	# Available, but is it used?
 	my $count = 0;
 	foreach my $d (&list_domains()) {

@@ -4827,8 +4827,7 @@ return $changed;
 sub fix_mod_php_directives
 {
 my ($d, $port) = @_;
-my @modes = &supported_php_modes($d);
-if (&indexof("mod_php", @modes) < 0) {
+if (!&get_apache_mod_php_version()) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	if ($virt) {
 		&apache::save_directive(
