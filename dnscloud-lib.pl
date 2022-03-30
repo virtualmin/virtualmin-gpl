@@ -282,8 +282,7 @@ return ($ok, $oldrecs) if (!$ok);
 my $js = { 'Changes' => [] };
 my %keep = map { &dns_record_key($_), 1 } @$recs;
 foreach my $r (@$oldrecs) {
-	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA' ||
-		 $r->{'type'} eq 'DMARC');
+	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
 	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
@@ -300,11 +299,11 @@ foreach my $r (@$oldrecs) {
 	     });
 	}
 foreach my $r (@$recs) {
-	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA' ||
-		 $r->{'type'} eq 'DMARC');
+	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
-	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
+	$type = "TXT" if ($type eq "SPF" || $type eq "DMARC");
+	$v = "\"$v\"" if ($r->{'type'} eq "TXT");
 	push(@{$js->{'Changes'}},
 	     { 'Action' => 'UPSERT',
 	       'ResourceRecordSet' => {
