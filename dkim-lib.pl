@@ -1014,8 +1014,13 @@ foreach my $d (@$doms) {
 		$changed++;
 		}
 	if ($changed) {
-		&post_records_change($d, $recs, $file);
-		&$second_print($text{'dkim_dnsadded'});
+		my $err = &post_records_change($d, $recs, $file);
+		if ($err) {
+			&$second_print(&text('dkim_ednsadded', $err));
+			}
+		else {
+			&$second_print($text{'dkim_dnsadded'});
+			}
 		$anychanged++;
 		}
 	else {

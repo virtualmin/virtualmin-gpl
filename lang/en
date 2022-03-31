@@ -6571,6 +6571,7 @@ dkim_dns=Adding DKIM records to DNS domain $1 ..
 dkim_ednszone=.. domain not found!
 dkim_ednsexclude=.. domain has been excluded from DKIM
 dkim_dnsadded=.. added successfully
+dkim_ednsadded=.. DNS update failed : $1
 dkim_dnsalready=.. records already exist
 dkim_config=Setting domain and selector in DKIM filter configuration ..
 dkim_boot=Enabling DKIM filter at boot time ..
