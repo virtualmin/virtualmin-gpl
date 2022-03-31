@@ -285,7 +285,7 @@ foreach my $r (@$oldrecs) {
 	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
 	next if ($keep{&dns_record_key($r)});
 	my $v = join(" ", @{$r->{'values'}});
-	$v = "\"$v\"" if ($r->{'type'} =~ /TXT|SPF/);
+	$v = &normalize_route53_txt($r) if ($r->{'type'} =~ /TXT|SPF/);
 	push(@{$js->{'Changes'}},
 	     { 'Action' => 'DELETE',
 	       'ResourceRecordSet' => {
@@ -302,8 +302,9 @@ foreach my $r (@$recs) {
 	next if ($r->{'type'} eq 'NS' || $r->{'type'} eq 'SOA');
 	next if (!$r->{'name'} || !$r->{'type'});	# $ttl or similar
 	my $v = join(" ", @{$r->{'values'}});
+	$type = $r->{'type'};
 	$type = "TXT" if ($type eq "SPF" || $type eq "DMARC");
-	$v = "\"$v\"" if ($r->{'type'} eq "TXT");
+	$v = &normalize_route53_txt($r) if ($type eq "TXT");
 	push(@{$js->{'Changes'}},
 	     { 'Action' => 'UPSERT',
 	       'ResourceRecordSet' => {
@@ -335,6 +336,16 @@ my $rv = &call_route53_cmd(
 	  '--change-batch', 'file://'.$temp ],
 	$info->{'location'}, 1);
 return ref($rv) ? (1, $rv) : (0, $rv);
+}
+
+sub normalize_route53_txt
+{
+my ($r) = @_;
+my $v = &split_long_txt_record("\"".join("", @{$r->{'values'}})."\"");
+$v =~ s/^\(\s*//;
+$v =~ s/\s*\)$//;
+$v =~ s/[\n\t]+/ /g;
+return $v;
 }
 
 # call_route53_cmd(akey, params, [region], [parse-json])
