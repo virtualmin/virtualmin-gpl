@@ -4,10 +4,16 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 can_backup_buckets() || &error($text{'buckets_ecannot'});
-$err = &check_s3();
-&error($err) if ($err);
+($err, $warn) = &check_s3();
 
 &ui_print_header(undef, $text{'buckets_title'}, "", "buckets");
+
+print &ui_alert_box($err, 'danger') if ($err);
+print &ui_alert_box($warn, 'warn') if ($warn);
+if ($err) {
+	&ui_print_footer("", $text{'index_return'});
+	return;
+	}
 
 # Find all S3 accounts
 @accounts = &list_all_s3_accounts();

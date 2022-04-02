@@ -5334,9 +5334,9 @@ spf_dnslocal=Moving DNS records to local hosting ..
 spf_eclouddns=.. failed : $1
 spf_ecloud=Failed to update DNS host : $1
 
-s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed
-s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2
-s3_emodule3=The Perl modules $1 or $2 needed to communicate with Amazon's S3 service is not installed
+s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed.
+s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2.
+s3_emodule3=The Perl modules $1 or $2 needed to communicate with Amazon's S3 service is not installed.
 s3_elist=Failed to list S3 buckets : $1
 s3_elistfiles=Failed to list S3 files : $1
 s3_edelete=Failed to delete S3 bucket : $1
@@ -7165,8 +7165,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_s3account=Using access key $1
 cloud_rsuser=Using login $1
-cloud_s3_noawscli=It is recommended to have official AWS command line interface installed.
-cloud_s3_noawscli2=AWS command line interface is not installed!
+cloud_s3_noawscli=We recommend installing the official AWS command line interface.
 cloud_s3_noawscli_install=<a href='$1'>Click here</a> to have it installed automatically.
 cloud_s3_awscli_installing=Installing the AWS CLI package ..
 cloud_s3_awscli_title=Install AWS CLI

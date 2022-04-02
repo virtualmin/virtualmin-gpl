@@ -191,15 +191,12 @@ return "<div class=\"vui_features_sorted_grid\" $style_flex_cnt>" . ($lgftable .
 
 =item return_desc - Text for return link 
 
-=item [no_dot] - Do not print leading dot and space
-
 =cut
 sub vui_install_mod_perl_link
 {
 my ($mods, $return_page, $return_desc, $no_dot) = @_;
 my $rv;
 if (&foreign_available('cpan')) {
-	$rv = ". " if (!$no_dot);
 	$rv .= &text('install_mod_perl_link', "../cpan/download.cgi?source=3&cpan=$mods&mode=2&".
 			"return=../virtual-server/$return_page&returndesc=".&urlize($return_desc));
 		}

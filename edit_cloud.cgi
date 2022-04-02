@@ -14,24 +14,20 @@ $prov || &error($text{'cloud_egone'});
 $sfunc = "cloud_".$prov->{'name'}."_get_state";
 $state = &$sfunc($p);
 
-if ($prov->{'longdesc'}) {
-	print $prov->{'longdesc'},"<p>\n";
-	}
-
 # First check if provider can be used
 my $cfunc = "check_".$prov->{'name'};
 if (defined(&$cfunc)) {
-	my $err = &$cfunc();
+	my ($err, $warn) = &$cfunc();
 	if ($err) {
-		if ($err !~ /no-cloud-echeck/) {
-			print &text('cloud_echeck', $prov->{'desc'}, $err),"<p>\n";
-			}
-		else {
-			print $err,"<p>\n";
-			}
+		print &text('cloud_echeck', $prov->{'desc'}, $err),"<p>\n";
 		&ui_print_footer("list_clouds.cgi", $text{'clouds_return'});
 		return;
 		}
+	print &ui_alert_box($warn, 'warn') if ($warn);
+	}
+
+if ($prov->{'longdesc'}) {
+	print $prov->{'longdesc'},"<p>\n";
 	}
 
 print &ui_form_start("save_cloud.cgi", "post");

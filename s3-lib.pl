@@ -4,66 +4,54 @@
 $s3_groups_uri = "http://acs.amazonaws.com/groups/global/";
 
 # check_s3()
-# Returns an error message if S3 cannot be used
+# Returns an error message if S3 cannot be used, or undef if OK. Also returns
+# a second more detailed warning if needed.
 sub check_s3
 {
 # Return no error if `aws_cmd` is set and installed
 if ($config{'aws_cmd'} && &has_command($config{'aws_cmd'})) {
-	return undef;
+	return (undef, undef, undef);
 	}
-my $s3_inbuilt_err;
-my $s3_official_err;
-my $s3_echeck_pre_err = "<i data-no-cloud-echeck></i>";
+
+# Check for core S3 modules
+my ($err, $warn);
 foreach my $m ("XML::Simple", "Digest::HMAC_SHA1",
                "LWP::Protocol::https", @s3_perl_modules) {
 	eval "use $m";
 	if ($@ =~ /Can't locate/) {
-		$s3_inbuilt_err = &text('s3_emodule', "<tt>$m</tt>") .
-			&vui_install_mod_perl_link(
-				$m, "list_buckets.cgi", $text{'index_buckets'});
+		$err = &text('s3_emodule', "<tt>$m</tt>");
+		$err .= " ".&vui_install_mod_perl_link(
+			$m, "list_buckets.cgi", $text{'index_buckets'});
 		}
 	elsif ($@) {
-		$s3_inbuilt_err = &text('s3_emodule2', "<tt>$m</tt>", "$@");
+		$err = &text('s3_emodule2', "<tt>$m</tt>", "$@");
 		}
-	}
-eval "use Crypt::SSLeay";
-if ($@) {
-	eval "use Net::SSLeay";
-	}
-if ($@) {
-	$s3_inbuilt_err = &text('s3_emodule3', "<tt>Crypt::SSLeay</tt>",
-				    "<tt>Net::SSLeay</tt>") .
-			&vui_install_mod_perl_link(
-				'Net::SSLeay', "list_buckets.cgi", $text{'index_buckets'});
 	}
 
-if ($config{'aws_cmd'} && !&has_command($config{'aws_cmd'})) {
-	my $install_link;
-	if (&foreign_available("software")) {
-		$install_link = " " . &text('cloud_s3_noawscli_install', 'install_awscli.cgi');
+if (!$err) {
+	# Check for SSL modules
+	eval "use Crypt::SSLeay";
+	if ($@) {
+		eval "use Net::SSLeay";
 		}
-	$s3_official_err =
-		&ui_alert_box(
-			$text{$s3_inbuilt_err ? 'cloud_s3_noawscli2' : 'cloud_s3_noawscli'} . $install_link,
-			$s3_inbuilt_err ? 'danger' : 'warn', undef, undef, $s3_inbuilt_err ? undef : "");
+	if ($@) {
+		$err = &text('s3_emodule3', "<tt>Crypt::SSLeay</tt>",
+					    "<tt>Net::SSLeay</tt>");
+		$err .= " ".&vui_install_mod_perl_link(
+		    'Net::SSLeay', "list_buckets.cgi", $text{'index_buckets'});
+		}
 	}
-# Return an error if `aws_cmd` is not set, and
-# required Perl modules not installed
-if (!$config{'aws_cmd'} && $s3_inbuilt_err) {
-	$s3_inbuilt_err = &ui_alert_box($s3_inbuilt_err, 'danger');
-	return "$s3_echeck_pre_err$s3_inbuilt_err";
-}
-# Return an error if `aws_cmd` is set, and 
-# netiher Perl modules or AWS CLI installed
-if (($config{'aws_cmd'} && $s3_inbuilt_err) && $s3_official_err) {
-	return "$s3_echeck_pre_err$s3_official_err";
-}
-# Just print a warning that it's better to use AWS CLI if 
-# Perl modules are the and `aws_cmd` is set
-if (($config{'aws_cmd'} && !$s3_inbuilt_err) && $s3_official_err) {
-	print "$s3_official_err";
-}
-return undef;
+
+# Offer to install the aws command, even if other dependencies are available
+if (!$config{'aws_cmd'} || !&has_command($config{'aws_cmd'})) {
+	$warn = $text{'cloud_s3_noawscli'};
+	if (&foreign_available("software")) {
+		$warn .= " ".&text('cloud_s3_noawscli_install',
+				  'install_awscli.cgi');
+		}
+	}
+
+return ($err, $warn);
 }
 
 # require_s3()

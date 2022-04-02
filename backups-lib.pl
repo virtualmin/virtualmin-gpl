@@ -432,7 +432,7 @@ foreach my $desturl (@$desturls) {
 			&$first_print($text{'backup_es3nopath'});
 			next;
 			}
-		local $cerr = &check_s3();
+		local ($cerr) = &check_s3();
 		if ($cerr) {
 			&$first_print($cerr);
 			next;
@@ -1973,7 +1973,7 @@ if ($mode > 0) {
 		      $mode == 10 ? $text{'restore_downloadbb'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
-		local $cerr = &check_s3();
+		local ($cerr) = &check_s3();
 		if ($cerr) {
 			&$second_print($cerr);
 			return 0;
@@ -4351,7 +4351,7 @@ elsif ($mode == 2) {
 	}
 elsif ($mode == 3) {
 	# Amazon S3 service
-	local $cerr = &check_s3();
+	local ($cerr) = &check_s3();
 	$cerr && &error($cerr);
 	$in{$name.'_s3path'} =~ /^\S+$/ || &error($text{'backup_es3path'});
 	$in{$name.'_s3path'} =~ /\\/ && &error($text{'backup_es3pathslash'});
