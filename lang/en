@@ -5433,10 +5433,10 @@ phpver_pub=Default HTML directory
 phpver_enewdir=Invalid website subdirectory - must be like <tt>myapp</tt> or <tt>programs/myapp</tt>
 
 html_title=Edit Web Pages
-html_edit=Edit existing file:
+html_edit=Edit existing file
 html_editok=Edit
 html_textok=Edit as Text
-html_create=Create new file:
+html_create=Create new file
 html_createok=Create
 html_efile=Invalid filename!
 html_err=Failed to save web page
@@ -5450,9 +5450,9 @@ html_dtitle=Delete Web Page
 html_drusure=Are you sure you want to delete the web page $1, which is $2 in size?
 html_dok=Delete Now
 html_return=web page editor
-html_upload=Upload file:
+html_upload=Upload file
 html_uploadok=Upload
-html_apply=Use content style:
+html_apply=Use content style
 html_styleok=Replace Files
 
 upload_err=Failed to upload file
