@@ -11288,7 +11288,7 @@ if (&master_admin() && !$config{'mod_php_ok'} && $config{'web'} &&
 			}
 		}
 	if (!$count) {
-		my $mod_text = "<b>".&text('index_disable_mod_php')."</b><p>\n";
+		my $mod_text = &text('index_disable_mod_php')."<p>\n";
 		$mod_text .= &ui_form_start(
 			"@{[&get_webprefix_safe()]}/$module_name/disable_mod_php.cgi");
 		$mod_text .= &ui_submit($text{'index_disable_mod_phpok'});

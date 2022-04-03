@@ -16,7 +16,7 @@ if ($in{'cancel'}) {
 else {
 	# Disable in Apache
 	&ui_print_unbuffered_header(
-		undef, $text{'index_disable_mod_php_title'}, "");
+		$text{'index_disable_mod_php_subtitle'}, $text{'index_disable_mod_php_title'}, "");
 	&require_apache();
 	my $changed = 0;
 
