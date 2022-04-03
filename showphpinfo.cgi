@@ -19,7 +19,9 @@ my $file = "file----phpinfo-$d->{'dom'}-$r.php";
 my $ipage = $dir ? "$dir/$file" : "$file";
 my $filepath = "$d->{'public_html_path'}/$ipage";
 my ($iout, $ierror);
-&write_file_contents($filepath, "<?php\nphpinfo();\n?>");
+&write_as_domain_user($d, sub {
+	&write_file_contents($filepath, "<?php\nphpinfo();\n?>");
+	});
 &set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $filepath);
 &get_http_connection($d, "/$ipage", \$iout, \$ierror);
 &PrintHeader();
