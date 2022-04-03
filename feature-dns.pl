@@ -1097,7 +1097,8 @@ while($str) {
 	$str = substr($str, 80);
 	push(@rv, $first);
 	}
-return "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
+return @rv == 1 ? '"'.$rv[0].'"'
+		: "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
 }
 
 # create_mail_records(file, &domain, ip, ip6)
