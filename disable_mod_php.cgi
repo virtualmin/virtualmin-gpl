@@ -55,6 +55,8 @@ else {
 		}
 	undef(@apache::get_config_cache);
 	undef($apache_mod_php_version_cache);
+	delete($apache::httpd_modules{'mod_php5'});
+	delete($apache::httpd_modules{'mod_php7'});
 	&$second_print($text{'setup_done'});
 
 	# Remove all php_value lines from domains
@@ -65,10 +67,11 @@ else {
 		next if ($d->{'alias'});
 		my @ports = ( $d->{'web_port'} );
 		push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+		my $c = 0;
 		foreach my $p (@ports) {
-			&fix_mod_php_directives($d, $port);
+			$c += &fix_mod_php_directives($d, $port, 1);
 			}
-		$dcount++;
+		$dcount++ if ($c);
 		}
 	&$second_print(&text('index_disable_mod_php_ddone', $dcount));
 

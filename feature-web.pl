@@ -4822,23 +4822,28 @@ foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
 return $changed;
 }
 
-# fix_mod_php_directives(&domain, port)
+# fix_mod_php_directives(&domain, port, [force])
 # Remove php_value directives if not supported by this system
 sub fix_mod_php_directives
 {
-my ($d, $port) = @_;
-if (!&get_apache_mod_php_version()) {
+my ($d, $port, $force) = @_;
+my $count = 0;
+if (!&get_apache_mod_php_version() || $force) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	if ($virt) {
+		my @phpv = &apache::find_directive("php_value", $vconf);
+		$count += scalar(@phpv);
 		&apache::save_directive(
 			"php_value", [ ], $vconf, $conf);
+		my @phpav = &apache::find_directive("php_admin_value", $vconf);
+		$count += scalar(@phpav);
 		&apache::save_directive(
 			"php_admin_value", [ ], $vconf, $conf);
 		&flush_file_lines($virt->{'file'}, undef, 1);
 		&register_post_action(\&restart_apache);
 		}
 	}
-
+return $count;
 }
 
 # fix_options_template(&tmpl, [ignore-version]))
