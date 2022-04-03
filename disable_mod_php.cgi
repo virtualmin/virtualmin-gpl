@@ -19,8 +19,10 @@ else {
 		undef, $text{'index_disable_mod_php_title'}, "");
 	&require_apache();
 	my $changed = 0;
+
 	if (&apache::can_configure_apache_modules()) {
 		# System supports a2enmod or similar
+		&$first_print($text{'index_disable_mod_php_enmod'});
 		my @mods = &apache::list_configured_apache_modules();
 		my @pmods = grep { $_->{'mod'} =~ /^(mod_)?php[0-9\.]*$/ }
 				 @mods;
@@ -32,6 +34,7 @@ else {
 		}
 	else {
 		# Remove the LoadModule line
+		&$first_print($text{'index_disable_mod_php_load'});
 		my $conf = &apache::get_config();
 		my @lm = &apache::find_directive_struct("LoadModule", $conf);
 		my @remlm;
@@ -50,8 +53,13 @@ else {
 			$changed++;
 			}
 		}
+	undef(@apache::get_config_cache);
+	undef($apache_mod_php_version_cache);
+	&$second_print($text{'setup_done'});
 
-	# Remove all php_value lines
+	# Remove all php_value lines from domains
+	&$first_print($text{'index_disable_mod_php_doms'});
+	my $dcount = 0;
 	foreach my $d (&list_domains()) {
 		next if (!$d->{'web'});
 		next if ($d->{'alias'});
@@ -60,7 +68,18 @@ else {
 		foreach my $p (@ports) {
 			&fix_mod_php_directives($d, $port);
 			}
+		$dcount++;
 		}
+	&$second_print(&text('index_disable_mod_php_ddone', $dcount));
+
+	# And at the top level
+	&$first_print($text{'index_disable_mod_php_global'});
+	my $conf = &apache::get_config();
+	&apache::save_directive("php_value", [], $conf, $conf);
+	&apache::save_directive("php_admin_value", [], $conf, $conf);
+	&flush_file_lines();
+	&register_post_action(\&restart_apache, 0);
+	&$second_print($text{'setup_done'});
 
 	if ($changed) {
 		# Re-detect modules
