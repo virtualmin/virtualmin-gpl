@@ -22,7 +22,6 @@ my ($iout, $ierror);
 &write_as_domain_user($d, sub {
 	&write_file_contents($filepath, "<?php\nphpinfo();\n?>");
 	});
-&set_ownership_permissions($d->{'uid'}, $d->{'gid'}, undef, $filepath);
 &get_http_connection($d, "/$ipage", \$iout, \$ierror);
 &PrintHeader();
 if ($ierror) {
@@ -31,4 +30,4 @@ if ($ierror) {
 else {
 	print $iout;
 	}
-unlink($filepath);
+&unlink_file_as_domain_user($d, $filepath);
