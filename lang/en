@@ -7385,6 +7385,7 @@ jailkit_emkdir=Failed to create directory : $1
 jailkit_eumount=Failed to unmount bind home directory : $1
 jailkit_eenabled=Chroot jail is not enabled for this domain
 jailkit_edir=No chroot jail directory found!
+jailkit_eshell=Shell $1 doesn't exist
 
 mysqlpass_shutdown=Shutting down MySQL server ..
 mysqlpass_eshutdown=.. shutdown failed : $1
