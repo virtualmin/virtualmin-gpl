@@ -132,6 +132,18 @@ else {
 	&flush_file_lines($sf);
 	}
 
+# Make sure that actual shell is copied
+my ($ushell) = grep { $_ eq $olduinfo->{'shell'} } @$lref;
+if ($ushell) {
+	my $ushell_cmd = &has_command($ushell);
+	if ($ushell_cmd) {
+		&copy_source_dest($ushell_cmd, $dir.$ushell_cmd);
+		}
+	else {
+		return &text('jailkit_eshell', "<tt>$ushell</tt>");
+		}
+	}
+
 return undef;
 }
 
