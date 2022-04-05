@@ -3143,7 +3143,7 @@ local ($d, $dmarc) = @_;
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
 	# Domain not found!
-	return;
+	return "DNS zone not found!";
 	}
 local $bump = 0;
 local ($r) = grep { ($_->{'type'} eq 'TXT' ||
@@ -3171,12 +3171,14 @@ elsif (!$r && $dmarc) {
 	$bump = 1;
 	}
 if ($bump) {
-	&post_records_change($d, $recs, $file);
+	my $err = &post_records_change($d, $recs, $file);
+	return $err if ($err);
 	&register_post_action(\&restart_bind, $d);
 	}
 else {
 	&after_records_change($d);
 	}
+return undef;
 }
 
 # is_domain_dmarc_enabled(&domain)

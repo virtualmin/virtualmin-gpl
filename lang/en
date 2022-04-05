@@ -5339,6 +5339,7 @@ spf_dnscloud=Moving DNS records to Cloud provider $1 ..
 spf_dnslocal=Moving DNS records to local hosting ..
 spf_eclouddns=.. failed : $1
 spf_ecloud=Failed to update DNS host : $1
+spf_epostchange=Failed to save DNS records : $1
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed.
 s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2.

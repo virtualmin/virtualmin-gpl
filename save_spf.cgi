@@ -78,6 +78,7 @@ if (defined($in{'tlsa'})) {
 	}
 
 $dmarc = &get_domain_dmarc($d);
+$err = undef;
 if ($in{'denabled'}) {
 	# Turn on and update DMARC record
 	$dmarc ||= &default_domain_dmarc($d);
@@ -86,12 +87,13 @@ if ($in{'denabled'}) {
 	$in{'dpct'} =~ /^\d+$/ && $in{'dpct'} >= 0 &&
 	  $in{'dpct'} <= 100 || &error($text{'tmpl_edmarcpct'});
 	$dmarc->{'pct'} = $in{'dpct'};
-	&save_domain_dmarc($d, $dmarc);
+	$err = &save_domain_dmarc($d, $dmarc);
 	}
 else {
 	# Just turn off DMARC record
-	&save_domain_dmarc($d, undef);
+	$err = &save_domain_dmarc($d, undef);
 	}
+&error($err) if ($err);
 
 if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
     &can_domain_dnssec($d) && defined($in{'dnssec'})) {

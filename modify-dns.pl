@@ -320,15 +320,15 @@ foreach $d (@doms) {
 		if ($dmarc == 1 && !$currdmarc) {
 			# Need to enable, with default settings
 			&$first_print($text{'spf_dmarcenable'});
-			&save_domain_dmarc($d,
+			$err = &save_domain_dmarc($d,
 				$currdmarc = &default_domain_dmarc($d));
-			&$second_print($text{'setup_done'});
+			&$second_print($err || $text{'setup_done'});
 			}
 		elsif ($dmarc == 0 && $currdmarc) {
 			# Need to disable
 			&$first_print($text{'spf_dmarcdisable'});
-			&save_domain_dmarc($d, undef);
-			&$second_print($text{'setup_done'});
+			$err = &save_domain_dmarc($d, undef);
+			&$second_print($err || $text{'setup_done'});
 			$currdmarc = undef;
 			}
 		}
@@ -595,7 +595,10 @@ foreach $d (@doms) {
 		}
 
 	if ($changed || $bumpsoa) {
-		&post_records_change($d, $recs, $file);
+		my $err = &post_records_change($d, $recs, $file);
+		if ($err) {
+			&$second_print(&text('spf_epostchange', $err));
+			}
 		&reload_bind_records($d);
 		}
 

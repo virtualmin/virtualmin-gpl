@@ -309,7 +309,7 @@ foreach my $r (@$recs) {
 	     { 'Action' => 'UPSERT',
 	       'ResourceRecordSet' => {
 	         'Name' => $r->{'name'},
-		 'Type' => $r->{'type'},
+		 'Type' => $type,
 		 'TTL' => int($r->{'ttl'} || 86400),
 		 'ResourceRecords' => [
 		   { 'Value' => $v },
