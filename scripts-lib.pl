@@ -2504,7 +2504,7 @@ return 0 if (!&foreign_check("cron"));
 &foreign_require("cron");
 $cmd =~ /^(.*)\//;
 local $dir = $1;
-local $cmd = &php_command_for_version($phpver, 2);
+local $php = &php_command_for_version($phpver, 2);
 local $fullcmd = "cd $dir && $php -f $cmd >/dev/null 2>&1";
 local $job = { 'user' => $d->{'user'},
 	       'active' => 1,
