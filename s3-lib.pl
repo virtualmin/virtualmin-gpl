@@ -169,6 +169,9 @@ my ($response) = @_;
 if ($response->body() =~ /<Message>(.*)<\/Message>/i) {
 	return $1;
 	}
+elsif ($response->http_response->code) {
+	return "HTTP status ".$response->http_response->code;
+	}
 return undef;
 }
 
