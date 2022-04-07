@@ -38,7 +38,7 @@ while(@ARGV > 0) {
 	}
 $downgrade || &usage();
 
-my $gpl_repos_warning = "GPL version already installed!";
+my $gpl_repos_warning = "GPL version is already installed!";
 my $gpl_downgrading_repository = "Downgrading Virtualmin repository ..";
 my $gpl_downgrading_package = "Downgrading Virtualmin package ..";
 my $gpl_downgrading_license = "Downgrading Virtualmin license ..";
