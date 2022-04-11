@@ -2472,8 +2472,8 @@ if ($callnow) {
 		}
 	else {
 		# Need to call wget
-		&system_logged(
-		    "$wget -q -O /dev/null $url >/dev/null 2>&1 </dev/null");
+		&system_logged("$wget -q -O /dev/null ".quotemeta($url).
+			       " >/dev/null 2>&1 </dev/null");
 		}
 	}
 return 1;
