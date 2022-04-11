@@ -5340,6 +5340,7 @@ spf_dnscloud=DNSレコードをクラウドプロバイダー $1に移動して�
 spf_dnslocal=DNSレコードをローカルホスティングに移動する ..
 spf_eclouddns=..失敗しました： $1
 spf_ecloud=DNSホストの更新に失敗しました： $1
+spf_epostchange=DNSレコードの保存に失敗しました： $1
 
 s3_emodule=AmazonのS3サービスとの通信に必要なPerlモジュール $1がインストールされていません
 s3_emodule2=AmazonのS3サービスとの通信に必要なPerlモジュール $1をロードできませんでした： $2
@@ -6331,7 +6332,7 @@ wizard_memory_lookup1=はい、より多くのRAMを使用してメール処理�
 wizard_memory_lookup0=いいえ、使用するRAMは少なくなりますが、CPU負荷は高くなり、メール処理は遅くなります。
 wizard_virusnew=大量の電子メールを受信するドメインをホストするシステムの場合、受信メッセージのウイルスをスキャンすると、CPU負荷が高くなる可能性があります。スキャンはClamAVスキャンサーバー<tt>clamd</tt>を使用して行われるため、電子メールを処理していないときでもRAMを消費します。システムが電子メールをホストしない場合は、ウイルススキャンを無効にすることができます。
 wizard_virusmsg=ClamAVでウイルススキャンを有効にしますか？
-wizard_virus1=はい、最大2GBのRAMを使用します
+wizard_virus1=はい、最大2GのRAMを使用します
 wizard_virus2=オンデマンドスキャナーを使い続ける
 wizard_virus0=いいえ、メールはフィルタリングされません
 wizard_clamdnone=ただし、VirtualminはシステムでClamAVサーバースキャナーを有効にする方法を認識していません。手動で設定する必要があります。

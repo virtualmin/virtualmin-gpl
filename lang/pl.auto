@@ -4455,6 +4455,7 @@ spf_dnscloud=Przenoszenie rekordów DNS do dostawcy chmury $1 ..
 spf_dnslocal=Przenoszenie rekordów DNS do lokalnego hostingu ..
 spf_eclouddns=.. nie powiodło się : $1 
 spf_ecloud=Nie udało się zaktualizować hosta DNS : $1
+spf_epostchange=Nie udało się zapisać rekordów DNS : $1
 
 s3_emodule=Moduł Perl $1 potrzebny do komunikacji z usługą Amazon S3 nie został zainstalowany
 s3_emodule2=Nie można załadować modułu Perla $1 potrzebnego do komunikacji z usługą Amazon S3 : $2 
@@ -5322,7 +5323,7 @@ wizard_memory_lookup1=Tak, szybsze przetwarzanie poczty przy większej ilości p
 wizard_memory_lookup0=Nie, wolniejsze przetwarzanie poczty przy mniejszym zużyciu pamięci RAM, ale większym obciążeniu procesora
 wizard_virusnew=Jeśli Twój system będzie hostował domeny, które otrzymają dużą liczbę wiadomości e-mail, skanowanie wiadomości przychodzących w poszukiwaniu wirusów może generować duże obciążenie procesora. Ponieważ skanowanie odbywa się za pomocą serwera skanującego ClamAV <tt>clamd</tt>, zużywa pamięć RAM, nawet jeśli nie przetwarza wiadomości e-mail. Jeśli twój system nie będzie hostował poczty e-mail, skanowanie antywirusowe można wyłączyć.
 wizard_virusmsg=Włączyć skanowanie w poszukiwaniu wirusów za pomocą ClamAV?
-wizard_virus1=Tak, wykorzystuje do 2 GB pamięci RAM
+wizard_virus1=Tak, używa do 2G pamięci RAM
 wizard_virus2=Używaj skanera na żądanie
 wizard_virus0=Nie, e-mail nie będzie filtrowany
 wizard_eclamdenable=Nie udało się uruchomić skanera serwera ClamAV. Spróbuj włączyć ją na stronie <b>Skanowanie spamu i wirusów</b>, aby wyświetlić bardziej szczegółowy komunikat o błędzie.

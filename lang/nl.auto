@@ -1014,6 +1014,7 @@ spf_dnscloud=DNS-records verplaatsen naar cloudprovider $1 ..
 spf_dnslocal=DNS-records verplaatsen naar lokale hosting ..
 spf_eclouddns=.. mislukt  : $1
 spf_ecloud=Kan DNS-host niet updaten : $1
+spf_epostchange=Kan DNS-records niet opslaan : $1
 
 s3_emodule2=De Perl-module $1 die nodig is om te communiceren met de S3-service van Amazon kan niet worden geladen : $2
 s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3-service van Amazon, zijn niet geïnstalleerd
@@ -1118,7 +1119,7 @@ wizard_memory_lookup1=Ja, snellere e-mailverwerking met meer RAM-geheugen ($1)
 wizard_memory_lookup0=Nee, langzamere e-mailverwerking met minder RAM-gebruik, maar meer CPU-belasting
 wizard_virusnew=Als uw systeem domeinen gaat hosten die een grote hoeveelheid e-mail zullen ontvangen, kan het scannen van inkomende berichten op virussen een hoge CPU-belasting genereren. Omdat er wordt gescand met de ClamAV-scanserver <tt>clamd</tt>, zal deze RAM verbruiken, zelfs wanneer geen e-mail wordt verwerkt. Als uw systeem geen e-mail host, kan virusscanning worden uitgeschakeld.
 wizard_virusmsg=Virusscanning inschakelen met ClamAV?
-wizard_virus1=Ja, gebruikt tot 2 GB RAM
+wizard_virus1=Ja, gebruikt tot 2G RAM
 wizard_virus2=Blijf on-demand scanner gebruiken
 wizard_virus0=Nee, e-mail wordt niet gefilterd
 wizard_eclaminuse=Virusscanning kan niet worden uitgeschakeld omdat het wordt gebruikt door $1 virtuele servers

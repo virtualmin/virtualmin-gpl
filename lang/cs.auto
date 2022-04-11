@@ -4236,6 +4236,7 @@ spf_dnscloud=Přesouvání záznamů DNS k poskytovateli cloudu $1 ..
 spf_dnslocal=Přesouvání záznamů DNS na místní hosting ..
 spf_eclouddns=.. nezdařilo se : $1
 spf_ecloud=Aktualizace hostitele DNS se nezdařila : $1
+spf_epostchange=Nepodařilo se uložit záznamy DNS : $1
 
 s3_emodule2=Modul Perl $1 potřebný pro komunikaci se službou Amazon S3 nelze načíst : $2 
 s3_emodule3=Moduly Perl $1 nebo $2 potřebné pro komunikaci se službou Amazon S3 nejsou nainstalovány
@@ -5062,7 +5063,7 @@ wizard_memory_lookup1=Ano, rychlejší zpracování pošty s větší spotřebou
 wizard_memory_lookup0=Ne, pomalejší zpracování pošty s menší spotřebou RAM, ale větším zatížením procesoru
 wizard_virusnew=Pokud váš systém bude hostit domény, které obdrží velké množství e-mailů, může kontrola příchozích zpráv na přítomnost virů způsobit vysoké zatížení CPU. Protože skenování se provádí pomocí skenovacího serveru ClamAV <tt>clamd</tt>, bude spotřebovávat RAM, i když nezpracovává e-maily. Pokud váš systém nebude hostovat e-maily, může být zakázáno prověřování virů.
 wizard_virusmsg=Povolit skenování virů pomocí ClamAV?
-wizard_virus1=Ano, používá až 2 GB RAM
+wizard_virus1=Ano, používá až 2G RAM
 wizard_virus2=Používejte skener na vyžádání
 wizard_virus0=Ne, e-maily nebudou filtrovány
 wizard_clamdnone=Virtualmin však neví, jak ve vašem systému povolit skener serveru ClamAV. Budete jej muset nastavit ručně.
