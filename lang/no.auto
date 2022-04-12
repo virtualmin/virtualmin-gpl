@@ -753,6 +753,7 @@ spf_dnscloud=Flytter DNS -poster til skyleverandør $1 ..
 spf_dnslocal=Flytter DNS -poster til lokal hosting ..
 spf_eclouddns=.. mislyktes : $1
 spf_ecloud=Kunne ikke oppdatere DNS -vert : $1
+spf_epostchange=Kunne ikke lagre DNS-poster : $1
 
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
@@ -824,7 +825,7 @@ wizard_memory_lookup1=Ja, raskere e-postbehandling med mer RAM brukt ($1)
 wizard_memory_lookup0=Nei, tregere postbehandling med mindre RAM brukt, men mer CPU-belastning
 wizard_virusnew=Hvis systemet ditt skal være vert for domener som vil motta en stor mengde e-post, kan skanning av innkommende meldinger etter virus generere høy CPU-belastning. Fordi skanning gjøres ved hjelp av ClamAV-skanningsserveren <tt>clamd</tt>, vil den konsumere RAM selv når du ikke behandler e-post. Hvis systemet ditt ikke er vert for e-post, kan virusscanning deaktiveres.
 wizard_virusmsg=Vil du aktivere virusscanning med ClamAV?
-wizard_virus1=Ja, bruker opptil 2 GB RAM
+wizard_virus1=Ja, bruker opptil 2G RAM
 wizard_virus2=Fortsett å bruke skanner på forespørsel
 wizard_virus0=Nei, e-post vil ikke bli filtrert
 wizard_eclaminuse=Virusskanning kan ikke deaktiveres da den er i bruk av $1 virtuelle servere

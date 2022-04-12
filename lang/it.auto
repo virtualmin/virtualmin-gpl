@@ -4134,6 +4134,7 @@ spf_dnscloud=Spostamento dei record DNS nel provider cloud $1 ..
 spf_dnslocal=Spostare i record DNS sull'hosting locale ..
 spf_eclouddns=.. fallito : $1
 spf_ecloud=Impossibile aggiornare l'host DNS : $1
+spf_epostchange=Impossibile salvare i record DNS : $1
 
 s3_emodule=Il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon non è installato
 s3_emodule2=Impossibile caricare il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon : $2 
@@ -4914,7 +4915,7 @@ wizard_memory_lookup1=Sì, elaborazione della posta più veloce con più RAM uti
 wizard_memory_lookup0=No, elaborazione della posta più lenta con meno RAM utilizzata, ma più carico della CPU
 wizard_virusnew=Se il tuo sistema ospiterà domini che riceveranno una grande quantità di e-mail, la scansione dei messaggi in arrivo alla ricerca di virus può generare un carico elevato della CPU. Poiché la scansione viene eseguita utilizzando il server di scansione ClamAV <tt>clamd</tt>, consumerà RAM anche quando non elabora la posta elettronica. Se il tuo sistema non ospiterà e-mail, la scansione antivirus può essere disabilitata.
 wizard_virusmsg=Abilitare la scansione antivirus con ClamAV?
-wizard_virus1=Sì, utilizza fino a 2 GB di RAM
+wizard_virus1=Sì, utilizza fino a 2G di RAM
 wizard_virus2=Continua a utilizzare lo scanner su richiesta
 wizard_virus0=No, le email non verranno filtrate
 wizard_clamdnone=Tuttavia, Virtualmin non sa come abilitare lo scanner del server ClamAV sul sistema. Dovrai configurarlo manualmente.

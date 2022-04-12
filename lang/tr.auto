@@ -2620,6 +2620,7 @@ spf_dnscloud=DNS kayıtları $1 Bulut sağlayıcısına taşınıyor ..
 spf_dnslocal=DNS kayıtlarını yerel barındırmaya taşıma ..
 spf_eclouddns=.. başarısız oldu : $1
 spf_ecloud=DNS ana bilgisayarı güncellenemedi : $1
+spf_epostchange=DNS kayıtları kaydedilemedi : $1
 
 s3_emodule2=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 Perl modülü yüklenemedi : $2 
 s3_emodule3=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 veya $2 Perl modülleri kurulu değil
@@ -3603,7 +3604,7 @@ wizard_memory_lookup1=Evet, daha fazla RAM kullanıldığında daha hızlı post
 wizard_memory_lookup0=Hayır, kullanılan daha az RAM ile daha yavaş posta işleme, ancak daha fazla CPU yükü
 wizard_virusnew=Sisteminiz büyük miktarda e-posta alacak etki alanlarını barındıracaksa, gelen iletileri virüslere karşı taramak yüksek CPU yükü oluşturabilir. Tarama, ClamAV tarama sunucusu <tt>istiridye</tt> kullanılarak yapıldığından, e-posta işlenmese bile RAM tüketir. Sisteminiz e-posta barındırmayacaksa, virüs taraması devre dışı bırakılabilir.
 wizard_virusmsg=ClamAV ile virüs taraması etkinleştirilsin mi?
-wizard_virus1=Evet, 2 GB'a kadar RAM kullanır
+wizard_virus1=Evet, 2G'ye kadar RAM kullanır
 wizard_virus2=İsteğe bağlı tarayıcıyı kullanmaya devam edin
 wizard_virus0=Hayır, e-posta filtrelenmeyecek
 wizard_clamdnone=Ancak Virtualmin, sisteminizde ClamAV sunucusu tarayıcısını nasıl etkinleştireceğinizi bilmiyor. Manuel olarak ayarlamanız gerekir.

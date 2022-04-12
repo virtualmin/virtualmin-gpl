@@ -2350,6 +2350,7 @@ spf_dnscloud=將 DNS 記錄移動到雲提供商 $1 ..
 spf_dnslocal=將 DNS 記錄移動到本地託管 ..
 spf_eclouddns=.. 失敗：$1
 spf_ecloud=無法更新 DNS 主機  : $1
+spf_epostchange=未能保存 DNS 記錄  : $1
 
 s3_emodule2=無法加載與Amazon的S3服務通信所需的Perl模塊 $1 : $2
 s3_emodule3=未安裝與Amazon的S3服務通信所需的Perl模塊 $1或 $2
@@ -3085,7 +3086,7 @@ wizard_memory_lookup1=是的，使用更多 RAM 的郵件處理速度更快 ($1)
 wizard_memory_lookup0=不，郵件處理速度較慢，使用的 RAM 較少，但 CPU 負載較高
 wizard_virusnew=如果您的系統將要託管將接收大量電子郵件的域，則掃描傳入消息中是否存在病毒會產生較高的CPU負載。由於掃描是使用ClamAV掃描服務器<tt>clamd</tt>完成的，因此即使不處理電子郵件，也會消耗RAM。如果您的系統將不託管電子郵件，則可以禁用病毒掃描。
 wizard_virusmsg=是否啟用ClamAV病毒掃描？
-wizard_virus1=是的，最多使用 2 GB 的 RAM
+wizard_virus1=是的，最多使用 2G 內存
 wizard_virus2=繼續使用按需掃描儀
 wizard_virus0=不，電子郵件不會被過濾
 wizard_clamdnone=但是，Virtualmin不知道如何在系統上啟用ClamAV服務器掃描程序。您將需要手動設置。
