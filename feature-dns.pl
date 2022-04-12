@@ -1233,6 +1233,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Add NS records from template
 			push(@created_ns, &get_slave_nameservers($tmpl));
 
+			@created_ns = &unique(@created_ns);
 			if ($tmpl->{'dns_indom'}) {
 				# Add A records pointing to the nameserver IPs
 				my $i = 1;
