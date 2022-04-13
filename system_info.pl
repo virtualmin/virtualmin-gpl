@@ -61,7 +61,7 @@ if (&need_config_check() && &can_check_config()) {
 # Suggest to GPL user to get Virtualmin Pro
 if (!$virtualmin_pro &&
     &should_show_pro_tip('dashboard', 1)) {
-	# Do not show dashboard alert within first seven days, until things settle down
+	# Do not show dashboard alert within first five days, until things settle down
 	&foreign_require("webmin");
 	my $uptime = &webmin::get_system_uptime();
 	if (!$uptime || $uptime > 60*60*24 * 5) {
