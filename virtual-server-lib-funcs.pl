@@ -15942,7 +15942,7 @@ foreach my $f ("parent", "sub", "alias", "users") {
 		}
 	}
 print &ui_table_row(&hlink($text{'tmpl_for'}, "template_for"),
-		    join(", ", @fors));
+		    join("&nbsp;&nbsp;&nbsp;", @fors));
 
 # Which resellers can use this template?
 local @resels = $virtualmin_pro ? &list_resellers() : ( );
