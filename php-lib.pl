@@ -35,6 +35,7 @@ if ($virt) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
 			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
+			    $h =~ /proxy:fcgi:\/\/127\.0\.0\.1/ ||
 			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
@@ -2076,6 +2077,7 @@ return (0, "No Apache virtualhost found") if (!$virt);
 my $webport;
 foreach my $p (&apache::find_directive("ProxyPassMatch", $vconf)) {
 	if ($p =~ /fcgi:\/\/localhost:(\d+)/ ||
+	    $p =~ /fcgi:\/\/127\.0\.0\.1:(\d+)/ ||
 	    $p =~ /unix:([^\|]+)/) {
 		$webport = $1;
 		}
@@ -2085,6 +2087,7 @@ foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 	foreach my $h (&apache::find_directive("SetHandler",
 					       $f->{'members'})) {
 		if ($h =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+		    $h =~ /proxy:fcgi:\/\/127\.0\.0\.1:(\d+)/ ||
 		    $h =~ /proxy:unix:([^\|]+)/) {
 			my $webport2 = $1;
 			if ($webport && $webport != $webport2) {
@@ -2145,6 +2148,7 @@ foreach my $p (@ports) {
                                                  $f->{'members'});
 		for(my $i=0; $i<@sh; $i++) {
 			if ($sh[$i] =~ /proxy:fcgi:\/\/localhost:(\d+)/ ||
+			    $sh[$i] =~ /proxy:fcgi:\/\/127\.0\.0\.1:(\d+)/ ||
 			    $sh[$i] =~ /proxy:unix:([^\|]+)/) {
 				# Found the directive to update
 				if ($socket =~ /^\d+$/) {
