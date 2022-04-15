@@ -1350,7 +1350,7 @@ if (&is_under_directory($d->{'home'}, $d->{'ssl_cert'})) {
 	$data = &read_file_contents_as_domain_user($d, $d->{'ssl_cert'});
 	}
 else {
-	$data = &read_file_contents($d, $d->{'ssl_cert'});
+	$data = &read_file_contents($d->{'ssl_cert'});
 	}
 $data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+CERTIFICATE-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+CERTIFICATE-----)/) {
@@ -1370,7 +1370,7 @@ if (&is_under_directory($d->{'home'}, $file)) {
 	$data = &read_file_contents_as_domain_user($d, $file);
 	}
 else {
-	$data = &read_file_contents($d, $file);
+	$data = &read_file_contents($file);
 	}
 $data =~ s/\r//g;
 if ($data =~ /(-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----\n([A-Za-z0-9\+\/=\n\r]+)-----END\s+RSA\s+PRIVATE\s+KEY-----)/) {
