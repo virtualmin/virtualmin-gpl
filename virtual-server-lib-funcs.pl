@@ -10971,8 +10971,8 @@ if ($status == 0 && $max_servers && !$err) {
 	# A servers limit exists .. check if we have exceeded it
 	if ($servers > $max_servers+1) {
 		$status = 1;
-		$err = &text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>");
-		$err .= " " . &text('licence_maxwarn', "https://virtualmin.com/shop/", "https://virtualmin.com/shop/");
+		$err = "<span>".&text('licence_maxservers2', $max_servers, $servers, "<tt>$serial{'SerialNumber'}</tt>")."</span>";
+		$err .= " " . &text('licence_maxwarn', "https://virtualmin.com/shop/", $text{'license_shop_name'});
 		}
 	}
 return ($status, $expiry, $err, $doms, $servers, $max_servers, $autorenew);

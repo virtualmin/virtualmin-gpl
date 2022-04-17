@@ -19,9 +19,9 @@ if ($status == 0) {
 	print $suc_text,"<p>\n";
 	if ($licence{'warn'}) {
 		# Most recent check failed
-		print "<b>",&text('licence_warn',
+		print &text('licence_warn',
 			              &ui_text_color($licence{'warn'}, 'warn')),
-		      "</b><p>\n";
+		      "<p>\n";
 		}
 	# Check for license close to expiry
 	if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
@@ -32,23 +32,23 @@ if ($status == 0) {
 	if ($expirytime && $expirytime - time() < 7*24*60*60) {
 		$days = int(($expirytime - time()) / (24*60*60));
 		$hours = int(($expirytime - time()) / (60*60));
-		print "<b>";
 		if ($days) {
 			print &ui_text_color(&text('licence_soon', $days), 'warn');
 			}
 		else {
 			print &ui_text_color(&text('licence_soon2', $hours), 'warn');
 			}
-		print "</b><p>\n";
+		print "<p>\n";
 		}
 	elsif (!$expirytime) {
-		print "<b>",&text('licence_goterr2',
-			&ui_text_color($expiry, 'danger')),"</b><p>\n";
+		print &text('licence_goterr2',
+			&ui_text_color($expiry, 'danger')),"<p>\n";
 		}
 	}
 else {
-	print "<b>",&text('licence_goterr',
-		&ui_text_color($err, 'danger')),"</b><p>\n";
+	my ($err1, $err2) = $err =~ /<span>(.*?)<\/span>(.*)/;
+	print &text('licence_goterr',
+		&ui_text_color($err1, 'danger'))."$err2<p>\n";
 	}
 
 &ui_print_footer("", $text{'index_return'});
