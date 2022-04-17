@@ -8,7 +8,7 @@ $d && &can_edit_domain($d) && &can_edit_ssl() && &can_webmin_cert() ||
 	&error($text{'copycert_ecannot'});
 $d->{'ssl_pass'} && &error($text{'copycert_epass'});
 
-&ui_print_header(&domain_in($d), $text{'copycert_title'}, "");
+&ui_print_unbuffered_header(&domain_in($d), $text{'copycert_title'}, "");
 @already = &get_all_domain_service_ssl_certs($d);
 
 foreach my $st (&list_service_ssl_cert_types()) {
