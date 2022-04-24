@@ -395,6 +395,7 @@ elsif (!$d->{'dns_submode'}) {
 		if (defined(&bind8::supports_dnssec) &&
 		    &bind8::supports_dnssec()) {
 			&bind8::delete_dnssec_key($z, 0);
+			&bind8::dt_delete_dnssec_state($z);
 			}
 
 		# Delete the records file
