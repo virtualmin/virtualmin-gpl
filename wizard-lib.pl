@@ -377,6 +377,7 @@ else {
 	if (!$in{'mypass_def'}) {
 		# Change in DB
 		eval {
+			local $main::error_must_die = 1;
 			&execute_password_change_sql(undef, $user, undef, $pass);
 			};
 		if (!$@) {
