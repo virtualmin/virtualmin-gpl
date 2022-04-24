@@ -394,7 +394,7 @@ elsif (!$d->{'dns_submode'}) {
 		# Delete any dnssec key
 		if (defined(&bind8::supports_dnssec) &&
 		    &bind8::supports_dnssec()) {
-			&bind8::delete_dnssec_key($z);
+			&bind8::delete_dnssec_key($z, 0);
 			}
 
 		# Delete the records file
@@ -3889,7 +3889,7 @@ if ($key) {
 foreach my $k (@keyfiles) {
         &lock_file($k);
         }
-&bind8::delete_dnssec_key($zone);
+&bind8::delete_dnssec_key($zone, 1);
 foreach my $k (@keyfiles) {
         &unlock_file($k);
         }
