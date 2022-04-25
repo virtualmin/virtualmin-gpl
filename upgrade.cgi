@@ -130,11 +130,16 @@ elsif ($itype eq "deb") {
 	my $apt_old_auth = !-d $virtualmin_apt_auth_dir ? "$in{'serial'}:$in{'key'}\@" : "";
 	$lref = &read_file_lines($virtualmin_apt_repo);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
-			$l = "deb https://$apt_old_auth$upgrade_virtualmin_host/$2";
+		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
+			my $gpgkey = $1;
+			my $rrepo = $3;
+			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/$rrepo";
 			}
-		elsif ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host\/vm\/(\d)\/gpl\/(.*)/) {
-			$l = "deb https://$apt_old_auth$upgrade_virtualmin_host/vm/$2/$3";
+		elsif ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/vm\/(\d)\/gpl\/(.*)/) {
+			my $gpgkey = $1;
+			my $vmver = $3;
+			my $rrepo = $4;
+			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/vm/$vmver/$rrepo";
 			}
 		}
 	&flush_file_lines($virtualmin_apt_repo);
