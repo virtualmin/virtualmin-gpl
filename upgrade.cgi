@@ -149,7 +149,7 @@ elsif ($itype eq "deb") {
 	# Force refresh of packages
 	&$first_print($text{'upgrade_update_pkgs'});
 	my $upgrade_update_pkgs_output;
-	&system_logged("apt-get install ca-certificates >/dev/null 2>&1");
+	&system_logged("apt-get -y install ca-certificates >/dev/null 2>&1");
 	&open_execute_command(YUM, "apt-get update", 2);
 	while(<YUM>) {
 		$upgrade_update_pkgs_output .= &html_escape($_);
