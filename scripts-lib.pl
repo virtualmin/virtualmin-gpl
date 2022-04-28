@@ -2556,7 +2556,7 @@ foreach my $d (@$doms) {
 			}
 		@vers = sort { &compare_versions($b, $a, $script) } @vers;
 		local @better = grep { &compare_versions($_,
-				$sinfo->{'version'}, $script) >= 0 } @vers;
+				$sinfo->{'version'}, $script) > 0 } @vers;
 		local $ver = @better ? $better[$#better] : undef;
 		next if (!$ver);
 
