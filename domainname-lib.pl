@@ -125,6 +125,7 @@ $name =~ /\.$/ && return $text{'setup_edomain2'};
 if ($name =~ /^(www)\./i) {
 	return &text('setup_edomainprefix', "$1");
 	}
+&check_ipaddress($name) && return $text{'setup_edomainip'};
 return undef;
 }
 
