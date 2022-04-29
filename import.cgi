@@ -220,7 +220,7 @@ if ($in{'confirm'}) {
 			&foreign_call($usermodule, "making_changes");
 			&foreign_call($usermodule, "create_group", \%ginfo);
 			&foreign_call($usermodule, "made_changes");
-			print $text{'setup_done'},"<p>\n";
+			&$second_print($text{'setup_done'});
 			}
 		else {
 			%ginfo = %$ginfo;
@@ -247,7 +247,7 @@ if ($in{'confirm'}) {
 			&foreign_call($usermodule, "making_changes");
 			&foreign_call($usermodule, "create_user", \%uinfo);
 			&foreign_call($usermodule, "made_changes");
-			print $text{'setup_done'},"<p>\n";
+			&$second_print($text{'setup_done'});
 
 			if (!-d $uinfo{'home'}) {
 				# Create his home directory, and copy files into it
@@ -259,7 +259,7 @@ if ($in{'confirm'}) {
 				&system_logged("chown $uid:$gid '$uinfo{'home'}'");
 				&copy_skel_files($config{'virtual_skel'},
 						 \%uinfo, $uinfo{'home'});
-				print $text{'setup_done'},"<p>\n";
+				&$second_print($text{'setup_done'});
 				}
 			}
 		else {
@@ -279,7 +279,7 @@ if ($in{'confirm'}) {
 				"chown $uid:$ugid '$uinfo{'home'}/$d->[0]'");
 			}
 		}
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 
 	if ($found{'ssl'}) {
 		# Find and record the SSL key files
@@ -318,7 +318,7 @@ if ($in{'confirm'}) {
 				$u->{'uid'}, $oldu->{'gid'},
 				$u->{'uid'}, $u->{'gid'});
 			}
-		print $text{'setup_done'},"<p>\n";
+		&$second_print($text{'setup_done'});
 		}
 
 	# Find any slave DNS servers with the domain
@@ -341,7 +341,7 @@ if ($in{'confirm'}) {
 	&find_html_cgi_dirs(\%dom);
 	print $text{'setup_save'},"<br>\n";
 	&save_domain(\%dom, 1);
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 
 	# Create or update webmin user
 	if ($in{'webmin'} && !$parent) {

@@ -44,7 +44,7 @@ if (!$before && $ok) {
 		}
 	&flush_file_lines();
 	&unlock_file(&get_ratelimit_config_file());
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 	}
 
 &webmin_log("install", "ratelimit");

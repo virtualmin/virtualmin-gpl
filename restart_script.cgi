@@ -18,15 +18,15 @@ $sinfo && $script || &error($text{'stopscript_egone'});
 print &text('stopscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
 &{$script->{'stop_server_func'}}($d, $sinfo->{'opts'});
 sleep(1);	# Give it time to shut down
-print &text('setup_done'),"<p>\n";
+&$second_print($text{'setup_done'});
 
 print &text('startscript_doing', "<i>$script->{'desc'}</i>"),"<br>";
 $err = &{$script->{'start_server_func'}}($d, $sinfo->{'opts'});
 if ($err) {
-	print &text('startscript_failed', $err),"<p>\n";
+	&$second_print(&text('startscript_failed', $err));
 	}
 else {
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 	}
 &run_post_actions();
 if (!$err) {
