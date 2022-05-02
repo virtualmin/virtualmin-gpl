@@ -118,6 +118,7 @@ setup_esubdomain=Nome di sottodominio non valido: non sono ammessi punti
 setup_eforceunder=Puoi creare domini solo con $1 
 setup_edomain4=Stai già ospitando questo dominio
 setup_edomainstar=Un nome di dominio non può iniziare con *. Per creare un dominio jolly, crearlo prima senza * e quindi vai a Configurazione server -&gt; Opzioni sito Web.
+setup_edomainip=Un nome di dominio non può essere un indirizzo IP
 setup_eip=Indirizzo IP mancante o non valido
 setup_eip6=Indirizzo IPv6 mancante o non valido
 setup_evirtalloc=Impossibile allocare l'indirizzo IP virtuale dall'intervallo

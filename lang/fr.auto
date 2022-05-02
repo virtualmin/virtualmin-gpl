@@ -116,6 +116,7 @@ setup_esubdomain=Nom de sous-domaine non valide - aucun point n'est autorisé
 setup_eforceunder=Vous êtes uniquement autorisé à créer des domaines sous $1 
 setup_edomain4=Vous hébergez déjà ce domaine
 setup_edomainstar=Un nom de domaine ne peut pas commencer par *. Pour créer un domaine générique, créez-le d'abord sans *, puis accédez à Configuration du serveur -&gt; Options du site Web.
+setup_edomainip=Un nom de domaine ne peut pas être une adresse IP
 setup_eip6=Adresse IPv6 manquante ou invalide
 setup_evirt6alloc=Impossible d'allouer l'adresse IPv6 à partir de la plage
 setup_evirtalloc2=Impossible d'allouer l'adresse IP virtuelle de la plage de revendeur

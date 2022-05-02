@@ -80,6 +80,7 @@ form_inputssect=Opciones de funciones adicionales
 setup_eplan=El plan seleccionado no existe o no está disponible
 setup_edomain4=Ya estás alojando este dominio
 setup_edomainstar=Un nombre de dominio no puede comenzar con *. Para crear un dominio comodín, primero créelo sin el * y luego vaya a Configuración del servidor -&gt; Opciones del sitio web.
+setup_edomainip=Un nombre de dominio no puede ser una dirección IP
 setup_eip6=Dirección IPv6 faltante o no válida
 setup_evirt6alloc=No se pudo asignar la dirección IPv6 del rango
 setup_evirt6alloc2=No se pudo asignar la dirección IPv6 virtual del rango del revendedor

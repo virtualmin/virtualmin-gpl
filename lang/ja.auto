@@ -389,6 +389,7 @@ setup_esubdomain=サブドメイン名が無効です-ドットは使用でき�
 setup_eforceunder=$1の下でのみドメインを作成できます
 setup_edomain4=このドメインはすでにホストされています
 setup_edomainstar=ドメイン名は*で始めることはできません。ワイルドカードドメインを作成するには、最初に*なしで作成し、次に[サーバーの設定]に移動します-＆gt;ウェブサイトのオプション。
+setup_edomainip=ドメイン名をIPアドレスにすることはできません
 setup_eip=IPアドレスがないか無効です
 setup_eip6=IPv6アドレスがないか無効です
 setup_evirtalloc=範囲から仮想IPアドレスを割り当てることができませんでした
