@@ -99,7 +99,7 @@ if (-r $virtualmin_apt_repo) {
 	&$first_print($gpl_downgrading_repository);
 	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
-        if ($l =~ /^deb\s+(https?):/) {
+        if ($l =~ /^deb(.*?)(https?):/) {
                 $l =~ s/(:\/\/)[0-9]+:[a-zA-Z-0-9]+\@/$1/;  
                 $l =~ s/(\/vm\/[\d]+)/$1\/gpl/; 
 				$found++;

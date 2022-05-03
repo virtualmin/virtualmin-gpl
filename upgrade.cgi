@@ -51,7 +51,7 @@ elsif ($itype eq "deb") {
 	$lref = &read_file_lines($virtualmin_apt_repo);
 	$found = 0;
 	foreach $l (@$lref) {
-		if ($l =~ /^deb\s+(http|https):\/\/$upgrade_virtualmin_host/) {
+		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host/) {
 			$found = 1;
 			}
 		}

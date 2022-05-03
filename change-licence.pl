@@ -126,21 +126,22 @@ if (-r $virtualmin_apt_repo) {
 	foreach my $l (@$lref) {
 		if (
 			# Pro license old format
-			$l =~ /^deb\s+(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
+			$l =~ /^deb(.*?)(https?):\/\/([^:]+):([^\@]+)\@($upgrade_virtualmin_host.*)$/ ||
 			# Pro license new format and GPL license
-			(-d $virtualmin_apt_auth_dir && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/) ||
+			(-d $virtualmin_apt_auth_dir && $l =~ /^deb(.*?)(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/) ||
 			# GPL license on old systems
-			($force_update && $l =~ /^deb\s+(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)
+			($force_update && $l =~ /^deb(.*?)(https?):(\/)(\/).*($upgrade_virtualmin_host.*)$/)
 			) {
-				my $host = $4;
+				my $gpgkey = $1;
+				my $host = $5;
 				if ($force_update && $l =~ /\/gpl\//) {
 					$host =~ s/gpl\///;
 					}
 				if (-d $virtualmin_apt_auth_dir) {
-					$l = "deb https://".$host;
+					$l = "deb${gpgkey}https://".$host;
 					}
 				else {
-					$l = "deb https://".$serial.":".$key."\@".$host;
+					$l = "deb${gpgkey}https://".$serial.":".$key."\@".$host;
 					}
 				$found++;
 			}
