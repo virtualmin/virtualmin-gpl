@@ -380,13 +380,11 @@ else {
 			local $main::error_must_die = 1;
 			&execute_password_change_sql(undef, $user, undef, $pass);
 			};
-		if (!$@) {
-			# Update the password used by subsequent code if
-			# changing it worked
-			&update_webmin_mysql_pass($user, $pass);
-			$mysql::mysql_pass = $pass;
-			$mysql::authstr = &mysql::make_authstr();
-			}
+		# Update the password used by subsequent code if
+		# changing it worked
+		&update_webmin_mysql_pass($user, $pass);
+		$mysql::mysql_pass = $pass;
+		$mysql::authstr = &mysql::make_authstr();
 		}
 	}
 
