@@ -3424,6 +3424,9 @@ return script_migrated_disallowed($script->{'migrated'}) ?
 sub check_script_quota
 {
 my ($d, $script, $ver) = @_;
+if ($d->{'parent'}) {
+	$d = &get_domain($d->{'parent'});
+	}
 my $qfunc = "script_".$script->{'name'}."_required_quota";
 if (defined(&$qfunc)) {
 	my ($need, $units) = &$qfunc($ver);
