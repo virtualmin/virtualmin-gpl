@@ -3810,22 +3810,38 @@ else {
 	local $ifacename = $config{'iface'} || &first_ethernet_iface();
 	local ($iface) = grep { $_->{'fullname'} eq $ifacename }
 			      &net::boot_interfaces();
-	if ($iface && @{$iface->{'address6'}}) {
+	if ($iface) {
 		# Use address on the boot interface if possible, as active
 		# IPv6 addresses can get re-ordered
-		return $iface->{'address6'}->[0];
+		my $best = &best_ip6_address($iface);
+		return $best if ($best);
 		}
 	# Otherwise, fall back to first active address
 	($iface) = grep { $_->{'fullname'} eq $ifacename }
 			&net::active_interfaces();
 	if ($iface) {
-		return $iface->{'address6'} && @{$iface->{'address6'}} ?
-			$iface->{'address6'}->[0] : undef;
+		my $best = &best_ip6_address($iface);
+		return $best if ($best);
 		}
-	else {
-		return undef;
-		}
+	return undef;
 	}
+}
+
+# best_ip6_address(&iface)
+# Returns the best IPv6 address (not local) from an interface
+sub best_ip6_address
+{
+local ($iface) = @_;
+return undef if (!$iface->{'address6'});
+foreach my $a (@{$iface->{'address6'}}) {
+	next if ($a eq '::1');		 # localhost
+	next if ($a =~ /^fe80::/);	 # Link local
+	next if ($a =~ /^2000::/);	 # Global unicast
+	next if ($a eq '::');		 # Unknown
+	next if ($a =~ /^(fec0|fc00):/); # Site local 
+	return $a;
+	}
+return undef;
 }
 
 # first_ethernet_iface()
