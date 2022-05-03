@@ -42,13 +42,13 @@ if ($in{'enabled'}) {
 	# Regenerate frame-forwarding file
 	print $text{'frame_gen'},"<br>\n";
 	&create_framefwd_file($d);
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 	}
 
 # Save the domain
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
-print $text{'setup_done'},"<p>\n";
+&$second_print($text{'setup_done'});
 
 # Run the after command
 &run_post_actions();

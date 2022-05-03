@@ -48,6 +48,7 @@ form_sshkey2=Bruk offentlig nøkkel nedenfor ..
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 
+setup_edomainip=Et domenenavn kan ikke være en IP-adresse
 setup_eremoteuser=Brukernavnet kan ikke være det samme som den nåværende Virtualmin-innloggingen
 setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha en Unix-bruker
 setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktivert

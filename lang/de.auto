@@ -86,6 +86,7 @@ setup_evital=Kritisches Feature $1 wurde nicht ordnungsgemäß erstellt - Die Er
 setup_esubdomain=Ungültiger Subdomainname - Punkte sind nicht zulässig
 setup_eforceunder=Sie dürfen nur Domains unter $1 erstellen
 setup_edomainstar=Ein Domainname kann nicht mit * beginnen. Um eine Platzhalterdomäne zu erstellen, erstellen Sie sie zuerst ohne das * und gehen Sie dann zu Serverkonfiguration -&gt; Websiteoptionen.
+setup_edomainip=Ein Domänenname kann keine IP-Adresse sein
 setup_evirt6alloc=IPv6-Adresse konnte nicht aus dem Bereich zugewiesen werden
 setup_evirtalloc2=Die virtuelle IP-Adresse aus dem Reseller-Bereich konnte nicht zugewiesen werden
 setup_evirt6alloc2=Die virtuelle IPv6-Adresse konnte nicht aus dem Reseller-Bereich zugewiesen werden

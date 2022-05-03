@@ -332,6 +332,7 @@ setup_esubdomain=Neplatný název subdomény - nejsou povoleny žádné tečky
 setup_eforceunder=Můžete vytvářet domény pouze pod $1 
 setup_edomain4=Tuto doménu již hostujete
 setup_edomainstar=Název domény nemůže začínat *. Chcete-li vytvořit zástupnou doménu, nejprve ji vytvořte bez * a poté přejděte na Konfigurace serveru -&gt; Možnosti webu.
+setup_edomainip=Název domény nemůže být IP adresa
 setup_eip6=Chybí nebo neplatná adresa IPv6
 setup_evirtalloc=Nelze přiřadit virtuální adresu IP z rozsahu
 setup_evirt6alloc=Nelze alokovat adresu IPv6 z rozsahu

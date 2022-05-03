@@ -41,7 +41,7 @@ foreach $f (&list_ordered_features($d)) {
 # Save the domain
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
-print $text{'setup_done'},"<p>\n";
+&$second_print($text{'setup_done'});
 
 # Run the after command
 &run_post_actions();

@@ -143,6 +143,7 @@ setup_eplan=Seçilen plan mevcut değil veya mevcut değil
 setup_evital=$1 kritik özelliği düzgün oluşturulmadı - Sanal sunucu oluşturma işlemi durduruldu.
 setup_edomain4=Bu alanı zaten barındırıyorsunuz
 setup_edomainstar=Alan adı * ile başlayamaz. Bir joker alan oluşturmak için, önce * olmadan oluşturun ve ardından Sunucu Yapılandırması -&gt; Web Sitesi Seçenekleri'ne gidin.
+setup_edomainip=Bir alan adı bir IP adresi olamaz
 setup_eip6=IPv6 adresi eksik veya geçersiz
 setup_evirt6alloc=IPv6 adresi aralıktan ayrılamadı
 setup_evirt6alloc2=Bayi aralığından sanal IPv6 adresi ayrılamadı

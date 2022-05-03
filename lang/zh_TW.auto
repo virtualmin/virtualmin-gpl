@@ -127,6 +127,7 @@ setup_eplan=所選計劃不存在或不可用
 setup_evital=無法正確創建關鍵功能 $1-暫停了虛擬服務器的創建。
 setup_edomain4=您已經託管了該域
 setup_edomainstar=域名不能以*開頭。要創建通配符域，請先創建不帶*的通配符域，然後轉到“服務器配置”-&gt;“網站選項”。
+setup_edomainip=域名不能是 IP 地址
 setup_eip6=缺少或無效的IPv6地址
 setup_evirt6alloc=無法分配範圍內的IPv6地址
 setup_evirt6alloc2=無法從經銷商範圍分配虛擬IPv6地址

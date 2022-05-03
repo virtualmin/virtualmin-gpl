@@ -389,6 +389,7 @@ setup_esubdomain=Neplatný názov subdomény – nie sú povolené žiadne bodky
 setup_eforceunder=Môžete vytvárať iba domény pod $1
 setup_edomain4=Túto doménu už hosťujete
 setup_edomainstar=Názov domény nemôže začínať znakom *. Ak chcete vytvoriť doménu so zástupnými znakmi, najprv ju vytvorte bez znaku * a potom prejdite na položku Konfigurácia servera -&gt; Možnosti webových stránok.
+setup_edomainip=Názov domény nemôže byť IP adresa
 setup_eip=Chýbajúca alebo neplatná adresa IP
 setup_eip6=Chýbajúca alebo neplatná adresa IPv6
 setup_evirtalloc=Nepodarilo sa prideliť virtuálnu IP adresu z rozsahu

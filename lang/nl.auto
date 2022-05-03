@@ -56,6 +56,7 @@ form_content2=Ja, met standaardsjabloon en inhoud hieronder
 form_content0=Ja, met onderstaande inhoud
 
 setup_eforceunder=Je mag alleen domeinen maken onder $1
+setup_edomainip=Een domeinnaam kan geen IP-adres zijn
 setup_evirt6alloc2=Kan virtueel IPv6-adres niet toewijzen uit resellerbereik
 setup_evirtalloc3=Geen IP-toewijzingsbereiken gedefinieerd!
 setup_evirt6alloc3=Geen IPv6-toewijzingsbereiken gedefinieerd!

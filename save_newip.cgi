@@ -332,8 +332,7 @@ foreach $f (&list_feature_plugins()) {
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
-print $text{'setup_done'},"<p>\n";
-
+&$second_print($text{'setup_done'});
 &$outdent_print();
 
 # Get and update all alias domains
@@ -382,7 +381,7 @@ foreach $sd (@doms) {
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	&save_domain($sd);
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 	&$outdent_print();
 	}
 

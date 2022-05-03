@@ -272,7 +272,7 @@ if ($plan && $plan->{'id'} ne $d->{'plan'}) {
 		}
 	$d->{'plan'} = $plan->{'id'};
 	&set_plan_on_children($d);
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 	}
 
 # Update prefix
@@ -326,7 +326,7 @@ else {
 # Save new domain details
 print $text{'save_domain'},"<br>\n";
 &save_domain($d);
-print $text{'setup_done'},"<p>\n";
+&$second_print($text{'setup_done'});
 
 # If the IP has changed, update any alias domains too
 if ($d->{'ip'} ne $oldd->{'ip'} ||

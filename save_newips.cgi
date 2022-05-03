@@ -103,7 +103,7 @@ foreach $d (@doms) {
 	# Save new domain details
 	print $text{'save_domain'},"<br>\n";
 	&save_domain($d);
-	print $text{'setup_done'},"<p>\n";
+	&$second_print($text{'setup_done'});
 
 	# Run the after command
 	&set_domain_envs($d, "MODIFY_DOMAIN", undef, \%oldd);

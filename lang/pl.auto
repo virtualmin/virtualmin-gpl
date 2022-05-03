@@ -221,6 +221,7 @@ setup_esubdomain=Nieprawidłowa nazwa subdomeny - niedozwolone są kropki
 setup_eforceunder=Możesz tworzyć domeny tylko w $1 
 setup_edomain4=Hostujesz już tę domenę
 setup_edomainstar=Nazwa domeny nie może zaczynać się od *. Aby utworzyć domenę wieloznaczną, najpierw utwórz ją bez *, a następnie przejdź do Konfiguracja serwera -&gt; Opcje strony internetowej.
+setup_edomainip=Nazwa domeny nie może być adresem IP
 setup_evirtalloc=Nie można przydzielić wirtualnego adresu IP z zakresu
 setup_evirt6alloc=Nie można przydzielić adresu IPv6 z zakresu
 setup_evirtalloc2=Nie można przydzielić wirtualnego adresu IP z zakresu sprzedawcy

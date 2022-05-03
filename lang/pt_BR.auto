@@ -388,6 +388,7 @@ setup_esubdomain=Nome de subdomínio inválido - nenhum ponto é permitido
 setup_eforceunder=Você só pode criar domínios abaixo de $1 
 setup_edomain4=Você já está hospedando este domínio
 setup_edomainstar=Um nome de domínio não pode começar com *. Para criar um domínio curinga, primeiro crie-o sem o * e, em seguida, vá para Configuração do servidor -&gt; Opções do site.
+setup_edomainip=Um nome de domínio não pode ser um endereço IP
 setup_eip=Endereço IP ausente ou inválido
 setup_eip6=Endereço IPv6 inválido ou ausente
 setup_evirtalloc=Não foi possível alocar o endereço IP virtual do intervalo
