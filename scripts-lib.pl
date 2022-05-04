@@ -769,8 +769,8 @@ foreach my $script (@domain_scripts) {
 								$script_config_file_path = "$sdir/$sproject/$script_config_file";
 								}
 							}
-						if (&is_under_directory($sdir, $script_config_file_path)) {
-							my $script_config_file_lines = &read_file_lines($script_config_file_path);
+						if (-w $script_config_file_path) {
+							my $script_config_file_lines = &read_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
 									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)(?<after>.*)/) {
@@ -796,7 +796,7 @@ foreach my $script (@domain_scripts) {
 										}
 									}
 								}
-							&flush_file_lines($script_config_file_path);
+							&flush_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($success) {
 								$success = 
 									$script_config_files_count > 1 ?
