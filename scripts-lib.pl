@@ -706,7 +706,7 @@ foreach my $script (@domain_scripts) {
 						&$indent_print() if(!$script_config_file_count++);
 						&$first_print("$sdata->{'desc'} ..") if (!$printed_name[$sdata->{'desc'}]), push(@printed_name, $sdata->{'desc'});
 						my $script_options_to_update = $script_config_types->{$config_type_current};
-						my ($replace_target, $replace_with, $value_func, @value_func_params, $script_option_multi, %options_multi);
+						my ($replace_target, $replace_with, $value_func, @value_func_params, $script_option_multi, $script_option_after, %options_multi);
 						foreach my $script_option (keys %{$script_options_to_update}) {
 							# Parse repalce
 							if ($script_option eq 'replace') {
@@ -724,6 +724,10 @@ foreach my $script (@domain_scripts) {
 							# Check if multi params must be replaced (complex replacement)
 							if ($script_option eq 'multi') {
 								$script_option_multi++;
+								}
+							# Include after regexp type (e.g. Drupal multiformat array (multi and single line))
+							if ($script_option eq 'after') {
+								$script_option_after++;
 								}
 							}
 
@@ -769,7 +773,8 @@ foreach my $script (@domain_scripts) {
 							my $script_config_file_lines = &read_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
-									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)/) {
+									if ($config_file_line =~ /(?<before>.*)(?<replace_target>$replace_target)(?<after>.*)/) {
+										my $include_after = $script_option_after ? "$+{after}" : "";
 										if ($script_option_multi) {
 											# Construct replacement first
 											foreach my $option_multi (keys %options_multi) {
@@ -781,11 +786,11 @@ foreach my $script (@domain_scripts) {
 												$replace_with =~ s/\$\$$option_multi/$option_multi_value/;
 												}
 											# Perform complex replacement (multi)
-											$config_file_line = "$+{before}$+{replace_target}$replace_with";
+											$config_file_line = "$+{before}$+{replace_target}$replace_with$include_after";
 											}
 										else {
 											# Perform simple replacement
-											$config_file_line = "$+{before}$replace_with";
+											$config_file_line = "$+{before}$replace_with$include_after";
 											}
 										$success++;
 										}
