@@ -15603,9 +15603,9 @@ if ($virtualmin_pro &&
 			my $found = 0;
 			foreach my $l (@$lref) {
 				# An old Debian format with login/pass inside of the repo file
-				if ($l =~ /^deb\s+https?:\/\/([^:]+):([^\@]+)\@$upgrade_virtualmin_host/) {
-					if ($1 eq $vserial{'SerialNumber'} &&
-					    $2 eq $vserial{'LicenseKey'}) {
+				if ($l =~ /^deb(.*?)https?:\/\/([^:]+):([^\@]+)\@$upgrade_virtualmin_host/) {
+					if ($2 eq $vserial{'SerialNumber'} &&
+					    $3 eq $vserial{'LicenseKey'}) {
 						$found = 2;
 						}
 					else {
@@ -15615,7 +15615,7 @@ if ($virtualmin_pro &&
 					}
 
 				# A new Debian format with auth in a separate file
-				if ($l =~ /^deb\s+(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/ &&
+				if ($l =~ /^deb(.*?)(https):(\/)(\/).*($upgrade_virtualmin_host.*)$/ &&
 					-r "$virtualmin_apt_auth_dir/virtualmin.conf") {
 					my $auth_conf_lines = &read_file_contents("$virtualmin_apt_auth_dir/virtualmin.conf");
 					if ($auth_conf_lines =~ /machine\s+$upgrade_virtualmin_host\s+login\s+(\S+)\s+password\s+(\S+)/gmi) {

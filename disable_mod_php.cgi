@@ -69,7 +69,7 @@ else {
 		push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 		my $c = 0;
 		foreach my $p (@ports) {
-			$c += &fix_mod_php_directives($d, $port, 1);
+			$c += &fix_mod_php_directives($d, $p, 1);
 			}
 		$dcount++ if ($c);
 		}
