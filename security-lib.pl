@@ -1,3 +1,6 @@
+
+use feature 'state';
+
 # Functions for accessing files and running commands as a domain owner
 
 # has_domain_user(&domain)
@@ -517,6 +520,80 @@ else {
 		exit($? / 256);
 		}
 	}
+}
+
+# control_path_permissions(action, dir/file, [under_dir])
+# Can set and get given file permissions for each path parts
+sub control_path_permissions
+{
+my ($action, $path, $under) = @_;
+state %paths;
+
+# Store and fix initial path
+my $ipath = $path;
+$ipath =~ s/[\/]+$//g;
+
+# Return existing
+if ($action eq 'get') {
+    return $paths{$ipath};
+    }
+elsif ($action eq 'set') {
+    # Control under directory (not to
+    # affect permissions on full tree)
+    my $under_dir =
+         !ref($under) && -d $under ? $under :
+          ref($under) ? $under->{'home'} || "/" : "/";
+
+
+    # Sanity check for passed file/path
+    if (-d $path && $path !~ /\/$/) {
+        $path .= "/";
+    }
+
+    my $xpath = $path;
+    my %cpaths;
+    $cpaths{$path} = sprintf("%04o", (stat($path))[2] & 07777)
+      if (!-d $path && -r $path);
+    map {
+        $xpath =~ s/(.*)(\/.*)/$1/;
+        if (&is_under_directory($under_dir, $xpath)) {
+            $cpaths{$xpath} = sprintf("%04o", (stat($xpath))[2] & 07777)
+                if ($xpath && -e $xpath);
+        }
+    } split('/', $path);
+
+    $paths{$ipath} = \%cpaths;
+    return $paths{$ipath};
+    }
+}
+
+# set_filepath_permissions_as_domain_user(&domain, file, [perms], [under])
+# Set given file and each path parts certain
+# permissions (to make file and path writable)
+sub set_filepath_permissions_as_domain_user
+{
+my ($d, $file, $perms, $under) = @_;
+$perms ||= 0755;
+my $fileparts = &control_path_permissions('set', $file, $under || $d->{'home'});
+my @files = keys %{$fileparts};
+my $done_num = &set_permissions_as_domain_user($d, $perms, @files)
+    if (@files);
+return $done_num;
+}
+
+# restore_filepath_permissions_as_domain_user(&domain, file, [under])
+# Restores given file and each path parts initial permissions
+sub restore_filepath_permissions_as_domain_user
+{
+my ($d, $file, $under) = @_;
+my $fileparts = &control_path_permissions('get', $file, $under || $d->{'home'});
+my $done_num;
+foreach my $ifile (keys %{$fileparts}) {
+    if (&set_permissions_as_domain_user($d, oct($fileparts->{$ifile}), $ifile)) {
+        $done_num++;
+        }
+    }
+return $done_num;
 }
 
 # write_as_domain_user(&domain, &code)

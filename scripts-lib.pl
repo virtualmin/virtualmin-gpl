@@ -770,6 +770,7 @@ foreach my $script (@domain_scripts) {
 								}
 							}
 						if (-w $script_config_file_path) {
+							&set_filepath_permissions_as_domain_user($d, $script_config_file_path, 0755, $sdir);
 							my $script_config_file_lines = &read_file_lines_as_domain_user($d, $script_config_file_path);
 							if ($replace_target && $replace_with) {
 								foreach my $config_file_line (@{$script_config_file_lines}) {
@@ -797,6 +798,7 @@ foreach my $script (@domain_scripts) {
 									}
 								}
 							&flush_file_lines_as_domain_user($d, $script_config_file_path);
+							&restore_filepath_permissions_as_domain_user($d, $script_config_file_path, $sdir);
 							if ($success) {
 								$success = 
 									$script_config_files_count > 1 ?
