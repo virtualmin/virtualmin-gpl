@@ -1254,16 +1254,21 @@ foreach my $db (@dbs) {
 	&$outdent_print();
 	if ($db->[1] =~ /(.*)\.gz$/) {
 		# Need to uncompress first
-		unlink("$1");	# To prevent malicious link overwrite
+		my $basefile = $1;
+		unlink($basefile);	# To prevent malicious link overwrite
+		&uncat_file($basefile, "");
+		&set_ownership_permissions(
+			$d->{'user'}, undef, 0755, $basefile);
 		my $out = &run_as_domain_user($d, 
-			&get_gunzip_command()." ".quotemeta($db->[1])." 2>&1");
+			&get_gunzip_command()." -c ".quotemeta($db->[1]).
+			" 2>&1 >".quotemeta($basefile));
 		if ($?) {
 			&$second_print(&text('restore_mysqlgunzipfailed',
 					     "<pre>$out</pre>"));
 			$rv = 0;
 			last;
 			}
-		$db->[1] =~ s/\.gz$//;
+		$db->[1] = $basefile;
 		}
 	local ($ex, $out);
 	if ($asd) {
