@@ -4243,6 +4243,7 @@ scripts_gpl_to_pro_upgrade=Aktualizácia tohto skriptu je teraz k dispozícii ib
 scripts_gpl_pro_tip=Profesionálna funkcia
 scripts_gpl_pro_tip_hide=Ďakujem za upozornenie
 scripts_gpl_pro_tip_hide2=Ďakujem, budem o tom premýšľať
+scripts_gpl_pro_tip_open=Kúpte si Virtualmin Pro
 scripts_gpl_pro_tip_and=a
 scripts_gpl_pro_tip_enroll=Zvážte zakúpenie licencie <a target=_blank href='$1'>Virtualmin Pro</a> na podporu vývoja a odomknutie tejto a mnohých ďalších skvelých funkcií.
 scripts_gpl_pro_tip_list_scripts=K dispozícii je viac inštalačných skriptov!

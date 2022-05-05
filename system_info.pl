@@ -74,6 +74,8 @@ if (!$virtualmin_pro &&
 			                               'https://www.virtualmin.com/product-category/virtualmin/'),
 			        'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
 			        'button_icon' => 'fa fa-fw fa-heartbeat',
+			        'button_text2' => $text{'scripts_gpl_pro_tip_open'},
+			        'button_icon2' => 'fa fa-fw fa-unlock',
 			    	}) },
 			  });
 		}

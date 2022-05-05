@@ -573,6 +573,7 @@ scripts_gpl_to_pro_upgrade=Oppgradering for dette skriptet er nå bare tilgjenge
 scripts_gpl_pro_tip=Pro -funksjon
 scripts_gpl_pro_tip_hide=Takk for advarselen
 scripts_gpl_pro_tip_hide2=Takk, jeg skal tenke på det
+scripts_gpl_pro_tip_open=Kjøp Virtualmin Pro
 scripts_gpl_pro_tip_and=og
 scripts_gpl_pro_tip_enroll=Vennligst vurder å kjøpe <a target=_blank href='$1'>Virtualmin Pro</a>-lisens for å støtte utviklingen og låse opp denne og mange andre kule funksjoner.
 scripts_gpl_pro_tip_list_scripts=Det er flere installasjonsskript tilgjengelig!

@@ -1974,6 +1974,7 @@ scripts_gpl_to_pro_upgrade=La mise à niveau de ce script n'est désormais dispo
 scripts_gpl_pro_tip=Fonctionnalité professionnelle
 scripts_gpl_pro_tip_hide=Merci pour l'information
 scripts_gpl_pro_tip_hide2=merci je vais y réfléchir
+scripts_gpl_pro_tip_open=Acheter Virtualmin Pro
 scripts_gpl_pro_tip_and=et
 scripts_gpl_pro_tip_enroll=Veuillez envisager d'acheter une licence <a target=_blank href='$1'>Virtualmin Pro</a> pour prendre en charge le développement et déverrouiller cela et de nombreuses autres fonctionnalités intéressantes.
 scripts_gpl_pro_tip_list_scripts=Il y a plus de scripts d'installation disponibles !
