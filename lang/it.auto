@@ -3239,6 +3239,7 @@ scripts_gpl_pro_tip=Funzionalità professionale
 scripts_gpl_pro_tip_hide=Grazie per il testa a testa
 scripts_gpl_pro_tip_hide2=Grazie, ci penserò su
 scripts_gpl_pro_tip_open=Acquista Virtualmin Pro
+scripts_gpl_pro_tip_remind=Ricordamelo più tardi
 scripts_gpl_pro_tip_and=e
 scripts_gpl_pro_tip_enroll=Considera l'acquisto di una licenza <a target=_blank href='$1'>Virtualmin Pro</a> per supportare lo sviluppo e sbloccare questa e molte altre fantastiche funzionalità.
 scripts_gpl_pro_tip_list_scripts=Sono disponibili più script di installazione!

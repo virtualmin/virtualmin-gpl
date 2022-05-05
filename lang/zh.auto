@@ -1848,6 +1848,7 @@ scripts_gpl_pro_tip=专业功能
 scripts_gpl_pro_tip_hide=感谢您的提醒
 scripts_gpl_pro_tip_hide2=谢谢，我会考虑的
 scripts_gpl_pro_tip_open=购买 Virtualmin Pro
+scripts_gpl_pro_tip_remind=稍后提醒我
 scripts_gpl_pro_tip_and=和
 scripts_gpl_pro_tip_enroll=请考虑购买 <a target=_blank href='$1'>Virtualmin Pro</a> 许可证以支持开发并解锁此功能和许多其他很酷的功能。
 scripts_gpl_pro_tip_list_scripts=有更多安装脚本可用！

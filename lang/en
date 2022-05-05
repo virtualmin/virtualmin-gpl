@@ -4244,6 +4244,7 @@ scripts_gpl_pro_tip=Pro Feature
 scripts_gpl_pro_tip_hide=Thanks for the heads-up
 scripts_gpl_pro_tip_hide2=Thanks, I will think about it
 scripts_gpl_pro_tip_open=Purchase Virtualmin Pro
+scripts_gpl_pro_tip_remind=Remind Me Later
 scripts_gpl_pro_tip_and=and
 scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock this and many other cool features.
 scripts_gpl_pro_tip_list_scripts=There are more install scripts available!

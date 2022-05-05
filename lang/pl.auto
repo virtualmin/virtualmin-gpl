@@ -3580,6 +3580,7 @@ scripts_gpl_pro_tip=Profesjonalna funkcja
 scripts_gpl_pro_tip_hide=Dzięki za ostrzeżenie
 scripts_gpl_pro_tip_hide2=Dzięki, pomyślę o tym
 scripts_gpl_pro_tip_open=Kup Virtualmin Pro
+scripts_gpl_pro_tip_remind=Przypomnij mi później
 scripts_gpl_pro_tip_and=oraz
 scripts_gpl_pro_tip_enroll=Rozważ zakup licencji <a target=_blank href='$1'>Virtualmin Pro</a>, aby wesprzeć rozwój i odblokować tę i wiele innych fajnych funkcji.
 scripts_gpl_pro_tip_list_scripts=Dostępnych jest więcej skryptów instalacyjnych!

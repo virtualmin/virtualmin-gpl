@@ -4024,6 +4024,7 @@ scripts_gpl_pro_tip=Recurso Pro
 scripts_gpl_pro_tip_hide=Obrigado pelo aviso
 scripts_gpl_pro_tip_hide2=Obrigado, vou pensar nisso
 scripts_gpl_pro_tip_open=Adquira o Virtualmin Pro
+scripts_gpl_pro_tip_remind=Lembre-me mais tarde
 scripts_gpl_pro_tip_and=e
 scripts_gpl_pro_tip_enroll=Por favor, considere comprar a licença <a target=_blank href='$1'>Virtualmin Pro</a> para apoiar o desenvolvimento e desbloquear este e muitos outros recursos interessantes.
 scripts_gpl_pro_tip_list_scripts=Existem mais scripts de instalação disponíveis!

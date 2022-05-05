@@ -4244,6 +4244,7 @@ scripts_gpl_pro_tip=プロ機能
 scripts_gpl_pro_tip_hide=ヘッドアップをありがとう
 scripts_gpl_pro_tip_hide2=ありがとう、私はそれについて考えます
 scripts_gpl_pro_tip_open=VirtualminProを購入する
+scripts_gpl_pro_tip_remind=後で思い出させる
 scripts_gpl_pro_tip_and=と
 scripts_gpl_pro_tip_enroll=<a target=_blank href='$1'>Virtualmin Pro</a>ライセンスの購入を検討して、開発をサポートし、この機能や他の多くの優れた機能のロックを解除してください。
 scripts_gpl_pro_tip_list_scripts=より多くのインストールスクリプトが利用可能です！

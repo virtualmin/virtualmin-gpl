@@ -806,6 +806,7 @@ scripts_gpl_pro_tip=Pro-functie
 scripts_gpl_pro_tip_hide=Bedankt voor de heads-up
 scripts_gpl_pro_tip_hide2=Bedankt, ik zal er over nadenken
 scripts_gpl_pro_tip_open=Koop Virtualmin Pro
+scripts_gpl_pro_tip_remind=Herinner me er later aan
 scripts_gpl_pro_tip_and=en
 scripts_gpl_pro_tip_enroll=Overweeg om een <a target=_blank href='$1'>Virtualmin Pro</a>-licentie aan te schaffen om de ontwikkeling te ondersteunen en deze en vele andere coole functies te ontgrendelen.
 scripts_gpl_pro_tip_list_scripts=Er zijn meer installatiescripts beschikbaar!
