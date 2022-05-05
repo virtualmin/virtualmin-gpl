@@ -524,6 +524,16 @@ else {
 
 # control_path_permissions(action, dir/file, [under_dir])
 # Can set and get given file permissions for each path parts
+#
+# Example:
+#      call: control_path_permissions('set', '/root/dir1/dir2/dir3/file1.txt', '/root/dir1');
+#    stores: ['/root/dir1/dir2/dir3/file1.txt'  =>
+#        {
+#          '/root/dir1/dir2/dir3/file1.txt'   => oct # 644
+#          '/root/dir1/dir2/dir3'             => oct # 755
+#          '/root/dir1/dir2'                  => oct # 755
+#          '/root/dir1'                       => oct # 755
+#        }]
 sub control_path_permissions
 {
 my ($action, $path, $under) = @_;
@@ -538,22 +548,29 @@ if ($action eq 'get') {
     return $paths{$ipath};
     }
 elsif ($action eq 'set') {
-    # Control under directory (not to
-    # affect permissions on full tree)
+    # Controls which path parts are affected when called,
+    # e.g. passing /home/user/public_html/script will not
+    # consider anything below given directory
     my $under_dir =
          !ref($under) && -d $under ? $under :
           ref($under) ? $under->{'home'} || "/" : "/";
 
-
-    # Sanity check for passed file/path
+    # Sanity check for passed path to
+    # make sure that a directory ends
+    # always with trailing slash
     if (-d $path && $path !~ /\/$/) {
         $path .= "/";
     }
 
     my $xpath = $path;
     my %cpaths;
+
+    # In case initial param refers to a file, always add it
+    # manually, as next iteration only works on directories
     $cpaths{$path} = sprintf("%04o", (stat($path))[2] & 07777)
       if (!-d $path && -r $path);
+
+    # Build a hash storing `file => currperms` records
     map {
         $xpath =~ s/(.*)(\/.*)/$1/;
         if (&is_under_directory($under_dir, $xpath)) {
@@ -562,6 +579,7 @@ elsif ($action eq 'set') {
         }
     } split('/', $path);
 
+    # Return a list of current permissions for passed path
     $paths{$ipath} = \%cpaths;
     return $paths{$ipath};
     }
