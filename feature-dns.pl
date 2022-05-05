@@ -3481,7 +3481,7 @@ sub pre_records_change
 local ($d) = @_;
 
 # Freeze the zone, so that updates to dynamic zones work
-if (!$d->{'provision_dns'}) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	&require_bind();
 	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
 	if ($z && defined(&bind8::before_editing)) {
@@ -3495,7 +3495,7 @@ if (!$d->{'provision_dns'}) {
 sub after_records_change
 {
 local ($d) = @_;
-if (!$d->{'provision_dns'}) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	my $z = &bind8::get_zone_name($d->{'dom'}, 'any');
 	if ($z && defined(&bind8::after_editing)) {
 		&bind8::after_editing($z);
