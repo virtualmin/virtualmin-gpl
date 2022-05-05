@@ -60,6 +60,7 @@ else {
 	&$second_print($text{'setup_done'});
 
 	# Remove all php_value lines from domains
+	my @dtargs = ('php_value', 'php_flag', 'php_admin_value', 'php_admin_flag');
 	&$first_print($text{'index_disable_mod_php_doms'});
 	my $dcount = 0;
 	foreach my $d (&list_domains()) {
@@ -78,8 +79,9 @@ else {
 	# And at the top level
 	&$first_print($text{'index_disable_mod_php_global'});
 	my $conf = &apache::get_config();
-	&apache::save_directive("php_value", [], $conf, $conf);
-	&apache::save_directive("php_admin_value", [], $conf, $conf);
+	foreach my $pval (@dtargs) {
+		&apache::save_directive($pval, [ ], $conf, $conf);
+		}
 	&flush_file_lines();
 	&register_post_action(\&restart_apache, 0);
 	&$second_print($text{'setup_done'});
