@@ -60,7 +60,7 @@ else {
 	&$second_print($text{'setup_done'});
 
 	# Remove all php_value lines from domains
-	my @dtargs = ('php_value', 'php_flag', 'php_admin_value', 'php_admin_flag');
+	my @dtargs = &list_mod_php_directives();
 	&$first_print($text{'index_disable_mod_php_doms'});
 	my $dcount = 0;
 	foreach my $d (&list_domains()) {

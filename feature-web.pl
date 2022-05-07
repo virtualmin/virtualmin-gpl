@@ -4824,6 +4824,13 @@ foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
 return $changed;
 }
 
+# list_mod_php_directives()
+# Returns names of directives associated with mod_php
+sub list_mod_php_directives
+{
+return ('php_value', 'php_flag', 'php_admin_value', 'php_admin_flag');
+}
+
 # fix_mod_php_directives(&domain, port, [force])
 # Remove php_value directives if not supported by this system
 sub fix_mod_php_directives
@@ -4833,8 +4840,7 @@ my $count = 0;
 if (!&get_apache_mod_php_version() || $force) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	if ($virt) {
-		my @dtargs = ('php_value', 'php_flag',
-			      'php_admin_value', 'php_admin_flag');
+		my @dtargs = &list_mod_php_directives();
 		foreach my $pval (@dtargs) {
 			my @phpv = &apache::find_directive($pval, $vconf);
 			$count += scalar(@phpv);
