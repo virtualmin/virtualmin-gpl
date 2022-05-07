@@ -99,7 +99,7 @@ sub wizard_show_virus
 print &ui_table_row(undef, $text{'wizard_virusnew'} . "<p></p>", 2);
 local $cs = &check_clamd_status();
 if ($cs != -1) {
-	$cs = 2 if (!$cs && $config{'virus'});
+	$cs = 2 if (!$cs && &get_global_virus_scanner() eq 'clamscan');
 	print &ui_table_row($text{'wizard_virusmsg'},
 		&ui_radio("clamd", $cs,
 			  [ [ 1, $text{'wizard_virus1'}."<br>" ],
