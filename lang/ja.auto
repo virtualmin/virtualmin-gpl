@@ -5899,6 +5899,7 @@ clamd_esrcalready=.. もう存在している
 clamd_initscript=ClamAV起動アクション $1を修正しています. ..
 clamd_initalready=..すでに完了
 clamd_start=ClamAVサーバーの起動と起動時の有効化 ..
+clamd_start_updater=ClamAVデータベース更新ユーティリティサーバーを起動し、起動時に有効にします。
 clamd_estart=..起動に失敗しました： $1
 clamd_einit=..起動アクション$1は存在しません！
 clamd_stop=ClamAVサーバーを停止し、起動時に無効にする ..

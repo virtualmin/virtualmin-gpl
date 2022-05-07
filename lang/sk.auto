@@ -5899,6 +5899,7 @@ clamd_esrcalready=.. už existuje
 clamd_initscript=Oprava spúšťacej akcie ClamAV $1 ..
 clamd_initalready=.. už hotový
 clamd_start=Spustenie servera ClamAV a povolenie pri zavádzaní ..
+clamd_start_updater=Spúšťa sa server nástroja na aktualizáciu databázy ClamAV a povoľuje sa pri zavádzaní ..
 clamd_estart=.. nepodarilo sa spustiť : $1
 clamd_einit=.. bootovacia akcia $1 neexistuje!
 clamd_stop=Zastavenie servera ClamAV a deaktivácia pri zavádzaní ..

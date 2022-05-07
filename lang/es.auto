@@ -1666,6 +1666,7 @@ sv_sdisabling=Deshabilitar el servidor de filtrado SpamAssassin.
 sv_senabling=Configurar y habilitar el servidor de filtrado SpamAssassin.
 sv_swarning=¡Advertencia! Virtualmin está configurado para usar el filtro del servidor, pero el proceso del servidor SpamAssassin ya no se está ejecutando
 
+clamd_start_updater=Iniciando el servidor de la utilidad de actualización de la base de datos de ClamAV y habilitándolo en el arranque ..
 clamd_einit=.. acción de arranque $1 no existe!
 spamd_estartmsg=El servidor de filtro SpamAssassin no se pudo iniciar
 spamd_estopmsg=El servidor de filtro SpamAssassin no se está ejecutando.

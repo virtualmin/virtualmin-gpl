@@ -3298,6 +3298,7 @@ clamd_esrcalready=.. existe déjà
 clamd_initscript=Correction de l'action de démarrage de ClamAV $1 ..
 clamd_initalready=.. déjà fait
 clamd_start=Démarrage du serveur ClamAV et activation au démarrage ..
+clamd_start_updater=Démarrage du serveur utilitaire de mise à jour de la base de données ClamAV et activation au démarrage ..
 clamd_estart=.. n'a pas pu démarrer : $1 
 clamd_einit=.. l'action de démarrage $1 n'existe pas!
 clamd_stop=Arrêt du serveur ClamAV et désactivation au démarrage.

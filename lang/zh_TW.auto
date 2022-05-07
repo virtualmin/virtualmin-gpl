@@ -2653,6 +2653,7 @@ clamd_esrcalready=.. 已經存在
 clamd_initscript=修復了ClamAV啟動操作 $1 ..
 clamd_initalready=.. 已經完成了
 clamd_start=啟動ClamAV服務器並在啟動時啟用 ..
+clamd_start_updater=啟動 ClamAV 數據庫更新實用程序服務器並在啟動時啟用 ..
 clamd_estart=..無法啟動： $1
 clamd_einit=..啟動動作$1不存在！
 clamd_stop=停止ClamAV服務器並在啟動時禁用 ..

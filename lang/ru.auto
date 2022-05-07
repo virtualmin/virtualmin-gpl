@@ -4487,6 +4487,7 @@ clamd_esrcalready=.. уже существует
 clamd_initscript=Исправление загрузочного действия ClamAV $1 ..
 clamd_initalready=.. уже сделано
 clamd_start=Запуск сервера ClamAV и включение при загрузке.
+clamd_start_updater=Запуск сервера утилиты обновления базы данных ClamAV и включение при загрузке ..
 clamd_estart=.. не удалось запустить : $1 
 clamd_einit=.. действие загрузки $1 не существует!
 clamd_stop=Остановка сервера ClamAV и отключение при загрузке.
