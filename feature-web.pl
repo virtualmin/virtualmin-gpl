@@ -4833,11 +4833,28 @@ my $count = 0;
 if (!&get_apache_mod_php_version() || $force) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	if ($virt) {
-		my @dtargs = ('php_value', 'php_flag', 'php_admin_value', 'php_admin_flag');
+		my @dtargs = ('php_value', 'php_flag',
+			      'php_admin_value', 'php_admin_flag');
 		foreach my $pval (@dtargs) {
 			my @phpv = &apache::find_directive($pval, $vconf);
 			$count += scalar(@phpv);
 			&apache::save_directive($pval, [ ], $vconf, $conf);
+			}
+		my @dirs;
+		foreach my $dirname ("Directory", "DirectoryMatch",
+				     "Files", "FilesMatch",
+				     "Location", "LocationMatch") {
+			push(@dirs, &apache::find_directive_struct(
+					$dirname, $vconf));
+			}
+		foreach my $dir (@dirs) {
+			foreach my $pval (@dtargs) {
+				my @phpv = &apache::find_directive(
+					$pval, $dir->{'members'});
+				$count += scalar(@phpv);
+				&apache::save_directive(
+					$pval, [ ], $dir->{'members'}, $conf);
+				}
 			}
 		&flush_file_lines($virt->{'file'}, undef, 1);
 		&register_post_action(\&restart_apache);
