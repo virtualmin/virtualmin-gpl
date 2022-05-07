@@ -572,6 +572,20 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 	&set_ownership_permissions(undef, undef, 0666, $sfile);
 	}
 
+
+if (&init::action_status('clamav-freshclam')) {
+	&$first_print(&text('clamd_start_updater'));
+	&init::enable_at_boot('clamav-freshclam');
+	local ($ok, $out) = &init::start_action('clamav-freshclam');
+	if (!$ok || $out =~ /failed|error/i) {
+		&$second_print(&text('clamd_estart',
+				"<tt>".&html_escape($out)."</tt>"));
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 if ($init) {
 	# Ubuntu, Joe's or FreeBSD .. all we have to do is enable and
 	# start the daemon!

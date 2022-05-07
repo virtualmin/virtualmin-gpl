@@ -3171,6 +3171,7 @@ clamd_esrcalready=.. zaten var
 clamd_initscript=ClamAV önyükleme eylemi $1 düzeltiliyor.
 clamd_initalready=.. zaten bitti
 clamd_start=ClamAV sunucusunu başlatma ve önyükleme sırasında etkinleştirme ..
+clamd_start_updater=ClamAV veritabanı güncelleme yardımcı programı sunucusunu başlatma ve açılışta etkinleştirme ..
 clamd_estart=.. başlatılamadı : $1 
 clamd_einit=.. $1 önyükleme eylemi yok!
 clamd_stop=ClamAV sunucusunu durdurma ve önyükleme sırasında devre dışı bırakma ..

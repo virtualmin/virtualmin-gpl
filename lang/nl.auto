@@ -1056,6 +1056,7 @@ history_stat_memcached=Buffercache gebruikt
 history_stat_memburst=Barstbare limiet
 history_stat_ratecount=E-mailtarief beperkt per minuut
 
+clamd_start_updater=ClamAV database update utility server starten en inschakelen bij opstarten ..
 clamd_einit=.. opstartactie $1 bestaat niet!
 
 newshells_reseller=Tussenpersoon?

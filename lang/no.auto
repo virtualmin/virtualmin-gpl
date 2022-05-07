@@ -778,6 +778,7 @@ exclude_edb=Databasens navn '$1' er ugyldig
 
 balancer_none=Ikke bruk proxy for denne banen, og tjen lokalt i stedet
 
+clamd_start_updater=Starter ClamAV-databaseoppdateringsverktøyserveren og aktiverer ved oppstart ..
 clamd_einit=.. oppstartshandling $1 eksisterer ikke!
 
 newshells_reseller=Forhandler?

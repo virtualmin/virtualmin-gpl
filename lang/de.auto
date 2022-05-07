@@ -2206,6 +2206,7 @@ sv_sdisabledesc=Klicken Sie auf diese Schaltfläche, um den SpamAssassin-Filters
 sv_senabledesc=Klicken Sie auf diese Schaltfläche, um den SpamAssassin-Filterserver <tt>spamd</tt> zu konfigurieren und zu starten. Auf diese Weise können Sie den oben genannten <tt>Spamc</tt> -Serverfilter auswählen, der bei der Verarbeitung großer E-Mail-Mengen im Allgemeinen schneller ist.
 sv_swarning=Warnung! Virtualmin ist für die Verwendung des Serverfilters konfiguriert, der SpamAssassin-Serverprozess wird jedoch nicht mehr ausgeführt
 
+clamd_start_updater=ClamAV Database Update Utility Server starten und beim Booten aktivieren ..
 clamd_einit=.. Bootup Aktion $1 existiert nicht!
 clamd_lognone=.. konnte Verzeichnis aus Konfigurationsdatei nicht herausfinden
 clamd_ekillmsg=Fehler beim Beenden der ClamAV-Virenscan-Serverprozesse : $1

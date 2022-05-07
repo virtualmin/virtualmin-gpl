@@ -4946,6 +4946,7 @@ clamd_esrcalready=.. już istnieje
 clamd_initscript=Naprawianie działania uruchamiania ClamAV $1 ..
 clamd_initalready=.. już zrobione
 clamd_start=Uruchamianie serwera ClamAV i włączanie przy rozruchu ..
+clamd_start_updater=Uruchamianie serwera narzędzia aktualizacji bazy danych ClamAV i włączanie przy starcie ..
 clamd_estart=.. nie udało się uruchomić : $1 
 clamd_einit=.. akcja rozruchowa $1 nie istnieje!
 clamd_stop=Zatrzymywanie serwera ClamAV i wyłączanie przy rozruchu ..

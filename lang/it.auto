@@ -4589,6 +4589,7 @@ features_desc=Questa pagina consente di selezionare le funzionalità principali 
 clamd_esrcfile=.. la corrispondenza del file di origine $1 non è stata trovata!
 clamd_initscript=Correzione dell'azione di avvio di ClamAV $1 ..
 clamd_start=Avvio del server ClamAV e abilitazione all'avvio.
+clamd_start_updater=Avvio del server di utilità di aggiornamento del database ClamAV e abilitazione all'avvio ..
 clamd_einit=.. l'azione di avvio $1 non esiste!
 clamd_stop=Arresto del server ClamAV e disabilitazione all'avvio.
 clamd_linkbin=Collegamento del server ClamAV a $1 ..
