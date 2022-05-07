@@ -2382,9 +2382,11 @@ if ($d->{'virt'} && !$d->{'name'}) {
 sub links_web
 {
 local ($d) = @_;
+return () if ($d->{'alias'});
 local @rv;
 my $link = $d->{'dom'}.":".$d->{'web_port'};
 my $slink = $d->{'dom'}.":".$d->{'web_sslport'};
+
 # Link to configure virtual host
 push(@rv, { 'mod' => 'apache',
 	    'desc' => $text{'links_web'},
@@ -2435,7 +2437,7 @@ if ($mode eq "cgi" || $mode eq "fcgid") {
 			  });
 		}
 	}
-elsif ($mode eq "fpm" && &get_webmin_version() >= 1.844) {
+elsif ($mode eq "fpm") {
 	# Link to phpini module for the FPM version
 	my $conf = &get_php_fpm_config($d);
 	if ($conf) {

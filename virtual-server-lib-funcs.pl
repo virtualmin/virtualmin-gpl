@@ -12488,7 +12488,7 @@ if (($d->{'spam'} && $config{'spam'} ||
 		  });
 	}
 
-if (&domain_has_website($d)) {
+if (&domain_has_website($d) && !$d->{'alias'}) {
 	# Website / PHP options buttons
 	if (&can_edit_phpmode()) {
 		push(@rv, { 'page' => 'edit_website.cgi',
