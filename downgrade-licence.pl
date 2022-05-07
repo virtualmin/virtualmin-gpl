@@ -43,8 +43,10 @@ my $gpl_downgrading_repository = "Downgrading Virtualmin repository ..";
 my $gpl_downgrading_package = "Downgrading Virtualmin package ..";
 my $gpl_downgrading_license = "Downgrading Virtualmin license ..";
 my $gpl_downgrading_all_done = "Your system has been successfully downgraded to Virtualmin GPL! Thank you for giving Virtualmin Pro a try.";
+my $gpl_downgrading_some_failed = "Downgrading to Virtualmin GPL finished with errors! Thank you for giving Virtualmin Pro a try.";
 my $gpl_downgrading_done = ".. done";
 my $gpl_downgrading_failed = ".. failed";
+my $gpl_downgrading_failed_status;
 
 # Downgrade RHEL repo and the package
 if (-r $virtualmin_yum_repo) {
@@ -75,13 +77,14 @@ if (-r $virtualmin_yum_repo) {
 		&lock_all_resellers;
 		&$first_print($gpl_downgrading_package);
 		&execute_command("yum clean all");
-		my $rv = &execute_command("yum -y swap wbm-virtual-server wbm-virtual-server");
+		my $rv = &execute_command("yum -y downgrade wbm-virtual-server");
 		&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
-		&$second_print($gpl_downgrading_done);
+		$gpl_downgrading_failed_status++ if ($rv);
 		}
 	else {
 		&$first_print($gpl_downgrading_package);
 		&$second_print($gpl_downgrading_failed);
+		$gpl_downgrading_failed_status++;
 		}
 	}
 
@@ -108,6 +111,7 @@ if (-r $virtualmin_apt_repo) {
 	&flush_file_lines($virtualmin_apt_repo);
 	&unlock_file($virtualmin_apt_repo);
 	&$second_print($found ? $gpl_downgrading_done : $gpl_downgrading_failed);
+	$gpl_downgrading_failed_status++ if (!$found);
 	if (-d $virtualmin_apt_auth_dir) {
 		unlink("$virtualmin_apt_auth_dir/virtualmin.conf");
 		}
@@ -119,10 +123,12 @@ if (-r $virtualmin_apt_repo) {
 		&execute_command("apt-get clean && apt-get update");
 		my $rv = &execute_command("apt-get -y install --allow-downgrades --reinstall webmin-virtual-server=*gpl");
 		&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
+		$gpl_downgrading_failed_status++ if ($rv);
 		}
 	else {
 		&$first_print($gpl_downgrading_package);
 		&$second_print($gpl_downgrading_failed);
+		$gpl_downgrading_failed_status++;
 		}
 	}
 
@@ -141,7 +147,12 @@ unlink($licence_status);
 &virtualmin_api_log(\@OLDARGV);
 
 # Display final message
-&$first_print($gpl_downgrading_all_done);
+if ($gpl_downgrading_failed_status) {
+	&$first_print($gpl_downgrading_some_failed);
+	}
+else {
+	&$first_print($gpl_downgrading_all_done);
+	}
 
 # Lock reseller accounts first
 sub lock_all_resellers
@@ -152,8 +163,7 @@ foreach my $resel (@resels) {
     $resel->{'pass'} = "!".$resel->{'pass'}
         if ($resel->{'pass'} !~ /^!/);
     &modify_reseller($resel, $oldresel);
-}
-
+	}
 }
 
 sub usage

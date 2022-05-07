@@ -226,13 +226,13 @@ if ($sched->{'email'} && $has_mailboxes &&
 			# Worked, but purging failed
 			$output_header .= &text('backup_donepurge',
 						&nice_size($size))." ";
-			$subject = &text('backup_donesubject', $host, $dest);
+			$subject = &text('backup_purgesubject', $host, $dest);
 			}
 		else {
 			# Totally worked
 			$output_header .= &text('backup_done',
 						&nice_size($size))." ";
-			$subject = &text('backup_purgesubject', $host, $dest);
+			$subject = &text('backup_donesubject', $host, $dest);
 			}
 		}
 	elsif ($ok && @$errdoms) {

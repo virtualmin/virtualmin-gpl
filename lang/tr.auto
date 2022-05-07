@@ -2044,6 +2044,8 @@ scripts_gpl_to_pro_upgrade=Bu komut dosyası için yükseltme artık yalnızca P
 scripts_gpl_pro_tip=Profesyonel Özellik
 scripts_gpl_pro_tip_hide=Söylediğin için teşekkürler
 scripts_gpl_pro_tip_hide2=Teşekkürler, bunu düşüneceğim
+scripts_gpl_pro_tip_open=Virtualmin Pro'yu satın alın
+scripts_gpl_pro_tip_remind=Bana daha sonra hatırlat
 scripts_gpl_pro_tip_and=ve
 scripts_gpl_pro_tip_enroll=Geliştirmeyi desteklemek ve bu ve diğer birçok harika özelliğin kilidini açmak için lütfen <a target=_blank href='$1'>Virtualmin Pro</a> lisansı satın almayı düşünün.
 scripts_gpl_pro_tip_list_scripts=Daha fazla yükleme komut dosyası var!

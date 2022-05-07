@@ -1535,6 +1535,8 @@ scripts_gpl_to_pro_upgrade=Das Upgrade für dieses Skript ist jetzt nur in Pro v
 scripts_gpl_pro_tip=Pro-Funktion
 scripts_gpl_pro_tip_hide=Danke für die Warnung
 scripts_gpl_pro_tip_hide2=Danke, ich werde darüber nachdenken
+scripts_gpl_pro_tip_open=Kaufen Sie Virtualmin Pro
+scripts_gpl_pro_tip_remind=Erinnere mich später
 scripts_gpl_pro_tip_and=und
 scripts_gpl_pro_tip_enroll=Bitte erwägen Sie den Kauf einer <a target=_blank href='$1'>Virtualmin Pro</a>-Lizenz, um die Entwicklung zu unterstützen und diese und viele andere coole Funktionen freizuschalten.
 scripts_gpl_pro_tip_list_scripts=Es sind weitere Installationsskripte verfügbar!

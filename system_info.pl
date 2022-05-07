@@ -60,11 +60,15 @@ if (&need_config_check() && &can_check_config()) {
 
 # Suggest to GPL user to get Virtualmin Pro
 if (!$virtualmin_pro &&
-    &should_show_pro_tip('dashboard', 1)) {
-	# Do not show dashboard alert within first five days, until things settle down
+    &should_show_pro_tip('dashboard', 'force')) {
+	# Do not show dashboard alert within first three days, until things settle down
 	&foreign_require("webmin");
 	my $uptime = &webmin::get_system_uptime();
-	if (!$uptime || $uptime > 60*60*24 * 5) {
+	$uptime = (!$uptime || $uptime > 60*60*24 * 3);
+	# Show alert in another five days if reminder been set
+	my ($remind) = &should_show_pro_tip('dashboard_reminder', 'force');
+	$remind = ($remind && (($remind + (60*60*24 * 5)) < time()));
+	if ($uptime || $remind) {
 		push(@rv, { 'type' => 'warning',
 			    'level' => 'info',
 			    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
@@ -74,6 +78,10 @@ if (!$virtualmin_pro &&
 			                               'https://www.virtualmin.com/product-category/virtualmin/'),
 			        'button_text' => $text{'scripts_gpl_pro_tip_hide2'},
 			        'button_icon' => 'fa fa-fw fa-heartbeat',
+			        'button_text2' => $text{'scripts_gpl_pro_tip_open'},
+			        'button_icon2' => 'fa fa-fw fa-unlock',
+			        'button_text3' => $text{'scripts_gpl_pro_tip_remind'},
+			        'button_icon3' => 'fa fa-fw fa-clock',
 			    	}) },
 			  });
 		}

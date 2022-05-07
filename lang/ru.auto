@@ -2830,6 +2830,8 @@ scripts_gpl_to_pro_upgrade=Обновление для этого скрипта
 scripts_gpl_pro_tip=Функция Pro
 scripts_gpl_pro_tip_hide=Спасибо за оповещение
 scripts_gpl_pro_tip_hide2=Спасибо, я подумаю над этим
+scripts_gpl_pro_tip_open=Купить Виртуалмин Про
+scripts_gpl_pro_tip_remind=Напомни мне позже
 scripts_gpl_pro_tip_and=а также
 scripts_gpl_pro_tip_enroll=Пожалуйста, подумайте о покупке лицензии <a target=_blank href='$1'>Virtualmin Pro</a>, чтобы поддержать разработку и разблокировать эту и многие другие интересные функции.
 scripts_gpl_pro_tip_list_scripts=Доступны другие сценарии установки!

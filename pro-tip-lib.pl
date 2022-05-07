@@ -75,7 +75,7 @@ return if (!$ignore &&
 my %protips;
 my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
 &read_file_cached($protip_file, \%protips);
-return !$protips{$tipid};
+return wantarray ? ($protips{$tipid}) : !$protips{$tipid};
 }
 
 # set_seen_pro_tip(tipid)
@@ -87,7 +87,7 @@ my %protips;
 my $protip_file = "$newfeatures_seen_dir/$remote_user-pro-tips";
 &make_dir($newfeatures_seen_dir, 0700) if (!-d $newfeatures_seen_dir);
 &read_file_cached($protip_file, \%protips);
-$protips{$tipid} = 1;
+$protips{$tipid} = time();
 &write_file($protip_file, \%protips);
 }
 
@@ -102,7 +102,7 @@ my $alert_body2 =
        &text(($text{"scripts_gpl_pro_tip_enroll_$tipid"} ?
                     "scripts_gpl_pro_tip_enroll_$tipid" :
                     'scripts_gpl_pro_tip_enroll'),
-             'https://www.virtualmin.com/product-category/virtualmin/');
+              $virtualmin_shop_link_cat);
 my $hide_button_text = ($text{"scripts_gpl_pro_tip_${tipid}_hide"} ||
                         $text{"scripts_gpl_pro_tip_hide"});
 my $hide_button_icon = 'fa2 fa-fw fa2-eye-off';
@@ -118,15 +118,38 @@ if ($opts) {
 		if ($opts->{'button_text'});
 	$hide_button_icon = $opts->{'button_icon'}
 		if ($opts->{'button_icon'});
+	$hide_button_text2 = $opts->{'button_text2'}
+		if ($opts->{'button_text'});
+	$hide_button_icon2 = $opts->{'button_icon2'}
+		if ($opts->{'button_icon'});
+	$hide_button_text3 = $opts->{'button_text3'}
+		if ($opts->{'button_text'});
+	$hide_button_icon3 = $opts->{'button_icon3'}
+		if ($opts->{'button_icon'});
 	}
-my $form = "&mdash;&nbsp;" .
+my %tinfo = &get_theme_info($current_theme);
+my ($ptitle, $btncls, $alertcls);
+if ($tinfo{'bootstrap'}) {
+	$ptitle = "&mdash;&nbsp;";
+	$btncls = "btn btn-tiny btn-success";
+	$alertcls = " fa2 fa2-virtualmin";
+	}
+else {
+	$alert_body1 = "<b>$alert_body1</b>";
+	$alert_body2 = "<b>$alert_body2</b>";
+	}
+my $form = $ptitle .
     &ui_form_start("@{[&get_webprefix_safe()]}/$module_name/set_seen_pro_tip.cgi", "post") .
         $alert_body1 .
         $alert_body2 . "<p>\n" . 
         &ui_hidden("tipid", $tipid) .
-    &ui_form_end([ [ undef, $hide_button_text, undef, undef, undef, $hide_button_icon ] ], undef, 1);
-
-return &ui_alert_box($form, 'success', undef, undef, $alert_title, " fa2 fa2-virtualmin");
+        &ui_form_end([
+            $hide_button_text2 ? [ undef, $hide_button_text2, undef, undef,
+                "onclick=\"window.open('$virtualmin_shop_link_cat','_blank');event.preventDefault();event.stopPropagation();\"",
+                $hide_button_icon2, $btncls ] : undef,
+            $hide_button_text3 ? [ 'remind', $hide_button_text3, undef, undef, undef, $hide_button_icon3 ] : undef,
+            $hide_button_text ? [ undef, $hide_button_text, undef, undef, undef, $hide_button_icon ] : undef ], undef, 1);
+return &ui_alert_box($form, 'success', undef, undef, $alert_title, $alertcls);
 }
 
 # global_menu_link_pro_tip(global-links-hash-ref)
