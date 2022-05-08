@@ -3053,13 +3053,14 @@ else {
 	}
 }
 
-# validate_letsencrypt_config(&domain)
+# validate_letsencrypt_config(&domain, [&features])
 # Returns a list of validation errors that might prevent Let's Encrypt
 sub validate_letsencrypt_config
 {
-my ($d) = @_;
+my ($d, $feats) = @_;
 my @rv;
-foreach my $f ("web", "dns") {
+$feats ||= ["web", "dns"];
+foreach my $f (@$feats) {
 	if ($d->{$f} && $config{$f}) {
 		my $vfunc = "validate_$f";
 		my $err = &$vfunc($d);

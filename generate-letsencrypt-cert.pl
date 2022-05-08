@@ -145,7 +145,11 @@ if ($connectivity && defined(&check_domain_connectivity)) {
 
 # If doing a connectivity check, also do web and DNS validation
 if ($connectivity || $validation) {
-	my @errs = map { &validate_letsencrypt_config($_) } @cdoms;
+	my $vcheck = ['web'];
+	foreach my $dn (@dnames) {
+		$vcheck = ['dns'] if ($dn =~ /\*/);
+		}
+	my @errs = map { &validate_letsencrypt_config($_, $vcheck) } @cdoms;
 	if (@errs) {
 		print "Validation check failed :\n";
 		foreach my $e (@errs) {

@@ -8147,7 +8147,11 @@ my @dnames = &get_hostnames_for_ssl($d);
 &$first_print(&text('letsencrypt_doing2',
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 if ($valid) {
-	my @errs = &validate_letsencrypt_config($d);
+	my $vcheck = ['web'];
+	foreach my $dn (@dnames) {
+		$vcheck = ['dns'] if ($dn =~ /\*/);
+		}
+	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
 		&$second_print($text{'letsencrypt_evalid'});
 		return 0;
