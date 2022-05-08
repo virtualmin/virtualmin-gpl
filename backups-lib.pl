@@ -4684,10 +4684,10 @@ return $fullcmd;
 sub get_gunzip_command
 {
 if (!$config{'pigz'}) {
-	return &has_command('gunzip') || 'gunzip';
+	return (&has_command('gunzip') || 'gunzip').' -f';
 	}
 elsif (&has_command('unpigz')) {
-	return &has_command('unpigz');
+	return &has_command('unpigz').' -f';
 	}
 else {
 	# Fall back to using -d option
