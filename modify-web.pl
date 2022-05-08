@@ -100,6 +100,11 @@ C<--protocols> flag to choose which are enabled for the website. This flag must
 be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
 the default protocols for your webserver, use the C<--default-protocols> flag.
 
+If your Apache configuration contains unsupported C<mod_php> directives,
+the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
+This is primarily useful if the Apache module has been disabled, but not all
+directives have been cleaned up.
+
 =cut
 
 package virtual_server;
@@ -294,6 +299,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-protocols") {
 		$protocols = [ ];
 		}
+	elsif ($a eq "--cleanup-mod-php") {
+		$fix_mod_php = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -309,7 +317,7 @@ $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
   $fpmsock || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
-  $protocols || &usage("Nothing to do");
+  $protocols || $fix_mod_php || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate fastCGI options
@@ -850,6 +858,16 @@ foreach $d (@doms) {
 			       scalar(@remove_dirs));
 		}
 
+	# Remove all mod_php directives
+	if ($fix_mod_php && $d->{'web'} && !$d->{'alias'}) {
+		&$first_print("Removing mod_php directives ..");
+		my $c = &fix_mod_php_directives($d, $d->{'web_port'}, 1);
+		if ($d->{'ssl'}) {
+			$c += &fix_mod_php_directives($d, $d->{'web_sslport'}, 1);
+			}
+		&$second_print(".. removed $c");
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
@@ -915,6 +933,7 @@ print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
+print "                     [--cleanup-mod-php]\n";
 exit(1);
 }
 
