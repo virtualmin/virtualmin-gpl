@@ -102,9 +102,9 @@ if ($cs != -1) {
 	$cs = 2 if (!$cs && &get_global_virus_scanner() eq 'clamscan');
 	print &ui_table_row($text{'wizard_virusmsg'},
 		&ui_radio("clamd", $cs,
-			  [ [ 1, $text{'wizard_virus1'}."<br>" ],
-			    $cs == 2 ? ( [ 2, $text{'wizard_virus2'} ] ) : ( ),
-			    [ 0, $text{'wizard_virus0'} ] ]));
+		  [ [ 1, $text{'wizard_virus1'}."<br>" ],
+		    $cs == 2 ? ( [ 2, $text{'wizard_virus2'}."<br>" ] ) : ( ),
+		    [ 0, $text{'wizard_virus0'} ] ]));
 	}
 else {
 	print &ui_table_row(undef, "<b>$text{'wizard_clamdnone'}</b>");
