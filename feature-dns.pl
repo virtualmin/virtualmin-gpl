@@ -2076,10 +2076,11 @@ else {
 	&$second_print($text{'setup_notrun'});
 	$rv = 0;
 	}
-if (&bind8::list_slave_servers()) {
+local @shosts = split(/\s+/, $d->{'dns_slaves'});
+if (&bind8::list_slave_servers() && @shosts) {
 	# Re-start on slaves too
 	&$first_print(&text('setup_bindslavepids'));
-	local @slaveerrs = &bind8::restart_on_slaves();
+	local @slaveerrs = &bind8::restart_on_slaves(\@shosts);
 	if (@slaveerrs) {
 		&$second_print($text{'setup_bindeslave'});
 		foreach $sr (@slaveerrs) {
