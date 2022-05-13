@@ -1959,7 +1959,7 @@ scripts_einstallmod=.. le module a été installé mais ne peut pas être charg�
 scripts_install_phpmods_check=Vérification des modules PHP ..
 scripts_install_phpmods_check_done=.. vérification effectuée
 scripts_passmode4=Mot de passe initial pour le script
-scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>
+scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>.
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
 scripts_iphpnover=Aucune version PHP n'a pu être trouvée pour ce serveur virtuel
 scripts_iphpfullver=La version PHP $1 ou ultérieure est requise, mais ce serveur virtuel utilise la version $2 

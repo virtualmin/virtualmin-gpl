@@ -3325,7 +3325,7 @@ scripts_proxyfailed=.. nastavení proxy se nezdařilo : $1
 scripts_epartial=.. instalace byla dokončena pouze částečně.
 scripts_icommand=Chybí příkaz $1 
 scripts_idbneed=Je potřeba databáze $1 
-scripts_idbneed_link=, kterou lze povolit na stránce <a href='$1'>$2</a>
+scripts_idbneed_link=, kterou lze povolit na stránce <a href='$1'>$2</a>.
 scripts_idbneedor=$1 nebo $2 
 scripts_gemver=Aktualizace Ruby Gems na nejnovější verzi od $1 ..
 scripts_gemverfailed=.. Aktualizace drahokamů selhala : $1 
