@@ -476,12 +476,14 @@ else {
 
 if ($config{'dropbox_oauth'} && !$config{'dropbox_token'}) {
 	# Need to get access token for the first time
-	my ($ok, $token, $uid, $rtoken) = &get_dropbox_oauth_access_token();
+	my ($ok, $token, $uid, $rtoken, $expires) =
+		&get_dropbox_oauth_access_token(0);
 	$ok || &error(&text('cloud_egoogletoken', $token));
 	$config{'dropbox_token'} = $token;
 	$config{'dropbox_uid'} = $uid;
 	$config{'dropbox_tstart'} = time();
 	$config{'dropbox_rtoken'} = $rtoken;
+	$config{'dropbox_expires'} = $expires;
 	}
 
 &lock_file($module_config_file);
@@ -516,6 +518,7 @@ delete($config{'dropbox_account'});
 delete($config{'dropbox_oauth'});
 delete($config{'dropbox_token'});
 delete($config{'dropbox_rtoken'});
+delete($config{'dropbox_expires'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
