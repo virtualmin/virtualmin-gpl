@@ -476,11 +476,12 @@ else {
 
 if ($config{'dropbox_oauth'} && !$config{'dropbox_token'}) {
 	# Need to get access token for the first time
-	my ($ok, $token, $uid) = &get_dropbox_oauth_access_token();
+	my ($ok, $token, $uid, $rtoken) = &get_dropbox_oauth_access_token();
 	$ok || &error(&text('cloud_egoogletoken', $token));
 	$config{'dropbox_token'} = $token;
 	$config{'dropbox_uid'} = $uid;
 	$config{'dropbox_tstart'} = time();
+	$config{'dropbox_rtoken'} = $rtoken;
 	}
 
 &lock_file($module_config_file);
@@ -495,7 +496,7 @@ if ($in{'dropbox_set_oauth'} || !$reauth) {
 
 return $text{'cloud_descoauth_dropbox'}."<p>\n".
        &ui_link("https://www.dropbox.com/oauth2/authorize?".
-		"response_type=code&client_id=$dropbox_app_key",
+		"response_type=code&client_id=$dropbox_app_key&token_access_type=offline",
                 $text{'cloud_openoauth'},
                 undef,
                 "target=_blank")."<p>\n".
@@ -514,6 +515,7 @@ sub cloud_dropbox_clear
 delete($config{'dropbox_account'});
 delete($config{'dropbox_oauth'});
 delete($config{'dropbox_token'});
+delete($config{'dropbox_rtoken'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
