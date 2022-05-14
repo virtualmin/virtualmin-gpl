@@ -3021,8 +3021,9 @@ $size ||= $config{'key_size'};
 my $phd = &public_html_dir($d);
 my ($ok, $cert, $key, $chain);
 my @errs;
+my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
-if (&domain_has_website($d) && (!$mode || $mode eq "web")) {
+if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
