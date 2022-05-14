@@ -8056,9 +8056,11 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 			# Need to run any pending Apache restart
 			&run_post_actions(\&restart_apache);
 			}
-		&create_initial_letsencrypt_cert(
-			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1);
-		$generated = 2;
+		if (&create_initial_letsencrypt_cert(
+			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1)) {
+			# Let's encrypt cert request worked
+			$generated = 2;
+			}
 		}
 	}
 
