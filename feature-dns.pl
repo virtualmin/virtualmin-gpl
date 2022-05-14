@@ -2308,6 +2308,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				}
 			&copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
 					  $key->{$t.'file'});
+			&bind8::set_ownership($key->{$t.'file'});
 			}
 		$i++;
 		}
