@@ -84,6 +84,18 @@ my %donepid;
 return @rv;
 }
 
+# unusual_domain_server_port(&process)
+# Returns 1 if a process looks risky
+sub unusual_domain_server_port
+{
+my ($p) = @_;
+if ($p->{'proc'}->{'args'} =~ /^spamd\s+child$/) {
+	# Spamd child process can sometimes open ports
+	return 0;
+	}
+return 1;
+}
+
 # disallowed_domain_server_ports(&domain)
 # Returns active ports that should not be in use
 sub disallowed_domain_server_ports
@@ -91,7 +103,8 @@ sub disallowed_domain_server_ports
 my ($d) = @_;
 my %canports = map { $_->{'lport'}, $_ } &allowed_domain_server_ports($d);
 my @usedports = &active_domain_server_ports($d);
-return grep { !$canports{$_->{'lport'}} } @usedports;
+my @bad = grep { !$canports{$_->{'lport'}} } @usedports;
+return grep { &unusual_domain_server_port($_) } @bad;
 }
 
 # kill_disallowed_domain_server_ports(&domain)
