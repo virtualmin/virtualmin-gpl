@@ -15553,7 +15553,8 @@ if (&foreign_check("software")) {
 # Check if jailkit support is available
 my $err = &check_jailkit_support();
 if ($err) {
-	&$second_print(&text('check_jailkiterr', $err));
+	&$second_print(&text('check_jailkiterr', $err))
+		if(!$config{'jailkit_disabled'});
 	}
 else {
 	&$second_print(&text('check_jailkitok'));

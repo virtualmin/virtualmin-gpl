@@ -3549,7 +3549,7 @@ scripts_delproxy=Usuwanie proxy dla ścieżki $1 ..
 scripts_epartial=.. instalacja została tylko częściowo ukończona.
 scripts_icommand=Brak polecenia $1 
 scripts_idbneed=Potrzebna jest baza danych $1 
-scripts_idbneed_link=, który można włączyć na stronie <a href='$1'>$2</a>
+scripts_idbneed_link=, który można włączyć na stronie <a href='$1'>$2</a>.
 scripts_gemver=Aktualizacja Ruby Gems do najnowszej wersji z $1 ..
 scripts_gemverfailed=.. Aktualizacja klejnotów nie powiodła się : $1 
 scripts_gemverfailed2=.. Aktualizacja klejnotów do wersji $2 wyglądała na udaną, ale naprawdę się nie udała : $1 

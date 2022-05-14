@@ -4209,7 +4209,7 @@ scripts_proxyfailed=.. proxy setup failed : $1
 scripts_epartial=.. installation was only partially complete.
 scripts_icommand=Missing command $1
 scripts_idbneed=A $1 database is needed
-scripts_idbneed_link=, which can be enabled on <a href='$1'>$2</a> page
+scripts_idbneed_link=, which can be enabled on <a href='$1'>$2</a> page.
 scripts_idbneedor=$1 or $2
 scripts_gemver=Updating Ruby Gems to latest version from $1 ..
 scripts_gemverfailed=.. Gems update failed : $1
@@ -7380,7 +7380,7 @@ php_fpmnoinit2=No FPM server bootup action found
 php_fpmnomod=Apache module $1 is missing or not enabled
 php_fpmeconfig=No FPM configuration found for domain!
 
-jailkit_ecmd=The Jailkit command $1 was not found on your system - maybe the <i>jailkit</i> package is not installed?
+jailkit_ecmd=The Jailkit command $1 was not found on your system - maybe the <tt>jailkit</tt> package is not installed?
 jailkit_einit=Failed to initialize jail : $1
 jailkit_elinux=Jailkit is only supported on Linux systems
 jailkit_emount=Failed to bind mount home directory : $1

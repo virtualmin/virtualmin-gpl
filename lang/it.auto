@@ -3204,7 +3204,7 @@ scripts_proxyfailed=.. configurazione del proxy non riuscita : $1
 scripts_epartial=.. l'installazione è stata completata solo in parte.
 scripts_icommand=Comando mancante $1 
 scripts_idbneed=È necessario un database $1 
-scripts_idbneed_link=, che può essere abilitato nella pagina <a href='$1'>$2</a>
+scripts_idbneed_link=, che può essere abilitato nella pagina <a href='$1'>$2</a>.
 scripts_idbneedor=$1 o $2 
 scripts_gemver=Aggiornamento di Ruby Gems all'ultima versione da $1 ..
 scripts_gemverfailed=.. Aggiornamento gemme non riuscito : $1 

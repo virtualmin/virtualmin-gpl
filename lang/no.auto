@@ -558,7 +558,7 @@ scripts_einstallmod=.. modulen ble installert, men kan ikke lastes
 scripts_install_phpmods_check=Sjekker PHP-moduler ..
 scripts_install_phpmods_check_done=.. sjekk ferdig
 scripts_passmode4=Opprinnelig passord for skript
-scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden
+scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden.
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren
 scripts_iphpfullver=PHP-versjon $1 eller nyere kreves, men denne virtuelle serveren bruker versjon $2 
