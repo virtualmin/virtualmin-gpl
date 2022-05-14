@@ -885,6 +885,7 @@ $dom{'no_default_service_certs'} = 1 if ($in->{'defssl'} != 2);
 if ($in->{'defssl'}) {
 	$dom{$sslf} = 1;
 	if ($in->{'defssl'} == 2) {
+		$dom{'letsencrypt_dname'} = $dname;
 		$dom{'auto_letsencrypt'} = 1;
 		}
 	else {

@@ -8145,7 +8145,13 @@ sub create_initial_letsencrypt_cert
 {
 local ($d, $valid) = @_;
 &foreign_require("webmin");
-my @dnames = &get_hostnames_for_ssl($d);
+my @dnames;
+if ($d->{'letsencrypt_dname'}) {
+	@dnames = split(/\s+/, $d->{'letsencrypt_dname'});
+	}
+else {
+	@dnames = &get_hostnames_for_ssl($d);
+	}
 &$first_print(&text('letsencrypt_doing2',
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 if ($valid) {
