@@ -805,7 +805,7 @@ else {
 				 &ui_textbox("defhost", $def, 20) ] ]));
 
 	print &ui_table_row($text{'wizard_defdom_ssl'},
-		&ui_radio("defssl", 1,
+		&ui_radio("defssl", 2,
 			  [ [ 0, $text{'wizard_defssl0'} ],
 			    [ 1, $text{'wizard_defssl1'} ],
 			    [ 2, $text{'wizard_defssl2'} ] ]));
@@ -878,10 +878,11 @@ my %dom;
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
 $dom{'dns'} = 1;
+$dom{'no_default_service_cert_webmin'} = 2
+	if ($ENV{'SERVER_NAME'} eq $dname);
 my $webf = &domain_has_website();
 my $sslf = &domain_has_ssl();
 $dom{$webf} = 1;
-$dom{'no_default_service_certs'} = 1 if ($in->{'defssl'} != 2);
 if ($in->{'defssl'}) {
 	$dom{$sslf} = 1;
 	if ($in->{'defssl'} == 2) {
