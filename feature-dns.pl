@@ -1696,7 +1696,12 @@ if ($d->{'dns_cloud'}) {
 	my $cfunc = "dnscloud_".$d->{'dns_cloud'}."_check_domain";
 	my $info = { 'domain' => $d->{'dom'} };
 	my $ok = &$cfunc($d, $info);
-	eturn &text('validate_ecloud', $d->{'dns_cloud'}) if (!$ok);
+	return &text('validate_ecloud', $d->{'dns_cloud'}) if (!$ok);
+	}
+if ($d->{'dns_cloud'}) {
+	# Make sure there is NOT a local zone file
+	my $file = &get_domain_dns_file_from_bind($d);
+	return &text('validate_enoncloud', $d->{'dns_cloud'}) if ($file);
 	}
 
 # Check for critical records, and that www.$dom and $dom resolve to the
@@ -3221,8 +3226,16 @@ if ($d->{'dns_cloud'}) {
 	&error("get_domain_dns_file($d->{'dom'}) cannot be called ".
 	       "for cloud hosted domains");
 	}
+return &get_domain_dns_file_from_bind($d);
+}
+
+# get_domain_dns_file_from_bind(&domain)
+# Lookup the zone file in local BIND, or return undef
+sub get_domain_dns_file_from_bind
+{
+my ($d) = @_;
 &require_bind();
-local $z;
+my $z;
 if ($d->{'dns_submode'}) {
 	# Records are in super-domain
 	local $parent = &get_domain($d->{'dns_subof'});
@@ -3233,7 +3246,7 @@ else {
 	$z = &get_bind_zone($d->{'dom'});
 	}
 return undef if (!$z);
-local $file = &bind8::find("file", $z->{'members'});
+my $file = &bind8::find("file", $z->{'members'});
 return undef if (!$file);
 return $file->{'values'}->[0];
 }
