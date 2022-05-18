@@ -653,6 +653,7 @@ backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaura
 
 backup_ebackupdirlock=.. el directorio de respaldo temporal $1 está bloqueado por el proceso $2
 backup_efeatureeval=.. falló la copia de seguridad de $1 : $2 
+backup_eincrzip=Las copias de seguridad incrementales no se pueden usar con formato ZIP
 backup_eownergone=¡El dominio del propietario ya no existe!
 backup_purging3=Eliminando copias de seguridad de $2 coincidentes $3 anteriores a $1 días. ..
 backup_purgeefiles5=.. no pudo enumerar los archivos de Backblaze : $1 
@@ -1346,6 +1347,7 @@ validate_ednsmx=Este dominio tiene el correo electrónico habilitado, pero ningu
 validate_ednsnotype=¡La zona DNS para el dominio $1 no tiene tipo!
 validate_ednstype=La zona DNS para el dominio $1 tiene el tipo $2 en lugar de $3
 validate_ecloud=No se encuentra el dominio DNS en el proveedor de nube $1 
+validate_enoncloud=El dominio DNS existe localmente cuando solo debería estar alojado en el proveedor de la nube $1
 validate_ewebconfig=Se encontró un error en la configuración del host virtual : $1 
 validate_ewebphpsuexec=PHP está configurado para ejecutarse como propietario del dominio, ¡pero suEXEC no está habilitado!
 validate_ewebphpconfig=Se encontraron errores de configuración de PHP en la versión $1 : $2 
