@@ -2600,6 +2600,7 @@ backup_webminproto=.. not required, as the Webmin user is in a remote data store
 backup_esamelock=A backup to the same destination is already running with PID $1
 backup_ekilllock=A backup to the same destination with PID $1 has been terminated
 backup_etarcmd=The <tt>tar</tt> command was not found on your system!
+backup_eincrzip=Incremental backups cannot be used with ZIP format
 backup_ezipkey=Encryption cannot be used with ZIP format backups
 backup_edesturl=Backup destination $1 is invalid : $2
 backup_eftptest=Failed to connect to FTP server : $1

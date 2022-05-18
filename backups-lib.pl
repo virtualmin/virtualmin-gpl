@@ -281,6 +281,12 @@ if (!defined($compression) || $compression eq '') {
 	}
 $opts->{'dir'}->{'compression'} = $compression;
 
+# Make sure incremental mode is supported with the compression format
+if ($compression == 3 && $increment) {
+	&$first_print($text{'backup_eincrzip'});
+	return (0, 0, $doms);
+	}
+
 # Check if the limit on running backups has been hit
 local $err = &check_backup_limits($asowner, $onsched, $desturl);
 if ($err) {
