@@ -8064,9 +8064,9 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 		}
 	}
 
-# Update service certs and DANE DNS records if a new Let's Encrypt cert was
-# generated
-if ($generated == 2 && !$dom->{'no_default_service_certs'}) {
+# Update service certs and DANE DNS records
+# if a new Let's Encrypt cert was generated
+if ($generated == 2) {
 	&enable_domain_service_ssl_certs($dom);
 	&sync_domain_tlsa_records($dom);
 	}

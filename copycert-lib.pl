@@ -267,6 +267,15 @@ foreach my $svc (&list_service_ssl_cert_types()) {
 	next if (!$svc->{'dom'} && !$svc->{'virt'});
 	next if (!$svc->{'dom'} && !$d->{'virt'});
 	if ($tmpl->{'web_'.$svc->{'id'}.'_ssl'}) {
+		# Prevent applying service certificate on initial
+		# service creation, like when calling 'setup_ssl'
+		# for the first time, to prevent application of
+		# default, potentially self-signed certificate
+		if ($d->{"no_default_service_cert_$svc->{'id'}"}) {
+			delete($d->{"no_default_service_cert_$svc->{'id'}"})
+				if ($d->{"no_default_service_cert_$svc->{'id'}"} == 2);
+			next;
+			}
 		my $func = "sync_".$svc->{'id'}."_ssl_cert";
 		&$func($d, 1) if (defined(&$func));
 		}

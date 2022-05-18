@@ -3,7 +3,7 @@
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'sv_ecannot'});
-&ui_print_header(undef, $text{'sv_title2'}, "");
+&ui_print_unbuffered_header(undef, $text{'sv_title2'}, "");
 
 print $text{'sv_disabling'},"<br>\n";
 &$indent_print();
