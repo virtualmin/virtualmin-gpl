@@ -12752,7 +12752,7 @@ foreach my $l (&get_domain_actions($d), &feature_links($d)) {
 		$l->{'url'} = "/$l->{'mod'}/$l->{'page'}";
 		}
 	else {
-		$l->{'url'} = "$vm/$l->{'page'}".
+		$l->{'url'} = $l->{'urlpro'} || "$vm/$l->{'page'}".
 			      "?dom=".$d->{'id'}."&amp;".
 			      join("&amp;", map { $_->[0]."=".&urlize($_->[1]) }
                                             @{$l->{'hidden'}});

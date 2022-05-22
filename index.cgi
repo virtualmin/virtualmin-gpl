@@ -39,10 +39,11 @@ if ($single_domain_mode) {
 $formno = 0;
 if (&need_config_check() && &can_check_config()) {
 	# Not since last config change .. force it now
-	print &ui_form_start("check.cgi");
-	print "<b>$text{'index_needcheck'}</b><p>\n";
-	print &ui_submit($text{'index_srefresh'});
-	print &ui_form_end();
+	my $recheck = &ui_form_start("check.cgi");
+	$recheck .= "$text{'index_needcheck'}<br>";
+	$recheck .= &ui_submit($text{'index_srefresh'});
+	$recheck .= &ui_form_end();
+	print &ui_alert_box($recheck, 'info')."<p>\n";
 	$formno++;
 
 	print &ui_form_start("edit_newfeatures.cgi");

@@ -163,49 +163,57 @@ foreach my $pro_demo_feature
 	# Add demo Reseller Accounts link for GPL users 
 	{ 'name' => 'newresels',
 	  'title' => $text{'newresels_title'},
-	  'cat' => 'setting'
+	  'cat' => 'setting',
+	  'url' => "https://virtualmin.com/professional/#newresels",
 	},
 
 	# Add demo Cloud Mail Delivery Providers link for GPL users 
 	{ 'name' => 'smtpclouds',
 	  'title' => $text{'smtpclouds_title'},
-	  'cat' => 'email'
+	  'cat' => 'email',
+	  'url' => "https://virtualmin.com/professional/#smtpclouds",
 	},
 
 	# Add demo Email Server Owners link for GPL users 
 	{ 'name' => 'newnotify',
 	  'title' => $text{'newnotify_title'},
-	  'cat' => 'email'
+	  'cat' => 'email',
+	  'url' => "https://virtualmin.com/professional/#newnotify",
 	},
 
 	# Add demo Email Server Owners link for GPL users 
 	{ 'name' => 'newretention',
 	  'title' => $text{'newretention_title'},
-	  'cat' => 'email'
+	  'cat' => 'email',
+	  'url' => "https://virtualmin.com/professional/#newretention",
 	},
 
 	# Add demo New Reseller Email link for GPL users 
 	{ 'name' => 'newreseller',
 	  'title' => $text{'newreseller_title'},
-	  'cat' => 'email'
+	  'cat' => 'email',
+	  'url' => "https://virtualmin.com/professional/#newreseller",
 	},
 
 	# Add demo Custom Links link for GPL users 
 	{ 'name' => 'newlinks',
 	  'title' => $text{'newlinks_title'},
-	  'cat' => 'custom'
+	  'cat' => 'custom',
+	  'url' => "https://virtualmin.com/professional/#newlinks",
 	},
 
 	# Add demo Secondary Mail Servers link for GPL users 
 	{ 'name' => 'newmxs',
 	  'title' => $text{'newmxs_title'},
-	  'cat' => 'ip'
+	  'cat' => 'ip',
+	  'url' => "https://virtualmin.com/professional/#newmxs",
 	},
 
 	# Add demo Disk Quota Monitoring link for GPL users 
 	{ 'name' => 'newquotas',
 	  'title' => $text{'newquotas_title'},
 	  'cat' => 'check',
+	  'url' => "https://virtualmin.com/professional/#newquotas",
 	  'skip' => !&has_home_quotas()
 	},
 
@@ -213,19 +221,21 @@ foreach my $pro_demo_feature
 	{ 'name' => 'newcmass',
 	  'title' => $text{'cmass_title'},
 	  'cat' => 'add',
+	  'url' => "https://virtualmin.com/professional/#newcmass",
 	},
 
 	# Add demo Backup Encryption Keys link for GPL users 
 	{ 'name' => 'bkeys',
 	  'title' => $text{'bkeys_title'},
 	  'cat' => 'backup',
+	  'url' => "https://virtualmin.com/professional/#bkeys",
 	},
 
 	# Add demo System Statistics link for GPL users 
-	{ 'url' => "demo_history.cgi",
-	  'name' => 'history',
+	{ 'name' => 'history',
 	  'icon' => 'graph',
 	  'title' => $text{'edit_history'},
+	  'url' => "https://virtualmin.com/professional/#demo_history",
 	},
 )
 {
@@ -248,6 +258,7 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_res',
 	  'title' => $text{'edit_res'},
 	  'cat' => 'admin',
+	  'url' => "https://virtualmin.com/professional/#edit_res",
 	  'skip' => !($d->{'unix'} && &can_edit_res($d))
 	},
 
@@ -255,6 +266,7 @@ foreach my $pro_demo_feature
 	{ 'name' => 'list_balancers',
 	  'title' => $text{'edit_balancer'},
 	  'cat' => 'server',
+	  'url' => "https://virtualmin.com/professional/#list_balancers",
 	  'skip' => !(&can_edit_forward()),
 	},
 
@@ -262,6 +274,7 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_maillog',
 	  'title' => $text{'edit_maillog'},
 	  'cat' => 'logs',
+	  'url' => "https://virtualmin.com/professional/#edit_maillog",
 	  'skip' => !($config{'mail'} &&
 	              $config{'mail_system'} <= 1 &&
 	              $d->{'mail'}),
@@ -271,12 +284,14 @@ foreach my $pro_demo_feature
 	{ 'name' => 'edit_connect',
 	  'title' => $text{'edit_connect'},
 	  'cat' => 'logs',
+	  'url' => "https://virtualmin.com/professional/#edit_connect",
 	},
 
 	# Add demo Edit Web Pages link for GPL users 
 	{ 'name' => 'edit_html',
 	  'title' => $text{'edit_html'},
 	  'cat' => 'services',
+	  'url' => "https://virtualmin.com/professional/#edit_html",
 	  'skip' => !(&domain_has_website($d) &&
 	              $d->{'dir'} &&
 	              !$d->{'alias'} &&
@@ -300,6 +315,7 @@ my ($demo_feature, $link_hash) = @_;
 if (should_show_pro_tip($demo_feature)) {
 	delete($link_hash->{'page'});
 	$link_hash->{'inactive'} = 1;
+	$link_hash->{'urlpro'} = $link_hash->{'url'};
 	$link_hash->{'title'} .=
 	  (
 	    " <span>" .
