@@ -9,6 +9,10 @@ require './virtual-server-lib.pl';
 for($i=0; defined($in{"name_$i"}); $i++) {
 	next if (!$in{"name_$i"});
 	$in{"desc_$i"} || &error(&text('newfields_edesc', $i+1));
+	if ($in{"type_$i"} == 7 || $in{"type_$i"} == 11) {
+		# Yes/No fields must have a value
+		$in{"opts_$i"} || &error(&text('newfields_eopts', $i+1));
+		}
 	push(@rv, { 'name' => $in{"name_$i"},
 		    'desc' => $in{"desc_$i"},
 		    'type' => $in{"type_$i"},

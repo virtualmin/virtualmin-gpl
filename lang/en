@@ -3699,6 +3699,9 @@ newfields_visible=Visible to
 newfields_visible0=All users
 newfields_visible1=All users (RO)
 newfields_visible2=Master admin
+newfields_err=Failed to save custom fields
+newfields_edesc=Missing description for field $1
+newfields_eopts=Missing value for yes/no field $1
 
 ldap_emod=Missing Perl module $1 needed for connecting to LDAP
 ldap_econn=Failed to connect to LDAP server $1 port $2
