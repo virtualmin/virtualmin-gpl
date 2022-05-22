@@ -52,22 +52,14 @@ my %umap = map { $_->{'user'}, $_ } &list_domain_users($d, 0, 1, 1, 1);
 if (!@active_domain_server_ports_procs) {
 	@active_domain_server_ports_procs = &proc::list_processes();
 	}
-if (defined(&proc::find_all_process_sockets) &&
-    !@active_domain_server_ports_socks) {
+if (!@active_domain_server_ports_socks) {
 	@active_domain_server_ports_socks = &proc::find_all_process_sockets();
 	}
 foreach my $p (@active_domain_server_ports_procs) {
 	my $u = $umap{$p->{'user'}};
 	next if (!$u);
-	my @psocks;
-	if (@active_domain_server_ports_socks) {
-		@psocks = grep { $_->{'pid'} eq $p->{'pid'} }
-			       @active_domain_server_ports_socks;
-		}
-	else {
-		# XXX remove this case when Webmin 1.950 is out
-		@psocks = &proc::find_process_sockets($p->{'pid'});
-		}
+	my @psocks = grep { $_->{'pid'} eq $p->{'pid'} }
+			  @active_domain_server_ports_socks;
 	foreach my $s (&proc::find_process_sockets($p->{'pid'})) {
 		next if (!$s->{'listen'});
 		if ($s->{'lport'} !~ /^\d+$/) {
