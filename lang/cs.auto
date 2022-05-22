@@ -2893,6 +2893,9 @@ newfields_visible=Viditelné pro
 newfields_visible0=Všichni uživatelé
 newfields_visible1=Všichni uživatelé (RO)
 newfields_visible2=Master admin
+newfields_err=Nepodařilo se uložit vlastní pole
+newfields_edesc=Chybí popis pro pole $1
+newfields_eopts=Chybějící hodnota pro pole ano/ne $1
 
 ldap_emod=Chybí modul Perl $1 potřebný pro připojení k LDAP
 ldap_econn=Nepodařilo se připojit k serveru LDAP $1 port $2 

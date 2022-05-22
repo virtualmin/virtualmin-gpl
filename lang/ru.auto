@@ -2343,6 +2343,9 @@ newfields_visible=Видно для
 newfields_visible0=Все пользователи
 newfields_visible1=Все пользователи (RO)
 newfields_visible2=Мастер админ
+newfields_err=Не удалось сохранить настраиваемые поля
+newfields_edesc=Отсутствует описание для поля $1
+newfields_eopts=Отсутствует значение для поля да/нет $1
 
 databases_indom=$1 базы данных в домене $2 
 databases_hosted=Все базы данных для этого домена размещены на удаленном сервере MySQL $1.

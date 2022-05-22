@@ -1721,6 +1721,9 @@ newfields_visible=Görünür
 newfields_visible0=Tüm kullanıcılar
 newfields_visible1=Tüm kullanıcılar (RO)
 newfields_visible2=Ana yönetici
+newfields_err=Özel alanlar kaydedilemedi
+newfields_edesc=$1 alanı için eksik açıklama
+newfields_eopts=Evet/hayır alanı $1 için eksik değer
 
 databases_indom=$2 etki alanındaki $1 veritabanı
 databases_hosted=Bu etki alanı için tüm veritabanları $1 uzak MySQL sunucusunda barındırılıyor.

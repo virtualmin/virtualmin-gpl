@@ -2736,6 +2736,9 @@ newfields_visible=Visibile a
 newfields_visible0=Tutti gli utenti
 newfields_visible1=Tutti gli utenti (RO)
 newfields_visible2=Amministratore principale
+newfields_err=Impossibile salvare i campi personalizzati
+newfields_edesc=Descrizione mancante per il campo $1
+newfields_eopts=Valore mancante per il campo sì/no $1
 
 ldap_emod=Modulo Perl mancante $1 necessario per la connessione a LDAP
 ldap_econn=Connessione al server LDAP $1 $2 non riuscita

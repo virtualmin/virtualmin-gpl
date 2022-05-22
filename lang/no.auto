@@ -495,6 +495,9 @@ tmpl_ephpfcgi=Manglende eller ugyldig FastCGI-innpakning for PHP $1
 bwgraph_enable=Sjekk $1 -siden for å sikre at statistikksamlingen er aktivert.
 
 newfields_type11=Ja/Nei (standard nei)
+newfields_err=Kunne ikke lagre egendefinerte felt
+newfields_edesc=Manglende beskrivelse for feltet $1
+newfields_eopts=Manglende verdi for ja/nei-feltet $1
 
 databases_tabremote=MySQL Server Host
 databases_desc6=Denne siden lar deg velge hvilken ekstern MySQL-server som skal brukes til å være vert for databaser for dette domenet.

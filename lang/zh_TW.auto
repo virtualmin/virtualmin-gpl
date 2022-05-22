@@ -1560,6 +1560,9 @@ newfields_visible=可見到
 newfields_visible0=全部用戶
 newfields_visible1=所有使用者（RO）
 newfields_visible2=主管理員
+newfields_err=未能保存自定義字段
+newfields_edesc=缺少字段 $1 的說明
+newfields_eopts=是/否字段 $1 缺少值
 
 databases_indom=域 $2中的 $1個數據庫
 databases_hosted=該域的所有數據庫都託管在遠程MySQL服務器 $1上。

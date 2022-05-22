@@ -999,6 +999,9 @@ newfields_visible=Visible a
 newfields_visible0=Todos los usuarios
 newfields_visible1=Todos los usuarios (RO)
 newfields_visible2=Administrador maestro
+newfields_err=No se pudieron guardar los campos personalizados
+newfields_edesc=Falta la descripción del campo $1
+newfields_eopts=Valor faltante para el campo sí/no $1
 
 databases_hosted=Todas las bases de datos para este dominio están alojadas en el servidor MySQL remoto $1.
 databases_desc3h=Este formulario se puede usar para cambiar las contraseñas de la base de datos principal para este servidor virtual.

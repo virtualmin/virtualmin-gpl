@@ -684,6 +684,9 @@ tmpl_outlook_eautoconfig=In de XML voor automatische configuratie van Outlook on
 bwgraph_enable=Controleer de $1 -pagina om ervoor te zorgen dat het verzamelen van statistieken is ingeschakeld.
 
 newfields_type11=Ja/Nee (standaard Nee)
+newfields_err=Kan aangepaste velden niet opslaan
+newfields_edesc=Ontbrekende beschrijving voor veld $1
+newfields_eopts=Ontbrekende waarde voor ja/nee-veld $1
 
 databases_indom=$1 databases in domein $2
 databases_desc3h=Dit formulier kan worden gebruikt om de primaire databasewachtwoorden voor deze virtuele server te wijzigen.
