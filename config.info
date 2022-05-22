@@ -60,6 +60,7 @@ webmin_theme=Webmin theme for server administrators,15,theme,webmin_theme
 show_tabs=Categorize Webmin modules on main menu?,1,1-Yes,0-No
 usermin_switch=Allow logins to Usermin as mailboxes?,1,1-Yes,0-No
 check_ports=Can listen on unexpected ports?,1,0-Yes,1-Notify admin only,2-Disallow and terminate processes
+allowed_ports=Additional ports and processes to allow,9,40,3,\t
 
 line2=Defaults for new domains,11
 home_base=Home directory base,3,From Users and Groups module

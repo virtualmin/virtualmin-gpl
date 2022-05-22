@@ -85,6 +85,20 @@ if ($p->{'proc'}->{'args'} =~ /^spamd\s+child$/) {
 	# Spamd child process can sometimes open ports
 	return 0;
 	}
+foreach my $a (split(/\t+/, $config{'allowed_ports'})) {
+	if ($a =~ /^\d+$/) {
+		# One port
+		return 0 if ($p->{'lport'} == $a);
+		}
+	elsif ($a =~ /^(\d+)\-(\d+)$/) {
+		# A port range
+		return 0 if ($p->{'lport'} >= $1 && $p->{'lport'} <= $2);
+		}
+	else {
+		# Assume it's a regexp for the process name
+		return 0 if ($p->{'proc'}->{'args'} =~ /$a/);
+		}
+	}
 return 1;
 }
 
