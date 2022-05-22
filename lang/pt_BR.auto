@@ -3521,6 +3521,9 @@ newfields_visible=Visível para
 newfields_visible0=Todos os usuários
 newfields_visible1=Todos os usuários (RO)
 newfields_visible2=Administrador principal
+newfields_err=Falha ao salvar campos personalizados
+newfields_edesc=Falta descrição para o campo $1 
+newfields_eopts=Valor em falta para o campo sim/não $1 
 
 ldap_emod=Falta o módulo Perl $1 necessário para conectar-se ao LDAP
 ldap_econn=Falha ao conectar ao servidor LDAP $1 porta $2 

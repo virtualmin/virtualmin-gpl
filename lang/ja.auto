@@ -3699,6 +3699,9 @@ newfields_visible=に表示されます
 newfields_visible0=すべてのユーザー
 newfields_visible1=すべてのユーザー（RO）
 newfields_visible2=マスター管理者
+newfields_err=カスタムフィールドの保存に失敗しました
+newfields_edesc=フィールド $1の説明がありません
+newfields_eopts=はい/いいえフィールド $1の値がありません
 
 ldap_emod=LDAPへの接続に必要なPerlモジュール $1がありません
 ldap_econn=LDAPサーバー $1ポート $2に接続できませんでした

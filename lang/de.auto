@@ -1299,6 +1299,9 @@ bwgraph_mode_0two=Elternlimit und Verwendung
 bwgraph_returnparent=Bandbreitennutzung für Server der obersten Ebene
 
 newfields_type11=Ja/Nein (Standard Nein)
+newfields_err=Benutzerdefinierte Felder konnten nicht gespeichert werden
+newfields_edesc=Fehlende Beschreibung für Feld $1
+newfields_eopts=Fehlender Wert für Ja/Nein-Feld $1
 
 databases_indom=$1 Datenbanken in Domäne $2
 databases_canadd0=Basierend auf Ihren Limits können $1 zusätzliche Datenbanken hinzugefügt werden.

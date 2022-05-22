@@ -3156,6 +3156,9 @@ newfields_visible=Widoczny dla
 newfields_visible0=Wszyscy użytkownicy
 newfields_visible1=Wszyscy użytkownicy (RO)
 newfields_visible2=Master admin
+newfields_err=Nie udało się zapisać pól niestandardowych
+newfields_edesc=Brak opisu dla pola $1 
+newfields_eopts=Brakująca wartość w polu tak/nie $1 
 
 ldap_emod=Brakujący moduł Perla $1 potrzebny do połączenia z LDAP
 ldap_econn=Nie udało się połączyć z serwerem LDAP $1 port $2 
