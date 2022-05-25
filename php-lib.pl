@@ -404,12 +404,12 @@ foreach my $p (@ports) {
 	local $fsock = &get_php_fpm_socket_file($d, 1);
 	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
-	local @oldppm = grep { /unix:\Q$fsock\E/ || /fcgi:\/\/localhost:\Q$fport\E/ } @ppm;
+	local @oldppm = grep { /unix:\Q$fsock\E/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
 	if ($fsock) {
 		@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
 		}
 	if ($fport) {
-		@ppm = grep { !/fcgi:\/\/localhost:\Q$fport\E/ } @ppm;
+		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
 		}
 	local $files;
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
@@ -421,12 +421,12 @@ foreach my $p (@ports) {
 		local $phd = $phpconfs[0]->{'words'}->[0];
 		if (-r $fsock) {
 			# Use existing socket file, since it presumably works
-			push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://localhost${phd}/\$1");
+			push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://127.0.0.1${phd}/\$1");
 			}
 		else {
 			# Allocate and use a port number
 			$fport = &get_php_fpm_socket_port($d);
-			push(@ppm, "^/(.*\.php(/.*)?)\$ fcgi://localhost:${fport}${phd}/\$1");
+			push(@ppm, "^/(.*\.php(/.*)?)\$ fcgi://127.0.0.1:${fport}${phd}/\$1");
 			}
 		}
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
@@ -434,11 +434,11 @@ foreach my $p (@ports) {
 		my $wanth;
 		if ($tmpl->{'php_sock'}) {
 			my $fsock = &get_php_fpm_socket_file($d);
-			$wanth = 'proxy:unix:'.$fsock."|fcgi://localhost";
+			$wanth = 'proxy:unix:'.$fsock."|fcgi://127.0.0.1";
 			}
 		else {
 			my $fport = &get_php_fpm_socket_port($d);
-			$wanth = 'proxy:fcgi://localhost:'.$fport;
+			$wanth = 'proxy:fcgi://127.0.0.1:'.$fport;
 			}
 		if (!$files) {
 			# Add a new FilesMatch block with the socket
@@ -2152,11 +2152,11 @@ foreach my $p (@ports) {
 			    $sh[$i] =~ /proxy:unix:([^\|]+)/) {
 				# Found the directive to update
 				if ($socket =~ /^\d+$/) {
-					$sh[$i] = "proxy:fcgi://localhost:".$socket;
+					$sh[$i] = "proxy:fcgi://127.0.0.1:".$socket;
 					}
 				else {
 					$sh[$i] = "proxy:unix:".$socket.
-						  "|fcgi://localhost";
+						  "|fcgi://127.0.0.1";
 					}
 				$found++;
 				}
