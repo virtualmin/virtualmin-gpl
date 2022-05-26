@@ -4,20 +4,21 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 my $d = &get_domain($in{'dom'});
-my $dir = $in{'dir'};
 &can_edit_domain($d) || &error($text{'phpmode_phpinfo_ecannot'});
+my $dir = $in{'dir'};
+my $public_html = &public_html_dir($d);
 if ($dir) {
-	if (!-r "$d->{'public_html_path'}/$dir" || !-w "$d->{'public_html_path'}/$dir" ||
-		!&is_under_directory($d->{'public_html_path'}, "$d->{'public_html_path'}/$dir")) {
+	if (!-r "$public_html/$dir" || !-w "$public_html/$dir" ||
+		!&is_under_directory($public_html, "$public_html/$dir")) {
 		&error(&text("phpmode_phpinfo_dir_ecannot_dir",
 		             "<tt>" . &html_escape($dir) . "</tt>",
-		             "<tt>" . &html_escape($d->{'public_html_path'}) . "</tt>"));
+		             "<tt>" . &html_escape($public_html) . "</tt>"));
 		}
 	}
 my $r = time() . "+" . int(rand() * 1000000);
 my $file = "file----phpinfo-$d->{'dom'}-$r.php";
 my $ipage = $dir ? "$dir/$file" : "$file";
-my $filepath = "$d->{'public_html_path'}/$ipage";
+my $filepath = "$public_html/$ipage";
 my ($iout, $ierror);
 &write_as_domain_user($d, sub {
 	&write_file_contents($filepath, "<?php\nphpinfo();\n?>");
