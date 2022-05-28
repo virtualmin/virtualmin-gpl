@@ -133,6 +133,24 @@ sub dnscloud_route53_create_domain
 my ($d, $info) = @_;
 my $ref = &generate_route53_ref();
 my $location = $info->{'location'} || $config{'route53_location'};
+
+# Does it already exist?
+my $rv = &call_route53_cmd(
+	$config{'route53_akey'},
+	[ 'list-hosted-zones' ], undef, 1);
+my $already;
+foreach my $z (@{$rv->{'HostedZones'}}) {
+	if ($z->{'Name'} eq $info->{'domain'}.".") {
+		$already = $z;
+		}
+	}
+if ($already) {
+	# Yes .. just take it over but leave the records
+	$info->{'id'} = $already>{'Id'};
+	$info->{'location'} = $location;
+	return (1, $already->{'Id'}, $location);
+	}
+
 my $rv = &call_route53_cmd(
 	$config{'route53_akey'},
 	[ 'create-hosted-zone',
