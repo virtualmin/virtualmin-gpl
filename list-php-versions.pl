@@ -77,10 +77,12 @@ elsif ($multiline) {
 		if ($s->[1]) {
 			print "    Command: $s->[1]\n";
 			}
-		if ($s->[2]) {
-			print "    PHP modes: ",join(" ", @{$s->[2]}),"\n";
+		my @modes = $s->[2] ? @{$s->[2]} : ();
+		my $fpm = &get_php_fpm_config($s->[0]);
+		push(@modes, "fpm") if ($fpm);
+		if (@modes) {
+			print "    PHP modes: ",join(" ", @modes),"\n";
 			}
-		$fpm = &get_php_fpm_config($s->[0]);
 		print "    FPM support: ",($fpm ? "Yes" : "No"),"\n";
 		$fv = &get_php_version($s->[0]);
 		print "    Full version: ",$fv,"\n";
