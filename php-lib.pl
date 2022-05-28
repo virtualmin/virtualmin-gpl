@@ -403,6 +403,9 @@ foreach my $p (@ports) {
 	# For FPM mode, we need a proxy directive at the top level
 	local $fsock = &get_php_fpm_socket_file($d, 1);
 	local $fport = $d->{'php_fpm_port'};
+	local $fmode = $fport ? 'port' :
+		       -r $fsock ? 'socket' :
+		       $tmpl->{'php_sock'} ? 'socket' : 'port';
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	local @oldppm = grep { /unix:\Q$fsock\E/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
 	if ($fsock) {
@@ -419,8 +422,8 @@ foreach my $p (@ports) {
 		# Use a proxy directive for older Apache or if this is what's
 		# already in use
 		local $phd = $phpconfs[0]->{'words'}->[0];
-		if (-r $fsock) {
-			# Use existing socket file, since it presumably works
+		if ($fmode eq 'socket') {
+			# Use socket file
 			push(@ppm, "^/(.*\.php(/.*)?)\$ unix:${fsock}|fcgi://127.0.0.1${phd}/\$1");
 			}
 		else {
@@ -432,11 +435,12 @@ foreach my $p (@ports) {
 	elsif ($mode eq "fpm" && $apache::httpd_modules{'core'} >= 2.4) {
 		# Can use a FilesMatch block with SetHandler inside instead
 		my $wanth;
-		if ($tmpl->{'php_sock'}) {
-			my $fsock = &get_php_fpm_socket_file($d);
+		if ($fmode eq 'socket') {
+			# Use a socket file
 			$wanth = 'proxy:unix:'.$fsock."|fcgi://127.0.0.1";
 			}
 		else {
+			# Allocate, save and use a TCP port
 			my $fport = &get_php_fpm_socket_port($d);
 			$wanth = 'proxy:fcgi://127.0.0.1:'.$fport;
 			}
