@@ -1789,7 +1789,7 @@ if (defined(&get_domain_php_mode) &&
 			&$second_print($text{'setup_done'});
 			}
 		else {
-			&$second_print($text{'setup_failed'});
+			&$second_print($text{'save_apache12none'});
 			}
 		}
 	}
