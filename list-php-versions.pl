@@ -81,7 +81,7 @@ elsif ($multiline) {
 		my $fpm = &get_php_fpm_config($s->[0]);
 		push(@modes, "fpm") if ($fpm);
 		if (@modes) {
-			print "    PHP modes: ",join(" ", @modes),"\n";
+			print "    PHP modes: ",join(" ", &unique(@modes)),"\n";
 			}
 		print "    FPM support: ",($fpm ? "Yes" : "No"),"\n";
 		$fv = &get_php_version($s->[0]);
