@@ -8398,6 +8398,17 @@ foreach my $dd (@alldoms) {
 			}
 		}
 
+	# Remove SSL cert from Dovecot, Postfix, etc
+	&disable_domain_service_ssl_certs($d);
+
+	# If this domain had it's own lets encrypt cert, delete any leftover
+	# files for it under /etc/letsencrypt
+	&foreign_require("webmin");
+	if ($d->{'letsencrypt_last'} && !$d->{'ssl_same'} &&
+	    defined(&webmin::cleanup_letsencrypt_files)) {
+		&webmin::cleanup_letsencrypt_files($d->{'dom'});
+		}
+
 	# Delete all features (or just 'webmin' if un-importing). Any
 	# failures are ignored!
 	my $f;

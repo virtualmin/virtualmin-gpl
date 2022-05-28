@@ -527,9 +527,6 @@ local ($d) = @_;
 &obtain_lock_web($d);
 local $conf = &apache::get_config();
 
-# Remove from Dovecot, Webmin, etc..
-&disable_domain_service_ssl_certs($d);
-
 # Remove the custom Listen directive added for the domain, if any
 &remove_listen($d, $conf, $d->{'web_sslport'} || $default_web_sslport);
 
@@ -555,14 +552,6 @@ foreach my $od (&get_domain_by("ssl_same", $d->{'id'})) {
 
 # Update DANE DNS records
 &sync_domain_tlsa_records($d);
-
-# If this domain had it's own lets encrypt cert, delete any leftover files
-# for it under /etc/letsencrypt
-&foreign_require("webmin");
-if ($d->{'letsencrypt_last'} && !$d->{'ssl_same'} &&
-    defined(&webmin::cleanup_letsencrypt_files)) {
-	&webmin::cleanup_letsencrypt_files($d->{'dom'});
-	}
 
 # If this domain was sharing a cert with another, forget about it now
 if ($d->{'ssl_same'}) {
