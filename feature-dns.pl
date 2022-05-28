@@ -2136,7 +2136,7 @@ if (!$field || $field eq 'dom') {
 			return &text('provision_edns', $d->{'dom'});
 			}
 		}
-	elsif ($d->{'dns_cloud'}) {
+	elsif ($d->{'dns_cloud'} && !$d->{'dns_cloud_import'}) {
 		# Check on cloud provider
 		my $ctype = $d->{'dns_cloud'};
 		my ($cloud) = grep { $_->{'name'} eq $ctype }

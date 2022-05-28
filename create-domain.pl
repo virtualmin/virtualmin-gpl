@@ -362,6 +362,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
 		}
+	elsif ($a eq "--cloud-dns-import") {
+		$clouddns_import = 1;
+		}
 	elsif ($a eq "--break-ssl-cert") {
 		$linkcert = 0;
 		}
@@ -829,6 +832,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'mysql_module', $mysql_module,
 	 'default_php_mode', $phpmode,
 	 'dns_cloud', $clouddns,
+	 'dns_cloud_import', $clouddns_import,
         );
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = $linkcert if ($linkcert == 1 || $linkcert == 2);
