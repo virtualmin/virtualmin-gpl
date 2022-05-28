@@ -2122,7 +2122,7 @@ return $rv;
 }
 
 # check_dns_clash(&domain, [changing])
-# Returns 1 if a domain already exists in BIND
+# Returns 1 if a domain already exists in BIND, or remotely
 sub check_dns_clash
 {
 local ($d, $field) = @_;
@@ -2151,13 +2151,8 @@ if (!$field || $field eq 'dom') {
 			}
 		my $tfunc = "dnscloud_".$ctype."_check_domain";
 		my $info = { 'domain' => $d->{'dom'} };
-		my ($ok, $err) = &$tfunc($d, $info);
-		if (!$ok && $err) {
-			# Failed lookup
-			return &text('setup_ednscloudclash',
-				     $cloud->{'desc'}, $err);
-			}
-		elsif ($ok) {
+		my $exists = &$tfunc($d, $info);
+		if ($exists) {
 			# Already exists
 			return &text('setup_dnscloudclash', $cloud->{'desc'});
 			}

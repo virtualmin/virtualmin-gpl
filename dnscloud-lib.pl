@@ -219,7 +219,7 @@ my $rv = &call_route53_cmd(
 	undef, 1);
 return 0 if (!ref($rv));
 foreach my $h (@{$rv->{'HostedZones'}}) {
-	if ($h->{'name'} eq $info->{'domain'}.".") {
+	if ($h->{'Name'} eq $info->{'domain'}.".") {
 		return 1;
 		}
 	}
