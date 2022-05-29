@@ -3494,6 +3494,7 @@ tmpl_edmarcpct=Percentage of messages must be an integer between 0 and 100
 tmpl_edns=No DNS records entered
 tmpl_dns_sub=Add sub-domain DNS records to parent domain?
 tmpl_dns_cloud=Create new DNS zones on
+tmpl_dns_cloud_import=Take over existing zone when creating
 dns_cloud_def=&lt;Choose automatically&gt;
 dns_cloud_services=Cloudmin Services
 dns_cloud_local=Local files

@@ -2695,7 +2695,9 @@ if (@clouds > 1) {
 	}
 print &ui_table_row(&hlink($text{'tmpl_dns_cloud'},
                            "template_dns_cloud"),
-	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds));
+	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds)."<br>\n".
+	&ui_checkbox("dns_cloud_import", 1, $text{'tmpl_dns_cloud_import'},
+		     $tmpl->{'dns_cloud_import'}));
 
 print &ui_table_hr();
 
@@ -2959,6 +2961,7 @@ $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 
 # Save cloud provider
 $tmpl->{'dns_cloud'} = $in{'dns_cloud'};
+$tmpl->{'dns_cloud_import'} = $in{'dns_cloud_import'};
 
 if (!$config{'provision_dns'}) {
 	# Save named.conf
