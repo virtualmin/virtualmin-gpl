@@ -4952,7 +4952,7 @@ my $port = "$domdir/socket";
 
 # Get the command
 my ($cmd, $log, $pidfile) = &get_fcgiwrap_server_command($d, $port);
-$cmd || return (0, $text{'fcgid_ecmd'});
+$cmd || return (0, $text{'setup_ewebfcgidcmd'});
 
 # Create init script
 &foreign_require("init");
