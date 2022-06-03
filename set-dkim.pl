@@ -39,48 +39,53 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
-while(@ARGV > 0) {
-	local $a = shift(@ARGV);
-	if ($a eq "--enable") {
-		$enabled = 1;
-		}
-	elsif ($a eq "--disable") {
-		$enabled = 0;
-		}
-	elsif ($a eq "--selector") {
-		$selector = shift(@ARGV);
-		$selector =~ /^[a-z0-9\.\-\_]+/i || &usage("Invalid selector");
-		}
-	elsif ($a eq "--size") {
-		$size = shift(@ARGV);
-		$size =~ /^\d+$/ && $size >= 512 || &usage("Invalid key size");
-		}
-	elsif ($a eq "--verify") {
-		$verify = 1;
-		}
-	elsif ($a eq "--no-verify") {
-		$verify = 0;
-		}
-	elsif ($a eq "--add-extra") {
-		$extra = shift(@ARGV);
-		$err = &valid_domain_name($extra);
-		$err && &usage("Invalid extra domain name : $err");
-		push(@addextra, $extra);
-		}
-	elsif ($a eq "--remove-extra") {
-		$extra = shift(@ARGV);
-		push(@delextra, $extra);
-		}
-	elsif ($a eq "--multiline") {
-		$multiline = 1;
-		}
-	elsif ($a eq "--help") {
-		&usage();
-		}
-	else {
-		&usage("Unknown parameter $a");
+if (@ARGV > 0) {
+	while(@ARGV > 0) {
+		local $a = shift(@ARGV);
+		if ($a eq "--enable") {
+			$enabled = 1;
+			}
+		elsif ($a eq "--disable") {
+			$enabled = 0;
+			}
+		elsif ($a eq "--selector") {
+			$selector = shift(@ARGV);
+			$selector =~ /^[a-z0-9\.\-\_]+/i || &usage("Invalid selector");
+			}
+		elsif ($a eq "--size") {
+			$size = shift(@ARGV);
+			$size =~ /^\d+$/ && $size >= 512 || &usage("Invalid key size");
+			}
+		elsif ($a eq "--verify") {
+			$verify = 1;
+			}
+		elsif ($a eq "--no-verify") {
+			$verify = 0;
+			}
+		elsif ($a eq "--add-extra") {
+			$extra = shift(@ARGV);
+			$err = &valid_domain_name($extra);
+			$err && &usage("Invalid extra domain name : $err");
+			push(@addextra, $extra);
+			}
+		elsif ($a eq "--remove-extra") {
+			$extra = shift(@ARGV);
+			push(@delextra, $extra);
+			}
+		elsif ($a eq "--multiline") {
+			$multiline = 1;
+			}
+		elsif ($a eq "--help") {
+			&usage();
+			}
+		else {
+			&usage("Unknown parameter $a");
+			}
 		}
 	}
+	else {
+		&usage("No parameters given");
+		}
 
 # Get current config and update
 $dkim = &get_dkim_config();

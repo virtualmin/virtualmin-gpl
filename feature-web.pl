@@ -243,8 +243,7 @@ if (!$d->{'alias'}) {
 			&$second_print(&text('setup_efcgiwrap', $err));
 			}
 		else {
-			&$second_print(&text('setup_efcgiwrap',
-					     $d->{'fcgiwrap_port'}));
+			&$second_print($text{'setup_done'});
 			}
 		}
 	}
