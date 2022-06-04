@@ -144,6 +144,9 @@ else {
 		push(@{$r->{'values'}}, $v);
 		}
 
+	# Can be proxied
+	$r->{'proxyit'} = $in{'proxyit'};
+
 	# Check for CNAME collision
 	$newrecs = [ @$recs ];
 	push(@$newrecs, $r) if ($in{'type'});
