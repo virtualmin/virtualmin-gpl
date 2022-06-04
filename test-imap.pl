@@ -9,6 +9,9 @@ and C<--pass> flags, followed by the IMAP hostname, login and password
 respectively. The optional C<--folder> flag can be used to select an IMAP
 folder other than the inbox.
 
+To connect to a different IMAP server port, use the C<--port> flag followed by
+a port number. To make an SSL connection, use the C<--ssl> flag.
+
 =cut
 
 package virtual_server;
@@ -108,6 +111,7 @@ print "virtualmin test-imap --user login\n";
 print "                    [--pass password]\n";
 print "                    [--server hostname]\n";
 print "                    [--port number|name]\n";
+print "                    [--ssl]\n";
 print "                    [--folder name]\n";
 exit(1);
 }
