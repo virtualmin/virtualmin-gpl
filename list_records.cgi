@@ -81,7 +81,12 @@ RECORD: foreach $r (@$recs) {
 		      &urlize($r->{'id'})."'>$name</a>" :
 		    $name,
 		$tdesc,
-		&html_escape($values),
+		&html_escape($values) . (defined($r->{'proxied'}) ? ($r->{'proxied'} ?
+		        "<span data-type='proxied' ".
+		           "data-text='$text{'records_typeprox'}'> ".
+		              "($text{'records_typeprox'})</span>" :
+		        "<span data-type='not-proxied' ".
+		            "data-text='$text{'records_typenoprox'}'></span>") : undef),
 		$anycomment ? ( &html_escape($r->{'comment'}) ) : ( ),
 		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
 	}

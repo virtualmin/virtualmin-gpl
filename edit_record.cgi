@@ -124,6 +124,14 @@ else {
 					     $vals[$i]->{'width'}, "soft");
 			}
 		$field .= " ".$vals[$i]->{'suffix'};
+		$field .= ($t->{'type'} =~ /^A$/i ||
+		           $t->{'type'} =~ /^AAAA$/i ?
+			        ($d->{'dns_cloud'} eq 'cloudflare' ?
+			          "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
+                              ucfirst($text{'records_typeprox'}),
+                              $r->{'proxied'}) :
+			          undef) :
+			       undef);
 		print &ui_table_row($vals[$i]->{'desc'}, $field);
 		}
 	}
