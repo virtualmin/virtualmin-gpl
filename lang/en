@@ -703,7 +703,7 @@ setup_mail_esmtpcloud=.. failed : $1
 setup_overquota=Virtual server creation failed due to lack of quota : $1
 setup_overgroupquota=Server quota for $2 of $1 has been reached
 setup_overuserquota=Domain owner quota for $2 of $1 has been reached
-setup_ewebfcgidcmd=Could not find fcgiwrap server command!
+setup_ewebfcgidcmd=Could not find <tt>fcgiwrap</tt> server command!
 
 indom=In domain $1
 equotacommand=Quota command $1 failed : $2
