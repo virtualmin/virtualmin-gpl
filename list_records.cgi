@@ -81,7 +81,9 @@ RECORD: foreach $r (@$recs) {
 		      &urlize($r->{'id'})."'>$name</a>" :
 		    $name,
 		$tdesc,
-		&html_escape($values) . (defined($r->{'proxied'}) ? ($r->{'proxied'} ?
+		&html_escape($values) .
+		    ((($r->{'type'} eq 'A' || $r->{'type'} eq 'AAAA') &&
+		      defined($r->{'proxied'})) ? ($r->{'proxied'} ?
 		        "<span data-type='proxied' ".
 		           "data-text='$text{'records_typeprox'}'> ".
 		              "($text{'records_typeprox'})</span>" :
