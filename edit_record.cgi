@@ -124,13 +124,14 @@ else {
 					     $vals[$i]->{'width'}, "soft");
 			}
 		$field .= " ".$vals[$i]->{'suffix'};
-		$field .= ($t->{'type'} =~ /^(A|AAAA|CNAME)$/i ?
-			        ($d->{'dns_cloud'} eq 'cloudflare' ?
-			          "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
-                              ucfirst($text{'records_typeprox'}),
-                              $r->{'proxied'}) :
-			          undef) :
-			       undef);
+		$field .= ($t->{'type'} =~ /^(A|AAAA|CNAME)$/ ?
+		            ($d->{'dns_cloud'} eq 'cloudflare' ?
+		              "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
+		                      $text{'records_typeprox'},
+		                      $r->{'proxied'}) :
+		              undef) :
+		           undef)
+		    if (!$in{'type'});
 		print &ui_table_row($vals[$i]->{'desc'}, $field);
 		}
 	}

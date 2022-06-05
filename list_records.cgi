@@ -82,7 +82,7 @@ RECORD: foreach $r (@$recs) {
 		    $name,
 		$tdesc,
 		&html_escape($values) .
-		    ((($r->{'type'} =~ /^(A|AAAA|CNAME)$/i) &&
+		    ((($r->{'type'} =~ /^(A|AAAA|CNAME)$/) &&
 		      defined($r->{'proxied'})) ? ($r->{'proxied'} ?
 		        "<span data-type='proxied' ".
 		           "data-text='$text{'records_typeprox'}'> ".

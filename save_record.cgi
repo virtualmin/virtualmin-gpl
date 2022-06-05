@@ -145,7 +145,8 @@ else {
 		}
 
 	# Can be proxied
-	$r->{'proxyit'} = $in{'proxyit'};
+	$r->{'proxied'} = bless( do{\(my $o = $in{'proxyit'} ? 1 : 0)}, 'JSON::PP::Boolean' )
+		if(defined($in{'proxyit'}) && $r->{'type'} =~ /^(A|AAAA|CNAME)$/);
 
 	# Check for CNAME collision
 	$newrecs = [ @$recs ];

@@ -3582,10 +3582,17 @@ elsif ($d->{'dns_cloud'}) {
 	# Upload records to cloud DNS provider
 	local $ctype = $d->{'dns_cloud'};
 	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	# Merge in non-standard DNS records
+	foreach my $newrec (@newrecs) {
+		my ($recsref) = grep { $_->{'name'} eq $newrec->{'name'}} @{$recs};
+		$newrec->{'proxied'} = $recsref->{'proxied'}
+			if (defined($recsref->{'proxied'}) &&
+			    $recsref->{'type'} =~ /^(A|AAAA|CNAME)$/);
+		}
 	local $info = { 'domain' => $d->{'dom'},
-		         'id' => $d->{'dns_cloud_id'},
-		         'location' => $d->{'dns_cloud_location'},
-			 'recs' => \@newrecs };
+	                'id' => $d->{'dns_cloud_id'},
+	                'location' => $d->{'dns_cloud_location'},
+	                'recs' => \@newrecs };
 	my $pfunc = "dnscloud_".$ctype."_put_records";
 	my ($ok, $msg) = &$pfunc($d, $info);
 	if (!$ok) {
