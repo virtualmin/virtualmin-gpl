@@ -8,6 +8,7 @@ my @rv = ( { 'name' => 'route53',
 	     'desc' => 'Amazon Route 53',
 	     'comments' => 0,
 	     'defttl' => 0,
+	     'proxy' => 0,
 	     'url' => 'https://aws.amazon.com/route53/',
 	     'longdesc' => $text{'dnscloud_route53_longdesc'} } );
 if (defined(&list_pro_dns_clouds)) {
@@ -35,6 +36,17 @@ sub dns_uses_cloud
 {
 my ($d, $c) = @_;
 return $d->{'dns'} && $d->{'dns_cloud'} eq $c->{'name'};
+}
+
+# get_domain_dns_cloud(&domain)
+# Returns the cloud provider hash for a domain
+sub get_domain_dns_cloud
+{
+my ($d) = @_;
+foreach my $c (&list_dns_clouds()) {
+	return $c if (&dns_uses_cloud($d, $c));
+	}
+return undef;
 }
 
 # dnscloud_route53_check()
