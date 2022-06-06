@@ -40,6 +40,7 @@ print &ui_columns_start([ "", $text{'records_name'},
 		        ], 100, 0, \@tds);
 
 %tmap = map { $_->{'type'}, $_ } &list_dns_record_types($d);
+$cloud = &get_domain_dns_cloud($d);
 RECORD: foreach $r (@$recs) {
 	if ($r->{'defttl'}) {
 		# Default TTL .. skip if in sub-domain
@@ -75,20 +76,26 @@ RECORD: foreach $r (@$recs) {
 		$etype = $t;
 		$tdesc = $t ? $t->{'type'}." - ".$t->{'desc'} : $r->{'type'};
 		}
+	my $pmsg = "";
+	if ($r->{'type'} =~ /^(A|AAAA|CNAME)$/ && $cloud && $cloud->{'proxy'}) {
+		if ($r->{'proxied'}) {
+			$pmsg = "<span data-type='proxied' ".
+		           	"data-text='$text{'records_typeprox'}'> ".
+		                "($text{'records_typeprox'})</span>";
+			}
+		else {
+			$pmsg = "<span data-type='not-proxied' ".
+		                "data-text='$text{'records_typenoprox'}'>".
+				"</span>";
+			}
+		}
 	print &ui_checked_columns_row([
 		$etype && &can_edit_record($r, $d) ?
 		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
 		      &urlize($r->{'id'})."'>$name</a>" :
 		    $name,
 		$tdesc,
-		&html_escape($values) .
-		    ((($r->{'type'} =~ /^(A|AAAA|CNAME)$/) &&
-		      defined($r->{'proxied'})) ? ($r->{'proxied'} ?
-		        "<span data-type='proxied' ".
-		           "data-text='$text{'records_typeprox'}'> ".
-		              "($text{'records_typeprox'})</span>" :
-		        "<span data-type='not-proxied' ".
-		            "data-text='$text{'records_typenoprox'}'></span>") : undef),
+		&html_escape($values).$pmsg,
 		$anycomment ? ( &html_escape($r->{'comment'}) ) : ( ),
 		], \@tds, "d", $r->{'id'}, 0, !&can_delete_record($r, $d));
 	}

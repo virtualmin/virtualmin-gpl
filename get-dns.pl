@@ -62,6 +62,7 @@ $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("Virtual server $dname does not exist");
 $d->{'dns'} || &usage("Virtual server $dname does not have DNS enabled");
+$cloud = &get_domain_dns_cloud($d);
 
 if ($dsmode) {
 	$dsrecs = &get_domain_dnssec_ds_records($d);
@@ -89,6 +90,10 @@ elsif ($multiline) {
 			}
 		foreach $v (@{$r->{'values'}}) {
 			print "    Value: $v\n";
+			}
+		if ($cloud && $cloud->{'proxy'}) {
+			print "    Proxied: ",
+			      ($r->{'proxied'} ? "Yes" : "No"),"\n";
 			}
 		}
 	}
