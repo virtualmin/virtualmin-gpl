@@ -149,8 +149,7 @@ else {
 		if ($r->{'type'} =~ /^(A|AAAA|CNAME)$/);
 
 	# Check for CNAME collision
-	$newrecs = [ @$recs ];
-	push(@$newrecs, $r) if ($in{'type'});
+	push(@$recs, $r) if ($in{'type'});
 	if ($r->{'type'} eq 'CNAME') {
 		%clash = map { $_->{'name'}, $_ }
 			     grep { $_ ne $r } @$newrecs;
