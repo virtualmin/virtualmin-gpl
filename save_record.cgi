@@ -173,7 +173,7 @@ else {
 		&bind8::modify_record($file, $r, @params);
 		}
 	}
-$err = &post_records_change($d, $recs, $file);
+$err = &post_records_change($d, $recs, $file, $r);
 &release_lock_dns($d);
 &reload_bind_records($d);
 &run_post_actions_silently();

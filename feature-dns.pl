@@ -3532,12 +3532,12 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	}
 }
 
-# post_records_change(&domain, &recs, [file])
+# post_records_change(&domain, &recs, [file], [&newrec])
 # Called after some records in a domain are changed, to bump to SOA
 # and possibly re-sign
 sub post_records_change
 {
-local ($d, $recs, $fn) = @_;
+local ($d, $recs, $fn, $newrec) = @_;
 &require_bind();
 local $z;
 if (!$fn) {
@@ -3598,10 +3598,28 @@ elsif ($d->{'dns_cloud'}) {
 	# Upload records to cloud DNS provider
 	local $ctype = $d->{'dns_cloud'};
 	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	# Merge in non-standard DNS records
+	foreach my $nrec (@newrecs) {
+		# Existing entries auxiliary records
+		my ($recsref) =
+		  grep { $_->{'name'} eq $nrec->{'name'}} @{$recs};
+		if (ref($recsref)) {
+			$nrec->{'proxied'} = $recsref->{'proxied'}
+				if (exists($recsref->{'proxied'}) &&
+				    $nrec->{'type'} =~ /^(A|AAAA|CNAME)$/);
+			}
+		# New entry auxiliary records
+		if (ref($newrec) &&
+		    $nrec->{'name'} eq $newrec->{'name'}) {
+			$nrec->{'proxied'} = $newrec->{'proxied'}
+				if (exists($newrec->{'proxied'}) &&
+				    $nrec->{'type'} =~ /^(A|AAAA|CNAME)$/);
+			}
+		}
 	local $info = { 'domain' => $d->{'dom'},
 	                'id' => $d->{'dns_cloud_id'},
 	                'location' => $d->{'dns_cloud_location'},
-	                'recs' => $recs };
+	                'recs' => \@newrecs };
 	my $pfunc = "dnscloud_".$ctype."_put_records";
 	my ($ok, $msg) = &$pfunc($d, $info);
 	if (!$ok) {
