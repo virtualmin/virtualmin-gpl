@@ -2232,6 +2232,12 @@ else {
 			$rec->{'comment'});
 		}
 	}
+
+# Also write out the records in serialized format, to preserve non-standard
+# attributes like 'proxied'
+local $rfile = $file."_records";
+&write_file_contents($rfile, &serialise_variable($recs));
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -2292,7 +2298,8 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
 	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} } @keys;
+	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
+		     @keys;
 	my $i = 0;
 	my %kinfo;
 	&read_file($file."_dnssec_keyinfo", \%kinfo);
@@ -2314,8 +2321,17 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 		}
 	}
 
-# Re-read records, bump SOA and upload records to provisioning server
-local @recs = &bind8::read_zone_file($zonefile, $d->{'dom'});
+# Re-read records, bump SOA and upload records to provisioning server. If the
+# original records were saved, use them
+local $rfile = $file."_records";
+local @recs;
+if (-r $rfile && $d->{'dns_cloud'}) {
+	my $orecs = &unserialise_variable(&read_file_contents($rfile));
+	@recs = @$orecs;
+	}
+else {
+	@recs = &bind8::read_zone_file($zonefile, $d->{'dom'});
+	}
 &post_records_change($d, \@recs, $zonefile);
 
 # Need to update IP addresses
@@ -3605,7 +3621,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local $file;
 		local $recs;
-		if ($ad->{'provision_dns'} || $d->{'cloud_dns'}) {
+		if ($ad->{'provision_dns'} || $d->{'dns_cloud'}) {
 			# On provisioning server
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
