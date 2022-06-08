@@ -3597,7 +3597,6 @@ if ($d->{'provision_dns'}) {
 elsif ($d->{'dns_cloud'}) {
 	# Upload records to cloud DNS provider
 	local $ctype = $d->{'dns_cloud'};
-	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
 	local $info = { 'domain' => $d->{'dom'},
 	                'id' => $d->{'dns_cloud_id'},
 	                'location' => $d->{'dns_cloud_location'},
