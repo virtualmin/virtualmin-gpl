@@ -3585,7 +3585,7 @@ elsif ($d->{'dns_cloud'}) {
 	local $info = { 'domain' => $d->{'dom'},
 	                'id' => $d->{'dns_cloud_id'},
 	                'location' => $d->{'dns_cloud_location'},
-	                'recs' => \@newrecs };
+	                'recs' => $recs };
 	my $pfunc = "dnscloud_".$ctype."_put_records";
 	my ($ok, $msg) = &$pfunc($d, $info);
 	if (!$ok) {
