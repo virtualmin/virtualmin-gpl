@@ -358,7 +358,7 @@ if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'} &&
 				    map { $_->{'dom'} }
 				     grep { $_->{'dns'} &&
 				            !$_->{'provision_dns'} &&
-					    !$_->{'cloud_dns'} } @doms),
+					    !$_->{'dns_cloud'} } @doms),
 		       'dir' => &resolve_links($_[0]->{'home'}),
 		       'master' => 0,
 		       'slave' => 0,

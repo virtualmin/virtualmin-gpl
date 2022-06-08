@@ -130,6 +130,18 @@ else {
 			$field .= "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
 		                      $text{'records_typeprox'},
 		                      $r->{'proxied'});
+			$field .= "
+			<script>
+				var ttl_def = document.querySelector('[name=\"ttl_def\"][value=\"1\"]'),
+					ttl_val = document.querySelector('[name=\"ttl_def\"][value=\"0\"]'),
+				    proxied = document.querySelector('[name=\"proxyit\"]');
+				    proxied.addEventListener(\"click\", function() {
+				    	this.checked && ttl_def.click()
+				    });
+				    ttl_val.addEventListener(\"click\", function() {
+				    	proxied.checked = false;
+				    });
+			</script>";
 			}
 		print &ui_table_row($vals[$i]->{'desc'}, $field);
 		}

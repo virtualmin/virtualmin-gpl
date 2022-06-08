@@ -3532,12 +3532,12 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	}
 }
 
-# post_records_change(&domain, &recs, [file])
+# post_records_change(&domain, &recs, [file], [&newrec])
 # Called after some records in a domain are changed, to bump to SOA
 # and possibly re-sign
 sub post_records_change
 {
-local ($d, $recs, $fn) = @_;
+local ($d, $recs, $fn, $newrec) = @_;
 &require_bind();
 local $z;
 if (!$fn) {
@@ -3598,10 +3598,28 @@ elsif ($d->{'dns_cloud'}) {
 	# Upload records to cloud DNS provider
 	local $ctype = $d->{'dns_cloud'};
 	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+	# Merge in non-standard DNS records
+	foreach my $nrec (@newrecs) {
+		# Existing entries auxiliary records
+		my ($recsref) =
+		  grep { $_->{'name'} eq $nrec->{'name'}} @{$recs};
+		if (ref($recsref)) {
+			$nrec->{'proxied'} = $recsref->{'proxied'}
+				if (exists($recsref->{'proxied'}) &&
+				    $nrec->{'type'} =~ /^(A|AAAA|CNAME)$/);
+			}
+		# New entry auxiliary records
+		if (ref($newrec) &&
+		    $nrec->{'name'} eq $newrec->{'name'}) {
+			$nrec->{'proxied'} = $newrec->{'proxied'}
+				if (exists($newrec->{'proxied'}) &&
+				    $nrec->{'type'} =~ /^(A|AAAA|CNAME)$/);
+			}
+		}
 	local $info = { 'domain' => $d->{'dom'},
 	                'id' => $d->{'dns_cloud_id'},
 	                'location' => $d->{'dns_cloud_location'},
-	                'recs' => $recs };
+	                'recs' => \@newrecs };
 	my $pfunc = "dnscloud_".$ctype."_put_records";
 	my ($ok, $msg) = &$pfunc($d, $info);
 	if (!$ok) {
@@ -4647,21 +4665,66 @@ foreach my $sfx (&list_public_dns_suffixes()) {
 return ();
 }
 
-# lookup_dns_records(name, [type])
-# Returns all DNS records matching some name and type, using the dig command.
-# Or an error string if the lookup failed.
+# lookup_dns_records(name, [type], [external])
+# Returns all DNS records matching some name and type,
+# using the dig command, or an error string if the lookup 
+# failed. Can additionally query external DNS, if set.
 sub lookup_dns_records
 {
-my ($name, $type) = @_;
-&has_command("dig") || return "Missing the dig command";
-my $cmd = "dig".($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
-my $temp = &transname();
-&execute_command($cmd, undef, $temp, \$err);
+my ($name, $type, $external) = @_;
+my ($command, $command_params, $temp, $err, @recs);
+$command = quotemeta(&has_command("dig"));
+$command || return "Missing the <tt>dig</tt> command";
+$command_params = ($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
+$temp = &transname();
+&execute_command(("$command"."$command_params"), undef, $temp, \$err);
 return $err if ($?);
+if ($external) {
+	my $ns_search_ok = sub {
+		my ($templocal) = @_;
+		my $recfound;
+		my $lref = &read_file_lines($templocal, 1);
+		$type ||= "";
+		foreach my $l (@$lref) {
+			if ($l =~ /$name.*?IN.*?$type.*?(\S)/) {
+				$recfound++;
+				}
+			}
+		return $recfound;
+		};
+
+	# If initial request wasn't successful try other DNS servers
+	if (!&$ns_search_ok($temp)) {
+		my @dnses = (
+			# Miami, United States (AT&T Services)
+			'12.121.117.201',
+			# Oberhausen, Germany (Deutsche Telekom AG)
+			'195.243.214.4',
+			# Manchester, United Kingdom (M247 Ltd)
+			'194.187.251.67',
+			# Zaragoza, Spain (Diputacion Provincial de Zaragoza)
+			'195.235.225.10',
+			# Innsbruck, Austria (nemox.net)
+			'83.137.41.9',
+			# Zizers, Switzerland (Oskar Emmenegger)
+			'194.209.157.109',
+		);
+		foreach my $dns (@dnses) {
+			my $tempexternal = &transname();
+			my $cmd = ("$command " . "+time=3 +tries=1 @" .quotemeta($dns)."$command_params");
+			&execute_command("$cmd", undef, $tempexternal, \$err);
+			return $err if ($?);
+			if (&$ns_search_ok($tempexternal)) {
+				$temp = $tempexternal;
+				last;
+				}
+			}
+		}
+	}
 &require_bind();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
-my @recs = &bind8::read_zone_file($temp, $name);
+@recs = &bind8::read_zone_file($temp, $name);
 return \@recs;
 }
 
