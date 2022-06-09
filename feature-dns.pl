@@ -4689,6 +4689,10 @@ if ($external) {
 			'83.137.41.9',
 			# Zizers, Switzerland (Oskar Emmenegger)
 			'194.209.157.109',
+			# California, United States (Google)
+			'8.8.8.8',
+			# California, United States (Cloudflare)
+			'1.1.1.1',
 		);
 		foreach my $dns (@dnses) {
 			my $tempexternal = &transname();
