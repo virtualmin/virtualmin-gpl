@@ -3620,7 +3620,7 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local $file;
 		local $recs;
-		if ($ad->{'provision_dns'} || $d->{'dns_cloud'}) {
+		if ($ad->{'provision_dns'} || $ad->{'dns_cloud'}) {
 			# On provisioning server
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
