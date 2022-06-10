@@ -4378,11 +4378,11 @@ sub get_whois_expiry
 {
 my ($d) = @_;
 my $whois = &has_command("whois");
-return (0, "Missing whois command") if (!$whois);
+return (0, "Missing the <tt>whois</tt> command") if (!$whois);
 my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
 return (0, "No DNS registrar found for domain")
     if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
-return (0, "Whois command did not report expiry date")
+return (0, "The <tt>whois</tt> command did not report expiry date")
         # google.com, google.fr, google.ru, google.sl
     if ($out !~ /(?|paid-till:|Expir(?:y|ation|es).*?(?:Date|Time|):)\s+(?<year>\d+)\-(?<month>\d+)\-(?<day>\d+).(?<hour>\d+):(?<minute>\d+):(?<second>\d+)(?:(?<utc>(?|[a-z\s])|[+-.][0-9a-z]+))/i &&
         # google.fi
