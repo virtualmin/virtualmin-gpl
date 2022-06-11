@@ -13,6 +13,7 @@ if (!$d->{'alias'}) {
 	$mode = &get_domain_php_mode($d);
 	}
 $p = &domain_has_website($d);
+my $ng = $p =~ /nginx/;
 
 &ui_print_header(&domain_in($d), $text{'phpmode_title2'}, "");
 
@@ -100,7 +101,8 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		print &ui_table_row($text{'phpmode_version'}, $fullver . &$get_php_info_bubble('label'))
 		    if ($mode ne 'none');
 		}
-	elsif ($mode eq "fpm" && @dirs == 1) {
+	elsif ($mode eq "fpm" && @dirs == 1 ||
+	       $mode eq "fcgid" && $ng) {
 		# Only one version can be set
 		print &ui_table_row(
 			&hlink($text{'phpmode_version'}, "phpmode_version"),

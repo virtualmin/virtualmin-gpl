@@ -4378,11 +4378,11 @@ sub get_whois_expiry
 {
 my ($d) = @_;
 my $whois = &has_command("whois");
-return (0, "Missing whois command") if (!$whois);
+return (0, "Missing the <tt>whois</tt> command") if (!$whois);
 my $out = &backquote_command($whois." ".quotemeta($d->{'dom'})." 2>/dev/null");
 return (0, "No DNS registrar found for domain")
     if ($out =~ /No\s+whois\s+server\s+is\s+known/i);
-return (0, "Whois command did not report expiry date")
+return (0, "The <tt>whois</tt> command did not report expiry date")
         # google.com, google.fr, google.ru, google.sl
     if ($out !~ /(?|paid-till:|Expir(?:y|ation|es).*?(?:Date|Time|):)\s+(?<year>\d+)\-(?<month>\d+)\-(?<day>\d+).(?<hour>\d+):(?<minute>\d+):(?<second>\d+)(?:(?<utc>(?|[a-z\s])|[+-.][0-9a-z]+))/i &&
         # google.fi
@@ -4653,12 +4653,13 @@ return ();
 sub lookup_dns_records
 {
 my ($name, $type, $external) = @_;
-my ($command, $command_params, $temp, $err, @recs);
+my ($command, $command_params, $dnslookup, $temp, $err, @recs);
 $command = quotemeta(&has_command("dig"));
 $command || return "Missing the <tt>dig</tt> command";
 $command_params = ($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
 $temp = &transname();
-&execute_command(("$command"."$command_params"), undef, $temp, \$err);
+$dnslookup = quotemeta($config{'dns_lookup_server'} || '8.8.8.8');
+&execute_command(("$command".' @'.$dnslookup."$command_params"), undef, $temp, \$err);
 return $err if ($?);
 if ($external) {
 	my $ns_search_ok = sub {
@@ -4667,8 +4668,9 @@ if ($external) {
 		my $lref = &read_file_lines($templocal, 1);
 		$type ||= "";
 		foreach my $l (@$lref) {
-			if ($l =~ /$name.*?IN.*?$type.*?(\S)/) {
-				$recfound++;
+			if ($l =~ /$name.*?IN.*?$type.*?(\S+)/) {
+				$recfound = "$1";
+				last;
 				}
 			}
 		return $recfound;
@@ -4689,13 +4691,32 @@ if ($external) {
 			'83.137.41.9',
 			# Zizers, Switzerland (Oskar Emmenegger)
 			'194.209.157.109',
+			# California, United States (Google)
+			'8.8.4.4',
+			# California, United States (Cloudflare)
+			'1.1.1.1',
 		);
 		foreach my $dns (@dnses) {
 			my $tempexternal = &transname();
 			my $cmd = ("$command " . "+time=3 +tries=1 @" .quotemeta($dns)."$command_params");
 			&execute_command("$cmd", undef, $tempexternal, \$err);
 			return $err if ($?);
-			if (&$ns_search_ok($tempexternal)) {
+			my $recmatch = &$ns_search_ok($tempexternal);
+			if ($recmatch) {
+				my $tempexternaldnssec = &transname();
+				&execute_command(("$command +dnssec +multi".' @'.$dnslookup."$command_params"), undef, $tempexternaldnssec, \$err);
+				return $err if ($?);
+				my $dnsstatus;
+				my $lref = &read_file_lines($tempexternaldnssec, 1);
+				foreach my $l (@$lref) {
+					if ($l =~ /.*?HEADER.*?status:\s*([a-zA-Z0-9]+)/) {
+						$dnsstatus = "$1";
+						last;
+						}
+					}
+				$recmatch =~ s/\.$//;
+				return "<tt>@{[&html_escape($recmatch)]}</tt> was found, however DNSSEC validation check failed with the status <tt>@{[&html_escape($dnsstatus)]}</tt>"
+					if ($dnsstatus !~ /NOERROR/i);
 				$temp = $tempexternal;
 				last;
 				}
