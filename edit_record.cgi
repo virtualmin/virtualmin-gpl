@@ -8,6 +8,7 @@ $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_records($d) || &error($text{'records_ecannot'});
 &require_bind();
+$tmpl = &get_template($d->{'template'});
 
 if ($in{'type'}) {
 	# Adding a new record
@@ -127,10 +128,10 @@ else {
 		$field .= " ".$vals[$i]->{'suffix'};
 		if ($cloud && $cloud->{'proxy'} &&
 		    $t->{'type'} =~ /^(A|AAAA|CNAME)$/) {
+			$pc = $in{'type'} ? $tmpl->{'dns_cloud_proxy'}
+					  : $r->{'proxied'};
 			$field .= "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
-		                      $text{'records_typeprox'},
-		                       $in{'type'} ? $config{'bind_cloud_proxy'} :
-		                                     $r->{'proxied'});
+		                      $text{'records_typeprox'}, $pc);
 			$field .= "
 			<script>
 				var ttl_def = document.querySelector('[name=\"ttl_def\"][value=\"1\"]'),
