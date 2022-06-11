@@ -26,7 +26,7 @@ $recs =~ s/.*NS.*\n//g;
 $recs =~ s/.*SOA.*\([^\)]+\).*\n//;
 
 # Show them
-print "<b>",$text{'records_viewdesc'},"</b><p>\n";
+print &ui_alert_box($text{'records_viewdesc'}, 'warn', undef, undef, "");
 print &ui_table_start(undef, undef, 2);
 print &ui_table_row(undef, "<pre>".&html_escape($recs)."</pre>", 2);
 print &ui_table_end();
