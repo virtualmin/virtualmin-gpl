@@ -38,6 +38,7 @@ if ($in{'delete'}) {
 				# Delete the record
 				&bind8::delete_record($file, $r);
 				}
+			splice(@$recs, &indexof($r, @$recs), 1);
 			}
 		}
 	$err = &post_records_change($d, $recs, $file);

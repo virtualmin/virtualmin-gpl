@@ -47,6 +47,7 @@ if ($in{'delete'}) {
 		# Delete the record
 		&bind8::delete_record($file, $r);
 		}
+	splice(@$recs, &indexof($r, @$recs), 1);
 	}
 elsif ($r->{'defttl'}) {
 	# Validate and save default TTL
