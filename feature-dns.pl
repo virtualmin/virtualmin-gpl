@@ -4661,29 +4661,38 @@ my ($name, $type, $external) = @_;
 my ($command, $command_params, $dnslookup, $temp, $err, @recs);
 $command = quotemeta(&has_command("dig"));
 $command || return "Missing the <tt>dig</tt> command";
+$name || return "Missing domain name parameter";
 $command_params = ($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
 $temp = &transname();
-$dnslookup = quotemeta($config{'dns_lookup_server'} || '8.8.8.8');
+$dnsseccheck = !$config{'dns_lookup_server_no_dnscheck'};
+$dnslookup = quotemeta($config{'dns_lookup_server'} ||
+                       # We need default DNS that returns clear EDE
+                       '1.1.1.1');
 &execute_command(("$command".' @'.$dnslookup."$command_params"), undef, $temp, \$err);
 return $err if ($?);
 if ($external) {
 	my $ns_search_ok = sub {
 		my ($templocal) = @_;
-		my $recfound;
+		my (@recsfound, $recfound);
 		my $lref = &read_file_lines($templocal, 1);
 		$type ||= "";
 		foreach my $l (@$lref) {
 			if ($l =~ /$name.*?IN.*?$type.*?(\S+)/) {
-				$recfound = "$1";
-				last;
+				my $rfound = "$1";
+				$rfound =~ s/\.$//;
+				push(@recsfound, $rfound);
 				}
 			}
+		$recfound = join(", ", @recsfound)
+		    if (@recsfound);
 		return $recfound;
 		};
 
 	# If initial request wasn't successful try other DNS servers
 	if (!&$ns_search_ok($temp)) {
-		my @dnses = (
+		# Trying DNS servers which ignore DNSSEC
+		# to find existing type of records
+		my @nodnssecdnses = (
 			# Miami, United States (AT&T Services)
 			'12.121.117.201',
 			# Oberhausen, Germany (Deutsche Telekom AG)
@@ -4696,32 +4705,31 @@ if ($external) {
 			'83.137.41.9',
 			# Zizers, Switzerland (Oskar Emmenegger)
 			'194.209.157.109',
-			# California, United States (Google)
-			'8.8.4.4',
-			# California, United States (Cloudflare)
-			'1.1.1.1',
 		);
-		foreach my $dns (@dnses) {
+		foreach my $dns (@nodnssecdnses) {
 			my $tempexternal = &transname();
-			my $cmd = ("$command " . "+time=3 +tries=1 @" .quotemeta($dns)."$command_params");
+			my $cmd = ("$command " . "+time=5 +tries=1 @" .quotemeta($dns)."$command_params");
 			&execute_command("$cmd", undef, $tempexternal, \$err);
 			return $err if ($?);
 			my $recmatch = &$ns_search_ok($tempexternal);
 			if ($recmatch) {
 				my $tempexternaldnssec = &transname();
-				&execute_command(("$command +dnssec +multi".' @'.$dnslookup."$command_params"), undef, $tempexternaldnssec, \$err);
+				&execute_command(("$command +time=5 +tries=1".' @'.$dnslookup."$command_params"), undef, $tempexternaldnssec, \$err);
 				return $err if ($?);
 				my $dnsstatus;
 				my $lref = &read_file_lines($tempexternaldnssec, 1);
 				foreach my $l (@$lref) {
 					if ($l =~ /.*?HEADER.*?status:\s*([a-zA-Z0-9]+)/) {
 						$dnsstatus = "$1";
+						}
+					if ($l =~ /.*?;.*?(EDE:\s.*)/) {
+						$dnsstatus = "$1";
 						last;
 						}
 					}
-				$recmatch =~ s/\.$//;
-				return "<tt>@{[&html_escape($recmatch)]}</tt> was found, however DNSSEC validation check failed with the status <tt>@{[&html_escape($dnsstatus)]}</tt>"
-					if ($dnsstatus !~ /NOERROR/i);
+				my $pform = $recmatch =~ /,/ ? 'were' : 'was';
+				return "<tt>@{[&html_escape($recmatch)]}</tt> $pform found, however DNSSEC validation check failed with <tt>@{[&html_escape($dnsstatus)]}</tt> error"
+					if (($dnsstatus !~ /NOERROR/i || $dnsstatus =~ /EDE:/i) && $dnsseccheck);
 				$temp = $tempexternal;
 				last;
 				}
