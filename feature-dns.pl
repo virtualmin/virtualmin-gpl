@@ -3398,6 +3398,57 @@ foreach my $r (@$recs) {
 	}
 }
 
+# create_dns_record(&records, file, &record)
+# Update a zone file and records array ref with a new record
+sub create_dns_record
+{
+my ($recs, $file, $r) = @_;
+&require_bind();
+my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
+	       &join_record_values($r), $r->{'comment'} );
+my $lref = &read_file_lines($file, 1);
+$r->{'file'} = $file;
+$r->{'line'} = scalar(@$lref);
+$r->{'eline'} = $r->{'line'};
+&bind8::create_record($file, @params);
+push(@$recs, $r);
+}
+
+# modify_dns_record(&records, file, &record)
+# Update a zone file with a changed record
+sub modify_dns_record
+{
+my ($recs, $file, $r) = @_;
+&require_bind();
+my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
+	       &join_record_values($r), $r->{'comment'} );
+&bind8::modify_record($file, $r, @params);
+}
+
+# delete_dns_record(&records, file, &record)
+# Update a zone file and records array ref to remove a record
+sub delete_dns_record
+{
+my ($recs, $file, $r) = @_;
+&require_bind();
+if (defined($r->{'defttl'})) {
+	&bind8::delete_defttl($file, $r);
+	}
+else {
+	&bind8::delete_record($file, $r);
+	}
+my $idx = &indexof($r, @$recs);
+if ($idx >= 0) {
+	splice(@$recs, $idx, 1);
+	}
+my $len = $r->{'eline'} - $r->{'line'} + 1;
+foreach my $o (@$recs) {
+	$o->{'line'} -= $len if ($o->{'line'} > $r->{'line'});
+	$o->{'eline'} -= $len if (defined($o->{'eline'}) &&
+				  $o->{'eline'} > $r->{'eline'});
+	}
+}
+
 # default_domain_spf(&domain)
 # Returns a default SPF object for a domain, based on its template
 sub default_domain_spf

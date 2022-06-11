@@ -33,21 +33,7 @@ else {
 if ($in{'delete'}) {
 	# Just delete it
 	&can_delete_record($d, $r) || &error($text{'record_edelete'});
-	if ($r->{'defttl'}) {
-		# Delete the TTL, renumber others down so that bumping the SOA
-		# modifies the correct line
-		&bind8::delete_defttl($file, $r);
-		foreach my $e (@$recs) {
-			$e->{'line'}-- if ($e->{'line'} > $r->{'line'});
-			$e->{'eline'}-- if (defined($e->{'eline'}) &&
-					    $e->{'eline'} > $r->{'line'});
-			}
-		}
-	else {
-		# Delete the record
-		&bind8::delete_record($file, $r);
-		}
-	splice(@$recs, &indexof($r, @$recs), 1);
+	&delete_dns_record($recs, $file, $r);
 	}
 elsif ($r->{'defttl'}) {
 	# Validate and save default TTL
@@ -150,8 +136,9 @@ else {
 		if ($r->{'type'} =~ /^(A|AAAA|CNAME)$/);
 
 	# Check for CNAME collision
-	push(@$recs, $r) if ($in{'type'});
 	if ($r->{'type'} eq 'CNAME') {
+		$newrecs = [ @$recs ];
+		push(@$newrecs, $r) if ($in{'type'});
 		%clash = map { $_->{'name'}, $_ }
 			     grep { $_ ne $r } @$newrecs;
 		foreach $e (@$newrecs) {
@@ -162,15 +149,13 @@ else {
 			}
 		}
 
-	@params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
-		    &join_record_values($r), $r->{'comment'} );
 	if ($in{'type'}) {
 		# Create the record
-		&bind8::create_record($file, @params);
+		&create_dns_record($recs, $file, $r);
 		}
 	else {
 		# Just update it
-		&bind8::modify_record($file, $r, @params);
+		&modify_dns_record($recs, $file, $r);
 		}
 	}
 $err = &post_records_change($d, $recs, $file);
