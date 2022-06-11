@@ -9037,6 +9037,7 @@ push(@rv, { 'id' => 0,
 	    'dns_sub' => $config{'bind_sub'} || "none",
 	    'dns_cloud' => $config{'bind_cloud'},
 	    'dns_cloud_import' => $config{'bind_cloud_import'},
+	    'dns_cloud_proxy' => $config{'bind_cloud_proxy'},
 	    'dns_master' => $config{'bind_master'} || "none",
 	    'dns_mx' => $config{'bind_mx'} || "none",
 	    'dns_ns' => $config{'dns_ns'},
@@ -9351,6 +9352,7 @@ if ($tmpl->{'id'} == 0) {
 							   : $tmpl->{'dns_sub'};
 	$config{'bind_cloud'} = $tmpl->{'dns_cloud'};
 	$config{'bind_cloud_import'} = $tmpl->{'dns_cloud_import'};
+	$config{'bind_cloud_proxy'} = $tmpl->{'dns_cloud_proxy'};
 	$config{'bind_master'} = $tmpl->{'dns_master'} eq 'none' ? undef
 						   : $tmpl->{'dns_master'};
 	$config{'bind_mx'} = $tmpl->{'dns_mx'} eq 'none' ? undef
