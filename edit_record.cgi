@@ -129,7 +129,8 @@ else {
 		    $t->{'type'} =~ /^(A|AAAA|CNAME)$/) {
 			$field .= "&nbsp;&nbsp;".&ui_checkbox("proxyit", 1,
 		                      $text{'records_typeprox'},
-		                      $r->{'proxied'});
+		                       $in{'type'} ? $config{'bind_cloud_proxy'} :
+		                                     $r->{'proxied'});
 			$field .= "
 			<script>
 				var ttl_def = document.querySelector('[name=\"ttl_def\"][value=\"1\"]'),
