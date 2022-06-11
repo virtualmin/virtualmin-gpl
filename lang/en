@@ -1877,9 +1877,9 @@ newreseller_title=New Reseller Email
 newreseller_ecannot=You are not allowed to edit the new reseller email template
 newreseller_desc2=Use this form to edit the template for the email message that can be sent to a new reseller account after it is created. The following substitions will be done to the text :
 
+feature_dns=DNS domain
 feature_web=Apache website
 feature_ssl=Apache SSL website
-feature_dns=BIND DNS domain
 feature_mysql=MySQL database
 feature_postgres=PostgreSQL database
 feature_webalizer=Webalizer reporting
