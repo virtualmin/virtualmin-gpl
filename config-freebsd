@@ -245,4 +245,4 @@ phpchildren=20
 combined_cert=0
 fcgiwrap=0
 bind_cloud_import=1
-bind_cloud_proxy=1
+bind_cloud_proxy=0
