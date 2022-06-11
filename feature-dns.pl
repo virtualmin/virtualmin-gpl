@@ -4743,6 +4743,22 @@ local $bind8::config{'chroot'} = undef;
 return \@recs;
 }
 
+# dns_check_record_mismatch(\recs, entry)
+# Returns a list of mismatched records that don't belong
+# Returns 0 if given entry matches all the records
+sub dns_check_record_mismatch
+{
+my ($recs, $entry) = @_;
+my @mismatched;
+foreach my $rec (@{$recs}) {
+	my (@mismatch) = grep { $_ =~ s/\.$//; $_ !~ /\Q$entry\E/ }
+	    @{$rec->{'values'}};
+	push(@mismatched, @mismatch);
+	}
+return \@mismatched if (@mismatched);
+return 0;
+}
+
 # supports_dns_comments(&domain)
 # Returns 1 if the DNS provider for a domain supports comments
 sub supports_dns_comments
