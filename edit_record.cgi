@@ -137,12 +137,14 @@ else {
 				var ttl_def = document.querySelector('[name=\"ttl_def\"][value=\"1\"]'),
 					ttl_val = document.querySelector('[name=\"ttl_def\"][value=\"0\"]'),
 				    proxied = document.querySelector('[name=\"proxyit\"]');
-				    proxied.addEventListener(\"click\", function() {
-				    	this.checked && ttl_def.click()
-				    });
-				    ttl_val.addEventListener(\"click\", function() {
-				    	proxied.checked = false;
-				    });
+				    if (ttl_val && proxied) {
+					    ttl_val.addEventListener(\"click\", function() {
+					    	proxied.checked = false;
+					    });
+					    proxied.addEventListener(\"click\", function() {
+					    	this.checked && ttl_def.click()
+					    });
+				    }
 			</script>";
 			}
 		print &ui_table_row($vals[$i]->{'desc'}, $field);
