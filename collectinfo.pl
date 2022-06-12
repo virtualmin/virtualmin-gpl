@@ -58,8 +58,6 @@ if ($config{'check_ports'} == 2) {
 if ($config{'php_session_age'}) {
 	foreach my $d (grep { &domain_has_website($_) } &list_domains()) {
 		my @f = &cleanup_php_sessions($d, 0);
-		foreach my $f (@f) {
-			}
 		}
 	}
 
