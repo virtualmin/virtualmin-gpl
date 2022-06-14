@@ -252,34 +252,41 @@ return 1;
 }
 
 # restart_webmin()
-# Send a signal to Webmin to re-read it's config
+# Send a signal to Webmin to re-read its config
 sub restart_webmin
 {
-&$first_print($text{'setup_webminpid2'});
-local %miniserv;
-&get_miniserv_config(\%miniserv);
-if (&check_pid_file($miniserv{'pidfile'})) {
+my $restarted = &getvar('webmin-restarted', undef, 1);
+&$first_print($text{'setup_webminpid2'})
+	if (!$restarted);
+eval {
+	local $main::error_must_die = 1;
 	&reload_miniserv();
-	&$second_print($text{'setup_done'});
+	};
+if ($@) {
+	&$second_print(&text('setup_webmindown2', "$@"))
+		if (!$restarted);
 	}
 else {
-	&$second_print($text{'setup_webmindown'});
+	&$second_print($text{'setup_done'})
+		if (!$restarted);
 	}
 }
 
 # restart_webmin_fully()
-# Send a signal to Webmin to make it fully restart and re-read it's config
+# Send a signal to Webmin to make it fully restart and re-read its config
 sub restart_webmin_fully
 {
+&setvar('webmin-restarted',	1);
 &$first_print($text{'setup_webminpid'});
-local %miniserv;
-&get_miniserv_config(\%miniserv);
-if (&check_pid_file($miniserv{'pidfile'})) {
+eval {
+	local $main::error_must_die = 1;
 	&restart_miniserv();
-	&$second_print($text{'setup_done'});
+	};
+if ($@) {
+	&$second_print(&text('setup_webmindown2', "$@"));
 	}
 else {
-	&$second_print($text{'setup_webmindown'});
+	&$second_print($text{'setup_done'});
 	}
 }
 
@@ -287,24 +294,17 @@ else {
 # Send a signal to Usermin to make it fully restart and re-read it's config
 sub restart_usermin
 {
-&$first_print($text{'setup_userminpid'});
 &foreign_require("usermin");
-local %miniserv;
-&usermin::get_usermin_miniserv_config(\%miniserv);
-if (&check_pid_file($miniserv{'pidfile'})) {
-	eval {
-		local $main::error_must_die = 1;
-		&usermin::restart_usermin_miniserv();
-		};
-	if ($@) {
-		&$second_print(&text('setup_usermindown2', "$@"));
-		}
-	else {
-		&$second_print($text{'setup_done'});
-		}
+&$first_print($text{'setup_userminpid'});
+eval {
+	local $main::error_must_die = 1;
+	&usermin::restart_usermin_miniserv();
+	};
+if ($@) {
+	&$second_print(&text('setup_usermindown2', "$@"));
 	}
 else {
-	&$second_print($text{'setup_usermindown'});
+	&$second_print($text{'setup_done'});
 	}
 }
 
