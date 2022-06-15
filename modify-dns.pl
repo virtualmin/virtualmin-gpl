@@ -14,11 +14,14 @@ from the DNS section of the domain's server template.
 
 To add allowed hostname, MX domains or IP addresses, use the C<--spf-add-a>,
 C<--spf-add-mx>, C<--spf-add-ip4> and C<--spf-add-ip6> options respectively.
-Each of which must be followed by a single host, domain or IP address.
+Each of which must be followed by a single host, domain or IP address. Or you
+can use C<--spf-add-include> followed by a domain name who's SPF policy will
+be included in this one.
 
-Similarly, the C<--spf-remove-a>, C<--spf-remove-mx>, C<--spf-remove-ip4> and
-C<--spf-remove-ip6> options will remove the following host, domain or IP address
-from the allowed list for the specified domains.
+Similarly, the C<--spf-remove-a>, C<--spf-remove-mx>, C<--spf-remove-ip4>,
+C<--spf-remove-ip6> and C<--spf-remove-include> options will remove the
+following host, domain or IP address from the allowed list for the specified
+domains.
 
 To control how SPF treats senders not in the allowed hosts list, use one of
 the C<--spf-all-disallow>, C<--spf-all-discourage>, C<--spf-all-neutral>,
@@ -111,14 +114,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-spf") {
 		$spf = 0;
 		}
-	elsif ($a =~ /^--spf-add-(a|mx|ip4|ip6)$/) {
+	elsif ($a =~ /^--spf-add-(a|mx|ip4|ip6|include)$/) {
 		$add = shift(@ARGV);
 		$type = $1;
 		$add =~ /^[a-z0-9\.\-\_:]+$/ ||
 		    &usage("$a must be followed by a hostname or IP address");
 		push(@{$add{$type}}, $add);
 		}
-	elsif ($a =~ /^--spf-remove-(a|mx|ip4|ip6)$/) {
+	elsif ($a =~ /^--spf-remove-(a|mx|ip4|ip6|include)$/) {
 		$rem = shift(@ARGV);
 		$type = $1;
 		$rem =~ /^[a-z0-9\.\-\_:]+$/ ||
