@@ -134,6 +134,7 @@ if ($itype eq "rpm") {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		&$second_print($text{'upgrade_success'});
 		}
 	}
 elsif ($itype eq "deb") {
