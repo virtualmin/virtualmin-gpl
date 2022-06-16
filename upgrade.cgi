@@ -83,7 +83,18 @@ if ($itype eq "rpm") {
 	local $found;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
+		# New repos have GPL in title too
+		if ($l =~ /^name=/ && $l =~ /Virtualmin\s+\d+\s+GPL/) {
+			$l =~ s/(GPL)/Professional/;
+		}
+		# New repo format such as /vm/7/gpl/rpm/noarch/
+		elsif ($l =~ /noarch/ && $l =~ /^baseurl=.*\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(gpl)(\/.*))/) {
+			my $path = $1;
+			$path =~ s/(gpl)/pro/;
+			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host/$path";
+			$found++;
+			}
+		elsif ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
 			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
 			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
