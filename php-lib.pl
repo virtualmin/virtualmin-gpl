@@ -97,6 +97,7 @@ local $p = &domain_has_website($d);
 $p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
 local $oldmode = &get_domain_php_mode($d);
+local @vers = &list_available_php_versions($d, $mode);
 
 # Work out the default PHP version for FPM
 if ($mode eq "fpm") {
@@ -108,10 +109,21 @@ if ($mode eq "fpm") {
 		delete($d->{'php_fpm_version'});
 		}
 	if (!$d->{'php_fpm_version'}) {
-		my $defconf = $tmpl->{'web_phpver'} ?
-			&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
-		$defconf ||= $fpms[0];
-		$d->{'php_fpm_version'} = $defconf->{'shortversion'};
+		# Work out the default FPM version from the template
+		if (@vers) {
+			my @ver_max = sort { $a->[0] < $b->[0] } @vers;
+			my ($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} ||
+			                   # Use max version if set to use highest
+			                   $_->[0] eq $ver_max[0]->[0] } @vers;
+			$fpm ||= $vers[0];
+			$d->{'php_fpm_version'} = $fpm->[0];
+			}
+		else {
+			my $defconf = $tmpl->{'web_phpver'} ?
+				&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
+			$defconf ||= $fpms[0];
+			$d->{'php_fpm_version'} = $defconf->{'shortversion'};
+			}
 		}
 	}
 
@@ -123,7 +135,6 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 
 # Work out source php.ini files
 local (%srcini, %subs_ini);
-local @vers = &list_available_php_versions($d, $mode);
 $mode eq "none" || @vers || return "No PHP versions found for mode $mode";
 foreach my $ver (@vers) {
 	$subs_ini{$ver->[0]} = 0;

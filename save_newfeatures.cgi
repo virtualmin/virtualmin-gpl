@@ -109,9 +109,7 @@ if ($oldplugins ne $config{'plugins'}) {
 # Clear cache of links
 &clear_links_cache();
 
-if (defined(&setvar)) {
-	&setvar('navigation-reload', 1);
-	}
+&setvar('navigation-reload', 1);
 
 &run_post_actions_silently();
 &webmin_log("features");
