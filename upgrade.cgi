@@ -176,7 +176,7 @@ elsif ($itype eq "deb") {
 		&$second_print($text{'setup_failed'});
 		print "<pre>";
 		print $upgrade_update_pkgs_output;
-		print "</pre>";
+		print "</pre><br data-x-br>";
 		}
 	else {
 		&$second_print($text{'setup_done'});
@@ -198,7 +198,11 @@ elsif ($itype eq "deb") {
 					     : $p->{'name'});
 			}
 		}
-	@packages || &error($text{'upgrade_epackages'});
+	if (!@packages) {
+		&$second_print($text{'setup_failed'});
+		print &ui_alert_box($text{'upgrade_problems'}, 'danger');
+		goto PAGEEND;
+		} 
 
 	my $upgrade_to_pro_output;
 	&clean_environment();
@@ -217,6 +221,7 @@ elsif ($itype eq "deb") {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		&$second_print($text{'upgrade_success'});
 		}
 	}
 else {
