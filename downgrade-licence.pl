@@ -116,12 +116,18 @@ if (-r $virtualmin_apt_repo) {
 	&$first_print($gpl_downgrading_repository);
 	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
-        if ($l =~ /^deb(.*?)(https?):/) {
-                $l =~ s/(:\/\/)[0-9]+:[a-zA-Z-0-9]+\@/$1/;  
-                $l =~ s/(\/vm\/[\d]+)/$1\/gpl/; 
-				$found++;
-            }
-        }
+		# Virtualmin 7 repo format (/vm/7/pro/rpm/noarch/)
+		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(pro)(\/.*))/) {
+			$l =~ s/(\/pro)/\/gpl/;
+		       $found++;
+			}
+		# Virtualmin 6 repo format (/vm/7/gpl/apt virtualmin main)
+		elsif ($l =~ /^deb(.*?)(https?):/) {
+		       $l =~ s/(:\/\/)[0-9]+:[a-zA-Z-0-9]+\@/$1/;  
+		       $l =~ s/(\/vm\/[\d]+)/$1\/gpl/; 
+		       $found++;
+			}
+		}
 	&flush_file_lines($virtualmin_apt_repo);
 	&unlock_file($virtualmin_apt_repo);
 	&$second_print($found ? $gpl_downgrading_done : $gpl_downgrading_failed);
@@ -135,7 +141,11 @@ if (-r $virtualmin_apt_repo) {
 		&lock_all_resellers;
 		&$first_print($gpl_downgrading_package);
 		&execute_command("apt-get clean && apt-get update");
-		my $rv = &execute_command("apt-get -y install --allow-downgrades --reinstall webmin-virtual-server=*gpl");
+		my $rv;
+		foreach my $n (reverse(1..12)) {
+			$rv = &execute_command("apt-get -y install --allow-downgrades --reinstall webmin-virtual-server=*.gpl-$n");
+			last if (!$rv);
+			}
 		&$second_print(!$rv ? $gpl_downgrading_done : "$gpl_downgrading_failed : $rv");
 		$gpl_downgrading_failed_status++ if ($rv);
 		}
