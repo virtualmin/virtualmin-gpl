@@ -63,9 +63,20 @@ if (-r $virtualmin_yum_repo) {
 	&lock_file($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
 		if ($l =~ /^baseurl=(https?):/) {
-				$l =~ s/(:\/\/)[0-9]+:[a-zA-Z-0-9]+\@/$1/;	
-				$l =~ s/(\/vm\/[\d]+)/$1\/gpl/;	
+				$l =~ s/(:\/\/)[0-9]+:[a-zA-Z-0-9]+\@/$1/;
+				
+				# New repo format such as /vm/7/pro/rpm/noarch/
+				if ($l =~ /\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(rpm|pro)(\/.*))/) {
+					next if ($l !~ /noarch/);
+					$l =~ s/(\/pro)/\/gpl/;
+				} else {
+					$l =~ s/(\/vm\/[\d]+)/$1\/gpl/;	
+					}
 				$found++;
+			}
+		# New repos have Pro in title too
+		if ($l =~ /^name=/ && $l =~ /Virtualmin\s+\d+\s+Professional/) {
+			$l =~ s/(Professional)/GPL/;
 			}
 		}
 	&flush_file_lines($virtualmin_yum_repo);
