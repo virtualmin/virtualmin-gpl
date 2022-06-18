@@ -69,7 +69,9 @@ flag followed by an address.
 
 Flags similar to all those above also exist for IPv6, if your system supports
 it. The equivalent flags are named C<--ip6>, C<--allocate-ip6>,
-C<--original-ip6> and C<--shared-ip6> respectively.
+C<--original-ip6> and C<--shared-ip6> respectively. You can also use C<--no-ip6>
+to turn off IPv6 for the domain entirely, even if it was enabled when the
+backup was taken.
 
 By default, if any non-fatal warnings encountered during the restore process
 will cause the restore to fail. However, you can force it to continue with the
@@ -278,6 +280,10 @@ while(@ARGV > 0) {
 			    'virt6already' => 0, 'netmask6' => $netmask6,
 			    'mode6' => 5 };
 		}
+	elsif ($a eq "--no-ip6") {
+		$ipinfo = { %$ipinfo,
+			    'mode6' => -2 };
+		}
 
 	elsif ($a eq "--skip-warnings") {
 		$skipwarnings = 1;
@@ -477,7 +483,7 @@ print "                         [--shared-ip address | --ip address |\n";
 print "                          --allocate-ip | --original-ip]\n";
 print "                         [--default-ip6 |\n";
 print "                          --shared-ip6 address | --ip6 address |\n";
-print "                          --allocate-ip6 | --original-ip6]\n";
+print "                          --allocate-ip6 | --original-ip6 | --no-ip6]\n";
 print "                         [--only-missing | --only-existing]\n";
 print "                         [--skip-warnings]\n";
 print "                         [--continue-on-error]\n";
