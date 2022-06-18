@@ -2682,7 +2682,7 @@ if ($ok) {
 					$d->{'ip6'} = $defip6;
 					if (!$d->{'ip6'}) {
 						&$second_print(
-						    $text{'restore_edefip'});
+						    $text{'restore_edefip6'});
 						$ok = 0;
 						if ($continue) { next DOMAIN; }
 						else { last DOMAIN; }
@@ -2717,7 +2717,8 @@ if ($ok) {
 				# Use this system's default IPv6 address
 				$d->{'ip6'} = $defip6;
 				if (!$d->{'ip6'}) {
-					&$second_print($text{'restore_edefip'});
+					&$second_print(
+						$text{'restore_edefip6'});
 					$ok = 0;
 					if ($continue) { next DOMAIN; }
 					else { last DOMAIN; }
