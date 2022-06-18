@@ -83,7 +83,18 @@ if ($itype eq "rpm") {
 	local $found;
 	local $lref = &read_file_lines($virtualmin_yum_repo);
 	foreach my $l (@$lref) {
-		if ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
+		# New repos have GPL in title too
+		if ($l =~ /^name=/ && $l =~ /Virtualmin\s+\d+\s+GPL/) {
+			$l =~ s/(GPL)/Professional/;
+		}
+		# New repo format such as /vm/7/gpl/rpm/noarch/
+		elsif ($l =~ /noarch/ && $l =~ /^baseurl=.*\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(gpl)(\/.*))/) {
+			my $path = $1;
+			$path =~ s/(gpl)/pro/;
+			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host/$path";
+			$found++;
+			}
+		elsif ($l =~ /^baseurl=.*\.com(\/.*)\/gpl(\/.*)/ || 
 			$l =~ /^baseurl=.*\/gpl(\/.*)/) {
 			$l = "baseurl=https://$in{'serial'}:$in{'key'}\@$upgrade_virtualmin_host$1$2";
 			$found++;
@@ -123,6 +134,7 @@ if ($itype eq "rpm") {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		&$second_print($text{'upgrade_success'});
 		}
 	}
 elsif ($itype eq "deb") {
@@ -130,7 +142,14 @@ elsif ($itype eq "deb") {
 	my $apt_old_auth = !-d $virtualmin_apt_auth_dir ? "$in{'serial'}:$in{'key'}\@" : "";
 	$lref = &read_file_lines($virtualmin_apt_repo);
 	foreach $l (@$lref) {
-		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
+		# New Virtualmin 7 repos
+		if ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/(vm\/(?|([7-9])|([0-9]{2,4}))\/(gpl)(\/.*))/) {
+			my $gpgkey = $1;
+			my $rrepo = $3;
+			$rrepo =~ s/(gpl)/pro/;
+			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/$rrepo";
+		}
+		elsif ($l =~ /^deb(.*?)(http|https):\/\/$upgrade_virtualmin_host\/gpl\/(.*)/) {
 			my $gpgkey = $1;
 			my $rrepo = $3;
 			$l = "deb${gpgkey}https://$apt_old_auth$upgrade_virtualmin_host/$rrepo";
@@ -164,7 +183,7 @@ elsif ($itype eq "deb") {
 		&$second_print($text{'setup_failed'});
 		print "<pre>";
 		print $upgrade_update_pkgs_output;
-		print "</pre>";
+		print "</pre><br data-x-br>";
 		}
 	else {
 		&$second_print($text{'setup_done'});
@@ -186,7 +205,11 @@ elsif ($itype eq "deb") {
 					     : $p->{'name'});
 			}
 		}
-	@packages || &error($text{'upgrade_epackages'});
+	if (!@packages) {
+		&$second_print($text{'setup_failed'});
+		print &ui_alert_box($text{'upgrade_problems'}, 'danger');
+		goto PAGEEND;
+		} 
 
 	my $upgrade_to_pro_output;
 	&clean_environment();
@@ -205,6 +228,7 @@ elsif ($itype eq "deb") {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		&$second_print($text{'upgrade_success'});
 		}
 	}
 else {
