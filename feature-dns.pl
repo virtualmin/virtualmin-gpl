@@ -3135,12 +3135,18 @@ sub build_spf_dmarc_caches
 {
 foreach my $d (grep { $_->{'dns'} } &list_domains()) {
 	if (!defined($d->{'domain_spf_enabled'})) {
+		&lock_domain($d);
+		$d = &get_domain($d->{'id'}, undef, 1);
 		&is_domain_spf_enabled($d);
 		&save_domain($d);
+		&unlock_domain($d);
 		}
 	if (!defined($d->{'domain_dmarc_enabled'})) {
+		&lock_domain($d);
+		$d = &get_domain($d->{'id'}, undef, 1);
 		&is_domain_dmarc_enabled($d);
 		&save_domain($d);
+		&unlock_domain($d);
 		}
 	}
 }
@@ -3404,7 +3410,7 @@ sub create_dns_record
 {
 my ($recs, $file, $r) = @_;
 &require_bind();
-my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
+my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'} || "IN", $r->{'type'},
 	       &join_record_values($r), $r->{'comment'} );
 my $lref = &read_file_lines($file, 1);
 $r->{'file'} = $file;
@@ -3420,7 +3426,7 @@ sub modify_dns_record
 {
 my ($recs, $file, $r) = @_;
 &require_bind();
-my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'}, $r->{'type'},
+my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'} || "IN", $r->{'type'},
 	       &join_record_values($r), $r->{'comment'} );
 &bind8::modify_record($file, $r, @params);
 }
@@ -4002,13 +4008,15 @@ else {
 	my ($ok, $size) = &bind8::compute_dnssec_key_size(
 				$tmpl->{'dnssec_alg'}, 1);
 	my $err;
+	my $regen = $d->{'dnssec_alg'} &&
+		    $tmpl->{'dnssec_alg'} ne $d->{'dnssec_alg'};
 	if (!$ok) {
 		# Key size failed
 		return &text('setup_ednssecsize', $size);
 		}
 	elsif ($err = &bind8::create_dnssec_key(
 			$zone, $tmpl->{'dnssec_alg'}, $size,
-			$tmpl->{'dnssec_single'})) {
+			$tmpl->{'dnssec_single'}, $regen)) {
 		# Key generation failed
 		return &text('setup_ednsseckey', $err);
 		}
@@ -4016,6 +4024,7 @@ else {
 		# Zone signing failed
 		return &text('setup_ednssecsign', $err);
 		}
+	$d->{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
 	}
 &release_lock_dns($d);
 return undef;
