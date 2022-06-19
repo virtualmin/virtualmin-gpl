@@ -64,27 +64,37 @@ if (defined($in{'writelogs'}) && $can == 2) {
 if (defined($in{'http2'})) {
 	my $canprots = &get_domain_supported_http_protocols($d);
 	my $prots = &get_domain_http_protocols($d);
-	if ($in{'http2'} == 1) {
+	my ($hashttp2) = grep { /^h2/ } @$prots;
+	my $changed = 0;
+	if ($in{'http2'} == 1 && !$hashttp2) {
+		# Turn on
 		&$first_print($text{'phpmode_http2on'});
 		my @h2 = grep { /^h2/ } @$canprots;
 		$prots = [ &unique(@$prots, @h2) ];
+		$changed = 1;
 		}
-	elsif ($in{'http2'} == 2) {
+	elsif ($in{'http2'} == 2 && @$prots) {
+		# Set to default protocols
 		&$first_print($text{'phpmode_http2def'});
 		$prots = [ ];
+		$changed = 1;
 		}
-	else {
+	elsif ($in{'http2'} == 0 && $hashttp2) {
+		# Turn off
 		&$first_print($text{'phpmode_http2off'});
 		$prots = [ grep { !/^h2/ } @$prots ];
+		$changed = 1;
 		}
-	$err = &save_domain_http_protocols($d, $prots);
-	if ($err) {
-		&$second_print(&text('phpmode_ssierr', $err));
+	if ($changed) {
+		$err = &save_domain_http_protocols($d, $prots);
+		if ($err) {
+			&$second_print(&text('phpmode_ssierr', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		$anything++;
 		}
-	else {
-		&$second_print($text{'setup_done'});
-		}
-	$anything++;
 	}
 
 # Save match-all mode
