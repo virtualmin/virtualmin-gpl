@@ -144,9 +144,9 @@ foreach my $d (@doms) {
 		if (@doms > 1) {
 			print "Scripts in domain $d->{'dom'} :\n"; 
 			}
-		$fmt = "%-20.20s %-30.30s %-10.10s %-25.25s\n";
+		$fmt = "%-16.16s %-25.25s %-10.10s %-25.25s\n";
 		printf $fmt, "ID", "Description", "Version", "URL path";
-		printf $fmt, ("-" x 20), ("-" x 30), ("-" x 10), ("-" x 25);
+		printf $fmt, ("-" x 16), ("-" x 25), ("-" x 10), ("-" x 25);
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});
 			$path = $sinfo->{'url'};
