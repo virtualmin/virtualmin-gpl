@@ -40,6 +40,10 @@ To limit the output to domains using a particular PHP execution mode, use
 the C<--php-mode> flag followed by one of C<none>, C<cgi>, C<fcgid>, C<fpm>
 or C<mod_php>.
 
+To search by IPv4 or IPv6 address, use the C<--ip> flag followed by either
+kind of address. This will find domains using that address either exclusively
+or shared with other domains.
+
 To find the domain that contains a mailbox, use the C<--mail-user> flag
 followed by the full mailbox username (as used by FTP and IMAP).
 
@@ -172,10 +176,19 @@ while(@ARGV > 0) {
 	elsif ($a eq "--any-reseller") {
 		$any_resel = 1;
 		}
-	elsif ($a eq "--disabled") { $disabled = 1; }
-	elsif ($a eq "--enabled") { $disabled = 0; }
+	elsif ($a eq "--disabled") {
+		$disabled = 1;
+		}
+	elsif ($a eq "--enabled") {
+		$disabled = 0;
+		}
 	elsif ($a eq "--php-mode") {
 		$php_mode = shift(@ARGV);
+		}
+	elsif ($a eq "--ip") {
+		$ip = shift(@ARGV);
+		&check_ipaddress($ip) || &check_ip6address($ip) ||
+		    &usage("--ip must be followed by an IPv4 or v6 address");
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -280,6 +293,12 @@ elsif ($disabled eq '0') {
 if ($php_mode) {
 	@doms = grep { $_->{'php_mode'} &&
 		       $_->{'php_mode'} eq $php_mode } @doms;
+	}
+
+# Limit by IP address
+if ($ip) {
+	@doms = grep { $_->{'ip'} eq $ip ||
+		       $_->{'ip6'} eq $ip } @doms;
 	}
 
 if ($multi) {
@@ -933,6 +952,7 @@ print "                        [--plan ID|name]\n";
 print "                        [--template ID|name]\n";
 print "                        [--disabled | --enabled]\n";
 print "                        [--php-mode cgi|fcgid|fpm|mod_php]\n";
+print "                        [--ip address]\n";
 if ($virtualmin_pro) {
 	print "                        [--reseller name | --no-reseller |\n";
 	print "                         --any-reseller]\n";
