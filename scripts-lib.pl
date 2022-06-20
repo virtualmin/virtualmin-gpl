@@ -1104,7 +1104,7 @@ if (defined(&$maxfunc)) {
 return undef if (!@vers);
 
 # Find the best matching directory with a PHP version set
-local $dirpath = &public_html_dir($d).$path;
+local $dirpath = &public_html_dir($d).($path eq '/' ? '' : $path);
 local @dirs = &list_domain_php_directories($d);
 local $bestdir;
 foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
