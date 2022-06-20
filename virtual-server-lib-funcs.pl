@@ -542,6 +542,10 @@ if (!$d->{'created'}) {
 	}
 $d->{'id'} ||= &domain_id();
 $d->{'lastsave'} = time();
+$d->{'lastsave_script'} = $ENV{'SCRIPT_NAME'} || $0;
+$d->{'lastsave_user'} = $remote_user;
+$d->{'lastsave_type'} = $main::webmin_script_type;
+$d->{'lastsave_webmincron'} = $main::webmin_script_webmincron;
 &write_file("$domains_dir/$d->{'id'}", $d);
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
@@ -8399,14 +8403,14 @@ foreach my $dd (@alldoms) {
 		}
 
 	# Remove SSL cert from Dovecot, Postfix, etc
-	&disable_domain_service_ssl_certs($d);
+	&disable_domain_service_ssl_certs($dd);
 
 	# If this domain had it's own lets encrypt cert, delete any leftover
 	# files for it under /etc/letsencrypt
 	&foreign_require("webmin");
-	if ($d->{'letsencrypt_last'} && !$d->{'ssl_same'} &&
+	if ($dd->{'letsencrypt_last'} && !$dd->{'ssl_same'} &&
 	    defined(&webmin::cleanup_letsencrypt_files)) {
-		&webmin::cleanup_letsencrypt_files($d->{'dom'});
+		&webmin::cleanup_letsencrypt_files($dd->{'dom'});
 		}
 
 	# Delete all features (or just 'webmin' if un-importing). Any

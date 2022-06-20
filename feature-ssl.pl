@@ -2372,7 +2372,7 @@ if ($d->{'virt'}) {
 					}
 				}
 			}
-		next if (!$smtp);
+		next if (!$smtp && $enable);
 
 		if ($enable) {
 			# Create or update the entry
@@ -2428,7 +2428,7 @@ if ($d->{'virt'}) {
 				&postfix::delete_master($already);
 				$changed = 1;
 				}
-			if (!@others && $smtp->{'name'} ne $pfx) {
+			if (!@others && $smtp && $smtp->{'name'} ne $pfx) {
 				# If the default service has an IP but this is
 				# no longer needed, remove it
 				$smtp->{'name'} = $pfx;
