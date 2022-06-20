@@ -115,6 +115,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--no-cleanup") {
 		$no_cleanup = 1;
 		}
+	elsif ($a eq "--skip-cleanup") {
+		$no_cleanup = 2;
+		}
 	elsif ($a eq "--output") {
 		$output = 1;
 		}
@@ -9910,6 +9913,7 @@ TESTS: foreach $tt (@tests) {
 		}
 	$lastt = undef;
 	foreach $t (@tts) {
+		next if ($no_cleanup == 2 && $t->{'cleanup'});
 		$lastt = $t;
 		$total++;
 		$ok = &run_test($t);
@@ -10114,7 +10118,7 @@ print "\n";
 print "usage: functional-tests.pl [--domain test.domain]\n";
 print "                           [--test type]*\n";
 print "                           [--skip-test type]*\n";
-print "                           [--no-cleanup]\n";
+print "                           [--no-cleanup | --skip-cleanup]\n";
 print "                           [--output]\n";
 print "                           [--migrate $mig]\n";
 print "                           [--user webmin-login --pass password]\n";
