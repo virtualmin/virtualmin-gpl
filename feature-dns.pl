@@ -4642,15 +4642,13 @@ foreach my $r (reverse(@$recs)) {
 	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
 		 &is_dnssec_record($r));
 	next if (!$r->{'name'} || !$r->{'type'});
-	&bind8::delete_record($file, $r);
+	&delete_dns_record($recs, $file, $r);
 	}
 foreach my $r (@oldrecs) {
 	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
 		 &is_dnssec_record($r));
 	next if (!$r->{'name'} || !$r->{'type'});
-	&bind8::create_record($file, $r->{'name'}, $r->{'ttl'},
-			      $r->{'class'}, $r->{'type'},
-			      &join_record_values($r));
+	&create_dns_record($recs, $file, $r);
 	}
 my $err = &post_records_change($d, $recs, $file);
 &release_lock_dns($d);
