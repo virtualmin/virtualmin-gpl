@@ -1373,6 +1373,7 @@ $script_tests = [
 		      [ 'path', '/' ],
 		      [ 'db', 'mysql '.$test_domain_db ],
 		      [ 'opt', 'demo 1' ],
+		      [ 'opt', 'nowizard 1' ],
 		      [ 'version', 'latest' ] ],
 	  'timeout' => 300,
 	  'antigrep' => 'partially complete',
