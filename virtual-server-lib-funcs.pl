@@ -15264,8 +15264,8 @@ $config{'old_defip'} ||= $defip;
 if (&supports_ip6()) {
 	local $defip6 = &get_default_ip6();
 	if (!$defip6) {
-		&$second_print("<b>".&text('index_edefip6',
-			"../config.cgi?$module_name")."</b>");
+		&$second_print(&ui_text_color(&text('index_edefip6',
+			"../config.cgi?module=$module_name&section=line1.3"), 'warn'));
 		}
 	else {
 		&$second_print(&text('check_defip6', $defip6));
