@@ -107,5 +107,7 @@ foreach $f (@dom_features) {
 	&$second_print($text{'setup_done'});
 	}
 
+&run_post_actions();
+
 &ui_print_footer("", $text{'index_return'},
 	 "edit_newvalidate.cgi?mode=reset", $text{'newvalidate_return'});
