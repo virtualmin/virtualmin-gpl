@@ -609,6 +609,11 @@ if ($c && defined(&list_smtp_clouds)) {
 		}
 	}
 
+# Turn off email autoconfig
+if (&domain_has_website($d) && $config{'mail_autoconfig'}) {
+	&disable_email_autoconfig($d);
+	}
+
 &release_lock_mail($d);
 return 1;
 }
@@ -4648,8 +4653,10 @@ if ($d->{'dns'} && !$config{'secmx_nodns'}) {
 				 $r->{'name'} eq $withdot &&
 				 $r->{'values'}->[1] eq $mxhost."." } @$recs;
 		if (!$r) {
-			&bind8::create_record($file, $withdot, undef,
-				      "IN", "MX", "10 $mxhost.");
+			my $r = { 'name' => $withdot,
+				  'type' => 'MX',
+				  'values' => [ 10, $mxhost."." ] };
+			&create_dns_record($recs, $file, $r);
 			$added++;
 			}
 		}
