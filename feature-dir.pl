@@ -502,36 +502,47 @@ if ($src{'mount'} !~ /^[a-z0-9_\-\.]+:/i) {
 # Create exclude file
 local $xtemp = &transname();
 local @xlist;
-push(@xlist, "domains");
-if ($opts->{'dirnologs'}) {
-	push(@xlist, "logs");
-	}
-if ($opts->{'dirnohomes'}) {
-	push(@xlist, "homes");
-	}
-push(@xlist, $home_virtualmin_backup);
-push(@xlist, &get_backup_excludes($d));
-push(@xlist, split(/\t+/, $opts->{'exclude'}));
-push(@xlist, "backup.lock");
-
-# Exclude all .zfs files, for Solaris
-if ($gconfig{'os_type'} eq 'solaris') {
-	open(FIND, "find ".quotemeta($d->{'home'})." -name .zfs |");
-	while(<FIND>) {
-		s/\r|\n//g;
-		s/^\Q$d->{'home'}\E\///;
-		push(@xlist, $_);
+local @ilist;
+if ($opts->{'include'}) {
+	# Include only specific files
+	@ilist = split(/\t+/, $opts->{'exclude'});
+	push(@ilist, ".backup") if ($homefmt);
+	if ($compression != 3) {
+		@ilist = map { "./".$_ } @ilist;
 		}
-	close(FIND);
+	}
+else {
+	# Build list of files to exclude
+	push(@xlist, "domains");
+	if ($opts->{'dirnologs'}) {
+		push(@xlist, "logs");
+		}
+	if ($opts->{'dirnohomes'}) {
+		push(@xlist, "homes");
+		}
+	push(@xlist, $home_virtualmin_backup);
+	push(@xlist, &get_backup_excludes($d));
+	push(@xlist, split(/\t+/, $opts->{'exclude'}));
+	push(@xlist, "backup.lock");
+
+	# Exclude all .zfs files, for Solaris
+	if ($gconfig{'os_type'} eq 'solaris') {
+		open(FIND, "find ".quotemeta($d->{'home'})." -name .zfs |");
+		while(<FIND>) {
+			s/\r|\n//g;
+			s/^\Q$d->{'home'}\E\///;
+			push(@xlist, $_);
+			}
+		close(FIND);
+		}
+	@ilist = (".");
+	if ($compression != 3) {
+		@xlist = map { "./".$_ } @xlist;
+		}
 	}
 &open_tempfile(XTEMP, ">$xtemp");
 foreach my $x (@xlist) {
-	if ($compression == 3) {
-		&print_tempfile(XTEMP, "$x\n");
-		}
-	else {
-		&print_tempfile(XTEMP, "./$x\n");
-		}
+	&print_tempfile(XTEMP, "$x\n");
 	}
 &close_tempfile(XTEMP);
 
@@ -588,21 +599,21 @@ if ($key && $homefmt) {
 # of compression.
 if ($homefmt && $compression == 0) {
 	# With gzip
-	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist).
 	       " | ".&get_gzip_command();
 	}
 elsif ($homefmt && $compression == 1) {
 	# With bzip
-	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".").
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist).
 	       " | ".&get_bzip2_command();
 	}
 elsif ($compression == 3) {
 	# ZIP archive
-	$cmd = &make_zip_command("-x\@".quotemeta($xtemp), "-", ".");
+	$cmd = &make_zip_command("-x\@".quotemeta($xtemp), "-", @ilist);
 	}
 else {
 	# Plain tar
-	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, ".");
+	$cmd = &make_tar_command("cfX", "-", $xtemp, $iargs, @ilist);
 	}
 $cmd .= " | $writer";
 local $ex = &execute_command("cd ".quotemeta($d->{'home'})." && $cmd",

@@ -186,6 +186,7 @@ else {
 		$sched->{'after'} = $in{'after_def'} ? undef : $in{'after'};
 		}
 	$sched->{'exclude'} = join("\t", split(/\r?\n/, $in{'exclude'}));
+	$sched->{'include'} = $in{'include'};
 	if ($cbmode != 1 && !$sched->{'owner'}) {
 		# Record the owner of this scheduled backup, which controls
 		# who it runs as

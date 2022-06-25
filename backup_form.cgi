@@ -191,7 +191,9 @@ if (&can_backup_virtualmin()) {
 # Show files to exclude from each domain
 @exclude = split(/\t+/, $sched->{'exclude'});
 print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
-	&ui_textarea("exclude", join("\n", @exclude), 5, 80));
+	&ui_textarea("exclude", join("\n", @exclude), 5, 80)."<br>\n".
+	&ui_checkbox("include", 1, $text{'backup_include'},
+		     $sched->{'include'}));
 
 print &ui_hidden_table_end("features");
 

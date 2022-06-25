@@ -108,6 +108,7 @@ foreach $f (@do_features) {
 			  split(/,/, $sched->{'backup_opts_'.$f}) };
 	}
 $options{'dir'}->{'exclude'} = $sched->{'exclude'};
+$options{'dir'}->{'include'} = $sched->{'include'};
 @vbs = split(/\s+/, $sched->{'virtualmin'});
 
 # Start capturing output

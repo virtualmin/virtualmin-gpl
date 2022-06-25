@@ -2596,6 +2596,7 @@ backup_vchroot=FTP directory restrictions
 backup_vmailserver=Mail server settings
 backup_virtualmin=Virtualmin settings to also backup
 backup_exclude=Files to exclude from each domain
+backup_include=Include only these files, instead of excluding
 backup_webmin=Backing up Webmin ACL files ..
 backup_webminfailed=.. tar failed : $1
 backup_webminnofiles=.. no ACL files found

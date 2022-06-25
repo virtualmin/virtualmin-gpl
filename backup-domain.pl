@@ -54,7 +54,8 @@ to change its behavior by doing an ad-hoc full backup.
 
 To exclude some files from each virtual server's home directory from the
 backup, use the C<--exclude> flag followed by a relative filename, like
-I<public_html/stats> or I<.bashrc>.
+I<public_html/stats> or I<.bashrc>. Alternately, you can limit the backup to
+only specific files and directories with the C<--include> flag.
 
 To have Virtualmin automatically replace strftime-style date formatting
 characters in the backup destination, you can use the C<--strftime> flag.
@@ -222,6 +223,10 @@ while(@ARGV > 0) {
 		$exclude = shift(@ARGV);
 		push(@exclude, $exclude);
 		}
+	elsif ($a eq "--include") {
+		$include = shift(@ARGV);
+		push(@include, $include);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -359,7 +364,15 @@ if ($strftime) {
 else {
 	@strfdests = @dests;
 	}
-$opts{'dir'}->{'exclude'} = join("\t", @exclude);
+@exclude && @include &&
+	&usage("The --exclude and --include flags are mutually exclusive");
+if (@exclude) {
+	$opts{'dir'}->{'exclude'} = join("\t", @exclude);
+	}
+elsif (@include) {
+	$opts{'dir'}->{'exclude'} = join("\t", @include);
+	$opts{'dir'}->{'include'} = 1;
+	}
 
 # Do the backup, printing any output
 if ($sched->{'doms'} || $sched->{'all'} || $sched->{'virtualmin'}) {
@@ -456,6 +469,7 @@ print "                                              [--except-virtualmin config
 print "                         [--option \"feature name value\"]\n";
 print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
+print "                         [--include file]*\n";
 print "                         [--purge days]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
