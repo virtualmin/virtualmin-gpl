@@ -123,7 +123,7 @@ foreach my $d (@doms) {
 				print "    Initial password: $sinfo->{'pass'}\n";
 				}
 			if ($script->{'site'}) {
-				print "    Website: $script->{'site'}\n";
+				print "    Website: @{[&script_link($script->{'site'}, undef, 2)]}\n";
 				}
 			}
 		}

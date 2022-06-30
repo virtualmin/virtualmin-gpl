@@ -155,7 +155,8 @@ foreach $script (@scripts_sorted) {
 	    { 'type' => 'radio', 'name' => 'script',
 	      'value' => $script->{'name'},
 	      'checked' => $in{'search'} && @scripts == 1 },
-	    $script->{'site'} ? "<a href='$script->{'site'}' target=_blank>".
+	    $script->{'site'} ?
+	    	"<a href='@{[&script_link($script->{'site'}, undef, 1)]}' target=_blank>".
 				"$script->{'desc'}</a>" : $script->{'desc'},
 	    $script->{'pro'} ? $script->{'version'} : 
 	    $vsel." ".
