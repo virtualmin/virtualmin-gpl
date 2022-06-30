@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "8.4.1", "8.0.5", "7.10.3" );
+return ( "8.5.1", "8.4.1", "8.0.5", "7.10.3" );
 }
 
 sub script_whmcs_gpl
@@ -193,38 +193,15 @@ sub script_whmcs_files
 local ($d, $ver, $opts, $upgrade) = @_;
 local $shortver = $ver;
 $shortver =~ s/\.//g;
-local @files = ( { 'name' => "source",
-	   'file' => "whmcs_v$shortver.zip",
-	   'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
+local @files = ( {
+    'name' => "source",
+    'file' => "whmcs_v${shortver}.zip",
+    'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
 local $io = &script_whmcs_get_ioncube_type();
-push(@files, { 'name' => "ioncube",
-	       'file' => "ioncube_loaders.zip",
-	       'url' => "http://downloads3.ioncube.com/".
-			"loader_downloads/ioncube_loaders_$io.zip" });
-if (&compare_versions($ver, "4.5.2") <= 0) {
-	# Also need security patch
-	push(@files, { 'name' => 'patch',
-		       'file' => 'patch.zip',
-		       'url' => 'http://www.whmcs.com/go/21/download' });
-	}
-if (&compare_versions($ver, "4.5.2") <= 0) {
-	# New security patch
-	push(@files, { 'name' => 'patch2',
-		       'file' => 'patch2.zip',
-		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=112' });
-	}
-if (&compare_versions($ver, "5.0.3") <= 0) {
-	# SQL injection path
-	push(@files, { 'name' => 'patch3',
-		       'file' => 'patch3.zip',
-		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=126' });
-	}
-if (&compare_versions($ver, "5.1.2") <= 0) {
-	# Patch for Boleto module
-	push(@files, { 'name' => 'patch4',
-		       'file' => 'patch4.zip',
-		       'url' => 'http://www.whmcs.com/members/dl.php?type=d&id=138' });
-	}
+push(@files, {
+    'name' => "ioncube",
+    'file' => "ioncube_loaders.zip",
+    'url' => "http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_$io.zip" });
 return @files;
 }
 
@@ -358,6 +335,7 @@ my $p = &domain_has_website($d);
 if ($p ne "web") {
 	&plugin_call($p, "feature_restart_web_php", $d);
 	}
+sleep 5;
 &pop_all_print();
 
 if (!-r $cfile) {
@@ -401,7 +379,7 @@ if (!$upgrade) {
 	if ($err) {
 		return (-1, "Database setup page failed : $err");
 		}
-	elsif ($out !~ /Setup\s+Administrator\s+Account/i) {
+	elsif ($out !~ /Set\s*up\s+Administrator\s+Account/i) {
 		return (-1, "Database setup did not succeed");
 		}
 
@@ -411,7 +389,7 @@ if (!$upgrade) {
 	$firstname =~ s/['"]//g;
 	$firstname ||= $d->{'dom'};
 	if (length($dompass) <= 5) {
-		$dompass .= "12345";
+		$dompass .= "1!aA45";
 		}
 	local @params = (
 		[ "firstName", $firstname ],
@@ -438,25 +416,21 @@ else {
 	if ($err) {
 		return (-1, "Failed to fetch upgrade check page : $err");
 		}
-	elsif ($out !~ /Perform\s+Upgrade|already\s+running/) {
+	elsif ($out !~ /Perform\s+Upgrade|already\s+running|currently\s+running/) {
 		return (-1, "Upgrade check failed");
 		}
 
 	# Post to DB upgrade page
-	local $oldver = $upgrade->{'version'};
-	$oldver =~ s/\.//g;
 	local @params = (
-		[ "step", "upgrade" ],
-		[ "version", $oldver ],
-		[ "confirmbackup", 1 ],
+		[ "confirmBackup", 1 ],
 		);
 	local $params = join("&", map { $_->[0]."=".&urlize($_->[1]) } @params);
 	local ($out, $err);
-	&post_http_connection($d, $ipath, $params, \$out, \$err);
+	&post_http_connection($d, $ipath."?step=upgrade", $params, \$out, \$err);
 	if ($err) {
 		return (-1, "Database upgrade page failed : $err");
 		}
-	elsif ($out !~ /Upgrade\s+Complete/i) {
+	elsif ($out !~ /Upgrade\s+Complete|perform\s+a\s+backup/i) {
 		return (-1, "Database upgrade did not succeed");
 		}
 	}
@@ -475,7 +449,8 @@ if (!$upgrade) {
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 local $adminurl = $url."admin/";
-return (1, "WHMCS installation complete. It can be accessed at <a href=$url target=_blank>$url</a> and managed at <a href=$adminurl target=_blank>$adminurl</a>. For more information, see <a href=http://wiki.whmcs.com/Installing_WHMCS target=_blank>http://wiki.whmcs.com/Installing_WHMCS</a> and <a href=http://wiki.whmcs.com/Virtualmin_Pro target=_blank>http://wiki.whmcs.com/Virtualmin_Pro</a>.",
+my $installtype = $upgrade ? 'upgrade' : 'installation';
+return (1, "WHMCS $installtype complete. It can be accessed at <a href=$url target=_blank>$url</a> and managed at <a href=$adminurl target=_blank>$adminurl</a>. For more information, see <a href=http://docs.whmcs.com/Installing_WHMCS target=_blank>http://docs.whmcs.com/Installing_WHMCS</a> and <a href=http://docs.whmcs.com/Virtualmin_Pro target=_blank>http://docs.whmcs.com/Virtualmin_Pro</a>.",
 	"Under $rp using $dbphptype database $dbname", $url,
 	$domuser, $dompass);
 }
@@ -539,12 +514,18 @@ return ( );
 
 sub script_whmcs_site
 {
-return 'http://www.whmcs.com/members/aff.php?aff=4115';
+my $minver = sprintf('%.2f', $module_info{'version'});
+if ($minver >= "7.2") {
+	return ['http://www.whmcs.com/members/aff.php?aff=4115', 'http://www.whmcs.com/'];
+	}
+else {
+	return 'http://www.whmcs.com/members/aff.php?aff=4115';
+	}
 }
 
 sub script_whmcs_passmode
 {
-return 1;
+return (1, 6, '^(?=.*[\p{L}])(?=.*\d)[\p{L}\d]{6,}$');
 }
 
 1;
