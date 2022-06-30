@@ -1358,8 +1358,8 @@ newsubdom_ecannot=Sie dürfen die Vorlage für neue Sub-Server-E-Mail nicht änd
 newsubdom_desc=Benutzen Sie dieses Formular um die Vorlagendatei $1 für die E-Mails zu ändern, die an Inhaber neue Virtueller Sub-Server versandt werden soll. Die folgenden Ersetzungen werden dabei vorgenommen:
 newsubdom_descdis=Benutzen Sie dieses Formular um die Vorlagendatei $1 für die E-Mails zu ändern, die an Inhaber neue Virtueller Sub-Server versandt würde, wenn Sie dies in der Modulkonfiguration eingerichten würden. Die folgenden Ersetzungen werden dabei vorgenommen:
 
-feature_web=Apache-Webseite
 feature_dns=BIND DNS-Domain
+feature_web=Apache-Webseite
 feature_mysql=MySQL-Datenbank
 feature_postgres=PostgreSQL-Datenbank
 feature_webalizer=Webalizer-Statistik

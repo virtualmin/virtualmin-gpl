@@ -742,8 +742,8 @@ newdom_sending=Invia email?
 newdom_to=Invia email a
 newdom_mailbox=Casella mail utente
 
-feature_web=Sito web Apache
 feature_dns=Dominio DNS BIND
+feature_web=Sito web Apache
 feature_mysql=MySQL database
 feature_postgres=PostgreSQL database
 feature_webalizer=Rapporto Webalizer

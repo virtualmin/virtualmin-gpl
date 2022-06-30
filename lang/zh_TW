@@ -1309,8 +1309,8 @@ newreseller_title=新分銷商通知郵件
 newreseller_ecannot=你不允許編輯新分銷商通知郵件模板
 newreseller_desc2=使用該表單編輯郵件內容的模板文件$1，該模板用于給新創建的分銷商發送通知郵件。文本中可以使用下列可替換變量：
 
-feature_web=Apache網站
 feature_dns=BIND DNS域
+feature_web=Apache網站
 feature_mysql=MySQL數據庫
 feature_postgres=PostgreSQL數據庫
 feature_webalizer=Webalizer報告

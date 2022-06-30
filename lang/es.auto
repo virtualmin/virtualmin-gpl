@@ -157,6 +157,7 @@ setup_emysqluser_provclash=.. este sistema está configurado para usar el servid
 setup_mysqluser_provisioned=.. creado en $1
 setup_mysqldb_provisioned=.. creado en $1
 setup_postgresdbimport=Importando la base de datos PostgreSQL $1 ..
+setup_webmindown2=.. no se pudo reiniciar Webmin : $1
 setup_usermindown=.. no se está ejecutando actualmente
 setup_usermindown2=.. no se pudo reiniciar Usermin : $1
 setup_virt6=Agregar dirección IPv6 $1 ..
@@ -196,6 +197,7 @@ setup_mail_esmtpcloud=... falló : $1
 setup_overquota=La creación del servidor virtual falló debido a la falta de cuota : $1 
 setup_overgroupquota=Se alcanzó la cuota de servidor para $2 de $1 
 setup_overuserquota=Se alcanzó la cuota de propietario de dominio para $2 de $1 
+setup_ewebfcgidcmd=¡No se pudo encontrar el comando del servidor <tt>fcgiwrap</tt>!
 
 users_indom=$1 usuarios en el dominio $2
 
@@ -327,6 +329,7 @@ save_emysqluser2_provision2=.. error al nuevo usuario : $1
 save_apache10=Actualización del directorio de inicio en la configuración de PHP.
 save_apache11=Actualización del directorio de documentos en la configuración del sitio web.
 save_apache12=Actualizando la configuración de PHP FPM ..
+save_apache12none=.. no se necesitan arreglos
 save_dns2_provision=Cambiar el nombre de dominio DNS en el host de servicios.
 save_dns2_ezone=¡Zona DNS para renombrar no encontrada!
 save_dnsip6=Cambiar la dirección IPv6 en el dominio DNS.
@@ -653,6 +656,7 @@ backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaura
 
 backup_ebackupdirlock=.. el directorio de respaldo temporal $1 está bloqueado por el proceso $2
 backup_efeatureeval=.. falló la copia de seguridad de $1 : $2 
+backup_include=Incluir solo estos archivos, en lugar de excluir
 backup_eincrzip=Las copias de seguridad incrementales no se pueden usar con formato ZIP
 backup_eownergone=¡El dominio del propietario ya no existe!
 backup_purging3=Eliminando copias de seguridad de $2 coincidentes $3 anteriores a $1 días. ..
@@ -688,6 +692,7 @@ restore_eresel=.. el revendedor $1 especificado en la copia de seguridad no exis
 restore_eresel2=.. el revendedor $1 especificado en la copia de seguridad no existe, eliminándolo del dominio
 restore_eugroup=.. el propietario del dominio grupo Unix $1 no existe
 restore_eugroup2=.. el grupo Unix del propietario del dominio $1 no existe; se vuelve a cambiar al grupo propio del dominio
+restore_edefip6=.. no se pudo determinar la dirección IPv6 predeterminada
 restore_erecreate=.. falló la creación del servidor faltante : $1
 restore_ewarnings=.. se detectaron las siguientes advertencias :
 restore_downloadrs=Descargando archivo de Rackspace Cloud Files ..
@@ -941,6 +946,8 @@ tmpl_dmarcyes=Sí, con la política a continuación.
 tmpl_dmarcextra=Opciones adicionales de DMARC
 tmpl_edmarcpct=El porcentaje de mensajes debe ser un número entero entre 0 y 100
 tmpl_dns_cloud=Cree nuevas zonas DNS en
+tmpl_dns_cloud_import=Tomar el control de la zona existente al crear
+tmpl_dns_cloud_proxy=Habilitar la función de proxy en nuevos registros
 dns_cloud_def=&lt; Elegir automáticamente &gt;
 dns_cloud_services=Servicios Cloudmin
 dns_cloud_local=Archivos locales
@@ -1152,6 +1159,7 @@ scripts_install_phpmods_check_done=.. comprobación hecho
 scripts_newer2=La versión $1 existe pero no se puede actualizar a
 scripts_ecpan=.. el módulo CPAN Perl no está instalado en su sistema.
 scripts_optpythonmod=Se recomienda el módulo Python $1.
+scripts_sitelink=Puede encontrar más información sobre el uso de este script en <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Contraseña inicial para script
 scripts_idbneed_link=, que se puede habilitar en la página <a href='$1'>$2</a>.
 scripts_gemver=Actualización de Ruby Gems a la última versión desde $1.
@@ -1508,6 +1516,7 @@ spf_dpct=Porcentaje de mensajes para aplicar la política.
 spf_delrecs=Eliminar registros DNS de $1.
 spf_addrecs=Agregar registros DNS de $1.
 spf_eaddrecs=.. ya existe un registro llamado $1
+spf_eaddproxy=.. El proveedor de Cloud DNS no admite registros de proxy
 spf_ttl=Establecer TTL predeterminado a $1.
 spf_ettlsupport=.. no admitido por el proveedor de DNS
 spf_enablednssec=Creación de claves y registros DNSSEC.
@@ -1590,6 +1599,7 @@ newstyles_del=Elimina ahora
 newstyles_edelete=¡El estilo de contenido seleccionado ya no existe!
 
 upgrade_epackages=¡No se encontraron paquetes para instalar!
+upgrade_success=La actualización a Virtualmin Pro fue exitosa. ¡Gracias por elegir Virtualmin Pro!
 upgrade_eyumlist=El paquete $1 RPM no se encontró en la lista de paquetes disponibles del repositorio. ¿Quizás uno de sus repositorios actuales no está funcionando?
 upgrade_to_pro=Actualizando a Virtualmin Pro ..
 upgrade_update_pkgs=Actualizando paquetes disponibles ..
@@ -2298,6 +2308,8 @@ records_title=Registros DNS
 records_ecannot=No tiene permiso para editar registros DNS
 records_name=Nombre del registro
 records_type=Tipo
+records_typeprox=proxy
+records_typenoprox=Solo DNS
 records_value=Valor
 records_delete=Eliminar registros seleccionados
 records_add=Crear registro de tipo:
@@ -2903,6 +2915,7 @@ dnscloud_cloudflare_esfx=El dominio $1 no está bajo un TLD público
 dnscloud_cloudflare_esfx2=El dominio $1 solo puede tener un nivel por debajo del TLD $2 
 dnscloud_cloudflare_ens=Error al buscar registros NS : $1 
 dnscloud_cloudflare_ens2=No se encontraron registros NS para $1. Cloudflare requiere que los dominios DNS se registren primero.
+dnscloud_cloudflare_ens3=Se encontraron registros NS para el dominio de <tt>$1</tt> ; sin embargo, estos registros NS de <tt>$2</tt> no apuntan al proveedor de Cloudflare
 
 install_mod_perl_link=Utilice la página <a href='$1'>Módulos Perl</a> en Webmin para instalarlo
 

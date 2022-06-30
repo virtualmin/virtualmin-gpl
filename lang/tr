@@ -1238,8 +1238,8 @@ newsubdom_ecannot="Yeni Sanal Alt-Sunucu" e-posta þablonunu düzenlemeye iznini
 newsubdom_desc=Bu formu, oluþturulduktan sonra yeni sanal alt-sunucu sahibine yollanacak e-posta mesajý þablon dosyasý $1'i düzenlemek için kullanýn. Metne aþaðýdaki yerdeðiþtirmeler yapýlacaktýr :
 newsubdom_descdis=Bu formu, oluþturulduktan sonra yeni sanal alt-sunucu sahibine yollanacak e-posta mesajý þablon dosyasý $1'i düzenlemek için kullanýn (bu özellik Module Config sayfasýnda etkinleþtirildiyse). Metne aþaðýdaki yerdeðiþtirmeler yapýlacaktýr :
 
-feature_web=Apache web sitesi
 feature_dns=BIND DNS alanadý
+feature_web=Apache web sitesi
 feature_mysql=MySQL veritabaný
 feature_postgres=PostgreSQL veritabaný
 feature_webalizer=Webalizer raporlama

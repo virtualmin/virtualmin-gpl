@@ -84,6 +84,7 @@ setup_ebind_cloud2=.. klaar, maar sommige records zijn niet gemaakt : $1
 setup_ebindslaveip2=.. kon het IP-adres voor dit systeem niet bepalen. U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_ebindslaveip=.. kon geen geldig IP-adres voor dit systeem bepalen (kreeg $1). U moet het IP-adres instellen in de BIND DNS Server-module.
 setup_enodnssecalg=.. DNSSEC-algoritme niet geselecteerd in serversjabloon
+setup_webmindown2=.. kan Webmin niet herstarten : $1
 setup_usermindown=.. momenteel niet actief
 setup_usermindown2=.. kan Usermin niet herstarten : $1
 setup_failed=.. mislukt
@@ -113,6 +114,7 @@ setup_mail_esmtpcloud=.. mislukt  : $1
 setup_overquota=Maken van virtuele server is mislukt vanwege gebrek aan quota : $1
 setup_overgroupquota=Serverquotum voor $2 van $1 is bereikt
 setup_overuserquota=Quotum voor domeineigenaar voor $2 van $1 is bereikt
+setup_ewebfcgidcmd=Kon <tt>fcgiwrap</tt> serveropdracht niet vinden!
 
 users_indom=$1 gebruikers in domein $2
 
@@ -189,6 +191,7 @@ delete_esslnoips=Geen SSL-certificaat gevonden voor domein
 delete_mail_smtpcloud=Cloudmailprovider $1 verwijderen ..
 
 save_apache12=PHP FPM-configuratie bijwerken ..
+save_apache12none=.. geen reparaties nodig
 save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
 save_bind_ecloud=.. mislukt : $1
 save_dok_rmfeatures=Ja, sla nu op
@@ -430,6 +433,7 @@ backup_ebackupdirlock=.. tijdelijke back-up directory $1 is vergrendeld door pro
 backup_efeatureeval=.. back-up van $1 is mislukt : $2
 backup_mailhomeless=Een back-up maken van de basismappen van $1 gebruiker.
 backup_mailhomefailed=.. back-up van thuismap is mislukt : $1
+backup_include=Alleen deze bestanden opnemen, in plaats van uitsluiten
 backup_webminnofiles=.. geen ACL-bestanden gevonden
 backup_ekilllock=Een back-up naar dezelfde bestemming met PID $1 is beëindigd
 backup_eincrzip=Incrementele back-ups kunnen niet worden gebruikt met ZIP-indeling
@@ -478,6 +482,7 @@ restore_deletefirst=Virtuele server $1 verwijderen ..
 restore_eresel2=.. de reseller $1 gespecificeerd in de back-up bestaat niet - het verwijderen uit het domein
 restore_eugroup=.. de domeineigenaar Unix-groep $1 bestaat niet
 restore_eugroup2=.. de domeineigenaar Unix-groep $1 bestaat niet - terugschakelen naar de eigen groep van het domein
+restore_edefip6=.. kon het standaard IPv6-adres niet achterhalen
 restore_erecreate=.. aanmaken van ontbrekende server is mislukt : $1
 restore_disabledomain=Opnieuw uitschakelen van virtuele server $1 ..
 restore_downloadrs=Archief downloaden van Rackspace Cloud Files.
@@ -653,6 +658,8 @@ tmpl_dmarcyes=Ja, met onderstaand beleid
 tmpl_dmarcextra=Extra DMARC-opties
 tmpl_edmarcpct=Het percentage berichten moet een geheel getal zijn tussen 0 en 100
 tmpl_dns_cloud=Maak nieuwe DNS-zones op
+tmpl_dns_cloud_import=Bestaande zone overnemen bij het maken
+tmpl_dns_cloud_proxy=Proxing inschakelen voor nieuwe records
 dns_cloud_def=&lt; Automatisch kiezen &gt;
 dns_cloud_services=Cloudmin-diensten
 dns_cloud_local=Lokale bestanden
@@ -786,6 +793,7 @@ scripts_eupdate=.. automatische module-installatie is niet beschikbaar op uw sys
 scripts_einstallmod=.. module is geïnstalleerd maar kan niet worden geladen
 scripts_install_phpmods_check=PHP-modules controleren ..
 scripts_install_phpmods_check_done=.. controle klaar
+scripts_sitelink=Meer informatie over het gebruik van dit script is te vinden op <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Eerste wachtwoord voor script
 scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>.
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server
@@ -1003,6 +1011,7 @@ spf_dpct=Percentage berichten dat beleid moet toepassen
 spf_delrecs=$1 DNS-records verwijderen.
 spf_addrecs=$1 DNS-records toevoegen.
 spf_eaddrecs=.. er bestaat al een record met de naam $1
+spf_eaddproxy=.. Cloud DNS-provider ondersteunt geen proxyrecords
 spf_ttl=Standaard TTL instellen op $1 ..
 spf_ettlsupport=.. niet ondersteund door DNS-provider
 spf_enablednssec=DNSSEC-sleutel en -records maken.
@@ -1041,6 +1050,7 @@ dynip_external=Extern script ..
 dynip_none=Update geen enkele dienst
 
 upgrade_epackages=Geen pakketten gevonden om te installeren!
+upgrade_success=Upgrade naar Virtualmin Pro is gelukt. Bedankt voor het kiezen van Virtualmin Pro!
 upgrade_eyumlist=Het $1 RPM-pakket is niet gevonden in de lijst met beschikbare pakketten uit de repository. Misschien werkt een van uw huidige repositories niet?
 upgrade_to_pro=Upgraden naar Virtualmin Pro ..
 upgrade_update_pkgs=Beschikbare pakketten bijwerken ..
@@ -1271,6 +1281,8 @@ smtpcloud_echeck=Cloudmailbezorgingsprovider $1 kan niet worden gebruikt : $2
 
 provision_nolimit=onbeperkt
 
+records_typeprox=volmacht
+records_typenoprox=Alleen DNS
 records_typesrv=Servicebestand
 records_valuesrv1=Prioriteit
 records_evaluesrv1=Prioriteit moet een nummer zijn
@@ -1911,6 +1923,7 @@ dnscloud_cloudflare_esfx=Domein $1 valt niet onder een openbaar TLD
 dnscloud_cloudflare_esfx2=Domein $1 kan slechts één niveau zijn onder TLD $2
 dnscloud_cloudflare_ens=Kan NS-records niet opzoeken : $1
 dnscloud_cloudflare_ens2=Geen NS-records gevonden voor $1. Cloudflare vereist dat DNS-domeinen eerst worden geregistreerd.
+dnscloud_cloudflare_ens3=NS-records gevonden voor <tt>$1</tt> domein, maar deze NS-records <tt>$2</tt> wijzen niet naar Cloudflare-provider
 
 install_mod_perl_link=Gebruik de <a href='$1'>Perl Modules</a> pagina in Webmin om het te installeren
 

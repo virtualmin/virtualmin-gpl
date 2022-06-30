@@ -462,8 +462,8 @@ sub_POP3HOME=Domovský adresář uživatele, například <tt>/home/foo/users/fre
 sub_LOCALHOME=Domovský adresář uživatele, například <tt>/home/fred</tt>
 sub_DESC=Popis serveru, například <tt>Martinovy stránky</tt>
 
-feature_web=Stránka Apache
 feature_dns=BIND DNS doména
+feature_web=Stránka Apache
 feature_mysql=Databáze MySQL
 feature_postgres=Databáze PostgreSQL
 feature_webalizer=Webalizer reporty

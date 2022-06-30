@@ -173,6 +173,7 @@ setup_ednssecsign=.. Signieren von Datensätzen fehlgeschlagen : $1
 setup_mysqldb_provision=Erstellen der MySQL-Datenbank $1 auf dem Diensthost.
 setup_mysqluser_provision=Erstellen einer MySQL-Anmeldung auf dem Diensthost.
 setup_emysqluser_provclash=.. dieses System ist für die Verwendung des Remote-MySQL-Servers $1 konfiguriert, aber die MySQL-Anmeldung wurde auf $2 erstellt!
+setup_webmindown2=.. Webmin konnte nicht neu gestartet werden : $1
 setup_usermindown=.. läuft gerade nicht
 setup_usermindown2=.. Benutzermin konnte nicht neu gestartet werden : $1
 setup_virtmissing=.. übergeordnete Schnittstelle $1 existiert nicht!
@@ -227,6 +228,7 @@ setup_mail_esmtpcloud=.. fehlgeschlagen  : $1
 setup_overquota=Fehler beim Erstellen des virtuellen Servers aufgrund fehlender Kontingente : $1
 setup_overgroupquota=Serverkontingent für $2 von $1 wurde erreicht
 setup_overuserquota=Domaininhaberkontingent für $2 von $1 wurde erreicht
+setup_ewebfcgidcmd=Serverbefehl <tt>fcgiwrap</tt> konnte nicht gefunden werden!
 
 users_indom=$1 Benutzer in Domain $2
 
@@ -397,6 +399,7 @@ save_apache9=Aktualisieren der Website-Proxy ..
 save_apache10=Aktualisieren des Home-Verzeichnisses in der PHP-Konfiguration.
 save_apache11=Aktualisieren des Dokumentverzeichnisses in der Website-Konfiguration.
 save_apache12=Aktualisieren der PHP-FPM-Konfiguration ..
+save_apache12none=.. keine Korrekturen erforderlich
 save_dns2_provision=Ändern des DNS-Domänennamens auf dem Diensthost.
 save_dns4=Hinzufügen von MX-Einträgen zur DNS-Domäne.
 save_dns5=Entfernen von MX-Einträgen aus der DNS-Domäne.
@@ -884,6 +887,7 @@ backup_vscheds=Geplante Virtualmin-Sicherungen
 backup_vchroot=Einschränkungen des FTP-Verzeichnisses
 backup_virtualmin=Virtualmin-Einstellungen, um auch zu sichern
 backup_exclude=Dateien, die von jeder Domain ausgeschlossen werden sollen
+backup_include=Schließen Sie nur diese Dateien ein, anstatt sie auszuschließen
 backup_webminproto=.. nicht erforderlich, da sich der Webmin-Benutzer in einem Remote-Datenspeicher befindet
 backup_esamelock=Eine Sicherung auf demselben Ziel wird bereits mit PID $1 ausgeführt
 backup_ekilllock=Eine Sicherung auf dasselbe Ziel mit PID $1 wurde beendet
@@ -973,6 +977,7 @@ restore_eresel2=.. der in der Sicherung angegebene Reseller $1 existiert nicht -
 restore_eugroup=.. die Unix-Gruppe $1 des Domänenbesitzers existiert nicht
 restore_eugroup2=.. die Unix-Gruppe $1 des Domäneninhabers existiert nicht - Wechsel zurück zur eigenen Gruppe der Domäne
 restore_edefip=.. konnte die Standard-IP-Adresse nicht ermitteln
+restore_edefip6=.. konnte die Standard-IPv6-Adresse nicht ermitteln
 restore_erecreate=.. Erstellung des fehlenden Servers fehlgeschlagen : $1
 restore_ewarnings=.. Folgende Warnungen wurden erkannt :
 restore_disabledomain=Erneutes Deaktivieren des virtuellen Servers $1 ..
@@ -1237,6 +1242,8 @@ tmpl_dmarcextra=Zusätzliche DMARC-Optionen
 tmpl_edmarcpct=Der Prozentsatz der Nachrichten muss eine Ganzzahl zwischen 0 und 100 sein
 tmpl_dns_sub=Unterdomänen-DNS-Einträge zur übergeordneten Domäne hinzufügen?
 tmpl_dns_cloud=Erstellen Sie neue DNS-Zonen auf
+tmpl_dns_cloud_import=Vorhandene Zone beim Erstellen übernehmen
+tmpl_dns_cloud_proxy=Proxing für neue Datensätze aktivieren
 dns_cloud_def=&lt; Automatisch auswählen &gt;
 dns_cloud_services=Cloudmin-Dienste
 dns_cloud_local=Lokale Dateien
@@ -1510,7 +1517,7 @@ scripts_einstallpear=Das Birnenmodul ist auch nach der Installation nicht verfü
 scripts_find=Finden Sie passende Skripte:
 scripts_installgem=Ruby Gems-Paket installieren ..
 scripts_mmax=(Höchstens $1)
-scripts_sitelink=Weitere Informationen zur Verwendung dieses Skripts finden Sie unter <a href='$1' target=_blank>$1</a>.
+scripts_sitelink=Weitere Informationen zur Verwendung dieses Skripts finden Sie unter <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Anfangskennwort für das Skript
 scripts_unsupdesc=Mit diesem Formular können Sie eine Skriptversion installieren, die nicht von Virtualmin getestet wurde oder nicht mehr unterstützt wird. Beachten Sie, dass dies möglicherweise nicht funktioniert und sogar andere Seiten des virtuellen Servers beschädigen kann.
 scripts_addover=Überschreiben des Proxys für Pfad $1 ..
@@ -2009,6 +2016,7 @@ spf_dpct=Prozentsatz der Nachrichten, die Richtlinien anwenden sollen
 spf_delrecs=$1 DNS-Einträge löschen.
 spf_addrecs=Hinzufügen von $1 DNS-Einträgen.
 spf_eaddrecs=.. ein Datensatz namens $1 existiert bereits
+spf_eaddproxy=.. Der Cloud-DNS-Anbieter unterstützt keine Proxy-Einträge
 spf_ttl=Festlegen der Standard-TTL auf $1 ..
 spf_ettlsupport=.. wird vom DNS-Anbieter nicht unterstützt
 spf_enablednssec=Erstellen von DNSSEC-Schlüsseln und -Datensätzen.
@@ -2131,6 +2139,7 @@ thumb_ethumb=Der Inhaltsstil $1 hat kein Vorschaubild.
 
 upgrade_desc1=Wenn Ihnen die Verwendung der Virtualmin-GPL gefallen hat und Sie den nächsten Schritt zur Pro-Version ausführen möchten, können Sie auf dieser Seite den Aktualisierungsvorgang automatisch ausführen. Die Schritte dazu sind :
 upgrade_epackages=Keine zu installierenden Pakete gefunden!
+upgrade_success=Das Upgrade auf Virtualmin Pro war erfolgreich. Vielen Dank, dass Sie sich für Virtualmin Pro entschieden haben!
 upgrade_esharedroot=Ihr Webmin-Stammverzeichnis $1 wird von mehreren Systemen gemeinsam genutzt - Modulaktualisierungen sind nicht zulässig
 upgrade_eyumlist=Das $1 RPM-Paket wurde in der Liste der verfügbaren Pakete aus dem Repository nicht gefunden. Vielleicht funktioniert eines Ihrer aktuellen Repositorys nicht?
 upgrade_to_pro=Upgrade auf Virtualmin Pro ..
@@ -2602,6 +2611,8 @@ provision_emysqlcheck=Dienstfehler beim Überprüfen der MySQL-Anmeldung : $1
 provision_ednscheck=Dienstfehler beim Überprüfen der DNS-Zone : $1
 provision_edns=Die DNS-Zone $1 ist bereits auf dem Diensthost vorhanden
 
+records_typeprox=Bevollmächtigt
+records_typenoprox=Nur DNS
 records_evalid=Warnung - In den DNS-Einträgen dieser Domain wurden Fehler gefunden : $1
 records_typecname=Name Alias
 records_valuemx1a=(Niedrigere Zahlen werden zuerst versucht)
@@ -3159,6 +3170,7 @@ dnscloud_cloudflare_esfx=Domain $1 ist nicht unter einer öffentlichen TLD
 dnscloud_cloudflare_esfx2=Domain $1 kann nur eine Ebene unter TLD $2. sein
 dnscloud_cloudflare_ens=Fehler beim Suchen von NS-Einträgen : $1
 dnscloud_cloudflare_ens2=Keine NS-Einträge für $1 gefunden. Cloudflare erfordert, dass zuerst DNS-Domains registriert werden.
+dnscloud_cloudflare_ens3=NS-Einträge für die Domäne <tt>$1</tt> gefunden, diese NS-Einträge <tt>$2</tt> verweisen jedoch nicht auf den Cloudflare-Anbieter
 
 install_mod_perl_link=Verwenden Sie die Seite <a href='$1'>Perl-Module</a> in Webmin, um sie zu installieren
 
