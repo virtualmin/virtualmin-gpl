@@ -353,7 +353,11 @@ if (!$got) {
 
 # Apply apache config now, for later wgets
 &push_all_print();
-&restart_apache();
+&restart_website_server();
+my $p = &domain_has_website($d);
+if ($p ne "web") {
+	&plugin_call($p, "feature_restart_web_php", $d);
+	}
 &pop_all_print();
 
 if (!-r $cfile) {
