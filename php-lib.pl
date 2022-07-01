@@ -477,10 +477,13 @@ foreach my $p (@ports) {
 			}
 		}
 	else {
-		# For non-FPM mode, remove the whole files block
+		# For non-FPM mode, remove the whole files block,
+		# and forget about any ports or sockets
 		if ($files) {
-			&apache::save_directive_struct($files, undef, $vconf, $conf);
+			&apache::save_directive_struct(
+				$files, undef, $vconf, $conf);
 			}
+		delete($d->{'php_fpm_port'});
 		}
 	&apache::save_directive("ProxyPassMatch", \@ppm, $vconf, $conf);
 
