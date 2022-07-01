@@ -174,7 +174,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 &$indent_print();
 print $msg,"<p>\n";
 if ($ok && $script->{'site'}) {
-	print &text('scripts_sitelink', $script->{'site'}),"<p>\n";
+	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
 	}
 if ($ok > 0 && !$sinfo) {
 	# Show login details

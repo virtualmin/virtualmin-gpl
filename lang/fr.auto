@@ -254,6 +254,7 @@ setup_postgresdbimport=Importation de la base de données PostgreSQL $1 ..
 setup_postgresuser=Création de la connexion PostgreSQL ..
 setup_webminpid2=Rechargement Webmin ..
 setup_webmindown=.. pas en cours d'exécution
+setup_webmindown2=.. impossible de redémarrer Webmin  : $1
 setup_userminpid=Redémarrer Usermin ..
 setup_usermindown=.. pas en cours d'exécution
 setup_usermindown2=.. impossible de redémarrer Usermin  : $1
@@ -343,6 +344,7 @@ setup_mail_esmtpcloud=.. a échoué  : $1
 setup_overquota=La création du serveur virtuel a échoué en raison d'un manque de quota : $1
 setup_overgroupquota=Le quota de serveur pour $2 sur $1 a été atteint
 setup_overuserquota=Le quota de propriétaire de domaine pour $2 sur $1 a été atteint
+setup_ewebfcgidcmd=Impossible de trouver la commande serveur <tt>fcgiwrap</tt> !
 
 equotacommand=La commande de quota $1 a échoué : $2 
 
@@ -480,6 +482,7 @@ save_apache9=Mise à jour du proxy de site Web ..
 save_apache10=Mise à jour du répertoire personnel dans la configuration PHP.
 save_apache11=Mise à jour du répertoire de documents dans la configuration du site Web.
 save_apache12=Mise à jour de la configuration PHP FPM ..
+save_apache12none=.. aucune correction nécessaire
 save_dns2_provision=Modification du nom de domaine DNS sur l'hôte des services ..
 save_dns4=Ajout d'enregistrements MX au domaine DNS ..
 save_dns5=Suppression des enregistrements MX du domaine DNS.
@@ -1065,6 +1068,7 @@ backup_eownrestore=Seules les sauvegardes signées peuvent être restaurées par
 backup_deleteddom=Le serveur virtuel $1 ne peut pas être sauvegardé car il a été supprimé!
 backup_ebackupdirlock=.. le répertoire de sauvegarde temporaire $1 est verrouillé par le processus $2 
 backup_efeatureeval=.. la sauvegarde de $1 a échoué : $2 
+backup_include=Inclure uniquement ces fichiers, au lieu d'exclure
 backup_ekilllock=Une sauvegarde vers la même destination avec le PID $1 a été interrompue
 backup_eincrzip=Les sauvegardes incrémentielles ne peuvent pas être utilisées avec le format ZIP
 backup_edesturl=La destination de sauvegarde $1 n'est pas valide : $2 
@@ -1086,6 +1090,7 @@ restore_zipcmd=.. la commande de décompression $1 n'est pas installée
 restore_ezipcmd=La commande de décompression $1 n'est pas installée
 restore_eugroup=.. le groupe Unix propriétaire du domaine $1 n'existe pas
 restore_eugroup2=.. le groupe Unix du propriétaire du domaine $1 n'existe pas - retour au groupe du domaine
+restore_edefip6=.. impossible de trouver l'adresse IPv6 par défaut
 restore_erecreate=.. la création du serveur manquant a échoué : $1 
 restore_downloadgc=Téléchargement d'archives à partir de Google Cloud Storage ..
 restore_downloaddb=Téléchargement de l'archive à partir de Dropbox ..
@@ -1503,6 +1508,8 @@ tmpl_edmarcpct=Le pourcentage de messages doit être un entier compris entre 0 e
 tmpl_edns=Aucun enregistrement DNS entré
 tmpl_dns_sub=Ajouter des enregistrements DNS de sous-domaine au domaine parent?
 tmpl_dns_cloud=Créer de nouvelles zones DNS sur
+tmpl_dns_cloud_import=Reprendre la zone existante lors de la création
+tmpl_dns_cloud_proxy=Activer le proxy sur les nouveaux enregistrements
 dns_cloud_def=&lt; Choisissez automatiquement &gt;
 dns_cloud_services=Services Cloudmin
 dns_cloud_local=Fichiers locaux
@@ -1962,6 +1969,7 @@ scripts_eupdate=.. l'installation automatique du module n'est pas disponible sur
 scripts_einstallmod=.. le module a été installé mais ne peut pas être chargé
 scripts_install_phpmods_check=Vérification des modules PHP ..
 scripts_install_phpmods_check_done=.. vérification effectuée
+scripts_sitelink=Plus d'informations sur l'utilisation de ce script sont disponibles sur <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Mot de passe initial pour le script
 scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>.
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
@@ -2767,6 +2775,7 @@ spf_dpct=Pourcentage de messages à appliquer la stratégie
 spf_delrecs=Suppression des enregistrements DNS $1.
 spf_addrecs=Ajout de $1 enregistrements DNS ..
 spf_eaddrecs=.. un enregistrement nommé $1 existe déjà
+spf_eaddproxy=.. Le fournisseur Cloud DNS ne prend pas en charge les enregistrements proxy
 spf_ttl=Définition du TTL par défaut sur $1 ..
 spf_ettlsupport=.. non pris en charge par le fournisseur DNS
 spf_enablednssec=Création de clés et d'enregistrements DNSSEC.
@@ -3028,6 +3037,7 @@ upgrade_schedok=.. terminé. Les mises à jour seront automatiquement installée
 upgrade_schednot=.. terminé, mais l'installation de la mise à jour automatique n'est pas activée. Utilisez le module <a href='$1'>$2</a> pour les activer.
 upgrade_file=Création d'un fichier de licence Virtualmin ..
 upgrade_problems=Certaines erreurs se sont produites lors de la mise à niveau de votre système vers Virtualmin Pro. Veuillez vérifier les messages ci-dessus pour les causes possibles.
+upgrade_success=La mise à niveau vers Virtualmin Pro a réussi. Merci d'avoir choisi Virtualmin Pro !
 upgrade_theme=Activation du thème <i>$1</i> ..
 upgrade_esharedroot=Votre répertoire racine Webmin $1 est partagé entre plusieurs systèmes - les mises à jour de module ne sont pas autorisées
 upgrade_eyumrepo=Virtualmin a été installé à partir d'un RPM, mais n'utilise pas le référentiel Virtualmin GPL. La mise à niveau n'est pas possible pour le moment.
@@ -3995,6 +4005,8 @@ provision_emysql=La connexion MySQL $1 existe déjà sur l'hôte des services
 provision_ednscheck=Erreur des services lors de la vérification de la zone DNS : $1 
 provision_edns=La zone DNS $1 existe déjà sur l'hôte des services
 
+records_typeprox=Proxy
+records_typenoprox=DNS uniquement
 record_sservice=Nom du service
 record_sproto=Protocole de service
 record_esservice=Nom de service manquant ou non valide
@@ -4711,6 +4723,7 @@ dnscloud_cloudflare_esfx=Le domaine $1 n'est pas sous un TLD public
 dnscloud_cloudflare_esfx2=Le domaine $1 ne peut avoir qu'un seul niveau sous le TLD $2
 dnscloud_cloudflare_ens=Échec de la recherche des enregistrements NS : $1
 dnscloud_cloudflare_ens2=Aucun enregistrement NS trouvé pour $1. Cloudflare exige que les domaines DNS soient d'abord enregistrés.
+dnscloud_cloudflare_ens3=Enregistrements NS trouvés pour le domaine <tt>$1</tt>, mais ces enregistrements NS <tt>$2</tt> ne pointent pas vers le fournisseur Cloudflare
 
 install_mod_perl_link=Utilisez la page <a href='$1'>Modules Perl</a> de Webmin pour l'installer
 

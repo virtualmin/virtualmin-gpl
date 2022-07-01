@@ -95,7 +95,7 @@ if ($multi) {
 		print "    Description: $script->{'longdesc'}\n";
 		print "    Uses: ",join(" ", @{$script->{'uses'}}),"\n";
 		if ($script->{'site'}) {
-			print "    Website: $script->{'site'}\n";
+			print "    Website: @{[&script_link($script->{'site'}, undef, 2)]}\n";
 			}
 		if ($script->{'author'}) {
 			print "    Installer author: $script->{'author'}\n";

@@ -3454,5 +3454,27 @@ if (defined(&$qfunc)) {
 return (1, undef, undef, undef);
 }
 
+# script_link(link, [lang], [text])
+# Returns script link, if array ref is passed returns link
+# and name, if language returns formatted language string,
+# if text just returns plain link
+sub script_link
+{
+my ($link, $lang, $text) = @_;
+my ($shref, $slname);
+if (ref($link) eq 'ARRAY') {
+	$shref = $link->[0];
+	$slname = $link->[1];
+	}
+else {
+	$shref = $link;
+	$slname = $link;
+	}
+return $slname if ($text == 2);
+return $shref if ($text == 1);
+return &text($lang, $shref, $slname) if ($lang);
+return &ui_link($shref, $slname, undef, "target=_blank");
+}
+
 1;
 

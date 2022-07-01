@@ -69,6 +69,7 @@ setup_ebind_cloud2=.. ferdig, men noen poster ble ikke opprettet : $1
 setup_ebindslaveip2=.. kunne ikke bestemme IP-adressen til dette systemet. Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_ebindslaveip=.. kunne ikke bestemme en gyldig IP-adresse for dette systemet (fikk $1). Du må angi IP-adressen i BIND DNS Server-modulen.
 setup_enodnssecalg=.. DNSSEC-algoritme ikke valgt i servermal
+setup_webmindown2=.. kunne ikke starte Webmin på nytt : $1
 setup_usermindown=.. kjører foreløpig ikke
 setup_usermindown2=.. kunne ikke starte Usermin på nytt : $1
 setup_failed=.. mislyktes
@@ -97,6 +98,7 @@ setup_mail_esmtpcloud=.. mislyktes : $1
 setup_overquota=Virtuell serveropprettelse mislyktes på grunn av mangel på kvote : $1
 setup_overgroupquota=Serverkvoten for $2 av $1 er nådd
 setup_overuserquota=Domeneeierkvoten for $2 av $1 er nådd
+setup_ewebfcgidcmd=Fant ikke <tt>fcgiwrap</tt> serverkommando!
 
 users_indomsub=$1 brukere i domene $2 ($3 inkludert underdomener)
 users_mailclient=Vis innstillinger for e-postklient
@@ -152,6 +154,7 @@ delete_esslnoips=Ingen SSL-sertifikater funnet for domene
 delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 
 save_apache12=Oppdaterer PHP FPM-konfigurasjon ..
+save_apache12none=.. ingen reparasjoner nødvendig
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
 save_dok_rmfeatures=Ja, spar nå
@@ -323,6 +326,7 @@ backup_eownrestore=Bare signerte sikkerhetskopier kan gjenopprettes av virtuelle
 backup_deleteddom=Virtuell server $1 kan ikke sikkerhetskopieres da den er slettet!
 backup_ebackupdirlock=.. midlertidig sikkerhetskopi $1 er låst av prosess $2 
 backup_efeatureeval=.. sikkerhetskopi av $1 mislyktes : $2 
+backup_include=Inkluder bare disse filene, i stedet for å ekskludere
 backup_ekilllock=En sikkerhetskopi til samme destinasjon med PID $1 er avsluttet
 backup_eincrzip=Inkrementelle sikkerhetskopier kan ikke brukes med ZIP-format
 backup_edesturl=Sikkerhetskopiedestinasjon $1 er ugyldig : $2 
@@ -345,6 +349,7 @@ restore_zipcmd=.. dekomprimeringskommando $1 er ikke installert
 restore_ezipcmd=Dekompresjonskommando $1 er ikke installert
 restore_eugroup=.. domeneeieren Unix-gruppen $1 eksisterer ikke
 restore_eugroup2=.. domeneeieren Unix-gruppen $1 eksisterer ikke - bytter tilbake til domenets egen gruppe
+restore_edefip6=.. kunne ikke finne standard IPv6-adressen
 restore_erecreate=.. oppretting av manglende server mislyktes : $1 
 restore_disabledomain=Deaktiver virtuell server $1 på nytt.
 restore_downloadgc=Laster ned arkiv fra Google Cloud Storage ..
@@ -475,6 +480,8 @@ tmpl_dmarcyes=Ja, med policy nedenfor
 tmpl_dmarcextra=Ekstra DMARC-alternativer
 tmpl_edmarcpct=Prosentdel av meldinger må være et helt tall mellom 0 og 100
 tmpl_dns_cloud=Opprett nye DNS-soner på
+tmpl_dns_cloud_import=Ta over eksisterende sone ved opprettelse
+tmpl_dns_cloud_proxy=Aktiver proxing på nye poster
 dns_cloud_def=&lt; Velg automatisk &gt;
 dns_cloud_services=Cloudmin-tjenester
 dns_cloud_local=Lokale filer
@@ -561,6 +568,7 @@ scripts_eupdate=.. automatisk modulinstallasjon er ikke tilgjengelig på systeme
 scripts_einstallmod=.. modulen ble installert, men kan ikke lastes
 scripts_install_phpmods_check=Sjekker PHP-moduler ..
 scripts_install_phpmods_check_done=.. sjekk ferdig
+scripts_sitelink=Mer informasjon om bruk av dette skriptet finner du på <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Opprinnelig passord for skript
 scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden.
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
@@ -742,6 +750,7 @@ spf_dpct=Prosentandel av meldinger som skal brukes
 spf_delrecs=Slette $1 DNS-poster ..
 spf_addrecs=Legger til $1 DNS-poster ..
 spf_eaddrecs=.. en post kalt $1 eksisterer allerede
+spf_eaddproxy=.. Cloud DNS-leverandør støtter ikke proxy-poster
 spf_ttl=Setter standard TTL til $1 ..
 spf_ettlsupport=.. støttes ikke av DNS -leverandør
 spf_enablednssec=Oppretter DNSSEC nøkkel og poster ..
@@ -772,6 +781,7 @@ dynip_external=Eksternt manus ..
 dynip_none=Ikke oppdater noen tjeneste
 
 upgrade_epackages=Fant ingen pakker å installere!
+upgrade_success=Oppgraderingen til Virtualmin Pro var vellykket. Takk for at du valgte Virtualmin Pro!
 upgrade_eyumlist=$1 RPM -pakken ble ikke funnet i listen over tilgjengelige pakker fra depotet. Kanskje en av de nåværende depotene dine ikke fungerer?
 upgrade_to_pro=Oppgraderer til Virtualmin Pro ..
 upgrade_update_pkgs=Oppdaterer tilgjengelige pakker ..
@@ -955,6 +965,8 @@ smtpcloud_echeck=Nettskypostleveringsleverandør $1 kan ikke brukes : $2
 
 provision_nolimit=ubegrenset
 
+records_typeprox=Fullmakt
+records_typenoprox=Kun DNS
 records_valuespf=Avsender er tillatt fra spesifikasjonen
 
 record_sservice=Tjenestenavn
@@ -1348,6 +1360,7 @@ dnscloud_cloudflare_esfx=Domenet $1 er ikke under en offentlig toppdommer
 dnscloud_cloudflare_esfx2=Domenet $1 kan bare være ett nivå under toppdomenet $2
 dnscloud_cloudflare_ens=Kunne ikke lete opp NS -poster : $1
 dnscloud_cloudflare_ens2=Ingen NS -poster ble funnet for $1. Cloudflare krever at DNS -domener registreres først.
+dnscloud_cloudflare_ens3=NS-poster funnet for <tt>$1</tt> -domene, men disse NS-postene <tt>$2</tt> peker ikke til Cloudflare-leverandøren
 
 install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den
 

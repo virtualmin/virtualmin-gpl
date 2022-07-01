@@ -1692,8 +1692,8 @@ newreseller_title=Ny forhandler e-post
 newreseller_ecannot=Du har ikke lov til å redigere malen for melding til nye forhandlere
 newreseller_desc2=Bruk dette skjemaet til å redigere mal for e-post meldingen som sendes til en ny forhandler-konto etter at den er opprettet. Følgende erstatninger vil bli gjort i teksten :
 
-feature_web=Apache nettsted
 feature_dns=BIND DNS domene
+feature_web=Apache nettsted
 feature_mysql=MySQL database
 feature_postgres=PostgreSQL database
 feature_webalizer=Webalizer rapportering
@@ -3665,8 +3665,6 @@ scripts_epythonmod=.. automatisk installasjon av Python moduler støttes ikke p�
 scripts_epythoninst=.. automatisk installasjon av Python modul feilet
 scripts_installgem=Installerer Ruby Gems pakke ..
 scripts_mmax=(Maksimalt $1)
-scripts_sitelink=Mer informasjon om bruk av dette scriptet kan finnes på <a href='$1' target=_new>$1</a>.
-
 scripts_userpass=Den initielle administrasjonsbrukeren er $1 med passordet $2.
 scripts_useronly=Denne initielle administrasjonsbrukeren er $1.
 scripts_passonly=Det initielle administrasjonspassordet er $1.

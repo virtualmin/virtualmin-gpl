@@ -67,7 +67,7 @@ foreach $script (sort { $a->{'sortcategory'} cmp $b->{'sortcategory'} ||
 		  'value' => $script->{'name'},
 		  'checked' => $script->{'avail_only'} },
 		$script->{'site'} ? 
-			"<a href='$script->{'site'}' target=_blank>".
+			"<a href='@{[&script_link($script->{'site'}, undef, 1)]}' target=_blank>".
 			"$script->{'desc'}</a>" : $script->{'desc'},
 		$script->{'longdesc'},
 		$text{'newscripts_'.$script->{'source'}},

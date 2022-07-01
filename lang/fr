@@ -34,6 +34,7 @@ index_return2=index du module
 index_list=Liste..
 index_enet=Le module de configuration du réseau n'est pas supporté pour votre système d'exploitation. Virtualmin a besoin de ce module pour gérer les interfaces réseau virtuelles.
 index_edefip=Virtualmin ne pouvait pas résoudre l'adresse IPv4 par défaut pour les serveurs virtuels sur votre système. Vous aurez besoin de mettre à jour soit le champs <b>Interface réseau pour les adresses virtuelles</b> ou <b>L'adresse IP par défaut du serveur virtuel</b> de la <a href='$1'>configuration du module</a>.
+
 index_edefip6=Virtualmin ne pouvait pas résoudre l'adresse IPv6 par défaut pour les serveurs virtuels sur votre système. Vous aurez besoin de mettre à jour soit le champs <b>Interface réseau pour les adresses virtuelles</b> ou <b>L'adresse IP par défaut  du serveur virtuel</b> de la <a href='$1'>configuration du module</a>.
 index_eapache=Le serveur web Apache ne semble pas etre installé sur votre systeme, ou n'a pas été correctement configuré dans le module Webmin <a href='$1'>Serveur web Apache</a>. Si votre système n'utilise pas Apache, il doit etre désactivé dans la page de configuration du <a href='$2'>module Virtualmin</a>.
 index_eproftpd=Le serveur ProFTPd ne semble pas installé sur votre système, ou n'a pas encore été configuré dans le module Webmin de <a href='$1'>Serveur ProFTPd</a>. Si votre système n'utilise pas ProFTPd, cette fonctionnalité doit être désactivée dans la page de <a href='$2'>configuration du module</a> Virtualmin.
@@ -1227,8 +1228,8 @@ newsubdom_ecannot=Vous n'êtes pas autorisé à éditer le template de courriel 
 newsubdom_desc=Ce formulaire vous permet d'éditer le fichier template $1 contenant le courriel envoyé au propriétaire d'un nouveau sous-serveur virtuel lors de sa création. Les substitutions suivantes seront faites dans le texte :
 newsubdom_descdis=Ce formulaire permet d'éditer le fichier template $1 pour le courriel qui serait envoyé au propriétaire d'un nouveau sous-serveur virtuel après sa création, si cette fonctionnalité a été activée sur la page de configuration du module. Les substitutions suivantes seront faites dans le texte :
 
-feature_web=Site Web Apache
 feature_dns=Domaine DNS BIND
+feature_web=Site Web Apache
 feature_mysql=Base de données MySQL
 feature_postgres=Base de données PostgreSQL
 feature_webalizer=Statistiques d'accès Webalizer
@@ -2282,8 +2283,6 @@ scripts_epythonmod=.. installation automatique du module Python n'est pas pris e
 scripts_epythoninst=.. installation automatique du module Python a échoué
 scripts_installgem=Installation de package Ruby Gems ..
 scripts_mmax=(Tout au plus $1)
-scripts_sitelink=Plus d'informations sur l'utilisation de ce script peut être trouvé à <a href='$1' target=_blank>$1</a>.
-
 scripts_userpass=La connexion initiale d'administration est $1 avec le mot de passe $2 .
 scripts_useronly=La connexion initiale d'administration est $1 .
 scripts_passonly=Le mot de passe d'administration initial est $1 .

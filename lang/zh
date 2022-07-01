@@ -1309,8 +1309,8 @@ newreseller_title=新分销商通知邮件
 newreseller_ecannot=你不允许编辑新分销商通知邮件模板
 newreseller_desc2=使用该表单编辑邮件内容的模板文件$1，该模板用于给新创建的分销商发送通知邮件。文本中可以使用下列可替换变量：
 
-feature_web=Apache网站
 feature_dns=BIND DNS域
+feature_web=Apache网站
 feature_mysql=MySQL数据库
 feature_postgres=PostgreSQL数据库
 feature_webalizer=Webalizer报告

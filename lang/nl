@@ -1641,8 +1641,8 @@ newreseller_title=Nieuwe Reseller Email
 newreseller_ecannot=U bent niet bevoegd de nieuwe reseller email template te bewerken
 newreseller_desc2=Gebruik dit formulier om de template te bewerken voor het email bericht dat gestuurd kan worden naar een nieuw reseller account wanneer dit aangemaakt word. De volgende zaken kunnen gedaan worden met de tekst :
 
-feature_web=Apache website
 feature_dns=BIND DNS domein
+feature_web=Apache website
 feature_mysql=MySQL database
 feature_postgres=PostgreSQL database
 feature_webalizer=Webalizer rapportage
@@ -3444,8 +3444,6 @@ scripts_epythonmod=.. de automatisch Python module installatie word niet onderst
 scripts_epythoninst=.. de automatisch Python module installatie mislukte
 scripts_installgem=Installeren van Ruby Gems pakket ..
 scripts_mmax=(op zijn hoogst $1)
-scripts_sitelink=Meer informatie voor gebruik van dit script kunt u vinden op <a href='$1' target=_new>$1</a>.
-
 scripts_userpass=Het aanvankelijke administratie inlog was $1 met het wachtwoord $2.
 scripts_useronly=De aanvankelijke administratie inlog was $1.
 scripts_passonly=Het aanvankelijke administratie wachtwoord was $1.

@@ -73,8 +73,7 @@ if ($sinfo->{'user'}) {
 # Show original website
 if ($script->{'site'}) {
 	print &ui_table_row($text{'scripts_isite'},
-		"<a href='$script->{'site'}' target=_blank>".
-		"$script->{'site'}</a>");
+		&script_link($script->{'site'}));
 	}
 
 # Show Mongrel ports and status
