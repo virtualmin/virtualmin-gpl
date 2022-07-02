@@ -10,7 +10,15 @@ sub check_s3
 {
 # Return no error if `aws_cmd` is set and installed
 if ($config{'aws_cmd'} && &has_command($config{'aws_cmd'})) {
-	return (undef, undef, undef);
+	if ($config{'s3_akey'}) {
+		my ($ok, $err) = &can_use_aws_s3_cmd(
+			$config{'s3_akey'}, $config{'s3_skey'});
+		if (!$ok) {
+			return (undef, &text('s3_eawscmd',
+					"<tt>".&html_escape($err)."</tt>"));
+			}
+		}
+	return (undef, undef);
 	}
 
 # Check for core S3 modules
