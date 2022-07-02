@@ -364,7 +364,10 @@ if (!$upgrade) {
 
 	# Create Django admin user
 	chdir($pdir);
-	local $out = &run_as_domain_user($d, "echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$domuser', '$domemail', '$dompass')\" | $python manage.py shell 2>&1");
+	my $dompass_esc = $dompass;
+	$dompass_esc =~ s/'/\\'/g;
+	$dompass_esc =~ s/"/\\"/g;
+	local $out = &run_as_domain_user($d, "echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$domuser', '$domemail', '$dompass_esc')\" | $python manage.py shell 2>&1");
 	if ($?) {
 		return (-1, "Initial Django user creation failed : ".
 			   "<tt>".&html_escape($out)."</tt>");
