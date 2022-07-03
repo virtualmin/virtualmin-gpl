@@ -1125,11 +1125,23 @@ local ($virt, $vconf, $d) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $conf = &apache::get_config();
 if ($tmpl->{'disabled_url'} eq 'none') {
-	# Disable is done via local HTML
+	# Disable is done via alias to local HTML
 	local @am = &apache::find_directive("AliasMatch", $vconf);
 	local $dis = &disabled_website_html($d);
 	&apache::save_directive("AliasMatch",
 				[ "^/.*\$ $dis", @am ], $vconf, $conf);
+
+	# Also prevent undoing this via .htaccess
+	local $pdir = &public_html_dir($d);
+	local ($dir) = grep { $_->{'words'}->[0] eq $pdir }
+			    &apache::find_directive_struct("Directory", $vconf);
+	if ($dir) {
+		local @ao = &apache::find_directive(
+			"AllowOverride", $dir->{'members'});
+		&apache::save_directive("AllowOverride",
+			[ @ao, "None" ], $dir->{'members'}, $conf);
+		}
+
 	&flush_file_lines($virt->{'file'});
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
 	local %hashtmp = %$d;
@@ -1249,6 +1261,19 @@ local $conf = &apache::get_config();
 local @rm = &apache::find_directive("RedirectMatch", $vconf);
 @rm = grep { substr($_, 0, 5) ne "^/.*\$" } @rm;
 &apache::save_directive("RedirectMatch", \@rm, $vconf, $conf);
+
+# Remove AllowOverride None
+local $pdir = &public_html_dir($d);
+local ($dir) = grep { $_->{'words'}->[0] eq $pdir }
+		    &apache::find_directive_struct("Directory", $vconf);
+if ($dir) {
+	local @ao = &apache::find_directive(
+		"AllowOverride", $dir->{'members'});
+	@ao = grep { $_ ne "None" } @ao;
+	&apache::save_directive("AllowOverride",
+		\@ao, $dir->{'members'}, $conf);
+	}
+
 
 &flush_file_lines($virt->{'file'}, undef, 1);
 }
