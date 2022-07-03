@@ -57,7 +57,7 @@ print &ui_table_row($text{'transfer_dom'},
 
 # Destination system
 my @hosts = &get_transfer_hosts();
-my $hfield = &ui_textbox("host", undef, 40, 0, undef, "autocomplete=off")." ".
+my $hfield = &ui_textbox("host", undef, 40, 0, undef, "autocomplete=off placeholder='example.com:22'")." ".
 	     &ui_checkbox("savehost", 1, $text{'transfer_savehost'}, 0);
 if (@hosts) {
 	print &ui_table_row($text{'transfer_host'},
