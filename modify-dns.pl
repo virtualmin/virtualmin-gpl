@@ -420,9 +420,8 @@ foreach $d (@doms) {
 				}
 			push(@alld, @d);
 			}
-		@alld = sort { $b->{'line'} cmp $a->{'line'} } @alld;
 		foreach my $r (@alld) {
-			&bind8::delete_record($file, $r);
+			&delete_dns_record($recs, $file, $r);
 			$changed++;
 			}
 		&$second_print($text{'setup_done'});
@@ -455,9 +454,7 @@ foreach $d (@doms) {
 				&$second_print(&text('spf_eaddproxy', $r->{'name'}));
 				}
 			else {
-				&bind8::create_record($file, $name, $ttl, "IN",
-						      uc($type), join(" ", @$values));
-				push(@$recs, $r);
+				&create_dns_record($recs, $file, $r);
 				$changed++;
 				}
 			}

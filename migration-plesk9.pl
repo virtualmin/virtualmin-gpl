@@ -447,12 +447,10 @@ if ($got{'dns'}) {
 					# Not migratable
 					next;
 					}
-				&bind8::create_record($file,
-						      $recname,
-						      undef,
-						      "IN",
-						      $rectype,
-						      $recvalue);
+				my $nr = { 'name' => $recname,
+					   'type' => $rectype,
+					   'values' => [ split(/\s+/, $recvalue) ] };
+				&create_dns_record($recs, $file, $nr);
 				$rcount++;
 				}
 			}

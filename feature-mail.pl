@@ -6245,8 +6245,10 @@ if (!$cr) {
 			    $_->{'type'} eq 'A' } @$recs;
 	if (!$r) {
 		my $ip = $d->{'dns_ip'} || $d->{'ip'};
-		&bind8::create_record($file, $autoconfig, undef,
-				      "IN", "A", $ip);
+		my $cr = { 'name' => $autoconfig,
+			   'type' => 'A',
+			   'values' => [ $ip ] };
+		&create_dns_record($recs, $file, $cr);
 		$changed++;
 		}
 
@@ -6255,8 +6257,10 @@ if (!$cr) {
 			    $_->{'type'} eq 'AAAA' } @$recs;
 	if (!$r && $d->{'ip6'}) {
 		my $ip = $d->{'ip6'};
-		&bind8::create_record($file, $autoconfig, undef,
-				      "IN", "AAAA", $ip);
+		my $cr = { 'name' => $autoconfig,
+			   'type' => 'AAAA',
+			   'values' => [ $ip ] };
+		&create_dns_record($recs, $file, $cr);
 		$changed++;
 		}
 	}
@@ -6600,8 +6604,10 @@ if ($d->{'dns'}) {
 	if ($prov) {
 		# Add provider records
 		foreach my $r (@{$prov->{'mx'}}) {
-			&bind8::create_record($file, $d->{'dom'}.".", undef,
-					      "IN", "MX", "10 ${r}.");
+			my $mxr = { 'name' => $d->{'dom'}.".",
+				    'type' => 'MX',
+				    'values' => [ 10, $r."." ] };
+			&create_dns_record($recs, $file, $mxr);
 			}
 		}
 	else {

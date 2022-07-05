@@ -2866,8 +2866,10 @@ my $lets = &is_letsencrypt_cert($info) ? 1 : 0;
 if (!@caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
-	&bind8::create_record($file, "@", undef, "IN",
-		      "CAA", join(" ", "0", "issuewild", "letsencrypt.org"));
+	my $caa = { 'name' => '@',
+		    'type' => 'CAA',
+		    'values' => [ "0", "issuewild", "letsencrypt.org" ] };
+	&create_dns_record($recs, $file, $caa);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}
@@ -2876,7 +2878,7 @@ elsif (@caa == 1 &&
        $caa[0]->{'values'}->[2] eq 'letsencrypt.org' && !$lets) {
 	# Need to remove the record
 	&pre_records_change($d);
-	&bind8::delete_record($file, $caa[0]);
+	&delete_dns_record($recs, $file, $caa[0]);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
 	}

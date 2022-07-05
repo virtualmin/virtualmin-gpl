@@ -274,13 +274,15 @@ if ($got{'dns'} && $si->{'config'}->{'zone'}) {
 			if ($rec->{'address'} eq $oldip) {
 				$rec->{'address'} = $ipinfo->{'ip'};
 				}
-			&bind8::create_record(
-				$file, $rec->{'owner'}, $rec->{'ttl'},
-				$rec->{'class'}, $rec->{'type'},
-				$rec->{'address'} || 
-				  $rec->{'exchange_dname'} ||
-				  $rec->{'name_server_dname'} ||
-				  $rec->{'alias'});
+			my $v = $rec->{'address'} || 
+				$rec->{'exchange_dname'} ||
+				$rec->{'name_server_dname'} ||
+				$rec->{'alias'};
+			my $nr = { 'name' => $rec->{'owner'},
+				   'ttl' => $rec->{'ttl'},
+				   'type' => $rec->{'type'},
+				   'values' => [ $v ] };
+			&create_dns_record($recs, $file, $nr);
 			$count++;
 			}
 		}
