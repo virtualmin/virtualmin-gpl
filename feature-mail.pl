@@ -6375,10 +6375,10 @@ if ($d->{'dns'}) {
 		}
 	my $changed = 0;
 	my %adots = map { $_.".", 1 } @autoconfig;
-	foreach my $r (reverse(@$recs)) {
+	foreach my $r (@$recs) {
 		if ($r->{'type'} =~ /^(A|AAAA)$/ &&
 		    $adots{$r->{'name'}}) {
-			&bind8::delete_record($file, $r);
+			&delete_dns_record($recs, $file, $r);
 			$changed++;
 			}
 		}
@@ -6593,9 +6593,9 @@ if ($d->{'dns'}) {
 	local ($recs, $file) = &get_domain_dns_records_and_file($d);
 
 	# Remove all MX records
-	foreach my $r (reverse(@$recs)) {
+	foreach my $r (@$recs) {
 		if ($r->{'type'} eq 'MX' && $r->{'name'} eq $d->{'dom'}.".") {
-			&bind8::delete_record($file, $r);
+			&delete_dns_record($recs, $file, $r);
 			}
 		}
 	&post_records_change($d, $recs);

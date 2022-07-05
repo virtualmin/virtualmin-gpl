@@ -1057,11 +1057,11 @@ foreach my $d (@$doms) {
                               $_->{'type'} eq 'TXT' } @$recs;
 	my $changed = 0;
 	if ($selrec) {
-		&bind8::delete_record($selrec->{'file'}, $selrec);
+		&delete_dns_record($recs, $selrec->{'file'}, $selrec);
 		$changed++;
 		}
 	if ($dkrec) {
-		&bind8::delete_record($dkrec->{'file'}, $dkrec);
+		&delete_dns_record($recs, $dkrec->{'file'}, $dkrec);
 		$changed++;
 		}
 	if ($changed) {
