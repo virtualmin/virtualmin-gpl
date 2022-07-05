@@ -3410,13 +3410,25 @@ sub create_dns_record
 {
 my ($recs, $file, $r) = @_;
 &require_bind();
-my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'} || "IN", $r->{'type'},
-	       &join_record_values($r), $r->{'comment'} );
 my $lref = &read_file_lines($file, 1);
 $r->{'file'} = $file;
 $r->{'line'} = scalar(@$lref);
 $r->{'eline'} = $r->{'line'};
-&bind8::create_record($file, @params);
+if (defined($r->{'defttl'})) {
+	&bind8::create_defttl($file, $r->{'defttl'});
+
+	# Defttl is always at the start, so move all other records down
+	foreach my $e (@$recs) {
+		$e->{'line'}++;
+		$e->{'eline'}++ if (defined($e->{'eline'}));
+		}
+	}
+else {
+	my @params = ( $r->{'name'}, $r->{'ttl'},
+		       $r->{'class'} || "IN", $r->{'type'},
+		       &join_record_values($r), $r->{'comment'} );
+	&bind8::create_record($file, @params);
+	}
 push(@$recs, $r);
 }
 
@@ -3426,9 +3438,15 @@ sub modify_dns_record
 {
 my ($recs, $file, $r) = @_;
 &require_bind();
-my @params = ( $r->{'name'}, $r->{'ttl'}, $r->{'class'} || "IN", $r->{'type'},
-	       &join_record_values($r), $r->{'comment'} );
-&bind8::modify_record($file, $r, @params);
+if (defined($r->{'defttl'})) {
+	&bind8::modify_defttl($file, $r, $r->{'defttl'});
+	}
+else {
+	my @params = ( $r->{'name'}, $r->{'ttl'},
+		       $r->{'class'} || "IN", $r->{'type'},
+		       &join_record_values($r), $r->{'comment'} );
+	&bind8::modify_record($file, $r, @params);
+	}
 }
 
 # delete_dns_record(&records, file, &record)

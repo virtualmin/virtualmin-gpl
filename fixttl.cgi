@@ -17,23 +17,18 @@ my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my ($oldttl) = grep { $_->{'defttl'} } @$recs;
 if ($oldttl) {
 	$oldttl->{'defttl'} = $in{'newttl'};
-	&bind8::modify_defttl($file, $oldttl, $in{'newttl'});
+	&modify_dns_record($recs, $file, $oldttl);
 	}
 else {
-	&bind8::create_defttl($file, $in{'newttl'});
-	foreach my $e (@$recs) {
-		$e->{'line'}++;
-		$e->{'eline'}++ if (defined($e->{'eline'}));
-		}
+	my $newttl = { 'defttl' => $in{'newttl'} };
+	&create_dns_record($recs, $file, $newttl);
 	}
 
 # Update records
 foreach my $r (@$recs) {
 	if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
 		$r->{'ttl'} = $in{'newttl'};
-		&bind8::modify_record($file, $r, $r->{'name'},
-		    $r->{'ttl'}, $r->{'class'}, $r->{'type'},
-		    &join_record_values($r), $r->{'comment'});
+		&modify_dns_record($recs, $file, $r);
 		}
 	}
 

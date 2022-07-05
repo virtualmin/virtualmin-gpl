@@ -471,14 +471,10 @@ foreach $d (@doms) {
 		($oldttl) = grep { $_->{'defttl'} } @$recs;
 		if ($oldttl) {
 			$oldttl->{'defttl'} = $ttl;
-			&bind8::modify_defttl($file, $oldttl, $ttl);
+			&modify_dns_record($recs, $file, $oldttl);
 			}
 		else {
-			&bind8::create_defttl($file, $ttl);
-			foreach my $e (@$recs) {
-				$e->{'line'}++;
-				$e->{'eline'}++ if (defined($e->{'eline'}));
-				}
+			&create_dns_record($recs, $file, $ttl);
 			}
 		$changed++;
 		&$second_print($text{'setup_done'});
@@ -497,9 +493,7 @@ foreach $d (@doms) {
 		foreach my $r (@$recs) {
 			if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
 				$r->{'ttl'} = $ttl;
-				&bind8::modify_record($file, $r, $r->{'name'},
-				    $r->{'ttl'}, $r->{'class'}, $r->{'type'},
-				    &join_record_values($r), $r->{'comment'});
+				&modify_dns_record($recs, $file, $r);
 				$changed++;
 				}
 			}

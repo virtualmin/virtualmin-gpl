@@ -50,15 +50,11 @@ elsif ($r->{'defttl'}) {
 	if ($in{'type'}) {
 		# Create the TTL, renumbering others up so that bumping the SOA
 		# modifies the correct line
-		&bind8::create_defttl($file, $r->{'defttl'});
-		foreach my $e (@$recs) {
-			$e->{'line'}++;
-			$e->{'eline'}++ if (defined($e->{'eline'}));
-			}
+		&create_dns_record($recs, $file, $r);
 		}
 	else {
 		# Just update it
-		&bind8::modify_defttl($file, $r, $r->{'defttl'});
+		&modify_dns_record($recs, $file, $r);
 		}
 
 	}
