@@ -4575,6 +4575,17 @@ $mail_tests = [
 
 		) : ( ),
 
+	&get_dkim_type() && ($dkim = &get_dkim_config()) &&
+	    $dkim && $dkim->{'enabled'} ? (
+		# Check for the DKIM DNS record
+		{ 'command' => 'get-dns.pl',
+		  'args' => [ [ 'multiline' ],
+			      [ 'domain', $test_domain ],
+			      [ 'regexp' => '_domainkey' ] ],
+		  'grep' => [ 'v=DKIM1' ],
+		},
+		) : ( ),
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
