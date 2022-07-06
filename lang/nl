@@ -5444,7 +5444,6 @@ dkim_return=DKIM formulier
 dkim_err=Mislukt om DKIM instellingen op te slaan
 dkim_eselector=Ontbrekende of ongeldige keuze - het moet een geldige DNS record naam zijn
 dkim_eselfile=.. sleutel file $1 bestaat reeds!
-dkim_extra=Extra domeinen om te ondertekenen
 dkim_eextra=Ongeldig extra domein $1
 
 dkim_title4=Installeer DKIM

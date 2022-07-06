@@ -774,6 +774,7 @@ spf_epostchange=Kunne ikke lagre DNS-poster : $1
 
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
+s3_eawscmd=AWS-kommandoen er installert, men fungerer ikke : $1
 
 newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal kjøres legges inn
 
@@ -914,6 +915,8 @@ redirect_http=Ikke-SSL nettsted
 redirect_https=SSL nettsted
 redirect_ecode=Ugyldig HTTP-statuskode
 
+dkim_extra=Ekstra domener å signere for
+
 dkim_ednsadded=.. DNS-oppdatering mislyktes : $1
 dkim_founddomains3=.. fant $1 servere og $2 ekstra domener
 dkim_pubkeypem=DKIM offentlig nøkkel i PEM-format
@@ -997,7 +1000,6 @@ domdkim_key1=Bruk global standardnøkkel
 domdkim_key2=Generer ny nøkkel
 domdkim_key0=Bruk tasten nedenfor
 domdkim_err=Kunne ikke lagre DomainKey-alternativene
-
 domdkim_setkey=Bruker tilpasset DKIM-tast ..
 domdkim_clearkey=Bruker standard DKIM-tast ..
 domdkim_econfig=.. DKIM konfigurasjonsfil ble ikke funnet!

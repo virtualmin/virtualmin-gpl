@@ -1540,6 +1540,7 @@ spf_epostchange=No se pudieron guardar los registros DNS : $1
 
 s3_emodule2=No se pudo cargar el módulo Perl $1 necesario para comunicarse con el servicio S3 de Amazon : $2
 s3_emodule3=Los módulos Perl $1 o $2 necesarios para comunicarse con el servicio S3 de Amazon no están instalados
+s3_eawscmd=El comando de AWS está instalado, pero no funciona : $1
 s3_elistfiles=Error al enumerar archivos S3 : $1
 s3_edelete=Error al eliminar el depósito S3 : $1
 s3_edeletefile=Error al eliminar el archivo S3 : $1
@@ -2167,7 +2168,7 @@ dkim_return=Formulario DKIM
 dkim_err=Error al guardar la configuración de DKIM
 dkim_eselector=Selector faltante o no válido: debe ser un nombre de registro DNS válido
 dkim_eselfile=¡el archivo de clave de selector $1 ya existe!
-dkim_extra=Dominios para firmar
+dkim_extra=Dominios adicionales para firmar
 dkim_eextra=Dominio adicional no válido $1
 dkim_eexclude=Dominio excluido no válido $1
 dkim_exclude=Nunca firme para dominios

@@ -4256,6 +4256,7 @@ spf_epostchange=Nepodařilo se uložit záznamy DNS : $1
 
 s3_emodule2=Modul Perl $1 potřebný pro komunikaci se službou Amazon S3 nelze načíst : $2 
 s3_emodule3=Moduly Perl $1 nebo $2 potřebné pro komunikaci se službou Amazon S3 nejsou nainstalovány
+s3_eawscmd=Příkaz AWS je nainstalován, ale nefunguje : $1
 s3_edom=Nepodařilo se nahrát soubor domény : $1 
 s3_einfo2=Nepodařilo se přečíst $1 : $2 
 s3_eputacl=Uložení ACL kbelíku se nezdařilo : $1 
@@ -5303,7 +5304,7 @@ dkim_return=DKIM formulář
 dkim_err=Uložení nastavení DKIM se nezdařilo
 dkim_eselector=Chybějící nebo neplatný selektor - musí být platný název záznamu DNS
 dkim_eselfile=.. soubor s klíčem voliče $1 již existuje!
-dkim_extra=Domény k přihlášení
+dkim_extra=Extra domény k přihlášení
 dkim_eextra=Neplatná další doména $1 
 dkim_eexclude=Neplatná vyloučená doména $1 
 dkim_exclude=Nikdy nepodepisujte domény

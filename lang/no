@@ -5735,7 +5735,6 @@ dkim_return=DKIM skjema
 dkim_err=Kunne ikka lagre DKIM innstillinger
 dkim_eselector=Manglende eller ugyldig selektor - må være et gyldig DNS oppføringsnavn
 dkim_eselfile=.. selektor nøkkelfil $1 finnes allerede!
-dkim_extra=Ekstra domener det skal signeres for
 dkim_eextra=Ugyldig ekstra domene $1
 dkim_eexclude=Ugyldig ekskludert domene $1
 dkim_exclude=Signer aldri for domenene

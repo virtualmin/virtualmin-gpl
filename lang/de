@@ -4184,7 +4184,6 @@ dkim_bits=bits
 dkim_makenewkey=Erzwinge Generation eines neuen privaten Schlüssels?
 dkim_return=DKIM Form
 dkim_err=Fehlgeschlagen DKIM Einstellungen zu speichern
-dkim_extra=Zusätzliche Domains zu signieren für
 dkim_eextra=Ungültig zusätzliche Domain $1
 dkim_eexclude=Ungültig ausgeschlossene Domain $1
 dkim_exclude=Niemals signieren für Domains

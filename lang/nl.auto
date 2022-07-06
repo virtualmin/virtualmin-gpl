@@ -1035,6 +1035,7 @@ spf_epostchange=Kan DNS-records niet opslaan : $1
 
 s3_emodule2=De Perl-module $1 die nodig is om te communiceren met de S3-service van Amazon kan niet worden geladen : $2
 s3_emodule3=De Perl-modules $1 of $2 die nodig zijn om te communiceren met de S3-service van Amazon, zijn niet geïnstalleerd
+s3_eawscmd=De AWS-opdracht is geïnstalleerd, maar werkt niet : $1
 s3_einfo2=Kan $1 : $2 niet lezen
 s3_eputacl=Kan bucket-ACL niet opslaan : $1
 s3_eputlifecycle=Kan bucketlevenscyclus niet opslaan : $1
@@ -1215,6 +1216,7 @@ redirect_ecode=Ongeldige HTTP-statuscode
 
 dkim_size=Grootte van nieuwe DKIM-sleutel
 dkim_bits=stukjes
+dkim_extra=Extra domeinen om voor te tekenen
 dkim_eexclude=Ongeldig uitgesloten domein $1
 dkim_exclude=Teken nooit voor domeinen
 

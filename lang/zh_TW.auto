@@ -2370,6 +2370,7 @@ spf_epostchange=未能保存 DNS 記錄  : $1
 
 s3_emodule2=無法加載與Amazon的S3服務通信所需的Perl模塊 $1 : $2
 s3_emodule3=未安裝與Amazon的S3服務通信所需的Perl模塊 $1或 $2
+s3_eawscmd=AWS 命令已安裝，但無法正常工作：$1
 s3_elistfiles=無法列出S3文件： $1
 s3_edelete=刪除S3存儲桶失敗： $1
 s3_edeletefile=刪除S3文件失敗： $1
@@ -3333,7 +3334,7 @@ dkim_return=DKIM表格
 dkim_err=無法保存DKIM設置
 dkim_eselector=選擇器缺失或無效-必須是有效的DNS記錄名稱
 dkim_eselfile=..選擇器密鑰文件 $1已存在！
-dkim_extra=要註冊的域名
+dkim_extra=要簽名的額外域
 dkim_eextra=無效的其他域 $1
 dkim_eexclude=無效的排除域 $1
 dkim_exclude=永遠不要註冊域名
