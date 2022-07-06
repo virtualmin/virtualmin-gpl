@@ -996,9 +996,11 @@ foreach my $d (@$doms) {
 			      $_->{'type'} eq 'TXT' } @$recs;
 	if (!$selrec) {
 		# Add new record
-		&bind8::create_record($file, $selname, undef, 'IN', 'TXT',
-		    &split_long_txt_record(
-			'"v=DKIM1; k=rsa; t=s; p='.$pubkey.'"'));
+		my $selrec = { 'name' => $selname,
+			       'type' => 'TXT',
+			       'values' => [ '"v=DKIM1; k=rsa; t=s; p='.
+					     $pubkey.'"' ] };
+		&create_dns_record($recs, $file, $selrec);
 		$changed++;
 		}
 	elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
@@ -1007,10 +1009,7 @@ foreach my $d (@$doms) {
 		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
 			$val = 'k=rsa; t=s; p='.$pubkey;
 			}
-		&bind8::modify_record($selrec->{'file'}, $selrec,
-				      $selrec->{'name'}, $selrec->{'ttl'},
-				      $selrec->{'class'}, $selrec->{'type'},
-				      &split_long_txt_record('"'.$val.'"'));
+		$selrec->{'values'} = [ '"'.$val.'"' ];
 		$changed++;
 		}
 	if ($changed) {
