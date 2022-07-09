@@ -74,9 +74,27 @@ print &ui_table_row($text{'dkim_exclude'},
 
 print &ui_table_end();
 
+# Get domains for which signing is currently active
+if ($dkim && $dkim->{'enabled'}) {
+	my @dnames = &get_dkim_domains($dkim);
+	print &ui_hidden_table_start($text{'dkim_header3'}, "width=100%",
+				     2, 'domains');
+
+	my @grid;
+	foreach my $dname (@dnames) {
+		my $d = &get_domain_by("dom", $dname);
+		push(@grid, $d ? &ui_link("summary_domain.cgi?dom=$d->{'id'}",
+					  &show_domain_name($d)) : $dname);
+		}
+	print &ui_table_row(undef, &ui_grid_table(\@grid, 4, 100), 2);
+
+	print &ui_hidden_table_end('domains');
+	}
+
 # Public key and DNS record, for offsite DNS domains
 if ($dkim && $dkim->{'enabled'}) {
-	print &ui_hidden_table_start($text{'dkim_header2'}, "width=100%", 2, 'keys');
+	print &ui_hidden_table_start($text{'dkim_header2'}, "width=100%",
+				     2, 'keys');
 
 	$privkey = &get_dkim_privkey($dkim);
 	print &ui_table_row($text{'dkim_privkeypem'},

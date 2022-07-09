@@ -967,6 +967,35 @@ if ($dkim_config) {
 	}
 }
 
+# get_dkim_domains(&dkim)
+# Returns the list of all domains currently being signed for
+sub get_dkim_domains
+{
+my ($dkim) = @_;
+my $dkim_config = &get_dkim_config_file();
+return ( ) if (!$dkim_config);
+my $conf = &get_open_dkim_config($dkim_config);
+my $keylist = $conf->{'KeyList'};
+my @rv;
+if ($keylist) {
+	# Use the key mapping file
+	my $lref = &read_file_lines($keylist, 1);
+	foreach my $l (@$lref) {
+		my @w = split(/:/, $l);
+		push(@rv, $w[1]);
+		}
+	}
+else {
+	# Use a domains file
+	my $file = $conf->{'Domain'};
+	if ($file && -r $file) {
+		my $lref = &read_file_lines($file, 1);
+		@rv = grep { !/^#/ && /\S/ } @$lref;
+		}
+	}
+return @rv;
+}
+
 # add_dkim_dns_records(&domains, &dkim)
 # Add DKIM DNS records to the given list of domains
 sub add_dkim_dns_records
