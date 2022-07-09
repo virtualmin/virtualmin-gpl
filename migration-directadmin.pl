@@ -358,12 +358,7 @@ if ($got{'dns'} && -r $dnsfile) {
 			$change++;
 			}
 		if ($change) {
-			&bind8::modify_record(
-				$zdstfile, $r, $r->{'name'},
-				$r->{'ttl'}, $r->{'class'},
-				$r->{'type'},
-				&join_record_values($r),
-				$r->{'comment'});
+			&modify_dns_record($recs, $zdstfile, $r);
 			}
 		}
 	&post_records_change(\%dom, $recs, $zdstfile);
