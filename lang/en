@@ -6568,6 +6568,7 @@ dkim_failed=DomainKeys indentified mail is not available on this system : $1
 dkim_installdesc=However, Virtualmin can attempt to automatically install the DKIM filter package for you.
 dkim_install=Install Now
 dkim_header=DomainKeys identified mail options
+dkim_header2=Keys and records for offsite hosting
 dkim_enabled=Signing of outgoing mail enabled?
 dkim_selector=Selector for DKIM record name
 dkim_verify=Reject incoming email with invalid DKIM signature?

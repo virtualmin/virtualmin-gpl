@@ -21,7 +21,7 @@ if ($err) {
 
 # Show form to enable
 print &ui_form_start("enable_dkim.cgi");
-print &ui_table_start($text{'dkim_header'}, undef, 2);
+print &ui_table_start($text{'dkim_header'}, "width=100%", 2);
 
 # Enabled?
 $dkim = &get_dkim_config();
@@ -65,24 +65,27 @@ if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
 			 &get_system_hostname(1));
 	}
 print &ui_table_row($text{'dkim_extra'},
-	&ui_textarea("extra", join("\n", @extra), 10, 60));
+	&ui_textarea("extra", join("\n", @extra), 5, 80));
 
 # Domains to never sign for
 @exclude = @{$dkim->{'exclude'}};
 print &ui_table_row($text{'dkim_exclude'},
-	&ui_textarea("exclude", join("\n", @exclude), 5, 60));
+	&ui_textarea("exclude", join("\n", @exclude), 5, 80));
+
+print &ui_table_end();
 
 # Public key and DNS record, for offsite DNS domains
 if ($dkim && $dkim->{'enabled'}) {
+	print &ui_hidden_table_start($text{'dkim_header2'}, "width=100%", 2, 'keys');
 
 	$privkey = &get_dkim_privkey($dkim);
 	print &ui_table_row($text{'dkim_privkeypem'},
-		&ui_textarea("privkey", $privkey, 8, 60, "hard",
+		&ui_textarea("privkey", $privkey, 8, 80, "hard",
 			     undef, "readonly=true"));
 	
 	$pubkey = &get_dkim_pubkey($dkim);
 	print &ui_table_row($text{'dkim_pubkeypem'},
-		&ui_textarea("pubkey", $pubkey, 8, 60, "hard",
+		&ui_textarea("pubkey", $pubkey, 8, 80, "hard",
 			     undef, "readonly=true"));
 
 
@@ -90,11 +93,12 @@ if ($dkim && $dkim->{'enabled'}) {
 	$records = $dkim->{'selector'}."._domainkey IN TXT ".
 		   &split_long_txt_record("\"v=DKIM1; k=rsa; t=s; p=$dnskey\"");
 	print &ui_table_row($text{'dkim_records'},
-		&ui_textarea("records", $records, 8, 60, "off",
+		&ui_textarea("records", $records, 8, 80, "off",
 			     undef, "readonly=true"));
+
+	print &ui_hidden_table_end('keys');
 	}
 
-print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
 
