@@ -67,18 +67,26 @@ $newip || &usage("One of --new-ip or --detect-new-ip must be given");
 $oldip ne $newip || &usage("The old and new IP addresses are the same!");
 
 # Do the change on all domains
+&$first_print("Changing IP address from $oldip to $newip ..");
+&$indent_print();
 $dc = &update_all_domain_ip_addresses($newip, $oldip);
+&$outdent_print();
+&$second_print(".. updated $dc virtual servers");
 
 # Also change shared IP
 @shared = &list_shared_ips();
 $idx = &indexof($oldip, @shared);
 if ($idx >= 0) {
+	&$first_print("Updating shared IP address $oldip ..");
 	$shared[$idx] = $newip;
 	&save_shared_ips(@shared);
+	&$second_print(".. changed to $newip");
 	}
 
 # Update any DNS slaves that were replicating from this IP
-&update_dns_slave_ip_addresses($newip, $oldip);
+&$first_print("Updating slave DNS servers ..");
+$bc = &update_dns_slave_ip_addresses($newip, $oldip);
+&$second_print(".. updated $bc domains");
 
 # Update the old default IP, which is used by a dashboard warning
 $config{'old_defip'} = &get_default_ip();
