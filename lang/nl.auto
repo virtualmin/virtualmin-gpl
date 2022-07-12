@@ -1214,6 +1214,8 @@ redirect_http=Niet-SSL-website
 redirect_https=SSL-website
 redirect_ecode=Ongeldige HTTP-statuscode
 
+dkim_header2=Sleutels en records voor offsite hosting
+dkim_header3=Domeinen waarvoor momenteel is aangemeld
 dkim_size=Grootte van nieuwe DKIM-sleutel
 dkim_bits=stukjes
 dkim_extra=Extra domeinen om voor te tekenen

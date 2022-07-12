@@ -915,6 +915,8 @@ redirect_http=Ikke-SSL nettsted
 redirect_https=SSL nettsted
 redirect_ecode=Ugyldig HTTP-statuskode
 
+dkim_header2=Nøkler og poster for offsite hosting
+dkim_header3=Domener som for øyeblikket er signert for
 dkim_extra=Ekstra domener å signere for
 
 dkim_ednsadded=.. DNS-oppdatering mislyktes : $1
