@@ -11279,6 +11279,7 @@ foreach my $d (&list_domains()) {
 my (@expired, @nearly);
 foreach my $d (&list_domains()) {
 	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+	next if ($d->{'disabled'});
 
 	# If status collection is disabled and last
 	# config check was done a long time ago or if
