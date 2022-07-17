@@ -9211,8 +9211,6 @@ push(@rv, { 'id' => 1,
 	    'for_sub' => 1,
 	    'for_alias' => 0,
 	    'for_users' => !$config{'subtmpl_nousers'},
-	    'resellers' => '*',
-	    'owners' => '*',
 	  } );
 local $f;
 opendir(DIR, $templates_dir);
@@ -9222,8 +9220,6 @@ while(defined($f = readdir(DIR))) {
 		&read_file("$templates_dir/$f", \%tmpl);
 		$tmpl{'file'} = "$templates_dir/$f";
 		$tmpl{'mail'} =~ s/\t/\n/g;
-		$tmpl{'resellers'} = '*' if (!defined($tmpl{'resellers'}));
-		$tmpl{'owners'} = '*' if (!defined($tmpl{'owners'}));
 		if ($tmpl{'id'} == 1 || $tmpl{'id'} == 0) {
 			foreach $k (keys %tmpl) {
 				$rv[$tmpl{'id'}]->{$k} = $tmpl{$k}
@@ -9240,6 +9236,10 @@ while(defined($f = readdir(DIR))) {
 				}
 			}
 		}
+	}
+foreach my $tmpl (@rv) {
+	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
+	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
 	}
 closedir(DIR);
 @list_templates_cache = @rv;
@@ -11279,6 +11279,7 @@ foreach my $d (&list_domains()) {
 my (@expired, @nearly);
 foreach my $d (&list_domains()) {
 	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
+	next if ($d->{'disabled'});
 
 	# If status collection is disabled and last
 	# config check was done a long time ago or if
