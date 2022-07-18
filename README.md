@@ -49,3 +49,40 @@ Bugs can be reported here at github in the issue tracker or at the ticket tracke
 The best way to extend Virtualmin is usually through plugins. Virtualmin plugins are merely Webmin modules, with a few extra files, and some hooks into the Virtualmin API. Webmin module development is documented in the [Webmin Wiki](http://doxfer.webmin.com/Webmin/ModuleDevelopment), and lots of example plugins exist in our other repos (e.g. virtualmin-nginx is a good example of extending core functionality with plugins).
 
 Virtualmin is mostly built in Perl 5.10.1+, with the frontend built in JavaScript and HTML5. It is possible to build Virtualmin components or to interact with Virtualmin in other languages, either via the CLI or remote API, or through reproducing the necessary pieces of the Webmin library in your preferred language (partial implementations of this exist in Python and PHP).
+
+# Maintainers
+
+Our current list of [Maintainers](MAINTAINERS.md).
+
+# Contributors
+
+Virtualmin exists thanks to [all the people who contribute](https://github.com/virtualmin/virtualmin-gpl/graphs/contributors).
+
+[How To Contribute](CONTRIBUTING.rst).
+
+<a href="https://github.com/virtualmin/virtualmin-gpl/graphs/contributors"><img src="https://opencollective.com/virtualmin-gpl/contributors.svg?width=890" /></a>
+
+
+# Backers
+
+Thank you to all our backers!   [Become a backer](https://opencollective.com/virtualmin-gpl#backer)
+
+<a href="https://opencollective.com/virtualmin-gpl#backers" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/backers.svg?width=890"></a>
+
+
+# Sponsors
+
+Support Virtualmin by becoming a sponsor. Your logo will show up here with a link to your website.
+
+[Become A Sponsor of Virtualmin.](https://opencollective.com/virtualmin-gpl#sponsor)
+
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/0/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/1/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/2/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/3/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/4/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/5/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/6/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/7/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/8/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/virtualmin-gpl/sponsor/9/website" target="_blank"><img src="https://opencollective.com/virtualmin-gpl/sponsor/9/avatar.svg"></a>
