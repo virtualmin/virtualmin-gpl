@@ -4109,9 +4109,11 @@ elsif (!$nolocal) {
 	       &file_chooser_button($name."_file")."<br>\n" ]);
 	}
 
+my $tablestart = sub { return "<table data-table-backup-mode=\"$_[0]\">\n" };
+
 # FTP file fields
 local $noac = "autocomplete=off";
-local $ft = "<table>\n";
+local $ft = &$tablestart('ftp');
 $ft .= "<tr> <td>$text{'backup_ftpserver'}</td> <td>".
        &ui_textbox($name."_server", $mode == 1 ? $serverport : undef, 20).
        "</td> </tr>\n";
@@ -4130,7 +4132,7 @@ $ft .= "</table>\n";
 push(@opts, [ 1, $text{'backup_mode1'}, $ft ]);
 
 # SCP file fields
-local $st = "<table>\n";
+local $st = &$tablestart('ssh');
 $st .= "<tr> <td>$text{'backup_sshserver'}</td> <td>".
        &ui_textbox($name."_sserver", $mode == 2 ? $serverport : undef, 20).
        "</td> </tr>\n";
@@ -4152,7 +4154,7 @@ $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 
 # Webmin RPC fields
-local $wt = "<table>\n";
+local $wt = &$tablestart('webmin');
 $wt .= "<tr> <td>$text{'backup_webminserver'}</td> <td>".
        &ui_textbox($name."_wserver", $mode == 9 ? $serverport : undef, 20).
        "</td> </tr>\n";
@@ -4177,7 +4179,7 @@ if (&can_use_cloud("s3")) {
 	$s3user ||= $config{'s3_akey'};
 	$s3pass ||= $config{'s3_skey'};
 	}
-local $st = "<table>\n";
+local $st = &$tablestart('s3');
 $st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
        &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
        "</td> </tr>\n";
@@ -4201,7 +4203,7 @@ if (&can_use_cloud("rs")) {
 	$rsuser ||= $config{'rs_user'};
 	$rspass ||= $config{'rs_key'};
 	}
-local $st = "<table>\n";
+local $st = &$tablestart('rs');
 $st .= "<tr> <td>$text{'backup_rsuser'}</td> <td>".
        &ui_textbox($name."_rsuser", $rsuser, 40, 0, undef, $noac).
        "</td> </tr>\n";
@@ -4219,7 +4221,7 @@ push(@opts, [ 6, $text{'backup_mode6'}, $st ]);
 # Google cloud files
 my $state = &cloud_google_get_state();
 if ($state->{'ok'} && &can_use_cloud("google")) {
-	local $st = "<table>\n";
+	local $st = &$tablestart('gc');
 	$st .= "<tr> <td>$text{'backup_gcpath'}</td> <td>".
 	       &ui_textbox($name."_gcpath", $mode != 7 ? undef :
 					    $server.($path ? "/".$path : ""), 50).
@@ -4231,7 +4233,7 @@ if ($state->{'ok'} && &can_use_cloud("google")) {
 # Dropbox
 $state = &cloud_dropbox_get_state();
 if ($state->{'ok'} && &can_use_cloud("dropbox")) {
-	local $st = "<table>\n";
+	local $st = &$tablestart('db');
 	$st .= "<tr> <td>$text{'backup_dbpath'}</td> <td>".
 	       &ui_textbox($name."_dbpath", $mode != 8 ? undef :
 					    $server.($path ? "/".$path : ""), 50).
@@ -4243,7 +4245,7 @@ if ($state->{'ok'} && &can_use_cloud("dropbox")) {
 # Backblaze
 my $state = &cloud_bb_get_state();
 if ($state->{'ok'} && &can_use_cloud("bb")) {
-	local $st = "<table>\n";
+	local $st = &$tablestart('bb');
 	$st .= "<tr> <td>$text{'backup_bbpath'}</td> <td>".
 	       &ui_textbox($name."_bbpath", $mode != 10 ? undef :
 					    $server.($path ? "/".$path : ""), 50).
