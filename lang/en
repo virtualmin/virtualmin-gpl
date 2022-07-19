@@ -2408,6 +2408,7 @@ backup_s3path=Bucket and path
 backup_webminserver=Webmin server
 backup_path=File on server
 backup_login=Login as user
+backup_pass=Login with password
 backup_pass2=Login with password
 backup_pass3=Or SSH key file
 backup_mailfiles2=Include mail files
