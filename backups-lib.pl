@@ -4141,13 +4141,12 @@ $st .= "<tr> <td>$text{'backup_login'}</td> <td>".
        &ui_textbox($name."_suser", $mode == 2 ? $user : undef, 15,
 		   0, undef, $noac).
        "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_pass2'}</td> <td>".
+$st .= "<tr> <td>$text{'backup_pass4'}</td> <td>".
+       "<span style='white-space: nowrap;'>" .
        &ui_password($name."_spass", $mode == 2 && $pass !~ /\// ? $pass : undef,
-		    15, 0, undef, $noac).
-       "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_pass3'}</td> <td>".
+                    25, 0, undef, $noac).
        &ui_filebox($name."_sshkey", $mode == 2 && $pass =~ /\// ? $pass : undef,
-		    60, 0, undef, $noac).
+                    25, 0, undef, $noac)."</span>".
        "</td> </tr>\n";
 $st .= "</table>\n";
 push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
