@@ -4115,7 +4115,8 @@ my $tablestart = sub { return "<table data-table-backup-mode=\"$_[0]\">\n" };
 local $noac = "autocomplete=off";
 local $ft = &$tablestart('ftp');
 $ft .= "<tr> <td>$text{'backup_ftpserver'}</td> <td>".
-       &ui_textbox($name."_server", $mode == 1 ? $serverport : undef, 20).
+       &ui_textbox($name."_server", $mode == 1 ? $serverport :
+                     undef, 20, undef, undef, "placeholder='example.com:21'").
        "</td> </tr>\n";
 $ft .= "<tr> <td>$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_path", $mode == 1 ? $path : undef, 50).
@@ -4134,7 +4135,8 @@ push(@opts, [ 1, $text{'backup_mode1'}, $ft ]);
 # SCP file fields
 local $st = &$tablestart('ssh');
 $st .= "<tr> <td>$text{'backup_sshserver'}</td> <td>".
-       &ui_textbox($name."_sserver", $mode == 2 ? $serverport : undef, 20).
+       &ui_textbox($name."_sserver", $mode == 2 ? $serverport :
+                     undef, 20, undef, undef, "placeholder='example.com:22'").
        "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_spath", $mode == 2 ? $path : undef, 50).
@@ -4156,7 +4158,8 @@ push(@opts, [ 2, $text{'backup_mode2'}, $st ]);
 # Webmin RPC fields
 local $wt = &$tablestart('webmin');
 $wt .= "<tr> <td>$text{'backup_webminserver'}</td> <td>".
-       &ui_textbox($name."_wserver", $mode == 9 ? $serverport : undef, 20).
+       &ui_textbox($name."_wserver", $mode == 9 ? $serverport :
+                     undef, 20, undef, undef, "placeholder='example.com:10000'").
        "</td> </tr>\n";
 $wt .= "<tr> <td>$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_wpath", $mode == 9 ? $path : undef, 50).
