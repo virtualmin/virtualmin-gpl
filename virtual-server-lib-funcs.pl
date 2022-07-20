@@ -12870,7 +12870,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    'dkim', 'ratelimit', 'provision',
    $config{'mail'} ? ( 'autoconfig' ) : ( ),
    $config{'mail'} && $virtualmin_pro ? ( 'retention' ) : ( ),
-   $config{'mail'} && $virtualmin_pro ? ( 'smtpclouds' ) : ( ),
+   $virtualmin_pro ? ( 'smtpclouds' ) : ( ),
    $config{'mysql'} ? ( 'mysqls' ) : ( ),
    'dnsclouds',
    );
