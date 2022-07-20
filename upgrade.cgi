@@ -114,8 +114,10 @@ if ($itype eq "rpm") {
 	&execute_command("yum clean all");
 	&$second_print($text{'setup_done'});
 
-	# Update all Virtualmin-related packages
-	my @packages = ('wbm-virtual-server');
+	# Update Virtualmin to Pro, and install support module
+	my @packages = ('wbm-virtual-server', 'wbm-virtualmin-support');
+
+	# Run the upgrade
 	my $upgrade_to_pro_output;
 	&$first_print($text{'upgrade_to_pro'});
 	&clean_environment();
@@ -211,6 +213,10 @@ elsif ($itype eq "deb") {
 		goto PAGEEND;
 		} 
 
+	# Add Virtualmin support module
+	push(@packages, 'webmin-virtualmin-support');
+
+	# Run the upgrade
 	my $upgrade_to_pro_output;
 	&clean_environment();
 	open(YUM, "apt-get -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages -f install ".join(" ", @packages)." 2>&1 |");
