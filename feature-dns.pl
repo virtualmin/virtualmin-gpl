@@ -4271,10 +4271,10 @@ my @need;
 if (&domain_has_website($d) && &domain_has_ssl_cert($d)) {
 	# SSL website
 	my $chain = &get_website_ssl_file($d, 'ca');
-	push(@need, &create_tlsa_dns_record(
-		$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $d->{'dom'}));
-	push(@need, &create_tlsa_dns_record(
-		$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, "www.".$d->{'dom'}));
+	foreach my $hn (&get_hostnames_for_ssl($d)) {
+		push(@need, &create_tlsa_dns_record(
+			$d->{'ssl_cert'}, $chain, $d->{'web_sslport'}, $hn));
+		}
 	}
 foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 	my $cfile = $svc->{'cert'};
