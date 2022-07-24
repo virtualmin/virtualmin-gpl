@@ -681,6 +681,13 @@ if (defined($jail)) {
 	$dom->{'jail'} = $jail if (!$err);
 	&save_domain($dom);
 	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+
+	# Update scripts hostnames, if jail changed
+	if (!$err) {
+		foreach my $dbt (('mysql', 'psql')) {
+			&update_all_installed_scripts_database_credentials($dom, $old, 'dbhost', undef, $dbt);
+			}
+		}
 	}
 if ($copyjail) {
 	print "Copying files into chroot jail ..\n";
