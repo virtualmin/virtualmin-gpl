@@ -420,6 +420,14 @@ my $db_conn_desc =
            {
                'replace' => [ 'define\(\s*[\'"]DB_USER[\'"],' => "define('DB_USER', '\$\$sdbuser');" ],
            },
+           'dbhost' => 
+           {
+               'replace' => [ 'define\(\s*[\'"]DB_HOST[\'"],' => "define('DB_HOST', '\$\$sdbhost');" ],
+           },
+           'dbname' => 
+           {
+               'replace' => [ 'define\(\s*[\'"]DB_NAME[\'"],' => "define('DB_NAME', '\$\$sdbname');" ],
+           },
         }
     };
 return $db_conn_desc;

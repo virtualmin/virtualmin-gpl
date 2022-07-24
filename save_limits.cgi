@@ -102,6 +102,11 @@ if (!&check_jailkit_support()) {
 	&save_domain($d);
 	}
 
+# Update scripts hostnames
+foreach my $dbt (('mysql', 'psql')) {
+	&update_all_installed_scripts_database_credentials($d, $d, 'dbhost', undef, $dbt);
+	}
+
 &run_post_actions();
 &clear_links_cache($d);
 &webmin_log("limits", "domain", $d->{'dom'}, $d);
