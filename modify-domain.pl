@@ -678,6 +678,7 @@ if (defined($jail)) {
 		$err = &disable_domain_jailkit($dom);
 		}
 	$d->{'jail'} = $jail if (!$err);
+	$dom->{'jail'} = $jail if (!$err);
 	&save_domain($dom);
 	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
 	}
