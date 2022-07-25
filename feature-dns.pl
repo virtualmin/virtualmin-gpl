@@ -75,14 +75,14 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	local $bind8::config{'chroot'} = undef;
 	$d->{'dns_submode'} = 0;	# Adding to existing domain not
 					# supported by Cloudmin Services
+	local $recs = [ ];
 	if ($d->{'alias'}) {
 		&create_alias_records($recs, $temp, $d, $ip);
 		}
 	else {
-		&create_standard_records($temp, $d, $ip);
+		&create_standard_records($recs, $temp, $d, $ip);
 		}
-	@inforecs = &bind8::read_zone_file($temp, $d->{'dom'});
-	$info->{'record'} = [ &records_to_text($d, \@inforecs) ];
+	$info->{'record'} = $recs;
 	}
 
 if ($d->{'provision_dns'}) {
@@ -264,6 +264,7 @@ elsif (!$dnsparent) {
 
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
+	local $recs = [ ];
 	if (-r $rootfile && -f $rootfile) {
 		&unlink_logged($rootfile);
 		}
@@ -271,7 +272,7 @@ elsif (!$dnsparent) {
 		&create_alias_records($recs, $file, $d, $ip);
 		}
 	else {
-		&create_standard_records($file, $d, $ip);
+		&create_standard_records($recs, $file, $d, $ip);
 		}
 	&bind8::set_ownership($rootfile);
 	&$second_print($text{'setup_done'});
@@ -324,7 +325,7 @@ else {
 		$d->{'dns_subalready'} = 1;
 		}
 	local $ip = $d->{'dns_ip'} || $d->{'ip'};
-	&create_standard_records($fn, $d, $ip);
+	&create_standard_records(\@recs, $fn, $d, $ip);
 	&post_records_change($dnsparent, \@recs);
 
 	&release_lock_dns($dnsparent);
@@ -4893,8 +4894,8 @@ return undef if ($d->{'alias'});
 my $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
-&create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
-my $defrecs = [ &bind8::read_zone_file($temp, $d->{'dom'}) ];
+local $defrecs = [ ];
+&create_standard_records($defrecs, $temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 
 # Compare with the actual records
 my $recs = [ &get_domain_dns_records($d) ];
