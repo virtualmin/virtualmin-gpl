@@ -731,6 +731,24 @@ foreach my $script (@domain_scripts) {
 								}
 							}
 
+						# If value is not set, use existing data to just update
+						if (!$value) {
+							my ($sdbhost, $sdbtype, $sdbname, $sdbuser, $sdbpass) =
+							    &get_script_database_credentials($d, $script->{'opts'});
+							if ($type =~ /host$/) {
+								$value = $sdbhost;
+								}
+							elsif ($type =~ /name$/) {
+								$value = $sdbname;
+								}
+							elsif ($type =~ /user$/) {
+								$value = $sdbuser;
+								}
+							elsif ($type =~ /pass$/) {
+								$value = $sdbpass;
+								}
+							}
+
 						# Pass new value through optional function if defined
 						if (defined(&$value_func)) {
 							$value = &$value_func($value, @value_func_params);

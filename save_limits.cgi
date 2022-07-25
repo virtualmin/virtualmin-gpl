@@ -87,20 +87,29 @@ if (defined($in{'shell'})) {
 # Update jail
 if (!&check_jailkit_support()) {
 	my $oldjail = &get_domain_jailkit($d);
+	my $jailupd;
 	if ($in{'jail'}) {
 		# Setup or re-sync jail for this user
 		$err = &enable_domain_jailkit($d);
 		&error(&text('limits_ejailon', $err)) if ($err);
-		$d->{'jail'} = 1 if (!$err);
+		$d->{'jail'} = 1, $jailupd++ if (!$err);
 		}
 	elsif ($oldjail && !$in{'jail'}) {
 		# Tear down jail for this user
 		$err = &disable_domain_jailkit($d);
 		&error(&text('limits_ejailoff', $err)) if ($err);
-		$d->{'jail'} = 0 if (!$err);
+		$d->{'jail'} = 0, $jailupd++ if (!$err);
 		}
 	&save_domain($d);
+	
+	# Update scripts hostnames, if jail changed
+	if ($jailupd) {
+		foreach my $dbt (('mysql', 'psql')) {
+			&update_all_installed_scripts_database_credentials($d, $d, 'dbhost', undef, $dbt);
+			}
+		}
 	}
+
 
 &run_post_actions();
 &clear_links_cache($d);
