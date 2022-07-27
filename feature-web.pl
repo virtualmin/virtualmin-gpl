@@ -2586,6 +2586,7 @@ sub show_template_web
 {
 local ($tmpl) = @_;
 
+my $hr;
 if ($config{'web'}) {
 	# Work out fields to disable when Apache is in default mode
 	local @webfields = ( "web", "web_ssl", "user_def",
@@ -2706,6 +2707,7 @@ if ($config{'web'}) {
 				[ 0, $text{'phpmode_mod_ruby'}."<br>" ],
 				[ 1, $text{'phpmode_cgi'}."<br>" ] ]));
 		}
+	$hr++;
 	}
 
 if ($config{'web'} && $config{'webalizer'}) {
@@ -2748,7 +2750,8 @@ if ($config{'web'} && $config{'webalizer'}) {
 	}
 
 # Add redirects for webmail and admin
-print &ui_table_hr();
+print &ui_table_hr()
+	if ($hr);
 foreach my $r ('webmail', 'admin') {
 	print &ui_table_row(&hlink($text{'newweb_'.$r},
 				   "template_".$r),
