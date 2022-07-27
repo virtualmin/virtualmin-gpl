@@ -99,7 +99,7 @@ else {
 		local $url = "http://$urlhost$port/";
 		if ($apache::httpd_modules{'mod_proxy'} &&
 		    $tmpl->{'web_alias'} == 2) {
-			push(@dirs, "ProxyPass /.well-known/acme-challenge/ !",
+			push(@dirs, "ProxyPass /.well-known !",
 				    "ProxyPass / $url",
 				    "ProxyPassReverse / $url");
 			$proxying = 1;
