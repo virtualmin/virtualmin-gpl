@@ -4241,12 +4241,12 @@ if (%ids) {
 
 # Add secondary nameservers
 if ($config{'dns'}) {
-	local %on = map { $_, 1 } split(/\s+/, $d->{'dns_slaves'});
+	local %on = map { $_, 1 } split(/\s+/, $d->{'dns_slave'});
 	local @servers = grep { $on{$_->{'host'}} || $on{$_->{'nsname'}} }
 			      &bind8::list_slave_servers();
 	$hash{'dns_server'} = &get_master_nameserver($tmpl);
-	$hash{'dns_slaves'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
-					    @servers);
+	$hash{'dns_slave'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
+					   @servers);
 	}
 
 # If any website feature is enabled (like Nginx), set the web variable
