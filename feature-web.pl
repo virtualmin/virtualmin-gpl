@@ -53,6 +53,9 @@ if ($d->{'php_fpm_port'}) {
 	}
 
 local @dirs = &apache_template($tmpl->{'web'}, $d);
+if ($apache::httpd_modules{'mod_proxy'}) {
+	push(@dirs, "ProxyPass /.well-known !");
+	}
 if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host (and the SSL virtual host, if any)
 	local @ports = ( $alias->{'web_port'} );
