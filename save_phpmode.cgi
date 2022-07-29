@@ -11,7 +11,8 @@ $canv = &can_edit_phpver($d);
 $can || $canv || &error($text{'phpmode_ecannot'});
 &require_apache();
 $p = &domain_has_website($d);
-
+@modes = &supported_php_modes($d);
+($newmode) = grep { $in{'mode'} =~ /^$_/ } @modes;
 if ($can) {
 	# Check for option clashes
 	if (!$d->{'alias'} && $can == 2) {
@@ -29,7 +30,7 @@ if ($can) {
 		}
 
 	# Check for working Apache suexec for PHP
-	if (!$d->{'alias'} && ($in{'mode'} eq 'cgi' || $in{'mode'} eq 'fcgid') &&
+	if (!$d->{'alias'} && ($newmode eq 'cgi' || $newmode eq 'fcgid') &&
 	    $can == 2 && $p eq 'web') {
 		$tmpl = &get_template($d->{'template'});
 		$err = &check_suexec_install($tmpl);
@@ -46,20 +47,19 @@ $mode = $oldmode = &get_domain_php_mode($d);
 
 if ($can) {
 	# Save PHP execution mode
-	if (defined($in{'mode'}) && $oldmode ne $in{'mode'} && $can == 2) {
-		&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
-		@modes = &supported_php_modes($d);
-		if (&indexof($in{'mode'}, @modes) < 0) {
+	if (defined($newmode) && $oldmode ne $newmode && $can == 2) {
+		&$first_print(&text('phpmode_moding', $text{'phpmode_'.$newmode}));
+		if (&indexof($newmode, @modes) < 0) {
 			&$second_print($text{'phpmode_emode'});
 			}
 		else {
-			my $err = &save_domain_php_mode($d, $in{'mode'});
+			my $err = &save_domain_php_mode($d, $newmode);
 			if ($err) {
 				&$second_print(&text('phpmode_emoding', $err));
 				}
 			else {
 				&$second_print($text{'setup_done'});
-				$mode = $in{'mode'};
+				$mode = $newmode;
 				}
 			}
 		$anything++;
