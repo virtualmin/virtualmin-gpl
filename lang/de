@@ -2326,7 +2326,6 @@ tmpl_phpdiff=Vergleich
 tmpl_phpexact=Exakt
 tmpl_phpmode=Standard PHP Ausführungsmodus
 tmpl_phpver=Standard PHP Version
-tmpl_phpchildren=Standard FCGId PHP Sub-Prozesse
 tmpl_php_iniv=Template PHP $1 Konfigurationsdatei
 tmpl_php_noedit=Erlaube editieren von PHP Konfiguration?
 tmpl_rubymode=Standard Ruby Ausführungsmodus
