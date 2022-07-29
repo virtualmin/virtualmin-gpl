@@ -1522,12 +1522,6 @@ if ($d->{'proxy_pass_mode'} == 1) {
 		# SSL proxy mode
 		push(@dirs, "SSLProxyEngine on");
 		}
-	if ($apache::httpd_modules{'core'} >= 2.0) {
-		# Ensure that proxying works
-		push(@dirs, "<Proxy *>",
-			    "allow from all",
-			    "</Proxy>");
-		}
 	}
 elsif ($d->{'proxy_pass_mode'} == 2) {
 	# Redirect to /framefwd.html
