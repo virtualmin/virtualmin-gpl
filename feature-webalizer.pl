@@ -641,7 +641,7 @@ my ($d, $htaccess_file, $passwd_file) = @_;
 &print_tempfile(HTACCESS, "AuthUserFile $passwd_file\n");
 &print_tempfile(HTACCESS, "require valid-user\n");
 &print_tempfile(HTACCESS, "<Files .stats-htpasswd>\n");
-&print_tempfile(HTACCESS, "deny from all\n");
+&print_tempfile(HTACCESS, "Require all denied\n");
 &print_tempfile(HTACCESS, "</Files>\n");
 &close_tempfile_as_domain_user($d, HTACCESS);
 }
