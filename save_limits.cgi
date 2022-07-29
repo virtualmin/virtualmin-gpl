@@ -56,6 +56,10 @@ if (&can_webmin_modules()) {
 %sel_edits = map { $_, 1 } split(/\0/, $in{'edit'});
 foreach $ed (@edit_limits) {
 	$d->{"edit_".$ed} = $sel_edits{$ed};
+	
+	# Update edits dependencies
+	&update_edit_limits($d, 'phpmode', $sel_edits{$ed})
+		if ($ed eq 'phpmode');
 	}
 
 # Save plugin inputs

@@ -2274,7 +2274,8 @@ else {
 	   	   "php_value[upload_tmp_dir] = $tmp",
 		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
-	&set_ownership_permissions($d->{'user'}, $d->{'ugroup'}, undef, $file);
+
+	&update_edit_limits($d, 'phpmode', $d->{'edit_phpmode'});
 
 	# Add / override custom options (with substitution)
 	if ($tmpl->{'php_fpm'} ne 'none') {
