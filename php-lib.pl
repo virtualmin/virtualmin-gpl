@@ -2251,7 +2251,12 @@ else {
 	# Create a new file
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
-	$defchildren = 9999 if ($defchildren eq "none" || !$defchildren);
+	if ($defchildren eq "none" || !$defchildren) {
+		$defchildren = 9999;
+		}
+	else {
+		$defchildren = $defchildren >= 5 ? $defchildren : 5;
+		}
 	local $tmp = &create_server_tmp($d);
 	my $lref = &read_file_lines($file);
 	@$lref = ( "[$d->{'id'}]",
