@@ -213,6 +213,7 @@ if (defined($in{'htmldir'}) &&
 
 if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
+	&$second_print($text{'phpmode_nothing_skip'});
 	}
 
 &save_domain($d);
