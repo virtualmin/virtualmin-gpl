@@ -67,6 +67,7 @@ if ($can) {
 
 	# Save PHP fcgi children
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
+	$nc = ($nc == 0 || $nc >= 5) ? $nc : 5;
 	if (defined($in{'children_def'}) &&
 	    $nc != &get_domain_php_children($d) && $can == 2) {
 		&$first_print($nc ? &text('phpmode_kidding', $nc)
