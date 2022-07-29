@@ -2410,6 +2410,7 @@ sub links_web
 {
 local ($d) = @_;
 return () if ($d->{'alias'});
+return () if (!&master_admin() && !$d->{'edit_phpmode'});
 local @rv;
 my $link = $d->{'dom'}.":".$d->{'web_port'};
 my $slink = $d->{'dom'}.":".$d->{'web_sslport'};
