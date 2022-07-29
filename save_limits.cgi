@@ -58,7 +58,7 @@ foreach $ed (@edit_limits) {
 	$d->{"edit_".$ed} = $sel_edits{$ed};
 	
 	# Update edits dependencies
-	&update_edit_limits($d, 'phpmode', $sel_edits{$ed});
+	&update_edit_limits($d, $ed, $sel_edits{$ed});
 	}
 
 # Save plugin inputs
