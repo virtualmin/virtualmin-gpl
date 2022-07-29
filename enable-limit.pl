@@ -114,8 +114,7 @@ foreach $d (@doms) {
 		$d->{'edit_'.$ed} = 1 if ($edit{$ed});
 
 		# Update edits dependencies
-		&update_edit_limits($d, 'phpmode', $edit{$ed})
-			if ($ed eq 'phpmode');
+		&update_edit_limits($d, 'phpmode', $edit{$ed});
 		}
 
 	# Save new domain details

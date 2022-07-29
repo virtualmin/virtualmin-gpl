@@ -18818,14 +18818,15 @@ else {
 	$d->{'smtp_cloud'} = $cloud;
 	}
 }
-# update_edit_limits(&dom, limit-name, limit-value, [&opts])
-# Updates dependencies for given feature when limits for a domain changed
+# update_edit_limits(&dom, limit-name, limit-value)
+# Updates dependencies for given feature 
+# when limits for a domain changed
 sub update_edit_limits {
-my ($d, $lname, $lvalue, $opts) = @_;
+my ($d, $lname, $lvalue) = @_;
 
 # Update FPM pool file perms
 if ($lname eq 'phpmode') {
-	my $fpmconf = $opts->{'fpm_config'} || &get_php_fpm_config($d);
+	my $fpmconf = &get_php_fpm_config($d);
 	my $fpmfile = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
 	if (-r $fpmfile) {
 		if ($lvalue) {
