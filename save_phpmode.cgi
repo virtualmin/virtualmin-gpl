@@ -49,8 +49,6 @@ if ($can) {
 	if (defined($in{'mode'}) && $oldmode ne $in{'mode'} && $can == 2) {
 		&$first_print(&text('phpmode_moding', $text{'phpmode_'.$in{'mode'}}));
 		@modes = &supported_php_modes($d);
-		var_dump($in{'mode'});
-		var_dump(\@modes);
 		if (&indexof($in{'mode'}, @modes) < 0) {
 			&$second_print($text{'phpmode_emode'});
 			}
