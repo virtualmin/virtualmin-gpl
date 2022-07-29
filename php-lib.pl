@@ -1320,7 +1320,7 @@ else {
 			local @lines = (
 				"    <Directory $dir>",
 				"        Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
-				"        allow from all",
+				"        Require all granted",
 				"        AllowOverride All".$olist,
 				(map { "        ".$_ } @phplines),
 				"    </Directory>"
