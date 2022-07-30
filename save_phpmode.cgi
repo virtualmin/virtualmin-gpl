@@ -12,7 +12,7 @@ $can || $canv || &error($text{'phpmode_ecannot'});
 &require_apache();
 $p = &domain_has_website($d);
 @modes = &supported_php_modes($d);
-($newmode) = grep { $in{'mode'} =~ /^$_/ } @modes;
+$newmode = $in{'mode'};
 if ($can) {
 	# Check for option clashes
 	if (!$d->{'alias'} && $can == 2) {
