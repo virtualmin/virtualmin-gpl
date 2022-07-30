@@ -2251,7 +2251,12 @@ else {
 	# Create a new file
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
-	$defchildren = 9999 if ($defchildren eq "none" || !$defchildren);
+	if ($defchildren eq "none" || !$defchildren) {
+		$defchildren = 9999;
+		}
+	else {
+		$defchildren = $defchildren >= 5 ? $defchildren : 5;
+		}
 	local $tmp = &create_server_tmp($d);
 	my $lref = &read_file_lines($file);
 	@$lref = ( "[$d->{'id'}]",
@@ -2269,6 +2274,8 @@ else {
 	   	   "php_value[upload_tmp_dir] = $tmp",
 		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
+
+	&update_edit_limits($d, 'phpmode', $d->{'edit_phpmode'});
 
 	# Add / override custom options (with substitution)
 	if ($tmpl->{'php_fpm'} ne 'none') {
