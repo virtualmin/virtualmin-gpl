@@ -871,7 +871,7 @@ if (@pconfs) {
 		       'global' => 0,
 		       'anyfile' => 0,
 		       'user' => $_[0]->{'user'},
-		       'manual' => 1 );
+		       'manual' => 0 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "phpini")
 		if (!$hasmods{'phpini'});
 	push(@mods, "phpini");
