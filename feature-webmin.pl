@@ -855,7 +855,7 @@ if ($extramods{'phpini'}) {
 			}
 		elsif ($mode eq "fpm") {
 			# Allow access to FPM configs for PHP overrides
-			my $conf = &get_php_fpm_config();
+			my $conf = &get_php_fpm_config($sd);
 			if ($conf) {
 				my $file = $conf->{'dir'}."/".
 					   $sd->{'id'}.".conf";
