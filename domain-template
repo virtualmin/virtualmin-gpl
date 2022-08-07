@@ -32,9 +32,9 @@ ${ENDIF-MAIL}
 ${IF-DNS}
 DNS domain:              ${DOM}
 Nameserver:              ${DNS_SERVER}
-${IF-DNS_SLAVES}
-Slave nameservers:       ${DNS_SLAVES}
-${ENDIF-DNS_SLAVES}
+${IF-DNS_SLAVE}
+Slave nameservers:       ${DNS_SLAVE}
+${ENDIF-DNS_SLAVE}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}

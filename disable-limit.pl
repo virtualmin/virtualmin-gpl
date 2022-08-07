@@ -112,6 +112,9 @@ foreach $d (@doms) {
 	# Update edits
 	foreach $ed (@edit_limits) {
 		$d->{'edit_'.$ed} = 0 if ($edit{$ed});
+
+		# Update edits dependencies
+		&update_edit_limits($d, $ed, !$edit{$ed});
 		}
 
 	# Save new domain details

@@ -436,7 +436,7 @@ else {
 	}
 
 # Grant access to Apache module if needed
-if ($features{'web'} && $avail{'web'}) {
+if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 	# Allow user to manage just this website
 	&require_apache();
 	push(@mods, "apache");
@@ -831,7 +831,7 @@ else {
 	}
 
 local @pconfs;
-if ($extramods{'phpini'}) {
+if ($extramods{'phpini'} && $d->{'edit_phpmode'}) {
 	# Can edit PHP configuration files
 	foreach my $sd (grep { $_->{'web'} } @doms) {
 		my $mode = &get_domain_php_mode($sd);
@@ -855,7 +855,7 @@ if ($extramods{'phpini'}) {
 			}
 		elsif ($mode eq "fpm") {
 			# Allow access to FPM configs for PHP overrides
-			my $conf = &get_php_fpm_config();
+			my $conf = &get_php_fpm_config($sd);
 			if ($conf) {
 				my $file = $conf->{'dir'}."/".
 					   $sd->{'id'}.".conf";
@@ -871,7 +871,7 @@ if (@pconfs) {
 		       'global' => 0,
 		       'anyfile' => 0,
 		       'user' => $_[0]->{'user'},
-		       'manual' => 1 );
+		       'manual' => 0 );
 	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "phpini")
 		if (!$hasmods{'phpini'});
 	push(@mods, "phpini");

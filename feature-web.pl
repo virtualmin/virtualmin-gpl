@@ -53,6 +53,9 @@ if ($d->{'php_fpm_port'}) {
 	}
 
 local @dirs = &apache_template($tmpl->{'web'}, $d);
+if ($apache::httpd_modules{'mod_proxy'}) {
+	push(@dirs, "ProxyPass /.well-known !");
+	}
 if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 	# Update the parent virtual host (and the SSL virtual host, if any)
 	local @ports = ( $alias->{'web_port'} );
@@ -99,7 +102,7 @@ else {
 		local $url = "http://$urlhost$port/";
 		if ($apache::httpd_modules{'mod_proxy'} &&
 		    $tmpl->{'web_alias'} == 2) {
-			push(@dirs, "ProxyPass /.well-known/acme-challenge/ !",
+			push(@dirs, "ProxyPass /.well-known !",
 				    "ProxyPass / $url",
 				    "ProxyPassReverse / $url");
 			$proxying = 1;
@@ -199,11 +202,6 @@ else {
 	# Same the HTML and CGI dirs that we set
 	if (!$d->{'alias'} && !$d->{'subdom'}) {
 		&find_html_cgi_dirs($d);
-		}
-
-	# Add <Proxy *> section, to ensure that proxypass works
-	if ($proxying) {
-		&add_proxy_allow_directives($d);
 		}
 
 	# Redirect webmail and admin to Usermin and Webmin
@@ -1523,12 +1521,6 @@ if ($d->{'proxy_pass_mode'} == 1) {
 	    $apache::httpd_modules{'core'} >= 2.0) {
 		# SSL proxy mode
 		push(@dirs, "SSLProxyEngine on");
-		}
-	if ($apache::httpd_modules{'core'} >= 2.0) {
-		# Ensure that proxying works
-		push(@dirs, "<Proxy *>",
-			    "allow from all",
-			    "</Proxy>");
 		}
 	}
 elsif ($d->{'proxy_pass_mode'} == 2) {
@@ -3247,37 +3239,6 @@ if (defined(&save_domain_ruby_mode)) {
 	}
 
 return $err;
-}
-
-# add_proxy_allow_directives(&domain)
-# Adds a <Proxy *> section to allow ProxyPass to work, in case it is overridden
-# at a higher level (as seen on Ubuntu).
-sub add_proxy_allow_directives
-{
-local ($d) = @_;
-&require_apache();
-return 0 if ($apache::httpd_modules{'core'} < 2);	# Not supported in 1.3
-local @ports;
-push(@ports, $d->{'web_port'}) if ($d->{'web'});
-push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
-local $added = 0;
-foreach my $port (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $port);
-	next if (!$virt);
-	local @proxy = grep { $_ eq "*" }
-			    &apache::find_directive("Proxy", $vconf);
-	if (!@proxy) {
-		local $lref = &read_file_lines($virt->{'file'});
-		splice(@$lref, $virt->{'eline'}, 0,
-		       "    <Proxy *>",
-		       "        allow from all",
-		       "    </Proxy>");
-		&flush_file_lines($virt->{'file'});
-		undef(@apache::get_config_cache);
-		$added++;
-		}
-	}
-return $added;
 }
 
 # add_webmail_redirect_directives(&domain, &template)
