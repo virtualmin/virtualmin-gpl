@@ -318,11 +318,11 @@ local $tmpl = &get_template($d->{'template'});
 local $chroot = &get_domain_jailkit($d);
 
 # Work out which module's ACLs to leave alone
-local %hasmods = map { $_, 1 } @{$_[1]->{'modules'}};
+local %hasmods = map { $_, 1 } @{$wuser->{'modules'}};
 %hasmods = ( ) if (!$config{'leave_acl'});
 
 # Work out which domains and features exist
-local @doms = ( $_[0], &get_domain_by("parent", $_[0]->{'id'}) );
+local @doms = ( $d, &get_domain_by("parent", $d->{'id'}) );
 local %doneid;
 @doms = grep { !$doneid{$_->{'id'}}++ } @doms;
 local (%features, $sd, $f);
@@ -349,8 +349,8 @@ local %extramods = map { $_, $avail{$_} }
 			@extramods;
 
 # Grant access to BIND module if needed
-if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'} &&
-    !$_[0]->{'dns_cloud'}) {
+if ($features{'dns'} && $avail{'dns'} && !$d->{'provision_dns'} &&
+    !$d->{'dns_cloud'}) {
 	# Allow user to manage just their domains
 	push(@mods, "bind8");
 	local %acl = ( 'noconfig' => 1,
@@ -359,7 +359,7 @@ if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'} &&
 				     grep { $_->{'dns'} &&
 				            !$_->{'provision_dns'} &&
 					    !$_->{'dns_cloud'} } @doms),
-		       'dir' => &resolve_links($_[0]->{'home'}),
+		       'dir' => &resolve_links($d->{'home'}),
 		       'master' => 0,
 		       'slave' => 0,
 		       'forward' => 0,
@@ -380,7 +380,7 @@ if ($features{'dns'} && $avail{'dns'} && !$_[0]->{'provision_dns'} &&
 		       'remote' => 0,
 		       'views' => 0,
 		       'vlist' => '' );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "bind8")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "bind8")
 		if (!$hasmods{'bind8'});
 	}
 else {
@@ -400,11 +400,11 @@ if ($features{'mysql'} && $avail{'mysql'}) {
 		       'stop' => 0,
 		       'perms' => 0,
 		       'edonly' => 0,
-		       'user' => &mysql_user($_[0]),
-		       'pass' => &mysql_pass($_[0]),
-		       'buser' => $_[0]->{'user'},
+		       'user' => &mysql_user($d),
+		       'pass' => &mysql_pass($d),
+		       'buser' => $d->{'user'},
 		       'bpath' => "/" );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, $mymod)
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, $mymod)
 		if (!$hasmods{$mymod});
 	}
 else {
@@ -423,12 +423,12 @@ if ($features{'postgres'} && $avail{'postgres'}) {
 		       'delete' => 0,
 		       'stop' => 0,
 		       'users' => 0,
-		       'user' => &postgres_user($_[0]),
-		       'pass' => &postgres_pass($_[0], 1),
+		       'user' => &postgres_user($d),
+		       'pass' => &postgres_pass($d, 1),
 		       'sameunix' => 1,
 		       'backup' => 0,
 		       'restore' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "postgresql")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "postgresql")
 		if (!$hasmods{'postgresql'});
 	}
 else {
@@ -453,8 +453,8 @@ if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 		       'names' => 0,
 		       'pipe' => 0,
 		       'stop' => 0,
-		       'dir' => &resolve_links($_[0]->{'home'}),
-		       'aliasdir' => &resolve_links($_[0]->{'home'}),
+		       'dir' => &resolve_links($d->{'home'}),
+		       'aliasdir' => &resolve_links($d->{'home'}),
 		       'test_always' => 1,
 		       'types' => join(" ",
 				(0 .. 7, 9 .. 16,
@@ -473,7 +473,7 @@ if ($features{'web'} && $avail{'web'} && $d->{'edit_phpmode'}) {
 			map { $_->{'dom'}, "$_->{'dom'}:$_->{'web_sslport'}" }
 			    @ssldoms);
 		}
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "apache")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "apache")
 		if (!$hasmods{'apache'});
 	}
 else {
@@ -493,9 +493,9 @@ if ($features{'webalizer'} && $avail{'webalizer'}) {
 		       'view' => $tmpl->{'web_stats_noedit'},
 		       'global' => 0,
 		       'add' => 0,
-		       'user' => $_[0]->{'user'},
+		       'user' => $d->{'user'},
 		       'dir' => join(" ", @logs) );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "webalizer")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "webalizer")
 		if (!$hasmods{'webalizer'});
 	}
 else {
@@ -516,7 +516,7 @@ if ($features{'spam'} && $avail{'spam'} && @spamassassin_doms) {
 		       'avail' => 'white,score,report,user,header,awl',
 		       'procmailrc' => "$procmail_spam_dir/$sd->{'id'}",
 		       'file' => "$spam_config_dir/$sd->{'id'}/virtualmin.cf",
-		       'awl_groups' => $_[0]->{'group'},
+		       'awl_groups' => $d->{'group'},
 		     );
 	$acl{'files'} = join(' ',
 			     map { "$spam_config_dir/$_->{'id'}/virtualmin.cf" }
@@ -524,7 +524,7 @@ if ($features{'spam'} && $avail{'spam'} && @spamassassin_doms) {
 	$acl{'procmailrcs'} = join(' ',
 			     map { "$procmail_spam_dir/$_->{'id'}" }
 			         @spamassassin_doms);
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "spam")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "spam")
 		if (!$hasmods{'spam'});
 	}
 else {
@@ -532,105 +532,105 @@ else {
 	}
 
 # All users get access to virtualmin at least
-local $can_create = $_[0]->{'domslimit'} && !$_[0]->{'no_create'} &&
-		    $_[0]->{'unix'};
+local $can_create = $d->{'domslimit'} && !$d->{'no_create'} &&
+		    $d->{'unix'};
 push(@mods, $module_name);
 local %acl = ( 'noconfig' => 1,
-	       'edit' => $_[0]->{'edit_domain'} ? 2 : 0,
+	       'edit' => $d->{'edit_domain'} ? 2 : 0,
 	       'create' => $can_create ? 2 : 0,
 	       'import' => 0,
 	       'stop' => 0,
 	       'local' => 0,
-	       'nodbname' => $_[0]->{'nodbname'},
-	       'norename' => $_[0]->{'norename'},
-	       'migrate' => $_[0]->{'migrate'},
-	       'forceunder' => $_[0]->{'forceunder'},
-	       'safeunder' => $_[0]->{'safeunder'},
-	       'ipfollow' => $_[0]->{'ipfollow'},
+	       'nodbname' => $d->{'nodbname'},
+	       'norename' => $d->{'norename'},
+	       'migrate' => $d->{'migrate'},
+	       'forceunder' => $d->{'forceunder'},
+	       'safeunder' => $d->{'safeunder'},
+	       'ipfollow' => $d->{'ipfollow'},
 	       'domains' => join(" ", map { $_->{'id'} } @doms),
-	       'admin' => $_[2] ? $_[0]->{'id'} : undef,
+	       'admin' => $acls ? $d->{'id'} : undef,
 	      );
 foreach $f (@opt_features, &list_feature_plugins(), 'virt') {
-	$acl{"feature_$f"} = $_[0]->{"limit_$f"};
+	$acl{"feature_$f"} = $d->{"limit_$f"};
 	}
 foreach my $ed (@edit_limits) {
-	$acl{'edit_'.$ed} = $_[0]->{'edit_'.$ed};
+	$acl{'edit_'.$ed} = $d->{'edit_'.$ed};
 	}
-$acl{'allowedscripts'} = $_[0]->{'allowedscripts'};
+$acl{'allowedscripts'} = $d->{'allowedscripts'};
 if ($acls) {
 	foreach my $k (keys %$acls) {
 		$acl{$k} = $acls->{$k};
 		}
 	}
-&save_module_acl_logged(\%acl, $_[1]->{'name'});
+&save_module_acl_logged(\%acl, $wuser->{'name'});
 %uaccess = %acl;
 
 # Set global ACL options
 local %acl = ( 'feedback' => 0,
 	       'rpc' => 0,
 	       'negative' => 1,
-	       'readonly' => $_[0]->{'demo'},
-	       'fileunix' => $_[0]->{'user'} );
+	       'readonly' => $d->{'demo'},
+	       'fileunix' => $d->{'user'} );
 if ($chroot) {
-	$acl{'root'} = $_[0]->{'home'};
+	$acl{'root'} = $d->{'home'};
 	}
 else {
 	$acl{'root'} = &resolve_links(
-		&substitute_domain_template($tmpl->{'gacl_root'}, $_[0]));
+		&substitute_domain_template($tmpl->{'gacl_root'}, $d));
 	}
 if ($tmpl->{'gacl_umode'} == 1) {
 	$acl{'uedit_mode'} = 5;
-	$acl{'uedit'} = &substitute_domain_template($tmpl->{'gacl_ugroups'}, $_[0]);
+	$acl{'uedit'} = &substitute_domain_template($tmpl->{'gacl_ugroups'}, $d);
 	}
 else {
 	$acl{'uedit_mode'} = 2;
-	$acl{'uedit'} = &substitute_domain_template($tmpl->{'gacl_uusers'}, $_[0]);
+	$acl{'uedit'} = &substitute_domain_template($tmpl->{'gacl_uusers'}, $d);
 	}
 $acl{'gedit_mode'} = 2;
-$acl{'gedit'} = &substitute_domain_template($tmpl->{'gacl_groups'}, $_[0]);
-if (!$_[0]->{'domslimit'}) {
+$acl{'gedit'} = &substitute_domain_template($tmpl->{'gacl_groups'}, $d);
+if (!$d->{'domslimit'}) {
 	$acl{'desc_'.$module_name} = $text{'index_title2'};
 	}
-&save_module_acl_logged(\%acl, $_[1]->{'name'}, ".");
+&save_module_acl_logged(\%acl, $wuser->{'name'}, ".");
 
-if ($extramods{'file'} && $_[0]->{'unix'}) {
+if ($extramods{'file'} && $d->{'unix'}) {
 	# Limit old Java file manager to user's directory, as unix user
 	local %acl = ( 'noconfig' => 1,
-		       'uid' => $_[0]->{'uid'},
+		       'uid' => $d->{'uid'},
 		       'follow' => 0,
-		       'root' => &resolve_links($_[0]->{'home'}),
+		       'root' => &resolve_links($d->{'home'}),
 		       'home' => 0,
 		       'goto' => 1 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "file")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "file")
 		if (!$hasmods{'file'});
 	push(@mods, "file");
 	}
 
-if ($extramods{'filemin'} && $_[0]->{'unix'}) {
+if ($extramods{'filemin'} && $d->{'unix'}) {
 	# Limit new HTML file manager to user's directory, as unix user
 	my $modname = &foreign_check("file-manager") ?
 				"file-manager" : "filemin";
 	local %acl = ( 'noconfig' => 1,
 		       'work_as_root' => 0,
-		       'work_as_user', $_[0]->{'user'},
-		       'allowed_paths' => &resolve_links($_[0]->{'home'}),
+		       'work_as_user', $d->{'user'},
+		       'allowed_paths' => &resolve_links($d->{'home'}),
 		     );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, $modname)
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, $modname)
 		if (!$hasmods{$modname});
 	push(@mods, $modname);
 	}
 
-if ($_[0]->{'unix'}) {
+if ($d->{'unix'}) {
 	if ($extramods{'passwd'} == 1 && !$isextra) {
 		# Can only change domain owners password
 		local %acl = ( 'noconfig' => 1,
 			       'mode' => 1,
-			       'users' => $_[0]->{'user'},
+			       'users' => $d->{'user'},
 			       'repeat' => 1,
 			       'old' => 1,
 			       'expire' => 0,
 			       'others' => 1 );
-		&save_module_acl_logged(\%acl, $_[1]->{'name'}, "passwd")
+		&save_module_acl_logged(\%acl, $wuser->{'name'}, "passwd")
 			if (!$hasmods{'passwd'});
 		push(@mods, "passwd");
 		}
@@ -639,58 +639,58 @@ if ($_[0]->{'unix'}) {
 		# owner, if this is an extra admin)
 		local %acl = ( 'noconfig' => 1,
 			       'mode' => 5,
-			       'users' => $_[0]->{'group'},
-			       'notusers' => $_[0]->{'user'},
+			       'users' => $d->{'group'},
+			       'notusers' => $d->{'user'},
 			       'repeat' => 1,
 			       'old' => 0,
 			       'expire' => 0,
 			       'others' => 1 );
-		&save_module_acl_logged(\%acl, $_[1]->{'name'}, "passwd")
+		&save_module_acl_logged(\%acl, $wuser->{'name'}, "passwd")
 			if (!$hasmods{'passwd'});
 		push(@mods, "passwd");
 		}
 	}
 
-if ($extramods{'proc'} && $_[0]->{'unix'} && !$chroot) {
+if ($extramods{'proc'} && $d->{'unix'} && !$chroot) {
 	# Can only manage and see his own processes
 	local %acl = ( 'noconfig' => 1,
-		       'uid' => $_[0]->{'uid'},
+		       'uid' => $d->{'uid'},
 		       'edit' => 1,
 		       'run' => 1,
-		       'users' => $_[0]->{'user'},
+		       'users' => $d->{'user'},
 		       'only' => ($extramods{'proc'} == 2) );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "proc")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "proc")
 		if (!$hasmods{'proc'});
 	push(@mods, "proc");
 	}
 
-if ($extramods{'cron'} && $_[0]->{'unix'} && !$chroot) {
+if ($extramods{'cron'} && $d->{'unix'} && !$chroot) {
 	# Can only manage his cron jobs
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
-		       'users' => $_[0]->{'user'},
+		       'users' => $d->{'user'},
 		       'allow' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "cron")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "cron")
 		if (!$hasmods{'cron'});
 	push(@mods, "cron");
 	}
 
-if ($extramods{'at'} && $_[0]->{'unix'} && !$chroot) {
+if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
 	# Can only manage his at jobs
 	local %acl = ( 'noconfig' => 1,
 		       'mode' => 1,
-		       'users' => $_[0]->{'user'},
+		       'users' => $d->{'user'},
 		       'allow' => 0,
 		       'stop' => 0, );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "at")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "at")
 		if (!$hasmods{'at'});
 	push(@mods, "at");
 	}
 
-if ($extramods{'telnet'} && $_[0]->{'unix'}) {
+if ($extramods{'telnet'} && $d->{'unix'}) {
 	# Cannot configure module
 	local %acl = ( 'noconfig' => 1 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "telnet")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "telnet")
 		if (!$hasmods{'telnet'});
 	push(@mods, "telnet");
 	}
@@ -700,25 +700,25 @@ if ($extramods{'custom'}) {
 	local %acl = ( 'noconfig' => 1,
 		       'cmd' => '*',
 		       'edit' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "custom")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "custom")
 		if (!$hasmods{'custom'});
 	push(@mods, "custom");
 	}
 
-if ($extramods{'shell'} && $_[0]->{'unix'}) {
+if ($extramods{'shell'} && $d->{'unix'}) {
 	# Can only run commands as server owner
 	local %acl = ( 'noconfig' => 1,
-		       'user' => $_[0]->{'user'},
+		       'user' => $d->{'user'},
 		       'chroot' => $chroot || '/' );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "shell")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "shell")
 		if (!$hasmods{'shell'});
 	push(@mods, "shell");
 	}
 
-if ($extramods{'updown'} && $_[0]->{'unix'}) {
+if ($extramods{'updown'} && $d->{'unix'}) {
 	# Can upload and download to home dir only
 	local %acl = ( 'noconfig' => 1,
-		       'dirs' => $_[0]->{'home'},
+		       'dirs' => $d->{'home'},
 		       'home' => 0,
 		       'mode' => 3, );
 	if ($extramods{'updown'} == 2) {
@@ -726,7 +726,7 @@ if ($extramods{'updown'} && $_[0]->{'unix'}) {
 		$acl{'download'} = 0;
 		$acl{'fetch'} = 0;
 		}
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "updown")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "updown")
 		if (!$hasmods{'updown'});
 	push(@mods, "updown");
 
@@ -735,8 +735,8 @@ if ($extramods{'updown'} && $_[0]->{'unix'}) {
 	local $udfile = "$config_directory/updown/config";
 	&lock_file($udfile);
 	&read_file($udfile, \%udconfig);
-	$udconfig{'dir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
-	$udconfig{'ddir_'.$_[1]->{'name'}} ||= &resolve_links($_[0]->{'home'});
+	$udconfig{'dir_'.$wuser->{'name'}} ||= &resolve_links($d->{'home'});
+	$udconfig{'ddir_'.$wuser->{'name'}} ||= &resolve_links($d->{'home'});
 	&write_file($udfile, \%udconfig);
 	&unlock_file($udfile);
 	}
@@ -746,14 +746,14 @@ if ($extramods{'change-user'}) {
 	push(@mods, "change-user");
 	}
 
-if ($extramods{'htaccess-htpasswd'} && $_[0]->{'unix'}) {
+if ($extramods{'htaccess-htpasswd'} && $d->{'unix'}) {
 	# Can create .htaccess files in home dir, as user
         local %acl = ( 'noconfig' => 1,
                        'home' => 0,
-                       'dirs' => $_[0]->{'home'},
+                       'dirs' => $d->{'home'},
                        'sync' => 0,
-                       'user' => $_[0]->{'user'} );
-        &save_module_acl_logged(\%acl, $_[1]->{'name'}, "htaccess-htpasswd")
+                       'user' => $d->{'user'} );
+        &save_module_acl_logged(\%acl, $wuser->{'name'}, "htaccess-htpasswd")
                 if (!$hasmods{'htaccess-htpasswd'});
         push(@mods, "htaccess-htpasswd");
         }
@@ -766,7 +766,7 @@ if ($extramods{'mailboxes'} && @maildoms) {
 		       'from' => join(" ", map { $_->{'dom'} } @maildoms),
 		       'canattach' => 0,
 		       'candetach' => 0,
-		       'dir' => &mail_domain_base($_[0]) );
+		       'dir' => &mail_domain_base($d) );
 	if (!&mail_system_needs_group()) {
 		# For vpopmail, mailboxes are identified by domain
 		$acl{'mmode'} = 6;
@@ -776,9 +776,9 @@ if ($extramods{'mailboxes'} && @maildoms) {
 	else {
 		# By server GID
 		$acl{'mmode'} = 5;
-		$acl{'musers'} = $_[0]->{'gid'};
+		$acl{'musers'} = $d->{'gid'};
 		}
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "mailboxes")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "mailboxes")
 		if (!$hasmods{'mailboxes'});
 	push(@mods, "mailboxes");
 	}
@@ -786,7 +786,7 @@ else {
 	@mods = grep { $_ ne "mailboxes" } @mods;
 	}
 
-if ($extramods{'syslog'} && $_[0]->{'webmin'}) {
+if ($extramods{'syslog'} && $d->{'webmin'}) {
 	# Can view log files for Apache and ProFTPd
 	local @extras;
 	local %done;
@@ -817,7 +817,7 @@ if ($extramods{'syslog'} && $_[0]->{'webmin'}) {
 			       'noedit' => 1,
 			       'syslog' => 0,
 			       'others' => 0 );
-		&save_module_acl_logged(\%acl, $_[1]->{'name'}, "syslog")
+		&save_module_acl_logged(\%acl, $wuser->{'name'}, "syslog")
 			if (!$hasmods{'syslog'});
 		push(@mods, "syslog");
 		}
@@ -870,9 +870,9 @@ if (@pconfs) {
 		       'noconfig' => 1,
 		       'global' => 0,
 		       'anyfile' => 0,
-		       'user' => $_[0]->{'user'},
+		       'user' => $d->{'user'},
 		       'manual' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "phpini")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "phpini")
 		if (!$hasmods{'phpini'});
 	push(@mods, "phpini");
 	}
@@ -882,14 +882,14 @@ else {
 
 if (!$noextras) {
 	# Add any extra modules specified for this domain
-	push(@mods, split(/\s+/, $_[0]->{'webmin_modules'}));
+	push(@mods, split(/\s+/, $d->{'webmin_modules'}));
 
 	# Add any extra modules specified in global config
 	local @wmods = split(/\s+/, $config{'webmin_modules'});
 	local $m;
 	foreach $m (@wmods) {
 		local %acl = ( 'noconfig' => 1 );
-		&save_module_acl_logged(\%acl, $_[1]->{'name'}, $m)
+		&save_module_acl_logged(\%acl, $wuser->{'name'}, $m)
 			if (!$hasmods{$m});
 		}
 	push(@mods, @wmods);
@@ -900,7 +900,7 @@ if (!$nofeatures) {
 	# for domain owners in the template
 	local $p;
 	foreach $p (@plugins) {
-		local @pmods = &plugin_call($p, "feature_webmin", $_[0],
+		local @pmods = &plugin_call($p, "feature_webmin", $d,
 					    \@doms);
 		local $pm;
 		foreach $pm (@pmods) {
@@ -909,23 +909,23 @@ if (!$nofeatures) {
 			push(@mods, $pm->[0]);
 			if ($pm->[1]) {
 				&save_module_acl_logged(
-					$pm->[1], $_[1]->{'name'}, $pm->[0]);
+					$pm->[1], $wuser->{'name'}, $pm->[0]);
 				}
 			}
 		}
 	}
 
-if ($extramods{'webminlog'} && $_[0]->{'webmin'}) {
+if ($extramods{'webminlog'} && $d->{'webmin'}) {
 	# Can view own actions, and those of extra admins. This has to be
 	# done last, to have access to the list of modules.
-	local @users = ( $_[0]->{'user'} );
+	local @users = ( $d->{'user'} );
 	if ($virtualmin_pro) {
-		push(@users, map { $_->{'name'} } &list_extra_admins($_[0]));
+		push(@users, map { $_->{'name'} } &list_extra_admins($d));
 		}
 	local %acl = ( 'users' => join(" ", @users),
 		       'mods' => join(" ", @mods),
 		       'rollback' => 0 );
-	&save_module_acl_logged(\%acl, $_[1]->{'name'}, "webminlog")
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "webminlog")
 		if (!$hasmods{'webminlog'});
 	push(@mods, "webminlog");
 	}
