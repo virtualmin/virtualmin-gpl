@@ -4044,7 +4044,7 @@ licence_goterr2=.. neplatný dátum vypršania platnosti : $1
 licence_ecannot=Nie je dovolené znova skontrolovať licenciu Virtualmin
 licence_maxdoms=Váš systém je licencovaný len pre servery $1, ale máte $2.
 licence_maxservers2=Vaše sériové číslo $3 je licencované iba pre server $1, ale používa sa na $2.
-licence_maxwarn=Pokiaľ sa toto sériové číslo dočasne nepoužíva na migráciu na nový server, musíte si zakúpiť dodatočnú licenciu na <a target=_blank href='$1'>$2</a>, aby ste predišli porušovaniu pravidiel služby a zabránili predčasné ukončenie existujúcej licencie.
+licence_maxwarn=Ak sa toto sériové číslo dočasne nepoužíva na migráciu na nový server, zakúpte si ďalšiu licenciu na <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=Zdá sa, že primárna IP adresa vášho systému sa zmenila z $1 na $2. Virtuálne servery používajúce starú adresu môžu byť nedostupné alebo môžu poskytovať nesprávny webový obsah.
 licence_changeip=Aktualizujte nesprávne IP adresy
 licence_smallcert=Váš systém používa certifikát SSL, ktorý je dlhý iba $1 bitov, čo je menej ako odporúčaná veľkosť 2048 bitov. Tento certifikát bol vydaný $4 až $3 pre doménu $2.

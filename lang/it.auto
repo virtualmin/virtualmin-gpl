@@ -3039,7 +3039,7 @@ licence_warn=Tuttavia, durante questo controllo della licenza si è verificato u
 licence_goterr2=.. data di scadenza non valida : $1 
 licence_maxdoms=Il tuo sistema è concesso in licenza solo per server $1, ma hai $2.
 licence_maxservers2=Il tuo numero di serie $3 è concesso in licenza solo per il server $1, ma è utilizzato su $2.
-licence_maxwarn=A meno che questo numero di serie non venga utilizzato temporaneamente per migrare a un nuovo server, è necessario acquistare una licenza aggiuntiva su <a target=_blank href='$1'>$2</a> per impedire la violazione delle regole del servizio ed evitare risoluzione anticipata della licenza esistente.
+licence_maxwarn=A meno che questo numero di serie non venga utilizzato temporaneamente per migrare a un nuovo server, acquista una licenza aggiuntiva su <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=L'indirizzo IP primario del sistema sembra essere cambiato da $1 a $2. I server virtuali che utilizzano il vecchio indirizzo potrebbero essere irraggiungibili o servire il contenuto Web errato.
 licence_changeip=Aggiorna indirizzi IP errati
 licence_smallcert=Il sistema utilizza un certificato SSL che è lungo solo $1 bit, che è inferiore alla dimensione consigliata di 2048 bit. Questo certificato è stato rilasciato da $4 a $3 per il dominio $2.

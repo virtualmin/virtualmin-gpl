@@ -1898,7 +1898,7 @@ licence_unlimited=sınırsız
 licence_goterr2=.. geçersiz son kullanma tarihi : $1 
 licence_maxdoms=Sisteminiz yalnızca $1 sunucu için lisanslanmış, ancak $2 sunucunuz var.
 licence_maxservers2=$3 seri numaranız yalnızca $1 sunucusu için lisanslanmıştır, ancak $2 üzerinde kullanılmaktadır.
-licence_maxwarn=Bu seri numarası yeni bir sunucuya geçmek için geçici olarak kullanılmadığı sürece, hizmet kurallarının ihlalini önlemek ve bundan kaçınmak için <a target=_blank href='$1'>$2</a> adresinden ek bir lisans satın almalısınız. mevcut lisansın erken feshi.
+licence_maxwarn=Bu seri numarası yeni bir sunucuya geçmek için geçici olarak kullanılmadıkça, lütfen <a target=_blank href='$1'>$2</a> adresinden ek bir lisans satın alın.
 licence_ipchanged=Sisteminizin birincil IP adresinin $1 'den $2 'ye değiştiği görülüyor. Eski adresi kullanan sanal sunuculara ulaşılamayabilir veya yanlış web içeriği sunabilir.
 licence_changeip=Hatalı IP Adreslerini Güncelleyin
 licence_smallcert=Sisteminiz, yalnızca $1 bit uzunluğunda ve önerilen 2048 bit boyutundan daha küçük bir SSL sertifikası kullanıyor. Bu sertifika, $2 alan adı için $4 ile $3 arasında verildi.

@@ -767,7 +767,7 @@ licence_ok2=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domei
 licence_ok3=.. licentie is <i>geldig</i>. Het is geldig voor $1 Virtualmin-domeinen en voor gebruik op $2 -systemen tot $3.
 licence_goterr2=.. ongeldige vervaldatum : $1
 licence_maxservers2=Uw serienummer $3 heeft alleen een licentie voor $1 server, maar wordt gebruikt op $2.
-licence_maxwarn=Tenzij dit serienummer tijdelijk wordt gebruikt om naar een nieuwe server te migreren, moet u een extra licentie aanschaffen bij <a target=_blank href='$1'>$2</a> om schending van de serviceregels te voorkomen en te voorkomen voortijdige beëindiging van de bestaande licentie.
+licence_maxwarn=Tenzij dit serienummer tijdelijk wordt gebruikt om naar een nieuwe server te migreren, dient u een extra licentie aan te schaffen bij <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=Het primaire IP-adres van uw systeem lijkt te zijn gewijzigd van $1 in $2. Virtuele servers die het oude adres gebruiken, zijn mogelijk onbereikbaar of geven de verkeerde webinhoud weer.
 licence_changeip=Update onjuiste IP-adressen
 licence_smallcert=Uw systeem gebruikt een SSL-certificaat dat slechts $1 bits lang is, wat kleiner is dan de aanbevolen grootte van 2048 bits. Dit certificaat is uitgegeven door $4 tot $3 voor het domein $2.
