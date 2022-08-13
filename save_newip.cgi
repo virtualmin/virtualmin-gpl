@@ -159,6 +159,7 @@ elsif ($in{'mode6'} == 3) {
 	$virt6already = $in{'virt6already'};
 	&check_ip6address($ip6) ||
 		&error($text{'setup_eip6'});
+	($ip6, $netmask6) = split(/\//, $ip6);
 	$clash = &check_virt6_clash($ip6);
 	if (!$virt6already) {
 		# Make sure the IPv6 address isn't assigned yet
