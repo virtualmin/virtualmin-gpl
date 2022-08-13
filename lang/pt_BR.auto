@@ -3829,7 +3829,7 @@ licence_goterr2=.. prazo de validade inválido : $1
 licence_ecannot=Você não tem permissão para verificar novamente a licença do Virtualmin
 licence_maxdoms=Seu sistema está licenciado para apenas $1 servidores, mas você possui $2.
 licence_maxservers2=Seu número de série $3 está licenciado apenas para o servidor $1, mas está sendo usado em $2.
-licence_maxwarn=A menos que este número de série seja usado temporariamente para migrar para um novo servidor, você deve comprar uma licença adicional em <a target=_blank href='$1'>$2</a> para impedir a violação das regras de serviço e evitar rescisão antecipada da licença existente.
+licence_maxwarn=A menos que este número de série seja usado temporariamente para migrar para um novo servidor, adquira uma licença adicional em <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=O endereço IP principal do seu sistema parece ter mudado de $1 para $2. Os servidores virtuais que usam o endereço antigo podem estar inacessíveis ou veicular o conteúdo da Web errado.
 licence_changeip=Atualizar endereços IP incorretos
 licence_smallcert=Seu sistema está usando um certificado SSL com apenas 1% de comprimento, menor que o tamanho recomendado de 2048 bits. Este certificado foi emitido por $4 a $3 para o domínio $2.

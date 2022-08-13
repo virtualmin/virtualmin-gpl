@@ -3471,7 +3471,7 @@ licence_goterr2=.. nieprawidłowa data ważności : $1
 licence_ecannot=Nie możesz ponownie sprawdzić licencji Virtualmin
 licence_maxdoms=Twój system jest licencjonowany tylko na $1 serwerów, ale masz $2.
 licence_maxservers2=Twój numer seryjny $3 jest licencjonowany tylko dla serwera $1, ale jest używany na $2.
-licence_maxwarn=O ile ten numer seryjny nie jest używany tymczasowo w celu migracji na nowy serwer, musisz kupić dodatkową licencję na <a target=_blank href='$1'>$2</a>, aby wykluczyć naruszenie zasad usługi i uniknąć przedterminowe rozwiązanie istniejącej licencji.
+licence_maxwarn=Jeśli ten numer seryjny nie jest używany tymczasowo w celu migracji na nowy serwer, kup dodatkową licencję pod adresem <a target=_blank href='$1'>$2</a>.
 licence_ipchanged=Wygląda na to, że główny adres IP twojego systemu zmienił się z $1 na $2. Serwery wirtualne używające starego adresu mogą być nieosiągalne lub mogą wyświetlać niewłaściwe treści internetowe.
 licence_changeip=Zaktualizuj nieprawidłowe adresy IP
 licence_smallcert=Twój system używa certyfikatu SSL, który ma tylko $1 bitów, czyli mniej niż zalecany rozmiar 2048 bitów. Ten certyfikat został wydany przez $4 do $3 dla domeny $2.
