@@ -918,6 +918,15 @@ foreach $u (@users) {
 	$u->{'mquota'} = $u->{$qtype.'mquota'} if (!defined($u->{'mquota'}));
 	}
 
+# Merge in cached quotas
+my $qfile = $quota_cache_dir."/".$_[0]->{'id'};
+my %qcache;
+&read_file_cached($qfile, \%qcache);
+foreach $u (@users) {
+	$u->{'quota_cache'} = $qcache{$u->{'user'}."_quota"};
+	$u->{'mquota_cache'} = $qcache{$u->{'user'}."_mquota"};
+	}
+
 # Check if spamc is being used
 local $spamc;
 if ($_[0] && $_[0]->{'spam'}) {
@@ -1408,6 +1417,7 @@ if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	# Set his initial quotas
 	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
 			 $_[1]);
+	&update_user_quota_cache($_[1], $_[0], 0);
 	}
 
 # Grant access to databases (unless this is the domain owner)
@@ -1800,6 +1810,10 @@ if ($_[0]->{'unix'} && $_[2] && $_[0]->{'user'} ne $_[2]->{'user'} &&
      $_[0]->{'mquota'} != $_[1]->{'mquota'})) {
 	&set_user_quotas($_[0]->{'user'}, $_[0]->{'quota'}, $_[0]->{'mquota'},
 			 $_[2]);
+	if ($_[0]->{'user'} ne $_[1]->{'user'}) {
+		&update_user_quota_cache($_[1], $_[0], 1);
+		}
+	&update_user_quota_cache($_[2], $_[0], 0);
 	}
 
 # Update the plain-text password file, except for a domain owner
@@ -2031,6 +2045,7 @@ sub delete_user
 # Zero out his quotas
 if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
+	&update_user_quota_cache($_[1], $_[0], 1);
 	}
 
 # Delete any of his cron jobs

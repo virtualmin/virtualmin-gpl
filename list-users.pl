@@ -153,6 +153,11 @@ foreach $d (@doms) {
 				      ($u->{'quota'} * $home_bsize),"\n";
 				print "    Home byte quota used: ",
 				      ($u->{'uquota'} * $home_bsize),"\n";
+				if (defined($u->{'quota_cache'}) &&
+				    $u->{'quota_cache'} != $u->{'quota'}) {
+					print "    Home quota expected: ",
+					      &quota_show($u->{'quota_cache'}, "home"),"\n";
+					}
 				}
 			if ($u->{'unix'} && &has_mail_quotas() &&
 			    !$u->{'noquota'}) {
@@ -164,6 +169,11 @@ foreach $d (@doms) {
 				      ($u->{'mquota'} * $mail_bsize),"\n";
 				print "    Mail byte quota used: ",
 				      ($u->{'umquota'} * $mail_bsize),"\n";
+				if (defined($u->{'mquota_cache'}) &&
+				    $u->{'mquota_cache'} != $u->{'mquota'}) {
+					print "    Mail quota expected: ",
+					      &quota_show($u->{'mquota_cache'}, "mail"),"\n";
+					}
 				}
 			if ($mailsize) {
 				($msize) = &mail_file_size($u);
