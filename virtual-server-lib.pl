@@ -358,6 +358,8 @@ $public_dns_suffix_url = "https://publicsuffix.org/list/public_suffix_list.dat";
 
 $lookup_domain_port = 11000;
 
+$quota_cache_dir = "$module_var_directory/quota-cache";
+
 # generate_plugins_list([list])
 # Creates the confplugins, plugins and other arrays based on the module config
 # or given space-separated string.

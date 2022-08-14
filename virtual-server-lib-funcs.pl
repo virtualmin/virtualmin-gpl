@@ -2478,6 +2478,32 @@ else {
 	}
 }
 
+# update_user_quota_cache(&domain, &user, [deleting])
+# Updates the cache file of mailbox quotas for this virtual server
+sub update_user_quota_cache
+{
+my ($d, $user, $deleting) = @_;
+&make_dir($quota_cache_dir, 0755) if (!-d $quota_cache_dir);
+my $qfile = $quota_cache_dir."/".$d->{'id'};
+my %cache;
+&read_file_cached($qfile, \%cache);
+my $u = $user->{'user'};
+if ($deleting) {
+	delete($cache{$u."_quota"});
+	delete($cache{$u."_mquota"});
+	}
+else {
+	$cache{$u."_quota"} = $user->{'quota'};
+	if (defined($user->{'mquota'})) {
+		$cache{$u."_mquota"} = $user->{'mquota'}
+		}
+	else {
+		delete($cache{$u."_mquota"});
+		}
+	}
+&write_file($qfile, \%cache);
+}
+
 # run_quota_command(config-suffix, arg, ...)
 # Run some external quota set/get command. On failure calls error, otherwise
 # returns the output.
