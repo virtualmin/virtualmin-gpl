@@ -14355,19 +14355,19 @@ if (&foreign_check("proc")) {
 		local $beans = &get_beancounters();
 		if ($mem[0]*1024 < $rmem) {
 			# Memory is less than 512 MB (768 on 64-bit)
-			&$second_print("<b>".&text('check_lowmemory',
+			&$second_print(&ui_text_color(&text('check_lowmemory',
 				&nice_size($mem[0]*1024),
-				&nice_size($rmem))."</b>");
+				&nice_size($rmem)), 'warn'));
 			}
 		elsif ($beans->{'vmguarpages'} &&
 		       $beans->{'vmguarpages'}*4096 < $rmem &&
 		       $beans->{'vmguarpages'} < $beans->{'privvmpages'}) {
 			# OpenVZ guaranteed memory is lower than max memory,
 			# and is less than 256 M
-			&$second_print("<b>".&text('check_lowgmemory',
+			&$second_print(&ui_text_color(&text('check_lowgmemory',
 				&nice_size($mem[0]*1024),
 				&nice_size($beans->{'vmguarpages'}*4096),
-				&nice_size($rmem))."</b>");
+				&nice_size($rmem)), 'warn'));
 			}
 		elsif ($beans->{'vmguarpages'} &&
 		       $beans->{'vmguarpages'} < $beans->{'privvmpages'}) {
@@ -14761,7 +14761,7 @@ if (&domain_has_website()) {
 					     join(", ", @msg)));
 			}
 		else {
-			&$second_print("<b>$text{'check_webphpnovers'}</b>");
+			&$second_print(&ui_text_color($text{'check_webphpnovers'}, 'warn'));
 			}
 		}
 
@@ -15286,9 +15286,9 @@ if ($config{'dns_ip'} ne '*') {
 		}
 	elsif ($ext_ip && $ext_ip ne $dns_ip) {
 		# Mis-match .. warn user
-		&$second_print("<b>".&text($config{'dns_ip'} ? 'check_ednsip1' :
+		&$second_print(&ui_text_color(&text($config{'dns_ip'} ? 'check_ednsip1' :
 				'check_ednsip2', $dns_ip, $ext_ip,
-				"../config.cgi?$module_name")."</b>");
+				"../config.cgi?$module_name"), 'warn'));
 		}
 	}
 
@@ -15429,15 +15429,15 @@ elsif ($config{'quotas'}) {
 	if ($qerr) {
 		# Check if a reboot is needed to enable XFS quotas on /
 		if (&needs_xfs_quota_fix() == 1) {
-			my $reboot_msg = "\n<b>$text{'licence_xfsreboot'}</b>&nbsp;";
+			my $reboot_msg = "\n$text{'licence_xfsreboot'}&nbsp;";
 			if (&foreign_available("init")) {
 				$reboot_msg .= ui_link("@{[&get_webprefix_safe()]}/init/reboot.cgi", $text{'licence_xfsrebootok'});
 				$reboot_msg .= ".";
 				}
-			&$second_print($reboot_msg);
+			&$second_print(&ui_text_color($reboot_msg, 'warn'));
 			}
 			else {
-				&$second_print("<b>$qerr</b>");
+				&$second_print(&ui_text_color($qerr, 'warn'));
 				}
 		}
 	elsif (!$config{'group_quotas'}) {
