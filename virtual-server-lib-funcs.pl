@@ -10195,8 +10195,12 @@ if ($d && !$notmpl) {
 		$user->{'to'} = [ map { &substitute_domain_template($_, $d) }
 				      split(/\t+/, $tmpl->{'user_aliases'}) ];
 		}
-	$user->{'quota'} = $tmpl->{'defmquota'};
-	$user->{'mquota'} = $tmpl->{'defmquota'};
+	if (&has_home_quotas()) {
+		$user->{'quota'} = $tmpl->{'defmquota'};
+		}
+	if (&has_mail_quotas()) {
+		$user->{'mquota'} = $tmpl->{'defmquota'};
+		}
 	}
 if (!$user->{'noprimary'}) {
 	$user->{'email'} = !$d ? "newuser\@".&get_system_hostname() :

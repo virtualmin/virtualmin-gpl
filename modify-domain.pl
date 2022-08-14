@@ -873,6 +873,30 @@ if (&has_home_quotas() && $applyquotas && $d->{'unix'}) {
 	&set_server_quotas($dom);
 	&$second_print(".. done");
 	}
+if (&has_home_quotas() && $applyquotas == 2) {
+	&$first_print("Re-applying mailbox user quotas ..");
+	my $fixed = 0;
+	foreach my $u (&list_domain_users($dom, 1, 0, 0, 0)) {
+		next if ($u->{'noquota'});
+		my $oldu = { %$u };
+		my $save = 0;
+		if ($u->{'quota_cache'} &&
+		    $u->{'quota'} != $u->{'quota_cache'}) {
+			$u->{'quota'} = $u->{'quota_cache'};
+			$save = 1;
+			}
+		if ($u->{'mquota_cache'} &&
+		    $u->{'mquota'} != $u->{'mquota_cache'}) {
+			$u->{'mquota'} = $u->{'mquota_cache'};
+			$save = 1;
+			}
+		if ($save) {
+			&modify_user($u, $oldu, $dom);
+			$fixed++;
+			}
+		}
+	&$second_print(".. updated $fixed users");
+	}
 
 # Update the Webmin user for this domain, or the parent
 &refresh_webmin_user($dom, $old);
