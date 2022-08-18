@@ -5770,106 +5770,114 @@ return $rv;
 # Adds a domain's configuration file to the backup
 sub backup_virtualmin
 {
+my ($d, $file) = @_;
 &$first_print($text{'backup_virtualmincp'});
 
 # Record parent's domain name, which can be used when restoring
-if ($_[0]->{'parent'}) {
-	local $parent = &get_domain($_[0]->{'parent'});
-	$_[0]->{'backup_parent_dom'} = $parent->{'dom'};
-	if ($_[0]->{'alias'}) {
-		local $alias = &get_domain($_[0]->{'alias'});
-		$_[0]->{'backup_alias_dom'} = $alias->{'dom'};
+if ($d->{'parent'}) {
+	local $parent = &get_domain($d->{'parent'});
+	$d->{'backup_parent_dom'} = $parent->{'dom'};
+	if ($d->{'alias'}) {
+		local $alias = &get_domain($d->{'alias'});
+		$d->{'backup_alias_dom'} = $alias->{'dom'};
 		}
-	if ($_[0]->{'subdom'}) {
-		local $subdom = &get_domain($_[0]->{'subdom'});
-		$_[0]->{'backup_subdom_dom'} = $subdom->{'dom'};
+	if ($d->{'subdom'}) {
+		local $subdom = &get_domain($d->{'subdom'});
+		$d->{'backup_subdom_dom'} = $subdom->{'dom'};
 		}
 	}
 
 # Record sub-directory for mail folders, used during mail restores
 local %mconfig = &foreign_config("mailboxes");
 if ($mconfig{'mail_usermin'}) {
-	$_[0]->{'backup_mail_folders'} = $mconfig{'mail_usermin'};
+	$d->{'backup_mail_folders'} = $mconfig{'mail_usermin'};
 	}
 else {
-	delete($_[0]->{'backup_mail_folders'});
+	delete($d->{'backup_mail_folders'});
 	}
 
 # Record encrypted Unix password
-delete($_[0]->{'backup_encpass'});
-if ($_[0]->{'unix'} && !$_[0]->{'parent'} && !$_[0]->{'disabled'}) {
+delete($d->{'backup_encpass'});
+if ($d->{'unix'} && !$d->{'parent'} && !$d->{'disabled'}) {
 	local @users = &list_all_users();
-	local ($user) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+	local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 	if ($user) {
-		$_[0]->{'backup_encpass'} = $user->{'pass'};
+		$d->{'backup_encpass'} = $user->{'pass'};
 		}
 	}
 
 # Record if default for the IP
-if (&domain_has_website($_[0])) {
-	$_[0]->{'backup_web_default'} = &is_default_website($_[0]);
+if (&domain_has_website($d)) {
+	$d->{'backup_web_default'} = &is_default_website($d);
 	}
 else {
-	delete($_[0]->{'backup_web_default'});
+	delete($d->{'backup_web_default'});
 	}
 
 # Record webserver type
-$_[0]->{'backup_web_type'} = &domain_has_website($_[0]);
-$_[0]->{'backup_ssl_type'} = &domain_has_ssl($_[0]);
+$d->{'backup_web_type'} = &domain_has_website($d);
+$d->{'backup_ssl_type'} = &domain_has_ssl($d);
 
-&save_domain($_[0]);
+&save_domain($d);
 
 # Save the domain's data file
-&copy_source_dest($_[0]->{'file'}, $_[1]);
+&copy_source_dest($d->{'file'}, $file);
 
-if (-r "$initial_users_dir/$_[0]->{'id'}") {
+if (-r "$initial_users_dir/$d->{'id'}") {
 	# Initial user settings
-	&copy_source_dest("$initial_users_dir/$_[0]->{'id'}", $_[1]."_initial");
+	&copy_source_dest("$initial_users_dir/$d->{'id'}", $file."_initial");
 	}
-if (-d "$extra_admins_dir/$_[0]->{'id'}") {
+if (-d "$extra_admins_dir/$d->{'id'}") {
 	# Extra admin details
 	&execute_command(
-	    "cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}").
-	    " && ".&make_tar_command("cf", $_[1]."_admins", "."));
+	    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}").
+	    " && ".&make_tar_command("cf", $file."_admins", "."));
 	}
 if ($config{'bw_active'}) {
 	# Bandwidth logs
-	if (-r "$bandwidth_dir/$_[0]->{'id'}") {
-		&copy_source_dest("$bandwidth_dir/$_[0]->{'id'}", $_[1]."_bw");
+	if (-r "$bandwidth_dir/$d->{'id'}") {
+		&copy_source_dest("$bandwidth_dir/$d->{'id'}", $file."_bw");
 		}
 	else {
 		# Create an empty file to indicate that we have no data
-		&open_tempfile(EMPTY, ">".$_[1]."_bw");
+		&open_tempfile(EMPTY, ">".$file."_bw");
 		&close_tempfile(EMPTY);
 		}
 	}
+
 # Script logs
-if (-d "$script_log_directory/$_[0]->{'id'}") {
+if (-d "$script_log_directory/$d->{'id'}") {
 	&execute_command(
-	    "cd ".quotemeta("$script_log_directory/$_[0]->{'id'}").
-	    " && ".&make_tar_command("cf", $_[1]."_scripts", "."));
+	    "cd ".quotemeta("$script_log_directory/$d->{'id'}").
+	    " && ".&make_tar_command("cf", $file."_scripts", "."));
 	}
 else {
 	# Create an empty file to indicate that we have no scripts
-	&open_tempfile(EMPTY, ">".$_[1]."_scripts");
+	&open_tempfile(EMPTY, ">".$file."_scripts");
 	&close_tempfile(EMPTY);
 	}
 
+# Cached disk quotas
+my $qfile = $quota_cache_dir."/".$d->{'id'};
+if (-r $qfile) {
+	&copy_source_dest($qfile, $file."_quota_cache");
+	}
+
 # Include template, in case the restore target doesn't have it
-local ($tmpl) = grep { $_->{'id'} == $_[0]->{'template'} } &list_templates();
+local ($tmpl) = grep { $_->{'id'} == $d->{'template'} } &list_templates();
 if (!$tmpl->{'standard'}) {
-	&copy_source_dest($tmpl->{'file'}, $_[1]."_template");
+	&copy_source_dest($tmpl->{'file'}, $file."_template");
 	}
 
 # Include plan too
-local $plan = &get_plan($_[0]->{'plan'});
+local $plan = &get_plan($d->{'plan'});
 if ($plan) {
-	&copy_source_dest($plan->{'file'}, $_[1]."_plan");
+	&copy_source_dest($plan->{'file'}, $file."_plan");
 	}
 
 # Save deleted aliases file
-&copy_source_dest("$saved_aliases_dir/$_[0]->{'id'}",
-		  $_[1]."_saved_aliases");
+&copy_source_dest("$saved_aliases_dir/$d->{'id'}",
+		  $file."_saved_aliases");
 
 &$second_print($text{'setup_done'});
 return 1;
@@ -6685,32 +6693,33 @@ return 1;
 # selected settings are copied from the backup, such as limits.
 sub restore_virtualmin
 {
-if (!$_[3]->{'fix'}) {
+my ($d, $file, $opts, $allopts) = @_;
+if (!$allopts->{'fix'}) {
 	# Merge current and backup configs
 	&$first_print($text{'restore_virtualmincp'});
 	local %oldd;
-	&read_file($_[1], \%oldd);
-	$_[0]->{'quota'} = $oldd{'quota'};
-	$_[0]->{'uquota'} = $oldd{'uquota'};
-	$_[0]->{'bw_limit'} = $oldd{'bw_limit'};
-	$_[0]->{'pass'} = $oldd{'pass'};
-	$_[0]->{'email'} = $oldd{'email'};
+	&read_file($file, \%oldd);
+	$d->{'quota'} = $oldd{'quota'};
+	$d->{'uquota'} = $oldd{'uquota'};
+	$d->{'bw_limit'} = $oldd{'bw_limit'};
+	$d->{'pass'} = $oldd{'pass'};
+	$d->{'email'} = $oldd{'email'};
 	foreach my $l (@limit_types) {
-		$_[0]->{$l} = $oldd{$l};
+		$d->{$l} = $oldd{$l};
 		}
-	$_[0]->{'nodbname'} = $oldd{'nodbname'};
-	$_[0]->{'norename'} = $oldd{'norename'};
-	$_[0]->{'forceunder'} = $oldd{'forceunder'};
-	$_[0]->{'safeunder'} = $oldd{'safeunder'};
-	$_[0]->{'ipfollow'} = $oldd{'ipfollow'};
+	$d->{'nodbname'} = $oldd{'nodbname'};
+	$d->{'norename'} = $oldd{'norename'};
+	$d->{'forceunder'} = $oldd{'forceunder'};
+	$d->{'safeunder'} = $oldd{'safeunder'};
+	$d->{'ipfollow'} = $oldd{'ipfollow'};
 	foreach my $f (@opt_features, &list_feature_plugins(), "virt") {
-		$_[0]->{'limit_'.$f} = $oldd{'limit_'.$f};
+		$d->{'limit_'.$f} = $oldd{'limit_'.$f};
 		}
-	$_[0]->{'owner'} = $oldd{'owner'};
-	$_[0]->{'proxy_pass_mode'} = $oldd{'proxy_pass_mode'};
-	$_[0]->{'proxy_pass'} = $oldd{'proxy_pass'};
+	$d->{'owner'} = $oldd{'owner'};
+	$d->{'proxy_pass_mode'} = $oldd{'proxy_pass_mode'};
+	$d->{'proxy_pass'} = $oldd{'proxy_pass'};
 	foreach my $f (&list_custom_fields()) {
-		$_[0]->{$f->{'name'}} = $oldd{$f->{'name'}};
+		$d->{$f->{'name'}} = $oldd{$f->{'name'}};
 		}
 	# Disable any features that are not on this system, as they can't
 	# be restored from the backup anyway.
@@ -6720,63 +6729,70 @@ if (!$_[3]->{'fix'}) {
 			$d->{$f} = 0;
 			}
 		}
-	&save_domain($_[0]);
-	if (-r $_[1]."_initial") {
+	&save_domain($d);
+	if (-r $file."_initial") {
 		# Also restore user defaults file
-		&copy_source_dest($_[1]."_initial",
-				  "$initial_users_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_initial",
+				  "$initial_users_dir/$d->{'id'}");
 		}
-	if (-r $_[1]."_admins") {
+	if (-r $file."_admins") {
 		# Also restore extra admins
 		&execute_command(
-			"rm -rf ".quotemeta("$extra_admins_dir/$_[0]->{'id'}"));
+			"rm -rf ".quotemeta("$extra_admins_dir/$d->{'id'}"));
 		if (!-d $extra_admins_dir) {
 			&make_dir($extra_admins_dir, 755);
 			}
-		&make_dir("$extra_admins_dir/$_[0]->{'id'}", 0755);
+		&make_dir("$extra_admins_dir/$d->{'id'}", 0755);
 		&execute_command(
-		    "cd ".quotemeta("$extra_admins_dir/$_[0]->{'id'}")." && ".
-		    &make_tar_command("xf", $_[1]."_admins", "."));
+		    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}")." && ".
+		    &make_tar_command("xf", $file."_admins", "."));
 		}
-	if ($config{'bw_active'} && -r $_[1]."_bw" &&
-	    !-r "$bandwidth_dir/$_[0]->{'id'}") {
+	if ($config{'bw_active'} && -r $file."_bw" &&
+	    !-r "$bandwidth_dir/$d->{'id'}") {
 		# Also restore bandwidth files for the domain, but only
 		# if missing.
 		&make_dir($bandwidth_dir, 0700);
-		&copy_source_dest($_[1]."_bw", "$bandwidth_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_bw", "$bandwidth_dir/$d->{'id'}");
 		}
-	if (-r $_[1]."_scripts") {
+	if (-r $file."_scripts") {
 		# Also restore script logs
 		&execute_command("rm -rf ".
-			quotemeta("$script_log_directory/$_[0]->{'id'}"));
-		if (-s $_[1]."_scripts") {
+			quotemeta("$script_log_directory/$d->{'id'}"));
+		if (-s $file."_scripts") {
 			if (!-d $script_log_directory) {
 				&make_dir($script_log_directory, 0755);
 				}
-			&make_dir("$script_log_directory/$_[0]->{'id'}", 0755);
+			&make_dir("$script_log_directory/$d->{'id'}", 0755);
 			&execute_command(
-			 "cd ".quotemeta("$script_log_directory/$_[0]->{'id'}").
+			 "cd ".quotemeta("$script_log_directory/$d->{'id'}").
 			 " && ".
 			 &make_tar_command("xf",
-				$_[1]."_scripts", "."));
+				$file."_scripts", "."));
 			}
 
 		# Fix up home dir on scripts
-		if ($_[5]->{'home'} && $_[5]->{'home'} ne $_[0]->{'home'}) {
+		if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
 			local $olddir = $_[5]->{'home'};
-			local $newdir = $_[0]->{'home'};
-			foreach my $sinfo (&list_domain_scripts($_[0])) {
+			local $newdir = $d->{'home'};
+			foreach my $sinfo (&list_domain_scripts($d)) {
 				$sinfo->{'opts'}->{'dir'} =~
 				       s/^\Q$olddir\E\//$newdir\//;
-				&save_domain_script($_[0], $sinfo);
+				&save_domain_script($d, $sinfo);
 				}
 			}
 		}
-	if (-r $_[1]."_saved_aliases") {
+	
+	if (-r $file."_quota_cache") {
+		# Cached disk quotas
+		my $qfile = $quota_cache_dir."/".$d->{'id'};
+		&copy_source_dest($file."_quota_cache", $qfile);
+		}
+
+	if (-r $file."_saved_aliases") {
 		# Restore saved aliases
 		&make_dir($saved_aliases_dir, 0700);
-		&copy_source_dest($_[1]."_saved_aliases",
-				  "$saved_aliases_dir/$_[0]->{'id'}");
+		&copy_source_dest($file."_saved_aliases",
+				  "$saved_aliases_dir/$d->{'id'}");
 		}
 	&$second_print($text{'setup_done'});
 	}
