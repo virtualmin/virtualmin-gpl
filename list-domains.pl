@@ -364,6 +364,10 @@ if ($multi) {
 		print "    User ID: $d->{'uid'}\n";
 		print "    Group name: $d->{'group'}\n";
 		print "    Group ID: $d->{'gid'}\n";
+		if ($d->{'ugroup'} && $d->{'ugroup'} ne $d->{'group'}) {
+			print "    User group name: $d->{'ugroup'}\n";
+			print "    User group ID: $d->{'ugid'}\n";
+			}
 		print "    Mailbox username prefix: $d->{'prefix'}\n";
 		print "    Password storage: ",
 		      ($d->{'hashpass'} ? "Hashed" : "Plain text"),"\n";
