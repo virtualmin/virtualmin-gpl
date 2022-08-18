@@ -4004,6 +4004,7 @@ if ($disallow_newlines) {
 	$rv =~ s/\n/ /g;
 	}
 $rv =~ s/<tt>|<\/tt>//g;
+$rv =~ s/<span.*?>|<\/span>//g;
 $rv =~ s/<b>|<\/b>//g;
 $rv =~ s/<i>|<\/i>//g;
 $rv =~ s/<u>|<\/u>//g;
