@@ -299,6 +299,7 @@ if ($parentuser) {
 	$ugid = $parentdom->{'ugid'};
 	$user = $parentdom->{'user'};
 	$group = $parentdom->{'group'};
+	$ugroup = $parentdom->{'ugroup'};
 	$uid = $parentdom->{'uid'};
 	}
 else {
