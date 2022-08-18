@@ -578,6 +578,7 @@ my $id = $d->{'id'};
 &unlink_file("$plainpass_dir/$id");
 &unlink_file("$hashpass_dir/$id");
 &unlink_file("$nospam_dir/$id");
+&unlink_file("$quota_cache_dir/$id");
 
 if (defined(&get_autoreply_file_dir)) {
 	# Delete any autoreply file links
