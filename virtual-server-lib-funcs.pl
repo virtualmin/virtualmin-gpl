@@ -5857,12 +5857,6 @@ else {
 	&close_tempfile(EMPTY);
 	}
 
-# Cached disk quotas
-my $qfile = $quota_cache_dir."/".$d->{'id'};
-if (-r $qfile) {
-	&copy_source_dest($qfile, $file."_quota_cache");
-	}
-
 # Include template, in case the restore target doesn't have it
 local ($tmpl) = grep { $_->{'id'} == $d->{'template'} } &list_templates();
 if (!$tmpl->{'standard'}) {
@@ -6782,12 +6776,6 @@ if (!$allopts->{'fix'}) {
 			}
 		}
 	
-	if (-r $file."_quota_cache") {
-		# Cached disk quotas
-		my $qfile = $quota_cache_dir."/".$d->{'id'};
-		&copy_source_dest($file."_quota_cache", $qfile);
-		}
-
 	if (-r $file."_saved_aliases") {
 		# Restore saved aliases
 		&make_dir($saved_aliases_dir, 0700);

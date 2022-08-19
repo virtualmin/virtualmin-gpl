@@ -3058,6 +3058,11 @@ if (-r "$nospam_dir/$d->{'id'}") {
 	&copy_write_as_domain_user($d, "$nospam_dir/$d->{'id'}", $file."_nospam");
 	}
 
+# Copy quota cache file
+if (-r "$quota_cache_dir/$d->{'id'}") {
+	&copy_write_as_domain_user($d, "$quota_cache_dir/$d->{'id'}", $file."_quota_cache");
+	}
+
 # Create BCC files
 if ($supports_bcc) {
 	local $bcc = &get_domain_sender_bcc($d);
@@ -3464,6 +3469,26 @@ if (-r $file."_hashpass") {
 		# Copy the whole file
 		&copy_source_dest($file."_hashpass",
 				  "$hashpass_dir/$d->{'id'}");
+		}
+	}
+
+# Restore quota cache
+if (-r $file."_quota_cache") {
+	if ($_[2]->{'mailuser'}) {
+		# Just copy for one user
+		my (%oldqc, %newqc);
+		&read_file($file."_quota_cache", \%oldqc);
+		&read_file("$quota_cache_dir/$d->{'id'}", \%newqc);
+		$newqc{$_[2]->{'mailuser'}."_quota"} =
+			$oldqc{$_[2]->{'mailuser'}."_quota"};
+		$newqc{$_[2]->{'mailuser'}."_mquota"} =
+			$oldqc{$_[2]->{'mailuser'}."_mquota"};
+		&write_file("$quota_cache_dir/$d->{'id'}", \%newqc);
+		}
+	else {
+		# Copy the whole file
+		&copy_source_dest($file."_quota_cache",
+				  "$quota_cache_dir/$d->{'id'}");
 		}
 	}
 
