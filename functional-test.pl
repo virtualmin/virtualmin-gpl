@@ -4320,11 +4320,6 @@ $purge_tests = [
 	];
 
 $mail_tests = [
-	# Fix clamd permissions
-	{ 'command' => 'chmod 755 /var/run/clamd.scan',
-	  'ignorefail' => 1,
-	},
-
 	# Create a domain to get spam
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -8219,6 +8214,12 @@ $clone_tests = [
 	},
 	{ 'command' => 'chown '.$test_domain_user.': '.
 		       $test_domain_home.'/.htaccess',
+	},
+
+	# Validate before cloning
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'all-features' ] ],
 	},
 
 	# Clone it
