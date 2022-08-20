@@ -1601,8 +1601,9 @@ my $count = 0;
 my $withdot = $d->{'dom'}.".";
 my $domip = $d->{'dns_ip'} || $d->{'ip'};
 my $domip6 = $d->{'dns_ip6'} || $d->{'ip6'};
-foreach my $r (@recs) {
-	if ($r->{'type'} eq 'A' &&
+foreach my $r (@$recs) {
+	if ($r->{'type'} &&
+	    $r->{'type'} eq 'A' &&
 	    $r->{'values'}->[0] eq $domip &&
 	    !$already{$r->{'name'}} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
