@@ -82,7 +82,7 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	else {
 		&create_standard_records($recs, $temp, $d, $ip);
 		}
-	$info->{'record'} = $recs;
+	$info->{'recs'} = $recs;
 	}
 
 if ($d->{'provision_dns'}) {
