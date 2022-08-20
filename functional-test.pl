@@ -4579,6 +4579,11 @@ $mail_tests = [
 			      [ 'regexp' => '_domainkey' ] ],
 		  'grep' => [ 'v=DKIM1' ],
 		},
+
+		# Check that it can actually be looked up
+		{ 'command' => 'dig TXT default._domainkey.'.$test_domain.' ; dig SPF default._domainkey.'.$test_domain,
+		  'grep' => 'v=DKIM1',
+		},
 		) : ( ),
 
 	# Cleanup the domain
