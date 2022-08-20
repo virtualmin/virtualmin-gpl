@@ -62,9 +62,7 @@ elsif ($dns_submode && $d->{'parent'}) {
 
 # Create domain info object
 my $info;
-my @inforecs;
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
-	# XXX populate $recs, don't create it
 	$info = { 'domain' => $d->{'dom'} };
 	if (@extra_slaves) {
 		$info->{'slave'} = [ grep { $_ } map { &to_ipaddress($_) }
@@ -110,7 +108,6 @@ elsif ($d->{'dns_cloud'}) {
 		return 0;
 		}
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
-	$info->{'recs'} = \@inforecs;
 	my ($ok, $msg, $location, $err2) = &$cfunc($d, $info);
 	if ($ok == 0) {
 		&$second_print(&text('setup_ebind_cloud', $msg));
@@ -1090,11 +1087,11 @@ else {
 	}
 }
 
-# split_long_txt_record(string)
+# split_long_txt_record(string, [no-brackets])
 # Split a TXT record at 80 char boundaries
 sub split_long_txt_record
 {
-local ($str) = @_;
+local ($str, $nobrackets) = @_;
 $str =~ s/^"//;
 $str =~ s/"$//;
 local @rv;
@@ -1103,8 +1100,9 @@ while($str) {
 	$str = substr($str, 80);
 	push(@rv, $first);
 	}
-return @rv == 1 ? '"'.$rv[0].'"'
-		: "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
+return @rv == 1 ? '"'.$rv[0].'"' :
+       $nobrackets ? join(" ", map { '"'.$_.'"' } @rv) :
+		     "( ".join("\n\t", map { '"'.$_.'"' } @rv)." )";
 }
 
 # create_mail_records(&records, file, &domain, ip, ip6)
@@ -1280,6 +1278,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	
 	# Work out which records are already in the file
+	# XXX
 	local $rd = $d;
 	if ($d->{'dns_submode'}) {
 		$rd = &get_domain($d->{'dns_subof'});
@@ -1301,8 +1300,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Add standard records we don't have yet
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
-			&bind8::create_record($file, $n, undef,
-					      "IN", "A", $ip);
+			&create_dns_record($recs, $file,
+				{ 'name' => $n, type => 'A',
+				  'values' => [ $ip ] });
 			}
 		}
 
@@ -1313,8 +1313,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			}
 		if ($ns =~ /^([^\.]+)\.(\S+\.)$/ && $2 eq $withdot &&
 		    !$already{$ns}) {
-			&bind8::create_record($file, $ns, undef,
-					      "IN", "A", $ip);
+			&create_dns_record($recs, $file,
+				{ 'name' => $ns, type => 'A',
+				  'values' => [ $ip ] });
 			}
 		}
 
@@ -1322,16 +1323,18 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# registrars require it!
 	local $n = "localhost.$withdot";
 	if (!$already{$n} && $addrecs{$n}) {
-		&bind8::create_record($file, $n, undef,
-				      "IN", "A", "127.0.0.1");
+		&create_dns_record($recs, $file,
+			{ 'name' => $n, type => 'A',
+			  'values' => [ "127.0.0.1" ] });
 		}
 
 	# If the hostname of the system is within this domain, add a record
 	# for it
 	my $hn = &get_system_hostname();
 	if ($hn =~ /\.\Q$d->{'dom'}\E$/ && !$already{$hn."."}) {
-		&bind8::create_record($file, $hn.".", undef,
-				      "IN", "A", &get_default_ip());
+		&create_dns_record($recs, $file,
+			{ 'name' => $hn.".", type => 'A',
+			  'values' => [ &get_default_ip() ] });
 		}
 
 	# If requested, add webmail and admin records
@@ -1353,8 +1356,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&bind8::create_record($file, $withdot, undef,
 				      "IN", "TXT", "\"$str\"");
 		if ($bind8::config{'spf_record'}) {
-			&bind8::create_record($file, $withdot, undef,
-					      "IN", "SPF", "\"$str\"");
+			&create_dns_record($recs, $file,
+				{ 'name' => $withdot, type => 'SPF',
+				  'values' => [ $str ] });
 			}
 		}
 
@@ -1362,8 +1366,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	if ($tmpl->{'dns_dmarc'} ne "none" &&
 	    !$d->{'dns_submode'}) {
 		local $str = &bind8::join_dmarc(&default_domain_dmarc($d));
-		&bind8::create_record($file, "_dmarc.".$withdot, undef,
-				      "IN", "TXT", "\"$str\"");
+		&create_dns_record($recs, $file,
+			{ 'name' => "_dmarc.".$withdot, type => 'TXT',
+			  'values' => [ $str ] });
 		}
 	}
 
