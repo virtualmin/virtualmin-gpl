@@ -984,19 +984,17 @@ sub modify_all_webmin
 {
 local ($tid) = @_;
 &$first_print($text{'check_allwebmin'});
-&obtain_lock_webmin($_[0]);
-	{
-	local ($first_print, $second_print, $indent_print, $outdent_print);
-	&set_all_null_print();
-	local $d;
-	foreach $d (&list_domains()) {
-		if ($d->{'webmin'} && $config{'webmin'} &&
-		    (!defined($tid) || $d->{'template'} == $tid)) {
-			&modify_webmin($d, $d);
-			}
+&obtain_lock_webmin();
+&push_all_print();
+&set_all_null_print();
+foreach my $d (&list_domains()) {
+	if ($d->{'webmin'} && $config{'webmin'} &&
+	    (!defined($tid) || $d->{'template'} == $tid)) {
+		&modify_webmin($d, $d);
 		}
 	}
-&release_lock_webmin($_[0]);
+&pop_all_print();
+&release_lock_webmin();
 &$second_print($text{'setup_done'});
 &register_post_action(\&restart_webmin);
 }
