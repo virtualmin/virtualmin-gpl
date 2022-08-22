@@ -880,12 +880,12 @@ if (&has_home_quotas() && $applyquotas == 2) {
 		next if ($u->{'noquota'});
 		my $oldu = { %$u };
 		my $save = 0;
-		if ($u->{'quota_cache'} &&
+		if (defined($u->{'quota_cache'}) &&
 		    $u->{'quota'} != $u->{'quota_cache'}) {
 			$u->{'quota'} = $u->{'quota_cache'};
 			$save = 1;
 			}
-		if ($u->{'mquota_cache'} &&
+		if (defined($u->{'mquota_cache'}) &&
 		    $u->{'mquota'} != $u->{'mquota_cache'}) {
 			$u->{'mquota'} = $u->{'mquota_cache'};
 			$save = 1;

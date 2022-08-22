@@ -2494,30 +2494,35 @@ else {
 	}
 }
 
-# update_user_quota_cache(&domain, &user, [deleting])
+# update_user_quota_cache(&domain, &user|&users, [deleting])
 # Updates the cache file of mailbox quotas for this virtual server
 sub update_user_quota_cache
 {
-my ($d, $user, $deleting) = @_;
+my ($d, $userlist, $deleting) = @_;
+my $users = ref($userlist) eq 'ARRAY' ? $userlist : [ $userlist ];
 &make_dir($quota_cache_dir, 0755) if (!-d $quota_cache_dir);
 my $qfile = $quota_cache_dir."/".$d->{'id'};
 my %cache;
+&lock_file($qfile);
 &read_file_cached($qfile, \%cache);
-my $u = $user->{'user'};
-if ($deleting) {
-	delete($cache{$u."_quota"});
-	delete($cache{$u."_mquota"});
-	}
-else {
-	$cache{$u."_quota"} = $user->{'quota'};
-	if (defined($user->{'mquota'})) {
-		$cache{$u."_mquota"} = $user->{'mquota'}
+foreach my $user (@$users) {
+	my $u = $user->{'user'};
+	if ($deleting) {
+		delete($cache{$u."_quota"});
+		delete($cache{$u."_mquota"});
 		}
 	else {
-		delete($cache{$u."_mquota"});
+		$cache{$u."_quota"} = $user->{'quota'};
+		if (defined($user->{'mquota'})) {
+			$cache{$u."_mquota"} = $user->{'mquota'}
+			}
+		else {
+			delete($cache{$u."_mquota"});
+			}
 		}
 	}
 &write_file($qfile, \%cache);
+&unlock_file($qfile);
 }
 
 # run_quota_command(config-suffix, arg, ...)

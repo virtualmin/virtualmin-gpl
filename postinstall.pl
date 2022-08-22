@@ -440,6 +440,16 @@ foreach my $d (&list_domains()) {
 # Update any domains with a new autoconfig.cgi script
 &update_all_autoconfig_cgis();
 
+# Fill in any missing quota cache files
+if (&has_home_quotas()) {
+	foreach my $d (&list_domains()) {
+		my $qfile = $quota_cache_dir."/".$d->{'id'};
+		next if (-r $qfile);
+		my @users = &list_domain_users($d, 1, 1, 0, 1);
+		&update_user_quota_cache($d, \@users, 0);
+		}
+	}
+
 # Run any needed actions, like server restarts
 &run_post_actions_silently();
 
