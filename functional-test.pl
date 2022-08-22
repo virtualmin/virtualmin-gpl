@@ -937,6 +937,17 @@ $mailbox_tests = [
 	  'grep' => "^$test_user",
 	},
 
+	# Check attributes
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'multiline' ],
+		      [ 'user' => $test_user ] ],
+	  'grep' => [ 'Password: smeg',
+		      'Email address: '.$test_user.'@'.$test_domain,
+		      'Home byte quota: '.(100*1024*1024) ],
+	  'antigrep' => [ 'Home quota expected:' ],
+	},
+
 	# Check Unix account
 	{ 'command' => $gconfig{'os_type'} =~ /-linux/ ? 
 			'su -s /bin/sh '.$test_full_user.' -c "id -a"' :
@@ -973,6 +984,7 @@ $mailbox_tests = [
 		      [ 'user' => $test_user ],
 		      [ 'pass' => 'newpass' ],
 		      [ 'real' => 'New name' ],
+		      [ 'quota' => 200*1024 ],
 		      [ 'add-mysql' => $test_domain_user ],
 		      [ 'add-email' => 'extra@'.$test_domain ] ],
 	},
@@ -984,12 +996,42 @@ $mailbox_tests = [
 		      [ 'multiline' ] ],
 	  'grep' => [ 'Password: newpass',
 		      'Real name: New name',
+		      'Home byte quota: '.(200*1024*1024),
 		      'Databases:.*'.$test_domain_user,
 		      'Extra addresses:.*extra@'.$test_domain, ],
+	  'antigrep' => [ 'Home quota expected:' ],
 	},
 
 	# Check user's MySQL login
 	{ 'command' => 'mysql -u '.$test_full_user_mysql.' -pnewpass '.$test_domain_db.' -e "select version()"',
+	},
+
+	# Break the quota by editing directly
+	{ 'command' => 'setquota '.$test_full_user.' 555555 555555 0 0 '.
+		       $config{'home_quotas'},
+	},
+
+	# Make sure the cached quota is still known
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Home byte quota expected: '.(200*1024*1024) ],
+	},
+
+	# Fix the broken quota
+	{ 'command' => 'modify-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'apply-all-quotas' ] ],
+	},
+
+	# Check the fix
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Home byte quota: '.(200*1024*1024) ],
+	  'antigrep' => [ 'Home byte quota expected:' ],
 	},
 
 	# Delete the user
@@ -2300,6 +2342,7 @@ $aliasdom_tests = [
 	  'grep' => [ 'Password: smeg',
 		      'Email address: '.$test_user.'@'.$test_domain,
 		      'Home quota: 777' ],
+	  'antigrep' => [ 'Home quota expected:' ],
 	},
 
 	# Test DNS lookup of sub-domain
