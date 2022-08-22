@@ -157,6 +157,8 @@ foreach $d (@doms) {
 				    $u->{'quota_cache'} != $u->{'quota'}) {
 					print "    Home quota expected: ",
 					      &quota_show($u->{'quota_cache'}, "home"),"\n";
+					print "    Home byte quota expected: ",
+					      ($u->{'quota_cache'} * $home_bsize),"\n";
 					}
 				}
 			if ($u->{'unix'} && &has_mail_quotas() &&
