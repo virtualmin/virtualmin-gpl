@@ -145,9 +145,6 @@ if ($ssl) {
 		}
 	}
 
-# Add <Proxy> block if needed
-&add_proxy_allow_directives($d);
-
 &register_post_action(\&restart_apache);
 return undef;
 }
