@@ -15748,15 +15748,18 @@ if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 		}
 	# Does repo file has correct links?
 	my $repofound;
-	foreach my $repoline (@$repolines) {
-		$repofound++
-			# If repo file contains /vm/6/ or /vm/7/ consider valid
-			if ($repoline =~ /\/(vm\/(?|([6-9])|([0-9]{2,4})))\//);
-		}
-	if (!$repofound) {
-		&$second_print(&ui_text_color(
-			&text('check_repoeoutdate',
-				"$virtualmin_link/documentation/repositories/"), 'warn'));
+	if (-r $virtualmin_yum_repo ||
+	    -r $virtualmin_apt_repo) {
+		foreach my $repoline (@$repolines) {
+			$repofound++
+				# If repo file contains /vm/6/ or /vm/7/ consider valid
+				if ($repoline =~ /\/(vm\/(?|([6-9])|([0-9]{2,4})))\//);
+			}
+		if (!$repofound) {
+			&$second_print(&ui_text_color(
+				&text('check_repoeoutdate',
+					"$virtualmin_link/documentation/repositories/"), 'warn'));
+			}
 		}
 	}
 
