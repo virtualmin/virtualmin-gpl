@@ -1027,8 +1027,8 @@ foreach my $d (@$doms) {
 		# Add new record
 		my $selrec = { 'name' => $selname,
 			       'type' => 'TXT',
-			       'values' => [ '"v=DKIM1; k=rsa; t=s; p='.
-					     $pubkey.'"' ] };
+			       'values' => [ 'v=DKIM1; k=rsa; t=s; p='.
+					     $pubkey ] };
 		&create_dns_record($recs, $file, $selrec);
 		$changed++;
 		}
@@ -1038,7 +1038,7 @@ foreach my $d (@$doms) {
 		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
 			$val = 'k=rsa; t=s; p='.$pubkey;
 			}
-		$selrec->{'values'} = [ '"'.$val.'"' ];
+		$selrec->{'values'} = [ $val ];
 		$changed++;
 		}
 	if ($changed) {
