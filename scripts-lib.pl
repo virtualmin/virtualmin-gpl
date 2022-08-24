@@ -1105,21 +1105,22 @@ local ($d, $script, $scriptver, $path) = @_;
 
 # Figure out which PHP versions the script supports
 my @vers = map { &get_php_version($_->[0]) } &list_available_php_versions($d);
+my $mode = &get_domain_php_mode($d);
+my $currver = &get_domain_php_version($d, $mode);
 my $minfunc = $script->{'php_fullver_func'};
 my $maxfunc = $script->{'php_maxver_func'};
+my $compatible = 1;
 if (defined(&$minfunc)) {
 	my $minver = &$minfunc($d, $scriptver);
-	if ($minver) {
-		@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
-		}
+	$compatible = undef
+		if (&compare_versions($currver, $minver) < 0);
 	}
 if (defined(&$maxfunc)) {
 	my $maxver = &$maxfunc($d, $scriptver);
-	if ($maxver) {
-		@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
-		}
+	$compatible = undef
+			if (&compare_versions($currver, $maxver) > 0);
 	}
-return undef if (!@vers);
+return undef if (!$compatible);
 
 # Find the best matching directory with a PHP version set
 local $dirpath = &public_html_dir($d).($path eq '/' ? '' : $path);
@@ -2990,19 +2991,20 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	my $minfunc = $script->{'php_fullver_func'};
 	my $maxfunc = $script->{'php_maxver_func'};
 	my $fullver = &get_php_version($phpver, $d);
+	my $currver = &get_domain_php_version($d, $mode);
 	if (!$fullver && $mode ne "none") {
 		push(@rv, $text{'scripts_iphpnover'});
 		}
-	if ($fullver && defined(&$minfunc)) {
+	if ($currver && defined(&$minfunc)) {
 		my $minver = &$minfunc($d, $ver, $sinfo);
-		if (&compare_versions($fullver, $minver) < 0) {
-			return &text('scripts_iphpfullver', $minver, $fullver);
+		if (&compare_versions($currver, $minver) < 0) {
+			return &text('scripts_iphpfullver', $minver, $currver);
 			}
 		}
-	if ($fullver && defined(&$maxfunc)) {
+	if ($currver && defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
-		if (&compare_versions($fullver, $maxver) > 0) {
-			return &text('scripts_iphpmaxver', $maxver, $fullver);
+		if (&compare_versions($currver, $maxver) > 0) {
+			return &text('scripts_iphpmaxver', $maxver, $currver);
 			}
 		}
 	}
