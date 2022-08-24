@@ -64,12 +64,6 @@ return ([ 'memory_limit', '64M', '+' ],
         [ 'mbstring.func_overload', 'Off' ]);
 }
 
-
-sub script_roundcube_php_vers
-{
-return ( 5 );
-}
-
 sub script_roundcube_release
 {
 return 3;	# For folders path fix
@@ -78,7 +72,8 @@ return 3;	# For folders path fix
 sub script_roundcube_php_fullver
 {
 local ($d, $ver, $sinfo, $phpver) = @_;
-return $ver >= 0.9 ? "5.4.1" : 5.2;
+my $phpver = &compare_versions($ver, "1.6.0") >= 0 ? "7.3" : 5.6;
+return $phpver;
 }
 
 # script_roundcube_params(&domain, version, &upgrade-info)
