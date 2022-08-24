@@ -1591,6 +1591,7 @@ check_eaptrepofile=Konfigurační soubor úložiště APT $1 neexistuje!
 check_aptrepook=Úložiště Virtualmin APT je správně nakonfigurováno
 check_aptrepowrong=Konfigurační soubor úložiště APT $1 obsahuje nesprávné sériové číslo licenčního klíče!
 check_aptrepomissing=Konfigurační soubor $1 úložiště Virtualmin APT neodkazuje na software.virtualmin.com!
+check_repoeoutdate=Repozitáře Virtualmin aktuálně nakonfigurované ve vašem systému jsou zastaralé. Prohlédněte si prosím <a target="_blank" href='$1'>tento návod</a> pro upgrade vašich repozitářů
 
 checkmap_enone=V <a href='$1'>konfiguraci Postfixu nebyly nalezeny žádné zdroje map</a>
 checkmap_esupport=Zdroj mapy <tt>$1</tt> není podporován Postfixem - možná budete muset pro něj nainstalovat Postfix knihovny nebo znovu kompilovat

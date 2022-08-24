@@ -304,6 +304,7 @@ check_eaptrepofile=Het APT-repository-configuratiebestand $1 bestaat niet!
 check_aptrepook=De Virtualmin APT-repository is correct geconfigureerd
 check_aptrepowrong=Het APT-repository-configuratiebestand $1 bevat het verkeerde serienummer van de licentiesleutel!
 check_aptrepomissing=Het configuratiebestand van de Virtualmin APT-repository $1 verwijst niet naar software.virtualmin.com!
+check_repoeoutdate=De Virtualmin-repository's die momenteel op uw systeem zijn geconfigureerd, zijn verouderd. Bekijk <a target="_blank" href='$1'>deze tutorial</a> voor het upgraden van je repo's
 
 check_eqmailldap=Qmail+LDAP-ondersteuning is verwijderd in Virtualmin 6.00
 

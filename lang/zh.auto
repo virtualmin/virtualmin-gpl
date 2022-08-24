@@ -708,6 +708,7 @@ check_eaptrepofile=APT存储库配置文件 $1不存在！
 check_aptrepook=Virtualmin APT存储库配置正确
 check_aptrepowrong=APT存储库配置文件 $1包含错误的许可证密钥序列号！
 check_aptrepomissing=Virtualmin APT 存储库配置文件 $1 未引用 software.virtualmin.com！
+check_repoeoutdate=当前在您的系统上配置的 Virtualmin 存储库已过时。请查看<a target="_blank" href='$1'>本教程</a>以升级您的存储库
 
 checkmap_enone=在<a href='$1'>Postfix配置</a>中未找到地图源。
 checkmap_esupport=Postfix不支持地图源<tt>$1</tt>-您可能需要为其安装Postfix库或重新编译
