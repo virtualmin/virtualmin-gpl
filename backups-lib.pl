@@ -4258,8 +4258,6 @@ if ($state->{'ok'} && &can_use_cloud("bb")) {
 
 if (!$nodownload) {
 	# Show mode to download in browser
-	push(@opts, [ 4, $text{'backup_mode4'},
-		      $text{'backup_mode4desc'}."<p>" ]);
 	push(@opts, [ 44, $text{'backup_mode44'},
 		      $text{'backup_mode44desc'}."<p>" ]);
 	}
