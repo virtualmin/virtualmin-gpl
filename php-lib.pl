@@ -1317,10 +1317,14 @@ else {
 				}
 			my $olist = $apache::httpd_modules{'core'} >= 2.2 ?
 					" ".&get_allowed_options_list() : "";
+			my $granteddir = "Require all granted";
+			if ($apache::httpd_modules{'core'} < 2.4) {
+				$granteddir = "Allow from all";
+				}
 			local @lines = (
 				"    <Directory $dir>",
 				"        Options +IncludesNOEXEC +SymLinksifOwnerMatch +ExecCGI",
-				"        Require all granted",
+				"        $granteddir",
 				"        AllowOverride All".$olist,
 				(map { "        ".$_ } @phplines),
 				"    </Directory>"
