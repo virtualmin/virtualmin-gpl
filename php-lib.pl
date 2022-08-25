@@ -2052,8 +2052,8 @@ sub get_php_fpm_socket_file
 my ($d, $nomkdir) = @_;
 # Universal FPM socket dir
 my $base = "/var/php-fpm";
-my $basefile = $base."/".$d->{'id'}.".sock";
 # Accommodate old styles in read only mode
+my $basefile = $base."/".$d->{'id'}.".sock";
 return $basefile if (-r $basefile);
 # Distro dependent FPM socket dirs (if exists)
 my $rhelbase = "/var/run/php-fpm";
