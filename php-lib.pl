@@ -2050,7 +2050,22 @@ return @rv;
 sub get_php_fpm_socket_file
 {
 my ($d, $nomkdir) = @_;
+# Universal FPM socket dir
 my $base = "/var/php-fpm";
+my $basefile = $base."/".$d->{'id'}.".sock";
+# Accommodate old styles in read only mode
+return $basefile if (-r $basefile);
+# Distro dependent FPM socket dirs (if exists)
+my $rhelbase = "/var/run/php-fpm";
+my $debbase = "/var/run/php";
+if (-d $rhelbase &&
+    $gconfig{'os_type'} eq 'redhat-linux') {
+	$base = $rhelbase;
+	}
+elsif (-d $debbase &&
+       $gconfig{'os_type'} eq 'debian-linux') {
+	$base = $debbase;
+	}
 if (!-d $base && !$nomkdir) {
 	&make_dir($base, 0755);
 	}
