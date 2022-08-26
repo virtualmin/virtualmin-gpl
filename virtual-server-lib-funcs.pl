@@ -15736,20 +15736,20 @@ if ($virtualmin_pro &&
 # Display a message about deprecated repos
 if ($gconfig{'os_type'} =~ /^(redhat-linux|debian-linux)$/) {
 	my $repolines;
+	my $reporead;
 	if ($gconfig{'os_type'} eq 'redhat-linux') {
 		# File exists, but does it contain correct repo links
-		$repolines = &read_file_lines($virtualmin_yum_repo, 1)
+		$repolines = &read_file_lines($virtualmin_yum_repo, 1), $reporead++
 			if (-r $virtualmin_yum_repo);
 		}
 	elsif ($gconfig{'os_type'} eq 'debian-linux') {
 		# File exists, but does it contain correct repo links
-		$repolines = &read_file_lines($virtualmin_apt_repo, 1)
+		$repolines = &read_file_lines($virtualmin_apt_repo, 1), $reporead++
 			if (-r $virtualmin_apt_repo);
 		}
 	# Does repo file has correct links?
 	my $repofound;
-	if (-r $virtualmin_yum_repo ||
-	    -r $virtualmin_apt_repo) {
+	if ($reporead) {
 		foreach my $repoline (@$repolines) {
 			$repofound++
 				# If repo file contains /vm/6/ or /vm/7/ consider valid
