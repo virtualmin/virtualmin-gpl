@@ -502,6 +502,7 @@ check_eaptrepofile=¡El archivo de configuración del repositorio APT $1 no exis
 check_aptrepook=El repositorio APT de Virtualmin está configurado correctamente
 check_aptrepowrong=¡El archivo de configuración del repositorio APT $1 contiene el número de serie incorrecto de la clave de licencia!
 check_aptrepomissing=¡El archivo de configuración del repositorio APT de Virtualmin $1 no hace referencia a software.virtualmin.com!
+check_repoeoutdate=Los repositorios de Virtualmin actualmente configurados en su sistema están desactualizados. Consulte <a target="_blank" href='$1'>este tutorial</a> para actualizar sus repositorios
 
 check_eqmailldap=La compatibilidad con Qmail+LDAP se ha eliminado en Virtualmin 6.00
 

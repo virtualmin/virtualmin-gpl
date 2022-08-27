@@ -2085,6 +2085,7 @@ check_eaptrepofile=The APT repository config file $1 does not exist!
 check_aptrepook=The Virtualmin APT repository is configured correctly
 check_aptrepowrong=The APT repository config file $1 contains the wrong serial number of license key!
 check_aptrepomissing=The Virtualmin APT repository config file $1 does not refer to software.virtualmin.com!
+check_repoeoutdate=The Virtualmin repositories currently configured on your system is outdated. Please check out <a target="_blank" href='$1'>this tutorial</a> for upgrading your repos
 
 checkmap_enone=No map sources were found in the <a href='$1'>Postfix configuration</a>
 checkmap_esupport=The map source <tt>$1</tt> is not supported by Postfix - you may need to install Postfix libraries for it, or re-compile

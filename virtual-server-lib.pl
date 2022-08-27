@@ -237,8 +237,9 @@ $rr_upload_tries = $config{'upload_tries'} || 1;
 
 $denied_ssh_group = "deniedssh";
 
-$virtualmin_shop_link = "https://www.virtualmin.com/shop/";
-$virtualmin_shop_link_cat = "https://www.virtualmin.com/product-category/virtualmin/";
+$virtualmin_link = "https://www.virtualmin.com";
+$virtualmin_shop_link = "$virtualmin_link/shop/";
+$virtualmin_shop_link_cat = "$virtualmin_link/product-category/virtualmin/";
 
 $script_download_host = "scripts.virtualmin.com";
 $script_download_port = 80;

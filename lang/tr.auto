@@ -790,6 +790,7 @@ check_eaptrepofile=$1 APT veri havuzu yapılandırma dosyası yok!
 check_aptrepook=Virtualmin APT deposu doğru yapılandırılmış
 check_aptrepowrong=$1 APT veri havuzu yapılandırma dosyası lisans anahtarının seri numarasını yanlış içeriyor!
 check_aptrepomissing=Virtualmin APT deposu yapılandırma dosyası $1, software.virtualmin.com'a başvurmuyor!
+check_repoeoutdate=Şu anda sisteminizde yapılandırılmış Virtualmin depoları güncel değil. Depolarınızı yükseltmek için lütfen <a target="_blank" href='$1'>bu eğiticiye</a> göz atın
 
 checkmap_enone=<a href='$1'>Postfix yapılandırmasında</a> harita kaynağı bulunamadı
 checkmap_esupport=<tt>$1</tt> harita kaynağı Postfix tarafından desteklenmiyor - bunun için Postfix kütüphanelerini kurmanız veya yeniden derlemeniz gerekebilir

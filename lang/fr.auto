@@ -819,6 +819,7 @@ check_eaptrepofile=Le fichier de configuration du référentiel APT $1 n'existe 
 check_aptrepook=Le référentiel Virtualmin APT est correctement configuré
 check_aptrepowrong=Le fichier de configuration du référentiel APT $1 contient le mauvais numéro de série de la clé de licence!
 check_aptrepomissing=Le fichier de configuration du référentiel Virtualmin APT $1 ne fait pas référence à software.virtualmin.com!
+check_repoeoutdate=Les référentiels Virtualmin actuellement configurés sur votre système sont obsolètes. Veuillez consulter <a target="_blank" href='$1'>ce tutoriel</a> pour mettre à jour vos dépôts
 
 checkmap_enone=Aucune source de carte n'a été trouvée dans la <a href='$1'>configuration Postfix</a>
 checkmap_esupport=La source de carte <tt>$1</tt> n'est pas prise en charge par Postfix - vous devrez peut-être installer les bibliothèques Postfix pour cela, ou recompiler
