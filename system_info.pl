@@ -64,11 +64,12 @@ if (!$virtualmin_pro &&
 	# Do not show dashboard alert within first three days, until things settle down
 	&foreign_require("webmin");
 	my $uptime = &webmin::get_system_uptime();
-	$uptime = (!$uptime || $uptime > 60*60*24 * 3);
+	$uptime = (!$uptime || $uptime > 60*60*24 * 4);
 	# Show alert in another five days if reminder been set
 	my ($remind) = &should_show_pro_tip('dashboard_reminder', 'force');
-	$remind = ($remind && (($remind + (60*60*24 * 5)) < time()));
-	if ($uptime || $remind) {
+	my $futureremind = (int($remind) + (60*60*24 * 5));
+	my $doremind = ($remind && $futureremind < time());
+	if (($uptime && !$remind) || ($uptime && $doremind)) {
 		push(@rv, { 'type' => 'warning',
 			    'level' => 'info',
 			    'warning' => { 'alert' => &alert_pro_tip('dashboard', {
