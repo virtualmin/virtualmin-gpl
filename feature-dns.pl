@@ -927,8 +927,8 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		}
 	if (@mx) {
 		&$first_print($text{'save_dns5'});
-		foreach my $r (reverse(@mx)) {
-			&bind8::delete_record($file, $r);
+		foreach my $r (@mx) {
+			&delete_dns_record($recs, $file, $r);
 			}
 		&$second_print($text{'setup_done'});
 		$rv++;
@@ -991,8 +991,8 @@ if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&
 				}
 			}
 		}
-	foreach my $r (reverse(@mxs)) {
-		&bind8::delete_record($file, $r);
+	foreach my $r (@mxs) {
+		&delete_dns_record($recs, $file, $r);
 		}
 
 	&$second_print($text{'setup_done'});
@@ -1021,7 +1021,7 @@ elsif (!$d->{'ip6'} && $oldd->{'ip6'}) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	&remove_ip6_records($oldd, $file);
+	&remove_ip6_records($oldd, $file, $recs);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -1353,8 +1353,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	if ($tmpl->{'dns_spf'} ne "none" &&
 	    !$d->{'dns_submode'}) {
 		local $str = &bind8::join_spf(&default_domain_spf($d));
-		&bind8::create_record($file, $withdot, undef,
-				      "IN", "TXT", "\"$str\"");
+		&create_dns_record($recs, $file,
+			{ 'name' => $withdot, type => 'TXT',
+			  'values' => [ $str ] });
 		if ($bind8::config{'spf_record'}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $withdot, type => 'SPF',
@@ -1635,23 +1636,21 @@ foreach my $r (@$recs) {
 return $count;
 }
 
-# remove_ip6_records(&domain, [file], [&records])
+# remove_ip6_records(&domain, file, &records)
 # Delete all AAAA records whose value is the domain's IP6 address
 sub remove_ip6_records
 {
 local ($d, $file, $recs) = @_;
 &require_bind();
-$file ||= &get_domain_dns_file($d);
-return 0 if (!$file);
-$recs ||= [ &bind8::read_zone_file($file, $d->{'dom'}) ];
 my $withdot = $d->{'dom'}.".";
-for(my $i=@$recs-1; $i>=0; $i--) {
-	my $r = $recs->[$i];
+foreach my $r (@$recs) {
 	if ($r->{'type'} eq 'AAAA' && $r->{'values'}->[0] eq $d->{'ip6'} &&
 	    ($r->{'name'} eq $withdot || $r->{'name'} =~ /\.\Q$withdot\E$/)) {
-		&bind8::delete_record($file, $r);
-		splice(@$recs, $i, 1);
+		push(@delrecs, $r);
 		}
+	}
+foreach my $r (@delrecs) {
+	&delete_dns_record($recs, $file, $r);
 	}
 }
 
@@ -2408,14 +2407,11 @@ if (!$opts->{'wholefile'}) {
 		if (@ns && $ns[0]->{'name'} =~ /\.disabled\.$/) {
 			$name .= "disabled.";
 			}
-		&bind8::create_record($zonefile, $name, $r->{'ttl'},
-				      $r->{'class'}, $r->{'type'},
-				      &join_record_values($r),
-				      $r->{'comment'});
+		&create_dns_record($recs, $zonefile, $r);
 		}
 	foreach my $r (reverse(@ns)) {
 		# Remove old NS records that we copied over
-		&bind8::delete_record($zonefile, $r);
+		&delete_dns_record($recs, $zonefile, $r);
 		}
 	}
 
@@ -3070,38 +3066,37 @@ sub save_domain_spf
 local ($d, $spf) = @_;
 &require_bind();
 local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
-local ($recs, $file);
+local ($recs, $file) = &get_domain_dns_records_and_file($d);
+if (!$file) {
+	# Zone not found!
+	return;
+	}
 local $bump = 0;
 &pre_records_change($d);
 foreach my $t (@types) {
-	($recs, $file) = &get_domain_dns_records_and_file($d);
-	if (!$file) {
-		# Domain not found!
-		return;
-		}
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=spf/ &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
 	local $str = $spf ? &bind8::join_spf($spf) : undef;
 	if ($r && $spf) {
 		# Update record
-		&bind8::modify_record(
-			$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
-			$r->{'class'}, $r->{'type'}, "\"$str\"",
-			$r->{'comment'});
+		$r->{'values'} = [ $str ];
+		&modify_dns_records($recs, $file, $r);
 		$bump = 1;
 		}
 	elsif ($r && !$spf) {
 		# Remove record
-		&bind8::delete_record($r->{'file'}, $r);
+		&delete_dns_record($recs, $file, $r);
 		$d->{'domain_spf_enabled'} = 0;
 		&save_domain($d);
 		$bump = 1;
 		}
 	elsif (!$r && $spf) {
 		# Add record
-		&bind8::create_record($file, $d->{'dom'}.'.', undef,
-				      "IN", $t, "\"$str\"");
+		$r = { 'name' => $d->{'dom'}.'.',
+		       'type' => $t,
+		       'values' => [ $str ] };
+		&create_dns_record($recs, $file, $r);
 		$d->{'domain_spf_enabled'} = 1;
 		&save_domain($d);
 		$bump = 1;
@@ -3221,21 +3216,21 @@ local ($r) = grep { ($_->{'type'} eq 'TXT' ||
 local $str = $dmarc ? &bind8::join_dmarc($dmarc) : undef;
 if ($r && $dmarc) {
 	# Update record
-	&bind8::modify_record(
-		$r->{'file'}, $r, $r->{'name'}, $r->{'ttl'},
-		$r->{'class'}, $r->{'type'}, "\"$str\"",
-		$r->{'comment'});
+	$r->{'values'} = [ $str ];
+	&modify_dns_record($recs, $file, $r);
 	$bump = 1;
 	}
 elsif ($r && !$dmarc) {
 	# Remove record
-	&bind8::delete_record($r->{'file'}, $r);
+	&delete_dns_record($recs, $file, $r);
 	$bump = 1;
 	}
 elsif (!$r && $dmarc) {
 	# Add record
-	&bind8::create_record($file, '_dmarc.'.$d->{'dom'}.'.', undef,
-			      "IN", "TXT", "\"$str\"");
+	$r = { 'name' => '_dmarc.'.$d->{'dom'}.'.',
+	       'type' => 'TXT',
+	       'values' => [ $str ] };
+	&create_dns_record($recs, $file, $r);
 	$bump = 1;
 	}
 if ($bump) {
@@ -4141,17 +4136,17 @@ if ($parent) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
-	foreach my $rec (reverse(@$precs)) {
+	foreach my $rec (@$precs) {
 		DS: foreach my $ds (@$dsrecs) {
 			if ($rec->{'name'} eq $ds->{'name'} &&
 			    $rec->{'type'} eq $ds->{'type'}) {
-				&bind8::delete_record($pfile, $rec);
+				&delete_dns_record($precs, $pfile, $rec);
 				last DS;
 				}
 			}
 		if ($rec->{'name'} eq $d->{'dom'}."." &&
 		    $rec->{'type'} eq 'NS') {
-			&bind8::delete_record($pfile, $rec);
+			&delete_dns_record($precs, $pfile, $rec);
 			}
 		}
 	&post_records_change($parent, $precs, $pfile);
