@@ -8264,6 +8264,12 @@ $clone_tests = [
 		       $test_domain_home.'/.htaccess',
 	},
 
+	# Add a DNS record
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing A 1.2.3.4' ] ],
+	},
+
 	# Validate before cloning
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -8420,6 +8426,16 @@ $clone_tests = [
 	},
 	{ 'command' => $wget_command.'http://'.$test_clone_domain.'/test.php',
 	  'grep' => 'uid=[0-9]+\\('.$test_clone_domain_user.'\\)',
+	},
+
+	# Check the DNS record
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_clone_domain ] ],
+	  'grep' => [ 'testing' ],
+	},
+	{ 'command' => 'host testing.'.$test_clone_domain,
+	  'grep' => '1.2.3.4',
 	},
 
 	# Cleanup the domain being cloned
