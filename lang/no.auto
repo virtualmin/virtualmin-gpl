@@ -241,6 +241,7 @@ check_eaptrepofile=APT-repository konfigurasjonsfilen $1 eksisterer ikke!
 check_aptrepook=Virtualmin APT-repository er riktig konfigurert
 check_aptrepowrong=APT-arkivets konfigurasjonsfil $1 inneholder feil serienummer på lisensnøkkelen!
 check_aptrepomissing=Konfigurasjonsfilen Virtualmin APT -depot $1 refererer ikke til software.virtualmin.com!
+check_repoeoutdate=Virtualmin-repositoriene som for øyeblikket er konfigurert på systemet ditt, er utdaterte. Vennligst sjekk ut <a target="_blank" href='$1'>denne veiledningen</a> for å oppgradere reposene dine
 
 check_eqmailldap=Qmail+LDAP-støtte er fjernet i Virtualmin 6.00
 

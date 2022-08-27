@@ -2085,6 +2085,7 @@ check_eaptrepofile=APTリポジトリ設定ファイル $1は存在しません�
 check_aptrepook=Virtualmin APTリポジトリが正しく構成されている
 check_aptrepowrong=APTリポジトリ設定ファイル $1に間違ったシリアル番号のライセンスキーが含まれています！
 check_aptrepomissing=Virtualmin APTリポジトリ設定ファイル $1はsoftware.virtualmin.comを参照していません！
+check_repoeoutdate=システムで現在構成されている Virtualmin リポジトリは古くなっています。リポジトリのアップグレードについては、<a target="_blank" href='$1'>こちらのチュートリアル</a>をご覧ください
 
 checkmap_enone=<a href='$1'>Postfix構成</a>でマップソースが見つかりませんでした
 checkmap_esupport=マップソース<tt>$1</tt>はPostfixでサポートされていません-Postfixライブラリをインストールするか、再コンパイルする必要があるかもしれません

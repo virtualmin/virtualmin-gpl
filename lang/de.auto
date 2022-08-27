@@ -642,6 +642,7 @@ check_eaptrepofile=Die APT-Repository-Konfigurationsdatei $1 existiert nicht!
 check_aptrepook=Das Virtualmin APT-Repository ist korrekt konfiguriert
 check_aptrepowrong=Die APT-Repository-Konfigurationsdatei $1 enthält die falsche Seriennummer des Lizenzschlüssels!
 check_aptrepomissing=Die Virtualmin APT-Repository-Konfigurationsdatei $1 verweist nicht auf software.virtualmin.com!
+check_repoeoutdate=Die derzeit auf Ihrem System konfigurierten Virtualmin-Repositories sind veraltet. Bitte sehen Sie sich <a target="_blank" href='$1'>dieses Tutorial</a> an, um Ihre Repos zu aktualisieren
 
 checkmap_esupport=Die Kartenquelle <tt>$1</tt> wird von Postfix nicht unterstützt. Möglicherweise müssen Sie Postfix-Bibliotheken dafür installieren oder neu kompilieren
 checkmap_eaccess=Die Kartenquelle <tt>$1</tt> kann nicht verwendet werden : $2
