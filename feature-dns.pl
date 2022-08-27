@@ -1940,12 +1940,8 @@ else {
 			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
 			    $r->{'name'} eq $d->{'dom'}.".") {
 				# Need to rename
-				&bind8::modify_record($fn, $r,
-					      $r->{'name'}."disabled.",
-					      $r->{'ttl'}, $r->{'class'},
-					      $r->{'type'},
-					      &join_record_values($r),
-					      $r->{'comment'});
+				$r->{'name'} = $r->{'name'}."disabled.";
+				&modify_dns_record(\@recs, $file, $nr);
 				}
 			}
 
@@ -2032,17 +2028,11 @@ else {
 		local $fn = $file->{'values'}->[0];
 		local @recs = &bind8::read_zone_file($fn, $d->{'dom'});
 		foreach my $r (@recs) {
-			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.disabled\.$/
-			    ||
+			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.disabled\.$/ ||
 			    $r->{'name'} eq $d->{'dom'}.".disabled.") {
 				# Need to rename
 				$r->{'name'} =~ s/\.disabled\.$/\./;
-				&bind8::modify_record($fn, $r,
-					      $r->{'name'},
-					      $r->{'ttl'}, $r->{'class'},
-					      $r->{'type'},
-					      &join_record_values($r),
-					      $r->{'comment'});
+				&modify_dns_record(\@recs, $file, $nr);
 				}
 			}
 
@@ -2437,16 +2427,15 @@ foreach my $t (@types) {
 		}
 	if ($changed) {
 		local $str = &bind8::join_spf($spf);
-		&bind8::modify_record($r->{'file'}, $r, $r->{'name'},
-				      $r->{'ttl'}, $r->{'class'},
-				      $r->{'type'}, "\"$str\"",
-				      $r->{'comment'});
+		$r->{'values'} = [ $str ];
+		&modify_dns_record($recs, $file, $r);
 		}
 	}
 
+&post_records_change($d, $recs, $file);
+&register_post_action(\&restart_bind, $d);
 &$second_print($text{'setup_done'});
 
-&register_post_action(\&restart_bind, $d);
 &release_lock_dns($d, 1);
 return 1;
 }
@@ -2478,12 +2467,7 @@ foreach my $r (@$recs) {
 		$changed = 1;
 		}
 	if ($changed) {
-		&bind8::modify_record($fn, $r, $r->{'name'},
-				      $r->{'ttl'},$r->{'class'},
-				      $r->{'type'},
-				      &join_record_values($r,
-					$r->{'eline'} == $r->{'line'}),
-				      $r->{'comment'});
+		&modify_dns_record($recs, $fn, $r);
 		$count++;
 		}
 	}
@@ -2525,12 +2509,7 @@ foreach my $r (@$recs) {
 		$r->{'values'}->[1] =~ s/$olddom/$newdom/;
 		}
 	if ($fn) {
-		&bind8::modify_record($fn, $r, $r->{'name'},
-				      $r->{'ttl'}, $r->{'class'},
-				      $r->{'type'},
-				      &join_record_values($r,
-					$r->{'eline'} == $r->{'line'}),
-				      $r->{'comment'});
+		&modify_dns_record($recs, $fn, $r);
 		}
 	}
 }
@@ -3666,12 +3645,14 @@ if (!$fn) {
 &bind8::bump_soa_record($fn, $recs);
 
 # If the domain is disabled, make sure all records end with .disabled
-if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0) {
+if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0 &&
+    !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	local @disrecs = &bind8::read_zone_file($fn, $d->{'dom'});
 	foreach my $r (@disrecs) {
 		if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
 		    $r->{'name'} eq $d->{'dom'}.".") {
-			# Not disabled - make it so
+			# Not disabled - make it so. This can call the old API
+			# since it's only used for local zones.
 			&bind8::modify_record($fn, $r,
 				      $r->{'name'}."disabled.",
 				      $r->{'ttl'}, $r->{'class'},
