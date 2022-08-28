@@ -7771,6 +7771,12 @@ if ($parentdom) {
 	$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
 	}
 
+# Was this originally the default domain?
+if (!defined($dom->{'defaultdomain'})) {
+	$dom->{'defaultdomain'} = 1
+		if ($dom->{'dom'} eq $config{'defaultdomain_name'});
+	}
+
 # Set up all the selected features (except Webmin login)
 my $f;
 local @dof = grep { $_ ne "webmin" } @features;

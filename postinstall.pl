@@ -59,6 +59,16 @@ if ($config{'show_sysinfo'} == 0 || $config{'show_sysinfo'} == 3) {
 # from before it
 $config{'first_version'} ||= &get_base_module_version();
 
+# Store the domain name of the default domain
+if (!$config{'defaultdomain_name'}) {
+	my $defd;
+	foreach my $d (&list_domains()) {
+		$defd = $d if ($d->{'defaultdomain'});
+		}
+	$config{'defaultdomain_name'} = $defd ? $defd->{'dom'} : 'none';
+	&save_module_config();
+	}
+
 # Make sure the remote.cgi page is accessible in non-session mode
 local %miniserv;
 &get_miniserv_config(\%miniserv);

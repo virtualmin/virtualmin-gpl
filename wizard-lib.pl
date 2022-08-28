@@ -922,6 +922,8 @@ my $err = &create_virtual_server(
 &pop_all_print();
 return $err if ($err);
 
+$config{'defaultdomain_name'} = $dom{'dom'};
+&save_module_config();
 &run_post_actions_silently();
 &unlock_domain_name($dname);
 
