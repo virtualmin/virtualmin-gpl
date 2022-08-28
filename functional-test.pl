@@ -8428,7 +8428,13 @@ $clone_tests = [
 	  'grep' => 'uid=[0-9]+\\('.$test_clone_domain_user.'\\)',
 	},
 
-	# Check the DNS record
+	# Check for basic DNS records
+	{ 'command' => 'host www.'.$test_clone_domain,
+	},
+	{ 'command' => 'host mail.'.$test_clone_domain,
+	},
+
+	# Check the extra DNS record
 	{ 'command' => 'get-dns.pl',
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_clone_domain ] ],
