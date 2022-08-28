@@ -360,6 +360,7 @@ if ($d->{'dns_cloud'}) {
 		}
 	delete($d->{'dns_cloud_id'});
 	delete($d->{'dns_cloud_location'});
+	delete($domain_dns_records_cache{$d->{'id'}});
 	&$second_print($text{'setup_done'});
 	}
 elsif ($d->{'provision_dns'}) {
@@ -380,6 +381,7 @@ elsif ($d->{'provision_dns'}) {
 	else {
 		&$second_print($text{'delete_bind_provision_none'});
 		}
+	delete($domain_dns_records_cache{$d->{'id'}});
 	}
 elsif (!$d->{'dns_submode'}) {
 	# Delete real domain
@@ -429,6 +431,7 @@ elsif (!$d->{'dns_submode'}) {
 
 	&delete_zone_on_slaves($d);
 	&release_lock_dns($d, 1);
+	delete($domain_dns_records_cache{$d->{'id'}});
 	}
 else {
 	# Delete records from parent zone
@@ -3299,6 +3302,11 @@ return $file->{'values'}->[0];
 sub get_domain_dns_records_and_file
 {
 local ($d) = @_;
+my $cid = $d->{'dns_submode'} ? $d->{'dns_subof'} : $d->{'id'};
+if (defined($domain_dns_records_cache{$cid})) {
+	# Use cached values
+	return @{$domain_dns_records_cache{$cid}};
+	}
 &require_bind();
 local $bind8::config{'short_names'} = 0;
 
@@ -3319,6 +3327,7 @@ if ($d->{'dns_cloud'} || $d->{'provision_dns'}) {
 		}
 	}
 
+my @rv;
 if ($d->{'dns_cloud'}) {
 	# Fetch from the cloud provider and write to temp file. The underlying
 	# BIND module API must be used here, because we need to write to an
@@ -3344,7 +3353,7 @@ if ($d->{'dns_cloud'}) {
 		$lnum++;
 		}
 	&set_record_ids($recs);
-	return ($recs, $temp);
+	@rv = ($recs, $temp);
 	}
 elsif ($d->{'provision_dns'}) {
 	# Fetch from cloudmin services and write to temp file. The underlying
@@ -3393,7 +3402,7 @@ elsif ($d->{'provision_dns'}) {
 		$lnum++;
 		}
 	&set_record_ids(\@recs);
-	return (\@recs, $temp);
+	@rv = (\@recs, $temp);
 	}
 else {
 	# Find local file
@@ -3402,8 +3411,10 @@ else {
 	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
 	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
 	&set_record_ids(\@recs);
-	return (\@recs, $file);
+	@rv = (\@recs, $file);
 	}
+$domain_dns_records_cache{$cid} = \@rv;
+return @rv;
 }
 
 # set_record_ids(&records)
