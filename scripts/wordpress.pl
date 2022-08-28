@@ -46,6 +46,15 @@ return ( "curl", "ssh2", "pecl-ssh2", "date",
          "posix", "sockets", "tokenizer" );
 }
 
+sub script_wordpress_php_vars
+{
+return ([ 'memory_limit', '64M', '+' ],
+        [ 'max_execution_time', 60, '+' ],
+        [ 'file_uploads', 'On' ],
+        [ 'upload_max_filesize', '10M', '+' ],
+        [ 'post_max_size', '10M', '+' ] );
+}
+
 sub script_wordpress_dbs
 {
 return ( "mysql" );
