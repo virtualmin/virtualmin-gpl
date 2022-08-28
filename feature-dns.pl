@@ -440,25 +440,25 @@ else {
 	&$first_print(&text('delete_bindsub', $dnsparent->{'dom'}));
 	&obtain_lock_dns($dnsparent);
 	&delete_parent_dnssec_ds_records($d);
-	local $z = &get_bind_zone($dnsparent->{'dom'});
-	if (!$z) {
+	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
+	if (!$file) {
 		&$second_print($text{'save_nobind'});
 		return;
 		}
 	&pre_records_change($dnsparent);
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
 	local $withdot = $d->{'dom'}.".";
-	foreach $r (reverse(@recs)) {
+	foreach $r (@$recs) {
 		# Don't delete if outside sub-domain
 		next if ($r->{'name'} !~ /\Q$withdot\E$/);
 		# Don't delete if the same as an existing record
 		next if ($r->{'name'} eq $withdot && $r->{'type'} eq 'A' &&
 			 $d->{'dns_subalready'});
-		&bind8::delete_record($fn, $r);
+		push(@delrecs, $r);
 		}
-	&post_records_change($dnsparent, \@recs);
+	foreach my $r (@delrecs) {
+		&delete_dns_record($recs, $file, $r);
+		}
+	&post_records_change($dnsparent, $recs);
 	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
 	delete($d->{'dns_submode'});
