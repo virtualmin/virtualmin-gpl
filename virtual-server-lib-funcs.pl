@@ -7960,12 +7960,12 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 		&setup_script_packages($script, $d, $ver);
 
 		# Check PHP version
-		local $phpver;
+		local ($phpver, $phperr);
 		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-			$phpver = &setup_php_version($dom, $script, $ver,
-						     $opts->{'path'});
+			($phpver, $phperr) = &setup_php_version(
+				$dom, $script, $ver, $opts->{'path'});
 			if (!$phpver) {
-				&$second_print($text{'scripts_ephpvers2'});
+				&$second_print($phperr);
 				next;
 				}
 			$opts->{'phpver'} = $phpver;

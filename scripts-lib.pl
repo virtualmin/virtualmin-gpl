@@ -1098,28 +1098,38 @@ return sort { $b <=> $a } &unique(@rv);
 
 # setup_php_version(&domain, &script, version, path)
 # Checks if one of the given PHP versions is available for the domain.
-# If not, sets up a per-directory version if possible.
+# If not, sets up a per-directory version if possible. Returns the chosen
+# version, or undef and an error message.
 sub setup_php_version
 {
 local ($d, $script, $scriptver, $path) = @_;
 
 # Figure out which PHP versions the script supports
 my @vers = map { &get_php_version($_->[0]) } &list_available_php_versions($d);
+if (!@vers) {
+	return (undef, $text{'scripts_enophpvers'});
+	}
+my @allvers = @vers;
 my $minfunc = $script->{'php_fullver_func'};
 my $maxfunc = $script->{'php_maxver_func'};
+my ($minver, $maxver);
 if (defined(&$minfunc)) {
-	my $minver = &$minfunc($d, $scriptver);
+	$minver = &$minfunc($d, $scriptver);
 	if ($minver) {
 		@vers = grep { &compare_versions($_, $minver) >= 0 } @vers;
 		}
 	}
 if (defined(&$maxfunc)) {
-	my $maxver = &$maxfunc($d, $scriptver);
+	$maxver = &$maxfunc($d, $scriptver);
 	if ($maxver) {
 		@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
 		}
 	}
-return undef if (!@vers);
+if (!@vers) {
+	my $msg = $minver && $maxver ? 'scripts_ephpminmax' :
+		  $minver ? 'scripts_ephpmin' : 'scripts_ephpmax';
+	return (undef, &text($msg, join(", ", @allvers), $minver, $maxver));
+	}
 
 # Find the best matching directory with a PHP version set
 local $dirpath = &public_html_dir($d).($path eq '/' ? '' : $path);
@@ -1131,20 +1141,27 @@ foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
 		$bestdir = $dir;
 		}
 	}
-$bestdir || &error("Could not find PHP version for $dirpath");
+if (!$bestdir) {
+	return (undef, &text('scripts_enophpdir', $dirpath));
+	}
 
 my $bestver = &get_php_version($bestdir->{'version'});
 if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
     &indexof($bestver, @vers) >= 0) {
 	# The best match dir supports one of the PHP versions .. so we are OK!
-	return $bestdir->{'version'};
+	return ($bestdir->{'version'}, undef);
 	}
 
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
 @vers = sort { &compare_versions($a, $b) } @vers;
 local $err = &save_domain_php_directory($d, $dirpath, $vers[0]);
-return $err ? undef : $vers[0];
+if ($err) {
+	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
+	}
+else {
+	return ($vers[0], undef);
+	}
 }
 
 # clear_php_version(&domain, &sinfo)

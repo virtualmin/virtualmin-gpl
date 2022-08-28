@@ -342,9 +342,9 @@ $merr = &making_changes();
 # Check PHP version
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	&$first_print("Checking PHP version ..");
-	$phpver = &setup_php_version($d, $script, $ver, $opts->{'path'});
+	($phpver, $phperr) = &setup_php_version($d, $script, $ver, $opts->{'path'});
 	if (!$phpver) {
-		&$second_print(".. no compatible PHP version found!");
+		&$second_print(".. $phperr");
 		exit(1);
 		}
 	else {

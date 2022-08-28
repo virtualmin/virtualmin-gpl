@@ -87,10 +87,10 @@ if ($in{'confirm'}) {
 		# Check if we have PHP
 		local $phpver;
 		if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-			$phpver = &setup_php_version($d, $script, $ver,
-						     $opts->{'path'});
+			($phpver, $phperr) = &setup_php_version(
+				$d, $script, $ver, $opts->{'path'});
 			if (!$phpver) {
-				&$second_print($text{'scripts_ephpvers2'});
+				&$second_print($phperr);
 				next;
 				}
 			}

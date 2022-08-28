@@ -135,9 +135,10 @@ $merr = &making_changes();
 
 # Setup PHP version
 if (&indexof("php", @{$script->{'uses'}}) >= 0) {
-	$phpver = &setup_php_version($d, $script, $ver, $opts->{'path'});
+	($phpver, $phperr) = &setup_php_version(
+		$d, $script, $ver, $opts->{'path'});
 	if (!$phpver) {
-		&error($text{'scripts_ephpvers2'});
+		&error($phperr);
 		}
 	$opts->{'phpver'} = $phpver;
 	}
