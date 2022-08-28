@@ -491,12 +491,21 @@ if (!$recs) {
 	}
 &obtain_lock_dns($d);
 
-# Copy over the records file
-local $absfile = &bind8::make_chroot($file);
-local $absofile = &bind8::make_chroot($ofile);
-&copy_source_dest($absofile, $absfile);
+# Remove all existing records, and create new ones
 &pre_records_change($d);
-$recs = [ &bind8::read_zone_file($file, $oldd->{'dom'}) ];
+my @delrecs;
+foreach my $r (@$recs) {
+	next if ($r->{'type'} eq 'SOA');
+	push(@delrecs, $r);
+	}
+foreach my $r (@delrecs) {
+	&delete_dns_record($recs, $file, $r);
+	}
+foreach my $r (@$orecs) {
+	next if ($r->{'type'} eq 'SOA');
+	my $nr = { %$r };
+	&create_dns_record($recs, $file, $nr);
+	}
 &modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
 local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
 local $newip = $d->{'dns_ip'} || $d->{'ip'};
@@ -513,16 +522,16 @@ local @sublist = grep { $_->{'id'} ne $oldd->{'id'} &&
 			$_->{'id'} ne $d->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$oldd->{'dom'}\E$/ }
 		      &list_domains();
-RECORD: foreach my $r (reverse(@$recs)) {
+RECORD: foreach my $r (@$recs) {
 	foreach my $sd (@sublist) {
 		if ($r->{'name'} eq $sd->{'dom'}."." ||
 		    $r->{'name'} =~ /\.\Q$sd->{'dom'}\E\.$/) {
-			&bind8::delete_record($file, $r);
+			&delete_dns_record($recs, $file, $r);
 			next RECORD;
 			}
 		}
 	if (&is_dnssec_record($r)) {
-		&bind8::delete_record($file, $r);
+		&delete_dns_record($recs, $file, $r);
 		}
 	}
 
