@@ -51,7 +51,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	@gotvers = sort { &get_php_version($b, $d) <=>
                           &get_php_version($a, $d) } @gotvers;
 	if (!@gotvers) {
-		print $text{'scripts_ephpvers2'},"<p>\n";
+		&error($text{'scripts_ephpvers2'});
 		$ok = 0;
 		}
 	}
@@ -59,7 +59,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 # Check dependencies
 $derr = &check_script_depends($script, $d, $ver, $sinfo, $gotvers[0]);
 if ($derr) {
-	print &text('scripts_edep', $derr),"<p>\n";
+	&error(&text('scripts_edep', $derr));
 	$ok = 0;
 	}
 
