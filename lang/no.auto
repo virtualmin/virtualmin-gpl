@@ -561,6 +561,12 @@ licence_xfsrebootok=Starte på nytt nå
 
 scripts_emissing=Manus eksisterer ikke!
 scripts_ephpvers2=Dette skriptet kan ikke installeres, da ingen PHP-versjoner ble funnet
+scripts_enophpvers=Ingen PHP-versjoner funnet!
+scripts_enophpdir=Finner ikke PHP-versjonen for $1
+scripts_ephpverchange=Kunne ikke endre katalogen $1 til å bruke PHP-versjon $2
+scripts_ephpminmax=Ingen av de tilgjengelige PHP-versjonene ($1) er mellom $2 og $3
+scripts_ephpmin=Ingen av de tilgjengelige PHP-versjonene ($1) er på eller over $2
+scripts_ephpmax=Ingen av de tilgjengelige PHP-versjonene ($1) er under $3
 scripts_uerr=Kunne ikke avinstallere skriptet
 scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks

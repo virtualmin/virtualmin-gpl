@@ -784,6 +784,12 @@ licence_xfsrebootok=Herstart nu
 
 scripts_emissing=Script bestaat niet!
 scripts_ephpvers2=Dit script kan niet worden geïnstalleerd omdat er geen PHP-versies zijn gevonden
+scripts_enophpvers=Geen PHP-versies gevonden!
+scripts_enophpdir=Kon geen PHP-versie vinden voor $1
+scripts_ephpverchange=Kan map $1 niet wijzigen om PHP-versie $2 te gebruiken
+scripts_ephpminmax=Geen van de beschikbare PHP-versies ($1) ligt tussen $2 en $3
+scripts_ephpmin=Geen van de beschikbare PHP-versies ($1) is gelijk aan of hoger dan $2
+scripts_ephpmax=Geen van de beschikbare PHP-versies ($1) is lager dan $3
 scripts_uerr=Kan script niet verwijderen
 scripts_egone=Script bestaat niet meer!
 scripts_idb2=Gebruikt database met tabelvoorvoegsel

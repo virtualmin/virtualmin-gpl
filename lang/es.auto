@@ -1145,6 +1145,12 @@ licence_xfsrebootok=Reinicie ahora
 
 scripts_emissing=¡El guión no existe!
 scripts_ephpvers2=Este script no se puede instalar, ya que no se encontraron versiones de PHP
+scripts_enophpvers=¡No se encontraron versiones de PHP!
+scripts_enophpdir=No se pudo encontrar la versión de PHP para $1
+scripts_ephpverchange=No se pudo cambiar el directorio $1 para usar la versión de PHP $2
+scripts_ephpminmax=Ninguna de las versiones de PHP disponibles ($1) está entre $2 y $3
+scripts_ephpmin=Ninguna de las versiones de PHP disponibles ($1) es igual o superior a $2
+scripts_ephpmax=Ninguna de las versiones de PHP disponibles ($1) está por debajo de $3
 scripts_edownload3=La descarga de $1 es un archivo de archivo incompleto : $2
 scripts_uerr=Error al desinstalar el script
 scripts_faking=Instalación falsa de $1 versión $2 ..
