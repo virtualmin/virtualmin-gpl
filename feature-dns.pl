@@ -302,6 +302,7 @@ elsif (!$dnsparent) {
 	}
 else {
 	# Creating a sub-domain - add to parent's DNS zone.
+	# XXX use proper API
 	&$first_print(&text('setup_bindsub', $dnsparent->{'dom'}));
 	&obtain_lock_dns($dnsparent);
 	local $z = &get_bind_zone($dnsparent->{'dom'});
@@ -823,6 +824,7 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 		}
 
 	# Modify any records containing the old name
+	# XXX don't re-read zone file
 	&lock_file(&bind8::make_chroot($nfn));
 	&pre_records_change($d);
         local @recs = &bind8::read_zone_file($nfn, $oldzonename);
@@ -1390,15 +1392,16 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 	# Add or use the user-defined records template, if defined and if this
 	# isn't a sub-domain being added to an existing file OR if we are just
 	# adding records
-	&open_tempfile(RECS, ">>$rootfile");
 	local %subs = %$d;
 	$subs{'serial'} = $serial;
 	$subs{'dnsemail'} = $d->{'emailto_addr'};
 	$subs{'dnsemail'} =~ s/\@/./g;
 	local $recs = &substitute_domain_template(
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
-	&print_tempfile(RECS, $recs);
-	&close_tempfile(RECS);
+	local @tmplrecs = &text_to_dns_records($recs, $d->{'dom'});
+	foreach my $r (@tmplrecs) {
+		&create_dns_record($recs, $file, $r);
+		}
 	}
 
 if ($d->{'ip6'}) {
@@ -1944,6 +1947,7 @@ else {
 		&flush_file_lines();
 
 		# Rename all records in the domain with the new .disabled name
+		# XXX use proper API
 		local $file = &bind8::find("file", $z->{'members'});
 		local $fn = $file->{'values'}->[0];
 		local @recs = &bind8::read_zone_file(
@@ -2036,6 +2040,7 @@ else {
 		&flush_file_lines();
 
 		# Fix all records in the domain with the .disabled name
+		# XXX use proper API
 		local $file = &bind8::find("file", $z->{'members'});
 		local $fn = $file->{'values'}->[0];
 		local @recs = &bind8::read_zone_file($fn, $d->{'dom'});
@@ -2529,6 +2534,7 @@ foreach my $r (@$recs) {
 # except_soa(&domain, file)
 # Returns the start and end lines of a records file for the entries
 # after the SOA.
+# XXX is this even needed?
 sub except_soa
 {
 local ($d, $file) = @_;
@@ -2891,16 +2897,7 @@ if ($in{"dns_mode"} == 2) {
 			{ 'ip' => $fakeip,
 			  'dom' => $fakedom,
 		 	  'web' => 1, });
-	local $temp = &transname();
-	&open_tempfile(TEMP, ">$temp");
-	&print_tempfile(TEMP, $recs);
-	&close_tempfile(TEMP);
-	local $bind8::config{'short_names'} = 0;  # force canonicalization
-	local $bind8::config{'chroot'} = '/';	  # turn off chroot for temp path
-	local $bind8::config{'auto_chroot'} = undef;
-	undef($bind8::get_chroot_cache);
-	local @recs = &bind8::read_zone_file($temp, $fakedom);
-	unlink($temp);
+	local @recs = &text_to_dns_records($recs, "example.com");
 	foreach $r (@recs) {
 		$soa++ if ($r->{'name'} eq $fakedom."." &&
 			   $r->{'type'} eq "SOA");
@@ -3599,8 +3596,8 @@ return $dmarc;
 # array of directive objects.
 sub text_to_named_conf
 {
-local ($str) = @_;
-local $temp = &transname();
+my ($str) = @_;
+my $temp = &transname();
 &open_tempfile(TEMP, ">$temp");
 &print_tempfile(TEMP, $str);
 &close_tempfile(TEMP);
@@ -3608,10 +3605,28 @@ local $temp = &transname();
 local $bind8::config{'chroot'} = undef;		# turn off chroot temporarily
 local $bind8::config{'auto_chroot'} = undef;
 undef($bind8::get_chroot_cache);
-local @rv = grep { $_->{'name'} ne 'dummy' }
+my @rv = grep { $_->{'name'} ne 'dummy' }
 	    &bind8::read_config_file($temp, 0);
 undef($bind8::get_chroot_cache);		# reset cache back
 return @rv;
+}
+
+# text_to_dns_records(text, domain-name)
+# Convert some text into an array of DNS records
+sub text_to_dns_records
+{
+my ($str, $dname) = @_;
+my $temp = &transname();
+&open_tempfile(TEMP, ">$temp");
+&print_tempfile(TEMP, $str);
+&close_tempfile(TEMP);
+&require_bind();
+local $bind8::config{'chroot'} = undef;		# turn off chroot temporarily
+local $bind8::config{'auto_chroot'} = undef;
+undef($bind8::get_chroot_cache);
+my @recs = &bind8::read_zone_file($temp, $dname, undef, 0, 1);
+undef($bind8::get_chroot_cache);		# reset cache back
+return @recs;
 }
 
 # pre_records_change(&domain)
@@ -3734,9 +3749,9 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		&pre_records_change($d);
 		local $file;
 		local $recs;
+		# XXX do we need this check??
 		if ($ad->{'provision_dns'} || $ad->{'dns_cloud'}) {
 			# On provisioning server
-			# XXX do we need this check??
 			$file = &transname();
 			local $bind8::config{'auto_chroot'} = undef;
 			local $bind8::config{'chroot'} = undef;
