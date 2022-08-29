@@ -19,14 +19,10 @@ local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_port'});
 if ($virt) {
 	# First check for FPM socket, using a single ProxyPassMatch
-	local $fosock = &get_php_fpm_socket_oldfile($d);
-	local $fsock = &get_php_fpm_socket_file($d, 1);
-	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	foreach my $ppm (@ppm) {
-		if ($ppm =~ /unix:\Q$fosock\E/ || $ppm =~ /unix:\Q$fsock\E/ ||
-		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/ ||
-		    $ppm =~ /fcgi:\/\/127\.0\.0\.1:\Q$fport\E/) {
+		if ($ppm =~ /unix:([^\|]+)/ ||
+		    $ppm =~ /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/) {
 			return 'fpm';
 			}
 		}
@@ -35,8 +31,7 @@ if ($virt) {
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
-			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
-			    $h =~ /proxy:fcgi:\/\/127\.0\.0\.1/ ||
+			if ($h =~ /proxy:fcgi:\/\/(localhost|127\.0\.0\.1)/ ||
 			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
@@ -413,19 +408,18 @@ foreach my $p (@ports) {
 		}
 
 	# For FPM mode, we need a proxy directive at the top level
-	local $fosock = &get_php_fpm_socket_oldfile($d);
 	local $fsock = &get_php_fpm_socket_file($d, 1);
 	local $fport = $d->{'php_fpm_port'};
 	local $fmode = $fport ? 'port' :
 		       -r $fsock ? 'socket' :
 		       $tmpl->{'php_sock'} ? 'socket' : 'port';
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
-	local @oldppm = grep { /unix:\Q$fosock\E/ || /unix:\Q$fsock\E/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
+	local @oldppm = grep { /unix:([^\|]+)/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 	if ($fsock) {
-		@ppm = grep { !/unix:\Q$fosock\E/ && !/unix:\Q$fsock\E/ } @ppm;
+		@ppm = grep { !/unix:([^\|]+)/ } @ppm;
 		}
 	if ($fport) {
-		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
+		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 		}
 	local $files;
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
@@ -2072,13 +2066,6 @@ if (!-d $base && !$nomkdir) {
 	&make_dir($base, 0755);
 	}
 return $base."/".$d->{'id'}.".sock";
-}
-
-# get_php_fpm_socket_oldfile(&domain)
-# Returns the path to the old style default per-domain PHP-FPM socket file.
-sub get_php_fpm_socket_oldfile {
-my ($d) = @_;
-return "/var/php-fpm/".$d->{'id'}.".sock";
 }
 
 # get_php_fpm_socket_port(&domain)
