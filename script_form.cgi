@@ -56,13 +56,6 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		}
 	}
 
-# Check dependencies
-$derr = &check_script_depends($script, $d, $ver, $sinfo, $gotvers[0]);
-if ($derr) {
-	print &text('scripts_edep', $derr),"<p>\n";
-	$ok = 0;
-	}
-
 if ($ok) {
 	# Check if abandoned
 	$afunc = $script->{'abandoned_func'};
