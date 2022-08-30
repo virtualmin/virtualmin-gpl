@@ -2054,7 +2054,10 @@ return $basefile if (-r $basefile);
 # Distro dependent FPM socket dirs (if exists)
 my $rhelbase = "/var/run/php-fpm";
 my $debbase = "/var/run/php";
-if (-d $rhelbase &&
+if ($config{'fpm_socket_dir'}) {
+	$base = $config{'fpm_socket_dir'};
+	}
+elsif (-d $rhelbase &&
     $gconfig{'os_type'} eq 'redhat-linux') {
 	$base = $rhelbase;
 	}
