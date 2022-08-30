@@ -2052,8 +2052,8 @@ my $base = "/var/php-fpm";
 my $basefile = $base."/".$d->{'id'}.".sock";
 return $basefile if (-r $basefile);
 # Distro dependent FPM socket dirs (if exists)
-my $rhelbase = "/var/run/php-fpm";
-my $debbase = "/var/run/php";
+my $rhelbase = "/run/php-fpm";
+my $debbase = "/run/php";
 if ($config{'fpm_socket_dir'}) {
 	$base = $config{'fpm_socket_dir'};
 	}
