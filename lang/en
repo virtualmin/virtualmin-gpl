@@ -7402,7 +7402,7 @@ letsencrypt_connerrs=.. errors were found, which will prevent Let's Encrypt from
 letsencrypt_connok=.. no problems found
 letsencrypt_validcheck=Validating configuration for $1 ..
 
-php_fpmrestart=Restarting PHP-FPM server ..
+php_fpmrestart=Restarting PHP-FPM $1 server ..
 php_fpmnoinit=.. no bootup action found!
 php_fpmeinit=.. failed : $1
 php_fpmnodir=No FPM configuration directory found

@@ -2324,7 +2324,7 @@ sub restart_php_fpm_server
 {
 my ($conf) = @_;
 $conf ||= &get_php_fpm_config();
-&$first_print($text{'php_fpmrestart'});
+&$first_print(&text('php_fpmrestart', $conf->{'shortversion'}));
 if ($conf->{'init'}) {
 	&foreign_require("init");
 	my ($ok, $err) = &init::restart_action($conf->{'init'});
