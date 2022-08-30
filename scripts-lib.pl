@@ -1096,6 +1096,29 @@ if (&indexof(5, @rv) >= 0) {
 return sort { $b <=> $a } &unique(@rv);
 }
 
+# parse_php_version_max (&phpvers, phpmax)
+# Given a list of versions extract maximum
+# version that is available on the list
+sub parse_php_version_max
+{
+my ($phpvers, $phpmax) = @_;
+my (@vers, @verexact, @vermaxalwd);
+$phpmax = &get_php_version($phpmax) || $phpmax;
+@verexact = grep { $_ eq $phpmax } @{$phpvers};
+if (@verexact) {
+	@vers = @verexact;
+	}
+else {
+	@vermaxalwd = 
+		(sort { $a <=> $b }
+			(grep { &compare_versions($_, $phpmax) <= 0 } @{$phpvers}));
+	if (@vermaxalwd) {
+		@vers = ($vermaxalwd[-1]);
+		}
+	}
+return wantarray ? @vers : $vers[0];
+}
+
 # setup_php_version(&domain, &script, version, path)
 # Checks if one of the given PHP versions is available for the domain.
 # If not, sets up a per-directory version if possible. Returns the chosen
@@ -1122,7 +1145,7 @@ if (defined(&$minfunc)) {
 if (defined(&$maxfunc)) {
 	$maxver = &$maxfunc($d, $scriptver);
 	if ($maxver) {
-		@vers = grep { &compare_versions($_, $maxver) < 0 } @vers;
+		@vers = parse_php_version_max(\@vers, $maxver);
 		}
 	}
 if (!@vers) {
@@ -3018,8 +3041,12 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		}
 	if ($fullver && defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
-		if ($maxver && &compare_versions($fullver, $maxver) > 0) {
-			return &text('scripts_iphpmaxver', $maxver, $fullver);
+		if ($maxver) {
+			my @fullverarr = ($fullver);
+			$maxver = &parse_php_version_max(\@fullverarr, $maxver);
+			if (&compare_versions($fullver, $maxver) > 0) {
+				return &text('scripts_iphpmaxver', $maxver, $fullver);
+				}
 			}
 		}
 	}
