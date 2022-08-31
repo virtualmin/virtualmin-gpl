@@ -1105,7 +1105,13 @@ sub setup_php_version
 local ($d, $script, $scriptver, $path) = @_;
 
 # Figure out which PHP versions the script supports
-my @vers = map { &get_php_version($_->[0]) } &list_available_php_versions($d);
+my @vers;
+my %vmap;
+foreach my $v (&list_available_php_versions($d)) {
+	my $fullv = &get_php_version($v->[0]);
+	push(@vers, $fullv);
+	$vmap{$fullv} = $v->[0];
+	}
 if (!@vers) {
 	return (undef, $text{'scripts_enophpvers'});
 	}
@@ -1132,7 +1138,10 @@ if (!@vers) {
 	}
 
 # Find the best matching directory with a PHP version set
-local $dirpath = &public_html_dir($d).($path eq '/' ? '' : $path);
+local $dirpath = &public_html_dir($d);
+if (&can_domain_php_directories($d) && $path ne '/') {
+	$dirpath .= $path;
+	}
 local @dirs = &list_domain_php_directories($d);
 local $bestdir;
 foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
@@ -1154,8 +1163,9 @@ if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
 
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
-@vers = sort { &compare_versions($a, $b) } @vers;
-local $err = &save_domain_php_directory($d, $dirpath, $vers[0]);
+my ($setver) = sort { &compare_versions($a, $b) } @vers;
+$setver = $vmap{$setver} || $setver;
+local $err = &save_domain_php_directory($d, $dirpath, $setver);
 if ($err) {
 	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
 	}

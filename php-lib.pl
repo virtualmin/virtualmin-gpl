@@ -1138,6 +1138,21 @@ $get_php_version_cache{$cmd} = undef;
 return undef;
 }
 
+# can_domain_php_directories(&domain, [mode])
+# Returns 1 if the PHP version can be set on specific directories
+sub can_domain_php_directories
+{
+my ($d, $mode) = @_;
+local $p = &domain_has_website($d);
+if ($p && $p ne 'web' &&
+    &plugin_defined($p, "feature_can_domain_php_directories")) {
+	return &plugin_call($p, "feature_can_domain_php_directories",
+			    $d, $mode);
+	}
+$mode ||= &get_domain_php_mode($d);
+return $mode eq "fpm" ? 0 : 1;
+}
+
 # list_domain_php_directories(&domain)
 # Returns a list of directories for which different versions of PHP have
 # been configured.
