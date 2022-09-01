@@ -2302,37 +2302,37 @@ if (!$zonefile) {
 	&release_lock_dns($d, 1);
 	return 0;
 	}
-local $absfile = &bind8::make_chroot(&bind8::absolute_path($zonefile));
-local @thisrecs = &bind8::read_zone_file($zonefile,
-    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""));
+
+# Read records from the backup file
+local @brecs = &bind8::read_zone_file($file,
+    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""), undef, 0, 1);
 
 if ($d->{'dns_submode'}) {
 	# Only replacing records for this sub-domain
 	my $oldsubrecs = &filter_domain_dns_records($d, $recs);
-	my @backuprecs = &bind8::read_zone_file($file, $d->{'dom'});
 	$oldsubrecs = &filter_domain_dns_records($d, $oldsubrecs);
-	my $newsubrecs = &filter_domain_dns_records($d, \@backuprecs);
-	foreach my $r (reverse(@$oldsubrecs)) {
+	my $newsubrecs = &filter_domain_dns_records($d, \@brecs);
+	foreach my $r (@$oldsubrecs) {
 		&delete_dns_record($recs, $zonefile, $r);
 		}
 	foreach my $r (@$newsubrecs) {
 		&create_dns_record($recs, $zonefile, $r);
 		}
 	}
-elsif ($opts->{'wholefile'}) {
-	# Copy whole file
-	&copy_source_dest($file, $absfile);
-	&bind8::set_ownership($zonefile);
-	}
 else {
-	# Only copy section after SOA
-	local $srclref = &read_file_lines($file, 1);
-	local $dstlref = &read_file_lines($absfile);
-	local ($srcstart, $srcend) = &except_soa($d, $file);
-	local ($dststart, $dstend) = &except_soa($d, $absfile);
-	splice(@$dstlref, $dststart, $dstend - $dststart + 1,
-	       @$srclref[$srcstart .. $srcend]);
-	&flush_file_lines($absfile);
+	# Delete old records and create ones from the backup
+	my @delrecs;
+	foreach my $r (@$recs) {
+		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
+		push(@delrecs, $r);
+		}
+	foreach my $r (@delrecs) {
+		&delete_dns_record($recs, $zonefile, $r);
+		}
+	foreach my $r (@brecs) {
+		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
+		&create_dns_record($recs, $zonefile, $r);
+		}
 	}
 
 if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
@@ -2529,29 +2529,6 @@ foreach my $r (@$recs) {
 		&modify_dns_record($recs, $fn, $r);
 		}
 	}
-}
-
-# except_soa(&domain, file)
-# Returns the start and end lines of a records file for the entries
-# after the SOA.
-# XXX is this even needed?
-sub except_soa
-{
-local ($d, $file) = @_;
-local $bind8::config{'chroot'} = "/";	# make sure path is absolute
-local $bind8::config{'auto_chroot'} = undef;
-undef($bind8::get_chroot_cache);
-local @recs = &bind8::read_zone_file($file, $d->{'dom'});
-local ($r, $start, $end);
-foreach $r (@recs) {
-	if ($r->{'type'} ne "SOA" && !$r->{'generate'} && !$r->{'defttl'} &&
-	    !defined($start)) {
-		$start = $r->{'line'};
-		}
-	$end = $r->{'eline'};
-	}
-undef($bind8::get_chroot_cache);	# Reset cache back
-return ($start, $end);
 }
 
 # get_bind_view([&conf], view)
