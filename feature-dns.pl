@@ -302,7 +302,6 @@ elsif (!$dnsparent) {
 	}
 else {
 	# Creating a sub-domain - add to parent's DNS zone.
-	# XXX use proper API
 	&$first_print(&text('setup_bindsub', $dnsparent->{'dom'}));
 	&obtain_lock_dns($dnsparent);
 	local $z = &get_bind_zone($dnsparent->{'dom'});
@@ -310,21 +309,19 @@ else {
 		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
 		}
 	&pre_records_change($dnsparent);
-	local $file = &bind8::find("file", $z->{'members'});
-	local $fn = $file->{'values'}->[0];
-	local @recs = &bind8::read_zone_file($fn, $dnsparent->{'dom'});
+	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
 	$d->{'dns_submode'} = 1;	# So we know how this was done
 	$d->{'dns_subof'} = $dnsparent->{'id'};
 	local ($already) = grep { $_->{'name'} eq $d->{'dom'}."." }
-				grep { $_->{'type'} eq 'A' } @recs;
+				grep { $_->{'type'} eq 'A' } @$recs;
 	if ($already) {
 		# A record with the same name as the sub-domain exists .. we
 		# don't want to delete this later
 		$d->{'dns_subalready'} = 1;
 		}
 	local $ip = $d->{'dns_ip'} || $d->{'ip'};
-	&create_standard_records(\@recs, $fn, $d, $ip);
-	&post_records_change($dnsparent, \@recs);
+	&create_standard_records($recs, $file, $d, $ip);
+	&post_records_change($dnsparent, $recs, $file);
 
 	&release_lock_dns($dnsparent);
 	&add_parent_dnssec_ds_records($d);
@@ -462,7 +459,7 @@ else {
 	foreach my $r (@delrecs) {
 		&delete_dns_record($recs, $file, $r);
 		}
-	&post_records_change($dnsparent, $recs);
+	&post_records_change($dnsparent, $recs, $file);
 	&release_lock_dns($dnsparent);
 	&$second_print($text{'setup_done'});
 	delete($d->{'dns_submode'});
@@ -4323,7 +4320,7 @@ if (&dns_records_to_text(@oldrecs) ne &dns_records_to_text(@need)) {
 		&create_dns_record($recs, $file, $r);
 		}
 
-	&post_records_change($d, $recs);
+	&post_records_change($d, $recs, $file);
 	&release_lock_dns($d);
 	}
 else {
@@ -4580,7 +4577,7 @@ foreach my $r (@srecs) {
 		&create_dns_record($recs, $file, $r);
 		}
 	}
-&post_records_change($d, $recs);
+&post_records_change($d, $recs, $file);
 &release_lock_dns($d);
 &register_post_action(\&restart_bind, $d);
 &save_domain($d);
