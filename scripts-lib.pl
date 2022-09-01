@@ -3028,7 +3028,7 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 		}
 	if ($fullver && defined(&$maxfunc)) {
 		my $maxver = &$maxfunc($d, $ver, $sinfo);
-		if ($maxver && &compare_versions($fullver, $maxver) > 0) {
+		if ($maxver && &compare_versions($fullver, $maxver) >= 0) {
 			return &text('scripts_iphpmaxver', $maxver, $fullver);
 			}
 		}
