@@ -298,7 +298,7 @@ $domains_tests = [
 	},
 
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -618,10 +618,10 @@ $domains_tests = [
 	},
 
 	# Verify that it worked
-	{ 'command' => 'host testing.'.$test_domain,
+	{ 'command' => 'host -t A testing.'.$test_domain,
 	  'grep' => '1.2.3.4',
 	},
-	{ 'command' => 'host ttltest.'.$test_domain,
+	{ 'command' => 'host -t A ttltest.'.$test_domain,
 	  'grep' => '5.6.7.8',
 	},
 
@@ -638,10 +638,10 @@ $domains_tests = [
 	},
 
 	# Make sure they are gone
-	{ 'command' => 'host testing.'.$test_domain,
+	{ 'command' => 'host -t A testing.'.$test_domain,
 	  'fail' => 1,
 	},
-	{ 'command' => 'host ttltest.'.$test_domain,
+	{ 'command' => 'host -t A ttltest.'.$test_domain,
 	  'fail' => 1,
 	},
 
@@ -808,12 +808,12 @@ $disable_tests = [
 	},
 
 	# Test that DNS lookup fails
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'antigrep' => &get_default_ip(),
 	},
 
 	# Test that DNS lookup works for the disabled domain
-	{ 'command' => 'host '.$test_domain.'.disabled',
+	{ 'command' => 'host -t A '.$test_domain.'.disabled',
 	  'grep' => &get_default_ip(),
 	},
 
@@ -2189,7 +2189,7 @@ $aliasdom_tests = [
 	},
 
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -2283,7 +2283,7 @@ $aliasdom_tests = [
 # Backup tests
 @post_restore_tests = (
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -2346,7 +2346,7 @@ $aliasdom_tests = [
 	},
 
 	# Test DNS lookup of sub-domain
-	{ 'command' => 'host '.$test_subdomain,
+	{ 'command' => 'host -t A '.$test_subdomain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -5361,7 +5361,7 @@ $ssl_tests = [
 	},
 
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'antigrep' => &get_default_ip(),
 	},
 
@@ -5590,7 +5590,7 @@ $ssl_tests = [
 	},
 
 	# Test DNS lookup after the restore
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'antigrep' => &get_default_ip(),
 	},
 
@@ -6199,7 +6199,7 @@ $shared_tests = [
         },
 
 	# Test DNS and website
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => '$SHARED_IP',
 	},
 	{ 'command' => $wget_command.'http://'.$test_domain,
@@ -6213,7 +6213,7 @@ $shared_tests = [
 	},
 
 	# Test DNS and website again
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
 	{ 'command' => $wget_command.'http://'.$test_domain,
@@ -6257,7 +6257,7 @@ $wildcard_tests = [
         },
 
 	# Test DNS and website
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => '$SHARED_IP',
 	},
 	{ 'command' => $wget_command.'http://'.$test_domain,
@@ -6283,7 +6283,7 @@ $wildcard_tests = [
         },
 
 	# Test DNS and website for the sub-domain
-	{ 'command' => 'host '.'sslsub.'.$test_domain,
+	{ 'command' => 'host -t A '.'sslsub.'.$test_domain,
 	  'grep' => '$SHARED_IP',
 	},
 	{ 'command' => $wget_command.'http://sslsub.'.$test_domain,
@@ -6974,10 +6974,10 @@ $ip6_tests = [
 	{ 'command' => 'sleep 10' },
 
 	# Test DNS lookup for v6 entry
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t AAAA '.$test_domain,
 	  'grep' => 'IPv6 address',
 	},
-	{ 'command' => 'host '.$test_target_domain,
+	{ 'command' => 'host -t AAAA '.$test_target_domain,
 	  'grep' => 'IPv6 address',
 	},
 
@@ -6996,7 +6996,7 @@ $ip6_tests = [
 	},
 
 	# Make sure DNS entries are gone
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t AAAA '.$test_domain,
 	  'antigrep' => 'IPv6 address',
 	},
 
@@ -7039,7 +7039,7 @@ $ip6_tests = [
 	},
 
 	# Test DNS lookup for v6 entry
-	{ 'command' => 'host '.$test_subdomain,
+	{ 'command' => 'host -t AAAA '.$test_subdomain,
 	  'grep' => [ 'IPv6 address', &get_default_ip6() ],
 	},
 
@@ -7125,7 +7125,7 @@ $webrename_tests = [
 	},
 
 	# Make sure DNS works
-	{ 'command' => 'host '.$test_rename_domain,
+	{ 'command' => 'host -t A '.$test_rename_domain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -7258,7 +7258,7 @@ $rename_tests = [
 	},
 
 	# Make sure DNS works
-	{ 'command' => 'host '.$test_rename_domain,
+	{ 'command' => 'host -t A '.$test_rename_domain,
 	  'grep' => '$PRIVATE_IP',
 	},
 
@@ -8357,7 +8357,7 @@ $clone_tests = [
 	},
 
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_clone_domain,
+	{ 'command' => 'host -t A '.$test_clone_domain,
 	  'antigrep' => &get_default_ip(),
 	},
 
@@ -8429,9 +8429,9 @@ $clone_tests = [
 	},
 
 	# Check for basic DNS records
-	{ 'command' => 'host www.'.$test_clone_domain,
+	{ 'command' => 'host -t A www.'.$test_clone_domain,
 	},
-	{ 'command' => 'host mail.'.$test_clone_domain,
+	{ 'command' => 'host -t A mail.'.$test_clone_domain,
 	},
 
 	# Check the extra DNS record
@@ -8440,7 +8440,7 @@ $clone_tests = [
 		      [ 'domain', $test_clone_domain ] ],
 	  'grep' => [ 'testing' ],
 	},
-	{ 'command' => 'host testing.'.$test_clone_domain,
+	{ 'command' => 'host -t A testing.'.$test_clone_domain,
 	  'grep' => '1.2.3.4',
 	},
 
@@ -8594,7 +8594,7 @@ $clonesub_tests = [
 	},
 
 	# Test DNS lookup
-	{ 'command' => 'host '.$test_clone_domain,
+	{ 'command' => 'host -t A '.$test_clone_domain,
 	  'antigrep' => &get_default_ip(),
 	},
 
@@ -8960,7 +8960,7 @@ $ipbackup_tests = [
 	},
 
 	# Check that the main domain IP resolves OK
-	{ 'command' => 'host '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
 
@@ -8978,7 +8978,7 @@ $ipbackup_tests = [
 	},
 
 	# Check that the sub-server IP resolves OK
-	{ 'command' => 'host '.$test_subdomain,
+	{ 'command' => 'host -t A '.$test_subdomain,
 	  'antigrep' => &get_default_ip(),
 	},
 
@@ -9219,6 +9219,18 @@ $dns_tests = [
 	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
 	},
 
+	# Validate standard records
+	{ 'command' => 'host -t A '.$test_domain,
+	},
+	{ 'command' => 'host -t A www.'.$test_domain,
+	},
+	{ 'command' => 'host -t A mail.'.$test_domain,
+	},
+	{ 'command' => 'host -t A '.$test_dns_subdomain,
+	},
+	{ 'command' => 'host -t A www.'.$test_dns_subdomain,
+	},
+
 	# Add a record to both domains
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -9239,6 +9251,10 @@ $dns_tests = [
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_dns_subdomain ] ],
 	  'grep' => [ 'testing2' ],
+	},
+	{ 'command' => 'host -t A testing1.'.$test_domain,
+	},
+	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain,
 	},
 
 	# Split the sub-domain into it's own zone
