@@ -2983,10 +2983,14 @@ print &ui_table_row(
 		     &list_available_php_versions() ]));
 
 # Default number of PHP child processes
-print &ui_table_row(
-    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
-    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'},
-	    5, $text{'tmpl_phpchildrennone'}));
+if (int($tmpl->{'web_php_suexec'}) >= 2) {
+	print &ui_table_row(
+	    &hlink($text{'tmpl_phpchildren'}, "template_phpchildren"),
+	    &ui_opt_textbox("web_phpchildren", $tmpl->{'web_phpchildren'}, 5,
+	    	int($tmpl->{'web_php_suexec'}) == 2 ? 
+	    	$text{'tmpl_phpchildrenauto'} :
+	        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
+	}
 
 # Source php.ini files
 foreach my $phpver (@allvers) {
