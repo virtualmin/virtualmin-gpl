@@ -1405,11 +1405,11 @@ if ($d->{'ip6'}) {
 	}
 }
 
-# create_alias_records(&records, file, &domain, ip)
+# create_alias_records(&records, file, &domain, ip, [diff-mode])
 # For a domain that is an alias, copy records from its target
 sub create_alias_records
 {
-local ($recs, $file, $d, $ip) = @_;
+local ($recs, $file, $d, $ip, $diff) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $aliasd = &get_domain($d->{'alias'});
 local ($aliasrecs, $aliasfile) = &get_domain_dns_records_and_file($aliasd);
@@ -1421,7 +1421,13 @@ local $oldip = $aliasd->{'ip'};
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
+local %already;
+foreach my $r (@$recs) {
+	$already{&dns_record_key($r, 1)} = $r;
+	}
+local %keep;
 RECORD: foreach my $r (@$aliasrecs) {
+	my $nr = { %$r };
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
 				    $r->{'type'} eq 'SOA')) {
 		# Skip SOA and NS records for sub-domains in the same file
@@ -1433,7 +1439,8 @@ RECORD: foreach my $r (@$aliasrecs) {
 		}
 	if ($r->{'defttl'}) {
 		# Add default TTL
-		&create_dns_record($recs, $file, $r);
+		next if ($diff && $already{&dns_record_key($nr, 1)});
+		&create_dns_record($recs, $file, $nr);
 		next;
 		}
 	if (!$r->{'type'}) {
@@ -1447,7 +1454,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 			next RECORD;
 			}
 		}
-	$r->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
+	$nr->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
 
 	# Change domain name to alias in record values, unless it is an NS
 	# that is set in the template
@@ -1464,22 +1471,33 @@ RECORD: foreach my $r (@$aliasrecs) {
 			gethostbyname($slave->{'host'});
 		$tmplns{$bn[0]."."} = 1 if ($bn[0]);
 		}
-	if ($r->{'type'} ne 'NS' || !$tmplns{$r->{'values'}->[0]}) {
-		foreach my $v (@{$r->{'values'}}) {
+	if ($nr->{'type'} ne 'NS' || !$tmplns{$nr->{'values'}->[0]}) {
+		foreach my $v (@{$nr->{'values'}}) {
 			$v =~ s/\Q$olddom\E/$dom/i;
 			$v =~ s/\Q$oldip\E$/$ip/i;
 			}
 		}
-	my $str;
-	my $joined = join("", @{$r->{'values'}});
-	if ($r->{'type'} eq 'TXT' && length($joined) > 80) {
-		$str = &split_long_txt_record($joined);
-		}
-	else {
-		$str = &join_record_values($r);
-		}
-	my $nr = { %$r };
+	$keep{&dns_record_key($nr, 1)} = 1;
+
+	# Create unless it already exists
+	next if ($diff && $already{&dns_record_key($nr, 1)});
+	next if ($diff && $nr->{'type'} eq 'SOA');
 	&create_dns_record($recs, $file, $nr);
+	}
+
+# Delete records that are missing now, if diffing
+if ($diff) {
+	my @delrecs;
+	foreach my $r (@$recs) {
+		next if (defined($r->{'defttl'}));
+		next if ($r->{'type'} eq 'SOA');
+		next if (&is_dnssec_record($r));
+		next if ($keep{&dns_record_key($r, 1)});
+		push(@delrecs, $r);
+		}
+	foreach my $r (@delrecs) {
+		&delete_dns_record($recs, $file, $r);
+		}
 	}
 }
 
@@ -3688,34 +3706,16 @@ elsif ($d->{'dns_cloud'}) {
 # Un-freeeze the zone
 &after_records_change($d);
 
-# If this domain has aliases, update their DNS records too
+# If this domain has aliases, re-create their DNS records too
 if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
-	local @aliases = grep { $_->{'dns'} && !$_>{'dns_submode'} }
+	local @aliases = grep { $_->{'dns'} && !$_->{'dns_submode'} }
 			      &get_domain_by("alias", $d->{'id'});
 	foreach my $ad (@aliases) {
 		&obtain_lock_dns($ad);
 		&pre_records_change($d);
-		local $file;
-		local $recs;
-		# XXX do we need this check??
-		if ($ad->{'provision_dns'} || $ad->{'dns_cloud'}) {
-			# On provisioning server
-			$file = &transname();
-			local $bind8::config{'auto_chroot'} = undef;
-			local $bind8::config{'chroot'} = undef;
-			&create_alias_records($recs, $file, $ad,
-					      $ad->{'dns_ip'} || $ad->{'ip'});
-			$recs = [ &bind8::read_zone_file($temp, $ad->{'dom'}) ];
-			}
-		else {
-			# On local BIND
-			$file = &get_domain_dns_file($ad);
-			&open_tempfile(EMPTY, ">$file", 0, 1);
-			&close_tempfile(EMPTY);
-			&create_alias_records($recs, $file, $ad,
-					      $ad->{'dns_ip'} || $ad->{'ip'});
-			$recs = [ get_domain_dns_records($ad) ];
-			}
+		local ($recs, $file) = &get_domain_dns_records_and_file($ad);
+		&create_alias_records($recs, $file, $ad,
+				      $ad->{'dns_ip'} || $ad->{'ip'}, 1);
 		&post_records_change($ad, $recs, $file);
 		&reload_bind_records($ad);
 		&release_lock_dns($ad);
@@ -4591,13 +4591,22 @@ return int($ttl);
 sub dns_record_key
 {
 my ($r, $val) = @_;
-my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
-my $type = $r->{'type'};
-$type = "TXT" if ($type eq "SPF");
-my @r = ($r->{'name'}, $type, $ttl);
-push(@r, @{$r->{'values'}}) if ($val);
-if ($r->{'proxied'}) {
-	$r[0] = "proxied_".$r[0];
+my @r;
+if (defined($r->{'defttl'})) {
+	# Default TTL
+	@r = ( '$ttl' );
+	push(@r, $r->{'defttl'}) if ($val);
+	}
+else {
+	# Regular record
+	my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
+	my $type = $r->{'type'};
+	$type = "TXT" if ($type eq "SPF");
+	@r = ($r->{'name'}, $type, $ttl);
+	push(@r, @{$r->{'values'}}) if ($val);
+	if ($r->{'proxied'}) {
+		$r[0] = "proxied_".$r[0];
+		}
 	}
 return join("/", @r);
 }
