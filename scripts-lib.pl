@@ -1139,8 +1139,8 @@ if (!@vers) {
 
 # Find the best matching directory with a PHP version set
 local $dirpath = &public_html_dir($d);
-my $can_domain_php_directories = &can_domain_php_directories($d);
-if ($can_domain_php_directories && $path ne '/') {
+my $candirs = &can_domain_php_directories($d);
+if ($candirs && $path ne '/') {
 	$dirpath .= $path;
 	}
 local @dirs = &list_domain_php_directories($d);
@@ -1162,11 +1162,16 @@ if (&indexof($bestdir->{'version'}, @vers) >= 0 ||
 	return ($bestdir->{'version'}, undef);
 	}
 
+if (!$candirs) {
+	# PHP mode doesn't allow per-directory versions
+	return ($bestver, undef);
+	}
+
 # Need to add a directory, or fix one. Use the lowest PHP version that
 # is supported.
 my ($setver) = sort { &compare_versions($a, $b) } @vers;
 $setver = $vmap{$setver} || $setver;
-local $err = !$can_domain_php_directories || &save_domain_php_directory($d, $dirpath, $setver);
+local $err = &save_domain_php_directory($d, $dirpath, $setver);
 if ($err) {
 	return (undef, &text('scripts_ephpverchange', $dirpath, $vers[0]));
 	}
