@@ -323,14 +323,14 @@ $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enab
 # Validate fastCGI options
 @modes = &supported_php_modes();
 if (defined($timeout)) {
-	&indexof("fcgid", @modes) >= 0 ||
+	grep(/^fcgid|fpm$/, @modes) ||
 		&usage("The PHP script timeout can only be set on systems ".
-		       "that support fcgid");
+		       "that support FCGId or FPM");
 	}
 if (defined($children)) {
-	&indexof("fcgid", @modes) >= 0 ||
+	grep(/^fcgid|fpm$/, @modes) ||
 		&usage("The number of PHP children can only be set on systems ".
-		       "that support fcgid");
+		       "that support FCGId or FPM");
 	}
 
 # Validate HTML dir
