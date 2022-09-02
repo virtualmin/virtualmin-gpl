@@ -1289,14 +1289,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	
 	# Work out which records are already in the file
-	# XXX
 	local $rd = $d;
 	if ($d->{'dns_submode'}) {
 		$rd = &get_domain($d->{'dns_subof'});
 		}
 	local %already = map { $_->{'name'}, $_ }
-			     grep { $_->{'type'} eq 'A' }
-				  &bind8::read_zone_file($file, $rd->{'dom'});
+			     grep { $_->{'type'} eq 'A' } @$recs;
 
 	# Work out which records to add
 	local $withdot = $d->{'dom'}.".";
@@ -1937,26 +1935,23 @@ else {
 	local $z = &get_bind_zone($d->{'dom'});
 	local $ok;
 	if ($z) {
+		local ($recs, $file) = &get_domain_dns_records_and_file($d);
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'}.".disabled";
 		&bind8::save_directive(&bind8::get_config_parent(),
 					[ $z ], [ $z ], 0);
-		&flush_file_lines();
+		&flush_file_lines($rootfile);
 
 		# Rename all records in the domain with the new .disabled name
-		# XXX use proper API
-		local $file = &bind8::find("file", $z->{'members'});
-		local $fn = $file->{'values'}->[0];
-		local @recs = &bind8::read_zone_file(
-				$fn, $d->{'dom'}.".disabled");
-		foreach my $r (@recs) {
+		foreach my $r (@$recs) {
 			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
 			    $r->{'name'} eq $d->{'dom'}.".") {
 				# Need to rename
 				$r->{'name'} = $r->{'name'}."disabled.";
-				&modify_dns_record(\@recs, $file, $nr);
+				&modify_dns_record($recs, $file, $r);
 				}
 			}
+		&post_records_change($d, $recs, $file);
 
 		# Clear zone names caches
 		undef(@bind8::list_zone_names_cache);
@@ -2030,25 +2025,23 @@ else {
 	local $z = &get_bind_zone($d->{'dom'});
 	local $ok;
 	if ($z) {
+		local ($recs, $file) = &get_domain_dns_records_and_file($d);
 		local $rootfile = &bind8::make_chroot($z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'};
 		&bind8::save_directive(
 			&bind8::get_config_parent(), [ $z ], [ $z ], 0);
-		&flush_file_lines();
+		&flush_file_lines($rootfile);
 
 		# Fix all records in the domain with the .disabled name
-		# XXX use proper API
-		local $file = &bind8::find("file", $z->{'members'});
-		local $fn = $file->{'values'}->[0];
-		local @recs = &bind8::read_zone_file($fn, $d->{'dom'});
-		foreach my $r (@recs) {
+		foreach my $r (@$recs) {
 			if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.disabled\.$/ ||
 			    $r->{'name'} eq $d->{'dom'}.".disabled.") {
 				# Need to rename
 				$r->{'name'} =~ s/\.disabled\.$/\./;
-				&modify_dns_record(\@recs, $file, $nr);
+				&modify_dns_record($recs, $file, $r);
 				}
 			}
+		&post_records_change($d, $recs, $file);
 
 		# Clear zone names caches
 		undef(@bind8::list_zone_names_cache);
@@ -3652,25 +3645,6 @@ if (!$fn) {
 
 # Increase the SOA
 &bind8::bump_soa_record($fn, $recs);
-
-# If the domain is disabled, make sure all records end with .disabled
-if ($d->{'disabled'} && &indexof("dns", split(/,/, $d->{'disabled'})) >= 0 &&
-    !$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
-	local @disrecs = &bind8::read_zone_file($fn, $d->{'dom'});
-	foreach my $r (@disrecs) {
-		if ($r->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/ ||
-		    $r->{'name'} eq $d->{'dom'}.".") {
-			# Not disabled - make it so. This can call the old API
-			# since it's only used for local zones.
-			&bind8::modify_record($fn, $r,
-				      $r->{'name'}."disabled.",
-				      $r->{'ttl'}, $r->{'class'},
-				      $r->{'type'},
-				      &join_record_values($r),
-				      $r->{'comment'});
-			}
-		}
-	}
 
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
