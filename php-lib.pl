@@ -625,7 +625,7 @@ foreach my $p (@ports) {
 	local @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
 	local $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
 	local $oldvalue = &apache::find_directive($dirname, $vconf);
-	local $want = $max ? $max + 1 : 9999;
+	local $want = $max ? $max + 1 : $max_php_fcgid_timeout;
 	if ($oldvalue ne $want) {
 		&apache::save_directive($dirname, [ $want ],
 					$vconf, $conf);
