@@ -44,7 +44,7 @@ if ($can) {
 	if (!$d->{'alias'} && grep(/^fcgid|fpm$/, @modes) && $can == 2 &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
 		$children = &get_domain_php_children($d);
-		if (defined($children) && $children >= 0) {
+		if ($children > 0) {
 			print &ui_table_row(&hlink($text{'phpmode_children'},
 						   "phpmode_children"),
 				    &ui_opt_textbox("children", $children || '',
