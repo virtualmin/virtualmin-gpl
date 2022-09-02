@@ -41,7 +41,7 @@ if ($can) {
 		}
 
 	# PHP fcgi sub-processes
-	if (!$d->{'alias'} && grep(/^fcgid|fpm$/, @modes) && $can == 2 &&
+	if (!$d->{'alias'} && $can == 2 &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
 		$children = &get_domain_php_children($d);
 		if ($children > 0) {

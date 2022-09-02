@@ -327,11 +327,6 @@ if (defined($timeout)) {
 		&usage("The PHP script timeout can only be set on systems ".
 		       "that support FCGId or FPM");
 	}
-if (defined($children)) {
-	grep(/^fcgid|fpm$/, @modes) ||
-		&usage("The number of PHP children can only be set on systems ".
-		       "that support FCGId or FPM");
-	}
 
 # Validate HTML dir
 if ($htmldir) {
@@ -447,7 +442,17 @@ foreach $d (@doms) {
 
 	# Update PHP fCGId children
 	if (defined($children) && !$d->{'alias'}) {
-		&save_domain_php_children($d, $children);
+		&$first_print("Updating PHP child processes ..");
+		$oldchildren = &get_domain_php_children($d);
+		if ($oldchildren == -2) {
+			&$second_print(".. not supported by this PHP mode");
+			}
+		elsif ($err = &save_domain_php_children($d, $children)) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
 		}
 
 	# Update PHP maximum time
