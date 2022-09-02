@@ -44,11 +44,13 @@ if ($can) {
 	if (!$d->{'alias'} && $can == 2 &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
 		$children = &get_domain_php_children($d);
-		if ($children > 0) {
+		if (defined($children) && $children >= 0) {
 			print &ui_table_row(&hlink($text{'phpmode_children'},
 						   "phpmode_children"),
-				    &ui_opt_textbox("children", $children || '',
-					 5, $text{'tmpl_phpchildrennone'}));
+				    &ui_opt_textbox("children", $children > 0 ? $children : '', 5,
+				        $mode eq 'fcgid' ?
+				        $text{'tmpl_phpchildrenauto'} : 
+				        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
 			}
 		}
 
