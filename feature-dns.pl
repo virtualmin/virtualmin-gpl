@@ -793,20 +793,19 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	local $nfn;
-	local $file = &bind8::find("file", $z->{'members'});
+	local $f = &bind8::find("file", $z->{'members'});
 	if (!$d->{'dns_submode'}) {
 		# Domain name has changed .. rename zone file
 		&$first_print($text{'save_dns2'});
-		local $fn = $file->{'values'}->[0];
-		$nfn = $fn;
+		local $fn = $f->{'values'}->[0];
+		local $nfn = $fn;
 		$nfn =~ s/$oldd->{'dom'}/$d->{'dom'}/;
 		if ($fn ne $nfn) {
 			&rename_logged(&bind8::make_chroot($fn),
 				       &bind8::make_chroot($nfn))
 			}
-		$file->{'values'}->[0] = $nfn;
-		$file->{'value'} = $nfn;
+		$f->{'values'}->[0] = $nfn;
+		$f->{'value'} = $nfn;
 
 		# Change zone in .conf file
 		$z->{'values'}->[0] = $d->{'dom'};
@@ -817,20 +816,18 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 		}
 	else {
 		&$first_print($text{'save_dns6'});
-		$nfn = $file->{'values'}->[0];
 		}
+	&clear_domain_dns_records_and_file($d);
 
 	# Modify any records containing the old name
-	# XXX don't re-read zone file
 	&lock_file(&bind8::make_chroot($nfn));
 	&pre_records_change($d);
-        local @recs = &bind8::read_zone_file($nfn, $oldzonename);
-	&modify_records_domain_name(\@recs, $nfn,
+	($recs, $file) = &get_domain_dns_records_and_file($d);
+	&modify_records_domain_name($recs, $file,
 				    $oldd->{'dom'}, $d->{'dom'});
 
         # Update SOA record
-	&post_records_change($d, \@recs);
-	$recs = \@recs;
+	&post_records_change($d, $recs);
 	&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
 
@@ -3397,6 +3394,15 @@ else {
 	}
 $domain_dns_records_cache{$cid} = \@rv;
 return @rv;
+}
+
+# clear_domain_dns_records_and_file(&domain)
+# Clear any cache of a domain's DNS records or filename
+sub clear_domain_dns_records_and_file
+{
+my ($d) = @_;
+my $cid = $d->{'dns_submode'} ? $d->{'dns_subof'} : $d->{'id'};
+delete($domain_dns_records_cache{$cid});
 }
 
 # set_record_ids(&records)
