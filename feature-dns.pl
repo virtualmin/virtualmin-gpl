@@ -2307,16 +2307,24 @@ if (!$zonefile) {
 	&release_lock_dns($d, 1);
 	return 0;
 	}
+local @thisrecs = @$recs;
 
 # Read records from the backup file
-local @brecs = &bind8::read_zone_file($file,
-    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""), undef, 0, 1);
+local $brecs;
+local $rfile = $file."_records";
+if (-r $rfile && $d->{'dns_cloud'}) {
+	$brecs = &unserialise_variable(&read_file_contents($rfile));
+	}
+else {
+	$brecs = [ &bind8::read_zone_file($file,
+	    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""), undef, 0, 1) ];
+	}
 
 if ($d->{'dns_submode'}) {
 	# Only replacing records for this sub-domain
 	my $oldsubrecs = &filter_domain_dns_records($d, $recs);
 	$oldsubrecs = &filter_domain_dns_records($d, $oldsubrecs);
-	my $newsubrecs = &filter_domain_dns_records($d, \@brecs);
+	my $newsubrecs = &filter_domain_dns_records($d, $brecs);
 	foreach my $r (@$oldsubrecs) {
 		&delete_dns_record($recs, $zonefile, $r);
 		}
@@ -2334,7 +2342,7 @@ else {
 	foreach my $r (@delrecs) {
 		&delete_dns_record($recs, $zonefile, $r);
 		}
-	foreach my $r (@brecs) {
+	foreach my $r (@$brecs) {
 		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
 		&create_dns_record($recs, $zonefile, $r);
 		}
@@ -2368,15 +2376,6 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 		}
 	}
 
-# Re-read records, bump SOA and upload records to provisioning server. If the
-# original records were saved, use them
-local $rfile = $file."_records";
-if (-r $rfile && $d->{'dns_cloud'}) {
-	$recs = &unserialise_variable(&read_file_contents($rfile));
-	}
-else {
-	$recs = [ &bind8::read_zone_file($zonefile, $d->{'dom'}) ];
-	}
 &post_records_change($d, $recs, $zonefile);
 
 # Need to update IP addresses
@@ -2408,9 +2407,9 @@ elsif ($baseip6 && !$ip6) {
 	&remove_ip6_records($d, $zonefile, $recs);
 	}
 
-# Replace NS records with those from new system
-if (!$opts->{'wholefile'}) {
-	local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
+# Replace NS records with those from new system (if there are any)
+local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
+if (!$opts->{'wholefile'} && @thisns) {
 	local @ns = grep { $_->{'type'} eq 'NS' } @$recs;
 	foreach my $r (@thisns) {
 		# Create NS records that were in new system's file
@@ -2421,7 +2420,7 @@ if (!$opts->{'wholefile'}) {
 			}
 		&create_dns_record($recs, $zonefile, $r);
 		}
-	foreach my $r (reverse(@ns)) {
+	foreach my $r (@ns) {
 		# Remove old NS records that we copied over
 		&delete_dns_record($recs, $zonefile, $r);
 		}
