@@ -6746,6 +6746,8 @@ provision_ednscheck=Services error checking DNS zone : $1
 provision_edns=DNS zone $1 already exists on the services host
 
 records_title=DNS Records
+records_provmsg=$1, hosted on Cloudmin Services
+records_cloudmsg=$1, hosted on $2
 records_ecannot=You are not allowed to edit DNS records
 records_name=Record name
 records_type=Type

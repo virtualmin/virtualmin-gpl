@@ -10,7 +10,14 @@ $d || &error($text{'edit_egone'});
 ($recs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($recs);
 
-&ui_print_header(&domain_in($d), $text{'records_title'}, "", "records");
+$msg = &domain_in($d);
+if ($d->{'provision_dns'}) {
+	$msg = &text('records_provmsg', $msg);
+	}
+elsif ($cloud = &get_domain_dns_cloud($d)) {
+	$msg = &text('records_cloudmsg', $msg, $cloud->{'desc'});
+	}
+&ui_print_header($msg, $text{'records_title'}, "", "records");
 
 # Warn if DNS records are not valid
 $err = &validate_dns($d, $recs, 1);
