@@ -1,1 +1,1 @@
-<header>默認FCGId PHP子進程</header>通過FCGId運行PHP腳本時，每個域將始終在此字段中設置運行的PHP進程數，以服務於請求。您可以將其從默認值4增加以改善PHP腳本延遲，或降低它以減少內存使用。 <p>將其設置為<b>None</b>將導致PHP進程僅根據需要按需啟動，並在一段時間不活動後進行清理。 <p><footer>
+<header>PHP服務最大子進程數</header>此選項設置將服務的同時請求數的限制，當此域的 PHP 腳本設置為通過 FPM 運行時，當<tt>pm</tt>選項設置為<tt>static</tt>時將創建子進程數和最大子進程數當<tt>pm</tt>選項設置為<tt>dynamic</tt>時可能會創建。最大子進程數不能低於<tt>pm.max_spare_servers</tt> ，默認為 5。<p>當此域的 PHP 腳本設置為通過 FCGId 運行時，應始終禁用 PHP 子進程管理，這一次只會將一個請求路由到它產生的應用程序進程。默認情況下，使用環境變量設置<tt>PHP_FCGI_CHILDREN=0</tt> ，PHP 子進程管理被禁用。<p><footer>

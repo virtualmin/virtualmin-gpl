@@ -70,8 +70,9 @@ if ($can) {
 	$nc = ($nc == 0 || $nc >= 5) ? $nc : 5;
 	if (defined($in{'children_def'}) &&
 	    $nc != &get_domain_php_children($d) && $can == 2) {
-		&$first_print($nc ? &text('phpmode_kidding', $nc)
-				  : $text{'phpmode_nokids'});
+		&$first_print($nc || $mode eq "fpm" ?
+		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
+		    $text{'phpmode_nokids'});
 		&save_domain_php_children($d, $nc);
 		&$second_print($text{'setup_done'});
 		$anything++;

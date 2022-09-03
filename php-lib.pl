@@ -625,7 +625,7 @@ foreach my $p (@ports) {
 	local @newdir = &apache::find_directive("FcgidIOTimeout", $vconf);
 	local $dirname = @newdir ? "FcgidIOTimeout" : "IPCCommTimeout";
 	local $oldvalue = &apache::find_directive($dirname, $vconf);
-	local $want = $max ? $max + 1 : 9999;
+	local $want = $max ? $max + 1 : $max_php_fcgid_timeout;
 	if ($oldvalue ne $want) {
 		&apache::save_directive($dirname, [ $want ],
 					$vconf, $conf);
@@ -736,8 +736,8 @@ foreach my $v (&list_available_php_versions($d, $mode)) {
 			$defchildren = undef if ($defchildren eq "none");
 			if ($defchildren) {
 				$common .= "PHP_FCGI_CHILDREN=$defchildren\n";
+				$common .= "export PHP_FCGI_CHILDREN\n";
 				}
-			$common .= "export PHP_FCGI_CHILDREN\n";
 			$common .= "PHP_FCGI_MAX_REQUESTS=99999\n";
 			$common .= "export PHP_FCGI_MAX_REQUESTS\n";
 			}
@@ -1568,7 +1568,7 @@ elsif ($mode eq "fpm") {
 			}
 		}
 	&unflush_file_lines($file);
-	return $childs == 9999 ? 0 : $childs;
+	return $childs == get_php_max_childred_allowed() ? 0 : $childs;
 	}
 else {
 	return -2;
@@ -1645,7 +1645,7 @@ elsif ($mode eq "fpm") {
 	return 0 if (!-r $file);
 	&lock_file($file);
 	my $lref = &read_file_lines($file);
-	$children = 9999 if ($children == 0);	# Unlimited
+	$children = get_php_max_childred_allowed() if ($children == 0);	# Recommended default
 	foreach my $l (@$lref) {
 		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
 			$l = "pm.max_children = $children";
@@ -2271,7 +2271,7 @@ else {
 	my $tmpl = &get_template($d->{'template'});
 	my $defchildren = $tmpl->{'web_phpchildren'};
 	if ($defchildren eq "none" || !$defchildren) {
-		$defchildren = 9999;
+		$defchildren = get_php_max_childred_allowed();
 		}
 	else {
 		$defchildren = $defchildren >= 5 ? $defchildren : 5;
@@ -2525,6 +2525,32 @@ if (!$dryrun) {
 	&unlink_file_as_domain_user($d, @rv);
 	}
 return @rv;
+}
+
+# get_php_max_childred_allowed()
+# Get PHP-FPM recommended allowed number for sub-processes,
+# which is calculated as total available RAM devided by
+# 64 MiB (aprox. cunsumed by each PHP-FPM process) and 
+# devided by 4 (as we assume that a maximum recommended 
+# default which PHP can use is 25% of all available RAM
+# on the system). However, manually it will be possible
+# to rase the number to use all available RAM as defined
+# using `$max_php_fcgid_children` variable
+sub get_php_max_childred_allowed
+{
+return $main::get_real_memory_size_cache
+	if (defined($main::get_real_memory_size_cache));
+my $max;
+my $mem = &get_real_memory_size();
+if ($mem) {
+	my $sysram_mb = $mem / 1024 / 1024;
+	$max = int(($sysram_mb / 64) / 4);
+	}
+else {
+ 	$max = $max_php_fcgid_children;
+	}
+$main::get_real_memory_size_cache = $max;
+return $max;
 }
 
 1;

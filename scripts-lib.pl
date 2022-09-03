@@ -3308,14 +3308,14 @@ local $mode = &get_domain_php_mode($d);
 if ($mode eq "fcgid") {
 	local $max = &get_fcgid_max_execution_time($d);
 	return undef if (!$max);
-	&set_fcgid_max_execution_time($d, 9999);
-	&set_php_max_execution_time($d, 9999);
+	&set_fcgid_max_execution_time($d, $max_php_fcgid_timeout);
+	&set_php_max_execution_time($d, $max_php_fcgid_timeout);
 	return $max;
 	}
 elsif ($mode eq "cgi") {
 	local $max = &get_php_max_execution_time($d);
 	return undef if (!$max);
-	&set_php_max_execution_time($d, 9999);
+	&set_php_max_execution_time($d, $max_php_fcgid_timeout);
 	return $max;
 	}
 else {
