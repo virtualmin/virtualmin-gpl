@@ -2286,6 +2286,9 @@ $aliasdom_tests = [
 	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
 	},
+	{ 'command' => 'host -t A www.'.$test_domain,
+	  'grep' => &get_default_ip(),
+	},
 
 	# Test HTTP get
 	{ 'command' => $wget_command.'http://'.$test_domain,
@@ -7261,6 +7264,9 @@ $rename_tests = [
 	{ 'command' => 'host -t A '.$test_rename_domain,
 	  'grep' => '$PRIVATE_IP',
 	},
+	{ 'command' => 'host -t A www.'.$test_rename_domain,
+	  'grep' => '$PRIVATE_IP',
+	},
 
 	# Make sure website works
 	{ 'command' => $wget_command.'http://'.$test_rename_domain,
@@ -9212,6 +9218,16 @@ $dns_tests = [
 		      @create_args, ],
         },
 
+	# Create an alias that should get a copy of records
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'alias', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test alias-domain' ],
+		      [ 'dir' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
 	# Validate DNS sub-domain was created
 	{ 'command' => 'list-domains.pl',
 	  'args' => [ [ 'multiline' ],
@@ -9229,6 +9245,14 @@ $dns_tests = [
 	{ 'command' => 'host -t A '.$test_dns_subdomain,
 	},
 	{ 'command' => 'host -t A www.'.$test_dns_subdomain,
+	},
+
+	# Validate alias domain records
+	{ 'command' => 'host -t A '.$test_subdomain,
+	},
+	{ 'command' => 'host -t A www.'.$test_subdomain,
+	},
+	{ 'command' => 'host -t A mail.'.$test_subdomain,
 	},
 
 	# Add a record to both domains
@@ -9249,10 +9273,17 @@ $dns_tests = [
 	},
 	{ 'command' => 'get-dns.pl',
 	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_subdomain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_dns_subdomain ] ],
 	  'grep' => [ 'testing2' ],
 	},
 	{ 'command' => 'host -t A testing1.'.$test_domain,
+	},
+	{ 'command' => 'host -t A testing1.'.$test_subdomain,
 	},
 	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain,
 	},
