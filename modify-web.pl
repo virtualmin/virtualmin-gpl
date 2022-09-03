@@ -91,8 +91,8 @@ C<--move-document-dir> flag.
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
-If your system supports Fcgiwrap for running CGI scripts, you can use the 
-C<--enable-fcgiwrap> flag to switch to it instead of using SuExec, or 
+If your system supports FCGIwrap for running CGI scripts, you can use the 
+C<--enable-fcgiwrap> flag to switch to it instead of using suEXEC, or 
 C<--disable-fcgiwrap> to switch back.
 
 If your webserver supports multiple HTTP protocols, you can use the 
@@ -369,14 +369,14 @@ foreach $d (@doms) {
 		}
 	}
 
-# Make sure suexec and PHP / Ruby settings don't clash
+# Make sure suEXEC and PHP / Ruby settings don't clash
 foreach $d (@doms) {
 	$p = $mode || &get_domain_php_mode($d);
 	if (defined(&get_domain_ruby_mode)) {
 		$r = $rubymode || &get_domain_ruby_mode($d);
 		}
 	if ($r eq "cgi" && !$s) {
-		&usage("For Ruby to be run as the domain owner in $d->{'dom'}, suexec must also be enabled");
+		&usage("For Ruby to be run as the domain owner in $d->{'dom'}, suEXEC must also be enabled");
 		}
 	@supp = &supported_php_modes($d);
 	!$mode || &indexof($mode, @supp) >= 0 ||
@@ -408,9 +408,9 @@ if ($includes ne "") {
 # Validate fcgiwrap change
 if (defined($fcgiwrap)) {
 	$fcgiwrap && !&supports_fcgiwrap() &&
-		&usage("Fcgiwrap is not supported on this system");
+		&usage("FCGIwrap is not supported on this system");
 	!$fcgiwrap && !&supports_suexec() &&
-		&usage("Suexec is not supported on this system");
+		&usage("suEXEC is not supported on this system");
 	}
 
 # Lock them all
@@ -792,7 +792,7 @@ foreach $d (@doms) {
 				}
 			}
 		else {
-			&$first_print("Switching to suexec for CGI scripts ..");
+			&$first_print("Switching to suEXEC for CGI scripts ..");
 			if (!$d->{'fcgiwrap_port'}) {
 				&$second_print(".. already enabled");
 				}

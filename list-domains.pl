@@ -580,10 +580,10 @@ if ($multi) {
 			print "    Possible PHP execution modes: ",
 				join(" ", @modes),"\n";
 			$s = &get_domain_suexec($d);
-			print "    SuExec for CGIs: ",
+			print "    suEXEC for CGIs: ",
 			      ($s ? "enabled" : "disabled"),"\n";
 			if ($d->{'fcgiwrap_port'}) {
-				print "    Fcgiwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
+				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
 				}
 			if ($p eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
