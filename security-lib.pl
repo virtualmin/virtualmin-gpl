@@ -763,5 +763,14 @@ my $rv = <FILE>;
 return $rv;
 }
 
+# readable_by_domain_user(&domain, file)
+# Uses -r to check for readability, but as the domain user
+sub readable_by_domain_user
+{
+my ($d, $file) = @_;
+my $rv = &write_as_domain_user($d, sub { -r $file });
+return $rv;
+}
+
 1;
 
