@@ -641,14 +641,24 @@ local $cert = &apache::find_directive("SSLCertificateFile", $vconf, 1);
 if (!$cert) {
 	return &text('validate_esslcert');
 	}
-elsif (!-r $cert) {
+elsif (!-e $cert) {
 	return &text('validate_esslcertfile', "<tt>$cert</tt>");
+	}
+elsif (&is_under_directory($d->{'home'}, $cert) &&
+       !&readable_by_domain_user($d, $cert)) {
+	return &text('validate_esslcertfile2', "<tt>$cert</tt>");
 	}
 
 # Make sure key exists
 local $key = &apache::find_directive("SSLCertificateKeyFile", $vconf, 1);
-if ($key && !-r $key) {
-	return &text('validate_esslkeyfile', "<tt>$key</tt>");
+if ($key) {
+	if (!-e $key) {
+		return &text('validate_esslkeyfile', "<tt>$key</tt>");
+		}
+	elsif (&is_under_directory($d->{'home'}, $key) &&
+	       !&readable_by_domain_user($d, $key)) {
+		return &text('validate_esslkeyfile2', "<tt>$key</tt>");
+		}
 	}
 
 # Make sure the cert is readable
