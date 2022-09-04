@@ -3087,12 +3087,12 @@ return -1 if (!$miniserv{'ssl'});
 if ($enable) {
 	return &setup_ipkeys(
 		$d, \&get_miniserv_config, \&put_miniserv_config,
-		\&restart_webmin);
+		\&restart_webmin_fully);
 	}
 else {
 	return &delete_ipkeys(
 		$d, \&get_miniserv_config, \&put_miniserv_config,
-		\&restart_webmin);
+		\&restart_webmin_fully);
 	}
 }
 
