@@ -96,7 +96,7 @@ if ($d->{'provision_dns'}) {
 	&$second_print(&text('setup_bind_provisioned',
 			     $d->{'provision_dns_host'}));
 	}
-elsif ($d->{'dns_cloud'}) {
+elsif ($d->{'dns_cloud'} && !$dnsparent) {
 	# Create on Cloud DNS service
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
@@ -304,12 +304,11 @@ else {
 	# Creating a sub-domain - add to parent's DNS zone.
 	&$first_print(&text('setup_bindsub', $dnsparent->{'dom'}));
 	&obtain_lock_dns($dnsparent);
-	local $z = &get_bind_zone($dnsparent->{'dom'});
-	if (!$z) {
-		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
-		}
 	&pre_records_change($dnsparent);
 	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
+	if (!$file) {
+		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
+		}
 	$d->{'dns_submode'} = 1;	# So we know how this was done
 	$d->{'dns_subof'} = $dnsparent->{'id'};
 	local ($already) = grep { $_->{'name'} eq $d->{'dom'}."." }
@@ -2152,6 +2151,10 @@ return $rv;
 sub reload_bind_records
 {
 local ($d) = @_;
+if ($d->{'dns_submode'}) {
+	# Reload in parent, which might be cloud hosted
+	$d = &get_domain($d->{'dns_parent'});
+	}
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
 	return undef;
@@ -3280,7 +3283,12 @@ return $file->{'values'}->[0];
 sub get_domain_dns_records_and_file
 {
 local ($d) = @_;
-my $cid = $d->{'dns_submode'} ? $d->{'dns_subof'} : $d->{'id'};
+if ($d->{'dns_submode'}) {
+	# Records are in the parent domain, so just call this same method for it
+	local $parent = &get_domain($d->{'dns_subof'});
+	return &get_domain_dns_records_and_file($parent);
+	}
+my $cid = $d->{'id'};
 if (defined($domain_dns_records_cache{$cid})) {
 	# Use cached values
 	return @{$domain_dns_records_cache{$cid}};
@@ -3655,6 +3663,12 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 sub post_records_change
 {
 local ($d, $recs, $fn) = @_;
+if ($d->{'dns_submode'}) {
+	# Apply change in the parent zone, which is actually connected to the
+	# Cloud DNS provider
+	my $parent = &get_domain($d->{'dns_subof'});
+	return &post_records_change($parent, $recs, $fn);
+	}
 &require_bind();
 local $z;
 if (!$fn) {
