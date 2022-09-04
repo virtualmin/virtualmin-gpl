@@ -247,7 +247,8 @@ return undef;
 }
 
 # dnscloud_route53_rename_domain(&domain, &info)
-# Rename a domain on route53 by deleting and re-creating it
+# Rename a domain on route53 by deleting and re-creating it. Returns an ok flag,
+# either an error message or the name domain ID.
 sub dnscloud_route53_rename_domain
 {
 my ($d, $info) = @_;
@@ -269,8 +270,8 @@ return (0, $err) if (!$ok);
 
 # Create the new one with the original records
 $info->{'recs'} = $recs;
-my ($ok, $err) = &dnscloud_route53_create_domain($d, $info);
-return ($ok, $err);
+my ($ok, $err, $location) = &dnscloud_route53_create_domain($d, $info);
+return ($ok, $err, $location);
 }
 
 # dnscloud_route53_get_records(&domain, &info)

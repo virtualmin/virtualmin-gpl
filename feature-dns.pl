@@ -773,12 +773,12 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 		}
 	else {
 		my $rfunc = "dnscloud_".$ctype."_rename_domain";
-		my ($ok, $msg) = &$rfunc($d, $info);
+		my ($ok, $id) = &$rfunc($d, $info);
 		if (!$ok) {
-			&$second_print(&text('save_bind_ecloud', $err));
+			&$second_print(&text('save_bind_ecloud', $id));
 			}
 		else {
-			$d->{'dns_cloud_id'} = $msg;
+			$d->{'dns_cloud_id'} = $id;
 			&$second_print($text{'setup_done'});
 			}
 		}
