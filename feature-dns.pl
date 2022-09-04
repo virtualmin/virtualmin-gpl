@@ -1168,9 +1168,10 @@ if (!$config{'secmx_nodns'}) {
 sub create_standard_records
 {
 local ($recs, $file, $d, $ip) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $proxy = $tmpl->{'dns_cloud_proxy'};
 &require_bind();
 local $rootfile = &bind8::make_chroot($file);
-local $tmpl = &get_template($d->{'template'});
 local $serial = $bconfig{'soa_style'} ?
 	&bind8::date_serial().sprintf("%2.2d", $bconfig{'soa_start'}) :
 	time();
@@ -1268,6 +1269,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					&create_dns_record($recs, $file,
 						{ 'name' => $r,
 						  'type' => 'A',
+						  'proxied' => $proxied,
 						  'values' => [ $a ] });
 					$i++;
 					}
@@ -1306,7 +1308,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
 			&create_dns_record($recs, $file,
-				{ 'name' => $n, type => 'A',
+				{ 'name' => $n,
+				  'type' => 'A',
+				  'proxied' => $proxied,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1319,7 +1323,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		if ($ns =~ /^([^\.]+)\.(\S+\.)$/ && $2 eq $withdot &&
 		    !$already{$ns}) {
 			&create_dns_record($recs, $file,
-				{ 'name' => $ns, type => 'A',
+				{ 'name' => $ns,
+				  'type' => 'A',
+				  'proxied' => $proxied,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1329,7 +1335,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	local $n = "localhost.$withdot";
 	if (!$already{$n} && $addrecs{$n}) {
 		&create_dns_record($recs, $file,
-			{ 'name' => $n, type => 'A',
+			{ 'name' => $n,
+			  'type' => 'A',
+			  'proxied' => $proxied,
 			  'values' => [ "127.0.0.1" ] });
 		}
 
@@ -1338,7 +1346,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	my $hn = &get_system_hostname();
 	if ($hn =~ /\.\Q$d->{'dom'}\E$/ && !$already{$hn."."}) {
 		&create_dns_record($recs, $file,
-			{ 'name' => $hn.".", type => 'A',
+			{ 'name' => $hn.".",
+			  'type' => 'A',
+			  'proxied' => $proxied,
 			  'values' => [ &get_default_ip() ] });
 		}
 
@@ -1391,6 +1401,7 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
 	local @tmplrecs = &text_to_dns_records($recs, $d->{'dom'});
 	foreach my $r (@tmplrecs) {
+		$r->{'proxied'} = $proxied;
 		&create_dns_record($recs, $file, $r);
 		}
 	}
@@ -1561,7 +1572,8 @@ foreach my $r ('webmail', 'admin') {
 	local $n = "$r.$d->{'dom'}.";
 	if ($tmpl->{'web_'.$r} && (!$already || !$already->{$n})) {
 		my $r = { 'name' => $n,
-			  'type' => "A",
+			  'type' => 'A',
+			  'proxied' => $tmpl->{'dns_cloud_proxy'},
 			  'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $r);
 		$count++;
@@ -1684,6 +1696,7 @@ foreach my $r (@delrecs) {
 sub save_domain_matchall_record
 {
 local ($d, $star) = @_;
+my $tmpl = &get_template($d->{'template'});
 &pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
@@ -1695,6 +1708,7 @@ if ($star && !$r) {
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	$r = { 'name' => $withstar,
 	       'type' => 'A',
+	       'proxied' => $tmpl->{'dns_cloud_proxy'},
 	       'values' => [ $ip ] };
 	&create_dns_record($recs, $file, $r);
 	$any++;
