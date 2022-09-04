@@ -86,6 +86,7 @@ else {
 	@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
 	}
 @recs = grep { !&is_dnssec_record($_) } @recs;
+@recs = @{&filter_domain_dns_records($d, \@recs)};
 
 # Filter by name and type if requested
 if ($rname) {
