@@ -1912,6 +1912,30 @@ if (!$d->{'dns_submode'} && !$recsonly) {
 		}
 	}
 
+# If DNSSEC is enabled and the parent domain is hosted by Virtualmin, make
+# sure DS records exist
+my $pname = $d->{'dom'};
+$pname =~ s/^([^\.]+)\.//;
+my $superdom = &get_domain_by("dom", $pname);
+if (!$d->{'dns_submode'} && $superdom && &can_domain_dnssec($d)) {
+	my $dsrecs = &get_domain_dnssec_ds_records($d);
+	if (ref($dsrecs)) {
+		my ($srecs, $sfile) =
+			&get_domain_dns_records_and_file($superdom);
+		my @missing;
+		foreach my $dr (@$dsrecs) {
+			my $key = &dns_record_key($dr, 1);
+			my ($found) = grep { &dns_record_key($_, 1) eq $key }
+					   @$srecs;
+			push(@missing, $dr) if (!$found);
+			}
+		if (@missing) {
+			return &text('validate_edsrecs',
+			     &show_domain_name($superdom), scalar(@missing));
+			}
+		}
+	}
+
 return undef;
 }
 
