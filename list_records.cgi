@@ -26,7 +26,10 @@ if ($err) {
 	}
 
 # Exclude sub-domains and parent domains
-$recs = &filter_domain_dns_records($d, $recs);
+if (!$in{'show'}) {
+	$recs = &filter_domain_dns_records($d, $recs);
+	$recs = &filter_generated_dns_records($d, $recs);
+	}
 
 # Check if we need a comment column
 if (&supports_dns_comments($d)) {
@@ -37,6 +40,14 @@ if (&supports_dns_comments($d)) {
 
 print &ui_form_start("delete_records.cgi");
 @links = ( &select_all_link("d"), &select_invert_link("d") );
+if ($in{'show'}) {
+	push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=0",
+			      $text{'records_show0'}));
+	}
+else {
+	push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=1",
+			      $text{'records_show1'}));
+	}
 print &ui_hidden("dom", $in{'dom'});
 @tds = ( "width=5" );
 print &ui_links_row(\@links);
@@ -67,10 +78,7 @@ RECORD: foreach $r (@$recs) {
 		}
 	else {
 		# Regular DNS record
-		next if ($r->{'type'} eq 'DNSKEY' ||	# auto-generated DNSSEC
-			 $r->{'type'} eq 'NSEC' ||
-			 $r->{'type'} eq 'NSEC3' ||
-			 $r->{'type'} eq 'RRSIG');
+		next if (&is_dnssec_record($r));	# auto-generated DNSSEC
 		$name = $r->{'name'};
 		$name =~ s/\.$//;
 		$values = join(" ", @{$r->{'values'}});
@@ -97,7 +105,7 @@ RECORD: foreach $r (@$recs) {
 	print &ui_checked_columns_row([
 		$etype && &can_edit_record($r, $d) ?
 		    "<a href='edit_record.cgi?dom=$in{'dom'}&id=".
-		      &urlize($r->{'id'})."'>$name</a>" :
+		      &urlize($r->{'id'})."&show=$in{'show'}'>$name</a>" :
 		    $name,
 		$tdesc,
 		&html_escape($values).$pmsg,
@@ -112,6 +120,7 @@ print &ui_links_row(\@links);
 if (!$gotttl && &supports_dns_defttl($d)) {
 	push(@types, [ '$ttl', '$ttl - '.$text{'records_typedefttl'} ]);
 	}
+print &ui_hidden("show", $in{'show'});
 print &ui_form_end([ [ 'delete', $text{'records_delete'} ],
 		     undef,
 		     [ 'new', $text{'records_add'},

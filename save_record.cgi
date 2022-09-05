@@ -161,5 +161,5 @@ $err = &post_records_change($d, $recs, $file);
 &webmin_log($in{'delete'} ? 'delete' : $in{'type'} ? 'create' : 'modify',
 	    'record', $d->{'dom'}, $r);
 &error(&text('record_epost', $err)) if ($err);
-&redirect("list_records.cgi?dom=$in{'dom'}");
+&redirect("list_records.cgi?dom=$in{'dom'}&show=$in{'show'}");
 

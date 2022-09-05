@@ -52,5 +52,5 @@ else {
 &run_post_actions_silently();
 &webmin_log("manual", "records", $d->{'dom'},
 	    { 'count' => scalar(@$recs) });
-&redirect("list_records.cgi?dom=$in{'dom'}");
+&redirect("list_records.cgi?dom=$in{'dom'}&show=$in{'show'}");
 

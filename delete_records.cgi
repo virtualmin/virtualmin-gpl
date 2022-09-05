@@ -32,14 +32,14 @@ if ($in{'delete'}) {
 	&webmin_log("delete", "records", $d->{'dom'},
 		    { 'count' => scalar(@d) });
 	&error(&text('records_epost', $err)) if ($err);
-	&redirect("list_records.cgi?dom=$in{'dom'}");
+	&redirect("list_records.cgi?dom=$in{'dom'}&show=$in{'show'}");
 	}
 elsif ($in{'manual'}) {
 	# Redirect to manual DNS form
-	&redirect("manual_records.cgi?dom=$in{'dom'}&type=$in{'type'}");
+	&redirect("manual_records.cgi?dom=$in{'dom'}&type=$in{'type'}&show=$in{'show'}");
 	}
 else {
 	# Redirect to add form for selected type
-	&redirect("edit_record.cgi?dom=$in{'dom'}&type=$in{'type'}");
+	&redirect("edit_record.cgi?dom=$in{'dom'}&type=$in{'type'}&show=$in{'show'}");
 	}
 

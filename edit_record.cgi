@@ -49,6 +49,7 @@ print &ui_form_start("save_record.cgi", "post");
 print &ui_hidden("dom", $in{'dom'});
 print &ui_hidden("type", $in{'type'});
 print &ui_hidden("id", $in{'id'});
+print &ui_hidden("show", $in{'show'});
 print &ui_table_start($text{'record_header'}, undef, 2);
 
 # Extract name and protocol from SRV

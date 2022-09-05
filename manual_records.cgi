@@ -22,6 +22,7 @@ $data = &read_file_contents($file);
 print $text{'mrecords_desc'},"<p>\n";
 print &ui_form_start("manual_records_save.cgi", "post");
 print &ui_hidden("dom", $in{'dom'});
+print &ui_hidden("show", $in{'show'});
 print &ui_table_start(undef, "width=100%", 2);
 print &ui_table_row(undef, &ui_textarea("data", $data, 30, 80, "off",
 					0, "style='width:100%'"), 2);
