@@ -74,6 +74,12 @@ If a virtual server is a sub-domain of another server, you can move it's DNS
 records out into a separate zone file with the C<--disable-subdomain> flag.
 Or if eligible, you can combine the zones with C<--enable-subdomain>.
 
+If this domain has a parent domain also hosted on the same system but not
+sharding the same zone file, you can use the C<--add-parent-ds> flags to add
+required DNSSEC DS records to the parent. Alternately you can use
+C<--remove-parent-ds> to delete them, but this is not recommded as it may
+break DNSSEC validation.
+
 =cut
 
 package virtual_server;
@@ -231,6 +237,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
 		}
+	elsif ($a eq "--add-parent-ds") {
+		$parentds = 1;
+		}
+	elsif ($a eq "--remove-parent-ds") {
+		$parentds = 0;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -243,7 +255,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
-  &usage("Nothing to do");
+  defined($parentds) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -599,6 +611,25 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Add or remove DS records in parent
+	if (defined($parentds)) {
+		my $err;
+		if ($parentds) {
+			&$first_print($text{'spf_enableds'});
+			$err = &add_parent_dnssec_ds_records($d);
+			}
+		else {
+			&$first_print($text{'spf_disableds'});
+			$err = &delete_parent_dnssec_ds_records($d);
+			}
+		if ($err) {
+			&$second_print(&text('spf_eenablesub', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
+
 	if ($changed || $bumpsoa) {
 		my $err = &post_records_change($d, $recs, $file);
 		if ($err) {
@@ -686,6 +717,7 @@ print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
 print "                     [--enable-subdomain | --disable-subdomain]\n";
 print "                     [--cloud-dns provider|\"local\"]\n";
+print "                     [--add-parent-ds | --remove-parent-ds]\n";
 exit(1);
 }
 

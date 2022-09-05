@@ -4139,13 +4139,15 @@ if ($parent) {
 		my $r = { 'name' => $d->{'dom'}.".",
 			  'type' => 'NS',
 			  'values' => [ $master ] };
-		&create_dns_record($precs, $pfile, $r);
+		if (!$already{$r->{'name'},$r->{'type'}}) {
+			&create_dns_record($precs, $pfile, $r);
+			}
 		}
 	&post_records_change($parent, $precs, $pfile);
 	&release_lock_dns($parent);
+	return undef;
 	}
-
-return undef;
+return "No parent DNS domain found";
 }
 
 # delete_parent_dnssec_ds_records(&domain)
@@ -4162,23 +4164,30 @@ if ($parent) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	my $deleted = 0;
+	my @delrecs;
 	foreach my $rec (@$precs) {
 		DS: foreach my $ds (@$dsrecs) {
 			if ($rec->{'name'} eq $ds->{'name'} &&
 			    $rec->{'type'} eq $ds->{'type'}) {
-				&delete_dns_record($precs, $pfile, $rec);
+				push(@delrecs, $rec);
+				$deleted++;
 				last DS;
 				}
 			}
 		if ($rec->{'name'} eq $d->{'dom'}."." &&
 		    $rec->{'type'} eq 'NS') {
-			&delete_dns_record($precs, $pfile, $rec);
+			push(@delrecs, $rec);
 			}
+		}
+	foreach my $rec (@delrecs) {
+		&delete_dns_record($precs, $pfile, $rec);
 		}
 	&post_records_change($parent, $precs, $pfile);
 	&release_lock_dns($parent);
+	return $deleted ? undef : "No DS records to remove found";
 	}
-return undef;
+return "No parent DNS domain found";
 }
 
 # get_domain_dnssec_ds_records(&domain)
