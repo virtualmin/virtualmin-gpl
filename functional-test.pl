@@ -37,6 +37,7 @@ $test_subdomain = "example.net";
 $test_parallel_domain1 = "example1.net";
 $test_parallel_domain2 = "example2.net";
 $test_cloud_domain = "cloudexample.com";
+$test_cloud_subdomain = "dns.cloudexample.com";
 $test_ip_address = &get_default_ip();
 $test_user = "testy";
 $test_alias = "testing";
@@ -9388,6 +9389,13 @@ $googledns_tests = [
 		      [ 'all-features' ] ],
 	},
 
+	# Validate that it has regular records
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'www', 'mail' ],
+	},
+
 	# Add a DNS record
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_cloud_domain ],
@@ -9399,6 +9407,47 @@ $googledns_tests = [
 	  'args' => [ [ 'multiline' ],
 		      [ 'domain', $test_cloud_domain ] ],
 	  'grep' => [ 'testing1' ],
+	},
+
+	# Create a sub-domain
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_subdomain ],
+		      [ 'parent', $test_cloud_domain ],
+		      [ 'desc', 'Test subdomain' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+        },
+
+	# Validate that it has regular records
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_subdomain ] ],
+	  'grep' => [ 'www', 'mail' ],
+	},
+
+	# Add a sub-domain record
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_cloud_subdomain ],
+		      [ 'add-record', 'testing2 A 1.2.3.4' ] ],
+	},
+
+	# Validate that it was created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Delete the sub-domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_subdomain ] ],
+	},
+
+	# Validate that the record is gone from the parent
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'antigrep' => [ 'testing2' ],
 	},
 
 	# Disable and re-enable the DNS feature
