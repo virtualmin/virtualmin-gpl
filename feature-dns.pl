@@ -1169,7 +1169,7 @@ sub create_standard_records
 {
 local ($recs, $file, $d, $ip) = @_;
 my $tmpl = &get_template($d->{'template'});
-my $proxy = $tmpl->{'dns_cloud_proxy'};
+my $proxied = $tmpl->{'dns_cloud_proxy'};
 &require_bind();
 local $rootfile = &bind8::make_chroot($file);
 local $serial = $bconfig{'soa_style'} ?
