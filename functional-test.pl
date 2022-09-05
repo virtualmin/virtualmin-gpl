@@ -9418,6 +9418,13 @@ $googledns_tests = [
 		      @create_args, ],
         },
 
+	# Validate that it's a DNS sub-domain
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_cloud_domain ],
+	},
+
 	# Validate that it has regular records
 	{ 'command' => 'get-dns.pl',
 	  'args' => [ [ 'multiline' ],
