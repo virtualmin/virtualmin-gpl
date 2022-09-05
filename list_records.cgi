@@ -71,10 +71,8 @@ RECORD: foreach $r (@$recs) {
 			 $r->{'type'} eq 'NSEC' ||
 			 $r->{'type'} eq 'NSEC3' ||
 			 $r->{'type'} eq 'RRSIG');
-
 		$name = $r->{'name'};
 		$name =~ s/\.$//;
-		$name =~ s/\.\Q$d->{'dom'}\E//;
 		$values = join(" ", @{$r->{'values'}});
 		if (length($values) > 80) {
 			$values = substr($values, 0, 75)." ...";
