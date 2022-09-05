@@ -1428,11 +1428,29 @@ local $oldip = $aliasd->{'ip'};
 local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
 			$_->{'dom'} =~ /\.\Q$aliasd->{'dom'}\E$/ }
 		      &list_domains();
+
+# Find records we already have
 local %already;
 foreach my $r (@$recs) {
 	$already{&dns_record_key($r, 1)} = $r;
 	}
 local %keep;
+
+# Build list of master nameservers
+my %tmplns;
+my $master = &get_master_nameserver($tmpl, $d);
+$tmplns{$master} = 1;
+foreach my $ns (&get_slave_nameservers($tmpl)) {
+	$tmplns{$ns} = 1;
+	}
+local @slaves = &bind8::list_slave_servers();
+foreach my $slave (@slaves) {
+	local @bn = $slave->{'nsname'} ?
+		( $slave->{'nsname'} ) :
+		gethostbyname($slave->{'host'});
+	$tmplns{$bn[0]."."} = 1 if ($bn[0]);
+	}
+
 RECORD: foreach my $r (@$aliasrecs) {
 	my $nr = { %$r };
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
@@ -1465,19 +1483,6 @@ RECORD: foreach my $r (@$aliasrecs) {
 
 	# Change domain name to alias in record values, unless it is an NS
 	# that is set in the template
-	my %tmplns;
-	my $master = &get_master_nameserver($tmpl, $d);
-	$tmplns{$master} = 1;
-	foreach my $ns (&get_slave_nameservers($tmpl)) {
-		$tmplns{$ns} = 1;
-		}
-	local @slaves = &bind8::list_slave_servers();
-	foreach my $slave (@slaves) {
-		local @bn = $slave->{'nsname'} ?
-			( $slave->{'nsname'} ) :
-			gethostbyname($slave->{'host'});
-		$tmplns{$bn[0]."."} = 1 if ($bn[0]);
-		}
 	if ($nr->{'type'} ne 'NS' || !$tmplns{$nr->{'values'}->[0]}) {
 		foreach my $v (@{$nr->{'values'}}) {
 			$v =~ s/\Q$olddom\E/$dom/i;
@@ -4650,7 +4655,7 @@ else {
 	my $type = $r->{'type'};
 	$type = "TXT" if ($type eq "SPF");
 	@r = ($r->{'name'}, $type, $ttl);
-	push(@r, @{$r->{'values'}}) if ($val);
+	push(@r, join("", @{$r->{'values'}})) if ($val);
 	if ($r->{'proxied'}) {
 		$r[0] = "proxied_".$r[0];
 		}
