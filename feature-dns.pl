@@ -303,6 +303,7 @@ elsif (!$dnsparent) {
 else {
 	# Creating a sub-domain - add to parent's DNS zone.
 	&$first_print(&text('setup_bindsub', $dnsparent->{'dom'}));
+	delete($d->{'dns_cloud'});	# Cloud always comes from parent
 	&obtain_lock_dns($dnsparent);
 	&pre_records_change($dnsparent);
 	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
@@ -3729,7 +3730,7 @@ if (!$fn) {
 if (defined(&bind8::supports_dnssec) &&
     &bind8::supports_dnssec() &&
     &can_domain_dnssec($d)) {
-	# Re-sign too
+	# Re-sign DNSSEC, or remove records if no longer signed
 	$z ||= &get_bind_zone($d->{'dom'});
 	eval {
 		local $main::error_must_die = 1;
@@ -4043,6 +4044,20 @@ my ($d) = @_;
 return $d->{'provision_dns'} || $d->{'dns_cloud'} ? 0 : 1;
 }
 
+# has_domain_dnssec(&domain, [&records])
+# Returns 1 if DNSSEC is enabled for a domain
+sub has_domain_dnssec
+{
+my ($d, $recs) = @_;
+if (!$recs) {
+	($recs) = &get_domain_dns_records_and_file($d);
+	}
+local $withdot = $d->{'dom'}.".";
+local ($dnskey) = grep { $_->{'type'} eq 'DNSKEY' &&
+			 $_->{'name'} eq $withdot } @$recs;
+return $dnskey ? 1 : 0;
+}
+
 # disable_domain_dnssec(&domain)
 # Remove all DNSSEC records for a domain
 sub disable_domain_dnssec
@@ -4058,6 +4073,7 @@ if ($key) {
 foreach my $k (@keyfiles) {
         &lock_file($k);
         }
+&delete_parent_dnssec_ds_records($d);
 &bind8::delete_dnssec_key($zone, 1);
 foreach my $k (@keyfiles) {
         &unlock_file($k);
@@ -4105,6 +4121,7 @@ else {
 	$d->{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
 	}
 &release_lock_dns($d);
+&add_parent_dnssec_ds_records($d);
 return undef;
 }
 
@@ -4119,6 +4136,7 @@ my $parent = &get_domain_by("dom", $pname);
 my $dsrecs = &get_domain_dnssec_ds_records($d);
 $dsrecs = [ ] if (!ref($dsrecs));
 if ($parent) {
+	@$dsrecs || return "Domain does not have DNSSEC enabled";
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
