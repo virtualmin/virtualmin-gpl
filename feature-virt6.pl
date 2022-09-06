@@ -12,11 +12,10 @@ if (!defined($supports_ip6_cache)) {
 		foreach my $a (&net::active_interfaces(1)) {
 			if (&best_ip6_address($a)) {
 				$supports_ip6_cache = 2;
-				last;
 				}
-			if ($a->{'address6'} && @{$a->{'address6'}} > 0) {
+			elsif ($a->{'address6'} && @{$a->{'address6'}} > 0 &&
+			       !$supports_ip6_cache) {
 				$supports_ip6_cache = 1;
-				last;
 				}
 			}
 		}
