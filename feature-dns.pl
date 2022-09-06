@@ -3321,19 +3321,19 @@ return undef if (!$file);
 return $file->{'values'}->[0];
 }
 
-# get_domain_dns_records_and_file(&domain)
+# get_domain_dns_records_and_file(&domain, [force-reread])
 # Returns an array ref of a domain's DNS records and the file they are in.
 # For a provisioned domain, this may be a local temp file.
 sub get_domain_dns_records_and_file
 {
-local ($d) = @_;
+local ($d, $force) = @_;
 if ($d->{'dns_submode'}) {
 	# Records are in the parent domain, so just call this same method for it
 	local $parent = &get_domain($d->{'dns_subof'});
 	return &get_domain_dns_records_and_file($parent);
 	}
 my $cid = $d->{'id'};
-if (defined($domain_dns_records_cache{$cid})) {
+if (defined($domain_dns_records_cache{$cid}) && !$force) {
 	# Use cached values
 	return @{$domain_dns_records_cache{$cid}};
 	}
@@ -4078,6 +4078,7 @@ foreach my $k (@keyfiles) {
 foreach my $k (@keyfiles) {
         &unlock_file($k);
         }
+&get_domain_dns_records_and_file($d, 1);	# Force re-read of records
 &release_lock_dns($d);
 return undef;
 }
@@ -4119,6 +4120,10 @@ else {
 		return &text('setup_ednssecsign', $err);
 		}
 	$d->{'dnssec_alg'} = $tmpl->{'dnssec_alg'};
+
+	# Force re-read of records from file, since dnssec-tools will have
+	# changed them
+	&get_domain_dns_records_and_file($d, 1);
 	}
 &release_lock_dns($d);
 &add_parent_dnssec_ds_records($d);
