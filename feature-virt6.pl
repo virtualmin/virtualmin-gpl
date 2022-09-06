@@ -1,7 +1,8 @@
 # Functions for IPv6 address management
 
-# Returns 1 if this system supports IPv6 addresses. Currently only true on
-# Linux where the ifconfig command reports v6 addresses
+# Returns 1 if this system supports IPv6 addresses, or 2 if a valid-looking
+# external IPv6 address is detected. Currently only true on Linux where the
+# ifconfig command reports v6 addresses.
 sub supports_ip6
 {
 if (!defined($supports_ip6_cache)) {
@@ -9,6 +10,10 @@ if (!defined($supports_ip6_cache)) {
 	$supports_ip6_cache = 0;
 	if (&net::supports_address6()) {
 		foreach my $a (&net::active_interfaces(1)) {
+			if (&best_ip6_address($a)) {
+				$supports_ip6_cache = 2;
+				last;
+				}
 			if ($a->{'address6'} && @{$a->{'address6'}} > 0) {
 				$supports_ip6_cache = 1;
 				last;

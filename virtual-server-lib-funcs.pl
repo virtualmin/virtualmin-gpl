@@ -15310,8 +15310,10 @@ if (!&running_in_zone()) {
 if ($config{'ip6enabled'} && &supports_ip6()) {
 	!$config{'netmask6'} || $config{'netmask6'} =~ /^\d+$/ ||
 		return &text('check_enetmask6', $config{'netmask6'});
-	&$second_print(&text('check_iface6',
-		"<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
+	if (&supports_ip6() == 2) {
+		&$second_print(&text('check_iface6',
+		    "<tt>".($config{'iface6'} || $config{'iface'})."</tt>"));
+		}
 	}
 
 # Show the default IPv4 address
