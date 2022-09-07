@@ -43,7 +43,12 @@ else {
 	($t) = grep { $_->{'type'} eq $r->{'type'} } &list_dns_record_types($d);
 	}
 &can_edit_record($d, $r) && $t || &error($text{'record_eedit'});
-$cloud = &get_domain_dns_cloud($d);
+if ($d->{'dns_submode'}) {
+	$cloud = &get_domain_dns_cloud(&get_domain($d->{'dns_subof'}));
+	}
+else {
+	$cloud = &get_domain_dns_cloud($d);
+	}
 
 print &ui_form_start("save_record.cgi", "post");
 print &ui_hidden("dom", $in{'dom'});
