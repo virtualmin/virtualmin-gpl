@@ -26,8 +26,10 @@ if ($err) {
 	}
 
 # Exclude sub-domains and parent domains
-if (!$in{'show'}) {
+if (!$in{'show'} || $d->{'dns_submode'}) {
 	$recs = &filter_domain_dns_records($d, $recs);
+	}
+if (!$in{'show'}) {
 	$recs = &filter_generated_dns_records($d, $recs);
 	}
 
