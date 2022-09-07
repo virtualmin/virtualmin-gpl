@@ -12611,7 +12611,7 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
 		  });
 	}
 
-if (&can_edit_records($d)) {
+if (&can_edit_records($d) && !&copy_alias_records($d)) {
 	if ($d->{'dns'}) {
 		# DNS edit records button
 		push(@rv, { 'page' => 'list_records.cgi',

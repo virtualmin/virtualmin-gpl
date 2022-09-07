@@ -250,14 +250,7 @@ elsif (!$dnsparent) {
 	# is a sub-domain, as they don't have their own domain. Also not
 	# possible if target uses another domain's zone file to store its
 	# records.
-	local $copyfromalias = 0;
-	if ($d->{'alias'}) {
-		local $target = &get_domain($d->{'alias'});
-		if ($target && !$target->{'subdom'} &&
-		    !$target->{'dns_submode'}) {
-			$copyfromalias = 1;
-			}
-		}
+	local $copyfromalias = &copy_alias_records($d);
 
 	# Create the records file
 	local $rootfile = &bind8::make_chroot($file);
@@ -3875,6 +3868,21 @@ elsif ($r->{'type'} eq 'SOA') {
 	return 0;
 	}
 return 1;
+}
+
+# copy_alias_records(&domain)
+# Returns 1 if an alias domain gets it's records copied from the target
+sub copy_alias_records
+{
+my ($d) = @_;
+if ($d->{'alias'}) {
+	local $target = &get_domain($d->{'alias'});
+	if ($target && !$target->{'subdom'} &&
+	    !$target->{'dns_submode'}) {
+		return 1;
+		}
+	}
+return 0;
 }
 
 # list_dns_record_types(&domain)
