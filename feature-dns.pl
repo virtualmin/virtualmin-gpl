@@ -4950,6 +4950,10 @@ return 0;
 sub supports_dns_comments
 {
 my ($d) = @_;
+if ($d->{'dns_submode'}) {
+	# Use super-domain cloud provider
+	$d = &get_domain($d->{'dns_subof'});
+	}
 return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
 my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
 return $c && $c->{'comments'};
@@ -4960,6 +4964,10 @@ return $c && $c->{'comments'};
 sub supports_dns_defttl
 {
 my ($d) = @_;
+if ($d->{'dns_submode'}) {
+	# TTL is per-file
+	return 0;
+	}
 return 1 if ($d->{'provision_dns'} || !$d->{'dns_cloud'});
 my ($c) = grep { $_->{'name'} eq $d->{'dns_cloud'} } &list_dns_clouds();
 return $c && $c->{'defttl'};
