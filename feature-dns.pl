@@ -342,7 +342,7 @@ sub delete_dns
 {
 local ($d) = @_;
 &require_bind();
-if ($d->{'dns_cloud'}) {
+if ($d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	# Delete from Cloud DNS provider
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
