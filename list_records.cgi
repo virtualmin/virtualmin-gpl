@@ -14,7 +14,7 @@ $msg = &domain_in($d);
 if ($d->{'provision_dns'}) {
 	$msg = &text('records_provmsg', $msg);
 	}
-elsif ($cloud = &get_domain_dns_cloud($d)) {
+elsif ($cloud = &get_domain_dns_cloud($d) || &get_domain_dns_cloud(&get_domain($d->{'dns_subof'}))) {
 	$msg = &text('records_cloudmsg', $msg, $cloud->{'desc'});
 	}
 &ui_print_header($msg, $text{'records_title'}, "", "records");
@@ -58,7 +58,6 @@ print &ui_columns_start([ "", $text{'records_name'},
 		        ], 100, 0, \@tds);
 
 %tmap = map { $_->{'type'}, $_ } &list_dns_record_types($d);
-$cloud = &get_domain_dns_cloud($d);
 RECORD: foreach $r (@$recs) {
 	if ($r->{'defttl'}) {
 		# Default TTL .. skip if in sub-domain
