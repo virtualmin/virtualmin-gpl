@@ -1503,6 +1503,10 @@ if ($tmpl->{'web_http2'} && &supports_http2()) {
 	# Enable HTTPv2 if supported by Apache
 	push(@dirs, "Protocols h2 h2c http/1.1");
 	}
+if (!&supports_suexec()) {
+	# Remove unsupported SuexecUserGroup directive
+	@dirs = grep { !/^\s*SuexecUserGroup\s/i } @dirs;
+	}
 return @dirs;
 }
 
