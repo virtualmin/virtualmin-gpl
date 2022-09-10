@@ -94,11 +94,17 @@ if (&supports_ip6() && $d->{'virt6'}) {
 if (&supports_ip6() && &can_use_feature("virt6")) {
 	# Build list of possible shared IPv6 addresses
 	@canips = ( );
-	push(@canips, [ &get_default_ip6(), $text{'newip_shared'} ]);
+	$defip6 = &get_default_ip6();
+	if ($defip6) {
+		push(@canips, [ $defip6, $text{'newip_shared'} ]);
+		}
 	$rd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 	if ($rd->{'reseller'}) {
-		push(@canips, [ &get_default_ip6($rd->{'reseller'}),
-			&text('newip_resel', $rd->{'reseller'}) ]);
+		$rdefip6 = &get_default_ip6($rd->{'reseller'});
+		if ($rdefip6) {
+			push(@canips, [ $rdefip6,
+				&text('newip_resel', $rd->{'reseller'}) ]);
+			}
 		}
 	push(@canips, map { [ $_, $text{'newip_shared2'} ] }
 			  &list_shared_ip6s());
@@ -109,9 +115,11 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 		      grep { !$done{$_->[0]}++ } @canips;
 
 	# Build options for new IPv6 field
-	@opts = ( [ -1, $text{'edit_virt6off'} ],
-		  [ 0, $text{'newip_sharedaddr'},
-		    &ui_select("ip6", $d->{'ip6'}, \@canips) ] );
+	@opts = ( [ -1, $text{'edit_virt6off'} ] );
+	if (@canips) {
+		push(@opts, [ 0, $text{'newip_sharedaddr'},
+			      &ui_select("ip6", $d->{'ip6'}, \@canips) ]);
+		}
 	if ($d->{'virt6'}) {
 		# Already got a private IP, show option to keep
 		push(@opts, [ 1, $text{'newip_virtaddr'} ] );
@@ -128,9 +136,9 @@ if (&supports_ip6() && &can_use_feature("virt6")) {
 				   $text{'form_virtalready'}) ]);
 
 	# Show new IPv6 field
+	$mode = $d->{'virt6'} ? 1 : $d->{'ip6'} && @canips ? 0 : -1;
 	print &ui_table_row($text{'newips_new6'},
-		&ui_radio_table("mode6", $d->{'virt6'} ? 1 :
-					 $d->{'ip6'} ? 0 : -1, \@opts, 1));
+		&ui_radio_table("mode6", $mode, \@opts, 1));
 	}
 
 # HTTP and HTTPS ports
