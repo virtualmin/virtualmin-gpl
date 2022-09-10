@@ -198,7 +198,9 @@ if ($orig) {
 	# For restores - option to use original IP
 	push(@opts, [ -1, $text{'form_origip'} ]);
 	}
-push(@opts, [ 0, &text('form_shared', $defip6) ]);
+if ($defip6) {
+	push(@opts, [ 0, &text('form_shared', $defip6) ]);
+	}
 local @shared = sort { $a cmp $b } &list_shared_ip6s();
 if (@shared && &can_edit_sharedips()) {
 	# Can select from extra shared list
