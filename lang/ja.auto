@@ -40,7 +40,6 @@ index_return2=モジュールインデックス
 index_list=リスト ..
 index_enet=ネットワーク構成モジュールは、ご使用のオペレーティングシステムではサポートされていません。 Virtualminは、仮想ネットワークインターフェイスを管理するためにこのモジュールを必要とします。
 index_edefip=Virtualminは、システム上の仮想サーバーのデフォルトIPv4アドレスを計算できませんでした。 <a href='$1'>モジュール構成</a>ページの[<b>仮想アドレスのネットワークインターフェース</b>]または[<b>デフォルトの仮想サーバーのIPアドレス</b>]フィールドを更新する必要があります。
-index_edefip6=Virtualminは、システム上の仮想サーバーのデフォルトIPv6アドレスを計算できませんでした。 <a href='$1'>モジュール構成</a>ページの[<b>仮想アドレスのネットワークインターフェース</b>]または[<b>デフォルトの仮想サーバーのIPアドレス</b>]フィールドを更新する必要があります。
 index_eapache=Apache Webサーバーがシステムにインストールされていないか、Webminの<a href='$1'>Apache Webサーバー</a>モジュールでまだ正しく設定されていません。システムでApacheを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_eproftpd=ProFTPDサーバーがシステムにインストールされていないか、Webminの<a href='$1'>ProFTPDサーバー</a>モジュールでまだ正しく設定されていません。システムでProFTPDを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
 index_ebind=BIND DNSサーバーバージョン8または9がシステムにインストールされていないか、Webminの<a href='$1'>BIND DNSサーバー</a>モジュールでまだ正しく設定されていません。システムがBINDを使用していない場合は、Virtualminの<a href='$2'>モジュール構成</a>ページで無効にする必要があります。
@@ -3547,7 +3546,7 @@ tmpl_phpatmost=せいぜい
 tmpl_phpmode=デフォルトのPHP実行モード
 tmpl_phpver=デフォルトのPHPバージョン
 tmpl_phpchildren=デフォルトのPHPサービスの最大サブプロセス
-tmpl_phpchildrennone=デフォルト推奨 <tt>($1)</tt>
+tmpl_phpchildrennone=デフォルト推奨 (<tt>$1</tt>)
 tmpl_phpchildrenauto=無効
 tmpl_php_iniv=テンプレートPHP $1構成ファイル
 tmpl_php_noedit=PHP構成の編集を許可しますか？
@@ -4883,6 +4882,7 @@ validate_ednsns=NSレコード $1はIPアドレスに解決できません
 validate_ednscheck=DNSレコードで次のエラーが見つかりました： $1
 validate_ednsslave=DNSゾーンはスレーブサーバー $1に存在しません
 validate_ednsslave2=スレーブサーバー $1のDNSゾーンのチェックに失敗しました： $2
+validate_edsrecs=親 DNS ゾーン $1 に $2 個の予期された DS レコードがありません
 validate_ednsip=DNSレコード $1は、仮想サーバーのIP $3ではなくIPアドレス $2に解決されます
 validate_ednsip6=DNSレコード $1は、仮想サーバーのIPv6アドレス $3ではなく、IPv6アドレス $2に解決されます
 validate_ednsmx=このドメインではメールが有効になっていますが、どのMXレコード $1もこのドメインをポイントしていません。 MXレコードを修正するか、メールが外部でホストされている場合はメール機能を無効にする必要があります。
@@ -4907,7 +4907,9 @@ validate_ewebip6=このドメインのApache仮想ホストはIPv6アドレス�
 validate_essl=$1のSSL Apache仮想ホストが見つかりません
 validate_esslcert=Apache仮想ホストでSSL証明書ファイルが指定されていません
 validate_esslcertfile=SSL証明書ファイル $1は存在しません
+validate_esslcertfile2=SSL 証明書ファイル $1 を読み取れません
 validate_esslkeyfile=SSLキーファイル $1は存在しません
+validate_esslkeyfile2=SSL キー ファイル $1 を読み取れません
 validate_esslcertinfo=SSL証明書ファイルを解析できませんでした
 validate_esslcainfo=SSL CAファイル $1を解析できませんでした
 validate_esslcamatch=$1/$2のSSL CA証明書がSSL証明書 $3/$4の発行者と一致しません
@@ -5369,6 +5371,8 @@ spf_dnslocal=DNSレコードをローカルホスティングに移動する ..
 spf_eclouddns=..失敗しました： $1
 spf_ecloud=DNSホストの更新に失敗しました： $1
 spf_epostchange=DNSレコードの保存に失敗しました： $1
+spf_enableds=DS レコードを親ドメインに追加しています ..
+spf_disableds=親ドメインから DS レコードを削除しています ..
 
 s3_emodule=AmazonのS3サービスとの通信に必要なPerlモジュール $1がインストールされていません
 s3_emodule2=AmazonのS3サービスとの通信に必要なPerlモジュール $1をロードできませんでした： $2
@@ -6746,6 +6750,8 @@ provision_ednscheck=DNSゾーンをチェックするサービスエラー： $1
 provision_edns=DNSゾーン $1はサービスホストに既に存在します
 
 records_title=DNSレコード
+records_provmsg=$1、Cloudmin サービスでホスト
+records_cloudmsg=$1、$2 でホスト
 records_ecannot=DNSレコードの編集は許可されていません
 records_name=レコード名
 records_type=タイプ
@@ -6799,6 +6805,8 @@ records_comment=コメント
 records_manual=レコードを手動で編集する
 records_epost=レコードは完全には削除されませんでした： $1
 records_viewdesc=この仮想サーバーのDNSドメインは、Virtualminシステムによってホストされていません。ドメインが他の場所でホストされている場合は、以下のレコードを使用して、Webサイトと電子メールが正しく機能することを確認する必要があります。
+records_show1=すべてのレコードを表示します。
+records_show0=内部記録を非表示にします。
 
 record_title1=DNSレコードを作成する
 record_title2=DNSレコードを編集

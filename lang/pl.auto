@@ -11,7 +11,6 @@ index_return=lista serwerów wirtualnych
 index_return2=indeks modułu
 index_enet=Moduł konfiguracji sieci nie jest obsługiwany w systemie operacyjnym. Virtualmin potrzebuje tego modułu do zarządzania wirtualnymi interfejsami sieciowymi.
 index_edefip=Virtualmin nie mógł wypracować domyślnego adresu IPv4 dla serwerów wirtualnych w twoim systemie. Konieczne będzie zaktualizowanie pól <b>Interfejs sieciowy dla adresów wirtualnych</b> lub <b>Domyślny adres IP serwera wirtualnego</b> na stronie <a href='$1'>konfiguracji modułu</a>.
-index_edefip6=Virtualmin nie mógł wypracować domyślnego adresu IPv6 dla serwerów wirtualnych w twoim systemie. Konieczne będzie zaktualizowanie pól <b>Interfejs sieciowy dla adresów wirtualnych</b> lub <b>Domyślny adres IP serwera wirtualnego</b> na stronie <a href='$1'>konfiguracji modułu</a>.
 index_eapache=Serwer Apache nie wygląda na zainstalowany w twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>Apache Webserver</a> Webmina. Jeśli twój system nie używa Apache, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> programu Virtualmin.
 index_eproftpd=Serwer ProFTPD nie wydaje się być zainstalowany w systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>serwera ProFTPD</a> Webmina. Jeśli twój system nie używa ProFTPD, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> programu Virtualmin.
 index_ebind=Serwer BIND DNS w wersji 8 lub 9 nie wydaje się być zainstalowany w twoim systemie lub nie został jeszcze poprawnie skonfigurowany w module <a href='$1'>serwera BIND DNS</a>. Jeśli twój system nie używa BIND, należy go wyłączyć na stronie <a href='$2'>konfiguracji modułu</a> programu Virtualmin.
@@ -3014,7 +3013,7 @@ tmpl_phpatmost=Najbardziej
 tmpl_phpmode=Domyślny tryb wykonywania PHP
 tmpl_phpver=Domyślna wersja PHP
 tmpl_phpchildren=Domyślna maksymalna liczba podprocesów usługi PHP
-tmpl_phpchildrennone=Zalecane domyślne <tt>($1)</tt>
+tmpl_phpchildrennone=Zalecane domyślne (<tt>$1</tt>)
 tmpl_phpchildrenauto=Wyłączone
 tmpl_php_iniv=Szablon pliku konfiguracyjnego PHP $1 
 tmpl_php_noedit=Zezwolić na edycję konfiguracji PHP?
@@ -4092,6 +4091,7 @@ validate_ednsns=Rekord NS $1 nie może zostać rozstrzygnięty na adres IP
 validate_ednscheck=W rekordach DNS znaleziono następujące błędy : $1 
 validate_ednsslave=Strefa DNS nie istnieje na serwerze podrzędnym $1 
 validate_ednsslave2=Nie można sprawdzić strefy DNS na serwerze podrzędnym $1 : $2 
+validate_edsrecs=Brak nadrzędnej strefy DNS $1 $2 oczekiwanych rekordów DS
 validate_ednsip=Rekord DNS $1 rozpoznaje adres IP $2 zamiast adresu IP serwera wirtualnego $3 
 validate_ednsip6=Rekord DNS $1 rozpoznaje adres IPv6 $2 zamiast adresu IPv6 serwera wirtualnego $3 
 validate_ednsmx=Ta domena ma włączoną obsługę poczty e-mail, ale żaden z rekordów MX nie wskazuje na nią $1. Albo rekordy MX powinny zostać poprawione, albo funkcja poczty e-mail wyłączona, jeśli poczta jest hostowana na zewnątrz.
@@ -4116,7 +4116,9 @@ validate_ewebip6=Wirtualny host Apache dla tej domeny nie używa adresu IPv6 i p
 validate_essl=Nie znaleziono hosta wirtualnego SSL Apache dla $1 
 validate_esslcert=Brak pliku certyfikatu SSL na hoście wirtualnym Apache
 validate_esslcertfile=Plik certyfikatu SSL $1 nie istnieje
+validate_esslcertfile2=Nie można odczytać pliku certyfikatu SSL $1 
 validate_esslkeyfile=Plik klucza SSL $1 nie istnieje
+validate_esslkeyfile2=Nie można odczytać pliku kluczy SSL $1 
 validate_esslcertinfo=Nie można przeanalizować pliku certyfikatu SSL
 validate_esslcainfo=Nie można przeanalizować pliku SSL CA $1 
 validate_esslcamatch=Certyfikat SSL CA dla $1/$2 nie jest zgodny z wystawcą certyfikatu SSL $3/$4 
@@ -4484,6 +4486,8 @@ spf_dnslocal=Przenoszenie rekordów DNS do lokalnego hostingu ..
 spf_eclouddns=.. nie powiodło się : $1 
 spf_ecloud=Nie udało się zaktualizować hosta DNS : $1
 spf_epostchange=Nie udało się zapisać rekordów DNS : $1
+spf_enableds=Dodawanie rekordów DS do domeny nadrzędnej. ..
+spf_disableds=Usuwanie rekordów DS z domeny nadrzędnej. ..
 
 s3_emodule=Moduł Perl $1 potrzebny do komunikacji z usługą Amazon S3 nie został zainstalowany
 s3_emodule2=Nie można załadować modułu Perla $1 potrzebnego do komunikacji z usługą Amazon S3 : $2 
@@ -5709,6 +5713,8 @@ provision_ednscheck=Błąd sprawdzania usług w strefie DNS : $1
 provision_edns=Strefa DNS $1 już istnieje na hoście usług
 
 records_title=Rekordy DNS
+records_provmsg=$1, hostowany w Cloudmin Services
+records_cloudmsg=$1, hostowany na $2
 records_ecannot=Nie możesz edytować rekordów DNS
 records_name=Nazwa nagrania
 records_type=Rodzaj
@@ -5760,6 +5766,8 @@ records_comment=Komentarz
 records_manual=Ręcznie edytuj rekordy
 records_epost=Rekordy nie zostały całkowicie usunięte : $1 
 records_viewdesc=Domena DNS tego wirtualnego serwera nie jest hostowana przez Twój system Virtualmin. Jeśli domena jest hostowana w innym miejscu, należy użyć poniższych rekordów, aby zapewnić prawidłowe działanie strony internetowej i poczty e-mail.
+records_show1=Pokaż wszystkie rekordy.
+records_show0=Ukryj rekordy wewnętrzne.
 
 record_title1=Utwórz rekord DNS
 record_title2=Edytuj rekord DNS

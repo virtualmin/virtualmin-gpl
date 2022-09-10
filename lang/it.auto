@@ -5,7 +5,6 @@ index_ip=indirizzo IP
 index_ssl_expiry=Scadenza SSL
 index_enet=Il modulo Network Configuration non è supportato sul tuo sistema operativo. Virtualmin ha bisogno di questo modulo per gestire le interfacce di rete virtuale.
 index_edefip=Virtualmin non è riuscito a elaborare l'indirizzo IPv4 predefinito per i server virtuali sul sistema. Dovrai aggiornare i campi <b>Interfaccia di rete per gli indirizzi virtuali</b> o <b>Indirizzo IP del server virtuale predefinito</b> nella pagina <a href='$1'>configurazione del modulo</a>.
-index_edefip6=Virtualmin non è riuscito a elaborare l'indirizzo IPv6 predefinito per i server virtuali sul sistema. Dovrai aggiornare i campi <b>Interfaccia di rete per gli indirizzi virtuali</b> o <b>Indirizzo IP del server virtuale predefinito</b> nella pagina <a href='$1'>configurazione del modulo</a>.
 index_eapache=Il server web Apache non sembra essere installato sul tuo sistema o non è stato ancora impostato correttamente nel modulo <a href='$1'>Server web Apache</a> di Webmin. Se il tuo sistema non utilizza Apache, dovrebbe essere disabilitato nella pagina <a href='$2'>configurazione del modulo di Virtualmin</a>.
 index_ebind=Il server DNS BIND versione 8 o 9 non sembra essere installato sul sistema o non è stato ancora impostato correttamente nel modulo <a href='$1'>server DNS BIND di Webmin. Se il tuo sistema non utilizza BIND, dovrebbe essere disabilitato nella pagina</a> configurazione del modulo </a> di Virtualmin.
 index_ebinderrs=Sono stati rilevati errori nella configurazione BIND del sistema : $1 
@@ -2631,7 +2630,7 @@ tmpl_phpatmost=Al massimo
 tmpl_phpmode=Modalità di esecuzione PHP predefinita
 tmpl_phpver=Versione PHP predefinita
 tmpl_phpchildren=Numero massimo di sottoprocessi predefiniti del servizio PHP
-tmpl_phpchildrennone=Predefinito consigliato <tt>($1)</tt>
+tmpl_phpchildrennone=Predefinito consigliato (<tt>$1</tt>)
 tmpl_phpchildrenauto=Disabilitato
 tmpl_php_iniv=File di configurazione modello PHP $1 
 tmpl_php_noedit=Consentire la modifica della configurazione di PHP?
@@ -3759,6 +3758,7 @@ validate_ednsns=Il record NS $1 non può essere risolto in un indirizzo IP
 validate_ednscheck=I seguenti errori sono stati trovati nei record DNS : $1 
 validate_ednsslave=La zona DNS non esiste sul server slave $1 
 validate_ednsslave2=Impossibile verificare la zona DNS sul server slave $1 : $2 
+validate_edsrecs=Nella zona DNS principale $1 mancano $2 record DS previsti
 validate_ednsip=Il record DNS $1 si risolve nell'indirizzo IP $2 anziché nell'IP $3 del server virtuale
 validate_ednsip6=Il record DNS $1 si risolve nell'indirizzo IPv6 $2 anziché nell'indirizzo IPv6 del server virtuale $3 
 validate_ednsmx=Questo dominio ha abilitato la posta elettronica, ma nessuno dei record MX $1 punta ad esso. È necessario correggere i record MX o disabilitare la funzione e-mail se la posta è ospitata esternamente.
@@ -3783,7 +3783,9 @@ validate_ewebip6=L'host virtuale Apache per questo dominio non utilizza l'indiri
 validate_essl=Nessun host virtuale Apache SSL per $1 trovato
 validate_esslcert=Nessun file di certificato SSL specificato nell'host virtuale Apache
 validate_esslcertfile=Il file del certificato SSL $1 non esiste
+validate_esslcertfile2=Impossibile leggere il file del certificato SSL $1
 validate_esslkeyfile=Il file chiave SSL $1 non esiste
+validate_esslkeyfile2=Impossibile leggere il file della chiave SSL $1
 validate_esslcertinfo=Impossibile analizzare il file del certificato SSL
 validate_esslcainfo=Impossibile analizzare il file CA SSL $1 
 validate_esslcamatch=Il certificato CA SSL per $1/$2 non corrisponde all'emittente del certificato SSL $3/$4 
@@ -4164,6 +4166,8 @@ spf_dnslocal=Spostare i record DNS sull'hosting locale ..
 spf_eclouddns=.. fallito : $1
 spf_ecloud=Impossibile aggiornare l'host DNS : $1
 spf_epostchange=Impossibile salvare i record DNS : $1
+spf_enableds=Aggiunta di record DS al dominio principale ..
+spf_disableds=Rimozione dei record DS dal dominio principale ..
 
 s3_emodule=Il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon non è installato
 s3_emodule2=Impossibile caricare il modulo Perl $1 necessario per comunicare con il servizio S3 di Amazon : $2 
@@ -5322,6 +5326,8 @@ provision_ednscheck=Errore servizi durante il controllo della zona DNS : $1
 provision_edns=La zona DNS $1 esiste già nell'host dei servizi
 
 records_title=Record DNS
+records_provmsg=$1, ospitato sui servizi Cloudmin
+records_cloudmsg=$1, ospitato su $2
 records_ecannot=Non è consentito modificare i record DNS
 records_name=Nome del record
 records_type=genere
@@ -5375,6 +5381,8 @@ records_comment=Commento
 records_manual=Modifica manualmente i record
 records_epost=I record non sono stati completamente eliminati : $1 
 records_viewdesc=Il dominio DNS di questo server virtuale non è ospitato dal tuo sistema Virtualmin. Se il dominio è ospitato altrove, i record seguenti devono essere utilizzati per garantire il corretto funzionamento del sito Web e della posta elettronica.
+records_show1=Mostra tutti i record.
+records_show0=Nascondi i record interni.
 
 record_title1=Crea record DNS
 record_title2=Modifica record DNS

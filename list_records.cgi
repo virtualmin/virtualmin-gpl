@@ -42,13 +42,15 @@ if (&supports_dns_comments($d)) {
 
 print &ui_form_start("delete_records.cgi");
 @links = ( &select_all_link("d"), &select_invert_link("d") );
-if ($in{'show'}) {
-	push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=0",
-			      $text{'records_show0'}));
-	}
-else {
-	push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=1",
-			      $text{'records_show1'}));
+if (!$d->{'dns_submode'}) {
+	if ($in{'show'}) {
+		push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=0",
+                              $text{'records_show0'}));
+		}
+	else {
+		push(@links, &ui_link("list_records.cgi?dom=$in{'dom'}&show=1",
+		                      $text{'records_show1'}));
+		}
 	}
 print &ui_hidden("dom", $in{'dom'});
 @tds = ( "width=5" );
