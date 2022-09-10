@@ -888,7 +888,7 @@ if ($in->{'defssl'}) {
 	$dom{$sslf} = 1;
 	if ($in->{'defssl'} == 2) {
 		$dom{'letsencrypt_dname'} = $dname;
-		$dom{'auto_letsencrypt'} = 2;
+		$dom{'auto_letsencrypt'} = 1;
 		}
 	else {
 		$dom{'auto_letsencrypt'} = 0;
