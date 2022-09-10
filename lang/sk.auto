@@ -40,7 +40,6 @@ index_return2=index modulu
 index_list=Zoznam..
 index_enet=Váš operačný systém nepodporuje modul konfigurácie siete. Virtualmin potrebuje tento modul na správu virtuálnych sieťových rozhraní.
 index_edefip=Virtualminu sa nepodarilo zistiť predvolenú adresu IPv4 pre virtuálne servery vo vašom systéme. Na stránke <a href='$1'>konfigurácie modulu</a> budete musieť aktualizovať buď pole <b>Sieťové rozhranie pre virtuálne adresy</b> alebo <b>Predvolená adresa IP virtuálneho servera</b>.
-index_edefip6=Virtualminu sa nepodarilo zistiť predvolenú adresu IPv6 pre virtuálne servery vo vašom systéme. Na stránke <a href='$1'>konfigurácie modulu</a> budete musieť aktualizovať buď pole <b>Sieťové rozhranie pre virtuálne adresy</b> alebo <b>Predvolená adresa IP virtuálneho servera</b>.
 index_eapache=Zdá sa, že webový server Apache nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>Webový server Apache</a> Webmin. Ak váš systém nepoužíva Apache, mal by byť vypnutý na stránke <a href='$2'>konfigurácie modulu</a> Virtualminu.
 index_eproftpd=Zdá sa, že server ProFTPD nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>ProFTPD Server</a> Webmin. Ak váš systém nepoužíva ProFTPD, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
 index_ebind=Server DNS BIND verzie 8 alebo 9 zrejme nie je nainštalovaný vo vašom systéme alebo ešte nebol správne nastavený v module <a href='$1'>BIND DNS Server</a> Webmin. Ak váš systém nepoužíva BIND, mal by byť vypnutý na stránke <a href='$2'>modulu</a> Virtualmin.
@@ -4883,6 +4882,7 @@ validate_ednsns=Záznam NS $1 nemožno preložiť na adresu IP
 validate_ednscheck=V záznamoch DNS sa našli nasledujúce chyby : $1
 validate_ednsslave=Zóna DNS na podriadenom serveri $1 neexistuje
 validate_ednsslave2=Nepodarilo sa skontrolovať zónu DNS na podriadenom serveri $1 : $2 
+validate_edsrecs=Nadradenej DNS zóne $1 chýba $2 očakávaných DS záznamov
 validate_ednsip=DNS záznam $1 sa preloží na IP adresu $2 namiesto IP $3 virtuálneho servera
 validate_ednsip6=DNS záznam $1 sa preloží na adresu IPv6 $2 namiesto adresy IPv6 virtuálneho servera $3
 validate_ednsmx=Táto doména má povolený e-mail, ale žiadny zo záznamov MX $1 naň neukazuje. Ak je pošta hosťovaná externe, mali by sa opraviť záznamy MX alebo deaktivovať funkciu e-mailu.
@@ -4907,7 +4907,9 @@ validate_ewebip6=Virtuálny hostiteľ Apache pre túto doménu nepoužíva adres
 validate_essl=Nenašiel sa žiadny virtuálny hostiteľ SSL Apache pre $1
 validate_esslcert=Vo virtuálnom hostiteľovi Apache nie je zadaný žiadny súbor certifikátu SSL
 validate_esslcertfile=Súbor certifikátu SSL $1 neexistuje
+validate_esslcertfile2=Súbor certifikátu SSL $1 sa nedá prečítať
 validate_esslkeyfile=Súbor kľúča SSL $1 neexistuje
+validate_esslkeyfile2=Súbor kľúča SSL $1 sa nedá prečítať
 validate_esslcertinfo=Súbor certifikátu SSL $1 sa nepodarilo analyzovať
 validate_esslcainfo=Súbor SSL CA $1 sa nepodarilo analyzovať
 validate_esslcamatch=Certifikát SSL CA pre $1/$2 sa nezhoduje s vydavateľom certifikátu SSL $3/$4
@@ -5369,6 +5371,8 @@ spf_dnslocal=Presun DNS záznamov na lokálny hosting ..
 spf_eclouddns=.. zlyhalo : $1
 spf_ecloud=Aktualizácia hostiteľa DNS zlyhala : $1
 spf_epostchange=Nepodarilo sa uložiť záznamy DNS : $1
+spf_enableds=Pridávanie záznamov DS do nadradenej domény ..
+spf_disableds=Odstraňujú sa záznamy DS z nadradenej domény ..
 
 s3_emodule=Perl modul $1 potrebný na komunikáciu so službou Amazon S3 nie je nainštalovaný
 s3_emodule2=Modul Perl $1 potrebný na komunikáciu so službou Amazon S3 sa nepodarilo načítať : $2
@@ -6746,6 +6750,8 @@ provision_ednscheck=Zóna DNS pri kontrole chýb služieb : $1
 provision_edns=Zóna DNS $1 už na hostiteľovi služieb existuje
 
 records_title=DNS záznamy
+records_provmsg=$1, hosťované na Cloudmin Services
+records_cloudmsg=$1, hosťované na $2
 records_ecannot=Nemáte povolené upravovať záznamy DNS
 records_name=Názov záznamu
 records_type=Typ
@@ -6799,6 +6805,8 @@ records_comment=Komentujte
 records_manual=Manuálna úprava záznamov
 records_epost=Záznamy neboli úplne odstránené : $1
 records_viewdesc=Doména DNS tohto virtuálneho servera nie je hostiteľom vášho systému Virtualmin. Ak je doména hosťovaná inde, na zabezpečenie správneho fungovania webovej stránky a e-mailu by sa mali použiť záznamy uvedené nižšie.
+records_show1=Zobraziť všetky záznamy.
+records_show0=Skryť interné záznamy.
 
 record_title1=Vytvorte DNS záznam
 record_title2=Upravte DNS záznam

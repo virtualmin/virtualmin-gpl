@@ -39,7 +39,6 @@ index_return2=índice do módulo
 index_list=Lista ..
 index_enet=O módulo de configuração de rede não é suportado no seu sistema operacional. O Virtualmin precisa deste módulo para gerenciar interfaces de rede virtual.
 index_edefip=O Virtualmin não conseguiu determinar o endereço IPv4 padrão para servidores virtuais no seu sistema. Você precisará atualizar os campos <b>Interface de rede para endereços virtuais</b> ou <b>Endereço IP padrão do servidor virtual</b> na página <a href='$1'>configuração do módulo</a>.
-index_edefip6=O Virtualmin não conseguiu determinar o endereço IPv6 padrão para servidores virtuais no seu sistema. Você precisará atualizar os campos <b>Interface de rede para endereços virtuais</b> ou <b>Endereço IP padrão do servidor virtual</b> na página <a href='$1'>configuração do módulo</a>.
 index_eapache=O servidor da web Apache não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo Apache Webserver <a href='$1'>Apmin Webserver</a> da Webmin. Se o seu sistema não usa o Apache, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
 index_eproftpd=O servidor ProFTPD não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>ProFTPD Server</a> do Webmin. Se o seu sistema não usa o ProFTPD, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
 index_ebind=O servidor BIND DNS versão 8 ou 9 não parece estar instalado no seu sistema ou ainda não foi configurado corretamente no módulo <a href='$1'>BIND DNS Server</a> do Webmin. Se o seu sistema não usa BIND, ele deve ser desativado na página de configuração do módulo <a href='$2'>do Virtualmin</a>.
@@ -4635,6 +4634,7 @@ validate_ednsns=O registro NS $1 não pode ser resolvido para um endereço IP
 validate_ednscheck=Os seguintes erros foram encontrados nos registros DNS : $1 
 validate_ednsslave=A zona DNS não existe no servidor escravo $1 
 validate_ednsslave2=Falha ao verificar a zona DNS no servidor escravo $1 : $2 
+validate_edsrecs=A zona DNS pai $1 está faltando $2 registros DS esperados
 validate_ednsip=O registro DNS $1 resolve para o endereço IP $2 em vez do IP $3 do servidor virtual
 validate_ednsip6=O registro DNS $1 resolve para o endereço IPv6 $2 em vez do endereço IPv6 $3 do servidor virtual
 validate_ednsmx=Este domínio tem o email ativado, mas nenhum dos registros MX $1 aponta para ele. Os registros MX devem ser corrigidos ou o recurso de email desativado se o email for hospedado externamente.
@@ -4659,7 +4659,9 @@ validate_ewebip6=O host virtual Apache para este domínio não usa o endereço I
 validate_essl=Nenhum host virtual SSL Apache para $1 encontrado
 validate_esslcert=Nenhum arquivo de certificado SSL especificado no host virtual Apache
 validate_esslcertfile=O arquivo de certificado SSL $1 não existe
+validate_esslcertfile2=O arquivo de certificado SSL $1 não pode ser lido
 validate_esslkeyfile=O arquivo de chave SSL $1 não existe
+validate_esslkeyfile2=O arquivo de chave SSL $1 não pode ser lido
 validate_esslcertinfo=Não foi possível analisar o arquivo de certificado SSL
 validate_esslcainfo=O arquivo SSL CA $1 não pôde ser analisado
 validate_esslcamatch=O certificado de CA SSL para $1/$2 não corresponde ao emissor do certificado SSL $3/$4 
@@ -5113,6 +5115,8 @@ spf_dnslocal=Movendo registros DNS para hospedagem local ..
 spf_eclouddns=.. falhou : $1 
 spf_ecloud=Falha ao atualizar host DNS : $1 
 spf_epostchange=Falha ao salvar registros DNS : $1
+spf_enableds=Adicionando registros DS ao domínio pai ..
+spf_disableds=Removendo registros DS do domínio pai ..
 
 s3_emodule=O módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon não está instalado
 s3_emodule2=Não foi possível carregar o módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon : $2 
@@ -6464,6 +6468,8 @@ provision_ednscheck=Erro de serviços na verificação da zona DNS : $1
 provision_edns=A zona DNS $1 já existe no host de serviços
 
 records_title=Registros DNS
+records_provmsg=$1, hospedado nos Serviços Cloudmin
+records_cloudmsg=$1, hospedado em $2
 records_ecannot=Você não tem permissão para editar registros DNS
 records_name=Nome do registro
 records_type=Tipo
@@ -6517,6 +6523,8 @@ records_comment=Comente
 records_manual=Editar registros manualmente
 records_epost=Os registros não foram totalmente excluídos : $1 
 records_viewdesc=O domínio DNS deste servidor virtual não é hospedado pelo seu sistema Virtualmin. Se o domínio estiver hospedado em outro lugar, os registros abaixo deverão ser usados para garantir que o site e o email funcionem corretamente.
+records_show1=Mostrar todos os registros.
+records_show0=Ocultar registros internos.
 
 record_title1=Criar registro DNS
 record_title2=Editar registro DNS

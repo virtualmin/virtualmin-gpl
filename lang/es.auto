@@ -1,6 +1,5 @@
 index_ip=dirección IP
 index_ssl_expiry=Vencimiento SSL
-index_edefip6=Virtualmin no pudo calcular la dirección IPv6 predeterminada para servidores virtuales en su sistema. Deberá actualizar la <b>interfaz de red para las direcciones virtuales</b> o <b>los</b> campos de la <b>dirección IP del servidor virtual predeterminado</b> en la página de <a href='$1'>configuración</a> del <a href='$1'>módulo</a>.
 index_ebinderrs=Se encontraron errores en la configuración BIND de su sistema : $1 
 index_ebindmod=El módulo Webmin del servidor DNS BIND no está instalado en su sistema.
 index_emysql2=Los programas cliente MySQL no parecen estar instalados o no se han configurado correctamente en el módulo de <a href='$1'>base de datos MySQL</a> de Webmin. Si su sistema no usa MySQL, debería deshabilitarse en la página de <a href='$2'>configuración</a> del <a href='$2'>módulo</a> de Virtualmin.
@@ -1369,6 +1368,7 @@ validate_ednsns=El registro NS $1 no se puede resolver en una dirección IP
 validate_ednscheck=Se encontraron los siguientes errores en los registros DNS : $1
 validate_ednsslave=La zona DNS no existe en el servidor esclavo $1
 validate_ednsslave2=Error al verificar la zona DNS en el servidor esclavo $1 : $2 
+validate_edsrecs=A la zona DNS principal $1 le faltan $2 registros DS esperados
 validate_ednsip=El registro DNS $1 se resuelve en la dirección IP $2 en lugar de la IP del servidor virtual $3
 validate_ednsip6=El registro DNS $1 se resuelve en la dirección IPv6 $2 en lugar de la dirección IPv6 del servidor virtual $3 
 validate_ednsmx=Este dominio tiene el correo electrónico habilitado, pero ninguno de los MX registra $1 punto. Los registros MX deben corregirse o la función de correo electrónico deshabilitada si el correo está alojado externamente.
@@ -1388,6 +1388,8 @@ validate_ewebipv6=Existe un registro DNS IPv6 $2 con la dirección $1, pero este
 validate_ewebipv6virt=Existe un registro DNS IPv6 con la dirección $1, pero la configuración de Apache de este servidor virtual no tiene una dirección IPv6
 validate_ewebip=El host virtual de Apache para este dominio no usa la dirección IPv4 y el puerto $1
 validate_ewebip6=El host virtual de Apache para este dominio no usa la dirección IPv6 y el puerto $1
+validate_esslcertfile2=No se puede leer el archivo de certificado SSL $1
+validate_esslkeyfile2=No se puede leer el archivo de clave SSL $1
 validate_esslcertinfo=El archivo del certificado SSL no se pudo analizar
 validate_esslcainfo=No se pudo analizar el archivo de CA SSL $1 
 validate_esslcamatch=El certificado de CA SSL para $1/$2 no coincide con el emisor del certificado SSL $3/$4 
@@ -1556,6 +1558,8 @@ spf_dnslocal=Mover registros DNS al alojamiento local. ..
 spf_eclouddns=... falló : $1 
 spf_ecloud=Error al actualizar el host DNS : $1 
 spf_epostchange=No se pudieron guardar los registros DNS : $1
+spf_enableds=Adición de registros de DS al dominio principal ..
+spf_disableds=Eliminando registros de DS del dominio principal ..
 
 s3_emodule2=No se pudo cargar el módulo Perl $1 necesario para comunicarse con el servicio S3 de Amazon : $2
 s3_emodule3=Los módulos Perl $1 o $2 necesarios para comunicarse con el servicio S3 de Amazon no están instalados
@@ -2327,6 +2331,8 @@ provision_ednscheck=Error de servicios al verificar la zona DNS : $1
 provision_edns=La zona DNS $1 ya existe en el host de servicios
 
 records_title=Registros DNS
+records_provmsg=$1, alojado en los servicios de Cloudmin
+records_cloudmsg=$1, alojado en $2
 records_ecannot=No tiene permiso para editar registros DNS
 records_name=Nombre del registro
 records_type=Tipo
@@ -2380,6 +2386,8 @@ records_comment=Comentario
 records_manual=Editar registros manualmente
 records_epost=Los registros no se eliminaron por completo : $1
 records_viewdesc=El dominio DNS de este servidor virtual no está alojado en su sistema Virtualmin. Si el dominio está alojado en otro lugar, los registros a continuación deben usarse para garantizar que el sitio web y el correo electrónico funcionen correctamente.
+records_show1=Mostrar todos los registros.
+records_show0=Ocultar registros internos.
 
 record_title1=Crear registro DNS
 record_title2=Editar registro DNS

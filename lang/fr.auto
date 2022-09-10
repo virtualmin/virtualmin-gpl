@@ -2563,6 +2563,7 @@ validate_ednsns=L'enregistrement NS $1 ne peut pas être résolu en une adresse 
 validate_ednscheck=Les erreurs suivantes ont été trouvées dans les enregistrements DNS : $1 
 validate_ednsslave=La zone DNS n'existe pas sur le serveur esclave $1 
 validate_ednsslave2=Impossible de vérifier la zone DNS sur le serveur esclave $1 : $2 
+validate_edsrecs=La zone DNS parente $1 manque $2 enregistrements DS attendus
 validate_ednsip=L'enregistrement DNS $1 se résout en l'adresse IP $2 au lieu de l'IP $3 du serveur virtuel
 validate_ednsip6=L'enregistrement DNS $1 se résout en l'adresse IPv6 $2 au lieu de l'adresse IPv6 du serveur virtuel $3 
 validate_ednsmx=Ce domaine a la messagerie activée, mais aucun des enregistrements MX $1 ne le pointe. Soit les enregistrements MX doivent être corrigés, soit la fonction de messagerie désactivée si le courrier est hébergé en externe.
@@ -2587,7 +2588,9 @@ validate_ewebip6=L'hôte virtuel Apache pour ce domaine n'utilise pas l'adresse 
 validate_essl=Aucun hôte virtuel SSL Apache pour $1 trouvé
 validate_esslcert=Aucun fichier de certificat SSL spécifié dans l'hôte virtuel Apache
 validate_esslcertfile=Le fichier de certificat SSL $1 n'existe pas
+validate_esslcertfile2=Impossible de lire le fichier de certificat SSL $1
 validate_esslkeyfile=Le fichier de clés SSL $1 n'existe pas
+validate_esslkeyfile2=Impossible de lire le fichier de clé SSL $1
 validate_esslcertinfo=Le fichier de certificat SSL n'a pas pu être analysé
 validate_esslcainfo=Le fichier d'autorité de certification SSL $1 n'a pas pu être analysé
 validate_esslcamatch=Le certificat SSL CA pour $1/$2 ne correspond pas à l'émetteur du certificat SSL $3/$4 
@@ -2812,6 +2815,8 @@ spf_dnslocal=Déplacement des enregistrements DNS vers l'hébergement local ..
 spf_eclouddns=.. a échoué  : $1
 spf_ecloud=Échec de la mise à jour de l'hôte DNS : $1
 spf_epostchange=Impossible d'enregistrer les enregistrements DNS  : $1
+spf_enableds=Ajout d'enregistrements DS au domaine parent ..
+spf_disableds=Suppression des enregistrements DS du domaine parent ..
 
 s3_emodule=Le module Perl $1 nécessaire pour communiquer avec le service S3 d'Amazon n'est pas installé
 s3_emodule2=Le module Perl $1 nécessaire pour communiquer avec le service S3 d'Amazon n'a pas pu être chargé : $2 
@@ -4024,8 +4029,13 @@ provision_emysql=La connexion MySQL $1 existe déjà sur l'hôte des services
 provision_ednscheck=Erreur des services lors de la vérification de la zone DNS : $1 
 provision_edns=La zone DNS $1 existe déjà sur l'hôte des services
 
+records_provmsg=$1, hébergé sur les services Cloudmin
+records_cloudmsg=$1, hébergé sur $2
 records_typeprox=Proxy
 records_typenoprox=DNS uniquement
+records_show1=Afficher tous les enregistrements.
+records_show0=Masquez les enregistrements internes.
+
 record_sservice=Nom du service
 record_sproto=Protocole de service
 record_esservice=Nom de service manquant ou non valide
@@ -4117,7 +4127,6 @@ mrecords_ecannot=Vous n'êtes pas autorisé à modifier manuellement les enregis
 mrecords_desc=Cette page vous permet de modifier manuellement tous les enregistrements DNS du domaine, au format de configuration BIND.
 mrecords_err=Impossible d'enregistrer les enregistrements DNS
 mrecords_enone=Rien n'est entré!
-
 mrecords_evalidate=Échec de la validation : $1 
 mrecords_validate=Valider de nouveaux enregistrements?
 
