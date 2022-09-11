@@ -2677,16 +2677,14 @@ if ($ok) {
 					# IPv6 for new domains is disabled
 					$d->{'ip6'} = undef;
 					}
-				else {
+				elsif ($defip6) {
 					# Use default shared IP
 					$d->{'ip6'} = $defip6;
-					if (!$d->{'ip6'}) {
-						&$second_print(
-						    $text{'restore_edefip6'});
-						$ok = 0;
-						if ($continue) { next DOMAIN; }
-						else { last DOMAIN; }
-						}
+					}
+				else {
+					# No IPv6 address found, so turn it off
+					$d->{'ip6'} = undef;
+					$d->{'virt6'} = 0;
 					}
 				}
 			elsif ($ipinfo && $ipinfo->{'ip6'}) {
