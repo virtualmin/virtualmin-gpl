@@ -3090,7 +3090,7 @@ foreach my $t (@types) {
 	if ($r && $spf) {
 		# Update record
 		$r->{'values'} = [ $str ];
-		&modify_dns_records($recs, $file, $r);
+		&modify_dns_record($recs, $file, $r);
 		$bump = 1;
 		}
 	elsif ($r && !$spf) {
