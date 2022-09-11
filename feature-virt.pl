@@ -249,9 +249,10 @@ else {
 		# Use shared or allocated (for restores only)
 		push(@opts, [ 5, &text('form_allocmaybe') ]);
 		}
-	if (&indexof($mode, map { $_->[0] } @opts) < 0) {
-		# Mode is not on the list .. use shared mode
-		$mode = 0;
+	my %hasmodes = map { $_->[0], 1 } @opts;
+	if (!$hasmodes{$mode}) {
+		# Mode is not on the list .. use shared mode or none
+		$mode = $hasmodes{0} ? 0 : -2;
 		}
 	return &ui_radio_table("virt", $mode, \@opts, 1);
 	}
