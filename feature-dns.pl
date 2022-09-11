@@ -3074,15 +3074,20 @@ sub save_domain_spf
 {
 local ($d, $spf) = @_;
 &require_bind();
-local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 if (!$file) {
 	# Zone not found!
 	return;
 	}
+local @types = map { $_->{'type'} }
+		   grep { $_->{'values'}->[0] =~ /^v=spf/ &&
+			  $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
+if (!@types) {
+	@types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" ) : ( "SPF" );
+	}
 local $bump = 0;
 &pre_records_change($d);
-foreach my $t (@types) {
+foreach my $t (&unique(@types)) {
 	local ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'values'}->[0] =~ /^v=spf/ &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
