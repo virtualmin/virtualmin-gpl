@@ -3077,7 +3077,9 @@ return @rv;
 
 # sync_webmin_ssl_cert(&domain, [enable-or-disable])
 # Add or remove the SSL cert for Webmin for this domain. Returns 1 on success,
-# 0 on failure, or -1 if not supported.
+# 0 on failure, or -1 if not supported. Calls restart_webmin_fully because
+# SSL certs are only loaded by miniserv at startup, rather than on a config
+# reload.
 sub sync_webmin_ssl_cert
 {
 my ($d, $enable) = @_;
