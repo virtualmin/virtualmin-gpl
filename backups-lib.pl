@@ -2712,14 +2712,13 @@ if ($ok) {
 				$d->{'ip6'} = undef;
 				}
 			elsif (!$d->{'virt6'}) {
-				# Use this system's default IPv6 address
-				$d->{'ip6'} = $defip6;
-				if (!$d->{'ip6'}) {
-					&$second_print(
-						$text{'restore_edefip6'});
-					$ok = 0;
-					if ($continue) { next DOMAIN; }
-					else { last DOMAIN; }
+				# Use this system's default IPv6 address, if
+				# there is one
+				if ($defip6) {
+					$d->{'ip6'} = $defip6;
+					}
+				else {
+					$d->{'ip6'} = undef;
 					}
 				}
 
