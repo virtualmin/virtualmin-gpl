@@ -2343,7 +2343,6 @@ restore_eresel2=.. odsprzedawca $1 określony w kopii zapasowej nie istnieje - u
 restore_eugroup=.. właściciel domeny grupa Unix $1 nie istnieje
 restore_eugroup2=.. grupa uniksowa $1 właściciela domeny nie istnieje - przełączenie z powrotem do własnej grupy domeny
 restore_edefip=.. nie udało się wypracować domyślnego adresu IP
-restore_edefip6=.. nie udało się ustalić domyślnego adresu IPv6
 restore_eclash=.. wykryto zderzenie : $1 
 restore_erecreate=.. utworzenie brakującego serwera nie powiodło się : $1 
 restore_ewarnings=.. wykryto następujące ostrzeżenia :
@@ -6367,13 +6366,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Nieszyfrowane
 
 deftmplt_error=BŁĄD
+deftmplt_default_page=Strona domyślna
 deftmplt_website_disabled=Strona Internetowa Wyłączona
-deftmplt_under_construction=W budowie
-deftmplt_slogan=zarządzany przez Virtualmin - potężny i elastyczny panel sterowania hostingu
-deftmplt_slogan2=właściciel domeny może zalogować się do panelu sterowania, aby zarządzać tą witryną
-deftmplt_made_with_love1=Zasilany
-deftmplt_made_with_love2=przez Virtualmin
-deftmplt_made_with_love_disclamer=* Firma Virtualmin nie ponosi odpowiedzialności za treści dostarczane przez ten serwer
+deftmplt_website_enabled=Witryna włączona
+deftmplt_default_slog=właściciel domeny może zalogować się do panelu<br>sterowania, aby zarządzać tą witryną
 
 2fa_title=Uwierzytelnianie dwuskładnikowe
 2fa_euser=Użytkownik Webmin nie istnieje!

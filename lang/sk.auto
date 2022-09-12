@@ -2765,7 +2765,6 @@ restore_eresel2=.. predajca $1 zadaný v zálohe neexistuje – odstraňuje sa z
 restore_eugroup=.. vlastník domény Unixová skupina $1 neexistuje
 restore_eugroup2=.. vlastník domény Unixová skupina $1 neexistuje - prepínanie späť do vlastnej skupiny domény
 restore_edefip=.. nedokázal zistiť predvolenú IP adresu
-restore_edefip6=.. nedokázal zistiť predvolenú adresu IPv6
 restore_eclash=.. bola zistená zrážka : $1
 restore_erecreate=.. vytvorenie chýbajúceho servera zlyhalo : $1
 restore_ewarnings=.. boli zistené nasledujúce upozornenia :
@@ -7487,13 +7486,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Nešifrované
 
 deftmplt_error=CHYBA
+deftmplt_default_page=Predvolená stránka
 deftmplt_website_disabled=Webové stránky sú zakázané
-deftmplt_under_construction=Vo výstavbe
-deftmplt_slogan=spravuje Virtualmin - výkonný a flexibilný ovládací panel webhostingu
-deftmplt_slogan2=vlastník domény sa môže prihlásiť do ovládacieho panela a spravovať túto webovú stránku
-deftmplt_made_with_love1=Poháňané s
-deftmplt_made_with_love2=od spoločnosti Virtualmin
-deftmplt_made_with_love_disclamer=* Spoločnosť Virtualmin nezodpovedá za obsah dodávaný týmto serverom
+deftmplt_website_enabled=Webová stránka povolená
+deftmplt_default_slog=vlastník domény sa môže prihlásiť do ovládacieho<br>panelu a spravovať túto webovú lokalitu
 
 2fa_title=Dvojfaktorová autentifikácia
 2fa_euser=Používateľ Webmin neexistuje!

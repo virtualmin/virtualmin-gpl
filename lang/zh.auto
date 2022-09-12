@@ -1107,7 +1107,6 @@ restore_eresel2=..备份中指定的转销商 $1不存在-从域中将其删除
 restore_eugroup=.. 域所有者 Unix 组 $1 不存在
 restore_eugroup2=.. 域所有者 Unix 组 $1 不存在 - 切换回域自己的组
 restore_edefip=..无法算出默认IP地址
-restore_edefip6=.. 无法计算出默认 IPv6 地址
 restore_erecreate=..创建丢失的服务器失败： $1
 restore_ewarnings=..检测到以下警告：
 restore_disabledomain=重新禁用虚拟服务器 $1 ..
@@ -4241,13 +4240,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=未加密
 
 deftmplt_error=错误
+deftmplt_default_page=默认页面
 deftmplt_website_disabled=网站已禁用
-deftmplt_under_construction=正在施工
-deftmplt_slogan=由Virtualmin管理-功能强大且灵活的Web托管控制面板
-deftmplt_slogan2=域所有者可以登录控制面板来管理此网站
-deftmplt_made_with_love1=供电
-deftmplt_made_with_love2=通过Virtualmin
-deftmplt_made_with_love_disclamer=* Virtualmin公司对此服务器提供的内容概不负责
+deftmplt_website_enabled=网站已启用
+deftmplt_default_slog=域所有者可以登录控制<br>面板来管理这个网站
 
 2fa_title=两要素认证
 2fa_euser=Webmin用户不存在！

@@ -7490,7 +7490,6 @@ deftmplt_default_page=Default Page
 deftmplt_website_disabled=Website Disabled
 deftmplt_website_enabled=Website Enabled
 deftmplt_default_slog=domain owner may login to the control<br>panel to manage this website
-deftmplt_made_cred=Powered by Virtualmin
 
 2fa_title=Two-Factor Authentication
 2fa_euser=Webmin user does not exist!

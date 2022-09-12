@@ -1222,7 +1222,6 @@ restore_eresel2=.. yedekte belirtilen $1 satıcısı mevcut değil - alan adınd
 restore_eugroup=.. etki alanı sahibi $1 Unix grubu mevcut değil
 restore_eugroup2=.. etki alanı sahibi $1 Unix grubu mevcut değil - etki alanının kendi grubuna geri dönüyor
 restore_edefip=.. varsayılan IP adresini çalıştıramadı
-restore_edefip6=.. varsayılan IPv6 adresini çözemedi
 restore_erecreate=.. eksik sunucu oluşturulamadı : $1 
 restore_ewarnings=.. aşağıdaki uyarılar tespit edildi :
 restore_disabledomain=$1 sanal sunucusunu yeniden devre dışı bırakma.
@@ -4759,13 +4758,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=şifresiz
 
 deftmplt_error=HATA
+deftmplt_default_page=Varsayılan sayfa
 deftmplt_website_disabled=Web Sitesi Devre Dışı
-deftmplt_under_construction=İnşaat halinde
-deftmplt_slogan=Virtualmin tarafından yönetilen - güçlü ve esnek bir web barındırma kontrol paneli
-deftmplt_slogan2=alan sahibi, bu web sitesini yönetmek için kontrol paneline giriş yapabilir
-deftmplt_made_with_love1=İle güçlendirilmiştir
-deftmplt_made_with_love2=Virtualmin tarafından
-deftmplt_made_with_love_disclamer=* Virtualmin şirketi, bu sunucu tarafından sağlanan içerikten sorumlu değildir
+deftmplt_website_enabled=Web Sitesi Etkin
+deftmplt_default_slog=alan sahibi, bu web sitesini yönetmek için<br>kontrol panelinde oturum açabilir
 
 2fa_title=İki Faktörlü Kimlik Doğrulama
 2fa_euser=Webmin kullanıcısı mevcut değil!

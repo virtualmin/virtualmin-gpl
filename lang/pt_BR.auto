@@ -2595,7 +2595,6 @@ restore_eresel2=.. o revendedor $1 especificado no backup não existe - removend
 restore_eugroup=.. o grupo Unix proprietário do domínio $1 não existe
 restore_eugroup2=.. o grupo Unix do proprietário do domínio $1 não existe - voltando para o grupo do próprio domínio
 restore_edefip=.. não foi possível calcular o endereço IP padrão
-restore_edefip6=.. não foi possível descobrir o endereço IPv6 padrão
 restore_eclash=.. um choque foi detectado : $1 
 restore_erecreate=.. falha na criação do servidor ausente : $1 
 restore_ewarnings=.. os seguintes avisos foram detectados :
@@ -7199,13 +7198,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Não criptografado
 
 deftmplt_error=ERRO
+deftmplt_default_page=Página padrão
 deftmplt_website_disabled=Website desativado
-deftmplt_under_construction=Em construção
-deftmplt_slogan=gerenciado pelo Virtualmin - um painel de controle poderoso e flexível de hospedagem na web
-deftmplt_slogan2=o proprietário do domínio pode fazer login no painel de controle para gerenciar este site
-deftmplt_made_with_love1=Powered with
-deftmplt_made_with_love2=por Virtualmin
-deftmplt_made_with_love_disclamer=* A empresa Virtualmin não é responsável pelo conteúdo entregue por este servidor
+deftmplt_website_enabled=Site ativado
+deftmplt_default_slog=o proprietário do domínio pode fazer login no painel<br>de controle para gerenciar este site
 
 2fa_title=Autenticação de dois fatores
 2fa_euser=O usuário Webmin não existe!

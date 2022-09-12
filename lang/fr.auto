@@ -1096,7 +1096,6 @@ restore_zipcmd=.. la commande de décompression $1 n'est pas installée
 restore_ezipcmd=La commande de décompression $1 n'est pas installée
 restore_eugroup=.. le groupe Unix propriétaire du domaine $1 n'existe pas
 restore_eugroup2=.. le groupe Unix du propriétaire du domaine $1 n'existe pas - retour au groupe du domaine
-restore_edefip6=.. impossible de trouver l'adresse IPv6 par défaut
 restore_erecreate=.. la création du serveur manquant a échoué : $1 
 restore_downloadgc=Téléchargement d'archives à partir de Google Cloud Storage ..
 restore_downloaddb=Téléchargement de l'archive à partir de Dropbox ..
@@ -4687,13 +4686,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Non crypté
 
 deftmplt_error=ERREUR
+deftmplt_default_page=Page par défaut
 deftmplt_website_disabled=site Web désactivé
-deftmplt_under_construction=En construction
-deftmplt_slogan=géré par Virtualmin - un panneau de contrôle d'hébergement Web puissant et flexible
-deftmplt_slogan2=le propriétaire du domaine peut se connecter au panneau de contrôle pour gérer ce site Web
-deftmplt_made_with_love1=Propulsé avec
-deftmplt_made_with_love2=par Virtualmin
-deftmplt_made_with_love_disclamer=* La société Virtualmin n'est pas responsable du contenu fourni par ce serveur
+deftmplt_website_enabled=Site Web activé
+deftmplt_default_slog=le propriétaire du domaine peut se connecter au panneau de contrôle<br>pour gérer ce site Web
 
 2fa_title=Authentification à deux facteurs
 2fa_euser=L'utilisateur Webmin n'existe pas!

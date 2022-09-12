@@ -1693,7 +1693,6 @@ restore_eresel2=.. посредник $1, указанный в резервно
 restore_eugroup=.. группа Unix владельца домена $1 не существует
 restore_eugroup2=.. группа Unix владельца домена $1 не существует - переключение обратно на собственную группу домена
 restore_edefip=.. не удалось определить IP-адрес по умолчанию
-restore_edefip6=.. не удалось определить адрес IPv6 по умолчанию
 restore_erecreate=.. не удалось создать отсутствующий сервер : $1 
 restore_ewarnings=.. были обнаружены следующие предупреждения :
 restore_disabledomain=Повторное отключение виртуального сервера $1 ..
@@ -6075,13 +6074,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Незашифрованная
 
 deftmplt_error=ОШИБКА
+deftmplt_default_page=Страница по умолчанию
 deftmplt_website_disabled=Сайт отключен
-deftmplt_under_construction=В разработке
-deftmplt_slogan=управляется Virtualmin - мощной и гибкой панелью управления веб-хостинга
-deftmplt_slogan2=владелец домена может войти в панель управления для управления этим сайтом
-deftmplt_made_with_love1=Работает с
-deftmplt_made_with_love2=от Virtualmin
-deftmplt_made_with_love_disclamer=* Компания Virtualmin не несет ответственности за контент, предоставляемый этим сервером.
+deftmplt_website_enabled=Веб-сайт включен
+deftmplt_default_slog=владелец домена может войти в панель управления<br>для управления этим веб-сайтом
 
 2fa_title=Двухфакторная аутентификация
 2fa_euser=Пользователь Webmin не существует!

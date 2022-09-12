@@ -1954,7 +1954,6 @@ restore_eresel2=.. il rivenditore $1 specificato nel backup non esiste - rimuove
 restore_eugroup=.. il gruppo Unix del proprietario del dominio $1 non esiste
 restore_eugroup2=.. il gruppo Unix del proprietario del dominio $1 non esiste - ritorno al gruppo del dominio
 restore_edefip=.. impossibile elaborare l'indirizzo IP predefinito
-restore_edefip6=.. non è stato possibile elaborare l'indirizzo IPv6 predefinito
 restore_eclash=.. è stato rilevato uno scontro : $1 
 restore_erecreate=.. creazione del server mancante non riuscita : $1 
 restore_ewarnings=.. sono stati rilevati i seguenti avvisi :
@@ -6063,13 +6062,10 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=in chiaro
 
 deftmplt_error=ERRORE
+deftmplt_default_page=Pagina predefinita
 deftmplt_website_disabled=Sito web disabilitato
-deftmplt_under_construction=In costruzione
-deftmplt_slogan=gestito da Virtualmin - un pannello di controllo di web hosting potente e flessibile
-deftmplt_slogan2=il proprietario del dominio può accedere al pannello di controllo per gestire questo sito web
-deftmplt_made_with_love1=Alimentato con
-deftmplt_made_with_love2=di Virtualmin
-deftmplt_made_with_love_disclamer=* La società Virtualmin non è responsabile per il contenuto fornito da questo server
+deftmplt_website_enabled=Sito abilitato
+deftmplt_default_slog=il proprietario del dominio può accedere al pannello<br>di controllo per gestire questo sito web
 
 2fa_title=Autenticazione a due fattori
 2fa_euser=L'utente Webmin non esiste!
