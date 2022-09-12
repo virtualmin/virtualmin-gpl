@@ -6066,7 +6066,7 @@ deftmplt_default_page=Pagina predefinita
 deftmplt_website_disabled=Sito web disabilitato
 deftmplt_website_enabled=Sito abilitato
 deftmplt_default_slog=il proprietario del dominio può accedere al pannello<br>di controllo per gestire questo sito web
-deftmplt_disable_slog=questo sito Web è stato disabilitato dall'amministratore del server
+deftmplt_disable_slog=questo sito Web è stato disabilitato<br>dall'amministratore del server
 
 2fa_title=Autenticazione a due fattori
 2fa_euser=L'utente Webmin non esiste!

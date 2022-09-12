@@ -4762,7 +4762,7 @@ deftmplt_default_page=Varsayılan sayfa
 deftmplt_website_disabled=Web Sitesi Devre Dışı
 deftmplt_website_enabled=Web Sitesi Etkin
 deftmplt_default_slog=alan sahibi, bu web sitesini yönetmek için<br>kontrol panelinde oturum açabilir
-deftmplt_disable_slog=bu web sitesi sunucu yöneticisi tarafından devre dışı bırakıldı
+deftmplt_disable_slog=bu web sitesi<br>sunucu yöneticisi tarafından devre dışı bırakıldı
 
 2fa_title=İki Faktörlü Kimlik Doğrulama
 2fa_euser=Webmin kullanıcısı mevcut değil!

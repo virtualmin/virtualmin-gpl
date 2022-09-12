@@ -6078,7 +6078,7 @@ deftmplt_default_page=Страница по умолчанию
 deftmplt_website_disabled=Сайт отключен
 deftmplt_website_enabled=Веб-сайт включен
 deftmplt_default_slog=владелец домена может войти в панель управления<br>для управления этим веб-сайтом
-deftmplt_disable_slog=этот сайт был отключен администратором сервера
+deftmplt_disable_slog=этот веб-сайт был отключен<br>администратором сервера
 
 2fa_title=Двухфакторная аутентификация
 2fa_euser=Пользователь Webmin не существует!
