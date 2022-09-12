@@ -4330,7 +4330,6 @@ if (!$file) {
 my @oldrecs = grep { $_->{'type'} =~ /^(TLSA|SSHFP)$/ &&
 		     ($_->{'name'} eq $d->{'dom'}."." ||
 		      $_->{'name'} =~ /\.\Q$d->{'dom'}\E\.$/) } @$recs;
-@oldrecs = map { my %r = %$_; delete($r{'ttl'}); \%r } @oldrecs;
 
 # Exit now if TLSA is not enabled globally, unless it's being forced on OR
 # there are already records
