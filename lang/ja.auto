@@ -7490,6 +7490,7 @@ deftmplt_default_page=デフォルトのページ
 deftmplt_website_disabled=無効なウェブサイト
 deftmplt_website_enabled=ウェブサイト対応
 deftmplt_default_slog=ドメインの所有者は、<br>コントロール パネルにログインして、この Web サイトを管理できます
+deftmplt_disable_slog=このウェブサイトはサーバー管理者によって無効にされました
 
 2fa_title=二要素認証
 2fa_euser=Webminユーザーは存在しません！

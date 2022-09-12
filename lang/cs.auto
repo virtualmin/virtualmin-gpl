@@ -6216,6 +6216,7 @@ deftmplt_default_page=Výchozí stránka
 deftmplt_website_disabled=Web zakázán
 deftmplt_website_enabled=Webové stránky povoleny
 deftmplt_default_slog=vlastník domény se může přihlásit k ovládacímu<br>panelu a spravovat tento web
+deftmplt_disable_slog=tento web byl deaktivován administrátorem serveru
 
 2fa_title=Dvoufaktorové ověřování
 2fa_euser=Uživatel Webmin neexistuje!

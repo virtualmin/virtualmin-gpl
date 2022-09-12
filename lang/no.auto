@@ -1331,6 +1331,7 @@ deftmplt_default_page=Standardside
 deftmplt_website_disabled=Nettstedet er deaktivert
 deftmplt_website_enabled=Nettsted aktivert
 deftmplt_default_slog=domeneeier kan logge på kontrollpanelet for å administrere denne nettsiden
+deftmplt_disable_slog=denne nettsiden ble deaktivert av serveradministrator
 
 2fa_title=Tofaktorautentisering
 2fa_euser=Webmin-bruker eksisterer ikke!

@@ -1144,7 +1144,7 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
 	local %hashtmp = %$d;
 	$hashtmp{'TMPLTTITLE'} = $text{'deftmplt_website_disabled'};
-	$hashtmp{'TMPLTSLOGAN'} = $text{'deftmplt_slogan'};
+	$hashtmp{'TMPLTSLOGAN'} = $text{'deftmplt_disable_slog'};
 	if ($d->{'disabled_why'}) {
 		$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
 		}

@@ -1893,6 +1893,7 @@ deftmplt_default_page=Standaard pagina
 deftmplt_website_disabled=Website uitgeschakeld
 deftmplt_website_enabled=Website ingeschakeld
 deftmplt_default_slog=domeineigenaar kan inloggen op het controlepaneel<br>om deze website te beheren
+deftmplt_disable_slog=deze website is uitgeschakeld door de serverbeheerder
 
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!

@@ -3136,6 +3136,7 @@ deftmplt_default_page=Standardseite
 deftmplt_website_disabled=Webseite deaktiviert
 deftmplt_website_enabled=Website aktiviert
 deftmplt_default_slog=Domain-Eigentümer können sich beim Controlpanel<br>anmelden, um diese Website zu verwalten
+deftmplt_disable_slog=Diese Website wurde vom Serveradministrator deaktiviert
 
 2fa_title=Zwei-Faktor-Authentifizierung
 2fa_euser=Webmin-Benutzer existiert nicht!

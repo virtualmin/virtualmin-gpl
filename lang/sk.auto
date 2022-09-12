@@ -7490,6 +7490,7 @@ deftmplt_default_page=Predvolená stránka
 deftmplt_website_disabled=Webové stránky sú zakázané
 deftmplt_website_enabled=Webová stránka povolená
 deftmplt_default_slog=vlastník domény sa môže prihlásiť do ovládacieho<br>panelu a spravovať túto webovú lokalitu
+deftmplt_disable_slog=táto stránka bola zakázaná správcom servera
 
 2fa_title=Dvojfaktorová autentifikácia
 2fa_euser=Používateľ Webmin neexistuje!

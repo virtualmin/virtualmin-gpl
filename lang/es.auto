@@ -2884,6 +2884,7 @@ deftmplt_default_page=Página por defecto
 deftmplt_website_disabled=Sitio web deshabilitado
 deftmplt_website_enabled=Sitio web habilitado
 deftmplt_default_slog=el propietario del dominio puede iniciar sesión en el panel de control<br>para administrar este sitio web
+deftmplt_disable_slog=este sitio web fue deshabilitado por el administrador del servidor
 
 2fa_title=Autenticación de dos factores
 2fa_euser=¡El usuario de Webmin no existe!

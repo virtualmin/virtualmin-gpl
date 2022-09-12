@@ -6370,6 +6370,7 @@ deftmplt_default_page=Strona domyślna
 deftmplt_website_disabled=Strona Internetowa Wyłączona
 deftmplt_website_enabled=Witryna włączona
 deftmplt_default_slog=właściciel domeny może zalogować się do panelu<br>sterowania, aby zarządzać tą witryną
+deftmplt_disable_slog=ta strona została wyłączona przez administratora serwera
 
 2fa_title=Uwierzytelnianie dwuskładnikowe
 2fa_euser=Użytkownik Webmin nie istnieje!

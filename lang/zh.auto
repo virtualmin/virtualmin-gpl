@@ -4244,6 +4244,7 @@ deftmplt_default_page=默认页面
 deftmplt_website_disabled=网站已禁用
 deftmplt_website_enabled=网站已启用
 deftmplt_default_slog=域所有者可以登录控制<br>面板来管理这个网站
+deftmplt_disable_slog=该网站已被服务器管理员禁用
 
 2fa_title=两要素认证
 2fa_euser=Webmin用户不存在！

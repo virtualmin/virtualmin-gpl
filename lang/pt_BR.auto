@@ -7202,6 +7202,7 @@ deftmplt_default_page=Página padrão
 deftmplt_website_disabled=Website desativado
 deftmplt_website_enabled=Site ativado
 deftmplt_default_slog=o proprietário do domínio pode fazer login no painel<br>de controle para gerenciar este site
+deftmplt_disable_slog=este site foi desativado pelo administrador do servidor
 
 2fa_title=Autenticação de dois fatores
 2fa_euser=O usuário Webmin não existe!
