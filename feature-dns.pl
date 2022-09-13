@@ -1009,7 +1009,7 @@ if ($d->{'ip6'} && !$oldd->{'ip6'}) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	&add_ip6_records($d, $file);
+	&add_ip6_records($d, $recs, $file);
 	&$second_print($text{'setup_done'});
 	$rv++;
 	}
@@ -1402,7 +1402,7 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 
 if ($d->{'ip6'}) {
 	# Create IPv6 records for IPv4
-	&add_ip6_records($d, $file);
+	&add_ip6_records($d, $recs, $file);
 	}
 }
 
