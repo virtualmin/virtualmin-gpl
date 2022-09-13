@@ -48,7 +48,7 @@ return ( "curl", "ssh2", "pecl-ssh2", "date",
 
 sub script_wordpress_php_vars
 {
-return ([ 'memory_limit', '64M', '+' ],
+return ([ 'memory_limit', '128M', '+' ],
         [ 'max_execution_time', 60, '+' ],
         [ 'file_uploads', 'On' ],
         [ 'upload_max_filesize', '10M', '+' ],
