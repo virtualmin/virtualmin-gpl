@@ -23,15 +23,15 @@ $tmpl = &get_template($d->{'template'});
 					      $text{'edit_title'}, "");
 # Disabled, so tell the user that features cannot be changed
 if ($d->{'disabled'}) {
-	print "<font color=#ff0000>".
+	print &ui_alert_box("<span>".
 	      "<b>".$text{'edit_disabled_'.$d->{'disabled_reason'}}."\n".
-	      $text{'edit_disabled'}."<br>".
+	      $text{'edit_disabled'}."</b><br>".
 	      ($d->{'disabled_why'} ?
 		&text('edit_disabled_why', $d->{'disabled_why'})."<br>" : "").
 	      ($d->{'disabled_time'} ?
 		&text('edit_disabled_time',
 		      &make_date($d->{'disabled_time'}))."<br>" : "").
-	      "</b></font><p>\n";
+	      "</span>", 'warn', undef, undef, "");
 	}
 
 @tds = ( "width=30%" );

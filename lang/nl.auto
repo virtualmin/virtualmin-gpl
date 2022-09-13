@@ -487,7 +487,6 @@ restore_deletefirst=Virtuele server $1 verwijderen ..
 restore_eresel2=.. de reseller $1 gespecificeerd in de back-up bestaat niet - het verwijderen uit het domein
 restore_eugroup=.. de domeineigenaar Unix-groep $1 bestaat niet
 restore_eugroup2=.. de domeineigenaar Unix-groep $1 bestaat niet - terugschakelen naar de eigen groep van het domein
-restore_edefip6=.. kon het standaard IPv6-adres niet achterhalen
 restore_erecreate=.. aanmaken van ontbrekende server is mislukt : $1
 restore_disabledomain=Opnieuw uitschakelen van virtuele server $1 ..
 restore_downloadrs=Archief downloaden van Rackspace Cloud Files.
@@ -1890,13 +1889,11 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Onversleuteld
 
 deftmplt_error=FOUT
+deftmplt_default_page=Standaard pagina
 deftmplt_website_disabled=Website uitgeschakeld
-deftmplt_under_construction=In opbouw
-deftmplt_slogan=beheerd door Virtualmin - een krachtig en flexibel webhosting-configuratiescherm
-deftmplt_slogan2=domeineigenaar kan inloggen op het configuratiescherm om deze website te beheren
-deftmplt_made_with_love1=Aangedreven met
-deftmplt_made_with_love2=door Virtualmin
-deftmplt_made_with_love_disclamer=* Het bedrijf Virtualmin is niet verantwoordelijk voor de inhoud die door deze server wordt geleverd
+deftmplt_website_enabled=Website ingeschakeld
+deftmplt_default_slog=domeineigenaar kan inloggen op het controlepaneel<br>om deze website te beheren
+deftmplt_disable_slog=deze website is uitgeschakeld<br>door de serverbeheerder
 
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!

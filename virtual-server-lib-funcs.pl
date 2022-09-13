@@ -16485,12 +16485,10 @@ return &substitute_template($str, \%ghash);
 sub populate_default_index_page
 {
 	my (%h) = @_;
-	$h{'TMPLTTITLE'}		= $text{'deftmplt_under_construction'} if (!$h{'TMPLTTITLE'});
-	$h{'TMPLTERROR'}		= $text{'deftmplt_error'};
-	$h{'TMPLTSLOGAN'}		= $text{'deftmplt_slogan2'} if (!$h{'TMPLTSLOGAN'});
-	$h{'TMPLTMADEWITH1'}	= $text{'deftmplt_made_with_love1'};
-	$h{'TMPLTMADEWITH2'}	= $text{'deftmplt_made_with_love2'};
-	$h{'TMPLTMADEWITH3'}	= $text{'deftmplt_made_with_love_disclamer'};
+	$h{'TMPLTPAGETITLE'} = $text{'deftmplt_default_page'} if (!$h{'TMPLTPAGETITLE'});
+	$h{'TMPLTERROR'}     = $text{'deftmplt_error'} if (!$h{'TMPLTERROR'});
+	$h{'TMPLTTITLE'}     = $text{'deftmplt_website_enabled'} if (!$h{'TMPLTTITLE'});
+	$h{'TMPLTSLOGAN'}    = $text{'deftmplt_default_slog'} if (!$h{'TMPLTSLOGAN'});
 	return %h;
 }
 

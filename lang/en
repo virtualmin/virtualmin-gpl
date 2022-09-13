@@ -7486,13 +7486,11 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Unencrypted
 
 deftmplt_error=ERROR
+deftmplt_default_page=Default Page
 deftmplt_website_disabled=Website Disabled
-deftmplt_under_construction=Under Construction
-deftmplt_slogan=managed by Virtualmin - a powerful and flexible web hosting control panel
-deftmplt_slogan2=domain owner may login to the control panel to manage this website
-deftmplt_made_with_love1=Powered with
-deftmplt_made_with_love2=by Virtualmin
-deftmplt_made_with_love_disclamer=* Virtualmin company is not responsible for the content delivered by this server
+deftmplt_website_enabled=Website Enabled
+deftmplt_default_slog=domain owner may login to the control<br>panel to manage this website
+deftmplt_disable_slog=this website was disabled<br>by server administrator
 
 2fa_title=Two-Factor Authentication
 2fa_euser=Webmin user does not exist!

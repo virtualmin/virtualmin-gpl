@@ -982,7 +982,6 @@ restore_eresel2=.. der in der Sicherung angegebene Reseller $1 existiert nicht -
 restore_eugroup=.. die Unix-Gruppe $1 des Domänenbesitzers existiert nicht
 restore_eugroup2=.. die Unix-Gruppe $1 des Domäneninhabers existiert nicht - Wechsel zurück zur eigenen Gruppe der Domäne
 restore_edefip=.. konnte die Standard-IP-Adresse nicht ermitteln
-restore_edefip6=.. konnte die Standard-IPv6-Adresse nicht ermitteln
 restore_erecreate=.. Erstellung des fehlenden Servers fehlgeschlagen : $1
 restore_ewarnings=.. Folgende Warnungen wurden erkannt :
 restore_disabledomain=Erneutes Deaktivieren des virtuellen Servers $1 ..
@@ -3133,13 +3132,11 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Unverschlüsselt
 
 deftmplt_error=ERROR
+deftmplt_default_page=Standardseite
 deftmplt_website_disabled=Webseite deaktiviert
-deftmplt_under_construction=Im Bau
-deftmplt_slogan=verwaltet von Virtualmin - einem leistungsstarken und flexiblen Webhosting-Kontrollfeld
-deftmplt_slogan2=Der Domaininhaber kann sich beim Control Panel anmelden, um diese Website zu verwalten
-deftmplt_made_with_love1=Angetrieben mit
-deftmplt_made_with_love2=von Virtualmin
-deftmplt_made_with_love_disclamer=* Das Unternehmen Virtualmin ist nicht verantwortlich für die von diesem Server bereitgestellten Inhalte
+deftmplt_website_enabled=Website aktiviert
+deftmplt_default_slog=Domain-Eigentümer können sich beim Controlpanel<br>anmelden, um diese Website zu verwalten
+deftmplt_disable_slog=Diese Website wurde<br>vom Serveradministrator deaktiviert
 
 2fa_title=Zwei-Faktor-Authentifizierung
 2fa_euser=Webmin-Benutzer existiert nicht!

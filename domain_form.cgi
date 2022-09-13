@@ -679,7 +679,7 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
 			    &ui_textarea("content", undef, 5, 70, undef, undef,
-			                 "placeholder=\"$text{'deftmplt_slogan2'}\" data-placeholder=\"$text{'deftmplt_slogan2'}\""),
+			                 "placeholder=\"@{[&html_strip($text{'deftmplt_default_slog'}, ' ')]}\""),
 			    3, \@tds);
 
 	print &ui_hidden_table_end();

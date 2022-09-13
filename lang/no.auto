@@ -355,7 +355,6 @@ restore_zipcmd=.. dekomprimeringskommando $1 er ikke installert
 restore_ezipcmd=Dekompresjonskommando $1 er ikke installert
 restore_eugroup=.. domeneeieren Unix-gruppen $1 eksisterer ikke
 restore_eugroup2=.. domeneeieren Unix-gruppen $1 eksisterer ikke - bytter tilbake til domenets egen gruppe
-restore_edefip6=.. kunne ikke finne standard IPv6-adressen
 restore_erecreate=.. oppretting av manglende server mislyktes : $1 
 restore_disabledomain=Deaktiver virtuell server $1 på nytt.
 restore_downloadgc=Laster ned arkiv fra Google Cloud Storage ..
@@ -1328,13 +1327,11 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=ukryptert
 
 deftmplt_error=FEIL
+deftmplt_default_page=Standardside
 deftmplt_website_disabled=Nettstedet er deaktivert
-deftmplt_under_construction=Under konstruksjon
-deftmplt_slogan=administrert av Virtualmin - et kraftig og fleksibelt kontrollpanel for webhotell
-deftmplt_slogan2=domeneeier kan logge på kontrollpanelet for å administrere dette nettstedet
-deftmplt_made_with_love1=Drevet med
-deftmplt_made_with_love2=av Virtualmin
-deftmplt_made_with_love_disclamer=* Virtualmin-selskapet er ikke ansvarlig for innholdet som leveres av denne serveren
+deftmplt_website_enabled=Nettsted aktivert
+deftmplt_default_slog=domeneeier kan logge på kontrollpanelet for å administrere denne nettsiden
+deftmplt_disable_slog=dette nettstedet ble deaktivert<br>av serveradministrator
 
 2fa_title=Tofaktorautentisering
 2fa_euser=Webmin-bruker eksisterer ikke!

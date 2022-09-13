@@ -697,7 +697,6 @@ restore_eresel=.. el revendedor $1 especificado en la copia de seguridad no exis
 restore_eresel2=.. el revendedor $1 especificado en la copia de seguridad no existe, eliminándolo del dominio
 restore_eugroup=.. el propietario del dominio grupo Unix $1 no existe
 restore_eugroup2=.. el grupo Unix del propietario del dominio $1 no existe; se vuelve a cambiar al grupo propio del dominio
-restore_edefip6=.. no se pudo determinar la dirección IPv6 predeterminada
 restore_erecreate=.. falló la creación del servidor faltante : $1
 restore_ewarnings=.. se detectaron las siguientes advertencias :
 restore_downloadrs=Descargando archivo de Rackspace Cloud Files ..
@@ -2881,13 +2880,11 @@ mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Sin cifrar
 
 deftmplt_error=ERROR
+deftmplt_default_page=Página por defecto
 deftmplt_website_disabled=Sitio web deshabilitado
-deftmplt_under_construction=En construcción
-deftmplt_slogan=administrado por Virtualmin: un panel de control de alojamiento web potente y flexible
-deftmplt_slogan2=El propietario del dominio puede iniciar sesión en el panel de control para administrar este sitio web.
-deftmplt_made_with_love1=Desarrollado con
-deftmplt_made_with_love2=por Virtualmin
-deftmplt_made_with_love_disclamer=* La empresa Virtualmin no se hace responsable del contenido entregado por este servidor
+deftmplt_website_enabled=Sitio web habilitado
+deftmplt_default_slog=el propietario del dominio puede iniciar sesión en el panel de control<br>para administrar este sitio web
+deftmplt_disable_slog=este sitio web fue inhabilitado<br>por el administrador del servidor
 
 2fa_title=Autenticación de dos factores
 2fa_euser=¡El usuario de Webmin no existe!
