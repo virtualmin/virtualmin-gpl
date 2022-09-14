@@ -387,7 +387,7 @@ foreach my $d (@doms) {
             	
             	# Get beginning of the string for speed and run
             	# extra check to make sure we have a needed file
-            	$l = substr($l, 0, 256);
+            	$l = substr($l, 0, 512);
 
                 # Get existing page title
                 if ($l =~ /\s*<title>(.*?)<\/title>/) {
