@@ -376,7 +376,7 @@ my $readdir = sub {
       grep {$_ ne '.' && $_ ne '..'} readdir($udir);
     closedir($udir);
     return @hdirs;
-	};
+    };
 my @hdirs = &$readdir($uhome);
 foreach my $hdir (@hdirs) {
     my $d       = &get_domain_by('home', $hdir);
