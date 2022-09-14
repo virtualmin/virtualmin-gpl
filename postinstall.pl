@@ -392,16 +392,18 @@ if (&foreign_check("useradmin")) {
 	                if ($l =~ /\s*<title>(.*?)<\/title>/) {
 	                    $eptitle = $1;
 	                    }
-	                if ($l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage)\sv([\d+\.]+)/) {
+	                
+	                # Test to make sure that given file is Virtualmin website default page
+	                if (!$efix && $l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage)\sv([\d+\.]+)$/) {
 	                    my $tmplver = $2;
-	                    if ($tmplver && &compare_version_numbers($tmplver, "2.0") < 0) {
-	                        $efix++;
-	                        }
+	                    $efix++ if ($tmplver && &compare_version_numbers($tmplver, "2.0") < 0);
 	                    }
+	                $efix++ if ($efix == 1 && $l =~ /\*\sCopyright\s+[\d]{4}\sVirtualmin,\sInc\.$/);
+                    $efix++ if ($efix == 2 && $l =~ /\*\sLicensed\sunder\sMIT$/);
 
 	                # If existing file is a template and needs a fix extract
 	                # current values to preserve to keep user happy too
-	                if ($efix) {
+	                if ($efix == 3) {
 	                    # Get existing page error label
 	                    if ($l =~ /\s*<h1.*?class=".*?error-message.*?">(.*?)<.*?(h1|br)>/) {
 	                        $eerr = $1;
@@ -423,7 +425,7 @@ if (&foreign_check("useradmin")) {
 
 	            # After existing file is read and if update
 	            # to existing default page is needed
-	            if ($efix) {
+	            if ($efix == 3) {
 	                my $domtmplfile = "$default_content_dir/index.html";
 	                if (-r $domtmplfile) {
 	                    my $domtmplfilecontent = &read_file_contents($domtmplfile);
