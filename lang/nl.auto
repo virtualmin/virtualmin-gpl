@@ -128,6 +128,7 @@ user_gotrecovery=Offsite adres
 user_erecovery=Ontbrekend of ongeldig uitziend adres voor wachtwoordherstel
 user_err2=Kan aanmeldings-e-mail niet opnieuw verzenden
 user_ereserved=De gebruikersnaam $1 is gereserveerd voor gebruik door Virtualmin
+user_enumeric=Gebruikersnamen mogen niet beginnen met een cijfer
 user_eoverquota=Het gebruikersquotum mag niet hoger zijn dan het domeinquotum van $1
 user_eovermquota=Het e-mailquotum van de gebruiker mag niet hoger zijn dan het e-mailquotum van $1 van het domein
 user_nospam2=E-mail controleren op spam?
@@ -1894,6 +1895,7 @@ deftmplt_website_disabled=Website uitgeschakeld
 deftmplt_website_enabled=Website ingeschakeld
 deftmplt_default_slog=domeineigenaar kan inloggen op het controlepaneel<br>om deze website te beheren
 deftmplt_disable_slog=deze website is uitgeschakeld<br>door de serverbeheerder
+deftmplt_under_construction=In opbouw
 
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!

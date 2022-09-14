@@ -532,6 +532,7 @@ user_eclash=Alias użytkownika lub poczty o tej samej nazwie i domenie już istn
 user_eclash2=Użytkownik o tej samej nazwie już istnieje
 user_euser=Brakująca lub nieprawidłowa nazwa użytkownika
 user_ereserved=Nazwa użytkownika $1 jest zarezerwowana do użytku przez Virtualmin
+user_enumeric=Nazwy użytkowników nie mogą zaczynać się od cyfr
 user_euser2=Nieprawidłowa nazwa użytkownika : $1 
 user_ereal=Nieprawidłowe prawdziwe imię
 user_uquota=Limit na katalog domowy
@@ -6371,6 +6372,7 @@ deftmplt_website_disabled=Strona Internetowa Wyłączona
 deftmplt_website_enabled=Witryna włączona
 deftmplt_default_slog=właściciel domeny może zalogować się do panelu<br>sterowania, aby zarządzać tą witryną
 deftmplt_disable_slog=ta strona została wyłączona<br>przez administratora serwera
+deftmplt_under_construction=W budowie
 
 2fa_title=Uwierzytelnianie dwuskładnikowe
 2fa_euser=Użytkownik Webmin nie istnieje!

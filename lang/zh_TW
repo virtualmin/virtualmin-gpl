@@ -233,7 +233,6 @@ form_nocreate=無法創建
 form_aliasdomslimit=允許的最大別名服務器數
 form_aliasdomslimit0=最多
 form_realdomslimit=允許的最大非別名服務器數
-form_aliasdomsabove=（子服務器的限制在這里同樣適用）
 form_unlimit=無限制
 form_atmost=最多
 form_proxy=URL的代理網站

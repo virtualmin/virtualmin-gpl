@@ -154,7 +154,6 @@ form_dbslimit=Maksymalna liczba baz danych
 form_domslimit=Maksymalna liczba wirtualnych serwerów
 form_nocreate=Nie może tworzyć
 form_aliasdomslimit0=Maksymalnie
-form_aliasdomsabove=(limit dla sub-serwera również ma zastosowanie)
 form_mongrelslimit=Maksymalna liczba procesów serwera Mongrel dla Rails
 form_unlimit=Nielimitowane
 form_iface=Interfejs sieciowy

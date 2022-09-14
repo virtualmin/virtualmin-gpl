@@ -304,6 +304,7 @@ user_gotrecovery=異地地址
 user_erecovery=密碼找回地址丟失或外觀無效
 user_err2=重新發送註冊電子郵件失敗
 user_ereserved=用戶名 $1保留供Virtualmin使用
+user_enumeric=用戶名不能以數字開頭
 user_noneused=（未使用）
 user_eoverquota=用戶的配額不能高於域的配額 $1
 user_eovermquota=用戶的郵件配額不能高於域的郵件配額 $1
@@ -4245,6 +4246,7 @@ deftmplt_website_disabled=網站已禁用
 deftmplt_website_enabled=網站已啟用
 deftmplt_default_slog=域所有者可以登錄控制<br>面板來管理這個網站
 deftmplt_disable_slog=此網站已被服務器管理員禁用<br>
+deftmplt_under_construction=正在建設中
 
 2fa_title=兩要素認證
 2fa_euser=Webmin用戶不存在！

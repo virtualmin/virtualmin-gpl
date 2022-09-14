@@ -300,7 +300,6 @@ form_nocreate=Kan ikke opprette
 form_aliasdomslimit=Maks. antall tillatte alias tjenere
 form_aliasdomslimit0=Maksimalt
 form_realdomslimit=Maks. antall tillatte ikke-alias tjenere
-form_aliasdomsabove=(Under-tjener begrensinger gjelder også)
 form_mongrelslimit=Maksimum Mongrel tjenerprosesser for Rails
 form_unlimit=Ubegrenset
 form_atmost=Maksimalt

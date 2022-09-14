@@ -294,7 +294,6 @@ form_nocreate=Kan niets aanmaken
 form_aliasdomslimit=Maximum toegestane alias servers
 form_aliasdomslimit0=Ten hoogste
 form_realdomslimit=Maximum toegestane niet-alias servers
-form_aliasdomsabove=(Sub-server limiet ook toevoegen)
 form_mongrelslimit=Maximum Mongrel server processen voor Rails
 form_unlimit=Ongelimiteerd
 form_atmost=Ten hoogste

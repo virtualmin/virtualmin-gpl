@@ -14,21 +14,6 @@ print &ui_hidden("dom", $in{'dom'}),"\n";
 print &ui_hidden_table_start($text{'limits_header'}, "width=100%", 2,
 			     "limits", 1, [ "width=30%" ]);
 
-# Maximum allowed mailboxes
-print &ui_table_row(&hlink($text{'form_mailboxlimit'}, "limits_mailbox"),
-	&ui_opt_textbox("mailboxlimit", $d->{'mailboxlimit'}, 4,
-	      $text{'form_unlimit'}, $text{'form_atmost'}));
-
-# Maximum allowed aliases
-print &ui_table_row(&hlink($text{'form_aliaslimit'}, "limits_alias"),
-	&ui_opt_textbox("aliaslimit", $d->{'aliaslimit'}, 4,
-	      $text{'form_unlimit'}, $text{'form_atmost'}));
-
-# Maximum allowed dbs
-print &ui_table_row(&hlink($text{'form_dbslimit'}, "limits_dbs"),
-	&ui_opt_textbox("dbslimit", $d->{'dbslimit'}, 4,
-	      $text{'form_unlimit'}, $text{'form_atmost'}));
-
 # Can create and edit domains?
 $dlm = $d->{'domslimit'} eq "" ? 1 :
        $d->{'domslimit'} eq "*" ? 2 : 0;
@@ -39,16 +24,6 @@ print &ui_table_row(&hlink($text{'form_domslimit'}, "limits_doms"),
 			 &ui_textbox("domslimit",
 				$dlm == 0 ? $d->{'domslimit'} : "", 4) ] ]));
 
-# Limit on alias domains
-$alm = $d->{'aliasdomslimit'} eq "*" || $d->{'aliasdomslimit'} eq "" ? 1 : 0;
-print &ui_table_row(&hlink($text{'form_aliasdomslimit'}, "limits_aliasdoms"),
-	&ui_radio("aliasdomslimit_def", $alm,
-		  [ [ 1, $text{'form_unlimit'} ],
-		    [ 0, $text{'form_aliasdomslimit0'}." ".
-			 &ui_textbox("aliasdomslimit", 
-			    $alm ? "" : $d->{'aliasdomslimit'}, 4)." ".
-			 $text{'form_aliasdomsabove'} ] ]));
-
 # Limit on non-alias domains
 $nlm = $d->{'realdomslimit'} eq "*" || $d->{'realdomslimit'} eq "" ? 1 : 0;
 print &ui_table_row(&hlink($text{'form_realdomslimit'}, "limits_realdoms"),
@@ -56,8 +31,31 @@ print &ui_table_row(&hlink($text{'form_realdomslimit'}, "limits_realdoms"),
 		  [ [ 1, $text{'form_unlimit'} ],
 		    [ 0, $text{'form_aliasdomslimit0'}." ".
 			 &ui_textbox("realdomslimit",
-			    $nlm ? "" : $d->{'realdomslimit'}, 4)." ".
-			 $text{'form_aliasdomsabove'} ] ]));
+			    $nlm ? "" : $d->{'realdomslimit'}, 4) ] ]));
+
+# Limit on alias domains
+$alm = $d->{'aliasdomslimit'} eq "*" || $d->{'aliasdomslimit'} eq "" ? 1 : 0;
+print &ui_table_row(&hlink($text{'form_aliasdomslimit'}, "limits_aliasdoms"),
+	&ui_radio("aliasdomslimit_def", $alm,
+		  [ [ 1, $text{'form_unlimit'} ],
+		    [ 0, $text{'form_aliasdomslimit0'}." ".
+			 &ui_textbox("aliasdomslimit", 
+			    $alm ? "" : $d->{'aliasdomslimit'}, 4) ] ]));
+
+# Maximum allowed email aliases
+print &ui_table_row(&hlink($text{'form_aliaslimit'}, "limits_alias"),
+	&ui_opt_textbox("aliaslimit", $d->{'aliaslimit'}, 4,
+	      $text{'form_unlimit'}, $text{'form_atmost'}));
+
+# Maximum allowed mailboxes
+print &ui_table_row(&hlink($text{'form_mailboxlimit'}, "limits_mailbox"),
+	&ui_opt_textbox("mailboxlimit", $d->{'mailboxlimit'}, 4,
+	      $text{'form_unlimit'}, $text{'form_atmost'}));
+
+# Maximum allowed dbs
+print &ui_table_row(&hlink($text{'form_dbslimit'}, "limits_dbs"),
+	&ui_opt_textbox("dbslimit", $d->{'dbslimit'}, 4,
+	      $text{'form_unlimit'}, $text{'form_atmost'}));
 
 # Can choose db name
 print &ui_table_row(&hlink($text{'limits_nodbname'}, "limits_nodbname"),

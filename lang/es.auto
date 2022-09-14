@@ -218,6 +218,7 @@ user_gotrecovery=Dirección fuera del sitio
 user_erecovery=Dirección de recuperación de contraseña faltante o de aspecto no válido
 user_err2=Error al reenviar el correo electrónico de registro
 user_ereserved=El nombre de usuario $1 está reservado para uso de Virtualmin
+user_enumeric=Los nombres de usuario no pueden comenzar con un número
 user_noneused=(Ninguno usado)
 user_eoverquota=La cuota del usuario no puede ser superior a la cuota del dominio de $1
 user_eovermquota=La cuota de correo del usuario no puede ser superior a la cuota de correo del dominio de $1
@@ -2885,6 +2886,7 @@ deftmplt_website_disabled=Sitio web deshabilitado
 deftmplt_website_enabled=Sitio web habilitado
 deftmplt_default_slog=el propietario del dominio puede iniciar sesión en el panel de control<br>para administrar este sitio web
 deftmplt_disable_slog=este sitio web fue inhabilitado<br>por el administrador del servidor
+deftmplt_under_construction=Bajo construcción
 
 2fa_title=Autenticación de dos factores
 2fa_euser=¡El usuario de Webmin no existe!

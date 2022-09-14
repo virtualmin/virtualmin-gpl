@@ -484,6 +484,7 @@ user_err2=Impossibile inviare nuovamente l'email di iscrizione
 user_eclash=Un utente o un alias di posta con lo stesso nome e dominio esiste già
 user_euser=Nome utente mancante o non valido
 user_ereserved=Il nome utente $1 è riservato per l'uso da Virtualmin
+user_enumeric=I nomi utente non possono iniziare con un numero
 user_euser2=Nome utente non valido : $1 
 user_ereal=Nome reale non valido
 user_equota=Dimensione quota mancante o non valida
@@ -6067,6 +6068,7 @@ deftmplt_website_disabled=Sito web disabilitato
 deftmplt_website_enabled=Sito abilitato
 deftmplt_default_slog=il proprietario del dominio può accedere al pannello<br>di controllo per gestire questo sito web
 deftmplt_disable_slog=questo sito Web è stato disabilitato<br>dall'amministratore del server
+deftmplt_under_construction=In costruzione
 
 2fa_title=Autenticazione a due fattori
 2fa_euser=L'utente Webmin non esiste!

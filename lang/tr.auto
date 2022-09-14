@@ -329,6 +329,7 @@ user_gotrecovery=Site dışı adres
 user_erecovery=Eksik veya geçersiz görünen şifre kurtarma adresi
 user_err2=Kayıt e-postası yeniden gönderilemedi
 user_ereserved=$1 kullanıcı adı Virtualmin tarafından kullanılmak üzere ayrılmıştır
+user_enumeric=Kullanıcı adları bir sayı ile başlayamaz
 user_noneused=(Hiçbiri kullanılmadı)
 user_eoverquota=Kullanıcının kotası, alan adının $1 olan kotasından daha yüksek olamaz
 user_eovermquota=Kullanıcının posta kotası, $1 alan adının posta kotasından daha büyük olamaz
@@ -4763,6 +4764,7 @@ deftmplt_website_disabled=Web Sitesi Devre Dışı
 deftmplt_website_enabled=Web Sitesi Etkin
 deftmplt_default_slog=alan sahibi, bu web sitesini yönetmek için<br>kontrol panelinde oturum açabilir
 deftmplt_disable_slog=bu web sitesi<br>sunucu yöneticisi tarafından devre dışı bırakıldı
+deftmplt_under_construction=Yapım halinde
 
 2fa_title=İki Faktörlü Kimlik Doğrulama
 2fa_euser=Webmin kullanıcısı mevcut değil!

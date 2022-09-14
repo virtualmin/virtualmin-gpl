@@ -277,7 +277,6 @@ form_nocreate=No se puede crear
 form_aliasdomslimit=Máximo permitido de servidores alias
 form_aliasdomslimit0=Hasta
 form_realdomslimit=Máximo permitido de servidores no-alias
-form_aliasdomsabove=(El límie del sub-servidor también se aplica)
 form_mongrelslimit=Máximos procesos de servidor Mongrel para Rails
 form_unlimit=Ilimitado
 form_atmost=No más de

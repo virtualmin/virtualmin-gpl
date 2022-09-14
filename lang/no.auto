@@ -108,6 +108,7 @@ user_recovery=Adresse for gjenoppretting av passord
 user_norecovery=Ingen sett
 user_gotrecovery=Adresse på stedet
 user_erecovery=Manglende eller ugyldig adresse for gjenoppretting av passord
+user_enumeric=Brukernavn kan ikke begynne med et tall
 user_nospam2=Sjekk e-post for spam?
 user_ehomehome=Hjemmekatalogen er ikke under $1 
 user_charset=Tegn satt for svarmelding
@@ -1332,6 +1333,7 @@ deftmplt_website_disabled=Nettstedet er deaktivert
 deftmplt_website_enabled=Nettsted aktivert
 deftmplt_default_slog=domeneeier kan logge på kontrollpanelet for å administrere denne nettsiden
 deftmplt_disable_slog=dette nettstedet ble deaktivert<br>av serveradministrator
+deftmplt_under_construction=Under konstruksjon
 
 2fa_title=Tofaktorautentisering
 2fa_euser=Webmin-bruker eksisterer ikke!

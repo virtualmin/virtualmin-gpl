@@ -246,7 +246,6 @@ form_domslimit=Massimi server virtuali permessi
 form_nocreate=Impossibile creare
 form_aliasdomslimit=Massimi alias server permessi
 form_aliasdomslimit0=Al massimo
-form_aliasdomsabove=(Applicati anche limiti per sub-server)
 form_unlimit=Illimitato
 form_atmost=Al massimo
 form_plocal=Serve localmente

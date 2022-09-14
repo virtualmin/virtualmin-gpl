@@ -225,7 +225,6 @@ form_nocreate=Oluþturulamaz
 form_aliasdomslimit=Maksimum izin verilen alias sunucu
 form_aliasdomslimit0=En fazla
 form_realdomslimit=Maksimum izin verilen non-alias sunucu
-form_aliasdomsabove=(Alt-sunucu limiti burda da geçerlidir)
 form_unlimit=Sýnýrsýz
 form_atmost=En fazla
 form_proxy=URL için proxy Web sitesi
