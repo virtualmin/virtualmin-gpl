@@ -365,8 +365,6 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 
 # Always update outdated (lower than v2.0)
 # Virtualmin website default (landing) page
-my %uconfig = &foreign_config("useradmin");
-my $uhome   = $uconfig{'home_base'};
 my $readdir = sub {
     my ($dir) = @_;
     my @hdirs;
@@ -377,9 +375,7 @@ my $readdir = sub {
     closedir($udir);
     return @hdirs;
     };
-my @hdirs = &$readdir($uhome);
-foreach my $hdir (@hdirs) {
-    my $d       = &get_domain_by('home', $hdir);
+foreach my $d (@doms) {
     my $dpubdir = $d->{'public_html_path'};
     if (-d $dpubdir) {
         my @dpubifiles = &$readdir($dpubdir);
