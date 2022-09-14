@@ -446,13 +446,11 @@ foreach my $d (@doms) {
                                                          $text{'deftmplt_default_slog'};
                     $domtmplfilecontent =
                       &substitute_virtualmin_template($domtmplfilecontent, \%hashtmp);
-                    eval {
-                        my $fh;
-                        &open_tempfile_as_domain_user($d, $fh, ">$dpubifile");
-                        &print_tempfile($fh, $domtmplfilecontent);
-                        &close_tempfile_as_domain_user($d, $fh);
-                        &set_permissions_as_domain_user($d, 0644, $dpubifile);
-                        };
+                    my $fh;
+                    &open_tempfile_as_domain_user($d, $fh, ">$dpubifile", 1);
+                    &print_tempfile($fh, $domtmplfilecontent);
+                    &close_tempfile_as_domain_user($d, $fh);
+                    &set_permissions_as_domain_user($d, 0644, $dpubifile);
                     }
                 }
             }
