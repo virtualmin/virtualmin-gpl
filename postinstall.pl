@@ -418,9 +418,9 @@ foreach my $hdir (@hdirs) {
                         }
                     # Get existing page title
                     if ($l =~ /\s*<h1.*?class=".*?default-title.*?">(.*?)<.*?h1>/) {
-                        my $__ = $1;
-                        $etitle = $__
-                            if ($__ != $text{'deftmplt_under_construction'});
+                        my $etitle_tmp = $1;
+                        $etitle = $etitle_tmp
+                            if ($etitle_tmp != $text{'deftmplt_under_construction'});
                     	}
                     # Get existing page message
                     if ($l =~ /\s*<h5.*?class=".*?message.*?">(.*?)<.*?h5>/) {
