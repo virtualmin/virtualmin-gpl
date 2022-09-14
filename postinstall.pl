@@ -388,6 +388,11 @@ if (&foreign_check("useradmin")) {
 	            my $dpubifilelines = &read_file_lines($dpubifile, 1);
 	            my ($efix, $eptitle, $eerr, $edom, $etitle, $emessage);
 	            foreach my $l (@{$dpubifilelines}) {
+	            	
+	            	# Get beginning of the string for speed and run
+	            	# extra check to make sure we have a needed file
+	            	$l = substr($l, 0, 160 / ($efix ? 4 : 1));
+
 	                # Get existing page title
 	                if ($l =~ /\s*<title>(.*?)<\/title>/) {
 	                    $eptitle = $1;
