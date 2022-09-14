@@ -381,7 +381,7 @@ if (&foreign_check("useradmin")) {
 	foreach my $hdir (@hdirs) {
 	    my $d       = &get_domain_by('home', $hdir);
 	    my $dpubdir = $d->{'public_html_path'};
-	    if ($dpubdir) {
+	    if (-d $dpubdir) {
 	        my @dpubifiles = &$readdir($dpubdir);
 	        @dpubifiles = grep (/^$dpubdir\/(index\.html|disabled_by_virtualmin\.html)$/, @dpubifiles);
 	        foreach my $dpubifile (@dpubifiles) {
