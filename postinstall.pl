@@ -369,8 +369,10 @@ my %uconfig = &foreign_config("useradmin");
 my $uhome   = $uconfig{'home_base'};
 my $readdir = sub {
     my ($dir) = @_;
+    my @hdirs;
+    return @hdirs if (!-d $dir);
     opendir(my $udir, $dir);
-    my @hdirs = map {&simplify_path("$dir/$_")}
+    @hdirs = map {&simplify_path("$dir/$_")}
       grep {$_ ne '.' && $_ ne '..'} readdir($udir);
     closedir($udir);
     return @hdirs;
