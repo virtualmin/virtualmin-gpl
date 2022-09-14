@@ -391,7 +391,7 @@ if (&foreign_check("useradmin")) {
 	            	
 	            	# Get beginning of the string for speed and run
 	            	# extra check to make sure we have a needed file
-	            	$l = substr($l, 0, 160 / ($efix ? 4 : 1));
+	            	$l = substr($l, 0, 256);
 
 	                # Get existing page title
 	                if ($l =~ /\s*<title>(.*?)<\/title>/) {
@@ -420,8 +420,10 @@ if (&foreign_check("useradmin")) {
 	                        }
 	                    # Get existing page title
 	                    if ($l =~ /\s*<h1.*?class=".*?default-title.*?">(.*?)<.*?h1>/) {
-	                        ($etitle) = $1;
-	                        }
+                            my $__ = $1;
+                            $etitle = $__
+                                if ($__ != $text{'deftmplt_under_construction'});
+                        	}
 	                    # Get existing page message
 	                    if ($l =~ /\s*<h5.*?class=".*?message.*?">(.*?)<.*?h5>/) {
 	                        $emessage = $1;
@@ -436,14 +438,16 @@ if (&foreign_check("useradmin")) {
 	                if (-r $domtmplfile) {
 	                    my $domtmplfilecontent = &read_file_contents($domtmplfile);
 	                    my %hashtmp            = %$d;
+	                    my $ddis               = $dpubifile =~ /disabled_by_virtualmin\.html/;
 	                    $hashtmp{'TMPLTPAGETITLE'} = $eptitle  || $text{'deftmplt_default_page'};
 	                    $hashtmp{'TMPLTERROR'}     = $eerr     || $text{'deftmplt_error'};
 	                    $hashtmp{'dom'}            = $edom     || $d->{'dom'};
-	                    $hashtmp{'TMPLTTITLE'}     = $etitle   || $text{'deftmplt_website_enabled'};
+	                    $hashtmp{'TMPLTTITLE'}     = $etitle   ||
+                                                     ($ddis ? $text{'deftmplt_website_disabled'} :
+                                                              $text{'deftmplt_website_enabled'});
 	                    $hashtmp{'TMPLTCONTENT'}   = $emessage || "";
-	                    $hashtmp{'TMPLTSLOGAN'}    = $dpubifile =~ /disabled_by_virtualmin\.html/ ? 
-	                                                     $text{'deftmplt_disable_slog'} : 
-	                                                     $text{'deftmplt_default_slog'};
+	                    $hashtmp{'TMPLTSLOGAN'}    = $ddis ? $text{'deftmplt_disable_slog'} :
+	                                                         $text{'deftmplt_default_slog'};
 	                    $domtmplfilecontent =
 	                      &substitute_virtualmin_template($domtmplfilecontent, \%hashtmp);
 	                    eval {
