@@ -363,6 +363,95 @@ foreach my $m ("mysql", "postgresql", "ldap-client", "ldap-server",
 		}
 	}
 
+# Always update outdated (lower than v2.0)
+# Virtualmin website default (landing) page
+if (&foreign_check("useradmin")) {
+	my %uconfig = &foreign_config("useradmin");
+	my $uhome   = $uconfig{'home_base'};
+	my $readdir = sub {
+	    my ($dir) = @_;
+	    opendir(my $udir, $dir);
+	    my @hdirs = map {&simplify_path("$dir/$_")}
+	      grep {$_ ne '.' && $_ ne '..'} readdir($udir);
+	    closedir($udir);
+	    return @hdirs;
+	};
+
+	my @hdirs = &$readdir($uhome);
+	foreach my $hdir (@hdirs) {
+	    my $d       = &get_domain_by('home', $hdir);
+	    my $dpubdir = $d->{'public_html_path'};
+	    if ($dpubdir) {
+	        my @dpubifiles = &$readdir($dpubdir);
+	        @dpubifiles = grep (/^$dpubdir\/(index\.html|disabled_by_virtualmin\.html)$/, @dpubifiles);
+	        foreach my $dpubifile (@dpubifiles) {
+	            my $dpubifilelines = &read_file_lines($dpubifile, 1);
+	            my ($efix, $eptitle, $eerr, $edom, $etitle, $emessage);
+	            foreach my $l (@{$dpubifilelines}) {
+	                # Get existing page title
+	                if ($l =~ /\s*<title>(.*?)<\/title>/) {
+	                    $eptitle = $1;
+	                    }
+	                if ($l =~ /\*\s(Virtualmin\sLanding|Website\sDefault\sPage)\sv([\d+\.]+)/) {
+	                    my $tmplver = $2;
+	                    if ($tmplver && &compare_version_numbers($tmplver, "2.0") < 0) {
+	                        $efix++;
+	                        }
+	                    }
+
+	                # If existing file is a template and needs a fix extract
+	                # current values to preserve to keep user happy too
+	                if ($efix) {
+	                    # Get existing page error label
+	                    if ($l =~ /\s*<h1.*?class=".*?error-message.*?">(.*?)<.*?(h1|br)>/) {
+	                        $eerr = $1;
+	                        }
+	                    # Get existing page domain name
+	                    if ($l =~ /\s*<h4.*?class=".*?domain.*?">(.*?)<.*?h4>/) {
+	                        $edom = $1;
+	                        }
+	                    # Get existing page title
+	                    if ($l =~ /\s*<h1.*?class=".*?default-title.*?">(.*?)<.*?h1>/) {
+	                        ($etitle) = $1;
+	                        }
+	                    # Get existing page message
+	                    if ($l =~ /\s*<h5.*?class=".*?message.*?">(.*?)<.*?h5>/) {
+	                        $emessage = $1;
+	                        }
+	                    }
+	                }
+
+	            # After existing file is read and if update
+	            # to existing default page is needed
+	            if ($efix) {
+	                my $domtmplfile = "$default_content_dir/index.html";
+	                if (-r $domtmplfile) {
+	                    my $domtmplfilecontent = &read_file_contents($domtmplfile);
+	                    my %hashtmp            = %$d;
+	                    $hashtmp{'TMPLTPAGETITLE'} = $eptitle  || $text{'deftmplt_default_page'};
+	                    $hashtmp{'TMPLTERROR'}     = $eerr     || $text{'deftmplt_error'};
+	                    $hashtmp{'dom'}            = $edom     || $d->{'dom'};
+	                    $hashtmp{'TMPLTTITLE'}     = $etitle   || $text{'deftmplt_website_enabled'};
+	                    $hashtmp{'TMPLTCONTENT'}   = $emessage || "";
+	                    $hashtmp{'TMPLTSLOGAN'}    = $dpubifile =~ /disabled_by_virtualmin\.html/ ? 
+	                                                     $text{'deftmplt_disable_slog'} : 
+	                                                     $text{'deftmplt_default_slog'};
+	                    $domtmplfilecontent =
+	                      &substitute_virtualmin_template($domtmplfilecontent, \%hashtmp);
+	                    eval {
+	                        my $fh;
+	                        &open_tempfile_as_domain_user($d, $fh, ">$dpubifile");
+	                        &print_tempfile($fh, $domtmplfilecontent);
+	                        &close_tempfile_as_domain_user($d, $fh);
+	                        &set_permissions_as_domain_user($d, 0644, $dpubifile);
+	                        };
+	                    }
+	                }
+	            }
+	        }
+	    }
+	}
+
 # Create API helper script /usr/bin/virtualmin
 &create_virtualmin_api_helper_command();
 
