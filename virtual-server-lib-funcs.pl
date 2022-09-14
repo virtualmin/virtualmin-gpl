@@ -3783,6 +3783,9 @@ return $err if ($err);
 if ($name eq "domains" || $name eq "logs" || $name eq $home_virtualmin_backup) {
 	return &text('user_ereserved', $name);
 	}
+if ($name =~ /^\d+/) {
+	return $text{'user_enumeric'};
+	}
 $err = &useradmin::check_username_restrictions($name);
 if ($err) {
 	return $err;
@@ -7437,12 +7440,12 @@ sub unixuser_name
 my ($dname) = @_;
 my ($dname_, $config_longname, $try1, $user) = ($dname, $config{'longname'});
 
-# Extract random username based on the user pattern
 if ($config_longname && $config_longname !~ /^[0-9]$/) {
+	# Extract random username based on the user pattern
 	$user = &generate_random_available_user($config_longname);
 	}
-# Use one based on actual domain name
 else {
+	# Use one based on actual domain name
 	$dname =~ s/^xn(-+)//;
 	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
