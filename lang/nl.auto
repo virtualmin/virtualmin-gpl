@@ -51,6 +51,8 @@ form_sshkey=SSH openbare sleutel
 form_sshkey0=Geen standaardsleutel
 form_sshkey1=Genereer privé- en openbare sleutels
 form_sshkey2=Gebruik onderstaande openbare sleutel. ..
+form_passf=Nieuw paswoord
+form_passa=herhaal wachtwoord
 form_content2=Ja, met standaardsjabloon en inhoud hieronder
 form_content0=Ja, met onderstaande inhoud
 

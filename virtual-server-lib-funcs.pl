@@ -11689,12 +11689,11 @@ elsif ($config{'passwd_mode'} == 0) {
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
-	return "<table>\n".
-	       "<tr><td>$text{'form_passf'}</td> ".
-	       "<td>".&ui_password($name, undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
-	       "<tr><td>$text{'form_passa'}</td> ".
-	       "<td>".&ui_password($name."_again", undef, 21, 0, undef, $attrnoauto)."</td> </tr>\n".
-	       "</table>";
+	return "<div style='display: inline-grid;'>".
+	          &ui_password($name, undef, undef, 0, undef, $attrnoauto.
+	            " placeholder='$text{'form_passf'}'").
+	          &ui_password($name."_again", undef, undef, 0, undef, $attrnoauto.
+	            " data-password-again placeholder='$text{'form_passa'}'")."</div>\n";
 	}
 }
 

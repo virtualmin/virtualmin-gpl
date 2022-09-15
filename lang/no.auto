@@ -45,6 +45,8 @@ form_sshkey=SSH offentlig nøkkel
 form_sshkey0=Ingen standardnøkkel
 form_sshkey1=Generer private og offentlige nøkler
 form_sshkey2=Bruk offentlig nøkkel nedenfor ..
+form_passf=Nytt passord
+form_passa=Gjenta passord
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 
