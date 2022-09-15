@@ -18844,7 +18844,7 @@ sub get_module_version_and_type
 my ($list, $gpl) = @_;
 my $mver = $module_info{'version'};
 my ($v_major, $v_minor, $v_type);
-if ($mver =~ /(\d+)\.(\d+)\.(\w+)/) {
+if ($mver =~ /(?|(\d+)\.(\d+\.\d+)\.(\w+)|(\d+)\.(\d+)\.(\w+))/) {
 	($v_major, $v_minor, $v_type) = ($1, $2, $3);
 	}
 else {
