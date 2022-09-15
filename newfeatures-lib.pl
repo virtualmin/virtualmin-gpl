@@ -109,7 +109,8 @@ else {
 sub get_base_module_version
 {
 my $ver = $module_info{'version'};
-return sprintf("%.2f", int($ver*100) / 100.0);
+($ver) = $ver =~ /(?|(\d+\.\d+\.\d+)|(\d+\.\d+))/;
+return $ver;
 }
 
 # get_new_features_html(&domain|&server, show-all)
