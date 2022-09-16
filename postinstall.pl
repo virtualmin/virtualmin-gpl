@@ -456,7 +456,6 @@ foreach my $d (@doms) {
             }
         }
     }
-###################
 
 # Create API helper script /usr/bin/virtualmin
 &create_virtualmin_api_helper_command();
@@ -474,17 +473,6 @@ if (defined(&supports_resource_limits) &&
 
 # Clear left-side links caches, in case new features are available
 &clear_links_cache();
-
-# Fix up PID file path on Debian
-if ($gconfig{'os_type'} eq 'debian-linux' && &foreign_check("bind8")) {
-	local %bconfig = &foreign_config("bind8");
-	if ($bconfig{'pid_file'}) {
-		$bconfig{'pid_file'} =
-			join(" ", &unique(split(/\s+/, $bconfig{'pid_file'}),
-				  "/var/run/bind/run/named/named.pid"));
-		&save_module_config(\%bconfig, "bind8");
-		}
-	}
 
 # If no domains yet, fix symlink perms in templates
 if (!@doms && $config{'allow_symlinks'} ne '1') {
