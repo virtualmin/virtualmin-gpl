@@ -18860,8 +18860,8 @@ else {
 		$v_type = "";
 		}
 	}
-	return $list ? ($v_major, $v_minor, $v_type) : 
-                  "$v_major.$v_minor$v_type";
+return $list ? ($v_major, $v_minor, $v_type) : 
+	  "$v_major.$v_minor$v_type";
 }
 
 # set_provision_features(&domain)
