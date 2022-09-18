@@ -2671,9 +2671,7 @@ local ($size, $myver, $variant) = @_;
 ($myver, $variant) = &get_dom_remote_mysql_version() if (!$myver && !$variant);
 my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 						      : "table_cache";
-my $tc = &compare_versions($myver, "5.7") < 0;
 my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $variant ne "mariadb";
-my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "default") {
 	return ([ "key_buffer_size", undef ],
 		[ $cachedir, undef ],
@@ -2682,10 +2680,8 @@ if ($size eq "default") {
 		[ "read_rnd_buffer_size", undef ],
 		[ "net_buffer_length", undef ],
 		[ "myisam_sort_buffer_size", undef ],
-		[ "thread_stack", undef ],
 		[ "thread_cache_size", undef ],
-		[ "query_cache_size", undef ],
-		[ "thread_concurrency", undef ]);
+		[ "query_cache_size", undef ]);
 	}
 elsif ($size eq "small") {
 	return ([ "key_buffer_size", "128M" ],
@@ -2695,20 +2691,8 @@ elsif ($size eq "small") {
 		[ "read_rnd_buffer_size", "256K" ],
 		[ "net_buffer_length", undef ],
 		[ "myisam_sort_buffer_size", undef ],
-		[ "thread_stack", undef ],
 		[ "thread_cache_size", undef ],
-		[ "query_cache_size", undef ],
-		[ "thread_concurrency", undef ],
-
-		[ "key_buffer_size", "8M", "isamchk" ],
-		[ "sort_buffer_size", "8M", "isamchk" ],
-		[ "read_buffer", undef, "isamchk" ],
-		[ "write_buffer", undef, "isamchk" ],
-
-		[ "key_buffer_size", "8M", "myisamchk" ],
-		[ "sort_buffer_size", "8M", "myisamchk" ],
-		[ "read_buffer", undef, "myisamchk" ],
-		[ "write_buffer", undef, "myisamchk" ]);
+		[ "query_cache_size", undef ]);
 	}
 elsif ($size eq "medium") {
 	return ([ "key_buffer_size", "192M" ],
@@ -2718,20 +2702,8 @@ elsif ($size eq "medium") {
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "512K" ],
 		[ "myisam_sort_buffer_size", undef ],
-		[ "thread_stack", undef ],
 		[ "thread_cache_size", undef ],
-		[ "query_cache_size", undef ],
-		[ "thread_concurrency", undef ],
-
-		[ "key_buffer_size", "20M", "isamchk" ],
-		[ "sort_buffer_size", "20M", "isamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
-
-		[ "key_buffer_size", "20M", "myisamchk" ],
-		[ "sort_buffer_size", "20M", "myisamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
+		[ "query_cache_size", undef ]);
 	}
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
@@ -2741,20 +2713,8 @@ elsif ($size eq "large") {
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "1M" ],
 		[ "myisam_sort_buffer_size", "256M" ],
-		[ "thread_stack", undef ],
 		[ "thread_cache_size", "512" ],
-		[ "query_cache_size", $mysql8 ? undef : "4M" ],
-		[ "thread_concurrency", $tc ? "8" : undef ],
-
-		[ "key_buffer_size", "128M", "isamchk" ],
-		[ "sort_buffer_size", "128M", "isamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
-
-		[ "key_buffer_size", "128M", "myisamchk" ],
-		[ "sort_buffer_size", "128M", "myisamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
+		[ "query_cache_size", $mysql8 ? undef : "4M" ]);
 	}
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
@@ -2764,20 +2724,8 @@ elsif ($size eq "huge") {
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "2M" ],
 		[ "myisam_sort_buffer_size", "384M" ],
-		[ "thread_stack", undef ],
 		[ "thread_cache_size", "768" ],
-		[ "query_cache_size", $mysql8 ? undef : "8M" ],
-		[ "thread_concurrency", $tc ? "8" : undef ],
-
-		[ "key_buffer_size", "256M", "isamchk" ],
-		[ "sort_buffer_size", "256M", "isamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "isamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "isamchk" ],
-
-		[ "key_buffer_size", "256M", "myisamchk" ],
-		[ "sort_buffer_size", "256M", "myisamchk" ],
-		[ "read_buffer$buffer_suffix", "2M", "myisamchk" ],
-		[ "write_buffer", $mysql8 ? undef : "2M", "myisamchk" ]);
+		[ "query_cache_size", $mysql8 ? undef : "8M" ]);
 	}
 return ( );
 }
