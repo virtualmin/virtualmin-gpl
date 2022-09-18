@@ -2677,7 +2677,7 @@ my $buffer_suffix = $mysql8 ? "_size" : "";
 if ($size eq "small") {
 	return ([ "key_buffer_size", "128M" ],
 		[ $cachedir, undef ],
-		[ "sort_buffer_size", "64K" ],
+		[ "sort_buffer_size", "2M" ],
 		[ "read_buffer_size", undef ],
 		[ "read_rnd_buffer_size", "256K" ],
 		[ "net_buffer_length", undef ],
@@ -2700,7 +2700,7 @@ if ($size eq "small") {
 elsif ($size eq "medium") {
 	return ([ "key_buffer_size", "192M" ],
 		[ $cachedir, "4000" ],
-		[ "sort_buffer_size", "512K" ],
+		[ "sort_buffer_size", "3M" ],
 		[ "read_buffer_size", "256K" ],
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "512K" ],
@@ -2723,7 +2723,7 @@ elsif ($size eq "medium") {
 elsif ($size eq "large") {
 	return ([ "key_buffer_size", "256M" ],
 		[ $cachedir, "6000" ],
-		[ "sort_buffer_size", "1M" ],
+		[ "sort_buffer_size", "4M" ],
 		[ "read_buffer_size", "512K" ],
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "1M" ],
@@ -2746,7 +2746,7 @@ elsif ($size eq "large") {
 elsif ($size eq "huge") {
 	return ([ "key_buffer_size", "384M" ],
 		[ $cachedir, "8000" ],
-		[ "sort_buffer_size", "4M" ],
+		[ "sort_buffer_size", "6M" ],
 		[ "read_buffer_size", "768K" ],
 		[ "net_buffer_length", undef ],
 		[ "read_rnd_buffer_size", "2M" ],
