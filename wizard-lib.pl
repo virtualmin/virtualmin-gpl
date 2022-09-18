@@ -428,9 +428,9 @@ if (-r $mysql::config{'my_cnf'}) {
 	local $mysize = $config{'mysql_size'} || "";
 	local $recsize;
 	if ($mem) {
-		$recsize = $mem <= 256*1024*1024 ? "small" :
-			   $mem <= 512*1024*1024 ? "medium" :
-			   $mem <= 1024*1024*1024 ? "large" : "huge";
+		$recsize = $mem <= 1024*1024*1024 ? "small" :
+			   $mem <= 2048*1024*1024 ? "medium" :
+			   $mem <= 4096*1024*1024 ? "large" : "huge";
 		}
 	my @types = &list_mysql_size_setting_types();
 	my $conf = &mysql::get_mysql_config();
