@@ -3077,24 +3077,24 @@ return @rv;
 
 # sync_webmin_ssl_cert(&domain, [enable-or-disable])
 # Add or remove the SSL cert for Webmin for this domain. Returns 1 on success,
-# 0 on failure, or -1 if not supported. Calls restart_webmin_fully because
-# SSL certs are only loaded by miniserv at startup, rather than on a config
-# reload.
+# 0 on failure, or -1 if not supported. Calls restart_webmin_fully on older
+# Webmin versions because SSL certs are only loaded by miniserv at startup,
+# rather than on a config reload.
 sub sync_webmin_ssl_cert
 {
 my ($d, $enable) = @_;
 my %miniserv;
 &get_miniserv_config(\%miniserv);
 return -1 if (!$miniserv{'ssl'});
+my $rfunc = &get_webmin_version() >= 2.001 ? \&restart_webmin
+					   : \&restart_webmin_fully;
 if ($enable) {
 	return &setup_ipkeys(
-		$d, \&get_miniserv_config, \&put_miniserv_config,
-		\&restart_webmin_fully);
+		$d, \&get_miniserv_config, \&put_miniserv_config, $rfunc);
 	}
 else {
 	return &delete_ipkeys(
-		$d, \&get_miniserv_config, \&put_miniserv_config,
-		\&restart_webmin_fully);
+		$d, \&get_miniserv_config, \&put_miniserv_config, $rfunc);
 	}
 }
 
