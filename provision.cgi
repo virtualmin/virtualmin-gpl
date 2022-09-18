@@ -28,7 +28,7 @@ print &ui_table_row($text{'provision_user'},
 # Password
 print &ui_table_row($text{'provision_pass'},
 	&ui_password("provision_pass", $config{'provision_pass'}, 40,
-		     undef, 0, "autocomplete=off"));
+		     undef, 0, "autocomplete=new-password"));
 
 # Features to use
 print &ui_table_row($text{'provision_features'},

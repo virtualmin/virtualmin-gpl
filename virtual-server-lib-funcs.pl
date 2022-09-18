@@ -11684,7 +11684,7 @@ else {
 sub new_password_input
 {
 local ($name) = @_;
-my $attrnoauto = "autocomplete='off' autocorrect='off' spellcheck='false'";
+my $attrnoauto = "autocomplete='new-password' autocorrect='off' spellcheck='false'";
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
 	return &ui_textbox($name, &random_password(), 21, 0, undef, $attrnoauto);

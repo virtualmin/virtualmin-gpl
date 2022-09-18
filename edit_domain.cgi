@@ -221,7 +221,7 @@ if (!$parentdom) {
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
 				$text{'edit_set'}, undef, undef, undef,
-			 	"autocomplete=off").
+			 	"autocomplete=new-password").
 		$smsg);
 	}
 
