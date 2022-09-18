@@ -5307,10 +5307,6 @@ wizard_mysql_empty=MySQL wachtwoord instellen
 wizard_title_mysize=MySQL database grote
 wizard_mysize=MySQL kan zo worden geconfigureerd dat het beter omgaat met het geheugen voor een betere performance, afhankelijk van hoeveel RAM geheugen uw systeem heeft en de verwachting hoe zwaar de database gebruikt zal worden.
 wizard_mysize_type=MySQL configuratie grote
-wizard_mysize_small=Klein systeem (256M) met af en toe MySQL gebruik
-wizard_mysize_medium=Gemiddeld systeem (512M) met gemiddeld MySQL gebruik
-wizard_mysize_large=Groot systeem (1G) waarop MySQL zwaar word gebruikt
-wizard_mysize_huge=Heel groot systeem (2G of meer) waarop MySQL zwaar word gebruikt
 wizard_emysizestart=MySQL kon niet worden gestart met de nieuwe configuratie : $1
 wizard_title_done=Alles uitgevoerd
 wizard_done=Virtualmin pre-installatie configuratie is nu compleet !<p>U kunt de zojuist gemaakte instellingen wijzigen op de <a href='$1'>Opties en Plugins</a> en <a href='$2'>Spam en Virus Scannen</a> pagina's.

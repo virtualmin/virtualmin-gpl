@@ -4080,10 +4080,6 @@ wizard_mysql_empty=Setze MySQL Passwort
 wizard_title_mysize=MySQL Datenbank-Größe
 wizard_mysize=MySQL kann so konfiguriert werden um zwischen Speichernutzung für Leistung abzuwägen, je nachdem, wie viel RAM Ihr System hat und wie stark Sie vorhaben, die Datenbank zu belasten.
 wizard_mysize_type=MySQL Konfigurationsgröße
-wizard_mysize_small=Kleines System (256 MB) mit unregelmäßigem MySQL Gebrauch
-wizard_mysize_medium=Mittleres System (512 MB) mit regelmäßigem MySQL Gebrauch
-wizard_mysize_large=Großes System (1 GB) mit starker Nutzung von MySQL
-wizard_mysize_huge=Sehr großes System (2 GB oder mehr) mit starker Nutzung von MySQL
 wizard_emysizestart=MySQL konnte nicht mit der neuen Konfiguration gestartet werden : $1. Die alte Konfiguration wurde wiederhergestellt.
 wizard_title_done=Alle fertig
 wizard_done=Virtualmin Nach-Konfiguration ist nun abgeschlossen!<p>Sie die gerade vorgenommenen Einstellungen auf den <a href='$1'>Features und Plugins</a> und <a href='$2'>Spam- und Virus Scanner</a> erneut einstellen.
