@@ -449,17 +449,15 @@ if (-r $mysql::config{'my_cnf'}) {
 		}
 	$currt ||= "default";
 	my $recom = 'wizard_myrec';
-	# Initial wizard run cannot have current
-	my $can_current = ($config{'wizard_run'} && $currt);
 	# All types like 'small' 'medium' 'large' and 'huge'
-	my @types_r = map { [ $currt eq $_ ? undef : $_, $text{'wizard_mysize_'.$_}.
+	my @types_r = map { [ $_, $text{'wizard_mysize_'.$_}.
 			        ($_ eq $recsize ? " <span data-$recom>$text{$recom}</span>" : "") ] } @types;
 
 	# Always allow to skip MySQL setup and use service defaults
 	# All types depend on if wizard runs the first time or not
 	my $types_all = [ @types_r ];
 	print &ui_table_row($text{'wizard_mysize_type'},
-		    &ui_radio_table("mysize", ($can_current ? undef : $recsize), $types_all));
+		    &ui_radio_table("mysize", $currt, $types_all));
 	}
 else {
 	print &ui_table_row(&text('wizard_mysize_ecnf',
