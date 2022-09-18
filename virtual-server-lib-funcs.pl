@@ -4289,6 +4289,9 @@ if (%ids) {
 	local @servers = grep { $ids{$_->{'id'}} } &list_mx_servers();
 	$hash{'mx_slaves'} = join(" ", map { $_->{'host'} } @servers);
 	}
+else {
+	$hash{'mx_slaves'} = '';
+	}
 
 # Add secondary nameservers
 if ($config{'dns'}) {
@@ -4298,6 +4301,9 @@ if ($config{'dns'}) {
 	$hash{'dns_server'} = &get_master_nameserver($tmpl);
 	$hash{'dns_slave'} = join(" ", map { $_->{'nsname'} || $_->{'host'} }
 					   @servers);
+	}
+else {
+	$hash{'dns_slave'} = '';
 	}
 
 # If any website feature is enabled (like Nginx), set the web variable
