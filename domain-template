@@ -38,12 +38,12 @@ ${ENDIF-DNS_SLAVE}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}
-${MYSQL_TYPE} database:          ${DB}
-${MYSQL_TYPE} login:             ${MYSQL_USER}
+${MYSQL_TYPE} database:        ${DB}
+${MYSQL_TYPE} login:           ${MYSQL_USER}
 ${IF-MYSQL_PASS}
-${MYSQL_TYPE} password:          ${MYSQL_PASS}
+${MYSQL_TYPE} password:        ${MYSQL_PASS}
 ${ELSE-MYSQL_PASS}
-${MYSQL_TYPE} password:          ${PASS}
+${MYSQL_TYPE} password:        ${PASS}
 ${ENDIF-MYSQL_PASS}
 
 ${ENDIF-MYSQL}

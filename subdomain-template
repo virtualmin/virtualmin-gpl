@@ -27,9 +27,9 @@ Nameserver:              ${HOSTNAME}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}
-${MYSQL_TYPE} database:          ${DB}
-${MYSQL_TYPE} login:             ${MYSQL_USER}
-${MYSQL_TYPE} password:          ${PASS}
+${MYSQL_TYPE} database:        ${DB}
+${MYSQL_TYPE} login:           ${MYSQL_USER}
+${MYSQL_TYPE} password:        ${PASS}
 
 ${ENDIF-MYSQL}
 ${IF-POSTGRES}
