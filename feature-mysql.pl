@@ -2658,7 +2658,7 @@ return $conns;
 
 sub list_mysql_size_setting_types
 {
-return ("small", "medium", "large", "huge");
+return ("default", "small", "medium", "large", "huge");
 }
 
 # list_mysql_size_settings("small"|"medium"|"large"|"huge")
@@ -2674,7 +2674,20 @@ my $cachedir = &compare_versions($myver, "5.1.3") > 0 ? "table_open_cache"
 my $tc = &compare_versions($myver, "5.7") < 0;
 my $mysql8 = &compare_versions($myver, "8.0") >= 0 && $variant ne "mariadb";
 my $buffer_suffix = $mysql8 ? "_size" : "";
-if ($size eq "small") {
+if ($size eq "default") {
+	return ([ "key_buffer_size", undef ],
+		[ $cachedir, undef ],
+		[ "sort_buffer_size", undef ],
+		[ "read_buffer_size", undef ],
+		[ "read_rnd_buffer_size", undef ],
+		[ "net_buffer_length", undef ],
+		[ "myisam_sort_buffer_size", undef ],
+		[ "thread_stack", undef ],
+		[ "thread_cache_size", undef ],
+		[ "query_cache_size", undef ],
+		[ "thread_concurrency", undef ]);
+	}
+elsif ($size eq "small") {
 	return ([ "key_buffer_size", "128M" ],
 		[ $cachedir, undef ],
 		[ "sort_buffer_size", "2M" ],
