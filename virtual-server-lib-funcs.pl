@@ -16478,6 +16478,11 @@ if ($escape) {
 		$ghash{$v} = &html_escape($ghash{$v});
 		}
 	}
+if ($config{'mysql'}) {
+	&require_mysql();
+	$ghash{'MYSQL_TYPE'} = $mysql::mysql_version =~ /mariadb/i ?
+				"MariaDB" : "MySQL";
+	}
 return &substitute_template($str, \%ghash);
 }
 
