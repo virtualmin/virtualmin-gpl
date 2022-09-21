@@ -11376,14 +11376,6 @@ foreach my $d (&list_domains()) {
 	}
 if (@expired || @nearly) {
 	my $exp;
-	my $getdnsrefform = sub {
-		my ($domsnames) = @_;
-			my $refreshdoms .= &ui_form_start(
-				"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
-			$refreshdoms .= &ui_hidden("doms", "@{$domsnames}")."\n".
-			$refreshdoms .= &ui_submit($text{'index_drefresh'});
-			$refreshdoms .= &ui_form_end();
-		};
 	if (@expired) {
 		my $gluechar = ", ";
 		if (scalar(@expired) == 1) {
@@ -11406,7 +11398,13 @@ if (@expired || @nearly) {
 		my @edoms;
 		push(@edoms, map { $_->{'dom'} } @expired) if (@expired);
 		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
-		$expiry_text .= &$getdnsrefform(\@edoms);
+		@edoms = &unique(@edoms);
+		my $expiry_form .= &ui_form_start(
+			"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
+		$expiry_form .= &ui_hidden("doms", "@edoms")."\n".
+		$expiry_form .= &ui_submit($text{'index_drefresh'});
+		$expiry_form .= &ui_form_end();
+		$expiry_text .= $expiry_form;
 		}
 	push(@rv, $expiry_text);
 	}
