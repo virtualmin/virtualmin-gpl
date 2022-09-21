@@ -200,6 +200,7 @@ index_squotas5g=Aktívne pre používateľov a skupiny v domovských adresároch
 index_srefresh=Znova skontrolujte a obnovte konfiguráciu
 index_srefresh2=Znova skontrolujte konfiguráciu
 index_rewizard=Znova spustite sprievodcu inštaláciou
+index_drefresh=Obnoviť stav vypršania platnosti domén
 index_featuresb=Spravujte povolené funkcie a doplnky
 index_tmpls=Upraviť šablóny servera
 index_smail=poštový server

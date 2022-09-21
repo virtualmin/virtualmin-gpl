@@ -58,6 +58,7 @@ index_fpmstart=PHP-FPM Sunucusunu Başlat
 index_fpmstartdesc=PHP-FPM sürüm $1 sunucusu çalışmıyor. Bu FPM sürümünü kullanan tüm PHP web siteleri için gerekli olan başlatmak için bu düğmeyi tıklatın.
 index_srefresh2=Yapılandırmayı Yeniden Kontrol Et
 index_rewizard=Yükleme Sihirbazını Yeniden Çalıştırma
+index_drefresh=Etki Alanlarını Yenileme Süre Sonu Durumu
 index_featuresb=Etkin Özellikleri ve Eklentileri Yönetme
 index_delete_all=Tüm Sanal Sunucuları Sil
 index_mass_all=Tüm Sanal Sunucuları Güncelle

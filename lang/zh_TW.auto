@@ -58,6 +58,7 @@ index_fpmstart=啟動PHP-FPM服務器
 index_fpmstartdesc=PHP-FPM版本 $1服務器未運行。單擊此按鈕將其啟動，這是使用此FPM版本的所有PHP網站所必需的。
 index_srefresh2=重新檢查配置
 index_rewizard=重新運行安裝嚮導
+index_drefresh=刷新域過期狀態
 index_featuresb=管理已啟用的功能和插件
 index_delete_all=刪除所有虛擬服務器
 index_mass_all=更新所有虛擬服務器

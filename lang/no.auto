@@ -10,6 +10,7 @@ index_fpmrestart=Start PHP-FPM Server på nytt
 index_fpmstopdesc=PHP-FPM-versjonen $1 -serveren kjører for øyeblikket. Klikk på denne knappen for å stoppe den, noe som deaktiverer alle PHP-nettsteder som bruker denne FPM-versjonen.
 index_fpmstart=Start PHP-FPM Server
 index_fpmstartdesc=PHP-FPM-versjonen $1 -serveren kjører ikke. Klikk på denne knappen for å starte den, som er nødvendig for alle PHP-nettsteder som bruker denne FPM-versjonen.
+index_drefresh=Oppdater domeners utløpsstatus
 
 index_running=Kjører sikkerhetskopier
 index_runningdesc=Vis alle planlagte sikkerhetskopier som for øyeblikket kjører, slik at de kan avbrytes.
