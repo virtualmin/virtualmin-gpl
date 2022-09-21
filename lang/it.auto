@@ -56,6 +56,7 @@ index_epgens=Nessun file di mappa canonica del mittente per gli indirizzi in usc
 index_eqgens=Il mapping degli indirizzi in uscita non è supportato con Qmail. È necessario disattivare questa funzione nella pagina <a href='$1'>del modulo di Virtualmin</a>.
 index_elocal=Il gruppo di utenti locali $1 non esiste. Forse la <a href='$2'>configurazione del modulo</a> non è corretta.
 index_rewizard=Rieseguire l'installazione guidata
+index_drefresh=Aggiorna lo stato di scadenza dei domini
 index_needcheck=La configurazione di Virtualmin non è stata verificata dall'ultimo aggiornamento. Fai clic sul pulsante qui sotto per verificarlo ora.
 
 index_running=Esecuzione di backup

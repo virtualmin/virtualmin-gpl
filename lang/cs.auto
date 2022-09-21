@@ -164,6 +164,7 @@ index_squotas5g=Aktivní pro uživatele a skupiny v domovských adresářích a 
 index_srefresh=Znovu zkontrolujte a obnovte konfiguraci
 index_srefresh2=Znovu zkontrolujte konfiguraci
 index_rewizard=Znovu spusťte Průvodce instalací
+index_drefresh=Obnovit stav vypršení platnosti domén
 index_tmpls=Upravit šablony serveru
 index_smail=Poštovní server
 index_needcheck=Konfigurace Virtualmin nebyla od poslední aktualizace zkontrolována. Kliknutím na tlačítko níže to nyní ověřte.

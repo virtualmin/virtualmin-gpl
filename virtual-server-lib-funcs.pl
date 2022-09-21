@@ -11394,6 +11394,18 @@ if (@expired || @nearly) {
 		$expiry_text .= $nl . &text('index_expirynearly',
 			join($gluechar, map { "<a href=\"@{[&get_webprefix_safe()]}/$module_name/summary_domain.cgi?dom=$_->{'id'}\">@{[&show_domain_name($_)]}</a>" } @nearly));
 		}
+	if (@expired || @nearly) {
+		my @edoms;
+		push(@edoms, map { $_->{'dom'} } @expired) if (@expired);
+		push(@edoms, map { $_->{'dom'} } @nearly) if (@nearly);
+		@edoms = &unique(@edoms);
+		my $expiry_form .= &ui_form_start(
+			"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
+		$expiry_form .= &ui_hidden("doms", "@edoms")."\n".
+		$expiry_form .= &ui_submit($text{'index_drefresh'});
+		$expiry_form .= &ui_form_end();
+		$expiry_text .= $expiry_form;
+		}
 	push(@rv, $expiry_text);
 	}
 

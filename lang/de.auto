@@ -24,6 +24,7 @@ index_ezone=Die Kontingentbearbeitung wurde deaktiviert, da diese Webmin-Install
 index_search_reseller=Verkäufer Name
 index_resellermode=Wiederverkäufer
 index_rewizard=Führen Sie den Installationsassistenten erneut aus
+index_drefresh=Domain-Ablaufstatus aktualisieren
 index_noadd1=Es können keine weiteren Server hinzugefügt werden, da Ihr Reseller sein Maximum von $1 erreicht hat.
 index_noadd2=Es können keine weiteren Server hinzugefügt werden. Sie haben Ihr Reseller-Maximum von $1 erreicht.
 index_noadd3=Es können keine weiteren Server hinzugefügt werden, das System hat sein lizenziertes Maximum von $1 erreicht.
