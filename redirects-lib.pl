@@ -80,6 +80,36 @@ foreach my $p (@ports) {
 			push(@rv, $rd);
 			}
 		}
+
+	# Find rewrite rules used for redirects that preserve the hostname
+	my @rws = (&apache::find_directive_struct("RewriteCond", $vconf),
+		   &apache::find_directive_struct("RewriteRule", $vconf));
+	@rws = sort { $a->{'line'} <=> $b->{'line'} } @rws;
+	for(my $i=0; $i<@rws; $i++) {
+		my $rwc = $rws[$i];
+		next if ($rwc->{'name'} ne 'RewriteCond');
+		my $rwr = $i+1 < @rws ? $rws[$i+1] : undef;
+		next if (!$rwr || $rwr->{'name'} ne 'RewriteRule');
+		next if ($rwc->{'words'}->[0] ne '%{HTTPS}');
+		next if ($rwr->{'words'}->[2] ne '[R]');
+		my $rd = { 'alias' => 0,
+			   'dir' => $rwc,
+			   'dir2' => $rwr,
+			 };
+		if (lc($rwc->{'words'}->[1]) eq 'on') {
+			$rd->{'http'} = 1;
+			}
+		elsif (lc($rwc->{'words'}->[1]) eq 'off') {
+			$rd->{'https'} = 1;
+			}
+		else {
+			next;
+			}
+		$rd->{'path'} = $rwr->{'words'}->[0];
+		$rd->{'dest'} = $rwr->{'words'}->[1];
+		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
+		push(@rv, $rd);
+		}
 	}
 return @rv;
 }
