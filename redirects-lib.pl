@@ -91,7 +91,7 @@ foreach my $p (@ports) {
 		my $rwr = $i+1 < @rws ? $rws[$i+1] : undef;
 		next if (!$rwr || $rwr->{'name'} ne 'RewriteRule');
 		next if ($rwc->{'words'}->[0] ne '%{HTTPS}');
-		next if ($rwr->{'words'}->[2] ne '[R]');
+		next if ($rwr->{'words'}->[2] !~ /^\[R(=\d+)?\]$/);
 		my $rd = { 'alias' => 0,
 			   'dir' => $rwc,
 			   'dir2' => $rwr,
@@ -107,6 +107,9 @@ foreach my $p (@ports) {
 			}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
+		if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
+			$rd->{'code'} = $1;
+			}
 		$rd->{'id'} = $rwc->{'name'}.'_'.$rd->{'path'};
 		push(@rv, $rd);
 		}
@@ -132,14 +135,34 @@ foreach my $p (@ports) {
 	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 	next if (!$redirect->{$proto});
 	next if (!$virt);
-	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
-	$dir .= "Match" if ($redirect->{'regexp'});
-	my @aliases = &apache::find_directive($dir, $vconf);
-	push(@aliases, ($redirect->{'code'} ? $redirect->{'code'}." " : "").
-		       $redirect->{'path'}.
-		       ($redirect->{'regexp'} ? "(\.\*)\$" : "").
-		       " ".$redirect->{'dest'});
-	&apache::save_directive($dir, \@aliases, $vconf, $conf);
+	if ($redirect->{'dest'} =~ /%{HTTP_/) {
+		# Destination uses variables, so RewriteRule is needed
+		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
+		my @rwcs = &apache::find_directive("RewriteCond", $vconf);
+		my @rwrs = &apache::find_directive("RewriteRule", $vconf);
+		my $flag = $redirect->{'code'} ? "[R=".$redirect->{'code'}."]"
+					       : "[R]";
+		push(@rwcs, "%{HTTPS} ".($proto eq 'http' ? 'off' : 'on'));
+		push(@rwrs, $redirect->{'path'}." ".$redirect->{'dest'}.
+			    " ".$flag);
+		if (!@rwes) {
+			&apache::save_directive(
+				"RewriteEngine", ["on"], $vconf, $conf);
+			}
+		&apache::save_directive("RewriteCond", \@rwcs, $vconf, $conf);
+		&apache::save_directive("RewriteRule", \@rwrs, $vconf, $conf);
+		}
+	else {
+		# Can just use Alias or Redirect
+		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
+		$dir .= "Match" if ($redirect->{'regexp'});
+		my @aliases = &apache::find_directive($dir, $vconf);
+		push(@aliases, ($redirect->{'code'} ? $redirect->{'code'}." " : "").
+			       $redirect->{'path'}.
+			       ($redirect->{'regexp'} ? "(\.\*)\$" : "").
+			       " ".$redirect->{'dest'});
+		&apache::save_directive($dir, \@aliases, $vconf, $conf);
+		}
 	&flush_file_lines($virt->{'file'});
 	$count++;
 	}
@@ -166,21 +189,44 @@ my $count = 0;
 foreach my $port (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $port);
 	next if (!$virt);
-	my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
-        $dir .= "Match" if ($redirect->{'regexp'});
-	my @aliases = &apache::find_directive($dir, $vconf);
-	my $re = $redirect->{'path'};
-	my @newaliases;
-	if ($redirect->{'regexp'}) {
-		# Handle .*$ or (.*)$ at the end
-		@newaliases = grep { !/^(\d+\s+)?\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+	my $changed = 0;
+	if ($redirect->{'dir2'}) {
+		# Remove RewriteCond and RewriteRule
+		my @rwcs = &apache::find_directive_struct("RewriteCond", $vconf);
+		my @rwrs = &apache::find_directive_struct("RewriteRule", $vconf);
+		my @newrwcs = map { join(" ", @{$_->{'words'}}) }
+				  grep { $_ ne $redirect->{'dir'} } @rwcs;
+		my @newrwrs = map { join(" ", @{$_->{'words'}}) }
+				  grep { $_ ne $redirect->{'dir2'} } @rwrs;
+		if (@rwcs != @newrwcs || @rwrs != @newrwrs) {
+			&apache::save_directive(
+				"RewriteCond", \@newrwcs, $vconf, $conf);
+			&apache::save_directive(
+				"RewriteRule", \@newrwrs, $vconf, $conf);
+			$changed++;
+			}
 		}
 	else {
-		# Match on path only
-		@newaliases = grep { !/^(\d+\s+)?\Q$re\E\s/ } @aliases;
+		# Remove a single Alias or Redirect line
+		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
+		$dir .= "Match" if ($redirect->{'regexp'});
+		my @aliases = &apache::find_directive($dir, $vconf);
+		my $re = $redirect->{'path'};
+		my @newaliases;
+		if ($redirect->{'regexp'}) {
+			# Handle .*$ or (.*)$ at the end
+			@newaliases = grep { !/^(\d+\s+)?\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+			}
+		else {
+			# Match on path only
+			@newaliases = grep { !/^(\d+\s+)?\Q$re\E\s/ } @aliases;
+			}
+		if (scalar(@aliases) != scalar(@newaliases)) {
+			&apache::save_directive($dir, \@newaliases, $vconf, $conf);
+			$changed++;
+			}
 		}
-	if (scalar(@aliases) != scalar(@newaliases)) {
-		&apache::save_directive($dir, \@newaliases, $vconf, $conf);
+	if ($changed) {
 		&flush_file_lines($virt->{'file'});
 		$count++;
 		}
