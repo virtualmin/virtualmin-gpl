@@ -22,6 +22,7 @@ index_fpmstart=Inicie el servidor PHP-FPM
 index_fpmstartdesc=El servidor PHP-FPM versión $1 no se está ejecutando. Haga clic en este botón para iniciarlo, que es necesario para todos los sitios web PHP que usan esta versión de FPM.
 index_srefresh2=Vuelva a verificar la configuración
 index_rewizard=Vuelva a ejecutar el asistente de instalación
+index_drefresh=Actualizar el estado de caducidad de los dominios
 
 index_scheds=Copias de seguridad programadas
 index_schedsdesc=Haga clic en este botón para mostrar una lista de las copias de seguridad programadas existentes y para agregar otras nuevas o administrar las existentes.

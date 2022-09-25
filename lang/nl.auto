@@ -11,6 +11,7 @@ index_fpmstopdesc=De server PHP-FPM versie $1 wordt momenteel uitgevoerd. Klik o
 index_fpmstart=Start PHP-FPM-server
 index_fpmstartdesc=De PHP-FPM-versie $1 -server is niet actief. Klik op deze knop om het te starten, wat vereist is voor alle PHP-websites die deze FPM-versie gebruiken.
 index_rewizard=Voer de installatiewizard opnieuw uit
+index_drefresh=Vervalstatus van domeinen vernieuwen
 
 index_running=Back-ups maken
 index_runningdesc=Toon alle geplande back-ups die momenteel actief zijn, zodat ze kunnen worden geannuleerd.

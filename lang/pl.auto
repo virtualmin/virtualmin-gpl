@@ -122,6 +122,7 @@ index_squotas4=Aktywny dla użytkowników tylko w systemie plików katalogów do
 index_squotas4g=Aktywny dla użytkowników i grup w systemie plików katalogów domowych $1 i systemie plików e-mail $2.
 index_squotas5=Aktywny dla użytkowników tylko w katalogach domowych i systemie plików e-mail $1.
 index_squotas5g=Aktywny dla użytkowników i grup w katalogach domowych i systemie plików e-mail $1.
+index_drefresh=Odśwież stan wygaśnięcia domen
 index_featuresb=Zarządzaj włączonymi funkcjami i wtyczkami
 index_tmpls=Edytuj szablony serwera
 index_smail=Serwer poczty elektronicznej

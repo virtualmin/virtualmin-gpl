@@ -200,6 +200,7 @@ index_squotas5g=ホームディレクトリと電子メールファイルシス�
 index_srefresh=設定を再確認して更新します
 index_srefresh2=構成を再確認
 index_rewizard=インストールウィザードを再実行
+index_drefresh=ドメインの有効期限ステータスの更新
 index_featuresb=有効な機能とプラグインを管理する
 index_tmpls=サーバーテンプレートの編集
 index_smail=メールサーバー

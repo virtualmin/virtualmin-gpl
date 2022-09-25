@@ -27,6 +27,7 @@ index_fpmstartdesc=Le serveur PHP-FPM version $1 n'est pas en cours d'exécution
 index_search_reseller=Nom du revendeur
 index_resellermode=revendeur
 index_rewizard=Assistant d'installation de réexécution
+index_drefresh=Actualiser l'état d'expiration des domaines
 index_noadd1=Aucun serveur supplémentaire ne peut être ajouté, car votre revendeur a atteint son maximum de $1.
 index_noadd2=Aucun serveur supplémentaire ne peut être ajouté, vous avez atteint votre maximum de revendeur de $1.
 index_noadd3=Aucun serveur supplémentaire ne peut être ajouté, le système a atteint son maximum autorisé de $1.

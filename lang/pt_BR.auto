@@ -199,6 +199,7 @@ index_squotas5g=Ativo para usuários e grupos em diretórios pessoais e sistema 
 index_srefresh=Verifique novamente e atualize a configuração
 index_srefresh2=Verifique novamente a configuração
 index_rewizard=Assistente para executar novamente a instalação
+index_drefresh=Atualizar status de expiração de domínios
 index_featuresb=Gerenciar recursos e plug-ins ativados
 index_tmpls=Editar modelos de servidor
 index_smail=Servidor de e-mail
