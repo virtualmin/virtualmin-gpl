@@ -107,6 +107,11 @@ foreach my $p (@ports) {
 			}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
+		if ($rd->{'dest'} !~ /\$1$/ &&
+		    $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
+			$rd->{'path'} = $1;
+			$rd->{'regexp'} = 1;
+			}
 		if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
 			$rd->{'code'} = $1;
 			}
@@ -130,6 +135,11 @@ if ($p && $p ne 'web') {
 my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my $count = 0;
+if ($redirect->{'dest'} =~ /%{HTTP_/ &&
+    $redirect->{'http'} && $redirect->{'https'}) {
+	return "Redirects using HTTP_ variables cannot be applied to both ".
+	       "HTTP and HTTPS modes";
+	}
 foreach my $p (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
@@ -143,14 +153,15 @@ foreach my $p (@ports) {
 		my $flag = $redirect->{'code'} ? "[R=".$redirect->{'code'}."]"
 					       : "[R]";
 		push(@rwcs, "%{HTTPS} ".($proto eq 'http' ? 'off' : 'on'));
-		push(@rwrs, $redirect->{'path'}." ".$redirect->{'dest'}.
-			    " ".$flag);
+		my $path = $redirect->{'path'};
+		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
+		push(@rwrs, $path." ".$redirect->{'dest'}." ".$flag);
 		if (!@rwes) {
 			&apache::save_directive(
 				"RewriteEngine", ["on"], $vconf, $conf);
 			}
-		&apache::save_directive("RewriteCond", \@rwcs, $vconf, $conf);
-		&apache::save_directive("RewriteRule", \@rwrs, $vconf, $conf);
+		&apache::save_directive("RewriteCond", \@rwcs, $vconf, $conf,1);
+		&apache::save_directive("RewriteRule", \@rwrs, $vconf, $conf,1);
 		}
 	else {
 		# Can just use Alias or Redirect
@@ -294,10 +305,10 @@ return $redir;
 sub get_redirect_to_ssl
 {
 my ($d) = @_;
-return { 'path' => '^/(?!.well-known)',
-	 'dest' => 'https://'.$d->{'dom'}.'/$1',
+return { 'path' => '^/(?!.well-known)(.*)$',
+	 'dest' => 'https://%{HTTP_HOST}/$1',
 	 'alias' => 0,
-	 'regexp' => 1,
+	 'regexp' => 0,
 	 'http' => 1,
 	 'https' => 0 };
 }
