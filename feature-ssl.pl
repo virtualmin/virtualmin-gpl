@@ -204,7 +204,7 @@ $d->{'web_urlsslport'} = $tmpl->{'web_urlsslport'};
 &sync_domain_tlsa_records($d);
 
 # Redirect HTTP to HTTPS
-if ($config{'auto_redirect'}) {
+if ($config{'auto_redirect'} || $d->{'auto_redirect'}) {
 	&create_redirect($d, &get_redirect_to_ssl($d));
 	}
 

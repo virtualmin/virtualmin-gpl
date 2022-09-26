@@ -254,6 +254,9 @@ if ($webmin_user) {
 	}
 $webmin_user_theme ||= $current_theme;
 
+# Check that global configs are setup for the test
+$config{'auto_redirect'} && die "auto_redirect must be set to 0";
+
 $_config_tests = [
 	# Just validate global config
 	{ 'command' => 'check-config.pl' },
@@ -5352,7 +5355,7 @@ $ssl_tests = [
 	},
 
 	# Create a second sub-domain with SSL on the same IP, but with no
-	# linked cert
+	# linked cert, but with redirect to SSL
 	{ 'command' => 'create-domain.pl',
           'args' => [ [ 'domain', $test_ssl2_subdomain ],
 		      [ 'desc', 'Test SSL 2 subdomain' ],
@@ -5360,7 +5363,18 @@ $ssl_tests = [
 		      [ 'dir' ], [ 'web' ], [ 'dns' ], [ 'ssl' ],
 		      [ 'parent-ip' ],
 		      [ 'break-ssl-cert' ],
+		      [ 'ssl-redirect' ],
 		      [ 'content' => 'Test SSL subdomain home page' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain for the second sub-domain
+	{ 'command' => 'create-domain.pl',
+          'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'alias', $test_ssl2_subdomain ],
+		      [ 'desc', 'Test SSL 2 alias' ],
+		      [ 'dir' ], [ 'web' ], [ 'dns' ],
+		      [ 'parent-ip' ],
 		      @create_args, ],
 	},
 
@@ -5385,9 +5399,22 @@ $ssl_tests = [
 	  'grep' => [ 'O=Test SSL domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
-	# Test HTTP get to subdomain
+	# Test HTTP get to subdomain, which should not redirect
 	{ 'command' => $wget_command.'http://'.$test_ssl_subdomain,
 	  'grep' => 'Test SSL subdomain home page',
+	  'antigrep' => 'https://'.$test_ssl_subdomain,
+	},
+
+	# Test HTTP get to second subdomain, which should redirect
+	{ 'command' => $wget_command.'http://'.$test_ssl2_subdomain,
+	  'grep' => ['Test SSL subdomain home page',
+		     'https://'.$test_ssl2_subdomain],
+	},
+
+	# Test HTTP get to alias, which should redirect to itself
+	{ 'command' => $wget_command.'http://'.$test_target_domain,
+	  'grep' => ['Test SSL subdomain home page',
+		     'https://'.$test_target_domain],
 	},
 
 	# Check for SSL linkage

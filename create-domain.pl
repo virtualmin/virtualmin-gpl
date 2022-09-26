@@ -388,6 +388,9 @@ while(@ARGV > 0) {
 			}
 		$sshkey =~ /\S/ || &usage("--use-ssh-key must be followed by a key file or data");
 		}
+	elsif ($a eq "--ssl-redirect") {
+		$auto_redirect = 1;
+		}
 	elsif ($a eq "--mode") {
 		$phpmode = shift(@ARGV);
 		}
@@ -862,6 +865,13 @@ $dom{'db'} = $db || &database_name(\%dom);
 &set_provision_features(\%dom);
 &generate_domain_password_hashes(\%dom, 1);
 
+# Check SSL redirect flag
+if ($auto_redirect) {
+	&domain_has_ssl(\%dom) || &usage("The --ssl-redirect flag cannot be ".
+					 "used unless SSL is enabled");
+	$dom{'auto_redirect'} = 1;
+	}
+
 # Work out home directory
 $dom{'home'} = &server_home_directory(\%dom, $parent);
 if (defined($mysqlpass) && $config{'mysql'}) {
@@ -1048,6 +1058,7 @@ print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
 print "                        [--cloud-dns provider|\"services\"|\"local\"]\n";
 print "                        [--break-ssl-cert | --link-ssl-cert]\n";
+print "                        [--ssl-redirect]\n";
 print "                        [--generate-ssl-cert]\n";
 print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";
 exit(1);
