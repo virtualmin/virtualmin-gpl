@@ -4430,7 +4430,8 @@ my $rv = "";
 foreach my $r (@_) {
 	$rv .= &bind8::make_record($r->{'name'}, $r->{'ttl'}, $r->{'class'},
 				   $r->{'type'}, join(" ", @{$r->{'values'}}));
-	$rv .= "\n";
+	$rv .= "\n"
+		if ($rv && &trim($rv));
 	}
 return $rv;
 }
