@@ -16214,12 +16214,14 @@ foreach my $f (@plugins) {
 # with module name, description and list of options (optional) entries.
 sub list_domain_owner_modules
 {
+&require_mysql();
+my $mytype = $mysql::mysql_version =~ /mariadb/i ? "MariaDB" : "MySQL";
 local @rv = (
         [ 'dns', 'BIND DNS Server (for DNS domain)' ],
         [ 'mail', 'Virtual Email (for mailboxes and aliases)' ],
         [ 'web', 'Apache Webserver (for virtual host)' ],
         [ 'webalizer', 'Webalizer Logfile Analysis (for website\'s logs)' ],
-        [ 'mysql', 'MySQL Database Server (for database)' ],
+        [ 'mysql', $mytype.' Database Server (for database)' ],
         [ 'postgres', 'PostgreSQL Database Server (for database)' ],
         [ 'spam', 'SpamAssassin Mail Filter (for domain\'s config file)' ],
         [ 'file', 'Java File Manager (home directory only)' ],
