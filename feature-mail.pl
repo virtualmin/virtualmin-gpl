@@ -6243,17 +6243,17 @@ foreach my $l (@$lref) {
 return $rv;
 }
 
-# enable_dns_autoconfig(&domain, autoconfig-hostname, [force-file])
+# enable_dns_autoconfig(&domain, autoconfig-hostname, [force-file, &recs])
 # Add the DNS records needed for email autoconfig
 sub enable_dns_autoconfig
 {
-my ($d, $autoconfig, $forcefile) = @_;
+my ($d, $autoconfig, $forcefile, $forcerecs) = @_;
 &obtain_lock_dns($d);
 my ($recs, $file);
 if ($forcefile) {
 	&require_bind();
 	$file = $forcefile;
-	$recs = [ &bind8::read_zone_file($file, $d->{'dom'}) ];
+	$recs = $forcerecs || [ &bind8::read_zone_file($file, $d->{'dom'}) ];
 	}
 else {
 	($recs, $file) = &get_domain_dns_records_and_file($d);

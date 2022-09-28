@@ -15,20 +15,20 @@ $temp = &transname();
 local $bind8::config{'auto_chroot'} = undef;
 local $bind8::config{'chroot'} = undef;
 local $bind8::get_chroot_cache = "";
-&create_standard_records($temp, $d, $d->{'dns_ip'} || $d->{'ip'});
+$recs = [ ];
+&create_standard_records($recs, $temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
-	&enable_dns_autoconfig($d, &get_autoconfig_hostname($d), $temp);
+	&enable_dns_autoconfig($d, &get_autoconfig_hostname($d), $temp, $recs);
 	}
-$recs = &read_file_contents($temp);
-&unlink_file($temp);
-$recs =~ s/^\$ttl.*\n//;
-$recs =~ s/.*NS.*\n//g;
-$recs =~ s/.*SOA.*\([^\)]+\).*\n//;
+$out = &dns_records_to_text(@$recs);
+$out =~ s/^\$ttl.*\n//;
+$out =~ s/.*NS.*\n//g;
+$out =~ s/.*SOA.*\([^\)]+\).*\n// || $out =~ s/.*SOA.*\n//g;
 
 # Show them
 print &ui_alert_box($text{'records_viewdesc'}, 'warn', undef, undef, "");
 print &ui_table_start(undef, undef, 2);
-print &ui_table_row(undef, "<pre>".&html_escape($recs)."</pre>", 2);
+print &ui_table_row(undef, "<pre>".&html_escape($out)."</pre>", 2);
 print &ui_table_end();
 
 &ui_print_footer(&domain_footer_link($d),
