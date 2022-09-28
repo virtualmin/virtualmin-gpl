@@ -405,8 +405,18 @@ if ($newconf->{'hide_pro_tips'} ne $oldconf->{'hide_pro_tips'}) {
 sub config_pre_load
 {
 my ($modconf_info, $modconf_order) = @_;
-my @forbidden_keys;
 
+# Replace config labels for MySQL
+if ($mysql_module_version =~ /mariadb/i) {
+	foreach my $confline (keys %{$modconf_info}) {
+		if ($modconf_info->{$confline} =~ /MySQL/) {
+			$modconf_info->{$confline} =~ s/MySQL/MariaDB/g;
+			}
+		}
+	}
+
+# Process forbidden keys
+my @forbidden_keys;
 # Virtualmin GPL/Pro version based config filter
 if ($virtual_server::virtualmin_pro) {
 	# Do not show Pro user 'Show Pro features overview' option
@@ -431,6 +441,21 @@ foreach my $fkey (@forbidden_keys) {
 	@{$modconf_order} = grep { $_ ne $fkey } @{$modconf_order}
 		if ($modconf_order);
 	}
+}
+
+# help_pre_load(help-text)
+# Check if some help text needs fixing
+sub help_pre_load
+{
+my ($htext) = @_;
+
+# Replace config labels for MySQL
+if ($mysql_module_version =~ /mariadb/i) {
+	if ($htext =~ /MySQL/m) {
+		$htext =~ s/MySQL/MariaDB/gm;
+		}
+	}
+return $htext;
 }
 
 1;
