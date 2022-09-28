@@ -4836,7 +4836,7 @@ foreach my $v (&get_global_template_variables()) {
 # Set other variables
 if ($others) {
 	foreach my $e (keys %$others) {
-		$ENV{uc($e)} = $others->{$e};
+		$ENV{"VIRTUALSERVER_".uc($e)} = $others->{$e};
 		}
 	}
 }
