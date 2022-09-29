@@ -97,10 +97,10 @@ foreach my $p (@ports) {
 			   'dir2' => $rwr,
 			 };
 		if (lc($rwc->{'words'}->[1]) eq 'on') {
-			$rd->{'http'} = 1;
+			$rd->{'https'} = 1;
 			}
 		elsif (lc($rwc->{'words'}->[1]) eq 'off') {
-			$rd->{'https'} = 1;
+			$rd->{'http'} = 1;
 			}
 		else {
 			next;
