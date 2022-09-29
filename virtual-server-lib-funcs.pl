@@ -16224,7 +16224,7 @@ local @rv = (
         [ 'mysql', $mytype.' Database Server (for database)' ],
         [ 'postgres', 'PostgreSQL Database Server (for database)' ],
         [ 'spam', 'SpamAssassin Mail Filter (for domain\'s config file)' ],
-        [ 'filemin', 'Filemin File Manager (home directory only)' ],
+        [ 'filemin', 'File Manager (home directory only)' ],
         [ 'passwd', 'Change Password',
 	  [ [ 2, 'User and mailbox passwords' ],
 	    [ 1, 'User password' ],

@@ -1,40 +1,45 @@
 The following virtual sub-server has been set up successfully :
 
-Domain name:             ${DOM}
-Hosting server:          ${HOSTNAME}
+Domain name:                ${DOM}
+Hosting server:             ${HOSTNAME}
 ${IF-VIRT}
-Virtual IP address:      ${IP}
+Virtual IP address:         ${IP}
 ${ENDIF-VIRT}
 
 ${IF-WEB}
-Website:                 http://www.${DOM}/
+Website:                    http://www.${DOM}/
 ${IF-WEBALIZER}
-Webalizer log reporting: Enabled
+Webalizer log reporting:    Enabled
 ${ELSE-WEBALIZER}
-Webalizer log reporting: Disabled
+Webalizer log reporting:    Disabled
 ${ENDIF-WEBALIZER}
+${IF-VIRTUALMIN-AWSTATS}
+AWStats log reporting:      Enabled
+${ELSE-VIRTUALMIN-AWSTATS}
+AWStats log reporting:      Disabled
+${ENDIF-VIRTUALMIN-AWSTATS}
 
 ${ENDIF-WEB}
 ${IF-MAIL}
-Email domain:            ${DOM}
-SMTP server:             mail.${DOM}
-POP3 server:             mail.${DOM}
+Email domain:               ${DOM}
+SMTP server:                mail.${DOM}
+POP3 server:                mail.${DOM}
 
 ${ENDIF-MAIL}
 ${IF-DNS}
-DNS domain:              ${DOM}
-Nameserver:              ${HOSTNAME}
+DNS domain:                 ${DOM}
+Nameserver:                 ${HOSTNAME}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}
-${MYSQL_TYPE} database:        ${DB}
-${MYSQL_TYPE} login:           ${MYSQL_USER}
-${MYSQL_TYPE} password:        ${PASS}
+${MYSQL_TYPE} database:     ${DB}
+${MYSQL_TYPE} login:        ${MYSQL_USER}
+${MYSQL_TYPE} password:     ${PASS}
 
 ${ENDIF-MYSQL}
 ${IF-POSTGRES}
-PostgreSQL database:     ${DB}
-PostgreSQL login:        ${USER}
-PostgreSQL password:     ${PASS}
+PostgreSQL database:        ${DB}
+PostgreSQL login:           ${USER}
+PostgreSQL password:        ${PASS}
 
 ${ENDIF-POSTGRES}

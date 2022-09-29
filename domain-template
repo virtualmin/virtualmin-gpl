@@ -1,55 +1,60 @@
 The following virtual server has been set up successfully :
 
-Domain name:             ${DOM}
-Hosting server:          ${HOSTNAME}
+Domain name:                ${DOM}
+Hosting server:             ${HOSTNAME}
 ${IF-VIRT}
-Virtual IP address:      ${IP}
+Virtual IP address:         ${IP}
 ${ENDIF-VIRT}
-Administration login:    ${USER}
-Administration password: ${PASS}
+Administration login:       ${USER}
+Administration password:    ${PASS}
 ${IF-WEBMIN}
-Administration URL:      ${WEBMIN_PROTO}://www.${DOM}:${WEBMIN_PORT}/
+Administration URL:         ${WEBMIN_PROTO}://www.${DOM}:${WEBMIN_PORT}/
 ${ENDIF-WEBMIN}
 
 ${IF-WEB}
-Website:                 http://www.${DOM}/
+Website:                    http://www.${DOM}/
 ${IF-WEBALIZER}
-Webalizer log reporting: Enabled
+Webalizer log reporting:    Enabled
 ${ELSE-WEBALIZER}
-Webalizer log reporting: Disabled
+Webalizer log reporting:    Disabled
 ${ENDIF-WEBALIZER}
+${IF-VIRTUALMIN-AWSTATS}
+AWStats log reporting:      Enabled
+${ELSE-VIRTUALMIN-AWSTATS}
+AWStats log reporting:      Disabled
+${ENDIF-VIRTUALMIN-AWSTATS}
 
 ${ENDIF-WEB}
 ${IF-MAIL}
-Email domain:            ${DOM}
-SMTP server:             mail.${DOM}
-POP3 server:             mail.${DOM}
+Email domain:               ${DOM}
+SMTP server:                mail.${DOM}
+POP3 server:                mail.${DOM}
 ${IF-MX_SLAVES}
-Backup SMTP servers:     ${MX_SLAVES}
+Backup SMTP servers:        ${MX_SLAVES}
 ${ENDIF-MX_SLAVES}
 
 ${ENDIF-MAIL}
 ${IF-DNS}
-DNS domain:              ${DOM}
-Nameserver:              ${DNS_SERVER}
+DNS domain:                 ${DOM}
+Nameserver:                 ${DNS_SERVER}
 ${IF-DNS_SLAVE}
-Slave nameservers:       ${DNS_SLAVE}
+Slave nameservers:          ${DNS_SLAVE}
 ${ENDIF-DNS_SLAVE}
 
 ${ENDIF-DNS}
 ${IF-MYSQL}
-${MYSQL_TYPE} database:        ${DB}
-${MYSQL_TYPE} login:           ${MYSQL_USER}
+${MYSQL_TYPE} database:     ${DB}
+${MYSQL_TYPE} login:        ${MYSQL_USER}
 ${IF-MYSQL_PASS}
-${MYSQL_TYPE} password:        ${MYSQL_PASS}
+${MYSQL_TYPE} password:     ${MYSQL_PASS}
 ${ELSE-MYSQL_PASS}
-${MYSQL_TYPE} password:        ${PASS}
+${MYSQL_TYPE} password:     ${PASS}
 ${ENDIF-MYSQL_PASS}
 
 ${ENDIF-MYSQL}
 ${IF-POSTGRES}
-PostgreSQL database:     ${DB}
-PostgreSQL login:        ${USER}
-PostgreSQL password:     ${PASS}
+PostgreSQL database:        ${DB}
+PostgreSQL login:           ${USER}
+PostgreSQL password:        ${PASS}
 
 ${ENDIF-POSTGRES}
