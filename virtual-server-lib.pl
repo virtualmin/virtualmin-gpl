@@ -409,9 +409,7 @@ my ($modconf_info, $modconf_order) = @_;
 # Replace config labels for MySQL
 if ($mysql_module_version =~ /mariadb/i) {
 	foreach my $confline (keys %{$modconf_info}) {
-		if ($modconf_info->{$confline} =~ /MySQL/) {
-			$modconf_info->{$confline} =~ s/MySQL/MariaDB/g;
-			}
+		$modconf_info->{$confline} =~ s/MySQL/MariaDB/g;
 		}
 	}
 
@@ -451,9 +449,7 @@ my ($htext) = @_;
 
 # Replace config labels for MySQL
 if ($mysql_module_version =~ /mariadb/i) {
-	if ($htext =~ /MySQL/m) {
-		$htext =~ s/MySQL/MariaDB/gm;
-		}
+	$htext =~ s/MySQL/MariaDB/gm;
 	}
 return $htext;
 }
