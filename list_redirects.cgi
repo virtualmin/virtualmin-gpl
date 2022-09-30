@@ -15,6 +15,11 @@ foreach $r (@redirects) {
 	my @protos;
 	push(@protos, "HTTP") if ($r->{'http'});
 	push(@protos, "HTTPS") if ($r->{'https'});
+	my $dest = $r->{'dest'};
+	if (!$r->{'alias'} &&
+	    $dest =~ /^(http|https):\/\/%{HTTP_HOST}(\/.*)$/) {
+		$dest = &text('redirects_with', "$2", uc($1));
+		}
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $r->{'id'} },
@@ -23,7 +28,7 @@ foreach $r (@redirects) {
 		$r->{'alias'} ? $text{'redirects_alias'}
 			      : $text{'redirects_redirect'},
 		join(", ", @protos),
-		$r->{'dest'},
+		$dest,
 		]);
 	}
 

@@ -6544,6 +6544,7 @@ redirects_alias=Alias to directory
 redirects_redirect=Redirect to URL
 redirects_dest=Destination
 redirects_protos=Protocols
+redirects_with=$1 with $2
 
 redirect_egone=Redirect no longer exists!
 redirect_create=Create Website Redirect
