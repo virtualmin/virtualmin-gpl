@@ -895,7 +895,6 @@ local $p = &domain_has_website($d);
 if ($p ne 'web') {
 	return &plugin_call($p, "feature_web_supported_php_modes", $d);
 	}
-var_dump($d);
 &require_apache();
 local @rv;
 push(@rv, "none");	# Turn off PHP entirely
