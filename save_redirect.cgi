@@ -43,9 +43,12 @@ else {
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
 		$r->{'alias'} = 0;
-		$r->{'code'} = $in{'code'};
-		$in{'code'} eq '' || $in{'code'} =~ /^\d{3}$/ && $in{'code'} >= 300 && $in{'code'} < 400 ||
-			&error($text{'redirect_ecode'});
+		}
+	elsif ($in{'mode'} == 2) {
+		# Redirect to a URL on this host
+		$in{'dpath'} =~ /^\/\S+$/ || &error($text{'redirect_eurl'});
+		$r->{'dest'} = $in{'dproto'}.'://%{HTTP_HOST}'.$in{'dpath'};
+		$r->{'alias'} = 0;
 		}
 	else {
 		# Alias to a directory
@@ -65,6 +68,13 @@ else {
 			}
 		$r->{'dest'} = $in{'dir'};
 		$r->{'alias'} = 1;
+		}
+	if ($in{'mode'} == 0 || $in{'mode'} == 2) {
+		# Save redirect code
+		$r->{'code'} = $in{'code'};
+		$in{'code'} eq '' || $in{'code'} =~ /^\d{3}$/ &&
+		    $in{'code'} >= 300 && $in{'code'} < 400 ||
+			&error($text{'redirect_ecode'});
 		}
 	$r->{'regexp'} = $in{'regexp'};
 	$r->{'http'} = $in{'http'};

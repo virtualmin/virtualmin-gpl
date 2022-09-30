@@ -6557,6 +6557,7 @@ redirect_302=Temporary (302)
 redirect_303=See other (303)
 redirect_url=URL at other website
 redirect_dir=Directory on this system
+redirect_dpath=URL at this website
 redirect_regexp=Include sub-paths in redirect?
 redirect_proto=Enable redirect for
 redirect_http=Non-SSL website

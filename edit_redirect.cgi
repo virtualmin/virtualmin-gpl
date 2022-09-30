@@ -30,12 +30,32 @@ print &ui_table_row(&hlink($text{'redirect_path'}, 'redirect_path'),
 	&ui_textbox("path", $r->{'path'}, 40));
 
 # Destination
+my ($mode, $dir, $url, $upath);
+if ($r->{'alias'}) {
+	$mode = 1;
+	$dir = $r->{'alias'};
+	}
+elsif ($r->{'dest'} &&
+       $r->{'dest'} =~ /^(http|https):\/\/%{HTTP_HOST}(\/.*)$/) {
+	$mode = 2;
+	$dproto = $1;
+	$dpath = $2;
+	}
+else {
+	$mode = 0;
+	$url = $r->{'dest'};
+	}
 print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
-	&ui_radio_table("mode", $r->{'alias'} ? 1 : 0,
+	&ui_radio_table("mode", $mode,
 		[ [ 0, $text{'redirect_url'},
-		    &ui_textbox("url", $r->{'alias'} ? '' : $r->{'dest'}, 40) ],
+		    &ui_textbox("url", $url, 40) ],
+		  [ 2, $text{'redirect_dpath'},
+		    &ui_select("dproto", $dproto,
+			       [ [ 'http', 'HTTP' ],
+			         [ 'https', 'HTTPS' ] ])." ".
+		    &ui_textbox("dpath", $dpath, 40) ],
 		  [ 1, $text{'redirect_dir'},
-		    &ui_textbox("dir", $r->{'alias'} ? $r->{'dest'} : '', 40) ],
+		    &ui_textbox("dir", $dir, 40) ],
 		]));
 
 # HTTP status code
