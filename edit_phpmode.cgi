@@ -23,7 +23,7 @@ print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
 if ($can) {
-	if (!$d->{'alias'} && $can == 2 &&
+	if (!$d->{'alias'} && $can >= 1 &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_mode"))) {
 		# PHP execution mode
 		push(@modes, $mode) if ($mode && &indexof($mode, @modes) < 0);
