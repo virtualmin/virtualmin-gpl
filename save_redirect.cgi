@@ -46,7 +46,7 @@ else {
 		}
 	elsif ($in{'mode'} == 2) {
 		# Redirect to a URL on this host
-		$in{'dpath'} =~ /^\/\S+$/ || &error($text{'redirect_eurl'});
+		$in{'dpath'} =~ /^\/\S*$/ || &error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'dproto'}.'://%{HTTP_HOST}'.$in{'dpath'};
 		$r->{'alias'} = 0;
 		}
