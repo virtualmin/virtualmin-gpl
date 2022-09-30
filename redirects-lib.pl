@@ -107,7 +107,7 @@ foreach my $p (@ports) {
 			}
 		$rd->{'path'} = $rwr->{'words'}->[0];
 		$rd->{'dest'} = $rwr->{'words'}->[1];
-		if ($rd->{'dest'} !~ /\$1$/ &&
+		if ($rd->{'path'} =~ /^(.*)\.\*\$$/ ||
 		    $rd->{'path'} =~ /^(.*)\(\.\*\)\$$/) {
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
@@ -203,12 +203,12 @@ foreach my $port (@ports) {
 	my $changed = 0;
 	if ($redirect->{'dir2'}) {
 		# Remove RewriteCond and RewriteRule
-		my @rwcs = &apache::find_directive_struct("RewriteCond", $vconf);
-		my @rwrs = &apache::find_directive_struct("RewriteRule", $vconf);
+		my @rwcs = &apache::find_directive_struct("RewriteCond",$vconf);
+		my @rwrs = &apache::find_directive_struct("RewriteRule",$vconf);
 		my @newrwcs = map { join(" ", @{$_->{'words'}}) }
-				  grep { $_ ne $redirect->{'dir'} } @rwcs;
+		  grep { $_->{'line'} != $redirect->{'dir'}->{'line'} } @rwcs;
 		my @newrwrs = map { join(" ", @{$_->{'words'}}) }
-				  grep { $_ ne $redirect->{'dir2'} } @rwrs;
+		  grep { $_->{'line'} != $redirect->{'dir2'}->{'line'} } @rwrs;
 		if (@rwcs != @newrwcs || @rwrs != @newrwrs) {
 			&apache::save_directive(
 				"RewriteCond", \@newrwcs, $vconf, $conf);
