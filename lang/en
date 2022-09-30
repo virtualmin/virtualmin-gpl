@@ -6543,6 +6543,7 @@ redirects_type=Type
 redirects_alias=Alias to directory
 redirects_redirect=Redirect to URL
 redirects_dest=Destination
+redirects_protos=Protocols
 
 redirect_egone=Redirect no longer exists!
 redirect_create=Create Website Redirect
