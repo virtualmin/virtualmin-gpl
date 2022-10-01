@@ -135,7 +135,7 @@ if ($p && $p ne 'web') {
 my @ports = ( $d->{'web_port'},
 	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 my $count = 0;
-if ($redirect->{'dest'} =~ /%{HTTP_/ &&
+if ($redirect->{'dest'} =~ /%\{HTTP_/ &&
     $redirect->{'http'} && $redirect->{'https'}) {
 	return "Redirects using HTTP_ variables cannot be applied to both ".
 	       "HTTP and HTTPS modes";
@@ -145,7 +145,7 @@ foreach my $p (@ports) {
 	my $proto = $p == $d->{'web_port'} ? 'http' : 'https';
 	next if (!$redirect->{$proto});
 	next if (!$virt);
-	if ($redirect->{'dest'} =~ /%{HTTP_/) {
+	if ($redirect->{'dest'} =~ /%\{HTTP_/) {
 		# Destination uses variables, so RewriteRule is needed
 		my @rwes = &apache::find_directive("RewriteEngine", $vconf);
 		my @rwcs = &apache::find_directive("RewriteCond", $vconf);
