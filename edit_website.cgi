@@ -92,7 +92,7 @@ if (!$d->{'alias'} && &can_log_paths() &&
 # Ruby execution mode
 if (defined(&supported_ruby_modes)) {
 	@rubys = &supported_ruby_modes($d);
-	if (!$d->{'alias'} && @rubys && $can == 2 &&
+	if (!$d->{'alias'} && @rubys && $can &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_ruby_mode"))) {
 		print &ui_table_row(
 			&hlink($text{'phpmode_rubymode'}, "rubymode"),

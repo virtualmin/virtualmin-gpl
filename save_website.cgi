@@ -38,7 +38,7 @@ if ($in{'ssi'} == 1) {
 
 # Save Ruby execution mode
 if (defined($in{'rubymode'}) && &get_domain_ruby_mode($d) ne $in{'rubymode'} &&
-    $can == 2) {
+    $can) {
 	&$first_print(&text('phpmode_rmoding',
 			    $text{'phpmode_'.$in{'rubymode'}}));
 	&save_domain_ruby_mode($d, $in{'rubymode'});
