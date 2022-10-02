@@ -15,7 +15,7 @@ $p = &domain_has_website($d);
 $newmode = $in{'mode'};
 if ($can) {
 	# Check for option clashes
-	if (!$d->{'alias'} && $can == 2) {
+	if (!$d->{'alias'} && $can) {
 		if (defined($in{'children_def'}) && !$in{'children_def'} &&
 		    ($in{'children'} < 1 ||
 		     $in{'children'} > $max_php_fcgid_children)) {
@@ -31,7 +31,7 @@ if ($can) {
 
 	# Check for working Apache suexec for PHP
 	if (!$d->{'alias'} && ($newmode eq 'cgi' || $newmode eq 'fcgid') &&
-	    $can == 2 && $p eq 'web') {
+	    $can && $p eq 'web') {
 		$tmpl = &get_template($d->{'template'});
 		$err = &check_suexec_install($tmpl);
 		&error($err) if ($err);
@@ -47,7 +47,7 @@ $mode = $oldmode = &get_domain_php_mode($d);
 
 if ($can) {
 	# Save PHP execution mode
-	if (defined($newmode) && $oldmode ne $newmode && $can == 2) {
+	if (defined($newmode) && $oldmode ne $newmode && $can) {
 		&$first_print(&text('phpmode_moding', $text{'phpmode_'.$newmode}));
 		if (&indexof($newmode, @modes) < 0) {
 			&$second_print($text{'phpmode_emode'});
@@ -69,7 +69,7 @@ if ($can) {
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
 	$nc = ($nc == 0 || $nc >= 5) ? $nc : 5;
 	if (defined($in{'children_def'}) &&
-	    $nc != &get_domain_php_children($d) && $can == 2) {
+	    $nc != &get_domain_php_children($d) && $can) {
 		&$first_print($nc || $mode eq "fpm" ?
 		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
 		    $text{'phpmode_nokids'});
