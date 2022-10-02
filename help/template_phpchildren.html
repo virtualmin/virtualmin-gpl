@@ -3,9 +3,8 @@
 This option sets the limit on the number of simultaneous requests that will be served,
 when PHP scripts for this domain setup to run via FPM, the number of child processes
 will be created when <tt>pm</tt> option is set to <tt>static</tt> and the maximum number of
-child processes could potentially be created when <tt>pm</tt> option is set to <tt>dynamic</tt>.
-The number of maximum sub-processes cannot be lower than <tt>pm.max_spare_servers</tt>
-which defaults to 5.<p>
+child processes could potentially be created when <tt>pm</tt> option is set to <tt>dynamic.</tt>
+<p>
 
 When PHP scripts for this domain setup to run via FCGId, PHP child process management
 should always be disabled, which will only route one request at a time to application processes

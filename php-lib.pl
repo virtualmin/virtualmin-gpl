@@ -1563,7 +1563,7 @@ elsif ($mode eq "fpm") {
 	my $lref = &read_file_lines($file, 1);
 	my $childs = 0;
 	foreach my $l (@$lref) {
-		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+		if ($l =~ /pm\.max_children\s*=\s*(\d+)/) {
 			$childs = $1;
 			}
 		}
@@ -1647,8 +1647,14 @@ elsif ($mode eq "fpm") {
 	my $lref = &read_file_lines($file);
 	$children = get_php_max_childred_allowed() if ($children == 0);	# Recommended default
 	foreach my $l (@$lref) {
-		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+		if ($l =~ /pm\.max_children\s*=\s*(\d+)/) {
 			$l = "pm.max_children = $children";
+			}
+		if ($l =~ /pm\.start_servers\s*=\s*(\d+)/) {
+			$l = "pm.start_servers = " . get_php_start_servers($children) . "";
+			}
+		if ($l =~ /pm\.max_spare_servers\s*=\s*(\d+)/) {
+			$l = "pm.max_spare_servers = " . get_php_max_spare_servers($children) . "";
 			}
 		}
 	&flush_file_lines($file);
@@ -2273,9 +2279,8 @@ else {
 	if ($defchildren eq "none" || !$defchildren) {
 		$defchildren = get_php_max_childred_allowed();
 		}
-	else {
-		$defchildren = $defchildren >= 5 ? $defchildren : 5;
-		}
+	my $defmaxspare = get_php_max_spare_servers($defchildren);
+	my $defstartservers = get_php_start_servers($defchildren);
 	local $tmp = &create_server_tmp($d);
 	my $lref = &read_file_lines($file);
 	@$lref = ( "[$d->{'id'}]",
@@ -2287,9 +2292,9 @@ else {
 		   "listen = ".$port,
 		   "pm = dynamic", 
 		   "pm.max_children = $defchildren",
-		   "pm.start_servers = 1",
+		   "pm.start_servers = $defstartservers",
 		   "pm.min_spare_servers = 1",
-		   "pm.max_spare_servers = 5",
+		   "pm.max_spare_servers = $defmaxspare",
 	   	   "php_value[upload_tmp_dir] = $tmp",
 		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
@@ -2549,8 +2554,29 @@ if ($mem) {
 else {
  	$max = $max_php_fcgid_children;
 	}
+
+# Low memory systems should not
+# return values lower than 1
+$max ||= 1;
 $main::get_real_memory_size_cache = $max;
-return $max;
+return int($max);
+}
+
+sub get_php_max_spare_servers
+{
+my ($defchildren) = @_;
+my $defmaxspare = $defchildren <= 5 ? $defchildren :
+        $defchildren >= 10 ? int($defchildren / 2) : 5;
+return int($defmaxspare);
+}
+
+sub get_php_start_servers
+{
+my ($defchildren) = @_;
+my $min_spare_servers = 1;
+my $max_spare_servers = get_php_max_spare_servers($defchildren);
+my $start_servers = $min_spare_servers + ($max_spare_servers - $min_spare_servers) / 4;
+return int($start_servers) || 1;
 }
 
 1;
