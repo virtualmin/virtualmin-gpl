@@ -2537,10 +2537,11 @@ return @rv;
 # which is calculated as total available RAM devided by
 # 64 MiB (aprox. cunsumed by each PHP-FPM process) and 
 # devided by 4 (as we assume that a maximum recommended 
-# default which PHP can use is 25% of all available RAM
+# default which PHP can use is 20% of all available RAM
 # on the system). However, manually it will be possible
 # to rase the number to use all available RAM as defined
-# using `$max_php_fcgid_children` variable
+# using `$max_php_fcgid_children` variable. Also on systems
+# with a lot of RAM limit maximum recommended to sensible 16.
 sub get_php_max_childred_allowed
 {
 return $main::get_real_memory_size_cache
@@ -2549,7 +2550,10 @@ my $max;
 my $mem = &get_real_memory_size();
 if ($mem) {
 	my $sysram_mb = $mem / 1024 / 1024;
-	$max = int(($sysram_mb / 64) / 4);
+	$max = int(($sysram_mb / 64) / 5);
+	if ($max > 16) {
+		$max = 16;
+		}
 	}
 else {
  	$max = $max_php_fcgid_children;
