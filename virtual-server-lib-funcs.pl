@@ -9882,7 +9882,7 @@ local $main::error_must_die = 1;
 eval { &plugin_call($mod, $func, @args) };
 if ($@) {
         &$second_print(&text('setup_failure',
-			     &plugin_call($f, "feature_name"), "$@"));
+			     &plugin_call($mod, "feature_name"), "$@"));
         return 0;
         }
 return 1;
