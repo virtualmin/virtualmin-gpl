@@ -221,15 +221,13 @@ if (!$in{'confirm'}) {
 	@missing = &missing_restore_features($cont, $contdoms);
 	@critical = grep { $_->{'critical'} } @missing;
 	if (@critical) {
-		print "<b>",&text('restore_fmissing', 
-			join(", ", map { $_->{'desc'} } @critical)),"</b><p>\n";
-		print "<b>",$text{'restore_fmissing3'},"</b><p>\n";
+		print &ui_alert_box(&text('restore_fmissing', 
+			join(", ", map { $_->{'desc'} } @critical))."<br>$text{'restore_fmissing3'}", 'info');
 		goto FAILED;
 		}
 	elsif (@missing) {
-		print "<b>",&text('restore_fmissing', 
-			join(", ", map { $_->{'desc'} } @missing)),"</b><p>\n";
-		print "<b>",$text{'restore_fmissing2'},"</b><p>\n";
+		print &ui_alert_box(&text('restore_fmissing', 
+			join(", ", map { $_->{'desc'} } @missing))."<br>$text{'restore_fmissing2'}", 'info');
 		}
 
 	# Check for backup problems
@@ -249,7 +247,7 @@ if (!$in{'confirm'}) {
 		}
 
 	# Tell the user what will be done
-	print &text('restore_from', $nice),"<p>\n";
+	print &ui_alert_box(&text('restore_from', $nice), 'warn');
 
 	print &ui_form_start("restore.cgi", "form-data");
 	print &ui_hidden("origsrc", $origsrc);
@@ -333,7 +331,7 @@ if (!$in{'confirm'}) {
 				}
 			}
 		print "<center>",&ui_submit($text{'restore_now2'}, "confirm"),
-		      "<br>",&ui_checkbox("skipwarnings", 1,
+		      "<p></p>",&ui_checkbox("skipwarnings", 1,
 					  $text{'restore_wskip'}, 0),
 		      (keys %$cont > 1 ?
 			      "<br>".&ui_checkbox("continue", 1,
