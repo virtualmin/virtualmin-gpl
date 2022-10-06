@@ -638,7 +638,6 @@ scripts_iok=Instaluj
 scripts_return=listy skryptów
 scripts_utitle=Odinstalowywanie skryptu
 scripts_egone=Skrypt już nie istnieje!
-scripts_rusure=Czy na pewno chcesz odinstalować skrypt $1 w wersji $2? Wszystkie pliki w <tt>$3</tt> zostaną usunięte ($4).
 scripts_uok2=Odinstaluj
 scripts_ustop=Zatrzymanie serwera
 scripts_urestart=Restart serwera
