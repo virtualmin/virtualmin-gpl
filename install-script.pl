@@ -329,6 +329,7 @@ if (!$sinfo && !$script->{'overlap'}) {
 # Run the before command
 %envs = map { 'script_'.$_, $opts->{$_} } (keys %$opts);
 $envs{'script_name'} = $sname;
+$envs{'script_upgrade'} = defined($id) ? 1 : 0;
 $envs{'script_version'} = $ver;
 &set_domain_envs($d, "SCRIPT_DOMAIN", \%newdom, undef, \%envs);
 $merr = &making_changes();
