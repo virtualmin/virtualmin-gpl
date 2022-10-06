@@ -97,7 +97,7 @@ else {
 		print &text('scripts_rusurehome',
 			    &public_html_dir($d, 1)),"<p>\n";
 		}
-	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
+	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<p>\n";
 	print &ui_form_end();
 	print "</center>\n";
 	}
