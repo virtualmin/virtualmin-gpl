@@ -18,13 +18,13 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "4.0.6", "3.2.15", "2.2.28", "1.11.29" );
+return ( "4.1.2", "4.0.8", "3.2.16", "2.2.28" );
 }
 
 sub script_django_can_upgrade
 {
 local ($sinfo, $newver) = @_;
-if ($sinfo->{'version'} < 1.9 && $newver >= 1.9) {
+if (&compare_versions($sinfo->{'version'}, "4.1.2") < 0) {
 	# Cannot upgrade from fcgi mode to proxy mode
 	return 0;
 	}
@@ -107,6 +107,8 @@ else {
 		     &ui_database_select("db", undef, \@dbs, $d, "django"));
 	$rv .= &ui_table_row("Initial project name",
 		     &ui_textbox("project", "myproject", 30));
+	# $rv .= &ui_table_row("Disable debug mode",
+	# 	     &ui_yesno_radio("nodebug", 0));
 	$rv .= &ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			     &ui_opt_textbox("dir", undef, 30,
 					     "At top level&nbsp;" .
@@ -134,8 +136,12 @@ else {
 	local ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
+		 'nodebug' => $in->{'nodebug'},
 		 'dir' => $dir,
+		 # 'dir' => $hdir,
+		 'idir' => "$d->{'home'}/.local",
 		 'path' => $in->{'dir_def'} ? "/" : "/$in->{'dir'}",
+		 # 'path' => "/",
 		 'project' => $in{'project'} };
 	}
 }
@@ -147,8 +153,10 @@ sub script_django_check
 local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
-if (-r "$opts->{'dir'}/django.fcgi") {
-	return "Django appears to be already installed in the selected directory";
+$opts->{'project'} !~ /^(bin|lib)$/ ||
+	return "Reserved name project name \`$opts->{'project'}\` cannot be used";
+if (-r "$opts->{'idir'}/$opts->{'project'}") {
+	return "Django appears to be already installed in the selected project directory";
 	}
 $opts->{'project'} ||
 	return "Missing initial project name";
@@ -168,8 +176,8 @@ local @files = (
 	   'file' => "Django-$ver.tar.gz",
 	   'url' => "https://www.djangoproject.com/download/$ver/tarball/" },
 	 { 'name' => "flup",
-	   'file' => "flup-1.0.2.tar.gz",
-	   'url' => "https://www.saddi.com/software/flup/dist/flup-1.0.2.tar.gz" },
+	   'file' => "flup-1.0.3.tar.gz",
+	   'url' => "https://files.pythonhosted.org/packages/bb/b5/26cc8f7baf0ddebd3e61a354a2bcc692cfe8005123c37ee3d8507c4c7511/flup-1.0.3.tar.gz" },
 	);
 return @files;
 }
@@ -205,16 +213,23 @@ if ($dbtype) {
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
 my $python = &get_python_path();
+my $pythonver = &get_python_version();
+($pythonver) = $pythonver =~ /(\d+.\d+)/;
+my $pythonlibs = "lib/python$pythonver";
+
+# Create base dir
+&run_as_domain_user($d, "mkdir ".quotemeta($opts->{'dir'}))
+	if (!-d $opts->{'dir'});
 
 # Create target dir
-if (!-d $opts->{'dir'}) {
-	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'dir'}));
-	-d $opts->{'dir'} ||
+if (!-d $opts->{'idir'}) {
+	$out = &run_as_domain_user($d, "mkdir -p ".quotemeta($opts->{'idir'}));
+	-d $opts->{'idir'} ||
 		return (0, "Failed to create directory : <tt>$out</tt>.");
 	}
 
 # Create python base dir
-$ENV{'PYTHONPATH'} = "$opts->{'dir'}/lib/python";
+$ENV{'PYTHONPATH'} = "$opts->{'idir'}/$pythonlibs";
 &run_as_domain_user($d, "mkdir -p ".quotemeta($ENV{'PYTHONPATH'}));
 
 # Extract the source
@@ -231,9 +246,9 @@ if ($upgrade) {
 	&script_django_stop_server($d, $opts);
 	}
 
-# Install to target dir
+# Install to .local
 local $icmd = "(cd ".quotemeta("$temp/Django-$ver")." && ".
-      "$python setup.py install --home ".quotemeta($opts->{'dir'}).") 2>&1";
+      "$python setup.py install --prefix=".quotemeta($opts->{'idir'}).") 2>&1";
 local $out = &run_as_domain_user($d, $icmd);
 if ($?) {
 	return (0, "Django source install failed : ".
@@ -244,8 +259,8 @@ if ($?) {
 local $err = &extract_script_archive($files->{'flup'}, $temp, $d);
 $err && return (0, "Failed to extract flup source : $err");
 local $out = &run_as_domain_user($d, 
-	"cp -r ".quotemeta("$temp/flup-1.0.2/flup").
-	" ".quotemeta("$opts->{'dir'}/lib/python"));
+	"cp -r ".quotemeta("$temp/flup-1.0.3/flup").
+	" ".quotemeta("$ENV{'PYTHONPATH'}/site-packages"));
 if ($?) {
 	return (0, "flup source copy failed : ".
 		   "<pre>".&html_escape($out)."</pre>");
@@ -254,7 +269,7 @@ if ($?) {
 if (!$upgrade) {
 	# Create the initial project
 	my $django_admin_file = $ver >= 4 ? 'django-admin' : 'django-admin.py';
-	local $icmd = "cd ".quotemeta($opts->{'dir'})." && ".
+	local $icmd = "cd ".quotemeta($opts->{'idir'})." && ".
 		      "./bin/$django_admin_file startproject ".
 		      quotemeta($opts->{'project'})." 2>&1";
 	local $out = &run_as_domain_user($d, $icmd);
@@ -264,7 +279,7 @@ if (!$upgrade) {
 		}
 
 	# Fixup settings.py to use the MySQL DB
-	local $pdir = "$opts->{'dir'}/$opts->{'project'}";
+	local $pdir = "$opts->{'idir'}/$opts->{'project'}";
 	local $sfile = "$pdir/settings.py";
 	if (!-r $sfile) {
 		# New django moves this into a sub-directory
@@ -277,6 +292,7 @@ if (!$upgrade) {
 	my $surl = &script_path_url($d, $opts);
 	$surl =~ s/\/$//;
 	my ($engine, $gotname, $gotuser, $gotpass, $gothost);
+	# my $lnum = scalar(@$lref);
 	foreach my $l (@$lref) {
 	
 		# Update Django variables
@@ -288,9 +304,14 @@ if (!$upgrade) {
 
 		if ($ver >= 4) {
 			if ($l =~ /ALLOWED_HOSTS\s*=\s*\[/) {
+				$l = "ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '.$d->{'dom'}']";
 				splice(@$lref, $i+1, 0,
 				       "CSRF_TRUSTED_ORIGINS = ['$surl']");
 				}
+			}
+		# Disable debug mode?
+		if ($opts->{'nodebug'} && $l =~ /^DEBUG\s+=/) {
+			$l = "# $l";
 			}
 
 		if ($l =~ /'ENGINE':/) {
@@ -313,6 +334,12 @@ if (!$upgrade) {
 			$l = "        'HOST': '$dbhost',";
 			$gothost++;
 			}
+		# if ($i == $lnum) {
+		# 	if ($opts->{'path'} && $opts->{'path'} ne '/') {
+		# 		splice(@$lref, $i+1, 0,
+		# 		   "\nLOGIN_URL = '$opts->{'path'}'");
+		# 		}
+		# 	}
 		$i++;
 		}
 	if (!$gotname) {
@@ -383,7 +410,7 @@ else {
 	$port = &allocate_mongrel_port(undef, 1);
 	$opts->{'port'} = $port;
 	}
-$opts->{'logfile'} ||= "$opts->{'dir'}/runserver.log";
+$opts->{'logfile'} ||= "$opts->{'idir'}/$opts->{'project'}/runserver.log";
 
 # Create an init script
 my $cmd = &get_django_start_cmd($d, $opts);
@@ -424,7 +451,7 @@ local $url = &script_path_url($d, $opts);
 local $adminurl = $url."admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to <tt>$opts->{'dir'}/lib/python</tt>.", "Under $rp", $url, $domuser, $dompass);
+return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to <tt>$ENV{'PYTHONPATH'}</tt>.", "Under $rp", $url, $domuser, $dompass);
 }
 
 # script_django_uninstall(&domain, version, &opts)
@@ -437,6 +464,10 @@ local ($d, $version, $opts) = @_;
 # Remove the contents of the target directory
 local $derr = &delete_script_install_directory($d, $opts);
 return (0, $derr) if ($derr);
+&unlink_file_as_domain_user($d,
+	("$opts->{'idir'}/$opts->{'project'}",
+	 "$opts->{'idir'}/bin/sqlformat",
+	 "$opts->{'idir'}/bin/django-admin"))
 
 # Remove base Django tables from the database (twice, because of dependencies)
 &cleanup_script_database($d, $opts->{'db'}, "(django|auth)_");
@@ -559,7 +590,10 @@ sub get_django_start_cmd
 {
 my ($d, $opts) = @_;
 my $python = &get_python_path();
-my $cmd = "cd $opts->{'dir'}/$opts->{'project'} && PYTHONPATH=$opts->{'dir'}/lib/python $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
+my $pythonver = &get_python_version();
+($pythonver) = $pythonver =~ /(\d+.\d+)/;
+my $pythonlibs = "lib/python$pythonver";
+my $cmd = "cd $opts->{'idir'}/$opts->{'project'} && PYTHONPATH=$opts->{'idir'}/$pythonlibs $python manage.py runserver $opts->{'port'} >$opts->{'logfile'} 2>&1 </dev/null";
 return $cmd;
 }
 
