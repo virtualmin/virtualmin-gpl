@@ -17,6 +17,27 @@ if (defined(&list_pro_dns_clouds)) {
 return @rv;
 }
 
+# list_available_dns_clouds()
+# Returns clouds that the current user can use
+sub list_available_dns_clouds
+{
+return grep { &can_dns_cloud($_) } &list_dns_clouds();
+}
+
+# can_dns_cloud(&cloud)
+# Returns 1 if some clopud can be used
+sub can_dns_cloud
+{
+my ($c) = @_;
+if (&master_admin()) {
+	return 1;
+	}
+if (&reseller_admin()) {
+	return $config{'dnscloud_'.$c->{'name'}.'_reseller'} ? 1 : 0;
+	}
+return $config{'dnscloud_'.$c->{'name'}.'_owner'} ? 1 : 0;
+}
+
 # default_dns_cloud([&template])
 # Returns the DNS cloud provider used by default for new domains
 sub default_dns_cloud

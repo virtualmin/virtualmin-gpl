@@ -123,6 +123,12 @@ if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
 &save_domain($d);
 
 # Update DNS cloud if changed
+if ($in{'cloud'} ne 'local' && $in{'cloud'} ne 'services') {
+	($c) = grep { $_->{'name'} eq $in{'cloud'} } &list_dns_clouds();
+	$c || &error($text{'spf_ecloudexists'});
+	$d->{'dns_cloud'} eq $c->{'name'} || &can_dns_cloud($c) ||
+		&error($text{'spf_ecloudcannot'});
+	}
 $err = &modify_dns_cloud($d, $in{'cloud'});
 $err && &error(&text('spf_ecloud', $err));
 
