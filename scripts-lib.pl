@@ -2340,7 +2340,7 @@ else {
 	opendir(DIR, $opts->{'dir'});
 	foreach my $f (readdir(DIR)) {
 		if ($f ne '.' && $f ne '..' && !$overlap{$f}) {
-			&unlink_file_as_domain_user($f, "$opts->{'dir'}/$f");
+			&unlink_file_as_domain_user($d, "$opts->{'dir'}/$f");
 			}
 		}
 	closedir(DIR);
