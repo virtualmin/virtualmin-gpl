@@ -1969,6 +1969,8 @@ scripts_ephpminmax=Aucune des versions PHP disponibles ($1) n'est comprise entre
 scripts_ephpmin=Aucune des versions PHP disponibles ($1) n'est égale ou supérieure à $2
 scripts_ephpmax=Aucune des versions PHP disponibles ($1) n'est inférieure à $3
 scripts_uerr=Échec de la désinstallation du script
+scripts_rusure=Voulez-vous vraiment désinstaller le script <tt>$1</tt> ? Tous les fichiers de moins <tt>$2</tt> seront supprimés ( $3 ).
+scripts_rusuredb=Les tables liées à ce script dans la base de données $ <tt>$1</tt> <tt>$2</tt> seront également supprimées.
 scripts_idb2=Utilise la base de données avec le préfixe de table
 scripts_idbtbpref=avec préfixe de table
 scripts_deregistering=Désenregistrement de la version $1 $2 ..
@@ -3844,10 +3846,14 @@ dbackup_doing=Suppression de la sauvegarde de $1 ..
 dbackup_done=.. Supprimé avec succès
 dbackup_failed=.. a échoué : $1 
 
+redirects_protos=Protocoles
+redirects_with=$1 avec $2
+
 redirect_code=Type de redirection HTTP
 redirect_301=Permanent (301)
 redirect_302=Temporaire (302)
 redirect_303=Voir d'autres (303)
+redirect_dpath=URL sur ce site Web
 redirect_ecode=Code d'état HTTP non valide
 
 newchangelog_title=Nouveau journal des fonctionnalités

@@ -572,6 +572,8 @@ scripts_ephpminmax=Ingen av de tilgjengelige PHP-versjonene ($1) er mellom $2 og
 scripts_ephpmin=Ingen av de tilgjengelige PHP-versjonene ($1) er på eller over $2
 scripts_ephpmax=Ingen av de tilgjengelige PHP-versjonene ($1) er under $3
 scripts_uerr=Kunne ikke avinstallere skriptet
+scripts_rusure=Er du sikker på at du vil avinstallere <tt>$1</tt> -skriptet? Alle filer under <tt>$2</tt> vil bli slettet ( $3 ).
+scripts_rusuredb=Tabellene relatert til dette skriptet i <tt>$1</tt> -databasen <tt>$2</tt> vil også bli fjernet.
 scripts_idb2=Bruker database med tabellprefiks
 scripts_idbtbpref=med bordprefiks
 scripts_deregistering=Avregistrerer nå $1 versjon $2 ..
@@ -937,10 +939,14 @@ dbackup_doing=Slette sikkerhetskopi fra $1 ..
 dbackup_done=.. slettet
 dbackup_failed=.. mislyktes : $1 
 
+redirects_protos=Protokoller
+redirects_with=$1 med $2
+
 redirect_code=HTTP-viderekoblingstype
 redirect_301=Permanent (301)
 redirect_302=Midlertidig (302)
 redirect_303=Se annet (303)
+redirect_dpath=URL på denne nettsiden
 redirect_proto=Aktiver viderekobling for
 redirect_http=Ikke-SSL nettsted
 redirect_https=SSL nettsted

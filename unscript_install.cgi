@@ -85,7 +85,9 @@ else {
 
 	$opts = $sinfo->{'opts'};
 	$sz = &nice_size(&disk_usage_kb($opts->{'dir'})*1024);
-	print &text('scripts_rusure', $script->{'desc'}, $sinfo->{'version'}, $opts->{'dir'}, $sz),"\n";
+	print &text('scripts_rusure',
+	               &ui_text_color("$script->{'desc'} $sinfo->{'version'}", 'danger'),
+	                $opts->{'dir'}, $sz),"\n";
 	if ($opts->{'db'}) {
 		($dbtype, $dbname) = split(/_/, $opts->{'db'}, 2);
 		print &text('scripts_rusuredb',
@@ -97,7 +99,7 @@ else {
 		print &text('scripts_rusurehome',
 			    &public_html_dir($d, 1)),"<p>\n";
 		}
-	print &ui_submit($text{'scripts_uok2'}, "confirm"),"<br>\n";
+	print "<p></p>", &ui_submit($text{'scripts_uok2'}, "confirm");
 	print &ui_form_end();
 	print "</center>\n";
 	}

@@ -1673,8 +1673,8 @@ foreach my $m (@mods) {
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
 			push(@pkgs, ($python =~ /python3/i ?
-				         "python3-mysql" :
-				         "MySQL-python"));
+				         "python3-mysqlclient" :
+				         "python3-mysql"));
 			}
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");

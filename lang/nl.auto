@@ -795,6 +795,8 @@ scripts_ephpmin=Geen van de beschikbare PHP-versies ($1) is gelijk aan of hoger 
 scripts_ephpmax=Geen van de beschikbare PHP-versies ($1) is lager dan $3
 scripts_uerr=Kan script niet verwijderen
 scripts_egone=Script bestaat niet meer!
+scripts_rusure=Weet u zeker dat u het <tt>$1</tt> -script wilt de-installeren? Alle bestanden onder de <tt>$2</tt> worden verwijderd ( $3 ).
+scripts_rusuredb=De tabellen met betrekking tot dit script in de <tt>$1</tt> -database <tt>$2</tt> worden ook verwijderd.
 scripts_idb2=Gebruikt database met tabelvoorvoegsel
 scripts_inewdb=(Wordt verwijderd wanneer het script is verwijderd)
 scripts_idbtbpref=met tabelvoorvoegsel
@@ -1235,10 +1237,14 @@ dbackup_doing=Back-up verwijderen van $1 ..
 dbackup_done=.. met succes verwijderd
 dbackup_failed=.. mislukt : $1
 
+redirects_protos=Protocollen
+redirects_with=$1 met $2
+
 redirect_code=HTTP-omleidingstype
 redirect_301=Permanent (301)
 redirect_302=Tijdelijk (302)
 redirect_303=Zie andere (303)
+redirect_dpath=URL op deze website
 redirect_proto=Omleiding inschakelen voor
 redirect_http=Niet-SSL-website
 redirect_https=SSL-website
