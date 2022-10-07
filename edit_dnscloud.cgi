@@ -47,9 +47,9 @@ print &$ifunc($cloud);
 # Allow use by other users?
 print &ui_table_row($text{'cloud_useby'},
 	&ui_checkbox("useby_reseller", 1, $text{'cloud_byreseller'},
-		     $config{'cloud_'.$in{'name'}.'_reseller'})."\n".
+		     $config{'dnscloud_'.$in{'name'}.'_reseller'})."\n".
 	&ui_checkbox("useby_owner", 1, $text{'cloud_byowner'},
-		     $config{'cloud_'.$in{'name'}.'_owner'}));
+		     $config{'dnscloud_'.$in{'name'}.'_owner'}));
 
 # Used by domains
 @users = grep { &dns_uses_cloud($_, $cloud) } &list_domains();
