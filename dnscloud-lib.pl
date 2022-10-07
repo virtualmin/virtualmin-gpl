@@ -17,13 +17,6 @@ if (defined(&list_pro_dns_clouds)) {
 return @rv;
 }
 
-# list_available_dns_clouds()
-# Returns clouds that the current user can use
-sub list_available_dns_clouds
-{
-return grep { &can_dns_cloud($_) } &list_dns_clouds();
-}
-
 # can_dns_cloud(&cloud)
 # Returns 1 if some clopud can be used
 sub can_dns_cloud
