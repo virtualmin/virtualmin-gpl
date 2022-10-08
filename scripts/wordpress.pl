@@ -104,6 +104,8 @@ else {
 	my @dbs = domain_databases($d, [ "mysql" ]);
 	$rv .= ui_table_row("Database for WordPress tables",
 		     ui_database_select("db", undef, \@dbs, $d, "wordpress"));
+	$rv .= ui_table_row("WordPress table prefix",
+		     ui_textbox("dbtbpref", "wp_", 20));
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
 	if (script_wordpress_cli_virtualmin_support()) {
