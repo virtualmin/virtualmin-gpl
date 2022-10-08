@@ -3402,7 +3402,7 @@ elsif ($d->{'provision_dns'}) {
 		local $rec;
 		if ($r->{'name'} eq '$ttl') {
 			$rec = { 'defttl' => $r->{'values'}->{'value'}->[0] };
-			&ind8::create_defttl($temp, $rec->{'defttl'});
+			&bind8::create_defttl($temp, $rec->{'defttl'});
 			}
 		elsif ($r->{'name'} eq '$generate') {
 			$rec = { 'generate' => $r->{'values'}->{'value'} };
