@@ -3387,7 +3387,6 @@ elsif ($d->{'provision_dns'}) {
 	# Fetch from cloudmin services and write to temp file. The underlying
 	# BIND module API must be used here, because we need to write to an
 	# actual file.
-	&require_bind();
 	local $info = { 'domain' => $d->{'dom'},
 			'host' => $d->{'provision_dns_host'} };
 	my ($ok, $msg) = &provision_api_call(
