@@ -9091,6 +9091,7 @@ push(@rv, { 'id' => 0,
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'web_http2' => $config{'web_http2'},
+	    'web_redirects' => $config{'web_redirects'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -9381,6 +9382,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_admin'} = $tmpl->{'web_admin'};
 	$config{'web_admindom'} = $tmpl->{'web_admindom'};
 	$config{'web_http2'} = $tmpl->{'web_http2'};
+	$config{'web_redirects'} = $tmpl->{'web_redirects'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :

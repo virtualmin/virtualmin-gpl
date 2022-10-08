@@ -1790,6 +1790,13 @@ newweb_admindom=URL for <tt>admin</tt> redirect
 newweb_ewebmaildom=Missing or invalid URL for webmail redirect
 newweb_eadmindom=Missing or invalid URL for admin redirect
 newweb_http2=Enable HTTP2 protocol for new websites?
+newweb_redirects=Redirects for new websites
+newweb_rfrom=From path
+newweb_rto=To path or URL
+newweb_rprotos=For protocols
+newwweb_efrom=Redirect $1 from path must start with a /
+newwweb_eto=Redirect $1 must be ether a path starting with / or a URL
+newwweb_eprotos=No protocols selected for redirect $1
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template

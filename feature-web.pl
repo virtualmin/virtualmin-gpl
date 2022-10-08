@@ -2798,6 +2798,26 @@ if ($config{'proxy_pass'} == 2) {
 # Enable HTTP2 for new websites
 print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
 	&ui_yesno_radio("web_http2", $tmpl->{'web_http2'}));
+
+# Default redirects
+print &ui_table_hr();
+my @redirs = map { [ split(/\s+/, $_, 3) ] }
+		 split(/\t+/, $tmpl->{'web_redirects'});
+push(@redirs, [ "", "", "http,https" ]);
+my $rtable = &ui_columns_start(
+    [ $text{'newweb_rfrom'}, $text{'newweb_rto'}, $text{'newweb_rprotos'} ]);
+for(my $i=0; $i<@redirs; $i++) {
+	my %protos = map { $_, 1 } split(/,/, $redirs[$i]->[2]);
+	$rtable .= &ui_columns_row([
+		&ui_textbox("rfrom_$i", $redirs[$i]->[0], 30),
+		&ui_textbox("rto_$i", $redirs[$i]->[1], 40),
+		&ui_checkbox("rprotos_$i", "http", "HTTP", $protos{'http'})." ".
+		&ui_checkbox("rprotos_$i", "https", "HTTPS", $protos{'https'})
+		]);
+	}
+$rtable .= &ui_columns_end();
+print &ui_table_row(&hlink($text{'newweb_redirects'}, 'template_web_redirects'),
+	$rtable);
 }
 
 # parse_template_web(&tmpl)
@@ -2939,6 +2959,21 @@ if ($config{'proxy_pass'} == 2) {
 
 # Save HTTP2 option
 $tmpl->{'web_http2'} = $in{'web_http2'};
+
+# Save default redirects
+my @redirs;
+my ($rfrom, $rto);
+for(my $i=0; defined($rfrom = $in{"rfrom_$i"}); $i++) {
+	$rto = $in{"rto_$i"};
+	next if (!$rfrom && !$rto);
+	$rfrom =~ /^\// || &error(&text('newwweb_efrom', $i+1));
+	$rto =~ /^\// || $rto =~ /^(http|https):/ ||
+		&error(&text('newwweb_eto', $i+1));
+	$rprotos = join(",", split(/\0/, $in{"rprotos_$i"}));
+	$rprotos || &error(&text('newwweb_eprotos', $i+1));
+	push(@redirs, [ $rfrom, $rto, $rprotos ]);
+	}
+$tmpl->{'web_redirects'} = join("\t", map { join(" ", @$_) } @redirs);
 }
 
 # postsave_template_web(&template)
