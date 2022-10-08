@@ -8073,6 +8073,43 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 	&save_domain($dom);
 	}
 
+# Create any redirects or aliases specified in the template
+my @redirs = map { [ split(/\s+/, $_, 3) ] }
+		 split(/\t+/, $tmpl->{'web_redirects'});
+if (@redirs && !$dom->{'alias'} &&  &domain_has_website($dom) &&
+    !$noscripts && !$dom->{'nocreationscripts'}) {
+	&$first_print($text{'setup_redirects'});
+	&$indent_print();
+	foreach my $r (@redirs) {
+		my %protos = map { $_, 1 } split(/,/, $redirs[$i]->[2]);
+		next if ($protos{'https'} && !$protos{'http'} &&
+			 !&domain_has_ssl($dom));
+		my $path = &substitute_domain_template($r->[0], $dom);
+		my $dest = &substitute_domain_template($r->[1], $dom);
+		&$first_print(&text('setup_redirecting', $path, $dest));
+		if ($dest !~ /^(http|https):/) {
+			$dest = &public_html_dir($dom).$dest;
+			}
+		my $redirect = { 'path' => $path,
+				 'dest' => $dest,
+				 'alias' => $dest =~ /^(http|https):/ ? 0 : 1,
+				 'regexp' => 0,
+				 'http' => $protos{'http'},
+				 'https' => $protos{'https'},
+			       };
+		$redirect = &add_wellknown_redirect($redirect);
+		my $err = &create_redirect($dom, $redirect);
+		if ($err) {
+			&$second_print(&text('setup_redirecterr', $err));
+			}
+		else {
+			&$second_print($text{'setup_redirected'});
+			}
+		}
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	}
+
 # If this was an alias domain, notify all features in the original domain. This
 # is useful for things like awstats, which need to add the alias domain to those
 # supported for the main site.

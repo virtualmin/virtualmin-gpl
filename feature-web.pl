@@ -2966,11 +2966,11 @@ my ($rfrom, $rto);
 for(my $i=0; defined($rfrom = $in{"rfrom_$i"}); $i++) {
 	$rto = $in{"rto_$i"};
 	next if (!$rfrom && !$rto);
-	$rfrom =~ /^\// || &error(&text('newwweb_efrom', $i+1));
+	$rfrom =~ /^\// || &error(&text('newweb_efrom', $i+1));
 	$rto =~ /^\// || $rto =~ /^(http|https):/ ||
-		&error(&text('newwweb_eto', $i+1));
+		&error(&text('newweb_eto', $i+1));
 	$rprotos = join(",", split(/\0/, $in{"rprotos_$i"}));
-	$rprotos || &error(&text('newwweb_eprotos', $i+1));
+	$rprotos || &error(&text('newweb_eprotos', $i+1));
 	push(@redirs, [ $rfrom, $rto, $rprotos ]);
 	}
 $tmpl->{'web_redirects'} = join("\t", map { join(" ", @$_) } @redirs);
