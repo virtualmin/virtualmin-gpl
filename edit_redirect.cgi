@@ -33,7 +33,7 @@ print &ui_table_row(&hlink($text{'redirect_path'}, 'redirect_path'),
 my ($mode, $dir, $url, $upath);
 if ($r->{'alias'}) {
 	$mode = 1;
-	$dir = $r->{'alias'};
+	$dir = $r->{'dest'};
 	}
 elsif ($r->{'dest'} &&
        $r->{'dest'} =~ /^(http|https):\/\/%{HTTP_HOST}(\/.*)$/) {
