@@ -1801,6 +1801,7 @@ newweb_rprotos=For protocols
 newweb_efrom=Redirect $1 from path must start with a /
 newweb_eto=Redirect $1 must be ether a path starting with / or a URL
 newweb_eprotos=No protocols selected for redirect $1
+newweb_sslredirect=Redirect all HTTP requests to HTTPS
 
 newftp_title=ProFTPD Server Template
 newftp_ecannot=You are not allowed to edit the ProFTPD template

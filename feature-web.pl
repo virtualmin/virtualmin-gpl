@@ -2816,6 +2816,8 @@ for(my $i=0; $i<@redirs; $i++) {
 		]);
 	}
 $rtable .= &ui_columns_end();
+$rtable .= &ui_checkbox("sslredirect", 1, $text{'newweb_sslredirect'},
+			$tmpl->{'web_sslredirect'});
 print &ui_table_row(&hlink($text{'newweb_redirects'}, 'template_web_redirects'),
 	$rtable);
 }
@@ -2974,6 +2976,7 @@ for(my $i=0; defined($rfrom = $in{"rfrom_$i"}); $i++) {
 	push(@redirs, [ $rfrom, $rto, $rprotos ]);
 	}
 $tmpl->{'web_redirects'} = join("\t", map { join(" ", @$_) } @redirs);
+$tmpl->{'web_sslredirect'} = $in{'sslredirect'};
 }
 
 # postsave_template_web(&template)

@@ -9129,6 +9129,7 @@ push(@rv, { 'id' => 0,
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'web_http2' => $config{'web_http2'},
 	    'web_redirects' => $config{'web_redirects'},
+	    'web_sslredirect' => $config{'auto_redirect'},
 	    'webalizer' => $config{'def_webalizer'} || "none",
 	    'disabled_web' => $config{'disabled_web'} || "none",
 	    'disabled_url' => $config{'disabled_url'} || "none",
@@ -9420,6 +9421,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'web_admindom'} = $tmpl->{'web_admindom'};
 	$config{'web_http2'} = $tmpl->{'web_http2'};
 	$config{'web_redirects'} = $tmpl->{'web_redirects'};
+	$config{'auto_redirect'} = $tmpl->{'web_sslredirect'};
 	$config{'php_vars'} = $tmpl->{'php_vars'} eq "none" ? "" :
 				$tmpl->{'php_vars'};
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
@@ -9702,6 +9704,7 @@ if (!$tmpl->{'default'}) {
 	local %done;
 	foreach $p ("dns_spf", "dns_sub", "dns_master", "dns_mx", "dns_dmarc",
 		    "web_webmail", "web_admin", "web_http2",
+		    "web_redirects", "web_sslredirect",
 		    "web", "dns", "ftp", "frame", "user_aliases",
 		    "ugroup", "sgroup", "quota", "uquota", "ushell", "ujail",
 		    "mailboxlimit", "domslimit",
@@ -9732,7 +9735,7 @@ if (!$tmpl->{'default'}) {
 			foreach $k (keys %$def) {
 				next if ($p eq "dns" && $k =~ /^dns_spf/);
 				next if ($p eq "php" && $k =~ /^php_(fpm|sock)/);
-				next if ($p eq "web" && $k =~ /^web_(webmail|admin|http2)/);
+				next if ($p eq "web" && $k =~ /^web_(webmail|admin|http2|redirects|sslredirect)/);
 				if (!$done{$k} &&
 				    ($k =~ /^\Q$p\E_/ || $k eq $p)) {
 					$tmpl->{$k} = $def->{$k};
