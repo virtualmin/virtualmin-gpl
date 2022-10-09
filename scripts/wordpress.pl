@@ -240,6 +240,7 @@ if (!$upgrade) {
 	# Configure the database
 	my $out = &run_as_domain_user($d,
 		"$wp config create --dbname=".quotemeta($dbname).
+		" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
 		" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
 		" --dbhost=".quotemeta($dbhost)." 2>&1");
 	if ($?) {
