@@ -1874,10 +1874,15 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	&$first_print($text{'setup_openssl'});
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
+	local @alts = ( $d->{'dom'}, "localhost",
+			&get_system_hostname(0),
+			&get_system_hostname(1) );
+	@alts = &unique(@alts);
 	local $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $d->{'owner'}, undef,
-		"*.$d->{'dom'}", $d->{'emailto_addr'}, [ $d->{'dom'} ], $d);
+		"*.$d->{'dom'}", $d->{'emailto_addr'},
+		\@alts, $d);
 	if ($err) {
 		&$second_print(&text('setup_eopenssl', $err));
 		return 0;
