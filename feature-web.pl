@@ -2811,8 +2811,9 @@ for(my $i=0; $i<@redirs; $i++) {
 	$rtable .= &ui_columns_row([
 		&ui_textbox("rfrom_$i", $redirs[$i]->[0], 30),
 		&ui_textbox("rto_$i", $redirs[$i]->[1], 40),
-		&ui_checkbox("rprotos_$i", "http", "HTTP", $protos{'http'})." ".
-		&ui_checkbox("rprotos_$i", "https", "HTTPS", $protos{'https'})
+		&vui_ui_block_no_wrap(
+			&ui_checkbox("rprotos_$i", "http", "HTTP", $protos{'http'})." ".
+			&ui_checkbox("rprotos_$i", "https", "HTTPS", $protos{'https'}), 1)
 		]);
 	}
 $rtable .= &ui_columns_end();
