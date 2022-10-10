@@ -2947,7 +2947,7 @@ my $out = &backquote_command("openssl version 2>/dev/null");
 if ($out =~ /OpenSSL\s+(\d\.\d)/) {
 	return $1;
 	}
-return undef;
+return 0;
 }
 
 # before_letsencrypt_website(&domain)
