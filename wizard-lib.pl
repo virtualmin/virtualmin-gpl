@@ -796,7 +796,7 @@ else {
 		&ui_radio("defdom", 1,
 			  [ [ 0, $text{'wizard_defdom0'} ],
 			    [ 1, $text{'wizard_defdom1'}." ".
-				 &ui_textbox("defhost", $def, 20) ] ]));
+				 &ui_textbox("defhost", $def, 26) ] ]));
 
 	print &ui_table_row($text{'wizard_defdom_ssl'},
 		&ui_radio("defssl", 2,
