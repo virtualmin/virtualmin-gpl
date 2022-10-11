@@ -17806,21 +17806,12 @@ if ($config{'scriptwarn_url'} && !$main::calling_get_virtualmin_url) {
 	$rv = &substitute_domain_template($config{'scriptwarn_url'}, $d);
 	$rv =~ s/\/$//;
 	$main::calling_get_virtualmin_url = 0;
+	return $rv;
 	}
-elsif (defined(&get_webmin_email_url)) {
+else {
 	# Use new standard function
 	return &get_webmin_email_url(undef, undef, 0, $d->{'dom'});
 	}
-else {
-	# Work out from miniserv
-	# XXX remove this after get_webmin_email_url is widely available
-	local %miniserv;
-	&get_miniserv_config(\%miniserv);
-	local $proto = $miniserv{'ssl'} ? 'https' : 'http';
-	local $port = $miniserv{'port'};
-	$rv = $proto."://$d->{'dom'}:$port";
-	}
-return $rv;
 }
 
 # get_domain_url(&domain, [ssl-if-enabled])
