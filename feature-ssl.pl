@@ -1697,10 +1697,11 @@ local $outtemp = &transname();
 local $keytemp = &transname();
 local $certtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
+local $addtextsup = &get_openssl_version() >= 1.1 ? "-addext extendedKeyUsage=serverAuth" : "";
 local $out = &backquote_logged(
 	"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
 	"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
-	"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." -utf8 2>&1");
+	"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
 local $rv = $?;
 if (!-r $certtemp || !-r $keytemp || $rv) {
 	# Failed .. return error
@@ -2943,10 +2944,10 @@ $d->{'ssl_everything'} = $everyfile;
 sub get_openssl_version
 {
 my $out = &backquote_command("openssl version 2>/dev/null");
-if ($out =~ /OpenSSL\s+([0-9\.a-z]+)/i) {
+if ($out =~ /OpenSSL\s+(\d\.\d)/) {
 	return $1;
 	}
-return undef;
+return 0;
 }
 
 # before_letsencrypt_website(&domain)
