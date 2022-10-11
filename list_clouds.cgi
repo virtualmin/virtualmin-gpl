@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Show a list of cloud storage providers
 
+$trust_unknown_referers = 1;
 require './virtual-server-lib.pl';
 &ReadParse();
 &can_cloud_providers() || &error($text{'clouds_ecannot'});

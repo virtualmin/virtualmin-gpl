@@ -267,7 +267,8 @@ return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
 
 sub cloud_google_get_state
 {
-if ($config{'google_account'} && $config{'google_oauth'}) {
+if ($config{'google_account'} &&
+    ($config{'google_oauth'} || $config{'google_rtoken'})) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_gaccount',
 				 "<tt>$config{'google_account'}</tt>",
@@ -289,11 +290,11 @@ $rv .= &ui_table_row($text{'cloud_google_account'},
 
 # Google OAuth2 client ID
 $rv .= &ui_table_row($text{'cloud_google_clientid'},
-	&ui_textbox("google_clientid", $config{'google_clientid'}, 60));
+	&ui_textbox("google_clientid", $config{'google_clientid'}, 80));
 
 # Google client secret
 $rv .= &ui_table_row($text{'cloud_google_secret'},
-	&ui_textbox("google_secret", $config{'google_secret'}, 40));
+	&ui_textbox("google_secret", $config{'google_secret'}, 60));
 
 # GCE project name
 $rv .= &ui_table_row($text{'cloud_google_project'},
@@ -319,86 +320,59 @@ sub cloud_google_parse_inputs
 my ($in) = @_;
 my $reauth = 0;
 
-if ($in{'google_set_oauth'}) {
-	# Special mode - saving the oauth token
-	$in->{'google_oauth'} =~ /^\S+$/ ||
-		&error($text{'cloud_egoogle_oauth'});
-	$config{'google_oauth'} = $in->{'google_oauth'};
-	}
-else {
-	# Parse google account
-	$in->{'google_account'} =~ /^\S+\@\S+$/ ||
-		&error($text{'cloud_egoogle_account'});
-	$reauth++ if ($config{'google_account'} ne $in->{'google_account'});
-	$config{'google_account'} = $in->{'google_account'};
+# Parse google account
+$in->{'google_account'} =~ /^\S+\@\S+$/ ||
+	&error($text{'cloud_egoogle_account'});
+$reauth++ if ($config{'google_account'} ne $in->{'google_account'});
+$config{'google_account'} = $in->{'google_account'};
 
-	# Parse client ID
-	$in->{'google_clientid'} =~ /^\S+$/ ||
-		&error($text{'cloud_egoogle_clientid'});
-	$reauth++ if ($config{'google_clientid'} ne $in->{'google_clientid'});
-	$config{'google_clientid'} = $in->{'google_clientid'};
+# Parse client ID
+$in->{'google_clientid'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_clientid'});
+$reauth++ if ($config{'google_clientid'} ne $in->{'google_clientid'});
+$config{'google_clientid'} = $in->{'google_clientid'};
 
-	# Parse client secret
-	$in->{'google_secret'} =~ /^\S+$/ ||
-		&error($text{'cloud_egoogle_secret'});
-	$reauth++ if ($config{'google_secret'} ne $in->{'google_secret'});
-	$config{'google_secret'} = $in->{'google_secret'};
+# Parse client secret
+$in->{'google_secret'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_secret'});
+$reauth++ if ($config{'google_secret'} ne $in->{'google_secret'});
+$config{'google_secret'} = $in->{'google_secret'};
 
-	# Parse project name
-	$in->{'google_project'} =~ /^\S+$/ ||
-		&error($text{'cloud_egoogle_project'});
-	$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
-	$config{'google_project'} = $in->{'google_project'};
+# Parse project name
+$in->{'google_project'} =~ /^\S+$/ ||
+	&error($text{'cloud_egoogle_project'});
+$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
+$config{'google_project'} = $in->{'google_project'};
 
-	# Parse bucket location
-	$config{'google_location'} = $in->{'google_location'};
-
-	$reauth++ if (!$config{'google_oauth'});
-	}
-
-if ($config{'google_oauth'} && !$config{'google_token'}) {
-	# Need to get access token for the first time
-	my $gce = { 'oauth' => $config{'google_oauth'},
-	            'clientid' => $config{'google_clientid'},
-		    'secret' => $config{'google_secret'} };
-	my ($ok, $token, $rtoken, $ttime) = &get_oauth_access_token($gce);
-	$ok || &error(&text('cloud_egoogletoken', $token));
-	$config{'google_token'} = $token;
-	$config{'google_rtoken'} = $rtoken;
-	$config{'google_ttime'} = $ttime;
-	$config{'google_tstart'} = time();
-
-	# Validate that it actually works
-	my $buckets = &list_gcs_buckets();
-	ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
-	}
+# Parse bucket location
+$config{'google_location'} = $in->{'google_location'};
 
 &lock_file($module_config_file);
+$config{'cloud_oauth_mode'} = $config{'google_oauth'} ? undef : 'google';
 &save_module_config();
 &unlock_file($module_config_file);
 
-if ($in{'google_set_oauth'} || !$reauth) {
+if ($config{'google_oauth'}) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
 	# settings were saved with no change
 	return undef;
 	}
 
+my $url = &get_virtualmin_url()."/virtual-server/oauth.cgi";
 return $text{'cloud_descoauth'}."<p>\n".
-       &ui_link("https://accounts.google.com/o/oauth2/auth?".
-                "scope=https://www.googleapis.com/auth/devstorage.read_write&".
-                "redirect_uri=urn:ietf:wg:oauth:2.0:oob&".
-                "response_type=code&".
-                "client_id=".&urlize($in->{'google_clientid'})."&".
-		"login_hint=".&urlize($in->{'google_account'}),
-                $text{'cloud_openoauth'},
-                undef,
-                "target=_blank")."<p>\n".
-       &ui_form_start("save_cloud.cgi", "post").
-       &ui_hidden("name", "google").
-       &ui_hidden("google_set_oauth", 1).
-       "<b>$text{'cloud_newoauth'}</b> ".
-       &ui_textbox("google_oauth", undef, 80)."<p>\n".
-       &ui_form_end([ [ undef, $text{'save'} ] ]);
+       &ui_form_start("https://accounts.google.com/o/oauth2/auth",
+		      "GET", "_blank")."\n".
+       &ui_hidden("scope",
+		  "https://www.googleapis.com/auth/devstorage.read_write")."\n".
+       &ui_hidden("redirect_uri", $url)."\n".
+       &ui_hidden("response_type", "code")."\n".
+       &ui_hidden("client_id", $in->{'google_clientid'})."\n".
+       &ui_hidden("login_hint", $in->{'google_account'})."\n".
+       &ui_hidden("access_type", "offline")."\n".
+       &ui_hidden("prompt", "consent")."\n".
+       &ui_submit($text{'cloud_openoauth'})."\n".
+       &ui_form_end()."<p>\n".
+       $text{'cloud_descoauth2'}."<p>\n";
 }
 
 # cloud_google_clear()
@@ -410,6 +384,7 @@ delete($config{'google_clientid'});
 delete($config{'google_secret'});
 delete($config{'google_oauth'});
 delete($config{'google_token'});
+delete($config{'google_rtoken'});
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
