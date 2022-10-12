@@ -85,6 +85,7 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
+	$info->{'recs'} = [ &records_to_text($d, $info->{'recs'}) ];
 	&$first_print($text{'setup_bind_provision'});
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
@@ -4430,8 +4431,7 @@ my $rv = "";
 foreach my $r (@_) {
 	$rv .= &bind8::make_record($r->{'name'}, $r->{'ttl'}, $r->{'class'},
 				   $r->{'type'}, join(" ", @{$r->{'values'}}));
-	$rv .= "\n"
-		if ($rv && &trim($rv));
+	$rv .= "\n" if ($rv && &trim($rv));
 	}
 return $rv;
 }
