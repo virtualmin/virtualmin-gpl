@@ -28,6 +28,7 @@ return ([ "Backup and restore", "backup-domain.pl", "list-scheduled-backups.pl",
 	[ "Account plans", "*-plan.pl", "*-plans.pl" ],
 	[ "SVN repositories", "*-svn-repositor*.pl" ],
 	[ "Amazon S3", "*-s3-*.pl", "*-rs-*.pl" ],
+	[ "License", "*license*" ],
 	[ "Other scripts", "*.pl" ],
 	);
 }
