@@ -125,6 +125,10 @@ to list, create and delete SVN repositories.",
 "These commands can be used to upload files to, download files from and
 manage files on Amazon's S3 cloud storage service.",
 
+"License",
+"These commands are used to list Virtualmin license info, change license or
+downgrade to GPL.",
+
 "Other scripts",
 "Programs in this section don't fall into any of the other categories.",
 	);
