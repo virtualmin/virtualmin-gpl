@@ -15,11 +15,12 @@ my @rv = ( { 'name' => 's3',
 	     'desc' => $text{'cloud_rsdesc'},
 	     'longdesc' => $text{'cloud_rs_longdesc'} } );
 if ($virtualmin_pro) {
+	my $ourl = &get_miniserv_base_url()."/$module_name/oauth.cgi";
 	push(@rv, { 'name' => 'google',
 		    'prefix' => [ 'gcs' ],
 		    'url' => 'https://cloud.google.com/storage',
 		    'desc' => $text{'cloud_googledesc'},
-		    'longdesc' => $text{'cloud_google_longdesc'} });
+		    'longdesc' => &text('cloud_google_longdesc', $ourl) });
 	push(@rv, { 'name' => 'dropbox',
 		    'prefix' => [ 'dropbox' ],
 		    'url' => 'https://www.dropbox.com/',
@@ -358,7 +359,7 @@ if ($config{'google_oauth'}) {
 	return undef;
 	}
 
-my $url = &get_virtualmin_url()."/virtual-server/oauth.cgi";
+my $url = &get_miniserv_base_url()."/virtual-server/oauth.cgi";
 return $text{'cloud_descoauth'}."<p>\n".
        &ui_form_start("https://accounts.google.com/o/oauth2/auth",
 		      "GET", "_blank")."\n".

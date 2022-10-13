@@ -4452,21 +4452,33 @@ if (!-s $cpath) {
 }
 
 # get_miniserv_port_proto()
-# Returns the port number and protocol (http or https) for Webmin
+# Returns the port number, protocol (http or https) and hostname for Webmin
 sub get_miniserv_port_proto
 {
 if ($ENV{'SERVER_PORT'}) {
 	# Running under miniserv
 	return ( $ENV{'SERVER_PORT'},
-		 $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http' );
+		 $ENV{'HTTPS'} eq 'ON' ? 'https' : 'http',
+	         $ENV{'SERVER_NAME'} );
 	}
 else {
 	# Get from miniserv config
 	local %miniserv;
 	&get_miniserv_config(\%miniserv);
 	return ( $miniserv{'port'},
-		 $miniserv{'ssl'} ? 'https' : 'http' );
+		 $miniserv{'ssl'} ? 'https' : 'http',
+		 &get_system_hostname() );
 	}
+}
+
+# get_miniserv_base_url()
+# Returns the base URL for this Virtualmin install, without the trailing /
+sub get_miniserv_base_url
+{
+my ($port, $proto, $host) = &get_miniserv_port_proto();
+my $portstr = $proto eq "http" && $port == 80 ? "" :
+	      $proto eq "https" && $port == 443 ? "" : ":".$port;
+return $proto."://".$host.$portstr;
 }
 
 # send_template_email(data, address, &substitions, subject, cc, bcc,
