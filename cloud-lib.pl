@@ -373,7 +373,7 @@ return $text{'cloud_descoauth'}."<p>\n".
        &ui_hidden("login_hint", $in->{'google_account'})."\n".
        &ui_hidden("access_type", "offline")."\n".
        &ui_hidden("prompt", "consent")."\n".
-       &ui_submit($text{'cloud_openoauth'})."\n".
+       &ui_submit($text{'cloud_openoauth'})."<p>\n".
        &ui_form_end()."<p>\n".
        $text{'cloud_descoauth2'}."<p>\n";
 }
