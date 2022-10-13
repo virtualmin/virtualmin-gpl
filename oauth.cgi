@@ -28,6 +28,25 @@ if ($mode eq 'google') {
 	my $buckets = &list_gcs_buckets();
 	ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
 	}
+elsif ($mode eq 'googledns') {
+	# Update Google DNS token
+	$config{'googledns_oauth'} = $in{'code'};
+	my $gce = { 'oauth' => $config{'googledns_oauth'},
+	            'clientid' => $config{'googledns_clientid'},
+		    'secret' => $config{'googledns_secret'},
+		  };
+	my ($ok, $token, $rtoken, $ttime) = &get_oauth_access_token($gce);
+	$ok || &error(&text('cloud_egoogletoken', $token));
+	$config{'googledns_token'} = $token;
+	$config{'googledns_rtoken'} = $rtoken;
+	$config{'googledns_ttime'} = $ttime;
+	$config{'googledns_tstart'} = time();
+
+	# Validate that it actually works
+	$rv = &call_googledns_api("/managedZones", [], "GET");
+	ref($rv) || &error(&text('cloud_egoogletoken2', $rv));
+	}
+
 else {
 	&error($text{'cloud_eoauth_mode'});
 	}
