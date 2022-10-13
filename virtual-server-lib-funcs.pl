@@ -8081,7 +8081,7 @@ if (@redirs && !$dom->{'alias'} &&  &domain_has_website($dom) &&
 	&$first_print($text{'setup_redirects'});
 	&$indent_print();
 	foreach my $r (@redirs) {
-		my %protos = map { $_, 1 } split(/,/, $redirs[$i]->[2]);
+		my %protos = map { $_, 1 } split(/,/, $r->[2]);
 		next if ($protos{'https'} && !$protos{'http'} &&
 			 !&domain_has_ssl($dom));
 		my $path = &substitute_domain_template($r->[0], $dom);
