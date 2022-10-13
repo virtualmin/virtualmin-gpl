@@ -348,12 +348,14 @@ $config{'google_project'} = $in->{'google_project'};
 # Parse bucket location
 $config{'google_location'} = $in->{'google_location'};
 
+$reauth++ if (!$config{'google_oauth'});
+
 &lock_file($module_config_file);
-$config{'cloud_oauth_mode'} = $config{'google_oauth'} ? undef : 'google';
+$config{'cloud_oauth_mode'} = $reauth ? 'google' : undef;
 &save_module_config();
 &unlock_file($module_config_file);
 
-if ($config{'google_oauth'}) {
+if (!$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
 	# settings were saved with no change
 	return undef;
