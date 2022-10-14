@@ -952,6 +952,25 @@ if ($virt) {
 		&fix_options_directives($vconf, $conf, 0);
 		}
 
+	# Handle case where there are DAV directives, but it isn't enabled
+	if (&indexof('virtualmin-dav', @plugins) == -1) {
+		my @locs = &apache::find_directive_struct("Location", $vconf);
+		my ($dav) = grep { $_->{'value'} eq '/dav' } @locs;
+		if ($dav) {
+			&apache::save_directive_struct($dav, undef, $vconf, $conf);
+			my @al = &apache::find_directive("Alias", $vconf);
+			@al = grep { !/^\/dav\s/ } @al;
+			&apache::save_directive("Alias", \@al, $vconf, $conf);
+			my @pp = &apache::find_directive("ProxyPass", $vconf);
+			@pp = grep { !/^\/dav\/\s/ } @pp;
+			&apache::save_directive("ProxyPass", \@pp, $vconf, $conf);
+			my @ppr = &apache::find_directive("ProxyPassReverse", $vconf);
+			@ppr = grep { !/^\/dav\/\s/ } @ppr;
+			&apache::save_directive("ProxyPassReverse", \@ppr, $vconf, $conf);
+			&flush_file_lines($virt->{'file'});
+			}
+		}
+
 	# Re-save CA cert path based on actual config
 	$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca');
 
