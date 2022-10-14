@@ -1847,9 +1847,7 @@ if ($virt) {
 		}
 
 	# Handle case where there are DAV directives, but it isn't enabled
-	if (!$d->{'virtualmin-dav'}) {
-		&remove_dav_directives($virt, $vconf, $conf);
-		}
+	&remove_dav_directives($d, $virt, $vconf, $conf);
 
 	&register_post_action(\&restart_apache);
 	$rv = 1;
@@ -4864,11 +4862,13 @@ foreach my $dir (&apache::find_directive_struct("Directory", $vconf)) {
 return $changed;
 }
 
-# remove_dav_directives(&virt, &vconf, &conf)
+# remove_dav_directives(&domain, &virt, &vconf, &conf)
 # Remove DAV related directives from an Apache virtualhost
 sub remove_dav_directives
 {
-my ($virt, $vconf, $conf) = @_;
+my ($d, $virt, $vconf, $conf) = @_;
+return 0 if ($d->{'virtualmin-dav'} &&
+	     &indexof('virtualmin-dav', @plugins) >= 0);
 my @locs = &apache::find_directive_struct("Location", $vconf);
 my ($dav) = grep { $_->{'value'} eq '/dav' } @locs;
 return 0 if (!$dav);

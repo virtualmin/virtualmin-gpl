@@ -953,9 +953,7 @@ if ($virt) {
 		}
 
 	# Handle case where there are DAV directives, but it isn't enabled
-	if (!$d->{'virtualmin-dav'}) {
-		&remove_dav_directives($virt, $vconf, $conf);
-		}
+	&remove_dav_directives($d, $virt, $vconf, $conf);
 
 	# Re-save CA cert path based on actual config
 	$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca');
