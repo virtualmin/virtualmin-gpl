@@ -2,12 +2,12 @@
 
 =head1 downgrade-licence.pl
 
-Downgrade system to GPL version
+Downgrade Virtualmin Pro system to GPL version
 
 This program downgrades Virtualmin Pro system to GPL by performing various
 actions like, swapping Pro package with GPL variant, locking resellers accounts,
 automatically switching repositories and reverting the license to GPL.
-The only required parameter to perform downgrade is C<--downgrade>.
+The only required parameter to perform downgrade is C<--perform>.
 
 =cut
 
@@ -32,7 +32,7 @@ if (!$module_name) {
 # Parse args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	if ($a eq "--downgrade") {
+	if ($a eq "--perform") {
 		$downgrade = 1;
 		}
 	}
@@ -195,7 +195,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Downgrade Virtualmin Pro system to GPL.\n";
 print "\n";
-print "virtualmin downgrade-licence --downgrade\n";
+print "virtualmin downgrade-licence --perform\n";
 exit(1);
 }
 
