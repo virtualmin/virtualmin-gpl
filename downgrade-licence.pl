@@ -2,7 +2,7 @@
 
 =head1 downgrade-licence.pl
 
-Downgrade system to GPL version
+Downgrade Virtualmin Pro system to GPL version
 
 This program downgrades Virtualmin Pro system to GPL by performing various
 actions like, swapping Pro package with GPL variant, locking resellers accounts,

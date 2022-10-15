@@ -2,7 +2,7 @@
 
 =head1 setup-repos.pl
 
-Install or fix Virtualmin repos.
+Setup Virtualmin repositories.
 
 This program can be used to setup or fix Virtualmin repositories.
 
@@ -86,7 +86,12 @@ else {
 
 sub usage
 {
-print STDERR "setup-repos.pl [[--serial] [--key]] [--no-check]\n";
+print "$_[0]\n\n" if ($_[0]);
+print "Setup Virtualmin repositories.\n";
+print "\n";
+print "virtualmin setup-repos [--serial number]\n";
+print "                       [--key id]\n";
+print "                       [--no-check]\n";
 exit(1);
 }
 
