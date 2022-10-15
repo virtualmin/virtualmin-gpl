@@ -62,6 +62,7 @@ if ($serial && $key) {
 		"${nocheck}--force-update", undef, \$out, \$err);
 	if ($?) {
 		&$second_print("..error : @{[setup_error($err || $out)]}");
+		exit(2);
 		}
 	else {
 		&$second_print("..done");
