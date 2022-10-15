@@ -365,13 +365,13 @@ my $url = &get_miniserv_base_url()."/virtual-server/oauth.cgi";
 return $text{'cloud_descoauth'}."<p>\n".
        &ui_link("https://accounts.google.com/o/oauth2/auth?".
                 "scope=https://www.googleapis.com/auth/devstorage.read_write&".
-		"redirect_uri=".&urlize($url)."&".
-       		"response_type=code&".
-		"client_id=".&urlize($in->{'google_clientid'})."&".
-		"login_hint=".&urlize($in->{'google_account'})."&".
-		"access_type=offline&".
-		"prompt=consent", $text{'cloud_openoauth'},
-		undef, "target=_blank")."<p>\n".
+                "redirect_uri=".&urlize($url)."&".
+                "response_type=code&".
+                "client_id=".&urlize($in->{'google_clientid'})."&".
+                "login_hint=".&urlize($in->{'google_account'})."&".
+                "access_type=offline&".
+                "prompt=consent", $text{'cloud_openoauth'},
+                undef, "target=_blank")."<p>\n".
        $text{'cloud_descoauth2'}."<p>\n";
 }
 
