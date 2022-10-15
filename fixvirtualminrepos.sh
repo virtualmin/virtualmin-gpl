@@ -177,6 +177,11 @@ while [ "$1" != "" ]; do
   esac
 done
 
+# Virtualmin packaged patch to always force repo setup
+setup_only=1
+mode='setup'
+unstable='unstable'
+
 if [ "${INTERACTIVE_MODE}" != "off" ];then
   stty -echo
 fi
