@@ -38,11 +38,11 @@ Virtualmin has been under consistent development since ~2003, averaging a new re
 
 Virtualmin has active forums at https://forum.virtualmin.com
 
-For commercial support, Virtualmin Professional subscriptions are available starting at $6/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. is also available at hourly or project rates.
+For commercial support, Virtualmin Professional subscriptions are available starting at $7.50/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. may also available at hourly or project rates, depending on developer availability.
 
 ### Reporting Bugs
 
-Bugs can be reported here at github in the issue tracker or at the ticket tracker on Virtualmin.com.
+Bugs can be reported here at github in the issue tracker. Please email security-related bug reports to security@webmin.com.
 
 ### Extending Virtualmin
 
