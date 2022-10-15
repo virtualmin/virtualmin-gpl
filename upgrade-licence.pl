@@ -56,7 +56,7 @@ my ($out, $err);
 
 # Setup Virtualmin license and repositories
 &$first_print("Upgrading Virtualmin license and repositories ..");
-my $vmcmd = &get_api_helper_command(get_api_helper_command);
+my $vmcmd = &get_api_helper_command();
 $vmcmd || &usage('Cannot find Virtualmin helper command');
 &execute_command("$vmcmd setup-repos ".
 	"--serial @{[quotemeta($serial)]} --key @{[quotemeta($key)]} ".

@@ -55,7 +55,7 @@ while(@ARGV > 0) {
 
 if ($serial && $key) {
 	&$first_print("Setting up license serial $serial and key $key ..");
-	my $vmcmd = &get_api_helper_command(get_api_helper_command);
+	my $vmcmd = &get_api_helper_command();
 	$vmcmd || &usage('Cannot find Virtualmin helper command');
 	my ($out, $err);
 	&execute_command("$vmcmd change-licence ".
