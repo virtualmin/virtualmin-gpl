@@ -101,6 +101,8 @@ foreach my $c (&list_api_categories()) {
 				$desc =~ s/\s(\S+)$//;
 				$wrap = $1." ".$wrap;
 				}
+			$desc =~ s/\.\s*$//;
+			$wrap =~ s/\.\s*$//;
 			if (!$donehead) {
 				# Category header
 				print $cname,"\n";
