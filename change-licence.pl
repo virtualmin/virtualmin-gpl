@@ -99,7 +99,7 @@ if (-r $virtualmin_yum_repo) {
 			) {
 				my $host = $4;
 				if ($force_update && $l =~ /\/gpl\//) {
-					$host =~ s/gpl\///;
+					$host =~ s/gpl\//pro\//;
 				}
 				$l = "baseurl=https://".$serial.":".$key."\@".$host;
 				$found++;
@@ -121,7 +121,7 @@ if (-r $virtualmin_apt_repo) {
 	my $gpl_warning = ("@{$lref}" =~ /\/gpl\// && !$force_update);
 	&usage($gpl_repos_warning) if ($gpl_warning);
 	
-	&$first_print("Updating Virtualmin APT repository ..");
+	&$first_print("Updating Virtualmin repository ..");
 	&lock_file($virtualmin_apt_repo);
 	foreach my $l (@$lref) {
 		if (
@@ -135,7 +135,7 @@ if (-r $virtualmin_apt_repo) {
 				my $gpgkey = $1;
 				my $host = $5;
 				if ($force_update && $l =~ /\/gpl\//) {
-					$host =~ s/gpl\///;
+					$host =~ s/gpl\//pro\//;
 					}
 				if (-d $virtualmin_apt_auth_dir) {
 					$l = "deb${gpgkey}https://".$host;
