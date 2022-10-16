@@ -9721,7 +9721,7 @@ $reset_tests = [
 		      'Destination: http://www.example.com',
 		      'Type: Redirect',
 		      'Match sub-paths: No',
-		      'Protocols: http$', ],
+		      'Protocols: https$', ],
 	},
 
 	# Check that the PHP mode is correct
