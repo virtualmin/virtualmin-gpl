@@ -7360,8 +7360,8 @@ if (!$webmin_user || !$webmin_pass) {
 
 # Tests for web, mail and FTP bandwidth accounting.
 # Uses a different domain to prevent re-reading of old mail logs.
-$test_bw_domain = time().$test_domain;
-$test_bw_domain_user = time().$test_domain_user;
+$test_bw_domain = 'bw'.time().$test_domain;
+$test_bw_domain_user = 'bw'.time().$test_domain_user;
 $bw_tests = [
 	# Create a domain for bandwidth loggin
 	{ 'command' => 'create-domain.pl',
