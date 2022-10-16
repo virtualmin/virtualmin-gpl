@@ -38,14 +38,14 @@ Virtualmin has been under consistent development since ~2003, averaging a new re
 
 Virtualmin has active forums at https://forum.virtualmin.com
 
-For commercial support, Virtualmin Professional subscriptions are available starting at $6/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. is also available at hourly or project rates.
+For commercial support, Virtualmin Professional subscriptions are available starting at $7.50/month, and include unlimited support tickets in our issue tracker. Hands-on support, custom development, etc. may also available at hourly or project rates, depending on developer availability.
 
 ### Reporting Bugs
 
-Bugs can be reported here at github in the issue tracker or at the ticket tracker on Virtualmin.com.
+Bugs can be reported here at github in the issue tracker. Please email security-related bug reports to security@webmin.com.
 
 ### Extending Virtualmin
 
 The best way to extend Virtualmin is usually through plugins. Virtualmin plugins are merely Webmin modules, with a few extra files, and some hooks into the Virtualmin API. Webmin module development is documented in the [Webmin Wiki](http://doxfer.webmin.com/Webmin/ModuleDevelopment), and lots of example plugins exist in our other repos (e.g. virtualmin-nginx is a good example of extending core functionality with plugins).
 
-Virtualmin is mostly built in Perl 5.10.1+, with the frontend built in JavaScript and HTML5. It is possible to build Virtualmin components or to interact with Virtualmin in other languages, either via the CLI or remote API, or through reproducing the necessary pieces of the Webmin library in your preferred language (partial implementations of this exist in Python and PHP).
+Virtualmin is mostly built in Perl 5.16+, with the frontend built in JavaScript and HTML5. It is possible to build Virtualmin components or to interact with Virtualmin in other languages, either via the CLI or remote API, or through reproducing the necessary pieces of the Webmin library in your preferred language (partial implementations of this exist in Python and PHP).
