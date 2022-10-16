@@ -85,11 +85,11 @@ if [ -e "$log" ]; then
   done
 fi
 
-skipyesno=0
-
 # Set defaults
 bundle='LAMP' # Other option is LEMP
 mode='full'   # Other option is minimal
+skipyesno=0
+vm6_repos=0
 
 usage() {
   # shellcheck disable=SC2046
@@ -97,16 +97,16 @@ usage() {
   echo
   echo "  If called without arguments, installs Virtualmin."
   echo
-  printf "  ${YELLOW}--help|-h${NORMAL}               display this help and exit\\n"
-  printf "  ${YELLOW}--bundle|-b <LAMP|LEMP>${NORMAL} choose bundle to install (defaults to LAMP)\\n"
-  printf "  ${YELLOW}--minimal|-m${NORMAL}            install a smaller subset of packages for low-memory/low-resource systems\\n"
-  printf "  ${YELLOW}--unstable|-e${NORMAL}           enable support for Grade B systems (Fedora, CentOS Stream, Oracle)\\n"
-  printf "  ${YELLOW}--no-package-updates|-x${NORMAL} skip installing system package updates\\n"
-  printf "  ${YELLOW}--setup|-s${NORMAL}              setup Virtualmin software repositories and exit\\n"
-  printf "  ${YELLOW}--hostname|-n${NORMAL}           set fully qualified hostname\\n"
-  printf "  ${YELLOW}--force|-f${NORMAL}              assume \"yes\" as answer to all prompts\\n"
-  printf "  ${YELLOW}--verbose|-v${NORMAL}            increase verbosity\\n"
-  printf "  ${YELLOW}--uninstall|-u${NORMAL}          removes all Virtualmin packages (do not use on a production system)\\n"
+  printf "  ${YELLOW}--help|-h${NORMAL}                       display this help and exit\\n"
+  printf "  ${YELLOW}--bundle|-b <LAMP|LEMP>${NORMAL}         choose bundle to install (defaults to LAMP)\\n"
+  printf "  ${YELLOW}--minimal|-m${NORMAL}                    install a smaller subset of packages for low-memory/low-resource systems\\n"
+  printf "  ${YELLOW}--unstable|-e${NORMAL}                   enable support for Grade B systems (Fedora, CentOS Stream, Oracle)\\n"
+  printf "  ${YELLOW}--no-package-updates|-x${NORMAL}         skip installing system package updates\\n"
+  printf "  ${YELLOW}--setup|-s <auto|force-latest>${NORMAL}  setup Virtualmin software repositories and exit\\n"
+  printf "  ${YELLOW}--hostname|-n${NORMAL}                   set fully qualified hostname\\n"
+  printf "  ${YELLOW}--force|-f${NORMAL}                      assume \"yes\" as answer to all prompts\\n"
+  printf "  ${YELLOW}--verbose|-v${NORMAL}                    increase verbosity\\n"
+  printf "  ${YELLOW}--uninstall|-u${NORMAL}                  removes all Virtualmin packages (do not use on a production system)\\n"
   echo
 }
 
@@ -150,6 +150,15 @@ while [ "$1" != "" ]; do
     setup_only=1
     mode='setup'
     unstable='unstable'
+    case "$1" in
+    force-latest)
+      shift
+      setup_only_force_latest=1
+      ;;
+    *)
+      setup_only_force_latest=0
+      ;;
+    esac
     break
     ;;
   --hostname | -n)
@@ -260,12 +269,12 @@ while true; do
       echo "  Attempting to install Perl .."
     fi
     if [ -x /usr/bin/dnf ]; then
-      dnf -y install perl >>$log
+      dnf -y install perl >>$log 2>&1
     elif [ -x /usr/bin/yum ]; then
-      yum -y install perl >>$log
+      yum -y install perl >>$log 2>&1
     elif [ -x /usr/bin/apt-get ]; then
-      apt-get update >>$log
-      apt-get -q -y install perl >>$log
+      apt-get update >>$log 2>&1
+      apt-get -q -y install perl >>$log 2>&1
     fi
     perl_attempted=1
     # Loop. Next loop should either break or exit.
@@ -767,25 +776,27 @@ if [ "$?" != "0" ]; then
 fi
 
 if [ -n "$setup_only" ]; then
-  # If Virtualmin 6 is installed and a user needs to fix repos make,
-  # sure that we don't switch 6 to 7 to keep the same stack packages
-  reposfile="/etc/yum.repos.d/virtualmin.repo /etc/apt/sources.list.d/virtualmin.list /etc/apt/sources.list"
-  vm_version_already_installed=$((vm_version - 1))
-  for repofile in $reposfile; do
-    if [ -f "$repofile" ]; then
-      if grep -F -q "universal" "$repofile"; then
-        vm_version=$vm_version_already_installed
+  if [ "$setup_only_force_latest" -ne 1 ]; then
+    # If Virtualmin 6 is installed and a user needs to fix repos make,
+    # sure that we don't switch 6 to 7 to keep the same stack packages
+    reposfile="/etc/yum.repos.d/virtualmin.repo /etc/apt/sources.list.d/virtualmin.list /etc/apt/sources.list"
+    vm_prev_version_installed=$((vm_version - 1))
+    for repofile in $reposfile; do
+      if [ -f "$repofile" ]; then
+        if grep -F -q "virtualmin-universal" "$repofile" || grep -F -q "/vm/$vm_prev_version_installed/" "$repofile"; then
 
-        # Fix for Virtualmin 6 repos
-        if [ "$vm_version" = "6" ]; then
-          if [ "$SERIAL" != "GPL" ]; then
-            repopath=""
+          # Fix for Virtualmin 6 repos
+          if [ "$vm_prev_version_installed" = "6" ]; then
+            if [ "$SERIAL" != "GPL" ]; then
+              repopath=""
+            fi
+            vm_version=$vm_prev_version_installed
+            vm6_repos=1
           fi
-          vm6_repos=1
         fi
       fi
-    fi
-  done
+    done
+  fi
   log_info "Started Virtualmin $vm_version $PRODUCT software repositories setup"
   printf "${YELLOW}▣${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}1${NORMAL}: Setup\\n"
 else
@@ -892,7 +903,7 @@ install_virtualmin_release() {
     fi
 
     # Download release file
-    if [ -n "$vm6_repos" ] && [ "$vm6_repos" -eq 1 ]; then
+    if [ "$vm6_repos" -eq 1 ]; then
       rpm_release_file_download="virtualmin-release-latest.noarch.rpm"
       download "https://${LOGIN}$upgrade_virtualmin_host/vm/$vm_version/${repopath}${os_type}/${os_major_version}/${arch}/$rpm_release_file_download" "Downloading Virtualmin $vm_version release package"
     else
@@ -943,7 +954,7 @@ install_virtualmin_release() {
     package_type="deb"
     if [ "$os_type" = "ubuntu" ]; then
       deps="$ubudeps"
-      if [ "$vm6_repos" = 1 ]; then
+      if [ "$vm6_repos" -eq 1 ]; then
         case "$os_version" in
         16.04*)
           repos="virtualmin-xenial virtualmin-universal"
@@ -963,7 +974,7 @@ install_virtualmin_release() {
       fi
     else
       deps="$debdeps"
-      if [ "$vm6_repos" = 1 ]; then
+      if [ "$vm6_repos" -eq 1 ]; then
         case "$os_version" in
         9*)
           repos="virtualmin-stretch virtualmin-universal"
@@ -1079,13 +1090,13 @@ install_with_yum() {
   # Enable CodeReady and EPEL on RHEL 8+
   if [ "$os_major_version" -ge 8 ] && [ "$os_type" = "rhel" ]; then
     # Important Perl packages are now hidden in CodeReady repo
-    run_ok "$install_config_manager --set-enabled codeready-builder-for-rhel-$os_major_version-x86_64*-rpms" "Enabling Red Hat CodeReady package repository"
+    run_ok "$install_config_manager --set-enabled codeready-builder-for-rhel-$os_major_version-x86_64-rpms" "Enabling Red Hat CodeReady package repository"
     # Install EPEL
-    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$os_major_version.noarch.rpm"
+    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$os_major_version.noarch.rpm" >>$log 2>&1
     run_ok "rpm -U --replacepkgs --quiet epel-release-latest-$os_major_version.noarch.rpm" "Installing EPEL $os_major_version release package"
   # Install EPEL on RHEL 7
   elif [ "$os_major_version" -eq 7 ] && [ "$os_type" = "rhel" ]; then
-    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm" >>$log 2>&1
     run_ok "rpm -U --replacepkgs --quiet epel-release-latest-7.noarch.rpm" "Installing EPEL 7 release package"
   # Install EPEL on CentOS/Alma/Rocky
   elif [ "$os_type" = "centos" ] || [ "$os_type" = "centos_stream" ] || [ "$os_type" = "rocky" ] || [ "$os_type" = "almalinux" ]; then  
