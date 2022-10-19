@@ -48,6 +48,7 @@ else {
 &save_module_config();
 &unlock_file($module_config_file);
 &clear_links_cache();
+&theme_post_save_domains() if (defined(&theme_post_save_domains));
 &run_post_actions();
 &webmin_log($in{'enabled'} ? "enable" : "disable", "dkim");
 
