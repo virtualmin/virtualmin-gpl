@@ -1017,30 +1017,7 @@ foreach my $d (@$doms) {
 		next;
 		}
 	&obtain_lock_dns($d);
-	my $withdot = $d->{'dom'}.'.';
-	my $dkname = '_domainkey.'.$withdot;
-	my $changed = 0;
-	my $selname = $dkim->{'selector'}.'.'.$dkname;
-	my ($selrec) = grep { $_->{'name'} eq $selname && 
-			      $_->{'type'} eq 'TXT' } @$recs;
-	if (!$selrec) {
-		# Add new record
-		my $selrec = { 'name' => $selname,
-			       'type' => 'TXT',
-			       'values' => [ 'v=DKIM1; k=rsa; t=s; p='.
-					     $pubkey ] };
-		&create_dns_record($recs, $file, $selrec);
-		$changed++;
-		}
-	elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
-		# Fix existing record
-		my $val = join("", @{$selrec->{'values'}});
-		if ($val !~ s/p=([^;]+)/p=$pubkey/) {
-			$val = 'k=rsa; t=s; p='.$pubkey;
-			}
-		$selrec->{'values'} = [ $val ];
-		$changed++;
-		}
+	my $changed = &add_domain_dkim_record($d, $dkim, $recs, $file);
 	if ($changed) {
 		my $err = &post_records_change($d, $recs, $file);
 		if ($err) {
@@ -1060,6 +1037,38 @@ foreach my $d (@$doms) {
 &register_post_action(\&restart_bind) if ($anychanged);
 }
 
+# add_domain_dkim_record(&domain, &dkim, &recs, file)
+# Add the DKIM record for a single domain to its zone file
+sub add_domain_dkim_record
+{
+my ($d, $dkim, $recs, $file) = @_;
+my $withdot = $d->{'dom'}.'.';
+my $dkname = '_domainkey.'.$withdot;
+my $changed = 0;
+my $selname = $dkim->{'selector'}.'.'.$dkname;
+my ($selrec) = grep { $_->{'name'} eq $selname && 
+		      $_->{'type'} eq 'TXT' } @$recs;
+if (!$selrec) {
+	# Add new record
+	my $selrec = { 'name' => $selname,
+		       'type' => 'TXT',
+		       'values' => [ 'v=DKIM1; k=rsa; t=s; p='.
+				     $pubkey ] };
+	&create_dns_record($recs, $file, $selrec);
+	$changed++;
+	}
+elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
+	# Fix existing record
+	my $val = join("", @{$selrec->{'values'}});
+	if ($val !~ s/p=([^;]+)/p=$pubkey/) {
+		$val = 'k=rsa; t=s; p='.$pubkey;
+		}
+	$selrec->{'values'} = [ $val ];
+	$changed++;
+	}
+return $changed;
+}
+
 # remove_dkim_dns_records(&domains, &dkim)
 # Delete all DKIM TXT records from the given DNS domains
 sub remove_dkim_dns_records
@@ -1076,22 +1085,7 @@ foreach my $d (@$doms) {
 		next;
 		}
 	&obtain_lock_dns($d);
-	my $withdot = $d->{'dom'}.'.';
-	my $dkname = '_domainkey.'.$withdot;
-	my ($dkrec) = grep { $_->{'name'} eq $dkname &&
-			     $_->{'type'} eq 'TXT' } @$recs;
-	my $selname = $dkim->{'selector'}.'.'.$dkname;
-	my ($selrec) = grep { $_->{'name'} eq $selname &&
-                              $_->{'type'} eq 'TXT' } @$recs;
-	my $changed = 0;
-	if ($selrec) {
-		&delete_dns_record($recs, $selrec->{'file'}, $selrec);
-		$changed++;
-		}
-	if ($dkrec) {
-		&delete_dns_record($recs, $dkrec->{'file'}, $dkrec);
-		$changed++;
-		}
+	my $changed = &remove_domain_dkim_record($d, $dkim, $recs, $file);
 	if ($changed) {
 		&post_records_change($d, $recs, $file);
 		&$second_print($text{'dkim_dnsremoved'});
@@ -1104,6 +1098,30 @@ foreach my $d (@$doms) {
 	&release_lock_dns($d);
 	}
 &register_post_action(\&restart_bind) if ($anychanged);
+}
+
+# remove_domain_dkim_record(&domain, &dkim, &recs, file)
+# Remove the DKIM records for a single domain from its zone file
+sub remove_domain_dkim_record
+{
+my ($d, $dkim, $recs, $file) = @_;
+my $withdot = $d->{'dom'}.'.';
+my $dkname = '_domainkey.'.$withdot;
+my ($dkrec) = grep { $_->{'name'} eq $dkname &&
+		     $_->{'type'} eq 'TXT' } @$recs;
+my $selname = $dkim->{'selector'}.'.'.$dkname;
+my ($selrec) = grep { $_->{'name'} eq $selname &&
+		      $_->{'type'} eq 'TXT' } @$recs;
+my $changed = 0;
+if ($selrec) {
+	&delete_dns_record($recs, $selrec->{'file'}, $selrec);
+	$changed++;
+	}
+if ($dkrec) {
+	&delete_dns_record($recs, $dkrec->{'file'}, $dkrec);
+	$changed++;
+	}
+return $changed;
 }
 
 # rebuild_sendmail_cf()
