@@ -4430,7 +4430,7 @@ my $rv = "";
 &require_bind();
 foreach my $r (@_) {
 	$rv .= &bind8::make_record($r->{'name'}, $r->{'ttl'}, $r->{'class'},
-				   $r->{'type'}, join(" ", @{$r->{'values'}}));
+				   $r->{'type'}, &join_record_values($r));
 	$rv .= "\n" if ($rv && &trim($rv));
 	}
 return $rv;

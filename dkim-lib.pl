@@ -1003,7 +1003,6 @@ sub add_dkim_dns_records
 my ($doms, $dkim) = @_;
 my $anychanged = 0;
 foreach my $d (@$doms) {
-	my $pubkey = &get_dkim_dns_pubkey($dkim, $d);
 	&$first_print(&text('dkim_dns', "<tt>$d->{'dom'}</tt>"));
 	if (&indexof($d->{'dom'}, @{$dkim->{'exclude'}}) >= 0) {
 		&$second_print($text{'dkim_ednsexclude'});
@@ -1048,6 +1047,7 @@ my $changed = 0;
 my $selname = $dkim->{'selector'}.'.'.$dkname;
 my ($selrec) = grep { $_->{'name'} eq $selname && 
 		      $_->{'type'} eq 'TXT' } @$recs;
+my $pubkey = &get_dkim_dns_pubkey($dkim, $d);
 if (!$selrec) {
 	# Add new record
 	my $selrec = { 'name' => $selname,

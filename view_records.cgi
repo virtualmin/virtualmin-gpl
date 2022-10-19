@@ -18,12 +18,18 @@ local $bind8::get_chroot_cache = "";
 $recs = [ ];
 &create_standard_records($recs, $temp, $d, $d->{'dns_ip'} || $d->{'ip'});
 if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
+	# Add autoconfig records
 	&enable_dns_autoconfig($d, &get_autoconfig_hostname($d), $temp, $recs);
 	}
+if ($d->{'mail'} && !&check_dkim() && ($dkim = &get_dkim_config()) &&
+    $dkim->{'enabled'}) {
+	# Add DKIM record
+	&add_domain_dkim_record($d, $dkim, $recs, $temp);
+	}
+@$recs = grep { $_->{'type'} ne 'NS' &&
+		$_->{'type'} ne 'SOA' &&
+		!$_->{'defttl'} } @$recs;
 $out = &dns_records_to_text(@$recs);
-$out =~ s/^\$ttl.*\n//;
-$out =~ s/.*NS.*\n//g;
-$out =~ s/.*SOA.*\([^\)]+\).*\n// || $out =~ s/.*SOA.*\n//g;
 
 # Show them
 print &ui_alert_box($text{'records_viewdesc'}, 'warn', undef, undef, "");
