@@ -2737,7 +2737,8 @@ if ($ok) {
 
 			# Check for clashes
 			$d->{'wasmissing'} = 1;
-			local $cerr = &virtual_server_clashes($d);
+			local $cerr = &virtual_server_clashes(
+					$d, $opts->{'repl'});
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;

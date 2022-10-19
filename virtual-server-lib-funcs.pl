@@ -7521,18 +7521,20 @@ else {
 return ($group);
 }
 
-# virtual_server_clashes(&dom, [&features-to-check], [field-to-check])
+# virtual_server_clashes(&dom, [&features-to-check], [field-to-check],
+# 			 [replication-mode])
 # Returns a clash error message if any were found for some new domain
 sub virtual_server_clashes
 {
-local ($dom, $check, $field) = @_;
+local ($dom, $check, $field, $repl) = @_;
 my $f;
 foreach $f (@features) {
 	next if ($dom->{'parent'} && $f eq "webmin");
 	next if ($dom->{'parent'} && $f eq "unix");
 	if ($dom->{$f} && (!$check || $check->{$f})) {
 		local $cfunc = "check_${f}_clash";
-		local $err = defined(&$cfunc) ? &$cfunc($dom, $field) : undef;
+		local $err = defined(&$cfunc) ? &$cfunc($dom, $field, $repl)
+					      : undef;
 		if ($err) {
 			if ($err eq '1') {
 				# Use a built-in error
