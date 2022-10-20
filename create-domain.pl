@@ -66,9 +66,9 @@ used. However, you can override this with the C<--cloud-dns> flag followed by
 either C<local> to host locally, C<services> to use Cloudmin services, or
 the ID of one of the supported providers like C<route53> or C<google>.
 
-Use the --letsencrypt option to generate automaticaly a Let's Encrypt
-certificate with auto-renewal. Use  --letsencrypt-always to also run checks
-before generation.
+Use the C<--letsencrypt> option to request automaticaly a Let's Encrypt
+certificate with auto-renewal. To skip connectivity checks, use instead
+C<--letsencrypt-always>.
 
 =cut
 
