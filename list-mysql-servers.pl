@@ -54,7 +54,7 @@ if ($multi) {
 			print "    Host: ",$m->{'config'}->{'host'},"\n";
 			}
 		if ($m->{'config'}->{'port'}) {
-			print "    Host: ",$m->{'config'}->{'port'},"\n";
+			print "    Port: ",$m->{'config'}->{'port'},"\n";
 			}
 		}
 	}
