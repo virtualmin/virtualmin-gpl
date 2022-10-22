@@ -365,8 +365,11 @@ if ($d->{'user'} ne $oldd->{'user'}) {
 		goto VIRTFAILED;
 		}
 	local @vals = &apache::find_directive("SuexecUserGroup", $nonvconf);
-	&apache::save_directive("SuexecUserGroup", \@vals, $vconf, $conf);
-	&flush_file_lines($virt->{'file'});
+	if (@vals) {
+		&apache::save_directive(
+			"SuexecUserGroup", \@vals, $vconf, $conf);
+		&flush_file_lines($virt->{'file'});
+		}
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
