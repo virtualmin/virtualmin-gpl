@@ -1136,6 +1136,7 @@ local $withdot = $d->{'dom'}.".";
 # MX for this system
 local $mxname = $tmpl->{'dns_mx'} && $tmpl->{'dns_mx'} ne 'none' ?
 			$tmpl->{'dns_mx'}."." : "mail.$withdot";
+$mxname = &substitute_domain_template($mxname, $d);
 my $r = { 'name' => $withdot,
 	  'type' => "MX",
 	  'values' => [ 5, $mxname ] };
@@ -2988,7 +2989,7 @@ $tmpl->{'dns_master'} = $in{'dns_master_mode'} == 0 ? "none" :
 $tmpl->{'dns_indom'} = $in{'dns_indom'};
 
 # Save MX hostname
-$in{'dns_mx_mode'} != 2 || $in{'dns_mx'} =~ /^[a-z0-9\.\-\_]+$/i ||
+$in{'dns_mx_mode'} != 2 || $in{'dns_mx'} =~ /^[a-z0-9\.\-\_\{\}]+$/i ||
 	&error($text{'tmpl_ednsmx'});
 $tmpl->{'dns_mx'} = $in{'dns_mx_mode'} == 0 ? "none" :
 		    $in{'dns_mx_mode'} == 1 ? undef : $in{'dns_mx'};
