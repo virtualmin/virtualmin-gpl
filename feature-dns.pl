@@ -4434,7 +4434,46 @@ foreach my $r (@_) {
 				   $r->{'type'}, &join_record_values($r));
 	$rv .= "\n" if ($rv && &trim($rv));
 	}
+
+# Format DNS records
+$rv = format_dns_text_records($rv);
 return $rv;
+}
+
+# format_dns_text_records($recs-text-list, [&opts])
+# Formats records to be column like 
+sub format_dns_text_records {
+my ($recs, $opts) = @_;
+return $recs if (!length(&trim($recs)));
+my $idelim =
+	$opts->{'in-delimiter'} ||= "	";
+my $odelim =
+	$opts->{'out-delimiter'} ||= $idelim;
+my @recs;
+my %cols;
+my @lines = split(/\n/, $recs);
+
+# Build columns meta
+foreach my $ln (@lines) {
+	my @lc = split(/$idelim/, $ln);
+	for my $x (0 .. $#lc) {
+	    my $cl = length($lc[$x]);
+	    $cols{"c${x}"} = $cl
+	    	if (!$cols{"c${x}"} || $cols{"c${x}"} < $cl);
+		}
+	}
+# Rebuild columns
+foreach my $ln (@lines) {
+	my @lc = split(/$odelim/, $ln);
+	my @rec;
+	for my $x (0 .. $#lc) {
+	    my $cl = length($lc[$x]);
+	    my $lm = $cols{"c${x}"} - $cl;
+	    push(@rec, $lc[$x] . " " x $lm);
+		}
+	push(@recs, join('	', @rec))
+	}
+return join("\n", @recs);
 }
 
 # obtain_lock_dns(&domain, [named-conf-too])

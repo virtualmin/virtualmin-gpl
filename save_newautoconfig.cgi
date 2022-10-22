@@ -34,7 +34,8 @@ if (@doms) {
 $config{'mail_autoconfig'} = $in{'autoconfig'};
 &save_module_config();
 &unlock_file($module_config_file);
-print "<p>$text{'autoconfig_enabled_global'}</p>\n";
+&$first_print($text{'autoconfig_enabled_global'});
+&$second_print($text{'setup_done'});
 
 &run_post_actions();
 &webmin_log("autoconfig", undef, undef, { 'enabled' => $in{'autoconfig'} });
