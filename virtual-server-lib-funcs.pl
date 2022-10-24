@@ -14236,8 +14236,9 @@ if ($group) {
 	}
 
 # Find any sub-server objects and update them
+my @subs;
 if (!$d->{'parent'}) {
-	my @subs = &get_domain_by("parent", $d->{'id'});
+	@subs = &get_domain_by("parent", $d->{'id'});
 	foreach my $sd (@subs) {
 		my %oldsd = %$sd;
 		push(@oldsubs, \%oldsd);
