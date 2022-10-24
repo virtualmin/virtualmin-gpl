@@ -14335,13 +14335,19 @@ my @olddoms = ( \%oldd );
 push(@doms, @subs, @aliases);
 push(@olddoms, @oldsubs, @oldaliases);
 
-# Setup print function to include domain name
-sub first_html_withdom
-{
-print &text('rename_dd', $doing_dom->{'dom'})," : ",@_,"<br>\n";
-}
+# Setup print functions to include domain name
 if (@doms > 1) {
-	$first_print = \&first_html_withdom;
+	if ($first_print eq \&first_text_print) {
+		$first_print = sub {
+		    print &text('rename_dd', $doing_dom->{'dom'})," : ",
+			(map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n";
+		    }
+		}
+	elsif ($first_print eq \&first_html_print) {
+		$first_print = sub {
+		    print &text('rename_dd', $doing_dom->{'dom'})," : ",@_,"<br>\n";
+		    }
+		}
 	}
 
 # Update all features in all domains. Include the mail feature always, as this
