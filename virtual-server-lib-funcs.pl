@@ -12356,9 +12356,10 @@ if (!&master_admin() && !&reseller_admin()) {
 	foreach my $k (keys %config) {
 		if ($k =~ /^avail_(\S+)$/ && &indexof($1, @features) < 0 &&
 					     &indexof($1, @plugins) < 0) {
-			if (&foreign_available($1)) {
-				local %minfo = &get_module_info($1);
-				push(@ot, { 'mod' => $1,
+			my $mod = $1;
+			if (&foreign_available($mod)) {
+				local %minfo = &get_module_info($mod);
+				push(@ot, { 'mod' => $mod,
 					    'page' => 'index.cgi',
 					    'title' => $minfo{'desc'},
 					    'desc' => $minfo{'desc'},
@@ -14336,6 +14337,7 @@ push(@doms, @subs, @aliases);
 push(@olddoms, @oldsubs, @oldaliases);
 
 # Setup print functions to include domain name
+&push_all_print();
 if (@doms > 1) {
 	if ($first_print eq \&first_text_print) {
 		$first_print = sub {
@@ -14443,6 +14445,7 @@ if (defined(&list_domain_scripts)) {
 		}
 	&$second_print($text{'setup_done'});
 	}
+&pop_all_print();
 
 # Fix backup schedule and key owners
 if (!$oldd{'parent'}) {
@@ -16300,6 +16303,7 @@ local @rv = (
         [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
         [ 'at', 'Scheduled Commands (user\'s commands)' ],
         [ 'telnet', 'SSH Login' ],
+        [ 'xterm', 'Interactive Shell' ],
         [ 'updown', 'Upload and Download (as user)',
 	  [ [ 1, 'Yes' ],
 	    [ 0, 'No' ],

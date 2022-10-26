@@ -695,11 +695,20 @@ if ($extramods{'at'} && $d->{'unix'} && !$chroot) {
 	}
 
 if ($extramods{'telnet'} && $d->{'unix'}) {
-	# Cannot configure module
+	# Cannot configure telnet module
 	local %acl = ( 'noconfig' => 1 );
 	&save_module_acl_logged(\%acl, $wuser->{'name'}, "telnet")
 		if (!$hasmods{'telnet'});
 	push(@mods, "telnet");
+	}
+
+if ($extramods{'xterm'} && $d->{'unix'}) {
+	# Cannot configure module xterm module, and shell opens as domain user
+	local %acl = ( 'noconfig' => 1,
+		       'user' => $d->{'user'} );
+	&save_module_acl_logged(\%acl, $wuser->{'name'}, "xterm")
+		if (!$hasmods{'xterm'});
+	push(@mods, "xterm");
 	}
 
 if ($extramods{'custom'}) {
