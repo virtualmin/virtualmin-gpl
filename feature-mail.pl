@@ -1016,7 +1016,7 @@ if ($_[0]->{'dom'} ne $_[1]->{'dom'} && $_[0]->{'mail'}) {
 			}
 
 		# Make a second pass through users to fix aliases
-		&flush_virtualmin_caches();
+		#&flush_virtualmin_caches();
 		foreach my $u (&list_domain_users($_[0])) {
 			local $oldu = { %$u };
 			if (&fix_alias_when_renaming($u, $_[0], $_[1])) {
