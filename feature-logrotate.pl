@@ -174,7 +174,7 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 		&$second_print($text{'setup_done'});
 		}
 	else {
-		&$second_print($text{'setup_nologrotate'});
+		&$second_print(&text('setup_nologrotate', $oldalog));
 		}
 	}
 
