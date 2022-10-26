@@ -7267,9 +7267,22 @@ $rename_tests = [
 		      [ 'to', 'nobody@virtualmin.com' ] ],
 	},
 
-	# Validate the domain before
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ $ssl ], [ 'dns' ], [ 'mail' ],
+		      [ 'webalizer' ], [ 'mysql' ],
+		      [ 'spam' ], [ 'virus' ],
+		      @create_args, ],
+	},
+
+	# Validate the domains before
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_subdomain ],
 		      [ 'all-features' ] ],
 	},
 
@@ -7282,9 +7295,10 @@ $rename_tests = [
 		      [ 'auto-prefix' ] ],
 	},
 
-	# Validate the domain
+	# Validate the domains after
 	{ 'command' => 'validate-domains.pl',
 	  'args' => [ [ 'domain' => $test_rename_domain ],
+		      [ 'domain' => $test_subdomain ],
 		      [ 'all-features' ] ],
 	},
 
