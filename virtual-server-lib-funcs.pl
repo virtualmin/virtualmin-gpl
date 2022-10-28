@@ -14257,6 +14257,9 @@ if (!$d->{'parent'}) {
 					       &server_home_directory($sd, $d));
 			}
 		if ($group) {
+			if ($sd->{'ugroup'} eq $sd->{'group'}) {
+				$sd->{'ugroup'} = $group;
+				}
 			$sd->{'group'} = $group;
 			}
 		}
