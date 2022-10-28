@@ -14336,22 +14336,6 @@ my @olddoms = ( \%oldd );
 push(@doms, @subs, @aliases);
 push(@olddoms, @oldsubs, @oldaliases);
 
-# Setup print functions to include domain name
-&push_all_print();
-if (@doms > 1) {
-	if ($first_print eq \&first_text_print) {
-		$first_print = sub {
-		    print &text('rename_dd', $doing_dom->{'dom'})," : ",
-			(map { &html_tags_to_text(&entities_to_ascii($_)) } @_),"\n";
-		    }
-		}
-	elsif ($first_print eq \&first_html_print) {
-		$first_print = sub {
-		    print &text('rename_dd', $doing_dom->{'dom'})," : ",@_,"<br>\n";
-		    }
-		}
-	}
-
 # Update all features in all domains. Include the mail feature always, as this
 # covers FTP users
 local $doing_dom;	# Has to be local for scoping
@@ -14445,7 +14429,6 @@ if (defined(&list_domain_scripts)) {
 		}
 	&$second_print($text{'setup_done'});
 	}
-&pop_all_print();
 
 # Fix backup schedule and key owners
 if (!$oldd{'parent'}) {
