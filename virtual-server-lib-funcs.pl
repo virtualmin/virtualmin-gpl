@@ -12873,7 +12873,8 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 if (&foreign_available("xterm") &&
     !$d->{'alias'} && $d->{'unix'} && $d->{'user'}) {
 	# Link to Terminal for master admin
-	push(@rv, { 'page' => 'index.cgi?user='.&urlize($d->{'user'}),
+	push(@rv, { 'page' => 'index.cgi?user='.&urlize($d->{'user'}).
+			      '&dir='.&urlize($d->{'home'}),
 		    'mod' => 'xterm',
 		    'title' => $text{'edit_terminal'},
 		    'desc' => $text{'edit_terminaldesc'},
