@@ -40,11 +40,11 @@ if (!$_[0]->{'mysql'}) {
 return undef;
 }
 
-# check_mysql_clash(&domain, [field])
+# check_mysql_clash(&domain, [field], [replication-mode])
 # Returns 1 if some MySQL user or database is used by another domain
 sub check_mysql_clash
 {
-local ($d, $field) = @_;
+local ($d, $field, $repl) = @_;
 local @doms = grep { $_->{'mysql'} && $_->{'id'} ne $d->{'id'} }
 		   &list_domains();
 
@@ -1005,13 +1005,14 @@ foreach my $r (@{$u->{'data'}}) {
 return undef;
 }
 
-# check_warnings_mysql(&dom, &old-domain)
+# check_warnings_mysql(&dom, &old-domain, [replication-mode])
 # Return warning if a MySQL database or user with a clashing name exists.
 # This can be overridden to allow a takeover of the DB.
 sub check_warnings_mysql
 {
 local ($d, $oldd) = @_;
 $d->{'mysql'} && (!$oldd || !$oldd->{'mysql'}) || return undef;
+return undef if ($repl);	# Clashes are expected in MySQL is shared
 if ($d->{'provision_mysql'}) {
 	# DB clash on provisioning server
 	my ($ok, $msg) = &provision_api_call(

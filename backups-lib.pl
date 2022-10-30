@@ -2738,7 +2738,7 @@ if ($ok) {
 			# Check for clashes
 			$d->{'wasmissing'} = 1;
 			local $cerr = &virtual_server_clashes(
-					$d, $opts->{'repl'});
+					$d, undef, undef, $opts->{'repl'});
 			if ($cerr) {
 				&$second_print(&text('restore_eclash', $cerr));
 				$ok = 0;
@@ -2748,7 +2748,8 @@ if ($ok) {
 
 			# Check for warnings
 			if (!$skipwarnings) {
-				local @warns = &virtual_server_warnings($d);
+				local @warns = &virtual_server_warnings(
+						$d, undef, $opts->{'repl'});
 				if (@warns) {
 					&$second_print(
 						$text{'restore_ewarnings'});

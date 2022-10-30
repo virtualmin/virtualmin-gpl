@@ -7660,19 +7660,19 @@ if (!$oldd) {
 return undef;
 }
 
-# virtual_server_warnings(&domain, [&old-domain])
+# virtual_server_warnings(&domain, [&old-domain], [replication-mode])
 # Returns a list of warning messages related to the creation or modification
 # of some virtual server.
 sub virtual_server_warnings
 {
-local ($d, $oldd) = @_;
+local ($d, $oldd, $repl) = @_;
 local @rv;
 
 # Check core features
 foreach my $f (grep { $d->{$_} } @features) {
 	local $wfunc = "check_warnings_$f";
 	if (defined(&$wfunc)) {
-		local $err = &$wfunc($d, $oldd);
+		local $err = &$wfunc($d, $oldd, $repl);
 		push(@rv, $err) if ($err);
 		}
 	}
