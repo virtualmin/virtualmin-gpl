@@ -12869,6 +12869,18 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 		    'icon' => 'page_edit',
 		  });
 	}
+
+if (&foreign_available("xterm") &&
+    !$d->{'alias'} && $d->{'user'}) {
+	# Link to Terminal for master admin
+	push(@rv, { 'page' => 'index.cgi?user='.&urlize($d->{'user'}),
+		    'mod' => 'xterm',
+		    'title' => $text{'edit_terminal'},
+		    'desc' => $text{'edit_terminaldesc'},
+		    'cat' => 'objects',
+		    'icon' => 'page_edit',
+		  });
+	}
 &menu_link_pro_tips(\@rv, $d) if (!$virtualmin_pro);
 &save_links_cache($ckey, $v, \@rv);
 return @rv;
