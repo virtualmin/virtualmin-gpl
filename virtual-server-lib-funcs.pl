@@ -16289,7 +16289,7 @@ local @rv = (
         [ 'cron', 'Scheduled Cron Jobs (user\'s Cron jobs)' ],
         [ 'at', 'Scheduled Commands (user\'s commands)' ],
         [ 'telnet', 'SSH Login' ],
-        [ 'xterm', 'Interactive Shell' ],
+        [ 'xterm', 'Terminal' ],
         [ 'updown', 'Upload and Download (as user)',
 	  [ [ 1, 'Yes' ],
 	    [ 0, 'No' ],
