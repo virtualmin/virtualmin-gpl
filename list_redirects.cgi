@@ -17,7 +17,7 @@ foreach $r (@redirects) {
 	push(@protos, "HTTPS") if ($r->{'https'});
 	my $dest = $r->{'dest'};
 	if (!$r->{'alias'} &&
-	    $dest =~ /^(http|https):\/\/%{HTTP_HOST}(\/.*)$/) {
+	    $dest =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
 		$dest = &text('redirects_with', "$2", uc($1));
 		}
 	push(@table, [

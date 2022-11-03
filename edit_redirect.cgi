@@ -36,7 +36,7 @@ if ($r->{'alias'}) {
 	$dir = $r->{'dest'};
 	}
 elsif ($r->{'dest'} &&
-       $r->{'dest'} =~ /^(http|https):\/\/%{HTTP_HOST}(\/.*)$/) {
+       $r->{'dest'} =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
 	$mode = 2;
 	$dproto = $1;
 	$dpath = $2;
