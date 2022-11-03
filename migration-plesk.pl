@@ -442,6 +442,7 @@ local $certificate = $domain->{'certificate'};
 if ($certificate) {
 	&$first_print("Migrating SSL certificate and key ..");
 	local $cert = &cleanup_plesk_cert($certificate->{'certificate-data'});
+	&create_ssl_certificate_directories(\%dom);
 	if ($cert) {
 		$dom{'ssl_cert'} ||= &default_certificate_file(\%dom, 'cert');
 		&open_tempfile(CERT, ">$dom{'ssl_cert'}");

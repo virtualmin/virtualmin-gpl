@@ -304,6 +304,7 @@ if ($certificate && $certificate->{'pub_key'}->{'src'} &&
 	local $certfile = $root."/".&remove_cid_prefix(
 					$certificate->{'pub_key'}->{'src'});
 	local $cert = &cleanup_plesk_cert(&read_file_contents($certfile));
+	&create_ssl_certificate_directories(\%dom);
 	if ($cert) {
 		$dom{'ssl_cert'} ||= &default_certificate_file(\%dom, 'cert');
 		&open_tempfile(CERT, ">$dom{'ssl_cert'}");
