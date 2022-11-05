@@ -12354,8 +12354,10 @@ foreach my $f (@plugins) {
 if (!&master_admin() && !&reseller_admin()) {
 	local @ot;
 	foreach my $k (keys %config) {
-		if ($k =~ /^avail_(\S+)$/ && &indexof($1, @features) < 0 &&
-					     &indexof($1, @plugins) < 0) {
+		if ($k =~ /^avail_(\S+)$/ &&
+		    &indexof($1, @features) < 0 &&
+		    &indexof($1, @plugins) < 0 &&
+		    $1 ne "phpini") {
 			my $mod = $1;
 			if (&foreign_available($mod)) {
 				local %minfo = &get_module_info($mod);
