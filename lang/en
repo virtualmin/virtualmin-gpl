@@ -4591,6 +4591,7 @@ links_flog=ProFTPD Log
 links_phpini=PHP Configuration
 links_phpini2=PHP $1 Configuration
 links_phpini3=PHP-FPM Configuration
+links_phplog=PHP Error Log
 
 massscript_err=Failed to upgrade scripts
 massscript_enone=No virtual servers selected
@@ -5204,6 +5205,7 @@ usage_tabdbs=By database
 webmin_alog=Apache access log for $1
 webmin_elog=Apache error log for $1
 webmin_flog=ProFTPD log for $1
+webmin_plog=PHP error log for $1
 webmin_phpini=PHP configuration for $1
 webmin_phpini2=PHP $2 configuration for $1
 

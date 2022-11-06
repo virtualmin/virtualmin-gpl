@@ -2583,5 +2583,29 @@ my $start_servers = $min_spare_servers + ($max_spare_servers - $min_spare_server
 return int($start_servers) || 1;
 }
 
+# get_domain_php_error_log(&domain)
+# Returns the PHP error log for a domain, from it's php.ini file
+sub get_domain_php_error_log
+{
+my ($d) = @_;
+my $mode = &get_domain_php_mode($d);
+my $phplog;
+if ($mode eq "fpm") {
+	$phplog = &get_php_fpm_ini_value($d, "error_log");
+	}
+elsif ($mode ne "none" && $mode ne "mod_php") {
+	&foreign_require("phpini");
+	foreach my $i (&list_domain_php_inis($d)) {
+		my $pconf = &phpini::get_config($i->[1]);
+		$phplog = &phpini::find_value("error_log", $pconf);
+		last if ($phplog);
+		}
+	}
+if ($phplog !~ /^\//) {
+	$phplog = $d->{'home'}.'/'.$phplog;
+	}
+return $phplog;
+}
+
 1;
 

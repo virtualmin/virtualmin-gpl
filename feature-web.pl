@@ -2431,8 +2431,7 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 	local $lf = &get_apache_log($d->{'dom'},
 				    $d->{'web_port'}, $log->[0]);
 	if ($lf) {
-		local $param = &master_admin() ? "file"
-					       : "extra";
+		local $param = &master_admin() ? "file" : "extra";
 		push(@rv, { 'mod' => 'syslog',
 			    'desc' => $log->[1],
 			    'page' => "save_log.cgi?view=1&nonavlinks=1".
@@ -2441,6 +2440,19 @@ foreach my $log ([ 0, $text{'links_alog'} ],
 			    'cat' => 'logs',
 			  });
 		}
+	}
+
+# Link to PHP log, if enabled
+my $phplog = &get_domain_php_error_log($d);
+if ($phplog) {
+	my $param = &master_admin() ? "file" : "extra";
+	push(@rv, { 'mod' => 'syslog',
+		    'desc' => $text{'links_phplog'},
+		    'page' => "save_log.cgi?view=1&nonavlinks=1".
+			      "&linktitle=".&urlize($text{'links_phplog'})."&".
+			      "$param=".&urlize($phplog),
+		    'cat' => 'logs',
+		  });
 	}
 
 # Links to edit PHP configs (if per-domain files exist)
