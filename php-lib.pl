@@ -1407,7 +1407,8 @@ return 0;
 }
 
 # list_domain_php_inis(&domain, [force-mode])
-# Returns a list of php.ini files used by a domain, and their PHP versions
+# Returns a list of php.ini files used by a domain, and their PHP versions and
+# commands.
 sub list_domain_php_inis
 {
 local ($d, $mode) = @_;
@@ -1415,13 +1416,13 @@ local @inis;
 foreach my $v (&list_available_php_versions($d, $mode)) {
 	local $ifile = "$d->{'home'}/etc/php$v->[0]/php.ini";
 	if (-r $ifile) {
-		push(@inis, [ $v->[0], $ifile ]);
+		push(@inis, [ $v->[0], $ifile, $v->[1] ]);
 		}
 	}
 if (!@inis) {
 	local $ifile = "$d->{'home'}/etc/php.ini";
 	if (-r $ifile) {
-		push(@inis, [ undef, $ifile ]);
+		push(@inis, [ undef, $ifile, undef ]);
 		}
 	}
 return @inis;
