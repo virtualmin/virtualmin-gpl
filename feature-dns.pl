@@ -1393,9 +1393,9 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 	$subs{'serial'} = $serial;
 	$subs{'dnsemail'} = $d->{'emailto_addr'};
 	$subs{'dnsemail'} =~ s/\@/./g;
-	local $recs = &substitute_domain_template(
+	local $recstxt = &substitute_domain_template(
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
-	local @tmplrecs = &text_to_dns_records($recs, $d->{'dom'});
+	local @tmplrecs = &text_to_dns_records($recstxt, $d->{'dom'});
 	foreach my $r (@tmplrecs) {
 		$r->{'proxied'} = $proxied;
 		&create_dns_record($recs, $file, $r);
