@@ -161,10 +161,6 @@ while(@ARGV > 0) {
 	elsif ($a eq "--disable-ftp") {
 		$shell = $nologin_shell;
 		}
-	elsif ($a eq "--jail-ftp") {
-		$shell = $jail_shell;
-		$shell || &usage("The --jail-ftp option cannot be used without an FTP jail shell specified on the Custom Shells page");
-		}
 	elsif ($a eq "--shell") {
 		$shell = { 'shell' => shift(@ARGV) };
 		}
@@ -585,9 +581,6 @@ if ($config{'mail'}) {
 print "                      [--newuser new-username]\n";
 print "                      [--enable-ftp]\n";
 print "                      [--disable-ftp]\n";
-if ($config{'jail_shell'}) {
-	print "                      [--jail-ftp]\n";
-	}
 print "                      [--add-group group]*\n";
 print "                      [--del-group group]*\n";
 print "                      [--send-update-email]\n";

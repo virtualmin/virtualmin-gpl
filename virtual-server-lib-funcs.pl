@@ -17290,14 +17290,6 @@ if (!@rv) {
 		    'mailbox' => 1,
 		    'avail' => 1,
 		    'id' => 'ftp' });
-	if ($config{'jail_shell'}) {
-		push(@rv, { 'shell' => $config{'jail_shell'},
-			    'desc' => $mail ? $text{'shells_mailboxjail'}
-					    : $text{'shells_mailboxjail2'},
-			    'mailbox' => 1,
-			    'avail' => 1,
-			    'id' => 'ftp' });
-		}
 	if (&has_command("scponly")) {
 		push(@rv, { 'shell' => &has_command("scponly"),
 			    'desc' => $mail ? $text{'shells_mailboxscp'}
