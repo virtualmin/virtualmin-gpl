@@ -5578,6 +5578,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		}
 
 	# Show shell access level
+	if ($u->{'domainowner'}) {
+		$u->{'shell'} = &get_domain_shell($d, $u);
+		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
 	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
@@ -11717,12 +11720,12 @@ else {
 	}
 }
 
-# get_domain_shell(&domain)
+# get_domain_shell(&domain, [&user])
 # Return the real shell for a domain's unix user
 sub get_domain_shell
 {
-my ($d) = @_;
-my $user = &get_domain_owner($d, 1, 1, 1);
+my ($d, $user) = @_;
+$user ||= &get_domain_owner($d, 1, 1, 1);
 if ($user->{'shell'} =~ /\/jk_chrootsh$/) {
 	return $d->{'unjailed_shell'};
 	}

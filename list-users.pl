@@ -126,6 +126,9 @@ foreach $d (@doms) {
 			print "    Encrypted password: ",$pass,"\n";
 			print "    Disabled: ",($disable ? "Yes" : "No"),"\n";
 			print "    Home directory: ",$u->{'home'},"\n";
+			if ($u->{'domainowner'}) {
+				$u->{'shell'} = &get_domain_shell($d, $u);
+				}
 			($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
 					@ashells;
 			print "    FTP access: ",
