@@ -2880,7 +2880,8 @@ sub update_caa_record
 my ($d) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
-return undef if (&compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
+return undef if (!$d->{'dns_cloud'} &&
+		 &compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
 my $info = &cert_info($d);

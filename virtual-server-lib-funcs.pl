@@ -8173,6 +8173,9 @@ if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 # new website.
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
+	if ($dom->{'dns'}) {
+		$dom->{'letsencrypt_wild'} = $config{'letsencrypt_wild'};
+		}
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
     !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
@@ -8279,6 +8282,7 @@ if ($d->{'letsencrypt_dname'}) {
 else {
 	@dnames = &get_hostnames_for_ssl($d);
 	}
+push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
 &$first_print(&text('letsencrypt_doing2',
 		    join(", ", map { "<tt>$_</tt>" } @dnames)));
 if ($valid) {
