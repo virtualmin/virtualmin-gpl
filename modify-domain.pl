@@ -689,14 +689,19 @@ if (defined($jail)) {
 		print "Disabling chroot jail ..\n";
 		$err = &disable_domain_jailkit($dom);
 		}
-	$d->{'jail'} = $jail if (!$err);
-	$dom->{'jail'} = $jail if (!$err);
-	&save_domain($dom);
-	print $err ? ".. failed : $err\n\n" : ".. done\n\n";
+	if (!$err) {
+		$dom->{'jail'} = $jail;
+		&modify_webmin($dom, $dom);
+		&save_domain($dom);
+		print ".. done\n\n";
+		}
+	else {
+		print ".. failed : $err\n\n";
+		}
 
 	# Update scripts hostnames, if jail changed
 	if (!$err) {
-		foreach my $dbt (('mysql', 'psql')) {
+		foreach my $dbt ('mysql', 'psql') {
 			&update_all_installed_scripts_database_credentials($dom, $old, 'dbhost', undef, $dbt);
 			}
 		}
