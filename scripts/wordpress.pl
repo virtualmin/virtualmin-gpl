@@ -20,7 +20,7 @@ return "A semantic personal publishing platform with a focus on aesthetics, web 
 # script_wordpress_versions()
 sub script_wordpress_versions
 {
-return ( "6.0.3" );
+return ( "6.1" );
 }
 
 sub script_wordpress_category
