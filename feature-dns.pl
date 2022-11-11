@@ -85,7 +85,9 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
-	$info->{'recs'} = [ &records_to_text($d, $info->{'recs'}) ];
+	my @precs = grep { $_->{'type'} ne 'NS' } @{$info->{'recs'}};
+	$info->{'record'} = [ &records_to_text($d, \@precs) ];
+	delete($info->{'recs'});
 	&$first_print($text{'setup_bind_provision'});
 	my ($ok, $msg) = &provision_api_call(
 		"provision-dns-zone", $info, 0);
