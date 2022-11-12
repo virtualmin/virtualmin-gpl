@@ -67,8 +67,7 @@ return undef;
 # Returns an error message if any requirements for Route 53 are missing
 sub dnscloud_route53_check
 {
-return $text{'dnscloud_eaws'} if (!$config{'aws_cmd'} ||
-				  !&has_command($config{'aws_cmd'}));
+return $text{'dnscloud_eaws'} if (!&has_aws_cmd());
 eval "use JSON::PP";
 return &text('dnscloud_eperl', 'JSON::PP') if ($@);
 return undef;
