@@ -66,7 +66,7 @@ else {
 		&remove_userdom($user->{'user'}, $d) : $user->{'user'};
 	print &ui_table_row($ulabel,
 		&ui_textbox("mailuser", $pop3, 13, 0, undef,
-			  "autocomplete='off' autocorrect='off' spellcheck='false'").
+		  &vui_ui_input_noauto_attrs()).
 		($d ? "\@".&show_domain_name($d) : ""),
 		2, \@tds);
 	print &ui_hidden("oldpop3", $pop3),"\n";
@@ -92,7 +92,7 @@ if ($user->{'person'}) {
 	print &ui_table_row(&hlink($text{'user_real'}, "realname"),
 		$mailbox ? $user->{'real'} :
 			   &ui_textbox("real", $user->{'real'}, 40, 0, undef,
-			  "autocomplete='off' autocorrect='off' spellcheck='false'"),
+			     &vui_ui_input_noauto_attrs()),
 		2, \@tds);
 	}
 

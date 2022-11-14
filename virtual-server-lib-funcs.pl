@@ -11760,22 +11760,25 @@ else {
 sub new_password_input
 {
 local ($name) = @_;
-my $attrnoauto = "autocomplete='new-password' autocorrect='off' spellcheck='false'";
 if ($config{'passwd_mode'} == 1) {
 	# Random but editable password
-	return &ui_textbox($name, &random_password(), 21, 0, undef, $attrnoauto);
+	return &ui_textbox($name, &random_password(), 21, 0, undef,
+	         &vui_ui_input_noauto_attrs());
 	}
 elsif ($config{'passwd_mode'} == 0) {
 	# One hidden password
-	return &ui_password($name, undef, 21, 0, undef, $attrnoauto);
+	return &ui_password($name, undef, 21, 0, undef,
+	         &vui_ui_input_noauto_attrs());
 	}
 elsif ($config{'passwd_mode'} == 2) {
 	# Two hidden passwords
 	return "<div style='display: inline-grid;'>".
-	          &ui_password($name, undef, undef, 0, undef, $attrnoauto.
-	            " placeholder='$text{'form_passf'}'").
-	          &ui_password($name."_again", undef, undef, 0, undef, $attrnoauto.
-	            " data-password-again placeholder='$text{'form_passa'}'")."</div>\n";
+	          &ui_password($name, undef, undef, 0, undef,
+	            &vui_ui_input_noauto_attrs().
+	              " placeholder='$text{'form_passf'}'").
+	          &ui_password($name."_again", undef, undef, 0, undef,
+	            &vui_ui_input_noauto_attrs().
+	              " data-password-again placeholder='$text{'form_passa'}'")."</div>\n";
 	}
 }
 
