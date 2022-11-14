@@ -572,8 +572,9 @@ if ($multi) {
 			}
 
 		# Show PHP and suexec execution mode
-		if (!$d->{'alias'} &&
-		    &domain_has_website($d) && $multi == 1) {
+		my $p = &domain_has_website($d);
+		my $showphp = !$d->{'alias'} && $p && $multi == 1;
+		if ($showphp) {
 			$p = &get_domain_php_mode($d);
 			print "    PHP execution mode: $p\n";
 			@modes = &supported_php_modes($d);
@@ -598,15 +599,13 @@ if ($multi) {
 		elsif (!$d->{'alias'} && $multi == 2 && $d->{'php_mode'}) {
 			print "    PHP execution mode: $d->{'php_mode'}\n";
 			}
-		if (!$d->{'alias'} &&
-		    &domain_has_website($d) &&
-		    defined(&get_domain_php_children) && $multi == 1) {
+		if ($showphp &&
+		    defined(&get_domain_php_children)) {
 			$childs = &get_domain_php_children($d);
 			print "    PHP fCGId subprocesses: ",
 				$childs < 0 ? "Not set" :
 				$childs == 0 ? "None" : $childs,"\n";
 			}
-		$p = &domain_has_website($d);
 		if (!$d->{'alias'} &&
 		    ($p eq 'web' ||
 		     &plugin_defined($p, "feature_get_fcgid_max_execution_time"))) {
@@ -616,39 +615,36 @@ if ($multi) {
 			print "    PHP max execution time: ",
 			      ($max || "Unlimited"),"\n";
 			}
-		if (!$d->{'alias'} &&
-		    &domain_has_website($d) &&
-		    defined(&list_domain_php_directories) && $multi == 1) {
+		if ($showphp &&
+		    defined(&list_domain_php_directories)) {
 			($dir) = &list_domain_php_directories($d);
 			if ($dir) {
 				print "    PHP version: $dir->{'version'}\n";
 				}
 			}
-		if (!$d->{'alias'} &&
-		    &domain_has_website($d) &&
-		    defined(&get_domain_ruby_mode) && $multi == 1) {
+		if ($showphp &&
+		    defined(&get_domain_ruby_mode)) {
 			$p = &get_domain_ruby_mode($d) || "none";
 			print "    Ruby execution mode: $p\n";
 			}
 
 		# Show webmail redirects
-		if (!$d->{'alias'} &&
-		    &has_webmail_rewrite($d) && &domain_has_website($d) &&
-		    !$d->{'alias'} && $multi == 1) {
+		if ($showphp &&
+		    &has_webmail_rewrite($d)) {
 			@wm = &get_webmail_redirect_directives($d);
 			print "    Webmail redirects: ",
 				(@wm ? "Yes" : "No"),"\n";
 			}
 
 		# Show star web server alias
-		if (&domain_has_website($d) && !$d->{'alias'} && $multi == 1) {
+		if ($showphp) {
 			$star = &get_domain_web_star($d);
 			print "    Match all web sub-domains: ",
 			      ($star ? "Yes" : "No"),"\n";
 			}
 
 		# Show HTTP protocols
-		if (&domain_has_website($d) && !$d->{'alias'} && $multi == 1) {
+		if ($showphp) {
 			$canprots = &get_domain_supported_http_protocols($d);
 			$prots = &get_domain_http_protocols($d);
 			if (@$canprots) {
@@ -660,7 +656,7 @@ if ($multi) {
 			}
 
 		# Show SSI setting
-		if (&domain_has_website($d) && !$d->{'alias'} && $multi == 1) {
+		if ($showphp) {
 			($ssi, $suffix) = &get_domain_web_ssi($d);
 			print "    Server-side includes: ",
 			      ($ssi == 0 ? "Disabled" : 
