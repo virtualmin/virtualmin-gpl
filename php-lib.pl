@@ -2616,6 +2616,10 @@ my ($d, $phplog) = @_;
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	&save_php_fpm_ini_value($d, "error_log", $phplog, 0);
+	my $loge = &get_php_fpm_ini_value($d, "log_errors");
+	if (lc($loge) ne "on") {
+		&save_php_fpm_ini_value($d, "log_errors", "On", 0);
+		}
 	}
 elsif ($mode ne "none" && $mode ne "mod_php") {
 	&foreign_require("phpini");
@@ -2623,6 +2627,10 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		&lock_file($i->[1]);
 		my $pconf = &phpini::get_config($i->[1]);
 		&phpini::save_directive($pconf, "error_log", $phplog);
+		my $loge = &phpini::find_value("log_errors", $pconf);
+		if (lc($loge) ne "on") {
+			&phpini::save_directive($pconf, "log_errors", "On");
+			}
 		&flush_file_lines($i->[1]);
 		&unlock_file($i->[1]);
 		}
