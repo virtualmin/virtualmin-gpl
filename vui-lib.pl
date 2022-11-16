@@ -248,4 +248,15 @@ $nbsps = "&nbsp;&nbsp;" if ($nbsps);
 	return "<div style='white-space: nowrap;'>$nbsps$html$nbsps</div>";
 }
 
+=head2 vui_ui_input_noauto_attrs()
+
+Returns attributes preventing browser
+to autofill input fields
+
+=cut
+sub vui_ui_input_noauto_attrs
+{
+return "autocomplete='new-password' autocorrect='off' spellcheck='false'";
+}
+
 1;
