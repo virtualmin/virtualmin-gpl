@@ -2602,10 +2602,32 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		last if ($phplog);
 		}
 	}
-if ($phplog !~ /^\//) {
+if ($phplog && $phplog !~ /^\//) {
 	$phplog = $d->{'home'}.'/'.$phplog;
 	}
 return $phplog;
+}
+
+# save_domain_php_error_log(&domain, [logfile])
+# Set or remove the PHP error log file for a domain in its php.ini file
+sub save_domain_php_error_log
+{
+my ($d, $phplog) = @_;
+my $mode = &get_domain_php_mode($d);
+if ($mode eq "fpm") {
+	&save_php_fpm_ini_value($d, "error_log", $phplog, 0);
+	}
+elsif ($mode ne "none" && $mode ne "mod_php") {
+	&foreign_require("phpini");
+	foreach my $i (&list_domain_php_inis($d)) {
+		my $pconf = &phpini::get_config($i->[1]);
+		&phpini::save_directive($pconf, "error_log", $phplog);
+		}
+	}
+else {
+	return "PHP error log cannot be set in $mode mode";
+	}
+return undef;
 }
 
 1;
