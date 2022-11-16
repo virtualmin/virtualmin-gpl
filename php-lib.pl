@@ -2620,8 +2620,11 @@ if ($mode eq "fpm") {
 elsif ($mode ne "none" && $mode ne "mod_php") {
 	&foreign_require("phpini");
 	foreach my $i (&list_domain_php_inis($d)) {
+		&lock_file($i->[1]);
 		my $pconf = &phpini::get_config($i->[1]);
 		&phpini::save_directive($pconf, "error_log", $phplog);
+		&flush_file_lines($i->[1]);
+		&unlock_file($i->[1]);
 		}
 	}
 else {

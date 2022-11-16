@@ -622,6 +622,12 @@ if ($multi) {
 				print "    PHP version: $dir->{'version'}\n";
 				}
 			}
+		if ($showphp) {
+			my $log = &get_domain_php_error_log($d);
+			if ($log) {
+				print "    PHP error log: ",$log,"\n";
+				}
+			}
 		if ($showphp &&
 		    defined(&get_domain_ruby_mode)) {
 			$p = &get_domain_ruby_mode($d) || "none";

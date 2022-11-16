@@ -105,6 +105,9 @@ the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
 This is primarily useful if the Apache module has been disabled, but not all
 directives have been cleaned up.
 
+PHP error logging can be enabled with the C<--php-log> flag, followed by
+a path like C<logs/php.log>. Or to turn it off, use the flag C<--no-php-log>.
+
 =cut
 
 package virtual_server;
@@ -302,6 +305,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cleanup-mod-php") {
 		$fix_mod_php = 1;
 		}
+	elsif ($a eq "--php-log") {
+		$phplog = shift(@ARGV);
+		$phplog =~ /^\S+$/ || &usage("--php-log must be followed by ".
+					     "a filename");
+		}
+	elsif ($a eq "--no-php-log") {
+		$phplog = "";
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -311,7 +322,7 @@ while(@ARGV > 0) {
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
 $mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
-  $content || defined($children) ||
+  $content || defined($children) || defined($phplog) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
@@ -873,6 +884,27 @@ foreach $d (@doms) {
 		&$second_print(".. removed $c");
 		}
 
+	# Update PHP log file
+	if (defined($phplog)) {
+		my $dphplog = $phplog;
+		if ($dphplog && $dphplog !~ /^\//) {
+			$dphplog = $d->{'home'}.'/'.$dphplog;
+			}
+		if ($dphplog) {
+			&$first_print("Changing PHP error log to $dphplog ..");
+			}
+		else {
+			&$first_print("Removing PHP error log ..");
+			}
+		my $err = &save_domain_php_error_log($d, $dphplog);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
+			}
+		}
+
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
 	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
@@ -939,6 +971,7 @@ print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 print "                     [--cleanup-mod-php]\n";
+print "                     [--php-log filename | --no-php-log]\n";
 exit(1);
 }
 
