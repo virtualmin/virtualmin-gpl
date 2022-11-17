@@ -64,7 +64,7 @@ if ($config{'php_session_age'}) {
 # Clean up websockets connections
 if (&foreign_check("xterm")) {
 	&foreign_require("xterm");
-	&xterm::cleanup_old_websockets();
+	&xterm::cleanup_miniserv_websockets();
 	}
 
 &run_post_actions_silently();
