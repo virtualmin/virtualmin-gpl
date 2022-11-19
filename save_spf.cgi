@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Save SPF options for a virtual server
+# Save DNS options for a virtual server
 
 require './virtual-server-lib.pl';
 &ReadParse();
