@@ -91,8 +91,7 @@ $config{'virt6'} = 1;
 @subdom_features = ( @opt_subdom_features );
 @database_features = ( 'mysql', 'postgres' );
 @template_features = ( 'basic', 'resources', @features, 'virt', 'virtualmin',
-		       'plugins', 'scripts', 'autoconfig',
-		       'php', 'phpwrappers', 'avail' );
+		       'plugins', 'scripts', 'autoconfig', 'php', 'avail' );
 @template_features_effecting_webmin = ( 'web', 'webmin', 'avail' );
 @can_always_features = ( 'dir', 'unix', 'logrotate' );
 @validate_features = ( @features, "virt", "virt6" );
