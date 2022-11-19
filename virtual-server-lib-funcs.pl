@@ -9138,6 +9138,7 @@ push(@rv, { 'id' => 0,
 	    'php_vars' => $config{'php_vars'} || "none",
 	    'php_fpm' => $config{'php_fpm'} || "none",
 	    'php_sock' => $config{'php_sock'} || 0,
+	    'php_log' => $config{'php_log'} || 0,
 	    'web_php_suexec' => int($config{'php_suexec'}),
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
@@ -9448,6 +9449,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'php_fpm'} = $tmpl->{'php_fpm'} eq "none" ? "" :
 				$tmpl->{'php_fpm'};
 	$config{'php_sock'} = $tmpl->{'php_sock'};
+	$config{'php_log'} = $tmpl->{'php_log'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
@@ -9738,7 +9740,8 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
-		    "php_fpm", "php", "status", "extra_prefix", "capabilities",
+		    "php_fpm", "php_log", "php",
+		    "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
 		    "ipfollow", "exclude", "cert_key_tmpl", "cert_cert_tmpl",

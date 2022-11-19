@@ -3113,6 +3113,14 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 		    [ 0, $text{'tmpl_php_sock0'} ],
 		    [ 1, $text{'tmpl_php_sock1'} ] ]));
 	}
+
+# Default PHP log file
+print &ui_table_row(
+	&hlink($text{'tmpl_php_log'}, "template_php_log"),
+	&ui_radio("php_log", $tmpl->{'php_log'},
+	  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
+	    [ 1, $text{'yes'} ],
+	    [ 0, $text{'no'} ] ]));
 }
 
 # parse_template_php(&tmpl)
@@ -3182,6 +3190,7 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 		}
 	$tmpl->{'php_sock'} = $in{'php_sock'};
 	}
+$tmpl->{'php_log'} = $in{'php_log'};
 }
 
 # list_php_wrapper_templates([only-installed])
@@ -3273,6 +3282,7 @@ sub add_script_language_directives
 local ($d, $tmpl, $port) = @_;
 my $err;
 
+# Find a usable PHP mode
 &require_apache();
 my $mode = $d->{'default_php_mode'} || &template_to_php_mode($tmpl);
 delete($d->{'default_php_mode'});
@@ -3288,6 +3298,9 @@ if (&indexof($mode, @supp) < 0) {
 	}
 if ($mode) {
 	&save_domain_php_mode($d, $mode, $port, 1);
+	if ($tmpl->{'php_log'}) {
+		&save_domain_php_error_log($d, "logs/php_log");
+		}
 	}
 
 if (defined(&save_domain_ruby_mode)) {

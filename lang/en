@@ -3574,6 +3574,7 @@ tmpl_php_fpm=Additional FPM pool options
 tmpl_php_sock=FPM server connection
 tmpl_php_sock0=TCP port
 tmpl_php_sock1=Unix socket file
+tmpl_php_log=Enable PHP logging?
 tmpl_status=Additional email address for monitoring messages
 tmpl_statusemail=Address
 tmpl_statusonly=Send email to server owner?
