@@ -4795,11 +4795,12 @@ if ($cloud ne "local") {
 
 # Get current records, then re-create the DNS config
 &push_all_print();
-&set_all_null_print();
+&set_all_capture_print();
+$print_output = "";
 my @oldrecs = &get_domain_dns_records($d);
 my $ok = &delete_dns($d);
 if (!$ok) {
-	return "Failed to remove existing DNS zone";
+	return "Failed to remove existing DNS zone : $print_output";
 	}
 my $oldcloud = $d->{'dns_cloud'};
 if ($cloud eq "local") {
@@ -4808,10 +4809,11 @@ if ($cloud eq "local") {
 else {
 	$d->{'dns_cloud'} = $cloud;
 	}
+$print_output = "";
 $ok = &setup_dns($d);
 if (!$ok) {
 	$d->{'dns_cloud'} = $oldcloud;
-	return "Failed to setup new DNS zone";
+	return "Failed to setup new DNS zone : $print_output";
 	}
 &save_domain($d);
 &pop_all_print();
