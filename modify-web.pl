@@ -106,7 +106,7 @@ This is primarily useful if the Apache module has been disabled, but not all
 directives have been cleaned up.
 
 PHP error logging can be enabled with the C<--php-log> flag, followed by
-a path like C<logs/php_log>. Alternately you can opt to use the default
+a path like C<logs/php.log>. Alternately you can opt to use the default
 path with the C<--default-php-log> flag, or turn logging off with the flag
 C<--no-php-log>.
 

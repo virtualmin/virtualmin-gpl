@@ -176,10 +176,16 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 	# PHP log
 	if (defined($in{'plog_def'})) {
 		$oldplog = &get_domain_php_error_log($d);
-		if ($in{'plog_def'}) {
+		if ($in{'plog_def'} == 1) {
+			# Logging disabled
 			$plog = "";
 			}
+		elsif ($in{'plog_def'} == 2) {
+			# Use the default log
+			$plog = &get_default_php_error_log($d);
+			}
 		else {
+			# Custom path
 			$plog = $in{'plog'};
 			if ($plog && $plog !~ /^\//) {
 				$plog = $d->{'home'}.'/'.$plog;

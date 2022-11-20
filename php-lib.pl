@@ -2652,7 +2652,9 @@ sub get_default_php_error_log
 my ($d) = @_;
 my $tmpl = &get_template($d->{'template'});
 my $path = $tmpl->{'php_log_path'} || "logs/php_log";
-return &substitute_domain_template($path, $d);
+$path = &substitute_domain_template($path, $d);
+$path = $d->{'home'}.'/'.$path if ($path !~ /^\//);
+return $path;
 }
 
 1;
