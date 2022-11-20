@@ -133,6 +133,12 @@ if ($mode =~ /mod_php|none/ && $oldmode !~ /mod_php|none/) {
 	$d->{'last_php_version'} = $oldver;
 	}
 
+my $oldplog;
+if ($mode ne $oldmode) {
+	# Save the PHP error log path
+	$oldplog = &get_domain_php_error_log($d);
+	}
+
 # Work out source php.ini files
 local (%srcini, %subs_ini);
 $mode eq "none" || @vers || return "No PHP versions found for mode $mode";
@@ -586,6 +592,11 @@ if ($mode !~ /mod_php|none/ && $oldmode =~ /mod_php|none/ &&
 	my $err = &save_domain_php_directory($d, &public_html_dir($d),
 				   $d->{'last_php_version'}, 1);
 	return $err if ($err);
+	}
+
+if (defined($oldplog)) {
+	# Restore the old PHP error log
+	&save_domain_php_error_log($d, $oldplog);
 	}
 
 # Link ~/etc/php.ini to the per-version ini file
