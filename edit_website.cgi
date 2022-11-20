@@ -87,6 +87,12 @@ if (!$d->{'alias'} && &can_log_paths() &&
 		print &ui_table_row(&hlink($text{'phpmode_elog'}, 'errorlog'),
 			&ui_textbox("elog", $elog, 60));
 		}
+	$plog = &get_domain_php_error_log($d);
+	if (defined($plog)) {
+		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+			&ui_opt_textbox("plog", $plog, 60,
+					$text{'phpmode_none'}));
+		}
 	}
 
 # Ruby execution mode

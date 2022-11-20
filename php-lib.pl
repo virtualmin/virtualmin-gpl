@@ -2592,15 +2592,19 @@ my ($d) = @_;
 my $mode = &get_domain_php_mode($d);
 my $phplog;
 if ($mode eq "fpm") {
-	$phplog = &get_php_fpm_ini_value($d, "error_log");
+	$phplog = &get_php_fpm_ini_value($d, "error_log") || "";
 	}
 elsif ($mode ne "none" && $mode ne "mod_php") {
+	$phplog = "";
 	&foreign_require("phpini");
 	foreach my $i (&list_domain_php_inis($d)) {
 		my $pconf = &phpini::get_config($i->[1]);
 		$phplog = &phpini::find_value("error_log", $pconf);
 		last if ($phplog);
 		}
+	}
+else {
+	return undef;
 	}
 if ($phplog && $phplog !~ /^\//) {
 	$phplog = $d->{'home'}.'/'.$phplog;
