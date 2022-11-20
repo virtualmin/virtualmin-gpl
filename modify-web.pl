@@ -106,7 +106,9 @@ This is primarily useful if the Apache module has been disabled, but not all
 directives have been cleaned up.
 
 PHP error logging can be enabled with the C<--php-log> flag, followed by
-a path like C<logs/php.log>. Or to turn it off, use the flag C<--no-php-log>.
+a path like C<logs/php_log>. Alternately you can opt to use the default
+path with the C<--default-php-log> flag, or turn logging off with the flag
+C<--no-php-log>.
 
 =cut
 
@@ -310,6 +312,9 @@ while(@ARGV > 0) {
 		$phplog =~ /^\S+$/ || &usage("--php-log must be followed by ".
 					     "a filename");
 		}
+	elsif ($a eq "--default-php-log") {
+		$phplog = "default";
+		}
 	elsif ($a eq "--no-php-log") {
 		$phplog = "";
 		}
@@ -437,10 +442,10 @@ foreach $d (@doms) {
 foreach $d (@doms) {
 	&$first_print("Updating server $d->{'dom'} ..");
 	&$indent_print();
+	$tmpl = &get_template($d->{'template'});
 
 	# Use the default mode for this domain
 	if ($defmode) {
-		$tmpl = &get_template($d->{'template'});
 		$mode = &template_to_php_mode($tmpl);
 		}
 
@@ -887,6 +892,9 @@ foreach $d (@doms) {
 	# Update PHP log file
 	if (defined($phplog)) {
 		my $dphplog = $phplog;
+		if ($dphplog eq "default") {
+			$dphplog = &get_default_php_error_log($d);
+			}
 		if ($dphplog && $dphplog !~ /^\//) {
 			$dphplog = $d->{'home'}.'/'.$dphplog;
 			}

@@ -3121,6 +3121,11 @@ print &ui_table_row(
 	  [ $tmpl->{'default'} ? ( ) : ( [ "", $text{'default'} ] ),
 	    [ 1, $text{'yes'} ],
 	    [ 0, $text{'no'} ] ]));
+
+print &ui_table_row(
+	&hlink($text{'tmpl_php_log_path'}, "template_php_log_path"),
+	&ui_opt_textbox("php_log_path", $tmpl->{'php_log_path'}, 60,
+			$text{'default'}." (<tt>logs/php_log</tt>)"));
 }
 
 # parse_template_php(&tmpl)
@@ -3191,6 +3196,7 @@ if (&indexof("fpm", &supported_php_modes()) >= 0) {
 	$tmpl->{'php_sock'} = $in{'php_sock'};
 	}
 $tmpl->{'php_log'} = $in{'php_log'};
+$tmpl->{'php_log_path'} = $in{'php_log_path_def'} ? undef : $in{'php_log_path'};
 }
 
 # list_php_wrapper_templates([only-installed])
@@ -3299,7 +3305,7 @@ if (&indexof($mode, @supp) < 0) {
 if ($mode) {
 	&save_domain_php_mode($d, $mode, $port, 1);
 	if ($tmpl->{'php_log'}) {
-		&save_domain_php_error_log($d, "logs/php_log");
+		&save_domain_php_error_log($d, &get_default_php_error_log($d));
 		}
 	}
 

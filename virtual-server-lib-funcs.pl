@@ -9139,6 +9139,7 @@ push(@rv, { 'id' => 0,
 	    'php_fpm' => $config{'php_fpm'} || "none",
 	    'php_sock' => $config{'php_sock'} || 0,
 	    'php_log' => $config{'php_log'} || 0,
+	    'php_log_path' => $config{'php_log_path'},
 	    'web_php_suexec' => int($config{'php_suexec'}),
 	    'web_ruby_suexec' => $config{'ruby_suexec'} eq '' ? -1 :
 					int($config{'ruby_suexec'}),
@@ -9450,6 +9451,7 @@ if ($tmpl->{'id'} == 0) {
 				$tmpl->{'php_fpm'};
 	$config{'php_sock'} = $tmpl->{'php_sock'};
 	$config{'php_log'} = $tmpl->{'php_log'};
+	$config{'php_log_path'} = $tmpl->{'php_log_path'};
 	$config{'php_suexec'} = $tmpl->{'web_php_suexec'};
 	$config{'ruby_suexec'} = $tmpl->{'web_ruby_suexec'};
 	$config{'phpver'} = $tmpl->{'web_phpver'};
