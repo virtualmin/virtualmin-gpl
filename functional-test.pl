@@ -369,6 +369,42 @@ $domains_tests = [
 	  'grep' => 'PHP Version',
 	},
 
+	# Enable PHP error log
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'php-log', 'logs/php_error_log' ] ],
+	},
+
+	# Write to PHP error log
+	{ 'command' => 'echo "<?php error_log(\"foo\"); ?>" >~'.
+		       $test_domain_user.'/public_html/log.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/log.php',
+	},
+
+	# Check PHP error log
+	{ 'command' => 'cat '.$test_domain_home.'/logs/php_error_log',
+	  'grep' => 'foo',
+	},
+
+	# Turn off PHP error log
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-php-log' ] ],
+	},
+
+	# Write a PHP error, which won't get logged
+	{ 'command' => 'echo "<?php error_log(\"bar\"); ?>" >~'.
+		       $test_domain_user.'/public_html/log.php',
+	},
+	{ 'command' => $wget_command.'http://'.$test_domain.'/log.php',
+	},
+
+	# Check PHP error log
+	{ 'command' => 'cat '.$test_domain_home.'/logs/php_error_log',
+	  'antigrep' => 'bar',
+	},
+
 	$supports_cgi ? (
 		# Switch PHP mode to CGI
 		{ 'command' => 'modify-web.pl',
