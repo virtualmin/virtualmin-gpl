@@ -56,8 +56,8 @@ $d || &usage("Virtual server $dname does not exist");
 	&usage("Virtual server $dname does not have an SSL cert");
 
 # Get either the CA or actual cert
+$cafile = &get_website_ssl_file($d, "ca");
 if ($chain) {
-	$cafile = &get_website_ssl_file($d, "ca");
 	$cafile || &usage("Virtual server does not have a CA certificate");
 	$info = &cert_file_info($cafile, $d);
 	}
@@ -66,6 +66,13 @@ else {
 	}
 $info || &usage("No SSL certificate found");
 
+if (!$chain) {
+	print "cert: ",&get_website_ssl_file($d, "cert"),"\n";
+	print "key: ",&get_website_ssl_file($d, "key"),"\n";
+	}
+if ($cafile) {
+	print "ca: ",$cafile,"\n";
+	}
 foreach $i (@cert_attributes) {
 	$v = $info->{$i};
 	if (ref($v)) {
