@@ -2385,7 +2385,17 @@ return undef if (!$conf);
 return &get_php_fpm_pool_config_value($conf, $d->{'id'}, $name);
 }
 
-# get_php_fpm_pool_config_value(&conf, id, name)
+# list_php_fpm_config_values(&domain)
+# Returns an array ref of name/value pairs from the FPM config for a domain
+sub list_php_fpm_config_values
+{
+my ($d) = @_;
+my $conf = &get_php_fpm_config($d);
+return undef if (!$conf);
+return &list_php_fpm_pool_config_values($conf, $d->{'id'});
+}
+
+# get_php_fpm_pool_config_value(&conf, domain-id, name)
 # Returns the value of a config setting from any pool file
 sub get_php_fpm_pool_config_value
 {
@@ -2398,6 +2408,22 @@ foreach my $l (@$lref) {
 		}
 	}
 return undef;
+}
+
+# list_php_fpm_pool_config_values(&conf, domain-id)
+# Returns an array ref of name/value pairs from the FPM config
+sub list_php_fpm_pool_config_values
+{
+my ($conf, $id) = @_;
+my $file = $conf->{'dir'}."/".$id.".conf";
+my $lref = &read_file_lines($file, 1);
+my @rv;
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*(\S+)\s*=\s*(.*)/) {
+		push(@rv, [ $1, $2 ]);
+		}
+	}
+return \@rv;
 }
 
 # get_php_fpm_ini_value(&domain, name)
@@ -2415,6 +2441,22 @@ if (!defined($rv)) {
 		}
 	}
 return wantarray ? ($rv, $k) : $rv;
+}
+
+# list_php_fpm_ini_values(&domain)
+# Returns an array ref of name/value/admin triplets for FPM PHP ini settings
+sub list_php_fpm_ini_values
+{
+my ($d) = @_;
+my $all = &list_php_fpm_config_values($d);
+return undef if (!$all);
+my @rv;
+foreach my $c (@$all) {
+	if ($c->[0] =~ /^(php_value|php_admin_value)\[(\S+)\]$/) {
+		push(@rv, [ $2, $c->[1], $1 eq "php_admin_value" ? 1 : 0 ]);
+		}
+	}
+return \@rv;
 }
 
 # save_php_fpm_config_value(&domain, name, value)
