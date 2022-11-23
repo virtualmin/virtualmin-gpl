@@ -1075,8 +1075,9 @@ if ($? || $out =~ /Unable to locate credentials/i ||
 	&print_tempfile(TEMP, $zone,"\n");
 	&print_tempfile(TEMP, "\n");
 	&close_tempfile(TEMP);
+	my $aws = $config{'aws_cmd'} || "aws";
 	$out = &backquote_command(
-		"$config{'aws_cmd'} configure --profile=".quotemeta($akey).
+		"$aws configure --profile=".quotemeta($akey).
 		" <$temp 2>&1");
 	my $ex = $?;
 	if (!$ex) {
@@ -1115,9 +1116,10 @@ if ($endpoint) {
 if (ref($params)) {
 	$params = join(" ", map { quotemeta($_) } @$params);
 	}
+my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
 &execute_command(
-	"TZ=GMT $config{'aws_cmd'} $cmd --profile=".quotemeta($akey)." ".
+	"TZ=GMT $aws $cmd --profile=".quotemeta($akey)." ".
 	$endpoint_param." ".$params, undef, \$out, \$err);
 return $out if (!$?);
 return $err || $out;
@@ -1127,8 +1129,7 @@ return $err || $out;
 # Returns 1 if the configured "aws" command is installed, minus flags
 sub has_aws_cmd
 {
-return 0 if (!$config{'aws_cmd'});
-my ($cmd) = &split_quoted_string($config{'aws_cmd'});
+my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
 }
 
