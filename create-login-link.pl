@@ -13,6 +13,8 @@ Alternately, you can use the C<--usermin-user> flag to login to Usermin
 as a mailbox user. This must be followed by the full Unix username of the 
 mailbox.
 
+If you want to login as root, use C<--root> flag only.
+
 =cut
 
 package virtual_server;
@@ -46,8 +48,8 @@ while(@ARGV > 0) {
 		$uname = shift(@ARGV);
 		$usermin = 1;
 		}
-	elsif ($a eq "--multiline") {
-		$multiline = 1;
+	elsif ($a eq "--root") {
+		$root = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -58,7 +60,11 @@ while(@ARGV > 0) {
 	}
 
 # Validate inputs
-if ($dname) {
+if ($root) {
+	$uname = "root"
+	$usermin = 0
+	}
+elsif ($dname) {
 	$d = &get_domain_by("dom", $dname);
 	$d || &usage("No virtual server named $dname found");
 	}
@@ -116,7 +122,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Generates a link that can be used to login to Virtualmin.\n";
 print "\n";
 print "virtualmin create-login-link [--domain name | --user name |\n";
-print "                              --usermin-user name]\n";
+print "                              --usermin-user name | --root]\n";
 exit(1);
 }
 
