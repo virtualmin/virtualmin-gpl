@@ -4437,18 +4437,18 @@ for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 undef(@apache::get_config_cache);
 
 # Fix all php.ini files that use old path
-my $mode = &get_domain_php_mode($d);
 if (&foreign_check("phpini")) {
 	&foreign_require("phpini");
+	my $mode = &get_domain_php_mode($d);
 	$mode = "cgi" if ($mode eq "mod_php" || $mode eq "fpm");
 	foreach my $ini (&list_domain_php_inis($d, $mode)) {
 		&lock_file($ini->[1]);
 		my $conf = &phpini::get_config($ini->[1]);
 		my $fixed = 0;
 		foreach my $c (@$conf) {
-			if ($c->{'value'} =~ /\Q$oldd->{'home'}\E/) {
+			if ($c->{'value'} =~ /^\Q$oldd->{'home'}\E\//) {
 				$c->{'value'} =~
-				    s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+				    s/^\Q$oldd->{'home'}\E\//$d->{'home'}\//g;
 				&phpini::save_directive($conf,
 				   $c->{'name'}, $c->{'value'});
 				$fixed++;
@@ -4462,10 +4462,12 @@ if (&foreign_check("phpini")) {
 	}
 
 # Fix all PHP settings in FPM files that use the old path
+my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
-	foreach my $v (&list_php_fpm_ini_values($d)) {
-		if ($v->[1] =~ /\Q$oldd->{'home'}\E/) {
-			$v->[1] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	my $inis = &list_php_fpm_ini_values($d);
+	foreach my $v (@$inis) {
+		if ($v->[1] =~ /^\Q$oldd->{'home'}\E\//) {
+			$v->[1] =~ s/^\Q$oldd->{'home'}\E\//$d->{'home'}\//g;
 			&save_php_fpm_ini_value($d, $v->[0], $v->[1], $v->[2]);
 			}
 		}
