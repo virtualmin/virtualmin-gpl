@@ -4102,6 +4102,7 @@ scripts_iuses_perl=Perl
 scripts_iuses_php=PHP
 scripts_iuses_ruby=Ruby on Rails
 scripts_iversion=Version to install
+scripts_iservice=Service name
 scripts_iport=Server assigned ports
 scripts_istatus=Server status
 scripts_istatus1=Running
@@ -4148,7 +4149,7 @@ scripts_itime=Installed on
 scripts_idir=Installation directory
 scripts_idb=Uses database
 scripts_idb2=Uses database with table prefix
-scripts_inewdb=(Will be deleted when script is un-installed)
+scripts_inewdb=(will be deleted when script is un-installed)
 scripts_idbname=<a href='$1'>$2 database $3</a>
 scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_idbtbpref=with table prefix
