@@ -109,6 +109,8 @@ else {
 	&foreign_require("webmin");
 	my %miniserv;
 	&get_miniserv_config(\%miniserv);
+	($uinfo) = grep { $_->{'name'} eq $uname } &acl::list_users();
+	$uinfo || &usage("Webmin user $uname does not exist");
 	my $sid = &acl::create_session_user(\%miniserv, $uname);
 	$sid || &usage("Failed to create login session");
 	&reload_miniserv();
