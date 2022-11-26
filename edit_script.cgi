@@ -25,6 +25,12 @@ print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
 print &ui_table_row($text{'scripts_iversion'},
 	$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 
+# Show original website
+if ($script->{'site'}) {
+	print &ui_table_row($text{'scripts_isite'},
+		&script_link($script->{'site'}));
+	}
+
 # Show error, if any
 if ($sinfo->{'partial'}) {
 	print &ui_table_row($text{'scripts_ipartial'},
@@ -70,19 +76,29 @@ if ($sinfo->{'user'}) {
 						  "<tt>$sinfo->{'pass'}</tt>"));
 	}
 
-# Show original website
-if ($script->{'site'}) {
-	print &ui_table_row($text{'scripts_isite'},
-		&script_link($script->{'site'}));
+$sfunc = $script->{'status_server_func'};
+# Show link to service
+if (defined(&$sfunc)) {
+	&foreign_require('init');
+	my $service_name = "$sinfo->{'name'}-$d->{'dom'}-$opts->{'port'}";
+	if (&init::action_status($service_name)) {
+		my $service_link = $service_name;
+		if ($init::init_mode eq "systemd" &&
+		    &foreign_available('init')) {
+			$service_link =
+			  &ui_link(&get_webprefix_safe()."/init/edit_systemd.cgi?name=".&urlize($service_name).".service",
+			           $service_name.".service");
+			}
+		print &ui_table_row($text{'scripts_iservice'}, "<tt>$service_link</tt>");
+		}
 	}
-
-# Show Mongrel ports and status
+# Show port
 if ($opts->{'port'}) {
 	@ports = split(/\s+/, $opts->{'port'});
 	print &ui_table_row($text{'scripts_iport'},
 			    join(", ", @ports));
 	}
-$sfunc = $script->{'status_server_func'};
+# Show current status
 if (defined(&$sfunc)) {
 	@pids = &$sfunc($d, $opts);
 	if ($pids[0] >= 0) {
