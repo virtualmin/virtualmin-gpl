@@ -198,9 +198,16 @@ print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
 print &ui_hidden_table_end("features");
 
 # Build destination field inputs
-@dests = &get_scheduled_backup_dests($sched);
-push(@dests, undef) if ($in{'sched'});
-@purges = &get_scheduled_backup_purges($sched);
+if ($in{'sched'}) {
+	# Show current scheduled backup destinations
+	@dests = &get_scheduled_backup_dests($sched);
+	push(@dests, undef);
+	@purges = &get_scheduled_backup_purges($sched);
+	}
+else {
+	# Just default to download
+	@dests = ( "downloadlink:" );
+	}
 my @dfields = ( );
 my $i = 0;
 foreach $dest (@dests) {
