@@ -594,6 +594,10 @@ if ($multi) {
 							  "Error $port";
 					print "    PHP FPM socket: $msg\n";
 					}
+				my $cfile = &get_php_fpm_config_file($d);
+				if ($cfile) {
+					print "    PHP FPM config file: $cfile\n";
+					}
 				}
 			}
 		elsif (!$d->{'alias'} && $multi == 2 && $d->{'php_mode'}) {

@@ -1925,6 +1925,16 @@ if ($ver) {
 return @confs ? $confs[0] : undef;
 }
 
+# get_php_fpm_config_file(&domain)
+# Returns the FPM pool config file for a domain
+sub get_php_fpm_config_file
+{
+my ($d) = @_;
+my $conf = &get_php_fpm_config($d);
+return undef if (!$conf);
+return $conf->{'dir'}."/".$d->{'id'}.".conf";
+}
+
 # list_php_fpm_configs()
 # Returns hash refs with details of the system's php-fpm configurations. Assumes
 # use of standard packages.
