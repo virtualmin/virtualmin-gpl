@@ -891,7 +891,7 @@ foreach $d (@doms) {
 
 	# Update PHP log file
 	if (defined($phplog)) {
-		my $dphplog = $phplog;
+		my $dphplog = $phplog eq "" ? undef : $phplog;
 		if ($dphplog eq "default") {
 			$dphplog = &get_default_php_error_log($d);
 			}

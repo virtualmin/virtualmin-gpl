@@ -178,7 +178,7 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 		$oldplog = &get_domain_php_error_log($d);
 		if ($in{'plog_def'} == 1) {
 			# Logging disabled
-			$plog = "";
+			$plog = undef;
 			}
 		elsif ($in{'plog_def'} == 2) {
 			# Use the default log
