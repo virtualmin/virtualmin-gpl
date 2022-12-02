@@ -115,11 +115,18 @@ for($i=0; defined($in{"dest".$i."_mode"}); $i++) {
 	$dest = &parse_backup_destination("dest".$i, \%in, $cbmode == 3, $d,
 					  $in{'fmt'});
 	push(@dests, $dest);
-	$anydownload++ if ($dest eq "download:");
+	$anydownload++ if ($dest eq "download:" || $dest eq "downloadlink:");
 	}
 @dests || &error($text{'backup_edests'});
-$anydownload && $in{'fmt'} && &error($text{'backup_edownloadfmt'});
-$anydownload && @dests > 1 && &error($text{'backup_edownloadmany'});
+if ($anydownload) {
+	if (@dests == 1) {
+		# If just downloading, always create a single file
+		$in{'fmt'} = 0;
+		}
+	else {
+		&error($text{'backup_edownloadmany'});
+		}
+	}
 
 @strfdests = $in{'strftime'} ? map { &backup_strftime($_) } @dests
 			     : @dests;
