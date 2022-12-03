@@ -11,7 +11,7 @@ C<--user> flags, or you can choose to modify them all with the C<--all-domains>
 option.
 
 If your system supports multiple PHP versions, you can limit the changes
-to the config for a specific version with the C<--php-version> flag folowed
+to the config for a specific version with the C<--php-version> flag followed
 by a number, like 4 or 5.
 
 The variables to change are set with the C<--ini-name> flag, which can be
