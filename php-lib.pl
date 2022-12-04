@@ -2655,7 +2655,11 @@ my ($d) = @_;
 my $mode = &get_domain_php_mode($d);
 my $phplog;
 if ($mode eq "fpm") {
-	$phplog = &get_php_fpm_ini_value($d, "error_log") || "";
+	$phplog = &get_php_fpm_ini_value($d, "error_log") || 
+	# `error_log` can never be an empty string,
+	# otherwise it will be set to default /usr
+	# if defined but the empty string in FPM
+	undef;
 	}
 elsif ($mode ne "none" && $mode ne "mod_php") {
 	$phplog = "";
