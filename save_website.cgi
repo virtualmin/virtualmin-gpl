@@ -173,6 +173,35 @@ if (defined($in{'alog'}) && !$d->{'alias'} && &can_log_paths()) {
 		$logchanged++;
 		}
 
+	# PHP log
+	if (defined($in{'plog_def'})) {
+		$oldplog = &get_domain_php_error_log($d);
+		if ($in{'plog_def'} == 1) {
+			# Logging disabled
+			$plog = undef;
+			}
+		elsif ($in{'plog_def'} == 2) {
+			# Use the default log
+			$plog = &get_default_php_error_log($d);
+			}
+		else {
+			# Custom path
+			$plog = $in{'plog'};
+			if ($plog && $plog !~ /^\//) {
+				$plog = $d->{'home'}.'/'.$plog;
+				}
+			$plog =~ /^\/\S+$/ || &error($text{'phpmode_eplog'});
+			}
+		if ($plog ne $oldplog) {
+			&$first_print($text{'phpmode_setplog'});
+			$err = &save_domain_php_error_log($d, $plog);
+			&$second_print(!$err ? $text{'setup_done'}
+					     : &text('phpmode_logerr', $err));
+			$anything++;
+			$logchanged++;
+			}
+		}
+
 	# Update Webmin permissions
 	if ($logchanged) {
 		&refresh_webmin_user($d);
