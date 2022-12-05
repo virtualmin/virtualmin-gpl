@@ -505,9 +505,12 @@ return $db_conn_desc;
 sub script_whmcs_latest
 {
 local ($ver) = @_;
-if ($ver >= 8.4) {
+local $vwant = $ver >= 8.6 ? "8\\.6" :
+	       $ver >= 8.5 ? "8\\.5" :
+	       $ver >= 8.4 ? "8\\.4" : undef;
+if ($vwant) {
 	return ( "https://download.whmcs.com/assets/scripts/get-downloads.php",
-		 "\"version\":\"([0-9\\.]+)\",\"type\":\"MAINTENANCE\"" );
+		 "\"version\":\"($vwant\\.[0-9\\.]+)\",\"type\":\"(MAINTENANCE|SECURITY)\"" );
 	}
 return ( );
 }
