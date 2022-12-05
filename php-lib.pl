@@ -2648,7 +2648,8 @@ return int($start_servers) || 1;
 }
 
 # get_domain_php_error_log(&domain)
-# Returns the PHP error log for a domain, from it's php.ini file
+# Returns the PHP error log for a domain, from it's php.ini file. Return a path
+# if set, an empty string if unset, or undef if it's not possible to set.
 sub get_domain_php_error_log
 {
 my ($d) = @_;
@@ -2680,6 +2681,7 @@ return $phplog;
 sub save_domain_php_error_log
 {
 my ($d, $phplog) = @_;
+$phplog = undef if (!$phplog);
 my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	&save_php_fpm_ini_value($d, "error_log", $phplog, 0);
