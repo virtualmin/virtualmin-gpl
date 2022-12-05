@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "8.5.1", "8.4.1", "8.0.5", "7.10.3" );
+return ( "8.6.1", "8.5.2", "8.4.1", "8.0.5", "7.10.3" );
 }
 
 sub script_whmcs_gpl
@@ -196,12 +196,12 @@ $shortver =~ s/\.//g;
 local @files = ( {
     'name' => "source",
     'file' => "whmcs_v${shortver}.zip",
-    'url' => "http://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
+    'url' => "https://scripts.virtualmin.com/whmcs_v${shortver}.zip" } );
 local $io = &script_whmcs_get_ioncube_type();
 push(@files, {
     'name' => "ioncube",
     'file' => "ioncube_loaders.zip",
-    'url' => "http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_$io.zip" });
+    'url' => "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_$io.zip" });
 return @files;
 }
 
@@ -525,7 +525,7 @@ else {
 
 sub script_whmcs_passmode
 {
-return (1, 6, '^(?=.*[\p{L}])(?=.*\d)[\p{L}\d]{6,}$');
+return (1, 8, '^(?=.*[a-zA-Z])(?=.*\d)[\w\d]{8,}$');
 }
 
 1;
