@@ -171,6 +171,14 @@ if (defined($in{'plog_def'})) {
 		&$second_print(!$err ? $text{'setup_done'}
 				     : &text('phpmode_logerr', $err));
 		$anything++;
+		if ($newmode eq 'cgi' || $newmode eq 'fcgid') {
+			if ($p eq "web") {
+				&register_post_action(\&restart_apache);
+				}
+			elsif ($p) {
+				&plugin_call($p, "feature_restart_web_php", $d);
+				}
+			}
 		}
 	}
 
