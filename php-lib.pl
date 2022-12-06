@@ -2700,7 +2700,7 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		if (lc($loge) ne "on") {
 			&phpini::save_directive($pconf, "log_errors", "On");
 			}
-		&flush_file_lines($i->[1]);
+		&flush_file_lines($i->[1], undef, 1);
 		&unlock_file($i->[1]);
 		}
 	}
