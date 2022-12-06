@@ -179,6 +179,21 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		}
 	}
 
+if ($mode ne 'none' && $mode ne 'mod_php') {
+	$plog = &get_domain_php_error_log($d);
+	$defplog = &get_default_php_error_log($d);
+	$mode = !$plog ? 1 :
+		$plog eq $defplog ? 2 : 0;
+	print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+		&ui_radio_table("plog_def", $mode,
+		[ [ 1, $text{'phpmode_noplog'} ],
+		  [ 2, $text{'phpmode_defplog'},
+		       "<tt>$defplog</tt>" ],
+		  [ 0, $text{'phpmode_fileplog'},
+		    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ],
+		]));
+	}
+
 print &ui_hidden_table_end();
 
 # Show PHP information
