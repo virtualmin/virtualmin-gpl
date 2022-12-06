@@ -87,20 +87,6 @@ if (!$d->{'alias'} && &can_log_paths() &&
 		print &ui_table_row(&hlink($text{'phpmode_elog'}, 'errorlog'),
 			&ui_textbox("elog", $elog, 60));
 		}
-	$plog = &get_domain_php_error_log($d);
-	if (defined($plog)) {
-		$defplog = &get_default_php_error_log($d);
-		$mode = !$plog ? 1 :
-			$plog eq $defplog ? 2 : 0;
-		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
-			&ui_radio_table("plog_def", $mode,
-			[ [ 1, $text{'phpmode_noplog'} ],
-			  [ 2, $text{'phpmode_defplog'},
-			       "<tt>$defplog</tt>" ],
-			  [ 0, $text{'phpmode_fileplog'},
-			    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ],
-			]));
-		}
 	}
 
 # Ruby execution mode
