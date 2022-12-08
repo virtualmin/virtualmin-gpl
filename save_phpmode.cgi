@@ -145,6 +145,43 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 		}
 	}
 
+# PHP log
+if (defined($in{'plog_def'})) {
+	my $oldplog = &get_domain_php_error_log($d);
+	my $plog;
+	if ($in{'plog_def'} == 1) {
+		# Logging disabled
+		$plog = undef;
+		}
+	elsif ($in{'plog_def'} == 2) {
+		# Use the default log
+		$plog = &get_default_php_error_log($d);
+		}
+	else {
+		# Custom path
+		$plog = $in{'plog'};
+		if ($plog && $plog !~ /^\//) {
+			$plog = $d->{'home'}.'/'.$plog;
+			}
+		$plog =~ /^\/\S+$/ || &error($text{'phpmode_eplog'});
+		}
+	if ($plog ne $oldplog) {
+		&$first_print($text{'phpmode_setplog'});
+		$err = &save_domain_php_error_log($d, $plog);
+		&$second_print(!$err ? $text{'setup_done'}
+				     : &text('phpmode_logerr', $err));
+		$anything++;
+		if ($newmode eq 'cgi' || $newmode eq 'fcgid') {
+			if ($p eq "web") {
+				&register_post_action(\&restart_apache);
+				}
+			elsif ($p) {
+				&plugin_call($p, "feature_restart_web_php", $d);
+				}
+			}
+		}
+	}
+
 if (!$anything) {
 	&$first_print($text{'phpmode_nothing'});
 	&$second_print($text{'phpmode_nothing_skip'});
