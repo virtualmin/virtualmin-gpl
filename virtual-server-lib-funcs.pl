@@ -1217,12 +1217,21 @@ foreach my $u (@users) {
 		}
 	else {
 		# Set quotas based on quota commands
-		$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}};
-		$u->{'hardquota'} = $main::hard_home_quota{$u->{'user'}};
-		$u->{'uquota'} = $main::used_home_quota{$u->{'user'}};
-		$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}};
-		$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}};
-		$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}};
+		my $altuser = $u->{'user'} =~ /\@/ ?
+				&replace_atsign($u->{'user'}) :
+				&add_atsign($u->{'user'});
+		$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}} ||
+				    $main::soft_home_quota{$altuser};
+		$u->{'hardquota'} = $main::hard_home_quota{$u->{'user'}} ||
+				    $main::hard_home_quota{$altuser};
+		$u->{'uquota'} = $main::used_home_quota{$u->{'user'}} ||
+				 $main::used_home_quota{$altuser};
+		$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}} ||
+				     $main::soft_mail_quota{$altuser};
+		$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}} ||
+				     $main::hard_mail_quota{$altuser};
+		$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}} ||
+				  $main::used_mail_quota{$altuser};
 		}
 	$u->{'unix'} = 1;
 	$u->{'person'} = 1;
@@ -9029,7 +9038,7 @@ return $escuser;
 # Converts a username into a suitable alias name
 sub escape_alias
 {
-local $escuser = $_[0];
+local ($escuser) = @_;
 $escuser =~ s/\@/-/g;
 return $escuser;
 }
@@ -9038,8 +9047,17 @@ return $escuser;
 # Replace an @ in a username with -
 sub replace_atsign
 {
-local $rv = $_[0];
+local ($rv) = @_;
 $rv =~ s/\@/-/g;
+return $rv;
+}
+
+# add_atsign(username)
+# Given a username like foo-bar.com, return foo@bar.com
+sub add_atsign
+{
+local ($rv) = @_;
+$rv =~ s/\-/\@/;
 return $rv;
 }
 
