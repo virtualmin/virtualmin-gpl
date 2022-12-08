@@ -53,6 +53,7 @@ $lnum = 0;
 $count = $ecount = 0;
 $sep = $in{'separator'};
 $sep = "\t" if ($sep eq "tab");
+@users = &list_domain_users($d, 0, 1, 1, 1);
 USER: foreach $line (@lines) {
 	$lnum++;
 	next if ($line !~ /\S/);
@@ -259,7 +260,8 @@ USER: foreach $line (@lines) {
 		}
 
 	# Check for clash within this domain
-	local ($clash) = grep { $_->{'user'} eq $username &&
+	local ($clash) = grep { &remove_userdom($_->{'user'}, $d) eq
+				  &remove_userdom($username, $d) &&
 			  	$_->{'unix'} == $user->{'unix'} } @users;
 	if ($clash) {
 		&line_error($text{'user_eclash2'});
@@ -301,6 +303,7 @@ USER: foreach $line (@lines) {
 
 	print "<font color=#00aa00>",
 	      &text('umass_done', "<tt>$username</tt>"),"</font><br>\n";
+	push(@users, $user);
 	$count++;
 	}
 
