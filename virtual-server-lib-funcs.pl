@@ -3510,7 +3510,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 			my $prog = &can_config_domain($d) ? "edit_domain.cgi"
 							  : "view_domain.cgi";
 			my $dn = &shorten_domain_name($d);
-			$dn = $d->{'disabled'} ? "<i>$dn</i>" : $dn;
+			$dn = $d->{'disabled'} ? &ui_text_color("<i>$dn</i>", 'danger') : $dn;
 			my $proxy = $d->{'proxy_pass_mode'} == 2 ?
 			 " <a href='frame_form.cgi?dom=$d->{'id'}'>(F)</a>" :
 				    $d->{'proxy_pass_mode'} == 1 ?
