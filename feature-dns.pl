@@ -1960,6 +1960,10 @@ elsif ($d->{'dns_cloud'}) {
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('disable_bind_cloud', $cloud->{'desc'}));
+	if (!$cloud->{'disable'}) {
+		&$second_print($text{'disable_ebind_discloud'});
+		return 0;
+		}
 	my $info = { 'domain' => $d->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
@@ -2051,6 +2055,10 @@ elsif ($d->{'dns_cloud'}) {
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
 	&$first_print(&text('enable_bind_cloud', $cloud->{'desc'}));
+	if (!$cloud->{'disable'}) {
+		&$second_print($text{'disable_ebind_discloud'});
+		return 0;
+		}
 	my $info = { 'domain' => $d->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };

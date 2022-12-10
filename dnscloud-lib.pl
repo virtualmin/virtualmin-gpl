@@ -9,6 +9,7 @@ my @rv = ( { 'name' => 'route53',
 	     'comments' => 0,
 	     'defttl' => 0,
 	     'proxy' => 0,
+	     'disable' => 0,
 	     'url' => 'https://aws.amazon.com/route53/',
 	     'longdesc' => $text{'dnscloud_route53_longdesc'} } );
 if (defined(&list_pro_dns_clouds)) {
