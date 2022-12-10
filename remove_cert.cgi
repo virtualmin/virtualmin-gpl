@@ -17,6 +17,11 @@ $d->{'ssl_same'} && &error($text{'rcert_esame2'});
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 @beforecerts && &error($text{'rcert_eservice'});
 
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&reset_domain_envs($d);
+&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 # Remove the cert and key from the domain object
 my $oldd = { %$d };
 foreach my $k ('cert', 'key', 'chain', 'combined', 'everything') {
@@ -31,6 +36,12 @@ foreach $f (&domain_features($d), &list_feature_plugins()) {
 	&call_feature_func($f, $d, $oldd);
 	}
 &save_domain($d);
+
+&set_domain_envs($d, "SSL_DOMAIN", undef);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
+
 &webmin_log("rcert", "domain", $d->{'dom'});
 &redirect("cert_form.cgi?dom=$d->{'id'}");
 

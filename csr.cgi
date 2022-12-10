@@ -40,6 +40,8 @@ if (!$in{'self'}) {
 
 	&set_domain_envs($d, "SSL_DOMAIN");
         my $merr = &making_changes();
+	&reset_domain_envs($d);
+	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
@@ -73,13 +75,15 @@ if (!$in{'self'}) {
 	# Save the domain
 	&save_domain($d);
 	
-	&made_changes();
+	&set_domain_envs($d, "SSL_DOMAIN", undef);
+	local $merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
         &reset_domain_envs($d);
 	
 	&run_post_actions();
 	&webmin_log("newcsr", "domain", $d->{'dom'}, $d);
 
-	print "$text{'csr_done'}<p>\n";
+	&$second_print($text{'csr_done'});
 
 	print &text('csr_csr', "<tt>$d->{'ssl_csr'}</tt>"),"\n";
 	print "<pre>",&html_escape(
@@ -95,6 +99,8 @@ else {
 
 	&set_domain_envs($d, "SSL_DOMAIN");
         my $merr = &making_changes();
+	&reset_domain_envs($d);
+	&error(&text('setup_emaking', "<tt>$merr</tt>")) if (defined($merr));
 
 	&$first_print($text{'csr_selfing'});
 	&obtain_lock_ssl($d);
@@ -155,10 +161,13 @@ else {
 
 	&save_domain($d);
 	
-	&made_changes();
-        &reset_domain_envs($d);
-	
 	&run_post_actions();
+
+	&set_domain_envs($d, "SSL_DOMAIN", undef);
+	local $merr = &made_changes();
+	&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+        &reset_domain_envs($d);
+
 	&webmin_log("newself", "domain", $d->{'dom'}, $d);
 	}
 
