@@ -34,6 +34,24 @@ if (!$_[0]->{'postgres'}) {
 return undef;
 }
 
+# obtain_lock_postgres(&domain)
+# Lock the PostgreSQL config for a domain
+sub obtain_lock_postgres
+{
+my ($d) = @_;
+return if (!$config{'postgres'});
+&obtain_lock_anything($d);
+}
+
+# release_lock_postgres(&domain)
+# Un-lock the PostgreSQL config file for some domain
+sub release_lock_postgres
+{
+local ($d) = @_;
+return if (!$config{'postgres'});
+&release_lock_anything($d);
+}
+
 # check_warnings_postgres(&dom, &old-domain)
 # Return warning if a PosgreSQL database or user with a clashing name exists.
 # This can be overridden to allow a takeover of the DB.
@@ -756,19 +774,21 @@ return 1 if (&indexof($_[1], @dblist) >= 0);
 # Create one PostgreSQL database
 sub create_postgres_database
 {
+my ($d, $db, $opts) = @_;
 &require_postgres();
+&obtain_lock_postgres($d);
 
-if (!&check_postgres_database_clash($_[0], $_[1])) {
+if (!&check_postgres_database_clash($d, $db)) {
 	# Build and run creation command
-	&$first_print(&text('setup_postgresdb', $_[1]));
-	local $user = &postgres_user($_[0]);
-	local $sql = "create database ".&postgresql::quote_table($_[1]);
+	&$first_print(&text('setup_postgresdb', $db));
+	local $user = &postgres_user($d);
+	local $sql = "create database ".&postgresql::quote_table($db);
 	local $withs;
 	if (&postgresql::get_postgresql_version() >= 7) {
 		$withs .= " owner=".&postgres_uquote($user);
 		}
-	if ($_[2]->{'encoding'}) {
-		$withs .= " encoding ".&postgres_quote($_[2]->{'encoding'});
+	if ($opts->{'encoding'}) {
+		$withs .= " encoding ".&postgres_quote($opts->{'encoding'});
 		}
 	if ($withs) {
 		$sql .= " with".$withs;
@@ -776,19 +796,20 @@ if (!&check_postgres_database_clash($_[0], $_[1])) {
 	&postgresql::execute_sql_logged($qconfig{'basedb'}, $sql);
 	}
 else {
-	&$first_print(&text('setup_postgresdbimport', $_[1]));
+	&$first_print(&text('setup_postgresdbimport', $db));
 	}
 
 # Make sure nobody else can access it
 eval {
 	local $main::error_must_die = 1;
 	&postgresql::execute_sql_logged($qconfig{'basedb'},
-		"revoke all on database ".&postgres_uquote($_[1]).
+		"revoke all on database ".&postgres_uquote($db).
 		" from public");
 	};
-local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
-push(@dbs, $_[1]);
-$_[0]->{'db_postgres'} = join(" ", @dbs);
+local @dbs = split(/\s+/, $d->{'db_postgres'});
+push(@dbs, $db);
+$d->{'db_postgres'} = join(" ", @dbs);
+&release_lock_postgres($d);
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -811,12 +832,14 @@ if (&postgresql::get_postgresql_version() >= 8.0) {
 # Delete one PostgreSQL database
 sub delete_postgres_database
 {
+my ($d, @deldbs) = @_;
 &require_postgres();
+&obtain_lock_postgres($d);
 local @dblist = &postgresql::list_databases();
-&$first_print(&text('delete_postgresdb', join(", ", @_[1..$#_])));
-local @dbs = split(/\s+/, $_[0]->{'db_postgres'});
+&$first_print(&text('delete_postgresdb', join(", ", @deldbs)));
+local @dbs = split(/\s+/, $d->{'db_postgres'});
 local @missing;
-foreach my $db (@_[1..$#_]) {
+foreach my $db (@deldbs) {
 	if (&indexof($db, @dblist) >= 0) {
 		eval {
 			local $main::error_must_die = 1;
@@ -847,7 +870,8 @@ foreach my $db (@_[1..$#_]) {
 		}
 	@dbs = grep { $_ ne $db } @dbs;
 	}
-$_[0]->{'db_postgres'} = join(" ", @dbs);
+$d->{'db_postgres'} = join(" ", @dbs);
+&release_lock_postgres($d);
 if (@missing) {
 	&$second_print(&text('delete_mysqlmissing', join(", ", @missing)));
 	}
