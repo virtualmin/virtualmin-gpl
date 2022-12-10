@@ -40,6 +40,24 @@ if (!$_[0]->{'mysql'}) {
 return undef;
 }
 
+# obtain_lock_mysql(&domain)
+# Lock the MySQL config for a domain
+sub obtain_lock_mysql
+{
+my ($d) = @_;
+return if (!$config{'mysql'});
+&obtain_lock_anything($d);
+}
+
+# release_lock_mysql(&domain)
+# Un-lock the MySQL config file for some domain
+sub release_lock_mysql
+{
+local ($d) = @_;
+return if (!$config{'mysql'});
+&release_lock_anything($d);
+}
+
 # check_mysql_clash(&domain, [field], [replication-mode])
 # Returns 1 if some MySQL user or database is used by another domain
 sub check_mysql_clash
@@ -1479,6 +1497,7 @@ sub create_mysql_database
 {
 local ($d, $dbname, $opts) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local @dbs = split(/\s+/, $d->{'db_mysql'});
 
 if ($d->{'provision_mysql'}) {
@@ -1493,6 +1512,7 @@ if ($d->{'provision_mysql'}) {
 	my ($ok, $msg) = &provision_api_call(
 		"provision-mysql-database", $info, 0);
 	if (!$ok) {
+		&release_lock_mysql($d);
 		&$second_print(&text('setup_emysqldb_provision', $msg));
 		return 0;
 		}
@@ -1519,6 +1539,7 @@ else {
 	}
 push(@dbs, $dbname);
 $d->{'db_mysql'} = join(" ", &unique(@dbs));
+&release_lock_mysql($d);
 return 1;
 }
 
@@ -1529,6 +1550,7 @@ sub grant_mysql_database
 {
 local ($d, $dbname) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 
 if ($d->{'provision_mysql'}) {
 	# Call remote API to grant access
@@ -1559,6 +1581,7 @@ else {
 		&system_logged("chmod +s ".quotemeta($dd));
 		}
 	}
+&release_lock_mysql($d);
 }
 
 # delete_mysql_database(&domain, dbname, ...)
@@ -1567,6 +1590,7 @@ sub delete_mysql_database
 {
 local ($d, @dbnames) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local @dbs = split(/\s+/, $d->{'db_mysql'});
 local @missing;
 local $failed = 0;
@@ -1618,6 +1642,7 @@ else {
 	}
 
 $d->{'db_mysql'} = join(" ", &unique(@dbs));
+&release_lock_mysql($d);
 if (!$failed) {
 	&$second_print($text{'setup_done'});
 	}
@@ -1630,6 +1655,7 @@ sub revoke_mysql_database
 {
 local ($d, $dbname) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local @oldusers = &list_mysql_database_users($d, $dbname);
 local @users = &list_domain_users($d, 1, 1, 1, 0);
 local @unames = ( &mysql_user($d),
@@ -1664,6 +1690,7 @@ if ($tmpl->{'mysql_chgrp'} && $dd && -d $dd) {
 	local $group = scalar(@st) ? $st[5] : "mysql";
 	&system_logged("chgrp -R $group ".quotemeta($dd));
 	}
+&release_lock_mysql($d);
 }
 
 # get_mysql_database_dir(&domain, db)
@@ -1813,6 +1840,7 @@ sub create_mysql_database_user
 {
 local ($d, $dbs, $user, $pass, $encpass, $restored) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 if ($d->{'provision_mysql'}) {
 	# Create on provisioning server
 	my $info = { 'user' => $user };
@@ -1853,6 +1881,7 @@ else {
 		};
 	&execute_for_all_mysql_servers($cfunc);
 	}
+&release_lock_mysql($d);
 }
 
 # delete_mysql_database_user(&domain, username)
@@ -1861,6 +1890,7 @@ sub delete_mysql_database_user
 {
 local ($d, $user) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local $myuser = &mysql_username($user);
 if ($d->{'provision_mysql'}) {
 	# Delete on provisioning server
@@ -1878,6 +1908,7 @@ else {
 		};
 	&execute_for_all_mysql_servers($dfunc);
 	}
+&release_lock_mysql($d);
 }
 
 # modify_mysql_database_user(&domain, &olddbs, &dbs, oldusername, username,
@@ -1888,6 +1919,7 @@ sub modify_mysql_database_user
 {
 local ($d, $olddbs, $dbs, $olduser, $user, $pass, $encpass) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local $myuser = &mysql_username($user);
 local $myolduser = &mysql_username($olduser);
 if ($d->{'provision_mysql'}) {
@@ -1951,6 +1983,7 @@ else {
 		};
 	&execute_for_all_mysql_servers($mfunc);
 	}
+&release_lock_mysql($d);
 }
 
 # list_mysql_tables(&domain, database)
@@ -2313,6 +2346,7 @@ sub save_mysql_allowed_hosts
 {
 local ($d, $hosts) = @_;
 &require_mysql();
+&obtain_lock_mysql($d);
 local $user = &mysql_user($d);
 
 if ($d->{'provision_mysql'}) {
@@ -2382,6 +2416,7 @@ else {
 		};
 	&execute_for_all_mysql_servers($ufunc);
 	}
+&release_lock_mysql($d);
 
 return undef;
 }
