@@ -907,7 +907,6 @@ else {
 		  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  );
 		&fix_php_ini_files($d, \@fixes);
-		&fix_php_fpm_pool_file($d, \@fixes);
 		}
 	&release_lock_web($d);
 	&create_framefwd_file($d);
