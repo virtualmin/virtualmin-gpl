@@ -707,24 +707,24 @@ if ($config{'mail'} && !$novirts) {
 
 # Get all virtusers to look for those for users
 local @virts;
-if (!$_[2]) {
+if (!$novirts) {
 	@virts = &list_virtusers();
 	}
 
 # Are we setting quotas individually?
 local $ind_quota = 0;
-if (&has_quota_commands() && $config{'quota_get_user_command'} && $_[0]) {
+if (&has_quota_commands() && $config{'quota_get_user_command'} && $d) {
 	$ind_quota = 1;
 	}
 
 local @users = &list_all_users_quotas($noquotas || $ind_quota);
-if ($_[0]) {
+if ($d) {
 	# Limit to domain users.
-	@users = grep { $_[0]->{'gid'} ne '' &&
-			$_->{'gid'} == $_[0]->{'gid'} ||
-			$_->{'user'} eq $_[0]->{'user'} } @users;
+	@users = grep { $d->{'gid'} ne '' &&
+			$_->{'gid'} == $d->{'gid'} ||
+			$_->{'user'} eq $d->{'user'} } @users;
 	foreach my $u (@users) {
-		if ($u->{'user'} eq $_[0]->{'user'} && $u->{'unix'}) {
+		if ($u->{'user'} eq $d->{'user'} && $u->{'unix'}) {
 			# Virtual server owner
 			$u->{'domainowner'} = 1;
 			if ($config{'mail_system'} == 5) {
@@ -737,7 +737,7 @@ if ($_[0]) {
 				$u->{'pass_digest'} = $d->{'digest_enc_pass'};
 				}
 			}
-		elsif ($u->{'uid'} == $_[0]->{'uid'} && $u->{'unix'}) {
+		elsif ($u->{'uid'} == $d->{'uid'} && $u->{'unix'}) {
 			# Web management user
 			$u->{'webowner'} = 1;
 			$u->{'noquota'} = 1;
@@ -759,16 +759,16 @@ if ($_[0]) {
 			}
 		}
 	local @subdoms;
-	if ($_[0]->{'parent'}) {
+	if ($d->{'parent'}) {
 		# This is a subdomain - exclude parent domain users
-		@users = grep { $_->{'home'} =~ /^$_[0]->{'home'}\// } @users;
+		@users = grep { $_->{'home'} =~ /^$d->{'home'}\// } @users;
 		}
-	elsif (@subdoms = &get_domain_by("parent", $_[0]->{'id'})) {
+	elsif (@subdoms = &get_domain_by("parent", $d->{'id'})) {
 		# This domain has subdomains - exclude their users
-		@users = grep { $_->{'home'} !~ /^$_[0]->{'home'}\/domains\// } @users;
+		@users = grep { $_->{'home'} !~ /^$d->{'home'}\/domains\// } @users;
 		}
 	@users = grep { !$_->{'domainowner'} } @users
-		if ($_[1] || $_[0]->{'parent'});
+		if ($skipunix || $d->{'parent'});
 
 	# Remove users with @ in their names for whom a user with the @ replace
 	# already exists (for Postfix)
@@ -789,7 +789,7 @@ if ($_[0]) {
 				   );
 		local $user;
 		local $_;
-		open(UINFO, "$vpopbin/vuserinfo -D $_[0]->{'dom'} |");
+		open(UINFO, "$vpopbin/vuserinfo -D $d->{'dom'} |");
 		while(<UINFO>) {
 			s/\r|\n//g;
 			if (/^([^:]+):\s+(.*)$/) {
@@ -819,7 +819,7 @@ if ($_[0]) {
 				if ($amapped eq "user") {
 					# Email is fixed with vpopmail
 					$user->{'email'} =
-						$value."\@".$_[0]->{'dom'};
+						$value."\@".$d->{'dom'};
 					}
 				}
 			}
@@ -911,7 +911,7 @@ else {
 	}
 
 # Set appropriate quota field
-local $tmpl = &get_template($_[0] ? $_[0]->{'template'} : 0);
+local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $qtype = $tmpl->{'quotatype'};
 local $u;
 foreach $u (@users) {
@@ -920,7 +920,7 @@ foreach $u (@users) {
 	}
 
 # Merge in cached quotas
-my $qfile = $quota_cache_dir."/".$_[0]->{'id'};
+my $qfile = $quota_cache_dir."/".$d->{'id'};
 my %qcache;
 &read_file_cached($qfile, \%qcache);
 foreach $u (@users) {
@@ -930,8 +930,8 @@ foreach $u (@users) {
 
 # Check if spamc is being used
 local $spamc;
-if ($_[0] && $_[0]->{'spam'}) {
-	local $spamclient = &get_domain_spam_client($_[0]);
+if ($d && $d->{'spam'}) {
+	local $spamclient = &get_domain_spam_client($d);
 	$spamc = 1 if ($spamclient =~ /spamc/);
 	}
 
@@ -941,7 +941,7 @@ if (&has_home_quotas()) {
 	foreach $u (@users) {
 		local $diff = $u->{'quota'}*$bsize - $u->{'uquota'}*$bsize;
 		if ($u->{'quota'} && $diff < $quota_spam_margin &&
-		    $_[0]->{'spam'} && !$spamc) {
+		    $d->{'spam'} && !$spamc) {
 			# Close to quota, which will block spamassassin ..
 			$u->{'spam_quota'} = 1;
 			$u->{'spam_quota_diff'} = $diff < 0 ? 0 : $diff;
@@ -970,7 +970,7 @@ if (!$novirts) {
 		}
 	}
 
-if (!$_[2]) {
+if (!$novirts) {
 	# Add email addresses and forwarding addresses to user structures
 	foreach my $u (@users) {
 		$u->{'email'} = $u->{'virt'} = undef;
@@ -981,7 +981,7 @@ if (!$_[2]) {
 			$u->{'alias'} = $al;
 			$u->{'to'} = $al->{'values'};
 			}
-		elsif ($va = $valiases{"$u->{'user'}\@$_[0]->{'dom'}"}) {
+		elsif ($va = $valiases{"$u->{'user'}\@$d->{'dom'}"}) {
 			$u->{'valias'} = $va;
 			$u->{'to'} = $va->{'to'};
 			}
@@ -995,9 +995,9 @@ if (!$_[2]) {
 				}
 			}
 		$u->{'generic'} = $generics{$u->{'user'}};
-		local $pop3 = $_[0] ? &remove_userdom($u->{'user'}, $_[0])
+		local $pop3 = $d ? &remove_userdom($u->{'user'}, $d)
 				    : $u->{'user'};
-		local $email = $_[0] ? "$pop3\@$_[0]->{'dom'}" : undef;
+		local $email = $d ? "$pop3\@$d->{'dom'}" : undef;
 		local $escuser = &escape_user($u->{'user'});
 		local $escalias = &escape_alias($u->{'user'});
 		local $v;
@@ -1009,7 +1009,7 @@ if (!$_[2]) {
 			      $config{'mail_system'} != 5) ||
 			     $v->{'from'} eq $email &&
 			      $v->{'to'}->[0] =~ /^BOUNCE/) &&
-			    (!$_[0] || $v->{'from'} ne $_[0]->{'dom'})) {
+			    (!$d || $v->{'from'} ne $d->{'dom'})) {
 				if ($v->{'from'} eq $email) {
 					if ($v->{'to'}->[0] !~ /^BOUNCE/) {
 						$u->{'email'} = $email;
@@ -1026,9 +1026,9 @@ if (!$_[2]) {
 		}
 	}
 
-if (!$_[4] && $_[0]) {
+if (!$_[4] && $d) {
 	# Add accessible databases
-	local @dbs = &domain_databases($_[0]);
+	local @dbs = &domain_databases($d);
 	local $db;
 	local %dbdone;
 	foreach $u (@users) {
@@ -1042,22 +1042,22 @@ if (!$_[4] && $_[0]) {
 			local $dfunc = "list_".$db->{'type'}."_database_users";
 			next if (!defined(&$dfunc));
 			$ufunc = $db->{'type'}."_username";
-			@dbu = &$dfunc($_[0], $db->{'name'});
+			@dbu = &$dfunc($d, $db->{'name'});
 			}
 		else {
 			# Plugin database
 			next if (!&plugin_defined($db->{'type'},
 						  "database_users"));
 			@dbu = &plugin_call($db->{'type'}, "database_users",
-					    $_[0], $db->{'name'});
+					    $d, $db->{'name'});
 			}
 		local %dbu = map { $_->[0], $_->[1] } @dbu;
 		local $u;
 		local $domufunc = $db->{'type'}.'_user';
-		local $domu = defined(&$domufunc) ? &$domufunc($_[0]) : undef;
+		local $domu = defined(&$domufunc) ? &$domufunc($d) : undef;
 		foreach $u (@users) {
 			# Domain owner always gets all databases
-			next if ($u->{'user'} eq $_[0]->{'user'} &&
+			next if ($u->{'user'} eq $d->{'user'} &&
 				 $u->{'unix'});
 
 			# For each user, add this DB to his list if there
@@ -1077,14 +1077,14 @@ if (!$_[4] && $_[0]) {
 		}
 
 	# Add plugin databases
-	local @dbs = &domain_databases($_[0]);
+	local @dbs = &domain_databases($d);
 	foreach $db (@dbs) {
 		next if (&indexof($db->{'type'}, &list_database_plugins()) == -1);
 		}
 	}
 
 # Add any secondary groups in the template
-local @sgroups = &allowed_secondary_groups($_[0]);
+local @sgroups = &allowed_secondary_groups($d);
 if (@sgroups) {
 	local @groups = &list_all_groups();
 	foreach my $u (@users) {
@@ -1105,9 +1105,9 @@ if (@sgroups) {
 	}
 
 # Add no-spam flags
-if ($_[0]) {
+if ($d) {
 	local %nospam;
-	&read_file_cached("$nospam_dir/$_[0]->{'id'}", \%nospam);
+	&read_file_cached("$nospam_dir/$d->{'id'}", \%nospam);
 	foreach my $u (@users) {
 		if (!defined($u->{'nospam'})) {
 			$u->{'nospam'} = $nospam{$u->{'user'}};
