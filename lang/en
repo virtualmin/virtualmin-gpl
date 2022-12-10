@@ -1645,6 +1645,7 @@ disable_bind=Renaming DNS zone to disable it ..
 disable_bind_provision=Renaming DNS zone on services host to disable it ..
 disable_ebind_provision=.. rename failed : $1
 disable_bind_cloud=Disabling DNS zone on $1 ..
+disable_ebind_discloud=.. not supported
 disable_ebind_cloud=.. failed : $1
 disable_ebind_cloud2=.. not supported by cloud provider
 disable_bindnosub=.. not possible for sub-domains
