@@ -95,6 +95,12 @@ $d || &usage("No virtual server named $dname found");
 $remove && (@got || $usenewkey || $newpass) &&
 	&usage("--remove-cert cannot be combined with any other options");
 
+# Run the before command
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&usage($merr) if ($merr);
+&reset_domain_envs($d);
+
 my $oldd = { %$d };
 if ($remove) {
 	# Validate that the cert isn't in use
@@ -236,6 +242,12 @@ foreach $od (&get_domain_by("ssl_same", $d->{'id'})) {
 &disable_letsencrypt_renewal($d);
 
 &run_post_actions();
+
+# Call the post command
+&set_domain_envs($d, "SSL_DOMAIN");
+&made_changes();
+&reset_domain_envs($d);
+
 &virtualmin_api_log(\@OLDARGV, $d);
 
 sub usage

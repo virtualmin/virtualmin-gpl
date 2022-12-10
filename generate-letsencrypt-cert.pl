@@ -159,6 +159,12 @@ if ($connectivity || $validation) {
 		}
 	}
 
+# Run the before command
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&usage($merr) if ($merr);
+&reset_domain_envs($d);
+
 # Request the cert
 &foreign_require("webmin");
 $phd = &public_html_dir($d);
@@ -217,6 +223,12 @@ else {
 	&$second_print(".. done");
 
 	&run_post_actions();
+
+	# Call the post command
+	&set_domain_envs($d, "SSL_DOMAIN");
+	&made_changes();
+	&reset_domain_envs($d);
+
 	&virtualmin_api_log(\@OLDARGV, $d);
 	}
 

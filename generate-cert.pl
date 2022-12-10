@@ -112,6 +112,12 @@ $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
 
+# Run the before command
+&set_domain_envs($d, "SSL_DOMAIN");
+my $merr = &making_changes();
+&usage($merr) if ($merr);
+&reset_domain_envs($d);
+
 if ($self) {
 	# Break SSL linkages that no longer work with this cert
 	@beforecerts = &get_all_domain_service_ssl_certs($d);
@@ -223,6 +229,11 @@ else {
 	&save_domain($d);
 	&run_post_actions();
 	}
+
+# Call the post command
+&set_domain_envs($d, "SSL_DOMAIN");
+&made_changes();
+&reset_domain_envs($d);
 
 &virtualmin_api_log(\@OLDARGV, $d);
 
