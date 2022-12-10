@@ -4757,11 +4757,11 @@ $ttl = $1*24*60*60 if ($ttl =~ /^(\d+)d$/);
 return int($ttl);
 }
 
-# dns_record_key(&rec, [value-too])
+# dns_record_key(&rec, [value-too], [leave-spf])
 # Returns a single string that represents a record for use in de-duping
 sub dns_record_key
 {
-my ($r, $val) = @_;
+my ($r, $val, $nospf) = @_;
 my @r;
 if (defined($r->{'defttl'})) {
 	# Default TTL
@@ -4772,7 +4772,7 @@ else {
 	# Regular record
 	my $ttl = &dns_ttl_to_seconds($r->{'ttl'} || 0);
 	my $type = $r->{'type'};
-	$type = "TXT" if ($type eq "SPF");
+	$type = "TXT" if ($type eq "SPF" && !$nospf);
 	@r = ($r->{'name'}, $type, $ttl);
 	push(@r, join("", @{$r->{'values'}})) if ($val);
 	if ($r->{'proxied'}) {
