@@ -686,7 +686,7 @@ else {
 			&$second_print($text{'delete_noapache'});
 			goto VIRTFAILED;
 			}
-		&modify_web_home_directory($d, $oldd, $virt, $vconf, $conf);
+		&modify_web_home_directory($d, $oldd, $virt, $vconf, $conf, $mode);
 		($virt, $vconf, $conf) = &get_apache_virtual($oldd->{'dom'},
 						      $oldd->{'web_port'});
 		$rv++;
@@ -4422,13 +4422,14 @@ if ($d->{'logrotate'}) {
 return undef;
 }
 
-# modify_web_home_directory(&domain, &old-domain, &virt, &vconf, &apache-config)
+# modify_web_home_directory(&domain, &old-domain, &virt, &vconf, &apache-config,
+# 			    [php-mode])
 # Updates all directives that refer to the old home directory, by modifying
 # the Apache config files directly. Also updates PHP config files. Invalidates
 # the Apache config cache.
 sub modify_web_home_directory
 {
-local ($d, $oldd, $virt, $vconf, $conf) = @_;
+local ($d, $oldd, $virt, $vconf, $conf, $mode) = @_;
 local $lref = &read_file_lines($virt->{'file'});
 for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 	$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
@@ -4437,11 +4438,12 @@ for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 undef(@apache::get_config_cache);
 
 # Fix all php.ini files that use old path
+$mode ||= &get_domain_php_mode($d);
 if (&foreign_check("phpini")) {
 	&foreign_require("phpini");
-	my $mode = &get_domain_php_mode($d);
-	$mode = "cgi" if ($mode eq "mod_php" || $mode eq "fpm");
-	foreach my $ini (&list_domain_php_inis($d, $mode)) {
+	my $inimode = $mode;
+	$inimode = "cgi" if ($inimode eq "mod_php" || $inimode eq "fpm");
+	foreach my $ini (&list_domain_php_inis($d, $inimode)) {
 		&lock_file($ini->[1]);
 		my $conf = &phpini::get_config($ini->[1]);
 		my $fixed = 0;
@@ -4462,7 +4464,6 @@ if (&foreign_check("phpini")) {
 	}
 
 # Fix all PHP settings in FPM files that use the old path
-my $mode = &get_domain_php_mode($d);
 if ($mode eq "fpm") {
 	my $inis = &list_php_fpm_ini_values($d);
 	foreach my $v (@$inis) {
