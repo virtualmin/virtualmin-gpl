@@ -61,8 +61,8 @@ while(@ARGV > 0) {
 
 # Validate inputs
 if ($root) {
-	$uname = "root"
-	$usermin = 0
+	$uname = "root";
+	$usermin = 0;
 	}
 elsif ($dname) {
 	$d = &get_domain_by("dom", $dname);
