@@ -2710,6 +2710,15 @@ else {
 return undef;
 }
 
+# can_php_error_log(&domain|mode)
+# Returns 1 if the PHP error log can be set for a domain or PHP mode
+sub can_php_error_log
+{
+my ($mode) = @_;
+$mode = &get_domain_php_mode($mode) if (ref($mode));
+return $mode ne "none" && $mode ne "mod_php";
+}
+
 # get_default_php_error_log(&domain)
 # Returns the default PHP log path for a domain, based on the template
 sub get_default_php_error_log

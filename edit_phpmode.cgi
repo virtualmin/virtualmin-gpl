@@ -179,7 +179,8 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 		}
 	}
 
-if ($mode ne 'none' && $mode ne 'mod_php') {
+# Show PHP error log
+if (&can_php_error_log($mode)) {
 	$plog = &get_domain_php_error_log($d);
 	$defplog = &get_default_php_error_log($d);
 	$mode = !$plog ? 1 :

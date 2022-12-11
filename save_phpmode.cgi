@@ -145,40 +145,40 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 		}
 	}
 
-# PHP log
-if (defined($in{'plog_def'}) && $mode ne "none" && $mode ne "mod_php") {
+# Save PHP log, or use default if coming out of an incompatible mode
+if (&can_php_error_log($mode)) {
 	my $oldplog = &get_domain_php_error_log($d);
 	my $plog;
-	if ($in{'plog_def'} == 1) {
-		# Logging disabled
-		$plog = undef;
-		}
-	elsif ($in{'plog_def'} == 2) {
-		# Use the default log
-		$plog = &get_default_php_error_log($d);
+	if (defined($in{'plog_def'})) {
+		# Use path from the user
+		if ($in{'plog_def'} == 1) {
+			# Logging disabled
+			$plog = undef;
+			}
+		elsif ($in{'plog_def'} == 2) {
+			# Use the default log
+			$plog = &get_default_php_error_log($d);
+			}
+		else {
+			# Custom path
+			$plog = $in{'plog'};
+			if ($plog && $plog !~ /^\//) {
+				$plog = $d->{'home'}.'/'.$plog;
+				}
+			$plog =~ /^\/\S+$/ || &error($text{'phpmode_eplog'});
+			}
 		}
 	else {
-		# Custom path
-		$plog = $in{'plog'};
-		if ($plog && $plog !~ /^\//) {
-			$plog = $d->{'home'}.'/'.$plog;
-			}
-		$plog =~ /^\/\S+$/ || &error($text{'phpmode_eplog'});
+		# Use template default path
+		$plog = &get_default_php_error_log($d);
 		}
 	if ($plog ne $oldplog) {
+		# Apply the new log if changed
 		&$first_print($text{'phpmode_setplog'});
 		$err = &save_domain_php_error_log($d, $plog);
 		&$second_print(!$err ? $text{'setup_done'}
 				     : &text('phpmode_logerr', $err));
 		$anything++;
-		if ($newmode eq 'cgi' || $newmode eq 'fcgid') {
-			if ($p eq "web") {
-				&register_post_action(\&restart_apache);
-				}
-			elsif ($p) {
-				&plugin_call($p, "feature_restart_web_php", $d);
-				}
-			}
 		}
 	}
 
