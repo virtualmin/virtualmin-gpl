@@ -524,11 +524,6 @@ else {
 	# Always off when web is
 	return 0;
 	}
-
-return &domain_has_website($d) &&
-       (!$oldd || !&domain_has_website($oldd)) &&
-       !$d->{'alias'} && !$d->{'subdom'} &&
-       $config{'logrotate'} == 3;
 }
 
 # modify_user_logrotate(&domain, &old-domain, &logrotate-config)
