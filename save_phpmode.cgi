@@ -146,7 +146,7 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 	}
 
 # PHP log
-if (defined($in{'plog_def'})) {
+if (defined($in{'plog_def'}) && $mode ne "none" && $mode ne "mod_php") {
 	my $oldplog = &get_domain_php_error_log($d);
 	my $plog;
 	if ($in{'plog_def'} == 1) {
