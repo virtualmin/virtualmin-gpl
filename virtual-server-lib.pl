@@ -374,6 +374,7 @@ foreach my $pname (@confplugins) {
 		push(@plugins, $pname);
 		}
 	}
+@plugins_inactive = split(/\s+/, $config{'plugins_inactive'});
 }
 
 # cache_file_path(name)

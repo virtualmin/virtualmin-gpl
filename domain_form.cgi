@@ -258,7 +258,7 @@ print $js;
 # Work out which features are enabled by default
 @dom_features = $aliasdom ? @opt_alias_features :
 		$subdom ? @opt_subdom_features : @opt_features;
-%plugins_inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+%plugins_inactive = map { $_, 1 } @plugins_inactive;
 if ($config{'plan_auto'}) {
 	@def_features = grep { $config{$_} == 1 || $config{$_} == 3 }
 			     @dom_features;

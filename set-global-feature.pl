@@ -121,7 +121,7 @@ foreach $f (@disable) {
 	}
 
 # Update default states
-@inactive = split(/\s+/, $config{'plugins_inactive'});
+@inactive = @plugins_inactive;
 foreach $f (@defaulton) {
 	if (&indexof($f, @features) >= 0) {
 		# A feature being turned on by default

@@ -13423,7 +13423,7 @@ sub can_chained_feature
 {
 my ($f, $check) = @_;
 if (&indexof($f, @plugins) >= 0) {
-	if ($check && $config{'plugins_inactive'} =~ /\Q$f\E/) {
+	if ($check && &indexof($f, @plugins_inactive) >= 0) {
 		# Chaining not currently active
 		return 0;
 		}
@@ -17093,7 +17093,7 @@ local @plug = grep { &plugin_call($_, "feature_suitable",
 if ($aliasdom) {
 	@plug = grep { $aliasdom->{$_} } @plug;
 	}
-local %inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+local %inactive = map { $_, 1 } @plugins_inactive;
 push(@rv, map { { 'feature' => $_,
 		  'desc' => &plugin_call($_, "feature_name", 0),
 		  'plugin' => 1,

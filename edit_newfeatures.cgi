@@ -66,7 +66,7 @@ foreach $f (@features) {
 
 # Add rows for all plugins
 %plugins = map { $_, 1 } @plugins;
-%inactive = map { $_, 1 } split(/\s+/, $config{'plugins_inactive'});
+%inactive = map { $_, 1 } @plugins_inactive;
 foreach $m (sort { $a->{'desc'} cmp $b->{'desc'} } &get_all_module_infos()) {
 	$mdir = &module_root_directory($m->{'dir'});
 	if (-r "$mdir/virtual_feature.pl") {
