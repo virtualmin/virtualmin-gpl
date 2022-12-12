@@ -330,8 +330,8 @@ if (!$d->{'disabled'}) {
 	@grid_order_initial = ( );
 	$i = 0;
 	foreach my $f (&list_possible_domain_features($d)) {
-		# Don't show features that are always enabled, if currently set
-		if ($config{$f} == 3 && $d->{$f}) {
+		# Don't show features that are always enabled, if currently on
+		if (&can_chained_feature($f, 1) && $d->{$f}) {
 			print &ui_hidden($f, $d->{$f}),"\n";
 			next;
 			}
@@ -362,6 +362,12 @@ if (!$d->{'disabled'}) {
 	foreach $f (&list_feature_plugins()) {
 		next if (!&plugin_call($f, "feature_suitable",
 					$parentdom, $aliasdom, $subdom));
+
+		# Don't show plugins that are always enabled, if currently on
+		if (&can_chained_feature($f, 1) && $d->{$f}) {
+			print &ui_hidden($f, $d->{$f}),"\n";
+			next;
+			}
 
 		$label = &plugin_call($f, "feature_label", 1);
 		$label = " <b>$label</b>";

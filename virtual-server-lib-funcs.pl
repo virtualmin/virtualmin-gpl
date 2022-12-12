@@ -13415,18 +13415,28 @@ return ($d->{'web'} && $config{'web'} ||
 	&domain_has_website($d)) && !$d->{'subdom'} && !$d->{'alias'};
 }
 
-# can_chained_feature(feature)
-# Returns 1 if some feature or plugin type gets enabled when another feature is
+# can_chained_feature(feature, [check-chaining-enabled?])
+# Returns 1 if some feature or plugin type gets enabled when another feature is.
+# If the second param is set, also check if chaining is active for this feature
+# right now.
 sub can_chained_feature
 {
-my ($f) = @_;
+my ($f, $check) = @_;
 if (&indexof($f, @plugins) >= 0) {
+	if ($check && $config{'plugins_inactive'} =~ /\Q$f\E/) {
+		# Chaining not currently active
+		return 0;
+		}
 	if (&plugin_defined($f, "feature_can_chained")) {
 		return &plugin_call($f, "feature_can_chained");
 		}
 	return 0;
 	}
 else {
+	if ($check && $config{$f} != 3) {
+		# Chaining not currently active
+		return 0;
+		}
 	my $cfunc = "can_chained_".$f;
 	return defined(&$cfunc) ? &$cfunc() : 0;
 	}
