@@ -268,7 +268,7 @@ my $chroot = &get_mailserver_chroot();
 if ($chroot) {
 	$socketfile =~ s/^\Q$chroot\E//;
 	}
-my $wantmilter = "local:".$socketfile;
+my $wantmilter = "local:$chroot$socketfile";
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Check Postfix config
