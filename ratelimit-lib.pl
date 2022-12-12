@@ -239,11 +239,13 @@ return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 # milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
-&foreign_require("postfix");
-my $postfix_conf = &postfix::get_master_config();
-my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};
-if ($postsmtpchroot) {
-	return "/var/spool/postfix";
+if ($config{'mail_system'} == 0) {
+	&foreign_require("postfix");
+	my $postfix_conf = &postfix::get_master_config();
+	my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};		
+	if ($postsmtpchroot) {
+		return "/var/spool/postfix";
+		}
 	}
 return "";
 }
@@ -266,7 +268,7 @@ my $chroot = &get_mailserver_chroot();
 if ($chroot) {
 	$socketfile =~ s/^\Q$chroot\E//;
 	}
-my $wantmilter = "local:".$socketfile;
+my $wantmilter = "local:$chroot$socketfile";
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Check Postfix config
@@ -411,7 +413,7 @@ else {
 # Configure mail server
 &$first_print($text{'ratelimit_mailserver'});
 &require_mail();
-my $newmilter = "local:".$socketfile;
+my $newmilter = "local:$chroot$socketfile";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
 	&lock_file($postfix::config{'postfix_config_file'});
@@ -512,9 +514,6 @@ if (!$socket) {
 	}
 my $socketfile = $socket->{'value'};
 my $chroot = &get_mailserver_chroot();
-if ($chroot) {
-	$socketfile =~ s/^\Q$chroot\E//;
-	}
 my $oldmilter = "local:".$socketfile;
 &require_mail();
 if ($config{'mail_system'} == 0) {
