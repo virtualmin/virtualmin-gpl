@@ -16678,13 +16678,19 @@ sub set_chained_features
 {
 local ($d, $oldd) = @_;
 foreach my $f (@features) {
-	if ($config{$f} == 3) {
-		local $cfunc = "chained_$f";
-		if (defined(&$cfunc)) {
-			local $c = &$cfunc($d, $oldd);
-			if (defined($c)) {
-				$d->{$f} = $c;
-				}
+	local $cfunc = "chained_$f";
+	if (defined(&$cfunc)) {
+		local $c = &$cfunc($d, $oldd);
+		if (defined($c)) {
+			$d->{$f} = $c;
+			}
+		}
+	}
+foreach my $f (@plugins) {
+	if (&plugin_defined($f, "feature_chained")) {
+		my $c = &plugin_call($f, "feature_chained", $d);
+		if (defined($c)) {
+			$d->{$f} = $c;
 			}
 		}
 	}
