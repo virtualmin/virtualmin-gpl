@@ -514,9 +514,6 @@ if (!$socket) {
 	}
 my $socketfile = $socket->{'value'};
 my $chroot = &get_mailserver_chroot();
-if ($chroot) {
-	$socketfile =~ s/^\Q$chroot\E//;
-	}
 my $oldmilter = "local:".$socketfile;
 &require_mail();
 if ($config{'mail_system'} == 0) {
