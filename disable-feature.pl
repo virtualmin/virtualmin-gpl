@@ -98,6 +98,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 				}
 			}
 		}
+	&set_chained_features(\%newdom, $d);
 	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 	if ($derr) {
 		&$second_print($derr);
@@ -141,9 +142,7 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	# Do it!
 	&$indent_print();
 	foreach $f (reverse(&list_ordered_features($oldd))) {
-		if ($feature{$f} || $plugin{$f}) {
-			$d->{$f} = 0;
-			}
+		$d->{$f} = $newdom{$f};
 		}
 	if (!$disassociate) {
 		# Only actually turn off feature if not just

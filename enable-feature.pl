@@ -107,6 +107,7 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 				}
 			}
 		}
+	&set_chained_features(\%newdom, $d);
 	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 	if ($derr) {
 		&$second_print($derr);
@@ -161,9 +162,7 @@ foreach $d (sort { ($a->{'alias'} ? 2 : $a->{'parent'} ? 1 : 0) <=>
 	# Do it!
 	&$indent_print();
 	foreach $f (&list_ordered_features($d)) {
-		if ($feature{$f} || $plugin{$f}) {
-			$d->{$f} = 1;
-			}
+		$d->{$f} = $newdom{$f};
 		}
 	if (!$associate) {
 		foreach $f (&list_ordered_features($d)) {
