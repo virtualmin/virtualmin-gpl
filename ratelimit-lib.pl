@@ -413,7 +413,7 @@ else {
 # Configure mail server
 &$first_print($text{'ratelimit_mailserver'});
 &require_mail();
-my $newmilter = "local:".$socketfile;
+my $newmilter = "local:$chroot$socketfile";
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
 	&lock_file($postfix::config{'postfix_config_file'});
