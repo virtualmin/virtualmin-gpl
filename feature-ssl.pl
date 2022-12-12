@@ -3295,7 +3295,7 @@ if ($config{'ssl'} != 3) {
 	}
 elsif ($d->{'alias'}) {
 	# Aliases never have their own SSL
-	return 0;
+	return undef;
 	}
 elsif (&domain_has_website($d)) {
 	if (!$oldd || !&domain_has_website($oldd)) {

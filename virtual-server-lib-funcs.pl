@@ -16688,7 +16688,7 @@ foreach my $f (@features) {
 	}
 foreach my $f (@plugins) {
 	if (&plugin_defined($f, "feature_chained")) {
-		my $c = &plugin_call($f, "feature_chained", $d);
+		my $c = &plugin_call($f, "feature_chained", $d, $oldd);
 		if (defined($c)) {
 			$d->{$f} = $c;
 			}
