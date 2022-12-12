@@ -239,8 +239,10 @@ return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 # milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
-if ($config{'mail_system'} == 0 && &get_ratelimit_type() eq 'debian') {
-	# XXX actually check master.cf to see if chroot is enabled
+&foreign_require("postfix");
+my $postfix_conf = &postfix::get_master_config();
+my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};
+if ($postsmtpchroot) {
 	return "/var/spool/postfix";
 	}
 return "";
