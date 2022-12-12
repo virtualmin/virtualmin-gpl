@@ -3283,6 +3283,36 @@ $tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
 $tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 }
 
+# chained_ssl(&domain, [&old-domain])
+# SSL is automatically enabled when a website is, if set to always mode
+# and if the website is just being turned on now.
+sub chained_ssl
+{
+local ($d, $oldd) = @_;
+if ($config{'ssl'} != 3) {
+	# Not in auto mode, so don't touch
+	return undef;
+	}
+elsif ($d->{'alias'}) {
+	# Aliases never have their own SSL
+	return 0;
+	}
+elsif (&domain_has_website($d)) {
+	if (!$oldd || !&domain_has_website($oldd)) {
+		# Turning on web, so turn on SSL
+		return 1;
+		}
+	else {
+		# Don't do anything
+		return undef;
+		}
+	}
+else {
+	# Always off when web is
+	return 0;
+	}
+}
+
 # write_ssl_file_contents(&domain, file, contents|srcfile)
 # Write out an SSL key or cert file with the correct permissions
 sub write_ssl_file_contents

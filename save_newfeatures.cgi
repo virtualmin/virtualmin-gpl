@@ -46,9 +46,10 @@ foreach $f (@features) {
 			}
 		elsif ($factive{$f}) {
 			# Enabled by default
-			if ($f eq "logrotate" && $config{$f} != 1) {
-				# For logrotate, use always mode unless the user
-				# had it on enabled but optional
+			if (($f eq "logrotate" || $f eq "ssl") &&
+			    $config{$f} != 1) {
+				# For these features, use always mode unless
+				# the user had it on enabled but optional
 				$config{$f} = 3;
 				}
 			else {
