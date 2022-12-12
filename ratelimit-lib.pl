@@ -239,11 +239,13 @@ return $out =~ /milter-greylist-([0-9\.]+)/ ? $1 : undef;
 # milter-greylist socket file must be relative to this.
 sub get_mailserver_chroot
 {
-&foreign_require("postfix");
-my $postfix_conf = &postfix::get_master_config();
-my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};
-if ($postsmtpchroot) {
-	return "/var/spool/postfix";
+if ($config{'mail_system'} == 0) {
+	&foreign_require("postfix");
+	my $postfix_conf = &postfix::get_master_config();
+	my ($postsmtpchroot) = grep { $_->{'name'} = 'smtp' && $_->{'chroot'} eq 'y' } @{$postfix_conf};		
+	if ($postsmtpchroot) {
+		return "/var/spool/postfix";
+		}
 	}
 return "";
 }
