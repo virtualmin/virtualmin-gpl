@@ -526,6 +526,13 @@ else {
 	}
 }
 
+# can_chained_logrotate()
+# Returns 1 because the logrotate feature will be enabled if a website is
+sub can_chained_logrotate
+{
+return 1;
+}
+
 # modify_user_logrotate(&domain, &old-domain, &logrotate-config)
 # Change the user and group names in a logrotate config
 sub modify_user_logrotate

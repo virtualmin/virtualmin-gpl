@@ -13415,6 +13415,23 @@ return ($d->{'web'} && $config{'web'} ||
 	&domain_has_website($d)) && !$d->{'subdom'} && !$d->{'alias'};
 }
 
+# can_chained_feature(feature)
+# Returns 1 if some feature or plugin type gets enabled when another feature is
+sub can_chained_feature
+{
+my ($f) = @_;
+if (&indexof($f, @plugins) >= 0) {
+	if (&plugin_defined($f, "feature_can_chained")) {
+		return &plugin_call($f, "feature_can_chained");
+		}
+	return 0;
+	}
+else {
+	my $cfunc = "can_chained_".$f;
+	return defined(&$cfunc) ? &$cfunc() : 0;
+	}
+}
+
 # call_feature_func(feature, &domain, &olddomain)
 # Calls the appropriate function to enable or disable a feature for a domain
 sub call_feature_func
