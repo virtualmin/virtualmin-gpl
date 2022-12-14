@@ -649,7 +649,7 @@ if ($owner && !$parent) {
 	&$first_print("Moving server owner's mailbox ..");
 	local ($mfile, $mtype) = &user_mail_file($owner);
 	local $srcfolder;
-	if (-d "$homesrc/mail/cur") {
+	if (-d "$homesrc/mail/cur" || -d "$homesrc/mail/new") {
 		# Maildir format
 		$srcfolder = { 'type' => 1, 'file' => "$homesrc/mail" };
 		}
@@ -1600,7 +1600,7 @@ while(<PASSWD>) {
 		&set_ownership_permissions(
 		     $uinfo->{'uid'}, $uinfo->{'gid'}, undef, $sfpath);
 		}
-	if (-d "$mailsrc/cur") {
+	if (-d "$mailsrc/cur" || -d "$mailsrc/new") {
 		# Mail directory is in Maildir format, and sub-folders
 		# are in Maildir++
 		local $srcfolder = { 'type' => 1,
