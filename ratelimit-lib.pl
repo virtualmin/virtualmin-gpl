@@ -35,7 +35,7 @@ return 'milter-greylist';
 sub get_ratelimit_user
 {
 my $type = &get_ratelimit_type();
-return $type eq 'redhat' ? 'greylist' :
+return $type eq 'redhat' ? 'grmilter' :
        $type eq 'debian' ? 'greylist' : undef;
 }
 
