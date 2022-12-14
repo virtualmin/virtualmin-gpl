@@ -920,12 +920,14 @@ foreach $u (@users) {
 	}
 
 # Merge in cached quotas
-my $qfile = $quota_cache_dir."/".$d->{'id'};
-my %qcache;
-&read_file_cached($qfile, \%qcache);
-foreach $u (@users) {
-	$u->{'quota_cache'} = $qcache{$u->{'user'}."_quota"};
-	$u->{'mquota_cache'} = $qcache{$u->{'user'}."_mquota"};
+if ($d) {
+	my $qfile = $quota_cache_dir."/".$d->{'id'};
+	my %qcache;
+	&read_file_cached($qfile, \%qcache);
+	foreach $u (@users) {
+		$u->{'quota_cache'} = $qcache{$u->{'user'}."_quota"};
+		$u->{'mquota_cache'} = $qcache{$u->{'user'}."_mquota"};
+		}
 	}
 
 # Check if spamc is being used
