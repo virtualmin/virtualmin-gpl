@@ -5417,6 +5417,10 @@ s3_einfo2=Failed to read $1 : $2
 s3_eputacl=Failed to save bucket ACL : $1
 s3_eputlifecycle=Failed to save bucket lifecycle : $1
 
+az_ecmd=The Azure CLI command <tt>az</tt> was not found
+az_elogin=The Azure CLI command has not authenticated yet. SSH into your Virtualmin system and run the command <tt>az login --use-device-code</tt> to login to Azure.
+azure_account=Azure account $1
+
 tdelete_err=Failed to delete templates
 tdelete_enone=None selected
 tdelete_title=Delete Server Templates
@@ -7244,6 +7248,7 @@ cloud_rsdesc=Rackspace Cloud Files
 cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
+cloud_azdesc=Azure Blob Storage
 cloud_s3account=Using access key $1
 cloud_rsuser=Using login $1
 cloud_s3_noawscli=We recommend installing the official AWS command line interface.
@@ -7267,6 +7272,7 @@ cloud_url=Provider's website
 cloud_es3_endpoint=S3 compatible server must be a valid hostname
 cloud_es3_endport=S3 compatible server port must be a number
 cloud_es3_chunk=Upload chunk size must be a positive number
+cloud_err=Failed to save cloud storage provider
 cloud_egone=Unknown cloud storage provider!
 cloud_rs_user=Rackspace username
 cloud_rs_key=Rackspace API key
@@ -7288,6 +7294,7 @@ cloud_s3_longdesc=The credentials on this page can be found on the Security Cred
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>. You must create an <b>OAuth Client ID</b> credential, with the <b>Authorized redirect URI</b> set to <tt>$1</tt> . Once created, the <b>client ID</b> and <b>client secret</b> can be entered here.
 cloud_dropbox_longdesc=Before you can backup to Dropbox, you must first <a href=http://www.virtualmin.com/dropbox-referral target=_blank>create an account</a> on their website if you don't already have one.
 cloud_bb_longdesc=Before you can backup to Backblaze, you must first <a href=https://backblaze.com/ target=_blank>create an account</a>, and then enable <b>B2 Cloud Storage</b> on the <b>My Settings</b> page. Then you need to generate an Application key with all capabilities on the <b>App Keys</b> page.
+cloud_az_longdesc=Before you can backup to Azure Blob Storage, you must first <a href=https://azure.microsoft.com/en-us/free/ target=_blank>create an account</a>, install the <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> command, and login to your Azure account by running <tt>az login --use-device-code</tt>.
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_newoauth_dropbox=OAuth2 code from Dropbox:
@@ -7317,6 +7324,19 @@ cloud_bb_ekey=Missing or invalid-looking API key
 cloud_bb_elogin=Login to Backblaze failed : $1
 cloud_eoauth_mode=Missing or invalid Oauth mode!
 clouds_oauth_done=OAuth Token Saved
+cloud_azaccount=Azure account $1
+cloud_azure_account=Azure account
+cloud_eazure_eaccount=Azure account must be an email address
+cloud_eazure_eaccount2=The <tt>az</tt> command is authenticated as a different account $1
+cloud_eazure_eaccount3=The <tt>az</tt> command is not authenticated with any account
+cloud_azure_name=Storage account name
+cloud_azure_auto=Find automatically
+cloud_azure_id=Storage subscription ID
+cloud_eazure_estor=No Azure storage accounts found!
+cloud_eazure_ename=Missing or invalid-looking storage account name
+cloud_eazure_eid=Missing or invalid-looking storage account subscription ID
+cloud_eazure_eid2=Could not work out storage account subscription ID
+cloud_eazure_elist=Storage account and ID provided were not accepted by Azure : $1
 
 left_virtualmin=Virtualmin
 left_master=Master admin

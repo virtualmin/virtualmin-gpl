@@ -3,6 +3,7 @@
 
 require './virtual-server-lib.pl';
 &ReadParse();
+&error_setup($text{'cloud_err'});
 &can_cloud_providers() || &error($text{'clouds_ecannot'});
 
 @provs = &list_cloud_providers();

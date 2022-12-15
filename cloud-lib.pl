@@ -31,6 +31,11 @@ if ($virtualmin_pro) {
 		    'url' => 'https://www.backblaze.com/',
 		    'desc' => $text{'cloud_bbdesc'},
 		    'longdesc' => $text{'cloud_bb_longdesc'} });
+	push(@rv, { 'name' => 'azure',
+		    'prefix' => [ 'azure' ],
+		    'url' => 'https://azure.microsoft.com/',
+		    'desc' => $text{'cloud_azdesc'},
+		    'longdesc' => $text{'cloud_az_longdesc'} });
 	}
 return @rv;
 }
@@ -565,5 +570,111 @@ delete($config{'cloud_bb_reseller'});
 &save_module_config();
 &unlock_file($module_config_file);
 }
+
+######## Functions for Backblaze ########
+
+sub cloud_azure_get_state
+{
+if ($config{'azure_account'}) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_azaccount',
+				 "<tt>$config{'azure_account'}</tt>"),
+	       };
+	}
+else {
+	return { 'ok' => 0 };
+	}
+}
+
+sub cloud_azure_show_inputs
+{
+my $rv;
+
+# Azure account
+$rv .= &ui_table_row($text{'cloud_azure_account'},
+	&ui_textbox("azure_account", $config{'azure_account'}, 60));
+
+# Storage account name
+if ($config{'azure_name'}) {
+	$rv .= &ui_table_row($text{'cloud_azure_name'},
+		&ui_textbox("azure_name", $config{'azure_name'}, 40));
+	}
+else {
+	$rv .= &ui_table_row($text{'cloud_azure_name'},
+		&ui_opt_textbox("azure_name", $config{'azure_name'}, 40,
+				$text{'cloud_azure_auto'}));
+	}
+
+# Storage subscription ID
+if ($config{'azure_id'}) {
+	$rv .= &ui_table_row($text{'cloud_azure_id'},
+		&ui_textbox("azure_id", $config{'azure_id'}, 40));
+	}
+else {
+	$rv .= &ui_table_row($text{'cloud_azure_id'},
+		&ui_opt_textbox("azure_id", $config{'azure_id'}, 40,
+				$text{'cloud_azure_auto'}));
+	}
+
+return $rv;
+}
+
+sub cloud_azure_parse_inputs
+{
+# Save account and check that it's in use
+$in{'azure_account'} =~ /^\S+\@\S+$/ || &error($text{'cloud_eazure_eaccount'});
+$config{'azure_account'} = $in{'azure_account'};
+my $out = &call_az_cmd("account", ["list"]);
+ref($out) && @$out || &error($text{'cloud_eazure_eaccount3'});
+$out->[0]->{'user'}->{'name'} eq $in{'azure_account'} ||
+	&error(&text('cloud_eazure_eaccount2', $out->[0]->{'user'}->{'name'}));
+
+# Fetch list of storage accounts
+my $stors = &call_az_cmd("storage", ["account", "list"]);
+ref($stors) || &error($stors);
+@$stors || &error($text{'cloud_eazure_estor'});
+if ($in{'azure_name_def'}) {
+	$config{'azure_name'} = $stors->[0]->{'name'};
+	}
+else {
+	$in{'azure_name'} =~ /^[a-z0-9]+$/ ||
+		&error($text{'cloud_eazure_ename'});
+	$config{'azure_name'} = $in{'azure_name'};
+	}
+if ($in{'azure_id_def'}) {
+	$stors->[0]->{'id'} =~ /^\/subscriptions\/([^\/]+)\// ||
+		&error($text{'cloud_eazure_eid2'});
+	$config{'azure_id'} = $1;
+	}
+else {
+	$in{'azure_id'} =~ /^[a-z0-9\-]+$/ ||
+		&error($text{'cloud_eazure_eid'});
+	$config{'azure_id'} = $in{'azure_id'};
+	}
+
+# Make sure the storage account entered works
+my $list = &call_az_cmd("storage", ["container", "list"]);
+ref($list) || &error(&text('cloud_eazure_elist', (split(/\r?\n/, $list))[0]));
+
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+
+return undef;
+}
+
+# cloud_azure_clear()
+# Reset the Azure account to the default
+sub cloud_azure_clear
+{
+&lock_file($module_config_file);
+delete($config{'azure_account'});
+delete($config{'azure_name'});
+delete($config{'azure_id'});
+&save_module_config();
+&unlock_file($module_config_file);
+}
+
+
 
 1;
