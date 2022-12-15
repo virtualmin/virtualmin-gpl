@@ -575,10 +575,11 @@ delete($config{'cloud_bb_reseller'});
 
 sub cloud_azure_get_state
 {
-if ($config{'azure_account'}) {
+if ($config{'azure_account'} && $config{'azure_name'} && $config{'azure_id'}) {
 	return { 'ok' => 1,
 		 'desc' => &text('cloud_azaccount',
-				 "<tt>$config{'azure_account'}</tt>"),
+				 "<tt>$config{'azure_account'}</tt>",
+				 "<tt>$config{'azure_name'}</tt>"),
 	       };
 	}
 else {

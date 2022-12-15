@@ -542,6 +542,22 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		}
+	elsif ($mode == 11) {
+		# Connect to Azure and create the container
+		local $containers = &list_azure_containers();
+		if (!ref($containers)) {
+			&$first_print($containers);
+			next;
+			}
+		my ($already) = grep { $_->{'name'} eq $server } @$containers;
+		if (!$already) {
+			local $err = &create_azure_container($server);
+			if ($err) {
+				&$first_print($err);
+				next;
+				}
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -1044,12 +1060,14 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				$err = &rs_upload_object($rsh, $server,
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
-			elsif ($mode == 7 || $mode == 8 || $mode == 10) {
+			elsif ($mode == 7 || $mode == 8 || $mode == 10 ||
+			       $mode == 11) {
 				# Via Google, Dropbox or Backblaze upload
 				&$first_print($text{'backup_upload'.$mode});
 				my $dfpath = $path ? $path."/".$df : $df;
 				my $func = $mode == 7 ? \&upload_gcs_file :
 					   $mode == 8 ? \&upload_dropbox_file :
+					   $mode == 11 ? \&upload_azure_file :
 							\&upload_bb_file;
 				my $tries = $mode == 7 ? $gcs_upload_tries :
 					    $mode == 8 ? $dropbox_upload_tries :
@@ -1634,13 +1652,14 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10) &&
+	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11) &&
 	       (@destfiles || !$dirfmt)) {
 		# Upload to Google cloud storage, Dropbox or Backblaze
 		local $err;
 		&$first_print($text{'backup_upload'.$mode});
 		local $func = $mode == 7 ? \&upload_gcs_file :
 			      $mode == 8 ? \&upload_dropbox_file :
+			      $mode == 11 ? \&upload_azure_file :
 					   \&upload_bb_file;
 		local $tries = $mode == 7 ? $gcs_upload_tries :
 			       $mode == 8 ? $dropbox_upload_tries :
@@ -1977,6 +1996,7 @@ if ($mode > 0) {
 		      $mode == 8 ? $text{'restore_downloaddb'} :
 		      $mode == 9 ? $text{'restore_downloadwebmin'} :
 		      $mode == 10 ? $text{'restore_downloadbb'} :
+		      $mode == 11 ? $text{'restore_downloadaz'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local ($cerr) = &check_s3();
@@ -3632,7 +3652,7 @@ elsif ($mode == 6) {
 		return $err if ($err);
 		}
 	}
-elsif ($mode == 7 || $mode == 8 || $mode == 10) {
+elsif ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11) {
 	# Download from Google cloud storage, Dropbox or Backblaze
 	local $files;
 	local $func;
@@ -3642,6 +3662,13 @@ elsif ($mode == 7 || $mode == 8 || $mode == 10) {
 		return "Failed to list $server : $files" if (!ref($files));
 		$files = [ map { $_->{'name'} } @$files ];
 		$func = \&download_gcs_file;
+		}
+	elsif ($mode == 11) {
+		# Get files under container from Azure
+		$files = &list_azure_files($server);
+		return "Failed to list $server : $files" if (!ref($files));
+		$files = [ map { $_->{'name'} } @$files ];
+		$func = \&download_azure_file;
 		}
 	elsif ($mode == 8 || $mode == 10) {
 		# Get files under dir from Dropbox or Backblaze. These have to
@@ -3850,7 +3877,7 @@ return $rv;
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
 # 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin,
-# 10 for Backblaze), login, password, host, path and port
+# 10 for Backblaze, 11 for Azure), login, password, host, path and port
 sub parse_backup_url
 {
 local ($url) = @_;
@@ -3923,13 +3950,23 @@ elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	@rv = (8, undef, undef, $1, $3, undef);
 	}
 elsif ($url =~ /^bb:\/\/([^\/]+)(\/(\S+))?$/) {
-	# Backblaze bucket
+	# Backblaze bucket and file
 	my $st = &cloud_bb_get_state();
 	if ($st->{'ok'}) {
 		@rv = (10, undef, undef, $1, $3, undef);
 		}
 	else {
 		@rv = (-1, "Backblaze has not been configured");
+		}
+	}
+elsif ($url =~ /^azure:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Azure container and file
+	my $st = &cloud_azure_get_state();
+	if ($st->{'ok'}) {
+		@rv = (11, undef, undef, $1, $3, undef);
+		}
+	else {
+		@rv = (-1, "Azure Blob Storage has not been configured");
 		}
 	}
 elsif ($url eq "download:") {
@@ -4007,6 +4044,11 @@ elsif ($proto == 10) {
 	$rv = $path ?
 		&text('backup_nicebbp', "<tt>$host</tt>", "<tt>$path</tt>") :
 		&text('backup_nicebb', "<tt>$host</tt>");
+	}
+elsif ($proto == 11) {
+	$rv = $path ?
+		&text('backup_niceazp', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_niceaz', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;
@@ -4255,6 +4297,18 @@ if ($state->{'ok'} && &can_use_cloud("bb")) {
 	push(@opts, [ 10, $text{'backup_mode10'}, $st ]);
 	}
 
+# Azure blob storage
+my $state = &cloud_azure_get_state();
+if ($state->{'ok'} && &can_use_cloud("azure")) {
+	local $st = &$tablestart('az');
+	$st .= "<tr> <td>$text{'backup_azpath'}</td> <td>".
+	       &ui_textbox($name."_azpath", $mode != 11 ? undef :
+					    $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 11, $text{'backup_mode11'}, $st ]);
+	}
+
 if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 44, $text{'backup_mode44'},
@@ -4413,6 +4467,13 @@ elsif ($mode == 10 && &can_use_cloud("bb")) {
 	($in{$name.'_bbpath'} =~ /^\// || $in{$name.'_bbpath'} =~ /\/$/) &&
 		&error($text{'backup_ebbpath2'});
 	return "bb://".$in{$name.'_bbpath'};
+	}
+elsif ($mode == 11 && &can_use_cloud("azure")) {
+	# Azure blob storage
+	$in{$name.'_azpath'} =~ /^\S+$/i || &error($text{'backup_eazpath'});
+	($in{$name.'_azpath'} =~ /^\// || $in{$name.'_azpath'} =~ /\/$/) &&
+		&error($text{'backup_eazpath2'});
+	return "azure://".$in{$name.'_azpath'};
 	}
 elsif ($mode == 9) {
 	# Webmin server
