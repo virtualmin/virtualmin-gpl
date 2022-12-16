@@ -7340,7 +7340,7 @@ cloud_eazure_eaccount3=The <tt>az</tt> command is not authenticated with any acc
 cloud_azure_name=Storage account name
 cloud_azure_auto=Find automatically
 cloud_azure_id=Storage subscription ID
-cloud_eazure_estor=No Azure storage accounts found!
+cloud_eazure_estor=No Azure storage accounts found! You must first create one on the <a href=http://portal.azure.com target=_blank>Azure Portal</a>.
 cloud_eazure_ename=Missing or invalid-looking storage account name
 cloud_eazure_eid=Missing or invalid-looking storage account subscription ID
 cloud_eazure_eid2=Could not work out storage account subscription ID
