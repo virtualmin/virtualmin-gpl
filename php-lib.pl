@@ -2683,6 +2683,7 @@ sub save_domain_php_error_log
 my ($d, $phplog) = @_;
 $phplog = undef if (!$phplog);
 my $mode = &get_domain_php_mode($d);
+my $p = &domain_has_website($d);
 if ($mode eq "fpm") {
 	&save_php_fpm_ini_value($d, "error_log", $phplog, 0);
 	my $loge = &get_php_fpm_ini_value($d, "log_errors");
@@ -2702,6 +2703,12 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 			}
 		&flush_file_lines($i->[1], undef, 1);
 		&unlock_file($i->[1]);
+		}
+	if ($p eq "web") {
+		&register_post_action(\&restart_apache);
+		}
+	elsif ($p) {
+		&plugin_call($p, "feature_restart_web_php", $d);
 		}
 	}
 else {
