@@ -3165,8 +3165,10 @@ elsif (@dst && $dst[9] >= $fst[9]) {
 	%dom = %$onedom if (%$onedom);
 	}
 
-# If we got the .dom files, can return now
-if (%dom && %info && keys(%dom) >= keys(%info)) {
+# If we got all the needed .dom files, can return now
+my %nvinfo = %info;
+delete($nvinfo{'virtualmin'});
+if (%dom && %nvinfo && keys(%dom) >= keys(%nvinfo)) {
 	if ($wantdoms) {
 		# Fill in missing field for domains that don't exist locally
 		foreach my $d (values %dom) {
@@ -5560,7 +5562,6 @@ elsif ($mode == 11 && $path =~ /\%/) {
 			local $ctime = &google_timestamp(
 				$st->{'properties'}->{'lastModified'});
 			$mcount++;
-			print STDERR "f=$f ctime=$ctime\n";
 			next if (!$ctime || $ctime >= $cutoff);
 			local $old = int((time() - $ctime) / (24*60*60));
 			&$first_print(&text('backup_deletingfile',
