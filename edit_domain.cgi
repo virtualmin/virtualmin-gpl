@@ -330,8 +330,10 @@ if (!$d->{'disabled'}) {
 	@grid_order_initial = ( );
 	$i = 0;
 	foreach my $f (&list_possible_domain_features($d)) {
-		# Don't show features that are chained from another
-		if (&can_chained_feature($f, 1)) {
+		# Don't show features that are chained from another, if both
+		# are in the same state
+		my @ch = &can_chained_feature($f, 1);
+		if (@ch && $d->{$ch[0]} == $d->{$f}) {
 			print &ui_hidden($f, $d->{$f}),"\n";
 			next;
 			}
@@ -364,7 +366,8 @@ if (!$d->{'disabled'}) {
 					$parentdom, $aliasdom, $subdom));
 
 		# Don't show plugins that are chained from another
-		if (&can_chained_feature($f, 1)) {
+		my @ch = &can_chained_feature($f, 1);
+                if (@ch && $d->{$ch[0]} == $d->{$f}) {
 			print &ui_hidden($f, $d->{$f}),"\n";
 			next;
 			}

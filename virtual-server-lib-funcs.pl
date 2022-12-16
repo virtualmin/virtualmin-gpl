@@ -13418,29 +13418,29 @@ return ($d->{'web'} && $config{'web'} ||
 }
 
 # can_chained_feature(feature, [check-chaining-enabled?])
-# Returns 1 if some feature or plugin type gets enabled when another feature is.
-# If the second param is set, also check if chaining is active for this feature
-# right now.
+# Returns a list of parent features if some feature or plugin type gets enabled
+# when another feature is. If the second param is set, also check if chaining
+# is active for this feature right now.
 sub can_chained_feature
 {
 my ($f, $check) = @_;
 if (&indexof($f, @plugins) >= 0) {
 	if ($check && &indexof($f, @plugins_inactive) >= 0) {
-		# Chaining not currently active
-		return 0;
+		# Chaining not currently active for this plugin
+		return ();
 		}
 	if (&plugin_defined($f, "feature_can_chained")) {
 		return &plugin_call($f, "feature_can_chained");
 		}
-	return 0;
+	return ();
 	}
 else {
 	if ($check && $config{$f} != 3) {
-		# Chaining not currently active
-		return 0;
+		# Chaining not currently active for this feature
+		return ();
 		}
 	my $cfunc = "can_chained_".$f;
-	return defined(&$cfunc) ? &$cfunc() : 0;
+	return defined(&$cfunc) ? &$cfunc() : ();
 	}
 }
 

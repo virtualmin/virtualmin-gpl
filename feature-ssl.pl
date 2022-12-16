@@ -3314,10 +3314,11 @@ else {
 }
 
 # can_chained_ssl()
-# Returns 1 because the SSL feature will be enabled if a website is
+# Returns the web feature because the SSL feature will be enabled if a
+# website is
 sub can_chained_ssl
 {
-return 1;
+return ('web');
 }
 
 # write_ssl_file_contents(&domain, file, contents|srcfile)
