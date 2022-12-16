@@ -4991,9 +4991,9 @@ elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 || $mode == 11) &&
        $path =~ /%/) {
-	# S3 / Rackspace / GCS filename which is date-based
+	# S3 / Rackspace / GCS / Azure filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
 	}
@@ -5545,6 +5545,41 @@ elsif ($mode == 10) {
 		}
 	}
 
+elsif ($mode == 11 && $path =~ /\%/) {
+	# Search for Azure files under the container
+	local $files = &list_azure_files($host);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles3', $files));
+		return 0;
+		}
+	foreach my $st (@$files) {
+		my $f = $st->{'name'};
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
+		    $f !~ /\.\d+$/) {
+			# Found one to delete
+			local $ctime = &google_timestamp(
+				$st->{'properties'}->{'lastModified'});
+			$mcount++;
+			print STDERR "f=$f ctime=$ctime\n";
+			next if (!$ctime || $ctime >= $cutoff);
+			local $old = int((time() - $ctime) / (24*60*60));
+			&$first_print(&text('backup_deletingfile',
+					    "<tt>$f</tt>", $old));
+			local $err = &delete_azure_file($host, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_azure_file($host, $f.".dom");
+				&delete_azure_file($host, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($st->{'properties'}->{'contentLength'})));
+				$pcount++;
+				}
+			}
+		}
+	}
 
 &$outdent_print();
 
