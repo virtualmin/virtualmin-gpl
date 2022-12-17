@@ -1,0 +1,19 @@
+The following substitutions can be used here. They will be replaced with the 
+actual values from the user when the template is used :<p>
+
+<table>
+<tr> <td><tt><b>${DOM}</b></td>
+<td>The domain name, such as <tt>foo.com</tt></td> </tr>
+<tr> <td><tt><b>${MAILBOX}</b></td>
+<td>The mailbox name, such as <tt>bob</tt></td> </tr>
+<tr> <td><tt><b>${USER}</b></td>
+<td>The full IMAP/SMTP login, such as <tt>bob-foo</tt></td> </tr>
+<tr> <td><tt><b>${HOME}</b></td>
+<td>The mailbox's home directory, like <tt>/home/foo/homes/bob</tt></td> </tr>
+<tr> <td><tt><b>${PLAINPASS}</b></td>
+<td>The new mailbox's password</td> </tr>
+<tr> <td><tt><b>${QUOTA}</b></td>
+<td>Disk quota assigned to the new mailbox</td> </tr>
+</table>
+
+In addition, conditional blocks like <i>${IF-FTP}...${ELSE-FTP}...{$ENDIF-FTP}</i> may be used.<p>

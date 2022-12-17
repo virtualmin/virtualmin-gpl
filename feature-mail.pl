@@ -5077,6 +5077,47 @@ if (!$in{'new'}) {
 	}
 }
 
+# show_template_newuser(&tmpl)
+# Show the new mailbox user message template
+sub show_template_newuser
+{
+local ($tmpl) = @_;
+
+print &ui_table_row(&hlink($text{'tmpl_newuser'}, "template_newuser"),
+	&none_def_input("newuser", $tmpl->{'newuser_on'}, $text{'tmpl_mailbelow'},
+			0, 0, undef, [ "mail", "subject", "cc", "bcc" ]).
+	"<br>\n".
+	&ui_textarea("newuser", $tmpl->{'newuser'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'newuser'})),
+		     10, 60)."\n".
+	&email_template_input(undef, $tmpl->{'newuser_subject'},
+			      $tmpl->{'newuser_cc'}, $tmpl->{'newuser_bcc'},
+			      $tmpl->{'newuser_to_mailbox'},
+			      $tmpl->{'newuser_to_owner'},
+			      $tmpl->{'newuser_to_reseller'})
+	);
+}
+
+# parse_template_newuser(&tmpl)
+# Update the new mailbox user message template
+sub parse_template_newuser
+{
+local ($tmpl) = @_;
+
+$tmpl->{'newuser_on'} = $in{'newuser_mode'} == 0 ? "none" :
+		        $in{'newuser_mode'} == 1 ? "" : "yes";
+if ($tmpl->{'newuser_on'} eq 'yes') {
+	$in{'newuser'} =~ s/\r//g;
+	$tmpl->{'newuser'} = $in{'newuser'};
+	}
+$tmpl->{'newuser_subject'} = $in{'subject'};
+$tmpl->{'newuser_cc'} = $in{'cc'};
+$tmpl->{'newuser_bcc'} = $in{'bcc'};
+$tmpl->{'newuser_to_mailbox'} = $in{'mailbox'};
+$tmpl->{'newuser_to_owner'} = $in{'owner'};
+$tmpl->{'newuser_to_reseller'} = $in{'reseller'};
+}
+
 # get_generics_hash()
 # Returns a hash of all username to outgoing address mappings
 sub get_generics_hash

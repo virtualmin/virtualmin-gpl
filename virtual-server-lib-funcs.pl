@@ -9128,6 +9128,7 @@ local @rv;
 &ensure_template("domain-template");
 &ensure_template("subdomain-template");
 &ensure_template("framefwd-template");
+&ensure_template("user-template");
 push(@rv, { 'id' => 0,
 	    'name' => $text{'newtmpl_name0'},
 	    'standard' => 1,
@@ -9228,6 +9229,18 @@ push(@rv, { 'id' => 0,
 	    'mail_cc' => $config{'newdom_cc'},
 	    'mail_bcc' => $config{'newdom_bcc'},
 	    'mail_cloud' => $config{'mail_cloud'},
+	    'newuser_on' => $config{'user_template'} eq "none" ? "none" : "yes",
+	    'newuser' => $config{'user_template'} eq "none" ||
+		      $config{'user_template'} eq "default" ?
+				&cat_file("user-template") :
+				&cat_file($config{'user_template'}),
+	    'newuser_subject' => $config{'newuser_subject'} ||
+			         &entities_to_ascii($text{'mail_usubject'}),
+	    'newuser_cc' => $config{'newuser_cc'},
+	    'newuser_bcc' => $config{'newuser_bcc'},
+	    'newuser_to_mailbox' => $config{'newuser_to_mailbox'} || 0,
+	    'newuser_to_owner' => $config{'newuser_to_owner'} || 0,
+	    'newuser_to_reseller' => $config{'newuser_to_reseller'} || 0,
 	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
@@ -9550,11 +9563,9 @@ if ($tmpl->{'id'} == 0) {
 		# Don't send
 		$config{'domain_template'} = 'none';
 		}
-	else {
+	elsif ($config{'domain_template'} eq 'none') {
 		# Sending, but need to set a valid mail file
-		if ($config{'domain_template'} eq 'none') {
-			$config{'domain_template'} = 'default';
-			}
+		$config{'domain_template'} = 'default';
 		}
 	# Write message to default template file, or custom if set
 	&uncat_file($config{'domain_template'} eq "none" ||
@@ -9564,6 +9575,22 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newdom_subject'} = $tmpl->{'mail_subject'};
 	$config{'newdom_cc'} = $tmpl->{'mail_cc'};
 	$config{'newdom_bcc'} = $tmpl->{'mail_bcc'};
+	if ($tmpl->{'newuser_on'} eq 'none') {
+		$config{'user_template'} = 'none';
+		}
+	elsif ($config{'user_template'} eq 'none') {
+		$config{'user_template'} = 'default';
+		}
+	&uncat_file($config{'user_template'} eq "none" ||
+		    $config{'user_template'} eq "default" ?
+			"user-template" :
+			$config{'user_template'}, $tmpl->{'newuser'});
+	$config{'newuser_subject'} = $tmpl->{'newuser_subject'};
+	$config{'newuser_cc'} = $tmpl->{'newuser_cc'};
+	$config{'newuser_bcc'} = $tmpl->{'newuser_bcc'};
+	$config{'newuser_to_mailbox'} = $tmpl->{'newuser_to_mailbox'};
+	$config{'newuser_to_owner'} = $tmpl->{'newuser_to_owner'};
+	$config{'newuser_to_reseller'} = $tmpl->{'newuser_to_reseller'};
 	$config{'mail_cloud'} = $tmpl->{'mail_cloud'};
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
@@ -9762,7 +9789,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
-		    "php_fpm", "php_log", "php",
+		    "php_fpm", "php_log", "php", "newuser",
 		    "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
@@ -13040,7 +13067,7 @@ local ($d, $refresh) = @_;
 # categories and codes
 sub get_template_pages
 {
-local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
+local @tmpls = ( 'features', 'tmpl', 'plan', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
@@ -13066,7 +13093,6 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    );
 local %tmplcat = (
 	'features' => 'setting',
-	'user' => 'email',
 	'update' => 'email',
 	'local' => 'email',
 	'notify' => 'email',
