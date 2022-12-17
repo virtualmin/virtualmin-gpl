@@ -3946,6 +3946,8 @@ newresels_return=resellers list
 newresels_delete=Delete Selected Resellers
 newresels_disable=Lock Selected
 newresels_enable=Un-Lock Selected
+newresels_email=New Reseller Email
+newresels_emaildesc=Edit the email message that can be optionally sent to new reseller's contacts email address after creation.
 
 dresels_err=Failed to delete resellers
 dresels_err2=Failed to lock resellers

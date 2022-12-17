@@ -13069,7 +13069,6 @@ local %tmplcat = (
 	'user' => 'email',
 	'update' => 'email',
 	'local' => 'email',
-	'reseller' => 'email',
 	'notify' => 'email',
 	'sv' => 'email',
 	'ips' => 'ip',
