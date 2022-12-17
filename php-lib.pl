@@ -2704,11 +2704,13 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 		&flush_file_lines($i->[1], undef, 1);
 		&unlock_file($i->[1]);
 		}
-	if ($p eq "web") {
-		&register_post_action(\&restart_apache);
-		}
-	elsif ($p) {
-		&plugin_call($p, "feature_restart_web_php", $d);
+	if ($mode eq 'fcgid') {
+		if ($p eq "web") {
+			&register_post_action(\&restart_apache);
+			}
+		elsif ($p) {
+			&plugin_call($p, "feature_restart_web_php", $d);
+			}
 		}
 	}
 else {
