@@ -13044,7 +13044,7 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'user', 'update',
    $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
-		       'reseller', 'notify', 'scripts', )
+		       'notify', 'scripts', )
 		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
    'shells',
    $config{'spam'} || $config{'virus'} ? ( 'sv' ) : ( ),
