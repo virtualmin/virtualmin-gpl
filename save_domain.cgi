@@ -138,22 +138,27 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {
 	# Collect features and plugins being disabled
-	local (@losing, @plosing);
+	local (@alosing, @losing, @plosing);
 	foreach $f (@dom_features) {
 		if ($config{$f} && $d->{$f} && !$newdom{$f}) {
-			push(@losing, $f);
+			push(@alosing, $f);
+			if (!&can_chained_feature($f, 1)) {
+				push(@losing, $f);
+				}
 			}
 		}
 	foreach $f (&list_feature_plugins()) {
 		if ($d->{$f} && !$newdom{$f}) {
-			push(@plosing, $f);
+			if (!&can_chained_feature($f, 1)) {
+				push(@plosing, $f);
+				}
 			}
 		}
 
 	# Check if any alias domains use a feature being disabled
 	local @ausers;
 	foreach my $ad (&get_domain_by("alias", $d->{'id'})) {
-		foreach $f (@losing) {
+		foreach $f (@alosing) {
 			if ($ad->{$f}) {
 				push(@ausers, $ad);
 				}
