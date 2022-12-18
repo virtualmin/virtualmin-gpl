@@ -4339,7 +4339,7 @@ sub will_send_user_email
 {
 local ($d, $isnew) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
-local $tmode = !$d ? "local" : $isnew ? "user" : "update";
+local $tmode = !$d || $isnew ? "user" : "update";
 if ($tmpl->{'new'.$tmode.'_on'} eq 'none' ||
     $tmode eq "user" && !$tmpl->{'new'.$tmode.'_to_mailbox'}) {
         return 0;
@@ -4357,7 +4357,7 @@ sub send_user_email
 {
 local ($d, $user, $userto, $mode) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
-local $tmode = $mode ? "update" : $d ? "user" : "local";
+local $tmode = $mode ? "update" : "user";
 local $subject = $config{'new'.$tmode.'_subject'};
 
 # Work out who we CC to
@@ -13069,7 +13069,6 @@ local ($d, $refresh) = @_;
 sub get_template_pages
 {
 local @tmpls = ( 'features', 'tmpl', 'plan', 'update',
-   $config{'localgroup'} ? ( 'local' ) : ( ),
    'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'notify', 'scripts', )
@@ -13095,7 +13094,6 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'update',
 local %tmplcat = (
 	'features' => 'setting',
 	'update' => 'email',
-	'local' => 'email',
 	'notify' => 'email',
 	'sv' => 'email',
 	'ips' => 'ip',
