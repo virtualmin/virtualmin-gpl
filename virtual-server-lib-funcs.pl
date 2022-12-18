@@ -4338,9 +4338,10 @@ return %hash;
 sub will_send_user_email
 {
 local ($d, $isnew) = @_;
+local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $tmode = !$d ? "local" : $isnew ? "user" : "update";
-if ($config{$tmode.'_template'} eq 'none' ||
-    $tmode eq "user" && !$config{'new'.$tmode.'_to_mailbox'}) {
+if ($tmpl->{'new'.$tmode.'_on'} eq 'none' ||
+    $tmode eq "user" && !$tmpl->{'new'.$tmode.'_to_mailbox'}) {
         return 0;
         }
 else {
@@ -4355,14 +4356,15 @@ else {
 sub send_user_email
 {
 local ($d, $user, $userto, $mode) = @_;
+local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $tmode = $mode ? "update" : $d ? "user" : "local";
 local $subject = $config{'new'.$tmode.'_subject'};
 
 # Work out who we CC to
 local @ccs;
-push(@ccs, $config{'new'.$tmode.'_cc'}) if ($config{'new'.$tmode.'_cc'});
-push(@ccs, $d->{'emailto'}) if ($config{'new'.$tmode.'_to_owner'});
-if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
+push(@ccs, $tmpl->{'new'.$tmode.'_cc'}) if ($tmpl->{'new'.$tmode.'_cc'});
+push(@ccs, $d->{'emailto'}) if ($tmpl->{'new'.$tmode.'_to_owner'});
+if ($tmpl->{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
     defined(&get_reseller)) {
 	foreach my $r (split(/\s+/, $d->{'reseller'})) {
 		local $resel = &get_reseller($r);
@@ -4373,13 +4375,10 @@ if ($config{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
 		}
 	}
 local $cc = join(",", @ccs);
-local $bcc = $config{'new'.$tmode.'_bcc'};
+local $bcc = $tmpl->{'new'.$tmode.'_bcc'};
 
-&ensure_template($tmode."-template");
-return (1, undef) if ($config{$tmode.'_template'} eq 'none');
-local $tmpl = $config{$tmode.'_template'} eq 'default' ?
-	"$module_config_directory/$tmode-template" :
-	$config{$tmode.'_template'};
+local $mail = $tmpl->{'new'.$tmode};
+return (1, undef) if ($mail eq 'none');
 local %hash = &make_user_substitutions($user, $d);
 local $email = $d ? $hash{'mailbox'}.'@'.$hash{'dom'}
 		  : $hash{'user'}.'@'.&get_system_hostname();
@@ -4389,13 +4388,13 @@ if ($userto) {
 	$email = $userto eq 'none' ? undef : $userto;
 	}
 if (($tmode eq 'user' || $tmode eq 'update') &&
-    !$config{'new'.$tmode.'_to_mailbox'}) {
+    !$tmpl->{'new'.$tmode.'_to_mailbox'}) {
 	# Don't email domain owner if disabled
 	$email = undef;
 	}
 return (1, undef) if (!$email && !$cc && !$bcc);
 
-return &send_template_email(&cat_file($tmpl), $email, \%hash,
+return &send_template_email($mail, $email, \%hash,
 			    $subject ||
 			    &entities_to_ascii($mode ? $text{'mail_upsubject'}
 						     : $text{'mail_usubject'}),
@@ -9383,6 +9382,7 @@ while(defined($f = readdir(DIR))) {
 		&read_file("$templates_dir/$f", \%tmpl);
 		$tmpl{'file'} = "$templates_dir/$f";
 		$tmpl{'mail'} =~ s/\t/\n/g;
+		$tmpl{'newuser'} =~ s/\t/\n/g;
 		if ($tmpl{'id'} == 1 || $tmpl{'id'} == 0) {
 			foreach $k (keys %tmpl) {
 				$rv[$tmpl{'id'}]->{$k} = $tmpl{$k}
@@ -9734,6 +9734,7 @@ if ($tmpl->{'id'} != 0) {
 	&make_dir($templates_dir, 0700);
 	$tmpl->{'created'} ||= time();
 	$tmpl->{'mail'} =~ s/\n/\t/g;
+	$tmpl->{'newuser'} =~ s/\n/\t/g;
 	&lock_file("$templates_dir/$tmpl->{'id'}");
 	&write_file("$templates_dir/$tmpl->{'id'}", $tmpl);
 	&unlock_file("$templates_dir/$tmpl->{'id'}");
