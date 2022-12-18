@@ -183,7 +183,7 @@ if (&domain_has_ssl_cert($d)) {
 		($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
 		push(@smissing, $st) if (!$a);
 		}
-	if (@smissing) {
+	if (@smissing && &can_webmin_cert()) {
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"peripcerts.cgi",
@@ -200,7 +200,7 @@ if (&domain_has_ssl_cert($d)) {
 		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;
 		push(@gmissing, $st) if (!$a);
 		}
-	if (@gmissing) {
+	if (@gmissing && &can_webmin_cert()) {
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
 			"copy_cert_all.cgi",
