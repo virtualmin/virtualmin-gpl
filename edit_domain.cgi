@@ -338,6 +338,13 @@ if (!$d->{'disabled'}) {
 			next;
 			}
 
+		# Don't show unix user and directory options if enabled
+		if (($f eq "dir" || $f eq "unix") &&
+		    $config{$f} == 3 && $d->{$f}) {
+			print &ui_hidden($f, $d->{$f}),"\n";
+			next;
+			}
+
 		# Don't show dir option for alias domains if not needed
 		if ($f eq 'dir' && $config{$f} == 3 && $d->{'alias'} &&
 		    $tmpl->{'aliascopy'}) {
