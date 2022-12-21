@@ -15258,16 +15258,30 @@ if ($config{'mysql'}) {
 		}
 	else {
 		# MySQL server is needed
-		&foreign_installed("mysql", 1) == 2 ||
+		my $mysql_server_status = &foreign_installed("mysql", 1);
+		# If we have remote server setup
+		# to be used by default
+		my $mysql_remote = grep { 
+			        $_->{'master'} eq '0' &&
+			        $_->{'config'}->{'host'} &&
+			        $_->{'config'}->{'virtualmin_default'}
+			    } &list_remote_mysql_modules();
+		if ($mysql_remote) {
+			&$second_print($text{'check_mysqlok3'});
+			}
+		elsif ($mysql_server_status != 2) {
 			return &text('index_emysql', "/mysql/", $clink);
-		if ($mysql::mysql_pass eq '') {
-			local $myd = &module_root_directory("mysql");
-			&$second_print(&text('check_mysqlnopass',
-					     '/mysql/root_form.cgi'));
 			}
 		else {
-			my ($v, $var) = &get_dom_remote_mysql_version();
-			&$second_print(&text('check_mysqlok', $v));
+			if ($mysql::mysql_pass eq '') {
+				local $myd = &module_root_directory("mysql");
+				&$second_print(&text('check_mysqlnopass',
+						     '/mysql/root_form.cgi'));
+				}
+			else {
+				my ($v, $var) = &get_dom_remote_mysql_version();
+				&$second_print(&text('check_mysqlok', $v));
+				}
 			}
 		}
 
