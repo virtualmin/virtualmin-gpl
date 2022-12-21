@@ -1856,22 +1856,6 @@ sub_RPLAINPASS=Reseller's password
 sub_EMAIL=Reseller's contact email address
 sub_WEBMINURL=URL to login to Virtualmin
 
-newuser_title=New Mailbox Email
-newuser_ecannot=You are not allowed to edit the new user email template
-newuser_desc2=Use this form to edit the template for the email message that can be sent to a new mail / FTP user after it is created. The following substitions will be done to the text :
-newuser_header=New user email message details
-newuser_docs=Explanation and substitutions
-
-newupdate_title=Updated Mailbox Email
-newupdate_ecannot=You are not allowed to edit the updated user email template
-newupdate_desc2=Use this form to edit the template for the email message that can be sent to a mail / FTP user after it is updated. The following substitions will be done to the text :
-newupdate_header=Updated user email message details
-
-newlocal_title=New Local Mailbox Email
-newlocal_ecannot=You are not allowed to edit the new local user email template
-newlocal_desc2=Use this form to edit the template for the email message that can be sent to a new local user after it is created. The following substitions will be done to the text :
-newlocal_header=New local user email message details
-
 newdom_title=New Virtual Server Email
 newdom_ecannot=You are not allowed to edit the new server email template
 newdom_desc=Use this form to edit the template file $1 for the email message that will be sent to a new virtual server owner after it is created. The following substitions will be done to the text :
@@ -3313,7 +3297,8 @@ tmpl_exclude=Directories to exclude from backups
 tmpl_exdirs=Listed directories ..
 tmpl_mail=Email message to send upon server creation
 tmpl_mailbelow=Message below ..
-tmpl_newuser=Email message to send upon mailbox creation
+tmpl_newuser=Email message to send on mailbox creation
+tmpl_updateuser=Email message to send on mailbox update
 tmpl_frame=HTML for frame-forwarded websites
 tmpl_framebelow=HTML below ..
 tmpl_web=Directives and settings for new websites
@@ -3619,6 +3604,7 @@ tmpl_editmode_php=PHP options
 tmpl_editmode_resources=CPU and memory resource limits
 tmpl_editmode_avail=Administrator's Webmin modules
 tmpl_editmode_newuser=New mailbox email
+tmpl_editmode_updateuser=Updated mailbox email
 tmpl_noplugins=No plugins have defined any template options.
 tmpl_editmode_scripts=Default script installers
 tmpl_cnext=Create and Next

@@ -5084,7 +5084,8 @@ sub show_template_newuser
 local ($tmpl) = @_;
 
 print &ui_table_row(&hlink($text{'tmpl_newuser'}, "template_newuser"),
-	&none_def_input("newuser", $tmpl->{'newuser_on'}, $text{'tmpl_mailbelow'},
+	&none_def_input("newuser", $tmpl->{'newuser_on'},
+			$text{'tmpl_mailbelow'},
 			0, 0, undef, [ "mail", "subject", "cc", "bcc" ]).
 	"<br>\n".
 	&ui_textarea("newuser", $tmpl->{'newuser'} eq "none" ? "" :
@@ -5116,6 +5117,48 @@ $tmpl->{'newuser_bcc'} = $in{'bcc'};
 $tmpl->{'newuser_to_mailbox'} = $in{'mailbox'};
 $tmpl->{'newuser_to_owner'} = $in{'owner'};
 $tmpl->{'newuser_to_reseller'} = $in{'reseller'};
+}
+
+# show_template_updateuser(&tmpl)
+# Show the new mailbox user message template
+sub show_template_updateuser
+{
+local ($tmpl) = @_;
+
+print &ui_table_row(&hlink($text{'tmpl_updateuser'}, "template_updateuser"),
+	&none_def_input("updateuser", $tmpl->{'updateuser_on'},
+			$text{'tmpl_mailbelow'},
+			0, 0, undef, [ "mail", "subject", "cc", "bcc" ]).
+	"<br>\n".
+	&ui_textarea("updateuser", $tmpl->{'updateuser'} eq "none" ? "" :
+				join("\n", split(/\t/, $tmpl->{'updateuser'})),
+		     10, 60)."\n".
+	&email_template_input(undef, $tmpl->{'updateuser_subject'},
+		      $tmpl->{'updateuser_cc'}, $tmpl->{'updateuser_bcc'},
+		      $tmpl->{'updateuser_to_mailbox'},
+		      $tmpl->{'updateuser_to_owner'},
+		      $tmpl->{'updateuser_to_reseller'})
+	);
+}
+
+# parse_template_updateuser(&tmpl)
+# Update the new mailbox user message template
+sub parse_template_updateuser
+{
+local ($tmpl) = @_;
+
+$tmpl->{'updateuser_on'} = $in{'updateuser_mode'} == 0 ? "none" :
+		        $in{'updateuser_mode'} == 1 ? "" : "yes";
+if ($tmpl->{'updateuser_on'} eq 'yes') {
+	$in{'updateuser'} =~ s/\r//g;
+	$tmpl->{'updateuser'} = $in{'updateuser'};
+	}
+$tmpl->{'updateuser_subject'} = $in{'subject'};
+$tmpl->{'updateuser_cc'} = $in{'cc'};
+$tmpl->{'updateuser_bcc'} = $in{'bcc'};
+$tmpl->{'updateuser_to_mailbox'} = $in{'mailbox'};
+$tmpl->{'updateuser_to_owner'} = $in{'owner'};
+$tmpl->{'updateuser_to_reseller'} = $in{'reseller'};
 }
 
 # get_generics_hash()

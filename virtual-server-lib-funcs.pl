@@ -4339,9 +4339,9 @@ sub will_send_user_email
 {
 local ($d, $isnew) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
-local $tmode = !$d || $isnew ? "user" : "update";
-if ($tmpl->{'new'.$tmode.'_on'} eq 'none' ||
-    $tmode eq "user" && !$tmpl->{'new'.$tmode.'_to_mailbox'}) {
+local $tmode = !$d || $isnew ? "newuser" : "updateuser";
+if ($tmpl->{$tmode.'_on'} eq 'none' ||
+    $tmode eq "newuser" && !$tmpl->{$tmode.'_to_mailbox'}) {
         return 0;
         }
 else {
@@ -4357,14 +4357,14 @@ sub send_user_email
 {
 local ($d, $user, $userto, $mode) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
-local $tmode = $mode ? "update" : "user";
-local $subject = $config{'new'.$tmode.'_subject'};
+local $tmode = $mode ? "updateuser" : "newuser";
+local $subject = $config{$tmode.'_subject'};
 
 # Work out who we CC to
 local @ccs;
-push(@ccs, $tmpl->{'new'.$tmode.'_cc'}) if ($tmpl->{'new'.$tmode.'_cc'});
-push(@ccs, $d->{'emailto'}) if ($tmpl->{'new'.$tmode.'_to_owner'});
-if ($tmpl->{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
+push(@ccs, $tmpl->{$tmode.'_cc'}) if ($tmpl->{$tmode.'_cc'});
+push(@ccs, $d->{'emailto'}) if ($d && $tmpl->{$tmode.'_to_owner'});
+if ($tmpl->{$tmode.'_to_reseller'} && $d && $d->{'reseller'} &&
     defined(&get_reseller)) {
 	foreach my $r (split(/\s+/, $d->{'reseller'})) {
 		local $resel = &get_reseller($r);
@@ -4375,9 +4375,9 @@ if ($tmpl->{'new'.$tmode.'_to_reseller'} && $d->{'reseller'} &&
 		}
 	}
 local $cc = join(",", @ccs);
-local $bcc = $tmpl->{'new'.$tmode.'_bcc'};
+local $bcc = $tmpl->{$tmode.'_bcc'};
 
-local $mail = $tmpl->{'new'.$tmode};
+local $mail = $tmpl->{$tmode};
 return (1, undef) if ($mail eq 'none');
 local %hash = &make_user_substitutions($user, $d);
 local $email = $d ? $hash{'mailbox'}.'@'.$hash{'dom'}
@@ -4387,8 +4387,7 @@ local $email = $d ? $hash{'mailbox'}.'@'.$hash{'dom'}
 if ($userto) {
 	$email = $userto eq 'none' ? undef : $userto;
 	}
-if (($tmode eq 'user' || $tmode eq 'update') &&
-    !$tmpl->{'new'.$tmode.'_to_mailbox'}) {
+if ($d && !$tmpl->{$tmode.'_to_mailbox'}) {
 	# Don't email domain owner if disabled
 	$email = undef;
 	}
@@ -4401,7 +4400,7 @@ return &send_template_email($mail, $email, \%hash,
 			    $cc, $bcc, $d);
 }
 
-# make_user_substitutions(&user, &domain)
+# make_user_substitutions(&user, [&domain])
 # Create a hash of email substitions for a user in some domain
 sub make_user_substitutions
 {
@@ -9240,6 +9239,19 @@ push(@rv, { 'id' => 0,
 	    'newuser_to_mailbox' => $config{'newuser_to_mailbox'} || 0,
 	    'newuser_to_owner' => $config{'newuser_to_owner'} || 0,
 	    'newuser_to_reseller' => $config{'newuser_to_reseller'} || 0,
+	    'updateuser_on' => $config{'update_template'} eq "none" ?
+				"none" : "yes",
+	    'updateuser' => $config{'update_template'} eq "none" ||
+		      $config{'update_template'} eq "default" ?
+				&cat_file("update-template") :
+				&cat_file($config{'update_template'}),
+	    'updateuser_subject' => $config{'newupdate_subject'} ||
+			         &entities_to_ascii($text{'mail_upsubject'}),
+	    'updateuser_cc' => $config{'newupdate_cc'},
+	    'updateuser_bcc' => $config{'newupdate_bcc'},
+	    'updateuser_to_mailbox' => $config{'newupdate_to_mailbox'} || 0,
+	    'updateuser_to_owner' => $config{'newupdate_to_owner'} || 0,
+	    'updateuser_to_reseller' => $config{'newupdate_to_reseller'} || 0,
 	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
@@ -9383,6 +9395,7 @@ while(defined($f = readdir(DIR))) {
 		$tmpl{'file'} = "$templates_dir/$f";
 		$tmpl{'mail'} =~ s/\t/\n/g;
 		$tmpl{'newuser'} =~ s/\t/\n/g;
+		$tmpl{'updateuser'} =~ s/\t/\n/g;
 		if ($tmpl{'id'} == 1 || $tmpl{'id'} == 0) {
 			foreach $k (keys %tmpl) {
 				$rv[$tmpl{'id'}]->{$k} = $tmpl{$k}
@@ -9591,6 +9604,22 @@ if ($tmpl->{'id'} == 0) {
 	$config{'newuser_to_mailbox'} = $tmpl->{'newuser_to_mailbox'};
 	$config{'newuser_to_owner'} = $tmpl->{'newuser_to_owner'};
 	$config{'newuser_to_reseller'} = $tmpl->{'newuser_to_reseller'};
+	if ($tmpl->{'updateuser_on'} eq 'none') {
+		$config{'update_template'} = 'none';
+		}
+	elsif ($config{'user_template'} eq 'none') {
+		$config{'update_template'} = 'default';
+		}
+	&uncat_file($config{'update_template'} eq "none" ||
+		    $config{'update_template'} eq "default" ?
+			"update-template" :
+			$config{'update_template'}, $tmpl->{'updateuser'});
+	$config{'newupdate_subject'} = $tmpl->{'updateuser_subject'};
+	$config{'newupdate_cc'} = $tmpl->{'updateuser_cc'};
+	$config{'newupdate_bcc'} = $tmpl->{'updateuser_bcc'};
+	$config{'newupdate_to_mailbox'} = $tmpl->{'updateuser_to_mailbox'};
+	$config{'newupdate_to_owner'} = $tmpl->{'updateuser_to_owner'};
+	$config{'newupdate_to_reseller'} = $tmpl->{'updateuser_to_reseller'};
 	$config{'mail_cloud'} = $tmpl->{'mail_cloud'};
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
@@ -9735,6 +9764,7 @@ if ($tmpl->{'id'} != 0) {
 	$tmpl->{'created'} ||= time();
 	$tmpl->{'mail'} =~ s/\n/\t/g;
 	$tmpl->{'newuser'} =~ s/\n/\t/g;
+	$tmpl->{'updateuser'} =~ s/\n/\t/g;
 	&lock_file("$templates_dir/$tmpl->{'id'}");
 	&write_file("$templates_dir/$tmpl->{'id'}", $tmpl);
 	&unlock_file("$templates_dir/$tmpl->{'id'}");
@@ -9790,7 +9820,7 @@ if (!$tmpl->{'default'}) {
 		    "othergroups", "defmquota", "quotatype", "append_style",
 		    "domalias", "logrotate_files", "logrotate_shared",
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
-		    "php_fpm", "php_log", "php", "newuser",
+		    "php_fpm", "php_log", "php", "newuser", "updateuser",
 		    "status", "extra_prefix", "capabilities",
 		    "webmin_group", "spamclear", "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
@@ -13068,8 +13098,7 @@ local ($d, $refresh) = @_;
 # categories and codes
 sub get_template_pages
 {
-local @tmpls = ( 'features', 'tmpl', 'plan', 'update',
-   'bw',
+local @tmpls = ( 'features', 'tmpl', 'plan', 'bw',
    $virtualmin_pro ? ( 'fields', 'links', 'ips', 'sharedips', 'dynip', 'resels',
 		       'notify', 'scripts', )
 		   : ( 'fields', 'ips', 'sharedips', 'scripts', 'dynip' ),
@@ -13093,7 +13122,6 @@ local @tmpls = ( 'features', 'tmpl', 'plan', 'update',
    );
 local %tmplcat = (
 	'features' => 'setting',
-	'update' => 'email',
 	'notify' => 'email',
 	'sv' => 'email',
 	'ips' => 'ip',
