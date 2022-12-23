@@ -917,6 +917,7 @@ if ($virt) {
 		&lock_file($cert);
 		&write_ssl_file_contents($d, $cert, $file."_cert");
 		&unlock_file($cert);
+		&save_website_ssl_file($d, "cert", $cert);
 		}
 	local $key = $d->{'ssl_key'} ||
 		     &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
@@ -924,6 +925,7 @@ if ($virt) {
 		&lock_file($key);
 		&write_ssl_file_contents($d, $key, $file."_key");
 		&unlock_file($key);
+		&save_website_ssl_file($d, "key", $key);
 		}
 	local $ca = $d->{'ssl_chain'} ||
 	    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
@@ -932,6 +934,7 @@ if ($virt) {
 		&lock_file($ca);
 		&write_ssl_file_contents($d, $ca, $file."_ca");
 		&unlock_file($ca);
+		&save_website_ssl_file($d, "ca", $ca);
 		}
 	&sync_combined_ssl_cert($d);
 
