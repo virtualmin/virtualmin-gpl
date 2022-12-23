@@ -168,10 +168,12 @@ foreach my $p (@ports) {
 		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
 		$dir .= "Match" if ($redirect->{'regexp'});
 		my @aliases = &apache::find_directive($dir, $vconf);
-		push(@aliases, ($redirect->{'code'} ? $redirect->{'code'}." " : "").
-			       $redirect->{'path'}.
-			       ($redirect->{'regexp'} ? "(\.\*)\$" : "").
-			       " ".$redirect->{'dest'});
+		push(@aliases,
+			($redirect->{'code'} && !$redirect->{'alias'} ?
+				$redirect->{'code'}." " : "").
+			$redirect->{'path'}.
+			($redirect->{'regexp'} ? "(\.\*)\$" : "").
+			" ".$redirect->{'dest'});
 		&apache::save_directive($dir, \@aliases, $vconf, $conf);
 		}
 	&flush_file_lines($virt->{'file'});
