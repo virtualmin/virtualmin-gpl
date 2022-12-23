@@ -2396,6 +2396,7 @@ else {
 		}
 	foreach my $r (@$brecs) {
 		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
+		next if (&is_dnssec_record($r));
 		&create_dns_record($recs, $zonefile, $r);
 		}
 	}
