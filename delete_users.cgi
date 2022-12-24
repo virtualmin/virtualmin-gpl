@@ -109,10 +109,11 @@ else {
 				  @hclash)),"</b><p>\n";
 		}
 	print &ui_form_end([ [ "confirm", $text{'users_dconfirm'} ] ]);
+	print "<p></p>";
 	print &text('users_dlist',
 		join(" ",
 		  map { "<tt>".&remove_userdom($_->{'user'}, $d)."</tt>" }
-		      @dusers)),"<p>\n";
+		      @dusers)),"\n";
 	print "</center>\n";
 	&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
 			 $text{'users_return'});
