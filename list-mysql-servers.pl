@@ -4,7 +4,9 @@
 
 Lists all registered remote MySQL servers.
 
-XXX
+This command lists all register MySQL servers that can be used for remote
+database hosting. Use the C<--name-only> flag to just list hostnames, or 
+C<--multiline> to show full details of each server.
 
 =cut
 
