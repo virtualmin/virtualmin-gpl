@@ -530,7 +530,8 @@ else {
 # Returns 'web' because the logrotate feature will be enabled if a website is
 sub can_chained_logrotate
 {
-return ('web');
+my $f = &domain_has_website();
+return ($f);
 }
 
 # modify_user_logrotate(&domain, &old-domain, &logrotate-config)
