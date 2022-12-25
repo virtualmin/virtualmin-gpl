@@ -4432,6 +4432,30 @@ if (&foreign_installed("dovecot")) {
 			   'links' => \@dlinks } );
 		}
 	}
+if (&foreign_check("init")) {
+	&foreign_require("init");
+	my $st = &init::action_status("saslauthd");
+	my $r = &init::status_action("saslauthd");
+	if ($st && $r >= 0) {
+		if ($r) {
+			push(@rv,{ 'status' => 1,
+				   'feature' => 'saslauthd',
+				   'name' => $text{'index_saname'},
+				   'desc' => $text{'index_sastop'},
+				   'restartdesc' => $text{'index_sarestart'},
+				   'longdesc' => $text{'index_sastopdesc'},
+				   'links' => [] } );
+			}
+		else {
+			push(@rv,{ 'status' => 0,
+				   'feature' => 'saslauthd',
+				   'name' => $text{'index_saname'},
+				   'desc' => $text{'index_sastart'},
+				   'longdesc' => $text{'index_sastartdesc'},
+				   'links' => [] } );
+			}
+		}
+	}
 return @rv;
 }
 
@@ -4455,6 +4479,20 @@ sub stop_service_dovecot
 {
 &foreign_require("dovecot");
 return &dovecot::stop_dovecot();
+}
+
+sub start_service_saslauthd
+{
+&foreign_require("init");
+my ($ok, $err) = &init::start_action("saslauthd");
+return $ok ? undef : $err;
+}
+
+sub stop_service_saslauthd
+{
+&foreign_require("init");
+my ($ok, $err) = &init::stop_action("saslauthd");
+return $ok ? undef : $err;
 }
 
 # check_secondary_mx()
