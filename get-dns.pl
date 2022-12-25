@@ -12,9 +12,11 @@ By default, output is in a human-readable table format. However, you can
 choose to a more easily parsed and complete format with the C<--multiline>
 flag, or get a list of just record names with the C<--name-only> option.
 
-Normally the command will output the DNS records in the domain's zone file,
-but you can request to show the DNSSEC DS records that should be created
-in the registrar's zone with the C<--ds-records> flag.
+Normally the command will output all the DNS records in the domain's zone file,
+except those used for DNSSEC, but you can request to show only the DNSSEC DS
+records that should be created in the registrar's zone with the
+C<--ds-records> flag. Or you can choose to have DNSSEC records included in
+the output with C<--dnssec-records>.
 
 By default the command will list all records, but you can limit it to
 records with a specific name via the C<--name> flag. Similarly you can limit
@@ -56,6 +58,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ds-records") {
 		$dsmode = 1;
 		}
+	elsif ($a eq "--dnssec-records") {
+		$dnssecmode = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -85,7 +90,9 @@ if ($dsmode) {
 else {
 	@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
 	}
-@recs = grep { !&is_dnssec_record($_) } @recs;
+if (!$dnssecmode) {
+	@recs = grep { !&is_dnssec_record($_) } @recs;
+	}
 @recs = @{&filter_domain_dns_records($d, \@recs)};
 
 # Filter by name and type if requested
@@ -145,6 +152,7 @@ print "Lists the DNS records in some domain.\n";
 print "\n";
 print "virtualmin get-dns --domain name\n";
 print "                  [--ds-records]\n";
+print "                  [--dnssec-records]\n";
 print "                  [--multiline | --name-only]\n";
 print "                  [--name record-name | --regexp name-pattern]\n";
 print "                  [--type A|AAAA|CNAME|MX|NS|TXT]\n";
