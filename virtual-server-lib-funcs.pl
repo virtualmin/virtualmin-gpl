@@ -15261,10 +15261,11 @@ if ($config{'mysql'}) {
 		my $mysql_server_status = &foreign_installed("mysql", 1);
 		# If we have remote server setup
 		# to be used by default
-		my $mysql_remote = grep { 
-			        $_->{'master'} eq '0' &&
-			        $_->{'config'}->{'host'} &&
-			        $_->{'config'}->{'virtualmin_default'}
+		my $mysql_remote = grep {
+			    ($_->{'config'}->{'sock'} ||
+			     $_->{'config'}->{'host'} ||
+			     $_->{'config'}->{'port'}) &&
+			       $_->{'config'}->{'virtualmin_default'}
 			    } &list_remote_mysql_modules();
 		if ($mysql_remote) {
 			&$second_print($text{'check_mysqlok3'});

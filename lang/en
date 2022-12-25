@@ -1856,6 +1856,8 @@ sub_RPLAINPASS=Reseller's password
 sub_EMAIL=Reseller's contact email address
 sub_WEBMINURL=URL to login to Virtualmin
 
+newuser_docs=Explanation and substitutions
+
 newdom_title=New Virtual Server Email
 newdom_ecannot=You are not allowed to edit the new server email template
 newdom_desc=Use this form to edit the template file $1 for the email message that will be sent to a new virtual server owner after it is created. The following substitions will be done to the text :
