@@ -7176,6 +7176,7 @@ transfer_pass=Root password for destination system
 transfer_passdef=(Optional if SSH authentication is configured)
 transfer_overwrite=Over-write existing domain?
 transfer_replication=Replicating to remote system?
+transfer_output=Show detailed output when backing up?
 transfer_delete=Action after transfer
 transfer_delete2=Delete from this system
 transfer_delete1=Disable on this system

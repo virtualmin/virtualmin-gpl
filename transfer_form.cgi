@@ -93,6 +93,10 @@ print &ui_table_row($text{'transfer_replication'},
 	&ui_yesno_radio("replication",
 			&list_remote_domain_features($d) ? 1 :0));
 
+# Show full transfer output?
+print &ui_table_row($text{'transfer_output'},
+	&ui_yesno_radio("output", 0));
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'transfer_ok'} ] ]);
 
