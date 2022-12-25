@@ -550,9 +550,9 @@ foreach $f (@dom_features) {
 	$can_feature{$f}++;
 	$can_website = 1 if ($f eq 'web');
 
-	if ($config{$f} == 3) {
-		# This feature is always on, so don't show it
-		print &ui_hidden($f, 1),"\n";
+	if (&can_chained_feature($f, 1)) {
+		# This feature is always on when some other feature is, so
+		# don't show it
 		next;
 		}
 
@@ -571,6 +571,12 @@ foreach $f (@fplugins) {
 				$parentdom, $aliasdom, $subdom));
 	next if (!&can_use_feature($f));
 	$can_website = 1 if (&plugin_call($f, "feature_provides_web"));
+
+	if (&can_chained_feature($f, 1)) {
+		# This feature is always on when some other feature is, so
+		# don't show it
+		next;
+		}
 
 	$label = &plugin_call($f, "feature_label", 0);
 	$label = " <b>$label</b>";
