@@ -2426,11 +2426,6 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 			}
 		$i++;
 		}
-	# Regenerate DNSSEC records
-	if (&has_domain_dnssec($d)) {
-		&disable_domain_dnssec($d);
-		&enable_domain_dnssec($d);
-		}
 	}
 
 &post_records_change($d, $recs, $zonefile);
@@ -2508,6 +2503,12 @@ foreach my $t (@types) {
 		$r->{'values'} = [ $str ];
 		&modify_dns_record($recs, $file, $r);
 		}
+	}
+
+# Regenerate DNSSEC records
+if (&has_domain_dnssec($d)) {
+	&disable_domain_dnssec($d);
+	&enable_domain_dnssec($d);
 	}
 
 &post_records_change($d, $recs, $file);
