@@ -2396,7 +2396,6 @@ else {
 		}
 	foreach my $r (@$brecs) {
 		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
-		next if (&is_dnssec_record($r) && $r->{'type'} ne 'DNSKEY');
 		&create_dns_record($recs, $zonefile, $r);
 		}
 	}
@@ -2426,6 +2425,11 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 			&bind8::set_ownership($key->{$t.'file'});
 			}
 		$i++;
+		}
+	# Regenerate DNSSEC records
+	if (&has_domain_dnssec($d)) {
+		&disable_domain_dnssec($d);
+		&enable_domain_dnssec($d);
 		}
 	}
 
