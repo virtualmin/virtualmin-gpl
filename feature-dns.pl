@@ -2404,6 +2404,13 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
+
+	if ($tmpl->{'dnssec'} ne 'yes' && &has_domain_dnssec($d)) {
+		my $err = &enable_domain_dnssec($d);
+		if (!$err) {
+			&add_parent_dnssec_ds_records($d);
+			}
+		}
 	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
 		     @keys;
