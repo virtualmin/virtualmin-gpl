@@ -2429,8 +2429,6 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 		}
 	}
 
-&post_records_change($d, $recs, $zonefile);
-
 # Need to update IP addresses
 local $r;
 local ($baserec) = grep { $_->{'type'} eq "A" &&
@@ -2506,7 +2504,7 @@ foreach my $t (@types) {
 		}
 	}
 
-&post_records_change($d, $recs, $file);
+&post_records_change($d, $recs, $zonefile);
 &register_post_action(\&restart_bind, $d);
 &$second_print($text{'setup_done'});
 
