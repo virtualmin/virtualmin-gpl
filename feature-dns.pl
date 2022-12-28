@@ -2401,24 +2401,43 @@ else {
 		}
 	}
 
-if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
+# Restore DNSSEC
+if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
+    !$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 
-	# Make sure that we actually have random DNSSEC 
-	# public and private keys to iterate on later
-	my $tmpl = &get_template($d->{'template'});
-	if ($tmpl->{'dnssec'} ne 'yes' && &has_domain_dnssec($d)) {
-		my $err = &enable_domain_dnssec($d);
-		if (!$err) {
-			&add_parent_dnssec_ds_records($d);
+	if (&has_domain_dnssec($d)) {
+		# Make sure that we have at first a random default
+		# DNSSEC public and private keys to restore on later
+		my $tmpl = &get_template($d->{'template'});
+		if ($tmpl->{'dnssec'} ne 'yes') {
+			&$indent_print();
+			&$first_print($text{'setup_dnssec2'});
+			my $dnssecalgdef = $tmpl->{'dnssec_alg'} || 'RSASHA256';
+			my $zone = &get_bind_zone($d->{'dom'});
+			my $err;
+			my ($ok, $size) =
+				&bind8::compute_dnssec_key_size($dnssecalgdef, 1);
+			$err++ if (!$ok);
+			$err++ if (&bind8::create_dnssec_key($zone, $dnssecalgdef, $size,
+			                $tmpl->{'dnssec_single'}, 1));
+			if ($err) {
+				&$second_print($text{'setup_failed'});
+				}
+			else {
+				&$second_print($text{'setup_done'});
+				}
+			&$outdent_print();
 			}
 		}
 
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
+	my $rok;
 	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
-	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
-		     @keys;
+	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} } @keys;
+	&$indent_print();
+	&$first_print($text{'restore_dnscp2'});
 	my $i = 0;
 	my %kinfo;
 	&read_file($file."_dnssec_keyinfo", \%kinfo);
@@ -2432,12 +2451,19 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				$key->{$t.'file'} = $keydir.'/'.
 					$kinfo{$t.'_'.$i};
 				}
-			&copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
+			$rok = &copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
 					  $key->{$t.'file'});
 			&bind8::set_ownership($key->{$t.'file'});
 			}
 		$i++;
 		}
+	if (!scalar(@keys) || !$rok) {
+		&$second_print($text{'setup_failed'});
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	&$outdent_print();
 	}
 
 # Need to update IP addresses
@@ -2515,17 +2541,26 @@ foreach my $t (@types) {
 		}
 	}
 
-# Regenerate DNSSEC records
-if (&has_domain_dnssec($d)) {
-	&disable_domain_dnssec($d);
-	&enable_domain_dnssec($d);
-	}
-
 &post_records_change($d, $recs, $zonefile);
 &register_post_action(\&restart_bind, $d);
-&$second_print($text{'setup_done'});
-
 &release_lock_dns($d, 1);
+
+# Refresh DNSSEC records
+if (&has_domain_dnssec($d)) {
+	&$indent_print();
+	&$first_print($text{'setup_dnssec3'});
+	if (&disable_domain_dnssec($d) ||
+	    &enable_domain_dnssec($d)) {
+		&$second_print($text{'setup_failed'});
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	&$outdent_print();
+	&post_records_change($d, $recs, $zonefile);
+	&register_post_action(\&restart_bind, $d);
+	}
+&$second_print($text{'setup_done'});
 return 1;
 }
 
