@@ -2405,6 +2405,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 
 	# Make sure that we actually have random DNSSEC 
 	# public and private keys to iterate on later
+	my $tmpl = &get_template($d->{'template'});
 	if ($tmpl->{'dnssec'} ne 'yes' && &has_domain_dnssec($d)) {
 		my $err = &enable_domain_dnssec($d);
 		if (!$err) {
