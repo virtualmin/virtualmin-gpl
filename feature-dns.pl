@@ -2500,7 +2500,7 @@ foreach my $t (@types) {
 	if ($changed) {
 		local $str = &bind8::join_spf($spf);
 		$r->{'values'} = [ $str ];
-		&modify_dns_record($recs, $file, $r);
+		&modify_dns_record($recs, $zonefile, $r);
 		}
 	}
 
