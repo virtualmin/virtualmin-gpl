@@ -42,10 +42,9 @@ if ($sinfo->{'deleted'}) {
 	}
 
 # Show install URL
-if ($sinfo->{'url'}) {
-	print &ui_table_row($text{'scripts_iurl'},
-			    "<a href='$sinfo->{'url'}' target=_blank>".
-			    "$sinfo->{'url'}</a>");
+my $slink = &get_script_link($d, $sinfo, 1);
+if ($slink) {
+	print &ui_table_row($text{'scripts_iurl'}, $slink);
 	}
 print &ui_table_row($text{'scripts_itime'}, &make_date($sinfo->{'time'}));
 

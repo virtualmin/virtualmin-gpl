@@ -65,9 +65,7 @@ foreach $sinfo (sort { lc($smap{$a->{'name'}}->{'desc'}) cmp
 		  'value' => $sinfo->{'id'}, 'disabled' => !$script->{'desc'} },
 		$desc_full,
 		$sversion,
-		$sinfo->{'url'} && !$sinfo->{'deleted'} ? 
-		  "<a href='$sinfo->{'url'}' target=_blank>$path</a>" :
-		  $path,
+		!$sinfo->{'deleted'} ? &get_script_link($d, $sinfo) : $path,
 		$dbdesc,
 		!$script->{'desc'} ? &ui_text_color($text{'scripts_discontinued'}, 'danger') :
 		                     script_migrated_status($status, $script->{'migrated'}, $canup),
