@@ -2491,7 +2491,7 @@ local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
 					    : ( "SPF" );
 foreach my $t (@types) {
 	local ($r) = grep { $_->{'type'} eq $t &&
-			    $r->{'name'} eq $d->{'dom'}.'.' } @$recs;
+			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
 	next if (!$r);
 	local $spf = &bind8::parse_spf(@{$r->{'values'}});
 	local $changed = 0;
@@ -2508,7 +2508,7 @@ foreach my $t (@types) {
 	if ($changed) {
 		local $str = &bind8::join_spf($spf);
 		$r->{'values'} = [ $str ];
-		&modify_dns_record($recs, $file, $r);
+		&modify_dns_record($recs, $zonefile, $r);
 		}
 	}
 
