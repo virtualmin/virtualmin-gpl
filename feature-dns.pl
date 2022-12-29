@@ -2372,6 +2372,7 @@ else {
 	    $d->{'dom'}.($d->{'disabled'} ? ".disabled" : ""), undef, 0, 1) ];
 	}
 
+my $dnskeys = 0;
 if ($d->{'dns_submode'}) {
 	# Only replacing records for this sub-domain
 	my $oldsubrecs = &filter_domain_dns_records($d, $recs);
@@ -2398,6 +2399,7 @@ else {
 		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
 		next if (&is_dnssec_record($r) && $r->{'type'} ne 'DNSKEY');
 		&create_dns_record($recs, $zonefile, $r);
+		$dnskeys++ if ($r->{'type'} eq 'DNSKEY');
 		}
 	}
 
@@ -2406,6 +2408,12 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
 	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	if (!@keys && $dnskeys) {
+		# DNSSEC was enabled before but not now, perhaps because it's
+		# not in the template. So enable it.
+		&enable_domain_dnssec($d);
+		@keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		}
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
 		     @keys;
 	my $i = 0;
