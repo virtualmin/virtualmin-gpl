@@ -411,7 +411,9 @@ else {
 		$msg =~ s/^\s+//;
 		$msg =~ s/\s+$//;
 		}
-	print "$msg\n";
+	&$indent_print();
+	&$first_print($msg);
+	&$outdent_print();
 	}
 
 # Re-enable script PHP timeout
@@ -420,6 +422,11 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	}
 
 if ($ok) {
+	if ($ok < 0) {
+		&$indent_print();
+		&$first_print($text{'scripts_epartialmanual'}." ".&get_script_link($d, $opts, 1));
+		&$outdent_print();
+		}
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
 			       : $text{'setup_done'});
 

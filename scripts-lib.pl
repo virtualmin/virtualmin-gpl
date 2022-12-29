@@ -3533,12 +3533,14 @@ return &ui_link($shref, $slname, undef, "target=_blank");
 sub get_script_link
 {
 my ($d, $sinfo, $fullurl) = @_;
-my $path = $sinfo->{'opts'}->{'path_real'} || $sinfo->{'opts'}->{'path'};
+my $path = $sinfo->{'opts'}->{'path_real'} ||
+           $sinfo->{'opts'}->{'path'} ||
+           $sinfo->{'path'};
 my $surl = $sinfo->{'url'} ? $sinfo->{'url'} :
-	((&domain_has_ssl($d) ? 'https://' : 'http://') ."$d->{'dom'}${path}");
+	((&domain_has_ssl($d) ? 'https://' : 'http://') ."$d->{'dom'}${path}/");
 my $slabel = $fullurl ? $surl : $path;
 my $slink = "<a href='$surl' target=_blank>$slabel</a>";
-return $sinfo->{'url'} ? $slink : "<em>$slink</em>";
+return $sinfo->{'url'} ? $slink : "<i>$slink</i>";
 }
 
 1;

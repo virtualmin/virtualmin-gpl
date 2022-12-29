@@ -4231,10 +4231,10 @@ scripts_epythonmod=.. automatic Python module installation is not supported on y
 scripts_epythoninst=.. automatic Python module installation failed
 scripts_installgem=Installing Ruby Gems package ..
 scripts_mmax=(At most $1)
-scripts_sitelink=More information on using this script can be found at <a href='$1' target=_blank>$2</a>.
-scripts_userpass=The initial administration login is $1 with the password $2 .
-scripts_useronly=The initial administration login is $1 .
-scripts_passonly=The initial administration password is $1 .
+scripts_sitelink=More information on using this script can be found at <a href='$1' target=_blank>$2</a>
+scripts_userpass=The initial administration login is $1 with the password $2
+scripts_useronly=The initial administration login is $1
+scripts_passonly=The initial administration password is $1
 scripts_passmode=Initial login for script
 scripts_passmode4=Initial password for script
 scripts_passmodedef1=Same username and password as domain
@@ -4252,6 +4252,7 @@ scripts_addover=Overriding proxying for path $1 ..
 scripts_delproxy=Removing proxying for path $1 ..
 scripts_proxyfailed=.. proxy setup failed : $1
 scripts_epartial=.. installation was only partially complete.
+scripts_epartialmanual=Installation can be continued manually at
 scripts_icommand=Missing command $1
 scripts_idbneed=A $1 database is needed
 scripts_idbneed_link=, which can be enabled on <a href='$1'>$2</a> page.

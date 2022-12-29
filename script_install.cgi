@@ -199,6 +199,12 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	}
 
 if ($ok) {
+	# Suggest to go on installation manually
+	if ($ok < 0) {
+		&$indent_print();
+		&$first_print($text{'scripts_epartialmanual'}." ".&get_script_link($d, $opts, 1));
+		&$outdent_print();
+		}
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
 			       : $text{'setup_done'});
 
