@@ -527,7 +527,10 @@ elsif (!$smtps_enabled_prior && !$smtps && $smtp) {
 &$second_print($text{'setup_done'});
 
 # Apply Postfix config
-&postfix::reload_postfix();
+if (&postfix::is_postfix_running()) {
+	&postfix::stop_postfix();
+	&postfix::start_postfix();
+	}
 }
 
 # copy_proftpd_ssl_service(&domain)
