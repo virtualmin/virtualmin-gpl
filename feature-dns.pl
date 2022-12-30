@@ -2411,13 +2411,26 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	if (!@keys && $dnskeys) {
 		# DNSSEC was enabled before but not now, perhaps because it's
 		# not in the template. So enable it.
-		&enable_domain_dnssec($d);
+		&$indent_print();
+		&$first_print($text{'restore_dnssec'});
+		if (&enable_domain_dnssec($d)) {
+			&$second_print($text{'setup_failed'});
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		&$outdent_print();
+
+		# As lock was removed while enabling
+		# domain DNSSEC, re-obtain it.
+		&obtain_lock_dns($d);
 		@keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 		}
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
 		     @keys;
 	my $i = 0;
 	my %kinfo;
+	my $rok;
 	&read_file($file."_dnssec_keyinfo", \%kinfo);
 	foreach my $key (@keys) {
 		foreach my $t ('private', 'public') {
@@ -2429,11 +2442,25 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				$key->{$t.'file'} = $keydir.'/'.
 					$kinfo{$t.'_'.$i};
 				}
-			&copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
+			$rok = &copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
 					  $key->{$t.'file'});
+			last if (!$rok);
 			&bind8::set_ownership($key->{$t.'file'});
 			}
 		$i++;
+		}
+
+	# Check if DNSSEC keys were restored correctly
+	if ($dnskeys) {
+		&$indent_print();
+		&$first_print($text{'restore_dnssec2'});
+		if (!@keys || !$rok) {
+			&$second_print($text{'setup_failed'});
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		&$outdent_print();
 		}
 	}
 
@@ -2514,9 +2541,27 @@ foreach my $t (@types) {
 
 &post_records_change($d, $recs, $zonefile);
 &register_post_action(\&restart_bind, $d);
-&$second_print($text{'setup_done'});
-
 &release_lock_dns($d, 1);
+
+# Refresh DNSSEC records in case it was enabled originally,
+# as `post_records_change` cannot do it because public and
+# private keys were restored afterwards
+if ($dnskeys) {
+	&$indent_print();
+	&$first_print($text{'restore_dnssec_resign'});
+	if (&disable_domain_dnssec($d) ||
+	    &enable_domain_dnssec($d)) {
+		&$second_print($text{'setup_failed'});
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		my ($recs, $file) = &get_domain_dns_records_and_file($d);
+		&post_records_change($d, $recs, $file);
+		&reload_bind_records($d);
+		}
+	&$outdent_print();
+	}
+&$second_print($text{'setup_done'});
 return 1;
 }
 
