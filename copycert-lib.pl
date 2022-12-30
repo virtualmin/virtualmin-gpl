@@ -421,7 +421,10 @@ if (!&dovecot::find_value("ssl_cipher_list", $conf, 0, "")) {
 &$second_print($text{'setup_done'});
 
 # Apply Dovecot config
-&dovecot::apply_configuration();
+if (&dovecot::is_dovecot_running()) {
+	&dovecot::stop_dovecot();
+	&dovecot::start_dovecot();
+	}
 }
 
 # copy_postfix_ssl_service(&domain)
