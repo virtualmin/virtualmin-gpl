@@ -1076,6 +1076,12 @@ foreach my $pdom (&unique(@parked)) {
 	if ($alias{'mail'}) {
 		&cpanel_migrate_mailboxes($alias{'dom'}, \%alias, undef);
 		}
+
+	# Create parked domain aliases
+	&$first_print("Copying email aliases for parked domain $pdom ..");
+	my $acount = &cpanel_migrate_addon_aliases($pdom);
+	&$second_print(".. done (migrated $acount aliases)");
+
 	&$outdent_print();
 	&$second_print($text{'setup_done'});
 	push(@rvdoms, \%alias);
@@ -1289,68 +1295,7 @@ foreach my $vf (readdir(VF)) {
 
 	# Create parked domain aliases
 	&$first_print("Copying email aliases for addon domain $vf ..");
-	local $acount = 0;
-	local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
-	open(VA, "<$userdir/va/$vf");
-	while(<VA>) {
-		s/\r|\n//g;
-		s/^\s*#.*$//;
-		if (/^(\S+):\s*(.*)$/) {
-			local ($name, $v) = ($1, $2);
-			next if (!$name);
-			local @values;
-			if ($v !~ /,/ && $v !~ /"/) {
-				# A single destination, not quoted!
-				@values = ( $v );
-				}
-			else {
-				# Comma-separated alias destinations
-				while($v =~ /^\s*,?\s*"(\|)([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*()"([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*(\|)"([^"]+)"(.*)$/ ||
-				      $v =~ /^\s*,?\s*()([^,\s]+)(.*)$/) {
-					push(@values, $1.$2);
-					$v = $3;
-					}
-				}
-			local $mailman = 0;
-			foreach my $v (@values) {
-				if ($v =~ /:fail:\s+(.*)/) {
-					# Fix bounce alias
-					$v = "BOUNCE $1";
-					}
-				local ($atype, $aname) = &alias_type($v, $name);
-				if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
-					# Turn into Virtualmin auto-responder
-					$v = "| $module_config_directory/autoreply.pl $3/$name $1";
-					&set_ownership_permissions(
-						undef, undef, 0755,
-						$3, "$3/$name");
-					}
-				elsif ($atype == 4 && $aname =~ /mailman/) {
-					$mailman++;
-					}
-				}
-			# Don't create aliases for mailman lists
-			next if ($mailman || $name =~ /^owner-/);
-
-			# Already done a domain forward
-			next if ($name =~ /^\*/);
-
-			# Just create an alias
-			if ($name !~ /\@/) {
-				$name .= "\@".$dom;
-				}
-			local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
-								 : $name,
-					'to' => \@values };
-			local $clash = $gotvirt{$virt->{'from'}};
-			&delete_virtuser($clash) if ($clash);
-			&create_virtuser($virt);
-			$acount++;
-			}
-		}
-	close(VA);
+	my $acount = &cpanel_migrate_addon_aliases($vf);
 	&$second_print(".. done (migrated $acount aliases)");
 	}
 }
@@ -1693,6 +1638,75 @@ while(<PASSWD>) {
 	}
 close(PASSWD);
 &$second_print(".. done (migrated $mcount mail users)");
+}
+
+# cpanel_migrate_addon_aliases(domain)
+sub cpanel_migrate_addon_aliases
+{
+local ($vf) = @_;
+local $acount = 0;
+local %gotvirt = map { $_->{'from'}, $_ } &list_virtusers();
+open(VA, "<$userdir/va/$vf");
+while(<VA>) {
+	s/\r|\n//g;
+	s/^\s*#.*$//;
+	if (/^(\S+):\s*(.*)$/) {
+		local ($name, $v) = ($1, $2);
+		next if (!$name);
+		local @values;
+		if ($v !~ /,/ && $v !~ /"/) {
+			# A single destination, not quoted!
+			@values = ( $v );
+			}
+		else {
+			# Comma-separated alias destinations
+			while($v =~ /^\s*,?\s*"(\|)([^"]+)"(.*)$/ ||
+			      $v =~ /^\s*,?\s*()"([^"]+)"(.*)$/ ||
+			      $v =~ /^\s*,?\s*(\|)"([^"]+)"(.*)$/ ||
+			      $v =~ /^\s*,?\s*()([^,\s]+)(.*)$/) {
+				push(@values, $1.$2);
+				$v = $3;
+				}
+			}
+		local $mailman = 0;
+		foreach my $v (@values) {
+			if ($v =~ /:fail:\s+(.*)/) {
+				# Fix bounce alias
+				$v = "BOUNCE $1";
+				}
+			local ($atype, $aname) = &alias_type($v, $name);
+			if ($atype == 4 && $aname =~ /autorespond\s+(\S+)\@(\S+)\s+(\S+)/) {
+				# Turn into Virtualmin auto-responder
+				$v = "| $module_config_directory/autoreply.pl $3/$name $1";
+				&set_ownership_permissions(
+					undef, undef, 0755,
+					$3, "$3/$name");
+				}
+			elsif ($atype == 4 && $aname =~ /mailman/) {
+				$mailman++;
+				}
+			}
+		# Don't create aliases for mailman lists
+		next if ($mailman || $name =~ /^owner-/);
+
+		# Already done a domain forward
+		next if ($name =~ /^\*/);
+
+		# Just create an alias
+		if ($name !~ /\@/) {
+			$name .= "\@".$vf;
+			}
+		local $virt = { 'from' => $name =~ /^\*/ ? "\@".$vf
+							 : $name,
+				'to' => \@values };
+		local $clash = $gotvirt{$virt->{'from'}};
+		&delete_virtuser($clash) if ($clash);
+		&create_virtuser($virt);
+		$acount++;
+		}
+	}
+close(VA);
+return $acount;
 }
 
 # get_cpanel_db_list(file, user, origuser)
