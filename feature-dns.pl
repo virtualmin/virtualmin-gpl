@@ -2420,10 +2420,6 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 			&$second_print($text{'setup_done'});
 			}
 		&$outdent_print();
-
-		# As lock was removed while enabling
-		# domain DNSSEC, re-obtain it.
-		&obtain_lock_dns($d);
 		@keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
 		}
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
