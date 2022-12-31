@@ -192,7 +192,7 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 		&$second_print($text{'setup_done'});
 		}
 	else {
-		&$second_print($text{'setup_nologrotate'});
+		&$second_print($text{'setup_nologrotate2'});
 		}
 	}
 
@@ -206,7 +206,7 @@ if ($_[0]->{'user'} ne $_[1]->{'user'} ||
 		&$second_print($text{'setup_done'});
 		}
 	else {
-		&$second_print($text{'setup_nologrotate'});
+		&$second_print($text{'setup_nologrotate2'});
 		}
 	}
 
@@ -246,7 +246,7 @@ if ($lconf) {
 	&$second_print($text{'setup_done'});
 	}
 else {
-	&$second_print($text{'setup_nologrotate'});
+	&$second_print($text{'setup_nologrotate2'});
 	}
 delete($d->{'logrotate_shared'});
 &release_lock_logrotate($d);
@@ -409,7 +409,7 @@ if ($lconf) {
 	$rv = 1;
 	}
 else {
-	&$second_print($text{'setup_nologrotate'});
+	&$second_print($text{'setup_nologrotate2'});
 	$rv = 0;
 	}
 &release_lock_logrotate($_[0]);
