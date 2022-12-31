@@ -2442,10 +2442,15 @@ local $r;
 local ($baserec) = grep { $_->{'type'} eq "A" &&
 			  ($_->{'name'} eq $d->{'dom'}."." ||
 			   $_->{'name'} eq '@') } @$recs;
-local $ip = $d->{'dns_ip'} || $d->{'ip'};
-local $baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
-		$d->{'old_ip'} ? $d->{'old_ip'} :
+local $dns_ip = $d->{'dns_ip'} || $d->{'ip'};
+local $dns_baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
+		    $d->{'old_ip'} ? $d->{'old_ip'} :
 			$baserec ? $baserec->{'values'}->[0] : undef;
+local $ip = $d->{'ip'};
+local $baseip = $d->{'old_ip'};
+if ($dns_baseip && $dns_baseip ne $baseip) {
+	&modify_records_ip_address($recs, $zonefile, $dns_baseip, $dns_ip);
+	}
 if ($baseip) {
 	&modify_records_ip_address($recs, $zonefile, $baseip, $ip);
 	}
