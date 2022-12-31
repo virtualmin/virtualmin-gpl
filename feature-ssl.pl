@@ -2538,9 +2538,7 @@ else {
 	# Cannot use per-domain or per-IP cert
 	return 0;
 	}
-if ($changed) {
-	&register_post_action(\&restart_mail_server);
-	}
+&register_post_action(\&restart_mail_server);
 return 1;
 }
 
