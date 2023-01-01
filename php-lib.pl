@@ -890,11 +890,12 @@ my ($d, $res) = @_;
 my $conf = &get_php_fpm_config($d);
 return 0 if (!$conf);
 if ($res->{'procs'}) {
-	&save_php_fpm_config_value($d, "process.max", $res->{'procs'});
+	&save_php_fpm_config_value($d, "pm.max_children", $res->{'procs'});
 	}
 else {
-	&save_php_fpm_config_value($d, "process.max", undef);
+	&save_php_fpm_config_value($d, "pm.max_children", undef);
 	}
+&register_post_action(\&restart_php_fpm_server, $conf);
 }
 
 # supported_php_modes([&domain])
