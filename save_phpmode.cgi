@@ -13,9 +13,10 @@ $can || $canv || &error($text{'phpmode_ecannot'});
 $p = &domain_has_website($d);
 @modes = &supported_php_modes($d);
 $newmode = $in{'mode'};
+$dom_limits = &get_domain_resource_limits($d);
 if ($can) {
 	# Check for option clashes
-	if (!$d->{'alias'} && $can) {
+	if (!$d->{'alias'} && $can && !$dom_limits->{'procs'}) {
 		if (defined($in{'children_def'}) && !$in{'children_def'} &&
 		    ($in{'children'} < 1 ||
 		     $in{'children'} > $max_php_fcgid_children)) {
@@ -67,7 +68,7 @@ if ($can) {
 
 	# Save PHP fcgi children
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
-	if (defined($in{'children_def'}) &&
+	if (defined($in{'children_def'}) && !$dom_limits->{'procs'} &&
 	    $nc != &get_domain_php_children($d) && $can) {
 		&$first_print($nc || $mode eq "fpm" ?
 		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
