@@ -1216,7 +1216,10 @@ foreach my $m (@mods) {
 		# can use it
 		$m = "mysqli";
 		}
-	next if (&check_php_module($m, $phpver, $d) == 1);
+	# Module name can never contain `pecl-`, unlike package name!
+	my $mphp = $m;
+	$mphp =~ s/^pecl-//;
+	next if (&check_php_module($mphp, $phpver, $d) == 1);
 	if(!$installing++) {
 		&$first_print($text{'scripts_install_phpmods_check'});
 		&$indent_print();
@@ -1243,7 +1246,7 @@ foreach my $m (@mods) {
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
-	local ($got) = grep { $_->{'value'} eq "$m.so" } @exts;
+	local ($got) = grep { $_->{'value'} eq "${mphp}.so" } @exts;
 	local $backupinifile;
 	if (!$got) {
 		# Needs to be enabled
@@ -1253,16 +1256,16 @@ foreach my $m (@mods) {
 		if (@exts) {
 			# After current extensions
 			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
-			       "extension=$m.so");
+			       "extension=${mphp}.so");
 			}
 		elsif (@allexts) {
 			# After commented out extensions
 			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
-			       "extension=$m.so");
+			       "extension=${mphp}.so");
 			}
 		else {
 			# At end of file (should never happen, but..)
-			push(@$lref, "extension=$m.so");
+			push(@$lref, "extension=${mphp}.so");
 			}
 		if ($mode eq "mod_php" || $mode eq "fpm") {
 			&flush_file_lines($inifile);
@@ -1273,7 +1276,7 @@ foreach my $m (@mods) {
 			}
 		undef($phpini::get_config_cache{$inifile});
 		undef(%main::php_modules);
-		if (&check_php_module($m, $phpver, $d) == 1) {
+		if (&check_php_module($mphp, $phpver, $d) == 1) {
 			# We have it now!
 			goto GOTMODULE;
 			}
@@ -1387,7 +1390,7 @@ foreach my $m (@mods) {
 	# Finally re-check to make sure it worked
 	GOTMODULE:
 	undef(%main::php_modules);
-	if (&check_php_module($m, $phpver, $d) != 1) {
+	if (&check_php_module($mphp, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
 		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
