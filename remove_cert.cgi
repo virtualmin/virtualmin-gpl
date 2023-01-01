@@ -38,7 +38,7 @@ foreach $f (&domain_features($d), &list_feature_plugins()) {
 &save_domain($d);
 
 &set_domain_envs($d, "SSL_DOMAIN", undef);
-local $merr = &made_changes();
+my $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($d);
 

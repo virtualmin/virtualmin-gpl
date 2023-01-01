@@ -76,7 +76,7 @@ if (!$in{'self'}) {
 	&save_domain($d);
 	
 	&set_domain_envs($d, "SSL_DOMAIN", undef);
-	local $merr = &made_changes();
+	my $merr = &made_changes();
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
         &reset_domain_envs($d);
 	
@@ -164,7 +164,7 @@ else {
 	&run_post_actions();
 
 	&set_domain_envs($d, "SSL_DOMAIN", undef);
-	local $merr = &made_changes();
+	my $merr = &made_changes();
 	&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
         &reset_domain_envs($d);
 
