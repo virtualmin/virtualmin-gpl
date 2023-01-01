@@ -1246,7 +1246,8 @@ foreach my $m (@mods) {
 	local $pconf = &phpini::get_config($inifile);
 	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 	local @exts = grep { $_->{'enabled'} } @allexts;
-	local ($got) = grep { $_->{'value'} eq "${mphp}.so" } @exts;
+	local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
+	                      $_->{'value'} eq $mphp } @exts;
 	local $backupinifile;
 	if (!$got) {
 		# Needs to be enabled
