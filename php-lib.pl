@@ -882,6 +882,22 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 	}
 }
 
+# set_php_fpm_ulimits(&domain, &resource-limits)
+# Update the FPM config with resource limits
+sub set_php_fpm_ulimits
+{
+my ($d, $res) = @_;
+my $conf = &get_php_fpm_config($d);
+return 0 if (!$conf);
+if ($res->{'procs'}) {
+	&save_php_fpm_config_value($d, "pm.max_children", $res->{'procs'});
+	}
+else {
+	&save_php_fpm_config_value($d, "pm.max_children", undef);
+	}
+&register_post_action(\&restart_php_fpm_server, $conf);
+}
+
 # supported_php_modes([&domain])
 # Returns a list of PHP execution modes possible for a domain
 sub supported_php_modes
