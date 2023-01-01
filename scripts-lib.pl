@@ -1210,7 +1210,6 @@ if (defined(&$optmodfunc)) {
 	}
 
 my $installing;
-my @phpmodpeclvariants;
 foreach my $m (@mods) {
 	if ($phpver >= 7 && $m eq "mysql") {
 		# PHP 7 only supports mysqli, but that's OK because most scripts
@@ -1220,7 +1219,6 @@ foreach my $m (@mods) {
 	# Module name can never contain `pecl-`, unlike package name!
 	my $mphp = $m;
 	$mphp =~ s/^pecl-//;
-	next if (&indexof($mphp, @phpmodpeclvariants) >= 0);
 	next if (&check_php_module($mphp, $phpver, $d) == 1);
 	if(!$installing++) {
 		&$first_print($text{'scripts_install_phpmods_check'});
@@ -1229,6 +1227,61 @@ foreach my $m (@mods) {
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optmod' : 'scripts_needmod',
 			    "<tt>$m</tt>"));
+
+	# Find the php.ini file
+	&foreign_require("phpini");
+	local $mode = &get_domain_php_mode($d);
+	local $inifile = $mode eq "mod_php" || $mode eq "fpm" ?
+			&get_global_php_ini($phpver, $mode) :
+			&get_domain_php_ini($d, $phpver);
+	if (!$inifile) {
+		# Could not find php.ini
+		&$second_print($mode eq "mod_php" || $mode eq "fpm" ?
+			$text{'scripts_noini'} : $text{'scripts_noini2'});
+		if ($opt) { next; }
+		else { return 0; }
+		}
+
+	# Configure the domain's php.ini to load it, if needed
+	local $pconf = &phpini::get_config($inifile);
+	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
+	local @exts = grep { $_->{'enabled'} } @allexts;
+	local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
+	                      $_->{'value'} eq $mphp } @exts;
+	local $backupinifile;
+	if (!$got) {
+		# Needs to be enabled
+		$backupinifile = &transname();
+		&copy_source_dest($inifile, $backupinifile);
+		local $lref = &read_file_lines($inifile);
+		if (@exts) {
+			# After current extensions
+			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
+			       "extension=${mphp}.so");
+			}
+		elsif (@allexts) {
+			# After commented out extensions
+			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
+			       "extension=${mphp}.so");
+			}
+		else {
+			# At end of file (should never happen, but..)
+			push(@$lref, "extension=${mphp}.so");
+			}
+		if ($mode eq "mod_php" || $mode eq "fpm") {
+			&flush_file_lines($inifile);
+			}
+		else {
+			&write_as_domain_user($d,
+				sub { &flush_file_lines($inifile) });
+			}
+		undef($phpini::get_config_cache{$inifile});
+		undef(%main::php_modules);
+		if (&check_php_module($mphp, $phpver, $d) == 1) {
+			# We have it now!
+			goto GOTMODULE;
+			}
+		}
 
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
@@ -1310,7 +1363,6 @@ foreach my $m (@mods) {
 			my ($out, $rs) = &capture_function_output(
 				\&software::update_system_install, $pkg);
 			$iok = 1 if (scalar(@$rs));
-			push(@phpmodpeclvariants, $mphp) if ($iok);
 			local $newpkg = $pkg;
 			if ($software::update_system eq "csw") {
 				# Real package name is different
@@ -1321,18 +1373,27 @@ foreach my $m (@mods) {
 				# Yep, it worked
 				$iok = 1;
 				push(@newpkgs, $m);
-				push(@phpmodpeclvariants, $mphp);
 				}
 			}
 		else {
 			# Already installed .. we're done
 			$iok = 1;
-			push(@phpmodpeclvariants, $mphp);
 			}
 		}
 	push(@$installed, @newpkgs) if ($installed);
 	if (!$iok) {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
+		if ($opt) { next; }
+		else { return 0; }
+		}
+
+	# Finally re-check to make sure it worked
+	GOTMODULE:
+	undef(%main::php_modules);
+	if (&check_php_module($mphp, $phpver, $d) != 1) {
+		&$second_print($text{'scripts_einstallmod'});
+		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
