@@ -632,6 +632,7 @@ setup_logrotate=Setting up log file rotation ..
 setup_clashlogrotate=.. the log file $1 is already being rotated
 setup_logrotatealready=.. already enabled for log file $1
 setup_nologrotate=.. no log rotation configuration found for $1
+setup_nologrotate2=.. no log rotation configuration found
 setup_spam=Setting up spam filtering ..
 setup_virus=Setting up virus filtering ..
 setup_virusalready=.. already enabled!
