@@ -2389,14 +2389,14 @@ else {
 	# Delete old records and create ones from the backup
 	my @delrecs;
 	foreach my $r (@$recs) {
-		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
+		next if ($r->{'type'} eq 'SOA');
 		push(@delrecs, $r);
 		}
 	foreach my $r (@delrecs) {
 		&delete_dns_record($recs, $zonefile, $r);
 		}
 	foreach my $r (@$brecs) {
-		next if ($r->{'type'} eq 'SOA' && !$opts->{'wholefile'});
+		next if ($r->{'type'} eq 'SOA');
 		next if (&is_dnssec_record($r) && $r->{'type'} ne 'DNSKEY');
 		&create_dns_record($recs, $zonefile, $r);
 		$dnskeys++ if ($r->{'type'} eq 'DNSKEY');
@@ -2496,7 +2496,7 @@ elsif ($baseip6 && !$ip6) {
 
 # Replace NS records with those from new system (if there are any)
 local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
-if (!$opts->{'wholefile'} && @thisns) {
+if (@thisns) {
 	local @ns = grep { $_->{'type'} eq 'NS' } @$recs;
 	foreach my $r (@thisns) {
 		# Create NS records that were in new system's file
@@ -2650,23 +2650,6 @@ $conf ||= &bind8::get_config();
 local @views = &bind8::find("view", $conf);
 local ($view) = grep { $_->{'values'}->[0] eq $vname } @views;
 return $view;
-}
-
-# show_restore_dns(&options)
-# Returns HTML for DNS restore option inputs
-sub show_restore_dns
-{
-local ($opts, $d) = @_;
-return &ui_checkbox("dns_wholefile", 1, $text{'restore_dnswholefile'},
-		    $opts->{'wholefile'});
-}
-
-# parse_restore_dns(&in)
-# Parses the inputs for DNS restore options
-sub parse_restore_dns
-{
-local ($in, $d) = @_;
-return { 'wholefile' => $in->{'dns_wholefile'} };
 }
 
 # sysinfo_dns()
