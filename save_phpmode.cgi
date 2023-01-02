@@ -19,7 +19,7 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	}
 if ($can) {
 	# Check for option clashes
-	if (!$d->{'alias'} && $can) {
+	if (!$d->{'alias'} && $can && !$dom_limits->{'procs'}) {
 		if (defined($in{'children_def'}) && !$in{'children_def'} &&
 		    ($in{'children'} < 1 ||
 		     $in{'children'} > $max_php_fcgid_children)) {
@@ -66,32 +66,6 @@ if ($can) {
 				$mode = $newmode;
 				}
 			}
-		$anything++;
-		}
-
-	# Save PHP fcgi children
-	$nc = $in{'children_def'} ? 0 : $in{'children'};
-	if (defined($in{'children_def'}) &&
-	    $nc != &get_domain_php_children($d) && $can) {
-		&$first_print($nc || $mode eq "fpm" ?
-		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
-		    $text{'phpmode_nokids'});
-		&save_domain_php_children($d, $nc);
-		&$second_print($text{'setup_done'});
-		$anything++;
-		}
-
-	# Save max PHP run time (in both Apache and PHP configs)
-	$max = $in{'maxtime_def'} ? 0 : $in{'maxtime'};
-	$oldmax = $mode eq "fcgid" ? &get_fcgid_max_execution_time($d)
-				   : &get_php_max_execution_time($d);
-	if (defined($in{'maxtime_def'}) &&
-	    $oldmax != $max) {
-		&$first_print($max ? &text('phpmode_maxing', $max)
-				   : $text{'phpmode_nomax'});
-		&set_fcgid_max_execution_time($d, $max);
-		&set_php_max_execution_time($d, $max);
-		&$second_print($text{'setup_done'});
 		$anything++;
 		}
 	}
