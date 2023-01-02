@@ -1358,14 +1358,14 @@ foreach my $m (@mods) {
 		}
 	else {
 
-		# Configure the domain's php.ini to load it, if needed
+		# On success configure the domain's php.ini to load it, if needed
 		local $pconf = &phpini::get_config($inifile);
 		local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
 		local @exts = grep { $_->{'enabled'} } @allexts;
 		local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
 		                      $_->{'value'} eq $mphp } @exts;
 		local $backupinifile;
-		if (!$got) {
+		if (!$got && &check_php_module($mphp, $phpver, $d) != 1) {
 			# Needs to be enabled
 			$backupinifile = &transname();
 			&copy_source_dest($inifile, $backupinifile);
@@ -1398,7 +1398,7 @@ foreach my $m (@mods) {
 				goto GOTMODULE;
 				}
 			}
-			
+
 		&$second_print(&text('setup_done', $m));
 		}
 
