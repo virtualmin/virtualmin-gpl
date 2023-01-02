@@ -1347,7 +1347,6 @@ foreach my $m (@mods) {
 		}
 
 	# Finally re-check to make sure it worked
-	GOTMODULE:
 	undef(%main::php_modules);
 	if (&check_php_module($mphp, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
