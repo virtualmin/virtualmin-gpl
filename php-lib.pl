@@ -882,6 +882,30 @@ foreach my $dir ("$d->{'home'}/fcgi-bin", &cgi_bin_dir($d)) {
 	}
 }
 
+# set_php_fpm_ulimits(&domain, &resource-limits)
+# Update the FPM config with resource limits
+sub set_php_fpm_ulimits
+{
+my ($d, $res) = @_;
+my $conf = &get_php_fpm_config($d);
+return 0 if (!$conf);
+my $php_max_children_def = &get_php_max_childred_allowed();
+if ($res->{'procs'}) {
+	my $php_max_children =
+		$res->{'procs'} > $max_php_fcgid_children ? 
+			$max_php_fcgid_children : $res->{'procs'};
+	&save_php_fpm_config_value($d, "pm.max_children", $php_max_children);
+	&save_php_fpm_config_value($d, "pm.start_servers", &get_php_start_servers($php_max_children));
+	&save_php_fpm_config_value($d, "pm.max_spare_servers", &get_php_max_spare_servers($php_max_children));
+	}
+else {
+	&save_php_fpm_config_value($d, "pm.max_children", $php_max_children_def);
+	&save_php_fpm_config_value($d, "pm.start_servers", &get_php_start_servers($php_max_children_def));
+	&save_php_fpm_config_value($d, "pm.max_spare_servers", &get_php_max_spare_servers($php_max_children_def));
+	}
+&register_post_action(\&restart_php_fpm_server, $conf);
+}
+
 # supported_php_modes([&domain])
 # Returns a list of PHP execution modes possible for a domain
 sub supported_php_modes
