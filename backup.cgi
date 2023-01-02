@@ -153,6 +153,7 @@ foreach $f (@do_features) {
 	}
 $options{'dir'}->{'exclude'} = join("\t", split(/\r?\n/, $in{'exclude'}));
 $options{'dir'}->{'include'} = $in{'include'};
+$options{'dir'}->{'strftime'} = $in{'strftime'};
 
 # Parse Virtualmin feature inputs
 if (&can_backup_virtualmin()) {

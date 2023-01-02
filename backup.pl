@@ -109,6 +109,7 @@ foreach $f (@do_features) {
 	}
 $options{'dir'}->{'exclude'} = $sched->{'exclude'};
 $options{'dir'}->{'include'} = $sched->{'include'};
+$options{'dir'}->{'strftime'} = $sched->{'strftime'};
 @vbs = split(/\s+/, $sched->{'virtualmin'});
 
 # Start capturing output
