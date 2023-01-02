@@ -1393,10 +1393,6 @@ foreach my $m (@mods) {
 				}
 			undef($phpini::get_config_cache{$inifile});
 			undef(%main::php_modules);
-			if (&check_php_module($mphp, $phpver, $d) == 1) {
-				# We have it now!
-				goto GOTMODULE;
-				}
 			}
 
 		&$second_print(&text('setup_done', $m));
