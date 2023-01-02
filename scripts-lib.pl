@@ -1342,7 +1342,6 @@ foreach my $m (@mods) {
 	push(@$installed, @newpkgs) if ($installed);
 	if (!$iok) {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
-		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
@@ -1352,7 +1351,6 @@ foreach my $m (@mods) {
 	undef(%main::php_modules);
 	if (&check_php_module($mphp, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
-		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
@@ -1364,11 +1362,8 @@ foreach my $m (@mods) {
 		local @exts = grep { $_->{'enabled'} } @allexts;
 		local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
 		                      $_->{'value'} eq $mphp } @exts;
-		local $backupinifile;
 		if (!$got && &check_php_module($mphp, $phpver, $d) != 1) {
 			# Needs to be enabled
-			$backupinifile = &transname();
-			&copy_source_dest($inifile, $backupinifile);
 			local $lref = &read_file_lines($inifile);
 			if (@exts) {
 				# After current extensions
