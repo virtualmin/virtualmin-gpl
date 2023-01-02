@@ -373,6 +373,7 @@ elsif (@include) {
 	$opts{'dir'}->{'exclude'} = join("\t", @include);
 	$opts{'dir'}->{'include'} = 1;
 	}
+$opts{'dir'}->{'strftime'} = $strftime;
 
 # Do the backup, printing any output
 if ($sched->{'doms'} || $sched->{'all'} || $sched->{'virtualmin'}) {
