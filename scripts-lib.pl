@@ -1242,47 +1242,6 @@ foreach my $m (@mods) {
 		else { return 0; }
 		}
 
-	# Configure the domain's php.ini to load it, if needed
-	local $pconf = &phpini::get_config($inifile);
-	local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
-	local @exts = grep { $_->{'enabled'} } @allexts;
-	local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
-	                      $_->{'value'} eq $mphp } @exts;
-	local $backupinifile;
-	if (!$got) {
-		# Needs to be enabled
-		$backupinifile = &transname();
-		&copy_source_dest($inifile, $backupinifile);
-		local $lref = &read_file_lines($inifile);
-		if (@exts) {
-			# After current extensions
-			splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
-			       "extension=${mphp}.so");
-			}
-		elsif (@allexts) {
-			# After commented out extensions
-			splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
-			       "extension=${mphp}.so");
-			}
-		else {
-			# At end of file (should never happen, but..)
-			push(@$lref, "extension=${mphp}.so");
-			}
-		if ($mode eq "mod_php" || $mode eq "fpm") {
-			&flush_file_lines($inifile);
-			}
-		else {
-			&write_as_domain_user($d,
-				sub { &flush_file_lines($inifile) });
-			}
-		undef($phpini::get_config_cache{$inifile});
-		undef(%main::php_modules);
-		if (&check_php_module($mphp, $phpver, $d) == 1) {
-			# We have it now!
-			goto GOTMODULE;
-			}
-		}
-
 	# Make sure the software module is installed and can do updates
 	if (!&foreign_installed("software")) {
 		&$second_print($text{'scripts_esoftware'});
@@ -1383,21 +1342,53 @@ foreach my $m (@mods) {
 	push(@$installed, @newpkgs) if ($installed);
 	if (!$iok) {
 		&$second_print(&text('scripts_phpmodfailed', scalar(@poss)));
-		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
 
 	# Finally re-check to make sure it worked
-	GOTMODULE:
 	undef(%main::php_modules);
 	if (&check_php_module($mphp, $phpver, $d) != 1) {
 		&$second_print($text{'scripts_einstallmod'});
-		&copy_source_dest($backupinifile, $inifile) if ($backupinifile);
 		if ($opt) { next; }
 		else { return 0; }
 		}
 	else {
+
+		# On success configure the domain's php.ini to load it, if needed
+		local $pconf = &phpini::get_config($inifile);
+		local @allexts = grep { $_->{'name'} eq 'extension' } @$pconf;
+		local @exts = grep { $_->{'enabled'} } @allexts;
+		local ($got) = grep { $_->{'value'} eq "${mphp}.so" ||
+		                      $_->{'value'} eq $mphp } @exts;
+		if (!$got && &check_php_module($mphp, $phpver, $d) != 1) {
+			# Needs to be enabled
+			local $lref = &read_file_lines($inifile);
+			if (@exts) {
+				# After current extensions
+				splice(@$lref, $exts[$#exts]->{'line'}+1, 0,
+				       "extension=${mphp}.so");
+				}
+			elsif (@allexts) {
+				# After commented out extensions
+				splice(@$lref, $allexts[$#allexts]->{'line'}+1, 0,
+				       "extension=${mphp}.so");
+				}
+			else {
+				# At end of file (should never happen, but..)
+				push(@$lref, "extension=${mphp}.so");
+				}
+			if ($mode eq "mod_php" || $mode eq "fpm") {
+				&flush_file_lines($inifile);
+				}
+			else {
+				&write_as_domain_user($d,
+					sub { &flush_file_lines($inifile) });
+				}
+			undef($phpini::get_config_cache{$inifile});
+			undef(%main::php_modules);
+			}
+
 		&$second_print(&text('setup_done', $m));
 		}
 
