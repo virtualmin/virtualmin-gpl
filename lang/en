@@ -5274,6 +5274,7 @@ phpmode_moding=Changing PHP execution mode to $1 ..
 phpmode_emoding=.. change failed : $1
 phpmode_emode=.. selected mode is not supported!
 phpmode_kidding=Changing number of PHP sub-processes to $1 ..
+phpmode_kiddingforce=Enforcing number of PHP sub-processes to $1 ..
 phpmode_nokids=Disabling PHP sub-processes ..
 phpmode_rmoding=Changing Ruby execution mode to $1 ..
 phpmode_suexecon=Enabling CGI scripts as domain owner ..

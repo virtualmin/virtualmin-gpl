@@ -176,7 +176,7 @@ if ($can) {
 	elsif($can && $mode eq "fpm" && $dom_limits->{'procs'}) {
 		my $ncl = $dom_limits->{'procs'} > $max_php_fcgid_children ? 
 			$max_php_fcgid_children : $dom_limits->{'procs'};
-		&$first_print(&text('phpmode_kidding', $ncl));
+		&$first_print(&text('phpmode_kiddingforce', $ncl));
 		&set_php_fpm_ulimits($d, $dom_limits);
 		&$second_print($text{'setup_done'});
 		$anything++;
