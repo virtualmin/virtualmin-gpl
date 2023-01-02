@@ -562,33 +562,45 @@ foreach my $desturl (@$desturls) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
 			# Looking for a directory
+			my $destdir = $desturl;
+			$destdir =~ s/\/[^\/]+$//;
+			my $derr;
 			if ($mkdir) {
-				local $derr;
-				if (!-d $desturl) {
-					# Create the directory as the domain
-					# user, and check that it worked
-					$derr = &make_backup_dir(
-						$desturl, 0700, 1, $asd);
-					}
-				if ($derr) {
-					&$first_print(&text('backup_emkdir',
-						   "<tt>$desturl</tt>", $derr));
-					next;
-					}
+				# Create the directory as the domain
+				# user, and check that it worked
+				$derr = &make_backup_dir(
+					$desturl, 0700, 1, $asd);
+				}
+			elsif ($destdir && -d $destdir &&
+			       $opts->{'dir'}->{'strftime'}) {
+				# Caller didn't request that the destination
+				# directory be created, but since the last part
+				# of the path is date-formatted, create it
+				# anyway
+				$derr = &make_backup_dir(
+					$desturl, 0700, 1, $asd);
 				}
 			else {
+				# Destination directory doesn't exist yet
 				&$first_print(&text('backup_edirtest',
 						    "<tt>$desturl</tt>"));
 				next;
 				}
+			if ($derr) {
+				&$first_print(&text('backup_emkdir',
+					"<tt>$desturl</tt>", $derr));
+				next;
+				}
 			}
 		elsif (!$dirfmt && -d $desturl) {
+			# Destination already exists and is a directory, but
+			# we're expecting to write a file
 			&$first_print(&text('backup_enotdirtest',
 					    "<tt>$desturl</tt>"));
 			next;
 			}
 		if (!$dirfmt && $mkdir) {
-			# Create parent directories if requested
+			# Create parent directories for a file backup
 			local $dirdest = $desturl;
 			$dirdest =~ s/\/[^\/]+$//;
 			if ($dirdest && !-d $dirdest) {
