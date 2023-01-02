@@ -1220,7 +1220,7 @@ foreach my $m (@mods) {
 	my $mphp = $m;
 	$mphp =~ s/^pecl-//;
 	next if (&check_php_module($mphp, $phpver, $d) == 1);
-	if(!$installing++) {
+	if (!$installing++) {
 		&$first_print($text{'scripts_install_phpmods_check'});
 		&$indent_print();
 		}
