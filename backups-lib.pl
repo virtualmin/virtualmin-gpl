@@ -563,13 +563,10 @@ foreach my $desturl (@$desturls) {
 		if ($dirfmt && !-d $desturl) {
 			# Looking for a directory
 			if ($mkdir) {
-				local $derr;
-				if (!-d $desturl) {
-					# Create the directory as the domain
-					# user, and check that it worked
-					$derr = &make_backup_dir(
-						$desturl, 0700, 1, $asd);
-					}
+				# Create the directory as the domain
+				# user, and check that it worked
+				local $derr = &make_backup_dir(
+					$desturl, 0700, 1, $asd);
 				if ($derr) {
 					&$first_print(&text('backup_emkdir',
 						   "<tt>$desturl</tt>", $derr));
@@ -583,12 +580,14 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		elsif (!$dirfmt && -d $desturl) {
+			# Destination already exists and is a directory, but
+			# we're expecting to write a file
 			&$first_print(&text('backup_enotdirtest',
 					    "<tt>$desturl</tt>"));
 			next;
 			}
 		if (!$dirfmt && $mkdir) {
-			# Create parent directories if requested
+			# Create parent directories for a file backup
 			local $dirdest = $desturl;
 			$dirdest =~ s/\/[^\/]+$//;
 			if ($dirdest && !-d $dirdest) {
