@@ -13,7 +13,10 @@ $can || $canv || &error($text{'phpmode_ecannot'});
 $p = &domain_has_website($d);
 @modes = &supported_php_modes($d);
 $newmode = $in{'mode'};
-$dom_limits = &get_domain_resource_limits($d);
+$dom_limits = {};
+if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+	$dom_limits = &get_domain_resource_limits($d);
+	}
 if ($can) {
 	# Check for option clashes
 	if (!$d->{'alias'} && $can && !$dom_limits->{'procs'}) {
