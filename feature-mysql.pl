@@ -2894,14 +2894,25 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0) {
 			    : "password $encpass"));
 	}
 elsif ($variant eq "mysql" && &compare_versions($ver, "5.7.6") >= 0) {
-	my $changepasssql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
+	my $changepasssql;
 	if ($plainpass) {
 		$changepasssql = "alter user '$user'\@'$host' identified $plugin by '".&mysql_escape($plainpass)."'";
+		}
+	else {
+		$changepasssql = "update user set authentication_string = $encpass where user = '$user' and host = '$host'";
 		}
 	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "$changepasssql", "flush privileges");
 	}
 elsif (&compare_versions($ver, 5) >= 0) {
-	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", "set password for '$user'\@'$host' = $encpass", "flush privileges");
+	my $setpasssql;
+	if ($plainpass) {
+		$setpasssql = "set password for '$user'\@'$host' = ".
+			      &encrypt_plain_mysql_pass($d, $plainpass);
+		}
+	else {
+		$setpasssql = "set password for '$user'\@'$host' = $encpass";
+		}
+	return ("insert ignore into user (host, user, ssl_type, ssl_cipher, x509_issuer, x509_subject) values ('$host', '$user', '', '', '', '')", "flush privileges", $setpasssql, "flush privileges");
 	}
 else {
 	return ("insert ignore into user (host, user, password) values ('$host', '$user', $encpass)");
