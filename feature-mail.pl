@@ -3248,6 +3248,28 @@ if ($url && $burl && $url eq $burl && $allopts->{'repl'} &&
 
 &obtain_lock_mail($d);
 &obtain_lock_unix($d);
+
+# Restore plain-text password file first
+if (-r $file."_plainpass") {
+	if ($_[2]->{'mailuser'}) {
+		# Just copy one plain password
+		local (%oldplain, %newplain);
+		&read_file($file."_plainpass", \%oldplain);
+		&read_file("$plainpass_dir/$d->{'id'}", \%newplain);
+		$newplain{$_[2]->{'mailuser'}} = $oldplain{$_[2]->{'mailuser'}};
+		$newplain{$_[2]->{'mailuser'}." encrypted"} =
+			$oldplain{$_[2]->{'mailuser'}." encrypted"};
+		&write_file("$plainpass_dir/$d->{'id'}", \%newplain);
+		}
+	else {
+		# Copy the whole file
+		&copy_source_dest($file."_plainpass",
+				  "$plainpass_dir/$d->{'id'}");
+		}
+	}
+my %plainpass;
+&read_file("$plainpass_dir/$d->{'id'}", \%plainpass);
+
 if ($opts->{'mailuser'}) {
 	# Just doing a single user .. delete him first if he exists
 	&$first_print(&text('restore_mailusers2', $opts->{'mailuser'}));
@@ -3326,6 +3348,7 @@ while(<UFILE>) {
 			}
 		$uinfo->{'user'} = $user[0];
 		$uinfo->{'pass'} = $user[1];
+		$uinfo->{'plainpass'} = $plainpass{$uinfo->{'user'}};
 		if ($user[2] eq 'w') {
 			# Web management user, so user same UID as server
 			$uinfo->{'uid'} = $d->{'uid'};
@@ -3432,25 +3455,6 @@ while(<UFILE>) {
 		}
 	}
 close(UFILE);
-
-# Restore plain-text password file too
-if (-r $file."_plainpass") {
-	if ($_[2]->{'mailuser'}) {
-		# Just copy one plain password
-		local (%oldplain, %newplain);
-		&read_file($file."_plainpass", \%oldplain);
-		&read_file("$plainpass_dir/$d->{'id'}", \%newplain);
-		$newplain{$_[2]->{'mailuser'}} = $oldplain{$_[2]->{'mailuser'}};
-		$newplain{$_[2]->{'mailuser'}." encrypted"} =
-			$oldplain{$_[2]->{'mailuser'}." encrypted"};
-		&write_file("$plainpass_dir/$d->{'id'}", \%newplain);
-		}
-	else {
-		# Copy the whole file
-		&copy_source_dest($file."_plainpass",
-				  "$plainpass_dir/$d->{'id'}");
-		}
-	}
 
 # Restore hashed password file too
 if (-r $file."_hashpass") {
