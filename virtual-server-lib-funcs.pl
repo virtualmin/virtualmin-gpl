@@ -1435,11 +1435,9 @@ if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 # Grant access to databases (unless this is the domain owner)
 if ($_[1] && !$_[0]->{'domainowner'}) {
 	local $dt;
-	my @restored_db_users;
 	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[1]))) {
 		eval {
 			local $main::error_must_die = 1;
-			push(@restored_db_users, $_[0]->{'user'});
 			local @dbs = map { $_->{'name'} }
 					 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
 			if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
@@ -1457,7 +1455,7 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 			};
 			if ($@) {
 				$restore_eusersql =
-					&text('restore_eusersql', join(', ', @restored_db_users));
+					$text{'restore_eusersql'};
 				}
 		}
 	}
