@@ -45,12 +45,18 @@ if ($can) {
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
 		$children = &get_domain_php_children($d);
 		if (defined($children) && $children >= 0) {
-			print &ui_table_row(&hlink($text{'phpmode_children'},
-						   "phpmode_children"),
-				    &ui_opt_textbox("children", $children > 0 ? $children : '', 5,
-				        $mode eq 'fcgid' ?
-				        $text{'tmpl_phpchildrenauto'} : 
-				        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
+			my $dom_limits = {};
+			if (defined(&supports_resource_limits) && &supports_resource_limits()) {
+				$dom_limits = &get_domain_resource_limits($d);
+				}
+			if (!$dom_limits->{'procs'}) {
+				print &ui_table_row(&hlink($text{'phpmode_children'},
+							   "phpmode_children"),
+					    &ui_opt_textbox("children", $children > 0 ? $children : '', 5,
+					        $mode eq 'fcgid' ?
+					        $text{'tmpl_phpchildrenauto'} : 
+					        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
+				}
 			}
 		}
 
