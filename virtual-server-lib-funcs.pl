@@ -1453,10 +1453,9 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 					     $_[0]->{'plainpass'},$_[0]->{$dt.'_pass'});
 				}
 			};
-			if ($@) {
-				$restore_eusersql =
-					$text{'restore_eusersql'};
-				}
+		if ($@) {
+			$restore_eusersql = $text{'restore_eusersql'};
+			}
 		}
 	}
 
