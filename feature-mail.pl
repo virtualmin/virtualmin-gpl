@@ -3542,7 +3542,14 @@ if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'} &&
 	&pop_all_print();
 	}
 
-if (@errs) {
+if ($restore_eusersql) {
+	my $errs = join(" ", @errs);
+	$errs =~ s/User\s+already\s+exists\.//;
+	$errs = &trim($errs);
+	$errs = " : $errs" if ($errs);
+	&$second_print(&text('restore_mailerrs', $restore_eusersql . $errs));
+	}
+elsif (@errs) {
 	&$second_print(&text('restore_mailerrs', join(" ", @errs)));
 	}
 elsif ($_[2]->{'mailuser'} && !$foundmailuser) {
