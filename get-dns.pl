@@ -130,6 +130,9 @@ elsif ($multiline) {
 			print "    Proxied: ",
 			      ($r->{'proxied'} ? "Yes" : "No"),"\n";
 			}
+                if ($r->{'file'}) {
+                        print "    File: $r->{'file'}\n";
+                        }  
 		}
 	}
 else {
