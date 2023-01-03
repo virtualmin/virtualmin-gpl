@@ -577,7 +577,7 @@ if ($supports_dependent) {
 &delete_everyone_file($d);
 
 # Remove domain from DKIM list
-&update_dkim_domains($d, 'delete', $leave_dns);
+&update_dkim_domains($d, 'delete', $leave_dns || $d->{'deleting'});
 
 # Remove secondary virtusers from slaves
 &sync_secondary_virtusers($d);
