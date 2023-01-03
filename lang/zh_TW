@@ -1267,21 +1267,7 @@ sub_RPLAINPASS=分銷商密碼
 sub_EMAIL=分銷商聯系人郵件地址
 sub_WEBMINURL=登錄Virtualmin的URL
 
-newuser_title=新郵箱通知郵件
-newuser_ecannot=你不允許編輯新郵箱通知郵件模板
-newuser_desc2=使用該表單編輯新郵箱通知郵件內容的模板，該模板用于給新創建的郵件／FTP用戶發送通知郵件。文本中可以使用下列可替換變量：
-newuser_header=新郵箱通知郵件詳細信息
 newuser_docs=解釋與替換變量
-
-newupdate_title=郵箱更新通知郵件
-newupdate_ecannot=你不允許編輯郵箱更新通知郵件模板
-newupdate_desc2=使用該表單編輯郵箱更新通知郵件內容的模板，該模板用于給被更新郵件／FTP的用戶發送通知郵件。文本中可以使用下列可替換變量：
-newupdate_header=郵箱更新通知郵件詳細信息
-
-newlocal_title=新本地郵箱通知郵件
-newlocal_ecannot=你不允許編輯新本地郵箱通知郵件模板
-newlocal_desc2=使用該表單編輯新本地郵箱通知郵件內容的模板，該模板用于給新創建的郵箱用戶發送通知郵件。文本中可以使用下列可替換變量：
-newlocal_header=新本地郵箱通知郵件詳細信息
 
 newdom_title=新虛擬服務器通知郵件
 newdom_ecannot=你不允許編輯新虛擬服務器通知郵件模板

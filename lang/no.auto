@@ -4,6 +4,12 @@ index_ip=IP adresse
 index_ssl_expiry=SSL-utløp
 index_ebinderrs=Det ble funnet feil i systemets BIND-konfigurasjon : $1 
 index_etlsassl=OpenSSL støtter ikke sertifikat-parsing eller SHA-256-hashing
+index_saname=SASL-autentiseringsserver
+index_sastop=Stopp saslauthd daemon
+index_sastart=Start saslauthd daemon
+index_sarestart=Start saslauthd daemon på nytt
+index_sastopdesc=SASL-autentiseringsserveren er for øyeblikket aktiv og validerer pålogginger for å sende e-post via SMTP. Klikk på denne knappen for å stoppe den.
+index_sastartdesc=SASL-autentiseringsserveren er for øyeblikket nede, noe som vil forhindre postboksbrukere fra å sende e-post. Klikk på denne knappen for å starte den.
 index_fpmname=PHP-FPM $1 -server
 index_fpmstop=Stopp PHP-FPM-server
 index_fpmrestart=Start PHP-FPM Server på nytt
@@ -77,6 +83,7 @@ setup_usermindown=.. kjører foreløpig ikke
 setup_usermindown2=.. kunne ikke starte Usermin på nytt : $1
 setup_failed=.. mislyktes
 setup_logrotatealready=.. allerede aktivert for loggfil $1 
+setup_nologrotate2=.. ingen konfigurasjon for loggrotasjon funnet
 setup_econtenting=.. klarte ikke å lage innledende innhold : $1
 setup_sshkey1=Genererer SSH private og offentlige nøkler ..
 setup_sshkey2=Autoriserer SSH offentlig nøkkel ..
@@ -140,6 +147,8 @@ edit_dnsip2=$1 eksternt
 edit_lang=Skifte språk
 edit_filemin=Filbehandler
 edit_filemindesc=Bla gjennom og rediger filer i denne virtuelle serverens webkatalog.
+edit_terminal=Terminal
+edit_terminaldesc=Få tilgang til skallet på systemet ditt uten behov for en separat SSH-klient, ved å bruke Xterm.js over Webmin WebSockets
 edit_website=Nettstedsalternativer
 edit_websitedesc=Konfigurer innstillinger relatert til nettstedet til denne virtuelle serveren, for eksempel logging og HTML-katalogen
 edit_php=PHP-alternativer
@@ -188,6 +197,7 @@ import_euserclash=Den virtuelle serveren $1 bruker allerede det valgte brukernav
 import_egroupclash=Den virtuelle serveren $1 bruker allerede det valgte gruppenavnet
 
 disable_bind_cloud=Deaktiverer DNS-sone på $1 ..
+disable_ebind_discloud=.. ikke støttet
 disable_ebind_cloud=.. mislyktes : $1 
 disable_ebind_cloud2=.. støttes ikke av skyleverandør
 
@@ -244,6 +254,7 @@ check_webadminfixed=Ikke-støttet $1 -direktiv ble fjernet fra $2 Apache-nettste
 check_etlsa=TLSA DNS-poster kan ikke opprettes på systemet ditt: $1
 check_tlsaok=TLSA DNS-poster vil bli lagt til nye domener
 check_mysqlok=MySQL $1 er installert og kjører
+check_mysqlok3=Virtualmin bruker en ekstern MySQL-server
 check_plugin=Plugin $1 er installert
 check_packageok=De valgte pakkeadministrasjons- og oppdateringssystemene er installert
 check_spamwrapperargs=Procmail-kommandoen <tt>$1</tt> i Postfix-konfigurasjonen har ikke de forventede flaggene <tt>$2</tt>
@@ -299,10 +310,12 @@ backup_mode7=Google Cloud Storage
 backup_mode8=Dropbox
 backup_mode9=Webmin-server
 backup_mode10=Backblaze
+backup_mode11=Azure Blob Storage
 backup_mode44desc=En lenke vil bli generert for å laste ned den resulterende Virtualmin-sikkerhetskopien.
 backup_gcpath=Bøtte og sti
 backup_dbpath=Dropbox-sti
 backup_bbpath=Backblaze-bane
+backup_azpath=Azure-beholder og bane
 backup_webminserver=Webmin-server
 backup_pass=Logg inn med passord
 backup_pass2=Logg inn med passord
@@ -317,6 +330,8 @@ backup_nicedb=Dropbox-mappen $1
 backup_nicedbp=$2 i Dropbox-mappen $1 
 backup_nicebb=Bakblaze bøtte $1 
 backup_nicebbp=$2 i Backblaze-bøtte $1 
+backup_niceaz=Azure-beholder $1
+backup_niceazp=$2 i Azure-beholder $1
 backup_nicedownloadlink=nedlastingslenke
 backup_downloadfile=Last ned sikkerhetskopifilen $1
 backup_edownloadfile=Manglende sikkerhetskopifil for nedlasting
@@ -336,6 +351,8 @@ backup_edbpath=Mangler Dropbox-sti
 backup_edbpath2=Dropbox-banen kan ikke starte eller avslutte med en skråstrek
 backup_ebbpath=Mangler Backblaze-bane
 backup_ebbpath2=Backblaze-banen kan ikke starte eller ende med en skråstrek
+backup_eazpath=Mangler Azure-bane
+backup_eazpath2=Azure-bane kan ikke starte eller slutte med en skråstrek
 backup_einconly=Det kan ikke opprettes en trinnvis planlagt sikkerhetskopi med mindre du har konfigurert minst en full sikkerhetskopi
 backup_donepurge=Sikkerhetskopieringen er fullført, men slettingen mislyktes. Endelig størrelse var $1.
 backup_purgesubject=Fullført sikkerhetskopiering av Virtualmin på $1 til $2, men sletting mislyktes
@@ -343,6 +360,7 @@ backup_upload7=Laster opp arkiv til Google Cloud Storage ..
 backup_upload8=Laster opp arkiv til Dropbox ..
 backup_upload9=Laster opp arkiv til Webmin-server $1 ..
 backup_upload10=Laster opp arkiv til Backblaze ..
+backup_upload11=Laster opp arkiv til Azure Blob Storage ..
 backup_eownrestore=Bare signerte sikkerhetskopier kan gjenopprettes av virtuelle servereiere
 
 backup_deleteddom=Virtuell server $1 kan ikke sikkerhetskopieres da den er slettet!
@@ -376,6 +394,7 @@ restore_disabledomain=Deaktiver virtuell server $1 på nytt.
 restore_downloadgc=Laster ned arkiv fra Google Cloud Storage ..
 restore_downloaddb=Laster ned arkiv fra Dropbox ..
 restore_downloadbb=Laster ned arkiv fra Backblaze ..
+restore_downloadaz=Laster ned arkiv fra Azure Blob Storage ..
 restore_downloadwebmin=Laster ned arkiv fra Webmin-serveren ..
 restore_euid=UID $1 er allerede i bruk på dette systemet
 restore_egid=GID $1 er allerede i bruk på dette systemet
@@ -387,8 +406,12 @@ restore_edirspace=.. advarsel - denne sikkerhetskopien inneholder $1 av filer, m
 restore_mysqldummy=Gjenopprette MySQL-databaser ..
 restore_mysqlsameremote=.. hopper over gjenoppretting til original server $1 i replikasjonsmodus
 restore_emysqlgrant=.. gjenoppretting mislyktes : $1 
+restore_eusersql=MySQL-brukere kan ikke gis tilgang til databasen automatisk
 restore_postgresdummy=Gjenopprette PostgreSQL databaser ..
 restore_postgressameremote=.. hopper over gjenoppretting til original server $1 i replikasjonsmodus
+restore_dnssec=Aktiverer DNSSEC på nytt for gjenopprettet domene ..
+restore_dnssec2=Gjenoppretter DNSSEC-nøkkel for domene ..
+restore_dnssec_resign=Resignerer DNS-sone for domene ..
 restore_mailuserssame=.. hopper over gjenoppretting til original LDAP-server $1 i replikasjonsmodus
 restore_logrotatecpshared=.. ikke nødvendig når det deles
 restore_okmode=.. modus $1 fungerer for dette systemet
@@ -471,6 +494,8 @@ newtmpl_name1=Innstillinger for sub-servere
 
 tmpl_exclude=Kataloger å ekskludere fra sikkerhetskopier
 tmpl_exdirs=Oppførte kataloger ..
+tmpl_newuser=E-postmelding som skal sendes ved opprettelse av postboks
+tmpl_updateuser=E-postmelding som skal sendes ved postboksoppdatering
 tmpl_web_ssl=Ekstra direktiver for SSL nettsteder
 tmpl_web_fcgiwrap=Kjør CGI -skript med
 tmpl_web_fcgiwrap1=FCGIwrap-server
@@ -513,10 +538,14 @@ tmpl_php_fpm=Flere FPM-bassengalternativer
 tmpl_php_sock=FPM-serverforbindelse
 tmpl_php_sock0=TCP-port
 tmpl_php_sock1=Unix-sokkelfil
+tmpl_php_log=Vil du aktivere PHP-logging?
+tmpl_php_log_path=Standard PHP-loggfil
 tmpl_ephpsuexec=PHP-skript kan ikke kjøres som domeneeier med mindre suEXEC er aktivert
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
 tmpl_editmode_php=PHP-alternativer
+tmpl_editmode_newuser=Ny postkasse e-post
+tmpl_editmode_updateuser=Oppdatert postkasse-e-post
 tmpl_ewgroup=Velg Webmin-gruppe kan ikke inneholde Virtualmin-modulen
 tmpl_phpcgi=CGI-wrapper for PHP $1 
 tmpl_phpfcgi=FastCGI-wrapper for PHP $1 
@@ -548,6 +577,9 @@ newips_mode1=Ekstern adresse brukt i DNS-poster
 newips6_eold=Den gamle IPv6-adressen er ikke i riktig format
 newips6_enew=Ny IPv6-adresse er ikke i riktig format
 
+newresels_email=Ny forhandler e-post
+newresels_emaildesc=Rediger e-postmeldingen som eventuelt kan sendes til den nye forhandlerens e-postadresse etter opprettelse.
+
 resel_unix=Opprette FTP/SSH-konto for forhandler?
 resel_from=Fra adresse for e-post fra forhandler
 resel_fromdef=Samme som ovenfor
@@ -575,6 +607,7 @@ licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 
+scripts_iservice=Tjenestenavn
 scripts_emissing=Manus eksisterer ikke!
 scripts_ephpvers2=Dette skriptet kan ikke installeres, da ingen PHP-versjoner ble funnet
 scripts_enophpvers=Ingen PHP-versjoner funnet!
@@ -602,6 +635,7 @@ scripts_install_phpmods_check=Sjekker PHP-moduler ..
 scripts_install_phpmods_check_done=.. sjekk ferdig
 scripts_sitelink=Mer informasjon om bruk av dette skriptet finner du på <a href='$1' target=_blank>$2</a>.
 scripts_passmode4=Opprinnelig passord for skript
+scripts_epartialmanual=Installasjonen kan fortsettes manuelt kl
 scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden.
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren
@@ -635,6 +669,7 @@ sysinfo_pythonpath=Sti til Python
 
 links_webminlog_dom=Loggede domenehandlinger
 links_phpini3=PHP-FPM-konfigurasjon
+links_phplog=PHP-feillogg
 
 massdelete_preserve=Bevar funksjoner eksternt vert
 
@@ -736,6 +771,8 @@ usage_dirheader2=Diskbruk av filer og kataloger under denne serverens hjem og an
 usage_dirdesc=Kolonnen <b>Kvote Størrelse</b> er diskplass sto til den virtuelle serveren, mens <b>Størrelse</b> er plass fortært av alle filer i hver katalog.
 usage_others=Andre filer i hjemmet
 
+webmin_plog=PHP-feillogg for $1
+
 newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene dine
 
 phpmode_title2=PHP-alternativer
@@ -749,12 +786,19 @@ phpmode_err2=Kunne ikke lagre PHP-alternativer
 phpmode_children=PHP-tjeneste maksimale underprosesser
 phpmode_emoding=.. endring mislyktes : $1 
 phpmode_emode=.. valgt modus støttes ikke på dette systemet!
+phpmode_kiddingforce=Håndhever antall PHP-underprosesser til $1 ..
 phpmode_nothing_skip=..hopping
 phpmode_vers=PHP-versjoner installert
 phpmode_novers=Ingen versjoner funnet!
 phpmode_errs=Konfigurasjonsfeil for PHP $1 
+phpmode_plog=PHP feilloggfil
+phpmode_eplog=Manglende eller ikke-absolutt PHP-feilloggbane
+phpmode_noplog=PHP-logging deaktivert
+phpmode_defplog=Standard loggfil
+phpmode_fileplog=Egendefinert loggfil
 phpmode_rename=Gi nytt navn til gjeldende katalog hvis det endres?
 phpmode_sslredir=Viderekoble alle forespørsler til SSL-nettstedet?
+phpmode_setplog=Endrer PHP-feillogg ..
 phpmode_ssloff=Fjerner viderekoblingen til SSL-siden ..
 phpmode_sslon=Legger til viderekobling til SSL-side ..
 phpmode_version=PHP-versjon
@@ -818,6 +862,10 @@ spf_disableds=Fjerner DS-poster fra overordnet domene ..
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
 s3_eawscmd=AWS-kommandoen er installert, men fungerer ikke : $1
+
+az_ecmd=Azure CLI-kommandoen <tt>az</tt> ble ikke funnet
+az_elogin=Azure CLI-kommandoen er ikke autentisert ennå. SSH inn i Virtualmin-systemet og kjør kommandoen <tt>az login --use-device-code</tt> for å logge på Azure.
+azure_account=Azure-konto $1
 
 newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal kjøres legges inn
 
@@ -1045,6 +1093,7 @@ bkey_extra=Eksisterende nøkkel
 bkey_download=Last ned nøkkel
 
 transfer_replication=Replikere til eksternt system?
+transfer_output=Vil du vise detaljert utdata når du sikkerhetskopierer?
 transfer_ttlerror=DNS TTL for denne virtuelle serveren er satt til $1, noe som betyr at IP-adresseendringen som er nødvendig for overføringen ikke vil være synlig for klienter på minst så lenge. TTL bør senkes ved å klikke på knappen nedenfor før du utfører overføringen.
 transfer_ereplication=Både replikering og sletting av domenet kan ikke aktiveres samtidig
 transfer_ehost=Manglende destinasjonsvertsnavn
@@ -1082,6 +1131,7 @@ cloud_rsdesc=Rackspace Cloud Files
 cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
+cloud_azdesc=Azure Blob Storage
 cloud_s3account=Bruker tilgangsnøkkel $1 
 cloud_rsuser=Bruker innlogging $1 
 cloud_s3_noawscli=Det anbefales å ha offisielt AWS kommandolinjegrensesnitt installert.
@@ -1105,6 +1155,7 @@ cloud_url=Leverandørens nettsted
 cloud_es3_endpoint=S3-kompatibel server må være et gyldig vertsnavn
 cloud_es3_endport=S3 -kompatibel serverport må være et nummer
 cloud_es3_chunk=Last opp delestørrelse må være et positivt tall
+cloud_err=Kunne ikke lagre skylagringsleverandøren
 cloud_egone=Ukjent leverandør av skylagring!
 cloud_rs_user=Rackspace-brukernavn
 cloud_rs_key=Rackspace API-nøkkel
@@ -1126,6 +1177,7 @@ cloud_s3_longdesc=Legitimasjonen på denne siden finner du på siden Sikkerhetso
 cloud_google_longdesc=Innstillingene på denne siden leveres av Google når du gir API-tilgang til prosjektet ditt på <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> -siden, under <b>APIer og autentisering</b> -> <b>legitimasjon</b>.
 cloud_dropbox_longdesc=Før du kan ta sikkerhetskopi til Dropbox, må du først <a href=http://www.virtualmin.com/dropbox-referral target=_blank>opprette en konto</a> på nettstedet deres hvis du ikke allerede har en.
 cloud_bb_longdesc=Før du kan sikkerhetskopiere til Backblaze, må du først <a href=https://backblaze.com/ target=_blank>opprette en konto</a>, og deretter aktivere <b>B2 Cloud Storage</b> på <b>Mine innstillinger</b> side. Deretter må du generere en applikasjonsnøkkel med alle funksjoner på siden <b>App-nøkler</b>.
+cloud_az_longdesc=Før du kan sikkerhetskopiere til Azure Blob Storage, må du først <a href=https://azure.microsoft.com/en-us/free/ target=_blank>opprette en konto</a>, installere <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> kommando, og logg på Azure-kontoen din ved å kjøre <tt>az login --use-device-code< /tt>.
 cloud_openoauth=Begynn OAuth2-registrering
 cloud_newoauth=OAuth2-kode fra Google:
 cloud_newoauth_dropbox=OAuth2-kode fra Dropbox:
@@ -1155,6 +1207,19 @@ cloud_bb_ekey=Manglende eller ugyldig API-nøkkel
 cloud_bb_elogin=Innlogging til Backblaze mislyktes : $1 
 cloud_eoauth_mode=Manglende eller ugyldig Oauth-modus!
 clouds_oauth_done=OAuth-token lagret
+cloud_azaccount=Azure Storage-konto $2 under $1
+cloud_azure_account=Azure-konto
+cloud_eazure_eaccount=Azure-kontoen må være en e-postadresse
+cloud_eazure_eaccount2=Kommandoen <tt>az</tt> er autentisert som en annen konto $1
+cloud_eazure_eaccount3=<tt>az</tt>-kommandoen er ikke autentisert med noen konto
+cloud_azure_name=Lagringskontonavn
+cloud_azure_auto=Finn automatisk
+cloud_azure_id=ID for lagringsabonnement
+cloud_eazure_estor=Fant ingen Azure-lagringskontoer! Du må først opprette en på <a href=http://portal.azure.com target=_blank>Azure Portal</a>.
+cloud_eazure_ename=Navnet på lagringskontoen mangler eller ser ugyldig ut
+cloud_eazure_eid=Manglende eller ugyldig lagringskonto-abonnements-ID
+cloud_eazure_eid2=Kunne ikke finne ut abonnements-ID for lagringskontoen
+cloud_eazure_elist=Oppgitt lagringskonto og ID ble ikke akseptert av Azure : $1
 
 left_virtualmin=Virtualmin
 left_master=Master admin

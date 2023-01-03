@@ -1267,21 +1267,7 @@ sub_RPLAINPASS=分销商密码
 sub_EMAIL=分销商联系人邮件地址
 sub_WEBMINURL=登录Virtualmin的URL
 
-newuser_title=新邮箱通知邮件
-newuser_ecannot=你不允许编辑新邮箱通知邮件模板
-newuser_desc2=使用该表单编辑新邮箱通知邮件内容的模板，该模板用于给新创建的邮件／FTP用户发送通知邮件。文本中可以使用下列可替换变量：
-newuser_header=新邮箱通知邮件详细信息
 newuser_docs=解释与替换变量
-
-newupdate_title=邮箱更新通知邮件
-newupdate_ecannot=你不允许编辑邮箱更新通知邮件模板
-newupdate_desc2=使用该表单编辑邮箱更新通知邮件内容的模板，该模板用于给被更新邮件／FTP的用户发送通知邮件。文本中可以使用下列可替换变量：
-newupdate_header=邮箱更新通知邮件详细信息
-
-newlocal_title=新本地邮箱通知邮件
-newlocal_ecannot=你不允许编辑新本地邮箱通知邮件模板
-newlocal_desc2=使用该表单编辑新本地邮箱通知邮件内容的模板，该模板用于给新创建的邮箱用户发送通知邮件。文本中可以使用下列可替换变量：
-newlocal_header=新本地邮箱通知邮件详细信息
 
 newdom_title=新虚拟服务器通知邮件
 newdom_ecannot=你不允许编辑新虚拟服务器通知邮件模板

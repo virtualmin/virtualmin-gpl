@@ -701,7 +701,6 @@ backup_cron=Zalohuju Naplanovane ulohy Cron
 backup_cronnone=.. zadny nebyl definovan.
 backup_allfeatures=Zalohovat vsechny doplnky
 backup_selfeatures=Pouze vybrane ..
-backup_edownloadfmt=Prohlizecem je mozne stahovat pouze zalohu do jednoho souboru
 backup_edownloadfailed=Zalohovani selhalo - provedete li opetovne zalohu do souboru na serveru, obdrzite cele zneni chybove zpravy
 backup_egone=Naplanovana zaloha jiz neexistuje!
 backup_starting=Zahajuji zalohu na pozadi pro $1 ..

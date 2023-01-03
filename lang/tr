@@ -1212,15 +1212,6 @@ sub_if=Ek olarak, duruma göre programcýklar, örneðin <i>${IF-MAIL}...${ENDIF
 sub_DESC=Sunucu açýklamasý, örneðin <tt>Mehmet'in Sayfasý</tt>
 sub_PROXY_PASS=Gerçek web sitesinin URL'i.
 
-newuser_title="Yeni Posta Kutusu" E-postasý
-newuser_ecannot="Yeni Posta Kutusu" e-posta þablonunu düzenlemeye izniniz yok
-
-newupdate_title="Güncellenmiþ Posta Kutusu" E-postasý
-newupdate_ecannot="Güncellenmiþ Posta Kutusu" e-posta þablonunu düzenlemeye izniniz yok
-
-newlocal_title="Yeni Lokal Posta Kutusu" E-postasý
-newlocal_ecannot="Yeni Lokal Posta Kutusu" e-posta þablonunu düzenlemeye izniniz yok
-
 newdom_title="Yeni Sanal Sunucu" E-postasý
 newdom_ecannot="Yeni Sanal Sunucu" e-posta þablonunu düzenlemeye izniniz yok
 newdom_desc=Bu formu, oluþturulduktan sonra yeni sanal sunucu sahibine yollanacak e-posta mesajý þablon dosyasý $1'i düzenlemek için kullanýn. Metne aþaðýdaki yerdeðiþtirmeler yapýlacaktýr :
