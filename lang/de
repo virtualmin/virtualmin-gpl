@@ -1334,14 +1334,6 @@ sub_DESC=Die Server-Berschreibung, wie z.B. <tt>Joe's Seite</tt>
 sub_PROXY_PASS=Die URL der echten Webseite.
 sub_WEBMINURL=URL zum Login zu Virtualmin
 
-newuser_title=Neue E-Mailbox-E-Mail
-newuser_ecannot=Sie dürfen die Vorlage für die Neue-E-Mailbox-E-Mail nicht ändern
-
-newupdate_title=Mailbox E-Mail aktualisiert
-
-newlocal_title=Neue lokale E-Mailbox-E-Mail
-newlocal_ecannot=Sie dürfen die Vorlage der E-Mail an neue lokale E-Mailboxen nicht ändern.
-
 newdom_title=Neue Virtuelle Server E-Mail
 newdom_ecannot=Sie dürfen die E-Mail-Vorlage für neue Virtuelle Server nicht ändern.
 newdom_desc=Benutzen Sie dieses Formular, um die Vorlagendatei $1 zu ändern. Diese wird für die E-Mail genutzt, welche an Server-Eigentümer geschickt wird, wenn ein neuer Virtueller Server erzeugt wurde. Folgende Ersetzungen werden berücksichtigt.

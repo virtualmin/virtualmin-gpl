@@ -1599,21 +1599,7 @@ sub_RPLAINPASS=Reseller's wachtwoord
 sub_EMAIL=Reseller's contact email adres
 sub_WEBMINURL=URL om in te loggen bij Virtualmin
 
-newuser_title=Nieuwe Mailbox Email
-newuser_ecannot=U bent niet bevoegd om de nieuwe mailbox email template te bewerken
-newuser_desc2=Gebruik dit formulier om de template voor het email bericht te bewerken dat verstuurd kan worden naar een nieuwe email/FTP gebruiker nadat het gemaakt is. De volgende zaken zullen in de tekst worden gezet :
-newuser_header=Nieuwe mailbox email berichten details
 newuser_docs=Uitleg en substituties
-
-newupdate_title=Update Mailbox Email
-newupdate_ecannot=U bent niet bevoegd om de ge-update mailbox email template te bewerken
-newupdate_desc2=Gebruik dit formulier om de template voor het email bericht te bewerken dat verstuurd kan worden naar een email/FTP gebruiker nadat het ge-update is. De volgende zaken zullen in de tekst worden gezet :
-newupdate_header=Ge-update mailbox email berichten details
-
-newlocal_title=Nieuwe Lokale Mailbox Email
-newlocal_ecannot=U bent niet bevoegd om de nieuwe locale mailbox email template te bewerken
-newlocal_desc2=Gebruik dit formulier om de template te bewerken voor de email berichten die gestuurd kunnen worden naar een nieuwe mailbox gebruiker nadat het gemaakt is. De volgende zaken zullen worden gedaan met de tekst :
-newlocal_header=Nieuwe lokale mailbox email berichten details
 
 newdom_title=Nieuwe Virtuele Server Email
 newdom_ecannot=U bent niet bevoegd om de server email template te bewerken
@@ -2196,7 +2182,6 @@ backup_allfeatures=Backup alle eigenschappen
 backup_selfeatures=Alleen de geselecteerde hieronder ..
 backup_edests=Er is geen backup bestemming ingevuld!
 backup_edownloadmany=Wanneer een backup gedownload word, moet dat de enigste bestemming zijn
-backup_edownloadfmt=Alleen backups naar een enkele file kunnen worden gedownload in uw browser
 backup_edownloadfailed=Backup mislukte - probeer het opnieuw naar een file op de server om het volledige fouten bericht te bekijken
 backup_egone=Geplande backup bestaat niet langer!
 backup_starting=Op de achtergrond opstarten van backup naar $1 ..

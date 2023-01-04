@@ -730,9 +730,6 @@ newdns_edom=Un record A o MX deve esistere nel template per il dominio
 newdns_view=Crea un nuovo dominio in vista
 newdns_enamedconf=Direttiva inserita in named.conf di BIND non valida
 
-newlocal_title=Nuova casella email locale
-newlocal_header=Dettagli  messaggi nuova casella email locale
-
 newdom_title=Nuova email per il server virtuale
 newdom_subject=Oggetto
 newdom_sending=Invia email?

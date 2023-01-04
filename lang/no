@@ -1649,21 +1649,7 @@ sub_RPLAINPASS=Leverandørs passord
 sub_EMAIL=Leverandør kontakt e-post adresse
 sub_WEBMINURL=URL for innlogging til Virtualmin
 
-newuser_title=Ny postboks e-post
-newuser_ecannot=Du har ikke lov til å redigere malen for melding om ny postboks
-newuser_desc2=Bruk dette skjemaet til å redigere malen for e-post meldingen som kan sendes til en ny e-post/FTP-bruker etter at denne er opprettet. Følgende erstatninger kan brukes i teksten :
-newuser_header=Detaljer for melding om ny postboks
 newuser_docs=Forklaringer og erstatninger
-
-newupdate_title=Oppdatert postboks e-post
-newupdate_ecannot=Du har ikke lov til å redigere malen for e-post om oppdatert postboks
-newupdate_desc2=Her kan du redigere malen for e-post meldingen som kan sendes til en e-post/FTP bruker etter at den er oppdatert. Følgende erstatninger vli bli gjort i teksten :
-newupdate_header=Detaljer for melding om oppdatert postboks
-
-newlocal_title=Melding om ny lokal postboks
-newlocal_ecannot=Du har ikke lov til å redigere malen for ny lokal postboks
-newlocal_desc2=Bruk dette skjemaet til å redigere malen for e-postmeldingen som kan sendes til en ny lokal posboks-bruker når denne opprettes. Følgende erstatninger vil bli gjort i teksten :
-newlocal_header=Detaljer for ny lokal postboks e-post melding
 
 newdom_title=Ny virtuell tjener e-post
 newdom_ecannot=Du har ikke lov til å redigere mal for epost om ny tjener
@@ -2301,7 +2287,6 @@ backup_allfeatures=Sikkerhetskopier alle funksjoner
 backup_selfeatures=Kun de som er valgt nedenfor ..
 backup_edests=Ingen destinasjoner for sikkerhetskopier angitt!
 backup_edownloadmany=Når en sikkerhetskopi blir lastet ned, må den være den eneste destinasjonen
-backup_edownloadfmt=Kun sikkerhetskopier til en enkelt fil kan lastes ned i nettleseren din
 backup_edownloadfailed=Sikkerhetskopiering feilet - prøv på nytt til en fil på tjeneren for å se fullstendig feilmelding
 backup_egone=Tidsplanlagt sikkerhetskopi finnes ikke lenger!
 backup_starting=Starter bakgrunnssikkerhetskopiering til $1 ..

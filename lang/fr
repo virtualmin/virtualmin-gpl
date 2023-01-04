@@ -1209,12 +1209,6 @@ sub_if=De plus, des blocs confitionnels tels que <i>${IF-MAIL}...${ENDIF-MAIL}</
 sub_DESC=La description du serveur, par exemple <tt>Le site de la société AAA</tt>
 sub_PROXY_PASS=L'URL du site Web réel.
 
-newuser_title=Courriel de nouvelle boîte mél
-newuser_ecannot=Vous n'êtes pas autorisé à éditer le template de nouvelle boîte de courriel.
-
-newlocal_title=Nouvelle boîte de courrier locale
-newlocal_ecannot=Vous n'êtes pas autorisé à éditer le template de nouvelle boîte de courrier locale
-
 newdom_title=Courrier envoyé à la création d'un nouveau serveur virtuel
 newdom_ecannot=Vous n'êtes pas autorisé à éditer le template de courrier envoyé à la création d'un nouveau serveur.
 newdom_desc=Utiliser ce formulaire pour éditer le fichier template $1 pour le courrier qui sera envoyé au propriétaire d'un nouveau serveur virtuel après sa création.
@@ -1578,7 +1572,6 @@ backup_allfeatures=Sauvegarder toutes les fonctionnalités
 backup_selfeatures=Uniquement ceux sélectionnés ci-dessous ..
 backup_edests=Aucune destinations de sauvegarde n'est renseignée !
 backup_edownloadmany=Lorsqu'une sauvegarde est en cours de téléchargement, ce doit être la seule destination
-backup_edownloadfmt=Seules les sauvegardes à un seul fichier peut être téléchargé dans votre navigateur
 backup_edownloadfailed=Échec de la sauvegarde - réessayer dans un fichier sur le serveur pour voir le message d'erreur complet
 backup_egone=La sauvegarde planifiée n'existe plus!
 backup_starting=Départ de sauvegarde background à $1 ..
