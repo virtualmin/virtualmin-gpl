@@ -3484,8 +3484,7 @@ else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
 	return ("No zone file found for $d->{'dom'}") if (!$file);
-	local $rd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
-	local @recs = &bind8::read_zone_file($file, $rd->{'dom'});
+	local @recs = &bind8::read_zone_file($file, $d->{'dom'});
 	&set_record_ids(\@recs);
 	@rv = (\@recs, $file);
 	}
@@ -3785,14 +3784,20 @@ if (defined(&bind8::supports_dnssec) &&
 	if ($@) {
 		return "DNSSEC signing failed : $@";
 		}
+	else {
+		# Signing will have updated all the records, so re-read them
+		my @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
+		&set_record_ids(\@newrecs);
+		@$recs = ( );
+		push(@$recs, @newrecs);
+		}
 	}
 if ($d->{'provision_dns'}) {
 	# Upload records to provisioning server
 	local $info = { 'domain' => $d->{'dom'},
 			'replace' => '',
 			'host' => $d->{'provision_dns_host'} };
-	local @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
-	$info->{'record'} = [ &records_to_text($d, \@newrecs) ];
+	$info->{'record'} = [ &records_to_text($d, $recs) ];
 	my ($ok, $msg) = &provision_api_call("modify-dns-records", $info, 0);
 	if (!ok) {
 		return "Error from provisioning server updating records : $msg";
