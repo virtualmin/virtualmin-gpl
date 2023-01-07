@@ -14920,19 +14920,21 @@ if ($config{'web'}) {
 		}
 
 	# Check if template PHP mode is supported, and if not change it
-	my $tmpl = &get_template(0);
-	my $mode = &template_to_php_mode($tmpl);
-	my @supp = &supported_php_modes();
-	my $modupd;
-	if (&indexof($mode, @supp) < 0) {
-		my $mmap = &php_mode_numbers_map();
-		my ($best) = grep { $_ ne "none" } @supp;
-		$best ||= $supp[0];
-		$tmpl->{'web_php_suexec'} = $mmap->{$best};
-		&$second_print(
-			&text('check_ewebdefphpmode2', $mode, $supp[0]));
-		&save_template($tmpl);
-		$modupd++
+	foreach my $id (0, 1) {
+		my $tmpl = &get_template($id);
+		my $mode = &template_to_php_mode($tmpl);
+		my @supp = &supported_php_modes();
+		my $modupd;
+		if (&indexof($mode, @supp) < 0) {
+			my $mmap = &php_mode_numbers_map();
+			my ($best) = grep { $_ ne "none" } @supp;
+			$best ||= $supp[0];
+			$tmpl->{'web_php_suexec'} = $mmap->{$best};
+			&$second_print(&text('check_ewebdefphpmode2',
+					     $mode, $supp[0]));
+			&save_template($tmpl);
+			$modupd++
+			}
 		}
 
 	# Complain if mod_php is the default mode, unless force reset above 
