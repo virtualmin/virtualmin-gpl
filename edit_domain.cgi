@@ -98,9 +98,12 @@ if (!$aliasdom && $d->{'dir'}) {
 if ($d->{'ip6'}) {
 	push(@ips, $d->{'ip6'});
 	}
-print &ui_table_row($text{'edit_ips'},
-	join(", ", @ips).
-	($d->{'dns_ip'} ? " (".&text('edit_dnsip2', $d->{'dns_ip'}).")" : ""));
+my $ip = join(", ", @ips).
+	($d->{'dns_ip'} ? " (".&text('edit_dnsip2', $d->{'dns_ip'}).")" : "");
+if (&can_change_ip($d) && &can_edit_domain($d)) {
+	$ip = &ui_link("newip_form.cgi?dom=$d->{'id'}", $ip);
+	}
+print &ui_table_row($text{'edit_ips'}, $ip);
 
 if ($d->{'proxy_pass_mode'} && $d->{'proxy_pass'} && &domain_has_website($d)) {
 	# Show forwarding / proxy destination

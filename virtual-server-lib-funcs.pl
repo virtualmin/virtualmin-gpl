@@ -5559,10 +5559,11 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 
 	if ($config{'show_mailsize'} && $d->{'mail'}) {
 		# Mailbox link, if this user has email enabled or is the owner
-		local ($szmsg, $sz);
+		local ($szmsg, $sz, $szb);
 		if (!$u->{'nomailfile'} &&
 		    ($u->{'email'} || @{$u->{'extraemail'}})) {
 			($sz) = &mail_file_size($u);
+			$szb = $sz;
 			$sz = $sz ? &nice_size($sz) : $text{'users_empty'};
 			local $lnk = &read_mail_link($u, $d);
 			if ($lnk) {
@@ -5575,9 +5576,10 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		else {
 			$szmsg = $text{'users_noemail'};
 			$sz = 0;
+			$szb = 0;
 			}
 		push(@cols, { 'type' => 'string',
-			      'td' => 'data-sort='.$sz,
+			      'td' => 'data-sort='.$szb,
 			      'value' => $szmsg });
 		}
 
