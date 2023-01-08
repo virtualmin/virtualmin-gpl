@@ -1265,10 +1265,11 @@ if ($mode eq "fpm") {
 	my $phd = &public_html_dir($d);
 	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
+		my $oldlisten = &get_php_fpm_config_value($d, "listen");
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
-		&create_php_fpm_pool($d);
+		&create_php_fpm_pool($d, $oldlisten);
 		}
 	}
 else {
@@ -2273,16 +2274,16 @@ closedir(DIR);
 return @rv;
 }
 
-# create_php_fpm_pool(&domain)
+# create_php_fpm_pool(&domain, [force-listen])
 # Create a per-domain pool config file
 sub create_php_fpm_pool
 {
-my ($d) = @_;
+my ($d, $forcelisten) = @_;
 my $tmpl = &get_template($d->{'template'});
 my $conf = &get_php_fpm_config($d);
 return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-my $oldlisten = &get_php_fpm_config_value($d, "listen");
+my $oldlisten = $forcelisten || &get_php_fpm_config_value($d, "listen");
 my $mode;
 if ($oldlisten) {
 	$mode = $oldlisten =~ /^\// ? 1 : 0;
