@@ -141,7 +141,7 @@ if ($ok) {
 	my $passmodepassfield =
 		$dompass_bad ?
 			&ui_textbox("passmodepass", $dompass, 20, undef, undef, $dompass_req) :
-			&ui_password("passmodepass", $dompass, undef, undef, $dompass_req);
+			&ui_textbox("passmodepass", $dompass, undef, undef, $dompass_req);
 	if ($passmode == 1) {
 		if ($dompass_bad) {
 			# Can choose login and password (with requirements)
