@@ -2200,6 +2200,8 @@ else {
 		}
 	else {
 		# May need to add or update
+		my $pdname = $d->{'dom'};
+		$pdname =~ s/^[^\.]+\.//;
 		foreach my $n (@dnames) {
 			my ($l) = grep { $_->{'value'} eq $n } @loc;
 			if ($l) {
@@ -2228,7 +2230,9 @@ else {
 						  'file' => $cfile, },
 						],
 					  'file' => $cfile };
-				&dovecot::create_section($conf, $l);
+				my ($plocal) = grep { $_->{'value'} eq $pdname } @loc;
+				&dovecot::create_section($conf, $l, undef,
+							 $plocal);
 				push(@$conf, $l);
 				&flush_file_lines($l->{'file'}, undef, 1);
 				}
