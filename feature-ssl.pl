@@ -2506,13 +2506,17 @@ elsif (&postfix_supports_sni()) {
 		}
 	else {
 		# Add or update map entries for domain
+		my $pdname = $d->{'dom'};
+		$pdname =~ s/^[^\.]+\.//;
 		foreach my $dname (@dnames) {
 			my ($r) = grep { $_->{'name'} eq $dname } @$map;
+			my ($pdr) = grep { $_->{'name'} eq $pdname } @$map;
 			if (!$r) {
 				# Need to add
 				&postfix::create_mapping(
 				    "tls_server_sni_maps",
-				    { 'name' => $dname, 'value' => $certstr });
+				    { 'name' => $dname, 'value' => $certstr },
+				    undef, undef, $pdr);
 				}
 			else {
 				# Update existing certs
