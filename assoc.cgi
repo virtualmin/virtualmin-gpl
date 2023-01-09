@@ -10,7 +10,8 @@ $d || &error($text{'edit_egone'});
 
 # Update domain object with new features
 &obtain_lock_everything($d);
-foreach my $f (&list_possible_domain_features($d)) {
+foreach my $f (&list_possible_domain_features($d),
+	       &list_possible_domain_plugins($d)) {
 	if ($d->{$f} && !$in{$f}) {
 		$d->{$f} = 0;
 		push(@disabled, $f);

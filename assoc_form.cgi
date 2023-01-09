@@ -20,6 +20,10 @@ my @grid;
 foreach my $f (&list_possible_domain_features($d)) {
 	push(@grid, &ui_checkbox($f, 1, $text{'edit_'.$f}, $d->{$f}));
 	}
+foreach my $f (&list_possible_domain_plugins($d)) {
+	$label = &plugin_call($f, "feature_label", 1);
+	push(@grid, &ui_checkbox($f, 1, $label, $d->{$f}));
+	}
 print &ui_table_row($text{'assoc_features'},
 	&ui_grid_table(\@grid, 2));
 

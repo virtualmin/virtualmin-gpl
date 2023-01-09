@@ -18919,6 +18919,23 @@ foreach my $f (&domain_features($d)) {
 return @rv;
 }
 
+# list_possible_domain_plugins(&domain)
+# Given a domain, returns a list of plugin features that can possibly be enabled
+# or disabled for it
+sub list_possible_domain_plugins
+{
+my ($d) = @_;
+my @rv;
+my $aliasdom = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
+my $subdom = $d->{'subdom'} ? &get_domain($d->{'subdom'}) : undef;
+foreach my $f (&list_feature_plugins()) {
+	next if (!&plugin_call($f, "feature_suitable",
+				$parentdom, $aliasdom, $subdom));
+	push(@rv, $f);
+	}
+return @rv;
+}
+
 # list_remote_domain_features(&domain)
 # Returns a list of all features for a domain that are on shared storage
 sub list_remote_domain_features
