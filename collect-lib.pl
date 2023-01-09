@@ -757,7 +757,7 @@ my @virtualmin_packages = (
 	"subversion", "python", "ruby", "irb", "rdoc", "rubygems",
 	"openssl", "perl", "php.*", "webmin", "usermin",
 	"fcgid", "awstats", "dovecot", "postgrey",
-	"virtualmin-modules", "kvm", "xen", "nginx", "jailkit",
+	"virtualmin-modules", "kvm", "xen", "nginx.*", "jailkit",
         );
 
 # is_virtualmin_package(&package)
