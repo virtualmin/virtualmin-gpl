@@ -18,7 +18,7 @@ Virtualmin includes the following features (and more):
   - Database management (MySQL, MariaDB, PostgreSQL, with optional modules for SQLite and Oracle)
   - FTP/ssh users
   - Web application installation and upgrades (more applications available in Virtualmin Pro)
-  - PHP configuration and multiple version support (including PHP7)
+  - PHP configuration and multiple version support (including PHP7 and PHP8)
   - PHP-FPM and mod_fcgid execution modes, with suexec
   - Ruby Gems, PHP Pear, and Perl CPAN package installation
   - System analytics
