@@ -15518,10 +15518,10 @@ foreach $p (@plugins) {
 		}
 	local $err = &plugin_call($p, "feature_check");
 	if ($err) {
-		return &text('check_eplugin', $err);
+		return &text('check_eplugin', "<tt>$p</tt>", $err);
 		}
 	else {
-		$pname = &plugin_call($p, "feature_name");
+		my $pname = &plugin_call($p, "feature_name");
 		&$second_print(&text('check_plugin', $pname));
 		}
 	}
