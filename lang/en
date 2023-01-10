@@ -2021,6 +2021,7 @@ check_proftpd=An error was found in the ProFTPD configuration template : $1. Thi
 check_enamevirt=The <b>All Apache virtual servers are name-based</b> and <b>Default IP address for DNS records</b> options cannot both be enabled on the <a href='$1'>Virtualmin Configuration</a> page
 check_logrotateok=Logrotate is installed
 check_plugin=Plugin $1 is installed
+check_eplugin=Plugin $1 cannot be used : $2
 check_eldap=An error occurred contacting the LDAP server : $1. Either LDAP must be disabled in the <a href='$2'>module configuration</a> page, or the <a href='$3'>LDAP Users and Groups</a> module must be set up correctly
 check_eldap2=The LDAP Users and Groups module is too old to be used by Virtualmin for user management. Either LDAP must be disabled in the <a href='$1'>module configuration</a> page, or the module upgraded to version $2
 check_ldap=LDAP user and group management is properly configured

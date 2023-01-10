@@ -15518,7 +15518,7 @@ foreach $p (@plugins) {
 		}
 	local $err = &plugin_call($p, "feature_check");
 	if ($err) {
-		return $err;
+		return &text('check_eplugin', $err);
 		}
 	else {
 		$pname = &plugin_call($p, "feature_name");
