@@ -13412,28 +13412,29 @@ if (!-d $links_cache_dir) {
 &close_tempfile(CACHEDATA);
 }
 
-# clear_links_cache([&domain|user])
+# clear_links_cache([&domain|user], ...)
 # Delete all cached information for some or all domains
 sub clear_links_cache
 {
-local ($d) = @_;
-opendir(CACHEDIR, $links_cache_dir);
-foreach my $f (readdir(CACHEDIR)) {
-	my $del;
-	if (ref($d)) {
-		# Belongs to domain?
-		$del = $f =~ /^\Q$d->{'id'}\E\-/ ? 1 : 0;
+foreach my $d (@_) {
+	opendir(CACHEDIR, $links_cache_dir);
+	foreach my $f (readdir(CACHEDIR)) {
+		my $del;
+		if (ref($d)) {
+			# Belongs to domain?
+			$del = $f =~ /^\Q$d->{'id'}\E\-/ ? 1 : 0;
+			}
+		elsif ($d) {
+			# Belongs to user?
+			$del = $f =~ /\-\Q$d\E$/ ? 1 : 0;
+			}
+		else {
+			$del = 1;
+			}
+		&unlink_file("$links_cache_dir/$f") if ($del);
 		}
-	elsif ($d) {
-		# Belongs to user?
-		$del = $f =~ /\-\Q$d\E$/ ? 1 : 0;
-		}
-	else {
-		$del = 1;
-		}
-	&unlink_file("$links_cache_dir/$f") if ($del);
+	closedir(CACHEDIR);
 	}
-closedir(CACHEDIR);
 }
 
 # get_startstop_links([live])
