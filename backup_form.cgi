@@ -198,10 +198,10 @@ print &ui_table_row(&hlink($text{'backup_exclude'}, 'backup_exclude'),
 print &ui_hidden_table_end("features");
 
 # Build destination field inputs
-if ($in{'sched'} || $in{'oneoff'}) {
+if ($in{'sched'} || $in{'new'} || $in{'oneoff'}) {
 	# Show current scheduled backup destinations
 	@dests = &get_scheduled_backup_dests($sched);
-	push(@dests, undef);
+	push(@dests, undef) if ($in{'sched'} || $in{'oneoff'});
 	@purges = &get_scheduled_backup_purges($sched);
 	}
 else {
