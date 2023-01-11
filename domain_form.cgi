@@ -555,6 +555,11 @@ foreach $f (@dom_features) {
 		# don't show it
 		next;
 		}
+	if (($f eq "dir" || $f eq "unix") && $config{$f} == 3) {
+		# These features are always on for new domains
+		print &ui_hidden($f, 1);
+		next;
+		}
 
 	local $txt = $parentdom ? $text{'form_sub'.$f} : undef;
 	$txt ||= $text{'form_'.$f};
