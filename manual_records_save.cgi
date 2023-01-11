@@ -17,13 +17,17 @@ $in{'data'} =~ /\S/ || &error($text{'mrecords_enone'});
 &pre_records_change($d);
 ($oldrecs, $file) = &get_domain_dns_records_and_file($d);
 $file || &error($oldrecs);
-$olderr = &validate_dns($d, $oldrecs);
+if ($in{'validate'}) {
+	$olderr = &validate_dns($d, $oldrecs);
+	}
 
 # Parse the newly entered records and validate
 $recs = [ &text_to_dns_records($in{'data'}, $d->{'dom'}) ];
 &set_record_ids($recs);
-$err = &validate_dns($d, $recs, 1);
-&error(&text('mrecords_evalidate', $err)) if ($err);
+if ($in{'validate'}) {
+	$err = &validate_dns($d, $recs, 1);
+	&error(&text('mrecords_evalidate', $err)) if ($err);
+	}
 
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Merge in any proxy bits set on old records
