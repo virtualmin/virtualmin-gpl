@@ -500,7 +500,7 @@ foreach my $r (@delrecs) {
 	}
 foreach my $r (@$orecs) {
 	next if ($r->{'type'} eq 'SOA');
-	my $nr = { %$r };
+	my $nr = &clone_dns_record($r);
 	&create_dns_record($recs, $file, $nr);
 	}
 &modify_records_domain_name($recs, $file, $oldd->{'dom'}, $d->{'dom'});
@@ -1450,7 +1450,7 @@ foreach my $slave (@slaves) {
 	}
 
 RECORD: foreach my $r (@$aliasrecs) {
-	my $nr = { %$r };
+	my $nr = &clone_dns_record($r);
 	if ($d->{'dns_submode'} && ($r->{'type'} eq 'NS' || 
 				    $r->{'type'} eq 'SOA')) {
 		# Skip SOA and NS records for sub-domains in the same file
@@ -1663,7 +1663,7 @@ foreach my $r (@$recs) {
 				}
 			}
 		if (!$insub) {
-			my $nr = { %$r };
+			my $nr = &clone_dns_record($r);
 			$nr->{'type'} = 'AAAA';
 			$nr->{'values'} = [ $domip6 ];
 			&create_dns_record($recs, $file, $nr);
@@ -3587,6 +3587,16 @@ foreach my $o (@$recs) {
 	$o->{'eline'} -= $len if (defined($o->{'eline'}) &&
 				  $o->{'eline'} > $r->{'eline'});
 	}
+}
+
+# clone_dns_record(&rec)
+# Returns a new hash ref for a record which is a deep copy of the original
+sub clone_dns_record
+{
+my ($r) = @_;
+my $nr = { %$r };
+$nr->{'values'} = [ @{$r->{'values'}} ];
+return $nr;
 }
 
 # default_domain_spf(&domain)
