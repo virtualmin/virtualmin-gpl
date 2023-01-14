@@ -3638,7 +3638,7 @@ foreach my $i (split(/\s+/, $includes)) {
 if ($d->{'dns_ip'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});
 	}
-if ($d->{'ip'} ne $defip) {
+if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
 if ($d->{'ip6'} && $d->{'ip6'} ne $defip6) {
