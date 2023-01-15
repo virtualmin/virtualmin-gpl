@@ -2219,6 +2219,12 @@ $aliasdom_tests = [
 		      @create_args, ],
         },
 
+	# Add a DNS record to the target
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_target_domain ],
+		      [ 'add-record', 'testing A 1.2.3.4' ] ],
+	},
+
 	# Create the alias domain
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2228,9 +2234,12 @@ $aliasdom_tests = [
 		      @create_args, ],
 	},
 
-	# Test DNS lookup
+	# Test DNS lookups
 	{ 'command' => 'host -t A '.$test_domain,
 	  'grep' => &get_default_ip(),
+	},
+	{ 'command' => 'host -t A testing.'.$test_domain,
+	  'grep' => '1.2.3.4',
 	},
 
 	# Test HTTP get
