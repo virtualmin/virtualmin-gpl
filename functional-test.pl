@@ -2225,6 +2225,12 @@ $aliasdom_tests = [
 		      [ 'add-record', 'testing A 1.2.3.4' ] ],
 	},
 
+	# Enable webmail DNS record
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_target_domain ],
+		      [ 'webmail' ] ],
+	},
+
 	# Create the alias domain
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -2240,6 +2246,9 @@ $aliasdom_tests = [
 	},
 	{ 'command' => 'host -t A testing.'.$test_domain,
 	  'grep' => '1.2.3.4',
+	},
+	{ 'command' => 'host -t A webmail.'.$test_domain,
+	  'grep' => &get_default_ip(),
 	},
 
 	# Test HTTP get
@@ -4551,7 +4560,7 @@ $mail_tests = [
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'desc', 'Test domain' ],
 		      [ 'pass', 'smeg' ],
-		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ], [ $web ],
 		      [ 'spam' ], [ 'virus' ],
 		      @create_args, ],
 	},
@@ -4811,6 +4820,27 @@ $mail_tests = [
 		  'grep' => 'v=DKIM1',
 		},
 		) : ( ),
+
+	# Enable webmail DNS record and redirect
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'webmail' ] ],
+	},
+
+	# Test wget to it
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain.'/',
+	},
+
+	# Disable webmail DNS record and redirect
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-webmail' ] ],
+	},
+
+	# Test wget to it, which should fail now
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain.'/',
+	  'fail' => 1,
+	},
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
