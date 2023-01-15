@@ -2256,6 +2256,11 @@ $aliasdom_tests = [
 	  'grep' => 'Test alias target page',
 	},
 
+	# Test HTTP get to Webmail alias
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
+	  'grep' => 'Usermin',
+	},
+
 	# Enable aliascopy mode
 	{ 'command' => 'modify-mail.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -4829,6 +4834,7 @@ $mail_tests = [
 
 	# Test wget to it
 	{ 'command' => $wget_command.'http://webmail.'.$test_domain.'/',
+	  'grep' => 'Usermin',
 	},
 
 	# Disable webmail DNS record and redirect
