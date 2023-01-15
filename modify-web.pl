@@ -563,14 +563,14 @@ foreach $d (@doms) {
 		&$second_print($text{'setup_done'});
 		}
 
-	if (defined($webmail) && &domain_has_website($d) && !$d->{'alias'}) {
+	if (defined($webmail) && &domain_has_website($d)) {
 		# Enable or disable webmail redirects
 		local @oldwm = &get_webmail_redirect_directives($d);
 		if ($webmail && !@oldwm) {
 			&$first_print("Adding webmail and admin redirects ..");
-			&add_webmail_redirect_directives($d);
+			&add_webmail_redirect_directives($d, undef, 1);
 			if ($d->{'dns'}) {
-				&add_webmail_dns_records($d);
+				&add_webmail_dns_records($d, 1);
 				}
 			&$second_print(".. done");
 			}

@@ -4498,6 +4498,26 @@ else {
 	}
 }
 
+# get_usermin_miniserv_port_proto()
+# Returns the port number, protocol (http or https) and hostname for Usermin
+sub get_usermin_miniserv_port_proto
+{
+my ($port, $proto, $host);
+if (&foreign_installed("usermin")) {
+	&foreign_require("usermin");
+	my %miniserv;
+	&usermin::get_usermin_miniserv_config(
+		\%miniserv);
+	$proto = $miniserv{'ssl'} ? 'https' : 'http';
+	$port = $miniserv{'port'};
+	}
+# Fall back to standard defaults
+$proto ||= "https";
+$port ||= 20000;
+$host ||= &get_system_hostname();
+return ($port, $proto, $host);
+}
+
 # get_miniserv_base_url()
 # Returns the base URL for this Virtualmin install, without the trailing /
 sub get_miniserv_base_url

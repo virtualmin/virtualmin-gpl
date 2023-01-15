@@ -78,9 +78,10 @@ if ($d->{'alias'} && $tmpl->{'web_alias'} == 1) {
 		}
 	$d->{'alias_mode'} = 1;
 
-	# Redirect webmail and admin in the alias to Usermin and Webmin
-	if (&has_webmail_rewrite($d)) {
-		&add_webmail_redirect_directives($d, $tmpl);
+	# If the target domain had redirects enabled, also do it for the alias
+	if (&has_webmail_rewrite($d) &&
+	    &get_webmail_redirect_directives($alias)) {
+		&add_webmail_redirect_directives($d, $tmpl, 1);
 		}
 	}
 else {
@@ -204,9 +205,10 @@ else {
 		&find_html_cgi_dirs($d);
 		}
 
-	# Redirect webmail and admin to Usermin and Webmin
+	# Redirect webmail and admin to Usermin and Webmin, if enabled in
+	# the template
 	if (&has_webmail_rewrite($d)) {
-		&add_webmail_redirect_directives($d, $tmpl);
+		&add_webmail_redirect_directives($d, $tmpl, 0);
 		}
 
 	# For Apache 2.4+, add a "Require all granted" directive
@@ -3321,18 +3323,17 @@ if (defined(&save_domain_ruby_mode)) {
 return $err;
 }
 
-# add_webmail_redirect_directives(&domain, &template)
+# add_webmail_redirect_directives(&domain, &template, [force-enable])
 # Add mod_rewrite directives to direct webmail.$DOM and admin.$DOM to
 # Usermin and Webmin. Also updates the ServerAlias if needed.
 sub add_webmail_redirect_directives
 {
-local ($d, $tmpl) = @_;
-return 1 if ($d->{'alias'});	# Don't bother for alias domains, due to
-				# Apache config clashes
+local ($d, $tmpl, $force) = @_;
 $tmpl ||= &get_template($d->{'template'});
 local $p = &domain_has_website($d);
 if ($p && $p ne 'web') {
-	return &plugin_call($p, "feature_add_web_webmail_redirect", $d, $tmpl);
+	return &plugin_call($p, "feature_add_web_webmail_redirect", $d, $tmpl,
+			    $force);
 	}
 &require_apache();
 my @ports = ( $d->{'web_port'} );
@@ -3340,7 +3341,7 @@ push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 
 my $fixed = 0;
 foreach my $r ('webmail', 'admin') {
-	next if (!$tmpl->{'web_'.$r});
+	next if (!$tmpl->{'web_'.$r} && !$force);
 
 	# Get directives we will be changing
 	foreach my $port (@ports) {
@@ -3363,17 +3364,8 @@ foreach my $r ('webmail', 'admin') {
 			my ($port, $proto);
 			if ($r eq 'webmail') {
 				# From Usermin
-				if (&foreign_installed("usermin")) {
-					&foreign_require("usermin");
-					local %miniserv;
-					&usermin::get_usermin_miniserv_config(
-						\%miniserv);
-					$proto = $miniserv{'ssl'} ? 'https' : 'http';
-					$port = $miniserv{'port'};
-					}
-				# Fall back to standard defaults
-				$proto ||= "http";
-				$port ||= 20000;
+				($port, $proto) =
+					&get_usermin_miniserv_port_proto();
 				}
 			else {
 				# From Webmin

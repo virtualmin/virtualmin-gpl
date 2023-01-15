@@ -1350,7 +1350,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			  'values' => [ &get_default_ip() ] });
 		}
 
-	# If requested, add webmail and admin records
+	# If enabled in the template, add webmail and admin records
 	if ($d->{'web'} && &has_webmail_rewrite($d)) {
 		&add_webmail_dns_records_to_file($d, $tmpl, $file, $recs,
 						 \%already);
@@ -1542,16 +1542,17 @@ foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
 return @rv;
 }
 
-# add_webmail_dns_records(&domain)
+# add_webmail_dns_records(&domain, [force-enable])
 # Adds the webmail and admin DNS records, if requested in the template
 sub add_webmail_dns_records
 {
-local ($d) = @_;
+local ($d, $force) = @_;
 local $tmpl = &get_template($d->{'template'});
 &pre_records_change($d);
 local ($recs, $file) = &get_domain_dns_records_and_file($d);
 return 0 if (!$file);
-local $count = &add_webmail_dns_records_to_file($d, $tmpl, $file, $recs);
+local $count = &add_webmail_dns_records_to_file($d, $tmpl, $file, $recs,
+						undef, $force);
 if ($count) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
@@ -1563,7 +1564,7 @@ return $count;
 }
 
 # add_webmail_dns_records_to_file(&domain, &tmpl, file, &records,
-#			          [&already-got])
+#			          [&already-got], [force-add])
 # Adds the webmail and admin DNS records to a specific file, if requested
 # in the template
 sub add_webmail_dns_records_to_file
@@ -1573,7 +1574,7 @@ local $count = 0;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r ('webmail', 'admin') {
 	local $n = "$r.$d->{'dom'}.";
-	if ($tmpl->{'web_'.$r} && (!$already || !$already->{$n})) {
+	if (($tmpl->{'web_'.$r} || $force) && (!$already || !$already->{$n})) {
 		my $r = { 'name' => $n,
 			  'type' => 'A',
 			  'proxied' => $tmpl->{'dns_cloud_proxy'},
