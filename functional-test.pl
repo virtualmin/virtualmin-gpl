@@ -2256,7 +2256,34 @@ $aliasdom_tests = [
 	  'grep' => 'Test alias target page',
 	},
 
-	# Test HTTP get to Webmail alias
+	# Test HTTP get to webmail alias
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
+	  'grep' => 'Usermin',
+	},
+
+	# Turn off webmail redirect for the alias
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'no-webmail' ] ],
+	},
+
+	# Test HTTP get to webmail alias, which will now fail
+	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
+	  'fail' => 1,
+	},
+
+	# But HTTP get to the main domain webmail alias will still work
+	{ 'command' => $wget_command.'http://webmail.'.$test_target_domain,
+	  'grep' => 'Usermin',
+	},
+
+	# Turn back on webmail redirect for the alias
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'webmail' ] ],
+	},
+
+	# Test HTTP get to webmail alias again
 	{ 'command' => $wget_command.'http://webmail.'.$test_domain,
 	  'grep' => 'Usermin',
 	},

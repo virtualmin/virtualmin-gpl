@@ -3485,7 +3485,7 @@ local @rrule = &apache::find_directive("RewriteRule", $vconf);
 local @rv;
 local $i = 0;
 foreach my $r (@rcond) {
-	if ($r =~ /^\%\{HTTP_HOST\}\s+=(\S+)/) {
+	if ($r =~ /^\%\{HTTP_HOST\}\s+=([^\.]+\.\Q$d->{'dom'}\E)/) {
 		my $rhost = $1;
 		my $rr = $rrule[$i];
 		if ($rr && $rr =~ /^(\S+)\s+(http|https):/) {
