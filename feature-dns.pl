@@ -1386,6 +1386,11 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 	}
 
+if ($d->{'ip6'}) {
+	# Create IPv6 records for IPv4
+	&add_ip6_records($d, $recs, $file);
+	}
+
 if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
     (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
 	# Add or use the user-defined records template, if defined and if this
@@ -1402,11 +1407,6 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 		$r->{'proxied'} = $proxied;
 		&create_dns_record($recs, $file, $r);
 		}
-	}
-
-if ($d->{'ip6'}) {
-	# Create IPv6 records for IPv4
-	&add_ip6_records($d, $recs, $file);
 	}
 }
 
