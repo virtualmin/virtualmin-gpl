@@ -9650,6 +9650,89 @@ $dns_tests = [
 	  'cleanup' => 1 },
 	];
 
+$dnssec_tests = [
+	# Create a domain with DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-domain with its one zone file
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'desc', 'Test subdomain' ],
+		      [ 'dir' ], [ 'dns' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'parent' => $test_domain ],
+		      [ 'separate-dns-subdomain' ],
+		      @create_args, ],
+        },
+
+	# Enable DNSSEC for both
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_dns_subdomain ],
+		      [ 'enable-dnssec' ] ],
+	},
+
+	# Validate everything
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain', $test_dns_subdomain ],
+		      [ 'all-features' ] ],
+	},
+
+	# Check for DNSSEC records
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dnssec-records' ] ],
+	  'grep' => [ 'NSEC', 'DS' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'dnssec-records' ] ],
+	  'grep' => [ 'NSEC' ],
+	},
+
+	# Check that a DNS lookup shows it is enabled
+	{ 'command' => 'dig '.$test_domain.' +dnssec',
+	  'grep' => $test_domain.'\.\s+\d+\s+IN\s+RRSIG',
+	},
+
+	# Disable DNSSEC for both
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_dns_subdomain ],
+		      [ 'disable-dnssec' ] ],
+	},
+
+	# Check DNSSEC records are gone
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'dnssec-records' ] ],
+	  'antigrep' => [ 'NSEC', 'DS' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'dnssec-records' ] ],
+	  'antigrep' => [ 'NSEC' ],
+	},
+
+	# Check that a DNS lookup shows it is disabled
+	{ 'command' => 'dig '.$test_domain.' +dnssec',
+	  'antigrep' => $test_domain.'\.\s+\d+\s+IN\s+RRSIG',
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'user', $test_domain_user ] ],
+	  'cleanup' => 1 },
+	];
+
 $googledns_tests = [
 	# Create a domain using Google DNS
 	{ 'command' => 'create-domain.pl',
@@ -10313,6 +10396,7 @@ $alltests = { '_config' => $_config_tests,
 	      'rs' => $rs_tests,
 	      'jail' => $jail_tests,
 	      'dns' => $dns_tests,
+	      'dnssec' => $dnssec_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
