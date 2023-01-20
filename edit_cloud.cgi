@@ -19,7 +19,12 @@ my $cfunc = "check_".$prov->{'name'};
 if (defined(&$cfunc)) {
 	my ($err, $warn) = &$cfunc();
 	if ($err) {
-		print &text('cloud_echeck', $prov->{'desc'}, $err),"<p>\n";
+		print &ui_alert_box(
+			&text('cloud_echeck', $prov->{'desc'}, $err), 'warn', undef, undef, '');
+		my $longdesc = $prov->{'longdesc'};
+		if ($longdesc) {
+			print &ui_alert_box($longdesc, 'info', undef, undef, '');
+			}
 		&ui_print_footer("list_clouds.cgi", $text{'clouds_return'});
 		return;
 		}

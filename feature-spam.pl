@@ -1352,10 +1352,9 @@ if (!&init::action_status("lookup-domain")) {
 	# Need to create and start the action
 	&init::enable_at_boot(
 	      "lookup-domain",
-	      "Daemon for quickly looking up Virtualmin servers ".
-		"from procmail",
+	      "Daemon for quickly looking up Virtualmin servers from procmail",
 	      "$helper lookup-domain-daemon",
-	      "kill `cat $pidfile`",
+	      "@{[&has_command('kill')]} `cat $pidfile`",
 	      undef,
 	      { 'fork' => 1, 'pidfie' => $pidfile });
 	&init::start_action("lookup-domain");
