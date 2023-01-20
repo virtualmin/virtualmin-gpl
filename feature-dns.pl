@@ -2844,7 +2844,9 @@ print &ui_table_row(&hlink($text{'tmpl_spf'},
 # Extra SPF hosts
 print &ui_table_row(&hlink($text{'tmpl_spfhosts'},
 			   "template_dns_spfhosts"),
-	&ui_textbox("dns_spfhosts", $tmpl->{'dns_spfhosts'}, 40));
+	&ui_textbox("dns_spfhosts", $tmpl->{'dns_spfhosts'}, 40)."<br>\n".
+	&ui_checkbox("dns_spfonly", 1, $text{'tmpl_spfonly'},
+		     !$tmpl->{'dns_spfonly'}));
 
 # Extra SPF includes
 print &ui_table_row(&hlink($text{'tmpl_spfincludes'},
@@ -3045,6 +3047,7 @@ $tmpl->{'dns_mx'} = $in{'dns_mx_mode'} == 0 ? "none" :
 $tmpl->{'dns_spf'} = $in{'dns_spf_mode'} == 0 ? "none" :
 		     $in{'dns_spf_mode'} == 1 ? undef : "yes";
 $tmpl->{'dns_spfhosts'} = $in{'dns_spfhosts'};
+$tmpl->{'dns_spfonly'} = !$in{'dns_spfonly'};
 $tmpl->{'dns_spfincludes'} = $in{'dns_spfincludes'};
 $tmpl->{'dns_spfall'} = $in{'dns_spfall'};
 
@@ -3612,10 +3615,10 @@ local $spf = { 'a' => 1, 'mx' => 1,
 	       'a:' => [ $d->{'dom'} ],
 	       'ip4:' => [ ],
 	       'ip6:' => [ ] };
-if ($defip ne "127.0.0.1") {
+if ($defip ne "127.0.0.1" && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $defip);
 	}
-if ($defip6) {
+if ($defip6 && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip6:'}}, $defip6);
 	}
 local $hosts = &substitute_domain_template($tmpl->{'dns_spfhosts'}, $d);
@@ -3636,13 +3639,14 @@ local $includes = &substitute_domain_template($tmpl->{'dns_spfincludes'}, $d);
 foreach my $i (split(/\s+/, $includes)) {
 	push(@{$spf->{'include:'}}, $i);
 	}
-if ($d->{'dns_ip'}) {
+if ($d->{'dns_ip'} && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'dns_ip'});
 	}
-if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/) {
+if ($d->{'ip'} ne $defip && $d->{'ip'} !~ /^(10\.|192\.168\.)/ &&
+    !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip4:'}}, $d->{'ip'});
 	}
-if ($d->{'ip6'} && $d->{'ip6'} ne $defip6) {
+if ($d->{'ip6'} && $d->{'ip6'} ne $defip6 && !$tmpl->{'dns_spfonly'}) {
 	push(@{$spf->{'ip6:'}}, $d->{'ip6'});
 	}
 $spf->{'all'} = $tmpl->{'dns_spfall'} + 1;

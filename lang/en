@@ -3504,6 +3504,7 @@ tmpl_dnsmauto=Automatic (from system's hostname)
 tmpl_spf=Add SPF DNS record?
 tmpl_spfyes=Yes, with server's IP address
 tmpl_spfhosts=Additional SPF IPs and hostnames
+tmpl_spfonly=Add system and virtual server's IP addresses?
 tmpl_spfincludes=Additional SPF included domains
 tmpl_spfall=Does SPF record cover all senders?
 tmpl_spfall0=No
