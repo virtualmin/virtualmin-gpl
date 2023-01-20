@@ -133,7 +133,6 @@ if ($d->{'reseller'} && defined(&get_reseller)) {
 		}
 	}
 
-
 # Check if any features are being deleted, and if so ask the user if
 # he is sure
 if (!$in{'confirm'} && !$d->{'disabled'}) {
@@ -293,13 +292,15 @@ if (defined($in{'linkdom'})) {
 if (!$d->{'disabled'}) {
 	# Enable or disable features
 	my $f;
-	foreach $f (@dom_features) {
-		if ($config{$f}) {
-			$d->{$f} = $newdom{$f};
-			}
-		}
 	my $oldcount = 0;
 	my $newcount = 0;
+	foreach $f (@dom_features) {
+		if ($config{$f}) {
+			$oldcount++ if ($d->{$f});
+			$d->{$f} = $newdom{$f};
+			$newcount++ if ($d->{$f});
+			}
+		}
 	foreach $f (&list_feature_plugins()) {
 		$oldcount++ if ($d->{$f});
 		$d->{$f} = $newdom{$f};
