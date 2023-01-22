@@ -23,12 +23,14 @@ if (!$in{'port_def'}) {
 $in{'myuser'} =~ /^\S+$/ || &error($text{'newmysqls_euser'});
 $user = $in{'myuser'};
 $pass = $in{'mypass'};
+$ssl = $in{'ssl'};
 
 # Add the clone module
 $mm = { 'minfo' => { },
 	'config' => { 'host' => $host,
 		      'port' => $port,
 		      'sock' => $sock,
+		      'ssl' => $ssl,
 		      'login' => $user,
 		      'pass' => $pass },
       };

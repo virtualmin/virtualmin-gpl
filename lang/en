@@ -4756,6 +4756,7 @@ newmysqls_remote=Remote host
 newmysqls_sock=Local socket file
 newmysqls_nohost=Default local server
 newmysqls_port=Connect to TCP port
+newmysqls_ssl=Connect using SSL?
 newmysqls_portdef=MySQL default (3306)
 newmysqls_user=Login with username
 newmysqls_pass=Login with password

@@ -21,9 +21,10 @@ foreach my $mm (&list_remote_mysql_modules()) {
 					$mm->{'minfo'}->{'dir'});
 	$vstr = $err || &text('newmysqls_ver'.$variant, $ver);
 	print &ui_checked_columns_row([
-		$mm->{'config'}->{'host'} ||
+		($mm->{'config'}->{'host'} ||
 		  $mm->{'config'}->{'sock'} ||
-		  "<i>$text{'newmysqls_local'}</i>",
+		  "<i>$text{'newmysqls_local'}</i>").
+		  ($mm->{'config'}->{'ssl'} ? " (SSL)" : ""),
 		$doms,
 		$mm->{'config'}->{'virtualmin_default'} ?
 			$text{'yes'} : $text{'no'},
@@ -55,6 +56,10 @@ print &ui_table_row($text{'newmysqls_formhost'},
 # TCP port number
 print &ui_table_row($text{'newmysqls_port'},
 	&ui_opt_textbox("port", undef, 6, $text{'newmysqls_portdef'}));
+
+# SSL mode
+print &ui_table_row($text{'newmysqls_ssl'},
+	&ui_yesno_radio("ssl", 0));
 
 # Username and password
 print &ui_table_row($text{'newmysqls_user'},
