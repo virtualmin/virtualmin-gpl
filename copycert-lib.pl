@@ -40,6 +40,12 @@ if ($config{'ftp'}) {
 		   'virt' => 0,
 		   'short' => 'f' });
 	}
+if ($config{'mysql'}) {
+	push(@rv, {'id' => 'mysql',
+		   'dom' => 0,
+		   'virt' => 0,
+		   'short' => 'm' });
+	}
 foreach my $rv (@rv) {
 	$rv->{'desc'} ||= $text{'cert_service_'.$rv->{'id'}};
 	}
@@ -211,6 +217,29 @@ if ($config{'ftp'}) {
 			      'port' => 990, });
 		}
 	}
+
+if ($config{'mysql'}) {
+	# Check MySQL certificate
+	&foreign_require("mysql");
+	my $conf = &mysql::get_mysql_config();
+	my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$conf;
+	my ($cert, $key, $ca);
+	if ($mysqld) {
+		my $mems = $mysqld->{'members'};
+		$cert = &mysql::find_value("ssl_cert", $mems);
+		$key = &mysql::find_value("ssl_key", $mems);
+		$ca = &mysql::find_value("ssl_ca", $mems);
+		}
+	if ($cert) {
+		push(@svcs, { 'id' => 'mysql',
+			      'cert' => $cert,
+			      'key' => $key,
+			      'ca' => $ca,
+			      'prefix' => 'mysql',
+			      'port' => 3306, });
+		}
+	}
+
 return @svcs;
 }
 
@@ -698,6 +727,79 @@ if (!$miniserv{'ssl'}) {
 	&$second_print(&text('copycert_userminnot',
 			     "../usermin/edit_ssl.cgi"));
 	}
+}
+
+# copy_mysql_ssl_service(&domain)
+# Copy a domain's SSL cert to MySQL
+sub copy_mysql_ssl_service
+{
+my ($d) = @_;
+
+&foreign_require("mysql");
+&$first_print($text{'copycert_mysql'});
+my $conf = &mysql::get_mysql_config();
+my ($mysqld) = grep { $_->{'name'} eq 'mysqld' } @$conf;
+if (!$mysqld) {
+	&$second_print($text{'copycert_emysqld'});
+	return;
+	}
+
+# Lock all configs
+my @cfiles = &mysql::get_all_mysqld_files();
+foreach my $f (@cfiles) {
+	&lock_file($f);
+	}
+
+# Figure out where to put files
+my $dir = $mysql::config{'my_cnf'};
+$dir =~ s/\/([^\/]+)$//;
+my $cert = &mysql::find_value("ssl_cert", $mysqld->{'members'});
+$cert ||= $dir."/mysql-ssl.cert";
+my $key = &mysql::find_value("ssl_key", $mysqld->{'members'});
+$key ||= $dir."/mysql-ssl.key";
+my $ca = &mysql::find_value("ssl_ca", $mysqld->{'members'});
+$ca ||= $dir."/mysql-ssl.ca";
+my $myuser = &mysql::find_value("user", $mysqld->{'members'});
+$myuser ||= 'mysql';
+
+# Copy them over
+&lock_file($cert);
+&copy_source_dest($d->{'ssl_cert'}, $cert);
+&unlock_file($cert);
+&set_ownership_permissions($myuser, undef, 0600, $cert);
+&mysql::save_directive($conf, $mysqld, "ssl_cert", [ $cert ]);
+if ($d->{'ssl_key'}) {
+	&lock_file($key);
+	&copy_source_dest($d->{'ssl_key'}, $key);
+	&unlock_file($key);
+	&set_ownership_permissions($myuser, undef, 0600, $key);
+	&mysql::save_directive($conf, $mysqld, "ssl_key", [ $key ]);
+	}
+if ($d->{'ssl_chain'}) {
+	&lock_file($ca);
+	&copy_source_dest($d->{'ssl_chain'}, $ca);
+	&unlock_file($ca);
+	&set_ownership_permissions($myuser, undef, 0600, $ca);
+	&mysql::save_directive($conf, $mysqld, "ssl_ca", [ $ca ]);
+	}
+else {
+	&mysql::save_directive($conf, $mysqld, "ssl_ca", [ ]);
+	}
+
+# Save all MySQL configs
+foreach my $f (@cfiles) {
+	&flush_file_lines($f, undef, 1);
+	&unlock_file($f);
+	}
+if (&mysql::is_mysql_running() > 0) {
+	&mysql::stop_mysql();
+	my $err = &mysql::start_mysql();
+	if ($err) {
+		&$second_print(&text('copycert_emysqlstart', $err));
+		return;
+		}
+	}
+&$second_print($text{'setup_done'});
 }
 
 1;
