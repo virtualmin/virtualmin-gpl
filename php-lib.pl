@@ -2085,7 +2085,7 @@ foreach my $pname (@pkgnames) {
 	# Apache modules
 	if ($config{'web'}) {
 		&require_apache();
-		foreach my $m ("mod_proxy", "mod_fcgid") {
+		foreach my $m ("mod_proxy") {
 			if (!$apache::httpd_modules{$m}) {
 				$rv->{'err'} = &text('php_fpmnomod', $m);
 				}
