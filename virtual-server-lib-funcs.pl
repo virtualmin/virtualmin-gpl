@@ -10722,6 +10722,61 @@ if ($rv eq "localhost" && $type eq "mysql") {
 return $rv;
 }
 
+# check_domain_hashpass(&domain)
+# Shows a checkbox to enable hashsed passwords
+# if domain and template don't have it aligned
+sub check_domain_hashpass
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $rs = "";
+if (defined($d->{'hashpass'}) && defined($tmpl->{'hashpass'}) &&
+    $d->{'hashpass'} != $tmpl->{'hashpass'}) {
+	$rs = "&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
+		$text{'edit_hash'}, $d->{'hashpass'});
+	}
+return $rs;
+}
+
+# update_domain_hashpass(&dom, mode)
+# Updates domain hashpass option if needed, and
+# delete all *_enc_pass if disabling hashing
+sub update_domain_hashpass
+{
+my ($d, $mode) = @_;
+if (&check_domain_hashpass($d)) {
+	$d->{'hashpass'} = $mode;
+	if (!$mode) {
+		my @encpass_opts = grep { $_ =~ /enc_pass$/ } keys %{$d};
+		foreach my $encpass_opt (@encpass_opts) {
+			delete($d->{$encpass_opt});
+			}
+		}
+	return 1;
+	}
+return 0;
+}
+
+# post_update_domain_hashpass(&@doms, mode, pass)
+# Apply domain services hashpass clean ups
+sub post_update_domain_hashpass
+{
+my ($d, $mode, $pass) = @_;
+if ($mode) {
+	# On switching to hashed mode some passwords
+	# services need to be reset to plain text	
+	my @opts = ('mysql_enc_pass');
+	foreach my $opt (@opts) {
+		if ($d->{$opt}) {
+			my $fn = $opt;
+			$fn =~ s/enc_//;
+			$d->{$fn} = $pass;
+			delete($d->{$opt});
+			}
+		}
+	}
+}
+
 # get_password_synced_types(&domain)
 # Returns a list of DB types that are enabled for this domain and have their
 # passwords synced with the admin login

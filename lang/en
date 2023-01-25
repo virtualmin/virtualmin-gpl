@@ -1109,6 +1109,7 @@ edit_passwd=Administration password
 edit_dbsync=Warning - any database passwords will also be updated if the admin password is changed
 edit_parent=Parent virtual server
 edit_lv=Leave unchanged
+edit_hash=Hash password
 edit_set=Set to ..
 edit_save=Save Virtual Server
 edit_quota=Total server quota
