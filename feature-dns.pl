@@ -149,7 +149,7 @@ elsif (!$dnsparent) {
 		}
 
 	# Also notify slave servers, unless already added
-	local @slaves = &bind8::list_slave_servers();
+	local @slaves = &get_default_domain_slaves($d);
 	if (@slaves && !$tmpl->{'namedconf_no_also_notify'}) {
 		local ($also) = grep { $_->{'name'} eq 'also-notify' }
 				     @{$dir->{'members'}};
@@ -542,6 +542,23 @@ foreach my $r (@dnskeys) {
 &register_post_action(\&restart_bind, $d);
 &$second_print($text{'setup_done'});
 return 1;
+}
+
+# get_default_domain_slaves(&domain)
+# Returns a list of slave nameservers to use when setting up DNS for this domain
+sub get_default_domain_slaves
+{
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my @slaves = &bind8::list_slave_servers();
+if ($tmpl->{'dns_slaves'} eq 'none') {
+	return ( );
+	}
+if ($tmpl->{'dns_slaves'} eq '') {
+	return @slaves;
+	}
+my %smap = map { $_, 1 } split(/\s+/, $tmpl->{'dns_slaves'});
+return grep { $smap{$_->{'id'}} } @slaves;
 }
 
 # create_zone_on_slaves(&domain, space-separate-slave-list)
@@ -1238,7 +1255,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				push(@created_ns, $master);
 				}
 			local $slave;
-			local @slaves = &bind8::list_slave_servers();
+			local @slaves = &get_default_domain_slaves($d);
 			foreach $slave (@slaves) {
 				local @bn = $slave->{'nsname'} ?
 					( $slave->{'nsname'} ) :
@@ -1441,7 +1458,7 @@ $tmplns{$master} = 1;
 foreach my $ns (&get_slave_nameservers($tmpl)) {
 	$tmplns{$ns} = 1;
 	}
-local @slaves = &bind8::list_slave_servers();
+local @slaves = &get_default_domain_slaves($d);
 foreach my $slave (@slaves) {
 	local @bn = $slave->{'nsname'} ?
 		( $slave->{'nsname'} ) :
@@ -2816,6 +2833,25 @@ print &ui_table_row(&hlink($text{'tmpl_dns_cloud'},
 	&ui_checkbox("dns_cloud_proxy", 1, $text{'tmpl_dns_cloud_proxy'},
 		     $tmpl->{'dns_cloud_proxy'}));
 
+# Create on slave DNS servers
+local @slaves = &bind8::list_slave_servers();
+if (@slaves) {
+	print &ui_table_hr();
+
+	my $smode = $tmpl->{'dns_slaves'} eq 'none' ? 2 :
+		    $tmpl->{'dns_slaves'} ? 0 : 1;
+	print &ui_table_row(&hlink($text{'tmpl_dns_slaves'},
+				   "template_dns_slaves"),
+		&ui_radio("dns_slaves_def", $smode,
+			  [ [ 1, $text{'tmpl_dns_slaves_all'} ],
+			    [ 2, $text{'tmpl_dns_slaves_none'} ],
+			    [ 0, $text{'tmpl_dns_slaves_sel'} ] ])."<br>\n".
+		&ui_select("dns_slaves",
+			   [ split(/\s+/, $tmpl->{'dns_slaves'}) ],
+			   [ map { [ $_->{'id'}, $_->{'host'} ] } @slaves ],
+			   5, 1));
+	}
+
 print &ui_table_hr();
 
 # Master NS hostnames
@@ -3074,6 +3110,18 @@ $tmpl->{'dns_sub'} = $in{'dns_sub_mode'} == 0 ? "none" :
 $tmpl->{'dns_cloud'} = $in{'dns_cloud'};
 $tmpl->{'dns_cloud_import'} = $in{'dns_cloud_import'};
 $tmpl->{'dns_cloud_proxy'} = $in{'dns_cloud_proxy'};
+
+# Save slave servers
+if ($in{'dns_slaves_def'} == 1) {
+	$tmpl->{'dns_slaves'} = '';
+	}
+elsif ($in{'dns_slaves_def'} == 2) {
+	$tmpl->{'dns_slaves'} = 'none';
+	}
+else {
+	$in{'dns_slaves'} || &error($text{'tmpl_dns_eslaves'});
+	$tmpl->{'dns_slaves'} = join(" ", split(/\0/, $in{'dns_slaves'}));
+	}
 
 if (!$config{'provision_dns'}) {
 	# Save named.conf
