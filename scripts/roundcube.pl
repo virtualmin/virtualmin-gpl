@@ -233,8 +233,6 @@ if (!$upgrade) {
 		}
 	&copy_source_dest_as_domain_user($d, $mcfileorig, $mcfile);
 	local $lref = &read_file_lines_as_domain_user($d, $mcfile);
-	local $vuf = &get_mail_virtusertable();
-	local $added_vuf = 0;
 	foreach my $l (@$lref) {
 		if ($l =~ /^\$(rcmail_config|config)\['enable_caching'\]\s+=/) {
 			$l = "\$${1}['enable_caching'] = FALSE;";
@@ -260,16 +258,6 @@ if (!$upgrade) {
 		if ($l =~ /^\$(rcmail_config|config)\['mail_domain'\]\s+=/) {
 			$l = "\$${1}['mail_domain'] = '$d->{'dom'}';";
 			}
-		if ($l =~ /^\$(rcmail_config|config)\['virtuser_file'\]\s+=/ && $vuf) {
-			$added_vuf = 1;
-			$l = "\$${1}['virtuser_file'] = '$vuf';";
-			}
-		if ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s+=\s+array\(\s*$/) {
-			$l = "\$${1}['plugins'] = array(\n    'virtuser_file',";
-			}
-		elsif ($l =~ /^\$(rcmail_config|config)\['plugins'\]\s*=\s*\[/) {
-			$l = "\$${1}['plugins'] = [\n    'virtuser_file',";
-			}
 		if ($l =~ /^\$(rcmail_config|config)\['db_dsnw'\]\s+=/) {
 			$l = "\$${1}['db_dsnw'] = 'mysql://$dbuser:".
 			     &php_quotemeta($dbpass, 1)."\@$dbhost/$dbname';";
@@ -278,11 +266,6 @@ if (!$upgrade) {
 		    $fmap{$2} && $fmap{$2} ne "*") {
                         $l = "\$${1}['${2}_mbox'] = '$fmap{$2}';";
                         }
-		}
-	if (!$added_vuf && $vuf) {
-		# Need to add virtuser_file directive, as no default exists
-		push(@$lref, "\$rcmail_config['virtuser_file'] = '$vuf';");
-		push(@$lref, "\$config['virtuser_file'] = '$vuf';");
 		}
 	&flush_file_lines_as_domain_user($d, $mcfile);
 
