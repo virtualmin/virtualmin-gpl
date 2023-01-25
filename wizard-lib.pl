@@ -127,13 +127,15 @@ if (defined($in->{'clamd'})) {
 		if ($ok) {
 			# Switch to clamdscan, after testing
 			local $last_err;
-			for(my $try=0; $try<10; $try++) {
+			&foreign_require("init");
+			for(my $try=0; $try<20; $try++) {
 				$last_err = &test_virus_scanner("clamdscan");
 				last if (!$last_err);
-				if ($try == 0 && &has_command("freshclam")) {
+				if ($try == 0 && &has_command("freshclam") &&
+					!init::action_status('clamav-freshclam')) {
 					# First time around, try running
 					# freshclam
-					&backquote_with_timeout("freshclam",60);
+					&backquote_with_timeout("freshclam", 60);
 					}
 				else {
 					sleep($try);

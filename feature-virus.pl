@@ -576,7 +576,7 @@ foreach my $c ("/etc/clamd.conf", "/etc/clamd.d/scan.conf",
 if (&init::action_status('clamav-freshclam')) {
 	&$first_print(&text('clamd_start_updater'));
 	&init::enable_at_boot('clamav-freshclam');
-	local ($ok, $out) = &init::start_action('clamav-freshclam');
+	local ($ok, $out) = &init::restart_action('clamav-freshclam');
 	if (!$ok || $out =~ /failed|error/i) {
 		&$second_print(&text('clamd_estart',
 				"<tt>".&html_escape($out)."</tt>"));
@@ -592,7 +592,7 @@ if ($init) {
 	&$first_print(&text('clamd_start'));
 	if (&init::action_status($init)) {
 		&init::enable_at_boot($init);
-		local ($ok, $out) = &init::start_action($init);
+		local ($ok, $out) = &init::restart_action($init);
 		if (!$ok || $out =~ /failed|error/i) {
 			&$second_print(&text('clamd_estart',
 					"<tt>".&html_escape($out)."</tt>"));
