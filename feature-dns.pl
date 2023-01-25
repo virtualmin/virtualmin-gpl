@@ -549,6 +549,7 @@ return 1;
 sub get_default_domain_slaves
 {
 my ($d) = @_;
+&require_bind();
 my $tmpl = &get_template($d->{'template'});
 my @slaves = &bind8::list_slave_servers();
 if ($tmpl->{'dns_slaves'} eq 'none') {
