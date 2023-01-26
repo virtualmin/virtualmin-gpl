@@ -10729,13 +10729,20 @@ sub check_domain_hashpass
 {
 my ($d) = @_;
 my $tmpl = &get_template($d->{'template'});
-my $rs = "";
 if (defined($d->{'hashpass'}) && defined($tmpl->{'hashpass'}) &&
     $d->{'hashpass'} != $tmpl->{'hashpass'}) {
-	$rs = "&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
-		$text{'edit_hash'}, $d->{'hashpass'});
+	return 1;
 	}
-return $rs;
+return 0;
+}
+
+# check_domain_hashpass(&domain)
+# Returns hashpass checkbox
+sub get_domain_hashpass_checkbox
+{
+my ($d) = @_;
+return "&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
+		$text{'edit_hash'}, $d->{'hashpass'});
 }
 
 # update_domain_hashpass(&dom, mode)
