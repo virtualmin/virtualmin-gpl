@@ -10754,7 +10754,7 @@ my ($d, $mode) = @_;
 if (&check_domain_hashpass($d)) {
 	$d->{'hashpass'} = $mode;
 	if (!$mode) {
-		my @encpass_opts = grep { $_ =~ /enc_pass$/ } keys %{$d};
+		my @encpass_opts = grep { /enc_pass$/ } keys %{$d};
 		foreach my $encpass_opt (@encpass_opts) {
 			delete($d->{$encpass_opt});
 			}
