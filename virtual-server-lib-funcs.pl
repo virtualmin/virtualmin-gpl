@@ -10736,15 +10736,6 @@ if (defined($d->{'hashpass'}) && defined($tmpl->{'hashpass'}) &&
 return 0;
 }
 
-# check_domain_hashpass(&domain)
-# Returns hashpass checkbox
-sub get_domain_hashpass_checkbox
-{
-my ($d) = @_;
-return "&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
-		$text{'edit_hash'}, $d->{'hashpass'});
-}
-
 # update_domain_hashpass(&dom, mode)
 # Updates domain hashpass option if needed, and
 # delete all *_enc_pass if disabling hashing

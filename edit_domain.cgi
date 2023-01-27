@@ -227,7 +227,10 @@ if (!$parentdom) {
 				$text{'edit_lv'}." ".&show_password_popup($d),
 				$text{'edit_set'}, undef, $optsextra, undef,
 			 	"autocomplete=new-password").
-		($checked_domain_hashpass ? &get_domain_hashpass_checkbox($d) : "").
+		($checked_domain_hashpass ? 
+			("&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
+				$text{'edit_hash'}, $d->{'hashpass'})) :
+			"").
 		$smsg);
 	}
 
