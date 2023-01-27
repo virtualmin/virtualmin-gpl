@@ -10763,14 +10763,12 @@ my ($d, $mode, $pass) = @_;
 if ($mode) {
 	# On switching to hashed mode some passwords
 	# services need to be reset to plain text	
-	my @opts = ('mysql_enc_pass');
-	foreach my $opt (@opts) {
-		if ($d->{$opt}) {
-			my $fn = $opt;
-			$fn =~ s/enc_//;
-			$d->{$fn} = $pass;
-			delete($d->{$opt});
-			}
+	my $opt = 'mysql_enc_pass';
+	if ($d->{$opt}) {
+		my $fn = $opt;
+		$fn =~ s/enc_//;
+		$d->{$fn} = $pass;
+		delete($d->{$opt});
 		}
 	}
 }
