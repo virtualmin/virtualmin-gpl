@@ -6735,6 +6735,12 @@ smtpclouds_return=cloud mail delivery providers
 
 smtpcloud_eaws=The <tt>aws</tt> command is needed to use Amazon's SES service
 smtpcloud_ses_location=Default API location
+smtpcloud_ses_user=SES SMTP credentials
+smtpcloud_ses_user1=Derive from access key
+smtpcloud_ses_user0=Custom username
+smtpcloud_ses_pass=and password
+smtpcloud_ses_euser=Missing or invalid-looking SMTP username
+smtpcloud_ses_epass=Missing or invalid-looking SMTP password
 smtpcloud_ses_longdesc=The credentials on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
 smtpcloud_header=Mail delivery provider options
 smtpcloud_provider=Mail delivery provider name
