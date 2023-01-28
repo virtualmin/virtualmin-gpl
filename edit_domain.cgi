@@ -220,11 +220,17 @@ if (!$parentdom) {
 
 	$smsg = &get_password_synced_types($d) ?
 			"<br>".$text{'edit_dbsync'} : "";
+	my $checked_domain_hashpass = &check_domain_hashpass($d);
+	my $optsextra = $checked_domain_hashpass ? ['hashpass_enable'] : undef;
 	print &ui_table_row($text{'edit_passwd'},
 		&ui_opt_textbox("passwd", undef, 20,
 				$text{'edit_lv'}." ".&show_password_popup($d),
-				$text{'edit_set'}, undef, undef, undef,
+				$text{'edit_set'}, undef, $optsextra, undef,
 			 	"autocomplete=new-password").
+		($checked_domain_hashpass ? 
+			("&nbsp;&nbsp;&nbsp;&nbsp;".&ui_checkbox("hashpass_enable", 1, 
+				$text{'edit_hash'}, $d->{'hashpass'})) :
+			"").
 		$smsg);
 	}
 
