@@ -129,13 +129,6 @@ local ($d, $nodb) = @_;
 local $tmpl = &get_template($d->{'template'});
 local $user = $d->{'postgres_user'} = &postgres_user($d);
 
-# Check if only hashed passwords are stored, and if so generate a random
-# PostgreSQL password now
-if ($d->{'hashpass'} && !$d->{'parent'} && !$d->{'postgres_pass'}) {
-	$d->{'postgres_pass'} = &random_password(16);
-	delete($d->{'postgres_enc_pass'});
-	}
-
 if (!$d->{'parent'}) {
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($d);
