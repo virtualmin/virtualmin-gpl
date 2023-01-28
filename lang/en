@@ -7640,6 +7640,8 @@ dnscloud_cloudflare_ens=Failed to lookup NS records : $1
 dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DNS domains be registered first.
 dnscloud_cloudflare_ens3=NS records found for <tt>$1</tt> domain, however these NS records <tt>$2</tt> do not point to Cloudflare provider
 
+remotedns_title=Remote DNS Servers
+
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
 reset_edns=DNS records will be lost : $1
@@ -7659,5 +7661,28 @@ reset_doing=Resetting $1 ..
 reset_iwarning=.. ignoring warning : $1
 reset_swarning=.. skipping warning : $1
 reset_dataloss=.. resetting would cause data loss : $1
+
+remotedns_title=Remote DNS Servers
+remotedns_host=Hostname
+remotedns_type=DNS Type
+remotedns_desc=Description
+remotedns_users=Used by
+remotedns_slave=Slave
+remotedns_master=Master
+remotedns_delete=Remove Selected Servers
+remotedns_ecannot=You are not allowed to manage remote DNS servers
+remotedns_header=New remote DNS server options
+remotedns_port=Port number
+remotedns_ssl=Use SSL?
+remotedns_user=Webmin username
+remotedns_pass=Webmin password
+remotedns_newhost=Server to add
+remotedns_existing=Existing Webmin server
+remotedns_new=New Webmin server
+remotedns_this=This system
+remotedns_cerr=Failed to add remote DNS server
+remotedns_eexists=Selected server does not exist!
+remotedns_ebind8=The BIND DNS Server Webmin module is not installed
+remotedns_ebind8inst=The BIND DNS Server is not installed or not running
 
 __norefs=1
