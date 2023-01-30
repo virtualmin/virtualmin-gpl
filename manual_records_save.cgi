@@ -38,7 +38,6 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 		}
 	foreach my $r (@$recs) {
 		$r->{'proxied'} = $proxy{&dns_record_key($r)};
-		print STDERR "r=$r->{'name'} proxied=$r->{'proxied'}\n";
 		}
 	}
 else {
