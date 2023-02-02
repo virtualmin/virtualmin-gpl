@@ -126,9 +126,10 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 		}
 	}
 elsif (!$dnsparent) {
-	# Creating a new real zone
+	# Creating a new real BIND zone
 	&$first_print($text{'setup_bind'});
 	&obtain_lock_dns($d, 1);
+	my $r = &get_domain_remote_dns($d);
 	local $conf = &bind8::get_config();
 	local $base = $bconfig{'master_dir'} ? $bconfig{'master_dir'} :
 					       &bind8::base_directory($conf);
@@ -5178,6 +5179,19 @@ if (@doomed) {
 	return &text('reset_edns', join(", ", @doomed));
 	}
 return undef;
+}
+
+# get_domain_remote_dns(&domain)
+# Returns the Webmin server object for a domain's remote DNS server
+sub get_domain_remote_dns
+{
+my ($d) = @_;
+my @remotes = defined(&list_remote_dns) ? &list_remote_dns() : ();
+if ($d->{'remote_dns'}) {
+	my ($r) = grep { $_->{'host'} eq $d->{'remote_dns'} } @remotes;
+	return $r if ($r);
+	}
+return { 'id' => 0, 'master' => 1 };
 }
 
 $done_feature_script{'dns'} = 1;
