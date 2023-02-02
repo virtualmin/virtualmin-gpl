@@ -670,10 +670,12 @@ else {
 
 # Show DNS IP address field
 if (&can_dnsip()) {
+	my $def_dns_ip = &get_dns_ip($resel);
+	my $defmsg = $def_dns_ip || $text{'spf_default2'};
 	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
 		&ui_opt_textbox("dns_ip",
 				$parentdom ? $parentdom->{'dns_ip'} : undef,
-				20, $text{'spf_default2'}));
+				20, $defmsg));
 	}
 
 print &ui_hidden_table_end();
