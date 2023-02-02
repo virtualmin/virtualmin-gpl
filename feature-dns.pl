@@ -1588,7 +1588,7 @@ return $count;
 # in the template
 sub add_webmail_dns_records_to_file
 {
-local ($d, $tmpl, $file, $recs, $already) = @_;
+local ($d, $tmpl, $file, $recs, $already, $force) = @_;
 local $count = 0;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
 foreach my $r ('webmail', 'admin') {

@@ -545,13 +545,17 @@ my ($pass, $encpass);
 if ($d->{'parent'}) {
 	my $parent = &get_domain($d->{'parent'});
 	$pass = $parent->{'pass'};
-	$encpass = $pass ? &htaccess_htpasswd::encrypt_password($pass)
-			 : $parent->{'crypt_enc_pass'};
+	$encpass = ($pass ? &htaccess_htpasswd::encrypt_password($pass)
+			 : ($parent->{'enc_pass'} ||
+			    $parent->{'md5_enc_pass'} ||
+			    $parent->{'crypt_enc_pass'}));
 	}
 else {
 	$pass = $d->{'pass'};
-	$encpass = $pass ? &htaccess_htpasswd::encrypt_password($pass)
-			 : $d->{'crypt_enc_pass'};
+	$encpass = ($pass ? &htaccess_htpasswd::encrypt_password($pass)
+			 : ($d->{'enc_pass'} ||
+			    $d->{'md5_enc_pass'} ||
+			    $d->{'crypt_enc_pass'}));
 	}
 my $users = &htaccess_htpasswd::list_users($file);
 my ($user) = grep { $_->{'user'} eq $olduser } @$users;
