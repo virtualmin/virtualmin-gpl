@@ -158,9 +158,7 @@ if (-d $daily) {
 	local $named = &extract_cpanel_file("$daily/files/_etc_named.conf.gz");
 	local $zone;
 	if ($named) {
-		# Check for DNS zone
-		$zone = &get_bind_zone($dom, undef, $named);
-		push(@got, "dns") if ($zone);
+		push(@got, "dns");
 		}
 	local $localdomains = &extract_cpanel_file("$daily/files/_etc_localdomains.gz");
 	if ($localdomains) {

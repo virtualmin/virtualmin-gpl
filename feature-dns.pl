@@ -1,9 +1,14 @@
 
+# require_bind([&domain])
 sub require_bind
 {
-return if ($require_bind++);
+my ($d) = @_;
+my $r = &get_domain_remote_dns($d);
+return $r if ($require_bind{$r->{'id'}}++);
 &foreign_require("bind8");
+&remote_foreign_require($r, "bind8");
 %bconfig = &foreign_config("bind8");
+return $r;
 }
 
 # check_depends_dns(&domain)
@@ -60,6 +65,20 @@ elsif ($dns_submode && $d->{'parent'}) {
 	$dnsparent = &find_parent_dns_domain($d);
 	}
 
+# Create the list of DNS records
+my $recs = [ ];
+my $recstemp = &transname();
+eval {
+	local $bind8::config{'auto_chroot'} = undef;
+	local $bind8::config{'chroot'} = undef;
+	if ($d->{'alias'}) {
+		&create_alias_records($recs, $recstemp, $d, $ip);
+		}
+	else {
+		&create_standard_records($recs, $recstemp, $d, $ip);
+		}
+	};
+
 # Create domain info object
 my $info;
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
@@ -68,23 +87,13 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 		$info->{'slave'} = [ grep { $_ } map { &to_ipaddress($_) }
 						     @extra_slaves ];
 		}
-	my $temp = &transname();
-	local $bind8::config{'auto_chroot'} = undef;
-	local $bind8::config{'chroot'} = undef;
-	$d->{'dns_submode'} = 0;	# Adding to existing domain not
-					# supported by Cloudmin Services
-	local $recs = [ ];
-	if ($d->{'alias'}) {
-		&create_alias_records($recs, $temp, $d, $ip);
-		}
-	else {
-		&create_standard_records($recs, $temp, $d, $ip);
-		}
 	$info->{'recs'} = $recs;
 	}
 
 if ($d->{'provision_dns'}) {
 	# Create on provisioning server
+	$d->{'dns_submode'} = 0;	# Adding to existing domain not
+					# supported by Cloudmin Services
 	my @precs = grep { $_->{'type'} ne 'NS' } @{$info->{'recs'}};
 	$info->{'record'} = [ &records_to_text($d, \@precs) ];
 	delete($info->{'recs'});
@@ -127,13 +136,20 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 	}
 elsif (!$dnsparent) {
 	# Creating a new real BIND zone
-	&$first_print($text{'setup_bind'});
 	&obtain_lock_dns($d, 1);
-	my $r = &get_domain_remote_dns($d);
-	local $conf = &bind8::get_config();
-	local $base = $bconfig{'master_dir'} ? $bconfig{'master_dir'} :
-					       &bind8::base_directory($conf);
-	local $file = &bind8::automatic_filename($d->{'dom'}, 0, $base);
+	my $r = &require_bind($d);
+	if ($r->{'id'} == 0) {
+		&$first_print($text{'setup_bind'});
+		}
+	else {
+		&$first_print(&text('setup_bindremote', $r->{'host'}));
+		}
+	local $conf = &remote_foreign_call($r, "bind8", "get_config");
+	local $rbconfig = &remote_foreign_config($r, "bind8");
+	local $base = $rbconfig->{'master_dir'} ||
+	      &remote_foreign_call($r, "bind8", "base_directory", $conf);
+	local $file = &remote_foreign_call($r, "bind8", "automatic_filename",
+					   $d->{'dom'}, 0, $base);
 	local $dir = {
 		 'name' => 'zone',
 		 'values' => [ $d->{'dom'} ],
@@ -203,9 +219,10 @@ elsif (!$dnsparent) {
 
 	local $pconf;
 	local $indent = 0;
-	if ($tmpl->{'dns_view'}) {
+	if ($tmpl->{'dns_view'} && $r->{'id'} == 0) {
 		# Adding inside a view. This may use named.conf, or an include
 		# file references inside the view, if any
+		# XXX what about remote?
 		$pconf = &bind8::get_config_parent();
 		local $view = &get_bind_view($conf, $tmpl->{'dns_view'});
 		if ($view) {
@@ -242,13 +259,15 @@ elsif (!$dnsparent) {
 		}
 	else {
 		# Adding at top level .. but perhaps in a different file
-		$dir->{'file'} = &bind8::add_to_file();
-		$pconf = &bind8::get_config_parent($dir->{'file'});
+		$dir->{'file'} = &remote_foreign_call($r, "bind8",
+						      "add_to_file");
+		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent",
+					      $dir->{'file'});
 		}
-	&bind8::save_directive($pconf, undef, [ $dir ], $indent);
-	&flush_file_lines();
-	&bind8::flush_zone_names();
-	undef(@bind8::get_config_cache);
+	&remote_foreign_call($r, "bind8", "save_directive", $pconf, undef, [ $dir ], $indent);
+	&remote_foreign_call($r, "bind8", "flush_file_lines");
+	&remote_foreign_call($r, "bind8", "flush_zone_names");
+	&remote_foreign_call($r, "bind8", "clear_config_cache");
 
 	# Work out if can copy from alias target - not possible if target
 	# is a sub-domain, as they don't have their own domain. Also not
@@ -257,18 +276,18 @@ elsif (!$dnsparent) {
 	local $copyfromalias = &copy_alias_records($d);
 
 	# Create the records file
-	local $rootfile = &bind8::make_chroot($file);
-	local $recs = [ ];
-	if (-r $rootfile && -f $rootfile) {
-		&unlink_logged($rootfile);
+	local $rootfile = &remote_foreign_call($r, "bind8", "make_chroot", $file);
+	if (!-d $rootfile) {
+		&remote_foreign_call($r, "bind8", "unlink_logged", $rootfile);
 		}
-	if ($copyfromalias) {
-		&create_alias_records($recs, $file, $d, $ip);
+	if ($r->{'id'} == 0) {
+		# If DNS is local, just copy over the records file file we
+		# created above. Otherwise, it will be uploaded in
+		# post_records_change
+		&copy_source_dest($recstemp, $rootfile);
 		}
-	else {
-		&create_standard_records($recs, $file, $d, $ip);
-		}
-	&bind8::set_ownership($rootfile);
+	&post_records_change($d, $recs, $recstemp);
+	&remote_foreign_call($r, "bind8", "set_ownership", $rootfile);
 	&$second_print($text{'setup_done'});
 
 	# If DNSSEC was requested, set it up
@@ -282,7 +301,7 @@ elsif (!$dnsparent) {
 		}
 
 	# Create on slave servers
-	local $myip = $bconfig{'this_ip'} ||
+	local $myip = $rbconfig->{'this_ip'} ||
 		      &to_ipaddress(&get_system_hostname());
 	if (@slaves && !$d->{'noslaves'}) {
 		local $slaves = join(" ", map { $_->{'nsname'} ||
@@ -303,7 +322,7 @@ else {
 	delete($d->{'dns_cloud'});	# Cloud always comes from parent
 	&obtain_lock_dns($dnsparent);
 	&pre_records_change($dnsparent);
-	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
+	my ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
 	if (!$file) {
 		&error(&text('setup_ednssub', $dnsparent->{'dom'}));
 		}
@@ -380,44 +399,48 @@ elsif ($d->{'provision_dns'}) {
 	}
 elsif (!$d->{'dns_submode'}) {
 	# Delete real domain
-	&$first_print($text{'delete_bind'});
+	my $r = &require_bind($d);
+	if ($r->{'id'} == 0) {
+		&$first_print($text{'delete_bind'});
+		}
+	else {
+		&$first_print(&text('delete_bindremote', $r->{'host'}));
+		}
 	&obtain_lock_dns($d, 1);
-	local $z = &get_bind_zone($d->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	if ($z) {
 		# Delete DS records in parent
 		&delete_parent_dnssec_ds_records($d);
 
 		# Delete any dnssec key
-		if (defined(&bind8::supports_dnssec) &&
-		    &bind8::supports_dnssec()) {
-			&bind8::delete_dnssec_key($z, 0);
-			&bind8::dt_delete_dnssec_state($z);
+		if (&remote_foreign_call($r, "bind8", "supports_dnssec")) {
+			&remote_foreign_call($r, "bind8",
+					     "delete_dnssec_key", $z, 0);
+			&remote_foreign_call($r, "bind8",
+					     "dt_delete_dnssec_state", $z);
 			}
 
 		# Delete the records file
 		local $file = &bind8::find("file", $z->{'members'});
 		if ($file) {
-			local $zonefile =
-			    &bind8::make_chroot($file->{'values'}->[0]);
-			&unlink_file($zonefile);
-			local $logfile = $zonefile.".log";
-			if (!-r $logfile) { $logfile = $zonefile.".jnl"; }
-			if (-r $logfile) {
-				&unlink_logged($logfile);
-				}
+			local $zonefile = &remote_foreign_call($r, "bind8",
+				"make_chroot", $file->{'values'}->[0]);
+			&remote_foreign_call($r, "bind8", "unlink_logged",
+					     $zonefile,
+					     $zonefile.".log",
+					     $zonefile.".jnl");
 			}
 
 		# Delete from named.conf
-		local $rootfile = &bind8::make_chroot($z->{'file'});
-		local $lref = &read_file_lines($rootfile);
-		splice(@$lref, $z->{'line'}, $z->{'eline'} - $z->{'line'} + 1);
-		&flush_file_lines($rootfile);
+		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent",
+					      $z->{'file'});
+		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
+				     [ $z ], [ ]);
+		&remote_foreign_call($r, "bind8", "flush_file_lines");
 
 		# Clear zone names caches
-		unlink($bind8::zone_names_cache);
-		undef(@bind8::list_zone_names_cache);
-		undef(@bind8::get_config_cache);
-		undef(%bind8::get_config_parent_cache);
+		&remote_foreign_call($r, "bind8", "flush_zone_names");
+		&remote_foreign_call($r, "bind8", "clear_config_cache");
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -801,7 +824,7 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
-	local $z = &get_bind_zone($zdom->{'dom'});
+	local $z = &get_bind_zone($zdom->{'dom'}, undef, $d);
 	if (!$z) {
 		# Zone not found!
 		&$second_print($text{'save_dns2_ezone'});
@@ -842,7 +865,7 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 				    $oldd->{'dom'}, $d->{'dom'});
 
         # Update SOA record
-	&post_records_change($d, $recs);
+	&post_records_change($d, $recs, $file);
 	&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
 
@@ -1780,7 +1803,7 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && $file) {
 	}
 if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'}) {
 	# Make sure it is a master
-	local $zone = &get_bind_zone($d->{'dom'});
+	local $zone = &get_bind_zone($d->{'dom'}, undef, $d);
 	return &text('validate_edns', "<tt>$d->{'dom'}</tt>") if (!$zone);
 	local $type = &bind8::find_value("type", $zone->{'members'});
 	return &text('validate_ednsnotype', "<tt>$d->{'dom'}</tt>") if (!$type);
@@ -1900,7 +1923,7 @@ if (!$d->{'dns_submode'}) {
 if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
     !$d->{'provision_dns'} && !$d->{'dns_cloud'} && !$d->{'dns_submode'} &&
     !$recsonly) {
-	local $z = &get_bind_zone($d->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	if ($z) {
 		local @errs = &bind8::check_zone_records($z);
 		if (@errs) {
@@ -2011,7 +2034,7 @@ else {
 		}
 	&obtain_lock_dns($d, 1);
 	&require_bind();
-	local $z = &get_bind_zone($d->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	local $ok;
 	if ($z) {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -2105,7 +2128,7 @@ else {
 		}
 	&obtain_lock_dns($d, 1);
 	&require_bind();
-	local $z = &get_bind_zone($d->{'dom'});
+	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	local $ok;
 	if ($z) {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
@@ -2146,16 +2169,13 @@ else {
 	}
 }
 
-# get_bind_zone(name, [&config], [file])
+# get_bind_zone(name, [&config], [&domain])
 # Returns the zone structure for the named domain, possibly with .disabled
 sub get_bind_zone
 {
-local ($name, $conf, $file) = @_;
-&require_bind();
-if (!$conf) {
-	$conf = $file ? [ &bind8::read_config_file($file) ]
-		      : &bind8::get_config();
-	}
+my ($name, $conf, $d) = @_;
+my $r = &require_bind($d);
+$conf ||= &remote_foreign_call($r, "bind8", "get_config");
 local @zones = &bind8::find("zone", $conf);
 local ($v, $z);
 foreach $v (&bind8::find("view", $conf)) {
@@ -2178,12 +2198,12 @@ if ($p) {
 	return 1;
 	}
 &$first_print($text{'setup_bindpid'});
-&require_bind();
+my $r = &require_bind($d);
 local $bindlock = "$module_config_directory/bind-restart";
 &lock_file($bindlock);
-local $pid = &get_bind_pid();
+local $pid = &get_bind_pid($d);
 if ($pid) {
-	my $err = &bind8::restart_bind();
+	my $err = &remote_foreign_call($r, "bind8", "restart_bind");
 	if ($err) {
 		&$second_print(&text('setup_ebindpid', $err));
 		}
@@ -2228,11 +2248,10 @@ if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
 	return undef;
 	}
-&require_bind();
-if (defined(&bind8::restart_zone)) {
-	local $err = &bind8::restart_zone($d->{'dom'}, $d->{'dns_view'});
-	return undef if (!$err);
-	}
+my $r = &require_bind($d);
+local $err = &remote_foreign_call($r, "bind8", "restart_zone",
+				  $d->{'dom'}, $d->{'dns_view'});
+return undef if (!$err);
 &push_all_print();
 &set_all_null_print();
 local $rv = &restart_bind($d);
@@ -2285,13 +2304,15 @@ if (!$field || $field eq 'dom') {
 return 0;
 }
 
-# get_bind_pid()
+# get_bind_pid([&domain])
 # Returns the BIND PID, if it is running
 sub get_bind_pid
 {
-&require_bind();
-local $pidfile = &bind8::get_pid_file();
-return &check_pid_file(&bind8::make_chroot($pidfile, 1));
+my ($d) = @_;
+my $r = &require_bind($r);
+local $pidfile = &remote_foreign_call($r, "bind8", "get_pid_file");
+$pidfile = &remote_foreign_call($r, "bind8", "make_chroot", $pidfile, 1);
+return &remote_foreign_call($r, "bind8", "check_pid_file", $pidfile);
 }
 
 # backup_dns(&domain, file)
@@ -2962,7 +2983,7 @@ if (!$config{'provision_dns'}) {
 			     !$tmpl->{'namedconf_no_allow_transfer'}));
 
 	# DNSSEC for new domains
-	if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec()) {
+	if (&bind8::supports_dnssec()) {
 		print &ui_table_hr();
 
 		# Setup for new domains?
@@ -3404,16 +3425,16 @@ return &get_domain_dns_file_from_bind($d);
 sub get_domain_dns_file_from_bind
 {
 my ($d) = @_;
-&require_bind();
+my $r = &require_bind($d);
 my $z;
 if ($d->{'dns_submode'}) {
 	# Records are in super-domain
 	local $parent = &get_domain($d->{'dns_subof'});
-	$z = &get_bind_zone($parent->{'dom'});
+	$z = &get_bind_zone($parent->{'dom'}, undef, $parent);
 	}
 else {
 	# In this domain
-	$z = &get_bind_zone($d->{'dom'});
+	$z = &get_bind_zone($d->{'dom'}, undef, $d);
 	}
 return undef if (!$z);
 my $file = &bind8::find("file", $z->{'members'});
@@ -3442,7 +3463,7 @@ local $bind8::config{'short_names'} = 0;
 
 # Create a temp file for writing downloaded records
 local ($temp, $abstemp);
-if ($d->{'dns_cloud'} || $d->{'provision_dns'}) {
+if ($d->{'dns_cloud'} || $d->{'provision_dns'} || $d->{'dns_remote'}) {
 	$temp = &transname();
 	$abstemp = $temp;
 	local $chroot = &bind8::get_chroot();
@@ -3534,6 +3555,22 @@ elsif ($d->{'provision_dns'}) {
 	&set_record_ids(\@recs);
 	@rv = (\@recs, $temp);
 	}
+elsif ($d->{'dns_remote'}) {
+	# Get records from remote Webmin server
+	# XXX chroot??
+	my $r = &require_bind($d);
+	my $rfile = &get_domain_dns_file_from_bind($d);
+	eval {
+		local $main::remote_error_handler = sub { die @_ };
+		&remote_read($r, $abstemp, $rfile);
+		};
+	if ($@) {
+		return ($@);
+		}
+	local @recs = &bind8::read_zone_file($temp, $d->{'dom'});
+	&set_record_ids(\@recs);
+	@rv = (\@recs, $temp);
+	}
 else {
 	# Find local file
 	local $file = &get_domain_dns_file($d);
@@ -3581,6 +3618,7 @@ sub create_dns_record
 my ($recs, $file, $r) = @_;
 &require_bind();
 my $lref = &read_file_lines($file, 1);
+$r->{'realname'} ||= $r->{'name'};
 $r->{'file'} = $file;
 $r->{'line'} = scalar(@$lref);
 $r->{'eline'} = $r->{'line'};
@@ -3594,9 +3632,12 @@ if (defined($r->{'defttl'})) {
 		}
 	}
 else {
+	my $vstr = &join_record_values($r);
 	my @params = ( $r->{'name'}, $r->{'ttl'},
 		       $r->{'class'} || "IN", $r->{'type'},
-		       &join_record_values($r), $r->{'comment'} );
+		       $vstr, $r->{'comment'} );
+	my @vlines = split(/\n/, $vstr);
+	$r->{'eline'} = $r->{'line'} + scalar(@vlines) - 1;
 	&bind8::create_record($file, @params);
 	}
 push(@$recs, $r);
@@ -3811,9 +3852,9 @@ if (!$d->{'provision_dns'} && !$d->{'dns_cloud'}) {
 	}
 }
 
-# post_records_change(&domain, &recs, [file])
+# post_records_change(&domain, &recs, file)
 # Called after some records in a domain are changed, to bump to SOA
-# and possibly re-sign
+# and possibly re-sign and upload to a remote server
 sub post_records_change
 {
 local ($d, $recs, $fn) = @_;
@@ -3823,25 +3864,14 @@ if ($d->{'dns_submode'}) {
 	my $parent = &get_domain($d->{'dns_subof'});
 	return &post_records_change($parent, $recs, $fn);
 	}
-&require_bind();
-local $z;
-if (!$fn) {
-	# Use local file by default
-	$z = &get_bind_zone($d->{'dom'});
-	return "Failed to find zone for $d->{'dom'}" if (!$z);
-	local $file = &bind8::find("file", $z->{'members'});
-	return "Failed to find records file for $d->{'dom'}" if (!$file);
-	$fn = $file->{'values'}->[0];
-	}
+my $r = &require_bind($d);
 
 # Increase the SOA
 &bind8::bump_soa_record($fn, $recs);
 
-if (defined(&bind8::supports_dnssec) &&
-    &bind8::supports_dnssec() &&
-    &can_domain_dnssec($d)) {
+if (&bind8::supports_dnssec() && &can_domain_dnssec($d)) {
 	# Re-sign DNSSEC, or remove records if no longer signed
-	$z ||= &get_bind_zone($d->{'dom'});
+	my $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	eval {
 		local $main::error_must_die = 1;
 		&bind8::sign_dnssec_zone_if_key($z, $recs, 0);
@@ -3879,6 +3909,21 @@ elsif ($d->{'dns_cloud'}) {
 	my ($ok, $msg) = &$pfunc($d, $info);
 	if (!$ok) {
 		return "Failed to update DNS records : $msg";
+		}
+	}
+elsif ($d->{'dns_remote'}) {
+	# Upload records to remote Webmin server
+	# XXX chroot??
+	my $rfile = &get_domain_dns_file_from_bind($d);
+	if (!$rfile) {
+		return "Remote zone file not found!";
+		}
+	eval {
+		local $main::remote_error_handler = sub { die @_ };
+		&remote_write($r, $fn, $rfile);
+		};
+	if ($@) {
+		return $@;
 		}
 	}
 
@@ -4172,7 +4217,7 @@ return $str =~ /^(\d+)s$/i ? $1 :
 sub can_domain_dnssec
 {
 my ($d) = @_;
-return $d->{'provision_dns'} || $d->{'dns_cloud'} ? 0 : 1;
+return $d->{'provision_dns'} || $d->{'dns_cloud'} || $d->{'dns_remote'} ? 0 : 1;
 }
 
 # has_domain_dnssec(&domain, [&records])
@@ -4194,9 +4239,9 @@ return $dnskey ? 1 : 0;
 sub disable_domain_dnssec
 {
 my ($d) = @_;
+my $r = &require_bind($d);
 &obtain_lock_dns($d);
-my $zone = &get_bind_zone($d->{'dom'});
-my $key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+my $key = &remote_foreign_call($r, "bind8", "get_dnssec_key", $zone);
 my @keyfiles;
 if ($key) {
 	@keyfiles = map { $k->{$_} } ('publicfile', 'privatefile');
@@ -4205,7 +4250,7 @@ foreach my $k (@keyfiles) {
         &lock_file($k);
         }
 &delete_parent_dnssec_ds_records($d);
-&bind8::delete_dnssec_key($zone, 1);
+&remote_foreign_call($r, "bind8", "delete_dnssec_key", $zone, 1);
 foreach my $k (@keyfiles) {
         &unlock_file($k);
         }
@@ -4219,19 +4264,20 @@ return undef;
 sub enable_domain_dnssec
 {
 my ($d) = @_;
+my $r = &require_bind($d);
 my $tmpl = &get_template($d->{'template'});
 if (!$tmpl->{'dnssec_alg'}) {
 	return $text{'setup_enodnssecalg'};
 	}
 &obtain_lock_dns($d);
-my $zone = &get_bind_zone($d->{'dom'});
-if (!defined(&bind8::supports_dnssec) ||
-    !&bind8::supports_dnssec()) {
+my $zone = &get_bind_zone($d->{'dom'}, undef, $d);
+if (!&bind8::supports_dnssec()) {
 	# Not supported
 	return $text{'setup_enodnssec'};
 	}
 else {
-	my ($ok, $size) = &bind8::compute_dnssec_key_size(
+	my ($ok, $size) = &remote_foreign_call(
+				$r, "bind8", "compute_dnssec_key_size",
 				$tmpl->{'dnssec_alg'}, 1);
 	my $err;
 	my $regen = $d->{'dnssec_alg'} &&
@@ -4240,13 +4286,14 @@ else {
 		# Key size failed
 		return &text('setup_ednssecsize', $size);
 		}
-	elsif ($err = &bind8::create_dnssec_key(
+	elsif ($err = &remote_foreign_call($r, "bind8", "create_dnssec_key",
 			$zone, $tmpl->{'dnssec_alg'}, $size,
 			$tmpl->{'dnssec_single'}, $regen)) {
 		# Key generation failed
 		return &text('setup_ednsseckey', $err);
 		}
-	elsif ($err = &bind8::sign_dnssec_zone($zone)) {
+	elsif ($err = &remote_foreign_call(
+			$r, "bind8", "sign_dnssec_zone", $zone)) {
 		# Zone signing failed
 		return &text('setup_ednssecsign', $err);
 		}
@@ -4558,13 +4605,12 @@ return $rv;
 
 # format_dns_text_records($recs-text-list, [&opts])
 # Formats records to be column like 
-sub format_dns_text_records {
+sub format_dns_text_records
+{
 my ($recs, $opts) = @_;
 return $recs if (!length(&trim($recs)));
-my $idelim =
-	$opts->{'in-delimiter'} ||= "	";
-my $odelim =
-	$opts->{'out-delimiter'} ||= $idelim;
+my $idelim = $opts->{'in-delimiter'} || "	";
+my $odelim = $opts->{'out-delimiter'} || $idelim;
 my @recs;
 my %cols;
 my @lines = split(/\n/, $recs);
@@ -4596,30 +4642,29 @@ return join("\n", @recs);
 # Lock a domain's zone file and named.conf file
 sub obtain_lock_dns
 {
-local ($d, $conftoo) = @_;
+my ($d, $conftoo) = @_;
 return if (!$config{'dns'});
 &obtain_lock_anything($d);
-local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
-		 : $config{'provision_dns'} || &default_dns_cloud();
+my $prov = &is_dns_remote($d);
 
 # Lock records file
 if ($d && !$prov) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 0) {
 		&require_bind();
-		local $lockd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
-		local $conf = &bind8::get_config();
-		local $z = &get_bind_zone($lockd->{'dom'}, $conf);
-		local $fn;
+		my $lockd = $d->{'dns_submode'} ? &get_domain($d->{'dns_subof'}) : $d;
+		my $conf = &bind8::get_config();
+		my $z = &get_bind_zone($lockd->{'dom'}, $conf);
+		my $fn;
 		if ($z) {
-			local $file = &bind8::find("file", $z->{'members'});
+			my $file = &bind8::find("file", $z->{'members'});
 			$fn = $file->{'values'}->[0];
 			}
 		else {
-			local $base = $bconfig{'master_dir'} ||
+			my $base = $bconfig{'master_dir'} ||
 				      &bind8::base_directory($conf);
 			$fn = &bind8::automatic_filename($lockd->{'dom'}, 0, $base);
 			}
-		local $rootfn = &bind8::make_chroot($fn);
+		my $rootfn = &bind8::make_chroot($fn);
 		&lock_file($rootfn);
 		$main::got_lock_dns_file{$d->{'id'}} = $rootfn;
 		}
@@ -4644,15 +4689,14 @@ if ($conftoo && !$prov) {
 # Unlock the zone's records file and possibly named.conf entry
 sub release_lock_dns
 {
-local ($d, $conftoo) = @_;
+my ($d, $conftoo) = @_;
 return if (!$config{'dns'});
-local $prov = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
-		 : $config{'provision_dns'} || &default_dns_cloud();
+my $prov = &is_dns_remote($d);
 
 # Unlock records file
 if ($d && !$prov) {
 	if ($main::got_lock_dns_zone{$d->{'id'}} == 1) {
-		local $rootfn = $main::got_lock_dns_file{$d->{'id'}};
+		my $rootfn = $main::got_lock_dns_file{$d->{'id'}};
 		&unlock_file($rootfn) if ($rootfn);
 		}
 	$main::got_lock_dns_zone{$d->{'id'}}--
@@ -4670,6 +4714,19 @@ if ($conftoo && !$prov) {
 	}
 
 &release_lock_anything($d);
+}
+
+# is_dns_remote([&domain])
+# Returns 1 if DNS is hosted remotely for a domain, or globally
+sub is_dns_remote
+{
+my ($d) = @_;
+if ($d) {
+	return $d->{'provision_dns'} || $d->{'dns_cloud'} || $d->{'dns_remote'};
+	}
+else {
+	return $config{'provision_dns'} || &default_dns_cloud();
+	}
 }
 
 # filter_domain_dns_records(&domain, &recs)
@@ -5181,17 +5238,22 @@ if (@doomed) {
 return undef;
 }
 
-# get_domain_remote_dns(&domain)
+# get_domain_remote_dns([&domain])
 # Returns the Webmin server object for a domain's remote DNS server
 sub get_domain_remote_dns
 {
 my ($d) = @_;
-my @remotes = defined(&list_remote_dns) ? &list_remote_dns() : ();
-if ($d->{'remote_dns'}) {
-	my ($r) = grep { $_->{'host'} eq $d->{'remote_dns'} } @remotes;
+if ($d && $d->{'dns_remote'}) {
+	my @remotes = defined(&list_remote_dns) ? &list_remote_dns() : ();
+	my ($r) = grep { $_->{'host'} eq $d->{'dns_remote'} } @remotes;
 	return $r if ($r);
 	}
-return { 'id' => 0, 'master' => 1 };
+return { 'id' => 0,
+	 'host' => &get_system_hostname(),
+	 'master' => 1,
+	 'this' => 1,
+	 'local' => 1,
+       };
 }
 
 $done_feature_script{'dns'} = 1;
