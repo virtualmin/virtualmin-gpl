@@ -2,7 +2,7 @@
 
 # migration_directadmin_validate(file, domain, [user], [&parent],
 # 				 [prefix], [pass])
-# Make sure the given file is a cPanel backup, and contains the domain
+# Make sure the given file is a DirectAdmin backup, and contains the domain
 sub migration_directadmin_validate
 {
 local ($file, $dom, $user, $parent, $prefix, $pass) = @_;
@@ -46,7 +46,7 @@ return (undef, $dom, $user, $pass);
 # migration_directadmin_migrate(file, domain, username, create-webmin,
 # 				template-id, &ipinfo, pass, [&parent],
 # 				[prefix], [email])
-# Actually extract the given cPanel backup, and return the list of domains
+# Actually extract the given DirectAdmin backup, and return the list of domains
 # created.
 sub migration_directadmin_migrate
 {
