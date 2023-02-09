@@ -591,13 +591,15 @@ return grep { $smap{$_->{'id'}} } @slaves;
 # May print messages.
 sub create_zone_on_slaves
 {
-local ($d, $slaves) = @_;
-local $tmpl = &get_template($d->{'template'});
-local @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
-			   split(/\s+/, $tmpl->{'dns_ns'});
-&require_bind();
-local $myip = $bconfig{'this_ip'} ||
-	      &to_ipaddress(&get_system_hostname());
+my ($d, $slaves) = @_;
+my $r = &require_bind($d);
+my $rbconfig = &remote_foreign_config($r, "bind8");
+my $tmpl = &get_template($d->{'template'});
+my @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
+			split(/\s+/, $tmpl->{'dns_ns'});
+my $myip = $rbconfig->{'this_ip'} ||
+	   &remote_foreign_call($r, "bind8", "to_ipaddress",
+		&remote_foreign_call($r, "bind8", "get_system_hostname"));
 &$first_print(&text('setup_bindslave', $slaves));
 if (!$myip) {
 	# IP lookup failed
@@ -605,11 +607,11 @@ if (!$myip) {
 	return;
 	}
 if ($myip =~ /^127\.0/) {
-	# Looks like a local network, which can't be correct
+	# Looks like a my network, which can't be correct
 	&$second_print(&text('setup_ebindslaveip', $myip));
 	return;
 	}
-local @slaveerrs = &bind8::create_on_slaves(
+my @slaveerrs = &bind8::create_on_slaves(
 	$d->{'dom'}, $myip, undef, [ split(/\s+/, $slaves) ],
 	$d->{'dns_view'} || $tmpl->{'dns_view'},
 	\@extra_slaves);
@@ -626,14 +628,14 @@ else {
 	}
 
 # Add to list of slaves where it succeeded
-local @newslaves;
+my @newslaves;
 foreach my $s (split(/\s+/, $slaves)) {
-	local ($err) = grep { $_->[0]->{'host'} eq $s } @slaveerrs;
+	my ($err) = grep { $_->[0]->{'host'} eq $s } @slaveerrs;
 	if (!$err) {
 		push(@newslaves, $s);
 		}
 	}
-local @oldslaves = split(/\s+/, $d->{'dns_slave'});
+my @oldslaves = split(/\s+/, $d->{'dns_slave'});
 $d->{'dns_slave'} = join(" ", &unique(@oldslaves, @newslaves));
 
 &register_post_action(\&restart_bind, $d);
@@ -1558,12 +1560,12 @@ if ($diff) {
 sub get_master_nameserver
 {
 my ($tmpl, $d) = @_;
-&require_bind();
-local $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
+my $r = &require_bind($d);
+my $tmaster = $tmpl->{'dns_master'} eq 'none' ? undef :
 			$tmpl->{'dns_master'};
-local $master = $tmaster ||
-		$bconfig{'default_prins'} ||
-		&get_system_hostname();
+my $master = $tmaster ||
+	     $rbconfig->{'default_prins'} ||
+	     &remote_foreign_call($r, "bind8", "get_system_hostname");
 $master .= "." if ($master !~ /\.$/);
 if ($d) {
 	$master = &substitute_domain_template($master, $d);
