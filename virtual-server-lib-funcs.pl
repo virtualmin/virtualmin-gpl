@@ -12368,8 +12368,8 @@ if ($dir) {
 		  "cd $qdir && unzip $qfile",
 		  "cd $qdir && ".
 		    &make_tar_command("xf", $file),
-		  "cd $qdir && ".
-		    &make_tar_command("xf", $file),
+		  "cd $qdir && unzstd -d -c $qfile | ".
+		    &make_tar_command("xf", "-")
 		  );
 	}
 else {
@@ -12383,7 +12383,7 @@ else {
 		    &make_tar_command("tf", "-"),
 		  "unzip -l $qfile",
 		  &make_tar_command("tf", $file),
-		  &make_tar_command("tf", $file),
+		  "unzstd --test $qfile",
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";
