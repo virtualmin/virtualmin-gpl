@@ -10,6 +10,9 @@ local ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
 local $domains = "$root/domains";
 local $backup = "$root/backup";
+if (!-r $domains && $dom && -d "$backup/$dom") {
+	$domains = $backup;
+	}
 -d $domains && -d $backup || return ("Not a DirectAdmin backup file");
 
 if (!$dom) {
@@ -53,6 +56,9 @@ local ($ok, $root) = &extract_directadmin_dir($file);
 $ok || return ("Not a DirectAdmin tar.gz file : $root");
 local $domains = "$root/domains";
 local $backup = "$root/backup";
+if (!-r $domains && $dom && -d "$backup/$dom") {
+	$domains = $backup;
+	}
 -d $domains && -d $backup || return ("Not a DirectAdmin backup file");
 local $tmpl = &get_template($template);
 
