@@ -72,10 +72,13 @@ $oldsrc = $src;
 $nice = &nice_backup_url($oldsrc);
 if ($mode == 5) {
 	# Uploaded data .. save to temp file
+	&$first_print(&text('migrate_uploading', $in{'src_file'}));
 	$src = &transname();
 	&open_tempfile(SRC, ">$src", 0, 1);
 	&print_tempfile(SRC, $in{'src_upload'});
 	&close_tempfile(SRC);
+	@st = stat($src);
+	&$second_print(&text('migrate_uploaded', &nice_size($st[7])));
 	}
 elsif ($mode > 0) {
 	# Fetch from some server
