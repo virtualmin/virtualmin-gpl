@@ -12301,7 +12301,7 @@ return ( );
 
 # compression_format(file, [&key])
 # Returns 0 if uncompressed, 1 for gzip, 2 for compress, 3 for bzip2 or
-# 4 for zip, 5 for tar
+# 4 for zip, 5 for tar, 6 for zstd
 sub compression_format
 {
 local ($file, $key) = @_;
@@ -12325,6 +12325,9 @@ if (!$rv) {
 	if ($out =~ /tar\s+archive/i) {
 		$rv = 5;
 		}
+	elsif ($out =~ /zstandard\s+compressed/i) {
+		$rv = 6;
+		}
 	}
 return $rv;
 }
@@ -12345,6 +12348,7 @@ local @needs = ( undef,
 		 [ $bunzip2, $tar ],
 		 [ "unzip" ],
 		 [ "tar" ],
+		 [ "unzstd" ],
 		);
 foreach my $n (@{$needs[$format]}) {
 	my ($noargs) = split(/\s+/, $n);
@@ -12364,6 +12368,8 @@ if ($dir) {
 		  "cd $qdir && unzip $qfile",
 		  "cd $qdir && ".
 		    &make_tar_command("xf", $file),
+		  "cd $qdir && unzstd -d -c $qfile | ".
+		    &make_tar_command("xf", "-")
 		  );
 	}
 else {
@@ -12377,6 +12383,7 @@ else {
 		    &make_tar_command("tf", "-"),
 		  "unzip -l $qfile",
 		  &make_tar_command("tf", $file),
+		  "unzstd --test $qfile",
 		  );
 	}
 $cmds[$format] || return "Unknown compression format";
