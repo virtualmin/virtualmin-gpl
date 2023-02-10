@@ -19209,18 +19209,27 @@ foreach my $f (&list_provision_features()) {
 		# Template has an option to control where DNS is hosted
 		my $cloud = $d->{'dns_cloud'} || $tmpl->{'dns_cloud'};
 		if ($cloud eq 'services') {
+			# Cloudmin services
 			$d->{'provision_dns'} = 1;
 			delete($d->{'dns_cloud'});
 			}
 		elsif ($cloud eq 'local') {
+			# Local system
 			$d->{'provision_dns'} = 0;
 			delete($d->{'dns_cloud'});
 			}
+		elsif ($cloud =~ /^remote_(\S+)$/) {
+			# Remote Webmin server
+			delete($d->{'dns_cloud'});
+			$d->{'dns_remote'} = $1;
+			}
 		elsif ($cloud eq '') {
+			# Global default
 			$d->{'provision_dns'} = 1 if ($config{'provision_dns'});
 			delete($d->{'dns_cloud'});
 			}
 		else {
+			# Cloud provider
 			$d->{'dns_cloud'} = $cloud;
 			$d->{'dns_cloud_import'} = $tmpl->{'dns_cloud_import'};
 			}

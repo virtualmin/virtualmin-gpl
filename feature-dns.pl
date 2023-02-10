@@ -2845,6 +2845,14 @@ foreach my $c (&list_dns_clouds()) {
 		push(@clouds, [ $c->{'name'}, $c->{'desc'} ]);
 		}
 	}
+my @remotes;
+if (defined(&list_remote_dns)) {
+	foreach my $r (grep { $_->{'id'} != 0 && !$_->{'slave'} }
+			    &list_remote_dns()) {
+		push(@clouds, [ "remote_".$r->{'host'},
+				&text('tmpl_dns_remote', $r->{'host'}) ]);
+		}
+	}
 if (@clouds > 1) {
 	splice(@clouds, 1, 0, [ "local", $text{'dns_cloud_local'} ]);
 	}
