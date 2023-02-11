@@ -2035,16 +2035,19 @@ else {
 		return 0;
 		}
 	&obtain_lock_dns($d, 1);
-	&require_bind();
+	my $r = &require_bind($d);
 	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	local $ok;
 	if ($z) {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
-		local $rootfile = &bind8::make_chroot($z->{'file'});
+		local $rootfile = &remote_foreign_call(
+			$r, "bind8", "make_chroot", $z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'}.".disabled";
-		&bind8::save_directive(&bind8::get_config_parent(),
-					[ $z ], [ $z ], 0);
-		&flush_file_lines($rootfile);
+		my $pconf = &remote_foreign_call($r, "bind8",
+						 "get_config_parent");
+		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
+				     [ $z ], [ $z ], 0);
+		&remote_foreign_call($r, "bind8", "flush_file_lines",$rootfile);
 
 		# Rename all records in the domain with the new .disabled name
 		foreach my $r (@$recs) {
@@ -2058,7 +2061,7 @@ else {
 		&post_records_change($d, $recs, $file);
 
 		# Clear zone names caches
-		undef(@bind8::list_zone_names_cache);
+		&remote_foreign_call($r, "bind8", "flush_zone_names");
 		&$second_print($text{'setup_done'});
 		&register_post_action(\&restart_bind, $d);
 
@@ -2129,16 +2132,19 @@ else {
 		return 0;
 		}
 	&obtain_lock_dns($d, 1);
-	&require_bind();
+	my $r = &require_bind($d);
 	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	local $ok;
 	if ($z) {
 		local ($recs, $file) = &get_domain_dns_records_and_file($d);
-		local $rootfile = &bind8::make_chroot($z->{'file'});
+		local $rootfile = &remote_foreign_call(
+			$r, "bind8", "make_chroot", $z->{'file'});
 		$z->{'values'}->[0] = $d->{'dom'};
-		&bind8::save_directive(
-			&bind8::get_config_parent(), [ $z ], [ $z ], 0);
-		&flush_file_lines($rootfile);
+		my $pconf = &remote_foreign_call($r, "bind8",
+						 "get_config_parent");
+		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
+				     [ $z ], [ $z ], 0);
+		&remote_foreign_call($r, "bind8", "flush_file_lines",$rootfile);
 
 		# Fix all records in the domain with the .disabled name
 		foreach my $r (@$recs) {
@@ -2152,7 +2158,7 @@ else {
 		&post_records_change($d, $recs, $file);
 
 		# Clear zone names caches
-		undef(@bind8::list_zone_names_cache);
+		&remote_foreign_call($r, "bind8", "flush_zone_names");
 		&$second_print($text{'setup_done'});
 		&register_post_action(\&restart_bind, $d);
 
