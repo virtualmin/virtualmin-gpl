@@ -2328,27 +2328,28 @@ return &remote_foreign_call($r, "bind8", "check_pid_file", $pidfile);
 sub backup_dns
 {
 my ($d, $file) = @_;
-&require_bind();
+my $r = &require_bind($d);
 &$first_print($text{'backup_dnscp'});
-local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
-if (!$zonefile) {
+my ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
+my $z = &get_bind_zone($d->{'dom'}, undef, $d);
+if (!$zonefile || !$z) {
 	# Zone doesn't exist!
 	&$second_print($text{'backup_dnsnozone'});
 	return 0;
 	}
-local $absfile = &bind8::make_chroot(&bind8::absolute_path($zonefile));
-if (!-r $absfile) {
-	# Zone file doesn't exist!
-	&$second_print(&text('backup_dnsnozonefile', "<tt>$zonefile</tt>"));
-	return 0;
-	}
+my $f = &bind8::find("file", $z->{'members'});
+my $absfile = &remote_foreign_call($r, "bind8", "make_chroot",
+    &remote_foreign_call($r, "bind8", "absolute_path", $f->{'values'}->[0]));
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
-	&copy_write_as_domain_user($d, $absfile, $file);
+	&write_as_domain_user($d, sub {
+		&remote_read($r, $file, $absfile);
+		});
 
 	# Also save DNSSEC keys, if possible
 	if (&can_domain_dnssec($d)) {
-		my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		my @keys = &remote_foreign_call(
+			$r, "bind8", "get_dnssec_key", $z);
 		@keys = grep { ref($_) &&
 			       $_->{'privatefile'} &&
 			       $_->{'publicfile'} } @keys;
@@ -2356,15 +2357,19 @@ if (!$d->{'dns_submode'}) {
 		my %kinfo;
 		foreach my $key (@keys) {
 			foreach my $t ('private', 'public') {
-				&copy_write_as_domain_user(
-					$d, $key->{$t.'file'},
-					$file.'_dnssec_'.$t.'_'.$i);
+				&write_as_domain_user($d, sub {
+					&remote_read($r,
+						$file.'_dnssec_'.$t.'_'.$i,
+						$key->{$t.'file'});
+					});
 				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
 				$kinfo{$t.'_'.$i} = $1;
 				}
 			$i++;
 			}
-		&write_file($file."_dnssec_keyinfo", \%kinfo);
+		&write_as_domain_user($d, sub {
+			&write_file($file."_dnssec_keyinfo", \%kinfo);
+			});
 		}
 	}
 else {
@@ -2384,7 +2389,7 @@ else {
 
 # Also write out the records in serialized format, to preserve non-standard
 # attributes like 'proxied'
-local $rfile = $file."_records";
+my $rfile = $file."_records";
 &write_file_contents($rfile, &serialise_variable($recs));
 
 &$second_print($text{'setup_done'});
@@ -2395,24 +2400,24 @@ return 1;
 # Update the virtual server's DNS records from the backup file, except the SOA
 sub restore_dns
 {
-local ($d, $file, $opts) = @_;
-&require_bind();
+my ($d, $file, $opts) = @_;
+my $r = &require_bind($d);
 &$first_print($text{'restore_dnscp'});
 &obtain_lock_dns($d, 1);
 &pre_records_change($d);
-local ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
-local $ok;
+my ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
+my $z = &get_bind_zone($d->{'dom'}, undef, $d);
 if (!$zonefile) {
 	# DNS zone not found!
 	&$second_print($text{'backup_dnsnozone'});
 	&release_lock_dns($d, 1);
 	return 0;
 	}
-local @thisrecs = @$recs;
+my @thisrecs = @$recs;
 
 # Read records from the backup file
-local $brecs;
-local $rfile = $file."_records";
+my $brecs;
+my $rfile = $file."_records";
 if (-r $rfile && $d->{'dns_cloud'}) {
 	$brecs = &unserialise_variable(&read_file_contents($rfile));
 	}
@@ -2456,7 +2461,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
-	my @keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	my @keys = &remote_foreign_call($r, "bind8", "get_dnssec_key", $z);
 	if (!@keys && $dnskeys) {
 		# DNSSEC was enabled before but not now, perhaps because it's
 		# not in the template. So enable it.
@@ -2469,7 +2474,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 			&$second_print($text{'setup_done'});
 			}
 		&$outdent_print();
-		@keys = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+		@keys = &remote_foreign_call($r, "bind8", "get_dnssec_key", $z);
 		}
 	@keys = grep { ref($_) && $_->{'privatefile'} && $_->{'publicfile'} }
 		     @keys;
@@ -2480,17 +2485,20 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	foreach my $key (@keys) {
 		foreach my $t ('private', 'public') {
 			next if (!-r $file.'_dnssec_'.$t.'_'.$i);
-			&unlink_file($key->{$t.'file'});
+			&remote_foreign_call($r, "bind8", "unlink_file",
+					     $key->{$t.'file'});
 			$key->{$t.'file'} =~ /^(.*)\// || next;
 			my $keydir = $1;
 			if ($kinfo{$t.'_'.$i}) {
 				$key->{$t.'file'} = $keydir.'/'.
 					$kinfo{$t.'_'.$i};
 				}
-			$rok = &copy_source_dest($file.'_dnssec_'.$t.'_'.$i,
-					  $key->{$t.'file'});
-			last if (!$rok);
-			&bind8::set_ownership($key->{$t.'file'});
+			&write_as_domain_user($d, sub {
+				&remote_write($r, $file.'_dnssec_'.$t.'_'.$i,
+					      $key->{$t.'file'});
+				});
+			&remote_foreign_call($r, "bind8", "set_ownership",
+					     $key->{$t.'file'});
 			}
 		$i++;
 		}
@@ -2510,16 +2518,16 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	}
 
 # Need to update IP addresses
-local $r;
-local ($baserec) = grep { $_->{'type'} eq "A" &&
+my $r;
+my ($baserec) = grep { $_->{'type'} eq "A" &&
 			  ($_->{'name'} eq $d->{'dom'}."." ||
 			   $_->{'name'} eq '@') } @$recs;
-local $dns_ip = $d->{'dns_ip'} || $d->{'ip'};
-local $dns_baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
+my $dns_ip = $d->{'dns_ip'} || $d->{'ip'};
+my $dns_baseip = $d->{'old_dns_ip'} ? $d->{'old_dns_ip'} :
 		    $d->{'old_ip'} ? $d->{'old_ip'} :
 			$baserec ? $baserec->{'values'}->[0] : undef;
-local $ip = $d->{'ip'};
-local $baseip = $d->{'old_ip'};
+my $ip = $d->{'ip'};
+my $baseip = $d->{'old_ip'};
 if ($dns_baseip && $dns_baseip ne $baseip) {
 	&modify_records_ip_address($recs, $zonefile, $dns_baseip, $dns_ip);
 	}
@@ -2528,11 +2536,11 @@ if ($baseip) {
 	}
 
 # Need to update IPv6 address
-local ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
+my ($baserec6) = grep { $_->{'type'} eq "AAAA" &&
 			   ($_->{'name'} eq $d->{'dom'}."." ||
 			    $_->{'name'} eq '@') } @$recs;
-local $ip6 = $d->{'ip6'};
-local $baseip6 = $d->{'old_ip6'} ? $d->{'old_ip6'} :
+my $ip6 = $d->{'ip6'};
+my $baseip6 = $d->{'old_ip6'} ? $d->{'old_ip6'} :
 			$baserec6 ? $baserec6->{'values'}->[0] : undef;
 if ($baseip6 && $ip6) {
 	# Update to new v6 address
@@ -2544,9 +2552,9 @@ elsif ($baseip6 && !$ip6) {
 	}
 
 # Replace NS records with those from new system (if there are any)
-local @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
+my @thisns = grep { $_->{'type'} eq 'NS' } @thisrecs;
 if (@thisns) {
-	local @ns = grep { $_->{'type'} eq 'NS' } @$recs;
+	my @ns = grep { $_->{'type'} eq 'NS' } @$recs;
 	foreach my $r (@thisns) {
 		# Create NS records that were in new system's file
 		my $name = $r->{'name'};
@@ -2564,26 +2572,26 @@ if (@thisns) {
 
 # Make sure any SPF record contains this system's default IP v4 and
 # v6 addresses
-local @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
+my @types = $bind8::config{'spf_record'} ? ( "SPF", "TXT" )
 					    : ( "SPF" );
 foreach my $t (@types) {
-	local ($r) = grep { $_->{'type'} eq $t &&
+	my ($r) = grep { $_->{'type'} eq $t &&
 			    $_->{'name'} eq $d->{'dom'}.'.' } @$recs;
 	next if (!$r);
-	local $spf = &bind8::parse_spf(@{$r->{'values'}});
-	local $changed = 0;
-	local $defip = &get_default_ip();
+	my $spf = &bind8::parse_spf(@{$r->{'values'}});
+	my $changed = 0;
+	my $defip = &get_default_ip();
 	if (&indexof($defip, @{$spf->{'ip4'}}) < 0) {
 		push(@{$spf->{'ip4'}}, $defip);
 		$changed++;
 		}
-	local $defip6 = &get_default_ip6();
+	my $defip6 = &get_default_ip6();
 	if (&indexof($defip6, @{$spf->{'ip6'}}) < 0) {
 		push(@{$spf->{'ip6'}}, $defip6);
 		$changed++;
 		}
 	if ($changed) {
-		local $str = &bind8::join_spf($spf);
+		my $str = &bind8::join_spf($spf);
 		$r->{'values'} = [ $str ];
 		&modify_dns_record($recs, $zonefile, $r);
 		}
