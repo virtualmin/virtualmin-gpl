@@ -7692,5 +7692,9 @@ remotedns_ebind8=The BIND DNS Server Webmin module is not installed
 remotedns_ebind8inst=The BIND DNS Server is not installed or not running
 remotedns_ebind8conf=BIND configuration could not be read!
 remotedns_eversion=Webmin version must be at least $1
+remotedns_derr=Failed to remove remote DNS servers
+remotedns_einuse=Server $1 is still in use
+remotedns_ednone=None selected!
+remotedns_eslave=This system can only be a master DNS server
 
 __norefs=1

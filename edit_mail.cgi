@@ -55,8 +55,6 @@ if ($supports_dependent) {
 			      ]));
 	}
 
-print &ui_table_hr();
-
 # Cloud mail filter
 @provs = &list_cloud_mail_providers($d);
 $prov = &get_domain_cloud_mail_provider($d);
@@ -91,8 +89,6 @@ if (defined(&list_smtp_clouds)) {
 	}
 if (@okclouds) {
 	# Cloud mail delivery provider fields
-	print &ui_table_hr();
-
 	print &ui_table_row($text{'mail_smtp_cloud'},
 		&ui_select("smtp_cloud", $d->{'smtp_cloud'},
 			[ [ "", $text{'mail_smtp_local'} ],
