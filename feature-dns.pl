@@ -2714,12 +2714,12 @@ return $view;
 sub sysinfo_dns
 {
 &require_bind();
-if ($config{'provision_dns'} || &default_dns_cloud()) {
+if (&is_dns_remote()) {
 	# No local BIND in provisioning mode
 	return ( );
 	}
 if (!$bind8::bind_version) {
-	local $out = `$bind8::config{'named_path'} -v 2>&1`;
+	local $out = &backquote_command("$bind8::config{'named_path'} -v 2>&1");
 	if ($out =~ /(bind|named)\s+([0-9\.]+)/i) {
 		$bind8::bind_version = $2;
 		}
@@ -2730,7 +2730,7 @@ return ( [ $text{'sysinfo_bind'}, $bind8::bind_version ] );
 sub startstop_dns
 {
 local ($typestatus) = @_;
-if ($config{'provision_dns'} || &default_dns_cloud()) {
+if (&is_dns_remote()) {
 	# Cannot start or stop when remote
 	return ();
 	}
@@ -2775,7 +2775,7 @@ sub show_template_dns
 local ($tmpl) = @_;
 &require_bind();
 local ($conf, @views);
-if (!$config{'provision_dns'}) {
+if (!&is_dns_remote()) {
 	$conf = &bind8::get_config();
 	@views = &bind8::find("view", $conf);
 	}
@@ -4749,7 +4749,8 @@ if ($d) {
 	return $d->{'provision_dns'} || $d->{'dns_cloud'} || $d->{'dns_remote'};
 	}
 else {
-	return $config{'provision_dns'} || &default_dns_cloud();
+	return $config{'provision_dns'} || &default_dns_cloud() ||
+	       $config{'dns_nolocal'};
 	}
 }
 
