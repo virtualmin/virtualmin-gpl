@@ -2765,6 +2765,7 @@ if ($ok) {
 				$d->{'provision_'.$f} = 0;
 				}
 			delete($d->{'dns_cloud'});
+			delete($d->{'dns_remote'});
 			&set_provision_features($d);
 
 			# Check for clashes
