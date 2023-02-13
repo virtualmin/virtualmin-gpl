@@ -646,6 +646,7 @@ $d->{'dns_slave'} = join(" ", &unique(@oldslaves, @newslaves));
 sub delete_zone_on_slaves
 {
 local ($d, $slaveslist) = @_;
+local $oldd = { %$d };
 local @delslaves = $slaveslist ? split(/\s+/, $slaveslist)
 			       : split(/\s+/, $d->{'dns_slave'});
 &require_bind();
@@ -685,7 +686,7 @@ if (@delslaves) {
 		}
 	}
 
-&register_post_action(\&restart_bind, $d);
+&register_post_action(\&restart_bind, $oldd);
 }
 
 # update_dns_slave_ip_addresses(ip, old-ip, [&doms])
@@ -2237,6 +2238,9 @@ if (&bind8::list_slave_servers() && @shosts) {
 		}
 	else {
 		&$second_print($text{'setup_done'});
+		}
+	if (defined(&bind8::restart_zone_on_slaves)) {
+		&bind8::restart_zone_on_slaves($d->{'dom'}, \@shosts);
 		}
 	}
 &unlock_file($bindlock);
