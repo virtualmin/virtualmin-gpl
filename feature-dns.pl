@@ -2254,7 +2254,7 @@ sub reload_bind_records
 local ($d) = @_;
 if ($d->{'dns_submode'}) {
 	# Reload in parent, which might be cloud hosted
-	$d = &get_domain($d->{'dns_parent'});
+	$d = &get_domain($d->{'dns_subof'});
 	}
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
