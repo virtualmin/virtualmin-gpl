@@ -646,6 +646,7 @@ $d->{'dns_slave'} = join(" ", &unique(@oldslaves, @newslaves));
 sub delete_zone_on_slaves
 {
 local ($d, $slaveslist) = @_;
+local $oldd = { %$d };
 local @delslaves = $slaveslist ? split(/\s+/, $slaveslist)
 			       : split(/\s+/, $d->{'dns_slave'});
 &require_bind();
@@ -685,7 +686,7 @@ if (@delslaves) {
 		}
 	}
 
-&register_post_action(\&restart_bind, $d);
+&register_post_action(\&restart_bind, $oldd);
 }
 
 # update_dns_slave_ip_addresses(ip, old-ip, [&doms])
@@ -747,7 +748,7 @@ if ($d->{'alias'} && $oldd->{'alias'} &&
 	return 1;
 	}
 
-&require_bind();
+my $r = &require_bind($d);
 local $tmpl = &get_template($d->{'template'});
 local ($oldzonename, $newzonename, $lockon, $lockconf, $zdom);
 if ($d->{'dns_submode'}) {
@@ -841,8 +842,9 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 		local $nfn = $fn;
 		$nfn =~ s/$oldd->{'dom'}/$d->{'dom'}/;
 		if ($fn ne $nfn) {
-			&rename_logged(&bind8::make_chroot($fn),
-				       &bind8::make_chroot($nfn))
+			&remote_foreign_call($r, "bind8", "rename_logged",
+			  &remote_foreign_call($r, "bind8", "make_chroot", $fn),
+			  &remote_foreign_call($r, "bind8", "make_chroot", $nfn));
 			}
 		$f->{'values'}->[0] = $nfn;
 		$f->{'value'} = $nfn;
@@ -850,9 +852,12 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 		# Change zone in .conf file
 		$z->{'values'}->[0] = $d->{'dom'};
 		$z->{'value'} = $d->{'dom'};
-		&bind8::save_directive(&bind8::get_config_parent(),
-				       [ $z ], [ $z ], 0);
-		&flush_file_lines();
+		my $pconf = &remote_foreign_call(
+			$r, "bind8", "get_config_parent");
+		&remote_foreign_call($r, "bind8", "save_directive", $pconf,
+			[ $z ], [ $z ], 0);
+		&remote_foreign_call($r, "bind8", "flush_file_lines");
+		&remote_foreign_call($r, "bind8", "clear_config_cache");
 		}
 	else {
 		&$first_print($text{'save_dns6'});
@@ -860,15 +865,20 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	&clear_domain_dns_records_and_file($d);
 
 	# Modify any records containing the old name
-	&lock_file(&bind8::make_chroot($nfn));
+	#&lock_file(&bind8::make_chroot($nfn));
 	&pre_records_change($d);
 	($recs, $file) = &get_domain_dns_records_and_file($d);
+	if (!$file) {
+		&$second_print(&text('save_dns2_enewfile', $recs));
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
 	&modify_records_domain_name($recs, $file,
 				    $oldd->{'dom'}, $d->{'dom'});
 
         # Update SOA record
 	&post_records_change($d, $recs, $file);
-	&unlock_file(&bind8::make_chroot($nfn));
+	#&unlock_file(&bind8::make_chroot($nfn));
 	$rv++;
 
 	# Clear zone names caches
@@ -2238,6 +2248,9 @@ if (&bind8::list_slave_servers() && @shosts) {
 	else {
 		&$second_print($text{'setup_done'});
 		}
+	if (defined(&bind8::restart_zone_on_slaves)) {
+		&bind8::restart_zone_on_slaves($d->{'dom'}, \@shosts);
+		}
 	}
 &unlock_file($bindlock);
 return $rv;
@@ -2250,7 +2263,7 @@ sub reload_bind_records
 local ($d) = @_;
 if ($d->{'dns_submode'}) {
 	# Reload in parent, which might be cloud hosted
-	$d = &get_domain($d->{'dns_parent'});
+	$d = &get_domain($d->{'dns_subof'});
 	}
 if ($d->{'provision_dns'} || $d->{'dns_cloud'}) {
 	# Done remotely when records are uploaded
@@ -3584,6 +3597,9 @@ elsif ($d->{'dns_remote'}) {
 	# XXX chroot??
 	my $r = &require_bind($d);
 	my $rfile = &get_domain_dns_file_from_bind($d);
+	if (!$rfile) {
+		return ("No zone file found for $d->{'dom'}");
+		}
 	eval {
 		local $main::remote_error_handler = sub { die @_ };
 		&remote_read($r, $abstemp, $rfile);

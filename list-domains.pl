@@ -743,6 +743,9 @@ if ($multi) {
 					$d->{'dns_cloud'} } &list_dns_clouds();
 				$mode = "Cloud DNS Provider $cloud->{'desc'}";
 				}
+			elsif ($f eq "dns" && $d->{'dns_remote'}) {
+				$mode = "Remote DNS server $d->{'dns_remote'}";
+				}
 			print "    Provisioning for ${f}: $mode\n";
 			}
 
