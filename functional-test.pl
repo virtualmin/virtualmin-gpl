@@ -257,6 +257,21 @@ $webmin_user_theme ||= $current_theme;
 # Check that global configs are setup for the test
 $config{'auto_redirect'} && die "auto_redirect must be set to 0";
 
+# Work out which DNS server is being used
+if ($tmplname) {
+	($tmpl) = grep { $_->{'name'} eq $tmplname } &list_templates();
+	$tmpl || die "No template named $tmplname exists";
+	}
+else {
+	$tmpl = &get_template(0);
+	}
+if ($tmpl->{'dns_cloud'} =~ /^remote_(\S+)$/) {
+	$dnsserver = $1;
+	}
+else {
+	$dnsserver = "127.0.0.1";
+	}
+
 $_config_tests = [
 	# Just validate global config
 	{ 'command' => 'check-config.pl' },
@@ -9517,23 +9532,23 @@ $dns_tests = [
 	},
 
 	# Validate standard records
-	{ 'command' => 'host -t A '.$test_domain,
+	{ 'command' => 'host -t A '.$test_domain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A www.'.$test_domain,
+	{ 'command' => 'host -t A www.'.$test_domain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A mail.'.$test_domain,
+	{ 'command' => 'host -t A mail.'.$test_domain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A '.$test_dns_subdomain,
+	{ 'command' => 'host -t A '.$test_dns_subdomain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A www.'.$test_dns_subdomain,
+	{ 'command' => 'host -t A www.'.$test_dns_subdomain.' '.$dnsserver,
 	},
 
 	# Validate alias domain records
-	{ 'command' => 'host -t A '.$test_subdomain,
+	{ 'command' => 'host -t A '.$test_subdomain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A www.'.$test_subdomain,
+	{ 'command' => 'host -t A www.'.$test_subdomain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A mail.'.$test_subdomain,
+	{ 'command' => 'host -t A mail.'.$test_subdomain.' '.$dnsserver,
 	},
 
 	# Add a record to both domains
@@ -9562,11 +9577,11 @@ $dns_tests = [
 		      [ 'domain', $test_dns_subdomain ] ],
 	  'grep' => [ 'testing2' ],
 	},
-	{ 'command' => 'host -t A testing1.'.$test_domain,
+	{ 'command' => 'host -t A testing1.'.$test_domain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A testing1.'.$test_subdomain,
+	{ 'command' => 'host -t A testing1.'.$test_subdomain.' '.$dnsserver,
 	},
-	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain,
+	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain.' '.$dnsserver,
 	},
 
 	# Split the sub-domain into it's own zone
