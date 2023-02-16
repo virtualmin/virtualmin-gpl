@@ -5120,7 +5120,7 @@ $command || return "Missing the <tt>dig</tt> command";
 $name || return "Missing domain name parameter";
 $command_params = ($type ? " ".quotemeta($type) : "")." ".quotemeta($name);
 $temp = &transname();
-$dnsseccheck = !$config{'dns_lookup_server_no_dnscheck'};
+$dnsseccheck = $config{'dns_lookup_server_dnsseccheck'};
 $dnslookup = quotemeta($config{'dns_lookup_server'} ||
                        # We need default DNS that returns clear EDE
                        '1.1.1.1');
