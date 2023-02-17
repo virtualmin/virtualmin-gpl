@@ -243,7 +243,7 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 		my $fsize = -s $temp;
 		my $fsizen = &nice_size($fsize);
 		print "<p><b>",
-		      &ui_link("/$module_name/download_backup.cgi?file=".
+		      &ui_link("@{[&get_webprefix_safe()]}/$module_name/download_backup.cgi?file=".
 				&urlize($temp),
 			       &text('backup_downloadfile', $tempfile) . " ($fsizen)" ),
 		      "</b><p>\n";
