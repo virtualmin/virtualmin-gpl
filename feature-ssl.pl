@@ -674,6 +674,14 @@ if ($err) {
 	return $err;
 	}
 
+# Make sure the cert and key match
+my $certdata = &read_file_contents($cert);
+my $keydata = &read_file_contents($key);
+my $err = check_cert_key_match($certdata, $keydata);
+if ($err) {
+	return $err;
+	}
+
 # Make sure this domain or www.domain matches cert. Include aliases, because
 # in some cases the alias may be the externally visible domain
 my $match = 0;
