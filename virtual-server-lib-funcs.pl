@@ -1361,7 +1361,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
 		}
 	if ($needextra) {
 		$extrauser = { %{$_[0]} };
-		$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
+		$extrauser->{'user'} = &replace_atsign($extrauser->{'user'}, 1);
 		&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
 		&set_virtualmin_user_envs($_[0], $_[1]);
 		&foreign_call($usermodule, "making_changes");
@@ -9091,10 +9091,10 @@ return $escuser;
 # Replace an @ in a username with -
 sub replace_atsign
 {
-my ($user) = @_;
+my ($user, $nocheck) = @_;
 my $origuser = $user;
 $user =~ s/\@/-/g;
-if (!getpwnam($user)) {
+if (!getpwnam($user) && !$nocheck) {
 	$user = &escape_user($origuser);
 	}
 
