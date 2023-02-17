@@ -9078,8 +9078,12 @@ return $escuser;
 # Converts a username into a suitable alias name
 sub escape_alias
 {
-local ($escuser) = @_;
+my ($escuser) = @_;
+my $origuser = $escuser;
 $escuser =~ s/\@/-/g;
+if (!getpwnam($escuser)) {
+	$escuser = &escape_user($origuser);
+	}
 return $escuser;
 }
 
