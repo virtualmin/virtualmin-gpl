@@ -135,24 +135,12 @@ if ($simple->{'bounce'}) {
 	}
 if ($simple->{'local'}) {
 	local $escuser = $simple->{'local'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/ &&
-	    getpwnam(&replace_atsign($escuser))) {
-		$escuser = &replace_atsign($escuser);
-		}
-	else {
-		$escuser = &escape_user($escuser);
-		}
+	$escuser = &replace_atsign($escuser);
 	push(@v, "\\".$escuser);
 	}
 if ($simple->{'tome'}) {
 	local $escuser = $alias->{'user'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/ &&
-	    getpwnam(&replace_atsign($escuser))) {
-		$escuser = &replace_atsign($escuser);
-		}
-	else {
-		$escuser = &escape_user($escuser);
-		}
+	$escuser = &replace_atsign($escuser);
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
 if ($simple->{'auto'}) {

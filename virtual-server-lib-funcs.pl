@@ -9091,9 +9091,14 @@ return $escuser;
 # Replace an @ in a username with -
 sub replace_atsign
 {
-local ($rv) = @_;
-$rv =~ s/\@/-/g;
-return $rv;
+my ($user) = @_;
+my $origuser = $user;
+$user =~ s/\@/-/g;
+if (!getpwnam($user)) {
+	$user = &escape_user($origuser);
+	}
+
+return $user;
 }
 
 # add_atsign(username)
