@@ -7515,6 +7515,9 @@ if ($config_longname && $config_longname !~ /^[0-9]$/) {
 	# Extract random username based on the user pattern
 	$user = &generate_random_available_user($config_longname);
 	}
+elsif ($config_longname == 2) {
+	$user = &compute_prefix($dname, undef, undef, 1);
+	}
 else {
 	# Use one based on actual domain name
 	$dname =~ s/^xn(-+)//;
@@ -7556,6 +7559,9 @@ if ($user && $config{'groupsame'}) {
 # Extract random group based on the user pattern
 if ($config_longname && $config_longname !~ /^[0-9]$/) {
 	$group = &generate_random_available_user($config_longname);
+	}
+elsif ($config_longname == 2) {
+	$group = &compute_prefix($dname, undef, undef, 1);
 	}
 # Use one based on actual domain name
 else {
