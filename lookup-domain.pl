@@ -163,7 +163,7 @@ $cacheclient = &get_domain_spam_client($d);
 # Check if the user is approaching his quota
 @users = &list_domain_users($d, 0, 1, 0, 1);
 ($user) = grep { $_->{'user'} eq $username ||
-		 &replace_atsign($_->{'user'}) eq $username } @users;
+		 &replace_atsign_if_exists($_->{'user'}) eq $username } @users;
 if (!$user) {
 	# Couldn't find him?! So do the spam check
 	$cachespam = $d->{'id'};

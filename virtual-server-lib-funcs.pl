@@ -773,7 +773,7 @@ if ($d) {
 	# Remove users with @ in their names for whom a user with the @ replace
 	# already exists (for Postfix)
 	if ($config{'mail_system'} == 0) {
-		local %umap = map { &replace_atsign($_->{'user'}), $_ }
+		local %umap = map { &replace_atsign_if_exists($_->{'user'}), $_ }
 				grep { $_->{'user'} =~ /\@/ } @users;
 		@users = grep { !$umap{$_->{'user'}} } @users;
 		}
@@ -1220,7 +1220,7 @@ foreach my $u (@users) {
 	else {
 		# Set quotas based on quota commands
 		my $altuser = $u->{'user'} =~ /\@/ ?
-				&replace_atsign($u->{'user'}) :
+				&replace_atsign_if_exists($u->{'user'}) :
 				&add_atsign($u->{'user'});
 		$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}} ||
 				    $main::soft_home_quota{$altuser};
@@ -1361,7 +1361,7 @@ if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
 		}
 	if ($needextra) {
 		$extrauser = { %{$_[0]} };
-		$extrauser->{'user'} = &replace_atsign($extrauser->{'user'}, 1);
+		$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
 		&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
 		&set_virtualmin_user_envs($_[0], $_[1]);
 		&foreign_call($usermodule, "making_changes");
@@ -1633,13 +1633,13 @@ else {
 	&foreign_call($usermodule, "made_changes");
 
 	if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
-		local $esc = &replace_atsign($_[1]->{'user'});
+		local $esc = &replace_atsign_if_exists($_[1]->{'user'});
 		local @allusers = &list_all_users_quotas(1);
 		local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
 		if ($oldextrauser) {
 			# Found him .. fix up
 			$extrauser = { %{$_[0]} };
-			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
+			$extrauser->{'user'} = &replace_atsign_if_exists($_[0]->{'user'});
 			$extrauser->{'dn'} = $oldextrauser->{'dn'};
 			&foreign_call($usermodule, "set_user_envs", $extrauser,
 					'MODIFY_USER', $_[0]->{'plainpass'},
@@ -2113,7 +2113,7 @@ else {
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Find the Unix user with the @ escaped and delete it too
-	local $esc = &replace_atsign($_[0]->{'user'});
+	local $esc = &replace_atsign_if_exists($_[0]->{'user'});
 	local @allusers = &list_all_users_quotas(1);
 	local ($extrauser) = grep { $_->{'user'} eq $esc } @allusers;
 	if ($extrauser) {
@@ -4762,7 +4762,7 @@ elsif ($_[0] =~ /^:include:(.*)$/) {
         @rv = (2, $1);
         }
 elsif ($_[0] =~ /^\\(\S+)$/) {
-	if ($1 eq $_[1] || $1 eq "NEWUSER" || $1 eq &replace_atsign($_[1]) ||
+	if ($1 eq $_[1] || $1 eq "NEWUSER" || $1 eq &replace_atsign_if_exists($_[1]) ||
 	    $1 eq &escape_user($_[1])) {
 		return (10);
 		}
@@ -5111,7 +5111,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 	elsif ($t == 10) {
 		# Alias to self .. may need to used at-escaped name
 		if ($config{'mail_system'} == 0 && $_[1] =~ /\@/) {
-			push(@values, "\\".&replace_atsign($_[1]));
+			push(@values, "\\".&replace_atsign_if_exists($_[1]));
 			}
 		else {
 			push(@values, "\\".&escape_user($_[1]));
@@ -9091,13 +9091,21 @@ return $escuser;
 # Replace an @ in a username with -
 sub replace_atsign
 {
-my ($user, $nocheck) = @_;
+my ($user) = @_;
+$user =~ s/\@/-/g;
+return $user;
+}
+
+# replace_atsign_if_exists(username)
+# Replace an @ in a username with -
+# if a user exists in system
+sub replace_atsign_if_exists
+{
+my ($user) = @_;
 my $origuser = $user;
 $user =~ s/\@/-/g;
-if (!getpwnam($user) && !$nocheck) {
-	$user = &escape_user($origuser);
-	}
-
+$user = &escape_user($origuser)
+	if (!getpwnam($user));
 return $user;
 }
 
@@ -11716,7 +11724,7 @@ foreach my $d (@doms) {
 	local $u;
 	foreach $u (@users) {
 		if ($u->{'user'} eq $_[0] ||
-		    &replace_atsign($u->{'user'}) eq $_[0]) {
+		    &replace_atsign_if_exists($u->{'user'}) eq $_[0]) {
 			return $d;
 			}
 		}
@@ -17340,7 +17348,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 		}
 	if ($config{'mail_system'} == 0) {
 		# Don't double-count Postfix @ and - users
-		local $noat = &replace_atsign($u->{'user'});
+		local $noat = &replace_atsign_if_exists($u->{'user'});
 		next if ($doneuser{$noat}++);
 		}
 	if ($did) {

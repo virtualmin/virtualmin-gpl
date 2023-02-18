@@ -153,7 +153,7 @@ if ($config{'mail_system'} != 4) {
 		if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
 			# Special case for Postfix @ users
 			$foruser{$pop3."\@".$d->{'dom'}} =
-				&replace_atsign($u->{'user'});
+				&replace_atsign_if_exists($u->{'user'});
 			}
 		}
 	if ($d->{'mail'}) {
@@ -2316,7 +2316,7 @@ elsif ($config{'mail_system'} == 0) {
 			# link from the @ so that the mail server and Webmin
 			# agree.
 			$mfreal = &postfix::postfix_mail_file(
-					&replace_atsign($user->{'user'}));
+					&replace_atsign_if_exists($user->{'user'}));
 			}
 		}
 	elsif ($s == 2) {
@@ -2502,7 +2502,7 @@ local $noat;
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Remove real file as well as link, if any
 	local $fakeuser = { %{$_[0]} };
-	$fakeuser->{'user'} = $noat = &replace_atsign($_[0]->{'user'});
+	$fakeuser->{'user'} = $noat = &replace_atsign_if_exists($_[0]->{'user'});
 	local ($realumf, $realtype) = &user_mail_file($fakeuser);
 	if ($realumf ne $umf && $realtype == 0) {
 		&system_logged("rm -f ".quotemeta($realumf));
@@ -2559,7 +2559,7 @@ if (&foreign_check("dovecot")) {
 		}
 	foreach my $dove (@doves) {
 		&unlink_file($dove."/".$_[0]->{'user'});
-		&unlink_file($dove."/".&replace_atsign($_[0]->{'user'}));
+		&unlink_file($dove."/".&replace_atsign_if_exists($_[0]->{'user'}));
 		}
 	}
 }
@@ -2606,8 +2606,8 @@ if (&foreign_check("dovecot")) {
 	foreach my $dove (@doves) {
 		&rename_file($dove."/".$_[1]->{'user'},
 			     $dove."/".$_[0]->{'user'});
-		&rename_file($dove."/".&replace_atsign($_[1]->{'user'}),
-			     $dove."/".&replace_atsign($_[0]->{'user'}));
+		&rename_file($dove."/".&replace_atsign_if_exists($_[1]->{'user'}),
+			     $dove."/".&replace_atsign_if_exists($_[0]->{'user'}));
 		}
 	}
 }
@@ -3169,7 +3169,7 @@ if (&foreign_check("dovecot") && &foreign_installed("dovecot")) {
 			if (-e "$control/$u->{'user'}") {
 				push(@names, $u->{'user'});
 				}
-			local $repl = &replace_atsign($u->{'user'});
+			local $repl = &replace_atsign_if_exists($u->{'user'});
 			if ($repl ne $u->{'user'} && -e "$control/$repl") {
 				push(@names, $repl);
 				}
@@ -3781,7 +3781,7 @@ if (-r $file."_control" && &foreign_check("dovecot") &&
 		if ($opts->{'mailuser'}) {
 			# Limit extract to one user
 			push(@onefiles, $opts->{'mailuser'});
-			local $at = &replace_atsign($opts->{'mailuser'});
+			local $at = &replace_atsign_if_exists($opts->{'mailuser'});
 			if ($at ne $opts->{'mailuser'}) {
 				push(@onefiles, $at);
 				}

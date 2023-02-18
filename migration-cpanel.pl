@@ -759,7 +759,7 @@ if ($got{'mail'}) {
 				local $touser = $uinfo->{'user'};
 				if ($config{'mail_system'} == 0 &&
 				    $escuser =~ /\@/) {
-					$touser = &replace_atsign($touser);
+					$touser = &replace_atsign_if_exists($touser);
 					}
 				$touser = "\\".$touser;
 				$uinfo->{'to'} = [ $touser, @values ];

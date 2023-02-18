@@ -135,12 +135,12 @@ if ($simple->{'bounce'}) {
 	}
 if ($simple->{'local'}) {
 	local $escuser = $simple->{'local'};
-	$escuser = &replace_atsign($escuser);
+	$escuser = &replace_atsign_if_exists($escuser);
 	push(@v, "\\".$escuser);
 	}
 if ($simple->{'tome'}) {
 	local $escuser = $alias->{'user'};
-	$escuser = &replace_atsign($escuser);
+	$escuser = &replace_atsign_if_exists($escuser);
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
 if ($simple->{'auto'}) {
