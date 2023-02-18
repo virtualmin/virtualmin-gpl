@@ -1442,6 +1442,7 @@ save_dns5=Removing MX records from DNS domain ..
 save_dns6=Renaming DNS records ..
 save_dns7=Updating secondary MX records ..
 save_dns2_ezone=DNS zone to rename not found!
+save_dns2_enewfile=New zone file cannot be read : $1
 save_dnsip6=Changing IPv6 address in DNS domain ..
 save_dnsip6on=Adding IPv6 DNS records ..
 save_dnsip6off=Removing IPv6 DNS records ..
@@ -5429,6 +5430,8 @@ spf_ecloud=Failed to update DNS host : $1
 spf_epostchange=Failed to save DNS records : $1
 spf_enableds=Adding DS records to parent domain ..
 spf_disableds=Removing DS records from parent domain ..
+spf_dnsrlocal=Moving DNS to local server ..
+spf_dnsrhost=Moving DNS to remote server $1 ..
 
 s3_emodule=The Perl module $1 needed to communicate with Amazon's S3 service is not installed.
 s3_emodule2=The Perl module $1 needed to communicate with Amazon's S3 service could not be loaded : $2.

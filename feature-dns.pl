@@ -5054,6 +5054,63 @@ return $err if ($err);
 return undef;
 }
 
+# modify_dns_remote(&domain, &server)
+# Update the remote DNS host for a domain, while preserving records
+sub modify_dns_remote
+{
+my ($d, $server) = @_;
+my $oldserver = &get_domain_remote_dns($d);
+if ($server->{'id'} == $oldserver->{'id'}) {
+	return undef;
+	}
+
+# Get current records, then re-create the DNS config
+&push_all_print();
+&set_all_capture_print();
+$print_output = "";
+my @oldrecs = &get_domain_dns_records($d);
+my $ok = &delete_dns($d);
+if (!$ok) {
+	return "Failed to remove existing DNS zone : $print_output";
+	}
+if ($server->{'id'} == 0) {
+	delete($d->{'dns_remote'});
+	}
+else {
+	$d->{'dns_remote'} = $server->{'host'};
+	}
+$print_output = "";
+$ok = &setup_dns($d);
+if (!$ok) {
+	return "Failed to setup new DNS zone : $print_output";
+	}
+&save_domain($d);
+&pop_all_print();
+
+# Delete all records that were created by default, and re-create original
+# records from before the conversion
+&obtain_lock_dns($d);
+my ($recs, $file) = &get_domain_dns_records_and_file($d);
+return $recs if (!ref($recs));
+foreach my $r (reverse(@$recs)) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
+	&delete_dns_record($recs, $file, $r);
+	}
+foreach my $r (@oldrecs) {
+	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
+		 &is_dnssec_record($r));
+	next if (!$r->{'name'} || !$r->{'type'});
+	&create_dns_record($recs, $file, $r);
+	}
+my $err = &post_records_change($d, $recs, $file);
+&release_lock_dns($d);
+return $err if ($err);
+&reload_bind_records($d);
+return undef;
+}
+
 # list_public_dns_suffixes()
 # Returns a full list of known DNS public suffixes
 sub list_public_dns_suffixes

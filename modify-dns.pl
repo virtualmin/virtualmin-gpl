@@ -80,6 +80,15 @@ required DNSSEC DS records to the parent. Alternately you can use
 C<--remove-parent-ds> to delete them, but this is not recommded as it may
 break DNSSEC validation.
 
+If you have Cloud DNS providers setup, you can move the domain to one
+with the C<--cloud-dns> flag followed by a provider name like C<cloudflare>
+or C<route53>. Alternately the domain can be moved back to local hosting
+with the flag C<--cloud-dns local>.
+
+Similarly, the C<--remote-dns> flag followed by a hostname can be used to move
+this domain to a remote Webmin DNS server, if one is configured. Or to move it
+back to local hosting, use the C<--local-dns> flag.
+
 =cut
 
 package virtual_server;
@@ -237,6 +246,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
 		}
+	elsif ($a eq "--remote-dns") {
+		$remotedns = shift(@ARGV);
+		}
+	elsif ($a eq "--local-dns") {
+		$remotedns = "";
+		}
 	elsif ($a eq "--add-parent-ds") {
 		$parentds = 1;
 		}
@@ -255,7 +270,7 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
-  defined($parentds) || &usage("Nothing to do");
+  defined($remotedns) || defined($parentds) || &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -296,6 +311,11 @@ if (@delslaves) {
 		}
 	}
 
+# Check for remote/cloud conflict
+if ($clouddns && defined($remotedns)) {
+	&usage("Remote and Cloud DNS providers cannot be set at the same time");
+	}
+
 # Validate the Cloud DNS provider
 if ($clouddns) {
 	if ($clouddns eq "services") {
@@ -308,6 +328,23 @@ if ($clouddns) {
 			&usage("Valid Cloud DNS providers are : ".
 			       join(" ", @cnames));
 		}
+	}
+
+# Validate remote DNS option
+if (defined($remotedns)) {
+	defined(&list_remote_dns) ||
+		&usage("Remote DNS servers are not supported");
+	my @remote = &list_remote_dns();
+	if ($remotedns eq "") {
+		($rserver) = grep { $_->{'id'} == 0 } @remote;
+		$rserver ||&usage("This system cannot be used as a DNS server");
+		}
+	else {
+		($rserver) = grep { $_->{'host'} eq $remotedns } @remote;
+		$rserver || &usage("Remote DNS server $remotedns not found");
+		}
+	$rserver->{'slave'} && &usage("Remote DNS server $rserver->{'host'} ".
+				      "cannot be used for master zones");
 	}
 
 # Do it for all domains
@@ -675,6 +712,25 @@ foreach $d (@doms) {
 			}
 		}
 
+	# Change remote DNS server
+	if ($rserver) {
+		if ($rserver->{'id'} == 0) {
+			&$first_print($text{'spf_dnsrlocal'});
+			}
+		else {
+			&$first_print(&text('spf_dnsrhost',$rserver->{'host'}));
+			}
+		&$indent_print();
+		my $err = &modify_dns_remote($d, $rserver);
+		&$outdent_print();
+		if ($err) {
+			&$second_print(&text('spf_eclouddns', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+		}
+
 	&$outdent_print();
 	&save_domain($d);
 	&release_lock_dns($d);
@@ -717,6 +773,7 @@ print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
 print "                     [--enable-subdomain | --disable-subdomain]\n";
 print "                     [--cloud-dns provider|\"local\"]\n";
+print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
 exit(1);
 }
