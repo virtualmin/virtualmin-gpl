@@ -14,10 +14,11 @@ print &ui_hidden("dom", $d->{'id'}),"\n";
 @tds = ( "width=30%" );
 print &ui_table_start($text{'spf_header'}, "width=100%", 2, \@tds);
 
-# DNS cloud host
+# DNS cloud host or remote DNS provider
 my $cloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+	    $d->{'dns_remote'} ? "remote_".$d->{'dns_remote'} :
 	    $d->{'provision_dns'} ? 'services' : 'local';
-my @opts = ( [ 'local', $text{'dns_cloud_local'} ] );
+my @opts;
 push(@opts, [ 'services', $text{'dns_cloud_services'} ])
 	if ($config{'provision_dns'});
 foreach my $c (&list_dns_clouds()) {
@@ -26,6 +27,24 @@ foreach my $c (&list_dns_clouds()) {
 	if ($s->{'ok'} && (&can_dns_cloud($d) || $c->{'name'} eq $cloud)) {
 		push(@opts, [ $c->{'name'}, $c->{'desc'} ]);
 		}
+	}
+my $canlocal = 0;
+if (defined(&list_remote_dns)) {
+	foreach my $r (grep { !$_->{'slave'} } &list_remote_dns()) {
+		if ($r->{'id'} == 0) {
+			$canlocal = 1;
+			}
+		else {
+			push(@opts, [ "remote_".$r->{'host'},
+				      &text('tmpl_dns_remote', $r->{'host'}) ]);
+			}
+		}
+	}
+else {
+	$canlocal = 1;
+	}
+if ($canlocal) {
+	splice(@opts, 0, 0, [ 'local', $text{'dns_cloud_local'} ]);
 	}
 print &ui_table_row(&hlink($text{'spf_cloud'}, 'spf_cloud'),
 		    &ui_select("cloud", $cloud, \@opts));

@@ -721,7 +721,7 @@ foreach $d (@doms) {
 			&$first_print(&text('spf_dnsrhost',$rserver->{'host'}));
 			}
 		&$indent_print();
-		my $err = &modify_dns_remote($d, $rserver);
+		my $err = &modify_dns_cloud($d, "local", $rserver);
 		&$outdent_print();
 		if ($err) {
 			&$second_print(&text('spf_eclouddns', $err));

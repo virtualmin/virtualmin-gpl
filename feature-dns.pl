@@ -4986,17 +4986,21 @@ else {
 return join("/", @r);
 }
 
-# modify_dns_cloud(&domain, cloud-name|"local"|"services")
-# Update the Cloud DNS provider for a domain, while preserving records
+# modify_dns_cloud(&domain, cloud-name|"local"|"services", &remote-server)
+# Update the Cloud DNS provider or remote server for a domain, while preserving
+# the original records
 sub modify_dns_cloud
 {
-my ($d, $cloud) = @_;
+my ($d, $cloud, $server) = @_;
 my $oldcloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+	       $d->{'dns_remote'} ? "remote_".$d->{'dns_remote'} :
 	       $d->{'provision_dns'} ? 'services' : 'local';
-return undef if ($oldcloud eq $cloud);
+my $newcloud = $server ? "remote_".$server->{'host'}
+		       : $cloud;
+return undef if ($oldcloud eq $newcloud);
 
 # Is the cloud provider working?
-if ($cloud ne "local") {
+if ($newcloud !~ /^(local|services|remote_.*)$/) {
 	my $cfunc = "dnscloud_".$cloud."_check";
 	my $err = &$cfunc();
 	return $err if ($err);
@@ -5015,73 +5019,22 @@ if (!$ok) {
 	return "Failed to remove existing DNS zone : $print_output";
 	}
 my $oldcloud = $d->{'dns_cloud'};
-if ($cloud eq "local") {
-	delete($d->{'dns_cloud'});
+delete($d->{'dns_cloud'});
+delete($d->{'dns_remote'});
+delete($d->{'provision_dns'});
+if ($cloud eq "services") {
+	$d->{'provision_dns'} = 1;
 	}
-else {
+elsif ($cloud && $cloud ne "local") {
 	$d->{'dns_cloud'} = $cloud;
 	}
-$print_output = "";
-$ok = &setup_dns($d);
-if (!$ok) {
-	$d->{'dns_cloud'} = $oldcloud;
-	return "Failed to setup new DNS zone : $print_output";
-	}
-&save_domain($d);
-&pop_all_print();
-
-# Delete all records that were created by default, and re-create original
-# records from before the conversion
-&obtain_lock_dns($d);
-my ($recs, $file) = &get_domain_dns_records_and_file($d);
-return $recs if (!ref($recs));
-foreach my $r (reverse(@$recs)) {
-	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
-		 &is_dnssec_record($r));
-	next if (!$r->{'name'} || !$r->{'type'});
-	&delete_dns_record($recs, $file, $r);
-	}
-foreach my $r (@oldrecs) {
-	next if ($r->{'type'} eq 'SOA' || $r->{'type'} eq 'NS' ||
-		 &is_dnssec_record($r));
-	next if (!$r->{'name'} || !$r->{'type'});
-	&create_dns_record($recs, $file, $r);
-	}
-my $err = &post_records_change($d, $recs, $file);
-&release_lock_dns($d);
-return $err if ($err);
-&reload_bind_records($d);
-return undef;
-}
-
-# modify_dns_remote(&domain, &server)
-# Update the remote DNS host for a domain, while preserving records
-sub modify_dns_remote
-{
-my ($d, $server) = @_;
-my $oldserver = &get_domain_remote_dns($d);
-if ($server->{'id'} == $oldserver->{'id'}) {
-	return undef;
-	}
-
-# Get current records, then re-create the DNS config
-&push_all_print();
-&set_all_capture_print();
-$print_output = "";
-my @oldrecs = &get_domain_dns_records($d);
-my $ok = &delete_dns($d);
-if (!$ok) {
-	return "Failed to remove existing DNS zone : $print_output";
-	}
-if ($server->{'id'} == 0) {
-	delete($d->{'dns_remote'});
-	}
-else {
+elsif ($server) {
 	$d->{'dns_remote'} = $server->{'host'};
 	}
 $print_output = "";
 $ok = &setup_dns($d);
 if (!$ok) {
+	$d->{'dns_cloud'} = $oldcloud if ($oldcloud);
 	return "Failed to setup new DNS zone : $print_output";
 	}
 &save_domain($d);
