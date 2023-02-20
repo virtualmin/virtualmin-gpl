@@ -3908,28 +3908,16 @@ if ($d->{'dns_submode'}) {
 	return &post_records_change($parent, $recs, $fn);
 	}
 my $r = &require_bind($d);
+my $rds = &remote_foreign_call($r, "bind8", "supports_dnssec");
 
 # Increase the SOA
 &bind8::bump_soa_record($fn, $recs);
 
-if (&bind8::supports_dnssec() && &can_domain_dnssec($d)) {
+if ($rds && &can_domain_dnssec($d) && !$d->{'dns_remote'}) {
 	# Re-sign DNSSEC, or remove records if no longer signed
-	my $z = &get_bind_zone($d->{'dom'}, undef, $d);
-	eval {
-		local $main::error_must_die = 1;
-		&bind8::sign_dnssec_zone_if_key($z, $recs, 0);
-		};
-	if ($@) {
-		return "DNSSEC signing failed : $@";
-		}
-	else {
-		# Signing will have updated all the records, so re-read them
-		my @newrecs = &bind8::read_zone_file($fn, $d->{'dom'});
-		&set_record_ids(\@newrecs);
-		@$recs = ( );
-		push(@$recs, @newrecs);
-		}
+	&sign_dnssec_zone($d, $recs);
 	}
+
 if ($d->{'provision_dns'}) {
 	# Upload records to provisioning server
 	local $info = { 'domain' => $d->{'dom'},
@@ -3968,6 +3956,10 @@ elsif ($d->{'dns_remote'}) {
 	if ($@) {
 		return $@;
 		}
+	if ($rds && &can_domain_dnssec($d)) {
+		# Sign DNSSEC on remote after uploading records
+		&sign_dnssec_zone($d, $recs);
+		}
 	}
 
 # Un-freeeze the zone
@@ -3989,6 +3981,31 @@ if (!$d->{'subdom'} && !$d->{'dns_submode'}) {
 		}
 	}
 
+return undef;
+}
+
+# sign_dnssec_zone(&domain, &recs)
+# Re-sign the zone with DNSSEC, and update the records array. Returns undef on
+# success or an error message on failure.
+sub sign_dnssec_zone
+{
+my ($d, $recs) = @_;
+my $r = &require_bind($d);
+my $z = &get_bind_zone($d->{'dom'}, undef, $d);
+eval {
+	local $main::error_must_die = 1;
+	&remote_foreign_call($r, "bind8", "sign_dnssec_zone_if_key",
+			     $z, $recs, 0);
+	};
+if ($@) {
+	return "DNSSEC signing failed : $@";
+	}
+else {
+	# Signing will have updated all the records, so re-read them
+	my ($newrecs) = &get_domain_dns_records_and_file($d, 1);
+	@$recs = ( );
+	push(@$recs, @$newrecs);
+	}
 return undef;
 }
 
@@ -4260,7 +4277,7 @@ return $str =~ /^(\d+)s$/i ? $1 :
 sub can_domain_dnssec
 {
 my ($d) = @_;
-return $d->{'provision_dns'} || $d->{'dns_cloud'} || $d->{'dns_remote'} ? 0 : 1;
+return $d->{'provision_dns'} || $d->{'dns_cloud'} ? 0 : 1;
 }
 
 # has_domain_dnssec(&domain, [&records])
@@ -4284,6 +4301,7 @@ sub disable_domain_dnssec
 my ($d) = @_;
 my $r = &require_bind($d);
 &obtain_lock_dns($d);
+my $zone = &get_bind_zone($d->{'dom'}, undef, $d);
 my $key = &remote_foreign_call($r, "bind8", "get_dnssec_key", $zone);
 my @keyfiles;
 if ($key) {
@@ -4313,12 +4331,12 @@ if (!$tmpl->{'dnssec_alg'}) {
 	return $text{'setup_enodnssecalg'};
 	}
 &obtain_lock_dns($d);
-my $zone = &get_bind_zone($d->{'dom'}, undef, $d);
-if (!&bind8::supports_dnssec()) {
+if (!&remote_foreign_call($r, "bind8", "supports_dnssec")) {
 	# Not supported
 	return $text{'setup_enodnssec'};
 	}
 else {
+	my $zone = &get_bind_zone($d->{'dom'}, undef, $d);
 	my ($ok, $size) = &remote_foreign_call(
 				$r, "bind8", "compute_dnssec_key_size",
 				$tmpl->{'dnssec_alg'}, 1);

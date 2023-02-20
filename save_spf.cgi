@@ -95,11 +95,10 @@ else {
 	}
 &error($err) if ($err);
 
-if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
-    &can_domain_dnssec($d) && defined($in{'dnssec'})) {
+if (&can_domain_dnssec($d) && defined($in{'dnssec'})) {
 	# Turn DNSSEC on or off
 	&pre_records_change($d);
-	my $key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+	my $key = &has_domain_dnssec($d);
 	my $err;
 	my $changed = 0;
 	if ($key && !$in{'dnssec'}) {

@@ -553,8 +553,7 @@ foreach $d (@doms) {
 		if (&can_domain_dnssec($d)) {
 			# DNSSEC is supported for this domain
 			&pre_records_change($d);
-			$key = &bind8::get_dnssec_key(
-				&get_bind_zone($d->{'dom'}));
+			$key = &has_domain_dnssec($d, $recs);
 			if ($dnssec && !$key) {
 				# Enable it
 				&$first_print($text{'spf_enablednssec'});

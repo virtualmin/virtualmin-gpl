@@ -99,12 +99,9 @@ print &ui_table_row(&hlink($text{'spf_dpct'}, 'spf_dpct'),
 	&ui_textbox("dpct", $eddmarc->{'pct'} || 100, 5)."%");
 
 # DNSSEC enabled
-&require_bind();
-if (defined(&bind8::supports_dnssec) && &bind8::supports_dnssec() &&
-    &can_domain_dnssec($d)) {
-	$key = &bind8::get_dnssec_key(&get_bind_zone($d->{'dom'}));
+if (&can_domain_dnssec($d)) {
 	print &ui_table_row(&hlink($text{'spf_dnssec'}, 'spf_dnssec'),
-			    &ui_yesno_radio("dnssec", $key ? 1 : 0));
+		&ui_yesno_radio("dnssec", &has_domain_dnssec($d)));
 	}
 
 print &ui_table_end();
