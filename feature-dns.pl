@@ -1792,6 +1792,7 @@ return $any;
 sub validate_dns
 {
 local ($d, $recs, $recsonly) = @_;
+my $r = &require_bind($d);
 local $file;
 if ($d->{'dns_submode'}) {
 	# For a sub-domain, don't complain if parent is disabled
@@ -1806,7 +1807,8 @@ if (!$recs) {
 	}
 return &text('validate_ednsfile', "<tt>$d->{'dom'}</tt>") if (!@$recs);
 local $absfile;
-if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} && $file) {
+if (!$d->{'provision_dns'} && !$d->{'dns_cloud'} &&
+    !$d->{'dns_remote'} && $file) {
 	# Make sure file exists
 	$absfile = &bind8::make_chroot(
 				&bind8::absolute_path($file));
@@ -1937,7 +1939,8 @@ if (defined(&bind8::supports_check_zone) && &bind8::supports_check_zone() &&
     !$recsonly) {
 	local $z = &get_bind_zone($d->{'dom'}, undef, $d);
 	if ($z) {
-		local @errs = &bind8::check_zone_records($z);
+		local @errs = &remote_foreign_call(
+			$r, "bind8", "check_zone_records", $z);
 		if (@errs) {
 			return &text('validate_ednscheck',
 				join("<br>", map { &html_escape($_) } @errs));
