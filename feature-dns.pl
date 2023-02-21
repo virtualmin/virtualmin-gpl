@@ -3597,7 +3597,6 @@ elsif ($d->{'provision_dns'}) {
 	}
 elsif ($d->{'dns_remote'}) {
 	# Get records from remote Webmin server
-	# XXX chroot??
 	my $r = &require_bind($d);
 	my $rfile = &get_domain_dns_file_from_bind($d);
 	if (!$rfile) {
@@ -3610,7 +3609,7 @@ elsif ($d->{'dns_remote'}) {
 	if ($@) {
 		return ($@);
 		}
-	local @recs = &bind8::read_zone_file($temp, $d->{'dom'});
+	local @recs = &bind8::read_zone_file($temp, $d->{'dom'}, undef, 0, 1);
 	&set_record_ids(\@recs);
 	@rv = (\@recs, $temp);
 	}
@@ -5224,9 +5223,7 @@ if ($external) {
 		}
 	}
 &require_bind();
-local $bind8::config{'auto_chroot'} = undef;
-local $bind8::config{'chroot'} = undef;
-@recs = &bind8::read_zone_file($temp, $name);
+@recs = &bind8::read_zone_file($temp, $name, undef, 0, 1);
 return \@recs;
 }
 
