@@ -2559,7 +2559,7 @@ if (&foreign_check("dovecot")) {
 		}
 	foreach my $dove (@doves) {
 		&unlink_file($dove."/".$_[0]->{'user'});
-		&unlink_file($dove."/".&replace_atsign_if_exists($_[0]->{'user'}));
+		&unlink_file($dove."/".&replace_atsign($_[0]->{'user'}));
 		}
 	}
 }
@@ -2606,8 +2606,8 @@ if (&foreign_check("dovecot")) {
 	foreach my $dove (@doves) {
 		&rename_file($dove."/".$_[1]->{'user'},
 			     $dove."/".$_[0]->{'user'});
-		&rename_file($dove."/".&replace_atsign_if_exists($_[1]->{'user'}),
-			     $dove."/".&replace_atsign_if_exists($_[0]->{'user'}));
+		&rename_file($dove."/".&replace_atsign($_[1]->{'user'}),
+			     $dove."/".&replace_atsign($_[0]->{'user'}));
 		}
 	}
 }

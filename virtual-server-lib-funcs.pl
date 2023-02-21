@@ -773,7 +773,7 @@ if ($d) {
 	# Remove users with @ in their names for whom a user with the @ replace
 	# already exists (for Postfix)
 	if ($config{'mail_system'} == 0) {
-		local %umap = map { &replace_atsign_if_exists($_->{'user'}), $_ }
+		local %umap = map { &replace_atsign($_->{'user'}), $_ }
 				grep { $_->{'user'} =~ /\@/ } @users;
 		@users = grep { !$umap{$_->{'user'}} } @users;
 		}
@@ -1220,7 +1220,7 @@ foreach my $u (@users) {
 	else {
 		# Set quotas based on quota commands
 		my $altuser = $u->{'user'} =~ /\@/ ?
-				&replace_atsign_if_exists($u->{'user'}) :
+				&replace_atsign($u->{'user'}) :
 				&add_atsign($u->{'user'});
 		$u->{'softquota'} = $main::soft_home_quota{$u->{'user'}} ||
 				    $main::soft_home_quota{$altuser};
@@ -1633,13 +1633,13 @@ else {
 	&foreign_call($usermodule, "made_changes");
 
 	if ($config{'mail_system'} == 0 && $_[1]->{'user'} =~ /\@/) {
-		local $esc = &replace_atsign_if_exists($_[1]->{'user'});
+		local $esc = &replace_atsign($_[1]->{'user'});
 		local @allusers = &list_all_users_quotas(1);
 		local ($oldextrauser) = grep { $_->{'user'} eq $esc } @allusers;
 		if ($oldextrauser) {
 			# Found him .. fix up
 			$extrauser = { %{$_[0]} };
-			$extrauser->{'user'} = &replace_atsign_if_exists($_[0]->{'user'});
+			$extrauser->{'user'} = &replace_atsign($_[0]->{'user'});
 			$extrauser->{'dn'} = $oldextrauser->{'dn'};
 			&foreign_call($usermodule, "set_user_envs", $extrauser,
 					'MODIFY_USER', $_[0]->{'plainpass'},

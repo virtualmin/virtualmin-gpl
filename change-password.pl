@@ -59,7 +59,7 @@ $d = &get_user_domain($username);
 $d || &error_exit("Not a Virtualmin user");
 @users = &list_domain_users($d);
 ($user) = grep { $_->{'user'} eq $username ||
-		 &replace_atsign_if_exists($_->{'user'}) eq $username } @users;
+		 &replace_atsign($_->{'user'}) eq $username } @users;
 $user || &error_exit("Not a Virtualmin user in $d->{'dom'}");
 $olduser = { %$user };
 

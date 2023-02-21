@@ -154,7 +154,7 @@ if (!$d) {
 	}
 @users = &list_domain_users($d, 0, 1, 0, 1);
 ($user) = grep { $_->{'user'} eq $username ||
-		 &replace_atsign_if_exists($_->{'user'}) eq $username }
+		 &replace_atsign($_->{'user'}) eq $username }
 	       @users;
 if (!$user) {
 	# Failed to find user again!
