@@ -3461,7 +3461,8 @@ return &get_domain_dns_file_from_bind($d);
 }
 
 # get_domain_dns_file_from_bind(&domain)
-# Lookup the zone file in local BIND, or return undef
+# Lookup the zone file in local BIND, or return undef. Path is relative to
+# any chroot.
 sub get_domain_dns_file_from_bind
 {
 my ($d) = @_;
@@ -3943,11 +3944,11 @@ elsif ($d->{'dns_cloud'}) {
 	}
 elsif ($d->{'dns_remote'}) {
 	# Upload records to remote Webmin server
-	# XXX chroot??
 	my $rfile = &get_domain_dns_file_from_bind($d);
 	if (!$rfile) {
 		return "Remote zone file not found!";
 		}
+	$rfile = &remote_foreign_call($r, "bind8", "make_chroot", $rfile);
 	eval {
 		local $main::remote_error_handler = sub { die @_ };
 		&remote_write($r, $fn, $rfile);
