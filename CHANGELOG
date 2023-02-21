@@ -1642,3 +1642,5 @@ Apache mod_php is no longer recommended for running PHP, and can be entirely dis
 Added flags to the modify-domain API command to re-generate Unix quotas for the domain owner or mailboxes if they are lost due to a filesystem move.
 ---- Changes since 7.2 ----
 Added a template option for default website aliases and redirects.
+---- Changes since 7.5 ----
+DNS zones can now be hosted on remote Webmin servers.

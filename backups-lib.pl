@@ -2468,6 +2468,36 @@ if ($ok) {
 					}
 				}
 
+			# Is the Cloud DNS provider valid? If not, forget it
+			if ($d->{'dns_cloud'}) {
+				my ($c) = &get_domain_dns_cloud($d);
+				if (!$c) {
+					delete($d->{'dns_cloud'});
+					}
+				else {
+					my $sfunc = "dnscloud_".$c->{'id'}.
+						    "_get_state";
+					my $s = defined(&$sfunc) ? &$sfunc()
+								 : undef;
+					if (!$s || !$s->{'ok'}) {
+						delete($d->{'dns_cloud'});
+						}
+					}
+				}
+
+			# Is the remote DNS server valid?
+			if ($d->{'dns_remote'}) {
+				if (!defined(&list_remote_dns)) {
+					delete($d->{'dns_remote'});
+					}
+				else {
+					my $r = &get_domain_remote_dns($d);
+					if (!$r || $r->{'id'} == 0) {
+						delete($d->{'dns_remote'});
+						}
+					}
+				}
+
 			# If this was a DNS sub-domain and the parent no longer
 			# exists, use a separate zone file
 			if ($d->{'dns_subof'}) {

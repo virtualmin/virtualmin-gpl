@@ -219,17 +219,16 @@ elsif (!$dnsparent) {
 
 	local $pconf;
 	local $indent = 0;
-	if ($tmpl->{'dns_view'} && $r->{'id'} == 0) {
+	local $addfile = &remote_foreign_call($r, "bind8", "add_to_file");
+	if ($tmpl->{'dns_view'}) {
 		# Adding inside a view. This may use named.conf, or an include
 		# file references inside the view, if any
-		# XXX what about remote?
-		$pconf = &bind8::get_config_parent();
+		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent");
 		local $view = &get_bind_view($conf, $tmpl->{'dns_view'});
 		if ($view) {
-			local $addfile = &bind8::add_to_file();
 			local $addfileok;
-			if ($bind8::config{'zones_file'} &&
-			    $view->{'file'} ne $bind8::config{'zones_file'}) {
+			if ($rbconfig->{'zones_file'} &&
+			    $view->{'file'} ne $rbconfig->{'zones_file'}) {
 				# BIND module config asks for a file .. make
 				# sure it is included in the view
 				foreach my $vm (@{$view->{'members'}}) {
@@ -249,7 +248,8 @@ elsif (!$dnsparent) {
 			else {
 				# Add to the file
 				$dir->{'file'} = $addfile;
-				$pconf = &bind8::get_config_parent($addfile);
+				$pconf = &remote_foreign_call($r, "bind8",
+					"get_config_parent", $addfile);
 				}
 			$d->{'dns_view'} = $tmpl->{'dns_view'};
 			}
@@ -259,8 +259,7 @@ elsif (!$dnsparent) {
 		}
 	else {
 		# Adding at top level .. but perhaps in a different file
-		$dir->{'file'} = &remote_foreign_call($r, "bind8",
-						      "add_to_file");
+		$dir->{'file'} = $addfile;
 		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent",
 					      $dir->{'file'});
 		}
@@ -1357,7 +1356,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	delete($addrescs{'noneselected'});
 
 	# Add standard records we don't have yet
-	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
+	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $n,
@@ -2515,6 +2514,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				});
 			&remote_foreign_call($r, "bind8", "set_ownership",
 					     $key->{$t.'file'});
+			$rok++;
 			}
 		$i++;
 		}
@@ -3461,7 +3461,8 @@ return &get_domain_dns_file_from_bind($d);
 }
 
 # get_domain_dns_file_from_bind(&domain)
-# Lookup the zone file in local BIND, or return undef
+# Lookup the zone file in local BIND, or return undef. Path is relative to
+# any chroot.
 sub get_domain_dns_file_from_bind
 {
 my ($d) = @_;
@@ -3597,7 +3598,6 @@ elsif ($d->{'provision_dns'}) {
 	}
 elsif ($d->{'dns_remote'}) {
 	# Get records from remote Webmin server
-	# XXX chroot??
 	my $r = &require_bind($d);
 	my $rfile = &get_domain_dns_file_from_bind($d);
 	if (!$rfile) {
@@ -3610,7 +3610,7 @@ elsif ($d->{'dns_remote'}) {
 	if ($@) {
 		return ($@);
 		}
-	local @recs = &bind8::read_zone_file($temp, $d->{'dom'});
+	local @recs = &bind8::read_zone_file($temp, $d->{'dom'}, undef, 0, 1);
 	&set_record_ids(\@recs);
 	@rv = (\@recs, $temp);
 	}
@@ -3944,11 +3944,11 @@ elsif ($d->{'dns_cloud'}) {
 	}
 elsif ($d->{'dns_remote'}) {
 	# Upload records to remote Webmin server
-	# XXX chroot??
 	my $rfile = &get_domain_dns_file_from_bind($d);
 	if (!$rfile) {
 		return "Remote zone file not found!";
 		}
+	$rfile = &remote_foreign_call($r, "bind8", "make_chroot", $rfile);
 	eval {
 		local $main::remote_error_handler = sub { die @_ };
 		&remote_write($r, $fn, $rfile);
@@ -5224,9 +5224,7 @@ if ($external) {
 		}
 	}
 &require_bind();
-local $bind8::config{'auto_chroot'} = undef;
-local $bind8::config{'chroot'} = undef;
-@recs = &bind8::read_zone_file($temp, $name);
+@recs = &bind8::read_zone_file($temp, $name, undef, 0, 1);
 return \@recs;
 }
 
