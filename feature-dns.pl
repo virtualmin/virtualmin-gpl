@@ -1357,7 +1357,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	delete($addrescs{'noneselected'});
 
 	# Add standard records we don't have yet
-	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot", "m.$withdot") {
+	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $n,
