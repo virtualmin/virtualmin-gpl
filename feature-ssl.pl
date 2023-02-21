@@ -1529,7 +1529,7 @@ else {
 	local @tls = ( "SSLv2", "SSLv3" );
 	if ($apache::httpd_modules{'core'} >= 2.4) {
 		push(@tls, "TLSv1");
-		if (&get_openssl_version() >= 1) {
+		if (&compare_version_numbers(&get_openssl_version(), '>=', '1.0.0')) {
 			push(@tls, "TLSv1.1");
 			}
 		}
@@ -1714,7 +1714,7 @@ local $outtemp = &transname();
 local $keytemp = &transname();
 local $certtemp = &transname();
 local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
-local $addtextsup = &get_openssl_version() >= 1.1 ? "-addext extendedKeyUsage=serverAuth" : "";
+local $addtextsup = &compare_version_numbers(&get_openssl_version(), '>=', '1.1.1') ? "-addext extendedKeyUsage=serverAuth" : "";
 local $out = &backquote_logged(
 	"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
 	"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
@@ -2968,7 +2968,7 @@ $d->{'ssl_everything'} = $everyfile;
 sub get_openssl_version
 {
 my $out = &backquote_command("openssl version 2>/dev/null");
-if ($out =~ /OpenSSL\s+(\d\.\d)/) {
+if ($out =~ /OpenSSL\s+(\d\.\d\.\d)/) {
 	return $1;
 	}
 return 0;
