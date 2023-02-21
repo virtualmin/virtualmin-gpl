@@ -219,17 +219,16 @@ elsif (!$dnsparent) {
 
 	local $pconf;
 	local $indent = 0;
-	if ($tmpl->{'dns_view'} && $r->{'id'} == 0) {
+	local $addfile = &remote_foreign_call($r, "bind8", "add_to_file");
+	if ($tmpl->{'dns_view'}) {
 		# Adding inside a view. This may use named.conf, or an include
 		# file references inside the view, if any
-		# XXX what about remote?
-		$pconf = &bind8::get_config_parent();
+		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent");
 		local $view = &get_bind_view($conf, $tmpl->{'dns_view'});
 		if ($view) {
-			local $addfile = &bind8::add_to_file();
 			local $addfileok;
-			if ($bind8::config{'zones_file'} &&
-			    $view->{'file'} ne $bind8::config{'zones_file'}) {
+			if ($rbconfig->{'zones_file'} &&
+			    $view->{'file'} ne $rbconfig->{'zones_file'}) {
 				# BIND module config asks for a file .. make
 				# sure it is included in the view
 				foreach my $vm (@{$view->{'members'}}) {
@@ -249,7 +248,8 @@ elsif (!$dnsparent) {
 			else {
 				# Add to the file
 				$dir->{'file'} = $addfile;
-				$pconf = &bind8::get_config_parent($addfile);
+				$pconf = &remote_foreign_call($r, "bind8",
+					"get_config_parent", $addfile);
 				}
 			$d->{'dns_view'} = $tmpl->{'dns_view'};
 			}
@@ -259,8 +259,7 @@ elsif (!$dnsparent) {
 		}
 	else {
 		# Adding at top level .. but perhaps in a different file
-		$dir->{'file'} = &remote_foreign_call($r, "bind8",
-						      "add_to_file");
+		$dir->{'file'} = $addfile;
 		$pconf = &remote_foreign_call($r, "bind8", "get_config_parent",
 					      $dir->{'file'});
 		}
@@ -2515,6 +2514,7 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				});
 			&remote_foreign_call($r, "bind8", "set_ownership",
 					     $key->{$t.'file'});
+			$rok++;
 			}
 		$i++;
 		}
