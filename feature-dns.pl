@@ -60,7 +60,7 @@ if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
 	$dnsparent = &get_domain($d->{'subdom'});
 	}
-elsif ($dns_submode && $d->{'parent'}) {
+elsif ($dns_submode) {
 	# Find most suitable domain with the same owner that has it's own file
 	$dnsparent = &find_parent_dns_domain($d);
 	}
@@ -4959,12 +4959,27 @@ return undef;
 sub find_parent_dns_domain
 {
 my ($d) = @_;
-foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
-		     (&get_domain_by("parent", $d->{'parent'}),
-		      &get_domain($d->{'parent'}))) {
-	if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
-	    &under_parent_domain($d, $pd)) {
-		return $pd;
+if ($d->{'parent'}) {
+	print STDERR "looking for parent domain for $d->{'dom'}\n";
+	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
+			     (&get_domain_by("parent", $d->{'parent'}),
+			      &get_domain($d->{'parent'}))) {
+		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
+		    &under_parent_domain($d, $pd)) {
+			return $pd;
+			}
+		}
+	}
+if ($d->{'dns_subany'}) {
+	# Allow any domain to be the DNS parent 
+	print STDERR "looking for any parent for $d->{'dom'}\n";
+	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
+			     &list_domains()) {
+		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
+		    &under_parent_domain($d, $pd)) {
+			print STDERR "found $pd->{'dom'}\n";
+			return $pd;
+			}
 		}
 	}
 return undef;
