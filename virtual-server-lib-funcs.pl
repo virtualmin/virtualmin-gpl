@@ -4762,7 +4762,7 @@ elsif ($_[0] =~ /^:include:(.*)$/) {
         @rv = (2, $1);
         }
 elsif ($_[0] =~ /^\\(\S+)$/) {
-	if ($1 eq $_[1] || $1 eq "NEWUSER" || $1 eq &replace_atsign_if_exists($_[1]) ||
+	if ($1 eq $_[1] || $1 eq "NEWUSER" || $1 eq &replace_atsign($_[1]) ||
 	    $1 eq &escape_user($_[1])) {
 		return (10);
 		}
@@ -11724,7 +11724,7 @@ foreach my $d (@doms) {
 	local $u;
 	foreach $u (@users) {
 		if ($u->{'user'} eq $_[0] ||
-		    &replace_atsign_if_exists($u->{'user'}) eq $_[0]) {
+		    &replace_atsign($u->{'user'}) eq $_[0]) {
 			return $d;
 			}
 		}
