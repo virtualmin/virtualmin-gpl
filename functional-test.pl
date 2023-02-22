@@ -9665,6 +9665,70 @@ $dns_tests = [
 	  'cleanup' => 1 },
 	];
 
+$dnssub_tests = [
+	# Create a domain with DNS
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ 'mail' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-domain with it's own owner that should share the DNS zone
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'desc', 'Test subdomain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ],
+		      [ 'content' => 'Test home page' ],
+		      [ 'any-dns-subdomain' ],
+		      @create_args, ],
+        },
+
+	# Validate DNS sub-domain was created
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Add a record to both domains
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-record', 'testing1 A 1.2.3.4' ] ],
+	},
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'add-record', 'testing2 A 1.2.3.4' ] ],
+	},
+
+	# Validate that they were created
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+	{ 'command' => 'host -t A testing1.'.$test_domain.' '.$dnsserver,
+	},
+	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain.' '.$dnsserver,
+	},
+
+	# Cleanup the domains
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ] ],
+	  'cleanup' => 1 },
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $dnssec_tests = [
 	# Create a domain with DNS
 	{ 'command' => 'create-domain.pl',
@@ -10412,6 +10476,7 @@ $alltests = { '_config' => $_config_tests,
 	      'jail' => $jail_tests,
 	      'dns' => $dns_tests,
 	      'dnssec' => $dnssec_tests,
+	      'dnssub' => $dnssub_tests,
 	      'googledns' => $googledns_tests,
 	      'route53' => $route53_tests,
 	      'htpasswd' => $htpasswd_tests,
