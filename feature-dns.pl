@@ -4960,7 +4960,6 @@ sub find_parent_dns_domain
 {
 my ($d) = @_;
 if ($d->{'parent'}) {
-	print STDERR "looking for parent domain for $d->{'dom'}\n";
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     (&get_domain_by("parent", $d->{'parent'}),
 			      &get_domain($d->{'parent'}))) {
@@ -4970,9 +4969,8 @@ if ($d->{'parent'}) {
 			}
 		}
 	}
-if ($d->{'dns_subany'}) {
+if ($d->{'dns_subany'} || $config{'dns_secany'}) {
 	# Allow any domain to be the DNS parent 
-	print STDERR "looking for any parent for $d->{'dom'}\n";
 	foreach my $pd (sort { length($b->{'dom'}) cmp length($a->{'dom'}) }
 			     &list_domains()) {
 		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&

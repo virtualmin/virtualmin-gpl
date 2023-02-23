@@ -189,6 +189,7 @@ mem_cmd=Command to get memory usage,3,Query operating system
 mem_low=Minimum recommended real memory,0,5,,MB
 api_helper=Path to create API helper command,3,Determine automatically
 secmx_nodns=Add DNS MX records for secondary mail servers?,1,0-Yes,1-No
+dns_secany=Allow DNS sub-domains with a different owner?,1,1-Yes,0-No
 mx_validate=Validate MX records for domains with email?,1,1-Yes,0-No
 scriptdir=Template for default script directory,10,-Script default,*-Top level public_html directory,Directory template
 python_cmd=Path to <tt>python</tt> command,3,Use system default
