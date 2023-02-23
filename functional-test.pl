@@ -9720,6 +9720,56 @@ $dnssub_tests = [
 	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain.' '.$dnsserver,
 	},
 
+	# Split the sub-domain into it's own zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'disable-subdomain' ] ],
+	},
+
+	# Validate the split
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'antigrep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
+	# Move the sub-domain back into the parent zone
+	{ 'command' => 'modify-dns.pl',
+	  'args' => [ [ 'domain', $test_dns_subdomain ],
+		      [ 'enable-subdomain' ] ],
+	},
+
+	# Validate the move
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'Parent DNS virtual server: '.$test_domain ],
+	},
+
+	# Validate that records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_dns_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
 	# Cleanup the domains
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_dns_subdomain ] ],
