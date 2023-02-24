@@ -1182,6 +1182,97 @@ if (@dbs == 1 && $dbs[0]->{'name'} eq $d->{'db'}) {
 return &text('reset_epostgres', join(" ", map { $_->{'name'} } @dbs));
 }
 
+# list_remote_postgres_modules()
+# Returns a list of hash refs containing details of PostgreSQL module clones for
+# local or remote databases
+sub list_remote_postgres_modules
+{
+my @rv;
+foreach my $minfo (&get_all_module_infos()) {
+	next if ($minfo->{'dir'} ne 'postgresql' &&
+		 $minfo->{'cloneof'} ne 'postgresql');
+	my %mconfig = &foreign_config($minfo->{'dir'});
+	my $mm = { 'minfo' => $minfo,
+		   'dbtype' => 'postgres',
+		   'master' => $minfo->{'cloneof'} ? 0 : 1,
+		   'config' => \%mconfig };
+	if ($mconfig{'host'} && $mconfig{'port'}) {
+		$mm->{'desc'} = &text('mysql_rhostport',
+			"<tt>$mconfig{'host'}</tt>", $mconfig{'port'});
+		}
+	elsif ($mconfig{'host'}) {
+		$mm->{'desc'} = &text('mysql_rhost',
+			"<tt>$mconfig{'host'}</tt>");
+		}
+	elsif ($mconfig{'port'}) {
+		$mm->{'desc'} = &text('mysql_rport', $mconfig{'port'});
+		}
+	else {
+		$mm->{'desc'} = $text{'mysql_rlocal'};
+		}
+	push(@rv, $mm);
+	}
+@rv = sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;
+my ($def) = grep { $_->{'config'}->{'virtualmin_default'} } @rv;
+if (!$def) {
+	# Assume core module is the default
+	$rv[0]->{'config'}->{'virtualmin_default'} = 1;
+	}
+return @rv;
+}
+
+# require_dom_postgres([&domain])
+# Finds and loads the PostgreSQL module for a domain
+sub require_dom_postgres
+{
+my ($d) = @_;
+my $mod = !$d ? 'postgresql' : $d->{'postgres_module'} || 'postgresql';
+my $pkg = $mod;
+$pkg =~ s/[^A-Za-z0-9]/_/g;
+eval "\$${pkg}::use_global_login = 1;";
+&foreign_require($mod);
+return $mod;
+}
+
+# get_dom_remote_postgres_version([&domain|module])
+# Returns the PostgreSQL server version for a domain
+sub get_dom_remote_postgres_version
+{
+my ($d) = @_;
+my $mod;
+if ($d && !ref($d)) {
+	# Asking for a specific module
+	$mod = $d;
+	&foreign_require($mod);
+	}
+else {
+	# Get module based on domain
+	$mod = &require_dom_postgres($d);
+	}
+my $rv;
+my $err;
+if ($get_dom_remote_postgres_version_cache{$mod}) {
+	$rv = $get_dom_remote_postgres_version_cache{$mod};
+	}
+else {
+	$rv = &foreign_call($mod, "get_postgresql_version", 0);
+	$err = "Failed to get version" if (!$rv);
+	if (!$err) {
+		$get_dom_remote_postgres_version_cache{$mod} = $rv;
+		}
+	}
+return wantarray ? ($rv, "postgresql", $err) : $rv;
+}
+
+# get_default_postgres_module()
+# Returns the name of the default module for remote PostgreSQL
+sub get_default_postgres_module
+{
+my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
+		 &list_remote_postgres_modules();
+return $def ? $def->{'minfo'}->{'dir'} : 'postgresql';
+}
+
 $done_feature_script{'postgres'} = 1;
 
 1;

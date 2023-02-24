@@ -7854,6 +7854,7 @@ elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
 # MySQL module comes from parent always
 if ($parentdom) {
 	$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
+	$dom->{'postgres_module'} = $parentdom->{'postgres_module'};
 	}
 
 # Was this originally the default domain?

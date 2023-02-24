@@ -3244,6 +3244,7 @@ foreach my $minfo (&get_all_module_infos()) {
 		 $minfo->{'cloneof'} ne 'mysql');
 	my %mconfig = &foreign_config($minfo->{'dir'});
 	my $mm = { 'minfo' => $minfo,
+		   'dbtype' => 'mysql',
 		   'master' => $minfo->{'cloneof'} ? 0 : 1,
 		   'config' => \%mconfig };
 	if ($mconfig{'sock'}) {

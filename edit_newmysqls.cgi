@@ -6,19 +6,34 @@ require './virtual-server-lib.pl';
 &ui_print_header(undef, $text{'newmysqls_title'}, "", "newmysqls");
 
 # Show a table of current servers
-@alldoms = grep { $_->{'mysql'} } &list_domains();
+@alldoms = &list_domains();
 print &ui_form_start("delete_newmysqls.cgi");
 print &ui_columns_start([ "", $text{'newmysqls_host'}, $text{'newmysqls_doms'},
 			  $text{'newmysqls_def'}, $text{'newmysqls_creator'},
 			  $text{'newmysqls_ver'}, $text{'newmysqls_actions'} ]);
-foreach my $mm (&list_remote_mysql_modules()) {
-	@doms = grep { ($_->{'mysql_module'} || 'mysql') eq
-		       $mm->{'minfo'}->{'dir'} } @alldoms;
+foreach my $mm (&list_remote_mysql_modules(),
+		&list_remote_postgres_modules()) {
+	if ($mm->{'dbtype'} eq 'mysql') {
+		@doms = grep { $_->{'mysql'} && 
+			       ($_->{'mysql_module'} || 'mysql') eq
+			       $mm->{'minfo'}->{'dir'} } @alldoms;
+		}
+	else {
+		@doms = grep { $_->{'postgres'} &&
+			       ($_->{'postgres_module'} || 'postgresql') eq
+			       $mm->{'minfo'}->{'dir'} } @alldoms;
+		}
 	$doms = !@doms ? $text{'newmysqls_none'} :
 		@doms > 5 ? &text('newmysqls_dcount', scalar(@doms)) :
 		  join(", ", map { &show_domain_name($_) } @doms);
-	($ver, $variant, $err) = &get_dom_remote_mysql_version(
-					$mm->{'minfo'}->{'dir'});
+	if ($mm->{'dbtype'} eq 'mysql') {
+		($ver, $variant, $err) = &get_dom_remote_mysql_version(
+						$mm->{'minfo'}->{'dir'});
+		}
+	else {
+		($ver, $variant, $err) = &get_dom_remote_postgres_version(
+						$mm->{'minfo'}->{'dir'});
+		}
 	$vstr = $err || &text('newmysqls_ver'.$variant, $ver);
 	print &ui_checked_columns_row([
 		($mm->{'config'}->{'host'} ||
