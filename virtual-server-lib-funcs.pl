@@ -17348,7 +17348,7 @@ foreach my $u (&list_all_users_quotas(1)) {
 		}
 	if ($config{'mail_system'} == 0) {
 		# Don't double-count Postfix @ and - users
-		local $noat = &replace_atsign_if_exists($u->{'user'});
+		local $noat = &replace_atsign($u->{'user'});
 		next if ($doneuser{$noat}++);
 		}
 	if ($did) {
