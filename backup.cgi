@@ -336,10 +336,10 @@ else {
 		}
 
 	PREFAILED:
-	if ($ok) {
-		&webmin_log("backup", $dests[0], undef,
-			    { 'doms' => [ map { $_->{'dom'} } @doms ] });
-		}
+	&webmin_log("backup", $dests[0], undef,
+		    { 'doms' => [ map { $_->{'dom'} } @doms ],
+		      'failed' => !$ok,
+		      'sched' => 0, });
 
 	&ui_print_footer("/$module_name/list_sched.cgi", $text{'sched_return'});
 	}

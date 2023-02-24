@@ -310,6 +310,11 @@ if ($sched->{'email_doms'} && $has_mailboxes &&
 # Backup is done
 &stop_running_backup($sched);
 
+&webmin_log("backup", $dests[0], undef,
+	    { 'doms' => [ map { $_->{'dom'} } @doms ],
+	      'failed' => !$ok,
+	      'sched' => $id, });
+
 # Override print functions to capture output
 sub first_save_print
 {

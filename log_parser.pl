@@ -116,6 +116,7 @@ elsif ($action eq "start" || $action eq "stop" || $action eq "restart") {
 	}
 elsif ($action eq "backup" || $action eq "restore") {
 	local @doms = split(/\0/, $p->{'doms'});
+	$action .= '_failed' if ($p->{'failed'});
 	if ($long) {
 		return &text('log_'.$action.'_l', join(" ", map { "<tt>$_</tt>" } @doms));
 		}
