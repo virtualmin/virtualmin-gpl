@@ -4842,7 +4842,8 @@ sub is_dnssec_record
 {
 my ($r) = @_;
 return $r->{'type'} eq 'NSEC' || $r->{'type'} eq 'NSEC3' ||
-       $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY';
+       $r->{'type'} eq 'RRSIG' || $r->{'type'} eq 'DNSKEY' ||
+       $r->{'type'} eq 'NSEC3PARAM';
 }
 
 # get_whois_expiry(&domain)
