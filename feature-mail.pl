@@ -2315,8 +2315,10 @@ elsif ($config{'mail_system'} == 0) {
 			# we need to create the file without the @ in it, and
 			# link from the @ so that the mail server and Webmin
 			# agree.
-			$mfreal = &postfix::postfix_mail_file(
-					&replace_atsign_if_exists($user->{'user'}));
+			my $ruser = &replace_atsign_if_exists($user->{'user'});
+			if ($ruser ne $user->{'user'}) {
+				$mfreal = &postfix::postfix_mail_file($ruser);
+				}
 			}
 		}
 	elsif ($s == 2) {
