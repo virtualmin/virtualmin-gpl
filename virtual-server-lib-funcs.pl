@@ -4377,6 +4377,9 @@ local ($d, $user, $userto, $mode) = @_;
 local $tmpl = &get_template($d ? $d->{'template'} : 0);
 local $tmode = $mode ? "updateuser" : "newuser";
 local $subject = $config{$tmode.'_subject'};
+if ($tmpl->{$tmode.'_on'} eq 'none') {
+	return (1, undef);
+	}
 
 # Work out who we CC to
 local @ccs;
