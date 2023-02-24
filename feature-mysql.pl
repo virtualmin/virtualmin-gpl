@@ -3265,6 +3265,7 @@ foreach my $minfo (&get_all_module_infos()) {
 	else {
 		$mm->{'desc'} = $text{'mysql_rlocal'};
 		}
+	$mm->{'desc'} .= " (SSL)" if ($mconfig{'ssl'});
 	push(@rv, $mm);
 	}
 @rv = sort { $a->{'minfo'}->{'dir'} cmp $b->{'minfo'}->{'dir'} } @rv;

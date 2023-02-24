@@ -36,10 +36,7 @@ foreach my $mm (&list_remote_mysql_modules(),
 		}
 	$vstr = $err || &text('newmysqls_ver'.$variant, $ver);
 	print &ui_checked_columns_row([
-		($mm->{'config'}->{'host'} ||
-		  $mm->{'config'}->{'sock'} ||
-		  "<i>$text{'newmysqls_local'}</i>").
-		  ($mm->{'config'}->{'ssl'} ? " (SSL)" : ""),
+		$mm->{'desc'},
 		$doms,
 		$mm->{'config'}->{'virtualmin_default'} ?
 			$text{'yes'} : $text{'no'},
