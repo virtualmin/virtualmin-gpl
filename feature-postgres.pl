@@ -62,7 +62,7 @@ $d->{'postgres'} && (!$oldd || !$oldd->{'postgres'}) || return undef;
 if (!$d->{'provision_postgres'}) {
 	# DB clash
 	&require_postgres();
-	local @dblist = &postgresql::list_databases();
+	local @dblist = &list_dom_postgres_databases($d);
 	return &text('setup_epostgresdb', $d->{'db'})
 		if (&indexof($d->{'db'}, @dblist) >= 0);
 
@@ -75,13 +75,14 @@ if (!$d->{'provision_postgres'}) {
 return undef;
 }
 
-# postgres_user_exists(&domain)
+# postgres_user_exists(&domain, [user])
 # Returns 1 if some user exists in PostgreSQL
 sub postgres_user_exists
 {
+my ($d, $user) = @_;
 &require_postgres();
-local $user = &postgres_user($_[0]);
-local $s = &postgresql::execute_sql($qconfig{'basedb'},
+$user ||= &postgres_user($d);
+my $s = &execute_dom_psql($d, $qconfig{'basedb'},
 		"select * from pg_shadow where usename = ?", $user);
 return $s->{'data'}->[0] ? 1 : 0;
 }
@@ -125,19 +126,23 @@ return undef;
 sub setup_postgres
 {
 local ($d, $nodb) = @_;
-&require_postgres();
 local $tmpl = &get_template($d->{'template'});
+if (!$d->{'postgres_module'}) {
+        # Use the default module for this system
+        $d->{'postgres_module'} = &get_default_postgres_module();
+	}
+&require_postgres();
 local $user = $d->{'postgres_user'} = &postgres_user($d);
 
 if (!$d->{'parent'}) {
 	&$first_print($text{'setup_postgresuser'});
 	local $pass = &postgres_pass($d);
 	if (&postgres_user_exists($user)) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'},
+		&execute_dom_psql($d, $qconfig{'basedb'},
 		  "drop user ".&postgres_uquote($user));
 		}
 	local $popts = &get_postgresql_user_flags();
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	&execute_dom_psql($d, $qconfig{'basedb'},
 		"create user ".&postgres_uquote($user).
 		" with password $pass $popts");
 	&$second_print($text{'setup_done'});
@@ -176,16 +181,17 @@ else {
 # postgres_pass(&domain, [neverquote])
 sub postgres_pass
 {
-if ($_[0]->{'parent'}) {
+my ($d, $noquote) = @_;
+if ($d->{'parent'}) {
 	# Password comes from parent domain
-	local $parent = &get_domain($_[0]->{'parent'});
+	my $parent = &get_domain($d->{'parent'});
 	return &postgres_pass($parent);
 	}
 &require_postgres();
-local $pass = defined($_[0]->{'postgres_pass'}) ? $_[0]->{'postgres_pass'}
-						: $_[0]->{'pass'};
-return !$_[1] && &postgresql::get_postgresql_version() >= 7 ?
-	&postgres_quote($pass) : $pass;
+local $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
+					     : $d->{'pass'};
+my $ver = &get_dom_remote_postgres_version($d);
+return !$noquote && &ver >= 7 ? &postgres_quote($pass) : $pass;
 }
 
 # postgres_quote(string)
@@ -214,91 +220,97 @@ else {
 # Change the PostgreSQL user's password if needed
 sub modify_postgres
 {
+my ($d, $oldd) = @_;
 &require_postgres();
-local $tmpl = &get_template($_[0]->{'template'});
-local $changeduser = $_[0]->{'user'} ne $_[1]->{'user'} &&
+my $ver = &get_dom_remote_postgres_version($d);
+my $tmpl = &get_template($d->{'template'});
+my $changeduser = $d->{'user'} ne $oldd->{'user'} &&
 		     !$tmpl->{'mysql_nouser'} ? 1 : 0;
-local $user = &postgres_user($_[0], $changeduser);
-local $olduser = &postgres_user($_[1]);
+my $user = &postgres_user($d, $changeduser);
+my $olduser = &postgres_user($oldd);
 
-local $pass = &postgres_pass($_[0]);
-local $oldpass = &postgres_pass($_[1]);
-if ($pass ne $oldpass && !$_[0]->{'parent'} &&
-    (!$tmpl->{'mysql_nopass'} || $_[0]->{'postgres_pass'})) {
+my $pass = &postgres_pass($d);
+my $oldpass = &postgres_pass($oldd);
+if ($pass ne $oldpass && !$d->{'parent'} &&
+    (!$tmpl->{'mysql_nopass'} || $d->{'postgres_pass'})) {
 	# Change PostgreSQL password ..
 	&$first_print($text{'save_postgrespass'});
-	if (&postgres_user_exists($_[1])) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'},
+	if (&postgres_user_exists($oldd)) {
+		&execute_dom_psql($d, $qconfig{'basedb'},
 			"alter user ".&postgres_uquote($olduser).
 			" with password $pass");
 		&$second_print($text{'setup_done'});
 
-		# Update all installed scripts database password which are using PostgreSQL
-		&update_all_installed_scripts_database_credentials($_[0], $_[1], 'dbpass', &postgres_pass($_[0]), 'postgres');
+		# Update all installed scripts database password which are
+		# using PostgreSQL
+		&update_all_installed_scripts_database_credentials(
+			$d, $oldd, 'dbpass', &postgres_pass($d), 'postgres');
 		}
 	else {
 		&$second_print($text{'save_nopostgres'});
 		}
 	}
-if (!$_[0]->{'parent'} && $_[1]->{'parent'}) {
+if (!$d->{'parent'} && $oldd->{'parent'}) {
 	# Server has been converted to a parent .. need to create user, and
 	# change database ownerships
-	delete($_[0]->{'postgres_user'});
+	delete($d->{'postgres_user'});
 	&$first_print($text{'setup_postgresuser'});
-	local $pass = &postgres_pass($_[0]);
-	local $popts = &get_postgresql_user_flags();
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	my $pass = &postgres_pass($d);
+	my $popts = &get_postgresql_user_flags();
+	&execute_dom_psql($d, $qconfig{'basedb'},
 		"create user ".&postgres_uquote($user).
 		" with password $pass $popts");
-	if (&postgresql::get_postgresql_version() >= 8.0) {
-		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
-			&postgresql::execute_sql_logged($db,
+	if ($ver >= 8.0) {
+		foreach my $db (&domain_databases($d, [ "postgres" ])) {
+			&execute_dom_psql($d, $db,
 			    "reassign owned by ".&postgres_uquote($olduser).
 			    " to ".&postgres_uquote($user));
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 			  "alter database ".&postgres_uquote($db->{'name'}).
 			  " owner to ".&postgres_uquote($user));
 			}
 		}
 	&$second_print($text{'setup_done'});
 	}
-elsif ($_[0]->{'parent'} && !$_[1]->{'parent'}) {
+elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Server has changed from parent to sub-server .. need to remove the
 	# old user and update all DB permissions
 	&$first_print($text{'save_postgresuser'});
-	if (&postgresql::get_postgresql_version() >= 8.0) {
-		foreach my $db (&domain_databases($_[0], [ "postgres" ])) {
-			&postgresql::execute_sql_logged($db,
+	if ($ver >= 8.0) {
+		foreach my $db (&domain_databases($d, [ "postgres" ])) {
+			&execute_dom_psql($d, $db,
 			    "reassign owned by ".&postgres_uquote($olduser).
 			    " to ".&postgres_uquote($user));
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 			    "alter database ".&postgres_uquote($db->{'name'}).
 			    " owner to ".&postgres_uquote($user));
 			}
 		}
-	if (&postgres_user_exists($_[1])) {
-		&postgresql::execute_sql_logged($qconfig{'basedb'},
+	if (&postgres_user_exists($oldd)) {
+		&execute_dom_psql($d, $qconfig{'basedb'},
 			"drop user ".&postgres_uquote($olduser));
 		}
 	&$second_print($text{'setup_done'});
 	}
-elsif ($user ne $olduser && !$_[0]->{'parent'}) {
+elsif ($user ne $olduser && !$d->{'parent'}) {
 	# Rename PostgreSQL user ..
 	&$first_print($text{'save_postgresuser'});
-	if (&postgres_user_exists($_[1])) {
-		if (&postgresql::get_postgresql_version() >= 7.4) {
+	if (&postgres_user_exists($oldd)) {
+		if ($ver >= 7.4) {
 			# Can use proper rename command
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 				"alter user ".&postgres_uquote($olduser).
 				" rename to ".&postgres_uquote($user));
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 				"alter user ".&postgres_uquote($user).
 				" with password $pass");
-			$_[0]->{'postgres_user'} = $user;
+			$d->{'postgres_user'} = $user;
 			&$second_print($text{'setup_done'});
 
-			# Update all installed scripts database username which are using PostgreSQL
-			&update_all_installed_scripts_database_credentials($_[0], $_[1], 'dbuser', $user, 'postgres');
+			# Update all installed scripts database username which
+			# are using PostgreSQL
+			&update_all_installed_scripts_database_credentials(
+				$d, $oldd, 'dbuser', $user, 'postgres');
 			}
 		else {
 			# Cannot
@@ -309,15 +321,15 @@ elsif ($user ne $olduser && !$_[0]->{'parent'}) {
 		&$second_print($text{'save_nopostgres'});
 		}
 	}
-elsif ($user ne $olduser && $_[0]->{'parent'}) {
+elsif ($user ne $olduser && $d->{'parent'}) {
 	# Change owner of PostgreSQL databases
 	&$first_print($text{'save_postgresuser2'});
-	local $user = &postgres_user($_[0]);
-	if (&postgresql::get_postgresql_version() >= 8.0) {
-		foreach my $db (&domain_databases($_[0], [ "mysql" ])) {
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
-				"alter database ".&postgres_uquote($db->{'name'}).
-				" owner to ".&postgres_uquote($user));
+	my $user = &postgres_user($d);
+	if ($ver >= 8.0) {
+		foreach my $db (&domain_databases($d, [ "mysql" ])) {
+			&execute_dom_psql($d, $qconfig{'basedb'},
+			    "alter database ".&postgres_uquote($db->{'name'}).
+			    " owner to ".&postgres_uquote($user));
 			}
 		&$second_print($text{'setup_done'});
 		}
@@ -352,26 +364,29 @@ if (!$d->{'parent'}) {
 	# Delete the user
 	&$first_print($text{'delete_postgresuser'});
 	if (&postgres_user_exists($d)) {
-		if (&postgresql::get_postgresql_version() >= 8.0) {
-			local $s = &postgresql::execute_sql($qconfig{'basedb'},
+		my $ver = &get_dom_remote_postgres_version($d);
+		if ($ver >= 8.0) {
+			local $s = &execute_dom_psql($d, $qconfig{'basedb'},
 				"select datname from pg_database ".
 				"join pg_authid ".
 				"on pg_database.datdba = pg_authid.oid ".
 				"where rolname = '$user'");
 			foreach my $db (map { $_->[0] } @{$s->{'data'}}) {
-				&postgresql::execute_sql_logged(
+				&execute_dom_psql(
+					$d,
 					$db,
 					"reassign owned by ".
 					  &postgres_uquote($user).
 					  " to ".
 					  $postgresql::postgres_login);
-				&postgresql::execute_sql_logged(
+				&execute_dom_psql(
+					$d,
 					$qconfig{'basedb'},
 					"alter database $db owner to ".
 					  $postgresql::postgres_login);
 				}
 			};
-		&postgresql::execute_sql_logged($qconfig{'basedb'},
+		&execute_dom_psql($d, $qconfig{'basedb'},
 			"drop user ".&postgres_uquote($user));
 		&$second_print($text{'setup_done'});
 		}
@@ -464,7 +479,7 @@ sub validate_postgres
 {
 local ($d) = @_;
 &require_postgres();
-local %got = map { $_, 1 } &postgresql::list_databases();
+local %got = map { $_, 1 } &list_dom_postgres_databases($d);
 foreach my $db (&domain_databases($d, [ "postgres" ])) {
 	$got{$db->{'name'}} || return &text('validate_epostgres',$db->{'name'});
 	}
@@ -569,7 +584,7 @@ foreach $db (@dbs) {
 	my $tables;
 	if (%texclude) {
 		$tables = [ grep { !$texclude{$_} }
-				 &postgresql::list_tables($db) ];
+				 &list_postgres_tables($d, $db) ];
 		}
 
 	local $err = &postgresql::backup_database($db, $destfile, 'c', $tables);
@@ -643,7 +658,7 @@ foreach $db (@dbs) {
 		# DB already exists, silently ignore it if not empty.
 		# This can happen during a restore when PostgreSQL is on a
 		# remote system.
-		my @tables = &postgresql::list_tables($db->[0], 1);
+		my @tables = &list_postgres_tables($d, $db->[0]);
 		if (@tables) {
 			# But grant access to the DB to the domain owner
 			if (&postgresql::get_postgresql_version() >= 8.0) {
@@ -738,17 +753,18 @@ return $_[0];
 # postgres_size(&domain, db, [size-only])
 sub postgres_size
 {
+my ($d, $db, $sizeonly) = @_;
 &require_postgres();
-local $size;
-local @tables;
+my $size;
+my @tables;
 eval {
 	# Make sure DBI errors don't cause a total failure
 	local $main::error_must_die = 1;
 	local $postgresql::force_nodbi = 1;
-	local $d = &postgresql::execute_sql($_[1], "select sum(relpages) from pg_class where relname not like 'pg_%'");
-	$size = $d->{'data'}->[0]->[0]*1024*2;
-	if (!$_[2]) {
-		@tables = &postgresql::list_tables($_[1], 1);
+	my $rv = &execute_dom_psql($d, $db, "select sum(relpages) from pg_class where relname not like 'pg_%'");
+	$size = $rv->{'data'}->[0]->[0]*1024*2;
+	if (!$sizeonly) {
+		@tables = &list_postgres_tables($d, $db);
 		}
 	};
 return ($size, scalar(@tables));
@@ -758,9 +774,10 @@ return ($size, scalar(@tables));
 # Returns 1 if some database name is already in use
 sub check_postgres_database_clash
 {
+my ($d, $db) = @_;
 &require_postgres();
-local @dblist = &postgresql::list_databases();
-return 1 if (&indexof($_[1], @dblist) >= 0);
+my @dblist = &list_dom_postgres_databases($d);
+return 1 if (&indexof($db, @dblist) >= 0);
 }
 
 # create_postgres_database(&domain, db, &opts)
@@ -774,10 +791,11 @@ my ($d, $db, $opts) = @_;
 if (!&check_postgres_database_clash($d, $db)) {
 	# Build and run creation command
 	&$first_print(&text('setup_postgresdb', $db));
-	local $user = &postgres_user($d);
-	local $sql = "create database ".&postgresql::quote_table($db);
-	local $withs;
-	if (&postgresql::get_postgresql_version() >= 7) {
+	my $user = &postgres_user($d);
+	my $sql = "create database ".&postgresql::quote_table($db);
+	my $withs;
+	my $ver = &get_dom_remote_postgres_version($d);
+	if ($ver >= 7) {
 		$withs .= " owner=".&postgres_uquote($user);
 		}
 	if ($opts->{'encoding'}) {
@@ -786,7 +804,7 @@ if (!&check_postgres_database_clash($d, $db)) {
 	if ($withs) {
 		$sql .= " with".$withs;
 		}
-	&postgresql::execute_sql_logged($qconfig{'basedb'}, $sql);
+	&execute_dom_psql($d, $qconfig{'basedb'}, $sql);
 	}
 else {
 	&$first_print(&text('setup_postgresdbimport', $db));
@@ -795,7 +813,7 @@ else {
 # Make sure nobody else can access it
 eval {
 	local $main::error_must_die = 1;
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	&execute_dom_psql($d, $qconfig{'basedb'},
 		"revoke all on database ".&postgres_uquote($db).
 		" from public");
 	};
@@ -811,11 +829,12 @@ return 1;
 # Alters the owner of a PostgreSQL database to some domain
 sub grant_postgres_database
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_postgres();
-if (&postgresql::get_postgresql_version() >= 8.0) {
-	local $user = &postgres_user($d);
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+my $ver = &get_dom_remote_postgres_version($d);
+if ($ver >= 8.0) {
+	my $user = &postgres_user($d);
+	&execute_dom_psql($d, $qconfig{'basedb'},
 		"alter database ".&postgres_uquote($dbname).
 		" owner to ".&postgres_uquote($user));
 	}
@@ -828,15 +847,15 @@ sub delete_postgres_database
 my ($d, @deldbs) = @_;
 &require_postgres();
 &obtain_lock_postgres($d);
-local @dblist = &postgresql::list_databases();
+my @dblist = &list_dom_postgres_databases($d);
 &$first_print(&text('delete_postgresdb', join(", ", @deldbs)));
-local @dbs = split(/\s+/, $d->{'db_postgres'});
-local @missing;
+my @dbs = split(/\s+/, $d->{'db_postgres'});
+my @missing;
 foreach my $db (@deldbs) {
 	if (&indexof($db, @dblist) >= 0) {
 		eval {
 			local $main::error_must_die = 1;
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 				"drop database ".&postgresql::quote_table($db).
 				" with force");
 			};
@@ -845,17 +864,14 @@ foreach my $db (@deldbs) {
 			# drop with cleanup of connections
 			eval {
 				local $main::error_must_die = 1;
-				&postgresql::execute_sql_logged(
-					$qconfig{'basedb'},
+				&execute_dom_psql(
+					$d, $qconfig{'basedb'},
 					"revoke connection on database ".
 					&postgresql::quote_table($db).
 					" from public");
 				};
-			&postgresql::execute_sql_logged($qconfig{'basedb'},
+			&execute_dom_psql($d, $qconfig{'basedb'},
 				"drop database ".&postgresql::quote_table($db));
-			}
-		if (defined(&postgresql::delete_database_backup_job)) {
-			&postgresql::delete_database_backup_job($db);
 			}
 		}
 	else {
@@ -880,11 +896,11 @@ sub revoke_postgres_database
 {
 local ($d, $dbname) = @_;
 &require_postgres();
-if (&postgresql::get_postgresql_version() >= 8.0 &&
-    &postgres_user_exists("postgres")) {
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+my $ver = &get_dom_remote_postgres_version($d);
+if ($ver && &postgres_user_exists($d, "postgres")) {
+	&execute_dom_psql($d, $qconfig{'basedb'},
 		"alter database ".&postgres_uquote($dbname).
-		" owner to ".&postgres_uquote(postgres));
+		" owner to ".&postgres_uquote("postgres"));
 	}
 }
 
@@ -914,8 +930,8 @@ sub create_postgres_database_user
 sub list_postgres_tables
 {
 my ($d, $db) = @_;
-&require_postgres();
-return &postgresql::list_tables($db, 1);
+my $mod = &require_dom_postgres($d);
+return &foreign_call($mod, "list_tables", $db);
 }
 
 # get_database_host_postgres()
@@ -1118,8 +1134,9 @@ return $opts;
 # Returns the names of all known databases
 sub list_all_postgres_databases
 {
+my ($d) = @_;
 &require_postgres();
-return &postgresql::list_databases();
+return &list_dom_postgres_databases($d);
 }
 
 # postgres_password_synced(&domain)
@@ -1156,11 +1173,15 @@ local ($d) = @_;
 return $postgresql::config{'host'};
 }
 
+# get_postgresql_user_flags(&domain)
+# Returns flags for the PostgreSQL create user command
 sub get_postgresql_user_flags
 {
+my ($d) = @_;
 &require_postgres();
 my @rv = ( "nocreatedb" );
-if (&postgresql::get_postgresql_version() < 9.5) {
+my $ver = &get_dom_remote_postgres_version($d);
+if ($ver < 9.5) {
 	push(@rv, "nocreateuser");
 	}
 return join(" ", @rv);
@@ -1223,6 +1244,104 @@ if (!$def) {
 return @rv;
 }
 
+# create_remote_postgres_module(&mod)
+# Creates and configures a new clone of the postgres module
+sub create_remote_postgres_module
+{
+my ($mm) = @_;
+
+# Create the config dir
+if (!$mm->{'minfo'}->{'dir'}) {
+	$mm->{'minfo'}->{'dir'} =
+		"postgresql-".($mm->{'config'}->{'host'} ||
+			       $mm->{'config'}->{'port'} || 'local');
+	$mm->{'minfo'}->{'dir'} =~ s/\./-/g;
+	if (&foreign_check($mm->{'minfo'}->{'dir'})) {
+		# Clash! Try appending username
+		$mm->{'minfo'}->{'dir'} .= "-".($mm->{'config'}->{'user'} || 'root');
+		$mm->{'minfo'}->{'dir'} =~ s/\./-/g;
+		if (&foreign_check($mm->{'minfo'}->{'dir'})) {
+			&error("The module ".$mm->{'minfo'}->{'dir'}.
+			       " already exists");
+			}
+		}
+	}
+$mm->{'minfo'}->{'cloneof'} = 'postgresql';
+my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
+my $srccdir = "$config_directory/postgresql";
+-d $cdir && &error("Config directory $cdir already exists!");
+&make_dir($cdir, 0700);
+&copy_source_dest("$srccdir/config", "$cdir/config");
+
+# Create the clone symlink
+my $mdir = "$root_directory/$mm->{'minfo'}->{'dir'}";
+&symlink_logged("postgresql", $mdir);
+
+# Populate the config dir
+my %mconfig = &foreign_config($mm->{'minfo'}->{'dir'});
+foreach my $k (keys %{$mm->{'config'}}) {
+	$mconfig{$k} = $mm->{'config'}->{$k};
+	}
+foreach my $k (keys %mconfig) {
+	if ($k =~ /^(backup_|sync_)/) {
+		delete($mconfig{$k});
+		}
+	}
+&save_module_config(\%mconfig, $mm->{'minfo'}->{'dir'});
+
+# Create the clone description
+my %myinfo = &get_module_info('postgresql');
+my $defdesc = $mm->{'config'}->{'host'} ? 
+		"PostgreSQL Server on ".$mm->{'config'}->{'host'} :
+	      $mm->{'config'}->{'port'} ?
+		"PostgreSQL Server on port ".$mm->{'config'}->{'host'} :
+		"PostgreSQL Server on local";
+my %cdesc = ( 'desc' => $mm->{'minfo'}->{'desc'} || $defdesc );
+&write_file("$config_directory/$mm->{'minfo'}->{'dir'}/clone", \%cdesc);
+
+# Grant access to the current (root) user
+&add_user_module_acl($base_remote_user, $mm->{'minfo'}->{'dir'});
+
+# Refresh visible modules cache
+&flush_webmin_caches();
+}
+
+# delete_remote_postgres_module(&mod)
+# Removes one PostgreSQL module clone
+sub delete_remote_postgres_module
+{
+my ($mm) = @_;
+$mm->{'minfo'}->{'cloneof'} eq 'postgresql' ||
+	&error("Only PostgreSQL clones can be removed!");
+$mm->{'minfo'}->{'dir'} || &error("Module has no directory!");
+my $cdir = "$config_directory/$mm->{'minfo'}->{'dir'}";
+my $rootdir = &module_root_directory($mm->{'minfo'}->{'dir'});
+-l $rootdir || &error("Module is not actually a clone!");
+&unlink_logged($cdir);
+&unlink_logged($rootdir);
+
+# Refresh visible modules cache
+unlink("$config_directory/module.infos.cache");
+unlink("$var_directory/module.infos.cache");
+}
+
+# get_remote_postgres_module(name)
+# Returns a postgres module hash, looked up by hostname or socket file
+sub get_remote_postgres_module
+{
+my ($name) = @_;
+foreach my $mm (&list_remote_postgres_modules()) {
+	my $c = $mm->{'config'};
+	if ($c->{'host'} && $name eq $c->{'host'}.':'.($c->{'port'} || 5432) ||
+	    $c->{'host'} && $name eq $c->{'host'} ||
+	    !$c->{'host'} && $name eq "localhost:".($c->{'port'} || 5432) ||
+	    !$c->{'host'} && $name eq "localhost") {
+		return $mm;
+		}
+	}
+return undef;
+}
+
 # require_dom_postgres([&domain])
 # Finds and loads the PostgreSQL module for a domain
 sub require_dom_postgres
@@ -1273,6 +1392,29 @@ sub get_default_postgres_module
 my ($def) = grep { $_->{'config'}->{'virtualmin_default'} }
 		 &list_remote_postgres_modules();
 return $def ? $def->{'minfo'}->{'dir'} : 'postgresql';
+}
+
+# execute_dom_psql(&domain, db, sql, ...)
+# Run some SQL, but in the module for the domain's PostgreSQL connection
+sub execute_dom_psql
+{
+my ($d, $db, $sql, @params) = @_;
+my $mod = &require_dom_postgres($d);
+if ($sql =~ /^(select|show)\s+/i) {
+        return &foreign_call($mod, "execute_sql", $db, $sql, @params);
+        }
+else {
+        return &foreign_call($mod, "execute_sql_logged", $db, $sql, @params);
+        }
+}
+
+# list_dom_mysql_databases(&domain)
+# Returns a list of postgres databases, from the server used by a domain
+sub list_dom_postgres_databases
+{
+my ($d, $db) = @_;
+my $mod = &require_dom_postgres($d);
+return &foreign_call($mod, "list_databases");
 }
 
 $done_feature_script{'postgres'} = 1;

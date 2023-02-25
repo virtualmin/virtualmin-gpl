@@ -3339,17 +3339,7 @@ my %cdesc = ( 'desc' => $mm->{'minfo'}->{'desc'} || $defdesc );
 &write_file("$config_directory/$mm->{'minfo'}->{'dir'}/clone", \%cdesc);
 
 # Grant access to the current (root) user
-my %acl;
-&read_acl(undef, \%acl);
-&open_lock_tempfile(ACL, "> ".&acl_filename());
-foreach $u (keys %acl) {
-        my @mods = @{$acl{$u}};
-        if ($u eq $base_remote_user) {
-                @mods = &unique(@mods, $mm->{'minfo'}->{'dir'});
-                }
-        &print_tempfile(ACL, "$u: ",join(' ', @mods),"\n");
-        }
-&close_tempfile(ACL);
+&add_user_module_acl($base_remote_user, $mm->{'minfo'}->{'dir'});
 
 # Refresh visible modules cache
 &flush_webmin_caches();

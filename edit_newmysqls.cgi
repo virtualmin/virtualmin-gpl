@@ -56,6 +56,13 @@ print &ui_hr();
 print &ui_form_start("create_newmysql.cgi", "post");
 print &ui_table_start($text{'newmysqls_header'}, undef, 2);
 
+# Database type
+my @types;
+push(@types, [ 'mysql', $text{'databases_mysql'} ]) if ($config{'mysql'});
+push(@types, [ 'postgres', $text{'databases_postgres'} ]) if ($config{'postgres'});
+print &ui_table_row($text{'newmysqls_formtype'},
+	&ui_select("type", $types[0]->[0], \@types));
+
 # Remote server, or local socket
 print &ui_table_row($text{'newmysqls_formhost'},
 	&ui_radio_table("mode", 0,

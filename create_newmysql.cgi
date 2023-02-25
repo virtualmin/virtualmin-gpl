@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Add a new MySQL clone module
+# Add a new MySQL or PostgreSQL clone module
 
 require './virtual-server-lib.pl';
 &can_edit_templates() || &error($text{'newmysqls_ecannot'});
@@ -29,20 +29,38 @@ $ssl = $in{'ssl'};
 $mm = { 'minfo' => { },
 	'config' => { 'host' => $host,
 		      'port' => $port,
-		      'sock' => $sock,
-		      'ssl' => $ssl,
 		      'login' => $user,
 		      'pass' => $pass },
       };
-&create_remote_mysql_module($mm);
+if ($in{'type'} eq 'mysql') {
+	# Add as MySQL module
+	$mm->{'config'}->{'ssl'} = $ssl;
+	$mm->{'config'}->{'sock'} = $sock;
+	&create_remote_mysql_module($mm);
 
-# Check that the MySQL connection works, and delete if not
-$mod = $mm->{'minfo'}->{'dir'};
-&foreign_require($mod, "mysql-lib.pl");
-($ok, $err) = &foreign_call($mod, "is_mysql_running");
-if ($ok != 1) {
-	&delete_remote_mysql_module($mm);
-	&error(&text('newmysqls_econn', $err));
+	# Check that the MySQL connection works, and delete if not
+	$mod = $mm->{'minfo'}->{'dir'};
+	&foreign_require($mod, "mysql-lib.pl");
+	($ok, $err) = &foreign_call($mod, "is_mysql_running");
+	if ($ok != 1) {
+		&delete_remote_mysql_module($mm);
+		&error(&text('newmysqls_econn', $err));
+		}
+	}
+else {
+	# Add as PostgreSQL module
+	$sock && &error($text{'newmysqls_esock2'});
+	$mm->{'config'}->{'sslmode'} = 'require' if ($ssl);
+	&create_remote_postgres_module($mm);
+
+	# Check that the connection works
+	$mod = $mm->{'minfo'}->{'dir'};
+	&foreign_require($mod, "postgresql-lib.pl");
+	($ok, $err) = &foreign_call($mod, "is_postgresql_running");
+	if ($ok != 1) {
+		&delete_remote_postgres_module($mm);
+		&error(&text('newmysqls_econn', $err));
+		}
 	}
 
 &webmin_log("create", "newmysql", $host || $sock, $mm->{'config'});

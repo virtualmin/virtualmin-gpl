@@ -1383,6 +1383,27 @@ my ($name) = @_;
 return &get_module_acl($name);
 }
 
+# add_user_module_acl(user, mod)
+# Add a module to the Webmin ACL for a user
+sub add_user_module_acl
+{
+my ($user, $mod) = @_;
+my %acl;
+my $f = &acl_filename();
+&lock_file($f);
+&read_acl(undef, \%acl);
+&open_lock_tempfile(ACL, ">$f");
+foreach $u (keys %acl) {
+        my @mods = @{$acl{$u}};
+        if ($u eq $user) {
+                @mods = &unique(@mods, $mod);
+                }
+        &print_tempfile(ACL, "$u: ",join(' ', @mods),"\n");
+        }
+&close_tempfile(ACL);
+&unlock_file($f);
+}
+
 # obtain_lock_webmin()
 # Lock a flag file indicating that Virtualmin is managing Webmin users.
 # Real locking is done in acl-lib.pl.

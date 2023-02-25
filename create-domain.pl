@@ -59,7 +59,8 @@ be overridden with the C<--skip-warnings> flag.
 
 If you have configured additional remote (or local) MySQL servers, you can
 select which one this domain will use with the C<--mysql-server> flag followed
-by a hostname, hostname:port or socket file.
+by a hostname, hostname:port or socket file. Similarly, a remote PostgreSQL
+server can be selected with the C<--postgres-server> flag.
 
 By default, the Cloud DNS provider chosen in the specified template will be
 used. However, you can override this with the C<--cloud-dns> flag followed by
@@ -362,6 +363,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--mysql-server") {
 		$myserver = shift(@ARGV);
+		}
+	elsif ($a eq "--postgres-server") {
+		$pgserver = shift(@ARGV);
 		}
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
@@ -753,7 +757,7 @@ else {
 	$uid = $ugid = $gid = undef;
 	}
 
-# Get remote MySQL server
+# Get remote MySQL or PostgreSQL server
 if ($myserver) {
 	my $mm = &get_remote_mysql_module($myserver);
 	$mm || &usage("No remote MySQL server named $myserver was found");
@@ -761,6 +765,11 @@ if ($myserver) {
 		&usage("Remote MySQL server $myserver is for use only by ".
 		       "Cloudmin Services provisioned domains");
 	$mysql_module = $mm->{'minfo'}->{'dir'};
+	}
+if ($pgserver) {
+	my $mm = &get_remote_postgres_module($myserver);
+	$mm || &usage("No remote PostgreSQL server named $pgserver was found");
+	$postgres_module = $mm->{'minfo'}->{'dir'};
 	}
 
 # Validate the Cloud DNS provider
@@ -857,6 +866,7 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'auto_letsencrypt', $letsencrypt,
 	 'jail', $jail,
 	 'mysql_module', $mysql_module,
+	 'postgres_module', $postgres_module,
 	 'default_php_mode', $phpmode,
 	 'dns_cloud', $clouddns,
 	 'dns_cloud_import', $clouddns_import,
@@ -1084,6 +1094,7 @@ print "                        [--letsencrypt-always]\n";
 print "                        [--field-name value]*\n";
 print "                        [--enable-jail | --disable-jail]\n";
 print "                        [--mysql-server hostname]\n";
+print "                        [--postgres-server hostname]\n";
 print "                        [--cloud-dns provider|\"services\"|\"local\"]\n";
 print "                        [--separate-dns-subdomain |\n";
 print "                         --any-dns-subdomain]\n";
