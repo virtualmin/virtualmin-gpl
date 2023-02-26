@@ -82,7 +82,7 @@ sub postgres_user_exists
 my ($d, $user) = @_;
 &require_postgres();
 $user ||= &postgres_user($d);
-my $s = &execute_dom_psql($d, $qconfig{'basedb'},
+my $s = &execute_dom_psql($d, undef,
 		"select * from pg_shadow where usename = ?", $user);
 return $s->{'data'}->[0] ? 1 : 0;
 }
@@ -144,11 +144,11 @@ if (!$d->{'parent'}) {
 		}
 	local $pass = &postgres_pass($d);
 	if (&postgres_user_exists($user)) {
-		&execute_dom_psql($d, $qconfig{'basedb'},
+		&execute_dom_psql($d, undef,
 		  "drop user ".&postgres_uquote($user));
 		}
 	local $popts = &get_postgresql_user_flags();
-	&execute_dom_psql($d, $qconfig{'basedb'},
+	&execute_dom_psql($d, undef,
 		"create user ".&postgres_uquote($user).
 		" with password $pass $popts");
 	&$second_print($text{'setup_done'});
@@ -242,7 +242,7 @@ if ($pass ne $oldpass && !$d->{'parent'} &&
 	# Change PostgreSQL password ..
 	&$first_print($text{'save_postgrespass'});
 	if (&postgres_user_exists($oldd)) {
-		&execute_dom_psql($d, $qconfig{'basedb'},
+		&execute_dom_psql($d, undef,
 			"alter user ".&postgres_uquote($olduser).
 			" with password $pass");
 		&$second_print($text{'setup_done'});
@@ -263,7 +263,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 	&$first_print($text{'setup_postgresuser'});
 	my $pass = &postgres_pass($d);
 	my $popts = &get_postgresql_user_flags();
-	&execute_dom_psql($d, $qconfig{'basedb'},
+	&execute_dom_psql($d, undef,
 		"create user ".&postgres_uquote($user).
 		" with password $pass $popts");
 	if ($ver >= 8.0) {
@@ -271,7 +271,7 @@ if (!$d->{'parent'} && $oldd->{'parent'}) {
 			&execute_dom_psql($d, $db,
 			    "reassign owned by ".&postgres_uquote($olduser).
 			    " to ".&postgres_uquote($user));
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 			  "alter database ".&postgres_uquote($db->{'name'}).
 			  " owner to ".&postgres_uquote($user));
 			}
@@ -287,13 +287,13 @@ elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 			&execute_dom_psql($d, $db,
 			    "reassign owned by ".&postgres_uquote($olduser).
 			    " to ".&postgres_uquote($user));
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 			    "alter database ".&postgres_uquote($db->{'name'}).
 			    " owner to ".&postgres_uquote($user));
 			}
 		}
 	if (&postgres_user_exists($oldd)) {
-		&execute_dom_psql($d, $qconfig{'basedb'},
+		&execute_dom_psql($d, undef,
 			"drop user ".&postgres_uquote($olduser));
 		}
 	&$second_print($text{'setup_done'});
@@ -304,10 +304,10 @@ elsif ($user ne $olduser && !$d->{'parent'}) {
 	if (&postgres_user_exists($oldd)) {
 		if ($ver >= 7.4) {
 			# Can use proper rename command
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 				"alter user ".&postgres_uquote($olduser).
 				" rename to ".&postgres_uquote($user));
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 				"alter user ".&postgres_uquote($user).
 				" with password $pass");
 			$d->{'postgres_user'} = $user;
@@ -333,7 +333,7 @@ elsif ($user ne $olduser && $d->{'parent'}) {
 	my $user = &postgres_user($d);
 	if ($ver >= 8.0) {
 		foreach my $db (&domain_databases($d, [ "mysql" ])) {
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 			    "alter database ".&postgres_uquote($db->{'name'}).
 			    " owner to ".&postgres_uquote($user));
 			}
@@ -372,7 +372,7 @@ if (!$d->{'parent'}) {
 	if (&postgres_user_exists($d)) {
 		my $ver = &get_dom_remote_postgres_version($d);
 		if ($ver >= 8.0) {
-			local $s = &execute_dom_psql($d, $qconfig{'basedb'},
+			local $s = &execute_dom_psql($d, undef,
 				"select datname from pg_database ".
 				"join pg_authid ".
 				"on pg_database.datdba = pg_authid.oid ".
@@ -387,12 +387,12 @@ if (!$d->{'parent'}) {
 					  $postgresql::postgres_login);
 				&execute_dom_psql(
 					$d,
-					$qconfig{'basedb'},
+					undef,
 					"alter database $db owner to ".
 					  $postgresql::postgres_login);
 				}
 			};
-		&execute_dom_psql($d, $qconfig{'basedb'},
+		&execute_dom_psql($d, undef,
 			"drop user ".&postgres_uquote($user));
 		&$second_print($text{'setup_done'});
 		}
@@ -509,7 +509,7 @@ if ($d->{'parent'}) {
 elsif (&postgres_user_exists($d)) {
 	&require_postgres();
 	my $date = localtime(0);
-	&execute_dom_pgsql($d, $qconfig{'basedb'},
+	&execute_dom_pgsql($d, undef,
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote($date));
 	&$second_print($text{'setup_done'});
@@ -534,7 +534,7 @@ if ($d->{'parent'}) {
 	}
 elsif (&postgres_user_exists($d)) {
 	&require_postgres();
-	&execute_dom_pgsql($d, $qconfig{'basedb'},
+	&execute_dom_pgsql($d, undef,
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote("Jan 1 2038"));
 	&$second_print($text{'setup_done'});
@@ -672,7 +672,7 @@ foreach $db (@dbs) {
 			# But grant access to the DB to the domain owner
 			local $q = &postgres_uquote(&postgres_user($d));
 			&execute_dom_psql(
-				$d, $qconfig{'basedb'},
+				$d, undef,
 				"alter database $db->[0] owner to $q");
 			foreach my $t (@tables) {
 				&execute_dom_psql(
@@ -767,7 +767,6 @@ my @tables;
 eval {
 	# Make sure DBI errors don't cause a total failure
 	local $main::error_must_die = 1;
-	local $postgresql::force_nodbi = 1;
 	my $rv = &execute_dom_psql($d, $db, "select sum(relpages) from pg_class where relname not like 'pg_%'");
 	$size = $rv->{'data'}->[0]->[0]*1024*2;
 	if (!$sizeonly) {
@@ -817,7 +816,7 @@ if (!&check_postgres_database_clash($d, $db)) {
 	if ($withs) {
 		$sql .= " with".$withs;
 		}
-	&execute_dom_psql($d, $qconfig{'basedb'}, $sql);
+	&execute_dom_psql($d, undef, $sql);
 	}
 else {
 	&$first_print(&text('setup_postgresdbimport', $db));
@@ -826,7 +825,7 @@ else {
 # Make sure nobody else can access it
 eval {
 	local $main::error_must_die = 1;
-	&execute_dom_psql($d, $qconfig{'basedb'},
+	&execute_dom_psql($d, undef,
 		"revoke all on database ".&postgres_uquote($db).
 		" from public");
 	};
@@ -847,7 +846,7 @@ my ($d, $dbname) = @_;
 my $ver = &get_dom_remote_postgres_version($d);
 if ($ver >= 8.0) {
 	my $user = &postgres_user($d);
-	&execute_dom_psql($d, $qconfig{'basedb'},
+	&execute_dom_psql($d, undef,
 		"alter database ".&postgres_uquote($dbname).
 		" owner to ".&postgres_uquote($user));
 	}
@@ -868,7 +867,7 @@ foreach my $db (@deldbs) {
 	if (&indexof($db, @dblist) >= 0) {
 		eval {
 			local $main::error_must_die = 1;
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 				"drop database ".&postgresql::quote_table($db).
 				" with force");
 			};
@@ -878,12 +877,12 @@ foreach my $db (@deldbs) {
 			eval {
 				local $main::error_must_die = 1;
 				&execute_dom_psql(
-					$d, $qconfig{'basedb'},
+					$d, undef,
 					"revoke connection on database ".
 					&postgresql::quote_table($db).
 					" from public");
 				};
-			&execute_dom_psql($d, $qconfig{'basedb'},
+			&execute_dom_psql($d, undef,
 				"drop database ".&postgresql::quote_table($db));
 			}
 		}
@@ -911,7 +910,7 @@ local ($d, $dbname) = @_;
 &require_postgres();
 my $ver = &get_dom_remote_postgres_version($d);
 if ($ver && &postgres_user_exists($d, "postgres")) {
-	&execute_dom_psql($d, $qconfig{'basedb'},
+	&execute_dom_psql($d, undef,
 		"alter database ".&postgres_uquote($dbname).
 		" owner to ".&postgres_uquote("postgres"));
 	}
@@ -966,7 +965,6 @@ local @rv;
 eval {
 	# Protect against DBI errors
 	local $main::error_must_die = 1;
-	local $postgresql::force_nodbi = 1;
 	local $ver = &postgresql::get_postgresql_version();
 	@rv = ( [ $text{'sysinfo_postgresql'}, $ver ] );
 	};
@@ -1130,12 +1128,12 @@ return \%opts;
 # Returns a hash ref of database creation options for an existing DB
 sub get_postgres_creation_opts
 {
-local ($d, $dbname) = @_;
+my ($d, $dbname) = @_;
 &require_postgres();
-local $opts = { };
+my $opts = { };
 eval {
 	local $main::error_must_die = 1;
-	local $rv = &postgresql::execute_sql($qconfig{'basedb'}, "\\l");
+	my $rv = &execute_dom_psql($d, undef, "\\l");
 	foreach my $r (@{$rv->{'data'}}) {
 		if ($r->[0] eq $dbname) {
 			$opts->{'encoding'} = $r->[2];
@@ -1415,6 +1413,10 @@ sub execute_dom_psql
 {
 my ($d, $db, $sql, @params) = @_;
 my $mod = &require_dom_postgres($d);
+if (!$db) {
+	my %rqconfig = &foreign_config($mod);
+	$db = $rqconfig{'basedb'};
+	}
 if ($sql =~ /^(select|show)\s+/i) {
         return &foreign_call($mod, "execute_sql", $db, $sql, @params);
         }
