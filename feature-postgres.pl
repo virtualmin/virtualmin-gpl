@@ -446,28 +446,27 @@ foreach my $db (&domain_databases($oldd, [ 'postgres' ])) {
 if (%dbmap) {
 	&require_postgres();
 	&$first_print($text{'clone_postgrescopy'});
+	my $mod = &require_dom_postgres($d);
 	foreach my $db (&domain_databases($d, [ 'postgres' ])) {
 		local $oldname = $dbmap{$db->{'name'}};
 		local $temp = &transname();
-		if ($postgresql::postgres_sameunix) {
+		local ($sameunix, $login) = &get_dom_postgres_creds($d);
+		if ($sameunix && (my @uinfo = getpwnam($login))) {
 			# Create empty file postgres user can write to
-			local @uinfo = getpwnam($postgresql::postgres_login);
-			if (@uinfo) {
-				&open_tempfile(EMPTY, ">$temp", 0, 1);
-				&close_tempfile(EMPTY);
-				&set_ownership_permissions($uinfo[2], $uinfo[3],
-							   undef, $temp);
-				}
+			&open_tempfile(EMPTY, ">$temp", 0, 1);
+			&close_tempfile(EMPTY);
+			&set_ownership_permissions($uinfo[2], $uinfo[3],
+						   undef, $temp);
 			}
-		local $err = &postgresql::backup_database($oldname, $temp,
-							  'c', undef);
+		local $err = &foreign_call($mod, "backup_database",
+					   $oldname, $temp, 'c', undef);
 		if ($err) {
 			&$second_print(&text('clone_postgresbackup',
 					     $oldname, $err));
 			next;
 			}
-		$err = &postgresql::restore_database($db->{'name'}, $temp,
-						     0, 0);
+		$err = &foreign_call($mod, "restore_database",
+				     $db->{'name'}, $temp, 0, 0);
 		&unlink_file($temp);
 		if ($err) {
 			&$second_print(&text('clone_postgresrestore',
