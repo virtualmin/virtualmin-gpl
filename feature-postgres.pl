@@ -135,7 +135,13 @@ if (!$d->{'postgres_module'}) {
 local $user = $d->{'postgres_user'} = &postgres_user($d);
 
 if (!$d->{'parent'}) {
-	&$first_print($text{'setup_postgresuser'});
+	if ($d->{'postgres_module'} ne 'postgresql') {
+		my $host = &get_database_host_postgres($d);
+		&$first_print(&text('setup_postgresuser2', $host));
+		}
+	else {
+		&$first_print($text{'setup_postgresuser'});
+		}
 	local $pass = &postgres_pass($d);
 	if (&postgres_user_exists($user)) {
 		&execute_dom_psql($d, $qconfig{'basedb'},
@@ -191,7 +197,7 @@ if ($d->{'parent'}) {
 local $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
 					     : $d->{'pass'};
 my $ver = &get_dom_remote_postgres_version($d);
-return !$noquote && &ver >= 7 ? &postgres_quote($pass) : $pass;
+return !$noquote && $ver >= 7 ? &postgres_quote($pass) : $pass;
 }
 
 # postgres_quote(string)
@@ -790,7 +796,13 @@ my ($d, $db, $opts) = @_;
 
 if (!&check_postgres_database_clash($d, $db)) {
 	# Build and run creation command
-	&$first_print(&text('setup_postgresdb', $db));
+	if ($d->{'postgres_module'} ne 'postgresql') {
+		my $host = &get_database_host_postgres($d);
+		&$first_print(&text('setup_postgresdb2', $db, $host));
+		}
+	else {
+		&$first_print(&text('setup_postgresdb', $db));
+		}
 	my $user = &postgres_user($d);
 	my $sql = "create database ".&postgresql::quote_table($db);
 	my $withs;
@@ -934,12 +946,14 @@ my $mod = &require_dom_postgres($d);
 return &foreign_call($mod, "list_tables", $db);
 }
 
-# get_database_host_postgres()
+# get_database_host_postgres([&domain])
 # Returns the hostname of the server on which PostgreSQL is actually running
 sub get_database_host_postgres
 {
-&require_postgres();
-return $postgres::config{'host'} || 'localhost';
+my ($d) = @_;
+my $pgmod = &require_dom_postgres($d);
+my %pgconfig = &foreign_config($pgmod);
+return $pgconfig{'host'} || 'localhost';
 }
 
 # sysinfo_postgres()

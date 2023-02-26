@@ -169,7 +169,13 @@ else {
 		}
 	local $wild = &substitute_domain_template($tmpl->{'mysql_wild'}, $d);
 	if (!$d->{'parent'}) {
-		&$first_print($text{'setup_mysqluser'});
+		if ($d->{'mysql_module'} ne 'mysql') {
+			my $host = &get_database_host_mysql($d);
+			&$first_print(&text('setup_mysqluser2', $host));
+			}
+		else {
+			&$first_print($text{'setup_mysqluser'});
+			}
 		local $cfunc = sub {
 			local $encpass = &encrypted_mysql_pass($d);
 			foreach my $h (@hosts) {
@@ -1521,7 +1527,13 @@ if ($d->{'provision_mysql'}) {
 else {
 	# Create the database locally, unless it already exists
 	if (&indexof($dbname, &list_dom_mysql_databases($d)) < 0) {
-		&$first_print(&text('setup_mysqldb', $dbname));
+		if ($d->{'mysql_module'} ne 'mysql') {
+			my $host = &get_database_host_mysql($d);
+			&$first_print(&text('setup_mysqldb2', $dbname, $host));
+			}
+		else {
+			&$first_print(&text('setup_mysqldb', $dbname));
+			}
 		&execute_dom_sql($d, $mysql::master_db,
 				 "create database ".&mysql::quotestr($dbname).
 				 ($opts->{'charset'} ?
