@@ -18273,6 +18273,7 @@ if ($pclash) {
 $d->{'db'} = &database_name($d);
 $d->{'no_mysql_db'} = 1;	# Don't create DB automatically
 $d->{'no_tmpl_aliases'} = 1;	# Don't create any aliases
+$d->{'nocreationmail'} = 1;	# Don't re-send post-creation email
 
 # Fix creator
 $d->{'created'} = time();
