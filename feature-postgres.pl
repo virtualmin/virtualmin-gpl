@@ -372,7 +372,8 @@ if (!$d->{'parent'}) {
 	if (&postgres_user_exists($d)) {
 		my $ver = &get_dom_remote_postgres_version($d);
 		if ($ver >= 8.0) {
-			local $s = &execute_dom_psql($d, undef,
+			my ($sameunix, $login) = &get_dom_postgres_creds($d);
+			my $s = &execute_dom_psql($d, undef,
 				"select datname from pg_database ".
 				"join pg_authid ".
 				"on pg_database.datdba = pg_authid.oid ".
@@ -384,12 +385,12 @@ if (!$d->{'parent'}) {
 					"reassign owned by ".
 					  &postgres_uquote($user).
 					  " to ".
-					  $postgresql::postgres_login);
+					  $login);
 				&execute_dom_psql(
 					$d,
 					undef,
 					"alter database $db owner to ".
-					  $postgresql::postgres_login);
+					  $login);
 				}
 			};
 		&execute_dom_psql($d, undef,
