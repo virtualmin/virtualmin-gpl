@@ -8,9 +8,10 @@ require './virtual-server-lib.pl';
 # Show a table of current servers
 @alldoms = &list_domains();
 print &ui_form_start("delete_newmysqls.cgi");
-print &ui_columns_start([ "", $text{'newmysqls_host'}, $text{'newmysqls_doms'},
-			  $text{'newmysqls_def'}, $text{'newmysqls_creator'},
-			  $text{'newmysqls_ver'}, $text{'newmysqls_actions'} ]);
+print &ui_columns_start(
+	[ "", $text{'newmysqls_host'}, $text{'newmysqls_ver'},
+	  $text{'newmysqls_doms'}, $text{'newmysqls_def'},
+	  $text{'newmysqls_creator'}, $text{'newmysqls_actions'} ]);
 foreach my $mm (&list_remote_mysql_modules(),
 		&list_remote_postgres_modules()) {
 	if ($mm->{'dbtype'} eq 'mysql') {
@@ -37,12 +38,12 @@ foreach my $mm (&list_remote_mysql_modules(),
 	$vstr = $err || &text('newmysqls_ver'.$variant, $ver);
 	print &ui_checked_columns_row([
 		$mm->{'desc'},
+		$vstr,
 		$doms,
 		$mm->{'config'}->{'virtualmin_default'} ?
 			$text{'yes'} : $text{'no'},
 		$mm->{'config'}->{'virtualmin_provision'} ?
 			$text{'newmysqls_cm'} : $text{'newmysqls_man'},
-		$vstr,
 		&ui_link("/$mm->{'minfo'}->{'dir'}", $text{'newmysqls_open'}),
 		], \@tds, "d", $mm->{'minfo'}->{'dir'}, 0, 
 		   $mm->{'config'}->{'virtualmin_provision'} ? 1 : 0);
