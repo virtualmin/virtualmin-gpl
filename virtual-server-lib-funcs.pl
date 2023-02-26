@@ -10601,6 +10601,7 @@ if ($d->{'mysql'} && (!$types || &indexof("mysql", @$types) >= 0)) {
 	}
 if ($d->{'postgres'} && (!$types || &indexof("postgres", @$types) >= 0)) {
 	local %done;
+	local $pgmod = &require_dom_postgres($d);
 	local $av = &foreign_available("postgresql");
 	&require_postgres();
 	local $pghost = &get_database_host_postgres($d);
@@ -10609,7 +10610,7 @@ if ($d->{'postgres'} && (!$types || &indexof("postgres", @$types) >= 0)) {
 		next if ($done{$db}++);
 		push(@dbs, { 'name' => $db,
 			     'type' => 'postgres',
-			     'link' => $av ? "../postgresql/".
+			     'link' => $av ? "../$pgmod/".
 					     "edit_dbase.cgi?db=$db"
 					   : undef,
 			     'desc' => $text{'databases_postgres'},

@@ -550,11 +550,12 @@ else {
 # Dumps this domain's postgreSQL database to a backup file
 sub backup_postgres
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &require_postgres();
+my $mod = &require_dom_postgres($d);
 
 # Find all the domains's databases
-local @dbs = split(/\s+/, $d->{'db_postgres'});
+my @dbs = split(/\s+/, $d->{'db_postgres'});
 
 # Filter out any excluded DBs
 my @exclude = &get_backup_db_excludes($d);
@@ -562,27 +563,25 @@ my %exclude = map { $_, 1 } @exclude;
 @dbs = grep { !$exclude{$_} } @dbs;
 
 # Create base backup file with meta-information
-local %info = ( 'remote' => $postgresql::config{'host'} );
+my $host = &get_database_host_postgres($d);
+my %info = ( 'remote' => $host );
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
-local $db;
-local $ok = 1;
-foreach $db (@dbs) {
+my $ok = 1;
+foreach my $db (@dbs) {
 	&$first_print(&text('backup_postgresdump', $db));
-	local $dbfile = $file."_".$db;
-	local $destfile = $dbfile;
-	if ($postgresql::postgres_sameunix) {
+	my $dbfile = $file."_".$db;
+	my $destfile = $dbfile;
+	my ($sameunix, $login) = &get_dom_postgres_creds($d);
+	if ($sameunix && (my @uinfo = getpwnam($login))) {
 		# For a backup done as the postgres user, create an empty file
 		# owned by him first
-		local @uinfo = getpwnam($postgresql::postgres_login);
-		if (@uinfo) {
-			$destfile = &transname();
-			&open_tempfile(EMPTY, ">$destfile", 0, 1);
-			&close_tempfile(EMPTY);
-			&set_ownership_permissions($uinfo[2], $uinfo[3],
-						   undef, $destfile);
-			}
+		$destfile = &transname();
+		&open_tempfile(EMPTY, ">$destfile", 0, 1);
+		&close_tempfile(EMPTY);
+		&set_ownership_permissions($uinfo[2], $uinfo[3],
+					   undef, $destfile);
 		}
 
 	# Limit tables to those that aren't excluded
@@ -595,7 +594,8 @@ foreach $db (@dbs) {
 				 &list_postgres_tables($d, $db) ];
 		}
 
-	local $err = &postgresql::backup_database($db, $destfile, 'c', $tables);
+	my $err = &foreign_call($mod, "backup_database", $db,
+				$destfile, 'c', $tables);
 	if ($err) {
 		&$second_print(&text('backup_postgresdumpfailed',
 				     "<pre>$err</pre>"));
@@ -617,15 +617,16 @@ return $ok;
 # the postgresql user.
 sub restore_postgres
 {
-local ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
-local %info;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd, $asd) = @_;
+my %info;
 &read_file($file, \%info);
 &require_postgres();
 
 # If in replication mode, AND the remote PostgreSQL system is the same on both
 # systems, do nothing
-if ($allopts->{'repl'} && $postgresql::config{'host'} && $info{'remote'} &&
-    $postgresql::config{'host'} eq $info{'remote'}) {
+my $host = &get_database_host_postgres($d);
+if ($allopts->{'repl'} && $host ne "localhost" && $info{'remote'} &&
+    $host eq $info{'remote'}) {
 	&$first_print($text{'restore_postgresdummy'});
 	&$second_print(&text('restore_postgressameremote', $info{'remote'}));
 	return 1;
@@ -693,28 +694,28 @@ foreach $db (@dbs) {
 		&create_postgres_database($d, $db->[0]);
 		}
 	&$outdent_print();
-	if ($postgresql::postgres_sameunix) {
+	my ($sameunix, $login) = &get_dom_postgres_creds($d);
+	if ($sameunix && (my @uinfo = getpwnam($login))) {
 		# Restore is running as the postgres user - make the backup
 		# file owned by him, and the parent directory world-accessible
-		local @uinfo = getpwnam($postgresql::postgres_login);
-		if (@uinfo) {
-			&set_ownership_permissions($uinfo[2], $uinfo[3],
-						   undef, $db->[1]);
-			local $dir = $file;
-			$dir =~ s/\/[^\/]+$//;
-			&set_ownership_permissions(undef, undef, 0711, $dir);
-			}
+		&set_ownership_permissions($uinfo[2], $uinfo[3],
+					   undef, $db->[1]);
+		local $dir = $file;
+		$dir =~ s/\/[^\/]+$//;
+		&set_ownership_permissions(undef, undef, 0711, $dir);
 		}
 	local $err;
+	my $mod = &require_dom_postgres($d);
 	if ($asd) {
 		# As domain owner
-		local $postgresql::postgres_login = &postgres_user($d);
-		local $postgresql::postgres_pass = &postgres_pass($d, 1);
-		$err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
+		$err = &foreign_call($mod, "restore_database",
+			$db->[0], $db->[1], 0, 0, undef,
+			&postgres_user($d), &postgres_pass($d, 1));
 		}
 	else {
 		# As master admin
-		$err = &postgresql::restore_database($db->[0], $db->[1], 0, 0);
+		$err = &foreign_call($mod, "restore_database",
+			$db->[0], $db->[1], 0, 0);
 		}
 	if ($err) {
 		&$second_print(&text('restore_mysqlloadfailed', "<pre>$err</pre>"));
@@ -1023,11 +1024,14 @@ sub check_postgres_login
 {
 local ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_postgres();
-local $main::error_must_die = 1;
-local $postgresql::postgres_login = $dbuser;
-local $postgresql::postgres_pass = $dbpass;
-eval { &postgresql::execute_sql($dbname, "select version()") };
+my $mod = &require_dom_postgres($d);
+&foreign_call($mod, "set_login_pass", 0, $dbuser, $dbpass);
+eval {
+	local $main::error_must_die = 1;
+	&execute_dom_psql($d, $dbname, "select version()");
+	};
 local $err = $@;
+&foreign_call($mod, "set_login_pass", &get_dom_postgres_creds($d));
 if ($err) {
 	$err =~ s/\s+at\s+.*\sline//g;
 	return $err;
@@ -1039,10 +1043,12 @@ return undef;
 # Returns options for a new PostgreSQL database
 sub creation_form_postgres
 {
+my ($d) = @_;
 &require_postgres();
-if (&postgresql::get_postgresql_version() >= 7.4) {
-	local $tmpl = &get_template($_[0]->{'template'});
-	local $cs = $tmpl->{'postgres_encoding'};
+my $ver = &get_dom_remote_postgres_version($d);
+if ($ver >= 7.4) {
+	my $tmpl = &get_template($d->{'template'});
+	my $cs = $tmpl->{'postgres_encoding'};
 	$cs = "" if ($cs eq "none");
 	return &ui_table_row($text{'database_encoding'},
 			     &ui_select("postgres_encoding", $cs,
@@ -1182,8 +1188,8 @@ return 1;
 sub remote_postgres
 {
 local ($d) = @_;
-&require_postgres();
-return $postgresql::config{'host'};
+my $host = &get_database_host_postgres($d);
+return $host eq "localhost" ? undef : $host;
 }
 
 # get_postgresql_user_flags(&domain)
@@ -1432,6 +1438,16 @@ sub list_dom_postgres_databases
 my ($d, $db) = @_;
 my $mod = &require_dom_postgres($d);
 return &foreign_call($mod, "list_databases");
+}
+
+# get_dom_postgres_creds(&domain)
+# Returns the sameunix and login variables for the PostgreSQL module for
+# this domain
+sub get_dom_postgres_creds
+{
+my $mod = &require_dom_postgres($d);
+my %rqconfig = &foreign_config($mod);
+return ($rqconfig{'sameunix'}, $rqconfig{'login'}, $rqconfig{'pass'});
 }
 
 $done_feature_script{'postgres'} = 1;
