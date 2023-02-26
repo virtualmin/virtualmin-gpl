@@ -767,7 +767,7 @@ if ($myserver) {
 	$mysql_module = $mm->{'minfo'}->{'dir'};
 	}
 if ($pgserver) {
-	my $mm = &get_remote_postgres_module($myserver);
+	my $mm = &get_remote_postgres_module($pgserver);
 	$mm || &usage("No remote PostgreSQL server named $pgserver was found");
 	$postgres_module = $mm->{'minfo'}->{'dir'};
 	}

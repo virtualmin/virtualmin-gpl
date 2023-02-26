@@ -352,13 +352,13 @@ sub delete_postgres
 local ($d, $preserve) = @_;
 &require_postgres();
 my @dblist = &unique(split(/\s+/, $d->{'db_postgres'}));
+my $pghost = &get_database_host_postgres($d);
 
 # If PostgreSQL is hosted remotely, don't delete the DB on the assumption that
 # other servers sharing the DB will still be using it
 if ($preserve && &remote_postgres($d)) {
 	&$first_print(&text('delete_postgresdb', join(" ", @dblist)));
-	&$second_print(&text('delete_mysqlpreserve',
-			     $postgresql::config{'host'}));
+	&$second_print(&text('delete_mysqlpreserve', $pghost));
 	return 1;
 	}
 
@@ -499,16 +499,17 @@ return undef;
 # Invalidate the domain's PostgreSQL user
 sub disable_postgres
 {
+my ($d) = @_;
 &$first_print($text{'disable_postgres'});
-local $user = &postgres_user($_[0]);
-if ($_[0]->{'parent'}) {
+my $user = &postgres_user($d);
+if ($d->{'parent'}) {
 	&$second_print($text{'save_nopostgrespar'});
 	return 0;
 	}
-elsif (&postgres_user_exists($_[0])) {
+elsif (&postgres_user_exists($d)) {
 	&require_postgres();
-	local $date = localtime(0);
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	my $date = localtime(0);
+	&execute_dom_pgsql($d, $qconfig{'basedb'},
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote($date));
 	&$second_print($text{'setup_done'});
@@ -524,15 +525,16 @@ else {
 # Validate the domain's PostgreSQL user
 sub enable_postgres
 {
+my ($d) = @_;
 &$first_print($text{'enable_postgres'});
-local $user = &postgres_user($_[0]);
-if ($_[0]->{'parent'}) {
+my $user = &postgres_user($d);
+if ($d->{'parent'}) {
 	&$second_print($text{'save_nopostgrespar'});
 	return 0;
 	}
-elsif (&postgres_user_exists($_[0])) {
+elsif (&postgres_user_exists($d)) {
 	&require_postgres();
-	&postgresql::execute_sql_logged($qconfig{'basedb'},
+	&execute_dom_pgsql($d, $qconfig{'basedb'},
 		"alter user ".&postgres_uquote($user).
 		" valid until ".&postgres_quote("Jan 1 2038"));
 	&$second_print($text{'setup_done'});
@@ -665,18 +667,17 @@ foreach $db (@dbs) {
 		# This can happen during a restore when PostgreSQL is on a
 		# remote system.
 		my @tables = &list_postgres_tables($d, $db->[0]);
-		if (@tables) {
+		my $ver = &get_dom_remote_postgres_version($d);
+		if (@tables && $ver >= 8.0) {
 			# But grant access to the DB to the domain owner
-			if (&postgresql::get_postgresql_version() >= 8.0) {
-				local $q = &postgres_uquote(&postgres_user($d));
-				&postgresql::execute_sql_logged(
-                                        $qconfig{'basedb'},
-                                        "alter database $db->[0] owner to $q");
-				foreach my $t (@tables) {
-					&postgresql::execute_sql_logged(
-						$db->[0],
-						"alter table $t owner to $q");
-					}
+			local $q = &postgres_uquote(&postgres_user($d));
+			&execute_dom_psql(
+				$d, $qconfig{'basedb'},
+				"alter database $db->[0] owner to $q");
+			foreach my $t (@tables) {
+				&execute_dom_psql(
+					$d, $db->[0],
+					"alter table $t owner to $q");
 				}
 			next;
 			}

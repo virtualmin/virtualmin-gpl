@@ -613,11 +613,12 @@ eval {
 	elsif ($dbtype eq "postgres") {
 		# Delete from PostgreSQL
 		&require_postgres();
-		foreach my $t (&postgresql::list_tables($dbname)) {
+		foreach my $t (&list_postgres_tables($d, $dbname)) {
 			if (ref($tables) && &indexoflc($t, @$tables) >= 0 ||
 			    !ref($tables) && $t =~ /^$tables/i) {
 				eval {
-					&postgresql::execute_sql_logged($dbname,
+					&execute_dom_psql(
+						$d, $dbname,
 						"drop table ".
 						&postgresql::quote_table($t));
 					};

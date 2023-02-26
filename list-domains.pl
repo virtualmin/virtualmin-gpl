@@ -393,6 +393,10 @@ if ($multi) {
 			my $host = &get_database_host_mysql($d);
 			print "    Hostname for mysql: $host\n";
 			}
+		if ($d->{'postgres'} && $d->{'postgres_module'} ne 'postgresql') {
+			my $host = &get_database_host_postgres($d);
+			print "    Hostname for postgres: $host\n";
+			}
 		print "    Home directory: $d->{'home'}\n";
 		if (!$d->{'parent'} && ($jail = &get_domain_jailkit($d))) {
 			print "    Jail directory: $jail\n";
