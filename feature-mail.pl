@@ -153,7 +153,7 @@ if ($config{'mail_system'} != 4) {
 		if ($config{'mail_system'} == 0 && $u->{'user'} =~ /\@/) {
 			# Special case for Postfix @ users
 			$foruser{$pop3."\@".$d->{'dom'}} =
-				&replace_atsign_if_exists($u->{'user'});
+				&escape_replace_atsign_if_exists($u->{'user'});
 			}
 		}
 	if ($d->{'mail'}) {

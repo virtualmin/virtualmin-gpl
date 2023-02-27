@@ -5111,7 +5111,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 	elsif ($t == 10) {
 		# Alias to self .. may need to used at-escaped name
 		if ($config{'mail_system'} == 0 && $_[1] =~ /\@/) {
-			push(@values, "\\".&replace_atsign_if_exists($_[1]));
+			push(@values, "\\".&escape_user(&replace_atsign_if_exists($_[1])));
 			}
 		else {
 			push(@values, "\\".&escape_user($_[1]));
@@ -9100,6 +9100,20 @@ return $user;
 # Replace an @ in a username with -
 # if a user exists in system
 sub replace_atsign_if_exists
+{
+my ($user) = @_;
+my $origuser = $user;
+$user =~ s/\@/-/g;
+$user = $origuser if (!getpwnam($user));
+return $user;
+}
+
+
+# escape_replace_atsign_if_exists(username)
+# Replace an @ in a username with - if a
+# user exists in system and if not return
+# escaped @ user
+sub escape_replace_atsign_if_exists
 {
 my ($user) = @_;
 my $origuser = $user;
