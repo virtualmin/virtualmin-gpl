@@ -741,6 +741,22 @@ else {
 return wantarray ? ($ok, $err) : $ok;
 }
 
+# copy_write_remote_as_domain_user(&domain, &server, srcfile, dstfile)
+# Read a file as root, and write it with domain user permissions. The file
+# can be local, or on a remote Webmin system.
+sub copy_write_remote_as_domain_user
+{
+my ($d, $r, $src, $dst) = @_;
+if ($r->{'id'} == 0) { 
+	&copy_write_as_domain_user($d, $src, $dst);
+	}
+else {
+	&write_as_domain_user($d, sub {
+		&remote_read($r, $dst, $src);
+		});
+	}
+}
+
 # safe_domain_file(&domain, file)
 # Returns 1 if some file is safe for a given domain to manage.
 # Currently just prevents symlinks

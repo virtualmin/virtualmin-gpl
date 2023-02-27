@@ -2357,9 +2357,7 @@ my $absfile = &remote_foreign_call($r, "bind8", "make_chroot",
     &remote_foreign_call($r, "bind8", "absolute_path", $f->{'values'}->[0]));
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
-	&write_as_domain_user($d, sub {
-		&remote_read($r, $file, $absfile);
-		});
+	&copy_write_remote_as_domain_user($d, $r, $absfile, $file);
 
 	# Also save DNSSEC keys, if possible
 	if (&can_domain_dnssec($d)) {
@@ -2372,11 +2370,9 @@ if (!$d->{'dns_submode'}) {
 		my %kinfo;
 		foreach my $key (@keys) {
 			foreach my $t ('private', 'public') {
-				&write_as_domain_user($d, sub {
-					&remote_read($r,
-						$file.'_dnssec_'.$t.'_'.$i,
-						$key->{$t.'file'});
-					});
+				&copy_write_remote_as_domain_user($d, $r,
+					$key->{$t.'file'},
+					$file.'_dnssec_'.$t.'_'.$i);
 				$key->{$t.'file'} =~ /^.*\/([^\/]+)$/;
 				$kinfo{$t.'_'.$i} = $1;
 				}
@@ -2508,10 +2504,8 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 				$key->{$t.'file'} = $keydir.'/'.
 					$kinfo{$t.'_'.$i};
 				}
-			&write_as_domain_user($d, sub {
-				&remote_write($r, $file.'_dnssec_'.$t.'_'.$i,
-					      $key->{$t.'file'});
-				});
+			&remote_write($r, $file.'_dnssec_'.$t.'_'.$i,
+				      $key->{$t.'file'});
 			&remote_foreign_call($r, "bind8", "set_ownership",
 					     $key->{$t.'file'});
 			$rok++;
