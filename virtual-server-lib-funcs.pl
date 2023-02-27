@@ -15380,15 +15380,11 @@ if ($config{'mysql'}) {
 	else {
 		# MySQL server is needed
 		my $mysql_server_status = &foreign_installed("mysql", 1);
-		# If we have remote server setup
-		# to be used by default
-		my $mysql_remote = grep {
-			    ($_->{'config'}->{'sock'} ||
-			     $_->{'config'}->{'host'} ||
-			     $_->{'config'}->{'port'}) &&
-			       $_->{'config'}->{'virtualmin_default'}
-			    } &list_remote_mysql_modules();
-		if ($mysql_remote) {
+		my ($defmysql) = grep {
+			$_->{'config'}->{'virtualmin_default'} &&
+			$_->{'dbtype'} eq 'mysql'
+			} &list_remote_mysql_modules();
+		if ($defmysql && $defmysql->{'host'}) {
 			&$second_print($text{'check_mysqlok3'});
 			}
 		elsif ($mysql_server_status != 2) {
@@ -15404,34 +15400,45 @@ if ($config{'mysql'}) {
 				my ($v, $var) = &get_dom_remote_mysql_version();
 				&$second_print(&text('check_mysqlok', $v));
 				}
+
+			# Update any cached MySQL version
+			if (defined(&mysql::save_mysql_version)) {
+				&mysql::save_mysql_version();
+				}
+
+			# If MYSQL_PWD doesn't work, disable it
+			if (defined(&mysql::working_env_pass) &&
+			    !&mysql::working_env_pass()) {
+				$mysql::config{'nopwd'} = 1;
+				&mysql::save_module_config();
+				}
 			}
-		}
-
-	# Update any cached MySQL version
-	if (defined(&mysql::save_mysql_version)) {
-		&mysql::save_mysql_version();
-		}
-
-	# If MYSQL_PWD doesn't work, disable it
-	if (defined(&mysql::working_env_pass) &&
-	    !&mysql::working_env_pass()) {
-		$mysql::config{'nopwd'} = 1;
-		&mysql::save_module_config();
 		}
 	}
 
 if ($config{'postgres'}) {
 	# Make sure PostgreSQL is installed
 	&require_postgres();
-	&foreign_installed("postgresql", 1) == 2 ||
-		return &text('index_epostgres', "/postgresql/", $clink);
-	if (!$postgresql::postgres_sameunix &&
-	    $postgresql::postgres_pass eq '') {
-		&$second_print(&text('check_postgresnopass', '/postgresql/',
-				      $postgresql::postgres_login || 'root'));
+	my ($defpostgres) = grep {
+		$_->{'config'}->{'virtualmin_default'} &&
+		$_->{'dbtype'} eq 'postgres'
+		} &list_remote_mysql_modules();
+	if ($defpostgres && $defpostgres->{'host'}) {
+		&$second_print($text{'check_postgresok3'});
 		}
 	else {
-		&$second_print($text{'check_postgresok'});
+		&foreign_installed("postgresql", 1) == 2 ||
+			return &text('index_epostgres', "/postgresql/", $clink);
+		if (!$postgresql::postgres_sameunix &&
+		    $postgresql::postgres_pass eq '') {
+			&$second_print(&text('check_postgresnopass',
+				     '/postgresql/',
+				     $postgresql::postgres_login || 'root'));
+			}
+		else {
+			my $v = &get_dom_remote_postgres_version();
+			&$second_print(&text('check_postgresok', $v));
+			}
 		}
 	}
 
