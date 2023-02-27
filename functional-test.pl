@@ -3158,6 +3158,17 @@ $multibackup_tests = [
 	# Run various tests again
 	@post_restore_tests,
 
+	# Restore DB with domain owner permissions
+	{ 'command' => 'chmod -R 755 '.$test_backup_dir,
+	},
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'feature', 'mysql' ],
+		      [ 'feature', 'postgres' ],
+		      [ 'as-owner' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
