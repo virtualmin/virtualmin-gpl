@@ -704,19 +704,9 @@ foreach $db (@dbs) {
 		$dir =~ s/\/[^\/]+$//;
 		&set_ownership_permissions(undef, undef, 0711, $dir);
 		}
-	local $err;
 	my $mod = &require_dom_postgres($d);
-	if ($asd) {
-		# As domain owner
-		$err = &foreign_call($mod, "restore_database",
-			$db->[0], $db->[1], 0, 0, undef,
-			&postgres_user($d), &postgres_pass($d, 1));
-		}
-	else {
-		# As master admin
-		$err = &foreign_call($mod, "restore_database",
-			$db->[0], $db->[1], 0, 0);
-		}
+	my $err = &foreign_call($mod, "restore_database",
+		$db->[0], $db->[1], 0, 0);
 	if ($err) {
 		&$second_print(&text('restore_mysqlloadfailed', "<pre>$err</pre>"));
 		return 0;
