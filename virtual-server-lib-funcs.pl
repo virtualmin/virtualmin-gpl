@@ -3712,10 +3712,15 @@ else {
 # Returns a username with the domain prefix (usually group) appended somehow
 sub userdom_name
 {
-local ($name, $d, $append_style) = @_;
+my ($name, $d, $append_style) = @_;
 if (!defined($append_style)) {
-	local $tmpl = &get_template($d->{'template'});
-	$append_style = $tmpl->{'append_style'};
+	if (defined($d->{'append_style'})) {
+		$append_style = $d->{'append_style'};
+		}
+	else {
+		my $tmpl = &get_template($d->{'template'});
+		$append_style = $tmpl->{'append_style'};
+		}
 	}
 if ($append_style == 0) {
 	return $name.".".$d->{'prefix'};
