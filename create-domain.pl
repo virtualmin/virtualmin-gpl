@@ -408,6 +408,14 @@ while(@ARGV > 0) {
 	elsif ($a eq "--ssl-redirect") {
 		$auto_redirect = 1;
 		}
+	elsif ($a eq "--append-style") {
+		$append_style = shift(@ARGV);
+		my ($as) = grep { $_->[0] eq $append_style ||
+				  $_->[1] eq $append_style }
+				&list_append_styles();
+		$as || &usage("Append style $append_style does not exists");
+		$append_style = $as->[0];
+		}
 	elsif ($a eq "--mode") {
 		$phpmode = shift(@ARGV);
 		}
@@ -877,6 +885,7 @@ $dom{'dns_subany'} = $dns_subany if (defined($dns_subany));
 $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = $linkcert if ($linkcert == 1 || $linkcert == 2);
 $dom{'always_ssl'} = $always_ssl if (defined($always_ssl));
+$dom{'append_style'} = $append_style if (defined($append_style));
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
 	}
@@ -1102,6 +1111,7 @@ print "                        [--break-ssl-cert | --link-ssl-cert]\n";
 print "                        [--ssl-redirect]\n";
 print "                        [--generate-ssl-cert]\n";
 print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";
+print "                        [--append-style format]\n";
 exit(1);
 }
 

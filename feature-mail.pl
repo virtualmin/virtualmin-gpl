@@ -4992,14 +4992,7 @@ print &ui_table_row(&hlink($text{'tmpl_othergroups'}, "template_othergroups"),
 print &ui_table_row(&hlink($text{'tmpl_append'}, "template_append"),
 	    &none_def_input("append", $tmpl->{'append_style'}, undef, 1)."\n".
 	    &ui_select("append", $tmpl->{'append_style'},
-		       [ [ 0, "username.domain" ],
-			 [ 2, "domain.username" ],
-			 [ 1, "username-domain" ],
-			 [ 3, "domain-username" ],
-			 [ 4, "username_domain" ],
-			 [ 5, "domain_username" ],
-			 [ 6, "username\@domain" ],
-			 [ 7, "username\%domain" ] ]));
+		       [ &list_append_styles() ]));
 }
 
 # parse_template_mail(&tmpl)
@@ -6800,6 +6793,20 @@ sub reset_mail
 my ($d) = @_;
 &delete_mail($d, 0, 1, 1);
 &setup_mail($d, 1, 1);
+}
+
+# list_append_styles()
+# Returns a list of all support username/domain append styles
+sub list_append_styles
+{
+return ( [ 0, "username.domain" ],
+	 [ 2, "domain.username" ],
+	 [ 1, "username-domain" ],
+	 [ 3, "domain-username" ],
+	 [ 4, "username_domain" ],
+	 [ 5, "domain_username" ],
+	 [ 6, "username\@domain" ],
+	 [ 7, "username\%domain" ] );
 }
 
 $done_feature_script{'mail'} = 1;
