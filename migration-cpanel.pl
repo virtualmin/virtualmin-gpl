@@ -757,9 +757,8 @@ if ($got{'mail'}) {
 				local $uinfo = $useremail{$name};
 				local $olduinfo = { %$uinfo };
 				local $touser = $uinfo->{'user'};
-				if ($config{'mail_system'} == 0 &&
-				    $escuser =~ /\@/) {
-					$touser = &replace_atsign($touser);
+				if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+					$touser = &escape_replace_atsign_if_exists($touser);
 					}
 				$touser = "\\".$touser;
 				$uinfo->{'to'} = [ $touser, @values ];

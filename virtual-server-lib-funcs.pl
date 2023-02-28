@@ -2113,7 +2113,7 @@ else {
 
 if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/) {
 	# Find the Unix user with the @ escaped and delete it too
-	local $esc = &replace_atsign($_[0]->{'user'});
+	local $esc = &replace_atsign_if_exists($_[0]->{'user'});
 	local @allusers = &list_all_users_quotas(1);
 	local ($extrauser) = grep { $_->{'user'} eq $esc } @allusers;
 	if ($extrauser) {
@@ -5114,7 +5114,7 @@ for($i=0; defined($t = $in{"type_$i"}); $i++) {
 	elsif ($t == 10) {
 		# Alias to self .. may need to used at-escaped name
 		if ($config{'mail_system'} == 0 && $_[1] =~ /\@/) {
-			push(@values, "\\".&replace_atsign($_[1]));
+			push(@values, "\\".&escape_user(&replace_atsign_if_exists($_[1])));
 			}
 		else {
 			push(@values, "\\".&escape_user($_[1]));
@@ -9088,8 +9088,12 @@ return $escuser;
 # Converts a username into a suitable alias name
 sub escape_alias
 {
-local ($escuser) = @_;
+my ($escuser) = @_;
+my $origuser = $escuser;
 $escuser =~ s/\@/-/g;
+if (!getpwnam($escuser)) {
+	$escuser = &escape_user($origuser);
+	}
 return $escuser;
 }
 
@@ -9097,9 +9101,36 @@ return $escuser;
 # Replace an @ in a username with -
 sub replace_atsign
 {
-local ($rv) = @_;
-$rv =~ s/\@/-/g;
-return $rv;
+my ($user) = @_;
+$user =~ s/\@/-/g;
+return $user;
+}
+
+# replace_atsign_if_exists(username)
+# Replace an @ in a username with -
+# if a user exists in system
+sub replace_atsign_if_exists
+{
+my ($user) = @_;
+my $origuser = $user;
+$user =~ s/\@/-/g;
+$user = $origuser if (!getpwnam($user));
+return $user;
+}
+
+
+# escape_replace_atsign_if_exists(username)
+# Replace an @ in a username with - if a
+# user exists in system and if not return
+# escaped @ user
+sub escape_replace_atsign_if_exists
+{
+my ($user) = @_;
+my $origuser = $user;
+$user =~ s/\@/-/g;
+$user = &escape_user($origuser)
+	if (!getpwnam($user));
+return $user;
 }
 
 # add_atsign(username)

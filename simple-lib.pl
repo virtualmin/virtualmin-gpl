@@ -135,9 +135,8 @@ if ($simple->{'bounce'}) {
 	}
 if ($simple->{'local'}) {
 	local $escuser = $simple->{'local'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/ &&
-	    getpwnam(&replace_atsign($escuser))) {
-		$escuser = &replace_atsign($escuser);
+	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
 	else {
 		$escuser = &escape_user($escuser);
@@ -146,9 +145,8 @@ if ($simple->{'local'}) {
 	}
 if ($simple->{'tome'}) {
 	local $escuser = $alias->{'user'};
-	if ($config{'mail_system'} == 0 && $escuser =~ /\@/ &&
-	    getpwnam(&replace_atsign($escuser))) {
-		$escuser = &replace_atsign($escuser);
+	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
+		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
 	else {
 		$escuser = &escape_user($escuser);

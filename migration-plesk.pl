@@ -503,7 +503,7 @@ foreach my $name (keys %$mailusers) {
 		# Add delivery to user's mailbox
 		local $escuser = $uinfo->{'user'};
 		if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
-			$escuser = &replace_atsign($escuser);
+			$escuser = &escape_replace_atsign_if_exists($escuser);
 			}
 		else {
 			$escuser = &escape_user($escuser);
