@@ -77,7 +77,7 @@ if ($tmpl->{'append_style'} == 6) {
 	}
 else {
 	# Actual prefix is in use
-	$msg = &get_prefix_msg($tmpl);
+	$msg = &get_prefix_msg($d);
 	$msg .= '_group' if (!$d->{'parent'});
 	@users = &list_domain_users($d, 1, 1, 1, 1);
 	$mode = @users ? 0 : 1;

@@ -18229,17 +18229,18 @@ local @tm = localtime($secs);
 return sprintf "%4.4d-%2.2d-%2.2d", $tm[5]+1900, $tm[4]+1, $tm[3];
 }
 
-# get_prefix_msg(&tmpl)
+# get_prefix_msg(&domain)
 # Returns either "prefix" or "suffix", depending on the mailbox name mode
 # set in the template.
 sub get_prefix_msg
 {
-local ($tmpl) = @_;
-return $tmpl->{'append_style'} == 0 ||
-       $tmpl->{'append_style'} == 1 ||
-       $tmpl->{'append_style'} == 4 ||
-       $tmpl->{'append_style'} == 7 ? 'suffix' :
-				      'prefix';
+my ($d) = @_;
+my $a = $d->{'append_style'};
+if (!defined($a)) {
+	my $tmpl = &get_template($d->{'template'});
+	$a = $tmpl->{'append_style'};
+	}
+return $a == 0 || $a == 1 || $a == 4 || $a == 7 ? 'suffix' : 'prefix';
 }
 
 # compare_versions(ver1, ver2, [&script])
