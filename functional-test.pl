@@ -200,6 +200,7 @@ $ssl_prefix = &compute_prefix($test_ssl_subdomain, $test_ssl_subdomain_user,
 		 'group' => $test_domain_user,
 		 'template' => &get_init_template() );
 $test_full_user = &userdom_name($test_user, \%test_domain);
+$test_full_atuser = &userdom_name($test_user, \%test_domain, 6);
 $test_full_user_mysql = &mysql_username($test_full_user);
 $test_full_user_postgres = &postgres_username($test_full_user);
 ($test_target_domain_user) = &unixuser_name($test_target_domain);
@@ -1203,6 +1204,8 @@ $alias_tests = [
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'cleanup' => 1 },
 	];
+
+$atalias_tests = &convert_to_atmail($alias_tests);
 
 # Reseller tests
 $reseller_tests = [
@@ -4907,6 +4910,8 @@ $mail_tests = [
 	  'cleanup' => 1,
         },
 	];
+
+$atmail_tests = &convert_to_atmail($mail_tests);
 
 $aliasmail_tests = [
 	# Create a domain to be the alias target
@@ -10465,6 +10470,7 @@ $alltests = { '_config' => $_config_tests,
 	      'web' => $web_tests,
 	      'mailbox' => $mailbox_tests,
 	      'alias' => $alias_tests,
+	      'atalias' => $atalias_tests,
 	      'aliasdom' => $aliasdom_tests,
 	      'reseller' => $reseller_tests,
 	      'script' => $script_tests,
@@ -10508,6 +10514,7 @@ $alltests = { '_config' => $_config_tests,
 	      'incremental' => $incremental_tests,
 	      'enc_incremental' => $enc_incremental_tests,
               'mail' => $mail_tests,
+              'atmail' => $atmail_tests,
               'aliasmail' => $aliasmail_tests,
 	      'prepost' => $prepost_tests,
 	      'webmin' => $webmin_tests,
@@ -10910,6 +10917,32 @@ foreach my $t (@$tests) {
 			$a->[1] .= "-".lc($location);
 			}
 		}
+	push(@$rv, $nt);
+	}
+return $rv;
+}
+
+# convert_to_atmail(&tests)
+# Change any domain creation calls to use @-format usernames
+sub convert_to_atmail
+{
+my ($tests) = @_;
+my $rv = [ ];
+foreach my $t (@$tests) {
+	my $nt = { %$t };
+	my @nargs;
+	if ($nt->{'command'} eq 'create-domain.pl') {
+		push(@nargs, [ 'append-style' => 'username@domain' ]);
+		}
+	foreach my $a (@{$nt->{'args'}}) {
+		my $na = [ @$a ];
+		if ($na->[1] eq $test_full_user) {
+			$na->[1] = $test_full_atuser;
+			}
+		push(@nargs, $na);
+		}
+	$nt->{'command'} =~ s/\~\Q$test_full_user\E/~$test_full_atuser/g;
+	$nt->{'args'} = \@nargs;
 	push(@$rv, $nt);
 	}
 return $rv;
