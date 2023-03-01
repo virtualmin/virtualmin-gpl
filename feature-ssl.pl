@@ -2874,7 +2874,7 @@ $d->{'ssl_pass'} = undef;
 
 # And the chained file
 if ($chain) {
-	$chainfile = &default_certificate_file($d, 'ca');
+	$chainfile = $d->{'ssl_chain'} || &default_certificate_file($d, 'ca');
 	$chain_text = &read_file_contents($chain);
 	&lock_file($chainfile);
 	&write_ssl_file_contents($d, $chainfile, $chain_text);
@@ -2939,7 +2939,7 @@ if ($d->{'ssl_same'}) {
 	}
 
 # Create file of all the certs
-my $combfile = &default_certificate_file($d, 'combined');
+my $combfile = $d->{'ssl_combined'} || &default_certificate_file($d, 'combined');
 &lock_file($combfile);
 &create_ssl_certificate_directories($d);
 my $comb = &read_file_contents($d->{'ssl_cert'})."\n";
@@ -2951,7 +2951,7 @@ if (-r $d->{'ssl_chain'}) {
 $d->{'ssl_combined'} = $combfile;
 
 # Create file of all the certs, and the key
-my $everyfile = &default_certificate_file($d, 'everything');
+my $everyfile = $d->{'ssl_everything'} || &default_certificate_file($d, 'everything');
 &lock_file($everyfile);
 my $every = &read_file_contents($d->{'ssl_key'})."\n".
 	    &read_file_contents($d->{'ssl_cert'})."\n";
