@@ -45,7 +45,7 @@ if (&domain_has_ssl($d)) {
 	&$second_print($text{'setup_done'});
 	}
 
-if (&domain_has_ssl_cert($d) && $tmpl->{'statussslcert'}) {
+if (&domain_has_ssl($d) && $tmpl->{'statussslcert'}) {
 	# Add SSL cert monitor
 	&$first_print($text{'setup_statussslcert'});
 	local $certserv = &make_sslcert_monitor($d);
