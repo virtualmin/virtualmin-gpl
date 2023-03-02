@@ -731,6 +731,7 @@ local $failalldoms;
 DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	# Force lock and re-read the domain in case it has changed
 	&obtain_lock_everything($d);
+	&lock_domain($d);
 	my $reread_d = &get_domain($d->{'id'}, undef, 1);	
 	if ($reread_d) {
 		$d = $reread_d;
@@ -1131,6 +1132,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 	if ($parent) {
 		&release_lock_everything($parent);
 		}
+	&unlock_domain($d);
 	&release_lock_everything($d);
 	}
 
