@@ -2229,26 +2229,6 @@ log_add_scripts=Added script installers $1
 log_disable_scripts=Disabled script installers $1
 log_enable_scripts=Enabled script installers $1
 log_allow_scripts=Changed master administrator script permissions
-log_restore=Restored $1 virtual servers
-log_restore_l=Restored virtual servers $1
-log_create_template=Created server template $1
-log_modify_template=Updated server template $1
-log_delete_template=Deleted server template $1
-log_install_script=Installed script $1 $2 in server $3
-log_uninstall_script=Un-installed script $1 $2 in server $3
-log_stop_script=Stopped script $1 $2 in server $3
-log_start_script=Started script $1 $2 in server $3
-log_restart_script=Re-started script $1 $2 in server $3
-log_create_database=Created $2 database $1 in server $3
-log_delete_database=Deleted $2 database $1 in server $3
-log_export_database=Disassociated $2 database $1 from server $3
-log_import_database=Imported $2 database $1 to server $3
-log_notify=Sent email to $1 server owners
-log_mailusers=Sent email to $1 users
-log_add_scripts=Added script installers $1
-log_disable_scripts=Disabled script installers $1
-log_enable_scripts=Enabled script installers $1
-log_allow_scripts=Changed master administrator script permissions
 log_upgrade_scripts=Upgraded $1 scripts
 log_uninstall_scripts=Uninstalled $1 scripts
 log_warn_scripts=Saved script upgrade notification options
@@ -7680,8 +7660,6 @@ dnscloud_cloudflare_esfx2=Domain $1 can be only one level under TLD $2
 dnscloud_cloudflare_ens=Failed to lookup NS records : $1
 dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DNS domains be registered first.
 dnscloud_cloudflare_ens3=NS records found for <tt>$1</tt> domain, however these NS records <tt>$2</tt> do not point to Cloudflare provider
-
-remotedns_title=Remote DNS Servers
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
