@@ -1361,7 +1361,7 @@ if (!&init::action_status("lookup-domain")) {
 	}
 else {
 	# Stop and re-start the daemon to pick up new version
-	my $ok = &init::stop_action("lookup-domain");
+	my ($ok) = &init::stop_action("lookup-domain");
 	if ($ok) {
 		sleep(5);	# Wait for port to free up
 		&init::start_action("lookup-domain");
