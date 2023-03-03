@@ -98,6 +98,7 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 				}
 			}
 		elsif ($in{"ver_$i"} ne $in{"oldver_$i"}) {
+			$phpnewver++;
 			# Directory version can be updated
 			&$first_print(&text('phpmode_savedir',
 				"<tt>".&html_escape($sd)."</tt>",
@@ -145,6 +146,9 @@ if (&can_php_error_log($mode)) {
 		elsif ($in{'plog_def'} == 2) {
 			# Use the default log
 			$plog = $defplog;
+			if ($mode ne $oldmode || $phpnewver) {
+				$oldplog = -1;
+				}
 			}
 		else {
 			# Custom path
