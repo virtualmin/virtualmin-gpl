@@ -7889,7 +7889,7 @@ foreach $f (@dof) {
 
 # Set up all the selected plugins
 foreach $f (&list_feature_plugins()) {
-	if ($dom->{$f} && $f ne $p) {
+	if ($dom->{$f} && $f ne $p && $f ne $s) {
 		my $err = &call_feature_setup($f, $dom);
 		return $err if ($err);
 		}
