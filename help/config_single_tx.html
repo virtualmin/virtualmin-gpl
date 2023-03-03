@@ -1,0 +1,10 @@
+<header>Backup MySQL in a single transaction?</header>
+
+When this option is set to <b>Yes</b>, MySQL backups will be performed in a
+single transaction to ensure consistency. However, this can consume more RAM
+when backing up a large and changing database. It can also fail with the 
+error <tt> Couldn't execute 'FLUSH TABLES WITH READ LOCK'</tt> on some MySQL
+versions or Amazon RDS. In this case, you should change this to <b>No</b>
+instead. <p>
+
+<footer>

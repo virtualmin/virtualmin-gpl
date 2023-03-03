@@ -252,3 +252,4 @@ bind_cloud_proxy=0
 letsencrypt_wild=0
 php_log=1
 dns_secany=0
+single_tx=1

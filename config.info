@@ -153,6 +153,7 @@ zip_args=Extra command-line parameters for compression command,3,None
 pbzip2=Compression command for <tt>bzip2</tt>,1,0-Regular <tt>(bzip2)</tt>,1-Parallel <tt>(pbzip2)</tt>
 pigz=Compression command for <tt>gzip</tt>,1,0-Regular <tt>(gzip)</tt>,1-Parallel <tt>(pigz)</tt>
 gzip_mysql=Compress MySQL backups?,1,1-Yes,0-No
+single_tx=Backup MySQL in a single transaction?,1,1-Yes,0-No
 backup_rotated=Included old rotated logs in backups?,1,1-Yes,0-No
 max_backups=Maximum concurrent backups,3,Unlimited,5
 max_timeout=Time to wait if maximum is exceeded,3,Halt immediately,5,,seconds
