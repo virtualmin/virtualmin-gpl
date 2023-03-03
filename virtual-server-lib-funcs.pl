@@ -7872,11 +7872,13 @@ if (!defined($dom->{'defaultdomain'})) {
 my $f;
 local @dof = grep { $_ ne "webmin" } @features;
 local $p = &domain_has_website($dom);
+local $s = &domain_has_ssl($dom);
 $dom->{'creating'} = 1;	# Tell features that they are being called for creation
 foreach $f (@dof) {
 	my $err;
-	if ($f eq 'web' && $p && $p ne 'web') {
-		# Web feature is provided by a plugin .. call it now
+	if ($f eq 'web' && $p && $p ne 'web' ||
+	    $f eq 'ssl' && $s && $s ne 'ssl') {
+		# Web or SSL feature is provided by a plugin .. call it now
 		$err = &call_feature_setup($p, $dom);
 		}
 	elsif ($dom->{$f}) {
