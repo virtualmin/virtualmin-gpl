@@ -48,7 +48,10 @@ if ($can) {
 &obtain_lock_dns($d);
 &obtain_lock_logrotate($d) if ($d->{'logrotate'});
 $mode = $oldmode = &get_domain_php_mode($d);
-
+my $oldplog;
+if (&can_php_error_log($mode)) {
+	$oldplog = &get_domain_php_error_log($d);
+	}
 if ($can) {
 	# Save PHP execution mode
 	if (defined($newmode) && $oldmode ne $newmode && $can) {
@@ -125,9 +128,15 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 
 # Save PHP log, or use default if coming out of an incompatible mode
 if (&can_php_error_log($mode)) {
-	my $oldplog = &get_domain_php_error_log($d);
 	my $plog;
-	if (defined($in{'plog_def'})) {
+	my $defplog = &get_default_php_error_log($d);
+	my $plogmode = !$oldplog ? 1 :
+		$oldplog eq $defplog ? 2 : 0;
+	if (!$can || (!&master_admin() && $plogmode == 0)) {
+		$plog = $oldplog;
+		$oldplog = -1;
+		}
+	elsif (defined($in{'plog_def'})) {
 		# Use path from the user
 		if ($in{'plog_def'} == 1) {
 			# Logging disabled
@@ -135,7 +144,7 @@ if (&can_php_error_log($mode)) {
 			}
 		elsif ($in{'plog_def'} == 2) {
 			# Use the default log
-			$plog = &get_default_php_error_log($d);
+			$plog = $defplog;
 			}
 		else {
 			# Custom path
@@ -149,7 +158,7 @@ if (&can_php_error_log($mode)) {
 		}
 	else {
 		# Use template default path
-		$plog = &get_default_php_error_log($d);
+		$plog = $defplog;
 		}
 	if ($plog ne $oldplog) {
 		# Apply the new log if changed
