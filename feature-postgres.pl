@@ -143,14 +143,17 @@ if (!$d->{'parent'}) {
 		&$first_print($text{'setup_postgresuser'});
 		}
 	local $pass = &postgres_pass($d);
-	if (&postgres_user_exists($user)) {
+	if (&postgres_user_exists($d, $user)) {
 		&execute_dom_psql($d, undef,
-		  "drop user ".&postgres_uquote($user));
+			"alter user ".&postgres_uquote($user).
+			" with password $pass");
 		}
-	local $popts = &get_postgresql_user_flags();
-	&execute_dom_psql($d, undef,
-		"create user ".&postgres_uquote($user).
-		" with password $pass $popts");
+	else {
+		local $popts = &get_postgresql_user_flags();
+		&execute_dom_psql($d, undef,
+			"create user ".&postgres_uquote($user).
+			" with password $pass $popts");
+		}
 	&$second_print($text{'setup_done'});
 	}
 if (!$nodb && $tmpl->{'mysql_mkdb'} && !$d->{'no_mysql_db'}) {
