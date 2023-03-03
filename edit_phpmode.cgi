@@ -191,14 +191,18 @@ if (&can_php_error_log($mode)) {
 	$defplog = &get_default_php_error_log($d);
 	$mode = !$plog ? 1 :
 		$plog eq $defplog ? 2 : 0;
-	print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
-		&ui_radio_table("plog_def", $mode,
-		[ [ 1, $text{'phpmode_noplog'} ],
+	my $opts = [ [ 1, $text{'phpmode_noplog'} ],
 		  [ 2, $text{'phpmode_defplog'},
-		       "<tt>$defplog</tt>" ],
-		  [ 0, $text{'phpmode_fileplog'},
-		    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ],
-		]));
+		       "<tt>$defplog</tt>" ]
+		];
+	my $logmanual;
+	if (&master_admin()) {
+		$logmanual = [ 0, $text{'phpmode_fileplog'},
+			    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ];
+		push(@{$opts}, $logmanual);
+		}
+	print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+		&ui_radio_table("plog_def", $mode, $opts));
 	}
 
 print &ui_hidden_table_end();

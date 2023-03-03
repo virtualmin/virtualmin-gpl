@@ -143,7 +143,8 @@ if (&can_php_error_log($mode)) {
 			if ($plog && $plog !~ /^\//) {
 				$plog = $d->{'home'}.'/'.$plog;
 				}
-			$plog =~ /^\/\S+$/ || &error($text{'phpmode_eplog'});
+			($plog =~ /^\/\S+$/ && &master_admin()) ||
+				&error($text{'phpmode_eplog'});
 			}
 		}
 	else {
