@@ -7856,6 +7856,19 @@ elsif ($tmpl->{'mysql_nopass'} == 2 && !$dom->{'parent'} &&
 	delete($dom->{'mysql_enc_pass'});
 	}
 
+# Same for PostgreSQL
+if ($dom->{'hashpass'} && !$dom->{'parent'} && !$dom->{'postgres_pass'}) {
+	# Hashed passwords in use
+	$dom->{'postgres_pass'} = &random_password();
+	delete($dom->{'postgres_enc_pass'});
+	}
+elsif ($tmpl->{'postgres_nopass'} == 2 && !$dom->{'parent'} &&
+       !$dom->{'postgres_pass'}) {
+	# Using random password by default
+	$dom->{'postgres_pass'} = &random_password();
+	delete($dom->{'postgres_enc_pass'});
+	}
+
 # MySQL module comes from parent always
 if ($parentdom) {
 	$dom->{'mysql_module'} = $parentdom->{'mysql_module'};
