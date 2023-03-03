@@ -2331,8 +2331,6 @@ else {
 		   "php_value[session.save_path] = $tmp" );
 	&flush_file_lines($file);
 
-	&update_edit_limits($d, 'phpmode', $d->{'edit_phpmode'});
-
 	# Add / override custom options (with substitution)
 	if ($tmpl->{'php_fpm'} ne 'none') {
 		foreach my $l (split(/\t+/,

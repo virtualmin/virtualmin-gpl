@@ -19333,22 +19333,6 @@ else {
 # when limits for a domain changed
 sub update_edit_limits {
 my ($d, $lname, $lvalue) = @_;
-
-# Update FPM pool file perms
-if ($lname eq 'phpmode') {
-	my $fpmconf = &get_php_fpm_config($d);
-	my $fpmfile = $fpmconf->{'dir'}."/".$d->{'id'}.".conf";
-	if (-r $fpmfile) {
-		if ($lvalue) {
-			# Allow virtual server owner to change FPM pool config
-			&set_ownership_permissions($d->{'user'}, $d->{'ugroup'}, undef, $fpmfile);
-			}
-		else {
-			# Forbid virtual server owner to change FPM pool config
-			&set_ownership_permissions(0, 0, undef, $fpmfile)
-			}
-		}
-	}
 }
 
 # text_html(&text)
