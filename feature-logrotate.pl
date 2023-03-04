@@ -151,9 +151,11 @@ my $alog = &get_website_log($d, 0);
 my $oldalog = &get_old_website_log($alog, $d, $oldd);
 my $elog = &get_website_log($d, 1);
 my $oldelog = &get_old_website_log($elog, $d, $oldd);
+my $plog = &get_domain_php_error_log($d);
+my $oldplog = &get_old_website_log($plog, $d, $oldd);
 
 # Stop here if nothing to do
-return if ($alog eq $oldalog && $elog eq $oldelog &&
+return if ($alog eq $oldalog && $elog eq $oldelog && $plog eq $oldplog &&
 	   $d->{'user'} eq $oldd->{'user'} &&
 	   $d->{'group'} eq $oldd->{'group'});
 &require_logrotate();
@@ -170,6 +172,7 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 		foreach my $n (@{$lconf->{'name'}}) {
 			$n = $alog if ($alog && $n eq $oldalog);
 			$n = $elog if ($elog && $n eq $oldelog);
+			$n = $plog if ($plog && $n eq $oldplog);
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines($lconf->{'file'});
