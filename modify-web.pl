@@ -979,7 +979,8 @@ print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
 print "                     [--cleanup-mod-php]\n";
-print "                     [--php-log filename | --no-php-log]\n";
+print "                     [--php-log filename | --no-php-log |\n";
+print "                      --default-php-log]\n";
 exit(1);
 }
 
