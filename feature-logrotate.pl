@@ -8,7 +8,7 @@ return if ($require_logrotate++);
 
 sub check_depends_logrotate
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!&domain_has_website($d)) {
 	return $text{'setup_edeplogrotate'};
 	}
@@ -24,18 +24,18 @@ my ($d) = @_;
 &require_logrotate();
 &require_apache();
 &obtain_lock_logrotate($d);
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 
 # Work out the log files we are rotating
-local @logs = &get_all_domain_logs($d);
-local @tmpllogs = &get_domain_template_logs($d);
+my @logs = &get_all_domain_logs($d);
+my @tmpllogs = &get_domain_template_logs($d);
 if (@logs) {
 	# If in single config mode, check if there is a block for Virtualmin
 	# already (either under /var/log/virtualmin, or in a domain's home)
-	local $parent = &logrotate::get_config_parent();
-	local $logdir = $logs[0];
+	my $parent = &logrotate::get_config_parent();
+	my $logdir = $logs[0];
 	$logdir =~ s/\/[^\/]+$//;
-	local $already;
+	my $already;
 	if ($tmpl->{'logrotate_shared'} eq 'yes') {
 		LOGROTATE: foreach my $c (@{$parent->{'members'}}) {
 			foreach my $n (@{$c->{'name'}}) {
@@ -70,15 +70,15 @@ if (@logs) {
 
 	if (!$already) {
 		# Add the new section
-		local $file = &logrotate::get_add_file(
+		my $file = &logrotate::get_add_file(
 			$tmpl->{'logrotate_shared'} eq 'yes' ?
 			    'virtualmin' : $d->{'dom'});
-		local $lconf = { 'file' => $file,
+		my $lconf = { 'file' => $file,
 				 'name' => \@logs };
-		local $newfile = !-r $lconf->{'file'};
+		my $newfile = !-r $lconf->{'file'};
 		if ($tmpl->{'logrotate'} eq 'none') {
 			# Use automatic configuration
-			local $script = &get_postrotate_script($d);
+			my $script = &get_postrotate_script($d);
 			$lconf->{'members'} = [
 					{ 'name' => 'rotate',
 					  'value' => $config{'logrotate_num'} || 5 },
@@ -92,8 +92,8 @@ if (@logs) {
 			}
 		else {
 			# Use manually defined directives
-			local $temp = &transname();
-			local $txt = $tmpl->{'logrotate'};
+			my $temp = &transname();
+			my $txt = $tmpl->{'logrotate'};
 			$txt =~ s/\t/\n/g;
 			&open_tempfile(TEMP, ">$temp");
 			&print_tempfile(TEMP, "/dev/null {\n");
@@ -101,7 +101,7 @@ if (@logs) {
 				&substitute_domain_template($txt, $d)."\n");
 			&print_tempfile(TEMP, "}\n");
 			&close_tempfile(TEMP);
-			local $tconf = &logrotate::get_config($temp);
+			my $tconf = &logrotate::get_config($temp);
 			$lconf->{'members'} = $tconf->[0]->{'members'};
 			unlink($temp);
 			$d->{'logrotate_shared'} = 1;
@@ -144,27 +144,29 @@ return 1;
 # Adjust path if home directory has changed
 sub modify_logrotate
 {
+my ($d, $oldd) = @_;
+
 # Work out old and new Apache logs
-local $alog = &get_website_log($_[0], 0);
-local $oldalog = &get_old_website_log($alog, $_[0], $_[1]);
-local $elog = &get_website_log($_[0], 1);
-local $oldelog = &get_old_website_log($elog, $_[0], $_[1]);
+my $alog = &get_website_log($d, 0);
+my $oldalog = &get_old_website_log($alog, $d, $oldd);
+my $elog = &get_website_log($d, 1);
+my $oldelog = &get_old_website_log($elog, $d, $oldd);
 
 # Stop here if nothing to do
 return if ($alog eq $oldalog && $elog eq $oldelog &&
-	   $_[0]->{'user'} eq $_[1]->{'user'} &&
-	   $_[0]->{'group'} eq $_[1]->{'group'});
+	   $d->{'user'} eq $oldd->{'user'} &&
+	   $d->{'group'} eq $oldd->{'group'});
 &require_logrotate();
-&obtain_lock_logrotate($_[0]);
+&obtain_lock_logrotate($d);
 
 # Change log paths if needed
 if ($alog ne $oldalog || $elog ne $oldelog) {
 	&$first_print($text{'save_logrotate'});
 
 	# Fix up the logrotate section for the old file
-	local $lconf = &get_logrotate_section($oldalog);
+	my $lconf = &get_logrotate_section($oldalog);
 	if ($lconf) {
-		local $parent = &logrotate::get_config_parent();
+		my $parent = &logrotate::get_config_parent();
 		foreach my $n (@{$lconf->{'name'}}) {
 			$n = $alog if ($alog && $n eq $oldalog);
 			$n = $elog if ($elog && $n eq $oldelog);
@@ -179,13 +181,13 @@ if ($alog ne $oldalog || $elog ne $oldelog) {
 	}
 
 # Change references to home dir
-if ($_[0]->{'home'} ne $_[1]->{'home'}) {
+if ($d->{'home'} ne $oldd->{'home'}) {
 	&$first_print($text{'save_logrotatehome'});
-	local $lconf = &get_logrotate_section($alog);
+	my $lconf = &get_logrotate_section($alog);
 	if ($lconf) {
-                local $parent = &logrotate::get_config_parent();
+                my $parent = &logrotate::get_config_parent();
 		foreach my $n (@{$lconf->{'name'}}) {
-			$n =~ s/\Q$_[1]->{'home'}\E\//$_[0]->{'home'}\//;
+			$n =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//;
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines($lconf->{'file'});
@@ -197,12 +199,12 @@ if ($_[0]->{'home'} ne $_[1]->{'home'}) {
 	}
 
 # Change references to user or group
-if ($_[0]->{'user'} ne $_[1]->{'user'} ||
-    $_[0]->{'group'} ne $_[1]->{'group'}) {
+if ($d->{'user'} ne $oldd->{'user'} ||
+    $d->{'group'} ne $oldd->{'group'}) {
 	&$first_print($text{'save_logrotateuser'});
-	local $lconf = &get_logrotate_section($alog);
+	my $lconf = &get_logrotate_section($alog);
 	if ($lconf) {
-		&modify_user_logrotate($_[0], $_[1], $lconf);
+		&modify_user_logrotate($d, $oldd, $lconf);
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -210,23 +212,23 @@ if ($_[0]->{'user'} ne $_[1]->{'user'} ||
 		}
 	}
 
-&release_lock_logrotate($_[0]);
+&release_lock_logrotate($d);
 }
 
 # delete_logrotate(&domain)
 # Remove logrotate section for this domain
 sub delete_logrotate
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_logrotate();
 &$first_print($text{'delete_logrotate'});
 &obtain_lock_logrotate($d);
-local $lconf = &get_logrotate_section($d);
-local $parent = &logrotate::get_config_parent();
+my $lconf = &get_logrotate_section($d);
+my $parent = &logrotate::get_config_parent();
 if ($lconf) {
 	# Check if all log files in the section are related to the domain
-	local %logs = map { $_, 1 } &get_all_domain_logs($d);
-	local @leftover = grep { !$logs{$_} } @{$lconf->{'name'}};
+	my %logs = map { $_, 1 } &get_all_domain_logs($d);
+	my @leftover = grep { !$logs{$_} } @{$lconf->{'name'}};
 	if (@leftover) {
 		# Just remove some log files, but leave the block
 		$lconf->{'name'} = \@leftover;
@@ -257,11 +259,11 @@ return 1;
 # Copy logrotate directives to a new domain
 sub clone_logrotate
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &obtain_lock_logrotate($d);
 &$first_print($text{'clone_logrotate'});
-local $lconf = &get_logrotate_section($d);
-local $olconf = &get_logrotate_section($oldd);
+my $lconf = &get_logrotate_section($d);
+my $olconf = &get_logrotate_section($oldd);
 if (!$olconf) {
 	&$second_print($text{'clone_logrotateold'});
 	return 0;
@@ -273,9 +275,9 @@ if (!$lconf) {
 &require_logrotate();
 
 # Splice across the lines
-local $lref = &read_file_lines($lconf->{'file'});
-local $olref = &read_file_lines($olconf->{'file'});
-local @lines = @$olref[$olconf->{'line'}+1 .. $olconf->{'eline'}-1];
+my $lref = &read_file_lines($lconf->{'file'});
+my $olref = &read_file_lines($olconf->{'file'});
+my @lines = @$olref[$olconf->{'line'}+1 .. $olconf->{'eline'}-1];
 splice(@$lref, $lconf->{'line'}+1,
        $lconf->{'eline'}-$lconf->{'line'}-1, @lines);
 &flush_file_lines($lconf->{'file'});
@@ -286,7 +288,7 @@ undef(%logrotate::get_config_files_cache);
 
 # Fix username if changed
 if ($d->{'user'} ne $oldd->{'user'}) {
-	local $lconf = &get_logrotate_section($d);
+	my $lconf = &get_logrotate_section($d);
 	&modify_user_logrotate($d, $oldd, $lconf);
 	}
 
@@ -299,10 +301,10 @@ return 1;
 # Returns an error message if a domain's logrotate section is not found
 sub validate_logrotate
 {
-local ($d) = @_;
-local $log = &get_website_log($d);
+my ($d) = @_;
+my $log = &get_website_log($d);
 return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$log);
-local $lconf = &get_logrotate_section($d);
+my $lconf = &get_logrotate_section($d);
 return &text('validate_elogrotate', "<tt>$log</tt>") if (!$lconf);
 return undef;
 }
@@ -311,22 +313,22 @@ return undef;
 # Returns the Logrotate configuration block for some domain or log file
 sub get_logrotate_section
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_logrotate();
 &require_apache();
-local $alog = ref($d) ? &get_website_log($d, 0) : $d;
+my $alog = ref($d) ? &get_website_log($d, 0) : $d;
 if (!$alog && ref($d)) {
 	# Website may have been already deleted, so we don't know the log
 	# file path! Try the template default.
 	$alog = &get_apache_template_log($d, 0);
 	}
-local $elog;
+my $elog;
 if (ref($d)) {
 	$elog = &get_website_log($d, 1) ||
 		&get_apache_template_log($d, 1);
 	}
-local $conf = &logrotate::get_config();
-local ($c, $n);
+my $conf = &logrotate::get_config();
+my ($c, $n);
 foreach $c (@$conf) {
 	foreach $n (@{$c->{'name'}}) {
 		return $c if ($n eq $alog);
@@ -347,11 +349,11 @@ return 0;
 # Saves the log rotation section for this domain to a file
 sub backup_logrotate
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &$first_print($text{'backup_logrotatecp'});
-local $lconf = &get_logrotate_section($d);
+my $lconf = &get_logrotate_section($d);
 if ($lconf) {
-	local $lref = &read_file_lines($lconf->{'file'});
+	my $lref = &read_file_lines($lconf->{'file'});
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach my $l (@$lref[$lconf->{'line'} .. $lconf->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
@@ -361,7 +363,7 @@ if ($lconf) {
 	return 1;
 	}
 else {
-	local $alog = &get_website_log($d, 0);
+	my $alog = &get_website_log($d, 0);
 	&$second_print(&text('setup_nologrotate', $alog));
 	return 0;
 	}
@@ -372,17 +374,17 @@ else {
 sub restore_logrotate
 {
 &$first_print($text{'restore_logrotatecp'});
-local $tmpl = &get_template($_[0]->{'template'});
+my $tmpl = &get_template($_[0]->{'template'});
 if ($d->{'logrotate_shared'}) {
 	&$second_print($text{'restore_logrotatecpshared'});
 	return 1;
 	}
 &obtain_lock_logrotate($_[0]);
-local $lconf = &get_logrotate_section($_[0]);
-local $rv;
+my $lconf = &get_logrotate_section($_[0]);
+my $rv;
 if ($lconf) {
-	local $srclref = &read_file_lines($_[1]);
-	local $dstlref = &read_file_lines($lconf->{'file'});
+	my $srclref = &read_file_lines($_[1]);
+	my $dstlref = &read_file_lines($lconf->{'file'});
 	splice(@$dstlref, $lconf->{'line'}+1,
 	       $lconf->{'eline'}-$lconf->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
@@ -429,8 +431,8 @@ return ( [ $text{'sysinfo_logrotate'}, $logrotate::logrotate_version ] );
 # Returns an error message if the default Logrotate directives don't look valid
 sub check_logrotate_template
 {
-local ($d, $gotpostrotate);
-local @dirs = split(/\t+/, $_[0]);
+my ($d, $gotpostrotate);
+my @dirs = split(/\t+/, $_[0]);
 foreach $d (@dirs) {
 	if ($d =~ /\s*postrotate/) {
 		$gotpostrotate = 1;
@@ -444,7 +446,7 @@ return undef;
 # Outputs HTML for editing Logrotate related template options
 sub show_template_logrotate
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Use shared logrotate config
 print &ui_table_row(
@@ -483,13 +485,13 @@ print &ui_table_row(
 # Updates Logrotate related template options from %in
 sub parse_template_logrotate
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save logrotate settings
 $tmpl->{'logrotate_shared'} = $in{'logrotate_shared'};
 $tmpl->{'logrotate'} = &parse_none_def("logrotate");
 if ($in{"logrotate_mode"} == 2) {
-	local $err = &check_logrotate_template($in{'logrotate'});
+	my $err = &check_logrotate_template($in{'logrotate'});
 	&error($err) if ($err);
 	}
 
@@ -501,7 +503,7 @@ $tmpl->{'logrotate_files'} = &parse_none_def("logrotate_files");
 # and if the website is just being turned on now.
 sub chained_logrotate
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if ($config{'logrotate'} != 3) {
 	# Not in auto mode, so don't touch
 	return undef;
@@ -538,10 +540,10 @@ return ($f);
 # Change the user and group names in a logrotate config
 sub modify_user_logrotate
 {
-local ($d, $oldd, $lconf) = @_;
-local $create = &logrotate::find_value("create", $lconf->{'members'});
+my ($d, $oldd, $lconf) = @_;
+my $create = &logrotate::find_value("create", $lconf->{'members'});
 if ($create =~ /^(\d+)\s+(\S+)\s+(\S+)$/) {
-	local ($p, $u, $g) = ($1, $2, $3);
+	my ($p, $u, $g) = ($1, $2, $3);
 	$u = $d->{'user'} if ($u eq $oldd->{'user'});
 	$g = $d->{'group'} if ($g eq $oldd->{'group'});
 	&logrotate::save_directive($lconf, "create",
@@ -584,16 +586,16 @@ $main::got_lock_logrotate-- if ($main::got_lock_logrotate);
 # Returns the script (as a string) for running after rotation
 sub get_postrotate_script
 {
-local ($d) = @_;
-local $p = &domain_has_website($d);
-local $script;
+my ($d) = @_;
+my $p = &domain_has_website($d);
+my $script;
 if ($p eq 'web') {
 	# Get restart command from Apache
-	local $apachectl = $apache::config{'apachectl_path'} ||
+	my $apachectl = $apache::config{'apachectl_path'} ||
 			   &has_command("apachectl") ||
 			   &has_command("apache2ctl") ||
 			   "apachectl";
-	local $apply_cmd = $apache::config{'apply_cmd'};
+	my $apply_cmd = $apache::config{'apply_cmd'};
 	$apply_cmd = undef if ($apply_cmd eq 'restart');
 	$script = $apache::config{'graceful_cmd'} ||
 		  $apply_cmd ||
@@ -611,16 +613,17 @@ return $script;
 # Returns all logs that should be rotated for a domain
 sub get_all_domain_logs
 {
-local ($d) = @_;
-local $alog = &get_website_log($d, 0);
-local $elog = &get_website_log($d, 1);
-local @logs = ( $alog, $elog );
+my ($d) = @_;
+my $alog = &get_website_log($d, 0);
+my $elog = &get_website_log($d, 1);
+my @logs = ( $alog, $elog );
 if ($d->{'ftp'}) {
 	push(@logs, &get_proftpd_log($d->{'ip'}));
 	}
 push(@logs, &get_domain_template_logs($d));
 push(@logs, &get_apache_template_log($d, 0));
 push(@logs, &get_apache_template_log($d, 1));
+push(@logs, &get_domain_php_error_log($d));
 return &unique(grep { $_ } @logs);
 }
 
@@ -628,9 +631,9 @@ return &unique(grep { $_ } @logs);
 # Returns extra logs from a domain's template 
 sub get_domain_template_logs
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local @tmpllogs;
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my @tmpllogs;
 foreach my $lt (split(/\t+/, $tmpl->{'logrotate_files'})) {
 	if ($lt && $lt ne "none") {
 		push(@tmpllogs, &substitute_domain_template($lt, $d));
