@@ -153,6 +153,9 @@ my $elog = &get_website_log($d, 1);
 my $oldelog = &get_old_website_log($elog, $d, $oldd);
 my $plog = &get_domain_php_error_log($d);
 my $oldplog = &get_old_website_log($plog, $d, $oldd);
+my @logmap = ( [ $alog, $oldalog ],
+	       [ $elog, $oldelog ],
+	       [ $plog, $oldplog ] );
 
 # Stop here if nothing to do
 return if ($alog eq $oldalog && $elog eq $oldelog && $plog eq $oldplog &&
@@ -162,17 +165,19 @@ return if ($alog eq $oldalog && $elog eq $oldelog && $plog eq $oldplog &&
 &obtain_lock_logrotate($d);
 
 # Change log paths if needed
-if ($alog ne $oldalog || $elog ne $oldelog) {
+if ($alog ne $oldalog || $elog ne $oldelog || $plog ne $oldplog) {
 	&$first_print($text{'save_logrotate'});
 
 	# Fix up the logrotate section for the old file
 	my $lconf = &get_logrotate_section($oldalog);
 	if ($lconf) {
 		my $parent = &logrotate::get_config_parent();
-		foreach my $n (@{$lconf->{'name'}}) {
-			$n = $alog if ($alog && $n eq $oldalog);
-			$n = $elog if ($elog && $n eq $oldelog);
-			$n = $plog if ($plog && $n eq $oldplog);
+		foreach my $lm (@logmap) {
+			foreach my $n (@{$lconf->{'name'}}) {
+				if ($lm->[0] && $n eq $lm->[1]) {
+					$n = $lm->[0];
+					}
+				}
 			}
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines($lconf->{'file'});
@@ -258,6 +263,24 @@ delete($d->{'logrotate_shared'});
 return 1;
 }
 
+# regenerate_domain_logrotate(&domain)
+# Update the rotated files for a domain
+sub regenerate_domain_logrotate
+{
+my ($d) = @_;
+return 0 if (!$d->{'logrotate'});
+my @logs = &get_all_domain_logs($d);
+my $lconf = &get_logrotate_section($d);
+if ($lconf) {
+	my $parent = &logrotate::get_config_parent();
+	$lconf->{'name'} = \@logs;
+	&logrotate::save_directive($parent, $lconf, $lconf);
+	&flush_file_lines($lconf->{'file'});
+	return 1;
+	}
+return 0;
+}
+
 # clone_logrotate(&domain, &old-domain)
 # Copy logrotate directives to a new domain
 sub clone_logrotate
@@ -307,8 +330,13 @@ sub validate_logrotate
 my ($d) = @_;
 my $log = &get_website_log($d);
 return &text('validate_elogfile', "<tt>$d->{'dom'}</tt>") if (!$log);
-my $lconf = &get_logrotate_section($d);
-return &text('validate_elogrotate', "<tt>$log</tt>") if (!$lconf);
+my @val = ( &get_website_log($d, 0), &get_website_log($d, 1) );
+my $plog = &get_domain_php_error_log($d);
+push(@val, $plog) if ($plog);
+foreach my $v (@val) {
+	my $lconf = &get_logrotate_section($v);
+	return &text('validate_elogrotate', "<tt>$v</tt>") if (!$lconf);
+	}
 return undef;
 }
 

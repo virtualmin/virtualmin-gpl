@@ -2724,6 +2724,7 @@ elsif ($mode ne "none" && $mode ne "mod_php") {
 else {
 	return "PHP error log cannot be set in $mode mode";
 	}
+&regenerate_domain_logrotate($d);
 return undef;
 }
 
