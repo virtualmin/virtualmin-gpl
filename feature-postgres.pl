@@ -199,8 +199,8 @@ if ($d->{'parent'}) {
 &require_postgres();
 local $pass = defined($d->{'postgres_pass'}) ? $d->{'postgres_pass'}
 					     : $d->{'pass'};
-my $ver = &get_dom_remote_postgres_version($d);
-return !$noquote && $ver >= 7 ? &postgres_quote($pass) : $pass;
+return !$noquote && &get_dom_remote_postgres_version($d) >= 7 ?
+	&postgres_quote($pass) : $pass;
 }
 
 # postgres_quote(string)
