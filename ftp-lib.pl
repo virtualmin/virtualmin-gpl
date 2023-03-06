@@ -179,7 +179,7 @@ if ($w[7] =~ /^(\d+):(\d+)$/) {
 	}
 elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 	# Time is year-month-day hour:minute
-	local @tm = ( 0, 0, 0, $3, $2-1, $1-1900 );
+	local @tm = ( 0, 0, 0, $3, $2-1, $1 );
 	if ($w[6] =~ /^(\d+):(\d+)$/) {
 		$tm[1] = $2;
 		$tm[2] = $1;
@@ -193,7 +193,7 @@ elsif ($w[5] =~ /^(\d{4})\-(\d+)\-(\d+)$/) {
 elsif ($w[7] =~ /^\d+$/ && $w[7] > 1000 && $w[7] < 10000) {
 	# Time is month day year
 	local @tm = ( 0, 0, 0, $w[6],
-		      &month_to_number($w[5]), $w[7]-1900 );
+		      &month_to_number($w[5]), $w[7] );
 	return ( ) if ($tm[4] eq '' || $tm[3] < 1 || $tm[3] > 31);
 	$st[8] = $st[9] = $st[10] = timelocal(@tm);
 	$st[13] = join(" ", @w[8..$#w]);
