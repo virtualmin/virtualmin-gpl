@@ -306,7 +306,7 @@ if ($max) {
 		# Work out the max usage for a month
 		$max = 0;
 		for($i=$end_month; $i>=$start_month; $i--) {
-			@tm = ( 0, 0, 0, 1, $i%12, int($i/12)-1900 );
+			@tm = ( 0, 0, 0, 1, $i%12, int($i/12) );
 			$istart[$i] = int(timelocal(@tm)/(24*60*60));
 			@endtm = ( 0, 0, 0, 1, $tm[4]+1, $tm[5] );
 			if ($endtm[4] == 12) { $endtm[4] = 0; $endtm[5]++ };
@@ -322,7 +322,7 @@ if ($max) {
 		# Show the month table
 		$max ||= 1;
 		for($i=$end_month; $i>=$start_month; $i--) {
-			@tm = ( 0, 0, 0, 1, $i%12, int($i/12)-1900 );
+			@tm = ( 0, 0, 0, 1, $i%12, int($i/12) );
 			print "<tr>\n";
 			print "<td>",strftime("%m/%Y", @tm),"</td>\n";
 			print "<td>";
