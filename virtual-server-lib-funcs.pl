@@ -10880,7 +10880,7 @@ foreach $f ($_[5] ? &all_log_files($_[0], $max_ltime) : ( $_[0] )) {
 	while(<LOG>) {
 		if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/) {
 			# ProFTPD extended log format line
-			local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6-1900);
+			local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6);
 			$max_ltime = $ltime if ($ltime > $max_ltime);
 			next if ($_[3] && &indexof($3, @{$_[3]}) < 0);	# user
 			next if (substr($11, 0, 4) ne "RETR" &&
@@ -10892,7 +10892,7 @@ foreach $f ($_[5] ? &all_log_files($_[0], $max_ltime) : ( $_[0] )) {
 			}
 		elsif (/^\S+\s+(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\d+)\s+\d+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+\S+\s+(\S+)\s+\S+\s+(\S+)/) {
 			# xferlog format line
-			local $ltime = timelocal($5, $4, $3, $2, $apache_mmap{lc($1)}, $6-1900);
+			local $ltime = timelocal($5, $4, $3, $2, $apache_mmap{lc($1)}, $6);
 			$max_ltime = $ltime if ($ltime > $max_ltime);
 			next if ($_[3] && &indexof($9, @{$_[3]}) < 0);	# user
 			next if ($8 ne "o" && $8 ne "i");
@@ -11464,7 +11464,7 @@ local $expirytime;
 if ($expiry =~ /^(\d+)\-(\d+)\-(\d+)$/) {
 	# Make Unix time
 	eval {
-		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1-1900);
+		$expirytime = timelocal(59, 59, 23, $3, $2-1, $1);
 		};
 	}
 if ($status != 0) {
@@ -18219,10 +18219,10 @@ local $rv;
 if ($date =~ /^(\d{4})-(\d+)-(\d+)$/) {
 	# Date only
 	if ($gmt) {
-		$rv = timegm(0, 0, 0, $3, $2-1, $1-1900);
+		$rv = timegm(0, 0, 0, $3, $2-1, $1);
 		}
 	else {
-		$rv = timelocal(0, 0, 0, $3, $2-1, $1-1900);
+		$rv = timelocal(0, 0, 0, $3, $2-1, $1);
 		}
 	$rv += 24*60*60-1 if ($eod);
 	}

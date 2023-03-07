@@ -4892,7 +4892,7 @@ eval {
     # to use `$+{utc}`, which returns either Z, .0Z, +03, +0000 or empty
 
     # Convert month name to month number (for .edu domains)
-    $tm = timegm($+{second}, $+{minute}, $+{hour}, $+{day}, &$monther($+{month})-1, $+{year}-1900);
+    $tm = timegm($+{second}, $+{minute}, $+{hour}, $+{day}, &$monther($+{month})-1, $+{year});
     };
 return (0, "Expiry date is not valid") if ($@);
 return ($tm);

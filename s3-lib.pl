@@ -745,11 +745,11 @@ sub s3_parse_date
 {
 my ($str) = @_;
 if ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)\.000Z/) {
-	my $rv = eval { timegm($6, $5, $4, $3, $2-1, $1-1900); };
+	my $rv = eval { timegm($6, $5, $4, $3, $2-1, $1); };
 	return $@ ? undef : $rv;
 	}
 elsif ($str =~ /^(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
-	my $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1-1900); };
+	my $rv = eval { timelocal($6, $5, $4, $3, $2-1, $1); };
 	return $@ ? undef : $rv;
 	}
 return undef;
