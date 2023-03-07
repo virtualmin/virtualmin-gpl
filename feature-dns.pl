@@ -1530,7 +1530,18 @@ RECORD: foreach my $r (@$aliasrecs) {
 			next RECORD;
 			}
 		}
-	$nr->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
+
+	# Update the record name, and skip if it's not in the target domain.
+	# For NS and SOA records, always update them to use this domain.
+	if ($nr->{'name'} =~ /\Q$olddom\E\.$/) {
+		$nr->{'name'} =~ s/\Q$olddom\E\.$/$dom\./i;
+		}
+	elsif ($nr->{'type'} eq 'SOA' || $nr->{'type'} eq 'NS') {
+		$nr->{'name'} = $d->{'dom'}.'.';
+		}
+	else {
+		next RECORD;
+		}
 
 	# Change domain name to alias in record values, unless it is an NS
 	# that is set in the template
@@ -4970,7 +4981,6 @@ if ($d->{'dns_subany'} || $config{'dns_secany'}) {
 			     &list_domains()) {
 		if ($pd->{'id'} ne $d->{'id'} && !$pd->{'dns_submode'} &&
 		    &under_parent_domain($d, $pd)) {
-			print STDERR "found $pd->{'dom'}\n";
 			return $pd;
 			}
 		}
