@@ -152,13 +152,19 @@ my $oldalog = &get_old_website_log($alog, $d, $oldd);
 my $elog = &get_website_log($d, 1);
 my $oldelog = &get_old_website_log($elog, $d, $oldd);
 my $plog = &get_domain_php_error_log($d);
-my $oldplog = &get_old_website_log($plog, $d, $oldd);
+my $oldplog = defined($oldd->{'php_error_log'}) ?
+		$oldd->{'php_error_log'} :
+		&get_old_website_log($plog, $d, $oldd);
 my @logmap = ( [ $alog, $oldalog ],
 	       [ $elog, $oldelog ],
 	       [ $plog, $oldplog ] );
 
 # Stop here if nothing to do
-return if ($alog eq $oldalog && $elog eq $oldelog && $plog eq $oldplog &&
+my $diff = 0;
+foreach my $lm (@logmap) {
+	$diff++ if ($lm->[0] ne $lm->[1]);
+	}
+return if (!$diff &&
 	   $d->{'user'} eq $oldd->{'user'} &&
 	   $d->{'group'} eq $oldd->{'group'});
 &require_logrotate();

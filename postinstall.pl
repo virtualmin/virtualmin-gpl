@@ -311,11 +311,15 @@ if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
 	&save_template($tmpl);
 	}
 
-# Cache current PHP modes
+# Cache current PHP modes and error log files
 foreach my $d (grep { &domain_has_website($_) && !$_->{'alias'} }
 		    &list_domains()) {
 	if (!$d->{'php_mode'}) {
 		$d->{'php_mode'} = &get_domain_php_mode($d);
+		&save_domain($d);
+		}
+	if (!defined($d->{'php_error_log'})) {
+		$d->{'php_error_log'} = &get_domain_php_error_log($d) || "";
 		&save_domain($d);
 		}
 	}
