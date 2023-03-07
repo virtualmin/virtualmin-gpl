@@ -263,7 +263,7 @@ else {
 	print &ui_table_row(&hlink($text{$sfx.'_local'}, $sfx."_local"),
 			    &ui_checkbox("local", 1, $text{'alias_localyes'},
 					 $simple->{'local'})." ".
-			    &ui_textbox("localto", $simple->{'local'}, 40),
+			    &ui_textbox("localto", unescape_user($simple->{'local'}), 40),
 			    undef, $tds);
 	}
 
