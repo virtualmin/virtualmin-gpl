@@ -1934,7 +1934,7 @@ my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Copy the cert and key to the new owning domain's directory
 &create_ssl_certificate_directories($d);
-foreach my $k ('cert', 'key', 'chain') {
+foreach my $k ('cert', 'key', 'chain', 'combined', 'everything') {
 	if ($d->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
 		&write_ssl_file_contents(
