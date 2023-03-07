@@ -5068,7 +5068,7 @@ local $asuser = $asd ? $asd->{'user'} : undef;
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
 local $nicebase = $base;
-$nicebase = $1.$nicebase if ($dest =~ /^(([a-z0-9]+):\/\/)/);
+$nicebase = $1.$nicebase if ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*)/);
 &$first_print(&text('backup_purging3', $days, &nice_backup_url($nicebase),
 				       "<tt>".&html_escape($re)."</tt>"));
 if (!$base && !$re) {
