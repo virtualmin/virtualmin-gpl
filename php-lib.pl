@@ -2690,6 +2690,7 @@ sub save_domain_php_error_log
 {
 my ($d, $phplog) = @_;
 $phplog = undef if (!$phplog);
+my $oldd = { %$d };
 my $mode = &get_domain_php_mode($d);
 my $p = &domain_has_website($d);
 if ($mode eq "fpm") {
@@ -2725,7 +2726,7 @@ else {
 	return "PHP error log cannot be set in $mode mode";
 	}
 $d->{'php_error_log'} = $phplog || "";
-&regenerate_domain_logrotate($d);
+&modify_logrotate($d, $oldd);
 return undef;
 }
 

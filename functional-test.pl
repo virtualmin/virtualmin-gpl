@@ -403,6 +403,12 @@ $domains_tests = [
 	  'grep' => 'foo',
 	},
 
+	# Check log rotation for the PHP error log
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature' => 'logrotate' ] ],
+	},
+
 	# Turn off PHP error log
 	{ 'command' => 'modify-web.pl',
 	  'args' => [ [ 'domain' => $test_domain ],
@@ -419,6 +425,18 @@ $domains_tests = [
 	# Check PHP error log
 	{ 'command' => 'cat '.$test_domain_home.'/logs/php_error_log',
 	  'antigrep' => 'bar',
+	},
+
+	# Re-enable PHP error log
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'php-log', 'logs/php_error_log' ] ],
+	},
+
+	# Check log rotation for the PHP error log again
+	{ 'command' => 'validate-domains.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature' => 'logrotate' ] ],
 	},
 
 	$supports_cgi ? (

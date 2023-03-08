@@ -168,7 +168,7 @@ return if (!@logmap &&
 &obtain_lock_logrotate($d);
 
 # Change log paths if needed
-if ($alog ne $oldalog || $elog ne $oldelog || $plog ne $oldplog) {
+if (@logmap) {
 	&$first_print($text{'save_logrotate'});
 
 	# Fix up the logrotate section for the old file
@@ -278,24 +278,6 @@ else {
 delete($d->{'logrotate_shared'});
 &release_lock_logrotate($d);
 return 1;
-}
-
-# regenerate_domain_logrotate(&domain)
-# Update the rotated files for a domain
-sub regenerate_domain_logrotate
-{
-my ($d) = @_;
-return 0 if (!$d->{'logrotate'});
-my @logs = &get_all_domain_logs($d);
-my $lconf = &get_logrotate_section($d);
-if ($lconf) {
-	my $parent = &logrotate::get_config_parent();
-	$lconf->{'name'} = \@logs;
-	&logrotate::save_directive($parent, $lconf, $lconf);
-	&flush_file_lines($lconf->{'file'});
-	return 1;
-	}
-return 0;
 }
 
 # clone_logrotate(&domain, &old-domain)
