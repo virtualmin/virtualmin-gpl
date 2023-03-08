@@ -158,13 +158,10 @@ my $oldplog = defined($oldd->{'php_error_log'}) ?
 my @logmap = ( [ $alog, $oldalog ],
 	       [ $elog, $oldelog ],
 	       [ $plog, $oldplog ] );
+@logmap = grep { $_->[0] ne $_->[1] } @logmap;
 
 # Stop here if nothing to do
-my $diff = 0;
-foreach my $lm (@logmap) {
-	$diff++ if ($lm->[0] ne $lm->[1]);
-	}
-return if (!$diff &&
+return if (!@logmap &&
 	   $d->{'user'} eq $oldd->{'user'} &&
 	   $d->{'group'} eq $oldd->{'group'});
 &require_logrotate();
@@ -178,13 +175,27 @@ if ($alog ne $oldalog || $elog ne $oldelog || $plog ne $oldplog) {
 	my $lconf = &get_logrotate_section($oldalog);
 	if ($lconf) {
 		my $parent = &logrotate::get_config_parent();
+		my @n = @{$lconf->{'name'}};
 		foreach my $lm (@logmap) {
-			foreach my $n (@{$lconf->{'name'}}) {
-				if ($lm->[0] && $n eq $lm->[1]) {
-					$n = $lm->[0];
+			if ($lm->[1]) {
+				# Old log exists, look for a replacement
+				my $idx = &indexof($lm->[1], @n);
+				if ($idx >= 0 && $lm->[0]) {
+					$n[$idx] = $lm->[0];
+					}
+				else {
+					splice(@n, $idx, 1);
+					}
+				}
+			elsif ($lm->[0]) {
+				# New value exists, add if missing
+				my $idx = &indexof($lm->[0], @n);
+				if ($idx < 0) {
+					push(@n, $lm->[0]);
 					}
 				}
 			}
+		$lconf->{'name'} = \@n;
 		&logrotate::save_directive($parent, $lconf, $lconf);
 		&flush_file_lines($lconf->{'file'});
 		&$second_print($text{'setup_done'});
