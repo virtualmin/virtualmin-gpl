@@ -653,7 +653,7 @@ if ($d->{'ftp'}) {
 push(@logs, &get_domain_template_logs($d));
 push(@logs, &get_apache_template_log($d, 0));
 push(@logs, &get_apache_template_log($d, 1));
-push(@logs, &get_domain_php_error_log($d));
+push(@logs, $d->{'php_error_log'} || &get_domain_php_error_log($d));
 return &unique(grep { $_ } @logs);
 }
 
