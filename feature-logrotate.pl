@@ -49,18 +49,17 @@ if (@logs) {
 		}
 
 	# Check if any are already rotated
+	my @addlogs = @logs;
 	foreach my $c (@{$parent->{'members'}}) {
 		foreach my $n (@{$c->{'name'}}) {
-			if (&indexof($n, @logs) >= 0) {
-				# Yes, but maybe that's OK
+			if (&indexof($n, @addlogs) >= 0) {
 				if ($already) {
-					&release_lock_logrotate($d);
-					&$second_print(
-						&text('setup_logrotatealready',
-                                                      "<tt>$n</tt>"));
-					return 1;
+					# Already rotated in a block that
+					# includes multiple domains logs
+					@addlogs = grep { $_ ne $n } @addlogs;
 					}
 				else {
+					# A block for just this domain exists!
 					&error(&text('setup_clashlogrotate',
 						     "<tt>$n</tt>"));
 					}
@@ -113,9 +112,9 @@ if (@logs) {
 						   $lconf->{'file'});
 			}
 		}
-	else {
+	elsif (@addlogs) {
 		# Add to existing section
-		push(@{$already->{'name'}}, @logs);
+		push(@{$already->{'name'}}, @addlogs);
 		&logrotate::save_directive($parent, $already, $already);
 		&flush_file_lines($already->{'file'});
 		}
