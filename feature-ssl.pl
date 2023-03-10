@@ -1189,17 +1189,13 @@ return 0;
 sub get_ssl_key_type
 {
 my ($key, $pass) = @_;
-my $lref = &read_file_lines($key, 1);
 my $qkey = quotemeta($key);
-foreach my $l (@$lref) {
-	if ($l =~ /-----BEGIN\s+(RSA|EC)\s+PRIVATE\s+KEY----/) {
-		return lc($1);
-		}
-	}
+# Detect key algo
 my $rsa_err = &execute_command("openssl rsa -in $qkey -text -passin pass:NONE");
 return 'rsa' if (!$rsa_err);
 my $ec_err = &execute_command("openssl ec -in $qkey -text -passin pass:NONE");
 return 'ec' if (!$ec_err);
+# Detect key algo (with passphrase)
 if ($pass) {
 	my $qpass = quotemeta($pass);
 	my $rsa_prot_err =
@@ -1208,6 +1204,13 @@ if ($pass) {
 	my $ec_prot_err =
 	    &execute_command("openssl ec -in $qkey -text -passin pass:$qpass");
 	return 'ec' if (!$ec_prot_err);
+	}
+# Read file directly
+my $lref = &read_file_lines($key, 1);
+foreach my $l (@$lref) {
+	if ($l =~ /-----BEGIN\s+(RSA|EC)\s+PRIVATE\s+KEY----/) {
+		return lc($1);
+		}
 	}
 return 'unknown';
 }
