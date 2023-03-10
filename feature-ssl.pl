@@ -1184,6 +1184,21 @@ foreach my $sp (&cert_file_split($file2)) {
 return 0;
 }
 
+# get_ssk_key_type(file)
+# Returns 'rsa' or 'ec' depending on the key type
+sub get_ssk_key_type
+{
+my ($key) = @_;
+my $lref = &read_file_lines($key, 1);
+my $type;
+foreach my $l (@$lref) {
+	if ($l =~ /-----BEGIN\s*(RSA|EC)?\s*PRIVATE\s*KEY----/) {
+		$type = lc($1) || "rsa";
+		}
+	}
+return $type;
+}
+
 # check_passphrase(key-data, passphrase)
 # Returns 0 if a passphrase is needed by not given, 1 if not needed, 2 if OK
 sub check_passphrase
@@ -1194,13 +1209,14 @@ local $temp = &transname();
 &set_ownership_permissions(undef, undef, 0700, $temp);
 &print_tempfile(KEY, $newkey);
 &close_tempfile(KEY);
-local $rv = &execute_command("openssl rsa -in ".quotemeta($temp).
+my $type = &get_ssk_key_type($temp);
+local $rv = &execute_command("openssl $type -in ".quotemeta($temp).
 			     " -text -passin pass:NONE");
 if (!$rv) {
 	return 1;
 	}
 if ($pass) {
-	local $rv = &execute_command("openssl rsa -in ".quotemeta($temp).
+	local $rv = &execute_command("openssl $type -in ".quotemeta($temp).
 				     " -text -passin pass:".quotemeta($pass));
 	if (!$rv) {
 		return 2;
@@ -1214,8 +1230,9 @@ return 0;
 sub get_key_size
 {
 local ($file) = @_;
+my $type = &get_ssk_key_type($temp);
 local $out = &backquote_command(
-	"openssl rsa -in ".quotemeta($file)." -text 2>&1 </dev/null");
+	"openssl $type -in ".quotemeta($file)." -text 2>&1 </dev/null");
 if ($out =~ /Private-Key:\s+\((\d+)/i) {
 	return $1;
 	}
@@ -1273,33 +1290,68 @@ my $pps_file = @pps_str ? $pps_str[0]->{'file'} : $conf->[0]->{'file'};
 # on success or an error message on failure.
 sub check_cert_key_match
 {
-local ($certtext, $keytext) = @_;
-local $certfile = &transname();
-local $keyfile = &transname();
-foreach $tf ([ $certtext, $certfile ], [ $keytext, $keyfile ]) {
+my ($certtext, $keytext) = @_;
+my $certfile = &transname();
+my $keyfile = &transname();
+foreach my $tf ([ $certtext, $certfile ], [ $keytext, $keyfile ]) {
 	&open_tempfile(CERTOUT, ">$tf->[1]", 0, 1);
 	&print_tempfile(CERTOUT, $tf->[0]);
 	&close_tempfile(CERTOUT);
 	}
-# Get certificate modulus
-local $certmodout = &backquote_command(
-	"openssl x509 -noout -modulus -in ".quotemeta($certfile)." 2>&1");
-$certmodout =~ /Modulus=([A-F0-9]+)/i ||
-	return "Certificate data is not valid : $certmodout";
-local $certmod = $1;
+my $type = &get_ssk_key_type($keyfile);
 
-# Get key modulus
-local $keymodout = &backquote_command(
-	"openssl rsa -noout -modulus -in ".quotemeta($keyfile)." 2>&1");
-$keymodout =~ /Modulus=([A-F0-9]+)/i ||
-	return "Key data is not valid : $keymodout";
-local $keymod = $1;
+if ($type eq "ec") {
+	# Get the public key data from the cert
+	my $x;
+	my $certpub = &extract_public_key($x=&backquote_command(
+		"openssl x509 -noout -text -in ".quotemeta($certfile)." 2>&1"));
+	my $keypub = &extract_public_key($x=&backquote_command(
+		"openssl ec -noout -text -in ".quotemeta($keyfile)." 2>&1"));
+	$certpub eq $keypub ||
+		return "Certificate and private key do not match";
+	}
+else {
+	# Get certificate modulus
+	my $certmodout = &backquote_command(
+	    "openssl x509 -noout -modulus -in ".quotemeta($certfile)." 2>&1");
+	$certmodout =~ /Modulus=([A-F0-9]+)/i ||
+		return "Certificate data is not valid : $certmodout";
+	my $certmod = $1;
 
-# Make sure they match
-$certmod eq $keymod ||
-	return "Certificate and private key do not match";
+	# Get key modulus
+	my $keymodout = &backquote_command(
+	    "openssl $type -noout -modulus -in ".quotemeta($keyfile)." 2>&1");
+	$keymodout =~ /Modulus=([A-F0-9]+)/i ||
+		return "Key data is not valid : $keymodout";
+	my $keymod = $1;
+
+	# Make sure they match
+	$certmod eq $keymod ||
+		return "Certificate and private key do not match";
+	}
 
 return undef;
+}
+
+# extract_public_key(text)
+# Given openssl -text output, extract the public key data
+sub extract_public_key
+{
+my ($txt) = @_;
+my $found = 0;
+my $pub = "";
+foreach my $l (split(/\r?\n/, $txt)) {
+	if ($l =~ /^\s*pub:\s*$/) {
+		$found = 1;
+		}
+	elsif ($l =~ /^\s+([a-f0-9:]+)\s*$/ && $found) {
+		$pub .= $1;
+		}
+	elsif ($found) {
+		last;
+		}
+	}
+return $pub;
 }
 
 # validate_cert_format(data|file, type)

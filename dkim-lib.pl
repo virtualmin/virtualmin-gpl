@@ -747,8 +747,9 @@ sub get_dkim_pubkey
 my ($dkim, $d) = @_;
 my $keyfile = &get_domain_dkim_key($d) ||
 	      $dkim->{'keyfile'};
+my $type = &get_ssk_key_type($keyfile);
 my $pubkey = &backquote_command(
-        "openssl rsa -in ".quotemeta($keyfile).
+        "openssl $type -in ".quotemeta($keyfile).
         " -pubout -outform PEM 2>/dev/null");
 if ($? || $pubkey !~ /BEGIN\s+PUBLIC\s+KEY/) {
 	return undef;
