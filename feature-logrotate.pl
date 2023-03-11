@@ -177,17 +177,19 @@ if (@logmap) {
 		my @n = @{$lconf->{'name'}};
 		foreach my $lm (@logmap) {
 			if ($lm->[1]) {
-				# Old log exists, look for a replacement
+				# We know what the old log file was
 				my $idx = &indexof($lm->[1], @n);
 				if ($idx >= 0 && $lm->[0]) {
+					# Found it, and there's a replacement
 					$n[$idx] = $lm->[0];
 					}
-				else {
+				elsif ($idx >= 0) {
+					# Found it, no replacement so remove it
 					splice(@n, $idx, 1);
 					}
 				}
 			elsif ($lm->[0]) {
-				# New value exists, add if missing
+				# Only new log exists, so add if missing
 				my $idx = &indexof($lm->[0], @n);
 				if ($idx < 0) {
 					push(@n, $lm->[0]);
