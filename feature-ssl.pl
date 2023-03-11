@@ -948,7 +948,7 @@ if ($virt) {
 		&unlock_file($ca);
 		&save_website_ssl_file($d, "ca", $ca);
 		}
-	&refresh_ssh_cert_expiry($d);
+	&refresh_ssl_cert_expiry($d);
 	&sync_combined_ssl_cert($d);
 
 	# Re-setup any SSL passphrase
