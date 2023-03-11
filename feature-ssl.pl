@@ -674,6 +674,10 @@ if ($err) {
 	return $err;
 	}
 
+# Check the key type
+local $type = &get_ssl_key_type($key, $d->{'ssl_pass'});
+$type || return &text('validate_esslkeytype', "<tt>$key</tt>");
+
 # Make sure the cert and key match
 my $certdata = &read_file_contents($cert);
 my $keydata = &read_file_contents($key);
@@ -1190,30 +1194,24 @@ return 0;
 sub get_ssl_key_type
 {
 my ($key, $pass) = @_;
-my $qkey = quotemeta($key);
-# Detect key algo
-my $rsa_err = &execute_command("openssl rsa -in $qkey -text -passin pass:NONE");
-return 'rsa' if (!$rsa_err);
-my $ec_err = &execute_command("openssl ec -in $qkey -text -passin pass:NONE");
-return 'ec' if (!$ec_err);
-# Detect key algo (with passphrase)
-if ($pass) {
-	my $qpass = quotemeta($pass);
-	my $rsa_prot_err =
-	    &execute_command("openssl rsa -in $qkey -text -passin pass:$qpass");
-	return 'rsa' if (!$rsa_prot_err);
-	my $ec_prot_err =
-	    &execute_command("openssl ec -in $qkey -text -passin pass:$qpass");
-	return 'ec' if (!$ec_prot_err);
-	}
-# Read file directly
+
+# First check if it's in the key file format
 my $lref = &read_file_lines($key, 1);
 foreach my $l (@$lref) {
 	if ($l =~ /-----BEGIN\s+(RSA|EC)\s+PRIVATE\s+KEY----/) {
 		return lc($1);
 		}
 	}
-return 'unknown';
+
+# Fallback to seeing if the openssl command can parse it
+foreach my $t ('rsa', 'ec') {
+	my $qpass = $pass ? quotemeta($pass) : "NONE";
+	my $ex = &execute_command("openssl $t -in ".quotemeta($key).
+				  " -text -passin pass:".$qpass);
+	return $t if (!$ex);
+	}
+
+return undef;
 }
 
 # check_passphrase(key-data, passphrase)

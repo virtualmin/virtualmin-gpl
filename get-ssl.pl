@@ -73,6 +73,9 @@ if (!$chain) {
 if ($cafile) {
 	print "ca: ",$cafile,"\n";
 	}
+print "type: ",&get_ssl_key_type(
+		&get_website_ssl_file($d, "key"),
+		$d->{'ssl_pass'}),"\n";
 foreach $i (@cert_attributes) {
 	$v = $info->{$i};
 	if (ref($v)) {
