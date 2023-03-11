@@ -705,11 +705,9 @@ if ($multi) {
 			print "    SSL candidate hostnames: ",
 				join(" ", @sslhn),"\n";
 			}
-		if ($d->{'ssl_cert_expiry'}) {
-			print "    SSL cert expiry: ",
-			    &make_date($d->{'ssl_cert_expiry'}),"\n";
-			print "    SSL cert expiry time: ",
-			    $d->{'ssl_cert_expiry'},"\n";
+		if ($exp = &get_ssl_cert_expiry($d)) {
+			print "    SSL cert expiry: ",&make_date($exp),"\n";
+			print "    SSL cert expiry time: ",$exp,"\n";
 			}
 		if ($d->{'letsencrypt_renew'} || $d->{'letsencrypt_last'}) {
 			print "    Lets Encrypt renewal: ",

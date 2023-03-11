@@ -944,6 +944,7 @@ if ($virt) {
 		&unlock_file($ca);
 		&save_website_ssl_file($d, "ca", $ca);
 		}
+	&refresh_ssh_cert_expiry($d);
 	&sync_combined_ssl_cert($d);
 
 	# Re-setup any SSL passphrase
@@ -3272,6 +3273,18 @@ if ($cert_info) {
 		$d->{'ssl_cert_expiry'} = $expiry;
 		}
 	}
+}
+
+# get_ssl_cert_expiry(&domain)
+# Returns the cached SSL cert expiry for a domain
+sub get_ssl_cert_expiry
+{
+my ($d) = @_;
+if ($d->{'ssl_same'}) {
+	my $s = &get_domain($d->{'ssl_same'});
+	return $s ? &get_ssl_cert_expiry($s) : undef;
+	}
+return $d->{'ssl_cert_expiry'};
 }
 
 # can_reset_ssl(&domain)

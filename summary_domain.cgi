@@ -195,12 +195,12 @@ if (&master_admin()) {
 	my $now = time();
 
 	# Show SSL cert expiry date and add color based on time
-	if ($d->{'ssl_cert_expiry'}) {
-		my $exp = &make_date($d->{'ssl_cert_expiry'});
-		if ($now > $d->{'ssl_cert_expiry'}) {
+	if ($exptime = &get_ssl_cert_expiry($d)) {
+		my $exp = &make_date($exptime);
+		if ($now > $exptime) {
 			$exp = &ui_text_color($exp, 'danger');
 			}
-		elsif ($now > $d->{'ssl_cert_expiry'} - 7*24*60*60) {
+		elsif ($now > $exptime - 7*24*60*60) {
 			$exp = &ui_text_color($exp, 'warn');
 			}
 		if (&can_edit_domain($d) && &can_edit_ssl()) {
