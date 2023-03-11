@@ -1245,7 +1245,7 @@ return 0;
 sub get_key_size
 {
 local ($file) = @_;
-my $type = &get_ssl_key_type($temp);
+my $type = &get_ssl_key_type($file);
 local $out = &backquote_command(
 	"openssl $type -in ".quotemeta($file)." -text 2>&1 </dev/null");
 if ($out =~ /Private-Key:\s+\((\d+)/i) {
