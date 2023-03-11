@@ -922,34 +922,37 @@ if ($virt) {
 			}
 		}
 
-	# Restore the cert and key, if any and if saved
-	local $cert = $d->{'ssl_cert'} ||
+	if (!$d->{'ssl_same'}) {
+		# Restore the cert and key, if any and if saved and if not
+		# shared with another domain
+		local $cert = $d->{'ssl_cert'} ||
 		      &apache::find_directive("SSLCertificateFile", $vconf, 1);
-	if ($cert && -r $file."_cert") {
-		&lock_file($cert);
-		&write_ssl_file_contents($d, $cert, $file."_cert");
-		&unlock_file($cert);
-		&save_website_ssl_file($d, "cert", $cert);
-		}
-	local $key = $d->{'ssl_key'} ||
+		if ($cert && -r $file."_cert") {
+			&lock_file($cert);
+			&write_ssl_file_contents($d, $cert, $file."_cert");
+			&unlock_file($cert);
+			&save_website_ssl_file($d, "cert", $cert);
+			}
+		local $key = $d->{'ssl_key'} ||
 		     &apache::find_directive("SSLCertificateKeyFile", $vconf,1);
-	if ($key && -r $file."_key" && $key ne $cert) {
-		&lock_file($key);
-		&write_ssl_file_contents($d, $key, $file."_key");
-		&unlock_file($key);
-		&save_website_ssl_file($d, "key", $key);
+		if ($key && -r $file."_key" && $key ne $cert) {
+			&lock_file($key);
+			&write_ssl_file_contents($d, $key, $file."_key");
+			&unlock_file($key);
+			&save_website_ssl_file($d, "key", $key);
+			}
+		local $ca = $d->{'ssl_chain'} ||
+		    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
+		    &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
+		if ($ca && -r $file."_ca") {
+			&lock_file($ca);
+			&write_ssl_file_contents($d, $ca, $file."_ca");
+			&unlock_file($ca);
+			&save_website_ssl_file($d, "ca", $ca);
+			}
+		&refresh_ssh_cert_expiry($d);
+		&sync_combined_ssl_cert($d);
 		}
-	local $ca = $d->{'ssl_chain'} ||
-	    &apache::find_directive("SSLCACertificateFile", $vconf,1) ||
-	    &apache::find_directive("SSLCertificateChainFile", $vconf, 1);
-	if ($ca && -r $file."_ca") {
-		&lock_file($ca);
-		&write_ssl_file_contents($d, $ca, $file."_ca");
-		&unlock_file($ca);
-		&save_website_ssl_file($d, "ca", $ca);
-		}
-	&refresh_ssh_cert_expiry($d);
-	&sync_combined_ssl_cert($d);
 
 	# Re-setup any SSL passphrase
 	&save_domain_passphrase($d);
@@ -975,10 +978,12 @@ if ($virt) {
 	&remove_dav_directives($d, $virt, $vconf, $conf);
 
 	# Re-save CA cert path based on actual config
-	$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca');
+	if (!$d->{'ssl_same'}) {
+		$d->{'ssl_chain'} = &get_website_ssl_file($d, 'ca');
 
-	# Sync cert to Dovecot, Postfix, Webmin, etc..
-	&enable_domain_service_ssl_certs($d);
+		# Sync cert to Dovecot, Postfix, Webmin, etc..
+		&enable_domain_service_ssl_certs($d);
+		}
 
 	&$second_print($text{'setup_done'});
 	}
