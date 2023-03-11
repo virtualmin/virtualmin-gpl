@@ -1185,19 +1185,35 @@ foreach my $sp (&cert_file_split($file2)) {
 return 0;
 }
 
-# get_ssk_key_type(file)
+# get_ssl_key_type(file, [passphrase])
 # Returns 'rsa' or 'ec' depending on the key type
-sub get_ssk_key_type
+sub get_ssl_key_type
 {
-my ($key) = @_;
+my ($key, $pass) = @_;
+my $qkey = quotemeta($key);
+# Detect key algo
+my $rsa_err = &execute_command("openssl rsa -in $qkey -text -passin pass:NONE");
+return 'rsa' if (!$rsa_err);
+my $ec_err = &execute_command("openssl ec -in $qkey -text -passin pass:NONE");
+return 'ec' if (!$ec_err);
+# Detect key algo (with passphrase)
+if ($pass) {
+	my $qpass = quotemeta($pass);
+	my $rsa_prot_err =
+	    &execute_command("openssl rsa -in $qkey -text -passin pass:$qpass");
+	return 'rsa' if (!$rsa_prot_err);
+	my $ec_prot_err =
+	    &execute_command("openssl ec -in $qkey -text -passin pass:$qpass");
+	return 'ec' if (!$ec_prot_err);
+	}
+# Read file directly
 my $lref = &read_file_lines($key, 1);
-my $type;
 foreach my $l (@$lref) {
-	if ($l =~ /-----BEGIN\s*(RSA|EC)?\s*PRIVATE\s*KEY----/) {
-		$type = lc($1) || "rsa";
+	if ($l =~ /-----BEGIN\s+(RSA|EC)\s+PRIVATE\s+KEY----/) {
+		return lc($1);
 		}
 	}
-return $type;
+return 'unknown';
 }
 
 # check_passphrase(key-data, passphrase)
@@ -1210,7 +1226,7 @@ local $temp = &transname();
 &set_ownership_permissions(undef, undef, 0700, $temp);
 &print_tempfile(KEY, $newkey);
 &close_tempfile(KEY);
-my $type = &get_ssk_key_type($temp);
+my $type = &get_ssl_key_type($temp, $pass);
 local $rv = &execute_command("openssl $type -in ".quotemeta($temp).
 			     " -text -passin pass:NONE");
 if (!$rv) {
@@ -1231,7 +1247,7 @@ return 0;
 sub get_key_size
 {
 local ($file) = @_;
-my $type = &get_ssk_key_type($temp);
+my $type = &get_ssl_key_type($temp);
 local $out = &backquote_command(
 	"openssl $type -in ".quotemeta($file)." -text 2>&1 </dev/null");
 if ($out =~ /Private-Key:\s+\((\d+)/i) {
@@ -1299,7 +1315,7 @@ foreach my $tf ([ $certtext, $certfile ], [ $keytext, $keyfile ]) {
 	&print_tempfile(CERTOUT, $tf->[0]);
 	&close_tempfile(CERTOUT);
 	}
-my $type = &get_ssk_key_type($keyfile);
+my $type = &get_ssl_key_type($keyfile);
 
 if ($type eq "ec") {
 	# Get the public key data from the cert
