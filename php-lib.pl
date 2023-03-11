@@ -2726,7 +2726,10 @@ else {
 	return "PHP error log cannot be set in $mode mode";
 	}
 $d->{'php_error_log'} = $phplog || "";
+&push_all_print();
+&set_all_null_print();
 &modify_logrotate($d, $oldd);
+&pop_all_print();
 return undef;
 }
 
