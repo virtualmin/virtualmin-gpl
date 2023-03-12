@@ -2536,6 +2536,12 @@ $backup_tests = [
 		      [ 'add-host', '1.2.3.4' ] ],
 	},
 
+	# Enable PHP error logging to a non-standard file
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'php-log', 'logs/custom-php.log' ] ],
+	},
+
 	# Create a sub-server to be included
 	{ 'command' => 'create-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
@@ -2684,6 +2690,13 @@ $backup_tests = [
 
 	# Run various tests yet again
 	@post_restore_tests,
+
+	# Also check the PHP error log
+	{ 'command' => 'list-domains.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_domain ] ],
+	  'grep' => [ 'PHP error log:.*logs/custom-php.log' ],
+	},
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
