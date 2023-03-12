@@ -1574,6 +1574,7 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_port'});
 if ($virt) {
+	# Save the Apache config
 	local $lref = &read_file_lines($virt->{'file'});
 	local $l;
 	local @adoms = &get_domain_by("alias", $d->{'id'});
@@ -1629,6 +1630,7 @@ if ($virt) {
 			return 0;
 			}
 		}
+
 	return 1;
 	}
 else {
@@ -3305,7 +3307,10 @@ if (&indexof($mode, @supp) < 0) {
 	}
 if ($mode) {
 	&save_domain_php_mode($d, $mode, $port, 1);
-	if ($tmpl->{'php_log'}) {
+	if ($d->{'php_error_log'}) {
+		&save_domain_php_error_log($d, $d->{'php_error_log'});
+		}
+	elsif ($tmpl->{'php_log'}) {
 		&save_domain_php_error_log($d, &get_default_php_error_log($d));
 		}
 	}
