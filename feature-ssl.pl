@@ -1209,8 +1209,8 @@ foreach my $l (@$lref) {
 	}
 
 # Fallback to seeing if the openssl command can parse it
+my $qpass = $pass ? quotemeta($pass) : "NONE";
 foreach my $t ('rsa', 'ec') {
-	my $qpass = $pass ? quotemeta($pass) : "NONE";
 	my $ex = &execute_command("openssl $t -in ".quotemeta($key).
 				  " -text -passin pass:".$qpass);
 	return $t if (!$ex);
