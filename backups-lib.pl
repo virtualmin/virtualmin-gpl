@@ -331,13 +331,15 @@ foreach my $desturl (@$desturls) {
 		# Always create virtualmin-backup directory
 		$mkdir = 1;
 		}
+
+	&$first_print(&text('backup_desttest', $desturl));
 	if ($mode == 1) {
 		# Try FTP login
 		local $ftperr;
 		&ftp_onecommand($server, "PWD", \$ftperr, $user, $pass, $port);
 		if ($ftperr) {
 			$ftperr =~ s/\Q$pass\E/$starpass/g;
-			&$first_print(&text('backup_eftptest', $ftperr));
+			&$second_print(&text('backup_eftptest', $ftperr));
 			next;
 			}
 		if ($dirfmt) {
@@ -397,7 +399,7 @@ foreach my $desturl (@$desturls) {
 			}
 		if ($scperr) {
 			$scperr =~ s/\Q$pass\E/$starpass/g;
-			&$first_print(&text('backup_escptest', $scperr));
+			&$second_print(&text('backup_escptest', $scperr));
 			next;
 			}
 
@@ -447,24 +449,24 @@ foreach my $desturl (@$desturls) {
 					     $s3_upload_tries,
 					     $config{'s3_location'});
 		if ($err) {
-			&$first_print($err);
+			&$second_print($err);
 			next;
 			}
 		}
 	elsif ($mode == 6) {
 		# Connect to Rackspace cloud files and create container
 		if (!$path && !$dirfmt) {
-			&$first_print($text{'backup_ersnopath'});
+			&$second_print($text{'backup_ersnopath'});
 			next;
 			}
 		$rsh = &rs_connect($config{'rs_endpoint'}, $user, $pass);
 		if (!ref($rsh)) {
-			&$first_print($rsh);
+			&$second_print($rsh);
 			next;
 			}
 		local $err = &rs_create_container($rsh, $server);
 		if ($err) {
-			&$first_print($err);
+			&$second_print($err);
 			next;
 			}
 
@@ -473,7 +475,7 @@ foreach my $desturl (@$desturls) {
 		# Connect to Google and create the bucket
 		local $buckets = &list_gcs_buckets();
 		if (!ref($buckets)) {
-			&$first_print($buckets);
+			&$second_print($buckets);
 			next;
 			}
 		my ($already) = grep { $_->{'name'} eq $server } @$buckets;
@@ -481,7 +483,7 @@ foreach my $desturl (@$desturls) {
 			local $err = &create_gcs_bucket(
 				$server, $config{'google_location'});
 			if ($err) {
-				&$first_print($err);
+				&$second_print($err);
 				next;
 				}
 			}
@@ -502,7 +504,7 @@ foreach my $desturl (@$desturls) {
 			if (!$already) {
 				my $err = &create_dropbox_dir("/".$server);
 				if ($err) {
-					&$first_print($err);
+					&$second_print($err);
 					next;
 					}
 				}
@@ -523,7 +525,7 @@ foreach my $desturl (@$desturls) {
 		if ($@) {
 			my $err = $@;
 			$err =~ s/\s+at\s+\S+\s+line\s+\d+.*//g;
-			&$first_print($err);
+			&$second_print($err);
 			next;
 			}
 		}
@@ -531,13 +533,13 @@ foreach my $desturl (@$desturls) {
 		# Connect to Backblaze and create the bucket
 		local $already = &get_bb_bucket($server);
 		if ($already && !ref($already)) {
-			&$first_print($already);
+			&$second_print($already);
 			next;
 			}
 		if (!$already) {
 			local $err = &create_bb_bucket($server);
 			if ($err) {
-				&$first_print($err);
+				&$second_print($err);
 				next;
 				}
 			}
@@ -546,14 +548,14 @@ foreach my $desturl (@$desturls) {
 		# Connect to Azure and create the container
 		local $containers = &list_azure_containers();
 		if (!ref($containers)) {
-			&$first_print($containers);
+			&$second_print($containers);
 			next;
 			}
 		my ($already) = grep { $_->{'name'} eq $server } @$containers;
 		if (!$already) {
 			local $err = &create_azure_container($server);
 			if ($err) {
-				&$first_print($err);
+				&$second_print($err);
 				next;
 				}
 			}
@@ -582,12 +584,12 @@ foreach my $desturl (@$desturls) {
 				}
 			else {
 				# Destination directory doesn't exist yet
-				&$first_print(&text('backup_edirtest',
-						    "<tt>$desturl</tt>"));
+				&$second_print(&text('backup_edirtest',
+						     "<tt>$desturl</tt>"));
 				next;
 				}
 			if ($derr) {
-				&$first_print(&text('backup_emkdir',
+				&$second_print(&text('backup_emkdir',
 					"<tt>$desturl</tt>", $derr));
 				next;
 				}
@@ -595,8 +597,8 @@ foreach my $desturl (@$desturls) {
 		elsif (!$dirfmt && -d $desturl) {
 			# Destination already exists and is a directory, but
 			# we're expecting to write a file
-			&$first_print(&text('backup_enotdirtest',
-					    "<tt>$desturl</tt>"));
+			&$second_print(&text('backup_enotdirtest',
+					     "<tt>$desturl</tt>"));
 			next;
 			}
 		if (!$dirfmt && $mkdir) {
@@ -607,13 +609,14 @@ foreach my $desturl (@$desturls) {
 				local $derr = &make_backup_dir(
 						$dirdest, 0700, 0, $asd);
 				if ($derr) {
-					&$first_print(&text('backup_emkdir',
-						   "<tt>$dirdest</tt>", $derr));
+					&$second_print(&text('backup_emkdir',
+						"<tt>$dirdest</tt>", $derr));
 					next;
 					}
 				}
 			}
 		}
+	&$second_print($text{'setup_done'});
 
 	# If we made it this far, the URL is valid
 	push(@okurls, $desturl);
