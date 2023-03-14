@@ -5744,6 +5744,7 @@ elsif (!$m && $dependent) {
 	if ($d->{'ip6'}) {
 		$m->{'command'} .= " -o smtp_bind_address6=$d->{'ip6'}";
 		}
+	$m->{'command'} .= " -o smtp_helo_name=mail.$d->{'dom'}";
 	$m->{'name'} = "smtp-".$d->{'id'};
 	&postfix::create_master($m);
 	&postfix::reload_postfix();
@@ -5761,6 +5762,10 @@ elsif ($m && $dependent) {
 	    $1 ne $d->{'ip6'}) {
 		$m->{'command'} =~ s/smtp_bind_address6=([a-f0-9:]+)/smtp_bind_address6=$d->{'ip6'}/;
 		$changed++;
+		}
+	if ($m->{'command'} =~ /smtp_helo_name=(\S+)/ &&
+	    $1 ne "mail.$d->{'dom'}") {
+		$m->{'command'} =~ s/smtp_helo_name=\S+/smtp_helo_name=mail.$d->{'dom'}/;
 		}
 	if ($changed) {
 		&postfix::modify_master($m);
