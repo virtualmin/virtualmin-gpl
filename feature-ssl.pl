@@ -953,6 +953,12 @@ if ($virt) {
 		&refresh_ssl_cert_expiry($d);
 		&sync_combined_ssl_cert($d);
 		}
+	else {
+		# Make sure that the Apache config uses the correct SSL path
+		&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+		&save_website_ssl_file($d, "key", $d->{'ssl_key'});
+		&save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
+		}
 
 	# Re-setup any SSL passphrase
 	&save_domain_passphrase($d);
