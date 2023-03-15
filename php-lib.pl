@@ -601,6 +601,7 @@ if (defined($oldplog)) {
 
 # Link ~/etc/php.ini to the per-version ini file
 &create_php_ini_link($d, $mode);
+&create_php_bin_links($d, $mode);
 
 &register_post_action(\&restart_apache);
 $pfound || return "Apache virtual host was not found";
@@ -1380,6 +1381,7 @@ else {
 
 # Re-create php.ini link
 &create_php_ini_link($d, $mode);
+&create_php_bin_links($d, $mode);
 
 # Copy in php.ini file for version if missing
 if (!$noini) {
@@ -1916,6 +1918,21 @@ if ($ver) {
 	local $etc = "$d->{'home'}/etc";
 	&unlink_file_as_domain_user($d, "$etc/php.ini");
 	&symlink_file_as_domain_user($d, "php".$ver."/php.ini", "$etc/php.ini");
+	}
+}
+
+# create_php_bin_links(&domain, [php-mode])
+# Create a link from ~/bin/php to the PHP CLI for the primary version
+sub create_php_bin_links
+{
+my ($d, $mode) = @_;
+my $bindir = $d->{'home'}.'/bin';
+&unlink_file_as_domain_user($d, $bindir.'/php');
+my ($ver, $cli);
+if (($ver = &get_domain_php_version($d, $mode)) &&
+    ($cli = &php_command_for_version($ver, 2))) {
+	&make_dir_as_domain_user($d, $bindir, 0755);
+	&symlink_file_as_domain_user($d, $cli, $bindir.'/php');
 	}
 }
 
