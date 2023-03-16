@@ -9325,6 +9325,7 @@ push(@rv, { 'id' => 0,
 	    'statussslcert' => $config{'statussslcert'},
 	    'mail_on' => $config{'domain_template'} eq "none" ? "none" : "yes",
 	    'mail' => $config{'domain_template'} eq "none" ||
+		      $config{'domain_template'} eq "" ||
 		      $config{'domain_template'} eq "default" ?
 				&cat_file("domain-template") :
 				&cat_file($config{'domain_template'}),
@@ -9335,7 +9336,8 @@ push(@rv, { 'id' => 0,
 	    'mail_cloud' => $config{'mail_cloud'},
 	    'newuser_on' => $config{'user_template'} eq "none" ? "none" : "yes",
 	    'newuser' => $config{'user_template'} eq "none" ||
-		      $config{'user_template'} eq "default" ?
+		         $config{'user_template'} eq "" ||
+		         $config{'user_template'} eq "default" ?
 				&cat_file("user-template") :
 				&cat_file($config{'user_template'}),
 	    'newuser_subject' => $config{'newuser_subject'} ||
@@ -9348,7 +9350,8 @@ push(@rv, { 'id' => 0,
 	    'updateuser_on' => $config{'update_template'} eq "none" ?
 				"none" : "yes",
 	    'updateuser' => $config{'update_template'} eq "none" ||
-		      $config{'update_template'} eq "default" ?
+			    $config{'update_template'} eq "" ||
+			    $config{'update_template'} eq "default" ?
 				&cat_file("update-template") :
 				&cat_file($config{'update_template'}),
 	    'updateuser_subject' => $config{'newupdate_subject'} ||
@@ -9690,6 +9693,7 @@ if ($tmpl->{'id'} == 0) {
 		}
 	# Write message to default template file, or custom if set
 	&uncat_file($config{'domain_template'} eq "none" ||
+		    $config{'domain_template'} eq "" ||
 		    $config{'domain_template'} eq "default" ?
 			"domain-template" :
 			$config{'domain_template'}, $tmpl->{'mail'});
@@ -9703,6 +9707,7 @@ if ($tmpl->{'id'} == 0) {
 		$config{'user_template'} = 'default';
 		}
 	&uncat_file($config{'user_template'} eq "none" ||
+		    $config{'user_template'} eq "" ||
 		    $config{'user_template'} eq "default" ?
 			"user-template" :
 			$config{'user_template'}, $tmpl->{'newuser'});
@@ -9719,6 +9724,7 @@ if ($tmpl->{'id'} == 0) {
 		$config{'update_template'} = 'default';
 		}
 	&uncat_file($config{'update_template'} eq "none" ||
+		    $config{'update_template'} eq "" ||
 		    $config{'update_template'} eq "default" ?
 			"update-template" :
 			$config{'update_template'}, $tmpl->{'updateuser'});
