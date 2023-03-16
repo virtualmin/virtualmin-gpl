@@ -54,10 +54,21 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
+
+	# Cert files
 	print &ui_table_row($text{'cert_incert'},
 			    "<tt>$d->{'ssl_cert'}</tt>", 3);
 	print &ui_table_row($text{'cert_inkey'},
 			    "<tt>$d->{'ssl_key'}</tt>", 3);
+
+	# Cert hash type
+	$type = &get_ssl_key_type($d->{'ssl_key'}, $d->{'ssl_pass'});
+	if ($type) {
+		print &ui_table_row($text{'cert_hash'},
+			$text{'cert_type_'.$type} || uc($type));
+		}
+
+
 
 	$info = &cert_info($d);
 	$chain = &get_website_ssl_file($d, 'ca');
@@ -523,5 +534,7 @@ if ($showdays) {
 
 print &ui_table_row($text{'cert_hash'},
 		    &ui_select("hash", $config{'cert_type'},
-			       [ [ "sha1", "SHA1" ], [ "sha2", "SHA2" ] ]));
+			       [ [ "sha1", "SHA1" ],
+				 [ "sha2", "SHA2" ],
+				 [ "ec", $text{'cert_type_ec'} ] ]));
 }
