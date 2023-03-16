@@ -577,6 +577,7 @@ local ($in) = @_;
 &require_bind();
 local @tmpls = &list_templates();
 local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+$tmpl || return $text{'wizard_etmpl0'};
 
 # Validate primary NS
 $in->{'prins'} =~ /^[a-z0-9\.\_\-]+$/i || return $text{'wizard_dns_eprins'};
@@ -656,6 +657,7 @@ local ($in) = @_;
 # Update default template
 local @tmpls = &list_templates();
 local ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+$tmpl || return $text{'wizard_etmpl0'};
 $tmpl->{'hashpass'} = $in->{'hashpass'};
 &save_template($tmpl);
 
@@ -746,6 +748,7 @@ sub wizard_parse_ssldir
 my ($in) = @_;
 my @tmpls = &list_templates();
 my ($tmpl) = grep { $_->{'id'} eq '0' } @tmpls;
+$tmpl || return $text{'wizard_etmpl0'};
 if ($in->{'ssldir'} == 0) {
 	# Fall back to the default
 	delete($tmpl->{'cert_key_tmpl'});

@@ -6503,6 +6503,7 @@ wizard_title_dns=DNS configuration
 wizard_dns=For DNS zones created by Virtualmin to be resolvable, the primary nameserver record for each zone must be set to something that can itself be resolved by other systems on the Internet.
 wizard_dns_prins=Primary nameserver
 wizard_dns_secns=Secondary nameservers (optional)
+wizard_etmpl0=Default template does not exist!
 wizard_dns_eprins=Primary nameserver is not a valid DNS name
 wizard_dns_eprins2=Primary nameserver cannot be resolved on this system
 wizard_dns_eprins3=Primary nameserver cannot be resolved from the rest of the Internet : $1
