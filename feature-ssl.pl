@@ -1773,7 +1773,7 @@ return &webmin::find_openssl_config_file();
 # files. Returns undef on success, or an error message on failure.
 sub generate_self_signed_cert
 {
-local ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
+my ($certfile, $keyfile, $size, $days, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
 $ctype ||= $config{'default_ctype'};
 &foreign_require("webmin");
@@ -1781,23 +1781,37 @@ $size ||= $webmin::default_key_size;
 $days ||= 1825;
 
 # Prepare for SSL alt names
-local @cnames = ( $common );
+my @cnames = ( $common );
 push(@cnames, @$altnames) if ($altnames);
-local $conf = &webmin::build_ssl_config(\@cnames);
-local $subject = &webmin::build_ssl_subject($country, $state, $city, $org,
-					    $orgunit, \@cnames, $email);
+my $conf = &webmin::build_ssl_config(\@cnames);
+my $subject = &webmin::build_ssl_subject($country, $state, $city, $org,
+					 $orgunit, \@cnames, $email);
 
 # Call openssl and write to temp files
-local $outtemp = &transname();
-local $keytemp = &transname();
-local $certtemp = &transname();
-local $ctypeflag = $ctype eq "sha2" ? "-sha256" : "";
-local $addtextsup = &compare_version_numbers(&get_openssl_version(), '>=', '1.1.1') ? "-addext extendedKeyUsage=serverAuth" : "";
-local $out = &backquote_logged(
-	"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
-	"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
-	"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
-local $rv = $?;
+my $keytemp = &transname();
+my $certtemp = &transname();
+my $ctypeflag = $ctype eq "sha2" || $ctype eq "ec" ? "-sha256" : "";
+my $addtextsup = &compare_version_numbers(&get_openssl_version(), '>=', '1.1.1') ? "-addext extendedKeyUsage=serverAuth" : "";
+my $out;
+if ($ctype eq "ec") {
+	my $pubtemp = &transname();
+	$out = &backquote_logged(
+		"openssl ecparam -genkey -name prime256v1 ".
+		"-noout -out ".quotemeta($keytemp)." 2>&1 && ".
+		"openssl ec -in ".quotemeta($keytemp)." -pubout ".
+		"-out ".quotemeta($pubtemp)." 2>&1 && ".
+		"openssl req -new -x509 -reqexts v3_req -days $days ".
+		"-config ".quotemeta($conf)." -subj ".quotemeta($subject).
+		" $addtextsup -utf8 -key ".quotemeta($keytemp)." ".
+		"-out ".quotemeta($certtemp)." 2>&1");
+	}
+else {
+	$out = &backquote_logged(
+		"openssl req $ctypeflag -reqexts v3_req -newkey rsa:$size ".
+		"-x509 -nodes -out ".quotemeta($certtemp)." -keyout ".quotemeta($keytemp)." ".
+		"-days $days -config ".quotemeta($conf)." -subj ".quotemeta($subject)." $addtextsup -utf8 2>&1");
+	}
+my $rv = $?;
 if (!-r $certtemp || !-r $keytemp || $rv) {
 	# Failed .. return error
 	return &text('csr_ekey', "<pre>$out</pre>");

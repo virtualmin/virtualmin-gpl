@@ -97,7 +97,7 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
-	elsif ($a =~ /^--(sha1|sha2)$/) {
+	elsif ($a =~ /^--(sha1|sha2|ec)$/) {
 		$ctype = $1;
 		}
 	elsif ($a eq "--help") {
