@@ -1171,12 +1171,14 @@ local $withdot = $d->{'dom'}.".";
 my $r = { 'name' => "mail.$withdot",
 	  'type' => "A",
 	  'values' => [ $ip ] };
-&create_dns_record($recs, $file, $r);
+my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+&create_dns_record($recs, $file, $r) if (!$already);
 if ($d->{'ip6'} && $ip6) {
 	my $r = { 'name' => "mail.$withdot",
 		  'type' => "AAAA",
 		  'values' => [ $ip6 ] };
-	&create_dns_record($recs, $file, $r);
+	my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+	&create_dns_record($recs, $file, $r) if (!$already);
 	}
 &create_mx_records($recs, $file, $d, $ip, $ip6);
 }
