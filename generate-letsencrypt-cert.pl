@@ -82,6 +82,9 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--(web|dns)$/) {
 		$mode = $1;
 		}
+	elsif ($a =~ /^--(sha1|sha2|rsa|ec)$/) {
+		$ctype = $1 eq "sha1" || $1 eq "sha2" ? "rsa" : $1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -94,6 +97,11 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+if ($ctype eq "ecdsa") {
+	&letsencrypt_supports_ec() ||
+		&usage("The Let's Encrypt client on your system does ".
+		       "not support EC certificates");
+	}
 if (!@dnames) {
 	# No hostnames specified
 	if ($defdnames || !$d->{'letsencrypt_dname'}) {
@@ -172,7 +180,7 @@ $phd = &public_html_dir($d);
 $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-				$d, \@dnames, $staging, $size, $mode);
+				$d, \@dnames, $staging, $size, $mode, $ctype);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
@@ -191,6 +199,8 @@ else {
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = $renew;
+	$d->{'letsencrypt_ctype'} = $ctype;
+	$d->{'letsencrypt_size'} = $size;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
@@ -245,6 +255,7 @@ print "                                    [--size bits]\n";
 print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
 print "                                    [--web | --dns]\n";
+print "                                    [--rsa | --ec]\n";
 exit(1);
 }
 

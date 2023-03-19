@@ -2901,7 +2901,8 @@ if ($merr) {
 else {
 	my $before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) =
-		&request_domain_letsencrypt_cert($d, \@dnames);
+		&request_domain_letsencrypt_cert($d, \@dnames, 0,
+		    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'});
 	&after_letsencrypt_website($d, $before);
 	}
 
@@ -3135,12 +3136,13 @@ foreach my $h (@$dnames) {
 return \@rv;
 }
 
-# request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode])
+# request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode],
+# 				  [key-type])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
-# DNS modes if possible
+# DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode) = @_;
+my ($d, $dnames, $staging, $size, $mode, $ctype) = @_;
 my $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
@@ -3153,7 +3155,7 @@ if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-		&get_global_from_address());
+		&get_global_from_address(), $ctype eq "ec" ? "ecdsa" : "rsa");
 	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
@@ -3161,7 +3163,7 @@ if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
 	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-		&get_global_from_address());
+		&get_global_from_address(), $ctype);
 	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {
@@ -3198,6 +3200,17 @@ foreach my $f (@$feats) {
 		}
 	}
 return @rv;
+}
+
+# letsencrypt_supports_ec()
+# Returns 1 if Let's Encrypt client supports EC certificates
+sub letsencrypt_supports_ec
+{
+&foreign_require("webmin");
+return 0 if (&webmin::check_letsencrypt());	# Not installed
+return 0 if (!$webmin::letsencrypt_cmd);	# Missing native client
+my $ver = &webmin::get_certbot_major_version($webmin::letsencrypt_cmd);
+return &compare_versions($ver, 2.0) >= 0;
 }
 
 # sync_webmin_ssl_cert(&domain, [enable-or-disable])

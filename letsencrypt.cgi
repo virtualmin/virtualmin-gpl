@@ -114,7 +114,8 @@ else {
 	$phd = &public_html_dir($d);
 	$before = &before_letsencrypt_website($d);
 	($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-					$d, \@dnames);
+					$d, \@dnames, 0, undef, undef,
+					$in{'ctype'});
 	&after_letsencrypt_website($d, $before);
 	if (!$ok) {
 		&$second_print(&text('letsencrypt_failed', $cert));
@@ -135,6 +136,7 @@ else {
 		$d->{'letsencrypt_dname'} = $custom_dname;
 		$d->{'letsencrypt_dwild'} = $in{'dwild'};
 		$d->{'letsencrypt_renew'} = $in{'renew'};
+		$d->{'letsencrypt_ctype'} = $in{'ctype'};
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
 		&refresh_ssl_cert_expiry($d);

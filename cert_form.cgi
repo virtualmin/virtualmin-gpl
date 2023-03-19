@@ -445,6 +445,14 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 				    [ 0, $text{'cert_connectivity0'} ] ]));
 			}
 
+		# Certificate type, if supported
+		if (&letsencrypt_supports_ec()) {
+			print &ui_table_row($text{'cert_hash'},
+				&ui_select("ctype", $d->{'letsencrypt_ctype'},
+					[ [ "rsa", $text{'cert_type_rsa'} ],
+					  [ "ec", $text{'cert_type_ec'} ] ]));
+			}
+
 		# Recent renewal details
 		if ($d->{'letsencrypt_last'}) {
 			$ago = (time() - $d->{'letsencrypt_last'}) /
