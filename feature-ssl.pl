@@ -1985,20 +1985,20 @@ if ($save) {
 # cert if needed. May print stuff.
 sub generate_default_certificate
 {
-local ($d) = @_;
+my ($d) = @_;
 $d->{'ssl_cert'} ||= &default_certificate_file($d, 'cert');
 $d->{'ssl_key'} ||= &default_certificate_file($d, 'key');
 if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 	# Need to do it
-	local $temp = &transname();
+	my $temp = &transname();
 	&$first_print($text{'setup_openssl'});
 	&lock_file($d->{'ssl_cert'});
 	&lock_file($d->{'ssl_key'});
-	local @alts = ( $d->{'dom'}, "localhost",
+	my @alts = ( $d->{'dom'}, "localhost",
 			&get_system_hostname(0),
 			&get_system_hostname(1) );
 	@alts = &unique(@alts);
-	local $err = &generate_self_signed_cert(
+	my $err = &generate_self_signed_cert(
 		$d->{'ssl_cert'}, $d->{'ssl_key'}, undef, 1825,
 		undef, undef, undef, $d->{'owner'}, undef,
 		"*.$d->{'dom'}", $d->{'emailto_addr'},
@@ -2025,6 +2025,11 @@ if (!-r $d->{'ssl_cert'} && !-r $d->{'ssl_key'}) {
 return 0;
 }
 
+sub list_ssl_file_types
+{
+return ('cert', 'key', 'chain', 'combined', 'everything');
+}
+
 # break_ssl_linkage(&domain, &old-same-domain)
 # If domain was using the SSL cert from old-same-domain before, break the link
 # by copying the cert into the default location for domain and updating the
@@ -2036,7 +2041,7 @@ my @beforecerts = &get_all_domain_service_ssl_certs($d);
 
 # Copy the cert and key to the new owning domain's directory
 &create_ssl_certificate_directories($d);
-foreach my $k ('cert', 'key', 'chain', 'combined', 'everything') {
+foreach my $k (&list_ssl_file_types()) {
 	if ($d->{'ssl_'.$k}) {
 		$d->{'ssl_'.$k} = &default_certificate_file($d, $k);
 		&write_ssl_file_contents(

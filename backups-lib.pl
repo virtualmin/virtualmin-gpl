@@ -2532,6 +2532,27 @@ if ($ok) {
 					}
 				}
 
+			# If the domain was syncing the SSL cert with another
+			# domain, make sure it exists
+			if ($d->{'ssl_same'} &&
+			    !&get_domain($d->{'ssl_same'})) {
+				if ($skipwarnings) {
+					&$second_print(
+						$text{'restore_esslsame2'});
+					foreach my $t (&list_ssl_file_types()) {
+						delete($d->{'ssl_'.$t});
+						}
+					delete($d->{'ssl_same'});
+					}
+				else {
+					&$second_print(
+						$text{'restore_esslsame'});
+					$ok = 0;
+					if ($continue) { next DOMAIN; }
+					else { last DOMAIN; }
+					}
+				}
+
 			# Build maps of used UIDs and GIDs
 			local (%gtaken, %taken);
 			&build_group_taken(\%gtaken);
