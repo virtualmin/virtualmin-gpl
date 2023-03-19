@@ -1833,24 +1833,34 @@ return undef;
 # files. Returns undef on success, or an error message on failure.
 sub generate_certificate_request
 {
-local ($csrfile, $keyfile, $size, $country, $state, $city, $org,
+my ($csrfile, $keyfile, $size, $country, $state, $city, $org,
        $orgunit, $common, $email, $altnames, $d, $ctype) = @_;
 $ctype ||= $config{'cert_type'};
 &foreign_require("webmin");
 $size ||= $webmin::default_key_size;
 
 # Generate the key
-local $keytemp = &transname();
-local $out = &backquote_command("openssl genrsa -out ".quotemeta($keytemp)." $size 2>&1 </dev/null");
-local $rv = $?;
+my $keytemp = &transname();
+my $out;
+if ($ctype eq "ec") {
+	$out = &backquote_command(
+		"openssl ecparam -genkey -name prime256v1 -out ".
+		quotemeta($keytemp)." 2>&1 </dev/null");
+	}
+else {
+	$out = &backquote_command(
+		"openssl genrsa -out ".quotemeta($keytemp).
+		" $size 2>&1 </dev/null");
+	}
+my $rv = $?;
 if (!-r $keytemp || $rv) {
 	return &text('csr_ekey', "<pre>$out</pre>");
 	}
 
 # Generate the CSR
-local @cnames = ( $common );
+my @cnames = ( $common );
 push(@cnames, @$altnames) if ($altnames);
-local ($ok, $csrtemp) = &webmin::generate_ssl_csr($keytemp, $country, $state, $city, $org, $orgunit, \@cnames, $email, $ctype);
+my ($ok, $csrtemp) = &webmin::generate_ssl_csr($keytemp, $country, $state, $city, $org, $orgunit, \@cnames, $email, $ctype);
 if (!$ok) {
 	return &text('csr_ecsr', "<pre>$csrtemp</pre>");
 	}

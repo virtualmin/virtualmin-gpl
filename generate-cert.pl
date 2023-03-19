@@ -37,7 +37,8 @@ configure Apache to use them. Any existing files will be overwritten.
 
 By default the certificate will use the hash format (SHA1 or SHA2) set on the
 Virtualmin Configuration page. However, to force a particular format like the
-more secure SHA2, you can use the C<--sha2> flag.
+more secure SHA2, you can use the C<--sha2> flag. Or you can request creation
+of an Elliptic Curve certificate with the C<--ec> flag.
 
 This command can also create a CSR, or certificate signing request. This is
 a file that is sent to a certificate authority like Verisign or Thawte along
@@ -254,7 +255,7 @@ print "                        [--o organization]\n";
 print "                        [--ou organization-unit]\n";
 print "                        [--email email-address]\n";
 print "                        [--alt alternate-domain-name]*\n";
-print "                        [--sha2 | --sha1]\n";
+print "                        [--sha2 | --sha1 | --ec]\n";
 exit(1);
 }
 
