@@ -931,18 +931,12 @@ if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	local ($mx) = grep { $_->{'type'} eq 'MX' &&
-			     $_->{'name'} eq $d->{'dom'}."." ||
-			     $_->{'type'} eq 'A' &&
-			     $_->{'name'} eq "mail.".$d->{'dom'}."."} @$recs;
-	if (!$mx) {
-		&$first_print($text{'save_dns4'});
-		local $ip = $d->{'dns_ip'} || $d->{'ip'};
-		local $ip6 = $d->{'ip6'};
-		&create_mail_records($recs, $file, $d, $ip, $ip6);
-		&$second_print($text{'setup_done'});
-		$rv++;
-		}
+	&$first_print($text{'save_dns4'});
+	local $ip = $d->{'dns_ip'} || $d->{'ip'};
+	local $ip6 = $d->{'ip6'};
+	&create_mail_records($recs, $file, $d, $ip, $ip6);
+	&$second_print($text{'setup_done'});
+	$rv++;
 	}
 elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was disabled .. remove MX records, but only those that
@@ -1197,7 +1191,8 @@ $mxname = &substitute_domain_template($mxname, $d);
 my $r = { 'name' => $withdot,
 	  'type' => "MX",
 	  'values' => [ 5, $mxname ] };
-&create_dns_record($recs, $file, $r);
+my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+&create_dns_record($recs, $file, $r) if (!$already);
 
 # Add MX records for slaves, if enabled
 if (!$config{'secmx_nodns'}) {
@@ -1210,7 +1205,8 @@ if (!$config{'secmx_nodns'}) {
 		my $r = { 'name' => $withdot,
 			  'type' => "MX",
 			  'values' => [ $n, $mxhost ] };
-		&create_dns_record($recs, $file, $r);
+		my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+		&create_dns_record($recs, $file, $r) if (!$already);
 		$n += 5;
 		}
 	}
