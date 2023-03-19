@@ -4192,6 +4192,7 @@ scripts_idbname2=<a href='$1'>$2 $3</a>
 scripts_idbtbpref=with table prefix
 scripts_iuser=Initial login
 scripts_ipass=$1 with password $2
+scripts_iphpver=PHP version
 scripts_uok=Un-Install Script
 scripts_upok=Upgrade To Version:
 scripts_upok2=Upgrade To Un-supported Version:

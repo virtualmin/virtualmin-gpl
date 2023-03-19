@@ -52,6 +52,21 @@ print &ui_table_row($text{'scripts_itime'}, &make_date($sinfo->{'time'}));
 if ($opts->{'dir'}) {
 	print &ui_table_row($text{'scripts_idir'},
 			    "<tt>$opts->{'dir'}</tt>");
+
+	# Show actual PHP version for the script's directory
+	@dirs = &list_domain_php_directories($d);
+	foreach my $dir (sort { length($a->{'dir'}) cmp length($b->{'dir'}) } @dirs) {
+		if (&is_under_directory($dir->{'dir'}, $opts->{'dir'}) ||
+		    $dir->{'dir'} eq $opts->{'dir'}) {
+			$bestdir = $dir;
+			}
+		}
+	if ($bestdir) {
+		$mode = &get_domain_php_mode($d);
+		print &ui_table_row($text{'scripts_iphpver'},
+				    $bestdir->{'version'}." (".
+				    $text{'phpmode_short_'.$mode}.")");
+		}
 	}
 
 # Show DB, if we have it
