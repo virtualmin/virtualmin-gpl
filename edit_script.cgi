@@ -63,9 +63,10 @@ if ($opts->{'dir'}) {
 		}
 	if ($bestdir) {
 		$mode = &get_domain_php_mode($d);
+		$fullver = &get_php_version($bestdir->{'version'}, $d) ||
+			   $bestdir->{'version'};
 		print &ui_table_row($text{'scripts_iphpver'},
-				    $bestdir->{'version'}." (".
-				    $text{'phpmode_short_'.$mode}.")");
+			$fullver." (".$text{'phpmode_short_'.$mode}.")");
 		}
 	}
 
