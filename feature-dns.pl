@@ -3178,15 +3178,18 @@ $tmpl->{'dns_cloud_import'} = $in{'dns_cloud_import'};
 $tmpl->{'dns_cloud_proxy'} = $in{'dns_cloud_proxy'};
 
 # Save slave servers
-if ($in{'dns_slaves_def'} == 1) {
-	$tmpl->{'dns_slaves'} = '';
-	}
-elsif ($in{'dns_slaves_def'} == 2) {
-	$tmpl->{'dns_slaves'} = 'none';
-	}
-else {
-	$in{'dns_slaves'} || &error($text{'tmpl_dns_eslaves'});
-	$tmpl->{'dns_slaves'} = join(" ", split(/\0/, $in{'dns_slaves'}));
+if (defined($in{'dns_slaves_def'}) ||
+    defined($in{'dns_slaves'})) {
+	if ($in{'dns_slaves_def'} == 1) {
+		$tmpl->{'dns_slaves'} = '';
+		}
+	elsif ($in{'dns_slaves_def'} == 2) {
+		$tmpl->{'dns_slaves'} = 'none';
+		}
+	else {
+		$in{'dns_slaves'} || &error($text{'tmpl_dns_eslaves'});
+		$tmpl->{'dns_slaves'} = join(" ", split(/\0/, $in{'dns_slaves'}));
+		}
 	}
 
 if (!$config{'provision_dns'}) {
