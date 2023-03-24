@@ -1,4 +1,0 @@
-desc=Plesk sub-domain migration
-html=Plesk sub-domains are now included with migrating, including any users for managing their content.
-master=1
-link=migrate_form.cgi

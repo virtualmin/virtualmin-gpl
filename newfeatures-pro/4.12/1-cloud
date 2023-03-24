@@ -1,4 +1,0 @@
-desc=Google Cloud Storage support
-html=Added support for backups to Google Cloud Storage, once an account is added on the new Cloud Storage Providers page.
-master=1
-link=list_clouds.cgi

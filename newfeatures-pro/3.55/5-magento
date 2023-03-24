@@ -1,6 +1,0 @@
-desc=Magento Script Installer
-html=Added the Magento eCommerce package to Virtualmin's script installers, version 1.0.
-master=1
-reseller=1
-domain=1
-link=list_scripts.cgi?dom=${ID}&scriptsmode=new&search=magento

@@ -1,4 +1,0 @@
-desc=Quota warning email customization
-html=The email to mailboxes who are approaching or over quota can now be customized on the Disk Quota Monitoring page.
-master=1
-link=edit_newquotas.cgi
