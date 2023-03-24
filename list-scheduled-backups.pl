@@ -11,7 +11,8 @@ flag. These must be folllowed by a domain name, administration username
 or reseller login respectively.
 
 To switch to a more detailed and parseable output format, add the 
-C<--multiline> flag to the command line.
+C<--multiline> flag to the command line. To show only scheduled backup IDs,
+use the C<--id-only> flag.
 
 =cut
 
@@ -45,6 +46,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--id-only") {
+		$idonly = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -138,6 +142,12 @@ if ($multi) {
 			}
 		}
 	}
+elsif ($idonly) {
+	# Just show IDs
+	foreach my $s (@scheds) {
+		print $s->{'id'},"\n";
+		}
+	}
 else {
 	# Just show one per line
 	$fmt = "%-22.22s %-40.40s %-15.15s\n";
@@ -163,7 +173,7 @@ print "\n";
 print "virtualmin list-scheduled-backups [--domain domain.name |\n";
 print "                                   --user name |\n";
 print "                                   --reseller name]\n";
-print "                                  [--multiline]\n";
+print "                                  [--multiline | --id-only]\n";
 exit(1);
 }
 
