@@ -56,7 +56,7 @@ else {
 	$nopurge = 1;
 	}
 
-if ($cbmode == 3 && ($in{'sched'} || $in{'oneoff'})) {
+if ($cbmode == 3 && $sched && ($in{'sched'} || $in{'oneoff'})) {
 	# If this backup is to a domain's directory but the current
 	# user is a reseller, use that domain
 	($mode) = &parse_backup_url($sched->{'dest'});
@@ -71,6 +71,7 @@ $sched ||= { 'all' => 1,
 	     'parent' => 1,
 	     'fmt' => 2,
 	     'onebyone' => 1,
+	     'strftime' => 1,
 	     'email' => $cbmode == 2 ? $d->{'emailto'} :
 			$cbmode == 3 ? $access{'email'} : undef };
 @tds = ( "width=30% ");
