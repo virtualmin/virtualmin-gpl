@@ -34,13 +34,13 @@ $webinit = &create_initial_user($d, undef, 1);
 if ($mleft != 0) {
 	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
 		       $text{'users_add'} ]);
+	if ($webinit->{'webowner'}) {
+		push(@links, [ "edit_user.cgi?new=1&web=1&dom=$in{'dom'}",
+			       $text{'users_addweb'} ]);
+		}
 	}
 push(@links, [ "mass_ucreate_form.cgi?dom=$in{'dom'}",
 	       $text{'users_batch2'}, "right" ]);
-if ($mleft != 0 && $webinit->{'webowner'}) {
-	push(@links, [ "edit_user.cgi?new=1&web=1&dom=$in{'dom'}",
-		       $text{'users_addweb'}, "right" ]);
-	}
 
 # Show message about why cannot
 if ($mleft != 0 && $mleft != -1 && !$mhide) {
