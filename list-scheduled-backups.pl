@@ -100,7 +100,8 @@ if ($multi) {
 				$key->{'id'},"\n";
 			}
 		if ($s->{'owner'}) {
-			print "    Owner: $s->{'owner'}\n";
+			my $o = &get_domain($s->{'owner'});
+			print "    Owner: $o->{'dom'}\n";
 			}
 		print "    Features: ",
 			$s->{'feature_all'} ? "All" : $s->{'features'},"\n";
