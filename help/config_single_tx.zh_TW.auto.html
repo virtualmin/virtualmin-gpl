@@ -1,0 +1,1 @@
+<header>在單個事務中備份 MySQL？</header>當此選項設置為<b>Yes</b>時，MySQL 備份將在單個事務中執行以確保一致性。但是，在備份大型且不斷變化的數據庫時，這會消耗更多的 RAM。它還可能會失敗，並在某些 MySQL 版本或 Amazon RDS 上顯示錯誤<tt>Couldn&#39;t execute &#39;FLUSH TABLES WITH READ LOCK&#39;</tt> 。在這種情況下，您應該將其更改為<b>否</b>。<p><footer>

@@ -1,0 +1,1 @@
+<header>在单个事务中备份 MySQL？</header>当此选项设置为<b>Yes</b>时，MySQL 备份将在单个事务中执行以确保一致性。但是，在备份大型且不断变化的数据库时，这会消耗更多的 RAM。它还可能会失败，并在某些 MySQL 版本或 Amazon RDS 上显示错误<tt>Couldn&#39;t execute &#39;FLUSH TABLES WITH READ LOCK&#39;</tt> 。在这种情况下，您应该将其更改为<b>否</b>。<p><footer>
