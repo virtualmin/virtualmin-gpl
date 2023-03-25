@@ -1029,6 +1029,18 @@ local $oldwd = $oldd->{'parent'} ? &get_domain($oldd->{'parent'}) : $oldd;
 if ($wd->{'webmin'}) {
 	&modify_webmin($wd, $oldwd);
 	}
+&refresh_reseller_user($d, $oldd);
+}
+
+# refresh_reseller_user(&domain, [&old-domain])
+# Update resellers
+sub refresh_reseller_user
+{
+local ($d, $oldd) = @_;
+my $has_oldd = $oldd ? 1 : 0;
+$oldd ||= $d;
+local $wd = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
+local $oldwd = $oldd->{'parent'} ? &get_domain($oldd->{'parent'}) : $oldd;
 if ($wd->{'reseller'} && $virtualmin_pro) {
 	# Update all resellers on the domain
 	foreach my $r (split(/\s+/, $wd->{'reseller'})) {
