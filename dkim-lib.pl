@@ -1065,6 +1065,7 @@ elsif ($selrec && join("", @{$selrec->{'values'}}) !~ /p=\Q$pubkey\E/) {
 		$val = 'k=rsa; t=s; p='.$pubkey;
 		}
 	$selrec->{'values'} = [ $val ];
+	&modify_dns_record($recs, $file, $selrec);
 	$changed++;
 	}
 return $changed;
