@@ -46,8 +46,7 @@ else {
 		}
 	}
 &update_extra_webmin($_[0]);
-&register_post_action(\&refresh_reseller_user, $_[0], undef)
-	if (&getvar('unix-user-created', $module_name));
+&register_post_action(\&refresh_reseller_user, $_[0]);
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
@@ -92,7 +91,6 @@ local %miniserv;
 &release_lock_webmin($_[0]);
 &register_post_action(\&restart_webmin);
 &$second_print($text{'setup_done'});
-&setvar('webmin-user-deleted', 1, $module_name);
 return 1;
 }
 

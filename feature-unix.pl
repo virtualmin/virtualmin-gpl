@@ -178,7 +178,6 @@ if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none' &&
 	}
 
 &release_lock_unix($_[0]);
-&setvar('unix-user-created', 1, $module_name);
 return 1;
 }
 
@@ -410,8 +409,7 @@ if (!$d->{'parent'}) {
 	&release_lock_cron($d);
 	}
 
-&register_post_action(\&refresh_reseller_user, $d, undef)
-	if (&getvar('webmin-user-deleted', $module_name));
+&register_post_action(\&refresh_reseller_user, $d);
 
 # Update any groups
 &build_denied_ssh_group(undef, $d);
