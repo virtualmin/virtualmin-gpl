@@ -7957,9 +7957,7 @@ if (!$dom->{'nocreationmail'}) {
 	}
 
 # Update the parent domain Webmin user
-if ($parentdom) {
-	&refresh_webmin_user($parentdom);
-	}
+&refresh_webmin_user($dom);
 
 if ($remote_user) {
 	# Add to this user's list of domains if needed
@@ -8673,11 +8671,8 @@ foreach my $dd (@alldoms) {
 	&$second_print($text{'setup_done'});
 
 	# Update the parent domain Webmin user, so that his ACL
-	# is refreshed
-	if ($dd->{'parent'} && $dd->{'parent'} != $d->{'id'}) {
-		local $parentdom = &get_domain($d->{'parent'});
-		&refresh_webmin_user($parentdom);
-		}
+	# is refreshed (and any resellers)
+	&refresh_webmin_user($dd);
 
 	# Call post script
 	&set_domain_envs($dd, "DELETE_DOMAIN");
