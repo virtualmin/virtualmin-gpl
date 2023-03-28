@@ -1318,6 +1318,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					&create_dns_record($recs, $file,
 						{ 'name' => $r,
 						  'type' => 'A',
+						  'proxied' => $proxied,
 						  'values' => [ $a ] });
 					$i++;
 					}
@@ -1355,12 +1356,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Add standard records we don't have yet
 	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot") {
 		if (!$already{$n} && $addrecs{$n}) {
-			my $p = $proxied && ($n eq $withdot ||
-					     $n eq "www.$withdot");
 			&create_dns_record($recs, $file,
 				{ 'name' => $n,
 				  'type' => 'A',
-				  'proxied' => $p,
+				  'proxied' => $proxied,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1375,6 +1374,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $ns,
 				  'type' => 'A',
+				  'proxied' => $proxied,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1386,6 +1386,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&create_dns_record($recs, $file,
 			{ 'name' => $n,
 			  'type' => 'A',
+			  'proxied' => $proxied,
 			  'values' => [ "127.0.0.1" ] });
 		}
 
@@ -1396,6 +1397,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&create_dns_record($recs, $file,
 			{ 'name' => $hn.".",
 			  'type' => 'A',
+			  'proxied' => $proxied,
 			  'values' => [ &get_default_ip() ] });
 		}
 
@@ -1453,6 +1455,7 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
 	local @tmplrecs = &text_to_dns_records($recstxt, $d->{'dom'});
 	foreach my $r (@tmplrecs) {
+		$r->{'proxied'} = $proxied;
 		&create_dns_record($recs, $file, $r);
 		}
 	}
