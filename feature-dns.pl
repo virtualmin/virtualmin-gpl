@@ -1639,7 +1639,6 @@ foreach my $r ('webmail', 'admin') {
 	if (($tmpl->{'web_'.$r} || $force) && (!$already || !$already->{$n})) {
 		my $r = { 'name' => $n,
 			  'type' => 'A',
-			  'proxied' => $tmpl->{'dns_cloud_proxy'},
 			  'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $r);
 		$count++;
