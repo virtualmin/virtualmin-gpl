@@ -858,7 +858,7 @@ my %dom;
 		'dns_ip', &get_dns_ip(),
 		'virt', 0,
 		'virtalready', 0,
-		'ip6', $ip6,
+		'ip6', $defip6,
 		'virt6', 0,
 		'virt6already', 0,
 		'pass', &random_password(),
