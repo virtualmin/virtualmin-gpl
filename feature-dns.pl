@@ -1160,16 +1160,20 @@ return @rv == 1 ? '"'.$rv[0].'"' :
 # Adds MX and mail.domain records to a DNS domain
 sub create_mail_records
 {
-local ($recs, $file, $d, $ip, $ip6) = @_;
+my ($recs, $file, $d, $ip, $ip6) = @_;
+my $tmpl = &get_template($d->{'template'});
+my $proxied = $tmpl->{'dns_cloud_proxy'};
 local $withdot = $d->{'dom'}.".";
 my $r = { 'name' => "mail.$withdot",
 	  'type' => "A",
+	  'proxied' => $proxied == 1 ? 1 : 0,
 	  'values' => [ $ip ] };
 my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
 &create_dns_record($recs, $file, $r) if (!$already);
 if ($d->{'ip6'} && $ip6) {
 	my $r = { 'name' => "mail.$withdot",
 		  'type' => "AAAA",
+		  'proxied' => $proxied == 1 ? 1 : 0,
 		  'values' => [ $ip6 ] };
 	my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
 	&create_dns_record($recs, $file, $r) if (!$already);
@@ -1318,7 +1322,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					&create_dns_record($recs, $file,
 						{ 'name' => $r,
 						  'type' => 'A',
-						  'proxied' => $proxied,
+						  'proxied' => $proxied == 1 ? 1 : 0,
 						  'values' => [ $a ] });
 					$i++;
 					}
@@ -1359,7 +1363,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $n,
 				  'type' => 'A',
-				  'proxied' => $proxied,
+				  'proxied' => $proxied ? 1 : 0,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1374,7 +1378,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $ns,
 				  'type' => 'A',
-				  'proxied' => $proxied,
+				  'proxied' => $proxied == 1 ? 1 : 0,
 				  'values' => [ $ip ] });
 			}
 		}
@@ -1386,7 +1390,6 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&create_dns_record($recs, $file,
 			{ 'name' => $n,
 			  'type' => 'A',
-			  'proxied' => $proxied,
 			  'values' => [ "127.0.0.1" ] });
 		}
 
@@ -1397,7 +1400,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		&create_dns_record($recs, $file,
 			{ 'name' => $hn.".",
 			  'type' => 'A',
-			  'proxied' => $proxied,
+			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ &get_default_ip() ] });
 		}
 
@@ -1455,7 +1458,7 @@ if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
 		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
 	local @tmplrecs = &text_to_dns_records($recstxt, $d->{'dom'});
 	foreach my $r (@tmplrecs) {
-		$r->{'proxied'} = $proxied;
+		$r->{'proxied'} = $proxied == 1 ? 1 : 0;
 		&create_dns_record($recs, $file, $r);
 		}
 	}
@@ -1773,7 +1776,7 @@ if ($star && !$r) {
 	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	$r = { 'name' => $withstar,
 	       'type' => 'A',
-	       'proxied' => $tmpl->{'dns_cloud_proxy'},
+	       'proxied' => $tmpl->{'dns_cloud_proxy'} == 1 ? 1 : 0,
 	       'values' => [ $ip ] };
 	&create_dns_record($recs, $file, $r);
 	$any++;
@@ -2890,13 +2893,18 @@ if (@clouds > 1) {
 	}
 print &ui_table_row(&hlink($text{'tmpl_dns_cloud'},
                            "template_dns_cloud"),
-	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds).
-	"<br>\n".
-	&ui_checkbox("dns_cloud_import", 1, $text{'tmpl_dns_cloud_import'},
-		     $tmpl->{'dns_cloud_import'}).
-	"<br>\n".
-	&ui_checkbox("dns_cloud_proxy", 1, $text{'tmpl_dns_cloud_proxy'},
-		     $tmpl->{'dns_cloud_proxy'}));
+	&ui_select("dns_cloud", $tmpl->{'dns_cloud'}, \@clouds));
+
+print &ui_table_row(&hlink($text{'tmpl_dns_cloud_import'},
+			   "template_dns_cloud_import"),
+	&ui_yesno_radio("dns_cloud_import", $tmpl->{'dns_cloud_import'}));
+
+print &ui_table_row(&hlink($text{'tmpl_dns_cloud_proxy'},
+			   "template_dns_cloud_proxy"),
+	&ui_radio("dns_cloud_proxy", $tmpl->{'dns_cloud_proxy'} || 0,
+		  [ [ 0, $text{'no'} ],
+		    [ 1, $text{'tmpl_dns_cloud_proxy1'} ],
+		    [ 2, $text{'tmpl_dns_cloud_proxy2'} ] ]));
 
 # Create on slave DNS servers
 local @slaves = &bind8::list_slave_servers();
