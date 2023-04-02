@@ -307,7 +307,9 @@ my @supp = &supported_php_modes();
 my %cannums = map { $mmap->{$_}, 1 } @supp;
 if (!$cannums{int($tmpl->{'web_php_suexec'})} && @supp) {
 	# Default mode cannot be used .. change to first that can
-	$tmpl->{'web_php_suexec'} = $mmap->{$supp[0]};
+	my @goodsupp = grep { $_ ne 'none' } @supp;
+	@goodsupp = @supp if (!@goodsupp);
+	$tmpl->{'web_php_suexec'} = $mmap->{$goodsupp[0]};
 	&save_template($tmpl);
 	}
 
