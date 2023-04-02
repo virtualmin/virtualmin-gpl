@@ -206,7 +206,7 @@ foreach my $pro_demo_feature
 	# Add demo Secondary Mail Servers link for GPL users 
 	{ 'name' => 'newmxs',
 	  'title' => $text{'newmxs_title'},
-	  'cat' => 'ip',
+	  'cat' => 'email',
 	  'url' => "https://virtualmin.com/professional/#newmxs",
 	},
 
