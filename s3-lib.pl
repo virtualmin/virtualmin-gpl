@@ -1065,7 +1065,27 @@ sub can_use_aws_creds
 {
 return 0 if (!&has_aws_cmd());
 my $zone;
-return &can_use_aws_cmd(undef, undef, $zone, \&call_aws_s3_cmd, "ls");
+my $ok = &can_use_aws_cmd(undef, undef, $zone, \&call_aws_s3_cmd, "ls");
+return 0 if (!$ok);
+my $cfile = "/root/.aws/credentials";
+return 1 if (!-r $cfile);	# Credentials magically work with no config,
+				# which means they are provided by EC2
+
+# Check if the config file says to get credentials from EC2 metadata
+my $lref = &read_file_lines($cfile, 1);
+my %defv;
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*\[(\S+)\]/) {
+		$indef = $1 eq "default" ? 1 : 0;
+		}
+	elsif ($l =~ /^\s*(\S+)\s*=\s*(\S+)/ && $indef) {
+		$defv{$1} = $2;
+		}
+	}
+if ($defv{'credential_source'} eq 'Ec2InstanceMetadata') {
+	return 1;
+	}
+return 0;
 }
 
 # can_use_aws_s3_cmd(access-key, secret-key, [default-zone])
