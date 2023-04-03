@@ -7314,6 +7314,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
 cloud_s3account=Using access key $1
+cloud_s3creds=Using system credentials
 cloud_rsuser=Using login $1
 cloud_s3_noawscli=We recommend installing the official AWS command line interface.
 cloud_s3_noawscli_install=<a href='$1'>Click here</a> to have it installed automatically.
@@ -7321,6 +7322,7 @@ cloud_s3_awscli_installing=Installing the AWS CLI package ..
 cloud_s3_awscli_title=Install AWS CLI
 cloud_s3_awscli_return=S3 form
 cloud_s3_akey=Default S3 login
+cloud_s3_creds=AWS credentials are already configured on this system
 cloud_noneset=None set
 cloud_below=Entered below ..
 cloud_s3_access=Access key

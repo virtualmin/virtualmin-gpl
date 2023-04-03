@@ -3987,7 +3987,8 @@ elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	# S3 with a username and password
 	@rv = (3, $2, $3, $4, $6, $1 eq "s3rrs" ? 1 : 0);
 	}
-elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ && $config{'s3_akey'} &&
+elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ &&
+       ($config{'s3_akey'} || &can_use_aws_creds()) &&
        &can_use_cloud("s3")) {
 	# S3 with the default login
 	return (3, $config{'s3_akey'}, $config{'s3_skey'}, $2, $4,
@@ -4295,12 +4296,14 @@ if (&can_use_cloud("s3")) {
 	$s3pass ||= $config{'s3_skey'};
 	}
 local $st = &$tablestart('s3');
-$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
-       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
-       "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
-       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
-       "</td> </tr>\n";
+if ($s3user || !&can_use_aws_creds()) {
+	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
+	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
+	       "</td> </tr>\n";
+	$st .= "<tr> <td>$text{'backup_skey'}</td> <td>".
+	       &ui_password($name."_skey", $s3pass, 40, 0, undef, $noac).
+	       "</td> </tr>\n";
+	}
 $st .= "<tr> <td>$text{'backup_s3path'}</td> <td>".
        &ui_textbox($name."_s3path", $mode != 3 ? "" :
 				    $server.($path ? "/".$path : ""), 50).
@@ -4489,11 +4492,16 @@ elsif ($mode == 3) {
 	$in{$name.'_s3path'} =~ /\\/ && &error($text{'backup_es3pathslash'});
 	($in{$name.'_s3path'} =~ /^\// || $in{$name.'_s3path'} =~ /\/$/) &&
 		&error($text{'backup_es3path2'});
-	$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
-	$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
 	local $proto = $in{$name.'_rrs'} ? 's3rrs' : 's3';
-	return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}."\@".
-	       $in{$name.'_s3path'};
+	if (!&can_use_aws_creds()) {
+		$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
+		$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
+		return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}.
+		       "\@".$in{$name.'_s3path'};
+		}
+	else {
+		return $proto."://".$in{$name.'_s3path'};
+		}
 	}
 elsif ($mode == 4) {
 	# Just download

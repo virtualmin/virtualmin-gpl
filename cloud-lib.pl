@@ -67,6 +67,11 @@ if ($config{'s3_akey'}) {
 				 "<tt>$config{'s3_akey'}</tt>"),
 	       };
 	}
+elsif (&can_use_aws_creds()) {
+	return { 'ok' => 1,
+		 'desc' => $text{'cloud_s3creds'},
+	       };
+	}
 else {
 	return { 'ok' => 0 };
 	}
@@ -77,14 +82,22 @@ sub cloud_s3_show_inputs
 my $rv;
 
 # Default login
-$rv .= &ui_table_row($text{'cloud_s3_akey'},
-	&ui_radio("s3_akey_def", $config{'s3_akey'} ? 0 : 1,
-		  [ [ 1, $text{'cloud_noneset'} ],
-		    [ 0, $text{'cloud_below'} ] ])."<br>\n".
-	&ui_grid_table([ "<b>$text{'cloud_s3_access'}</b>",
-		         &ui_textbox("s3_akey", $config{'s3_akey'}, 50),
-		         "<b>$text{'cloud_s3_secret'}</b>",
-                         &ui_textbox("s3_skey", $config{'s3_skey'}, 50) ], 2));
+if (!$config{'s3_akey'} && &can_use_aws_creds()) {
+	# Tell the user that credentials are already setup
+	$rv .= &ui_table_row($text{'cloud_s3_akey'},
+			     "<i>$text{'cloud_s3_creds'}</i>");
+	}
+else {
+	# Prompt for login
+	$rv .= &ui_table_row($text{'cloud_s3_akey'},
+		&ui_radio("s3_akey_def", $config{'s3_akey'} ? 0 : 1,
+			  [ [ 1, $text{'cloud_noneset'} ],
+			    [ 0, $text{'cloud_below'} ] ])."<br>\n".
+		&ui_grid_table([ "<b>$text{'cloud_s3_access'}</b>",
+			 &ui_textbox("s3_akey", $config{'s3_akey'}, 50),
+			 "<b>$text{'cloud_s3_secret'}</b>",
+			 &ui_textbox("s3_skey", $config{'s3_skey'}, 50) ], 2));
+	}
 
 # S3 endpoint hostname, for non-amazon implementations
 $rv .= &ui_table_row($text{'cloud_s3_endpoint'},
@@ -110,15 +123,17 @@ sub cloud_s3_parse_inputs
 my ($in) = @_;
 
 # Parse default login
-if ($in->{'s3_akey_def'}) {
-	delete($config{'s3_akey'});
-	delete($config{'s3_skey'});
-	}
-else {
-	$in->{'s3_akey'} =~ /^\S+$/ || &error($text{'backup_eakey'});
-	$in->{'s3_skey'} =~ /^\S+$/ || &error($text{'backup_eskey'});
-	$config{'s3_akey'} = $in->{'s3_akey'};
-	$config{'s3_skey'} = $in->{'s3_skey'};
+if ($config{'s3_akey'} || !&can_use_aws_creds()) {
+	if ($in->{'s3_akey_def'}) {
+		delete($config{'s3_akey'});
+		delete($config{'s3_skey'});
+		}
+	else {
+		$in->{'s3_akey'} =~ /^\S+$/ || &error($text{'backup_eakey'});
+		$in->{'s3_skey'} =~ /^\S+$/ || &error($text{'backup_eskey'});
+		$config{'s3_akey'} = $in->{'s3_akey'};
+		$config{'s3_skey'} = $in->{'s3_skey'};
+		}
 	}
 
 # Parse endpoint hostname

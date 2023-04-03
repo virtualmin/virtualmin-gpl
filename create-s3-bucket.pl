@@ -53,8 +53,10 @@ while(@ARGV > 0) {
 	}
 $akey ||= $config{'s3_akey'};
 $skey ||= $config{'s3_skey'};
-$akey || &usage("Missing --access-key parameter");
-$skey || &usage("Missing --secret-key parameter");
+if (!&can_use_aws_creds()) {
+	$akey || &usage("Missing --access-key parameter");
+	$skey || &usage("Missing --secret-key parameter");
+	}
 $bucket || &usage("Missing --bucket parameter");
 
 # Try the upload

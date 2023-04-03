@@ -10,15 +10,12 @@ sub check_s3
 {
 # Return no error if `aws_cmd` is set and installed
 if (&has_aws_cmd()) {
-	if ($config{'s3_akey'}) {
-		my ($ok, $err) = &can_use_aws_s3_cmd(
-			$config{'s3_akey'}, $config{'s3_skey'});
-		if (!$ok) {
-			return (undef, &text('s3_eawscmd',
-					"<tt>".&html_escape($err)."</tt>"));
-			}
+	my ($ok, $err) = &can_use_aws_s3_cmd(
+		$config{'s3_akey'}, $config{'s3_skey'});
+	if (!$ok) {
+		return (undef, &text('s3_eawscmd',
+				"<tt>".&html_escape($err)."</tt>"));
 		}
-	return (undef, undef);
 	}
 
 # Check for core S3 modules
@@ -544,27 +541,25 @@ sub s3_list_domains
 {
 my ($akey, $skey, $bucket, $path) = @_;
 &require_s3();
-my $conn = &make_s3_connection($akey, $skey);
-return $text{'s3_econn'} if (!$conn);
-
-my $response = $conn->list_bucket($bucket);
-if ($response->http_response->code != 200) {
-	return &text('s3_elist2', &extract_s3_message($response));
+my $files = &s3_list_files($akey, $skey, $bucket);
+if (!ref($files)) {     
+	return &text('s3_elist2', $files);
 	}
 my $rv = { };
-foreach my $f (@{$response->entries}) {
+foreach my $f (@$files) {
 	if ($f->{'Key'} =~ /^(\S+)\.dom$/ && $path eq $1 ||
 	    $f->{'Key'} =~ /^([^\/\s]+)\.dom$/ && !$path ||
 	    $f->{'Key'} =~ /^((\S+)\/([^\/]+))\.dom$/ && $path && $path eq $2){
 		# Found a valid .dom file .. get it
 		my $bfile = $1;
-		my ($bentry) = grep { $_->{'Key'} eq $bfile }
-				  @{$response->entries};
-		next if (!$bentry);	# No actual backup file found!
-		my $gresponse = $conn->get($bucket, $f->{'Key'});
-		if ($gresponse->http_response->code == 200) {
+		my ($bentry) = grep { $_->{'Key'} eq $bfile } @$files;
+		next if (!$bentry);     # No actual backup file found!
+		my $temp = &transname();
+		my $err = &s3_download($akey, $skey, $bucket,
+				       $f->{'Key'}, $temp);
+		if (!$err) {
 			my $dom = &unserialise_variable(
-				$gresponse->object->data);
+					&read_file_contents($temp));
 			foreach my $dname (keys %$dom) {
 				$rv->{$dname} = $dom->{$dname};
 				}
@@ -615,25 +610,45 @@ sub s3_get_bucket
 {
 &require_s3();
 my ($akey, $skey, $bucket) = @_;
-my %rv;
-my $conn = &make_s3_connection($akey, $skey);
-my $response = $conn->get_bucket_location($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'location'} = $response->{'LocationConstraint'};
+if (&can_use_aws_s3_cmd($akey, $skey)) {
+	# Use the S3 API command
+	my %rv;
+	my $out = &call_aws_s3api_cmd($akey,
+		[ "get-bucket-location", "--bucket", $bucket ], undef, 1);
+	$rv->{'location'} = $out->{'LocationConstraint'} if (ref($out));
+	my $out = &call_aws_s3api_cmd($akey,
+		[ "get-bucket-logging", "--bucket", $bucket ], undef, 1);
+	$rv->{'logging'} = $out->{'BucketLoggingStatus'} if (ref($out));
+	my $out = &call_aws_s3api_cmd($akey,
+		[ "get-bucket-acl", "--bucket", $bucket ], undef, 1);
+	$rv->{'acl'} = $out->{'AccessControlPolicy'} if (ref($out));
+	my $out = &call_aws_s3api_cmd($akey,
+		[ "get-bucket-lifecycle-configuration", "--bucket", $bucket ], undef, 1);
+	$rv->{'lifecycle'} = $out->{'LifecycleConfiguration'} if (ref($out));
+	return \%rv;
 	}
-$response = $conn->get_bucket_logging($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'logging'} = $response->{'BucketLoggingStatus'};
+else {
+	# Make an HTTP API call
+	my %rv;
+	my $conn = &make_s3_connection($akey, $skey);
+	my $response = $conn->get_bucket_location($bucket);
+	if ($response->http_response->code == 200) {
+		$rv{'location'} = $response->{'LocationConstraint'};
+		}
+	$response = $conn->get_bucket_logging($bucket);
+	if ($response->http_response->code == 200) {
+		$rv{'logging'} = $response->{'BucketLoggingStatus'};
+		}
+	$response = $conn->get_bucket_acl($bucket);
+	if ($response->http_response->code == 200) {
+		$rv{'acl'} = $response->{'AccessControlPolicy'};
+		}
+	$response = $conn->get_bucket_lifecycle($bucket);
+	if ($response->http_response->code == 200) {
+		$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
+		}
+	return \%rv;
 	}
-$response = $conn->get_bucket_acl($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'acl'} = $response->{'AccessControlPolicy'};
-	}
-$response = $conn->get_bucket_lifecycle($bucket);
-if ($response->http_response->code == 200) {
-	$rv{'lifecycle'} = $response->{'LifecycleConfiguration'};
-	}
-return \%rv;
 }
 
 # s3_put_bucket_acl(access-key, secret-key, bucket, &acl)
@@ -1043,6 +1058,16 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 	"me-south-1", "sa-east-1");
 }
 
+# can_use_aws_creds()
+# Returns 1 if the AWS command can be used with local credentials, such as on
+# an EC2 instance with IAM
+sub can_use_aws_creds
+{
+return 0 if (!&has_aws_cmd());
+my $zone;
+return &can_use_aws_cmd(undef, undef, $zone, \&call_aws_s3_cmd, "ls");
+}
+
 # can_use_aws_s3_cmd(access-key, secret-key, [default-zone])
 # Returns 1 if the aws command can be used to access S3
 sub can_use_aws_s3_cmd
@@ -1057,41 +1082,51 @@ return &can_use_aws_cmd($akey, $skey, $zone, \&call_aws_s3_cmd, "ls");
 sub can_use_aws_cmd
 {
 my ($akey, $skey, $zone, $func, @cmd) = @_;
+my $acachekey = $akey || "none";
 if (!&has_aws_cmd()) {
 	return wantarray ? (0, "The <tt>aws</tt> command is not installed") : 0;
 	}
-if (defined($can_use_aws_cmd_cache{$akey})) {
-	return wantarray ? @{$can_use_aws_cmd_cache{$akey}}
-			 : $can_use_aws_cmd_cache{$akey}->[0];
+if (defined($can_use_aws_cmd_cache{$acachekey})) {
+	return wantarray ? @{$can_use_aws_cmd_cache{$acachekey}}
+			 : $can_use_aws_cmd_cache{$acachekey}->[0];
 	}
 my $out = &$func($akey, @cmd);
 if ($? || $out =~ /Unable to locate credentials/i ||
 	  $out =~ /could not be found/) {
 	# Credentials profile hasn't been setup yet
-	my $temp = &transname();
-	&open_tempfile(TEMP, ">$temp");
-	&print_tempfile(TEMP, $akey,"\n");
-	&print_tempfile(TEMP, $skey,"\n");
-	&print_tempfile(TEMP, $zone,"\n");
-	&print_tempfile(TEMP, "\n");
-	&close_tempfile(TEMP);
-	my $aws = $config{'aws_cmd'} || "aws";
-	$out = &backquote_command(
-		"$aws configure --profile=".quotemeta($akey).
-		" <$temp 2>&1");
-	my $ex = $?;
-	if (!$ex) {
-		# Test again to make sure it worked
-		$out = &$func($akey, @cmd);
-		$ex = $?;
-		}
-	if ($ex) {
-		# Profile setup failed!
-		$can_use_aws_cmd_cache{$akey} = [0, $out];
+	if (!$akey) {
+		# No access key was given, and default credentials don't work
+		my $err = "No default AWS credentials have been configured";
+		$can_use_aws_cmd_cache{$acachekey} = [0, $err];
 		return wantarray ? (0, $out) : 0;
 		}
+	else {
+		# Try to create a profile with the given credentials
+		my $temp = &transname();
+		&open_tempfile(TEMP, ">$temp");
+		&print_tempfile(TEMP, $akey,"\n");
+		&print_tempfile(TEMP, $skey,"\n");
+		&print_tempfile(TEMP, $zone,"\n");
+		&print_tempfile(TEMP, "\n");
+		&close_tempfile(TEMP);
+		my $aws = $config{'aws_cmd'} || "aws";
+		$out = &backquote_command(
+			"$aws configure --profile=".quotemeta($akey).
+			" <$temp 2>&1");
+		my $ex = $?;
+		if (!$ex) {
+			# Test again to make sure it worked
+			$out = &$func($akey, @cmd);
+			$ex = $?;
+			}
+		if ($ex) {
+			# Profile setup failed!
+			$can_use_aws_cmd_cache{$acachekey} = [0, $out];
+			return wantarray ? (0, $out) : 0;
+			}
+		}
 	}
-$can_use_aws_cmd_cache{$akey} = [1, undef];
+$can_use_aws_cmd_cache{$acachekey} = [1, undef];
 return wantarray ? (1, undef) : 1;
 }
 
@@ -1102,6 +1137,23 @@ sub call_aws_s3_cmd
 my ($akey, $params, $endpoint) = @_;
 $endpoint ||= $config{'s3_endpoint'};
 return &call_aws_cmd($akey, "s3", $params, $endpoint);
+}
+
+# call_aws_s3api_cmd(akey, params, [endpoint], [parse-json])
+# Run the aws command for s3api with some params, and return output
+sub call_aws_s3api_cmd
+{
+my ($akey, $params, $endpoint, $json) = @_;
+$endpoint ||= $config{'s3_endpoint'};
+my $out = &call_aws_cmd($akey, "s3api", $params, $endpoint);
+if (!$? && $json) {
+	eval "use JSON::PP";
+	my $coder = JSON::PP->new->pretty;
+	eval {
+		$out = $coder->decode($out);
+		};
+	}
+return $out;
 }
 
 # call_aws_cmd(akey, command, params, endpoint)
@@ -1119,7 +1171,8 @@ if (ref($params)) {
 my $aws = $config{'aws_cmd'} || "aws";
 my ($out, $err);
 &execute_command(
-	"TZ=GMT $aws $cmd --profile=".quotemeta($akey)." ".
+	"TZ=GMT $aws $cmd ".
+	($akey ? "--profile=".quotemeta($akey)." " : "").
 	$endpoint_param." ".$params, undef, \$out, \$err);
 return $out if (!$?);
 return $err || $out;
