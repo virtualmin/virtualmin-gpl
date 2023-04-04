@@ -869,6 +869,7 @@ my %dom;
 		'plan', $plan->{'id'},
 		'prefix', $prefix,
 		'nocreationmail', 1,
+		'nowebmailredirect', 1,
 		'hashpass', 0,
 		'defaultdomain', 1,
         );
