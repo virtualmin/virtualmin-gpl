@@ -7654,11 +7654,13 @@ dnscloud_url=DNS provider's website
 dnscloud_users=Used by virtual servers
 dnscloud_nousers=None yet
 dnscloud_route53_location=Default zone location
+dnscloud_route53_def=Same as this EC2 instance
 dnscloud_route53_longdesc=The credentials on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
 dnscloud_err=Failed to save cloud DNS provider
 dnscloud_egone=Provider does not exist!
 dnscloud_eawscreds=AWS credentials are not valid : $1
 dnscloud_clear=Delete Credentials
+dnscloud_eawsregion=No AWS region selected!
 
 dnscloud_cloudflare_email=Cloudflare account address
 dnscloud_cloudflare_apikey=Cloudflare API key

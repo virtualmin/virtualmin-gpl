@@ -84,7 +84,14 @@ if ($config{'route53_akey'}) {
                                  "<tt>$config{'route53_akey'}</tt>"),
 	       };
 	}
-return { 'ok' => 0 };
+elsif (&can_use_aws_s3_creds()) {
+        return { 'ok' => 1,
+                 'desc' => $text{'cloud_s3creds'},
+               };
+        }
+else {
+	return { 'ok' => 0 };
+	}
 }
 
 # dnscloud_route53_show_inputs()
@@ -94,15 +101,24 @@ sub dnscloud_route53_show_inputs
 my $rv;
 
 # AWS login
-$rv .= &ui_table_row($text{'cloud_s3_access'},
-	&ui_textbox("route53_akey", $config{'route53_akey'}, 50));
-$rv .= &ui_table_row($text{'cloud_s3_secret'},
-	&ui_textbox("route53_skey", $config{'route53_skey'}, 50));
+if (!$config{'route53_akey'} && &can_use_aws_route53_creds()) {
+	$rv .= &ui_table_row($text{'cloud_s3_access'},
+		"<i>$text{'cloud_s3_creds'}</i>");
+	}
+else {
+	$rv .= &ui_table_row($text{'cloud_s3_access'},
+		&ui_textbox("route53_akey", $config{'route53_akey'}, 50));
+	$rv .= &ui_table_row($text{'cloud_s3_secret'},
+		&ui_textbox("route53_skey", $config{'route53_skey'}, 50));
+	}
 
 # Default location for zones
+my @locs = &s3_list_locations();
+if (&get_ec2_aws_region()) {
+	unshift(@locs, [ "", $text{'dnscloud_route53_def'} ]);
+	}
 $rv .= &ui_table_row($text{'dnscloud_route53_location'},
-	&ui_select("route53_location", $config{'route53_location'},
-		   [ &s3_list_locations() ]));
+	&ui_select("route53_location", $config{'route53_location'}, \@locs));
 
 return $rv;
 }
@@ -114,18 +130,24 @@ sub dnscloud_route53_parse_inputs
 my ($in) = @_;
 
 # Parse default login
-if ($in->{'route53_akey_def'}) {
-	delete($config{'route53_akey'});
-	delete($config{'route53_skey'});
-	}
-else {
-	$in->{'route53_akey'} =~ /^\S+$/ || &error($text{'backup_eakey'});
-	$in->{'route53_skey'} =~ /^\S+$/ || &error($text{'backup_eskey'});
-	$config{'route53_akey'} = $in->{'route53_akey'};
-	$config{'route53_skey'} = $in->{'route53_skey'};
+if ($config{'route53_akey'} || !&can_use_aws_route53_creds()) {
+	if ($in->{'route53_akey_def'}) {
+		delete($config{'route53_akey'});
+		delete($config{'route53_skey'});
+		}
+	else {
+		$in->{'route53_akey'} =~ /^\S+$/ ||
+			&error($text{'backup_eakey'});
+		$in->{'route53_skey'} =~ /^\S+$/ ||
+			&error($text{'backup_eskey'});
+		$config{'route53_akey'} = $in->{'route53_akey'};
+		$config{'route53_skey'} = $in->{'route53_skey'};
+		}
 	}
 
 # Parse new bucket location
+$in->{'route53_location'} || &get_ec2_aws_region() ||
+	&error($text{'dnscloud_eawsregion'});
 $config{'route53_location'} = $in->{'route53_location'};
 
 # Validate that they work
@@ -399,6 +421,7 @@ sub call_route53_cmd
 {
 my ($akey, $params, $region, $json) = @_;
 $region ||= $config{'route53_location'};
+$region ||= &get_ec2_aws_region();
 $params ||= [];
 unshift(@$params, "--region", $region);
 my $out = &call_aws_cmd($akey, "route53", $params, undef);
@@ -424,6 +447,18 @@ sub can_use_aws_route53_cmd
 {
 my ($akey, $skey, $region) = @_;
 return &can_use_aws_cmd($akey, $skey, $zone, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
+}
+
+# can_use_aws_route53_creds()
+# Returns 1 if the AWS command can be used with local credentials, such as on
+# an EC2 instance with IAM
+sub can_use_aws_route53_creds
+{
+return 0 if (!&has_aws_cmd());
+my $region = &get_ec2_aws_region() || "us-east1";
+my $ok = &can_use_aws_cmd(undef, undef, undef, \&call_route53_cmd, [ "list-hosted-zones" ], $region);
+return 0 if (!$ok);
+return &has_aws_ec2_creds() ? 1 : 0;
 }
 
 1;

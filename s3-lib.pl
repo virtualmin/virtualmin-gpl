@@ -1064,28 +1064,9 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 sub can_use_aws_s3_creds
 {
 return 0 if (!&has_aws_cmd());
-my $zone;
-my $ok = &can_use_aws_cmd(undef, undef, $zone, \&call_aws_s3_cmd, "ls");
+my $ok = &can_use_aws_cmd(undef, undef, undef, \&call_aws_s3_cmd, "ls");
 return 0 if (!$ok);
-my $cfile = "/root/.aws/credentials";
-return 1 if (!-r $cfile);	# Credentials magically work with no config,
-				# which means they are provided by EC2
-
-# Check if the config file says to get credentials from EC2 metadata
-my $lref = &read_file_lines($cfile, 1);
-my %defv;
-foreach my $l (@$lref) {
-	if ($l =~ /^\s*\[(\S+)\]/) {
-		$indef = $1 eq "default" ? 1 : 0;
-		}
-	elsif ($l =~ /^\s*(\S+)\s*=\s*(\S+)/ && $indef) {
-		$defv{$1} = $2;
-		}
-	}
-if ($defv{'credential_source'} eq 'Ec2InstanceMetadata') {
-	return 1;
-	}
-return 0;
+return &has_aws_ec2_creds() ? 1 : 0;
 }
 
 # can_use_aws_s3_cmd(access-key, secret-key, [default-zone])
@@ -1204,6 +1185,41 @@ sub has_aws_cmd
 {
 my ($cmd) = &split_quoted_string($config{'aws_cmd'} || "aws");
 return &has_command($cmd);
+}
+
+# has_aws_ec2_creds()
+# Check if the config file says to get credentials from EC2 metadata
+sub has_aws_ec2_creds
+{
+my $cfile = "/root/.aws/credentials";
+return 2 if (!-r $cfile);	# Credentials magically work with no config,
+				# which means they are provided by EC2
+my $lref = &read_file_lines($cfile, 1);
+my %defv;
+foreach my $l (@$lref) {
+	if ($l =~ /^\s*\[(\S+)\]/) {
+		$indef = $1 eq "default" ? 1 : 0;
+		}
+	elsif ($l =~ /^\s*(\S+)\s*=\s*(\S+)/ && $indef) {
+		$defv{$1} = $2;
+		}
+	}
+if ($defv{'credential_source'} eq 'Ec2InstanceMetadata') {
+	return 1;
+	}
+return 0;
+}
+
+# get_ec2_aws_region()
+# If we're hosted on EC2, return the region name
+sub get_ec2_aws_region
+{
+my ($out, $err);
+&http_download("169.254.169.254", 80,
+	       "/latest/dynamic/instance-identity/document", \$out, \$err,
+	       undef, 0, undef, undef, 1);
+return undef if ($err);
+return $out =~ /"region"\s*:\s*"(\S+)"/ ? $1 : undef;
 }
 
 1;
