@@ -18,7 +18,7 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "4.1.7", "4.0.10", "3.2.18", "2.2.28" );
+return ( "4.2", "4.1.7", "3.2.18", "2.2.28" );
 }
 
 sub script_django_can_upgrade
@@ -515,8 +515,8 @@ sub script_django_latest
 {
 local ($ver) = @_;
 return ( "http://www.djangoproject.com/download/",
-	 $ver >= 4.1 ? "Django-([0-9\\.]+)\\.tar\\.gz" :
-	 $ver >= 4.0 ? "Django-(4\\.0\\.[0-9\\.]+)\\.tar\\.gz" :
+	 $ver >= 4.2 ? "Django-([0-9\\.]+)\\.tar\\.gz" :
+	 $ver >= 4.1 ? "Django-(4\\.1\\.[0-9\\.]+)\\.tar\\.gz" :
 	 $ver >= 3.1 ? "Django-(3\\.[0-9\\.]+)\\.tar\\.gz" :
 	 $ver >= 2.2 ? "Django-(2\\.[0-9\\.]+)\\.tar\\.gz" 
 		     : "Django-(1\\.[0-9\\.]+)\\.tar\\.gz" );
