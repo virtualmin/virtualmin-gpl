@@ -3988,7 +3988,7 @@ elsif ($url =~ /^(s3|s3rrs):\/\/([^:]*):([^\@]*)\@([^\/]+)(\/(.*))?$/) {
 	@rv = (3, $2, $3, $4, $6, $1 eq "s3rrs" ? 1 : 0);
 	}
 elsif ($url =~ /^(s3|s3rrs):\/\/([^\/]+)(\/(.*))?$/ &&
-       ($config{'s3_akey'} || &can_use_aws_creds()) &&
+       ($config{'s3_akey'} || &can_use_aws_s3_creds()) &&
        &can_use_cloud("s3")) {
 	# S3 with the default login
 	return (3, $config{'s3_akey'}, $config{'s3_skey'}, $2, $4,
@@ -4296,7 +4296,7 @@ if (&can_use_cloud("s3")) {
 	$s3pass ||= $config{'s3_skey'};
 	}
 local $st = &$tablestart('s3');
-if ($s3user || !&can_use_aws_creds()) {
+if ($s3user || !&can_use_aws_s3_creds()) {
 	$st .= "<tr> <td>$text{'backup_akey'}</td> <td>".
 	       &ui_textbox($name."_akey", $s3user, 40, 0, undef, $noac).
 	       "</td> </tr>\n";
@@ -4493,7 +4493,7 @@ elsif ($mode == 3) {
 	($in{$name.'_s3path'} =~ /^\// || $in{$name.'_s3path'} =~ /\/$/) &&
 		&error($text{'backup_es3path2'});
 	local $proto = $in{$name.'_rrs'} ? 's3rrs' : 's3';
-	if (!&can_use_aws_creds()) {
+	if (!&can_use_aws_s3_creds()) {
 		$in{$name.'_akey'} =~ /^\S+$/i || &error($text{'backup_eakey'});
 		$in{$name.'_skey'} =~ /^\S+$/i || &error($text{'backup_eskey'});
 		return $proto."://".$in{$name.'_akey'}.":".$in{$name.'_skey'}.

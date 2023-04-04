@@ -67,7 +67,7 @@ if ($config{'s3_akey'}) {
 				 "<tt>$config{'s3_akey'}</tt>"),
 	       };
 	}
-elsif (&can_use_aws_creds()) {
+elsif (&can_use_aws_s3_creds()) {
 	return { 'ok' => 1,
 		 'desc' => $text{'cloud_s3creds'},
 	       };
@@ -82,7 +82,7 @@ sub cloud_s3_show_inputs
 my $rv;
 
 # Default login
-if (!$config{'s3_akey'} && &can_use_aws_creds()) {
+if (!$config{'s3_akey'} && &can_use_aws_s3_creds()) {
 	# Tell the user that credentials are already setup
 	$rv .= &ui_table_row($text{'cloud_s3_akey'},
 			     "<i>$text{'cloud_s3_creds'}</i>");
@@ -123,7 +123,7 @@ sub cloud_s3_parse_inputs
 my ($in) = @_;
 
 # Parse default login
-if ($config{'s3_akey'} || !&can_use_aws_creds()) {
+if ($config{'s3_akey'} || !&can_use_aws_s3_creds()) {
 	if ($in->{'s3_akey_def'}) {
 		delete($config{'s3_akey'});
 		delete($config{'s3_skey'});

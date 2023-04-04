@@ -1058,10 +1058,10 @@ return ("us-east-1", "us-east-2", "us-west-1", "us-west-2", "af-south-1",
 	"me-south-1", "sa-east-1");
 }
 
-# can_use_aws_creds()
+# can_use_aws_s3_creds()
 # Returns 1 if the AWS command can be used with local credentials, such as on
 # an EC2 instance with IAM
-sub can_use_aws_creds
+sub can_use_aws_s3_creds
 {
 return 0 if (!&has_aws_cmd());
 my $zone;
