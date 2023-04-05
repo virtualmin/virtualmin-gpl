@@ -2782,6 +2782,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Almacenamiento de blobs de Azure
 cloud_s3account=Usando la tecla de acceso $1
+cloud_s3creds=Uso de credenciales de EC2
 cloud_rsuser=Usando login $1
 cloud_s3_noawscli=Se recomienda tener instalada la interfaz de línea de comandos oficial de AWS.
 cloud_s3_noawscli_install=<a href='$1'>Haga clic aquí</a> para que se instale automáticamente.
@@ -2789,6 +2790,7 @@ cloud_s3_awscli_installing=Instalación del paquete AWS CLI ..
 cloud_s3_awscli_title=Instalar la CLI de AWS
 cloud_s3_awscli_return=formulario S3
 cloud_s3_akey=Inicio de sesión S3 predeterminado
+cloud_s3_creds=Las credenciales de AWS ya están disponibles en este sistema desde los metadatos de EC2
 cloud_noneset=Ninguno establecido
 cloud_below=Entró a continuación ..
 cloud_s3_access=Llave de acceso
@@ -3067,11 +3069,13 @@ dnscloud_url=Sitio web del proveedor de DNS
 dnscloud_users=Usado por servidores virtuales
 dnscloud_nousers=Ninguno aún
 dnscloud_route53_location=Ubicación de la zona predeterminada
+dnscloud_route53_def=Igual que esta instancia EC2
 dnscloud_route53_longdesc=Las credenciales de esta página se pueden encontrar en la página Credenciales de seguridad de su cuenta en la <a href=https://console.aws.amazon.com/ target=_blank>Consola de AWS</a>.
 dnscloud_err=No se pudo guardar el proveedor de DNS en la nube
 dnscloud_egone=¡El proveedor no existe!
 dnscloud_eawscreds=Las credenciales de AWS no son válidas
 dnscloud_clear=Eliminar credenciales
+dnscloud_eawsregion=¡No se seleccionó ninguna región de AWS!
 
 dnscloud_cloudflare_email=Dirección de la cuenta de Cloudflare
 dnscloud_cloudflare_apikey=Clave de API de Cloudflare

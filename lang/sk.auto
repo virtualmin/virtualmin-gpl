@@ -7314,6 +7314,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
 cloud_s3account=Pomocou prístupového kľúča $1
+cloud_s3creds=Pomocou poverení EC2
 cloud_rsuser=Použitie prihlásenia $1
 cloud_s3_noawscli=Odporúča sa mať nainštalované oficiálne rozhranie príkazového riadka AWS.
 cloud_s3_noawscli_install=<a href='$1'>Kliknutím sem</a> sa automaticky nainštaluje.
@@ -7321,6 +7322,7 @@ cloud_s3_awscli_installing=Inštalácia balíka AWS CLI ..
 cloud_s3_awscli_title=Nainštalujte AWS CLI
 cloud_s3_awscli_return=formulár S3
 cloud_s3_akey=Predvolené prihlásenie S3
+cloud_s3_creds=Poverenia AWS sú už v tomto systéme dostupné z metadát EC2
 cloud_noneset=Žiadne nastavené
 cloud_below=Zadané nižšie ..
 cloud_s3_access=Prístupový kľúč
@@ -7652,11 +7654,13 @@ dnscloud_url=Webová stránka poskytovateľa DNS
 dnscloud_users=Používané virtuálnymi servermi
 dnscloud_nousers=Zatiaľ žiadne
 dnscloud_route53_location=Predvolené umiestnenie zóny
+dnscloud_route53_def=Rovnaké ako táto inštancia EC2
 dnscloud_route53_longdesc=Prihlasovacie údaje na tejto stránke nájdete na stránke Bezpečnostné poverenia svojho účtu v <a href=https://console.aws.amazon.com/ target=_blank>konzole AWS</a>.
 dnscloud_err=Poskytovateľa cloudového DNS sa nepodarilo uložiť
 dnscloud_egone=Poskytovateľ neexistuje!
 dnscloud_eawscreds=Poverenia AWS nie sú platné : $1
 dnscloud_clear=Odstrániť poverenia
+dnscloud_eawsregion=Nie je vybratá žiadna oblasť AWS!
 
 dnscloud_cloudflare_email=Adresa účtu Cloudflare
 dnscloud_cloudflare_apikey=Kľúč API Cloudflare

@@ -7314,6 +7314,7 @@ cloud_dropboxdesc=ドロップボックス
 cloud_bbdesc=バックブレイズ
 cloud_azdesc=Azure ブロブ ストレージ
 cloud_s3account=アクセスキー $1を使用しています
+cloud_s3creds=EC2 クレデンシャルの使用
 cloud_rsuser=ログイン $1を使用
 cloud_s3_noawscli=公式のAWSコマンドラインインターフェースをインストールすることをお勧めします。
 cloud_s3_noawscli_install=<a href='$1'>ここをクリック</a>すると、自動的にインストールされます。
@@ -7321,6 +7322,7 @@ cloud_s3_awscli_installing=AWSCLIパッケージのインストール ..
 cloud_s3_awscli_title=AWSCLIをインストールします
 cloud_s3_awscli_return=S3フォーム
 cloud_s3_akey=デフォルトのS3ログイン
+cloud_s3_creds=AWS クレデンシャルは、EC2 メタデータからこのシステムですでに利用可能です
 cloud_noneset=設定なし
 cloud_below=以下に入力します。
 cloud_s3_access=アクセスキー
@@ -7652,11 +7654,13 @@ dnscloud_url=DNSプロバイダーのWebサイト
 dnscloud_users=仮想サーバーで使用
 dnscloud_nousers=まだありません
 dnscloud_route53_location=デフォルトのゾーンの場所
+dnscloud_route53_def=この EC2 インスタンスと同じ
 dnscloud_route53_longdesc=このページのクレデンシャルは、<a href=https://console.aws.amazon.com/ target=_blank>AWSコンソール</a>のアカウントの[セキュリティクレデンシャル]ページにあります。
 dnscloud_err=クラウドDNSプロバイダーの保存に失敗しました
 dnscloud_egone=プロバイダーが存在しません！
 dnscloud_eawscreds=AWS認証情報が無効です
 dnscloud_clear=資格情報を削除する
+dnscloud_eawsregion=AWS リージョンが選択されていません!
 
 dnscloud_cloudflare_email=Cloudflareアカウントアドレス
 dnscloud_cloudflare_apikey=CloudflareAPIキー

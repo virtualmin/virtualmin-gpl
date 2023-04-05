@@ -6265,6 +6265,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Magazyn obiektów blob platformy Azure
 cloud_s3account=Używanie klucza dostępu $1 
+cloud_s3creds=Korzystanie z poświadczeń EC2
 cloud_rsuser=Używanie loginu $1 
 cloud_s3_noawscli=Zaleca się zainstalowanie oficjalnego interfejsu wiersza poleceń AWS.
 cloud_s3_noawscli_install=<a href='$1'>Kliknij tutaj</a>, aby zainstalować go automatycznie.
@@ -6272,6 +6273,7 @@ cloud_s3_awscli_installing=Instalowanie pakietu AWS CLI ..
 cloud_s3_awscli_title=Zainstaluj AWS CLI
 cloud_s3_awscli_return=Formularz S3
 cloud_s3_akey=Domyślny login S3
+cloud_s3_creds=Poświadczenia AWS są już dostępne w tym systemie z metadanych EC2
 cloud_noneset=Brak zestawu
 cloud_below=Wprowadzono poniżej ..
 cloud_s3_access=Klucz dostępu
@@ -6536,11 +6538,13 @@ dnscloud_url=Witryna internetowa dostawcy DNS
 dnscloud_users=Używany przez serwery wirtualne
 dnscloud_nousers=Jeszcze nic
 dnscloud_route53_location=Domyślna lokalizacja strefy
+dnscloud_route53_def=Tak samo jak ta instancja EC2
 dnscloud_route53_longdesc=Dane logowania na tej stronie można znaleźć na stronie Poświadczenia bezpieczeństwa swojego konta w <a href=https://console.aws.amazon.com/ target=_blank>Konsoli AWS</a>.
 dnscloud_err=Nie udało się zapisać dostawcy DNS w chmurze
 dnscloud_egone=Dostawca nie istnieje!
 dnscloud_eawscreds=Poświadczenia AWS są nieprawidłowe
 dnscloud_clear=Usuń dane logowania
+dnscloud_eawsregion=Nie wybrano regionu AWS!
 
 dnscloud_cloudflare_email=Adres konta Cloudflare
 dnscloud_cloudflare_apikey=Klucz API Cloudflare

@@ -1182,6 +1182,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
 cloud_s3account=Bruker tilgangsnøkkel $1 
+cloud_s3creds=Bruker EC2-legitimasjon
 cloud_rsuser=Bruker innlogging $1 
 cloud_s3_noawscli=Det anbefales å ha offisielt AWS kommandolinjegrensesnitt installert.
 cloud_s3_noawscli_install=<a href='$1'>Klikk her</a> for å få den installert automatisk.
@@ -1189,6 +1190,7 @@ cloud_s3_awscli_installing=Installere AWS CLI-pakken ..
 cloud_s3_awscli_title=Installer AWS CLI
 cloud_s3_awscli_return=S3-skjema
 cloud_s3_akey=Standard S3 pålogging
+cloud_s3_creds=AWS-legitimasjon er allerede tilgjengelig på dette systemet fra EC2-metadata
 cloud_noneset=Ingen sett
 cloud_below=Oppført nedenfor ..
 cloud_s3_access=Tilgangsnøkkel
@@ -1520,11 +1522,13 @@ dnscloud_url=DNS-leverandørens nettsted
 dnscloud_users=Brukt av virtuelle servere
 dnscloud_nousers=Ingen enda
 dnscloud_route53_location=Standard soneplassering
+dnscloud_route53_def=Samme som denne EC2-forekomsten
 dnscloud_route53_longdesc=Legitimasjonen på denne siden finner du på siden Sikkerhetsopplysninger for kontoen din på <a href=https://console.aws.amazon.com/ target=_blank>AWS -konsollen</a>.
 dnscloud_err=Kunne ikke lagre sky DNS-leverandør
 dnscloud_egone=Leverandør eksisterer ikke!
 dnscloud_eawscreds=AWS-legitimasjon er ikke gyldig
 dnscloud_clear=Slett legitimasjon
+dnscloud_eawsregion=Ingen AWS-region er valgt!
 
 dnscloud_cloudflare_email=Cloudflare -kontoadresse
 dnscloud_cloudflare_apikey=Cloudflare API -nøkkel

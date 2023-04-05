@@ -4087,6 +4087,7 @@ cloud_dropboxdesc=投寄箱
 cloud_bbdesc=烈火
 cloud_azdesc=Azure Blob 存储
 cloud_s3account=使用访问密钥 $1
+cloud_s3creds=使用 EC2 凭据
 cloud_rsuser=使用登录 $1
 cloud_s3_noawscli=建议安装官方 AWS 命令行界面。
 cloud_s3_noawscli_install=<a href='$1'>点击此处</a>自动安装。
@@ -4094,6 +4095,7 @@ cloud_s3_awscli_installing=安装 AWS CLI ? ..
 cloud_s3_awscli_title=安装 AWS CLI
 cloud_s3_awscli_return=S3表格
 cloud_s3_akey=默认S3登录
+cloud_s3_creds=EC2 元数据中的 AWS 凭证已在此系统上可用
 cloud_noneset=没有设置
 cloud_below=在下面输入
 cloud_s3_access=快捷键
@@ -4425,11 +4427,13 @@ dnscloud_url=DNS提供商的网站
 dnscloud_users=由虚拟服务器使用
 dnscloud_nousers=还没有
 dnscloud_route53_location=默认区域位置
+dnscloud_route53_def=与此 EC2 实例相同
 dnscloud_route53_longdesc=此页面上的凭证可以在 <a href=https://console.aws.amazon.com/ target=_blank>AWS 控制台</a> 上您账户的安全凭证页面上找到。
 dnscloud_err=无法保存云DNS提供商
 dnscloud_egone=提供者不存在！
 dnscloud_eawscreds=AWS凭证无效
 dnscloud_clear=删除凭证
+dnscloud_eawsregion=未选择 AWS 区域！
 
 dnscloud_cloudflare_email=Cloudflare 帐户地址
 dnscloud_cloudflare_apikey=Cloudflare API 密钥

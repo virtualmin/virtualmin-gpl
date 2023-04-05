@@ -5906,6 +5906,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Хранилище BLOB-объектов Azure
 cloud_s3account=Использование ключа доступа $1 
+cloud_s3creds=Использование учетных данных EC2
 cloud_rsuser=Использование логина $1 
 cloud_s3_noawscli=Рекомендуется установить официальный интерфейс командной строки AWS.
 cloud_s3_noawscli_install=<a href='$1'>Нажмите здесь</a>, чтобы установить его автоматически.
@@ -5913,6 +5914,7 @@ cloud_s3_awscli_installing=Установка пакета AWS CLI ..
 cloud_s3_awscli_title=Установите интерфейс командной строки AWS
 cloud_s3_awscli_return=Форма S3
 cloud_s3_akey=Логин S3 по умолчанию
+cloud_s3_creds=Учетные данные AWS уже доступны в этой системе из метаданных EC2
 cloud_noneset=Не установлен
 cloud_below=Введено ниже ..
 cloud_s3_access=Ключ доступа
@@ -6244,11 +6246,13 @@ dnscloud_url=Сайт DNS-провайдера
 dnscloud_users=Используется виртуальными серверами
 dnscloud_nousers=Пока нет
 dnscloud_route53_location=Расположение зоны по умолчанию
+dnscloud_route53_def=То же, что и этот экземпляр EC2
 dnscloud_route53_longdesc=Учетные данные на этой странице можно найти на странице «Учетные данные безопасности» вашей учетной записи на <a href=https://console.aws.amazon.com/ target=_blank>консоли AWS</a>.
 dnscloud_err=Не удалось сохранить облачного DNS-провайдера
 dnscloud_egone=Провайдера не существует!
 dnscloud_eawscreds=Учетные данные AWS недействительны
 dnscloud_clear=Удалить учетные данные
+dnscloud_eawsregion=Не выбран регион AWS!
 
 dnscloud_cloudflare_email=Адрес учетной записи Cloudflare
 dnscloud_cloudflare_apikey=Ключ API Cloudflare

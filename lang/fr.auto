@@ -4523,6 +4523,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Stockage Blob Azure
 cloud_s3account=Utilisation de la clé d'accès $1 
+cloud_s3creds=Utilisation des identifiants EC2
 cloud_rsuser=Utilisation de la connexion $1 
 cloud_s3_noawscli=Il est recommandé d'installer l'interface de ligne de commande AWS officielle.
 cloud_s3_noawscli_install=<a href='$1'>Cliquez ici</a> pour l'installer automatiquement.
@@ -4530,6 +4531,7 @@ cloud_s3_awscli_installing=Installation du package AWS CLI ..
 cloud_s3_awscli_title=Installer l'interface de ligne de commande AWS
 cloud_s3_awscli_return=Formulaire S3
 cloud_s3_akey=Connexion S3 par défaut
+cloud_s3_creds=Les informations d'identification AWS sont déjà disponibles sur ce système à partir des métadonnées EC2
 cloud_noneset=Aucun ensemble
 cloud_below=Entré ci-dessous ..
 cloud_s3_access=Clef d'accès
@@ -4860,11 +4862,13 @@ dnscloud_url=Site Web du fournisseur DNS
 dnscloud_users=Utilisé par les serveurs virtuels
 dnscloud_nousers=Aucun encore
 dnscloud_route53_location=Emplacement de la zone par défaut
+dnscloud_route53_def=Identique à cette instance EC2
 dnscloud_route53_longdesc=Les informations d'identification de cette page se trouvent sur la page Informations d'identification de sécurité de votre compte sur la <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
 dnscloud_err=Échec de l'enregistrement du fournisseur DNS cloud
 dnscloud_egone=Le fournisseur n'existe pas!
 dnscloud_eawscreds=Les informations d'identification AWS ne sont pas valides
 dnscloud_clear=Supprimer les informations d'identification
+dnscloud_eawsregion=Aucune région AWS sélectionnée !
 
 dnscloud_cloudflare_email=Adresse du compte Cloudflare
 dnscloud_cloudflare_apikey=Clé API Cloudflare
