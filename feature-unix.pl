@@ -239,6 +239,9 @@ if (!$d->{'parent'}) {
 			$uinfo->{'plainpass'} = $d->{'pass'};
 			&set_pass_change($uinfo);
 			&set_usermin_imap_password($uinfo);
+			foreach my $f (&list_mail_plugins()) {
+				&plugin_call($f, "mailbox_modify", $uinfo, \%old, $d);
+				}
 			}
 		else {
 			# Password not changing
