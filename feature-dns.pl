@@ -1358,7 +1358,10 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	delete($addrescs{'noneselected'});
 
 	# Add standard records we don't have yet
-	foreach my $n ($withdot, "www.$withdot", "ftp.$withdot") {
+	my @recsstd = ($withdot);
+	push(@recsstd, "www.$withdot", "ftp.$withdot")
+		if (!$d->{'nodnsstd'});
+	foreach my $n (@recsstd) {
 		if (!$already{$n} && $addrecs{$n}) {
 			&create_dns_record($recs, $file,
 				{ 'name' => $n,
@@ -1419,7 +1422,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 
 	# Add SPF record for domain, if defined and if it's not a sub-domain
 	if ($tmpl->{'dns_spf'} ne "none" &&
-	    !$d->{'dns_submode'}) {
+	    !$d->{'dns_submode'} && !$d->{'nodnsspf'}) {
 		local $str = &bind8::join_spf(&default_domain_spf($d));
 		&create_dns_record($recs, $file,
 			{ 'name' => $withdot, type => 'TXT',
