@@ -2983,6 +2983,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure-Blobspeicher
 cloud_s3account=Zugriffsschlüssel $1 verwenden
+cloud_s3creds=Verwenden von EC2-Anmeldeinformationen
 cloud_rsuser=Login $1 verwenden
 cloud_s3_noawscli=Es wird empfohlen, die offizielle AWS-Befehlszeilenschnittstelle installiert zu haben.
 cloud_s3_noawscli_install=<a href='$1'>Klicken Sie hier</a>, um es automatisch installieren zu lassen.
@@ -2990,6 +2991,7 @@ cloud_s3_awscli_installing=Installieren des AWS CLI-Pakets ..
 cloud_s3_awscli_title=Installieren Sie AWS CLI
 cloud_s3_awscli_return=S3-Formular
 cloud_s3_akey=Standard S3 Anmeldung
+cloud_s3_creds=AWS-Anmeldeinformationen sind auf diesem System bereits aus EC2-Metadaten verfügbar
 cloud_noneset=Keine festgelegt
 cloud_below=Unten eingetragen ..
 cloud_s3_access=Zugangsschlüssel
@@ -3310,11 +3312,13 @@ dnscloud_url=Website des DNS-Anbieters
 dnscloud_users=Wird von virtuellen Servern verwendet
 dnscloud_nousers=Noch keine
 dnscloud_route53_location=Standardzonenstandort
+dnscloud_route53_def=Dasselbe wie diese EC2-Instanz
 dnscloud_route53_longdesc=Die Anmeldeinformationen auf dieser Seite finden Sie auf der Seite Sicherheitsanmeldeinformationen Ihres Kontos in der <a href=https://console.aws.amazon.com/ target=_blank>AWS-Konsole</a>.
 dnscloud_err=Fehler beim Speichern des Cloud-DNS-Anbieters
 dnscloud_egone=Anbieter existiert nicht!
 dnscloud_eawscreds=AWS-Anmeldeinformationen sind ungültig
 dnscloud_clear=Anmeldeinformationen löschen
+dnscloud_eawsregion=Keine AWS-Region ausgewählt!
 
 dnscloud_cloudflare_email=Cloudflare-Kontoadresse
 dnscloud_cloudflare_apikey=Cloudflare-API-Schlüssel

@@ -1744,6 +1744,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob-opslag
 cloud_s3account=Toegangssleutel $1 gebruiken
+cloud_s3creds=EC2-referenties gebruiken
 cloud_rsuser=Login $1 gebruiken
 cloud_s3_noawscli=Het wordt aanbevolen om de officiële AWS-opdrachtregelinterface te installeren.
 cloud_s3_noawscli_install=<a href='$1'>Klik hier</a> om het automatisch te laten installeren.
@@ -1751,6 +1752,7 @@ cloud_s3_awscli_installing=Het AWS CLI-pakket installeren ..
 cloud_s3_awscli_title=Installeer AWS CLI
 cloud_s3_awscli_return=S3-formulier
 cloud_s3_akey=Standaard S3-login
+cloud_s3_creds=AWS-referenties zijn al beschikbaar op dit systeem via EC2-metadata
 cloud_noneset=Geen ingesteld
 cloud_below=Hieronder ingevoerd ..
 cloud_s3_access=Toegangssleutel
@@ -2082,11 +2084,13 @@ dnscloud_url=Website van DNS-provider
 dnscloud_users=Gebruikt door virtuele servers
 dnscloud_nousers=Nog geen
 dnscloud_route53_location=Standaard zonelocatie
+dnscloud_route53_def=Hetzelfde als deze EC2-instantie
 dnscloud_route53_longdesc=De inloggegevens op deze pagina zijn te vinden op de pagina Beveiligingsreferenties van uw account op de <a href=https://console.aws.amazon.com/ target=_blank>AWS-console</a>.
 dnscloud_err=Opslaan van DNS-provider in de cloud is mislukt
 dnscloud_egone=Aanbieder bestaat niet!
 dnscloud_eawscreds=AWS-inloggegevens zijn niet geldig
 dnscloud_clear=Verwijder referenties
+dnscloud_eawsregion=Geen AWS-regio geselecteerd!
 
 dnscloud_cloudflare_email=Cloudflare-accountadres
 dnscloud_cloudflare_apikey=Cloudflare API-sleutel

@@ -6042,6 +6042,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
 cloud_s3account=Použití přístupového klíče $1 
+cloud_s3creds=Pomocí pověření EC2
 cloud_rsuser=Pomocí přihlašovacího jména $1 
 cloud_s3_noawscli=Doporučuje se mít nainstalované oficiální rozhraní příkazového řádku AWS.
 cloud_s3_noawscli_install=<a href='$1'>Klikněte sem</a>, chcete-li jej nainstalovat automaticky.
@@ -6049,6 +6050,7 @@ cloud_s3_awscli_installing=Instalace balíčku AWS CLI ..
 cloud_s3_awscli_title=Nainstalujte AWS CLI
 cloud_s3_awscli_return=formulář S3
 cloud_s3_akey=Výchozí přihlášení S3
+cloud_s3_creds=Přihlašovací údaje AWS jsou již v tomto systému k dispozici z metadat EC2
 cloud_noneset=Žádná sada
 cloud_below=Zadáno níže ..
 cloud_s3_access=Přístupový klíč
@@ -6380,11 +6382,13 @@ dnscloud_url=Web poskytovatele DNS
 dnscloud_users=Používá se virtuálními servery
 dnscloud_nousers=Ještě žádný
 dnscloud_route53_location=Výchozí umístění zóny
+dnscloud_route53_def=Stejné jako tato instance EC2
 dnscloud_route53_longdesc=Pověření na této stránce najdete na stránce Bezpečnostní pověření vašeho účtu v <a href=https://console.aws.amazon.com/ target=_blank>konzole AWS</a>.
 dnscloud_err=Nepodařilo se uložit poskytovatele cloudových DNS
 dnscloud_egone=Poskytovatel neexistuje!
 dnscloud_eawscreds=Pověření AWS nejsou platná
 dnscloud_clear=Smazat pověření
+dnscloud_eawsregion=Není vybrána žádná oblast AWS!
 
 dnscloud_cloudflare_email=Adresa účtu Cloudflare
 dnscloud_cloudflare_apikey=Klíč API Cloudflare

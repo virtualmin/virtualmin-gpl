@@ -4595,6 +4595,7 @@ cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Depolama
 cloud_s3account=$1 erişim anahtarını kullanma
+cloud_s3creds=EC2 kimlik bilgilerini kullanma
 cloud_rsuser=$1 giriş bilgilerini kullanma
 cloud_s3_noawscli=Resmi AWS komut satırı arayüzünün kurulu olması önerilir.
 cloud_s3_noawscli_install=Otomatik olarak yüklenmesi için <a href='$1'>burayı tıklayın</a>.
@@ -4602,6 +4603,7 @@ cloud_s3_awscli_installing=AWS CLI paketini yükleme ..
 cloud_s3_awscli_title=AWS CLI'yi yükleyin
 cloud_s3_awscli_return=S3 formu
 cloud_s3_akey=Varsayılan S3 girişi
+cloud_s3_creds=AWS kimlik bilgileri bu sistemde zaten EC2 meta verilerinden edinilebilir
 cloud_noneset=Hiçbiri ayarlanmadı
 cloud_below=Aşağıya girildi ..
 cloud_s3_access=Erişim anahtarı
@@ -4933,11 +4935,13 @@ dnscloud_url=DNS sağlayıcısının web sitesi
 dnscloud_users=Sanal sunucular tarafından kullanılıyor
 dnscloud_nousers=Henüz yok
 dnscloud_route53_location=Varsayılan bölge konumu
+dnscloud_route53_def=Bu EC2 bulut sunucusuyla aynı
 dnscloud_route53_longdesc=Bu sayfadaki kimlik bilgileri, hesabınızın <a href=https://console.aws.amazon.com/ target=_blank>AWS Konsolu</a>'ndaki Güvenlik Kimlik Bilgileri sayfasında bulunabilir.
 dnscloud_err=Bulut DNS sağlayıcısı kaydedilemedi
 dnscloud_egone=Sağlayıcı mevcut değil!
 dnscloud_eawscreds=AWS kimlik bilgileri geçerli değil
 dnscloud_clear=Kimlik Bilgilerini Sil
+dnscloud_eawsregion=AWS bölgesi seçilmedi!
 
 dnscloud_cloudflare_email=Cloudflare hesap adresi
 dnscloud_cloudflare_apikey=Cloudflare API anahtarı
