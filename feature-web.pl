@@ -207,7 +207,7 @@ else {
 
 	# Redirect webmail and admin to Usermin and Webmin, if enabled in
 	# the template
-	if (&has_webmail_rewrite($d)) {
+	if (&has_webmail_rewrite($d) && !$d->{'nowebmailredirect'}) {
 		&add_webmail_redirect_directives($d, $tmpl, 0);
 		}
 
@@ -3346,7 +3346,7 @@ push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 
 my $fixed = 0;
 foreach my $r ('webmail', 'admin') {
-	next if ((!$tmpl->{'web_'.$r} || $d->{'nowebmailredirect'}) && !$force);
+	next if (!$tmpl->{'web_'.$r} && !$force);
 
 	# Get directives we will be changing
 	foreach my $port (@ports) {

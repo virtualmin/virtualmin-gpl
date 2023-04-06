@@ -1405,7 +1405,8 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 		}
 
 	# If enabled in the template, add webmail and admin records
-	if ($d->{'web'} && &has_webmail_rewrite($d)) {
+	if ($d->{'web'} && &has_webmail_rewrite($d) &&
+	    !$d->{'nowebmailredirect'}) {
 		&add_webmail_dns_records_to_file($d, $tmpl, $file, $recs,
 						 \%already);
 		}
