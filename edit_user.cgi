@@ -225,7 +225,8 @@ $hassend = &will_send_user_email($d, $in{'new'});
 $hasspam = $config{'spam'} && $hasprimary;
 $hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
 if ($hasemail) {
-	print &ui_hidden_table_start($text{'user_header2a'}, "width=100%", 2,
+	my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
+	print &ui_hidden_table_start($text{'user_header2a'}, "${style_display_none}width=100%", 2,
 				     "table2a", 0);
 	}
 
@@ -234,7 +235,7 @@ if ($hasprimary) {
 	print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
 		    &ui_yesno_radio("mailbox",
 				    $user->{'email'} || $in{'new'} ? 1 : 0),
-		    2, \@tds);
+		    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 if ($hasmailfile && $config{'show_mailuser'}) {
@@ -259,7 +260,7 @@ if ($hasmailfile && $config{'show_mailuser'}) {
 		}
 	print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
 			    $mffield,
-			    2, \@tds);
+			    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 if ($hasextra) {
@@ -274,7 +275,7 @@ if ($hasextra) {
 		}
 	print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
 			    &ui_textarea("extra", join("\n", @extra), 5, 50),
-			    2, \@tds);
+			    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 if ($in{'new'} && &will_send_user_email($d, 1)) {
@@ -284,7 +285,7 @@ if ($in{'new'} && &will_send_user_email($d, 1)) {
 				$user->{'email'} ? $text{'user_newmail1'}
 						 : $text{'user_newmail2'},
 				$text{'user_newmail0'}),
-		2, \@tds);
+		2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 	# Show option to re-send info email
@@ -293,7 +294,7 @@ elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
 			  [ [ 1, $text{'user_remail1'} ],
 			    [ 0, $text{'user_remail0'} ] ])." ".
 		    &ui_textbox("remail", $user->{'email'}, 40),
-		    2, \@tds);
+		    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 # Show spam check flag
@@ -318,7 +319,7 @@ if ($hasspam) {
 			&ui_radio("nospam", int($user->{'nospam'}),
 				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
 			$awl_link,
-		2, \@tds);
+		2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 # Show most recent logins
@@ -331,7 +332,8 @@ if ($hasemail && !$in{'new'}) {
 		}
 	print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
 		@grid ? &ui_grid_table(\@grid, 2, 50)
-		      : $text{'user_lastlogin_never'});
+		      : $text{'user_lastlogin_never'}, undef, undef,
+		          $d->{'mail'} ? undef : ['style="display: none"']);
 	}
 
 if ($hasemail) {
