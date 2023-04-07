@@ -9598,6 +9598,13 @@ $dns_tests = [
 	{ 'command' => 'host -t A mail.'.$test_subdomain.' '.$dnsserver,
 	},
 
+	# Check for MX and NS records
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'grep' => [ $test_domain.'\\.\\s+MX\\s+',
+		      $test_domain.'\\.\\s+NS\\s+' ],
+	},
+
 	# Add a record to both domains
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ],
