@@ -1195,7 +1195,8 @@ $mxname = &substitute_domain_template($mxname, $d);
 my $r = { 'name' => $withdot,
 	  'type' => "MX",
 	  'values' => [ 5, $mxname ] };
-my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
+		       $_->{'type'} eq $r->{'type'} } @$recs;
 &create_dns_record($recs, $file, $r) if (!$already);
 
 # Add MX records for slaves, if enabled
@@ -1209,7 +1210,8 @@ if (!$config{'secmx_nodns'}) {
 		my $r = { 'name' => $withdot,
 			  'type' => "MX",
 			  'values' => [ $n, $mxhost ] };
-		my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+		my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
+				       $_->{'type'} eq $r->{'type'} } @$recs;
 		&create_dns_record($recs, $file, $r) if (!$already);
 		$n += 5;
 		}
