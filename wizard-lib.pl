@@ -870,7 +870,6 @@ my %dom;
 	'prefix', $prefix,
 	'nocreationmail', 1,
 	'nowebmailredirect', 1,
-	'nodnsstd', 1,
 	'nodnsspf', 1,
 	'hashpass', 0,
 	'defaultdomain', 1,
