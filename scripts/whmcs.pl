@@ -510,7 +510,7 @@ local $vwant = $ver >= 8.6 ? "8\\.6" :
 	       $ver >= 8.4 ? "8\\.4" : undef;
 if ($vwant) {
 	return ( "https://download.whmcs.com/assets/scripts/get-downloads.php",
-		 "\"version\":\"($vwant\\.[0-9\\.]+)\",\"type\":\"(MAINTENANCE|SECURITY)\"" );
+		 "\"version\":\"($vwant\\.[0-9\\.]+)\",(\"type\":\"(MAINTENANCE|SECURITY)\"|\"compatibleWith\")" );
 	}
 return ( );
 }
