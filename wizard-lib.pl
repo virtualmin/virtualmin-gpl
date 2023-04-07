@@ -870,6 +870,8 @@ my %dom;
 	'prefix', $prefix,
 	'nocreationmail', 1,
 	'nowebmailredirect', 1,
+	'nodnsstd', 1,
+	'nodnsspf', 1,
 	'hashpass', 0,
 	'defaultdomain', 1,
         );
@@ -878,6 +880,7 @@ my %dom;
 $dom{'dir'} = 1;
 $dom{'unix'} = 1;
 $dom{'dns'} = 1;
+$dom{'mail'} = 0;
 $dom{'no_default_service_cert_webmin'} = 2
 	if ($ENV{'SERVER_NAME'} eq $dname);
 my $webf = &domain_has_website();
