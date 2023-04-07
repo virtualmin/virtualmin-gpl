@@ -507,7 +507,9 @@ sub script_whmcs_latest
 local ($ver) = @_;
 local $vwant = $ver >= 8.6 ? "8\\.6" :
 	       $ver >= 8.5 ? "8\\.5" :
-	       $ver >= 8.4 ? "8\\.4" : undef;
+	       $ver >= 8.4 ? "8\\.4" :
+	       $ver >= 8.0 ? "8\\.0" :
+			     "7\\.10";
 if ($vwant) {
 	return ( "https://download.whmcs.com/assets/scripts/get-downloads.php",
 		 "\"version\":\"($vwant\\.[0-9\\.]+)\",(\"type\":\"(MAINTENANCE|SECURITY)\"|\"compatibleWith\")" );
