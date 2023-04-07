@@ -4836,6 +4836,10 @@ $mail_tests = [
 	  'sleep' => 5,
 	},
 
+	# Test that the DNS record is gone too
+	{ 'command' => 'host -t A autoconfig.'.$test_domain.' '.$dnsserver,
+	},
+
 	# Test sender BCC feature
 	$supports_bcc >= 1 ? (
 		# Enable outgoing BCC
@@ -9602,7 +9606,22 @@ $dns_tests = [
 	{ 'command' => 'get-dns.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
 	  'grep' => [ $test_domain.'\\.\\s+MX\\s+',
-		      $test_domain.'\\.\\s+NS\\s+' ],
+		      'mail\\s+A\\s+',
+		      $test_domain.'\\.\\s+NS\\s+',
+		    ],
+	},
+
+	# Turn off email and make sure mail-related records are gone
+	{ 'command' => 'disable-feature.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'domain' => $test_subdomain ],
+		      [ 'mail' ] ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'antigrep' => [ $test_domain.'\\.\\s+MX\\s+',
+		          'mail\\s+A\\s+',
+		        ],
 	},
 
 	# Add a record to both domains
