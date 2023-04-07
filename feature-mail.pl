@@ -610,7 +610,7 @@ if ($c && defined(&list_smtp_clouds)) {
 	}
 
 # Turn off email autoconfig
-if (&domain_has_website($d) && $config{'mail_autoconfig'}) {
+if (&domain_has_website($d)) {
 	&disable_email_autoconfig($d);
 	}
 
