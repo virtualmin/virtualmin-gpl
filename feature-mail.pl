@@ -6531,16 +6531,18 @@ if ($d->{'dns'}) {
 		&release_lock_dns($d);
 		return "No DNS zone for $d->{'dom'} found";
 		}
-	my $changed = 0;
 	my %adots = map { $_.".", 1 } @autoconfig;
+	my @delrecs;
 	foreach my $r (@$recs) {
 		if ($r->{'type'} =~ /^(A|AAAA)$/ &&
 		    $adots{$r->{'name'}}) {
-			&delete_dns_record($recs, $file, $r);
-			$changed++;
+			push(@delrecs, $r);
 			}
 		}
-	if ($changed) {
+	foreach my $r (@delrecs) {
+		&delete_dns_record($recs, $file, $r);
+		}
+	if (@delrecs) {
 		&post_records_change($d, $recs, $file);
 		&register_post_action(\&restart_bind, $d);
 		}
