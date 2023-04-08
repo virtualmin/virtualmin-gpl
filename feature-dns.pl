@@ -1174,14 +1174,16 @@ my $r = { 'name' => "mail.$withdot",
 	  'type' => "A",
 	  'proxied' => $proxied == 1 ? 1 : 0,
 	  'values' => [ $ip ] };
-my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
+		       $_->{'type'} eq $r->{'type'} } @$recs;
 &create_dns_record($recs, $file, $r) if (!$already);
 if ($d->{'ip6'} && $ip6) {
 	my $r = { 'name' => "mail.$withdot",
 		  'type' => "AAAA",
 		  'proxied' => $proxied == 1 ? 1 : 0,
 		  'values' => [ $ip6 ] };
-	my ($already) = grep { $_->{'name'} eq $r->{'name'} } @$recs;
+	my ($already) = grep { $_->{'name'} eq $r->{'name'} &&
+			       $_->{'type'} eq $r->{'type'} } @$recs;
 	&create_dns_record($recs, $file, $r) if (!$already);
 	}
 &create_mx_records($recs, $file, $d, $ip, $ip6);
