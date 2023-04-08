@@ -107,6 +107,9 @@ if (&can_domain_dnssec($d)) {
 print &ui_table_end();
 
 # DNSSEC key details
+my $r = &require_bind($d);
+my $zone = &get_bind_zone($d->{'dom'}, undef, $d);
+my $key = &remote_foreign_call($r, "bind8", "get_dnssec_key", $zone);
 if ($key) {
 	print &ui_hidden_table_start($text{'spf_header2'}, "width=100%",
 				     2, "dnssec", 0, \@tds);
