@@ -971,7 +971,13 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		       $r->{'name'} eq $d->{'dom'}.".") {
 			# MX record for domain .. does it point to our IP?
 			local $mxip = &to_ipaddress($r->{'values'}->[1]);
-			if ($mxip eq $ip || &indexof($mxip, @slaveips) >= 0) {
+			if (!$mxip) {
+				my ($mxr) = grep { $_->{'name'} eq
+						   $r->{'values'}->[1] } @$recs;
+				$mxip = $mxr->{'values'}->[0] if ($mxr);
+				}
+			if ($mxip && ($mxip eq $ip ||
+				      &indexof($mxip, @slaveips) >= 0)) {
 				push(@mx, $r);
 				}
 			}
