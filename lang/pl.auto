@@ -3992,6 +3992,7 @@ massdomains_enaok=Włącz serwery teraz
 massdomains_enadoms=Serwery do włączenia: $1 
 
 newmxs_title=Pomocnicze serwery pocztowe
+newmxs_return=drugorzędne serwery pocztowe
 newmxs_header=Automatyczne pomocnicze serwery pocztowe
 newmxs_servers=Serwery do skonfigurowania jako dodatkowe MX
 newmxs_none=W module Webmin Servers Index nie zdefiniowano jeszcze żadnych użytecznych serwerów.
@@ -4001,7 +4002,7 @@ newmxs_evirtualmin=.. na serwerze $1 nie ma zainstalowanej Virtualmin
 newmxs_eversion=Serwer $1 ma Virtualmin $3, ale wymagana jest wersja $2 lub nowsza
 newmxs_email=E-mail nie jest włączony w tym systemie
 newmxs_emailsystem=Żaden system poczty nie został skonfigurowany
-newmxs_esystem=Skonfigurowany system poczty $1 nie jest zainstalowany
+newmxs_esystem=Skonfigurowany system pocztowy $1 nie działa lub nie jest zainstalowany
 newmxs_eprob=Serwer $1 nie może być używany jako dodatkowy serwer pocztowy : $2 
 newmxs_already=Ten serwer już przekazuje lub hostuje domenę poczty
 newmxs_missing=Ten serwer nie jest przekaźnikiem dla domeny poczty
@@ -5990,9 +5991,9 @@ mrecords_evalidate=Sprawdzanie poprawności nie powiodło się : $1
 mrecords_validate=Zatwierdzić nowe rekordy?
 
 mxv_unsupported=Obsługiwane są tylko Sendmail i Postfix w celu ograniczenia przekazywania
-mxv_rrm=Dyrektywa $1 nie jest ustawiona w konfiguracji Postfix
+mxv_rrm=Dyrektywa <tt>$1</tt> nie jest ustawiona w konfiguracji Postfiksa
 mxv_eaccess=Funkcja kontroli spamu (access_db) nie jest włączona w konfiguracji Sendmaila
-mxv_eaccessfile=Plik kontroli spamu (access_db) $1 jeszcze nie istnieje
+mxv_eaccessfile=Plik kontroli spamu (access_db) <tt>$1</tt> jeszcze nie istnieje
 
 fixperms_err=Nie można naprawić uprawnień
 fixperms_edoms=Nie wybrano serwerów wirtualnych

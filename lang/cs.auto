@@ -3764,6 +3764,7 @@ massdomains_enarusure=Opravdu chcete povolit vybrané virtuální servery $1 ? N
 massdomains_enaok=Povolit servery nyní
 
 newmxs_title=Sekundární poštovní servery
+newmxs_return=sekundární poštovní servery
 newmxs_header=Automatické sekundární poštovní servery
 newmxs_servers=Servery pro nastavení jako sekundární MX
 newmxs_none=V modulu Webmin Servers Index zatím nebyly definovány žádné použitelné servery.
@@ -3773,7 +3774,7 @@ newmxs_evirtualmin=.. server $1 nemá nainstalován Virtualmin
 newmxs_eversion=Server $1 má Virtualmin $3, ale je nutná verze $2 nebo novější
 newmxs_email=V tomto systému není povolen e-mail
 newmxs_emailsystem=Nebyl nakonfigurován žádný poštovní systém
-newmxs_esystem=Konfigurovaný poštovní systém $1 není nainstalován
+newmxs_esystem=Nakonfigurovaný poštovní systém $1 není spuštěn nebo není nainstalován
 newmxs_eprob=Server $1 nelze použít jako sekundární poštovní server : $2 
 newmxs_already=Tento server již přenáší nebo hostuje poštovní doménu
 newmxs_missing=Tento server není přenosem pro poštovní doménu
@@ -5753,9 +5754,9 @@ mrecords_evalidate=Ověření se nezdařilo : $1
 mrecords_validate=Ověření nových záznamů?
 
 mxv_unsupported=Pro omezení přenosu jsou podporovány pouze Sendmail a Postfix
-mxv_rrm=Direktiva $1 není nastavena v konfiguraci Postfixu
+mxv_rrm=Direktiva <tt>$1</tt> není nastavena v konfiguraci Postfixu
 mxv_eaccess=Funkce kontroly nevyžádané pošty (access_db) není v konfiguraci Sendmail povolena
-mxv_eaccessfile=Soubor kontroly nevyžádané pošty (access_db) $1 zatím neexistuje
+mxv_eaccessfile=Soubor kontroly spamu (access_db) <tt>$1</tt> zatím neexistuje
 
 fixperms_err=Oprávnění se nezdařilo
 fixperms_edoms=Nebyly vybrány žádné virtuální servery

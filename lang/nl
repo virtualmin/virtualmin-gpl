@@ -3845,7 +3845,6 @@ newmxs_evirtualmin=.. server $1 heeft Virtualmin niet geinstalleerd
 newmxs_eversion=Server $1 heeft Virtualmin $3, maar versie $2 of later is nodig
 newmxs_email=Email is niet aangezet op dit systeem
 newmxs_emailsystem=Er is geen email systeem geconfigureerd
-newmxs_esystem=Het ge-configureerde $1 email systeem is niet geinstalleerd
 newmxs_eprob=Server $1 kan niet gebruikt worden als secundaire email server : $2
 newmxs_already=Deze server schakelt het reeds door of host het email domein
 newmxs_missing=Deze server is geen relais voor het email domein
@@ -5652,9 +5651,7 @@ mrecords_enone=Niets ingevuld!
 mrecords_evalidate=Validatie mislukte : $1
 
 mxv_unsupported=Alleen Sendmail en Postfix worden ondersteund voor relais beperkingen.
-mxv_rrm=De richtlijn $1 is niet ingesteld in de Postfix configuratie.
 mxv_eaccess=De spam controle (access_db) optie is niet aangezet in de Sendmail configuratie.
-mxv_eaccessfile=De spam controle (access_db) file $1 bestaat nog niet.
 
 fixperms_err=Permissies repareren is mislukt
 fixperms_edoms=Er zijn geen virtuele servers geselecteerd

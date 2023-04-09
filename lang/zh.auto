@@ -2091,7 +2091,9 @@ massdomains_enarusure=您确定要启用 $1个选定的虚拟服务器吗？他�
 massdomains_enaok=立即启用服务器
 massdomains_enadoms=要启用的服务器： $1
 
+newmxs_return=二级邮件服务器
 newmxs_none2=<a href='$1'>Webmin服务器索引</a>模块中尚未定义可用的服务器。
+newmxs_esystem=配置的 $1 邮件系统未运行或未安装
 newmxs_saveadd=保存并将现有域添加到新的辅助域
 newmxs_syncing=更新允许的用户进行中继 ..
 newmxs_esynced=..一些失败： $1
@@ -3798,9 +3800,9 @@ mrecords_evalidate=验证失败： $1
 mrecords_validate=验证新记录？
 
 mxv_unsupported=仅支持Sendmail和Postfix来限制中继
-mxv_rrm=在Postfix配置中未设置 $1指令
+mxv_rrm=<tt>$1</tt> 指令未在 Postfix 配置中设置
 mxv_eaccess=Sendmail配置中未启用垃圾邮件控制（access_db）功能
-mxv_eaccessfile=垃圾邮件控件（access_db）文件 $1尚不存在
+mxv_eaccessfile=垃圾邮件控制 (access_db) 文件 <tt>$1</tt> 尚不存在
 
 fixperms_err=修复权限失败
 fixperms_edoms=未选择虚拟服务器

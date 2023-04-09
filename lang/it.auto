@@ -3680,13 +3680,14 @@ massdomains_why=Motivo della disabilitazione:
 massdomains_disdoms=Server da disabilitare: $1 
 massdomains_enarusure=Sei sicuro di voler abilitare i $1 server virtuali selezionati? Saranno riportati allo stato in cui si trovavano prima di essere disabilitati.
 
+newmxs_return=server di posta secondari
 newmxs_header=Server di posta secondari automatici
 newmxs_servers=Server da configurare come MX secondari
 newmxs_none=Nessun server utilizzabile è stato ancora definito nel modulo Indice server Webmin.
 newmxs_none2=Nessun server utilizzabile è stato ancora definito nel modulo <a href='$1'>Webmin Servers Index</a>.
 newmxs_evirtualmin=.. sul server $1 non è installato Virtualmin
 newmxs_eversion=Il server $1 ha Virtualmin $3, ma è necessaria la versione $2 o successive
-newmxs_esystem=Il sistema di posta $1 configurato non è installato
+newmxs_esystem=Il sistema di posta $1 configurato non è in esecuzione o non è installato
 newmxs_eprob=Il server $1 non può essere utilizzato come server di posta secondario : $2 
 newmxs_already=Questo server sta già inoltrando o ospitando il dominio di posta
 newmxs_syncing=Aggiornamento degli utenti consentiti per l'inoltro ..
@@ -5606,9 +5607,9 @@ mrecords_evalidate=Convalida non riuscita : $1
 mrecords_validate=Convalida nuovi record?
 
 mxv_unsupported=Solo Sendmail e Postfix sono supportati per limitare l'inoltro
-mxv_rrm=La direttiva $1 non è impostata nella configurazione di Postfix
+mxv_rrm=La direttiva <tt>$1</tt> non è impostata nella configurazione Postfix
 mxv_eaccess=La funzione di controllo dello spam (access_db) non è abilitata nella configurazione di Sendmail
-mxv_eaccessfile=Il file di controllo dello spam (access_db) $1 non esiste ancora
+mxv_eaccessfile=Il file di controllo antispam (access_db) <tt>$1</tt> non esiste ancora
 
 fixperms_err=Impossibile correggere le autorizzazioni
 fixperms_edoms=Nessun server virtuale selezionato

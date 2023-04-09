@@ -4499,6 +4499,7 @@ massdomains_enaok=Ativar servidores agora
 massdomains_enadoms=Servidores para ativar: $1 
 
 newmxs_title=Servidores de Correio Secundário
+newmxs_return=servidores de correio secundário
 newmxs_header=Servidores de correio secundário automáticos
 newmxs_servers=Servidores para configurar como MXs secundários
 newmxs_none=Nenhum servidor utilizável foi definido no módulo Índice de Servidores Webmin ainda.
@@ -4508,7 +4509,7 @@ newmxs_evirtualmin=.. o servidor $1 não possui o Virtualmin instalado
 newmxs_eversion=O servidor $1 possui o Virtualmin $3, mas a versão $2 ou posterior é necessária
 newmxs_email=O email não está ativado neste sistema
 newmxs_emailsystem=Nenhum sistema de email foi configurado
-newmxs_esystem=O sistema de correio $1 configurado não está instalado
+newmxs_esystem=O sistema de correio $1 configurado não está em execução ou não está instalado
 newmxs_eprob=O servidor $1 não pode ser usado como um servidor de email secundário : $2 
 newmxs_already=Este servidor já está retransmitindo ou hospedando o domínio de email
 newmxs_missing=Este servidor não é uma retransmissão para o domínio de email
@@ -6737,9 +6738,9 @@ mrecords_evalidate=Falha na validação : $1
 mrecords_validate=Validar novos registros?
 
 mxv_unsupported=Somente Sendmail e Postfix são suportados para restringir a retransmissão
-mxv_rrm=A diretiva $1 não está definida na configuração do Postfix
+mxv_rrm=A diretiva <tt>$1</tt> não está definida na configuração do Postfix
 mxv_eaccess=O recurso de controle de spam (access_db) não está ativado na configuração do Sendmail
-mxv_eaccessfile=O arquivo de controle de spam (access_db) $1 ainda não existe
+mxv_eaccessfile=O arquivo de controle de spam (access_db) <tt>$1</tt> ainda não existe
 
 fixperms_err=Falha ao corrigir permissões
 fixperms_edoms=Nenhum servidor virtual selecionado

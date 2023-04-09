@@ -2497,7 +2497,6 @@ newmxs_evirtualmin=.. sunucu $1'de Virtualmin kurulmamýþ
 newmxs_eversion=Sunucu $1 Virtualmin $3 var, fakat versiyon $2 ya da sonrasý gerekli
 newmxs_email=E-posta bu sistemde etkinleþtirilmemiþ
 newmxs_emailsystem=E-posta sistemi yapýlandýrýlmamýþ
-newmxs_esystem=Yapýlandýrýlmýþ $1 mail sistemi kurulmamýþ
 newmxs_eprob=Sunucu $1 ikincil e-posta sunucu olarak kullanýlamaz : $2
 newmxs_already=Bu sunucu e-posta alanadýný zaten ya relay ediyor ya da barýndýrýyor
 newmxs_missing=Bu sunucu e-posta alanadý için bir relay deðil

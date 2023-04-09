@@ -1354,7 +1354,9 @@ massdomains_phpchildren=Subprocesos máximos del servicio PHP
 massdomains_ephpvering=.. no se pudo cambiar la versión : $1 
 massdomains_phpchildrening=Cambiando los subprocesos máximos del servicio PHP ..
 
+newmxs_return=servidores de correo secundarios
 newmxs_none2=Aún no se han definido servidores utilizables en el módulo <a href='$1'>Índice de servidores Webmin</a>.
+newmxs_esystem=El sistema de correo $1 configurado no se está ejecutando o no está instalado
 newmxs_saveadd=Guarde y agregue dominios existentes a nuevas secundarias
 newmxs_syncing=Actualización de usuarios permitidos para retransmitir ..
 newmxs_esynced=.. algunos fallaron : $1
@@ -2616,9 +2618,9 @@ mrecords_evalidate=La validación falló : $1
 mrecords_validate=Validar nuevos registros?
 
 mxv_unsupported=Solo Sendmail y Postfix son compatibles para restringir la retransmisión
-mxv_rrm=La directiva $1 no está establecida en la configuración de Postfix
+mxv_rrm=La directiva <tt>$1</tt> no está configurada en la configuración de Postfix
 mxv_eaccess=La función de control de spam (access_db) no está habilitada en la configuración de Sendmail
-mxv_eaccessfile=El archivo de control de spam (access_db) $1 todavía no existe
+mxv_eaccessfile=El archivo de control de spam (access_db) <tt>$1</tt> aún no existe
 
 fixperms_err=Error al corregir los permisos
 fixperms_title=Permisos de fijación

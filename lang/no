@@ -4078,7 +4078,6 @@ newmxs_evirtualmin=.. tjener $1 har ikke Virtualmin installert
 newmxs_eversion=Tjener $1 har Virtualmin $3, men versjon $2 eller nyere er påkrevd
 newmxs_email=E-post er ikke aktivert på dette systemet
 newmxs_emailsystem=Det er ikke konfigurert noe e-post system
-newmxs_esystem=Det konfigurerte $1 e-post systemet er ikke installert
 newmxs_eprob=Tjener $1 kan ikke brukes som en sekundær e-post tjener : $2
 newmxs_already=Denne tjeneren betjener allerede videresending for eller er vert for e-post domene
 newmxs_missing=Denne tjeneren er ikke et relé for e-post domenet
@@ -5970,9 +5969,7 @@ mrecords_evalidate=Validering feilet : $1
 mrecords_validate=Valider nye oppføringer?
 
 mxv_unsupported=Kun Sendmail og Postfix støtter begrensing av videresending
-mxv_rrm=$1 direktivet var ikke satt i Postfix konfigurasjonen
 mxv_eaccess=Søppelpost-kontroll (access_db) funksjonaliteten er ikke aktivert i Sendmail konfigurasjonen.
-mxv_eaccessfile=Søppelpost-kontroll (access_db) filen $1 finnes ikke enda
 
 fixperms_err=Kunne ikke fikse tillatelser
 fixperms_edoms=Ingen virtuelle tjenere valgt

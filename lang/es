@@ -3446,7 +3446,6 @@ newmxs_evirtualmin=.. el servidor $1 no tiene Virtualmin instalado
 newmxs_eversion=El servidor $1 tiene Virtualmin $3, pero se necesita la versión $2 o posterior
 newmxs_email=Email no está habilitado está habilitado en este sistema
 newmxs_emailsystem=No se ha configurado ningún sistema de email
-newmxs_esystem=El sistema de mail $1 configurado no está instalado
 newmxs_eprob=El servidor $1 no puede ser utilizado como servidor de mail secundario : $2
 newmxs_already=Este servidor está actualmente haciendo relay o hosteando el dominio
 newmxs_missing=Este servidor no es un relay para el dominio

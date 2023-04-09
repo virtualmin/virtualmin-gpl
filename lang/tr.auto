@@ -2314,7 +2314,9 @@ massdomains_enarusure=Seçilen $1 sanal sunucuyu etkinleştirmek istediğinizden
 massdomains_enaok=Sunucuları Şimdi Etkinleştir
 massdomains_enadoms=Etkinleştirilecek sunucular: $1 
 
+newmxs_return=ikincil posta sunucuları
 newmxs_none2=<a href='$1'>Webmin Sunucuları Dizini</a> modülünde henüz kullanılabilir hiçbir sunucu tanımlanmadı.
+newmxs_esystem=Yapılandırılan $1 posta sistemi çalışmıyor veya kurulu değil
 newmxs_saveadd=Kaydet ve mevcut alan adlarını yeni ikincil öğelere ekle
 newmxs_syncing=İzin verilen kullanıcılar geçiş için güncelleniyor.
 newmxs_esynced=.. bazıları başarısız oldu : $1 
@@ -4306,9 +4308,9 @@ mrecords_evalidate=Doğrulama başarısız oldu : $1
 mrecords_validate=Yeni kayıtlar doğrulansın mı?
 
 mxv_unsupported=Geçişi kısıtlamak için yalnızca Sendmail ve Postfix desteklenir
-mxv_rrm=$1 yönergesi Postfix yapılandırmasında ayarlanmadı
+mxv_rrm=<tt>$1</tt> yönergesi, Postfix yapılandırmasında ayarlanmadı
 mxv_eaccess=Spam kontrolü (access_db) özelliği Sendmail yapılandırmasında etkin değil
-mxv_eaccessfile=$1 spam denetimi (access_db) dosyası henüz yok
+mxv_eaccessfile=Spam kontrol (access_db) dosyası <tt>$1</tt> henüz mevcut değil
 
 fixperms_err=İzinler düzeltilemedi
 fixperms_edoms=Hiçbir sanal sunucu seçilmedi
