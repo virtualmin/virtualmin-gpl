@@ -4018,6 +4018,7 @@ newmxs_removing=Usuwanie domeny dodatkowej w $1 ..
 newmxs_syncing=Aktualizowanie dozwolonych użytkowników do przekazywania.
 newmxs_esynced=.. niektóre zawiodły : $1 
 newmxs_synced=.. zrobione w $1 
+newmxs_nothing=Nie wprowadzono żadnych zmian w domenach ani serwerach.
 
 newmysqls_title=Serwery baz danych
 newmysqls_ecannot=Nie możesz edytować dodatkowych serwerów baz danych

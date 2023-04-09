@@ -948,6 +948,7 @@ massdomains_phpchildrening=Wijzigen van maximale subprocessen van PHP-service ..
 
 newmxs_return=secundaire mailservers
 newmxs_esystem=Het geconfigureerde $1 mailsysteem is niet actief of niet geïnstalleerd
+newmxs_nothing=Er zijn geen wijzigingen aangebracht in domeinen of servers.
 
 newmysqls_title=Database-servers
 newmysqls_ecannot=Het is niet toegestaan om extra databaseservers te bewerken

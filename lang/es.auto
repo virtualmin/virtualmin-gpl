@@ -1361,6 +1361,7 @@ newmxs_saveadd=Guarde y agregue dominios existentes a nuevas secundarias
 newmxs_syncing=Actualización de usuarios permitidos para retransmitir ..
 newmxs_esynced=.. algunos fallaron : $1
 newmxs_synced=.. hecho en $1
+newmxs_nothing=No se realizaron cambios en ningún dominio o servidor.
 
 newmysqls_title=Servidores de base de datos
 newmysqls_ecannot=No se le permite editar servidores de bases de datos adicionales.

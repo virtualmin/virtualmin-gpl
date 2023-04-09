@@ -1774,6 +1774,7 @@ newmxs_already=Dieser Server leitet die Mail-Domain bereits weiter oder hostet s
 newmxs_missing=Dieser Server ist kein Relay für die Mail-Domain
 newmxs_saveadd=Speichern Sie und fügen Sie vorhandene Domänen zu neuen Secondaries hinzu
 newmxs_syncing=Aktualisieren der zulässigen Benutzer für die Weiterleitung.
+newmxs_nothing=Es wurden keine Änderungen an Domänen oder Servern vorgenommen.
 
 newmysqls_title=Datenbankserver
 newmysqls_ecannot=Sie dürfen keine zusätzlichen Datenbankserver bearbeiten

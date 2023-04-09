@@ -4526,6 +4526,7 @@ newmxs_removing=Removendo o domínio secundário em $1 ..
 newmxs_syncing=Atualizando usuários permitidos para retransmissão ..
 newmxs_esynced=.. alguns falharam : $1 
 newmxs_synced=.. feito em $1 
+newmxs_nothing=Nenhuma alteração foi feita em nenhum domínio ou servidor.
 
 newmysqls_title=Servidores de banco de dados
 newmysqls_ecannot=Você não tem permissão para editar servidores de banco de dados adicionais

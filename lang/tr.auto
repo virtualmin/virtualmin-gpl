@@ -2321,6 +2321,7 @@ newmxs_saveadd=Kaydet ve mevcut alan adlarını yeni ikincil öğelere ekle
 newmxs_syncing=İzin verilen kullanıcılar geçiş için güncelleniyor.
 newmxs_esynced=.. bazıları başarısız oldu : $1 
 newmxs_synced=.. $1 tarihinde yapıldı
+newmxs_nothing=Herhangi bir etki alanında veya sunucuda herhangi bir değişiklik yapılmadı.
 
 newmysqls_title=Veritabanı Sunucuları
 newmysqls_ecannot=Ek veritabanı sunucularını düzenleme izniniz yok

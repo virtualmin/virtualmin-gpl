@@ -2098,6 +2098,7 @@ newmxs_saveadd=保存并将现有域添加到新的辅助域
 newmxs_syncing=更新允许的用户进行中继 ..
 newmxs_esynced=..一些失败： $1
 newmxs_synced=..在 $1上完成
+newmxs_nothing=没有对任何域或服务器进行任何更改。
 
 newmysqls_title=数据库服务器
 newmysqls_ecannot=您无权编辑其他数据库服务器
