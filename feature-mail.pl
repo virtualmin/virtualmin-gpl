@@ -4558,7 +4558,7 @@ if ($config{'mail_system'} == 1) {
 elsif ($config{'mail_system'} == 0) {
 	# Add to Postfix relay domains
 	local @rd = split(/[, ]+/,
-			&postfix::get_current_value("relay_domains"));
+			&postfix::get_real_value("relay_domains"));
 	if ($rd[0] =~ /:/) {
 		# Actually in a map
 		local $rmaps = &postfix::get_maps("relay_domains");
