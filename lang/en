@@ -7026,9 +7026,9 @@ mrecords_evalidate=Validation failed : $1
 mrecords_validate=Validate new records?
 
 mxv_unsupported=Only Sendmail and Postfix are supported for restricting relaying
-mxv_rrm=The $1 directive is not set in the Postfix configuration
+mxv_rrm=The <tt>$1</tt> directive is not set in the Postfix configuration
 mxv_eaccess=The spam control (access_db) feature is not enabled in the Sendmail configuration
-mxv_eaccessfile=The spam control (access_db) file $1 does not exist yet
+mxv_eaccessfile=The spam control (access_db) file <tt>$1</tt> does not exist yet
 
 fixperms_err=Failed to fix permissions
 fixperms_edoms=No virtual servers selected
