@@ -2032,7 +2032,8 @@ sub update_secondary_mx_virtusers
 {
 local ($dom, $mailboxes) = @_;
 local %mailboxes_map = map { $_, 1 } @$mailboxes;
-&obtain_lock_mail($_[0]);
+local $rv;
+&obtain_lock_mail($dom);
 &require_mail();
 if ($config{'mail_system'} == 1) {
 	# Update Sendmail access list
@@ -2109,6 +2110,7 @@ if ($config{'mail_system'} == 1) {
 					 $afile, $adbm, $adbmtype);
 		}
 	&unlock_file($afile);
+	$rv = undef;
 	}
 elsif ($config{'mail_system'} == 0) {
 	# Update Postfix relay_recipient_maps
@@ -2143,11 +2145,13 @@ elsif ($config{'mail_system'} == 0) {
 	foreach my $f (@mapfiles) {
 		&unlock_file($f);
 		}
-	return undef;
+	$rv = undef;
 	}
 else {
-	return $text{'mxv_unsupported'};
+	$rv = $text{'mxv_unsupported'};
 	}
+&release_lock_mail($dom);
+return $rv;
 }
 
 # register_sync_secondary_virtuser(&virtuser)
