@@ -4733,6 +4733,7 @@ massdomains_enaok=Enable Servers Now
 massdomains_enadoms=Servers to enable: $1
 
 newmxs_title=Secondary Mail Servers
+newmxs_return=secondary mail servers
 newmxs_header=Automatic secondary mail servers
 newmxs_servers=Servers to setup as secondary MXs
 newmxs_none=No usable servers have been defined in the Webmin Servers Index module yet.

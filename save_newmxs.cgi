@@ -143,5 +143,5 @@ foreach my $d (&list_domains()) {
 &run_post_actions();
 &webmin_log("mxs");
 failed:			# Goto here if one server fails
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("edit_newmxs.cgi", $text{'newmxs_return'}, "", $text{'index_return'});
 
