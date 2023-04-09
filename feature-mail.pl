@@ -2118,7 +2118,7 @@ elsif ($config{'mail_system'} == 0) {
 	if (!$rrm) {
 		return &text('mxv_rrm', 'relay_recipient_maps');
 		}
-	local @mapfiles = &postfix::get_maps_files();
+	local @mapfiles = &postfix::get_maps_files($rrm);
 	foreach my $f (@mapfiles) {
 		&lock_file($f);
 		}
@@ -2142,7 +2142,7 @@ elsif ($config{'mail_system'} == 0) {
 					   'value' => 'OK' });
 		}
 	&postfix::regenerate_any_table('relay_recipient_maps');
-	foreach my $f (@mapfiles) {
+	foreach my $f (reverse(@mapfiles)) {
 		&unlock_file($f);
 		}
 	$rv = undef;
@@ -4583,6 +4583,18 @@ elsif ($config{'mail_system'} == 0) {
 		&lock_file($postfix::config{'postfix_config_file'});
 		&postfix::set_current_value("relay_domains", join(", ", @rd));
 		&unlock_file($postfix::config{'postfix_config_file'});
+		}
+
+	# Ensure that relay_recipient_maps is configured
+	local $rrm = &postfix::get_current_value("relay_recipient_maps");
+	if (!$rrm) {
+		my $cdir = $postfix::config{'postfix_config_file'};
+		$cdir =~ s/\/[^\/]+$//;
+		$rrm = "hash:$cdir/relay_recipient_maps";
+		&postfix::set_current_value("relay_recipient_maps", $rrm);
+		&postfix::ensure_map("relay_recipient_maps");
+		&postfix::regenerate_relay_recipient_table();
+		&postfix::reload_postfix();
 		}
 	}
 elsif ($config{'mail_system'} == 2 || $config{'mail_system'} == 5) {
