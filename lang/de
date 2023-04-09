@@ -3041,7 +3041,6 @@ newmxs_evirtualmin=.. Server $1 hat nicht Virtualmin installiert
 newmxs_eversion=Server $1 hat Virtualmin $3, aber Version $2 oder später wird benötigt
 newmxs_email=E-Mail ist nicht auf diesem System aktiviert
 newmxs_emailsystem=Kein Mail System wurde konfiguriert
-newmxs_esystem=Das konfigurierte $1 Mailsystem ist nicht installiert
 newmxs_eprob=Server $1 nicht als sekundärer Mail-Server verwendet werden : $2
 newmxs_server=Webmin Server
 newmxs_mxname=Hostname für MX Eintrag
@@ -4377,8 +4376,6 @@ mrecords_ecannot=Es ist Ihnen nicht erlaubt manuell DNS Einträge zu editieren
 mrecords_err=Fehlgeschlagen DNS Einträge zu speichern
 mrecords_enone=Nichts eingegeben!
 mrecords_evalidate=Validation fehlgeschlagen : $1
-
-mxv_eaccessfile=Die spam control (access_db) Datei $1 existiert bisher nicht
 
 fixperms_err=Fehlgeschlagen Berechtigungen zu beheben
 fixperms_edoms=Keine Virtuellen Server ausgewählt

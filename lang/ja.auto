@@ -4733,6 +4733,7 @@ massdomains_enaok=今すぐサーバーを有効にする
 massdomains_enadoms=有効にするサーバー： $1
 
 newmxs_title=セカンダリメールサーバー
+newmxs_return=セカンダリ メール サーバー
 newmxs_header=自動セカンダリメールサーバー
 newmxs_servers=セカンダリMXとしてセットアップするサーバー
 newmxs_none=Webmin Servers Indexモジュールではまだ使用可能なサーバーが定義されていません。
@@ -4742,7 +4743,7 @@ newmxs_evirtualmin=..サーバー $1にはVirtualminがインストールされ�
 newmxs_eversion=サーバー $1にはVirtualmin $3がありますが、バージョン $2以降が必要です
 newmxs_email=このシステムではメールが有効になっていません
 newmxs_emailsystem=メールシステムが構成されていません
-newmxs_esystem=構成された $1メールシステムがインストールされていません
+newmxs_esystem=構成された $1 メール システムが実行されていないか、インストールされていません
 newmxs_eprob=サーバー $1はセカンダリメールサーバーとして使用できません： $2
 newmxs_already=このサーバーは既にメールドメインを中継またはホストしています
 newmxs_missing=このサーバーはメールドメインのリレーではありません
@@ -7025,9 +7026,9 @@ mrecords_evalidate=検証に失敗しました： $1
 mrecords_validate=新しいレコードを検証しますか？
 
 mxv_unsupported=リレーの制限は、SendmailとPostfixのみがサポートされています
-mxv_rrm=$1ディレクティブがPostfix構成で設定されていません
+mxv_rrm=<tt>$1</tt> ディレクティブが Postfix 構成で設定されていません
 mxv_eaccess=スパム制御（access_db）機能がSendmail構成で有効になっていません
-mxv_eaccessfile=スパム制御（access_db）ファイル $1はまだ存在しません
+mxv_eaccessfile=スパム コントロール (access_db) ファイル <tt>$1</tt> はまだ存在しません
 
 fixperms_err=権限を修正できませんでした
 fixperms_edoms=仮想サーバーが選択されていません

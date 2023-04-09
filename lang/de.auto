@@ -1765,9 +1765,11 @@ massdomains_rubymoding=Ruby-Ausführungsmodus ändern ..
 massdomains_disrusure=Möchten Sie die ausgewählten $1 -virtuellen Server wirklich deaktivieren? Dies kann später ohne Datenverlust durch erneutes Aktivieren des Servers rückgängig gemacht werden.
 massdomains_enarusure=Möchten Sie die ausgewählten $1 -virtuellen Server wirklich aktivieren? Sie werden in den Zustand zurückgebracht, in dem sie sich befanden, bevor sie deaktiviert wurden.
 
+newmxs_return=sekundäre Mailserver
 newmxs_servers=Server, die als sekundäre MXs eingerichtet werden sollen
 newmxs_none=Im Modul Webmin Servers Index wurden noch keine verwendbaren Server definiert.
 newmxs_none2=Im Modul <a href='$1'>Webmin Servers Index</a> wurden noch keine verwendbaren Server definiert.
+newmxs_esystem=Das konfigurierte Mailsystem $1 läuft nicht oder ist nicht installiert
 newmxs_already=Dieser Server leitet die Mail-Domain bereits weiter oder hostet sie
 newmxs_missing=Dieser Server ist kein Relay für die Mail-Domain
 newmxs_saveadd=Speichern Sie und fügen Sie vorhandene Domänen zu neuen Secondaries hinzu
@@ -2792,8 +2794,9 @@ mrecords_desc=Auf dieser Seite können Sie alle DNS-Einträge in der Domäne im 
 mrecords_validate=Neue Datensätze validieren?
 
 mxv_unsupported=Nur Sendmail und Postfix werden unterstützt, um die Weiterleitung einzuschränken
-mxv_rrm=Die Direktive $1 ist in der Postfix-Konfiguration nicht festgelegt
+mxv_rrm=Die Direktive <tt>$1</tt> ist in der Postfix-Konfiguration nicht gesetzt
 mxv_eaccess=Die Spam-Kontrolle (access_db) ist in der Sendmail-Konfiguration nicht aktiviert
+mxv_eaccessfile=Die Spam-Kontrolldatei (access_db) <tt>$1</tt> existiert noch nicht
 
 fixperms_dom=Beheben des Dateibesitzes und der Berechtigungen für $1 ..
 fixperms_edir=.. hat kein Home-Verzeichnis

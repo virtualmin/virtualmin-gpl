@@ -2715,7 +2715,6 @@ newmxs_evirtualmin=.. 服务器$1没有安装Virtualmin
 newmxs_eversion=服务器$1安装了Virtualmin $3，但是需要版本$2或更高版本
 newmxs_email=该系统邮件不可用
 newmxs_emailsystem=没有配置邮件系统
-newmxs_esystem=配置的$1邮件系统没有安装
 newmxs_eprob=服务器$1不能用作第二邮件服务器：$2
 newmxs_already=该服务器已经提供邮件域或邮件中继
 newmxs_missing=该服务器不是邮件中继

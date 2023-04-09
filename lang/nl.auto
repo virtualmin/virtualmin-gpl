@@ -946,6 +946,9 @@ massdomains_phpchildren=PHP-service maximale subprocessen
 massdomains_ephpvering=.. kan versie $1 niet wijzigen
 massdomains_phpchildrening=Wijzigen van maximale subprocessen van PHP-service ..
 
+newmxs_return=secundaire mailservers
+newmxs_esystem=Het geconfigureerde $1 mailsysteem is niet actief of niet geïnstalleerd
+
 newmysqls_title=Database-servers
 newmysqls_ecannot=Het is niet toegestaan om extra databaseservers te bewerken
 newmysqls_host=Hostnaam van de server
@@ -1462,6 +1465,9 @@ clone_scripts=Geïnstalleerde scriptlogboeken kopiëren.
 clone_mysqlprefix2=.. in plaats daarvan met de nieuwe databasenaam $1
 
 mrecords_validate=Nieuwe records valideren?
+
+mxv_rrm=De <tt>$1</tt>-richtlijn is niet ingesteld in de Postfix-configuratie
+mxv_eaccessfile=Het spamcontrolebestand (access_db) <tt>$1</tt> bestaat nog niet
 
 fixperms_edir=.. heeft geen homedirectory
 fixperms_failed=.. mislukt : $1

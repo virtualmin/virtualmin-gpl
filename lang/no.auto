@@ -707,6 +707,9 @@ massdomains_phpchildren=PHP-tjeneste maksimale underprosesser
 massdomains_ephpvering=.. mislyktes i å endre versjon : $1 
 massdomains_phpchildrening=Endring av PHP-tjenestens maksimale underprosesser ..
 
+newmxs_return=sekundære e-postservere
+newmxs_esystem=Det konfigurerte e-postsystemet $1 kjører ikke eller er ikke installert
+
 newmysqls_title=Databaseservere
 newmysqls_ecannot=Du har ikke lov til å redigere flere databaseservere
 newmysqls_host=Serververtsnavn
@@ -1134,6 +1137,9 @@ record_esproto=Ugyldig tjenesteprotokoll
 clone_eclash=En virtuell server med samme navn eksisterer allerede
 clone_eclash2=En bruker med samme navn eksisterer allerede
 clone_epass=Ingen passord tastet inn for den nye overordnede serveren
+
+mxv_rrm=<tt>$1</tt>-direktivet er ikke satt i Postfix-konfigurasjonen
+mxv_eaccessfile=Spamkontrollfilen (access_db) <tt>$1</tt> eksisterer ikke ennå
 
 fixperms_edir=.. har ikke en hjemmekatalog
 fixperms_failed=.. mislyktes : $1 

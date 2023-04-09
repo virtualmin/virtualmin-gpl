@@ -4733,6 +4733,7 @@ massdomains_enaok=Enable Servers Now
 massdomains_enadoms=Servers to enable: $1
 
 newmxs_title=Secondary Mail Servers
+newmxs_return=secondary mail servers
 newmxs_header=Automatic secondary mail servers
 newmxs_servers=Servers to setup as secondary MXs
 newmxs_none=No usable servers have been defined in the Webmin Servers Index module yet.
@@ -4742,7 +4743,7 @@ newmxs_evirtualmin=.. server $1 does not have Virtualmin installed
 newmxs_eversion=Server $1 has Virtualmin $3, but version $2 or later is needed
 newmxs_email=Email is not enabled on this system
 newmxs_emailsystem=No mail system has been configured
-newmxs_esystem=The configured $1 mail system is not installed
+newmxs_esystem=The configured $1 mail system is not running or not installed
 newmxs_eprob=Server $1 cannot be used as a secondary mail server : $2
 newmxs_already=This server is already relaying or hosting the mail domain
 newmxs_missing=This server is not a relay for the mail domain
@@ -7025,9 +7026,9 @@ mrecords_evalidate=Validation failed : $1
 mrecords_validate=Validate new records?
 
 mxv_unsupported=Only Sendmail and Postfix are supported for restricting relaying
-mxv_rrm=The $1 directive is not set in the Postfix configuration
+mxv_rrm=The <tt>$1</tt> directive is not set in the Postfix configuration
 mxv_eaccess=The spam control (access_db) feature is not enabled in the Sendmail configuration
-mxv_eaccessfile=The spam control (access_db) file $1 does not exist yet
+mxv_eaccessfile=The spam control (access_db) file <tt>$1</tt> does not exist yet
 
 fixperms_err=Failed to fix permissions
 fixperms_edoms=No virtual servers selected

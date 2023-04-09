@@ -2715,7 +2715,6 @@ newmxs_evirtualmin=.. 服務器$1沒有安裝Virtualmin
 newmxs_eversion=服務器$1安裝了Virtualmin $3，但是需要版本$2或更高版本
 newmxs_email=該系統郵件不可用
 newmxs_emailsystem=沒有配置郵件系統
-newmxs_esystem=配置的$1郵件系統沒有安裝
 newmxs_eprob=服務器$1不能用作第二郵件服務器：$2
 newmxs_already=該服務器已經提供郵件域或郵件中繼
 newmxs_missing=該服務器不是郵件中繼
