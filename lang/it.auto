@@ -3693,6 +3693,7 @@ newmxs_already=Questo server sta già inoltrando o ospitando il dominio di posta
 newmxs_syncing=Aggiornamento degli utenti consentiti per l'inoltro ..
 newmxs_esynced=.. alcuni falliti : $1 
 newmxs_synced=.. fatto su $1 
+newmxs_nothing=Non sono state apportate modifiche a domini o server.
 
 newmysqls_title=Server di database
 newmysqls_ecannot=Non è consentito modificare server database aggiuntivi

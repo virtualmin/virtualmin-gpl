@@ -4760,6 +4760,7 @@ newmxs_removing=$1のセカンダリドメインを削除しています. ..
 newmxs_syncing=中継が許可されたユーザーの更新 ..
 newmxs_esynced=..失敗しました： $1
 newmxs_synced=.. $1で完了
+newmxs_nothing=ドメインまたはサーバーに変更は加えられていません。
 
 newmysqls_title=データベースサーバー
 newmysqls_ecannot=追加のデータベースサーバーを編集することは許可されていません

@@ -3791,6 +3791,7 @@ newmxs_removing=Odstraňování sekundární domény na $1 ..
 newmxs_syncing=Aktualizace povolených uživatelů pro předávání.
 newmxs_esynced=.. některé selhaly : $1 
 newmxs_synced=.. provedeno na $1 
+newmxs_nothing=Nebyly provedeny žádné změny na žádných doménách ani serverech.
 
 newmysqls_title=Databázové servery
 newmysqls_ecannot=Není dovoleno upravovat další databázové servery

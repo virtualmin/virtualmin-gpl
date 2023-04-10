@@ -709,6 +709,7 @@ massdomains_phpchildrening=Endring av PHP-tjenestens maksimale underprosesser ..
 
 newmxs_return=sekundære e-postservere
 newmxs_esystem=Det konfigurerte e-postsystemet $1 kjører ikke eller er ikke installert
+newmxs_nothing=Ingen endringer ble gjort på noen domener eller servere.
 
 newmysqls_title=Databaseservere
 newmysqls_ecannot=Du har ikke lov til å redigere flere databaseservere

@@ -2485,6 +2485,7 @@ newmxs_removing=Suppression du domaine secondaire sur $1 ..
 newmxs_syncing=Mise à jour des utilisateurs autorisés pour le relais ..
 newmxs_esynced=.. certains ont échoué : $1 
 newmxs_synced=.. fait sur $1 
+newmxs_nothing=Aucune modification n'a été apportée aux domaines ou aux serveurs.
 
 newmysqls_title=Serveurs de base de données
 newmysqls_ecannot=Vous n'êtes pas autorisé à modifier des serveurs de base de données supplémentaires
