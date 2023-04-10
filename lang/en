@@ -7324,7 +7324,7 @@ cloud_s3_awscli_installing=Installing the AWS CLI package ..
 cloud_s3_awscli_title=Install AWS CLI
 cloud_s3_awscli_return=S3 form
 cloud_s3_akey=Default S3 login
-cloud_s3_creds=AWS credentials are already available on this system from EC2 metadata
+cloud_s3_creds=AWS credentials are already available on this system from EC2 metadata.
 cloud_noneset=None set
 cloud_below=Entered below ..
 cloud_s3_access=Access key
@@ -7350,15 +7350,17 @@ cloud_rs_endpoint=Rackspace server location
 cloud_users=Used by backups
 cloud_nousers=None yet
 cloud_gaccount=Using account $1 and project $2
+cloud_gcpcreds=Using GCP credentials
 cloud_daccount=Using login $1
 cloud_google_account=Google account email address
+cloud_google_creds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full Cloud Storage access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=OAuth2 client ID
 cloud_google_secret=OAuth2 client secret
 cloud_google_project=Project ID
 cloud_google_location=Location for new buckets
 cloud_google_oauth=OAuth2 code from Google
 cloud_google_token=OAuth2 token from Google
-cloud_s3_longdesc=The credentials on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
+cloud_s3_longdesc=The credentials to enter on this page can be found on the Security Credentials page of your account on the <a href=https://console.aws.amazon.com/ target=_blank>AWS Console</a>.
 cloud_google_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>. You must create an <b>OAuth Client ID</b> credential, with the <b>Authorized redirect URI</b> set to <tt>$1</tt> . Once created, the <b>client ID</b> and <b>client secret</b> can be entered here.
 cloud_dropbox_longdesc=Before you can backup to Dropbox, you must first <a href=http://www.virtualmin.com/dropbox-referral target=_blank>create an account</a> on their website if you don't already have one.
 cloud_bb_longdesc=Before you can backup to Backblaze, you must first <a href=https://backblaze.com/ target=_blank>create an account</a>, and then enable <b>B2 Cloud Storage</b> on the <b>My Settings</b> page. Then you need to generate an Application key with all capabilities on the <b>App Keys</b> page.

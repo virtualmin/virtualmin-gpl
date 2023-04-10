@@ -8,7 +8,7 @@ my @rv = ( { 'name' => 's3',
 	     'prefix' => [ 's3', 's3rrs' ],
 	     'url' => 'https://aws.amazon.com/s3/',
 	     'desc' => $text{'cloud_s3desc'},
-	     'longdesc' => $text{'cloud_s3_longdesc'} },
+	     'longdesc' => \&cloud_s3_longdesc },
 	   { 'name' => 'rs',
 	     'prefix' => [ 'rs' ],
 	     'url' => 'https://www.rackspace.com/openstack/public/files',
@@ -20,7 +20,7 @@ if ($virtualmin_pro) {
 		    'prefix' => [ 'gcs' ],
 		    'url' => 'https://cloud.google.com/storage',
 		    'desc' => $text{'cloud_googledesc'},
-		    'longdesc' => &text('cloud_google_longdesc', $ourl) });
+		    'longdesc' => \&cloud_google_longdesc });
 	push(@rv, { 'name' => 'dropbox',
 		    'prefix' => [ 'dropbox' ],
 		    'url' => 'https://www.dropbox.com/',
@@ -77,17 +77,22 @@ else {
 	}
 }
 
+sub cloud_s3_longdesc
+{
+if (!$config{'s3_akey'} && &can_use_aws_s3_creds()) {
+	return $text{'cloud_s3_creds'};
+	}
+else {
+	return $text{'cloud_s3_longdesc'};
+	}
+}
+
 sub cloud_s3_show_inputs
 {
 my $rv;
 
 # Default login
-if (!$config{'s3_akey'} && &can_use_aws_s3_creds()) {
-	# Tell the user that credentials are already setup
-	$rv .= &ui_table_row($text{'cloud_s3_akey'},
-			     "<i>$text{'cloud_s3_creds'}</i>");
-	}
-else {
+if ($config{'s3_akey'} || !&can_use_aws_s3_creds()) {
 	# Prompt for login
 	$rv .= &ui_table_row($text{'cloud_s3_akey'},
 		&ui_radio("s3_akey_def", $config{'s3_akey'} ? 0 : 1,
@@ -296,8 +301,24 @@ if ($config{'google_account'} &&
 				 "<tt>$config{'google_project'}</tt>"),
 	       };
 	}
+elsif (&can_use_gcloud_storage_creds()) {
+	return { 'ok' => 1,
+		 'desc' => $text{'cloud_gcpcreds'},
+	       };
+	}
 else {
 	return { 'ok' => 0 };
+	}
+}
+
+sub cloud_google_longdesc
+{
+if (!$config{'google_account'} && &can_use_gcloud_storage_creds()) {
+	return $text{'cloud_google_creds'};
+	}
+else {
+	my $ourl = &get_miniserv_base_url()."/$module_name/oauth.cgi";
+	return &text('cloud_google_longdesc', $ourl);
 	}
 }
 
@@ -305,21 +326,32 @@ sub cloud_google_show_inputs
 {
 my $rv;
 
-# Google account
-$rv .= &ui_table_row($text{'cloud_google_account'},
-	&ui_textbox("google_account", $config{'google_account'}, 40));
+if (&can_use_gcloud_storage_creds() && !$config{'google_account'}) {
+	$rv .= &ui_table_row($text{'cloud_google_account'},
+		&get_gcloud_account());
 
-# Google OAuth2 client ID
-$rv .= &ui_table_row($text{'cloud_google_clientid'},
-	&ui_textbox("google_clientid", $config{'google_clientid'}, 80));
+	# Optional GCE project name
+	$rv .= &ui_table_row($text{'cloud_google_project'},
+		&ui_opt_textbox("google_project", $config{'google_project'}, 40,
+			$text{'default'}." (".&get_gcloud_project().")"));
+	}
+else {
+	# Google account
+	$rv .= &ui_table_row($text{'cloud_google_account'},
+		&ui_textbox("google_account", $config{'google_account'}, 40));
 
-# Google client secret
-$rv .= &ui_table_row($text{'cloud_google_secret'},
-	&ui_textbox("google_secret", $config{'google_secret'}, 60));
+	# Google OAuth2 client ID
+	$rv .= &ui_table_row($text{'cloud_google_clientid'},
+		&ui_textbox("google_clientid", $config{'google_clientid'}, 80));
 
-# GCE project name
-$rv .= &ui_table_row($text{'cloud_google_project'},
-	&ui_textbox("google_project", $config{'google_project'}, 40));
+	# Google client secret
+	$rv .= &ui_table_row($text{'cloud_google_secret'},
+		&ui_textbox("google_secret", $config{'google_secret'}, 60));
+
+	# GCE project name
+	$rv .= &ui_table_row($text{'cloud_google_project'},
+		&ui_textbox("google_project", $config{'google_project'}, 40));
+	}
 
 # Default location for new buckets
 $rv .= &ui_table_row($text{'cloud_google_location'},
@@ -340,44 +372,64 @@ sub cloud_google_parse_inputs
 {
 my ($in) = @_;
 my $reauth = 0;
+my $authed = 0;
 
-# Parse google account
-$in->{'google_account'} =~ /^\S+\@\S+$/ ||
-	&error($text{'cloud_egoogle_account'});
-$reauth++ if ($config{'google_account'} ne $in->{'google_account'});
-$config{'google_account'} = $in->{'google_account'};
+if (&can_use_gcloud_storage_creds() && !$config{'google_account'}) {
+	# Just parse project name
+	$authed = 1;
+	if ($in->{'google_project_def'}) {
+		$config{'google_project'} = '';
+		}
+	else {
+		$in->{'google_project'} =~ /^\S+$/ ||
+			&error($text{'cloud_egoogle_project'});
+		$config{'google_project'} = $in->{'google_project'};
+		}
+	}
+else {
+	# Parse google account
+	$in->{'google_account'} =~ /^\S+\@\S+$/ ||
+		&error($text{'cloud_egoogle_account'});
+	$reauth++ if ($config{'google_account'} ne $in->{'google_account'});
+	$config{'google_account'} = $in->{'google_account'};
 
-# Parse client ID
-$in->{'google_clientid'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_clientid'});
-$reauth++ if ($config{'google_clientid'} ne $in->{'google_clientid'});
-$config{'google_clientid'} = $in->{'google_clientid'};
+	# Parse client ID
+	$in->{'google_clientid'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_clientid'});
+	$reauth++ if ($config{'google_clientid'} ne $in->{'google_clientid'});
+	$config{'google_clientid'} = $in->{'google_clientid'};
 
-# Parse client secret
-$in->{'google_secret'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_secret'});
-$reauth++ if ($config{'google_secret'} ne $in->{'google_secret'});
-$config{'google_secret'} = $in->{'google_secret'};
+	# Parse client secret
+	$in->{'google_secret'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_secret'});
+	$reauth++ if ($config{'google_secret'} ne $in->{'google_secret'});
+	$config{'google_secret'} = $in->{'google_secret'};
 
-# Parse project name
-$in->{'google_project'} =~ /^\S+$/ ||
-	&error($text{'cloud_egoogle_project'});
-$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
-$config{'google_project'} = $in->{'google_project'};
+	# Parse project name
+	$in->{'google_project'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_project'});
+	$reauth++ if ($config{'google_project'} ne $in->{'google_project'});
+	$config{'google_project'} = $in->{'google_project'};
+	}
 
 # Parse bucket location
 $config{'google_location'} = $in->{'google_location'};
 
-$reauth++ if (!$config{'google_oauth'});
-
 &lock_file($module_config_file);
-$config{'cloud_oauth_mode'} = $reauth ? 'google' : undef;
+if (!$authed) {
+	$reauth++ if (!$config{'google_oauth'});
+	$config{'cloud_oauth_mode'} = $reauth ? 'google' : undef;
+	}
 &save_module_config();
 &unlock_file($module_config_file);
 
 if (!$reauth) {
 	# Nothing more to do - either the OAuth2 token was just set, or the
 	# settings were saved with no change
+	return undef;
+	}
+if ($authed) {
+	# Nothing to do, because token comes from the gcloud command
 	return undef;
 	}
 

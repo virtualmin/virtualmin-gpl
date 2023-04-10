@@ -16,12 +16,15 @@ $state = &$sfunc($p);
 
 # First check if provider can be used
 my $cfunc = "check_".$prov->{'name'};
+my $longdesc = $prov->{'longdesc'};
+if (ref($longdesc) eq 'CODE') {
+	$longdesc = &$longdesc();
+	}
 if (defined(&$cfunc)) {
 	my ($err, $warn) = &$cfunc();
 	if ($err) {
 		print &ui_alert_box(
 			&text('cloud_echeck', $prov->{'desc'}, $err), 'warn', undef, undef, '');
-		my $longdesc = $prov->{'longdesc'};
 		if ($longdesc) {
 			print &ui_alert_box($longdesc, 'info', undef, undef, '');
 			}
@@ -31,8 +34,8 @@ if (defined(&$cfunc)) {
 	print &ui_alert_box($warn, 'warn') if ($warn);
 	}
 
-if ($prov->{'longdesc'}) {
-	print $prov->{'longdesc'},"<p>\n";
+if ($longdesc) {
+	print $longdesc,"<p>\n";
 	}
 
 print &ui_form_start("save_cloud.cgi", "post");
