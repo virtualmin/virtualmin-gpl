@@ -1079,7 +1079,7 @@ while(<OUT>) {
 	if (/subject=.*L\s*=\s*([^\/,]+)/) {
 		$rv{'l'} = $1;
 		}
-	if (/subject=.*O\s*=\s*([^\/,]+)/) {
+	if (/subject=.*O\s*=\s*"(.*?)"/ || /subject=.*O\s*=\s*([^\/,]+)/) {
 		$rv{'o'} = $1;
 		}
 	if (/subject=.*OU\s*=\s*([^\/,]+)/) {
@@ -1101,7 +1101,7 @@ while(<OUT>) {
 	if (/issuer=.*L\s*=\s*([^\/,]+)/) {
 		$rv{'issuer_l'} = $1;
 		}
-	if (/issuer=.*O\s*=\s*([^\/,]+)/) {
+	if (/issuer=.*O\s*=\s*"(.*?)"/ || /issuer=.*O\s*=\s*([^\/,]+)/) {
 		$rv{'issuer_o'} = $1;
 		}
 	if (/issuer=.*OU\s*=\s*([^\/,]+)/) {
