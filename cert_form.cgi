@@ -450,7 +450,7 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 			print &ui_table_row($text{'cert_hash'},
 				&ui_select("ctype", $d->{'letsencrypt_ctype'},
 					[ [ "rsa", $text{'cert_type_rsa'} ],
-					  [ "ec", $text{'cert_type_ec'} ] ]));
+					  [ "ecdsa", $text{'cert_type_ec'} ] ]));
 			}
 
 		# Recent renewal details
@@ -544,5 +544,5 @@ print &ui_table_row($text{'cert_hash'},
 		    &ui_select("hash", $config{'cert_type'},
 			       [ [ "sha1", "SHA1" ],
 				 [ "sha2", "SHA2" ],
-				 [ "ec", $text{'cert_type_ec'} ] ]));
+				 [ "ecdsa", $text{'cert_type_ec'} ] ]));
 }

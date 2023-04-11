@@ -1079,7 +1079,7 @@ while(<OUT>) {
 	if (/subject=.*L\s*=\s*([^\/,]+)/) {
 		$rv{'l'} = $1;
 		}
-	if (/subject=.*O\s*=\s*([^\/,]+)/) {
+	if (/subject=.*O\s*=\s*"(.*?)"/ || /subject=.*O\s*=\s*([^\/,]+)/) {
 		$rv{'o'} = $1;
 		}
 	if (/subject=.*OU\s*=\s*([^\/,]+)/) {
@@ -1101,7 +1101,7 @@ while(<OUT>) {
 	if (/issuer=.*L\s*=\s*([^\/,]+)/) {
 		$rv{'issuer_l'} = $1;
 		}
-	if (/issuer=.*O\s*=\s*([^\/,]+)/) {
+	if (/issuer=.*O\s*=\s*"(.*?)"/ || /issuer=.*O\s*=\s*([^\/,]+)/) {
 		$rv{'issuer_o'} = $1;
 		}
 	if (/issuer=.*OU\s*=\s*([^\/,]+)/) {
@@ -1790,10 +1790,10 @@ my $subject = &webmin::build_ssl_subject($country, $state, $city, $org,
 # Call openssl and write to temp files
 my $keytemp = &transname();
 my $certtemp = &transname();
-my $ctypeflag = $ctype eq "sha2" || $ctype eq "ec" ? "-sha256" : "";
+my $ctypeflag = $ctype eq "sha2" || $ctype =~ /^ec/ ? "-sha256" : "";
 my $addtextsup = &compare_version_numbers(&get_openssl_version(), '>=', '1.1.1') ? "-addext extendedKeyUsage=serverAuth" : "";
 my $out;
-if ($ctype eq "ec") {
+if ($ctype =~ /^ec/) {
 	my $pubtemp = &transname();
 	$out = &backquote_logged(
 		"openssl ecparam -genkey -name prime256v1 ".
@@ -1842,7 +1842,7 @@ $size ||= $webmin::default_key_size;
 # Generate the key
 my $keytemp = &transname();
 my $out;
-if ($ctype eq "ec") {
+if ($ctype =~ /^ec/) {
 	$out = &backquote_command(
 		"openssl ecparam -genkey -name prime256v1 -out ".
 		quotemeta($keytemp)." 2>&1 </dev/null");
@@ -3170,7 +3170,7 @@ if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-		&get_global_from_address(), $ctype eq "ec" ? "ecdsa" : "rsa");
+		&get_global_from_address(), $ctype =~ /^ec/ ? "ecdsa" : "rsa");
 	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
@@ -3178,7 +3178,7 @@ if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
 	# Fall back to DNS
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-		&get_global_from_address(), $ctype);
+		&get_global_from_address(), $ctype =~ /^ec/ ? "ecdsa" : "rsa");
 	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {

@@ -97,7 +97,7 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
-if ($ctype eq "ecdsa") {
+if ($ctype =~ /^ec/) {
 	&letsencrypt_supports_ec() ||
 		&usage("The Let's Encrypt client on your system does ".
 		       "not support EC certificates");
