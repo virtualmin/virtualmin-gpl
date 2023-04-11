@@ -68,7 +68,7 @@ foreach my $d (&list_domains()) {
 	my $changed = 0;
 
 	my @ids = split(/\s+/, $d->{'mx_servers'});
-	my @added;
+	my (@added, @deleted);
 	if ($in{'addexisting'}) {
 		# Add to new secondaries
 		if (!$changed++) {
@@ -111,6 +111,7 @@ foreach my $d (&list_domains()) {
 				&$second_print(&text('newmxs_failed', $err));
 				}
 			@ids = grep { $_ != $server->{'id'} } @ids;
+			push(@deleted, $server);
 			}
 		}
 	if ($changed) {
@@ -122,10 +123,15 @@ foreach my $d (&list_domains()) {
 			}
 		}
 
-	# Re-sync virtusers for domain to secondaries, if any were added
-	if (@added) {
+	# Re-sync virtusers for domain to secondaries, if any were added or
+	# removed
+	if (@added || @deleted) {
 		&$first_print($text{'newmxs_syncing'});
-		@rv = &sync_secondary_virtusers($d, \@added);
+		@rv = ( );
+		push(@rv, &sync_secondary_virtusers($d, \@added, 0))
+			if (@added);
+		push(@rv, &sync_secondary_virtusers($d, \@deleted, 1))
+			if (@deleted);
 		@errs = grep { $_->[1] } @rv;
 		if (@errs) {
 			&$second_print(&text('newmxs_esynced',

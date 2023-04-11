@@ -1972,7 +1972,7 @@ elsif ($config{'mail_system'} == 6) {
 &register_sync_secondary_virtuser($_[0]);
 }
 
-# sync_secondary_virtusers(&domain, [&only-servers])
+# sync_secondary_virtusers(&domain, [&only-servers], [delete-all])
 # Find all virtusers in the given domain, and make sure all secondary MX
 # servers running Postfix or Sendmail have only those users on their list to
 # allow relaying for.
@@ -1980,13 +1980,13 @@ elsif ($config{'mail_system'} == 6) {
 # Returns a list of tuples containing the server object and error message.
 sub sync_secondary_virtusers
 {
-local ($d, $onlyservers) = @_;
+local ($d, $onlyservers, $delete) = @_;
 local @servers = $onlyservers ? @$onlyservers : &list_mx_servers();
 return if (!@servers);
 
 # Build list of mailboxes in the domain
 local @mailboxes;
-if (!$d->{'disabled'}) {
+if (!$d->{'disabled'} && !$delete) {
 	foreach my $v (&list_virtusers(1)) {
 		my ($mb, $dom) = split(/\@/, $v->{'from'});
 		if ($dom eq $d->{'dom'}) {
