@@ -125,6 +125,24 @@ if ($in{'newkey_mode'} != 2) {
 	&$second_print($text{'setup_done'});
 	}
 
+# Clear the CA cert if no longer valid
+if ($in{'cert_mode'} != 2 && ($cafile = &get_website_ssl_file($d, "ca"))) {
+	&$first_print($text{'newkey_checkingca'});
+	my $info = &cert_file_info($d->{'ssl_cert'}, $d);
+	my $cainfo = &cert_file_info($cafile, $d);
+	if (!$cainfo || !$cainfo->{'cn'}) {
+		&$second_print($text{'newkey_echeckingca2'});
+		}
+	elsif ($cainfo->{'o'} ne $info->{'issuer_o'} ||
+	       $cainfo->{'cn'} ne $info->{'issuer_cn'}) {
+		&save_website_ssl_file($d, "ca", undef);
+		&$second_print($text{'newkey_echeckingca'});
+		}
+	else {
+		&$second_print($text{'setup_done'});
+		}
+	}
+
 # Update other services using the cert
 &update_all_domain_service_ssl_certs($d, \@beforecerts);
 
