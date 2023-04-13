@@ -1204,6 +1204,9 @@ cert_eperipfail=Service $1 ist fehlgeschlagen
 csr_selfing=Generieren eines selbstsignierten Zertifikats und eines privaten Schlüssels.
 csr_csring=Signaturanforderung und privaten Schlüssel generieren.
 
+newkey_checkingca=Validierung, dass das CA-Zertifikat mit dem neuen Zertifikat übereinstimmt ..
+newkey_echeckingca=.. CA stimmt nicht überein und wurde entfernt.
+newkey_echeckingca2=.. CA-Zertifikat konnte nicht gelesen werden!
 newkey_ecertfilehome=Die Zertifikatdatei $1 muss sich im Ausgangsverzeichnis des virtuellen Servers befinden
 newkey_enewkeyfile=Fehler beim Lesen der privaten Schlüsseldatei $1
 newkey_enewkeyfilehome=Die private Schlüsseldatei $1 muss sich im Home-Verzeichnis des virtuellen Servers befinden
@@ -2012,6 +2015,7 @@ newquotacheck_who=Überprüfen Sie die Quoten für
 newquotacheck_udoing=Überprüfen der Benutzerkontingente für $1 ..
 newquotacheck_gdoing=Überprüfen Sie die Gruppenkontingente für $1 ..
 
+phpmode_return=Website-Optionen
 phpmode_title2=PHP-Optionen
 phpmode_ecannot=Sie dürfen keine Website-Optionen für diesen virtuellen Server konfigurieren
 phpmode_header=PHP-Optionen für diese Domain
@@ -3021,8 +3025,10 @@ cloud_rs_endpoint=Standort des Rackspace-Servers
 cloud_users=Wird von Backups verwendet
 cloud_nousers=Noch keine
 cloud_gaccount=Verwenden von Konto $1 und Projekt $2
+cloud_gcpcreds=Verwenden von GCP-Anmeldedaten
 cloud_daccount=Login $1 verwenden
 cloud_google_account=E-Mail-Adresse des Google-Kontos
+cloud_google_creds=GCP-Anmeldedaten sind auf diesem System bereits über den Befehl <tt>gcloud</tt> verfügbar. Dies ist normalerweise der Fall, wenn es auf Google Compute Engine ausgeführt wird. Möglicherweise müssen Sie dem Dienstkonto unten in der <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=OAuth2-Client-ID
 cloud_google_secret=OAuth2-Client-Geheimnis
 cloud_google_project=Projekt-ID

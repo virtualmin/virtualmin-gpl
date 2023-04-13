@@ -1397,6 +1397,9 @@ newkey_ecert2=丟失或無效的簽名SSL證書： $1
 newkey_enewkey2=SSL私鑰缺失或無效： $1
 newkey_savingcert=正在保存證書 ..
 newkey_savingkey=正在保存私鑰 ..
+newkey_checkingca=驗證 CA 證書是否與新證書匹配 ..
+newkey_echeckingca=.. CA 不匹配，已被刪除。
+newkey_echeckingca2=.. 無法讀取 CA 證書！
 newkey_epass=私鑰受密碼保護，但未輸入任何密碼或密碼不正確
 newkey_ematch=檢測到證書問題： $1
 newkey_ecertfile=讀取證書文件 $1失敗
@@ -2342,6 +2345,7 @@ webmin_phpini2=$1的PHP $2配置
 
 newquotacheck_esupport=文件系統不支持或不需要配額檢查
 
+phpmode_return=網站選項
 phpmode_title2=PHP選項
 phpmode_header=該域的PHP選項
 phpmode_fpm=FPM（以虛擬服務器所有者身份運行）
@@ -4124,8 +4128,10 @@ cloud_rs_endpoint=機架空間服務器位置
 cloud_users=由備份使用
 cloud_nousers=還沒有
 cloud_gaccount=使用帳戶 $1和項目 $2
+cloud_gcpcreds=使用 GCP 憑據
 cloud_daccount=使用登錄 $1
 cloud_google_account=Google帳戶的電子郵件地址
+cloud_google_creds=GCP 憑據已可通過 <tt>gcloud</tt> 命令在此系統上使用。在 Google Compute Engine 上運行時通常就是這種情況。但是，您可能需要在 <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM 控制台</a>。
 cloud_google_clientid=OAuth2客戶端ID
 cloud_google_secret=OAuth2客戶端機密
 cloud_google_project=專案編號

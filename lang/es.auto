@@ -893,6 +893,9 @@ newkey_ecert2=Certificado SSL firmado faltante o no válido : $1
 newkey_enewkey2=Clave privada SSL faltante o no válida : $1
 newkey_savingcert=Guardando certificado ..
 newkey_savingkey=Guardando clave privada ..
+newkey_checkingca=Validando que el certificado de CA coincida con el nuevo certificado. ..
+newkey_echeckingca=.. CA no coincide y se eliminó.
+newkey_echeckingca2=.. ¡No se pudo leer el certificado CA!
 newkey_epass=La clave privada está protegida con contraseña, pero no se ingresó ninguna o la contraseña era incorrecta
 newkey_ematch=Problema de certificado detectado : $1
 newkey_ecertfile=Error al leer el archivo del certificado $1
@@ -1535,6 +1538,7 @@ webmin_plog=Registro de errores de PHP para $1
 
 newquotacheck_esupport=La comprobación de cuotas no es compatible ni requerida por sus sistemas de archivos
 
+phpmode_return=opciones del sitio web
 phpmode_title2=Opciones PHP
 phpmode_header=Opciones de PHP para este dominio
 phpmode_fpm=FPM (ejecutar como propietario del servidor virtual)
@@ -2819,8 +2823,10 @@ cloud_rs_endpoint=Ubicación del servidor de Rackspace
 cloud_users=Usado por copias de seguridad
 cloud_nousers=Ninguna todavia
 cloud_gaccount=Usando la cuenta $1 y el proyecto $2
+cloud_gcpcreds=Usar credenciales de GCP
 cloud_daccount=Usando login $1
 cloud_google_account=Dirección de correo electrónico de la cuenta de Google
+cloud_google_creds=Las credenciales de GCP ya están disponibles en este sistema desde el comando <tt>gcloud</tt>. Este suele ser el caso cuando se ejecuta en Google Compute Engine. Sin embargo, es posible que deba otorgar permisos completos de acceso a Cloud Storage a la cuenta de servicio a continuación en la <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=ID de cliente OAuth2
 cloud_google_secret=Secreto de cliente OAuth2
 cloud_google_project=Projecto ID
