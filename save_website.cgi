@@ -237,6 +237,7 @@ if (defined(&theme_post_save_domain)) {
 
 # All done
 &webmin_log("website", "domain", $d->{'dom'});
-&ui_print_footer(&domain_footer_link($d),
-		 "", $text{'index_return'});
+&ui_print_footer(
+    "edit_website.cgi?dom=$d->{'id'}", $text{'phpmode_return'},
+    &domain_footer_link($d), "", $text{'index_return'});
 
