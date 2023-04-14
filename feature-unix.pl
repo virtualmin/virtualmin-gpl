@@ -128,29 +128,21 @@ if (&has_home_quotas()) {
 	&set_server_quotas($_[0]);
 	}
 
-&$first_print($text{'setup_usermail2'});
-eval {
-	# Create virtuser pointing to new user, and possibly generics entry
-	local $main::error_must_die = 1;
-	if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
-		local @virts = &list_virtusers();
-		local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
-		local ($virt) = grep { $_->{'from'} eq $email } @virts;
-		if (!$virt) {
-			$virt = { 'from' => $email,
-				  'to' => [ $_[0]->{'user'} ] };
-			&create_virtuser($virt);
-			&sync_alias_virtuals($_[0]);
-			}
-		if ($config{'generics'}) {
-			&create_generic($_[0]->{'user'}, $email, 1);
-			}
+# Create virtuser pointing to new user, and possibly generics entry
+if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
+	&$first_print($text{'setup_usermail2'});
+	local @virts = &list_virtusers();
+	local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
+	local ($virt) = grep { $_->{'from'} eq $email } @virts;
+	if (!$virt) {
+		$virt = { 'from' => $email,
+			  'to' => [ $_[0]->{'user'} ] };
+		&create_virtuser($virt);
+		&sync_alias_virtuals($_[0]);
 		}
-	};
-if ($@) {
-	&$second_print(&text('setup_eusermail2', "$@"));
-	}
-else {
+	if ($config{'generics'}) {
+		&create_generic($_[0]->{'user'}, $email, 1);
+		}
 	&$second_print($text{'setup_done'});
 	}
 
