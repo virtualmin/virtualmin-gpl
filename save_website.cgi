@@ -80,9 +80,15 @@ if (defined($in{'http2'})) {
 		$changed = 1;
 		}
 	elsif ($in{'http2'} == 0 && $hashttp2) {
-		# Turn off
+		# Turn off, when protocols are set in the domain
 		&$first_print($text{'phpmode_http2off'});
 		$prots = [ grep { !/^h2/ } @$prots ];
+		$changed = 1;
+		}
+	elsif ($in{'http2'} == 0 && !$hashttp2) {
+		# Turn off, when set globally
+		&$first_print($text{'phpmode_http2off'});
+		$prots = [ grep { !/^h2/ } @$canprots ];
 		$changed = 1;
 		}
 	if ($changed) {
