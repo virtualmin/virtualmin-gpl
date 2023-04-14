@@ -131,18 +131,7 @@ if (&has_home_quotas()) {
 # Create virtuser pointing to new user, and possibly generics entry
 if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
 	&$first_print($text{'setup_usermail2'});
-	local @virts = &list_virtusers();
-	local $email = $_[0]->{'user'}."\@".$_[0]->{'dom'};
-	local ($virt) = grep { $_->{'from'} eq $email } @virts;
-	if (!$virt) {
-		$virt = { 'from' => $email,
-			  'to' => [ $_[0]->{'user'} ] };
-		&create_virtuser($virt);
-		&sync_alias_virtuals($_[0]);
-		}
-	if ($config{'generics'}) {
-		&create_generic($_[0]->{'user'}, $email, 1);
-		}
+	&create_email_for_unix($_[0]);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -181,6 +170,7 @@ local ($d, $oldd) = @_;
 if (!$d->{'pass_set'} &&
     $d->{'user'} eq $oldd->{'user'} &&
     $d->{'home'} eq $oldd->{'home'} &&
+    $d->{'mail'} == $oldd->{'mail'} &&
     $d->{'owner'} eq $oldd->{'owner'} &&
     $d->{'group'} eq $oldd->{'group'} &&
     $d->{'quota'} eq $oldd->{'quota'} &&
@@ -311,6 +301,12 @@ if (!$d->{'parent'}) {
 elsif ($d->{'parent'} && !$oldd->{'parent'}) {
 	# Unix feature has been turned off .. so delete the user and group
 	&delete_unix($oldd);
+	}
+if ($d->{'mail'} && !$oldd->{'mail'} && $config{'mail_system'} != 5) {
+	# Add email for the domain user
+	&$first_print($text{'setup_usermail2'});
+	&create_email_for_unix($d);
+	&$second_print($text{'setup_done'});
 	}
 }
 
@@ -1322,6 +1318,25 @@ $uinfo->{'gid'} = $d->{'ugid'} || $d->{'gid'};
 &modify_user($uinfo, $olduinfo, undef);
 &set_server_quotas($d);
 &$second_print($text{'setup_done'});
+}
+
+# create_email_for_unix(&domain)
+# Setup email for the virtual server's unix user
+sub create_email_for_unix
+{
+my ($d) = @_;
+local @virts = &list_virtusers();
+local $email = $d->{'user'}."\@".$d->{'dom'};
+local ($virt) = grep { $_->{'from'} eq $email } @virts;
+if (!$virt) {
+	$virt = { 'from' => $email,
+		  'to' => [ $d->{'user'} ] };
+	&create_virtuser($virt);
+	&sync_alias_virtuals($d);
+	}
+if ($config{'generics'}) {
+	&create_generic($d->{'user'}, $email, 1);
+	}
 }
 
 $done_feature_script{'unix'} = 1;
