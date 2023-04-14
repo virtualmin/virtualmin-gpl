@@ -70,7 +70,10 @@ if (defined($in{'http2'})) {
 		# Turn on
 		&$first_print($text{'phpmode_http2on'});
 		my @h2 = grep { /^h2/ } @$canprots;
-		$prots = [ &unique(@$prots, @h2) ];
+		# Always remove http/1.1 before adding HTTP2,
+		# to have a correct directives order
+		$prots = grep { !/^http\/1\.1/ } @$prots;
+		$prots = [ &unique(@$prots, @h2, 'http/1.1') ];
 		$changed = 1;
 		}
 	elsif ($in{'http2'} == 2 && @$prots) {
