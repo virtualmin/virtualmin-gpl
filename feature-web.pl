@@ -1500,9 +1500,18 @@ if ($tmpl->{'web_writelogs'}) {
 			}
 		}
 	}
-if ($tmpl->{'web_http2'} && &supports_http2()) {
-	# Enable HTTPv2 if supported by Apache
-	push(@dirs, "Protocols h2 h2c http/1.1");
+# Enable or Disable HTTPv2 if supported by Apache
+if (&supports_http2()) {
+	# Enable HTTPv2
+	push(@dirs, "Protocols h2 h2c http/1.1")
+		if ($tmpl->{'web_http2'} == 1);
+
+	# Disable HTTPv2 explicitly, as Apache 2.4.37+ have HTTP2
+	# enabled by default, but we want it to be disabled
+	push(@dirs, "Protocols http/1.1")
+		if ($tmpl->{'web_http2'} == 2 &&
+		    &compare_version_numbers(
+		        $apache::site{'fullversion'}, '2.4.37') >= 0);
 	}
 if (!&supports_suexec()) {
 	# Remove unsupported SuexecUserGroup directive
@@ -2815,7 +2824,10 @@ if ($config{'proxy_pass'} == 2) {
 
 # Enable HTTP2 for new websites
 print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
-	&ui_yesno_radio("web_http2", $tmpl->{'web_http2'}));
+    &ui_radio("web_http2", int($tmpl->{'web_http2'}),
+	      [ [ 0, $text{'default'} ],
+	        [ 1, $text{'yes'} ],
+	        [ 2, $text{'no'} ] ]));
 
 # Default redirects
 print &ui_table_hr();
