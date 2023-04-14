@@ -663,6 +663,9 @@ cert_eperipfail=Service $1 is mislukt
 
 newkey_savingcert=Certificaat opslaan. ..
 newkey_savingkey=Privésleutel opslaan. ..
+newkey_checkingca=Valideren dat CA-certificaat overeenkomt met nieuw certificaat ..
+newkey_echeckingca=.. CA komt niet overeen en is verwijderd.
+newkey_echeckingca2=.. CA-certificaat kon niet worden gelezen!
 newkey_ecertfile=Kan certificaatbestand $1 niet lezen
 newkey_ecertfilehome=Certificaatbestand $1 moet zich in de basismap van de virtuele server bevinden
 newkey_enewkeyfile=Kan privésleutelbestand $1 niet lezen
@@ -1065,6 +1068,7 @@ webmin_plog=PHP-foutenlogboek voor $1
 
 newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of vereist door uw bestandssystemen
 
+phpmode_return=website-opties
 phpmode_title2=PHP-opties
 phpmode_header=PHP-opties voor dit domein
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)
@@ -1785,8 +1789,10 @@ cloud_rs_endpoint=Locatie van Rackspace-server
 cloud_users=Gebruikt door back-ups
 cloud_nousers=Nog geen
 cloud_gaccount=Account $1 en project $2 gebruiken
+cloud_gcpcreds=GCP-referenties gebruiken
 cloud_daccount=Login $1 gebruiken
 cloud_google_account=E-mailadres van Google-account
+cloud_google_creds=GCP-inloggegevens zijn al beschikbaar op dit systeem via de opdracht <tt>gcloud</tt>. Dit is meestal het geval bij gebruik van Google Compute Engine. Mogelijk moet u echter volledige toegangsrechten voor Cloud Storage verlenen aan het serviceaccount hieronder in de <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-console</a>.
 cloud_google_clientid=OAuth2-client-ID
 cloud_google_secret=OAuth2-clientgeheim
 cloud_google_project=Project-ID

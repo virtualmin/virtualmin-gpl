@@ -5283,6 +5283,7 @@ newquotacheck_udoing=Checking user quotas on $1 ..
 newquotacheck_gdoing=Check group quotas on $1 ..
 
 phpmode_title=Website Options
+phpmode_return=website options
 phpmode_title2=PHP Options
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
 phpmode_header=PHP options for this domain

@@ -507,6 +507,10 @@ cert_eperiperr=Kunne ikke lagre servicesertifikater
 cert_eperipinst=Tjeneste $1 er ikke installert
 cert_eperipfail=Tjeneste $1 mislyktes
 
+newkey_checkingca=Validerer at CA-sertifikatet samsvarer med nytt sertifikat ..
+newkey_echeckingca=.. CA samsvarer ikke, og har blitt fjernet.
+newkey_echeckingca2=.. CA-sertifikatet kunne ikke leses!
+
 newtmpl_name0=Standard instillinger
 newtmpl_name1=Innstillinger for sub-servere
 
@@ -815,6 +819,7 @@ webmin_plog=PHP-feillogg for $1
 
 newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene dine
 
+phpmode_return=nettstedalternativer
 phpmode_title2=PHP-alternativer
 phpmode_header=PHP-alternativer for dette domenet
 phpmode_fpm=FPM (kjøres som virtuell servereier)
@@ -1223,8 +1228,10 @@ cloud_rs_endpoint=Rackspace-serverplassering
 cloud_users=Brukt av sikkerhetskopier
 cloud_nousers=Ingen enda
 cloud_gaccount=Bruker konto $1 og prosjekt $2 
+cloud_gcpcreds=Bruker GCP-legitimasjon
 cloud_daccount=Bruker innlogging $1 
 cloud_google_account=E-postadresse for Google-kontoen
+cloud_google_creds=GCP-legitimasjon er allerede tilgjengelig på dette systemet fra <tt>gcloud</tt>-kommandoen. Dette er vanligvis tilfellet når du kjører på Google Compute Engine. Det kan imidlertid hende du må gi full tilgangstillatelse til Cloud Storage til tjenestekontoen nedenfor på <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-konsollen</a>.
 cloud_google_clientid=OAuth2-klient-ID
 cloud_google_secret=OAuth2-klienthemmelighet
 cloud_google_project=Prosjekt-ID

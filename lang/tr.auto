@@ -1520,6 +1520,9 @@ newkey_ecert2=Eksik veya geçersiz imzalı SSL sertifikası : $1
 newkey_enewkey2=Eksik veya geçersiz SSL özel anahtarı : $1 
 newkey_savingcert=Sertifika kaydediliyor ..
 newkey_savingkey=Özel anahtar kaydediliyor ..
+newkey_checkingca=CA sertifikasının yeni sertifikayla eşleştiği doğrulanıyor ..
+newkey_echeckingca=.. CA eşleşmiyor ve kaldırıldı.
+newkey_echeckingca2=.. CA sertifikası okunamadı!
 newkey_epass=Özel anahtar parola korumalı, ancak hiçbiri girilmedi veya parola yanlış
 newkey_ematch=Sertifika sorunu algılandı : $1 
 newkey_ecertfile=$1 sertifika dosyası okunamadı
@@ -2595,6 +2598,7 @@ webmin_phpini2=$1 için PHP $2 yapılandırması
 
 newquotacheck_esupport=Kota denetimi dosya sistemleriniz tarafından desteklenmiyor veya gerekli değil
 
+phpmode_return=web sitesi seçenekleri
 phpmode_title2=PHP Seçenekleri
 phpmode_header=Bu etki alanı için PHP seçenekleri
 phpmode_fcgid=FCGId (sanal sunucu sahibi olarak çalıştır)
@@ -4632,8 +4636,10 @@ cloud_rs_endpoint=Rackspace sunucusunun konumu
 cloud_users=Yedeklemeler tarafından kullanılır
 cloud_nousers=Henüz yok
 cloud_gaccount=$1 hesabını ve $2 projesini kullanma
+cloud_gcpcreds=GCP kimlik bilgilerini kullanma
 cloud_daccount=$1 giriş bilgilerini kullanma
 cloud_google_account=Google hesabı e-posta adresi
+cloud_google_creds=GCP kimlik bilgileri bu sistemde <tt>gcloud</tt> komutuyla zaten mevcut. Google Compute Engine'de çalışırken durum genellikle böyledir. Ancak, <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Konsolu</a>.
 cloud_google_clientid=OAuth2 istemci kimliği
 cloud_google_secret=OAuth2 istemci sırrı
 cloud_google_project=Proje Kimliği
