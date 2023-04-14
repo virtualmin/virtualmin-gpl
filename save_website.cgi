@@ -70,9 +70,7 @@ if (defined($in{'http2'})) {
 		# Turn on
 		&$first_print($text{'phpmode_http2on'});
 		my @h2 = grep { /^h2/ } @$canprots;
-		# Always remove http/1.1 before adding HTTP2
-		$prots = grep { !/^http\/1\.1/ } @$prots;
-		$prots = [ &unique(@$prots, @h2, 'http/1.1') ];
+		$prots = [ &unique(@$prots, @h2) ];
 		$changed = 1;
 		}
 	elsif ($in{'http2'} == 2 && @$prots) {
@@ -85,12 +83,6 @@ if (defined($in{'http2'})) {
 		# Turn off, when protocols are set in the domain
 		&$first_print($text{'phpmode_http2off'});
 		$prots = [ grep { !/^h2/ } @$prots ];
-		# HTTP2 is enabled by default, disable it
-		if (&indexof('http/1.1', @$prots) < 0 &&
-			# HTTP2 is enabled by default force disable it
-			&compare_version_numbers($apache::site{'fullversion'}, '2.4.37') >= 0) {
-			push(@$prots, "http/1.1");
-			}
 		$changed = 1;
 		}
 	elsif ($in{'http2'} == 0 && !$hashttp2) {
