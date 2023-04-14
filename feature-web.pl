@@ -1501,17 +1501,17 @@ if ($tmpl->{'web_writelogs'}) {
 		}
 	}
 # Enable or Disable HTTPv2 if supported by Apache
-if (&supports_http2()) {
-	# Enable HTTPv2
-	push(@dirs, "Protocols h2 h2c http/1.1")
-		if ($tmpl->{'web_http2'} == 1);
-
-	# Disable HTTPv2 explicitly, as Apache 2.4.37+ have HTTP2
-	# enabled by default, but we want it to be disabled
-	push(@dirs, "Protocols http/1.1")
-		if ($tmpl->{'web_http2'} == 2 &&
-		    &compare_version_numbers(
-		        $apache::site{'fullversion'}, '2.4.37') >= 0);
+my $supp = &supports_http2();
+if ($supp) {
+	if ($tmpl->{'web_http2'} == 1) {
+		# Enable HTTPv2
+		push(@dirs, "Protocols h2 h2c http/1.1")
+		}
+	elsif ($tmpl->{'web_http2'} == 2 && $supp == 2) {
+		# Disable HTTPv2 explicitly, as Apache 2.4.37+ have HTTP2
+		# enabled by default, but we want it to be disabled
+		push(@dirs, "Protocols http/1.1")
+		}
 	}
 if (!&supports_suexec()) {
 	# Remove unsupported SuexecUserGroup directive
@@ -3995,7 +3995,8 @@ return $apache::site{'fullversion'} &&
 }
 
 # supports_http2()
-# Returns 1 if HTTPv2 is supported by Apache on this system
+# Returns 1 if HTTPv2 is supported by Apache on this system, 2 if it is enabled
+# by default, or 0 if not supported at all
 sub supports_http2
 {
 &require_apache();
@@ -4010,7 +4011,9 @@ elsif (!$apache::site{'fullversion'} ||
        &compare_versions($apache::site{'fullversion'}, "2.4.17") < 0) {
 	$err = "Apache must be at least version 2.4.17";
 	}
-my @rv = ($err ? 0 : 1, $err);
+my $ok = $err ? 0 :
+	 &compare_versions($apache::site{'fullversion'}, "2.4.37") >= 0 ? 2 : 1;
+my @rv = ($ok, $err);
 return wantarray ? @rv : $rv[0];
 }
 
