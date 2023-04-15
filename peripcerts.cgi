@@ -27,7 +27,7 @@ foreach my $st (&list_service_ssl_cert_types()) {
 	if ($ok < 0) {
 		&error(&text('cert_eperipinst', $st->{'id'}));
 		}
-	elsif ($ok == 0) {
+	elsif (defined($ok) && $ok == 0) {
 		&error(&text('cert_eperipfail', $st->{'id'}));
 		}
 	}

@@ -188,10 +188,12 @@ if (&domain_has_ssl_cert($d)) {
 
 	# Show button to copy to per-service, if any are missing
 	my @smissing;
+	my @sall;
 	foreach my $st (&list_service_ssl_cert_types()) {
 		next if (!$st->{'dom'} && !$st->{'virt'});
 		next if (!$st->{'dom'} && !$d->{'virt'});
 		($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
+		push(@sall, $st);
 		push(@smissing, $st) if (!$a);
 		}
 	if (@smissing && &can_webmin_cert()) {
@@ -203,6 +205,16 @@ if (&domain_has_ssl_cert($d)) {
 			    &vui_make_and(map { $_->{'desc'} } @smissing)),
 			&ui_hidden("dom", $in{'dom'}).
 			&ui_hidden("enable", 1));
+		}
+	# Show button to uninstall all per-service
+	else {
+		print &ui_hr() if (!$ui_hr++);
+		print &ui_buttons_row(
+			"peripcerts.cgi",
+			$text{'cert_removeall'},
+			&text('cert_removealldesc',
+			    &vui_make_and(map { $_->{'desc'} } @sall)),
+			&ui_hidden("dom", $in{'dom'}));
 		}
 
 	# Show button to copy to global
