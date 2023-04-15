@@ -153,6 +153,13 @@ if (&domain_has_ssl_cert($d)) {
 	print &ui_table_row($text{'cert_kdownload'},
 			    &ui_links_row(\@dlinks), 3);
 
+	# Can copy as Global
+	my @gmissing;
+	foreach my $st (&list_service_ssl_cert_types()) {
+		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;
+		push(@gmissing, $st) if (!$a);
+		}
+
 	# Expiry status, if we have it
 	my $expiry = &parse_notafter_date($info->{'notafter'});
 	if ($expiry) {
@@ -172,6 +179,8 @@ if (&domain_has_ssl_cert($d)) {
 		print &ui_table_row($text{'cert_etime'}, $emsg);
 		}
 
+	print &ui_table_row($text{'cert_def'},
+		(@gmissing && &can_webmin_cert()) ? $text{'no'} : $text{'yes'}, 3);
 	print &ui_table_end();
 
 	my $ui_hr;
@@ -218,11 +227,6 @@ if (&domain_has_ssl_cert($d)) {
 		}
 
 	# Show button to copy to global
-	my @gmissing;
-	foreach my $st (&list_service_ssl_cert_types()) {
-		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;
-		push(@gmissing, $st) if (!$a);
-		}
 	if (@gmissing && &can_webmin_cert()) {
 		print &ui_hr() if (!$ui_hr++);
 		print &ui_buttons_row(
