@@ -713,6 +713,8 @@ massdomains_phpchildrening=Endring av PHP-tjenestens maksimale underprosesser ..
 
 newmxs_return=sekundære e-postservere
 newmxs_esystem=Det konfigurerte e-postsystemet $1 kjører ikke eller er ikke installert
+newmxs_save=Lagre for fremtidig bruk i alle nye domener
+newmxs_saveadd=Lagre og søk nå på alle eksisterende domener
 newmxs_nothing=Ingen endringer ble gjort på noen domener eller servere.
 
 newmysqls_title=Databaseservere

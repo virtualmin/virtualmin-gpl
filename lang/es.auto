@@ -1360,7 +1360,8 @@ massdomains_phpchildrening=Cambiando los subprocesos máximos del servicio PHP .
 newmxs_return=servidores de correo secundarios
 newmxs_none2=Aún no se han definido servidores utilizables en el módulo <a href='$1'>Índice de servidores Webmin</a>.
 newmxs_esystem=El sistema de correo $1 configurado no se está ejecutando o no está instalado
-newmxs_saveadd=Guarde y agregue dominios existentes a nuevas secundarias
+newmxs_save=Guardar para uso futuro en todos los dominios nuevos
+newmxs_saveadd=Guardar y aplicar ahora a todos los dominios existentes
 newmxs_syncing=Actualización de usuarios permitidos para retransmitir ..
 newmxs_esynced=.. algunos fallaron : $1
 newmxs_synced=.. hecho en $1

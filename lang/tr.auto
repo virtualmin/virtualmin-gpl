@@ -2320,7 +2320,8 @@ massdomains_enadoms=Etkinleştirilecek sunucular: $1
 newmxs_return=ikincil posta sunucuları
 newmxs_none2=<a href='$1'>Webmin Sunucuları Dizini</a> modülünde henüz kullanılabilir hiçbir sunucu tanımlanmadı.
 newmxs_esystem=Yapılandırılan $1 posta sistemi çalışmıyor veya kurulu değil
-newmxs_saveadd=Kaydet ve mevcut alan adlarını yeni ikincil öğelere ekle
+newmxs_save=Tüm yeni etki alanlarında ileride kullanmak üzere kaydedin
+newmxs_saveadd=Kaydedin ve şimdi tüm mevcut alan adlarına uygulayın
 newmxs_syncing=İzin verilen kullanıcılar geçiş için güncelleniyor.
 newmxs_esynced=.. bazıları başarısız oldu : $1 
 newmxs_synced=.. $1 tarihinde yapıldı

@@ -2097,7 +2097,8 @@ massdomains_enadoms=要啟用的服務器： $1
 newmxs_return=二級郵件服務器
 newmxs_none2=<a href='$1'>Webmin服務器索引</a>模塊中尚未定義可用的服務器。
 newmxs_esystem=配置的 $1 郵件系統未運行或未安裝
-newmxs_saveadd=保存並將現有域添加到新的輔助域
+newmxs_save=保存以備將來在所有新域中使用
+newmxs_saveadd=保存並立即應用於所有現有域
 newmxs_syncing=更新允許的用戶進行中繼 ..
 newmxs_esynced=..一些失敗： $1
 newmxs_synced=..在 $1上完成

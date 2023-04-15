@@ -1109,7 +1109,6 @@ newmxs_server=Webmin server
 newmxs_mxname=Hostname per record MX
 newmxs_same=Stesso hostname
 newmxs_emxname=Hostname non valido per il record MX per $1
-newmxs_saveadd=Salva e aggiungi domini esistenti a nuovi secondari
 newmxs_doing=Test del server MX secondario $1 ..
 newmxs_dom=Aggiornamento server virtuale $1
 newmxs_adding=Aggiunta dominio secondario su $1 ..

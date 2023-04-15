@@ -4085,7 +4085,6 @@ newmxs_server=Webmin tjener
 newmxs_mxname=Vertsnavn for MX oppføringer
 newmxs_same=Samme som vertsnavn
 newmxs_emxname=Ugyldig vertsnavn for MX oppføring for $1
-newmxs_saveadd=Lagre, og legg eksisterende domener til nye sekundære
 newmxs_doing=Tester sekundær MX tjener $1 ..
 newmxs_dom=Oppdaterer virtuell tjener $1 ..
 newmxs_adding=Legger til sekundært domene på $1 ..

@@ -1775,7 +1775,8 @@ newmxs_none2=Im Modul <a href='$1'>Webmin Servers Index</a> wurden noch keine ve
 newmxs_esystem=Das konfigurierte Mailsystem $1 läuft nicht oder ist nicht installiert
 newmxs_already=Dieser Server leitet die Mail-Domain bereits weiter oder hostet sie
 newmxs_missing=Dieser Server ist kein Relay für die Mail-Domain
-newmxs_saveadd=Speichern Sie und fügen Sie vorhandene Domänen zu neuen Secondaries hinzu
+newmxs_save=Für die zukünftige Verwendung in allen neuen Domains speichern
+newmxs_saveadd=Sparen und jetzt auf alle bestehenden Domains anwenden
 newmxs_syncing=Aktualisieren der zulässigen Benutzer für die Weiterleitung.
 newmxs_nothing=Es wurden keine Änderungen an Domänen oder Servern vorgenommen.
 

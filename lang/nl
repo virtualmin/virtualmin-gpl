@@ -3852,7 +3852,6 @@ newmxs_server=Webmin server
 newmxs_mxname=Host naam voor MX record
 newmxs_same=Zelfde als hostnaam
 newmxs_emxname=Ongeldige hostnaam voor MX record voor $1
-newmxs_saveadd=Opslaan en toevoegen van bestaande domeinen aan nieuwe secondaries
 newmxs_doing=Testen van secundaire MX server $1 ..
 newmxs_dom=Updaten van virtuele server $1 ..
 newmxs_adding=Toevoegen van secondaire domein op $1 ..

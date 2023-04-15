@@ -25,7 +25,7 @@ foreach $s (sort { $a->{'host'} cmp $b->{'host'} } @servers) {
 # Render the table
 print &ui_form_columns_table(
 	"save_newmxs.cgi",
-	[ [ "save", $text{'save'} ],
+	[ [ "save", $text{'newmxs_save'} ],
 	  [ "addexisting", $text{'newmxs_saveadd'} ] ],
 	0,
 	undef,

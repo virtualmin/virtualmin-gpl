@@ -2097,7 +2097,8 @@ massdomains_enadoms=要启用的服务器： $1
 newmxs_return=二级邮件服务器
 newmxs_none2=<a href='$1'>Webmin服务器索引</a>模块中尚未定义可用的服务器。
 newmxs_esystem=配置的 $1 邮件系统未运行或未安装
-newmxs_saveadd=保存并将现有域添加到新的辅助域
+newmxs_save=保存以备将来在所有新域中使用
+newmxs_saveadd=保存并立即应用于所有现有域
 newmxs_syncing=更新允许的用户进行中继 ..
 newmxs_esynced=..一些失败： $1
 newmxs_synced=..在 $1上完成
