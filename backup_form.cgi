@@ -88,13 +88,14 @@ if ($in{'new'} || $in{'sched'}) {
 # Fields to select domains
 @bak = split(/\s+/, $sched->{'doms'});
 @doms = grep { &can_backup_domain($_) } &list_domains();
-$dis1 = &js_disable_inputs([ "doms" ], [ ], "onClick");
-$dis2 = &js_disable_inputs([ ], [ "doms" ], "onClick");
+@dlist = ( "doms_opts", "doms_vals", "doms_add", "doms_remove" );
+$dis1 = &js_disable_inputs(\@dlist, [ ], "onClick");
+$dis2 = &js_disable_inputs([ ], \@dlist, "onClick");
 $dsel = &ui_radio("all", int($sched->{'all'}),
 		[ [ 1, $text{'backup_all'}, $dis1 ],
 		  [ 0, $text{'backup_sel'}, $dis2 ],
 		  [ 2, $text{'backup_exc'}, $dis2 ] ])."<br>\n".
-	&servers_input("doms", \@bak, \@doms, $sched->{'all'} == 1);
+	&servers_input("doms", \@bak, \@doms, $sched->{'all'} == 1, 1);
 $dsel .= "<br>".&ui_checkbox(
 	"parent", 1, &hlink($text{'backup_parent'}, 'backup_parent'),
 	$sched->{'parent'});

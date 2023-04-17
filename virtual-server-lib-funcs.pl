@@ -11025,16 +11025,25 @@ else {
 	}
 }
 
-# servers_input(name, &ids, &domains, [disabled])
+# servers_input(name, &ids, &domains, [disabled], [use-multi-select])
 # Returns HTML for a multi-server selection field
 sub servers_input
 {
-local ($name, $ids, $doms, $dis) = @_;
-local $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
-return &ui_select($name, $ids,
-		  [ map { [ $_->{'id'}, &show_domain_name($_) ] }
-			sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ],
-		  $sz, 1, 0, $dis);
+my ($name, $ids, $doms, $dis, $ms) = @_;
+my $sz = scalar(@$doms) > 10 ? 10 : scalar(@$doms) < 5 ? 5 : scalar(@$doms);
+my $opts = [ map { [ $_->{'id'}, &show_domain_name($_) ] }
+		 sort { $a->{'dom'} cmp $b->{'dom'} } @$doms ];
+my $vals = [ ];
+foreach my $id (@$ids) {
+	my $d = &get_domain($id);
+	push(@$vals, [ $id, $d ? &show_domain_name($d) : $id ]);
+	}
+if ($ms) {
+	return &ui_multi_select($name, $vals, $opts, $sz, 1, $dis);
+	}
+else {
+	return &ui_select($name, $vals, $opts, $sz, 1, 0, $dis);
+	}
 }
 
 # one_server_input(name, id, &domains, [disabled])

@@ -46,11 +46,11 @@ else {
 		@doms = grep { &can_edit_domain($_) } &list_domains();
 		}
 	elsif ($in{'all'} == 2) {
-		%exc = map { $_, 1 } split(/\0/, $in{'doms'});
+		%exc = map { $_, 1 } split(/\s+/, $in{'doms'});
 		@doms = grep { !$exc{$_->{'id'}} } &list_domains();
 		}
 	else {
-		foreach $did (split(/\0/, $in{'doms'})) {
+		foreach $did (split(/\s+/, $in{'doms'})) {
 			push(@doms, &get_domain($did));
 			}
 		}
@@ -120,7 +120,7 @@ else {
 	# Update the schedule object
 	$sched->{'desc'} = $in{'desc'};
 	$sched->{'all'} = $in{'all'};
-	$sched->{'doms'} = join(" ", split(/\0/, $in{'doms'}));
+	$sched->{'doms'} = join(" ", split(/\s+/, $in{'doms'}));
 	if (&can_edit_plans()) {
 		$sched->{'plan'} = $in{'plan_def'} ? undef :
 			join(" ", split(/\0/, $in{'plan'}));

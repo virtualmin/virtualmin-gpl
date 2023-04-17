@@ -50,7 +50,7 @@ if ($in{'all'} == 1) {
 	}
 elsif ($in{'all'} == 2) {
 	# All except selected
-	%exc = map { $_, 1 } split(/\0/, $in{'doms'});
+	%exc = map { $_, 1 } split(/\s+/, $in{'doms'});
 	@doms = grep { &can_backup_domain($_, $acluser) &&
 		       !$exc{$_->{'id'}} } &list_domains();
 	if ($in{'parent'}) {
@@ -59,7 +59,7 @@ elsif ($in{'all'} == 2) {
 	}
 else {
 	# Only selected
-	foreach $did (split(/\0/, $in{'doms'})) {
+	foreach $did (split(/\s+/, $in{'doms'})) {
 		local $dinfo = &get_domain($did);
 		if ($dinfo && &can_backup_domain($dinfo, $acluser)) {
 			push(@doms, $dinfo);
