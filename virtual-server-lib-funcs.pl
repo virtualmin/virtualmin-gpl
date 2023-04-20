@@ -15345,7 +15345,7 @@ if (&domain_has_website()) {
 		}
 
 	# Check if any new PHP versions have shown up, and re-generate their
-	# cgi and fcgid wrappers
+	# cgi and fcgid wrappers and INI files
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
@@ -15356,7 +15356,8 @@ if (&domain_has_website()) {
 				    &list_domains()) {
 			eval {
 				local $main::error_must_die = 1;
-				local $mode = &get_domain_php_mode($d);
+				local $mode = $d->{'php_mode'} ||
+					      &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
 				    $mode ne "fpm" && $mode ne "none") {
 					&obtain_lock_web($d);
