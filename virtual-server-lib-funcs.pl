@@ -10789,7 +10789,7 @@ return $rv;
 }
 
 # check_domain_hashpass(&domain)
-# Shows a checkbox to enable hashsed passwords
+# Shows a checkbox to enable hashed passwords
 # if domain and template don't have it aligned
 sub check_domain_hashpass
 {
