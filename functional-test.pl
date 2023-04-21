@@ -144,6 +144,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--list-tests") {
 		$list_tests = 1;
 		}
+	elsif ($a eq "--script") {
+		push(@testscripts, split(/\s+/, shift(@ARGV)));
+		}
 	elsif ($a eq "--template") {
 		$tmplname = shift(@ARGV);
 		$tmplname || &usage("--template must be followed by a ".
@@ -1725,32 +1728,35 @@ $allscript_tests = [
 
 # Test each script that we can
 foreach my $sname (&list_scripts(1)) {
+	next if (@testscripts && &indexof($sname, @testscripts) < 0);
 	my $script = &get_script($sname);
 	next if (!$script);
 	next if (!$script->{'testable'});
 
-	push(@$allscript_tests,
-		# Install it
-		{ 'command' => 'install-script.pl',
-		  'args' => [ [ 'domain', $test_domain ],
-			      [ 'type', $script->{'name'} ],
-			      [ 'path', '/' ],
-			      [ 'db', 'mysql '.$test_domain_db ],
-			      [ 'version', 'latest' ],
-			    ],
-		},
+	foreach my $ver (@{$script->{'install_versions'}}) {
+		push(@$allscript_tests,
+			# Install it
+			{ 'command' => 'install-script.pl',
+			  'args' => [ [ 'domain', $test_domain ],
+				      [ 'type', $script->{'name'} ],
+				      [ 'path', '/' ],
+				      [ 'db', 'mysql '.$test_domain_db ],
+				      [ 'version', $ver ],
+				    ],
+			},
 
-		# Test that it works
-		{ 'command' => $wget_command.'http://'.$test_domain.'/',
-		  'antigrep' => 'Test home page',
-		},
+			# Test that it works
+			{ 'command' => $wget_command.'http://'.$test_domain.'/',
+			  'antigrep' => 'Test home page',
+			},
 
-		# Un-install it
-		{ 'command' => 'delete-script.pl',
-		  'args' => [ [ 'domain', $test_domain ],
-			      [ 'type', $script->{'name'} ] ],
-		},
-		);
+			# Un-install it
+			{ 'command' => 'delete-script.pl',
+			  'args' => [ [ 'domain', $test_domain ],
+				      [ 'type', $script->{'name'} ] ],
+			},
+			);
+		}
 	}
 
 # Cleanup the domain
@@ -10931,6 +10937,7 @@ print "                           [--no-cleanup | --skip-cleanup]\n";
 print "                           [--output]\n";
 print "                           [--migrate $mig]\n";
 print "                           [--user webmin-login --pass password]\n";
+print "                           [--script name]*\n";
 exit(1);
 }
 
