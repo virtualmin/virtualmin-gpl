@@ -43,6 +43,11 @@ sub script_phpmyadmin_php_vers
 return ( 5 );
 }
 
+sub script_phpmyadmin_testable
+{
+return 1;
+}
+
 sub script_phpmyadmin_php_modules
 {
 return ("mysql", "json", "mbstring", "session",

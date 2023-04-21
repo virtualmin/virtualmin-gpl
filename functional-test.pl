@@ -1709,6 +1709,57 @@ else {
 	$fpmscript_tests = [];
 	}
 
+# Test that testable scripts install OK and don't 500
+$allscript_tests = [
+	# Create a domain for the scripts
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'mysql' ], [ 'dns' ],
+		      [ 'postgres' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+	];
+
+# Test each script that we can
+foreach my $sname (&list_scripts(1)) {
+	my $script = &get_script($sname);
+	next if (!$script);
+	next if (!$script->{'testable'});
+
+	push(@$allscript_tests,
+		# Install it
+		{ 'command' => 'install-script.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'type', $script->{'name'} ],
+			      [ 'path', '/' ],
+			      [ 'db', 'mysql '.$test_domain_db ],
+			      [ 'version', 'latest' ],
+			    ],
+		},
+
+		# Test that it works
+		{ 'command' => $wget_command.'http://'.$test_domain.'/',
+		  'antigrep' => 'Test home page',
+		},
+
+		# Un-install it
+		{ 'command' => 'delete-script.pl',
+		  'args' => [ [ 'domain', $test_domain ],
+			      [ 'type', $script->{'name'} ] ],
+		},
+		);
+	}
+
+# Cleanup the domain
+push(@$allscript_tests,
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	);
+
 # Database tests
 $database_tests = [
 	# Create a domain for the databases
@@ -10607,6 +10658,7 @@ $alltests = { '_config' => $_config_tests,
 	      'htpasswd' => $htpasswd_tests,
 	      'reset' => $reset_tests,
 	      'compression' => $compression_tests,
+	      'allscript' => $allscript_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL

@@ -37,6 +37,11 @@ sub script_phppgadmin_php_vers
 return ( 5 );
 }
 
+sub script_phppgadmin_testable
+{
+return 1;
+}
+
 sub script_phppgadmin_php_modules
 {
 return ("pgsql");

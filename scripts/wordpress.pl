@@ -33,6 +33,11 @@ sub script_wordpress_php_vers
 return ( 5 );
 }
 
+sub script_wordpress_testable
+{
+return 1;
+}
+
 sub script_wordpress_php_modules
 {
 return ( "mysql", "gd", "json", "xml" );

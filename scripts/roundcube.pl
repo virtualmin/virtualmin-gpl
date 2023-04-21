@@ -31,6 +31,11 @@ sub script_roundcube_category
 return "Email";
 }
 
+sub script_roundcube_testable
+{
+return 1;
+}
+
 sub script_roundcube_php_modules
 {
 local ($d, $ver, $phpver, $opts) = @_;
