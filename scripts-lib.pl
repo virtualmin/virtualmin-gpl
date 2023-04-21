@@ -116,6 +116,7 @@ local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
 local $overlapfunc = "script_${name}_overlap";
 local $migratedfunc = "script_${name}_migrated";
+local $testablefunc = "script_${name}_testable";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -152,6 +153,7 @@ local $rv = { 'name' => $name,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
 	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
 	      'overlap' => defined(&$overlapfunc) ? &$overlapfunc() : undef,
+	      'testable' => defined(&$testablefunc) ? &$testablefunc() : undef,
 	      'dir' => $sdir,
 	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",
@@ -2731,6 +2733,15 @@ if ($copydir) {
 			"(find ".quotemeta($path).
 			" -type f | xargs chmod ug+rx) 2>&1");
 		last if ($out !~ /permission\s+denied/i);
+		}
+
+	# If the destination has an index.html file and the source does not,
+	# but does have index.php, remove the HTML
+	my $hfile = $copydir."/index.html";
+	$hfile = $copydir."/index.htm" if (!-r $hfile);
+	my $pfile = $dir.($subdir ? "/$subdir" : "")."/index.php";
+	if (-r $hfile && -r $pfile) {
+		&unlink_file_as_domain_user($d, $hfile);
 		}
 
 	local $out;
