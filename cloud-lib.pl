@@ -301,7 +301,7 @@ if ($config{'google_account'} &&
 				 "<tt>$config{'google_project'}</tt>"),
 	       };
 	}
-elsif (&can_use_gcloud_storage_creds()) {
+elsif ($virtualmin_pro && &can_use_gcloud_storage_creds()) {
 	return { 'ok' => 1,
 		 'desc' => $text{'cloud_gcpcreds'},
 	       };
@@ -313,7 +313,8 @@ else {
 
 sub cloud_google_longdesc
 {
-if (!$config{'google_account'} && &can_use_gcloud_storage_creds()) {
+if (!$config{'google_account'} && $virtualmin_pro &&
+    &can_use_gcloud_storage_creds()) {
 	return $text{'cloud_google_creds'};
 	}
 else {
@@ -326,7 +327,8 @@ sub cloud_google_show_inputs
 {
 my $rv;
 
-if (&can_use_gcloud_storage_creds() && !$config{'google_account'}) {
+if ($virtualmin_pro && &can_use_gcloud_storage_creds() &&
+   !$config{'google_account'}) {
 	$rv .= &ui_table_row($text{'cloud_google_account'},
 		&get_gcloud_account());
 
@@ -374,7 +376,8 @@ my ($in) = @_;
 my $reauth = 0;
 my $authed = 0;
 
-if (&can_use_gcloud_storage_creds() && !$config{'google_account'}) {
+if ($virtualmin_pro && &can_use_gcloud_storage_creds() &&
+   !$config{'google_account'}) {
 	# Just parse project name
 	$authed = 1;
 	if ($in->{'google_project_def'}) {
