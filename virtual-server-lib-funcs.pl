@@ -13569,7 +13569,9 @@ if (!-d $links_cache_dir) {
 # Delete all cached information for some or all domains
 sub clear_links_cache
 {
-foreach my $d (@_) {
+my (@list) = @_;
+@list = (0) if (!@list); 
+foreach my $d (@list) {
 	opendir(CACHEDIR, $links_cache_dir);
 	foreach my $f (readdir(CACHEDIR)) {
 		my $del;
