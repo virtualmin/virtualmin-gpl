@@ -13570,7 +13570,7 @@ if (!-d $links_cache_dir) {
 sub clear_links_cache
 {
 my (@list) = @_;
-@list = (0) if (!@list); 
+@list = (undef) if (!@list); 
 foreach my $d (@list) {
 	opendir(CACHEDIR, $links_cache_dir);
 	foreach my $f (readdir(CACHEDIR)) {
@@ -13584,6 +13584,7 @@ foreach my $d (@list) {
 			$del = $f =~ /\-\Q$d\E$/ ? 1 : 0;
 			}
 		else {
+			# Deleting everything
 			$del = 1;
 			}
 		&unlink_file("$links_cache_dir/$f") if ($del);
