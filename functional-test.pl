@@ -9714,6 +9714,22 @@ $dns_tests = [
 	{ 'command' => 'host -t A testing2.'.$test_dns_subdomain.' '.$dnsserver,
 	},
 
+	# Backup and restore the DNS feature for all domains
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_dns_subdomain ],
+		      [ 'feature', 'dns' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'domain', $test_dns_subdomain ],
+		      [ 'feature', 'dns' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
 	# Split the sub-domain into it's own zone
 	{ 'command' => 'modify-dns.pl',
 	  'args' => [ [ 'domain', $test_dns_subdomain ],
