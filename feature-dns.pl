@@ -2369,17 +2369,23 @@ my ($d, $file) = @_;
 my $r = &require_bind($d);
 &$first_print($text{'backup_dnscp'});
 my ($recs, $zonefile) = &get_domain_dns_records_and_file($d);
-my $z = &get_bind_zone($d->{'dom'}, undef, $d);
-if (!$zonefile || !$z) {
-	# Zone doesn't exist!
-	&$second_print($text{'backup_dnsnozone'});
+if (!$zonefile) {
+	# Zone file doesn't exist!
+	&$second_print($text{'backup_dnsnozone2'});
 	return 0;
 	}
-my $f = &bind8::find("file", $z->{'members'});
-my $absfile = &remote_foreign_call($r, "bind8", "make_chroot",
-    &remote_foreign_call($r, "bind8", "absolute_path", $f->{'values'}->[0]));
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
+	my $z = &get_bind_zone($d->{'dom'}, undef, $d);
+	if (!$z) {
+		# Zone doesn't exist!
+		&$second_print($text{'backup_dnsnozone'});
+		return 0;
+		}
+	my $f = &bind8::find("file", $z->{'members'});
+	my $absfile = &remote_foreign_call($r, "bind8", "make_chroot",
+	    &remote_foreign_call($r, "bind8", "absolute_path",
+				 $f->{'values'}->[0]));
 	&copy_write_remote_as_domain_user($d, $r, $absfile, $file);
 
 	# Also save DNSSEC keys, if possible
