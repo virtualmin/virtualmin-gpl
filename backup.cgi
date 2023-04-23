@@ -223,7 +223,13 @@ if ($dests[0] eq "download:" || $dests[0] eq "downloadlink:") {
 	&run_post_actions();
 	if (!$ok) {
 		unlink($temp);
-		&error($text{'backup_edownloadfailed'});
+		if ($dests[0] eq "download:") {
+			&error($text{'backup_edownloadfailed'});
+			}
+		else {
+			&ui_print_footer("/$module_name/list_sched.cgi",
+					 $text{'sched_return'});
+			}
 		}
 	elsif ($dests[0] eq "download:") {
 		# Just output the file
