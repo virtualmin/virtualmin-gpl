@@ -323,7 +323,7 @@ foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
 	if ($mode < 0) {
-		&$first_print(&text('backup_edesturl', $desturl, $user));
+		&$first_print(&text('backup_edesturl', &nice_backup_url($desturl), $user));
 		return (0, 0, $doms);
 		}
 	local $starpass = "*" x length($pass);
@@ -332,7 +332,7 @@ foreach my $desturl (@$desturls) {
 		$mkdir = 1;
 		}
 
-	&$first_print(&text('backup_desttest', $desturl));
+	&$first_print(&text('backup_desttest', &nice_backup_url($desturl)));
 	if ($mode == 1) {
 		# Try FTP login
 		local $ftperr;
