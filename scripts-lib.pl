@@ -2740,6 +2740,7 @@ if ($copydir) {
 	my $hfile = $copydir."/index.html";
 	$hfile = $copydir."/index.htm" if (!-r $hfile);
 	my $pfile = $dir.($subdir ? "/$subdir" : "")."/index.php";
+	$pfile = glob($pfile);
 	if (-r $hfile && -r $pfile) {
 		&unlink_file_as_domain_user($d, $hfile);
 		}
