@@ -560,8 +560,10 @@ if ($subdomain) {
 
 # Validate args and work out defaults for those unset
 $domain = lc(&parse_domain_name($domain));
-$err = &valid_domain_name($domain);
-&usage($err) if ($err);
+if (!$skipwarnings) {
+	$err = &valid_domain_name($domain);
+	&usage($err) if ($err);
+	}
 &lock_domain_name($domain);
 &domain_name_clash($domain) && &usage($text{'setup_edomain4'});
 if ($parentdomain) {
