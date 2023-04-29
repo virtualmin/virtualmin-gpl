@@ -2377,19 +2377,23 @@ if (!$zonefile) {
 if (!$d->{'dns_submode'}) {
 	# Can just copy the whole zone file
 	my $z = &get_bind_zone($d->{'dom'}, undef, $d);
-	if (!$z) {
-		# Zone doesn't exist!
-		&$second_print($text{'backup_dnsnozone'});
-		return 0;
+	my $absfile;
+	if ($z) {
+		# Use the absolute file path from BIND
+		my $f = &bind8::find("file", $z->{'members'});
+		$absfile = &remote_foreign_call($r, "bind8", "make_chroot",
+		    &remote_foreign_call($r, "bind8", "absolute_path",
+					 $f->{'values'}->[0]));
 		}
-	my $f = &bind8::find("file", $z->{'members'});
-	my $absfile = &remote_foreign_call($r, "bind8", "make_chroot",
-	    &remote_foreign_call($r, "bind8", "absolute_path",
-				 $f->{'values'}->[0]));
+	else {
+		# Fall back to using a local copy, such as when DNS is hosted
+		# remotely
+		$absfile = $zonefile;
+		}
 	&copy_write_remote_as_domain_user($d, $r, $absfile, $file);
 
 	# Also save DNSSEC keys, if possible
-	if (&can_domain_dnssec($d)) {
+	if ($z && &can_domain_dnssec($d)) {
 		my @keys = &remote_foreign_call(
 			$r, "bind8", "get_dnssec_key", $z);
 		@keys = grep { ref($_) &&
