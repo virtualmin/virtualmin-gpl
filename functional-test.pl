@@ -1743,19 +1743,23 @@ foreach my $sname (&list_scripts(1)) {
 				      [ 'db', 'mysql '.$test_domain_db ],
 				      [ 'version', $ver ],
 				    ],
-			},
+			});
 
-			# Test that it works
-			{ 'command' => $wget_command.'http://'.$test_domain.'/',
-			  'antigrep' => 'Test home page',
-			},
+		if ($script->{'testable'} == 1) {
+			push(@$allscript_tests,
+				# Test that it works
+				{ 'command' => $wget_command.
+					       'http://'.$test_domain.'/',
+				  'antigrep' => 'Test home page',
+				});
+			}
 
+		push(@$allscript_tests,
 			# Un-install it
 			{ 'command' => 'delete-script.pl',
 			  'args' => [ [ 'domain', $test_domain ],
 				      [ 'type', $script->{'name'} ] ],
-			},
-			);
+			});
 		}
 	}
 
