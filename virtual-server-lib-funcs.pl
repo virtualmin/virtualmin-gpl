@@ -15100,10 +15100,10 @@ if ($config{'web'}) {
 		}
 
 	# Check if template PHP mode is supported, and if not change it
+	my @supp = &supported_php_modes();
 	foreach my $id (0, 1) {
 		my $tmpl = &get_template($id);
 		my $mode = &template_to_php_mode($tmpl);
-		my @supp = &supported_php_modes();
 		my $modupd;
 		if (&indexof($mode, @supp) < 0) {
 			my $mmap = &php_mode_numbers_map();
@@ -15352,8 +15352,9 @@ if (&domain_has_website()) {
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
-		&$second_print(&text('check_webphpversinis',
+		&$first_print(&text('check_webphpversinis',
 				     join(", ", @newvernums)));
+		&$indent_print();
 		foreach my $d (grep { &domain_has_website($_) &&
 				      !$_->{'alias'} }
 				    &list_domains()) {
@@ -15363,6 +15364,8 @@ if (&domain_has_website()) {
 					      &get_domain_php_mode($d);
 				if ($mode && $mode ne "mod_php" &&
 				    $mode ne "fpm" && $mode ne "none") {
+					&$first_print(&text('check_webphpversd',
+						&show_domain_name($d)));
 					&obtain_lock_web($d);
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
@@ -15370,6 +15373,8 @@ if (&domain_has_website()) {
 					}
 				};
 			}
+		&$outdent_print();
+		&$second_print($text{'setup_done'});
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
 	}
