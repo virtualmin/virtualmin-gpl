@@ -10138,10 +10138,10 @@ local ($mod, $func, @args) = @_;
 local $main::error_must_die = 1;
 eval { &plugin_call($mod, $func, @args) };
 if ($@) {
-        &$second_print(&text('setup_failure',
-			     &plugin_call($mod, "feature_name"), "$@"));
-        return 0;
-        }
+	my $fn = &plugin_call($mod, "feature_name");
+	&$second_print(&text('setup_failure', $fn, "$@"));
+	return 0;
+	}
 return 1;
 }
 
