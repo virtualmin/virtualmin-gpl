@@ -1977,12 +1977,12 @@ else {
 
 # post_http_connection(&domain, page, &cgi-params, &out, &err,
 #		       &moreheaders, &returnheaders, &returnheaders-array,
-#		       form-data-mode)
+#		       form-data-mode, [timeout])
 # Makes an HTTP post to some URL, sending the given CGI parameters as data.
 sub post_http_connection
 {
 local ($d, $page, $params, $out, $err, $headers,
-       $returnheaders, $returnheaders_array, $formdata) = @_;
+       $returnheaders, $returnheaders_array, $formdata, $timeout) = @_;
 local $ip = $d->{'ip'};
 local $host = &get_domain_http_hostname($d);
 my $usessl = &domain_has_ssl($d);
@@ -1990,6 +1990,9 @@ my $port = $usessl ? $d->{'web_sslport'} : $d->{'web_port'};
 
 local $oldproxy = $gconfig{'http_proxy'};	# Proxies mess up connection
 $gconfig{'http_proxy'} = '';			# to the IP explicitly
+$main::download_timed_out = undef;
+local $SIG{ALRM} = \&download_timeout;
+alarm($timeout || 300);
 local $h = &make_http_connection($ip, $port, $usessl, "POST", $page,
 			 undef, undef, { 'host' => $host, 'nocheckhost' => 1 });
 $gconfig{'http_proxy'} = $oldproxy;
@@ -2037,10 +2040,16 @@ else {
 	&write_http_connection($h, "$params\r\n");
 	}
 
+alarm(0);
+$h = $main::download_timed_out if ($main::download_timed_out);
+if (!ref($h)) {
+	if ($err) { $$err = $h; return; }
+	else { &error($h); }
+	}
+
 # Read back the results
 $post_http_headers = undef;
 $post_http_headers_array = undef;
-local $SIG{'ALRM'} = 'IGNORE';		# Let complete function run forever
 &complete_http_connection($d, $h, $out, $err, \&capture_http_headers, 0,
 			  $host, $port, $page, $headers);
 if ($returnheaders && $post_http_headers) {
