@@ -10083,6 +10083,32 @@ $googledns_tests = [
 	  'grep' => [ 'testing2' ],
 	},
 
+	# Backup and restore both domains
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'domain', $test_cloud_subdomain ],
+		      [ 'feature', 'dns' ],
+		      [ 'dest', $test_backup_file ] ],
+	},
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_cloud_domain ],
+		      [ 'domain', $test_cloud_subdomain ],
+		      [ 'feature', 'dns' ],
+		      [ 'source', $test_backup_file ] ],
+	},
+
+	# Re-check that expected records still exist
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_domain ] ],
+	  'grep' => [ 'testing1' ],
+	},
+	{ 'command' => 'get-dns.pl',
+	  'args' => [ [ 'multiline' ],
+		      [ 'domain', $test_cloud_subdomain ] ],
+	  'grep' => [ 'testing2' ],
+	},
+
 	# Delete the sub-domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_cloud_subdomain ] ],
