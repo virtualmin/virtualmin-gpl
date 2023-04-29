@@ -1241,6 +1241,22 @@ local $serial = $bconfig{'soa_style'} ?
 local %zd;
 &bind8::get_zone_defaults(\%zd);
 local @created_ns;
+
+# Extract custom records from the template
+my @tmplrecs;
+if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none') {
+	my %subs = %$d;
+	$subs{'serial'} = $serial;
+	$subs{'dnsemail'} = $d->{'emailto_addr'};
+	$subs{'dnsemail'} =~ s/\@/./g;
+	my $recstxt = &substitute_domain_template(
+		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
+	@tmplrecs = &text_to_dns_records($recstxt, $d->{'dom'});
+	foreach my $r (@tmplrecs) {
+		$r->{'proxied'} = $proxied == 1 ? 1 : 0;
+		}
+	}
+
 if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Create records that are appropriate for this domain, as long as the
 	# user hasn't selected a completely custom template, or records are
@@ -1347,6 +1363,12 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 					}
 				}
 			}
+		}
+	
+	# Add all records from the template at the top of the file,
+	# so that they take precedence over any default records
+	foreach my $r (@tmplrecs) {
+		&create_dns_record($recs, $file, $r);
 		}
 	
 	# Work out which records are already in the file
@@ -1457,20 +1479,9 @@ if ($d->{'ip6'}) {
 	&add_ip6_records($d, $recs, $file);
 	}
 
-if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none' &&
-    (!$d->{'dns_submode'} || !$tmpl->{'dns_replace'})) {
-	# Add or use the user-defined records template, if defined and if this
-	# isn't a sub-domain being added to an existing file OR if we are just
-	# adding records
-	local %subs = %$d;
-	$subs{'serial'} = $serial;
-	$subs{'dnsemail'} = $d->{'emailto_addr'};
-	$subs{'dnsemail'} =~ s/\@/./g;
-	local $recstxt = &substitute_domain_template(
-		join("\n", split(/\t+/, $tmpl->{'dns'}))."\n", \%subs);
-	local @tmplrecs = &text_to_dns_records($recstxt, $d->{'dom'});
+if ($tmpl->{'dns_replace'} && !$d->{'dns_submode'}) {
+	# DNS records come entirely from the template
 	foreach my $r (@tmplrecs) {
-		$r->{'proxied'} = $proxied == 1 ? 1 : 0;
 		&create_dns_record($recs, $file, $r);
 		}
 	}
