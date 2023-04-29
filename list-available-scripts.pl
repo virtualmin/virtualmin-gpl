@@ -7,7 +7,8 @@ List known scripts
 This command simply outputs a list of scripts that can potentially installed
 into Virtualmin servers. By default it displays a nicely formatted table, but
 if the C<--multiline> option is given it will use a more machine-readable format
-which shows more information.
+which shows more information. Or you can use C<--name-only> to show just script
+names.
 
 By default all scripts available are listed, but you can limit the output
 to only those built into Virtualmin with the C<--source core> parameter. Or
@@ -38,6 +39,9 @@ while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--multiline") {
 		$multi = 1;
+		}
+	elsif ($a eq "--name-only") {
+		$nameonly = 1;
 		}
 	elsif ($a eq "--source") {
 		$source = shift(@ARGV);
@@ -103,6 +107,13 @@ if ($multi) {
 		print "    Source: $script->{'source'}\n";
 		}
 	}
+elsif ($nameonly) {
+	# Show just script names
+	foreach $script (@scripts) {
+		next if (&script_migrated_disallowed($script->{'migrated'}));
+		print $script->{'name'},"\n";
+		}
+	}
 else {
 	# Show all on one line
 	$fmt = "%-30.30s %-30.30s %-10.10s\n";
@@ -121,7 +132,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Lists the third-party scripts available for installation.\n";
 print "\n";
-print "virtualmin list-available-scripts [--multiline]\n";
+print "virtualmin list-available-scripts [--multiline | --name-only]\n";
 print "                                  [--source core|custom|plugin|latest]\n";
 print "                                  [--type name]*\n";
 print "                                  [--available-only]\n";
