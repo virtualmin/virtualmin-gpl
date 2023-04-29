@@ -382,6 +382,9 @@ my $readdir = sub {
     return @hdirs;
     };
 foreach my $d (@doms) {
+    # Disable fixing index.html, until a new
+    # version of landing page is added
+    next;
     my $dpubdir = $d->{'public_html_path'};
     if (-d $dpubdir) {
         my @dpubifiles = &$readdir($dpubdir);
