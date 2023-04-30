@@ -1727,6 +1727,12 @@ $allscript_tests = [
 		      [ 'content' => 'Test home page' ],
 		      @create_args, ],
         },
+
+	# Use fcgid PHP mode so we can switch versions
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'mode', 'fcgid' ] ],
+	},
 	];
 
 # Test each script that we can
@@ -10923,7 +10929,7 @@ local ($out, $timed_out) = &backquote_with_timeout(
 				"($cmd) 2>&1 </dev/null", $to);
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
-		print $out if (!$t->{'quiet'});
+		print $out if ($output || !$t->{'quiet'});
 		if ($t->{'fail'}) {
 			print "    .. failed to fail\n";
 			}
@@ -10948,7 +10954,7 @@ if ($t->{'grep'}) {
 				}
 			}
 		if (!$match) {
-			print $out if (!$t->{'quiet'});
+			print $out if ($output || !$t->{'quiet'});
 			print "    .. no match on $grep\n";
 			return 0;
 			}
@@ -10967,7 +10973,7 @@ if ($t->{'antigrep'}) {
 				}
 			}
 		if ($match) {
-			print $out if (!$t->{'quiet'});
+			print $out if ($output || !$t->{'quiet'});
 			print "    .. unexpected match on $grep\n";
 			return 0;
 			}
