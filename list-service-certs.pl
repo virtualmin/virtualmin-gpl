@@ -58,6 +58,7 @@ if ($multiline) {
 		print "    Service type: ",
 		      ($svc->{'d'} ? "domain" : "global"),"\n";
 		print "    Cert file: ",$svc->{'cert'},"\n";
+		print "    Key file: ",$svc->{'key'},"\n" if ($svc->{'key'});
 		print "    CA file: ",$svc->{'ca'},"\n" if ($svc->{'ca'});
 		print "    IP address: ",$svc->{'ip'},"\n" if ($svc->{'ip'});
 		print "    Domain name: ",$svc->{'dom'},"\n" if ($svc->{'dom'});
