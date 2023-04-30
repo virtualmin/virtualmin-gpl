@@ -328,6 +328,7 @@ $domains_tests = [
 	# Test HTTP get
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Check FTP login
@@ -897,6 +898,7 @@ $disable_tests = [
 	# Make sure website is gone
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'antigrep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Check FTP login fails
@@ -972,6 +974,7 @@ $disable_tests = [
 	# Check website again
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Validate all features
@@ -1743,6 +1746,7 @@ foreach my $sname (&list_scripts(1)) {
 				      [ 'db', 'mysql '.$test_domain_db ],
 				      [ 'version', $ver ],
 				    ],
+			  'continuefail' => 1,
 			});
 
 		if ($script->{'testable'} == 1) {
@@ -1751,6 +1755,8 @@ foreach my $sname (&list_scripts(1)) {
 				{ 'command' => $wget_command.
 					       'http://'.$test_domain.'/',
 				  'antigrep' => 'Test home page',
+				  'quiet' => 1,
+				  'continuefail' => 1,
 				});
 			}
 
@@ -1759,6 +1765,7 @@ foreach my $sname (&list_scripts(1)) {
 			{ 'command' => 'delete-script.pl',
 			  'args' => [ [ 'domain', $test_domain ],
 				      [ 'type', $script->{'name'} ] ],
+			  'continuefail' => 1,
 			});
 		}
 	}
@@ -2132,6 +2139,7 @@ $move_tests = [
 	# Make sure the website still works
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Make sure the sub-server website still works
@@ -2200,6 +2208,7 @@ $move_tests = [
 	# Make sure the website still works
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Make sure MySQL is back
@@ -2480,14 +2489,17 @@ $aliasdom_tests = [
 	# Test HTTP get
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Test HTTP get of alias domains
 	{ 'command' => $wget_command.'http://'.$test_parallel_domain1,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 	{ 'command' => $wget_command.'http://'.$test_parallel_domain2,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Check FTP login
@@ -2543,6 +2555,7 @@ $aliasdom_tests = [
 	# Test HTTP get of sub-domain
 	{ 'command' => $wget_command.'http://'.$test_subdomain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Check that extra database exists
@@ -9381,6 +9394,7 @@ $ipbackup_tests = [
 	# Check main domain website
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Make sure the sub-server is on a private IP
@@ -10585,6 +10599,7 @@ $compression_tests = [
 	# Test HTTP get on restored file
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Backup to a directory in ZIP format
@@ -10615,6 +10630,7 @@ $compression_tests = [
 	# Test HTTP get on restored file
 	{ 'command' => $wget_command.'http://'.$test_domain,
 	  'grep' => 'Test home page',
+	  'quiet' => 1,
 	},
 
 	# Cleanup the domain
@@ -10781,7 +10797,9 @@ TESTS: foreach $tt (@tests) {
 		if (!$ok) {
 			$allok = 0;
 			$failed++;
-			last;
+			if (!$t->{'continuefail'}) {
+				last;
+				}
 			}
 		$count++;
 		}
@@ -10905,7 +10923,7 @@ local ($out, $timed_out) = &backquote_with_timeout(
 				"($cmd) 2>&1 </dev/null", $to);
 if (!$t->{'ignorefail'}) {
 	if ($? && !$t->{'fail'} || !$? && $t->{'fail'}) {
-		print $out;
+		print $out if (!$t->{'quiet'});
 		if ($t->{'fail'}) {
 			print "    .. failed to fail\n";
 			}
@@ -10930,7 +10948,7 @@ if ($t->{'grep'}) {
 				}
 			}
 		if (!$match) {
-			print $out;
+			print $out if (!$t->{'quiet'});
 			print "    .. no match on $grep\n";
 			return 0;
 			}
@@ -10949,7 +10967,7 @@ if ($t->{'antigrep'}) {
 				}
 			}
 		if ($match) {
-			print $out;
+			print $out if (!$t->{'quiet'});
 			print "    .. unexpected match on $grep\n";
 			return 0;
 			}
