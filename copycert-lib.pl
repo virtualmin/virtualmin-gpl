@@ -67,11 +67,12 @@ if ($miniserv{'ssl'}) {
 	if ($perip) {
 		# Check for per-IP or per-domain cert first
 		my @ipkeys = &webmin::get_ipkeys(\%miniserv);
-		my ($cfile, $chain, $ip, $dom) =
+		my ($cfile, $chain, $ip, $dom, $kfile) =
 			&ipkeys_to_domain_cert($d, \@ipkeys);
 		if ($cfile) {
 			push(@svcs, { 'id' => 'webmin',
 				      'cert' => $cfile,
+				      'key' => $kfile,
 				      'ca' => $chain,
 				      'ip' => $ip,
 				      'dom' => $dom,
@@ -81,10 +82,12 @@ if ($miniserv{'ssl'}) {
 			}
 		}
 	# Also add global config
+	my $kfile = $miniserv{'keyfile'};
 	my $cfile = $miniserv{'certfile'};
 	my $chain = $miniserv{'extracas'};
 	push(@svcs, { 'id' => 'webmin',
 		      'cert' => $cfile,
+		      'key' => $kfile,
 		      'ca' => $chain,
 		      'prefix' => 'admin',
 		      'port' => $miniserv{'port'} });
@@ -100,11 +103,12 @@ if (&foreign_installed("usermin")) {
 		if ($perip) {
 			# Check for per-IP or per-domain cert first
 			my @ipkeys = &webmin::get_ipkeys(\%uminiserv);
-			my ($cfile, $chain, $ip, $dom) =
+			my ($cfile, $chain, $ip, $dom, $kfile) =
 				&ipkeys_to_domain_cert($d, \@ipkeys);
 			if ($cfile) {
 				push(@svcs, { 'id' => 'usermin',
 					      'cert' => $cfile,
+					      'key' => $kfile,
 					      'ca' => $chain,
 					      'ip' => $ip,
 					      'dom' => $dom,
@@ -115,9 +119,11 @@ if (&foreign_installed("usermin")) {
 			}
 		# Also add global config
 		my $cfile = $uminiserv{'certfile'};
+		my $kfile = $uminiserv{'keyfile'};
 		my $chain = $uminiserv{'extracas'};
 		push(@svcs, { 'id' => 'usermin',
 			      'cert' => $cfile,
+			      'key' => $kfile,
 			      'ca' => $chain,
 			      'prefix' => 'webmail',
 			      'port' => $uminiserv{'port'} });
@@ -137,6 +143,7 @@ if (&foreign_installed("dovecot")) {
 				}
 			push(@svcs, { 'id' => 'dovecot',
 				      'cert' => $cfile,
+				      'key' => $kfile,
 				      'ca' => $cafile,
 				      'prefix' => 'mail',
 				      'port' => 993,
@@ -152,6 +159,9 @@ if (&foreign_installed("dovecot")) {
 	my $cfile = &dovecot::find_value("ssl_cert_file", $conf, 0, "") ||
 		    &dovecot::find_value("ssl_cert", $conf, 0, "");
 	$cfile =~ s/^<//;
+	my $kfile = &dovecot::find_value("ssl_key_file", $conf, 0, "") ||
+		    &dovecot::find_value("ssl_key", $conf, 0, "");
+	$kfile =~ s/^<//;
 	$cafile = &dovecot::find_value("ssl_ca", $conf, 0, "");
 	$cafile =~ s/^<//;
 	if ($cfile) {
@@ -161,6 +171,7 @@ if (&foreign_installed("dovecot")) {
 			}
 		push(@svcs, { 'id' => 'dovecot',
 			      'cert' => $cfile,
+			      'key' => $kfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 993,
@@ -177,6 +188,7 @@ if ($config{'mail_system'} == 0) {
 		if ($cfile) {
 			push(@svcs, { 'id' => 'postfix',
 				      'cert' => $cfile,
+				      'key' => $kfile,
 				      'ca' => $cafile,
 				      'prefix' => 'mail',
 				      'port' => 587,
@@ -189,10 +201,12 @@ if ($config{'mail_system'} == 0) {
 	# Also add global Postfix cert
 	&foreign_require("postfix");
 	my $cfile = &postfix::get_real_value("smtpd_tls_cert_file");
+	my $kfile = &postfix::get_real_value("smtpd_tls_key_file");
 	my $cafile = &postfix::get_real_value("smtpd_tls_CAfile");
 	if ($cfile) {
 		push(@svcs, { 'id' => 'postfix',
 			      'cert' => $cfile,
+			      'key' => $kfile,
 			      'ca' => $cafile,
 			      'prefix' => 'mail',
 			      'port' => 587,
@@ -207,11 +221,14 @@ if ($config{'ftp'}) {
 	my $conf = &proftpd::get_config();
 	my $cfile = &proftpd::find_directive(
 			"TLSRSACertificateFile", $conf);
+	my $kfile = &proftpd::find_directive(
+			"TLSRSACertificateKeyFile", $conf);
 	my $cafile = &proftpd::find_directive(
 			"TLSCACertificateFile", $conf);
 	if ($cfile) {
 		push(@svcs, { 'id' => 'proftpd',
 			      'cert' => $cfile,
+			      'key' => $kfile,
 			      'ca' => $cafile,
 			      'prefix' => 'ftp',
 			      'port' => 990, });
@@ -326,17 +343,20 @@ foreach my $svc (&get_all_service_ssl_certs($d, 1)) {
 }
 
 # ipkeys_to_domain_cert(&domain, &ipkeys)
-# Returns the cert, chain file, IP and domain for a matching ipkeys entry
+# Returns the cert, chain file, IP, domain and key file for a matching
+# ipkeys entry
 sub ipkeys_to_domain_cert
 {
 my ($d, $ipkeys) = @_;
 foreach my $k (@$ipkeys) {
 	if (&indexof($d->{'dom'}, @{$k->{'ips'}}) >= 0) {
-		return ($k->{'cert'}, $k->{'extracas'}, undef, $d->{'dom'});
+		return ($k->{'cert'}, $k->{'extracas'}, undef, $d->{'dom'},
+			$k->{'key'});
 		}
 	if ($d->{'virt'} &&
 	    &indexof($d->{'ip'}, @{$k->{'ips'}}) >= 0) {
-		return ($k->{'cert'}, $k->{'extracas'}, $d->{'ip'}, undef);
+		return ($k->{'cert'}, $k->{'extracas'}, $d->{'ip'}, undef,
+			$k->{'key'});
 		}
 	}
 return ( );
