@@ -117,6 +117,7 @@ local $authorfunc = "script_${name}_author";
 local $overlapfunc = "script_${name}_overlap";
 local $migratedfunc = "script_${name}_migrated";
 local $testablefunc = "script_${name}_testable";
+local $testpathfunc = "script_${name}_testpath";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -196,6 +197,7 @@ local $rv = { 'name' => $name,
 	      'minversion' => $unavail{$name."_minversion"},
 	      'abandoned_func' => "script_${name}_abandoned",
 	      'migrated_func' => "script_${name}_migrated",
+	      'testpath_func' => "script_${name}_testpath",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();

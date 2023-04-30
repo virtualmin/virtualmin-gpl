@@ -1154,6 +1154,30 @@ $rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
 return \%rv;
 }
 
+# convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8")
+# Convert an SSL key into a different format
+sub convert_ssl_key_format
+{
+my ($d, $file, $fmt, $outfile) = @_;
+$outfile ||= $file;
+my $cmd;
+if ($fmt eq "pkcs1") {
+	$cmd = "openssl rsa -in ".quotemeta($file)." -out ".quotemeta($outfile);
+	}
+elsif ($fmt eq "pkcs8") {
+	$cmd = "openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in ".
+	       quotemeta($file)." -out ".quotemeta($outfile);
+	}
+else {
+	return "Unknown format $fmt";
+	}
+if ($d && &is_under_directory($d->{'home'}, $file)) {
+	$cmd = &command_as_user($d->{'user'}, 0, $cmd);
+	}
+my $out = &backquote_logged("$cmd 2>&1 </dev/null");
+return $? ? $out : undef;
+}
+
 # parse_notafter_date(str)
 # Parse a date string like "Nov 30 07:46:00 2016 GMT" into a Unix time
 sub parse_notafter_date

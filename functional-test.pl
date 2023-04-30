@@ -1741,8 +1741,10 @@ foreach my $sname (&list_scripts(1)) {
 	my $script = &get_script($sname);
 	next if (!$script);
 	next if (!$script->{'testable'});
+	my $tpfunc = $script->{'testpath_func'};
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
+		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
 		push(@$allscript_tests,
 			# Install it
 			{ 'command' => 'install-script.pl',
@@ -1759,7 +1761,7 @@ foreach my $sname (&list_scripts(1)) {
 			push(@$allscript_tests,
 				# Test that it works
 				{ 'command' => $wget_command.
-					       'http://'.$test_domain.'/',
+					       'http://'.$test_domain.$path,
 				  'antigrep' => 'Test home page',
 				  'quiet' => 1,
 				  'continuefail' => 1,

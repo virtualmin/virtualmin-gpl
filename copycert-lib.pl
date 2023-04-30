@@ -771,6 +771,7 @@ $myuser ||= 'mysql';
 if ($d->{'ssl_key'}) {
 	&lock_file($key);
 	&copy_source_dest($d->{'ssl_key'}, $key);
+	&convert_ssl_key_format(undef, $key, "pkcs1");
 	&unlock_file($key);
 	&set_ownership_permissions($myuser, undef, 0600, $key);
 	&mysql::save_directive($conf, $mysqld, "ssl_key", [ $key ]);
