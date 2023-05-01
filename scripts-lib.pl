@@ -118,6 +118,7 @@ local $overlapfunc = "script_${name}_overlap";
 local $migratedfunc = "script_${name}_migrated";
 local $testablefunc = "script_${name}_testable";
 local $testpathfunc = "script_${name}_testpath";
+local $testargsfunc = "script_${name}_testargs";
 
 # Check for critical functions
 return undef if (!defined(&$dfunc) || !defined(&$vfunc));
@@ -198,6 +199,7 @@ local $rv = { 'name' => $name,
 	      'abandoned_func' => "script_${name}_abandoned",
 	      'migrated_func' => "script_${name}_migrated",
 	      'testpath_func' => "script_${name}_testpath",
+	      'testargs_func' => "script_${name}_testargs",
 	    };
 if (defined(&$catfunc)) {
 	my @cats = &$catfunc();
@@ -3411,17 +3413,31 @@ foreach my $file (split(/\r?\n/, $out)) {
 return @fixed;
 }
 
+# get_python_path([major-version])
+# Returns the full path to python
 sub get_python_path
 {
-return &has_command($config{'python_cmd'}) ||
-       &has_command("python3") || &has_command("python30") ||
-       &has_command("python3.9") || &has_command("python39") ||
-       &has_command("python3.8") || &has_command("python38") ||
-       &has_command("python3.7") || &has_command("python37") ||
-       &has_command("python3.6") || &has_command("python36") ||
-       &has_command("python2.7") || &has_command("python27") ||
-       &has_command("python2.6") || &has_command("python26") ||
-       "python";
+my ($ver) = @_;
+my @opts = ( $config{'python_cmd'} );
+if (!$ver || $ver == 3) {
+	push(@opts, "python3", "python30",
+		    "python3.9", "python39",
+		    "python3.8", "python38",
+		    "python3.7", "python37",
+		    "python3.6", "python36");
+	}
+if (!$ver || $ver == 2) {
+	push(@opts, "python2.7", "python27",
+		    "python2.6", "python26");
+	}
+push(@opts, "python");
+foreach my $o (@opts) {
+	my $p = &has_command($o);
+	next if (!$p);
+	next if ($ver && &get_python_version($p) !~ /^\Q$ver\E\./);
+	return $p;
+	}
+return undef;
 }
 
 # list_used_tcp_ports()
