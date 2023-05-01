@@ -12079,12 +12079,13 @@ push(@enable, grep { $d->{$_} && $disabled{$_} &&
 return &unique(@enable);
 }
 
-# get_python_version()
+# get_python_version([path])
 # Return current Python version, if instaled
 sub get_python_version
 {
+my ($python_pathpath) = @_;
+$python_pathpath ||= get_python_path();
 my $python_version;
-my $python_pathpath = get_python_path();
 my $out = &backquote_command("$python_pathpath --version 2>&1", 1);
 $python_version = $1 if ($out =~ /Python\s+(.*)/i);
 return $python_version;
