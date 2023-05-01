@@ -49,7 +49,8 @@ $test_admin = "testadmin";
 $timeout = 240;			# Longest time a test should take
 $nowdate = strftime("%Y-%m-%d", localtime(time()));
 $yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
-$wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate  ";
+$wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate ";
+$curl_command = "curl ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_ensim_domain = "apservice.org";
 $migration_ensim = "$migration_dir/$migration_ensim_domain.ensim.tar.gz";
@@ -1742,9 +1743,11 @@ foreach my $sname (&list_scripts(1)) {
 	next if (!$script);
 	next if (!$script->{'testable'});
 	my $tpfunc = $script->{'testpath_func'};
+	my $tafunc = $script->{'testargs_func'};
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
+		my @args = defined(&$tafunc) ? &$tafunc($ver) : "/";
 		push(@$allscript_tests,
 			# Install it
 			{ 'command' => 'install-script.pl',
@@ -1753,6 +1756,7 @@ foreach my $sname (&list_scripts(1)) {
 				      [ 'path', '/' ],
 				      [ 'db', 'mysql '.$test_domain_db ],
 				      [ 'version', $ver ],
+				      @args,
 				    ],
 			  'continuefail' => 1,
 			});
@@ -1760,7 +1764,7 @@ foreach my $sname (&list_scripts(1)) {
 		if ($script->{'testable'} == 1) {
 			push(@$allscript_tests,
 				# Test that it works
-				{ 'command' => $wget_command.
+				{ 'command' => $curl_command.
 					       'http://'.$test_domain.$path,
 				  'antigrep' => 'Test home page',
 				  'quiet' => 1,
