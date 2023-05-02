@@ -1747,7 +1747,7 @@ foreach my $sname (&list_scripts(1)) {
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
-		my @args = defined(&$tafunc) ? &$tafunc($ver) : "/";
+		my @args = defined(&$tafunc) ? &$tafunc($ver) : ();
 		push(@$allscript_tests,
 			# Install it
 			{ 'command' => 'install-script.pl',
