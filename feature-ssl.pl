@@ -1154,7 +1154,7 @@ $rv{'type'} = $rv{'self'} ? $text{'cert_typeself'} : $text{'cert_typereal'};
 return \%rv;
 }
 
-# convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8")
+# convert_ssl_key_format(&domain, file, "pkcs1"|"pkcs8", [outfile])
 # Convert an SSL key into a different format
 sub convert_ssl_key_format
 {
