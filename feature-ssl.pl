@@ -2077,7 +2077,8 @@ delete($d->{'ssl_same'});
 # Re-generate any combined cert files
 &sync_combined_ssl_cert($d);
 
-if ($d->{'web'}) {
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
 	# Update Apache config to point to the new cert file
 	local ($ovirt, $ovconf, $conf) = &get_apache_virtual(
 		$d->{'dom'}, $d->{'web_sslport'});
@@ -2098,6 +2099,12 @@ if ($d->{'web'}) {
 			$ovconf, $conf);
 		&flush_file_lines($ovirt->{'file'});
 		}
+	}
+else {
+	# Update the other webserver's config
+	&save_website_ssl_file($d, "cert", $d->{'ssl_cert'});
+	&save_website_ssl_file($d, "key", $d->{'ssl_key'});
+	&save_website_ssl_file($d, "ca", $d->{'ssl_chain'});
 	}
 
 # Update any service certs for this domain
