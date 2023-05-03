@@ -77,6 +77,10 @@ elsif ($multiline) {
 		if ($s->[1]) {
 			print "    Command: $s->[1]\n";
 			}
+		$cli = &get_php_cli_command($s->[0]);
+		if ($cli) {
+			print "    CLI: $cli\n";
+			}
 		my @modes = $s->[2] ? @{$s->[2]} : ();
 		my $fpm = &get_php_fpm_config($s->[0]);
 		push(@modes, "fpm") if ($fpm);
