@@ -2,13 +2,13 @@
 
 use Time::Local;
 
-# get_simple_alias(&domain, &alias)
+# get_simple_alias(&domain, &alias, [allow-merging-local])
 # If the current forwarding rules are simple (local delivery, autoreply
 # and forwarding only), return a hash ref containing the settings. Otherwise,
 # return undef.
 sub get_simple_alias
 {
-local ($d, $a) = @_;
+local ($d, $a, $allow_merge) = @_;
 local $simple;
 foreach my $v (@{$a->{'to'}}) {
 	local ($atype, $aval) = &alias_type($v, $a->{'user'} || $a->{'name'});
@@ -23,6 +23,11 @@ foreach my $v (@{$a->{'to'}}) {
 	elsif ($atype == 7) {
 		# Local delivery
 		$simple->{'local'} = $aval;
+		push(@{$simple->{'local-all'}}, $aval)
+			if ($allow_merge &&
+			    $config{'mail_system'} == 0 &&
+			    $aval =~ /\@/ &&
+			    getpwnam(&unescape_user($aval)));
 		}
 	elsif ($atype == 10) {
 		# To this user
@@ -133,7 +138,9 @@ push(@v, @{$simple->{'forward'}});
 if ($simple->{'bounce'}) {
 	push(@v, "BOUNCE");
 	}
-if ($simple->{'local'}) {
+if ($simple->{'local'} &&
+   (!$simple->{'local-all'} ||
+   	&indexof($simple->{'local'}, @{$simple->{'local-all'}}) == -1)) {
 	local $escuser = $simple->{'local'};
 	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
@@ -277,6 +284,15 @@ if (!$nobounce) {
 
 # Forward to some address
 @fwd = @{$simple->{'forward'}};
+
+# Merge with local @ users if any, because we can properly
+# parse it on save, so we don't fallback to advanced form
+if (defined($simple->{'local-all'})) {
+	my @local_unescaped =
+		map { &unescape_user($_) }
+			@{$simple->{'local-all'}};
+	push(@fwd, @local_unescaped);
+	}
 print &ui_table_row(&hlink($text{$sfx.'_forward'}, $sfx."_forward"),
 		    &ui_checkbox("forward", 1,$text{'alias_forwardyes'},
 				 scalar(@fwd))."<br>\n".
