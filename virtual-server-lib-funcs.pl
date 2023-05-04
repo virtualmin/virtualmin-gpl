@@ -1303,6 +1303,28 @@ foreach $u (@groups) {
 return @groups;
 }
 
+# need_extra_user(&user)
+# Checks if an extra Unix user needs
+# to be created for Postfix
+sub need_extra_user
+{
+&require_mail();
+my $needextra = 0;
+if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
+    !$_[0]->{'webowner'}) {
+	if ($config{'nopostfix_extra_user'} == 2) {
+		# Explicitly enabled by the admin
+		$needextra = 1;
+		}
+	elsif ($config{'nopostfix_extra_user'} == 0) {
+		# Check if it's really needed
+		my $dq = &postfix::get_real_value("resolve_dequoted_address");
+		$needextra = lc($dq) eq "no" ? 0 : 1;
+		}
+	}
+return $needextra;
+}
+
 # create_user(&user, [&domain])
 # Create a mailbox or local user, his virtuser and possibly his alias
 sub create_user
@@ -1347,28 +1369,15 @@ else {
 # If we are running Postfix and the username has an @ in it, create an extra
 # Unix user without the @ but all the other details the same
 local $extrauser;
-if ($config{'mail_system'} == 0 && $_[0]->{'user'} =~ /\@/ &&
-    !$_[0]->{'webowner'}) {
-	my $needextra = 0;
-	if ($config{'nopostfix_extra_user'} == 2) {
-		# Explicitly enabled by the admin
-		$needextra = 1;
-		}
-	elsif ($config{'nopostfix_extra_user'} == 0) {
-		# Check if it's really needed
-		my $dq = &postfix::get_real_value("resolve_dequoted_address");
-		$needextra = lc($dq) eq "no" ? 0 : 1;
-		}
-	if ($needextra) {
-		$extrauser = { %{$_[0]} };
-		$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
-		&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
-		&set_virtualmin_user_envs($_[0], $_[1]);
-		&foreign_call($usermodule, "making_changes");
-		&userdom_substitutions($extrauser, $_[1]);
-		&foreign_call($usermodule, "create_user", $extrauser);
-		&foreign_call($usermodule, "made_changes");
-		}
+if (&need_extra_user($_[0])) {
+	$extrauser = { %{$_[0]} };
+	$extrauser->{'user'} = &replace_atsign($extrauser->{'user'});
+	&foreign_call($usermodule, "set_user_envs", $extrauser, 'CREATE_USER', $extrauser->{'plainpass'}, [ ]);
+	&set_virtualmin_user_envs($_[0], $_[1]);
+	&foreign_call($usermodule, "making_changes");
+	&userdom_substitutions($extrauser, $_[1]);
+	&foreign_call($usermodule, "create_user", $extrauser);
+	&foreign_call($usermodule, "made_changes");
 	}
 
 # Add virtusers
