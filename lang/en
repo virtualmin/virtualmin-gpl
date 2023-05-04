@@ -4298,6 +4298,7 @@ scripts_icommand=Missing command $1
 scripts_idbneed=A $1 database is needed
 scripts_idbneed_link=, which can be enabled on <a href='$1'>$2</a> page.
 scripts_idbneedor=$1 or $2
+scripts_nodbavail=Not yet configured $1
 scripts_gemver=Updating Ruby Gems to latest version from $1 ..
 scripts_gemverfailed=.. Gems update failed : $1
 scripts_gemverfailed2=.. Gems update to version $2 appeared to succeed, but really failed : $1

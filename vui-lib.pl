@@ -259,4 +259,23 @@ sub vui_ui_input_noauto_attrs
 return "autocomplete='new-password' autocorrect='off' spellcheck='false'";
 }
 
+=head2 vui_edit_link_icon()
+
+Returns a link as a unicode symbol (icon)
+
+=cut
+sub vui_edit_link_icon
+{
+my ($link, $unisymb) = @_;
+my $styles = "font-size: 140%;";
+   $styles .= "position: absolute;";
+   $styles .= "margin: -4px 0 0 4px;";
+$unisymb ||= '&#9881;'; # default is cog
+my $unisymb_class = $unisymb;
+$unisymb_class =~ tr/[0-9]//cd;
+return &ui_link($link,
+  "<span style='$styles'>$unisymb</span>",
+  "vui_edit_link_icon i$unisymb_class");
+}
+
 1;

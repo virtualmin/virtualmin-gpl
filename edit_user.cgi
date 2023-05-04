@@ -352,11 +352,15 @@ if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
 		$simple = { 'tome' => 1 };
 		}
 	else {
-		$simple = &get_simple_alias($d, $user);
+		$simple = &get_simple_alias($d, $user, 1);
 		}
 	if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
-		# Local and bounce delivery are not allowed on the simple form
-		$simple = undef;
+		# Local and bounce delivery are not allowed on the simple form,
+		# unless we can merge some (@) local users with forward users, 
+		# which will be handled automatically on save to prevent showing
+		# advanced form for no reason
+		$simple = undef
+			if (!$simple->{'local-all'} || $simple->{'bounce'});
 		}
 
 	if ($simple) {
