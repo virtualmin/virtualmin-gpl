@@ -171,7 +171,9 @@ else {
 		$in{'mailuser'} =~ s/^\s+//;
 		$in{'mailuser'} =~ s/\s+$//;
 		$err = &valid_mailbox_name($in{'mailuser'});
-		&error($err) if ($err);
+		$olderr = $in{'new'} ? undef
+				     : &valid_mailbox_name($user->{'user'});
+		&error($err) if ($err && !$olderr);
 		if ($user->{'person'}) {
 			$in{'real'} =~ /^[^:\r\n]*$/ ||
 				&error($text{'user_ereal'});
