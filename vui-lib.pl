@@ -267,14 +267,15 @@ Returns a link as a unicode symbol (icon)
 sub vui_edit_link_icon
 {
 my ($link, $unisymb) = @_;
-return &theme_vui_edit_link_icon(@_)
-	if (defined(&theme_vui_edit_link_icon));
 my $styles = "font-size: 140%;";
    $styles .= "position: absolute;";
    $styles .= "margin: -4px 0 0 4px;";
 $unisymb ||= '&#9881;'; # default is cog
+my $unisymb_class = $unisymb;
+$unisymb_class =~ tr/[0-9]//cd;
 return &ui_link($link,
-  "<span style='$styles'>$unisymb</span>");
+  "<span style='$styles'>$unisymb</span>",
+  "vui_edit_link_icon i$unisymb_class");
 }
 
 1;
