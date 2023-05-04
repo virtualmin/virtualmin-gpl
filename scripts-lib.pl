@@ -509,7 +509,12 @@ if ($newsuffix) {
 	if ($dleft != 0 && &can_edit_databases()) {
 		# Choose a name ether based on the allowed prefix, or the
 		# default DB name
-		$newdbtype = $d->{'mysql'} ? "mysql" : "postgres";
+		$newdbtype = $d->{'mysql'} ? "mysql" :
+		             $d->{'postgres'} ? "postgres" : undef;
+		if (!$newdbtype) {
+			return &text('scripts_nodbavail',
+				&vui_edit_link_icon("edit_domain.cgi?dom=$d->{'id'}"));
+			}
 		if ($tmpl->{'mysql_suffix'} ne "none") {
 			local $prefix = &substitute_domain_template(
 						$tmpl->{'mysql_suffix'}, $d);
