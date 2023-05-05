@@ -41,6 +41,16 @@ sub script_django_gpl
 return 1;
 }
 
+sub script_django_testable
+{
+return 1;
+}
+
+sub script_django_testargs
+{
+return ( [ 'opt', 'project testproject' ] );
+}
+
 sub script_django_category
 {
 return "Development";
@@ -61,7 +71,7 @@ local ($d, $ver) = @_;
 local @rv;
 
 # Check for python, and required version
-my $python = &get_python_path();
+my $python = &get_python_path(3);
 $python || push(@rv, "The python command is not installed");
 local $out = &backquote_command("$python --version 2>&1 </dev/null");
 if ($out =~ /Python\s+([0-9\.]+)/i) {
@@ -153,6 +163,8 @@ sub script_django_check
 local ($d, $ver, $opts, $upgrade) = @_;
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
+$opts->{'project'} ||
+	return "Missing project name parameter";
 $opts->{'project'} !~ /^(bin|lib)$/ ||
 	return "Reserved name project name \`$opts->{'project'}\` cannot be used";
 if (-r "$opts->{'idir'}/$opts->{'project'}") {
