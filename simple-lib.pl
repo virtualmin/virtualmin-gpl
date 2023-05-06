@@ -151,7 +151,7 @@ if ($simple->{'local'} &&
 	push(@v, "\\".$escuser);
 	}
 if ($simple->{'tome'}) {
-	local $escuser = $alias->{'user'};
+	local $escuser = $alias->{'user_extra'} || $alias->{'user'};
 	if ($config{'mail_system'} == 0 && $escuser =~ /\@/) {
 		$escuser = &escape_replace_atsign_if_exists($escuser);
 		}
