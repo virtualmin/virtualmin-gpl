@@ -216,7 +216,8 @@ my $dbuser = $dbtype eq "mysql" ? mysql_user($d) : postgres_user($d);
 my $dbpass = $dbtype eq "mysql" ? mysql_pass($d) : postgres_pass($d, 1);
 my $dbphptype = $dbtype eq "mysql" ? "mysql" : "psql";
 my $dbhost = get_database_host($dbtype, $d);
-my $dberr = check_script_db_connection($dbtype, $dbname, $dbuser, $dbpass);
+my $dberr = check_script_db_connection(
+	$d, $dbtype, $dbname, $dbuser, $dbpass);
 my $d_proto = domain_has_ssl($d) ? "https://" : "http://";
 my $url = script_path_url($d, $opts);
 return (0, "Database connection failed : $dberr") if ($dberr);

@@ -228,7 +228,7 @@ local $dbhost = &get_database_host($dbtype, $d);
 local $domemail = $d->{'emailto_addr'};
 $dbhost = undef if ($dbhost eq "localhost" || $dbhost eq "127.0.0.1");
 if ($dbtype) {
-	local $dberr = &check_script_db_connection($dbtype, $dbname,
+	local $dberr = &check_script_db_connection($d, $dbtype, $dbname,
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
@@ -255,7 +255,6 @@ $ENV{'PYTHONPATH'} = "$opts->{'idir'}/$pythonlibs";
 # Install needed PIP modules
 foreach my $pip ("contextvars", "typing", "typing-extensions", "asyncio") {
 	$out = &run_as_domain_user($d, "$python -m pip install --upgrade ".quotemeta($pip)." 2>&1 </dev/null");
-	print STDERR $out;
 	if ($?) {
 		return (0, "Failed to install PIP module $pip : $out");
 		}
