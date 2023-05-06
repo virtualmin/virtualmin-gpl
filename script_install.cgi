@@ -144,6 +144,16 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 	$opts->{'phpver'} = $phpver;
 	}
 
+# Setup Python version
+if (&indexof("python", @{$script->{'uses'}}) >= 0) {
+	($pyver, $pyerr) = &setup_python_version(
+		$d, $script, $ver, $opts->{'path'});
+	if ($pyerr) {
+		&error($pyerr);
+		}
+	$opts->{'pyver'} = $pyver;
+	}
+
 # Check depends again
 $derr = &check_script_depends($script, $d, $ver, $sinfo, $phpver);
 &error(&text('scripts_edep', $derr)) if ($derr);

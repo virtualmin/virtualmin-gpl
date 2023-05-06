@@ -116,7 +116,6 @@ local $sitefunc = "script_${name}_site";
 local $authorfunc = "script_${name}_author";
 local $overlapfunc = "script_${name}_overlap";
 local $migratedfunc = "script_${name}_migrated";
-local $testablefunc = "script_${name}_testable";
 local $testpathfunc = "script_${name}_testpath";
 local $testargsfunc = "script_${name}_testargs";
 
@@ -155,7 +154,6 @@ local $rv = { 'name' => $name,
 	      'site' => defined(&$sitefunc) ? &$sitefunc() : undef,
 	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
 	      'overlap' => defined(&$overlapfunc) ? &$overlapfunc() : undef,
-	      'testable' => defined(&$testablefunc) ? &$testablefunc() : undef,
 	      'dir' => $sdir,
 	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",
@@ -181,6 +179,7 @@ local $rv = { 'name' => $name,
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
+	      'python_fullver_func' => "script_${name}_python_fullver",
 	      'python_mods_func' => "script_${name}_python_modules",
 	      'python_opt_mods_func' => "script_${name}_opt_python_modules",
 	      'gem_version_func' => "script_${name}_gem_version",
@@ -198,6 +197,7 @@ local $rv = { 'name' => $name,
 	      'minversion' => $unavail{$name."_minversion"},
 	      'abandoned_func' => "script_${name}_abandoned",
 	      'migrated_func' => "script_${name}_migrated",
+	      'testable_func' => "script_${name}_testable",
 	      'testpath_func' => "script_${name}_testpath",
 	      'testargs_func' => "script_${name}_testargs",
 	    };
@@ -1069,15 +1069,37 @@ local $out = &backquote_command("$perl -e 'use $mod' 2>&1");
 return $? ? 0 : 1;
 }
 
-# check_python_module(mod, &domain)
+# check_python_module(mod, &domain, python-ver)
 # Checks if some Python module exists
 sub check_python_module
 {
-local ($mod, $d) = @_;
-my $python = &get_python_path();
+local ($mod, $d, $pyver) = @_;
+my $python = &get_python_path($pyver);
 local $out = &backquote_command("echo import ".quotemeta($mod).
 				" | $python 2>&1");
 return $? ? 0 : 1;
+}
+
+# setup_python_version(&domain, &script, version, path)
+# Checks if a script needs a specific Python version, and if so returns it.
+# Otherwise returns undef and an error message.
+sub setup_python_version
+{
+local ($d, $script, $scriptver, $path) = @_;
+my $minfunc = $script->{'python_fullver_func'};
+return (undef, undef) if (!defined(&$minfunc));
+my $ver = &$minfunc($scriptver);
+return (undef, undef) if (!$ver);
+my $basever = substr($ver, 0, 1);
+my $path = get_python_path($basever);
+return (undef, "Python version $ver is not available") if (!$path);
+my $gotver = &get_python_version($path);
+return (undef, "Could not find version of Python command $path") if (!$gotver);
+if (&compare_versions($ver, $gotver) > 0) {
+	return (undef, "Python version $ver is required, ".
+		       "but $path is version $gotver");
+	}
+return ($gotver, undef);
 }
 
 # check_php_version(&domain, [number])
@@ -1634,9 +1656,10 @@ if (&foreign_installed("software")) {
 		$canpkgs = 1;
 		}
 	}
-my $python = &get_python_path();
+my $python = &get_python_path($opts->{'pyver'});
+my $pyver = &get_python_version($python);
 foreach my $m (@mods) {
-	next if (&check_python_module($m, $d) == 1);
+	next if (&check_python_module($m, $d, $pyver) == 1);
 	local $opt = &indexof($m, @optmods) >= 0 ? 1 : 0;
 	&$first_print(&text($opt ? 'scripts_optpythonmod'
 				 : 'scripts_needpythonmod', "<tt>$m</tt>"));
@@ -1659,19 +1682,14 @@ foreach my $m (@mods) {
 			push(@pkgs, "python-subversion");
 			}
 		elsif ($mp eq "psycopg2") {
-			push(@pkgs, ($python =~ /python3/i ? 
-				         "python3-psycopg2" :
-				         "python-psycopg2"));
+			push(@pkgs, $pyver >= 3 ? "python3-psycopg2" :
+				         	  "python-psycopg2");
 			}
-		elsif ($m eq "MySQLdb" &&
-			   $python =~ /python3/i) {
+		elsif ($m eq "MySQLdb" && $pyver >= 3) {
 			push(@pkgs, "python3-mysqldb");
 			}
 		else {
-			my $python_package = "python";
-			if ($python =~ /python3/i) {
-				$python_package = "python3";
-				}
+			my $python_package = $pyver >= 3 ? "python3" : "python";
 			push(@pkgs, "$python_package-$mp");
 			}
 		}
@@ -1679,29 +1697,31 @@ foreach my $m (@mods) {
 		# For YUM, naming is less standard .. the MySQLdb package
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
-			push(@pkgs, ($python =~ /python3/i ?
-				         "python3-mysqlclient" :
-				         "python3-mysql"));
+			# XXX
+			push(@pkgs, $pyver >= 3 ? "python3-mysqlclient" :
+				         	  "python3-mysql");
+			if ($pyver =~ /^3\.(\d)/) {
+				push(@pkgs, "python3$1-mysql");
+				}
 			}
 		elsif ($m eq "setuptools") {
 			push(@pkgs, "setuptools", "python-setuptools");
 			}
 		elsif ($mp eq "psycopg2") {
 			# Try to install old and new versions
-			push(@pkgs, ($python =~ /python3/i ? 
-				         "python3-psycopg2" :
-				         "python-psycopg2"));
+			push(@pkgs, $pyver >= 3 ? "python3-psycopg2" :
+				         	  "python-psycopg2");
 			}
 		elsif ($m eq "svn") {
 			push(@pkgs, "subversion-python");
 			}
 		else {
 			$mp = lc($mp);
-			my $python_package = "python";
-			if ($python =~ /python3/i) {
-				$python_package = "python3";
-				}
+			my $python_package = $pyver >= 3 ? "python3" : "python";
 			push(@pkgs, "$python_package-$mp");
+			if ($pyver =~ /^3\.(\d)/) {
+				push(@pkgs, "python3$1-$mp");
+				}
 			}
 		}
 	elsif ($software::config{'package_system'} eq 'pkgadd') {
@@ -3423,15 +3443,16 @@ return @fixed;
 sub get_python_path
 {
 my ($ver) = @_;
+my $basever = substr($ver, 0, 1);
 my @opts = ( $config{'python_cmd'} );
-if (!$ver || $ver == 3) {
+if (!$basever || $basever == 3) {
 	push(@opts, "python3", "python30",
 		    "python3.9", "python39",
 		    "python3.8", "python38",
 		    "python3.7", "python37",
 		    "python3.6", "python36");
 	}
-if (!$ver || $ver == 2) {
+if (!$basever || $basever == 2) {
 	push(@opts, "python2.7", "python27",
 		    "python2.6", "python26");
 	}

@@ -8078,6 +8078,18 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 			$opts->{'phpver'} = $phpver;
 			}
 
+		# Check Python version
+		local ($pyver, $pyerr);
+		if (&indexof("python", @{$script->{'uses'}}) >= 0) {
+			($pyver, $pyerr) = &setup_python_version(
+				$dom, $script, $ver, $opts->{'path'});
+			if ($pyerr) {
+				&$second_print($pyerr);
+				next;
+				}
+			$opts->{'pyver'} = $pyver;
+			}
+
 		# Check dependencies
 		local $derr = &check_script_depends($script, $dom, $ver,
 						    $sinfo, $phpver);
