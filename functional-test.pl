@@ -50,7 +50,7 @@ $timeout = 240;			# Longest time a test should take
 $nowdate = strftime("%Y-%m-%d", localtime(time()));
 $yesterdaydate = strftime("%Y-%m-%d", localtime(time()-24*60*60));
 $wget_command = "wget -O - --cache=off --proxy=off --no-check-certificate ";
-$curl_command = "curl ";
+$curl_command = "curl --fail ";
 $migration_dir = "/usr/local/webadmin/virtualmin/migration";
 $migration_ensim_domain = "apservice.org";
 $migration_ensim = "$migration_dir/$migration_ensim_domain.ensim.tar.gz";
@@ -78,6 +78,7 @@ $supports_cgi = &indexof("cgi", &supported_php_modes()) >= 0;
 @php_versions = sort { &compare_versions($a->[0], $b->[0]) }
 		     &list_available_php_versions();
 $max_php_version = $php_versions[@php_versions-1]->[0];
+$scriptdb = 'mysql';
 
 @create_args = ( [ 'limits-from-plan' ],
 		 [ 'no-email' ],
@@ -147,6 +148,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--script") {
 		push(@testscripts, split(/\s+/, shift(@ARGV)));
+		}
+	elsif ($a eq "--script-db") {
+		$scriptdb = shift(@ARGV);
+		}
+	elsif ($a eq "--version") {
+		push(@testversions, split(/\s+/, shift(@ARGV)));
 		}
 	elsif ($a eq "--template") {
 		$tmplname = shift(@ARGV);
@@ -1746,6 +1753,7 @@ foreach my $sname (&list_scripts(1)) {
 	my $tafunc = $script->{'testargs_func'};
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
+		next if (@testversions && &indexof($ver, @testversions) < 0);
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
 		my @args = defined(&$tafunc) ? &$tafunc($ver) : ();
 		push(@$allscript_tests,
@@ -1754,7 +1762,7 @@ foreach my $sname (&list_scripts(1)) {
 			  'args' => [ [ 'domain', $test_domain ],
 				      [ 'type', $script->{'name'} ],
 				      [ 'path', '/' ],
-				      [ 'db', 'mysql '.$test_domain_db ],
+				      [ 'db', $scriptdb.' '.$test_domain_db ],
 				      [ 'version', $ver ],
 				      @args,
 				    ],
