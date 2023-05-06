@@ -43,7 +43,15 @@ return 1;
 
 sub script_django_testable
 {
-return 1;
+my ($ver) = @_;
+return $ver >= 3.2 ? 0 : 1;
+}
+
+sub script_django_python_fullver
+{
+my ($ver) = @_;
+return $ver >= 4.0 ? 3.8 :
+       $ver >= 3.2 ? 3.7 : 3.6;
 }
 
 sub script_django_testargs
@@ -71,19 +79,18 @@ local ($d, $ver) = @_;
 local @rv;
 
 # Check for python, and required version
-my $python = &get_python_path(3);
+my $python = &get_python_path($ver >= 2.2 ? 3 : 2);
 $python || push(@rv, "The python command is not installed");
-local $out = &backquote_command("$python --version 2>&1 </dev/null");
-if ($out =~ /Python\s+([0-9\.]+)/i) {
-	my $pyver = $1;
+my $pyver = &get_python_version($python);
+if ($pyver) {
 	if ($ver >= 4.0 && &compare_versions($pyver, "3.8") < 0) {
 		push(@rv, "Django 4.0 requires Python 3.8 or later");
 		}
-	elsif ($ver >= 2.2 && &compare_versions($pyver, "3.6") < 0) {
-		push(@rv, "Django 3.1 requires Python 3.6 or later");
+	elsif ($ver >= 3.2 && &compare_versions($pyver, "3.7") < 0) {
+		push(@rv, "Django 3.1 requires Python 3.7 or later");
 		}
-	elsif (&compare_versions($pyver, "2.6") < 0) {
-		push(@rv, "Django 1.11 requires Python 2.6 or later");
+	elsif (&compare_versions($pyver, "3.6") < 0) {
+		push(@rv, "Django 2.2 requires Python 3.6 or later");
 		}
 	}
 else {
@@ -161,6 +168,7 @@ else {
 sub script_django_check
 {
 local ($d, $ver, $opts, $upgrade) = @_;
+$opts->{'idir'} ||= "$d->{'home'}/.local";
 $opts->{'dir'} =~ /^\// || return "Missing or invalid install directory";
 $opts->{'db'} || return "Missing database";
 $opts->{'project'} ||
@@ -243,6 +251,15 @@ if (!-d $opts->{'idir'}) {
 # Create python base dir
 $ENV{'PYTHONPATH'} = "$opts->{'idir'}/$pythonlibs";
 &run_as_domain_user($d, "mkdir -p ".quotemeta($ENV{'PYTHONPATH'}));
+
+# Install needed PIP modules
+foreach my $pip ("contextvars", "typing", "typing-extensions", "asyncio") {
+	$out = &run_as_domain_user($d, "$python -m pip install --upgrade ".quotemeta($pip)." 2>&1 </dev/null");
+	print STDERR $out;
+	if ($?) {
+		return (0, "Failed to install PIP module $pip : $out");
+		}
+	}
 
 # Extract the source
 local $temp = &transname();
