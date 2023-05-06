@@ -1018,13 +1018,14 @@ sub check_postgres_login
 local ($d, $dbname, $dbuser, $dbpass) = @_;
 &require_postgres();
 my $mod = &require_dom_postgres($d);
-&foreign_call($mod, "set_login_pass", 0, $dbuser, $dbpass);
+my @defcreds = &get_dom_postgres_creds($d);
+&foreign_call($mod, "set_login_pass", $defcreds[0], $dbuser, $dbpass);
 eval {
 	local $main::error_must_die = 1;
 	&execute_dom_psql($d, $dbname, "select version()");
 	};
 local $err = $@;
-&foreign_call($mod, "set_login_pass", &get_dom_postgres_creds($d));
+&foreign_call($mod, "set_login_pass", @defcreds);
 if ($err) {
 	$err =~ s/\s+at\s+.*\sline//g;
 	return $err;
