@@ -489,6 +489,8 @@ else {
 				&parse_simple_form($simple, \%in, $d, 1, 1, 1,
 						   $user->{'user'});
 				$simple->{'from'} = $fullemail;
+				$user->{'user_extra'} = &replace_atsign($user->{'user'})
+					if (&need_extra_user($user));
 				&save_simple_alias($d, $user, $simple);
 				if (@{$user->{'to'}} == 1 &&
 				    $simple->{'tome'}) {
