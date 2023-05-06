@@ -1748,12 +1748,15 @@ foreach my $sname (&list_scripts(1)) {
 	next if (@testscripts && &indexof($sname, @testscripts) < 0);
 	my $script = &get_script($sname);
 	next if (!$script);
-	next if (!$script->{'testable'});
+	my $tfunc = $script->{'testable_func'};
+	next if (!$tfunc || !defined(&$tfunc));
 	my $tpfunc = $script->{'testpath_func'};
 	my $tafunc = $script->{'testargs_func'};
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
 		next if (@testversions && &indexof($ver, @testversions) < 0);
+		my $testable = &$tfunc($ver);
+		next if (!$testable);
 		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
 		my @args = defined(&$tafunc) ? &$tafunc($ver) : ();
 		push(@$allscript_tests,
@@ -1769,7 +1772,7 @@ foreach my $sname (&list_scripts(1)) {
 			  'continuefail' => 1,
 			});
 
-		if ($script->{'testable'} == 1) {
+		if ($testable == 1) {
 			push(@$allscript_tests,
 				# Test that it works
 				{ 'command' => $curl_command.
