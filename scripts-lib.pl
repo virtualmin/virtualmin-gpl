@@ -180,6 +180,7 @@ local $rv = { 'name' => $name,
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
 	      'python_fullver_func' => "script_${name}_python_fullver",
+	      'python_maxver_func' => "script_${name}_python_maxver",
 	      'python_mods_func' => "script_${name}_python_modules",
 	      'python_opt_mods_func' => "script_${name}_opt_python_modules",
 	      'gem_version_func' => "script_${name}_gem_version",
@@ -1087,17 +1088,23 @@ sub setup_python_version
 {
 local ($d, $script, $scriptver, $path) = @_;
 my $minfunc = $script->{'python_fullver_func'};
+my $maxfunc = $script->{'python_maxver_func'};
 return (undef, undef) if (!defined(&$minfunc));
 my $ver = &$minfunc($scriptver);
 return (undef, undef) if (!$ver);
+my $maxver = defined(&$maxfunc) ? &$maxfunc($scriptver) : undef;
 my $basever = substr($ver, 0, 1);
 my $path = get_python_path($basever);
 return (undef, "Python version $ver is not available") if (!$path);
 my $gotver = &get_python_version($path);
 return (undef, "Could not find version of Python command $path") if (!$gotver);
-if (&compare_versions($ver, $gotver) > 0) {
+&compare_versions($gotver, $ver) >= 0 ||
 	return (undef, "Python version $ver is required, ".
 		       "but $path is version $gotver");
+if ($maxver) {
+	&compare_versions($gotver, $maxver) < 0 ||
+		return (undef, "Python version below $maxver is required, ".
+			       "but $path is version $gotver");
 	}
 return ($gotver, undef);
 }
