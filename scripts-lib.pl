@@ -1698,10 +1698,14 @@ foreach my $m (@mods) {
 		# is in MySQL-python
 		if ($m eq "MySQLdb") {
 			# XXX
-			push(@pkgs, $pyver >= 3 ? "python3-mysqlclient" :
-				         	  "python3-mysql");
 			if ($pyver =~ /^3\.(\d)/) {
-				push(@pkgs, "python3$1-mysql");
+				push(@pkgs, "python3-mysqlclient",
+					    "python3-mysql",
+					    "python3$1-mysql");
+				}
+			else {
+				push(@pkgs, "python-mysqlclient",
+					    "python-mysql");
 				}
 			}
 		elsif ($m eq "setuptools") {
@@ -1709,18 +1713,26 @@ foreach my $m (@mods) {
 			}
 		elsif ($mp eq "psycopg2") {
 			# Try to install old and new versions
-			push(@pkgs, $pyver >= 3 ? "python3-psycopg2" :
-				         	  "python-psycopg2");
+			if ($pyver =~ /^3\.(\d)/) {
+				push(@pkgs, "python3-psycopg2");
+				push(@pkgs, "python3$1-psycopg2");
+				push(@pkgs, "python3$1-pg8000");
+				}
+			else {
+				push(@pkgs, "python-psycopg2");
+				}
 			}
 		elsif ($m eq "svn") {
 			push(@pkgs, "subversion-python");
 			}
 		else {
 			$mp = lc($mp);
-			my $python_package = $pyver >= 3 ? "python3" : "python";
-			push(@pkgs, "$python_package-$mp");
 			if ($pyver =~ /^3\.(\d)/) {
+				push(@pkgs, "python3-$mp");
 				push(@pkgs, "python3$1-$mp");
+				}
+			else {
+				push(@pkgs, "python-$mp");
 				}
 			}
 		}
@@ -3460,7 +3472,7 @@ push(@opts, "python");
 foreach my $o (@opts) {
 	my $p = &has_command($o);
 	next if (!$p);
-	next if ($ver && &get_python_version($p) !~ /^\Q$ver\E\./);
+	next if ($ver && &get_python_version($p) !~ /^\Q$ver\E(\.|$)/);
 	return $p;
 	}
 return undef;
