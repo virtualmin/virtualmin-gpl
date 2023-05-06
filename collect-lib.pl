@@ -263,6 +263,8 @@ sub refresh_possible_packages
 local ($pkgs) = @_;
 local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
+my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
+$info->{'vposs'} = \@vposs;
 &save_collected_info($info);
 }
 
