@@ -257,12 +257,16 @@ $info->{'startstop'} = [ &get_startstop_links() ];
 }
 
 # refresh_possible_packages(&newpackages)
-# Refresh regularly collected info on available packages
+# Refresh regularly collected info on available packages. Assumes that
+# system_status::refresh_possible_packages has already been called.
 sub refresh_possible_packages
 {
 local ($pkgs) = @_;
 local %pkgs = map { $_, 1 } @$pkgs;
 local $info = &get_collected_info();
+&foreign_require("system-status");
+local $sinfo = &system_status::get_collected_info();
+$info->{'poss'} = $sinfo->{'poss'};
 my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 $info->{'vposs'} = \@vposs;
 &save_collected_info($info);
