@@ -7365,6 +7365,7 @@ cloud_gcpcreds=Using GCP credentials
 cloud_daccount=Using login $1
 cloud_google_account=Google account email address
 cloud_google_creds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full Cloud Storage access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
+cloud_google_dnscreds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full DNS access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=OAuth2 client ID
 cloud_google_secret=OAuth2 client secret
 cloud_google_project=Project ID

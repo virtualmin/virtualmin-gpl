@@ -14,8 +14,12 @@ $cloud || &error($text{'dnscloud_egone'});
 $sfunc = "dnscloud_".$cloud->{'name'}."_get_state";
 $state = &$sfunc($p);
 
-if ($cloud->{'longdesc'}) {
-	print $cloud->{'longdesc'},"<p>\n";
+my $longdesc = $cloud->{'longdesc'};
+if (ref($longdesc) eq 'CODE') {
+	$longdesc = &$longdesc();
+	}
+if ($longdesc) {
+	print $longdesc,"<p>\n";
 	}
 
 # First check if provider can be used
