@@ -4435,15 +4435,16 @@ return undef;
 
 # modify_web_home_directory(&domain, &old-domain, &virt, &vconf, &apache-config,
 # 			    [php-mode])
-# Updates all directives that refer to the old home directory, by modifying
-# the Apache config files directly. Also updates PHP config files. Invalidates
-# the Apache config cache.
+# Updates all directives that refer to the old home directory or domain ID, by
+# modifying the Apache config files directly. Also updates PHP config files.
+# Invalidates the Apache config cache.
 sub modify_web_home_directory
 {
 local ($d, $oldd, $virt, $vconf, $conf, $mode) = @_;
 local $lref = &read_file_lines($virt->{'file'});
 for(my $i=$virt->{'line'}; $i<=$virt->{'eline'}; $i++) {
 	$lref->[$i] =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/g;
+	$lref->[$i] =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g;
 	}
 &flush_file_lines($virt->{'file'});
 undef(@apache::get_config_cache);
