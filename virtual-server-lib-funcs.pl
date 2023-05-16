@@ -18382,10 +18382,11 @@ $d->{'nocreationmail'} = 1;	# Don't re-send post-creation email
 $d->{'created'} = time();
 $d->{'creator'} = $remote_user ||  getpwuid($<);
 
-# Fix any paths that refer to old home, like SSL certs
+# Fix any paths that refer to old home or ID, like SSL certs
 foreach my $k (keys %$d) {
 	next if ($k eq "home");	# already fixed
 	$d->{$k} =~ s/\Q$oldd->{'home'}\E\//$d->{'home'}\//g;
+	$d->{$k} =~ s/\Q$oldd->{'id'}\E/$d->{'id'}/g if ($k =~ /^ssl_/);
 	}
 &$second_print($text{'setup_done'});
 
