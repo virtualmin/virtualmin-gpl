@@ -18237,18 +18237,30 @@ local ($msg) = @_;
 }
 
 # get_domain_http_hostname(&domain)
-# Returns the best hostname for making HTTP requests to some domain, like
-# www.$DOM or just $DOM
+# Returns the best hostname for making HTTP requests
+# to some domain, like www.$DOM or just $DOM
 sub get_domain_http_hostname
 {
 my ($d) = @_;
+my $host = $d->{'dom'};
 foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 	my $ip = &to_ipaddress($h);
 	if ($ip && $ip eq $d->{'ip'}) {
-		return $h;
+		$host = $h;
+		last;
 		}
 	}
-return $d->{'dom'};	# Fallback
+if (defined(&get_http_redirect)) {
+	my $hostrs =
+	    &get_http_redirect(
+	        (&domain_has_ssl($d) ?
+	            "https" : "http")."://$host");
+	if ($hostrs->{'redir'} &&
+	    $hostrs->{'redir'}->{'host'} =~ /\Q$host\E/) {
+		$host = $hostrs->{'redir'}->{'host'};
+		}
+	}
+return $host;
 }
 
 # date_to_time(date-string, [gmt], [end-of-day])
