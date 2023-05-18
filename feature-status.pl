@@ -61,8 +61,7 @@ sub make_monitor
 {
 local ($d, $ssl) = @_;
 local $tmpl = &get_template($d->{'template'});
-local $host = $d->{'dns'} ? "www.".$d->{'dom'}
-			  : &get_domain_http_hostname($d);
+local $host = &get_domain_http_hostname($d);
 local $serv = { 'id' => $d->{'id'}.($ssl ? "_ssl" : "_web"),
 		'type' => 'http',
 		'desc' => $ssl ? "Website $host (SSL)" 
@@ -87,8 +86,7 @@ sub make_sslcert_monitor
 {
 local ($d) = @_;
 local $tmpl = &get_template($d->{'template'});
-local $host = $d->{'dns'} ? "www.".$d->{'dom'}
-			  : &get_domain_http_hostname($d);
+local $host = &get_domain_http_hostname($d);
 local $serv = { 'id' => $d->{'id'}."_sslcert",
 		'type' => 'sslcert',
 		'desc' => "SSL cert $host",
@@ -133,8 +131,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} ||
 	# Update HTTP monitor
 	&$first_print($text{'save_status'});
 	local $serv = &status::get_service($d->{'id'}."_web");
-	local $host = $d->{'dns'} ? "www.".$d->{'dom'}
-				     : &get_domain_http_hostname($d);
+	local $host = &get_domain_http_hostname($d);
 	if ($serv) {
 		$serv->{'host'} = $host;
 		$serv->{'desc'} = "Website $host";
