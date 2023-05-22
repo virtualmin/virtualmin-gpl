@@ -18257,13 +18257,12 @@ foreach my $h ("www.$d->{'dom'}", $d->{'dom'}) {
 		}
 	}
 if (defined(&get_http_redirect)) {
-	my $hostrs =
+	my $http_redirect =
 	    &get_http_redirect(
 	        (&domain_has_ssl($d) ?
 	            "https" : "http")."://$host");
-	if ($hostrs->{'redir'} &&
-	    $hostrs->{'redir'}->{'host'} =~ /\Q$host\E/) {
-		$host = $hostrs->{'redir'}->{'host'};
+	if ($http_redirect->{'host'} =~ /\Q$host\E/) {
+		$host = $http_redirect->{'host'};
 		}
 	}
 return $host;
