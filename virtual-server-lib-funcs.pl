@@ -8887,11 +8887,17 @@ if ($restarting) {
 # Run unique actions
 local %done;
 local @newpost;
-foreach $a (@main::post_actions) {
-	# Don't run multiple times. For BIND, all restarts are considered equal
-	local $key = $a->[0] eq \&restart_bind ? $a->[0] :
-	     $a->[0] eq \&update_secondary_mx_virtusers ? $a->[1]->{'dom'} :
-	     join(",", @$a);
+foreach my $a (@main::post_actions) {
+	# Don't run multiple times
+	my $key;
+	if ($a->[0] eq \&restart_bind ||
+	    $a->[0] eq \&update_secondary_mx_virtusers) {
+		# Restarts in the same domain are considered equal
+		$key = $a->[0].($a->[1] ? ",".$a->[1]->{'dom'} : "");
+		}
+	else {
+		$key = join(",", @$a);
+		}
 	next if ($done{$key}++);
 
 	# Skip if the caller requested specific actions
