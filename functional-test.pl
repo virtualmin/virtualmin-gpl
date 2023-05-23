@@ -7210,29 +7210,31 @@ $web_tests = [
 	  'grep' => 'Test web page',
 	},
 
-	# Enable use of server-side includes
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'includes', '.shtml' ] ],
-	},
+	&supports_ssi() ? (
+		# Enable use of server-side includes
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'includes', '.shtml' ] ],
+		},
 
-	# Create a test file and get it
-	{ 'command' => 'echo "<!--#echo var="REQUEST_METHOD" -->" >~'.$test_domain_user.'/public_html/test.shtml',
-	},
-	{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
-	  'grep' => 'GET',
-	},
+		# Create a test file and get it
+		{ 'command' => 'echo "<!--#echo var="REQUEST_METHOD" -->" >~'.$test_domain_user.'/public_html/test.shtml',
+		},
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
+		  'grep' => 'GET',
+		},
 
-	# Disable use of server-side includes
-	{ 'command' => 'modify-web.pl',
-	  'args' => [ [ 'domain' => $test_domain ],
-		      [ 'no-includes' ] ],
-	},
+		# Disable use of server-side includes
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'no-includes' ] ],
+		},
 
-	# Get the file again, and make sure includes are disabled
-	{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
-	  'antigrep' => 'GET',
-	},
+		# Get the file again, and make sure includes are disabled
+		{ 'command' => $wget_command.'http://'.$test_domain.'/test.shtml',
+		  'antigrep' => 'GET',
+		},
+	) : ( ),
 
 	# Enable proxying
 	{ 'command' => 'modify-web.pl',
@@ -7364,15 +7366,40 @@ $web_tests = [
 	{ 'command' => 'grep smeg /var/log/'.$test_domain.'_access_log' },
 
 	# Create a test CGI script
-	{ 'command' => '(echo "#!/bin/sh" ; echo "echo Content-type: text/plain" ; echo echo ; echo uptime) >~'.$test_domain_user.'/cgi-bin/test.cgi',
+	{ 'command' => '(echo "#!/bin/sh" ; echo "echo Content-type: text/plain" ; echo echo ; echo uptime ; echo env) >~'.$test_domain_user.'/cgi-bin/test.cgi',
 	},
 	{ 'command' => 'chown '.$test_domain_user.': ~'.$test_domain_user.'/cgi-bin/test.cgi',
 	},
 	{ 'command' => 'chmod 755 ~'.$test_domain_user.'/cgi-bin/test.cgi',
 	},
+
+	# Run the test CGI script
 	{ 'command' => $wget_command.'http://'.$test_domain.'/cgi-bin/test.cgi',
 	  'grep' => 'load average',
 	},
+
+	# Test in fcgiwrap mode
+	&supports_fcgiwrap() ? (
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'enable-fcgiwrap' ] ],
+		},
+
+		{ 'command' => $wget_command.
+			       'http://'.$test_domain.'/cgi-bin/test.cgi',
+		  'grep' => 'load average',
+		},
+
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'enable-fcgiwrap' ] ],
+		},
+
+		{ 'command' => $wget_command.
+			       'http://'.$test_domain.'/cgi-bin/test.cgi',
+		  'grep' => 'load average',
+		},
+	) : ( ),
 
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
