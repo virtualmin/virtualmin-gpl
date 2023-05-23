@@ -429,6 +429,11 @@ if (defined($fcgiwrap)) {
 		&usage("suEXEC is not supported on this system");
 	}
 
+# Validate SSI change
+if (defined($includes) && !&supports_ssi()) {
+	&usage("Server-side includes are not supported on this system");
+	}
+
 # Lock them all
 foreach $d (@doms) {
 	&obtain_lock_web($d) if ($d->{'web'});

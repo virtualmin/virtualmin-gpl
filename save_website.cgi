@@ -25,7 +25,7 @@ if (!$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./ &&
 	}
 
 # Validate SSI suffix
-if ($in{'ssi'} == 1) {
+if (defined($in{'ssi'}) && $in{'ssi'} == 1) {
 	$in{'suffix'} =~ /^\.([a-z0-9\.\_\-]+)$/i ||
 		&error($text{'phpmode_essisuffix'});
 	}

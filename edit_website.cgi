@@ -43,7 +43,7 @@ if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_star")) {
 	}
 
 # Server-side includes
-if ($p eq 'web' || &plugin_defined($p, "feature_get_web_domain_ssi")) {
+if (&supports_ssi($d)) {
 	($ssi, $suffix) = &get_domain_web_ssi($d);
 	$suffix = ".shtml" if ($ssi != 1);
 	print &ui_table_row(&hlink($text{'phpmode_ssi'}, "phpmode_ssi"),

@@ -4727,6 +4727,29 @@ return "Options=ExecCGI,Includes,IncludesNOEXEC,".
        "Indexes,MultiViews,SymLinksIfOwnerMatch";
 }
 
+# supports_ssi(&domain)
+# Does this webserver support server-side includes?
+sub supports_ssi
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p && $p ne 'web') {
+	# Check with plugin
+	if (&plugin_defined($p, "feature_web_supports_ssi")) {
+		return &plugin_call($p, "feature_web_supports_ssi", $d);
+		}
+	return 0;
+	}
+elsif ($p) {
+	# Check Apache module
+	&require_apache();
+	return $apache::httpd_modules{'mod_include'} ? 1 : 0;
+	}
+else {
+	return 0;
+	}
+}
+
 # get_domain_web_ssi(&domain)
 # Returns 1 and the file suffix if server-side includes are enabled for a
 # domain, 0 and an optional error if not, and 2 if the global settings are
