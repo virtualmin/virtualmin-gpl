@@ -5233,9 +5233,8 @@ foreach my $p (@ports) {
 		&apache::save_directive("SetHandler",
 		  [ "proxy:unix:$port|fcgi://localhost" ],
 		  $dir->{'members'}, $conf);
-		&apache::save_directive("ProxyFCGISetEnvIf",
-		  [ "true SCRIPT_FILENAME \"$d->{'home'}%{reqenv:SCRIPT_NAME}\"" ],
-		  $dir->{'members'}, $conf);
+		&apache::save_directive("ProxyFCGIBackendType", ["GENERIC"],
+					$dir->{'members'}, $conf);
 		&flush_file_lines($virt->{'file'});
 		}
 	else {
@@ -5267,6 +5266,8 @@ foreach my $p (@ports) {
 		&apache::save_directive("SetHandler", \@sh,
 					$dir->{'members'}, $conf);
 		&apache::save_directive("ProxyFCGISetEnvIf", [],
+					$dir->{'members'}, $conf);
+		&apache::save_directive("ProxyFCGIBackendType", [],
 					$dir->{'members'}, $conf);
 		&flush_file_lines($virt->{'file'});
 		}
