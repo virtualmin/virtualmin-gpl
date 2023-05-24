@@ -7352,6 +7352,7 @@ cloud_provider=Provider name
 cloud_url=Provider's website
 cloud_es3_endpoint=S3 compatible server must be a valid hostname
 cloud_es3_endport=S3 compatible server port must be a number
+cloud_es3_location=Invalid-looking default bucket location
 cloud_es3_chunk=Upload chunk size must be a positive number
 cloud_err=Failed to save cloud storage provider
 cloud_egone=Unknown cloud storage provider!

@@ -115,10 +115,19 @@ $rv .= &ui_table_row($text{'cloud_s3_chunk'},
 			$text{'default'}." (5 MB)"));
 
 # Location for new buckets
-$rv .= &ui_table_row($text{'cloud_s3_location'},
-	&ui_select("s3_location", $config{'s3_location'},
-		   [ [ "", $text{'default'} ],
-		     &s3_list_locations(@$account) ]));
+if ($config{'s3_endpoint'}) {
+	$rv .= &ui_table_row($text{'cloud_s3_location'},
+		&ui_opt_textbox("s3_location", $config{'s3_location'}, 30,
+				$text{'default'}));
+	}
+else {
+	my @locs = &s3_list_locations();
+	$rv .= &ui_table_row($text{'cloud_s3_location'},
+		&ui_select("s3_location", $config{'s3_location'},
+			   [ [ "", $text{'default'} ],
+			     &s3_list_locations(@$account) ],
+			   1, 0, 1));
+	}
 
 return $rv;
 }
@@ -165,7 +174,14 @@ else {
 	}
 
 # Parse new bucket location
-$config{'s3_location'} = $in->{'s3_location'};
+if ($in->{'s3_location_def'}) {
+	$config{'s3_location'} = '';
+	}
+else {
+	$in->{'s3_location'} =~ /^[a-z0-9\.\-]*/i ||
+		&error($text{'cloud_es3_location'});
+	$config{'s3_location'} = $in->{'s3_location'};
+	}
 
 &lock_file($module_config_file);
 &save_module_config();
