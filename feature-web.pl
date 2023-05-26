@@ -257,6 +257,13 @@ if ($tmpl->{'web_user'} ne 'none' && $web_user) {
 	&add_user_to_domain_group($d, $web_user, 'setup_webuser');
 	}
 
+# If creating web after domain creation,
+# maybe add autoconfig DNS records
+if ($config{'mail_autoconfig'} && $d->{'mail'} &&
+    !$d->{'creating'} && !$d->{'alias'}) {
+	&enable_email_autoconfig($d);
+	}
+
 &$first_print($text{'setup_webpost'});
 my $err;
 eval {
