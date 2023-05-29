@@ -695,6 +695,12 @@ if ($multi) {
 		if ($d->{'ssl_chain'}) {
 			print "    SSL CA file: $d->{'ssl_chain'}\n";
 			}
+		if ($d->{'ssl_combined'}) {
+			print "    SSL cert and CA file: $d->{'ssl_combined'}\n";
+			}
+		if ($d->{'ssl_everything'}) {
+			print "    SSL cert and key file: $d->{'ssl_everything'}\n";
+			}
 		$same = $d->{'ssl_same'} ? &get_domain($d->{'ssl_same'})
 					 : undef;
 		if ($same) {
