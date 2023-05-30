@@ -306,11 +306,23 @@ if (!$noeveryone) {
 				 $simple->{'everyone'}));
 	}
 
-# Autoreply active and text
+# Get possible autoreply even if not active
+my $simple_autotext = $simple->{'autotext'};
+if (!$simple->{'auto'}) {
+	my $simple_ghost;
+	$simple_ghost->{'autoreply'} =
+	    "$d->{'home'}/autoreply-$in{'user'}.txt";
+	if (-r $simple_ghost->{'autoreply'}) {
+		&read_autoreply($simple_ghost->{'autoreply'}, $simple_ghost);
+		my $simple_ghost_autotext = $simple_ghost->{'autotext'};
+		$simple_autotext = $simple_ghost_autotext
+			if ($simple_ghost_autotext);
+		}
+	}
 print &ui_table_row(&hlink($text{$sfx.'_auto'}, $sfx."_auto"),
 		    &ui_checkbox("auto", 1,$text{'alias_autoyes'},
 				 $simple->{'auto'})."<br>\n".
-		    &ui_textarea("autotext", $simple->{'autotext'},
+		    &ui_textarea("autotext", $simple_autotext,
 				 5, 60),
 		    undef, $tds);
 
