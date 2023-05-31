@@ -2671,19 +2671,21 @@ if ($config{'web'}) {
 				  [ [ 1, $text{'tmpl_web_fcgiwrap1'} ],
 				    [ 0, $text{'tmpl_web_fcgiwrap0'} ] ]));
 		}
+	}
 
-	# HTML sub-directory input
-	print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
-		&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
-				"$text{'default'} (<tt>public_html</tt>)<br>",
-				$text{'newweb_htmldir0'})."<br>\n".
-		("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
-	local $hdir = $tmpl->{'web_html_dir'} || "public_html";
+# HTML sub-directory input
+print &ui_table_row(&hlink($text{'newweb_htmldir'}, "template_html_dir_def"),
+	&ui_opt_textbox("html_dir", $tmpl->{'web_html_dir'}, 20,
+			"$text{'default'} (<tt>public_html</tt>)<br>",
+			$text{'newweb_htmldir0'})."<br>\n".
+	("&nbsp;" x 3).$text{'newweb_htmldir0suf'});
+local $hdir = $tmpl->{'web_html_dir'} || "public_html";
 
-	# HTML directory permissions
-	print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
-		&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
+# HTML directory permissions
+print &ui_table_row(&hlink($text{'newweb_htmlperms'}, "template_html_perms"),
+	&ui_textbox("html_perms", $tmpl->{'web_html_perms'}, 4));
 
+if ($config{'web'}) {
 	# Alias mode
 	print &ui_table_row(&hlink($text{'tmpl_alias'}, "template_alias_mode"),
 		&ui_radio("alias_mode", int($tmpl->{'web_alias'}),
@@ -2951,6 +2953,20 @@ if ($config{'web'}) {
 			$tmpl->{'web_ruby_suexec'} = $in{'web_ruby_suexec'};
 			}
 		}
+	}
+else {
+	# Some options apply to any webserver
+	if ($in{'html_dir_def'}) {
+		delete($tmpl->{'web_html_dir'});
+		}
+	else {
+		$in{'html_dir'} =~ /^\S+$/ && $in{'html_dir'} !~ /^\// &&
+		    $in{'html_dir'} !~ /\.\./ || &error($text{'newweb_ehtml'});
+		$tmpl->{'web_html_dir'} = $in{'html_dir'};
+		}
+	$in{'html_perms'} =~ /^[0-7]{3,4}$/ ||
+		&error($text{'newweb_ehtmlperms'});
+	$tmpl->{'web_html_perms'} = $in{'html_perms'};
 	}
 
 if ($config{'web'} && $config{'webalizer'}) {
