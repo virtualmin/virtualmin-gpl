@@ -105,6 +105,7 @@ foreach my $port (@ports) {
 		   @pdirs,
 		   "</Proxy>",
 		   "ProxyPass $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
+		   "ProxyPassReverse $balancer->{'path'} balancer://$balancer->{'balancer'}$slash",
 		   );
 		undef(@apache::get_config_cache);
 		}
