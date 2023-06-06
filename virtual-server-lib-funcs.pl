@@ -8666,6 +8666,13 @@ foreach my $dd (@alldoms) {
 			}
 		}
 
+	# Delete any FPM or FCGIwrap servers, just in case they
+	# were disassociated
+	&delete_php_fpm_pool($d);
+	if ($d->{'fcgiwrap_port'}) {
+		&delete_fcgiwrap_server($d);
+		}
+
 	# Delete SSL key files outside the home dir
 	if (!$dd->{'ssl_same'}) {
 		foreach my $k ('ssl_cert', 'ssl_key', 'ssl_chain',
