@@ -208,6 +208,7 @@ ip6enabled=0
 reseller_unix=0
 dovecot_ssl=1
 postfix_ssl=1
+mysql_ssl=1
 cert_type=sha2
 apache_star=0
 gzip_mysql=1

@@ -153,7 +153,7 @@ if (&domain_has_ssl_cert($d)) {
 	print &ui_table_row($text{'cert_kdownload'},
 			    &ui_links_row(\@dlinks), 3);
 
-	# Can copy as Global
+	# Can copy as global
 	my @gmissing;
 	foreach my $st (&list_service_ssl_cert_types()) {
 		($a) = grep { !$_->{'d'} && $_->{'id'} eq $st->{'id'}} @already;

@@ -1795,6 +1795,7 @@ newweb_webmin=Configure Webmin to use same SSL cert?
 newweb_usermin=Configure Usermin to use same SSL cert?
 newweb_dovecot=Configure Dovecot to use same SSL cert?
 newweb_postfix=Configure Postfix to use same SSL cert?
+newweb_mysql=Configure MySQL to use same SSL cert?
 newweb_cert_key=Template for private key path
 newweb_cert_cert=Template for certificate path
 newweb_cert_ca=Template for CA certificate path
