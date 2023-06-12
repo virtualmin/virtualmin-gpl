@@ -581,6 +581,25 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 
 	&write_env_file($dkim_defaults, \%def);
 	&unlock_file($dkim_defaults);
+
+	# Add the postfix user to the opendkim Unix group
+	&foreign_require("useradmin");
+	&obtain_lock_unix();
+	my @groups = &useradmin::list_groups();
+	my ($g) = grep { $_->{'group'} eq 'opendkim' } @groups;
+	if ($g) {
+		my $oldg = { %$g };
+		my @mems = split(/,/, $g->{'members'});
+		if (&indexof("postfix", @mems) < 0) {
+			push(@mems, "postfix");
+			$g->{'members'} = join(",", @mems);
+			&useradmin::set_group_envs($g, 'MODIFY_GROUP', $oldg);
+			&useradmin::making_changes();
+			&useradmin::modify_group($oldg, $g);
+			&useradmin::made_changes();
+			}
+		}
+	&release_lock_unix();
 	}
 elsif (&get_dkim_type() eq 'centos') {
 	# Save sign/verify mode flags
