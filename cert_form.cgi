@@ -50,7 +50,7 @@ print &ui_tabs_start_tab("mode", "current");
 if (&domain_has_ssl_cert($d)) {
 	print "<p>$text{'cert_desc2'}</p>\n";
 	if (!&domain_has_ssl($d)) {
-		print "<p>$text{'cert_hasnossl'}</p>\n";
+		print &ui_alert_box($text{'cert_hasnossl'}, 'warn');
 		}
 
 	print &ui_table_start($text{'cert_header2'}, undef, 4);
@@ -254,10 +254,9 @@ print "$text{'cert_desc4'}<p>\n";
 
 # Show warning if there is a CSR outstanding
 if ($d->{'ssl_csr'} && -r $d->{'ssl_csr'}) {
-	print "<b>",&text('cert_csrwarn',
+	print &ui_alert_box(&text('cert_csrwarn',
 		"<tt>".&home_relative_path($d, $d->{'ssl_csr'})."</tt>",
-		"<tt>".&home_relative_path($d, $d->{'ssl_newkey'})."</tt>"),
-	      "</b><p>\n";
+		"<tt>".&home_relative_path($d, $d->{'ssl_newkey'})."</tt>"), 'warn');
 	}
 
 print &ui_form_start("csr.cgi");
@@ -276,10 +275,9 @@ print "$text{'cert_desc6'}<p>\n";
 
 # Show warning if there is an existing key
 if ($d->{'ssl_key'} && -r $d->{'ssl_key'}) {
-	print "<b>",&text('cert_keywarn',
+	print &ui_alert_box(&text('cert_keywarn',
 		"<tt>".&home_relative_path($d, $d->{'ssl_cert'})."</tt>",
-		"<tt>".&home_relative_path($d, $d->{'ssl_key'})."</tt>"),
-	      "</b><p>\n";
+		"<tt>".&home_relative_path($d, $d->{'ssl_key'})."</tt>"), 'warn');
 	}
 
 print &ui_form_start("csr.cgi");

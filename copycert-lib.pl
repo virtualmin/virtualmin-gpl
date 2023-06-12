@@ -393,6 +393,15 @@ if ($cfile =~ /snakeoil/) {
 $cfile ||= "$dovedir/dovecot.cert.pem";
 $kfile ||= "$dovedir/dovecot.key.pem";
 
+# Break possible linkage to snakeoil cert and key
+foreach my $file ($cfile, $kfile) {
+    my $file_link = &resolve_links($file);
+    if ($file ne $file_link) {
+        &unlink_file($file);
+        &copy_source_dest($file_link, $file);
+        }
+    }
+
 # Copy cert into those files
 &$first_print($text{'copycert_dsaving'});
 my $cdata = &cert_pem_data($d);
@@ -495,6 +504,15 @@ if ($cfile =~ /snakeoil/) {
 $cfile ||= "$cdir/postfix.cert.pem";
 $kfile ||= "$cdir/postfix.key.pem";
 $cafile ||= "$cdir/postfix.ca.pem";
+
+# Break possible linkage to snakeoil cert and key
+foreach my $file ($cfile, $kfile, $cafile) {
+    my $file_link = &resolve_links($file);
+    if ($file ne $file_link) {
+        &unlink_file($file);
+        &copy_source_dest($file_link, $file);
+        }
+    }
 
 # Copy cert into those files
 my $casrcfile = &get_website_ssl_file($d, "ca");
