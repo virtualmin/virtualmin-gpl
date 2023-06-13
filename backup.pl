@@ -22,6 +22,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--debug") {
 		$backup_debug = 1;
 		}
+	elsif ($a eq "--purge-debug") {
+		$purge_debug = 1;
+		}
 	elsif ($a eq "--force-email") {
 		$force_email = 1;
 		}
@@ -180,7 +183,8 @@ if ($ok || $sched->{'errors'} == 1) {
 		if ($purges[$i]) {
 			$current_id = undef;
 			$pok = &purge_domain_backups(
-				$dest, $purges[$i], $start_time, $asd);
+				$dest, $purges[$i], $start_time, $asd,
+				$purge_debug);
 			if (!$pok) {
 				push(@perrs, $dest);
 				$ok = 0;
@@ -360,6 +364,7 @@ print "Runs one scheduled Virtualmin backup. Usually called automatically from C
 print "\n";
 print "usage: backup.pl [--id number]\n";
 print "                 [--debug]\n";
+print "                 [--purge-debug]\n";
 print "                 [--force-email]\n";
 exit(1);
 }
