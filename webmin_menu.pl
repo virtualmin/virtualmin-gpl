@@ -28,15 +28,13 @@ if ($image) {
 	}
 
 # Login and level
-push(@rv, { 'type' => 'text',
-	    'desc' => &text('left_login', $remote_user) });
 my $level = &master_admin() ? $text{'left_master'} :
             &reseller_admin() ? $text{'left_reseller'} :
             &extra_admin() ? $text{'left_extra'} :
             $single_domain_mode ? $text{'left_single'} :
                                   $text{'left_user'};
 push(@rv, { 'type' => 'text',
-	    'desc' => $level });
+	    'desc' => &text('left_login', $remote_user).' ('.$level.')' });
 push(@rv, { 'type' => 'hr' });
 
 # Get domains and find the default
