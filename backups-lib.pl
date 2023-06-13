@@ -5173,12 +5173,24 @@ elsif ($mode == 1) {
 		return 0;
 		}
 	foreach my $f (@$dir) {
-		if ($f->[13] =~ /^$re$/ &&
-		    $f->[13] !~ /\.(dom|info)$/ &&
-		    $f->[13] ne "." && $f->[13] ne "..") {
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f->[13],
+					    &make_date($f->[9])));
+			}
+		if ($f->[13] =~ /^$re$/ && $f->[13] !~ /\.(dom|info)$/) {
 			$mcount++;
-			next if (!$f->[9] || $f->[9] >= $cutoff);
+			if (!$f->[9] || $f->[9] >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $f->[9]) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingftp',
 					    "<tt>$base/$f->[13]</tt>", $old));
 			local $err;
@@ -5200,6 +5212,9 @@ elsif ($mode == 1) {
 						     &nice_size($sz)));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
@@ -5225,12 +5240,25 @@ elsif ($mode == 2) {
 	foreach my $l (split(/\r?\n/, $lsout)) {
 		local @st = &parse_lsl_line($l);
 		next if (!scalar(@st));
-		if ($st[13] =~ /^$re$/ &&
-		    $st[13] !~ /\.(dom|info)$/ &&
-		    $st[13] ne "." && $st[13] ne "..") {
+		next if ($st[13] eq "." || $st[13] eq "..");
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f->[13],
+					    &make_date($f->[9])));
+			}
+		if ($st[13] =~ /^$re$/ && $st[13] !~ /\.(dom|info)$/) {
 			$mcount++;
-			next if (!$st[9] || $st[9] >= $cutoff);
+			if (!$st[9] || $st[9] >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $st[9]) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingssh',
 					    "<tt>$base/$st[13]</tt>", $old));
 			local $rmcmd = $sshcmd." rm -rf".
@@ -5248,6 +5276,9 @@ elsif ($mode == 2) {
 						     &nice_size($st[7])));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
@@ -5275,12 +5306,25 @@ elsif ($mode == 9) {
 		}
 	foreach my $f (@$files) {
 		my ($fn, @st) = @$f;
-		if ($fn =~ /^$re$/ &&
-		    $fn !~ /\.(dom|info)$/ &&
-		    $fn ne "." && $fn ne "..") {
+		next if ($fn eq "." || $fn eq "..");
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $fn,
+					    &make_date($st[9])));
+			}
+		if ($fn =~ /^$re$/ && $fn !~ /\.(dom|info)$/) {
 			$mcount++;
-			next if (!$st[9] || $st[9] >= $cutoff);
+			if (!$st[9] || $st[9] >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $st[9]) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingwebmin',
 					    "<tt>$base/$fn</tt>", $old));
 			eval {
@@ -5304,7 +5348,9 @@ elsif ($mode == 9) {
 				$pcount++;
 				}
 			}
-
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
 		}
 	}
 
@@ -5316,12 +5362,26 @@ elsif ($mode == 3 && $host =~ /\%/) {
 		return 0;
 		}
 	foreach my $b (@$buckets) {
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs2', $b->{'Name'},
+					    $b->{'CreationDate'}));
+			}
 		if ($b->{'Name'} =~ /^$re$/) {
 			# Found one to delete
 			local $ctime = &s3_parse_date($b->{'CreationDate'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingbucket',
 					    "<tt>$b->{'Name'}</tt>", $old));
 
@@ -5345,6 +5405,9 @@ elsif ($mode == 3 && $host =~ /\%/) {
 						     &nice_size($sz)));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
