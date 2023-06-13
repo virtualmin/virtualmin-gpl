@@ -5090,12 +5090,12 @@ elsif ($mode == 8) {
 return ( );
 }
 
-# purge_domain_backups(dest, days, [time-now], [&as-domain])
+# purge_domain_backups(dest, days, [time-now], [&as-domain], [detailed-output])
 # Searches a backup destination for backup files or directories older than
 # same number of days, and deletes them. May print stuff using first_print.
 sub purge_domain_backups
 {
-local ($dest, $days, $start, $asd) = @_;
+local ($dest, $days, $start, $asd, $detail) = @_;
 local $asuser = $asd ? $asd->{'user'} : undef;
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
@@ -5119,14 +5119,28 @@ if ($mode == 0) {
 	# Just search a local directory for matching files, and remove them
 	opendir(PURGEDIR, $base);
 	foreach my $f (readdir(PURGEDIR)) {
+		next if ($f eq "." || $f eq "..");
 		local $path = "$base/$f";
 		local @st = stat($path);
-		if ($f ne "." && $f ne ".." && $f =~ /^$re$/ &&
-		    $f !~ /\.(dom|info)$/) {
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $path,
+					    &make_date($st[9])));
+			}
+		if ($f =~ /^$re$/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
-			next if (!$st[9] || $st[9] >= $cutoff);
+			if (!$st[9] || $st[9] >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $st[9]) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text(-d $path ? 'backup_deletingdir'
 					             : 'backup_deletingfile',
 				            "<tt>$path</tt>", $old));
@@ -5136,6 +5150,9 @@ if ($mode == 0) {
 			&unlink_file($path);
 			&$second_print(&text('backup_deleted', $sz));
 			$pcount++;
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	closedir(PURGEDIR);

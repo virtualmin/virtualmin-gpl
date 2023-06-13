@@ -61,7 +61,8 @@ To have Virtualmin automatically replace strftime-style date formatting
 characters in the backup destination, you can use the C<--strftime> flag.
 When this is enabled, the C<--purge> flag can also be given, followed by a 
 number of days. The command will then delete backups in the same desination
-directory older than the specified number of days.
+directory older than the specified number of days. To see more detail about
+which files were consisered for purging, add the C<--purge-debug> flag.
 
 On a Virtualmin Pro system, you can use the C<--key> flag followed by
 a backup key ID or description to select the key to encrypt this backup with.
@@ -215,6 +216,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--purge") {
 		$purge = shift(@ARGV);
 		$purge =~ /^[0-9\.]+$/ || &usage("--purge must be followed by a number");
+		}
+	elsif ($a eq "--purge-debug") {
+		$purge_debug = 1;
 		}
 	elsif ($a eq "--key") {
 		$keyid = shift(@ARGV);
@@ -422,7 +426,8 @@ $pok = 1;
 if ($purge && $ok) {
 	$asd = $asowner ? &get_backup_as_domain(\@doms) : undef;
 	foreach $dest (@dests) {
-		$pok = &purge_domain_backups($dest, $purge, $start_time, $asd);
+		$pok = &purge_domain_backups($dest, $purge, $start_time, $asd,
+					     $purge_debug);
 		if (!$pok) {
 			$ex = 3;
 			}
@@ -472,6 +477,7 @@ print "                         [--as-owner]\n";
 print "                         [--exclude file]*\n";
 print "                         [--include file]*\n";
 print "                         [--purge days]\n";
+print "                         [--purge-debug]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
