@@ -5420,14 +5420,28 @@ elsif ($mode == 3 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $f (@$files) {
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f->{'Key'},
+					    $f->{'LastModified'}));
+			}
 		if (($f->{'Key'} =~ /^$re$/ ||
 		     $f->{'Key'} =~ /^$re\/.*\.(tar\.gz|tar\.bz2|zip|tar)$/) &&
 		    $f->{'Key'} !~ /\.(dom|info)$/) {
 			# Found one to delete
 			local $ctime = &s3_parse_date($f->{'LastModified'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f->{'Key'}</tt>", $old));
 			local $err = &s3_delete_file($user, $pass, $host,
@@ -5446,6 +5460,9 @@ elsif ($mode == 3 && $path =~ /\%/) {
 				$pcount++;
 				}
 			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
 		}
 	}
 
@@ -5461,14 +5478,28 @@ elsif ($mode == 6 && $host =~ /\%/) {
 		return 0;
 		}
 	foreach my $c (@$containers) {
+		local $st = &rs_stat_container($rsh, $c);
+		next if (!ref($st));
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs3', $c,
+					    $st->{'X-Timestamp'}));
+			}
 		if ($c =~ /^$re$/) {
 			# Found one to delete
-			local $st = &rs_stat_container($rsh, $c);
-			next if (!ref($st));
 			local $ctime = int($st->{'X-Timestamp'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingcontainer',
 					    "<tt>$c</tt>", $old));
 
@@ -5483,6 +5514,9 @@ elsif ($mode == 6 && $host =~ /\%/) {
 			          &nice_size($st->{'X-Container-Bytes-Used'})));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
@@ -5499,15 +5533,29 @@ elsif ($mode == 6 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $f (@$files) {
+		local $st = &rs_stat_object($rsh, $host, $f);
+		next if (!ref($st));
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $c,
+					    $st->{'X-Timestamp'}));
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete
-			local $st = &rs_stat_object($rsh, $host, $f);
-			next if (!ref($st));
 			local $ctime = int($st->{'X-Timestamp'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f</tt>", $old));
 			local $err = &rs_delete_object($rsh, $host, $f);
@@ -5522,6 +5570,9 @@ elsif ($mode == 6 && $path =~ /\%/) {
 				     &nice_size($st->{'Content-Length'})));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
