@@ -5586,12 +5586,26 @@ elsif ($mode == 7 && $host =~ /\%/) {
 		}
 	foreach my $st (@$buckets) {
 		my $c = $st->{'name'};
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs2', $c,
+					    $st->{'timeCreated'}));
+			}
 		if ($c =~ /^$re$/) {
 			# Found one with a name to delete
 			local $ctime = &google_timestamp($st->{'timeCreated'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingbucket',
 					    "<tt>$c</tt>", $old));
 
@@ -5608,6 +5622,9 @@ elsif ($mode == 7 && $host =~ /\%/) {
 				$pcount++;
 				}
 			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
 		}
 	}
 
@@ -5620,13 +5637,27 @@ elsif ($mode == 7 && $path =~ /\%/) {
 		}
 	foreach my $st (@$files) {
 		my $f = $st->{'name'};
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+					    $st->{'updated'}));
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete
 			local $ctime = &google_timestamp($st->{'updated'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f</tt>", $old));
 			local $err = &delete_gcs_file($host, $f);
@@ -5641,6 +5672,9 @@ elsif ($mode == 7 && $path =~ /\%/) {
 				     &nice_size($st->{'size'})));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
@@ -5673,11 +5707,25 @@ elsif ($mode == 8) {
 		else {
 			$ctime = &dropbox_timestamp($st->{'client_modified'});
 			}
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+					    &make_date($ctime)));
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
-                        next if (!$ctime || $ctime >= $cutoff);
+                        if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
                         local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
                                             "<tt>$f</tt>", $old));
 			my $p = $st->{'path'};
@@ -5699,6 +5747,9 @@ elsif ($mode == 8) {
 				     &nice_size($size)));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}
@@ -5731,11 +5782,25 @@ elsif ($mode == 10) {
 		else {
 			$ctime = $st->{'time'};
 			}
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+					    &make_date($ctime)));
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/) {
 			# Found one to delete
 			$mcount++;
-                        next if (!$ctime || $ctime >= $cutoff);
+                        if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
                         local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
                                             "<tt>$f</tt>", $old));
 			my $size = $st->{'folder'} ?
@@ -5754,6 +5819,9 @@ elsif ($mode == 10) {
 				$pcount++;
 				}
 			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
 		}
 	}
 
@@ -5766,14 +5834,28 @@ elsif ($mode == 11 && $path =~ /\%/) {
 		}
 	foreach my $st (@$files) {
 		my $f = $st->{'name'};
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+				$st->{'properties'}->{'lastModified'}));
+			}
 		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
 		    $f !~ /\.\d+$/) {
 			# Found one to delete
 			local $ctime = &google_timestamp(
 				$st->{'properties'}->{'lastModified'});
 			$mcount++;
-			next if (!$ctime || $ctime >= $cutoff);
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
 			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
 			&$first_print(&text('backup_deletingfile',
 					    "<tt>$f</tt>", $old));
 			local $err = &delete_azure_file($host, $f);
@@ -5788,6 +5870,9 @@ elsif ($mode == 11 && $path =~ /\%/) {
 				     &nice_size($st->{'properties'}->{'contentLength'})));
 				$pcount++;
 				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
 			}
 		}
 	}

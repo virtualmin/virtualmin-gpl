@@ -2721,6 +2721,12 @@ backup_arun=Running post-backup command ..
 backup_brunfailed=.. failed. The backup will not proceed.
 backup_arunfailed=.. failed!
 backup_efeature=.. feature $1 failed
+backup_purgeposs=Considering file $1 dated $2 ..
+backup_purgeposs2=Considering bucket $1 dated $2 ..
+backup_purgeposs3=Considering container $1 dated $2 ..
+backup_purgepat=.. does not match pattern $1
+backup_purgenew=.. not older than $1
+backup_purgecan=.. matches pattern $1 and is $2 days old
 
 restore_title=Restore Virtual Servers
 restore_header=Options for restoring backup
