@@ -55,9 +55,6 @@ if (&need_config_check() && &can_check_config()) {
 	print &ui_submit($text{'index_tmpls'});
 	print &ui_form_end();
 	$formno++;
-
-	&ui_print_footer("/", $text{'index'});
-	exit;
 	}
 
 # Show any warnings
