@@ -15389,7 +15389,7 @@ if (&domain_has_website()) {
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
-		&$first_print(&text('check_webphpversinis',
+		&$second_print(&text('check_webphpversinis',
 				     join(", ", @newvernums)));
 		&$indent_print();
 		foreach my $d (grep { &domain_has_website($_) &&
@@ -15411,7 +15411,6 @@ if (&domain_has_website()) {
 				};
 			}
 		&$outdent_print();
-		&$second_print($text{'setup_done'});
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
 	}
