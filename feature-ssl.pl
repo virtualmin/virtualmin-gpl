@@ -3197,6 +3197,7 @@ my ($ok, $cert, $key, $chain);
 my @errs;
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
+&disable_quotas($d);
 if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 	# Try using website first
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
@@ -3219,6 +3220,7 @@ elsif (!$ok) {
 		push(@errs, $cert);
 		}
 	}
+&enable_quotas($d);
 &unlock_file($ssl_letsencrypt_lock);
 if (!$ok) {
 	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
