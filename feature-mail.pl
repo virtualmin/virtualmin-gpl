@@ -6439,7 +6439,7 @@ if (!$cr) {
 		}
 	}
 
-if ($changed) {
+if ($changed && !$forcefile) {
 	&post_records_change($d, $recs, $file);
 	&register_post_action(\&restart_bind, $d);
 	}
