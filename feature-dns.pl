@@ -1507,7 +1507,7 @@ local @sublist = grep { $_->{'id'} ne $aliasd->{'id'} &&
 # Find records we already have
 local %already;
 foreach my $r (@$recs) {
-	$already{&dns_record_key($r, 1)} = $r;
+	$already{&dns_record_key($r, 1)}++;
 	}
 local %keep;
 
@@ -1539,7 +1539,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 		}
 	if ($r->{'defttl'}) {
 		# Add default TTL
-		next if ($diff && $already{&dns_record_key($nr, 1)});
+		next if ($diff && $already{&dns_record_key($nr, 1)}--);
 		&create_dns_record($recs, $file, $nr);
 		next;
 		}
@@ -1578,7 +1578,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 	$keep{&dns_record_key($nr, 1)} = 1;
 
 	# Create unless it already exists
-	next if ($diff && $already{&dns_record_key($nr, 1)});
+	next if ($diff && $already{&dns_record_key($nr, 1)}--);
 	next if ($diff && $nr->{'type'} eq 'SOA');
 	&create_dns_record($recs, $file, $nr);
 	}
