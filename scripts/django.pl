@@ -205,7 +205,7 @@ return @files;
 sub script_django_commands
 {
 local ($d, $ver, $opts) = @_;
-return (&get_python_path(), "fuser");
+return (&get_python_path(), "fuser", "pip");
 }
 
 # script_django_install(&domain, version, &opts, &files, &upgrade-info)
