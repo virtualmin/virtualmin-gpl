@@ -34,7 +34,9 @@ my $level = &master_admin() ? $text{'left_master'} :
             $single_domain_mode ? $text{'left_single'} :
                                   $text{'left_user'};
 push(@rv, { 'type' => 'text',
-	    'desc' => &text('left_login', $remote_user).' ('.$level.')' });
+            'json' => {level => $level,
+                       label => &text('left_login', $remote_user)},
+            'desc' => &text('left_login', $remote_user).' ('.$level.')' });
 push(@rv, { 'type' => 'hr' });
 
 # Get domains and find the default
