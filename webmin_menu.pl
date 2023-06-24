@@ -34,8 +34,9 @@ my $level = &master_admin() ? $text{'left_master'} :
             $single_domain_mode ? $text{'left_single'} :
                                   $text{'left_user'};
 push(@rv, { 'type' => 'text',
-            'json' => {level => $level,
-                       label => &text('left_login', $remote_user)},
+            'json' => { level => $level,
+                        label => &text('left_login', $remote_user),
+                        status => 1 },
             'desc' => &text('left_login', $remote_user).' ('.$level.')' });
 push(@rv, { 'type' => 'hr' });
 
