@@ -24,7 +24,7 @@ return "WHMCS is an all-in-one client management, billing & support solution for
 # script_whmcs_versions()
 sub script_whmcs_versions
 {
-return ( "8.6.2", "8.5.2" );
+return ( "8.7.3", "8.6.2", "8.5.2" );
 }
 
 sub script_whmcs_gpl
@@ -506,7 +506,8 @@ return $db_conn_desc;
 sub script_whmcs_latest
 {
 local ($ver) = @_;
-local $vwant = $ver >= 8.6 ? "8\\.6" :
+local $vwant = $ver >= 8.7 ? "8\\.7" :
+	       $ver >= 8.6 ? "8\\.6" :
 	       $ver >= 8.5 ? "8\\.5" : undef;
 if ($vwant) {
 	return ( "https://download.whmcs.com/assets/scripts/get-downloads.php",
