@@ -8279,7 +8279,8 @@ if (!defined($dom->{'auto_letsencrypt'})) {
 		}
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
-    !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'}) {
+    !$dom->{'disabled'} && !$dom->{'alias'} && !$dom->{'ssl_same'} &&
+    &under_public_dns_suffix($dom->{'dom'})) {
 	my $info = &cert_info($dom);
 	if ($info->{'self'}) {
 		if ($nopost) {
