@@ -290,10 +290,10 @@ elsif (&get_dkim_type() eq 'centos') {
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Postfix config
-	my $wantmilter = $rv{'port'} ? "inet:localhost:$rv{'port'}" :
+	my $wantmilter = $rv{'port'} ? "inet:(localhost|127\.0\.0\.1):$rv{'port'}" :
 			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 	my $milters = &postfix::get_real_value("smtpd_milters");
-	if ($wantmilter && $milters !~ /\Q$wantmilter\E/) {
+	if ($wantmilter && $milters !~ /$wantmilter/) {
 		$rv{'enabled'} = 0;
 		}
 	}
@@ -674,7 +674,9 @@ if (!$ok) {
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to use filter
-	my $newmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+	my $wantmilter = $dkim->{'port'} ? "inet:(localhost|127\.0\.0\.1):$dkim->{'port'}"
+					 : "local:$dkim->{'socket'}";
+	my $newmilter = $dkim->{'port'} ? "inet:127.0.0.1:$dkim->{'port'}"
 					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	&postfix::set_current_value("milter_default_action", "accept");
@@ -682,7 +684,7 @@ if ($config{'mail_system'} == 0) {
 		&postfix::set_current_value("milter_protocol", 2);
 		}
 	my $milters = &postfix::get_current_value("smtpd_milters");
-	if ($milters !~ /\Q$newmilter\E/) {
+	if ($milters !~ /$wantmilter/) {
 		$milters = $milters ? $milters.",".$newmilter : $newmilter;
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
@@ -694,7 +696,9 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to use filter
-	my $newmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@localhost"
+	my $wantmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@(localhost|127\.0\.0\.1)"
+					 : "local:$dkim->{'socket'}";
+	my $newmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@127.0.0.1"
 					: "local:$dkim->{'socket'}";
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my $changed = 0;
@@ -702,7 +706,7 @@ elsif ($config{'mail_system'} == 1) {
 
 	# Check for filter definition
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
-			      $_->{'text'} =~ /\Q$newmilter\E/ } @feats;
+			      $_->{'text'} =~ /$wantmilter/ } @feats;
 	if (!$milter) {
 		# Add to .mc file
 		&sendmail::create_feature({
@@ -801,12 +805,12 @@ my @doms = grep { $_->{'dns'} && $_->{'mail'} } &list_domains();
 &require_mail();
 if ($config{'mail_system'} == 0) {
 	# Configure Postfix to not use filter
-	my $oldmilter = $dkim->{'port'} ? "inet:localhost:$dkim->{'port'}"
+	my $oldmilter = $dkim->{'port'} ? "inet:(localhost|127\.0\.0\.1):$dkim->{'port'}"
 					: "local:$dkim->{'socket'}";
 	&lock_file($postfix::config{'postfix_config_file'});
 	my $milters = &postfix::get_current_value("smtpd_milters");
-	if ($milters =~ /\Q$oldmilter\E/) {
-		$milters = join(",", grep { $_ ne $oldmilter }
+	if ($milters =~ /$oldmilter/) {
+		$milters = join(",", grep { !/$oldmilter/ }
 				split(/\s*,\s*/, $milters));
 		&postfix::set_current_value("smtpd_milters", $milters);
 		&postfix::set_current_value("non_smtpd_milters", $milters);
@@ -818,7 +822,7 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Configure Sendmail to not use filter
-	my $oldmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@localhost"
+	my $oldmilter = $dkim->{'port'} ? "inet:$dkim->{'port'}\@(localhost|127\.0\.0\.1)"
 					: "local:$dkim->{'socket'}";
 	&lock_file($sendmail::config{'sendmail_mc'});
 	my @feats = &sendmail::list_features();
@@ -844,7 +848,7 @@ elsif ($config{'mail_system'} == 1) {
 
 	# Remove milter definition
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
-			      $_->{'text'} =~ /\Q$oldmilter\E/ } @feats;
+			      $_->{'text'} =~ /$oldmilter/ } @feats;
 	if ($milter) {
 		&sendmail::delete_feature($milter);
 		$changed++;
