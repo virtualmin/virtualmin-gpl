@@ -639,7 +639,7 @@ return undef;	# Always works
 # Ask the user if he wants to enable storage of hashed passwords only
 sub wizard_show_hashpass
 {
-print &ui_table_row(undef, "$text{'wizard_hashpass'} $text{'wizard_hashpass_warn'}<br><br>", 2);
+print &ui_table_row(undef, "$text{'wizard_hashpass'} $text{'wizard_hashpass_warn'}<br>", 2);
 
 local $tmpl = &get_template(0);
 print &ui_table_row($text{'wizard_hashpass_mode'},
