@@ -1185,6 +1185,8 @@ else {
 				$quota::user{$i,'hblocks'};
 			$main::used_home_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'ublocks'};
+			$main::used_home_fquota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'ufiles'};
 			}
 		}
 	if (!%main::soft_mail_quota && &has_mail_quotas() && !$_[0]) {
@@ -1197,6 +1199,8 @@ else {
 				$quota::user{$i,'hblocks'};
 			$main::used_mail_quota{$quota::user{$i,'user'}} =
 				$quota::user{$i,'ublocks'};
+			$main::used_mail_fquota{$quota::user{$i,'user'}} =
+				$quota::user{$i,'ufiles'};
 			}
 		}
 	}
@@ -1213,9 +1217,11 @@ foreach my $u (@users) {
 		$u->{'softquota'} = $sameu->{'softquota'};
 		$u->{'hardquota'} = $sameu->{'hardquota'};
 		$u->{'uquota'} = $sameu->{'uquota'};
+		$u->{'ufquota'} = $sameu->{'ufquota'};
 		$u->{'softmquota'} = $sameu->{'softmquota'};
 		$u->{'hardmquota'} = $sameu->{'hardmquota'};
 		$u->{'umquota'} = $sameu->{'umquota'};
+		$u->{'umfquota'} = $sameu->{'umfquota'};
 		}
 	else {
 		# Set quotas based on quota commands
@@ -1228,12 +1234,16 @@ foreach my $u (@users) {
 				    $main::hard_home_quota{$altuser};
 		$u->{'uquota'} = $main::used_home_quota{$u->{'user'}} ||
 				 $main::used_home_quota{$altuser};
+		$u->{'ufquota'} = $main::used_home_fquota{$u->{'user'}} ||
+				  $main::used_home_fquota{$altuser};
 		$u->{'softmquota'} = $main::soft_mail_quota{$u->{'user'}} ||
 				     $main::soft_mail_quota{$altuser};
 		$u->{'hardmquota'} = $main::hard_mail_quota{$u->{'user'}} ||
 				     $main::hard_mail_quota{$altuser};
 		$u->{'umquota'} = $main::used_mail_quota{$u->{'user'}} ||
 				  $main::used_mail_quota{$altuser};
+		$u->{'umfquota'} = $main::used_mail_fquota{$u->{'user'}} ||
+				   $main::used_mail_fquota{$altuser};
 		}
 	$u->{'unix'} = 1;
 	$u->{'person'} = 1;
@@ -1272,6 +1282,8 @@ else {
 				$quota::group{$i,'hblocks'};
 			$main::gused_home_quota{$quota::group{$i,'group'}} =
 				$quota::group{$i,'ublocks'};
+			$main::gused_home_fquota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'ufiles'};
 			}
 		}
 	if (!%main::gsoft_mail_quota && &has_mail_quotas() && !$_[0]) {
@@ -1284,6 +1296,8 @@ else {
 				$quota::group{$i,'hblocks'};
 			$main::gused_mail_quota{$quota::group{$i,'group'}} =
 				$quota::group{$i,'ublocks'};
+			$main::gused_mail_fquota{$quota::group{$i,'group'}} =
+				$quota::group{$i,'ufiles'};
 			}
 		}
 	}
@@ -1296,9 +1310,11 @@ foreach $u (@groups) {
 	$u->{'softquota'} = $main::gsoft_home_quota{$u->{'group'}};
 	$u->{'hardquota'} = $main::ghard_home_quota{$u->{'group'}};
 	$u->{'uquota'} = $main::gused_home_quota{$u->{'group'}};
+	$u->{'ufquota'} = $main::gused_home_fquota{$u->{'group'}};
 	$u->{'softmquota'} = $main::gsoft_mail_quota{$u->{'group'}};
 	$u->{'hardmquota'} = $main::ghard_mail_quota{$u->{'group'}};
 	$u->{'umquota'} = $main::gused_mail_quota{$u->{'group'}};
+	$u->{'umfquota'} = $main::gused_mail_fquota{$u->{'group'}};
 	}
 return @groups;
 }
@@ -17210,6 +17226,7 @@ undef(%get_bandwidth_cache);
 undef(%main::soft_home_quota);
 undef(%main::hard_home_quota);
 undef(%main::used_home_quota);
+undef(%main::used_home_fquota);
 undef(%main::soft_mail_quota);
 undef(%main::hard_mail_quota);
 undef(%main::used_mail_quota);

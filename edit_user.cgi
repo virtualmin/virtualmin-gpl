@@ -165,13 +165,15 @@ if ($showquota) {
 			&hlink($qsame ? $text{'user_umquota'}
 				      : $text{'user_uquota'}, "diskquota"),
 			&quota_field("quota", $user->{'quota'},
-			     $user->{'uquota'}, "home", $user),
+			     $user->{'uquota'}, $user->{'ufquota'},
+			     "home", $user),
 			2, \@tds);
 		}
 	if (&has_mail_quotas()) {
 		print &ui_table_row(&hlink($text{'user_mquota'}, "diskmquota"),
 				    &quota_field("mquota", $user->{'mquota'},
-					 $user->{'umquota'}, "mail", $user),
+					 $user->{'umquota'},$user->{'umfquota'},
+					 "mail", $user),
 				    2, \@tds);
 		}
 	}
@@ -529,10 +531,10 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
-# quota_field(name, value, used, filesystem, &user)
+# quota_field(name, value, used, files-used, filesystem, &user)
 sub quota_field
 {
-my ($name, $value, $used, $fs, $u) = @_;
+my ($name, $value, $used, $fused, $fs, $u) = @_;
 my $rv;
 my $color = $u->{'over_quota'} ? "#ff0000" :
 	    $u->{'warn_quota'} ? "#ff8800" :
@@ -550,7 +552,9 @@ else {
 	$rv .= ($q ? &quota_show($q, $_[3]) : $text{'form_unlimit'})."\n";
 	}
 if (!$in{'new'}) {
-	my $umsg = $used ? &text('user_used', &quota_show($used, $fs))
+	my $umsg = $used && $fused ? &text('user_used2',
+					&quota_show($used, $fs), $fused) :
+		   $used ? &text('user_used', &quota_show($used, $fs))
 		         : &text('user_noneused');
 	if ($color) {
 		$umsg = "<font color=$color>$umsg</font>";

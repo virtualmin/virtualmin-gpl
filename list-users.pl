@@ -156,6 +156,8 @@ foreach $d (@doms) {
 				      ($u->{'quota'} * $home_bsize),"\n";
 				print "    Home byte quota used: ",
 				      ($u->{'uquota'} * $home_bsize),"\n";
+				print "    Home files used: ",
+				      $u->{'ufquota'},"\n";
 				if (defined($u->{'quota_cache'}) &&
 				    $u->{'quota_cache'} != $u->{'quota'}) {
 					print "    Home quota expected: ",
@@ -174,6 +176,8 @@ foreach $d (@doms) {
 				      ($u->{'mquota'} * $mail_bsize),"\n";
 				print "    Mail byte quota used: ",
 				      ($u->{'umquota'} * $mail_bsize),"\n";
+				print "    Mail files used: ",
+				      $u->{'umfquota'},"\n";
 				if (defined($u->{'mquota_cache'}) &&
 				    $u->{'mquota_cache'} != $u->{'mquota'}) {
 					print "    Mail quota expected: ",

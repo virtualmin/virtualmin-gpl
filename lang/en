@@ -821,6 +821,7 @@ user_mquota=Mail file quota
 user_qquota=Mail server quota
 user_umquota=Home and mail quota
 user_used=($1 used)
+user_used2=($1 used in $2 files)
 user_noneused=(None used)
 user_equota=Missing or invalid quota size
 user_eqquota=Missing or invalid mail server quota
