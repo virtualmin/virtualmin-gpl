@@ -8385,8 +8385,7 @@ else {
 	@dnames = &get_hostnames_for_ssl($d);
 	}
 push(@dnames, "*.".$d->{'dom'}) if ($d->{'letsencrypt_dwild'});
-&$first_print(&text('letsencrypt_doing2',
-		    join(", ", map { "<tt>$_</tt>" } @dnames)));
+&$first_print($text{'letsencrypt_doing3'});
 if ($valid) {
 	my $vcheck = ['web'];
 	foreach my $dn (@dnames) {
@@ -8394,14 +8393,14 @@ if ($valid) {
 		}
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
-		&$second_print($text{'letsencrypt_evalid'});
+		&$second_print($text{'letsencrypt_doing3failed'});
 		return 0;
 		}
 	if (defined(&check_domain_connectivity)) {
 		@errs = &check_domain_connectivity(
 			$d, { 'mail' => 1, 'ssl' => 1 });
 		if (@errs) {
-			&$second_print($text{'letsencrypt_econnect'});
+			&$second_print($text{'letsencrypt_doing3failed'});
 			return 0;
 			}
 		}
@@ -8413,7 +8412,7 @@ my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
-	&$second_print(&text('letsencrypt_failed', $cert));
+	&$second_print($text{'letsencrypt_doing3failed'});
 	return 0;
 	}
 else {
@@ -8435,7 +8434,8 @@ else {
 	&break_invalid_ssl_linkages($d);
 	&sync_domain_tlsa_records($d);
 	&release_lock_ssl($d);
-	&$second_print($text{'letsencrypt_done'});
+	&$second_print(&text('letsencrypt_doing3ok',
+			     join(", ", map { "<tt>$_</tt>" } @dnames)));
 	return 1;
 	}
 }
