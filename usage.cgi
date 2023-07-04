@@ -20,6 +20,33 @@ foreach $sd ($d, @subs) {
 		}
 	}
 
+# Compute usage by users
+foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
+	@users = &list_domain_users($sd, 0, 1, 0, 1);
+	foreach my $u (@users) {
+		next if ($u->{'webowner'});
+		if ($u->{'domainowner'}) {
+			# Only show mail for domain owner
+			($uusage) = &mail_file_size($u);
+			}
+		elsif (&has_home_quotas()) {
+			$uusage = $u->{'uquota'}*$homesize +
+				  $u->{'umquota'}*$mailsize;
+			}
+		else {
+			($uusage) = &recursive_disk_usage_mtime($u->{'home'});
+			if (!&mail_under_home()) {
+				($umail) = &mail_file_size($u);
+				$uusage += $umail;
+				}
+			}
+		push(@userusage,
+		     [ &remove_userdom($u->{'user'}, $sd),
+		       &show_domain_name($sd),
+		       $uusage ]);
+		}
+	}
+
 # First work out what tabs we have
 @tabs = ( );
 $prog = "usage.cgi?dom=$in{'dom'}&mode=";
@@ -27,7 +54,9 @@ if (&has_home_quotas()) {
 	push(@tabs, [ "summary", $text{'usage_tabsummary'}, $prog."summary" ]);
 	}
 push(@tabs, [ "homes", $text{'usage_tabhomes'}, $prog."homes" ]);
-push(@tabs, [ "users", $text{'usage_tabusers'}, $prog."users" ]);
+if (@userusage) {
+	push(@tabs, [ "users", $text{'usage_tabusers'}, $prog."users" ]);
+	}
 if (@subs) {
 	push(@tabs, [ "subs", $text{'usage_tabsubs'}, $prog."subs" ]);
 	}
@@ -110,35 +139,12 @@ $msg .= " $text{'usage_dirdesc'}\n";
 print &ui_tabs_end_tab();
 
 # Show usage by top 10 mail users, in all domains
-foreach $sd ($d, &get_domain_by("parent", $d->{'id'})) {
-	@users = &list_domain_users($sd, 0, 1, 0, 1);
-	foreach my $u (@users) {
-		next if ($u->{'webowner'});
-		if ($u->{'domainowner'}) {
-			# Only show mail for domain owner
-			($uusage) = &mail_file_size($u);
-			}
-		elsif (&has_home_quotas()) {
-			$uusage = $u->{'uquota'}*$homesize +
-				  $u->{'umquota'}*$mailsize;
-			}
-		else {
-			($uusage) = &recursive_disk_usage_mtime($u->{'home'});
-			if (!&mail_under_home()) {
-				($umail) = &mail_file_size($u);
-				$uusage += $umail;
-				}
-			}
-		push(@userusage,
-		     [ &remove_userdom($u->{'user'}, $sd),
-		       &show_domain_name($sd),
-		       $uusage ]);
-		}
+if (@userusage) {
+	print &ui_tabs_start_tab("mode", "users");
+	&usage_table(\@userusage, $text{'usage_user'}, $in{'all'} ? 0 : 10,
+		     $text{'usage_userheader'}, $text{'usage_dom'});
+	print &ui_tabs_end_tab();
 	}
-print &ui_tabs_start_tab("mode", "users");
-&usage_table(\@userusage, $text{'usage_user'}, $in{'all'} ? 0 : 10,
-	     $text{'usage_userheader'}, $text{'usage_dom'});
-print &ui_tabs_end_tab();
 
 # Show usage by sub-servers, if there are any
 if (@subs) {
