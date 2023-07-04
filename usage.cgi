@@ -7,7 +7,18 @@ $d = &get_domain($in{'dom'});
 &can_edit_domain($d) || &error($text{'newbw_ecannot'});
 
 $subh = &domain_in($d);
+@subs = &get_domain_by("parent", $d->{'id'});
 &ui_print_header($subh, $text{'usage_title'}, "", "usage");
+
+# Compute usage by database
+$dbtotal = 0;
+foreach $sd ($d, @subs) {
+	foreach $db (&domain_databases($sd)) {
+		($dbu, $dbq) = &get_one_database_usage($sd, $db);
+		push(@dbusage, [ $db->{'name'}, &show_domain_name($sd), $dbu ]);
+		$dbtotal += $dbu;
+		}
+	}
 
 # First work out what tabs we have
 @tabs = ( );
@@ -17,8 +28,12 @@ if (&has_home_quotas()) {
 	}
 push(@tabs, [ "homes", $text{'usage_tabhomes'}, $prog."homes" ]);
 push(@tabs, [ "users", $text{'usage_tabusers'}, $prog."users" ]);
-push(@tabs, [ "subs", $text{'usage_tabsubs'}, $prog."subs" ]);
-push(@tabs, [ "dbs", $text{'usage_tabdbs'}, $prog."dbs" ]);
+if (@subs) {
+	push(@tabs, [ "subs", $text{'usage_tabsubs'}, $prog."subs" ]);
+	}
+if (@dbusage) {
+	push(@tabs, [ "dbs", $text{'usage_tabdbs'}, $prog."dbs" ]);
+	}
 print &ui_tabs_start(\@tabs, "mode", $in{'mode'} || $tabs[0]->[0], 1);
 
 # Show quota usage
@@ -125,31 +140,26 @@ print &ui_tabs_start_tab("mode", "users");
 	     $text{'usage_userheader'}, $text{'usage_dom'});
 print &ui_tabs_end_tab();
 
-# Show usage by sub-servers
-@subs = &get_domain_by("parent", $d->{'id'});
-foreach $sd (@subs) {
-	next if (!$sd->{'dir'});
-	($susage) = &recursive_disk_usage_mtime($sd->{'home'});
-	push(@subusage, [ &show_domain_name($sd), $susage ]);
+# Show usage by sub-servers, if there are any
+if (@subs) {
+	foreach $sd (@subs) {
+		next if (!$sd->{'dir'});
+		($susage) = &recursive_disk_usage_mtime($sd->{'home'});
+		push(@subusage, [ &show_domain_name($sd), $susage ]);
+		}
+	print &ui_tabs_start_tab("mode", "subs");
+	&usage_table(\@subusage, $text{'usage_sub'}, $in{'all'} ? 0 : 10,
+		     $text{'usage_subheader'});
+	print &ui_tabs_end_tab();
 	}
-print &ui_tabs_start_tab("mode", "subs");
-&usage_table(\@subusage, $text{'usage_sub'}, $in{'all'} ? 0 : 10,
-	     $text{'usage_subheader'});
-print &ui_tabs_end_tab();
 
 # Show usage by databases
-$dbtotal = 0;
-foreach $sd ($d, @subs) {
-	foreach $db (&domain_databases($sd)) {
-		($dbu, $dbq) = &get_one_database_usage($sd, $db);
-		push(@dbusage, [ $db->{'name'}, &show_domain_name($sd), $dbu ]);
-		$dbtotal += $dbu;
-		}
+if (@dbusage) {
+	print &ui_tabs_start_tab("mode", "dbs");
+	&usage_table(\@dbusage, $text{'usage_db'}, $in{'all'} ? 0 : 10,
+		     $text{'usage_dbheader'}, $text{'usage_dom'});
+	print &ui_tabs_end_tab();
 	}
-print &ui_tabs_start_tab("mode", "dbs");
-&usage_table(\@dbusage, $text{'usage_db'}, $in{'all'} ? 0 : 10,
-	     $text{'usage_dbheader'}, $text{'usage_dom'});
-print &ui_tabs_end_tab();
 
 print &ui_tabs_end(1);
 
