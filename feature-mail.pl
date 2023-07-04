@@ -2751,21 +2751,21 @@ return ( );
 }
 
 # mail_file_size(&user)
-# Returns the size in bytes (rounded to blocks), path to and last modified date
-# of a user's mail file or directory
+# Returns the size in bytes (rounded to blocks), path to, last modified date
+# and file count of a user's mail file or directory
 sub mail_file_size
 {
 &require_mail();
 local $umf = &user_mail_file($_[0]);
 if (-d $umf) {
 	# Need to sum up a maildir-format directory, via a recursive search
-	local ($sz, $maxmod) = &recursive_disk_usage_mtime($umf);
-	return ( $sz, $umf, $maxmod );
+	local ($sz, $maxmod, $ct) = &recursive_disk_usage_mtime($umf);
+	return ( $sz, $umf, $maxmod, $ct );
 	}
 else {
 	# Just the size of a single mail file
 	local @st = stat($umf);
-	return ( $st[12]*&quota_bsize("mail", 1) || $st[7], $umf, $st[9] );
+	return ( $st[12]*&quota_bsize("mail", 1) || $st[7], $umf, $st[9], 1 );
 	}
 }
 
@@ -2780,27 +2780,28 @@ local $dir = &translate_filename($dir);
 local $bs = &quota_bsize("mail", 1);
 $inodes ||= { };
 if (-l $dir) {
-	return (0, undef);
+	return (0, undef, 1);
 	}
 elsif (!-d $dir) {
 	local @st = stat($dir);
 	if ($inodes{$st[1]}++) {
 		# Already done this inode (ie. hard link)
-		return ( 0, undef );
+		return ( 0, undef, 0 );
 		}
 	elsif (!defined($gid) || $st[5] == $gid) {
-		return ( $st[12]*$bs, $st[9] );
+		return ( $st[12]*$bs, $st[9], 1 );
 		}
 	else {
-		return ( 0, undef );
+		return ( 0, undef, 0 );
 		}
 	}
 else {
 	local @st = stat($dir);
-	local ($rv, $rt) = (0, undef);
+	local ($rv, $rt, $ct) = (0, undef, 0);
 	if (!defined($gid) || $st[5] == $gid) {
 		$rv = $st[12]*$bs;
 		$rt = $st[9];
+		$ct++;
 		}
 	if (!defined($levels) || $levels > 0) {
 		opendir(DIR, $dir);
@@ -2808,15 +2809,16 @@ else {
 		closedir(DIR);
 		foreach my $f (@files) {
 			next if ($f eq "." || $f eq "..");
-			local ($ss, $st) = &recursive_disk_usage_mtime(
+			local ($ss, $st, $c) = &recursive_disk_usage_mtime(
 				"$dir/$f", $gid,
 				defined($levels) ? $levels - 1 : undef,
 				$inodes);
 			$rv += $ss;
 			$rt = $st if ($st > $rt);
+			$ct += $c;
 			}
 		}
-	return ($rv, $rt);
+	return ($rv, $rt, $ct);
 	}
 }
 

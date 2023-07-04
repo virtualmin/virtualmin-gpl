@@ -66,10 +66,13 @@ if ($multi) {
 	foreach $db (@dbs) {
 		print "$db->{'name'}\n";
 		print "    Type: $db->{'type'}\n";
-		($size, $tables) = &get_db_size($db);
+		($size, $tables, undef, $count) = &get_one_database_usage($d, $db);
 		if ($size) {
 			print "    Size: ",&nice_size($size),"\n";
 			print "    Byte size: ",$size,"\n";
+			}
+		if ($count) {
+			print "    Files: ",$count,"\n";
 			}
 		print "    Tables: $tables\n";
 		if ($db->{'host'}) {
@@ -104,24 +107,11 @@ else {
 	printf $fmt, "Database", "Type", "Size", "Tables";
 	printf $fmt, ("-" x 30), ("-" x 20), ("-" x 15), ("-" x 10);
 	foreach $db (@dbs) {
-		($size, $tables) = &get_db_size($db);
+		($size, $tables) = &get_one_database_usage($d, $db);
 		printf $fmt, $db->{'name'}, $db->{'type'},
 			     $size ? &nice_size($size) : "Unknown", $tables;
 		}
 	}
-
-# get_db_size(&db)
-sub get_db_size
-{
-local ($db) = @_;
-if (&indexof($db->{'type'}, &list_database_plugins()) >= 0) {
-	return &plugin_call($db->{'type'}, "database_size", $d, $db->{'name'});
-	}
-else {
-	$szfunc = $db->{'type'}."_size";
-	($size, $tables) = &$szfunc($d, $db->{'name'});
-	}
-}
 
 sub usage
 {

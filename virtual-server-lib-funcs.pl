@@ -12283,22 +12283,22 @@ return wantarray ? ($rv, $qrv) : $rv;
 }
 
 # get_one_database_usage(&domain, &db)
-# Returns the disk space used by one database, and the amount of space that
-# is already counted by the quota system.
+# Returns the disk space used by one database, the table count, the amount of
+# space that is already counted by the quota system, and the file count.
 sub get_one_database_usage
 {
 local ($d, $db) = @_;
 if ($db->{'type'} eq 'mysql' || $db->{'type'} eq 'postgres') {
 	# Get size from core database
 	local $szfunc = $db->{'type'}."_size";
-	local ($size, $tables, $qsize) = &$szfunc($d, $db->{'name'}, 1);
-	return ($size, $qsize);
+	local ($size, $tables, $qsize, $count) = &$szfunc($d, $db->{'name'}, 0);
+	return ($size, $tables, $qsize, $count);
 	}
 else {
 	# Get size from plugin
-	local ($size, $tables, $qsize) = &plugin_call($db->{'type'},
-		      "database_size", $d, $db->{'name'}, 1);
-	return ($size, $qsize);
+	local ($size, $tables, $qsize, $count) = &plugin_call($db->{'type'},
+		      "database_size", $d, $db->{'name'}, 0);
+	return ($size, $tables, $qsize, $count);
 	}
 }
 

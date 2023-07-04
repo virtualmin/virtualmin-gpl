@@ -54,16 +54,12 @@ print &ui_table_row($text{'database_type'},
 
 if (!$in{'new'}) {
 	# Show database size and tables
-	if (&indexof($in{'type'}, &list_database_plugins()) >= 0) {
-		($size, $tables) = &plugin_call($in{'type'}, "database_size",
-						$d, $in{'name'});
-		}
-	else {
-		$szfunc = $in{'type'}."_size";
-		($size, $tables) = &$szfunc($d, $in{'name'});
-		}
+	($size, $tables, undef, $count) = &get_one_database_usage($d, $db);
 	if ($size ne "") {
 		print &ui_table_row($text{'database_size'}, &nice_size($size));
+		}
+	if ($count ne "") {
+		print &ui_table_row($text{'database_count'}, $count);
 		}
 	if ($tables ne "") {
 		print &ui_table_row($text{'database_tables'}, $tables);

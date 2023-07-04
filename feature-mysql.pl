@@ -1435,17 +1435,17 @@ return $rv;
 }
 
 # mysql_size(&domain, dbname, [size-only])
-# Returns the size, number of tables in a database, and size included in a
-# domain's Unix quota.
+# Returns the size, number of tables in a database, size included in a
+# domain's Unix quota, and number of files.
 sub mysql_size
 {
 my ($d, $dbname, $sizeonly) = @_;
 &require_mysql();
-local ($size, $qsize);
+local ($size, $qsize, $count);
 local $dd = &get_mysql_database_dir($d, $dbname);
 if ($dd) {
 	# Can check actual on-disk size
-	$size = &disk_usage_kb($dd)*1024;
+	($size, undef, $count) = &recursive_disk_usage_mtime($dd);
 	local @dst = stat($dd);
 	if (&has_group_quotas() && &has_mysql_quotas() &&
             $dst[5] == $d->{'gid'}) {
@@ -1455,11 +1455,13 @@ if ($dd) {
 else {
 	# Use 'show table status'
 	$size = 0;
+	$count = 0;
 	eval {
 		local $main::error_must_die = 1;
 		my $rv = &execute_dom_sql($d, $dbname, "show table status");
 		foreach my $r (@{$rv->{'data'}}) {
 			$size += $r->[6];
+			$count++;
 			}
 		};
 	}
@@ -1476,7 +1478,7 @@ if (!$sizeonly) {
 		@tables = &list_dom_mysql_tables($d, $dbname, 1);
 		};
 	}
-return ($size, scalar(@tables), $qsize);
+return ($size, scalar(@tables), $qsize, $count);
 }
 
 # check_mysql_database_clash(&domain, dbname)

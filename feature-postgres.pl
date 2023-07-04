@@ -757,17 +757,19 @@ sub postgres_size
 my ($d, $db, $sizeonly) = @_;
 &require_postgres();
 my $size;
+my $count;
 my @tables;
 eval {
 	# Make sure DBI errors don't cause a total failure
 	local $main::error_must_die = 1;
-	my $rv = &execute_dom_psql($d, $db, "select sum(relpages) from pg_class where relname not like 'pg_%'");
+	my $rv = &execute_dom_psql($d, $db, "select sum(relpages),count(relpages) from pg_class where relname not like 'pg_%'");
 	$size = $rv->{'data'}->[0]->[0]*1024*2;
+	$size = $rv->{'data'}->[0]->[1];
 	if (!$sizeonly) {
 		@tables = &list_postgres_tables($d, $db);
 		}
 	};
-return ($size, scalar(@tables));
+return ($size, scalar(@tables), 0, $count);
 }
 
 # check_postgres_database_clash(&domain, db)
