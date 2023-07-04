@@ -20,7 +20,7 @@ $recs = [ ];
 if ($config{'mail_autoconfig'} && &domain_has_website($d)) {
 	# Add autoconfig records
 	foreach my $autoconfig (&get_autoconfig_hostname($d)) {
-		&enable_dns_autoconfig($d, $autoconfig, $temp, $recs);
+		&create_dns_autoconfig_records($d, $autoconfig, $temp, $recs);
 		}
 	}
 if ($d->{'mail'} && !&check_dkim() && ($dkim = &get_dkim_config()) &&

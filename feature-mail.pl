@@ -6408,12 +6408,27 @@ else {
 	($recs, $file) = &get_domain_dns_records_and_file($d);
 	}
 $file || return "No DNS zone for $d->{'dom'} found";
+my $changed = &create_dns_autoconfig_records($d, $autoconfig, $file, $recs);
+
+if ($changed && !$forcefile) {
+	&post_records_change($d, $recs, $file);
+	&register_post_action(\&restart_bind, $d);
+	}
+&release_lock_dns($d);
+return undef;
+}
+
+# create_dns_autoconfig_records(&domain, autoconfig, file, &recs)
+# Just create the DNS records for some autoconfig hostname
+sub create_dns_autoconfig_records
+{
+my ($d, $autoconfig, $file, $recs) = @_;
 $autoconfig .= ".";
 
 # Add A record for IPv4
 my $changed = 0;
 my ($cr) = grep { $_->{'name'} eq $autoconfig &&
-		     $_->{'type'} eq 'CNAME' } @$recs;
+		  $_->{'type'} eq 'CNAME' } @$recs;
 if (!$cr) {
 	my ($r) = grep { $_->{'name'} eq $autoconfig &&
 			    $_->{'type'} eq 'A' } @$recs;
@@ -6438,15 +6453,9 @@ if (!$cr) {
 		$changed++;
 		}
 	}
-
-if ($changed && !$forcefile) {
-	&post_records_change($d, $recs, $file);
-	&register_post_action(\&restart_bind, $d);
-	}
-
-&release_lock_dns($d);
-return undef;
+return $changed;
 }
+
 
 # disable_email_autoconfig(&domain)
 # Delete the DNS entry, ServerAlias and Redirect for mail auto-config
