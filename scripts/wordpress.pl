@@ -73,7 +73,12 @@ return 5;	# Fix format of wp-config.php
 sub script_wordpress_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
-return "5.6.20";
+if (&compare_versions($ver, "6.3") >= 0) {
+	return "7.0.0";
+	}
+else {
+	return "5.6.20";
+	}
 }
 
 sub script_wordpress_cli_virtualmin_support
