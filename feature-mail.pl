@@ -2771,8 +2771,9 @@ else {
 
 # recursive_disk_usage_mtime(directory, [only-gid], [levels], [&inodes-map])
 # Returns the number of bytes taken up by all files in some directory,
-# and the most recent modification time. The size is based on the filesystem's
-# block size, not the file lengths in bytes.
+# the most recent modification time, and the file and directory counts.
+# The size is based on the filesystem's block size, not the file lengths
+# in bytes.
 sub recursive_disk_usage_mtime
 {
 local ($dir, $gid, $levels, $inodes) = @_;
@@ -2780,28 +2781,28 @@ local $dir = &translate_filename($dir);
 local $bs = &quota_bsize("mail", 1);
 $inodes ||= { };
 if (-l $dir) {
-	return (0, undef, 1);
+	return (0, undef, 1, 0);
 	}
 elsif (!-d $dir) {
 	local @st = stat($dir);
 	if ($inodes{$st[1]}++) {
 		# Already done this inode (ie. hard link)
-		return ( 0, undef, 0 );
+		return ( 0, undef, 0, 0 );
 		}
 	elsif (!defined($gid) || $st[5] == $gid) {
-		return ( $st[12]*$bs, $st[9], 1 );
+		return ( $st[12]*$bs, $st[9], 1, 0 );
 		}
 	else {
-		return ( 0, undef, 0 );
+		return ( 0, undef, 0, 0 );
 		}
 	}
 else {
 	local @st = stat($dir);
-	local ($rv, $rt, $ct) = (0, undef, 0);
+	local ($rv, $rt, $ct, $dct) = (0, undef, 0, 0);
 	if (!defined($gid) || $st[5] == $gid) {
 		$rv = $st[12]*$bs;
 		$rt = $st[9];
-		$ct++;
+		$dct++;
 		}
 	if (!defined($levels) || $levels > 0) {
 		opendir(DIR, $dir);
@@ -2809,20 +2810,19 @@ else {
 		closedir(DIR);
 		foreach my $f (@files) {
 			next if ($f eq "." || $f eq "..");
-			local ($ss, $st, $c) = &recursive_disk_usage_mtime(
+			local ($ss, $st, $c, $dc) = &recursive_disk_usage_mtime(
 				"$dir/$f", $gid,
 				defined($levels) ? $levels - 1 : undef,
 				$inodes);
 			$rv += $ss;
 			$rt = $st if ($st > $rt);
 			$ct += $c;
+			$dct += $dc;
 			}
 		}
-	return ($rv, $rt, $ct);
+	return ($rv, $rt, $ct, $dct);
 	}
 }
-
-
 
 # mail_system_base()
 # Returns the base directory under which user mail files can be found
