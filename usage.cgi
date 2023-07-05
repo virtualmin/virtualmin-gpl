@@ -76,17 +76,21 @@ if (&has_home_quotas()) {
 	print $text{'usage_summaryheader'},"<p>\n";
 	print &ui_table_start(undef, undef, 4);
 
+	# Total virtual server quota
 	print &ui_table_row($text{'usage_squota'},
 			    &quota_show($d->{'quota'}));
 
+	# Quota used
 	($home, $mail, $db) = &get_domain_quota($d, 1);
 	$usage = $home*$homesize + $mail*$mailsize;
 	print &ui_table_row($text{'usage_susage'},
 			    &nice_size($usage));
 
+	# Space used by databases
 	print &ui_table_row($text{'usage_sdb'},
 			    &nice_size($db));
 
+	# Percentage used
 	if ($d->{'quota'}) {
 		$pc = 100*($usage + $db) / ($d->{'quota'}*$homesize);
 		$pc = int($pc)."%";
