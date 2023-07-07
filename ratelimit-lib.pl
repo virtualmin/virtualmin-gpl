@@ -371,6 +371,7 @@ if ($chroot) {
 					}
 				}
 			&flush_file_lines($ifile);
+			&init::restart_systemd();
 			}
 		}
 
