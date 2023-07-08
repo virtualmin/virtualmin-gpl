@@ -5148,7 +5148,7 @@ local ($tmpl) = @_;
 print &ui_table_row(&hlink($text{'tmpl_newuser'}, "template_newuser"),
 	&none_def_input("newuser", $tmpl->{'newuser_on'},
 			$text{'tmpl_mailbelow'},
-			0, 0, undef, [ "subject", "cc", "bcc" ]).
+			0, 0, undef, [ "newuser", "subject", "cc", "bcc" ]).
 	"<br>\n".
 	&ui_textarea("newuser", $tmpl->{'newuser'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'newuser'})),
@@ -5190,7 +5190,7 @@ local ($tmpl) = @_;
 print &ui_table_row(&hlink($text{'tmpl_updateuser'}, "template_updateuser"),
 	&none_def_input("updateuser", $tmpl->{'updateuser_on'},
 			$text{'tmpl_mailbelow'},
-			0, 0, undef, [ "subject", "cc", "bcc" ]).
+			0, 0, undef, [ "updateuser", "subject", "cc", "bcc" ]).
 	"<br>\n".
 	&ui_textarea("updateuser", $tmpl->{'updateuser'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'updateuser'})),
