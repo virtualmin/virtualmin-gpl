@@ -299,11 +299,11 @@ if ($config{'mail_system'} == 0) {
 	}
 elsif ($config{'mail_system'} == 1) {
 	# Sendmail config
-	my $wantmilter = $rv{'port'} ? "inet:$rv{'port'}\@localhost" :
+	my $wantmilter = $rv{'port'} ? "inet:$rv{'port'}\@(localhost|127\.0\.0\.1)" :
 			 $rv{'socket'} ? "local:$rv{'socket'}" : "";
 	my @feats = &sendmail::list_features();
 	my ($milter) = grep { $_->{'text'} =~ /INPUT_MAIL_FILTER/ &&
-			      $_->{'text'} =~ /\Q$wantmilter\E/ } @feats;
+			      $_->{'text'} =~ /$wantmilter/ } @feats;
 	if (!$milter) {
 		$rv{'enabled'} = 0;
                 }
@@ -480,7 +480,7 @@ if ($dkim_config) {
 		if (!$conf->{'Socket'} ||
 		    $conf->{'Socket'} =~ /^local:/) {
 		        &save_open_dkim_config($dkim_config,
-			    "Socket", "inet:8891\@localhost");
+			    "Socket", "inet:8891\@127.0.0.1");
 			}
 		}
 	else {
@@ -521,7 +521,7 @@ if ($dkim_config) {
 		        # Set socket if not set, or if a local file
 		        # and Postfix is in use
 		        &save_open_dkim_config($dkim_config,
-			    "Socket", "inet:8891\@localhost");
+			    "Socket", "inet:8891\@127.0.0.1");
 		        $dkim->{'port'} = 8891;
 			}
 		elsif ($dkim->{'port'}) {
@@ -530,7 +530,7 @@ if ($dkim_config) {
 			    $conf->{'Socket'} =~ /^inet:(\d+)/ &&
 			    $1 != $dkim->{'port'}) {
 				&save_open_dkim_config($dkim_config,
-				  "Socket", "inet:$dkim->{'port'}\@localhost");
+				  "Socket", "inet:$dkim->{'port'}\@127.0.0.1");
 				}
 			}
 		elsif ($dkim->{'socket'}) {
@@ -567,7 +567,7 @@ if (&get_dkim_type() eq 'debian' || &get_dkim_type() eq 'ubuntu') {
 	    $def{'SOCKET'} =~ /^local:/ && $config{'mail_system'} == 0) {
 		# Set socket in defaults file if missing, or if a local file
 		# and Postfix is in use
-		$def{'SOCKET'} = "inet:8891\@localhost";
+		$def{'SOCKET'} = "inet:8891\@127.0.0.1";
 		$dkim->{'port'} = 8891;
 		}
 
@@ -622,7 +622,7 @@ elsif (&get_dkim_type() eq 'redhat') {
 	&read_env_file($dkim_defaults, \%def);
 	if ($config{'mail_system'} == 0 && $dkim->{'socket'}) {
 		# Force use of tcp socket in defaults file for postfix
-		$def{'SOCKET'} = "inet:8891\@localhost";
+		$def{'SOCKET'} = "inet:8891\@127.0.0.1";
 		$dkim->{'port'} = 8891;
 		delete($dkim->{'socket'});
 		}
