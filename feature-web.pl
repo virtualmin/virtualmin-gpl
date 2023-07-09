@@ -2637,7 +2637,7 @@ if ($config{'web'}) {
 	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
 				     0, undef, \@webfields);
 	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
-		$ndi."<br>\n".
+		$ndi."\n".
 		&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
 					join("\n", split(/\t/, $tmpl->{'web'})),
 			     10, 60));
