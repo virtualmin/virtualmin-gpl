@@ -268,6 +268,8 @@ $webmin_user_theme ||= $current_theme;
 
 # Check that global configs are setup for the test
 $config{'auto_redirect'} && die "auto_redirect must be set to 0";
+$config{'spam_client'} eq 'spamassassin' ||
+	die "Spam client must be spamassassin";
 
 # Work out which DNS server is being used
 if ($tmplname) {
@@ -4935,6 +4937,7 @@ $mail_tests = [
 
 	# Test that the DNS record is gone too
 	{ 'command' => 'host -t A autoconfig.'.$test_domain.' '.$dnsserver,
+	  'fail' => 1,
 	},
 
 	# Test sender BCC feature
