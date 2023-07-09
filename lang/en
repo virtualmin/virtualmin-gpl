@@ -1830,7 +1830,7 @@ newftp_undo=Undo
 newftp_err=Failed to save ProFTPD template
 newftp_dir=Anonymous FTP subdirectory to create
 newftp_dir0=Directory under home
-newftp_dir0suf=(Must match &lt;Anonymous&gt; section above)
+newftp_dir0suf=(Must match <tt>&lt;Anonymous&gt;</tt> section above)
 newftp_edir=Missing or invalid anonymous FTP subdirectory
 
 newdns_title=BIND DNS Template
