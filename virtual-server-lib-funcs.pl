@@ -16399,7 +16399,7 @@ if (-d $profiled && !-r $profiledphpalias) {
 	"fi\n";
 	write_file_contents($profiledphpalias, $phpalias);
 	&$second_print($text{'setup_done'});
-}
+	}
 
 # Restart lookup-domain daemon, if need
 if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
