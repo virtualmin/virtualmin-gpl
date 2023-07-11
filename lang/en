@@ -2084,6 +2084,7 @@ check_packageok=The selected package management and update systems are installed
 check_apicmd=Creating API helper command ..
 check_apicmdok=.. created <tt>$1</tt>
 check_apicmderr=.. failed : $1
+check_bashphpprofile=Creating Bash startup profile for PHP alias ..
 check_spamlockon=Adding lockfile to all domains' spamassassin calls ..
 check_spamlockoff=Removing lockfile from all domains' spamassassin calls ..
 check_spamwrappercmd=The procmail command <tt>$1</tt> in the Postfix configuration does not exist

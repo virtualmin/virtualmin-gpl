@@ -16386,6 +16386,21 @@ if ($config{'api_helper'} ne $lastconfig{'api_helper'} ||
 			     $path));
 	}
 
+# Create Bash startup profile for PHP alias work on sub-server
+# basis, so users could use specific to sub-server PHP version
+my $profiled = "/etc/profile.d";
+my $profiledphpalias = "$profiled/virtualmin-phpalias.sh";
+if (-d $profiled && !-r $profiledphpalias) {
+	&$first_print($text{'check_bashphpprofile'});
+	my $phpalias =
+	"php=\$\(which php 2>/dev/null\)\n".
+	"if \[ -x \"\$php\" \]; then\n".
+		"  alias php='\$\(phpdom=\"bin/php\" ; \(while [ ! -f \"\$phpdom\" ] && [ \"\$PWD\" != \"/\" ]; do cd \"\$\(dirname \"\$PWD\"\)\" || \"\$php\" ; done ; if [ -f \"\$phpdom\" ] ; then echo \"\$PWD/\$phpdom\" ; else echo \"\$php\" ; fi\)\)'\n".
+	"fi\n";
+	write_file_contents($profiledphpalias, $phpalias);
+	&$second_print($text{'setup_done'});
+}
+
 # Restart lookup-domain daemon, if need
 if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
 	&setup_lookup_domain_daemon();
