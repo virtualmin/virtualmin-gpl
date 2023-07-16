@@ -1897,7 +1897,7 @@ $stable .= &ui_columns_table(
 	undef,
 	undef,
 	);
-
+$stable = "<div data-table-name='template-script'>$stable</div>";
 print &ui_table_row(undef, $stable, 2);
 }
 

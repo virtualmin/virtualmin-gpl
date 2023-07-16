@@ -525,7 +525,7 @@ local @ffields = ( "ftp", "ftp_dir", "ftp_dir_def" );
 local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1,
 			     0, undef, \@ffields);
 print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
-	$ndi."<br>\n".
+	$ndi."\n".
 	&ui_textarea("ftp", $tmpl->{'ftp'} eq "none" ? "" :
 				join("\n", split(/\t/, $tmpl->{'ftp'})),
 		     10, 60));
@@ -534,7 +534,7 @@ print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
 print &ui_table_row(&hlink($text{'newftp_dir'}, "template_ftp_dir_def"),
 	&ui_opt_textbox("ftp_dir", $tmpl->{'ftp_dir'}, 20,
 			"$text{'default'} (<tt>ftp</tt>)",
-			$text{'newftp_dir0'})."<br>".
+			$text{'newftp_dir0'}).
 	("&nbsp;" x 3).$text{'newftp_dir0suf'});
 }
 

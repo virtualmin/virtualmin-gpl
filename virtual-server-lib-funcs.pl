@@ -15406,7 +15406,7 @@ if (&domain_has_website()) {
 	local @newvernums = sort { $a <=> $b } map { $_->[0] } &unique(@vers);
 	local @oldvernums = sort { $a <=> $b } split(/\s+/, $config{'last_check_php_vers'});
 	if (join(" ", @newvernums) ne join(" ", @oldvernums)) {
-		&$second_print(&text('check_webphpversinis',
+		&$first_print(&text('check_webphpversinis',
 				     join(", ", @newvernums)));
 		&$indent_print();
 		foreach my $d (grep { &domain_has_website($_) &&
@@ -15424,10 +15424,12 @@ if (&domain_has_website()) {
 					&save_domain_php_mode($d, $mode);
 					&clear_links_cache($d);
 					&release_lock_web($d);
+					&$first_print($text{'setup_done'});
 					}
 				};
 			}
 		&$outdent_print();
+		&$second_print("");
 		$config{'last_check_php_vers'} = join(" ", @newvernums);
 		}
 	}
@@ -16384,6 +16386,21 @@ if ($config{'api_helper'} ne $lastconfig{'api_helper'} ||
 	local ($ok, $path) = &create_virtualmin_api_helper_command();
 	&$second_print(&text($ok ? 'check_apicmdok' : 'check_apicmderr',
 			     $path));
+	}
+
+# Create Bash startup profile for PHP alias work on sub-server
+# basis, so users could use specific to sub-server PHP version
+my $profiled = "/etc/profile.d";
+my $profiledphpalias = "$profiled/virtualmin-phpalias.sh";
+if (-d $profiled && !-r $profiledphpalias) {
+	&$first_print($text{'check_bashphpprofile'});
+	my $phpalias =
+	"php=\$\(which php 2>/dev/null\)\n".
+	"if \[ -x \"\$php\" \]; then\n".
+		"  alias php='\$\(phpdom=\"bin/php\" ; \(while [ ! -f \"\$phpdom\" ] && [ \"\$PWD\" != \"/\" ]; do cd \"\$\(dirname \"\$PWD\"\)\" || \"\$php\" ; done ; if [ -f \"\$phpdom\" ] ; then echo \"\$PWD/\$phpdom\" ; else echo \"\$php\" ; fi\)\)'\n".
+	"fi\n";
+	write_file_contents($profiledphpalias, $phpalias);
+	&$second_print($text{'setup_done'});
 	}
 
 # Restart lookup-domain daemon, if need
