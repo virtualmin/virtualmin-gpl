@@ -17313,7 +17313,12 @@ local $virt = { 'address' => $ip,
 	      };
 $virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
 &net::save_interface($virt);
-&net::activate_interface($virt);
+if (&auto_apply_interface()) {
+	&net::apply_network();
+	}
+else {
+	&net::activate_interface($virt);
+	}
 return undef;
 }
 

@@ -43,7 +43,12 @@ if (!$d->{'virtalready'}) {
 		      };
 	$virt->{'fullname'} = $virt->{'name'}.":".$virt->{'virtual'};
 	&net::save_interface($virt);
-	&net::activate_interface($virt);
+	if (&auto_apply_interface()) {
+		&net::apply_network();
+		}
+	else {
+		&net::activate_interface($virt);
+		}
 	$d->{'iface'} = $virt->{'fullname'};
 	&$second_print(&text('setup_virtdone', $d->{'iface'}));
 	}
@@ -83,8 +88,12 @@ if (!$d->{'virtalready'}) {
 		}
 	elsif ($biface->{'virtual'} ne '') {
 		&net::delete_interface($biface);
-		&net::deactivate_interface($aiface)
-			if ($aiface && $aiface->{'virtual'} ne '');
+		if (&auto_apply_interface()) {
+			&net::apply_network();
+			}
+		elsif ($aiface && $aiface->{'virtual'} ne '') {
+			&net::deactivate_interface($aiface)
+			}
 		&$second_print($text{'setup_done'});
 		}
 	else {
@@ -112,12 +121,15 @@ if ($d->{'ip'} ne $oldd->{'ip'} && $d->{'virt'} &&
 			       &net::boot_interfaces();
 	local ($aiface) = grep { $_->{'address'} eq $oldd->{'ip'} }
 			       &net::active_interfaces();
-	if ($biface && $aiface) {
+	if ($biface) {
 		if ($biface->{'virtual'} ne '') {
 			$biface->{'address'} = $d->{'ip'};
 			&net::save_interface($biface);
 			}
-		if ($aiface->{'virtual'} ne '') {
+		if (&auto_apply_interface()) {
+			&net::apply_network();
+			}
+		elsif ($aiface->{'virtual'} ne '') {
 			$aiface->{'address'} = $d->{'ip'};
 			&net::activate_interface($aiface);
 			}
@@ -486,6 +498,15 @@ $main::got_lock_virt-- if ($main::got_lock_virt);
 sub can_reset_virt
 {
 return 0;
+}
+
+# auto_apply_interface()
+# Returns 1 if changes should only be made to the boot-time interface config,
+# and then applied
+sub auto_apply_interface
+{
+&foreign_require("net");
+return $net::net_mode eq "nm";
 }
 
 $done_feature_script{'virt'} = 1;

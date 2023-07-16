@@ -363,12 +363,17 @@ sub activate_ip6_interface
 {
 local ($iface) = @_;
 &foreign_require("net");
-my @active = &net::active_interfaces();
-my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
-$active || &error("No active interface found for $iface->{'name'}");
-push(@{$active->{'address6'}}, $iface->{'address'});
-push(@{$active->{'netmask6'}}, $iface->{'netmask'});
-&net::activate_interface($active);
+if (&auto_apply_interface()) {
+	&net::apply_network();
+	}
+else {
+	my @active = &net::active_interfaces();
+	my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
+	$active || &error("No active interface found for $iface->{'name'}");
+	push(@{$active->{'address6'}}, $iface->{'address'});
+	push(@{$active->{'netmask6'}}, $iface->{'netmask'});
+	&net::activate_interface($active);
+	}
 }
 
 # save_ip6_interface(&iface)
@@ -390,20 +395,25 @@ push(@{$boot->{'netmask6'}}, $iface->{'netmask'});
 sub deactivate_ip6_interface
 {
 local ($iface) = @_;
-my @active = &net::active_interfaces();
-my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
-$active || &error("No active interface found for $iface->{'name'}");
-my $found = 0;
-for(my $i=0; $i<@{$active->{'address6'}}; $i++) {
-	if (&canonicalize_ip6($iface->{'address'}) eq
-	    &canonicalize_ip6($active->{'address6'}->[$i])) {
-		splice(@{$active->{'address6'}}, $i, 1);
-		splice(@{$active->{'netmask6'}}, $i, 1);
-		$found++;
-		}
+if (&auto_apply_interface()) {
+	&net::apply_network();
 	}
-if ($found) {
-	&net::activate_interface($active);
+else {
+	my @active = &net::active_interfaces();
+	my ($active) = grep { $_->{'fullname'} eq $iface->{'name'} } @active;
+	$active || &error("No active interface found for $iface->{'name'}");
+	my $found = 0;
+	for(my $i=0; $i<@{$active->{'address6'}}; $i++) {
+		if (&canonicalize_ip6($iface->{'address'}) eq
+		    &canonicalize_ip6($active->{'address6'}->[$i])) {
+			splice(@{$active->{'address6'}}, $i, 1);
+			splice(@{$active->{'netmask6'}}, $i, 1);
+			$found++;
+			}
+		}
+	if ($found) {
+		&net::activate_interface($active);
+		}
 	}
 }
 
