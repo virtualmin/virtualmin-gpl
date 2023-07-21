@@ -539,6 +539,16 @@ else {
 	if ($compression != 3) {
 		@xlist = map { "./".$_ } @xlist;
 		}
+	else {
+		@xlist = map {
+			if (-d "$d->{'home'}/$_" && $_ !~ /\/[*]+$/) {
+				"$_/\*\*";
+				}
+			else {
+				"$_";
+				}
+			} @xlist;
+		}
 	}
 &open_tempfile(XTEMP, ">$xtemp");
 foreach my $x (@xlist) {
