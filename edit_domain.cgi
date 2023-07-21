@@ -216,8 +216,7 @@ if (!$parentdom) {
 	print &ui_table_row(&hlink($text{'edit_email'}, "ownersemail"),
 		$d->{'unix'} ? &ui_opt_textbox("email", $d->{'email'}, 30,
 					       $text{'edit_email_def'})
-			     : &ui_textbox("email", $d->{'email'}, 30),
-		undef, undef, $d->{'mail'} ? undef : ['style="display: none"']);
+			     : &ui_textbox("email", $d->{'email'}, 30));
 
 	$smsg = &get_password_synced_types($d) ?
 			"<br>".$text{'edit_dbsync'} : "";
