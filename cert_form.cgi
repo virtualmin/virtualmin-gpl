@@ -431,7 +431,7 @@ if (&can_edit_letsencrypt() && &domain_has_website($d)) {
 		$dis0 = &js_disable_inputs([ ], [ "dname" ], "onClick");
 		$wildcb = "";
 		&foreign_require("webmin");
-		if ($webmin::letsencrypt_cmd) {
+		if ($webmin::letsencrypt_cmd && $d->{'dns'}) {
 			$wildcb = "<br>".&ui_checkbox(
 				"dwild", 1, $text{'cert_dwild'},
 				$d->{'letsencrypt_dwild'});
