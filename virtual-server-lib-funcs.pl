@@ -19360,11 +19360,20 @@ return undef;
 
 sub get_module_version_and_type
 {
-my ($list, $gpl) = @_;
-my $mver = $module_info{'version'};
-my ($v_major, $v_minor, $v_type);
-if ($mver =~ /(?|(\d+)\.(\d+\.\d+)\.(\w+)|(\d+)\.(\d+)\.(\w+))/) {
-	($v_major, $v_minor, $v_type) = ($1, $2, $3);
+my ($list, $gpl, $ver) = @_;
+my $mver = $ver || $module_info{'version'};
+my ($v_major, $v_minor, $v_build, $v_type);
+if ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+).*?(?<type>[a-z]+)/i) {
+	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, $+{build}, $+{type});
+	}
+elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+).*?(?<type>[a-z]+)/i) {
+	($v_major, $v_minor, $v_build, $v_type) = ($+{major}, $+{minor}, undef, $+{type});
+	}
+elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+)/) {
+	($v_major, $v_minor, $v_build) = ($+{major}, $+{minor}, $+{build});
+	}
+elsif ($mver =~ /(?<major>\d+)\.(?<minor>\d+)/) {
+	($v_major, $v_minor) = ($+{major}, $+{minor});
 	}
 else {
 	return $mver;
@@ -19380,8 +19389,8 @@ else {
 		$v_type = "";
 		}
 	}
-return $list ? ($v_major, $v_minor, $v_type) : 
-	  "$v_major.$v_minor$v_type";
+return $list ? ($v_major, $v_minor, $v_build, &trim($v_type)) : 
+	  "$v_major.$v_minor".(defined($v_build) ? ".$v_build" : "")."$v_type";
 }
 
 # set_provision_features(&domain)
