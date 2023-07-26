@@ -19268,7 +19268,12 @@ foreach my $pname (@load) {
 				my $err = $@;
 				$err = &html_strip($err);
 				$err =~ s/[\n\r]+/ /g;
-				&miniserv::log_error("Failed to load $pname : $err");
+				if (defined(&error_stderr)) {
+					&error_stderr($err);
+					}
+				else {
+					print STDERR "$err\n";
+					}
 				}
 			}
 		}
