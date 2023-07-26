@@ -2743,6 +2743,11 @@ else {
 	return "PHP error log cannot be set in $mode mode";
 	}
 $d->{'php_error_log'} = $phplog || "";
+if ($phplog && !-r $phplog) {
+	# Make sure the log file exists
+	&open_tempfile_as_domain_user($d, PHPLOG, ">$phplog", 1, 1);
+	&close_tempfile_as_domain_user($d, PHPLOG);
+	}
 &push_all_print();
 &set_all_null_print();
 &modify_logrotate($d, $oldd);
