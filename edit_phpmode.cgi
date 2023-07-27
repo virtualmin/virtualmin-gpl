@@ -191,14 +191,26 @@ if (&can_php_error_log($mode)) {
 	$defplog = &get_default_php_error_log($d);
 	$mode = !$plog ? 1 :
 		$plog eq $defplog ? 2 : 0;
-	print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
-		&ui_radio_table("plog_def", $mode,
-		[ [ 1, $text{'phpmode_noplog'} ],
-		  [ 2, $text{'phpmode_defplog'},
-		       "<tt>$defplog</tt>" ],
-		  [ 0, $text{'phpmode_fileplog'},
-		    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ],
-		]));
+	if (&can_log_paths()) {
+		# Can set to any path
+		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+			&ui_radio_table("plog_def", $mode,
+			[ [ 1, $text{'phpmode_noplog'} ],
+			  [ 2, $text{'phpmode_defplog'},
+			       "<tt>$defplog</tt>" ],
+			  [ 0, $text{'phpmode_fileplog'},
+			    &ui_textbox("plog", $mode == 0 ? $plog : "", 60) ],
+			]));
+		}
+	else {
+		# Can just turn on or off
+		print &ui_table_row(&hlink($text{'phpmode_plog'}, 'phplog'),
+			&ui_radio("plog_def", $mode == 1 ? 1 : 0,
+				  [ [ 1, $text{'phpmode_noplog'} ],
+				    [ 0, $mode != 0 ? $text{'phpmode_defplog'}
+						    : $text{'phpmode_fileplog'}.
+						      " <tt>$plog</tt>" ] ]));
+		}
 	}
 
 print &ui_hidden_table_end();

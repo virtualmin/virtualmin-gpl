@@ -126,8 +126,13 @@ if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
 # Save PHP log, or use default if coming out of an incompatible mode
 if (&can_php_error_log($mode)) {
 	my $oldplog = &get_domain_php_error_log($d);
+	my $defplog = &get_default_php_error_log($d);
 	my $plog;
-	if (defined($in{'plog_def'})) {
+	if (!defined($in{'plog_def'})) {
+		# Use template default path
+		$plog = $defplog;
+		}
+	elsif (&can_log_paths()) {
 		# Use path from the user
 		if ($in{'plog_def'} == 1) {
 			# Logging disabled
@@ -147,8 +152,15 @@ if (&can_php_error_log($mode)) {
 			}
 		}
 	else {
-		# Use template default path
-		$plog = &get_default_php_error_log($d);
+		# Can just enable or disable
+		if ($in{'plog_def'} == 1) {
+                        # Logging disabled
+                        $plog = undef; 
+			}
+		else {
+			# Use current or default path
+			$plog = $oldplog || $defplog;
+			}
 		}
 	if ($plog ne $oldplog) {
 		# Apply the new log if changed
