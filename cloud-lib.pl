@@ -194,9 +194,9 @@ return undef;
 # Reset the S3 account to the default
 sub cloud_s3_clear
 {
+&lock_file($module_config_file);
 delete($config{'s3_akey'});
 delete($config{'s3_skey'});
-&lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
 }
