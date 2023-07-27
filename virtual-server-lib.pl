@@ -66,7 +66,7 @@ if (!defined($first_print)) {
 	}
 
 # For the GPL version, force some features off.
-$virtualmin_pro = $module_info{'version'} =~ /gpl/ ? 0 : 1;
+$virtualmin_pro = $module_info{'version'} =~ /pro/i ? 1 : 0;
 if (!$virtualmin_pro) {
 	$config{'status'} = 0;
 	}
