@@ -10692,6 +10692,93 @@ $compression_tests = [
 	  'cleanup' => 1 },
 	];
 
+$parallel_backup_tests = [
+	# Create a parent domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ], [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Backup to a temp dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir ] ],
+	  'background' => 1,
+	},
+
+	# Backup to another temp dir
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $test_backup_dir2 ] ],
+	  'background' => 2,
+	},
+
+	# Wait for background processes to complete
+	{ 'wait' => [ 1, 2 ] },
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls -l '.$test_backup_dir.'/'.$test_domain.'.tar.gz.dom' },
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_dir2.'/'.$test_domain.'.tar.gz' },
+	{ 'command' => 'ls -l '.$test_backup_dir2.'/'.$test_domain.'.tar.gz.info' },
+	{ 'command' => 'ls -l '.$test_backup_dir2.'/'.$test_domain.'.tar.gz.dom' },
+
+	# Make sure both were logged
+	{ 'command' => 'list-backup-logs.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'start', -1 ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Domains: '.$test_domain,
+		      'Final status: OK',
+		      'Destination: '.$test_backup_dir,
+		      'Destination: '.$test_backup_dir2 ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore from backup 1
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir ] ],
+	},
+
+	# Delete the domain, in preparation for re-creation
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	},
+
+	# Restore from backup 2
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', $test_backup_dir2 ] ],
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -10780,6 +10867,7 @@ $alltests = { '_config' => $_config_tests,
 	      'reset' => $reset_tests,
 	      'compression' => $compression_tests,
 	      'allscript' => $allscript_tests,
+	      'parallel_backup' => $parallel_backup_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
