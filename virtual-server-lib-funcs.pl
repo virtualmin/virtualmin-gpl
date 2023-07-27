@@ -19257,8 +19257,24 @@ local $loaded = 0;
 foreach my $pname (@load) {
 	if (!$main::done_load_plugin_libraries{$pname}++) {
 		if (&foreign_check($pname)) {
-			&foreign_require($pname, "virtual_feature.pl");
-			$loaded++;
+			eval {
+				local $main::error_must_die = 1;
+				&foreign_require($pname, "virtual_feature.pl");
+				};
+			if (!$@) {
+				$loaded++;
+				}
+			else {
+				my $err = $@;
+				$err = &html_strip($err);
+				$err =~ s/[\n\r]+/ /g;
+				if (defined(&error_stderr)) {
+					&error_stderr($err);
+					}
+				else {
+					print STDERR "$err\n";
+					}
+				}
 			}
 		}
 	}
