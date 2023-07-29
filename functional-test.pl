@@ -10706,6 +10706,10 @@ $parallel_backup_tests = [
 		      @create_args, ],
         },
 
+	# Cleanup backup destinations
+	{ 'command' => 'rm -rf '.$test_backup_dir },
+	{ 'command' => 'rm -rf '.$test_backup_dir2 },
+
 	# Backup to a temp dir
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
@@ -10771,6 +10775,38 @@ $parallel_backup_tests = [
 		      [ 'all-features' ],
 		      [ 'source', $test_backup_dir2 ] ],
 	},
+
+	# Cleanup backup destination
+	{ 'command' => 'rm -f '.$test_backup_file },
+	{ 'command' => 'rm -f '.$test_backup_file.'.info' },
+	{ 'command' => 'rm -f '.$test_backup_file.'.dom' },
+
+	# Backup to a temp file
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	  'background' => 1,
+	},
+
+	# Backup to the same temp file, which should fail
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', $test_backup_file ] ],
+	  'background' => 2,
+	  'sleep' => 1,
+	},
+
+	# Wait for background processes to complete
+	{ 'wait' => [ 2 ],
+	  'fail' => 1 },
+	{ 'wait' => [ 1 ] },
+
+	# Make sure the file and meta-files exist
+	{ 'command' => 'ls -l '.$test_backup_file },
+	{ 'command' => 'ls -l '.$test_backup_file.'.info' },
+	{ 'command' => 'ls -l '.$test_backup_file.'.dom' },
 
 	# Cleanup the domain
 	{ 'command' => 'delete-domain.pl',
@@ -10997,12 +11033,26 @@ if ($t->{'wait'}) {
 			$ok = 0;
 			}
 		waitpid($pid, 0);
-		if ($?) {
-			print "    .. PID $pid failed : $?\n";
-			$ok = 0;
+		if ($t->{'ignorefail'}) {
+			print "    .. PID $pid status ignored\n";
+			}
+		elsif ($?) {
+			if ($t->{'fail'}) {
+				print "    .. PID $pid successfully failed\n";
+				}
+			else {
+				print "    .. PID $pid failed : $?\n";
+				$ok = 0;
+				}
 			}
 		else {
-			print "    .. PID $pid done\n";
+			if ($t->{'fail'}) {
+				print "    .. PID $pid failed to fail\n";
+				$ok = 0;
+				}
+			else {
+				print "    .. PID $pid done\n";
+				}
 			}
 		delete($backgrounds{$w});
 		}
