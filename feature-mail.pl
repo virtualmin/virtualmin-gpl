@@ -85,13 +85,7 @@ elsif ($config{'mail_system'} == 0) {
 
 	# Work out if per-domain outgoing IP support is available
 	if (&compare_versions($postfix::postfix_version, 2.7) >= 0) {
-		$dependent_maps = &postfix::get_real_value(
-			"sender_dependent_default_transport_maps");
-		@dependent_map_files = &postfix::get_maps_files(
-						$dependent_maps);
-		if (@dependent_map_files) {
-			$supports_dependent = 1;
-			}
+		$supports_dependent = 1;
 		}
 
 	$supports_aliascopy = 1;
@@ -5692,12 +5686,15 @@ return undef if (!$supports_dependent);
 &require_mail();
 
 # Read the map file to find an entry for the domain
-local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
-local ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
+my $dependent_maps = &postfix::get_real_value(
+	"sender_dependent_default_transport_maps");
+return undef if (!$dependent_maps);
+my $map = &postfix::get_maps("sender_dependent_default_transport_maps");
+my ($rv) = grep { $_->{'name'} eq '@'.$d->{'dom'} } @$map;
 return undef if (!$rv);
 
 # Check for a Postfix service
-local $master = &postfix::get_master_config();
+my $master = &postfix::get_master_config();
 foreach my $m (@$master) {
 	if ($m->{'name'} eq $rv->{'value'} && $m->{'enabled'}) {
 		# Found match on the name .. extract the IP
@@ -5717,6 +5714,23 @@ sub save_domain_dependent
 local ($d, $dependent) = @_;
 return undef if (!$supports_dependent);
 &require_mail();
+
+# Setup the map if needed
+my $dependent_maps = &postfix::get_real_value(
+	"sender_dependent_default_transport_maps");
+if (!$dependent_maps) {
+	&lock_file($postfix::config{'postfix_config_file'});
+	my $cdir = $postfix::config{'postfix_config_file'};
+	$cdir =~ s/\/[^\/]+$//;
+	$dependent_maps = "hash:$cdir/sender_dependent_default_transport_maps";
+	&postfix::set_current_value("sender_dependent_default_transport_maps",
+				    $dependent_maps);
+	&postfix::ensure_map("sender_dependent_default_transport_maps");
+	&postfix::regenerate_any_table(
+		"sender_dependent_default_transport_maps");
+	&postfix::reload_postfix();
+	&unlock_file($postfix::config{'postfix_config_file'});
+	}
 
 # Read the map file to find an entry for the domain
 local $map = &postfix::get_maps("sender_dependent_default_transport_maps");
