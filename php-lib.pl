@@ -1259,6 +1259,7 @@ elsif (!$p) {
 &require_apache();
 local $mode = &get_domain_php_mode($d);
 return "PHP versions cannot be set in mod_php mode" if ($mode eq "mod_php");
+local $oldlog = &get_domain_php_error_log($d);
 
 if ($mode eq "fpm") {
 	# Remove the old version pool and create a new one if needed.
@@ -1391,6 +1392,9 @@ if (!$noini) {
 		&save_domain_php_mode($d, $mode);
 		}
 	}
+
+# Re-save PHP version
+&save_domain_php_error_log($d, $oldlog);
 
 &register_post_action(\&restart_apache);
 return undef;
