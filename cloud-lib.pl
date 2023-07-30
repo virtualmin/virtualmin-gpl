@@ -199,6 +199,7 @@ my $akey = $config{'s3_akey'};
 &lock_file($module_config_file);
 delete($config{'s3_akey'});
 delete($config{'s3_skey'});
+delete($config{'s3_location'});
 &save_module_config();
 &unlock_file($module_config_file);
 
