@@ -702,8 +702,18 @@ foreach my $desturl (@$desturls) {
 		}
 	local $lockfile = $backup_locks_dir."/".$lockname;
 	local $lpid = &test_lock($lockfile);
-	if ($lpid) {
-		if ($kill && $lpid && $lpid != $$) {
+	if ($kill == 2 && $lpid) {
+		# Destination is locked, wait for it to free up
+		&$first_print(&text('backup_waitlock', $lpid));
+		while($lpid = &test_lock($lockfile)) {
+			sleep(1);
+			}
+		&$second_print($text{'backup_donelock'});
+		}
+	elsif ($kill != 2 && $lpid) {
+		# Destination is already locked
+		if ($kill == 1 && $lpid != $$) {
+			# Kill the current backup
 			&kill_logged('TERM', $lpid);
 			sleep(2);
 			if (&test_lock($lockfile)) {
@@ -712,6 +722,7 @@ foreach my $desturl (@$desturls) {
 			&$second_print(&text('backup_ekilllock', $lpid));
 			}
 		else {
+			# Exit immediatel
 			&$second_print(&text('backup_esamelock', $lpid));
 			return (0, 0, $doms);
 			}

@@ -71,7 +71,8 @@ Keys can be found using the C<list-backup-keys> API call.
 By default, only one backup to the same destination can be running at the
 same time - the second backup will immediately fail. You can invert this
 behavior with the C<--kill-running> flag, which terminates the first backup
-and allows this one to continue.
+and allows this one to continue. Or you can use the C<--wait-running> flag
+to delay the backup until the first one completes.
 
 To override the default compression format set on the Virtualmin Configuration
 page, use the C<--compression> flag followed by one of C<gzip>, C<bzip2>, 
@@ -236,6 +237,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--kill-running") {
 		$kill = 1;
+		}
+	elsif ($a eq "--wait-running") {
+		$kill = 2;
 		}
 	elsif ($a eq "--compression") {
 		my $c = shift(@ARGV);
@@ -481,7 +485,7 @@ print "                         [--purge-debug]\n";
 if (defined(&list_backup_keys)) {
 	print "                         [--key id]\n";
 	}
-print "                         [--kill-running]\n";
+print "                         [--kill-running | --wait-running]\n";
 print "                         [--compression gzip|bzip2|tar|zip]\n";
 print "\n";
 print "Multiple domains may be specified with multiple --domain parameters.\n";
