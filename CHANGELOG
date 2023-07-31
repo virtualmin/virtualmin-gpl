@@ -1645,3 +1645,5 @@ Added a template option for default website aliases and redirects.
 ---- Changes since 7.5 ----
 DNS zones can now be hosted on remote Webmin servers.
 Remote databases are now supported for PostgreSQL in the same way as MySQL.
+---- Changes since 7.7 ----
+Passowrd hashing is now enabled by default on all new installs
