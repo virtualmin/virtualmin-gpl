@@ -1028,7 +1028,8 @@ if (!$isalias) {
 	}
 
 # If domain was re-named and had a private DKIM key, update it
-if (!$_[0]->{'alias'} && $config{'dkim_enabled'}) {
+if (!$_[0]->{'alias'} && $config{'dkim_enabled'} &&
+    $_[0]->{'dom'} ne $_[1]->{'dom'}) {
 	my $keyfile = &get_domain_dkim_key($_[1]);
 	if ($keyfile) {
 		my $key = &read_file_contents($keyfile);
