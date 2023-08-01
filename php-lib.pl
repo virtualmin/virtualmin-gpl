@@ -2380,6 +2380,7 @@ return $text{'php_fpmeconfig'} if (!$conf);
 my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 if (-r $file) {
 	&unlink_logged($file);
+	&unflush_file_lines($file);
 	my $sock = &get_php_fpm_socket_file($d, 1);
 	if (-r $sock) {
 		&unlink_logged($sock);
