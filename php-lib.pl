@@ -2514,6 +2514,7 @@ sub save_php_fpm_pool_config_value
 {
 my ($conf, $id, $name, $value) = @_;
 my $file = $conf->{'dir'}."/".$id.".conf";
+return if (!-r $file);
 &lock_file($file);
 my $lref = &read_file_lines($file);
 my $found = -1;
