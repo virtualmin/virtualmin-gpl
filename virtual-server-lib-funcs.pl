@@ -546,6 +546,7 @@ $d->{'lastsave_script'} = $ENV{'SCRIPT_NAME'} || $0;
 $d->{'lastsave_user'} = $remote_user;
 $d->{'lastsave_type'} = $main::webmin_script_type;
 $d->{'lastsave_webmincron'} = $main::webmin_script_webmincron;
+$d->{'lastsave_pid'} = $main::initial_process_id;
 &write_file("$domains_dir/$d->{'id'}", $d);
 &unlock_file("$domains_dir/$d->{'id'}");
 $main::get_domain_cache{$d->{'id'}} = $d;
@@ -14707,6 +14708,9 @@ my @doms = ( $d );
 my @olddoms = ( \%oldd );
 push(@doms, @subs, @aliases);
 push(@olddoms, @oldsubs, @oldaliases);
+foreach my $ld (@doms) {
+	&lock_domain($ld);
+	}
 
 # Update all features in all domains. Include the mail feature always, as this
 # covers FTP users
@@ -14814,6 +14818,7 @@ if (!$oldd{'parent'}) {
 &$first_print($text{'save_domain'});
 for(my $i=0; $i<@doms; $i++) {
 	&save_domain($doms[$i]);
+	&unlock_domain($doms[$i]);
 	}
 &$second_print($text{'setup_done'});
 
