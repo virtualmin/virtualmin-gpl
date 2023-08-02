@@ -2886,6 +2886,7 @@ foreach my $d (&list_domains()) {
 		}
 
 	# Time to attempt the renewal
+	&lock_domain($d);
 	$done++;
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	my ($subject, $body);
@@ -2909,6 +2910,7 @@ foreach my $d (&list_domains()) {
 	# Send email
 	my $from = &get_global_from_address($d);
 	&send_notify_email($from, [$d], $d, $subject, $body);
+	&unlock_domain($d);
 	}
 
 $config{'last_letsencrypt_mass_renewal'} = $now;

@@ -327,9 +327,12 @@ foreach my $d (&list_domains()) {
 	if ($config{'jail_age'} &&
 	    time() - $d->{'jail_last_copy'} > $config{'jail_age'}*3600) {
 		# Time to sync
+		&lock_domain($d);
+		$d = &get_domain($d->{'id'}, undef, 1);
 		&copy_jailkit_files($d, $dir);
 		$d->{'jail_last_copy'} = time();
 		&save_domain($d);
+		&unlock_domain($d);
 		}
 	}
 }
