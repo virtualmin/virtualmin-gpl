@@ -7903,6 +7903,7 @@ $bw_tests = [
 
 	# Run bw.pl on the parent domain
 	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	  'sleep' => 5,
 	},
 
 	# Check web usage in sub-domain
@@ -7970,6 +7971,7 @@ $bw_tests = [
 
 	# Re-run bw.pl to pick up that email
 	{ 'command' => $module_config_directory.'/bw.pl '.$test_bw_domain,
+	  'sleep' => 5,
 	},
 
 	# Check that the email was counted
