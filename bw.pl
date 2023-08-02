@@ -86,12 +86,24 @@ foreach $d (@bwdoms) {
 # For each server, sum up usage over the monitoring period to find those
 # that are over their limit
 foreach $d (@doms) {
-	$d = &get_domain($d->{'id'}, undef, 1);	# Force re-read from disk
-	next if (!$d);				# Deleted
 	next if ($d->{'parent'});
+	&lock_domain($d);
+	$d = &get_domain($d->{'id'}, undef, 1);	# Force re-read from disk
+	if (!$d) {
+		# Deleted!
+		&unlock_domain($d);
+		next;
+		}
 
 	# Find domain and sub-domains
-	@alld = ($d, &get_domain_by("parent", $d->{'id'}));
+	@alld = ($d);
+	@subd = ();
+	foreach my $dd (&get_domain_by("parent", $d->{'id'})) {
+		&lock_domain($dd);
+		$dd = &get_domain($dd->{'id'}, undef, 1); # Force re-read
+		push(@subd, $dd);
+		}
+	push(@alld, @subd);
 
 	# Sum up usage for domain and sub-domains
 	$usage = 0;
@@ -116,7 +128,7 @@ foreach $d (@doms) {
 		foreach $k (keys %usage_only) {
 			$dd->{'bw_usage_only_'.$k} = $usage_only{$k};
 			}
-		if ($d ne $dd) {
+		if ($d->{'id'} ne $dd->{'id'}) {
 			&save_domain($dd);
 			}
 		}
@@ -256,6 +268,10 @@ foreach $d (@doms) {
 		&webmin_log("enable", "domain", $d->{'dom'}, $d);
 		}
 	&save_domain($d);
+	foreach my $dd (reverse(@subd)) {
+		&unlock_domain($dd);
+		}
+	&unlock_domain($d);
 	}
 
 # Release running lock
