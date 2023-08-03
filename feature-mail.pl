@@ -2360,7 +2360,7 @@ if ($mf) {
 			&unlink_file($mfreal);
 			&open_tempfile(MF, ">$mfreal", 1);
 			&close_tempfile(MF);
-			&set_ownership_permissions($uid, $gid, undef, $mfreal);
+			&set_ownership_permissions($uid, $gid, 0600, $mfreal);
 			&symlink_file($mfreal, $mf);
 			}
 		else {
@@ -2368,7 +2368,7 @@ if ($mf) {
 			&unlink_file($mf);
 			&open_tempfile(MF, ">$mf", 1);
 			&close_tempfile(MF);
-			&set_ownership_permissions($uid, $gid, undef, $mf);
+			&set_ownership_permissions($uid, $gid, 0600, $mf);
 			}
 		}
 	@rv = ( $mf, 0 );
