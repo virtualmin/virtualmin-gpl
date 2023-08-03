@@ -193,6 +193,7 @@ $file ||= "$domains_dir/$id";
 &read_file($file, \%dom) || return undef;
 $dom{'file'} = "$domains_dir/$id";
 $dom{'id'} ||= $id;
+$dom{'lastread_time'} = time();
 &complete_domain(\%dom);
 if (!defined($dom->{'created'})) {
 	# compat - creation date can be inferred from ID
@@ -521,9 +522,11 @@ $id = $id->{'id'} if (ref($id));
 sub save_domain
 {
 local ($d, $creating) = @_;
-if (!$creating && $d->{'id'} && !-r "$domains_dir/$d->{'id'}") {
+local $file = "$domains_dir/$d->{'id'}";
+if (!$creating && $d->{'id'} && !-r $file) {
 	# Deleted from under us! Don't save
-	print STDERR "Domain was deleted before saving!\n";
+	print STDERR "Domain $file was deleted before saving!\n";
+	&print_call_stack();
 	return 0;
 	}
 if ($d->{'dom'} eq '') {
@@ -532,9 +535,15 @@ if ($d->{'dom'} eq '') {
 	return 0;
 	}
 &make_dir($domains_dir, 0700);
-&lock_file("$domains_dir/$d->{'id'}");
+&lock_file($file);
 local $oldd = { };
-&read_file("$domains_dir/$d->{'id'}", $oldd);
+if (&read_file($file, $oldd)) {
+	my @st = stat($file);
+	if ($d->{'lastread_time'} && $st[9] > $d->{'lastread_time'}) {
+		print STDERR "Domain $file was modified since last read!\n";
+		&print_call_stack();
+		}
+	}
 if (!$d->{'created'}) {
 	$d->{'created'} = time();
 	$d->{'creator'} ||= $remote_user;
@@ -547,8 +556,10 @@ $d->{'lastsave_user'} = $remote_user;
 $d->{'lastsave_type'} = $main::webmin_script_type;
 $d->{'lastsave_webmincron'} = $main::webmin_script_webmincron;
 $d->{'lastsave_pid'} = $main::initial_process_id;
-&write_file("$domains_dir/$d->{'id'}", $d);
-&unlock_file("$domains_dir/$d->{'id'}");
+delete($d->{'lastread_time'});
+&write_file($file, $d);
+&unlock_file($file);
+$d->{'lastread_time'} = time();
 $main::get_domain_cache{$d->{'id'}} = $d;
 if (scalar(@main::list_domains_cache)) {
 	@main::list_domains_cache =
@@ -562,7 +573,7 @@ foreach my $m (keys %get_domain_by_maps) {
 if ($mchanged) {
 	&build_domain_maps();
 	}
-&set_ownership_permissions(undef, undef, 0700, "$domains_dir/$d->{'id'}");
+&set_ownership_permissions(undef, undef, 0700, $file);
 return 1;
 }
 
