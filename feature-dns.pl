@@ -1660,11 +1660,13 @@ sub add_webmail_dns_records_to_file
 local ($d, $tmpl, $file, $recs, $already, $force) = @_;
 local $count = 0;
 local $ip = $d->{'dns_ip'} || $d->{'ip'};
+my $proxied = $tmpl->{'dns_cloud_proxy'};
 foreach my $r ('webmail', 'admin') {
 	local $n = "$r.$d->{'dom'}.";
 	if (($tmpl->{'web_'.$r} || $force) && (!$already || !$already->{$n})) {
 		my $r = { 'name' => $n,
 			  'type' => 'A',
+			  'proxied' => $proxied == 1 ? 1 : 0,
 			  'values' => [ $ip ] };
 		&create_dns_record($recs, $file, $r);
 		$count++;
