@@ -54,6 +54,7 @@ if (&need_config_check() && &can_check_config()) {
 	print &ui_form_start("edit_newtmpl.cgi");
 	print &ui_submit($text{'index_tmpls'});
 	print &ui_form_end();
+	print "<p></p>\n";
 	$formno++;
 	}
 
