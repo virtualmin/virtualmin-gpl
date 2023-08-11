@@ -8303,7 +8303,7 @@ if (!&domain_has_ssl($dom) && $always_ssl && !$dom->{'alias'}) {
 if (!defined($dom->{'auto_letsencrypt'})) {
 	$dom->{'auto_letsencrypt'} = $config{'auto_letsencrypt'};
 	if ($dom->{'dns'}) {
-		$dom->{'letsencrypt_wild'} = $config{'letsencrypt_wild'};
+		$dom->{'letsencrypt_dwild'} = $config{'letsencrypt_wild'};
 		}
 	}
 if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
