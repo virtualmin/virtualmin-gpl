@@ -403,7 +403,7 @@ if ($in->{'delanon'}) {
 	}
 
 # Work out the max mysql username length, but only for new installs
-if (!&list_domains() && !$config{'mysql_user_size'}) {
+if (!$config{'mysql_user_size'}) {
 	eval {
 		local $main::error_must_die = 1;
 		my @str = &mysql::table_structure($mysql::master_db, "user");
