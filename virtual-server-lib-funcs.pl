@@ -17410,7 +17410,10 @@ else {
 sub open_uncompress_file
 {
 local ($fh, $f) = @_;
-if ($f =~ /\.gz$/i) {
+if ($f =~ /\|$/) {
+	return open($fh, $f);
+	}
+elsif ($f =~ /\.gz$/i) {
 	return open($fh, "gunzip -c ".quotemeta($f)." |");
 	}
 elsif ($f =~ /\.Z$/i) {

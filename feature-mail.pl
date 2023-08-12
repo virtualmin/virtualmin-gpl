@@ -4384,6 +4384,9 @@ elsif (&foreign_installed("syslog-ng")) {
 foreach my $f ("/var/log/mail", "/var/log/maillog", "/var/log/mail.log") {
 	return $f if (-r $f);
 	}
+if (&has_command("journalctl")) {
+	return "journalctl -u 'postfix*' -u 'dovecot*' |";
+	}
 return undef;
 }
 

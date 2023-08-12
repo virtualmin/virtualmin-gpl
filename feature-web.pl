@@ -1928,7 +1928,15 @@ return $max_ltime;
 # that have not been modified since some time
 sub all_log_files
 {
-$_[0] =~ /^(.*)\/([^\/]+)$/;
+my ($file, $ltime) = @_;
+if ($file =~ /\|$/) {
+	# Running a command
+	return ($file);
+	}
+if ($file !~ /^(.*)\/([^\/]+)$/) {
+	# Not a valid path?!
+	return ( );
+	}
 local $dir = $1;
 local $base = $2;
 local ($f, @rv, %mtime);
@@ -1937,7 +1945,7 @@ foreach $f (readdir(DIR)) {
 	if ($f =~ /^\Q$base\E/ && -f "$dir/$f" && $f ne $base.".offset") {
 		local @st = stat("$dir/$f");
 		if ($f ne $base) {
-			next if ($_[1] && $st[9] <= $_[1]);
+			next if ($ltime && $st[9] <= $ltime);
 			}
 		$mtime{"$dir/$f"} = $st[9];
 		push(@rv, "$dir/$f");
