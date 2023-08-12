@@ -621,12 +621,6 @@ print &ui_table_row(undef, $text{'wizard_done2'}, 2);
 sub wizard_show_alldone
 {
 print &ui_table_row(undef, &text('wizard_alldone'), 2);
-
-# If user sets up a default domain, refresh navigation menu with it
-if (defined(&theme_post_save_domain) && $in{'refresh'}) {
-	my $dom = get_domain_by("dom", $in{'refresh'});
-	&theme_post_save_domain($dom, 'create');
-	}
 }
 
 sub wizard_parse_alldone

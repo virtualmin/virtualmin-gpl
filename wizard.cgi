@@ -27,13 +27,7 @@ if ($in{'parse'} || $in{'mypass'}) {
 	if (!$err) {
 		# Worked, show next step, if there is one
 		if ($in{'step'}+1 < scalar(@wizard_steps)) {
-
-			# If default domain is set, refresh navigation to it
-			my $refresh;
-			if ($in{'defdom'}) {
-				$refresh = "&refresh=$in{'defhost'}";
-				}
-			&redirect("wizard.cgi?step=".($in{'step'}+1)."$refresh");
+			&redirect("wizard.cgi?step=".($in{'step'}+1));
 			}
 		else {
 			$config{'wizard_run'} = 1;
