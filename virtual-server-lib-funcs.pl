@@ -78,10 +78,11 @@ foreach my $m (@migration_types) {
 	}
 }
 
-# list_domains()
+# list_domains([opts])
 # Returns a list of structures containing information about hosted domains
 sub list_domains
 {
+my ($opts) = @_;
 local (@rv, $d);
 local @files;
 local @st = stat($domains_dir);
@@ -103,7 +104,26 @@ foreach $d (@files) {
 		push(@rv, &get_domain($d));
 		}
 	}
+# Apply domain filters
+&list_domains_filters(\@rv, $opts);
 return @rv;
+}
+
+# list_domains_filters(&domains, [opts])
+# Filters initial domains list to exclude some domains
+sub list_domains_filters
+{
+my ($rv, $opts) = @_;
+
+# Remove default domain from the list unless
+# we want it included in scheduled functions
+if (!$opts->{'include-default-domain'}) {
+	# Only remove default domain if enabled in config
+	if ($config{'default_domain_ssl'}) {
+		@rv = grep { ! $_->{'defaulthostdomain'} } @rv;
+		@$rv = @rv;
+		}
+	}
 }
 
 # list_visible_domains()

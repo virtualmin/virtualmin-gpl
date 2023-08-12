@@ -178,7 +178,7 @@ my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 $info->{'vposs'} = \@vposs;
 
 # SSL certificate expiries
-foreach my $d (@doms) {
+foreach my $d (&list_domains({'include-default-domain' => 1})) {
 	if (!&domain_has_ssl_cert($d)) {
 		# Doesn't even have SSL, so clear cache fields
 		if ($d->{'ssl_cert_expiry'}) {
