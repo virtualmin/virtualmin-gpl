@@ -2116,6 +2116,10 @@ checkmap_eaccess=The map source <tt>$1</tt> cannot be used : $2
 checkmap_efile=The map type is not supported by this version of Webmin - only maps using files like <tt>hash</tt> and <tt>regexp</tt> can be used
 check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 
+check_defhost_nok=The given host name <tt>$1</tt> is not a fully qualified domain name
+check_defhost_clash=A host default domain named <tt>$1</tt> already exists
+check_defhost_desc=Host default domain
+
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
 

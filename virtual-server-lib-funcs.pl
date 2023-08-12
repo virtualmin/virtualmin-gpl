@@ -19518,6 +19518,140 @@ if (defined(&get_sub_ref_name)) {
 	}
 }
 
+# setup_virtualmin_default_hostname_ssl()
+# Setup default hostname domain with SSL certificate,
+# unless previously default domain has not been setup
+# and return error message or undef on success
+sub setup_virtualmin_default_hostname_ssl
+{
+my $is_default_domain = &get_domain_by("defaultdomain", 1);
+my $system_host_name = &get_system_hostname();		
+if ($system_host_name !~ /\./) {
+	my $system_host_name_ = &get_system_hostname(0, 1);
+	$system_host_name = $system_host_name_
+		if ($system_host_name_ =~ /\./);
+	}
+
+# Hostname should be FQDN
+return &text('check_defhost_nok', $system_host_name)
+	if ($system_host_name !~ /(\.[^.]+){2,}/);
+
+# Check if domain already exist for some reason
+return &text('check_defhost_clash', $system_host_name)
+	if (&get_domain_by("dom", $system_host_name) ||
+		$is_default_domain);
+
+# Setup from source
+my $setup_source = $0;
+
+&lock_domain_name($system_host_name);
+
+# Work out username / etc
+my ($user, $try1, $try2);
+$user = "_default_hostname";
+if (defined(getpwnam($user))) {
+	($user, $try1, $try2) = &unixuser_name($system_host_name);
+	}
+$user || return &text('setup_eauto', $try1, $try2);
+my ($group, $gtry1, $gtry2);
+$group = "_default_hostname";
+if (defined(getgrnam($group))) {
+	($group, $gtry1, $gtry2) = &unixgroup_name($system_host_name, $user);
+	}
+$group || return &text('setup_eauto2', $try1, $try2);
+my $defip = &get_default_ip();
+my $defip6 = &get_default_ip6();
+my $template = &get_init_template();
+my $plan = &get_default_plan();
+
+# Work out prefix if needed, and check it
+my $prefix ||= &compute_prefix($system_host_name, $group, undef, 1);
+$prefix =~ /^[a-z0-9\.\-]+$/i || return $text{'setup_eprefix'};
+my $pclash = &get_domain_by("prefix", $prefix);
+$pclash && return &text('setup_eprefix3', $prefix, $pclash->{'dom'});
+
+# Create the virtual server object
+my %dom;
+%dom = ('id', &domain_id(),
+	'dom', $system_host_name,
+	'user', $user,
+	'group', $group,
+	'ugroup', $group,
+	'owner', $text{'check_defhost_desc'},
+	'name', 1,
+	'name6', 1,
+	'ip', $defip,
+	'dns_ip', &get_dns_ip(),
+	'virt', 0,
+	'virtalready', 0,
+	'ip6', $defip6,
+	'virt6', 0,
+	'virt6already', 0,
+	'pass', &random_password(),
+	'quota', 0,
+	'uquota', 0,
+	'source', $setup_source,
+	'template', $template,
+	'plan', $plan->{'id'},
+	'prefix', $prefix,
+	'nocreationmail', 1,
+	'nowebmailredirect', 1,
+	'nodnsspf', 1,
+	'hashpass', 1,
+	# Old ref
+	'defaultdomain', 1,
+	# New ref
+	'defaulthostdomain', 1,
+    );
+
+# Set initial features
+$dom{'dir'} = 1;
+$dom{'unix'} = 1;
+$dom{'dns'} = 1;
+$dom{'mail'} = 0;
+my $webf = &domain_has_website();
+my $sslf = &domain_has_ssl();
+$dom{$webf} = 1;
+$dom{$sslf} = 1;
+$dom{'letsencrypt_dname'} = $system_host_name;
+$dom{'auto_letsencrypt'} = 2;
+
+# Fill in other default fields
+&set_limits_from_plan(\%dom, $plan);
+&set_capabilities_from_plan(\%dom, $plan);
+$dom{'emailto'} = $dom{'user'}.'@'.&get_system_hostname();
+$dom{'db'} = &database_name(\%dom);
+&set_featurelimits_from_plan(\%dom, $plan);
+&set_chained_features(\%dom, undef);
+&set_provision_features(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
+$dom{'home'} = &server_home_directory(\%dom, undef);
+$dom{'home'} =~ s/(\/)(?=[^\/]*$)/.$1/;
+&complete_domain(\%dom);
+
+# Check for various clashes
+$derr = &virtual_server_depends(\%dom);
+return $derr if ($derr);
+$cerr = &virtual_server_clashes(\%dom);
+return $cerr if ($cerr);
+my @warns = &virtual_server_warnings(\%dom);
+return join(" ", @warns) if (@warns);
+
+# Create the server
+&push_all_print();
+&set_all_null_print();
+my $err = &create_virtual_server(
+	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
+&pop_all_print();
+return $err if ($err);
+
+$config{'defaultdomain_name'} = $dom{'dom'};
+&save_module_config();
+&run_post_actions_silently();
+&unlock_domain_name($system_host_name);
+return undef;
+}
+
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {
