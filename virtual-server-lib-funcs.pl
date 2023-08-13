@@ -7849,11 +7849,11 @@ return 0;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#			[no-post-actions], [password], [content])
+#                       [no-post-actions], [password], [content], [template-overrides])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content, $tmplopts) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7876,7 +7876,7 @@ if ($dom->{'ip'} eq &get_default_ip() &&
 	}
 
 # Work out the auto-alias domain name
-local $tmpl = &get_template($dom->{'template'});
+local $tmpl = &get_template($dom->{'template'}, $tmplopts);
 local $aliasname;
 if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	local $aliasprefix = $dom->{'dom'};
@@ -9988,12 +9988,13 @@ if ($save_config) {
 undef(@list_templates_cache);
 }
 
-# get_template(id)
+# get_template(id, [template-overrides])
 # Returns a template, with any default settings filled in from real default
 sub get_template
 {
+my ($tmplid, $tmplopts) = @_;
 local @tmpls = &list_templates();
-local ($tmpl) = grep { $_->{'id'} == $_[0] } @tmpls;
+local ($tmpl) = grep { $_->{'id'} == $tmplid } @tmpls;
 return undef if (!$tmpl);	# not found
 if (!$tmpl->{'default'}) {
 	local $def = $tmpls[0];
@@ -10059,6 +10060,9 @@ if (!$tmpl->{'default'}) {
 	# in this template, but we are using the GPL release
 	$tmpl->{'web_ruby_suexec'} = -1 if ($tmpl->{'web_ruby_suexec'} eq '');
 	}
+# We may want to change template defaults when creating
+# a new domain manually, e.g. for host default domain 
+$tmpl = {%$tmpl, %$tmplopts} if ($tmplopts);
 return $tmpl;
 }
 
@@ -19564,12 +19568,6 @@ my $defip6 = &get_default_ip6();
 my $template = &get_init_template();
 my $plan = &get_default_plan();
 
-# Work out prefix if needed, and check it
-my $prefix ||= &compute_prefix($system_host_name, $group, undef, 1);
-$prefix =~ /^[a-z0-9\.\-]+$/i || return $text{'setup_eprefix'};
-my $pclash = &get_domain_by("prefix", $prefix);
-$pclash && return &text('setup_eprefix3', $prefix, $pclash->{'dom'});
-
 # Create the virtual server object
 my %dom;
 %dom = ('id', &domain_id(),
@@ -19602,6 +19600,7 @@ my %dom;
 	'defaultdomain', 1,
 	# New ref
 	'defaulthostdomain', 1,
+	'nocreationscripts', 1,
     );
 
 # Set initial features
@@ -19626,7 +19625,7 @@ $dom{'db'} = &database_name(\%dom);
 &set_provision_features(\%dom);
 &generate_domain_password_hashes(\%dom, 1);
 $dom{'home'} = &server_home_directory(\%dom, undef);
-$dom{'home'} =~ s/(\/)(?=[^\/]*$)/.$1/;
+$dom{'home'} =~ s/(\/)(?=[^\/]*$)/$1./;
 &complete_domain(\%dom);
 
 # Check for various clashes
@@ -19641,7 +19640,21 @@ return join(" ", @warns) if (@warns);
 &push_all_print();
 &set_all_null_print();
 my $err = &create_virtual_server(
-	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
+	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'},
+	# Templates defaults override
+	{'defushell' => '/dev/null',
+	 'dns_records' => '@',
+	 'dns_cloud_import' => '1',
+	 'bind_cloud_proxy' => '1',
+	 'web_webmail' => 0,
+	 'web_admin' => 0,
+	 'postfix_ssl' => 0,
+	 'dovecot_ssl' => 0,
+	 'mysql_ssl' => 0,
+	 'virtualmin-awstatspasswd' => 0,
+	 'php_log' => 0,
+	 'php_suexec' => '4',
+	});
 &pop_all_print();
 return $err if ($err);
 
