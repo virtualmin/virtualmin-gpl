@@ -10075,19 +10075,19 @@ if (!$tmpl->{'default'}) {
 	}
 # We may want to change template defaults when creating
 # a new domain manually, e.g. for host default domain
-my $tmplopts = &template_overrides();
+my $tmplopts = &template_overrides($tmplid);
 $tmpl = {%$tmpl, %$tmplopts} if ($tmplopts);
 return $tmpl;
 }
 
-# template_overrides([set])
-# Get template overrides previously set in this call
+# template_overrides(id, [overrides])
+# Get template overrides for the give template id
 sub template_overrides
 {
-my ($overrides) = @_;
-state $tmpl;
-$tmpl = $overrides if ($overrides);
-return $tmpl;
+my ($tmplid, $overrides) = @_;
+state @tmpl;
+$tmpl[$tmplid] = $overrides if ($overrides);
+return $tmpl[$tmplid];
 }
 
 # delete_template(&template)
@@ -19673,7 +19673,7 @@ my @warns = &virtual_server_warnings(\%dom);
 return &$err(join(" ", @warns)) if (@warns);
 
 # Templates defaults override
-&template_overrides(
+&template_overrides($template,
 	{'ushell' => '/dev/null',
 	 'dns_records' => '@',
 	 'dns_cloud_import' => 1,
