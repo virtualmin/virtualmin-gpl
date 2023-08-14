@@ -19557,8 +19557,8 @@ sub setup_virtualmin_default_hostname_ssl
 {
 my $wantarr = wantarray;
 my $err = sub {
-	my ($msg, $code) = @_;
-	return $wantarr ? ($code || 0, $msg) : $code || 0;
+	my ($msg, $code, $d) = @_;
+	return $wantarr ? ($code || 0, $msg, $d) : $code || 0;
 	};
 
 # Can create
@@ -19704,7 +19704,7 @@ $config{'defaultdomain_name'} = $dom{'dom'};
 &unlock_file($module_config_file);
 &run_post_actions_silently();
 &unlock_domain_name($system_host_name);
-return &$err($succ_msg, $succ);
+return &$err($succ_msg, $succ, $rs);
 }
 
 # delete_virtualmin_default_hostname_ssl()
