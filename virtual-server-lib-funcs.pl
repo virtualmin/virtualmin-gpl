@@ -19689,6 +19689,26 @@ $config{'defaultdomain_name'} = $dom{'dom'};
 return &$err($succ_msg, $succ);
 }
 
+# delete_virtualmin_default_hostname_ssl()
+# Delete default hostname domain
+sub delete_virtualmin_default_hostname_ssl
+{
+# Test host default domain being deleted
+my $d = &get_domain_by("defaultdomain", 1);
+return if (!$d);
+return if (!&can_delete_domain($d));
+# Delete host default domain
+&lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
+&push_all_print();
+&set_all_null_print();
+$err = &delete_virtual_server($d, 0, 0);
+&pop_all_print();
+&run_post_actions();
+&unlock_domain_name($d->{'dom'}); #### XXXX
+return wantarray ? (0, $err) : 0 if ($err);
+return wantarray ? (1, undef) : 1;
+}
+
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {
