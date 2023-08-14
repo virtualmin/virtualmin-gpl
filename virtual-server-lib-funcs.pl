@@ -19636,6 +19636,7 @@ my %dom;
 	'nocreationscripts', 1,
 	'defaultdomain', 1,
 	'defaulthostdomain', 1,
+	'letsencrypt_dwild', 0,
     );
 
 # Set initial features
