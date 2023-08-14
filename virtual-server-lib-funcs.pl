@@ -19779,6 +19779,7 @@ if ($new_default_domain->{'dom'}) {
 				&$second_print($text{'setup_done'});
 				}
 			else {
+				&$remove_default_host_domain(1);
 				&$second_print(&text('check_apicmderr', $defdom_msg));
 				}
 			}
@@ -19804,6 +19805,7 @@ elsif ($config{'default_domain_ssl'}) {
 			&$second_print($text{'setup_done'});
 			}
 		else {
+			&$remove_default_host_domain(1);
 			&$second_print(&text('check_apicmderr', $defdom_msg));
 			}
 		}
