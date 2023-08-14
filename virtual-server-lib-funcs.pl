@@ -19707,6 +19707,43 @@ $err = &delete_virtual_server($d, 0, 0);
 &unlock_domain_name($d->{'dom'}); #### XXXX
 return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
+
+# validate_domain_ssl_certificate(domain, [port])
+# Validate domain SSL certificate if valid return 1, otherwise return 0, or -1
+# if IO::Socket::SSL is not available, or -2 if failed to establish connection
+sub validate_domain_ssl_certificate
+{
+my ($domain, $port) = @_;
+$port ||= 443;
+my $wantarr = wantarray;
+my $err = sub {
+	my ($msg, $code) = @_;
+	return $wantarr ? ($code || 0, $msg) : $code || 0;
+	};
+# Check if IO::Socket::SSL is available
+eval "use IO::Socket::SSL";
+if ($@) {
+	return &$err(&text('validate_domssl_err1', $@), -1);
+	}
+# Establish an SSL connection
+my $ssl_socket = IO::Socket::SSL->new(
+    PeerHost => $domain,
+    PeerPort => $port,
+    SSL_verify_mode => 0,
+);
+
+if ($ssl_socket) {
+    # Check if the certificate is valid
+    if ($ssl_socket->verify_hostname($domain)) {
+        return &$err(&text('validate_domssl_ok', $domain), 1);
+    } else {
+		return &$err(&text('validate_domssl_nok', $domain), 0);
+    }
+
+    # Close the SSL connection
+    $ssl_socket->close();
+	}
+return &$err("$text{'validate_domssl_err2'} : " . IO::Socket::SSL::errstr(), -2);
 }
 
 # Returns a list of all plugins that define features

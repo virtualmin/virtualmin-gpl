@@ -2123,6 +2123,11 @@ check_defhost_succ=SSL certificate for host default domain <tt>$1</tt> was succe
 check_defhost_err=SSL certificate request for host default domain <tt>$1</tt> failed
 check_defhost_cannot=Cannot create host default domain, because this user <tt>$1</tt> is not allowed to create virtual servers
 
+validate_domssl_ok=SSL certifiate for <tt>$1</tt> is valid
+validate_domssl_nok=SSL certifiate for <tt>$1</tt> is not valid
+validate_domssl_err1=The IO::Socket::SSL Perl module is not available on your system : $1
+validate_domssl_err2=Failed to establish SSL connection
+
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users
 
