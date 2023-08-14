@@ -19667,7 +19667,7 @@ return join(" ", @warns) if (@warns);
 my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
-return $rs if ($rs && ref($rs) ne 'HASH');
+return wantarray ? (0, $rs) : 0 if ($rs && ref($rs) ne 'HASH');
 my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
 my $succ_msg = $succ ? &text('check_defhost_succ', $system_host_name) :
                            &text('check_defhost_err', $system_host_name);
