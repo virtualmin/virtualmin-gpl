@@ -19682,7 +19682,7 @@ my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed?
 my $succ_smsg = $text{'check_defhost_sharedsucc'};
 if ($rs->{'ssl_same'}) {
-	my $ssucc = &validate_domain_ssl_certificate($system_host_name);
+	my $ssucc = &validate_domain_ssl_certificate($rs);
 	$succ = 2 if ($ssucc == 1); 
 	}
 my $succ_msg = $succ ? 
@@ -19717,18 +19717,19 @@ return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
 }
 
-# validate_domain_ssl_certificate(domain, [port])
+# validate_domain_ssl_certificate(&domain)
 # Validate domain SSL certificate if valid return 1, otherwise return 0, or -1
 # if IO::Socket::SSL is not available, or -2 if failed to establish connection
 sub validate_domain_ssl_certificate
 {
-my ($domain, $port) = @_;
-$port ||= 443;
+my ($d) = @_;
 my $wantarr = wantarray;
 my $err = sub {
 	my ($msg, $code) = @_;
 	return $wantarr ? ($code || 0, $msg) : $code || 0;
 	};
+my $domain = $d->{'dom'};
+my $port = $d->{'web_sslport'} || 443;
 # Check if IO::Socket::SSL is available
 eval "use IO::Socket::SSL";
 if ($@) {
@@ -19743,7 +19744,7 @@ my $ssl_socket = IO::Socket::SSL->new(
 
 if ($ssl_socket) {
     # Check if the certificate is valid
-    if ($ssl_socket->verify_hostname($domain)) {
+    if ($ssl_socket->verify_hostname($domain) && !&self_signed_cert($d)) {
         return &$err(&text('validate_domssl_ok', $domain), 1);
     } else {
 		return &$err(&text('validate_domssl_nok', $domain), 0);
