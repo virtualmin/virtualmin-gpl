@@ -7947,7 +7947,7 @@ if ($parentdom) {
 
 # Was this originally the default domain?
 if (!defined($dom->{'defaultdomain'})) {
-	$dom->{'defaultdomain'} = 1
+	$dom->{'defaultdomain'} = 1, $dom->{'defaulthostdomain'} = 1
 		if ($dom->{'dom'} eq $config{'defaultdomain_name'});
 	}
 
