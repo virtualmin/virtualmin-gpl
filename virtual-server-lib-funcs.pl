@@ -19545,6 +19545,10 @@ my $err = sub {
 	return $wantarr ? ($code || 0, $msg) : $code || 0;
 	};
 
+# Can create
+return &$err(&text('check_defhost_cannot', $remote_user))
+		if (!&can_create_master_servers());
+
 my $is_default_domain = &get_domain_by("defaultdomain", 1);
 my $system_host_name = &get_system_hostname();		
 if ($system_host_name !~ /\./) {
