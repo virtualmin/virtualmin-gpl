@@ -2085,6 +2085,10 @@ check_apicmd=Creating API helper command ..
 check_apicmdok=.. created <tt>$1</tt>
 check_apicmderr=.. failed : $1
 check_bashphpprofile=Creating Bash startup profile for PHP alias ..
+check_hostdefaultdomain_enable=Creating <tt>$1</tt> as host default domain ..
+check_hostdefaultdomain_disable=Removing previously created <tt>$1</tt> host default domain ..
+check_hostdefaultdomain_change=Changing host default domain from <tt>$1</tt> to <tt>$2</tt> and enabling Let's Encrypt SSL certificate ..
+check_hostdefaultdomain_errold=.. failed : cannot create host default domain, because earlier created default <tt>$1</tt> already exists
 check_spamlockon=Adding lockfile to all domains' spamassassin calls ..
 check_spamlockoff=Removing lockfile from all domains' spamassassin calls ..
 check_spamwrappercmd=The procmail command <tt>$1</tt> in the Postfix configuration does not exist
@@ -2117,10 +2121,11 @@ checkmap_efile=The map type is not supported by this version of Webmin - only ma
 check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 
 check_defhost_nok=The given host name <tt>$1</tt> is not a fully qualified domain name
-check_defhost_clash=A host default domain named <tt>$1</tt> already exists
+check_defhost_clash=The host default domain named <tt>$1</tt> already exists
 check_defhost_desc=Host default domain
 check_defhost_succ=SSL certificate for host default domain <tt>$1</tt> was successfully setup
 check_defhost_sharedsucc=Shared SSL certificate for host default domain <tt>$1</tt> was successfully setup
+check_defhost_sharedsucc2=.. done with shared SSL certificate
 check_defhost_err=SSL certificate request for host default domain <tt>$1</tt> failed
 check_defhost_cannot=Cannot create host default domain, because this user <tt>$1</tt> is not allowed to create virtual servers
 

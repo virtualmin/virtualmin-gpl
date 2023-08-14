@@ -117,12 +117,10 @@ my ($rv, $opts) = @_;
 
 # Remove default domain from the list unless
 # we want it included in scheduled functions
-if (!$opts->{'include-default-domain'}) {
-	# Only remove default domain if enabled in config
-	if ($config{'default_domain_ssl'}) {
-		@rv = grep { ! $_->{'defaulthostdomain'} } @rv;
-		@$rv = @rv;
-		}
+if ($opts->{'include-default-domain'}) {
+	# Never display host default domain of new type
+	@rv = grep { ! $_->{'defaulthostdomain'} } @rv;
+	@$rv = @rv;
 	}
 }
 
@@ -431,7 +429,7 @@ for(my $i=0; $i<@_; $i+=2) {
 		# Need to check manually
 		@possible = grep { $_->{$_[$i]} eq $_[$i+1] ||
 				   $_->{$_[$i]} ne "" && $_[$i+1] eq "_ANY_" }
-				 &list_domains();
+				 &list_domains({'include-default-domain' => 1});
 		}
 	if ($i == 0) {
 		# First field, so matches are the result
@@ -16450,9 +16448,12 @@ if (-d $profiled && !-r $profiledphpalias) {
 	"if \[ -x \"\$php\" \]; then\n".
 		"  alias php='\$\(phpdom=\"bin/php\" ; \(while [ ! -f \"\$phpdom\" ] && [ \"\$PWD\" != \"/\" ]; do cd \"\$\(dirname \"\$PWD\"\)\" || \"\$php\" ; done ; if [ -f \"\$phpdom\" ] ; then echo \"\$PWD/\$phpdom\" ; else echo \"\$php\" ; fi\)\)'\n".
 	"fi\n";
-	write_file_contents($profiledphpalias, $phpalias);
+	&write_file_contents($profiledphpalias, $phpalias);
 	&$second_print($text{'setup_done'});
 	}
+
+# Check host default domain
+&check_virtualmin_default_hostname_ssl();
 
 # Restart lookup-domain daemon, if need
 if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
@@ -19564,7 +19565,7 @@ return &$err(&text('check_defhost_nok', $system_host_name))
 # Check if domain already exist for some reason
 return &$err(&text('check_defhost_clash', $system_host_name))
 	if (&get_domain_by("dom", $system_host_name) ||
-		$is_default_domain);
+		$is_default_domain->{'dom'});
 
 # Setup from source
 my $setup_source = $0;
@@ -19618,12 +19619,8 @@ my %dom;
 	'nodnsspf', 1,
 	'hashpass', 1,
 	'nocreationscripts', 1,
-	'nolink_certs', 1,
-	# Old ref
 	'defaultdomain', 1,
-	# New ref
 	'defaulthostdomain', 1,
-	
     );
 
 # Set initial features
@@ -19681,14 +19678,15 @@ my ($rs) = &create_virtual_server(
 &pop_all_print();
 return &$err($rs) if ($rs && ref($rs) ne 'HASH');
 my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
-# Perhaps shared SSL certificate was installed?
-my $succ_smsg = $text{'check_defhost_sharedsucc'};
+# Perhaps shared SSL certificate was installed, trust it
+$succ = 2 if ($rs->{'ssl_same'});
 my $succ_msg = $succ ? 
-	&text('check_defhost_succ', $system_host_name) :
+	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
     &text('check_defhost_err', $system_host_name);
-
 $config{'defaultdomain_name'} = $dom{'dom'};
+&lock_file($module_config_file);
 &save_module_config();
+&unlock_file($module_config_file);
 &run_post_actions_silently();
 &unlock_domain_name($system_host_name);
 return &$err($succ_msg, $succ);
@@ -19699,19 +19697,102 @@ return &$err($succ_msg, $succ);
 sub delete_virtualmin_default_hostname_ssl
 {
 # Test host default domain being deleted
-my $d = &get_domain_by("defaultdomain", 1);
-return if (!$d);
+my $d = &get_domain_by("defaulthostdomain", 1);
+return if (!$d->{'dom'});
 return if (!&can_delete_domain($d));
 # Delete host default domain
-&lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
+# &lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
 &push_all_print();
 &set_all_null_print();
 $err = &delete_virtual_server($d, 0, 0);
 &pop_all_print();
-&run_post_actions();
-&unlock_domain_name($d->{'dom'}); #### XXXX
+&run_post_actions_silently();
+# &unlock_domain_name($d->{'dom'}); #### XXXX
+&lock_file($module_config_file);
+$config{'defaultdomain_name'} = undef;
+&save_module_config();
+&unlock_file($module_config_file);
 return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
+}
+
+# check_virtualmin_default_hostname_ssl()
+# Check default host domain
+sub check_virtualmin_default_hostname_ssl
+{
+# Get actual system hostname
+my $system_host_name = &get_system_hostname();		
+if ($system_host_name !~ /\./) {
+	my $system_host_name_ = &get_system_hostname(0, 1);
+	$system_host_name = $system_host_name_
+		if ($system_host_name_ =~ /\./);
+	}
+my $remove_default_host_domain = sub {
+	my ($silent_print) = @_;	
+	if ($silent_print) {
+		&push_all_print();
+		&set_all_null_print();
+		}
+	&$first_print(&text('check_hostdefaultdomain_disable', $system_host_name));
+		my ($ok, $rsmsg) = &delete_virtualmin_default_hostname_ssl();
+		if (!$ok) {
+			&$second_print(&text('check_apicmderr', $rsmsg));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+	if ($silent_print) {
+		&pop_all_print();
+		}
+	};
+my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
+if ($new_default_domain->{'dom'}) {
+	if ($config{'default_domain_ssl'}) {
+		my $known_default_domain = $config{'defaultdomain_name'};
+		my $hostname_changed = $known_default_domain ne $system_host_name;
+		my $failed_le = !$new_default_domain->{'letsencrypt_last_success'} && !$new_default_domain->{'ssl_same'};
+		my $text_msg = $hostname_changed ?
+			'check_hostdefaultdomain_change' : 'check_hostdefaultdomain_enable';
+		if ($hostname_changed || $failed_le) {
+			&$first_print(&text($text_msg, $known_default_domain, $system_host_name));
+			&$remove_default_host_domain(1);
+			my ($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+			if ($defdom_status == 2) {
+				&$second_print($text{'check_defhost_sharedsucc2'});
+				}
+			elsif ($defdom_status >= 1) {
+				&$second_print($text{'setup_done'});
+				}
+			else {
+				&$second_print(&text('check_apicmderr', $defdom_msg));
+				}
+			}
+		}
+	else {
+		&$remove_default_host_domain();
+		}
+	}
+elsif ($config{'default_domain_ssl'}) {
+	my $old_default_domain = &get_domain_by("defaultdomain", 1);
+
+	&$first_print(&text('check_hostdefaultdomain_enable', $system_host_name));
+	if ($old_default_domain->{'dom'} && !$old_default_domain->{'defaulthostdomain'}) {
+		&$second_print(&text('check_hostdefaultdomain_errold', $old_default_domain->{'dom'}));
+		}
+	else {
+		&$remove_default_host_domain(1);
+		my ($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+		if ($defdom_status == 2) {
+			&$second_print($text{'check_defhost_sharedsucc2'});
+			}
+		elsif ($defdom_status >= 1) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			&$second_print(&text('check_apicmderr', $defdom_msg));
+			}
+		}
+	}
 }
 
 # Returns a list of all plugins that define features
