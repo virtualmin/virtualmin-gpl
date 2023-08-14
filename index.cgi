@@ -77,7 +77,7 @@ if ($config{'localgroup'} && &can_edit_local()) {
 if (!$main::basic_virtualmin_menu) {
 	print &ui_subheading($text{'index_header2'});
 	}
-@alldoms = &list_domains();
+@alldoms = &list_domains(&list_domains_excludes());
 @doms = grep { &can_edit_domain($_) } @alldoms;
 if ($config{'display_max'} && @doms > $config{'display_max'}) {
 	# Too many domains to display, so show a search form

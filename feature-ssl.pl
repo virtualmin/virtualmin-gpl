@@ -2839,7 +2839,7 @@ my $last_renew_time = $config{'last_letsencrypt_mass_renewal'};
 my $now = time();
 
 my $done = 0;
-foreach my $d (&list_domains({'include-default-domain' => 1})) {
+foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
 
