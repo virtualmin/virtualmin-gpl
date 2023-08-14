@@ -2119,6 +2119,8 @@ check_eqmailldap=Qmail+LDAP support has been removed in Virtualmin 6.00
 check_defhost_nok=The given host name <tt>$1</tt> is not a fully qualified domain name
 check_defhost_clash=A host default domain named <tt>$1</tt> already exists
 check_defhost_desc=Host default domain
+check_defhost_succ=SSL certificate for host default domain <tt>$1</tt> was successfully setup
+check_defhost_err=SSL certificate request for host default domain <tt>$1</tt> failed
 
 allwebmin_ecannot=You are not allowed to update all Webmin users
 allwebmin_title=Updating Webmin Users

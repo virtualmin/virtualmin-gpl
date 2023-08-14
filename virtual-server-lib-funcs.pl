@@ -8415,7 +8415,7 @@ local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
 
-return undef;
+return wantarray ? ($dom) : undef;
 }
 
 # create_initial_letsencrypt_cert(&domain, [validate-first])
@@ -19664,16 +19664,19 @@ return join(" ", @warns) if (@warns);
 # Create the server
 &push_all_print();
 &set_all_null_print();
-my $err = &create_virtual_server(
+my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
-return $err if ($err);
+return $rs if ($rs && ref($rs) ne 'HASH');
+my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
+my $succ_msg = $succ ? &text('check_defhost_succ', $system_host_name) :
+                           &text('check_defhost_err', $system_host_name);
 
 $config{'defaultdomain_name'} = $dom{'dom'};
 &save_module_config();
 &run_post_actions_silently();
 &unlock_domain_name($system_host_name);
-return undef;
+return wantarray ? ($succ, $succ_msg) : $succ;
 }
 
 # Returns a list of all plugins that define features
