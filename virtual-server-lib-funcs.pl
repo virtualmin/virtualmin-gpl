@@ -19539,6 +19539,12 @@ if (defined(&get_sub_ref_name)) {
 # and return error message or undef on success
 sub setup_virtualmin_default_hostname_ssl
 {
+my $wantarr = wantarray;
+my $err = sub {
+	my ($msg, $code) = @_;
+	return $wantarr ? ($code || 0, $msg) : $code || 0;
+	};
+
 my $is_default_domain = &get_domain_by("defaultdomain", 1);
 my $system_host_name = &get_system_hostname();		
 if ($system_host_name !~ /\./) {
@@ -19548,11 +19554,11 @@ if ($system_host_name !~ /\./) {
 	}
 
 # Hostname should be FQDN
-return &text('check_defhost_nok', $system_host_name)
+return &$err(&text('check_defhost_nok', $system_host_name))
 	if ($system_host_name !~ /(\.[^.]+){2,}/);
 
 # Check if domain already exist for some reason
-return &text('check_defhost_clash', $system_host_name)
+return &$err(&text('check_defhost_clash', $system_host_name))
 	if (&get_domain_by("dom", $system_host_name) ||
 		$is_default_domain);
 
@@ -19567,13 +19573,13 @@ $user = "_default_hostname";
 if (defined(getpwnam($user))) {
 	($user, $try1, $try2) = &unixuser_name($system_host_name);
 	}
-$user || return &text('setup_eauto', $try1, $try2);
+$user || return &$err(&text('setup_eauto', $try1, $try2));
 my ($group, $gtry1, $gtry2);
 $group = "_default_hostname";
 if (defined(getgrnam($group))) {
 	($group, $gtry1, $gtry2) = &unixgroup_name($system_host_name, $user);
 	}
-$group || return &text('setup_eauto2', $try1, $try2);
+$group || return &$err(&text('setup_eauto2', $try1, $try2));
 my $defip = &get_default_ip();
 my $defip6 = &get_default_ip6();
 my $template = &get_init_template();
@@ -19641,11 +19647,11 @@ $dom{'home'} =~ s/(\/)(?=[^\/]*$)/$1./;
 
 # Check for various clashes
 $derr = &virtual_server_depends(\%dom);
-return $derr if ($derr);
+return &$err($derr) if ($derr);
 $cerr = &virtual_server_clashes(\%dom);
-return $cerr if ($cerr);
+return &$err($cerr) if ($cerr);
 my @warns = &virtual_server_warnings(\%dom);
-return join(" ", @warns) if (@warns);
+return &$err(join(" ", @warns)) if (@warns);
 
 # Templates defaults override
 &template_overrides(
@@ -19667,7 +19673,7 @@ return join(" ", @warns) if (@warns);
 my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
-return wantarray ? (0, $rs) : 0 if ($rs && ref($rs) ne 'HASH');
+return &$err($rs) if ($rs && ref($rs) ne 'HASH');
 my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
 my $succ_msg = $succ ? &text('check_defhost_succ', $system_host_name) :
                            &text('check_defhost_err', $system_host_name);
@@ -19676,7 +19682,7 @@ $config{'defaultdomain_name'} = $dom{'dom'};
 &save_module_config();
 &run_post_actions_silently();
 &unlock_domain_name($system_host_name);
-return wantarray ? ($succ, $succ_msg) : $succ;
+return &$err($succ_msg, $succ);
 }
 
 # Returns a list of all plugins that define features
