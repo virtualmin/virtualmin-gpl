@@ -19679,8 +19679,16 @@ my ($rs) = &create_virtual_server(
 &pop_all_print();
 return &$err($rs) if ($rs && ref($rs) ne 'HASH');
 my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
-my $succ_msg = $succ ? &text('check_defhost_succ', $system_host_name) :
-                           &text('check_defhost_err', $system_host_name);
+# Perhaps shared SSL certificate was installed?
+my $succ_smsg = $text{'check_defhost_sharedsucc'};
+if ($rs->{'ssl_same'}) {
+	my $ssucc = &validate_domain_ssl_certificate($system_host_name);
+	$succ = 2 if ($ssucc == 1); 
+	}
+my $succ_msg = $succ ? 
+	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ',
+          $system_host_name) :
+    &text('check_defhost_err', $system_host_name);
 
 $config{'defaultdomain_name'} = $dom{'dom'};
 &save_module_config();
@@ -19707,6 +19715,7 @@ $err = &delete_virtual_server($d, 0, 0);
 &unlock_domain_name($d->{'dom'}); #### XXXX
 return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
+}
 
 # validate_domain_ssl_certificate(domain, [port])
 # Validate domain SSL certificate if valid return 1, otherwise return 0, or -1
