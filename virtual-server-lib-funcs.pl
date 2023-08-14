@@ -19693,7 +19693,7 @@ my ($rs) = &create_virtual_server(
 	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
 return &$err($rs) if ($rs && ref($rs) ne 'HASH');
-my $succ = $rs->{'letsencrypt_last_success'} ? 1 : 0;
+my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
 # Perhaps shared SSL certificate was installed, trust it
 $succ = 2 if ($rs->{'ssl_same'});
 my $succ_msg = $succ ? 
