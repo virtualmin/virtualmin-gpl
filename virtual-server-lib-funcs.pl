@@ -10081,7 +10081,7 @@ return $tmpl;
 }
 
 # template_overrides(id, [overrides])
-# Get template overrides for the give template id
+# Get template overrides for the given template id
 sub template_overrides
 {
 my ($tmplid, $overrides) = @_;
