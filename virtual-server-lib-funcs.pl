@@ -19766,7 +19766,7 @@ if ($new_default_domain->{'dom'}) {
 	if ($config{'default_domain_ssl'}) {
 		my $known_default_domain = $config{'defaultdomain_name'};
 		my $hostname_changed = $known_default_domain ne $system_host_name;
-		my $failed_le = !$new_default_domain->{'letsencrypt_last_success'} && !$new_default_domain->{'ssl_same'};
+		my $failed_le = !$new_default_domain->{'letsencrypt_last'} && !$new_default_domain->{'ssl_same'};
 		my $text_msg = $hostname_changed ?
 			'check_hostdefaultdomain_change' : 'check_hostdefaultdomain_enable';
 		if ($hostname_changed || $failed_le) {
