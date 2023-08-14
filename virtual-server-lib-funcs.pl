@@ -7853,7 +7853,7 @@ return 0;
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content, $tmplopts) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7876,7 +7876,7 @@ if ($dom->{'ip'} eq &get_default_ip() &&
 	}
 
 # Work out the auto-alias domain name
-local $tmpl = &get_template($dom->{'template'}, $tmplopts);
+local $tmpl = &get_template($dom->{'template'});
 local $aliasname;
 if ($tmpl->{'domalias'} ne 'none' && $tmpl->{'domalias'} && !$dom->{'alias'}) {
 	local $aliasprefix = $dom->{'dom'};
@@ -9992,7 +9992,7 @@ undef(@list_templates_cache);
 # Returns a template, with any default settings filled in from real default
 sub get_template
 {
-my ($tmplid, $tmplopts) = @_;
+my ($tmplid) = @_;
 local @tmpls = &list_templates();
 local ($tmpl) = grep { $_->{'id'} == $tmplid } @tmpls;
 return undef if (!$tmpl);	# not found
@@ -10061,8 +10061,19 @@ if (!$tmpl->{'default'}) {
 	$tmpl->{'web_ruby_suexec'} = -1 if ($tmpl->{'web_ruby_suexec'} eq '');
 	}
 # We may want to change template defaults when creating
-# a new domain manually, e.g. for host default domain 
+# a new domain manually, e.g. for host default domain
+my $tmplopts = &template_overrides();
 $tmpl = {%$tmpl, %$tmplopts} if ($tmplopts);
+return $tmpl;
+}
+
+# template_overrides([set])
+# Get template overrides previously set in this call
+sub template_overrides
+{
+my ($overrides) = @_;
+state $tmpl;
+$tmpl = $overrides if ($overrides);
 return $tmpl;
 }
 
@@ -19636,12 +19647,8 @@ return $cerr if ($cerr);
 my @warns = &virtual_server_warnings(\%dom);
 return join(" ", @warns) if (@warns);
 
-# Create the server
-&push_all_print();
-&set_all_null_print();
-my $err = &create_virtual_server(
-	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'},
-	# Templates defaults override
+# Templates defaults override
+&template_overrides(
 	{'defushell' => '/dev/null',
 	 'dns_records' => '@',
 	 'dns_cloud_import' => '1',
@@ -19655,6 +19662,12 @@ my $err = &create_virtual_server(
 	 'php_log' => 0,
 	 'php_suexec' => '4',
 	});
+
+# Create the server
+&push_all_print();
+&set_all_null_print();
+my $err = &create_virtual_server(
+	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
 &pop_all_print();
 return $err if ($err);
 
