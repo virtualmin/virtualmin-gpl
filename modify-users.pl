@@ -87,10 +87,6 @@ else {
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
 	}
 
-# Check unicode support
-&execute_command("locale charmap", undef, \$can_unicode);
-my $can_unicode = $can_unicode =~ /utf/i ? 1 : 0;
-
 # Run the subcommand for given domains and users
 foreach my $d (@doms) {
 	my @users = &list_domain_users($d, 0, 0, 0, 0);
@@ -112,22 +108,10 @@ foreach my $d (@doms) {
         $out_ =~ s/(the\suser(?!\w))/$1 "$user"/ig;
         $out_ =~ s/(the\sdomain(?!\w))/$1 "$d->{'dom'}"/ig;
         if ($ex) {
-            if ($can_unicode) {
-                # Out with unicode cross symbol
-                print "  \xE2\x9B\x8C $out_\n";
-                }
-            else {
                 print "  Failed: $out_\n";
-                }
             }
         else {
-            if ($can_unicode) {
-                # Out with unicode check symbol
-                print "  \xE2\x9C\x93 $out_\n";
-                }
-            else {
-                print "  Passed: $out_\n";
-                }
+                print "  Done: $out_\n";
             }
         }
     #
