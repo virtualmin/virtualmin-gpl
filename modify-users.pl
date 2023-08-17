@@ -101,7 +101,8 @@ foreach my $d (@doms) {
     foreach my $user (map { $_->{'user'} } @users) {
         $dom_done++;
         # Run subcommand
-        my $ex = &execute_command("virtualmin modify-user --domain $d->{'dom'} --user $user $argvs", undef, \$out);
+        my $ex = &execute_command("virtualmin modify-user --domain @{[quotemeta($d->{'dom'})]} --user @{[$user]} $argvs", undef, \$out);
+
         my ($out_before_new_empty_line) = $out =~ /(.*?)(?:\n\s*\n|\z)/;
         my $out_ = &trim($out_before_new_empty_line || $out);
         # Prep helpers
