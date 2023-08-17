@@ -22,7 +22,7 @@ $info->{'startstop'} = [ &get_startstop_links() ];
 # Counts for domains
 local $dusers = &count_domain_users();
 local $daliases = &count_domain_aliases(1);
-local @doms = &list_domains(&list_domains_excludes());
+local @doms = &list_visible_domains();
 local @doms_all = &list_domains();
 local %fcount = map { $_, 0 } @features;
 $fcount{'doms'} = 0;

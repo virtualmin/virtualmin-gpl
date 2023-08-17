@@ -41,8 +41,8 @@ push(@rv, { 'type' => 'text',
 push(@rv, { 'type' => 'hr' });
 
 # Get domains and find the default
-my @alldoms = &list_domains(&list_domains_excludes());
-my @doms = &list_visible_domains(&list_domains_excludes());
+my @alldoms = &list_visible_domains();
+my @doms = &list_visible_domains({ 'exclude-alias' => 1 });
 my ($d, $did);
 if (defined($in->{'dom'})) {
 	# Specific domain given

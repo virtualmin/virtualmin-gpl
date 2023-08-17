@@ -78,11 +78,10 @@ foreach my $m (@migration_types) {
 	}
 }
 
-# list_domains([opts])
+# list_domains()
 # Returns a list of structures containing information about hosted domains
 sub list_domains
 {
-my ($opts) = @_;
 local (@rv, $d);
 local @files;
 local @st = stat($domains_dir);
@@ -104,37 +103,7 @@ foreach $d (@files) {
 		push(@rv, &get_domain($d));
 		}
 	}
-# Apply domain filters
-&list_domains_filters(\@rv, $opts);
 return @rv;
-}
-
-# list_domains_filters(&domains, [opts])
-# Filters initial domains list to exclude some domains
-sub list_domains_filters
-{
-my ($rv, $opts) = @_;
-
-# Exclude domains based on given field
-if ($opts->{'exclude'}) {
-	@rv = grep { ! $_->{$opts->{'exclude'}} } @rv;
-	@$rv = @rv;
-	}
-}
-
-# list_domains_excludes([opts])
-# Returns the list of fields that can be used to exclude domains
-sub list_domains_excludes
-{
-my ($opts) = @_;
-$opts ||= {};
-
-# Always exclude default host domain
-my $always_exclude = {
-	'exclude' => 'defaulthostdomain',
-};
-$opts = {%$opts, %$always_exclude};
-return $opts;
 }
 
 # list_visible_domains([opts])
@@ -144,19 +113,22 @@ return $opts;
 sub list_visible_domains
 {
 my ($opts) = @_;
-my @rv = grep { &can_edit_domain($_) } &list_domains($opts);
-if ($config{'hide_alias'}) {
+my @rv = grep { &can_edit_domain($_) } &list_domains();
+
+# Always exclude default host domain
+my $exclude_defaulthostdomain =
+	{ 'exclude' => 'defaulthostdomain' };
+$opts = {%$opts, %$exclude_defaulthostdomain};
+
+# Exclude domains based on given field
+@rv = grep { ! $_->{$opts->{'exclude'}} } @rv
+	if ($opts->{'exclude'});
+
+# Exclude alias domains
+if ($config{'hide_alias'} && $opts->{'exclude-alias'}) {
 	@rv = grep { !$_->{'alias'} } @rv;
 	}
 return @rv;
-}
-
-# list_available_domains([opts])
-# Returns a list of domain structures the current user has access to
-sub list_available_domains
-{
-my ($opts) = @_;
-return grep { &can_edit_domain($_) } &list_domains($opts);
 }
 
 # sort_indent_domains(&domains)
@@ -17531,7 +17503,7 @@ sub count_domain_users
 {
 local %rv;
 local (%homemap, %doneuser, %gidmap);
-foreach my $d (&list_domains(&list_domains_excludes())) {
+foreach my $d (&list_visible_domains()) {
 	$homemap{$d->{'home'}} = $d->{'id'};
 	$gidmap{$d->{'gid'}} = $d->{'id'} if (!$d->{'parent'});
 	}

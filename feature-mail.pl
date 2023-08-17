@@ -5375,7 +5375,7 @@ if ($ignore) {
 
 # Map each virtuser to a domain, except for those owned by plugins or for
 # which the destination is a user
-local %dmap = map { $_->{'dom'}, $_ } &list_domains(&list_domains_excludes());
+local %dmap = map { $_->{'dom'}, $_ } &list_visible_domains();
 foreach my $v (&list_virtusers()) {
 	if (!$ignore{$v->{'from'}} && $v->{'from'} =~ /\@(\S+)$/) {
 		local $d = $dmap{$1};

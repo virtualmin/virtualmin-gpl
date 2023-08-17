@@ -87,7 +87,7 @@ if ($in{'new'} || $in{'sched'}) {
 
 # Fields to select domains
 @bak = split(/\s+/, $sched->{'doms'});
-@doms = grep { &can_backup_domain($_) } &list_domains(&list_domains_excludes());
+@doms = grep { &can_backup_domain($_) } &list_visible_domains();
 @dlist = ( "doms_opts", "doms_vals", "doms_add", "doms_remove" );
 $dis1 = &js_disable_inputs(\@dlist, [ ], "onClick");
 $dis2 = &js_disable_inputs([ ], \@dlist, "onClick");
