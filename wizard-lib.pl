@@ -871,8 +871,10 @@ my %dom;
 	'nocreationmail', 1,
 	'nowebmailredirect', 1,
 	'nodnsspf', 1,
+	'nodnsdmarc', 1,
 	'hashpass', 0,
 	'defaultdomain', 1,
+	'dns_initial_records', '@',
         );
 
 # Set initial features
