@@ -118,7 +118,8 @@ my @rv = grep { &can_edit_domain($_) } &list_domains();
 # Always exclude default host domain
 my $exclude_defaulthostdomain =
 	{ 'exclude' => 'defaulthostdomain' };
-$opts = {%$opts, %$exclude_defaulthostdomain};
+$opts = {%$opts, %$exclude_defaulthostdomain}
+	if ($config{'default_domain_ssl'} != 2);
 
 # Exclude domains based on given field
 @rv = grep { ! $_->{$opts->{'exclude'}} } @rv
@@ -19752,7 +19753,10 @@ if ($new_default_domain->{'dom'}) {
 				&$second_print($text{'setup_done'});
 				}
 			else {
-				&$remove_default_host_domain(1);
+				# Remove on failure unless host
+				# default domain set to be visible
+				&$remove_default_host_domain(1)
+					if ($config{'default_domain_ssl'} != 2);
 				&$second_print(&text('check_apicmderr', $defdom_msg));
 				}
 			}
@@ -19778,7 +19782,10 @@ elsif ($config{'default_domain_ssl'}) {
 			&$second_print($text{'setup_done'});
 			}
 		else {
-			&$remove_default_host_domain(1);
+			# Remove on failure unless host
+			# default domain set to be visible
+			&$remove_default_host_domain(1)
+				if ($config{'default_domain_ssl'} != 2);
 			&$second_print(&text('check_apicmderr', $defdom_msg));
 			}
 		}
