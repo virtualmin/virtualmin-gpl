@@ -74,7 +74,7 @@ else {
 	}
 
 # Work out the shell, which can come from the template
-local $shell = $tmpl->{'ushell'};
+local $shell = $_[0]->{'defaultshell'} || $tmpl->{'ushell'};
 if ($shell eq 'none' || !$shell) {
 	$shell = &default_available_shell('owner');
 	}
