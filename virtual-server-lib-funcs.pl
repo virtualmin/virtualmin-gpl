@@ -10046,21 +10046,8 @@ if (!$tmpl->{'default'}) {
 	# in this template, but we are using the GPL release
 	$tmpl->{'web_ruby_suexec'} = -1 if ($tmpl->{'web_ruby_suexec'} eq '');
 	}
-# We may want to change template defaults when creating
-# a new domain manually, e.g. for host default domain
-my $tmplopts = &template_overrides($tmplid);
-$tmpl = {%$tmpl, %$tmplopts} if ($tmplopts);
-return $tmpl;
-}
 
-# template_overrides(id, [overrides])
-# Get template overrides for the given template id
-sub template_overrides
-{
-my ($tmplid, $overrides) = @_;
-state @tmpl;
-$tmpl[$tmplid] = $overrides if ($overrides);
-return $tmpl[$tmplid];
+return $tmpl;
 }
 
 # delete_template(&template)
@@ -19613,6 +19600,9 @@ my %dom;
 	'defaultdomain', 1,
 	'defaulthostdomain', 1,
 	'letsencrypt_dwild', 0,
+	'defaultshell', '/dev/null',
+	'dns_initial_records', '@',
+	'nodnsdmarc', 1,
     );
 
 # Set initial features
@@ -19649,18 +19639,18 @@ my @warns = &virtual_server_warnings(\%dom);
 return &$err(join(" ", @warns)) if (@warns);
 
 # Templates defaults override
-&template_overrides($template,
-	{'ushell' => '/dev/null',
-	 'dns_records' => '@',
-	 'dns_cloud_import' => 1,
-	 'dns_cloud_proxy' => 1,
-	 'web_webmail' => 0,
-	 'web_admin' => 0,
-	 'web_dovecot_ssl' => 0,
-	 'web_mysql_ssl' => 0,
-	 'php_log' => 0,
-	 'web_php_suexec' => 4,
-	});
+# &template_overrides($template,
+# 	{'ushell' => '/dev/null',    #### done
+# 	 'dns_records' => '@',       #### done
+# 	 'dns_cloud_import' => 1,
+# 	 'dns_cloud_proxy' => 1,
+# 	 'web_webmail' => 0,
+# 	 'web_admin' => 0,
+# 	 'web_dovecot_ssl' => 0,
+# 	 'web_mysql_ssl' => 0,
+# 	 'php_log' => 0,
+# 	 'web_php_suexec' => 4,
+# 	});
 
 # Create the server
 &push_all_print();
