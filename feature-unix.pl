@@ -6,48 +6,49 @@ $feature_depends{'unix'} = [ 'dir' ];
 # Creates the Unix user and group for a domain
 sub setup_unix
 {
-local $tmpl = &get_template($_[0]->{'template'});
-&obtain_lock_unix($_[0]);
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+&obtain_lock_unix($d);
 &require_useradmin();
-local (%uinfo, %ginfo);
+my (%uinfo, %ginfo);
 
 # Do some sanity checks
-if ($_[0]->{'user'} eq '') {
+if ($d->{'user'} eq '') {
 	&error("Domain is missing Unix username!");
 	}
-if ($_[0]->{'group'} eq '' && &mail_system_needs_group()) {
+if ($d->{'group'} eq '' && &mail_system_needs_group()) {
 	&error("Domain is missing Unix group name!");
 	}
 
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.
-local @allusers = &list_all_users();
-local ($uclash) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
-if ($uclash && &remote_unix() && $_[0]->{'wasmissing'}) {
+my @allusers = &list_all_users();
+my ($uclash) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+if ($uclash && &remote_unix() && $d->{'wasmissing'}) {
 	# Domain is being re-created as part of a restore and users are stored
 	# remotely, and the user already exists. Assume shared LDAP storage.
 	goto QUOTAS;
 	}
-local ($clash) = grep { $_->{'uid'} == $_[0]->{'uid'} } @allusers;
-if ($clash || !$_[0]->{'uid'}) {
-	local (%taken, %utaken);
+my ($clash) = grep { $_->{'uid'} == $d->{'uid'} } @allusers;
+if ($clash || !$d->{'uid'}) {
+	my (%taken, %utaken);
 	&build_taken(\%taken, \%utaken, \@allusers);
-	$_[0]->{'uid'} = &allocate_uid(\%taken);
+	$d->{'uid'} = &allocate_uid(\%taken);
 	}
-local @allgroups = &list_all_groups();
-local ($gclash) = grep { $_->{'gid'} == $_[0]->{'gid'} } @allgroups;
-if ($gclash || !$_[0]->{'gid'}) {
-	local (%gtaken, %ggtaken);
+my @allgroups = &list_all_groups();
+my ($gclash) = grep { $_->{'gid'} == $d->{'gid'} } @allgroups;
+if ($gclash || !$d->{'gid'}) {
+	my (%gtaken, %ggtaken);
 	&build_group_taken(\%gtaken, \%ggtaken, \@allgroups);
-	$_[0]->{'gid'} = &allocate_gid(\%gtaken);
+	$d->{'gid'} = &allocate_gid(\%gtaken);
 	}
-$_[0]->{'ugid'} = $_[0]->{'gid'} if ($_[0]->{'ugid'} eq '');
+$d->{'ugid'} = $d->{'gid'} if ($d->{'ugid'} eq '');
 
-if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
+if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	# Create the group
-	&$first_print(&text('setup_group', $_[0]->{'group'}));
-	%ginfo = ( 'group', $_[0]->{'group'},
-		   'gid', $_[0]->{'gid'},
+	&$first_print(&text('setup_group', $d->{'group'}));
+	%ginfo = ( 'group', $d->{'group'},
+		   'gid', $d->{'gid'},
 		 );
 	eval {
 		local $main::error_must_die = 1;
@@ -58,66 +59,66 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 		&foreign_call($usermodule, "made_changes");
 		};
 	my $err = $@;
-	if ($err || !&wait_for_group_to_exist($_[0]->{'group'})) {
+	if ($err || !&wait_for_group_to_exist($d->{'group'})) {
 		&delete_partial_group(\%ginfo);
 		&$second_print($err ? &text('setup_ecrgroup2', $err)
 				    : $text{'setup_ecrgroup'});
-		&release_lock_unix($_[0]);
+		&release_lock_unix($d);
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
 	}
 else {
 	# Server has no group!
-	delete($_[0]->{'gid'});
-	delete($_[0]->{'group'});
+	delete($d->{'gid'});
+	delete($d->{'group'});
 	}
 
 # Work out the shell, which can come from the template
-local $shell = $_[0]->{'defaultshell'} || $tmpl->{'ushell'};
+my $shell = $d->{'defaultshell'} || $tmpl->{'ushell'};
 if ($shell eq 'none' || !$shell) {
 	$shell = &default_available_shell('owner');
 	}
 
 # Then the user
-&$first_print(&text('setup_user', $_[0]->{'user'}));
-%uinfo = ( 'user', $_[0]->{'user'},
-	   'uid', $_[0]->{'uid'},
-	   'gid', $_[0]->{'ugid'},
-	   'pass', $_[0]->{'enc_pass'} ||
-		   &useradmin::encrypt_password($_[0]->{'pass'}),
-	   'real', $_[0]->{'owner'},
-	   'home', $_[0]->{'home'},
+&$first_print(&text('setup_user', $d->{'user'}));
+%uinfo = ( 'user', $d->{'user'},
+	   'uid', $d->{'uid'},
+	   'gid', $d->{'ugid'},
+	   'pass', $d->{'enc_pass'} ||
+		   &useradmin::encrypt_password($d->{'pass'}),
+	   'real', $d->{'owner'},
+	   'home', $d->{'home'},
 	   'shell', $shell,
-	   'mailbox', $_[0]->{'user'},
-	   'dom', $_[0]->{'dom'},
-	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
-	   'plainpass', $_[0]->{'pass'},
+	   'mailbox', $d->{'user'},
+	   'dom', $d->{'dom'},
+	   'dom_prefix', substr($d->{'dom'}, 0, 1),
+	   'plainpass', $d->{'pass'},
 	   'domainowner', 1,
 	   'unix', 1,
-	   'email', $_[0]->{'user'}.'\@'.$_[0]->{'dom'},
+	   'email', $d->{'user'}.'\@'.$d->{'dom'},
 	 );
 &set_pass_change(\%uinfo);
 eval {
 	local $main::error_must_die = 1;
 	&foreign_call($usermodule, "set_user_envs", \%uinfo,
-		      'CREATE_USER', $_[0]->{'pass'}, [ ]);
+		      'CREATE_USER', $d->{'pass'}, [ ]);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "create_user", \%uinfo);
 	&foreign_call($usermodule, "made_changes");
 	if ($config{'other_users'} || $config{'other_doms'}) {
-		&create_domain_home_directory($_[0], \%uinfo);
+		&create_domain_home_directory($d, \%uinfo);
 		&foreign_call($usermodule, "other_modules",
 			      "useradmin_create_user", \%uinfo);
 		}
 	};
 my $err = $@;
-if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
+if ($err || !&wait_for_user_to_exist($d->{'user'})) {
 	&delete_partial_group(\%ginfo) if (%ginfo);
 	&delete_partial_user(\%uinfo);
 	&$second_print($err ? &text('setup_ecruser2', $err)
 			    : $text{'setup_ecruser'});
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	return 0;
 	}
 &$second_print($text{'setup_done'});
@@ -125,13 +126,13 @@ if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
 # Set the user's quota
 QUOTAS:
 if (&has_home_quotas()) {
-	&set_server_quotas($_[0]);
+	&set_server_quotas($d);
 	}
 
 # Create virtuser pointing to new user, and possibly generics entry
-if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'} && $config{'mail_system'} != 5) {
 	&$first_print($text{'setup_usermail2'});
-	&create_email_for_unix($_[0]);
+	&create_email_for_unix($d);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -140,8 +141,8 @@ if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
 &$first_print($text{'setup_usergroups'});
 eval {
 	local $main::error_must_die = 1;
-	&build_denied_ssh_group($_[0]);
-	&update_domain_owners_group($_[0]);
+	&build_denied_ssh_group($d);
+	&update_domain_owners_group($d);
 	};
 if ($@) {
 	&$second_print(&text('setup_eusergroups', "$@"));
@@ -153,12 +154,12 @@ else {
 # Setup resource limits from template
 if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none' &&
     &supports_resource_limits()) {
-	local $rv = { map { split(/=/, $_) }
+	my $rv = { map { split(/=/, $_) }
 		split(/\s+/, $tmpl->{'resources'}) };
-	&save_domain_resource_limits($_[0], $rv, 1);
+	&save_domain_resource_limits($d, $rv, 1);
 	}
 
-&release_lock_unix($_[0]);
+&release_lock_unix($d);
 return 1;
 }
 
