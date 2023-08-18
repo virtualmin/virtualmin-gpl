@@ -19640,20 +19640,6 @@ return &$err($cerr) if ($cerr);
 my @warns = &virtual_server_warnings(\%dom);
 return &$err(join(" ", @warns)) if (@warns);
 
-# Templates defaults override
-# &template_overrides($template,
-# 	{'ushell' => '/dev/null',    #### done
-# 	 'dns_records' => '@',       #### done
-# 	 'dns_cloud_import' => 1,
-# 	 'dns_cloud_proxy' => 1,
-# 	 'web_webmail' => 0,
-# 	 'web_admin' => 0,
-# 	 'web_dovecot_ssl' => 0,
-# 	 'web_mysql_ssl' => 0,
-# 	 'php_log' => 0,             #### done
-# 	 'web_php_suexec' => 4,      #### done
-# 	});
-
 # Create the server
 &push_all_print();
 &set_all_null_print();
