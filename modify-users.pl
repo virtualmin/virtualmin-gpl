@@ -44,11 +44,19 @@ if (!$module_name) {
 my $argvs = "@ARGV";
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	if ($a eq "--domain") {
-		push(@dnames, shift(@ARGV));
+	if ($a eq "--all-domains") {
+		$all_doms = 1;
 		}
-	elsif ($a eq "--user") {
-		$usernames{shift(@ARGV)} = 1;
+    elsif ($a eq "--domain") {
+		push(@dnames, shift(@ARGV));
+        $domain = 1;
+		}
+	elsif ($a eq "--all-users") {
+		$all_users = 1;
+		}
+    elsif ($a eq "--user") {
+        $usernames{shift(@ARGV)} = 1;
+        $user = 1;
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -56,23 +64,19 @@ while(@ARGV > 0) {
 	}
 
 # Prepare argvs string for subprogram
-$argvs =~ s/--domain\s+(?:(?!--)(?<regex_domain>\S+))//;
-my $regex_domain = $+{regex_domain};
+$argvs =~ s/--domain\s+(?:(?!--)(\S+))//;
 $argvs =~ s/--domain(?!\w)//;
-$argvs =~ s/--user\s+(?:(?!--)(?<regex_user>\S+))//;
-my $regex_user = $+{regex_user};
+$argvs =~ s/--user\s+(?:(?!--)(\S+))//;
 $argvs =~ s/--user(?!\w)//;
-$argvs =~ s/(?<regex_all_doms>--all-domains)//;
-my $regex_all_doms = $+{regex_all_doms};
-$argvs =~ s/(?<regex_all_users>--all-users)//;
-my $regex_all_users = $+{regex_all_users};
+$argvs =~ s/--all-domains//;
+$argvs =~ s/--all-users//;
 $argvs = &trim($argvs);
 
 # Sanity check for args in this program
-if (!$regex_all_doms && !$regex_domain) {
+if (!$all_doms && !$domain) {
     &usage("No --domain or --all-domains flag given");
     }
-elsif (!$regex_all_users && !$regex_user) {
+elsif (!$all_users && !$user) {
     &usage("No --user or --all-users flag given");
     }
 elsif ($argvs !~ /\S/) {
@@ -80,7 +84,7 @@ elsif ($argvs !~ /\S/) {
     }
 
 # Parse args and get domains
-if ($regex_all_doms) {
+if ($all_doms) {
 	@doms = &list_domains();
 	}
 else {
