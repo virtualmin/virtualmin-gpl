@@ -6,48 +6,49 @@ $feature_depends{'unix'} = [ 'dir' ];
 # Creates the Unix user and group for a domain
 sub setup_unix
 {
-local $tmpl = &get_template($_[0]->{'template'});
-&obtain_lock_unix($_[0]);
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+&obtain_lock_unix($d);
 &require_useradmin();
-local (%uinfo, %ginfo);
+my (%uinfo, %ginfo);
 
 # Do some sanity checks
-if ($_[0]->{'user'} eq '') {
+if ($d->{'user'} eq '') {
 	&error("Domain is missing Unix username!");
 	}
-if ($_[0]->{'group'} eq '' && &mail_system_needs_group()) {
+if ($d->{'group'} eq '' && &mail_system_needs_group()) {
 	&error("Domain is missing Unix group name!");
 	}
 
 # Check if the UID or GID has been allocated to someone else, and if so
 # re-allocate them. Also allocate if they haven't been done yet.
-local @allusers = &list_all_users();
-local ($uclash) = grep { $_->{'user'} eq $_[0]->{'user'} } @allusers;
-if ($uclash && &remote_unix() && $_[0]->{'wasmissing'}) {
+my @allusers = &list_all_users();
+my ($uclash) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+if ($uclash && &remote_unix() && $d->{'wasmissing'}) {
 	# Domain is being re-created as part of a restore and users are stored
 	# remotely, and the user already exists. Assume shared LDAP storage.
 	goto QUOTAS;
 	}
-local ($clash) = grep { $_->{'uid'} == $_[0]->{'uid'} } @allusers;
-if ($clash || !$_[0]->{'uid'}) {
-	local (%taken, %utaken);
+my ($clash) = grep { $_->{'uid'} == $d->{'uid'} } @allusers;
+if ($clash || !$d->{'uid'}) {
+	my (%taken, %utaken);
 	&build_taken(\%taken, \%utaken, \@allusers);
-	$_[0]->{'uid'} = &allocate_uid(\%taken);
+	$d->{'uid'} = &allocate_uid(\%taken);
 	}
-local @allgroups = &list_all_groups();
-local ($gclash) = grep { $_->{'gid'} == $_[0]->{'gid'} } @allgroups;
-if ($gclash || !$_[0]->{'gid'}) {
-	local (%gtaken, %ggtaken);
+my @allgroups = &list_all_groups();
+my ($gclash) = grep { $_->{'gid'} == $d->{'gid'} } @allgroups;
+if ($gclash || !$d->{'gid'}) {
+	my (%gtaken, %ggtaken);
 	&build_group_taken(\%gtaken, \%ggtaken, \@allgroups);
-	$_[0]->{'gid'} = &allocate_gid(\%gtaken);
+	$d->{'gid'} = &allocate_gid(\%gtaken);
 	}
-$_[0]->{'ugid'} = $_[0]->{'gid'} if ($_[0]->{'ugid'} eq '');
+$d->{'ugid'} = $d->{'gid'} if ($d->{'ugid'} eq '');
 
-if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
+if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
 	# Create the group
-	&$first_print(&text('setup_group', $_[0]->{'group'}));
-	%ginfo = ( 'group', $_[0]->{'group'},
-		   'gid', $_[0]->{'gid'},
+	&$first_print(&text('setup_group', $d->{'group'}));
+	%ginfo = ( 'group', $d->{'group'},
+		   'gid', $d->{'gid'},
 		 );
 	eval {
 		local $main::error_must_die = 1;
@@ -58,66 +59,66 @@ if (&mail_system_needs_group() || $_[0]->{'gid'} == $_[0]->{'ugid'}) {
 		&foreign_call($usermodule, "made_changes");
 		};
 	my $err = $@;
-	if ($err || !&wait_for_group_to_exist($_[0]->{'group'})) {
+	if ($err || !&wait_for_group_to_exist($d->{'group'})) {
 		&delete_partial_group(\%ginfo);
 		&$second_print($err ? &text('setup_ecrgroup2', $err)
 				    : $text{'setup_ecrgroup'});
-		&release_lock_unix($_[0]);
+		&release_lock_unix($d);
 		return 0;
 		}
 	&$second_print($text{'setup_done'});
 	}
 else {
 	# Server has no group!
-	delete($_[0]->{'gid'});
-	delete($_[0]->{'group'});
+	delete($d->{'gid'});
+	delete($d->{'group'});
 	}
 
 # Work out the shell, which can come from the template
-local $shell = $tmpl->{'ushell'};
+my $shell = $d->{'defaultshell'} || $tmpl->{'ushell'};
 if ($shell eq 'none' || !$shell) {
 	$shell = &default_available_shell('owner');
 	}
 
 # Then the user
-&$first_print(&text('setup_user', $_[0]->{'user'}));
-%uinfo = ( 'user', $_[0]->{'user'},
-	   'uid', $_[0]->{'uid'},
-	   'gid', $_[0]->{'ugid'},
-	   'pass', $_[0]->{'enc_pass'} ||
-		   &useradmin::encrypt_password($_[0]->{'pass'}),
-	   'real', $_[0]->{'owner'},
-	   'home', $_[0]->{'home'},
+&$first_print(&text('setup_user', $d->{'user'}));
+%uinfo = ( 'user', $d->{'user'},
+	   'uid', $d->{'uid'},
+	   'gid', $d->{'ugid'},
+	   'pass', $d->{'enc_pass'} ||
+		   &useradmin::encrypt_password($d->{'pass'}),
+	   'real', $d->{'owner'},
+	   'home', $d->{'home'},
 	   'shell', $shell,
-	   'mailbox', $_[0]->{'user'},
-	   'dom', $_[0]->{'dom'},
-	   'dom_prefix', substr($_[0]->{'dom'}, 0, 1),
-	   'plainpass', $_[0]->{'pass'},
+	   'mailbox', $d->{'user'},
+	   'dom', $d->{'dom'},
+	   'dom_prefix', substr($d->{'dom'}, 0, 1),
+	   'plainpass', $d->{'pass'},
 	   'domainowner', 1,
 	   'unix', 1,
-	   'email', $_[0]->{'user'}.'\@'.$_[0]->{'dom'},
+	   'email', $d->{'user'}.'\@'.$d->{'dom'},
 	 );
 &set_pass_change(\%uinfo);
 eval {
 	local $main::error_must_die = 1;
 	&foreign_call($usermodule, "set_user_envs", \%uinfo,
-		      'CREATE_USER', $_[0]->{'pass'}, [ ]);
+		      'CREATE_USER', $d->{'pass'}, [ ]);
 	&foreign_call($usermodule, "making_changes");
 	&foreign_call($usermodule, "create_user", \%uinfo);
 	&foreign_call($usermodule, "made_changes");
 	if ($config{'other_users'} || $config{'other_doms'}) {
-		&create_domain_home_directory($_[0], \%uinfo);
+		&create_domain_home_directory($d, \%uinfo);
 		&foreign_call($usermodule, "other_modules",
 			      "useradmin_create_user", \%uinfo);
 		}
 	};
 my $err = $@;
-if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
+if ($err || !&wait_for_user_to_exist($d->{'user'})) {
 	&delete_partial_group(\%ginfo) if (%ginfo);
 	&delete_partial_user(\%uinfo);
 	&$second_print($err ? &text('setup_ecruser2', $err)
 			    : $text{'setup_ecruser'});
-	&release_lock_unix($_[0]);
+	&release_lock_unix($d);
 	return 0;
 	}
 &$second_print($text{'setup_done'});
@@ -125,13 +126,13 @@ if ($err || !&wait_for_user_to_exist($_[0]->{'user'})) {
 # Set the user's quota
 QUOTAS:
 if (&has_home_quotas()) {
-	&set_server_quotas($_[0]);
+	&set_server_quotas($d);
 	}
 
 # Create virtuser pointing to new user, and possibly generics entry
-if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
+if ($d->{'mail'} && $config{'mail_system'} != 5) {
 	&$first_print($text{'setup_usermail2'});
-	&create_email_for_unix($_[0]);
+	&create_email_for_unix($d);
 	&$second_print($text{'setup_done'});
 	}
 
@@ -140,8 +141,8 @@ if ($_[0]->{'mail'} && $config{'mail_system'} != 5) {
 &$first_print($text{'setup_usergroups'});
 eval {
 	local $main::error_must_die = 1;
-	&build_denied_ssh_group($_[0]);
-	&update_domain_owners_group($_[0]);
+	&build_denied_ssh_group($d);
+	&update_domain_owners_group($d);
 	};
 if ($@) {
 	&$second_print(&text('setup_eusergroups', "$@"));
@@ -153,12 +154,12 @@ else {
 # Setup resource limits from template
 if (defined(&supports_resource_limits) && $tmpl->{'resources'} ne 'none' &&
     &supports_resource_limits()) {
-	local $rv = { map { split(/=/, $_) }
+	my $rv = { map { split(/=/, $_) }
 		split(/\s+/, $tmpl->{'resources'}) };
-	&save_domain_resource_limits($_[0], $rv, 1);
+	&save_domain_resource_limits($d, $rv, 1);
 	}
 
-&release_lock_unix($_[0]);
+&release_lock_unix($d);
 return 1;
 }
 
@@ -166,7 +167,7 @@ return 1;
 # Change the password and real name for a domain unix user
 sub modify_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if (!$d->{'pass_set'} &&
     $d->{'user'} eq $oldd->{'user'} &&
     $d->{'home'} eq $oldd->{'home'} &&
@@ -183,9 +184,9 @@ if (!$d->{'parent'}) {
 	# Check for a user change
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &list_domain_users($oldd);
-	local ($uinfo) = grep { $_->{'user'} eq $oldd->{'user'} } @allusers;
-	local $rv;
+	my @allusers = &list_domain_users($oldd);
+	my ($uinfo) = grep { $_->{'user'} eq $oldd->{'user'} } @allusers;
+	my $rv;
 	if (defined(&supports_resource_limits) &&
 	    &supports_resource_limits() &&
 	    ($d->{'user'} ne $oldd->{'user'} ||
@@ -195,12 +196,12 @@ if (!$d->{'parent'}) {
 		&save_domain_resource_limits($oldd, { }, 1);
 		}
 	if ($uinfo) {
-		local %old = %$uinfo;
+		my %old = %$uinfo;
 		&$first_print($text{'save_user'});
 		$uinfo->{'real'} = $d->{'owner'};
 		if ($d->{'pass_set'}) {
 			# Update the Unix user's password
-			local $enc;
+			my $enc;
 			if ($d->{'pass'}) {
 				$enc = &foreign_call($usermodule,
 					"encrypt_password", $d->{'pass'});
@@ -278,10 +279,10 @@ if (!$d->{'parent'}) {
 		}
 
 	# Check for a group change
-	local ($ginfo) = grep { $_->{'group'} eq $oldd->{'group'} }
+	my ($ginfo) = grep { $_->{'group'} eq $oldd->{'group'} }
 			      &list_all_groups();
 	if ($ginfo && $d->{'group'} ne $oldd->{'group'}) {
-		local %old = %$ginfo;
+		my %old = %$ginfo;
 		&$first_print($text{'save_group'});
 		$ginfo->{'group'} = $d->{'group'};
 		&foreign_call($usermodule, "set_group_envs", $ginfo,
@@ -314,15 +315,15 @@ if ($d->{'mail'} && !$oldd->{'mail'} && $config{'mail_system'} != 5) {
 # Delete the unix user and group for a domain
 sub delete_unix
 {
-local ($d, $preserve) = @_;
+my ($d, $preserve) = @_;
 
 if (!$d->{'parent'}) {
 	# Get the user object
 	&obtain_lock_unix($d);
 	&obtain_lock_cron($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 
 	# Zero his quotas
 	if ($uinfo) {
@@ -333,16 +334,16 @@ if (!$d->{'parent'}) {
 	&delete_unix_cron_jobs($d->{'user'});
 
 	# Delete virtuser and generic
-	local @virts = &list_virtusers();
-	local $email = $d->{'user'}."\@".$d->{'dom'};
-	local ($virt) = grep { $_->{'from'} eq $email } @virts;
+	my @virts = &list_virtusers();
+	my $email = $d->{'user'}."\@".$d->{'dom'};
+	my ($virt) = grep { $_->{'from'} eq $email } @virts;
 	if ($virt) {
 		&delete_virtuser($virt);
 		&sync_alias_virtuals($d);
 		}
 	if ($config{'generics'}) {
-		local %generics = &get_generics_hash();
-		local $g = $generics{$d->{'user'}};
+		my %generics = &get_generics_hash();
+		my $g = $generics{$d->{'user'}};
 		if ($g) {
 			&delete_generic($g);
 			}
@@ -377,8 +378,8 @@ if (!$d->{'parent'}) {
 			}
 
 		# Delete unix group
-		local @allgroups = &foreign_call($usermodule, "list_groups");
-		local ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
+		my @allgroups = &foreign_call($usermodule, "list_groups");
+		my ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
 				      @allgroups;
 		if ($ginfo) {
 			&$first_print($text{'delete_group'});
@@ -410,7 +411,7 @@ return 1;
 # Copy crontab for a Unix user to a new cloned domain
 sub clone_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_unix'});
 &obtain_lock_unix($d);
 &obtain_lock_cron($d);
@@ -420,16 +421,16 @@ local ($d, $oldd) = @_;
 
 # Copy resource limits
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
-	local $olimits = &get_domain_resource_limits($oldd);
+	my $olimits = &get_domain_resource_limits($oldd);
 	&save_domain_resource_limits($d, $olimits);
 	}
 
 # Copy mail file
 if (&mail_under_home()) {
-	local $oldmf = &user_mail_file($oldd->{'user'});
-	local $newmf = &user_mail_file($d->{'user'});
+	my $oldmf = &user_mail_file($oldd->{'user'});
+	my $newmf = &user_mail_file($d->{'user'});
 	if (-r $oldmf) {
-		local @st = stat($newmf);
+		my @st = stat($newmf);
 		&copy_source_dest($oldmf, $newmf);
 		if (@st) {
 			&set_ownership_permissions(
@@ -451,12 +452,12 @@ if (&mail_under_home()) {
 # Check if quota is being lowered below what is actually being used
 sub check_warnings_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 return undef if (!$oldd);
-local $bsize = &quota_bsize("home");
+my $bsize = &quota_bsize("home");
 if ($d->{'quota'} && $d->{'quota'} < $oldd->{'quota'}) {
 	# Has a domain quota, which was just lowered .. check if under usage
-	local ($usage) = &get_domain_quota($d);
+	my ($usage) = &get_domain_quota($d);
 	if ($d->{'quota'} < $usage) {
 		return &text('save_edomainquota',
 			     &nice_size($usage*$bsize),
@@ -465,7 +466,7 @@ if ($d->{'quota'} && $d->{'quota'} < $oldd->{'quota'}) {
 	}
 if ($d->{'uquota'} && $d->{'uquota'} < $oldd->{'uquota'}) {
 	# Has a user quota, which was just lowered .. check if under usage
-	local ($uinfo) = &get_domain_owner($d);
+	my ($uinfo) = &get_domain_owner($d);
 	if ($d->{'uquota'} < $uinfo->{'uquota'}) {
 		return &text('save_euserquota',
 			     &nice_size($uinfo->{'uquota'}*$bsize),
@@ -479,22 +480,22 @@ return undef;
 # Check for the Unix user and group
 sub validate_unix
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 return undef if ($d->{'parent'});	# sub-servers have no user
 &require_useradmin();
 
 # Make sure user exists and has right UID
-local @users = &list_all_users_quotas(0);
-local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
+my @users = &list_all_users_quotas(0);
+my ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 return &text('validate_euser', $d->{'user'}) if (!$user);
 return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 	if ($d->{'uid'} != $user->{'uid'});
 
 # Make sure group exists and has right ID
-local $group;
+my $group;
 if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
-	local @groups = &list_all_groups_quotas(0);
+	my @groups = &list_all_groups_quotas(0);
 	($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
 	return &text('validate_egid', $d->{'group'}, $d->{'gid'},
@@ -509,8 +510,8 @@ return &text('validate_euserhome', $user->{'user'}, $d->{'home'}, $user->{'home'
 
 # Make sure encrypted password matches
 if (!$cannot_rehash_password && $d->{'pass'}) {
-	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
-	local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
+	my $encmd5 = &encrypt_user_password($user, $d->{'pass'});
+	my $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
 	if (!&useradmin::validate_password($d->{'pass'}, $user->{'pass'}) &&
 	    $user->{'pass'} ne $encmd5 &&
 	    $user->{'pass'} ne $encdes &&
@@ -539,9 +540,9 @@ foreach my $r (&list_running_backups()) {
 	}
 if (&has_home_quotas() && !$backing) {
 	# Domain owner's Unix quota
-	local $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
+	my $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
 						     : $user->{'softquota'};
-	local $bsize = &quota_bsize("home");
+	my $bsize = &quota_bsize("home");
 	if ($want != $d->{'uquota'}) {
 		return &text('validate_euquota',
 		     $user->{'user'},
@@ -553,7 +554,7 @@ if (&has_home_quotas() && !$backing) {
 
 	# Domain group's quota
 	if ($group) {
-		local $want = $tmpl->{'quotatype'} eq 'hard' ?
+		my $want = $tmpl->{'quotatype'} eq 'hard' ?
 			$group->{'hardquota'} : $group->{'softquota'};
 		if ($want != $d->{'quota'}) {
 			return &text('validate_egquota',
@@ -584,30 +585,31 @@ return undef;
 # check_unix_clash(&domain, [field])
 sub check_unix_clash
 {
-return 0 if ($_[0]->{'parent'});	# user already exists!
-return 0 if (&remote_unix() && $_[0]->{'wasmissing'});
-if (!$_[1] || $_[1] eq 'user') {
+my ($d, $field) = @_;
+return 0 if ($d->{'parent'});	# user already exists!
+return 0 if (&remote_unix() && $d->{'wasmissing'});
+if (!$field || $field eq 'user') {
 	# Check for username clash
-	return &text('setup_eunixclash1', $_[0]->{'user'})
-		if (defined(getpwnam($_[0]->{'user'})));
+	return &text('setup_eunixclash1', $d->{'user'})
+		if (defined(getpwnam($d->{'user'})));
 	}
-if (!$_[1] || $_[1] eq 'group') {
+if (!$field || $field eq 'group') {
 	# Check for group name clash
-	return &text('setup_eunixclash2', $_[0]->{'group'})
-		 if ($_[0]->{'group'} &&
-		     defined(getgrnam($_[0]->{'group'})));
+	return &text('setup_eunixclash2', $d->{'group'})
+		 if ($d->{'group'} &&
+		     defined(getgrnam($d->{'group'})));
 	}
-if (!$_[1] || $_[1] eq 'uid') {
+if (!$field || $field eq 'uid') {
 	# Check for UID clash
-	return &text('setup_eunixclash3', $_[0]->{'uid'})
-		 if ($_[0]->{'uid'} &&
-		     defined(getpwuid($_[0]->{'uid'})));
+	return &text('setup_eunixclash3', $d->{'uid'})
+		 if ($d->{'uid'} &&
+		     defined(getpwuid($d->{'uid'})));
 	}
-if (!$_[1] || $_[1] eq 'gid') {
+if (!$field || $field eq 'gid') {
 	# Check for GID clash
-	return &text('setup_eunixclash4', $_[0]->{'gid'})
-		 if ($_[0]->{'gid'} &&
-		     defined(getgrgid($_[0]->{'gid'})));
+	return &text('setup_eunixclash4', $d->{'gid'})
+		 if ($d->{'gid'} &&
+		     defined(getgrgid($d->{'gid'})));
 	}
 return 0;
 }
@@ -620,8 +622,8 @@ my ($d) = @_;
 if (!$d->{'parent'}) {
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'disable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -657,8 +659,8 @@ my ($d) = @_;
 if (!$d->{'parent'}) {
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'enable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -685,9 +687,9 @@ return 1;
 # Backs up the users crontab file
 sub backup_unix
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &foreign_require("cron");
-local $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
+my $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
 &$first_print(&text('backup_cron'));
 if (-r $cronfile) {
 	&copy_write_as_domain_user($d, $cronfile, $file);
@@ -711,7 +713,7 @@ return 1;
 # Note - quotas are not set here, as they get set in restore_domain
 sub restore_unix
 {
-local ($d, $file, $opts, $allopts) = @_;
+my ($d, $file, $opts, $allopts) = @_;
 &obtain_lock_unix($_[0]);
 &obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
@@ -728,12 +730,12 @@ if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
 
 # Update domain owner user password and description
 &require_useradmin();
-local @allusers = &foreign_call($usermodule, "list_users");
-local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+my @allusers = &foreign_call($usermodule, "list_users");
+my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 if ($uinfo && !$d->{'parent'}) {
-	local $olduinfo = { %$uinfo };
+	my $olduinfo = { %$uinfo };
 	$uinfo->{'real'} = $d->{'owner'};
-	local $enc;
+	my $enc;
 	if ($d->{'pass'}) {
 		 $enc = &foreign_call($usermodule, "encrypt_password",
 				      $d->{'pass'});
@@ -780,38 +782,39 @@ return 1;
 # any mail users with FTP access
 sub bandwidth_unix
 {
-local $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
-	     $config{'ftp'} ? &get_proftpd_log() : undef;
+my ($d, $start, $bw) = @_;
+my $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
+	  $config{'ftp'} ? &get_proftpd_log() : undef;
 if ($log) {
-	local @users;
-	local @ashells = grep { $_->{'mailbox'} } &list_available_shells();
-	if (!$_[0]->{'parent'}) {
+	my @users;
+	my @ashells = grep { $_->{'mailbox'} } &list_available_shells();
+	if (!$d->{'parent'}) {
 		# Only do the domain owner if this is the parent domain, to
 		# avoid double-counting in subdomains
-		push(@users, $_[0]->{'user'});
+		push(@users, $d->{'user'});
 		}
-	foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
+	foreach $u (&list_domain_users($d, 0, 1, 1, 1)) {
 		# Only add Unix users with FTP access
 		next if (!$u->{'unix'});
-		local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+		my ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
                                       @ashells;
 		if (!$shell || $shell->{'id'} ne 'nologin') {
 			push(@users, $u->{'user'});
 			}
 		}
 	if (@users) {
-		return &count_ftp_bandwidth($log, $_[1], $_[2], \@users, "ftp",
+		return &count_ftp_bandwidth($log, $start, $bw, \@users, "ftp",
 					    $config{'bw_ftplog_rotated'});
 		}
 	}
-return $_[1];
+return $start;
 }
 
 # show_template_unix(&tmpl)
 # Outputs HTML for editing unix-user-related template options
 sub show_template_unix
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Quota type (hard or soft)
 print &ui_table_row(&hlink($text{'tmpl_quotatype'}, "template_quotatype"),
@@ -862,7 +865,7 @@ print &ui_table_row(&hlink($text{'tmpl_uplainpass'}, "template_uplainpass"),
 		[ 0, $text{'yes'} ], [ 1, $text{'tmpl_uplainpassno'} ] ]));
 
 # Hash types to store
-local @hashtypes = &list_password_hash_types();
+my @hashtypes = &list_password_hash_types();
 print &ui_table_row(&hlink($text{'tmpl_hashtypes'}, "template_hashtypes"),
     &ui_radio("hashtypes_def", $tmpl->{'hashtypes'} eq "*" ? 1 :
 			       $tmpl->{'hashtypes'} eq "none" ? 3 :
@@ -879,7 +882,7 @@ print &ui_table_row(&hlink($text{'tmpl_hashtypes'}, "template_hashtypes"),
 # Updates unix-user-related template options from %in
 sub parse_template_unix
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save quota type (hard or soft)
 $tmpl->{'quotatype'} = $in{'quotatype'};
@@ -929,26 +932,25 @@ else {
 sub get_unix_shells
 {
 # Read FTP-capable shells
-local @rv;
-local $_;
-local @shells;
+my @rv;
+my @shells;
 open(SHELLS, "</etc/shells");
-while(<SHELLS>) {
-	s/\r|\n//g;
-	s/#.*$//;
-	push(@shells, $_) if (/\S/);
+while(my $l = <SHELLS>) {
+	$l =~ s/\r|\n//g;
+	$l =~ s/#.*$//;
+	push(@shells, $l) if ($l =~ /\S/);
 	}
 close(SHELLS);
-local %shells = map { $_, 1 } @shells;
+my %shells = map { $_, 1 } @shells;
 
 # Find no-login shells
-local @nologin = ($config{'shell'}, '/dev/null', '/sbin/nologin',
-		  '/bin/nologin', '/sbin/noshell', '/bin/noshell');
+my @nologin = ($config{'shell'}, '/dev/null', '/sbin/nologin',
+		'/bin/nologin', '/sbin/noshell', '/bin/noshell');
 push(@rv, map { [ 'nologin', $_ ] } grep { !$shells{$_} } @nologin);
 
 # Find a good FTP-capable shell
-local @ftp = ( $config{'ftp_shell'}, '/bin/false', '/bin/true',
-	       '/sbin/nologin', '/bin/nologin' );
+my @ftp = ( $config{'ftp_shell'}, '/bin/false', '/bin/true',
+	    '/sbin/nologin', '/bin/nologin' );
 push(@rv, map { [ 'ftp', $_ ] } grep { $shells{$_} } @ftp);
 
 # Find FTP and SSH login shells
@@ -965,25 +967,25 @@ return @rv;
 # who don't get to login (based on their shell)
 sub build_denied_ssh_group
 {
-local ($newd, $deld) = @_;
+my ($newd, $deld) = @_;
 return 0 if ($config{'nodeniedssh'});	# Disabled in config
 
 # First make sure the group exists
-&obtain_lock_unix($_[0]);
+&obtain_lock_unix($newd);
 &require_useradmin();
-local @allgroups = &list_all_groups();
-local ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
+my @allgroups = &list_all_groups();
+my ($group) = grep { $_->{'group'} eq $denied_ssh_group } @allgroups;
 if (!$group) {
-	&release_lock_unix($_[0]);
+	&release_lock_unix($newd);
 	return 0;
 	}
 
 # Find domain owners who can't login
-local @shells = &list_available_shells();
+my @shells = &list_available_shells();
 foreach my $d (&list_domains(), $newd) {
 	next if ($d->{'parent'} || !$d->{'unix'} || $d eq $deld);
-	local $user = &get_domain_owner($d, 1);
-	local ($sinfo) = grep { $_->{'shell'} eq $user->{'shell'} } @shells;
+	my $user = &get_domain_owner($d, 1);
+	my ($sinfo) = grep { $_->{'shell'} eq $user->{'shell'} } @shells;
 	if ($sinfo && $sinfo->{'id'} ne 'ssh' &&
 	    $user->{'shell'} !~ /\/(sh|bash|ksh|csh|tcsh|zsh|scponly)$/) {
 		# Has a non-SSH shell
@@ -992,7 +994,7 @@ foreach my $d (&list_domains(), $newd) {
 	}
 
 # Update the group
-local $oldgroup = { %$group };
+my $oldgroup = { %$group };
 $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
@@ -1002,7 +1004,7 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "made_changes");
 	}
 
-&release_lock_unix($_[0]);
+&release_lock_unix($newd);
 return 1;
 }
 
@@ -1011,23 +1013,23 @@ return 1;
 # contain all domain owners.
 sub update_domain_owners_group
 {
-local ($newd, $deld) = @_;
-local $tmpl = $newd ? &get_template($newd->{'template'}) :
-	      $deld ? &get_template($deld->{'template'}) : undef;
+my ($newd, $deld) = @_;
+my $tmpl = $newd ? &get_template($newd->{'template'}) :
+	   $deld ? &get_template($deld->{'template'}) : undef;
 return 0 if (!$tmpl || !$tmpl->{'sgroup'});
 
 # First make sure the group exists
-&obtain_lock_unix($_[0]);
+&obtain_lock_unix($newd);
 &require_useradmin();
-local @allgroups = &list_all_groups();
-local ($group) = grep { $_->{'group'} eq $tmpl->{'sgroup'} } @allgroups;
+my @allgroups = &list_all_groups();
+my ($group) = grep { $_->{'group'} eq $tmpl->{'sgroup'} } @allgroups;
 if (!$group) {
-	&release_lock_unix($_[0]);
+	&release_lock_unix($newd);
 	return 0;
 	}
 
 # Find domain owners with Unix logins
-local @members;
+my @members;
 foreach my $d (&list_domains(), $newd) {
 	if ($d->{'unix'} && $d ne $deld) {
 		push(@members, $d->{'user'});
@@ -1035,7 +1037,7 @@ foreach my $d (&list_domains(), $newd) {
 	}
 
 # Update the group
-local $oldgroup = { %$group };
+my $oldgroup = { %$group };
 $group->{'members'} = join(",", &unique(@members));
 if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "set_group_envs", $group,
@@ -1044,17 +1046,17 @@ if ($group->{'members'} ne $oldgroup->{'members'}) {
 	&foreign_call($group->{'module'}, "modify_group", $oldgroup, $group);
 	&foreign_call($group->{'module'}, "made_changes");
 	}
-&release_lock_unix($_[0]);
+&release_lock_unix($newd);
 }
 
 sub startstop_unix
 {
-local @rv;
+my @rv;
 if (&foreign_installed("sshd")) {
 	# Add SSH server status
-	local @links = ( { 'link' => '/sshd/',
-			   'desc' => $text{'index_sshmanage'},
-			   'manage' => 1 } );
+	my @links = ( { 'link' => '/sshd/',
+			'desc' => $text{'index_sshmanage'},
+			'manage' => 1 } );
 	&foreign_require("sshd");
 	if (&sshd::get_sshd_pid()) {
 		push(@rv, { 'status' => 1,
@@ -1103,11 +1105,11 @@ return &sshd::start_sshd();
 # Deletes a group that may not have been created completely
 sub delete_partial_group
 {
-local ($group) = @_;
+my ($group) = @_;
 eval {
 	local $main::error_must_die = 1;
-	local @allgroups = &list_all_groups();
-	local ($ginfo) = grep { $_->{'group'} eq $group->{'group'} &&
+	my @allgroups = &list_all_groups();
+	my ($ginfo) = grep { $_->{'group'} eq $group->{'group'} &&
 				$_->{'module'} eq $usermodule } @allgroups;
 	if ($ginfo) {
 		&foreign_call($ginfo->{'module'}, "set_group_envs", $ginfo,
@@ -1123,11 +1125,11 @@ eval {
 # Deletes a user that may not have been created completely
 sub delete_partial_user
 {
-local ($user) = @_;
+my ($user) = @_;
 eval {
 	local $main::error_must_die = 1;
-	local @allusers = &list_all_users();
-	local ($uinfo) = grep { $_->{'user'} eq $user->{'user'} &&
+	my @allusers = &list_all_users();
+	my ($uinfo) = grep { $_->{'user'} eq $user->{'user'} &&
 				$_->{'module'} eq $usermodule } @allusers;
 	if ($uinfo) {
 		&foreign_call($uinfo->{'module'}, "set_user_envs", $uinfo,
@@ -1231,7 +1233,7 @@ $main::got_lock_unix-- if ($main::got_lock_unix);
 # Locks a domain's user's crontab file, and root's
 sub obtain_lock_cron
 {
-local ($d) = @_;
+my ($d) = @_;
 &obtain_lock_anything($d);
 foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 0) {
@@ -1246,7 +1248,7 @@ foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 # Un-locks a domain's user's crontab file
 sub release_lock_cron
 {
-local ($d) = @_;
+my ($d) = @_;
 foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 	if ($main::got_lock_cron_user{$u} == 1) {
 		&foreign_require("cron");
@@ -1262,7 +1264,7 @@ foreach my $u ($d ? ( $d->{'user'} ) : ( ), 'root') {
 # Returns true if Unix users are stored on a remote system
 sub remote_unix
 {
-local ($d) = @_;
+my ($d) = @_;
 return &get_user_database_url();
 }
 
@@ -1325,9 +1327,9 @@ $uinfo->{'gid'} = $d->{'ugid'} || $d->{'gid'};
 sub create_email_for_unix
 {
 my ($d) = @_;
-local @virts = &list_virtusers();
-local $email = $d->{'user'}."\@".$d->{'dom'};
-local ($virt) = grep { $_->{'from'} eq $email } @virts;
+my @virts = &list_virtusers();
+my $email = $d->{'user'}."\@".$d->{'dom'};
+my ($virt) = grep { $_->{'from'} eq $email } @virts;
 if (!$virt) {
 	$virt = { 'from' => $email,
 		  'to' => [ $d->{'user'} ] };

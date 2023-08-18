@@ -1382,6 +1382,9 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 	# Work out which records to add
 	local $withdot = $d->{'dom'}.".";
 	local @addrecs = split(/\s+/, $tmpl->{'dns_records'});
+	if ($d->{'dns_initial_records'}) {
+		@addrecs = split(/\s+/, $d->{'dns_initial_records'});
+		}
 	if (!@addrecs || $addrecs[0] eq 'none') {
 		@addrecs = @automatic_dns_records;
 		}
@@ -1466,7 +1469,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 
 	# Add DMARC record for domain, if defined and if it's not a sub-domain
 	if ($tmpl->{'dns_dmarc'} ne "none" &&
-	    !$d->{'dns_submode'}) {
+	    !$d->{'dns_submode'} && !$d->{'nodnsdmarc'}) {
 		local $str = &bind8::join_dmarc(&default_domain_dmarc($d));
 		&create_dns_record($recs, $file,
 			{ 'name' => "_dmarc.".$withdot, type => 'TXT',
