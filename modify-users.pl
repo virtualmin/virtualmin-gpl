@@ -101,7 +101,7 @@ foreach my $d (@doms) {
 		}
     my $dom_done;
     #
-    print "Updating user attributes in domain \"$d->{'dom'}\" ..\n";
+    print "Updating user attributes in domain $d->{'dom'} ..\n";
     foreach my $user (map { $_->{'user'} } @users) {
         $dom_done++;
         # Run subcommand
@@ -110,8 +110,8 @@ foreach my $d (@doms) {
         my ($out_before_new_empty_line) = $out =~ /(.*?)(?:\n\s*\n|\z)/;
         my $out_ = &trim($out_before_new_empty_line || $out);
         # Prep helpers
-        $out_ =~ s/(the\suser(?!\w))/$1 "$user"/ig;
-        $out_ =~ s/(the\sdomain(?!\w))/$1 "$d->{'dom'}"/ig;
+        $out_ =~ s/(the\suser(?!\w))/$1 $user/ig;
+        $out_ =~ s/(the\sdomain(?!\w))/$1 $d->{'dom'}/ig;
         if ($ex) {
                 print "  Failed: $out_\n";
             }
