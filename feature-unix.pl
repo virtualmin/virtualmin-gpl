@@ -167,7 +167,7 @@ return 1;
 # Change the password and real name for a domain unix user
 sub modify_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if (!$d->{'pass_set'} &&
     $d->{'user'} eq $oldd->{'user'} &&
     $d->{'home'} eq $oldd->{'home'} &&
@@ -184,9 +184,9 @@ if (!$d->{'parent'}) {
 	# Check for a user change
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &list_domain_users($oldd);
-	local ($uinfo) = grep { $_->{'user'} eq $oldd->{'user'} } @allusers;
-	local $rv;
+	my @allusers = &list_domain_users($oldd);
+	my ($uinfo) = grep { $_->{'user'} eq $oldd->{'user'} } @allusers;
+	my $rv;
 	if (defined(&supports_resource_limits) &&
 	    &supports_resource_limits() &&
 	    ($d->{'user'} ne $oldd->{'user'} ||
@@ -196,12 +196,12 @@ if (!$d->{'parent'}) {
 		&save_domain_resource_limits($oldd, { }, 1);
 		}
 	if ($uinfo) {
-		local %old = %$uinfo;
+		my %old = %$uinfo;
 		&$first_print($text{'save_user'});
 		$uinfo->{'real'} = $d->{'owner'};
 		if ($d->{'pass_set'}) {
 			# Update the Unix user's password
-			local $enc;
+			my $enc;
 			if ($d->{'pass'}) {
 				$enc = &foreign_call($usermodule,
 					"encrypt_password", $d->{'pass'});
@@ -279,10 +279,10 @@ if (!$d->{'parent'}) {
 		}
 
 	# Check for a group change
-	local ($ginfo) = grep { $_->{'group'} eq $oldd->{'group'} }
+	my ($ginfo) = grep { $_->{'group'} eq $oldd->{'group'} }
 			      &list_all_groups();
 	if ($ginfo && $d->{'group'} ne $oldd->{'group'}) {
-		local %old = %$ginfo;
+		my %old = %$ginfo;
 		&$first_print($text{'save_group'});
 		$ginfo->{'group'} = $d->{'group'};
 		&foreign_call($usermodule, "set_group_envs", $ginfo,
@@ -315,15 +315,15 @@ if ($d->{'mail'} && !$oldd->{'mail'} && $config{'mail_system'} != 5) {
 # Delete the unix user and group for a domain
 sub delete_unix
 {
-local ($d, $preserve) = @_;
+my ($d, $preserve) = @_;
 
 if (!$d->{'parent'}) {
 	# Get the user object
 	&obtain_lock_unix($d);
 	&obtain_lock_cron($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 
 	# Zero his quotas
 	if ($uinfo) {
@@ -334,16 +334,16 @@ if (!$d->{'parent'}) {
 	&delete_unix_cron_jobs($d->{'user'});
 
 	# Delete virtuser and generic
-	local @virts = &list_virtusers();
-	local $email = $d->{'user'}."\@".$d->{'dom'};
-	local ($virt) = grep { $_->{'from'} eq $email } @virts;
+	my @virts = &list_virtusers();
+	my $email = $d->{'user'}."\@".$d->{'dom'};
+	my ($virt) = grep { $_->{'from'} eq $email } @virts;
 	if ($virt) {
 		&delete_virtuser($virt);
 		&sync_alias_virtuals($d);
 		}
 	if ($config{'generics'}) {
-		local %generics = &get_generics_hash();
-		local $g = $generics{$d->{'user'}};
+		my %generics = &get_generics_hash();
+		my $g = $generics{$d->{'user'}};
 		if ($g) {
 			&delete_generic($g);
 			}
@@ -378,8 +378,8 @@ if (!$d->{'parent'}) {
 			}
 
 		# Delete unix group
-		local @allgroups = &foreign_call($usermodule, "list_groups");
-		local ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
+		my @allgroups = &foreign_call($usermodule, "list_groups");
+		my ($ginfo) = grep { $_->{'group'} eq $d->{'group'} }
 				      @allgroups;
 		if ($ginfo) {
 			&$first_print($text{'delete_group'});
@@ -411,7 +411,7 @@ return 1;
 # Copy crontab for a Unix user to a new cloned domain
 sub clone_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_unix'});
 &obtain_lock_unix($d);
 &obtain_lock_cron($d);
@@ -421,16 +421,16 @@ local ($d, $oldd) = @_;
 
 # Copy resource limits
 if (defined(&supports_resource_limits) && &supports_resource_limits()) {
-	local $olimits = &get_domain_resource_limits($oldd);
+	my $olimits = &get_domain_resource_limits($oldd);
 	&save_domain_resource_limits($d, $olimits);
 	}
 
 # Copy mail file
 if (&mail_under_home()) {
-	local $oldmf = &user_mail_file($oldd->{'user'});
-	local $newmf = &user_mail_file($d->{'user'});
+	my $oldmf = &user_mail_file($oldd->{'user'});
+	my $newmf = &user_mail_file($d->{'user'});
 	if (-r $oldmf) {
-		local @st = stat($newmf);
+		my @st = stat($newmf);
 		&copy_source_dest($oldmf, $newmf);
 		if (@st) {
 			&set_ownership_permissions(
@@ -452,12 +452,12 @@ if (&mail_under_home()) {
 # Check if quota is being lowered below what is actually being used
 sub check_warnings_unix
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 return undef if (!$oldd);
-local $bsize = &quota_bsize("home");
+my $bsize = &quota_bsize("home");
 if ($d->{'quota'} && $d->{'quota'} < $oldd->{'quota'}) {
 	# Has a domain quota, which was just lowered .. check if under usage
-	local ($usage) = &get_domain_quota($d);
+	my ($usage) = &get_domain_quota($d);
 	if ($d->{'quota'} < $usage) {
 		return &text('save_edomainquota',
 			     &nice_size($usage*$bsize),
@@ -466,7 +466,7 @@ if ($d->{'quota'} && $d->{'quota'} < $oldd->{'quota'}) {
 	}
 if ($d->{'uquota'} && $d->{'uquota'} < $oldd->{'uquota'}) {
 	# Has a user quota, which was just lowered .. check if under usage
-	local ($uinfo) = &get_domain_owner($d);
+	my ($uinfo) = &get_domain_owner($d);
 	if ($d->{'uquota'} < $uinfo->{'uquota'}) {
 		return &text('save_euserquota',
 			     &nice_size($uinfo->{'uquota'}*$bsize),
@@ -480,22 +480,22 @@ return undef;
 # Check for the Unix user and group
 sub validate_unix
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 return undef if ($d->{'parent'});	# sub-servers have no user
 &require_useradmin();
 
 # Make sure user exists and has right UID
-local @users = &list_all_users_quotas(0);
-local ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
+my @users = &list_all_users_quotas(0);
+my ($user) = grep { $_->{'user'} eq $d->{'user'} } @users;
 return &text('validate_euser', $d->{'user'}) if (!$user);
 return &text('validate_euid', $d->{'user'}, $d->{'uid'}, $user->{'uid'})
 	if ($d->{'uid'} != $user->{'uid'});
 
 # Make sure group exists and has right ID
-local $group;
+my $group;
 if (&mail_system_needs_group() || $d->{'gid'} == $d->{'ugid'}) {
-	local @groups = &list_all_groups_quotas(0);
+	my @groups = &list_all_groups_quotas(0);
 	($group) = grep { $_->{'group'} eq $d->{'group'} } @groups;
 	return &text('validate_egroup', $d->{'group'}) if (!$group);
 	return &text('validate_egid', $d->{'group'}, $d->{'gid'},
@@ -510,8 +510,8 @@ return &text('validate_euserhome', $user->{'user'}, $d->{'home'}, $user->{'home'
 
 # Make sure encrypted password matches
 if (!$cannot_rehash_password && $d->{'pass'}) {
-	local $encmd5 = &encrypt_user_password($user, $d->{'pass'});
-	local $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
+	my $encmd5 = &encrypt_user_password($user, $d->{'pass'});
+	my $encdes = &unix_crypt($d->{'pass'}, $user->{'pass'});
 	if (!&useradmin::validate_password($d->{'pass'}, $user->{'pass'}) &&
 	    $user->{'pass'} ne $encmd5 &&
 	    $user->{'pass'} ne $encdes &&
@@ -540,9 +540,9 @@ foreach my $r (&list_running_backups()) {
 	}
 if (&has_home_quotas() && !$backing) {
 	# Domain owner's Unix quota
-	local $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
+	my $want = $tmpl->{'quotatype'} eq 'hard' ? $user->{'hardquota'}
 						     : $user->{'softquota'};
-	local $bsize = &quota_bsize("home");
+	my $bsize = &quota_bsize("home");
 	if ($want != $d->{'uquota'}) {
 		return &text('validate_euquota',
 		     $user->{'user'},
@@ -554,7 +554,7 @@ if (&has_home_quotas() && !$backing) {
 
 	# Domain group's quota
 	if ($group) {
-		local $want = $tmpl->{'quotatype'} eq 'hard' ?
+		my $want = $tmpl->{'quotatype'} eq 'hard' ?
 			$group->{'hardquota'} : $group->{'softquota'};
 		if ($want != $d->{'quota'}) {
 			return &text('validate_egquota',
@@ -621,8 +621,8 @@ my ($d) = @_;
 if (!$d->{'parent'}) {
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'disable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -658,8 +658,8 @@ my ($d) = @_;
 if (!$d->{'parent'}) {
 	&obtain_lock_unix($d);
 	&require_useradmin();
-	local @allusers = &foreign_call($usermodule, "list_users");
-	local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+	my @allusers = &foreign_call($usermodule, "list_users");
+	my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 	if ($uinfo) {
 		&$first_print($text{'enable_unix'});
 		&foreign_call($usermodule, "set_user_envs", $uinfo,
@@ -686,9 +686,9 @@ return 1;
 # Backs up the users crontab file
 sub backup_unix
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &foreign_require("cron");
-local $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
+my $cronfile = &cron::cron_file({ 'user' => $d->{'user'} });
 &$first_print(&text('backup_cron'));
 if (-r $cronfile) {
 	&copy_write_as_domain_user($d, $cronfile, $file);
@@ -712,7 +712,7 @@ return 1;
 # Note - quotas are not set here, as they get set in restore_domain
 sub restore_unix
 {
-local ($d, $file, $opts, $allopts) = @_;
+my ($d, $file, $opts, $allopts) = @_;
 &obtain_lock_unix($_[0]);
 &obtain_lock_cron($_[0]);
 &$first_print($text{'restore_unixuser'});
@@ -729,12 +729,12 @@ if ($url && $burl && $url eq $burl && $allopts->{'repl'}) {
 
 # Update domain owner user password and description
 &require_useradmin();
-local @allusers = &foreign_call($usermodule, "list_users");
-local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
+my @allusers = &foreign_call($usermodule, "list_users");
+my ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @allusers;
 if ($uinfo && !$d->{'parent'}) {
-	local $olduinfo = { %$uinfo };
+	my $olduinfo = { %$uinfo };
 	$uinfo->{'real'} = $d->{'owner'};
-	local $enc;
+	my $enc;
 	if ($d->{'pass'}) {
 		 $enc = &foreign_call($usermodule, "encrypt_password",
 				      $d->{'pass'});
@@ -781,11 +781,11 @@ return 1;
 # any mail users with FTP access
 sub bandwidth_unix
 {
-local $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
-	     $config{'ftp'} ? &get_proftpd_log() : undef;
+my $log = $config{'bw_ftplog'} ? $config{'bw_ftplog'} :
+	  $config{'ftp'} ? &get_proftpd_log() : undef;
 if ($log) {
-	local @users;
-	local @ashells = grep { $_->{'mailbox'} } &list_available_shells();
+	my @users;
+	my @ashells = grep { $_->{'mailbox'} } &list_available_shells();
 	if (!$_[0]->{'parent'}) {
 		# Only do the domain owner if this is the parent domain, to
 		# avoid double-counting in subdomains
@@ -794,7 +794,7 @@ if ($log) {
 	foreach $u (&list_domain_users($_[0], 0, 1, 1, 1)) {
 		# Only add Unix users with FTP access
 		next if (!$u->{'unix'});
-		local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
+		my ($shell) = grep { $_->{'shell'} eq $u->{'shell'} }
                                       @ashells;
 		if (!$shell || $shell->{'id'} ne 'nologin') {
 			push(@users, $u->{'user'});
