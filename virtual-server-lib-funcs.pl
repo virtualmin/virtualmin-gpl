@@ -19604,6 +19604,7 @@ my %dom;
 	'dns_initial_records', '@',
 	'nodnsdmarc', 1,
 	'default_php_mode', 4,
+	'dom_defnames', $system_host_name
     );
 
 # Set initial features

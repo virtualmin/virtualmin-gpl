@@ -1524,6 +1524,15 @@ if (!&supports_suexec()) {
 	# Remove unsupported SuexecUserGroup directive
 	@dirs = grep { !/^\s*SuexecUserGroup\s/i } @dirs;
 	}
+if ($d->{'dom_defnames'}) {
+	# If domain level config has server default
+	# names set, remove those not in the list
+	@dirs = grep { &indexof($_, grep {
+		$_ =~ /^(ServerName|ServerAlias)\s+(?<r_serv_name>.*)/ &&
+		&indexof($+{r_serv_name}, split(/\s+/, $d->{'dom_defnames'})) < 0
+		} @dirs) < 0 } @dirs;
+	# XXXX Maybe add too? It already works in Nginx
+	}
 return @dirs;
 }
 
