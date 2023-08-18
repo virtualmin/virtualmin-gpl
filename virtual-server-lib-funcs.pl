@@ -19603,6 +19603,7 @@ my %dom;
 	'defaultshell', '/dev/null',
 	'dns_initial_records', '@',
 	'nodnsdmarc', 1,
+	'default_php_mode', 4,
     );
 
 # Set initial features
@@ -19648,8 +19649,8 @@ return &$err(join(" ", @warns)) if (@warns);
 # 	 'web_admin' => 0,
 # 	 'web_dovecot_ssl' => 0,
 # 	 'web_mysql_ssl' => 0,
-# 	 'php_log' => 0,
-# 	 'web_php_suexec' => 4,
+# 	 'php_log' => 0,             #### done
+# 	 'web_php_suexec' => 4,      #### done
 # 	});
 
 # Create the server
