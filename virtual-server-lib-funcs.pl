@@ -19656,7 +19656,7 @@ return &$err(join(" ", @warns)) if (@warns);
 &push_all_print();
 &set_all_null_print();
 my ($rs) = &create_virtual_server(
-	\%dom, undef, undef, 0, 0, $pass, $dom{'owner'});
+	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
 &pop_all_print();
 return &$err($rs) if ($rs && ref($rs) ne 'HASH');
 my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
