@@ -121,6 +121,10 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 		}
 	my $cfunc = "dnscloud_".$ctype."_create_domain";
 	my ($ok, $msg, $location, $err2) = &$cfunc($d, $info);
+	my $efunc = "dnscloud_".$ctype."_post_validate";
+	($ok, $msg, $location, $err2) =
+		&$efunc($d, $ok, $msg, $location, $err2)
+			if (defined(&$efunc));
 	if ($ok == 0) {
 		&$second_print(&text('setup_ebind_cloud', $msg));
 		return 0;
@@ -815,6 +819,8 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 	else {
 		my $rfunc = "dnscloud_".$ctype."_rename_domain";
 		my ($ok, $id) = &$rfunc($d, $info);
+		my $efunc = "dnscloud_".$ctype."_post_validate";
+		($ok, $id) = &$efunc($d, $ok, $id) if (defined(&$efunc));
 		if (!$ok) {
 			&$second_print(&text('save_bind_ecloud', $id));
 			}

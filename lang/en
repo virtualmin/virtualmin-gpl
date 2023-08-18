@@ -7709,6 +7709,8 @@ dnscloud_cloudflare_esfx2=Domain $1 can be only one level under TLD $2
 dnscloud_cloudflare_ens=Failed to lookup NS records : $1
 dnscloud_cloudflare_ens2=No NS records found for $1. Cloudflare requires that DNS domains be registered first.
 dnscloud_cloudflare_ens3=NS records found for <tt>$1</tt> domain, however these NS records <tt>$2</tt> do not point to Cloudflare provider
+dnscloud_cloudflare_explain_err_1116=For Virtualmin to be able to create top-level virtual sub-servers with Cloudflare DNS, you must first allow DNS sub-domains with a different owner on the <a href='$1'>Virtualmin Configuration / Advanced options</a> page.
+dnscloud_cloudflare_explain_err_1116_2=For this Virtualmin system to host top-level virtual sub-server <tt>$2</tt> it has to host <tt>$1</tt> as well
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
