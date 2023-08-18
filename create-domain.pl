@@ -422,6 +422,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--shell") {
+		$defaultshell = shift(@ARGV);
+		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
 		if ($plugin_args{$1}->{'novalue'}) {
@@ -888,6 +891,7 @@ $dom{'nolink_certs'} = 1 if ($linkcert eq '0');
 $dom{'link_certs'} = $linkcert if ($linkcert == 1 || $linkcert == 2);
 $dom{'always_ssl'} = $always_ssl if (defined($always_ssl));
 $dom{'append_style'} = $append_style if (defined($append_style));
+$dom{'defaultshell'} = $defaultshell if (defined($defaultshell));
 foreach $f (keys %fields) {
 	$dom{$f} = $fields{$f};
 	}
@@ -1114,6 +1118,7 @@ print "                        [--ssl-redirect]\n";
 print "                        [--generate-ssl-cert]\n";
 print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";
 print "                        [--append-style format]\n";
+print "                        [--shell command]\n";
 exit(1);
 }
 
