@@ -47,14 +47,14 @@ while(@ARGV > 0) {
 	if ($a eq "--all-domains") {
 		$all_doms = 1;
 		}
-    elsif ($a eq "--domain") {
+  elsif ($a eq "--domain") {
 		push(@dnames, shift(@ARGV));
         $domain = 1;
 		}
 	elsif ($a eq "--all-users") {
 		$all_users = 1;
 		}
-    elsif ($a eq "--user") {
+  elsif ($a eq "--user") {
         $usernames{shift(@ARGV)} = 1;
         $user = 1;
 		}
