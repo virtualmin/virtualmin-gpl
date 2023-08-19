@@ -94,7 +94,7 @@ foreach my $d (@doms) {
     #
     my $dom_done;
     #
-    print "Updating user passwords in domain \"$d->{'dom'}\" ..\n";
+    print "Updating user passwords in domain $d->{'dom'} ..\n";
     #
     if (!$exclude_owner) {
         @users_owners = map { $_->{'user'} } @users_owners;
