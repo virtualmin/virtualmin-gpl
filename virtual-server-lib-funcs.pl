@@ -19684,6 +19684,41 @@ return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
 }
 
+# rename_default_domain_ssl(&domain, new_hostname)
+# Rename default hostname domain
+sub rename_default_domain_ssl
+{
+my ($d, $new_hostname) = @_;
+if (!&can_edit_domain($d) || !&can_edit_ssl() || !&can_webmin_cert()) {
+	return 0;
+	}
+
+# Try renaming default domain
+&push_all_print();
+&set_all_null_print();
+my $err = &rename_virtual_server($d, $new_hostname);
+
+# Update state of all certs
+my @already = &get_all_domain_service_ssl_certs($d);
+foreach my $st (&list_service_ssl_cert_types()) {
+	next if (!$st->{'dom'} && !$st->{'virt'});
+	next if (!$st->{'dom'} && !$d->{'virt'});
+	my ($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
+	my $func = "sync_".$st->{'id'}."_ssl_cert";
+	my $ok = 1;
+	$ok = &$func($d, 1) if (!$a);
+	$err = 1 if (!$ok);
+	}
+# Update config entry
+$config{'defaultdomain_name'} = $new_hostname;
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+&run_post_actions_silently();
+&pop_all_print();
+return $err ? 0 : 1;
+}
+
 # check_virtualmin_default_hostname_ssl()
 # Check default host domain
 sub check_virtualmin_default_hostname_ssl
@@ -19723,19 +19758,26 @@ if ($new_default_domain->{'dom'}) {
 			'check_hostdefaultdomain_change' : 'check_hostdefaultdomain_enable';
 		if ($hostname_changed || $failed_le) {
 			&$first_print(&text($text_msg, $known_default_domain, $system_host_name));
-			&$remove_default_host_domain(1);
-			my ($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+			my ($defdom_status, $defdom_msg);
+			if ($hostname_changed) {
+				$defdom_status = &rename_default_domain_ssl($new_default_domain, $system_host_name);
+				}
+			else {
+				&$remove_default_host_domain(1);
+				($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+				}
 			if ($defdom_status == 2) {
 				&$second_print($text{'check_defhost_sharedsucc2'});
 				}
-			elsif ($defdom_status >= 1) {
+			elsif ($defdom_status == 1) {
 				&$second_print($text{'setup_done'});
 				}
 			else {
 				# Remove on failure unless host
 				# default domain set to be visible
 				&$remove_default_host_domain(1)
-					if ($config{'default_domain_ssl'} != 2);
+					if ($config{'default_domain_ssl'} != 2 &&
+					    !$hostname_changed);
 				&$second_print(&text('check_apicmderr', $defdom_msg));
 				}
 			}
@@ -19757,7 +19799,7 @@ elsif ($config{'default_domain_ssl'}) {
 		if ($defdom_status == 2) {
 			&$second_print($text{'check_defhost_sharedsucc2'});
 			}
-		elsif ($defdom_status >= 1) {
+		elsif ($defdom_status == 1) {
 			&$second_print($text{'setup_done'});
 			}
 		else {
