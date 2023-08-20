@@ -569,7 +569,7 @@ if (!$skipwarnings) {
 	}
 &lock_domain_name($domain);
 my $clashed = &domain_name_clash($domain);
-&error($clashed->{'defaulthostdomain'} ?
+&usage($clashed->{'defaulthostdomain'} ?
 		&text('setup_edomain5', $clashed->{'dom'}) :
 			$text{'setup_edomain4'})
 				if ($clashed);
