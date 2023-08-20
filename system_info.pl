@@ -15,7 +15,7 @@ if (!&foreign_available($module_name)) {
 my @rv;
 my $info = &get_collected_info();
 my @vposs = $info ? @{$info->{'vposs'}} : ( );
-my @doms = &list_visible_domains({ 'exclude-alias' => 1 });
+my @doms = &list_visible_domains();
 
 # Check for wizard redirect
 my $redir = &wizard_redirect();

@@ -11,7 +11,6 @@ dns_ip=Adresse IP par défaut pour les enregistrements DNS,3,La même que l'IP d
 line1.4=Paramètres interface utilisateur,11
 display_max=Nombre maximum de domaines à afficher,3,Illimité
 domains_sort=Trier les serveurs virtuels par,1,user-Utilisateur,dom-Nom de domaine,owner-Description,sub-Sous domaine
-hide_alias=Inclure l'alias du serveur virtuel dans le menu,1,0-Oui,1-Non
 line1.5=Permissions du propriétaire du domaine,11
 edit_afiles=Peut éditer les fichiers à inclure et de réponse aux alias?,1,1-Oui,0-Non
 edit_homes=Peut sélectionner les répertoires home des utilisateurs?,1,1-Oui,0-Non

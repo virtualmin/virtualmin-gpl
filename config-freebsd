@@ -175,7 +175,6 @@ collect_restart=0
 secmx_nodns=0
 usermin_switch=1
 plan_auto=1
-hide_alias=0
 avail_htaccess-htpasswd=1
 index_cols=dom,user,owner,users,aliases
 collect_noall=0

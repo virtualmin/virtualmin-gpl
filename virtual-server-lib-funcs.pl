@@ -125,10 +125,6 @@ $opts = {%$opts, %$exclude_defaulthostdomain}
 @rv = grep { ! $_->{$opts->{'exclude'}} } @rv
 	if ($opts->{'exclude'});
 
-# Exclude alias domains
-if ($config{'hide_alias'} && $opts->{'exclude-alias'}) {
-	@rv = grep { !$_->{'alias'} } @rv;
-	}
 return @rv;
 }
 
