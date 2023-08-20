@@ -7823,9 +7823,9 @@ return 1;
 # Returns 1 if some domain name is already in use
 sub domain_name_clash
 {
-local ($domain) = @_;
+my ($domain) = @_;
 foreach my $d (&list_domains()) {
-        return 1 if (lc($d->{'dom'}) eq lc($domain));
+        return $d if (lc($d->{'dom'}) eq lc($domain));
         }
 return 0;
 }
