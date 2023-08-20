@@ -19650,6 +19650,7 @@ my $succ_msg = $succ ?
 	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
     &text('check_defhost_err', $system_host_name);
 $config{'defaultdomain_name'} = $dom{'dom'};
+$config{'default_domain_ssl'} = 1 if ($succ);
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
