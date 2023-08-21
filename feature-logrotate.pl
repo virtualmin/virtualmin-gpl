@@ -51,7 +51,7 @@ if (@logs) {
 	# Check if any are already rotated
 	my @addlogs = @logs;
 	foreach my $c (@{$parent->{'members'}}) {
-		foreach my $n (@{$c->{'name'}}) {
+		foreach my $n (map { glob($_) } @{$c->{'name'}}) {
 			if (&indexof($n, @addlogs) >= 0) {
 				if ($already) {
 					# Already rotated in a block that
