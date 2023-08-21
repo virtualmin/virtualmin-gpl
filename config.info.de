@@ -31,7 +31,6 @@ theme_link=Klickziel für das Firmenlogo,3,Keines,50
 docs_link=Link-Ziel für zusätzliche Dokumentation,3,Keine,50
 docs_text=Link-Titel für zusätzliche Dokumentation,3,Keine oder Standard,50
 show_nf=Zeige neue Features an für,2,master-Masteradmin,reseller-Reseller,domain-Domaineigentümer
-hide_alias=Alias-Virtualserver in Menü einschließen?,1,0-Ja,1-Nein
 line1.5=Serveradministrator&#45;Rechte,11
 edit_afiles=Darf Alias einbeziehen und Antwortdateien bearbeiten?,1,1-Ja,0-Nein
 edit_homes=Darf Heimatverzeichnisse für die Benutzer auswählen?,1,1-Ja,0-Nein

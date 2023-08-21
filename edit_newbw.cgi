@@ -115,7 +115,7 @@ print &ui_table_row(&hlink($text{'newbw_servers'}, "bandwidth_serversmode"),
 			        [ 1, $text{'newbw_servers1'} ],
 			        [ 2, $text{'newbw_servers2'} ] ])."<br>\n".
 		    &servers_input("servers", \@servers,
-				   [ &list_domains() ]));
+				   [ &list_visible_domains() ]));
 
 # Log files for FTP and mail
 $defftplog = $config{'ftp'} ? &get_proftpd_log() : undef;

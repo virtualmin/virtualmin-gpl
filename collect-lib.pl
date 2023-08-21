@@ -22,7 +22,8 @@ $info->{'startstop'} = [ &get_startstop_links() ];
 # Counts for domains
 local $dusers = &count_domain_users();
 local $daliases = &count_domain_aliases(1);
-local @doms = &list_domains();
+local @doms = &list_visible_domains();
+local @doms_all = &list_domains();
 local %fcount = map { $_, 0 } @features;
 $fcount{'doms'} = 0;
 foreach my $d (@doms) {
@@ -178,7 +179,7 @@ my @vposs = grep { &is_virtualmin_package($_) } @{$info->{'poss'}};
 $info->{'vposs'} = \@vposs;
 
 # SSL certificate expiries
-foreach my $d (@doms) {
+foreach my $d (@doms_all) {
 	if (!&domain_has_ssl_cert($d)) {
 		# Doesn't even have SSL, so clear cache fields
 		if ($d->{'ssl_cert_expiry'}) {
@@ -201,7 +202,7 @@ foreach my $d (@doms) {
 
 # Domain registration expiries
 my $now = time();
-foreach my $d (@doms) {
+foreach my $d (@doms_all) {
 	next if (!$d->{'dns'});
 	next if ($d->{'whois_next'} && $now < $d->{'whois_next'});
 

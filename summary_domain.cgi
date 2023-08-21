@@ -38,7 +38,7 @@ else {
 
 # Default domain
 if ($d->{'defaultdomain'}) {
-	print &ui_table_row($text{'wizard_defdom_desc'},
+	print &ui_table_row($text{'check_defhost_desc'},
 			    $text{'yes'}, undef, \@tds);
 	}
 
@@ -174,7 +174,7 @@ if (!$aliasdom && $d->{'dir'}) {
 
 # Description
 if ($d->{'owner'} && 
-	$d->{'owner'} ne $text{'wizard_defdom_desc'}) {
+	$d->{'owner'} ne $text{'check_defhost_desc'}) {
 	my $owner = $d->{'owner'};
 	if (&can_config_domain($d)) {
 		$owner = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$owner</a>"

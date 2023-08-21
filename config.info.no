@@ -33,7 +33,6 @@ theme_link=Lenke-mål for firmalogo,3,Ingen,50
 docs_link=Lenke-mål for ekstra dokumentasjon,3,Ingen,50
 docs_text=Lenke-tittel for ekstra dokumentasjon,3,Ingen eller standard,50
 show_nf=Vis nye funksjoner til,2,master-Master administrator,domain-Domene eiere
-hide_alias=Ta med alias virtuelle tjenere i meny,1,0-Ja,1-Nei
 line1.5=Tillatelser for tjener administrator,11
 edit_afiles=Kan redigere alias include og reply filer?,1,1-Ja,0-Nei
 edit_homes=Kan velge hjemmekataloger for brukere?,1,1-Ja,0-Nei

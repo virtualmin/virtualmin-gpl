@@ -8,7 +8,7 @@ require './virtual-server-lib.pl';
 
 # Check and parse inputs
 if ($in{'servers_def'}) {
-	@doms = &list_available_domains();
+	@doms = &list_visible_domains();
 	}
 else {
 	foreach $id (split(/\0/, $in{'servers'})) {

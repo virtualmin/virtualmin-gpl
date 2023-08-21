@@ -15,7 +15,7 @@ print &ui_form_start("notify.cgi", "form-data");
 print &ui_table_start($text{'newnotify_header'}, undef, 2);
 
 # Servers to email
-@doms = grep { $_->{'emailto'} } &list_domains();
+@doms = grep { $_->{'emailto'} } &list_visible_domains();
 print &ui_table_row($text{'newnotify_servers'},
 		    &ui_radio("servers_def", 1,
 			[ [ 1, $text{'newips_all'} ],

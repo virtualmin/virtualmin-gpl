@@ -124,7 +124,7 @@ print "$text{'newscripts_desc3'}<p>\n";
 
 # Find those we actually use, and the minimum version of each installed
 @all_scripts = ( );
-foreach $d (&list_domains()) {
+foreach $d (&list_visible_domains()) {
 	&detect_real_script_versions($d);
 	foreach my $sinfo (&list_domain_scripts($d)) {
 		$n = $sinfo->{'name'};
@@ -162,7 +162,7 @@ if (@opts) {
 			    &ui_select("script", undef, \@opts));
 
 	# Servers to upgrade
-	@doms = grep { !$_->{'disabled'} } &list_domains();
+	@doms = grep { !$_->{'disabled'} } &list_visible_domains();
 	print &ui_table_row($text{'newscripts_servers'},
 			    &ui_radio("servers_def", 1,
 				[ [ 1, $text{'newips_all'} ],
@@ -212,7 +212,7 @@ print &ui_table_row($text{'newscripts_wservers'},
 			        [ 1, $text{'newbw_servers1'} ],
 			        [ 2, $text{'newbw_servers2'} ] ])."<br>\n".
 		    &servers_input("servers", \@servers,
-				   [ &list_domains() ]));
+				   [ &list_visible_domains() ]));
 
 # Notification schedule
 $sched = $job ? &parse_cron_schedule($job)
