@@ -29,7 +29,8 @@ foreach $t (@tmpls) {
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $t->{'id'}, 'disabled' => $t->{'standard'} },
-		ui_link("edit_tmpl.cgi?id=$t->{'id'}", $t->{'name'}),
+		ui_link("edit_tmpl.cgi?id=$t->{'id'}",
+			&html_escape($t->{'name'})),
 		$t->{'skel'} eq "none" ? $text{'newtmpl_none'} :
 		$t->{'skel'} eq "" ? $text{'default'} :
 				     "<tt>$t->{'skel'}</tt>",

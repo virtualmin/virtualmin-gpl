@@ -10391,6 +10391,7 @@ local $rv;
 local $col = 0;
 foreach my $f (&list_custom_fields()) {
 	local ($desc, $tip) = split(/;/, $f->{'desc'}, 2);
+	$desc = &html_escape($desc);
 	if ($tip) {
 		$desc = "<div title='".&quote_escape($tip)."'>$desc</div>";
 		}
