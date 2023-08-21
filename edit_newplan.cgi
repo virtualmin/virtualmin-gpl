@@ -61,7 +61,8 @@ if (@aplans) {
 	print "<b>$text{'plans_setdef'}</b>\n";
 	print &ui_select("plan", $defplan ? $defplan->{'id'} : '',
 			 [ [ '', "&lt;$text{'plans_nodef'}&gt;" ],
-			   map { [ $_->{'id'}, $_->{'name'} ] } @aplans ]);
+			   map { [ $_->{'id'}, &html_escape($_->{'name'}) ] }
+			       @aplans ]);
 	print &ui_submit($text{'plans_savedef'});
 	print &ui_form_end();
 	}
