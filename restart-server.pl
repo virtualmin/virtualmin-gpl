@@ -8,6 +8,10 @@ This command stops and re-starts one of the servers managed by Virtualmin,
 such as Apache or BIND. The server to restart must be set using the
 C<--server> flag, followed by a feature name like C<web> or C<dns>.
 
+For server types that have multiple versions such as FPM, you can select
+the version to restart with the C<--version> flag. Or use C<--domain> to find
+automatically select the correct version for the given domain.
+
 =cut
 
 package virtual_server;
@@ -34,6 +38,9 @@ while(@ARGV > 0) {
 	if ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
+	elsif ($a eq "--version") {
+		$ver = shift(@ARGV);
+		}
 	elsif ($a eq "--server") {
 		$sname = shift(@ARGV);
 		}
@@ -54,10 +61,13 @@ $sname || &usage("Missing name of server to restart");
 foreach my $f (@startstop_features) {
 	my $sfunc = "startstop_".$f;
 	if ($config{$f} && defined(&$sfunc)) {
-		if ($f eq $sname) {
-			$found = 1;
+		foreach my $s (&$sfunc()) {
+			my $sf = $s->{'feature'} || $f;
+			if ($sf eq $sname) {
+				$found = 1;
+				}
+			push(@slist, $sf);
 			}
-		push(@slist, $f);
 		}
 	}
 foreach my $f (&list_startstop_plugins()) {
@@ -66,13 +76,23 @@ foreach my $f (&list_startstop_plugins()) {
 		}
 	push(@slist, $f);
 	}
+@slist = &unique(@slist);
 $found || &usage("Server $sname does not exist. Valid servers are : ".join(" ", @slist));
 
+# Get the FPM version from the domain
+if ($sname eq "fpm" && !$ver) {
+	$dname || &usage("When restarting the FPM server, either the --version or --domain flag must be given");
+	$d = &get_domain_by("dom", $dname);
+	$d || &usage("Virtual server $dname does not exist");
+	my $conf = &get_php_fpm_config($d);
+	$conf || &usage("No FPM config found for $dname");
+	$ver = $conf->{'version'};
+	}
+
 # Restart the server
-&$first_print("Restarting server type $sname ...");
+&$first_print("Restarting server $sname".($ver ? " version $ver" : "")." ...");
 if ($found == 1) {
 	# Core server
-	# XXX get FPM version
 	my $startfunc = "start_service_".$sname;
 	my $stopfunc = "stop_service_".$sname;
 	$err = &$stopfunc($ver);
@@ -104,7 +124,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Restarts one of the servers managed by Virtualmin.\n";
 print "\n";
 print "virtualmin restart-server --server name\n";
-print "                         [--domain name]\n";
+print "                         [--domain name | --version number]\n";
 exit(1);
 }
 
