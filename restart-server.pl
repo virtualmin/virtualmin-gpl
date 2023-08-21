@@ -47,6 +47,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
+	elsif ($a eq "--quiet") {
+		$quiet = 1;
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -82,7 +85,7 @@ $found || &usage("Server $sname does not exist. Valid servers are : ".join(" ", 
 # Get the FPM version from the domain
 if ($sname eq "fpm" && !$ver) {
 	$dname || &usage("When restarting the FPM server, either the --version or --domain flag must be given");
-	$d = &get_domain_by("dom", $dname);
+	$d = &get_domain($dname) || &get_domain_by("dom", $dname);
 	$d || &usage("Virtual server $dname does not exist");
 	my $conf = &get_php_fpm_config($d);
 	$conf || &usage("No FPM config found for $dname");
@@ -90,7 +93,9 @@ if ($sname eq "fpm" && !$ver) {
 	}
 
 # Restart the server
-&$first_print("Restarting server $sname".($ver ? " version $ver" : "")." ...");
+if (!$quiet) {
+	&$first_print("Restarting server $sname".($ver ? " version $ver" : "")." ...");
+	}
 if ($found == 1) {
 	# Core server
 	my $startfunc = "start_service_".$sname;
@@ -107,11 +112,13 @@ else {
 		$err = &plugin_call($sname, "feature_start_service", $ver);
 		}
 	}
-if ($err) {
-	&$second_print(".. failed : $err");
-	}
-else {
-	&$second_print(".. done");
+if (!$quiet) {
+	if ($err) {
+		&$second_print(".. failed : $err");
+		}
+	else {
+		&$second_print(".. done");
+		}
 	}
 
 &run_post_actions();
@@ -125,6 +132,7 @@ print "Restarts one of the servers managed by Virtualmin.\n";
 print "\n";
 print "virtualmin restart-server --server name\n";
 print "                         [--domain name | --version number]\n";
+print "                         [--quiet]\n";
 exit(1);
 }
 

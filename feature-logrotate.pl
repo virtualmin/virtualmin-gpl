@@ -619,7 +619,17 @@ sub get_postrotate_script
 {
 my ($d) = @_;
 my $p = &domain_has_website($d);
+return undef if (!$p);
 my $script;
+my $mode = &get_domain_php_mode($d);
+my $fpmcmd = undef;
+if ($mode eq "fpm" && $d->{'php_error_log'}) {
+	# Also needs to restart the FPM server
+	my $conf = &get_php_fpm_config($d);
+	if ($conf && $conf->{'init'}) {
+		$fpmcmd = "virtualmin restart-server --server fpm --domain $d->{'id'} --quiet";
+		}
+	}
 if ($p eq 'web') {
 	# Get restart command from Apache
 	my $apachectl = $apache::config{'apachectl_path'} ||
@@ -631,11 +641,13 @@ if ($p eq 'web') {
 	$script = $apache::config{'graceful_cmd'} ||
 		  $apply_cmd ||
 		  "$apachectl graceful";
+	$script .= " ; $fpmcmd" if ($fpmcmd);
 	$script .= " ; sleep 5";
 	}
 else {
 	# Ask plugin
 	$script = &plugin_call($p, "feature_restart_web_command", $d);
+	$script .= " ; $fpmcmd" if ($fpmcmd);
 	}
 return $script;
 }
