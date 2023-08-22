@@ -41,7 +41,6 @@ push(@rv, { 'type' => 'text',
 push(@rv, { 'type' => 'hr' });
 
 # Get domains and find the default
-my @alldoms = &list_domains();
 my @doms = &list_visible_domains();
 my ($d, $did);
 if (defined($in->{'dom'})) {
@@ -112,7 +111,7 @@ elsif (@doms) {
 else {
 	# No domains!
 	push(@rv, { 'type' => 'text',
-		    'desc' => @alldoms ? $text{'left_noaccess'}
+		    'desc' => @doms ? $text{'left_noaccess'}
 				       : $text{'left_nodoms'} });
 	}
 

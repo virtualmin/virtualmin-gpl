@@ -1479,31 +1479,31 @@ return &check_pid_file(&apache::get_pid_file());
 # text lines
 sub apache_template
 {
-local $dirs = $_[0];
+my ($dirs, $d) = @_;
 $dirs =~ s/\t/\n/g;
-$dirs = &substitute_domain_template($dirs, $_[1]);
+$dirs = &substitute_domain_template($dirs, $d);
 local @dirs = split(/\n/, $dirs);
 local ($sudir, $ppdir);
 foreach (@dirs) {
 	$sudir++ if (/^\s*SuexecUserGroup\s/i);
 	$ppdir++ if (/^\s*ProxyPass\s/);
 	}
-local $tmpl = &get_template($_[1]->{'template'});
-local $pdom = $_[1]->{'parent'} ? &get_domain($_[1]->{'parent'}) : $_[1];
+local $tmpl = &get_template($d->{'template'});
+local $pdom = $d->{'parent'} ? &get_domain($d->{'parent'}) : $d;
 if (!$sudir && $pdom->{'unix'}) {
 	# Automatically add suexec directives if missing
 	unshift(@dirs, "SuexecUserGroup \"#$pdom->{'uid'}\" ".
 		       "\"#$pdom->{'ugid'}\"");
 	}
-if (!$ppdir && $_[1]->{'proxy_pass'}) {
+if (!$ppdir && $d->{'proxy_pass'}) {
 	# Add proxy directives
-	push(@dirs, &apache_proxy_directives($_[1]));
+	push(@dirs, &apache_proxy_directives($d));
 	}
 if ($tmpl->{'web_writelogs'}) {
 	# Fix any CustomLog or ErrorLog directives to write via writelogs.pl
-	foreach $d (@dirs) {
-		if ($d =~ /^(\s*)(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
-			$d = "$1$2 \"|$writelogs_cmd $_[1]->{'id'} $3\"$4";
+	foreach my $dir (@dirs) {
+		if ($dir =~ /^(\s*)(CustomLog|ErrorLog)\s+(\S+)(\s*\S*)/) {
+			$dir = "$1$2 \"|$writelogs_cmd $d->{'id'} $3\"$4";
 			}
 		}
 	}
@@ -1523,6 +1523,15 @@ if ($supp) {
 if (!&supports_suexec()) {
 	# Remove unsupported SuexecUserGroup directive
 	@dirs = grep { !/^\s*SuexecUserGroup\s/i } @dirs;
+	}
+if ($d->{'dom_defnames'}) {
+	# If domain level config has server default
+	# names set, remove those not in the list
+	@dirs = grep { &indexof($_, grep {
+		$_ =~ /^(ServerName|ServerAlias)\s+(?<r_serv_name>.*)/ &&
+		&indexof($+{r_serv_name}, split(/\s+/, $d->{'dom_defnames'})) < 0
+		} @dirs) < 0 } @dirs;
+	# XXXX Maybe add too? It already works in Nginx
 	}
 return @dirs;
 }

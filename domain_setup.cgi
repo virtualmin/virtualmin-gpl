@@ -72,7 +72,11 @@ else {
 &lock_domain_name($dname);
 $in{'owner'} =~ s/\r|\n//g;
 $in{'owner'} =~ /:/ && &error($text{'setup_eowner'});
-&domain_name_clash($dname) && &error($text{'setup_edomain4'});
+my $clashed = &domain_name_clash($dname);
+&error($clashed->{'defaulthostdomain'} ?
+		&text('setup_edomain5', $clashed->{'dom'}) :
+			$text{'setup_edomain4'})
+				if ($clashed);
 $tmpl = &get_template($in{'template'});
 &can_use_template($tmpl) || &error($text{'setup_etmpl'});
 if (!$parentdom) {

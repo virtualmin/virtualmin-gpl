@@ -568,7 +568,11 @@ if (!$skipwarnings) {
 	&usage($err) if ($err);
 	}
 &lock_domain_name($domain);
-&domain_name_clash($domain) && &usage($text{'setup_edomain4'});
+my $clashed = &domain_name_clash($domain);
+&usage($clashed->{'defaulthostdomain'} ?
+		&text('setup_edomain5', $clashed->{'dom'}) :
+			$text{'setup_edomain4'})
+				if ($clashed);
 if ($parentdomain) {
 	$parent = &get_domain_by("dom", $parentdomain);
 	$parent || &usage("Parent domain does not exist");

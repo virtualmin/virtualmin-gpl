@@ -23,7 +23,7 @@ print &ui_form_start("validate.cgi", "post");
 print &ui_table_start($text{'newvalidate_header'}, undef, 2);
 
 # Servers to check
-@doms = &list_available_domains();
+@doms = &list_visible_domains();
 print &ui_table_row($text{'newvalidate_servers'},
 		    &ui_radio("servers_def", 1,
 			[ [ 1, $text{'newips_all'} ],

@@ -20,7 +20,7 @@ print &ui_table_row($text{'retention_policy'},
 		]));
 
 # Apply to domains
-@alldoms = &list_domains();
+@alldoms = &list_visible_domains();
 print &ui_table_row($text{'retention_doms'},
 	&ui_radio("mode", $config{'retention_mode'} || 0,
 		  [ [ 0, $text{'retention_domsall'}."<br>" ],

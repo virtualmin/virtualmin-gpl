@@ -106,24 +106,26 @@ foreach $d (@files) {
 return @rv;
 }
 
-# list_visible_domains()
+# list_visible_domains([opts])
 # Returns a list of domain structures the current user can see, for use in
 # domain menus. Excludes those that he doesn't have access to, and perhaps
 # alias domains.
 sub list_visible_domains
 {
+my ($opts) = @_;
 my @rv = grep { &can_edit_domain($_) } &list_domains();
-if ($config{'hide_alias'}) {
-	@rv = grep { !$_->{'alias'} } @rv;
-	}
-return @rv;
-}
 
-# list_available_domains()
-# Returns a list of domain structures the current user has access to
-sub list_available_domains
-{
-return grep { &can_edit_domain($_) } &list_domains();
+# Always exclude default host domain
+my $exclude_defaulthostdomain =
+	{ 'exclude' => 'defaulthostdomain' };
+$opts = {%$opts, %$exclude_defaulthostdomain}
+	if ($config{'default_domain_ssl'} != 2);
+
+# Exclude domains based on given field
+@rv = grep { ! $_->{$opts->{'exclude'}} } @rv
+	if ($opts->{'exclude'});
+
+return @rv;
 }
 
 # sort_indent_domains(&domains)
@@ -7821,19 +7823,19 @@ return 1;
 # Returns 1 if some domain name is already in use
 sub domain_name_clash
 {
-local ($domain) = @_;
+my ($domain) = @_;
 foreach my $d (&list_domains()) {
-        return 1 if (lc($d->{'dom'}) eq lc($domain));
+        return $d if (lc($d->{'dom'}) eq lc($domain));
         }
 return 0;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#			[no-post-actions], [password], [content])
+#                       [no-post-actions], [password], [content], [template-overrides])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
-local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass,$content) = @_;
+local ($dom, $parentdom, $parentuser, $noscripts, $nopost, $pass, $content) = @_;
 
 # Sanity checks
 $dom->{'ip'} || return $text{'setup_edefip'};
@@ -7914,7 +7916,7 @@ if ($parentdom) {
 
 # Was this originally the default domain?
 if (!defined($dom->{'defaultdomain'})) {
-	$dom->{'defaultdomain'} = 1
+	$dom->{'defaultdomain'} = 1, $dom->{'defaulthostdomain'} = 1
 		if ($dom->{'dom'} eq $config{'defaultdomain_name'});
 	}
 
@@ -8395,7 +8397,7 @@ local $merr = &made_changes();
 &$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
 &reset_domain_envs($dom);
 
-return undef;
+return wantarray ? ($dom) : undef;
 }
 
 # create_initial_letsencrypt_cert(&domain, [validate-first])
@@ -9968,12 +9970,13 @@ if ($save_config) {
 undef(@list_templates_cache);
 }
 
-# get_template(id)
+# get_template(id, [template-overrides])
 # Returns a template, with any default settings filled in from real default
 sub get_template
 {
+my ($tmplid) = @_;
 local @tmpls = &list_templates();
-local ($tmpl) = grep { $_->{'id'} == $_[0] } @tmpls;
+local ($tmpl) = grep { $_->{'id'} == $tmplid } @tmpls;
 return undef if (!$tmpl);	# not found
 if (!$tmpl->{'default'}) {
 	local $def = $tmpls[0];
@@ -10039,6 +10042,7 @@ if (!$tmpl->{'default'}) {
 	# in this template, but we are using the GPL release
 	$tmpl->{'web_ruby_suexec'} = -1 if ($tmpl->{'web_ruby_suexec'} eq '');
 	}
+
 return $tmpl;
 }
 
@@ -16416,9 +16420,12 @@ if (-d $profiled && !-r $profiledphpalias) {
 	"if \[ -x \"\$php\" \]; then\n".
 		"  alias php='\$\(phpdom=\"bin/php\" ; \(while [ ! -f \"\$phpdom\" ] && [ \"\$PWD\" != \"/\" ]; do cd \"\$\(dirname \"\$PWD\"\)\" || \"\$php\" ; done ; if [ -f \"\$phpdom\" ] ; then echo \"\$PWD/\$phpdom\" ; else echo \"\$php\" ; fi\)\)'\n".
 	"fi\n";
-	write_file_contents($profiledphpalias, $phpalias);
+	&write_file_contents($profiledphpalias, $phpalias);
 	&$second_print($text{'setup_done'});
 	}
+
+# Check host default domain
+&check_virtualmin_default_hostname_ssl();
 
 # Restart lookup-domain daemon, if need
 if ($config{'spam'} && !$config{'no_lookup_domain_daemon'}) {
@@ -17484,7 +17491,7 @@ sub count_domain_users
 {
 local %rv;
 local (%homemap, %doneuser, %gidmap);
-foreach my $d (&list_domains()) {
+foreach my $d (&list_visible_domains()) {
 	$homemap{$d->{'home'}} = $d->{'id'};
 	$gidmap{$d->{'gid'}} = $d->{'id'} if (!$d->{'parent'});
 	}
@@ -19498,6 +19505,311 @@ if (defined(&get_sub_ref_name)) {
 	if ($print_mode &&
 	    $print_mode =~ /_html_/) {
 		return &text(@_);
+		}
+	}
+}
+
+# setup_virtualmin_default_hostname_ssl()
+# Setup default hostname domain with SSL certificate,
+# unless previously default domain has not been setup
+# and return error message or undef on success
+sub setup_virtualmin_default_hostname_ssl
+{
+my $wantarr = wantarray;
+my $err = sub {
+	my ($msg, $code, $d) = @_;
+	return $wantarr ? ($code || 0, $msg, $d) : $code || 0;
+	};
+
+# Can create
+return &$err(&text('check_defhost_cannot', $remote_user))
+		if (!&can_create_master_servers());
+
+my $is_default_domain = &get_domain_by("defaultdomain", 1);
+my $system_host_name = &get_system_hostname();		
+if ($system_host_name !~ /\./) {
+	my $system_host_name_ = &get_system_hostname(0, 1);
+	$system_host_name = $system_host_name_
+		if ($system_host_name_ =~ /\./);
+	}
+
+# Hostname should be FQDN
+return &$err(&text('check_defhost_nok', $system_host_name))
+	if ($system_host_name !~ /(\.[^.]+){2,}/);
+
+# Check if domain already exist for some reason
+return &$err(&text('check_defhost_clash', $system_host_name))
+	if (&get_domain_by("dom", $system_host_name) ||
+		$is_default_domain->{'dom'});
+
+# Setup from source
+my $setup_source = $0;
+
+&lock_domain_name($system_host_name);
+
+# Work out username / etc
+my ($user, $try1, $try2);
+$user = "_default_hostname";
+if (defined(getpwnam($user))) {
+	($user, $try1, $try2) = &unixuser_name($system_host_name);
+	}
+$user || return &$err(&text('setup_eauto', $try1, $try2));
+my ($group, $gtry1, $gtry2);
+$group = "_default_hostname";
+if (defined(getgrnam($group))) {
+	($group, $gtry1, $gtry2) = &unixgroup_name($system_host_name, $user);
+	}
+$group || return &$err(&text('setup_eauto2', $try1, $try2));
+my $defip = &get_default_ip();
+my $defip6 = &get_default_ip6();
+my $template = &get_init_template();
+my $plan = &get_default_plan();
+
+# Create the virtual server object
+my %dom;
+%dom = ('id', &domain_id(),
+	'dom', $system_host_name,
+	'user', $user,
+	'group', $group,
+	'ugroup', $group,
+	'owner', $text{'check_defhost_desc'},
+	'name', 1,
+	'name6', 1,
+	'ip', $defip,
+	'dns_ip', &get_dns_ip(),
+	'virt', 0,
+	'virtalready', 0,
+	'ip6', $defip6,
+	'virt6', 0,
+	'virt6already', 0,
+	'pass', &random_password(),
+	'quota', 0,
+	'uquota', 0,
+	'source', $setup_source,
+	'template', $template,
+	'plan', $plan->{'id'},
+	'prefix', $prefix,
+	'nocreationmail', 1,
+	'nowebmailredirect', 1,
+	'nodnsspf', 1,
+	'hashpass', 1,
+	'nocreationscripts', 1,
+	'defaultdomain', 1,
+	'defaulthostdomain', 1,
+	'letsencrypt_dwild', 0,
+	'defaultshell', '/dev/null',
+	'dns_initial_records', '@',
+	'nodnsdmarc', 1,
+	'default_php_mode', 4,
+	'dom_defnames', $system_host_name
+    );
+
+# Set initial features
+$dom{'dir'} = 1;
+$dom{'unix'} = 1;
+$dom{'dns'} = 1;
+$dom{'mail'} = 0;
+my $webf = &domain_has_website();
+my $sslf = &domain_has_ssl();
+$dom{$webf} = 1;
+$dom{$sslf} = 1;
+$dom{'letsencrypt_dname'} = $system_host_name;
+$dom{'auto_letsencrypt'} = 2;
+
+# Fill in other default fields
+&set_limits_from_plan(\%dom, $plan);
+&set_capabilities_from_plan(\%dom, $plan);
+$dom{'emailto'} = $dom{'user'}.'@'.&get_system_hostname();
+$dom{'db'} = &database_name(\%dom);
+&set_featurelimits_from_plan(\%dom, $plan);
+&set_chained_features(\%dom, undef);
+&set_provision_features(\%dom);
+&generate_domain_password_hashes(\%dom, 1);
+$dom{'home'} = &server_home_directory(\%dom, undef);
+$dom{'home'} =~ s/(\/)(?=[^\/]*$)/$1./;
+&complete_domain(\%dom);
+
+# Check for various clashes
+$derr = &virtual_server_depends(\%dom);
+return &$err($derr) if ($derr);
+$cerr = &virtual_server_clashes(\%dom);
+return &$err($cerr) if ($cerr);
+my @warns = &virtual_server_warnings(\%dom);
+return &$err(join(" ", @warns)) if (@warns);
+
+# Create the server
+&push_all_print();
+&set_all_null_print();
+my ($rs) = &create_virtual_server(
+	\%dom, undef, undef, 1, 0, $pass, $dom{'owner'});
+&pop_all_print();
+return &$err($rs) if ($rs && ref($rs) ne 'HASH');
+my $succ = $rs->{'letsencrypt_last'} ? 1 : 0;
+# Perhaps shared SSL certificate was installed, trust it
+$succ = 2 if ($rs->{'ssl_same'});
+my $succ_msg = $succ ? 
+	&text($succ == 2 ? 'check_defhost_sharedsucc' : 'check_defhost_succ', $system_host_name) :
+    &text('check_defhost_err', $system_host_name);
+$config{'defaultdomain_name'} = $dom{'dom'};
+$config{'default_domain_ssl'} = 1
+	if ($succ && !$config{'default_domain_ssl'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+&run_post_actions_silently();
+&unlock_domain_name($system_host_name);
+return &$err($succ_msg, $succ, $rs);
+}
+
+# delete_virtualmin_default_hostname_ssl()
+# Delete default hostname domain
+sub delete_virtualmin_default_hostname_ssl
+{
+# Test host default domain being deleted
+my $d = &get_domain_by("defaulthostdomain", 1);
+return if (!$d->{'dom'});
+return if (!&can_delete_domain($d));
+# Delete host default domain
+# &lock_domain_name($d->{'dom'});   #### XXXX do we need locking on delete?
+&push_all_print();
+&set_all_null_print();
+$err = &delete_virtual_server($d, 0, 0);
+&pop_all_print();
+&run_post_actions_silently();
+# &unlock_domain_name($d->{'dom'}); #### XXXX
+&lock_file($module_config_file);
+$config{'defaultdomain_name'} = undef;
+&save_module_config();
+&unlock_file($module_config_file);
+return wantarray ? (0, $err) : 0 if ($err);
+return wantarray ? (1, undef) : 1;
+}
+
+# rename_default_domain_ssl(&domain, new_hostname)
+# Rename default hostname domain
+sub rename_default_domain_ssl
+{
+my ($d, $new_hostname) = @_;
+if (!&can_edit_domain($d) || !&can_edit_ssl() || !&can_webmin_cert()) {
+	return 0;
+	}
+
+# Try renaming default domain
+&push_all_print();
+&set_all_null_print();
+my $err = &rename_virtual_server($d, $new_hostname);
+
+# Update state of all certs
+my @already = &get_all_domain_service_ssl_certs($d);
+foreach my $st (&list_service_ssl_cert_types()) {
+	next if (!$st->{'dom'} && !$st->{'virt'});
+	next if (!$st->{'dom'} && !$d->{'virt'});
+	my ($a) = grep { $_->{'d'} && $_->{'id'} eq $st->{'id'} } @already;
+	my $func = "sync_".$st->{'id'}."_ssl_cert";
+	my $ok = 1;
+	$ok = &$func($d, 1) if (!$a);
+	$err = 1 if (!$ok);
+	}
+# Update config entry
+$config{'defaultdomain_name'} = $new_hostname;
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+&run_post_actions_silently();
+&pop_all_print();
+return $err ? 0 : 1;
+}
+
+# check_virtualmin_default_hostname_ssl()
+# Check default host domain
+sub check_virtualmin_default_hostname_ssl
+{
+# Get actual system hostname
+my $system_host_name = &get_system_hostname();		
+if ($system_host_name !~ /\./) {
+	my $system_host_name_ = &get_system_hostname(0, 1);
+	$system_host_name = $system_host_name_
+		if ($system_host_name_ =~ /\./);
+	}
+my $remove_default_host_domain = sub {
+	my ($silent_print) = @_;	
+	if ($silent_print) {
+		&push_all_print();
+		&set_all_null_print();
+		}
+	&$first_print(&text('check_hostdefaultdomain_disable', $system_host_name));
+		my ($ok, $rsmsg) = &delete_virtualmin_default_hostname_ssl();
+		if (!$ok) {
+			&$second_print(&text('check_apicmderr', $rsmsg));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+	if ($silent_print) {
+		&pop_all_print();
+		}
+	};
+my $new_default_domain = &get_domain_by("defaulthostdomain", 1);
+if ($new_default_domain->{'dom'}) {
+	if ($config{'default_domain_ssl'}) {
+		my $known_default_domain = $config{'defaultdomain_name'};
+		my $hostname_changed = $known_default_domain ne $system_host_name;
+		my $failed_le = !$new_default_domain->{'letsencrypt_last'} && !$new_default_domain->{'ssl_same'};
+		my $text_msg = $hostname_changed ?
+			'check_hostdefaultdomain_change' : 'check_hostdefaultdomain_enable';
+		if ($hostname_changed || $failed_le) {
+			&$first_print(&text($text_msg, $known_default_domain, $system_host_name));
+			my ($defdom_status, $defdom_msg);
+			if ($hostname_changed) {
+				$defdom_status = &rename_default_domain_ssl($new_default_domain, $system_host_name);
+				}
+			else {
+				&$remove_default_host_domain(1);
+				($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+				}
+			if ($defdom_status == 2) {
+				&$second_print($text{'check_defhost_sharedsucc2'});
+				}
+			elsif ($defdom_status == 1) {
+				&$second_print($text{'setup_done'});
+				}
+			else {
+				# Remove on failure unless host
+				# default domain set to be visible
+				&$remove_default_host_domain(1)
+					if ($config{'default_domain_ssl'} != 2 &&
+					    !$hostname_changed);
+				&$second_print(&text('check_apicmderr', $defdom_msg));
+				}
+			}
+		}
+	else {
+		&$remove_default_host_domain();
+		}
+	}
+elsif ($config{'default_domain_ssl'}) {
+	my $old_default_domain = &get_domain_by("defaultdomain", 1);
+
+	&$first_print(&text('check_hostdefaultdomain_enable', $system_host_name));
+	if ($old_default_domain->{'dom'} && !$old_default_domain->{'defaulthostdomain'}) {
+		&$second_print(&text('check_hostdefaultdomain_errold', $old_default_domain->{'dom'}));
+		}
+	else {
+		&$remove_default_host_domain(1);
+		my ($defdom_status, $defdom_msg) = &setup_virtualmin_default_hostname_ssl();
+		if ($defdom_status == 2) {
+			&$second_print($text{'check_defhost_sharedsucc2'});
+			}
+		elsif ($defdom_status == 1) {
+			&$second_print($text{'setup_done'});
+			}
+		else {
+			# Remove on failure unless host
+			# default domain set to be visible
+			&$remove_default_host_domain(1)
+				if ($config{'default_domain_ssl'} != 2);
+			&$second_print(&text('check_apicmderr', $defdom_msg));
+			}
 		}
 	}
 }

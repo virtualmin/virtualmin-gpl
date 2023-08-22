@@ -32,7 +32,6 @@ theme_link=Bestemming's link voor bedrijfs logo,3,Geen,50
 docs_link=Bestemming link voor extra documentatie,3,Geen,50
 docs_text=Link titel voor extra documentatie,3,Geen of standaard,50
 show_nf=Laat nieuwe opties zien aan,2,master-Hoofd administrator,reseller-Resellers,domain-Domein eigenaren
-hide_alias=Voeg alias virtuele server toe aan menu?,1,0-Ja,1-Nee
 line1.5=Server administratie permissies,11
 edit_afiles=Mag alias inclusief antwoord files bewerken?,1,1-Ja,0-Nee
 edit_homes=Mag home directory's selecteren voor gebruiker?,1,1-Ja,0-Nee,2-Alleen voor FTP website gebruikers
