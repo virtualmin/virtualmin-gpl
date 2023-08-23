@@ -1619,6 +1619,9 @@ if ($init::init_mode eq "rc") {
 	# On FreeBSD, the boot script name differs from the rc.conf entry
 	&init::enable_rc_script("spamd_enable");
 	}
+if (&init::action_status("spamassassin-maintenance.timer")) {
+	&init::enable_at_boot("spamassassin-maintenance.timer");
+	}
 &$second_print($text{'setup_done'});
 
 # Start now
@@ -1661,6 +1664,9 @@ if (!$init) {
 if ($init::init_mode eq "rc") {
 	# On FreeBSD, the boot script name differs from the rc.conf entry
 	&init::disable_rc_script("spamd_enable");
+	}
+if (&init::action_status("spamassassin-maintenance.timer")) {
+	&init::disable_at_boot("spamassassin-maintenance.timer");
 	}
 &$second_print($text{'setup_done'});
 
