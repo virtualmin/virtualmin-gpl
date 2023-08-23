@@ -42,6 +42,12 @@ if ($can) {
 		}
 	}
 
+# Run the before command
+&set_domain_envs($d, "MODIFY_DOMAIN", \%newdom);
+$merr = &making_changes();
+&reset_domain_envs($d);
+&error(&text('save_emaking', "<tt>$merr</tt>")) if (defined($merr));
+
 # Start telling the user what is being done
 &ui_print_unbuffered_header(&domain_in($d), $text{'phpmode_title2'}, "");
 &obtain_lock_web($d);
@@ -211,6 +217,12 @@ if (!$anything) {
 &release_lock_web($d);
 &clear_links_cache($d);
 &run_post_actions();
+
+# Run the after command
+&set_domain_envs($d, "MODIFY_DOMAIN", undef, $oldd);
+local $merr = &made_changes();
+&$second_print(&text('setup_emade', "<tt>$merr</tt>")) if (defined($merr));
+&reset_domain_envs($d);
 
 # Call any theme post command
 if (defined(&theme_post_save_domain)) {
