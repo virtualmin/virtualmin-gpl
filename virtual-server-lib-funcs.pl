@@ -8318,7 +8318,8 @@ if ($dom->{'auto_letsencrypt'} && &domain_has_website($dom) &&
 			&run_post_actions(\&restart_apache);
 			}
 		if (&create_initial_letsencrypt_cert(
-			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1)) {
+			$dom, $dom->{'auto_letsencrypt'} == 2 ? 0 : 1,
+			$config{'err_letsencrypt'})) {
 			# Let's encrypt cert request worked
 			$generated = 2;
 			}
@@ -8400,12 +8401,12 @@ local $merr = &made_changes();
 return wantarray ? ($dom) : undef;
 }
 
-# create_initial_letsencrypt_cert(&domain, [validate-first])
+# create_initial_letsencrypt_cert(&domain, [validate-first], [show-errors])
 # Create the initial default let's encrypt cert for a domain which has just
 # had SSL enabled. May print stuff.
 sub create_initial_letsencrypt_cert
 {
-local ($d, $valid) = @_;
+local ($d, $valid, $showerrors) = @_;
 &foreign_require("webmin");
 my @dnames;
 if ($d->{'letsencrypt_dname'}) {
@@ -8423,14 +8424,26 @@ if ($valid) {
 		}
 	my @errs = &validate_letsencrypt_config($d, $vcheck);
 	if (@errs) {
-		&$second_print($text{'letsencrypt_doing3failed'});
+		if ($showerrors) {
+			&$second_print(&text('letsencrypt_evalid',
+				&html_escape(join(", ", @errs))));
+			}
+		else {
+			&$second_print($text{'letsencrypt_doing3failed'});
+			}
 		return 0;
 		}
 	if (defined(&check_domain_connectivity)) {
 		@errs = &check_domain_connectivity(
 			$d, { 'mail' => 1, 'ssl' => 1 });
 		if (@errs) {
-			&$second_print($text{'letsencrypt_doing3failed'});
+			if ($showerrors) {
+				&$second_print(&text('letsencrypt_econnect',
+					&html_escape(join(", ", map { $_->{'desc'} } @errs))));
+				}
+			else {
+				&$second_print($text{'letsencrypt_doing3failed'});
+				}
 			return 0;
 			}
 		}
@@ -8442,7 +8455,12 @@ my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 					$d, \@dnames);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
-	&$second_print($text{'letsencrypt_doing3failed'});
+	if ($showerrors) {
+		&$second_print(&text('letsencrypt_failed',&html_escape($cert)));
+		}
+	else {
+		&$second_print($text{'letsencrypt_doing3failed'});
+		}
 	return 0;
 	}
 else {
