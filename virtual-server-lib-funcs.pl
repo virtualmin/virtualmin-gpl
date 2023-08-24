@@ -17009,8 +17009,8 @@ my ($wmport, $wmproto, $wmhost) = &get_miniserv_port_proto();
 # Domain defaults
 my $ddom = $d->{'dom'};
 my $ddomemail = $d->{'emailto'} || "abuse@$ddom";
-my $ddomdef = $d->{'defaultdomain'};
 my $dndis = $d->{'disabled_time'} ? 0 : 1;
+my $ddomdef = $d->{'defaultdomain'} && $dndis;
 my $diswhy = $d->{'disabled_why'} || $text{"${lpref}tmpltpagedommsglogindescnoreason0"};
 $diswhy = "$diswhy." if ($diswhy && $diswhy !~ /\.$/);
 my $ddompubhtml = $d->{'public_html_dir'} || 'public_html';
@@ -17038,7 +17038,7 @@ $h{$title} = "$ddom \&mdash;  " . $deftitle
 $h{$headtitle} = $deftitle if (!defined($h{$headtitle}));
 $h{$dom} = $ddom if (!defined($h{$dom}));
 $h{$statushead} = $text{$lpref . lc("$statushead$dndis")} if (!defined($h{$statushead}));
-$h{$status} = $text{"${lpref}tmpltpagedomstatus1"} if (!defined($h{$status}));
+$h{$status} = $text{"${lpref}tmpltpagedomstatus$dndis"} if (!defined($h{$status}));
 $h{$statustext} = $text{$lpref . lc("$statustext$dndis")} if (!defined($h{$statustext}));
 $h{$statusico} = "⊗" if (!defined($h{$statusico}) && !$dndis);
 $h{$dommsglogindesc} = &text($lpref . lc("$dommsglogindesc$dndis"), $dndis ? $ddompubhtml : $diswhy)
@@ -17063,9 +17063,10 @@ return %h;
 sub replace_default_index_page
 {
 my ($d, $content) = @_;
-my $type = $d->{'defaultdomain'} ? 'domain' : 'host';
+my $ddis = $d->{'disabled_time'};
+my $type = ($d->{'defaultdomain'} && !$ddis) ? 'domain' : 'host';
 $content =~ s/<x-(main|div)\s+data-type=["']\Q$type\E["'](.*?)<\/x-(main|div)>//gs;
-if ($d->{'disabled_time'}) {
+if ($ddis) {
 	$content =~ s/<a\s+data-login=["']\Qbutton\E["'](.*?)<\/a>//s,
 	$content =~ s/<x-div\s+data-postlogin=["']\Qcontainer\E["'](.*?)<\/x-div>//s,
 	map { $content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm } (0..1);

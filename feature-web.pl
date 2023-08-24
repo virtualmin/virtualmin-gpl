@@ -1151,7 +1151,6 @@ if ($tmpl->{'disabled_url'} eq 'none') {
 	&flush_file_lines($virt->{'file'});
 	local $def_tpl = &read_file_contents("$default_content_dir/index.html");
 	local %hashtmp = %$d;
-	$hashtmp{'TMPLTPAGEDOMSTATUS'} = $text{'deftmplt_tmpltpagedomstatus0'};
 	%hashtmp = &populate_default_index_page($d, %hashtmp);
 	$def_tpl = &replace_default_index_page($d, $def_tpl);
 	$def_tpl = &substitute_virtualmin_template($def_tpl, \%hashtmp);
