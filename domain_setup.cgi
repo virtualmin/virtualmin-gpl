@@ -511,7 +511,10 @@ if (!$dom{'alias'} && &domain_has_website(\%dom) &&
 		&open_tempfile_as_domain_user(
 			\%dom, DATA, ">$home/index.html");
 		$content =~ s/\n/<br>\n/g if ($content);
-		$content = &substitute_virtualmin_template($content, \%dom);
+		my %hashtmp = %dom;
+		%hashtmp = &populate_default_index_page(\%dom, %hashtmp);
+		$content = &replace_default_index_page(\%dom, $content);
+		$content = &substitute_virtualmin_template($content, \%hashtmp);
 		&print_tempfile(DATA, $content);
 		&close_tempfile_as_domain_user(\%dom, DATA);
 		};
