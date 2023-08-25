@@ -7656,7 +7656,6 @@ deftmplt_tmpltpagedommsglogin0=Cannot Login
 deftmplt_tmpltpagedommsglogindesc1=If you are a website owner, this default page appears because no website has been set up on this virtual server yet. To modify this page and upload your website, log in to Virtualmin panel and place your files in the <tt>$1</tt> directory.
 deftmplt_tmpltpagedommsglogindesc0=This website has been disabled for the following reason: $1
 deftmplt_tmpltpagedommsglogindescnoreason0=No reason given by the server administrator.
-deftmplt_tmpltpagedommsgloginlink=https://example.com:10000
 deftmplt_tmpltpagedommsgloginlinktext=Login to Virtualmin
 deftmplt_tmpltpagedommsgreport=Report
 deftmplt_tmpltpagedommsgreportdesc=If you believe there has been abusive or suspicious activity using this domain, please contact the domain owner at <tt>$1</tt> to report the issue. Your assistance in maintaining the integrity of this site is greatly appreciated.
