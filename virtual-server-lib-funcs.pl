@@ -19544,7 +19544,7 @@ return &$err(&text('check_defhost_cannot', $remote_user))
 		if (!&can_create_master_servers());
 
 my $is_default_domain = &get_domain_by("defaultdomain", 1);
-my $system_host_name = &get_system_hostname();		
+my $system_host_name = &get_system_hostname();
 if ($system_host_name !~ /\./) {
 	my $system_host_name_ = &get_system_hostname(0, 1);
 	$system_host_name = $system_host_name_
@@ -19637,7 +19637,7 @@ $dom{'auto_letsencrypt'} = 2;
 # Fill in other default fields
 &set_limits_from_plan(\%dom, $plan);
 &set_capabilities_from_plan(\%dom, $plan);
-$dom{'emailto'} = $dom{'user'}.'@'.&get_system_hostname();
+$dom{'emailto'} = $dom{'user'}.'@'.$system_host_name;
 $dom{'db'} = &database_name(\%dom);
 &set_featurelimits_from_plan(\%dom, $plan);
 &set_chained_features(\%dom, undef);
@@ -19743,7 +19743,7 @@ return $err ? 0 : 1;
 sub check_virtualmin_default_hostname_ssl
 {
 # Get actual system hostname
-my $system_host_name = &get_system_hostname();		
+my $system_host_name = &get_system_hostname();
 if ($system_host_name !~ /\./) {
 	my $system_host_name_ = &get_system_hostname(0, 1);
 	$system_host_name = $system_host_name_
