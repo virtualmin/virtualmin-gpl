@@ -17017,17 +17017,81 @@ if ($config{'mysql'}) {
 return &substitute_template($str, \%ghash);
 }
 
-# populate_default_index_page(string, &hash)
-# Replaces defaults for default/index.html 
-# template avoiding polluting context
+# populate_default_index_page(&dom, hash)
+# Populates defaults for index.html for the given domain
 sub populate_default_index_page
 {
-	my (%h) = @_;
-	$h{'TMPLTPAGETITLE'} = $text{'deftmplt_default_page'} if (!$h{'TMPLTPAGETITLE'});
-	$h{'TMPLTERROR'}     = $text{'deftmplt_error'} if (!$h{'TMPLTERROR'});
-	$h{'TMPLTTITLE'}     = $text{'deftmplt_website_enabled'} if (!$h{'TMPLTTITLE'});
-	$h{'TMPLTSLOGAN'}    = $text{'deftmplt_default_slog'} if (!$h{'TMPLTSLOGAN'});
-	return %h;
+my ($d, %h) = @_;
+my $lpref = 'deftmplt_';
+my ($wmport, $wmproto, $wmhost) = &get_miniserv_port_proto();
+# Domain defaults
+my $ddom = $d->{'dom'};
+my $ddomemail = $d->{'emailto'} || "abuse@$ddom";
+my $dndis = $d->{'disabled_time'} ? 0 : 1;
+my $ddomdef = $d->{'defaultdomain'};
+my $diswhy = $d->{'disabled_why'} || $text{"${lpref}tmpltpagedommsglogindescnoreason0"};
+$diswhy = "$diswhy." if ($diswhy && $diswhy !~ /\.$/);
+my $ddompubhtml = $d->{'public_html_dir'} || 'public_html';
+my $deftitle = ($ddomdef ?
+		$text{"${lpref}tmpltpagedefhost"} :
+			$text{"${lpref}tmpltpagedefdom"});
+# Template defaults variables
+my $lang = uc('tmpltpagelang');
+my $title = uc('tmpltpagetitle');
+my $headtitle = uc('tmpltpageheadtitle');
+my $dom = uc('tmpltpagedomname');
+my $statushead = uc('tmpltpagedommsg');
+my $status = uc('tmpltpagedomstatus');
+my $statustext = uc('tmpltpagedommsglogin');
+my $statusico = uc('tmpltpagedommsgloginico');
+my $dommsglogindesc = uc("tmpltpagedommsglogindesc");
+my $dommsgloginlink = uc('tmpltpagedommsgloginlink');
+my $dommsgreportdesc = uc('tmpltpagedommsgreportdesc');
+my $dommsgreportlink = uc('tmpltpagedommsgreportlink');
+my $pagefooteryear = uc('tmpltpagefooteryear');
+# Domain template defaults substitutions
+$h{$lang} = $current_lang if (!defined($h{$lang}));
+$h{$title} = "$ddom \&mdash;  " . $deftitle
+				if (!defined($h{$title}));
+$h{$headtitle} = $deftitle if (!defined($h{$headtitle}));
+$h{$dom} = $ddom if (!defined($h{$dom}));
+$h{$statushead} = $text{$lpref . lc("$statushead$dndis")} if (!defined($h{$statushead}));
+$h{$status} = $text{"${lpref}tmpltpagedomstatus$dndis"} if (!defined($h{$status}));
+$h{$statustext} = $text{$lpref . lc("$statustext$dndis")} if (!defined($h{$statustext}));
+$h{$statusico} = "⊗" if (!defined($h{$statusico}) && !$dndis);
+$h{$dommsglogindesc} = &text($lpref . lc("$dommsglogindesc$dndis"), $dndis ? $ddompubhtml : $diswhy)
+						if (!defined($h{$dommsglogindesc}));
+$h{$dommsgloginlink} = "$wmproto://$wmhost:$wmport" if (!defined($h{$dommsgloginlink}));
+$h{$dommsgreportdesc} = &text($lpref . lc($dommsgreportdesc), $ddomemail)
+						if (!defined($h{$dommsgreportdesc}));
+$h{$dommsgreportlink} = "mailto:$ddomemail" if (!defined($h{$dommsgreportlink}));
+$h{$pagefooteryear} = strftime('%Y',localtime) if (!defined($h{$pagefooteryear}));
+# Standard template defaults substitutions
+my (@deftmpls) = grep { $_ =~ s/^(\Q$lpref\E)// } keys %text;
+foreach my $deftmpl (@deftmpls) {
+	my $key = &trim(uc($deftmpl));
+	my $value = $text{"$lpref$deftmpl"};
+	$h{$key} = $value if (!defined($h{$key}) && $key !~ /\d$/);
+	}
+return %h;
+}
+
+# replace_default_index_page(&dom, content)
+# Replaces defaults for index.html for the given template in domain
+sub replace_default_index_page
+{
+my ($d, $content) = @_;
+my $ddis = $d->{'disabled_time'};
+my $type = ($d->{'defaultdomain'} && !$ddis) ? 'domain' : 'host';
+$content =~ s/<x-(main|div)\s+data-type=["']\Q$type\E["'](.*?)<\/x-(main|div)>//gs;
+if ($ddis) {
+	$content =~ s/<a\s+data-login=["']\Qbutton\E["'](.*?)<\/a>//s,
+	$content =~ s/<x-div\s+data-postlogin=["']\Qcontainer\E["'](.*?)<\/x-div>//s,
+	map { $content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm } (0..1);
+	$content =~ s/(data-login=["']row["'].*)(col-l.*)(".*)/$1col-lg-8 col-xl-7$3/gm;
+	}
+$content =~ s/x-(main|div)/$1/g;
+return $content;
 }
 
 # absolute_domain_path(&domain, path)
