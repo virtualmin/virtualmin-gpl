@@ -18689,9 +18689,9 @@ else {
 }
 
 # domain_has_website([&domain])
-# Returns 1 if a domain has a website, either via apache or a plugin.
-# If called without a domain parameter, just return the plugin or feature
-# that provides a website.
+# Returns the feature name if a domain has a website, either via apache or a
+# plugin. If called without a domain parameter, just return the plugin or
+# feature that provides a website.
 sub domain_has_website
 {
 my ($d) = @_;
@@ -18705,9 +18705,9 @@ return undef;
 }
 
 # domain_has_ssl([&domain])
-# Returns 1 if a domain has a website with SSL, either via apache or a plugin
-# If called without a domain parameter, just return the plugin or feature
-# that provides an SSL website.
+# Returns the feature name if a domain has a website with SSL, either via
+# apache or a plugin. If called without a domain parameter, just return the
+# plugin or feature that provides an SSL website.
 sub domain_has_ssl
 {
 my ($d) = @_;
