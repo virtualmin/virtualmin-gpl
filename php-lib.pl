@@ -489,6 +489,7 @@ foreach my $p (@ports) {
 			&apache::save_directive_struct(
 				$files, undef, $vconf, $conf);
 			}
+		@ppm = grep { !/unix:|fcgi:/ } @ppm;
 		delete($d->{'php_fpm_port'});
 		}
 	&apache::save_directive("ProxyPassMatch", \@ppm, $vconf, $conf);
