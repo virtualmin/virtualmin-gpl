@@ -17030,7 +17030,7 @@ my $ddomemail = $d->{'emailto'} || "abuse@$ddom";
 my $dndis = $d->{'disabled_time'} ? 0 : 1;
 my $ddomdef = $d->{'defaultdomain'};
 my $diswhy = $d->{'disabled_why'} || $text{"${lpref}tmpltpagedommsglogindescnoreason0"};
-$diswhy = "$diswhy." if ($diswhy && $diswhy !~ /\.$/);
+$diswhy = "$diswhy." if ($diswhy && $diswhy !~ /[.!?]$/);
 my $ddompubhtml = $d->{'public_html_dir'} || 'public_html';
 my $deftitle = ($ddomdef ?
 		$text{"${lpref}tmpltpagedefhost"} :
