@@ -1,7 +1,7 @@
 #!/bin/sh
-# shellcheck disable=SC2059 disable=SC2181 disable=SC2154
+# shellcheck disable=SC2059 disable=SC2181 disable=SC2154 disable=SC2317 disable=SC3043 disable=SC2086 disable=SC2039 disable=SC2034
 # virtualmin-install.sh
-# Copyright 2005-2022 Virtualmin, Inc.
+# Copyright 2005-2023 Virtualmin, Inc.
 # Simple script to grab the virtualmin-release and virtualmin-base packages.
 # The packages do most of the hard work, so this script can be small-ish and
 # lazy-ish.
@@ -18,59 +18,14 @@
 # License and version
 SERIAL=GPL
 KEY=GPL
-VER=7.0.1
+VER=7.1.2
 vm_version=7
+
+# Server
 upgrade_virtualmin_host=software.virtualmin.com
 
-# Determines if we have a terminal
-if ! tty -s; then
-  INTERACTIVE_MODE="off"
-else
-  INTERACTIVE_MODE="on"
-fi
-
-# Set a trap to catch any exit, whether
-# normal or forced (e.g. Ctrl-C)
-enable_stty () {
-  if [ "${INTERACTIVE_MODE}" != "off" ];then
-    stty echo
-  fi
-}
-trap enable_stty INT QUIT TERM EXIT
-
-# Print usage info, if --help, set mode, etc.
-# Temporary colors
-if [ "${INTERACTIVE_MODE}" != "off" ];then
-  RED="$(tput setaf 1)"
-  YELLOW="$(tput setaf 3)"
-  CYAN="$(tput setaf 6)"
-  BLACK="$(tput setaf 16)"
-  NORMAL="$(tput sgr0)"
-  GREEN=$(tput setaf 2)
-  CYANBG=$(tput setab 6)
-  BRIGHTWHITEBG=$(tput setab 15)
-  BOLD=$(tput bold)
-else
-  RED=''
-  YELLOW=''
-  CYAN=''
-  BLACK=''
-  NORMAL=''
-  GREEN=''
-  CYANBG=''
-  BRIGHTWHITEBG=''
-  BOLD=''
-fi
-
-# Currently supported systems:
-supported="    ${CYANBG}${BLACK}${BOLD}Red Hat Enterprise Linux and derivatives${NORMAL}${CYAN}
-      - RHEL 8 and 9 on x86_64
-      - Alma and Rocky 8 and 9 on x86_64
-      - CentOS 7 on x86_64${NORMAL}
-      UNSTABLERHEL
-    ${CYANBG}${BLACK}${BOLD}Debian Linux and derivatives${NORMAL}${CYAN}
-      - Debian 10 and 11 on i386 and amd64
-      - Ubuntu 20.04 LTS and 22.04 LTS on i386 and amd64${NORMAL}"
+# Currently supported systems
+# https://www.virtualmin.com/os-support/
 
 # Store new log each time
 log=/root/virtualmin-install.log
@@ -97,16 +52,17 @@ usage() {
   echo
   echo "  If called without arguments, installs Virtualmin."
   echo
-  printf "  ${YELLOW}--help|-h${NORMAL}                       display this help and exit\\n"
-  printf "  ${YELLOW}--bundle|-b <LAMP|LEMP>${NORMAL}         choose bundle to install (defaults to LAMP)\\n"
-  printf "  ${YELLOW}--minimal|-m${NORMAL}                    install a smaller subset of packages for low-memory/low-resource systems\\n"
-  printf "  ${YELLOW}--unstable|-e${NORMAL}                   enable support for Grade B systems (Fedora, CentOS Stream, Oracle)\\n"
-  printf "  ${YELLOW}--no-package-updates|-x${NORMAL}         skip installing system package updates\\n"
-  printf "  ${YELLOW}--setup|-s <auto|force-latest>${NORMAL}  setup Virtualmin software repositories and exit\\n"
-  printf "  ${YELLOW}--hostname|-n${NORMAL}                   set fully qualified hostname\\n"
-  printf "  ${YELLOW}--force|-f${NORMAL}                      assume \"yes\" as answer to all prompts\\n"
-  printf "  ${YELLOW}--verbose|-v${NORMAL}                    increase verbosity\\n"
-  printf "  ${YELLOW}--uninstall|-u${NORMAL}                  removes all Virtualmin packages (do not use on a production system)\\n"
+  printf "  --help|-h                       display this help and exit\\n"
+  printf "  --bundle|-b <LAMP|LEMP>         choose bundle to install (defaults to LAMP)\\n"
+  printf "  --minimal|-m                    install a smaller subset of packages for low-memory/low-resource systems\\n"
+  printf "  --unstable|-e                   enable support for Grade B systems (Fedora, CentOS Stream, Oracle, CloudLinux)\\n"
+  printf "  --insecure-downloads|-i         skip remote server SSL certificate check upon downloads (not recommended)\\n"
+  printf "  --no-package-updates|-x         skip installing system package updates (not recommended)\\n"
+  printf "  --setup|-s <auto|force-latest>  setup Virtualmin software repositories and exit\\n"
+  printf "  --hostname|-n                   set fully qualified hostname\\n"
+  printf "  --force|-f                      assume \"yes\" as answer to all prompts\\n"
+  printf "  --verbose|-v                    increase verbosity\\n"
+  printf "  --uninstall|-u                  removes all Virtualmin packages (do not use on a production system)\\n"
   echo
 }
 
@@ -128,7 +84,7 @@ while [ "$1" != "" ]; do
       bundle='LEMP'
       ;;
     *)
-      printf "Unknown bundle ${YELLOW}$1${NORMAL}: exiting\\n"
+      printf "Unknown bundle $1: exiting\\n"
       exit 1
       ;;
     esac
@@ -140,6 +96,13 @@ while [ "$1" != "" ]; do
   --unstable | -e)
     shift
     unstable='unstable'
+    virtualmin_config_system_excludes=""
+    virtualmin_stack_custom_packages=""
+    ;;
+  --insecure-downloads | -i)
+    shift
+    insecure_download_wget_flag=' --no-check-certificate'
+    insecure_download_curl_flag=' -k'
     ;;
   --no-package-updates | -x)
     shift
@@ -185,151 +148,6 @@ while [ "$1" != "" ]; do
     ;;
   esac
 done
-
-# Virtualmin packaged patch to always force repo setup
-setup_only=1
-mode='setup'
-unstable='unstable'
-
-if [ "${INTERACTIVE_MODE}" != "off" ];then
-  stty -echo
-fi
-
-if [ -z "$setup_only" ]; then
-  echo "Running ${GREEN}Virtualmin ${vm_version}${NORMAL} pre-installation setup:"
-
-  # Check if current time
-  # is not older than
-  # May 16, 2022
-  TIMEBASE=1652691600
-  TIME=$(date +%s)
-  if [ "$TIME" -lt "$TIMEBASE" ]; then
-    echo "  Force-syncing system time .."
-
-    # Try to sync time automatically first
-    if systemctl restart chronyd 1>/dev/null 2>&1; then
-      sleep 15
-    elif systemctl restart systemd-timesyncd 1>/dev/null 2>&1; then
-      sleep 15
-    fi
-
-    # Check again after all
-    TIME=$(date +%s)
-    if [ "$TIME" -lt "$TIMEBASE" ]; then
-      echo "  .. failed to automatically sync system time; it must be corrected manually to continue"
-      exit
-    fi
-    echo "  .. done"
-  # Graceful sync
-  else
-    echo "  Syncing system time .."
-    if systemctl restart chronyd 1>/dev/null 2>&1; then
-      sleep 2
-      echo "  .. done"
-    elif systemctl restart systemd-timesyncd 1>/dev/null 2>&1; then
-      echo "  .. done"
-      sleep 2
-    fi
-  fi
-
-  # Update all system packages first
-  printf "Checking for an update for a set of CA certificates ..\\n" >>$log
-  echo "  Updating CA certificates .."
-  if [ -x /usr/bin/dnf ]; then
-    dnf -y update ca-certificates >>$log 2>&1
-  elif [ -x /usr/bin/yum ]; then
-    yum -y update ca-certificates >>$log 2>&1
-  elif [ -x /usr/bin/apt-get ]; then
-    apt-get -y install ca-certificates >>$log 2>&1
-  fi
-  echo "  .. done"
-
-  # Make sure Perl is installed
-  printf "Checking for Perl ..\\n" >>$log
-fi
-# loop until we've got a Perl or until we can't try any more
-while true; do
-  perl="$(command -pv perl 2>/dev/null)"
-  if [ -z "$perl" ]; then
-    if [ -x /usr/bin/perl ]; then
-      perl=/usr/bin/perl
-      break
-    elif [ -x /usr/local/bin/perl ]; then
-      perl=/usr/local/bin/perl
-      break
-    elif [ -x /opt/csw/bin/perl ]; then
-      perl=/opt/csw/bin/perl
-      break
-    elif [ "$perl_attempted" = 1 ]; then
-      printf "Perl ${RED}could not${NORMAL} be installed. Cannot continue.\\n"
-      exit 2
-    fi
-    # couldn't find Perl, so we need to try to install it
-    if [ -z "$setup_only" ]; then
-      echo "  Attempting to install Perl .."
-    fi
-    if [ -x /usr/bin/dnf ]; then
-      dnf -y install perl >>$log 2>&1
-    elif [ -x /usr/bin/yum ]; then
-      yum -y install perl >>$log 2>&1
-    elif [ -x /usr/bin/apt-get ]; then
-      apt-get update >>$log 2>&1
-      apt-get -q -y install perl >>$log 2>&1
-    fi
-    perl_attempted=1
-    # Loop. Next loop should either break or exit.
-  else
-    break
-  fi
-done
-if [ -z "$setup_only" ]; then
-  if [ "$perl_attempted" = 1 ]; then
-    echo "  .. done"
-  fi
-fi
-printf ".. found Perl at $perl\\n" >>$log
-
-# Check for wget or curl or fetch
-printf "Checking for HTTP client .." >>$log
-while true; do
-  if [ -x "/usr/bin/wget" ]; then
-    download="/usr/bin/wget -nv"
-    break
-  elif [ -x "/usr/bin/curl" ]; then
-    download="/usr/bin/curl -f -s -L -O"
-    break
-  elif [ -x "/usr/bin/fetch" ]; then
-    download="/usr/bin/fetch"
-    break
-  elif [ "$wget_attempted" = 1 ]; then
-    printf ".. ${RED}no HTTP client available. Could not install wget. Cannot continue.${NORMAL}\\n"
-    exit 1
-  fi
-
-  # Made it here without finding a downloader, so try to install one
-  wget_attempted=1
-  if [ -x /usr/bin/dnf ]; then
-    dnf -y install wget >>$log
-  elif [ -x /usr/bin/yum ]; then
-    yum -y install wget >>$log
-  elif [ -x /usr/bin/apt-get ]; then
-    apt-get update >>/dev/null
-    apt-get -y -q install wget >>$log
-  fi
-done
-if [ -z "$download" ]; then
-  echo "Tried to install downloader, but failed. Do you have working network and DNS?"
-fi
-printf " found %s\\n" "$download" >>$log
-
-# Check for gpg, debian 10 doesn't install by default!?
-if [ -x /usr/bin/apt-get ]; then
-  if [ ! -x /usr/bin/gpg ]; then
-    printf "GPG not found, attempting to install .." >>$log
-    apt-get update >>/dev/null
-    apt-get -y -q install gnupg >>$log
-  fi
-fi
 
 # If Pro user downloads GPL version of `install.sh` script
 # to fix repos check if there is an active license exists
@@ -400,9 +218,9 @@ fi
 # Check whether $TMPDIR is mounted noexec (everything will fail, if so)
 # XXX: This check is imperfect. If $TMPDIR is a full path, but the parent dir
 # is mounted noexec, this won't catch it.
-TMPNOEXEC="$(grep $TMPDIR /etc/mtab | grep noexec)"
+TMPNOEXEC="$(grep "$TMPDIR" /etc/mtab | grep noexec)"
 if [ -n "$TMPNOEXEC" ]; then
-  echo "${RED}Fatal:${NORMAL} $TMPDIR directory is mounted noexec. Cannot continue."
+  echo "Error: $TMPDIR directory is mounted noexec. Cannot continue."
   exit 1
 fi
 
@@ -418,43 +236,88 @@ fi
 mkdir "$tempdir/files"
 srcdir="$tempdir/files"
 if ! cd "$srcdir"; then
-  echo "Failed to cd to $srcdir"
+  echo "Error: Failed to enter $srcdir temporary directory"
   exit 1
 fi
+export tempdir
 
-# Download the slib (source: http://github.com/virtualmin/slib)
-# Lots of little utility functions.
-$download "https://$upgrade_virtualmin_host/lib/slib.sh" >>$log 2>&1
-if [ $? -ne 0 ]; then
-  echo "${RED}Error:${NORMAL} Failed to download utility function library. Cannot continue. Check your network connection and DNS settings."
-  exit 1
-fi
-chmod +x slib.sh
-# shellcheck disable=SC1091
-. ./slib.sh
+pre_check_http_client() {
+  # Check for wget or curl or fetch
+  printf "Checking for HTTP client .." >>"$log"
+  while true; do
+    if [ -x "/usr/bin/wget" ]; then
+      download="/usr/bin/wget -nv$insecure_download_wget_flag"
+      break
+    elif [ -x "/usr/bin/curl" ]; then
+      download="/usr/bin/curl -f$insecure_download_curl_flag -s -L -O"
+      break
+    elif [ -x "/usr/bin/fetch" ]; then
+      download="/usr/bin/fetch"
+      break
+    elif [ "$wget_attempted" = 1 ]; then
+      printf " error: No HTTP client available. The installation of a download command has failed. Cannot continue.\\n" >>"$log"
+      return 1
+    fi
+
+    # Made it here without finding a downloader, so try to install one
+    wget_attempted=1
+    if [ -x /usr/bin/dnf ]; then
+      dnf -y install wget >>"$log"
+    elif [ -x /usr/bin/yum ]; then
+      yum -y install wget >>"$log"
+    elif [ -x /usr/bin/apt-get ]; then
+      apt-get update >>/dev/null
+      apt-get -y -q install wget >>"$log"
+    fi
+  done
+  if [ -z "$download" ]; then
+    printf " not found\\n" >>"$log"
+    return 1
+  else
+    printf " found %s\\n" "$download" >>"$log"
+    return 0;
+  fi
+}
+
+download_slib() {
+  # We need HTTP client first
+  pre_check_http_client
+
+  # Download the slib (source: http://github.com/virtualmin/slib)
+  $download "https://$upgrade_virtualmin_host/lib/slib.sh" >>"$log" 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to download utility function library. Cannot continue. Check your network connection and DNS settings."
+    exit 1
+  fi
+  chmod +x slib.sh
+  # shellcheck disable=SC1091
+  . ./slib.sh
+}
+
+# Utility function library
+##########################################
+download_slib # for production this block
+              # can be replaces with the
+              # content of slib.sh file,
+              # minus its header
+##########################################
 
 # Check the serial number and key
 serial_ok "$SERIAL" "$KEY"
 # Setup slog
-# shellcheck disable=SC2034
 LOG_PATH="$log"
 # Setup run_ok
-# shellcheck disable=SC2034
 RUN_LOG="$log"
 # Exit on any failure during shell stage
-# shellcheck disable=SC2034
 RUN_ERRORS_FATAL=1
 
 # Console output level; ignore debug level messages.
 if [ "$VERBOSE" = "1" ]; then
-  # shellcheck disable=SC2034
   LOG_LEVEL_STDOUT="DEBUG"
 else
-  # shellcheck disable=SC2034
   LOG_LEVEL_STDOUT="INFO"
 fi
 # Log file output level; catch literally everything.
-# shellcheck disable=SC2034
 LOG_LEVEL_LOG="DEBUG"
 
 # log_fatal calls log_error
@@ -463,9 +326,8 @@ log_fatal() {
 }
 
 remove_virtualmin_release() {
-  # shellcheck disable=SC2154
   case "$os_type" in
-  "fedora" | "centos" | "centos_stream" | "rhel" | "rocky" | "almalinux" | "ol")
+  "fedora" | "centos" | "centos_stream" | "rhel" | "rocky" | "almalinux" | "ol" | "cloudlinux" | "amzn")
     rm -f /etc/yum.repos.d/virtualmin.repo
     rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualmin-*
     rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-webmin
@@ -502,22 +364,24 @@ success() {
 # Function to find out if some services were pre-installed
 is_preconfigured() {
   preconfigured=""
-  if command -pv named -v 1>/dev/null 2>&1; then
+  if named -v 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}BIND${NORMAL} "
   fi
-  if command -pv apachectl -v 1>/dev/null 2>&1; then
+  if apachectl -v 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}Apache${NORMAL} "
   fi
-  if command -pv nginx -v 1>/dev/null 2>&1; then
+  if nginx -v 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}Nginx${NORMAL} "
   fi
   if command -pv mariadb 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}MariaDB${NORMAL} "
-  fi
-  if command -pv mysql 1>/dev/null 2>&1; then
+  elif command -pv mysql 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}MySQL${NORMAL} "
   fi
-  if command -pv php -v 1>/dev/null 2>&1; then
+  if postconf mail_version 1>/dev/null 2>&1; then
+    preconfigured="${preconfigured}${YELLOW}${BOLD}Postfix${NORMAL} "
+  fi
+  if php -v 1>/dev/null 2>&1; then
     preconfigured="${preconfigured}${YELLOW}${BOLD}PHP${NORMAL} "
   fi
   preconfigured=$(echo "$preconfigured" | sed 's/ /, /g' | sed 's/, $/ /')
@@ -616,13 +480,23 @@ fi
 
 # Calculate disk space requirements (this is a guess, for now)
 if [ "$mode" = 'minimal' ]; then
-  disk_space_required=500
+  disk_space_required=1
 else
-  disk_space_required=650
+  disk_space_required=2
 fi
 
 # Message to display in interactive mode
 install_msg() {
+  supported="    ${CYANBG}${BLACK}${BOLD}Red Hat Enterprise Linux and derivatives${NORMAL}${CYAN}
+      - RHEL 8 and 9 on x86_64
+      - Alma and Rocky 8 and 9 on x86_64
+      - CentOS 7 on x86_64${NORMAL}
+      UNSTABLERHEL
+    ${CYANBG}${BLACK}${BOLD}Debian Linux and derivatives${NORMAL}${CYAN}
+      - Debian 10, 11 and 12 on i386 and amd64
+      - Ubuntu 20.04 LTS and 22.04 LTS on i386 and amd64${NORMAL}
+      UNSTABLEDEB"
+
   cat <<EOF
 
   Welcome to the Virtualmin ${GREEN}$PRODUCT${NORMAL} installer, version ${GREEN}$VER${NORMAL}
@@ -631,29 +505,34 @@ install_msg() {
   perform updates or upgrades (use your system package manager) or license
   changes (use the "virtualmin change-license" command).
 
-  The systems currently supported by install script are:
+  The systems currently supported by the install script are:
 
 EOF
   supported_all=$supported
   if [ -n "$unstable" ]; then
-    unstable_rhel="${YELLOW}- Fedora Server 36+ on x86_64\\n \
+    unstable_rhel="${YELLOW}- Fedora Server 38 on x86_64\\n \
+     - Amazon Linux 2023 on x86_64\\n \
      - CentOS Stream 8 and 9 on x86_64\\n \
      - Oracle Linux 8 and 9 on x86_64\\n \
+     - CloudLinux 8 and 9 on x86_64\\n \
+          ${NORMAL}"
+    unstable_deb="${YELLOW}- Kali Linux Rolling on x86_64\\n \
           ${NORMAL}"
     supported_all=$(echo "$supported_all" | sed "s/UNSTABLERHEL/$unstable_rhel/")
+    supported_all=$(echo "$supported_all" | sed "s/UNSTABLEDEB/$unstable_deb/")
   else
     supported_all=$(echo "$supported_all" | sed 's/UNSTABLERHEL//')
+    supported_all=$(echo "$supported_all" | sed 's/UNSTABLEDEB//')
   fi
   echo "$supported_all"
   cat <<EOF
-
   If your OS/version/arch is not listed, installation ${BOLD}${RED}will fail${NORMAL}. More
   details about the systems supported by the script can be found here:
 
     ${UNDERLINE}https://www.virtualmin.com/os-support${NORMAL}
 
   The selected package bundle is ${CYAN}${bundle}${NORMAL} and the size of install is
-  ${CYAN}${mode}${NORMAL}. It will require up to ${CYAN}${disk_space_required} MB${NORMAL} of disk space.
+  ${CYAN}${mode}${NORMAL}. It will require up to ${CYAN}${disk_space_required} GB${NORMAL} of disk space.
 
   Exit and re-run this script with ${CYAN}--help${NORMAL} flag to see available options.
 
@@ -674,7 +553,7 @@ preconfigured_system_msg() {
   if [ -n "$is_preconfigured_rs" ]; then
     cat <<EOF
 
-  ${BRIGHTWHITEBG}${RED}${BOLD} ATTENTION! ${NORMAL}
+  ${WHITEBG}${RED}${BOLD} ATTENTION! ${NORMAL}
 
   Pre-installed software detected: $is_preconfigured_rs
 
@@ -696,7 +575,7 @@ already_installed_msg() {
   if is_installed; then
     cat <<EOF
 
-  ${BRIGHTWHITEBG}${RED}${BOLD} WARNING! ${NORMAL}
+  ${WHITEBG}${RED}${BOLD} WARNING! ${NORMAL}
 
   Virtualmin may already be installed. This can happen if an installation failed,
   and can be ignored in that case.
@@ -731,7 +610,7 @@ else
   # minimal mode probably needs less memory to succeed
   minimum_memory=1048576
 fi
-if ! memory_ok "$minimum_memory"; then
+if ! memory_ok "$minimum_memory" "$disk_space_required"; then
   log_fatal "Too little memory, and unable to create a swap file. Consider adding swap"
   log_fatal "or more RAM to your system."
   exit 1
@@ -750,6 +629,131 @@ if [ -z "$setup_only" ]; then
   fi
 fi
 
+pre_check_system_time() {
+  # Check if current time
+  # is not older than
+  # Wed Dec 01 2022
+  printf "Syncing system time ..\\n" >>"$log"
+  TIMEBASE=1669888800
+  TIME=$(date +%s)
+  if [ "$TIME" -lt "$TIMEBASE" ]; then
+
+    # Try to sync time automatically first
+    if systemctl restart chronyd 1>/dev/null 2>&1; then
+      sleep 30
+    elif systemctl restart systemd-timesyncd 1>/dev/null 2>&1; then
+      sleep 30
+    fi
+
+    # Check again after all
+    TIME=$(date +%s)
+    if [ "$TIME" -lt "$TIMEBASE" ]; then
+      printf ".. failed to automatically sync system time; it should be corrected manually to continue\\n" >>"$log"
+      return 1;
+    fi
+  # Graceful sync
+  else
+    if systemctl restart chronyd 1>/dev/null 2>&1; then
+      sleep 10
+    elif systemctl restart systemd-timesyncd 1>/dev/null 2>&1; then
+      sleep 10
+    fi
+  fi
+  printf ".. done\\n" >>"$log"
+  return 0
+}
+
+pre_check_ca_certificates() {
+  printf "Checking for an update for a set of CA certificates ..\\n" >>"$log"
+  if [ -x /usr/bin/dnf ]; then
+    dnf -y update ca-certificates >>"$log" 2>&1
+  elif [ -x /usr/bin/yum ]; then
+    yum -y update ca-certificates >>"$log" 2>&1
+  elif [ -x /usr/bin/apt-get ]; then
+    apt-get -y install ca-certificates >>"$log" 2>&1
+  fi
+  res=$?
+  printf ".. done\\n" >>"$log"
+  return "$res"
+}
+
+pre_check_perl() {
+  printf "Checking for Perl .." >>"$log"
+  # loop until we've got a Perl or until we can't try any more
+  while true; do
+    perl="$(command -pv perl 2>/dev/null)"
+    if [ -z "$perl" ]; then
+      if [ -x /usr/bin/perl ]; then
+        perl=/usr/bin/perl
+        break
+      elif [ -x /usr/local/bin/perl ]; then
+        perl=/usr/local/bin/perl
+        break
+      elif [ -x /opt/csw/bin/perl ]; then
+        perl=/opt/csw/bin/perl
+        break
+      elif [ "$perl_attempted" = 1 ]; then
+        printf ".. Perl could not be installed. Cannot continue\\n" >>"$log"
+        return 1
+      fi
+      # couldn't find Perl, so we need to try to install it
+      if [ -x /usr/bin/dnf ]; then
+        dnf -y install perl >>"$log" 2>&1
+      elif [ -x /usr/bin/yum ]; then
+        yum -y install perl >>"$log" 2>&1
+      elif [ -x /usr/bin/apt-get ]; then
+        apt-get update >>"$log" 2>&1
+        apt-get -q -y install perl >>"$log" 2>&1
+      fi
+      perl_attempted=1
+      # Loop. Next loop should either break or exit.
+    else
+      break
+    fi
+  done
+  printf ".. found Perl at $perl\\n" >>"$log"
+  return 0
+}
+
+pre_check_gpg() {
+  if [ -x /usr/bin/apt-get ]; then
+    printf "Checking for GPG .." >>"$log"
+    if [ ! -x /usr/bin/gpg ]; then
+      printf " not found, attempting to install .." >>"$log"
+      apt-get update >>/dev/null
+      apt-get -y -q install gnupg >>"$log"
+      printf " finished : $?\\n" >>"$log"
+    else
+      printf " found GPG command\\n" >>"$log"
+    fi
+  fi
+}
+
+pre_check_all() {
+  
+  if [ -z "$setup_only" ]; then
+    # Check system time
+    run_ok pre_check_system_time "Checking system time"
+    
+    # Make sure Perl is installed
+    run_ok pre_check_perl "Checking Perl installation"
+
+    # Update CA certificates package
+    run_ok pre_check_ca_certificates "Checking CA certificates package"
+  else
+    # Make sure Perl is installed
+    run_ok pre_check_perl "Checking Perl installation"
+  fi
+
+  # Checking for HTTP client
+  run_ok pre_check_http_client "Checking HTTP client"
+
+  # Check for gpg, debian 10 doesn't install by default!?
+  run_ok pre_check_gpg "Checking GPG package"
+
+  echo ""
+}
+
 # download()
 # Use $download to download the provided filename or exit with an error.
 download() {
@@ -767,8 +771,7 @@ download() {
 }
 
 # Only root can run this
-id | grep -i "uid=0(" >/dev/null
-if [ "$?" != "0" ]; then
+if [ "$(id -u)" -ne 0 ]; then
   uname -a | grep -i CYGWIN >/dev/null
   if [ "$?" != "0" ]; then
     fatal "${RED}Fatal:${NORMAL} The Virtualmin install script must be run as root"
@@ -797,26 +800,40 @@ if [ -n "$setup_only" ]; then
       fi
     done
   fi
+  pre_check_perl
+  pre_check_http_client
+  pre_check_gpg
   log_info "Started Virtualmin $vm_version $PRODUCT software repositories setup"
   printf "${YELLOW}▣${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}1${NORMAL}: Setup\\n"
 else
   log_info "Started installation log in $log"
-  log_debug "Phase 1 of 3: Setup"
-  printf "${YELLOW}▣${CYAN}◻◻${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}3${NORMAL}: Setup\\n"
+
+  log_debug "Phase 1 of 4: Check"
+  printf "${YELLOW}▣${CYAN}◻◻◻${NORMAL} Phase ${YELLOW}1${NORMAL} of ${GREEN}4${NORMAL}: Check\\n"
+  pre_check_all
+
+  log_debug "Phase 2 of 4: Setup"
+  printf "${GREEN}▣${YELLOW}▣${CYAN}◻◻${NORMAL} Phase ${YELLOW}2${NORMAL} of ${GREEN}4${NORMAL}: Setup\\n"
 fi
 
 # Print out some details that we gather before logging existed
 log_debug "Install mode: $mode"
 log_debug "Product: Virtualmin $PRODUCT"
-log_debug "install.sh version: $VER"
+log_debug "virtualmin-install.sh version: $VER"
 
 # Check for a fully qualified hostname
-log_debug "Checking for fully qualified hostname .."
-name="$(hostname -f)"
-if [ -n "$forcehostname" ]; then
-  set_hostname "$forcehostname"
-elif ! is_fully_qualified "$name"; then
-  set_hostname
+if [ -z "$setup_only" ]; then
+  log_debug "Checking for fully qualified hostname .."
+  name="$(hostname -f)"
+  if [ -n "$forcehostname" ]; then
+    set_hostname "$forcehostname"
+  elif ! is_fully_qualified "$name"; then
+    set_hostname
+  else
+    # Hostname is already FQDN, yet still set it 
+    # again to make sure to have it updated everywhere
+    set_hostname "$name"
+  fi
 fi
 
 # Insert the serial number and password into /etc/virtualmin-license
@@ -834,38 +851,55 @@ log_debug "Operating system type:    $os_type"
 log_debug "Operating system major:   $os_major_version"
 
 install_virtualmin_release() {
+  unstable_suffix=" but it can be installed as Grade B system using ${YELLOW}--unstable${NORMAL} flag."
   # Grab virtualmin-release from the server
   log_debug "Configuring package manager for ${os_real} ${os_version} .."
   case "$os_type" in
-  rhel | centos | centos_stream | rocky | almalinux | ol | fedora)
+  rhel | centos | centos_stream | rocky | almalinux | ol | cloudlinux | amzn | fedora)
     case "$os_type" in
     rhel | centos | centos_stream)
       if [ "$os_type" = "centos_stream" ]; then
         if [ "$os_major_version" -lt 8 ] || [ -z "$unstable" ]; then
-          printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+          printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer${unstable_suffix}\\n"
           exit 1
         fi
       else
         if [ "$os_major_version" -lt 7 ]; then
-          printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+          printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer.\\n"
           exit 1
         fi
       fi
       ;;
     rocky | almalinux | ol)
       if [ "$os_major_version" -lt 8 ] || [ -z "$unstable" ] && [ "$os_type" = "ol" ]; then
-        printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+        can_unstable_suffix="."
+        if [ "$os_type" = "ol" ]; then
+          can_unstable_suffix="$unstable_suffix"
+        fi
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer${can_unstable_suffix}\\n"
+        exit 1
+      fi
+      ;;
+    cloudlinux)
+      if [ "$os_major_version" -lt 8 ] || [ -z "$unstable" ] && [ "$os_type" = "cloudlinux" ]; then
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer${unstable_suffix}\\n"
+        exit 1
+      fi
+      ;;
+    amzn)
+      if [ "$os_version" -lt 2023 ] || [ -z "$unstable" ] && [ "$os_type" = "amzn" ]  ; then
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by stable installer${unstable_suffix}\\n"
         exit 1
       fi
       ;;
     fedora)
       if [ "$os_version" -lt 35 ] || [ -z "$unstable" ] && [ "$os_type" = "fedora" ]  ; then
-        printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer${unstable_suffix}\\n"
         exit 1
       fi
       ;;
     *)
-      printf "${RED}This OS/version is not recognized. Cannot continue.${NORMAL}\\n"
+      printf "${RED}This OS/version is not recognized! Cannot continue!${NORMAL}\\n"
       exit 1
       ;;
     esac
@@ -936,17 +970,23 @@ install_virtualmin_release() {
       sed -i 's/http:\/\//https:\/\//' /etc/yum.repos.d/virtualmin.repo
     fi
     ;;
-  debian | ubuntu)
+  debian | ubuntu | kali)
     case "$os_type" in
     ubuntu)
-      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ -z "$vm6_repos" ]; then
+      if [ "$os_version" != "18.04" ] && [ "$os_version" != "20.04" ] && [ "$os_version" != "22.04" ] && [ "$vm6_repos" -eq 0 ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
         exit 1
       fi
       ;;
     debian)
-      if [ "$os_major_version" -lt 10 ] && [ -z "$vm6_repos" ]; then
+      if [ "$os_major_version" -lt 10 ] && [ "$vm6_repos" -eq 0 ]; then
         printf "${RED}${os_real} ${os_version} is not supported by this installer.${NORMAL}\\n"
+        exit 1
+      fi
+      ;;
+    kali)
+      if [ -z "$unstable" ] && [ "$os_type" = "kali" ]  ; then
+        printf "${RED}${os_real} ${os_version}${NORMAL} is not supported by this installer${unstable_suffix}\\n"
         exit 1
       fi
       ;;
@@ -1002,11 +1042,11 @@ install_virtualmin_release() {
     if [ -d "$apt_auth_dir" ]; then
       if [ -n "$LOGIN" ]; then
         LOGINREAL=""
-        printf "machine $upgrade_virtualmin_host login $SERIAL password $KEY\\n" >>"$apt_auth_dir/virtualmin.conf"
+        printf "machine $upgrade_virtualmin_host login $SERIAL password $KEY\\n" >"$apt_auth_dir/virtualmin.conf"
       fi
     fi
     for repo in $repos; do
-      printf "deb [signed-by=/usr/share/keyrings/debian-virtualmin-$vm_version.gpg] https://${LOGINREAL}$upgrade_virtualmin_host/vm/${vm_version}/${repopath}apt ${repo} main\\n" >>/etc/apt/sources.list.d/virtualmin.list
+      printf "deb [signed-by=/usr/share/keyrings/debian-virtualmin-$vm_version.gpg] https://${LOGINREAL}$upgrade_virtualmin_host/vm/${vm_version}/${repopath}apt ${repo} main\\n" >/etc/apt/sources.list.d/virtualmin.list
     done
 
     # Install our keys
@@ -1019,7 +1059,7 @@ install_virtualmin_release() {
     run_ok "apt-get update" "Downloading repository metadata"
     # Make sure universe repos are available
     # XXX Test to make sure this run_ok syntax works as expected (with single quotes inside double)
-    if [ $os_type = "ubuntu" ]; then
+    if [ "$os_type" = "ubuntu" ]; then
       if [ -x "/bin/add-apt-repository" ] || [ -x "/usr/bin/add-apt-repository" ]; then
         run_ok "add-apt-repository -y universe" \
           "Enabling universe repositories, if not already available"
@@ -1064,7 +1104,7 @@ fi
 install_with_apt() {
   # Install system package upgrades, if any
   if [ -z "$noupdates" ]; then
-    run_ok "$update" "Checking and installing system packages updates"
+    run_ok "$update" "Checking and installing system package updates"
   fi
 
   # Silently purge packages that may cause issues upon installation
@@ -1092,22 +1132,34 @@ install_with_yum() {
     # Important Perl packages are now hidden in CodeReady repo
     run_ok "$install_config_manager --set-enabled codeready-builder-for-rhel-$os_major_version-x86_64-rpms" "Enabling Red Hat CodeReady package repository"
     # Install EPEL
-    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$os_major_version.noarch.rpm" >>$log 2>&1
+    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$os_major_version.noarch.rpm" >>"$log" 2>&1
     run_ok "rpm -U --replacepkgs --quiet epel-release-latest-$os_major_version.noarch.rpm" "Installing EPEL $os_major_version release package"
   # Install EPEL on RHEL 7
   elif [ "$os_major_version" -eq 7 ] && [ "$os_type" = "rhel" ]; then
-    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm" >>$log 2>&1
+    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm" >>"$log" 2>&1
     run_ok "rpm -U --replacepkgs --quiet epel-release-latest-7.noarch.rpm" "Installing EPEL 7 release package"
   # Install EPEL on CentOS/Alma/Rocky
   elif [ "$os_type" = "centos" ] || [ "$os_type" = "centos_stream" ] || [ "$os_type" = "rocky" ] || [ "$os_type" = "almalinux" ]; then  
     run_ok "$install epel-release" "Installing EPEL release package"
+  # CloudLinux EPEL 
+  elif [ "$os_type" = "cloudlinux" ]; then
+    # Install EPEL on CloudLinux
+    download "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$os_major_version.noarch.rpm" >>"$log" 2>&1
+    run_ok "rpm -U --replacepkgs --quiet epel-release-latest-$os_major_version.noarch.rpm" "Installing EPEL $os_major_version release package"
   # Install EPEL on Oracle 7+
   elif [ "$os_type" = "ol" ]; then
     run_ok "$install oracle-epel-release-el$os_major_version" "Installing EPEL release package"
+  # Installation on Amazon Linux
+  elif [ "$os_type" = "amzn" ]; then
+    # Set for installation packages whichever available on Amazon Linux as they
+    # go with different name, e.g. mariadb105-server instead of mariadb-server
+    virtualmin_stack_custom_packages="mariadb*-server"
+    # Exclude from config what's not available on Amazon Linux
+    virtualmin_config_system_excludes=" --exclude AWStats --exclude Etckeeper --exclude Fail2banFirewalld --exclude ProFTPd"
   fi
 
   # Important Perl packages are now hidden in PowerTools repo
-  if [ "$os_major_version" -ge 8 ] && [ "$os_type" = "centos" ] || [ "$os_type" = "centos_stream" ] || [ "$os_type" = "rocky" ] || [ "$os_type" = "almalinux" ]; then
+  if [ "$os_major_version" -ge 8 ] && [ "$os_type" = "centos" ] || [ "$os_type" = "centos_stream" ] || [ "$os_type" = "rocky" ] || [ "$os_type" = "almalinux" ] || [ "$os_type" = "cloudlinux" ]; then
     # Detect CRB/PowerTools repo name
     if [ "$os_major_version" -ge 9 ]; then
       extra_packages=$(dnf repolist all | grep "^crb")
@@ -1145,16 +1197,21 @@ install_with_yum() {
 
   # Upgrade system packages first
   if [ -z "$noupdates" ]; then
-    run_ok "$update" "Checking and installing system packages updates"
+    run_ok "$update" "Checking and installing system package updates"
+  fi
+
+  # Install custom stack packages
+  if [ -n "$virtualmin_stack_custom_packages" ]; then
+    run_ok "$install $virtualmin_stack_custom_packages" "Installing missing stack packages"
   fi
 
   # Install core and stack
   run_ok "$install_group $rhgroup" "Installing dependencies and system packages"
   run_ok "$install_group $vmgroup" "Installing Virtualmin $vm_version and all related packages"
+  rs=$?
   if [ $? -ne 0 ]; then
-    fatal "Installation failed: $?"
+    fatal "Installation failed: $rs"
   fi
-
 
   return 0
 }
@@ -1171,10 +1228,11 @@ install_virtualmin() {
     install_with_tar
     ;;
   esac
+  rs=$?
   if [ $? -eq 0 ]; then
     return 0
   else
-    return $?
+    return "$rs"
   fi
 }
 
@@ -1211,8 +1269,8 @@ yum_check_skipped() {
 errors=$((0))
 install_virtualmin_release
 echo
-log_debug "Phase 2 of 3: Installation"
-printf "${GREEN}▣${YELLOW}▣${CYAN}◻${NORMAL} Phase ${YELLOW}2${NORMAL} of ${GREEN}3${NORMAL}: Installation\\n"
+log_debug "Phase 3 of 4: Installation"
+printf "${GREEN}▣▣${YELLOW}▣${CYAN}◻${NORMAL} Phase ${YELLOW}3${NORMAL} of ${GREEN}4${NORMAL}: Installation\\n"
 install_virtualmin
 if [ "$?" != "0" ]; then
   errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Package installation returned an error.\\n"
@@ -1239,12 +1297,17 @@ done
 # problem. XXX This is hacky. I'm not sure what's really causing random fails.
 sleep 1
 echo
-log_debug "Phase 3 of 3: Configuration"
-printf "${GREEN}▣▣${YELLOW}▣${NORMAL} Phase ${YELLOW}3${NORMAL} of ${GREEN}3${NORMAL}: Configuration\\n"
+log_debug "Phase 4 of 4: Configuration"
+printf "${GREEN}▣▣▣${YELLOW}▣${NORMAL} Phase ${YELLOW}4${NORMAL} of ${GREEN}4${NORMAL}: Configuration\\n"
 if [ "$mode" = "minimal" ]; then
   bundle="Mini${bundle}"
 fi
-virtualmin-config-system --bundle "$bundle"
+virtualmin-config-system --bundle "$bundle"$virtualmin_config_system_excludes
+# Log SSL request status, if available
+if [ -f "$tempdir/virtualmin_ssl_host_status" ]; then
+  virtualmin_ssl_host_status=$(cat "$tempdir/virtualmin_ssl_host_status")
+  log_debug "$virtualmin_ssl_host_status"
+fi
 if [ "$?" != "0" ]; then
   errorlist="${errorlist}  ${YELLOW}◉${NORMAL} Postinstall configuration returned an error.\\n"
   errors=$((errors + 1))
@@ -1263,7 +1326,7 @@ disable_selinux() {
 
 # Changes that are specific to OS
 case "$os_type" in
-"fedora" | "centos" | "centos_stream" | "rhel" | "rocky" | "almalinux" | "ol")
+"fedora" | "centos" | "centos_stream" | "rhel" | "rocky" | "almalinux" | "ol" | "cloudlinux")
   disable_selinux
   ;;
 esac
@@ -1272,12 +1335,15 @@ esac
 kill "$config_system_pid" 1>/dev/null 2>&1
 
 # Make sure the cursor is back (if spinners misbehaved)
-if [ "${INTERACTIVE_MODE}" != "off" ];then
-  tput cnorm
+tput cnorm 1>/dev/null 2>&1
+
+# Was host default domain SSL request successful?
+if [ -d "$tempdir/virtualmin_ssl_host_success" ]; then
+  ssl_host_success=1
 fi
 
-printf "${GREEN}▣▣▣${NORMAL} Cleaning up\\n"
 # Cleanup the tmp files
+printf "${GREEN}▣▣▣${NORMAL} Cleaning up\\n"
 if [ "$tempdir" != "" ] && [ "$tempdir" != "/" ]; then
   log_debug "Cleaning up temporary files in $tempdir."
   find "$tempdir" -delete
@@ -1299,9 +1365,9 @@ if [ $errors -eq "0" ]; then
   log_success "Installation Complete!"
   log_success "If there were no errors above, Virtualmin should be ready"
   log_success "to configure at https://${hostname}:10000 (or https://${address}:10000)."
-  log_success "You may receive a security warning in your browser on your first visit."
-  log_success "Chromium based browsers, to bypass security warning screen may require"
-  log_success "you to type \`thisisunsafe\` to get to the login page."
+  if [ -z "$ssl_host_success" ]; then
+    log_success "You may receive a security warning in your browser on your first visit."
+  fi
   TIME=$(date +%s)
   echo "$VER=$TIME" > "/etc/webmin/virtual-server/installed"
 else
