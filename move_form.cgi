@@ -37,7 +37,7 @@ else {
 	# New parent
 	@pdoms = sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 		      grep { !$_->{'parent'} && &can_config_domain($_) }
-		           &list_domains();
+		           &list_visible_domains();
 	if ($d->{'parent'}) {
 		@pdoms = grep { $_->{'id'} ne $d->{'parent'} } @pdoms;
 		}
