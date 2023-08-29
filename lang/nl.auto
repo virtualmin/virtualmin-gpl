@@ -64,6 +64,7 @@ form_content2=Ja, met standaardsjabloon en inhoud hieronder
 form_content0=Ja, met onderstaande inhoud
 
 setup_eforceunder=Je mag alleen domeinen maken onder $1
+setup_edomain5=U host al dit automatisch aangemaakte $1 standaardhostdomein. U kunt geen nieuw domein met dezelfde naam maken, tenzij het standaardhostdomein eerst is uitgeschakeld op de Virtualmin Configuratie SSL-instellingenpagina
 setup_edomainip=Een domeinnaam kan geen IP-adres zijn
 setup_evirt6alloc2=Kan virtueel IPv6-adres niet toewijzen uit resellerbereik
 setup_evirtalloc3=Geen IP-toewijzingsbereiken gedefinieerd!
@@ -673,7 +674,6 @@ cert_letsonly=Alleen vernieuwing bijwerken
 cert_desc8=Let's Encrypt is een gratis, geautomatiseerde en open certificeringsinstantie die kan worden gebruikt om een SSL-certificaat te genereren voor gebruik door Virtualmin.
 cert_letsdesc=Deze pagina kan worden gebruikt om een nieuw certificaat aan te vragen, dat een ander certificaat overschrijft dat u momenteel voor dit domein heeft geconfigureerd. De Let's Encrypt-service vereist echter dat uw eigendom van het certificaatdomein wordt gevalideerd door te controleren of dit systeem de website voor het domein host. Dit wordt gedaan door een klein tijdelijk bestand onder de documentdirectory $1 van de website te plaatsen.
 cert_elets=Het kan echter niet worden gebruikt op uw systeem : $1
-cert_ewebminver=Alleen Webmin-versies 1.780 en hoger ondersteunen Let's Encrypt
 cert_dnamefor=Certificaat aanvragen voor
 cert_dnamedef=Domeinen die aan deze server zijn gekoppeld
 cert_dnamesel=Domeinnamen die hier worden vermeld
@@ -2081,13 +2081,42 @@ mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Onversleuteld
 
-deftmplt_error=FOUT
-deftmplt_default_page=Standaard pagina
-deftmplt_website_disabled=Website uitgeschakeld
-deftmplt_website_enabled=Website ingeschakeld
-deftmplt_default_slog=domeineigenaar kan inloggen op het controlepaneel<br>om deze website te beheren
-deftmplt_disable_slog=deze website is uitgeschakeld<br>door de serverbeheerder
-deftmplt_under_construction=In opbouw
+deftmplt_tmpltpagedefdom=Standaardpagina van het domein
+deftmplt_tmpltpagedefhost=Standaardpagina host
+deftmplt_tmpltpagedomstatus1=Website ingeschakeld
+deftmplt_tmpltpagedomstatus0=Website uitgeschakeld
+deftmplt_tmpltpagedommsg1=Deze pagina geeft aan dat een nieuw gemaakte website werkt. Deze standaardpagina wordt automatisch gegenereerd nadat een virtuele server is ingesteld door Virtualmin, een eersteklas open-source hostingcontrolepaneel, dat automatisering en uitgebreid beheer biedt voor webhostingomgevingen.
+deftmplt_tmpltpagedommsg0=Deze website is uitgeschakeld door de serverbeheerder. De site-eigenaar wordt aangemoedigd contact op te nemen met de beheerder om de kwestie verder te bespreken en de nodige stappen te ondernemen om de functionaliteit van de website te herstellen.
+deftmplt_tmpltpagehostmsg=Deze pagina geeft aan dat de webserver werkt. Deze standaardpagina wordt automatisch gegenereerd nadat het standaardhostdomein is ingesteld door Virtualmin, een eersteklas open-source hostingcontrolepaneel, dat automatisering en uitgebreid beheer biedt voor webhostingomgevingen.
+deftmplt_tmpltpagehostexp=Mocht deze pagina zichtbaar zijn binnen een productieomgeving, en het aangevraagde domein in de URL komt niet overeen met het domein bovenaan deze pagina, dan kan dit duiden op een onjuiste configuratie van uw webserver. Bekijk de onderstaande richtlijnen voor probleemoplossing om het probleem te diagnosticeren en te verhelpen.
+deftmplt_tmpltpagedommsglogin1=Log in
+deftmplt_tmpltpagedommsglogin0=Kan niet inloggen
+deftmplt_tmpltpagedommsglogindesc1=Als u de website-eigenaar bent, verschijnt deze standaardpagina omdat er nog geen website op deze virtuele server is ingesteld. Om deze pagina aan te passen en uw website te uploaden, logt u in bij Virtualmin en plaatst u uw bestanden in de map <tt>$1</tt>.
+deftmplt_tmpltpagedommsglogindesc0=Deze website is om de volgende reden uitgeschakeld: $1
+deftmplt_tmpltpagedommsglogindescnoreason0=Geen reden opgegeven door de serverbeheerder.
+deftmplt_tmpltpagedommsgloginlinktext=Log in op Virtualmin
+deftmplt_tmpltpagedommsgreport=Rapport
+deftmplt_tmpltpagedommsgreportdesc=Als u denkt dat er sprake is van beledigende of verdachte activiteit op dit domein, neem dan contact op met de domeineigenaar op <tt>$1</tt> om het probleem te melden. Uw hulp bij het handhaven van de integriteit van deze site wordt zeer op prijs gesteld.
+deftmplt_tmpltpagedommsgreportlink=mailto:abuse@example.com
+deftmplt_tmpltpagedommsgreportlinktext=Rapporteer probleem
+deftmplt_tmpltpagehostmsgmisconfig=Verkeerde configuratie van de server
+deftmplt_tmpltpagehostmsgmisconfigtext=Controleer of het IP-adres voor de webserver en DNS correct zijn geconfigureerd. Als IPv6 is ingeschakeld, zorg er dan voor dat zowel IPv4- als IPv6-adressen correct en consistent zijn geconfigureerd voor zowel de webserver als DNS.
+deftmplt_tmpltpagehostmsgnetwork=Netwerk gewijzigd
+deftmplt_tmpltpagehostmsgnetworktext=Het IP-adres van het domein is mogelijk gewijzigd. Controleer uw DNS-instellingen om te verifiëren dat het domein de juiste <tt>NS</tt>-records heeft die naar de juiste server verwijzen. Houd er rekening mee dat het enkele uren kan duren voordat DNS-wijzigingen zijn doorgevoerd.
+deftmplt_tmpltpagehostmsgwebsiterm=Website verwijderd
+deftmplt_tmpltpagehostmsgwebsitermtext=Het domein is mogelijk door de beheerder van de server verwijderd of de websitefunctie is mogelijk niet ingeschakeld voor het domein.
+deftmplt_tmpltpagedisclaimer=Virtualmin is niet verantwoordelijk voor het leveren van deze pagina. Vragen over uw account of een uitgeschakelde site moeten worden gericht aan uw hostingprovider.
+deftmplt_tmpltpagefootersources=Bronnen
+deftmplt_tmpltpagefootersourcesdoc=Documentatie
+deftmplt_tmpltpagefootersourcesdl=Downloaden
+deftmplt_tmpltpagefootersourcesforum=Forum
+deftmplt_tmpltpagefootersourcessupport=Steun
+deftmplt_tmpltpagefootersourcesshop=Winkel
+deftmplt_tmpltpagefooterabout=Over
+deftmplt_tmpltpagefooteraboutcomp=Bedrijf
+deftmplt_tmpltpagefooteraboutcont=Contact
+deftmplt_tmpltpagefooteraboutpriv=Privacybeleid
+deftmplt_tmpltpagefooteraboutterms=Voorwaarden
 
 2fa_title=Twee-factorenauthenticatie
 2fa_euser=Webmin-gebruiker bestaat niet!
@@ -2148,6 +2177,9 @@ dnscloud_cloudflare_esfx2=Domein $1 kan slechts één niveau zijn onder TLD $2
 dnscloud_cloudflare_ens=Kan NS-records niet opzoeken : $1
 dnscloud_cloudflare_ens2=Geen NS-records gevonden voor $1. Cloudflare vereist dat DNS-domeinen eerst worden geregistreerd.
 dnscloud_cloudflare_ens3=NS-records gevonden voor <tt>$1</tt> domein, maar deze NS-records <tt>$2</tt> wijzen niet naar Cloudflare-provider
+dnscloud_cloudflare_explain_err_1116=Om ervoor te zorgen dat Virtualmin virtuele subservers op het hoogste niveau kan creëren met Cloudflare DNS, moet u eerst het aanmaken van DNS-subdomeinen met een andere eigenaar toestaan via de <a href='$1'>Virtualmin-configuratie/geavanceerde opties</a> pagina.
+dnscloud_cloudflare_explain_err_1116_user=Om ervoor te zorgen dat Virtualmin virtuele subservers op het hoogste niveau kan creëren met Cloudflare DNS, moet de systeembeheerder eerst het aanmaken van DNS-subdomeinen met een andere eigenaar toestaan op de Virtualmin-configuratiepagina.
+dnscloud_cloudflare_explain_err_1116_2=Als dit Virtualmin-systeem de virtuele subserver <tt>$2</tt> op het hoogste niveau wil hosten, moet het ook <tt>$1</tt> hosten
 
 install_mod_perl_link=Gebruik de <a href='$1'>Perl Modules</a> pagina in Webmin om het te installeren
 

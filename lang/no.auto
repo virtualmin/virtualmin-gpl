@@ -57,6 +57,7 @@ form_passa=Gjenta passord
 form_content2=Ja, med standardmal og innhold nedenfor
 form_content0=Ja, med innholdet nedenfor
 
+setup_edomain5=Du er allerede vert for dette automatisk opprettede $1 vertsstandarddomenet. Du kan ikke opprette et nytt domene med samme navn, med mindre vertsstandarddomene først er deaktivert i Virtualmin Configuration SSL-innstillingssiden
 setup_edomainip=Et domenenavn kan ikke være en IP-adresse
 setup_eremoteuser=Brukernavnet kan ikke være det samme som den nåværende Virtualmin-innloggingen
 setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha en Unix-bruker
@@ -519,7 +520,6 @@ cert_letsonly=Bare oppdater fornyelse
 cert_desc8=Let's Encrypt er en gratis, automatisert og åpen sertifikatmyndighet som kan brukes til å generere et SSL-sertifikat for bruk av Virtualmin.
 cert_letsdesc=Denne siden kan brukes til å be om et nytt sertifikat, som vil overskrive alle andre du for øyeblikket har konfigurert for dette domenet. La oss kryptere tjenesten krever imidlertid at ditt eierskap til sertifikatdomenet blir validert ved å sjekke at dette systemet er vert for nettstedet for domenet. Dette gjøres ved å plassere en liten midlertidig fil under nettstedets dokumentkatalog $1.
 cert_elets=Den kan imidlertid ikke brukes på systemet ditt : $1 
-cert_ewebminver=Bare Webmin versjoner 1.780 og nyere støtter Let's Encrypt
 cert_dnamefor=Be om attest for
 cert_dnamedef=Domener tilknyttet denne serveren
 cert_dnamesel=Domenenavn listet her
@@ -1520,13 +1520,42 @@ mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=ukryptert
 
-deftmplt_error=FEIL
-deftmplt_default_page=Standardside
-deftmplt_website_disabled=Nettstedet er deaktivert
-deftmplt_website_enabled=Nettsted aktivert
-deftmplt_default_slog=domeneeier kan logge på kontrollpanelet for å administrere denne nettsiden
-deftmplt_disable_slog=dette nettstedet ble deaktivert<br>av serveradministrator
-deftmplt_under_construction=Under konstruksjon
+deftmplt_tmpltpagedefdom=Domenestandardside
+deftmplt_tmpltpagedefhost=Verts standardside
+deftmplt_tmpltpagedomstatus1=Nettsted aktivert
+deftmplt_tmpltpagedomstatus0=Nettstedet er deaktivert
+deftmplt_tmpltpagedommsg1=Denne siden indikerer at et nyopprettet nettsted fungerer. Denne standardsiden genereres automatisk etter at en virtuell server er satt opp av Virtualmin, et førsteklasses kontrollpanel for åpen kildekode, som tilbyr automatisering og omfattende administrasjon for webhotellmiljøer.
+deftmplt_tmpltpagedommsg0=Dette nettstedet har blitt deaktivert av serveradministratoren. Nettstedseieren oppfordres til å kontakte administratoren for å diskutere saken videre og ta nødvendige skritt for å gjenopprette funksjonaliteten på nettstedet.
+deftmplt_tmpltpagehostmsg=Denne siden indikerer at webserveren fungerer. Denne standardsiden genereres automatisk etter at vertsstandarddomenet er satt opp av Virtualmin, et førsteklasses kontrollpanel for åpen kildekode, som tilbyr automatisering og omfattende administrasjon for webhotellmiljøer.
+deftmplt_tmpltpagehostexp=Skulle denne siden være synlig i et produksjonsmiljø, og det forespurte domenet i URL-en ikke samsvarer med domenet øverst på denne siden, kan det tyde på en feil konfigurasjon av webserveren din. Sjekk feilsøkingsretningslinjene nedenfor for å diagnostisere og rette opp problemet.
+deftmplt_tmpltpagedommsglogin1=Logg Inn
+deftmplt_tmpltpagedommsglogin0=Kan ikke logge inn
+deftmplt_tmpltpagedommsglogindesc1=Hvis du er nettstedets eier, vises denne standardsiden fordi ingen nettside er satt opp på denne virtuelle serveren ennå. For å endre denne siden og laste opp nettstedet ditt, logg inn på Virtualmin og plasser filene dine i <tt>$1</tt>-katalogen.
+deftmplt_tmpltpagedommsglogindesc0=Dette nettstedet har blitt deaktivert av følgende grunn: $1
+deftmplt_tmpltpagedommsglogindescnoreason0=Ingen grunn gitt av serveradministratoren.
+deftmplt_tmpltpagedommsgloginlinktext=Logg inn på Virtualmin
+deftmplt_tmpltpagedommsgreport=Rapportere
+deftmplt_tmpltpagedommsgreportdesc=Hvis du mener det har vært støtende eller mistenkelig aktivitet fra dette domenet, kan du kontakte domeneeieren på <tt>$1</tt> for å rapportere problemet. Din hjelp til å opprettholde integriteten til dette nettstedet settes stor pris på.
+deftmplt_tmpltpagedommsgreportlink=mailto:abuse@example.com
+deftmplt_tmpltpagedommsgreportlinktext=Rapporter problem
+deftmplt_tmpltpagehostmsgmisconfig=Server feilkonfigurasjon
+deftmplt_tmpltpagehostmsgmisconfigtext=Kontroller at IP-adressen for webserveren og DNS er riktig konfigurert. Hvis IPv6 er aktivert, sørg for at både IPv4- og IPv6-adresser er konfigurert riktig og konsekvent for både webserveren og DNS.
+deftmplt_tmpltpagehostmsgnetwork=Nettverk endret
+deftmplt_tmpltpagehostmsgnetworktext=IP-adressen for domenet kan ha endret seg. Sjekk DNS-innstillingene for å bekrefte at domenet har de riktige <tt>NS</tt>-postene som peker til riktig server. Vær oppmerksom på at det kan ta flere timer før DNS-endringer spres.
+deftmplt_tmpltpagehostmsgwebsiterm=Nettstedet er fjernet
+deftmplt_tmpltpagehostmsgwebsitermtext=Domenet kan ha blitt fjernet fra serveren av administratoren, eller nettsidefunksjonen er kanskje ikke aktivert for domenet.
+deftmplt_tmpltpagedisclaimer=Virtualmin er ikke ansvarlig for å levere denne siden. Spørsmål om kontoen din eller et deaktivert nettsted bør rettes til vertsleverandøren din.
+deftmplt_tmpltpagefootersources=Ressurser
+deftmplt_tmpltpagefootersourcesdoc=Dokumentasjon
+deftmplt_tmpltpagefootersourcesdl=nedlasting
+deftmplt_tmpltpagefootersourcesforum=Forum
+deftmplt_tmpltpagefootersourcessupport=Brukerstøtte
+deftmplt_tmpltpagefootersourcesshop=Butikk
+deftmplt_tmpltpagefooterabout=Om
+deftmplt_tmpltpagefooteraboutcomp=Selskap
+deftmplt_tmpltpagefooteraboutcont=Kontakt
+deftmplt_tmpltpagefooteraboutpriv=Personvernerklæring
+deftmplt_tmpltpagefooteraboutterms=Vilkår og betingelser
 
 2fa_title=Tofaktorautentisering
 2fa_euser=Webmin-bruker eksisterer ikke!
@@ -1587,6 +1616,9 @@ dnscloud_cloudflare_esfx2=Domenet $1 kan bare være ett nivå under toppdomenet 
 dnscloud_cloudflare_ens=Kunne ikke lete opp NS -poster : $1
 dnscloud_cloudflare_ens2=Ingen NS -poster ble funnet for $1. Cloudflare krever at DNS -domener registreres først.
 dnscloud_cloudflare_ens3=NS-poster funnet for <tt>$1</tt> -domene, men disse NS-postene <tt>$2</tt> peker ikke til Cloudflare-leverandøren
+dnscloud_cloudflare_explain_err_1116=For at Virtualmin skal kunne lage virtuelle underservere på toppnivå med Cloudflare DNS, må du først tillate opprettelse av DNS-underdomener med en annen eier på <a href='$1'>Virtualmin-konfigurasjon / avanserte alternativer</a> side.
+dnscloud_cloudflare_explain_err_1116_user=For at Virtualmin skal kunne lage virtuelle underservere på toppnivå med Cloudflare DNS, må systemadministrator først tillate opprettelse av DNS-underdomener med en annen eier på Virtualmin-konfigurasjonssiden.
+dnscloud_cloudflare_explain_err_1116_2=For at dette Virtualmin-systemet skal være vert for den virtuelle underserveren <tt>$2</tt> på toppnivå, må det også være vert for <tt>$1</tt>
 
 install_mod_perl_link=Bruk siden <a href='$1'>Perl Modules</a> i Webmin for å installere den
 

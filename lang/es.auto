@@ -87,6 +87,7 @@ form_inputssect=Opciones de funciones adicionales
 
 setup_eplan=El plan seleccionado no existe o no está disponible
 setup_edomain4=Ya estás alojando este dominio
+setup_edomain5=Ya estás alojando este dominio predeterminado de host $1 creado automáticamente. No puede crear un nuevo dominio con el mismo nombre, a menos que el dominio predeterminado del host esté primero deshabilitado en la página de configuración SSL de Virtualmin
 setup_edomainstar=Un nombre de dominio no puede comenzar con *. Para crear un dominio comodín, primero créelo sin el * y luego vaya a Configuración del servidor -&gt; Opciones del sitio web.
 setup_edomainip=Un nombre de dominio no puede ser una dirección IP
 setup_eip6=Dirección IPv6 faltante o no válida
@@ -3060,13 +3061,42 @@ mailclient_smtp_starttls=STARTTLS
 mailclient_smtp_ssltls=SSL/TLS
 mailclient_smtp_plain=Sin cifrar
 
-deftmplt_error=ERROR
-deftmplt_default_page=Página por defecto
-deftmplt_website_disabled=Sitio web deshabilitado
-deftmplt_website_enabled=Sitio web habilitado
-deftmplt_default_slog=el propietario del dominio puede iniciar sesión en el panel de control<br>para administrar este sitio web
-deftmplt_disable_slog=este sitio web fue inhabilitado<br>por el administrador del servidor
-deftmplt_under_construction=Bajo construcción
+deftmplt_tmpltpagedefdom=Página predeterminada del dominio
+deftmplt_tmpltpagedefhost=Página predeterminada del host
+deftmplt_tmpltpagedomstatus1=Sitio web habilitado
+deftmplt_tmpltpagedomstatus0=Sitio web deshabilitado
+deftmplt_tmpltpagedommsg1=Esta página indica que un sitio web recién creado está funcionando. Esta página predeterminada se genera automáticamente después de que Virtualmin configura un servidor virtual, un panel de control de alojamiento de código abierto de primer nivel, que ofrece automatización y gestión integral para entornos de alojamiento web.
+deftmplt_tmpltpagedommsg0=Este sitio web ha sido deshabilitado por el administrador del servidor. Se recomienda al propietario del sitio que se comunique con el administrador para discutir el asunto más a fondo y tomar las medidas necesarias para restaurar la funcionalidad del sitio web.
+deftmplt_tmpltpagehostmsg=Esta página indica que el servidor web está funcionando. Esta página predeterminada se genera automáticamente después de que Virtualmin configura el dominio predeterminado del host, un panel de control de alojamiento de código abierto de primer nivel, que ofrece automatización y administración integral para entornos de alojamiento web.
+deftmplt_tmpltpagehostexp=Si esta página es visible dentro de un entorno de producción y si el dominio solicitado en la URL no coincide con el dominio en la parte superior de esta página, puede indicar una configuración incorrecta de su servidor web. Consulte las pautas de solución de problemas a continuación para diagnosticar y rectificar el problema.
+deftmplt_tmpltpagedommsglogin1=Acceso
+deftmplt_tmpltpagedommsglogin0=No puedes ingresar
+deftmplt_tmpltpagedommsglogindesc1=Si usted es el propietario del sitio web, esta página predeterminada aparece porque todavía no se ha configurado ningún sitio web en este servidor virtual. Para modificar esta página y cargar su sitio web, inicie sesión en Virtualmin y coloque sus archivos en el directorio <tt>$1</tt>.
+deftmplt_tmpltpagedommsglogindesc0=Este sitio web ha sido deshabilitado por el siguiente motivo: $1
+deftmplt_tmpltpagedommsglogindescnoreason0=El administrador del servidor no ha dado ningún motivo.
+deftmplt_tmpltpagedommsgloginlinktext=Iniciar sesión en Virtualmin
+deftmplt_tmpltpagedommsgreport=Informe
+deftmplt_tmpltpagedommsgreportdesc=Si cree que ha habido actividad abusiva o sospechosa en este dominio, comuníquese con el propietario del dominio al <tt>$1</tt> para informar el problema. Se agradece enormemente su ayuda para mantener la integridad de este sitio.
+deftmplt_tmpltpagedommsgreportlink=correo a:abuso@ejemplo.com
+deftmplt_tmpltpagedommsgreportlinktext=Informar problema
+deftmplt_tmpltpagehostmsgmisconfig=Configuración incorrecta del servidor
+deftmplt_tmpltpagehostmsgmisconfigtext=Verifique que la dirección IP del servidor web y DNS estén configurados correctamente. Si IPv6 está habilitado, asegúrese de que las direcciones IPv4 e IPv6 estén configuradas de manera correcta y coherente tanto para el servidor web como para el DNS.
+deftmplt_tmpltpagehostmsgnetwork=Red cambiada
+deftmplt_tmpltpagehostmsgnetworktext=Es posible que la dirección IP del dominio haya cambiado. Verifique su configuración de DNS para verificar que el dominio tenga los registros <tt>NS</tt> correctos que apunten al servidor correcto. Tenga en cuenta que los cambios de DNS pueden tardar varias horas en propagarse.
+deftmplt_tmpltpagehostmsgwebsiterm=Sitio web eliminado
+deftmplt_tmpltpagehostmsgwebsitermtext=Es posible que el administrador haya eliminado el dominio del servidor o que la función del sitio web no se haya habilitado para el dominio.
+deftmplt_tmpltpagedisclaimer=Virtualmin no es responsable de entregar esta página. Las preguntas sobre su cuenta o un sitio deshabilitado deben dirigirse a su proveedor de alojamiento.
+deftmplt_tmpltpagefootersources=Recursos
+deftmplt_tmpltpagefootersourcesdoc=Documentación
+deftmplt_tmpltpagefootersourcesdl=Descargar
+deftmplt_tmpltpagefootersourcesforum=Foro
+deftmplt_tmpltpagefootersourcessupport=Apoyo
+deftmplt_tmpltpagefootersourcesshop=Comercio
+deftmplt_tmpltpagefooterabout=Acerca de
+deftmplt_tmpltpagefooteraboutcomp=Compañía
+deftmplt_tmpltpagefooteraboutcont=Contacto
+deftmplt_tmpltpagefooteraboutpriv=política de privacidad
+deftmplt_tmpltpagefooteraboutterms=Términos y condiciones
 
 2fa_title=Autenticación de dos factores
 2fa_euser=¡El usuario de Webmin no existe!
@@ -3127,6 +3157,9 @@ dnscloud_cloudflare_esfx2=El dominio $1 solo puede tener un nivel por debajo del
 dnscloud_cloudflare_ens=Error al buscar registros NS : $1 
 dnscloud_cloudflare_ens2=No se encontraron registros NS para $1. Cloudflare requiere que los dominios DNS se registren primero.
 dnscloud_cloudflare_ens3=Se encontraron registros NS para el dominio de <tt>$1</tt> ; sin embargo, estos registros NS de <tt>$2</tt> no apuntan al proveedor de Cloudflare
+dnscloud_cloudflare_explain_err_1116=Para que Virtualmin pueda crear subservidores virtuales de nivel superior con DNS de Cloudflare, primero debe permitir la creación de subdominios DNS con un propietario diferente en la <a href='$1'>Configuración de Virtualmin/Opciones avanzadas</a> página.
+dnscloud_cloudflare_explain_err_1116_user=Para que Virtualmin pueda crear subservidores virtuales de nivel superior con DNS de Cloudflare, el administrador del sistema primero debe permitir la creación de subdominios DNS con un propietario diferente en la página de configuración de Virtualmin.
+dnscloud_cloudflare_explain_err_1116_2=Para que este sistema Virtualmin aloje un subservidor virtual de nivel superior <tt>$2</tt>, también debe albergar <tt>$1</tt>
 
 install_mod_perl_link=Utilice la página <a href='$1'>Módulos Perl</a> en Webmin para instalarlo
 
