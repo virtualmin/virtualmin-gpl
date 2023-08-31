@@ -102,6 +102,7 @@ if ($ctype =~ /^ec/) {
 		&usage("The Let's Encrypt client on your system does ".
 		       "not support EC certificates");
 	}
+$ctype ||= ($d->{'letsencrypt_ctype'} || "rsa");
 if (!@dnames) {
 	# No hostnames specified
 	if ($defdnames || !$d->{'letsencrypt_dname'}) {
@@ -199,7 +200,7 @@ else {
 	$d->{'letsencrypt_last'} = time();
 	$d->{'letsencrypt_last_success'} = time();
 	$d->{'letsencrypt_renew'} = $renew;
-	$d->{'letsencrypt_ctype'} = $ctype;
+	$d->{'letsencrypt_ctype'} = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_size'} = $size;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);

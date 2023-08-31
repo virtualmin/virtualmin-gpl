@@ -136,7 +136,7 @@ else {
 		$d->{'letsencrypt_dname'} = $custom_dname;
 		$d->{'letsencrypt_dwild'} = $in{'dwild'};
 		$d->{'letsencrypt_renew'} = $in{'renew'};
-		$d->{'letsencrypt_ctype'} = $in{'ctype'};
+		$d->{'letsencrypt_ctype'} = $in{'ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_success'} = time();
 		&refresh_ssl_cert_expiry($d);
