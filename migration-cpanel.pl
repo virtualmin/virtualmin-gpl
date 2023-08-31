@@ -660,6 +660,8 @@ if ($owner && !$parent) {
 		local $dstfolder = { 'type' => $mtype, 'file' => $mfile };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&set_mailfolder_owner($dstfolder, $owner);
+		&mailboxes::mailbox_uncompress_folder($dstfolder)
+			if (defined(&mailboxes::mailbox_uncompress_folder));
 		&$second_print(".. done");
 		}
 	else {
@@ -1551,6 +1553,8 @@ while(<PASSWD>) {
 				     'type' => $crtype };
 		&mailboxes::mailbox_move_folder($srcfolder, $dstfolder);
 		&set_mailfolder_owner($dstfolder, $uinfo);
+		&mailboxes::mailbox_uncompress_folder($dstfolder)
+			if (defined(&mailboxes::mailbox_uncompress_folder));
 		opendir(DIR, $mailsrc);
 		while(my $mf = readdir(DIR)) {
 			next if ($mf eq "." || $mf eq ".." ||
@@ -1564,6 +1568,8 @@ while(<PASSWD>) {
 			&mailboxes::mailbox_move_folder($srcfolder,
 							$dstfolder);
 			&set_mailfolder_owner($dstfolder, $uinfo);
+			&mailboxes::mailbox_uncompress_folder($dstfolder)
+				if (defined(&mailboxes::mailbox_uncompress_folder));
 			}
 		closedir(DIR);
 		}
