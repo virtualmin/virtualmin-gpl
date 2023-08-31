@@ -65,25 +65,24 @@ if ($config{'external_ip_cache'} ne $out) {
 return $out;
 }
 
-# update_dynip_service()
+# update_dynip_service(new-ip, old-ip)
 # Talk to the configured dynamic DNS service, and return the set IP address
 # and an error message (if any)
 sub update_dynip_service
 {
-local $ip = $config{'dynip_auto'} ? &get_external_ip_address()
-				  : &get_default_ip();
+my ($ip, $oldip) = @_;
 if ($config{'dynip_service'} eq 'dyndns') {
 	# Update DynDNS
-	local $host = "members.dyndns.org";
-	local $port = 80;
-	local $page = "/nic/update?".
+	my $host = "members.dyndns.org";
+	my $port = 80;
+	my $page = "/nic/update?".
 		      "system=dyndns&".
 		      "hostname=".&urlize($config{'dynip_host'})."&".
 		      "myip=$ip&".
 		      "wildcard=NOCHG&".
 		      "mx=NOCHG&".
 		      "backmx=NOCHG";
-	local ($out, $error);
+	my ($out, $error);
 	&http_download($host, $port, $page, \$out, \$error, undef, 0,
 		       $config{'dynip_user'},
 		       $config{'dynip_pass'},
@@ -107,7 +106,8 @@ if ($config{'dynip_service'} eq 'dyndns') {
 elsif ($config{'dynip_service'} eq 'external') {
 	# Just run an external script with the IP and hostname as args
 	my $cmd = $config{'dynip_external'}." ".quotemeta($ip).
-		  " ".quotemeta($config{'dynip_host'});
+		  " ".quotemeta($config{'dynip_host'}).
+		  " ".quotemeta($oldip);
 	my $out = &backquote_logged("$cmd 2>&1 </dev/null");
 	if ($?) {
 		return (undef, "$cmd failed : $out");
