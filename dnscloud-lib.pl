@@ -208,7 +208,7 @@ return (0, $rv) if (!ref($rv));
 $info->{'id'} = $rv->{'HostedZone'}->{'Id'};
 $info->{'location'} = $location;
 my ($ok, $err) = &dnscloud_route53_put_records($d, $info, 1);
-return (2, "Failed to create records : $err") if (!$ok);
+return (2, $rv->{'HostedZone'}->{'Id'}, $location, "Failed to create records : $err") if (!$ok);
 return (1, $rv->{'HostedZone'}->{'Id'}, $location);
 }
 
