@@ -5423,6 +5423,7 @@ phpmode_phpinfo_show=Click to display information about PHP environment on your 
 phpmode_phpinfo_show_dir=Click to display information about PHP environment on your server under <tt>$1</tt> directory using <tt>phpinfo()</tt> function
 phpmode_phpinfo_ecannot=You are not allowed to view PHP information for this virtual server
 phpmode_phpinfo_dir_ecannot_dir=This virtual server doesn't have requested $1 directory under $2
+phpmode_fixport=Fixing PHP FPM port configuration ..
 
 website_header=Website options
 

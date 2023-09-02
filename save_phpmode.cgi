@@ -76,6 +76,14 @@ if ($can) {
 		}
 	}
 
+# Switch off FPM mode and back again to re-allocate port
+if ($in{'fixport'} && $mode eq "fpm") {
+	&$first_print($text{'phpmode_fixport'});
+	&save_domain_php_mode($d, "cgi");
+	&save_domain_php_mode($d, "fpm");
+	&$second_print($text{'setup_done'});
+	}
+
 # Update PHP versions
 @avail = &list_available_php_versions($d, $mode);
 if ($canv && !$d->{'alias'} && $mode && $mode ne "mod_php" &&
