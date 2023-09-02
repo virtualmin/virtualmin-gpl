@@ -74,7 +74,7 @@ my ($ip, $oldip) = @_;
 if ($config{'dynip_service'} eq 'dyndns') {
 	# Update DynDNS
 	my $host = "members.dyndns.org";
-	my $port = 80;
+	my $port = 443;
 	my $page = "/nic/update?".
 		      "system=dyndns&".
 		      "hostname=".&urlize($config{'dynip_host'})."&".
