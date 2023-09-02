@@ -1025,6 +1025,19 @@ else {
 		if ($ok == 0) {
 			return &text('validate_ewebphpfpmport', $port);
 			}
+		else {
+			my ($clash, $conf, $port) =
+				&check_php_fpm_port_clash($d);
+			my $cd = $clash ? &get_domain($clash) : undef;
+			if ($cd) {
+				return &text('validate_ewebphpfpmport2', $port,
+					     &show_domain_name($cd));
+				}
+			elsif ($clash) {
+				return &text('validate_ewebphpfpmport3', $port,
+					     $conf->{'dir'}."/".$clash.".conf");
+				}
+			}
 		}
 
 	# If there are suexec directives, validate them
