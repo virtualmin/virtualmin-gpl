@@ -5323,6 +5323,7 @@ phpmode_return=website options
 phpmode_title2=PHP Options
 phpmode_ecannot=You are not allowed to configure website options for this virtual server
 phpmode_header=PHP options for this domain
+phpmode_fixport=Click <b>Save</b> below to update the FPM port and correct this error
 phpmode_mode=PHP script execution mode
 phpmode_mod_php=<tt>mod_php</tt>
 phpmode_cgi=CGI wrapper

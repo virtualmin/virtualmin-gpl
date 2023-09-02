@@ -17,8 +17,21 @@ my $ng = $p =~ /nginx/;
 
 &ui_print_header(&domain_in($d), $text{'phpmode_title2'}, "");
 
+# Check for FPM port clash or error
+my $fixport = 0;
+if ($mode eq "fpm") {
+	my $fpmerr = &get_php_fpm_port_error($d);
+	if ($fpmerr) {
+		print &ui_alert_box(
+			$fpmerr."<p>\n".$text{'phpmode_fixport'},
+			'warn');
+		$fixport = 1;
+		}
+	}
+
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
+print &ui_hidden("fixport", $fixport),"\n";
 print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 

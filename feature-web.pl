@@ -1021,23 +1021,8 @@ else {
 
 	# Validate the FPM port
 	if ($mode eq "fpm") {
-		my ($ok, $port) = &get_domain_php_fpm_port($d);
-		if ($ok == 0) {
-			return &text('validate_ewebphpfpmport', $port);
-			}
-		else {
-			my ($clash, $conf, $port) =
-				&check_php_fpm_port_clash($d);
-			my $cd = $clash ? &get_domain($clash) : undef;
-			if ($cd) {
-				return &text('validate_ewebphpfpmport2', $port,
-					     &show_domain_name($cd));
-				}
-			elsif ($clash) {
-				return &text('validate_ewebphpfpmport3', $port,
-					     $conf->{'dir'}."/".$clash.".conf");
-				}
-			}
+		my $fpmerr = &get_php_fpm_port_error($d);
+		return $fpmerr if ($fpmerr);
 		}
 
 	# If there are suexec directives, validate them
@@ -1097,6 +1082,31 @@ else {
 		    &indexof("*:".$d->{'web_port'}, @{$virt->{'words'}}) < 0) {
 			return &text('validate_ewebipv6virt', $ip6addr);
 			}
+		}
+	}
+return undef;
+}
+
+# get_php_fpm_port_error(&domain)
+# Returns any error message that should be displayed about the FPM port
+sub get_php_fpm_port_error
+{
+my ($d) = @_;
+my ($ok, $port) = &get_domain_php_fpm_port($d);
+if ($ok == 0) {
+	return &text('validate_ewebphpfpmport', $port);
+	}
+else {
+	my ($clash, $conf, $port) =
+		&check_php_fpm_port_clash($d);
+	my $cd = $clash ? &get_domain($clash) : undef;
+	if ($cd) {
+		return &text('validate_ewebphpfpmport2', $port,
+			     &show_domain_name($cd));
+		}
+	elsif ($clash) {
+		return &text('validate_ewebphpfpmport3', $port,
+			     $conf->{'dir'}."/".$clash.".conf");
 		}
 	}
 return undef;
