@@ -1440,6 +1440,7 @@ save_apache11=Updating document directory in website configuration ..
 save_apache12=Updating PHP FPM configuration ..
 save_apache12none=.. no fixes needed
 save_dns=Changing IP address in DNS domain ..
+save_dnsinternal=Changing internal IP address in DNS domain ..
 save_dns2=Changing DNS domain name ..
 save_dns2_provision=Changing DNS domain name on services host ..
 save_dns3=Changing slave domain on $1 ..

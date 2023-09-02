@@ -928,6 +928,20 @@ if ($oldip ne $newip) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
+elsif ($oldd->{'ip'} ne $d->{'ip'}) {
+	# Internal IP address changed, but external IP didn't
+	&$first_print($text{'save_dnsinternal'});
+	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
+	if (!$file) {
+		&$second_print($text{'save_nobind'});
+		&release_lock_dns($lockon, $lockconf);
+		return 0;
+		}
+	&modify_records_ip_address($recs, $file, $oldd->{'ip'}, $d->{'ip'},
+				   $d->{'dom'});
+	$rv++;
+	&$second_print($text{'setup_done'});
+	}
 
 if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was enabled .. add MX records
