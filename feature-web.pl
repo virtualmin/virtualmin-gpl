@@ -1106,7 +1106,13 @@ else {
 			     &show_domain_name($cd));
 		}
 	elsif ($clash) {
-		return &text('validate_ewebphpfpmport3', $port);
+		my $clash_domname = &show_domain_name($cd);
+		my $this_domclash = $clash_domname eq $d->{'dom'};
+		my $errmsg = $this_domclash ?
+			&text('validate_ewebphpfpmport3', $port) :
+			&text('validate_ewebphpfpmport4', $port, $clash_domname);
+		return wantarray ?
+			($errmsg, $this_domclash ? undef : $clash_domname) : $errmsg;
 		}
 	}
 return undef;

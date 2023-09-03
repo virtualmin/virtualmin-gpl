@@ -20,10 +20,17 @@ my $ng = $p =~ /nginx/;
 # Check for FPM port clash or error
 my $fixport = 0;
 if ($mode eq "fpm") {
-	my $fpmerr = &get_php_fpm_port_error($d);
+	my ($fpmerr, $clashdom) = &get_php_fpm_port_error($d);
+	my $clashdomid;
 	if ($fpmerr) {
+		if ($clashdom) {
+			my $cd = &get_domain_by("dom", $clashdom);
+			$clashdomid = $cd->{'id'};
+			}
+		my $errmsg = (!&master_admin() && $clashdom) ? $text{'phpmode_fixport_desc3'} :
+			($clashdom ? &text('phpmode_fixport_desc2', $clashdomid, $clashdom) : $text{'phpmode_fixport_desc1'});
 		print &ui_alert_box(
-			$fpmerr."<p>\n".$text{'phpmode_fixport_desc'},
+			$fpmerr."<p>\n". $errmsg,
 			'warn');
 		$fixport = 1;
 		}
