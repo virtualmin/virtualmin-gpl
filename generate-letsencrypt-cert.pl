@@ -85,6 +85,9 @@ while(@ARGV > 0) {
 	elsif ($a =~ /^--(sha1|sha2|rsa|ec)$/) {
 		$ctype = $1 eq "sha1" || $1 eq "sha2" ? "rsa" : $1;
 		}
+	elsif ($a eq "--server") {
+		$leserver = shift(@ARGV);
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -181,7 +184,7 @@ $phd = &public_html_dir($d);
 $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-				$d, \@dnames, $staging, $size, $mode, $ctype);
+	$d, \@dnames, $staging, $size, $mode, $ctype, $leserver);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
@@ -202,6 +205,7 @@ else {
 	$d->{'letsencrypt_renew'} = $renew;
 	$d->{'letsencrypt_ctype'} = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_size'} = $size;
+	$d->{'letsencrypt_server'} = $server;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
