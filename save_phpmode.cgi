@@ -79,7 +79,22 @@ if ($can) {
 # Switch off FPM mode and back again to re-allocate port
 if ($in{'fixport'} && $mode eq "fpm") {
 	&$first_print($text{'phpmode_fixport'});
+	# Toggle mode off PHP-FPM
 	&save_domain_php_mode($d, "cgi");
+	# Also delete any stray PHP-FPM pool file for the give domain
+	my @fpms = &list_php_fpm_configs();
+	foreach my $conf (@fpms) {
+		my @pools = &list_php_fpm_pools($conf);
+		foreach my $p (@pools) {
+			if ($p eq $d->{'id'}) {
+				my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+				&unlink_logged($file) if (-r $file);
+				my $sock = &get_php_fpm_socket_file($d, 1);
+				&unlink_logged($sock) if (-r $sock);
+				}
+			}
+		}
+	# Toggle mode back
 	&save_domain_php_mode($d, "fpm");
 	&$second_print($text{'setup_done'});
 	}
