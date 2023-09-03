@@ -1942,7 +1942,7 @@ if (($ver = &get_domain_php_version($d, $mode)) &&
 }
 
 # get_php_fpm_config([version|&domain])
-# Returns the first valid FPM config
+# Returns the first valid FPM config for a domain
 sub get_php_fpm_config
 {
 my ($ver) = @_;
@@ -2287,11 +2287,13 @@ sub check_php_fpm_port_clash
 {
 my ($d) = @_;
 my (undef, $port) = &get_domain_php_fpm_port($d);
+my $dconf = &get_php_fpm_config($d);
 my @fpms = &list_php_fpm_configs();
 foreach my $conf (@fpms) {
 	my @pools = &list_php_fpm_pools($conf);
 	foreach my $p (@pools) {
-		next if ($p eq $d->{'id'});
+		next if ($p eq $d->{'id'} &&
+			 $conf->{'version'} eq $dconf->{'version'});
 		my $t = get_php_fpm_pool_config_value($conf, $p, "listen");
 		next if (!$t);
 		$t =~ s/^\S+:(\d+)$/$1/g;	# Remove listen:
