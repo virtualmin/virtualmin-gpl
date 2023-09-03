@@ -111,9 +111,9 @@ if ($mode eq "fpm") {
 	if (!$d->{'php_fpm_version'}) {
 		# Work out the default FPM version from the template
 		if (@vers) {
+			# Use max version if set to use highest
 			my @ver_max = sort { $a->[0] < $b->[0] } @vers;
 			my ($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} ||
-			                   # Use max version if set to use highest
 			                   $_->[0] eq $ver_max[0]->[0] } @vers;
 			$fpm ||= $vers[0];
 			$d->{'php_fpm_version'} = $fpm->[0];
@@ -2401,19 +2401,24 @@ return undef;
 sub delete_php_fpm_pool
 {
 my ($d) = @_;
-my $conf = &get_php_fpm_config($d);
-return $text{'php_fpmeconfig'} if (!$conf);
-my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-if (-r $file) {
-	&unlink_logged($file);
-	&unflush_file_lines($file);
-	my $sock = &get_php_fpm_socket_file($d, 1);
-	if (-r $sock) {
-		&unlink_logged($sock);
+my @fpms = &list_php_fpm_configs();
+my $found = 0;
+foreach my $conf (@fpms) {
+	my @pools = &list_php_fpm_pools($conf);
+	foreach my $p (@pools) {
+		if ($p eq $d->{'id'}) {
+			my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+			if (-r $file) {
+				&unlink_logged($file);
+				&unflush_file_lines($file);
+				my $sock = &get_php_fpm_socket_file($d, 1);
+				&unlink_logged($sock) if (-r $sock);
+				$found++;
+				}
+			}
 		}
-	&register_post_action(\&restart_php_fpm_server, $conf);
 	}
-return undef;
+&register_post_action(\&restart_php_fpm_server, $conf) if ($found);
 }
 
 # restart_php_fpm_server([&config])
