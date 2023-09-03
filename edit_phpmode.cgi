@@ -19,9 +19,9 @@ my $ng = $p =~ /nginx/;
 
 # Check for FPM port clash or error
 my $fixport = 0;
+my $clashdomid;
 if ($mode eq "fpm") {
 	my ($fpmerr, $clashdom) = &get_php_fpm_port_error($d);
-	my $clashdomid;
 	my $can = 1;
 	if ($fpmerr) {
 		if ($clashdom) {
@@ -40,7 +40,7 @@ if ($mode eq "fpm") {
 
 print &ui_form_start("save_phpmode.cgi");
 print &ui_hidden("dom", $d->{'id'}),"\n";
-print &ui_hidden("fixport", $fixport),"\n";
+print &ui_hidden("fixport", $fixport),"\n" if (!$clashdomid);
 print &ui_hidden_table_start($text{'phpmode_header'}, "width=100%", 2,
 			     "phpmode", 1, [ "width=30%" ]);
 
