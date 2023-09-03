@@ -23,7 +23,7 @@ if ($mode eq "fpm") {
 	my $fpmerr = &get_php_fpm_port_error($d);
 	if ($fpmerr) {
 		print &ui_alert_box(
-			$fpmerr."<p>\n".$text{'phpmode_fixport'},
+			$fpmerr."<p>\n".$text{'phpmode_fixport_desc'},
 			'warn');
 		$fixport = 1;
 		}
