@@ -22,12 +22,14 @@ my $fixport = 0;
 if ($mode eq "fpm") {
 	my ($fpmerr, $clashdom) = &get_php_fpm_port_error($d);
 	my $clashdomid;
+	my $can = 1;
 	if ($fpmerr) {
 		if ($clashdom) {
 			my $cd = &get_domain_by("dom", $clashdom);
 			$clashdomid = $cd->{'id'};
+			$can = &can_edit_phpmode($cd);
 			}
-		my $errmsg = (!&master_admin() && $clashdom) ? $text{'phpmode_fixport_desc3'} :
+		my $errmsg = (!$can && $clashdom) ? $text{'phpmode_fixport_desc3'} :
 			($clashdom ? &text('phpmode_fixport_desc2', $clashdomid, $clashdom) : $text{'phpmode_fixport_desc1'});
 		print &ui_alert_box(
 			$fpmerr."<p>\n". $errmsg,
