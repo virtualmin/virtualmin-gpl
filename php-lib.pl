@@ -2288,17 +2288,16 @@ sub check_php_fpm_port_clash
 my ($d) = @_;
 my (undef, $port) = &get_domain_php_fpm_port($d);
 my @fpms = &list_php_fpm_configs();
-my $poolcnt = 0;
 foreach my $conf (@fpms) {
 	my @pools = &list_php_fpm_pools($conf);
 	foreach my $p (@pools) {
-		$poolcnt++ if ($p eq $d->{'id'});
-		next if ($poolcnt <= 1 && $p eq $d->{'id'});
+		next if ($p eq $d->{'id'});
 		my $t = get_php_fpm_pool_config_value($conf, $p, "listen");
 		next if (!$t);
 		$t =~ s/^\S+:(\d+)$/$1/g;	# Remove listen:
 		if ($t eq $port) {
-			return ($p, $conf, $port);
+			my $otherid = $port =~ /\/(\d+)\.sock/ ? $1 : undef;
+			return ($p, $conf, $port, $otherid);
 			}
 		}
 	}

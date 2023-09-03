@@ -1021,7 +1021,7 @@ else {
 
 	# Validate the FPM port
 	if ($mode eq "fpm") {
-		my $fpmerr = &get_php_fpm_port_error($d);
+		my ($fpmerr) = &get_php_fpm_port_error($d);
 		return $fpmerr if ($fpmerr);
 		}
 
@@ -1094,28 +1094,29 @@ sub get_php_fpm_port_error
 my ($d) = @_;
 my ($ok, $port) = &get_domain_php_fpm_port($d);
 if ($ok == 0) {
-	return &text('validate_ewebphpfpmport', $port);
+	return (&text('validate_ewebphpfpmport', $port), undef);
 	}
 else {
-	my ($clash, $conf, $port) =
-		&check_php_fpm_port_clash($d);
+	my ($clash, $conf, $port, $otherid) = &check_php_fpm_port_clash($d);
 	my $cd = $clash ? &get_domain($clash) : undef;
-	my $issoc = $port =~ /\//;
-	if ($cd && !$issoc) {
-		return &text('validate_ewebphpfpmport2', $port,
-			     &show_domain_name($cd));
+	if ($cd) {
+		# Owned by another domain
+		if ($otherid && $otherid ne $cd->{'id'}) {
+			return (&text('validate_ewebphpfpmport4', $port,
+				      &show_domain_name($cd)), $cd->{'id'});
+			}
+		else {
+			return (&text('validate_ewebphpfpmport2', $port,
+				      &show_domain_name($cd)), undef);
+			}
 		}
 	elsif ($clash) {
-		my $clash_domname = &show_domain_name($cd);
-		my $this_domclash = $clash_domname eq $d->{'dom'};
-		my $errmsg = $this_domclash ?
-			&text('validate_ewebphpfpmport3', $port) :
-			&text('validate_ewebphpfpmport4', $port, $clash_domname);
-		return wantarray ?
-			($errmsg, $this_domclash ? undef : $clash_domname) : $errmsg;
+		# Owned by another pool file
+		return (&text('validate_ewebphpfpmport3', $port,
+			      $conf->{'dir'}."/".$clash.".conf"), undef);
 		}
 	}
-return undef;
+return ();
 }
 
 # disable_web(&domain)

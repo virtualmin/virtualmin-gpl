@@ -20,20 +20,23 @@ my $ng = $p =~ /nginx/;
 # Check for FPM port clash or error
 my $fixport = 0;
 my $clashdomid;
-if ($mode eq "fpm") {
-	my ($fpmerr, $clashdom) = &get_php_fpm_port_error($d);
-	my $can = 1;
+if ($mode eq "fpm" && $can) {
+	my ($fpmerr, $otherid) = &get_php_fpm_port_error($d);
 	if ($fpmerr) {
-		if ($clashdom) {
-			my $cd = &get_domain_by("dom", $clashdom);
-			$clashdomid = $cd->{'id'};
-			$can = &can_edit_phpmode($cd);
+		my $otherd;
+		if ($otherid) {
+			# Has to be fixed on the other domain's page
+			$otherd = &get_domain_by($otherid);
 			}
-		my $errmsg = (!$can && $clashdom) ? $text{'phpmode_fixport_desc3'} :
-			($clashdom ? &text('phpmode_fixport_desc2', $clashdomid, $clashdom) : $text{'phpmode_fixport_desc1'});
-		print &ui_alert_box(
-			$fpmerr."<p>\n". $errmsg,
-			'warn');
+		if ($otherd && &can_edit_phpmode($otherd)) {
+			$fpmerr .= "<p>\n".&text('phpmode_fixport_desc2',
+				&ui_link("edit_phpmode.cgi?dom=$otherid",
+					 $text{'phpmode_title2'}));
+			}
+		else {
+			$fpmerr .= "<p>\n".$text{'phpmode_fixport_desc'};
+			}
+		print &ui_alert_box($fpmerr, 'warn');
 		$fixport = 1;
 		}
 	}
