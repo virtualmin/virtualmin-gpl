@@ -1100,13 +1100,13 @@ else {
 	my ($clash, $conf, $port) =
 		&check_php_fpm_port_clash($d);
 	my $cd = $clash ? &get_domain($clash) : undef;
-	if ($cd) {
+	my $issoc = $port =~ /\//;
+	if ($cd && !$issoc) {
 		return &text('validate_ewebphpfpmport2', $port,
 			     &show_domain_name($cd));
 		}
 	elsif ($clash) {
-		return &text('validate_ewebphpfpmport3', $port,
-			     $conf->{'dir'}."/".$clash.".conf");
+		return &text('validate_ewebphpfpmport3', $port);
 		}
 	}
 return undef;
