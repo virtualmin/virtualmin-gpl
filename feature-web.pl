@@ -1099,7 +1099,7 @@ if ($ok == 0) {
 else {
 	my ($clash, $conf, $port, $otherid) = &check_php_fpm_port_clash($d);
 	my $cd = $clash ? &get_domain($clash) : undef;
-	$cd = undef if ($cd->{'id'} eq $d->{'id'});
+	$cd = undef if ($cd && $cd->{'id'} eq $d->{'id'});
 	if ($cd) {
 		# Owned by another domain
 		if ($otherid && $otherid ne $cd->{'id'}) {
