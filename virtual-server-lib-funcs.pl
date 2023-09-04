@@ -5749,15 +5749,17 @@ return undef;
 # Returns text for the quota on some filesystem, in a human-readable format
 sub quota_show
 {
-if (!$_[0]) {
-	return $_[2] ? $text{'resel_none'} : $text{'resel_unlimit'};
+my ($n, $fs, $zeromode) = @_;
+if (!$n) {
+	return $zeromode == 1 ? $text{'resel_none'} :
+	       $zeromode == 0 ? $text{'resel_unlimit'} : 0;
 	}
 else {
-	local $bsize = &quota_bsize($_[1]);
+	local $bsize = &quota_bsize($fs);
 	if ($bsize) {
-		return &nice_size($_[0]*$bsize);
+		return &nice_size($n*$bsize);
 		}
-	return $_[0]." ".$text{'form_b'};
+	return $n." ".$text{'form_b'};
 	}
 }
 
@@ -7737,7 +7739,7 @@ local $newquota = $d->{'quota'} - ($oldd ? $oldd->{'quota'} : 0);
 if ($left != -1 && $left-$newquota < 0) {
 	return &text('setup_noquotaadd'.$reason,
 		     &quota_show($left+($oldd ? $oldd->{'quota'} : 0),
-				 "home", 1));
+				 "home", 2));
 	}
 
 # Check bandwidth limits
