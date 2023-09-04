@@ -217,6 +217,7 @@ delete_mail_smtpcloud=Cloudmailprovider $1 verwijderen ..
 
 save_apache12=PHP FPM-configuratie bijwerken ..
 save_apache12none=.. geen reparaties nodig
+save_dnsinternal=Intern IP-adres in DNS-domein wijzigen ..
 save_dns2_enewfile=Nieuw zonebestand kan niet worden gelezen : $1
 save_bind_cloud=DNS-domeinnaam wijzigen op $1 ..
 save_bind_ecloud=.. mislukt : $1
@@ -1067,6 +1068,9 @@ validate_ewebconfig=Er is een fout gevonden in de configuratie van de virtuele h
 validate_ewebphpsuexec=PHP is geconfigureerd om als domeineigenaar te worden uitgevoerd, maar suEXEC is niet ingeschakeld!
 validate_ewebphpconfig=Er zijn PHP-configuratiefouten gevonden in versie $1 : $2
 validate_ewebphpfpmport=PHP FPM-configuratiefout gevonden : $1
+validate_ewebphpfpmport2=PHP-FPM-poort /socket <tt>$1</tt> wordt ook gebruikt door <tt>$2</tt>
+validate_ewebphpfpmport3=PHP-FPM-poort /socket <tt>$1</tt> wordt ook gebruikt in een ander poolconfiguratiebestand <tt>$2</tt>
+validate_ewebphpfpmport4=PHP-FPM-poort /socket <tt>$1</tt> wordt ook ten onrechte gebruikt door <tt>$2</tt>
 validate_ewebuid=suEXEC-gebruiker is ingesteld op $1, maar de UID van de virtuele server is $2
 validate_ewebgid=suEXEC-groep is ingesteld op $1, maar de GID van de virtuele server is $2
 validate_ewebroot=Apache DocumentRoot is niet ingesteld op HTML-directory $1
@@ -1107,6 +1111,8 @@ newquotacheck_esupport=Het controleren van quota wordt niet ondersteund of verei
 phpmode_return=website-opties
 phpmode_title2=PHP-opties
 phpmode_header=PHP-opties voor dit domein
+phpmode_fixport_desc=Klik hieronder op de knop <b>Opslaan</b> om de PHP-FPM-configuratie bij te werken en deze fout te corrigeren
+phpmode_fixport_desc2=Dit kan worden gecorrigeerd op de $1-pagina ervan
 phpmode_fpm=FPM (uitgevoerd als eigenaar van een virtuele server)
 phpmode_none=Gehandicapt
 phpmode_short_fpm=FPM
@@ -1155,6 +1161,7 @@ phpmode_phpinfo_show=Klik om informatie over de PHP-omgeving op uw server weer t
 phpmode_phpinfo_show_dir=Klik om informatie weer te geven over de PHP-omgeving op uw server onder de <tt>$1</tt> directory met behulp van de <tt>phpinfo()</tt> functie
 phpmode_phpinfo_ecannot=U mag geen PHP-informatie voor deze virtuele server bekijken
 phpmode_phpinfo_dir_ecannot_dir=Deze virtuele server heeft de map $1 niet opgevraagd onder $2
+phpmode_fixport=PHP-FPM poort/socket-configuratie repareren ..
 
 website_header=Website-opties
 

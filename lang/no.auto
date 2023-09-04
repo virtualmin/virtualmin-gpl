@@ -181,6 +181,7 @@ delete_mail_smtpcloud=Fjerner leverandør av skymelding $1 ..
 
 save_apache12=Oppdaterer PHP FPM-konfigurasjon ..
 save_apache12none=.. ingen reparasjoner nødvendig
+save_dnsinternal=Endre intern IP-adresse i DNS-domene ..
 save_dns2_enewfile=Ny sonefil kan ikke leses : $1
 save_bind_cloud=Endrer DNS-domenenavn på $1 ..
 save_bind_ecloud=.. mislyktes : $1 
@@ -826,6 +827,9 @@ validate_ewebconfig=Det ble funnet en feil i den virtuelle vertskonfigurasjonen 
 validate_ewebphpsuexec=PHP er konfigurert til å kjøre som domeneeier, men suEXEC er ikke aktivert!
 validate_ewebphpconfig=PHP-konfigurasjonsfeil ble funnet i versjon $1 : $2 
 validate_ewebphpfpmport=PHP FPM-konfigurasjonsfeil funnet : $1 
+validate_ewebphpfpmport2=PHP-FPM-port /socket <tt>$1</tt> brukes også av <tt>$2</tt>
+validate_ewebphpfpmport3=PHP-FPM-port /socket <tt>$1</tt> blir også brukt i en annen pool-konfigurasjonsfil <tt>$2</tt>
+validate_ewebphpfpmport4=PHP-FPM-porten /socket <tt>$1</tt> blir også feilaktig brukt av <tt>$2</tt>
 validate_ewebuid=suEXEC-bruker er satt til $1, men den virtuelle serverens UID er $2
 validate_ewebgid=suEXEC-gruppen er satt til $1, men den virtuelle serverens GID er $2
 validate_ewebroot=Apache DocumentRoot er ikke satt til HTML-katalog $1 
@@ -858,6 +862,8 @@ newquotacheck_esupport=Kvotekontroll støttes eller kreves ikke av filsystemene 
 phpmode_return=nettstedalternativer
 phpmode_title2=PHP-alternativer
 phpmode_header=PHP-alternativer for dette domenet
+phpmode_fixport_desc=Klikk <b>Lagre</b>-knappen nedenfor for å oppdatere PHP-FPM-konfigurasjonen og rette opp denne feilen
+phpmode_fixport_desc2=Dette kan rettes på $1-siden
 phpmode_fpm=FPM (kjøres som virtuell servereier)
 phpmode_none=Funksjonshemmet
 phpmode_short_fpm=FPM
@@ -898,6 +904,7 @@ phpmode_phpinfo_show=Klikk for å vise informasjon om PHP-miljøet på serveren 
 phpmode_phpinfo_show_dir=Klikk for å vise informasjon om PHP-miljøet på serveren din under <tt>$1</tt> katalogen ved å bruke <tt>phpinfo()</tt> funksjonen
 phpmode_phpinfo_ecannot=Du har ikke lov til å se PHP-informasjon for denne virtuelle serveren
 phpmode_phpinfo_dir_ecannot_dir=Denne virtuelle serveren har ikke forespurt katalogen $1 under $2
+phpmode_fixport=Retter PHP-FPM port/socket konfigurasjon ..
 
 website_header=Nettstedsalternativer
 
