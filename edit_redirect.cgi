@@ -27,7 +27,8 @@ print &ui_table_start($text{'redirect_header'}, undef, 2);
 
 # URL path
 print &ui_table_row(&hlink($text{'redirect_path'}, 'redirect_path'),
-	&ui_textbox("path", $r->{'path'}, 40));
+	&ui_textbox("path", $r->{'path'}, 40, undef, undef,
+		"placeholder=\"$text{'index_global_eg'} / or /old-path\""), );
 
 # Destination
 my ($mode, $dir, $url, $upath);
@@ -48,14 +49,17 @@ else {
 print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 	&ui_radio_table("mode", $mode,
 		[ [ 0, $text{'redirect_url'},
-		    &ui_textbox("url", $url, 40) ],
+		    &ui_textbox("url", $url, 40, undef, undef,
+				"placeholder=\"$text{'index_global_eg'} https://google.com\"") ],
 		  [ 2, $text{'redirect_dpath'},
 		    &ui_select("dproto", $dproto,
 			       [ [ 'http', 'HTTP' ],
 			         [ 'https', 'HTTPS' ] ])." ".
-		    &ui_textbox("dpath", $dpath, 40) ],
+		    &ui_textbox("dpath", $dpath, 40, undef, undef,
+				"placeholder=\"$text{'index_global_eg'} /new-path\"") ],
 		  [ 1, $text{'redirect_dir'},
-		    &ui_textbox("dir", $dir, 40) ],
+		    &ui_textbox("dir", $dir, 52, undef, undef,
+				"placeholder=\"$text{'index_global_eg'} $d->{'home'}/$d->{'public_html_dir'}/new-path\"") ],
 		]));
 
 # HTTP status code
