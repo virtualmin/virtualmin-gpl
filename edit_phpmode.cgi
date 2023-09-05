@@ -226,7 +226,7 @@ if ($canv && !$d->{'alias'} && $mode ne "mod_php") {
 			   $text{'phpver_ver'} );
 		print &ui_table_row(
 			&hlink($text{'phpmode_versions'}, "phpmode_versions"),
-			&ui_columns_table(\@heads, 100, \@table));
+			&ui_columns_table(\@heads, 100, \@table), undef, undef, ["data-table-id='php-multi'"]);
 
 		# Warn if changing mode would remove per-dir versions
 		if ($mode eq "cgi" || $mode eq "fcgid") {
