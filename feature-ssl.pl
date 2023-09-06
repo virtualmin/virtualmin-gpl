@@ -2951,7 +2951,8 @@ else {
 	($ok, $cert, $key, $chain) =
 		&request_domain_letsencrypt_cert($d, \@dnames, 0,
 		    $d->{'letsencrypt_size'}, undef, $d->{'letsencrypt_ctype'},
-		    $d->{'letsencrypt_server'});
+		    $d->{'letsencrypt_server'}, $d->{'letsencrypt_key'},
+		    $d->{'letsencrypt_hmac'});
 	&after_letsencrypt_website($d, $before);
 	}
 
@@ -3186,12 +3187,13 @@ return \@rv;
 }
 
 # request_domain_letsencrypt_cert(&domain, &dnames, [staging], [size], [mode],
-# 				  [key-type], [letsencrypt-server])
+# 				  [key-type], [letsencrypt-server],
+# 				  [server-key], [server-hmac])
 # Attempts to request a Let's Encrypt cert for a domain, trying both web and
 # DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode, $ctype, $server) = @_;
+my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
 my $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
@@ -3209,7 +3211,7 @@ if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
 		&get_global_from_address(), $actype, $actype_reuse,
-		$server);
+		$server, $key, $hmac);
 	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 	}
 if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
@@ -3218,7 +3220,7 @@ if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
 	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
 		&get_global_from_address(), $actype, $actype_reuse,
-		$server);
+		$server, $key, $hmac);
 	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 	}
 elsif (!$ok) {

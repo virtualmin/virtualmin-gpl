@@ -22,6 +22,11 @@ To have Virtualmin perform a local validation check of the domain, use the
 C<--validate-first> flag. This is automatically enabled when C<--check-first>
 is set.
 
+By default, the standard Let's Encrypt service will be used. However, you can
+use a different ACME-compatible provider with the C<--server> flag followed
+by the provider's API URL. The C<--server-key> and C<--server-hmac> flags can
+be used to specify a login to the provider.
+
 =cut
 
 package virtual_server;
@@ -87,6 +92,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--server") {
 		$leserver = shift(@ARGV);
+		}
+	elsif ($a eq "--server-key") {
+		$leserver_key = shift(@ARGV);
+		}
+	elsif ($a eq "--server-hmac") {
+		$leserver_hmac = shift(@ARGV);
 		}
 	elsif ($a eq "--help") {
 		&usage();
@@ -184,7 +195,8 @@ $phd = &public_html_dir($d);
 $before = &before_letsencrypt_website($d);
 @beforecerts = &get_all_domain_service_ssl_certs($d);
 ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
-	$d, \@dnames, $staging, $size, $mode, $ctype, $leserver);
+	$d, \@dnames, $staging, $size, $mode, $ctype, $leserver,
+	$leserver_key, $leserver_hmac);
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	&$second_print(".. failed : $cert");
@@ -205,7 +217,9 @@ else {
 	$d->{'letsencrypt_renew'} = $renew;
 	$d->{'letsencrypt_ctype'} = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 	$d->{'letsencrypt_size'} = $size;
-	$d->{'letsencrypt_server'} = $server;
+	$d->{'letsencrypt_server'} = $leserver;
+	$d->{'letsencrypt_key'} = $leserver_key;
+	$d->{'letsencrypt_hmac'} = $leserver_hmac;
 	&refresh_ssl_cert_expiry($d);
 	&save_domain($d);
 
@@ -261,6 +275,9 @@ print "                                    [--staging]\n";
 print "                                    [--check-first | --validate-first]\n";
 print "                                    [--web | --dns]\n";
 print "                                    [--rsa | --ec]\n";
+print "                                    [--server url]\n";
+print "                                    [--server-key id]\n";
+print "                                    [--server-hmac string]\n";
 exit(1);
 }
 
