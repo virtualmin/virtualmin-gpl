@@ -278,4 +278,14 @@ return &ui_link($link,
   "vui_edit_link_icon i$unisymb_class");
 }
 
+=head2 vui_js_func_block_history()
+
+Inner test for a JS function if history button was clicked
+
+=cut
+sub vui_js_func_block_history
+{
+return "var is_history_step = false; try { is_history_step = (typeof vars === 'object' && typeof pjax === 'object' && vars.pjax.popstate) || (window.performance.getEntriesByType('navigation')[0].type === 'back_forward'); } catch(e) { is_history_step = false; };if (is_history_step) {return;}\n";
+}
+
 1;

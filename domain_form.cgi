@@ -272,7 +272,7 @@ $defplan = &get_default_plan();
 $js = "<script>\n";
 $js .= "function select_plan(num)\n";
 $js .= "{\n";
-$js .= "if (typeof _history_page_back === 'number') {return;}\n";
+$js .= &vui_js_func_block_history();
 $js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain\"][action*=\".cgi\"]');\n";
 foreach $plan (@availplans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
