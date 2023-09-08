@@ -278,14 +278,4 @@ return &ui_link($link,
   "vui_edit_link_icon i$unisymb_class");
 }
 
-=head2 vui_js_func_block_history()
-
-Inner test for a JS function if history button was clicked
-
-=cut
-sub vui_js_func_block_history
-{
-return "if (typeof vars === 'object' && typeof pjax === 'object' && vars.pjax.popstate) { return }\n";
-}
-
 1;

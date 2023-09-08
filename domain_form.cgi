@@ -272,7 +272,6 @@ $defplan = &get_default_plan();
 $js = "<script>\n";
 $js .= "function select_plan(num)\n";
 $js .= "{\n";
-$js .= &vui_js_func_block_history();
 $js .= "var domain_form_target = document.querySelectorAll('form[action*=\"domain\"][action*=\".cgi\"]');\n";
 foreach $plan (@availplans) {
 	$js .= "if (num == $plan->{'id'}) {\n";
@@ -700,10 +699,10 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 	}
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {
-	print "<script>select_template($deftmpl->{'id'});</script>\n";
+	print "<script data-nocache>select_template($deftmpl->{'id'});</script>\n";
 	}
 if (!$parentdom) {
-	print "<script>select_plan($defplan->{'id'});</script>\n";
+	print "<script data-nocache>select_plan($defplan->{'id'});</script>\n";
 	}
 
 &ui_print_footer("", $text{'index_return'});
