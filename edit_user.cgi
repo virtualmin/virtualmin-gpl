@@ -57,7 +57,14 @@ $ulabel = $d->{'mail'} ? &hlink($text{'user_user'}, "username")
 		       : &hlink($text{'user_user2'}, "username2");
 if ($mailbox) {
 	# Domain owner
-	print &ui_table_row($ulabel, "<tt>$user->{'user'}</tt>", 2, \@tds);
+	my $ouser_email = $user->{'user'};
+	if ($d->{'mail'} && $ouser_email !~ /\@/) {
+		$ouser_email = $user->{'user'} . "\@" . $d->{'dom'};
+		}
+	print &ui_table_row(&hlink($text{'user_user2'}, "username2"),
+	                    "<tt>$user->{'user'}</tt>", 2, \@tds);
+	print &ui_table_row($ulabel, "<tt>$ouser_email</tt>", 2, \@tds)
+		if ($d->{'mail'});
 	$pop3 = $user->{'user'};
 	}
 else {
