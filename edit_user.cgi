@@ -95,7 +95,7 @@ else {
 	}
 
 # Real name - only for true Unix users or LDAP persons
-if ($user->{'person'}) {
+if ($user->{'person'} && $user->{'real'}) {
 	print &ui_table_row(&hlink($text{'user_real'}, "realname"),
 		$mailbox ? $user->{'real'} :
 			   &ui_textbox("real", $user->{'real'}, 40, 0, undef,
