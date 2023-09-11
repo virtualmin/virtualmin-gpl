@@ -71,13 +71,6 @@ else {
 	# Regular user
 	$pop3 = $d && !$user->{'noappend'} ?
 		&remove_userdom($user->{'user'}, $d) : $user->{'user'};
-	print &ui_table_row($ulabel,
-		&ui_textbox("mailuser", $pop3, 13, 0, undef,
-		  &vui_ui_input_noauto_attrs()).
-		($d ? "\@".&show_domain_name($d) : ""),
-		2, \@tds);
-	print &ui_hidden("oldpop3", $pop3),"\n";
-
 	# Full username differs
 	if ($pop3 ne $user->{'user'}) {
 		print &ui_table_row(
@@ -85,6 +78,13 @@ else {
 				     : &hlink($text{"user_imapf$mysql_suff"},'user_imapf'),
 			"<tt>$user->{'user'}</tt>");
 		}
+	# Edit mail username
+	print &ui_table_row($ulabel,
+		&ui_textbox("mailuser", $pop3, 13, 0, undef,
+		  &vui_ui_input_noauto_attrs()).
+		($d ? "\@".&show_domain_name($d) : ""),
+		2, \@tds);
+	print &ui_hidden("oldpop3", $pop3),"\n";
 
 	# Always display MySQL username
 	if ($user->{'mysql_user'}) {
