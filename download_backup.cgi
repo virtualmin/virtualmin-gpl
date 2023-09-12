@@ -15,7 +15,7 @@ $in{'file'} || &error($text{'backup_edownloadfile'});
 $in{'file'} =~ s/^\/.*\///g || &error($text{'backup_edownloadfile2'});
 $in{'file'} =~ /\.\./ && &error($text{'backup_edownloadfile7'});
 $in{'file'} =~ /\0/ && &error($text{'backup_edownloadfile7'});
-$in{'file'} =~ /^(\S+):(\S+\.(zip|tar\.[a-z0-9]+))$/ ||
+$in{'file'} =~ /^(\S+):(\S+\.(zip|tar|tar\.[a-z0-9]+))$/ ||
 	&error($text{'backup_edownloadfile3'});
 $remote_user eq $1 || &error($text{'backup_edownloadfile4'});
 my $tempfile = $2;
