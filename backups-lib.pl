@@ -5782,7 +5782,7 @@ elsif ($mode == 10) {
 		if ($st->{'folder'}) {
 			# Age is age of the oldest file
 			$ctime = time();
-			my $subfiles = &list_dropbox_files($base, $f);
+			my $subfiles = &list_bb_files($base, $f);
 			if (ref($subfiles)) {
 				foreach my $sf (@$subfiles) {
 					$ctime = $sf->{'time'}
