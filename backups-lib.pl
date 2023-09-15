@@ -5823,8 +5823,8 @@ elsif ($mode == 10) {
 				$ok = 0;
 				}
 			else {
-				&delete_dropbox_path($base, $f.".dom");
-				&delete_dropbox_path($base, $f.".info");
+				&delete_bb_file($base, $f.".dom");
+				&delete_bb_file($base, $f.".info");
 				&$second_print(&text('backup_deleted',
 				     &nice_size($size)));
 				$pcount++;
