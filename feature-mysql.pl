@@ -1351,6 +1351,9 @@ close(DBFILE);
 if ($first =~ /^mysqldump:.*error/i) {
 	return $first;
 	}
+if ($first eq "") {
+	return "MySQL backup is empty!";
+	}
 return undef;
 }
 
