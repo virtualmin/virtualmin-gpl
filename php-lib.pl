@@ -1269,10 +1269,18 @@ if ($mode eq "fpm") {
 	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		my $oldlisten = &get_php_fpm_config_value($d, "listen");
+		my @phpvs;
+		my $confs = &list_php_fpm_config_values($d);
+		foreach my $pv (@$confs) {
+			push(@phpvs, $pv) if ($pv->[0] =~ /^(php_value\[|env\[)/);
+			}
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
 		&create_php_fpm_pool($d, $oldlisten);
+		foreach my $pv (@phpvs) {
+			&save_php_fpm_config_value($d, $pv->[0], $pv->[1]);
+			}
 		}
 	}
 else {
@@ -2414,12 +2422,12 @@ foreach my $conf (@fpms) {
 				&unflush_file_lines($file);
 				my $sock = &get_php_fpm_socket_file($d, 1);
 				&unlink_logged($sock) if (-r $sock);
-				$found++;
+				&register_post_action(
+					\&restart_php_fpm_server, $conf);
 				}
 			}
 		}
 	}
-&register_post_action(\&restart_php_fpm_server, $conf) if ($found);
 }
 
 # restart_php_fpm_server([&config])
