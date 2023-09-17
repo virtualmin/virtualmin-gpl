@@ -2276,7 +2276,12 @@ if ($p) {
 	# Hosted on a provisioning server, so nothing to do
 	return 1;
 	}
-&$first_print($text{'setup_bindpid'});
+if ($d) {
+	&$first_print(&text('setup_bindpid2', &show_domain_name($d)));
+	}
+else {
+	&$first_print($text{'setup_bindpid'});
+	}
 my $r = &require_bind($d);
 local $bindlock = "$module_config_directory/bind-restart";
 &lock_file($bindlock);
