@@ -1272,7 +1272,9 @@ if ($mode eq "fpm") {
 		my @phpvs;
 		my $confs = &list_php_fpm_config_values($d);
 		foreach my $pv (@$confs) {
-			push(@phpvs, $pv) if ($pv->[0] =~ /^(php_value\[|env\[)/);
+			push(@phpvs, $pv)
+				if ($pv->[0] =~ /^(php_value|php_admin_value|env)\[/ ||
+				    $pv->[0] =~ /^pm\./);
 			}
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
