@@ -11759,6 +11759,7 @@ my (@expired, @nearly);
 foreach my $d (&list_domains()) {
 	next if (!$d->{'whois_expiry'} || !$d->{'dns'});
 	next if ($d->{'disabled'});
+	next if ($d->{'whois_ignore'});
 
 	# If status collection is disabled and last
 	# config check was done a long time ago or if
@@ -11809,8 +11810,9 @@ if (@expired || @nearly) {
 		@edoms = &unique(@edoms);
 		my $expiry_form .= &ui_form_start(
 			"@{[&get_webprefix_safe()]}/$module_name/recollect_whois.cgi");
-		$expiry_form .= &ui_hidden("doms", "@edoms")."\n".
+		$expiry_form .= &ui_hidden("doms", join(" ", @edoms))."\n".
 		$expiry_form .= &ui_submit($text{'index_drefresh'});
+		$expiry_form .= &ui_submit($text{'index_dignore'}, "ignore");
 		$expiry_form .= &ui_form_end();
 		$expiry_text .= $expiry_form;
 		}
