@@ -11766,10 +11766,12 @@ foreach my $d (&list_domains()) {
 	# already expired and next hasn't been updated
 	# for the passed half an hour, then skip it
 	# considering current records to be stale	
+	my $nocoll = $config{'collect_interval'} eq 'none' ? 1 : 0;
 	if ($d->{'whois_next'}) {
-		if(($config{'collect_interval'} eq 'none' && $now > $d->{'whois_next'}) ||
-		   ($config{'collect_interval'} eq 'none' && $config{'last_check'} > $d->{'whois_next'}) ||
-		   ($config{'whois_expiry'} < $now && $now > $d->{'whois_next'} + 1800)) {
+		if ($nocoll && $now > $d->{'whois_next'} ||
+		    $nocoll && $config{'last_check'} > $d->{'whois_next'} ||
+		    $config{'whois_expiry'} < $now &&
+		      $now > $d->{'whois_next'} + 1800) {
 			next;
 			}
 		}
