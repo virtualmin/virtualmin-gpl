@@ -175,9 +175,9 @@ if (!$aliasdom && $d->{'dir'}) {
 # Description
 if ($d->{'owner'} && 
 	$d->{'owner'} ne $text{'check_defhost_desc'}) {
-	my $owner = $d->{'owner'};
+	my $owner = &html_escape($d->{'owner'});
 	if (&can_config_domain($d)) {
-		$owner = "<a href='edit_domain.cgi?dom=$d->{'id'}'>$owner</a>"
+		$owner = &ui_link("edit_domain.cgi?dom=$d->{'id'}", $owner);
 		}
 	print &ui_table_row($text{'edit_owner'}, $owner, 3, \@tds);
 	}
