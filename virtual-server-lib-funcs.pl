@@ -16665,7 +16665,10 @@ local ($tmpl) = @_;
 
 if (!$tmpl->{'standard'}) {
 	$in{'name'} || &error($text{'tmpl_ename'});
-	$tmpl->{'name'} = $in{'name'};
+	if ($tmpl->{'name'} ne $in{'name'}) {
+		$in{'name'} =~ /<|>|\&|"|'/ && &error($text{'tmpl_ename2'});
+		$tmpl->{'name'} = $in{'name'};
+		}
 	}
 
 # Save for-use-by list

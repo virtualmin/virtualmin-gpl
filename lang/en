@@ -3421,6 +3421,7 @@ tmpl_alias0=Creating Redirect virtual host
 tmpl_alias4=Creating permanent Redirect virtual host
 tmpl_err=Failed to save server template
 tmpl_ename=Missing template name
+tmpl_ename2=Invalid template name
 tmpl_eresellers=No resellers selected
 tmpl_eskel=Missing or invalid skeleton directory
 tmpl_egone=Template no longer exists!
