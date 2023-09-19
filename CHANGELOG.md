@@ -1,3 +1,7 @@
+#### Version 7.x
+* Add ability to preserve `php_value`, `php_admin_value`, `env` and `pm.` settings when changing PHP-FPM version
+* Fix Backblaze clearing old backups [#640](https://github.com/virtualmin/virtualmin-gpl/issues/640)
+
 #### Version 7.8
 * Update host and domain default page [#629](https://github.com/virtualmin/virtualmin-gpl/issues/629)
 * Add API to setup Virtualmin default hostname SSL

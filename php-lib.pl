@@ -2050,6 +2050,7 @@ foreach my $pname (@pkgnames) {
 	my @verdirs;
 	DIR: foreach my $cdir ("/etc/php-fpm.d",
 			       "/etc/php*/fpm/pool.d",
+			       "/etc/php*/fpm/php-fpm.d",
 			       "/etc/php/*/fpm/pool.d",
 			       "/etc/opt/remi/php*/php-fpm.d",
 			       "/etc/opt/rh/rh-php*/php-fpm.d",
