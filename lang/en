@@ -1984,6 +1984,7 @@ check_webphpfpm2=The following PHP-FPM versions are available : $1
 check_ewebphpfpm2=The following PHP-FPM versions cannot be used : $1
 check_webphpnofpm2=No PHP-FPM packages were found
 check_webphpfpmport=Fixing port $2 clash for PHP-FPM version $1
+check_webfpmboot=Enabling PHP-FPM version $1 at boot time
 check_webphpverfixed=Corrected PHP-FPM version for <tt>$1</tt> domains
 check_webphplocalfixed=Limited PHP-FPM server version <tt>$2</tt> to localhost for <tt>$1</tt> domains
 check_webadminfixed=Removed unsupported <tt>$1</tt> directive from <tt>$2</tt> Apache websites

@@ -15370,6 +15370,14 @@ if (&domain_has_website()) {
 				}
 			}
 
+		# Fix FPM versions that aren't enabled at boot
+		my @bootfpms = grep { $_->{'init'} && !$_->{'enabled'}} @okfpms;
+		foreach my $conf (@bootfpms) {
+			&foreign_require("init");
+			&$second_print(&text('check_webfpmboot', $conf->{'version'}));
+			&init::enable_at_boot($conf->{'init'});
+			}
+
 		# Check for invalid FPM versions, in case one has been
 		# upgraded to a new release
 		local @fpmfixed;
