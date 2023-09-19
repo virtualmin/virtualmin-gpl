@@ -338,7 +338,7 @@ print &ui_table_row(&hlink($text{'form_template'},"template"),
 if (!$parentdom) {
 	foreach $p (sort { $a->{'name'} cmp $b->{'name'} }
 			 &list_available_plans()) {
-		push(@popts, [ $p->{'id'}, $p->{'name'} ]);
+		push(@popts, [ $p->{'id'}, &html_escape($p->{'name'}) ]);
 		}
 	print &ui_table_row(&hlink($text{'form_plan'}, "plan"),
 		&ui_select("plan", $defplan->{'id'}, \@popts, 1, 0, 0, 0,
