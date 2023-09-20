@@ -8715,6 +8715,9 @@ foreach my $dd (@alldoms) {
 				}
 			&call_feature_delete($f, $dd, @args);
 			}
+		if (&indexof($f, @plugins) >= 0) {
+			&plugin_call($f, "feature_always_delete", $dd);
+			}
 		}
 
 	# Delete any FPM or FCGIwrap servers, just in case they
@@ -14041,9 +14044,9 @@ foreach my $f (@features) {
 # Do move for plugins, with error handling
 foreach my $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
+		$doing_dom = $doms[$i];
+		local $main::error_must_die = 1;
 		if ($doms[$i]->{$f}) {
-			$doing_dom = $doms[$i];
-			local $main::error_must_die = 1;
 			eval { &plugin_call($f, "feature_modify",
 				     	    $doms[$i], $olddoms[$i]) };
 			if ($@) {
@@ -14052,6 +14055,8 @@ foreach my $f (&list_feature_plugins()) {
 					&plugin_call($f, "feature_name"),$err));
 				}
 			}
+		eval { &plugin_call($f, "feature_always_modify",
+				    $doms[$i], $olddoms[$i]) };
 		}
 	}
 
@@ -14282,9 +14287,9 @@ foreach $f (@features) {
 	}
 foreach $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
+		$doing_dom = $doms[$i];
+		local $main::error_must_die = 1;
 		if ($doms[$i]->{$f}) {
-			$doing_dom = $doms[$i];
-			local $main::error_must_die = 1;
 			eval { &plugin_call($f, "feature_modify",
 					    $doms[$i], $olddoms[$i]) };
 			if ($@) {
@@ -14293,6 +14298,8 @@ foreach $f (&list_feature_plugins()) {
 					&plugin_call($f, "feature_name"),$err));
 				}
 			}
+		eval { &plugin_call($f, "feature_always_modify",
+				    $doms[$i], $olddoms[$i]) };
 		}
 	}
 
@@ -14403,8 +14410,8 @@ foreach my $f (@features) {
 
 # Update all enabled plugins
 foreach my $f (&list_feature_plugins()) {
+	local $main::error_must_die = 1;
 	if ($d->{$f}) {
-		local $main::error_must_die = 1;
 		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
 		if ($@) {
 			local $err = $@;
@@ -14412,6 +14419,7 @@ foreach my $f (&list_feature_plugins()) {
 				&plugin_call($f, "feature_name"), $err));
 			}
 		}
+	eval { &plugin_call($f, "feature_always_modify", $d, $oldd) };
 	}
 
 # Save the domain object
@@ -14489,8 +14497,8 @@ foreach my $f (@features) {
 
 # Update all enabled plugins
 foreach my $f (&list_feature_plugins()) {
+	local $main::error_must_die = 1;
 	if ($d->{$f}) {
-		local $main::error_must_die = 1;
 		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
 		if ($@) {
 			local $err = $@;
@@ -14498,6 +14506,7 @@ foreach my $f (&list_feature_plugins()) {
 				&plugin_call($f, "feature_name"), $err));
 			}
 		}
+	eval { &plugin_call($f, "feature_always_modify", $d, $oldd) };
 	}
 
 # Save the domain object
@@ -14805,11 +14814,13 @@ foreach my $f (&unique(@features, 'mail')) {
 foreach $f (&list_feature_plugins()) {
 	for(my $i=0; $i<@doms; $i++) {
 		my $p = &domain_has_website($doms[$i]);
+		$doing_dom = $doms[$i];
 		if ($doms[$i]->{$f} && $f ne $p) {
-			$doing_dom = $doms[$i];
 			&try_plugin_call($f, "feature_modify",
 					 $doms[$i], $olddoms[$i]);
 			}
+		&try_plugin_call($f, "feature_always_modify",
+				 $doms[$i], $olddoms[$i]);
 		}
 	}
 
@@ -18284,6 +18295,7 @@ foreach my $ad (@aliases) {
 		if ($ad->{$f}) {
 			&plugin_call($f, "feature_modify", $ad, $oldad);
 			}
+		&plugin_call($f, "feature_always_modify", $ad, $oldad);
 		}
 	&$outdent_print();
 	&save_domain($ad);
