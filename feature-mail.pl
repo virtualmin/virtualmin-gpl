@@ -5959,7 +5959,7 @@ while(<MAILLOG>) {
 	# Remove Solaris extra part like [ID 197553 mail.info]
 	s/\[ID\s+\d+\s+\S+\]\s+//;
 
-	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
+	if (/^(\S+)\s+(\d+)\s+(\d+):(\d+):(\d+)\s+(\S+)\s+dovecot\S*:\s+(pop3|imap)-login:\s+Login:\s+user=<([^>]+)>/) {
 		# POP3 or IMAP login with dovecot
 		my $ltime;
 		eval { $ltime = timelocal($5, $4, $3, $2,
