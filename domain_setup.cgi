@@ -92,9 +92,7 @@ if (!$parentuser) {
 		$tmpl->{'mail_on'} eq "none" || !$in{'email_def'} ||
 			&error($text{'setup_eemail2'});
 		}
-	if ($in{'unix'} || $in{'webmin'}) {
-		$pass = &parse_new_password("vpass", 0);
-		}
+	$pass = &parse_new_password("vpass", 0);
 
 	# Parse admin/unix username
 	if ($in{'vuser_def'}) {
