@@ -2886,10 +2886,10 @@ foreach my $d (&list_domains()) {
 		}
 
 	# Time to attempt the renewal
-	&lock_domain($d);
 	$done++;
 	my ($ok, $err, $dnames) = &renew_letsencrypt_cert($d);
 	my ($subject, $body);
+	&lock_domain($d);
 	if (!$ok) {
 		# Failed! Tell the user
 		$subject = $text{'letsencrypt_sfailed'};
