@@ -297,6 +297,7 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 			(!$status->{'status'} ?
 			      "<img src='$idir/down.gif' alt='Stopped'>" :
 			      "<img src='$idir/up.gif' alt='Running'>").
+			"&nbsp;&nbsp;&nbsp;".
 		        $action_link.
 		        "&nbsp;".$restart_link });
 		}
