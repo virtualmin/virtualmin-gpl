@@ -19,13 +19,10 @@ local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						   $d->{'web_port'});
 if ($virt) {
 	# First check for FPM socket, using a single ProxyPassMatch
-	local $fsock = &get_php_fpm_socket_file($d, 1);
-	local $fport = $d->{'php_fpm_port'};
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
 	foreach my $ppm (@ppm) {
-		if ($ppm =~ /unix:\Q$fsock\E/ ||
-		    $ppm =~ /fcgi:\/\/localhost:\Q$fport\E/ ||
-		    $ppm =~ /fcgi:\/\/127\.0\.0\.1:\Q$fport\E/) {
+		if ($ppm =~ /unix:([^\|]+)/ ||
+		    $ppm =~ /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/) {
 			return 'fpm';
 			}
 		}
@@ -34,8 +31,7 @@ if ($virt) {
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
 		next if ($f->{'words'}->[0] ne '\.php$');
 		foreach my $h (&apache::find_directive("SetHandler", $f->{'members'})) {
-			if ($h =~ /proxy:fcgi:\/\/localhost/ ||
-			    $h =~ /proxy:fcgi:\/\/127\.0\.0\.1/ ||
+			if ($h =~ /proxy:fcgi:\/\/(localhost|127\.0\.0\.1)/ ||
 			    $h =~ /proxy:unix:/) {
 				return 'fpm';
 				}
@@ -424,12 +420,12 @@ foreach my $p (@ports) {
 		       -r $fsock ? 'socket' :
 		       $tmpl->{'php_sock'} ? 'socket' : 'port';
 	local @ppm = &apache::find_directive("ProxyPassMatch", $vconf);
-	local @oldppm = grep { /unix:\Q$fsock\E/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
+	local @oldppm = grep { /unix:([^\|]+)/ || /fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 	if ($fsock) {
-		@ppm = grep { !/unix:\Q$fsock\E/ } @ppm;
+		@ppm = grep { !/unix:([^\|]+)/ } @ppm;
 		}
 	if ($fport) {
-		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\Q$fport\E/ } @ppm;
+		@ppm = grep { !/fcgi:\/\/(localhost|127\.0\.0\.1):\d+/ } @ppm;
 		}
 	local $files;
 	foreach my $f (&apache::find_directive_struct("FilesMatch", $vconf)) {
@@ -2136,7 +2132,25 @@ return @rv;
 sub get_php_fpm_socket_file
 {
 my ($d, $nomkdir) = @_;
+# Universal FPM socket dir
 my $base = "/var/php-fpm";
+# Accommodate old styles in read only mode
+my $basefile = $base."/".$d->{'id'}.".sock";
+return $basefile if (-r $basefile);
+# Distro dependent FPM socket dirs (if exists)
+my $rhelbase = "/run/php-fpm";
+my $debbase = "/run/php";
+if ($config{'fpm_socket_dir'}) {
+	$base = $config{'fpm_socket_dir'};
+	}
+elsif (-d $rhelbase &&
+    $gconfig{'os_type'} eq 'redhat-linux') {
+	$base = $rhelbase;
+	}
+elsif (-d $debbase &&
+       $gconfig{'os_type'} eq 'debian-linux') {
+	$base = $debbase;
+	}
 if (!-d $base && !$nomkdir) {
 	&make_dir($base, 0755);
 	}
