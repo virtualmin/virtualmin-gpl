@@ -1188,6 +1188,7 @@ if (!$d->{'parent'} && $info{'hosts'}) {
 	my $err = &save_mysql_allowed_hosts($d, \@lhosts);
 	if ($err) {
 		&$second_print(&text('restore_emysqlgrant', $err));
+		return 0;
 		}
 	else {
 		&$second_print($text{'setup_done'});
