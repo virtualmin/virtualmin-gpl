@@ -3872,6 +3872,7 @@ databases_remotenew=New MySQL host
 databases_remoteok=Move Databases
 databases_warn=WARNING! Any scripts or applications currently installed will NOT be updated to use the new host system.
 databases_moving=Moving MySQL databases from $1 to $2 ..
+databases_subwarn=To adjust database username and password associated with this virtual sub-server, make the modifications in its parent server settings.
 
 database_title1=Create Database
 database_title2=Edit Database
@@ -7802,5 +7803,7 @@ remotedns_derr=Failed to remove remote DNS servers
 remotedns_einuse=Server $1 is still in use
 remotedns_ednone=None selected!
 remotedns_eslave=This system can only be a master DNS server
+
+global_dismiss=Dismiss
 
 __norefs=1
