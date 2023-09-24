@@ -8,7 +8,6 @@ require './virtual-server-lib.pl';
 my $d = &get_domain($in{'id'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
-&can_edit_databases($d) || &error($text{'databases_ecannot'});
 my @deleted = grep { /^submitter/ || $in{$_} =~ /^$/ } keys %in;
 &merge_domain_config($d, \%in, \@deleted);
 &lock_domain_name($d->{'dom'});
