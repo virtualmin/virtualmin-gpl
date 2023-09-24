@@ -297,9 +297,9 @@ if (!$data->{'nostatus'} && $info->{'startstop'} &&
 			(!$status->{'status'} ?
 			      "<img src='$idir/down.gif' alt='Stopped'>" :
 			      "<img src='$idir/up.gif' alt='Running'>").
-			"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".
-		        $action_link.
-		        "&nbsp;".$restart_link });
+			    ("&nbsp;" x 10).
+			    $action_link.
+			    "&nbsp;".$restart_link });
 		}
 	push(@rv, { 'type' => 'table',
 		    'id' => 'status',
