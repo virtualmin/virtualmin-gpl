@@ -17229,6 +17229,17 @@ local ($name) = @_;
 &unlock_file("$domainnames_dir/$name");
 }
 
+# merge_domain_config(&d, &newhash, [@&deleted])
+# Merge domain configs, possibly delete some keys
+sub merge_domain_config
+{
+my ($d, $newhash, $deleted) = @_;
+# Merge the hashes
+%$d = (%$d, %$newhash);
+# Delete specified keys from the merged hash
+delete @{$d}{@$deleted} if @$deleted;
+}
+
 # show_domain_quota_usage(&domain)
 # Prints ui_table fields for quota usage in a domain
 sub show_domain_quota_usage
