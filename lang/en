@@ -3872,7 +3872,8 @@ databases_remotenew=New MySQL host
 databases_remoteok=Move Databases
 databases_warn=WARNING! Any scripts or applications currently installed will NOT be updated to use the new host system.
 databases_moving=Moving MySQL databases from $1 to $2 ..
-databases_subwarn=To adjust database username and password associated with this virtual sub-server, make the modifications in its parent server settings.
+databases_subwarn=To adjust database username and password associated with this virtual sub-server, make the modifications in its parent server.
+databases_subwarn2=To adjust database username and password associated with this virtual sub-server, make the modifications in <a href="$1">Edit Databases</a> page of the parent server.
 
 database_title1=Create Database
 database_title2=Edit Database

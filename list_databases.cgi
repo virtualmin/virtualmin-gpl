@@ -23,7 +23,11 @@ if (!$d->{'ui_dbwarn'} && $d->{'parent'} && !$d->{'alias'} &&
 	my $form = &ui_form_start("save_domain_config.cgi");
 	$form .= &ui_hidden("id", $d->{'id'});
 	$form .= &ui_hidden("ui_dbwarn", 1);
-	$form .= "$text{'databases_subwarn'}<p>\n";
+	my $databases_subwarn_text =
+		&can_edit_databases(&get_domain($d->{'parent'})) ?
+			&text('databases_subwarn2', "list_databases.cgi?dom=$d->{'parent'}&databasemode=usernames") :
+			$text{'databases_subwarn'};
+	$form .= "$databases_subwarn_text<p>\n";
 	$form .= &ui_form_end(
 		[ [ "submitter", $text{'global_dismiss'} ] ]);
 	print &ui_alert_box($form, 'info');
