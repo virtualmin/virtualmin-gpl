@@ -12,9 +12,9 @@ $tmpl = &get_template($d->{'template'});
 if ($in{'ui_dbwarn'}) {
 	# If dismissing a warning
 	&merge_domain_config($d, { ui_dbwarn => 1 });
-	&lock_domain_name($d->{'dom'});
+	&lock_domain($d);
 	&save_domain($d);
-	&unlock_domain_name($d->{'dom'});
+	&unlock_domain($d);
 	&redirect(&get_referer_relative());
 	exit;
 	}
