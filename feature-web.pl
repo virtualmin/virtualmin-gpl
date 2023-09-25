@@ -5280,6 +5280,20 @@ $name =~ s/\./-/g;
 return $name;
 }
 
+# get_fcgiwrap_status(&domain)
+# Returns 0 if no init script exists, 1 if it exists but is down, or 2 if 
+# exists and is running
+sub get_fcgiwrap_status
+{
+my ($d) = @_;
+my $name = &init_script_fcgiwrap_name($d);
+&foreign_require("init");
+my $st = &init::action_status($name);
+return 0 if (!$st);
+my $r = &init::status_action($name);
+return $r == 1 ? 2 : 1;
+}
+
 # enable_apache_fcgiwrap(&domain)
 # Turn on fcgiwrap for running CGIs for a domain
 sub enable_apache_fcgiwrap
