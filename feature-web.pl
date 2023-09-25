@@ -1046,6 +1046,17 @@ else {
 		return $text{'validate_ewebphpsuexec'};
 		}
 
+	# If using fcgiwrap, make sure the server is running
+	if ($d->{'fcgiwrap_port'}) {
+		my $st = &get_fcgiwrap_status($d);
+		if ($st == 0) {
+			return $text{'validate_efcgiwrapinit'};
+			}
+		elsif ($st == 1) {
+			return $text{'validate_efcgiwraprun'};
+			}
+		}
+
 	# Make sure a <Directory> exists for the document root, and that
 	# DocumentRoot is valid
 	if (!$d->{'alias'}) {
@@ -5246,6 +5257,7 @@ if ($d->{'fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
 	my $domdir = $1;
 	&unlink_file($d->{'fcgiwrap_port'});
 	&unlink_file($domdir);
+	delete($d->{'fcgiwrap_port'});
 	}
 }
 
