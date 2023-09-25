@@ -20,8 +20,8 @@ $msg = &text('databases_indom', scalar(@dbs),
 &ui_print_header($msg, $text{'databases_title'}, "", "databases");
 if (!$d->{'ui_dbwarn'} && $d->{'parent'} && !$d->{'alias'} &&
     &can_edit_domain(&get_domain($d->{'parent'}))) {
-	my $form = &ui_form_start("save_domain_config.cgi");
-	$form .= &ui_hidden("id", $d->{'id'});
+	my $form = &ui_form_start("save_database.cgi");
+	$form .= &ui_hidden("dom", $d->{'id'});
 	$form .= &ui_hidden("ui_dbwarn", 1);
 	$form .= "$text{'databases_subwarn'}<p>\n";
 	$form .= &ui_form_end(
