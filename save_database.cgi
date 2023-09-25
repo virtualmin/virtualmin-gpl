@@ -4,9 +4,20 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
+$d || &error($text{'edit_egone'});
 &can_edit_domain($d) || &error($text{'edit_ecannot'});
 &can_edit_databases($d) || &error($text{'databases_ecannot'});
 $tmpl = &get_template($d->{'template'});
+
+if ($in{'ui_dbwarn'}) {
+	# If dismissing a warning
+	&merge_domain_config($d, { ui_dbwarn => 1 });
+	&lock_domain($d);
+	&save_domain($d);
+	&unlock_domain($d);
+	&redirect(&get_referer_relative());
+	exit;
+	}
 
 if ($in{'new'}) {
 	# Create one, after checking for clashes
