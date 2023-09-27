@@ -168,6 +168,27 @@ if (defined(&list_scripts)) {
 	}
 
 print &ui_hidden_table_end("limits");
+
+# Jailkit section
+if (!&check_jailkit_support()) {
+print &ui_hidden_table_start($text{'limits_header4'}, "width=100%", 2,
+			     "jail", 0, [ "width=30%" ]);
+	# Chroot directory
+	my $jail = &get_domain_jailkit($d);
+	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
+		&ui_radio("jail", $jail ? 1 : 0,
+		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
+		    [ 0, $text{'no'} ] ]));
+	print &ui_table_row(&hlink($text{'limits_jail_clean'}, "limits_jail_clean"),
+		&ui_yesno_radio("jail_clean", 0));
+	print &ui_table_row(&hlink($text{'limits_jail2'}, "limits_jail_esects"),
+				    &ui_textbox("jail_esects", $d->{'jail_esects'}, 50));
+	print &ui_table_row(&hlink($text{'limits_jail3'}, "limits_jail_ecmds"),
+				    &ui_textbox("jail_ecmds", $d->{'jail_ecmds'}, 50));
+	print &ui_hidden_table_end("jail");
+	}
+
+# Other section
 print &ui_hidden_table_start($text{'limits_header3'}, "width=100%", 2,
 			     "other", 0, [ "width=30%" ]);
 
@@ -193,15 +214,6 @@ if (&can_edit_shell() && $d->{'unix'}) {
 	my $shell = &get_domain_shell($d);
 	print &ui_table_row(&hlink($text{'limits_shell'}, "limits_shell"),
 		    &available_shells_menu("shell", $shell, 'owner'));
-	}
-
-if (!&check_jailkit_support()) {
-	# Chroot directory
-	my $jail = &get_domain_jailkit($d);
-	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
-		&ui_radio("jail", $jail ? 1 : 0,
-		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
-		    [ 0, $text{'no'} ] ]));
 	}
 
 print &ui_hidden_table_end("other");

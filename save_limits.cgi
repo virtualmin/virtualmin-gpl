@@ -91,20 +91,69 @@ if (defined($in{'shell'})) {
 if (!&check_jailkit_support()) {
 	my $oldjail = &get_domain_jailkit($d);
 	my $jailupd;
+	my $jail_post_clean_enabled = 0;
+	my $jail_post_clean_disabled = 0;
+	$d->{'jail_esects'} = $in{'jail_esects'};
+	$d->{'jail_ecmds'} = $in{'jail_ecmds'};
+
+	# Clear chroot first
+	if ($in{'jail_clean'}) {
+		# Disable jail
+		if ($oldjail) {
+			$err = &disable_domain_jailkit($d);
+			&error(&text('limits_ejailoff2', $err)) if ($err);
+			$jail_post_clean_disabled = 1;
+			}
+
+		# Clean all previously copied files
+		my $dom_chdir = &domain_jailkit_dir($d);
+		if (-d $dom_chdir && $dom_chdir =~ /^\/.*?([\d]{6,})$/) {
+			if ($1 eq $d->{'id'}) {
+				eval "use File::Find";
+				eval "use File::Path 'rmtree'";
+				# Safe delete just in case home directory hasn't been unmounted
+				if (!$@) {
+					finddepth(sub {
+						my $rs = $File::Find::name;
+						return if (&is_under_directory("$dom_chdir/home", $rs));
+						if (-d $rs) {
+							rmtree($rs);
+							}
+						else {
+							unlink($rs);
+							}
+						}, $dom_chdir);
+					}
+				else {
+					&error(&text('limits_ejailclean', $@));
+					}
+				}
+			}
+		# Re-enable jail
+		if ($in{'jail'}) {
+			$err = &enable_domain_jailkit($d);
+			&error(&text('limits_ejailon2', $err)) if ($err);
+			$jail_post_clean_enabled = 1;
+			}
+		}
 	if ($in{'jail'}) {
 		# Setup or re-sync jail for this user
-		$err = &enable_domain_jailkit($d);
-		&error(&text('limits_ejailon', $err)) if ($err);
-		if (!$err) {
+		if (!$jail_post_clean_enabled) {
+			$err = &enable_domain_jailkit($d);
+			&error(&text('limits_ejailon', $err)) if ($err);
+			}
+		if (!$err || $jail_post_clean_enabled) {
 			$d->{'jail'} = 1;
 			$jailupd++
 			}
 		}
 	elsif ($oldjail && !$in{'jail'}) {
 		# Tear down jail for this user
-		$err = &disable_domain_jailkit($d);
-		&error(&text('limits_ejailoff', $err)) if ($err);
-		if (!$err) {
+		if (!$jail_post_clean_disabled) {
+			$err = &disable_domain_jailkit($d);
+			&error(&text('limits_ejailoff', $err)) if ($err);
+			}
+		if (!$err || $jail_post_clean_disabled) {
 			$d->{'jail'} = 0;
 			$jailupd++;
 			}
