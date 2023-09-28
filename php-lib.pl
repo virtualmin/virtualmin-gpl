@@ -2143,12 +2143,10 @@ my $debbase = "/run/php";
 if ($config{'fpm_socket_dir'}) {
 	$base = $config{'fpm_socket_dir'};
 	}
-elsif (-d $rhelbase &&
-    $gconfig{'os_type'} eq 'redhat-linux') {
+elsif (-d $rhelbase && $gconfig{'os_type'} eq 'redhat-linux') {
 	$base = $rhelbase;
 	}
-elsif (-d $debbase &&
-       $gconfig{'os_type'} eq 'debian-linux') {
+elsif (-d $debbase && $gconfig{'os_type'} eq 'debian-linux') {
 	$base = $debbase;
 	}
 if (!-d $base && !$nomkdir) {
