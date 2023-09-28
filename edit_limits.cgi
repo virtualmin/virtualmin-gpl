@@ -171,7 +171,7 @@ print &ui_hidden_table_end("limits");
 
 # Jailkit section
 if (!&check_jailkit_support()) {
-print &ui_hidden_table_start($text{'limits_header4'}, "width=100%", 2,
+	print &ui_hidden_table_start($text{'limits_header4'}, "width=100%", 2,
 			     "jail", 0, [ "width=30%" ]);
 	# Chroot directory
 	my $jail = &get_domain_jailkit($d);
