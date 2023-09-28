@@ -58,12 +58,12 @@ foreach my $v (@{$a->{'to'}}) {
 		return undef;
 		}
 	}
-#if (!$simple->{'autoreply'}) {
-#	# Get autoreply message from default file
-#	$simple->{'autoreply'} = "$d->{'home'}/autoreply-".
-#			         ($a->{'user'} || $a->{'from'}).".txt";
-#	&read_autoreply($simple->{'autoreply'}, $simple);
-#	}
+if (!$simple->{'autoreply'}) {
+	# Get autoreply message from default file
+	$simple->{'autoreply'} = "$d->{'home'}/autoreply-".
+			         ($a->{'user'} || $a->{'from'}).".txt";
+	&read_autoreply($simple->{'autoreply'}, $simple);
+	}
 $simple->{'cmt'} = $a->{'cmt'};
 return $simple;
 }
@@ -160,9 +160,11 @@ if ($simple->{'tome'}) {
 		}
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
+if ($simple->{'auto'} || $simple->{'autotext'}) {
+	$simple->{'autoreply'} ||= "$d->{'home'}/autoreply-$who.txt";
+	}
 if ($simple->{'auto'}) {
 	local $who = $alias->{'user'} || $alias->{'from'};
-	$simple->{'autoreply'} ||= "$d->{'home'}/autoreply-$who.txt";
 	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who $link");
 	}
