@@ -2416,6 +2416,12 @@ my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
 my $dir = &get_domain_jailkit($parent);
 &save_php_fpm_config_value($d, "chroot", $dir);
 &unlock_file($file);
+if ($port =~ /^\// && !-e $port) {
+	# Pre-create the socket file
+	open(TOUCH, ">$port");
+	close(TOUCH);
+	&set_ownership_permissions($d->{'user'}, $d->{'ugroup'}, 0660, $port);
+	}
 &register_post_action(\&restart_php_fpm_server, $conf);
 return undef;
 }
