@@ -112,7 +112,9 @@ local $rv;
 local $hdir = &public_html_dir($d, 1);
 if ($upgrade) {
 	# Options are fixed when upgrading
-	$rv .= &ui_table_row("Automatically login to MySQL?",
+	$rv .= &ui_table_row("Allow logins with empty passwords",
+		     $upgrade->{'opts'}->{'emptypass'} ? $text{'yes'} : $text{'no'});
+	$rv .= &ui_table_row("Automatically login to phpMyAdmin",
 		     $upgrade->{'opts'}->{'auto'} ? $text{'yes'} : $text{'no'});
 	local @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
 	$rv .= &ui_table_row("Databases to manage",
@@ -123,8 +125,11 @@ if ($upgrade) {
 	}
 else {
 	# Show editable install options
-	$rv .= &ui_table_row("Automatically login to MySQL?",
-		&ui_radio("auto", 0, [ [ 1, "Yes (Possibly dangerous)" ],
+	$rv .= &ui_table_row("Allow logins with empty passwords",
+		&ui_radio("emptypass", 0, [ [ 1, "Yes" ],
+				       [ 0, "No" ] ]));
+	$rv .= &ui_table_row("Automatically login to phpMyAdmin",
+		&ui_radio("auto", 0, [ [ 1, "Yes" ],
 				       [ 0, "No" ] ]));
 	local @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database to manage",
@@ -166,6 +171,7 @@ else {
 				       : join(" ", split(/\0/, $in->{'db'})),
 		 'dir' => $dir,
 		 'path' => $in->{'dir_def'} ? "/" : "/$in->{'dir'}",
+		 'emptypass' => $in->{'emptypass'},
 		 'auto' => $in->{'auto'},
 		 'all_langs' => $in->{'all_langs'} };
 	}
@@ -256,7 +262,15 @@ local $dbs = join(" ", @dbs);
 local $dbsarray = @dbs ? "Array(".join(", ", map { "'$_'" } @dbs).")" : "''";
 foreach $l (@$lref) {
 	# These are for phpMyAdmin 2.6+
+	if ($opts->{'emptypass'}) {
+		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\]/) {
+			$l = "\$cfg['Servers'][\$i]['AllowNoPassword'] = true;";
+			}
+		}
 	if ($opts->{'auto'}) {
+		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['auth_type'\]/) {
+			$l = "\$cfg['Servers'][\$i]['auth_type'] = 'config';";
+			}
 		if ($l =~ /^\$cfg\['Servers'\]\[\$i\]\['user'\]/) {
 			$l = "\$cfg['Servers'][\$i]['user'] = '$dbuser';";
 			}
