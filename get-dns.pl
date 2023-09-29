@@ -88,7 +88,9 @@ if ($dsmode) {
 	@recs = @$dsrecs;
 	}
 else {
-	@recs = grep { $_->{'type'} } &get_domain_dns_records($d);
+	my ($recs, $file) = &get_domain_dns_records_and_file($d);
+	$file || &usage("Failed to read DNS records : $recs");
+	@recs = grep { $_->{'type'} } @$recs;
 	}
 if (!$dnssecmode) {
 	@recs = grep { !&is_dnssec_record($_) } @recs;
