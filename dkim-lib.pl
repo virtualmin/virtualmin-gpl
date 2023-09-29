@@ -446,14 +446,18 @@ my $dkim_config = &get_dkim_config_file();
 if ($dkim_config) {
 	# Save domains and key file in config
 	&lock_file($dkim_config);
+	my $conf = &get_open_dkim_config($dkim_config);
 	&save_open_dkim_config($dkim_config, 
 		"Selector", $dkim->{'selector'});
 	&save_open_dkim_config($dkim_config, 
 		"KeyFile", $dkim->{'keyfile'});
 	&save_open_dkim_config($dkim_config,
                 "Syslog", "yes");
+	if ($conf->{'Canonicalization'} eq 'simple') {
+		&save_open_dkim_config($dkim_config,
+			"Canonicalization", "relaxed/relaxed");
+		}
 
-	my $conf = &get_open_dkim_config($dkim_config);
 	if (&get_dkim_type() eq 'ubuntu' || &get_dkim_type() eq 'freebsd' ||
 	    &get_dkim_type() eq 'centos' || &get_dkim_type() eq 'gentoo') {
 		# OpenDKIM version supplied with Ubuntu and Debian 6 supports
