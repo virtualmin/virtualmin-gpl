@@ -2362,7 +2362,13 @@ if ($oldlisten) {
 else {
 	$mode = $tmpl->{'php_sock'};
 	}
-my $port = $mode ? &get_php_fpm_socket_file($d) : &get_php_fpm_socket_port($d);
+my $port;
+if ($mode) {
+	$port = $oldlisten || &get_php_fpm_socket_file($d);
+	}
+else {
+	$port = &get_php_fpm_socket_port($d);
+	}
 $port = "127.0.0.1:".$port if ($port =~ /^\d+$/);
 &lock_file($file);
 if (-r $file) {
