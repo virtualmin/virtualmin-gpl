@@ -31,11 +31,11 @@ else {
 
 &ui_print_header(undef, $text{'newvalidate_title'}, "");
 
-print "<b>$text{'newvalidate_doing'}</b><p>\n";
+&$first_print($text{'newvalidate_doing'});
+&$indent_print();
 
 # Do it
-print "<dl>\n";
-foreach $d (@doms) {
+foreach my $d (@doms) {
 	# Call all the feature validators
 	@errs = ( );
 	$count = 0;
@@ -56,21 +56,21 @@ foreach $d (@doms) {
 		push(@errs, "$name : $err") if ($err);
 		$count++;
 		}
-
+	
 	# Print message, if anything done
 	if ($count) {
-		print "<dt>",&show_domain_name($d),"\n";
+		&$first_print("<b>".&show_domain_name($d)."</b>");
 		if (@errs) {
-			print "<dd><font color=#ff0000>",
-			      join("<br>\n", @errs),"</font>\n";
+			&$second_print("<font color=#ff0000>&nbsp;&nbsp;&mdash;",join("<br>&nbsp;&nbsp;&mdash;\n", @errs),"</font>");
 			}
 		else {
-			print "<dd>$text{'newvalidate_good'}\n";
+			&$second_print("$text{'newvalidate_good'}");
 			}
 		}
 	}
-print "</dl>\n";
 
+&$outdent_print();
+&$second_print("$text{'setup_done'}");
 &ui_print_footer("", $text{'index_return'},
 		 "edit_newvalidate.cgi", $text{'newvalidate_return'});
 
