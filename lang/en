@@ -1970,6 +1970,7 @@ check_webok=Apache is installed
 check_suexecok2=CGI scripts can be executed using suEXEC or FCGIwrap
 check_suexecok=CGI scripts can be executed using suEXEC
 check_fcgiwrapok=CGI scripts can be executed using FCGIwrap
+check_nocgiscript=CGI scripts cannot be executed on this system!
 check_http2ok=Apache supports HTTP/2 on your system
 check_http2err=Apache does not support HTTP/2 : $1
 check_webphpvers=The following PHP versions are available : $1

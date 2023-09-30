@@ -15282,6 +15282,9 @@ if ($config{'web'}) {
 	elsif (&supports_fcgiwrap()) {
 		&$second_print($text{'check_fcgiwrapok'});
 		}
+	else {
+		&$second_print($text{'check_nocgiscript'});
+		}
 
 	# Check HTTP2 support
 	my ($ok, $err) = &supports_http2();
