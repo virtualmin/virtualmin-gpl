@@ -178,9 +178,8 @@ if (!&check_jailkit_support()) {
 	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
 		&ui_radio("jail", $jail ? 1 : 0,
 		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
-		    [ 0, $text{'no'} ] ]));
-	print &ui_table_row(&hlink($text{'limits_jail_clean'}, "limits_jail_clean"),
-		&ui_yesno_radio("jail_clean", 0));
+		    [ 0, $text{'no'} ] ])."<br> ".
+		&ui_checkbox("jail_clean", 1, &hlink($text{'limits_jail_clean'}, "limits_jail_clean")));
 	print &ui_table_row(&hlink($text{'limits_jail2'}, "limits_jail_esects"),
 				    &ui_textbox("jail_esects", $d->{'jail_esects'}, 50));
 	print &ui_table_row(&hlink($text{'limits_jail3'}, "limits_jail_ecmds"),
