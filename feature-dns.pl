@@ -211,6 +211,11 @@ elsif (!$dnsparent) {
 			push(@trans, { 'name' => $s6 });
 			}
 		}
+	my $opts = &bind8::find("options", $conf);
+	my $gat = &bind8::find("allow-transfer", $opts->{'members'});
+	if ($gat) {
+		push(@trans, @{$gat->{'members'}});
+		}
 	@trans = grep { $_->{'name'} } @trans;
 	local ($trans) = grep { $_->{'name'} eq 'allow-transfer' }
 			      @{$dir->{'members'}};
