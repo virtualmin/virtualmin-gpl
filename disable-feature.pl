@@ -112,13 +112,13 @@ foreach $d (sort { ($b->{'alias'} ? 2 : $b->{'parent'} ? 1 : 0) <=>
 	&set_chained_features(\%newdom, $d);
 	$derr = &virtual_server_depends(\%newdom, undef, $oldd);
 	if ($derr) {
-		&$second_print($derr);
+		&$second_print(".. dependency checks failed : $derr");
 		$failed++;
 		next;
 		}
 	$cerr = &virtual_server_clashes(\%newdom, \%check);
 	if ($cerr) {
-		&$second_print($cerr);
+		&$second_print(".. clash detected : $cerr");
 		$failed++;
 		next;
 		}
