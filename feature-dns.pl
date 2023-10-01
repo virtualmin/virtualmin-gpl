@@ -2275,6 +2275,9 @@ return $z;
 sub restart_bind
 {
 local ($d) = @_;
+if ($d && $d->{'dns_subof'}) {
+	$d = &get_domain($d->{'dns_subof'});
+	}
 local $p = $d ? $d->{'provision_dns'} || $d->{'dns_cloud'}
 	      : $config{'provision_dns'} || &default_dns_cloud();
 if ($p) {
