@@ -492,6 +492,24 @@ foreach my $dname (@_) {
 return @rv;
 }
 
+# expand_dns_subdomains(&domains)
+# Given a list of domains, find all their sub-domains as well and return the
+# complete list
+sub expand_dns_subdomains
+{
+my ($doms) = @_;
+my @rv;
+foreach my $d (@doms) {
+	push(@rv, $d);
+	if ($d->{'dns'}) {
+		push(@rv, grep { $_->{'dns'} }
+			       &get_domain_by("dns_subof", $d->{'id'}));
+		}
+	}
+my %done;
+return grep { !$done{$_->{'id'}}++ } @rv;
+}
+
 # domain_id()
 # Returns a new unique domain ID
 sub domain_id

@@ -9,6 +9,11 @@ line parameters, but disables the specified features instead. Be careful when
 using it, as it will not prompt for confirmation before disabling features
 that may result in the loss of configuration files and other data.
 
+You can select the servers to update with the C<--domain> and C<--user> flags,
+each of which can be given multiple times. The C<--dns-subdomains> flag will
+also include all DNS sub-domains that share the same zone file of those
+selected.
+
 If the C<--disassociate> flag is given, this command will simply remove the
 association between the domain and the underlying system configuration or
 database. For example, if disabling the MySQL with the C<--disassociate>
@@ -47,6 +52,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--user") {
 		push(@users, shift(@ARGV));
 		}
+	elsif ($a eq "--dns-subdomains") {
+		$dnssub = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -78,6 +86,9 @@ if ($all_doms) {
 else {
 	# Get domains by name and user
 	@doms = &get_domains_by_names_users(\@dnames, \@users, \&usage);
+	}
+if ($dnssub) {
+	@doms = &expand_dns_subdomains(\@doms);
 	}
 
 # Do it for all domains, aliases first
@@ -179,6 +190,7 @@ print "$_[0]\n\n" if ($_[0]);
 print "Enables features for one or more domains specified on the command line.\n";
 print "\n";
 print "virtualmin disable-feature --domain name | --user name | --all-domains\n";
+print "                          [--dns-subdomains]\n";
 print "                          [--disassociate]\n";
 foreach $f (@features) {
 	print "                          [--$f]\n" if ($config{$f});
