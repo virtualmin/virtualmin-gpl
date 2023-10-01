@@ -1461,6 +1461,7 @@ save_bindeslave=.. some slave servers failed :
 save_nomysql=.. MySQL user does not exist!
 save_nomysqlpar=.. MySQL user can only be disabled in master domain
 save_nobind=.. DNS zone does not exist!
+save_nobind2=.. DNS zone could not be read : $1
 save_nopostgres=.. PostgreSQL user does not exist!
 save_norename=.. PostgreSQL users cannot be renamed in versions below 7.4
 save_emaking=Before modification command failed : $1

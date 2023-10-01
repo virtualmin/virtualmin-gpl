@@ -471,7 +471,7 @@ else {
 	&delete_parent_dnssec_ds_records($d);
 	local ($recs, $file) = &get_domain_dns_records_and_file($dnsparent);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		return;
 		}
 	&pre_records_change($dnsparent);
@@ -800,7 +800,7 @@ if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	# Rename records
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -924,7 +924,7 @@ if ($oldip ne $newip) {
 	&$first_print($text{'save_dns'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -938,7 +938,7 @@ elsif ($oldd->{'ip'} ne $d->{'ip'}) {
 	&$first_print($text{'save_dnsinternal'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -952,7 +952,7 @@ if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# Email was enabled .. add MX records
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -968,7 +968,7 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 	# point to this system or secondaries.
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -1023,7 +1023,7 @@ if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&
 	&$first_print($text{'save_dns7'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -1086,7 +1086,7 @@ if ($d->{'ip6'} && !$oldd->{'ip6'}) {
 	&$first_print($text{'save_dnsip6on'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -1099,7 +1099,7 @@ elsif (!$d->{'ip6'} && $oldd->{'ip6'}) {
 	&$first_print($text{'save_dnsip6off'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -1113,7 +1113,7 @@ elsif ($d->{'ip6'} && $oldd->{'ip6'} &&
 	&$first_print($text{'save_dnsip6'});
 	($recs, $file) = &get_domain_dns_records_and_file($d) if (!$file);
 	if (!$file) {
-		&$second_print($text{'save_nobind'});
+		&$second_print(&text('save_nobind2', $recs));
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
@@ -4508,6 +4508,9 @@ if ($parent) {
 	&obtain_lock_dns($parent);
 	&pre_records_change($parent);
 	my ($precs, $pfile) = &get_domain_dns_records_and_file($parent);
+	if (!$pfile) {
+		return "Failed to read parent DNS domain : $precs";
+		}
 	my $deleted = 0;
 	my @delrecs;
 	foreach my $rec (@$precs) {
