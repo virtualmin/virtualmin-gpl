@@ -3611,8 +3611,10 @@ if ($d->{'dns_cloud'}) {
 	my $info = { 'domain' => $d->{'dom'},
 		     'id' => $d->{'dns_cloud_id'},
 		     'location' => $d->{'dns_cloud_location'} };
+	my $cloud = &get_domain_dns_cloud($d);
+	$cloud || "Cloud provider $ctype does not exist!";
 	my ($ok, $recs) = &$gfunc($d, $info);
-	return ($recs) if (!$ok);
+	return (&text('save_ereaddnscloud', $cloud->{'desc'}, $recs)) if (!$ok);
 	local $lnum = 0;
 	foreach my $rec (@$recs) {
 		&bind8::create_record($temp, $rec->{'name'},
