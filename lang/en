@@ -7749,7 +7749,7 @@ dnscloud_eawsregion=No AWS region selected!
 dnscloud_cloudflare_email=Cloudflare account address
 dnscloud_cloudflare_apikey=Cloudflare API key
 dnscloud_caccount=Using account $1
-dnscloud_cloudflare_longdesc=The settings on this page can be found on the <a target=_blank href=https://dash.cloudflare.com/profile/api-tokens>API tokens</a> page of your Cloudflare dashboard.
+dnscloud_cloudflare_longdesc=The settings on this page can be found on the API Keys section of the <a target=_blank href=https://dash.cloudflare.com/profile/api-tokens>API tokens</a> page of your Cloudflare dashboard.
 dnscloud_cloudflare_eemail=Missing or invalid-looking email address
 dnscloud_cloudflare_eapikey=Missing or invalid-looking hexidecimal API key
 dnscloud_cloudflare_ecreds=Cloudflare credentials were not accepted : $1
