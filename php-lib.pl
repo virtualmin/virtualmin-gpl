@@ -1937,6 +1937,7 @@ if ($ver) {
 sub create_php_bin_links
 {
 my ($d, $mode) = @_;
+return if ($mode eq "none");
 my $bindir = $d->{'home'}.'/bin';
 &unlink_file_as_domain_user($d, $bindir.'/php');
 my ($ver, $cli);
