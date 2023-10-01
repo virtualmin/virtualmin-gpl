@@ -1170,7 +1170,7 @@ local %info;
 &require_mysql();
 
 # Fail fast if MySQL is down
-my $mymod = &get_domain_mysql_module($d);
+my $mymod = &require_dom_mysql($d);
 if (!&foreign_call($mymod, "is_mysql_running")) {
 	&$first_print($text{'restore_mysqlerunning'});
 	return 0;
