@@ -8476,7 +8476,7 @@ my ($ok, $cert, $key, $chain) = &request_domain_letsencrypt_cert(
 &after_letsencrypt_website($d, $before);
 if (!$ok) {
 	if ($showerrors) {
-		&$second_print(&text('letsencrypt_failed',&html_escape($cert)));
+		&$second_print(&text('letsencrypt_failed', $cert));
 		}
 	else {
 		&$second_print($text{'letsencrypt_doing3failed'});
