@@ -1149,6 +1149,7 @@ while(@srcs) {
 					$d, DATA, ">".$destfile);
 				if ($f =~ /\.(html|htm|txt|php|php4|php5)$/i) {
 					local %hash = %$d;
+					$hash{uc('tmpltpageheadtitle')} = $content if ($content);
 					%hash = &populate_default_index_page($d, %hash);
 					$data = &replace_default_index_page($d, $data);
 					$data = &substitute_virtualmin_template($data, \%hash);

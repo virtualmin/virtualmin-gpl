@@ -7851,7 +7851,7 @@ return 0;
 }
 
 # create_virtual_server(&domain, [&parent-domain], [parent-user], [no-scripts],
-#                       [no-post-actions], [password], [content], [template-overrides])
+#                       [no-post-actions], [password], [content])
 # Given a complete domain object, setup all it's features
 sub create_virtual_server
 {
