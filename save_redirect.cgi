@@ -37,11 +37,17 @@ else {
 		&error($text{'redirect_epath'});
 		}
 	if ($in{'mode'} == 0) {
-		# Redirect to a URL
+		# Redirect to a URL on another host
 		$in{'url'} =~ /^(http|https):\/\/\S+$/ ||
-		    $in{'url'} =~ /^\/\S+$/ ||
 			&error($text{'redirect_eurl'});
 		$r->{'dest'} = $in{'url'};
+		$r->{'alias'} = 0;
+		}
+	elsif ($in{'mode'} == 3) {
+		# Redirect to a URL path on this
+		$in{'urlpath'} =~ /^\/\S+$/ ||
+			&error($text{'redirect_eurlpath'});
+		$r->{'dest'} = $in{'urlpath'};
 		$r->{'alias'} = 0;
 		}
 	elsif ($in{'mode'} == 2) {

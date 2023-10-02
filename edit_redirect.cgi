@@ -33,24 +33,35 @@ print &ui_table_row(&hlink($text{'redirect_path'}, 'redirect_path'),
 # Destination
 my ($mode, $dir, $url, $upath);
 if ($r->{'alias'}) {
+	# A directory on this server
 	$mode = 1;
 	$dir = $r->{'dest'};
 	}
 elsif ($r->{'dest'} &&
        $r->{'dest'} =~ /^(http|https):\/\/%\{HTTP_HOST\}(\/.*)$/) {
+	# A URL on this website, but with a different protocol
 	$mode = 2;
 	$dproto = $1;
 	$dpath = $2;
 	}
-else {
+elsif ($r->{'dest'} && $r->{'desc'} =~ /^(http|https):\/\//) {
+	# A URL on a different website
 	$mode = 0;
 	$url = $r->{'dest'};
+	}
+else {
+	# A URL on this website with the same protocol
+	$mode = 3;
+	$urlpath = $r->{'dest'};
 	}
 print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 	&ui_radio_table("mode", $mode,
 		[ [ 0, $text{'redirect_url'},
 		    &ui_textbox("url", $url, 34, undef, undef,
 				"placeholder=\"$text{'index_global_eg'} https://google.com\"") ],
+		  [ 3, $text{'redirect_urlpath'},
+		    &ui_textbox("urlpath", $urlpath, 34, undef, undef,
+				"placeholder=\"$text{'index_global_eg'} /new-path\"") ],
 		  [ 2, $text{'redirect_dpath'},
 		    &ui_select("dproto", $dproto,
 			       [ [ 'http', 'HTTP' ],
