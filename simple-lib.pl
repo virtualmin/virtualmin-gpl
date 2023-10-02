@@ -59,10 +59,15 @@ foreach my $v (@{$a->{'to'}}) {
 		}
 	}
 if (!$simple->{'autoreply'}) {
-	# Get autoreply message from default file
+	# Get autoreply message from default file, if it exists
 	$simple->{'autoreply'} = "$d->{'home'}/autoreply-".
 			         ($a->{'user'} || $a->{'from'}).".txt";
-	&read_autoreply($simple->{'autoreply'}, $simple);
+	if (-r $simple->{'autoreply'}) {
+		&read_autoreply($simple->{'autoreply'}, $simple);
+		}
+	else {
+		delete($simple->{'autoreply'});
+		}
 	}
 $simple->{'cmt'} = $a->{'cmt'};
 return $simple;
@@ -160,11 +165,11 @@ if ($simple->{'tome'}) {
 		}
 	push(@v, "\\".($escuser || $alias->{'name'}));
 	}
+local $who = $alias->{'user'} || $alias->{'from'};
 if ($simple->{'auto'} || $simple->{'autotext'}) {
 	$simple->{'autoreply'} ||= "$d->{'home'}/autoreply-$who.txt";
 	}
 if ($simple->{'auto'}) {
-	local $who = $alias->{'user'} || $alias->{'from'};
 	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
 	push(@v, "|$module_config_directory/autoreply.pl $simple->{'autoreply'} $who $link");
 	}
@@ -232,6 +237,14 @@ if ($simple->{'autotext'}) {
 			       "$link : $!");
 		}
         }
+elsif ($simple->{'autoreply'}) {
+	# Clean up old autoreply file
+	&unlink_file_as_domain_user($d, $simple->{'autoreply'});
+	local $link = &convert_autoreply_file($d, $simple->{'autoreply'});
+	if ($link) {
+		&unlink_file_as_domain_user($d, $link);
+		}
+	}
 }
 
 # delete_simple_autoreply(&domain, &simple)
@@ -431,8 +444,8 @@ else {
 	}
 $simple->{'everyone'} = $in->{'everyone'};
 $in->{'autotext'} =~ s/\r//g;
+$simple->{'autotext'} = $in->{'autotext'};
 if ($in->{'autotext'}) {
-	$simple->{'autotext'} = $in->{'autotext'};
 	if ($in->{'period_def'}) {
 		delete($simple->{'replies'});
 		delete($simple->{'period'});
