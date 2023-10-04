@@ -82,8 +82,10 @@ print &ui_table_row(&hlink($text{'redirect_code'}, 'redirect_code'),
 		     [ 303, $text{'redirect_303'} ] ], 1, 0, 1));
 
 # Include sub-paths
-print &ui_table_row(&hlink($text{'redirect_regexp'}, 'redirect_regexp'),
-	&ui_yesno_radio("regexp", $r->{'regexp'}));
+print &ui_table_row(&hlink($text{'redirect_regexp2'}, 'redirect_regexp2'),
+	&ui_radio("regexp", int($r->{'regexp'}),
+		  [ [ 0, $text{'redirect_regexp2no'}."<br>" ],
+		    [ 1, $text{'redirect_regexp2yes'} ] ]));
 
 # Protocols to include
 if (&domain_has_ssl($d)) {
