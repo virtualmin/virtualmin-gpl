@@ -2420,8 +2420,10 @@ else {
 		}
 	}
 my $parent = $d->{'parent'} ? &get_domain_by($d->{'parent'}) : $d;
-my $dir = &get_domain_jailkit($parent);
-&save_php_fpm_config_value($d, "chroot", $dir);
+if ($parent->{'jail'}) {
+	my $dir = &get_domain_jailkit($parent);
+	&save_php_fpm_config_value($d, "chroot", $dir);
+	}
 &unlock_file($file);
 if ($port =~ /^\// && !-e $port) {
 	# Pre-create the socket file

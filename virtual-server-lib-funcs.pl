@@ -17075,7 +17075,6 @@ my $lpref = 'deftmplt_';
 my ($wmport, $wmproto, $wmhost) = &get_miniserv_port_proto();
 # Domain defaults
 my $ddom = $d->{'dom'};
-my $ddomemail = $d->{'emailto'} || "abuse@$ddom";
 my $dndis = $d->{'disabled_time'} ? 0 : 1;
 my $ddomdef = $d->{'defaultdomain'};
 my $diswhy = $d->{'disabled_why'} || $text{"${lpref}tmpltpagedommsglogindescnoreason0"};
@@ -17087,6 +17086,7 @@ my $deftitle = ($ddomdef ?
 # Template defaults variables
 my $lang = uc('tmpltpagelang');
 my $title = uc('tmpltpagetitle');
+my $container_type = uc('tmpltpagecontainertype');
 my $headtitle = uc('tmpltpageheadtitle');
 my $dom = uc('tmpltpagedomname');
 my $statushead = uc('tmpltpagedommsg');
@@ -17095,13 +17095,12 @@ my $statustext = uc('tmpltpagedommsglogin');
 my $statusico = uc('tmpltpagedommsgloginico');
 my $dommsglogindesc = uc("tmpltpagedommsglogindesc");
 my $dommsgloginlink = uc('tmpltpagedommsgloginlink');
-my $dommsgreportdesc = uc('tmpltpagedommsgreportdesc');
-my $dommsgreportlink = uc('tmpltpagedommsgreportlink');
 my $pagefooteryear = uc('tmpltpagefooteryear');
 # Domain template defaults substitutions
 $h{$lang} = $current_lang if (!defined($h{$lang}));
 $h{$title} = "$ddom \&mdash;  " . $deftitle
 				if (!defined($h{$title}));
+$h{$container_type} = $ddomdef ? 'no-max' : undef;
 $h{$headtitle} = $deftitle if (!defined($h{$headtitle}));
 $h{$dom} = $ddom if (!defined($h{$dom}));
 $h{$statushead} = $text{$lpref . lc("$statushead$dndis")} if (!defined($h{$statushead}));
@@ -17111,9 +17110,6 @@ $h{$statusico} = "⊗" if (!defined($h{$statusico}) && !$dndis);
 $h{$dommsglogindesc} = &text($lpref . lc("$dommsglogindesc$dndis"), $dndis ? $ddompubhtml : $diswhy)
 						if (!defined($h{$dommsglogindesc}));
 $h{$dommsgloginlink} = "$wmproto://$wmhost:$wmport" if (!defined($h{$dommsgloginlink}));
-$h{$dommsgreportdesc} = &text($lpref . lc($dommsgreportdesc), $ddomemail)
-						if (!defined($h{$dommsgreportdesc}));
-$h{$dommsgreportlink} = "mailto:$ddomemail" if (!defined($h{$dommsgreportlink}));
 $h{$pagefooteryear} = strftime('%Y',localtime) if (!defined($h{$pagefooteryear}));
 # Standard template defaults substitutions
 my (@deftmpls) = grep { $_ =~ s/^(\Q$lpref\E)// } keys %text;
@@ -17136,9 +17132,9 @@ $content =~ s/<x-(main|div)\s+data-type=["']\Q$type\E["'](.*?)<\/x-(main|div)>//
 if ($ddis) {
 	$content =~ s/<a\s+data-login=["']\Qbutton\E["'](.*?)<\/a>//s,
 	$content =~ s/<x-div\s+data-postlogin=["']\Qcontainer\E["'](.*?)<\/x-div>//s,
-	map { $content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm } (0..1);
-	$content =~ s/(data-login=["']row["'].*)(col-l.*)(".*)/$1col-lg-8 col-xl-7$3/gm;
+	$content =~ s/(data-(login|domain)=["'].*?["'].*?)(success)/$1warning/gm;
 	}
+$content =~ s/(data-login=["']row["'].*)(col-l.*)(".*)/$1col-lg-8 col-xl-7$3/gm;
 $content =~ s/x-(main|div)/$1/g;
 return $content;
 }
