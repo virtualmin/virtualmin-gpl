@@ -109,24 +109,29 @@ if (!&check_jailkit_support()) {
 		my $dom_chdir = &domain_jailkit_dir($d);
 		if (-d $dom_chdir && $dom_chdir =~ /^\/.*?([\d]{6,})$/) {
 			if ($1 eq $d->{'id'}) {
-				eval "use File::Find";
-				eval "use File::Path 'rmtree'";
-				# Safe delete just in case home directory hasn't been unmounted
-				if (!$@) {
-					finddepth(sub {
-						my $rs = $File::Find::name;
-						return if (&is_under_directory("$dom_chdir/home", $rs));
-						if (-d $rs) {
-							rmtree($rs);
+				opendir(my $dh, $dom_chdir) || &error("Cannot open chroot directory $dom_chdir for cleaning: $!");
+				while (my $dir = readdir($dh)) {
+					next if $dir eq '.' or $dir eq '..';
+					my $fpath = "$dom_chdir/$dir";
+					# Remove home directory only if empty
+					if (&is_under_directory("$dom_chdir/home", $fpath)) {
+						opendir(my $dhh, $fpath) || &error("Cannot open chroot home directory $dom_chdir for cleaning: $!");
+						while (my $dirh = readdir($dhh)) {
+							next if $dirh eq '.' or $dirh eq '..';
+							my $fpathh = "$fpath/$dirh";
+							# Remove a directory under home only if empty
+							rmdir($fpathh);
 							}
-						else {
-							unlink($rs);
-							}
-						}, $dom_chdir);
+						closedir($dhh);
+						# Remove home directory only if empty
+						rmdir($fpath);
+						}
+					else {
+						# Remove recursively
+						&unlink_file($fpath)
+						}
 					}
-				else {
-					&error(&text('limits_ejailclean', $@));
-					}
+				closedir($dh);
 				}
 			}
 		# Re-enable jail
