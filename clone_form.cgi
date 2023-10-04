@@ -13,7 +13,7 @@ if ($d->{'parent'} && !&can_create_sub_servers() ||
 ($dleft, $dreason, $dmax) = &count_domains(
 	$d->{'alias'} ? "aliasdoms" :
 	$d->{'parent'} ? "realdoms" : "topdoms");
-&error(&text('setup_emax', $dmax)) if ($dleft == 0);
+&error(&text('setup_emax', $dmax, $virtualmin_shop_link)) if ($dleft == 0);
 
 &ui_print_header(&domain_in($d), $text{'clone_title'}, "", "clone");
 
