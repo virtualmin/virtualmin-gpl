@@ -5110,6 +5110,7 @@ local ($dest, $days, $start, $asd, $detail) = @_;
 local $asuser = $asd ? $asd->{'user'} : undef;
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
+print STDERR "base=$base re=$re\n";
 local $nicebase = $base;
 $nicebase = $1.$nicebase if ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*)/);
 &$first_print(&text('backup_purging3', $days, &nice_backup_url($nicebase),
@@ -5812,12 +5813,19 @@ elsif ($mode == 10) {
 				&$second_print(&text('backup_purgecan',
 						     $re, $old));
 				}
-			&$first_print(&text('backup_deletingfile',
-                                            "<tt>$f</tt>", $old));
-			my $size = $st->{'folder'} ?
-					&size_bb_directory($base, $f) :
-					$st->{'size'};
-			local $err = &delete_bb_file($base, $f);
+			my ($size, $err);
+			if ($st->{'folder'}) {
+				&$first_print(&text('backup_deletingdir',
+						    "<tt>$f</tt>", $old));
+				$size = &size_bb_directory($base, $f);
+				$err = &delete_bb_directory($base, $f);
+				}
+			else {
+				&$first_print(&text('backup_deletingfile',
+						    "<tt>$f</tt>", $old));
+				$size = $st->{'size'};
+				$err = &delete_bb_file($base, $f);
+				}
 			if ($err) {
 				&$second_print(&text('backup_edelbucket',$err));
 				$ok = 0;
