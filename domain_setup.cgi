@@ -50,7 +50,7 @@ if ($in{'subdom'}) {
 ($dleft, $dreason, $dmax) = &count_domains(
 	$aliasdom ? "aliasdoms" :
 	$parentdom ? "realdoms" : "topdoms");
-&error(&text('setup_emax', $dmax)) if ($dleft == 0);
+&error(&text('setup_emax', $dmax, $virtualmin_shop_link)) if ($dleft == 0);
 
 # Validate inputs (check domain name to see if in use)
 $dname = lc(&parse_domain_name($in{'dom'}));
