@@ -4235,7 +4235,7 @@ $bbbackup_tests = [
 		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Backup to Dropbox again, to test that over-writing works
+	# Backup to Backblaze again, to test that over-writing works
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
@@ -4247,21 +4247,21 @@ $bbbackup_tests = [
 		      [ 'dest', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Restore from Dropbox
+	# Restore from Backblaze
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
 		      [ 'source', "$bb_backup_prefix/$test_domain.tar.gz" ] ],
 	},
 
-	# Restore sub-domain from Dropbox
+	# Restore sub-domain from Backblaze
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', "$bb_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Backup to Dropbox in home format
+	# Backup to Backblaze in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4270,7 +4270,7 @@ $bbbackup_tests = [
 		      [ 'dest', $bb_backup_prefix ] ],
 	},
 
-	# Backup to Dropbox in home format again, to test overwriting
+	# Backup to Backblaze in home format again, to test overwriting
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4279,7 +4279,7 @@ $bbbackup_tests = [
 		      [ 'dest', $bb_backup_prefix ] ],
 	},
 
-	# Restore from Dropbox in home format
+	# Restore from Backblaze in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4287,7 +4287,7 @@ $bbbackup_tests = [
 		      [ 'source', $bb_backup_prefix ] ],
 	},
 
-	# Backup from Dropbox one-by-one
+	# Backup from Backblaze one-by-one
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4297,14 +4297,14 @@ $bbbackup_tests = [
 		      [ 'dest', $bb_backup_prefix ] ],
 	},
 
-	# Restore from Dropbox, all domains
+	# Restore from Backblaze, all domains
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'all-domains' ],
 		      [ 'all-features' ],
 		      [ 'source', $bb_backup_prefix ] ],
 	},
 
-	# Backup to Dropbox subdirectory in home format
+	# Backup to Backblaze subdirectory in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4313,7 +4313,7 @@ $bbbackup_tests = [
 		      [ 'dest', $bb_backup_prefix."/subdir" ] ],
 	},
 
-	# Restore from Dropbox subdirectory in home format
+	# Restore from Backblaze subdirectory in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
