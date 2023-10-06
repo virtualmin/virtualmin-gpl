@@ -5110,9 +5110,15 @@ local ($dest, $days, $start, $asd, $detail) = @_;
 local $asuser = $asd ? $asd->{'user'} : undef;
 local ($mode, $user, $pass, $host, $path, $port) = &parse_backup_url($dest);
 local ($base, $re) = &extract_purge_path($dest);
-print STDERR "base=$base re=$re\n";
 local $nicebase = $base;
-$nicebase = $1.$nicebase if ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*)/);
+if ($dest =~ /^(([a-z0-9]+):\/\/[^\/]*\@[^\/]*)/) {
+	# Add protocol prefix back, if formatted like ftp://user:pass@host/dir
+	$nicebase = $1.$nicebase;
+	}
+elsif ($dest =~ /^(([a-z0-9]+):\/\/)/) {
+	# Add protocol prefix back, if formatted like bb://bucket/dir
+	$nicebase = $1.$nicebase;
+	}
 &$first_print(&text('backup_purging3', $days, &nice_backup_url($nicebase),
 				       "<tt>".&html_escape($re)."</tt>"));
 if (!$base && !$re) {
