@@ -7011,6 +7011,9 @@ sub free_ip_address
 local ($tmpl) = @_;
 local %taken = &interface_ip_addresses();
 %taken = (%taken, &domain_ip_addresses(), &cloudmin_ip_addresses());
+foreach my $ip (&get_default_ip(), &list_shared_ips()) {
+	$taken{$ip}++;
+	}
 local @ranges = split(/\s+/, $tmpl->{'ranges'});
 foreach my $rn (@ranges) {
 	my ($r, $n) = split(/\//, $rn);
