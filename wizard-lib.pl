@@ -314,6 +314,12 @@ if (&mysql::is_mysql_running() == -1) {
 		&ui_textbox("mypass", undef, 20)."<br>\n".
 		&ui_checkbox("forcepass", 1, $text{'wizard_mysql_forcepass'}, 0));
 	}
+elsif (defined(&mysql::mysql_login_type) &&
+       &mysql::mysql_login_type($mysql::mysql_login || 'root')) {
+	# Using socket authentication
+	print &ui_table_row(undef, $text{'wizard_mysql5'}, 2);
+	print &ui_hidden("socket", 1);
+	}
 else {
 	# Offer to change the password
 	print &ui_hidden("needchange", 0);
@@ -354,6 +360,10 @@ sub wizard_parse_mysql
 {
 local ($in) = @_;
 &require_mysql();
+if ($in->{'socket'}) {
+	# No password needed
+	return undef;
+	}
 local $pass = $in->{'mypass_def'} ? $mysql::mysql_pass : $in->{'mypass'};
 local $user = $mysql::mysql_login || 'root';
 if ($in->{'needchange'}) {

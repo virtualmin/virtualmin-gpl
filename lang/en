@@ -6542,6 +6542,7 @@ wizard_mysql=To prevent other users on your system from managing the MySQL datab
 wizard_mysql2=Currently the MySQL password is not set, which is highly insecure.
 wizard_mysql3=This has already been done, so changing the password here is not mandatory.
 wizard_mysql4=Virtualmin does not not know what the current MySQL <tt>root</tt> password is. It must be set here to allow Virtualmin to create new MySQL databases and users.
+wizard_mysql5=MySQL is using Unix socket authentication for the <tt>root</tt> user, so the password cannot be changed.
 wizard_mysql_pass=Change MySQL password
 wizard_mysql_pass1=Leave un-changed
 wizard_mysql_pass0=Set to
