@@ -14,9 +14,14 @@ server's domain name. The C<--path> parameter is also mandatory, and must be
 followed by a local URL path like C</rails> or even C</>. 
 
 To redirect to a different URL, use the C<--redirect> flag followed by a
-complete URL starting with http or https. To map the path to a directory,
-use the C<--alias> flag followed by a full directory path, ideally under the
-domain's C<public_html> directory.
+complete URL starting with http or https, or a URL path on this same domain.
+To map the path to a directory, use the C<--alias> flag followed by a full
+directory path, ideally under the domain's C<public_html> directory.
+
+By default, requests for sub-paths under the URL path will be mapped to
+the same sub-path in the destination directory or path. However, you can
+use the C<--exact> flag to only match the given path, or the C<--regexp> flag
+to ignore sub-paths when redirecting.
 
 For domains with both non-SSL and SSL websites, you can use the C<--http> and
 C<--https> flags to limit the alias or redirect to one website type or the
@@ -64,6 +69,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--regexp") {
 		$regexp = 1;
 		}
+	elsif ($a eq "--exact") {
+		$exact = 1;
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -87,6 +95,7 @@ while(@ARGV > 0) {
 	}
 $domain || &usage("No domain specified");
 $path || &usage("No redirect path specified");
+$exact && $regexp && &usage("Only one of --regexp or --exact can be given");
 if ($url) {
 	$url =~ /^*(http|https):\/\/\S+$/ ||
 	    $url =~ /^\/\S+$/ ||
@@ -121,6 +130,7 @@ $r = { 'path' => $path,
        'dest' => $url || $dir,
        'alias' => $dir ? 1 : 0,
        'regexp' => $regexp,
+       'exact' => $exact,
        'http' => $http,
        'https' => $https,
        'code' => $code,
@@ -146,7 +156,7 @@ print "\n";
 print "virtualmin create-redirect --domain domain.name\n";
 print "                           --path url-path\n";
 print "                           --alias directory | --redirect url\n";
-print "                          [--regexp]\n";
+print "                          [--regexp | --exact]\n";
 print "                          [--code number]\n";
 print "                          [--http | --https]\n";
 exit(1);

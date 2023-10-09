@@ -58,14 +58,29 @@ foreach my $p (@ports) {
 			}
 		$rd->{'dest'} = $w[1];
 		if ($al->{'name'} eq 'Alias' || $al->{'name'} eq 'Redirect') {
+			# Like Redirect /foo /bar
+			# or   Alias /foo /home/smeg/public_html/bar
+			# or   Redirect /foo http://bar.com/smeg
 			$rd->{'path'} = $w[0];
 			}
 		elsif (($al->{'name'} eq 'AliasMatch' ||
 			$al->{'name'} eq 'RedirectMatch') &&
 		       ($w[0] =~ /^(.*)\.\*\$$/ ||
 			$w[0] =~ /^(.*)\(\.\*\)\$$/)) {
+			# Like RedirectMatch /foo(.*)$ /bar
+			# or   AliasMatch /foo(.*)$ /home/smeg/public_html/bar
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
+			}
+		elsif (($al->{'name'} eq 'AliasMatch' ||
+			$al->{'name'} eq 'RedirectMatch') &&
+		       ($w[0] =~ /^\^(.*)\$$/ ||
+			$w[0] =~ /^\^(.*)\$$/)) {
+			# Like RedirectMatch ^/foo$ /bar
+			# or   Alias ^/foo$ /home/smeg/public_html/bar
+			# or   RedirectMatch ^/foo$ http://bar.com/smeg
+			$rd->{'path'} = $1;
+			$rd->{'exact'} = 1;
 			}
 		else {
 			next;
@@ -166,14 +181,21 @@ foreach my $p (@ports) {
 	else {
 		# Can just use Alias or Redirect
 		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
-		$dir .= "Match" if ($redirect->{'regexp'});
+		$dir .= "Match" if ($redirect->{'regexp'} ||
+				    $redirect->{'exact'});
 		my @aliases = &apache::find_directive($dir, $vconf);
+		my $path;
+		if ($redirect->{'exact'}) {
+			$path = "^".$redirect->{'path'}."\$";
+			}
+		else {
+			$path = $redirect->{'path'}.
+				($redirect->{'regexp'} ? "(\.\*)\$" : "");
+			}
 		push(@aliases,
 			($redirect->{'code'} && !$redirect->{'alias'} ?
 				$redirect->{'code'}." " : "").
-			$redirect->{'path'}.
-			($redirect->{'regexp'} ? "(\.\*)\$" : "").
-			" ".$redirect->{'dest'});
+			$path." ".$redirect->{'dest'});
 		&apache::save_directive($dir, \@aliases, $vconf, $conf);
 		}
 	&flush_file_lines($virt->{'file'});
@@ -222,13 +244,19 @@ foreach my $port (@ports) {
 	else {
 		# Remove a single Alias or Redirect line
 		my $dir = $redirect->{'alias'} ? "Alias" : "Redirect";
-		$dir .= "Match" if ($redirect->{'regexp'});
+		$dir .= "Match" if ($redirect->{'regexp'} ||
+				    $redirect->{'exact'});
 		my @aliases = &apache::find_directive($dir, $vconf);
 		my $re = $redirect->{'path'};
 		my @newaliases;
 		if ($redirect->{'regexp'}) {
 			# Handle .*$ or (.*)$ at the end
 			@newaliases = grep { !/^(\d+\s+)?\Q$re\E(\.\*|\(\.\*\))\$\s/ } @aliases;
+			}
+		elsif ($redirect->{'exact'}) {
+			# Handle ^ at start and $ at end
+			print STDERR "in only mode for ^$re\$\n";
+			@newaliases = grep { !/^(\d+\s+)?\^\Q$re\E\$\s/ } @aliases;
 			}
 		else {
 			# Match on path only
