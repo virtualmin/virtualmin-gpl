@@ -311,7 +311,8 @@ else {
 sub add_wellknown_redirect
 {
 my ($redir) = @_;
-if ($redir->{'path'} eq '/' && !$redir->{'alias'} && !$redir->{'regexp'}) {
+if ($redir->{'path'} eq '/' && !$redir->{'alias'} &&
+    !$redir->{'regexp'} && !$redir->{'exact'}) {
 	$redir->{'path'} = '^/(?!.well-known)';
 	$redir->{'regexp'} = 1;
 	}
