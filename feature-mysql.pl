@@ -757,6 +757,7 @@ local ($d, $oldd) = @_;
 
 # Re-create each DB with a new name
 local %dbmap;
+local $tmpl = &get_template($oldd->{'template'});
 my @dbs = &domain_databases($oldd, [ 'mysql' ]);
 foreach my $db (@dbs) {
 	local $newname = $db->{'name'};
@@ -814,7 +815,7 @@ if (%dbmap) {
 		local $mymod = &require_dom_mysql($oldd);
 		local $err = &foreign_call(
 			$mymod, "backup_database", $oldname, $temp, 0, 1, 0,
-			undef, undef, undef, undef,
+			$tmpl->{'mysql_charset'} || $mysql::config{'charset'}, undef, undef, undef,
 			&mysql_single_transaction($d, $db));
 		if ($err) {
 			&$second_print(&text('clone_mysqlbackup',
@@ -1127,7 +1128,7 @@ foreach $db (@dbs) {
 	my $mymod = &require_dom_mysql($d);
 	local $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
-		undef, undef, $tables, $d->{'user'},
+		$tmpl->{'mysql_charset'} || $mysql::config{'charset'}, undef, $tables, $d->{'user'},
 		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'});
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
