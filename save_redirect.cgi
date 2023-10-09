@@ -82,7 +82,8 @@ else {
 		    $in{'code'} >= 300 && $in{'code'} < 400 ||
 			&error($text{'redirect_ecode'});
 		}
-	$r->{'regexp'} = $in{'regexp'};
+	$r->{'regexp'} = $in{'regexp'} == 1 ? 1 : 0;
+	$r->{'exact'} = $in{'regexp'} == 2 ? 1 : 0;
 	$r->{'http'} = $in{'http'};
 	$r->{'https'} = $in{'https'};
 	$r = &add_wellknown_redirect($r);
