@@ -127,6 +127,10 @@ foreach my $p (@ports) {
 			$rd->{'path'} = $1;
 			$rd->{'regexp'} = 1;
 			}
+		elsif ($rd->{'path'} =~ /^\^(.*)\$$/) {
+			$rd->{'path'} = $1;
+			$rd->{'exact'} = 1;
+			}
 		if ($rwr->{'words'}->[2] =~ /^\[R=(\d+)\]$/) {
 			$rd->{'code'} = $1;
 			}
@@ -170,6 +174,7 @@ foreach my $p (@ports) {
 		push(@rwcs, "%{HTTPS} ".($proto eq 'http' ? 'off' : 'on'));
 		my $path = $redirect->{'path'};
 		$path .= "(\.\*)\$" if ($redirect->{'regexp'});
+		$path = "^".$path."\$" if ($redirect->{'exact'});
 		push(@rwrs, $path." ".$redirect->{'dest'}." ".$flag);
 		if (!@rwes) {
 			&apache::save_directive(
