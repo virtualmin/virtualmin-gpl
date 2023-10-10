@@ -251,4 +251,3 @@ php_log=1
 dns_secany=0
 single_tx=1
 err_letsencrypt=0
-letsencrypt_retry=1

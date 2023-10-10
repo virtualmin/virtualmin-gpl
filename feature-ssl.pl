@@ -1,4 +1,3 @@
-use feature 'state';
 
 sub init_ssl
 {
@@ -3077,7 +3076,7 @@ elsif (@caa == 1 &&
 	}
 if ($dns_delay) {
 	my %webmin_mod_config = &foreign_config("webmin");
-	sleep(int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10);
+	sleep($webmin_mod_config{'letsencrypt_dns_wait'} || 15);	# Wait for DNS propagation
 	}
 }
 
@@ -3207,8 +3206,6 @@ return \@rv;
 sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
-state $tried = !$config{'letsencrypt_retry'} ? 1 : 0;
-state $original_params = [ @_ ];
 my $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
@@ -3249,13 +3246,6 @@ elsif (!$ok) {
 	}
 &enable_quotas($d);
 &unlock_file($ssl_letsencrypt_lock);
-if (!$ok && !$tried++) {
-	# Try again after a small delay, which works in 99% of
-	# cases, considering initial configuration was correct
-	my %webmin_mod_config = &foreign_config("webmin");
-	sleep((int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10) * 2);
-	return &request_domain_letsencrypt_cert(@$original_params);
-	}
 if (!$ok) {
 	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
 	}
