@@ -1,4 +1,4 @@
-use feature 'state';
+
 
 sub init_ssl
 {
@@ -3195,53 +3195,57 @@ return \@rv;
 sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
-state $tried = !$config{'letsencrypt_retry'} ? 1 : 0;
-state $original_params = [ @_ ];
-my $dnames = &filter_ssl_wildcards($dnames);
-$size ||= $config{'key_size'};
-&foreign_require("webmin");
-my $phd = &public_html_dir($d);
-my ($ok, $cert, $key, $chain);
-my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
-my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
-my $actype_reuse = $actype eq $dctype ? 1 : 0;
-my @errs;
-my @wilds = grep { /^\*\./ } @$dnames;
-&lock_file($ssl_letsencrypt_lock);
-&disable_quotas($d);
-if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
-	# Try using website first
-	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-		&get_global_from_address(), $actype, $actype_reuse,
-		$server, $key, $hmac);
-	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
-	}
-if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
-    (!$mode || $mode eq "dns")) {
-	# Fall back to DNS
-	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-		&get_global_from_address(), $actype, $actype_reuse,
-		$server, $key, $hmac);
-	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
-	}
-elsif (!$ok) {
-	if (!$cert) {
-		$cert = "Domain has no website, ".
-			"and DNS-based validation is not possible";
-		push(@errs, $cert);
+my ($ok, $cert, $key, $chain, @errs);
+my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
+foreach (@tried) {
+	my $try = $_;
+	my $dnames = &filter_ssl_wildcards($dnames);
+	$size ||= $config{'key_size'};
+	&foreign_require("webmin");
+	my $phd = &public_html_dir($d);
+	my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
+	my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
+	my $actype_reuse = $actype eq $dctype ? 1 : 0;
+	my @wilds = grep { /^\*\./ } @$dnames;
+	&lock_file($ssl_letsencrypt_lock);
+	&disable_quotas($d);
+	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
+		# Try using website first
+		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+			$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
+			&get_global_from_address(), $actype, $actype_reuse,
+			$server, $key, $hmac);
+		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
+		}
+	if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
+		(!$mode || $mode eq "dns")) {
+		# Fall back to DNS
+		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
+			&get_global_from_address(), $actype, $actype_reuse,
+			$server, $key, $hmac);
+		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
+		}
+	elsif (!$ok) {
+		if (!$cert) {
+			$cert = "Domain has no website, ".
+				"and DNS-based validation is not possible";
+			push(@errs, $cert);
+			}
+		}
+	&enable_quotas($d);
+	&unlock_file($ssl_letsencrypt_lock);
+	if (!$ok && !$try) {
+		# Try again after a small delay, which works in 99% of
+		# cases, considering initial configuration was correct
+		my %webmin_mod_config = &foreign_config("webmin");
+		sleep((int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10) * 2);
+		}
+	else {
+		last;
 		}
 	}
-&enable_quotas($d);
-&unlock_file($ssl_letsencrypt_lock);
-if (!$ok && !$tried++) {
-	# Try again after a small delay, which works in 99% of
-	# cases, considering initial configuration was correct
-	my %webmin_mod_config = &foreign_config("webmin");
-	sleep((int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10) * 2);
-	return &request_domain_letsencrypt_cert(@$original_params);
-	}
+# Return results
 if (!$ok) {
 	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
 	}
