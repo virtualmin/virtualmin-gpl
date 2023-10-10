@@ -3076,7 +3076,7 @@ elsif (@caa == 1 &&
 	}
 if ($dns_delay) {
 	my %webmin_mod_config = &foreign_config("webmin");
-	sleep($webmin_mod_config{'letsencrypt_dns_wait'} || 15);	# Wait for DNS propagation
+	sleep(int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10);
 	}
 }
 
