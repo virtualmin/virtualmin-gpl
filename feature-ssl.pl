@@ -3197,18 +3197,19 @@ sub request_domain_letsencrypt_cert
 my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
 my ($ok, $cert, $key, $chain, @errs);
 my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
+my $dnames = &filter_ssl_wildcards($dnames);
+$size ||= $config{'key_size'};
+&foreign_require("webmin");
+my $phd = &public_html_dir($d);
+my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
+my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
+my $actype_reuse = $actype eq $dctype ? 1 : 0;
+my @wilds = grep { /^\*\./ } @$dnames;
+&lock_file($ssl_letsencrypt_lock);
+&disable_quotas($d);
 foreach (@tried) {
 	my $try = $_;
-	my $dnames = &filter_ssl_wildcards($dnames);
-	$size ||= $config{'key_size'};
-	&foreign_require("webmin");
-	my $phd = &public_html_dir($d);
-	my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
-	my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
-	my $actype_reuse = $actype eq $dctype ? 1 : 0;
-	my @wilds = grep { /^\*\./ } @$dnames;
-	&lock_file($ssl_letsencrypt_lock);
-	&disable_quotas($d);
+	@errs = ();
 	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
 		# Try using website first
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
@@ -3233,8 +3234,6 @@ foreach (@tried) {
 			push(@errs, $cert);
 			}
 		}
-	&enable_quotas($d);
-	&unlock_file($ssl_letsencrypt_lock);
 	if (!$ok && !$try) {
 		# Try again after a small delay, which works in 99% of
 		# cases, considering initial configuration was correct
@@ -3245,6 +3244,8 @@ foreach (@tried) {
 		last;
 		}
 	}
+&enable_quotas($d);
+&unlock_file($ssl_letsencrypt_lock);
 # Return results
 if (!$ok) {
 	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
