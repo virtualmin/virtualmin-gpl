@@ -3194,10 +3194,10 @@ return \@rv;
 # DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
+my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $keytype, $hmac) = @_;
 my ($ok, $cert, $key, $chain, @errs);
 my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
-my $dnames = &filter_ssl_wildcards($dnames);
+$dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
@@ -3215,7 +3215,7 @@ foreach (@tried) {
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
 			&get_global_from_address(), $actype, $actype_reuse,
-			$server, $key, $hmac);
+			$server, $keytype, $hmac);
 		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
 		}
 	if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
@@ -3224,7 +3224,7 @@ foreach (@tried) {
 		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
 			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
 			&get_global_from_address(), $actype, $actype_reuse,
-			$server, $key, $hmac);
+			$server, $keytype, $hmac);
 		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
 		}
 	elsif (!$ok) {
