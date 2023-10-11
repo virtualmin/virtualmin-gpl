@@ -3035,19 +3035,25 @@ if ($chain) {
 &update_caa_record($d);
 }
 
-# update_caa_record(&domain)
+# update_caa_record(&domain, [force-letsencrypt])
 # Update the CAA record for Let's Encrypt if needed
 sub update_caa_record
 {
-my ($d) = @_;
+my ($d, $letsencrypt_cert) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
 return undef if (!$d->{'dns_cloud'} &&
 		 &compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
-my $info = &cert_info($d);
-my $lets = &is_letsencrypt_cert($info) ? 1 : 0;
+# At this stage the cert is always self-signed,
+# so we need to force it for Let's Encrypt
+my $lets = $letsencrypt_cert;
+if (!$lets) {
+	my $info = &cert_info($d);
+	$lets = &is_letsencrypt_cert($info) ? 1 : 0;
+	}
+# Need delay for DNS propagation
 if (!@caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
