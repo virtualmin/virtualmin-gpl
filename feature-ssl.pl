@@ -3053,7 +3053,6 @@ if (!$lets) {
 	$lets = &is_letsencrypt_cert($info) ? 1 : 0;
 	}
 # Need delay for DNS propagation
-my $dns_delay = 0;
 if (!@caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
@@ -3063,7 +3062,6 @@ if (!@caa && $lets) {
 	&create_dns_record($recs, $file, $caa);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
-	$dns_delay++;
 	}
 elsif (@caa == 1 &&
        $caa[0]->{'values'}->[1] eq 'issuewild' &&
@@ -3073,10 +3071,6 @@ elsif (@caa == 1 &&
 	&delete_dns_record($recs, $file, $caa[0]);
 	&post_records_change($d, $recs, $file);
 	&reload_bind_records($d);
-	}
-if ($dns_delay) {
-	my %webmin_mod_config = &foreign_config("webmin");
-	sleep(int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10);
 	}
 }
 
