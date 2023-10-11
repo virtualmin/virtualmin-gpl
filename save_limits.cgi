@@ -114,7 +114,7 @@ if (!&check_jailkit_support()) {
 					next if $dir eq '.' or $dir eq '..';
 					my $fpath = "$dom_chdir/$dir";
 					# Remove home directory only if empty
-					if (&is_under_directory("$dom_chdir/home", $fpath)) {
+					if ($dir eq "home") {
 						opendir(my $dhh, $fpath) || &error("Cannot open chroot home directory $dom_chdir for cleaning: $!");
 						while (my $dirh = readdir($dhh)) {
 							next if $dirh eq '.' or $dirh eq '..';
