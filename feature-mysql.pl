@@ -1125,9 +1125,13 @@ foreach $db (@dbs) {
 		}
 
 	my $mymod = &require_dom_mysql($d);
-	local $err = &foreign_call(
+	my $cs;
+	if &foreign_defined($mymod, "get_character_set")) {
+		$cs = &foreign_call($mymod, "get_character_set", $db);
+		}
+	my $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
-		undef, undef, $tables, $d->{'user'},
+		$cs, undef, $tables, $d->{'user'},
 		&mysql_single_transaction($d, $db), 0, $allopts->{'skip'});
 	if (!$err) {
 		$err = &validate_mysql_backup($dbfile);
