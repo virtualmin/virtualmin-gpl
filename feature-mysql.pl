@@ -1126,7 +1126,7 @@ foreach $db (@dbs) {
 
 	my $mymod = &require_dom_mysql($d);
 	my $cs;
-	if &foreign_defined($mymod, "get_character_set")) {
+	if (&foreign_defined($mymod, "get_character_set")) {
 		$cs = &foreign_call($mymod, "get_character_set", $db);
 		}
 	my $err = &foreign_call(
