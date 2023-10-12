@@ -1,4 +1,5 @@
 
+
 sub init_ssl
 {
 $feature_depends{'ssl'} = [ 'web', 'dir' ];
@@ -3034,19 +3035,25 @@ if ($chain) {
 &update_caa_record($d);
 }
 
-# update_caa_record(&domain)
+# update_caa_record(&domain, [force-letsencrypt])
 # Update the CAA record for Let's Encrypt if needed
 sub update_caa_record
 {
-my ($d) = @_;
+my ($d, $letsencrypt_cert) = @_;
 &require_bind();
 return undef if (!$d->{'dns'});
 return undef if (!$d->{'dns_cloud'} &&
 		 &compare_version_numbers($bind8::bind_version, "9.9.6") < 0);
 my ($recs, $file) = &get_domain_dns_records_and_file($d);
 my @caa = grep { $_->{'type'} eq 'CAA' } @$recs;
-my $info = &cert_info($d);
-my $lets = &is_letsencrypt_cert($info) ? 1 : 0;
+# At this stage the cert is always self-signed,
+# so we need to force it for Let's Encrypt
+my $lets = $letsencrypt_cert;
+if (!$lets) {
+	my $info = &cert_info($d);
+	$lets = &is_letsencrypt_cert($info) ? 1 : 0;
+	}
+# Need delay for DNS propagation
 if (!@caa && $lets) {
 	# Need to add a Let's Encrypt record
 	&pre_records_change($d);
@@ -3193,45 +3200,59 @@ return \@rv;
 # DNS modes if possible. The key type must be one of 'rsa' or 'ecdsa'
 sub request_domain_letsencrypt_cert
 {
-my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $key, $hmac) = @_;
-my $dnames = &filter_ssl_wildcards($dnames);
+my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $keytype, $hmac) = @_;
+my ($ok, $cert, $key, $chain, @errs);
+my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
+$dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
-my ($ok, $cert, $key, $chain);
 my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
 my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
 my $actype_reuse = $actype eq $dctype ? 1 : 0;
-my @errs;
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
 &disable_quotas($d);
-if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
-	# Try using website first
-	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
-		&get_global_from_address(), $actype, $actype_reuse,
-		$server, $key, $hmac);
-	push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
-	}
-if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
-    (!$mode || $mode eq "dns")) {
-	# Fall back to DNS
-	($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
-		$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
-		&get_global_from_address(), $actype, $actype_reuse,
-		$server, $key, $hmac);
-	push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
-	}
-elsif (!$ok) {
-	if (!$cert) {
-		$cert = "Domain has no website, ".
-			"and DNS-based validation is not possible";
-		push(@errs, $cert);
+foreach (@tried) {
+	my $try = $_;
+	@errs = ();
+	if (&domain_has_website($d) && !@wilds && (!$mode || $mode eq "web")) {
+		# Try using website first
+		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+			$dnames, $phd, $d->{'emailto'}, $size, "web", $staging,
+			&get_global_from_address(), $actype, $actype_reuse,
+			$server, $keytype, $hmac);
+		push(@errs, &text('letsencrypt_eweb', $cert)) if (!$ok);
+		}
+	if (!$ok && &get_webmin_version() >= 1.834 && $d->{'dns'} &&
+		(!$mode || $mode eq "dns")) {
+		# Fall back to DNS
+		($ok, $cert, $key, $chain) = &webmin::request_letsencrypt_cert(
+			$dnames, undef, $d->{'emailto'}, $size, "dns", $staging,
+			&get_global_from_address(), $actype, $actype_reuse,
+			$server, $keytype, $hmac);
+		push(@errs, &text('letsencrypt_edns', $cert)) if (!$ok);
+		}
+	elsif (!$ok) {
+		if (!$cert) {
+			$cert = "Domain has no website, ".
+				"and DNS-based validation is not possible";
+			push(@errs, $cert);
+			}
+		}
+	if (!$ok && !$try) {
+		# Try again after a small delay, which works in 99% of
+		# cases, considering initial configuration was correct
+		my %webmin_mod_config = &foreign_config("webmin");
+		sleep((int($webmin_mod_config{'letsencrypt_dns_wait'}) || 10) * 2);
+		}
+	else {
+		last;
 		}
 	}
 &enable_quotas($d);
 &unlock_file($ssl_letsencrypt_lock);
+# Return results
 if (!$ok) {
 	return ($ok, join("&nbsp;&nbsp;&nbsp;", @errs), $key, $chain);
 	}
