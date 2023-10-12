@@ -809,19 +809,23 @@ if (%dbmap) {
 	&require_mysql();
 	&$first_print($text{'clone_mysqlcopy'});
 	foreach my $db (&domain_databases($d, [ 'mysql' ])) {
-		local $oldname = $dbmap{$db->{'name'}};
-		local $temp = &transname();
-		local $mymod = &require_dom_mysql($oldd);
-		local $err = &foreign_call(
-			$mymod, "backup_database", $oldname, $temp, 0, 1, 0,
-			undef, undef, undef, undef,
+		my $oldname = $dbmap{$db->{'name'}};
+		my $temp = &transname();
+		my $mymod = &require_dom_mysql($oldd);
+		my $cs;
+		if (&foreign_defined($mymod, "get_character_set")) {
+			$cs = &foreign_call($mymod, "get_character_set", $db);
+			}
+		my $err = &foreign_call(
+			$mymod, "backup_database", $oldname, $temp, 0, 1, undef,
+			$cs, undef, undef, undef,
 			&mysql_single_transaction($d, $db));
 		if ($err) {
 			&$second_print(&text('clone_mysqlbackup',
 					     $oldname, $err));
 			next;
 			}
-		local ($ex, $out) = &execute_dom_sql_file($d, $db->{'name'},
+		my ($ex, $out) = &execute_dom_sql_file($d, $db->{'name'},
 							  $temp);
 		&unlink_file($temp);
 		if ($ex) {
