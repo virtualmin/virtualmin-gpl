@@ -69,8 +69,8 @@ elsif ($dns_submode) {
 my $recs = [ ];
 my $recstemp = &transname();
 eval {
-	my $bind8::config{'auto_chroot'} = undef;
-	my $bind8::config{'chroot'} = undef;
+	local $bind8::config{'auto_chroot'} = undef;
+	local $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'}) {
 		&create_alias_records($recs, $recstemp, $d, $ip);
 		}
@@ -343,7 +343,7 @@ else {
 		# don't want to delete this later
 		$d->{'dns_subalready'} = 1;
 		}
-	local $ip = $d->{'dns_ip'} || $d->{'ip'};
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
 	&create_standard_records($recs, $file, $d, $ip);
 	&post_records_change($dnsparent, $recs, $file);
 
