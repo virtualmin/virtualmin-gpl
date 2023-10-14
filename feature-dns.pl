@@ -2354,11 +2354,11 @@ local $rv = &restart_bind($d);
 return $rv;
 }
 
-# check_dns_clash(&domain, [changing])
+# check_dns_clash(&domain, [changing], [replication-mode])
 # Returns 1 if a domain already exists in BIND, or remotely
 sub check_dns_clash
 {
-local ($d, $field) = @_;
+local ($d, $field, $repl) = @_;
 if (!$field || $field eq 'dom') {
 	if ($d->{'provision_dns'}) {
 		# Check on remote provisioning server
@@ -2369,8 +2369,9 @@ if (!$field || $field eq 'dom') {
 			return &text('provision_edns', $d->{'dom'});
 			}
 		}
-	elsif ($d->{'dns_cloud'} && !$d->{'dns_cloud_import'}) {
+	elsif ($d->{'dns_cloud'}) {
 		# Check on cloud provider
+		return 0 if ($d->{'dns_cloud_import'} || $repl);
 		my $ctype = $d->{'dns_cloud'};
 		my ($cloud) = grep { $_->{'name'} eq $ctype }
 				   &list_dns_clouds();
