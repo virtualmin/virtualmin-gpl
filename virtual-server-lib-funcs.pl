@@ -19798,8 +19798,13 @@ $config{'default_domain_ssl'} = 1
 &lock_file($module_config_file);
 &save_module_config();
 &unlock_file($module_config_file);
+# Set as default domain if create some time later
+if (&can_default_website(\%dom)) {
+	&set_default_website(\%dom);
+	}
 &run_post_actions_silently();
 &unlock_domain_name($system_host_name);
+&clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return &$err($succ_msg, $succ, $rs);
 }
 
@@ -19823,6 +19828,7 @@ $err = &delete_virtual_server($d, 0, 0);
 $config{'defaultdomain_name'} = undef;
 &save_module_config();
 &unlock_file($module_config_file);
+&clear_links_cache();
 return wantarray ? (0, $err) : 0 if ($err);
 return wantarray ? (1, undef) : 1;
 }
@@ -19859,6 +19865,7 @@ $config{'defaultdomain_name'} = $new_hostname;
 &unlock_file($module_config_file);
 &run_post_actions_silently();
 &pop_all_print();
+&clear_links_cache() if ($config{'default_domain_ssl'} == 2);
 return $err ? 0 : 1;
 }
 
