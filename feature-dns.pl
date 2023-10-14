@@ -16,10 +16,10 @@ return $r;
 # parent zone actually exists
 sub check_depends_dns
 {
-local ($d) = @_;
+my ($d) = @_;
 if ($d->{'subdom'}) {
-	local $tmpl = &get_template($d->{'template'});
-	local $parent = &get_domain($d->{'subdom'});
+	my $tmpl = &get_template($d->{'template'});
+	my $parent = &get_domain($d->{'subdom'});
 	if ($tmpl->{'dns_sub'} && !$parent->{'dns'}) {
 		return $text{'setup_edepdnssub'};
 		}
@@ -31,7 +31,7 @@ return undef;
 # Ensure that a parent server without DNS does not have any sub-domains with it
 sub check_anti_depends_dns
 {
-local ($d) = @_;
+my ($d) = @_;
 if (!$d->{'dns'}) {
 	foreach my $sd (&get_domain_by("dns_subof", $d->{'id'})) {
 		if ($sd->{'dns'}) {
@@ -46,15 +46,15 @@ return undef;
 # Set up a zone for a domain
 sub setup_dns
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_bind();
-local $tmpl = &get_template($d->{'template'});
-local $ip = $d->{'dns_ip'} || $d->{'ip'};
-local @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
+my $tmpl = &get_template($d->{'template'});
+my $ip = $d->{'dns_ip'} || $d->{'ip'};
+my @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
 
 # Find the DNS domain that this could be placed under
-local $dnsparent;
-local $dns_submode = defined($d->{'dns_submode'}) ? $d->{'dns_submode'} :
+my $dnsparent;
+my $dns_submode = defined($d->{'dns_submode'}) ? $d->{'dns_submode'} :
 			$tmpl->{'dns_sub'} eq 'yes' ? 1 : 0;
 if ($d->{'subdom'}) {
 	# Special subdom mode, always under that domain
@@ -69,8 +69,8 @@ elsif ($dns_submode) {
 my $recs = [ ];
 my $recstemp = &transname();
 eval {
-	local $bind8::config{'auto_chroot'} = undef;
-	local $bind8::config{'chroot'} = undef;
+	my $bind8::config{'auto_chroot'} = undef;
+	my $bind8::config{'chroot'} = undef;
 	if ($d->{'alias'}) {
 		&create_alias_records($recs, $recstemp, $d, $ip);
 		}
@@ -148,13 +148,13 @@ elsif (!$dnsparent) {
 	else {
 		&$first_print(&text('setup_bindremote', $r->{'host'}));
 		}
-	local $conf = &remote_foreign_call($r, "bind8", "get_config");
-	local $rbconfig = &remote_foreign_config($r, "bind8");
-	local $base = $rbconfig->{'master_dir'} ||
+	my $conf = &remote_foreign_call($r, "bind8", "get_config");
+	my $rbconfig = &remote_foreign_config($r, "bind8");
+	my $base = $rbconfig->{'master_dir'} ||
 	      &remote_foreign_call($r, "bind8", "base_directory", $conf);
-	local $file = &remote_foreign_call($r, "bind8", "automatic_filename",
+	my $file = &remote_foreign_call($r, "bind8", "automatic_filename",
 					   $d->{'dom'}, 0, $base);
-	local $dir = {
+	my $dir = {
 		 'name' => 'zone',
 		 'values' => [ $d->{'dom'} ],
 		 'type' => 1,
