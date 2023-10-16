@@ -1957,6 +1957,8 @@ check_defip=Default IPv4 address for virtual servers is $1
 check_defip6=Default IPv6 address for virtual servers is $1
 check_dnsip1=External IP address for DNS records is set to $1, which matches the detected external address
 check_dnsip2=Default IP address is set to $1, which matches the detected external address
+check_dnsip3=Detected external IPv4 address is $1
+check_ednsip3=Could not detect external IPv4 address
 check_ednsip1=External IP address for DNS records is set to $1, but the detected external address is actually $2. This may cause DNS records for Virtualmin domains to point to the wrong system
 check_ednsip2=Default IP address is set to $1, but the detected external address is actually $2. This is typically the result of being behind a NAT firewall, and should be corrected on the <a href='$3'>module configuration</a> page
 check_ewebsuexecbin=The <tt>suexec</tt> command was not found on your system
