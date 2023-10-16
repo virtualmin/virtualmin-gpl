@@ -47,9 +47,15 @@ else {
 # Returns the IP address of this system, as seen by other hosts on the Internet.
 sub get_external_ip_address
 {
-local $url = "http://software.virtualmin.com/cgi-bin/ip.cgi";
-local ($host, $port, $page, $ssl) = &parse_http_url($url);
-local ($out, $error);
+my $now = time();
+if ($config{'external_ip_cache'} &&
+    $now - $config{'external_ip_cache_time'} < 24*60*60) {
+	# Can use last cached value
+	return $config{'external_ip_cache'};
+	}
+my $url = "http://software.virtualmin.com/cgi-bin/ip.cgi";
+my ($host, $port, $page, $ssl) = &parse_http_url($url);
+my ($out, $error);
 &http_download($host, $port, $page, \$out, \$error, undef, $ssl,
 	       undef, undef, 5, 0, 1);
 $out =~ s/\r|\n//g;
@@ -57,11 +63,12 @@ if ($error) {
 	# Fall back to last cached value
 	return $config{'external_ip_cache'};
 	}
-if ($config{'external_ip_cache'} ne $out) {
-	# Cache it for future calls
-	$config{'external_ip_cache'} = $out;
-	&save_module_config();
-	}
+# Cache it for future calls
+&lock_file($module_config_file);
+$config{'external_ip_cache'} = $out;
+$config{'external_ip_cache_time'} = $now;
+&save_module_config();
+&unlock_file($module_config_file);
 return $out;
 }
 
