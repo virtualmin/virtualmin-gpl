@@ -15912,6 +15912,15 @@ if ($config{'dns_ip'} ne '*') {
 				"../config.cgi?$module_name"), 'warn'));
 		}
 	}
+else {
+	my $ext_ip = &get_external_ip_address();
+	if ($ext_ip) {
+		&$second_print(&text('check_dnsip3', $ext_ip));
+		}
+	else {
+		&$second_print(&ui_text_color($text{'check_ednsip3'}, 'warn'));
+		}
+	}
 
 # Make sure local group exists
 if ($config{'localgroup'} && !defined(getgrnam($config{'localgroup'}))) {
