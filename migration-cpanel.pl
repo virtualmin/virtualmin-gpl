@@ -1463,6 +1463,8 @@ foreach my $vf (readdir(VF)) {
 
 		&create_virtual_server(\%subd, $parentdom,
 				       $parentdom->{'user'});
+		&create_standard_directory_for_domain(
+		    \%subd, $subd{'cgi_bin_path'}, $tmpl->{'web_html_perms'}); 
 
 		# Cpanel sub-domains always seem to forward mail to the parent
 		if ($subd{'mail'}) {
