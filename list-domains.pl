@@ -804,6 +804,17 @@ if ($multi) {
 				}
 			}
 
+		# Show secondary mail servers
+		if ($d->{'mx_servers'}) {
+			my %ids = map { $_, 1 }
+				      split(/\s+/, $d->{'mx_servers'});
+			my @servers = grep { $ids{$_->{'id'}} }
+					   &list_mx_servers();
+			print "    Secondary mail servers: ",
+				join(", ", map { $_->{'mxname'} || $_->{'host'}}
+					       @servers),"\n";
+			}
+
 		# Show owner limits
 		if (!$d->{'parent'}) {
 			print "    Maximum sub-servers: ",
