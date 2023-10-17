@@ -1426,6 +1426,7 @@ foreach my $vf (readdir(VF)) {
 				'nocopyskel', 1,
 				'no_tmpl_aliases', 1,
 				);
+		$subd{'mail'} = 0;
 		foreach my $f (@subdom_features) {
 			if ($f eq 'mail') {
 				$subd{$f} = $subof{$f} && -r "$userdir/va/$vf";
