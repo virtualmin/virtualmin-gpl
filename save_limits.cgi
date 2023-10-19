@@ -111,25 +111,9 @@ if (!&check_jailkit_support()) {
 			if ($1 eq $d->{'id'}) {
 				opendir(my $dh, $dom_chdir) || &error("Cannot open chroot directory $dom_chdir for cleaning: $!");
 				while (my $dir = readdir($dh)) {
-					next if $dir eq '.' or $dir eq '..';
-					my $fpath = "$dom_chdir/$dir";
-					# Remove home directory only if empty
-					if ($dir eq "home") {
-						opendir(my $dhh, $fpath) || &error("Cannot open chroot home directory $dom_chdir for cleaning: $!");
-						while (my $dirh = readdir($dhh)) {
-							next if $dirh eq '.' or $dirh eq '..';
-							my $fpathh = "$fpath/$dirh";
-							# Remove a directory under home only if empty
-							rmdir($fpathh);
-							}
-						closedir($dhh);
-						# Remove home directory only if empty
-						rmdir($fpath);
-						}
-					else {
-						# Remove recursively
-						&unlink_file($fpath)
-						}
+					next if $dir eq '.' or $dir eq '..' or $dir eq "home";
+					# Remove recursively
+					&unlink_file("$dom_chdir/$dir")
 					}
 				closedir($dh);
 				}
