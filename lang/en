@@ -3024,6 +3024,7 @@ limits_ejailon2=Failed to re-enable chroot after cleaning jail : $1
 limits_ejailoff=Failed to disable chroot jail : $1
 limits_ejailoff2=Failed to disable chroot before cleaning jail : $1
 limits_ejailclean=Failed to clean chroot jail : $1
+limits_eopenchroot=Cannot open chroot directory $1 for cleaning: $2
 
 rename_title=Change Domain Name
 rename_header=Virtual server domain name change options

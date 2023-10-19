@@ -107,16 +107,17 @@ if (!&check_jailkit_support()) {
 
 		# Clean all previously copied files
 		my $dom_chdir = &domain_jailkit_dir($d);
-		if (-d $dom_chdir && $dom_chdir =~ /^\/.*?([\d]{6,})$/) {
-			if ($1 eq $d->{'id'}) {
-				opendir(my $dh, $dom_chdir) || &error("Cannot open chroot directory $dom_chdir for cleaning: $!");
-				while (my $dir = readdir($dh)) {
-					next if $dir eq '.' or $dir eq '..' or $dir eq "home";
-					# Remove recursively
-					&unlink_file("$dom_chdir/$dir")
-					}
-				closedir($dh);
+		if (-d $dom_chdir && $dom_chdir =~ /^\/.*?([\d]{6,})$/ &&
+		    $1 eq $d->{'id'}) {
+			opendir(my $dh, $dom_chdir) ||
+			    &error(&text('limits_eopenchroot', $dom_chdir, $!));
+			while (my $dir = readdir($dh)) {
+				next if ($dir eq '.' || $dir eq '..' ||
+					 $dir eq "home");
+				# Remove recursively
+				&unlink_file("$dom_chdir/$dir")
 				}
+			closedir($dh);
 			}
 		# Re-enable jail
 		if ($in{'jail'}) {
