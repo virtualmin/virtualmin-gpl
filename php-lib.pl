@@ -2734,8 +2734,8 @@ return int($max);
 sub get_php_max_spare_servers
 {
 my ($defchildren) = @_;
-my $defmaxspare = $defchildren <= 5 ? $defchildren :
-        $defchildren >= 10 ? int($defchildren / 2) : 5;
+my $defmaxspare = $defchildren <= 1 ? $defchildren :
+        $defchildren >= 4 ? int($defchildren / 2) : 2;
 return int($defmaxspare);
 }
 
