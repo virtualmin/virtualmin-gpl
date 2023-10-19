@@ -4540,7 +4540,6 @@ else {
 sub setup_secondary_mx
 {
 local ($dom) = @_;
-&obtain_lock_mail($_[0]);
 &require_mail();
 if ($config{'mail_system'} == 1) {
 	# Just add to sendmail relay domains file
@@ -4615,7 +4614,6 @@ return undef;
 sub delete_secondary_mx
 {
 local ($dom) = @_;
-&obtain_lock_mail($_[0]);
 &require_mail();
 if ($config{'mail_system'} == 1) {
 	# Just remove from sendmail relay domains file
