@@ -4365,7 +4365,7 @@ if ($d->{'postgres'} && !$hash{'postgres_user'}) {
 	}
 
 # Add remote MySQL and PostgreSQL hosts
-if $d->{'mysql'}) {
+if ($d->{'mysql'}) {
 	$hash{'mysql_host'} = &get_database_host_mysql($d);
 	$hash{'mysql_port'} = &get_database_port_mysql($d);
 	}
