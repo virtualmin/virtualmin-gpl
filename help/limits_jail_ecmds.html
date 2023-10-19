@@ -1,0 +1,15 @@
+<header>Extra commands and directories for Jailkit to copy</header>
+
+Extra commands and directories to copy using <tt>jk_cp</tt> command. <p>
+
+<tt>jk_cp</tt> is a command provided by Jailkit package to copy files and directories into the
+<em>chroot</em> environment. The <tt>jk_cp</tt> command will also automatically handle and copy necessary
+library dependencies for binary files, ensuring that executables work correctly inside the
+<em>chroot</em>.
+<p>
+Instead of manually copying extra commands and all dependencies in the domain <em>chroot</em> directory,
+use this field to add extra commands (separated by space) to bring to into the <em>chroot</em>,
+ensuring that everything works as expected. For example to copy <tt>rsync</tt> and <tt>zip</tt>
+commands, put <tt>rsync zip</tt> in this field.
+
+<footer>

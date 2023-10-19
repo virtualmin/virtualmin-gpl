@@ -1,0 +1,12 @@
+<header>Extra sections for Jailkit to enable</header>
+
+By default, only essential files are copied from Jailkit config sections
+into new or updated jails. To include additional files, list the desired
+sections from <tt>/etc/jailkit/jk_init.ini</tt> here.<p>
+
+The sections in <tt>/etc/jailkit/jk_init.ini</tt> file are named as <tt>[git]</tt>
+or <tt>[apacheutils]</tt>. For example, to include <tt>git</tt> and <tt>apacheutils</tt> sections
+in this domain <em>chroot</em> environment, put <tt>git apacheutils</tt> (separated by space)
+in this field.<p>
+
+<footer>

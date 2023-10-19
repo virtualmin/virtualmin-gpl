@@ -1,7 +1,19 @@
-<header>Chroot jail domain Unix user?</header>
+<header>Enable Jailkit for domain</header>
 
-If enabled, all SSH and SCP access by the virtual server's Unix user will
-be restricted to his home directory. This also applies to PHP scripts run
-in FPM or FCGId modes. <p>
+This option allows administrators to restrict a specific domain's user environment
+using Jailkit, thereby potentially enhancing security by isolating it from the
+complete system.<p>
+
+When enabled, the domain's associated Unix user will be placed in a <em>chrooted</em>
+environment using Jailkit. This means the user will only have access to a limited set
+of resources, defined by the Jailkit configuration.<p>
+
+Jailkit configuration utilizes the settings from the <tt>jk_init.ini</tt> configuration file
+to determine which files, binaries, and libraries are accessible within the <em>chrooted</em>
+environment. Additional configurations, such as extra sections or commands, can also be defined
+as needed.<p>
+
+Before enabling Jailkit for a domain, ensure you understand the implications. Users might experience
+limitations in accessing certain system resources or executing specific commands.<p>
 
 <footer>

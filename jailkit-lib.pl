@@ -288,14 +288,28 @@ $dir || return $text{'jailkit_edir'};
 # Use jk_init to copy in standard file sets
 foreach my $sect ("perl", "basicshell", "extendedshell", "ssh", "scp", "sftp",
 		  "editors", "netutils", "php", "logbasics",
-		  split(/\s+/, $config{'jail_sects'})) {
+		  split(/\s+/, $config{'jail_sects'}),
+		  split(/\s+/, $d->{'jail_esects'})) {
 	my $cmd = "jk_init -f -j ".quotemeta($dir)." ".$sect;
 	my ($out, $err);
 	&execute_command($cmd, undef, \$out, \$err);
 	if ($?) {
 		return &text('jailkit_einit', $err);
 		}
-	&system_logged("chmod g-w ".quotemeta($dir)."/*");
+	&system_logged("chmod -R g-w ".quotemeta($dir)."/*");
+	}
+
+# Use jk_cp to copy in any other files/directories
+foreach my $jail_cmd (split(/\s+/, $d->{'jail_ecmds'})) {
+	my $jail_cmd_real = &has_command($jail_cmd);
+	next if (!$jail_cmd_real && $jail_cmd !~ /^\/\S+$/);
+	my $cmd = "jk_cp -j ".quotemeta($dir)." -f ". ($jail_cmd_real || $jail_cmd);
+	my ($out, $err);
+	&execute_command($cmd, undef, \$out, \$err);
+	if ($?) {
+		return &text('jailkit_einit2', $jail_cmd, $err);
+		}
+	&system_logged("chmod -R g-w ".quotemeta($dir)."/*");
 	}
 
 # Make sure /tmp exists
