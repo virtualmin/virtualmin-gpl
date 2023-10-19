@@ -389,13 +389,17 @@ if ($multi) {
 				print "    Password for ${f}: $p\n";
 				}
 			}
-		if ($d->{'mysql'} && $d->{'mysql_module'} ne 'mysql') {
+		if ($d->{'mysql'}) {
 			my $host = &get_database_host_mysql($d);
 			print "    Hostname for mysql: $host\n";
+			my $port = &get_database_port_mysql($d);
+			print "    Port for mysql: $port\n";
 			}
-		if ($d->{'postgres'} && $d->{'postgres_module'} ne 'postgresql') {
+		if ($d->{'postgres'}) {
 			my $host = &get_database_host_postgres($d);
 			print "    Hostname for postgres: $host\n";
+			my $port = &get_database_port_postgres($d);
+			print "    Port for postgres: $port\n";
 			}
 		print "    Home directory: $d->{'home'}\n";
 		if (!$d->{'parent'} && ($jail = &get_domain_jailkit($d))) {

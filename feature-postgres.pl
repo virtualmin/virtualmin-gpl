@@ -952,6 +952,16 @@ my %pgconfig = &foreign_config($pgmod);
 return $pgconfig{'host'} || 'localhost';
 }
 
+# get_database_port_postgres([&domain])
+# Returns the port number the server on which PostgreSQL is actually running
+sub get_database_port_postgres
+{
+my ($d) = @_;
+my $pgmod = &require_dom_postgres($d);
+my %pgconfig = &foreign_config($pgmod);
+return $pgconfig{'port'} || 5432;
+}
+
 # sysinfo_postgres()
 # Returns the PostgreSQL version
 sub sysinfo_postgres

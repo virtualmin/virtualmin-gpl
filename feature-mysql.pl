@@ -2040,6 +2040,16 @@ my %myconfig = &foreign_config($mymod);
 return $myconfig{'host'} || 'localhost';
 }
 
+# get_database_port_mysql([&domain])
+# Returns the port on the server on which MySQL is actually running
+sub get_database_port_mysql
+{
+my ($d) = @_;
+my $mymod = &require_dom_mysql($d);
+my %myconfig = &foreign_config($mymod);
+return $myconfig{'port'} || 3306;
+}
+
 # get_database_ssl_mysql([&domain])
 # Returns 1 if connections to MySQL should be made using SSL
 sub get_database_ssl_mysql

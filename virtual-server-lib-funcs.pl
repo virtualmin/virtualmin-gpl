@@ -4364,6 +4364,16 @@ if ($d->{'postgres'} && !$hash{'postgres_user'}) {
 		}
 	}
 
+# Add remote MySQL and PostgreSQL hosts
+if $d->{'mysql'}) {
+	$hash{'mysql_host'} = &get_database_host_mysql($d);
+	$hash{'mysql_port'} = &get_database_port_mysql($d);
+	}
+if ($d->{'postgres'}) {
+	$hash{'postgres_host'} = &get_database_host_postgres($d);
+	$hash{'postgres_port'} = &get_database_port_postgres($d);
+	}
+
 # Add random numbers length 1-10
 &seed_random();
 for(my $i=1; $i<=10; $i++) {
