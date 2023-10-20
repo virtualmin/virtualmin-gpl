@@ -5665,7 +5665,6 @@ redirect_path=Kilde URL sti
 redirect_dest=Mål
 redirect_url=URL på annet nettsted
 redirect_dir=Katalog på dette systemet
-redirect_regexp=Ta med under-stier i redirigering?
 redirect_err=Kunne ikke lagre redirigering
 redirect_epath=Manglende eller ugyldig kilde URL sti
 redirect_epath2=Domene i kilde-URL er ikke $1

@@ -2778,7 +2778,6 @@ redirect_path=Chemin de l'URL source
 redirect_dest=Destination
 redirect_url=URL à d'autres sites
 redirect_dir=Répertoire sur ce système
-redirect_regexp=Inclure les sous-chemins dans redirection?
 redirect_proto=Activer redirection pour
 redirect_http=Site non-SSL
 redirect_https=Site SSL
