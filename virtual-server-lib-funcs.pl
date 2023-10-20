@@ -12840,8 +12840,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases() &&
 	push(@rv, { 'page' => 'list_aliases.cgi',
 		    'title' => $text{'edit_aliases'},
 		    'desc' => $text{'edit_aliasesdesc'},
-		    'cat' => 'objects',
-		    'icon' => 'email_go',
+		    'cat' => 'mail',
 		    });
 	}
 
