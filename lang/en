@@ -4802,6 +4802,7 @@ newmxs_email=Email is not enabled on this system
 newmxs_emailsystem=No mail system has been configured
 newmxs_esystem=The configured $1 mail system is not running or not installed
 newmxs_eprob=Server $1 cannot be used as a secondary mail server : $2
+newmxs_esame=Server $1 is actually this system $2!
 newmxs_already=This server is already relaying or hosting the mail domain
 newmxs_missing=This server is not a relay for the mail domain
 newmxs_server=Webmin server

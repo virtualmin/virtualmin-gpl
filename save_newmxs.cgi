@@ -39,20 +39,30 @@ foreach $id (split(/\0/, $in{'servers'})) {
 					$server->{'host'}, $mxerr));
 				goto failed;
 				}
-			else {
-				if ($in{"mxname_".$server->{'id'}."_def"}) {
-					delete($server->{'mxname'});
-					}
-				else {
-					$in{"mxname_".$server->{'id'}} =~
-					    /^[a-z0-9\.\-\_]+$/ ||
-						&text('newmxs_emxname',
-						      $server->{'host'});
-					$server->{'mxname'} =
-						$in{"mxname_".$server->{'id'}};
-					}
-				push(@mxs, $server);
+
+			# Make sure we're not somehow adding this system!
+			$rhost = &remote_foreign_call($server, "virtual-server",
+						      "get_system_hostname");
+			$myhost = &get_system_hostname();
+			if ($rhost eq $myhost) {
+				&$second_print(&text('newmxs_esame',
+					$server->{'host'}, $myhost));
+				goto failed;
 				}
+
+			# Save the MX name to use for this server
+			if ($in{"mxname_".$server->{'id'}."_def"}) {
+				delete($server->{'mxname'});
+				}
+			else {
+				$in{"mxname_".$server->{'id'}} =~
+				    /^[a-z0-9\.\-\_]+$/ ||
+					&text('newmxs_emxname',
+					      $server->{'host'});
+				$server->{'mxname'} =
+					$in{"mxname_".$server->{'id'}};
+				}
+			push(@mxs, $server);
 			$newmxids{$server->{'id'}} = $server;
 			}
 		&$second_print($text{'setup_done'});
