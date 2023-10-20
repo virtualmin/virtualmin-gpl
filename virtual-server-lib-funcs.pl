@@ -1,4 +1,4 @@
-
+always_
 use Time::Local;
 use POSIX;
 use feature 'state';
@@ -20014,7 +20014,8 @@ return grep { &plugin_defined($_, "feature_startstop") } @plugins;
 sub list_backup_plugins
 {
 &load_plugin_libraries();
-return grep { &plugin_defined($_, "feature_backup") } @plugins;
+return grep { &plugin_defined($_, "feature_backup") ||
+	      &plugin_defined($_, "feature_always_backup") } @plugins;
 }
 
 # Returns a list of all plugins that define new script installers

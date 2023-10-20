@@ -845,11 +845,12 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 		}
 
 	&$indent_print();
+	my @bplugins = &list_backup_plugins();
 	foreach $f (@backupfeatures) {
-		local $bfunc = "backup_$f";
-		local $fok;
-		local $ffile;
-		if (&indexof($f, &list_backup_plugins()) < 0 &&
+		my $bfunc = "backup_$f";
+		my $fok;
+		my $ffile = "$backupdir/$d->{'dom'}_$f";
+		if (&indexof($f, @bplugins) < 0 &&
 		    defined(&$bfunc) &&
 		    ($d->{$f} || $f eq "virtualmin" ||
 		     $f eq "mail" && &can_domain_have_users($d))) {
@@ -858,9 +859,6 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				# For a home format backup, write the home
 				# itself to the backup destination
 				$ffile = "$dest/$d->{'dom'}.$hfsuffix";
-				}
-			else {
-				$ffile = "$backupdir/$d->{'dom'}_$f";
 				}
 			eval {
 				local $main::error_must_die = 1;
@@ -876,11 +874,15 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 				$fok = 0;
 				}
 			}
-		elsif (&indexof($f, &list_backup_plugins()) >= 0 &&
-		       $d->{$f}) {
+		elsif (&indexof($f, @bplugins) >= 0 && $d->{$f}) {
 			# Call plugin backup function
-			$ffile = "$backupdir/$d->{'dom'}_$f";
 			$fok = &plugin_call($f, "feature_backup",
+					  $d, $ffile, $opts->{$f}, $homefmt,
+					  $increment, $asd, $opts);
+			}
+		else {
+			# Call plugin always backup function
+			$fok = &plugin_call($f, "feature_always_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
 					  $increment, $asd, $opts);
 			}
