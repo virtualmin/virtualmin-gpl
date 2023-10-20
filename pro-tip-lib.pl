@@ -258,7 +258,7 @@ foreach my $pro_demo_feature
 	# Add demo Edit Resource Limits link for GPL users 
 	{ 'name' => 'edit_res',
 	  'title' => $text{'edit_res'},
-	  'cat' => 'admin',
+	  'cat' => 'server',
 	  'url' => "https://virtualmin.com/professional/#edit_res",
 	  'skip' => !($d->{'unix'} && &can_edit_res($d))
 	},
@@ -266,7 +266,7 @@ foreach my $pro_demo_feature
 	# Add demo Proxy Paths link for GPL users 
 	{ 'name' => 'list_balancers',
 	  'title' => $text{'edit_balancer'},
-	  'cat' => 'server',
+	  'cat' => 'web',
 	  'url' => "https://virtualmin.com/professional/#list_balancers",
 	  'skip' => !(&can_edit_forward()),
 	},
@@ -291,7 +291,7 @@ foreach my $pro_demo_feature
 	# Add demo Edit Web Pages link for GPL users 
 	{ 'name' => 'edit_html',
 	  'title' => $text{'edit_html'},
-	  'cat' => 'services',
+	  'cat' => 'web',
 	  'url' => "https://virtualmin.com/professional/#edit_html",
 	  'skip' => !(&domain_has_website($d) &&
 	              $d->{'dir'} &&
