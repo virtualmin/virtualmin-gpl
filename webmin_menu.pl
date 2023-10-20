@@ -145,6 +145,7 @@ if ($d) {
 
 	# Other items by category
 	my @cats = &unique(map { $_->{'cat'} } @buts);
+	&sort_virtual_server_categories(\@cats);
 	foreach my $c (@cats) {
                 next if ($c eq 'objects' || $c eq 'create');
                 next if ($c eq 'webmin' && $d->{'webmin_nocat_modules'});
@@ -214,6 +215,23 @@ elsif ($b->{'target'} eq '_blank' || $b->{'target'} eq '_new') {
 	$i->{'target'} = 'new';
 	}
 return $i;
+}
+
+# Order virtual server categories
+sub sort_virtual_server_categories
+{
+my ($arr) = @_;
+my %order = (
+        'objects' => 10,
+        'create'  => 20,
+        'server'  => 30,
+        'dns'     => 40,
+        'web'     => 50,
+        'mail'    => 60,
+        'logs'    => 70,
+        'delete'  => 80,
+    );
+@$arr = sort { $order{$a} <=> $order{$b} } @$arr;
 }
 
 1;
