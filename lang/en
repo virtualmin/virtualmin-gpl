@@ -3681,6 +3681,7 @@ tmpl_dbs=Edit Default Databases
 tmpl_return=template
 tmpl_ephpsuexec=PHP scripts cannot be run as the domain owner unless suEXEC is enabled
 tmpl_ephpcmd=PHP scripts cannot be run as the domain owner unless the <tt>php</tt> command is installed
+tmpl_ephpvers=PHP version $1 is not available in mode $2. The only versions available are $3
 tmpl_erubycmd=Ruby scripts cannot be run as the domain owner unless the <tt>ruby</tt> command is installed
 tmpl_editmode=Edit template section:
 tmpl_switch=Change

@@ -3235,7 +3235,19 @@ if ($in{'web_php_suexec'} == 1 || $in{'web_php_suexec'} == 2) {
 	@vers || &error($text{'tmpl_ephpcmd'});
 	}
 $tmpl->{'web_php_suexec'} = $in{'web_php_suexec'};
+
+# Check that PHP version is valid for the mode
+my $mmap = &php_mode_numbers_map();
+$mmap = { reverse(%$mmap) };
+my $mode = $mmap->{$in{'web_php_suexec'}};
+if ($mode && $mode ne "none") {
+	my @vers = map { $_->[0] } &list_available_php_versions(undef, $mode);
+	my ($gotver) = grep { $_ eq $in{'web_phpver'} } @vers;
+	$gotver || &error(&text('tmpl_ephpvers', $in{'web_phpver'}, $mode,
+				join(", ", @vers)));
+	}
 $tmpl->{'web_phpver'} = $in{'web_phpver'};
+
 if ($in{'web_phpchildren_def'} ||
     !defined($in{'web_phpchildren_def'})) {
 	$tmpl->{'web_phpchildren'} = undef;
