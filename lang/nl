@@ -5377,7 +5377,6 @@ redirect_path=Bron URL pad
 redirect_dest=Bestemming
 redirect_url=URL op een andere website
 redirect_dir=Directory op dit systeem
-redirect_regexp=Sub-paden toevoegen aan de omleiding?
 redirect_err=Mislukt om omleiding op te slaan
 redirect_epath=Ontbrekende of ongeldig bron URL pad
 redirect_epath2=Domein in de bron URL is niet $1
