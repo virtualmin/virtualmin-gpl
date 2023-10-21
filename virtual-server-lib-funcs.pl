@@ -12840,8 +12840,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_aliases() &&
 	push(@rv, { 'page' => 'list_aliases.cgi',
 		    'title' => $text{'edit_aliases'},
 		    'desc' => $text{'edit_aliasesdesc'},
-		    'cat' => 'objects',
-		    'icon' => 'email_go',
+		    'cat' => 'mail',
 		    });
 	}
 
@@ -12980,7 +12979,7 @@ if (&can_create_sub_servers() && !$d->{'alias'} && $unixer->{'unix'}) {
 if ($d->{'dir'} && &can_edit_ssl() && !$d->{'alias'}) {
 	# SSL options page button
 	push(@rv, { 'page' => 'cert_form.cgi',
-		    'title' => $text{'edit_cert'},
+		    'title' => $text{'edit_catcert'},
 		    'desc' => $text{'edit_certdesc'},
 		    'cat' => 'server',
 		  });
@@ -12991,7 +12990,7 @@ if ($d->{'unix'} && &can_edit_limits($d) && !$d->{'alias'}) {
 	push(@rv, { 'page' => 'edit_limits.cgi',
 		    'title' => $text{'edit_limits'},
 		    'desc' => $text{'edit_limitsdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13001,7 +13000,7 @@ if ($d->{'unix'} && defined(&supports_resource_limits) &&
 	push(@rv, { 'page' => 'pro/edit_res.cgi',
 		    'title' => $text{'edit_res'},
 		    'desc' => $text{'edit_resdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13010,7 +13009,7 @@ if (!$d->{'parent'} && &can_edit_admins($d)) {
 	push(@rv, { 'page' => 'list_admins.cgi',
 		    'title' => $text{'edit_admins'},
 		    'desc' => $text{'edit_adminsdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13019,19 +13018,19 @@ if (!$d->{'parent'} && $d->{'webmin'} && &can_switch_user($d)) {
 	push(@rv, { 'page' => 'switch_user.cgi',
 		    'title' => $text{'edit_switch'},
 		    'desc' => $text{'edit_switchdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		    'target' => '_top',
 		  });
 	}
 
 if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
-	# Proxying / frame forwward configuration button
+	# Proxying / frame forward configuration button
 	local $mode = $d->{'proxy_pass_mode'} || $config{'proxy_pass'};
 	local $psuffix = $mode == 2 ? "frame" : "proxy";
 	push(@rv, { 'page' => $psuffix.'_form.cgi',
 		    'title' => $text{'edit_'.$psuffix},
 		    'desc' => $text{'edit_'.$psuffix.'desc'},
-		    'cat' => 'server',
+		    'cat' => 'web',
 		  });
 	}
 
@@ -13040,7 +13039,7 @@ if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	push(@rv, { 'page' => 'pro/list_balancers.cgi',
 		    'title' => $text{'edit_balancer'},
 		    'desc' => $text{'edit_balancerdesc'},
-		    'cat' => 'server',
+		    'cat' => 'web',
 		  });
 	}
 
@@ -13049,7 +13048,7 @@ if (&has_web_redirects($d) && &can_edit_redirect() && !$d->{'alias'}) {
 	push(@rv, { 'page' => 'list_redirects.cgi',
 		    'title' => $text{'edit_redirects'},
 		    'desc' => $text{'edit_redirectsdesc'},
-		    'cat' => 'server',
+		    'cat' => 'web',
 		  });
 	}
 
@@ -13059,7 +13058,7 @@ if (($d->{'spam'} && $config{'spam'} ||
 	push(@rv, { 'page' => 'edit_spam.cgi',
 		    'title' => $text{'edit_spamvirus'},
 		    'desc' => $text{'edit_spamvirusdesc'},
-		    'cat' => 'server',
+		    'cat' => 'mail',
 		  });
 	}
 
@@ -13069,14 +13068,14 @@ if (&domain_has_website($d) && !$d->{'alias'}) {
 		push(@rv, { 'page' => 'edit_website.cgi',
 			    'title' => $text{'edit_website'},
 			    'desc' => $text{'edit_websitedesc'},
-			    'cat' => 'server',
+			    'cat' => 'web',
 			  });
 		}
 	if (&can_edit_phpmode() || &can_edit_phpver()) {
 		push(@rv, { 'page' => 'edit_phpmode.cgi',
 			    'title' => $text{'edit_php'},
 			    'desc' => $text{'edit_phpdesc'},
-			    'cat' => 'server',
+			    'cat' => 'web',
 			  });
 		}
 	}
@@ -13087,7 +13086,7 @@ if ($d->{'dns'} && !$d->{'dns_submode'} && $config{'dns'} &&
 	push(@rv, { 'page' => 'edit_spf.cgi',
 		    'title' => $text{'edit_spf'},
 		    'desc' => $text{'edit_spfdesc'},
-		    'cat' => 'server',
+		    'cat' => 'dns',
 		  });
 	}
 
@@ -13097,7 +13096,7 @@ if (&can_edit_records($d) && !&copy_alias_records($d)) {
 		push(@rv, { 'page' => 'list_records.cgi',
 			    'title' => $text{'edit_records'},
 			    'desc' => $text{'edit_recordsdesc'},
-			    'cat' => 'server',
+			    'cat' => 'dns',
 			  });
 		}
 	elsif (!$d->{'subdom'}) {
@@ -13105,7 +13104,7 @@ if (&can_edit_records($d) && !&copy_alias_records($d)) {
 		push(@rv, { 'page' => 'view_records.cgi',
 			    'title' => $text{'edit_viewrecords'},
 			    'desc' => $text{'edit_viewrecordsdesc'},
-			    'cat' => 'server',
+			    'cat' => 'dns',
 			  });
 		}
 	}
@@ -13116,7 +13115,7 @@ if ($d->{'mail'} && $config{'mail'} && &can_edit_mail()) {
 	push(@rv, { 'page' => 'edit_mail.cgi',
 		    'title' => $text{'edit_mailopts'},
 		    'desc' => $text{'edit_mailoptsdesc'},
-		    'cat' => 'server',
+		    'cat' => 'mail',
 		  });
 	}
 
@@ -13125,7 +13124,7 @@ if ($d->{'mail'} && !$d->{'alias'} && $config{'dkim_enabled'}) {
 	push(@rv, { 'page' => 'edit_domdkim.cgi',
 		    'title' => $text{'edit_domdkim'},
 		    'desc' => $text{'edit_domdkimdesc'},
-		    'cat' => 'server',
+		    'cat' => 'dns',
 		  });
 	}
 
@@ -13143,7 +13142,7 @@ if ($d->{'dir'} && !$d->{'parent'}) {
 	push(@rv, { 'page' => 'usage.cgi',
 		    'title' => $text{'edit_usage'},
 		    'desc' => $text{'edit_usagehdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'logs',
 		  });
 	}
 
@@ -13153,7 +13152,7 @@ if (!$d->{'alias'} && &can_config_domain($d)) {
 		    'title' => $text{'edit_reemail'},
 		    'desc' => &text('edit_reemaildesc',
                                     "<tt>$d->{'emailto_addr'}</tt>"),
-		    'cat' => 'admin',
+		    'cat' => 'mail',
 		  });
 	}
 
@@ -13181,7 +13180,7 @@ if (!$d->{'alias'} && &can_edit_exclude()) {
 	push(@rv, { 'page' => 'edit_exclude.cgi',
 		    'title' => $text{'edit_exclude'},
 		    'desc' => $text{'edit_excludedesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13226,7 +13225,7 @@ if (&can_passwd()) {
 	push(@rv, { 'page' => 'edit_pass.cgi',
 		    'title' => $text{'edit_changepass'},
 		    'desc' => $text{'edit_changepassdesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13235,7 +13234,7 @@ if (&can_2fa()) {
 	push(@rv, { 'page' => 'edit_2fa.cgi',
 		    'title' => $text{'edit_change2fa'},
 		    'desc' => $text{'edit_change2fadesc'},
-		    'cat' => 'admin',
+		    'cat' => 'server',
 		  });
 	}
 
@@ -13246,7 +13245,7 @@ if (&domain_has_website($d) && $d->{'dir'} && !$d->{'alias'} &&
 	push(@rv, { 'page' => 'pro/edit_html.cgi',
 		    'title' => $text{'edit_html'},
 		    'desc' => $text{'edit_htmldesc'},
-		    'cat' => 'services',
+		    'cat' => 'web',
 		  });
 	}
 
@@ -13318,8 +13317,8 @@ if (!$d->{'parent'}) {
 	push(@rv, { 'url' => $vm.'/search.cgi?field=parent&amp;what='.
 			     &urlize($d->{'dom'}),
 		    'title' => $text{'edit_psearch'},
-		    'cat' => 'admin',
-		    'catname' => $text{'cat_admin'} });
+		    'cat' => 'server',
+		    'catname' => $text{'cat_server'} });
 	}
 
 # Add actions and links
@@ -13344,7 +13343,7 @@ if (&domain_has_website($d) && &can_use_preview()) {
 	push(@rv, { 'url' => "/$module_name/".
 		    	     "link.cgi/$d->{'ip'}/http://www.$d->{'dom'}$pt/",
 		    'title' => $text{'links_website'},
-		    'cat' => 'services',
+		    'cat' => 'web',
 		    'catname' => $text{'cat_services'},
 		    'target' => '_new',
 		  });

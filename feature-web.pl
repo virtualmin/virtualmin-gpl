@@ -2488,14 +2488,14 @@ my $slink = $d->{'dom'}.":".$d->{'web_sslport'};
 push(@rv, { 'mod' => 'apache',
 	    'desc' => $text{'links_web'},
 	    'page' => "virt_index.cgi?virt=".$link,
-	    'cat' => 'services',
+	    'cat' => 'web',
 	  });
 if ($d->{'ssl'}) {
 	# Link to configure SSL virtual host
 	push(@rv, { 'mod' => 'apache',
 		    'desc' => $text{'links_ssl'},
 		    'page' => "virt_index.cgi?virt=".$slink,
-		    'cat' => 'services',
+		    'cat' => 'web',
 		  });
 	}
 
@@ -2542,7 +2542,7 @@ if ($mode eq "cgi" || $mode eq "fcgid") {
 				&text('links_phpini'),
 			    'page' => 'list_ini.cgi?file='.
 					&urlize($ini->[1]),
-			    'cat' => 'services',
+			    'cat' => 'web',
 			  });
 		}
 	}
@@ -2555,7 +2555,7 @@ elsif ($mode eq "fpm") {
 			    'desc' => &text('links_phpini3'),
 			    'page' => 'list_ini.cgi?file='.
 					&urlize($file),
-			    'cat' => 'services',
+			    'cat' => 'web',
 			  });
 		}
 	}
