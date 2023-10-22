@@ -3492,7 +3492,7 @@ sub list_used_tcp_ports
 my @rv;
 my $out = &backquote_command("lsof -i tcp -n -l -P");
 foreach my $l (split(/\r?\n/, $out)) {
-	if ($l =~ /\s+([^:]+):(\d+)\s+\(LISTEN\)/) {
+	if ($l =~ /\s+([^:]+|\[[0-9a-f:]+\]):(\d+)\s+\(LISTEN\)/) {
 		push(@rv, $2);
 		}
 	}
