@@ -736,7 +736,7 @@ if ($client ne "spamc") {
 		   'page' => 'index.cgi?file='.&urlize(
 			"$spam_config_dir/$d->{'id'}/virtualmin.cf").
 			'&title='.&urlize(&show_domain_name($d)),
-		   'cat' => 'services',
+		   'cat' => 'mail',
 		 });
 	}
 return ( );
