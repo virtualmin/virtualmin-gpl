@@ -93,7 +93,8 @@ local $p = &domain_has_website($d);
 $p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
 local $oldmode = &get_domain_php_mode($d);
-local @vers = &list_available_php_versions($d, $mode);
+local @vers = sort { $a->[0] <=> $b->[0] }
+		   &list_available_php_versions($d, $mode);
 
 # Work out the default PHP version for FPM
 if ($mode eq "fpm") {
@@ -107,14 +108,17 @@ if ($mode eq "fpm") {
 	if (!$d->{'php_fpm_version'}) {
 		# Work out the default FPM version from the template
 		if (@vers) {
-			# Use max version if set to use highest
-			my @ver_max = sort { $a->[0] < $b->[0] } @vers;
-			my ($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} ||
-			                   $_->[0] eq $ver_max[0]->[0] } @vers;
-			$fpm ||= $vers[0];
+			# Use version from template, or the max version
+			my $fpm;
+			if ($tmpl->{'web_phpver'}) {
+				($fpm) = grep { $_->[0] eq
+					$tmpl->{'web_phpver'} } @vers;
+				}
+			$fpm ||= $vers[$#vers];
 			$d->{'php_fpm_version'} = $fpm->[0];
 			}
 		else {
+			# This should never happen?
 			my $defconf = $tmpl->{'web_phpver'} ?
 				&get_php_fpm_config($tmpl->{'web_phpver'}) : undef;
 			$defconf ||= $fpms[0];
