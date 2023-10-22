@@ -880,7 +880,7 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 					  $d, $ffile, $opts->{$f}, $homefmt,
 					  $increment, $asd, $opts);
 			}
-		else {
+		elsif (&indexof($f, @bplugins) >= 0) {
 			# Call plugin always backup function
 			$fok = &plugin_call($f, "feature_always_backup",
 					  $d, $ffile, $opts->{$f}, $homefmt,
@@ -2934,14 +2934,14 @@ if ($ok) {
 			my $domain_failed = 0;
 			foreach $f (@rfeatures) {
 				# Restore features
-				local $rfunc = "restore_$f";
-				local $fok;
+				my $rfunc = "restore_$f";
+				my $fok;
+				my $ffile = "$restoredir/$d->{'dom'}_$f";
 				if (&indexof($f, @bplugins) < 0 &&
 				    defined(&$rfunc) &&
 				    ($d->{$f} || $f eq "virtualmin" ||
 				     $f eq "mail" &&
 				     &can_domain_have_users($d))) {
-					local $ffile;
 					local $p = "$backup/$d->{'dom'}";
 					local $hft =
 					    $homeformat{"$p.tar.gz"} ||
@@ -2957,8 +2957,6 @@ if ($ok) {
 						@fopts = ( $ffile );
 						}
 					else {
-						$ffile = $restoredir."/".
-							 $d->{'dom'}."_".$f;
 						@fopts = ( $ffile, glob("$ffile.*") );
 						}
 					if ($f eq "virtualmin") {
@@ -2975,16 +2973,20 @@ if ($ok) {
 						}
 					}
 				elsif (&indexof($f, @bplugins) >= 0 &&
-				       $d->{$f}) {
+				       $d->{$f} && -r $ffile) {
 					# Restoring a plugin feature
-					local $ffile =
-						"$restoredir/$d->{'dom'}_$f";
-					if (-r $ffile) {
-						$fok = &plugin_call($f,
-						    "feature_restore", $d,
-						    $ffile, $opts->{$f}, $opts,
-						    $hft, \%oldd, $asowner);
-						}
+					$fok = &plugin_call($f,
+						"feature_restore", $d,
+						$ffile, $opts->{$f}, $opts,
+						$hft, \%oldd, $asowner);
+					}
+				elsif (&indexof($f, @bplugins) >= 0 &&
+				       -r $ffile) {
+					# Restoring a plugin
+					$fok = &plugin_call($f,
+						"feature_always_restore", $d,
+						$ffile, $opts->{$f}, $opts,
+						$hft, \%oldd, $asowner);
 					}
 				if (defined($fok) && !$fok) {
 					# Handle feature failure

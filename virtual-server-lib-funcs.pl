@@ -8732,7 +8732,7 @@ foreach my $dd (@alldoms) {
 		@of = ( "webmin" );
 		}
 	else {
-		@of = reverse(&list_ordered_features($dd));
+		@of = reverse(&list_ordered_features($dd, 1));
 		}
 	foreach $f (@of) {
 		if (($config{$f} || &indexof($f, @plugins) >= 0) &&
@@ -14073,7 +14073,7 @@ foreach my $f (@features) {
 	}
 
 # Do move for plugins, with error handling
-foreach my $f (&list_feature_plugins()) {
+foreach my $f (&list_feature_plugins(1)) {
 	for(my $i=0; $i<@doms; $i++) {
 		$doing_dom = $doms[$i];
 		local $main::error_must_die = 1;
@@ -14316,7 +14316,7 @@ foreach $f (@features) {
 			}
 		}
 	}
-foreach $f (&list_feature_plugins()) {
+foreach $f (&list_feature_plugins(1)) {
 	for(my $i=0; $i<@doms; $i++) {
 		$doing_dom = $doms[$i];
 		local $main::error_must_die = 1;
@@ -14440,7 +14440,7 @@ foreach my $f (@features) {
 	}
 
 # Update all enabled plugins
-foreach my $f (&list_feature_plugins()) {
+foreach my $f (&list_feature_plugins(1)) {
 	local $main::error_must_die = 1;
 	if ($d->{$f}) {
 		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
@@ -14527,7 +14527,7 @@ foreach my $f (@features) {
 	}
 
 # Update all enabled plugins
-foreach my $f (&list_feature_plugins()) {
+foreach my $f (&list_feature_plugins(1)) {
 	local $main::error_must_die = 1;
 	if ($d->{$f}) {
 		eval { &plugin_call($f, "feature_modify", $d, $oldd) };
@@ -14842,7 +14842,7 @@ foreach my $f (&unique(@features, 'mail')) {
 	}
 
 # Update plugins in all domains
-foreach $f (&list_feature_plugins()) {
+foreach $f (&list_feature_plugins(1)) {
 	for(my $i=0; $i<@doms; $i++) {
 		my $p = &domain_has_website($doms[$i]);
 		$doing_dom = $doms[$i];
@@ -18341,7 +18341,7 @@ foreach my $ad (@aliases) {
 			&try_function($f, $mfunc, $ad, $oldad);
 			}
 		}
-	foreach my $f (&list_feature_plugins()) {
+	foreach my $f (&list_feature_plugins(1)) {
 		if ($ad->{$f}) {
 			&plugin_call($f, "feature_modify", $ad, $oldad);
 			}
@@ -19000,17 +19000,17 @@ else {
 	}
 }
 
-# list_ordered_features(&domain)
+# list_ordered_features(&domain, [include-always-features])
 # Returns a list of features or plugins possibly relevant to some domain,
 # in dependency order for creation.
 sub list_ordered_features
 {
-local ($d) = @_;
-local @dom_features = &domain_features($d);
-local $p = &domain_has_website($d);
-local $s = &domain_has_ssl($d);
-local @rv;
-foreach my $f (@dom_features, &list_feature_plugins()) {
+my ($d, $always) = @_;
+my @dom_features = &domain_features($d);
+my $p = &domain_has_website($d);
+my $s = &domain_has_ssl($d);
+my @rv;
+foreach my $f (@dom_features, &list_feature_plugins($always)) {
 	if ($f eq "web" && $p && $p ne "web") {
 		# Replace website feature in ordering with website plugin
 		push(@rv, $p, "web");
@@ -19982,11 +19982,14 @@ elsif ($config{'default_domain_ssl'}) {
 	}
 }
 
+# list_feature_plugins([include-always])
 # Returns a list of all plugins that define features
 sub list_feature_plugins
 {
+my ($always) = @_;
 &load_plugin_libraries();
-return grep { &plugin_defined($_, "feature_setup") } @plugins;
+return grep { &plugin_defined($_, "feature_setup") ||
+	      $always && &plugin_defined($_, "feature_always_setup") } @plugins;
 }
 
 # Returns a list of all plugins that add mailbox-level options
