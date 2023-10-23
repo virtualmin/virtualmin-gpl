@@ -66,7 +66,7 @@ print &ui_table_row(&hlink($text{'redirect_dest'}, 'redirect_dest'),
 		    &ui_select("dproto", $dproto,
 			       [ [ 'http', 'HTTP' ],
 			         [ 'https', 'HTTPS' ] ])." ".
-		    &ui_textbox("dpath", $dpath, 36, undef, undef,
+		    &ui_textbox("dpath", $dpath, 29, undef, undef,
 				"placeholder=\"$text{'index_global_eg'} /new-path\"") ],
 		  [ 1, $text{'redirect_dir'},
 		    &ui_textbox("dir", $dir, 52, undef, undef,
