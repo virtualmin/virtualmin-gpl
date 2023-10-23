@@ -1085,6 +1085,7 @@ spam_efile=Neplatný nebo chybějící soubor v domovském adresáři
 
 cat_objects=Objekty Serveru
 cat_server=Konfigurace serveru
+cat_dns=Registrace Domeny
 cat_admin=Možnosti administrace
 cat_create=Vytvorit Sub-Server
 cat_backup=Zalohovat ci Obnovit
@@ -1092,7 +1093,6 @@ cat_delete=Zakazat a Odstranit
 cat_services=Služby
 cat_logs=Události a zprávy
 cat_webmin=Moduly Webminu
-cat_dns=Registrace Domeny
 cat_links=Vlastni Odkazy
 cat_add=Pridat Server
 cat_setting=Nastaveni Systemu

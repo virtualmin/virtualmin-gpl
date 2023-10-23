@@ -425,6 +425,8 @@ edit_hash=Mot de passe haché
 edit_assoc=Dissocier les fonctionnalités
 edit_assocdesc=Ajoutez ou supprimez des fonctionnalités d'un serveur virtuel sans réellement créer ou supprimer des fichiers de configuration réels.
 edit_dnsip2=$1 en externe
+edit_catcert=Configurer le certificat SSL
+edit_catproxy=Paramètres du proxy
 edit_lang=Changer de langue
 edit_filemin=Gestionnaire de fichiers
 edit_filemindesc=Parcourez et modifiez les fichiers dans le répertoire du site Web de ce serveur virtuel.
@@ -1699,6 +1701,7 @@ tmpl_dbs=Modifier les bases de données par défaut
 tmpl_return=modèle
 tmpl_ephpsuexec=Les scripts PHP ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que suEXEC ne soit activé
 tmpl_ephpcmd=Les scripts PHP ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que la commande <tt>php</tt> ne soit installée
+tmpl_ephpvers=La version PHP $1 n'est pas disponible en mode $2. Les seules versions disponibles sont $3
 tmpl_erubycmd=Les scripts Ruby ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que la commande <tt>ruby</tt> ne soit installée
 tmpl_editmode=Modifier la section du modèle:
 tmpl_switch=Changement
@@ -2077,6 +2080,7 @@ licence_xfsrebootok=Redémarrer maintenant
 config_deftheme=Global Webmin par défaut
 config_oldtheme=Ancien thème Webmin
 
+scripts_iversion2=Version installée
 scripts_iservice=Nom du service
 scripts_emissing=Le script n'existe pas!
 scripts_ephpvers2=Ce script ne peut pas être installé, car aucune version de PHP n'a été trouvée
@@ -2795,6 +2799,10 @@ spam_scanner4=Scanner de serveur distant
 spam_lookup_port=Port du démon de recherche de domaine
 spam_elookup_port=Le numéro de port du démon de recherche est un nombre
 spam_elookup_port2=Le port du démon de recherche est déjà utilisé !
+
+cat_web=Configuration Web
+cat_mail=Options de messagerie
+cat_dnsreg=Enregistrement de domaines
 
 dbname_err=Impossible de modifier les noms d'utilisateur de la base de données
 dbname_euser=Nom d'utilisateur manquant ou invalide

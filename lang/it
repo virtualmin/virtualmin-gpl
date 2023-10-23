@@ -1182,6 +1182,7 @@ tscripts_other=Altri database..
 
 cat_objects=Oggetti Server
 cat_server=Configurazione Server
+cat_dns=Registrazione Dominio
 cat_admin=Opzioni Amministrative
 cat_create=Creazione Sub-Server
 cat_backup=Backup e Restore
@@ -1189,7 +1190,6 @@ cat_delete=Disabilita e Cancella
 cat_services=Servizi
 cat_logs=Logs e Reports
 cat_webmin=Moduli Webmin
-cat_dns=Registrazione Dominio
 cat_links=Links Personalizzati
 cat_add=Aggiungi Servers
 cat_setting=Settaggi Sistema

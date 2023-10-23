@@ -309,7 +309,6 @@ setup_evirtclash=Sanal arabirim IP adresi zaten kullanýlýyor
 setup_evirtclash2=IP adresi için arabirim mevcut deðil
 setup_evirtclash3=IP adresi için arabirim sanal deðil
 setup_evirtclash4=Sanal sunucu $1 ' da bu IP adresi kullanýmdadýr
-setup_emax=$1'den fazla sanal sunucu oluþturma izniniz yok
 setup_emaxnone=Herhangi bir sanal sunucu oluþturma izniniz yok
 setup_eprefix=Eksik veya geçersiz e-posta kullanýcý ismi öneki
 setup_eprefix2=Belirlenen kullanýcý ismi öneki zaten kullanýmda

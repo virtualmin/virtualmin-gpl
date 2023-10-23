@@ -185,7 +185,9 @@ edit_disabled_time=Uitgeschakeld op : $1
 edit_ips=IP-adressen
 edit_noip6support=<i>Niet ondersteund op dit systeem</i>
 edit_dnsip2=$1 extern
+edit_catcert=SSL-certificaat instellen
 edit_aliasmail=Met eigen e-mail
+edit_catproxy=Proxy instellingen
 edit_lang=Verander taal
 edit_filemin=Bestandsbeheer
 edit_filemindesc=Blader door en bewerk bestanden in de websitemap van deze virtuele server.
@@ -801,6 +803,7 @@ tmpl_php_sock1=Unix socket-bestand
 tmpl_php_log=PHP-logboekregistratie inschakelen?
 tmpl_php_log_path=Standaard PHP-logbestand
 tmpl_ephpsuexec=PHP-scripts kunnen niet worden uitgevoerd als de domeineigenaar, tenzij suEXEC is ingeschakeld
+tmpl_ephpvers=PHP-versie $1 is niet beschikbaar in modus $2. De enige beschikbare versies zijn $3
 tmpl_editmode_web=Website voor domein
 tmpl_editmode_ssl=SSL-website voor domein
 tmpl_editmode_autoconfig=Automatische configuratie van e-mailclient
@@ -913,6 +916,7 @@ licence_fixlinksignore=Sta onveilige symbolische links toe
 licence_xfsreboot=Uw systeem moet opnieuw worden opgestart om XFS-quota op het rootbestandssysteem mogelijk te maken. Zolang dit niet is gedaan, detecteert Virtualmin geen quota als actief en is het onmogelijk om limieten voor schijfgebruik op virtuele servers of gebruikers toe te passen.
 licence_xfsrebootok=Herstart nu
 
+scripts_iversion2=Versie geïnstalleerd
 scripts_iservice=Service naam
 scripts_emissing=Script bestaat niet!
 scripts_ephpvers2=Dit script kan niet worden geïnstalleerd omdat er geen PHP-versies zijn gevonden
@@ -1118,6 +1122,10 @@ spam_queue=Wachtrij voor latere levering
 spam_lookup_port=Daemon-poort voor opzoeken van domein
 spam_elookup_port=Het poortnummer van de daemon opzoeken is een getal
 spam_elookup_port2=Lookup-daemon-poort is al in gebruik!
+
+cat_web=Webconfiguratie
+cat_mail=E-mailopties
+cat_dnsreg=Domeinregistratie
 
 pass_dbsync=Waarschuwing: als u het beheerderswachtwoord van dit domein wijzigt, wordt ook het wachtwoord bijgewerkt dat nodig is om verbinding te maken met de databases.
 pass_hashpass=Alleen hash-wachtwoord opslaan voor dit domein?
