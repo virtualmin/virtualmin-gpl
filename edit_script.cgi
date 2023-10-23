@@ -22,7 +22,7 @@ print &ui_table_start($text{'scripts_uheader'}, undef, 2);
 
 # Show script description
 print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
-print &ui_table_row($text{'scripts_iversion'},
+print &ui_table_row($text{'scripts_iversion2'},
 	$script->{'vdesc'}->{$sinfo->{'version'}} || $sinfo->{'version'});
 
 # Show original website
