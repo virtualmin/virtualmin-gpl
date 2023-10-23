@@ -510,6 +510,7 @@ setup_evirtnoshared=Vybraná IP adresa nie je zdieľaná!
 setup_evirt6clash=Adresa IPv6 virtuálneho rozhrania sa už používa
 setup_evirt6clash2=Neexistuje žiadne rozhranie pre adresu IPv6
 setup_evirt6clash4=Adresu IPv6 už virtuálny server $1 používa
+setup_emax=Vaša aktuálna licencia vám umožňuje vytvoriť spolu až <tt>$1</tt> serverov najvyššej úrovne a podserverov. Ak chcete vytvoriť viac serverov najvyššej úrovne alebo podradených serverov, zvážte inováciu svojej licencie na stránke <a target=_blank href='$2'>virtualmin.com / Môj účet / Predplatné</a>.
 setup_emaxnone=Nie je dovolené vytvárať žiadne virtuálne servery
 setup_eprefix=Chýbajúca alebo neplatná predpona e-mailového používateľského mena
 setup_eprefix2=Zadaná predpona používateľského mena sa už používa

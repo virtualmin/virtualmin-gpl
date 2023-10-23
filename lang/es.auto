@@ -127,6 +127,7 @@ setup_epassvalid=Contraseña no válida : $1
 setup_evirt6clash=La dirección IPv6 de la interfaz virtual ya está en uso.
 setup_evirt6clash2=No existe una interfaz para la dirección IPv6
 setup_evirt6clash4=La dirección IPv6 ya la usa el servidor virtual $1
+setup_emax=Su licencia actual le permite crear hasta <tt>$1</tt> servidores secundarios y de nivel superior combinados. Para poder crear más servidores secundarios o de nivel superior, considere actualizar su licencia visitando su página <a target=_blank href='$2'>virtualmin.com/Mi cuenta/Suscripciones</a>.
 setup_eprefix4=El prefijo de nombre de usuario no puede comenzar o terminar con. o -
 setup_eslashpass=MySQL no admite contraseñas que contengan una barra diagonal inversa
 setup_etmpl=No tiene permiso para usar la plantilla seleccionada

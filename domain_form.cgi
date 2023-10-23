@@ -140,7 +140,12 @@ if ($in{'subdom'}) {
 			$subdom ? "create_subdom" :
 			$parentdom ? "create_subserver" :
 				  "create_form");
-
+# Show user friendly info
+if (!$tdleft && $tdreason == 3) {
+	print &ui_alert_box(
+		&text('setup_emax', $tdmax, $virtualmin_account_subscriptions),
+		'warn', undef, undef, '');
+	}
 # Show generic mode selector
 if ($in{'generic'} && @generics > 1) {
 	print "<b>$text{'form_genericmode'}</b>\n";

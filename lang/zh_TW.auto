@@ -186,6 +186,7 @@ setup_epassvalid=無效的密碼： $1
 setup_evirt6clash=虛擬接口IPv6地址已在使用中
 setup_evirt6clash2=沒有用於IPv6地址的接口
 setup_evirt6clash4=IPv6地址已由虛擬服務器 $1使用
+setup_emax=您目前的許可證可讓您建立最多 <tt>$1</tt> 個頂級伺服器和子伺服器的組合。為了能夠創建更多頂級伺服器或子伺服器，請考慮訪問<a target=_blank href='$2'>virtualmin.com/我的帳戶/訂閱</a>頁面升級您的許可證。
 setup_eprefix3=用戶名前綴 $1已被 $2使用
 setup_eprefix4=用戶名前綴不能以開頭或結尾。要么 -
 setup_aliasfailure=.. $1別名設置失敗： $2

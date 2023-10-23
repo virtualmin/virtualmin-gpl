@@ -510,6 +510,7 @@ setup_evirtnoshared=選択したIPアドレスは共有されません！
 setup_evirt6clash=仮想インターフェースIPv6アドレスは既に使用されています
 setup_evirt6clash2=IPv6アドレスのインターフェースがありません
 setup_evirt6clash4=IPv6アドレスは仮想サーバー $1ですでに使用されています
+setup_emax=現在のライセンスでは、トップレベル サーバーとサブサーバーを合わせて <tt>$1</tt> 個まで作成できます。さらにトップレベルまたはサブサーバーを作成できるようにするには、<a target=_blank href='$2'>virtualmin.com / マイ アカウント / サブスクリプション</a> ページにアクセスしてライセンスをアップグレードすることを検討してください。
 setup_emaxnone=仮想サーバーの作成は許可されていません
 setup_eprefix=メールユーザー名の接頭辞がないか無効です
 setup_eprefix2=指定されたユーザー名の接頭辞は既に使用されています

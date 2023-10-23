@@ -193,6 +193,7 @@ setup_evirtnoshared=L'adresse IP sélectionnée n'est pas partagée!
 setup_evirt6clash=L'adresse IPv6 de l'interface virtuelle est déjà utilisée
 setup_evirt6clash2=Il n'existe aucune interface pour l'adresse IPv6
 setup_evirt6clash4=L'adresse IPv6 est déjà utilisée par le serveur virtuel $1 
+setup_emax=Votre licence actuelle vous permet de créer jusqu'à <tt>$1</tt> serveurs de niveau supérieur et sous-serveurs combinés. Pour pouvoir créer davantage de serveurs de niveau supérieur ou de sous-serveurs, envisagez de mettre à niveau votre licence en visitant votre page <a target=_blank href='$2'>virtualmin.com / Mon compte / Abonnements</a>.
 setup_eprefix3=Le préfixe du nom d'utilisateur $1 est déjà utilisé par $2 
 setup_eprefix4=Le préfixe du nom d'utilisateur ne peut pas commencer ni se terminer par. ou -
 setup_aliasfailure=.. La configuration de l'alias $1 a échoué : $2 

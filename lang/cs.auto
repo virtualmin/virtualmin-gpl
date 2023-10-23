@@ -425,6 +425,7 @@ setup_eusername2=Uživatelské jméno $1 nezačíná písmenem
 setup_evirt6clash=Adresa IPv6 virtuálního rozhraní je již používána
 setup_evirt6clash2=Neexistuje rozhraní pro adresu IPv6
 setup_evirt6clash4=Adresa IPv6 již používá virtuální server $1 
+setup_emax=Vaše aktuální licence vám umožňuje vytvořit až <tt>$1</tt> nejvyšší úrovně a podserverů dohromady. Chcete-li vytvořit více serverů nejvyšší úrovně nebo podřízených serverů, zvažte upgrade své licence na stránce <a target=_blank href='$2'>virtualmin.com / Můj účet / Předplatné</a>.
 setup_emaxnone=Není dovoleno vytvářet žádné virtuální servery
 setup_eprefix=Chybějící nebo neplatná předpona uživatelského jména pro poštu
 setup_eprefix2=Zadaná předpona uživatelského jména se již používá

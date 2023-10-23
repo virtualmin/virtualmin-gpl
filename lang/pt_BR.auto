@@ -509,6 +509,7 @@ setup_evirtnoshared=O endereço IP selecionado não é compartilhado!
 setup_evirt6clash=O endereço IPv6 da interface virtual já está em uso
 setup_evirt6clash2=Não existe interface para o endereço IPv6
 setup_evirt6clash4=O endereço IPv6 já está sendo usado pelo servidor virtual $1 
+setup_emax=Sua licença atual permite criar até <tt>$1</tt> servidores de nível superior e subservidores combinados. Para poder criar mais servidores de nível superior ou subservidores, considere atualizar sua licença visitando a página <a target=_blank href='$2'>virtualmin.com / Minha conta / Assinaturas</a>.
 setup_emaxnone=Você não tem permissão para criar servidores virtuais
 setup_eprefix=Prefixo de nome de usuário de email ausente ou inválido
 setup_eprefix2=O prefixo do nome de usuário especificado já está em uso

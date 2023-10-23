@@ -66,6 +66,7 @@ setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktiv
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
 setup_edeppostgressub=En topptjener må ha PostgreSQL aktivert hvis noen under-servere gjør det
 setup_epassvalid=Ugyldig passord : $1 
+setup_emax=Din nåværende lisens lar deg opprette opptil <tt>$1</tt> toppnivå- og underservere kombinert. For muligheten til å lage flere toppnivå- eller undertjenere, bør du vurdere å oppgradere lisensen din ved å gå til siden <a target=_blank href='$2'>virtualmin.com / Min konto / Abonnementer</a>.
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
 setup_etmpl=Du har ikke lov til å bruke den valgte malen
 

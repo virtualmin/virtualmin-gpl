@@ -79,6 +79,7 @@ setup_edeppostgressub=Op een server op het hoogste niveau moet PostgreSQL zijn i
 setup_eemail3=E-mailadres voor contact is niet geldig - moet een domeinnaam bevatten
 setup_eemail4=Het e-mailadres voor contact mag niet in het domein zijn dat wordt gemaakt
 setup_epassvalid=Ongeldig wachtwoord : $1
+setup_emax=Met uw huidige licentie kunt u maximaal <tt>$1</tt> gecombineerde top-level- en subservers maken. Als u meer top-level- of subservers wilt maken, kunt u overwegen uw licentie te upgraden door naar de pagina <a target=_blank href='$2'>virtualmin.com / Mijn account / Abonnementen</a> te gaan.
 setup_eprefix4=Het voorvoegsel van de gebruikersnaam mag niet beginnen of eindigen met. of -
 setup_eslashpass=Wachtwoorden met een backslash worden niet ondersteund door MySQL
 setup_etmpl=U mag de geselecteerde sjabloon niet gebruiken

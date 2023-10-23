@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 &can_config_domain($d) || &error($text{'unalias_ecannot'});
 ($dleft, $dreason, $dmax) = &count_domains("realdoms");
-&error(&text('setup_emax', $dmax, $virtualmin_shop_link)) if ($dleft == 0);
+&error(&text('setup_emax', $dmax, $virtualmin_account_subscriptions)) if ($dleft == 0);
 
 if ($in{'confirm'}) {
 	# Do it, and show progress

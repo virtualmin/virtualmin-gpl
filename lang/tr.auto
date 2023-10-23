@@ -203,6 +203,7 @@ setup_evirtnoshared=Seçilen IP adresi paylaşılmıyor!
 setup_evirt6clash=Sanal arabirim IPv6 adresi zaten kullanılıyor
 setup_evirt6clash2=IPv6 adresi için arayüz yok
 setup_evirt6clash4=IPv6 adresi $1 sanal sunucusu tarafından zaten kullanılıyor
+setup_emax=Mevcut lisansınız, toplam <tt>$1</tt> adede kadar üst düzey ve alt sunucu oluşturmanıza olanak tanır. Daha fazla üst düzey veya alt sunucu oluşturabilmek için <a target=_blank href='$2'>virtualmin.com / Hesabım / Abonelikler</a> sayfanızı ziyaret ederek lisansınızı yükseltmeyi düşünün.
 setup_eprefix3=$1 kullanıcı adı öneki zaten $2 tarafından kullanılıyor
 setup_eprefix4=Kullanıcı adı öneki ile başlayamaz veya bitemez. veya -
 setup_aliasfailure=.. $1 takma ad kurulumu başarısız oldu : $2 

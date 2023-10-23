@@ -270,7 +270,7 @@ foreach $line (@lines) {
 		&count_domains($aliasdom ? "aliasdoms" :
 			       $parentdom ? "realdoms" : "topdoms");
 	if ($dleft == 0) {
-		&line_error(&text('setup_emax', $dmax, $virtualmin_shop_link));
+		&line_error(&text('setup_emax', $dmax, $virtualmin_account_subscriptions));
 		next;
 		}
 

@@ -148,6 +148,7 @@ setup_erealdomslimit=Ungültige maximale Anzahl von Nicht-Alias-Servern
 setup_ealiaslimit=Fehlende oder ungültige Aliase begrenzen
 setup_epassvalid=Ungültiges Passwort : $1
 setup_evirtnoshared=Ausgewählte IP-Adresse wird nicht geteilt!
+setup_emax=Mit Ihrer aktuellen Lizenz können Sie bis zu <tt>$1</tt> Top-Level- und Sub-Server zusammen erstellen. Um die Möglichkeit zu haben, mehr Top-Level- oder Sub-Server zu erstellen, sollten Sie ein Upgrade Ihrer Lizenz in Betracht ziehen, indem Sie Ihre Seite <a target=_blank href='$2'>virtualmin.com / Mein Konto / Abonnements</a> besuchen.
 setup_eprefix3=Das Benutzernamenpräfix $1 wird bereits von $2 verwendet
 setup_eprefix4=Das Benutzernamenpräfix kann nicht mit beginnen oder enden. oder -
 setup_aliasfailure=.. $1 Alias-Setup fehlgeschlagen : $2

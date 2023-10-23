@@ -186,6 +186,7 @@ setup_epassvalid=无效的密码： $1
 setup_evirt6clash=虚拟接口IPv6地址已在使用中
 setup_evirt6clash2=没有用于IPv6地址的接口
 setup_evirt6clash4=IPv6地址已由虚拟服务器 $1使用
+setup_emax=您当前的许可证允许您创建最多 <tt>$1</tt> 个顶级服务器和子服务器的组合。为了能够创建更多顶级服务器或子服务器，请考虑访问<a target=_blank href='$2'>virtualmin.com/我的帐户/订阅</a>页面升级您的许可证。
 setup_eprefix3=用户名前缀 $1已被 $2使用
 setup_eprefix4=用户名前缀不能以开头或结尾。要么 -
 setup_aliasfailure=.. $1别名设置失败： $2

@@ -7273,7 +7273,6 @@ if ($left != 0 && $type ne "aliasdoms") {
 				     (!$_->{'defaultdomain'} || $donedef++) }
 				   &list_domains();
 		if (@doms > $ldoms) {
-			# Hit the licenced max!
 			return (0, 3, $ldoms, 0);
 			}
 		else {
