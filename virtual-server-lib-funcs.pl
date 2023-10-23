@@ -12779,7 +12779,7 @@ if (!&master_admin() && !&reseller_admin()) {
 		if ($k =~ /^avail_(\S+)$/ &&
 		    &indexof($1, @features) < 0 &&
 		    &indexof($1, @plugins) < 0 &&
-		    $1 ne "phpini") {
+		    $1 !~ /(phpini|webminlog|filemin)/) {
 			my $mod = $1;
 			if (&foreign_available($mod)) {
 				local %minfo = &get_module_info($mod);
