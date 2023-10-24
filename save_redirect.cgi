@@ -44,11 +44,15 @@ else {
 		$r->{'alias'} = 0;
 		}
 	elsif ($in{'mode'} == 3) {
-		# Redirect to a URL path on this
+		# Redirect to a URL path on this host
 		$in{'urlpath'} =~ /^\/\S+$/ ||
 			&error($text{'redirect_eurlpath'});
 		$r->{'dest'} = $in{'urlpath'};
 		$r->{'alias'} = 0;
+		if ($in{'path'} eq '/' && $in{'regexp'} != 2 &&
+		    $in{'http'} && $in{'https'}) {
+			&error($text{'redirect_eurlpath2'});
+			}
 		}
 	elsif ($in{'mode'} == 2) {
 		# Redirect to a URL on this host

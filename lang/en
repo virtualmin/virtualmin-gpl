@@ -6726,6 +6726,7 @@ redirect_epath=Missing or invalid source URL path
 redirect_epath2=Domain in source URL is not $1
 redirect_eurl=Missing or invalid destination URL
 redirect_eurlpath=Missing or invalid destination URL path
+redirect_eurlpath2=A redirect from / to a local URL would cause an infinite loop
 redirect_edir=Non-absolute destination directory
 redirect_edir3=Missing destination directory $1
 redirect_edir2=Destination directory must be under $1
