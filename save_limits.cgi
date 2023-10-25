@@ -90,14 +90,16 @@ if (defined($in{'shell'})) {
 # Update jail
 if (!&check_jailkit_support()) {
 	my $oldjail = &get_domain_jailkit($d);
+	my $jailfeat = $virtualmin_pro;
 	my $jailupd;
-	my $jail_post_clean_enabled = 0;
-	my $jail_post_clean_disabled = 0;
-	$d->{'jail_esects'} = $in{'jail_esects'};
-	$d->{'jail_ecmds'} = $in{'jail_ecmds'};
+	my $jail_post_clean_enabled;
+	my $jail_post_clean_disabled;
+	my $jail_clean = $jailfeat && $in{'jail_clean'};
+	$d->{'jail_esects'} = !$jailfeat ? undef : $in{'jail_esects'};
+	$d->{'jail_ecmds'} = !$jailfeat ? undef : $in{'jail_ecmds'};
 
 	# Clear chroot first
-	if ($in{'jail_clean'}) {
+	if ($jail_clean) {
 		# Disable jail
 		if ($oldjail) {
 			$err = &disable_domain_jailkit($d);
