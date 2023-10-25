@@ -5455,6 +5455,7 @@ redirect_epath=Chybějící nebo neplatná cesta ke zdrojové adrese URL
 redirect_epath2=Doména ve zdrojové adrese URL není $1 
 redirect_eurl=Chybějící nebo neplatná cílová adresa URL nebo cesta k adrese URL
 redirect_eurlpath=Chybějící nebo neplatná cesta cílové adresy URL
+redirect_eurlpath2=Přesměrování z / na místní adresu URL by způsobilo nekonečnou smyčku
 redirect_edir=Adresář, který není absolutní
 redirect_edir3=Chybí cílový adresář $1 
 redirect_edir2=Cílový adresář musí být pod $1 

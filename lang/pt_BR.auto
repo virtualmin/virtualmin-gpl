@@ -6444,6 +6444,7 @@ redirect_epath=Caminho de URL de origem ausente ou inválido
 redirect_epath2=O domínio no URL de origem não é $1 
 redirect_eurl=URL de destino ausente ou inválido ou caminho da URL
 redirect_eurlpath=Caminho do URL de destino ausente ou inválido
+redirect_eurlpath2=Um redirecionamento de/para um URL local causaria um loop infinito
 redirect_edir=Diretório de destino não absoluto
 redirect_edir3=Diretório de destino ausente $1 
 redirect_edir2=O diretório de destino deve estar abaixo de $1 

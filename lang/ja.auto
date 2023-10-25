@@ -6726,6 +6726,7 @@ redirect_epath=ソースURLパスが見つからないか無効です
 redirect_epath2=ソースURLのドメインは $1ではありません
 redirect_eurl=リンク先URLまたはURLパスが見つからないか無効です
 redirect_eurlpath=リンク先 URL パスが見つからないか無効です
+redirect_eurlpath2=ローカル URL から / へのリダイレクトにより無限ループが発生する
 redirect_edir=非絶対宛先ディレクトリー
 redirect_edir3=宛先ディレクトリ $1がありません
 redirect_edir2=宛先ディレクトリは $1の下にある必要があります

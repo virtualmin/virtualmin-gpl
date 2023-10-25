@@ -3501,6 +3501,7 @@ redirect_epath=來源網址路徑缺失或無效
 redirect_epath2=源URL中的域不是 $1
 redirect_eurl=目標網址或網址路徑缺失或無效
 redirect_eurlpath=目標 URL 路徑缺失或無效
+redirect_eurlpath2=從/到本機 URL 的重定向會導致無限循環
 redirect_edir=非絕對目標目錄
 redirect_edir3=缺少目標目錄 $1
 redirect_edir2=目標目錄必須在 $1下

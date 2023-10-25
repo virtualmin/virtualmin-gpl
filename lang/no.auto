@@ -1134,6 +1134,7 @@ redirect_proto=Aktiver viderekobling for
 redirect_http=Ikke-SSL nettsted
 redirect_https=SSL nettsted
 redirect_eurlpath=Manglende eller ugyldig bane for destinasjonsadresse
+redirect_eurlpath2=En omdirigering fra / til en lokal URL vil forårsake en uendelig sløyfe
 redirect_ecode=Ugyldig HTTP-statuskode
 
 dkim_header2=Nøkler og poster for offsite hosting

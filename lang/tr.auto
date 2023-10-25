@@ -4009,6 +4009,7 @@ redirect_epath=Eksik veya geçersiz kaynak URL yolu
 redirect_epath2=Kaynak URL'deki alan adı $1 değil
 redirect_eurl=Eksik veya geçersiz hedef URL veya URL yolu
 redirect_eurlpath=Eksik veya geçersiz hedef URL yolu
+redirect_eurlpath2=Yerel bir URL'den/ye yönlendirme sonsuz bir döngüye neden olur
 redirect_edir=Mutlak olmayan hedef dizin
 redirect_edir3=$1 eksik hedef dizini
 redirect_edir2=Hedef dizin $1 'in altında olmalıdır

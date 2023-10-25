@@ -1431,6 +1431,7 @@ redirect_proto=Omleiding inschakelen voor
 redirect_http=Niet-SSL-website
 redirect_https=SSL-website
 redirect_eurlpath=Ontbrekend of ongeldig pad naar bestemmings-URL
+redirect_eurlpath2=Een omleiding van/naar een lokale URL zou een oneindige lus veroorzaken
 redirect_ecode=Ongeldige HTTP-statuscode
 
 dkim_header2=Sleutels en records voor offsite hosting

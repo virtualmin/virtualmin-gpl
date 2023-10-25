@@ -5311,6 +5311,7 @@ redirect_epath=Percorso URL di origine mancante o non valido
 redirect_epath2=Il dominio nell'URL di origine non è $1 
 redirect_eurl=URL di destinazione mancante o non valido o percorso URL
 redirect_eurlpath=Percorso dell'URL di destinazione mancante o non valido
+redirect_eurlpath2=Un reindirizzamento da/verso un URL locale causerebbe un loop infinito
 redirect_edir=Directory di destinazione non assoluta
 redirect_edir3=Directory di destinazione mancante $1 
 redirect_edir2=La directory di destinazione deve essere inferiore a $1 

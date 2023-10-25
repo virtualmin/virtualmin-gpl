@@ -2713,6 +2713,7 @@ redirect_proto=Aktivieren Sie die Umleitung für
 redirect_http=Nicht-SSL-Website
 redirect_https=SSL-Website
 redirect_eurlpath=Fehlender oder ungültiger Ziel-URL-Pfad
+redirect_eurlpath2=Eine Weiterleitung von/zu einer lokalen URL würde eine Endlosschleife verursachen
 redirect_edir=Nicht absolutes Zielverzeichnis
 redirect_ecode=Ungültiger HTTP-Statuscode
 

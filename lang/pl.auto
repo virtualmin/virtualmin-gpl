@@ -5702,6 +5702,7 @@ redirect_epath=Brakująca lub nieprawidłowa ścieżka źródłowego adresu URL
 redirect_epath2=Domena w źródłowym adresie URL to nie $1 
 redirect_eurl=Brakujący lub nieprawidłowy docelowy adres URL lub ścieżka adresu URL
 redirect_eurlpath=Brakująca lub nieprawidłowa ścieżka docelowego adresu URL
+redirect_eurlpath2=Przekierowanie z/na lokalny adres URL spowodowałoby nieskończoną pętlę
 redirect_edir=Nie bezwzględny katalog docelowy
 redirect_edir3=Brak katalogu docelowego $1 
 redirect_edir2=Katalog docelowy musi być poniżej $1 

@@ -6726,6 +6726,7 @@ redirect_epath=Chýbajúca alebo neplatná cesta webovej adresy zdroja
 redirect_epath2=Doména v zdrojovej adrese URL nie je $1
 redirect_eurl=Chýbajúca alebo neplatná cieľová adresa URL alebo cesta adresy URL
 redirect_eurlpath=Chýbajúca alebo neplatná cesta cieľovej adresy URL
+redirect_eurlpath2=Presmerovanie z / na lokálnu adresu URL by spôsobilo nekonečnú slučku
 redirect_edir=Neabsolútny cieľový adresár
 redirect_edir3=Chýba cieľový adresár $1
 redirect_edir2=Cieľový adresár musí byť nižší ako $1
