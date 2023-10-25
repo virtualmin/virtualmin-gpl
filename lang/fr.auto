@@ -2081,6 +2081,8 @@ licence_xfsrebootok=Redémarrer maintenant
 config_deftheme=Global Webmin par défaut
 config_oldtheme=Ancien thème Webmin
 
+scripts_iinstver=Version du programme d'installation du script
+scripts_iinstdate=Dernière mise à jour du programme d'installation du script
 scripts_iversion2=Version installée
 scripts_iservice=Nom du service
 scripts_emissing=Le script n'existe pas!

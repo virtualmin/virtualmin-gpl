@@ -696,6 +696,8 @@ licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 
+scripts_iinstver=Skriptinstallasjonsversjon
+scripts_iinstdate=Skriptinstallasjonsprogram siste oppdatering
 scripts_iversion2=Versjon installert
 scripts_iservice=Tjenestenavn
 scripts_emissing=Manus eksisterer ikke!

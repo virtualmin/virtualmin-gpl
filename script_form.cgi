@@ -78,6 +78,10 @@ if ($ok) {
 	print &ui_table_start($text{'scripts_iheader'}, undef, 2);
 
 	# Show script description
+	print &ui_table_row($text{'scripts_iinstver'},
+		&filetimestamp_to_version($script->{'filename'})."&nbsp;".
+			&ui_help("$text{'scripts_iinstdate'}: ".
+				&filetimestamp_to_date($script->{'filename'})));
 	print &ui_table_row($text{'scripts_iname'}, $script->{'desc'});
 	print &ui_table_row($text{'scripts_idesc'}, $script->{'longdesc'})
 		if ($script->{'longdesc'});

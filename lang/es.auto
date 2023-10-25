@@ -1277,6 +1277,8 @@ licence_fixlinksignore=Permitir enlaces simbólicos inseguros
 licence_xfsreboot=Su sistema debe reiniciarse para habilitar las cuotas XFS en el sistema de archivos raíz. Hasta que esto se haga, Virtualmin no detectará las cuotas como activas, y será imposible aplicar límites en el uso del disco a los servidores o usuarios virtuales.
 licence_xfsrebootok=Reinicie ahora
 
+scripts_iinstver=Versión del instalador de scripts
+scripts_iinstdate=Última actualización del instalador de scripts
 scripts_iversion2=Versión instalada
 scripts_iservice=Nombre del Servicio
 scripts_emissing=¡El guión no existe!
