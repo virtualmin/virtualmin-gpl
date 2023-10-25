@@ -193,6 +193,7 @@ setup_evirtnoshared=L'adresse IP sélectionnée n'est pas partagée!
 setup_evirt6clash=L'adresse IPv6 de l'interface virtuelle est déjà utilisée
 setup_evirt6clash2=Il n'existe aucune interface pour l'adresse IPv6
 setup_evirt6clash4=L'adresse IPv6 est déjà utilisée par le serveur virtuel $1 
+setup_emax=Votre licence actuelle vous permet de créer jusqu'à <tt>$1</tt> serveurs de niveau supérieur et sous-serveurs combinés. Pour pouvoir créer davantage de serveurs de niveau supérieur ou de sous-serveurs, envisagez de mettre à niveau votre licence en visitant votre page <a target=_blank href='$2'>virtualmin.com / Mon compte / Abonnements</a>.
 setup_eprefix3=Le préfixe du nom d'utilisateur $1 est déjà utilisé par $2 
 setup_eprefix4=Le préfixe du nom d'utilisateur ne peut pas commencer ni se terminer par. ou -
 setup_aliasfailure=.. La configuration de l'alias $1 a échoué : $2 
@@ -425,6 +426,8 @@ edit_hash=Mot de passe haché
 edit_assoc=Dissocier les fonctionnalités
 edit_assocdesc=Ajoutez ou supprimez des fonctionnalités d'un serveur virtuel sans réellement créer ou supprimer des fichiers de configuration réels.
 edit_dnsip2=$1 en externe
+edit_catcert=Configurer le certificat SSL
+edit_catproxy=Paramètres du proxy
 edit_lang=Changer de langue
 edit_filemin=Gestionnaire de fichiers
 edit_filemindesc=Parcourez et modifiez les fichiers dans le répertoire du site Web de ce serveur virtuel.
@@ -1699,6 +1702,7 @@ tmpl_dbs=Modifier les bases de données par défaut
 tmpl_return=modèle
 tmpl_ephpsuexec=Les scripts PHP ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que suEXEC ne soit activé
 tmpl_ephpcmd=Les scripts PHP ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que la commande <tt>php</tt> ne soit installée
+tmpl_ephpvers=La version PHP $1 n'est pas disponible en mode $2. Les seules versions disponibles sont $3
 tmpl_erubycmd=Les scripts Ruby ne peuvent pas être exécutés en tant que propriétaire du domaine à moins que la commande <tt>ruby</tt> ne soit installée
 tmpl_editmode=Modifier la section du modèle:
 tmpl_switch=Changement
@@ -2077,6 +2081,7 @@ licence_xfsrebootok=Redémarrer maintenant
 config_deftheme=Global Webmin par défaut
 config_oldtheme=Ancien thème Webmin
 
+scripts_iversion2=Version installée
 scripts_iservice=Nom du service
 scripts_emissing=Le script n'existe pas!
 scripts_ephpvers2=Ce script ne peut pas être installé, car aucune version de PHP n'a été trouvée
@@ -2795,6 +2800,10 @@ spam_scanner4=Scanner de serveur distant
 spam_lookup_port=Port du démon de recherche de domaine
 spam_elookup_port=Le numéro de port du démon de recherche est un nombre
 spam_elookup_port2=Le port du démon de recherche est déjà utilisé !
+
+cat_web=Configuration Web
+cat_mail=Options de messagerie
+cat_dnsreg=Enregistrement de domaines
 
 dbname_err=Impossible de modifier les noms d'utilisateur de la base de données
 dbname_euser=Nom d'utilisateur manquant ou invalide

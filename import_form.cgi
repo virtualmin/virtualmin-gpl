@@ -47,7 +47,7 @@ print &ui_table_row($text{'import_dom'},
 
 # Parent virtual server
 @doms = sort { $a->{'user'} cmp $b->{'user'} }
-	     grep { $_->{'unix'} } &list_domains();
+	     grep { $_->{'unix'} } &list_visible_domains();
 if (@doms) {
 	print &ui_table_row($text{'migrate_parent'},
 			    &ui_radio("parent_def", 1,

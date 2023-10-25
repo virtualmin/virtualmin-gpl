@@ -66,6 +66,7 @@ setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktiv
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
 setup_edeppostgressub=En topptjener må ha PostgreSQL aktivert hvis noen under-servere gjør det
 setup_epassvalid=Ugyldig passord : $1 
+setup_emax=Din nåværende lisens lar deg opprette opptil <tt>$1</tt> toppnivå- og underservere kombinert. For muligheten til å lage flere toppnivå- eller undertjenere, bør du vurdere å oppgradere lisensen din ved å gå til siden <a target=_blank href='$2'>virtualmin.com / Min konto / Abonnementer</a>.
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
 setup_etmpl=Du har ikke lov til å bruke den valgte malen
 
@@ -154,6 +155,8 @@ edit_hash=Hash passord
 edit_assoc=Koble fra funksjoner
 edit_assocdesc=Legg til eller fjern funksjoner fra en virtuell server uten å opprette eller slette reelle konfigurasjonsfiler.
 edit_dnsip2=$1 eksternt
+edit_catcert=Sett opp SSL-sertifikat
+edit_catproxy=Proxy-innstillinger
 edit_lang=Skifte språk
 edit_filemin=Filbehandler
 edit_filemindesc=Bla gjennom og rediger filer i denne virtuelle serverens webkatalog.
@@ -622,6 +625,7 @@ tmpl_php_sock1=Unix-sokkelfil
 tmpl_php_log=Vil du aktivere PHP-logging?
 tmpl_php_log_path=Standard PHP-loggfil
 tmpl_ephpsuexec=PHP-skript kan ikke kjøres som domeneeier med mindre suEXEC er aktivert
+tmpl_ephpvers=PHP-versjon $1 er ikke tilgjengelig i modus $2. De eneste tilgjengelige versjonene er $3
 tmpl_editmode_web=Nettsted for domene
 tmpl_editmode_ssl=SSL-nettsted for domene
 tmpl_editmode_php=PHP-alternativer
@@ -692,6 +696,7 @@ licence_maxwarn=Med mindre dette serienummeret brukes midlertidig for å migrere
 licence_xfsreboot=Systemet ditt må startes på nytt for å aktivere XFS-kvoter i rotfilsystemet. Inntil dette er gjort, vil Virtualmin ikke oppdage kvoter som aktive, og det vil være umulig å anvende grenser for diskbruk på virtuelle servere eller brukere.
 licence_xfsrebootok=Starte på nytt nå
 
+scripts_iversion2=Versjon installert
 scripts_iservice=Tjenestenavn
 scripts_emissing=Manus eksisterer ikke!
 scripts_ephpvers2=Dette skriptet kan ikke installeres, da ingen PHP-versjoner ble funnet
@@ -871,6 +876,10 @@ spam_scanner4=Ekstern server skanner
 spam_lookup_port=Domenesøk daemon-port
 spam_elookup_port=Lookup daemon portnummer være et nummer
 spam_elookup_port2=Lookup daemon-port er allerede i bruk!
+
+cat_web=Nettkonfigurasjon
+cat_mail=E-postalternativer
+cat_dnsreg=Domeneregistrering
 
 pass_dbsync=Advarsel - å endre dette domenets administrasjonspassord vil også oppdatere passordet som trengs for å koble til databasene.
 

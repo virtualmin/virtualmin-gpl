@@ -326,7 +326,6 @@ setup_evirtclash2=該IP地址的網絡接口不存在
 setup_evirtclash3=該IP地址的網絡接口不是虛擬接口
 setup_evirtclash4=該IP地址已被虛擬服務器$1使用
 setup_evirtnoshared=選擇的IP地址沒有被共享！
-setup_emax=你不能創建超過$1個虛擬服務器
 setup_emaxnone=你不能創建任何虛擬服務器
 setup_eprefix=缺少或無效的郵件用戶名前綴
 setup_eprefix2=指定的用戶名前綴已被使用

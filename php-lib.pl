@@ -93,7 +93,7 @@ local $p = &domain_has_website($d);
 $p || return "Virtual server does not have a website";
 local $tmpl = &get_template($d->{'template'});
 local $oldmode = &get_domain_php_mode($d);
-local @vers = sort { $a->[0] <=> $b->[0] }
+local @vers = sort { &compare_version_numbers($a->[0], $b->[0]) }
 		   &list_available_php_versions($d, $mode);
 
 # Work out the default PHP version for FPM

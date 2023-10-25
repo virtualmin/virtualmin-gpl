@@ -848,6 +848,7 @@ tscripts_version=Wersja
 tscripts_db=Nazwa bazy danych
 
 cat_server=Konfiguracja serwera
+cat_dns=Rejestracja domen
 cat_admin=Opcje administracyjne
 cat_create=Tworzenie sub-serwera
 cat_backup=Kopia zapasowa i przywracanie
@@ -855,7 +856,6 @@ cat_delete=Wyłącz i usuń
 cat_services=Usługi
 cat_logs=Logi i raporty
 cat_webmin=Moduły Webmina
-cat_dns=Rejestracja domen
 cat_links=Własne linki
 cat_add=Dodaj serwery
 cat_setting=Ustawienia systemu

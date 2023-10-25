@@ -222,14 +222,16 @@ sub sort_virtual_server_categories
 {
 my ($arr) = @_;
 my %order = (
-        'objects' => 10,
-        'create'  => 20,
-        'server'  => 30,
-        'dns'     => 40,
-        'web'     => 50,
-        'mail'    => 60,
-        'logs'    => 70,
-        'delete'  => 80,
+        'objects'  => 10,
+        'create'   => 20,
+        'server'   => 30,
+        'dns'      => 40,
+        'web'      => 50,
+        'mail'     => 60,
+        'logs'     => 70,
+        'delete'   => 80,
+        'services' => 90,
+        'dnsreg'   => 100,
     );
 @$arr = sort { $order{$a} <=> $order{$b} } @$arr;
 }

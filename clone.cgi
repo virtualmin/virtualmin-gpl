@@ -15,7 +15,7 @@ if ($d->{'parent'} && !&can_create_sub_servers() ||
 ($dleft, $dreason, $dmax) = &count_domains(
 	$d->{'alias'} ? "aliasdoms" :
 	$d->{'parent'} ? "realdoms" : "topdoms");
-&error(&text('setup_emax', $dmax, $virtualmin_shop_link)) if ($dleft == 0);
+&error(&text('setup_emax', $dmax, $virtualmin_account_subscriptions)) if ($dleft == 0);
 
 # Validate inputs
 $in{'newdomain'} = lc(&parse_domain_name($in{'newdomain'}));

@@ -240,6 +240,7 @@ $rr_upload_tries = $config{'upload_tries'} || 1;
 $denied_ssh_group = "deniedssh";
 
 $virtualmin_link = "https://www.virtualmin.com";
+$virtualmin_account_subscriptions = "$virtualmin_link/account/subscriptions/";
 $virtualmin_shop_link = "$virtualmin_link/shop/";
 $virtualmin_shop_link_cat = "$virtualmin_link/product-category/virtualmin/";
 

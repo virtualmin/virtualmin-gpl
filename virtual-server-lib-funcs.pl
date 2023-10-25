@@ -7273,7 +7273,6 @@ if ($left != 0 && $type ne "aliasdoms") {
 				     (!$_->{'defaultdomain'} || $donedef++) }
 				   &list_domains();
 		if (@doms > $ldoms) {
-			# Hit the licenced max!
 			return (0, 3, $ldoms, 0);
 			}
 		else {
@@ -12711,6 +12710,26 @@ local $v = [ 'time' => $d->{'lastsave'},
 	     'features' => \@config_features ];
 local $ckey = $d->{'id'}."-links-".$base_remote_user;
 local $crv = &get_links_cache($ckey, $v);
+my $modify_plugin_category = sub {
+	my ($l) = @_;
+	if ($l->{'mod'} =~ /virtualmin-(init|oracle|svn|git)/ ||
+	    ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'virtualmin-awstats')) {
+		$l->{'cat'} = 'server';
+		}
+	elsif ($l->{'mod'} =~ /virtualmin-(mailman|mailrelay)/) {
+		$l->{'cat'} = 'mail';
+		}
+	elsif ($l->{'mod'} =~ /virtualmin-(htpasswd|dav)/ ||
+	       ($l->{'cat'} eq 'services' && $l->{'mod'} eq 'virtualmin-nginx')) {
+		$l->{'cat'} = 'web';
+		}
+	elsif ($l->{'mod'} eq 'virtualmin-slavedns') {
+		$l->{'cat'} = 'dns';
+		}
+	elsif ($l->{'mod'} eq 'virtualmin-registrar') {
+		$l->{'cat'} = 'dnsreg';
+		}
+	};
 if ($crv) {
 	return @$crv;
 	}
@@ -12737,6 +12756,7 @@ foreach my $f (@plugins) {
 			if (&foreign_available($l->{'mod'})) {
 				$l->{'title'} ||= $l->{'desc'};
 				$l->{'plugin'} = 1;
+				&$modify_plugin_category($l);
 				push(@rv, $l);
 				}
 			}
@@ -12745,6 +12765,7 @@ foreach my $f (@plugins) {
 		if (&foreign_available($l->{'mod'})) {
 			$l->{'title'} ||= $l->{'desc'};
 			$l->{'plugin'} = 2;
+			&$modify_plugin_category($l);
 			push(@rv, $l);
 			}
 		}
@@ -12757,7 +12778,7 @@ if (!&master_admin() && !&reseller_admin()) {
 		if ($k =~ /^avail_(\S+)$/ &&
 		    &indexof($1, @features) < 0 &&
 		    &indexof($1, @plugins) < 0 &&
-		    $1 ne "phpini") {
+		    $1 !~ /(phpini|webminlog|filemin)/) {
 			my $mod = $1;
 			if (&foreign_available($mod)) {
 				local %minfo = &get_module_info($mod);
