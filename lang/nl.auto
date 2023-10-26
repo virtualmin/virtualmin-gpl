@@ -917,6 +917,8 @@ licence_fixlinksignore=Sta onveilige symbolische links toe
 licence_xfsreboot=Uw systeem moet opnieuw worden opgestart om XFS-quota op het rootbestandssysteem mogelijk te maken. Zolang dit niet is gedaan, detecteert Virtualmin geen quota als actief en is het onmogelijk om limieten voor schijfgebruik op virtuele servers of gebruikers toe te passen.
 licence_xfsrebootok=Herstart nu
 
+scripts_iinstver=Versie van het scriptinstallatieprogramma
+scripts_iinstdate=Scriptinstallatieprogramma laatste update
 scripts_iversion2=Versie geïnstalleerd
 scripts_iservice=Service naam
 scripts_emissing=Script bestaat niet!
@@ -1431,6 +1433,7 @@ redirect_proto=Omleiding inschakelen voor
 redirect_http=Niet-SSL-website
 redirect_https=SSL-website
 redirect_eurlpath=Ontbrekend of ongeldig pad naar bestemmings-URL
+redirect_eurlpath2=Een omleiding van/naar een lokale URL zou een oneindige lus veroorzaken
 redirect_ecode=Ongeldige HTTP-statuscode
 
 dkim_header2=Sleutels en records voor offsite hosting

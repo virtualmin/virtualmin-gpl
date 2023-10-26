@@ -155,6 +155,7 @@ local $rv = { 'name' => $name,
 	      'author' => defined(&$authorfunc) ? &$authorfunc() : undef,
 	      'overlap' => defined(&$overlapfunc) ? &$overlapfunc() : undef,
 	      'dir' => $sdir,
+	      'filename' => $spath,
 	      'source' => $sfiles[0]->[3],
 	      'depends_func' => "script_${name}_depends",
 	      'dbs_func' => "script_${name}_dbs",
@@ -3621,6 +3622,23 @@ my $surl = $sinfo->{'url'} ? $sinfo->{'url'} :
 my $slabel = $fullurl ? $surl : $path;
 my $slink = "<a href='$surl' target=_blank>$slabel</a>";
 return $sinfo->{'url'} ? $slink : "<i>$slink</i>";
+}
+
+# filetimestamp_to_version(filename-path)
+# Given file name, returns versions number like 53.310.48
+sub filetimestamp_to_version {
+    my $filetimestamp = (stat(shift))[9];
+    my $seconds_in_a_day = 86400;
+    my $major = int($filetimestamp / ($seconds_in_a_day * 365));
+    my $minor = int(($filetimestamp % ($seconds_in_a_day * 365)) / $seconds_in_a_day);
+    my $patch = int(100 * (($filetimestamp % $seconds_in_a_day) / $seconds_in_a_day));
+    return "$major.$minor.$patch";
+}
+
+# filetimestamp_to_date(filename-path)
+# Given file name, returns its date like 10/25/2023 12:39 pm
+sub filetimestamp_to_date {
+    return &make_date((stat(shift))[9]);
 }
 
 1;

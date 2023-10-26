@@ -1612,6 +1612,8 @@ scripts_nonew=Für diesen virtuellen Server sind keine Skripte verfügbar.
 scripts_nomatch=Keine Skripte stimmten mit Ihrer Suche überein.
 scripts_ipartial=Teilinstallationsfehler
 scripts_ideleted=Das Verzeichnis wurde manuell gelöscht
+scripts_iinstver=Version des Skript-Installationsprogramms
+scripts_iinstdate=Letztes Update des Skript-Installers
 scripts_iauthor=Autor des Skriptinstallationsprogramms
 scripts_iversion2=Version installiert
 scripts_iservice=Dienstname
@@ -2713,6 +2715,7 @@ redirect_proto=Aktivieren Sie die Umleitung für
 redirect_http=Nicht-SSL-Website
 redirect_https=SSL-Website
 redirect_eurlpath=Fehlender oder ungültiger Ziel-URL-Pfad
+redirect_eurlpath2=Eine Weiterleitung von/zu einer lokalen URL würde eine Endlosschleife verursachen
 redirect_edir=Nicht absolutes Zielverzeichnis
 redirect_ecode=Ungültiger HTTP-Statuscode
 

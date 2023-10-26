@@ -2081,6 +2081,8 @@ licence_xfsrebootok=Redémarrer maintenant
 config_deftheme=Global Webmin par défaut
 config_oldtheme=Ancien thème Webmin
 
+scripts_iinstver=Version du programme d'installation du script
+scripts_iinstdate=Dernière mise à jour du programme d'installation du script
 scripts_iversion2=Version installée
 scripts_iservice=Nom du service
 scripts_emissing=Le script n'existe pas!
@@ -4022,6 +4024,7 @@ redirect_regexp2yes=Uniquement l'URL de destination
 redirect_regexp2exact=Ignorer les sous-répertoires
 redirect_regexp2no=Même sous-répertoire sous l'URL de destination
 redirect_eurlpath=Chemin d'URL de destination manquant ou non valide
+redirect_eurlpath2=Une redirection depuis/vers une URL locale provoquerait une boucle infinie
 redirect_ecode=Code d'état HTTP non valide
 
 newchangelog_title=Nouveau journal des fonctionnalités

@@ -175,15 +175,20 @@ if (!&check_jailkit_support()) {
 			     "jail", 0, [ "width=30%" ]);
 	# Chroot directory
 	my $jail = &get_domain_jailkit($d);
+	my $jail_reset = &inline_html_pro_tip("<br>".&ui_checkbox("jail_clean", 1, 
+		&hlink($text{'limits_jail_clean'}, "limits_jail_clean")), 'jailkit');
+	my $jail_esects = &inline_html_pro_tip(
+		&ui_textbox("jail_esects", $d->{'jail_esects'}, 50), 'jailkit');
+	my $jail_ecmds = &inline_html_pro_tip(
+		&ui_textbox("jail_ecmds", $d->{'jail_ecmds'}, 50), 'jailkit');
 	print &ui_table_row(&hlink($text{'limits_jail'}, "limits_jail"),
 		&ui_radio("jail", $jail ? 1 : 0,
 		  [ [ 1, $text{'yes'}.($jail ? " (<tt>$jail</tt>)" : "") ],
-		    [ 0, $text{'no'} ] ])."<br> ".
-		&ui_checkbox("jail_clean", 1, &hlink($text{'limits_jail_clean'}, "limits_jail_clean")));
-	print &ui_table_row(&hlink($text{'limits_jail2'}, "limits_jail_esects"),
-				    &ui_textbox("jail_esects", $d->{'jail_esects'}, 50));
-	print &ui_table_row(&hlink($text{'limits_jail3'}, "limits_jail_ecmds"),
-				    &ui_textbox("jail_ecmds", $d->{'jail_ecmds'}, 50));
+		    [ 0, $text{'no'} ] ]).$jail_reset);
+	print &ui_table_row(&hlink($text{'limits_jail2'}, "limits_jail_esects"), $jail_esects)
+		if ($jail_esects);
+	print &ui_table_row(&hlink($text{'limits_jail3'}, "limits_jail_ecmds"), $jail_ecmds)
+		if ($jail_ecmds);
 	print &ui_hidden_table_end("jail");
 	}
 

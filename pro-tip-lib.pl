@@ -330,6 +330,36 @@ elsif (!$virtualmin_pro) {
 	}
 }
 
+# inline_html_pro_tip(html, name)
+# Modifies passed HTML element to advertise GPL user Pro features, if allowed
+sub inline_html_pro_tip
+{
+my ($h, $n) = @_;
+my $f = sub {
+	my ($h) = @_;
+	map { $h =~ /<input/ &&
+	      $h =~ s/(<input[^>]*?)\s?(name|value|id|size)=["'][^"']*["'](.*?>)/$1$3/ }
+	      	(0..3);
+	      $h =~ s/(<input[^>]*?)>/$1 disabled>/g;
+	return $h;
+	};
+my $d = sub {
+	my ($h) = @_;
+	return "<span style='filter:grayscale(1);opacity:.7;'>$h</span>";
+	};
+if (!$virtualmin_pro) {
+	if ($config{'hide_pro_tips'} != 1) {
+		$h = &$d(&$f($h));
+		$h .= &$d("&nbsp;&nbsp;<small><a target='_blank' ".
+		            "href='https://virtualmin.com/professional/#${n}' ".
+			    "data-pro='$n'>&#128274;&nbsp;&nbsp;Pro</a></small>");
+		return $h;
+		}
+	return undef;
+	}
+return $h;
+}
+
 # build_pro_scripts_list_for_pro_tip()
 # Builds a list of Virtualmin Pro scripts for inclusion to GPL package
 sub build_pro_scripts_list_for_pro_tip
@@ -361,3 +391,4 @@ my $fh = "SCRIPTS";
 &close_tempfile($fh);
 }
 
+1;

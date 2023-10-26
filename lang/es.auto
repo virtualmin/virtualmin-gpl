@@ -1277,6 +1277,8 @@ licence_fixlinksignore=Permitir enlaces simbólicos inseguros
 licence_xfsreboot=Su sistema debe reiniciarse para habilitar las cuotas XFS en el sistema de archivos raíz. Hasta que esto se haga, Virtualmin no detectará las cuotas como activas, y será imposible aplicar límites en el uso del disco a los servidores o usuarios virtuales.
 licence_xfsrebootok=Reinicie ahora
 
+scripts_iinstver=Versión del instalador de scripts
+scripts_iinstdate=Última actualización del instalador de scripts
 scripts_iversion2=Versión instalada
 scripts_iservice=Nombre del Servicio
 scripts_emissing=¡El guión no existe!
@@ -2348,6 +2350,7 @@ redirect_epath=Ruta URL de origen faltante o no válida
 redirect_epath2=El dominio en la URL de origen no es $1
 redirect_eurl=URL de destino o ruta de URL no válida o faltante
 redirect_eurlpath=Ruta URL de destino faltante o no válida
+redirect_eurlpath2=Una redirección desde/hacia una URL local provocaría un bucle infinito
 redirect_edir=Directorio de destino no absoluto
 redirect_edir3=Falta el directorio de destino $1
 redirect_edir2=El directorio de destino debe ser inferior a $1
