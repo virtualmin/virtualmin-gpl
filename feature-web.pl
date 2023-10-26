@@ -1605,18 +1605,18 @@ return @dirs;
 # ServerAlias lines for alias domains
 sub backup_web
 {
-local ($d, $file, $opts, $homefmt, $increment, $asd, $allopts) = @_;
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts) = @_;
 if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# For an alias domain, just save the old ServerAlias entries
 	&$first_print($text{'backup_apachecp2'});
-	local $alias = &get_domain($d->{'alias'});
-	local ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
+	my $alias = &get_domain($d->{'alias'});
+	my ($pvirt, $pconf) = &get_apache_virtual($alias->{'dom'},
 						     $alias->{'web_port'});
 	if (!$pvirt) {
 		&$second_print($text{'setup_ewebalias'});
 		return 0;
 		}
-	local @aliasnames;
+	my @aliasnames;
 	foreach my $sa (&apache::find_directive_struct("ServerAlias", $pconf)) {
 		foreach my $w (@{$sa->{'words'}}) {
 			if ($w eq $d->{'dom'} ||
@@ -1634,20 +1634,20 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 	return 1;
 	}
 &$first_print($text{'backup_apachecp'});
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_port'});
 if ($virt) {
 	# Save the Apache config
-	local $lref = &read_file_lines($virt->{'file'});
-	local $l;
-	local @adoms = &get_domain_by("alias", $d->{'id'});
-	local %adoms = map { $_->{'dom'}, 1 } @adoms;
+	my $lref = &read_file_lines($virt->{'file'});
+	my $l;
+	my @adoms = &get_domain_by("alias", $d->{'id'});
+	my %adoms = map { $_->{'dom'}, 1 } @adoms;
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		if ($l =~ /^(\s*)ServerAlias\s+(.*)/i) {
 			# Exclude ServerAlias entries for alias domains
 			my ($indent, $sa) = ($1, $2);
-			local @sa = split(/\s+/, $sa);
+			my @sa = split(/\s+/, $sa);
 			@sa = grep { !($adoms{$_} ||
 				       /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
 			next if (!@sa);
@@ -1659,7 +1659,7 @@ if ($virt) {
 	&$second_print($text{'setup_done'});
 
 	# If the Apache log is outside the home, back it up too
-	local $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
+	my $alog = &get_apache_log($d->{'dom'}, $d->{'web_port'});
 	if ($alog && -r $alog &&
 	    !&is_under_directory($d->{'home'}, $alog) &&
 	    !$allopts->{'dir'}->{'dirnologs'}) {
@@ -1678,8 +1678,7 @@ if ($virt) {
 			}
 
 		# Also copy the error log
-		local $elog = &get_apache_log($d->{'dom'},
-					      $d->{'web_port'}, 1);
+		my $elog = &get_apache_log($d->{'dom'}, $d->{'web_port'}, 1);
 		if ($elog && -r $elog && $ok &&
 		    !&is_under_directory($d->{'home'}, $elog)) {
 			($ok, $err) = &copy_write_as_domain_user(
@@ -1692,6 +1691,13 @@ if ($virt) {
 			&$second_print($err);
 			return 0;
 			}
+		}
+
+	# If there is an FPM pool file, back it up
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "fpm") {
+		my $pfile = &get_php_fpm_config_file($d);
+		&copy_write_as_domain_user($d, $pfile, $file."_pool");
 		}
 
 	return 1;
@@ -1914,6 +1920,24 @@ if ($virt) {
 
 	# Handle case where there are DAV directives, but it isn't enabled
 	&remove_dav_directives($d, $virt, $vconf, $conf);
+
+	# If in FPM mode and there is a backup of the pool file, copy
+	# back any custom PHP values
+	my $mode = &get_domain_php_mode($d);
+	if ($mode eq "fpm" && -r $file."_pool") {
+		my $oldconfs = &list_php_fpm_file_config_values($file."_pool");
+		my %done;
+		foreach my $pv (&copyable_fpm_configs($oldconfs)) {
+			$done{$pv->[0]}++;
+			&save_php_fpm_config_value($d, $pv->[0], $pv->[1]);
+			}
+		my $confs = &list_php_fpm_config_values($d);
+		foreach my $pv (&copyable_fpm_configs($confs)) {
+			if (!$done{$pv->[0]}) {
+				&save_php_fpm_config_value($d, $pv->[0], undef);
+				}
+			}
+		}
 
 	&register_post_action(\&restart_apache);
 	$rv = 1;

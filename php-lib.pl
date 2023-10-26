@@ -1269,13 +1269,8 @@ if ($mode eq "fpm") {
 	$dir eq $phd || return "FPM version can only be changed for the top-level directory";
 	if ($ver ne $d->{'php_fpm_version'}) {
 		my $oldlisten = &get_php_fpm_config_value($d, "listen");
-		my @phpvs;
 		my $confs = &list_php_fpm_config_values($d);
-		foreach my $pv (@$confs) {
-			push(@phpvs, $pv)
-				if ($pv->[0] =~ /^(php_value|php_admin_value|env)\[/ ||
-				    $pv->[0] =~ /^pm\./);
-			}
+		my @phpvs = &copyable_fpm_configs($confs);
 		&delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&save_domain($d);
@@ -2530,6 +2525,14 @@ sub list_php_fpm_pool_config_values
 {
 my ($conf, $id) = @_;
 my $file = $conf->{'dir'}."/".$id.".conf";
+return &list_php_fpm_file_config_values($file);
+}
+
+# list_php_fpm_file_config_values(file)
+# Returns an array ref of name/value pairs from an FPM pool file
+sub list_php_fpm_file_config_values
+{
+my ($file) = @_;
 my $lref = &read_file_lines($file, 1);
 my @rv;
 foreach my $l (@$lref) {
@@ -2854,6 +2857,20 @@ my $path = $tmpl->{'php_log_path'} || "logs/php_log";
 $path = &substitute_domain_template($path, $d);
 $path = $d->{'home'}.'/'.$path if ($path !~ /^\//);
 return $path;
+}
+
+# copyable_fpm_configs(&conf)
+# Returns only FPM configs that should be copied when changing version,
+# cloning or restoring a backup
+sub copyable_fpm_configs
+{
+my ($confs) = @_;
+my @rv;
+foreach my $pv (@$confs) {
+	push(@rv, $pv) if ($pv->[0] =~ /^(php_value|php_admin_value|env)\[/ ||
+		           $pv->[0] =~ /^pm\./);
+	}
+return @rv;
 }
 
 1;
