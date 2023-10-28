@@ -716,7 +716,9 @@ if ($oldmasterip eq $oldip && $oldip ne $ip) {
 	foreach my $d (@bdoms) {
 		my $oldslaves = $d->{'dns_slave'};
 		&delete_zone_on_slaves($d);
-		&create_zone_on_slaves($d, $oldslaves);
+		if ($oldslaves) {
+			&create_zone_on_slaves($d, $oldslaves);
+			}
 		$bc++;
 		}
 	}
@@ -2240,7 +2242,9 @@ else {
 
 		# If it used to be on any slaves, enable too
 		$d->{'dns_slave'} = $d->{'old_dns_slave'};
-		&create_zone_on_slaves($d, $d->{'dns_slave'});
+		if ($d->{'dns_slave'}) {
+			&create_zone_on_slaves($d, $d->{'dns_slave'});
+			}
 		delete($d->{'old_dns_slave'});
 		$ok = 1;
 		}
