@@ -344,15 +344,15 @@ my $f = sub {
 	return $h;
 	};
 my $d = sub {
-	my ($h) = @_;
-	return "<span style='filter:grayscale(1);opacity:.7;'>$h</span>";
+	my ($h, $n) = @_;
+	return "<span data-pro-disabled='$n'>$h</span>";
 	};
 if (!$virtualmin_pro) {
 	if ($config{'hide_pro_tips'} != 1) {
-		$h = &$d(&$f($h));
+		$h = &$d(&$f($h), "$n-elem");
 		$h .= &$d("&nbsp;&nbsp;<small><a target='_blank' ".
 		            "href='https://virtualmin.com/professional/#${n}' ".
-			    "data-pro='$n'>&#128274;&nbsp;&nbsp;Pro</a></small>");
+			    "data-pro='$n'>&#128274;&nbsp;&nbsp;<span>Pro</span></a></small>", "$n-link");
 		return $h;
 		}
 	return undef;
