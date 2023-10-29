@@ -1141,9 +1141,16 @@ while(<OUT>) {
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
 		$rv{'modulus'} .= $1;
 		}
+	# RSA exponent
 	if (/Exponent:\s*(\d+)/) {
 		$rv{'exponent'} = $1;
 		$inmodulus = 0;
+		}
+	# ECC properties
+	elsif (/(ASN1\s+OID):\s*(\S+)/ || /(NIST\s+CURVE):\s*(\S+)/) {
+		$inmodulus = 0;
+		my $comma = $rv{'exponent'} ? ", " : "";
+		$rv{'exponent'} .= "$comma$1: $2";
 		}
 	}
 close(OUT);
