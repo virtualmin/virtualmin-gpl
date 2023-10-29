@@ -1129,10 +1129,13 @@ while(<OUT>) {
 				}
 			}
 		}
-	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/EC\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	elsif (/EC\s+Public\s+Key:\s+\((\d+)\s*bit/) {
+		$rv{'size'} = $1;
+		}
+	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
 	if (/Modulus\s*\(.*\):/ || /Modulus:/ || /pub:/) {
