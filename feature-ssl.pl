@@ -1135,7 +1135,7 @@ while(<OUT>) {
 	if (/EC\s+Public\s+Key:\s+\((\d+)\s+bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
+	if (/Modulus\s*\(.*\):/ || /Modulus:/ || /pub:/) {
 		$inmodulus = 1;
 		}
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
