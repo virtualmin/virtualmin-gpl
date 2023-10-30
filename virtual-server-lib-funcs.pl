@@ -11659,7 +11659,7 @@ if ($ENV{'HTTPS'} eq 'ON') {
 	local $certfile = $miniserv{'certfile'} || $miniserv{'keyfile'};
 	if ($certfile) {
 		local $cert = &cert_file_info($certfile);
-		if ($cert->{'size'} && $cert->{'size'} < 2048) {
+		if ($cert->{'algo'} eq 'rsa' && $cert->{'size'} && $cert->{'size'} < 2048) {
 			# Too small!
 			$small = $cert;
 			}
