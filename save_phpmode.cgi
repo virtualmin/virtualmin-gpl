@@ -18,12 +18,20 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	$dom_limits = &get_domain_resource_limits($d);
 	}
 if ($can) {
+	# Save sanity check option if set
+	my $nophpsanity_check = $in{'nophpsanity_check'};
+	$d->{'phpnosanity_check'} = $nophpsanity_check;
+
 	# Check for option clashes
 	if (!$d->{'alias'} && $can && !$dom_limits->{'procs'}) {
-		if (defined($in{'children_def'}) && !$in{'children_def'} &&
-		    ($in{'children'} < 1 ||
-		     $in{'children'} > $max_php_fcgid_children)) {
-			&error(&text('phpmode_echildren', $max_php_fcgid_children));
+		if (defined($in{'children_def'}) && !$in{'children_def'}) {
+			if ($in{'children'} < 1) {
+				&error($text{'phpmode_echildren'});
+				}
+			elsif (!$nophpsanity_check &&
+			        $in{'children'} > $max_php_fcgid_children) {
+				&error(&text('phpmode_echildren2', $max_php_fcgid_children));
+				}
 			}
 		}
 	if (!$d->{'alias'}) {
