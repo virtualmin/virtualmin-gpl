@@ -3913,9 +3913,9 @@ validate_efcgiwrapinit=Non esiste alcuna azione di avvio del server FCGIwrap!
 validate_efcgiwraprun=Il server FCGIwrap per questo dominio non è in esecuzione
 validate_ewebphpconfig=Sono stati rilevati errori di configurazione di PHP nella versione $1 : $2 
 validate_ewebphpfpmport=Rilevato errore di configurazione PHP FPM : $1 
-validate_ewebphpfpmport2=La porta PHP-FPM /socket <tt>$1</tt> viene utilizzata anche da <tt>$2</tt>
-validate_ewebphpfpmport3=La porta PHP-FPM /socket <tt>$1</tt> viene utilizzata anche in un altro file di configurazione del pool <tt>$2</tt>
-validate_ewebphpfpmport4=Anche la porta PHP-FPM /socket <tt>$1</tt> viene utilizzata erroneamente da <tt>$2</tt>
+validate_ewebphpfpmport2=L'endpoint PHP-FPM <tt>$1</tt> viene utilizzato anche da <tt>$2</tt>
+validate_ewebphpfpmport3=L'endpoint PHP-FPM <tt>$1</tt> viene utilizzato anche in un altro file di configurazione del pool <tt>$2</tt>
+validate_ewebphpfpmport4=Anche l'endpoint PHP-FPM <tt>$1</tt> viene utilizzato erroneamente da <tt>$2</tt>
 validate_ewebuid=L'utente suEXEC è impostato su $1, ma l'UID del server virtuale è $2
 validate_ewebgid=Il gruppo suEXEC è impostato su $1, ma il GID del server virtuale è $2
 validate_ewebdir=Blocco &lt;Directory&gt; di Apache mancante per la directory HTML $1 
@@ -4260,7 +4260,7 @@ phpmode_phpinfo_show=Fare clic per visualizzare le informazioni sull'ambiente PH
 phpmode_phpinfo_show_dir=Fare clic per visualizzare le informazioni sull'ambiente PHP sul server nella <tt>$1</tt> utilizzando la funzione <tt>phpinfo()</tt>
 phpmode_phpinfo_ecannot=Non sei autorizzato a visualizzare le informazioni PHP per questo server virtuale
 phpmode_phpinfo_dir_ecannot_dir=Questo server virtuale non ha richiesto la directory $1 in $2
-phpmode_fixport=Correzione della configurazione della porta/socket PHP-FPM ..
+phpmode_fixport=Correzione della configurazione dell'endpoint PHP-FPM ..
 
 website_header=Opzioni del sito web
 

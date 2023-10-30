@@ -4244,9 +4244,9 @@ validate_efcgiwrapinit=Nie istnieje żadna akcja uruchamiania serwera FCGIwrap!
 validate_efcgiwraprun=Serwer FCGIwrap dla tej domeny nie działa
 validate_ewebphpconfig=Znaleziono błędy konfiguracji PHP w wersji $1 : $2 
 validate_ewebphpfpmport=Znaleziono błąd konfiguracji PHP FPM : $1 
-validate_ewebphpfpmport2=Port PHP-FPM /socket <tt>$1</tt> jest również używany przez <tt>$2</tt>
-validate_ewebphpfpmport3=Port PHP-FPM /socket <tt>$1</tt> jest również używany w innym pliku konfiguracyjnym puli <tt>$2</tt>
-validate_ewebphpfpmport4=Port PHP-FPM /socket <tt>$1</tt> jest również niepoprawnie używany przez <tt>$2</tt>
+validate_ewebphpfpmport2=Punkt końcowy PHP-FPM <tt>$1</tt> jest również używany przez <tt>$2</tt>
+validate_ewebphpfpmport3=Punkt końcowy PHP-FPM <tt>$1</tt> jest również używany w innym pliku konfiguracyjnym puli <tt>$2</tt>
+validate_ewebphpfpmport4=Punkt końcowy PHP-FPM <tt>$1</tt> jest również niepoprawnie używany przez <tt>$2</tt>
 validate_ewebuid=Użytkownik suEXEC jest ustawiony na $1, ale UID wirtualnego serwera to $2 
 validate_ewebgid=Grupa suEXEC jest ustawiona na $1, ale GID wirtualnego serwera to $2 
 validate_ewebdir=Brakujący blok &lt;Directory&gt; Apache dla katalogu HTML $1 
@@ -4579,7 +4579,7 @@ phpmode_phpinfo_show=Kliknij, aby wyświetlić informacje o środowisku PHP na T
 phpmode_phpinfo_show_dir=Kliknij, aby wyświetlić informacje o środowisku PHP na serwerze w <tt>$1</tt> za pomocą funkcji <tt>phpinfo()</tt>
 phpmode_phpinfo_ecannot=Nie masz uprawnień do przeglądania informacji PHP dla tego serwera wirtualnego
 phpmode_phpinfo_dir_ecannot_dir=Ten wirtualny serwer nie zażądał katalogu $1 w $2 
-phpmode_fixport=Naprawianie konfiguracji portu/gniazda PHP-FPM ..
+phpmode_fixport=Naprawianie konfiguracji punktu końcowego PHP-FPM ..
 
 website_header=Opcje witryny
 

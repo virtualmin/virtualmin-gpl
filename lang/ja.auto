@@ -5031,9 +5031,9 @@ validate_efcgiwrapinit=FCGIwrap サーバーのブートアップ アクショ�
 validate_efcgiwraprun=このドメインの FCGIwrap サーバーは実行されていません
 validate_ewebphpconfig=PHP構成エラーがバージョン $1で見つかりました： $2
 validate_ewebphpfpmport=PHP FPM構成エラーが見つかりました： $1
-validate_ewebphpfpmport2=PHP-FPM ポート/socket <tt>$1</tt>は<tt>$2</tt>によっても使用されています
-validate_ewebphpfpmport3=PHP-FPM ポート/socket <tt>$1</tt>は別のプール構成ファイル<tt>$2</tt>でも使用されています
-validate_ewebphpfpmport4=PHP-FPM ポート/socket <tt>$1</tt>も<tt>$2</tt>によって誤って使用されています
+validate_ewebphpfpmport2=PHP-FPM エンドポイント<tt>$1</tt>は<tt>$2</tt>によっても使用されています
+validate_ewebphpfpmport3=PHP-FPM エンドポイント<tt>$1</tt>は別のプール構成ファイル<tt>$2</tt>でも使用されています
+validate_ewebphpfpmport4=PHP-FPM エンドポイント<tt>$1</tt>も<tt>$2</tt>によって誤って使用されています
 validate_ewebuid=suEXECユーザーは $1に設定されていますが、仮想サーバーのUIDは $2です
 validate_ewebgid=suEXECグループは $1に設定されていますが、仮想サーバーのGIDは $2です。
 validate_ewebdir=Apache＆lt; Directory＆gt;がありませんHTMLディレクトリ $1のブロック
@@ -5458,7 +5458,7 @@ phpmode_phpinfo_show=<tt>phpinfo()</tt>関数を使用してサーバー上のPH
 phpmode_phpinfo_show_dir=クリックして、 <tt>phpinfo()</tt>関数<tt>$1</tt>ディレクトリの下にあるPHP環境に関する情報を表示します。
 phpmode_phpinfo_ecannot=この仮想サーバーのPHP情報を表示することは許可されていません
 phpmode_phpinfo_dir_ecannot_dir=この仮想サーバーは、 $2の下の $1ディレクトリを要求していません
-phpmode_fixport=PHP-FPM ポート/ソケット構成を修正しています。
+phpmode_fixport=PHP-FPM エンドポイント構成を修正しています。
 
 website_header=ウェブサイトのオプション
 

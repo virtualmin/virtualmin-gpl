@@ -2293,9 +2293,9 @@ validate_efcgiwrapinit=不存在 FCGIwrap 服务器启动操作！
 validate_efcgiwraprun=该域的 FCGIwrap 服务器未运行
 validate_ewebphpconfig=在版本 $1中发现PHP配置错误： $2
 validate_ewebphpfpmport=找到PHP FPM配置错误： $1
-validate_ewebphpfpmport2=PHP-FPM 端口/socket <tt>$1</tt>也被<tt>$2</tt>使用
-validate_ewebphpfpmport3=PHP-FPM 端口/socket <tt>$1</tt>也在另一个池配置文件<tt>$2</tt>中使用
-validate_ewebphpfpmport4=PHP-FPM 端口/socket <tt>$1</tt>也被<tt>$2</tt>错误地使用
+validate_ewebphpfpmport2=PHP-FPM 端点<tt>$1</tt>也被<tt>$2</tt>使用
+validate_ewebphpfpmport3=PHP-FPM 端点<tt>$1</tt>也在另一个池配置文件<tt>$2</tt>中使用
+validate_ewebphpfpmport4=PHP-FPM 端点<tt>$1</tt>也被<tt>$2</tt>错误地使用
 validate_ewebuid=suEXEC 用户设置为 $1，但虚拟服务器的 UID 为 $2
 validate_ewebgid=suEXEC 组设置为 $1，但虚拟服务器的 GID 为 $2
 validate_ewebdir=HTML目录 $1缺少Apache &lt;Directory&gt;块
@@ -2509,7 +2509,7 @@ phpmode_phpinfo_show=<tt>phpinfo()</tt>函数在您的服务器上显示有关 P
 phpmode_phpinfo_show_dir=单击以使用<tt>phpinfo()</tt>函数<tt>$1</tt>目录下的服务器上显示有关 PHP 环境的信息
 phpmode_phpinfo_ecannot=您无权查看此虚拟服务器的 PHP 信息
 phpmode_phpinfo_dir_ecannot_dir=此虚拟服务器没有请求 $2 下的 $1 目录
-phpmode_fixport=修复 PHP-FPM 端口/套接字配置 ..
+phpmode_fixport=修复 PHP-FPM 端点配置 ..
 
 website_header=网站选项
 

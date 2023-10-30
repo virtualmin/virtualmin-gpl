@@ -5031,9 +5031,9 @@ validate_efcgiwrapinit=Neexistuje žiadna akcia spustenia servera FCGIwrap!
 validate_efcgiwraprun=Server FCGIwrap pre túto doménu nie je spustený
 validate_ewebphpconfig=Chyby konfigurácie PHP sa našli vo verzii $1 : $2 
 validate_ewebphpfpmport=Našla sa chyba konfigurácie PHP FPM : $1
-validate_ewebphpfpmport2=PHP-FPM port /socket <tt>$1</tt> používa aj <tt>$2</tt>
-validate_ewebphpfpmport3=Port PHP-FPM /socket <tt>$1</tt> sa používa aj v inom konfiguračnom súbore fondu <tt>$2</tt>
-validate_ewebphpfpmport4=PHP-FPM port /socket <tt>$1</tt> tiež nesprávne používa <tt>$2</tt>
+validate_ewebphpfpmport2=Koncový bod PHP-FPM <tt>$1</tt> používa aj <tt>$2</tt>
+validate_ewebphpfpmport3=Koncový bod PHP-FPM <tt>$1</tt> sa používa aj v inom konfiguračnom súbore fondu <tt>$2</tt>
+validate_ewebphpfpmport4=<tt>$2</tt> <tt>$1</tt> 1
 validate_ewebuid=Používateľ suEXEC je nastavený na $1, ale UID virtuálneho servera je $2
 validate_ewebgid=skupina suEXEC je nastavená na $1, ale GID virtuálneho servera je $2
 validate_ewebdir=Chýba Apache &lt;Adresár&gt; blok pre HTML adresár $1
@@ -5458,7 +5458,7 @@ phpmode_phpinfo_show=Kliknutím zobrazíte informácie o prostredí PHP na vašo
 phpmode_phpinfo_show_dir=Kliknutím zobrazíte informácie o prostredí PHP na vašom serveri v <tt>$1</tt> pomocou funkcie <tt>phpinfo()</tt>
 phpmode_phpinfo_ecannot=Nemáte povolené zobrazovať informácie o PHP pre tento virtuálny server
 phpmode_phpinfo_dir_ecannot_dir=Tento virtuálny server nepožaduje adresár $1 pod $2
-phpmode_fixport=Oprava konfigurácie PHP-FPM portu/zásuvky ..
+phpmode_fixport=Oprava konfigurácie koncového bodu PHP-FPM ..
 
 website_header=Možnosti webovej stránky
 
