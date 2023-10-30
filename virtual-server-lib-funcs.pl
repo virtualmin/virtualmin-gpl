@@ -11670,15 +11670,16 @@ if ($small) {
 	local $msg = $small->{'issuer_c'} eq $small->{'c'} &&
 		     $small->{'issuer_o'} eq $small->{'o'} ?
 			'licence_smallself' : 'licence_smallcert';
-	$alert_text .= "<b>".&text($msg,
+	$alert_text .= &text($msg,
 			   $small->{'size'},
-			   $small->{'cn'},
-			   $small->{'c'} || $small->{'o'},
-			   $small->{'issuer_c'} || $small->{'issuer_o'},
-			   )."</b><p>\n";
+			   "<tt>$small->{'cn'}</tt>",
+			   $small->{'issuer_o'},
+			   $small->{'issuer_cn'},
+			   )."<p>\n";
 	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi");
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
-					'create' : 'csr');
+					'create' : $small->{'issuer_o'} =~ /let.*?encrypt/i ?
+							'lets' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
