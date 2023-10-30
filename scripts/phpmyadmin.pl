@@ -19,18 +19,30 @@ return "A browser-based MySQL database management interface";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "5.2.1", "4.9.11" );
+return ( "5.2.1", "4.9.11", "6.0.0" );
 }
 
 sub script_phpmyadmin_version_desc
 {
 local ($ver) = @_;
-return &compare_versions($ver, "5") >= 0 ? "$ver" : "$ver (LTS)";
+return &compare_versions($ver, "6") >= 0 ? "$ver (devel)" :
+       &compare_versions($ver, "5") >= 0 ? "$ver" : "$ver (LTS)";
 }
 
 sub script_phpmyadmin_release
 {
 return 10;		# To fix MySQL version check
+}
+
+sub script_phpmyadmin_can_upgrade
+{
+local ($sinfo, $newver) = @_;
+if (&compare_versions($newver, '>=', 6) &&
+    &compare_versions($sinfo->{'version'}, '<=', 5)) {
+	# Cannot upgrade 5 -> 6 devel
+	return 0;
+	}
+return 1;
 }
 
 sub script_phpmyadmin_category
@@ -194,25 +206,28 @@ return undef;
 # containing a name, filename and URL
 sub script_phpmyadmin_files
 {
-local ($d, $ver, $opts, $upgrade) = @_;
-local $origver = $ver;
-if (&compare_versions($ver, 2.2) < 0) {
-	$ver = $ver."-php";
+my ($d, $ver, $opts, $upgrade) = @_;
+my $origver = $ver;
+my $url;
+if (&compare_versions($ver, 6) >= 0) {
+	# Fix version number to match
+	# snapshot, i.e. 6.0.0 to 6.0
+	$ver =~ s/\.\d+$//;
+	$ver = $ver."+snapshot";
 	}
-elsif (&compare_versions($ver, "2.9.1.1") >= 0) {
-	if ($opts->{'all_langs'}) {
-		$ver = $ver."-all-languages";
-		}
-	else {
-		$ver = $ver."-english";
-		}
+if ($opts->{'all_langs'}) {
+	$ver = $ver."-all-languages";
 	}
-elsif (&compare_versions($ver, "2.10.0") >= 0) {
-	$ver = $ver."--all-languages-utf-8-only";
+else {
+	$ver = $ver."-english";
+	}
+$url = "https://files.phpmyadmin.net/phpMyAdmin/$origver/phpMyAdmin-$ver.zip";
+if (&compare_versions($ver, 6) >= 0) {
+	$url = "https://files.phpmyadmin.net/snapshots/phpMyAdmin-$ver.tar.gz";
 	}
 local @files = ( { 'name' => "source",
 	   'file' => "phpMyAdmin-$ver.zip",
-	   'url' => "https://files.phpmyadmin.net/phpMyAdmin/$origver/phpMyAdmin-$ver.zip" } );
+	   'url' => $url } );
 return @files;
 }
 
@@ -240,16 +255,15 @@ if ($upgrade && $ver >= 4) {
 	}
 
 # Extract tar file to temp dir and copy to target
-local $verdir = &compare_versions($ver, "2.9.1.1") >= 0 ?
-	"phpMyAdmin-$ver-*" : "phpMyAdmin-$ver";
 local $temp = &transname();
 local $err = &extract_script_archive($files->{'source'}, $temp, $d,
-                                     $opts->{'dir'}, $verdir);
+                                     $opts->{'dir'}, "phpMyAdmin*");
 $err && return (0, "Failed to extract source : $err");
 local $cfile = "$opts->{'dir'}/config.inc.php";
 if (!-r $cfile) {
 	local $cdef = "$opts->{'dir'}/config.default.php";
 	$cdef = "$opts->{'dir'}/libraries/config.default.php" if (!-r $cdef);
+	$cdef = "$opts->{'dir'}/config.sample.inc.php" if (!-r $cdef);
 	&run_as_domain_user($d, "cp ".quotemeta($cdef)." ".quotemeta($cfile));
 	}
 -r $cfile || return (0, "Failed to copy config file");
