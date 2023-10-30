@@ -189,8 +189,8 @@ if (&can_php_error_log($mode)) {
 
 if ($can) {
 	# Save PHP-FPM process manager mode
-	if ($mode eq 'fpm') {
-		my $fpmtype = $in{'fpmtype'};
+	my $fpmtype = $in{'fpmtype'};
+	if ($mode eq 'fpm' && $fpmtype) {
 		$fpmtype =~ /^(dynamic|static|ondemand)$/ ||
 			&error($text{'phpmode_efpmtype'});
 		my $fpmtype_curr = &get_domain_php_fpm_mode($d);
