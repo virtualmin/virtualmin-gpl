@@ -11676,7 +11676,12 @@ if ($small) {
 			   $small->{'issuer_o'},
 			   $small->{'issuer_cn'},
 			   )."<p>\n";
-	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi");
+	my $formlink = "@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi";
+	my $domid = &get_domain_by('dom', $small->{'cn'});
+	if ($domid) {
+		$formlink = "@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$domid";
+		}
+	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
 					'create' : $small->{'issuer_o'} =~ /let.*?encrypt/i ?
 							'lets' : 'csr');
