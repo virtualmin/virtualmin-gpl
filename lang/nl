@@ -4286,7 +4286,6 @@ phpmode_emodsuexec=De <b>Uitvoeren van CGI scripts als domein eigenaar</b> optie
 phpmode_rubymode=Ruby script executie mode
 phpmode_mod_ruby=Apache <tt>mod_ruby</tt> (uitvoeren als Apache gebruiker)
 phpmode_noruby=Ruby scripts uitgeschakeld
-phpmode_echildren=Aantal PHP sub-processen moet zitten tussen 1 en $1
 phpmode_maxtime=Maximum PHP script uitvoer tijd
 phpmode_maxing=Verander de maximum PHP script uitvoer tijd naar $1 seconden ..
 phpmode_nomax=Verwijder limiet van maximum PHP script uitvoer tijd ..

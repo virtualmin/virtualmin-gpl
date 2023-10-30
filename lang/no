@@ -4530,7 +4530,6 @@ phpmode_emodsuexec=Innstillingen <b>Kjør CGI script som domene-eier</b> kan ikk
 phpmode_rubymode=Eksekverings-modus for Ruby script
 phpmode_mod_ruby=Apache <tt>mod_ruby</tt> (kjør som Apaches bruker)
 phpmode_noruby=Ruby scripts deaktivert
-phpmode_echildren=Antall PHP under-prosesser må være mellmo 1 og $1
 phpmode_maxtime=Maks. kjøretid for PHP script
 phpmode_maxing=Endre maks kjøretid for PHP script til $1 sekunder ..
 phpmode_nomax=Fjerner begrensing på maks kjøretid for PHP script ..
