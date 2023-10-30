@@ -213,7 +213,7 @@ if ($can) {
 	# Save PHP fcgi children
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
 	if (defined($in{'children_def'}) && !$dom_limits->{'procs'} &&
-	    $nc != &get_domain_php_children($d) && $can) {
+	    $nc != &get_domain_php_children($d) && $can && $mode ne "none") {
 		&$first_print($nc || $mode eq "fpm" ?
 		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
 		    $text{'phpmode_nokids'});
