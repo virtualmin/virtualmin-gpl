@@ -3277,10 +3277,8 @@ if ($in{'web_phpchildren_def'} ||
 	$tmpl->{'web_phpchildren'} = undef;
 	}
 else {
-	if ($in{'web_phpchildren'} < 1 ||
-	    $in{'web_phpchildren'} > $max_php_fcgid_children) {
-		&error(&text('phpmode_echildren',
-			     $max_php_fcgid_children));
+	if ($in{'web_phpchildren'} < 1) {
+		&error($text{'phpmode_echildren'});
 		}
 	$tmpl->{'web_phpchildren'} = $in{'web_phpchildren'};
 	}
