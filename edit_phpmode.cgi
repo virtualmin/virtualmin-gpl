@@ -64,7 +64,15 @@ if ($can) {
 				      [ map { [ $_, &$dmode($_) ] }
 					    @modes ]));
 		}
-
+	# FPM mode
+	if ($mode eq 'fpm') {
+		print &ui_table_row(
+			&hlink($text{'phpmode_fpmtype'}, "phpmode_fpmtype"),
+			&ui_radio("fpmtype", &get_domain_php_fpm_mode($d),
+				[ ['dynamic', '<tt>dynamic</tt>'],
+				  ['static', '<tt>static</tt>'],
+				  ['ondemand', '<tt>ondemand</tt>'] ] ));
+		}
 	# PHP fcgi sub-processes
 	if (!$d->{'alias'} && $can &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {

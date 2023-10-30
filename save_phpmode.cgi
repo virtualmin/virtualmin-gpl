@@ -188,6 +188,20 @@ if (&can_php_error_log($mode)) {
 	}
 
 if ($can) {
+	# Save PHP-FPM process manager mode
+	if ($mode eq 'fpm') {
+		my $fpmtype = $in{'fpmtype'};
+		$fpmtype =~ /^(dynamic|static|ondemand)$/ ||
+			&error($text{'phpmode_efpmtype'});
+		my $fpmtype_curr = &get_domain_php_fpm_mode($d);
+		if ($fpmtype ne $fpmtype_curr) {
+			&$first_print(&text('phpmode_fpmtypeing', $fpmtype));
+			&save_domain_php_fpm_mode($d, $fpmtype);
+			&$second_print($text{'setup_done'});
+			$anything++;
+			}
+		}
+
 	# Save PHP fcgi children
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
 	if (defined($in{'children_def'}) && !$dom_limits->{'procs'} &&

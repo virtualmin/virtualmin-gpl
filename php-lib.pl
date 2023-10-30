@@ -1560,6 +1560,15 @@ local $sock = &phpini::find_value("mysql.default_socket", $gconf);
 return $sock;
 }
 
+# get_domain_php_fpm_mode(&domain)
+# Get the PHP-FPM process manager mode for some domain
+sub get_domain_php_fpm_mode
+{
+my ($d) = @_;
+my $pm = &get_php_fpm_config_value($d, "pm");
+return $pm || 'dynamic';
+}
+
 # get_domain_php_children(&domain)
 # For a domain using fcgi to run PHP, returns the number of child processes.
 # Returns 0 if not set, -1 if the file doesn't even exist, -2 if not supported
@@ -1607,6 +1616,14 @@ elsif ($mode eq "fpm") {
 else {
 	return -2;
 	}
+}
+
+# save_domain_php_fpm_mode(&domain, mode)
+# Save the PHP-FPM process manager mode for some domain
+sub save_domain_php_fpm_mode
+{
+my ($d, $modetype) = @_;
+&save_php_fpm_config_value($d, 'pm', $modetype);
 }
 
 # save_domain_php_children(&domain, children, [no-writable])
