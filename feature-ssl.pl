@@ -1129,21 +1129,31 @@ while(<OUT>) {
 				}
 			}
 		}
-	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/EC\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	elsif (/EC\s+Public\s+Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
+	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
+		$rv{'size'} = $1;
+		}
+	if (/Modulus\s*\(.*\):/ || /Modulus:/ || /pub:/) {
 		$inmodulus = 1;
 		}
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
 		$rv{'modulus'} .= $1;
 		}
+	# RSA exponent
 	if (/Exponent:\s*(\d+)/) {
 		$rv{'exponent'} = $1;
 		$inmodulus = 0;
+		}
+	# ECC properties
+	elsif (/(ASN1\s+OID):\s*(\S+)/ || /(NIST\s+CURVE):\s*(\S+)/) {
+		$inmodulus = 0;
+		my $comma = $rv{'exponent'} ? ", " : "";
+		$rv{'exponent'} .= "$comma$1: $2";
 		}
 	}
 close(OUT);
