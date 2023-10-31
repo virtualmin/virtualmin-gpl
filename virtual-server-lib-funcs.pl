@@ -11683,7 +11683,7 @@ if ($small) {
 		}
 	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
-					'create' : $small->{'issuer_o'} =~ /let.*?encrypt/i ?
+					'create' : &is_letsencrypt_cert($small) ?
 							'lets' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
 				$text{'licence_newcert'} :
