@@ -2908,7 +2908,7 @@ foreach my $d (&list_domains()) {
 			      join(", ", @$dnames), $err);
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
-		$cert =~ s/\r?\n/\t/g;
+		$err =~ s/\r?\n/\t/g;
 		$d->{'letsencrypt_last_err'} = $err;
 		&save_domain($d);
 		}
