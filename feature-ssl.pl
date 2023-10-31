@@ -1129,6 +1129,10 @@ while(<OUT>) {
 				}
 			}
 		}
+	# Try to detect key algorithm
+	if (/Key\s+Algorithm:.*?(rsa|ec)[EP]/) {
+		$rv{'algo'} = $1;
+		}
 	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
@@ -1138,8 +1142,15 @@ while(<OUT>) {
 	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/Modulus\s*\(.*\):/ || /Modulus:/ || /pub:/) {
+	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
 		$inmodulus = 1;
+		# RSA algo
+		$rv{'algo'} = "rsa" if (!$rv{'algo'});
+		}
+	elsif (/pub:/) {
+		$inmodulus = 1;
+		# ECC algo
+		$rv{'algo'} = 'ec' if (!$rv{'algo'});
 		}
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
 		$rv{'modulus'} .= $1;

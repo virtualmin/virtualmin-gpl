@@ -11659,7 +11659,7 @@ if ($ENV{'HTTPS'} eq 'ON') {
 	local $certfile = $miniserv{'certfile'} || $miniserv{'keyfile'};
 	if ($certfile) {
 		local $cert = &cert_file_info($certfile);
-		if ($cert->{'size'} && $cert->{'size'} < 2048) {
+		if ($cert->{'algo'} eq 'rsa' && $cert->{'size'} && $cert->{'size'} < 2048) {
 			# Too small!
 			$small = $cert;
 			}
@@ -11670,15 +11670,21 @@ if ($small) {
 	local $msg = $small->{'issuer_c'} eq $small->{'c'} &&
 		     $small->{'issuer_o'} eq $small->{'o'} ?
 			'licence_smallself' : 'licence_smallcert';
-	$alert_text .= "<b>".&text($msg,
+	$alert_text .= &text($msg,
 			   $small->{'size'},
-			   $small->{'cn'},
-			   $small->{'c'} || $small->{'o'},
-			   $small->{'issuer_c'} || $small->{'issuer_o'},
-			   )."</b><p>\n";
-	$alert_text .= &ui_form_start("@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi");
+			   "<tt>$small->{'cn'}</tt>",
+			   $small->{'issuer_o'},
+			   $small->{'issuer_cn'},
+			   )."<p>\n";
+	my $formlink = "@{[&get_webprefix_safe()]}/webmin/edit_ssl.cgi";
+	my $domid = &get_domain_by('dom', $small->{'cn'});
+	if ($domid) {
+		$formlink = "@{[&get_webprefix_safe()]}/$module_name/cert_form.cgi?dom=$domid";
+		}
+	$alert_text .= &ui_form_start($formlink);
 	$alert_text .= &ui_hidden("mode", $msg eq 'licence_smallself' ?
-					'create' : 'csr');
+					'create' : &is_letsencrypt_cert($small) ?
+							'lets' : 'csr');
 	$alert_text .= &ui_submit($msg eq 'licence_smallself' ?
 				$text{'licence_newcert'} :
 				$text{'licence_newcsr'});
