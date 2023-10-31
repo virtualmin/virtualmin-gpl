@@ -223,7 +223,7 @@ else {
 	}
 $url = "https://files.phpmyadmin.net/phpMyAdmin/$origver/phpMyAdmin-$ver.zip";
 if (&compare_versions($ver, 6) >= 0) {
-	$url = "https://files.phpmyadmin.net/snapshots/phpMyAdmin-$ver.tar.gz";
+	$url = "https://files.phpmyadmin.net/snapshots/phpMyAdmin-$ver.zip";
 	}
 local @files = ( { 'name' => "source",
 	   'file' => "phpMyAdmin-$ver.zip",
