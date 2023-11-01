@@ -64,7 +64,15 @@ if ($can) {
 				      [ map { [ $_, &$dmode($_) ] }
 					    @modes ]));
 		}
-
+	# FPM mode
+	print &ui_table_row(
+		&hlink($text{'phpmode_fpmtype'}, "phpmode_fpmtype"),
+		&ui_radio("fpmtype", &get_domain_php_fpm_mode($d),
+			[ ['dynamic', '<tt>dynamic</tt>'],
+				['static', '<tt>static</tt>'],
+				['ondemand', '<tt>ondemand</tt>'] ] ),
+				undef, undef, ['data-row-name="phpmode"'.
+				               ($mode eq 'fpm' ? '' : ' style="display: none;"')]);
 	# PHP fcgi sub-processes
 	if (!$d->{'alias'} && $can &&
 	    ($p eq 'web' || &plugin_defined($p, "feature_get_web_php_children"))) {
@@ -80,7 +88,9 @@ if ($can) {
 					    &ui_opt_textbox("children", $children > 0 ? $children : '', 5,
 					        $mode eq 'fcgid' ?
 					        $text{'tmpl_phpchildrenauto'} : 
-					        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())));
+					        &text('tmpl_phpchildrennone', &get_php_max_childred_allowed())).
+						" &nbsp; ".&ui_checkbox("nophpsanity_check", 1, $text{'phpmode_sanitycheck'},
+					                $d->{'phpnosanity_check'}));
 				}
 			}
 		}

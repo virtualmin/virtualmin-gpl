@@ -18,12 +18,20 @@ if (defined(&supports_resource_limits) && &supports_resource_limits()) {
 	$dom_limits = &get_domain_resource_limits($d);
 	}
 if ($can) {
+	# Save sanity check option if set
+	my $nophpsanity_check = $in{'nophpsanity_check'};
+	$d->{'phpnosanity_check'} = $nophpsanity_check;
+
 	# Check for option clashes
 	if (!$d->{'alias'} && $can && !$dom_limits->{'procs'}) {
-		if (defined($in{'children_def'}) && !$in{'children_def'} &&
-		    ($in{'children'} < 1 ||
-		     $in{'children'} > $max_php_fcgid_children)) {
-			&error(&text('phpmode_echildren', $max_php_fcgid_children));
+		if (defined($in{'children_def'}) && !$in{'children_def'}) {
+			if ($in{'children'} < 1) {
+				&error($text{'phpmode_echildren'});
+				}
+			elsif (!$nophpsanity_check &&
+			        $in{'children'} > $max_php_fcgid_children) {
+				&error(&text('phpmode_echildren2', $max_php_fcgid_children));
+				}
 			}
 		}
 	if (!$d->{'alias'}) {
@@ -188,10 +196,24 @@ if (&can_php_error_log($mode)) {
 	}
 
 if ($can) {
+	# Save PHP-FPM process manager mode
+	my $fpmtype = $in{'fpmtype'};
+	if ($mode eq 'fpm' && $fpmtype) {
+		$fpmtype =~ /^(dynamic|static|ondemand)$/ ||
+			&error($text{'phpmode_efpmtype'});
+		my $fpmtype_curr = &get_domain_php_fpm_mode($d);
+		if ($fpmtype ne $fpmtype_curr) {
+			&$first_print(&text('phpmode_fpmtypeing', $fpmtype));
+			&save_domain_php_fpm_mode($d, $fpmtype);
+			&$second_print($text{'setup_done'});
+			$anything++;
+			}
+		}
+
 	# Save PHP fcgi children
 	$nc = $in{'children_def'} ? 0 : $in{'children'};
 	if (defined($in{'children_def'}) && !$dom_limits->{'procs'} &&
-	    $nc != &get_domain_php_children($d) && $can) {
+	    $nc != &get_domain_php_children($d) && $can && $mode ne "none") {
 		&$first_print($nc || $mode eq "fpm" ?
 		    &text('phpmode_kidding', $nc || &get_php_max_childred_allowed()) :
 		    $text{'phpmode_nokids'});

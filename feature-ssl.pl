@@ -1129,21 +1129,42 @@ while(<OUT>) {
 				}
 			}
 		}
-	if (/RSA\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	# Try to detect key algorithm
+	if (/Key\s+Algorithm:.*?(rsa|ec)[EP]/) {
+		$rv{'algo'} = $1;
+		}
+	if (/RSA\s+Public\s+Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
-	if (/EC\s+Public\s+Key:\s+\((\d+)\s+bit/) {
+	elsif (/EC\s+Public\s+Key:\s+\((\d+)\s*bit/) {
+		$rv{'size'} = $1;
+		}
+	elsif (/Public-Key:\s+\((\d+)\s*bit/) {
 		$rv{'size'} = $1;
 		}
 	if (/Modulus\s*\(.*\):/ || /Modulus:/) {
 		$inmodulus = 1;
+		# RSA algo
+		$rv{'algo'} = "rsa" if (!$rv{'algo'});
+		}
+	elsif (/pub:/) {
+		$inmodulus = 1;
+		# ECC algo
+		$rv{'algo'} = 'ec' if (!$rv{'algo'});
 		}
 	if (/^\s+([0-9a-f:]+)\s*$/ && $inmodulus) {
 		$rv{'modulus'} .= $1;
 		}
+	# RSA exponent
 	if (/Exponent:\s*(\d+)/) {
 		$rv{'exponent'} = $1;
 		$inmodulus = 0;
+		}
+	# ECC properties
+	elsif (/(ASN1\s+OID):\s*(\S+)/ || /(NIST\s+CURVE):\s*(\S+)/) {
+		$inmodulus = 0;
+		my $comma = $rv{'exponent'} ? ", " : "";
+		$rv{'exponent'} .= "$comma$1: $2";
 		}
 	}
 close(OUT);
@@ -2898,7 +2919,7 @@ foreach my $d (&list_domains()) {
 			      join(", ", @$dnames), $err);
 		$d->{'letsencrypt_last'} = time();
 		$d->{'letsencrypt_last_failure'} = time();
-		$cert =~ s/\r?\n/\t/g;
+		$err =~ s/\r?\n/\t/g;
 		$d->{'letsencrypt_last_err'} = $err;
 		&save_domain($d);
 		}
@@ -3202,14 +3223,18 @@ sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $keytype, $hmac) = @_;
 my ($ok, $cert, $key, $chain, @errs);
-my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
+my @tried = $config{'letsencrypt_retry'} ? (0..1) : (1);
 $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
 my $phd = &public_html_dir($d);
 my $actype = $ctype =~ /^ec/ ? "ecdsa" : "rsa";
-my $dctype = $d->{'letsencrypt_ctype'} =~ /^ec/ ? "ecdsa" : "rsa";
+my $dcinfo = &cert_info($d);
+my $dclets = &is_letsencrypt_cert($d);
+my $dcalgo = $dcinfo->{'algo'};
+my $dctype = $dcalgo =~ /^ec/ ? "ecdsa" : "rsa";
 my $actype_reuse = $actype eq $dctype ? 1 : 0;
+$actype_reuse = -1 if (!$dcalgo || !$dclets);
 my @wilds = grep { /^\*\./ } @$dnames;
 &lock_file($ssl_letsencrypt_lock);
 &disable_quotas($d);

@@ -3830,7 +3830,6 @@ phpmode_emodsuexec=La opción <b>Ejecutar scripts CGI como dueño de dominio</b>
 phpmode_rubymode=Modo de ejecución de scripts Ruby
 phpmode_mod_ruby=Apache <tt>mod_ruby</tt> (ejecutar como usuario de Apache)
 phpmode_noruby=Scripts Ruby deshabilitados
-phpmode_echildren=El número de sub-procesos de PHP debe estar entre 1 y $1
 phpmode_moding=Cambiando el modo de ejecución del PHP a $1 ..
 phpmode_kidding=Cambiando el número de los sub-procesos de PHP a $1 ..
 phpmode_nokids=Deshabilitando sub-procesos PHP ..

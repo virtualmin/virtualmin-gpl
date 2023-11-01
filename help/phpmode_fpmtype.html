@@ -1,0 +1,35 @@
+<header>PHP process manager mode</header>
+PHP-FPM, or FastCGI Process Manager for PHP, provides several management
+modes for its worker processes. These modes determine how PHP-FPM will
+create, maintain, and recycle the child processes that handle PHP requests.
+The mode is set using the <tt>pm</tt> configuration directive.<br>
+
+<br>
+<b><tt>dynamic</tt></b> (default)<br>
+In the <tt>dynamic</tt> mode, PHP-FPM dynamically adjusts the number of spawned
+child processes based on the demand. Benefits include automatic adjustment
+of the number of child processes based on demand, ensuring optimal resource
+utilization. This is especially useful for servers with fluctuating loads.<br>
+
+<br>
+<b><tt>static</tt></b><br>
+In the <tt>static</tt> mode, PHP-FPM maintains a fixed number of child processes.
+This number is specified by the <tt>pm.max_children</tt> directive. Benefits include
+consistent memory usage due to a constant number of child processes. This is ideal
+for servers with stable loads.<br>
+
+<br>
+<b><tt>ondemand</tt></b><br>
+In the <tt>ondemand</tt> mode, PHP-FPM spawns child processes only when they are needed,
+i.e., when there's an incoming request that needs processing. Processes are then terminated
+after being idle for a specified amount of time by the <tt>pm.process_idle_timeout</tt>
+directive. Benefits include reduced memory usage during periods of low or no traffic.
+Ideal for servers with intermittent loads or applications with unpredictable traffic
+patterns.<br>
+
+<br>
+The best mode for your application may vary based on the server's available resources, traffic
+patterns, and specific application characteristics. It's essential to monitor and fine-tune the
+settings to achieve optimal performance.
+<footer>
+
