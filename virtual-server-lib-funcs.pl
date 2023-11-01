@@ -3584,13 +3584,7 @@ foreach my $d (&sort_indent_domains($doms)) {
 
 	# Add configured columns
 	foreach my $c (@colnames) {
-		if ($c eq "type") {
-			my $dtype = $d->{'alias'} ? "$pfx$text{'form_generic_aliasshort'}" :
-				    $d->{'parent'} ? "$pfx$text{'form_generic_subserver'}" :
-				    $text{'form_generic_master'};
-			push(@cols, $dtype);
-			}
-		elsif ($c eq "dom") {
+		if ($c eq "dom") {
 			# Domain name, with link
 			my $prog = &can_config_domain($d) ? "edit_domain.cgi"
 							  : "view_domain.cgi";
@@ -3602,6 +3596,12 @@ foreach my $d (&sort_indent_domains($doms)) {
 			 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" :"";
 			push(@cols, "$pfx<a href='$prog?".
 				    "dom=$d->{'id'}'>$dn</a>$proxy");
+			}
+		elsif ($c eq "type") {
+			my $dtype = $d->{'alias'} ? "$pfx$text{'form_generic_aliasshort'}" :
+				    $d->{'parent'} ? "$pfx$text{'form_generic_subserver'}" :
+				    $text{'form_generic_master'};
+			push(@cols, $dtype);
 			}
 		elsif ($c eq "user") {
 			# Username
