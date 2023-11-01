@@ -136,8 +136,13 @@ foreach $script (@scripts_sorted) {
 	next if (grep (/^$script->{'name'}$/, @scripts_added));
 	if (!$script->{'pro'}) {
 		if (@vers > 1) {
+			my $pfunc = $script->{'preferred_version_func'};
+			my $pver = $vers[0];
+			if (defined(&$pfunc)) {
+				$pver = &$pfunc($d);
+				}
 			$vsel = &ui_select("ver_".$script->{'name'},
-			    undef,
+			    $pver,
 			    [ map { [ $_, $script->{'vdesc'}->{$_} ] }
 				  @vers ]);
 			}

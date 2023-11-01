@@ -182,8 +182,12 @@ if ($opts->{'mongrels'} > 1 && &has_proxy_balancer($d) != 2) {
 	&usage("This virtual server does not support more than one Mongrel");
 	}
 if ($ver eq "latest") {
-	# First (highest) version
+	# Preferred or first (highest) version
+	my $pfunc = $script->{'preferred_version_func'};
 	$ver = $vers[0];
+	if (defined(&$pfunc)) {
+		$ver = &$pfunc($d);
+		}
 	}
 elsif ($atleast) {
 	# Lowest version that is at least the one asked for
