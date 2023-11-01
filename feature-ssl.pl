@@ -3223,7 +3223,7 @@ sub request_domain_letsencrypt_cert
 {
 my ($d, $dnames, $staging, $size, $mode, $ctype, $server, $keytype, $hmac) = @_;
 my ($ok, $cert, $key, $chain, @errs);
-my @tried = !$config{'letsencrypt_retry'} ? (0..1) : (1);
+my @tried = $config{'letsencrypt_retry'} ? (0..1) : (1);
 $dnames = &filter_ssl_wildcards($dnames);
 $size ||= $config{'key_size'};
 &foreign_require("webmin");
