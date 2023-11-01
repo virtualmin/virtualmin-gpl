@@ -153,10 +153,6 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 	local @catdoms;
 	foreach my $d (grep { !$_->{'parent'} } @doms) {
 		push(@catdoms, $d);
-		foreach my $ad (grep { $_->{'alias'} eq $d->{'id'} } @doms) {
-			$ad->{'indent'} = 2;
-			push(@catdoms, $ad);
-			}
 		foreach my $sd (grep { $_->{'parent'} eq $d->{'id'} &&
 				       !$_->{'alias'} } @doms) {
 			$sd->{'indent'} = 1;
@@ -166,6 +162,10 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 				$ad->{'indent'} = 2;
 				push(@catdoms, $ad);
 				}
+			}
+		foreach my $ad (grep { $_->{'alias'} eq $d->{'id'} } @doms) {
+			$ad->{'indent'} = 2;
+			push(@catdoms, $ad);
 			}
 		}
 	# Any domains that we missed due to their parent not being included
