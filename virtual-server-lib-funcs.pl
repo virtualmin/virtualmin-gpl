@@ -159,7 +159,7 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 			push(@catdoms, $sd);
 			foreach my $ad (grep { $_->{'alias'} eq $sd->{'id'} }
 					     @doms) {
-				$ad->{'indent'} = 2;
+				$ad->{'indent'} = 3;
 				push(@catdoms, $ad);
 				}
 			}
