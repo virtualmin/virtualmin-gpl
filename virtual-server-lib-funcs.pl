@@ -3597,6 +3597,12 @@ foreach my $d (&sort_indent_domains($doms)) {
 			push(@cols, "$pfx<a href='$prog?".
 				    "dom=$d->{'id'}'>$dn</a>$proxy");
 			}
+		elsif ($c eq "type") {
+			my $dtype = $d->{'alias'} ? "$pfx$text{'form_generic_aliasshort'}" :
+				    $d->{'parent'} ? "$pfx$text{'form_generic_subserver'}" :
+				    $text{'form_generic_master'};
+			push(@cols, $dtype);
+			}
 		elsif ($c eq "user") {
 			# Username
 			push(@cols, &html_escape($d->{'user'}));
