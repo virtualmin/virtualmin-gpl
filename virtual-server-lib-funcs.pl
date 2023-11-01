@@ -290,7 +290,9 @@ if (!defined($dom->{'prefix'})) {
 	}
 if (!defined($dom->{'home'})) {
 	local @u = getpwnam($dom->{'user'});
-	$dom->{'home'} = $u[7];
+	if (@u && $u[7] ne '/' && $u[7] ne '/root') {
+		$dom->{'home'} = $u[7];
+		}
 	}
 if (!defined($dom->{'proxy_pass_mode'}) && $dom->{'proxy_pass'}) {
 	# assume that proxy pass mode is proxy-based if not set
