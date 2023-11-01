@@ -92,6 +92,8 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+$d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
+			   "with another domain");
 $remove && (@got || $usenewkey || $newpass) &&
 	&usage("--remove-cert cannot be combined with any other options");
 

@@ -111,6 +111,8 @@ while(@ARGV > 0) {
 $dname || &usage("Missing --domain parameter");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+$d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
+			   "with another domain");
 if ($ctype =~ /^ec/) {
 	&letsencrypt_supports_ec() ||
 		&usage("The Let's Encrypt client on your system does ".

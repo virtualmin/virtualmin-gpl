@@ -470,7 +470,9 @@ if ($d->{'dom'} ne $oldd->{'dom'} && &self_signed_cert($d) &&
 		}
 	}
 
-if ($d->{'dom'} ne $oldd->{'dom'} && &is_letsencrypt_cert($d) &&
+if ($d->{'dom'} ne $oldd->{'dom'} &&
+    !$d->{'ssl_same'} &&
+    &is_letsencrypt_cert($d) &&
     !&check_domain_certificate($d->{'dom'}, $d)) {
 	# Domain name has changed ... re-request let's encrypt cert
 	&$first_print($text{'save_ssl12'});
@@ -2864,6 +2866,9 @@ my $done = 0;
 foreach my $d (&list_domains()) {
 	# Does the domain have SSL enabled and a renewal policy?
 	next if (!&domain_has_ssl_cert($d) || !$d->{'letsencrypt_renew'});
+
+	# Does the domain have it's own SSL cert?
+	next if ($d->{'ssl_same'});
 
 	# Is the domain enabled?
 	next if ($d->{'disabled'});

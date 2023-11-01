@@ -112,6 +112,8 @@ $dname || &usage("Missing --domain parameter");
 $self || $csr || &usage("One of the --self or --csr parameters must be given");
 $d = &get_domain_by("dom", $dname);
 $d || &usage("No virtual server named $dname found");
+$d->{'ssl_same'} && &usage("This server shares it's SSL certificate ".
+			   "with another domain");
 
 # Run the before command
 &set_domain_envs($d, "SSL_DOMAIN");
