@@ -153,19 +153,19 @@ if ($sortfield eq 'user' || $sortfield eq 'sub') {
 	local @catdoms;
 	foreach my $d (grep { !$_->{'parent'} } @doms) {
 		push(@catdoms, $d);
-		foreach my $ad (grep { $_->{'alias'} eq $d->{'id'} } @doms) {
-			$ad->{'indent'} = 2;
-			push(@catdoms, $ad);
-			}
 		foreach my $sd (grep { $_->{'parent'} eq $d->{'id'} &&
 				       !$_->{'alias'} } @doms) {
 			$sd->{'indent'} = 1;
 			push(@catdoms, $sd);
 			foreach my $ad (grep { $_->{'alias'} eq $sd->{'id'} }
 					     @doms) {
-				$ad->{'indent'} = 2;
+				$ad->{'indent'} = 3;
 				push(@catdoms, $ad);
 				}
+			}
+		foreach my $ad (grep { $_->{'alias'} eq $d->{'id'} } @doms) {
+			$ad->{'indent'} = 2;
+			push(@catdoms, $ad);
 			}
 		}
 	# Any domains that we missed due to their parent not being included
@@ -3596,6 +3596,12 @@ foreach my $d (&sort_indent_domains($doms)) {
 			 " <a href='proxy_form.cgi?dom=$d->{'id'}'>(P)</a>" :"";
 			push(@cols, "$pfx<a href='$prog?".
 				    "dom=$d->{'id'}'>$dn</a>$proxy");
+			}
+		elsif ($c eq "type") {
+			my $dtype = $d->{'alias'} ? "$pfx$text{'form_generic_aliasshort'}" :
+				    $d->{'parent'} ? "$pfx$text{'form_generic_subserver'}" :
+				    $text{'form_generic_master'};
+			push(@cols, $dtype);
 			}
 		elsif ($c eq "user") {
 			# Username
@@ -19484,12 +19490,7 @@ foreach my $pname (@load) {
 				my $err = $@;
 				$err = &html_strip($err);
 				$err =~ s/[\n\r]+/ /g;
-				if (defined(&error_stderr)) {
-					&error_stderr($err);
-					}
-				else {
-					print STDERR "$err\n";
-					}
+				&error_stderr_local($err);
 				}
 			}
 		}
@@ -20007,6 +20008,25 @@ elsif ($config{'default_domain_ssl'}) {
 			&$second_print(&text('check_apicmderr', $defdom_msg));
 			}
 		}
+	}
+}
+
+# error_stderr_local(err, [dont-print-return-as-string]]])
+# Print an error message to STDERR,
+# or call error_stderr if defined
+sub error_stderr_local
+{
+my ($err, $noprint) = @_;
+if (defined(&error_stderr)) {
+	if ($noprint) {
+		return &error_stderr($err, $noprint);
+		}
+	else {
+		&error_stderr($err);
+		}
+	}
+else {
+	print STDERR "$err\n";
 	}
 }
 
