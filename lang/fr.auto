@@ -1,3 +1,4 @@
+index_type=Type de domaine
 index_postgres=PostgreSQL?
 index_reseller=Revendeur
 index_plan=Plan
@@ -74,6 +75,7 @@ form_genericmode=Nouveau type de serveur virtuel:
 form_generic_master=Serveur de niveau supérieur
 form_generic_subserver=Sous-serveur
 form_generic_alias=Alias de $1 
+form_generic_aliasshort=Alias
 form_generic_aliasmail=Alias de $1, avec son propre e-mail
 form_generic_subdom=Sous-domaine de $1 
 form_reseller=Appartenant au revendeur
@@ -2952,6 +2954,8 @@ phpmode_fixport=Correction de la configuration du point de terminaison PHP-FPM .
 website_header=Options du site Web
 
 spf_dmarcchange=Mise à jour de l'enregistrement DMARC ..
+spf_default3=Adresse externe par défaut
+spf_custom=Adresse IP personnalisée
 spf_dsrecs=Enregistrements DS pour le registraire
 spf_edsrecs=Impossible de générer des enregistrements DS : $1 
 spf_dmarcenable=Création d'un enregistrement DMARC ..

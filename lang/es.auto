@@ -1,3 +1,4 @@
+index_type=tipo de dominio
 index_ip=dirección IP
 index_ssl_expiry=Vencimiento SSL
 index_ebinderrs=Se encontraron errores en la configuración BIND de su sistema : $1 
@@ -67,6 +68,7 @@ index_certinvalid=El archivo de certificado SSL $2 para $1 no es válido : $3
 index_keyinvalid=El archivo de claves SSL $2 para $1 no es válido : $3 
 index_global_eg=p.ej.
 
+form_generic_aliasshort=Alias
 form_reseller=Propiedad del revendedor
 form_rmysql=Servidor de base de datos MySQL
 form_noreseller=&lt;Ninguno&gt;
@@ -1708,6 +1710,8 @@ spf_include=Dominios incluidos para permitir
 spf_eip6='$1' no es una dirección IPv6 válida
 spf_einclude='$1' no es un nombre de dominio válido para incluir
 spf_default2=Igual que la dirección real
+spf_default3=Dirección externa predeterminada
+spf_custom=Dirección IP personalizada
 spf_public=Clave pública DNSSEC
 spf_private=Clave privada DNSSEC
 spf_dsrecs=Registros DS para registrador

@@ -1,3 +1,4 @@
+index_type=Tipo di dominio
 index_emailto=Indirizzo email
 index_plan=Piano
 index_phpv=Versione PHP
@@ -99,6 +100,7 @@ index_keyinvalid=Il file di chiavi SSL $2 per $1 non è valido : $3
 index_global_eg=per esempio.
 
 form_generic_master=Server di livello superiore
+form_generic_aliasshort=Alias
 form_generic_aliasmail=Alias di $1, con la propria email
 form_rmysql=Server di database MySQL
 form_web=Vuoi configurare il sito web di Apache?
@@ -4297,6 +4299,8 @@ spf_eip6='$1' non è un indirizzo IPv6 valido
 spf_einclude='$1' non è un nome di dominio valido da includere
 spf_default=Come l'indirizzo reale ($1)
 spf_default2=Come l'indirizzo reale
+spf_default3=Indirizzo esterno predefinito
+spf_custom=Indirizzo IP personalizzato
 spf_public=Chiave pubblica DNSSEC
 spf_private=Chiave privata DNSSEC
 spf_dsrecs=Record DS per registrar

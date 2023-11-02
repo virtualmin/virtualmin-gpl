@@ -1,5 +1,6 @@
 index_link=列出虛擬服務器
 index_dom=域名
+index_type=網域類型
 index_webmin=Webmin？
 index_users=用戶數
 index_aliases=別名
@@ -110,6 +111,7 @@ index_keyinvalid=$1的SSL密鑰文件 $2無效： $3
 index_global_eg=例如
 
 form_enomore=您無權再創建任何類型的虛擬服務器
+form_generic_aliasshort=別名
 form_generic_aliasmail=$1的別名，帶有自己的電子郵件
 form_reseller=由經銷商擁有
 form_rmysql=MySQL數據庫服務器
@@ -2526,6 +2528,8 @@ spf_include=包含的域允許
 spf_eip6='$1'不是有效的IPv6地址
 spf_einclude=“$1”不是要包含的有效域名
 spf_default2=與真實地址相同
+spf_default3=預設外部位址
+spf_custom=自訂IP位址
 spf_public=DNSSEC公鑰
 spf_private=DNSSEC私鑰
 spf_dsrecs=DS記錄的註冊商

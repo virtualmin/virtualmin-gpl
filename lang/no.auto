@@ -1,3 +1,4 @@
+index_type=Domenetype
 index_plan=Plan
 index_phpv=PHP-versjon
 index_ip=IP adresse
@@ -46,6 +47,7 @@ index_certinvalid=SSL-sertifikatfilen $2 for $1 er ugyldig : $3
 index_keyinvalid=SSL-nøkkelfilen $2 for $1 er ugyldig : $3 
 index_global_eg=f.eks.
 
+form_generic_aliasshort=Alias
 form_rmysql=MySQL-databaseserver
 form_web=Sett opp Apache-nettstedet?
 form_ssl=Sett opp Apache SSL-nettsted?
@@ -949,6 +951,8 @@ phpmode_fixport=Fikser PHP-FPM-endepunktkonfigurasjon ..
 website_header=Nettstedsalternativer
 
 spf_dmarcchange=Oppdaterer DMARC-posten ..
+spf_default3=Standard ekstern adresse
+spf_custom=Egendefinert IP-adresse
 spf_dsrecs=DS poster for registrar
 spf_edsrecs=Kunne ikke generere DS-poster : $1 
 spf_dmarcenable=Oppretter DMARC-post ..
