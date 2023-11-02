@@ -19,6 +19,7 @@ foreach $p (@newplugins) {
 	$err = &plugin_call($p, "feature_check", \@neweverything);
 	$name = &plugin_call($p, "feature_name");
 	if ($err) {
+		&push_all_print();
 		&error(&text('newplugin_emod', $name, $err));
 		}
 	}
