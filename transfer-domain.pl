@@ -53,6 +53,7 @@ if (!$module_name) {
 &set_all_text_print();
 
 # Parse command-line args
+$proto = "ssh";
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
 	if ($a eq "--domain") {
@@ -91,6 +92,12 @@ while(@ARGV > 0) {
 	elsif ($a eq "--allocate-ip") {
 		$reallocate = 1;
 		}
+	elsif ($a eq "--webmin") {
+		$proto = "webmin";
+		}
+	elsif ($a eq "--ssh") {
+		$proto = "ssh";
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -107,7 +114,7 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 
 # Validate transfer target
-$err = &validate_transfer_host($d, $desthost, $destpass, $overwrite);
+$err = &validate_transfer_host($d, $desthost, $destpass, $proto, $overwrite);
 &usage($err) if ($err);
 
 # Call the transfer function
@@ -116,7 +123,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$first_print(&text(@subs ? 'transfer_doing2' : 'transfer_doing',
 		    $d->{'dom'}, $desthost, scalar(@subs)));
 &$indent_print();
-$ok = &transfer_virtual_server($d, $desthost, $destpass,
+$ok = &transfer_virtual_server($d, $desthost, $destpass, $proto,
 			       $delete ? 2 : $disable ? 1 : 0,
 			       $deletemissing, $replication, $showoutput,
 			       $reallocate);
@@ -138,6 +145,7 @@ print "\n";
 print "virtualmin transfer-domain --domain domain.name\n";
 print "                           --host hostname\n";
 print "                          [--pass password]\n";
+print "                          [--webmin | --ssh]\n";
 print "                          [--disable | --delete]\n";
 print "                          [--overwrite]\n";
 print "                          [--delete-missing-files]\n";
