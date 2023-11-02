@@ -60,7 +60,6 @@ edit_ftp=1
 edit_quota=1
 post_check=1
 generics=0
-all_namevirtual=0
 backup_feature_virtualmin=1
 backup_feature_unix=1
 backup_feature_dir=1
