@@ -675,11 +675,19 @@ else {
 # Show DNS IP address field
 if (&can_dnsip()) {
 	my $def_dns_ip = $config{'external_ip_cache'} || &get_dns_ip($resel);
-	my $defmsg = $def_dns_ip || $text{'spf_default2'};
+	my $dns_ip = $parentdom ? $parentdom->{'dns_ip'} : undef;
+	my @opts;
+	if ($def_dns_ip) {
+		push(@opts, [ 1, $text{'spf_default3'}, $def_dns_ip ]);
+		push(@opts, [ 2, $text{'spf_default2'} ]);
+		}
+	else {
+		push(@opts, [ 1, $text{'spf_default2'} ]);
+		}
+	push(@opts, [ 0, $text{'spf_custom'},
+		      &ui_textbox("dns_ip", $dns_ip, 20) ]);
 	print &ui_table_row(&hlink($text{'edit_dnsip'}, "edit_dnsip"),
-		&ui_opt_textbox("dns_ip",
-				$parentdom ? $parentdom->{'dns_ip'} : undef,
-				20, $defmsg));
+		&ui_radio_table("dns_ip_def", $dns_ip ? 0 : 1, \@opts));
 	}
 
 print &ui_hidden_table_end();

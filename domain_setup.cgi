@@ -286,7 +286,7 @@ if (&supports_ip6()) {
 
 # Validate the DNS IP
 if (&can_dnsip()) {
-	if (!$in{'dns_ip_def'}) {
+	if ($in{'dns_ip_def'} == 0) {
 		&check_ipaddress($in{'dns_ip'}) || &error($text{'save_ednsip'});
 		}
 	}
@@ -347,7 +347,8 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'netmask', $netmask,
 	 'ip6', $ip6,
 	 'netmask6', $netmask6,
-	 'dns_ip', !$in{'dns_ip_def'} && &can_dnsip() ? $in{'dns_ip'} :
+	 'dns_ip', $in{'dns_ip_def'} == 0 && &can_dnsip() ? $in{'dns_ip'} :
+		   $in{'dns_ip_def'} == 2 && &can_dnsip() ? undef :
 		   $alias ? $alias->{'dns_ip'} :
 		   $virt || $config{'all_namevirtual'} ? undef
 						       : &get_dns_ip($resel),
