@@ -13,6 +13,7 @@ require './virtual-server-lib.pl';
 		   split(/\0/, $in{'fmods'}) );
 
 # Validate plugins
+&set_all_null_print();
 foreach $p (@newplugins) {
 	&foreign_require($p, "virtual_feature.pl");
 	$err = &plugin_call($p, "feature_check", \@neweverything);
@@ -67,7 +68,6 @@ $config{'plugins_inactive'} = join(" ", @inactive);
 
 # Validate new settings with a config check
 @plugins = @newplugins;
-&set_all_null_print();
 $cerr = &check_virtual_server_config(\%lastconfig);
 &error($cerr) if ($cerr);
 
