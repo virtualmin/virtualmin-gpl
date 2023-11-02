@@ -703,12 +703,10 @@ if ($can_website && !$aliasdom && $virtualmin_pro) {
 				      [ [ 1, $text{'form_content1'} ],
 					[ 2, $text{'form_content2'} ],
 					[ 0, $text{'form_content0'} ] ])."<br>".
-			    &ui_textarea("content", undef, 5, 70, undef, undef,
-			                 "placeholder=\"@{[&html_strip($text{'deftmplt_default_slog'}, ' ')]}\""),
+			    &ui_textarea("content", undef, 5, 70),
 			    3, \@tds);
 
 	print &ui_hidden_table_end();
-	print '<script>var content_def_radios = document.querySelectorAll("input[type=radio][name=\'content_def\']"), content_textarea = document.querySelector("textarea[name=\'content\']"), content_textarea_def_placeholder = content_textarea.getAttribute(\'placeholder\'); function content_def_event(event) { if ( this.value == 1 ) { content_textarea.style.display = "none"; } else { content_textarea.style.display = "inline-block"; } content_textarea.placeholder = this.value == 2 ? content_textarea_def_placeholder : content_textarea.placeholder = ""; } Array.prototype.forEach.call(content_def_radios, function(radio) { radio.removeEventListener("change", content_def_event); radio.addEventListener("change", content_def_event); });</script>';
 	}
 print &ui_form_end([ [ "ok", $text{'form_ok'} ] ]);
 if (!$config{'template_auto'}) {

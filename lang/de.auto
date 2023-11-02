@@ -88,7 +88,7 @@ form_aliasdomslimit0=Maximal
 form_realdomslimit=Maximal zulässige Nicht-Alias-Server
 form_esubdom=Der übergeordnete Domain Virtualmin Server $1 wurde nicht gefunden!
 form_allocmaybe=Weisen Sie die IP zu, wenn der Server ursprünglich eine hatte, andernfalls freigegeben
-form_content2=Ja, mit Standardvorlage und Inhalt unten
+form_content2=Ja, mit der Standard-Landingpage-Vorlage
 form_content0=Ja, mit Inhalt unten
 
 setup_eplan=Der ausgewählte Plan existiert nicht oder ist nicht verfügbar

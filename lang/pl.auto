@@ -219,7 +219,7 @@ form_ealiasdom=Alias docelowej domeny nie został znaleziony!
 form_fwdto=Domyślny adres do przesyłania poczty
 form_park=Początkowa treść strony
 form_content=Utworzyć początkową stronę internetową?
-form_content2=Tak, z domyślnym szablonem i zawartością poniżej
+form_content2=Tak, z domyślnym szablonem strony docelowej
 form_content0=Tak, z poniższą zawartością
 form_inputssect=Dodatkowe opcje funkcji
 

@@ -117,7 +117,7 @@ form_proxy=Sito Web proxy su URL
 form_framefwd=Frame forwarding all'URL
 form_esubdom=Impossibile trovare il server Virtualmin del dominio padre $1 !
 form_allocmaybe=Allocare IP se il server ne aveva originariamente uno, altrimenti condiviso
-form_content2=Sì, con il modello e il contenuto predefiniti di seguito
+form_content2=Sì, con il modello di pagina di destinazione predefinito
 form_content0=Sì, con il contenuto di seguito
 
 setup_err=Impossibile creare il server virtuale

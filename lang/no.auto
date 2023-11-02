@@ -57,7 +57,7 @@ form_sshkey1=Generer private og offentlige nøkler
 form_sshkey2=Bruk offentlig nøkkel nedenfor ..
 form_passf=Nytt passord
 form_passa=Gjenta passord
-form_content2=Ja, med standardmal og innhold nedenfor
+form_content2=Ja, med standard landingssidemal
 form_content0=Ja, med innholdet nedenfor
 
 setup_edomain5=Du er allerede vert for dette automatisk opprettede $1 vertsstandarddomenet. Du kan ikke opprette et nytt domene med samme navn, med mindre vertsstandarddomene først er deaktivert i Virtualmin Configuration SSL-innstillingssiden
