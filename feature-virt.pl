@@ -197,77 +197,70 @@ sub virtual_ip_input
 local ($tmpls, $resel, $orig, $mode) = @_;
 $mode ||= 0;
 local $defip = &get_default_ip($resel);
-if ($config{'all_namevirtual'}) {
-	# Always name-based, but on varying IP
-	return &ui_textbox("ip", $defip, 20);
+local ($t, $anyalloc, $anychoose, $anyzone);
+if (&running_in_zone() || &running_in_vserver()) {
+	# When running in a Solaris zone or VServer, you MUST select an
+	# existing active IP, as they are controlled from the host.
+	$anyzone = 1;
 	}
-else {
-	# An IP can be selected, perhaps private, shared or default
-	local ($t, $anyalloc, $anychoose, $anyzone);
-	if (&running_in_zone() || &running_in_vserver()) {
-		# When running in a Solaris zone or VServer, you MUST select an
-		# existing active IP, as they are controlled from the host.
-		$anyzone = 1;
+elsif (&can_use_feature("virt")) {
+	# Check if private IPs are allocated or manual, if we are
+	# allowed to choose them.
+	foreach $t (@$tmpls) {
+		local $tmpl = &get_template($t->{'id'});
+		if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
+		else { $anychoose++; }
 		}
-	elsif (&can_use_feature("virt")) {
-		# Check if private IPs are allocated or manual, if we are
-		# allowed to choose them.
-		foreach $t (@$tmpls) {
-			local $tmpl = &get_template($t->{'id'});
-			if ($tmpl->{'ranges'} ne "none") { $anyalloc++; }
-			else { $anychoose++; }
-			}
-		}
-	local @opts;
-	if ($orig) {
-		# For restores - option to use original IP
-		push(@opts, [ -1, $text{'form_origip'} ]);
-		}
-	push(@opts, [ 0, &text('form_shared', $defip) ]);
-	local @shared = sort { $a cmp $b } &list_shared_ips();
-	if (@shared && &can_edit_sharedips()) {
-		# Can select from extra shared list
-		push(@opts, [ 3, $text{'form_shared2'},
-				 &ui_select("sharedip", undef,
-					[ map { [ $_ ] } @shared ]) ]);
-		}
-	if ($anyalloc) {
-		# Can allocate
-		push(@opts, [ 2, &text('form_alloc') ]);
-		}
-	if ($anychoose) {
-		# Can enter arbitrary IP
-		push(@opts, [ 1, $text{'form_vip'},
-			 &ui_textbox("ip", undef, 20)." ".
-			 &ui_checkbox("virtalready", 1,
-				      $text{'form_virtalready'}) ]);
-		}
-	if ($anyzone) {
-		# Can select an existing active IP
-		&foreign_require("net");
-		local @act = grep { $_->{'virtual'} ne '' }
-				  &net::active_interfaces();
-		if (@act) {
-			push(@opts, [ 4, $text{'form_activeip'},
-				 &ui_select("zoneip", undef,
-				  [ map { [ $_->{'address'} ] } @act ]) ]);
-			}
-		else {
-			push(@opts, [ 4, $text{'form_activeip'},
-					 &ui_textbox("zoneip", undef, 20) ]);
-			}
-		}
-	if ($mode == 5 && $anyalloc) {
-		# Use shared or allocated (for restores only)
-		push(@opts, [ 5, &text('form_allocmaybe') ]);
-		}
-	my %hasmodes = map { $_->[0], 1 } @opts;
-	if (!$hasmodes{$mode}) {
-		# Mode is not on the list .. use shared mode or none
-		$mode = $hasmodes{0} ? 0 : -2;
-		}
-	return &ui_radio_table("virt", $mode, \@opts, 1);
 	}
+local @opts;
+if ($orig) {
+	# For restores - option to use original IP
+	push(@opts, [ -1, $text{'form_origip'} ]);
+	}
+push(@opts, [ 0, &text('form_shared', $defip) ]);
+local @shared = sort { $a cmp $b } &list_shared_ips();
+if (@shared && &can_edit_sharedips()) {
+	# Can select from extra shared list
+	push(@opts, [ 3, $text{'form_shared2'},
+			 &ui_select("sharedip", undef,
+				[ map { [ $_ ] } @shared ]) ]);
+	}
+if ($anyalloc) {
+	# Can allocate
+	push(@opts, [ 2, &text('form_alloc') ]);
+	}
+if ($anychoose) {
+	# Can enter arbitrary IP
+	push(@opts, [ 1, $text{'form_vip'},
+		 &ui_textbox("ip", undef, 20)." ".
+		 &ui_checkbox("virtalready", 1,
+			      $text{'form_virtalready'}) ]);
+	}
+if ($anyzone) {
+	# Can select an existing active IP
+	&foreign_require("net");
+	local @act = grep { $_->{'virtual'} ne '' }
+			  &net::active_interfaces();
+	if (@act) {
+		push(@opts, [ 4, $text{'form_activeip'},
+			 &ui_select("zoneip", undef,
+			  [ map { [ $_->{'address'} ] } @act ]) ]);
+		}
+	else {
+		push(@opts, [ 4, $text{'form_activeip'},
+				 &ui_textbox("zoneip", undef, 20) ]);
+		}
+	}
+if ($mode == 5 && $anyalloc) {
+	# Use shared or allocated (for restores only)
+	push(@opts, [ 5, &text('form_allocmaybe') ]);
+	}
+my %hasmodes = map { $_->[0], 1 } @opts;
+if (!$hasmodes{$mode}) {
+	# Mode is not on the list .. use shared mode or none
+	$mode = $hasmodes{0} ? 0 : -2;
+	}
+return &ui_radio_table("virt", $mode, \@opts, 1);
 }
 
 # parse_virtual_ip(&template, reseller)
@@ -276,15 +269,7 @@ else {
 sub parse_virtual_ip
 {
 local ($tmpl, $resel) = @_;
-if ($config{'all_namevirtual'}) {
-	# Make sure the IP *is* assigned
-	&check_ipaddress($in{'ip'}) || &error($text{'setup_eip'});
-	if (!&check_virt_clash($in{'ip'})) {
-		&error(&text('setup_evirtclash2', $in{'ip'}));
-		}
-	return ($in{'ip'}, 0, 1);
-	}
-elsif ($in{'virt'} == 2) {
+if ($in{'virt'} == 2) {
 	# Automatic IP allocation chosen .. select one from either the
 	# reseller's range, or the template
 	if ($resel) {

@@ -336,7 +336,7 @@ local $plan = $parent ? &get_plan($parent->{'plan'}) : &get_default_plan();
          'ugid', $ugid,
          'owner', "Migrated cPanel server $dom",
          'email', $email ? $email : $parent ? $parent->{'email'} : undef,
-	 'dns_ip', $ipinfo->{'virt'} || $config{'all_namevirtual'} ? undef :
+	 'dns_ip', $ipinfo->{'virt'} ? undef :
 		   &get_dns_ip($parent ? $parent->{'id'} : undef),
 	 $parent ? ( 'pass', $parent->{'pass'} )
 		 : ( 'pass', $pass ),

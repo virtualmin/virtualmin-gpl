@@ -33,12 +33,7 @@ if ($d->{'virt'}) {
 @r = split(/\s+/, $d->{'reseller'});
 %racl = @r ? &get_reseller_acl($r[0]) : ();
 
-if ($config{'all_namevirtual'} && &can_use_feature("virt")) {
-	# Always name-based, but IP can be changed
-	print &ui_table_row($text{'newips_new'},
-		&ui_textbox("ip", $d->{'ip'}, 15));
-	}
-elsif (&can_use_feature("virt")) {
+if (&can_use_feature("virt")) {
 	# Build list of possible shared IPs
 	@canips = ( );
 	push(@canips, [ &get_default_ip(), $text{'newip_shared'} ]);

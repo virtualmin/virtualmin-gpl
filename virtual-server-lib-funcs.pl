@@ -3144,7 +3144,7 @@ else {
 sub can_select_ip
 {
 local @shared = &list_shared_ips();
-return $config{'all_namevirtual'} || &can_use_feature("virt") ||
+return &can_use_feature("virt") ||
        @shared && &can_edit_sharedips();
 }
 
@@ -12408,7 +12408,7 @@ foreach my $c ("mail_system", "generics", "bccs", "append_style", "ldap_host",
 	       "vpopmail_dir", "vpopmail_user", "vpopmail_group",
 	       "clamscan_cmd", "iface", "netmask6", "localgroup", "home_quotas",
 	       "mail_quotas", "group_quotas", "quotas", "shell", "ftp_shell",
-	       "all_namevirtual", "dns_ip", "default_procmail",
+	       "dns_ip", "default_procmail",
 	       "compression", "pbzip2", "domains_group",
 	       "quota_commands", "home_base",
 	       "quota_set_user_command", "quota_set_group_command",
@@ -16142,11 +16142,6 @@ if ($nologin_shell && $shells{$nologin_shell->{'shell'}}) {
 if ($ftp_shell && !$shells{$ftp_shell->{'shell'}}) {
 	&$second_print(&text('check_eftpshell',
 		"<tt>$ftp_shell->{'shell'}</tt>", "<tt>/etc/shells</tt>"));
-	}
-
-# Check for problem module config settings
-if ($config{'all_namevirtual'} && $config{'dns_ip'}) {
-	return &text('check_enamevirt', $clink);
 	}
 
 # Make sure LDAP module is set up, if selected

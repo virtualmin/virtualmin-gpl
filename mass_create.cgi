@@ -135,12 +135,7 @@ foreach $line (@lines) {
 			&line_error($text{'cmass_evirt'});
 			next;
 			}
-		if ($config{'all_namevirtual'}) {
-			# Name-based, but with different IP
-			$virt = 1;
-			$virtalready = 1;
-			}
-		elsif ($ip eq 'allocate') {
+		if ($ip eq 'allocate') {
 			# Need to allocate
 			%racl = $resel ? &get_reseller_acl($resel) : ();
 			if ($racl{'ranges'}) {
@@ -169,8 +164,7 @@ foreach $line (@lines) {
 			}
 		else {
 			# IP specified manually
-			if ($tmpl->{'ranges'} ne "none" &&
-			    !$config{'all_namevirtual'}) {
+			if ($tmpl->{'ranges'} ne "none") {
 				&line_error($text{'cmass_eipmust'});
 				next;
 				}
@@ -335,8 +329,7 @@ foreach $line (@lines) {
 		 'netmask', $netmask,
 		 'netmask6', $netmask6,
 		 'dns_ip', $alias ? $alias->{'dns_ip'} :
-			   $virt || $config{'all_namevirtual'} ? undef :
-			   &get_dns_ip($resel),
+			   $virt ? undef : &get_dns_ip($resel),
 		 'virt', $virt,
 		 'virt6', $virt6,
 		 'virtalready', $virtalready,

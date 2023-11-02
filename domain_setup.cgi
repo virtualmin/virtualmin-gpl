@@ -350,8 +350,7 @@ $pclash && &error(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
 	 'dns_ip', $in{'dns_ip_def'} == 0 && &can_dnsip() ? $in{'dns_ip'} :
 		   $in{'dns_ip_def'} == 2 && &can_dnsip() ? undef :
 		   $alias ? $alias->{'dns_ip'} :
-		   $virt || $config{'all_namevirtual'} ? undef
-						       : &get_dns_ip($resel),
+		   $virt ? undef : &get_dns_ip($resel),
 	 'virt', $virt,
 	 'virt6', $virt6,
 	 'name6', !$virt6,

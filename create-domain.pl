@@ -174,13 +174,8 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--ip") {
 		$ip = shift(@ARGV);
-		if (!$config{'all_namevirtual'}) {
-			$feature{'virt'} = 1;	# for dependency checks
-			$virt = 1;
-			}
-		else {
-			$virtalready = 1;
-			}
+		$feature{'virt'} = 1;	# for dependency checks
+		$virt = 1;
 		$name = 0;
 		}
 	elsif ($a eq "--allocate-ip") {
@@ -488,7 +483,7 @@ if ($ip eq "allocate") {
 	}
 elsif ($virt) {
 	# Make sure manual IP specification is allowed
-	$tmpl->{'ranges'} eq "none" || $config{'all_namevirtual'} || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
+	$tmpl->{'ranges'} eq "none" || &usage("The --ip option cannot be used when automatic IP allocation is enabled - use --allocate-ip instead");
 	}
 
 if ($ip6 eq "allocate") {
@@ -704,14 +699,7 @@ elsif ($parent) {
 	}
 
 if (!$alias) {
-	if ($config{'all_namevirtual'}) {
-		# Make sure the IP *is* assigned
-		&check_ipaddress($ip) || &usage($text{'setup_eip'});
-		if (!&check_virt_clash($ip)) {
-			&usage(&text('setup_evirtclash2'));
-			}
-		}
-	elsif ($virt) {
+	if ($virt) {
 		# Validate virtual IP address
 		&check_ipaddress($ip) || &usage($text{'setup_eip'});
 		$clash = &check_virt_clash($ip);
@@ -838,16 +826,14 @@ $pclash && &usage(&text('setup_eprefix3', $prefix, $pclash->{'dom'}));
          'email', $parent ? $parent->{'email'} : $email,
          'name', $name,
          'name6', $name6,
-         'ip', $config{'all_namevirtual'} ? $ip :
-	       $virt ? $ip :
+         'ip', $virt ? $ip :
 	       $alias ? $ip :
 	       $parentip ? $parent->{'ip'} :
 	       $sharedip ? $sharedip : $defip,
 	 'netmask', $netmask,
 	 'dns_ip', defined($dns_ip) ? $dns_ip :
 		   $alias ? $alias->{'dns_ip'} :
-		   $virt || $config{'all_namevirtual'} ? undef
-						       : &get_dns_ip($resel),
+		   $virt ? undef : &get_dns_ip($resel),
          'virt', $virt,
          'virtalready', $virtalready,
 	 'ip6', $parentip ? $parent->{'ip6'} : $ip6,

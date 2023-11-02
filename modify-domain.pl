@@ -348,7 +348,6 @@ if ($dom->{'virt'} && $ip eq "allocate") {
 	&usage("An IP address cannot be allocated when one is already active");
 	}
 elsif (!$dom->{'virt'} && $ip eq "allocate") {
-	$config{'all_namevirtual'} && &usage("The --allocate-ip option cannot be used when all virtual servers are name-based");
 	%racl = $d->{'reseller'} ? &get_reseller_acl($d->{'reseller'}) : ( );
 	if ($racl{'ranges'}) {
 		# Allocating IP from reseller's ranges
@@ -535,11 +534,9 @@ if (defined($ip)) {
 	$dom->{'ip'} = $ip;
 	$dom->{'netmask'} = $netmask;
 	delete($dom->{'dns_ip'});
-	if (!$config{'all_namevirtual'}) {
-		$dom->{'virt'} = 1;
-		$dom->{'name'} = 0;
-		$dom->{'virtalready'} = 0;
-		}
+	$dom->{'virt'} = 1;
+	$dom->{'name'} = 0;
+	$dom->{'virtalready'} = 0;
 	}
 elsif ($defaultip) {
 	# Falling back to default IP
