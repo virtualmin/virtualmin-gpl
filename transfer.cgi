@@ -32,6 +32,7 @@ else {
 		&save_transfer_hosts(@hosts);
 		}
 	}
+$proto = $in{'proto'};
 my $err = &validate_transfer_host($d, $host, $pass, $proto, $in{'overwrite'});
 &error($err) if ($err);
 

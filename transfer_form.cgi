@@ -73,6 +73,12 @@ else {
 	print &ui_table_row($text{'transfer_host'}, $hfield);
 	}
 
+# Transfer protocol
+print &ui_table_row($text{'transfer_proto'},
+	&ui_select("proto", "ssh",
+		   [ [ "ssh", $text{'transfer_ssh'} ],
+		     [ "webmin", $text{'transfer_webmin'} ] ]));
+
 # Root password
 print &ui_table_row($text{'transfer_pass'},
 	&ui_password("hostpass", undef, 20)." ".

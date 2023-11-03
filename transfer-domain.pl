@@ -9,8 +9,10 @@ must also run Virtualmin. The server to move is specified with the C<--domain>
 flag, and if a top-level server is given all sub-servers will be moved along
 with it.
 
-The target system is set with the C<--host> flag follow by the hostname or
-IP of a system that is reachable via SSH. If the C<root> user requires a
+By default, the transfer to the new system is done via SSH. However, you can
+switch to using the Webmin RPC protocol with the C<--webmin> flag. The target
+system is set with the C<--host> flag follow by the hostname or IP of a system
+that is reachable via the chosen protocol. If the C<root> user requires a
 password to login, the C<--pass> flag must also be given.
 
 By default the domain is simply copied to the target system using Virtualmin's
