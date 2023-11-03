@@ -1722,15 +1722,15 @@ my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 if ($d->{'alias'} && $d->{'alias_mode'}) {
 	# Just re-add ServerAlias entries if missing
 	&$first_print($text{'restore_apachecp2'});
-	local $alias = &get_domain($d->{'alias'});
-	local ($pvirt, $pconf, $conf) = &get_apache_virtual($alias->{'dom'},
-						            $alias->{'web_port'});
+	my $alias = &get_domain($d->{'alias'});
+	my ($pvirt, $pconf, $conf) = &get_apache_virtual($alias->{'dom'},
+						         $alias->{'web_port'});
 	if (!$pvirt) {
 		&$second_print($text{'setup_ewebalias'});
 		return 0;
 		}
-	local @sa = &apache::find_directive("ServerAlias", $pconf);
-	local $srclref = &read_file_lines($file, 1);
+	my @sa = &apache::find_directive("ServerAlias", $pconf);
+	my $srclref = &read_file_lines($file, 1);
 	push(@sa, @$srclref);
 	&unflush_file_lines($file);
 	@sa = &unique(@sa);
@@ -1741,17 +1741,17 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 	}
 &$first_print($text{'restore_apachecp'});
 &obtain_lock_web($d);
-local $rv;
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+my $rv;
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
 					    $d->{'web_port'});
-local $tmpl = &get_template($d->{'template'});
+my $tmpl = &get_template($d->{'template'});
 if ($virt) {
-	local $srclref = &read_file_lines($file);
-	local $dstlref = &read_file_lines($virt->{'file'});
+	my $srclref = &read_file_lines($file);
+	my $dstlref = &read_file_lines($virt->{'file'});
 
 	# Extract old logging-based directives before we change them, so they
 	# can be restored later to match *this* system
-	local %lmap;
+	my %lmap;
 	foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
 		if ($dstlref->[$i] =~
 		    /^\s*(CustomLog|ErrorLog|TransferLog)\s+(.*)/i) {
@@ -1764,7 +1764,7 @@ if ($virt) {
 
 	if ($allopts->{'reuid'}) {
 		# Fix up any UID or GID in suexec lines
-		local $i;
+		my $i;
 		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
 			if ($dstlref->[$i] =~ /^\s*SuexecUserGroup\s/) {
 				$dstlref->[$i] = "SuexecUserGroup ".
@@ -1775,7 +1775,7 @@ if ($virt) {
 
 	# Fix up any DocumentRoot or other file-related directives
 	if ($oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
-		local $i;
+		my $i;
 		foreach $i ($virt->{'line'} ..
 			    $virt->{'line'}+scalar(@$srclref)-1) {
 			$dstlref->[$i] =~
@@ -1801,7 +1801,7 @@ if ($virt) {
 	else {
 		($oldn, $newn) = ('AuthUserFile', 'AuthDigestFile');
 		}
-	local $i;
+	my $i;
 	foreach $i ($virt->{'line'} ..  $virt->{'line'}+scalar(@$srclref)-1) {
 		if ($dstlref->[$i] =~ /^\s*\Q$oldn\E\s+(.*)$/) {
 			$dstlref->[$i] = "$newn $1";
@@ -1823,20 +1823,20 @@ if ($virt) {
 
 	# Re-generate PHP wrappers to match this system
 	if (defined(&create_php_wrappers) && !$d->{'alias'}) {
-		local $mode = &get_domain_php_mode($d);
+		my $mode = &get_domain_php_mode($d);
 		&create_php_wrappers($d, $mode);
 		}
 	&$second_print($text{'setup_done'});
 
 	# Make sure the PHP execution mode is valid
-	local $mode;
+	my $mode;
 	if (!$d->{'alias'}) {
 		&$first_print($text{'restore_checkmode'});
 		$mode = &get_domain_php_mode($d);
-		local @supp = &supported_php_modes();
+		my @supp = &supported_php_modes();
 		if ($mode && &indexof($mode, @supp) < 0 && @supp) {
 			# Need to fix
-			local $fix = pop(@supp);
+			my $fix = pop(@supp);
 			&save_domain_php_mode($d, $fix);
 			&$second_print(&text('restore_badmode', 
 					$text{'phpmode_short_'.$mode},
@@ -1857,8 +1857,8 @@ if ($virt) {
 
 	# Correct system-specific entries in PHP config files
 	if (!$d->{'alias'} && $oldd) {
-		local $sock = &get_php_mysql_socket($d);
-		local @fixes = (
+		my $sock = &get_php_mysql_socket($d);
+		my @fixes = (
 		  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  );
@@ -1888,7 +1888,7 @@ if ($virt) {
 		&$first_print($text{'restore_apachelog'});
 
 		# Restore the access log
-		local $alog = &get_apache_log($d->{'dom'},
+		my $alog = &get_apache_log($d->{'dom'},
 					      $d->{'web_port'});
 		&copy_source_dest($file."_alog", $alog);
 		&set_apache_log_permissions($d, $alog);
@@ -1905,8 +1905,8 @@ if ($virt) {
 
 		if (-r $file."_elog") {
 			# Restore the error log
-			local $elog = &get_apache_log($d->{'dom'},
-						      $d->{'web_port'}, 1);
+			my $elog = &get_apache_log($d->{'dom'},
+						   $d->{'web_port'}, 1);
 			&copy_source_dest($file."_elog", $elog);
 			&set_apache_log_permissions($d, $elog);
 			}
@@ -1964,15 +1964,14 @@ return $rv;
 # day counters in the given hash
 sub bandwidth_web
 {
-local @logs = ( &get_apache_log($_[0]->{'dom'}, $_[0]->{'web_port'}),
-		&get_apache_log($_[0]->{'dom'}, $_[0]->{'web_sslport'}) );
-return if ($_[0]->{'alias'} || $_[0]->{'subdom'}); # never accounted separately
-local $l;
-local $max_ltime = $_[1];
-foreach $l (&unique(@logs)) {
-	local $f;
-	foreach $f (&all_log_files($l, $max_ltime)) {
-		local $_;
+my ($d, $start, $bwhash) = @_;
+my @logs = ( &get_apache_log($d->{'dom'}, $d->{'web_port'}),
+	     &get_apache_log($d->{'dom'}, $d->{'web_sslport'}) );
+return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
+my $max_ltime = $start;
+foreach my $l (&unique(@logs)) {
+	foreach my $f (&all_log_files($l, $max_ltime)) {
+		my $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");
 			}
@@ -1985,10 +1984,11 @@ foreach $l (&unique(@logs)) {
 		while(<LOG>) {
 			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/) {
 				# Valid-looking log line .. work out the time
-				local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6);
-				if ($ltime > $_[1]) {
-					local $day = int($ltime / (24*60*60));
-					$_[2]->{"web_".$day} += $13;
+				my $ltime = timelocal(
+				    $9, $8, $7, $4, $apache_mmap{lc($5)}, $6);
+				if ($ltime > $start) {
+					my $day = int($ltime / (24*60*60));
+					$bwhash->{"web_".$day} += $13;
 					}
 				$max_ltime = $ltime if ($ltime > $max_ltime);
 				}
@@ -2013,13 +2013,13 @@ if ($file !~ /^(.*)\/([^\/]+)$/) {
 	# Not a valid path?!
 	return ( );
 	}
-local $dir = $1;
-local $base = $2;
-local ($f, @rv, %mtime);
+my $dir = $1;
+my $base = $2;
+my ($f, @rv, %mtime);
 opendir(DIR, $dir);
 foreach $f (readdir(DIR)) {
 	if ($f =~ /^\Q$base\E/ && -f "$dir/$f" && $f ne $base.".offset") {
-		local @st = stat("$dir/$f");
+		my @st = stat("$dir/$f");
 		if ($f ne $base) {
 			next if ($ltime && $st[9] <= $ltime);
 			}
@@ -2035,14 +2035,15 @@ return sort { $mtime{$a} cmp $mtime{$b} } @rv;
 # Create a framefwd.html file for a server, if needed
 sub create_framefwd_file
 {
-if ($_[0]->{'proxy_pass_mode'} == 2) {
-	local $template = &get_template($_[0]->{'template'});
-	local $ff = &framefwd_file($_[0]);
+my ($d) = @_;
+if ($d->{'proxy_pass_mode'} == 2) {
+	my $template = &get_template($d->{'template'});
+	my $ff = &framefwd_file($d);
 	&unlink_file($ff);
-	local $text = $template->{'frame'};
+	my $text = $template->{'frame'};
 	$text =~ s/\t/\n/g;
 	&open_tempfile_as_domain_user($d, FRAME, ">$ff");
-	local %subs = %{$_[0]};
+	my %subs = %{$d};
 	$subs{'proxy_title'} ||= $tmpl{'owner'};
 	$subs{'proxy_meta'} ||= "";
 	$subs{'proxy_meta'} = join("\n", split(/\t/, $subs{'proxy_meta'}));
@@ -2050,7 +2051,7 @@ if ($_[0]->{'proxy_pass_mode'} == 2) {
 	&close_tempfile_as_domain_user($d, FRAME);
 
 	# Create a blank HTML page too, used in the frameset
-	local $bl = &frameblank_file($_[0]);
+	my $bl = &frameblank_file($d);
 	&unlink_file($bl);
 	&open_tempfile_as_domain_user($d, BLANK, ">$bl");
 	&print_tempfile(BLANK, "<body bgcolor=#ffffff></body>\n");
@@ -2062,16 +2063,17 @@ if ($_[0]->{'proxy_pass_mode'} == 2) {
 # Returns the HTML documents directory for a virtual server
 sub public_html_dir
 {
-local ($d, $rel, $nosubdom) = @_;
+my ($d, $rel, $nosubdom) = @_;
+
 # First check for cache in domain object
-local $want = $rel ? 'public_html_dir' : 'public_html_path';
+my $want = $rel ? 'public_html_dir' : 'public_html_path';
 if ($d->{$want} && !$nosubdom) {
 	return $d->{$want};
 	}
 if ($d->{'subdom'} && !$nosubdom) {
 	# Under public_html of parent domain
-	local $subdom = &get_domain($d->{'subdom'});
-	local $phtml = &public_html_dir($subdom, $rel);
+	my $subdom = &get_domain($d->{'subdom'});
+	my $phtml = &public_html_dir($subdom, $rel);
 	if ($rel) {
 		return "../../$phtml/$d->{'subprefix'}";
 		}
@@ -2081,8 +2083,8 @@ if ($d->{'subdom'} && !$nosubdom) {
 	}
 else {
 	# Under own home
-	local $tmpl = &get_template($d->{'template'});
-	local ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
+	my $tmpl = &get_template($d->{'template'});
+	my ($hdir) = ($tmpl->{'web_html_dir'} || 'public_html');
 	if ($hdir ne 'public_html') {
 		$hdir = &substitute_domain_template($hdir, $d);
 		}
@@ -2096,10 +2098,10 @@ else {
 # failure.
 sub set_public_html_dir
 {
-local ($d, $subdir, $rename) = @_;
-local $p = &domain_has_website($d);
-local $path = $d->{'home'}."/".$subdir;
-local $oldpath = $d->{'public_html_path'};
+my ($d, $subdir, $rename) = @_;
+my $p = &domain_has_website($d);
+my $path = $d->{'home'}."/".$subdir;
+my $oldpath = $d->{'public_html_path'};
 if ($rename && (&is_under_directory($oldpath, $path) ||
 		&is_under_directory($path, $oldpath))) {
 	return "The old and new HTML directories cannot be sub-directories of ".
@@ -2116,21 +2118,20 @@ if ($p ne "web") {
 	}
 else {
 	# Do it for Apache
-	local @ports = ( $d->{'web_port'},
-			 $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+	my @ports = ( $d->{'web_port'},
+		      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
 	foreach my $p (@ports) {
-		local ($virt, $vconf, $conf) =
+		my ($virt, $vconf, $conf) =
 			&get_apache_virtual($d->{'dom'}, $p);
 		next if (!$virt);
-		&apache::save_directive(
-			"DocumentRoot", [ $path ], $vconf, $conf);
-		local @dirs = &apache::find_directive_struct(
-			"Directory", $vconf);
-		local ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
-				      $_->{'words'}->[0] eq $oldpath."/"} @dirs;
+		&apache::save_directive("DocumentRoot", [ $path ],
+					$vconf, $conf);
+		my @dirs = &apache::find_directive_struct("Directory", $vconf);
+		my ($dir) = grep { $_->{'words'}->[0] eq $oldpath ||
+				   $_->{'words'}->[0] eq $oldpath."/"} @dirs;
 		$dir ||= $dirs[0];
 		$dir || return "No existing Directory block found!";
-		local $olddir = { %$dir };
+		my $olddir = { %$dir };
 		$dir->{'value'} = $path;
 		&apache::save_directive_struct($olddir, $dir, $vconf, $conf, 1);
 		&flush_file_lines($virt->{'file'});
@@ -2151,17 +2152,18 @@ return undef;
 # Returns the CGI programs directory for a virtual server
 sub cgi_bin_dir
 {
-local ($d, $rel, $nosubdom) = @_;
+my ($d, $rel, $nosubdom) = @_;
+
 # First check for cache in domain object
-local $want = $rel ? 'cgi_bin_dir' : 'cgi_bin_path';
+my $want = $rel ? 'cgi_bin_dir' : 'cgi_bin_path';
 if ($d->{$want} && !$nosubdom) {
 	return $d->{$want};
 	}
-local $cdir = $d->{'cgi_bin_dir'} || "cgi-bin";
+my $cdir = $d->{'cgi_bin_dir'} || "cgi-bin";
 if ($d->{'subdom'} && !$nosubdom) {
 	# Under cgi-bin of parent domain
-	local $subdom = &get_domain($d->{'subdom'});
-	local $pcgi = &cgi_bin_dir($subdom, $rel);
+	my $subdom = &get_domain($d->{'subdom'});
+	my $pcgi = &cgi_bin_dir($subdom, $rel);
 	return $rel ? "../../$pcgi/$d->{'subprefix'}"
 		    : "$pcgi/$d->{'subprefix'}";
 	}
@@ -2174,14 +2176,16 @@ else {
 # framefwd_file(&domain)
 sub framefwd_file
 {
-local $hdir = &public_html_dir($_[0]);
+my ($d) = @_;
+my $hdir = &public_html_dir($d);
 return "$hdir/framefwd.html";
 }
 
 # frameblank_file(&domain)
 sub frameblank_file
 {
-local $hdir = &public_html_dir($_[0]);
+my ($d) = @_;
+my $hdir = &public_html_dir($d);
 return "$hdir/frameblank.html";
 }
 
@@ -2189,33 +2193,34 @@ return "$hdir/frameblank.html";
 # Ensure that a website has a home directory, if not proxying
 sub check_depends_web
 {
-if (!$_[0]->{'parent'} && !$_[0]->{'unix'}) {
+my ($d) = @_;
+if (!$d->{'parent'} && !$d->{'unix'}) {
 	# For a non-sub-server, we need a Unix user
 	return $text{'setup_edepunix2'};
 	}
-if ($_[0]->{'alias'}) {
+if ($d->{'alias'}) {
 	# If this is an alias domain, then no home is needed
 	return undef;
 	}
-elsif ($_[0]->{'proxy_pass_mode'} == 2) {
+elsif ($d->{'proxy_pass_mode'} == 2) {
 	# If proxying using frame forwarding, a home is needed
-	return $_[0]->{'dir'} ? undef : $text{'setup_edepframe'};
+	return $d->{'dir'} ? undef : $text{'setup_edepframe'};
 	}
-elsif ($_[0]->{'proxy_pass_mode'} == 1) {
+elsif ($d->{'proxy_pass_mode'} == 1) {
 	# If proxying using ProxyPass, no home is needed
 	return undef;
 	}
 else {
 	# For a normal website, we need a home
-	return $_[0]->{'dir'} ? undef : $text{'setup_edepweb'};
+	return $d->{'dir'} ? undef : $text{'setup_edepweb'};
 	}
 }
 
 # frame_fwd_input(forwardto)
 sub frame_fwd_input
 {
-local $rv;
-local $label;
+my ($fwdto) = @_;
+my $label;
 if ($config{'proxy_pass'} == 1) {
 	$label = &hlink($text{'form_proxy'}, "proxypass");
 	}
@@ -2223,7 +2228,7 @@ else {
 	$label = &hlink($text{'form_framefwd'}, "framefwd");
 	}
 return &ui_table_row($label,
-	&ui_opt_textbox("proxy", $_[0], 40,
+	&ui_opt_textbox("proxy", $fwdto, 40,
 			$text{'form_plocal'}, $text{'form_purl'}), 3);
 }
 
@@ -2231,11 +2236,13 @@ return &ui_table_row($label,
 # Creates the writelogs wrapper
 sub setup_writelogs
 {
+my ($d) = @_;
 &foreign_require("cron");
 &cron::create_wrapper($writelogs_cmd, $module_name, "writelogs.pl");
 if (&has_command("chcon")) {
-	&execute_command("chcon -t httpd_sys_script_exec_t ".quotemeta($writelogs_cmd).
-	       ">/dev/null 2>&1");
+	&execute_command("chcon -t httpd_sys_script_exec_t ".
+		quotemeta($writelogs_cmd).
+		">/dev/null 2>&1");
 	&execute_command("chcon -t httpd_sys_script_exec_t ".
 	       quotemeta("$module_root_directory/writelogs.pl").
 	       ">/dev/null 2>&1");
@@ -2246,20 +2253,20 @@ if (&has_command("chcon")) {
 # Enables logging via a program for some server
 sub enable_writelogs
 {
+my ($d) = @_;
 &require_apache();
-local $conf = &apache::get_config();
-local @ports = ( $_[0]->{'web_port'},
-		 $_[0]->{'ssl'} ? ( $_[0]->{'web_sslport'} ) : ( ) );
-local ($p, $any);
-foreach $p (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'}, $p);
-	local $ld;
-	foreach $ld ("CustomLog", "ErrorLog") {
-		local $custom = &apache::find_directive($ld, $vconf);
+my $conf = &apache::get_config();
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $any = 0;
+foreach my $p (@ports) {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	foreach my $ld ("CustomLog", "ErrorLog") {
+		my $custom = &apache::find_directive($ld, $vconf);
 		if ($custom !~ /$writelogs_cmd/ && $custom =~ /(\S+)(\s*\S*)/) {
 			# Fix logging directive
 			&$first_print($text{'save_fix'.lc($ld)});
-			$custom = "\"|$writelogs_cmd $_[0]->{'id'} $1\"$2";
+			$custom = "\"|$writelogs_cmd $d->{'id'} $1\"$2";
 			&apache::save_directive($ld, [ $custom ],
 						$vconf, $conf);
 			&$second_print($text{'setup_done'});
@@ -2277,16 +2284,16 @@ if ($any) {
 # Disables logging via a program for some server
 sub disable_writelogs
 {
+my ($d) = @_;
 &require_apache();
-local $conf = &apache::get_config();
-local @ports = ( $_[0]->{'web_port'},
-		 $_[0]->{'ssl'} ? ( $_[0]->{'web_sslport'} ) : ( ) );
-local ($p, $any);
-foreach $p (@ports) {
-	local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'}, $p);
-	local $ld;
-	foreach $ld ("CustomLog", "ErrorLog") {
-		local $custom = &apache::find_directive($ld, $vconf);
+my $conf = &apache::get_config();
+my @ports = ( $d->{'web_port'},
+	      $d->{'ssl'} ? ( $d->{'web_sslport'} ) : ( ) );
+my $any = 0;
+foreach my $p (@ports) {
+	my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $p);
+	foreach my $ld ("CustomLog", "ErrorLog") {
+		my $custom = &apache::find_directive($ld, $vconf);
 		if ($custom =~ /^"\|$writelogs_cmd\s+(\S+)\s+(\S+)"(\s*\S*)/) {
 			# Un-fix logging directive
 			&$first_print($text{'save_unfix'.lc($ld)});
@@ -2308,9 +2315,9 @@ if ($any) {
 # Returns 1 if some domain is doing logging via a program
 sub get_writelogs_status
 {
-local ($virt, $vconf) = &get_apache_virtual($_[0]->{'dom'},
-					    $_[0]->{'web_port'});
-local $custom = &apache::find_directive("CustomLog", $vconf);
+my ($d) = @_;
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+my $custom = &apache::find_directive("CustomLog", $vconf);
 return $custom =~ /^"\|$writelogs_cmd\s+(\S+)\s+(\S+)"(\s*\S*)/ ? 1 : 0;
 }
 
@@ -2319,23 +2326,24 @@ return $custom =~ /^"\|$writelogs_cmd\s+(\S+)\s+(\S+)"(\s*\S*)/ ? 1 : 0;
 # that this is a new file.
 sub get_website_file
 {
+my ($d) = @_;
 &require_apache();
-local $vfile = $apache::config{'virt_file'} ?
+my $vfile = $apache::config{'virt_file'} ?
 	&apache::server_root($apache::config{'virt_file'}) :
 	undef;
-local ($rv, $newfile);
+my ($rv, $newfile);
 if ($vfile) {
 	if (!-d $vfile) {
 		$rv = $vfile;
 		}
 	else {
-		local $tmpl = $apache::config{'virt_name'} || '${DOM}.conf';
-		$rv = "$vfile/".&substitute_domain_template($tmpl, $_[0]);
+		my $tmpl = $apache::config{'virt_name'} || '${DOM}.conf';
+		$rv = "$vfile/".&substitute_domain_template($tmpl, $d);
 		$newfile = 1;
 		}
 	}
 else {
-	local $vconf = &apache::get_virtual_config();
+	my $vconf = &apache::get_virtual_config();
 	$rv = $vconf->[0]->{'file'};
 	}
 $rv =~ s/\/+/\//g;	# Fix use of //
@@ -2346,12 +2354,13 @@ return wantarray ? ($rv, $newfile) : $rv;
 # Returns the Unix user that the Apache process runs as, such as www or httpd
 sub get_apache_user
 {
-if ($_[0]) {
-	local $tmpl = &get_template($_[0]->{'template'});
+my ($d) = @_;
+if ($d) {
+	my $tmpl = &get_template($d->{'template'});
 	return $tmpl->{'web_user'} if ($tmpl->{'web_user'} &&
 				       defined(getpwnam($tmpl->{'web_user'})));
 	}
-foreach $u ("httpd", "apache", "www", "www-data", "wwwrun", "nobody") {
+foreach my $u ("httpd", "apache", "www", "www-data", "wwwrun", "nobody") {
 	return $u if (defined(getpwnam($u)));
 	}
 return undef;	# won't happen!
