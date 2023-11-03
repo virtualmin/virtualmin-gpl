@@ -257,8 +257,7 @@ local ($d, $preserve) = @_;
 
 # Delete homedir
 &require_useradmin();
-if (-d $d->{'home'} && $d->{'home'} ne "/" &&
-    !&same_file($d->{'home'}, $home_base)) {
+if (-d $d->{'home'} && &safe_delete_dir($d, $d->{'home'})) {
 	&$first_print($text{'delete_home'});
 
 	# Don't delete if on remote
@@ -1178,6 +1177,18 @@ return $tab && $tab->[1] =~ /^[a-z0-9\.\_\-]+:/i ? $tab->[1] : undef;
 sub can_reset_dir
 {
 return 0;
+}
+
+# safe_delete_dir(&domain, dir)
+# Returns 1 if a directory for a domain can be safely removed
+sub safe_delete_dir
+{
+my ($d, $dir) = @_;
+return $dir eq '/' || $dir eq '/root' ||
+       $dir eq '/etc' || $dir eq '/usr' ||
+       &same_file($dir, $home_base) ||
+       &is_under_directory($root_directory, $dir) ||
+       !&is_under_directory($d->{'home'}, $dir) ? 0 : 1;
 }
 
 $done_feature_script{'dir'} = 1;
