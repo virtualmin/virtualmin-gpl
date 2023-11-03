@@ -1434,6 +1434,11 @@ if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 			}
 		}
 	}
+elsif ($log =~ /^\|(\$)?(tee|\S+\/tee)(\s+\-a)?\s+("[^"]+"|\S+)/) {
+	# Log via the tee command
+	$log = $4;
+	$log = $1 if ($log =~ /^"(.*)"$/);
+	}
 elsif ($log =~ /^\|/) {
 	# Via some program .. so we don't know where the real log is
 	$log = undef;
