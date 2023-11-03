@@ -1742,8 +1742,7 @@ if ($d->{'alias'} && $d->{'alias_mode'}) {
 &$first_print($text{'restore_apachecp'});
 &obtain_lock_web($d);
 my $rv;
-my ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_port'});
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
 my $tmpl = &get_template($d->{'template'});
 if ($virt) {
 	my $srclref = &read_file_lines($file);
