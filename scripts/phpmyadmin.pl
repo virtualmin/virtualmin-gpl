@@ -19,7 +19,7 @@ return "A browser-based MySQL database management interface";
 # script_phpmyadmin_versions()
 sub script_phpmyadmin_versions
 {
-return ( "6.0.0", "5.2.1", "4.9.11" );
+return ( "6.0", "5.2.1", "4.9.11" );
 }
 
 sub script_phpmyadmin_preferred_version
@@ -37,7 +37,7 @@ return &compare_versions($ver, "6") >= 0 ? "$ver (devel)" :
 
 sub script_phpmyadmin_release
 {
-return 10;		# To fix MySQL version check
+return 11;		# Version is 6.0, not 6.0.0
 }
 
 sub script_phpmyadmin_can_upgrade
@@ -216,9 +216,7 @@ my ($d, $ver, $opts, $upgrade) = @_;
 my $origver = $ver;
 my $url;
 if (&compare_versions($ver, 6) >= 0) {
-	# Fix version number to match
-	# snapshot, i.e. 6.0.0 to 6.0
-	$ver =~ s/\.\d+$//;
+	# Fix version number to match snapshot
 	$ver = $ver."+snapshot";
 	}
 if ($opts->{'all_langs'}) {
@@ -387,7 +385,11 @@ return (1, "phpMyAdmin directory deleted.");
 sub script_phpmyadmin_latest
 {
 local ($ver) = @_;
-if (&compare_versions($ver, "5") > 0) {
+if (&compare_versions($ver, "6") > 0) {
+	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
+		 "phpMyAdmin-(6\\.[0-9\\.]+)\\+snapshot-all-languages\\.zip" );
+	}
+elsif (&compare_versions($ver, "5") > 0) {
 	return ( "http://www.phpmyadmin.net/home_page/downloads.php",
 		 "phpMyAdmin-(5\\.[0-9][0-9\\.]+)-all-languages\\.zip" );
 	}
