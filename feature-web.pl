@@ -1970,7 +1970,6 @@ return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
 my $max_ltime = $start;
 foreach my $l (&unique(@logs)) {
 	foreach my $f (&all_log_files($l, $max_ltime)) {
-		my $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");
 			}
