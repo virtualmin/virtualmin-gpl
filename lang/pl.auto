@@ -1,5 +1,6 @@
 index_migrate=Przeprowadź migrację serwera wirtualnego
 index_batch=Partia Utwórz serwery
+index_type=Typ domeny
 index_ftp=FTP?
 index_reseller=Odsprzedawca
 index_admins=Administratorzy
@@ -180,6 +181,7 @@ index_certinvalid=Plik certyfikatu SSL $2 dla $1 jest nieprawidłowy : $3
 index_keyinvalid=Plik kluczy SSL $2 dla $1 jest nieprawidłowy : $3 
 index_global_eg=np.
 
+form_generic_aliasshort=Alias
 form_rmysql=Serwer bazy danych MySQL
 form_web=Skonfigurować witrynę Apache?
 form_ftp=Czy skonfigurować wirtualny FTP oparty na IP?
@@ -217,7 +219,7 @@ form_ealiasdom=Alias docelowej domeny nie został znaleziony!
 form_fwdto=Domyślny adres do przesyłania poczty
 form_park=Początkowa treść strony
 form_content=Utworzyć początkową stronę internetową?
-form_content2=Tak, z domyślnym szablonem i zawartością poniżej
+form_content2=Tak, z domyślnym szablonem strony docelowej
 form_content0=Tak, z poniższą zawartością
 form_inputssect=Dodatkowe opcje funkcji
 
@@ -4614,6 +4616,8 @@ spf_emx=„$1” nie jest prawidłową nazwą domeny
 spf_eip4=„$1” nie jest prawidłowym adresem IPv4
 spf_eip6=„$1” nie jest prawidłowym adresem IPv6
 spf_einclude=„$1” nie jest prawidłową nazwą domeny do uwzględnienia
+spf_default3=Domyślny adres zewnętrzny
+spf_custom=Niestandardowy adres IP
 spf_public=Klucz publiczny DNSSEC
 spf_private=Klucz prywatny DNSSEC
 spf_dsrecs=Rekordy DS dla rejestratora

@@ -1,4 +1,5 @@
 index_batch=Batch-Server erstellen
+index_type=Domänentyp
 index_reseller=Wiederverkäufer
 index_plan=Planen
 index_phpv=PHP-Version
@@ -68,6 +69,7 @@ index_keyinvalid=Die SSL-Schlüsseldatei $2 für $1 ist ungültig : $3
 index_global_eg=z.B.
 
 form_enomore=Sie dürfen keine virtuellen Server mehr erstellen
+form_generic_aliasshort=Alias
 form_reseller=Im Besitz des Wiederverkäufers
 form_rmysql=MySQL-Datenbankserver
 form_noreseller=&lt;Keine&gt;
@@ -86,7 +88,7 @@ form_aliasdomslimit0=Maximal
 form_realdomslimit=Maximal zulässige Nicht-Alias-Server
 form_esubdom=Der übergeordnete Domain Virtualmin Server $1 wurde nicht gefunden!
 form_allocmaybe=Weisen Sie die IP zu, wenn der Server ursprünglich eine hatte, andernfalls freigegeben
-form_content2=Ja, mit Standardvorlage und Inhalt unten
+form_content2=Ja, mit der Standard-Landingpage-Vorlage
 form_content0=Ja, mit Inhalt unten
 
 setup_eplan=Der ausgewählte Plan existiert nicht oder ist nicht verfügbar
@@ -2191,6 +2193,8 @@ spf_all2=Entmutigen
 spf_eip6='$1' ist keine gültige IPv6-Adresse
 spf_default=Entspricht der tatsächlichen Adresse ($1)
 spf_default2=Gleich wie echte Adresse
+spf_default3=Externe Standardadresse
+spf_custom=Benutzerdefinierte IP-Adresse
 spf_dsrecs=DS-Datensätze für Registrar
 spf_edsrecs=DS-Datensätze konnten nicht generiert werden : $1
 spf_dmarcenable=DMARC-Datensatz erstellen ..

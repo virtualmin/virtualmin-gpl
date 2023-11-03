@@ -1,3 +1,4 @@
+index_type=Domeintype
 index_plan=Plan
 index_phpv=PHP-versie
 index_ip=IP adres
@@ -51,6 +52,7 @@ index_certinvalid=Het SSL-certificaatbestand $2 voor $1 is ongeldig : $3
 index_keyinvalid=Het SSL-sleutelbestand $2 voor $1 is ongeldig : $3
 index_global_eg=bijv.
 
+form_generic_aliasshort=Alias
 form_generic_aliasmail=Alias van $1, met eigen e-mailadres
 form_rmysql=MySQL-databaseserver
 form_web=Apache-website instellen?
@@ -61,7 +63,7 @@ form_sshkey1=Genereer privé- en openbare sleutels
 form_sshkey2=Gebruik onderstaande openbare sleutel. ..
 form_passf=Nieuw paswoord
 form_passa=herhaal wachtwoord
-form_content2=Ja, met standaardsjabloon en inhoud hieronder
+form_content2=Ja, met de standaard landingspaginasjabloon
 form_content0=Ja, met onderstaande inhoud
 
 setup_eforceunder=Je mag alleen domeinen maken onder $1
@@ -1208,6 +1210,8 @@ website_header=Website-opties
 spf_dmarcchange=DMARC-record bijwerken.
 spf_ip6=Toegestane IPv6-adressen van afzenders
 spf_eip6='$1' is geen geldig IPv6-adres
+spf_default3=Standaard extern adres
+spf_custom=Aangepast IP-adres
 spf_dsrecs=DS-records voor registrar
 spf_edsrecs=Kan DS-records niet genereren : $1
 spf_dmarcenable=DMARC-record maken. ..
