@@ -10,29 +10,34 @@ $d = &get_domain($in{'dom'});
 # Validate inputs
 my @hosts = &get_transfer_hosts();
 if ($in{'host_mode'}) {
+	# Use an old host
 	my ($h) = grep { $_->[0] eq $in{'oldhost'} } @hosts;
+	$h || &error($text{'transfer_eoldhost'});
 	$host = $h->[0];
 	$pass = $h->[1];
+	$proto = $h->[2] || 'ssh';
 	}
 else {
+	# Entering a new host
 	$in{'host'} =~ /^\S+$/ || &error($text{'transfer_ehost'});
 	($hostname) = split(/:/, $in{'host'});
 	&to_ipaddress($hostname) || &to_ip6address($hostname) ||
 		&error($text{'transfer_ehost2'});
 	$host = $in{'host'};
 	$pass = $in{'hostpass'};
+	$proto = $in{'proto'};
 	if ($in{'savehost'}) {
 		my ($h) = grep { $_->[0] eq $in{'host'} } @hosts;
 		if ($h) {
 			$h->[1] = $pass;
+			$h->[2] = $proto;
 			}
 		else {
-			push(@hosts, [ $host, $pass ]);
+			push(@hosts, [ $host, $pass, $proto ]);
 			}
 		&save_transfer_hosts(@hosts);
 		}
 	}
-$proto = $in{'proto'};
 my $err = &validate_transfer_host($d, $host, $pass, $proto, $in{'overwrite'});
 &error($err) if ($err);
 
