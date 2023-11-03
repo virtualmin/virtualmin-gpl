@@ -1406,19 +1406,19 @@ if ($virt) {
 		$log = &apache::find_directive("TransferLog", $vconf) ||
 		       &apache::find_directive("CustomLog", $vconf);
 		}
-	return &extract_writelogs_path($log);
+	return &extract_writelogs_path($log, $dname);
 	}
 else {
 	return undef;
 	}
 }
 
-# extract_writelogs_path(log-command)
+# extract_writelogs_path(log-command, domain-name)
 # Given a log destination, which may be input to a command, return the
 # real log file path.
 sub extract_writelogs_path
 {
-local ($log) = @_;
+local ($log, $dom) = @_;
 local $w = &apache::wsplit($log);	# Extract first word
 $log = $w->[0];
 if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
@@ -1434,7 +1434,7 @@ if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 			}
 		}
 	}
-elsif ($log =~ /^\|(\$)?(tee|\S+\/tee)(\s+\-a)?\s+("[^"]+"|\S+)/) {
+elsif ($log =~ /^\|(\$)?(tee|\S+\/tee)(\s+\-a)?.*?([^'"\s]+\Q$dom\E[^'"\s]+)/) {
 	# Log via the tee command
 	$log = $4;
 	$log = $1 if ($log =~ /^"(.*)"$/);
@@ -4521,7 +4521,7 @@ foreach my $p (@ports) {
 	next if (!$virt);
 	local $oldlog = &apache::find_directive($dir, $vconf);
 	next if (!$oldlog);
-	local $oldlogfile = &extract_writelogs_path($oldlog);
+	local $oldlogfile = &extract_writelogs_path($oldlog, $d->{'dom'});
 	$oldlog =~ s/\Q$oldlogfile\E/$log/;
 	$movelog ||= $oldlogfile;
 	&apache::save_directive($dir, [ $oldlog ], $vconf, $conf);
