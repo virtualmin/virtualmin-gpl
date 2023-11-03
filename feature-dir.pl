@@ -1184,8 +1184,13 @@ return 0;
 sub safe_delete_dir
 {
 my ($d, $dir) = @_;
-return $dir eq '/' || $dir eq '/root' ||
-       $dir eq '/etc' || $dir eq '/usr' ||
+return 0 if ($dir eq '');
+$dir = &simplify_path($dir);
+return 0 if (!defined($dir));
+return $dir eq '/' ||
+       &is_under_directory('/root', $dir) ||
+       &is_under_directory('/etc', $dir) ||
+       &same_file($dir, '/usr') ||
        &same_file($dir, $home_base) ||
        &is_under_directory($root_directory, $dir) ||
        !&is_under_directory($d->{'home'}, $dir) ? 0 : 1;
