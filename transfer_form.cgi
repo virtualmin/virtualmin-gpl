@@ -18,7 +18,7 @@ if ($d->{'dns'}) {
 			# Default comes from SOA record
 			$maxttl = $r->{'values'}->[6];
 			}
-		if ($r->{'ttl'} &&
+		if (!&is_dnssec_record($r) && $r->{'ttl'} &&
 		    &ttl_to_seconds($r->{'ttl'}) > &ttl_to_seconds($maxttl)) {
 			$maxttl = $r->{'ttl'};
 			}

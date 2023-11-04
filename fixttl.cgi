@@ -26,7 +26,7 @@ else {
 
 # Update records
 foreach my $r (@$recs) {
-	if ($r->{'ttl'} && $r->{'type'} ne 'SOA') {
+	if ($r->{'ttl'} && $r->{'type'} ne 'SOA' && !&is_dnssec_record($r)) {
 		$r->{'ttl'} = $in{'newttl'};
 		&modify_dns_record($recs, $file, $r);
 		}
