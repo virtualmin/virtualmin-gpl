@@ -2565,8 +2565,8 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 		# not in the template. So enable it.
 		&$indent_print();
 		&$first_print($text{'restore_dnssec'});
-		if (&enable_domain_dnssec($d)) {
-			&$second_print($text{'setup_failed'});
+		if (my $err = &enable_domain_dnssec($d)) {
+			&$second_print(&text('restore_ednssec', $err));
 			}
 		else {
 			&$second_print($text{'setup_done'});
@@ -2604,8 +2604,11 @@ if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
 	if ($dnskeys) {
 		&$indent_print();
 		&$first_print($text{'restore_dnssec2'});
-		if (!@keys || !$rok) {
-			&$second_print($text{'setup_failed'});
+		if (!@keys) {
+			&$second_print($text{'restore_ednssec2a'});
+			}
+		elsif (!$rok) {
+			&$second_print($text{'restore_ednssec2b'});
 			}
 		else {
 			&$second_print($text{'setup_done'});
@@ -2704,9 +2707,9 @@ foreach my $t (@types) {
 if ($dnskeys) {
 	&$indent_print();
 	&$first_print($text{'restore_dnssec_resign'});
-	if (&disable_domain_dnssec($d) ||
-	    &enable_domain_dnssec($d)) {
-		&$second_print($text{'setup_failed'});
+	my $err = &disable_domain_dnssec($d) || &enable_domain_dnssec($d);
+	if ($err) {
+		&$second_print(&text('restore_ednssec_resign', $err));
 		}
 	else {
 		&$second_print($text{'setup_done'});
@@ -4384,7 +4387,8 @@ return $dnskey ? 1 : 0;
 }
 
 # disable_domain_dnssec(&domain)
-# Remove all DNSSEC records for a domain
+# Remove all DNSSEC records for a domain. Returns undef on success or an error
+# message on failure.
 sub disable_domain_dnssec
 {
 my ($d) = @_;
@@ -4410,7 +4414,8 @@ return undef;
 }
 
 # enable_domain_dnssec(&domain)
-# Add appropriate DNSSEC records for a domain
+# Add appropriate DNSSEC records for a domain. Returns undef on success or an
+# error message on failure.
 sub enable_domain_dnssec
 {
 my ($d) = @_;
