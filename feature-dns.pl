@@ -2555,7 +2555,7 @@ else {
 		}
 	}
 
-if (!$d->{'dns_submode'} && &can_domain_dnssec($d)) {
+if (!$d->{'dns_submode'} && &can_domain_dnssec($d) && $tmpl->{'dnssec_alg'}) {
 	# If the backup contained a DNSSEC key and this system has the zone
 	# signed, copy them in (but under the OLD filenames, so they match
 	# up with the key IDs in records)
