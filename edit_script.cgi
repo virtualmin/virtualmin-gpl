@@ -142,7 +142,7 @@ if (!script_migrated_disallowed($script->{'migrated'})) {
 	$canupfunc = $script->{'can_upgrade_func'};
 	if (!$sinfo->{'deleted'}) {
 		if (defined(&$canupfunc)) {
-			@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+			@vers = grep { &$canupfunc($sinfo, $_) > 0 } @vers;
 			}
 		if (@vers) {
 			# Upgrade button

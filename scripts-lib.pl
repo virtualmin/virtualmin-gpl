@@ -3327,6 +3327,7 @@ my @vers = grep { &can_script_version($script, $_) }
 my @allvers = @vers;
 my $canupfunc = $script->{'can_upgrade_func'};
 if (defined(&$canupfunc)) {
+	@allvers = grep { &$canupfunc($sinfo, $_) >= 0 } @allvers;
 	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
 	}
 my ($status, $canup);
