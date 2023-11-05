@@ -37,14 +37,14 @@ return &compare_versions($ver, "6") >= 0 ? "$ver (devel)" :
 
 sub script_phpmyadmin_release
 {
-return 12;		# Version is 6.0, not 6.0.0
+return 13;		# compare_versions is not compare_version_numbers
 }
 
 sub script_phpmyadmin_can_upgrade
 {
 local ($sinfo, $newver) = @_;
-if (&compare_versions($newver, '>=', 6) &&
-    &compare_versions($sinfo->{'version'}, '<=', 5)) {
+if (&compare_versions($newver, 6) >= 0 &&
+    &compare_versions($sinfo->{'version'}, 5) <= 0) {
 	# Cannot upgrade 5 -> 6 devel
 	return 0;
 	}
