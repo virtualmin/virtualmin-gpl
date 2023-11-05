@@ -22,7 +22,7 @@ Or switch back to using a TCP port with the C<--php-fpm-port> flag.
 
 If your system has more than one version of PHP installed, the version to use
 for a domain can be set with the C<--php-version> parameter, followed by a
-number (4 or 5).
+number (7.4 or 8.2).
 
 If Virtualmin runs PHP via FastCGI, you can set the number of PHP sub-processes
 with the C<--php-children> parameter or using C<--php-children-no-check> parameter
