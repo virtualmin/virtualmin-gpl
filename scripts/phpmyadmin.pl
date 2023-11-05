@@ -37,7 +37,7 @@ return &compare_versions($ver, "6") >= 0 ? "$ver (devel)" :
 
 sub script_phpmyadmin_release
 {
-return 11;		# Version is 6.0, not 6.0.0
+return 12;		# Version is 6.0, not 6.0.0
 }
 
 sub script_phpmyadmin_can_upgrade
