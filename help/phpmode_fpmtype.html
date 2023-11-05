@@ -7,7 +7,34 @@ The mode is set using the <tt>pm</tt> configuration directive.<br>
 <br>
 <b><tt>dynamic</tt></b> (default)<br>
 In the <tt>dynamic</tt> mode, PHP-FPM dynamically adjusts the number of spawned
-child processes based on the demand. Benefits include automatic adjustment
+child processes based on the demand, and controlled by the following directives:
+<p></p>
+<table>
+<tr>
+        <td style="white-space: nowrap; vertical-align: top; padding-right: 0.5rem!important;"><tt>pm.max_children</tt></td>
+        <td>the maximum number of children that can be alive at the same time</td>
+</tr>
+<tr>
+        <td style="white-space: nowrap; vertical-align: top; padding-right: 0.5rem!important;"><tt>pm.start_servers</tt></td>
+        <td>the number of children created on startup</td>
+</tr>
+<tr>
+        <td style="white-space: nowrap; vertical-align: top; padding-right: 0.5rem!important;"><tt>pm.min_spare_servers</tt></td>
+        <td>the minimum number of children in 'idle' state (waiting to process). If the number of 'idle' processes is less than 
+                this number then some children will be created</td>
+</tr>
+<tr>
+        <td style="white-space: nowrap; vertical-align: top; padding-right: 0.5rem!important;"><tt>pm.max_spare_servers</tt></td>
+        <td>the maximum number of children in 'idle' state (waiting to process). If the number of 'idle' processes is greater than 
+                this number then some children will be killed</td>
+</tr>
+<tr>
+        <td style="white-space: nowrap; vertical-align: top; padding-right: 0.5rem!important;"><tt>pm.max_spawn_rate</tt></td>
+        <td>the maximum number of rate to spawn child processes at once</td>
+</tr>
+</table>  
+<p></p>
+Benefits include automatic adjustment
 of the number of child processes based on demand, ensuring optimal resource
 utilization. This is especially useful for servers with fluctuating loads.<br>
 
@@ -20,10 +47,10 @@ for servers with stable loads.<br>
 
 <br>
 <b><tt>ondemand</tt></b><br>
-In the <tt>ondemand</tt> mode, PHP-FPM spawns child processes only when they are needed,
-i.e., when there's an incoming request that needs processing. Processes are then terminated
-after being idle for a specified amount of time by the <tt>pm.process_idle_timeout</tt>
-directive. Benefits include reduced memory usage during periods of low or no traffic.
+In the <tt>ondemand</tt> mode, no children are created at startup. Instead PHP-FPM will spawn child processes only when needed,
+i.e., when there's an incoming request that needs processing. The maximum number of children that can be alive at the same time
+is controlled by <tt>pm.max_children</tt> directive. Processes are then terminated after being idle for a specified amount of
+time by the <tt>pm.process_idle_timeout</tt> directive. Benefits include reduced memory usage during periods of low or no traffic.
 Ideal for servers with intermittent loads or applications with unpredictable traffic
 patterns.<br>
 
