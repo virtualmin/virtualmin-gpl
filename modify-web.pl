@@ -13,9 +13,33 @@ parameter followed by one of C<none>, C<mod_php>, C<cgi>, C<fcgid> or C<fpm>.
 Or you can use C<--default-mode> to switch to the default defined in the 
 domain's template.
 
-When using FPM mode, you can configure Apache to use a socket file
+When using FPM mode, you can configure process manager mode, like C<dynamic>,
+C<static> or C<ondemand> with the C<--php-fpm-mode> flag.
+
+Additionally, when using FPM mode, you can configure webserver to use a socket file
 for communication with the FPM server with the C<--php-fpm-socket> flag.
 Or switch back to using a TCP port with the C<--php-fpm-port> flag.
+
+If your system has more than one version of PHP installed, the version to use
+for a domain can be set with the C<--php-version> parameter, followed by a
+number (7.4 or 8.2).
+
+If Virtualmin runs PHP via FastCGI, you can set the number of PHP sub-processes
+with the C<--php-children> parameter or using C<--php-children-no-check> parameter
+to skip recommended checks, or turn off the automatic startup of
+sub-processes with C<--no-php-children>. Similarly, the maximum run-time of 
+a PHP script can be set with C<--php-timeout>, or set to unlimited with
+C<--no-php-timeout>.
+
+PHP error logging can be enabled with the C<--php-log> flag, followed by
+a path like C<logs/php.log>. Alternately you can opt to use the default
+path with the C<--default-php-log> flag, or turn logging off with the flag
+C<--no-php-log>.
+
+If your Apache configuration contains unsupported C<mod_php> directives,
+the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
+This is primarily useful if the Apache module has been disabled, but not all
+directives have been cleaned up.
 
 The C<--proxy> parameter can be used to have the website proxy all requests
 to another URL, which must follow C<--proxy>. To disable this, the
@@ -25,16 +49,6 @@ The C<--framefwd> parameter similarly can be used to forward requests to the
 virtual server to another URL, using a hidden frame rather than proxying. To
 turn it off, using the C<--no-framefwd> option. To specify a title for the
 forwarding frame page, use C<--frametitle>.
-
-If your system has more than one version of PHP installed, the version to use
-for a domain can be set with the C<--php-version> parameter, followed by a
-number (4 or 5).
-
-If Virtualmin runs PHP via fastCGI, you can set the number of PHP sub-processes
-with the C<--php-children> parameter, or turn off the automatic startup of
-sub-processes with C<--no-php-children>. Similarly, the maximum run-time of 
-a PHP script can be set with C<--php-timeout>, or set to unlimited with
-C<--no-php-timeout>.
 
 If Ruby is installed, the execution mode for scripts in that language can be
 set with the C<--ruby-mode> flag, followed by either C<--mod_ruby>, C<--cgi> or
@@ -100,16 +114,6 @@ C<--protocols> flag to choose which are enabled for the website. This flag must
 be followed by some combination of C<http/1.1>, C<h2> and C<h2c>. To revert to
 the default protocols for your webserver, use the C<--default-protocols> flag.
 
-If your Apache configuration contains unsupported C<mod_php> directives,
-the C<--cleanup-mod-php> flag can be used to remove them from a virtual server.
-This is primarily useful if the Apache module has been disabled, but not all
-directives have been cleaned up.
-
-PHP error logging can be enabled with the C<--php-log> flag, followed by
-a path like C<logs/php.log>. Alternately you can opt to use the default
-path with the C<--default-php-log> flag, or turn logging off with the flag
-C<--no-php-log>.
-
 =cut
 
 package virtual_server;
@@ -146,13 +150,11 @@ while(@ARGV > 0) {
 	elsif ($a eq "--default-mode") {
 		$defmode = 1;
 		}
-	elsif ($a eq "--ruby-mode" && $supports_ruby) {
-		$rubymode = shift(@ARGV);
-		}
-	elsif ($a eq "--php-children") {
+	elsif ($a =~ /--php-children/) {
 		$children = shift(@ARGV);
+		$children_no_check = 1 if ($a =~ /no-check/);
 		$children > 0 || &usage("Invalid number of PHP sub-processes");
-		$children > $max_php_fcgid_children && &usage("Too many PHP sub-processes - maximum is $max_php_fcgid_children");
+		(!$children_no_check && $children > $max_php_fcgid_children) && &usage("Too many PHP sub-processes -  maximum recommended is $max_php_fcgid_children");
 		}
 	elsif ($a eq "--no-php-children") {
 		$children = 0;
@@ -186,6 +188,9 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-framefwd") {
 		$framefwd = "";
+		}
+	elsif ($a eq "--ruby-mode" && $supports_ruby) {
+		$rubymode = shift(@ARGV);
 		}
 	elsif ($a eq "--content") {
 		$content = shift(@ARGV);
@@ -279,6 +284,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--php-fpm-socket") {
 		$fpmsock = 1;
 		}
+	elsif ($a eq "--php-fpm-mode") {
+		$fpmtype = shift(@ARGV);
+		}
 	elsif ($a eq "--enable-fcgiwrap") {
 		$fcgiwrap = 1;
 		}
@@ -326,17 +334,17 @@ while(@ARGV > 0) {
 		}
 	}
 @dnames || $all_doms || usage("No domains to modify specified");
-$mode || $rubymode || defined($proxy) || defined($framefwd) || $tlsa ||
+$mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   $content || defined($children) || defined($phplog) ||
   $version || defined($webmail) || defined($matchall) || defined($timeout) ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
+  $fpmsock || $fpmtype || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
   $protocols || $fix_mod_php || &usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
-# Validate fastCGI options
+# Validate FastCGI options
 @modes = &supported_php_modes();
 if (defined($timeout)) {
 	grep(/^fcgid|fpm$/, @modes) ||
@@ -461,18 +469,35 @@ foreach $d (@doms) {
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
+	# Save PHP-FPM process manager mode
+	my $curr_phpmode = &get_domain_php_mode($d);
+	if ($curr_phpmode eq 'fpm' && $fpmtype) {
+		$fpmtype =~ /^(dynamic|static|ondemand)$/ ||
+			&usage("Unknown PHP-FPM process manager mode : $fpmtype. Valid modes are dynamic, static and ondemand");
+		my $fpmtype_curr = &get_domain_php_fpm_mode($d);
+		if ($fpmtype ne $fpmtype_curr) {
+			&$first_print(&text('phpmode_fpmtypeing', $fpmtype));
+			&save_domain_php_fpm_mode($d, $fpmtype);
+			&$second_print($text{'setup_done'});
+			}
+		}
+
 	# Update PHP fCGId children
 	if (defined($children) && !$d->{'alias'}) {
 		&$first_print("Updating PHP child processes ..");
 		$oldchildren = &get_domain_php_children($d);
+		$d->{'phpnosanity_check'} = $children_no_check;
 		if ($oldchildren == -2) {
 			&$second_print(".. not supported by this PHP mode");
 			}
-		elsif ($err = &save_domain_php_children($d, $children)) {
-			&$second_print(".. failed : $err");
-			}
 		else {
-			&$second_print(".. done");
+			my $ok = &save_domain_php_children($d, $children);
+			if (!$ok) {
+				&$second_print(".. failed");
+				}
+			else {
+				&$second_print(".. done");
+				}
 			}
 		}
 
@@ -480,8 +505,10 @@ foreach $d (@doms) {
 	if (defined($timeout) && !$d->{'alias'}) {
 		$oldtimeout = &get_fcgid_max_execution_time($d);
 		if ($timeout != $oldtimeout) {
+			&$first_print("Updating PHP maximum run-time ..");
 			&set_fcgid_max_execution_time($d, $timeout);
 			&set_php_max_execution_time($d, $timeout);
+			&$second_print(".. done");
 			}
 		}
 
@@ -920,7 +947,7 @@ foreach $d (@doms) {
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
+	    defined($children_no_check) || defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
 	    defined($fcgiwrap) || defined($phplog)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
@@ -949,16 +976,19 @@ print "Changes web server settings for one or more domains.\n";
 print "\n";
 print "virtualmin modify-web --domain name | --all-domains\n";
 print "                     [--mode mod_php|cgi|fcgid|fpm | --default-mode]\n";
-print "                     [--php-children number | --no-php-children]\n";
+print "                     [--php-children|--php-children-no-check number | --no-php-children]\n";
 print "                     [--php-version num]\n";
 print "                     [--php-timeout seconds | --no-php-timeout]\n";
 print "                     [--php-fpm-port | --php-fpm-socket]\n";
-if ($supports_ruby) {
-	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
-	}
+print "                     [--php-fpm-mode dynamic|static|ondemand]\n";
+print "                     [--php-log filename | --no-php-log | --default-php-log]\n";
+print "                     [--cleanup-mod-php]\n";
 print "                     [--proxy http://... | --no-proxy]\n";
 print "                     [--framefwd http://... | --no-framefwd]\n";
 print "                     [--frametitle \"title\" ]\n";
+if ($supports_ruby) {
+	print "                     [--ruby-mode none|mod_ruby|cgi|fcgid]\n";
+	}
 if ($virtualmin_pro) {
 	print "                     [--content text|filename]\n";
 	}
@@ -983,9 +1013,6 @@ print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
 print "                     [--protocols \"proto ..\" | --default-protocols]\n";
-print "                     [--cleanup-mod-php]\n";
-print "                     [--php-log filename | --no-php-log |\n";
-print "                      --default-php-log]\n";
 exit(1);
 }
 
