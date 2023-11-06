@@ -1419,6 +1419,7 @@ else {
 sub extract_writelogs_path
 {
 local ($log, $dom) = @_;
+my $log_ = $log;
 local $w = &apache::wsplit($log);	# Extract first word
 $log = $w->[0];
 if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
@@ -1434,8 +1435,8 @@ if ($log =~ /^\|\Q$writelogs_cmd\E\s+(\S+)\s+(\S+)/) {
 			}
 		}
 	}
-elsif ($log =~ /^(?:"|'|\\"|\\')?\|(\$)?(tee|\S+\/tee)(\s+\-a)?.*?([^'"\s]+(?:\Q$dom\E|\d{10,20})[^'"\s]+)/ ||
-       $log =~ /^(?:"|'|\\"|\\')?\|(\$)?(tee|\S+\/tee)(\s+\-a)?.*?([^'"\s]+.?[^'"\s]+)/) {
+elsif ($log_ =~ /^(?:"|'|\\"|\\')?\|(\$)?(tee|\S+\/tee)(\s+\-a)?.*?([^'"\s]+(?:\Q$dom\E|\d{10,20})[^'"\s]+)/ ||
+       $log_ =~ /^(?:"|'|\\"|\\')?\|(\$)?(tee|\S+\/tee)(\s+\-a)?.*?([^'"\s]+.?[^'"\s]+)/) {
 	# Log via the tee command
 	$log = $4;
 	$log = $1 if ($log =~ /^"(.*)"$/);
