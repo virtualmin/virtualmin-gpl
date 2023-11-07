@@ -19085,19 +19085,19 @@ return grep { /^[^@ ]+\@[^@ ]+$/ }
 	    map { $_->[0] } &mailboxes::split_addresses($str);
 }
 
-# execute_command_via_ssh(host:port, pass, command)
+# execute_command_via_ssh(host:port, user, pass, command)
 # Run some command on a remote system, and return either 1 and the output, or
 # 0 and an error message
 sub execute_command_via_ssh
 {
-my ($host, $pass, $cmd) = @_;
+my ($host, $user, $pass, $cmd) = @_;
 my $port;
 if ($host =~ s/:(\d+)$//) {
 	$port = $1;
 	}
 my $sshcmd = "ssh".($port ? " -p $port" : "")." ".
 	     $config{'ssh_args'}." ".
-	     "root\@".$host." ".
+	     $user."\@".$host." ".
 	     $cmd;
 my $err;
 my $out = &run_ssh_command($sshcmd, $pass, \$err);
@@ -19110,19 +19110,20 @@ else {
 	}
 }
 
-# execute_virtualmin_api_command(host, pass, proto, command)
+# execute_virtualmin_api_command(host, user, pass, proto, command)
 # Runs a Virtualmin API command on some system via SSH. Returns
 # 0 and the output structure on success, 1 and an error message
 # on remote API failure, or 2 and an error message on SSH failure.
 sub execute_virtualmin_api_command
 {
-my ($host, $pass, $proto, $cmd) = @_;
+my ($host, $user, $pass, $proto, $cmd) = @_;
 $proto ||= "ssh";
+$user ||= "root";
 my $out;
 if ($proto eq "ssh") {
 	# Run the virtualmin command via SSH
 	my $sshok;
-	($sshok, $out) = &execute_command_via_ssh($host, $pass,
+	($sshok, $out) = &execute_command_via_ssh($host, $user, $pass,
 						  "virtualmin ".$cmd);
 	if (!$sshok) {
 		return (2, $out);
@@ -19130,7 +19131,7 @@ if ($proto eq "ssh") {
 	}
 elsif ($proto eq "webmin") {
 	# Run via a Webmin API call
-	my $webmin = &dest_to_webmin("webmin://root:$pass\@$host:/tmp");
+	my $webmin = &dest_to_webmin("webmin://$user:$pass\@$host:/tmp");
 	eval {
 		local $main::error_must_die = 1;
 		&remote_foreign_require($webmin, "webmin");
@@ -19155,11 +19156,12 @@ else {
 	}
 }
 
-# validate_transfer_host(&domain, desthost, destpass, proto, ignore-clash)
+# validate_transfer_host(&domain, destuser, desthost, destpass, proto,
+# 			 ignore-clash)
 # Checks if a transfer to a remote Virtualmin system is possible
 sub validate_transfer_host
 {
-my ($d, $desthost, $destpass, $proto, $overwrite) = @_;
+my ($d, $desthost, $destuser, $destpass, $proto, $overwrite) = @_;
 
 # Cannot transfer a disabled domain
 if ($d->{'disabled'}) {
@@ -19167,7 +19169,7 @@ if ($d->{'disabled'}) {
 	}
 
 my ($status, $out) = &execute_virtualmin_api_command(
-	$desthost, $destpass, $proto, "list-domains --name-only");
+	$desthost, $destuser, $destpass, $proto, "list-domains --name-only");
 if ($status) {
 	# Couldn't connect or run the command
 	return &text('transfer_econnect', $out);
@@ -19210,11 +19212,12 @@ return undef;
 # an OK flag.
 sub transfer_virtual_server
 {
-my ($d, $desthost, $destpass, $proto, $deletemode, $deletemissing, $replication,
-    $showoutput, $reallocate) = @_;
+my ($d, $desthost, $destuser, $destpass, $proto, $deletemode, $deletemissing,
+    $replication, $showoutput, $reallocate) = @_;
 
 # Get all domains to include
 $proto ||= "ssh";
+$destuser ||= "root";
 my @doms = ( $d );
 push(@doms, &get_domain_by("parent", $d->{'id'}));
 push(@doms, &get_domain_by("alias", $d->{'id'}));
@@ -19241,16 +19244,17 @@ my $desturl;
 my $webmin;
 if ($proto eq "ssh") {
 	# Get the temp dir from the webmin config
-	$desturl = "ssh://root:$destpass\@$desthost";
-	my ($tok, $tout) = &execute_command_via_ssh($desthost, $destpass,
-				      "grep tempdir= /etc/webmin/config");
+	$desturl = "ssh://$destuser:$destpass\@$desthost";
+	my ($tok, $tout) = &execute_command_via_ssh(
+		$desthost, $destuser, $destpass,
+		"grep tempdir= /etc/webmin/config");
 	if ($tok && $tout =~ /tempdir=(\/\S+)/) {
 		$remotetempdir = $1;
 		}
 	}
 elsif ($proto eq "webmin") {
 	# Get the temp dir via Webmin call
-	$desturl = "webmin://root:$destpass\@$desthost";
+	$desturl = "webmin://$destuser:$destpass\@$desthost";
 	$webmin = &dest_to_webmin($desturl.':/tmp');
 	eval {
 		local $main::error_must_die = 1;
@@ -19305,7 +19309,7 @@ if (!$ok) {
 
 my $cleanup_remotetemp = sub {
 	if ($proto eq "ssh") {
-		&execute_command_via_ssh($desthost, $destpass,
+		&execute_command_via_ssh($desthost, $destuser, $destpass,
 					 "rm -rf ".quotemeta($remotetemp));
 		}
 	elsif ($proto eq "webmin") {
@@ -19320,8 +19324,8 @@ my $cleanup_remotetemp = sub {
 my @lsfiles;
 if ($proto eq "ssh") {
 	# Run the SSH command
-	my ($lsok, $lsout) = &execute_command_via_ssh($desthost, $destpass,
-						      "ls ".$remotetemp);
+	my ($lsok, $lsout) = &execute_command_via_ssh(
+		$desthost, $destuser, $destpass, "ls ".$remotetemp);
 	if (!$lsok) {
 		&$second_print(&text('transfer_eremotetemp',
 				     $remotetemp, $desthost));
@@ -19394,7 +19398,7 @@ elsif ($deletemode == 1) {
 # Restore via an API call to the remote system
 &$first_print($text{'transfer_restoring'});
 my ($rok, $rerr, $rout) = &execute_virtualmin_api_command(
-	$desthost, $destpass, $proto,
+	$desthost, $destuser, $destpass, $proto,
 	"restore-domain --source $remotetemp --all-domains --all-features ".
 	"--skip-warnings --continue-on-error ".
 	($deletemissing ? "--option dir delete 1 " : "").

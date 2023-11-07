@@ -9,6 +9,7 @@ $d = &get_domain($in{'dom'});
 
 # Validate inputs
 my @hosts = &get_transfer_hosts();
+$user = 'root';
 if ($in{'host_mode'}) {
 	# Use an old host
 	my ($h) = grep { $_->[0] eq $in{'oldhost'} } @hosts;
@@ -38,7 +39,8 @@ else {
 		&save_transfer_hosts(@hosts);
 		}
 	}
-my $err = &validate_transfer_host($d, $host, $pass, $proto, $in{'overwrite'});
+my $err = &validate_transfer_host($d, $host, $user, $pass, $proto,
+				  $in{'overwrite'});
 &error($err) if ($err);
 
 # Cannot both delete and replicate
@@ -54,7 +56,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$first_print(&text(@subs ? 'transfer_doing2' : 'transfer_doing',
 		    $d->{'dom'}, $host, scalar(@subs)));
 &$indent_print();
-$ok = &transfer_virtual_server($d, $host, $pass, $proto,
+$ok = &transfer_virtual_server($d, $host, $user, $pass, $proto,
 			       $in{'delete'},
 			       $in{'overwrite'} && !$in{'delete'},
 			       $in{'replication'}, $in{'output'});

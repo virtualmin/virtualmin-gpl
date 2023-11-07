@@ -67,6 +67,9 @@ while(@ARGV > 0) {
 		&to_ipaddress($desthostname) || &to_ip6address($desthostname) ||
 			&usage("Destination system cannot be resolved");
 		}
+	elsif ($a eq "--user") {
+		$destuser = shift(@ARGV);
+		}
 	elsif ($a eq "--pass") {
 		$destpass = shift(@ARGV);
 		}
@@ -116,7 +119,8 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist.");
 
 # Validate transfer target
-$err = &validate_transfer_host($d, $desthost, $destpass, $proto, $overwrite);
+$err = &validate_transfer_host($d, $desthost, $destuser, $destpass,
+			       $proto, $overwrite);
 &usage($err) if ($err);
 
 # Call the transfer function
@@ -125,7 +129,7 @@ my @subs = ( &get_domain_by("parent", $d->{'id'}),
 &$first_print(&text(@subs ? 'transfer_doing2' : 'transfer_doing',
 		    $d->{'dom'}, $desthost, scalar(@subs)));
 &$indent_print();
-$ok = &transfer_virtual_server($d, $desthost, $destpass, $proto,
+$ok = &transfer_virtual_server($d, $desthost, $destuser, $destpass, $proto,
 			       $delete ? 2 : $disable ? 1 : 0,
 			       $deletemissing, $replication, $showoutput,
 			       $reallocate);
