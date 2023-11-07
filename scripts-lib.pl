@@ -3336,13 +3336,13 @@ if ($sinfo->{'deleted'}) {
 		  $text{'scripts_deleted'}."</font>";
 	}
 elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
-	# Not on list of possible versions
+	# Not on list of possible versions that can be installed
 	my @better = grep { &compare_versions($_, $sinfo->{'version'},
 					      $script) > 0 } @vers;
 	my @allbetter = grep { &compare_versions($_, $sinfo->{'version'},
 					         $script) > 0 } @allvers;
 	if (@better) {
-		# Some newer version exists
+		# Some newer version exists and we can upgrade to it
 		$status = "<font color=#ffaa00>".
 		  &text('scripts_newer', $better[$#better]).
 		  "</font>";
@@ -3353,6 +3353,11 @@ elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
 		$status = "<font color=#ffaa00>".
 		  &text('scripts_newer2', $allbetter[$#allbetter]).
 		  "</font>";
+		}
+	elsif (&indexof($sinfo->{'version'}, @allvers) >= 0) {
+		# On the newest version that can be installed
+		$status = "<font color=#00aa00>".
+			  $text{'scripts_newest'}."</font>";
 		}
 	else {
 		$status = $text{'scripts_nonewer'};
