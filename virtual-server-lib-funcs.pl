@@ -15433,7 +15433,7 @@ if (&domain_has_website()) {
 					if ($t && $t =~ /^\d+$/ && $used{$t}++) {
 						# Port is wrong!
 						&$second_print(&text('check_webphpfpmport',
-							$conf->{'version'}, $t));
+							$conf->{'shortversion'}, $t));
 						while($used{$t}) {
 							$t = &increase_fpm_port($t) || 9001;
 							}
@@ -15453,7 +15453,7 @@ if (&domain_has_website()) {
 		my @bootfpms = grep { $_->{'init'} && !$_->{'enabled'}} @okfpms;
 		foreach my $conf (@bootfpms) {
 			&foreign_require("init");
-			&$second_print(&text('check_webfpmboot', $conf->{'version'}));
+			&$second_print(&text('check_webfpmboot', $conf->{'shortversion'}));
 			&init::enable_at_boot($conf->{'init'});
 			}
 
@@ -15499,8 +15499,8 @@ if (&domain_has_website()) {
 				}
 			if ($changed) {
 				&$second_print(&text('check_webphplocalfixed',
-					     $changed, $conf->{'version'}));
-				&$second_print(&text('check_fpmrestart', $conf->{'version'}));
+					     $changed, $conf->{'shortversion'}));
+				&$second_print(&text('check_fpmrestart', $conf->{'shortversion'}));
 				&push_all_print();
 				&set_all_null_print();
 				&restart_php_fpm_server($conf);
