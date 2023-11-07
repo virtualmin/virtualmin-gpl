@@ -3322,9 +3322,10 @@ else {
 sub describe_script_status
 {
 my ($sinfo, $script) = @_;
-my @vers = grep { &can_script_version($script, $_) }
-		@{$script->{'versions'}};
-my @allvers = @vers;
+my @everyvers = grep { &can_script_version($script, $_) }
+		     @{$script->{'versions'}};
+my @vers = @everyvers;
+my @allvers = @everyvers;
 my $canupfunc = $script->{'can_upgrade_func'};
 if (defined(&$canupfunc)) {
 	@allvers = grep { &$canupfunc($sinfo, $_) >= 0 } @allvers;
@@ -3354,7 +3355,7 @@ elsif (&indexof($sinfo->{'version'}, @vers) < 0) {
 		  &text('scripts_newer2', $allbetter[$#allbetter]).
 		  "</font>";
 		}
-	elsif (&indexof($sinfo->{'version'}, @allvers) >= 0) {
+	elsif (&indexof($sinfo->{'version'}, @everyvers) >= 0) {
 		# On the newest version that can be installed
 		$status = "<font color=#00aa00>".
 			  $text{'scripts_newest'}."</font>";
