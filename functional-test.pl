@@ -10819,6 +10819,110 @@ $parallel_backup_tests = [
 	  'cleanup' => 1 },
 	];
 
+$transfer_tests = [
+	# Create a parent domain to be transferred
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'mysql' ], [ 'spam' ], [ 'virus' ],
+		      $config{'postgres'} ? ( [ 'postgres' ] ) : ( ),
+		      [ 'webmin' ], [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Add a user to the domain being backed up
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 777*1024 ],
+		      [ 'mail-quota', 777*1024 ] ],
+	},
+
+	# Add an extra database
+	{ 'command' => 'create-database.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'name', $test_domain_db.'_extra' ] ],
+	},
+
+	# Add an allowed database host
+	{ 'command' => 'modify-database-hosts.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'type', 'mysql' ],
+		      [ 'add-host', '1.2.3.4' ] ],
+	},
+
+	# Create a sub-server to be included
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'logrotate' ], [ 'dns' ],
+		      [ 'mail' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, with a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain1 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain with dir' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      @create_args, ],
+	},
+
+	# Create an alias domain to be included, without a dir
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_parallel_domain2 ],
+		      [ 'alias', $test_domain ],
+		      [ 'desc', 'Test alias domain without dir' ],
+		      [ $web ], [ 'dns' ],
+		      @create_args, ],
+	},
+
+	# Test that everything works initially
+	@post_restore_tests,
+
+	# Transfer locally
+	{ 'command' => 'transfer-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '127.0.0.1' ],
+		      [ 'webmin' ],
+		      [ 'pass', $webmin_pass ],
+		      [ 'overwrite' ] ],
+	},
+
+	# Test that everything still works
+	@post_restore_tests,
+
+	# Transfer locally
+	{ 'command' => 'transfer-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'host', '127.0.0.1' ],
+		      [ 'webmin' ],
+		      [ 'pass', $webmin_pass ],
+		      [ 'overwrite' ],
+		      [ 'delete' ] ],
+	},
+
+	# Test that everything still works
+	@post_restore_tests,
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+if (!$webmin_pass) {
+	$transfer_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
+	}
 
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
@@ -10909,6 +11013,7 @@ $alltests = { '_config' => $_config_tests,
 	      'compression' => $compression_tests,
 	      'allscript' => $allscript_tests,
 	      'parallel_backup' => $parallel_backup_tests,
+	      'transfer' => $transfer_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
