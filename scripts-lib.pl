@@ -2667,7 +2667,7 @@ foreach my $d (@$doms) {
 			     @{$script->{'versions'}};
 		local $canupfunc = $script->{'can_upgrade_func'};
 		if (defined(&$canupfunc)) {
-			@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+			@vers = grep { &$canupfunc($sinfo, $_) > 0 } @vers;
 			}
 		@vers = sort { &compare_versions($b, $a, $script) } @vers;
 		local @better = grep { &compare_versions($_,
@@ -3328,7 +3328,7 @@ my @allvers = @vers;
 my $canupfunc = $script->{'can_upgrade_func'};
 if (defined(&$canupfunc)) {
 	@allvers = grep { &$canupfunc($sinfo, $_) >= 0 } @allvers;
-	@vers = grep { &$canupfunc($sinfo, $_) } @vers;
+	@vers = grep { &$canupfunc($sinfo, $_) > 0 } @vers;
 	}
 my ($status, $canup);
 if ($sinfo->{'deleted'}) {
