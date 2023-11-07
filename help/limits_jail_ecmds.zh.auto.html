@@ -1,0 +1,1 @@
+<header>供 Jailkit 复制的额外命令和目录</header>使用<tt>jk_cp</tt>命令复制的额外命令和目录。<p> <tt>jk_cp</tt>是 Jailkit 包提供的一个命令，用于将文件和目录复制到<em>chroot</em>环境中。 <tt>jk_cp</tt>命令还将自动处理和复制二进制文件所需的库依赖项，确保可执行文件在<em>chroot</em>内正常工作。<p>无需手动复制域<em>chroot</em>目录中的额外命令和所有依赖项，而是使用此字段添加额外命令（以空格分隔）以将其带入<em>chroot</em> ，确保一切按预期工作。例如，要复制<tt>rsync</tt>和<tt>zip</tt>命令，请将<tt>rsync zip</tt>放入此字段。<footer>

@@ -4642,7 +4642,6 @@ ratelimit_m=minutos
 
 transfer_title=Transferir servidor virtual
 transfer_ecannot=No tienes permitido transferir servidores virtuales
-transfer_subs=y subservidores
 
 left_generic=Crear Servidor Virtual
 

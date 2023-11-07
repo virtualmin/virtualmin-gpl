@@ -1163,7 +1163,6 @@ buckets_created=Utworzony
 bucket_dok=Usuń
 
 transfer_title=Transfer wirtualnego serwera
-transfer_subs=I sub-serwery
 
 left_virtualmin=Virtualmin
 left_master=Główny admin
