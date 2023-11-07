@@ -19451,7 +19451,9 @@ return map { [ $_, split(/\s+/, $hosts{$_}) ] } keys %hosts;
 sub save_transfer_hosts
 {
 my $hfile = "$module_config_directory/transfer-hosts";
-my %hosts = map { $_->[0], $_->[1].($_->[2] ? " ".$_->[2] : "") } @_;
+my %hosts = map { $_->[0], $_->[1].
+	($_->[2] ? " ".$_->[2] : "").
+	($_->[3] ? " ".$_->[3] : "") } @_;
 &write_file($hfile, \%hosts);
 &set_ownership_permissions(undef, undef, 0600, $hfile);
 }

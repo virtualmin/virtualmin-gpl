@@ -57,8 +57,8 @@ print &ui_table_row($text{'transfer_dom'},
 
 # Destination system
 my @hosts = &get_transfer_hosts();
-my $hfield = &ui_textbox("host", undef, 40, 0, undef,
-			 "autocomplete=off placeholder='example.com:22'")." ".
+my $hfield = &ui_textbox("host", undef, 41, 0, undef,
+			 "autocomplete=off placeholder='example.com $text{'backup_pass4_or'} username\@example.com:22'")." ".
 	     &ui_select("proto", "ssh",
                    [ [ "ssh", $text{'transfer_ssh'} ],
                      [ "webmin", $text{'transfer_webmin'} ] ])." ".
@@ -79,7 +79,7 @@ else {
 
 # Root password
 print &ui_table_row($text{'transfer_pass'},
-	&ui_password("hostpass", undef, 20)." ".
+	&ui_password("hostpass", undef, 20)." &nbsp;".
 	$text{'transfer_passdef'});
 
 # Delete from source
