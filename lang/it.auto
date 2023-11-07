@@ -1261,6 +1261,7 @@ check_webphpfpmport=Correzione dello scontro della porta $2 per la versione PHP-
 check_webfpmboot=Abilitazione della versione PHP-FPM $1 all'avvio
 check_webphpverfixed=Versione FPM corretta per $1 domini
 check_webphplocalfixed=Versione limitata del server FPM $2 a localhost per i domini $1
+check_fpmrestart=Riavvio del server PHP-FPM $1
 check_webadminfixed=Rimossa la direttiva $1 non supportata dai siti Web Apache $2
 check_ftpok=ProFTPD è installato
 check_dnsok3=I domini DNS di BIND saranno ospitati su un host di servizi

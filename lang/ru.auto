@@ -1109,6 +1109,7 @@ check_webphpfpmport=Исправление конфликта порта $2 дл
 check_webfpmboot=Включение версии PHP-FPM $1 во время загрузки
 check_webphpverfixed=Исправлена версия FPM для доменов $1
 check_webphplocalfixed=Ограниченная версия сервера FPM $2 для localhost для доменов $1
+check_fpmrestart=Перезапуск сервера PHP-FPM $1
 check_webadminfixed=Удалена неподдерживаемая директива $1 с сайтов $2 Apache
 check_dnsok2=BIND DNS-сервер установлен
 check_dnsok3=Домены DNS BIND будут размещаться на хосте служб

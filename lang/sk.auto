@@ -1996,6 +1996,7 @@ check_webphpfpmport=Oprava kolízie portu $2 pre verziu PHP-FPM $1
 check_webfpmboot=Povolenie verzie PHP-FPM $1 v čase zavádzania
 check_webphpverfixed=Opravená verzia FPM pre domény $1
 check_webphplocalfixed=Obmedzená verzia servera FPM $2 na localhost pre domény $1
+check_fpmrestart=Reštartuje sa server PHP-FPM $1
 check_webadminfixed=Odstránená nepodporovaná direktíva $1 z $2 webových stránok Apache
 check_ftpok=ProFTPD je nainštalovaný
 check_dnsok2=BIND DNS server je nainštalovaný

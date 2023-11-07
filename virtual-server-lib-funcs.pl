@@ -15500,7 +15500,11 @@ if (&domain_has_website()) {
 			if ($changed) {
 				&$second_print(&text('check_webphplocalfixed',
 					     $changed, $conf->{'version'}));
+				&$second_print(&text('check_fpmrestart', $conf->{'version'}));
+				&push_all_print();
+				&set_all_null_print();
 				&restart_php_fpm_server($conf);
+				&pop_all_print();
 				}
 			}
 

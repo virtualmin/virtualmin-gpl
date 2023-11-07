@@ -1827,6 +1827,7 @@ check_webphpfpmport=Corrigindo o conflito da porta $2 para a versão $1 do PHP-F
 check_webfpmboot=Ativando a versão $1 do PHP-FPM na inicialização
 check_webphpverfixed=Versão do FPM corrigida para $1 domínios
 check_webphplocalfixed=Versão do servidor FPM limitada $2 para localhost para $1 domínios
+check_fpmrestart=Reiniciando o servidor PHP-FPM $1
 check_webadminfixed=Diretiva $1 não suportada dos sites $2 Apache
 check_ftpok=O ProFTPD está instalado
 check_dnsok2=Servidor DNS BIND está instalado

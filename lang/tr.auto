@@ -751,6 +751,7 @@ check_webphpfpmport=PHP-FPM $1 için bağlantı noktası $2 çakışması düzel
 check_webfpmboot=PHP-FPM $1 sürümü önyükleme sırasında etkinleştiriliyor
 check_webphpverfixed=$1 alan adları için FPM sürümü düzeltildi
 check_webphplocalfixed=$2 alan adlarının $2 'si için yerel ana bilgisayarla sınırlı FPM sunucusu sürümü
+check_fpmrestart=PHP-FPM $1 sunucusu yeniden başlatılıyor
 check_webadminfixed=$2 Apache web sitesinden desteklenmeyen $1 yönergesi kaldırıldı
 check_dnsok2=BIND DNS sunucusu yüklü
 check_dnsok3=BIND DNS etki alanları bir hizmet ana bilgisayarında barındırılacaktır

@@ -276,6 +276,7 @@ check_webphpfpmport=Fiksing av port $2 sammenstøt for PHP-FPM versjon $1
 check_webfpmboot=Aktiverer PHP-FPM versjon $1 ved oppstart
 check_webphpverfixed=Korrigert FPM-versjon for $1 domener
 check_webphplocalfixed=Begrenset FPM-serverversjon $2 til localhost for $1 domener
+check_fpmrestart=Starter PHP-FPM $1 server på nytt
 check_webadminfixed=Ikke-støttet $1 -direktiv ble fjernet fra $2 Apache-nettsteder
 check_etlsa=TLSA DNS-poster kan ikke opprettes på systemet ditt: $1
 check_tlsaok=TLSA DNS-poster vil bli lagt til nye domener

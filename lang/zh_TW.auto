@@ -684,6 +684,7 @@ check_webphpfpmport=修復了PHP-FPM版本 $1的端口 $2衝突
 check_webfpmboot=在啟動時啟用 PHP-FPM 版本 $1
 check_webphpverfixed=已更正 $1域的FPM版本。
 check_webphplocalfixed=對於 $1域，將FPM服務器版本 $2限制為localhost。
+check_fpmrestart=正在重新啟動 PHP-FPM $1 伺服器
 check_webadminfixed=從 $2 Apache網站中刪除了不受支持的 $1指令。
 check_dnsok2=BIND DNS服務器已安裝。
 check_dnsok3=BIND DNS域將託管在服務主機上。

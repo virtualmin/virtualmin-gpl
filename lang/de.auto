@@ -622,6 +622,7 @@ check_webphpfpmport=Behebung eines Konflikts zwischen Port $2 für PHP-FPM Versi
 check_webfpmboot=PHP-FPM-Version $1 wird beim Booten aktiviert
 check_webphpverfixed=Korrigierte FPM-Version für $1 -Domains
 check_webphplocalfixed=Begrenzte FPM-Serverversion $2 auf localhost für $1 -Domains
+check_fpmrestart=PHP-FPM $1-Server wird neu gestartet
 check_webadminfixed=Nicht unterstützte $1 -Direktive von $2 Apache-Websites entfernt
 check_etlsa=TLSA-DNS-Einträge können auf Ihrem System nicht erstellt werden: $1
 check_tlsaok=TLSA-DNS-Einträge werden neuen Domänen hinzugefügt

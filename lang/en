@@ -1996,6 +1996,7 @@ check_webphpfpmport=Fixing port $2 clash for PHP-FPM version $1
 check_webfpmboot=Enabling PHP-FPM version $1 at boot time
 check_webphpverfixed=Corrected PHP-FPM version for <tt>$1</tt> domains
 check_webphplocalfixed=Limited PHP-FPM server version <tt>$2</tt> to localhost for <tt>$1</tt> domains
+check_fpmrestart=Restarting PHP-FPM $1 server
 check_webadminfixed=Removed unsupported <tt>$1</tt> directive from <tt>$2</tt> Apache websites
 check_ftpok=ProFTPD is installed
 check_dnsok2=BIND DNS server is installed

@@ -334,6 +334,7 @@ check_webphpfpmport=Port $2 clash repareren voor PHP-FPM versie $1
 check_webfpmboot=PHP-FPM-versie $1 inschakelen tijdens het opstarten
 check_webphpverfixed=Gecorrigeerde FPM-versie voor $1 domeinen
 check_webphplocalfixed=Beperkte FPM-serverversie $2 tot localhost voor $1 domeinen
+check_fpmrestart=Herstarten van PHP-FPM $1-server
 check_webadminfixed=Niet-ondersteunde richtlijn $1 verwijderd van $2 Apache-websites
 check_etlsa=TLSA DNS-records kunnen niet worden gemaakt op uw systeem: $1
 check_tlsaok=TLSA DNS-records worden toegevoegd aan nieuwe domeinen

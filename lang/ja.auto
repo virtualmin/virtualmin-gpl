@@ -1996,6 +1996,7 @@ check_webphpfpmport=PHP-FPMバージョン $1のポート $2クラッシュの�
 check_webfpmboot=起動時に PHP-FPM バージョン $1 を有効にします
 check_webphpverfixed=$1ドメインのFPMバージョンを修正しました。
 check_webphplocalfixed=FPMサーバーのバージョン $2を $1ドメインのローカルホストに制限しました。
+check_fpmrestart=PHP-FPM $1 サーバーを再起動しています
 check_webadminfixed=サポートされていない $1ディレクティブを $2 Apache Webサイトから削除しました。
 check_ftpok=ProFTPDがインストールされます。
 check_dnsok2=BIND DNSサーバーがインストールされている。

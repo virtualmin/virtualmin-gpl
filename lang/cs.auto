@@ -1529,6 +1529,7 @@ check_webphpfpmport=Oprava střetu portů $2 pro PHP-FPM verze $1
 check_webfpmboot=Povolení PHP-FPM verze $1 při spouštění
 check_webphpverfixed=Opravená verze FPM pro domény $1
 check_webphplocalfixed=Verze serveru FPM $2 na localhost pro domény $1
+check_fpmrestart=Restartování serveru PHP-FPM $1
 check_webadminfixed=Z webů Apache $2 byla odebrána nepodporovaná směrnice $1
 check_ftpok=Je nainstalován ProFTPD
 check_dnsok3=Domény BIND DNS budou hostovány na hostiteli služeb

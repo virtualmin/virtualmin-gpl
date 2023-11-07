@@ -510,6 +510,7 @@ check_webphpfpmport=Arreglando el puerto $2 choque para la versión PHP-FPM $1
 check_webfpmboot=Habilitando PHP-FPM versión $1 en el momento del arranque
 check_webphpverfixed=Versión de FPM corregida para $1 dominios
 check_webphplocalfixed=Versión limitada del servidor FPM $2 a localhost para $1 dominios
+check_fpmrestart=Reiniciando el servidor PHP-FPM $1
 check_webadminfixed=Se eliminó la directiva $1 no compatible de $2 sitios web de Apache
 check_dnsok3=Los dominios DNS BIND se alojarán en un host de servicios
 check_etlsa=Los registros DNS de TLSA no se pueden crear en su sistema: $1
