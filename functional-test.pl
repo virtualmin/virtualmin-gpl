@@ -1772,6 +1772,7 @@ foreach my $sname (&list_scripts(1)) {
 				      @args,
 				    ],
 			  'continuefail' => 1,
+			  'antigrep' => 'partially complete',
 			});
 
 		if ($testable == 1) {
