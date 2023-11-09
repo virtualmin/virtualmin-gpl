@@ -7327,6 +7327,7 @@ transfer_host0=New system
 transfer_savehost=Save for later use?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Login for destination system
 transfer_pass=Password for destination system
 transfer_passdef=(optional if SSH authentication is configured)
 transfer_overwrite=Over-write existing domain?

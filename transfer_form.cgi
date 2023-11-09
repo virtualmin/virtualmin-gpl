@@ -77,6 +77,10 @@ else {
 	print &ui_table_row($text{'transfer_host'}, $hfield);
 	}
 
+# Root login
+print &ui_table_row($text{'transfer_user'},
+	&ui_textbox("hostuser", "root", 20));
+
 # Root password
 print &ui_table_row($text{'transfer_pass'},
 	&ui_password("hostpass", undef, 20)." ".
