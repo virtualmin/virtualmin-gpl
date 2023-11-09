@@ -83,7 +83,7 @@ print &ui_table_row($text{'transfer_user'},
 
 # Root password
 print &ui_table_row($text{'transfer_pass'},
-	&ui_password("hostpass", undef, 20)." ".
+	&ui_password("hostpass", undef, 20)." &nbsp;".
 	$text{'transfer_passdef'});
 
 # Delete from source
