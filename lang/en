@@ -5933,13 +5933,14 @@ balancers_add=Add a new proxy path.
 balancers_path=URL path
 balancers_name=Balancer name
 balancers_urls=Destination URLs
-balancers_used=For script
+balancers_used2=Used by
 balancers_delete=Delete Selected Proxies
 balancers_none=No proxy paths have been defined yet.
 balancers_return=list of proxy paths
 balancers_derr=Failed to delete proxy paths
 balancers_denone=None selected
 balancers_none2=No proxying
+balancers_script=Script $1 version $2
 
 balancer_create=Create Proxy Path
 balancer_edit=Edit Proxy Path

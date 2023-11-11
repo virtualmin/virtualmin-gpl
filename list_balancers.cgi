@@ -15,18 +15,34 @@ foreach $sinfo (&list_domain_scripts($d)) {
 	$used{$sinfo->{'opts'}->{'path'}} = $sinfo;
 	}
 
+# Find use of paths by plugins
+foreach my $p (&list_feature_plugins(1)) {
+	if (&plugin_defined($p, "feature_path_desc")) {
+		foreach my $pd (&plugin_call($p, "feature_path_desc", $d)) {
+			$pd->{'plugin'} = $p;
+			$pused{$pd->{'path'}} = $pd;
+			}
+		}
+	}
+
 # Build table data
 @balancers = &list_proxy_balancers($d);
 foreach $b (@balancers) {
-	$sinfo = $used{$b->{'path'}};
 	$umsg = "";
-	if ($sinfo) {
+	if ($sinfo = $used{$b->{'path'}}) {
 		# Used by a script
 		$script = &get_script($sinfo->{'name'});
-		$umsg = "<a href='edit_script.cgi?dom=$in{'dom'}&".
-			"script=$sinfo->{'id'}'>".
-			$script->{'desc'}." ".$sinfo->{'version'}.
-			"</a>";
+		$umsg = &ui_link("edit_script.cgi?dom=$in{'dom'}&".
+				 "script=$sinfo->{'id'}",
+				 &text('balancers_script', $script->{'desc'},
+					$sinfo->{'version'}));
+		}
+	elsif ($pinfo = $pused{$b->{'path'}}) {
+		# Used by a plugin
+		%pinfo = &get_module_info($pinfo->{'plugin'});
+		$umsg = $pinfo->{'link'} ?
+				&ui_link($pinfo->{'link'}, $pinfo->{'desc'}) :
+				$pinfo->{'desc'};
 		}
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
@@ -51,7 +67,7 @@ print &ui_form_columns_table(
 	[ "", $text{'balancers_path'},
           $has == 2 ? ( $text{'balancers_name'} ) : ( ),
           $text{'balancers_urls'},
-          $text{'balancers_used'} ],
+          $text{'balancers_used2'} ],
 	100,
 	\@table,
 	undef,
