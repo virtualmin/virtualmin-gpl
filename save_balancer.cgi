@@ -1,7 +1,6 @@
 #!/usr/local/bin/perl
 # Create, update or delete a proxy balancer
 
-$0 =~ /^(.*)\/pro\// && chdir($1);
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});

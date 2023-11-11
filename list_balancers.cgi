@@ -1,7 +1,6 @@
 #!/usr/local/bin/perl
 # Display proxies in some domain
 
-$0 =~ /^(.*)\/pro\// && chdir($1);
 require './virtual-server-lib.pl';
 &ReadParse();
 $d = &get_domain($in{'dom'});
