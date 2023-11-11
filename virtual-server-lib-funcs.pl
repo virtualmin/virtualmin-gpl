@@ -13071,7 +13071,7 @@ if (&domain_has_website($d) && !$d->{'alias'} && &can_edit_forward()) {
 
 if (&has_proxy_balancer($d) && &can_edit_forward()) {
 	# Proxy balance editor
-	push(@rv, { 'page' => 'pro/list_balancers.cgi',
+	push(@rv, { 'page' => 'list_balancers.cgi',
 		    'title' => $text{'edit_balancer'},
 		    'desc' => $text{'edit_balancerdesc'},
 		    'cat' => 'web',
