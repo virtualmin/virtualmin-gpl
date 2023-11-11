@@ -30,6 +30,16 @@ foreach my $sinfo (&list_domain_scripts($d)) {
 		}
 	}
 
+# Plugin ports, for things like app servers
+foreach my $p (&list_feature_plugins(1)) {
+	if (&plugin_defined($p, "feature_ports") && $d->{$p}) {
+		push(@rv, &plugin_call($p, "feature_ports", $d));
+		}
+	if (&plugin_defined($p, "feature_always_ports")) {
+		push(@rv, &plugin_call($p, "feature_always_ports", $d));
+		}
+	}
+
 # FCGId ports?
 # XXX
 
