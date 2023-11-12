@@ -232,6 +232,7 @@ if ($dbtype) {
 						   $dbuser, $dbpass);
 	return (0, "Database connection failed : $dberr") if ($dberr);
 	}
+my $dbpass_quote_escaped = &php_quotemeta($dbpass, 1);
 my $python = &get_python_path();
 my $pythonver = &get_python_version();
 ($pythonver) = $pythonver =~ /(\d+.\d+)/;
@@ -355,7 +356,7 @@ if (!$upgrade) {
 			$gotuser++;
 			}
 		if ($l =~ /'PASSWORD':/ && !$gotpass) {
-			$l = "        'PASSWORD': '$dbpass',";
+			$l = "        'PASSWORD': '$dbpass_quote_escaped',";
 			$gotpass++;
 			}
 		if ($l =~ /'HOST':/ && !$gothost) {
@@ -377,7 +378,7 @@ if (!$upgrade) {
 		splice(@$lref, $engine, 0, "        'USER': '$dbuser',");
 		}
 	if (!$gotpass) {
-		splice(@$lref, $engine, 0, "        'PASSWORD': '$dbpass',");
+		splice(@$lref, $engine, 0, "        'PASSWORD': '$dbpass_quote_escaped',");
 		}
 	if (!$gothost) {
 		splice(@$lref, $engine, 0, "        'HOST': '$dbhost',");
