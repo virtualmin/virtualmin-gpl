@@ -518,8 +518,13 @@ return (1, "Django directory and tables deleted.");
 
 sub script_django_db_conn_desc
 {
+my ($d, $opts) = @_;
+my $pdir = "$opts->{'idir'}/$opts->{'project'}";
+my $sfile = "$pdir/settings.py";
+$sfile = "$pdir/$opts->{'project'}/settings.py" if (!-r $sfile);
+$sfile =~ s/^$d->{'home'}/../;
 my $db_conn_desc = 
-    { 'settings.py' =>
+    { "$sfile" =>
         {
            'dbpass' =>
            {
