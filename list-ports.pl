@@ -4,7 +4,10 @@
 
 Lists TCP ports associated with some virtual server
 
-XXX
+This command lists all TCP ports in use by or allowed to be used by the
+virtual server selected with the C<--domain> flag. To output a list of just
+port numbers, use the C<--port-only> flag. Or to show the full details of
+each port, use C<--multiline>.
 
 =cut
 
@@ -52,15 +55,59 @@ my @useports = &active_domain_server_ports($d);
 my @canports = &allowed_domain_server_ports($d);
 my @allports = sort { $a->{'lport'} <=> $b->{'lport'} } (@useports, @canports);
 
-if ($multiline) {
+my %done;
+if ($multi) {
+	# Show full details
 	foreach my $p (@allports) {
+		next if ($done{$p->{'lport'}}++);
+		print $p->{'lport'},"\n";
+		my ($use) = grep { $_->{'lport'} eq $p->{'lport'} } @useports;
+		my ($can) = grep { $_->{'lport'} eq $p->{'lport'} } @canports;
+		print "  In use: ",($use ? "Yes" : "No"),"\n";
+		print "  Allowed: ",($can ? "Yes" : "No"),"\n";
+		if ($use) {
+			print "  Used by PID: ",$use->{'proc'}->{'pid'},"\n";
+			print "  Used by command: ",$use->{'proc'}->{'args'},"\n";
+			print "  Used by user: ",$use->{'user'}->{'user'},"\n";
+			}
+		if ($can) {
+			print "  Allowed type: ",$can->{'type'},"\n";
+			print "  Allowed by: ",$can->{'desc'},"\n";
+			}
 		}
 	}
 elsif ($portonly) {
+	# Just show port numbers
 	foreach my $p (&unique(map { $_->{'lport'} } @allports)) {
 		print $p,"\n";
 		}
 	}
 else {
+	# Show table of ports
+	$fmt = "%-6.6s %-10.10s %-6.6s %-50.50s\n";
+	printf $fmt, "Port", "Status", "PID", "Allowed by";
+	printf $fmt, ("-" x 6), ("-" x 10), ("-" x 6), ("-" x 50);
+	foreach my $p (@allports) {
+		next if ($done{$p->{'lport'}}++);
+		my ($use) = grep { $_->{'lport'} eq $p->{'lport'} } @useports;
+		my ($can) = grep { $_->{'lport'} eq $p->{'lport'} } @canports;
+		printf $fmt, $p->{'lport'},
+			$use && $can ? "Active" :
+			$can ? "Allowed" :
+			$use ? "Not allowed" : "",
+			$use ? $use->{'proc'}->{'pid'} : "",
+			$can ? $can->{'desc'} : "";
+		}
 	}
+
+sub usage
+{
+print "$_[0]\n\n" if ($_[0]);
+print "Lists TCP ports associated with some virtual server.\n";
+print "\n";
+print "virtualmin list-ports --domain name\n";
+print "                     [--multiline]\n";
+print "                     [--port-only]\n";
+exit(1);
+}
 

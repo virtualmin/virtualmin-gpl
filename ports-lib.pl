@@ -15,6 +15,7 @@ if (&domain_has_website($d)) {
 		my $port = &get_php_fpm_config_value($d, "listen");
 		if ($port =~ /^([a-zA-Z0-9\-\.\_]+:)?(\d+)$/) {
 			push(@rv, { 'lport' => $2,
+				    'desc' => $text{'ports_fpm'},
 				    'type' => 'fpm' });
 			}
 		}
@@ -24,6 +25,7 @@ if (&domain_has_website($d)) {
 foreach my $sinfo (&list_domain_scripts($d)) {
 	foreach my $p (split(/\s+/, $sinfo->{'opts'}->{'port'})) {
 		push(@rv, { 'lport' => $p,
+			    'desc' => &text('ports_script', $sinfo->{'type'}),
 			    'type' => 'script',
 			    'script' => $sinfo->{'type'},
 			    'sid' => $sinfo->{'id'} });
@@ -32,11 +34,17 @@ foreach my $sinfo (&list_domain_scripts($d)) {
 
 # Plugin ports, for things like app servers
 foreach my $p (&list_feature_plugins(1)) {
+	my @prv;
 	if (&plugin_defined($p, "feature_ports") && $d->{$p}) {
-		push(@rv, &plugin_call($p, "feature_ports", $d));
+		push(@prv, &plugin_call($p, "feature_ports", $d));
 		}
 	if (&plugin_defined($p, "feature_always_ports")) {
-		push(@rv, &plugin_call($p, "feature_always_ports", $d));
+		push(@prv, &plugin_call($p, "feature_always_ports", $d));
+		}
+	foreach my $pr (@prv) {
+		$pr->{'type'} = 'plugin';
+		$pr->{'plugin'} = $p;
+		push(@rv, $pr);
 		}
 	}
 

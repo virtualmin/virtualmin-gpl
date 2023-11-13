@@ -7861,4 +7861,7 @@ remotedns_eslave=This system can only be a master DNS server
 
 global_dismiss=Dismiss
 
+ports_fpm=PHP FPM server
+ports_script=Installed $1 script
+
 __norefs=1
