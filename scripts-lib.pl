@@ -705,7 +705,7 @@ foreach my $script (@domain_scripts) {
 		}
 	if (defined(&$db_conn_desc) && $dbtype eq $sdbtype) {
 		# Check if a script has a description sub
-		$db_conn_desc = &{$db_conn_desc};
+		$db_conn_desc = &$db_conn_desc($d, $script->{'opts'});
 		if (ref($db_conn_desc)) {
 			&$first_print($text{"save_installed_scripts_${type}_${dbtype}"}) if (!$printed_type++);
 			# Extract script config file(s) to operate on
