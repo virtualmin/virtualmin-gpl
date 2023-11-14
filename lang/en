@@ -5960,6 +5960,8 @@ balancer_eurls=No destination URLs entered
 balancer_script=Used by script installer
 balancer_scriptver=Script version
 balancer_none=Don't proxy for this path and serve locally instead
+balancer_scriptused=This proxy path is being used by the installed script $1 version $2. Modifying or deleting it may cause the script to stop working!
+balancer_pluginused=This proxy path is being used by $1. Modifying or deleting it may cause this feature to stop working!
 
 scriptwarn_header=The following scripts managed by Virtualmin have new versions available :
 scriptwarn_header2=The following scripts managed by Virtualmin have new versions available, in the\nvirtual server $1 :

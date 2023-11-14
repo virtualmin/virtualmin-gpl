@@ -16,6 +16,22 @@ if (!$in{'new'}) {
 &ui_print_header(&domain_in($d), $in{'new'} ? $text{'balancer_create'}
 					    : $text{'balancer_edit'}, "");
 
+if (!$in{'new'}) {
+	# Show warning if in use
+	&get_balancer_usage($d, \%used, \%pused);
+	if ($sinfo = $used{$b->{'path'}}) {
+		$script = &get_script($sinfo->{'name'});
+		$msg = &text('balancer_scriptused', $script->{'desc'},
+			     $sinfo->{'version'});
+		}
+	elsif ($pinfo = $pused{$b->{'path'}}) {
+		$msg = &text('balancer_pluginused', $pinfo->{'desc'});
+		}
+	if ($msg) {
+		print &ui_alert_box($msg, 'warn');
+		}
+	}
+
 print &ui_form_start("save_balancer.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("dom", $in{'dom'});
