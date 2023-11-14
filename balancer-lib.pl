@@ -276,5 +276,24 @@ return sort { my ($pa, $ua) = split(/\s+/, $a, 2);
 	      return length($pb) <=> length($pa) } @_;
 }
 
+# get_balancer_usage(&domain, &scripts-used, &plugin-used)
+# Fill in two hashes with maps from paths to script into and plugin usage of
+# balancers
+sub get_balancer_usage
+{
+my ($d, $used, $pused) = @_;
+foreach $sinfo (&list_domain_scripts($d)) {
+	$used->{$sinfo->{'opts'}->{'path'}} = $sinfo;
+	}
+foreach my $p (&list_feature_plugins(1)) {
+	if (&plugin_defined($p, "feature_path_desc")) {
+		foreach my $pd (&plugin_call($p, "feature_path_desc", $d)) {
+			$pd->{'plugin'} = $p;
+			$pused->{$pd->{'path'}} = $pd;
+			}
+		}
+	}
+}
+
 1;
 

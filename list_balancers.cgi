@@ -10,20 +10,8 @@ $has = &has_proxy_balancer($d);
 $has || &error($text{'balancers_esupport'});
 &ui_print_header(&domain_in($d), $text{'balancers_title'}, "", "balancers");
 
-# Find scripts in this domain that use the proxy path
-foreach $sinfo (&list_domain_scripts($d)) {
-	$used{$sinfo->{'opts'}->{'path'}} = $sinfo;
-	}
-
-# Find use of paths by plugins
-foreach my $p (&list_feature_plugins(1)) {
-	if (&plugin_defined($p, "feature_path_desc")) {
-		foreach my $pd (&plugin_call($p, "feature_path_desc", $d)) {
-			$pd->{'plugin'} = $p;
-			$pused{$pd->{'path'}} = $pd;
-			}
-		}
-	}
+# Find scripts and plugins in this domain that use the proxy path
+&get_balancer_usage($d, \%used, \%pused);
 
 # Build table data
 @balancers = &list_proxy_balancers($d);
