@@ -53,6 +53,7 @@ $d || usage("Virtual server $domain does not exist");
 @balancers = &list_proxy_balancers($d);
 if ($multi) {
 	# Show each destination on a separate line
+	&get_balancer_usage($d, \%used, \%pused);
 	foreach $b (@balancers) {
 		print "$b->{'path'}\n";
 		if ($b->{'balancer'}) {
@@ -61,6 +62,14 @@ if ($multi) {
 		print "    Proxying: ",$b->{'none'} ? "No" : "Yes","\n";
 		foreach $u (@{$b->{'urls'}}) {
 			print "    URL: $u\n";
+			}
+		if ($sinfo = $used{$b->{'path'}}) {
+			print "    Script name: $sinfo->{'name'}\n";
+			print "    Script version: $sinfo->{'version'}\n";
+			}
+		if ($pinfo = $pused{$b->{'path'}}) {
+			print "    Plugin module: $pinfo->{'plugin'}\n";
+			print "    Plugin use: $pinfo->{'desc'}\n";
 			}
 		}
 	}
