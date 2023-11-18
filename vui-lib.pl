@@ -295,7 +295,7 @@ my $styles = "font-size: 10px;";
    $styles .= "margin: 0 5px 0 10px;";
    $styles .= "padding: 1px 5px;";
    $styles .= "vertical-align: inherit;";
-my $styles_cnt .= "display:contents;position:absolute;";
+my $styles_cnt .= "display:contents;";
 my $text = $text{$textid};
 $text = uc($text) if ($upper);
 return "<span class='vui_inline_label' style='$styles_cnt'>".
