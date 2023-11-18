@@ -30,10 +30,10 @@ foreach $t (@tmpls) {
 		{ 'type' => 'checkbox', 'name' => 'd',
 		  'value' => $t->{'id'}, 'disabled' => $t->{'standard'} },
 		ui_link("edit_tmpl.cgi?id=$t->{'id'}",
-			&html_escape($t->{'name'})),
-		$t->{'id'} == &get_init_template(0) ||
-		  $t->{'id'} == &get_init_template(1) ? "<b>$text{'yes'}</b>"
-						      : $text{'no'},
+			&html_escape($t->{'name'})) . (
+				$t->{'id'} == &get_init_template(0) ||
+		  		$t->{'id'} == &get_init_template(1) ?
+					&vui_inline_label('newtmpl_def', 1) : ""),
 		$t->{'skel'} eq "none" ? $text{'newtmpl_none'} :
 		$t->{'skel'} eq "" ? $text{'default'} :
 				     "<tt>$t->{'skel'}</tt>",
@@ -51,8 +51,7 @@ print &ui_form_columns_table(
 	[ [ "edit_tmpl.cgi?new=1&cp=1", $text{'newtmpl_add2'} ],
 	  [ "edit_tmpl.cgi?new=1", $text{'newtmpl_add1'} ] ],
 	undef,
-	[ "", $text{'newtmpl_name'},
-	  $text{'newtmpl_def'}, $text{'newtmpl_skel'},
+	[ "", $text{'newtmpl_name'}, $text{'newtmpl_skel'},
 	  $text{'newtmpl_web'}, $text{'newtmpl_dns'},
 	  $text{'newtmpl_ftp'}, $text{'newtmpl_logrotate'},
 	  $text{'newtmpl_mail'},

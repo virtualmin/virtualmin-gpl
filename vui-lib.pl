@@ -278,4 +278,28 @@ return &ui_link($link,
   "vui_edit_link_icon i$unisymb_class");
 }
 
+=head2 vui_inline_label()
+
+Returns a text label as a inline element
+
+=cut
+sub vui_inline_label
+{
+my ($textid, $upper) = @_;
+my $styles = "font-size: 10px;";
+   $styles .= "font-weight: bold;";
+   $styles .= "background-color: #bdbdbd;";
+   $styles .= "border-radius: 50px;";
+   $styles .= "color: #fff;";
+   $styles .= "line-height: inherit;";
+   $styles .= "margin: 0 5px 0 10px;";
+   $styles .= "padding: 1px 5px;";
+   $styles .= "vertical-align: inherit;";
+my $styles_cnt .= "display:contents;position:absolute;";
+my $text = $text{$textid};
+$text = uc($text) if ($upper);
+return "<span class='vui_inline_label' style='$styles_cnt'>".
+       "<span data-$textid style='$styles'>$text</span></span>";
+}
+
 1;
