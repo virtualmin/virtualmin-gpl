@@ -17072,7 +17072,7 @@ local @rv = grep { $sfunc = "show_template_".$_;
                     ($config{$_} || !$isfeature{$_} || $_ eq 'mail' ||
 		     $_ eq 'web' || $_ eq 'ssl') }
                  @template_features;
-if ($tmpl && $tmpl->{'id'} == 1) {
+if ($tmpl && ($tmpl->{'id'} == 1 || !$tmpl->{'for_parent'})) {
 	# For sub-servers only
 	@rv = grep { $_ ne 'resources' && $_ ne 'unix' && $_ ne 'webmin' &&
 		     $_ ne 'avail' } @rv;
