@@ -119,7 +119,7 @@ if ($d->{'ip6'} && !$aliasdom) {
 	}
 
 # Plan, if any
-if ($d->{'plan'} ne '') {
+if (!$parentdom && $d->{'plan'} ne '') {
 	my $plan = &get_plan($d->{'plan'});
 	my $plan_name = $plan->{'name'};
 	if (&can_config_domain($d)) {
