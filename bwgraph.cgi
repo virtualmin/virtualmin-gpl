@@ -300,8 +300,8 @@ if ($max) {
 		# Work out the start and end months
 		@start_tm = localtime($start_day * (24*60*60));
 		@end_tm = localtime(time());
-		$start_month = ($start_tm[5]+1900)*12 + $start_tm[4];
-		$end_month = ($end_tm[5]+1900)*12 + $end_tm[4];
+		$start_month = $start_tm[5]*12 + $start_tm[4];
+		$end_month = $end_tm[5]*12 + $end_tm[4];
 
 		# Work out the max usage for a month
 		$max = 0;
