@@ -30,7 +30,7 @@ foreach $t (@tmpls) {
 
 	push(@table, [
 		{ 'type' => 'checkbox', 'name' => 'd',
-		  'value' => $t->{'id'}, 'disabled' => $t->{'standard'} },
+		  'value' => $t->{'id'} },
 		ui_link("edit_tmpl.cgi?id=$t->{'id'}",
 			&html_escape($t->{'name'})) . (
 				$t->{'id'} == &get_init_template(0) ||
@@ -48,7 +48,10 @@ foreach $t (@tmpls) {
 # Show the table of templates
 print &ui_form_columns_table(
 	"delete_tmpls.cgi",
-	$deletable ? [ [ "delete", $text{'newtmpl_delete'} ] ] : [ ],
+	[ $deletable ? ( [ "delete", $text{'newtmpl_delete'} ] ) : ( ),
+	  [ 'default', $text{'newtmpl_setdef'} ],
+	  [ 'defaultsub', $text{'newtmpl_setdefsub'} ],
+	],
 	0,
 	[ [ "edit_tmpl.cgi?new=1&cp=1", $text{'newtmpl_add2'} ],
 	  [ "edit_tmpl.cgi?new=1", $text{'newtmpl_add1'} ] ],

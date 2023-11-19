@@ -3364,6 +3364,9 @@ newtmpl_cust=Custom
 newtmpl_return=templates list
 newtmpl_scripts=Template scripts
 newtmpl_delete=Delete Selected Templates
+newtmpl_edelete=Standard templates cannot be deleted
+newtmpl_setdef=Set Default Top-Level Template
+newtmpl_setdefsub=Set Default Server-Server Template
 newtmpl_created=Created on
 newtmpl_init=Virtualmin install
 newtmpl_name0=Default Settings
@@ -5566,11 +5569,14 @@ az_elogin=The Azure CLI command has not authenticated yet. SSH into your Virtual
 azure_account=Azure account $1
 
 tdelete_err=Failed to delete templates
+tdelete_err2=Failed to change default template
 tdelete_enone=None selected
 tdelete_title=Delete Server Templates
 tdelete_warn=Are you sure you want to delete the following selected server templates : $1
 tdelete_confirm=Delete Templates
 tdelete_users2=They are currently in use by virtual servers : $1
+tdelete_edefsub=The standard sub-server template cannot be the default for top-level servers
+tdelete_edeftop=The standard template cannot be the default for sub-servers
 
 switch_ecannot=You are not allowed to switch to the admin of this domain
 switch_eadmin=The specified extra administrator does not exist!
