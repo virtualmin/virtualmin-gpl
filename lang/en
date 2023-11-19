@@ -2246,6 +2246,7 @@ log_restore_l=Restored virtual servers $1
 log_create_template=Created server template $1
 log_modify_template=Updated server template $1
 log_delete_template=Deleted server template $1
+log_default_template=Changed default template to $1
 log_install_script=Installed script $1 $2 in server $3
 log_uninstall_script=Un-installed script $1 $2 in server $3
 log_stop_script=Stopped script $1 $2 in server $3

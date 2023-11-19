@@ -85,15 +85,6 @@ if ($in{'cloneof'} || $in{'cp'}) {
 	&save_template_scripts($tmpl, $scripts);
 	}
 
-# Update the module config for the default template
-if ($in{'init'}) {
-	$config{'init_template'} = $tmpl->{'id'};
-	}
-if ($in{'initsub'}) {
-	$config{'initsub_template'} = $tmpl->{'id'};
-	}
-&save_module_config();
-
 &webmin_log($in{'new'} ? "create" : "modify", "template", $tmpl->{'name'});
 
 # Call post-save function

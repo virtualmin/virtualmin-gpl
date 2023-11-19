@@ -33,7 +33,7 @@ if ($in{'default'} || $in{'defaultsub'}) {
 		}
 	&unlock_file($module_config_file);
 	&save_module_config();
-	&webmin_log("default", "templates", $tmpl->{'id'});
+	&webmin_log("default", "templates", $tmpl->{'name'});
 	&redirect("edit_newtmpl.cgi");
 	}
 elsif ($in{'confirm'}) {
