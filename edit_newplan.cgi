@@ -16,9 +16,9 @@ foreach $plan (@plans) {
 	push(@cols, { 'type' => 'checkbox', 'name' => 'd',
 		      'value' => $plan->{'id'} });
 	push(@cols, ui_link("edit_plan.cgi?id=$plan->{'id'}'",
-		    &html_escape($plan->{'name'} || $plan->{'id'})));
-	push(@cols, $defplan && $defplan->{'id'} == $plan->{'id'} ?
-			"<b>$text{'yes'}</b>" : $text{'no'});
+		    &html_escape($plan->{'name'} || $plan->{'id'})).
+		    	($defplan && $defplan->{'id'} == $plan->{'id'} ? 
+		    		&vui_inline_label('plans_default', 1) : ""));
 	if ($canplans == 2) {
 		push(@cols, $plan->{'owner'} ||
 			    "<i>$text{'plans_noresel'}</i>");
@@ -46,7 +46,7 @@ print &ui_form_columns_table(
 	1,
 	[ [ "edit_plan.cgi?new=1", $text{'plans_add'} ] ],
 	undef,
-	[ "", $text{'plans_name'}, $text{'plans_default'},
+	[ "", $text{'plans_name'},
 	  $canplans == 2 ? ( $text{'plans_resel'} ) : ( ),
 	  $text{'plans_quota'}, $text{'plans_bw'},
 	  $text{'plans_doms'}, $text{'plans_mailboxes'},
