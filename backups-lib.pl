@@ -560,6 +560,22 @@ foreach my $desturl (@$desturls) {
 				}
 			}
 		}
+	elsif ($mode == 12) {
+		# Connect to Drive and create the folder
+		local $folders = &list_drive_folders();
+		if (!ref($folders)) {
+			&$second_print($folders);
+			next;
+			}
+		my ($already) = grep { $_->{'name'} eq $server } @$folders;
+		if (!$already) {
+			local $err = &create_drive_folder($server);
+			if ($err) {
+				&$second_print($err);
+				next;
+				}
+			}
+		}
 	elsif ($mode == 0) {
 		# Make sure target is / is not a directory
 		if ($dirfmt && !-d $desturl) {
@@ -3963,7 +3979,8 @@ return $rv;
 # Converts a URL like ftp:// or a filename into its components. These will be
 # protocol (1 for FTP, 2 for SSH, 0 for local, 3 for S3, 4 for download,
 # 5 for upload, 6 for rackspace, 7 for GCS, 8 for Dropbox, 9 for Webmin,
-# 10 for Backblaze, 11 for Azure), login, password, host, path and port
+# 10 for Backblaze, 11 for Azure, 12 for Drive), login, password, host, path
+# and port
 sub parse_backup_url
 {
 local ($url) = @_;
@@ -4056,6 +4073,16 @@ elsif ($url =~ /^azure:\/\/([^\/]+)(\/(\S+))?$/) {
 		@rv = (-1, "Azure Blob Storage has not been configured");
 		}
 	}
+elsif ($url =~ /^drive:\/\/([^\/]+)(\/(\S+))?$/) {
+	# Google Drive folder and file
+	my $st = &cloud_drive_get_state();
+	if ($st->{'ok'}) {
+		@rv = (12, undef, undef, $1, $3, undef);
+		}
+	else {
+		@rv = (-1, "Google Drive has not been configured");
+		}
+	}
 elsif ($url eq "download:") {
 	@rv = (4, undef, undef, undef, undef, undef);
 	}
@@ -4136,6 +4163,11 @@ elsif ($proto == 11) {
 	$rv = $path ?
 		&text('backup_niceazp', "<tt>$host</tt>", "<tt>$path</tt>") :
 		&text('backup_niceaz', "<tt>$host</tt>");
+	}
+elsif ($proto == 12) {
+	$rv = $path ?
+		&text('backup_nicedrivep', "<tt>$host</tt>", "<tt>$path</tt>") :
+		&text('backup_nicedrive', "<tt>$host</tt>");
 	}
 else {
 	$rv = $url;

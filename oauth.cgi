@@ -61,9 +61,8 @@ elsif ($mode eq 'drive') {
 	$config{'drive_tstart'} = time();
 
 	# Validate that it actually works
-	# XXX
-	#my $buckets = &list_gcs_buckets();
-	#ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
+	my $buckets = &list_drive_folders();
+	ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
 	}
 else {
 	&error($text{'cloud_eoauth_mode'});
