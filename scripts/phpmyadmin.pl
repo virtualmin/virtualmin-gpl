@@ -321,14 +321,14 @@ foreach $l (@$lref) {
 			$l = "\$cfgServers[\$i]['password'] = '".
 			     &php_quotemeta($dbpass, 1)."';";
 			}
-		if ($l =~ /^\$cfgServers\[\$i\]\['host'\]/) {
-			$l = "\$cfgServers[\$i]['host'] = '$dbhost';";
-			}
 		}
 	else {
 		if ($l =~ /^\$cfgServers\[\$i\]\['auth_type'\]/) {
 			$l = "\$cfgServers[\$i]['auth_type'] = 'cookie';";
 			}
+		}
+	if ($l =~ /^\$cfgServers\[\$i\]\['host'\]/) {
+		$l = "\$cfgServers[\$i]['host'] = '$dbhost';";
 		}
 	if ($l =~ /^\$cfgServers\[\$i\]\['only_db'\]/) {
 		$l = "\$cfgServers[\$i]['only_db'] = '$dbs';";
