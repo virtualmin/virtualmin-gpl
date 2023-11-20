@@ -7416,6 +7416,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
+cloud_drivedesc=Google Drive
 cloud_s3account=Using access key $1
 cloud_s3creds=Using EC2 credentials
 cloud_rsuser=Using login $1
@@ -7457,6 +7458,7 @@ cloud_gcpcreds=Using GCP credentials
 cloud_daccount=Using login $1
 cloud_google_account=Google account email address
 cloud_google_creds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full Cloud Storage access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
+cloud_drive_creds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full Google Drive access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_dnscreds=GCP credentials are already available on this system from the <tt>gcloud</tt> command. This is typically the case when running on Google Compute Engine. However, you may need to grant full DNS access permissions to the service account below on the <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=OAuth2 client ID
 cloud_google_secret=OAuth2 client secret
@@ -7469,6 +7471,7 @@ cloud_google_longdesc=The settings on this page are supplied by Google when you 
 cloud_dropbox_longdesc=Before you can backup to Dropbox, you must first <a href=http://www.virtualmin.com/dropbox-referral target=_blank>create an account</a> on their website if you don't already have one.
 cloud_bb_longdesc=Before you can backup to Backblaze, you must first <a href=https://backblaze.com/ target=_blank>create an account</a>, and then enable <b>B2 Cloud Storage</b> on the <b>My Settings</b> page. Then you need to generate an Application key with all capabilities on the <b>App Keys</b> page.
 cloud_az_longdesc=Before you can backup to Azure Blob Storage, you must first <a href=https://azure.microsoft.com/en-us/free/ target=_blank>create an account</a>, install the <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> command, and login to your Azure account by running <tt>az login --use-device-code</tt>.
+cloud_drive_longdesc=The settings on this page are supplied by Google when you grant API access to your project on the <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> page, under <b>APIs and Auth</b> -&gt; <b>Credentials</b>. You must create an <b>OAuth Client ID</b> credential, with the <b>Authorized redirect URI</b> set to <tt>$1</tt> . Once created, the <b>client ID</b> and <b>client secret</b> can be entered here.
 cloud_openoauth=Begin OAuth2 Enrollment
 cloud_newoauth=OAuth2 code from Google:
 cloud_newoauth_dropbox=OAuth2 code from Dropbox:

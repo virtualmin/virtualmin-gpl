@@ -46,7 +46,25 @@ elsif ($mode eq 'googledns') {
 	$rv = &call_googledns_api("/managedZones", [], "GET");
 	ref($rv) || &error(&text('cloud_egoogletoken2', $rv));
 	}
+elsif ($mode eq 'drive') {
+	# Update Drive token
+	$config{'drive_oauth'} = $in{'code'};
+	my $gce = { 'oauth' => $config{'drive_oauth'},
+	            'clientid' => $config{'drive_clientid'},
+		    'secret' => $config{'drive_secret'},
+		  };
+	my ($ok, $token, $rtoken, $ttime) = &get_oauth_access_token($gce);
+	$ok || &error(&text('cloud_egoogletoken', $token));
+	$config{'drive_token'} = $token;
+	$config{'drive_rtoken'} = $rtoken;
+	$config{'drive_ttime'} = $ttime;
+	$config{'drive_tstart'} = time();
 
+	# Validate that it actually works
+	# XXX
+	#my $buckets = &list_gcs_buckets();
+	#ref($buckets) || &error(&text('cloud_egoogletoken2', $buckets));
+	}
 else {
 	&error($text{'cloud_eoauth_mode'});
 	}

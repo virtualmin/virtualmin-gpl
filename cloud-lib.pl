@@ -36,6 +36,11 @@ if ($virtualmin_pro) {
 		    'url' => 'https://azure.microsoft.com/',
 		    'desc' => $text{'cloud_azdesc'},
 		    'longdesc' => $text{'cloud_az_longdesc'} });
+	push(@rv, { 'name' => 'drive',
+		    'prefix' => [ 'drive' ],
+		    'url' => 'https://drive.google.com/',
+		    'desc' => $text{'cloud_drivedesc'},
+		    'longdesc' => \&cloud_drive_longdesc });
 	}
 return @rv;
 }
@@ -334,7 +339,8 @@ sub list_rackspace_endpoints
 return ( [ 'https://identity.api.rackspacecloud.com/v1.0', 'US default' ],
 	 [ 'https://lon.auth.api.rackspacecloud.com/v1.0', 'UK default' ],
 	 [ 'https://identity.api.rackspacecloud.com/v1.0;DFW', 'US - Dallas' ],
-	 [ 'https://identity.api.rackspacecloud.com/v1.0;ORD', 'US - Chicago' ] );
+	 [ 'https://identity.api.rackspacecloud.com/v1.0;ORD', 'US - Chicago' ],
+       );
 }
 
 
@@ -795,6 +801,171 @@ delete($config{'azure_id'});
 &unlock_file($module_config_file);
 }
 
+######## Functions for Google Drive ########
 
+sub cloud_drive_get_state
+{
+if ($config{'drive_account'} &&
+    ($config{'drive_oauth'} || $config{'drive_rtoken'})) {
+	return { 'ok' => 1,
+		 'desc' => &text('cloud_gaccount',
+				 "<tt>$config{'drive_account'}</tt>",
+				 "<tt>$config{'drive_project'}</tt>"),
+	       };
+	}
+elsif ($virtualmin_pro && &can_use_gcloud_storage_creds()) {
+	return { 'ok' => 1,
+		 'desc' => $text{'cloud_gcpcreds'},
+	       };
+	}
+else {
+	return { 'ok' => 0 };
+	}
+}
+
+sub cloud_drive_longdesc
+{
+if (!$config{'drive_account'} && $virtualmin_pro &&
+    &can_use_gcloud_storage_creds()) {
+	return $text{'cloud_drive_creds'};
+	}
+else {
+	my $ourl = &get_miniserv_base_url()."/$module_name/oauth.cgi";
+	return &text('cloud_drive_longdesc', $ourl);
+	}
+}
+
+sub cloud_drive_show_inputs
+{
+my $rv;
+
+if ($virtualmin_pro && &can_use_gcloud_storage_creds() &&
+   !$config{'drive_account'}) {
+	$rv .= &ui_table_row($text{'cloud_drive_account'},
+		&get_gcloud_account());
+
+	# Optional GCE project name
+	$rv .= &ui_table_row($text{'cloud_google_project'},
+		&ui_opt_textbox("drive_project", $config{'drive_project'}, 40,
+			$text{'default'}." (".&get_gcloud_project().")"));
+	}
+else {
+	# Google account
+	$rv .= &ui_table_row($text{'cloud_google_account'},
+		&ui_textbox("drive_account", $config{'drive_account'}, 40));
+
+	# Google OAuth2 client ID
+	$rv .= &ui_table_row($text{'cloud_google_clientid'},
+		&ui_textbox("drive_clientid", $config{'drive_clientid'}, 80));
+
+	# Google client secret
+	$rv .= &ui_table_row($text{'cloud_google_secret'},
+		&ui_textbox("drive_secret", $config{'drive_secret'}, 60));
+
+	# GCE project name
+	$rv .= &ui_table_row($text{'cloud_google_project'},
+		&ui_textbox("drive_project", $config{'drive_project'}, 40));
+	}
+
+# OAuth2 code
+if ($config{'drive_oauth'}) {
+	$rv .= &ui_table_row($text{'cloud_google_oauth'},
+		             "<tt>$config{'drive_oauth'}</tt>");
+	}
+
+return $rv;
+}
+
+sub cloud_drive_parse_inputs
+{
+my ($in) = @_;
+my $reauth = 0;
+my $authed = 0;
+
+if ($virtualmin_pro && &can_use_gcloud_storage_creds() &&
+   !$config{'drive_account'}) {
+	# Just parse project name
+	$authed = 1;
+	if ($in->{'drive_project_def'}) {
+		$config{'drive_project'} = '';
+		}
+	else {
+		$in->{'drive_project'} =~ /^\S+$/ ||
+			&error($text{'cloud_egoogle_project'});
+		$config{'drive_project'} = $in->{'drive_project'};
+		}
+	}
+else {
+	# Parse google account
+	$in->{'drive_account'} =~ /^\S+\@\S+$/ ||
+		&error($text{'cloud_egoogle_account'});
+	$reauth++ if ($config{'drive_account'} ne $in->{'drive_account'});
+	$config{'drive_account'} = $in->{'drive_account'};
+
+	# Parse client ID
+	$in->{'drive_clientid'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_clientid'});
+	$reauth++ if ($config{'drive_clientid'} ne $in->{'drive_clientid'});
+	$config{'drive_clientid'} = $in->{'drive_clientid'};
+
+	# Parse client secret
+	$in->{'drive_secret'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_secret'});
+	$reauth++ if ($config{'drive_secret'} ne $in->{'drive_secret'});
+	$config{'drive_secret'} = $in->{'drive_secret'};
+
+	# Parse project name
+	$in->{'drive_project'} =~ /^\S+$/ ||
+		&error($text{'cloud_egoogle_project'});
+	$reauth++ if ($config{'drive_project'} ne $in->{'drive_project'});
+	$config{'drive_project'} = $in->{'drive_project'};
+	}
+
+&lock_file($module_config_file);
+if (!$authed) {
+	$reauth++ if (!$config{'drive_oauth'});
+	$config{'cloud_oauth_mode'} = $reauth ? 'drive' : undef;
+	}
+&save_module_config();
+&unlock_file($module_config_file);
+
+if (!$reauth) {
+	# Nothing more to do - either the OAuth2 token was just set, or the
+	# settings were saved with no change
+	return undef;
+	}
+if ($authed) {
+	# Nothing to do, because token comes from the gcloud command
+	return undef;
+	}
+
+my $url = &get_miniserv_base_url()."/virtual-server/oauth.cgi";
+return $text{'cloud_descoauth'}."<p>\n".
+       &ui_link("https://accounts.google.com/o/oauth2/auth?".
+                "scope=https://www.googleapis.com/auth/drive&".
+                "redirect_uri=".&urlize($url)."&".
+                "response_type=code&".
+                "client_id=".&urlize($in->{'drive_clientid'})."&".
+                "login_hint=".&urlize($in->{'drive_account'})."&".
+                "access_type=offline&".
+                "prompt=consent", $text{'cloud_openoauth'},
+                undef, "target=_blank")."<p>\n".
+       $text{'cloud_descoauth2'}."<p>\n";
+}
+
+# cloud_drive_clear()
+# Reset the GCS account to the default
+sub cloud_drive_clear
+{
+delete($config{'drive_account'});
+delete($config{'drive_clientid'});
+delete($config{'drive_secret'});
+delete($config{'drive_oauth'});
+delete($config{'drive_token'});
+delete($config{'drive_rtoken'});
+&lock_file($module_config_file);
+&save_module_config();
+&unlock_file($module_config_file);
+}
 
 1;
