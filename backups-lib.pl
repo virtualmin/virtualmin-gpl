@@ -2889,6 +2889,7 @@ if ($ok) {
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
 			$d->{'auto_letsencrypt'} = 0;
+			$d->{'no_mysql_db'} = 1;
 			my $err = &create_virtual_server($d, $parentdom,
 			       $parentdom ? $parentdom->{'user'} : undef, 1);
 			&$outdent_print();
