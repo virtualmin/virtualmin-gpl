@@ -152,7 +152,7 @@ else {
 		$d->{'cgi_bin_dir'} = $subcgi;
 		foreach my $sd ($subdir, $subcgi) {
 			if (!-d $sd) {
-				&make_dir_as_domain_user($d, $sd, 0755);
+				&make_dir_as_domain_user($d, $sd, 0755, 1);
 				}
 			}
 		}

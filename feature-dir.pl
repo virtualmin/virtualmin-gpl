@@ -16,50 +16,51 @@ return undef;
 # Creates the home directory
 sub setup_dir
 {
-local $tmpl = &get_template($_[0]->{'template'});
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 &require_useradmin();
-local $qh = quotemeta($_[0]->{'home'});
+my $qh = quotemeta($d->{'home'});
 &$first_print($text{'setup_home'});
 
 # Get Unix user, either for this domain or its parent
-local $uinfo;
-if ($_[0]->{'unix'} || $_[0]->{'parent'}) {
-	local @users = &list_all_users();
-	($uinfo) = grep { $_->{'user'} eq $_[0]->{'user'} } @users;
+my $uinfo;
+if ($d->{'unix'} || $d->{'parent'}) {
+	my @users = &list_all_users();
+	($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @users;
 	}
-if ($_[0]->{'unix'} && !$uinfo) {
+if ($d->{'unix'} && !$uinfo) {
 	# If we are going to have a Unix user but none has been created
 	# yet, fake his details here for use in chowning and skel copying
 	# This should never happen!
-	$uinfo ||= { 'uid' => $_[0]->{'uid'},
-		     'gid' => $_[0]->{'ugid'},
+	$uinfo ||= { 'uid' => $d->{'uid'},
+		     'gid' => $d->{'ugid'},
 		     'shell' => '/bin/sh',
-		     'group' => $_[0]->{'group'} || $_[0]->{'ugroup'} };
+		     'group' => $d->{'group'} || $d->{'ugroup'} };
 	}
 
 # Create and populate home directory
-&create_domain_home_directory($_[0], $uinfo);
+&create_domain_home_directory($d, $uinfo);
 
 # Populate home dir
-if ($tmpl->{'skel'} ne "none" && !$_[0]->{'nocopyskel'} &&
-    !$_[0]->{'alias'}) {
+if ($tmpl->{'skel'} ne "none" && !$d->{'nocopyskel'} &&
+    !$d->{'alias'}) {
 	# Don't die if this fails due to quota issues
 	eval {
 	  local $main::error_must_die = 1;
-	  &copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $_[0]),
-	  		   $uinfo, $_[0]->{'home'},
-	  		   $_[0]->{'group'} || $_[0]->{'ugroup'}, $_[0]);
+	  &copy_skel_files(&substitute_domain_template($tmpl->{'skel'}, $d),
+	  		   $uinfo, $d->{'home'},
+	  		   $d->{'group'} || $d->{'ugroup'}, $d);
 	  };
 	}
 
 # If this is a sub-domain, move public_html from any skeleton to it's sub-dir
 # under the parent
-if ($_[0]->{'subdom'}) {
-	local $phsrc = &public_html_dir($_[0], 0, 1);
-	local $phdst = &public_html_dir($_[0], 0, 0);
+if ($d->{'subdom'}) {
+	my $phsrc = &public_html_dir($d, 0, 1);
+	my $phdst = &public_html_dir($d, 0, 0);
 	if (-d $phsrc && !-d $phdst) {
-		&make_dir($phdst, 0755);
-		&set_ownership_permissions($_[0]->{'uid'}, $_[0]->{'gid'},
+		&make_dir($phdst, 0755, 1);
+		&set_ownership_permissions($d->{'uid'}, $d->{'gid'},
 					   undef, $phdst);
 		&copy_source_dest($phsrc, $phdst);
 		&unlink_file($phsrc);
@@ -67,15 +68,15 @@ if ($_[0]->{'subdom'}) {
 	}
 
 # Setup sub-directories
-&create_standard_directories($_[0]);
+&create_standard_directories($d);
 &$second_print($text{'setup_done'});
 
 # Create mail file
-if (!$_[0]->{'parent'} && $uinfo) {
+if (!$d->{'parent'} && $uinfo) {
 	&$first_print($text{'setup_usermail3'});
 	eval {
 		local $main::error_must_die = 1;
-		&create_mail_file($uinfo, $_[0]);
+		&create_mail_file($uinfo, $d);
 
 		# Set the user's Usermin IMAP password
 		&set_usermin_imap_password($uinfo);
@@ -90,7 +91,7 @@ if (!$_[0]->{'parent'} && $uinfo) {
 
 # Copy excludes from template
 if ($tmpl->{'exclude'} ne 'none') {
-	$_[0]->{'backup_excludes'} = $tmpl->{'exclude'};
+	$d->{'backup_excludes'} = $tmpl->{'exclude'};
 	}
 
 return 1;
