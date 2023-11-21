@@ -7960,6 +7960,11 @@ if (!defined($dom->{'defaultdomain'})) {
 		if ($dom->{'dom'} eq $config{'defaultdomain_name'});
 	}
 
+# Save domain details before enabling features
+&$first_print($text{'setup_save'});
+&save_domain($dom, 1);
+&$second_print($text{'setup_done'});
+
 # Set up all the selected features (except Webmin login)
 my $f;
 local @dof = grep { $_ ne "webmin" } @features;
@@ -8014,9 +8019,9 @@ if ($dom->{'virt6'}) {
 	}
 delete($dom->{'creating'});
 
-# Save domain details
+# Save domain details again at the end
 &$first_print($text{'setup_save'});
-&save_domain($dom, 1);
+&save_domain($dom);
 &$second_print($text{'setup_done'});
 
 # If mail client autoconfig is enabled globally, set it up for
