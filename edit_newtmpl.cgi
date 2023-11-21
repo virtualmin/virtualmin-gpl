@@ -11,13 +11,6 @@ require './virtual-server-lib.pl';
 foreach $t (@tmpls) {
 	next if ($t->{'deleted'});
 
-	# Get scripts installed by the tempate
-	$scripts = &list_template_scripts($t);
-	$smesg = $scripts eq "none" ? $text{'newtmpl_none'} :
-		 @$scripts ? scalar(@$scripts) :
-	         $t->{'default'} ? $text{'newtmpl_none'} :
-			     $text{'default'};
-
 	# Find domains on the template
 	my @tdoms = grep { $_->{'template'} eq $t->{'id'} } @doms;
 
@@ -39,7 +32,6 @@ foreach $t (@tmpls) {
 		join(", ", @uses),
 		&ui_link("search.cgi?field=template&what=$t->{'id'}",
 			 scalar(@tdoms)),
-		&ui_link("edit_tmpl.cgi?id=$t->{'id'}&editmode=scripts",$smesg),
 	        $t->{'created'} ? &make_date($t->{'created'}, 1)
 				: "<i>$text{'newtmpl_init'}</i>" ]);
 	$deletable++ if (!$t->{'standard'});
@@ -60,7 +52,6 @@ print &ui_form_columns_table(
 	  $text{'newtmpl_name'},
 	  $text{'newtmpl_useby'},
 	  $text{'newtmpl_tdoms'},
-	  $text{'newtmpl_scripts'},
 	  $text{'newtmpl_created'} ],
 	100,
 	\@table);

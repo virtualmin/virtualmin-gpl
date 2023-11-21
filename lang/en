@@ -3365,7 +3365,6 @@ newtmpl_add2=Create a template from the default settings.
 newtmpl_none=None
 newtmpl_cust=Custom
 newtmpl_return=templates list
-newtmpl_scripts=Template scripts
 newtmpl_delete=Delete Selected Templates
 newtmpl_edelete=Standard templates cannot be deleted
 newtmpl_setdef=Set Default Top-Level Template
