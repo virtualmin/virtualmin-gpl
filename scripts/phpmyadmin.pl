@@ -93,27 +93,6 @@ if (&compare_versions($phpver, "7.1") < 0) {
 return ();
 }
 
-# Must have at least one existing DB, and PHP 5.2
-sub script_phpmyadmin_depends
-{
-local ($d, $ver, $sinfo, $phpver) = @_;
-local @rv;
-
-&has_domain_databases($d, [ "mysql" ], 1) ||
-	push(@rv, "phpMyAdmin requires a MySQL database");
-
-# Check for latest MySQL
-if (&compare_versions($ver, "4.2.3") >= 0 &&
-    defined(&get_dom_remote_mysql_version)) {
-	my ($myver, $variant) = &get_dom_remote_mysql_version($d);
-	if ($myver && $myver < 5.5) {
-		push(@rv, "phpMyAdmin requires MySQL version 5.5 or later");
-		}
-	}
-
-return @rv;
-}
-
 sub script_phpmyadmin_php_fullver
 {
 my ($d, $ver, $sinfo) = @_;
@@ -132,8 +111,10 @@ if ($upgrade) {
 	# Options are fixed when upgrading
 	$rv .= &ui_table_row("Allow logins with empty passwords",
 		     $upgrade->{'opts'}->{'emptypass'} ? $text{'yes'} : $text{'no'});
-	$rv .= &ui_table_row("Automatically login to phpMyAdmin",
-		     $upgrade->{'opts'}->{'auto'} ? $text{'yes'} : $text{'no'});
+	if ($d->{'mysql'}) {
+		$rv .= &ui_table_row("Automatically login to phpMyAdmin",
+			$upgrade->{'opts'}->{'auto'} ? $text{'yes'} : $text{'no'});
+		}
 	local @dbnames = split(/\s+/, $upgrade->{'opts'}->{'db'});
 	$rv .= &ui_table_row("Databases to manage",
 		join(" ", @dbnames) || "<i>All databases</i>");
@@ -146,9 +127,11 @@ else {
 	$rv .= &ui_table_row("Allow logins with empty passwords",
 		&ui_radio("emptypass", 0, [ [ 1, "Yes" ],
 				       [ 0, "No" ] ]));
-	$rv .= &ui_table_row("Automatically login to phpMyAdmin",
-		&ui_radio("auto", 0, [ [ 1, "Yes" ],
-				       [ 0, "No" ] ]));
+	if ($d->{'mysql'}) {
+		$rv .= &ui_table_row("Automatically login to phpMyAdmin",
+			&ui_radio("auto", 0, [ [ 1, "Yes" ],
+					[ 0, "No" ] ]));
+		}
 	local @dbs = &domain_databases($d, [ "mysql" ]);
 	$rv .= &ui_table_row("Database to manage",
 		     &ui_radio("db_def", 1, [ [ 1, "All databases" ],
@@ -248,10 +231,14 @@ sub script_phpmyadmin_install
 local ($d, $ver, $opts, $files, $upgrade) = @_;
 local ($out, $ex);
 local @dbs = map { s/^mysql_//; $_ } split(/\s+/, $opts->{'db'});
-local $dbuser = &mysql_user($d);
-local $dbpass = &mysql_pass($d);
-local $dbhost = &get_database_host("mysql", $d);
-
+local $dbuser;
+local $dbpass;
+local $dbhost = 'localhost';
+if ($d->{'mysql'}) {
+	$dbuser = &mysql_user($d);
+	$dbpass = &mysql_pass($d);
+	$dbhost = &get_database_host("mysql", $d);
+	}
 # Delete old files known to be obsolete
 if ($upgrade && $ver >= 4) {
 	&unlink_file_as_domain_user($d, "$opts->{'dir'}/main.php");
