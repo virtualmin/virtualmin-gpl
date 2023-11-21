@@ -34,7 +34,12 @@ To create an alias of an existing virtual server, use the --alias option,
 followed by the domain name of the target server. For alias servers, the
 --pass , --unix , --webmin , --dir and --quota options are not needed.
 A variation is the --alias-with-mail option, which creates an alias virtual
-server that can still have mailboxes and email aliases. 
+server that can still have mailboxes and email aliases.
+
+To create a sub-domain, use the C<--subdom> flag followed by the parent
+domain, which the domain being created must be under. The optional
+C<--subprefix> flag can be used to set the directory under public_html
+of the parent domain for the sub-domains's HTML files.
 
 You can specify limits on the number of aliases, sub-servers, mailboxes and
 databases for the new domain owner using the --max-aliases, --max-doms,
@@ -420,6 +425,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--shell") {
 		$defaultshell = shift(@ARGV);
 		}
+	elsif ($a eq "--subprefix") {
+		$subprefix = shift(@ARGV);
+		}
 	elsif ($a =~ /^\-\-(.*)$/ && $plugin_args{$1}) {
 		# Plugin-specific arg
 		if ($plugin_args{$1}->{'novalue'}) {
@@ -582,7 +590,7 @@ if ($parentdomain) {
 	if ($subdomain) {
 		$domain =~ /^(\S+)\.\Q$subdomain\E$/ ||
 			&usage("Sub-domain $domain must be under the parent domain $subdomain");
-		$subprefix = $1;
+		$subprefix ||= $1;
 		}
 	}
 
@@ -1109,6 +1117,7 @@ print "                        [--generate-ssl-cert]\n";
 print "                        [--generate-ssh-key | --use-ssh-key file|data]\n";
 print "                        [--append-style format]\n";
 print "                        [--shell command]\n";
+print "                        [--subprefix directory]\n";
 exit(1);
 }
 
