@@ -98,9 +98,15 @@ to enable sharing.
 To change the domain's HTML directory, use the C<--document-dir> flag followed
 by a path relative to the domain's home. Alternately, if the Apache config has
 been modified outside of Virtualmin and you just want to detect the new path,
-use the C<--fix-document-dir> flag. If you want the directory to be renames
+use the C<--fix-document-dir> flag. If you want the directory to be renamed
 as well as updated in the webserver configuration, use the
-C<--move-document-dir> flag.
+C<--move-document-dir> flag. Note that this flag cannot be used for sub-domains,
+as their HTML directory is under the parent's HTML dir.
+
+However, for sub-domains you can adjust the HTML sub-directory with the 
+C<--subprefix> path followed by a directory relative to the parent's
+C<public_html> dir. Or use C<--move-subprefix> to actually move the directory
+as well.
 
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
@@ -229,6 +235,13 @@ while(@ARGV > 0) {
 		$htmldir = shift(@ARGV);
 		$htmldirmove = 1;
 		}
+	elsif ($a eq "--subprefix") {
+		$subprefix = shift(@ARGV);
+		}
+	elsif ($a eq "--move-subprefix") {
+		$subprefix = shift(@ARGV);
+		$htmldirmove = 1;
+		}
 	elsif ($a eq "--fix-document-dir") {
 		$fixhtmldir = 1;
 		}
@@ -340,8 +353,9 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $fpmtype || $defmode || defined($fcgiwrap) || @add_dirs || @remove_dirs ||
-  $protocols || $fix_mod_php || &usage("Nothing to do");
+  $fpmsock || $fpmtype || $defmode || defined($fcgiwrap) || $subprefix ||
+  @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
+	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
 
 # Validate FastCGI options
@@ -695,10 +709,26 @@ foreach $d (@doms) {
 		&refresh_webmin_user($d);
 		}
 
-	if ($htmldir && !$d->{'alias'} && $d->{'public_html_dir'} !~ /\.\./) {
-		# Change HTML directory
+	if ($htmldir && !$d->{'alias'} && !$d->{'subdom'} &&
+	    $d->{'public_html_dir'} !~ /\.\./) {
+		# Change HTML directory for a regular domain
 		&$first_print("Changing documents directory to $htmldir ..");
 		$err = &set_public_html_dir($d, $htmldir, $htmldirmove);
+		&$second_print($err ? ".. failed : $err" : ".. done");
+		}
+	elsif ($subprefix && $d->{'subdom'}) {
+		# Change HTML directory for a sub-domain
+		&$first_print(
+		  "Changing sub-domain documents directory to $subprefix ..");
+		my $newd = { %$d };
+		$newd->{'subprefix'} = $subprefix;
+		delete($newd->{'public_html_dir'});
+		delete($newd->{'public_html_path'});
+		$htmldir = &public_html_dir($newd, 1);
+		$err = &set_public_html_dir($d, $htmldir, $htmldirmove);
+		if (!$err) {
+			$d->{'subprefix'} = $subprefix;
+			}
 		&$second_print($err ? ".. failed : $err" : ".. done");
 		}
 
@@ -1002,6 +1032,8 @@ print "                     [--access-log log-path]\n";
 print "                     [--error-log log-path]\n";
 print "                     [--document-dir subdirectory |\n";
 print "                      --move-document-dir subdirectory |\n";
+print "                      --subprefix subdirectory |\n";
+print "                      --move-subprefix subdirectory |\n";
 print "                      --fix-document-dir]\n";
 print "                     [--port number] [--ssl-port number]\n";
 print "                     [--url-port number] [--ssl-url-port number]\n";

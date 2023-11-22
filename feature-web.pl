@@ -2100,7 +2100,7 @@ sub set_public_html_dir
 {
 my ($d, $subdir, $rename) = @_;
 my $p = &domain_has_website($d);
-my $path = $d->{'home'}."/".$subdir;
+my $path = &simplify_path($d->{'home'}."/".$subdir);
 my $oldpath = $d->{'public_html_path'};
 if ($rename && (&is_under_directory($oldpath, $path) ||
 		&is_under_directory($path, $oldpath))) {
