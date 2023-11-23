@@ -1106,13 +1106,14 @@ DOMAIN: foreach $d (sort { $a->{'dom'} cmp $b->{'dom'} } @$doms) {
 					$dfpath.".dom", $domtemp) if (!$err);
 				}
 			elsif ($mode == 7 || $mode == 8 || $mode == 10 ||
-			       $mode == 11) {
+			       $mode == 11 || $mode == 12) {
 				# Via Google, Dropbox or Backblaze upload
 				&$first_print($text{'backup_upload'.$mode});
 				my $dfpath = $path ? $path."/".$df : $df;
 				my $func = $mode == 7 ? \&upload_gcs_file :
 					   $mode == 8 ? \&upload_dropbox_file :
 					   $mode == 11 ? \&upload_azure_file :
+					   $mode == 12 ? \&upload_drive_file :
 							\&upload_bb_file;
 				my $tries = $mode == 7 ? $gcs_upload_tries :
 					    $mode == 8 ? $dropbox_upload_tries :
@@ -1698,7 +1699,8 @@ foreach my $desturl (@$desturls) {
 		&unlink_file($domtemp);
 		&$second_print($text{'setup_done'}) if ($ok);
 		}
-	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11) &&
+	elsif ($ok && ($mode == 7 || $mode == 8 || $mode == 10 ||
+		       $mode == 11 || $mode == 12) &&
 	       (@destfiles || !$dirfmt)) {
 		# Upload to Google cloud storage, Dropbox or Backblaze
 		local $err;
@@ -1706,6 +1708,7 @@ foreach my $desturl (@$desturls) {
 		local $func = $mode == 7 ? \&upload_gcs_file :
 			      $mode == 8 ? \&upload_dropbox_file :
 			      $mode == 11 ? \&upload_azure_file :
+			      $mode == 12 ? \&upload_drive_file :
 					   \&upload_bb_file;
 		local $tries = $mode == 7 ? $gcs_upload_tries :
 			       $mode == 8 ? $dropbox_upload_tries :
