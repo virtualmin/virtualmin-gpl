@@ -263,14 +263,6 @@ foreach my $pro_demo_feature
 	  'skip' => !($d->{'unix'} && &can_edit_res($d))
 	},
 
-	# Add demo Proxy Paths link for GPL users 
-	{ 'name' => 'list_balancers',
-	  'title' => $text{'edit_balancer'},
-	  'cat' => 'web',
-	  'url' => "https://virtualmin.com/professional/#list_balancers",
-	  'skip' => !(&can_edit_forward()),
-	},
-
 	# Add demo Search Mail Logs link for GPL users 
 	{ 'name' => 'edit_maillog',
 	  'title' => $text{'edit_maillog'},

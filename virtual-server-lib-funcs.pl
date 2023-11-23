@@ -11290,7 +11290,6 @@ return &can_edit_templates() || $access{'createresellers'};
 sub has_proxy_balancer
 {
 local ($d) = @_;
-return 0 if (!$virtualmin_pro);
 if ($config{'web'} && !$d->{'alias'} && !$d->{'proxy_pass_mode'}) {
 	# From Apache
 	&require_apache();
