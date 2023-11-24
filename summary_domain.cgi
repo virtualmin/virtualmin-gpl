@@ -50,7 +50,7 @@ print &ui_table_row($text{'edit_created'},
 	$d->{'creator'} ? 3 : 1, \@tds);
 
 # Owner
-my $owner = "<tt>$d->{'user'}</tt>";
+my $owner = "<tt title='$d->{'user'} ($d->{'uid'})'>$d->{'user'}</tt>";
 if (&can_edit_domain($d) && &can_rename_domains()) {
 	$owner = "<a href='rename_form.cgi?dom=$d->{'id'}'>$owner</a>"
 	}
@@ -58,7 +58,7 @@ print &ui_table_row($text{'edit_user'}, $owner,
 		    undef, \@tds);
 if (!$d->{'parent'}) {
 	my $gr = $d->{'unix'} &&
-	          $d->{'group'} ? "<tt>$d->{'group'}</tt>" : $text{'edit_nogroup'};
+	          $d->{'group'} ? "<tt title='$d->{'group'} ($d->{'gid'})'>$d->{'group'}</tt>" : $text{'edit_nogroup'};
 	if (&can_edit_domain($d) && &can_rename_domains()) {
 		$gr = "<a href='rename_form.cgi?dom=$d->{'id'}'>$gr</a>"
 		}
