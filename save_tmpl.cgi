@@ -26,8 +26,8 @@ elsif ($in{'cp'}) {
 	$tmpl->{'default'} = 0;
 	}
 else {
-	# Start with blank
-	$tmpl = { };
+	# Start with blank, with some sensible defaults
+	$tmpl = { 'web_php_suexec' => 3 };
 	}
 
 if ($in{'delete'}) {
