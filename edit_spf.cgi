@@ -124,6 +124,16 @@ if ($key) {
 		$dsrecstext = &dns_records_to_text(@$dsrecs);
 		$dsrecsbox = &ui_textarea("dsrecs", $dsrecstext, 2, 80,
 					  "off", 0, "readonly");
+		$dsrecsbox .= &ui_columns_start([
+			$text{'spf_keytag'},
+			$text{'spf_alg'},
+			$text{'spf_type'},
+			$text{'spf_digest'},
+			]);
+		foreach my $r (@$dsrecs) {
+			$dsrecsbox .= &ui_columns_row($r->{'values'});
+			}
+		$dsrecsbox .= &ui_columns_end();
 		}
 	else {
 		$dsrecsbox = &text('spf_edsrecs', $dsrecs);
