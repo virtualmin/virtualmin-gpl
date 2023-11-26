@@ -896,6 +896,7 @@ log_sched_virtualmin=virtualmin ayarları
 log_sched_doms=$1 alan adı
 log_backup_failed=$1 sanal sunucu yedeklenemedi
 log_backup_failed_l=$1 sanal sunucuları yedeklenemedi
+log_default_template=Varsayılan şablon $1 olarak değiştirildi
 log_stop_script=$3 sunucusunda $1 $2 komut dosyası durduruldu
 log_start_script=$3 sunucusunda $1 $2 komut dosyası başlatıldı
 log_restart_script=$3 sunucusunda $1 $2 komut dosyası yeniden başlatıldı
@@ -1087,6 +1088,8 @@ backup_nicebb=Backblaze kovası $1
 backup_nicebbp=$1 Backblaze kovasında $2 
 backup_niceaz=Azure kapsayıcısı $1
 backup_niceazp=$1 Azure kapsayıcısında $2
+backup_nicedrive=Google Drive klasörü $1
+backup_nicedrivep=$2 Google Drive klasöründe $1
 backup_nicedownload=indirilmiş dosya
 backup_nicedownloadlink=İndirme: {link
 backup_niceupload=yüklenen dosya
@@ -1146,6 +1149,7 @@ backup_upload8=Arşiv Dropbox'a yükleniyor. ..
 backup_upload9=Arşiv, $1 Webmin sunucusuna yükleniyor.
 backup_upload10=Arşiv Backblaze'e yükleniyor ..
 backup_upload11=Arşiv Azure Blob Storage'a yükleniyor ..
+backup_upload12=Arşiv Google Drive'a yükleniyor ..
 backup_errorsites=Hatalı sunucular: $1 
 backup_ersnopath=Rackspace'e tek bir dosyaya yedeklerken bir dosya adı belirtmelisiniz
 backup_copy=Ek hedefe $1 kopyalanıyor.
@@ -1609,8 +1613,14 @@ newbw_return=bant genişliği izleme formu
 newbw_mailout=Giden e-postaları bant genişliği kullanımına dahil edilsin mi?
 newbw_mailall=Geçişli e-postaları bant genişliği kullanımına dahil edilsin mi?
 
+newtmpl_tdoms=Sunucular tarafından kullanılır
+newtmpl_useby=Tarafından kullanılmak üzere
+newtmpl_def=Varsayılan
 newtmpl_add1=Boş bir şablon oluşturun.
 newtmpl_add2=Varsayılan ayarlardan bir şablon oluşturun.
+newtmpl_edelete=Standart şablonlar silinemez
+newtmpl_setdef=Varsayılan Üst Düzey Şablonu Ayarla
+newtmpl_setdefsub=Varsayılan Alt Sunucu Şablonunu Ayarla
 newtmpl_created=Oluşturma tarihi
 newtmpl_init=Virtualmin kurulumu
 newtmpl_name0=Varsayılan ayarları
@@ -2837,6 +2847,10 @@ spf_enableds=Üst etki alanına DS kayıtları ekleniyor ..
 spf_disableds=DS kayıtları üst alan adından kaldırılıyor ..
 spf_dnsrlocal=DNS yerel sunucuya taşınıyor ..
 spf_dnsrhost=DNS $1 uzak sunucusuna taşınıyor ..
+spf_keytag=Anahtar etiketi
+spf_alg=Algoritma
+spf_type=Özet türü
+spf_digest=Özet dizesi
 
 s3_emodule2=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 Perl modülü yüklenemedi : $2 
 s3_emodule3=Amazon'un S3 hizmetiyle iletişim kurmak için gereken $1 veya $2 Perl modülleri kurulu değil
@@ -2853,10 +2867,13 @@ az_ecmd=<tt>az</tt> Azure CLI komutu bulunamadı
 az_elogin=Azure CLI komutunun kimliği henüz doğrulanmadı. Virtualmin sisteminize SSH ekleyin ve Azure'da oturum açmak için <tt>az login --use-device-code</tt> komutunu çalıştırın.
 azure_account=Azure hesabı $1
 
+tdelete_err2=Varsayılan şablon değiştirilemedi
 tdelete_title=Sunucu Şablonlarını Sil
 tdelete_warn=Aşağıdaki seçilen sunucu şablonlarını silmek istediğinizden emin misiniz : $1 
 tdelete_confirm=Şablonları Sil
 tdelete_users2=Şu anda sanal sunucular tarafından kullanılıyor : $1 
+tdelete_edefsub=Standart alt sunucu şablonu, üst düzey sunucular için varsayılan olamaz
+tdelete_edeftop=Standart şablon alt sunucular için varsayılan olamaz
 
 switch_eadmin=Belirtilen ekstra yönetici mevcut değil!
 
@@ -3216,13 +3233,14 @@ balancers_add=Yeni bir proxy yolu ekleyin.
 balancers_path=URL yolu
 balancers_name=Dengeleyici adı
 balancers_urls=Hedef URL'ler
-balancers_used=Senaryo için
+balancers_used2=Tarafından kullanılan
 balancers_delete=Seçilen Proxy'leri Sil
 balancers_none=Henüz hiçbir proxy yolu tanımlanmadı.
 balancers_return=proxy yolları listesi
 balancers_derr=Proxy yolları silinemedi
 balancers_denone=Hiçbiri seçilmedi
 balancers_none2=Proxy yok
+balancers_script=Komut dosyası $1 sürüm $2
 
 balancer_create=Proxy Yolu Oluştur
 balancer_edit=Proxy Yolunu Düzenle
@@ -3242,6 +3260,8 @@ balancer_eurls=Hedef URL girilmedi
 balancer_script=Betik yükleyici tarafından kullanılır
 balancer_scriptver=Komut dosyası sürümü
 balancer_none=Bu yol için proxy yapmayın ve bunun yerine yerel olarak sunun
+balancer_scriptused=Bu proxy yolu, yüklü komut dosyası $1 sürüm $2 tarafından kullanılıyor. Bunu değiştirmek veya silmek, komut dosyasının çalışmasının durmasına neden olabilir!
+balancer_pluginused=Bu proxy yolu $1 tarafından kullanılıyor. Bunu değiştirmek veya silmek bu özelliğin çalışmasının durmasına neden olabilir!
 
 scriptwarn_header=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının yeni sürümleri vardır :
 scriptwarn_header2=Virtualmin tarafından yönetilen aşağıdaki komut dosyalarının \nvirtual $1 sunucusunda yeni sürümleri vardır :
@@ -3670,6 +3690,7 @@ cfix_smtpto=Posta sunucunuzun bu alan adı için e-posta kabul edecek şekilde y
 plans_title=Hesap Planları
 newplan_title=Hesap Planları
 plans_name=Plan adı
+plans_default=Varsayılan
 plans_quota=Disk kotası
 plans_bw=Bant genişliği sınırı
 plans_doms=Alanlar
@@ -3679,6 +3700,7 @@ plans_none=Henüz hesap planı oluşturulmadı.
 plans_none2=Henüz herhangi bir hesap planı oluşturmadınız.
 plans_add=Yeni bir hesap planı ekleyin.
 plans_delete=Seçilen Planları Sil
+plans_setdefault=Varsayılan Planı Ayarla
 plans_resel=Bayi
 plans_noresel=Yok
 plans_ecannot=Planları yönetme izniniz yok
@@ -3711,6 +3733,7 @@ plan_scriptsopts=Tüm komut dosyaları
 plan_scriptssel=İzin
 
 dplans_err=Planlar silinemedi
+dplans_err2=Varsayılan plan değiştirilemedi
 dplans_enone=Hiçbiri seçilmedi
 dplans_eall=En az bir plan olmalı
 
@@ -4610,6 +4633,7 @@ transfer_host0=Yeni sistem
 transfer_savehost=Daha sonra kullanmak üzere kaydedilsin mi?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC'si
+transfer_user=Hedef sistem için giriş yapın
 transfer_pass=Hedef sistem için şifre
 transfer_passdef=(SSH kimlik doğrulaması yapılandırılmışsa isteğe bağlıdır)
 transfer_overwrite=Mevcut alan adının üzerine yazılsın mı?
@@ -4687,6 +4711,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Depolama
+cloud_drivedesc=Google sürücü
 cloud_s3account=$1 erişim anahtarını kullanma
 cloud_s3creds=EC2 kimlik bilgilerini kullanma
 cloud_rsuser=$1 giriş bilgilerini kullanma
@@ -4728,6 +4753,7 @@ cloud_gcpcreds=GCP kimlik bilgilerini kullanma
 cloud_daccount=$1 giriş bilgilerini kullanma
 cloud_google_account=Google hesabı e-posta adresi
 cloud_google_creds=GCP kimlik bilgileri bu sistemde <tt>gcloud</tt> komutuyla zaten mevcut. Google Compute Engine'de çalışırken durum genellikle böyledir. Ancak, <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Konsolu</a>.
+cloud_drive_creds=GCP kimlik bilgileri bu sistemde <tt>gcloud</tt> komutundan zaten mevcut. Bu genellikle Google Compute Engine'de çalıştırırken karşılaşılan durumdur. Ancak, <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Konsolu</a>.
 cloud_google_dnscreds=GCP kimlik bilgileri bu sistemde <tt>gcloud</tt> komutuyla zaten mevcut. Google Compute Engine'de çalışırken durum genellikle böyledir. Ancak, <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Konsolu</a>'nda aşağıdaki hizmet hesabına tam DNS erişim izinleri vermeniz gerekebilir ..
 cloud_google_clientid=OAuth2 istemci kimliği
 cloud_google_secret=OAuth2 istemci sırrı
@@ -4740,6 +4766,7 @@ cloud_google_longdesc=<a href=https://console.developers.google.com/apis/credent
 cloud_dropbox_longdesc=Dropbox'a yedekleyebilmeniz için, öncelikle web sitenizde <a href=http://www.virtualmin.com/dropbox-referral target=_blank>bir hesap oluşturmanız</a> gerekir.
 cloud_bb_longdesc=Backblaze'e yedeklemeden önce, önce <a href=https://backblaze.com/ target=_blank>bir hesap oluşturmalı</a> ve ardından <b>Ayarlarım</b> sayfası. Ardından, <b>Uygulama Anahtarları</b> sayfasındaki tüm yeteneklere sahip bir Uygulama anahtarı oluşturmanız gerekir.
 cloud_az_longdesc=Azure Blob Storage'a yedekleme yapmadan önce <a href=https://azure.microsoft.com/en-us/free/ target=_blank>bir hesap oluşturmanız</a>, <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> komutunu girin ve <tt>az login --use-device-code<komutunuçalıştırarak Azure hesabınızda oturum açın. /tt>.
+cloud_drive_longdesc=Bu sayfadaki ayarlar, <a href=https://console.developers.google.com/apis/credentials target=_blank>Google API Konsolu</a> sayfasında projenize API erişimi verdiğinizde Google tarafından sağlanır., <b>API'ler ve Kimlik Doğrulama</b> altında -&gt; <b>Kimlik bilgileri</b>. <b>Yetkili yönlendirme URI'si</b> <tt>$1</tt> olarak ayarlanmış şekilde bir <b>OAuth İstemci Kimliği</b> kimlik bilgisi oluşturmalısınız. Oluşturulduktan sonra <b>istemci kimliği</b> ve <b>istemci sırrı</b> buraya girilebilir.
 cloud_openoauth=OAuth2 Kaydına Başla
 cloud_newoauth=Google'dan OAuth2 kodu:
 cloud_newoauth_dropbox=Dropbox'tan OAuth2 kodu:
@@ -5141,3 +5168,6 @@ remotedns_ednone=Hiçbiri seçilmedi!
 remotedns_eslave=Bu sistem yalnızca bir ana DNS sunucusu olabilir
 
 global_dismiss=Azletmek
+
+ports_fpm=PHP FPM sunucusu
+ports_script=$1 komut dosyası yüklendi

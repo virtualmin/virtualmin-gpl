@@ -1783,17 +1783,11 @@ expframe_ewrite=Kullanýcý $2 tarafýndan yönlendirme dosyasý $1 yazýlamadý
 
 newtmpl_title=Sunucu Þablonlarý
 newtmpl_name=Þablon
-newtmpl_skel=Çatý klasör
-newtmpl_web=Apache?
-newtmpl_dns=BIND?
-newtmpl_ftp=ProFTPd?
-newtmpl_logrotate=Logrotate?
 newtmpl_frame=Çerçeve HTML?
 newtmpl_mail=E-posta mesajý?
 newtmpl_none=Hiçbiri
 newtmpl_cust=Özgün
 newtmpl_return=Þablon listesi
-newtmpl_scripts=Kurulum Sihirbazlarý
 newtmpl_delete=Seçilmiþ Þablonlarý Sil
 
 tmpl_title1=Sunucu Þablonu Oluþtur

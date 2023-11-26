@@ -1294,7 +1294,6 @@ balancers_add=Pridat novou cestu k Proxy
 balancers_path=URL adresa
 balancers_name=Nazev proxy
 balancers_urls=Cilove URL
-balancers_used=Pro skript
 balancers_delete=Odstranit zvolene proxy
 balancers_none=Nebyla doposud definovana zadna cesta k Proxy
 balancers_return=seznam cest k Proxy

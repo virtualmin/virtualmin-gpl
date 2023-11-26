@@ -1,7 +1,7 @@
 <header>Does SPF record cover all senders?</header>
 
 This field controls how the SPF record covers hosts other than the Virtualmin
-server itself, and hosts specified in the previous options. The choices are :
+server itself, and hosts specified in the previous options. The choices are:
 
 <dl>
 <dt><b>No</b> (SPF mode <tt>?all</tt>)
@@ -11,13 +11,12 @@ server itself, and hosts specified in the previous options. The choices are :
 <dd>The SPF record will apply only to the Virtualmin server itself, and other hosts defined above.  This is the preferred method of SPF usage, as it limits the hosts which can send mail claiming to be from this domain, but does not entirely block messages from other sources.<p>
 
 <dt><b>Yes, and deny other senders</b> (SPF mode <tt>-all</tt>)
-<dd>Like the option above, but repients should entirely discard messages from other senders. <p>
+<dd>Like the option above, but recipients should entirely discard messages from other senders. <p>
 </dl>
 
 </ul>
 
-Read more about SPF at the
-<a href="http://open-spf.org/Introduction/">Sender Policy Framework</a> homepage.
+Read more about SPF at the <a href="http://open-spf.org/Introduction/">Sender Policy Framework&nbsp;</a>homepage.
 <p>
 
 <footer>

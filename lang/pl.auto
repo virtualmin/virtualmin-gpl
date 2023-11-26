@@ -1839,6 +1839,7 @@ log_restore_l=Przywrócono serwery wirtualne $1
 log_create_template=Utworzono szablon serwera $1 
 log_modify_template=Zaktualizowany szablon serwera $1 
 log_delete_template=Usunięty szablon serwera $1 
+log_default_template=Zmieniono domyślny szablon na $1
 log_install_script=Zainstalowany skrypt $1 $2 na serwerze $3 
 log_uninstall_script=Odinstalowany skrypt $1 $2 na serwerze $3 
 log_stop_script=Zatrzymany skrypt $1 $2 na serwerze $3 
@@ -2090,6 +2091,8 @@ backup_nicebb=Zasobnik Backblaze $1
 backup_nicebbp=$2 w zasobniku Backblaze $1 
 backup_niceaz=Kontener platformy Azure $1
 backup_niceazp=$2 w kontenerze platformy Azure $1
+backup_nicedrive=Folder Dysku Google $1
+backup_nicedrivep=$2 w folderze Dysku Google $1
 backup_nicedownload=pobrany plik
 backup_nicedownloadlink=link do pobrania
 backup_niceupload=przesłany plik
@@ -2176,6 +2179,7 @@ backup_upload8=Przesyłanie archiwum do Dropbox ..
 backup_upload9=Przesyłanie archiwum na serwer Webmin $1 ..
 backup_upload10=Przesyłanie archiwum do Backblaze. ..
 backup_upload11=Przesyłanie archiwum do usługi Azure Blob Storage ..
+backup_upload12=Przesyłanie archiwum na Dysk Google ..
 backup_uploadfailed=.. przesyłanie nie powiodło się! $1 
 backup_finalstatus=Kopia zapasowa serwerów $1 zakończyła się powodzeniem, $2 zawierało błędy.
 backup_finalstatus2=Utworzono kopię zapasową ustawień konfiguracji $1 Virtualmin.
@@ -2839,11 +2843,16 @@ expframe_title=Przesyłanie ramki HTML
 expframe_desc=Tego formularza można użyć do ręcznej aktualizacji pliku przekazywania ramek $1 dla tego serwera wirtualnego.
 expframe_ewrite=Nie udało się zapisać do pliku przekazywania ramek $1 jako użytkownik $2 : $3 
 
-newtmpl_skel=Katalog szkieletów
+newtmpl_tdoms=Używany przez serwery
+newtmpl_useby=Do użytku przez
+newtmpl_def=Domyślny
 newtmpl_frame=Ramka HTML?
 newtmpl_add1=Utwórz pusty szablon.
 newtmpl_add2=Utwórz szablon z ustawień domyślnych.
 newtmpl_cust=Zwyczaj
+newtmpl_edelete=Szablonów standardowych nie można usunąć
+newtmpl_setdef=Ustaw domyślny szablon najwyższego poziomu
+newtmpl_setdefsub=Ustaw domyślny szablon subserwera
 newtmpl_name1=Ustawienia dla serwerów podrzędnych
 
 tmpl_title1=Utwórz szablon serwera
@@ -4665,6 +4674,10 @@ spf_enableds=Dodawanie rekordów DS do domeny nadrzędnej. ..
 spf_disableds=Usuwanie rekordów DS z domeny nadrzędnej. ..
 spf_dnsrlocal=Przenoszenie DNS na serwer lokalny ..
 spf_dnsrhost=Przenoszenie DNS na zdalny serwer $1 ..
+spf_keytag=Kluczowa etykieta
+spf_alg=Algorytm
+spf_type=Typ podsumowania
+spf_digest=Ciąg skrótowy
 
 s3_emodule=Moduł Perl $1 potrzebny do komunikacji z usługą Amazon S3 nie został zainstalowany
 s3_emodule2=Nie można załadować modułu Perla $1 potrzebnego do komunikacji z usługą Amazon S3 : $2 
@@ -4687,10 +4700,13 @@ az_elogin=Polecenie interfejsu wiersza polecenia platformy Azure nie zostało je
 azure_account=Konto platformy Azure $1
 
 tdelete_err=Nie udało się usunąć szablonów
+tdelete_err2=Nie udało się zmienić szablonu domyślnego
 tdelete_title=Usuń szablony serwera
 tdelete_warn=Czy na pewno chcesz usunąć następujące wybrane szablony serwerów : $1 
 tdelete_confirm=Usuń szablony
 tdelete_users2=Są obecnie używane przez serwery wirtualne : $1 
+tdelete_edefsub=Standardowy szablon serwera podrzędnego nie może być domyślnym szablonem dla serwerów najwyższego poziomu
+tdelete_edeftop=Szablon standardowy nie może być szablonem domyślnym dla podserwerów
 
 switch_ecannot=Nie możesz przełączyć się na administratora tej domeny
 switch_eadmin=Określony dodatkowy administrator nie istnieje!
@@ -5003,11 +5019,12 @@ balancers_add=Dodaj nową ścieżkę proxy.
 balancers_path=Ścieżka URL
 balancers_name=Nazwa balansera
 balancers_urls=Docelowe adresy URL
-balancers_used=Do skryptu
+balancers_used2=Używany przez
 balancers_none=Nie zdefiniowano jeszcze ścieżek proxy.
 balancers_return=lista ścieżek proxy
 balancers_derr=Nie udało się usunąć ścieżek proxy
 balancers_none2=Bez pośrednictwa
+balancers_script=Skrypt $1 wersja $2
 
 balancer_create=Utwórz ścieżkę proxy
 balancer_edit=Edytuj ścieżkę proxy
@@ -5027,6 +5044,8 @@ balancer_eurls=Nie wprowadzono docelowych adresów URL
 balancer_script=Używany przez instalatora skryptów
 balancer_scriptver=Wersja skryptu
 balancer_none=Nie używaj proxy dla tej ścieżki i zamiast tego wyświetlaj lokalnie
+balancer_scriptused=Ta ścieżka proxy jest używana przez zainstalowany skrypt $1 w wersji $2. Modyfikowanie lub usuwanie może spowodować, że skrypt przestanie działać!
+balancer_pluginused=Ta ścieżka proxy jest używana przez $1. Modyfikowanie lub usuwanie może spowodować, że ta funkcja przestanie działać!
 
 scriptwarn_header=Następujące skrypty zarządzane przez Virtualmin mają nowe wersje :
 scriptwarn_header2=Poniższe skrypty zarządzane przez Virtualmin mają nowe wersje dostępne na \nwirtualnym serwerze $1  :
@@ -5403,6 +5422,7 @@ cfix_smtp=Upewnij się, że serwer pocztowy twojego systemu działa i nasłuchuj
 cfix_smtpto=Upewnij się, że Twój serwer pocztowy jest skonfigurowany do przyjmowania wiadomości e-mail dla tej domeny.
 
 plans_name=Nazwa planu
+plans_default=Domyślny
 plans_quota=Miejsce na dysku
 plans_bw=Limit przepustowości
 plans_mailboxes=Skrzynki pocztowe
@@ -5410,6 +5430,7 @@ plans_aliases=Aliasy poczty
 plans_none=Nie utworzono jeszcze planów kont.
 plans_none2=Nie utworzyłeś jeszcze żadnych planów kont.
 plans_add=Dodaj nowy abonament.
+plans_setdefault=Ustaw plan domyślny
 plans_resel=Odsprzedawca
 plans_noresel=Żaden
 plans_ecannot=Nie możesz zarządzać planami
@@ -5435,6 +5456,7 @@ plan_eclash=Plan o tej samej nazwie już istnieje
 plan_toomany=W tym planie jest $1 serwerów wirtualnych, co jest wyższe niż limit wyświetlania Virtualmin wynoszący $2.
 
 dplans_err=Nie udało się usunąć planów
+dplans_err2=Nie udało się zmienić planu domyślnego
 dplans_eall=Musi istnieć co najmniej jeden plan
 
 postgrey_title=E-mail Greylisting
@@ -6279,6 +6301,7 @@ transfer_host0=Nowy system
 transfer_savehost=Zapisać do późniejszego wykorzystania?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Zaloguj się do systemu docelowego
 transfer_pass=Hasło do systemu docelowego
 transfer_passdef=(opcjonalnie, jeśli skonfigurowano uwierzytelnianie SSH)
 transfer_overwrite=Zastąpić istniejącą domenę?
@@ -6356,6 +6379,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Magazyn obiektów blob platformy Azure
+cloud_drivedesc=dysk Google
 cloud_s3account=Używanie klucza dostępu $1 
 cloud_s3creds=Korzystanie z poświadczeń EC2
 cloud_rsuser=Używanie loginu $1 
@@ -6397,6 +6421,7 @@ cloud_gcpcreds=Używanie poświadczeń GCP
 cloud_daccount=Używanie loginu $1 
 cloud_google_account=Adres e-mail konta Google
 cloud_google_creds=Poświadczenia GCP są już dostępne w tym systemie za pomocą polecenia <tt>gcloud</tt>. Dzieje się tak zazwyczaj w przypadku uruchamiania w Google Compute Engine. Może być jednak konieczne przyznanie pełnego dostępu do Cloud Storage poniższemu kontu usługi w <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konsoli Google IAM</a>.
+cloud_drive_creds=Poświadczenia GCP są już dostępne w tym systemie za pomocą polecenia <tt>gcloud</tt>. Dzieje się tak zazwyczaj w przypadku pracy w Google Compute Engine. Może być jednak konieczne przyznanie pełnych uprawnień dostępu do Dysku Google poniższemu kontu usługi w <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konsoli Google IAM</a>.
 cloud_google_dnscreds=Poświadczenia GCP są już dostępne w tym systemie za pomocą polecenia <tt>gcloud</tt>. Dzieje się tak zazwyczaj w przypadku uruchamiania w Google Compute Engine. Może być jednak konieczne nadanie poniższemu kontu usługi pełnych uprawnień dostępu DNS w <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konsoli Google IAM</a>.
 cloud_google_clientid=Identyfikator klienta OAuth2
 cloud_google_secret=Tajny klient OAuth2
@@ -6409,6 +6434,7 @@ cloud_google_longdesc=Ustawienia na tej stronie są dostarczane przez Google, gd
 cloud_dropbox_longdesc=Aby móc wykonać kopię zapasową w Dropbox, musisz najpierw <a href=http://www.virtualmin.com/dropbox-referral target=_blank>utworzyć konto</a> w ich witrynie, jeśli jeszcze go nie masz.
 cloud_bb_longdesc=Aby móc tworzyć kopie zapasowe w Backblaze, musisz najpierw <a href=https://backblaze.com/ target=_blank>utworzyć konto</a>, a następnie włączyć <b>B2 Cloud Storage</b> na <b>strona Moje ustawienia</b>. Następnie należy wygenerować klucz aplikacji ze wszystkimi możliwościami na stronie <b>Klucze aplikacji</b>.
 cloud_az_longdesc=Przed utworzeniem kopii zapasowej w usłudze Azure Blob Storage należy najpierw <a href=https://azure.microsoft.com/en-us/free/ target=_blank>utworzyć konto</a>, zainstalować <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> i zaloguj się do swojego konta Azure, uruchamiając polecenie <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=Ustawienia na tej stronie są dostarczane przez Google po przyznaniu dostępu API do swojego projektu na stronie <a href=https://console.developers.google.com/apis/credentials target=_blank>Konsola API Google</a>, w obszarze <b>API i uwierzytelnianie</b> -&gt; <b>Poświadczenia</b>. Musisz utworzyć dane uwierzytelniające <b>Identyfikator klienta OAuth</b> z <b>URI autoryzowanego przekierowania</b> ustawionym na <tt>$1</tt>. Po utworzeniu można tutaj wprowadzić <b>identyfikator klienta</b> i <b>tajemnicę klienta</b>.
 cloud_openoauth=Rozpocznij rejestrację w OAuth2
 cloud_newoauth=Kod OAuth2 od Google:
 cloud_newoauth_dropbox=Kod OAuth2 z Dropbox:
@@ -6743,3 +6769,6 @@ remotedns_ednone=Nie wybrano!
 remotedns_eslave=Ten system może być tylko głównym serwerem DNS
 
 global_dismiss=Odrzucać
+
+ports_fpm=Serwer PHP FPM
+ports_script=Zainstalowano skrypt $1

@@ -750,6 +750,7 @@ log_delete_scheds=Geplante $1 -Sicherungen gelöscht
 log_kill_scheds=Geplante $1 -Sicherungen wurden gestoppt
 log_backup_failed=$1 virtuelle Server konnten nicht gesichert werden
 log_backup_failed_l=Backup der virtuellen Server $1 fehlgeschlagen
+log_default_template=Standardvorlage in $1 geändert
 log_uninstall_script=Nicht installiertes Skript $1 $2 auf Server $3
 log_restart_script=Skript $1 $2 in Server $3 neu gestartet
 log_export_database=Zugeordnete $2 -Datenbank $1 vom Server $3 getrennt
@@ -891,6 +892,8 @@ backup_nicebb=Backblaze-Eimer $1
 backup_nicebbp=$2 im Backblaze-Eimer $1
 backup_niceaz=Azure-Container $1
 backup_niceazp=$2 im Azure-Container $1
+backup_nicedrive=Google Drive-Ordner $1
+backup_nicedrivep=$2 im Google Drive-Ordner $1
 backup_nicedownloadlink=Download-Link
 backup_senabled1=Die geplante Sicherung von Virtualmin wurde für alle virtuellen Server aktiviert.
 backup_senabled0=Die geplante Sicherung von Virtualmin wurde für $1 virtuelle Server aktiviert.
@@ -941,6 +944,7 @@ backup_upload8=Archiv in Dropbox hochladen ..
 backup_upload9=Hochladen des Archivs auf den Webmin-Server $1 ..
 backup_upload10=Archiv in Backblaze hochladen ..
 backup_upload11=Hochladen des Archivs in Azure Blob Storage ..
+backup_upload12=Archiv auf Google Drive hochladen ..
 backup_es3nopath=Sie müssen einen Dateinamen angeben, wenn Sie in S3 eine einzelne Datei sichern
 backup_ersnopath=Sie müssen einen Dateinamen angeben, wenn Sie eine einzelne Datei in Rackspace sichern
 backup_copy=Kopieren auf zusätzliches Ziel $1 ..
@@ -1286,6 +1290,12 @@ newbw_mailall=Weitergeleitete E-Mails in die Bandbreitennutzung einbeziehen?
 
 proxy_desc=Mit diesem Formular können Sie die URL aktivieren und konfigurieren, an die alle Anforderungen an die Website dieses virtuellen Servers weitergeleitet werden.
 
+newtmpl_tdoms=Wird von Servern verwendet
+newtmpl_useby=Zur Verwendung durch
+newtmpl_def=Standard
+newtmpl_edelete=Standardvorlagen können nicht gelöscht werden
+newtmpl_setdef=Legen Sie die Standardvorlage der obersten Ebene fest
+newtmpl_setdefsub=Legen Sie die Standard-Subservervorlage fest
 newtmpl_name0=Standardeinstellungen
 newtmpl_name1=Einstellungen für Subserver
 
@@ -2240,6 +2250,10 @@ spf_enableds=Hinzufügen von DS-Einträgen zur übergeordneten Domain ..
 spf_disableds=Entfernen von DS-Einträgen aus der übergeordneten Domain ..
 spf_dnsrlocal=Verschieben von DNS auf lokalen Server ..
 spf_dnsrhost=Verschieben von DNS auf Remote-Server $1 ..
+spf_keytag=Schlüsselwort
+spf_alg=Algorithmus
+spf_type=Digest-Typ
+spf_digest=Digest-String
 
 s3_emodule=Das Perl-Modul $1, das für die Kommunikation mit dem S3-Dienst von Amazon benötigt wird, ist nicht installiert
 s3_emodule2=Das Perl-Modul $1, das für die Kommunikation mit dem S3-Dienst von Amazon benötigt wird, konnte nicht geladen werden : $2
@@ -2261,9 +2275,12 @@ az_ecmd=Der Azure CLI-Befehl <tt>az</tt> wurde nicht gefunden
 az_elogin=Der Azure CLI-Befehl wurde noch nicht authentifiziert. SSH in Ihr Virtualmin-System und führen Sie den Befehl <tt>az login --use-device-code</tt> aus, um sich bei Azure anzumelden.
 azure_account=Azure-Konto $1
 
+tdelete_err2=Die Standardvorlage konnte nicht geändert werden
 tdelete_enone=Nichts ausgewählt
 tdelete_warn=Möchten Sie die folgenden ausgewählten Servervorlagen wirklich löschen : $1
 tdelete_users2=Sie werden derzeit von virtuellen Servern verwendet : $1
+tdelete_edefsub=Die Standardvorlage für Subserver kann nicht die Standardvorlage für Server der obersten Ebene sein
+tdelete_edeftop=Die Standardvorlage kann nicht die Standardvorlage für Subserver sein
 
 switch_ecannot=Sie dürfen nicht zum Administrator dieser Domain wechseln
 
@@ -2392,10 +2409,14 @@ exclude_err=Ausgeschlossene Verzeichnisse konnten nicht gespeichert werden
 exclude_edb=Der Datenbankname '$1' ist ungültig
 
 balancers_ecannot=Sie dürfen keine Proxy-Pfade für diese Domain bearbeiten
+balancers_used2=Benutzt von
+balancers_script=Skript $1 Version $2
 
 balancer_ebalancer=Fehlender oder ungültiger Balancername - nur Buchstaben und Zahlen sind zulässig
 balancer_script=Wird vom Skriptinstallationsprogramm verwendet
 balancer_none=Verwenden Sie keinen Proxy für diesen Pfad und stellen Sie stattdessen lokal bereit
+balancer_scriptused=Dieser Proxy-Pfad wird vom installierten Skript $1 Version $2 verwendet. Das Ändern oder Löschen kann dazu führen, dass das Skript nicht mehr funktioniert!
+balancer_pluginused=Dieser Proxy-Pfad wird von $1 verwendet. Das Ändern oder Löschen kann dazu führen, dass diese Funktion nicht mehr funktioniert!
 
 scriptwarn_where3=Upgrades können in Virtualmin auf der Seite Install Scripts jeder Domain oder auf einmal unter folgender Adresse durchgeführt werden: \n $1
 
@@ -2544,6 +2565,7 @@ cfix_smtpto=Stellen Sie sicher, dass Ihr Mailserver so konfiguriert ist, dass er
 plans_title=Kontopläne
 newplan_title=Kontopläne
 plans_name=Plan Name
+plans_default=Standard
 plans_quota=Festplattenkontingent
 plans_bw=Bandbreitenbegrenzung
 plans_mailboxes=Postfächer
@@ -2552,6 +2574,7 @@ plans_none=Es wurden noch keine Kontopläne erstellt.
 plans_none2=Sie haben noch keine Kontopläne erstellt.
 plans_add=Fügen Sie einen neuen Kontoplan hinzu.
 plans_delete=Ausgewählte Pläne löschen
+plans_setdefault=Legen Sie den Standardplan fest
 plans_resel=Wiederverkäufer
 plans_noresel=Keiner
 plans_ecannot=Sie dürfen keine Pläne verwalten
@@ -2578,6 +2601,7 @@ plan_toomany=Dieser Plan enthält $1 virtuelle Server, was über dem Anzeigelimi
 plan_scriptsall=Alle außer den weltweit deaktivierten
 
 dplans_err=Pläne konnten nicht gelöscht werden
+dplans_err2=Der Standardplan konnte nicht geändert werden
 dplans_enone=Nichts ausgewählt
 dplans_eall=Es muss mindestens ein Plan vorhanden sein
 
@@ -3000,6 +3024,7 @@ transfer_host0=Neues System
 transfer_savehost=Für spätere Verwendung speichern?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Melden Sie sich für das Zielsystem an
 transfer_pass=Passwort für Zielsystem
 transfer_passdef=(optional, wenn SSH-Authentifizierung konfiguriert ist)
 transfer_overwrite=Bestehende Domain überschreiben?
@@ -3077,6 +3102,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure-Blobspeicher
+cloud_drivedesc=Google Drive
 cloud_s3account=Zugriffsschlüssel $1 verwenden
 cloud_s3creds=Verwenden von EC2-Anmeldeinformationen
 cloud_rsuser=Login $1 verwenden
@@ -3119,6 +3145,7 @@ cloud_gcpcreds=Verwenden von GCP-Anmeldedaten
 cloud_daccount=Login $1 verwenden
 cloud_google_account=E-Mail-Adresse des Google-Kontos
 cloud_google_creds=GCP-Anmeldedaten sind auf diesem System bereits über den Befehl <tt>gcloud</tt> verfügbar. Dies ist normalerweise der Fall, wenn es auf Google Compute Engine ausgeführt wird. Möglicherweise müssen Sie dem Dienstkonto unten in der <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
+cloud_drive_creds=GCP-Anmeldeinformationen sind auf diesem System bereits über den Befehl <tt>gcloud</tt> verfügbar. Dies ist typischerweise bei der Ausführung auf Google Compute Engine der Fall. Möglicherweise müssen Sie jedoch dem Dienstkonto unten in der <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-Konsole</a>.
 cloud_google_dnscreds=GCP-Anmeldeinformationen sind auf diesem System bereits über den Befehl <tt>gcloud</tt> verfügbar. Dies ist typischerweise bei der Ausführung auf Google Compute Engine der Fall. Möglicherweise müssen Sie jedoch dem Dienstkonto unten in der <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-Konsole</a> vollständige DNS-Zugriffsberechtigungen erteilen.
 cloud_google_clientid=OAuth2-Client-ID
 cloud_google_secret=OAuth2-Client-Geheimnis
@@ -3131,6 +3158,7 @@ cloud_google_longdesc=Die Einstellungen auf dieser Seite werden von Google berei
 cloud_dropbox_longdesc=Bevor Sie ein Backup auf Dropbox erstellen können, müssen Sie zunächst <a href=http://www.virtualmin.com/dropbox-referral target=_blank>auf ihrer Website ein Konto</a> erstellen, falls Sie noch keines haben.
 cloud_bb_longdesc=Bevor Sie ein Backup auf Backblaze erstellen können, müssen Sie zunächst <a href=https://backblaze.com/ target=_blank>ein Konto erstellen</a> und dann <b>B2 Cloud Storage</b> auf dem aktivieren <b>Seite Meine Einstellungen</b>. Anschließend müssen Sie auf der Seite <b>App Keys</b> einen Anwendungsschlüssel mit allen Funktionen generieren.
 cloud_az_longdesc=Bevor Sie in Azure Blob Storage sichern können, müssen Sie zuerst <a href=https://azure.microsoft.com/en-us/free/ target=_blank>ein Konto erstellen</a>, die <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> und melden Sie sich bei Ihrem Azure-Konto an, indem Sie <tt>az login --use-device-code<ausführen/tt>.
+cloud_drive_longdesc=Die Einstellungen auf dieser Seite werden von Google bereitgestellt, wenn Sie auf der Seite <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a> API-Zugriff auf Ihr Projekt gewähren, unter <b>APIs und Auth</b> -&gt; <b>Anmeldeinformationen</b>. Sie müssen eine <b>OAuth-Client-ID</b>-Anmeldeinformation erstellen, wobei der <b>Autorisierte Weiterleitungs-URI</b> auf <tt>$1</tt> gesetzt ist. Nach der Erstellung können hier die <b>Client-ID</b> und das <b>Client-Geheimnis</b> eingegeben werden.
 cloud_openoauth=Beginnen Sie mit der OAuth2-Registrierung
 cloud_newoauth=OAuth2-Code von Google:
 cloud_newoauth_dropbox=OAuth2-Code von Dropbox:
@@ -3521,3 +3549,6 @@ remotedns_ednone=Nichts ausgewählt!
 remotedns_eslave=Dieses System kann nur ein Master-DNS-Server sein
 
 global_dismiss=Zurückweisen
+
+ports_fpm=PHP-FPM-Server
+ports_script=Das $1-Skript wurde installiert

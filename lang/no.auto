@@ -326,6 +326,7 @@ log_proxy_domain=Endret proxyer for server $1
 log_kill_scheds=Stoppet $1 planlagte sikkerhetskopier
 log_backup_failed=Kunne ikke sikkerhetskopiere $1 virtuelle servere
 log_backup_failed_l=Kunne ikke sikkerhetskopiere virtuelle servere $1
+log_default_template=Endret standardmal til $1
 log_copycert_proftpd=Kopiert SSL-sertifikat til ProFTPD
 log_copycert_all=Kopierte SSL -sertifikat til alle tjenester
 log_retention=Oppdaterte innstillinger for oppretting av postkasse
@@ -379,6 +380,8 @@ backup_nicebb=Bakblaze bøtte $1
 backup_nicebbp=$2 i Backblaze-bøtte $1 
 backup_niceaz=Azure-beholder $1
 backup_niceazp=$2 i Azure-beholder $1
+backup_nicedrive=Google Disk-mappen $1
+backup_nicedrivep=$2 i Google Disk-mappen $1
 backup_nicedownloadlink=nedlastingslenke
 backup_downloadfile=Last ned sikkerhetskopifilen $1
 backup_edownloadfile=Manglende sikkerhetskopifil for nedlasting
@@ -408,6 +411,7 @@ backup_upload8=Laster opp arkiv til Dropbox ..
 backup_upload9=Laster opp arkiv til Webmin-server $1 ..
 backup_upload10=Laster opp arkiv til Backblaze ..
 backup_upload11=Laster opp arkiv til Azure Blob Storage ..
+backup_upload12=Laster opp arkiv til Google Disk ..
 backup_eownrestore=Bare signerte sikkerhetskopier kan gjenopprettes av virtuelle servereiere
 
 backup_deleteddom=Virtuell server $1 kan ikke sikkerhetskopieres da den er slettet!
@@ -570,6 +574,12 @@ newkey_checkingca=Validerer at CA-sertifikatet samsvarer med nytt sertifikat ..
 newkey_echeckingca=.. CA samsvarer ikke, og har blitt fjernet.
 newkey_echeckingca2=.. CA-sertifikatet kunne ikke leses!
 
+newtmpl_tdoms=Brukes av servere
+newtmpl_useby=Til bruk av
+newtmpl_def=Misligholde
+newtmpl_edelete=Standardmaler kan ikke slettes
+newtmpl_setdef=Angi standard mal på toppnivå
+newtmpl_setdefsub=Angi standard underservermal
 newtmpl_name0=Standard instillinger
 newtmpl_name1=Innstillinger for sub-servere
 
@@ -998,6 +1008,10 @@ spf_enableds=Legger til DS-poster til overordnet domene ..
 spf_disableds=Fjerner DS-poster fra overordnet domene ..
 spf_dnsrlocal=Flytter DNS til lokal server ..
 spf_dnsrhost=Flytter DNS til ekstern server $1 ..
+spf_keytag=Nøkkelbrikke
+spf_alg=Algoritme
+spf_type=Digest type
+spf_digest=Digest streng
 
 s3_emodule2=Perl-modulen $1 som trengs for å kommunisere med Amazons S3-tjeneste, kunne ikke lastes : $2 
 s3_emodule3=Perl-modulene $1 eller $2 som trengs for å kommunisere med Amazons S3-tjeneste er ikke installert
@@ -1006,6 +1020,10 @@ s3_eawscmd=AWS-kommandoen er installert, men fungerer ikke : $1
 az_ecmd=Azure CLI-kommandoen <tt>az</tt> ble ikke funnet
 az_elogin=Azure CLI-kommandoen er ikke autentisert ennå. SSH inn i Virtualmin-systemet og kjør kommandoen <tt>az login --use-device-code</tt> for å logge på Azure.
 azure_account=Azure-konto $1
+
+tdelete_err2=Kunne ikke endre standardmal
+tdelete_edefsub=Standard underservermal kan ikke være standard for servere på toppnivå
+tdelete_edeftop=Standardmalen kan ikke være standard for underservere
 
 newdynip_eexternal=I ekstern skriptmodus må hele banen til et skript som skal kjøres legges inn
 
@@ -1023,7 +1041,12 @@ exclude_dbs=Databaser og tabeller du kan hoppe over
 exclude_dbdesc=Skriv inn en <tt>database</tt> navn eller <tt>database.table</tt> på hver linje.
 exclude_edb=Databasens navn '$1' er ugyldig
 
+balancers_used2=Brukt av
+balancers_script=Skript $1 versjon $2
+
 balancer_none=Ikke bruk proxy for denne banen, og tjen lokalt i stedet
+balancer_scriptused=Denne proxy-banen brukes av det installerte skriptet $1 versjon $2. Å endre eller slette det kan føre til at skriptet slutter å fungere!
+balancer_pluginused=Denne proxy-banen brukes av $1. Modifisering eller sletting kan føre til at denne funksjonen slutter å fungere!
 
 clamd_start_updater=Starter ClamAV-databaseoppdateringsverktøyserveren og aktiverer ved oppstart ..
 clamd_einit=.. oppstartshandling $1 eksisterer ikke!
@@ -1057,6 +1080,11 @@ sched_inc2=Full (ingen oppdatering)
 sched_logs=Sikkerhetskopieringslogger ..
 
 dsched_erunning=Sikkerhetskopien med ID $1 kjører ikke lenger
+
+plans_default=Misligholde
+plans_setdefault=Angi standardplan
+
+dplans_err2=Kunne ikke endre standardplanen
 
 postgrey_procdone=.. begynt ferdig
 postgrey_noprocdone=.. avstengning utført
@@ -1245,6 +1273,7 @@ transfer_eoldhost=Gammel vert eksisterer ikke!
 transfer_subs=inkludert underservere
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Logg inn for destinasjonssystem
 transfer_pass=Passord for destinasjonssystem
 transfer_passdef=(valgfritt hvis SSH-autentisering er konfigurert)
 transfer_replication=Replikere til eksternt system?
@@ -1287,6 +1316,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
+cloud_drivedesc=Google Disk
 cloud_s3account=Bruker tilgangsnøkkel $1 
 cloud_s3creds=Bruker EC2-legitimasjon
 cloud_rsuser=Bruker innlogging $1 
@@ -1329,6 +1359,7 @@ cloud_gcpcreds=Bruker GCP-legitimasjon
 cloud_daccount=Bruker innlogging $1 
 cloud_google_account=E-postadresse for Google-kontoen
 cloud_google_creds=GCP-legitimasjon er allerede tilgjengelig på dette systemet fra <tt>gcloud</tt>-kommandoen. Dette er vanligvis tilfellet når du kjører på Google Compute Engine. Det kan imidlertid hende du må gi full tilgangstillatelse til Cloud Storage til tjenestekontoen nedenfor på <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-konsollen</a>.
+cloud_drive_creds=GCP-legitimasjon er allerede tilgjengelig på dette systemet fra <tt>gcloud</tt>-kommandoen. Dette er vanligvis tilfellet når du kjører på Google Compute Engine. Det kan imidlertid hende du må gi full tilgangstillatelse for Google Disk til tjenestekontoen nedenfor på <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-konsollen</a>.
 cloud_google_dnscreds=GCP-legitimasjon er allerede tilgjengelig på dette systemet fra <tt>gcloud</tt>-kommandoen. Dette er vanligvis tilfellet når du kjører på Google Compute Engine. Det kan imidlertid hende du må gi fulle DNS-tilgangstillatelser til tjenestekontoen nedenfor på <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM-konsollen</a>.
 cloud_google_clientid=OAuth2-klient-ID
 cloud_google_secret=OAuth2-klienthemmelighet
@@ -1341,6 +1372,7 @@ cloud_google_longdesc=Innstillingene på denne siden leveres av Google når du g
 cloud_dropbox_longdesc=Før du kan ta sikkerhetskopi til Dropbox, må du først <a href=http://www.virtualmin.com/dropbox-referral target=_blank>opprette en konto</a> på nettstedet deres hvis du ikke allerede har en.
 cloud_bb_longdesc=Før du kan sikkerhetskopiere til Backblaze, må du først <a href=https://backblaze.com/ target=_blank>opprette en konto</a>, og deretter aktivere <b>B2 Cloud Storage</b> på <b>Mine innstillinger</b> side. Deretter må du generere en applikasjonsnøkkel med alle funksjoner på siden <b>App-nøkler</b>.
 cloud_az_longdesc=Før du kan sikkerhetskopiere til Azure Blob Storage, må du først <a href=https://azure.microsoft.com/en-us/free/ target=_blank>opprette en konto</a>, installere <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> kommando, og logg på Azure-kontoen din ved å kjøre <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=Innstillingene på denne siden er levert av Google når du gir API-tilgang til prosjektet ditt på <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a>-siden, under <b>APIer og autentisering</b> -&gt; <b>Påloggingsinformasjon</b>. Du må opprette en <b>OAuth-klient-ID</b>-legitimasjon, med <b>Autorisert omdirigerings-URI</b> satt til <tt>$1</tt>. Når den er opprettet, kan <b>klient-ID</b> og <b>klienthemmelighet</b> legges inn her.
 cloud_openoauth=Begynn OAuth2-registrering
 cloud_newoauth=OAuth2-kode fra Google:
 cloud_newoauth_dropbox=OAuth2-kode fra Dropbox:
@@ -1742,3 +1774,6 @@ remotedns_ednone=Ingen valgt!
 remotedns_eslave=Dette systemet kan bare være en master DNS-server
 
 global_dismiss=Avskjedige
+
+ports_fpm=PHP FPM-server
+ports_script=Installert $1-skript

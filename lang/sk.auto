@@ -2246,6 +2246,7 @@ log_restore_l=Obnovené virtuálne servery $1
 log_create_template=Vytvorená šablóna servera $1
 log_modify_template=Aktualizovaná šablóna servera $1
 log_delete_template=Odstránená šablóna servera $1
+log_default_template=Predvolená šablóna bola zmenená na $1
 log_install_script=Nainštalovaný skript $1 $2 na serveri $3
 log_uninstall_script=Odinštalovaný skript $1 $2 na serveri $3
 log_stop_script=Zastavený skript $1 $2 na serveri $3
@@ -2507,6 +2508,8 @@ backup_nicebb=Backblaze bucket $1
 backup_nicebbp=$2 v segmente Backblaze $1
 backup_niceaz=Azure kontajner $1
 backup_niceazp=$2 v kontajneri Azure $1
+backup_nicedrive=Priečinok Disku Google $1
+backup_nicedrivep=$2 v priečinku Disku Google $1
 backup_nicedownload=stiahnutý súbor
 backup_nicedownloadlink=odkaz na stiahnutie
 backup_niceupload=nahraný súbor
@@ -2593,6 +2596,7 @@ backup_upload8=Nahráva sa archív do Dropboxu ..
 backup_upload9=Nahráva sa archív na server Webmin $1 ..
 backup_upload10=Nahráva sa archív do Backblaze ..
 backup_upload11=Nahráva sa archív do Azure Blob Storage ..
+backup_upload12=Nahráva sa archív na Disk Google ..
 backup_uploadfailed=.. nahrávanie zlyhalo! $1
 backup_finalstatus=Servery $1 boli úspešne zálohované, $2 malo chyby.
 backup_finalstatus2=$1 konfiguračné nastavenia Virtualmin boli úspešne zálohované.
@@ -3352,11 +3356,9 @@ expframe_ewrite=Nepodarilo sa zapísať do súboru na preposielanie snímok $1 a
 
 newtmpl_title=Serverové šablóny
 newtmpl_name=Šablóna
-newtmpl_skel=Adresár kostry
-newtmpl_web=Apache?
-newtmpl_dns=Zviazať?
-newtmpl_ftp=ProFTPD?
-newtmpl_logrotate=Logrotate?
+newtmpl_tdoms=Používané servermi
+newtmpl_useby=Na použitie do
+newtmpl_def=Predvolené
 newtmpl_frame=Frame HTML?
 newtmpl_mail=E-mailová správa?
 newtmpl_add1=Vytvorte prázdnu šablónu.
@@ -3364,8 +3366,10 @@ newtmpl_add2=Vytvorte šablónu z predvolených nastavení.
 newtmpl_none=žiadne
 newtmpl_cust=Vlastné
 newtmpl_return=zoznam šablón
-newtmpl_scripts=Skriptá
 newtmpl_delete=Odstrániť vybraté šablóny
+newtmpl_edelete=Štandardné šablóny nie je možné odstrániť
+newtmpl_setdef=Nastaviť predvolenú šablónu najvyššej úrovne
+newtmpl_setdefsub=Nastaviť predvolenú šablónu podservera
 newtmpl_created=Vytvorené na
 newtmpl_init=Inštalácia Virtualminu
 newtmpl_name0=Predvolené nastavenia
@@ -5546,6 +5550,10 @@ spf_enableds=Pridávanie záznamov DS do nadradenej domény ..
 spf_disableds=Odstraňujú sa záznamy DS z nadradenej domény ..
 spf_dnsrlocal=Presun DNS na lokálny server ..
 spf_dnsrhost=Presun DNS na vzdialený server $1 ..
+spf_keytag=Kľúčový štítok
+spf_alg=Algoritmus
+spf_type=Typ trávenia
+spf_digest=Stráviť reťazec
 
 s3_emodule=Perl modul $1 potrebný na komunikáciu so službou Amazon S3 nie je nainštalovaný
 s3_emodule2=Modul Perl $1 potrebný na komunikáciu so službou Amazon S3 sa nepodarilo načítať : $2
@@ -5568,11 +5576,14 @@ az_elogin=Príkaz Azure CLI ešte nebol overený. SSH do vášho systému Virtua
 azure_account=Účet Azure $1
 
 tdelete_err=Šablóny sa nepodarilo odstrániť
+tdelete_err2=Nepodarilo sa zmeniť predvolenú šablónu
 tdelete_enone=Nie je vybratá žiadna
 tdelete_title=Odstrániť serverové šablóny
 tdelete_warn=Naozaj chcete odstrániť nasledujúce vybraté šablóny servera : $1
 tdelete_confirm=Odstrániť šablóny
 tdelete_users2=Momentálne ich používajú virtuálne servery : $1
+tdelete_edefsub=Štandardná šablóna podservera nemôže byť predvolená pre servery najvyššej úrovne
+tdelete_edeftop=Štandardná šablóna nemôže byť predvolená pre podservery
 
 switch_ecannot=Nemáte povolené prepnúť na správcu tejto domény
 switch_eadmin=Zadaný dodatočný správca neexistuje!
@@ -5933,13 +5944,14 @@ balancers_add=Pridajte novú cestu proxy.
 balancers_path=cesta URL
 balancers_name=Názov balancéra
 balancers_urls=Cieľové adresy URL
-balancers_used=Pre scenár
+balancers_used2=Používaný
 balancers_delete=Odstrániť vybrané servery proxy
 balancers_none=Zatiaľ neboli definované žiadne proxy cesty.
 balancers_return=zoznam proxy ciest
 balancers_derr=Nepodarilo sa odstrániť cesty proxy
 balancers_denone=Nie je vybratá žiadna
 balancers_none2=Žiadne proxy
+balancers_script=Verzia skriptu $1 $2
 
 balancer_create=Vytvorte cestu proxy
 balancer_edit=Upravte cestu proxy
@@ -5959,6 +5971,8 @@ balancer_eurls=Nie sú zadané žiadne cieľové adresy URL
 balancer_script=Používa ho inštalátor skriptov
 balancer_scriptver=Verzia skriptu
 balancer_none=Neposkytujte proxy pre túto cestu a namiesto toho podávajte lokálne
+balancer_scriptused=Túto cestu proxy používa nainštalovaný skript $1 verzia $2. Jeho úprava alebo odstránenie môže spôsobiť, že skript prestane fungovať!
+balancer_pluginused=Túto cestu proxy používa $1. Úprava alebo odstránenie môže spôsobiť, že táto funkcia prestane fungovať!
 
 scriptwarn_header=Nasledujúce skripty spravované Virtualminom majú k dispozícii nové verzie :
 scriptwarn_header2=Nasledujúce skripty spravované Virtualminom majú k dispozícii nové verzie na\nvirtuálnom serveri $1 :
@@ -6387,6 +6401,7 @@ cfix_smtpto=Uistite sa, že váš poštový server je nakonfigurovaný na prijí
 plans_title=Plány účtov
 newplan_title=Plány účtov
 plans_name=Názov plánu
+plans_default=Predvolené
 plans_quota=Disková kvóta
 plans_bw=Limit šírky pásma
 plans_doms=domény
@@ -6396,6 +6411,7 @@ plans_none=Zatiaľ neboli vytvorené žiadne plány účtov.
 plans_none2=Zatiaľ ste nevytvorili žiadne plány účtu.
 plans_add=Pridajte nový plán účtu.
 plans_delete=Odstrániť vybrané plány
+plans_setdefault=Nastaviť predvolený plán
 plans_resel=Predajca
 plans_noresel=žiadne
 plans_ecannot=Nemáte dovolené spravovať plány
@@ -6428,6 +6444,7 @@ plan_scriptsopts=Všetky skripty
 plan_scriptssel=Povolený
 
 dplans_err=Plány sa nepodarilo odstrániť
+dplans_err2=Nepodarilo sa zmeniť predvolený plán
 dplans_enone=Nie je vybratá žiadna
 dplans_eall=Musí existovať aspoň jeden plán
 
@@ -7327,6 +7344,7 @@ transfer_host0=Nový systém
 transfer_savehost=Uložiť na neskoršie použitie?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Prihláste sa do cieľového systému
 transfer_pass=Heslo pre cieľový systém
 transfer_passdef=(voliteľné, ak je nakonfigurované overenie SSH)
 transfer_overwrite=Prepísať existujúcu doménu?
@@ -7404,6 +7422,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
+cloud_drivedesc=disk Google
 cloud_s3account=Pomocou prístupového kľúča $1
 cloud_s3creds=Pomocou poverení EC2
 cloud_rsuser=Použitie prihlásenia $1
@@ -7445,6 +7464,7 @@ cloud_gcpcreds=Používanie poverení GCP
 cloud_daccount=Použitie prihlásenia $1
 cloud_google_account=E-mailová adresa účtu Google
 cloud_google_creds=Poverenia GCP sú už v tomto systéme dostupné z príkazu <tt>gcloud</tt>. To je zvyčajne prípad, keď beží na Google Compute Engine. Možno však budete musieť udeliť úplné povolenia na prístup do cloudového úložiska nižšie uvedenému účtu služby v <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzole Google IAM</a>.
+cloud_drive_creds=Poverenia GCP sú už v tomto systéme dostupné z príkazu <tt>gcloud</tt>. Toto je zvyčajne prípad, keď beží na Google Compute Engine. Možno však budete musieť udeliť úplné povolenia na prístup k Disku Google nižšie uvedenému účtu služby v <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzole Google IAM</a>.
 cloud_google_dnscreds=Poverenia GCP sú už v tomto systéme dostupné z príkazu <tt>gcloud</tt>. To je zvyčajne prípad, keď beží na Google Compute Engine. Možno však budete musieť udeliť úplné povolenia na prístup k DNS servisnému účtu nižšie v <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzole Google IAM</a>.
 cloud_google_clientid=ID klienta OAuth2
 cloud_google_secret=Tajný kľúč klienta OAuth2
@@ -7457,6 +7477,7 @@ cloud_google_longdesc=Nastavenia na tejto stránke poskytuje spoločnosť Google
 cloud_dropbox_longdesc=Pred zálohovaním do Dropboxu si musíte najprv <a href=http://www.virtualmin.com/dropbox-referral target=_blank>vytvoriť účet</a> na ich webe, ak ho ešte nemáte.
 cloud_bb_longdesc=Pred zálohovaním na Backblaze si musíte najprv <a href=https://backblaze.com/ target=_blank>vytvoriť účet</a> a potom povoliť <b>B2 Cloud Storage</b> na <b>Mojenastavenia</b>. Potom musíte vygenerovať aplikačný kľúč so všetkými možnosťami na stránke <b>Kľúče aplikácie</b>.
 cloud_az_longdesc=Pred zálohovaním do Azure Blob Storage si musíte najprv <a href=https://azure.microsoft.com/en-us/free/ target=_blank>vytvoriť účet</a> a nainštalovať <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> príkaz a prihláste sa do svojho účtu Azure spustením <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=Nastavenia na tejto stránke poskytuje spoločnosť Google, keď svojmu projektu udelíte prístup cez rozhranie API na stránke <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a>, v časti <b>Rozhrania API a overenie</b> -&gt; <b>Poverenia</b>. Musíte vytvoriť <b>OAuth Client ID</b> poverenie s <b>URI autorizovaného presmerovania</b> nastaveným na <tt>$1</tt>. Po vytvorení tu môžete zadať <b>ID klienta</b> a <b>tajomstvo klienta</b>.
 cloud_openoauth=Spustite registráciu OAuth2
 cloud_newoauth=Kód OAuth2 od spoločnosti Google:
 cloud_newoauth_dropbox=Kód OAuth2 z Dropboxu:
@@ -7858,3 +7879,6 @@ remotedns_ednone=Žiadne vybraté!
 remotedns_eslave=Tento systém môže byť iba hlavným serverom DNS
 
 global_dismiss=Odmietnuť
+
+ports_fpm=PHP FPM server
+ports_script=Nainštalovaný skript $1

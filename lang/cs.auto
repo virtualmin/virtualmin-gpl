@@ -1749,6 +1749,7 @@ log_restore_l=Obnovené virtuální servery $1
 log_create_template=Vytvořená šablona serveru $1 
 log_modify_template=Aktualizovaná šablona serveru $1 
 log_delete_template=Šablona serveru byla smazána $1 
+log_default_template=Výchozí šablona byla změněna na $1
 log_install_script=Nainstalovaný skript $1 $2 na serveru $3 
 log_uninstall_script=Neinstalovaný skript $1 $2 na serveru $3 
 log_stop_script=Zastavený skript $1 $2 na serveru $3 
@@ -1926,6 +1927,8 @@ backup_nicebb=Kbelík backblaze $1
 backup_nicebbp=$2 v bloku Backblaze $1 
 backup_niceaz=Azure kontejner $1
 backup_niceazp=$2 v kontejneru Azure $1
+backup_nicedrive=Složka Disku Google $1
+backup_nicedrivep=$2 ve složce Disku Google $1
 backup_nicedownloadlink=odkaz ke stažení
 backup_key=Šifrovat zálohu pomocí klíče
 backup_nokey=Nepodepisujte ani nešifrujte
@@ -1973,6 +1976,7 @@ backup_upload8=Nahrávání archivu do Dropboxu ..
 backup_upload9=Nahrávání archivu na server Webmin $1 ..
 backup_upload10=Nahrávání archivu do Backblaze ..
 backup_upload11=Nahrávání archivu do Azure Blob Storage ..
+backup_upload12=Nahrávání archivu na Disk Google ..
 backup_ersnopath=Při zálohování jednoho souboru na Rackspace musíte zadat název souboru
 backup_copy=Kopírování do dalšího cíle $1 ..
 backup_copyfailed=.. kopie se nezdařila : $1 
@@ -2578,11 +2582,9 @@ expframe_ewrite=Nepodařilo se zapsat do souboru pro předávání snímků $1 j
 
 newtmpl_title=Šablony serveru
 newtmpl_name=Šablona
-newtmpl_skel=Adresář kostry
-newtmpl_web=Apache?
-newtmpl_dns=SVÁZAT?
-newtmpl_ftp=ProFTPD?
-newtmpl_logrotate=Logrotate?
+newtmpl_tdoms=Používané servery
+newtmpl_useby=Pro použití do
+newtmpl_def=Výchozí
 newtmpl_frame=Rám HTML?
 newtmpl_mail=E-mailová zpráva?
 newtmpl_add1=Vytvořte prázdnou šablonu.
@@ -2590,7 +2592,9 @@ newtmpl_add2=Vytvořte šablonu z výchozího nastavení.
 newtmpl_none=Žádný
 newtmpl_cust=Zvyk
 newtmpl_return=seznam šablon
-newtmpl_scripts=Skripty
+newtmpl_edelete=Standardní šablony nelze smazat
+newtmpl_setdef=Nastavit výchozí šablonu nejvyšší úrovně
+newtmpl_setdefsub=Nastavit výchozí šablonu sub-serveru
 newtmpl_created=Vytvořeno dne
 newtmpl_init=Instalace Virtualmin
 newtmpl_name0=Výchozí nastavení
@@ -4447,6 +4451,10 @@ spf_enableds=Přidávání záznamů DS do nadřazené domény ..
 spf_disableds=Odebírání záznamů DS z nadřazené domény ..
 spf_dnsrlocal=Přesun DNS na lokální server ..
 spf_dnsrhost=Přesouvání DNS na vzdálený server $1 ..
+spf_keytag=Klíčenka
+spf_alg=Algoritmus
+spf_type=Typ digestu
+spf_digest=Řetězec trávení
 
 s3_emodule2=Modul Perl $1 potřebný pro komunikaci se službou Amazon S3 nelze načíst : $2 
 s3_emodule3=Moduly Perl $1 nebo $2 potřebné pro komunikaci se službou Amazon S3 nejsou nainstalovány
@@ -4461,11 +4469,14 @@ az_elogin=Příkaz Azure CLI ještě nebyl ověřen. SSH do vašeho systému Vir
 azure_account=Účet Azure $1
 
 tdelete_err=Šablony se nepodařilo smazat
+tdelete_err2=Nepodařilo se změnit výchozí šablonu
 tdelete_enone=Nebyl vybrán žádný
 tdelete_title=Odstraňte šablony serveru
 tdelete_warn=Opravdu chcete odstranit následující vybrané šablony serverů : $1 
 tdelete_confirm=Smazat šablony
 tdelete_users2=Virtuální servery jsou aktuálně používány : $1 
+tdelete_edefsub=Standardní šablona podserveru nemůže být výchozí pro servery nejvyšší úrovně
+tdelete_edeftop=Standardní šablona nemůže být výchozí pro podservery
 
 switch_ecannot=Není dovoleno přepnout na správce této domény
 switch_eadmin=Zadaný zvláštní správce neexistuje!
@@ -4727,7 +4738,12 @@ exclude_eabs=Adresář '$1' nemůže být absolutní cestou
 exclude_edot=Adresář '$1' nemůže obsahovat ..
 exclude_edb=Název databáze '$1' je neplatný
 
+balancers_used2=Použito uživatelem
+balancers_script=Skript $1 verze $2
+
 balancer_none=Neposkytujte proxy pro tuto cestu a poskytujte místo toho místně
+balancer_scriptused=Tuto cestu proxy používá nainstalovaný skript $1 verze $2. Jeho úprava nebo smazání může způsobit, že skript přestane fungovat!
+balancer_pluginused=Tuto cestu proxy používá $1. Úprava nebo smazání může způsobit, že tato funkce přestane fungovat!
 
 scriptwarn_header=Následující skripty spravované Virtualminem mají k dispozici nové verze :
 scriptwarn_header2=Následující skripty spravované Virtualminem mají k dispozici nové verze na \nvirtual serveru $1  :
@@ -5133,11 +5149,13 @@ cfix_smtpto=Zkontrolujte, zda je váš poštovní server nakonfigurován pro př
 
 newplan_title=Plány účtů
 plans_name=Název plánu
+plans_default=Výchozí
 plans_quota=Disková kvóta
 plans_bw=Limit šířky pásma
 plans_doms=Domény
 plans_mailboxes=Poštovní schránky
 plans_aliases=Poštovní aliasy
+plans_setdefault=Nastavit výchozí plán
 plans_resel=Překupník
 plans_noresel=Žádný
 plans_ecannot=Nemáte oprávnění spravovat plány
@@ -5168,6 +5186,7 @@ plan_scriptsopts=Všechny skripty
 plan_scriptssel=Povoleno
 
 dplans_err=Plány se nepodařilo smazat
+dplans_err2=Nepodařilo se změnit výchozí plán
 dplans_enone=Nebyl vybrán žádný
 dplans_eall=Musí existovat alespoň jeden plán
 
@@ -6056,6 +6075,7 @@ transfer_host0=Nový systém
 transfer_savehost=Uložit pro pozdější použití?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Přihlášení do cílového systému
 transfer_pass=Heslo pro cílový systém
 transfer_passdef=(volitelné, pokud je nakonfigurováno ověřování SSH)
 transfer_overwrite=Přepsat existující doménu?
@@ -6133,6 +6153,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Azure Blob Storage
+cloud_drivedesc=Disk Google
 cloud_s3account=Použití přístupového klíče $1 
 cloud_s3creds=Pomocí pověření EC2
 cloud_rsuser=Pomocí přihlašovacího jména $1 
@@ -6174,6 +6195,7 @@ cloud_gcpcreds=Použití přihlašovacích údajů GCP
 cloud_daccount=Pomocí přihlašovacího jména $1 
 cloud_google_account=E-mailová adresa účtu Google
 cloud_google_creds=Přihlašovací údaje GCP jsou již v tomto systému dostupné z příkazu <tt>gcloud</tt>. To je obvykle případ, kdy běží na Google Compute Engine. Možná však budete muset udělit úplná přístupová oprávnění ke cloudovému úložišti servisnímu účtu níže na <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzoli Google IAM</a>.
+cloud_drive_creds=Přihlašovací údaje GCP jsou již v tomto systému dostupné z příkazu <tt>gcloud</tt>. To je obvykle případ, kdy běží na Google Compute Engine. Možná však budete muset udělit úplná přístupová oprávnění k Disku Google níže uvedenému servisnímu účtu v <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzoli Google IAM</a>.
 cloud_google_dnscreds=Přihlašovací údaje GCP jsou již v tomto systému dostupné z příkazu <tt>gcloud</tt>. To je obvykle případ, kdy běží na Google Compute Engine. Možná však budete muset udělit úplná přístupová oprávnění DNS servisnímu účtu níže v <a href=https://console.developers.google.com/iam-admin/iam target=_blank>konzoli Google IAM</a>.
 cloud_google_clientid=ID klienta OAuth2
 cloud_google_secret=Tajemství klienta OAuth2
@@ -6186,6 +6208,7 @@ cloud_google_longdesc=Nastavení na této stránce poskytuje společnost Google,
 cloud_dropbox_longdesc=Než budete moci zálohovat do Dropboxu, musíte nejprve <a href=http://www.virtualmin.com/dropbox-referral target=_blank>vytvořit účet</a> na svém webu, pokud jej ještě nemáte.
 cloud_bb_longdesc=Než budete moci zálohovat na Backblaze, musíte nejprve <a href=https://backblaze.com/ target=_blank>vytvořit účet</a> a poté povolit <b>B2 Cloud Storage</b> na <b>stránka Moje nastavení</b>. Poté musíte vygenerovat aplikační klíč se všemi funkcemi na stránce <b>App Keys</b>.
 cloud_az_longdesc=Než budete moci zálohovat do Azure Blob Storage, musíte si nejprve <a href=https://azure.microsoft.com/en-us/free/ target=_blank>vytvořit účet</a> a nainstalovat <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> a přihlaste se ke svému účtu Azure spuštěním <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=Nastavení na této stránce poskytuje Google, když svému projektu udělíte přístup k rozhraní API na stránce <a href=https://console.developers.google.com/apis/credentials target=_blank>Google APIs Console</a>, v části <b>Rozhraní API a ověření</b> -&gt; <b>Přihlašovací údaje</b>. Musíte vytvořit <b>ID klienta OAuth</b> s <b>URI autorizovaného přesměrování</b> nastaveným na <tt>$1</tt>. Po vytvoření zde můžete zadat <b>ID klienta</b> a <b>tajný klíč klienta</b>.
 cloud_openoauth=Začněte s registrací OAuth2
 cloud_newoauth=Kód OAuth2 od Googlu:
 cloud_newoauth_dropbox=Kód OAuth2 z Dropboxu:
@@ -6587,3 +6610,6 @@ remotedns_ednone=Nebyl vybrán žádný!
 remotedns_eslave=Tento systém může být pouze hlavním serverem DNS
 
 global_dismiss=Zavrhnout
+
+ports_fpm=PHP FPM server
+ports_script=Nainstalován skript $1

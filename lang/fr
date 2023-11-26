@@ -1975,10 +1975,6 @@ expframe_ewrite=L'écriture du fichier de forwarding via une frame $1, sous l'ut
 
 newtmpl_title=Templates de serveur
 newtmpl_name=Template
-newtmpl_skel=Répertoire des squelettes
-newtmpl_web=Apache?
-newtmpl_dns=BIND?
-newtmpl_ftp=ProFTPd?
 newtmpl_frame=Frame HTML?
 newtmpl_mail=Courriel?
 newtmpl_none=Aucun

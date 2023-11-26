@@ -606,6 +606,7 @@ log_sched_virtualmin=configuración de virtualmin
 log_sched_doms=$1 dominios
 log_backup_failed=No se pudo realizar la copia de seguridad de $1 servidores virtuales
 log_backup_failed_l=Error al realizar la copia de seguridad de los servidores virtuales $1
+log_default_template=Se cambió la plantilla predeterminada a $1
 log_stop_script=Script detenido $1 $2 en el servidor $3
 log_start_script=Script iniciado $1 $2 en el servidor $3
 log_restart_script=Script reiniciado $1 $2 en el servidor $3
@@ -716,6 +717,8 @@ backup_nicebb=Cubo de backblaze $1
 backup_nicebbp=$2 en el depósito Backblaze $1 
 backup_niceaz=Contenedor de Azure $1
 backup_niceazp=$2 en el contenedor de Azure $1
+backup_nicedrive=Carpeta de Google Drive $1
+backup_nicedrivep=$2 en la carpeta de Google Drive $1
 backup_nicedownloadlink=enlace de descarga
 backup_downloadfile=Descargar archivo de copia de seguridad $1
 backup_edownloadfile=Falta el archivo de copia de seguridad para descargar
@@ -738,6 +741,7 @@ backup_purgesubject=Se completó la copia de seguridad de Virtualmin en $1 a $2,
 backup_upload9=Subiendo archivo al servidor Webmin $1 ..
 backup_upload10=Subiendo archivo a Backblaze. ..
 backup_upload11=Subiendo archivo a Azure Blob Storage ..
+backup_upload12=Subiendo archivo a Google Drive ..
 backup_eownrestore=Solo los propietarios de servidores virtuales pueden restaurar las copias de seguridad firmadas
 
 backup_ebackupdirlock=.. el directorio de respaldo temporal $1 está bloqueado por el proceso $2
@@ -971,6 +975,13 @@ newbw_backup=¿Incluye transferencias de respaldo en el uso?
 newbw_estep=Las horas entre la recolección deben ser un número del 1 al 24
 newbw_allunder=Todos los servidores virtuales están por debajo de sus límites de ancho de banda.
 newbw_mailall=¿Incluye correo electrónico retransmitido en el uso de ancho de banda?
+
+newtmpl_tdoms=Utilizado por servidores
+newtmpl_useby=Para uso por
+newtmpl_def=Por defecto
+newtmpl_edelete=Las plantillas estándar no se pueden eliminar
+newtmpl_setdef=Establecer plantilla de nivel superior predeterminada
+newtmpl_setdefsub=Establecer plantilla de subservidor predeterminada
 
 tmpl_title5=Eliminar plantilla de servidor
 tmpl_skel_nosubs=Patrones de archivo para no sustituir
@@ -1759,6 +1770,10 @@ spf_enableds=Adición de registros de DS al dominio principal ..
 spf_disableds=Eliminando registros de DS del dominio principal ..
 spf_dnsrlocal=Moviendo DNS al servidor local ..
 spf_dnsrhost=Moviendo DNS al servidor remoto $1 ..
+spf_keytag=Etiqueta de la llave
+spf_alg=Algoritmo
+spf_type=tipo de resumen
+spf_digest=cadena de resumen
 
 s3_emodule2=No se pudo cargar el módulo Perl $1 necesario para comunicarse con el servicio S3 de Amazon : $2
 s3_emodule3=Los módulos Perl $1 o $2 necesarios para comunicarse con el servicio S3 de Amazon no están instalados
@@ -1775,9 +1790,12 @@ az_ecmd=No se encontró el comando <tt>az</tt> de la CLI de Azure
 az_elogin=El comando de la CLI de Azure aún no se ha autenticado. SSH en su sistema Virtualmin y ejecute el comando <tt>az login --use-device-code</tt> para iniciar sesión en Azure.
 azure_account=Cuenta azul $1
 
+tdelete_err2=No se pudo cambiar la plantilla predeterminada
 tdelete_title=Eliminar plantillas de servidor
 tdelete_warn=¿Está seguro de que desea eliminar las siguientes plantillas de servidor seleccionadas : $1
 tdelete_confirm=Eliminar plantillas
+tdelete_edefsub=La plantilla de subservidor estándar no puede ser la predeterminada para servidores de nivel superior
+tdelete_edeftop=La plantilla estándar no puede ser la predeterminada para los subservidores
 
 newlinks_nocat2=Ninguna
 newlinks_tmpl=Para plantilla
@@ -1839,7 +1857,12 @@ exclude_dbs=Bases de datos y tablas para omitir
 exclude_dbdesc=En cada línea, introduzca una <tt>database</tt> nombre o <tt>database.table</tt> nombre.
 exclude_edb=El nombre de la base de datos '$1' no es válido
 
+balancers_used2=Usado por
+balancers_script=Secuencia de comandos $1 versión $2
+
 balancer_none=No utilice proxy para esta ruta y sirva localmente en su lugar
+balancer_scriptused=Esta ruta de proxy está siendo utilizada por el script instalado $1 versión $2. ¡Modificarlo o eliminarlo puede hacer que el script deje de funcionar!
+balancer_pluginused=Esta ruta de proxy está siendo utilizada por $1. ¡Modificarlo o eliminarlo puede hacer que esta función deje de funcionar!
 
 scriptwarn_where3=Las actualizaciones se pueden hacer en Virtualmin, en la página Instalar scripts de cada dominio o todas a la vez en: \n $1
 
@@ -2048,11 +2071,13 @@ cfix_smtptimeout=Compruebe si el firewall de su sistema está bloqueando el puer
 plans_title=Planes de cuenta
 newplan_title=Planes de cuenta
 plans_name=Nombre del plan
+plans_default=Por defecto
 plans_quota=Cuota de disco
 plans_doms=Dominios
 plans_mailboxes=Buzones
 plans_none=Aún no se han creado planes de cuenta.
 plans_none2=Aún no ha creado ningún plan de cuenta.
+plans_setdefault=Establecer plan predeterminado
 plans_resel=Revendedores
 plans_noresel=Ninguna
 plans_ecannot=No tienes permiso para administrar planes
@@ -2079,6 +2104,7 @@ plan_toomany=Este plan tiene servidores virtuales de $1, que es más alto que el
 plan_clone=Clon
 
 dplans_err=Error al eliminar planes
+dplans_err2=No se pudo cambiar el plan predeterminado
 dplans_enone=Ninguna seleccionada
 dplans_eall=Al menos un plan debe existir
 
@@ -2801,6 +2827,7 @@ transfer_host0=Nuevo sistema
 transfer_savehost=Guardar para uso posterior?
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=Iniciar sesión en el sistema de destino
 transfer_pass=Contraseña para el sistema de destino
 transfer_passdef=(opcional si la autenticación SSH está configurada)
 transfer_overwrite=¿Sobreescribir el dominio existente?
@@ -2878,6 +2905,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Almacenamiento de blobs de Azure
+cloud_drivedesc=Google Drive
 cloud_s3account=Usando la tecla de acceso $1
 cloud_s3creds=Uso de credenciales de EC2
 cloud_rsuser=Usando login $1
@@ -2920,6 +2948,7 @@ cloud_gcpcreds=Usar credenciales de GCP
 cloud_daccount=Usando login $1
 cloud_google_account=Dirección de correo electrónico de la cuenta de Google
 cloud_google_creds=Las credenciales de GCP ya están disponibles en este sistema desde el comando <tt>gcloud</tt>. Este suele ser el caso cuando se ejecuta en Google Compute Engine. Sin embargo, es posible que deba otorgar permisos completos de acceso a Cloud Storage a la cuenta de servicio a continuación en la <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
+cloud_drive_creds=Las credenciales de GCP ya están disponibles en este sistema desde el comando <tt>gcloud</tt>. Este suele ser el caso cuando se ejecuta en Google Compute Engine. Sin embargo, es posible que tengas que otorgar permisos completos de acceso a Google Drive a la cuenta de servicio que aparece a continuación en la <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_dnscreds=Las credenciales de GCP ya están disponibles en este sistema desde el comando <tt>gcloud</tt>. Este suele ser el caso cuando se ejecuta en Google Compute Engine. Sin embargo, es posible que deba otorgar permisos completos de acceso DNS a la cuenta de servicio a continuación en la <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a> ..
 cloud_google_clientid=ID de cliente OAuth2
 cloud_google_secret=Secreto de cliente OAuth2
@@ -2932,6 +2961,7 @@ cloud_google_longdesc=Google proporciona la configuración de esta página cuand
 cloud_dropbox_longdesc=Antes de que pueda hacer una copia de seguridad en Dropbox, primero debe <a href=http://www.virtualmin.com/dropbox-referral target=_blank&gt;create an account en su sitio web si aún no tiene una.
 cloud_bb_longdesc=Antes de poder hacer una copia de seguridad en Backblaze, primero debe <a href=https://backblaze.com/ target=_blank>crear una cuenta</a> y luego habilitar <b>B2 Cloud Storage</b> en el <b>página Mi configuración</b>. Luego, debe generar una clave de aplicación con todas las capacidades en la página <b>Claves de la aplicación</b>.
 cloud_az_longdesc=Antes de poder realizar una copia de seguridad en Azure Blob Storage, primero debe <a href=https://azure.microsoft.com/en-us/free/ target=_blank>crear una cuenta</a>, instalar <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> e inicie sesión en su cuenta de Azure ejecutando <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=Google proporciona la configuración de esta página cuando otorga acceso API a su proyecto en la página <a href=https://console.developers.google.com/apis/credentials target=_blank>Consola de API de Google</a>., en <b>API y autenticación</b> -&gt; <b>Credenciales</b>. Debe crear una credencial <b>ID de cliente de OAuth</b>, con el <b>URI de redireccionamiento autorizado</b> establecido en <tt>$1</tt>. Una vez creado, el <b>ID de cliente</b> y el <b>secreto de cliente</b> se pueden ingresar aquí.
 cloud_openoauth=Comience la inscripción en OAuth2
 cloud_newoauth=Código OAuth2 de Google:
 cloud_newoauth_dropbox=Código OAuth2 de Dropbox:
@@ -3280,3 +3310,6 @@ remotedns_ednone=¡Ninguna seleccionada!
 remotedns_eslave=Este sistema solo puede ser un servidor DNS maestro
 
 global_dismiss=Despedir
+
+ports_fpm=Servidor PHP FPM
+ports_script=Script $1 instalado

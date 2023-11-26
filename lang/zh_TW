@@ -1913,11 +1913,6 @@ expframe_ewrite=用戶$2寫入到frame-forwarding文件$1失敗：$3
 
 newtmpl_title=服務器模板
 newtmpl_name=模板
-newtmpl_skel=框架目錄
-newtmpl_web=Apache?
-newtmpl_dns=BIND?
-newtmpl_ftp=ProFTPd?
-newtmpl_logrotate=Logrotate?
 newtmpl_frame=Frame HTML?
 newtmpl_mail=郵件消息?
 newtmpl_add1=創建一個空模板。
@@ -1925,7 +1920,6 @@ newtmpl_add2=從缺省設置創建新模板。
 newtmpl_none=無
 newtmpl_cust=自定義
 newtmpl_return=模板列表
-newtmpl_scripts=腳本
 newtmpl_delete=刪除選中的模板
 
 tmpl_title1=創建服務器模板

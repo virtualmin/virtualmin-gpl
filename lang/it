@@ -1341,7 +1341,6 @@ aedit_eauto=Le risposte automatiche non possono essere configurate quando si mod
 
 balancers_title=Percorso proxy
 balancers_urls=Indirizzi di destinazione
-balancers_used=Per script
 
 balancer_auto=Seleziona automaticamente
 

@@ -819,6 +819,7 @@ log_sched_virtualmin=virtualmin設置
 log_sched_doms=$1個網域
 log_backup_failed=無法備份 $1 個虛擬服務器
 log_backup_failed_l=無法備份虛擬服務器 $1
+log_default_template=已將預設模板更改為 $1
 log_stop_script=服務器 $3中已停止腳本 $1 $2
 log_start_script=服務器 $3中已啟動腳本 $1 $2
 log_restart_script=重新啟動服務器 $3中的腳本 $1 $2
@@ -991,6 +992,8 @@ backup_nicebb=烈焰鬥 $1
 backup_nicebbp=Backblaze存儲桶 $1中的 $2
 backup_niceaz=Azure 容器 $1
 backup_niceazp=Azure 容器 $1 中的 $2
+backup_nicedrive=Google 雲端硬碟資料夾 $1
+backup_nicedrivep=$2 在 Google 雲端硬碟資料夾 $1 中
 backup_nicedownload=下載文件
 backup_nicedownloadlink=下載鏈接
 backup_niceupload=上傳的文件
@@ -1045,6 +1048,7 @@ backup_upload8=正在將存檔上傳到Dropbox ..
 backup_upload9=將檔案上傳到Webmin服務器 $1 ..
 backup_upload10=將檔案上傳到Backblaze ..
 backup_upload11=將存檔上傳到 Azure Blob 存儲 ..
+backup_upload12=正在將存檔上傳到 Google 雲端硬碟 ..
 backup_ersnopath=備份到Rackspace的單個文件時，必須指定文件名
 backup_copy=複製到其他目標 $1 ..
 backup_copyfailed=..複製失敗： $1
@@ -1476,6 +1480,12 @@ newbw_allunder=所有虛擬服務器都在其帶寬限制內。
 newbw_mailout=在帶寬使用情況中包括傳出電子郵件？
 newbw_mailall=在帶寬使用中包括中繼電子郵件嗎？
 
+newtmpl_tdoms=由伺服器使用
+newtmpl_useby=供以下人員使用
+newtmpl_def=預設
+newtmpl_edelete=標準模板無法刪除
+newtmpl_setdef=設定預設頂級模板
+newtmpl_setdefsub=設定預設子伺服器模板
 newtmpl_created=創建於
 newtmpl_init=Virtualmin安裝
 newtmpl_name0=默認設置
@@ -2577,6 +2587,10 @@ spf_enableds=將 DS 記錄添加到父域 ..
 spf_disableds=從父域中刪除 DS 記錄 ..
 spf_dnsrlocal=將 DNS 移動到本地服務器 ..
 spf_dnsrhost=將 DNS 移動到遠程服務器 $1 ..
+spf_keytag=鑰匙標籤
+spf_alg=演算法
+spf_type=摘要型
+spf_digest=摘要字串
 
 s3_emodule2=無法加載與Amazon的S3服務通信所需的Perl模塊 $1 : $2
 s3_emodule3=未安裝與Amazon的S3服務通信所需的Perl模塊 $1或 $2
@@ -2593,10 +2607,13 @@ az_ecmd=找不到 Azure CLI 命令 <tt>az</tt>
 az_elogin=Azure CLI 命令尚未通過身份驗證。 SSH 進入您的 Virtualmin 系統並運行命令 <tt>az login --use-device-code</tt> 以登錄到 Azure。
 azure_account=Azure 帳戶 $1
 
+tdelete_err2=更改預設模板失敗
 tdelete_title=刪除服務器模板
 tdelete_warn=您確定要刪除以下選定的服務器模板： $1
 tdelete_confirm=刪除模板
 tdelete_users2=虛擬服務器當前正在使用它們： $1
+tdelete_edefsub=標準子伺服器模板不能作為頂級伺服器的預設模板
+tdelete_edeftop=標準模板不能作為子伺服器的預設模板
 
 newlinks_nocat2=沒有
 newlinks_tmpl=對於模板
@@ -2708,13 +2725,14 @@ balancers_add=添加一個新的代理路徑。
 balancers_path=網址路徑
 balancers_name=平衡器名稱
 balancers_urls=目標網址
-balancers_used=對於腳本
+balancers_used2=使用者
 balancers_delete=刪除選定的代理
 balancers_none=尚未定義代理路徑。
 balancers_return=代理路徑列表
 balancers_derr=刪除代理路徑失敗
 balancers_denone=未選擇
 balancers_none2=沒有代理
+balancers_script=腳本 $1 版本 $2
 
 balancer_create=創建代理路徑
 balancer_edit=編輯代理路徑
@@ -2734,6 +2752,8 @@ balancer_eurls=沒有輸入目標網址
 balancer_script=由腳本安裝程序使用
 balancer_scriptver=腳本版本
 balancer_none=不要代理此路徑並在本地提供服務
+balancer_scriptused=此代理路徑正在由已安裝的腳本 $1 版本 $2 使用。修改或刪除它可能會導致腳本停止工作！
+balancer_pluginused=此代理路徑正被 $1 使用。修改或刪除可能會導致該功能停止運作！
 
 scriptwarn_header=Virtualmin管理的以下腳本具有可用的新版本：
 scriptwarn_header2=由Virtualmin管理的以下腳本在\n虛擬服務器 $1中具有可用的新版本：
@@ -3162,6 +3182,7 @@ cfix_smtpto=確保您的郵件服務器配置為接受該域的電子郵件。
 plans_title=帳戶計劃
 newplan_title=帳戶計劃
 plans_name=計劃名稱
+plans_default=預設
 plans_quota=磁盤配額
 plans_bw=帶寬限制
 plans_doms=域
@@ -3171,6 +3192,7 @@ plans_none=尚未創建任何帳戶計劃。
 plans_none2=您尚未創建任何帳戶計劃。
 plans_add=添加新的帳戶計劃。
 plans_delete=刪除所選計劃
+plans_setdefault=設定預設計劃
 plans_resel=轉銷商
 plans_noresel=沒有
 plans_ecannot=您無權管理計劃
@@ -3203,6 +3225,7 @@ plan_scriptsopts=所有腳本
 plan_scriptssel=允許的
 
 dplans_err=刪除計劃失敗
+dplans_err2=更改預設計劃失敗
 dplans_enone=未選擇
 dplans_eall=至少必須存在一個計劃
 
@@ -4102,6 +4125,7 @@ transfer_host0=新系統
 transfer_savehost=保存以備後用？
 transfer_ssh=SSH
 transfer_webmin=Webmin RPC
+transfer_user=登入目標系統
 transfer_pass=目標系統的密碼
 transfer_passdef=（如果配置了 SSH 身份驗證，則可選）
 transfer_overwrite=覆蓋現有域？
@@ -4179,6 +4203,7 @@ cloud_googledesc=谷歌云存儲
 cloud_dropboxdesc=投寄箱
 cloud_bbdesc=烈火
 cloud_azdesc=Azure Blob 存儲
+cloud_drivedesc=Google雲端硬碟
 cloud_s3account=使用訪問密鑰 $1
 cloud_s3creds=使用 EC2 憑據
 cloud_rsuser=使用登錄 $1
@@ -4220,6 +4245,7 @@ cloud_gcpcreds=使用 GCP 憑據
 cloud_daccount=使用登錄 $1
 cloud_google_account=Google帳戶的電子郵件地址
 cloud_google_creds=GCP 憑據已可通過 <tt>gcloud</tt> 命令在此系統上使用。在 Google Compute Engine 上運行時通常就是這種情況。但是，您可能需要在 <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM 控制台</a>。
+cloud_drive_creds=GCP 憑證已可透過 <tt>gcloud</tt> 指令在此系統上使用。在 Google Compute Engine 上運作時通常會出現這種情況。不過，您可能需要在<a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM 控制台</a>。
 cloud_google_dnscreds=GCP 憑據已可通過 <tt>gcloud</tt> 命令在此系統上使用。在 Google Compute Engine 上運行時通常會出現這種情況。不過，您可能需要在 <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM 控制台</a>上向以下服務帳號授予完整的 DNS 訪問權限。
 cloud_google_clientid=OAuth2客戶端ID
 cloud_google_secret=OAuth2客戶端機密
@@ -4232,6 +4258,7 @@ cloud_google_longdesc=當您在<a href=https://console.developers.google.com/api
 cloud_dropbox_longdesc=如果您尚未建立帳戶，則必須先在其網站上<a href=http://www.virtualmin.com/dropbox-referral target=_blank>創建帳戶</a>，然後才能備份到Dropbox。
 cloud_bb_longdesc=在備份到Backblaze之前，必須首先<a href=https://backblaze.com/ target=_blank>創建帳戶</a>，然後在<b>B2 Cloud Storage</b>上啟用<b>b>我的設置</b>頁面。然後，您需要在<b>應用程序密鑰</b>頁面上生成具有所有功能的應用程序密鑰。
 cloud_az_longdesc=在備份到 Azure Blob 存儲之前，您必須先<a href=https://azure.microsoft.com/en-us/free/ target=_blank>創建一個帳戶</a>，安裝<a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> 命令，然後通過運行 <tt>az login --use-device-code<登錄到您的Azure 帳戶/tt>。
+cloud_drive_longdesc=當您在<a href=https://console.developers.google.com/apis/credentials target=_blank>Google API 主機</a>頁面上向您的專案授予API 存取權限時，Google 會提供此頁面上的設置，在 <b>API 和身份驗證</b>下 -> <b>憑證</b>。您必須建立一個 <b>OAuth 用戶端 ID</b> 憑證，並將<b>授權重定向 URI</b> 設為 <tt>$1</tt> 。建立後，可以在此輸入<b>客戶端 ID</b> 和<b>客戶端密碼</b>。
 cloud_openoauth=開始OAuth2註冊
 cloud_newoauth=來自Google的OAuth2代碼：
 cloud_newoauth_dropbox=Dropbox的OAuth2代碼：
@@ -4633,3 +4660,6 @@ remotedns_ednone=未選擇！
 remotedns_eslave=該系統只能是主DNS服務器
 
 global_dismiss=解僱
+
+ports_fpm=PHP FPM 伺服器
+ports_script=已安裝 $1 腳本
