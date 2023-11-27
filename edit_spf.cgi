@@ -64,7 +64,7 @@ foreach $t ('a', 'mx', 'ip4', 'ip6', 'include') {
 	}
 
 # All mode
-print &ui_table_row(&hlink($text{'spf_all'}, 'spf_all'),
+print &ui_table_row(&hlink($text{'spf_all'}, 'template_dns_spfall'),
 		    &ui_select("all", $edspf->{'all'},
 			       [ [ '', "&lt;$text{'default'}&gt;" ],
 				 [ 3, $text{'spf_all3'} ],

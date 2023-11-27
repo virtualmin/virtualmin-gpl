@@ -3040,12 +3040,12 @@ print &ui_table_row(&hlink($text{'tmpl_spfincludes'},
 	&ui_textbox("dns_spfincludes", $tmpl->{'dns_spfincludes'}, 40));
 
 # SPF ~all mode
-print &ui_table_row(&hlink($text{'tmpl_spfall'},
+print &ui_table_row(&hlink($text{'spf_all'},
 			   "template_dns_spfall"),
 	&ui_radio("dns_spfall", $tmpl->{'dns_spfall'},
-		  [ [ 0, $text{'tmpl_spfall0'} ],
-		    [ 1, $text{'tmpl_spfall1'} ],
-		    [ 2, $text{'tmpl_spfall2'} ] ]));
+		  [ [ 0, $text{'spf_all1'} ],
+		    [ 1, $text{'spf_all2'} ],
+		    [ 2, $text{'spf_all3'} ] ]));
 
 print &ui_table_hr();
 
