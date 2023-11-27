@@ -5972,14 +5972,15 @@ elsif ($mode == 11 && $path =~ /\%/) {
 
 elsif ($mode == 12 && $path =~ /\%/) {
 	# Search for Google drive files under the container
-	local $files = &list_drive_files($host);
+	local $files = &list_drive_files($host, 1);
 	if (!ref($files)) {
 		&$second_print(&text('backup_purgeefiles3', $files));
 		return 0;
 		}
 	foreach my $st (@$files) {
-		# XXX need to stat file to get timestamps
+		# XXX purge time is off?
 		my $f = $st->{'name'};
+		my $info;
 		if ($detail) {
 			&$first_print(&text('backup_purgeposs', $f,
 				$st->{'modifiedTime'}));
