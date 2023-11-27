@@ -5148,7 +5148,8 @@ elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 || $mode == 11) &&
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 ||
+	$mode == 11 || $mode == 12) &&
        $path =~ /%/) {
 	# S3 / Rackspace / GCS / Azure filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
@@ -5960,6 +5961,59 @@ elsif ($mode == 11 && $path =~ /\%/) {
 				&delete_azure_file($host, $f.".info");
 				&$second_print(&text('backup_deleted',
 				     &nice_size($st->{'properties'}->{'contentLength'})));
+				$pcount++;
+				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
+		}
+	}
+
+elsif ($mode == 12 && $path =~ /\%/) {
+	# Search for Google drive files under the container
+	local $files = &list_drive_files($host);
+	if (!ref($files)) {
+		&$second_print(&text('backup_purgeefiles3', $files));
+		return 0;
+		}
+	foreach my $st (@$files) {
+		# XXX need to stat file to get timestamps
+		my $f = $st->{'name'};
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+				$st->{'modifiedTime'}));
+			}
+		if ($f =~ /^$re($|\/)/ && $f !~ /\.(dom|info)$/ &&
+		    $f !~ /\.\d+$/) {
+			# Found one to delete
+			local $ctime = &google_timestamp(
+				$st->{'modifiedTime'});
+			$mcount++;
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
+			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
+			&$first_print(&text('backup_deletingfile',
+					    "<tt>$f</tt>", $old));
+			local $err = &delete_drive_file($host, $f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&delete_drive_file($host, $f.".dom");
+				&delete_drive_file($host, $f.".info");
+				&$second_print(&text('backup_deleted',
+				     &nice_size($st->{'size'})));
 				$pcount++;
 				}
 			}
