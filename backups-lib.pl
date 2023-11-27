@@ -4442,6 +4442,18 @@ if ($state->{'ok'} && &can_use_cloud("azure")) {
 	push(@opts, [ 11, $text{'backup_mode11'}, $st ]);
 	}
 
+# Google drive storage
+my $state = &cloud_drive_get_state();
+if ($state->{'ok'} && &can_use_cloud("drive")) {
+	local $st = &$tablestart('dr');
+	$st .= "<tr> <td>$text{'backup_drpath'}</td> <td>".
+	       &ui_textbox($name."_drpath", $mode != 12 ? undef :
+			   $server.($path ? "/".$path : ""), 50).
+	       "</td> </tr>\n";
+	$st .= "</table>\n";
+	push(@opts, [ 12, $text{'backup_mode12'}, $st ]);
+	}
+
 if (!$nodownload) {
 	# Show mode to download in browser
 	push(@opts, [ 44, $text{'backup_mode44'},
@@ -4612,6 +4624,13 @@ elsif ($mode == 11 && &can_use_cloud("azure")) {
 	($in{$name.'_azpath'} =~ /^\// || $in{$name.'_azpath'} =~ /\/$/) &&
 		&error($text{'backup_eazpath2'});
 	return "azure://".$in{$name.'_azpath'};
+	}
+elsif ($mode == 12 && &can_use_cloud("drive")) {
+	# Google Drive
+	$in{$name.'_drpath'} =~ /^\S+$/i || &error($text{'backup_edrpath'});
+	($in{$name.'_drpath'} =~ /^\// || $in{$name.'_drpath'} =~ /\/$/) &&
+		&error($text{'backup_edrpath2'});
+	return "drive://".$in{$name.'_drpath'};
 	}
 elsif ($mode == 9) {
 	# Webmin server
