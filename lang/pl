@@ -546,14 +546,9 @@ frame_ok=Zapisz i zastosuj
 
 newtmpl_title=Szablony serwera
 newtmpl_name=Szablon
-newtmpl_web=Apache?
-newtmpl_dns=BIND?
-newtmpl_ftp=ProFTPd?
-newtmpl_logrotate=Rotacja logów?
 newtmpl_mail=Wiadomości e-mail?
 newtmpl_none=Brak
 newtmpl_return=listy szablonów
-newtmpl_scripts=Skrypty
 newtmpl_delete=Usuń wybrane szablony
 newtmpl_created=Utworzony
 newtmpl_init=przy instalacji Virtualmin

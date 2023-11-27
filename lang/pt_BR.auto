@@ -2077,6 +2077,7 @@ log_restore_l=Servidores virtuais restaurados $1
 log_create_template=Modelo de servidor criado $1 
 log_modify_template=Modelo de servidor atualizado $1 
 log_delete_template=Modelo de servidor excluído $1 
+log_default_template=Modelo padrão alterado para $1 
 log_install_script=Script instalado $1 $2 no servidor $3 
 log_uninstall_script=Script não instalado $1 $2 no servidor $3 
 log_stop_script=Script interrompido $1 $2 no servidor $3 
@@ -2338,6 +2339,8 @@ backup_nicebb=Balde backblaze $1
 backup_nicebbp=$2 no balde Backblaze $1 
 backup_niceaz=Contêiner do Azure $1 
 backup_niceazp=$2 no contêiner do Azure $1
+backup_nicedrive=Pasta do Google Drive $1 
+backup_nicedrivep=$2 na pasta Google Drive $1 
 backup_nicedownload=arquivo baixado
 backup_nicedownloadlink=Link para Download
 backup_niceupload=arquivo enviado
@@ -2424,6 +2427,7 @@ backup_upload8=Upload de arquivo para o Dropbox ..
 backup_upload9=Carregando arquivo morto para o servidor Webmin $1 ..
 backup_upload10=Enviando arquivo para Backblaze ..
 backup_upload11=Carregando arquivo para o Armazenamento de Blobs do Azure ..
+backup_upload12=Fazendo upload do arquivo para o Google Drive ..
 backup_uploadfailed=.. upload falhou! $1 
 backup_finalstatus=$1 servidores fizeram backup com sucesso, $2 teve erros.
 backup_finalstatus2=$1 As definições de configuração do Virtualmin foram copiadas com êxito.
@@ -3182,19 +3186,19 @@ expframe_ewrite=Falha ao gravar no arquivo de encaminhamento de quadros $1 como 
 
 newtmpl_title=Modelos de servidor
 newtmpl_name=Modelo
-newtmpl_skel=Diretório esqueleto
-newtmpl_web=Apache?
-newtmpl_dns=LIGAR?
-newtmpl_ftp=ProFTPD?
-newtmpl_logrotate=Logrotate?
+newtmpl_tdoms=Usado por servidores
+newtmpl_useby=Para uso por
+newtmpl_def=Padrão
 newtmpl_frame=Frame HTML?
 newtmpl_mail=Mensagem de email?
 newtmpl_add1=Crie um modelo vazio.
 newtmpl_add2=Crie um modelo a partir das configurações padrão.
 newtmpl_none=Nenhum
 newtmpl_return=lista de modelos
-newtmpl_scripts=Scripts
 newtmpl_delete=Excluir modelos selecionados
+newtmpl_edelete=Os modelos padrão não podem ser excluídos
+newtmpl_setdef=Definir modelo de nível superior padrão
+newtmpl_setdefsub=Definir modelo de subservidor padrão
 newtmpl_init=Instalação do Virtualmin
 newtmpl_name0=Configurações padrão
 newtmpl_name1=Configurações para sub-servidores
@@ -5290,6 +5294,10 @@ spf_enableds=Adicionando registros DS ao domínio pai ..
 spf_disableds=Removendo registros DS do domínio pai ..
 spf_dnsrlocal=Movendo o DNS para o servidor local ..
 spf_dnsrhost=Movendo o DNS para o servidor remoto $1 ..
+spf_keytag=Chave-chave
+spf_alg=Algoritmo
+spf_type=Tipo de resumo
+spf_digest=Sequência de resumo
 
 s3_emodule=O módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon não está instalado
 s3_emodule2=Não foi possível carregar o módulo Perl $1 necessário para se comunicar com o serviço S3 da Amazon : $2 
@@ -5312,11 +5320,14 @@ az_elogin=O comando CLI do Azure ainda não foi autenticado. SSH em seu sistema 
 azure_account=Conta do Azure $1 
 
 tdelete_err=Falha ao excluir modelos
+tdelete_err2=Falha ao alterar o modelo padrão
 tdelete_enone=Nenhum selecionado
 tdelete_title=Excluir modelos de servidor
 tdelete_warn=Tem certeza de que deseja excluir os seguintes modelos de servidor selecionados : $1 
 tdelete_confirm=Excluir modelos
 tdelete_users2=Atualmente, eles estão em uso por servidores virtuais : $1 
+tdelete_edefsub=O modelo de subservidor padrão não pode ser o padrão para servidores de nível superior
+tdelete_edeftop=O modelo padrão não pode ser o padrão para subservidores
 
 switch_ecannot=Você não tem permissão para mudar para o administrador deste domínio
 switch_eadmin=O administrador extra especificado não existe!
@@ -5677,13 +5688,14 @@ balancers_add=Adicione um novo caminho de proxy.
 balancers_path=Caminho do URL
 balancers_name=Nome do balanceador
 balancers_urls=URLs de destino
-balancers_used=Para script
+balancers_used2=Usado por
 balancers_delete=Excluir proxies selecionados
 balancers_none=Nenhum caminho de proxy foi definido ainda.
 balancers_return=lista de caminhos de proxy
 balancers_derr=Falha ao excluir caminhos do proxy
 balancers_denone=Nenhum selecionado
 balancers_none2=Sem proxy
+balancers_script=Script $1 versão $2 
 
 balancer_create=Criar caminho de proxy
 balancer_edit=Editar caminho do proxy
@@ -5703,6 +5715,8 @@ balancer_eurls=Nenhum URL de destino inserido
 balancer_script=Usado pelo instalador de scripts
 balancer_scriptver=Versão do script
 balancer_none=Não faça proxy para este caminho e veicule localmente em vez disso
+balancer_scriptused=Este caminho de proxy está sendo usado pelo script instalado $1 versão $2. Modificá-lo ou excluí-lo pode fazer com que o script pare de funcionar!
+balancer_pluginused=Este caminho de proxy está sendo usado por $1. Modificá-lo ou excluí-lo pode fazer com que esse recurso pare de funcionar!
 
 scriptwarn_header=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis :
 scriptwarn_header2=Os seguintes scripts gerenciados pelo Virtualmin têm novas versões disponíveis, no \nvirtual servidor $1  :
@@ -6122,6 +6136,7 @@ cfix_smtpto=Verifique se o servidor de email está configurado para aceitar emai
 plans_title=Planos de conta
 newplan_title=Planos de conta
 plans_name=Nome do plano
+plans_default=Padrão
 plans_quota=Cota de disco
 plans_bw=Limite de banda larga
 plans_doms=Domínios
@@ -6131,6 +6146,7 @@ plans_none=Nenhum plano de conta foi criado ainda.
 plans_none2=Você ainda não criou nenhum plano de conta.
 plans_add=Adicione um novo plano de conta.
 plans_delete=Excluir planos selecionados
+plans_setdefault=Definir plano padrão
 plans_resel=Revendedor
 plans_noresel=Nenhum
 plans_ecannot=Você não tem permissão para gerenciar planos
@@ -6163,6 +6179,7 @@ plan_scriptsopts=Todos os scripts
 plan_scriptssel=Permitido
 
 dplans_err=Falha ao excluir planos
+dplans_err2=Falha ao alterar o plano padrão
 dplans_enone=Nenhum selecionado
 dplans_eall=Pelo menos um plano deve existir
 
@@ -7039,6 +7056,7 @@ transfer_host0=Novo sistema
 transfer_savehost=Salvar para uso posterior?
 transfer_ssh=SSH
 transfer_webmin=WebminRPC
+transfer_user=Login para sistema de destino
 transfer_pass=Senha do sistema de destino
 transfer_passdef=(opcional se a autenticação SSH estiver configurada)
 transfer_overwrite=Sobrescrever domínio existente?
@@ -7116,6 +7134,7 @@ cloud_googledesc=Google Cloud Storage
 cloud_dropboxdesc=Dropbox
 cloud_bbdesc=Backblaze
 cloud_azdesc=Armazenamento de Blobs do Azure
+cloud_drivedesc=Google Drive
 cloud_s3account=Usando a chave de acesso $1 
 cloud_s3creds=Usando credenciais do EC2
 cloud_rsuser=Usando o login $1 
@@ -7157,6 +7176,7 @@ cloud_gcpcreds=Usando credenciais do GCP
 cloud_daccount=Usando o login $1 
 cloud_google_account=Endereço de e-mail da conta do Google
 cloud_google_creds=As credenciais do GCP já estão disponíveis neste sistema a partir do comando <tt>gcloud</tt>. Normalmente, esse é o caso ao executar no Google Compute Engine. No entanto, pode ser necessário conceder permissões de acesso total ao Cloud Storage para a conta de serviço abaixo no <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
+cloud_drive_creds=As credenciais do GCP já estão disponíveis neste sistema no comando <tt>gcloud</tt>. Normalmente, esse é o caso quando executado no Google Compute Engine. No entanto, talvez seja necessário conceder permissões de acesso total ao Google Drive à conta de serviço abaixo no <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Console IAM do Google</a>.
 cloud_google_dnscreds=As credenciais do GCP já estão disponíveis neste sistema a partir do comando <tt>gcloud</tt>. Normalmente, esse é o caso ao executar no Google Compute Engine. No entanto, pode ser necessário conceder permissões de acesso DNS total à conta de serviço abaixo no <a href=https://console.developers.google.com/iam-admin/iam target=_blank>Google IAM Console</a>.
 cloud_google_clientid=ID do cliente OAuth2
 cloud_google_secret=Segredo do cliente OAuth2
@@ -7169,6 +7189,7 @@ cloud_google_longdesc=As configurações nesta página são fornecidas pelo Goog
 cloud_dropbox_longdesc=Antes de fazer backup no Dropbox, você deve primeiro <a href=http://www.virtualmin.com/dropbox-referral target=_blank>criar uma conta</a> no site deles, se ainda não tiver uma.
 cloud_bb_longdesc=Antes de fazer backup para Backblaze, você deve primeiro <a href=https://backblaze.com/ target=_blank>criar uma conta</a> e, em seguida, habilitar o <b>Armazenamento em nuvem B2</b> no <b>página Minhas configurações</b>. Em seguida, você precisa gerar uma chave de aplicativo com todos os recursos na página <b>Chaves de aplicativo</b>.
 cloud_az_longdesc=Antes de poder fazer backup no Armazenamento de Blob do Azure, você deve primeiro <a href=https://azure.microsoft.com/en-us/free/ target=_blank>criar uma conta</a>, instalar o <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> e faça login em sua conta do Azure executando <tt>az login --use-device-code< /tt>.
+cloud_drive_longdesc=As configurações nesta página são fornecidas pelo Google quando você concede acesso de API ao seu projeto na página do <a href=https://console.developers.google.com/apis/credentials target=_blank>Console de APIs do Google</a>, em <b>APIs e autenticação</b> -&gt; <b>Credenciais</b>. Você deve criar uma credencial de <b>ID do cliente OAuth</b>, com o <b>URI de redirecionamento autorizado</b> definido como <tt>$1</tt>. Depois de criados, o <b>ID do cliente</b> e o <b>segredo do cliente</b> podem ser inseridos aqui.
 cloud_openoauth=Iniciar inscrição no OAuth2
 cloud_newoauth=Código OAuth2 do Google:
 cloud_newoauth_dropbox=Código OAuth2 do Dropbox:
@@ -7570,3 +7591,6 @@ remotedns_ednone=Nenhum selecionado!
 remotedns_eslave=Este sistema só pode ser um servidor DNS mestre
 
 global_dismiss=Liberar
+
+ports_fpm=Servidor PHP FPM
+ports_script=Script $1 instalado
