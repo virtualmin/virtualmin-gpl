@@ -2856,6 +2856,7 @@ restore_downloadgc=Downloading archive from Google Cloud Storage ..
 restore_downloaddb=Downloading archive from Dropbox ..
 restore_downloadbb=Downloading archive from Backblaze ..
 restore_downloadaz=Downloading archive from Azure Blob Storage ..
+restore_downloaddr=Downloading archive from Google Drive ..
 restore_downloadwebmin=Downloading archive from Webmin server ..
 restore_downloadfailed=.. download failed! $1
 restore_global2=Restoring Virtualmin settings ..

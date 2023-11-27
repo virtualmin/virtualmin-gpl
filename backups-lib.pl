@@ -2046,6 +2046,7 @@ if ($mode > 0) {
 		      $mode == 9 ? $text{'restore_downloadwebmin'} :
 		      $mode == 10 ? $text{'restore_downloadbb'} :
 		      $mode == 11 ? $text{'restore_downloadaz'} :
+		      $mode == 12 ? $text{'restore_downloaddr'} :
 				   $text{'restore_downloadssh'});
 	if ($mode == 3) {
 		local ($cerr) = &check_s3();
@@ -3758,7 +3759,7 @@ elsif ($mode == 6) {
 		return $err if ($err);
 		}
 	}
-elsif ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11) {
+elsif ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11 || $mode == 12) {
 	# Download from Google cloud storage, Dropbox or Backblaze
 	local $files;
 	local $func;
@@ -3775,6 +3776,13 @@ elsif ($mode == 7 || $mode == 8 || $mode == 10 || $mode == 11) {
 		return "Failed to list $server : $files" if (!ref($files));
 		$files = [ map { $_->{'name'} } @$files ];
 		$func = \&download_azure_file;
+		}
+	elsif ($mode == 12) {
+		# Get files under folder from Google drive
+		$files = &list_drive_files($server);
+		return "Failed to list $server : $files" if (!ref($files));
+		$files = [ map { $_->{'name'} } @$files ];
+		$func = \&download_drive_file;
 		}
 	elsif ($mode == 8 || $mode == 10) {
 		# Get files under dir from Dropbox or Backblaze. These have to
