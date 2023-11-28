@@ -152,7 +152,6 @@ user_tome=Doručit tomuto uživateli
 user_forward=Přeposlat dalším uživatelům
 user_auto=Poslat automatickou odpověď
 user_period=Minimální doba mezi automatickými odpověďmi
-user_ehomeexists=Domovský adresář musí existovat pro FTP uživatele
 
 aliases_ecannot=Nejste opravne upravovat aliasy teto domeny
 aliases_title=Aliasy Postovnich Schranek

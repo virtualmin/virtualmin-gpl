@@ -773,7 +773,6 @@ user_header5=Brukerkonfigurert videresending av e-post
 user_fcondition=Videresendings-betingelse
 user_faction=Handling
 user_eshell=Valgt skall er ikke tilgjengelig for e-post/FTP brukere
-user_ehomeexists=Hjemmekatalogen må være en eksisterende katalog for nettstedets FTP brukere
 user_awl=Administrer auto-hvitliste
 user_eloop=En bruker kan ikke videresende e-post til sin egen adresse
 user_switch=Logg inn på Usermin

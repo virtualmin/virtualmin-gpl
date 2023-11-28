@@ -62,7 +62,6 @@ user_tome=Entrega de e-mail normal
 user_forward=Encaminhados para outros endereços
 user_auto=Enviar resposta automática
 user_period=Tempo mínimo entre respostas automáticas
-user_ehomeexists=Diretório home deve ser um diretório existente para os usuários do site FTP
 user_lastlogin=Último login
 user_lastlogin_imap=IMAP (fetching email)
 

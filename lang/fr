@@ -526,7 +526,6 @@ user_header5=L'acheminement du courrier configuré par l'utilisateur
 user_fcondition=état de redirection
 user_faction=Action
 user_eshell=La shell choisie n'est pas disponible pour les utilisateurs de messagerie / FTP
-user_ehomeexists=Répertoire Home doit être un répertoire existant pour les utilisateurs FTP du site
 user_awl=Gérer liste blanche automatique
 user_eloop=Un utilisateur ne peut pas acheminer le courrier à sa propre adresse
 user_switch=Connectez-vous à Usermin

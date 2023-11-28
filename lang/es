@@ -655,7 +655,6 @@ user_header5=Reenvío de mail configurado por el usuario
 user_fcondition=Condición de reenvío
 user_faction=Acción
 user_eshell=El shell seleccionado no está disponible para usuarios de mail / FTP
-user_ehomeexists=El directorio home debe ser un directorio existente para usuarios de FTP
 user_awl=Administrar auto-whitelist
 
 aliases_ecannot=Ud. no está autorizado a editar alias en este dominio

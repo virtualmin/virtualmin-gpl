@@ -751,7 +751,6 @@ user_header5=Gebruiker ge-configureerde email door sturing
 user_fcondition=Doorstuur conditie
 user_faction=Actie
 user_eshell=Geselecteerde shell is niet beschikbaar voor email / FTP gebruikers
-user_ehomeexists=Home directory moet een bestaande directory zijn voor website FTP gebruikers
 user_awl=Beheer auto-witte lijst
 user_eloop=Een gebruiker kan geen email doorsturen naar zijn eigen adres
 user_switch=Inloggen bij  Usermin
