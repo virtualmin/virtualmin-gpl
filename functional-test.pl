@@ -4093,7 +4093,7 @@ $azurebackup_tests = [
 		      @create_args, ],
 	},
 
-	# Backup to Dropbox
+	# Backup to Azure
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
@@ -4105,7 +4105,7 @@ $azurebackup_tests = [
 		      [ 'dest', "$azure_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Backup to Dropbox again, to test that over-writing works
+	# Backup to Azure again, to test that over-writing works
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
@@ -4117,21 +4117,21 @@ $azurebackup_tests = [
 		      [ 'dest', "$azure_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Restore from Dropbox
+	# Restore from Azure
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'all-features' ],
 		      [ 'source', "$azure_backup_prefix/$test_domain.tar.gz" ] ],
 	},
 
-	# Restore sub-domain from Dropbox
+	# Restore sub-domain from Azure
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_subdomain ],
 		      [ 'all-features' ],
 		      [ 'source', "$azure_backup_prefix/$test_subdomain.tar.gz" ] ],
 	},
 
-	# Backup to Dropbox in home format
+	# Backup to Azure in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4140,7 +4140,7 @@ $azurebackup_tests = [
 		      [ 'dest', $azure_backup_prefix ] ],
 	},
 
-	# Backup to Dropbox in home format again, to test overwriting
+	# Backup to Azure in home format again, to test overwriting
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4149,7 +4149,7 @@ $azurebackup_tests = [
 		      [ 'dest', $azure_backup_prefix ] ],
 	},
 
-	# Restore from Dropbox in home format
+	# Restore from Azure in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4157,7 +4157,7 @@ $azurebackup_tests = [
 		      [ 'source', $azure_backup_prefix ] ],
 	},
 
-	# Backup from Dropbox one-by-one
+	# Backup from Azure one-by-one
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4167,14 +4167,14 @@ $azurebackup_tests = [
 		      [ 'dest', $azure_backup_prefix ] ],
 	},
 
-	# Restore from Dropbox, all domains
+	# Restore from Azure, all domains
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'all-domains' ],
 		      [ 'all-features' ],
 		      [ 'source', $azure_backup_prefix ] ],
 	},
 
-	# Backup to Dropbox subdirectory in home format
+	# Backup to Azure subdirectory in home format
 	{ 'command' => 'backup-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4183,7 +4183,7 @@ $azurebackup_tests = [
 		      [ 'dest', $azure_backup_prefix."/subdir" ] ],
 	},
 
-	# Restore from Dropbox subdirectory in home format
+	# Restore from Azure subdirectory in home format
 	{ 'command' => 'restore-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ],
 		      [ 'domain', $test_subdomain ],
@@ -4199,6 +4199,120 @@ $azurebackup_tests = [
 	];
 
 $enc_azurebackup_tests = &convert_to_encrypted($azurebackup_tests);
+
+$drive_backup_prefix = "drive://virtualmin-test-backup-folder";
+$drivebackup_tests = [
+	# Create a simple domain to be backed up
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ 'dns' ], [ $web ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      [ 'content' => 'Test home page' ],
+		      @create_args, ],
+        },
+
+	# Create a sub-server
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'parent', $test_domain ],
+		      [ 'prefix', 'example2' ],
+		      [ 'desc', 'Test sub-domain' ],
+		      [ 'dir' ], [ $web ], [ 'dns' ], [ 'mail' ],
+		      [ 'logrotate' ],
+		      @create_args, ],
+	},
+
+	# Backup to Google Drive
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$drive_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$drive_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Google Drive again, to test that over-writing works
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$drive_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'dest', "$drive_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Restore from Google Drive
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'all-features' ],
+		      [ 'source', "$drive_backup_prefix/$test_domain.tar.gz" ] ],
+	},
+
+	# Restore sub-domain from Google Drive
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', "$drive_backup_prefix/$test_subdomain.tar.gz" ] ],
+	},
+
+	# Backup to Google Drive in home format
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $drive_backup_prefix ] ],
+	},
+
+	# Backup to Google Drive in home format again, to test overwriting
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'newformat' ],
+		      [ 'dest', $drive_backup_prefix ] ],
+	},
+
+	# Restore from Google Drive in home format
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'source', $drive_backup_prefix ] ],
+	},
+
+	# Backup from Google Drive one-by-one
+	{ 'command' => 'backup-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'domain', $test_subdomain ],
+		      [ 'all-features' ],
+		      [ 'onebyone' ],
+		      [ 'newformat' ],
+		      [ 'dest', $drive_backup_prefix ] ],
+	},
+
+	# Restore from Google Drive, all domains
+	{ 'command' => 'restore-domain.pl',
+	  'args' => [ [ 'all-domains' ],
+		      [ 'all-features' ],
+		      [ 'source', $drive_backup_prefix ] ],
+	},
+
+	# Cleanup the backup domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1,
+	},
+	];
+
+$enc_drivebackup_tests = &convert_to_encrypted($drivebackup_tests);
 
 $bb_backup_prefix = "bb://virtualmin-test-backup-bucket";
 $bbbackup_tests = [
@@ -10962,6 +11076,8 @@ $alltests = { '_config' => $_config_tests,
 	      'enc_dropboxbackup' => $enc_dropboxbackup_tests,
 	      'azurebackup' => $azurebackup_tests,
 	      'enc_azurebackup' => $enc_azurebackup_tests,
+	      'drivebackup' => $drivebackup_tests,
+	      'enc_drivebackup' => $enc_drivebackup_tests,
 	      'bbbackup' => $bbbackup_tests,
 	      'enc_bbbackup' => $enc_bbbackup_tests,
 	      'rsbackup' => $rsbackup_tests,
