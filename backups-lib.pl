@@ -5978,7 +5978,6 @@ elsif ($mode == 12 && $path =~ /\%/) {
 		return 0;
 		}
 	foreach my $st (@$files) {
-		# XXX purge time is off?
 		my $f = $st->{'name'};
 		my $info;
 		if ($detail) {
