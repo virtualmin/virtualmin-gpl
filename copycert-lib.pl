@@ -830,12 +830,34 @@ foreach my $f (@cfiles) {
 	&flush_file_lines($f, undef, 1);
 	&unlock_file($f);
 	}
+
+# Apply the change
 if (&mysql::is_mysql_running() > 0) {
-	&mysql::stop_mysql();
-	my $err = &mysql::start_mysql();
-	if ($err) {
-		&$second_print(&text('copycert_emysqlstart', $err));
-		return;
+	# First try to apply the live config
+	my @cmds = ( "set global ssl_key = '$key'",
+		     "set global ssl_cert = '$cert'",
+		     "set global ssl_ca = '$ca'",
+		     "alter instance reload tls" );
+	my $failed = 0;
+	foreach my $c (@cmds) {
+		eval {
+			local $main::error_must_die = 1;
+			&mysql::execute_sql_logged($mysql::master_db, $c);
+			};
+		if ($@) {
+			$failed = 1;
+			last;
+			}
+		}
+
+	# Fall back to restarting MySQL
+	if (!$failed) {
+		&mysql::stop_mysql();
+		my $err = &mysql::start_mysql();
+		if ($err) {
+			&$second_print(&text('copycert_emysqlstart', $err));
+			return;
+			}
 		}
 	}
 &$second_print($text{'setup_done'});
