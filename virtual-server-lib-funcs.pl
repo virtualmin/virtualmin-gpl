@@ -5942,6 +5942,28 @@ if ($unlimited) {
 return $rv;
 }
 
+# quota_field(name, value, used, files-used, filesystem, &user)
+sub quota_field
+{
+my ($name, $value, $used, $fused, $fs, $u) = @_;
+my $rv;
+my $color = $u->{'over_quota'} ? "#ff0000" :
+	    $u->{'warn_quota'} ? "#ff8800" :
+	    $u->{'spam_quota'} ? "#aaaaaa" : undef;
+if (&can_mailbox_quota()) {
+	# Show inputs for editing quotas
+	local $quota = $_[1];
+	$quota = undef if ($quota eq "none");
+	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
+	$rv .= "\n";
+	}
+else {
+	# Just show current settings, or default
+	$rv .= ($defmquota[0] ? &quota_show($defmquota[0], $_[3]) : $text{'form_unlimit'})."\n";
+	}
+return $rv;
+}
+
 # backup_virtualmin(&domain, file)
 # Adds a domain's configuration file to the backup
 sub backup_virtualmin

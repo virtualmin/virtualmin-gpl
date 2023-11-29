@@ -538,36 +538,3 @@ else {
 	&ui_print_footer("", $text{'index_return'});
 	}
 
-# quota_field(name, value, used, files-used, filesystem, &user)
-sub quota_field
-{
-my ($name, $value, $used, $fused, $fs, $u) = @_;
-my $rv;
-my $color = $u->{'over_quota'} ? "#ff0000" :
-	    $u->{'warn_quota'} ? "#ff8800" :
-	    $u->{'spam_quota'} ? "#aaaaaa" : undef;
-if (&can_mailbox_quota()) {
-	# Show inputs for editing quotas
-	local $quota = $_[1];
-	$quota = undef if ($quota eq "none");
-	$rv .= &opt_quota_input($_[0], $quota, $_[3]);
-	$rv .= "\n";
-	}
-else {
-	# Just show current settings, or default
-	local $q = $in{'new'} ? $defmquota[0] : $_[1];
-	$rv .= ($q ? &quota_show($q, $_[3]) : $text{'form_unlimit'})."\n";
-	}
-if (!$in{'new'}) {
-	my $umsg = $used && $fused ? &text('user_used2',
-					&quota_show($used, $fs), $fused) :
-		   $used ? &text('user_used', &quota_show($used, $fs))
-		         : &text('user_noneused');
-	if ($color) {
-		$umsg = "<font color=$color>$umsg</font>";
-		}
-	$rv .= $umsg."\n";
-	}
-return $rv;
-}
-
