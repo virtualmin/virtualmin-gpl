@@ -5624,6 +5624,7 @@ local $u;
 local $did = $d ? $d->{'id'} : 0;
 local @table;
 local $userdesc;
+my @domsdbs = &domain_databases($d);
 foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		   $a->{'user'} cmp $b->{'user'} } @$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
@@ -5724,9 +5725,11 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 
 	# Show number of DBs
 	if ($d->{'mysql'} || $d->{'postgres'}) {
+		my $userdbscnt = scalar(@{$u->{'dbs'}});
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
-					   @{$u->{'dbs'}} ? $text{'yes'}
-					   		  : $text{'no'});
+			    $userdbscnt ? scalar(@domsdbs) == $userdbscnt
+					? $text{'users_all'} : $userdbscnt
+					: $text{'no'});
 		}
 
 	# Show columns from plugins
