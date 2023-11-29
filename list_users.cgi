@@ -26,18 +26,25 @@ else {
 		     "<tt>".&show_domain_name($d)."</tt>");
 	}
 &ui_print_header($msg, $text{'edit_users4'}, "");
-$webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
 if ($mleft != 0) {
+	my @ssh_shells =
+		grep { $_->{'id'} eq 'ssh' && $_->{'avail'} }
+			&list_available_shells($d);
+	if (@ssh_shells) {
+		push(@links, [ "edit_user_ssh.cgi?new=1&dom=$in{'dom'}",
+					$text{'users_add_ssh'} ]);
+		}
+	my $webinit = &create_initial_user($d, undef, 1);
+	if ($webinit->{'webowner'}) {
+		push(@links, [ "edit_user_ftp.cgi?new=1&dom=$in{'dom'}",
+				$text{'users_add_ftp'} ]);
+		}
 	if ($d->{'mail'}) {
 		push(@links, [ "edit_user_mail.cgi?new=1&dom=$in{'dom'}",
 			$text{'users_add_mail'} ]);
-		}
-	if ($webinit->{'webowner'}) {
-		push(@links, [ "edit_user_ftp.cgi?new=1&web=1&dom=$in{'dom'}",
-			       $text{'users_add_ftp'} ]);
 		}
 	if ($d->{'mysql'} || $d->{'postgres'}) {
 		push(@links, [ "edit_user_db.cgi?new=1&dom=$in{'dom'}",
