@@ -68,19 +68,17 @@ elsif ($mleft == 0) {
 print &ui_hr();
 print &ui_buttons_start();
 
-if ($d->{'mail'}) {
-	# Button to email all users
-	print &ui_buttons_row("edit_mailusers.cgi",
-	      $text{'users_mail'}, $text{'users_maildesc'},
-	      &ui_hidden("dom", $in{'dom'}));
-	}
-
 # Button to set user defaults
 print &ui_buttons_row("edit_defaults.cgi",
       $text{'users_defaults'}, $text{'users_defaultsdesc'},
       &ui_hidden("dom", $in{'dom'}));
 
 if ($d->{'mail'}) {
+	# Button to email all users
+	print &ui_buttons_row("edit_mailusers.cgi",
+	      $text{'users_mail'}, $text{'users_maildesc'},
+	      &ui_hidden("dom", $in{'dom'}));
+
 	# Button to show mail client settings
 	print &ui_buttons_row("mailclient.cgi",
 	      $text{'users_mailclient'}, $text{'users_mailclientdesc'},
