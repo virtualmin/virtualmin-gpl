@@ -25,8 +25,7 @@ else {
 	$msg = &text('users_indom', scalar(@users),
 		     "<tt>".&show_domain_name($d)."</tt>");
 	}
-&ui_print_header($msg, $d->{'mail'} ? $text{'users_title'}
-				    : $text{'users_title2'}, "");
+&ui_print_header($msg, $text{'edit_users4'}, "");
 $webinit = &create_initial_user($d, undef, 1);
 
 # Create select / add links
