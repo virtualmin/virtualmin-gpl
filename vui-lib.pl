@@ -302,4 +302,15 @@ return "<span class='vui_inline_label' style='$styles_cnt'>".
        "<span data-$textid style='$styles'>$text</span></span>";
 }
 
+=head2 vui_hidden()
+
+Given content returns it as a hidden container
+
+=cut
+sub vui_hidden
+{
+my ($content) = @_;
+return "<div class='vui_hidden' style='display: none'>$content</div>";
+}
+
 1;
