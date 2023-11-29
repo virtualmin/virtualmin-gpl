@@ -851,7 +851,7 @@ if (&mysql::is_mysql_running() > 0) {
 		}
 
 	# Fall back to restarting MySQL
-	if (!$failed) {
+	if ($failed) {
 		&mysql::stop_mysql();
 		my $err = &mysql::start_mysql();
 		if ($err) {
