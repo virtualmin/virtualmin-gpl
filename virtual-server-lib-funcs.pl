@@ -5623,6 +5623,7 @@ foreach $f (&list_mail_plugins()) {
 local $u;
 local $did = $d ? $d->{'id'} : 0;
 local @table;
+local $userdesc;
 foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		   $a->{'user'} cmp $b->{'user'} } @$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
@@ -5637,6 +5638,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
 	push(@cols, &html_escape($u->{'user'}));
 	push(@cols, &html_escape($u->{'real'}));
+	$userdesc++ if ($u->{'real'});
 
 	# Add columns for quotas
 	local $quota;
@@ -5740,6 +5742,13 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 				 'disabled' => $u->{'domainowner'} });
 		}
 	push(@table, \@cols);
+	}
+
+# Drop "Real name" column if no column has any data
+if (!$userdesc) {
+	my $colnum = $cgi ? 3 : 2;
+	map { splice(@$_, $colnum, 1) } @table;
+	splice(@headers, $colnum, 1);
 	}
 
 # Generate the table, perhaps with a form
