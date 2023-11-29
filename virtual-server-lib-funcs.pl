@@ -5592,8 +5592,8 @@ local @ashells = &list_available_shells($d);
 local @headers;
 push(@headers, "") if ($cgi);
 push(@headers, $text{'users_name'},
-	    $d->{'mail'} ? $text{'users_pop3'} : $text{'users_pop3f'},
-	    $text{'users_real'} );
+	       $text{'user_user2'},
+	       $text{'users_real'} );
 if ($can_quotas) {
 	push(@headers, $text{'users_quota'}, $text{'users_uquota'});
 	}
