@@ -31,11 +31,21 @@ $webinit = &create_initial_user($d, undef, 1);
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
 if ($mleft != 0) {
-	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
-		       $text{'users_add'} ]);
+	if ($d->{'mail'}) {
+		push(@links, [ "edit_user_mail.cgi?new=1&dom=$in{'dom'}",
+			$text{'users_add_mail'} ]);
+		}
 	if ($webinit->{'webowner'}) {
-		push(@links, [ "edit_user.cgi?new=1&web=1&dom=$in{'dom'}",
-			       $text{'users_addweb'} ]);
+		push(@links, [ "edit_user_ftp.cgi?new=1&web=1&dom=$in{'dom'}",
+			       $text{'users_add_ftp'} ]);
+		}
+	if ($d->{'mysql'} || $d->{'postgres'}) {
+		push(@links, [ "edit_user_db.cgi?new=1&dom=$in{'dom'}",
+			$text{'users_add_db'} ]);
+		}
+	if ($d->{'web'}) {
+		push(@links, [ "edit_user_web.cgi?new=1&dom=$in{'dom'}",
+			$text{'users_add_web'} ]);
 		}
 	}
 push(@links, [ "mass_ucreate_form.cgi?dom=$in{'dom'}",
