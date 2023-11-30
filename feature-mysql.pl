@@ -219,11 +219,11 @@ if ($tmpl->{'mysql_nopass'}) {
 return $ok;
 }
 
-# add_db_table(&domain, host, db, user, preserve)
+# add_db_table(&domain, host, db, user, [enable-access-to-all-domain-dbs])
 # Adds an entry to the db table, with all permission columns set to Y
 sub add_db_table
 {
-local ($d, $host, $db, $user, $preserve) = @_;
+local ($d, $host, $db, $user, $dbs_enall) = @_;
 local $mod = &require_dom_mysql($d);
 local @str = &foreign_call($mod, "table_structure", $mysql::master_db, 'db');
 local ($s, @fields, @yeses);
@@ -240,7 +240,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	# Use the grant command
 
 	# Preserve all other domain's database permissions (useful on restore)
-	if ($preserve) {
+	if ($dbs_enall) {
 		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
 			my $qddb = &quote_mysql_database($ddb->{'name'});
 			if ($qddb ne $qdb) {
@@ -1869,11 +1869,11 @@ else {
 	}
 }
 
-# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass])
+# create_mysql_database_user(&domain, &dbs, username, plain-pass, [enc-pass], [enable-access-to-all-domain-dbs])
 # Adds one mysql user, who can access multiple databases
 sub create_mysql_database_user
 {
-local ($d, $dbs, $user, $pass, $encpass, $restored) = @_;
+local ($d, $dbs, $user, $pass, $encpass, $dbs_enall) = @_;
 &require_mysql();
 &obtain_lock_mysql($d);
 if ($d->{'provision_mysql'}) {
@@ -1909,7 +1909,7 @@ else {
 			      $pass);
 			local $db;
 			foreach $db (@$dbs) {
-				&add_db_table($d, $h, $db, $myuser, $restored);
+				&add_db_table($d, $h, $db, $myuser, $dbs_enall);
 				}
 			&set_mysql_user_connections($d, $h, $myuser, 1);
 			}
