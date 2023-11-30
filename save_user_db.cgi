@@ -38,7 +38,7 @@ else {
                              'name' => $name });
                 }
         $user->{'dbs'} = \@dbs;
-        $user->{'user'} = $in{'dbuser'};
+        $user->{'user'} = "$in{'dbuser'}"."@".$d->{'dom'};
 
         #
 	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
