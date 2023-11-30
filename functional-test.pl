@@ -1847,6 +1847,26 @@ $database_tests = [
 	  'grep' => 'Allowed mysql hosts:.*1\\.2\\.3\\.4',
 	},
 
+	# Create a mailbox user with access to the DBs
+	{ 'command' => 'create-user.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'user', $test_user ],
+		      [ 'pass', 'smeg' ],
+		      [ 'desc', 'Test user' ],
+		      [ 'quota', 100*1024 ],
+		      [ 'mysql', $test_domain_db ],
+		      [ 'mail-quota', 100*1024 ] ],
+	},
+
+	# Verify that mailbox user exists and has DB access
+	{ 'command' => 'list-users.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'user' => $test_user ],
+		      [ 'multiline' ] ],
+	  'grep' => [ 'Databases: '.$test_domain_db.' \(mysql\)' ],
+	  'antigrep' => [ $test_domain_db.'_extra \(mysql\)' ],
+	},
+
 	# Drop the extra MySQL database
 	{ 'command' => 'delete-database.pl',
 	  'args' => [ [ 'domain', $test_domain ],
