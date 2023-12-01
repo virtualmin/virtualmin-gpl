@@ -2587,9 +2587,9 @@ if ($ok) {
 				}
 
 			# Build maps of used UIDs and GIDs
-			local (%gtaken, %taken);
-			&build_group_taken(\%gtaken);
-			&build_taken(\%taken);
+			local (%gtaken, %taken, %usertaken, %grouptaken);
+			&build_group_taken(\%gtaken, \%grouptaken);
+			&build_taken(\%taken, \%usertaken);
 
 			if ($parentdom) {
 				# UID and GID always come from parent
@@ -2636,12 +2636,34 @@ if ($ok) {
 					}
 				}
 
+			my $changeduser = 0;
+			if (!$parentdom && $opts->{'reuser'} &&
+			    $usertaken{$d->{'user'}}) {
+				# Re-allocated user name if there is a clash
+				my ($newuser) = &unixuser_name($d->{'dom'});
+				if ($newuser) {
+					$d->{'user'} = $newuser;
+					$changeduser = 1;
+					}
+				}
+			if (!$parentdom && $opts->{'reuser'} &&
+			    $grouptaken{$d->{'group'}}) {
+				# Re-allocated group name if there is a clash
+				my ($newgroup) = &unixgroup_name($d->{'dom'});
+				if ($newgroup) {
+					$d->{'group'} = $newgroup;
+					$d->{'ugroup'} = $newgroup;
+					$changeduser = 1;
+					}
+				}
+
 			# Set the home directory to match this system's base, 
-			# but only if it's not compatible with this system
+			# but only if the old one is not compatible with this
+			# system, or the username changed
 			&require_useradmin();
 			local $newhome = &server_home_directory($d, $parentdom);
 			local $oldhome = $d->{'home'};
-			if ($oldhome !~ /^\Q$home_base\E\//) {
+			if ($oldhome !~ /^\Q$home_base\E\// || $changeduser) {
 				# Totally different base
 				$d->{'home'} = $newhome;
 				}

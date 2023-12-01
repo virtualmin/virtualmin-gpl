@@ -7,10 +7,13 @@ Restore one or more virtual servers
 To restore a Virtualmin backup from the command line, you will need to use
 this program. It takes very similar parameters to C<backup-domain>, with the
 exceptions that C<--dest> is replace with C<--source>, and the C<--separate> and
-C<--ignore-errors> options are not used. The extra option C<--no-reuid> can be
-specified prevent the re-allocation of Unix UIDs and GIDs for virtual servers
-that are created by the restore process, so that UIDs the original system
-are preserved.
+C<--ignore-errors> options are not used.
+
+The extra option C<--no-reuid> can be specified prevent the re-allocation of
+Unix UIDs and GIDs for virtual servers that are created by the restore
+process, so that UIDs the original system are preserved. Conversely, the flag
+C<--reuser> will force re-allocation of Unix user and group names if necessary
+for the new system.
 
 Specific features to restore can be selected with the C<--feature> flag,
 followed by a feature name like C<dns> to just restore a domain's DNS records.
@@ -119,6 +122,7 @@ $outdent_print = \&outdent_text_print;
 # Parse command-line args
 $asowner = 0;
 $reuid = 1;
+$reuser = 0;
 $ipinfo = { };
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
@@ -158,6 +162,12 @@ while(@ARGV > 0) {
 		}
 	elsif ($a eq "--no-reuid") {
 		$reuid = 0;
+		}
+	elsif ($a eq "--reuser") {
+		$reuser = 1;
+		}
+	elsif ($a eq "--no-reuser") {
+		$reuser = 0;
 		}
 	elsif ($a eq "--fix") {
 		$fix = 1;
@@ -447,6 +457,7 @@ if ($test) {
 
 # Do it!
 $opts{'reuid'} = $reuid;
+$opts{'reuser'} = $reuser;
 $opts{'fix'} = $fix;
 $opts{'repl'} = $replication;
 &$first_print("Starting restore..");
@@ -475,6 +486,7 @@ print "                         [--domain name] | [--all-domains]\n";
 print "                         [--feature name] | [--all-features]\n";
 print "                         [--except-feature name]\n";
 print "                         [--reuid | --no-reuid]\n";
+print "                         [--reuser | --no-reuser]\n";
 print "                         [--fix]\n";
 print "                         [--option \"feature name value\"]\n";
 print "                         [--all-virtualmin] | [--virtualmin config]\n";
