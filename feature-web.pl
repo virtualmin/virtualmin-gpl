@@ -1862,6 +1862,7 @@ if ($virt) {
 		my @fixes = (
 		  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
+		  [ "error_log", $oldd->{'home'}, $d->{'home'}, 1 ],
 		  );
 		if ($sock ne 'none') {
 			push(@fixes, [ "mysql.default_socket", undef, $sock ]);
