@@ -599,6 +599,18 @@ if ($mchanged) {
 return 1;
 }
 
+# update_domain(&domain)
+# Update domain given key value in JSON format
+sub update_domain
+{
+my ($d, $key, $name, $value) = @_;
+my $dom_key_json = $d->{$key} || '{}';
+my $dom_key_hash = &convert_from_json($dom_key_json);
+$dom_key_hash->{$name} = $value if (defined($value));
+delete($dom_key_hash->{$name}) if (!defined($value));
+$d->{$key} = &convert_to_json($dom_key_hash);
+}
+
 # delete_domain(&domain)
 # Delete all of Virtualmin's internal information about a domain
 sub delete_domain
@@ -1063,6 +1075,10 @@ if (!$novirts) {
 	}
 
 if (!$_[4] && $d) {
+	# Collect domain extra database users
+	my $db_extra_users = &list_domain_extra_database_users($d);
+	push(@users, @$db_extra_users) if ($db_extra_users);
+
 	# Add accessible databases
 	local @dbs = &domain_databases($d);
 	local $db;
@@ -1150,8 +1166,96 @@ if ($d) {
 			}
 		}
 	}
-
+# Return users list
 return @users;
+}
+
+# list_domain_extra_database_users(&domain, &database)
+# Returns a list of associated extra database users
+sub list_domain_extra_database_users
+{
+my ($d) = @_;
+my @rv;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	my $dt_users_extra = $dt."_users";
+	my $dt_users_extra_json = $d->{"$dt_users_extra"} || '{}';
+	my $dt_users_extra_hash = &convert_from_json($dt_users_extra_json);
+	# Itterate each dt_users_extra_json
+	foreach my $user (keys %$dt_users_extra_hash) {
+		my $pass = $dt_users_extra_hash->{$user};
+		push(@rv, { 'user' => $user,
+		            'pass' => $pass,
+			    'type' => $dt,
+			    'filetype' => '_db',
+			    'userextra' => 'database' });
+		}
+	}
+return \@rv;
+}
+
+# create_databases_user(&domain, &user)
+# Create a database user for some domain
+# Returns an error message on failure, or undef on success
+sub create_databases_user
+{
+my ($d, $user) = @_;
+my @dts;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	push(@dts, $dt);
+	eval {
+		local $main::error_must_die = 1;
+		my @dbs = map { $_->{'name'} }
+					grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
+		if (&indexof($dt, &list_database_plugins()) < 0) {
+			# Create in core database
+			my $crfunc = "create_${dt}_database_user";
+			&$crfunc($d, \@dbs, $user->{'user'}, $user->{'pass'});
+			}
+		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
+			# Create in plugin database
+			&plugin_call($dt, "database_create_user",
+					$d, \@dbs, $user->{'user'},
+					$user->{'pass'});
+			}
+		};
+	# Show error
+	if ($@) {
+		my $err = &text('user_eadddbuser', "$user->{'user'} : $@");
+		return wantarray ? ($err) : $err;
+		}
+	}
+return wantarray ? (0, \@dts) : undef;
+}
+
+# delete_databases_user(&domain, &user)
+# Delete a database user from a domain
+# Returns an error message on failure, or undef on success
+sub delete_databases_user
+{
+my ($d, $user) = @_;
+my @dts;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	push(@dts, $dt);
+	eval {
+		local $main::error_must_die = 1;
+		if (&indexof($dt, &list_database_plugins()) < 0) {
+			# Delete from core database
+			local $dlfunc = "delete_${dt}_database_user";
+			&$dlfunc($d, $user);
+			}
+		elsif (&indexof($dt, &list_database_plugins()) >= 0) {
+			# Delete from plugin database
+			&plugin_call($dt, "delete_database_user",
+				$d, $user);
+			}
+		};
+	# Show error
+	if ($@) {
+		my $err = &text('user_edeletedbuser', "$user : $@");
+		return wantarray ? ($err) : $err;
+		}
+	}
+return wantarray ? (0, \@dts) : undef;
 }
 
 # safe_unix_crypt(pass, salt)
@@ -1515,7 +1619,7 @@ if ($_[1] && !$_[0]->{'domainowner'}) {
 				# Create in core database
 				local $crfunc = "create_${dt}_database_user";
 				&$crfunc($_[1], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'}, 1);
+					 $_[0]->{'plainpass'}, $_[0]->{$dt.'_pass'});
 				}
 			elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
 				# Create in plugin database
@@ -2072,6 +2176,24 @@ if ($_[2]) {
 # Delete a mailbox user and all associated virtusers and aliases
 sub delete_user
 {
+# For extra specific user associated
+# with domain delete it and return
+if ($_[0]->{'userextra'}) {
+	if ($_[0]->{'userextra'} eq 'database') {
+		# Delete database user
+		my ($err, $dts) = &delete_databases_user($_[1], $_[0]->{'user'});
+		&error($err) if ($err);
+		# Delete user from domain config
+		foreach my $dt (@$dts) {
+			&update_domain($_[1], "${dt}_users", $_[0]->{'user'});
+			&lock_domain($_[1]);
+			&save_domain($_[1]);
+			unlock_domain($_[1]);
+			}
+		}
+	return undef;
+	}
+
 # Zero out his quotas
 if ($_[0]->{'unix'} && !$_[0]->{'noquota'}) {
 	&set_user_quotas($_[0]->{'user'}, 0, 0, $_[1]);
@@ -5637,7 +5759,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	push(@cols, "<a href='edit_user.cgi?dom=$did&amp;".
+	push(@cols, "<a href='edit_user$u->{'filetype'}.cgi?dom=$did&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
 	       $u->{'webowner'} &&
@@ -5655,7 +5777,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
-	if ($u->{'webowner'} && defined($quota)) {
+	if (($u->{'webowner'} || $u->{'userextra'}) && defined($quota)) {
 		# Website owners have no real quota
 		push(@cols, $text{'users_same'}, "");
 		}
@@ -5724,7 +5846,8 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	push(@cols, !$u->{'shell'} ? $text{'users_qmail'} :
+	push(@cols, $u->{'userextra'} ? $text{"users_login_extra$u->{'type'}"} :
+		    !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
 			$text{'shells_mailboxftp2'} :

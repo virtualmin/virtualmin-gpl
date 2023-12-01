@@ -20,24 +20,37 @@ $user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );
 print &ui_form_start("save_user_db.cgi", "post");
-print &ui_hidden("new", 1);
+print &ui_hidden("new", $in{'new'});
+print &ui_hidden("olduser", $in{'user'});
 print &ui_hidden("dom", $in{'dom'});
 
-# my @users = &list_domain_users($d, 1, 1, 1, 0);
-# var_dump(\@users);
+my $dbuser = {};
+my $dbuser_name;
+if (!$in{'new'}) {
+        my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+        ($dbuser) = grep { $_->{'user'} eq $in{'user'} } @dbusers;
+        $dbuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
+        $dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};
+        }
 
 print &ui_table_start($d ? $text{'user_header_db'} : $text{'user_lheader'},
                       "width=100%", 2);
 
 # Edit db user
 print &ui_table_row(&hlink($text{'user_user2'}, "username"),
-	&ui_textbox("dbuser", undef, 13, 0, undef,
+	&ui_textbox("dbuser", $dbuser_name, 15, 0, undef,
 		&vui_ui_input_noauto_attrs()).
 	($d ? "\@".&show_domain_name($d) : ""),
 	2, \@tds);
 
 # Edit password
 my $pwfield = &new_password_input("dbpass");
+if (!$in{'new'}) {
+        # For existing user show password field
+        $pwfield = &ui_opt_textbox("dbpass", undef, 15,
+			$text{'user_passdef'},
+			$text{'user_passset'});
+        }
 print &ui_table_row(&hlink($text{'user_pass'}, "password"),
 			$pwfield,
 			2, \@tds);
@@ -50,9 +63,9 @@ my @dbs;
 if (@dbs) {
         my $hrr = "<hr data-row-separator>";
         print &ui_table_row(undef, $hrr, 2);
-	print &ui_table_row(undef, $hrr, 2) if (!$user->{'mysql_user'} && $shell_row);
+	print &ui_table_row(undef, $hrr, 2) if (!$dbuser->{'mysql_user'} && $shell_row);
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
-			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
+			   $_->{'name'}." ($_->{'desc'})" ] } @{$dbuser->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),

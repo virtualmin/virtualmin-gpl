@@ -6,7 +6,7 @@
 require './virtual-server-lib.pl';
 &ReadParse();
 &error_setup($text{'user_err'});
-my $d;
+my ($d, $user);
 if ($in{'dom'}) {
 	$d = &get_domain($in{'dom'});
 	&can_edit_domain($d) || &error($text{'users_ecannot'});
@@ -16,61 +16,83 @@ else {
 	}
 &can_edit_users() || &error($text{'users_ecannot'});
 
-# User to edit or create
-my $user;
-
+# User to edit or delete
 if (!$in{'new'}) {
-        # Edit user
-	$user || &error("User does not exist!");
-	}
-if ($in{'delete'}) {
-        # Delete user
-	}
+        my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+        my $olduser_name = $in{'olduser'};
+        ($user) = grep { $_->{'user'} eq $olduser_name } @dbusers;
+        $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
+        my %olduser = %{$user};
+
+        if ($in{'delete'}) {
+                # Delete database user
+                my ($err, $dts) = &delete_databases_user($d, $olduser_name);
+                &error($err) if ($err);
+                # Delete user from domain config
+                foreach my $dt (@$dts) {
+                        &update_domain($d, "${dt}_users", $olduser_name);
+                        }
+	        }
+        else {
+                # Update user
+                $user->{'user'} = lc("$in{'dbuser'}"."@".$d->{'dom'});
+                # Pass password
+                if (!$in{'dbpass_def'}) {
+                        $user->{'pass'} = $in{'dbpass'};
+                        $user->{'pass'} || &error($text{'user_epassdbnotset'});
+                        }
+                $user->{'plainpass'} = $user->{'pass'};
+                
+                # Submitted database list changed
+                my @dbs;
+                foreach my $db (split(/\r?\n/, $in{'dbs'})) {
+                        my ($type, $name) = split(/_/, $db, 2);
+                        push(@dbs, { 'type' => $type,
+                                'name' => $name });
+                }
+                $user->{'dbs'} = \@dbs;
+                &update_domain($d, "$olduser{'type'}_users", $olduser_name);
+                &update_domain($d, "$user->{'type'}_users", $user->{'user'}, $user->{'pass'});
+                &modify_database_user($user, \%olduser, $d);
+                }
+        }
 else {
-	# Create new user
+	# Create initial user
         $user = &create_initial_user($d);
+        $user->{'user'} = lc("$in{'dbuser'}"."@".$d->{'dom'});
+        my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+        my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
+        !$user_already || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
+        
+        # Set initial password
+        $user->{'pass'} = $in{'dbpass'};
+        $user->{'pass'} || &error($text{'user_epassdbnotset'});
 
         # Databases to allow
-        my ($db, @dbs);
-        foreach $db (split(/\r?\n/, $in{'dbs'})) {
+        my @dbs;
+        foreach my $db (split(/\r?\n/, $in{'dbs'})) {
                 my ($type, $name) = split(/_/, $db, 2);
                 push(@dbs, { 'type' => $type,
                              'name' => $name });
                 }
         $user->{'dbs'} = \@dbs;
-        $user->{'user'} = "$in{'dbuser'}"."@".$d->{'dom'};
 
-        #
-	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-			local $main::error_must_die = 1;
-			my @dbs = map { $_->{'name'} }
-					 grep { $_->{'type'} eq $dt } @{$user->{'dbs'}};
-			if (@dbs && &indexof($dt, &list_database_plugins()) < 0) {
-				# Create in core database
-				my $crfunc = "create_${dt}_database_user";
-				&$crfunc($d, \@dbs, $user->{'user'}, $in{'dbpass'});
-				}
-			elsif (@dbs && &indexof($dt, &list_database_plugins()) >= 0) {
-				# Create in plugin database
-				&plugin_call($dt, "database_create_user",
-					     $d, \@dbs, $user->{'user'},
-					     $in{'dbpass'});
-				}
-		if ($@) {
-			&error($text{'restore_eusersql'});
-			}
-		}
-
+        # Create database user
+        my ($err, $dts) = &create_databases_user($d, $user);
+        &error($err) if ($err);
+        # Add user to domain config
+        foreach my $dt (@$dts) {
+                &update_domain($d, "${dt}_users", $user->{'user'}, $user->{'pass'});
+                }
 	}
 
-# &set_all_null_print();
-# &run_post_actions();
-
-# Domain lock
+# Save domain
+&lock_domain($d);
+&save_domain($d);
+unlock_domain($d);
 
 # Log
 &webmin_log($in{'new'} ? "create" : "modify", "user",
                 &remove_userdom($user->{'user'}, $d), $user);
 # Redirect
 &redirect($d ? "list_users.cgi?dom=$in{'dom'}" : "index.cgi");
-
