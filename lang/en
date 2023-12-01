@@ -792,8 +792,7 @@ users_mailclient=Show Email Client Settings
 users_mailclientdesc=Display settings that should be used by users' email clients for this domain.
 users_all=All
 users_same=Owner shared
-users_login_extramysql=MySQL only
-users_login_extrapostgres=PostgreSQL only
+users_login_extradb=Database only
 
 user_create=Create User
 user_createssh=Create SSH User

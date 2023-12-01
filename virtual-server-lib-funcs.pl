@@ -5846,7 +5846,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	push(@cols, $u->{'userextra'} ? $text{"users_login_extra$u->{'type'}"} :
+	push(@cols, $u->{'userextra'} ? $text{"users_login_extradb"} :
 		    !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
