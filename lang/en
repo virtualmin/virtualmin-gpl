@@ -792,7 +792,13 @@ users_mailclient=Show Email Client Settings
 users_mailclientdesc=Display settings that should be used by users' email clients for this domain.
 users_all=All
 users_same=Owner shared
-users_login_extradb=Database only
+users_login_access_web=Web
+users_login_access_db=Database
+users_login_access_mail=Email
+users_login_access_ftp=FTP
+users_login_access_ssh=SSH
+users_login_access__and=and
+users_login_access__only=only
 
 user_create=Create User
 user_createssh=Create SSH User

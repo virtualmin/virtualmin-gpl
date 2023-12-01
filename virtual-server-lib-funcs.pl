@@ -5717,6 +5717,23 @@ local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
+# Given a list of services user-friendly
+# login access label
+my $login_access_label = sub {
+	my @s = @_;
+	my $n = scalar(@s);
+	if ($n == 0) {
+		return '';
+		}
+	elsif ($n == 1) {
+		return "$s[0] $text{'users_login_access__only'}";
+		}
+	else {
+		my $l = pop(@s);
+		return join(', ', @s) . " $text{'users_login_access__and'} $l";
+		}
+	};
+
 # Work out table header
 local @headers;
 push(@headers, "") if ($cgi);
@@ -5846,7 +5863,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	push(@cols, $u->{'userextra'} ? $text{"users_login_extradb"} :
+	push(@cols, $u->{'userextra'} ? &$login_access_label($text{"users_login_access_db"}) :
 		    !$u->{'shell'} ? $text{'users_qmail'} :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
