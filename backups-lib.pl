@@ -2665,19 +2665,9 @@ if ($ok) {
 			&require_useradmin();
 			local $newhome = &server_home_directory($d, $parentdom);
 			local $oldhome = $d->{'home'};
-			if ($oldhome !~ /^\Q$home_base\E\// || $changeduser) {
-				# Totally different base
-				$d->{'home'} = $newhome;
-				}
-			if ($d->{'home'} ne $oldhome) {
-				# Fix up setings that reference the home
-				# XXX common function for this?
-				$d->{'ssl_cert'} =~s/\Q$oldhome\E/$d->{'home'}/;
-				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
-				$d->{'ssl_chain'} =~ s/\Q$oldhome\E/$d->{'home'}/;
-				$d->{'ssl_everything'} =~ s/\Q$oldhome\E/$d->{'home'}/;
-				$d->{'ssl_combined'} =~ s/\Q$oldhome\E/$d->{'home'}/;
-				$d->{'php_error_log'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+			if (($oldhome !~ /^\Q$home_base\E\// || $changeduser) &&
+			    $newhome ne $oldhome) {
+				&change_home_directory($d, $newhome);
 				}
 
 			# Fix up the IPv4 address if needed
