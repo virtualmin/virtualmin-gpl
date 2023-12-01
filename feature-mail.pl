@@ -3322,7 +3322,8 @@ while(<UFILE>) {
 			}
 		}
 	local @to = split(/,/, $_);
-	if ($user[0] eq $d->{'user'}) {
+	if ($user[0] eq $d->{'user'} ||
+	    $d->{'restoreolduser'} && $user[0] eq $d->{'restoreolduser'}) {
 		# Domain owner, just update alias list
 		local ($uinfo) = grep { $_->{'user'} eq $d->{'user'} } @users;
 		if ($uinfo) {

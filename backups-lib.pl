@@ -2642,6 +2642,7 @@ if ($ok) {
 				# Re-allocated user name if there is a clash
 				my ($newuser) = &unixuser_name($d->{'dom'});
 				if ($newuser) {
+					$d->{'restoreolduser'} = $d->{'user'};
 					$d->{'user'} = $newuser;
 					$changeduser = 1;
 					}
@@ -2651,6 +2652,7 @@ if ($ok) {
 				# Re-allocated group name if there is a clash
 				my ($newgroup) = &unixgroup_name($d->{'dom'});
 				if ($newgroup) {
+					$d->{'restoreoldgroup'} = $d->{'group'};
 					$d->{'group'} = $newgroup;
 					$d->{'ugroup'} = $newgroup;
 					$changeduser = 1;
@@ -2669,11 +2671,13 @@ if ($ok) {
 				}
 			if ($d->{'home'} ne $oldhome) {
 				# Fix up setings that reference the home
+				# XXX common function for this?
 				$d->{'ssl_cert'} =~s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_key'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_chain'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_everything'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				$d->{'ssl_combined'} =~ s/\Q$oldhome\E/$d->{'home'}/;
+				$d->{'php_error_log'} =~ s/\Q$oldhome\E/$d->{'home'}/;
 				}
 
 			# Fix up the IPv4 address if needed
