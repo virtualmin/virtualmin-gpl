@@ -1950,66 +1950,7 @@ if (!$_[0]->{'domainowner'} && $_[2] && $_[2]->{'hashpass'}) {
 
 # Update his allowed databases (unless this is the domain owner), if any
 # have been added or removed.
-local $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
-				@{$_[0]->{'dbs'}});
-local $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
-				@{$_[1]->{'dbs'}});
-if ($_[2] && !$_[0]->{'domainowner'} &&
-    ($newdbstr ne $olddbstr ||
-     $_[0]->{'pass'} ne $_[1]->{'pass'} ||
-     $_[0]->{'user'} ne $_[1]->{'user'})) {
-	local $dt;
-	foreach $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
-		local @dbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
-		local @olddbs = map { $_->{'name'} }
-				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
-		local $plugin = &indexof($dt, &list_database_plugins()) >= 0;
-		if (@dbs && !@olddbs) {
-			# Need to add database user
-			if (!$plugin) {
-				local $crfunc = "create_${dt}_database_user";
-				&$crfunc($_[2], \@dbs, $_[0]->{'user'},
-					 $_[0]->{'plainpass'},
-					 $_[0]->{'pass_'.$dt});
-				}
-			else {
-				&plugin_call($dt, "database_create_user",
-					     $_[2], \@dbs, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},
-					     $_[0]->{'pass_'.$dt});
-				}
-			}
-		elsif (@dbs && @olddbs) {
-			# Need to update database user
-			if (!$plugin) {
-				local $mdfunc = "modify_${dt}_database_user";
-				&$mdfunc($_[2], \@olddbs, \@dbs,
-					 $_[1]->{'user'}, $_[0]->{'user'},
-					 $_[0]->{'plainpass'},
-					 $_[0]->{'pass_'.$dt});
-				}
-			else {
-				&plugin_call($dt, "database_modify_user",
-					     $_[2], \@olddbs, \@dbs,
-					     $_[1]->{'user'}, $_[0]->{'user'},
-					     $_[0]->{'plainpass'},
-					     $_[0]->{'pass_'.$dt});
-				}
-			}
-		elsif (!@dbs && @olddbs) {
-			# Need to delete database user
-			if (!$plugin) {
-				local $dlfunc = "delete_${dt}_database_user";
-				&$dlfunc($_[2], $_[1]->{'user'});
-				}
-			else {
-				&plugin_call($dt, "database_delete_user",
-					     $_[2], $_[1]->{'user'});
-				}
-			}
-		}
-	}
+&modify_database_user(@_);
 
 # Rename user in secondary groups, and update membership
 local @groups = &list_all_groups();
@@ -2320,6 +2261,72 @@ if ($_[1]) {
 # Sync up jail password file
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
+	}
+}
+
+# modify_databse_user(&user, &olduser, &domain)
+# Updates the database user, including database
+# permissions and password
+sub modify_database_user
+{
+my $newdbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[0]->{'dbs'}});
+my $olddbstr = join(" ", map { $_->{'type'}."_".$_->{'name'} }
+				@{$_[1]->{'dbs'}});
+if ($_[2] && !$_[0]->{'domainowner'} &&
+    ($newdbstr ne $olddbstr ||
+     $_[0]->{'pass'} ne $_[1]->{'pass'} ||
+     $_[0]->{'user'} ne $_[1]->{'user'})) {
+	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($_[2]))) {
+		my @dbs = map { $_->{'name'} }
+				 grep { $_->{'type'} eq $dt } @{$_[0]->{'dbs'}};
+		my @olddbs = map { $_->{'name'} }
+				 grep { $_->{'type'} eq $dt } @{$_[1]->{'dbs'}};
+		my $plugin = &indexof($dt, &list_database_plugins()) >= 0;
+		if (@dbs && !@olddbs) {
+			# Need to add database user
+			if (!$plugin) {
+				my $crfunc = "create_${dt}_database_user";
+				&$crfunc($_[2], \@dbs, $_[0]->{'user'},
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
+				}
+			else {
+				&plugin_call($dt, "database_create_user",
+					     $_[2], \@dbs, $_[0]->{'user'},
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
+				}
+			}
+		elsif (@dbs && @olddbs) {
+			# Need to update database user
+			if (!$plugin) {
+				my $mdfunc = "modify_${dt}_database_user";
+				&$mdfunc($_[2], \@olddbs, \@dbs,
+					 $_[1]->{'user'}, $_[0]->{'user'},
+					 $_[0]->{'plainpass'},
+					 $_[0]->{'pass_'.$dt});
+				}
+			else {
+				&plugin_call($dt, "database_modify_user",
+					     $_[2], \@olddbs, \@dbs,
+					     $_[1]->{'user'}, $_[0]->{'user'},
+					     $_[0]->{'plainpass'},
+					     $_[0]->{'pass_'.$dt});
+				}
+			}
+		elsif (!@dbs && @olddbs) {
+			# Need to delete database user
+			if (!$plugin) {
+				my $dlfunc = "delete_${dt}_database_user";
+				&$dlfunc($_[2], $_[1]->{'user'});
+				}
+			else {
+				&plugin_call($dt, "database_delete_user",
+					     $_[2], $_[1]->{'user'});
+				}
+			}
+		}
 	}
 }
 
