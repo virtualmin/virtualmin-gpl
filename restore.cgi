@@ -125,6 +125,7 @@ foreach $f (@do_features) {
 # Parse creation options
 if ($crmode == 1) {
 	$options{'reuid'} = $in{'reuid'};
+	$options{'reuser'} = $in{'reuser'};
 	$options{'fix'} = $in{'fix'};
 
 	# Parse IP inputs

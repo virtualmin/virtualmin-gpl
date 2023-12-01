@@ -167,6 +167,10 @@ if ($crmode == 1) {
 	print &ui_table_row(&hlink($text{'restore_reuid'}, "restore_reuid"),
 			    &ui_yesno_radio("reuid", 1));
 
+	# Re-allocate user and group
+	print &ui_table_row(&hlink($text{'restore_reuser'}, "restore_reuser"),
+			    &ui_yesno_radio("reuser", 0));
+
 	# Just re-import, to fix missing domains file
 	print &ui_table_row(&hlink($text{'restore_fix'}, "restore_fix"),
 			    &ui_yesno_radio("fix", 0));
