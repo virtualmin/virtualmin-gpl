@@ -7653,10 +7653,11 @@ elsif ($config_longname == 2) {
 # Use one based on actual domain name
 else {
 	$dname =~ s/^xn(-+)//;
+	$dname = &remove_numeric_prefix($dname);
 	$dname =~ /^([^\.]+)/;
 	($try1, $group) = ($1, $1);
 	if (defined(getgrnam($try1)) || $config{'longname'}) {
-		$group = $dname_;
+		$group = &remove_numeric_prefix($dname_);
 		$try2 = $group;
 		if (defined(getpwnam($try))) {
 			return (undef, $try1, $try2);
