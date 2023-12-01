@@ -277,13 +277,32 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
-	my $dbs = "*.*";
-	$dbs = "`$qdb`.*" if ($db);
-	foreach my $r (@{$rv->{'data'}}) {
+	
+	# Specific database that was passed
+	my @dbs = ("`$qdb`.*");
+
+	# All databases belonging to the given user because
+	# *.* simply won't work without deleting the user
+	if (!$db) {
+		my @user_db_names;
+		@dbs = ();
 		eval {
-			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
-			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+			my @user_dbs = &list_domain_users($d, 1, 1, 1, 0);
+			($dbuser) = grep { $_->{'user'} eq $user } @user_dbs;
+			@user_db_names = map { $_->{'name'} } grep { $_->{'type'} eq 'mysql' } @{$dbuser->{'dbs'}};
+			@user_db_names = map { "`$_`.*" } @user_db_names;
+			};
+		@dbs = @user_db_names if (!$@);
+		}
+	foreach my $dbs (@dbs) {
+		foreach my $r (@{$rv->{'data'}}) {
+			eval {
+				local $main::error_must_die = 1;
+				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, 'flush privileges');
+				};
 			}
 		}
 	}
