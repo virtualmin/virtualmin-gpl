@@ -5717,8 +5717,8 @@ local $can_quotas = &has_home_quotas() || &has_mail_quotas();
 local $can_qquotas = $config{'mail_system'} == 5;
 local @ashells = &list_available_shells($d);
 
-# Given a list of services user-friendly
-# login access label
+# Given a list of services return
+# user-friendly login access label
 my $login_access_label = sub {
 	my @s = @_;
 	my $n = scalar(@s);
