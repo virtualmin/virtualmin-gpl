@@ -1985,12 +1985,7 @@ else {
 	local $mfunc = sub {
 		if ($olduser ne $user) {
 			# Change the username
-			&execute_dom_sql($d, $mysql::master_db,
-				"update user set user = ? where user = ?",
-				$myuser, $myolduser);
-			&execute_dom_sql($d, $mysql::master_db,
-				"update db set user = ? where user = ?",
-				$myuser, $myolduser);
+			&execute_user_rename_sql($d, $myolduser, $myuser);
 			}
 		if (defined($pass)) {
 			# Change the password
