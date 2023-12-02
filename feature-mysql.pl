@@ -288,7 +288,7 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 		@dbs = ();
 		eval {
 			my @user_dbs = &list_domain_users($d, 1, 1, 1, 0);
-			($dbuser) = grep { $_->{'user'} eq $user } @user_dbs;
+			my ($dbuser) = grep { $_->{'user'} eq $user } @user_dbs;
 			@user_db_names = map { $_->{'name'} } grep { $_->{'type'} eq 'mysql' } @{$dbuser->{'dbs'}};
 			@user_db_names = map { "`$_`.*" } @user_db_names;
 			};
