@@ -5883,7 +5883,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	my $udbs = scalar(@{$u->{'dbs'}});
+	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
 	push(@cols, $u->{'userextra'} eq 'database' ? &$login_access_label('mail') :
 		    $u->{'userextra'} eq 'web' ? &$login_access_label('web') :
 		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
