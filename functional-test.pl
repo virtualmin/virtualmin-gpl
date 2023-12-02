@@ -92,7 +92,7 @@ $scriptdb = 'mysql';
 			'list_databases', 'list_scripts', 'rename_form',
 			'move_form', 'transfer_form', 'clone_form',
 			'newip_form', 'pro/edit_res', 'list_admins',
-			'pro/list_balancers', 'list_redirects',
+			'list_balancers', 'list_redirects',
 			'list_records', 'view_records', 'usage',
 			'reemail', 'pro/maillog', 'disable_domain',
 			'assoc_form', 'pro/edit_html' );
