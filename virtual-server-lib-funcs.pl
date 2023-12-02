@@ -5739,6 +5739,8 @@ local @ashells = &list_available_shells($d);
 # user-friendly login access label
 my $login_access_label = sub {
 	my @s = @_;
+	@s = map { $text{'users_login_access_'.$_} } @s;
+	@s = grep { $_ } @s;
 	my $n = scalar(@s);
 	if ($n == 0) {
 		return '';
@@ -5881,12 +5883,21 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		$u->{'shell'} = &get_domain_shell($d, $u);
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
-	push(@cols, $u->{'userextra'} ? &$login_access_label($text{"users_login_access_db"}) :
-		    !$u->{'shell'} ? $text{'users_qmail'} :
+	my $udbs = scalar(@{$u->{'dbs'}});
+	push(@cols, $u->{'userextra'} eq 'database' ? &$login_access_label('mail') :
+		    $u->{'userextra'} eq 'web' ? &$login_access_label('web') :
+		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
-			$text{'shells_mailboxftp2'} :
-		    	$shell->{'desc'});
+			&$login_access_label($udbs ? 'db' : undef, 'ftp') :
+		    	(&$login_access_label(
+				# Add db and web (later XXXX) first
+				$udbs ? 'db' : undef,
+				$shell->{'id'} eq 'nologin' ? 'mail' :
+				$shell->{'id'} eq 'ftp' ? ('mail', 'ftp') :
+				$shell->{'id'} eq 'scp' ? ('mail', 'scp') :
+				$shell->{'id'} eq 'ssh' ? ('mail', 'ftp', 'ssh') : undef
+			) || $shell->{'desc'}));
 
 	# Show number of DBs
 	if ($d->{'mysql'} || $d->{'postgres'}) {
