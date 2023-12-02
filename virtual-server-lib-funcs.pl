@@ -1076,8 +1076,20 @@ if (!$novirts) {
 
 if (!$_[4] && $d) {
 	# Collect domain extra database users
-	my $db_extra_users = &list_domain_extra_database_users($d);
-	push(@users, @$db_extra_users) if ($db_extra_users);
+	my @extra_database_users;
+	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+		my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
+		my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
+		foreach my $user (keys %$dt_users_extra_hash) {
+			my $pass = $dt_users_extra_hash->{$user};
+			push(@extra_database_users, { 'user' => $user, 'type' => $dt });
+			push(@users, { 'user' => $user,
+				'pass' => $pass,
+				'type' => $dt,
+				'filetype' => '_db',
+				'userextra' => 'database' });
+			}
+		}
 
 	# Add accessible databases
 	local @dbs = &domain_databases($d);
@@ -1128,6 +1140,35 @@ if (!$_[4] && $d) {
 			}
 		}
 
+	# If extra database users overlap with system users, which already
+	# handle databases, pop them off the list and update domain config
+	if (@extra_database_users) {
+		my @other_users_with_dbs = map { $_->{'user'} } grep { 
+			$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' && scalar @{$_->{'dbs'}} > 0 &&
+			$_->{'userextra'} ne 'database'
+		} @users;
+		# Clear main array of redundant extra database users
+		if (@other_users_with_dbs) {
+			@users = grep { 
+				$_->{'userextra'} ne 'database' ||
+				&indexof($_->{'user'}, @other_users_with_dbs) < 0
+			} @users;
+			# Now clear Virtualmin record of extra database users
+			# belonging to other user account
+			my $updated_domain;
+			foreach my $extra_database_user (@extra_database_users) {
+				if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
+					&lock_domain($d) if (!$updated_domain++);
+					&update_domain($d, "$extra_database_user->{'type'}_users", $extra_database_user->{'user'});
+					}
+				}
+			# Save only if we updated the domain
+			&save_domain($d),
+			unlock_domain($d)
+				if ($updated_domain);
+			}
+		}
+
 	# Add plugin databases
 	local @dbs = &domain_databases($d);
 	foreach $db (@dbs) {
@@ -1168,29 +1209,6 @@ if ($d) {
 	}
 # Return users list
 return @users;
-}
-
-# list_domain_extra_database_users(&domain, &database)
-# Returns a list of associated extra database users
-sub list_domain_extra_database_users
-{
-my ($d) = @_;
-my @rv;
-foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-	my $dt_users_extra = $dt."_users";
-	my $dt_users_extra_json = $d->{"$dt_users_extra"} || '{}';
-	my $dt_users_extra_hash = &convert_from_json($dt_users_extra_json);
-	# Itterate each dt_users_extra_json
-	foreach my $user (keys %$dt_users_extra_hash) {
-		my $pass = $dt_users_extra_hash->{$user};
-		push(@rv, { 'user' => $user,
-		            'pass' => $pass,
-			    'type' => $dt,
-			    'filetype' => '_db',
-			    'userextra' => 'database' });
-		}
-	}
-return \@rv;
 }
 
 # create_databases_user(&domain, &user)
