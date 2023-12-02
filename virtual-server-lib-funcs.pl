@@ -1144,7 +1144,7 @@ if (!$_[4] && $d) {
 	# handle databases, pop them off the list and update domain config
 	if (@extra_database_users) {
 		my @other_users_with_dbs = map { $_->{'user'} } grep { 
-			$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' && scalar @{$_->{'dbs'}} > 0 &&
+			$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
 			$_->{'userextra'} ne 'database'
 		} @users;
 		# Clear main array of redundant extra database users
