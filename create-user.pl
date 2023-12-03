@@ -18,7 +18,8 @@ specified username with the C<--noappend> flag.
 The C<--ftp> option can be used to give the new user an FTP login as well - by
 default, he will only be given an email account. The C<--noemail> option turns
 off the default email account, which is useful for creating FTP or
-database-only users.
+database-only users. The C<--db-only> flag is used to create a database-only
+user, with no email or FTP access.
 
 Extra email addresses for the new user can be specified with the C<--extra>
 option, followed by an email address within the virtual server. This option
@@ -133,6 +134,10 @@ while(@ARGV > 0) {
 	elsif ($a eq "--mysql") {
 		$db = shift(@ARGV);
 		push(@dbs, { 'type' => 'mysql', 'name' => $db });
+		}
+	elsif ($a eq "--db-only") {
+		$db_only++;
+		$noemail++
 		}
 	elsif ($a eq "--group") {
 		$group = shift(@ARGV);
@@ -361,8 +366,28 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 	&create_user_home($user, $d);
 	}
 
+# Create database user only
+if ($db_only) {
+	my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+        my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
+        !$user_already || &error(&text('user_ealreadyexist', $user->{'user'}));
+	$user->{'pass'} = $pass;
+	# Create database user
+        my ($err, $dts) = &create_databases_user($d, $user);
+        &error($err) if ($err);
+        # Add user to domain config
+        foreach my $dt (@$dts) {
+                &update_domain($d, "${dt}_users", $user->{'user'}, $user->{'pass'});
+                }
+	# Save domain
+	&lock_domain($d);
+	&save_domain($d);
+	unlock_domain($d);
+	}
 # Create the user and virtusers and alias
-&create_user($user, $d);
+else {
+	&create_user($user, $d);
+	}
 
 # Create an empty mail file, if needed
 if ($user->{'email'} && !$user->{'nomailfile'}) {

@@ -512,7 +512,14 @@ $err = &validate_user($d, $user, $olduser);
 &usage($err) if ($err);
 
 # Save the user
-&modify_user($user, $olduser, $d);
+if ($user->{'userextra'}) {
+	&update_domain($d, "$olduser->{'type'}_users", $olduser->{'user'});
+	&update_domain($d, "$user->{'type'}_users", $user->{'user'}, $user->{'pass'});
+	&modify_database_user($user, $olduser, $d);
+	}
+else {
+	&modify_user($user, $olduser, $d);
+	}
 
 if ($remail) {
 	# Email the user his new account details

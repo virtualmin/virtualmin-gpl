@@ -116,7 +116,7 @@ foreach $d (@doms) {
 			print "$u->{'user'}\n";
 			print "    User: " . &remove_userdom($u->{'user'}, $d),"\n";
 			print "    Domain: $d->{'dom'}\n";
-			print "    Unix username: ",$u->{'user'},"\n";
+			print "    Unix username: ",$u->{'user'},"\n" if (!$u->{'userextra'});
 			print "    Real name: ",$u->{'real'},"\n";
 			if (defined($u->{'plainpass'})) {
 				print "    Password: ",$u->{'plainpass'},"\n";
@@ -223,6 +223,9 @@ foreach $d (@doms) {
 			@dblist = ( );
 			foreach $db (@{$u->{'dbs'}}) {
 				push(@dblist, $db->{'name'}." ($db->{'type'})");
+				}
+			if ($u->{'userextra'} eq 'database') {
+				print "    Database username: ",$u->{'user'},"\n";
 				}
 			if (@dblist) {
 				print "    Databases: ",
