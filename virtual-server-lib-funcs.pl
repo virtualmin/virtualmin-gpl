@@ -5893,10 +5893,10 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		    	(&$login_access_label(
 				# Add db and web (later XXXX) first
 				$udbs ? 'db' : undef,
-				$shell->{'id'} eq 'nologin' ? 'mail' :
-				$shell->{'id'} eq 'ftp' ? ('mail', 'ftp') :
-				$shell->{'id'} eq 'scp' ? ('mail', 'scp') :
-				$shell->{'id'} eq 'ssh' ? ('mail', 'ftp', 'ssh') : undef
+				$shell->{'id'} eq 'nologin' ? ($u->{'email'} ? 'mail' : undef) :
+				$shell->{'id'} eq 'ftp' ? ($u->{'email'} ? 'mail' : undef, 'ftp') :
+				$shell->{'id'} eq 'scp' ? ($u->{'email'} ? 'mail' : undef, 'scp') :
+				$shell->{'id'} eq 'ssh' ? ($u->{'email'} ? 'mail' : undef, 'ftp', 'ssh') : undef
 			) || $shell->{'desc'}));
 
 	# Show number of DBs
