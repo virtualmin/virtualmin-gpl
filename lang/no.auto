@@ -447,6 +447,7 @@ backup_purgepat=.. samsvarer ikke med mønsteret $1
 backup_purgenew=.. ikke eldre enn $1
 backup_purgecan=.. samsvarer med mønsteret $1 og er $2 dager gammelt
 
+restore_reuser=Vil du tildele bruker- og gruppenavn på nytt?
 restore_contents=Kontrollerer innholdet i sikkerhetskopien ..
 restore_gotcontents2=.. fant $1 virtuelle servere og $2 globale virtualmin-innstillinger
 restore_gotcontents=.. fant $1 virtuelle servere
@@ -490,6 +491,10 @@ restore_mailuserssame=.. hopper over gjenoppretting til original LDAP-server $1 
 restore_logrotatecpshared=.. ikke nødvendig når det deles
 restore_okmode=.. modus $1 fungerer for dette systemet
 restore_vmailserver_missing=.. ikke konfigurert på dette systemet
+restore_reuiding=Re-allokering av bruker- og gruppe-ID-er ..
+restore_reuiddone=.. tildelt bruker-ID er <tt>$1</tt> og gruppe-ID er <tt>$2</tt>
+restore_reusering=Re-allokering av bruker- og gruppenavn ..
+restore_reusered=.. tildelt bruker er <tt>$1</tt> og gruppen er <tt>$2</tt>
 
 limits_header4=Miljøbegrensninger
 limits_migrate=Kan migrere sikkerhetskopier?
@@ -753,6 +758,7 @@ scripts_sitelink=Mer informasjon om bruk av dette skriptet finner du på <a href
 scripts_passmode4=Opprinnelig passord for skript
 scripts_epartialmanual=Installasjonen kan fortsettes manuelt kl
 scripts_idbneed_link=, som kan aktiveres på <a href='$1'>$2</a> siden.
+scripts_idbversion=MySQL-versjon $1 eller høyere er nødvendig, men dette systemet har bare versjon $2
 scripts_nodbavail=Ikke konfigurert $1 ennå
 scripts_iphpneed=PHP er deaktivert for denne virtuelle serveren
 scripts_iphpnover=Det ble ikke funnet noen PHP -versjon for denne virtuelle serveren

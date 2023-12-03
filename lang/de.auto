@@ -1036,6 +1036,7 @@ restore_key=Mit Schlüssel entschlüsseln
 restore_madeat=Backup gemacht bei
 restore_dirdelete=Löschen Sie Dateien, die sich nicht in der Sicherung befinden
 restore_mailuser=Nur Benutzer wiederherstellen:
+restore_reuser=Benutzer- und Gruppennamen neu zuweisen?
 restore_fix=Serverdetails einfach erneut importieren?
 restore_delete=Virtuelle Server löschen und neu erstellen?
 restore_dnswholefile=Stellen Sie alles in der DNS-Zonendatei wieder her
@@ -1138,6 +1139,10 @@ restore_vmailserver_grey=Wiederherstellen von Greylisting-Einstellungen.
 restore_vmailserver_missing=.. auf diesem System nicht konfiguriert
 restore_ereseller=Reseller $1 existiert nicht
 restore_eparent=Der ursprüngliche übergeordnete virtuelle Server $1 ist nicht vorhanden
+restore_reuiding=Benutzer- und Gruppen-IDs neu zuweisen ..
+restore_reuiddone=.. Die zugewiesene Benutzer-ID ist <tt>$1</tt> und die Gruppen-ID ist <tt>$2</tt>
+restore_reusering=Benutzer- und Gruppennamen neu zuweisen ..
+restore_reusered=.. Der zugewiesene Benutzer ist <tt>$1</tt> und die Gruppe ist <tt>$2</tt>
 
 limits_header2=Zulässige Funktionen und Merkmale
 limits_header4=Umgebungseinschränkungen
@@ -1687,6 +1692,7 @@ scripts_delproxy=Proxy für Pfad $1 entfernen ..
 scripts_proxyfailed=.. Proxy-Einrichtung fehlgeschlagen : $1
 scripts_epartialmanual=Die Installation kann unter manuell fortgesetzt werden
 scripts_idbneed_link=, die auf der Seite <a href='$1'>$2</a> aktiviert werden kann.
+scripts_idbversion=Es wird MySQL-Version $1 oder höher benötigt, aber dieses System verfügt nur über Version $2
 scripts_nodbavail=Noch nicht konfiguriert $1
 scripts_gemver=Aktualisieren von Ruby Gems auf die neueste Version von $1 ..
 scripts_gemverfailed=.. Edelstein-Update fehlgeschlagen : $1

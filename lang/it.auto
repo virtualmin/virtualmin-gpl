@@ -1978,6 +1978,7 @@ restore_dirdelete=Elimina i file che non sono presenti nel backup
 restore_mailuser=Ripristina solo l'utente:
 restore_dirchown=Ripristina le proprietà dei file
 restore_reuid=Ri-allocare UID e GID?
+restore_reuser=Riassegnare i nomi degli utenti e dei gruppi?
 restore_fix=Basta reimportare i dettagli del server?
 restore_delete=Eliminare e ricreare server virtuali?
 restore_virtualmin=Impostazioni di Virtualmin da ripristinare
@@ -2162,6 +2163,10 @@ restore_vmailserver_grey=Ripristino delle impostazioni greylisting ..
 restore_vmailserver_missing=.. non configurato su questo sistema
 restore_ereseller=Il rivenditore $1 non esiste
 restore_eparent=Il server virtuale padre originale $1 non esiste
+restore_reuiding=Riallocazione degli ID utente e gruppo ..
+restore_reuiddone=.. l'ID utente assegnato è <tt>$1</tt> e l'ID gruppo è <tt>$2</tt>
+restore_reusering=Riallocazione dei nomi di utenti e gruppi ..
+restore_reusered=.. l'utente assegnato è <tt>$1</tt> e il gruppo è <tt>$2</tt>
 
 limits_title=Limiti del proprietario del server
 limits_header=Limiti di Virtualmin per il proprietario del server
@@ -3368,6 +3373,7 @@ scripts_epartialmanual=L'installazione può essere proseguita manualmente su
 scripts_icommand=Comando mancante $1 
 scripts_idbneed=È necessario un database $1 
 scripts_idbneed_link=, che può essere abilitato nella pagina <a href='$1'>$2</a>.
+scripts_idbversion=È necessaria la versione MySQL $1 o successiva, ma questo sistema ha solo la versione $2
 scripts_idbneedor=$1 o $2 
 scripts_nodbavail=$1 non ancora configurato
 scripts_gemver=Aggiornamento di Ruby Gems all'ultima versione da $1 ..

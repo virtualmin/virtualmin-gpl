@@ -2784,6 +2784,7 @@ restore_dirdelete=Odstráňte súbory, ktoré nie sú v zálohe
 restore_mailuser=Obnoviť iba používateľa:
 restore_dirchown=Obnoviť vlastníctvo súborov
 restore_reuid=Znova prideliť UID a GID?
+restore_reuser=Znova prideliť mená používateľov a skupín?
 restore_fix=Stačí znova importovať podrobnosti o serveri?
 restore_delete=Odstrániť a znova vytvoriť virtuálne servery?
 restore_virtualmin=Nastavenia Virtualmin na obnovenie
@@ -2968,6 +2969,10 @@ restore_vmailserver_grey=Obnovujú sa nastavenia greylistingu ..
 restore_vmailserver_missing=.. v tomto systéme nie je nakonfigurované
 restore_ereseller=Predajca $1 neexistuje
 restore_eparent=Pôvodný nadradený virtuálny server $1 neexistuje
+restore_reuiding=Opätovné pridelenie ID používateľov a skupín ..
+restore_reuiddone=.. pridelené ID užívateľa je <tt>$1</tt> a ID skupiny je <tt>$2</tt>
+restore_reusering=Opätovné pridelenie názvov používateľov a skupín ..
+restore_reusered=.. pridelený používateľ je <tt>$1</tt> a skupina je <tt>$2</tt>
 
 limits_title=Obmedzenia vlastníka servera
 limits_header=Limity Virtualmin pre vlastníka servera
@@ -4367,6 +4372,7 @@ scripts_epartialmanual=Inštalácia môže pokračovať manuálne na
 scripts_icommand=Chýba príkaz $1
 scripts_idbneed=Je potrebná databáza $1
 scripts_idbneed_link=, ktorú možno povoliť na stránke <a href='$1'>$2</a>.
+scripts_idbversion=Je potrebná verzia MySQL $1 alebo vyššia, ale tento systém má iba verziu $2
 scripts_idbneedor=$1 alebo $2
 scripts_nodbavail=Zatiaľ nie je nakonfigurovaný $1
 scripts_gemver=Aktualizácia Ruby Gems na najnovšiu verziu z $1 ..

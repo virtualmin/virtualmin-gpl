@@ -1174,6 +1174,7 @@ restore_nokey=備份未加密
 restore_madeat=備份於
 restore_dirhomes=恢復<tt>homes</tt>目錄
 restore_dirdelete=刪除不在備份中的文件
+restore_reuser=重新分配使用者名稱和群組名稱？
 restore_delete=刪除並重新創建虛擬服務器？
 restore_newip=還原服務器的IPv4地址
 restore_newip6=還原服務器的IPv6地址
@@ -1283,6 +1284,10 @@ restore_vmailserver_grey=恢復灰名單設置 ..
 restore_vmailserver_missing=..未在此系統上配置
 restore_ereseller=轉銷商 $1不存在
 restore_eparent=原始父虛擬服務器 $1不存在
+restore_reuiding=重新分配使用者和群組 ID ..
+restore_reuiddone=..分配的使用者 ID 為<tt>$1</tt> ，群組 ID 為<tt>$2</tt>
+restore_reusering=重新分配使用者名稱和群組名稱 ..
+restore_reusered=..分配的使用者是<tt>$1</tt> ，群組是<tt>$2</tt>
 
 limits_header2=允許的功能和特性
 limits_header3=其他限制
@@ -1997,6 +2002,7 @@ scripts_epartialmanual=可以手動繼續安裝
 scripts_icommand=缺少命令 $1
 scripts_idbneed=需要一個 $1數據庫
 scripts_idbneed_link=，可以在 <a href='$1'>$2</a> 頁面上啟用.
+scripts_idbversion=需要 MySQL 版本 $1 或更高版本，但係統只有版本 $2
 scripts_idbneedor=$1或 $2
 scripts_nodbavail=尚未配置 $1
 scripts_gemver=從 $1..將Ruby Gems更新到最新版本。

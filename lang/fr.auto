@@ -1175,6 +1175,7 @@ backup_purgepat=.. ne correspond pas au modèle $1
 backup_purgenew=.. pas plus vieux que $1
 backup_purgecan=.. correspond au modèle $1 et date de $2 jours
 
+restore_reuser=Réattribuer les noms d'utilisateurs et de groupes ?
 restore_contents=Vérification du contenu de la sauvegarde.
 restore_gotcontents2=.. trouvé $1 serveurs virtuels et $2 paramètres globaux virtualmin
 restore_gotcontents=.. trouvé $1 serveurs virtuels
@@ -1217,6 +1218,10 @@ restore_mailuserssame=.. ignorer la restauration sur le serveur LDAP d'origine $
 restore_logrotatecpshared=.. pas nécessaire en cas de partage
 restore_okmode=.. le mode $1 fonctionne pour ce système
 restore_vmailserver_missing=.. non configuré sur ce système
+restore_reuiding=Réattribution des ID d'utilisateur et de groupe ..
+restore_reuiddone=.. l'ID utilisateur alloué est <tt>$1</tt> et l'ID de groupe est <tt>$2</tt>
+restore_reusering=Réattribution des noms d'utilisateurs et de groupes ..
+restore_reusered=.. l'utilisateur alloué est <tt>$1</tt> et le groupe est <tt>$2</tt>
 
 limits_header4=Limites de l'environnement
 limits_migrate=Peut migrer des sauvegardes?
@@ -2136,6 +2141,7 @@ scripts_sitelink=Plus d'informations sur l'utilisation de ce script sont disponi
 scripts_passmode4=Mot de passe initial pour le script
 scripts_epartialmanual=L'installation peut être poursuivie manuellement à
 scripts_idbneed_link=, qui peut être activé sur la page <a href='$1'>$2</a>.
+scripts_idbversion=La version MySQL $1 ou supérieure est nécessaire, mais ce système n'a que la version $2
 scripts_nodbavail=Pas encore configuré $1
 scripts_iphpneed=PHP est désactivé pour ce serveur virtuel
 scripts_iphpnover=Aucune version PHP n'a pu être trouvée pour ce serveur virtuel

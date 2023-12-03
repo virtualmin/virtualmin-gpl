@@ -571,6 +571,7 @@ restore_key=Ontsleutelen met sleutel
 restore_nokey=Back-up is niet versleuteld
 restore_dirhomes=Herstel de directory <tt>homes</tt>
 restore_dirdelete=Verwijder bestanden die niet in de back-up staan
+restore_reuser=Gebruikers- en groepsnamen opnieuw toewijzen?
 restore_delete=Virtuele servers verwijderen en opnieuw maken?
 restore_newip6=IPv6-adres voor herstelde servers
 restore_contents=Inhoud van de back-up controleren. ..
@@ -627,6 +628,10 @@ restore_vmailserver_ratelimit=Instellingen voor snelheidsbeperking herstellen. .
 restore_vmailserver_missing=.. niet geconfigureerd op dit systeem
 restore_ereseller=Reseller $1 bestaat niet
 restore_eparent=Originele virtuele bovenliggende server $1 bestaat niet
+restore_reuiding=Gebruikers- en groeps-ID's opnieuw toewijzen ..
+restore_reuiddone=.. toegewezen gebruikers-ID is <tt>$1</tt> en groeps-ID is <tt>$2</tt>
+restore_reusering=Gebruikers- en groepsnamen opnieuw toewijzen ..
+restore_reusered=.. toegewezen gebruiker is <tt>$1</tt> en groep is <tt>$2</tt>
 
 limits_header4=Beperkingen van de omgeving
 limits_migrate=Kunnen back-ups migreren?
@@ -976,6 +981,7 @@ scripts_sitelink=Meer informatie over het gebruik van dit script is te vinden op
 scripts_passmode4=Eerste wachtwoord voor script
 scripts_epartialmanual=De installatie kan handmatig worden voortgezet op
 scripts_idbneed_link=, die kan worden ingeschakeld op de pagina <a href='$1'>$2</a>.
+scripts_idbversion=MySQL-versie $1 of hoger is vereist, maar dit systeem heeft alleen versie $2
 scripts_nodbavail=Nog niet geconfigureerd $1
 scripts_iphpneed=PHP is uitgeschakeld voor deze virtuele server
 scripts_iphpnover=Er is geen PHP-versie gevonden voor deze virtuele server

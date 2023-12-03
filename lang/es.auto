@@ -774,6 +774,7 @@ restore_nokey=La copia de seguridad no está encriptada
 restore_madeat=Copia de seguridad realizada en
 restore_dirhomes=Restaurar directorio de <tt>homes</tt>
 restore_dirdelete=Eliminar archivos que no están en la copia de seguridad
+restore_reuser=¿Reasignar nombres de usuarios y grupos?
 restore_delete=¿Eliminar y volver a crear servidores virtuales?
 restore_newip6=Dirección IPv6 para servidores restaurados
 restore_contents=Comprobando el contenido de la copia de seguridad.
@@ -864,6 +865,10 @@ restore_vmailserver_grey=Restaurando la configuración de listas grises.
 restore_vmailserver_missing=.. no configurado en este sistema
 restore_ereseller=El distribuidor $1 no existe
 restore_eparent=El servidor virtual principal original $1 no existe
+restore_reuiding=Reasignación de ID de usuarios y grupos ..
+restore_reuiddone=.. el ID de usuario asignado es <tt>$1</tt> y el ID de grupo es <tt>$2</tt>
+restore_reusering=Reasignación de nombres de usuarios y grupos ..
+restore_reusered=.. el usuario asignado cuesta <tt>$1</tt> y el grupo cuesta <tt>$2</tt>
 
 limits_header4=Limitaciones del entorno
 limits_migrate=¿Se pueden migrar copias de seguridad?
@@ -1342,6 +1347,7 @@ scripts_sitelink=Puede encontrar más información sobre el uso de este script e
 scripts_passmode4=Contraseña inicial para script
 scripts_epartialmanual=La instalación se puede continuar manualmente en
 scripts_idbneed_link=, que se puede habilitar en la página <a href='$1'>$2</a>.
+scripts_idbversion=Se necesita la versión $1 o superior de MySQL, pero este sistema solo tiene la versión $2
 scripts_nodbavail=Aún no configurado $1
 scripts_gemver=Actualización de Ruby Gems a la última versión desde $1.
 scripts_gemverfailed=.. La actualización de gemas falló : $1

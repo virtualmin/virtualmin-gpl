@@ -2784,6 +2784,7 @@ restore_dirdelete=バックアップにないファイルを削除する
 restore_mailuser=ユーザーのみを復元：
 restore_dirchown=ファイルの所有権をリセットする
 restore_reuid=UIDとGIDを再割り当てしますか？
+restore_reuser=ユーザー名とグループ名を再割り当てしますか?
 restore_fix=サーバーの詳細を再インポートするだけですか？
 restore_delete=仮想サーバーを削除して再作成しますか？
 restore_virtualmin=復元するVirtualmin設定
@@ -2968,6 +2969,10 @@ restore_vmailserver_grey=グレイリスト設定の復元 ..
 restore_vmailserver_missing=..このシステムでは構成されていない
 restore_ereseller=リセラー $1は存在しません
 restore_eparent=元の親仮想サーバー $1は存在しません
+restore_reuiding=ユーザー ID とグループ ID を再割り当てしています。
+restore_reuiddone=.. 割り当てられたユーザー ID は<tt>$1</tt> 、グループ ID は<tt>$2</tt>
+restore_reusering=ユーザー名とグループ名を再割り当てしています。
+restore_reusered=.. 割り当てられたユーザーは<tt>$1</tt> 、グループは<tt>$2</tt>
 
 limits_title=サーバー所有者の制限
 limits_header=サーバー所有者のVirtualmin制限
@@ -4367,6 +4372,7 @@ scripts_epartialmanual=インストールは次の場所で手動で続行でき
 scripts_icommand=コマンド $1がありません
 scripts_idbneed=$1データベースが必要です
 scripts_idbneed_link=、<a href='$1'>$2</a>ページで有効にできます.
+scripts_idbversion=MySQL バージョン $1 以降が必要ですが、このシステムにはバージョン $2 しかありません
 scripts_idbneedor=$1または $2
 scripts_nodbavail=まだ構成されていません $1
 scripts_gemver=Ruby Gemsを $1から最新バージョンに更新しています ..

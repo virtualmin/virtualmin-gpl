@@ -2365,6 +2365,7 @@ restore_dirdelete=Usuń pliki, których nie ma w kopii zapasowej
 restore_mailuser=Przywróć tylko użytkownika:
 restore_dirchown=Zresetuj własność pliku
 restore_reuid=Ponownie przydzielić UID i GID?
+restore_reuser=Ponownie przydzielić nazwy użytkowników i grup?
 restore_fix=Chcesz ponownie zaimportować dane serwera?
 restore_delete=Usunąć i ponownie utworzyć serwery wirtualne?
 restore_virtualmin=Ustawienia Virtualmin do przywrócenia
@@ -2549,6 +2550,10 @@ restore_vmailserver_grey=Przywracanie ustawień greylistingu ..
 restore_vmailserver_missing=.. nie skonfigurowano w tym systemie
 restore_ereseller=Sprzedawca $1 nie istnieje
 restore_eparent=Oryginalny nadrzędny serwer wirtualny $1 nie istnieje
+restore_reuiding=Ponowne przydzielanie identyfikatorów użytkowników i grup ..
+restore_reuiddone=.. przydzielony identyfikator użytkownika to <tt>$1</tt>, a identyfikator grupy to <tt>$2</tt>
+restore_reusering=Ponowne przydzielanie nazw użytkowników i grup ..
+restore_reusered=.. przydzielony użytkownik to <tt>$1</tt>, a grupa to <tt>$2</tt>
 
 limits_header4=Ograniczenia środowiskowe
 limits_erealdomslimit=Brakująca lub nieprawidłowa maksymalna liczba serwerów nie-aliasowych
@@ -3716,6 +3721,7 @@ scripts_epartialmanual=Instalację można kontynuować ręcznie o godz
 scripts_icommand=Brak polecenia $1 
 scripts_idbneed=Potrzebna jest baza danych $1 
 scripts_idbneed_link=, który można włączyć na stronie <a href='$1'>$2</a>.
+scripts_idbversion=Wymagana jest wersja MySQL $1 lub wyższa, ale w tym systemie dostępna jest tylko wersja $2
 scripts_nodbavail=Jeszcze nie skonfigurowano $1
 scripts_gemver=Aktualizacja Ruby Gems do najnowszej wersji z $1 ..
 scripts_gemverfailed=.. Aktualizacja klejnotów nie powiodła się : $1 

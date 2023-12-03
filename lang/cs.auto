@@ -2086,6 +2086,7 @@ restore_dirdelete=Odstraňte soubory, které nejsou v záloze
 restore_mailuser=Obnovit pouze uživatele:
 restore_dirchown=Obnovit vlastnictví souborů
 restore_reuid=Přerozdělit UID a GID?
+restore_reuser=Znovu přidělit jména uživatelů a skupin?
 restore_fix=Chcete znovu importovat podrobnosti o serveru?
 restore_delete=Odstranit a znovu vytvořit virtuální servery?
 restore_dnswholefile=Obnovte vše v souboru zóny DNS
@@ -2261,6 +2262,10 @@ restore_vmailserver_grey=Obnovení nastavení greylistingu ..
 restore_vmailserver_missing=.. není v tomto systému nakonfigurováno
 restore_ereseller=Prodejce $1 neexistuje
 restore_eparent=Původní nadřazený virtuální server $1 neexistuje
+restore_reuiding=Opětovné přidělení ID uživatelů a skupin ..
+restore_reuiddone=.. přidělené ID uživatele je <tt>$1</tt> a ID skupiny je <tt>$2</tt>
+restore_reusering=Opětovné přidělení jmen uživatelů a skupin ..
+restore_reusered=.. přidělený uživatel je <tt>$1</tt> a skupina je <tt>$2</tt>
 
 limits_title=Limity vlastníka serveru
 limits_header=Limity Virtualmin pro vlastníka serveru
@@ -3488,6 +3493,7 @@ scripts_epartialmanual=V instalaci lze pokračovat ručně na
 scripts_icommand=Chybí příkaz $1 
 scripts_idbneed=Je potřeba databáze $1 
 scripts_idbneed_link=, kterou lze povolit na stránce <a href='$1'>$2</a>.
+scripts_idbversion=Je potřeba MySQL verze $1 nebo vyšší, ale tento systém má pouze verzi $2
 scripts_idbneedor=$1 nebo $2 
 scripts_nodbavail=Dosud nenakonfigurováno $1
 scripts_gemver=Aktualizace Ruby Gems na nejnovější verzi od $1 ..

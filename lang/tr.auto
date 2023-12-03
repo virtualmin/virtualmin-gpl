@@ -1279,6 +1279,7 @@ restore_nokey=Yedek şifreli değil
 restore_madeat=Yedekleme yapıldı
 restore_dirhomes=<tt>homes</tt> dizinini geri yükle
 restore_dirdelete=Yedekte bulunmayan dosyaları silme
+restore_reuser=Kullanıcı ve grup adları yeniden tahsis edilsin mi?
 restore_delete=Sanal sunucular silinsin mi ve yeniden oluşturulsun mu?
 restore_newip=Geri yüklenen sunucular için IPv4 adresi
 restore_newip6=Geri yüklenen sunucular için IPv6 adresi
@@ -1392,6 +1393,10 @@ restore_vmailserver_grey=Gri liste ayarlarını geri yükleme ..
 restore_vmailserver_missing=.. bu sistemde yapılandırılmamış
 restore_ereseller=$1 satıcısı mevcut değil
 restore_eparent=$1 orijinal üst sanal sunucusu mevcut değil
+restore_reuiding=Kullanıcı ve grup kimlikleri yeniden tahsis ediliyor ..
+restore_reuiddone=.. tahsis edilen kullanıcı kimliği <tt>$1</tt> ve grup kimliği <tt>$2</tt>
+restore_reusering=Kullanıcı ve grup adları yeniden tahsis ediliyor ..
+restore_reusered=.. tahsis edilen kullanıcı <tt>$1</tt> ve grup <tt>$2</tt> dır
 
 limits_header2=İzin verilen yetenekler ve özellikler
 limits_header3=Diğer kısıtlamalar
@@ -2184,6 +2189,7 @@ scripts_epartialmanual=Kurulum şu adreste manuel olarak devam ettirilebilir:
 scripts_icommand=$1 komutu eksik
 scripts_idbneed=$1 veritabanı gerekiyor
 scripts_idbneed_link=<a href='$1'>$2</a> sayfasında etkinleştirilebilen.
+scripts_idbversion=MySQL sürümü $1 veya üstü gerekli, ancak bu sistemde yalnızca $2 sürümü var
 scripts_idbneedor=$1 yada 2
 scripts_nodbavail=Henüz yapılandırılmadı $1
 scripts_gemver=Ruby Gems $1 sürümünden en son sürüme güncelleniyor.
