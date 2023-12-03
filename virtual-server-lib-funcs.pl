@@ -5800,9 +5800,10 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&
-	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
-	       $u->{'webowner'} ? "<u>$pop3</u>" :
-	       $u->{'pass'} =~ /^\!/ ? "<i>$pop3</i>" : $pop3)."</a>\n");
+	        $u->{'pass'} =~ /^\!/ ? $pop3.&vui_inline_label('users_shared_label', undef, 'disabled') :
+	       $u->{'webowner'} ? $pop3.&vui_inline_label('users_shared_label') :
+	       $u->{'pass'} =~ /^\!/ ? $pop3.&vui_inline_label('users_disabled_label', undef, 'disabled') :
+	       $pop3)."</a>\n");
 	push(@cols, &html_escape($u->{'user'}));
 	push(@cols, &html_escape($u->{'real'}));
 	$userdesc++ if ($u->{'real'});

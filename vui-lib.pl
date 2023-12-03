@@ -285,7 +285,7 @@ Returns a text label as a inline element
 =cut
 sub vui_inline_label
 {
-my ($textid, $upper) = @_;
+my ($textid, $upper, $class) = @_;
 my $styles = "font-size: 10px;";
    $styles .= "font-weight: bold;";
    $styles .= "background-color: #bdbdbd;";
@@ -298,7 +298,8 @@ my $styles = "font-size: 10px;";
 my $styles_cnt .= "display:contents;";
 my $text = $text{$textid};
 $text = uc($text) if ($upper);
-return "<span class='vui_inline_label' style='$styles_cnt'>".
+$class = " $class" if ($class);
+return "<span class='vui_inline_label$class' style='$styles_cnt'>".
        "<span data-$textid style='$styles'>$text</span></span>";
 }
 
