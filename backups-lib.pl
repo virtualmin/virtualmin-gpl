@@ -2591,6 +2591,7 @@ if ($ok) {
 			&build_group_taken(\%gtaken, \%grouptaken);
 			&build_taken(\%taken, \%usertaken);
 
+			&$indent_print();
 			if ($parentdom) {
 				# UID and GID always come from parent
 				$d->{'uid'} = $parentdom->{'uid'};
@@ -2668,6 +2669,7 @@ if ($ok) {
 				&$second_print(&text('restore_reusered',
 					$d->{'user'}, $d->{'group'}));
 				}
+			&$outdent_print();
 
 			# Set the home directory to match this system's base, 
 			# but only if the old one is not compatible with this
