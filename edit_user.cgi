@@ -482,21 +482,21 @@ if ($htpasswdplugin) {
 	}
 
 
-# Other plugins permissions settings
-if ($anyotherplugins) {
-	print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2,
-				     "table6", 0, \@tds);
-	}
-
 # Find and show all plugin features
 foreach my $f (&list_mail_plugins()) {
 	if ($f ne "virtualmin-htpasswd") {
-		print &ui_table_row(undef, $hrr, 2) if ($list_mail_plugin++);
-		$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
-		print $input;
+		my $input = &trim(&plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
+		if ($input) {
+			$anyotherpluginsdata .= &ui_table_row(undef, $hrr, 2) if ($list_mail_plugin++);
+			$anyotherpluginsdata .= $input;
+			}
 		}
 	}
-if ($anyotherplugins) {
+# Other plugins permissions settings
+if ($anyotherplugins && $anyotherpluginsdata) {
+	print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2,
+				     "table6", 0, \@tds);
+	print $anyotherpluginsdata;
 	print &ui_hidden_table_end("table6");
 	}
 
