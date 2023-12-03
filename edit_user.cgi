@@ -31,7 +31,7 @@ else {
 	&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 	}
 
-$shell_switch = &can_mailbox_ftp() && !$mailbox && $user->{'unix'};
+$shell_switch = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} && !$user->{'webowner'};
 @sgroups = &allowed_secondary_groups($d);
 # Work out if the other permissions section has anything to display
 if ($d && !$mailbox) {
@@ -138,10 +138,12 @@ if (!$mailbox) {
 			    2, \@tds);
 
 	# Password recovery field
-	print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
-		&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
-				$text{'user_norecovery'},
-				$text{'user_gotrecovery'}));
+	if (!$user->{'webowner'}) {
+		print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
+			&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
+					$text{'user_norecovery'},
+					$text{'user_gotrecovery'}));
+		}
 	}
 
 	# Show FTP shell field
@@ -256,194 +258,204 @@ $hasextra = !$user->{'noextra'};
 $hassend = &will_send_user_email($d, $in{'new'});
 $hasspam = $config{'spam'} && $hasprimary;
 $hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
-if ($hasemail) {
-	my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
-	print &ui_hidden_table_start($text{'user_header3'}, "${style_display_none}width=100%", 2,
-				     "table2a", 0);
-	}
+$hasemailaccordion = !$user->{'webowner'};
 
-if ($hasprimary) {
-	# Show primary email address field
-	print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
-		    &ui_yesno_radio("mailbox",
-				    $user->{'email'} || $in{'new'} ? 1 : 0),
-		    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
-
-if ($hasmailfile && $config{'show_mailuser'}) {
-	# Show the user's mail file
-	local ($sz, $umf, $lastmod) = &mail_file_size($user);
-	local $link = &read_mail_link($user, $d);
-	if ($link) {
-		$mffield = "<a href='$link'><tt>$umf</tt></a>\n";
+# Email settings
+if ($hasemailaccordion) {
+	if ($hasemail) {
+		my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
+		print &ui_hidden_table_start($text{'user_header3'}, "${style_display_none}width=100%", 2,
+					"table2a", 0);
 		}
-	else {
-		$mffield = "<tt>$umf</tt>\n";
-		}
-	if ($lastmod) {
-		$mffield .= "(".&text('user_lastmod', &make_date($lastmod)).")";
-		}
-	if ($user->{'spam_quota'}) {
-		$mffield .= "<br><font color=#ff0000>".
-		      &text($user->{'spam_quota_diff'} ? 'user_spamquota'
-						       : 'user_soamquota2',
-			    &nice_size($user->{'spam_quota_diff'})).
-		      "</font>\n";
-		}
-	print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
-			    $mffield,
-			    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
 
-if ($hasextra) {
-	# Show extra email addresses
-	@extra = @{$user->{'extraemail'}};
-	foreach $e (@extra) {
-		if ($e =~ /^(\S*)\@(\S+)$/) {
-			local ($eu, $ed) = ($1, $2);
-			$ed = &show_domain_name($ed);
-			$e = $eu."\@".$ed;
-			}
+	if ($hasprimary) {
+		# Show primary email address field
+		print &ui_table_row(&hlink($text{'user_mailbox'}, "mailbox"),
+			&ui_yesno_radio("mailbox",
+					$user->{'email'} || $in{'new'} ? 1 : 0),
+			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 		}
-	print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
-			    &ui_textarea("extra", join("\n", @extra), 5, 50),
-			    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
 
-if ($in{'new'} && &will_send_user_email($d, 1)) {
-	# Show address for confirmation email (for the mailbox itself)
-	print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
-		&ui_opt_textbox("newmail", undef, 40,
-				$user->{'email'} ? $text{'user_newmail1'}
-						 : $text{'user_newmail2'},
-				$text{'user_newmail0'}),
-		2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
-elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
-	# Show option to re-send info email
-	print &ui_table_row(&hlink($text{'user_remail'},"remail"),
-		    &ui_radio("remail_def", 1,
-			  [ [ 1, $text{'user_remail1'} ],
-			    [ 0, $text{'user_remail0'} ] ])." ".
-		    &ui_textbox("remail", $user->{'email'}, 40),
-		    2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
-
-# Show spam check flag
-if ($hasspam) {
-	$awl_link = undef;
-	if (!$in{'new'} && &foreign_available("spam")) {
-		# Create AWL link
-		&foreign_require("spam");
-		if (defined(&spam::can_edit_awl) &&
-		    &spam::supports_auto_whitelist() == 2 &&
-		    &spam::get_auto_whitelist_file($user->{'user'}) &&
-		    &spam::can_edit_awl($user->{'user'})) {
-			$awl_link = "&nbsp;( <a href='../spam/edit_awl.cgi?".
-				    "user=".&urlize($user->{'user'}).
-				    "'>$text{'user_awl'}</a> )";
-			}
-		}
-	print &ui_table_row(
-		&hlink($d->{'virus'} ? $text{'user_nospam'}
-				     : $text{'user_nospam2'}, "nospam"),
-		!$d->{'spam'} ? $text{'user_spamdis'} :
-			&ui_radio("nospam", int($user->{'nospam'}),
-				  [ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
-			$awl_link,
-		2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
-	}
-
-# Show most recent logins
-if ($hasemail && !$in{'new'}) {
-	$ll = &get_last_login_time($user->{'user'});
-	@grid = ( );
-	foreach $k (keys %$ll) {
-		push(@grid, $text{'user_lastlogin_'.$k},
-			    &make_date($ll->{$k}));
-		}
-	print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
-		@grid ? &ui_grid_table(\@grid, 2, 50)
-		      : $text{'user_lastlogin_never'}, undef, undef,
-		          $d->{'mail'} ? undef : ['style="display: none"']);
-	}
-
-if ($hasemail) {
-	# Show forwarding setup for this user, using simple form if possible
-	if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
-		print &ui_table_row(undef, $hrr, 2);
-
-		# Work out if simple mode is supported
-		if (!@{$user->{'to'}}) {
-			# If no forwarding, just check delivery to me as this is
-			# the default.
-			$simple = { 'tome' => 1 };
+	if ($hasmailfile && $config{'show_mailuser'}) {
+		# Show the user's mail file
+		local ($sz, $umf, $lastmod) = &mail_file_size($user);
+		local $link = &read_mail_link($user, $d);
+		if ($link) {
+			$mffield = "<a href='$link'><tt>$umf</tt></a>\n";
 			}
 		else {
-			$simple = &get_simple_alias($d, $user, 1);
+			$mffield = "<tt>$umf</tt>\n";
 			}
-		if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
-			# Local and bounce delivery are not allowed on the simple form,
-			# unless we can merge some (@) local users with forward users, 
-			# which will be handled automatically on save to prevent showing
-			# advanced form for no reason
-			$simple = undef
-				if (!$simple->{'local-all'} || $simple->{'bounce'});
+		if ($lastmod) {
+			$mffield .= "(".&text('user_lastmod', &make_date($lastmod)).")";
 			}
-
-		if ($simple) {
-			# Show simple form
-			print &ui_hidden("simplemode", "simple");
-			&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
+		if ($user->{'spam_quota'}) {
+			$mffield .= "<br><font color=#ff0000>".
+			&text($user->{'spam_quota_diff'} ? 'user_spamquota'
+							: 'user_soamquota2',
+				&nice_size($user->{'spam_quota_diff'})).
+			"</font>\n";
 			}
-		else {
-			# Show complex form
-			print &ui_hidden("simplemode", "complex");
-			&alias_form($user->{'to'},
-				&hlink($text{'user_aliases'}, "userdest"),
-				$d, "user", $in{'user'}, \@tds);
-			}
-
-		}
-	# Show user-level mail filters, if he has any
-	@filters = ( );
-	$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-	if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
-	&foreign_check("filter")) {
-		&foreign_require("filter");
-		@filters = &filter::list_filters($procmailrc);
-		}
-	if (@filters) {
-		my $mail_filter_title = $text{'user_header3a'};
-		my $mail_filter_body;
-		$lastalways = 0;
-		@folders = &mailboxes::list_user_folders($user->{'user'});
-		@table = ( );
-		foreach $filter (@filters) {
-			($cdesc, $lastalways) = &filter::describe_condition($filter);
-			$adesc = &filter::describe_action($filter, \@folders,
-							$user->{'home'});
-			push(@table, [ $cdesc, $adesc ]);
-			}
-		if (!$lastalways) {
-			push(@table, [ $filter::text{'index_calways'},
-				$filter::text{'index_adefault'} ]);
-			}
-		$mail_filter_body = &ui_columns_table(
-			[ $text{'user_fcondition'}, $text{'user_faction'} ],
-			100,
-			\@table);
-		my $mail_filter_details = &ui_details({
-			'title' => $mail_filter_title,
-			'content' => $mail_filter_body,
-			'class' =>'default',
-			'html' => 1});
-		print &ui_table_row(undef, $mail_filter_details, 2, undef, ["data-row-wrapper='details'"]);
+		print &ui_table_row(&hlink($text{'user_mail'}, "mailfile"),
+				$mffield,
+				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
 		}
 
-	print &ui_hidden_table_end("table2a");
+	if ($hasextra) {
+		# Show extra email addresses
+		@extra = @{$user->{'extraemail'}};
+		foreach $e (@extra) {
+			if ($e =~ /^(\S*)\@(\S+)$/) {
+				local ($eu, $ed) = ($1, $2);
+				$ed = &show_domain_name($ed);
+				$e = $eu."\@".$ed;
+				}
+			}
+		print &ui_table_row(&hlink($text{'user_extra'}, "extraemail"),
+				&ui_textarea("extra", join("\n", @extra), 5, 50),
+				2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+		}
+
+	if ($in{'new'} && &will_send_user_email($d, 1)) {
+		# Show address for confirmation email (for the mailbox itself)
+		print &ui_table_row(&hlink($text{'user_newmail'},"newmail"),
+			&ui_opt_textbox("newmail", undef, 40,
+					$user->{'email'} ? $text{'user_newmail1'}
+							: $text{'user_newmail2'},
+					$text{'user_newmail0'}),
+			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+		}
+	elsif (!$in{'new'} && &will_send_user_email($d, 0)) {
+		# Show option to re-send info email
+		print &ui_table_row(&hlink($text{'user_remail'},"remail"),
+			&ui_radio("remail_def", 1,
+				[ [ 1, $text{'user_remail1'} ],
+				[ 0, $text{'user_remail0'} ] ])." ".
+			&ui_textbox("remail", $user->{'email'}, 40),
+			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+		}
+
+	# Show spam check flag
+	if ($hasspam) {
+		$awl_link = undef;
+		if (!$in{'new'} && &foreign_available("spam")) {
+			# Create AWL link
+			&foreign_require("spam");
+			if (defined(&spam::can_edit_awl) &&
+			&spam::supports_auto_whitelist() == 2 &&
+			&spam::get_auto_whitelist_file($user->{'user'}) &&
+			&spam::can_edit_awl($user->{'user'})) {
+				$awl_link = "&nbsp;( <a href='../spam/edit_awl.cgi?".
+					"user=".&urlize($user->{'user'}).
+					"'>$text{'user_awl'}</a> )";
+				}
+			}
+		print &ui_table_row(
+			&hlink($d->{'virus'} ? $text{'user_nospam'}
+					: $text{'user_nospam2'}, "nospam"),
+			!$d->{'spam'} ? $text{'user_spamdis'} :
+				&ui_radio("nospam", int($user->{'nospam'}),
+					[ [ 0, $text{'yes'} ], [ 1, $text{'no'} ] ]).
+				$awl_link,
+			2, \@tds, $d->{'mail'} ? undef : ['style="display: none"']);
+		}
+
+	# Show most recent logins
+	if ($hasemail && !$in{'new'}) {
+		$ll = &get_last_login_time($user->{'user'});
+		@grid = ( );
+		foreach $k (keys %$ll) {
+			push(@grid, $text{'user_lastlogin_'.$k},
+				&make_date($ll->{$k}));
+			}
+		print &ui_table_row(&hlink($text{'user_lastlogin'}, "lastlogin"),
+			@grid ? &ui_grid_table(\@grid, 2, 50)
+			: $text{'user_lastlogin_never'}, undef, undef,
+				$d->{'mail'} ? undef : ['style="display: none"']);
+		}
+
+	if ($hasemail) {
+		# Show forwarding setup for this user, using simple form if possible
+		if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
+			print &ui_table_row(undef, $hrr, 2);
+
+			# Work out if simple mode is supported
+			if (!@{$user->{'to'}}) {
+				# If no forwarding, just check delivery to me as this is
+				# the default.
+				$simple = { 'tome' => 1 };
+				}
+			else {
+				$simple = &get_simple_alias($d, $user, 1);
+				}
+			if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
+				# Local and bounce delivery are not allowed on the simple form,
+				# unless we can merge some (@) local users with forward users, 
+				# which will be handled automatically on save to prevent showing
+				# advanced form for no reason
+				$simple = undef
+					if (!$simple->{'local-all'} || $simple->{'bounce'});
+				}
+
+			if ($simple) {
+				# Show simple form
+				print &ui_hidden("simplemode", "simple");
+				&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
+				}
+			else {
+				# Show complex form
+				print &ui_hidden("simplemode", "complex");
+				&alias_form($user->{'to'},
+					&hlink($text{'user_aliases'}, "userdest"),
+					$d, "user", $in{'user'}, \@tds);
+				}
+
+			}
+		# Show user-level mail filters, if he has any
+		@filters = ( );
+		$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
+		if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
+		&foreign_check("filter")) {
+			&foreign_require("filter");
+			@filters = &filter::list_filters($procmailrc);
+			}
+		if (@filters) {
+			my $mail_filter_title = $text{'user_header3a'};
+			my $mail_filter_body;
+			$lastalways = 0;
+			@folders = &mailboxes::list_user_folders($user->{'user'});
+			@table = ( );
+			foreach $filter (@filters) {
+				($cdesc, $lastalways) = &filter::describe_condition($filter);
+				$adesc = &filter::describe_action($filter, \@folders,
+								$user->{'home'});
+				push(@table, [ $cdesc, $adesc ]);
+				}
+			if (!$lastalways) {
+				push(@table, [ $filter::text{'index_calways'},
+					$filter::text{'index_adefault'} ]);
+				}
+			$mail_filter_body = &ui_columns_table(
+				[ $text{'user_fcondition'}, $text{'user_faction'} ],
+				100,
+				\@table);
+			my $mail_filter_details = &ui_details({
+				'title' => $mail_filter_title,
+				'content' => $mail_filter_body,
+				'class' =>'default',
+				'html' => 1});
+			print &ui_table_row(undef, $mail_filter_details, 2, undef, ["data-row-wrapper='details'"]);
+			}
+
+		print &ui_hidden_table_end("table2a");
+		}
+	}
+else {
+	print &ui_hidden('recovery_def', 1);
+	print &ui_hidden('remail_def', 1);
 	}
 
+# Test available plugins first	
 foreach my $f (&list_mail_plugins()) {
 	if ($f eq "virtualmin-htpasswd") {
 		$htpasswdplugin++;
