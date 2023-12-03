@@ -743,27 +743,35 @@ return $z ? "OK" : undef;
 # IP to the new.
 sub modify_dns
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
-	# Converting from a sub-domain to top-level .. just delete and re-create
+	# Converting from a sub-domain to top-level .. move the records
+	# XXX print stuff
 	&save_dns_submode($d, 0);
+	return 1;
+	}
+my $tmpl = &get_template($d->{'template'});
+my $dnsparent = &find_parent_dns_domain($d);
+if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
+	# Converting from top-level to sub-domain .. move the records
+	# XXX print stuff
+	&save_dns_submode($d, 1);
 	return 1;
 	}
 if ($d->{'alias'} && $oldd->{'alias'} &&
     $d->{'alias'} != $oldd->{'alias'}) {
-	# Alias target changed
+	# Alias target changed, just delete and re-create
 	&delete_dns($oldd);
 	&setup_dns($d);
 	return 1;
 	}
 
 my $r = &require_bind($d);
-local $tmpl = &get_template($d->{'template'});
-local ($oldzonename, $newzonename, $lockon, $lockconf, $zdom);
+my ($oldzonename, $newzonename, $lockon, $lockconf, $zdom);
 if ($d->{'dns_submode'}) {
 	# Get parent domain
-	local $dnsparent = &get_domain($d->{'dns_subof'});
+	my $dnsparent = &get_domain($d->{'dns_subof'});
 	&obtain_lock_dns($dnsparent);
 	$lockon = $dnsparent;
 	$zdom = $dnsparent;
@@ -778,18 +786,18 @@ else {
 	$newzonename = $oldd->{'dom'};
 	$oldzonename = $oldd->{'dom'};
 	}
-local $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
-local $newip = $d->{'dns_ip'} || $d->{'ip'};
-local $rv = 0;
+my $oldip = $oldd->{'dns_ip'} || $oldd->{'ip'};
+my $newip = $d->{'dns_ip'} || $d->{'ip'};
+my $rv = 0;
 
 # Zone file name and records, if we read them
-local ($file, $recs);
+my ($file, $recs);
 &pre_records_change($d);
 
 if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	# Domain name has changed .. rename via API call
 	&$first_print($text{'save_dns2_provision'});
-	local $info = { 'domain' => $oldd->{'dom'},
+	my $info = { 'domain' => $oldd->{'dom'},
 			'host' => $d->{'provision_dns_host'},
 			'new-domain' => $d->{'dom'} };
 	my ($ok, $msg) = &provision_api_call("modify-dns-zone", $info, 0);
@@ -839,19 +847,19 @@ elsif ($d->{'dom'} ne $oldd->{'dom'} && $d->{'dns_cloud'}) {
 	}
 elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Domain name has changed .. rename locally
-	local $z = &get_bind_zone($zdom->{'dom'}, undef, $d);
+	my $z = &get_bind_zone($zdom->{'dom'}, undef, $d);
 	if (!$z) {
 		# Zone not found!
 		&$second_print($text{'save_dns2_ezone'});
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	local $f = &bind8::find("file", $z->{'members'});
+	my $f = &bind8::find("file", $z->{'members'});
 	if (!$d->{'dns_submode'}) {
 		# Domain name has changed .. rename zone file
 		&$first_print($text{'save_dns2'});
-		local $fn = $f->{'values'}->[0];
-		local $nfn = $fn;
+		my $fn = $f->{'values'}->[0];
+		my $nfn = $fn;
 		$nfn =~ s/$oldd->{'dom'}/$d->{'dom'}/;
 		if ($fn ne $nfn) {
 			&remote_foreign_call($r, "bind8", "rename_logged",
@@ -899,11 +907,11 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	&$second_print($text{'setup_done'});
 
 	if (!$d->{'dns_submode'}) {
-		local @slaves = split(/\s+/, $d->{'dns_slave'});
+		my @slaves = split(/\s+/, $d->{'dns_slave'});
 		if (@slaves) {
 			# Rename on slave servers too
 			&$first_print(&text('save_dns3', $d->{'dns_slave'}));
-			local @slaveerrs = &bind8::rename_on_slaves(
+			my @slaveerrs = &bind8::rename_on_slaves(
 				$oldd->{'dom'}, $d->{'dom'}, \@slaves);
 			if (@slaveerrs) {
 				&$second_print($text{'save_bindeslave'});
@@ -959,8 +967,8 @@ if ($d->{'mail'} && !$oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		return 0;
 		}
 	&$first_print($text{'save_dns4'});
-	local $ip = $d->{'dns_ip'} || $d->{'ip'};
-	local $ip6 = $d->{'ip6'};
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	my $ip6 = $d->{'ip6'};
 	&create_mail_records($recs, $file, $d, $ip, $ip6);
 	&$second_print($text{'setup_done'});
 	$rv++;
@@ -974,12 +982,12 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	local $ip = $d->{'dns_ip'} || $d->{'ip'};
-	local $ip6 = $d->{'ip6'};
-	local %ids = map { $_, 1 }
+	my $ip = $d->{'dns_ip'} || $d->{'ip'};
+	my $ip6 = $d->{'ip6'};
+	my %ids = map { $_, 1 }
 		split(/\s+/, $d->{'mx_servers'});
-	local @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
-	local @slaveips = map { &to_ipaddress($_->{'mxname'} || $_->{'host'}) }
+	my @slaves = grep { $ids{$_->{'id'}} } &list_mx_servers();
+	my @slaveips = map { &to_ipaddress($_->{'mxname'} || $_->{'host'}) }
 			      @slaves;
 	foreach my $r (@$recs) {
 		if ($r->{'type'} eq 'A' &&
@@ -997,7 +1005,7 @@ elsif (!$d->{'mail'} && $oldd->{'mail'} && !$tmpl->{'dns_replace'}) {
 		elsif ($r->{'type'} eq 'MX' &&
 		       $r->{'name'} eq $d->{'dom'}.".") {
 			# MX record for domain .. does it point to our IP?
-			local $mxip = &to_ipaddress($r->{'values'}->[1]);
+			my $mxip = &to_ipaddress($r->{'values'}->[1]);
 			if (!$mxip) {
 				my ($mxr) = grep { $_->{'name'} eq
 						   $r->{'values'}->[1] } @$recs;
@@ -1029,20 +1037,20 @@ if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&
 		&release_lock_dns($lockon, $lockconf);
 		return 0;
 		}
-	local @newmxs = split(/\s+/, $d->{'mx_servers'});
-	local @oldmxs = split(/\s+/, $oldd->{'mx_servers'});
+	my @newmxs = split(/\s+/, $d->{'mx_servers'});
+	my @oldmxs = split(/\s+/, $oldd->{'mx_servers'});
 	&foreign_require("servers");
-	local %servers = map { $_->{'id'}, $_ }
+	my %servers = map { $_->{'id'}, $_ }
 			     (&servers::list_servers(), &list_mx_servers());
-	local $withdot = $d->{'dom'}.".";
+	my $withdot = $d->{'dom'}.".";
 
 	# Add missing MX records
 	foreach my $id (@newmxs) {
 		if (&indexof($id, @oldmxs) < 0) {
 			# A new MX .. add a record for it, if there isn't one
-			local $s = $servers{$id};
-			local $mxhost = $s->{'mxname'} || $s->{'host'};
-			local $already = 0;
+			my $s = $servers{$id};
+			my $mxhost = $s->{'mxname'} || $s->{'host'};
+			my $already = 0;
 			foreach my $r (@$recs) {
 				if ($r->{'type'} eq 'MX' &&
 				    $r->{'name'} eq $withdot &&
@@ -1060,12 +1068,12 @@ if ($d->{'mx_servers'} ne $oldd->{'mx_servers'} && $d->{'mail'} &&
 		}
 
 	# Remove those that are no longer needed
-	local @mxs;
+	my @mxs;
 	foreach my $id (@oldmxs) {
 		if (&indexof($id, @newmxs) < 0) {
 			# An old MX .. remove it
-			local $s = $servers{$id};
-			local $mxhost = $s->{'mxname'} || $s->{'host'};
+			my $s = $servers{$id};
+			my $mxhost = $s->{'mxname'} || $s->{'host'};
 			foreach my $r (@$recs) {
 				if ($r->{'type'} eq 'MX' &&
 				    $r->{'name'} eq $withdot &&
