@@ -178,6 +178,7 @@ local $rv = { 'name' => $name,
 	      'php_opt_mods_func' => "script_${name}_php_optional_modules",
 	      'php_fullver_func' => "script_${name}_php_fullver",
 	      'php_maxver_func' => "script_${name}_php_maxver",
+	      'mysql_fullver_func' => "script_${name}_mysql_fullver",
 	      'pear_mods_func' => "script_${name}_pear_modules",
 	      'perl_mods_func' => "script_${name}_perl_modules",
 	      'perl_opt_mods_func' => "script_${name}_opt_perl_modules",
@@ -3125,6 +3126,30 @@ if (defined(&{$script->{'dbs_func'}})) {
 			(&can_edit_domain($d) ? 
 			 &text_html('scripts_idbneed_link',
 				        "edit_domain.cgi?dom=$d->{'id'}", $text{'edit_title'}) : ""));
+		}
+
+	# Check for MySQL version
+	my $myvfunc = $script->{'mysql_fullver_func'};
+	if (&indexof('mysql', @dbs) >= 0 && defined(&$myvfunc)) {
+		my @vers = &$myvfunc($ver);
+		if (@vers) {
+			my ($ver, $variant) = &get_dom_remote_mysql_version($d);
+			my $found = 0;
+			my ($wantver, $wantvariant);
+			for(my $i=0; $i<@vers; $i+=2) {
+				$wantver = $vers[$i];
+				$wantvariant = $vers[$i+1];
+				next if ($wantvariant &&
+					 $variant ne $wantvariant);
+				next if (&compare_versions($ver, $wantver) < 0);
+				$found = 1;
+				}
+			if (!$found) {
+				# Don't have it
+				return &text('scripts_idbversion',
+					     $wantver, $ver);
+				}
+			}
 		}
 	}
 

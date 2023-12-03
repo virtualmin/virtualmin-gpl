@@ -4372,6 +4372,7 @@ scripts_epartialmanual=Installation can be continued manually at
 scripts_icommand=Missing command $1
 scripts_idbneed=A $1 database is needed
 scripts_idbneed_link=, which can be enabled on <a href='$1'>$2</a> page.
+scripts_idbversion=MySQL version $1 or higher is needed, but this system only has version $2
 scripts_idbneedor=$1 or $2
 scripts_nodbavail=Not yet configured $1
 scripts_gemver=Updating Ruby Gems to latest version from $1 ..
