@@ -481,21 +481,20 @@ if ($htpasswdplugin) {
 	print &ui_hidden_table_end("table5");
 	}
 
-
+# Other plugins permissions settings
 # Find and show all plugin features
 foreach my $f (&list_mail_plugins()) {
 	if ($f ne "virtualmin-htpasswd") {
 		my $input = &trim(&plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
 		if ($input) {
-			$anyotherpluginsdata .= &ui_table_row(undef, $hrr, 2) if ($list_mail_plugin++);
+			$anyotherpluginsdata .= &ui_table_row(undef, $hrr, 2)
+				if ($list_mail_plugin++);
 			$anyotherpluginsdata .= $input;
 			}
 		}
 	}
-# Other plugins permissions settings
 if ($anyotherplugins && $anyotherpluginsdata) {
-	print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2,
-				     "table6", 0, \@tds);
+	print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2, "table6", 0, \@tds);
 	print $anyotherpluginsdata;
 	print &ui_hidden_table_end("table6");
 	}
