@@ -18194,6 +18194,11 @@ if (!@rv) {
 		$firstclass->{'avail'} = 1;
 		}
 	}
+# Sort based on both description and shell
+# name to avoid random ordering
+@rv = sort { $a->{'desc'} cmp $b->{'desc'} ||
+	     $a->{'shell'} cmp $b->{'shell'} } @rv;
+
 $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
