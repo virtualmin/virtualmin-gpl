@@ -277,13 +277,29 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	# Use the revoke command
 	local $rv = &execute_dom_sql($d, $mysql::master_db,
 		"select host from user where user = ?", $user);
-	my $dbs = "*.*";
-	$dbs = "`$qdb`.*" if ($db);
-	foreach my $r (@{$rv->{'data'}}) {
-		eval {
-			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
-			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+	
+	# Specific database that was passed
+	my @dbs = ("`$qdb`.*");
+
+	# All databases belonging to the given user because
+	# *.* simply won't work without deleting the user
+	if (!$db) {
+		@dbs = ();
+		my @user_dbs = &list_domain_users($d, 1, 1, 1, 0);
+		my ($dbuser) = grep { $_->{'user'} eq $user } @user_dbs;
+		if ($dbuser && $dbuser->{'dbs'} && ref($dbuser->{'dbs'}) eq 'ARRAY' && scalar(@{$dbuser->{'dbs'}}) > 0) {
+			my @user_db_names = map { $_->{'name'} } grep { $_->{'type'} eq 'mysql' } @{$dbuser->{'dbs'}};
+			@user_db_names = map { "`$_`.*" } @user_db_names;
+			@dbs = @user_db_names if (@user_db_names);
+			}
+		}
+	foreach my $dbs (@dbs) {
+		foreach my $r (@{$rv->{'data'}}) {
+			eval {
+				local $main::error_must_die = 1;
+				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
+				&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
+				};
 			}
 		}
 	}
@@ -1985,12 +2001,7 @@ else {
 	local $mfunc = sub {
 		if ($olduser ne $user) {
 			# Change the username
-			&execute_dom_sql($d, $mysql::master_db,
-				"update user set user = ? where user = ?",
-				$myuser, $myolduser);
-			&execute_dom_sql($d, $mysql::master_db,
-				"update db set user = ? where user = ?",
-				$myuser, $myolduser);
+			&execute_user_rename_sql($d, $myolduser, $myuser);
 			}
 		if (defined($pass)) {
 			# Change the password
