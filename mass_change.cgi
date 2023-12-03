@@ -44,6 +44,13 @@ foreach $user (@musers) {
 	&$indent_print();
 	$pop3 = &remove_userdom($user->{'user'}, $d);
 
+	# Skip virtual (extra) users
+	if ($user->{'userextra'}) {
+		&$outdent_print();
+		&$second_print($text{'mass_evirtuser'});
+		next;
+		}
+
 	# Home directory quota
 	if (&has_home_quotas() && $in{'quota_def'} != 2) {
 		&$first_print($text{'mass_setquota'});
