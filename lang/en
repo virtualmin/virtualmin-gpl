@@ -791,6 +791,7 @@ users_defaultsdesc=View and edit default settings for new users in this virtual 
 users_mailclient=Show Email Client Settings
 users_mailclientdesc=Display settings that should be used by users' email clients for this domain.
 users_all=All
+users_owner_label=OWNER
 users_same=Owner shared
 users_login_access_web=Web
 users_login_access_db=Database

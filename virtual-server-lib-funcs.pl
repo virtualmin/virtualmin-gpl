@@ -5798,7 +5798,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local @cols;
 	push(@cols, "<a href='edit_user$u->{'filetype'}.cgi?dom=$did&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
-	      ($u->{'domainowner'} ? "<b>$pop3</b>" :
+	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&
 	        $u->{'pass'} =~ /^\!/ ? "<u><i>$pop3</i></u>" :
 	       $u->{'webowner'} ? "<u>$pop3</u>" :
