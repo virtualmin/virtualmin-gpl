@@ -15,6 +15,7 @@ else {
 &can_edit_users() || &error($text{'users_ecannot'});
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
+
 if ($in{'new'}) {
 	$suffix = $in{'web'} ? 'web' : '';
 	&ui_print_header($din, $text{'user_create'.$suffix}, "");
@@ -29,6 +30,15 @@ else {
 	$suffix = $user->{'webowner'} ? 'web' : '';
 	&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 	}
+
+$shell_switch = &can_mailbox_ftp() && !$mailbox && $user->{'unix'};
+@sgroups = &allowed_secondary_groups($d);
+# Work out if the other permissions section has anything to display
+if ($d && !$mailbox) {
+	@dbs = grep { $_->{'users'} } &domain_databases($d);
+	}
+# Row separators for logical clarity
+my $hrr = "<hr data-row-separator>";
 
 # FTP user in a sub-server .. check if FTP restrictions are active
 if ($user->{'webowner'} && $d->{'parent'} && $config{'ftp'}) {
@@ -48,7 +58,7 @@ print &ui_hidden("unix", $in{'unix'});
 print &ui_hidden("web", $in{'web'});
 
 print &ui_hidden_table_start($mailbox ? $text{'user_mheader'} :
-			     $user->{'webowner'} ? $text{'user_wheader'} :
+			     $user->{'webowner'} ? $text{'user_header_ftp'} :
 			     $d ? $text{'user_header'} : $text{'user_lheader'},
 		             "width=100%", 2, "table1", 1);
 
@@ -74,8 +84,8 @@ else {
 	# Full username differs
 	if ($pop3 ne $user->{'user'}) {
 		print &ui_table_row(
-			$d->{'mail'} ? &hlink($text{"user_imap$mysql_suff"}, 'user_imap')
-				     : &hlink($text{"user_imapf$mysql_suff"},'user_imapf'),
+			$d->{'mail'} ? &hlink($text{"user_user3"}, 'user_imap')
+				     : &hlink($text{"user_user3"}, 'user_imapf'),
 			"<tt>$user->{'user'}</tt>");
 		}
 	# Edit mail username
@@ -86,12 +96,6 @@ else {
 		2, \@tds);
 	print &ui_hidden("oldpop3", $pop3),"\n";
 
-	# Always display MySQL username
-	if ($user->{'mysql_user'}) {
-		print &ui_table_row(
-			&hlink($text{'user_mysqluser2'}, 'user_mysqluser2'),
-			"<tt>$user->{'mysql_user'}</tt>");
-		}
 	}
 
 # Real name - only for true Unix users or LDAP persons
@@ -140,6 +144,22 @@ if (!$mailbox) {
 				$text{'user_gotrecovery'}));
 	}
 
+	# Show FTP shell field
+	if ($shell_switch) {
+		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
+			&available_shells_menu("shell", $user->{'shell'}, "mailbox",
+					0, $user->{'webowner'}),
+			2, \@tds);
+		}
+
+	# Show secondary groups
+	if (@sgroups && $user->{'unix'}) {
+		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
+				&ui_select("groups", $user->{'secs'},
+					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
+				2, \@tds);
+		}
+
 print &ui_hidden_table_end();
 
 $showmailquota = !$mailbox && $user->{'mailquota'};
@@ -149,7 +169,10 @@ $showhome = &can_mailbox_home($user) && $d && $d->{'home'} &&
 
 if ($showmailquota || $showquota || $showhome) {
 	# Start quota and home table
-	print &ui_hidden_table_start($text{'user_header2'}, "width=100%", 2,
+	my $header2_title = 'user_header2';
+	$header2_title = 'user_header2a' if (!$showhome);
+	$header2_title = 'user_header2b' if (!$showmailquota && !$showquota);
+	print &ui_hidden_table_start($text{$header2_title}, "width=100%", 2,
 				     "table2", 0);
 	}
 
@@ -235,7 +258,7 @@ $hasspam = $config{'spam'} && $hasprimary;
 $hasemail = $hasprimary || $hasmailfile || $hasextra || $hassend || $hasspam;
 if ($hasemail) {
 	my $style_display_none = $d->{'mail'} ? "" : " style='display:none' ";
-	print &ui_hidden_table_start($text{'user_header2a'}, "${style_display_none}width=100%", 2,
+	print &ui_hidden_table_start($text{'user_header3'}, "${style_display_none}width=100%", 2,
 				     "table2a", 0);
 	}
 
@@ -346,147 +369,135 @@ if ($hasemail && !$in{'new'}) {
 	}
 
 if ($hasemail) {
+	# Show forwarding setup for this user, using simple form if possible
+	if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
+		print &ui_table_row(undef, $hrr, 2);
+
+		# Work out if simple mode is supported
+		if (!@{$user->{'to'}}) {
+			# If no forwarding, just check delivery to me as this is
+			# the default.
+			$simple = { 'tome' => 1 };
+			}
+		else {
+			$simple = &get_simple_alias($d, $user, 1);
+			}
+		if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
+			# Local and bounce delivery are not allowed on the simple form,
+			# unless we can merge some (@) local users with forward users, 
+			# which will be handled automatically on save to prevent showing
+			# advanced form for no reason
+			$simple = undef
+				if (!$simple->{'local-all'} || $simple->{'bounce'});
+			}
+
+		if ($simple) {
+			# Show simple form
+			print &ui_hidden("simplemode", "simple");
+			&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
+			}
+		else {
+			# Show complex form
+			print &ui_hidden("simplemode", "complex");
+			&alias_form($user->{'to'},
+				&hlink($text{'user_aliases'}, "userdest"),
+				$d, "user", $in{'user'}, \@tds);
+			}
+
+		}
+	# Show user-level mail filters, if he has any
+	@filters = ( );
+	$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
+	if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
+	&foreign_check("filter")) {
+		&foreign_require("filter");
+		@filters = &filter::list_filters($procmailrc);
+		}
+	if (@filters) {
+		my $mail_filter_title = $text{'user_header3a'};
+		my $mail_filter_body;
+		$lastalways = 0;
+		@folders = &mailboxes::list_user_folders($user->{'user'});
+		@table = ( );
+		foreach $filter (@filters) {
+			($cdesc, $lastalways) = &filter::describe_condition($filter);
+			$adesc = &filter::describe_action($filter, \@folders,
+							$user->{'home'});
+			push(@table, [ $cdesc, $adesc ]);
+			}
+		if (!$lastalways) {
+			push(@table, [ $filter::text{'index_calways'},
+				$filter::text{'index_adefault'} ]);
+			}
+		$mail_filter_body = &ui_columns_table(
+			[ $text{'user_fcondition'}, $text{'user_faction'} ],
+			100,
+			\@table);
+		my $mail_filter_details = &ui_details({
+			'title' => $mail_filter_title,
+			'content' => $mail_filter_body,
+			'class' =>'default',
+			'html' => 1});
+		print &ui_table_row(undef, $mail_filter_details, 2, undef, ["data-row-wrapper='details'"]);
+		}
+
 	print &ui_hidden_table_end("table2a");
 	}
 
-# Show forwarding setup for this user, using simple form if possible
-if (($user->{'email'} || $user->{'noprimary'}) && !$user->{'noalias'}) {
-	print &ui_hidden_table_start($text{'user_header3'}, "width=100%", 2,
-				     "table3", 0);
-
-	# Work out if simple mode is supported
-	if (!@{$user->{'to'}}) {
-		# If no forwarding, just check delivery to me as this is
-		# the default.
-		$simple = { 'tome' => 1 };
-		}
-	else {
-		$simple = &get_simple_alias($d, $user, 1);
-		}
-	if ($simple && ($simple->{'local'} || $simple->{'bounce'})) {
-		# Local and bounce delivery are not allowed on the simple form,
-		# unless we can merge some (@) local users with forward users, 
-		# which will be handled automatically on save to prevent showing
-		# advanced form for no reason
-		$simple = undef
-			if (!$simple->{'local-all'} || $simple->{'bounce'});
-		}
-
-	if ($simple) {
-		# Show simple form
-		print &ui_hidden("simplemode", "simple");
-		&show_simple_form($simple, 1, 1, 1, 1, \@tds, "user");
-		}
-	else {
-		# Show complex form
-		print &ui_hidden("simplemode", "complex");
-		&alias_form($user->{'to'},
-			    &hlink($text{'user_aliases'}, "userdest"),
-			    $d, "user", $in{'user'}, \@tds);
-		}
-
-	print &ui_hidden_table_end("table3");
-	}
-
-# Show user-level mail filters, if he has any
-@filters = ( );
-$procmailrc = "$user->{'home'}/.procmailrc" if (!$in{'new'});
-if (!$in{'new'} && $user->{'email'} && $user->{'unix'} && -r $procmailrc &&
-    &foreign_check("filter")) {
-	&foreign_require("filter");
-	@filters = &filter::list_filters($procmailrc);
-	}
-if (@filters) {
-	print &ui_hidden_table_start($text{'user_header5'}, "width=100%", 2,
-				     "table5", 0);
-	$lastalways = 0;
-	@folders = &mailboxes::list_user_folders($user->{'user'});
-	@table = ( );
-	foreach $filter (@filters) {
-		($cdesc, $lastalways) = &filter::describe_condition($filter);
-		$adesc = &filter::describe_action($filter, \@folders,
-						  $user->{'home'});
-		push(@table, [ $cdesc, $adesc ]);
-		}
-	if (!$lastalways) {
-		push(@table, [ $filter::text{'index_calways'},
-			       $filter::text{'index_adefault'} ]);
-		}
-	$ftable = &ui_columns_table(
-		[ $text{'user_fcondition'}, $text{'user_faction'} ],
-		100,
-		\@table);
-	print &ui_table_row(undef, $ftable, 2);
-	print &ui_hidden_table_end("table5");
-	}
-
-# Work out if the other permissions section has anything to display
-if ($d && !$mailbox) {
-	@dbs = grep { $_->{'users'} } &domain_databases($d);
-	}
-@sgroups = &allowed_secondary_groups($d);
 foreach my $f (&list_mail_plugins()) {
-	$anyplugins++ if (&plugin_defined($f, "mailbox_inputs"));
+	if ($f eq "virtualmin-htpasswd") {
+		$htpasswdplugin++;
+		}
+	else {
+		$anyotherplugins++ if (&plugin_defined($f, "mailbox_inputs"));
+		}
 	}
-my $shell_row = &can_mailbox_ftp() && !$mailbox && $user->{'unix'};
-$anyother = $shell_row ||
-	    $anyplugins ||
-	    @dbs ||
-	    @sgroups && $user->{'unix'};
 
-if ($anyother) {
+# Put user databases select under separate category
+if (@dbs) {
 	print &ui_hidden_table_start($text{'user_header4'}, "width=100%", 2,
 				     "table4", 0, \@tds);
-	}
-
-if ($shell_row) {
-	# Show FTP shell field
-	print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-		&available_shells_menu("shell", $user->{'shell'}, "mailbox",
-				       0, $user->{'webowner'}),
-		2, \@tds);
-	}
-
-# Find and show all plugin features
-foreach my $f (&list_mail_plugins()) {
-	$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
-	print $input;
-	}
-
-# Row separators for logical clarity
-my $hrr = "<hr data-row-separator>";
-
-# Show allowed databases
-if (@dbs) {
-	if ($user->{'mysql_user'}) {
-		print &ui_table_row(undef, $hrr, 2) if ($shell_row);
-		print &ui_table_row(
-			&hlink($text{'user_mysqluser2'}, 'user_mysqluser2'),
-			"<tt>$user->{'mysql_user'}</tt>");
-		}
-	print &ui_table_row(undef, $hrr, 2) if (!$user->{'mysql_user'} && $shell_row);
+	# Show allowed databases
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
 			   $_->{'name'}." ($_->{'desc'})" ] } @{$user->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 	  &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
-			   $text{'user_dbsall'}, $text{'user_dbssel'}),
-	  2, \@tds);
-	}
-
-# Show secondary groups
-if (@sgroups && $user->{'unix'}) {
-	print &ui_table_row(undef, $hrr, 2)
-		if ($shell_row || $user->{'mysql_user'} || @dbs);
-	print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
-			    &ui_select("groups", $user->{'secs'},
-				[ map { [ $_ ] } @sgroups ], 5, 1, 1),
-			    2, \@tds);
-	}
-
-if ($anyother) {
+			   $text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
 	print &ui_hidden_table_end("table4");
+	}
+
+# Put htpasswd into separate category for clarity
+if ($htpasswdplugin) {
+	print &ui_hidden_table_start($text{'user_header5'}, "width=100%", 2,
+				     "table5", 0, \@tds);
+	foreach my $f (&list_mail_plugins()) {
+		if ($f eq "virtualmin-htpasswd") {
+			$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
+			print $input;
+			}
+		}
+	print &ui_hidden_table_end("table5");
+	}
+
+
+# Other plugins permissions settings
+if ($anyotherplugins) {
+	print &ui_hidden_table_start($text{'user_header6'}, "width=100%", 2,
+				     "table6", 0, \@tds);
+	}
+
+# Find and show all plugin features
+foreach my $f (&list_mail_plugins()) {
+	if ($f ne "virtualmin-htpasswd") {
+		print &ui_table_row(undef, $hrr, 2) if ($list_mail_plugin++);
+		$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
+		print $input;
+		}
+	}
+if ($anyotherplugins) {
+	print &ui_hidden_table_end("table6");
 	}
 
 # Work out if switching to Usermin is allowed
