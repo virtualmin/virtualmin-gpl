@@ -2971,6 +2971,8 @@ restore_ereseller=Reseller $1 does not exist
 restore_eparent=Original parent virtual server $1 does not exist
 restore_reuiding=Re-allocating UID and GID ..
 restore_reuiddone=.. allocated UID $1 and GID $2
+restore_reusering=Re-allocating user and group name ..
+restore_reusered=.. new user is $1 and group is $2
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner

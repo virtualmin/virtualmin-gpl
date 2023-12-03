@@ -2643,6 +2643,7 @@ if ($ok) {
 			if (!$parentdom && $opts->{'reuser'} &&
 			    $usertaken{$d->{'user'}}) {
 				# Re-allocated user name if there is a clash
+				&$first_print($text{'restore_reusering'});
 				my ($newuser) = &unixuser_name($d->{'dom'});
 				if ($newuser) {
 					$d->{'restoreolduser'} = $d->{'user'};
@@ -2653,6 +2654,8 @@ if ($ok) {
 			if (!$parentdom && $opts->{'reuser'} &&
 			    $grouptaken{$d->{'group'}}) {
 				# Re-allocated group name if there is a clash
+				&$first_print($text{'restore_reusering'})
+					if (!$changeduser);
 				my ($newgroup) = &unixgroup_name($d->{'dom'});
 				if ($newgroup) {
 					$d->{'restoreoldgroup'} = $d->{'group'};
@@ -2660,6 +2663,10 @@ if ($ok) {
 					$d->{'ugroup'} = $newgroup;
 					$changeduser = 1;
 					}
+				}
+			if ($changeduser) {
+				&$second_print(&text('restore_reusered',
+					$d->{'user'}, $d->{'group'}));
 				}
 
 			# Set the home directory to match this system's base, 
