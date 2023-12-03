@@ -13076,7 +13076,7 @@ if ($crv) {
 if (&can_domain_have_users($d) && &can_edit_users()) {
 	# Users button
 	push(@rv, { 'page' => 'list_users.cgi',
-		    'title' => $text{'edit_users4'},
+		    'title' => $text{'edit_users'},
 		    'desc' => $text{'edit_usersdesc'},
 		    'cat' => 'objects',
 		    'icon' => 'group',

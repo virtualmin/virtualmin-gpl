@@ -25,7 +25,7 @@ else {
 	$msg = &text('users_indom', scalar(@users),
 		     "<tt>".&show_domain_name($d)."</tt>");
 	}
-&ui_print_header($msg, $text{'edit_users4'}, "");
+&ui_print_header($msg, $text{'edit_users'}, "");
 
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
