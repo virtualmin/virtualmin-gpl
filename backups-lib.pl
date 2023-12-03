@@ -2599,6 +2599,7 @@ if ($ok) {
 				}
 			elsif ($opts->{'reuid'}) {
 				# Re-allocate the UID and GID
+				&$first_print($text{'restore_reuiding'});
 				local ($samegid) = ($d->{'gid'}==$d->{'ugid'});
 				$d->{'gid'} = &allocate_gid(\%gtaken);
 				$d->{'ugid'} = $d->{'gid'};
@@ -2611,6 +2612,8 @@ if ($ok) {
                                                 $d->{'ugid'} = $ginfo[2];
                                                 }
                                         }
+				&$second_print(&text('restore_reuiddone',
+					$d->{'uid'}, $d->{'gid'}));
 				}
 			else {
 				# UID and GID are the same - but check for a

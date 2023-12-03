@@ -2784,6 +2784,7 @@ restore_dirdelete=Delete files that are not in the backup
 restore_mailuser=Only restore user:
 restore_dirchown=Reset file ownerships
 restore_reuid=Re-allocate UIDs and GID?
+restore_reuser=Re-generate username if taken?
 restore_fix=Just re-import server details?
 restore_delete=Delete and re-create virtual servers?
 restore_virtualmin=Virtualmin settings to restore
@@ -2968,6 +2969,8 @@ restore_vmailserver_grey=Restoring greylisting settings ..
 restore_vmailserver_missing=.. not configured on this system
 restore_ereseller=Reseller $1 does not exist
 restore_eparent=Original parent virtual server $1 does not exist
+restore_reuiding=Re-allocating UID and GID ..
+restore_reuiddone=.. allocated UID $1 and GID $2
 
 limits_title=Server Owner Limits
 limits_header=Virtualmin limits for server owner
