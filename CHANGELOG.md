@@ -22,7 +22,7 @@
 * Fix renewal errors for Let's Encrypt certificates caused by using incorrect certificate types
 * Fix caching system external IP address for faster API calls
 * Fix issues with base website redirects causing redirect loops in the past
-* Fix to improve restore experience XXXXX
+* Fix to improve virtual servers restore experience
 * Fix DKIM signature issue on Debian and Ubuntu systems
 * Fix auto-reply form not being saved correctly
 * Fix to correctly print _years_ in bandwidth usage reports [#689](https://github.com/virtualmin/virtualmin-gpl/issues/689)
