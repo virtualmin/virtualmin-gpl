@@ -4,7 +4,7 @@ This field controls how the SPF record covers hosts other than the Virtualmin
 server itself, and hosts specified in the previous options. The choices are:
 
 <dl>
-<dt><b>Allow (SPF mode <tt>all</tt>)
+<dt><b>Allow</b> (SPF mode <tt>all</tt>)
 <dd>The sender's IP address shouldn't be considered at all. This effectively
 disables SPF.<p>
 
@@ -15,11 +15,12 @@ disables SPF.<p>
 <dd>The SPF record will apply only to the Virtualmin server itself, and other hosts defined above.  This is the preferred method of SPF usage, as it limits the hosts which can send mail claiming to be from this domain, but does not entirely block messages from other sources.<p>
 
 <dt><b>Disallow</b> (SPF mode <tt>-all</tt>)
-<dd>Like the option above, but repients should entirely discard messages from other senders. <p>
+<dd>Like the option above, but recipients should entirely discard messages from other senders. <p>
 </dl>
 
 </ul>
-
+<p>
+<br>
 Read more about SPF at the <a href="http://open-spf.org/Introduction/">Sender Policy Framework&nbsp;</a>homepage.
 <p>
 
