@@ -49,6 +49,7 @@ sub list_clouds_pro_tip
 {
 return if (!should_show_pro_tip('list_clouds'));
 my @pro_list_clouds_list = (
+	"<em>Google Drive</em>",
 	"<em>Google Cloud Storage</em>",
 	"<em>Azure Blob Storage</em>",
 	"<em>Dropbox</em>",
