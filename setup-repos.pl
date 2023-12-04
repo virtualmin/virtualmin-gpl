@@ -15,12 +15,6 @@ a quick Virtualmin Pro repositories setup.
 In case C<--serial> and C<--key> params are set and license is not actually 
 valid, the error will be returned, unless the C<--no-check> param is given.
 
-By default repositories are setup for the same version that was originally
-installed. However, if you wish to setup repos for the latest available
-Virtualmin version C<--force-latest> param can be used. This is preferred,
-although should be done with care, as new repo can replace dependent stack
-package.
-
 =cut
 package virtual_server;
 if (!$module_name) {
@@ -45,10 +39,7 @@ if (!$module_name) {
 # Parse args
 while(@ARGV > 0) {
 	local $a = shift(@ARGV);
-	if ($a eq "--force-latest") {
-		$force_latest = ' force-latest';
-		}
-	elsif ($a eq "--serial") {
+	if ($a eq "--serial") {
 		$serial = shift(@ARGV);
 		}
 	elsif ($a eq "--key") {
@@ -98,8 +89,7 @@ sub usage
 print "$_[0]\n\n" if ($_[0]);
 print "Setup Virtualmin repositories.\n";
 print "\n";
-print "virtualmin setup-repos [--force-latest]\n";
-print "                       [--serial number] [--key id] [--no-check]\n";
+print "virtualmin setup-repos [--serial number] [--key id] [--no-check]\n";
 exit(1);
 }
 
