@@ -748,13 +748,13 @@ if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
 	# Converting from a sub-domain to top-level .. first move the records
 	# out into their own file
-	# XXX DS and NS records are left in the parent domain
 	&$first_print($text{'save_dns8'});
 	&push_all_print();
 	&set_all_null_print();
 	&save_dns_submode($oldd, 0);
 	$d->{'dns_submode'} = 0;
 	delete($d->{'dns_subof'});
+	&delete_parent_dnssec_ds_records($oldd);
 	&pop_all_print();
 	&$second_print($text{'setup_done'});
 	}
@@ -5028,7 +5028,8 @@ my $withdot = $d->{'dom'}.".";
 foreach my $r (@$recs) {
 	if (($r->{'name'} eq $withdot ||
 	     $r->{'name'} =~ /\.$withdot$/) &&
-	    $r->{'type'} !~ /SOA|NS|NSEC/i) {
+	    $r->{'type'} !~ /SOA|NS/i &&
+	    !&is_dnssec_record($r)) {
 		push(@srecs, $r);
 		}
 	}
