@@ -746,18 +746,27 @@ sub modify_dns
 my ($d, $oldd) = @_;
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
-	# Converting from a sub-domain to top-level .. move the records
-	# XXX print stuff
-	&save_dns_submode($d, 0);
-	return 1;
+	# Converting from a sub-domain to top-level .. first move the records
+	# out into their own file
+	# XXX DS and NS records are left in the parent domain
+	&$first_print($text{'save_dns8'});
+	&push_all_print();
+	&set_all_null_print();
+	&save_dns_submode($oldd, 0);
+	$d->{'dns_submode'} = 0;
+	delete($d->{'dns_subof'});
+	&pop_all_print();
+	&$second_print($text{'setup_done'});
 	}
 my $tmpl = &get_template($d->{'template'});
 my $dnsparent = &find_parent_dns_domain($d);
 if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
 	# Converting from top-level to sub-domain .. move the records
-	# XXX print stuff
-	&save_dns_submode($d, 1);
-	return 1;
+	# XXX also has to rename at the same time
+	#&$first_print($text{'save_dns8'});
+	#&save_dns_submode($d, 1);
+	#&$second_print($text{'setup_done'});
+	#return 1;
 	}
 if ($d->{'alias'} && $oldd->{'alias'} &&
     $d->{'alias'} != $oldd->{'alias'}) {
@@ -4998,11 +5007,12 @@ return (0, "Expiry date is not valid") if ($@);
 return ($tm);
 }
 
-# save_dns_submode(&domain, enabled?)
+# save_dns_submode(&domain, enabled?, [&old-domain])
 # Move this domain into or out of it's parent DNS domain
 sub save_dns_submode
 {
-my ($d, $enabled) = @_;
+my ($d, $enabled, $oldd) = @_;
+$oldd ||= $d;
 if ($d->{'dns_submode'} && $enabled ||
     !$d->{'dns_submode'} && !$enabled) {
 	# Nothing to do
