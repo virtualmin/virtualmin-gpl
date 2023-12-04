@@ -18,6 +18,7 @@
 * Extend the GPL version with the capability to edit proxy paths, previously exclusive to Pro users
 * Fix Backblaze clearing old backups [#640](https://github.com/virtualmin/virtualmin-gpl/issues/640)
 * Fix issues when performing DNS-based Let's Encrypt renewals, including in wildcard mode
+* Fix auto-discover config feature work correctly in Microsoft Outlook
 * Fix to correctly revoke access to previously allowed MySQL/MariaDB databases
 * Fix renewal errors for Let's Encrypt certificates caused by using incorrect certificate types
 * Fix caching system external IP address for faster API calls
