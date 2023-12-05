@@ -6601,11 +6601,10 @@ sub get_thunderbird_autoconfig_xml
 {
 return <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
- 
 <clientConfig version="1.1">
   <emailProvider id="$SMTP_DOMAIN">
     <domain>$SMTP_DOMAIN</domain>
-    <displayName>$OWNER Email</displayName>
+    <displayName>$OWNER</displayName>
     <displayShortName>$OWNER</displayShortName>
     <incomingServer type="imap">
       <hostname>$IMAP_HOST</hostname>
@@ -6638,31 +6637,33 @@ EOF
 sub get_outlook_autoconfig_xml
 {
 return <<'EOF';
-<?xml version="1.0" encoding="utf-8" ?>
 <Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
   <Response xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a">
+    <User>
+      <DisplayName>$OWNER</DisplayName>
+    </User>
     <Account>
       <AccountType>email</AccountType>
       <Action>settings</Action>
       <Protocol>
-	<Type>IMAP</Type>
-        <TTL>24</TTL>
-	<Server>$IMAP_HOST</Server>
+        <Type>IMAP</Type>
+        <Server>$IMAP_HOST</Server>
         <Port>$IMAP_PORT</Port>
-	<LoginName>$SMTP_LOGIN</LoginName>
         <DomainRequired>off</DomainRequired>
+        <SPA>off</SPA>
         <SSL>$IMAP_SSL</SSL>
-	<AuthRequired>on</AuthRequired>
+        <AuthRequired>on</AuthRequired>
+        <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
       <Protocol>
-	<Type>SMTP</Type>
-        <TTL>24</TTL>
-	<Server>$SMTP_HOST</Server>
+        <Type>SMTP</Type>
+        <Server>$SMTP_HOST</Server>
         <Port>$SMTP_PORT</Port>
-	<LoginName>$SMTP_LOGIN</LoginName>
         <DomainRequired>off</DomainRequired>
+        <SPA>off</SPA>
         <SSL>$SMTP_SSL</SSL>
-	<AuthRequired>on</AuthRequired>
+        <AuthRequired>on</AuthRequired>
+        <LoginName>$SMTP_LOGIN</LoginName>
       </Protocol>
     </Account>
   </Response>

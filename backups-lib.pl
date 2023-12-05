@@ -4318,7 +4318,7 @@ $ft .= "<tr> <td>$text{'backup_ftpserver'}</td> <td>".
        &ui_textbox($name."_server", $mode == 1 ? $serverport :
                      undef, 20, undef, undef, "placeholder='example.com:21'").
        "</td> </tr>\n";
-$ft .= "<tr> <td>$text{'backup_path'}</td> <td>".
+$ft .= "<tr> <td data-backup-path data-backup-path-file=\"$text{'backup_path'}\" data-backup-path-dir=\"$text{'backup_path2'}\">$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_path", $mode == 1 ? $path : undef, 50).
        "</td> </tr>\n";
 $ft .= "<tr> <td>$text{'backup_login'}</td> <td>".
@@ -4338,7 +4338,7 @@ $st .= "<tr> <td>$text{'backup_sshserver'}</td> <td>".
        &ui_textbox($name."_sserver", $mode == 2 ? $serverport :
                      undef, 20, undef, undef, "placeholder='example.com:22'").
        "</td> </tr>\n";
-$st .= "<tr> <td>$text{'backup_path'}</td> <td>".
+$st .= "<tr> <td data-backup-path data-backup-path-file=\"$text{'backup_path'}\" data-backup-path-dir=\"$text{'backup_path2'}\">$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_spath", $mode == 2 ? $path : undef, 50).
        "</td> </tr>\n";
 $st .= "<tr> <td>$text{'backup_login'}</td> <td>".
@@ -4361,7 +4361,7 @@ $wt .= "<tr> <td>$text{'backup_webminserver'}</td> <td>".
        &ui_textbox($name."_wserver", $mode == 9 ? $serverport :
                      undef, 20, undef, undef, "placeholder='example.com:10000'").
        "</td> </tr>\n";
-$wt .= "<tr> <td>$text{'backup_path'}</td> <td>".
+$wt .= "<tr> <td data-backup-path data-backup-path-file=\"$text{'backup_path'}\" data-backup-path-dir=\"$text{'backup_path2'}\">$text{'backup_path'}</td> <td>".
        &ui_textbox($name."_wpath", $mode == 9 ? $path : undef, 50).
        "</td> </tr>\n";
 $wt .= "<tr> <td>$text{'backup_login'}</td> <td>".

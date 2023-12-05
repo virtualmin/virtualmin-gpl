@@ -2468,6 +2468,7 @@ backup_sshserver=SSH server
 backup_s3path=Bucket and path
 backup_webminserver=Webmin server
 backup_path=File on server
+backup_path2=Directory on server
 backup_login=Login as user
 backup_pass=Login with password
 backup_pass2=Login with password
@@ -4412,7 +4413,7 @@ scripts_gpl_pro_tip_hide2=Thanks, I will think about it
 scripts_gpl_pro_tip_open=Purchase Virtualmin Pro
 scripts_gpl_pro_tip_remind=Remind Me Later
 scripts_gpl_pro_tip_and=and
-scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock this and many other cool features.
+scripts_gpl_pro_tip_enroll=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock these and many other cool features.
 scripts_gpl_pro_tip_list_scripts=There are more install scripts available!
 scripts_gpl_pro_tip_enroll_list_scripts=Please consider purchasing <a target=_blank href='$1'>Virtualmin Pro</a> license to support the development and unlock all install scripts listed below.
 scripts_gpl_pro_tip_clouds=Support for $1 providers is also available!
