@@ -30,6 +30,8 @@ else {
 # Create select / add links
 ($mleft, $mreason, $mmax, $mhide) = &count_feature("mailboxes");
 if ($mleft != 0) {
+	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
+		       $text{'users_add'} ]);
 	my @ssh_shells =
 		grep { $_->{'id'} eq 'ssh' && $_->{'avail'} }
 			&list_available_shells($d);
