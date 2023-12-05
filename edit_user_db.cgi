@@ -37,7 +37,7 @@ print &ui_table_start($d ? $text{'user_header_db'} : $text{'user_lheader'},
                       "width=100%", 2);
 
 # Edit db user
-print &ui_table_row(&hlink($text{'user_user2'}, "username"),
+print &ui_table_row(&hlink($text{'user_user2'}, "username_db"),
 	&ui_textbox("dbuser", $dbuser_name, 15, 0, undef,
 		&vui_ui_input_noauto_attrs()).
 	($d ? "\@".&show_domain_name($d) : ""),

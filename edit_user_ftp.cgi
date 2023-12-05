@@ -41,7 +41,8 @@ print &ui_table_start($d ? $text{'user_header_ftp'} : $text{'user_lheader'},
 		             "width=100%", 2);
 
 # Edit mail username
-print &ui_table_row(&hlink($text{'user_user2'}, "username"),
+my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
+print &ui_table_row(&hlink($text{'user_user2'}, "username4$universal_type"),
 	&ui_textbox("mailuser", undef, 13, 0, undef,
 		&vui_ui_input_noauto_attrs()).
 	($d ? "\@".&show_domain_name($d) : ""), 2, \@tds);

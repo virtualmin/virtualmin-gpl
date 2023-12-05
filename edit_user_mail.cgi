@@ -58,7 +58,8 @@ print &ui_hidden_table_start($d ? $text{'user_header_mail'} : $text{'user_lheade
 		             "width=100%", 2, "table1", 1);
 
 # Edit mail username
-print &ui_table_row(&hlink($text{'user_user'}, "username"),
+my $universal_type = $config{'nopostfix_extra_user'} != 2 ? "_universal" : "";
+print &ui_table_row(&hlink($text{'user_user'}, "username$universal_type"),
         &ui_textbox("mailuser", undef, 13, 0, undef,
                 &vui_ui_input_noauto_attrs()).
         ($d ? "\@".&show_domain_name($d) : ""),
