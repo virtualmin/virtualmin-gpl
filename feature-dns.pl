@@ -744,6 +744,8 @@ return $z ? "OK" : undef;
 sub modify_dns
 {
 my ($d, $oldd) = @_;
+my $tmpl = &get_template($d->{'template'});
+
 if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
     !&under_parent_domain($d) && $d->{'dns_submode'}) {
 	# Converting from a sub-domain to top-level .. first move the records
@@ -757,16 +759,6 @@ if (!$d->{'subdom'} && $oldd->{'subdom'} && $d->{'dns_submode'} ||
 	&delete_parent_dnssec_ds_records($oldd);
 	&pop_all_print();
 	&$second_print($text{'setup_done'});
-	}
-my $tmpl = &get_template($d->{'template'});
-my $dnsparent = &find_parent_dns_domain($d);
-if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
-	# Converting from top-level to sub-domain .. move the records
-	# XXX also has to rename at the same time
-	#&$first_print($text{'save_dns8'});
-	#&save_dns_submode($d, 1);
-	#&$second_print($text{'setup_done'});
-	#return 1;
 	}
 if ($d->{'alias'} && $oldd->{'alias'} &&
     $d->{'alias'} != $oldd->{'alias'}) {
@@ -914,6 +906,20 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	unlink($bind8::zone_names_cache);
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
+
+	# Converting from top-level to sub-domain .. move the records after they
+	# have been renamed
+	my $dnsparent = &find_parent_dns_domain($d);
+	if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
+		&$first_print($text{'save_dns8'});
+		&push_all_print();
+		&set_all_null_print();
+		&save_dns_submode($d, 1);
+		&pop_all_print();
+		delete($domain_dns_records_cache{$d->{'id'}});
+		$recs = $file = undef;
+		&$second_print($text{'setup_done'});
+		}
 
 	if (!$d->{'dns_submode'}) {
 		my @slaves = split(/\s+/, $d->{'dns_slave'});
