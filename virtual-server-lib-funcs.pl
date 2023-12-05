@@ -5898,7 +5898,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 				$shell->{'id'} eq 'ftp' ? ($u->{'email'} ? 'mail' : undef, 'ftp') :
 				$shell->{'id'} eq 'scp' ? ($u->{'email'} ? 'mail' : undef, 'scp') :
 				$shell->{'id'} eq 'ssh' ? ($u->{'email'} ? 'mail' : undef, 'ftp', 'ssh') : undef
-			) || $shell->{'desc'}));
+			) || ($shell->{'id'} eq 'nologin' ?
+				(!$u->{'email'} ? $text{'users_login_access_none'} :
+					$shell->{'desc'}) : $shell->{'desc'})));
 
 	# Show number of DBs
 	if ($d->{'mysql'} || $d->{'postgres'}) {
