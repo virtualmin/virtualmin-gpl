@@ -279,7 +279,7 @@ else {
 		}
 
 	# Start backup and show progress
-	$nice = join(", ", map { &nice_backup_url($_) } @dests);
+	$nice = join(", ", map { &nice_backup_url($_) } @strfdests);
 	if (@doms) {
 		print &text('backup_doing', scalar(@doms), $nice),"<p>\n";
 		}
