@@ -25,8 +25,7 @@ foreach my $p (@provs) {
 	print &ui_columns_row([
 		&ui_link("edit_cloud.cgi?name=$p->{'name'}", $p->{'desc'}),
 		&ui_link($p->{'url'}, $p->{'url'}, undef, "target=_blank"),
-		$state->{'ok'} ? $state->{'desc'} :
-		  "<font color=red>$text{'clouds_unconf'}</font>",
+		$state->{'ok'} ? $state->{'desc'} : $text{'clouds_unconf'},
 		$users ]);
 	}
 print &ui_columns_end();
