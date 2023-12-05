@@ -25,8 +25,7 @@ foreach my $c (@clouds) {
 	print &ui_columns_row([
                 &ui_link("edit_dnscloud.cgi?name=$c->{'name'}", $c->{'desc'}),
 		&ui_link($c->{'url'}, $c->{'url'}, undef, "target=_blank"),
-                $state->{'ok'} ? $state->{'desc'} :
-                  "<font color=red>$text{'clouds_unconf'}</font>",
+                $state->{'ok'} ? $state->{'desc'} : $text{'clouds_unconf'},
                 $users ]);
 	$any++ if ($state->{'ok'});
 	}
