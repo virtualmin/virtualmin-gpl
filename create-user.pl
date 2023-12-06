@@ -19,7 +19,7 @@ The C<--ftp> option can be used to give the new user an FTP login as well - by
 default, he will only be given an email account. The C<--noemail> option turns
 off the default email account, which is useful for creating FTP or
 database-only users. The C<--db-only> flag is used to create a database-only
-user, with no email or FTP access.
+user, with no Unix user, email or FTP access.
 
 Extra email addresses for the new user can be specified with the C<--extra>
 option, followed by an email address within the virtual server. This option
