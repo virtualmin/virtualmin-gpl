@@ -17974,10 +17974,15 @@ if (!@rv) {
                 $classes{'ssh'}++;
 		$defclass = 'ssh';
 		}
-	# Only the default or first of each class are available
+	# Only the default or first of each class are available for each user
 	foreach my $c (grep { $_ ne $defclass } keys %classes) {
-		local ($firstclass) = grep { $_->{'id'} eq $c } @rv;
-		$firstclass->{'avail'} = 1;
+		foreach my $u ('owner', 'mailbox') {
+			my ($firstclass) = grep { $_->{'id'} eq $c &&
+						  $_->{$u} } @rv;
+			if ($firstclass) {
+				$firstclass->{'avail'} = 1;
+				}
+			}
 		}
 	}
 $list_available_shells_cache{$mail} = \@rv;
