@@ -5809,7 +5809,7 @@ if ($config{'show_lastlogin'} && $d->{'mail'}) {
 	push(@headers, $text{'users_ll'});
 	}
 push(@headers, $text{'users_ushell'});
-if ($d->{'mysql'} || $d->{'postgres'}) {
+if (($d->{'mysql'} || $d->{'postgres'}) && $config{'show_dbs'}) {
 	push(@headers, $text{'users_db'});
 	}
 local ($f, %plugcol);
@@ -5939,7 +5939,7 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 					$shell->{'desc'}) : $shell->{'desc'})));
 
 	# Show number of DBs
-	if ($d->{'mysql'} || $d->{'postgres'}) {
+	if (($d->{'mysql'} || $d->{'postgres'}) && $config{'show_dbs'}) {
 		my $userdbscnt = scalar(@{$u->{'dbs'}});
 		push(@cols, $u->{'domainowner'} ? $text{'users_all'} :
 			    $userdbscnt ? scalar(@domsdbs) == $userdbscnt
