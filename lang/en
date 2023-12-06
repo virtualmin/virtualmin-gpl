@@ -749,7 +749,7 @@ users_add_ssh=Add SSH user.
 users_add_ftp=Add FTP user.
 users_add_mail=Add mail user.
 users_add_db=Add database user.
-users_add_web=Add web user.
+users_add_web=Add webserver user.
 users_addweb=Add a website FTP access user.
 users_none=No users have been created in this domain yet.
 users_return=users list
@@ -804,12 +804,15 @@ users_login_access_ftp=FTP
 users_login_access_ssh=SSH
 users_login_access__and=and
 users_login_access__only=only
+users_addprotecteddir=To begin, navigate to the <a href='$1'>Protected Directories</a> module to add a directory. Once added, you can then secure this directory specifically for this user's access.
+users_addprotecteddir2=Navigate to the <a href='$1'>Protected Directories</a> module for adding, editing, or deleting protected directories.
 
 user_create=Create User
 user_createssh=Create SSH User
 user_createweb=Create FTP User
 user_createmail=Create Mail User
 user_createdb=Create Database User
+user_createwebserver=Create Webserver User
 user_edit=Edit User
 user_editweb=Edit FTP User
 user_chrootwarn=Warning : Because FTP directory restrictions are not enabled, this user will have access to the top-level server's web content as well.
@@ -818,6 +821,7 @@ user_header_ssh=SSH user details
 user_header_ftp=FTP user details
 user_header_mail=Mail user details
 user_header_db=Database user details
+user_header_webserver=Webserver user details
 user_lheader=Local user details
 user_mheader=Virtual server administration user's details
 user_header2=Quota and home directory settings
