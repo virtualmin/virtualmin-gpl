@@ -5830,15 +5830,17 @@ my @domsdbs = &domain_databases($d);
 foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		   $a->{'user'} cmp $b->{'user'} } @$users) {
 	local $pop3 = $d ? &remove_userdom($u->{'user'}, $d) : $u->{'user'};
+	local $pop3_dis =
+		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
 	$pop3 = &html_escape($pop3);
 	local @cols;
 	push(@cols, "<a href='edit_user$u->{'filetype'}.cgi?dom=$did&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&
-	        $u->{'pass'} =~ /^\!/ ? $pop3.&vui_inline_label('users_shared_label', undef, 'disabled') :
-	       $u->{'webowner'} ? $pop3.&vui_inline_label('users_shared_label') :
-	       $u->{'pass'} =~ /^\!/ ? $pop3.&vui_inline_label('users_disabled_label', undef, 'disabled') :
+	        $u->{'pass'} =~ /^\!/ ? $pop3_dis :
+	       $u->{'webowner'} ? $pop3 :
+	       $u->{'pass'} =~ /^\!/ ? $pop3_dis :
 	       $pop3)."</a>\n");
 	push(@cols, &html_escape($u->{'user'}));
 	push(@cols, &html_escape($u->{'real'}));
@@ -5852,8 +5854,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
 	if (($u->{'webowner'} || $u->{'userextra'}) && defined($quota)) {
-		# Website owners have no real quota
-		push(@cols, $text{'users_same'}, "");
+		# Website owners, virtual database and web users have no real quota
+		push(@cols, $u->{'userextra'} eq 'webuser' ?
+			$text{'users_na'} : $text{'users_same'}, "");
 		}
 	elsif (defined($quota)) {
 		# Has Unix quotas
@@ -5922,13 +5925,13 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
 	push(@cols, $u->{'userextra'} eq 'database' ? &$login_access_label('db') :
-		    $u->{'userextra'} eq 'web' ? &$login_access_label('web') :
+		    $u->{'userextra'} eq 'webuser' ? &$login_access_label('web') :
 		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
 			&$login_access_label($udbs ? 'db' : undef, 'ftp') :
 		    	(&$login_access_label(
-				# Add db and web (later XXXX) first
+				$u->{'userextra'} eq 'webuser' ? 'web' :
 				$udbs ? 'db' : undef,
 				$shell->{'id'} eq 'nologin' ? ($u->{'email'} ? 'mail' : undef) :
 				$shell->{'id'} eq 'ftp' ? ($u->{'email'} ? 'mail' : undef, 'ftp') :
