@@ -5863,11 +5863,11 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		push(@cols, $quota ? &quota_show($quota, "home")
 				   : $text{'form_unlimit'});
 		my $color = $u->{'over_quota'} ? "#ff0000" :
-			    $u->{'warn_quota'} ? "#ff8800" :
+			    $u->{'warn_quota'} ? "#df7d0e" :
 			    $u->{'spam_quota'} ? "#aaaaaa" : undef;
 		if ($color) {
-			push(@cols, "<font color=$color>".
-				    &quota_show($uquota, "home")."</font>");
+			push(@cols, "<font color=$color><i>".
+				    &quota_show($uquota, "home")."</i></font>");
 			}
 		else {
 			push(@cols, &quota_show($uquota, "home"));
@@ -6166,7 +6166,7 @@ sub quota_field
 my ($name, $value, $used, $fused, $fs, $u) = @_;
 my $rv;
 my $color = $u->{'over_quota'} ? "#ff0000" :
-	    $u->{'warn_quota'} ? "#ff8800" :
+	    $u->{'warn_quota'} ? "#df7d0e" :
 	    $u->{'spam_quota'} ? "#aaaaaa" : undef;
 if (&can_mailbox_quota()) {
 	# Show inputs for editing quotas
