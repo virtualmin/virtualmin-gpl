@@ -31,7 +31,7 @@ else {
 	&ui_print_header($din, $text{'user_edit'.$suffix}, "");
 	}
 
-$shell_switch = &can_mailbox_ftp() && !$mailbox && $user->{'unix'} && !$user->{'webowner'};
+$shell_switch = ((&can_mailbox_ftp() && !$mailbox) || &master_admin()) && $user->{'unix'} && !$user->{'webowner'};
 @sgroups = &allowed_secondary_groups($d);
 # Work out if the other permissions section has anything to display
 if ($d && !$mailbox) {

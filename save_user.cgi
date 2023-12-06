@@ -542,7 +542,7 @@ else {
 			$emailmailbox = 1;
 			}
 		}
-	else {
+	else { 
 		# Check if any extras clash
 		%oldextra = map { $_, 1 } @{$old{'extraemail'}};
 		foreach $e (@extra) {
@@ -673,6 +673,15 @@ else {
 			if (!$user->{'nomailfile'}) {
 				# Rename his mail file (if needed)
 				&rename_mail_file($user, \%old);
+				}
+			}
+		elsif (&master_admin()) {
+			# Update shell if called in master admin mode, and only if available 
+			if (defined($in{'shell'})) {
+				&check_available_shell($in{'shell'}, 'mailbox',
+						       $user->{'shell'}) ||
+					&error($text{'user_eshell'});
+				$user->{'shell'} = $in{'shell'};
 				}
 			}
 
