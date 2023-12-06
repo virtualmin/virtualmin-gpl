@@ -33,8 +33,7 @@ if (!$in{'new'}) {
         $dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};
         }
 
-print &ui_table_start($d ? $text{'user_header_db'} : $text{'user_lheader'},
-                      "width=100%", 2);
+print &ui_table_start($text{'user_header_db'}, "width=100%", 2);
 
 # Edit db user
 print &ui_table_row(&hlink($text{'user_user2'}, "username_db"),
@@ -61,17 +60,14 @@ my @dbs;
 
 # Show allowed databases
 if (@dbs) {
-        my $hrr = "<hr data-row-separator>";
-        print &ui_table_row(undef, $hrr, 2);
-	print &ui_table_row(undef, $hrr, 2) if (!$dbuser->{'mysql_user'} && $shell_row);
+        print &ui_table_row(undef, "<hr data-row-separator>", 2);
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
 			   $_->{'name'}." ($_->{'desc'})" ] } @{$dbuser->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),
 	  &ui_multi_select("dbs", \@userdbs, \@alldbs, 5, 1, 0,
-			   $text{'user_dbsall'}, $text{'user_dbssel'}),
-	  2, \@tds);
+			   $text{'user_dbsall'}, $text{'user_dbssel'}), 2, \@tds);
 	}
 
 print &ui_table_end();
