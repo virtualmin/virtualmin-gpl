@@ -15,7 +15,8 @@ else {
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
-&ui_print_header($din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "");
+&ui_print_header($din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "",
+        $in{'new'} ? 'users_explain_user_web' : undef);
 
 @tds = ( "width=30%", "width=70%" );
 print &ui_form_start("save_user_web.cgi", "post");

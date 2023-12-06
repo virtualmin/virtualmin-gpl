@@ -15,7 +15,8 @@ else {
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
-&ui_print_header($din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "");
+&ui_print_header($din, $text{$in{'new'} ? 'user_createdb' : 'user_edit'}, "",
+	$in{'new'} ? 'users_explain_user_db' : undef);
 $user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );

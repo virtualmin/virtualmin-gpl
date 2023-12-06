@@ -15,7 +15,7 @@ else {
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
-&ui_print_header($din, $text{'user_createweb'}, "");
+&ui_print_header($din, $text{'user_createweb'}, "", "users_explain_user_ftp");
 $user = &create_initial_user($d, undef, 1);
 
 # FTP user in a sub-server .. check if FTP restrictions are active

@@ -18,7 +18,7 @@ $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
 if ($in{'new'}) {
 	$suffix = $in{'web'} ? 'web' : '';
-	&ui_print_header($din, $text{'user_create'.$suffix}, "");
+	&ui_print_header($din, $text{'user_create'.$suffix}, "", "users_explain_user");
 	$user = &create_initial_user($d, undef, $in{'web'});
 	}
 else {

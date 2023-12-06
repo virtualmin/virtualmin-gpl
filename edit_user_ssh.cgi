@@ -15,7 +15,7 @@ else {
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
-&ui_print_header($din, $text{'user_createssh'}, "");
+&ui_print_header($din, $text{'user_createssh'}, "", "users_explain_user_ssh");
 $user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );

@@ -16,7 +16,7 @@ $d->{'mail'} || &error($text{'users_ecannot3'});
 
 $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
-&ui_print_header($din, $text{'user_createmail'}, "");
+&ui_print_header($din, $text{'user_createmail'}, "", "users_explain_user_mail");
 $user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );
