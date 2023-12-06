@@ -19,7 +19,6 @@ $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 $user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );
-@rowattrs = ('data-column-span="all" data-column-separator="1" data-column-locked="1"');
 print &ui_form_start("save_user_db.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("olduser", $in{'user'});
@@ -74,7 +73,7 @@ if ($htpasswd_data) {
         print $htpasswd_data;
         my $msg = &text('users_addprotecteddir2',
                 &get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
-        print &ui_table_row(undef, $msg, 2, undef, \@rowattrs);
+        print &ui_table_row(undef, $msg, 2);
         print &ui_table_end();
         }
 else {
