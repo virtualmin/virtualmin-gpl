@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 # edit_user_web.cgi
-# Display a form for adding a web user.
+# Display a form for adding a webserver user.
 
 require './virtual-server-lib.pl';
 &ReadParse();
@@ -16,18 +16,17 @@ $din = $d ? &domain_in($d) : undef;
 $tmpl = $d ? &get_template($d->{'template'}) : &get_template(0);
 
 &ui_print_header($din, $text{$in{'new'} ? 'user_createwebserver' : 'user_edit'}, "");
-$user = &create_initial_user($d);
 
 @tds = ( "width=30%", "width=70%" );
-print &ui_form_start("save_user_db.cgi", "post");
+print &ui_form_start("save_user_web.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("olduser", $in{'user'});
 print &ui_hidden("dom", $in{'dom'});
 
-my $webuser = {};
+my $webuser = &create_initial_user($d);
 my $webuser_name;
 if (!$in{'new'}) {
-        my @webusers = &list_domain_users($d, 1, 1, 1, 0);
+        my @webusers = &list_domain_users($d, 1, 0, 1, 1);
         ($webuser) = grep { $_->{'user'} eq $in{'user'} } @webusers;
         $webuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
         $webuser_name = &remove_userdom($webuser->{'user'}, $d) || $webuser->{'user'};
@@ -39,7 +38,7 @@ foreach my $f (&list_mail_plugins()) {
 	if ($f eq "virtualmin-htpasswd") {
                 foreach my $f (&list_mail_plugins()) {
                         if ($f eq "virtualmin-htpasswd") {
-                                $input = &trim(&plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
+                                $input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
                                 $htpasswd_data = $input if ($input);
                                 last;
                                 }
@@ -80,7 +79,6 @@ else {
         print &text('users_addprotecteddir',
                 &get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
         }
-
 
 # Form create/delete buttons
 if ($htpasswd_data) {

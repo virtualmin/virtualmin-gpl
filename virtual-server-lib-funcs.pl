@@ -753,6 +753,7 @@ if ($config{'mail'} && !$novirts) {
 
 # Get all virtusers to look for those for users
 local @virts;
+local @webserver_virts;
 if (!$novirts) {
 	@virts = &list_virtusers();
 	}
@@ -1072,6 +1073,9 @@ if (!$novirts) {
 				}
 			}
 		}
+	# Include webserver users
+	@webserver_virts = &list_webserver_users();
+	push(@users, @webserver_virts) if (@webserver_virts);
 	}
 
 if (!$_[4] && $d) {
@@ -1154,12 +1158,41 @@ if (!$_[4] && $d) {
 				&indexof($_->{'user'}, @other_users_with_dbs) < 0
 			} @users;
 			# Now clear Virtualmin record of extra database users
-			# belonging to other user account
+			# belonging to an actual user account
 			my $updated_domain;
 			foreach my $extra_database_user (@extra_database_users) {
 				if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
 					&lock_domain($d) if (!$updated_domain++);
 					&update_domain($d, "$extra_database_user->{'type'}_users", $extra_database_user->{'user'});
+					}
+				}
+			# Save only if we updated the domain
+			&save_domain($d),
+			unlock_domain($d)
+				if ($updated_domain);
+			}
+		}
+
+	# If extra webserver users overlap with system users, which already
+	# can access virtualmin-htpasswd module, pop them off the list and
+	# update domain config
+	if (@webserver_virts) {
+		my @other_users_with_webs = map { $_->{'user'} } grep { 
+			$_->{'userextra'} ne 'webuser'
+		} @users;
+		# Clear main array of redundant extra webserver users
+		if (@other_users_with_webs) {
+			@users = grep { 
+				$_->{'userextra'} ne 'webuser' ||
+				&indexof($_->{'user'}, @other_users_with_webs) < 0
+			} @users;
+			# Now clear Virtualmin record of extra webusers users
+			# belonging to an actual user account
+			my $updated_domain;
+			foreach my $webserver_virt (@webserver_virts) {
+				if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
+					&lock_domain($d) if (!$updated_domain++);
+					&update_domain($d, "webusers", $webserver_virt->{'user'});
 					}
 				}
 			# Save only if we updated the domain
@@ -2208,6 +2241,9 @@ if ($_[0]->{'userextra'}) {
 			&save_domain($_[1]);
 			unlock_domain($_[1]);
 			}
+		}
+	if ($_[0]->{'userextra'} eq 'webuser') {
+		&delete_webserver_user($_[0], $_[1]);
 		}
 	return undef;
 	}
