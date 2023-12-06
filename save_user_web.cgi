@@ -17,10 +17,10 @@ else {
 &can_edit_users() || &error($text{'users_ecannot'});
 
 # User to edit or delete
+my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});
 if (!$in{'new'}) {
         my @webusers = &list_domain_users($d, 1, 0, 1, 1);
         my $olduser_name = $in{'olduser'};
-        my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});
         ($user) = grep { $_->{'user'} eq $olduser_name } @webusers;
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
         my %olduser = %{$user};
