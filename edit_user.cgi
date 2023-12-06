@@ -511,6 +511,7 @@ if ($htpasswdplugin) {
 		if ($f eq "virtualmin-htpasswd") {
 			$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 			print $input;
+			last;
 			}
 		}
 	print &ui_hidden_table_end("table5");
