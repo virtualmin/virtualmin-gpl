@@ -20,9 +20,15 @@ else {
 if (!$in{'new'}) {
         my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
         my $olduser_name = $in{'olduser'};
+        my $full_dbuser = lc("$in{'dbuser'}"."@".$d->{'dom'});
         ($user) = grep { $_->{'user'} eq $olduser_name } @dbusers;
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
         my %olduser = %{$user};
+        # If renaming user, check if new name is not already used
+        if ($olduser_name ne $full_dbuser) {
+                my ($user_check) = grep { $_->{'user'} eq $full_dbuser } @dbusers;
+                !$user_check || &error(&text('user_ealreadyexist', &html_escape($full_dbuser)));
+                }
 
         if ($in{'delete'}) {
                 # Delete database user
@@ -35,7 +41,7 @@ if (!$in{'new'}) {
 	        }
         else {
                 # Update user
-                $user->{'user'} = lc("$in{'dbuser'}"."@".$d->{'dom'});
+                $user->{'user'} = $full_dbuser;
                 # Pass password
                 if (!$in{'dbpass_def'}) {
                         $user->{'pass'} = $in{'dbpass'};
@@ -59,7 +65,7 @@ if (!$in{'new'}) {
 else {
 	# Create initial user
         $user = &create_initial_user($d);
-        $user->{'user'} = lc("$in{'dbuser'}"."@".$d->{'dom'});
+        $user->{'user'} = $full_dbuser;
         my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
         my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
         !$user_already || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
