@@ -35,7 +35,8 @@ if ($mleft != 0) {
 	my @ssh_shells =
 		grep { $_->{'id'} eq 'ssh' && $_->{'avail'} }
 			&list_available_shells($d);
-	if (@ssh_shells) {
+	# Only available for master admin
+	if (&master_admin() && @ssh_shells) {
 		push(@links, [ "edit_user_ssh.cgi?new=1&dom=$in{'dom'}",
 					$text{'users_add_ssh'} ]);
 		}
