@@ -511,6 +511,9 @@ if ($htpasswdplugin) {
 		if ($f eq "virtualmin-htpasswd") {
 			$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 			print $input;
+			my $msg = &text('users_addprotecteddir2',
+			&get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
+			print &ui_table_row(undef, $msg, 2);
 			last;
 			}
 		}
