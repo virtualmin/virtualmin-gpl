@@ -52,9 +52,11 @@ if ($mleft != 0) {
 		push(@links, [ "edit_user_db.cgi?new=1&dom=$in{'dom'}",
 			$text{'users_add_db'} ]);
 		}
-	if ($d->{'web'}) {
-		push(@links, [ "edit_user_web.cgi?new=1&dom=$in{'dom'}",
-			$text{'users_add_web'} ]);
+	if (&domain_has_website($d)) {
+		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
+			push(@links, [ "edit_user_web.cgi?new=1&dom=$in{'dom'}",
+				$text{'users_add_web'} ]);
+			}
 		}
 	}
 push(@links, [ "mass_ucreate_form.cgi?dom=$in{'dom'}",
