@@ -515,7 +515,10 @@ $err = &validate_user($d, $user, $olduser);
 if ($user->{'userextra'}) {
 	if ($user->{'userextra'} eq 'database') {
 		&update_domain($d, "$olduser->{'type'}_users", $olduser->{'user'});
-		&update_domain($d, "$user->{'type'}_users", $user->{'user'}, $user->{'pass'});
+		&update_domain($d, "$user->{'type'}_users",
+                        $user->{'user'},
+                        { pass => $pass,
+                          dbs => $user->{'dbs'} });
 		&modify_database_user($user, $olduser, $d);
 		}
 	if ($user->{'userextra'} eq 'webuser') {

@@ -1085,10 +1085,11 @@ if (!$_[4] && $d) {
 		my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
 		my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
 		foreach my $user (keys %$dt_users_extra_hash) {
-			my $pass = $dt_users_extra_hash->{$user};
+			my $data = $dt_users_extra_hash->{$user};
 			push(@extra_database_users, { 'user' => $user, 'type' => $dt });
 			push(@users, { 'user' => $user,
-				'pass' => $pass,
+				'data' => $data,
+				'pass' => $data->{'pass'},
 				'type' => $dt,
 				'filetype' => '_db',
 				'userextra' => 'database' });

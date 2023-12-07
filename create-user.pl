@@ -377,7 +377,10 @@ if ($db_only) {
         &error($err) if ($err);
         # Add user to domain config
         foreach my $dt (@$dts) {
-                &update_domain($d, "${dt}_users", $user->{'user'}, $user->{'pass'});
+		&update_domain($d, "${dt}_users",
+                        $user->{'user'},
+                        { pass => $pass,
+                          dbs => $user->{'dbs'} });
                 }
 	# Save domain
 	&lock_domain($d);

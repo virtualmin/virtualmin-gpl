@@ -58,7 +58,10 @@ if (!$in{'new'}) {
                 }
                 $user->{'dbs'} = \@dbs;
                 &update_domain($d, "$olduser{'type'}_users", $olduser_name);
-                &update_domain($d, "$user->{'type'}_users", $user->{'user'}, $user->{'pass'});
+                &update_domain($d, "$user->{'type'}_users",
+                        $user->{'user'},
+                        { pass => $user->{'pass'},
+                          dbs => $user->{'dbs'} });
                 &modify_database_user($user, \%olduser, $d);
                 }
         }
@@ -88,7 +91,11 @@ else {
         &error($err) if ($err);
         # Add user to domain config
         foreach my $dt (@$dts) {
-                &update_domain($d, "${dt}_users", $user->{'user'}, $user->{'pass'});
+                &update_domain($d, "${dt}_users",
+                        $user->{'user'},
+                        $user->{'user'},
+                        { pass => $user->{'pass'},
+                          dbs => $user->{'dbs'} });
                 }
 	}
 
