@@ -5809,15 +5809,19 @@ if ($config{'show_lastlogin'} && $d->{'mail'}) {
 	push(@headers, $text{'users_ll'});
 	}
 push(@headers, $text{'users_ushell'});
+# Database column
 if (($d->{'mysql'} || $d->{'postgres'}) && $config{'show_dbs'}) {
 	push(@headers, $text{'users_db'});
 	}
+# Other plugins columns
 local ($f, %plugcol);
-foreach $f (&list_mail_plugins()) {
-	local $col = &plugin_call($f, "mailbox_header", $d);
-	if ($col) {
-		$plugcol{$f} = $col;
-		push(@headers, $col);
+if ($config{'show_plugins'}) {
+	foreach $f (&list_mail_plugins()) {
+		local $col = &plugin_call($f, "mailbox_header", $d);
+		if ($col) {
+			$plugcol{$f} = $col;
+			push(@headers, $col);
+			}
 		}
 	}
 
@@ -5951,8 +5955,10 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		}
 
 	# Show columns from plugins
-	foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
-		push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
+	if ($config{'show_plugins'}) {
+		foreach $f (grep { $plugcol{$_} } &list_mail_plugins()) {
+			push(@cols, &plugin_call($f, "mailbox_column", $u, $d));
+			}
 		}
 
 	# Insert checkbox, if needed

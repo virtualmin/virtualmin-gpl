@@ -29,6 +29,7 @@ show_mailsize=Show mailbox size in users list?,1,1-Yes,0-No
 show_mailuser=Show mailbox size when editing users?,1,1-Yes,0-No
 show_lastlogin=Show last login in users list?,1,1-Yes,0-No
 show_dbs=Show databases in users list?,1,1-Yes,0-No
+show_plugins=Show other plugins in users list?,1,1-Yes,0-No
 show_sysinfo=Show system information to domain owners and resellers?,1,1-Yes,2-No
 show_uquotas=Quotas to show on system information page,1,1-Domain owner,0-Whole domain
 template_auto=Allow editing of limits when creating server?,1,0-Yes,1-No
