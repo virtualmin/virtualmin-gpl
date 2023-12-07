@@ -15062,8 +15062,8 @@ if ($config{'dns'}) {
 			$mastermsg ||= &text('check_dnsmaster2',
 				     "<tt>$master</tt>", "<tt>$masterip</tt>");
 			}
-
-		&$second_print($text{'check_dnsok2'}." ".$mastermsg);
+		$mastermsg = ", $mastermsg" if ($mastermsg);
+		&$second_print($text{'check_dnsok2'}.$mastermsg);
 
 		# Make sure TLSA records can be created
 		if ($config{'tlsa_records'}) {
