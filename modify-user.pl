@@ -520,6 +520,9 @@ if ($user->{'userextra'}) {
                         { pass => $pass,
                           dbs => $user->{'dbs'} });
 		&modify_database_user($user, $olduser, $d);
+		&lock_domain($d);
+		&save_domain($d);
+		unlock_domain($d);
 		}
 	if ($user->{'userextra'} eq 'webuser') {
 		&usage($text{'user_ewebusersupp'});
