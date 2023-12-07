@@ -93,7 +93,6 @@ else {
         foreach my $dt (@$dts) {
                 &update_domain($d, "${dt}_users",
                         $user->{'user'},
-                        $user->{'user'},
                         { pass => $user->{'pass'},
                           dbs => $user->{'dbs'} });
                 }
