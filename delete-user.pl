@@ -54,7 +54,7 @@ $d = &get_domain_by("dom", $domain);
 $d || usage("Virtual server $domain does not exist");
 &obtain_lock_mail($d);
 &obtain_lock_unix($d);
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 ($user) = grep { $_->{'user'} eq $username ||
 		 &remove_userdom($_->{'user'}, $d) eq $username } @users;
 $user || usage("No user named $username was found in the server $domain");

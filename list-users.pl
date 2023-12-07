@@ -102,7 +102,7 @@ else {
 @ashells = grep { $_->{'mailbox'} } &list_available_shells();
 
 foreach $d (@doms) {
-	@users = &list_domain_users($d, $owner, 0, 0, 0);
+	@users = &list_domain_users($d, $owner, 0, 0, 0, 1);
 	if (%usernames) {
 		@users = grep { $usernames{$_->{'user'}} ||
 				$usernames{&remove_userdom($_->{'user'}, $d)} }

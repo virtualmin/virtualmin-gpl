@@ -15,7 +15,7 @@ if ($in{'confirm'}) {
 	&obtain_lock_unix($d);
 	&obtain_lock_mail($d);
 	}
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 
 # Get the users
 foreach $du (@del) {

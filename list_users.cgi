@@ -8,12 +8,12 @@ require './virtual-server-lib.pl';
 $d = &get_domain($in{'dom'});
 $d || &error($text{'edit_egone'});
 &can_edit_domain($d) && &can_edit_users() || &error($text{'users_ecannot'});
-@users = &list_domain_users($d, 0, 0, 0, 0);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 $utotal = scalar(@users);
 if (!$d->{'parent'}) {
 	# Sum up users from all sub-domains
 	foreach my $sd (&get_domain_by("parent", $d->{'id'})) {
-		local @susers = &list_domain_users($sd, 0, 1, 1, 1);
+		local @susers = &list_domain_users($sd, 0, 1, 1, 1, 1);
 		$utotal += scalar(@susers);
 		}
 	}

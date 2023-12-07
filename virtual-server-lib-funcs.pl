@@ -721,12 +721,12 @@ foreach my $m (keys %get_domain_by_maps) {
 	}
 }
 
-# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs])
+# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [show-extrausers])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
 sub list_domain_users
 {
-local ($d, $skipunix, $novirts, $noquotas, $nodbs) = @_;
+local ($d, $skipunix, $novirts, $noquotas, $nodbs, $show_extrausers) = @_;
 
 # Get all aliases (and maybe generics) to look for those that match users
 local (%aliases, %generics);
@@ -1073,26 +1073,30 @@ if (!$novirts) {
 				}
 			}
 		}
-	# Include webserver users
-	@webserver_virts = &list_webserver_users();
-	push(@users, @webserver_virts) if (@webserver_virts);
+	if ($show_extrausers) {
+		# Include webserver users
+		@webserver_virts = &list_webserver_users();
+		push(@users, @webserver_virts) if (@webserver_virts);
+		}
 	}
 
 if (!$_[4] && $d) {
 	# Collect domain extra database users
 	my @extra_database_users;
-	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-		my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
-		my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
-		foreach my $user (keys %$dt_users_extra_hash) {
-			my $data = $dt_users_extra_hash->{$user};
-			push(@extra_database_users, { 'user' => $user, 'type' => $dt });
-			push(@users, { 'user' => $user,
-				'data' => $data,
-				'pass' => $data->{'pass'},
-				'type' => $dt,
-				'filetype' => '_db',
-				'userextra' => 'database' });
+	if ($show_extrausers) {
+		foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+			my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
+			my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
+			foreach my $user (keys %$dt_users_extra_hash) {
+				my $data = $dt_users_extra_hash->{$user};
+				push(@extra_database_users, { 'user' => $user, 'type' => $dt });
+				push(@users, { 'user' => $user,
+					'data' => $data,
+					'pass' => $data->{'pass'},
+					'type' => $dt,
+					'filetype' => '_db',
+					'userextra' => 'database' });
+				}
 			}
 		}
 
@@ -1144,62 +1148,63 @@ if (!$_[4] && $d) {
 				}
 			}
 		}
-
-	# If extra database users overlap with system users, which already
-	# handle databases, pop them off the list and update domain config
-	if (@extra_database_users) {
-		my @other_users_with_dbs = map { $_->{'user'} } grep { 
-			$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
-			$_->{'userextra'} ne 'database'
-		} @users;
-		# Clear main array of redundant extra database users
-		if (@other_users_with_dbs) {
-			@users = grep { 
-				$_->{'userextra'} ne 'database' ||
-				&indexof($_->{'user'}, @other_users_with_dbs) < 0
+	if ($show_extrausers) {
+		# If extra database users overlap with system users, which already
+		# handle databases, pop them off the list and update domain config
+		if (@extra_database_users) {
+			my @other_users_with_dbs = map { $_->{'user'} } grep { 
+				$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
+				$_->{'userextra'} ne 'database'
 			} @users;
-			# Now clear Virtualmin record of extra database users
-			# belonging to an actual user account
-			my $updated_domain;
-			foreach my $extra_database_user (@extra_database_users) {
-				if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
-					&lock_domain($d) if (!$updated_domain++);
-					&update_domain($d, "$extra_database_user->{'type'}_users", $extra_database_user->{'user'});
+			# Clear main array of redundant extra database users
+			if (@other_users_with_dbs) {
+				@users = grep { 
+					$_->{'userextra'} ne 'database' ||
+					&indexof($_->{'user'}, @other_users_with_dbs) < 0
+				} @users;
+				# Now clear Virtualmin record of extra database users
+				# belonging to an actual user account
+				my $updated_domain;
+				foreach my $extra_database_user (@extra_database_users) {
+					if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
+						&lock_domain($d) if (!$updated_domain++);
+						&update_domain($d, "$extra_database_user->{'type'}_users", $extra_database_user->{'user'});
+						}
 					}
+				# Save only if we updated the domain
+				&save_domain($d),
+				unlock_domain($d)
+					if ($updated_domain);
 				}
-			# Save only if we updated the domain
-			&save_domain($d),
-			unlock_domain($d)
-				if ($updated_domain);
 			}
-		}
 
-	# If extra webserver users overlap with system users, which already
-	# can access virtualmin-htpasswd module, pop them off the list and
-	# update domain config
-	if (@webserver_virts) {
-		my @other_users_with_webs = map { $_->{'user'} } grep { 
-			$_->{'userextra'} ne 'webuser'
-		} @users;
-		# Clear main array of redundant extra webserver users
-		if (@other_users_with_webs) {
-			@users = grep { 
-				$_->{'userextra'} ne 'webuser' ||
-				&indexof($_->{'user'}, @other_users_with_webs) < 0
+		# If extra webserver users overlap with system users, which already
+		# can access virtualmin-htpasswd module, pop them off the list and
+		# update domain config
+		if (@webserver_virts) {
+			my @other_users_with_webs = map { $_->{'user'} } grep { 
+				$_->{'userextra'} ne 'webuser'
 			} @users;
-			# Now clear Virtualmin record of extra webusers users
-			# belonging to an actual user account
-			my $updated_domain;
-			foreach my $webserver_virt (@webserver_virts) {
-				if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
-					&lock_domain($d) if (!$updated_domain++);
-					&update_domain($d, "webusers", $webserver_virt->{'user'});
+			# Clear main array of redundant extra webserver users
+			if (@other_users_with_webs) {
+				@users = grep { 
+					$_->{'userextra'} ne 'webuser' ||
+					&indexof($_->{'user'}, @other_users_with_webs) < 0
+				} @users;
+				# Now clear Virtualmin record of extra webusers users
+				# belonging to an actual user account
+				my $updated_domain;
+				foreach my $webserver_virt (@webserver_virts) {
+					if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
+						&lock_domain($d) if (!$updated_domain++);
+						&update_domain($d, "webusers", $webserver_virt->{'user'});
+						}
 					}
+				# Save only if we updated the domain
+				&save_domain($d),
+				unlock_domain($d)
+					if ($updated_domain);
 				}
-			# Save only if we updated the domain
-			&save_domain($d),
-			unlock_domain($d)
-				if ($updated_domain);
 			}
 		}
 

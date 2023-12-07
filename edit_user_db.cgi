@@ -28,7 +28,7 @@ print &ui_hidden("dom", $in{'dom'});
 my $dbuser = {};
 my $dbuser_name;
 if (!$in{'new'}) {
-        my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+        my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
         ($dbuser) = grep { $_->{'user'} eq $in{'user'} } @dbusers;
         $dbuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
         $dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};

@@ -368,7 +368,7 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 
 # Create database user only
 if ($db_only) {
-	my @dbusers = &list_domain_users($d, 1, 1, 1, 0);
+	my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
         my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
         !$user_already || &error(&text('user_ealreadyexist', $user->{'user'}));
 	$user->{'pass'} = $pass;

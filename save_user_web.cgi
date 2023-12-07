@@ -19,7 +19,7 @@ else {
 # User to edit or delete
 my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});
 if (!$in{'new'}) {
-        my @webusers = &list_domain_users($d, 1, 0, 1, 1);
+        my @webusers = &list_domain_users($d, 1, 0, 1, 1, 1);
         my $olduser_name = $in{'olduser'};
         ($user) = grep { $_->{'user'} eq $olduser_name } @webusers;
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
@@ -52,7 +52,7 @@ else {
 	# Create initial user
         $user = &create_initial_user($d);
         $user->{'user'} = lc("$in{'webuser'}"."@".$d->{'dom'});
-        my @webusers = &list_domain_users($d, 1, 0, 1, 1);
+        my @webusers = &list_domain_users($d, 1, 0, 1, 1, 1);
         my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @webusers;
         !$user_already || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
         

@@ -12,7 +12,7 @@ $d = &get_domain($in{'dom'});
 
 &obtain_lock_unix($d);
 &obtain_lock_mail($d);
-@users = &list_domain_users($d);
+@users = &list_domain_users($d, 0, 0, 0, 0, 1);
 @ashells = grep { $_->{'mailbox'} && $_->{'avail'} } &list_available_shells();
 
 # Get the users
