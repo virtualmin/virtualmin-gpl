@@ -1102,6 +1102,7 @@ if ($show_extrausers) {
 		}
 	}
 
+if (!$nodbs && $d) {
 	# Add accessible databases
 	local @dbs = &domain_databases($d);
 	local $db;
