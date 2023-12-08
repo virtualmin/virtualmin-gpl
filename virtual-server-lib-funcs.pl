@@ -1073,11 +1073,13 @@ if (!$novirts) {
 				}
 			}
 		}
-	if ($show_extrausers) {
-		# Include webserver users
-		@webserver_virts = &list_webserver_users();
-		push(@users, @webserver_virts) if (@webserver_virts);
-		}
+	if ($show_extrausers && &domain_has_website($d)) {
+		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
+			# Include webserver users
+			@webserver_virts = &list_webserver_users();
+			push(@users, @webserver_virts) if (@webserver_virts);
+			}
+		}	
 	}
 
 if (!$_[4] && $d) {
