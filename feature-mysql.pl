@@ -1366,6 +1366,28 @@ foreach my $uname (keys %userdbs) {
 		}
 	}
 
+# Restoring virtual MySQL users
+my @dbusers_virt = grep { $_->{'userextra'} eq 'database' }
+	&list_domain_users($d, 1, 1, 1, 1, 1);
+if (@dbusers_virt) {
+	&$first_print($text{'restore_mysqludummy'});
+	&$indent_print();
+	foreach my $dbuser_virt (@dbusers_virt) {
+		&$first_print(&text('restore_mysqludummy2', $dbuser_virt->{'user'}));
+		$dbuser_virt->{'dbs'} = $dbuser_virt->{'data'}->{'dbs'};
+		my $err = &create_databases_user($d, $dbuser_virt, 'mysql');
+		if ($err) {
+			&$second_print(&text('restore_emysqluimport', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
+
+		}
+	&$outdent_print();
+	&$second_print($text{'setup_done'});
+	}
+
 # Put quotas back
 &enable_quotas($d);
 
