@@ -1082,25 +1082,25 @@ if (!$novirts) {
 		}	
 	}
 
-if (!$_[4] && $d) {
-	# Collect domain extra database users
-	my @extra_database_users;
-	if ($show_extrausers) {
-		foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-			my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
-			my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
-			foreach my $user (keys %$dt_users_extra_hash) {
-				my $data = $dt_users_extra_hash->{$user};
-				push(@extra_database_users, { 'user' => $user, 'type' => $dt });
-				push(@users, { 'user' => $user,
-					'data' => $data,
-					'pass' => $data->{'pass'},
-					'type' => $dt,
-					'filetype' => '_db',
-					'userextra' => 'database' });
-				}
+# Collect domain extra database users
+my @extra_database_users;
+if ($show_extrausers) {
+	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+		my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
+		my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
+		foreach my $user (keys %$dt_users_extra_hash) {
+			my $data = $dt_users_extra_hash->{$user};
+			push(@extra_database_users, { 'user' => $user, 'type' => $dt })
+				if (!$nodbs);
+			push(@users, { 'user' => $user,
+				'data' => $data,
+				'pass' => $data->{'pass'},
+				'type' => $dt,
+				'filetype' => '_db',
+				'userextra' => 'database' });
 			}
 		}
+	}
 
 	# Add accessible databases
 	local @dbs = &domain_databases($d);
