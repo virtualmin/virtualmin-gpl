@@ -1253,14 +1253,15 @@ if ($d) {
 return @users;
 }
 
-# create_databases_user(&domain, &user)
+# create_databases_user(&domain, &user, [type])
 # Create a database user for some domain
 # Returns an error message on failure, or undef on success
 sub create_databases_user
 {
-my ($d, $user) = @_;
+my ($d, $user, $type) = @_;
 my @dts;
 foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	next if ($type && $type ne $dt);
 	push(@dts, $dt);
 	eval {
 		local $main::error_must_die = 1;
