@@ -123,7 +123,7 @@ if (!$d->{'alias'}) {
 			$inp = &ui_radio("http2",
 				@$prots == 0 ? 2 :
 				&indexof("h2", @$prots) >= 0 ? 1 : 0,
-				[ [ 2, $text{'default'}." ($def)" ],
+				[ [ 2, $text{'newweb_http2_def'}." ($def)" ],
 				  [ 1, $text{'yes'} ],
 				  [ 0, $text{'no'} ] ]);
 			}

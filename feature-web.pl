@@ -2926,11 +2926,14 @@ if ($config{'proxy_pass'} == 2) {
 	}
 
 # Enable HTTP2 for new websites
+my @opts = ( [ 0, $text{'newweb_http2_def'} ],
+	     [ 1, $text{'yes'} ],
+	     [ 2, $text{'no'} ] );
+if (!$tmpl->{'default'}) {
+	unshift(@opts, [ '', $text{'newweb_http2_inherit'} ]);
+	}
 print &ui_table_row(&hlink($text{'newweb_http2'}, 'template_web_http2'),
-    &ui_radio("web_http2", int($tmpl->{'web_http2'}),
-	      [ [ 0, $text{'default'} ],
-	        [ 1, $text{'yes'} ],
-	        [ 2, $text{'no'} ] ]));
+    &ui_radio("web_http2", $tmpl->{'web_http2'}, \@opts));
 
 # Default redirects
 print &ui_table_hr();
