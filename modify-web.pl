@@ -977,8 +977,9 @@ foreach $d (@doms) {
 
 	if (defined($proxy) || defined($framefwd) || $htmldir ||
 	    $port || $sslport || $urlport || $sslurlport || $mode || $version ||
-	    defined($children_no_check) || defined($renew) || $breakcert || $linkcert || $fixhtmldir ||
-	    defined($fcgiwrap) || defined($phplog)) {
+	    defined($children_no_check) || defined($renew) || $breakcert ||
+	    $linkcert || $fixhtmldir || defined($fcgiwrap) ||
+	    defined($phplog) || defined($fcgiwrap)) {
 		# Save the domain
 		&$first_print($text{'save_domain'});
 		&save_domain($d);
