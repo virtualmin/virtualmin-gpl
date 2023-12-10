@@ -369,7 +369,7 @@ else {
 
 		# Make sure home exists, for web owner user
 		if ($user->{'webowner'} && !-d $home) {
-			&error(&text('user_ehomeexists2', &html_escape($home)));
+			&error(&text('user_ehomeexists', &html_escape($home)));
 			}
 		}
 
