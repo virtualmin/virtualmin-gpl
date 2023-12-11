@@ -451,7 +451,7 @@ else {
 &delete_php_fpm_pool($d);	# May not exist, but delete just in case
 if ($d->{'fcgiwrap_port'}) {
 	&delete_fcgiwrap_server($d);
-	delete($d->{'fcgiwrap_port'});
+	&refresh_domain_fcgiwrap($d, 1);
 	}
 undef(@apache::get_config_cache);
 return 1;
@@ -5309,7 +5309,7 @@ if ($d->{'fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
 	my $domdir = $1;
 	&unlink_file($d->{'fcgiwrap_port'});
 	&unlink_file($domdir);
-	delete($d->{'fcgiwrap_port'});
+	&refresh_domain_fcgiwrap($d, 1);
 	}
 }
 
@@ -5419,7 +5419,7 @@ foreach my $p (@ports) {
 	}
 &register_post_action(\&restart_apache);
 &delete_fcgiwrap_server($d);
-delete($d->{'fcgiwrap_port'});
+&refresh_domain_fcgiwrap($d, 1);
 return undef;
 }
 
