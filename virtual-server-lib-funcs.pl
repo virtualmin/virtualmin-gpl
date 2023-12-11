@@ -11397,6 +11397,17 @@ else {
 	}
 }
 
+# refresh_domain_fcgiwrap(&domain, [force])
+sub refresh_domain_fcgiwrap
+{
+my ($d, $f) = @_;
+if ($f || (!&supports_fcgiwrap() || &supports_suexec())) {
+	foreach my $key (grep { /fcgiwrap_port$/ } keys %{$d}) {
+		delete($d->{$key});
+		}
+	}
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not

@@ -2914,6 +2914,9 @@ if ($ok) {
 					}
 				}
 
+			# Clear features that should be re-created locally
+			&refresh_domain_fcgiwrap($d, 1);
+
 			# Finally, create it
 			&$indent_print();
 			delete($d->{'missing'});
