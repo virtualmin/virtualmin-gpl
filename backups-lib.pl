@@ -2956,12 +2956,12 @@ if ($ok) {
 				my $fcgiwrap_port_dir =
 					($fcgiwrap_port_plugin ? "${fcgiwrap_port_plugin}_" : "").
 						'fcgiwrap_port';
-				# If not the same webserver, flip domain config directives
+				# If not the same webserver, flip and clean domain config directives
 				if (!$same_web) {
 					$d->{$fcgiwrap_port_dir} = $d->{$fcgiwrap_port}
 						if (!$d->{$fcgiwrap_port_dir});
 					delete($d->{$fcgiwrap_port});
-				}
+					}
 				# Need to disable fcgiwrap for domain
 				if ($disable_fcgiwrap) {
 					my ($fcgiwrap_plugin) = $newweb =~ /-(.*)$/;
