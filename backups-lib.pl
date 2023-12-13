@@ -2971,7 +2971,6 @@ if ($ok) {
 						if (!$fcgiwrap_plugin);
 					my $cfunc = "${fcgiwrap_plugin_name}disable_${fcgiwrap_plugin}_fcgiwrap";
 					&$cfunc($d) if (defined(&$cfunc));
-					delete($d->{$fcgiwrap_port});
 					}
 				}
 			}
