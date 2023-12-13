@@ -2914,9 +2914,6 @@ if ($ok) {
 					}
 				}
 
-			# Clear features that should be re-created locally
-			&refresh_domain_fcgiwrap($d, 1);
-
 			# Finally, create it
 			&$indent_print();
 			delete($d->{'missing'});
@@ -2946,6 +2943,36 @@ if ($ok) {
 					$d->{'disabled_reason'},
 					$d->{'disabled_why'});
 				&$outdent_print();
+				}
+			
+			# If domain had fcgiwrap enabled, check what's up
+			my $fcgiwrap_port;
+			map { $fcgiwrap_port = $_ } grep { /fcgiwrap_port$/ } keys %{$d};
+			if ($fcgiwrap_port) {
+				my $newweb = &domain_has_website();
+				my $disable_fcgiwrap = !&supports_fcgiwrap() || &supports_suexec();
+				my $same_web = $newweb eq $oldweb;
+				my ($fcgiwrap_port_plugin) = $newweb =~ /-(.*)$/;
+				my $fcgiwrap_port_dir =
+					($fcgiwrap_port_plugin ? "${fcgiwrap_port_plugin}_" : "").
+						'fcgiwrap_port';
+				# If not the same webserver, flip domain config directives
+				if (!$same_web) {
+					$d->{$fcgiwrap_port_dir} = $d->{$fcgiwrap_port}
+						if (!$d->{$fcgiwrap_port_dir});
+					delete($d->{$fcgiwrap_port});
+				}
+				# Need to disable fcgiwrap for domain
+				if ($disable_fcgiwrap) {
+					my ($fcgiwrap_plugin) = $newweb =~ /-(.*)$/;
+					my $fcgiwrap_plugin_name = "${newweb}::";
+					$fcgiwrap_plugin_name =~ s/-/_/g;
+					$fcgiwrap_plugin = 'apache', $fcgiwrap_plugin_name = undef
+						if (!$fcgiwrap_plugin);
+					my $cfunc = "${fcgiwrap_plugin_name}disable_${fcgiwrap_plugin}_fcgiwrap";
+					&$cfunc($d) if (defined(&$cfunc));
+					delete($d->{$fcgiwrap_port});
+					}
 				}
 			}
 		else {
