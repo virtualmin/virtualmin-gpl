@@ -2949,7 +2949,7 @@ if ($ok) {
 			my $fcgiwrap_port;
 			map { $fcgiwrap_port = $_ } grep { /fcgiwrap_port$/ } keys %{$d};
 			if ($fcgiwrap_port) {
-				my $newweb = &domain_has_website();
+				my $newweb = &domain_has_website($d);
 				my $disable_fcgiwrap = !&supports_fcgiwrap() || &supports_suexec();
 				my $same_web = $newweb eq $oldweb;
 				my ($fcgiwrap_port_plugin) = $newweb =~ /-(.*)$/;
