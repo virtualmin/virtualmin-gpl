@@ -2280,6 +2280,8 @@ if ($opts->{'reuid'}) {
 
 local $vcount = 0;
 local %restoreok;	# Which domain IDs were restored OK?
+local $enable_fcgiwrap_func;
+local $disable_fcgiwrap_func;
 if ($ok) {
 	# Restore any Virtualmin settings
 	if (@$vbs) {
@@ -2914,6 +2916,39 @@ if ($ok) {
 					}
 				}
 
+			# If domain had fcgiwrap enabled, check what's up
+			my $fcgiwrap_port;
+			map { $fcgiwrap_port = $_ } grep { /fcgiwrap_port$/ } keys %{$d};
+			if ($fcgiwrap_port) {
+				my $newweb = &domain_has_website($d);
+				my $enable_fcgiwrap;
+				my $can_fcgiwrap = &supports_fcgiwrap();
+				my ($fcgiwrap_port_plugin) = $newweb =~ /-(.*)$/;
+				my $fcgiwrap_port_dir =
+					($fcgiwrap_port_plugin ? "${fcgiwrap_port_plugin}_" : "").
+						'fcgiwrap_port';
+
+				# If not the same webserver, clean domain config
+				# directives first but mark for restore later
+				if ($newweb ne $oldweb) {
+					delete($d->{$fcgiwrap_port});
+					delete($d->{$fcgiwrap_port_dir});
+					$enable_fcgiwrap++;
+					}
+
+				# Need to preserv the state of fcgiwrap for domain as
+				# in original system if supported, otherwise disable
+				my ($fcgiwrap_plugin) = $newweb =~ /-(.*)$/;
+				my $fcgiwrap_plugin_name = "${newweb}::";
+				$fcgiwrap_plugin_name =~ s/-/_/g;
+				$fcgiwrap_plugin = 'apache', $fcgiwrap_plugin_name = undef
+					if (!$fcgiwrap_plugin);
+				$enable_fcgiwrap_func = "${fcgiwrap_plugin_name}enable_${fcgiwrap_plugin}_fcgiwrap"
+					if ($enable_fcgiwrap && $can_fcgiwrap);
+				$disable_fcgiwrap_func = "${fcgiwrap_plugin_name}disable_${fcgiwrap_plugin}_fcgiwrap"
+					if (!$can_fcgiwrap);
+				}
+
 			# Finally, create it
 			&$indent_print();
 			delete($d->{'missing'});
@@ -2943,35 +2978,6 @@ if ($ok) {
 					$d->{'disabled_reason'},
 					$d->{'disabled_why'});
 				&$outdent_print();
-				}
-			
-			# If domain had fcgiwrap enabled, check what's up
-			my $fcgiwrap_port;
-			map { $fcgiwrap_port = $_ } grep { /fcgiwrap_port$/ } keys %{$d};
-			if ($fcgiwrap_port) {
-				my $newweb = &domain_has_website($d);
-				my $disable_fcgiwrap = !&supports_fcgiwrap() || &supports_suexec();
-				my $same_web = $newweb eq $oldweb;
-				my ($fcgiwrap_port_plugin) = $newweb =~ /-(.*)$/;
-				my $fcgiwrap_port_dir =
-					($fcgiwrap_port_plugin ? "${fcgiwrap_port_plugin}_" : "").
-						'fcgiwrap_port';
-				# If not the same webserver, flip and clean domain config directives
-				if (!$same_web) {
-					$d->{$fcgiwrap_port_dir} = $d->{$fcgiwrap_port}
-						if (!$d->{$fcgiwrap_port_dir});
-					delete($d->{$fcgiwrap_port});
-					}
-				# Need to disable fcgiwrap for domain
-				if ($disable_fcgiwrap) {
-					my ($fcgiwrap_plugin) = $newweb =~ /-(.*)$/;
-					my $fcgiwrap_plugin_name = "${newweb}::";
-					$fcgiwrap_plugin_name =~ s/-/_/g;
-					$fcgiwrap_plugin = 'apache', $fcgiwrap_plugin_name = undef
-						if (!$fcgiwrap_plugin);
-					my $cfunc = "${fcgiwrap_plugin_name}disable_${fcgiwrap_plugin}_fcgiwrap";
-					&$cfunc($d) if (defined(&$cfunc));
-					}
 				}
 			}
 		else {
@@ -3084,6 +3090,22 @@ if ($ok) {
 			# Make site the default if it was before
 			if ($d->{'web'} && $d->{'backup_web_default'}) {
 				&set_default_website($d);
+				}
+
+			# If fcgiwrap can be used on this system,
+			# and restored domain had fcgiwrap enabled,
+			# but the webserver is different, then
+			# reenable fcgiwrap for the domain
+			if ($enable_fcgiwrap_func) {
+				&$enable_fcgiwrap_func($d)
+					if (defined(&$enable_fcgiwrap_func));
+				}
+
+			# If the system doesn't have fcgiwrap support
+			# at all and webservers are the same
+			if ($disable_fcgiwrap_func) {
+				&$disable_fcgiwrap_func($d)
+					if (defined(&$disable_fcgiwrap_func));
 				}
 
 			# Run the post-restore command
