@@ -583,8 +583,8 @@ if ($multi) {
 		my $p = &domain_has_website($d);
 		my $showphp = !$d->{'alias'} && $p && $multi == 1;
 		if ($showphp) {
-			$p = &get_domain_php_mode($d);
-			print "    PHP execution mode: $p\n";
+			$pm = &get_domain_php_mode($d);
+			print "    PHP execution mode: $pm\n";
 			@modes = &supported_php_modes($d);
 			print "    Possible PHP execution modes: ",
 				join(" ", @modes),"\n";
@@ -594,7 +594,7 @@ if ($multi) {
 			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
 				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
 				}
-			if ($p eq "fpm") {
+			if ($pm eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
 					$msg = $ok == 2 ? "File $port" :
