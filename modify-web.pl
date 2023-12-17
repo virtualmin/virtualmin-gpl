@@ -853,7 +853,7 @@ foreach $d (@doms) {
 		&$second_print(".. done");
 		}
 
-	if (defined($fcgiwrap)) {
+	if (defined($fcgiwrap) && $d->{'web'}) {
 		# Turn fcgiwrap on or off
 		if ($fcgiwrap) {
 			&$first_print(
