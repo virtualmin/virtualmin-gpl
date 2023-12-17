@@ -63,6 +63,7 @@ print &ui_table_row($text{'dkim_size'},
 if (!@extra && (!$dkim || !$dkim->{'enabled'})) {
 	@extra = &unique(&get_system_hostname(),
 			 &get_system_hostname(1));
+	@extra = grep { $_ =~ /\./ } @extra;
 	}
 print &ui_table_row($text{'dkim_extra'},
 	&ui_textarea("extra", join("\n", @extra), 5, 80));
