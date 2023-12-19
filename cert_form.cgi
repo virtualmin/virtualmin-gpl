@@ -38,7 +38,7 @@ $prog = "cert_form.cgi?dom=$in{'dom'}&mode=";
 		( ),
 	  [ "new", $text{'cert_tabnew'}, $prog."new" ],
 	  [ "chain", $text{'cert_tabchain'}, $prog."chain" ],
-	  &can_edit_letsencrypt() && &domain_has_website($d) ?
+	  &can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'}) ?
 		( [ "lets", $text{'cert_tablets'}, $prog."lets" ] ) :
 		( ),
 	);

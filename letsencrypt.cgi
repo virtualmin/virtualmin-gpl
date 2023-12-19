@@ -6,7 +6,7 @@ require './virtual-server-lib.pl';
 &error_setup($text{'letsencrypt_err'});
 $d = &get_domain($in{'dom'});
 &can_edit_domain($d) && &can_edit_ssl() && &can_edit_letsencrypt() &&
-    &domain_has_website($d) ||
+    (&domain_has_website($d) || $d->{'dns'}) ||
 	&error($text{'edit_ecannot'});
 $d->{'disabled'} && &error($text{'letsencrypt_eenabled'});
 
