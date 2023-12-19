@@ -5813,20 +5813,27 @@ if ($bsize) {
 		# Default to MB, since bytes are rarely useful
 		$units = $unit*$unit;
 		}
-	elsif ($sz >= $unit*$unit*$unit*$unit) {
-		$units = $unit*$unit*$unit*$unit;
-		}
-	elsif ($sz >= $unit*$unit*$unit) {
-		$units = $unit*$unit*$unit;
-		}
-	elsif ($sz >= $unit*$unit) {
-		$units = $unit*$unit;
-		}
-	elsif ($sz >= $unit) {
-		$units = $unit;
-		}
 	else {
-		$units = 1;
+		my @units_solid;
+		for(my $i=1; $i<=4; $i++) {
+			my $u = $unit**$i;
+			if ($sz >= $u) {
+				$units = $u;
+				if ($sz % $u == 0 && $sz/$u <= $u) {
+					push(@units_solid,
+						{ units => $units,
+						  size => $sz/$u });
+					}
+				}
+			}
+		if (@units_solid) {
+			@units_solid = sort { $a->{'size'} <=> $b->{'size'} } @units_solid;
+			my $fsz = $sz/$units;
+			my $fraction = $fsz - int($fsz);
+			my $decimal_nice = 
+    				$fraction == 0 || $fraction == 0.25 || $fraction == 0.5 || $fraction == 0.75;
+			$units = $units_solid[0]->{'units'} if (!($fsz =~ /\./ && $decimal_nice));
+			}
 		}
 	$sz = $sz == 0 ? "" : sprintf("%.2f", ($sz*1.0)/$units);
 	$sz =~ s/\.00$//;
