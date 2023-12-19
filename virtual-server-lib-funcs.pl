@@ -5803,42 +5803,11 @@ else {
 # Returns HTML for an input for entering a quota, doing block->kb conversion
 sub quota_input
 {
-local ($name, $value, $fs, $dis) = @_;
-local $bsize = &quota_bsize($fs);
+my ($name, $value, $fs, $dis) = @_;
+my $bsize = &quota_bsize($fs);
 if ($bsize) {
-	my $unit = 1024;
-	local $sz = $value*$bsize;
-	local $units = 1;
-	if ($value eq "") {
-		# Default to MB, since bytes are rarely useful
-		$units = $unit*$unit;
-		}
-	elsif ($sz >= $unit*$unit*$unit*$unit) {
-		$units = $unit*$unit*$unit*$unit;
-		}
-	elsif ($sz >= $unit*$unit*$unit) {
-		$units = $unit*$unit*$unit;
-		}
-	elsif ($sz >= $unit*$unit) {
-		$units = $unit*$unit;
-		}
-	elsif ($sz >= $unit) {
-		$units = $unit;
-		}
-	else {
-		$units = 1;
-		}
-	$sz = $sz == 0 ? "" : sprintf("%.2f", ($sz*1.0)/$units);
-	$sz =~ s/\.00$//;
-	return &ui_textbox($name, $sz, 8, $dis)." ".
-	       &ui_select($name."_units", $units,
-			 [ [ 1, $text{"nice_size_b"} ],
-			   [ $unit, $text{"nice_size_kiB"} ],
-			   [ $unit*$unit, $text{"nice_size_MiB"} ],
-			   [ $unit*$unit*$unit, $text{"nice_size_GiB"} ],
-			   [ $unit*$unit*$unit*$unit, $text{"nice_size_TiB"} ],
-			   [ $unit*$unit*$unit*$unit*$unit, $text{"nice_size_PiB"} ] ],
-			 1, 0, 0, $_[3]);
+	my $sz = $value*$bsize;
+	return &ui_bytesbox($name, $value, 8, $dis, undef, 1024*1024);
 	}
 else {
 	# Just show blocks input
