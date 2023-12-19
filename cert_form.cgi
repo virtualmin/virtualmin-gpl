@@ -401,7 +401,7 @@ print &ui_form_end([ [ "ok", $text{'cert_chainok'} ] ]);
 print &ui_tabs_end_tab();
 
 # Let's encrypt tab
-if (&can_edit_letsencrypt() && &domain_has_website($d)) {
+if (&can_edit_letsencrypt() && (&domain_has_website($d) || $d->{'dns'})) {
 	&foreign_require("webmin");
 	$err = &webmin::check_letsencrypt();
 	print &ui_tabs_start_tab("mode", "lets");
