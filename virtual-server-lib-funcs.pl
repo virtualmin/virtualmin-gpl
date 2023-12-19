@@ -5837,6 +5837,8 @@ if ($bsize) {
 		}
 	$sz = $sz == 0 ? "" : sprintf("%.2f", ($sz*1.0)/$units);
 	$sz =~ s/\.00$//;
+	# Remove trailing zeros in decimal part
+	$sz =~ s/(\.\d*?[1-9])0+$/$1/;
 	return &ui_textbox($name, $sz, 8, $dis)." ".
 	       &ui_select($name."_units", $units,
 			 [ [ 1, $text{"nice_size_b"} ],
