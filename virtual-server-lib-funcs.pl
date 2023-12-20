@@ -5806,8 +5806,7 @@ sub quota_input
 my ($name, $value, $fs, $dis) = @_;
 my $bsize = &quota_bsize($fs);
 if ($bsize) {
-	my $sz = $value*$bsize;
-	return &ui_bytesbox($name, $value, 8, $dis, undef, 1024*1024);
+	return &ui_bytesbox($name, $value*$bsize, 8, $dis, undef, 1024*1024);
 	}
 else {
 	# Just show blocks input
