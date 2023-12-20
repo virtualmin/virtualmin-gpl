@@ -11,6 +11,7 @@ local $daily = glob("$root/backup*/cpbackup/daily");
 local ($homedir) = glob("$root/*/homedir");
 $homedir = "$root/homedir" if (!-d $homedir);
 local $datastore = "$root/.cpanel-datastore";
+$datastore = "$root/.cpanel/datastore" if (!-d $datastore);
 -d $daily || -d $homedir || -d $datastore ||
 	return ("Not a cPanel daily or home directory backup file");
 
@@ -116,6 +117,7 @@ local ($ok, $root) = &extract_cpanel_dir($file);
 $ok || &error("Failed to extract backup : $root");
 local $daily = glob("$root/backup*/cpbackup/daily");
 local $datastore = "$root/.cpanel-datastore";
+$datastore = "$root/.cpanel/datastore" if (!-d $datastore);
 local $tmpl = &get_template($template);
 
 # Check for prefix clash
