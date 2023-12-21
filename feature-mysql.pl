@@ -235,7 +235,6 @@ foreach $s (@str) {
 	}
 my ($ver, $variant) = &get_dom_remote_mysql_version($d);
 my $qdb = &quote_mysql_database($db);
-my $qdb_noescape_underscore = &quote_mysql_database($db, 1);
 if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
     $variant eq "mysql" && &compare_versions($ver, 8) >= 0) {
 	# Use the grant command
@@ -243,21 +242,20 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 	# Preserve all other domain's database permissions (useful on restore)
 	if ($dbs_enall) {
 		foreach my $ddb (&domain_databases($d, [ "mysql" ])) {
-			if ($ddb->{'name'} ne $db) {
-				my $dbs_noescape_underscore = &quote_mysql_database($ddb->{'name'}, 1);
-				# Grant all privileges for the given database to the user
+			my $qddb = &quote_mysql_database($ddb->{'name'});
+			if ($qddb ne $qdb) {
 				eval {
 					local $main::error_must_die = 1;
-					&execute_dom_sql($d, $mysql::master_db, "grant all on `$dbs_noescape_underscore`.* to '$user'\@'$host' with grant option");
-					};
+					&execute_dom_sql($d, $mysql::master_db, "grant all on `$qddb`.* to '$user'\@'$host' with grant option");
+					}
 				}
 			}
 		}
 	# Update given database
 	eval {
 		local $main::error_must_die = 1;
-		&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb_noescape_underscore`.* to '$user'\@'$host' with grant option");
-		};
+		&execute_dom_sql($d, $mysql::master_db, "grant all on `$qdb`.* to '$user'\@'$host' with grant option");
+		}
 	}
 else {
 	# Can update the DB table directly
@@ -296,21 +294,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 			}
 		}
 	foreach my $dbs (@dbs) {
-		my $dbs_noescape_underscore = &quote_mysql_database(&unquote_mysql_database($dbs), 1);
 		foreach my $r (@{$rv->{'data'}}) {
-			# Try unescaped database name first
-			eval {
-				local $main::error_must_die = 1;
-				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs_noescape_underscore from '$user'\@'$r->[0]'");
-				&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs_noescape_underscore from '$user'\@'$r->[0]'");
-				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs_noescape_underscore from '$user'\@'$r->[0]'");
-				};
-			# Try escaped database name
 			eval {
 				local $main::error_must_die = 1;
 				&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$user'\@'$r->[0]'");
 				&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$user'\@'$r->[0]'");
-				&execute_dom_sql($d, $mysql::master_db, "revoke all privileges on $dbs from '$user'\@'$r->[0]'");
 				};
 			}
 		}
@@ -2147,13 +2135,12 @@ $db =~ s/\\%/%/g;
 return $db;
 }
 
-# quote_mysql_database(name, [simple])
-# Returns a MySQL database name with % and _ characters escaped,
-# unless simple flag is given in which case only % is escaped
+# quote_mysql_database(name)
+# Returns a MySQL database name with % and _ characters escaped
 sub quote_mysql_database
 {
-local ($db, $simple) = @_;
-$db =~ s/_/\\_/g if (!$simple);
+local ($db) = @_;
+$db =~ s/_/\\_/g;
 $db =~ s/%/\\%/g;
 return $db;
 }
@@ -2936,25 +2923,13 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 		"select host from user where user = ?", $olduser);
 	my $qdb = &quote_mysql_database($db);
 	my $dbs = "`$qdb`.*";
-	my $dbs_noescape_underscore = &quote_mysql_database(&unquote_mysql_database($dbs), 1);
 	foreach my $r (@{$rv->{'data'}}) {
-		# Try revoking unescaped database name first
-		eval {
-			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs_noescape_underscore from '$olduser'\@'$r->[0]'");
-			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs_noescape_underscore from '$olduser'\@'$r->[0]'");
-			};
-		# Try revoking escaped database name
 		eval {
 			local $main::error_must_die = 1;
 			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
 			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
-			};
-		# Try granting with unescaped database name at last
-		eval {
-			local $main::error_must_die = 1;
-			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs_noescape_underscore to '$user'\@'$r->[0]' with grant option");
-			};
+			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
+			}
 		}
 	}
 else {
