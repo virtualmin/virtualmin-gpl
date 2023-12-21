@@ -5170,7 +5170,7 @@ elsif (($mode == 1 || $mode == 2 || $mode == 9) &&
 	$date =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($base, $date);
 	}
-elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10) &&
+elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 || $mode == 12) &&
        $host =~ /%/) {
 	# S3 / Rackspace / GCS bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
