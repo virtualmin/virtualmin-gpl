@@ -4123,6 +4123,16 @@ elsif ($url =~ /^drive:\/\/([^\/]+)(\/(\S+))?$/) {
 		@rv = (-1, "Google Drive has not been configured");
 		}
 	}
+elsif ($url =~ /^drive:\/\/([^\/]*)(\/(\S+))?$/) {
+	# Google drive folder
+	my $st = &cloud_drive_get_state();
+	if ($st->{'ok'}) {
+		@rv = (12, undef, undef, $1, $3, undef);
+		}
+	else {
+		@rv = (-1, "Google Drive has not been configured");
+		}
+	}
 elsif ($url eq "download:") {
 	@rv = (4, undef, undef, undef, undef, undef);
 	}
@@ -4207,7 +4217,9 @@ elsif ($proto == 11) {
 elsif ($proto == 12) {
 	$rv = $path ?
 		&text('backup_nicedrivep', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_nicedrive', "<tt>$host</tt>");
+	      $host ?
+		&text('backup_nicedrive', "<tt>$host</tt>") :
+		&text('backup_nicedrivet');
 	}
 else {
 	$rv = $url;
@@ -5999,10 +6011,10 @@ elsif ($mode == 11 && $path =~ /\%/) {
 	}
 
 elsif ($mode == 12 && $path =~ /\%/) {
-	# Search for Google drive files under the container
+	# Search for Google drive files under the folder
 	local $files = &list_drive_files($host, 1);
 	if (!ref($files)) {
-		&$second_print(&text('backup_purgeefiles3', $files));
+		&$second_print(&text('backup_purgeefiles6', $files));
 		return 0;
 		}
 	foreach my $st (@$files) {
@@ -6042,6 +6054,57 @@ elsif ($mode == 12 && $path =~ /\%/) {
 				&delete_drive_file($host, $f.".info");
 				&$second_print(&text('backup_deleted',
 				     &nice_size($st->{'size'})));
+				$pcount++;
+				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
+		}
+	}
+
+elsif ($mode == 12 && $host =~ /\%/) {
+	# Search for Google drive folders
+	local $folders = &list_drive_folders(1);
+	if (!ref($folders)) {
+		&$second_print(&text('backup_purgeefiles6', $folders));
+		return 0;
+		}
+	foreach my $st (@$folders) {
+		my $f = $st->{'name'};
+		my $info;
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs', $f,
+				$st->{'modifiedTime'}));
+			}
+		if ($f =~ /^$re$/) {
+			# Found one to delete
+			local $ctime = &google_timestamp(
+				$st->{'modifiedTime'});
+			$mcount++;
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
+			local $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
+			&$first_print(&text('backup_deletingdir',
+					    "<tt>$f</tt>", $old));
+			my $sz = &size_drive_folder($f);
+			local $err = &delete_drive_folder($f);
+			if ($err) {
+				&$second_print(&text('backup_edelbucket',$err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+				     &nice_size($sz)));
 				$pcount++;
 				}
 			}
