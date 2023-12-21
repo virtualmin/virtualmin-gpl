@@ -2928,8 +2928,11 @@ if ($variant eq "mariadb" && &compare_versions($ver, "10.4") >= 0 ||
 			local $main::error_must_die = 1;
 			&execute_dom_sql($d, $mysql::master_db, "revoke grant option on $dbs from '$olduser'\@'$r->[0]'");
 			&execute_dom_sql($d, $mysql::master_db, "revoke all on $dbs from '$olduser'\@'$r->[0]'");
+			};
+		eval {
+			local $main::error_must_die = 1;
 			&execute_dom_sql($d, $mysql::master_db, "grant all on $dbs to '$user'\@'$r->[0]' with grant option");
-			}
+			};
 		}
 	}
 else {
