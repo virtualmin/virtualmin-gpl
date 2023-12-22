@@ -1019,6 +1019,8 @@ newweb_admindom=URL для перенаправления <tt>admin</tt>
 newweb_ewebmaildom=Отсутствует или неверный URL для перенаправления веб-почты
 newweb_eadmindom=Отсутствует или неверный URL для перенаправления администратора
 newweb_http2=Включить протокол HTTP2 для новых сайтов?
+newweb_http2_inherit=Из шаблона по умолчанию
+newweb_http2_def=Веб-сервер по умолчанию
 newweb_redirects=Редиректы для новых сайтов
 newweb_rfrom=С пути
 newweb_rto=Путь или URL
@@ -1123,7 +1125,8 @@ check_dnsmaster3=однако главный DNS-сервер $1 по умолч
 check_mysqlok=MySQL $1 установлен и работает
 check_mysqlok2=Клиентские программы MySQL устанавливаются для использования с хостом служб
 check_mysqlok3=Virtualmin использует удаленный сервер MySQL
-check_mysqlnopass=MySQL установлен и работает, но не установлен пароль <tt>root</tt>! <b>Это должно быть немедленно изменено в модуле<a href='$1'> MySQL Database </a></b>
+check_mysqlnopass=MySQL $1 установлен и работает, но для него не установлен пароль <tt>root</tt>. Это должно быть немедленно исправлено в модуле <a href='$1'>MySQL Database</a>
+check_mysqlnopasssocket=MySQL $1 установлен и работает с использованием аутентификации сокетов Unix
 check_postgresok3=Virtualmin использует удаленный сервер PostgreSQL
 check_postgresnopass=PostgreSQL установлен и работает, но не установлен ни один <tt>$2</tt> пароль! <b>Это должно быть немедленно изменено в<a href='$1'> модуле базы данных PostgreSQL </a></b>
 check_enetmask6=Маска IPv6 $1 недействительна - это должно быть число, например 64
@@ -5206,7 +5209,7 @@ wizard_mysql=Чтобы другие пользователи в вашей си
 wizard_mysql2=В настоящее время пароль MySQL не установлен, что крайне небезопасно.
 wizard_mysql3=Это уже сделано, поэтому смена пароля здесь не обязательна.
 wizard_mysql4=Virtualmin не знает, какой текущий пароль MySQL <tt>root</tt>. Это должно быть установлено здесь, чтобы позволить Virtualmin создавать новые базы данных MySQL и пользователей.
-wizard_mysql5=MySQL использует аутентификацию сокетов Unix для пользователя <tt>root</tt>, поэтому пароль не может быть изменен.
+wizard_mysql5=MySQL использует аутентификацию сокетов Unix для пользователя <tt>root</tt>, поэтому пароль не будет установлен.
 wizard_mysql_pass=Изменить пароль MySQL
 wizard_mysql_pass1=Оставить без изменений
 wizard_mysql_pass0=Установлен в

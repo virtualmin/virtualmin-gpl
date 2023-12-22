@@ -677,6 +677,8 @@ newweb_admindom=<tt>yönetici</tt> yönlendirmesi için URL
 newweb_ewebmaildom=Web postası yönlendirmesi için eksik veya geçersiz URL
 newweb_eadmindom=Yönetici yönlendirmesi için eksik veya geçersiz URL
 newweb_http2=Yeni web siteleri için HTTP2 protokolü etkinleştirilsin mi?
+newweb_http2_inherit=Varsayılan şablondan
+newweb_http2_def=Web sunucusu varsayılanı
 newweb_redirects=Yeni web siteleri için yönlendirmeler
 newweb_rfrom=yoldan
 newweb_rto=Yola veya URL'ye
@@ -765,7 +767,8 @@ check_dnsmaster3=ancak varsayılan ana DNS sunucusu $1, bu sisteme ait gibi gör
 check_mysqlok=MySQL $1 yüklendi ve çalışıyor
 check_mysqlok2=MySQL istemci programları bir servis ana bilgisayarı ile kullanılmak üzere kurulur
 check_mysqlok3=Virtualmin uzak bir MySQL sunucusu kullanıyor
-check_mysqlnopass=MySQL kurulu ve çalışıyor, ancak ayarlanmış bir <tt>root</tt> şifresi yok! <b>Bu,<a href='$1'> MySQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir
+check_mysqlnopass=MySQL $1 kurulu ve çalışıyor ancak ayarlanmış herhangi bir <tt>root</tt> şifresi yok. Bu durumun <a href='$1'>MySQL Veritabanı</a> modülünde hemen düzeltilmesi gerekir
+check_mysqlnopasssocket=MySQL $1, Unix soket kimlik doğrulaması kullanılarak yüklendi ve çalışıyor
 check_postgresok3=Virtualmin uzak bir PostgreSQL sunucusu kullanıyor
 check_postgresnopass=PostgreSQL kurulu ve çalışıyor fakat ayarlanmış bir <tt>$2</tt> şifre yok! <b>Bu,<a href='$1'> PostgreSQL Veritabanı </a>modülünde</b> derhal değiştirilmelidir
 check_enetmask6=IPv6 netmask $1 geçerli değil - 64 gibi bir sayı olmalı
@@ -3898,7 +3901,7 @@ wizard_mysql=Sisteminizdeki diğer kullanıcıların MySQL veritabanını yönet
 wizard_mysql2=Şu anda MySQL şifresi ayarlanmamıştır, bu da oldukça güvensizdir.
 wizard_mysql3=Bu zaten yapıldı, bu yüzden burada şifreyi değiştirmek zorunlu değildir.
 wizard_mysql4=Virtualmin, geçerli MySQL <tt>root</tt> şifresinin ne olduğunu bilmiyor. Virtualmin'in yeni MySQL veritabanları ve kullanıcıları oluşturmasına izin vermek için burada ayarlanmalıdır.
-wizard_mysql5=MySQL, <tt>root</tt> kullanıcısı için Unix soket kimlik doğrulamasını kullanıyor, dolayısıyla parola değiştirilemez.
+wizard_mysql5=MySQL, <tt>root</tt> kullanıcısı için Unix soket kimlik doğrulamasını kullanıyor, dolayısıyla bir parola ayarlanmayacaktır.
 wizard_mysql_pass=MySQL şifresini değiştirme
 wizard_mysql_pass1=Değiştirilmemiş olarak bırak
 wizard_mysql_pass0=Ayarlanır

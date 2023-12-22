@@ -627,6 +627,8 @@ newweb_admindom=<tt>admin</tt>重定向的URL
 newweb_ewebmaildom=用於Webmail重定向的URL丟失或無效
 newweb_eadmindom=管理員重定向網址缺失或無效
 newweb_http2=為新網站啟用 HTTP2 協議？
+newweb_http2_inherit=從預設模板
+newweb_http2_def=網路伺服器預設值
 newweb_redirects=新網站的重定向
 newweb_rfrom=從路徑
 newweb_rto=到路徑或 URL
@@ -698,7 +700,8 @@ check_dnsmaster3=但是，預設主 DNS 伺服器 $1 解析為 IP 位址 $2，�
 check_mysqlok=MySQL $1已安裝並正在運行。
 check_mysqlok2=已安裝MySQL客戶端程序以與服務主機一起使用。
 check_mysqlok3=Virtualmin 正在使用遠程 MySQL 服務器
-check_mysqlnopass=MySQL已安裝並正在運行，但未設置任何<tt>root</tt>密碼！ <b>應立即在<a href='$1'> MySQL數據庫</a>模塊</b>中對此進行更改。
+check_mysqlnopass=MySQL $1 已安裝並正在執行，但沒有設定任何 <tt>root</tt> 密碼。應立即在 <a href='$1'>MySQL 資料庫</a> 模組中修復此問題
+check_mysqlnopasssocket=MySQL $1 已安裝並正在執行，使用 Unix 套接字驗證
 check_postgresok3=Virtualmin 正在使用遠程 PostgreSQL 服務器
 check_postgresnopass=PostgreSQL已安裝並正在運行，但未設置任何<tt>$2</tt>密碼！ <b>應立即在<a href='$1'> PostgreSQL數據庫</a>模塊</b>中對此進行更改。
 check_enetmask6=IPv6網絡掩碼 $1無效-它應該是一個數字，例如64
@@ -3390,7 +3393,7 @@ wizard_mysql=為了防止系統上的其他用戶管理MySQL數據庫，應為<t
 wizard_mysql2=當前未設置MySQL密碼，這是非常不安全的。
 wizard_mysql3=這已經完成，因此在此更改密碼不是強制性的。
 wizard_mysql4=Virtualmin不知道當前的MySQL <tt>root</tt>密碼是什麼。必須在此處設置它以允許Virtualmin創建新的MySQL數據庫和用戶。
-wizard_mysql5=MySQL 對 <tt>root</tt> 使用者使用 Unix 套接字驗證，因此無法變更密碼。
+wizard_mysql5=MySQL 對 <tt>root</tt> 使用者使用 Unix 套接字驗證，因此不會設定密碼。
 wizard_mysql_pass=更改MySQL密碼
 wizard_mysql_pass1=保持不變
 wizard_mysql_pass0=設置

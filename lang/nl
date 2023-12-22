@@ -1684,7 +1684,6 @@ check_dnsok2=BIND DNS server is geinstalleerd
 check_dnsok3=BIND DNS domeinen worden gehost op een service server
 check_dnsmaster=Echter, de standaard master DNS server $1 is geen volledige gekwalificeerde domein naam
 check_mysqlok2=MySQL client programma's zijn geinstalleerd voor gebruik met een toelevering server
-check_mysqlnopass=MySQL is geinstalleerd en aan het werk, maar er is nog geen <tt>root</tt> wachtwoord gezet!<b>Dit moet u onmiddellijk veranderen in de <a href='$1'>MySQL Database</a> module</b>
 check_postgresok=PostgreSQL is geinstalleerd en aan het werk
 check_postgresnopass=PostgreSQL is geinstalleerd en aan het werk, maar er is geen enkel <tt>$2</tt> wachtwoord gezet! <b>Dit moet onmiddellijk verandert worden in de <a href='$1'>PostgreSQL Database</a> module</b>
 check_webalizerok=Webalizer is geinstalleerd

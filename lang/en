@@ -2013,10 +2013,11 @@ check_dnsmaster3=however, the default master DNS server $1 resolves to IP addres
 check_mysqlok=MySQL $1 is installed and running
 check_mysqlok2=MySQL client programs are installed for use with a services host
 check_mysqlok3=Virtualmin is using a remote MySQL server
-check_mysqlnopass=MySQL is installed and running, but does not have any <tt>root</tt> password set! <b>This should be changed immediately in the <a href='$1'>MySQL Database</a> module</b>
+check_mysqlnopass=MySQL $2 is installed and running, but does not have any <tt>root</tt> password set. This should be fixed immediately in the <a href='$1'>MySQL Database</a> module
+check_mysqlnopasssocket=MySQL $1 is installed and running, using Unix socket authentication
 check_postgresok=PostgreSQL $1 is installed and running
 check_postgresok3=Virtualmin is using a remote PostgreSQL server
-check_postgresnopass=PostgreSQL is installed and running, but does not have any <tt>$2</tt> password set! <b>This should be changed immediately in the <a href='$1'>PostgreSQL Database</a> module</b>
+check_postgresnopass=PostgreSQL is installed and running, but does not have any <tt>$2</tt> password set! This should be changed immediately in the <a href='$1'>PostgreSQL Database</a> module
 check_webalizerok=Webalizer is installed
 check_ifaceok=Using network interface $1 for virtual IPs
 check_enetmask6=IPv6 netmask $1 is not valid - it should be a number, like 64
@@ -6614,7 +6615,7 @@ wizard_mysql=To prevent other users on your system from managing the MySQL datab
 wizard_mysql2=Currently the MySQL password is not set, which is highly insecure.
 wizard_mysql3=This has already been done, so changing the password here is not mandatory.
 wizard_mysql4=Virtualmin does not not know what the current MySQL <tt>root</tt> password is. It must be set here to allow Virtualmin to create new MySQL databases and users.
-wizard_mysql5=MySQL is using Unix socket authentication for the <tt>root</tt> user, so the password cannot be changed.
+wizard_mysql5=MySQL is using Unix socket authentication for the <tt>root</tt> user, so a password won't be set.
 wizard_mysql_pass=Change MySQL password
 wizard_mysql_pass1=Leave un-changed
 wizard_mysql_pass0=Set to

@@ -1131,6 +1131,8 @@ newweb_admindom=URL per il reindirizzamento <tt>admin</tt>
 newweb_ewebmaildom=URL mancante o non valido per il reindirizzamento della webmail
 newweb_eadmindom=URL mancante o non valido per il reindirizzamento dell'amministratore
 newweb_http2=Abilitare il protocollo HTTP2 per i nuovi siti web?
+newweb_http2_inherit=Dal modello predefinito
+newweb_http2_def=Impostazione predefinita del server Web
 newweb_redirects=Reindirizzamenti per nuovi siti web
 newweb_rfrom=Dal sentiero
 newweb_rto=Al percorso o all'URL
@@ -1275,7 +1277,8 @@ check_dnsmaster3=tuttavia, il server DNS principale predefinito $1 si risolve ne
 check_mysqlok=MySQL $1 è installato e in esecuzione
 check_mysqlok2=I programmi client MySQL sono installati per l'uso con un host di servizi
 check_mysqlok3=Virtualmin utilizza un server MySQL remoto
-check_mysqlnopass=MySQL è installato e in esecuzione, ma non ha alcuna password <tt>root</tt> impostata! <b>Questo dovrebbe essere cambiato immediatamente nel<a href='$1'> modulo Database MySQL </a></b>
+check_mysqlnopass=MySQL $1 è installato e in esecuzione, ma non ha alcuna password <tt>root</tt> impostata. Questo problema dovrebbe essere risolto immediatamente nel modulo <a href='$1'>MySQL Database</a>
+check_mysqlnopasssocket=MySQL $1 è installato e in esecuzione utilizzando l'autenticazione socket Unix
 check_postgresok=PostgreSQL è installato e in esecuzione
 check_postgresok3=Virtualmin utilizza un server PostgreSQL remoto
 check_postgresnopass=PostgreSQL è installato e in esecuzione, ma non ha alcuna password <tt>$2</tt> impostata! <b>Questo dovrebbe essere cambiato immediatamente nel<a href='$1'> database PostgreSQL </a>modulo</b>
@@ -5202,7 +5205,7 @@ wizard_mysql=Per impedire ad altri utenti del sistema di gestire il database MyS
 wizard_mysql2=Attualmente la password di MySQL non è impostata, il che è altamente insicuro.
 wizard_mysql3=Questo è già stato fatto, quindi cambiare la password qui non è obbligatorio.
 wizard_mysql4=Virtualmin non sa quale sia l'attuale password MySQL <tt>root</tt>. Deve essere impostato qui per consentire a Virtualmin di creare nuovi database e utenti MySQL.
-wizard_mysql5=MySQL utilizza l'autenticazione socket Unix per l'utente <tt>root</tt>, quindi la password non può essere modificata.
+wizard_mysql5=MySQL utilizza l'autenticazione socket Unix per l'utente <tt>root</tt>, quindi non verrà impostata una password.
 wizard_mysql_pass=Cambia password MySQL
 wizard_mysql_pass1=Lascia invariato
 wizard_mysql_pass0=Impostato

@@ -1826,6 +1826,8 @@ newweb_admindom=<tt>admin</tt>リダイレクトのURL
 newweb_ewebmaildom=ウェブメールリダイレクトのURLが見つからないか無効です
 newweb_eadmindom=管理リダイレクトのURLがないか無効です
 newweb_http2=新しいウェブサイトでHTTP2プロトコルを有効にしますか？
+newweb_http2_inherit=デフォルトのテンプレートから
+newweb_http2_def=Webサーバーのデフォルト
 newweb_redirects=新しいウェブサイトへのリダイレクト
 newweb_rfrom=パスから
 newweb_rto=パスまたは URL へ
@@ -2011,7 +2013,8 @@ check_dnsmaster3=ただし、デフォルトのマスター DNS サーバー $1 
 check_mysqlok=MySQL $1がインストールされ、実行されています。
 check_mysqlok2=MySQLクライアントプログラムは、サービスホストで使用するためにインストールされます。
 check_mysqlok3=Virtualmin はリモートの MySQL サーバーを使用しています
-check_mysqlnopass=MySQLはインストールされて実行されていますが、<tt>root</tt>パスワードが設定されていません。 <b>これは<a href='$1'> MySQLデータベース</a>モジュール</b>ですぐに変更する必要があります。
+check_mysqlnopass=MySQL $1 はインストールされ実行されていますが、<tt>root</tt> パスワードが設定されていません。この問題は、<a href='$1'>MySQL Database</a> モジュールで直ちに修正する必要があります。
+check_mysqlnopasssocket=MySQL $1 はインストールされ、Unix ソケット認証を使用して実行されています
 check_postgresok=PostgreSQLがインストールされ、実行されています。
 check_postgresok3=Virtualmin はリモート PostgreSQL サーバーを使用しています
 check_postgresnopass=PostgreSQLがインストールされ、実行されていますが、<tt>$2</tt>のパスワードが設定されていません。 <b>これは、<a href='$1'> PostgreSQLデータベース</a>モジュール</b>ですぐに変更する必要があります。
@@ -6609,7 +6612,7 @@ wizard_mysql=システム上の他のユーザーがMySQLデータベースを�
 wizard_mysql2=現在、MySQLパスワードは設定されていません。これは非常に安全ではありません。
 wizard_mysql3=これはすでに行われているため、ここでのパスワードの変更は必須ではありません。
 wizard_mysql4=Virtualminは、現在のMySQL <tt>root</tt>パスワードが何であるかを知りません。 Virtualminが新しいMySQLデータベースとユーザーを作成できるようにするには、ここで設定する必要があります。
-wizard_mysql5=MySQL は <tt>root</tt> ユーザーに対して Unix ソケット認証を使用しているため、パスワードを変更できません。
+wizard_mysql5=MySQL は <tt>root</tt> ユーザーに対して Unix ソケット認証を使用しているため、パスワードは設定されません。
 wizard_mysql_pass=MySQLパスワードを変更する
 wizard_mysql_pass1=変更しない
 wizard_mysql_pass0=に設定

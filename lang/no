@@ -1739,7 +1739,6 @@ check_dnsok2=BIND DNS tjener er installert
 check_dnsok3=BIND DNS domener vil bli betjent fra en tjeneste-vert
 check_dnsmaster=Standard master DNS tjener $1 er imidlertid ikke et fullt kvalifisert domenenavn
 check_mysqlok2=MySQL klientprogrammer er installert for bruk mot en tjenestevert
-check_mysqlnopass=MySQL er installert og kjører, men har ikke noe <tt>root</tt> passord satt! <b>Dette bør rettes opp umiddelbart i <a href='$1'>MySQL Database</a> modulen</b>
 check_postgresok=PostgreSQL er installert og kjører
 check_postgresnopass=PostgreSQL er installert og kjører, men det er ikke satt noe <tt>$2</tt> passord! <b>Dette bør rettes umiddelbart i <a href='$1'>PostgreSQL Database</a> modulen</b>
 check_webalizerok=Webalizer er installert
