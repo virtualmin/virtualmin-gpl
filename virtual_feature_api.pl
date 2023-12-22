@@ -325,6 +325,20 @@ sub feature_web_supports_cgi
 {
 }
 
+# feature_web_get_domain_cgi_mode(&domain)
+# Returns the current CGI mode for a domain ('suexec' or 'fcgiwrap'), or undef
+# if none are enabled
+sub feature_web_get_domain_cgi_mode
+{
+}
+
+# feature_web_save_domain_cgi_mode(&domain, mode)
+# Updates the current CGI mode for a domain to either 'suexec' or 'fcgiwrap',
+# or disable CGI scripts if the mode is set to undef
+sub feature_web_get_domain_cgi_mode
+{
+}
+
 # feature_web_supported_php_modes([&domain])
 # If a feature provides a website, this function must return the list of 
 # possible PHP execution modes

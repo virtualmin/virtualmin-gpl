@@ -11366,6 +11366,66 @@ elsif ($p) {
 return ( );
 }
 
+# get_domain_cgi_mode(&domain)
+# Returns either 'suexec', 'fcgiwrap' or undef depending on how CGI scripts
+# are being run
+sub get_domain_cgi_mode
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Check Apache suexec or fcgiwrap modes
+	if (&get_domain_suexec($d)) {
+		return 'suexec';
+		}
+	elsif ($d->{'fcgiwrap_port'}) {
+		return 'fcgiwrap';
+		}
+	return undef;
+	}
+elsif ($p) {
+	# Check plugin supported mode
+	return &plugin_call($p, "feature_web_get_domain_cgi_mode", $d);
+	}
+return undef;
+}
+
+# save_domain_cgi_mode(&domain, mode)
+# Change the mode for executing CGI scripts to either fcgiwrap, suexec or undef
+# to disable them entirely
+sub save_domain_cgi_mode
+{
+my ($d, $mode) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	&obtain_lock_web($d);
+	my $err = undef;
+	if ($mode ne 'fcgiwrap') {
+		&delete_fcgiwrap_server($d);
+		}
+	if ($mode ne 'suexec') {
+		&disable_apache_suexec($d);
+		}
+	if ($mode eq 'suexec') {
+		$err = &enable_apache_suexec($d);
+		}
+	elsif ($mode eq 'fcgiwrap') {
+		$err = &enable_apache_fcgiwrap($d);
+		if (!$err) {
+			&save_domain($d);
+			}
+		}
+	&release_lock_web($d);
+	return $err;
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_web_save_domain_cgi_mode", $d, $mode);
+	}
+else {
+	return "Virtual server does not have a website!";
+	}
+}
+
 # require_licence()
 # Reads in the file containing the licence_scheduled function.
 # Returns 1 if OK, 0 if not
