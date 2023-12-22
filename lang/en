@@ -2692,6 +2692,7 @@ backup_etarcmd=The <tt>tar</tt> command was not found on your system!
 backup_eincrzip=Incremental backups cannot be used with ZIP format
 backup_ezipkey=Encryption cannot be used with ZIP format backups
 backup_edesturl=Backup destination $1 is invalid : $2
+backup_edesthomedir=Backup destination cannot be a directory unless creating one file per domain
 backup_desttest=Testing backup destination $1 ..
 backup_eftptest=Failed to connect to FTP server : $1
 backup_escptest=Failed to connect to SSH server : $1

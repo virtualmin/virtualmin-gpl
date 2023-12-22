@@ -567,6 +567,10 @@ foreach my $desturl (@$desturls) {
 			&$second_print($folders);
 			next;
 			}
+		if (!$path && !$homefmt && !$dirfmt) {
+			&$second_print($text{'backup_edesthomedir'});
+			next;
+			}
 		my ($already) = grep { $_->{'name'} eq $server } @$folders;
 		if (!$already) {
 			local $err = &create_drive_folder($server);
