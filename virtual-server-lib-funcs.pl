@@ -11340,29 +11340,30 @@ else {
 }
 
 # has_cgi_support([&domain])
-# Returns 1 if the webserver supports CGI scripts, 0 if not
+# Returns a list of supported cgi modes, which can be 'suexec' and 'fcgiwrap'
 sub has_cgi_support
 {
 my ($d) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	# Check if Apache supports suexec or fcgiwrap
-	return 1 &supports_suexec($d);
+	my @rv;
+	push(@rv, 'suexec') if (&supports_suexec($d));
 	if ($d) {
-		return $d->{'fcgiwrap_port'} ? 1 : 0;
+		push(@rv, 'fcgiwrap') if ($d->{'fcgiwrap_port'});
 		}
 	else {
-		return &supports_fcgiwrap();
+		push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
 		}
+	return @rv;
 	}
 elsif ($p) {
 	# Call plugin function
-	return &plugin_defined($p, "feature_web_supports_cgi") &&
-	       &plugin_call($p, "feature_web_supports_cgi", $d);
+	my $supp = &plugin_defined($p, "feature_web_supports_cgi") &&
+	           &plugin_call($p, "feature_web_supports_cgi", $d);
+	return ('fcgiwrap') if ($supp);
 	}
-else {
-	return 0;
-	}
+return ( );
 }
 
 # require_licence()
