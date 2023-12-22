@@ -111,9 +111,9 @@ as well.
 To force re-generated of TLSA DNS records after the SSL cert is manually
 modified, use the C<--sync-tlsa> flag.
 
-If your system supports FCGIwrap for running CGI scripts, you can use the 
-C<--enable-fcgiwrap> flag to switch to it instead of using suEXEC, or 
-C<--disable-fcgiwrap> to switch back.
+You can select which mode is used for running CGI scripts with one of the
+flags C<--enable-fcgiwrap> or C<--enable-suexec>. Or you can turn off CGIs
+entirely (not recommended) with C<--disable-cgi>.
 
 If your webserver supports multiple HTTP protocols, you can use the 
 C<--protocols> flag to choose which are enabled for the website. This flag must
@@ -301,10 +301,13 @@ while(@ARGV > 0) {
 		$fpmtype = shift(@ARGV);
 		}
 	elsif ($a eq "--enable-fcgiwrap") {
-		$fcgiwrap = 1;
+		$cgimode = 'fcgiwrap';
 		}
-	elsif ($a eq "--disable-fcgiwrap") {
-		$fcgiwrap = 0;
+	elsif ($a eq "--disable-fcgiwrap" || $a eq "--enable-suexec") {
+		$cgimode = 'suexec';
+		}
+	elsif ($a eq "--disable-cgi") {
+		$cgimode = '';
 		}
 	elsif ($a eq "--add-directive") {
 		my ($n, $v) = split(/\s+/, shift(@ARGV));
@@ -353,7 +356,7 @@ $mode || defined($proxy) || defined($framefwd) || $tlsa || $rubymode ||
   $defwebsite || $accesslog || $errorlog || $htmldir || $port || $sslport ||
   $urlport || $sslurlport || defined($includes) || defined($fixoptions) ||
   defined($renew) || $fixhtmldir || $breakcert || $linkcert || $fpmport ||
-  $fpmsock || $fpmtype || $defmode || defined($fcgiwrap) || $subprefix ||
+  $fpmsock || $fpmtype || $defmode || defined($cgimode) || $subprefix ||
   @add_dirs || @remove_dirs || $protocols || $fix_mod_php ||
 	&usage("Nothing to do");
 $proxy && $framefwd && &usage("Both proxying and frame forwarding cannot be enabled at once");
@@ -443,12 +446,11 @@ if ($includes ne "") {
 	    &usage("--includes must be followed by an extension like .html");
 	}
 
-# Validate fcgiwrap change
-if (defined($fcgiwrap)) {
-	$fcgiwrap && !&supports_fcgiwrap() &&
-		&usage("FCGIwrap is not supported on this system");
-	!$fcgiwrap && !&supports_suexec() &&
-		&usage("suEXEC is not supported on this system");
+# Validate CGI script mode
+if ($cgimode) {
+	@cgimodes = &has_cgi_support();
+	&indexof($cgimode, @cgimodes) >= 0 ||
+	    &usage("CGI script mode $cgimode is not supported on this system");
 	}
 
 # Validate SSI change
@@ -853,33 +855,21 @@ foreach $d (@doms) {
 		&$second_print(".. done");
 		}
 
-	if (defined($fcgiwrap) && $d->{'web'}) {
-		# Turn fcgiwrap on or off
-		if ($fcgiwrap) {
+	if (defined($cgimode)) {
+		# Switch to fcgiwrap or suexec mode
+		if ($cgimode) {
 			&$first_print(
-				"Switching to fcgiwrap for CGI scripts ..");
-			if ($d->{'fcgiwrap_port'}) {
-				&$second_print(".. already enabled");
-				}
-			elsif ($err = &enable_apache_fcgiwrap($d)) {
-				&$second_print(".. failed : $err");
-				}
-			else {
-				&$second_print(
-				  ".. done, using port $d->{'fcgiwrap_port'}");
-				}
+				"Switching to $cgimode for CGI scripts ..");
 			}
 		else {
-			&$first_print("Switching to suEXEC for CGI scripts ..");
-			if (!$d->{'fcgiwrap_port'}) {
-				&$second_print(".. already enabled");
-				}
-			elsif ($err = &disable_apache_fcgiwrap($d)) {
-				&$second_print(".. failed : $err");
-				}
-			else {
-				&$second_print(".. done");
-				}
+			&$first_print("Turning off support for CGI scripts ..");
+			}
+		$err = &save_domain_cgi_mode($d, $cgimode);
+		if ($err) {
+			&$second_print(".. failed : $err");
+			}
+		else {
+			&$second_print(".. done");
 			}
 		}
 
@@ -1041,7 +1031,8 @@ print "                     [--url-port number] [--ssl-url-port number]\n";
 print "                     [--fix-options]\n";
 print "                     [--letsencrypt-renew | --no-letsencrypt-renew]\n";
 print "                     [--break-ssl-cert | --link-ssl-cert]\n";
-print "                     [--enable-fcgiwrap | --disable-fcgiwrap]\n";
+print "                     [--enable-fcgiwrap | --enable-suexec |\n";
+print "                      --disable-cgi]\n";
 print "                     [--sync-tlsa]\n";
 print "                     [--add-directive \"name value\"]\n";
 print "                     [--remove-directive \"name value\"]\n";
