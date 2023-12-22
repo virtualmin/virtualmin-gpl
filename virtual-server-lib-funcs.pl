@@ -11340,28 +11340,89 @@ else {
 }
 
 # has_cgi_support([&domain])
-# Returns 1 if the webserver supports CGI scripts, 0 if not
+# Returns a list of supported cgi modes, which can be 'suexec' and 'fcgiwrap'
 sub has_cgi_support
 {
 my ($d) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	# Check if Apache supports suexec or fcgiwrap
-	return 1 &supports_suexec($d);
+	my @rv;
+	push(@rv, 'suexec') if (&supports_suexec($d));
 	if ($d) {
-		return $d->{'fcgiwrap_port'} ? 1 : 0;
+		push(@rv, 'fcgiwrap') if ($d->{'fcgiwrap_port'});
 		}
 	else {
-		return &supports_fcgiwrap();
+		push(@rv, 'fcgiwrap') if (&supports_fcgiwrap());
 		}
+	return @rv;
 	}
 elsif ($p) {
 	# Call plugin function
-	return &plugin_defined($p, "feature_web_supports_cgi") &&
-	       &plugin_call($p, "feature_web_supports_cgi", $d);
+	my $supp = &plugin_defined($p, "feature_web_supports_cgi") &&
+	           &plugin_call($p, "feature_web_supports_cgi", $d);
+	return ('fcgiwrap') if ($supp);
+	}
+return ( );
+}
+
+# get_domain_cgi_mode(&domain)
+# Returns either 'suexec', 'fcgiwrap' or undef depending on how CGI scripts
+# are being run
+sub get_domain_cgi_mode
+{
+my ($d) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	# Check Apache suexec or fcgiwrap modes
+	if (&get_domain_suexec($d)) {
+		return 'suexec';
+		}
+	elsif ($d->{'fcgiwrap_port'}) {
+		return 'fcgiwrap';
+		}
+	return undef;
+	}
+elsif ($p) {
+	# Check plugin supported mode
+	return &plugin_call($p, "feature_web_get_domain_cgi_mode", $d);
+	}
+return undef;
+}
+
+# save_domain_cgi_mode(&domain, mode)
+# Change the mode for executing CGI scripts to either fcgiwrap, suexec or undef
+# to disable them entirely
+sub save_domain_cgi_mode
+{
+my ($d, $mode) = @_;
+my $p = &domain_has_website($d);
+if ($p eq 'web') {
+	&obtain_lock_web($d);
+	my $err = undef;
+	if ($mode ne 'fcgiwrap') {
+		&delete_fcgiwrap_server($d);
+		}
+	if ($mode ne 'suexec') {
+		&disable_apache_suexec($d);
+		}
+	if ($mode eq 'suexec') {
+		$err = &enable_apache_suexec($d);
+		}
+	elsif ($mode eq 'fcgiwrap') {
+		$err = &enable_apache_fcgiwrap($d);
+		if (!$err) {
+			&save_domain($d);
+			}
+		}
+	&release_lock_web($d);
+	return $err;
+	}
+elsif ($p) {
+	return &plugin_call($p, "feature_web_save_domain_cgi_mode", $d, $mode);
 	}
 else {
-	return 0;
+	return "Virtual server does not have a website!";
 	}
 }
 

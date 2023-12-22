@@ -5423,6 +5423,42 @@ delete($d->{'fcgiwrap_port'});
 return undef;
 }
 
+# enable_apache_suexec(&domain)
+# Adds Apache directives for running CGI scripts with suexec
+sub enable_apache_suexec
+{
+my ($d) = @_;
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	&apache::save_directive("SuexecUserGroup",
+		[ "#$d->{'uid'} #$d->{'ugid'}" ], $virt->{'members'}, $conf);
+	&flush_file_lines($virt->{'file'});
+	}
+&register_post_action(\&restart_apache);
+return undef;
+}
+
+# disable_apache_suexec(&domain)
+# Removes Apache directives for running CGI scripts with suexec
+sub disable_apache_suexec
+{
+my ($d) = @_;
+my @ports = ( $d->{'web_port'} );
+push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+foreach my $p (@ports) {
+	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
+	next if (!$virt);
+	&apache::save_directive(
+		"SuexecUserGroup", [], $virt->{'members'}, $conf);
+	&flush_file_lines($virt->{'file'}, undef, 1);
+	}
+&register_post_action(\&restart_apache);
+return undef;
+}
+
 # reset_web(&domain)
 # Turn the website feature off and on again, but preserve redirects
 sub reset_web
