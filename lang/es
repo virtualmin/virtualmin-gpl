@@ -1507,7 +1507,6 @@ check_webok=Apache está instalado
 check_ftpok=ProFTPd está instalado
 check_dnsok2=Servidor BIND DNS está instalado
 check_dnsmaster=Sin embargo, el servidor, por defecto, de DNS principal $1 no es un dominio válido
-check_mysqlnopass=MySQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>root</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos MySQL</a></b>
 check_postgresok=PostgreSQL está instalado y ejecutándose
 check_postgresnopass=PostgreSQL está instalado y corriendo, pero no tiene ninguna contraseña de <tt>$2</tt> configurada! <b>Esto debe ser cambiado inmediatamente en el módulo <a href='$1'>Base de datos PostgreSQl</a></b>
 check_webalizerok=Webalizer está instalado

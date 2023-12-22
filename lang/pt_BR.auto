@@ -1659,6 +1659,8 @@ newweb_admindom=URL para redirecionamento <tt>admin</tt>
 newweb_ewebmaildom=URL ausente ou inválido para redirecionamento de webmail
 newweb_eadmindom=URL ausente ou inválido para redirecionamento de administrador
 newweb_http2=Ativar protocolo HTTP2 para novos sites?
+newweb_http2_inherit=Do modelo padrão
+newweb_http2_def=Padrão do servidor web
 newweb_redirects=Redirecionamentos para novos sites
 newweb_rfrom=Do caminho
 newweb_rto=Para caminho ou URL
@@ -1843,7 +1845,8 @@ check_dnsmaster3=entretanto, o servidor DNS mestre padrão $1 resolve para o end
 check_mysqlok=MySQL $1 está instalado e em execução
 check_mysqlok2=Os programas clientes MySQL são instalados para uso com um host de serviços
 check_mysqlok3=Virtualmin está usando um servidor MySQL remoto
-check_mysqlnopass=O MySQL está instalado e em execução, mas não possui nenhuma senha <tt>root</tt> definida! <b>Isso deve ser alterado imediatamente no módulo<a href='$1'> Banco de Dados MySQL </a></b>
+check_mysqlnopass=O MySQL $1 está instalado e em execução, mas não possui nenhuma senha <tt>root</tt> definida. Isso deve ser corrigido imediatamente no módulo <a href='$1'>Banco de Dados MySQL</a>
+check_mysqlnopasssocket=O MySQL $1 está instalado e em execução, usando autenticação de soquete Unix
 check_postgresok=O PostgreSQL está instalado e em execução
 check_postgresok3=Virtualmin está usando um servidor PostgreSQL remoto
 check_postgresnopass=O PostgreSQL está instalado e em execução, mas não possui nenhuma senha <tt>$2</tt> definida! <b>Isso deve ser alterado imediatamente no módulo<a href='$1'> Banco de dados PostgreSQL </a></b>
@@ -6337,7 +6340,7 @@ wizard_mysql=Para impedir que outros usuários em seu sistema gerenciem o banco 
 wizard_mysql2=Atualmente, a senha do MySQL não está definida, o que é altamente inseguro.
 wizard_mysql3=Isso já foi feito, portanto, a alteração da senha aqui não é obrigatória.
 wizard_mysql4=O Virtualmin não sabe qual é a senha atual do <tt>root</tt> do MySQL. Ele deve ser definido aqui para permitir que o Virtualmin crie novos bancos de dados e usuários MySQL.
-wizard_mysql5=O MySQL está usando autenticação de soquete Unix para o usuário <tt>root</tt>, portanto a senha não pode ser alterada.
+wizard_mysql5=O MySQL está usando autenticação de soquete Unix para o usuário <tt>root</tt>, portanto uma senha não será definida.
 wizard_mysql_pass1=Deixar inalterado
 wizard_mysql_pass0=Definido como
 wizard_mysql_forcepass=Substitua a senha do MySQL <tt>root</tt> para corresponder

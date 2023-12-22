@@ -1403,7 +1403,6 @@ check_dnsok2=BIND DNS-Server ist installiert
 check_dnsok3=BIND DNS-Domains werden auf Service-Host gehostet
 check_dnsmaster=Allerdings ist der Standard-Master-DNS-Server $1 kein Fully Qualified Domain Name
 check_mysqlok2=MySQL-Client-Programme sind installiert für die Benutzung mit einem Service Host
-check_mysqlnopass=MySQL ist installiert und läuft, aber kein <tt>root</tt> Passwort ist gesetzt! <b>Dies sollte sofort in dem <a href='$1'>MySQL Datenbank</a> Modul geändert werden..
 check_postgresok=PostgreSQL ist installiert und läuft
 check_postgresnopass=PostgreSQL installiert ist und läuft, aber es ist noch kein <tt>$2</tt> Passwort gesetzt! <b>Dies sollte sofort in der <a href='$1'>PostgreSQL Datenbank geändert werden </a> Modul</b>
 check_webalizerok=Webalizer ist installiert

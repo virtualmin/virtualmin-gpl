@@ -488,7 +488,6 @@ check_defip=Vychozi IP adresa pro virtualni servery je $1
 check_ednsip2=Implicitní IP adresa je nastavena na $1, ale detekovaná veřejná adresa je $2 . Toto zpravidla nastává v případě, kdy jste připojeni přes NAT a mělo by být opraveno na stránce <a href='$3'>nastavení modulů</a>
 check_ewebactions=Modul Apache <tt>mod_actions</tt> buď není nainstalován nebo není povolen
 check_dnsok2=BIND DNS server je instalovan
-check_mysqlnopass=MySQL je nainstalován a běží, ale nemá nastaven žádné <tt>root</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze MySQL</a></b>
 check_postgresnopass=PostgreSQL je nainstalován a běží, ale nemá nastaven žádné <tt>$2</tt> heslo! <b>Proveďte nápravu okamžitě v modulu <a href='$1'>Databáze PostgreSQL</a></b>
 check_done=.. vas system je pripraven pro pouziti Virtualminem
 check_edepwebalizer=Webalizer nelze povolit v <a href='$1'>konfiguraci modulu</a> Virtualminu soucasne s apachem

@@ -680,6 +680,8 @@ newweb_admindom=URL pour la redirection <tt>admin</tt>
 newweb_ewebmaildom=URL manquante ou non valide pour la redirection de messagerie Web
 newweb_eadmindom=URL manquante ou non valide pour la redirection administrateur
 newweb_http2=Activer le protocole HTTP2 pour les nouveaux sites Web?
+newweb_http2_inherit=À partir du modèle par défaut
+newweb_http2_def=Serveur Web par défaut
 newweb_redirects=Redirections vers de nouveaux sites Web
 newweb_rfrom=Du chemin
 newweb_rto=Vers le chemin ou l'URL
@@ -782,7 +784,8 @@ check_dnsmaster3=cependant, le serveur DNS maître par défaut $1 est résolu en
 check_mysqlok=MySQL $1 est installé et en cours d'exécution
 check_mysqlok2=Les programmes clients MySQL sont installés pour être utilisés avec un hôte de services
 check_mysqlok3=Virtualmin utilise un serveur MySQL distant
-check_mysqlnopass=MySQL est installé et fonctionne, mais n'a pas de mot de passe <tt>root</tt> défini! <b>Cela devrait être changé immédiatement dans le module<a href='$1'> Base de données MySQL </a></b>
+check_mysqlnopass=MySQL $1 est installé et en cours d'exécution, mais aucun mot de passe <tt>root</tt> n'est défini. Cela devrait être corrigé immédiatement dans le module <a href='$1'>Base de données MySQL</a>
+check_mysqlnopasssocket=MySQL $1 est installé et en cours d'exécution, à l'aide de l'authentification par socket Unix
 check_postgresok3=Virtualmin utilise un serveur PostgreSQL distant
 check_postgresnopass=PostgreSQL est installé et en cours d'exécution, mais aucun mot de passe <tt>$2</tt> n'a été défini! <b>Cela devrait être changé immédiatement dans le module<a href='$1'> Base de données PostgreSQL </a></b>
 check_enetmask6=Le masque de réseau IPv6 $1 n'est pas valide - il doit s'agir d'un nombre, comme 64
@@ -3991,7 +3994,7 @@ wizard_mysql=Pour empêcher d'autres utilisateurs de votre système de gérer la
 wizard_mysql2=Actuellement, le mot de passe MySQL n'est pas défini, ce qui est très peu sûr.
 wizard_mysql3=Cela a déjà été fait, donc changer le mot de passe ici n'est pas obligatoire.
 wizard_mysql4=Virtualmin ne sait pas quel est le mot de passe <tt>root</tt> MySQL actuel. Il doit être défini ici pour permettre à Virtualmin de créer de nouvelles bases de données et utilisateurs MySQL.
-wizard_mysql5=MySQL utilise l'authentification par socket Unix pour l'utilisateur <tt>root</tt>, le mot de passe ne peut donc pas être modifié.
+wizard_mysql5=MySQL utilise l'authentification par socket Unix pour l'utilisateur <tt>root</tt>, donc aucun mot de passe ne sera défini.
 wizard_mysql_pass=Changer le mot de passe MySQL
 wizard_mysql_pass1=Laisser inchangé
 wizard_mysql_pass0=Mis à

@@ -1455,6 +1455,8 @@ newweb_admindom=Adres URL przekierowania <tt>admin</tt>
 newweb_ewebmaildom=Brakujący lub nieprawidłowy adres URL przekierowania poczty internetowej
 newweb_eadmindom=Brakujący lub nieprawidłowy adres URL przekierowania administratora
 newweb_http2=Włączyć protokół HTTP2 dla nowych stron internetowych?
+newweb_http2_inherit=Z domyślnego szablonu
+newweb_http2_def=Domyślne ustawienie serwera WWW
 newweb_redirects=Przekierowania dla nowych stron internetowych
 newweb_rfrom=Ze ścieżki
 newweb_rto=Do ścieżki lub adresu URL
@@ -1619,7 +1621,8 @@ check_dnsmaster3=jednakże domyślny główny serwer DNS $1 jest rozpoznawany na
 check_mysqlok=MySQL $1 jest zainstalowany i działa
 check_mysqlok2=Programy klienckie MySQL są instalowane do użytku z hostem usług
 check_mysqlok3=Virtualmin używa zdalnego serwera MySQL
-check_mysqlnopass=MySQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>root</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> MySQL Database </a></b>
+check_mysqlnopass=MySQL $1 jest zainstalowany i uruchomiony, ale nie ma ustawionego żadnego hasła <tt>root</tt>. Należy to natychmiast naprawić w module <a href='$1'>Baza danych MySQL</a>
+check_mysqlnopasssocket=MySQL $1 jest zainstalowany i uruchomiony przy użyciu uwierzytelniania gniazda Unix
 check_postgresok=PostgreSQL jest zainstalowany i działa
 check_postgresok3=Virtualmin używa zdalnego serwera PostgreSQL
 check_postgresnopass=PostgreSQL jest zainstalowany i działa, ale nie ma ustawionego hasła <tt>$2</tt>! <b>Należy to natychmiast zmienić w module<a href='$1'> Baza danych PostgreSQL </a></b>
@@ -5602,7 +5605,7 @@ wizard_mysql=Aby uniemożliwić innym użytkownikom systemu zarządzanie bazą d
 wizard_mysql2=Obecnie hasło MySQL nie jest ustawione, co jest bardzo niepewne.
 wizard_mysql3=To już zostało zrobione, więc zmiana hasła tutaj nie jest obowiązkowa.
 wizard_mysql4=Virtualmin nie wie, jakie jest bieżące hasło <tt>root</tt> MySQL. Należy tu ustawić, aby Virtualmin mógł tworzyć nowe bazy danych MySQL i użytkowników.
-wizard_mysql5=MySQL używa uwierzytelniania gniazda Unix dla użytkownika <tt>root</tt>, więc nie można zmienić hasła.
+wizard_mysql5=MySQL używa uwierzytelniania gniazda Unix dla użytkownika <tt>root</tt>, więc hasło nie zostanie ustawione.
 wizard_mysql_forcepass=Zastąp <tt>root</tt> hasło MySQL, aby pasowało
 wizard_mysql_deltest=Usunąć bazę danych <tt>test</tt> MySQL?
 wizard_mysql_delc=(Zawiera tabele $1)

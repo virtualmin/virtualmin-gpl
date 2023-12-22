@@ -1826,6 +1826,8 @@ newweb_admindom=Adresa URL pre presmerovanie <tt>admin</tt>
 newweb_ewebmaildom=Chýbajúca alebo neplatná adresa URL pre presmerovanie webovej pošty
 newweb_eadmindom=Chýbajúca alebo neplatná adresa URL pre presmerovanie správcu
 newweb_http2=Povoliť protokol HTTP2 pre nové webové stránky?
+newweb_http2_inherit=Z predvolenej šablóny
+newweb_http2_def=Predvolená hodnota webového servera
 newweb_redirects=Presmerovania na nové webové stránky
 newweb_rfrom=Z cesty
 newweb_rto=Na cestu alebo URL
@@ -2011,7 +2013,8 @@ check_dnsmaster3=predvolený hlavný server DNS $1 sa však prekladá na adresu 
 check_mysqlok=MySQL $1 je nainštalovaný a spustený
 check_mysqlok2=Klientske programy MySQL sú nainštalované na použitie s hostiteľom služieb
 check_mysqlok3=Virtualmin používa vzdialený server MySQL
-check_mysqlnopass=MySQL je nainštalovaný a spustený, ale nemá nastavené žiadne <tt>root</tt> heslo! <b>Toto by sa malo okamžite zmeniť v module <a href='$1'>MySQL Database</a></b>
+check_mysqlnopass=MySQL $1 je nainštalovaný a spustený, ale nemá nastavené žiadne <tt>root</tt> heslo. Toto by malo byť okamžite opravené v module <a href='$1'>MySQL Database</a>
+check_mysqlnopasssocket=MySQL $1 je nainštalovaný a spustený pomocou autentifikácie soketu Unix
 check_postgresok=PostgreSQL je nainštalovaný a spustený
 check_postgresok3=Virtualmin používa vzdialený server PostgreSQL
 check_postgresnopass=PostgreSQL je nainštalovaný a spustený, ale nemá nastavené žiadne heslo <tt>$2</tt>! <b>Toto by sa malo okamžite zmeniť v module <a href='$1'>Databáza PostgreSQL</a></b>
@@ -6609,7 +6612,7 @@ wizard_mysql=Aby ste zabránili iným používateľom vo vašom systéme spravov
 wizard_mysql2=Momentálne nie je nastavené heslo MySQL, čo je veľmi neisté.
 wizard_mysql3=Toto už bolo urobené, takže zmena hesla tu nie je povinná.
 wizard_mysql4=Virtualmin nevie, aké je aktuálne heslo <tt>root</tt> MySQL. Musí sa tu nastaviť, aby Virtualmin mohol vytvárať nové databázy MySQL a používateľov.
-wizard_mysql5=MySQL používa autentifikáciu soketu Unix pre používateľa <tt>root</tt>, takže heslo nemožno zmeniť.
+wizard_mysql5=MySQL používa autentifikáciu soketu Unix pre používateľa <tt>root</tt>, takže heslo nebude nastavené.
 wizard_mysql_pass=Zmeňte heslo MySQL
 wizard_mysql_pass1=Nechajte nezmenené
 wizard_mysql_pass0=Nastavený na

@@ -15639,14 +15639,20 @@ if ($config{'mysql'}) {
 			return &text('index_emysql', "/mysql/", $clink);
 			}
 		else {
+			my ($mysql_ver) = &get_dom_remote_mysql_version();
 			if ($mysql::mysql_pass eq '') {
-				local $myd = &module_root_directory("mysql");
-				&$second_print(&text('check_mysqlnopass',
-						     '/mysql/root_form.cgi'));
+				if (defined(&mysql::mysql_login_type) &&
+				    &mysql::mysql_login_type($mysql::mysql_login || 'root')) {
+					# Using socket authentication
+					&$second_print(&text('check_mysqlnopasssocket', $mysql_ver));
+					}
+				else {
+					&$second_print(&text('check_mysqlnopass',
+							'/mysql/root_form.cgi', $mysql_ver));
+					}
 				}
 			else {
-				my ($v, $var) = &get_dom_remote_mysql_version();
-				&$second_print(&text('check_mysqlok', $v));
+				&$second_print(&text('check_mysqlok', $mysql_ver));
 				}
 
 			# Update any cached MySQL version
