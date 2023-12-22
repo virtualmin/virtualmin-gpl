@@ -588,12 +588,15 @@ if ($multi) {
 			@modes = &supported_php_modes($d);
 			print "    Possible PHP execution modes: ",
 				join(" ", @modes),"\n";
-			$s = &get_domain_suexec($d);
-			print "    suEXEC for CGIs: ",
-			      ($s ? "enabled" : "disabled"),"\n";
+			$s = &get_domain_cgi_mode($d);
+			print "    CGI script execution mode: ",
+				($s || "disabled"),"\n";
 			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
 				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
 				}
+			@modes = &has_cgi_support($d);
+			print "    Possible CGI script execution modes: ",
+				join(" ", @modes),"\n";
 			if ($pm eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
