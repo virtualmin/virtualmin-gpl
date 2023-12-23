@@ -335,7 +335,7 @@ sub feature_web_get_domain_cgi_mode
 # feature_web_save_domain_cgi_mode(&domain, mode)
 # Updates the current CGI mode for a domain to either 'suexec' or 'fcgiwrap',
 # or disable CGI scripts if the mode is set to undef
-sub feature_web_get_domain_cgi_mode
+sub feature_save_get_domain_cgi_mode
 {
 }
 
