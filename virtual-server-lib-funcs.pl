@@ -9335,6 +9335,7 @@ push(@rv, { 'id' => 0,
 	    'web_writelogs' => $config{'web_writelogs'},
 	    'web_user' => $config{'web_user'},
 	    'web_fcgiwrap' => $config{'fcgiwrap'},
+	    'web_cgimode' => $config{'cgimode'},
 	    'web_html_dir' => $config{'html_dir'},
 	    'web_html_perms' => $config{'html_perms'} || 750,
 	    'web_stats_dir' => $config{'stats_dir'},
@@ -9621,6 +9622,12 @@ while(defined($f = readdir(DIR))) {
 foreach my $tmpl (@rv) {
 	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
 	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
+	if (!defined($tmpl->{'web_cgimode'})) {
+		# XXX use first mode
+		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ?
+						'fcgiwrap' : 'suexec';
+		delete($tmpl->{'web_fcgiwrap'});
+		}
 	}
 closedir(DIR);
 @list_templates_cache = @rv;
@@ -9675,7 +9682,8 @@ if ($tmpl->{'id'} == 0) {
 	$config{'apache_ssl_config'} = $tmpl->{'web_ssl'};
 	$config{'web_writelogs'} = $tmpl->{'web_writelogs'};
 	$config{'web_user'} = $tmpl->{'web_user'};
-	$config{'fcgiwrap'} = $tmpl->{'web_fcgiwrap'};
+	delete($config{'fcgiwrap'});
+	$config{'cgimode'} = $tmpl->{'web_cgimode'};
 	$config{'html_dir'} = $tmpl->{'web_html_dir'};
 	$config{'html_perms'} = $tmpl->{'web_html_perms'};
 	$config{'stats_dir'} = $tmpl->{'web_stats_dir'};

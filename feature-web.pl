@@ -234,11 +234,14 @@ else {
 &$second_print($text{'setup_done'});
 
 if (!$d->{'alias'}) {
-	# If suexec isn't supported, setup fcgiwrap
-	if (($tmpl->{'web_fcgiwrap'} || !&supports_suexec()) &&
-	    &supports_fcgiwrap()) {
-		&$first_print($text{'setup_fcgiwrap'});
-		my $err = &enable_apache_fcgiwrap($d);
+	# Switch to the template CGI mode, if supported
+	my $mode = $tmpl->{'web_cgimode'};
+	my @cgimodes = &has_cgi_support();
+	if (!$mode || &indexof($mode, @cgimodes) >= 0) {
+		&$first_print($mode ? &text('setup_cgimode',
+					$text{'tmpl_web_cgimode'.$mode})
+				    : $text{'setup_cgimodenone'});
+		my $err = &save_domain_cgi_mode($d, $mode);
 		if ($err) {
 			&$second_print(&text('setup_efcgiwrap', $err));
 			}
@@ -2711,14 +2714,14 @@ sub show_template_web
 local ($tmpl) = @_;
 
 my $hr;
+my @cgimodes = &has_cgi_support();
 if ($config{'web'}) {
 	# Work out fields to disable when Apache is in default mode
 	local @webfields = ( "web", "web_ssl", "user_def",
 			     $tmpl->{'writelogs'} ? ( "writelogs" ) : ( ),
 			     "html_dir", "html_dir_def", "html_perms",
 			     "alias_mode", "web_port", "web_sslport",
-			     "web_ssi", "web_ssi_suffix",
-			     &supports_fcgiwrap() ? ( "fcgiwrap" ) : ( ) );
+			     "web_ssi", "web_ssi_suffix");
 	if ($config{'webalizer'}) {
 		push(@webfields, "stats_mode", "stats_dir", "stats_hdir",
 				 "statspass", "statsnoedit");
@@ -2731,7 +2734,7 @@ if ($config{'web'}) {
 	local $ndi = &none_def_input("web", $tmpl->{'web'}, $text{'tmpl_webbelow'}, 1,
 				     0, undef, \@webfields);
 	print &ui_table_row(&hlink($text{'tmpl_web'}, "template_web"),
-		$ndi."\n".
+		$ndi."<br>\n".
 		&ui_textarea("web", $tmpl->{'web'} eq "none" ? "" :
 					join("\n", split(/\t/, $tmpl->{'web'})),
 			     10, 60));
@@ -2757,14 +2760,16 @@ if ($config{'web'}) {
 			 [ 1, $text{'newweb_useryes'}." ".
 			      &ui_user_textbox("user", $tmpl->{'web_user'} eq 'none' ?
 							'' : $tmpl->{'web_user'}) ] ]));
+	}
 
-	# CGI scripts execution mode
-	if (&supports_fcgiwrap()) {
-		print &ui_table_row(&hlink($text{'tmpl_web_fcgiwrap'}, "template_web_fcgiwrap"),
-			&ui_radio("fcgiwrap", $tmpl->{'web_fcgiwrap'} ? 1 : 0,
-				  [ [ 1, $text{'tmpl_web_fcgiwrap1'} ],
-				    [ 0, $text{'tmpl_web_fcgiwrap0'} ] ]));
-		}
+# CGI script execution mode
+if (@cgimodes > 0) {
+	print &ui_table_row(
+		&hlink($text{'tmpl_web_cgimode'}, "template_web_cgimode"),
+		&ui_radio("cgimode", $tmpl->{'web_cgimode'},
+			  [ [ '', $text{'tmpl_web_cgimodenone'} ],
+			    map { [ $_, $text{'tmpl_web_cgimode'.$_} ] }
+				@cgimodes ]));
 	}
 
 # HTML sub-directory input
@@ -2978,9 +2983,6 @@ if ($config{'web'}) {
 		if (defined($in{'writelogs'})) {
 			$tmpl->{'web_writelogs'} = $in{'writelogs'};
 			}
-		if (defined($in{'fcgiwrap'})) {
-			$tmpl->{'web_fcgiwrap'} = $in{'fcgiwrap'};
-			}
 		if ($in{'html_dir_def'}) {
 			delete($tmpl->{'web_html_dir'});
 			}
@@ -3003,6 +3005,9 @@ if ($config{'web'}) {
 			$tmpl->{'web_user'} = $in{'user'};
 			}
 		$tmpl->{'web_alias'} = $in{'alias_mode'};
+		if (defined($in{'cgimode'})) {
+			$tmpl->{'web_cgimode'} = $in{'cgimode'};
+			}
 
 		$in{'web_port'} =~ /^\d+$/ && $in{'web_port'} > 0 &&
 			$in{'web_port'} < 65536 || &error($text{'newweb_eport'});
@@ -3064,6 +3069,9 @@ else {
 	$in{'html_perms'} =~ /^[0-7]{3,4}$/ ||
 		&error($text{'newweb_ehtmlperms'});
 	$tmpl->{'web_html_perms'} = $in{'html_perms'};
+	if (defined($in{'cgimode'})) {
+		$tmpl->{'web_cgimode'} = $in{'cgimode'};
+		}
 	}
 
 if ($config{'web'} && $config{'webalizer'}) {

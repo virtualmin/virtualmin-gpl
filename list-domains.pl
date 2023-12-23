@@ -313,6 +313,7 @@ if ($multi) {
 		$ms = &quota_bsize("mail");
 		$sender_bcc = &get_all_domains_sender_bcc();
 		$recipient_bcc = &get_all_domains_recipient_bcc();
+		@cgimodes = &has_cgi_support();
 		}
 	foreach $d (@doms) {
 		local @users = &list_domain_users($d, 0, 1, 0, 1);
@@ -594,9 +595,8 @@ if ($multi) {
 			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
 				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
 				}
-			@modes = &has_cgi_support($d);
 			print "    Possible CGI script execution modes: ",
-				join(" ", @modes),"\n";
+				join(" ", @cgimodes),"\n";
 			if ($pm eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
