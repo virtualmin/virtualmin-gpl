@@ -5445,6 +5445,7 @@ sub enable_apache_suexec
 my ($d) = @_;
 my @ports = ( $d->{'web_port'} );
 push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $found = 0;
 foreach my $p (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
@@ -5455,9 +5456,10 @@ foreach my $p (@ports) {
 	push(@sca, "/cgi-bin/ ".&cgi_bin_dir($d)."/");
 	&apache::save_directive("ScriptAlias", \@sca, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
+	$found++;
 	}
-&register_post_action(\&restart_apache);
-return undef;
+&register_post_action(\&restart_apache) if ($found);
+return $found ? undef : "No Apache virtualhost found!";
 }
 
 # disable_apache_suexec(&domain)
@@ -5467,6 +5469,7 @@ sub disable_apache_suexec
 my ($d) = @_;
 my @ports = ( $d->{'web_port'} );
 push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
+my $found = 0;
 foreach my $p (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
@@ -5475,9 +5478,10 @@ foreach my $p (@ports) {
 	@sca = grep { !/^\/cgi-bin\/\s/ } @sca;
 	&apache::save_directive("ScriptAlias", \@sca, $vconf, $conf);
 	&flush_file_lines($virt->{'file'}, undef, 1);
+	$found++;
 	}
-&register_post_action(\&restart_apache);
-return undef;
+&register_post_action(\&restart_apache) if ($found);
+return $found ? undef : "No Apache virtualhost found!";
 }
 
 # reset_web(&domain)
