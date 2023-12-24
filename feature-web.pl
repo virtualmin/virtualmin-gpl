@@ -5443,6 +5443,10 @@ foreach my $p (@ports) {
 	next if (!$virt);
 	&apache::save_directive("SuexecUserGroup",
 		[ "#$d->{'uid'} #$d->{'ugid'}" ], $virt->{'members'}, $conf);
+	my @sca = &apache::find_directive("ScriptAlias", $vconf);
+	@sca = grep { !/^\/cgi-bin\/\s/ } @sca;
+	push(@sca, "/cgi-bin/ ".&cgi_bin_dir($d)."/");
+	&apache::save_directive("ScriptAlias", \@sca, $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
 	}
 &register_post_action(\&restart_apache);
@@ -5459,8 +5463,10 @@ push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 foreach my $p (@ports) {
 	my ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'}, $p);
 	next if (!$virt);
-	&apache::save_directive(
-		"SuexecUserGroup", [], $virt->{'members'}, $conf);
+	&apache::save_directive("SuexecUserGroup", [], $vconf, $conf);
+	my @sca = &apache::find_directive("ScriptAlias", $vconf);
+	@sca = grep { !/^\/cgi-bin\/\s/ } @sca;
+	&apache::save_directive("ScriptAlias", \@sca, $vconf, $conf);
 	&flush_file_lines($virt->{'file'}, undef, 1);
 	}
 &register_post_action(\&restart_apache);
