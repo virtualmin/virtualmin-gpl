@@ -1879,7 +1879,7 @@ if ($virt) {
 		&fix_php_extension_dir($d);
 		}
 
-	# Fix unsupported PHP execution mode
+	# Fix unsupported CGI execution mode
 	my $oldmode = &get_domain_cgi_mode($d);
 	my @cgimodes = &has_cgi_support();
 	if ($oldmode && &indexof($oldmodes, @cgimodes) < 0) {
