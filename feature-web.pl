@@ -5395,6 +5395,10 @@ foreach my $p (@ports) {
 		  $dir->{'members'}, $conf);
 		&apache::save_directive("ProxyFCGIBackendType", ["GENERIC"],
 					$dir->{'members'}, $conf);
+		my @sca = &apache::find_directive("ScriptAlias", $vconf);
+		@sca = grep { !/^\/cgi-bin\/\s/ } @sca;
+		push(@sca, "/cgi-bin/ ".&cgi_bin_dir($d)."/");
+		&apache::save_directive("ScriptAlias", \@sca, $vconf, $conf);
 		&flush_file_lines($virt->{'file'});
 		}
 	else {
