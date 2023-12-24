@@ -100,7 +100,7 @@
 * Added a configuration option and flag to create-domain to allow SSL linkage across domain owners.
 * Added the reset-feature API command and a tab on the Validate Virtual Servers page to reset the settings for selected features of a virtual server back to their defaults.
 * Removed the mostly useless configuration check for 127.0.0.1 in /etc/resolv.conf.
-* On systems without SuExec, fcgiwrap will be used to execute CGI scripts instead for new virtual servers.
+* On systems without suEXEC, fcgiwrap will be used to execute CGI scripts instead for new virtual servers.
 
 #### Version 6.16
 * Added a field for entering an SSH private key file for use in backups, instead of a password.
@@ -659,7 +659,7 @@
 * Added a bandwidth monitoring option to include relayed email, thanks to Collin from Bisnet.
 * When editing default scripts in a template, an option to always install the latest version is now available.
 * If a single database backup for a virtual server fails, others will still be backed up.
-* Added validation for incorrect SuExec Apache directives.
+* Added validation for incorrect suEXEC Apache directives.
 * Deprecated the feature to write logs via a program, as logging to /var/log/virtualmin is now the default.
 * Added support for JSON, XML and Perl output to the remote API, enabled with the json=1, xml=1 or perl=1 URL parameters.
 * Removed support for Joomla 1.0 series versions.
@@ -1579,7 +1579,7 @@
 * MySQL database names containing the _ or % characters are now properly escaped in the db table, to prevent their owners from accessing or creating other databases.
 * Added an option when creating a virtual server with a private IP address to enter an IP that is already active on the system.
 * When deleting a virtual server, its webalizer config files are removed too.
-* Fixed a bug that prevented SuExec directives from being added to sub-server Apache configurations.
+* Fixed a bug that prevented suEXEC directives from being added to sub-server Apache configurations.
 * If a mailbox user's password is changed by the passwd command or some other program, Virtualmin will detect this and realize that the plain-text password stored for the user is no longer valid.
 * All script installers that use a database will now be configured to connect to the correct remote database server, if one has been setup in the MySQL or PostgreSQL modules.
 * When making a backup to a remote server, the connection is tested before the backup is actually started.

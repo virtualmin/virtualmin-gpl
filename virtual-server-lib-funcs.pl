@@ -15391,7 +15391,7 @@ if ($config{'web'}) {
 
 	&$second_print($text{'check_webok'});
 
-	# Check SuExec / CGI mode
+	# Check suEXEC / CGI mode
 	my @cgimodes = &has_cgi_support();
 	if (@cgimodes) {
 		&$second_print(&text('check_cgimodes', join(' ', @cgimodes)));

@@ -4106,7 +4106,7 @@ foreach my $suhome (@suhome) {
 return 0 if (!$under);
 
 if ($d) {
-	# Is SuExec enabled in the Apache config?
+	# Is suEXEC enabled in the Apache config?
 	local ($virt, $vconf) = &get_apache_virtual(
 					$d->{'dom'}, $d->{'web_port'});
 	return 0 if (!$virt);
