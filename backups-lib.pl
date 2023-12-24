@@ -2924,6 +2924,7 @@ if ($ok) {
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
+			$d->{'notmplcgimode'} = 1;
 			$d->{'auto_letsencrypt'} = 0;
 			$d->{'no_mysql_db'} = 1;
 			my $err = &create_virtual_server($d, $parentdom,

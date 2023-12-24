@@ -233,8 +233,8 @@ else {
 &create_framefwd_file($d);
 &$second_print($text{'setup_done'});
 
-if (!$d->{'alias'}) {
-	# Switch to the template CGI mode, if supported
+if (!$d->{'alias'} && !$d->{'notmplcgimode'}) {
+	# Switch to the template CGI mode, if supported (unless restoring)
 	my $mode = $tmpl->{'web_cgimode'};
 	my @cgimodes = &has_cgi_support();
 	if (!$mode || &indexof($mode, @cgimodes) >= 0) {
@@ -1877,6 +1877,13 @@ if ($virt) {
 	# Fix broken PHP extension_dir directives
 	if (($mode eq "fcgid" || $mode eq "cgi") && !$d->{'alias'}) {
 		&fix_php_extension_dir($d);
+		}
+
+	# Fix unsupported PHP execution mode
+	my $oldmode = &get_domain_cgi_mode($d);
+	my @cgimodes = &has_cgi_support();
+	if ($oldmode && &indexof($oldmodes, @cgimodes) < 0) {
+		&save_domain_cgi_mode($d, @cgimodes ? $cgimodes[0] : undef);
 		}
 
 	# Add Require all granted directive if this system is Apache 2.4
@@ -5422,7 +5429,7 @@ foreach my $p (@ports) {
 					$dir->{'members'}, $conf);
 		&apache::save_directive("ProxyFCGIBackendType", [],
 					$dir->{'members'}, $conf);
-		&flush_file_lines($virt->{'file'});
+		&flush_file_lines($virt->{'file'}, undef, 1);
 		}
 	}
 &register_post_action(\&restart_apache);
