@@ -7516,18 +7516,19 @@ $web_tests = [
 	  'grep' => 'load average',
 	},
 
+	# Test with CGI scripts off
+	{ 'command' => 'modify-web.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'disable-cgi' ] ],
+	},
+
+	{ 'command' => $wget_command.
+		       'http://'.$test_domain.'/cgi-bin/test.cgi',
+	  'fail' => 1,
+	},
+
 	# Test in fcgiwrap mode
 	&supports_fcgiwrap() ? (
-		{ 'command' => 'modify-web.pl',
-		  'args' => [ [ 'domain' => $test_domain ],
-			      [ 'enable-fcgiwrap' ] ],
-		},
-
-		{ 'command' => $wget_command.
-			       'http://'.$test_domain.'/cgi-bin/test.cgi',
-		  'grep' => 'load average',
-		},
-
 		{ 'command' => 'modify-web.pl',
 		  'args' => [ [ 'domain' => $test_domain ],
 			      [ 'enable-fcgiwrap' ] ],
