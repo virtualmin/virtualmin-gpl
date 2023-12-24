@@ -1050,7 +1050,7 @@ else {
 		}
 
 	# If using fcgiwrap, make sure the server is running
-	if ($d->{'fcgiwrap_port'}) {
+	if (&get_domain_cgi_mode($d) eq 'fcgiwrap') {
 		my $st = &get_fcgiwrap_status($d);
 		if ($st == 0) {
 			return $text{'validate_efcgiwrapinit'};

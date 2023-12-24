@@ -9623,9 +9623,9 @@ foreach my $tmpl (@rv) {
 	$tmpl->{'resellers'} = '*' if (!defined($tmpl->{'resellers'}));
 	$tmpl->{'owners'} = '*' if (!defined($tmpl->{'owners'}));
 	if (!defined($tmpl->{'web_cgimode'})) {
-		# XXX use first mode
+		my @cgimodes = &has_cgi_support();
 		$tmpl->{'web_cgimode'} = $tmpl->{'web_fcgiwrap'} ?
-						'fcgiwrap' : 'suexec';
+						'fcgiwrap' : $cgimodes[0];
 		delete($tmpl->{'web_fcgiwrap'});
 		}
 	}
@@ -11409,7 +11409,7 @@ if ($p eq 'web') {
 	&obtain_lock_web($d);
 	my $err = undef;
 	if ($mode ne 'fcgiwrap') {
-		&delete_fcgiwrap_server($d);
+		&disable_apache_fcgiwrap($d);
 		}
 	if ($mode ne 'suexec') {
 		&disable_apache_suexec($d);
@@ -11423,6 +11423,7 @@ if ($p eq 'web') {
 			&save_domain($d);
 			}
 		}
+	&save_domain($d);
 	&release_lock_web($d);
 	return $err;
 	}
