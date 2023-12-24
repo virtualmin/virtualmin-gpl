@@ -2070,7 +2070,7 @@ if ($mode > 0) {
 		}
 	else {
 		# Done .. account for bandwidth
-		if ($asd) {
+		if ($asd && $asd->{'id'}) {
 			local $sz = &disk_usage_kb($backup)*1024;
 			&record_backup_bandwidth($asd, $sz, 0, $tstart, time());
 			}
