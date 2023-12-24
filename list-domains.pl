@@ -589,14 +589,6 @@ if ($multi) {
 			@modes = &supported_php_modes($d);
 			print "    Possible PHP execution modes: ",
 				join(" ", @modes),"\n";
-			$s = &get_domain_cgi_mode($d);
-			print "    CGI script execution mode: ",
-				($s || "disabled"),"\n";
-			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
-				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
-				}
-			print "    Possible CGI script execution modes: ",
-				join(" ", @cgimodes),"\n";
 			if ($pm eq "fpm") {
 				($ok, $port) = &get_domain_php_fpm_port($d);
 				if ($ok >= 0) {
@@ -610,6 +602,14 @@ if ($multi) {
 					print "    PHP FPM config file: $cfile\n";
 					}
 				}
+			$s = &get_domain_cgi_mode($d);
+			print "    CGI script execution mode: ",
+				($s || "disabled"),"\n";
+			if ($d->{'fcgiwrap_port'} && $d->{'web'}) {
+				print "    FCGIwrap port for CGIs: ",$d->{'fcgiwrap_port'},"\n";
+				}
+			print "    Possible CGI script execution modes: ",
+				join(" ", @cgimodes),"\n";
 			}
 		elsif (!$d->{'alias'} && $multi == 2 && $d->{'php_mode'}) {
 			print "    PHP execution mode: $d->{'php_mode'}\n";
