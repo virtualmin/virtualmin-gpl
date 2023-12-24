@@ -9012,28 +9012,30 @@ return $job;
 # Returns the bandwidth usage object for some domain
 sub get_bandwidth
 {
-if (!defined($get_bandwidth_cache{$_[0]->{'id'}})) {
+my ($d) = @_;
+if (!defined($get_bandwidth_cache{$d->{'id'}})) {
 	local %bwinfo;
-	&read_file("$bandwidth_dir/$_[0]->{'id'}", \%bwinfo);
-	local $k;
-	foreach $k (keys %bwinfo) {
+	&read_file("$bandwidth_dir/$d->{'id'}", \%bwinfo);
+	foreach my $k (keys %bwinfo) {
 		if ($k =~ /^\d+$/) {
 			# Convert old web entries
 			$bwinfo{"web_$k"} = $bwinfo{$k};
 			delete($bwinfo{$k});
 			}
 		}
-	$get_bandwidth_cache{$_[0]->{'id'}} = \%bwinfo;
+	$get_bandwidth_cache{$d->{'id'}} = \%bwinfo;
 	}
-return $get_bandwidth_cache{$_[0]->{'id'}};
+return $get_bandwidth_cache{$d->{'id'}};
 }
 
 # save_bandwidth(&domain, &info)
+# Update the bandwidth usage object for some domain
 sub save_bandwidth
 {
+my ($d, $info) = @_;
 &make_dir($bandwidth_dir, 0700);
-&write_file("$bandwidth_dir/$_[0]->{'id'}", $_[1]);
-$get_bandwidth_cache{$_[0]->{'id'}} ||= $_[1];
+&write_file("$bandwidth_dir/$d->{'id'}", $info);
+$get_bandwidth_cache{$d->{'id'}} ||= $info;
 }
 
 # bandwidth_input(name, value, [no-unlimited], [dont-change])
@@ -15391,15 +15393,6 @@ if ($config{'web'}) {
 
 	&$second_print($text{'check_webok'});
 
-	# Check suEXEC / CGI mode
-	my @cgimodes = &has_cgi_support();
-	if (@cgimodes) {
-		&$second_print(&text('check_cgimodes', join(' ', @cgimodes)));
-		}
-	else {
-		&$second_print($text{'check_nocgiscript'});
-		}
-
 	# Check HTTP2 support
 	my ($ok, $err) = &supports_http2();
 	if ($ok) {
@@ -15411,6 +15404,15 @@ if ($config{'web'}) {
 	}
 
 if (&domain_has_website()) {
+	# Check suEXEC / CGI mode
+	my @cgimodes = &has_cgi_support();
+	if (@cgimodes) {
+		&$second_print(&text('check_cgimodes', join(' ', @cgimodes)));
+		}
+	else {
+		&$second_print($text{'check_nocgiscript'});
+		}
+
 	# Report on supported PHP modes
 	my @supp = grep { $_ ne 'none' } &supported_php_modes();
 	if (@supp) {
