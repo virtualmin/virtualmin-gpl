@@ -1820,7 +1820,7 @@ sub script_path_url
 {
 local ($d, $opts) = @_;
 local $pp = $opts->{'path'} eq '/' ? '' : $opts->{'path'};
-if ($pp !~ /\.(cgi|pl|php)$/i) {
+if ($pp && $pp !~ /\.(cgi|pl|php)$/i) {
 	$pp .= "/";
 	}
 return &get_domain_url($d, 1).$pp;
