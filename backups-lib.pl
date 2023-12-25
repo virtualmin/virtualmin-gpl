@@ -2379,6 +2379,7 @@ if ($ok) {
 			# If the domain originally had a different webserver
 			# enabled, use the one from this system instead
 			local $oldweb = $d->{'backup_web_type'};
+			my $changedweb = 0;
 			if (!$oldweb && $d->{'web'}) {
 				$oldweb = 'web';
 				}
@@ -2390,6 +2391,7 @@ if ($ok) {
 				$d->{$oldweb} = 0;
 				my $newweb = &domain_has_website();
 				$d->{$newweb} = 1 if ($newweb);
+				$changedweb = 1;
 				}
 			local $oldssl = $d->{'backup_ssl_type'};
 			if (!$oldssl && $d->{'ssl'}) {
@@ -2924,7 +2926,7 @@ if ($ok) {
 			$d->{'nocreationmail'} = 1;
 			$d->{'nocreationscripts'} = 1;
 			$d->{'nocopyskel'} = 1;
-			$d->{'notmplcgimode'} = 1;
+			$d->{'notmplcgimode'} = 1 if (!$changedweb);
 			$d->{'auto_letsencrypt'} = 0;
 			$d->{'no_mysql_db'} = 1;
 			my $err = &create_virtual_server($d, $parentdom,
