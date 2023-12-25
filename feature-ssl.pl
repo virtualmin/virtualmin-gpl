@@ -969,6 +969,9 @@ if ($virt) {
 	# Re-save PHP mode, in case it changed
 	&save_domain_php_mode($d, &get_domain_php_mode($d));
 
+	# Re-save CGI mode from non-SSL domain
+	&save_domain_cgi_mode($d, &get_domain_cgi_mode($d));
+
 	# Add Require all granted directive if this system is Apache 2.4
 	&add_require_all_granted_directives($d, $d->{'web_sslport'});
 

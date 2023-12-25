@@ -2884,6 +2884,8 @@ restore_phpbad=WARNING - The following scripts used PHP versions that are not av
 restore_phpbad2=$1 - $2 - Version $3
 restore_euid=UID $1 is already in use
 restore_egid=GID $1 is already in use
+restore_cgimode=Changing CGI execution mode to $1 ..
+restore_ecgimode=.. failed : $1
 
 restore_unixuser=Updating administration password and quotas ..
 restore_unixsame=.. skipping restore to original LDAP server $1 in replication mode

@@ -1883,7 +1883,16 @@ if ($virt) {
 	my $oldmode = &get_domain_cgi_mode($d);
 	my @cgimodes = &has_cgi_support();
 	if ($oldmode && &indexof($oldmodes, @cgimodes) < 0) {
-		&save_domain_cgi_mode($d, @cgimodes ? $cgimodes[0] : undef);
+		my $newmode = @cgimodes ? $cgimodes[0] : undef;
+		&$first_print(&text('restore_cgimode',
+			$text{'tmpl_web_cgimode'.$newmode}));
+		my $err = &save_domain_cgi_mode($d, $newmode);
+		if ($err) {
+			&$second_print(&text('restore_ecgimode', $err));
+			}
+		else {
+			&$second_print($text{'setup_done'});
+			}
 		}
 
 	# Add Require all granted directive if this system is Apache 2.4
@@ -3426,6 +3435,7 @@ sub get_domain_suexec
 local ($d) = @_;
 &require_apache();
 local ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return 0 if (!$virt);
 local $su = &apache::find_directive("SuexecUserGroup", $vconf);
 return $su ? 1 : 0;
 }
@@ -5220,6 +5230,22 @@ if (!$sn) {
 return $sn;
 }
 
+# get_domain_fcgiwrap(&domain)
+# Returns 1 if fcgiwrap is enabled for a domain
+sub get_domain_fcgiwrap
+{
+my ($d) = @_;
+&require_apache();
+my ($virt, $vconf) = &get_apache_virtual($d->{'dom'}, $d->{'web_port'});
+return 0 if (!$virt);
+my @dirs = &apache::find_directive_struct("Directory", $vconf);
+my $cgid = &cgi_bin_dir($d);
+my ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
+return 0 if (!$dir);
+my @sh = &apache::find_directive("SetHandler", $dir->{'members'});
+return @sh ? 1 : 0;
+}
+
 # setup_fcgiwrap_server(&domain)
 # Starts up a fcgiwrap process running as the domain user, and enables it
 # at boot time. Returns an OK flag and the port number selected to listen on.
@@ -5414,7 +5440,6 @@ return undef;
 sub disable_apache_fcgiwrap
 {
 my ($d) = @_;
-return undef if (!$d->{'fcgiwrap_port'});
 my @ports = ( $d->{'web_port'} );
 push(@ports, $d->{'web_sslport'}) if ($d->{'ssl'});
 my $port = $d->{'fcgiwrap_port'};
@@ -5425,10 +5450,12 @@ foreach my $p (@ports) {
         my $cgid = &cgi_bin_dir($d);
         my ($dir) = grep { $_->{'words'}->[0] eq $cgid } @dirs;
 	if ($dir) {
-		my @sh = &apache::find_directive("SetHandler", $vconf);
-		@sh = grep { !/proxy:unix:\Q$port\E:/ } @sh;
-		&apache::save_directive("SetHandler", \@sh,
-					$dir->{'members'}, $conf);
+		if ($port) {
+			my @sh = &apache::find_directive("SetHandler", $vconf);
+			@sh = grep { !/proxy:unix:\Q$port\E:/ } @sh;
+			&apache::save_directive("SetHandler", \@sh,
+						$dir->{'members'}, $conf);
+			}
 		&apache::save_directive("ProxyFCGISetEnvIf", [],
 					$dir->{'members'}, $conf);
 		&apache::save_directive("ProxyFCGIBackendType", [],

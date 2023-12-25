@@ -11388,7 +11388,7 @@ if ($p eq 'web') {
 	if (&get_domain_suexec($d)) {
 		return 'suexec';
 		}
-	elsif ($d->{'fcgiwrap_port'}) {
+	elsif (&get_domain_fcgiwrap($d)) {
 		return 'fcgiwrap';
 		}
 	return undef;
@@ -11409,21 +11409,22 @@ my ($d, $mode) = @_;
 my $p = &domain_has_website($d);
 if ($p eq 'web') {
 	&obtain_lock_web($d);
-	my $err = undef;
 	if ($mode ne 'fcgiwrap') {
 		&disable_apache_fcgiwrap($d);
 		}
 	if ($mode ne 'suexec') {
 		&disable_apache_suexec($d);
 		}
+	my $err = undef;
 	if ($mode eq 'suexec') {
 		$err = &enable_apache_suexec($d);
 		}
 	elsif ($mode eq 'fcgiwrap') {
 		$err = &enable_apache_fcgiwrap($d);
-		if (!$err) {
-			&save_domain($d);
-			}
+		}
+	if (!$err) {
+		$d->{'last_cgimode'} = $mode;
+		&save_domain($d);
 		}
 	&save_domain($d);
 	&release_lock_web($d);
