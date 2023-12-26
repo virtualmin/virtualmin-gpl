@@ -7540,6 +7540,19 @@ $web_tests = [
 		},
 	) : ( ),
 
+	# Test in suexec mode
+	&supports_fcgiwrap() ? (
+		{ 'command' => 'modify-web.pl',
+		  'args' => [ [ 'domain' => $test_domain ],
+			      [ 'enable-suexec' ] ],
+		},
+
+		{ 'command' => $wget_command.
+			       'http://'.$test_domain.'/cgi-bin/test.cgi',
+		  'grep' => 'load average',
+		},
+	) : ( ),
+
 	# Get rid of the domain
 	{ 'command' => 'delete-domain.pl',
 	  'args' => [ [ 'domain', $test_domain ] ],
