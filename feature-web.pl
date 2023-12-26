@@ -1884,8 +1884,13 @@ if ($virt) {
 	my @cgimodes = &has_cgi_support();
 	if ($oldmode && &indexof($oldmodes, @cgimodes) < 0) {
 		my $newmode = @cgimodes ? $cgimodes[0] : undef;
-		&$first_print(&text('restore_cgimode',
-			$text{'tmpl_web_cgimode'.$newmode}));
+		if ($newmode) {
+			&$first_print(&text('restore_cgimode',
+				$text{'tmpl_web_cgimode'.$newmode}));
+			}
+		else {
+			&$first_print($text{'restore_cgimodenone'});
+			}
 		my $err = &save_domain_cgi_mode($d, $newmode);
 		if ($err) {
 			&$second_print(&text('restore_ecgimode', $err));
