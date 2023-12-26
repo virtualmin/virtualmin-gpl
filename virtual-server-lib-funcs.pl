@@ -11431,7 +11431,13 @@ if ($p eq 'web') {
 	return $err;
 	}
 elsif ($p) {
-	return &plugin_call($p, "feature_web_save_domain_cgi_mode", $d, $mode);
+	my $err = &plugin_call($p, "feature_web_save_domain_cgi_mode",
+			       $d, $mode);
+	if (!$err) {
+		$d->{'last_cgimode'} = $mode;
+		&save_domain($d);
+		}
+	return $err;
 	}
 else {
 	return "Virtual server does not have a website!";
