@@ -314,12 +314,6 @@ if (&mysql::is_mysql_running() == -1) {
 		&ui_textbox("mypass", undef, 20)."<br>\n".
 		&ui_checkbox("forcepass", 1, $text{'wizard_mysql_forcepass'}, 0));
 	}
-elsif (defined(&mysql::mysql_login_type) &&
-       &mysql::mysql_login_type($mysql::mysql_login || 'root')) {
-	# Using socket authentication
-	print &ui_table_row(undef, $text{'wizard_mysql5'}, 2);
-	print &ui_hidden("socket", 1);
-	}
 else {
 	# Offer to change the password
 	print &ui_hidden("needchange", 0);
@@ -333,8 +327,21 @@ else {
 					$text{'wizard_mysql_pass0'}));
 		}
 	else {
-		print &ui_table_row($text{'wizard_mysql_empty'},
+		if (defined(&mysql::mysql_login_type) &&
+		    &mysql::mysql_login_type($mysql::mysql_login || 'root')) {
+			# Using socket authentication
+			my $text_mysql_def = $text{'wizard_mysql_pass2'} .
+				"&nbsp;".&ui_help($text{'wizard_mysql5'});
+			print &ui_hidden("socket", 1);
+			print &ui_table_row($text{'wizard_mysql_pass'},
+			&ui_opt_textbox("mypass", undef, 20,
+					$text_mysql_def."<br>",
+					$text{'wizard_mysql_pass0'}));
+			}
+		else {
+			print &ui_table_row($text{'wizard_mysql_empty'},
 			&ui_textbox("mypass", &random_password(16), 20));
+			}
 		}
 
 	# Offer to clean up test/anonymous DB and user, if they exist
@@ -360,7 +367,7 @@ sub wizard_parse_mysql
 {
 local ($in) = @_;
 &require_mysql();
-if ($in->{'socket'}) {
+if ($in->{'socket'} && !$in->{'mypass'}) {
 	# No password needed
 	return undef;
 	}
