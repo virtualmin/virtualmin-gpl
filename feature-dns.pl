@@ -50,7 +50,8 @@ my ($d) = @_;
 &require_bind();
 my $tmpl = &get_template($d->{'template'});
 my $ip = $d->{'dns_ip'} || $d->{'ip'};
-my @extra_slaves = split(/\s+/, $tmpl->{'dns_ns'});
+my @extra_slaves = split(/\s+/, &substitute_domain_template(
+					$tmpl->{'dns_ns'}, $d));
 
 # Find the DNS domain that this could be placed under
 my $dnsparent;
@@ -604,7 +605,7 @@ my $r = &require_bind($d);
 my $rbconfig = &remote_foreign_config($r, "bind8");
 my $tmpl = &get_template($d->{'template'});
 my @extra_slaves = grep { $_ } map { &to_ipaddress($_) }
-			split(/\s+/, $tmpl->{'dns_ns'});
+	split(/\s+/, &substitute_domain_template($tmpl->{'dns_ns'}, $d));
 my $myip = $rbconfig->{'this_ip'} ||
 	   &remote_foreign_call($r, "bind8", "to_ipaddress",
 		&remote_foreign_call($r, "bind8", "get_system_hostname"));
@@ -1381,7 +1382,7 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 				}
 
 			# Add NS records from template
-			push(@created_ns, &get_slave_nameservers($tmpl));
+			push(@created_ns, &get_slave_nameservers($d));
 
 			@created_ns = &unique(@created_ns);
 			if ($tmpl->{'dns_indom'}) {
@@ -1568,7 +1569,7 @@ local %keep;
 my %tmplns;
 my $master = &get_master_nameserver($tmpl, $d);
 $tmplns{$master} = 1;
-foreach my $ns (&get_slave_nameservers($tmpl)) {
+foreach my $ns (&get_slave_nameservers($d)) {
 	$tmplns{$ns} = 1;
 	}
 local @slaves = &get_default_domain_slaves($d);
@@ -1670,13 +1671,14 @@ if ($d) {
 return $master;
 }
 
-# get_slave_nameserver(&template)
+# get_slave_nameserver(&domain)
 # Returns default additional slave NS names (with . appended)
 sub get_slave_nameservers
 {
-local ($tmpl) = @_;
-local @rv;
-foreach my $ns (split(/\s+/, $tmpl->{'dns_ns'})) {
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my @rv;
+foreach my $ns (split(/\s+/, &substitute_domain_template($tmpl->{'dns_ns'}, $d))) {
 	$ns .= "." if ($ns !~ /\.$/);
 	push(@rv, $ns);
 	}
@@ -3230,7 +3232,7 @@ if ($in{"dns_mode"} != 1) {
 	local @ns = split(/\n+/, $in{'dnsns'});
 	foreach my $n (@ns) {
 		&check_ipaddress($n) && &error(&text('newdns_ensip', $n));
-		&to_ipaddress($n) || &to_ip6address($n) ||
+		$n =~ /\$/ || &to_ipaddress($n) || &to_ip6address($n) ||
 			&error(&text('newdns_enshost', $n));
 		}
 	$tmpl->{'dns_ns'} = join(" ", @ns);
