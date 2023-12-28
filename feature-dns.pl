@@ -5144,6 +5144,22 @@ else {
 return join("/", @r);
 }
 
+# expand_dns_record(name, &domain)
+# If a DNS record name is relative, expand it to the full domain name
+sub expand_dns_record
+{
+my ($name, $d) = @_;
+if ($name eq '@') {
+	return $d->{'dom'}.'.';
+	}
+elsif ($name =~ /\.$/) {
+	return $name;
+	}
+else {
+	return $name.'.'.$d->{'dom'}.'.';
+	}
+}
+
 # modify_dns_cloud(&domain, cloud-name|"local"|"services", &remote-server)
 # Update the Cloud DNS provider or remote server for a domain, while preserving
 # the original records
@@ -5430,7 +5446,8 @@ my @doomed;
 foreach my $r (@$recs) {
 	next if (&is_dnssec_record($r));
 	next if (!$r->{'name'} || !$r->{'type'});
-	my ($dr) = grep { $_->{'name'} eq $r->{'name'} &&
+	my ($dr) = grep { &expand_dns_record($_->{'name'}, $d) eq
+			    &expand_dns_record($r->{'name'}, $d) &&
 			  $_->{'type'} eq $r->{'type'} } @$defrecs;
 	if (!$dr) {
 		my $n = $r->{'name'};
