@@ -5448,7 +5448,8 @@ foreach my $r (@$recs) {
 	next if (!$r->{'name'} || !$r->{'type'});
 	my ($dr) = grep { &expand_dns_record($_->{'name'}, $d) eq
 			    &expand_dns_record($r->{'name'}, $d) &&
-			  $_->{'type'} eq $r->{'type'} } @$defrecs;
+			  ($_->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) eq
+			    ($r->{'type'} eq 'SPF' ? 'TXT' : $_->{'type'}) } @$defrecs;
 	if (!$dr) {
 		my $n = $r->{'name'};
 		$n =~ s/\.\Q$d->{'dom'}\E\.//;
