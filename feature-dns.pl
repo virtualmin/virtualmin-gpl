@@ -2944,9 +2944,7 @@ print &ui_table_row(&hlink($text{'tmpl_dnsttl'}, "template_dns_ttl"),
 # Manual NS records
 print &ui_table_row(&hlink($text{'tmpl_dnsns'}, "template_dns_ns"),
 	&ui_textarea("dnsns", join("\n", split(/\s+/, $tmpl->{'dns_ns'})),
-		     3, 50)."<br>\n".
-	&ui_checkbox("dnsprins", 1, $text{'tmpl_dnsprins'},
-		     $tmpl->{'dns_prins'}));
+		     3, 50));
 
 # Hostname for MX record
 print &ui_table_row(&hlink($text{'tmpl_dnsmx'}, "template_dns_mx"),
@@ -3029,7 +3027,7 @@ if (@slaves) {
 
 print &ui_table_hr();
 
-# Master NS hostnames
+# Master NS hostname
 print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
                            "template_dns_master"),
 	&none_def_input("dns_master", $tmpl->{'dns_master'},
@@ -3037,6 +3035,10 @@ print &ui_table_row(&hlink($text{'tmpl_dnsmaster'},
 			$text{'tmpl_dnsmauto'}."<br>", [ "dns_master" ])." ".
 	&ui_textbox("dns_master", $tmpl->{'dns_master'} eq 'none' ? '' :
 					$tmpl->{'dns_master'}, 40));
+
+# Add NS record for master?
+print &ui_table_row(&hlink($text{'tmpl_dnsprins'}, "template_dns_prins"),
+	&ui_yesno_radio("dnsprins", $tmpl->{'dns_prins'} ? 1 : 0));
 
 # Add NS records in this domain
 print &ui_table_row(&hlink($text{'tmpl_dnsindom'},
