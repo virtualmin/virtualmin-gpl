@@ -18,7 +18,13 @@ return "Django is a high-level Python Web framework that encourages rapid develo
 # script_django_versions()
 sub script_django_versions
 {
-return ( "5.0", "3.2.23", "2.2.28" );
+return ( "5.0", "4.2.8", "3.2.23" );
+}
+
+sub script_django_version_desc
+{
+local ($ver) = @_;
+return $ver =~ /^(\d+)\.2/ ? "$ver (LTS)" : $ver;
 }
 
 sub script_django_can_upgrade
@@ -33,7 +39,7 @@ return 1;
 
 sub script_django_release
 {
-return 3;		# To fix DB login issue
+return 4;		# To fix Python requirements for version 5
 }
 
 sub script_django_gpl
@@ -50,7 +56,9 @@ return $ver >= 3.2 ? 0 : 1;
 sub script_django_python_fullver
 {
 my ($ver) = @_;
-return $ver >= 4.0 ? 3.8 :
+$ver =~ s/(?<=\.\d)\.\d$//; # Compare against 4.2, not 4.2.8
+return $ver >= 5 ? 3.10 :
+       $ver >= 4 ? 3.8 :
        $ver >= 3.2 ? 3.7 : 3.6;
 }
 
@@ -477,7 +485,8 @@ if (!$upgrade) {
 	}
 
 local $url = &script_path_url($d, $opts);
-local $adminurl = $url."admin/";
+$url =~ s/\/$//;
+local $adminurl = $url."/admin/";
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 return (1, "Initial Django installation complete. Go to <a target=_blank href='$adminurl'>$adminurl</a> to manage it. Django is a development environment, so it doesn't do anything by itself. Some applications may require you to set the <tt>PYTHONPATH</tt> environment variable to <tt>$ENV{'PYTHONPATH'}</tt>.", "Under $rp", $url, $domuser, $dompass);
