@@ -43,7 +43,8 @@ if (defined($merr)) {
 &ui_print_header(&domain_in($d), $text{'reset_title'}, "");
 
 # Reset each feature or plugin that was selected
-$oldd = { %$d };
+my $oldd = { %$d };
+my $dataloss;
 foreach $f (@dom_features) {
 	my $err;
 	my $fn = &feature_name($f, $d);
@@ -66,6 +67,7 @@ foreach $f (@dom_features) {
 			}
 		else {
 			&$second_print(&text('reset_dataloss', $err));
+			$dataloss = 1;
 			next;
 			}
 		}
@@ -108,6 +110,16 @@ foreach $f (@dom_features) {
 	}
 
 &run_post_actions();
+
+# Offer to reset anyway
+if ($dataloss) {
+	print &ui_form_start("reset_features.cgi", "post");
+	print &ui_hidden("server", $in{'server'});
+	foreach my $f (keys %sel) {
+		print &ui_hidden("features", $f);
+		}
+	print &ui_form_end( [ [ 'skipwarnings', $text{'reset_override'} ] ]);
+	}
 
 &ui_print_footer("", $text{'index_return'},
 	 "edit_newvalidate.cgi?mode=reset", $text{'newvalidate_return'});
