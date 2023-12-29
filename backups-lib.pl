@@ -5193,14 +5193,14 @@ elsif (($mode == 1 || $mode == 2 || $mode == 9) &&
 	}
 elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 || $mode == 12) &&
        $host =~ /%/) {
-	# S3 / Rackspace / GCS bucket which is date-based
+	# S3 / Rackspace / GCS / Drive bucket which is date-based
 	$host =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return (undef, $host);
 	}
 elsif (($mode == 3 || $mode == 6 || $mode == 7 || $mode == 10 ||
 	$mode == 11 || $mode == 12) &&
        $path =~ /%/) {
-	# S3 / Rackspace / GCS / Azure filename which is date-based
+	# S3 / Rackspace / GCS / Azure / Drive filename which is date-based
 	$path =~ s/%[_\-0\^\#]*\d*[A-Za-z]/\.\*/g;
 	return ($host, $path);
 	}
@@ -6074,7 +6074,16 @@ elsif ($mode == 12 && $path =~ /\%/) {
 
 elsif ($mode == 12 && $host =~ /\%/) {
 	# Search for Google drive folders
-	local $folders = &list_drive_folders(1);
+	my $parent;
+	my $pfx = "";
+	if ($re =~ /^(.*)\/([^\/]+)$/) {        
+		my $pname = $1;
+		$re = $2;
+		$parent = &get_drive_folder($pname, 0);
+		return $parent if (!ref($parent));
+		$pfx = $pname."/";
+		}
+	local $folders = &list_drive_folders(1, $parent);
 	if (!ref($folders)) {
 		&$second_print(&text('backup_purgeefiles6', $folders));
 		return 0;
@@ -6083,7 +6092,7 @@ elsif ($mode == 12 && $host =~ /\%/) {
 		my $f = $st->{'name'};
 		my $info;
 		if ($detail) {
-			&$first_print(&text('backup_purgeposs', $f,
+			&$first_print(&text('backup_purgeposs4', $f,
 				$st->{'modifiedTime'}));
 			}
 		if ($f =~ /^$re$/) {
@@ -6105,8 +6114,8 @@ elsif ($mode == 12 && $host =~ /\%/) {
 				}
 			&$first_print(&text('backup_deletingdir',
 					    "<tt>$f</tt>", $old));
-			my $sz = &size_drive_folder($f);
-			local $err = &delete_drive_folder($f);
+			my $sz = &size_drive_folder($pfx.$f);
+			my $err = &delete_drive_folder($pfx.$f);
 			if ($err) {
 				&$second_print(&text('backup_edelbucket',$err));
 				$ok = 0;
