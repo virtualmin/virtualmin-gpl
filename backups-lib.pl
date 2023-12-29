@@ -562,7 +562,7 @@ foreach my $desturl (@$desturls) {
 		}
 	elsif ($mode == 12) {
 		# Connect to Drive and create the folder
-		local $folders = &list_drive_folders();
+		my $folders = &list_drive_folders();
 		if (!ref($folders)) {
 			&$second_print($folders);
 			next;
@@ -571,8 +571,8 @@ foreach my $desturl (@$desturls) {
 			&$second_print($text{'backup_edesthomedir'});
 			next;
 			}
-		my ($already) = grep { $_->{'name'} eq $server } @$folders;
-		if (!$already) {
+		my $already = &get_drive_folder($server);
+		if (!ref($already)) {
 			local $err = &create_drive_folder($server);
 			if ($err) {
 				&$second_print($err);
@@ -4092,7 +4092,7 @@ elsif ($url =~ /^gcs:\/\/([^\/]+)(\/(\S+))?$/) {
 		@rv = (-1, "Google Cloud Storage has not been configured");
 		}
 	}
-elsif ($url =~ /^dropbox:\/\/([^\/]+\.(gz|zip|bz2))$/) {
+elsif ($url =~ /^dropbox:\/\/([^\/]+\.(gz|zip|bz2|tar))$/) {
 	# Dropbox file at the top level
 	@rv = (8, undef, undef, "", $1, undef);
 	}
@@ -4120,21 +4120,23 @@ elsif ($url =~ /^azure:\/\/([^\/]+)(\/(\S+))?$/) {
 		@rv = (-1, "Azure Blob Storage has not been configured");
 		}
 	}
-elsif ($url =~ /^drive:\/\/([^\/]+)(\/(\S+))?$/) {
-	# Google Drive folder and file
+elsif ($url =~ /^drive:\/\/(.*\.(gz|zip|bz2|tar))$/) {
+	# Google drive folder and file
+	my @w = split(/\//, $1);
 	my $st = &cloud_drive_get_state();
 	if ($st->{'ok'}) {
-		@rv = (12, undef, undef, $1, $3, undef);
+		my $f = pop(@w);
+		return (12, undef, undef, join("/", @w), $f, undef);
 		}
 	else {
 		@rv = (-1, "Google Drive has not been configured");
 		}
 	}
-elsif ($url =~ /^drive:\/\/([^\/]*)(\/(\S+))?$/) {
+elsif ($url =~ /^drive:\/\/(.*)$/) {
 	# Google drive folder
 	my $st = &cloud_drive_get_state();
 	if ($st->{'ok'}) {
-		@rv = (12, undef, undef, $1, $3, undef);
+		@rv = (12, undef, undef, $1, undef, undef);
 		}
 	else {
 		@rv = (-1, "Google Drive has not been configured");
