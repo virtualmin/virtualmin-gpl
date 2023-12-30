@@ -5075,6 +5075,7 @@ validate_ewebuid=suEXEC user is set to $1, but the virtual server's UID is $2
 validate_ewebgid=suEXEC group is set to $1, but the virtual server's GID is $2
 validate_ewebdir=Missing Apache &lt;Directory&gt; block for HTML directory $1
 validate_ewebroot=Apache DocumentRoot is not set to HTML directory $1
+validate_envstar=The Apache VirtualHost for this server is using the address $1, but the VirtualHost for $3 is using the address $2 which will take precedence over it! This may lead to clients seeing the wrong website when visiting this domain.
 validate_ewebipv6=An IPv6 DNS record $2 with address $1 exists, but this virtual server does not have IPv6 enabled
 validate_ewebipv6virt=An IPv6 DNS record with address $1 exists, but this virtual server's Apache config does not have an IPv6 address
 validate_ewebip=The Apache virtual host for this domain does not use the IPv4 address and port $1

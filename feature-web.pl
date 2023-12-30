@@ -954,7 +954,7 @@ if ($d->{'alias_mode'}) {
 	}
 else {
 	# Find real domain
-	local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
+	local ($virt, $vconf, $conf) = &get_apache_virtual($d->{'dom'},
 						    $d->{'web_port'});
 	return &text('validate_eweb', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
@@ -1076,6 +1076,29 @@ else {
 			}
 		}
 
+	# If the <virtualhost> address uses a *, make sure that no other
+	# virtualhost uses the domain's IP
+	if ($virt->{'words'}->[0] =~ /^\*/) {
+		my ($ipclash, $ipclashv);
+		VHOST: foreach my $ovirt (&apache::find_directive_struct(
+					"VirtualHost", $conf)) {
+			foreach my $v (@{$ovirt->{'words'}}) {
+				if ($v =~ /^([^:]+)(:(\d+))?/i &&
+				    ($1 eq $d->{'ip'}) &&
+				    (!$3 || $3 == $d->{'web_port'})) {
+					$ipclash = $ovirt;
+					$ipclashv = $v;
+					last VHOST;
+					}
+				}
+			}
+		if ($ipclash) {
+			my $sn = &apache::find_directive(
+				"ServerName", $ipclash->{'members'});
+			return &text('validate_envstar', $virt->{'words'}->[0],
+							 $ipclashv, $sn);
+			}
+		}
 
 	# If an IPv6 DNS record exists, make sure the Apache config supports it
 	my $ip6addr;
