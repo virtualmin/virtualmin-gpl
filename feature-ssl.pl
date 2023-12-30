@@ -626,8 +626,8 @@ return 1;
 sub validate_ssl
 {
 local ($d) = @_;
-local ($virt, $vconf) = &get_apache_virtual($d->{'dom'},
-					    $d->{'web_sslport'});
+local ($virt, $vconf, $conf) = &get_apache_virtual(
+				$d->{'dom'}, $d->{'web_sslport'});
 return &text('validate_essl', "<tt>$d->{'dom'}</tt>") if (!$virt);
 
 # Check IP addresses
@@ -723,6 +723,30 @@ if ($cafile && !&self_signed_cert($d)) {
 		return &text('validate_esslcamatch',
 			     $cainfo->{'o'}, $cainfo->{'cn'},
 			     $info->{'issuer_o'}, $info->{'issuer_cn'});
+		}
+	}
+	
+# If the <virtualhost> address uses a *, make sure that no other
+# virtualhost uses the domain's IP
+if ($virt->{'words'}->[0] =~ /^\*/) {
+	my ($ipclash, $ipclashv);
+	VHOST: foreach my $ovirt (&apache::find_directive_struct(
+				"VirtualHost", $conf)) {
+		foreach my $v (@{$ovirt->{'words'}}) {
+			if ($v =~ /^([^:]+)(:(\d+))?/i &&
+			    ($1 eq $d->{'ip'}) &&
+			    (!$3 || $3 == $d->{'web_port'})) {
+				$ipclash = $ovirt;
+				$ipclashv = $v;
+				last VHOST;
+				}
+			}
+		}
+	if ($ipclash) {
+		my $sn = &apache::find_directive(
+			"ServerName", $ipclash->{'members'});
+		return &text('validate_envstar', $virt->{'words'}->[0],
+						 $ipclashv, $sn);
 		}
 	}
 
