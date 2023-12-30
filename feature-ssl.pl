@@ -726,22 +726,6 @@ if ($cafile && !&self_signed_cert($d)) {
 		}
 	}
 
-# Make sure the first virtualhost on this IP serves the same cert, unless
-# SNI is enabled
-&require_apache();
-local $conf = &apache::get_config();
-local $firstcert;
-foreach my $v (&apache::find_directive_struct("VirtualHost",
-					      $conf)) {
-	local ($vip, $vport) = split(/:/, $v->{'words'}->[0]);
-	if ($vip eq $d->{'ip'} && $vport == $d->{'web_sslport'}) {
-		# Found first one .. is it's cert OK?
-		$firstcert = &apache::find_directive("SSLCertificateFile",
-			$v->{'members'}, 1);
-		last;
-		}
-	}
-
 return undef;
 }
 
