@@ -82,7 +82,7 @@ elsif ($multiline) {
 		if ($s->[1]) {
 			print "    Command: $s->[1]\n";
 			}
-		$cli = &get_php_cli_command($s->[0]);
+		$cli = &get_php_cli_command($s->[1] || $s->[0], $d);
 		if ($cli) {
 			print "    CLI: $cli\n";
 			}

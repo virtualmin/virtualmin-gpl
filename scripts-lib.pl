@@ -3559,15 +3559,26 @@ while($rport < 65536) {
 return $rport >= 65536 ? undef : $rport;
 }
 
-# get_php_cli_command(script-php-version) 
+# get_php_cli_command(script-php-version|cmd, [&domain]) 
 # Returns the path to the non-CGI version of the PHP command
 sub get_php_cli_command
 {
-local ($v) = @_;
-local ($p5) = grep { $_->[0] == $v } &list_available_php_versions($d);
-local $cmd = $p5->[1];
-$cmd ||= &has_command("php5") || &has_command("php");
-$cmd =~ s/-cgi//;
+my ($v, $d) = @_;
+my $cmd;
+if ($v =~ /^\//) {
+	# Command was given
+	$cmd = $v;
+	}
+else {
+	my ($p5) = grep { $_->[0] == $v } &list_available_php_versions($d);
+	my $cmd = $p5->[1];
+	$cmd ||= &has_command("php5") || &has_command("php");
+	}
+$cmd =~ s/-(cgi|fpm)//;
+if (!-x $cmd && $cmd =~ /^(.*)\/sbin\/(.*)$/) {
+	my $bincmd = $1."/bin/".$2;
+	$cmd = $bincmd if (-x $bincmd);
+	}
 return $cmd;
 }
 
