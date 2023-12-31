@@ -15464,7 +15464,7 @@ if (&domain_has_website()) {
 		if (@okfpms) {
 			&$second_print(&text('check_webphpfpm2',
 			  join(" ", map { $_->{'version'}.
-					  " (".$_->{'package'}.")" } @okfpms)));
+				  " (".($_->{'package'} || $_->{'cmd'}).")" } @okfpms)));
 			}
 		if (@errfpms) {
 			&$second_print(&text('check_ewebphpfpm2',
@@ -15513,6 +15513,17 @@ if (&domain_has_website()) {
 			&foreign_require("init");
 			&$second_print(&text('check_webfpmboot', $conf->{'shortversion'}));
 			&init::enable_at_boot($conf->{'init'});
+			}
+
+		# Check if the custom FPM binary path is a valid
+		if ($config{'php_fpm_cmd'} && !-e $config{'php_fpm_cmd'}) {
+			&$second_print(&text('check_ewebphpcustomcmd',
+				"<tt>$config{'php_fpm_cmd'}</tt>"));
+			}
+		if ($config{'php_fpm_cmd'} &&
+		    $config{'php_fpm_pool'} && !-d $config{'php_fpm_pool'}) {
+			&$second_print(&text('check_ewebphpcustompool',
+				"<tt>$config{'php_fpm_pool'}</tt>"));
 			}
 
 		# Check for invalid FPM versions, in case one has been

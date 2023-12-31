@@ -1979,6 +1979,8 @@ check_ewebconfig=Apache configuration errors were found : $1
 check_ewebapacheversion=Virtualmin could not work out the version of Apache on your system
 check_ewebapacheversion2=Your system is running Apache version $1, but Virtualmin requires version $2 or later
 check_ewebphp=Apache configuration file $1 contains $2 lines that prevent PHP from running with domain owner permissions. These lines must be removed
+check_ewebphpcustomcmd=Additional PHP FPM server $1 does not exist!
+check_ewebphpcustompool=Additional PHP FPM pool directory $1 does not exist!
 check_webok=Apache is installed
 check_cgimodes=The following CGI script execution modes are available : $1
 check_nocgiscript=CGI scripts cannot be executed on this system!
@@ -7688,6 +7690,7 @@ php_fpmnoinit=.. no bootup action found!
 php_fpmeinit=.. failed : $1
 php_fpmnodir=No PHP-FPM configuration directory found
 php_fpmnoinit2=No PHP-FPM server bootup action found
+php_fpmnoinit3=PHP-FPM server bootup action $1 does not exist!
 php_fpmnomod=Apache module $1 is missing or not enabled
 php_fpmeconfig=No PHP-FPM configuration found for domain!
 

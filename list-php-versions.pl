@@ -12,7 +12,8 @@ C<--full-version> flag.
 
 By default all versions available on the system will be shown, but you can
 limit the list to those available for one virtual server with the C<--domain>
-flag.
+flag. Alternately you can force display of only versions for a particular PHP
+execution mode with the C<--mode> flag followed by C<fpm>, C<fcgid> or C<cgi>.
 
 =cut
 
@@ -42,6 +43,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--domain") {
 		$dname = shift(@ARGV);
 		}
+	elsif ($a eq "--mode") {
+		$forcemode = shift(@ARGV);
+		}
 	elsif ($a eq "--multiline") {
 		$multiline = 1;
 		}
@@ -56,12 +60,13 @@ while(@ARGV > 0) {
 		}
 	}
 
+$dname && $forcemode && &usage("Only one of --domain or --mode can be set");
 if ($dname) {
 	$d = &get_domain_by("dom", $dname);
 	$d || &usage("Virtual server $dname does not exist");
 	}
 
-@vers = &list_available_php_versions($d);
+@vers = &list_available_php_versions($d, $forcemode);
 $fmt = "%-15.15s %-60.60s\n";
 if ($nameonly) {
 	# Just show version numbers
@@ -88,7 +93,7 @@ elsif ($multiline) {
 			print "    PHP modes: ",join(" ", &unique(@modes)),"\n";
 			}
 		print "    FPM support: ",($fpm ? "Yes" : "No"),"\n";
-		$fv = &get_php_version($s->[0]);
+		$fv = &get_php_version($s->[1] || $s->[0]);
 		print "    Full version: ",$fv,"\n";
 		}
 	}
@@ -109,6 +114,7 @@ print "Lists the available PHP versions on this system.\n";
 print "\n";
 print "virtualmin list-php-versions [--name-only | --multiline]\n";
 print "                             [--domain name]\n";
+print "                             [--mode fpm|fcgid|cgi]\n";
 print "                             [--full-version]\n";
 exit(1);
 }

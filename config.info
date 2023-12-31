@@ -177,6 +177,7 @@ fcgid_max=Maximum fcgid execution time,10,-From PHP configuration,*-Don't set,Ti
 php_paths=Additional locations for PHP commands,9,60,3,\t
 php_fpm_port=Base port number for FPM servers,0
 php_fpm_cmd=Additional PHP FPM server,3,None installed
+php_fpm_pool=Additional PHP FPM pool directory,3,None installed
 php_fpm_init=Addiitonal PHP FPM bootup action,3,None installed
 php_session_age=Cleanup PHP session files after,3,Never cleanup,6,,days
 

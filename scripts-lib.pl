@@ -203,6 +203,7 @@ local $rv = { 'name' => $name,
 	      'migrated_func' => "script_${name}_migrated",
 	      'testable_func' => "script_${name}_testable",
 	      'testpath_func' => "script_${name}_testpath",
+	      'testinstallpath_func' => "script_${name}_testinstallpath",
 	      'testargs_func' => "script_${name}_testargs",
 	    };
 if (defined(&$catfunc)) {

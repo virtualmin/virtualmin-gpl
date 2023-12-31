@@ -988,7 +988,7 @@ if ($mode eq "fpm") {
 	my @rv;
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
-		my $cmd = &php_command_for_version($ver, 0);
+		my $cmd = $conf->{'cmd'} || &php_command_for_version($ver, 0);
 		if (!$cmd && $ver =~ /^5\./) {
 			# Try just PHP version 5
 			$ver = 5;
@@ -2134,12 +2134,32 @@ foreach my $pname (@pkgnames) {
 	# Apache modules
 	if ($config{'web'}) {
 		&require_apache();
-		foreach my $m ("mod_proxy") {
-			if (!$apache::httpd_modules{$m}) {
-				$rv->{'err'} = &text('php_fpmnomod', $m);
-				}
+		if (!$apache::httpd_modules{'mod_proxy'}) {
+			$rv->{'err'} = &text('php_fpmnomod', 'mod_proxy');
 			}
 		}
+	}
+
+# If FPM was setup without a package or init script, also allow it
+if ($config{'php_fpm_cmd'} && -x $config{'php_fpm_cmd'} &&
+    $config{'php_fpm_pool'} && -d $config{'php_fpm_pool'}) {
+	my $rv = { 'cmd' => $config{'php_fpm_cmd'},
+		   'fromconfig' => 1,
+		   'init' => $config{'php_fpm_init'},
+		 };
+	$rv->{'version'} = &get_php_version($rv->{'cmd'});
+	$rv->{'shortversion'} = $rv->{'version'};
+	$rv->{'shortversion'} =~ s/^(\d+\.\d+)\..*/$1/;  # Reduce version to 5.x
+	if ($rv->{'init'}) {
+		my $st = &init::action_status($rv->{'init'});
+		if ($st == 0) {
+			$rv->{'err'} = &text('php_fpmnoinit3', $rv->{'init'});
+			}
+		elsif ($st == 2) {
+			$rv->{'enabled'} = 1;
+			}
+		}
+	push(@rv, $rv);
 	}
 
 $php_fpm_config_cache = \@rv;
