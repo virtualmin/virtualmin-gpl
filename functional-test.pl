@@ -1753,20 +1753,23 @@ foreach my $sname (&list_scripts(1)) {
 	my $tfunc = $script->{'testable_func'};
 	next if (!$tfunc || !defined(&$tfunc));
 	my $tpfunc = $script->{'testpath_func'};
+	my $tipfunc = $script->{'testinstallpath_func'};
 	my $tafunc = $script->{'testargs_func'};
 
 	foreach my $ver (@{$script->{'install_versions'}}) {
 		next if (@testversions && &indexof($ver, @testversions) < 0);
 		my $testable = &$tfunc($ver);
 		next if (!$testable);
-		my $path = defined(&$tpfunc) ? &$tpfunc($ver) : "/";
+		my $ipath = defined(&$tipfunc) ? &$tipfunc($ver) : "/";
+		my $path = defined(&$tpfunc) ? &$tpfunc($ver) :
+			   $ipath ? $ipath : "/";
 		my @args = defined(&$tafunc) ? &$tafunc($ver) : ();
 		push(@$allscript_tests,
 			# Install it
 			{ 'command' => 'install-script.pl',
 			  'args' => [ [ 'domain', $test_domain ],
 				      [ 'type', $script->{'name'} ],
-				      [ 'path', '/' ],
+				      [ 'path', $ipath ],
 				      [ 'db', $scriptdb.' '.$test_domain_db ],
 				      [ 'version', $ver ],
 				      @args,
