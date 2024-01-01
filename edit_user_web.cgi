@@ -37,13 +37,11 @@ if (!$in{'new'}) {
 my $htpasswd_data;
 foreach my $f (&list_mail_plugins()) {
 	if ($f eq "virtualmin-htpasswd") {
-                foreach my $f (&list_mail_plugins()) {
-                        if ($f eq "virtualmin-htpasswd") {
-                                $input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
-                                $htpasswd_data = $input if ($input);
-                                last;
-                                }
-		        }
+                if ($f eq "virtualmin-htpasswd") {
+                        $input = &trim(&plugin_call($f, "mailbox_inputs", $webuser, $in{'new'}, $d));
+                        $htpasswd_data = $input if ($input);
+                        last;
+                        }
 		}
         }
 
