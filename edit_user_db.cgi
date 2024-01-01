@@ -61,7 +61,7 @@ my @dbs;
 
 # Show allowed databases
 if (@dbs) {
-        print &ui_table_row(undef, "<hr data-row-separator>", 2);
+	print &ui_table_hr();
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
 			   $_->{'name'}." ($_->{'desc'})" ] } @{$dbuser->{'dbs'}};
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},

@@ -69,7 +69,7 @@ if ($htpasswd_data) {
         print &ui_table_row(&hlink($text{'user_pass'}, "password"),
                                 $pwfield,
                                 2, \@tds);
-        print &ui_table_row(undef, "<hr data-row-separator>", 2);
+        print &ui_table_hr();
         print $htpasswd_data;
         my $msg = &text('users_addprotecteddir2',
                 &get_webprefix()."/virtualmin-htpasswd/index.cgi?dom=$d->{'id'}");
