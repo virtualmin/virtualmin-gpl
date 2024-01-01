@@ -478,8 +478,11 @@ else {
 	print &ui_hidden('remail_def', 1);
 	}
 
-# Test available plugins first	
-foreach my $f (&list_mail_plugins()) {
+# Cache the list of available mail plugins
+my @list_mail_plugins = &list_mail_plugins();
+
+# Test available plugins first
+foreach my $f (@list_mail_plugins) {
 	if ($f eq "virtualmin-htpasswd") {
 		$htpasswdplugin++;
 		}
@@ -507,7 +510,7 @@ if (@dbs) {
 if ($htpasswdplugin) {
 	print &ui_hidden_table_start($text{'user_header5'}, "width=100%", 2,
 				     "table5", 0, \@tds);
-	foreach my $f (&list_mail_plugins()) {
+	foreach my $f (@list_mail_plugins) {
 		if ($f eq "virtualmin-htpasswd") {
 			$input = &plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d);
 			print $input;
@@ -522,7 +525,7 @@ if ($htpasswdplugin) {
 
 # Other plugins permissions settings
 # Find and show all plugin features
-foreach my $f (&list_mail_plugins()) {
+foreach my $f (@list_mail_plugins) {
 	if ($f ne "virtualmin-htpasswd") {
 		my $input = &trim(&plugin_call($f, "mailbox_inputs", $user, $in{'new'}, $d));
 		if ($input) {
