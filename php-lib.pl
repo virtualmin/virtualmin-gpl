@@ -2146,6 +2146,7 @@ if ($config{'php_fpm_cmd'} && -x $config{'php_fpm_cmd'} &&
 	my $rv = { 'cmd' => $config{'php_fpm_cmd'},
 		   'fromconfig' => 1,
 		   'init' => $config{'php_fpm_init'},
+		   'dir' => $config{'php_fpm_pool'},
 		 };
 	$rv->{'version'} = &get_php_version($rv->{'cmd'});
 	$rv->{'shortversion'} = $rv->{'version'};
