@@ -984,8 +984,8 @@ return () if ($mode eq "none");
 &require_apache();
 
 # In FPM mode, only the versions for which packages are installed can be used
-if ($mode eq "fpm") {
-	my @rv;
+my @rv;
+if ($mode eq "fpm" || !$mode) {
 	foreach my $conf (grep { !$_->{'err'} } &list_php_fpm_configs()) {
 		my $ver = $conf->{'shortversion'};
 		my $cmd = $conf->{'cmd'} || &php_command_for_version($ver, 0);
@@ -999,21 +999,15 @@ if ($mode eq "fpm") {
 			push(@rv, [ $ver, $cmd, ["fpm"] ]);
 			}
 		}
-	return @rv;
 	}
 
-if ($d) {
-	# If the domain is using mod_php, we can only use one version
-	if ($mode eq "mod_php") {
-		my $v = &get_apache_mod_php_version();
-		if ($v) {
-			my $cmd = &has_command("php$v") ||
-				  &has_command("php");
-			return ([ $v, $cmd, ["mod_php"] ]);
-			}
-		else {
-			return ( );
-			}
+# Add the mod_php version if installed
+if ($mode eq "mod_php" || !$mode) {
+	my $v = &get_apache_mod_php_version();
+	if ($v) {
+		my $cmd = &has_command("php$v") ||
+			  &has_command("php");
+		push(@rv, [ $v, $cmd, ["mod_php"] ]);
 		}
 	}
 
@@ -1053,17 +1047,23 @@ if ($php && scalar(keys %vercmds) != scalar(@all_possible_php_versions)) {
 		}
 	}
 
-# Return results as list
-my @rv = map { [ $_, $vercmds{$_}, ["cgi", "fcgid"] ] }
-	     sort { $a <=> $b } (keys %vercmds);
-
-# If no domain is given, included mod_php versions if active
-if (!$d) {
-	my $v = &get_apache_mod_php_version();
-	if ($v) {
-		push(@rv, [ $v, undef, ["mod_php"] ]);
+# Add versions found to the final list
+foreach my $v (sort { $a <=> $b } (keys %vercmds)) {
+	my ($already) = grep { $_->[0] eq $v } @rv;
+	if ($already) {
+		$already->[2] = [ &unique(@{$already->[2]}, "cgi", "fcgid") ];
+		}
+	else {
+		push(@rv, [ $v, $vercmds{$v}, ["cgi", "fcgid"] ]);
 		}
 	}
+
+# If a mode was given, filter down to it
+if ($mode) {
+	@rv = grep { &indexof($mode, @{$_->[2]}) >= 0 } @rv;
+	}
+
+@rv = sort { $a->[0] <=> $b->[0] } @rv;
 return @rv;
 }
 
