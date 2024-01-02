@@ -386,7 +386,7 @@ return (128, 'M') ;
 
 sub script_wordpress_passmode
 {
-return (script_wordpress_cli_virtualmin_support()) ? 1 : 0;
+return (1, 8, '^(?=.*[a-zA-Z])(?=.*)[\w]{8,}$');
 }
 
 1;
