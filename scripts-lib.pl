@@ -3688,5 +3688,14 @@ sub filetimestamp_to_date {
     return &make_date((stat(shift))[9]);
 }
 
+# get_script_minor_version(ver)
+# Returns minor version number from full version number
+sub get_script_minor_version
+{
+my ($ver) = @_;
+$ver =~ s/(?<=\.\d)\.\d$//; # remove minor version
+return $ver;
+}
+
 1;
 
