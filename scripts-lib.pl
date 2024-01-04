@@ -3573,7 +3573,7 @@ if ($v =~ /^\//) {
 	}
 else {
 	my ($p5) = grep { $_->[0] == $v } &list_available_php_versions($d);
-	my $cmd = $p5->[1];
+	$cmd = $p5->[1];
 	$cmd ||= &has_command("php5") || &has_command("php");
 	}
 $cmd =~ s/-(cgi|fpm)//;
