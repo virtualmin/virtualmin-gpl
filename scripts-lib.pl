@@ -257,6 +257,8 @@ while(my $f = readdir(DIR)) {
 			my $url = &get_domain_url($d, $1 eq "https");
 			$info{'url'} = $url.$3;
 			}
+		# Script version can never end in a dot
+		$info{'version'} =~ s/\.$// if ($info{'version'});
 		push(@rv, \%info);
 		}
 	}
@@ -3571,7 +3573,7 @@ if ($v =~ /^\//) {
 	}
 else {
 	my ($p5) = grep { $_->[0] == $v } &list_available_php_versions($d);
-	my $cmd = $p5->[1];
+	$cmd = $p5->[1];
 	$cmd ||= &has_command("php5") || &has_command("php");
 	}
 $cmd =~ s/-(cgi|fpm)//;
@@ -3684,6 +3686,15 @@ sub filetimestamp_to_version {
 # Given file name, returns its date like 10/25/2023 12:39 pm
 sub filetimestamp_to_date {
     return &make_date((stat(shift))[9]);
+}
+
+# get_script_minor_version(ver)
+# Returns minor version number from full version number
+sub get_script_minor_version
+{
+my ($ver) = @_;
+$ver =~ s/(?<=\.\d)\.\d$//; # remove minor version
+return $ver;
 }
 
 1;
