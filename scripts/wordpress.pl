@@ -199,16 +199,14 @@ return (0, "Database connection failed : $dberr") if ($dberr);
 my $dom_php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
 my $wp = "cd $opts->{'dir'} && $dom_php_bin $opts->{'dir'}/wp-cli.phar";
 
+# Copy wordpress-cli
+&make_dir_as_domain_user($d, $opts->{'dir'}, 0755) if (!-d $opts->{'dir'});
+&copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
+&set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
+
 # Install using cli
 if (!$upgrade) {
 	my $err_continue = "<br>Installation can be continued manually at <a target=_blank href='${url}wp-admin'>$url</a>.";
-
-	# Execute the download command
-	&make_dir_as_domain_user($d, $opts->{'dir'}, 0755);
-
-	# Copy wordpress-cli
-	&copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
-	&set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
 
 	# Start installation
 	my $out = &run_as_domain_user($d, "$wp core download --version=$version 2>&1");
@@ -277,10 +275,6 @@ if (!$upgrade) {
 		}
 	}
 else {
-	# Copy latest wordpress-cli
-	&copy_source_dest($files->{'cli'}, "$opts->{'dir'}/wp-cli.phar");
-	&set_permissions_as_domain_user($d, 0750, "$opts->{'dir'}/wp-cli.phar");
-
 	# Do the upgrade
 	my $out = &run_as_domain_user($d,
                     "$wp core upgrade --version=$version 2>&1");
