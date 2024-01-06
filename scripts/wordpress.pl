@@ -185,17 +185,17 @@ sub script_wordpress_files
 my ($d, $ver, $opts, $upgrade) = @_;
 my @files;
 if (script_wordpress_cli_virtualmin_support() && $opts->{'usecli'}) {
-@files = (
-	{ 'name' => "cli",
-	   'file' => "wordpress-cli.phar",
-	   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
-	   'nocache' => 1 } );
-}
+	@files = (
+		{ 'name' => "cli",
+		   'file' => "wordpress-cli.phar",
+		   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
+		   'nocache' => 1 } );
+	}
 else {
-@files = ( { 'name' => "source",
-	   'file' => "wordpress-$ver.zip",
-	   'url' => "http://wordpress.org/wordpress-$ver.zip",
-	   'virtualmin' => 1 } );
+	@files = ( { 'name' => "source",
+		   'file' => "wordpress-$ver.zip",
+		   'url' => "http://wordpress.org/wordpress-$ver.zip",
+		   'virtualmin' => 1 } );
 	}
 return @files;
 }
