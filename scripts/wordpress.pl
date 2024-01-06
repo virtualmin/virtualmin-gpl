@@ -162,29 +162,11 @@ return undef;
 sub script_wordpress_files
 {
 my ($d, $ver, $opts, $upgrade) = @_;
-<<<<<<< HEAD
-my @files;
-if (script_wordpress_cli_virtualmin_support() && $opts->{'usecli'}) {
-	@files = (
-		{ 'name' => "cli",
-		   'file' => "wordpress-cli.phar",
-		   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
-		   'nocache' => 1 } );
-	}
-else {
-	@files = ( { 'name' => "source",
-		   'file' => "wordpress-$ver.zip",
-		   'url' => "http://wordpress.org/wordpress-$ver.zip",
-		   'virtualmin' => 1 } );
-	}
-return @files;
-=======
 return (
 	{ 'name' => "cli",
 	   'file' => "wordpress-cli.phar",
 	   'url' => "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar",
 	   'nocache' => 1 } );
->>>>>>> 80eedebf4d78e016a8e0d1c1042bdfee4692ef8e
 }
 
 sub script_wordpress_commands
