@@ -269,6 +269,12 @@ if (!$upgrade) {
 	if ($?) {
 		return (-1, "\`wp user update\` failed : $out");
 		}
+
+	# Clean up an index.html file that might take precendence over index.php
+	my $hfile = $opts->{'dir'}."/index.html";
+	if (-r $hfile) {
+		&unlink_file_as_domain_user($d, $hfile);
+		}
 	}
 else {
 	# Copy latest wordpress-cli
