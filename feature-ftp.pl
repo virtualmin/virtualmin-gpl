@@ -12,33 +12,33 @@ return if ($require_proftpd++);
 # Setup a virtual FTP server for some domain
 sub setup_ftp
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
 &$first_print($text{'setup_proftpd'});
 &obtain_lock_ftp($d);
 &require_proftpd();
 
 # Get the template
-local @dirs = &proftpd_template($tmpl->{'ftp'}, $d);
+my @dirs = &proftpd_template($tmpl->{'ftp'}, $d);
 
 # Add the directives
-local $conf = &proftpd::get_config();
-local $l = $conf->[@$conf - 1];
-local $addfile = $proftpd::config{'add_file'} || $l->{'file'};
-local $lref = &read_file_lines($addfile);
-local @ips = ( $d->{'ip'} );
+my $conf = &proftpd::get_config();
+my $l = $conf->[@$conf - 1];
+my $addfile = $proftpd::config{'add_file'} || $l->{'file'};
+my $lref = &read_file_lines($addfile);
+my @ips = ( $d->{'ip'} );
 if ($d->{'virt6'}) {
 	push(@ips, $d->{'ip6'});
 	}
-local @lines = ( "<VirtualHost ".join(" ", @ips).">" );
+my @lines = ( "<VirtualHost ".join(" ", @ips).">" );
 push(@lines, @dirs);
 push(@lines, "</VirtualHost>");
 push(@$lref, @lines);
 &flush_file_lines($addfile);
 
 # Create directory for FTP root
-local ($fdir) = ($tmpl->{'ftp_dir'} || 'ftp');
-local $ftp = "$d->{'home'}/$fdir";
+my ($fdir) = ($tmpl->{'ftp_dir'} || 'ftp');
+my $ftp = "$d->{'home'}/$fdir";
 if (!-d $ftp) {
 	&make_dir($ftp, 0755);
 	&set_ownership_permissions($d->{'uid'}, $d->{'ugid'}, 0755, $ftp);
@@ -51,7 +51,7 @@ undef(@proftpd::get_config_cache);
 
 # Add the FTP server user to the domain's group, so that the directory
 # can be accessed in anonymous mode
-local $ftp_user = &get_proftpd_user($d);
+my $ftp_user = &get_proftpd_user($d);
 if ($ftp_user) {
 	&add_user_to_domain_group($d, $ftp_user, 'setup_ftpuser');
 	}
@@ -62,13 +62,13 @@ return 1;
 # Delete the virtual server from the ProFTPd config
 sub delete_ftp
 {
-local ($d) = @_;
+my ($d) = @_;
 &require_proftpd();
 &$first_print($text{'delete_proftpd'});
 &obtain_lock_ftp($d);
-local ($virt, $vconf, $conf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf) = &get_proftpd_virtual($d->{'ip'});
 if ($virt) {
-	local $lref = &read_file_lines($virt->{'file'});
+	my $lref = &read_file_lines($virt->{'file'});
 	splice(@$lref, $virt->{'line'}, $virt->{'eline'} - $virt->{'line'} + 1);
 	&flush_file_lines();
 
@@ -87,11 +87,11 @@ return 1;
 # Copy proftpd directives to a new cloned domain
 sub clone_ftp
 {
-local ($d, $oldd) = @_;
+my ($d, $oldd) = @_;
 &$first_print($text{'clone_ftp'});
 &require_proftpd();
-local ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
-local ($ovirt, $ovconf) = &get_proftpd_virtual($oldd->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+my ($ovirt, $ovconf) = &get_proftpd_virtual($oldd->{'ip'});
 if (!$ovirt) {
 	&$second_print($text{'clone_ftpold'});
 	return 0;
@@ -103,9 +103,9 @@ if (!$virt) {
 &obtain_lock_ftp($d);
 
 # Splice across directives, fixing home
-local $olref = &read_file_lines($ovirt->{'file'});
-local $lref = &read_file_lines($virt->{'file'});
-local @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
+my $olref = &read_file_lines($ovirt->{'file'});
+my $lref = &read_file_lines($virt->{'file'});
+my @lines = @$olref[$ovirt->{'line'}+1 .. $ovirt->{'eline'}-1];
 foreach my $l (@lines) {
 	$l =~ s/\Q$oldd->{'home'}\E/$d->{'home'}/;
 	}
@@ -114,7 +114,7 @@ splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
 ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
 
 # Fix server name
-local $sname = &proftpd::find_directive_struct("ServerName", $vconf);
+my $sname = &proftpd::find_directive_struct("ServerName", $vconf);
 if ($sname) {
 	&proftpd::save_directive("ServerName", [ $d->{'dom'} ], $vconf, $conf);
 	&flush_file_lines($virt->{'file'});
@@ -130,8 +130,8 @@ return 1;
 # If the server has changed IP address, update the ProFTPd virtual server
 sub modify_ftp
 {
-local ($d, $oldd) = @_;
-local $rv = 0;
+my ($d, $oldd) = @_;
+my $rv = 0;
 
 if ($d->{'dom'} eq $oldd->{'dom'} &&
     $d->{'home'} eq $oldd->{'home'} &&
@@ -150,7 +150,7 @@ if (!$virt) {
 if ($d->{'dom'} ne $oldd->{'dom'}) {
 	# Update domain name in ProFTPd virtual server
 	&$first_print($text{'save_proftpd2'});
-	local $sname = &proftpd::find_directive_struct("ServerName", $vconf);
+	my $sname = &proftpd::find_directive_struct("ServerName", $vconf);
 	if ($sname) {
 		&proftpd::save_directive(
 			"ServerName", [ $d->{'dom'} ], $vconf, $conf);
@@ -161,7 +161,7 @@ if ($d->{'dom'} ne $oldd->{'dom'}) {
 if ($d->{'home'} ne $oldd->{'home'} && $anon) {
 	# Update anonymous FTP directory in ProFTPd virtual server
 	&$first_print($text{'save_proftpd3'});
-	local $lref = &read_file_lines($anon->{'file'});
+	my $lref = &read_file_lines($anon->{'file'});
 	$lref->[$anon->{'line'}] =~ s/$oldd->{'home'}/$d->{'home'}/;
 	&flush_file_lines($anon->{'file'});
 	$rv++;
@@ -170,8 +170,8 @@ if ($d->{'home'} ne $oldd->{'home'} && $anon) {
 if ($d->{'ip'} ne $oldd->{'ip'} || $d->{'ip6'} ne $oldd->{'ip6'}) {
 	# Update IP address in ProFTPd virtual server
 	&$first_print($text{'save_proftpd'});
-	local $lref = &read_file_lines($virt->{'file'});
-	local @ips = ( $d->{'ip'} );
+	my $lref = &read_file_lines($virt->{'file'});
+	my @ips = ( $d->{'ip'} );
 	if ($d->{'virt6'}) {
 		push(@ips, $d->{'ip6'});
 		}
@@ -199,11 +199,12 @@ return undef;
 # Disable FTP for this server by adding a deny directive
 sub disable_ftp
 {
+my ($d) = @_;
 &$first_print($text{'disable_proftpd'});
-&obtain_lock_ftp($_[0]);
+&obtain_lock_ftp($d);
 &require_proftpd();
 my $ok;
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
 if ($anon) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
 	local ($login) = grep { $_->{'words'}->[0] eq "LOGIN" } @limit;
@@ -221,7 +222,7 @@ else {
 	&$second_print($text{'delete_noproftpd'});
 	$ok = 0;
 	}
-&release_lock_ftp($_[0]);
+&release_lock_ftp($d);
 return $ok;
 }
 
@@ -229,10 +230,11 @@ return $ok;
 # Enable FTP for this server by removing the deny directive
 sub enable_ftp
 {
+my ($d) = @_;
 &$first_print($text{'enable_proftpd'});
-&obtain_lock_ftp($_[0]);
+&obtain_lock_ftp($d);
 &require_proftpd();
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($_[0]->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
 my $ok;
 if ($virt) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
@@ -251,7 +253,7 @@ else {
 	&$second_print($text{'delete_noproftpd'});
 	$ok = 0;
 	}
-&release_lock_ftp($_[0]);
+&release_lock_ftp($d);
 return $ok;
 }
 
@@ -259,9 +261,9 @@ return $ok;
 # Returns a suitably substituted ProFTPd template
 sub proftpd_template
 {
-local $dirs = $_[0];
+my ($dir, $d) = @_;
 $dirs =~ s/\t/\n/g;
-$dirs = &substitute_domain_template($dirs, $_[1]);
+$dirs = &substitute_domain_template($dirs, $d);
 local @dirs = split(/\n/, $dirs);
 return @dirs;
 }
@@ -270,8 +272,8 @@ return @dirs;
 # Returns an error message if the default ProFTPd directives don't look valid
 sub check_proftpd_template
 {
-local ($d, $gotuser, $gotgroup);
-local @dirs = split(/\t+/, defined($_[0]) ? $_[0] : $config{'proftpd_config'});
+my ($d, $gotuser, $gotgroup);
+my @dirs = split(/\t+/, defined($_[0]) ? $_[0] : $config{'proftpd_config'});
 foreach $d (@dirs) {
 	$d =~ s/#.*$//;
 	if ($d =~ /^\s*User\s+(\S+)$/i) {
@@ -297,8 +299,8 @@ return undef;
 sub restart_proftpd
 {
 &require_proftpd();
-local $conf = &proftpd::get_config();
-local $st = &proftpd::find_directive("ServerType", $conf);
+my $conf = &proftpd::get_config();
+my $st = &proftpd::find_directive("ServerType", $conf);
 if (lc($st) ne "inetd") {
 	# Call proftpd restart function
 	&$first_print($text{'setup_proftpdpid'});
@@ -351,11 +353,11 @@ return 0;
 # Save the virtual server's ProFTPd config as a separate file
 sub backup_ftp
 {
-local ($d, $file) = @_;
+my ($d, $file) = @_;
 &$first_print($text{'backup_proftpdcp'});
-local ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
 if ($virt) {
-	local $lref = &read_file_lines($virt->{'file'});
+	my $lref = &read_file_lines($virt->{'file'});
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
 	foreach my $l (@$lref[$virt->{'line'} .. $virt->{'eline'}]) {
 		&print_tempfile(FILE, "$l\n");
@@ -375,21 +377,20 @@ else {
 # change the actual <Virtualhost> lines!
 sub restore_ftp
 {
-local ($d, $file) = @_;
+my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 &$first_print($text{'restore_proftpdcp'});
 &obtain_lock_ftp($d);
-local ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
-local $rv;
+my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+my $rv;
 if ($virt) {
-	local $srclref = &read_file_lines($file);
-	local $dstlref = &read_file_lines($virt->{'file'});
+	my $srclref = &read_file_lines($file);
+	my $dstlref = &read_file_lines($virt->{'file'});
 	splice(@$dstlref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1,
 	       @$srclref[1 .. @$srclref-2]);
-	if ($_[5]->{'home'} && $_[5]->{'home'} ne $d->{'home'}) {
+	if ($oldd && $oldd->{'home'} && $oldd->{'home'} ne $d->{'home'}) {
 		# Fix up any file-related directives
-		local $i;
-		foreach $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
-			$dstlref->[$i] =~ s/$_[5]->{'home'}/$d->{'home'}/g;
+		foreach my $i ($virt->{'line'} .. $virt->{'line'}+scalar(@$srclref)-1) {
+			$dstlref->[$i] =~ s/$oldd->{'home'}/$d->{'home'}/g;
 			}
 		}
 	&flush_file_lines();
@@ -411,7 +412,7 @@ return $rv;
 # give, returns the global log file path.
 sub get_proftpd_log
 {
-local ($ip) = @_;
+my ($ip) = @_;
 if (!&foreign_check("proftpd")) {
 	return undef;
 	}
@@ -426,8 +427,8 @@ if ($ip) {
 	}
 else {
 	# Just return global log
-	local $conf = &proftpd::get_config();
-	local $global = &proftpd::find_directive_struct("Global", $conf);
+	my $conf = &proftpd::get_config();
+	my $global = &proftpd::find_directive_struct("Global", $conf);
 	return &proftpd::find_directive("TransferLog", $global->{'members'}) ||
 	       &proftpd::find_directive("ExtendedLog", $global->{'members'}) ||
 	       &proftpd::find_directive("TransferLog", $conf) ||
@@ -442,12 +443,13 @@ return undef;
 # day counters in the given hash
 sub bandwidth_ftp
 {
-local $log = &get_proftpd_log($_[0]->{'ip'});
+my ($d, $start, $bwinfo) = @_;
+my $log = &get_proftpd_log($d->{'ip'});
 if ($log) {
-	return &count_ftp_bandwidth($log, $_[1], $_[2], undef, "ftp");
+	return &count_ftp_bandwidth($log, $start, $bwinfo, undef, "ftp");
 	}
 else {
-	return $_[1];
+	return $start;
 	}
 }
 
@@ -462,22 +464,22 @@ return ( [ $text{'sysinfo_proftpd'}, $proftpd::site{'version'} ] );
 
 sub startstop_ftp
 {
-local ($typestatus) = @_;
+my ($typestatus) = @_;
 &require_proftpd();
-local $conf = &proftpd::get_config();
-local $st = &proftpd::find_directive("ServerType", $conf);
+my $conf = &proftpd::get_config();
+my $st = &proftpd::find_directive("ServerType", $conf);
 if ($st eq 'inetd') {
 	# Running under inetd
 	return ( );
 	}
-local $status;
+my $status;
 if (defined($typestatus->{'proftpd'})) {
 	$status = $typestatus->{'proftpd'} == 1;
 	}
 else {
 	$status = &proftpd::get_proftpd_pid();
 	}
-local @links = ( { 'link' => '/proftpd/',
+my @links = ( { 'link' => '/proftpd/',
 		   'desc' => $text{'index_fmanage'},
 	 	   'manage' => 1 } );
 if ($status) {
@@ -514,12 +516,12 @@ return &proftpd::start_proftpd();
 # Outputs HTML for editing ProFTPd related template options
 sub show_template_ftp
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # ProFTPd directives
-local @ffields = ( "ftp", "ftp_dir", "ftp_dir_def" );
-local $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1,
-			     0, undef, \@ffields);
+my @ffields = ( "ftp", "ftp_dir", "ftp_dir_def" );
+my $ndi = &none_def_input("ftp", $tmpl->{'ftp'}, $text{'tmpl_ftpbelow'}, 1,
+			  0, undef, \@ffields);
 print &ui_table_row(&hlink($text{'tmpl_ftp'}, "template_ftp"),
 	$ndi."\n".
 	&ui_textarea("ftp", $tmpl->{'ftp'} eq "none" ? "" :
@@ -538,12 +540,12 @@ print &ui_table_row(&hlink($text{'newftp_dir'}, "template_ftp_dir_def"),
 # Updates ProFTPd related template options from %in
 sub parse_template_ftp
 {
-local ($tmpl) = @_;
+my ($tmpl) = @_;
 
 # Save FTP directives
 $tmpl->{'ftp'} = &parse_none_def("ftp");
 if ($in{"ftp_mode"} == 2) {
-	local $err = &check_proftpd_template($in{'ftp'});
+	my $err = &check_proftpd_template($in{'ftp'});
 	&error($err) if ($err);
 	if ($in{'ftp_dir_def'}) {
 		delete($tmpl->{'ftp_dir'});
@@ -556,12 +558,12 @@ if ($in{"ftp_mode"} == 2) {
 	}
 }
 
+# Return links to FTP log
 sub links_ftp
 {
-local ($d) = @_;
-# Links to FTP log
-local @rv;
-local $lf = &get_proftpd_log($d->{'ip'});
+my ($d) = @_;
+my @rv;
+my $lf = &get_proftpd_log($d->{'ip'});
 if ($lf) {
 	local $param = &master_admin() ? "file"
 				       : "extra";
@@ -581,9 +583,9 @@ return @rv;
 # taken from the User line in the template directives.
 sub get_proftpd_user
 {
-local ($d) = @_;
-local $tmpl = &get_template($d->{'template'});
-local @dirs = &proftpd_template($tmpl->{'ftp'}, $d);
+my ($d) = @_;
+my $tmpl = &get_template($d->{'template'});
+my @dirs = &proftpd_template($tmpl->{'ftp'}, $d);
 foreach my $l (@dirs) {
 	if ($l =~ /^\s*User\s+(\S+)/) {
 		return $1;
@@ -609,11 +611,11 @@ return $config{'ftp'};
 #  dir - The chroot directory, or ~ for users' homes
 sub list_ftp_chroots
 {
-local @rv;
+my @rv;
 &require_proftpd();
-local $conf = &proftpd::get_config();
+my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;		# get_or_create is broken in Webmin 1.410
-local $gconf = &proftpd::get_or_create_global($conf);
+my $gconf = &proftpd::get_or_create_global($conf);
 foreach my $dr (&proftpd::find_directive_struct("DefaultRoot", $gconf)) {
 	local $chroot = { 'dr' => $dr,
 			  'dir' => $dr->{'words'}->[0] };
@@ -637,20 +639,20 @@ return @rv;
 # Updates the list of chroot'd directories. 
 sub save_ftp_chroots
 {
-local ($chroots) = @_;
+my ($chroots) = @_;
 &require_proftpd();
-local $conf = &proftpd::get_config();
+my $conf = &proftpd::get_config();
 $proftpd::conf = $conf;
-local $gconf = &proftpd::get_or_create_global($conf);
+my $gconf = &proftpd::get_or_create_global($conf);
 
 # Find old directives that we can't configure yet
-local @old = &proftpd::find_directive_struct("DefaultRoot", $gconf);
-local @keep = grep { $_->{'words'}->[1] =~ /,/ } @old;
-local @newv = map { $_->{'value'} } @keep;
+my @old = &proftpd::find_directive_struct("DefaultRoot", $gconf);
+my @keep = grep { $_->{'words'}->[1] =~ /,/ } @old;
+my @newv = map { $_->{'value'} } @keep;
 
 # Add new ones
 foreach my $chroot (@$chroots) {
-	local @w = ( $chroot->{'dir'} );
+	my @w = ( $chroot->{'dir'} );
 	if ($chroot->{'group'}) {
 		push(@w, ($chroot->{'neg'} ? "!" : "").$chroot->{'group'});
 		}
