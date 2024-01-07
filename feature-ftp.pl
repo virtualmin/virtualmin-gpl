@@ -261,7 +261,7 @@ return $ok;
 # Returns a suitably substituted ProFTPd template
 sub proftpd_template
 {
-my ($dir, $d) = @_;
+my ($dirs, $d) = @_;
 $dirs =~ s/\t/\n/g;
 $dirs = &substitute_domain_template($dirs, $d);
 local @dirs = split(/\n/, $dirs);
