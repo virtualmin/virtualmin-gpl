@@ -573,7 +573,8 @@ else {
 	# Check for a ProFTPd virtualhost
 	if ($config{'ftp'} && $in{'virt'}) {
 		&require_proftpd();
-		($virt, $vconf, $anon, $aconf) = &get_proftpd_virtual($in{'ip'});
+		my ($virt, $vconf, $conf, $anon, $aconf) =
+			&get_proftpd_virtual($in{'ip'});
 		if ($virt && $anon) {
 			$found{'ftp'}++;
 			print "<b>",&text('import_ftp',

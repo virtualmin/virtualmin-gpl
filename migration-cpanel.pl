@@ -931,8 +931,7 @@ if ($got{'mysql'}) {
 if ($got{'ftp'}) {
 	&$first_print("Modifying FTP server configuration ..");
 	&require_proftpd();
-	local $conf = &proftpd::get_config();
-	local ($fvirt, $fconf, $anon, $aconf) =
+	local ($fvirt, $fconf, $conf, $anon, $aconf) =
 		&get_proftpd_virtual($ipinfo->{'ip'});
 	if ($anon) {
 		local $lref = &read_file_lines($anon->{'file'});
