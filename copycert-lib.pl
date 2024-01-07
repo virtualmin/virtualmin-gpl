@@ -37,7 +37,7 @@ if ($config{'mail'} && $config{'mail_system'} == 0) {
 if ($config{'ftp'}) {
 	push(@rv, {'id' => 'proftpd',
 		   'dom' => 0,
-		   'virt' => 0,
+		   'virt' => 1,
 		   'short' => 'f' });
 	}
 if ($config{'mysql'}) {
@@ -216,9 +216,33 @@ if ($config{'mail_system'} == 0) {
 	}
 
 if ($config{'ftp'}) {
-	# Check ProFTPd certificate
+	# Check ProFTPd per-IP certificate
 	&foreign_require("proftpd");
 	my $conf = &proftpd::get_config();
+	if ($perip) {
+		my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+		if ($virt) {
+			my $cfile = &proftpd::find_directive(
+					"TLSRSACertificateFile", $vconf);
+			my $kfile = &proftpd::find_directive(
+					"TLSRSACertificateKeyFile", $vconf);
+			my $cafile = &proftpd::find_directive(
+					"TLSCACertificateFile", $vconf);
+			if ($cfile) {
+				push(@svcs, { 'id' => 'proftpd',
+					      'cert' => $cfile,
+					      'key' => $kfile,
+					      'ca' => $cafile,
+					      'prefix' => 'ftp',
+					      'port' => 990,
+					      'ip' => $d->{'ip'},
+					      'd' => $d,
+					    });
+				}
+			}
+		}
+
+	# Check ProFTPd global certificate
 	my $cfile = &proftpd::find_directive(
 			"TLSRSACertificateFile", $conf);
 	my $kfile = &proftpd::find_directive(
@@ -231,7 +255,8 @@ if ($config{'ftp'}) {
 			      'key' => $kfile,
 			      'ca' => $cafile,
 			      'prefix' => 'ftp',
-			      'port' => 990, });
+			      'port' => 990,
+			    });
 		}
 	}
 

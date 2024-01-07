@@ -2731,6 +2731,44 @@ else {
 return 1;
 }
 
+# sync_proftpd_ssl_cert(&domain, enable)
+# Configure ProFTPd to use a domain's SSL cert for connections on its IP
+sub sync_proftpd_ssl_cert
+{
+my ($d, $enable) = @_;
+&foreign_require("proftpd");
+&proftpd::lock_proftpd_files();
+my ($virt, $vconf, $conf) = &get_proftpd_virtual($d->{'ip'});
+return 0 if (!$virt);
+if ($enable) {
+	# Make proftpd virtualhost use domain's SSL cert files
+	my $cfile = &get_website_ssl_file($d, "cert");
+	&proftpd::save_directive(
+		"TLSRSACertificateFile", [ $cfile ], $vconf, $conf);
+	my $kfile = &get_website_ssl_file($d, "key");
+	&proftpd::save_directive(
+		"TLSRSACertificateKeyFile", [ $kfile ], $vconf, $conf);
+	my $cafile = &get_website_ssl_file($d, "ca");
+	&proftpd::save_directive(
+		"TLSCACertificateFile", $cafile ? [ $cafile ] : [ ], $vconf, $conf);
+	&proftpd::save_directive("TLSEngine", [ "on" ], $vconf, $conf);
+	}
+else {
+	# Remove SSL cert for domain
+	&proftpd::save_directive(
+		"TLSRSACertificateFile", [ ], $vconf, $conf);
+	&proftpd::save_directive(
+		"TLSRSACertificateKeyFile", [ ], $vconf, $conf);
+	&proftpd::save_directive(
+		"TLSCACertificateFile", [ ], $vconf, $conf);
+	&proftpd::save_directive("TLSEngine", [ ], $vconf, $conf);
+	}
+&flush_file_lines($virt->{'file'}, undef, 1);
+&proftpd::unlock_proftpd_files();
+&register_post_action(\&restart_proftpd);
+return 1;
+}
+
 # get_postfix_ssl_cert(&domain)
 # Returns the path to the cert, key and CA cert in the Postfix config for
 # a domain, if any
