@@ -8817,15 +8817,20 @@ else {
 	}
 }
 
-# disable_virtual_server(&domain, [reason-code], [reason-why])
+# disable_virtual_server(&domain, [reason-code], [reason-why], [&only-features])
 # Disables all features of one virtual server. Returns undef on success, or
 # an error message on failure.
 sub disable_virtual_server
 {
-my ($d, $reason, $why) = @_;
+my ($d, $reason, $why, $only) = @_;
 
 # Work out what can be disabled
 my @disable = &get_disable_features($d);
+if ($only) {
+	@disable = grep { &indexof($_, @$only) >= 0 } @disable;
+	@disable || return "None of the features to disable exist on this ".
+			   "virtual server";
+	}
 
 # Disable it
 my %disable = map { $_, 1 } @disable;

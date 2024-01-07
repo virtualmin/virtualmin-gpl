@@ -13,6 +13,10 @@ The optional C<--why> parameter can be followed by a description explaining
 why the domain has been disabled, which will be shown when anyone tries to
 edit it in Virtualmin.
 
+By default all features are disabled for the selected domains, but you can
+limit this with the C<--feature> flag. For example, to only disable the website
+use C<--disable web>.
+
 To have all sub-servers owned by the same user as the specified server
 disabled as well, use the C<--subservers> flag.
 
@@ -53,6 +57,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--subservers") {
 		$subservers = 1;
 		}
+	elsif ($a eq "--feature") {
+		push(@feats, shift(@ARGV));
+		}
 	elsif ($a eq "--help") {
 		&usage();
 		}
@@ -79,7 +86,8 @@ if ($subservers && !$d->{'parent'}) {
 
 foreach $d (@doms) {
 	print "Disabling virtual server $d->{'dom'} ..\n\n";
-	$err = &disable_virtual_server($d, 'manual', $why);
+	$err = &disable_virtual_server($d, 'manual', $why,
+				       @feats ? \@feats : undef);
 	&usage($err) if ($err);
 	}
 
@@ -95,6 +103,7 @@ print "\n";
 print "virtualmin disable-domain --domain domain.name\n";
 print "                         [--why \"explanation for disable\"]\n";
 print "                         [--subservers]\n";
+print "                         [--feature name]*\n";
 exit(1);
 }
 
