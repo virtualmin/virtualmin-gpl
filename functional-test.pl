@@ -11075,6 +11075,66 @@ if (!$webmin_pass) {
 	$transfer_tests = [ { 'command' => 'echo Missing user or password ; false' } ];
 	}
 
+$ftp_tests = [
+	# Create a domain with SSL, FTP and a private IP
+	{ 'command' => 'create-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'desc', 'Test FTP domain' ],
+		      [ 'pass', 'smeg' ],
+		      [ 'dir' ], [ 'unix' ], [ $web ], [ 'dns' ], [ $ssl ],
+		      [ 'logrotate' ], [ 'ftp' ],
+		      [ 'allocate-ip' ],
+		      [ 'content' => 'Test FTP home page' ],
+		      @create_args, ],
+        },
+
+	# Check that anonymous FTP to it works
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain.'/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Put a file in the anonymous FTP directory
+	{ 'command' => 'echo "bar" >~'.
+		       $test_domain_user.'/ftp/foo.txt',
+	},
+
+	# Try to fetch it
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain.'/foo.txt',
+	  'grep' => 'bar',
+	},
+
+	# Disable the domain
+	{ 'command' => 'disable-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ],
+		      [ 'feature' => 'ftp' ] ],
+	},
+
+	# FTP should fail now
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain.'/',
+	  'grep' => 'Login incorrect',
+	  'fail' => 1,
+	},
+
+	# Re-enable the domain
+	{ 'command' => 'enable-domain.pl',
+	  'args' => [ [ 'domain' => $test_domain ] ],
+	},
+
+	# FTP should work again
+	{ 'command' => $wget_command.
+		       'ftp://'.$test_domain.'/',
+	  'antigrep' => 'Login incorrect',
+	},
+
+	# Cleanup the domain
+	{ 'command' => 'delete-domain.pl',
+	  'args' => [ [ 'domain', $test_domain ] ],
+	  'cleanup' => 1 },
+	];
+
 $alltests = { '_config' => $_config_tests,
 	      'domains' => $domains_tests,
 	      'hashpass' => $hashpass_tests,
@@ -11167,6 +11227,7 @@ $alltests = { '_config' => $_config_tests,
 	      'allscript' => $allscript_tests,
 	      'parallel_backup' => $parallel_backup_tests,
 	      'transfer' => $transfer_tests,
+	      'ftp' => $ftp_tests,
 	    };
 if (!$virtualmin_pro) {
 	# Some tests don't work on GPL
