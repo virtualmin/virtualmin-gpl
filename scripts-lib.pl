@@ -257,8 +257,6 @@ while(my $f = readdir(DIR)) {
 			my $url = &get_domain_url($d, $1 eq "https");
 			$info{'url'} = $url.$3;
 			}
-		# Script version can never end in a dot
-		$info{'version'} =~ s/\.$// if ($info{'version'});
 		push(@rv, \%info);
 		}
 	}
