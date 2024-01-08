@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 6;	# Always use CLI
+return 7;	# Allow to disable initial setup
 }
 
 sub script_wordpress_php_fullver
@@ -106,7 +106,9 @@ else {
 	$rv .= ui_table_row("Install sub-directory under <tt>$hdir</tt>",
 			   ui_opt_textbox("dir", &substitute_scriptname_template("wordpress", $d), 30, "At top level"));
 	$rv .= ui_table_row("WordPress site title",
-		ui_textbox("title", $d->{'owner'} || "My Blog", 40));
+		ui_textbox("title", $d->{'owner'} || "My Blog", 25).
+			   "&nbsp;".ui_checkbox("noauto", 1, "Do not perform initial setup", 0,
+			   	"onchange=\"form.title.disabled=this.checked;document.getElementById('title_row').nextElementSibling.style.visibility=(this.checked?'hidden':'visible')\""), undef, undef, ["id='title_row'"]);
 	}
 return $rv;
 }
@@ -124,12 +126,13 @@ else {
 	my $hdir = public_html_dir($d, 0);
 	$in{'dir_def'} || $in{'dir'} =~ /\S/ && $in{'dir'} !~ /\.\./ ||
 		return "Missing or invalid installation directory";
-	$in{'title'} || return "Missing or invalid WordPress site title";
+	(!$in{'title'} && !$in->{'noauto'}) && return "Missing or invalid WordPress site title";
 	my $dir = $in{'dir_def'} ? $hdir : "$hdir/$in{'dir'}";
 	my ($newdb) = ($in->{'db'} =~ s/^\*//);
 	return { 'db' => $in->{'db'},
 		 'newdb' => $newdb,
 		 'dir' => $dir,
+		 'noauto' => $in->{'noauto'},
 		 'dbtbpref' => $in->{'dbtbpref'},
 		 'path' => $in{'dir_def'} ? "/" : "/$in{'dir'}",
 		 'title' => $in{'title'} };
@@ -214,60 +217,61 @@ if (!$upgrade) {
 		return (-1, "\`wp core download\` failed` : $out");
 		}
 
-	# Configure the database
-	$out = &run_as_domain_user($d,
-		"$wp config create --dbname=".quotemeta($dbname).
-		" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
-		" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
-		" --dbhost=".quotemeta($dbhost)." 2>&1");
-	if ($?) {
-		return (-1, "\`wp config create\` failed : $out$err_continue");
-		}
-
-	# Set db prefix, if given
-	if ($opts->{'dbtbpref'}) {
-		my $out = &run_as_domain_user($d,
-			"$wp config set table_prefix ".
-			quotemeta($opts->{'dbtbpref'}).
-			" --type=variable".
-			" --path=".$opts->{'dir'}." 2>&1");
+	if (!$opts->{'noauto'}) {
+		# Configure the database
+		$out = &run_as_domain_user($d,
+			"$wp config create --dbname=".quotemeta($dbname).
+			" --dbprefix=".quotemeta($opts->{'dbtbpref'}).
+			" --dbuser=".quotemeta($dbuser)." --dbpass=".quotemeta($dbpass).
+			" --dbhost=".quotemeta($dbhost)." 2>&1");
 		if ($?) {
-			return (-1, "\`wp config set table_prefix\` failed : $out$err_continue");
+			return (-1, "\`wp config create\` failed : $out$err_continue");
+			}
+
+		# Set db prefix, if given
+		if ($opts->{'dbtbpref'}) {
+			my $out = &run_as_domain_user($d,
+				"$wp config set table_prefix ".
+				quotemeta($opts->{'dbtbpref'}).
+				" --type=variable".
+				" --path=".$opts->{'dir'}." 2>&1");
+			if ($?) {
+				return (-1, "\`wp config set table_prefix\` failed : $out$err_continue");
+				}
+			}
+		
+		# Do the install
+		$out = &run_as_domain_user($d,
+			"$wp core install " .
+			" --url=$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}").
+			" --title=".quotemeta($opts->{'title'} || $d->{'owner'}).
+			" --admin_user=".quotemeta($domuser).
+			" --admin_password=".quotemeta($dompass).
+			" --admin_email=".quotemeta($d->{'emailto'})." 2>&1");
+		if ($?) {
+			return (-1, "\`wp core install\` failed : $out$err_continue");
+			}
+
+		# Force update site URL manually as suggested by the installer
+		# Update `siteurl` option
+		$out = &run_as_domain_user($d,
+			"$wp option update siteurl \"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
+		if ($?) {
+			return (-1, "\`wp option update siteurl\` failed : $out");
+			}
+		# Update `home` option
+		$out = &run_as_domain_user($d,
+			"$wp option update home \"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
+		if ($?) {
+			return (-1, "\`wp option update home\` failed : $out");
+			}
+		# Update user `user_url` record
+		$out = &run_as_domain_user($d,
+			"$wp user update ".quotemeta($domuser)." --user_url=\"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
+		if ($?) {
+			return (-1, "\`wp user update\` failed : $out");
 			}
 		}
-	
-	# Do the install
-	$out = &run_as_domain_user($d,
-		"$wp core install " .
-		" --url=$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}").
-		" --title=".quotemeta($opts->{'title'} || $d->{'owner'}).
-		" --admin_user=".quotemeta($domuser).
-		" --admin_password=".quotemeta($dompass).
-		" --admin_email=".quotemeta($d->{'emailto'})." 2>&1");
-	if ($?) {
-		return (-1, "\`wp core install\` failed : $out$err_continue");
-		}
-
-	# Force update site URL manually as suggested by the installer
-	# Update `siteurl` option
-	$out = &run_as_domain_user($d,
-		"$wp option update siteurl \"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
-	if ($?) {
-		return (-1, "\`wp option update siteurl\` failed : $out");
-		}
-	# Update `home` option
-	$out = &run_as_domain_user($d,
-		"$wp option update home \"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
-	if ($?) {
-		return (-1, "\`wp option update home\` failed : $out");
-		}
-	# Update user `user_url` record
-	$out = &run_as_domain_user($d,
-		"$wp user update ".quotemeta($domuser)." --user_url=\"$d_proto".quotemeta("$d->{'dom'}$opts->{'path'}")."\" 2>&1");
-	if ($?) {
-		return (-1, "\`wp user update\` failed : $out");
-		}
-
 	# Clean up an index.html file that might take precendence over index.php
 	my $hfile = $opts->{'dir'}."/index.html";
 	if (-r $hfile) {
@@ -284,13 +288,18 @@ else {
 	}
 
 # Delet edefault config
-unlink_file("$opts->{'dir'}/wp-config-sample.php");
+if (!$opts->{'noauto'} || $upgrade) {
+	unlink_file("$opts->{'dir'}/wp-config-sample.php");
+	}
 
 # Install is all done, return the base URL
 my $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
 my $msg_type = $upgrade ? "upgrade" : "installation";
-return (1, "WordPress $msg_type completed. It can be accessed at <a target=_blank href='${url}wp-admin'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url, $domuser, $dompass);
+my $access_msg = $upgrade || !$opts->{'noauto'} ? "It can be accessed" : "It can be configured";
+my $dbcreds = $upgrade ? "" : 
+	!$opts->{'noauto'} ? "" : "<br>For database credentials, use '<tt>$dbuser</tt>' for the user, '<tt>$dbpass</tt>' for the password, and '<tt>$dbname</tt>' for the database name.";
+return (1, "WordPress $msg_type completed. $access_msg at <a target=_blank href='${url}wp-admin'>$url</a>$dbcreds", "Under $rp using $dbphptype database $dbname", $url, !$opts->{'noauto'} ? $domuser : undef, !$opts->{'noauto'} ? $dompass : undef);
 }
 
 # script_wordpress_uninstall(&domain, version, &opts)
