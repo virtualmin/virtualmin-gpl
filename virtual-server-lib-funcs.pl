@@ -1060,11 +1060,6 @@ if (!$novirts) {
 				}
 			}
 		}
-	if ($includeextra && &domain_has_website($d)) {
-		# Include webserver users
-		push(@users, &list_extra_web_users($d))
-			if (&indexof('virtualmin-htpasswd', @plugins) >= 0);
-		}	
 	}
 
 # Push domain extra database users
@@ -1130,7 +1125,7 @@ if (!$nodbs && $d) {
 		if (@extra_database_users) {
 			my @other_users_with_dbs = map { $_->{'user'} } grep { 
 				$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
-				$_->{'type'} ne 'db'
+				!$_->{'extra'}
 			} @users;
 			# Clear main array of redundant extra database users
 			if (@other_users_with_dbs) {
@@ -1147,30 +1142,6 @@ if (!$nodbs && $d) {
 					}
 				}
 			}
-
-		# If extra webserver users overlap with system users, which already
-		# can access virtualmin-htpasswd module, pop them off the list and
-		# remove extra web user
-		my (@webserver_virts) = grep { $_->{'extra'} && $_->{'type'} eq 'web' } @users;
-		if (@webserver_virts) {
-			my @other_users_with_webs = map { $_->{'user'} } grep { 
-				$_->{'type'} ne 'web'
-			} @users;
-			# Clear main array of redundant extra webserver users
-			if (@other_users_with_webs) {
-				@users = grep { 
-					$_->{'type'} ne 'web' ||
-					&indexof($_->{'user'}, @other_users_with_webs) < 0
-				} @users;
-				# Now clear Virtualmin record of extra webusers users
-				# belonging to an actual user account
-				foreach my $webserver_virt (@webserver_virts) {
-					if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
-						&delete_extra_user($d, $webserver_virt);
-						}
-					}
-				}
-			}
 		}
 
 	# Add plugin databases
@@ -1179,6 +1150,36 @@ if (!$nodbs && $d) {
 		next if (&indexof($db->{'type'}, &list_database_plugins()) == -1);
 		}
 	}
+
+if ($includeextra && &domain_has_website($d)) {
+	# Include webserver users
+	push(@users, &list_extra_web_users($d))
+		if (&indexof('virtualmin-htpasswd', @plugins) >= 0);
+
+	# If extra webserver users overlap with system users, which already
+	# can access virtualmin-htpasswd module, pop them off the list and
+	# remove extra web user
+	my (@webserver_virts) = grep { $_->{'extra'} && $_->{'type'} eq 'web' } @users;
+	if (@webserver_virts) {
+		my @other_users_with_webs = map { $_->{'user'} } grep { 
+			!$_->{'extra'}
+		} @users;
+		# Clear main array of redundant extra webserver users
+		if (@other_users_with_webs) {
+			@users = grep { 
+				$_->{'type'} ne 'web' ||
+				&indexof($_->{'user'}, @other_users_with_webs) < 0
+			} @users;
+			# Now clear Virtualmin record of extra webusers users
+			# belonging to an actual user account
+			foreach my $webserver_virt (@webserver_virts) {
+				if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
+					&delete_webserver_user($webserver_virt, $d);
+					}
+				}
+			}
+		}
+	}	
 
 # Add any secondary groups in the template
 local @sgroups = &allowed_secondary_groups($d);

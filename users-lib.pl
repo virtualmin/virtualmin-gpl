@@ -21,6 +21,23 @@ closedir(DIR);
 return @rv;
 }
 
+# check_users_clash(&domain, username, type)
+# Check for a username clash with all Unix
+# users and given type of extra users
+sub check_users_clash
+{
+my ($d, $u, $t) = @_;
+my @rv;
+# Check for clash with Unix users first
+my (@userclash) = grep { $_->{'user'} eq $u }
+        &list_domain_users($d, 0, 0, 1, 1);
+# Check for clash with extra users if type is given
+if ($t && !@userclash) {
+        @userclash = &list_extra_users($d, $t, $u);
+        }
+return @userclash;
+}
+
 # list_extra_db_users(&domain, [username])
 # Returns a list of extra users for some domain with database list
 sub list_extra_db_users

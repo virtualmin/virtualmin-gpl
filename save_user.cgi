@@ -523,9 +523,13 @@ else {
 			&error($err) if ($err);
 			}
 
-		# Validate user
-		$err = &validate_user($d, $user);
-		&error($err) if ($err);
+		# Validate user unless extra database user
+		# which can be merged with Unix user
+		my @extra_db_user = &list_extra_db_users($d, $user->{'user'});
+		if (!@extra_db_user) {
+			$err = &validate_user($d, $user);
+			&error($err) if ($err);
+			}
 
 		if ($home && !$user->{'nocreatehome'} &&
 		    (!$user->{'maybecreatehome'} || !-d $home)) {
