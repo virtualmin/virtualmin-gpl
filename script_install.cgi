@@ -185,9 +185,6 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 				     $domuser, $dompass);
 &$indent_print();
 print $msg,"<p>\n";
-if ($ok && $script->{'site'}) {
-	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
-	}
 if ($ok > 0 && !$sinfo) {
 	# Show login details
 	if ($suser && $spass) {
@@ -200,6 +197,9 @@ if ($ok > 0 && !$sinfo) {
 	elsif ($spass) {
 		print &text('scripts_passonly', "<tt>$spass</tt>"),"<p>\n";
 		}
+	}
+if ($ok && $script->{'site'}) {
+	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
 	}
 &$outdent_print();
 
