@@ -2752,6 +2752,7 @@ if ($enable) {
 	&proftpd::save_directive(
 		"TLSCACertificateFile", $cafile ? [ $cafile ] : [ ], $vconf, $conf);
 	&proftpd::save_directive("TLSEngine", [ "on" ], $vconf, $conf);
+	&proftpd::save_directive("TLSOptions", [ "NoSessionReuseRequired" ], $vconf, $conf);
 	}
 else {
 	# Remove SSL cert for domain
@@ -2762,6 +2763,7 @@ else {
 	&proftpd::save_directive(
 		"TLSCACertificateFile", [ ], $vconf, $conf);
 	&proftpd::save_directive("TLSEngine", [ ], $vconf, $conf);
+	&proftpd::save_directive("TLSOptions", [ ], $vconf, $conf);
 	}
 &flush_file_lines($virt->{'file'}, undef, 1);
 &proftpd::unlock_proftpd_files();
