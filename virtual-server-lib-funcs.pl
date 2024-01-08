@@ -599,18 +599,6 @@ if ($mchanged) {
 return 1;
 }
 
-# update_domain(&domain)
-# Update domain given key value in JSON format
-sub update_domain
-{
-my ($d, $key, $name, $value) = @_;
-my $dom_key_json = $d->{$key} || '{}';
-my $dom_key_hash = &convert_from_json($dom_key_json);
-$dom_key_hash->{$name} = $value if (defined($value));
-delete($dom_key_hash->{$name}) if (!defined($value));
-$d->{$key} = &convert_to_json($dom_key_hash);
-}
-
 # delete_domain(&domain)
 # Delete all of Virtualmin's internal information about a domain
 sub delete_domain
@@ -1176,17 +1164,11 @@ if (!$nodbs && $d) {
 				} @users;
 				# Now clear Virtualmin record of extra webusers users
 				# belonging to an actual user account
-				my $updated_domain;
 				foreach my $webserver_virt (@webserver_virts) {
 					if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
-						&lock_domain($d) if (!$updated_domain++);
-						&update_domain($d, "webusers", $webserver_virt->{'user'});
+						&delete_extra_user($d, $webserver_virt);
 						}
 					}
-				# Save only if we updated the domain
-				&save_domain($d),
-				unlock_domain($d)
-					if ($updated_domain);
 				}
 			}
 		}
