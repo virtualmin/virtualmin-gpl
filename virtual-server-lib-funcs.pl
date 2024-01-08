@@ -9377,6 +9377,7 @@ push(@rv, { 'id' => 0,
 	    'web_dovecot_ssl' => $config{'dovecot_ssl'},
 	    'web_postfix_ssl' => $config{'postfix_ssl'},
 	    'web_mysql_ssl' => $config{'mysql_ssl'},
+	    'web_proftpd_ssl' => $config{'proftpd_ssl'},
 	    'web_http2' => $config{'web_http2'},
 	    'web_redirects' => $config{'web_redirects'},
 	    'web_sslredirect' => $config{'auto_redirect'},
@@ -9727,6 +9728,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'dovecot_ssl'} = $tmpl->{'web_dovecot_ssl'};
 	$config{'postfix_ssl'} = $tmpl->{'web_postfix_ssl'};
 	$config{'mysql_ssl'} = $tmpl->{'web_mysql_ssl'};
+	$config{'proftpd_ssl'} = $tmpl->{'web_proftpd_ssl'};
 	foreach my $phpver (@all_possible_php_versions) {
 		$config{'php_ini_'.$phpver} = $tmpl->{'web_php_ini_'.$phpver};
 		}

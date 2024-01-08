@@ -3533,17 +3533,13 @@ print &ui_table_hr();
 # Setup matching Webmin/Usermin SSL certs
 print &ui_table_row(&hlink($text{'newweb_webmin'},
 			   "template_web_webmin_ssl"),
-	&ui_radio("web_webmin_ssl",
-		  $tmpl->{'web_webmin_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("web_webmin_ssl", $tmpl->{'web_webmin_ssl'}));
 
 print &ui_table_row(&hlink($text{'newweb_usermin'},
 			   "template_web_usermin_ssl"),
-	&ui_radio("web_usermin_ssl",
-		  $tmpl->{'web_usermin_ssl'} ? 1 : 0,
-		  [ [ 1, $text{'yes'} ], [ 0, $text{'no'} ] ]));
+	&ui_yesno_radio("web_usermin_ssl", $tmpl->{'web_usermin_ssl'}));
 
-# Setup Dovecot, Postfix and MySQL SSL certs
+# Setup Dovecot, Postfix, MySQL and ProFTPd SSL certs
 print &ui_table_row(&hlink($text{'newweb_dovecot'},
 			   "template_web_dovecot_ssl"),
 	&ui_yesno_radio("web_dovecot_ssl", $tmpl->{'web_dovecot_ssl'}));
@@ -3555,6 +3551,10 @@ print &ui_table_row(&hlink($text{'newweb_postfix'},
 print &ui_table_row(&hlink($text{'newweb_mysql'},
 			   "template_web_mysql_ssl"),
 	&ui_yesno_radio("web_mysql_ssl", $tmpl->{'web_mysql_ssl'}));
+
+print &ui_table_row(&hlink($text{'newweb_proftpd'},
+			   "template_web_proftpd_ssl"),
+	&ui_yesno_radio("web_proftpd_ssl", $tmpl->{'web_proftpd_ssl'}));
 }
 
 # parse_template_ssl(&tmpl)
@@ -3583,6 +3583,7 @@ $tmpl->{'web_usermin_ssl'} = $in{'web_usermin_ssl'};
 $tmpl->{'web_postfix_ssl'} = $in{'web_postfix_ssl'};
 $tmpl->{'web_dovecot_ssl'} = $in{'web_dovecot_ssl'};
 $tmpl->{'web_mysql_ssl'} = $in{'web_mysql_ssl'};
+$tmpl->{'web_proftpd_ssl'} = $in{'web_proftpd_ssl'};
 }
 
 # chained_ssl(&domain, [&old-domain])
