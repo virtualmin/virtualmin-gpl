@@ -11088,6 +11088,13 @@ $ftp_tests = [
 		      @create_args, ],
         },
 
+	# Copy the domain's SSL cert to proftpd
+	{ 'command' => 'install-service-cert.pl',
+	  'args' => [ [ 'domain', $test_domain ],
+		      [ 'add-domain' ],
+		      [ 'service', 'proftpd' ] ],
+	},
+
 	# Check that anonymous FTP to it works
 	{ 'command' => $wget_command.
 		       'ftp://'.$test_domain.'/',
@@ -11103,6 +11110,12 @@ $ftp_tests = [
 	{ 'command' => $wget_command.
 		       'ftp://'.$test_domain.'/foo.txt',
 	  'grep' => 'bar',
+	},
+
+	# Test that encrypted FTP works and serves the right cert
+	{ 'command' => $curl_command.' --ftp-ssl --insecure -v '.
+		       'ftp://'.$test_domain.'/foo.txt',
+	  'grep' => [ 'bar', 'O=Test FTP domain', 'CN=(\\*\\.)?'.$test_domain ],
 	},
 
 	# Disable the domain
