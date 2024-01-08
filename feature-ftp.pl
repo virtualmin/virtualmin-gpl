@@ -8,6 +8,21 @@ return if ($require_proftpd++);
 &foreign_require("proftpd");
 }
 
+# check_depends_ftp(&domain)
+# Ensure that a domain with FTP enabled has a home directory and possibly a
+# private IP
+sub check_depends_ftp
+{
+my ($d) = @_;
+if (!$d->{'dir'}) {
+	return $text{'setup_edepftpdir'};
+	}
+if (!$d->{'virt'} && !&supports_namebased_ftp()) {
+	return $text{'setup_edepftp'};
+	}
+return undef;
+}
+
 # setup_ftp(&domain)
 # Setup a virtual FTP server for some domain
 sub setup_ftp
@@ -691,6 +706,15 @@ if ($main::got_lock_ftp == 1) {
 	}
 $main::got_lock_ftp-- if ($main::got_lock_ftp);
 &release_lock_anything();
+}
+
+# supports_namebased_ftp()
+# Returns 1 if ProFTPd supports name-based FTP sites
+sub supports_namebased_ftp
+{
+&require_proftpd();
+$proftpd::site{'version'} ||= &proftpd::get_proftpd_version();
+return $proftpd::site{'version'} >= 1.36;
 }
 
 $done_feature_script{'ftp'} = 1;
