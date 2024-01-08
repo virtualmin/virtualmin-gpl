@@ -5473,24 +5473,6 @@ if (!$d->{'alias'}) {
 	}
 }
 
-# list_webserver_users()
-# List domain extra webserver users
-sub list_webserver_users
-{
-my @extra_webserver_users;
-my $webserver_users_extra = "webusers"; # e.g. handles webusers key in domain config
-my $webserver_users_extra_hash = &convert_from_json($d->{"$webserver_users_extra"} || '{}');
-my @webserver_users;
-foreach my $user (keys %$webserver_users_extra_hash) {
-	my $pass = $webserver_users_extra_hash->{$user};
-	push(@webserver_users, { 'user' => $user,
-	               'pass' => $pass,
-	               'filetype' => '_web',
-	               'userextra' => 'webuser' });
-	}
-return @webserver_users;
-}
-
 # modify_webserver_user(&user, &old-user, &domain)
 # Create or update a webserver user
 sub modify_webserver_user
@@ -5500,10 +5482,7 @@ my ($user, $olduser, $d) = @_;
 # Encrypt user initial password
  $user->{'pass'} = &encrypt_user_password($user, $user->{'pass'})
         if (!$in{'webpass_def'});
-
-# Return existing password if not changed
-$user->{'pass_crypt'} = $user->{'pass'}
-        if ($in{'webpass_def'});
+$user->{'pass_crypt'} = $user->{'pass'};
 
 # Validate plugins
 foreach my $f (&list_mail_plugins()) {
@@ -5522,13 +5501,7 @@ foreach $f (&list_mail_plugins()) {
                 }
         }
 # Add user to domain config
-&update_domain($d, "webusers", $olduser->{'user'}) if ($olduser);
-&update_domain($d, "webusers", $user->{'user'}, $user->{'pass'});
-
-# Save domain
-&lock_domain($d);
-&save_domain($d);
-unlock_domain($d);
+&update_extra_user($d, $user, $olduser);
 }
 
 # delete_webserver_user(&user, &domain)
@@ -5542,12 +5515,7 @@ foreach my $f (&list_mail_plugins()) {
                 }
         }
 # Delete user from domain config
-&update_domain($d, "webusers", $user->{'user'});
-
-# Save domain
-&lock_domain($d);
-&save_domain($d);
-unlock_domain($d);
+&delete_extra_user($d, $user);
 }
 
 $done_feature_script{'web'} = 1;

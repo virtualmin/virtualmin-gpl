@@ -512,19 +512,22 @@ $err = &validate_user($d, $user, $olduser);
 &usage($err) if ($err);
 
 # Save the user
-if ($user->{'userextra'}) {
-	if ($user->{'userextra'} eq 'database') {
-		&update_domain($d, "$olduser->{'type'}_users", $olduser->{'user'});
-		&update_domain($d, "$user->{'type'}_users",
-                        $user->{'user'},
-                        { pass => $pass,
-                          dbs => $user->{'dbs'} });
+if ($user->{'extra'}) {
+	if ($user->{'type'} eq 'db') {
 		&modify_database_user($user, $olduser, $d);
-		&lock_domain($d);
-		&save_domain($d);
-		unlock_domain($d);
+		my %dbuser = %{$user};
+		%dbuser = map { $_, $dbuser{$_} }
+			grep { $_ =~ /^(user|pass|plainpass|extra|type)$/ }
+				keys %dbuser;
+		$dbuser{'pass'} = $dbuser{'plainpass'};
+		foreach my $db (@{$user->{'dbs'}}) {
+			$dbuser{'db_'.$db->{'type'}} .=
+				$dbuser{'db_'.$db->{'type'}} ?
+					" $db->{'name'}" : $db->{'name'};
+			}
+		&update_extra_user($d, \%dbuser, $olduser);
 		}
-	if ($user->{'userextra'} eq 'webuser') {
+	if ($user->{'type'} eq 'web') {
 		&usage($text{'user_ewebusersupp'});
 		}
 	}

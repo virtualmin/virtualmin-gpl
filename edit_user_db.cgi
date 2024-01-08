@@ -28,8 +28,8 @@ print &ui_hidden("dom", $in{'dom'});
 my $dbuser = {};
 my $dbuser_name;
 if (!$in{'new'}) {
-        my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
-        ($dbuser) = grep { $_->{'user'} eq $in{'user'} } @dbusers;
+        my @dbuser = &list_extra_db_users($d, $in{'user'});
+	$dbuser = $dbuser[0];
         $dbuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
         $dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};
         }
@@ -62,8 +62,9 @@ my @dbs;
 # Show allowed databases
 if (@dbs) {
 	print &ui_table_hr();
+	my @idbs = $in{'new'} ? @{$user->{'dbs'}} : @{$dbuser->{'dbs'}};
 	@userdbs = map { [ $_->{'type'}."_".$_->{'name'},
-			   $_->{'name'}." ($_->{'desc'})" ] } @{$dbuser->{'dbs'}};
+			   $_->{'name'}." ($_->{'desc'})" ] } @idbs;
 	@alldbs = map { [ $_->{'type'}."_".$_->{'name'},
 			  $_->{'name'}." ($_->{'desc'})" ] } @dbs;
 	print &ui_table_row(&hlink($text{'user_dbs'},"userdbs"),

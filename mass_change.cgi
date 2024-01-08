@@ -45,7 +45,7 @@ foreach $user (@musers) {
 	$pop3 = &remove_userdom($user->{'user'}, $d);
 
 	# Skip virtual (extra) users
-	if ($user->{'userextra'}) {
+	if ($user->{'extra'}) {
 		&$outdent_print();
 		&$second_print($text{'mass_evirtuser'});
 		next;

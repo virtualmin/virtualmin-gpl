@@ -212,6 +212,8 @@ $domainnames_dir = "$module_config_directory/names";
 $spamclear_file = "$module_config_directory/spamclear";
 $plans_dir = "$module_config_directory/plans";
 
+$extra_users_dir = "$module_config_directory/users";
+
 $extra_admins_dir = "$module_config_directory/admins";
 @all_possible_php_versions = ( 5, 5.2, 5.3, 5.4, 5.5, 5.6,
                               "7.0", 7.1, 7.2, 7.3, 7.4,

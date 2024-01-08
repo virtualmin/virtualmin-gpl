@@ -369,23 +369,22 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 # Create database user only
 if ($db_only) {
 	my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
-        my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
-        !$user_already || &error(&text('user_ealreadyexist', $user->{'user'}));
+        my ($dbuser) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
+        !$dbuser || &error(&text('user_ealreadyexist', $user->{'user'}));
 	$user->{'pass'} = $pass;
 	# Create database user
-        my ($err, $dts) = &create_databases_user($d, $user);
+        my $err = &create_databases_user($d, $user);
         &error($err) if ($err);
-        # Add user to domain config
-        foreach my $dt (@$dts) {
-		&update_domain($d, "${dt}_users",
-                        $user->{'user'},
-                        { pass => $pass,
-                          dbs => $user->{'dbs'} });
+        # Add user to domain list
+	$dbuser->{'user'} = $user->{'user'};
+	$dbuser->{'pass'} = $pass;
+	$dbuser->{'extra'} = 1;
+        $dbuser->{'type'} = 'db';
+        foreach my $db (@{$user->{'dbs'}}) {
+                $dbuser->{'db_'.$db->{'type'}} .=
+                        $dbuser->{'db_'.$db->{'type'}} ? " $db->{'name'}" : $db->{'name'};
                 }
-	# Save domain
-	&lock_domain($d);
-	&save_domain($d);
-	unlock_domain($d);
+        &update_extra_user($d, $dbuser);
 	}
 # Create the user and virtusers and alias
 else {

@@ -27,8 +27,8 @@ print &ui_hidden("dom", $in{'dom'});
 my $webuser = &create_initial_user($d);
 my $webuser_name;
 if (!$in{'new'}) {
-        my @webusers = &list_domain_users($d, 1, 0, 1, 1, 1);
-        ($webuser) = grep { $_->{'user'} eq $in{'user'} } @webusers;
+        my @webuser = &list_extra_web_users($d, $in{'user'});
+        $webuser = $webuser[0];
         $webuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
         $webuser_name = &remove_userdom($webuser->{'user'}, $d) || $webuser->{'user'};
         }

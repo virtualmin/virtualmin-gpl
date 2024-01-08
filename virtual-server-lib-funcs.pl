@@ -16,7 +16,7 @@ if (!$virtual_server_root) {
 	$0 =~ /^(.*)\//;
 	$virtual_server_root = "$1/virtual-server";
 	}
-foreach my $lib ("scripts", "resellers", "admins", "simple", "s3",
+foreach my $lib ("scripts", "resellers", "admins", "users", "simple", "s3",
 		 "php", "ruby", "vui", "dynip", "collect", "maillog",
 		 "balancer", "newfeatures", "resources", "backups",
 		 "domainname", "commands", "connectivity", "plans",
@@ -721,12 +721,12 @@ foreach my $m (keys %get_domain_by_maps) {
 	}
 }
 
-# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [show-extrausers])
+# list_domain_users([&domain], [skipunix], [no-virts], [no-quotas], [no-dbs], [include-extra])
 # List all Unix users who are in the domain's primary group.
 # If domain is omitted, returns local users.
 sub list_domain_users
 {
-local ($d, $skipunix, $novirts, $noquotas, $nodbs, $show_extrausers) = @_;
+local ($d, $skipunix, $novirts, $noquotas, $nodbs, $includeextra) = @_;
 
 # Get all aliases (and maybe generics) to look for those that match users
 local (%aliases, %generics);
@@ -753,7 +753,6 @@ if ($config{'mail'} && !$novirts) {
 
 # Get all virtusers to look for those for users
 local @virts;
-local @webserver_virts;
 if (!$novirts) {
 	@virts = &list_virtusers();
 	}
@@ -1073,32 +1072,17 @@ if (!$novirts) {
 				}
 			}
 		}
-	if ($show_extrausers && &domain_has_website($d)) {
-		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
-			# Include webserver users
-			@webserver_virts = &list_webserver_users();
-			push(@users, @webserver_virts) if (@webserver_virts);
-			}
+	if ($includeextra && &domain_has_website($d)) {
+		# Include webserver users
+		push(@users, &list_extra_web_users($d))
+			if (&indexof('virtualmin-htpasswd', @plugins) >= 0);
 		}	
 	}
 
-# Collect domain extra database users
-my @extra_database_users;
-if ($show_extrausers) {
-	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-		my $dt_users_extra = $dt."_users"; # e.g. handles mysql_users key in domain config
-		my $dt_users_extra_hash = &convert_from_json($d->{"$dt_users_extra"} || '{}');
-		foreach my $user (keys %$dt_users_extra_hash) {
-			my $data = $dt_users_extra_hash->{$user};
-			push(@extra_database_users, { 'user' => $user, 'type' => $dt })
-				if (!$nodbs);
-			push(@users, { 'user' => $user,
-				'data' => $data,
-				'pass' => $data->{'pass'},
-				'type' => $dt,
-				'filetype' => '_db',
-				'userextra' => 'database' });
-			}
+# Push domain extra database users
+if ($includeextra) {
+	foreach (&list_extra_db_users($d)) {
+		push(@users, $_);
 		}
 	}
 
@@ -1151,47 +1135,43 @@ if (!$nodbs && $d) {
 				}
 			}
 		}
-	if ($show_extrausers) {
+	if ($includeextra) {
 		# If extra database users overlap with system users, which already
-		# handle databases, pop them off the list and update domain config
+		# handle databases, pop them off the list and remove extra db user
+		my (@extra_database_users) = grep { $_->{'extra'} && $_->{'type'} eq 'db' } @users;
 		if (@extra_database_users) {
 			my @other_users_with_dbs = map { $_->{'user'} } grep { 
 				$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
-				$_->{'userextra'} ne 'database'
+				$_->{'type'} ne 'db'
 			} @users;
 			# Clear main array of redundant extra database users
 			if (@other_users_with_dbs) {
 				@users = grep { 
-					$_->{'userextra'} ne 'database' ||
+					$_->{'type'} ne 'db' ||
 					&indexof($_->{'user'}, @other_users_with_dbs) < 0
 				} @users;
-				# Now clear Virtualmin record of extra database users
-				# belonging to an actual user account
-				my $updated_domain;
+				# Now remove a record of extra database user
+				# as it belongs to an actual user account
 				foreach my $extra_database_user (@extra_database_users) {
 					if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
-						&lock_domain($d) if (!$updated_domain++);
-						&update_domain($d, "$extra_database_user->{'type'}_users", $extra_database_user->{'user'});
+						&delete_extra_user($d, $extra_database_user);
 						}
 					}
-				# Save only if we updated the domain
-				&save_domain($d),
-				unlock_domain($d)
-					if ($updated_domain);
 				}
 			}
 
 		# If extra webserver users overlap with system users, which already
 		# can access virtualmin-htpasswd module, pop them off the list and
-		# update domain config
+		# remove extra web user
+		my (@webserver_virts) = grep { $_->{'extra'} && $_->{'type'} eq 'web' } @users;
 		if (@webserver_virts) {
 			my @other_users_with_webs = map { $_->{'user'} } grep { 
-				$_->{'userextra'} ne 'webuser'
+				$_->{'type'} ne 'web'
 			} @users;
 			# Clear main array of redundant extra webserver users
 			if (@other_users_with_webs) {
 				@users = grep { 
-					$_->{'userextra'} ne 'webuser' ||
+					$_->{'type'} ne 'web' ||
 					&indexof($_->{'user'}, @other_users_with_webs) < 0
 				} @users;
 				# Now clear Virtualmin record of extra webusers users
@@ -1259,10 +1239,8 @@ return @users;
 sub create_databases_user
 {
 my ($d, $user, $type) = @_;
-my @dts;
 foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 	next if ($type && $type ne $dt);
-	push(@dts, $dt);
 	eval {
 		local $main::error_must_die = 1;
 		my @dbs = map { $_->{'name'} }
@@ -1281,11 +1259,10 @@ foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
 		};
 	# Show error
 	if ($@) {
-		my $err = &text('user_eadddbuser', "$user->{'user'} : $@");
-		return wantarray ? ($err) : $err;
+		return &text('user_eadddbuser', "$user->{'user'} : $@");
 		}
 	}
-return wantarray ? (0, \@dts) : undef;
+return undef;
 }
 
 # delete_databases_user(&domain, &user)
@@ -2239,20 +2216,15 @@ sub delete_user
 {
 # For extra specific user associated
 # with domain delete it and return
-if ($_[0]->{'userextra'}) {
-	if ($_[0]->{'userextra'} eq 'database') {
+if ($_[0]->{'extra'}) {
+	if ($_[0]->{'type'} eq 'db') {
 		# Delete database user
 		my ($err, $dts) = &delete_databases_user($_[1], $_[0]->{'user'});
 		&error($err) if ($err);
 		# Delete user from domain config
-		foreach my $dt (@$dts) {
-			&update_domain($_[1], "${dt}_users", $_[0]->{'user'});
-			&lock_domain($_[1]);
-			&save_domain($_[1]);
-			unlock_domain($_[1]);
-			}
+		&delete_extra_user($_[1], $_[0]);
 		}
-	if ($_[0]->{'userextra'} eq 'webuser') {
+	if ($_[0]->{'type'} eq 'web') {
 		&delete_webserver_user($_[0], $_[1]);
 		}
 	return undef;
@@ -5848,7 +5820,8 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	push(@cols, "<a href='edit_user$u->{'filetype'}.cgi?dom=$did&amp;".
+	local $filesuffix = $u->{'extra'} ? "_$u->{'type'}" : "";
+	push(@cols, "<a href='edit_user$filesuffix.cgi?dom=$did&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&
@@ -5867,9 +5840,9 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 	local $uquota;
 	$uquota += $u->{'uquota'} if (&has_home_quotas());
 	$uquota += $u->{'muquota'} if (&has_mail_quotas());
-	if (($u->{'webowner'} || $u->{'userextra'}) && defined($quota)) {
+	if (($u->{'webowner'} || $u->{'extra'}) && defined($quota)) {
 		# Website owners, virtual database and web users have no real quota
-		push(@cols, $u->{'userextra'} eq 'webuser' ?
+		push(@cols, $u->{'type'} eq 'web' ?
 			$text{'users_na'} : $text{'users_same'}, "");
 		}
 	elsif (defined($quota)) {
@@ -5938,14 +5911,14 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		}
 	local ($shell) = grep { $_->{'shell'} eq $u->{'shell'} } @ashells;
 	my $udbs = scalar(@{$u->{'dbs'}}) || $u->{'domainowner'};
-	push(@cols, $u->{'userextra'} eq 'database' ? &$login_access_label('db') :
-		    $u->{'userextra'} eq 'webuser' ? &$login_access_label('web') :
+	push(@cols, ($u->{'extra'} && $u->{'type'} eq 'db') ? &$login_access_label('db') :
+		    ($u->{'extra'} && $u->{'type'} eq 'web') ? &$login_access_label('web') :
 		    !$u->{'shell'} ? &$login_access_label($udbs ? 'db' : undef, 'mail') :
 		    !$shell ? &text('users_shell', "<tt>$u->{'shell'}</tt>") :
 	            $shell->{'id'} eq 'ftp' && !$u->{'email'} ?
 			&$login_access_label($udbs ? 'db' : undef, 'ftp') :
 		    	(&$login_access_label(
-				$u->{'userextra'} eq 'webuser' ? 'web' :
+				($u->{'extra'} && $u->{'type'} eq 'web') ? 'web' :
 				$udbs ? 'db' : undef,
 				$shell->{'id'} eq 'nologin' ? ($u->{'email'} ? 'mail' : undef) :
 				$shell->{'id'} eq 'ftp' ? ($u->{'email'} ? 'mail' : undef, 'ftp') :
@@ -6264,6 +6237,12 @@ if (-d "$extra_admins_dir/$d->{'id'}") {
 	&execute_command(
 	    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}").
 	    " && ".&make_tar_command("cf", $file."_admins", "."));
+	}
+if (-d "$extra_users_dir/$d->{'id'}") {
+	# Extra users details
+	&execute_command(
+	    "cd ".quotemeta("$extra_users_dir/$d->{'id'}").
+	    " && ".&make_tar_command("cf", $file."_users", "."));
 	}
 if ($config{'bw_active'}) {
 	# Bandwidth logs
@@ -7163,8 +7142,10 @@ if (!$allopts->{'fix'}) {
 		}
 	if (-r $file."_admins") {
 		# Also restore extra admins
-		&execute_command(
-			"rm -rf ".quotemeta("$extra_admins_dir/$d->{'id'}"));
+		if ($d->{'id'}) {
+			&execute_command(
+				"rm -rf ".quotemeta("$extra_admins_dir/$d->{'id'}"));
+			}
 		if (!-d $extra_admins_dir) {
 			&make_dir($extra_admins_dir, 755);
 			}
@@ -7172,6 +7153,20 @@ if (!$allopts->{'fix'}) {
 		&execute_command(
 		    "cd ".quotemeta("$extra_admins_dir/$d->{'id'}")." && ".
 		    &make_tar_command("xf", $file."_admins", "."));
+		}
+	if (-r $file."_users") {
+		# Also restore extra users
+		if ($d->{'id'}) {
+			&execute_command(
+				"rm -rf ".quotemeta("$extra_users_dir/$d->{'id'}"));
+			}
+		if (!-d $extra_users_dir) {
+			&make_dir($extra_users_dir, 0700);
+			}
+		&make_dir("$extra_users_dir/$d->{'id'}", 0700);
+		&execute_command(
+		    "cd ".quotemeta("$extra_users_dir/$d->{'id'}")." && ".
+		    &make_tar_command("xf", $file."_users", "."));
 		}
 	if ($config{'bw_active'} && -r $file."_bw" &&
 	    !-r "$bandwidth_dir/$d->{'id'}") {

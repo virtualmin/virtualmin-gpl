@@ -19,9 +19,9 @@ else {
 # User to edit or delete
 my $full_dbuser = lc("$in{'dbuser'}"."@".$d->{'dom'});
 if (!$in{'new'}) {
-        my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
         my $olduser_name = $in{'olduser'};
-        ($user) = grep { $_->{'user'} eq $olduser_name } @dbusers;
+        my @dbuser = &list_extra_db_users($d, $olduser_name);
+        $user = $dbuser[0];
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
         my %olduser = %{$user};
         # If renaming user, check if new name is not already used
@@ -34,11 +34,9 @@ if (!$in{'new'}) {
                 # Delete database user
                 my ($err, $dts) = &delete_databases_user($d, $olduser_name);
                 &error($err) if ($err);
-                # Delete user from domain config
-                foreach my $dt (@$dts) {
-                        &update_domain($d, "${dt}_users", $olduser_name);
-                        }
-	        }
+                # Delete extra database user
+                &delete_extra_user($d, $user);
+                }
         else {
                 # Update user
                 $user->{'user'} = $full_dbuser;
@@ -54,21 +52,26 @@ if (!$in{'new'}) {
                 foreach my $db (split(/\r?\n/, $in{'dbs'})) {
                         my ($type, $name) = split(/_/, $db, 2);
                         push(@dbs, { 'type' => $type,
-                                'name' => $name });
-                }
+                                     'name' => $name });
+                        $user->{'db_'.$type} = undef
+                        	if (!$dbreset{$type}++);
+                        $user->{'db_'.$type} .=
+                                $user->{'db_'.$type} ? " $name" : $name;
+                        }
+
+                # Update database user and databases
                 $user->{'dbs'} = \@dbs;
-                &update_domain($d, "$olduser{'type'}_users", $olduser_name);
-                &update_domain($d, "$user->{'type'}_users",
-                        $user->{'user'},
-                        { pass => $user->{'pass'},
-                          dbs => $user->{'dbs'} });
                 &modify_database_user($user, \%olduser, $d);
+
+                delete($user->{'dbs'});
+                &update_extra_user($d, $user, \%olduser);
                 }
         }
 else {
-	# Create initial user
-        $user = &create_initial_user($d);
+        # Create initial user
         $user->{'user'} = $full_dbuser;
+        $user->{'extra'} = 1;
+        $user->{'type'} = 'db';
         my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
         my ($user_already) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
         !$user_already || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
@@ -83,25 +86,19 @@ else {
                 my ($type, $name) = split(/_/, $db, 2);
                 push(@dbs, { 'type' => $type,
                              'name' => $name });
+                $user->{'db_'.$type} .=
+                        $user->{'db_'.$type} ? " $name" : $name;
                 }
         $user->{'dbs'} = \@dbs;
 
         # Create database user
-        my ($err, $dts) = &create_databases_user($d, $user);
+        my $err = &create_databases_user($d, $user);
         &error($err) if ($err);
-        # Add user to domain config
-        foreach my $dt (@$dts) {
-                &update_domain($d, "${dt}_users",
-                        $user->{'user'},
-                        { pass => $user->{'pass'},
-                          dbs => $user->{'dbs'} });
-                }
-	}
-
-# Save domain
-&lock_domain($d);
-&save_domain($d);
-unlock_domain($d);
+        
+        # Add extra database user
+        delete($user->{'dbs'});
+        &update_extra_user($d, $user);
+        }
 
 # Log
 &webmin_log($in{'new'} ? "create" : "modify", "user",

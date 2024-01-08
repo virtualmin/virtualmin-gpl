@@ -720,14 +720,12 @@ foreach $db (@dbs) {
 	}
 
 # Restoring virtual PostgreSQL users 
-my @dbusers_virt = grep { $_->{'userextra'} eq 'database' }
-	&list_domain_users($d, 1, 1, 1, 1, 1);
+my @dbusers_virt = &list_extra_db_users($d);
 if (@dbusers_virt) {
 	&$first_print($text{'restore_postgresudummy'});
 	&$indent_print();
 	foreach my $dbuser_virt (@dbusers_virt) {
 		&$first_print(&text('restore_mysqludummy2', $dbuser_virt->{'user'}));
-		$dbuser_virt->{'dbs'} = $dbuser_virt->{'data'}->{'dbs'};
 		my $err = &create_databases_user($d, $dbuser_virt, 'postgres');
 		if ($err) {
 			&$second_print(&text('restore_emysqluimport', $err));
