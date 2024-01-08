@@ -198,7 +198,7 @@ if ($ok > 0 && !$sinfo) {
 		print &text('scripts_passonly', "<tt>$spass</tt>"),"<p>\n";
 		}
 	}
-if ($ok && $script->{'site'}) {
+if ($ok && $script->{'site'} && $ok >= 0) {
 	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
 	}
 &$outdent_print();
@@ -213,6 +213,9 @@ if ($ok) {
 	if ($ok < 0) {
 		&$indent_print();
 		&$first_print($text{'scripts_epartialmanual'}." ".&get_script_link($d, $opts, 1));
+		if ($ok && $script->{'site'}) {
+			print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
+			}
 		&$outdent_print();
 		}
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
