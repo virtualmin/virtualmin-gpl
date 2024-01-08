@@ -185,9 +185,6 @@ if (&indexof("php", @{$script->{'uses'}}) >= 0) {
 				     $domuser, $dompass);
 &$indent_print();
 print $msg,"<p>\n";
-if ($ok && $script->{'site'}) {
-	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
-	}
 if ($ok > 0 && !$sinfo) {
 	# Show login details
 	if ($suser && $spass) {
@@ -201,6 +198,9 @@ if ($ok > 0 && !$sinfo) {
 		print &text('scripts_passonly', "<tt>$spass</tt>"),"<p>\n";
 		}
 	}
+if ($ok && $script->{'site'} && $ok >= 0) {
+	print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
+	}
 &$outdent_print();
 
 # Re-enable script PHP timeout
@@ -213,6 +213,9 @@ if ($ok) {
 	if ($ok < 0) {
 		&$indent_print();
 		&$first_print($text{'scripts_epartialmanual'}." ".&get_script_link($d, $opts, 1));
+		if ($ok && $script->{'site'}) {
+			print &script_link($script->{'site'}, 'scripts_sitelink'),"<p>\n";
+			}
 		&$outdent_print();
 		}
 	&$second_print($ok < 0 ? $text{'scripts_epartial'}
