@@ -820,7 +820,7 @@ if ($extramods{'syslog'} && $d->{'webmin'}) {
 			}
 		# Add FTP logs
 		if ($sd->{'ftp'}) {
-			local $flog = &get_proftpd_log($sd->{'ip'});
+			local $flog = &get_proftpd_log($sd);
 			if ($flog && !$done{$flog}++) {
 				push(@extras, $flog." ".&text('webmin_flog',
 							     $sd->{'dom'}))

@@ -220,7 +220,7 @@ if ($config{'ftp'}) {
 	&foreign_require("proftpd");
 	my $conf = &proftpd::get_config();
 	if ($perip) {
-		my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+		my ($virt, $vconf) = &get_proftpd_virtual($d);
 		if ($virt) {
 			my $cfile = &proftpd::find_directive(
 					"TLSRSACertificateFile", $vconf);

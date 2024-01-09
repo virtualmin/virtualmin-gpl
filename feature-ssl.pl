@@ -2738,7 +2738,7 @@ sub sync_proftpd_ssl_cert
 my ($d, $enable) = @_;
 &foreign_require("proftpd");
 &proftpd::lock_proftpd_files();
-my ($virt, $vconf, $conf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf) = &get_proftpd_virtual($d);
 return 0 if (!$virt);
 if ($enable) {
 	# Make proftpd virtualhost use domain's SSL cert files

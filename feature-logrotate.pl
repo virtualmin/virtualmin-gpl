@@ -661,7 +661,7 @@ my $alog = &get_website_log($d, 0);
 my $elog = &get_website_log($d, 1);
 my @logs = ( $alog, $elog );
 if ($d->{'ftp'}) {
-	push(@logs, &get_proftpd_log($d->{'ip'}));
+	push(@logs, &get_proftpd_log($d));
 	}
 push(@logs, &get_domain_template_logs($d));
 push(@logs, &get_apache_template_log($d, 0));

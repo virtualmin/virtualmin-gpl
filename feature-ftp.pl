@@ -1,7 +1,5 @@
 # Functions for managing a virtual FTP server
 
-$feature_depends{'ftp'} = [ 'dir' ];
-
 sub require_proftpd
 {
 return if ($require_proftpd++);
@@ -41,10 +39,7 @@ my $conf = &proftpd::get_config();
 my $l = $conf->[@$conf - 1];
 my $addfile = $proftpd::config{'add_file'} || $l->{'file'};
 my $lref = &read_file_lines($addfile);
-my @ips = ( $d->{'ip'} );
-if ($d->{'virt6'}) {
-	push(@ips, $d->{'ip6'});
-	}
+my @ips = &get_proftpd_virtualhost_ips($d);
 my @lines = ( "<VirtualHost ".join(" ", @ips).">" );
 push(@lines, @dirs);
 push(@lines, "</VirtualHost>");
@@ -81,7 +76,7 @@ my ($d) = @_;
 &require_proftpd();
 &$first_print($text{'delete_proftpd'});
 &obtain_lock_ftp($d);
-my ($virt, $vconf, $conf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf) = &get_proftpd_virtual($d);
 if ($virt) {
 	my $lref = &read_file_lines($virt->{'file'});
 	splice(@$lref, $virt->{'line'}, $virt->{'eline'} - $virt->{'line'} + 1);
@@ -105,8 +100,8 @@ sub clone_ftp
 my ($d, $oldd) = @_;
 &$first_print($text{'clone_ftp'});
 &require_proftpd();
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
-my ($ovirt, $ovconf) = &get_proftpd_virtual($oldd->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d);
+my ($ovirt, $ovconf) = &get_proftpd_virtual($oldd);
 if (!$ovirt) {
 	&$second_print($text{'clone_ftpold'});
 	return 0;
@@ -126,7 +121,7 @@ foreach my $l (@lines) {
 	}
 splice(@$lref, $virt->{'line'}+1, $virt->{'eline'}-$virt->{'line'}-1, @lines);
 &flush_file_lines($virt->{'file'});
-($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d);
 
 # Fix server name
 my $sname = &proftpd::find_directive_struct("ServerName", $vconf);
@@ -157,19 +152,22 @@ if ($d->{'dom'} eq $oldd->{'dom'} &&
 
 &obtain_lock_ftp($d);
 &require_proftpd();
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($oldd->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($oldd);
 if (!$virt) {
 	&release_lock_ftp($d);
 	return 0;
 	}
 if ($d->{'dom'} ne $oldd->{'dom'}) {
-	# Update domain name in ProFTPd virtual server
+	# Update domain name in ProFTPd servername or alias
 	&$first_print($text{'save_proftpd2'});
 	my $sname = &proftpd::find_directive_struct("ServerName", $vconf);
 	if ($sname) {
 		&proftpd::save_directive(
 			"ServerName", [ $d->{'dom'} ], $vconf, $conf);
 		}
+	my @sa = map { s/\Q$oldd->{'dom'}\E/$d->{'dom'}/g; $_ }
+			&apache::find_directive("ServerAlias", $vconf);
+	&proftpd::save_directive("ServerAlias", \@sa, $vconf, $conf);
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
@@ -182,14 +180,12 @@ if ($d->{'home'} ne $oldd->{'home'} && $anon) {
 	$rv++;
 	&$second_print($text{'setup_done'});
 	}
-if ($d->{'ip'} ne $oldd->{'ip'} || $d->{'ip6'} ne $oldd->{'ip6'}) {
-	# Update IP address in ProFTPd virtual server
+if ($d->{'ip'} ne $oldd->{'ip'} || $d->{'ip6'} ne $oldd->{'ip6'} ||
+    $d->{'dom'} ne $oldd->{'dom'}) {
+	# Update IP address in ProFTPd virtualhost
 	&$first_print($text{'save_proftpd'});
 	my $lref = &read_file_lines($virt->{'file'});
-	my @ips = ( $d->{'ip'} );
-	if ($d->{'virt6'}) {
-		push(@ips, $d->{'ip6'});
-		}
+	my @ips = &get_proftpd_virtualhost_ips($d);
 	$lref->[$virt->{'line'}] = "<VirtualHost ".join(" ", @ips).">";
 	&flush_file_lines();
 	$rv++;
@@ -205,7 +201,7 @@ return $rv;
 sub validate_ftp
 {
 my ($d) = @_;
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d);
 return &text('validate_eftp', $d->{'ip'}) if (!$virt);
 return undef;
 }
@@ -219,7 +215,7 @@ my ($d) = @_;
 &obtain_lock_ftp($d);
 &require_proftpd();
 my $ok;
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d);
 if ($anon) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
 	local ($login) = grep { $_->{'words'}->[0] eq "LOGIN" } @limit;
@@ -249,7 +245,7 @@ my ($d) = @_;
 &$first_print($text{'enable_proftpd'});
 &obtain_lock_ftp($d);
 &require_proftpd();
-my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf, $conf, $anon, $aconf) = &get_proftpd_virtual($d);
 my $ok;
 if ($virt) {
 	local @limit = &proftpd::find_directive_struct("Limit", $aconf);
@@ -329,16 +325,23 @@ if (lc($st) ne "inetd") {
 	}
 }
 
-# get_proftpd_virtual(ip)
+# get_proftpd_virtual(ip|&domain)
 # Returns the list of configuration directives and the directive for the
 # virtual server itself for some domain
 sub get_proftpd_virtual
 {
 my ($ip) = @_;
+my @match;
+if (ref($ip)) {
+	@match = ( $ip->{'ip'}, $ip->{'dom'} );
+	}
+else {
+	@match = ( $ip );
+	}
 &require_proftpd();
 my $conf = &proftpd::get_config();
 foreach my $v (&proftpd::find_directive_struct("VirtualHost", $conf)) {
-	if ($v->{'words'}->[0] eq $ip) {
+	if (&indexof($v->{'words'}->[0], @match) >= 0) {
 		# Found it! Look for the anonymous block
 		my @rv = ($v, $v->{'members'}, $conf);
 		my $a = &proftpd::find_directive_struct(
@@ -358,7 +361,7 @@ sub check_ftp_clash
 {
 local ($d, $field) = @_;
 if (!$field || $field eq 'ip') {
-	local ($cvirt, $cconf) = &get_proftpd_virtual($d->{'ip'});
+	local ($cvirt, $cconf) = &get_proftpd_virtual($d);
 	return $cvirt ? 1 : 0;
 	}
 return 0;
@@ -370,7 +373,7 @@ sub backup_ftp
 {
 my ($d, $file) = @_;
 &$first_print($text{'backup_proftpdcp'});
-my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf) = &get_proftpd_virtual($d);
 if ($virt) {
 	my $lref = &read_file_lines($virt->{'file'});
 	&open_tempfile_as_domain_user($d, FILE, ">$file");
@@ -395,7 +398,7 @@ sub restore_ftp
 my ($d, $file, $opts, $allopts, $homefmt, $oldd) = @_;
 &$first_print($text{'restore_proftpdcp'});
 &obtain_lock_ftp($d);
-my ($virt, $vconf) = &get_proftpd_virtual($d->{'ip'});
+my ($virt, $vconf) = &get_proftpd_virtual($d);
 my $rv;
 if ($virt) {
 	my $srclref = &read_file_lines($file);
@@ -422,19 +425,19 @@ else {
 return $rv;
 }
 
-# get_proftpd_log([ip])
+# get_proftpd_log([&domain])
 # Given a virtual server IP, returns the path to its log file. If no IP is
 # give, returns the global log file path.
 sub get_proftpd_log
 {
-my ($ip) = @_;
+my ($d) = @_;
 if (!&foreign_check("proftpd")) {
 	return undef;
 	}
 &require_proftpd();
-if ($ip) {
-	# Find by IP
-	local ($virt, $vconf) = &get_proftpd_virtual($ip);
+if ($d) {
+	# Find by domain
+	local ($virt, $vconf) = &get_proftpd_virtual($d);
 	if ($virt) {
 		return &proftpd::find_directive("ExtendedLog", $vconf) ||
 		       &proftpd::find_directive("TransferLog", $vconf);
@@ -459,7 +462,7 @@ return undef;
 sub bandwidth_ftp
 {
 my ($d, $start, $bwinfo) = @_;
-my $log = &get_proftpd_log($d->{'ip'});
+my $log = &get_proftpd_log($d);
 if ($log) {
 	return &count_ftp_bandwidth($log, $start, $bwinfo, undef, "ftp");
 	}
@@ -578,7 +581,7 @@ sub links_ftp
 {
 my ($d) = @_;
 my @rv;
-my $lf = &get_proftpd_log($d->{'ip'});
+my $lf = &get_proftpd_log($d);
 if ($lf) {
 	local $param = &master_admin() ? "file"
 				       : "extra";
@@ -715,6 +718,26 @@ sub supports_namebased_ftp
 &require_proftpd();
 $proftpd::site{'version'} ||= &proftpd::get_proftpd_version();
 return $proftpd::site{'version'} >= 1.36;
+}
+
+# get_proftpd_virtualhost_ips(&domain)
+# Returns the IPs or hostnames for use in a <VirtualHost> block
+sub get_proftpd_virtualhost_ips
+{
+my ($d) = @_;
+my @ips;
+if ($d->{'virt'}) {
+	# Accept all connections on an IP
+	@ips = ( $d->{'ip'} );
+	if ($d->{'virt6'}) {
+		push(@ips, $d->{'ip6'});
+		}
+	}
+else {
+	# Match by hostname
+	@ips = ( $d->{'dom'} );
+	}
+return @ips;
 }
 
 $done_feature_script{'ftp'} = 1;

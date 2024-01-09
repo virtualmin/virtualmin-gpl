@@ -71,7 +71,7 @@ if ($logtype eq "alog" || $logtype eq "elog") {
 	}
 elsif ($logtype eq "flog") {
 	$d->{'ftp'} || &usage("Virtual server does not have FTP enabled");
-	$logfile = &get_proftpd_log($d->{'ip'});
+	$logfile = &get_proftpd_log($d);
 	}
 $logfile || &usage("Log file not found!");
 
