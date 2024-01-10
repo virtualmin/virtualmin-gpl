@@ -5803,8 +5803,8 @@ foreach $u (sort { $b->{'domainowner'} <=> $a->{'domainowner'} ||
 		&ui_text_color($pop3.&vui_inline_label('users_disabled_label', undef, 'disabled'), 'danger');
 	$pop3 = &html_escape($pop3);
 	local @cols;
-	local $filesuffix = $u->{'extra'} ? "_$u->{'type'}" : "";
-	push(@cols, "<a href='edit_user$filesuffix.cgi?dom=$did&amp;".
+	local $filetype = $u->{'extra'} ? "&type=@{[&urlize($u->{'type'})]}" : "";
+	push(@cols, "<a href='edit_user.cgi?dom=$did$filetype&amp;".
 	      "user=".&urlize($u->{'user'})."&amp;unix=$u->{'unix'}'>".
 	      ($u->{'domainowner'} ? "<b>$pop3</b>".&vui_inline_label('users_owner_label') :
 	       $u->{'webowner'} &&

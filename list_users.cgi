@@ -37,25 +37,25 @@ if ($mleft != 0) {
 			&list_available_shells($d);
 	# Only available for master admin
 	if (&master_admin() && @ssh_shells) {
-		push(@links, [ "edit_user_ssh.cgi?new=1&dom=$in{'dom'}",
+		push(@links, [ "edit_user.cgi?new=1&type=ssh&dom=$in{'dom'}",
 					$text{'users_add_ssh'} ]);
 		}
 	my $webinit = &create_initial_user($d, undef, 1);
 	if ($webinit->{'webowner'} && !$d->{'aliasmail'}) {
-		push(@links, [ "edit_user_ftp.cgi?new=1&dom=$in{'dom'}",
+		push(@links, [ "edit_user.cgi?new=1&type=ftp&dom=$in{'dom'}",
 				$text{'users_add_ftp'} ]);
 		}
 	if ($d->{'mail'}) {
-		push(@links, [ "edit_user_mail.cgi?new=1&dom=$in{'dom'}",
+		push(@links, [ "edit_user.cgi?new=1&type=mail&dom=$in{'dom'}",
 			$text{'users_add_mail'} ]);
 		}
 	if ($d->{'mysql'} || $d->{'postgres'}) {
-		push(@links, [ "edit_user_db.cgi?new=1&dom=$in{'dom'}",
+		push(@links, [ "edit_user.cgi?new=1&type=db&dom=$in{'dom'}",
 			$text{'users_add_db'} ]);
 		}
 	if (&domain_has_website($d) && !$d->{'aliasmail'}) {
 		if (&indexof('virtualmin-htpasswd', @plugins) >= 0) {
-			push(@links, [ "edit_user_web.cgi?new=1&dom=$in{'dom'}",
+			push(@links, [ "edit_user.cgi?new=1&type=web&dom=$in{'dom'}",
 				$text{'users_add_web'} ]);
 			}
 		}
