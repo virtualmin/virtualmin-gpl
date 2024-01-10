@@ -42,6 +42,8 @@ if ($virtualmin_pro) {
 		    'desc' => $text{'cloud_drivedesc'},
 		    'longdesc' => \&cloud_drive_longdesc });
 	}
+# Sort based on hash desc key
+@rv = sort { $a->{'desc'} cmp $b->{'desc'} } @rv;
 return @rv;
 }
 
