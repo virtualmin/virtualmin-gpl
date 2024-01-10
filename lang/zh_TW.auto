@@ -4286,7 +4286,7 @@ cloud_google_oauth=來自Google的OAuth2代碼
 cloud_google_token=來自Google的OAuth2令牌
 cloud_s3_longdesc=此頁面上的憑證可以在 <a href=https://console.aws.amazon.com/ target=_blank>AWS 控制台</a> 上您賬戶的安全憑證頁面上找到。
 cloud_google_longdesc=當您在<a href=https://console.cloud.google.com/apis/credentials target=_blank>Google API控制台</a>頁上向項目授予API訪問權限時，此頁面上的設置將由Google提供。 ，在<b>API和身份驗證</b>-> <b>憑據</b>下。
-cloud_dropbox_longdesc=如果您尚未建立帳戶，則必須先在其網站上<a href=http://www.virtualmin.com/dropbox-referral target=_blank>創建帳戶</a>，然後才能備份到Dropbox。
+cloud_dropbox_longdesc=如果您尚未建立帳戶，則必須先在其網站上<a href=https://www.dropbox.com/register target=_blank>創建帳戶</a>，然後才能備份到Dropbox。
 cloud_bb_longdesc=在備份到Backblaze之前，必須首先<a href=https://backblaze.com/ target=_blank>創建帳戶</a>，然後在<b>B2 Cloud Storage</b>上啟用<b>b>我的設置</b>頁面。然後，您需要在<b>應用程序密鑰</b>頁面上生成具有所有功能的應用程序密鑰。
 cloud_az_longdesc=在備份到 Azure Blob 存儲之前，您必須先<a href=https://azure.microsoft.com/en-us/free/ target=_blank>創建一個帳戶</a>，安裝<a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> 命令，然後通過運行 <tt>az login --use-device-code<登錄到您的Azure 帳戶/tt>。
 cloud_drive_longdesc=當您在<a href=https://console.cloud.google.com/apis/credentials target=_blank>Google API 主機</a>頁面上向您的專案授予API 存取權限時，Google 會提供此頁面上的設置，在 <b>API 和身份驗證</b>下 -> <b>憑證</b>。您必須建立一個 <b>OAuth 用戶端 ID</b> 憑證，並將<b>授權重定向 URI</b> 設為 <tt>$1</tt> 。建立後，可以在此輸入<b>客戶端 ID</b> 和<b>客戶端密碼</b>。

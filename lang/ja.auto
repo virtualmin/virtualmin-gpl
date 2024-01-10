@@ -7505,7 +7505,7 @@ cloud_google_oauth=GoogleのOAuth2コード
 cloud_google_token=GoogleのOAuth2トークン
 cloud_s3_longdesc=このページのクレデンシャルは、<a href=https://console.aws.amazon.com/ target=_blank>AWSコンソール</a>のアカウントの[セキュリティクレデンシャル]ページにあります。
 cloud_google_longdesc=このページの設定は、<a href=https://console.cloud.google.com/apis/credentials target=_blank>Google APIs Console</a>ページでプロジェクトへのAPIアクセスを許可したときにGoogleから提供されます、<b>APIと認証</b>-＆gt; <b>資格情報</b>。
-cloud_dropbox_longdesc=Dropboxにバックアップする前に、ウェブサイトでアカウントをまだ持っていない場合は、最初に<a href=http://www.virtualmin.com/dropbox-referral target=_blank>アカウントを作成</a>する必要があります。
+cloud_dropbox_longdesc=Dropboxにバックアップする前に、ウェブサイトでアカウントをまだ持っていない場合は、最初に<a href=https://www.dropbox.com/register target=_blank>アカウントを作成</a>する必要があります。
 cloud_bb_longdesc=Backblazeにバックアップする前に、<a href=https://backblaze.com/ target=_blank>アカウントを作成</a>してから、<で<b>B2 Cloud Storage</b>を有効にする必要がありますb>マイ設定</b>ページ。次に、[<b>アプリキー</b>]ページですべての機能を備えたアプリケーションキーを生成する必要があります。
 cloud_az_longdesc=Azure Blob Storage にバックアップする前に、まず <a href=https://azure.microsoft.com/en-us/free/ target=_blank>アカウントを作成</a>し、<a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> コマンドにアクセスし、<tt>az login --use-device-code<を実行してAzure アカウントにログインします。 /tt>.
 cloud_drive_longdesc=このページの設定は、<a href=https://console.cloud.google.com/apis/credentials target=_blank>Google API コンソール</a> ページでプロジェクトに API アクセスを許可するときに Google によって提供されます。 、[<b>API と認証</b>] の下 -&gt; <b>認証情報</b>。 <b>承認されたリダイレクト URI</b> を <tt>$1</tt> に設定して、<b>OAuth クライアント ID</b> 認証情報を作成する必要があります。作成したら、<b>クライアント ID</b> と <b>クライアント シークレット</b> をここに入力できます。
