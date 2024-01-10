@@ -1114,7 +1114,7 @@ save_dns4=Dodawanie rekordów MX do domeny DNS ..
 save_dns5=Usuwanie rekordów MX z domeny DNS ..
 save_dns6=Zmienianie nazw rekordów DNS ..
 save_dns7=Aktualizowanie wtórnych rekordów MX ..
-save_dns8=Przenoszenie rekordów DNS poza domenę nadrzędn� ..
+save_dns8=Przenoszenie rekordów DNS poza domenę nadrzędn� ..
 save_dns9=Przenoszenie rekordów DNS do domeny nadrzędnej ..
 save_dns2_ezone=Nie znaleziono strefy DNS do zmiany nazwy!
 save_dns2_enewfile=Nie można odczytać nowego pliku strefy : $1
@@ -6461,11 +6461,11 @@ cloud_google_location=Lokalizacja nowych wiader
 cloud_google_oauth=Kod OAuth2 od Google
 cloud_google_token=Token OAuth2 od Google
 cloud_s3_longdesc=Dane logowania na tej stronie można znaleźć na stronie Poświadczenia bezpieczeństwa swojego konta w <a href=https://console.aws.amazon.com/ target=_blank>Konsoli AWS</a>.
-cloud_google_longdesc=Ustawienia na tej stronie są dostarczane przez Google, gdy udzielasz dostępu API do swojego projektu na stronie <a href=https://console.developers.google.com/apis/credentials target=_blank>Konsola interfejsów API Google</a>, w obszarze <b>Interfejsy API i uwierzytelnianie</b> -> <b>Poświadczenia</b>.
-cloud_dropbox_longdesc=Aby móc wykonać kopię zapasową w Dropbox, musisz najpierw <a href=http://www.virtualmin.com/dropbox-referral target=_blank>utworzyć konto</a> w ich witrynie, jeśli jeszcze go nie masz.
+cloud_google_longdesc=Ustawienia na tej stronie są dostarczane przez Google, gdy udzielasz dostępu API do swojego projektu na stronie <a href=https://console.cloud.google.com/apis/credentials target=_blank>Konsola interfejsów API Google</a>, w obszarze <b>Interfejsy API i uwierzytelnianie</b> -> <b>Poświadczenia</b>.
+cloud_dropbox_longdesc=Aby móc wykonać kopię zapasową w Dropbox, musisz najpierw <a href=https://www.dropbox.com/register target=_blank>utworzyć konto</a> w ich witrynie, jeśli jeszcze go nie masz.
 cloud_bb_longdesc=Aby móc tworzyć kopie zapasowe w Backblaze, musisz najpierw <a href=https://backblaze.com/ target=_blank>utworzyć konto</a>, a następnie włączyć <b>B2 Cloud Storage</b> na <b>strona Moje ustawienia</b>. Następnie należy wygenerować klucz aplikacji ze wszystkimi możliwościami na stronie <b>Klucze aplikacji</b>.
 cloud_az_longdesc=Przed utworzeniem kopii zapasowej w usłudze Azure Blob Storage należy najpierw <a href=https://azure.microsoft.com/en-us/free/ target=_blank>utworzyć konto</a>, zainstalować <a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> i zaloguj się do swojego konta Azure, uruchamiając polecenie <tt>az login --use-device-code< /tt>.
-cloud_drive_longdesc=Ustawienia na tej stronie są dostarczane przez Google po przyznaniu dostępu API do swojego projektu na stronie <a href=https://console.developers.google.com/apis/credentials target=_blank>Konsola API Google</a>, w obszarze <b>API i uwierzytelnianie</b> -&gt; <b>Poświadczenia</b>. Musisz utworzyć dane uwierzytelniające <b>Identyfikator klienta OAuth</b> z <b>URI autoryzowanego przekierowania</b> ustawionym na <tt>$1</tt>. Po utworzeniu można tutaj wprowadzić <b>identyfikator klienta</b> i <b>tajemnicę klienta</b>.
+cloud_drive_longdesc=Ustawienia na tej stronie są dostarczane przez Google po przyznaniu dostępu API do swojego projektu na stronie <a href=https://console.cloud.google.com/apis/credentials target=_blank>Konsola API Google</a>, w obszarze <b>API i uwierzytelnianie</b> -&gt; <b>Poświadczenia</b>. Musisz utworzyć dane uwierzytelniające <b>Identyfikator klienta OAuth</b> z <b>URI autoryzowanego przekierowania</b> ustawionym na <tt>$1</tt>. Po utworzeniu można tutaj wprowadzić <b>identyfikator klienta</b> i <b>tajemnicę klienta</b>.
 cloud_openoauth=Rozpocznij rejestrację w OAuth2
 cloud_newoauth=Kod OAuth2 od Google:
 cloud_newoauth_dropbox=Kod OAuth2 z Dropbox:

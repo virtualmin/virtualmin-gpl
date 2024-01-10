@@ -4285,11 +4285,11 @@ cloud_google_location=新桶的位置
 cloud_google_oauth=来自Google的OAuth2代码
 cloud_google_token=来自Google的OAuth2令牌
 cloud_s3_longdesc=此页面上的凭证可以在 <a href=https://console.aws.amazon.com/ target=_blank>AWS 控制台</a> 上您账户的安全凭证页面上找到。
-cloud_google_longdesc=当您在<a href=https://console.developers.google.com/apis/credentials target=_blank>Google API控制台</a>页上向项目授予API访问权限时，此页面上的设置将由Google提供。 ，在<b>API和身份验证</b>-> <b>凭据</b>下。
-cloud_dropbox_longdesc=如果您尚未建立帐户，则必须先在其网站上<a href=http://www.virtualmin.com/dropbox-referral target=_blank>创建帐户</a>，然后才能备份到Dropbox。
+cloud_google_longdesc=当您在<a href=https://console.cloud.google.com/apis/credentials target=_blank>Google API控制台</a>页上向项目授予API访问权限时，此页面上的设置将由Google提供。 ，在<b>API和身份验证</b>-> <b>凭据</b>下。
+cloud_dropbox_longdesc=如果您尚未建立帐户，则必须先在其网站上<a href=https://www.dropbox.com/register target=_blank>创建帐户</a>，然后才能备份到Dropbox。
 cloud_bb_longdesc=在备份到Backblaze之前，必须首先<a href=https://backblaze.com/ target=_blank>创建帐户</a>，然后在<b>B2 Cloud Storage</b>上启用<b>b>我的设置</b>页面。然后，您需要在<b>应用程序密钥</b>页面上生成具有所有功能的应用程序密钥。
 cloud_az_longdesc=在备份到 Azure Blob 存储之前，您必须先<a href=https://azure.microsoft.com/en-us/free/ target=_blank>创建一个帐户</a>，安装<a href=https://learn.microsoft.com/en-us/cli/azure/ target=_blank>az</a> 命令，然后通过运行 <tt>az login --use-device-code<登录到您的Azure 帐户/tt>。
-cloud_drive_longdesc=当您在 <a href=https://console.developers.google.com/apis/credentials target=_blank>Google API 控制台</a>页面上向您的项目授予 API 访问权限时，Google 会提供此页面上的设置，在 <b>API 和身份验证</b>下 -> <b>凭据</b>。您必须创建一个 <b>OAuth 客户端 ID</b> 凭据，并将<b>授权重定向 URI</b> 设置为 <tt>$1</tt> 。创建后，可以在此处输入<b>客户端 ID</b> 和<b>客户端密码</b>。
+cloud_drive_longdesc=当您在 <a href=https://console.cloud.google.com/apis/credentials target=_blank>Google API 控制台</a>页面上向您的项目授予 API 访问权限时，Google 会提供此页面上的设置，在 <b>API 和身份验证</b>下 -> <b>凭据</b>。您必须创建一个 <b>OAuth 客户端 ID</b> 凭据，并将<b>授权重定向 URI</b> 设置为 <tt>$1</tt> 。创建后，可以在此处输入<b>客户端 ID</b> 和<b>客户端密码</b>。
 cloud_openoauth=开始OAuth2注册
 cloud_newoauth=来自Google的OAuth2代码：
 cloud_newoauth_dropbox=Dropbox的OAuth2代码：
