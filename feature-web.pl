@@ -5485,20 +5485,16 @@ my ($user, $olduser, $d) = @_;
 $user->{'pass_crypt'} = $user->{'pass'};
 
 # Validate plugins
-foreach my $f (&list_mail_plugins()) {
-        if ($f eq "virtualmin-htpasswd") {
-                $err = &plugin_call($f, "mailbox_validate", $user, $olduser,
-                                    \%in, $in{'new'}, $d);
-                &error($err) if ($err);
-                }
-        }
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_validate")) {
+	$err = &plugin_call("virtualmin-htpasswd", "mailbox_validate", $user, $olduser,
+				\%in, $in{'new'}, $d);
+	&error($err) if ($err);
+	}
 
 # Run plugin save functions
-foreach $f (&list_mail_plugins()) {
-        if ($f eq "virtualmin-htpasswd") {
-                $dp = &plugin_call($f, "mailbox_save", $user, $olduser,
-                                   \%in, $in{'new'}, $d);
-                }
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_save")) {
+	$dp = &plugin_call("virtualmin-htpasswd", "mailbox_save", $user, $olduser,
+				\%in, $in{'new'}, $d);
         }
 # Add user to domain config
 &update_extra_user($d, $user, $olduser);
@@ -5509,10 +5505,8 @@ foreach $f (&list_mail_plugins()) {
 sub delete_webserver_user
 {
 my ($user, $d) = @_;
-foreach my $f (&list_mail_plugins()) {
-        if ($f eq "virtualmin-htpasswd") {
-                &plugin_call($f, "mailbox_delete", $user, $d);
-                }
+if (&plugin_defined("virtualmin-htpasswd", "mailbox_delete")) {
+	&plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
         }
 # Delete user from domain config
 &delete_extra_user($d, $user);
