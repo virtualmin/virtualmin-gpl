@@ -61,12 +61,14 @@ form_content2=Ja, med standard landingssidemal
 form_content0=Ja, med innholdet nedenfor
 
 setup_edomain5=Du er allerede vert for dette automatisk opprettede $1 vertsstandarddomenet. Du kan ikke opprette et nytt domene med samme navn, med mindre vertsstandarddomene først er deaktivert i Virtualmin Configuration SSL-innstillingssiden
+setup_edomainstar=Et domenenavn kan ikke begynne med *. For å opprette et jokertegn-domene må du først opprette det uten * og deretter gå til siden <b>Webkonfigurasjon for nettstedalternativer</b>.
 setup_edomainip=Et domenenavn kan ikke være en IP-adresse
 setup_eremoteuser=Brukernavnet kan ikke være det samme som den nåværende Virtualmin-innloggingen
 setup_edepunixdir=En virtuell server på toppnivå med retning i hjemmet, må ha en Unix-bruker
 setup_edepdnssub2=DNS kan ikke deaktiveres mens underdomenet fremdeles har aktivert
 setup_edeppostgres=En sub-server kan ikke ha PostgreSQL aktivert med mindre overordnede serveren gjør det
 setup_edeppostgressub=En topptjener må ha PostgreSQL aktivert hvis noen under-servere gjør det
+setup_edepftpdir=Virtuell FTP kan ikke aktiveres med mindre serveren har en hjemmekatalog
 setup_epassvalid=Ugyldig passord : $1 
 setup_emax=Din nåværende lisens lar deg opprette opptil <tt>$1</tt> toppnivå- og underservere kombinert. For muligheten til å lage flere toppnivå- eller undertjenere, bør du vurdere å oppgradere lisensen din ved å gå til siden <a target=_blank href='$2'>virtualmin.com / Min konto / Abonnementer</a>.
 setup_eslashpass=Passord som inneholder et tilbakeskritt støttes ikke av MySQL
@@ -234,6 +236,7 @@ newweb_esslproto=SSL-protokoller må være som SSLv3 eller TLSv1.1, eventuelt fo
 newweb_dovecot=Vil du konfigurere Dovecot til å bruke samme SSL-sertifikat?
 newweb_postfix=Vil du konfigurere Postfix til å bruke samme SSL-sertifikat?
 newweb_mysql=Konfigurere MySQL til å bruke samme SSL-sertifikat?
+newweb_proftpd=Kopiere per-IP SSL-sertifikater til ProFTPd?
 newweb_cert_key=Mal for privat nøkkelbane
 newweb_cert_cert=Mal for sertifikatbane
 newweb_cert_ca=Mal for CA-sertifikatbane
