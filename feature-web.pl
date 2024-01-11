@@ -5493,9 +5493,9 @@ if (&plugin_defined("virtualmin-htpasswd", "mailbox_validate")) {
 
 # Run plugin save functions
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_save")) {
-	$dp = &plugin_call("virtualmin-htpasswd", "mailbox_save", $user, $olduser,
+	&plugin_call("virtualmin-htpasswd", "mailbox_save", $user, $olduser,
 				\%in, $in{'new'}, $d);
-        }
+	}
 # Add user to domain config
 &update_extra_user($d, $user, $olduser);
 }
@@ -5507,7 +5507,7 @@ sub delete_webserver_user
 my ($user, $d) = @_;
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_delete")) {
 	&plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
-        }
+	}
 # Delete user from domain config
 &delete_extra_user($d, $user);
 }
