@@ -1063,11 +1063,8 @@ if (!$novirts) {
 	}
 
 # Push domain extra database users
-if ($includeextra) {
-	foreach (&list_extra_db_users($d)) {
-		push(@users, $_);
-		}
-	}
+push(@users, &list_extra_db_users($d))
+	if ($includeextra);
 
 if (!$nodbs && $d) {
 	# Add accessible databases
