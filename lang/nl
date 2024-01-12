@@ -330,7 +330,6 @@ setup_edomain=Ontbrekende of ongeldige domein naam - alleen letters, nummers en 
 setup_edomain2=Domein namen mogen niet beginnen of eindigen met een punt.
 setup_esubdomain=Ongeldige sub-domein naam - er zijn geen punten toegestaan
 setup_edomain4=U host dit domein al
-setup_edomainstar=Een domein naam kan niet beginnen met een ' * '. Om een wildcard domein aan te maken moet u deze eerst aanmaken zonder de ' * ' en ga dan naar de Server Configuratie -&gt; Website Opties.
 setup_eip=Ontbrekend of ongeldig IP adres
 setup_eip6=Ontbrekend of ongeldig IPv6 adres
 setup_evirtalloc=Kon geen virtueel IP adres toewijzen vanuit de reeks

@@ -337,7 +337,6 @@ setup_edomain2=Domenenavn kan ikke starte eller slutte med en .
 setup_esubdomain=Ugyldig navn på under-domene - du kan ikke bruke punktum i navnet
 setup_eforceunder=Du har bare lov til å opprette domener under $1
 setup_edomain4=Du er allerede vert for dette domenet
-setup_edomainstar=Et domenenavn kan ikke starte med *. For å opprette et jokertegn (wildcard) domene, må du først opprette det uten * og så gå til Tjenerkonfigurasjon -&gt; Innstillinger for nettsted
 setup_eip=Manglende eller ugyldig IP adresse
 setup_eip6=Manglende eller ugyldig IPv6 adresse
 setup_evirtalloc=Kunne ikke tildele virtuell IP-adresse fra utvalg
