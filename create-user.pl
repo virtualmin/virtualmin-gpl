@@ -339,7 +339,7 @@ if ($user->{'unix'}) {
 # Check for clash within this domain
 ($clash) = grep { $_->{'user'} eq $username &&
 		  $_->{'unix'} == $user->{'unix'} } @users;
-$clash && &error($text{'user_eclash2'});
+$clash && &usage($text{'user_eclash2'});
 
 if (!$user->{'noextra'}) {
 	# Check if any extras clash
@@ -370,11 +370,11 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 if ($db_only) {
 	my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
         my ($dbuser) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
-        !$dbuser || &error(&text('user_ealreadyexist', $user->{'user'}));
+        !$dbuser || &usage(&text('user_ealreadyexist', $user->{'user'}));
 	$user->{'pass'} = $pass;
 	# Create database user
         my $err = &create_databases_user($d, $user);
-        &error($err) if ($err);
+        &usage($err) if ($err);
         # Add user to domain list
 	$dbuser->{'user'} = $user->{'user'};
 	$dbuser->{'pass'} = $pass;
