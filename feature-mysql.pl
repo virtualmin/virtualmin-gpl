@@ -1125,6 +1125,16 @@ local @hosts = &get_mysql_allowed_hosts($d);
 my $mymod = &get_domain_mysql_module($d);
 local %info = ( 'hosts' => join(' ', @hosts),
 		'remote' => $mymod->{'config'}->{'host'} );
+foreach $db (@dbs) {
+	if (&foreign_defined($mymod, "get_character_set")) {
+		$info{'charset_'.$db} = &foreign_call(
+			$mymod, "get_character_set", $db);
+		}
+	if (&foreign_defined($mymod, "get_collation_order")) {
+		$info{'collation_'.$db} = &foreign_call(
+			$mymod, "get_collation_order", $db);
+		}
+	}
 &write_as_domain_user($d, sub { &write_file($file, \%info) });
 
 # Back them all up
@@ -1145,10 +1155,7 @@ foreach $db (@dbs) {
 		}
 
 	my $mymod = &require_dom_mysql($d);
-	my $cs;
-	if (&foreign_defined($mymod, "get_character_set")) {
-		$cs = &foreign_call($mymod, "get_character_set", $db);
-		}
+	my $cs = $info{'charset_'.$db};
 	my $err = &foreign_call(
 		$mymod, "backup_database", $db, $dbfile, 0, 1, undef,
 		$cs, undef, $tables, $d->{'user'},
