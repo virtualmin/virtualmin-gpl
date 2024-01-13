@@ -102,4 +102,24 @@ my ($user, $d) = @_;
 return "$extra_users_dir/$d->{'id'}/$user->{'type'}/$user->{'user'}.user";
 }
 
+# suppressible_extra_users_types()
+# Returns a list of all extra user types
+# that cannot coexist with Unix users
+sub suppressible_extra_users_types
+{
+return ('db', 'web');
+}
+
+# suppress_extra_user(&unix-user, &domain)
+# Remove records of extra user that
+# cannot coexist with Unix user
+sub suppress_extra_user
+{
+my ($unix_user, $d) = @_;
+foreach (&suppressible_extra_users_types()) {
+	my @extra_user = &list_extra_users($d, $_, $unix_user->{'user'});
+	&delete_extra_user($d, $extra_user[0]) if ($extra_user[0]);
+        }
+}
+
 1;

@@ -1115,31 +1115,6 @@ if (!$nodbs && $d) {
 				}
 			}
 		}
-	if ($includeextra) {
-		# If extra database users overlap with system users, which already
-		# handle databases, pop them off the list and remove extra db user
-		my (@extra_database_users) = grep { $_->{'extra'} && $_->{'type'} eq 'db' } @users;
-		if (@extra_database_users) {
-			my @other_users_with_dbs = map { $_->{'user'} } grep { 
-				$_->{'dbs'} && ref($_->{'dbs'}) eq 'ARRAY' &&
-				!$_->{'extra'}
-			} @users;
-			# Clear main array of redundant extra database users
-			if (@other_users_with_dbs) {
-				@users = grep { 
-					$_->{'type'} ne 'db' ||
-					&indexof($_->{'user'}, @other_users_with_dbs) < 0
-				} @users;
-				# Now remove a record of extra database user
-				# as it belongs to an actual user account
-				foreach my $extra_database_user (@extra_database_users) {
-					if (&indexof($extra_database_user->{'user'}, @other_users_with_dbs) != -1) {
-						&delete_extra_user($d, $extra_database_user);
-						}
-					}
-				}
-			}
-		}
 
 	# Add plugin databases
 	local @dbs = &domain_databases($d);
@@ -1148,35 +1123,11 @@ if (!$nodbs && $d) {
 		}
 	}
 
-if ($includeextra && &domain_has_website($d)) {
+if ($includeextra && &domain_has_website($d) &&
+    &indexof('virtualmin-htpasswd', @plugins) >= 0) {
 	# Include webserver users
-	push(@users, &list_extra_web_users($d))
-		if (&indexof('virtualmin-htpasswd', @plugins) >= 0);
-
-	# If extra webserver users overlap with system users, which already
-	# can access virtualmin-htpasswd module, pop them off the list and
-	# remove extra web user
-	my (@webserver_virts) = grep { $_->{'extra'} && $_->{'type'} eq 'web' } @users;
-	if (@webserver_virts) {
-		my @other_users_with_webs = map { $_->{'user'} } grep { 
-			!$_->{'extra'}
-		} @users;
-		# Clear main array of redundant extra webserver users
-		if (@other_users_with_webs) {
-			@users = grep { 
-				$_->{'type'} ne 'web' ||
-				&indexof($_->{'user'}, @other_users_with_webs) < 0
-			} @users;
-			# Now clear Virtualmin record of extra webusers users
-			# belonging to an actual user account
-			foreach my $webserver_virt (@webserver_virts) {
-				if (&indexof($webserver_virt->{'user'}, @other_users_with_webs) != -1) {
-					&delete_webserver_user($webserver_virt, $d);
-					}
-				}
-			}
-		}
-	}	
+	push(@users, &list_extra_web_users($d));
+	}
 
 # Add any secondary groups in the template
 local @sgroups = &allowed_secondary_groups($d);
@@ -1742,6 +1693,9 @@ if ($_[1] && $_[1]->{'mail'}) {
 if ($_[1]) {
 	&create_jailkit_passwd_file($_[1]);
 	}
+
+# Suppress incompatible extra users
+&suppress_extra_user($_[0], $_[1]);
 }
 
 # modify_user(&user, &old, &domain, [noaliases])
