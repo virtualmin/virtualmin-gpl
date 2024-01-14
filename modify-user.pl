@@ -521,17 +521,7 @@ if ($user->{'extra'}) {
                 	}
 
 		&modify_database_user($user, $olduser, $d);
-		my %dbuser = %{$user};
-		%dbuser = map { $_, $dbuser{$_} }
-			grep { $_ =~ /^(user|pass|plainpass|extra|type)$/ }
-				keys %dbuser;
-		$dbuser{'pass'} = $dbuser{'plainpass'};
-		foreach my $db (@{$user->{'dbs'}}) {
-			$dbuser{'db_'.$db->{'type'}} .=
-				$dbuser{'db_'.$db->{'type'}} ?
-					" $db->{'name'}" : $db->{'name'};
-			}
-		&update_extra_user($d, \%dbuser, $olduser);
+		&update_extra_user($d, $user, $olduser);
 		}
 	if ($user->{'type'} eq 'web') {
 		&usage($text{'user_ewebusersupp'});

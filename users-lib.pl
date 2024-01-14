@@ -149,7 +149,33 @@ if ($olduser->{'user'} && $user->{'user'} &&
     $olduser->{'user'} ne $user->{'user'}) {
         unlink(&extra_user_filename($olduser, $d));
 	}
-&write_file(&extra_user_filename($user, $d), $user);
+&write_file(&extra_user_filename($user, $d), &extra_user_object($user, $d));
+}
+
+# extra_user_object(&user)
+# Returns a hash refence ready for
+# writing to an extra user file
+sub extra_user_object
+{
+my ($user, $d) = @_;
+my %user = %{$user};
+%user = map { $_, $user{$_} }
+	grep { $_ =~ /^(user|pass|extra|type)$|^(pass_)|(_pass)$/ } keys %user;
+$user{'pass'} = $user->{'plainpass'} if ($user->{'plainpass'});
+if ($d->{'hashpass'} && $user->{'pass'} && $user->{'type'} eq 'db') {
+	my $hashes = &generate_password_hashes($user, $user->{'pass'}, $d);
+	$user{'mysql_pass'} = $hashes->{'mysql'};
+	}
+delete($user{'mysql_pass'}) if (!$d->{'hashpass'});
+delete($user{'pass'}) if ($d->{'hashpass'});
+if (@{$user->{'dbs'}}) {
+	foreach my $db (@{$user->{'dbs'}}) {
+		$user{'db_'.$db->{'type'}} .=
+			$user{'db_'.$db->{'type'}} ?
+				" $db->{'name'}" : $db->{'name'};
+		}
+	}
+return \%user;
 }
 
 # extra_user_filename(&user, &domain)

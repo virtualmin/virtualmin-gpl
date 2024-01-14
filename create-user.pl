@@ -375,16 +375,9 @@ if ($db_only) {
         my $err = &create_databases_user($d, $user);
         &usage($err) if ($err);
         # Add user to domain list
-	my $dbuser;
-	$dbuser->{'user'} = $user->{'user'};
-	$dbuser->{'pass'} = $pass;
-	$dbuser->{'extra'} = 1;
-        $dbuser->{'type'} = 'db';
-        foreach my $db (@{$user->{'dbs'}}) {
-                $dbuser->{'db_'.$db->{'type'}} .=
-                        $dbuser->{'db_'.$db->{'type'}} ? " $db->{'name'}" : $db->{'name'};
-                }
-        &update_extra_user($d, $dbuser);
+	$user->{'extra'} = 1;
+        $user->{'type'} = 'db';
+        &update_extra_user($d, $user);
 	}
 # Create the user and virtusers and alias
 else {

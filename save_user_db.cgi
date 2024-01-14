@@ -52,17 +52,12 @@ if (!$in{'new'}) {
                         my ($type, $name) = split(/_/, $db, 2);
                         push(@dbs, { 'type' => $type,
                                      'name' => $name });
-                        $user->{'db_'.$type} = undef
-                        	if (!$dbreset{$type}++);
-                        $user->{'db_'.$type} .=
-                                $user->{'db_'.$type} ? " $name" : $name;
                         }
 
                 # Update database user and databases
                 $user->{'dbs'} = \@dbs;
                 &modify_database_user($user, \%olduser, $d);
-
-                delete($user->{'dbs'});
+                # Update extra database user
                 &update_extra_user($d, $user, \%olduser);
                 }
         }
@@ -85,8 +80,6 @@ else {
                 my ($type, $name) = split(/_/, $db, 2);
                 push(@dbs, { 'type' => $type,
                              'name' => $name });
-                $user->{'db_'.$type} .=
-                        $user->{'db_'.$type} ? " $name" : $name;
                 }
         $user->{'dbs'} = \@dbs;
 
@@ -95,7 +88,6 @@ else {
         &error($err) if ($err);
         
         # Add extra database user
-        delete($user->{'dbs'});
         &update_extra_user($d, $user);
         }
 
