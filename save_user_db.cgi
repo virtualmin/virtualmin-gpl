@@ -26,7 +26,7 @@ if (!$in{'new'}) {
         # If renaming user, check if new name is not already used
         if ($olduser_name ne $full_dbuser) {
                 my $user_check = &check_extra_user_clash($d, $full_dbuser, 'db');
-                !$user_check || &error(&text('user_ealreadyexist', &html_escape($full_dbuser)));
+                !$user_check || &error($user_check);
                 }
 
         if ($in{'delete'}) {
@@ -73,7 +73,7 @@ else {
         $user->{'type'} = 'db';
         my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
 	my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'db');
-        !$userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
+        !$userclash || &error($userclash);
         
         # Set initial password
         $user->{'pass'} = $in{'dbpass'};

@@ -37,15 +37,44 @@ return $extra_user;
 sub check_extra_user_clash
 {
 my ($d, $u, $t) = @_;
-my @rv;
-# Check for clash with Unix users first
-my ($userclash) = grep { $_->{'user'} eq $u }
-        &list_domain_users($d, 0, 0, 1, 1);
+my ($userclash, @rv);
+
 # Check for clash with extra users if type is given
 if ($t && !$userclash) {
         $userclash = &get_extra_user($d, $t, $u);
         }
-return $userclash;
+# Check for clash with any existing database users
+if (!$userclash && $t eq 'db') {
+	$userclash = &check_any_database_user_clash($d, $u);
+	# If user under the same domain, we can re-import it
+	if ($userclash &&
+	    $u ne &remove_userdom($u, $d)) {
+		$userclash = undef
+		}
+	}
+# Check for clash with Unix users first
+if (!$userclash) {
+	($userclash) = grep { $_->{'user'} eq $u }
+		&list_domain_users($d, 0, 0, 1, 1);
+	}
+return $userclash ?
+	(ref($userclash) ? &text("user_e${t}clash", &html_escape($u)) : $userclash) :
+	undef;
+}
+
+# check_any_database_user_clash(&domain, database-username)
+# Check for a username clash with any database user
+sub check_any_database_user_clash
+{
+my ($d, $dbusername) = @_;
+foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
+	my $cfunc = "check_".$dt."_user_clash";
+	next if (!defined(&$cfunc));
+	my $ufunc = $dt."_username";
+	if (&$cfunc($d, &$ufunc($dbusername))) {
+		return &text("user_edbclash_$dt", &html_escape($dbusername));
+		}
+	}
 }
 
 # list_extra_db_users(&domain)

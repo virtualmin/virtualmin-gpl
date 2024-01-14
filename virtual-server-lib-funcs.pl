@@ -2638,15 +2638,7 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 		return $text{'user_edbpass'};
 		}
 	# Check for username clash
-	foreach my $dt (&unique(map { $_->{'type'} } &domain_databases($d))) {
-		local $cfunc = "check_".$dt."_user_clash";
-		next if (!defined(&$cfunc));
-		local $ufunc = $dt."_username";
-		if (&$cfunc($d, &$ufunc($user->{'user'}))) {
-			# Found a clash!
-			return $text{'user_edbclash'};
-			}
-		}
+	return &check_any_database_user_clash($d, $user->{'user'});
 	}
 if ($d && $user->{'home'} &&
     (!$old || $old->{'home'} ne $user->{'home'}) &&

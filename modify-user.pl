@@ -514,6 +514,12 @@ $err = &validate_user($d, $user, $olduser);
 # Save the user
 if ($user->{'extra'}) {
 	if ($user->{'type'} eq 'db') {
+		# Check database clash to include extra users
+		if ($olduser->{'name'} ne $user->{'name'}) {
+			my $user_check = &check_extra_user_clash($d, $user->{'name'}, 'db');
+			!$user_check || &usage($user_check);
+                	}
+
 		&modify_database_user($user, $olduser, $d);
 		my %dbuser = %{$user};
 		%dbuser = map { $_, $dbuser{$_} }

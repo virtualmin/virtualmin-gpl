@@ -368,14 +368,14 @@ if ($user->{'home'} && !$user->{'nocreatehome'} &&
 
 # Create database user only
 if ($db_only) {
-	my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
-        my ($dbuser) = grep { $_->{'user'} eq $user->{'user'} } @dbusers;
-        !$dbuser || &usage(&text('user_ealreadyexist', $user->{'user'}));
+	my $dbuserclash = &check_extra_user_clash($d, $user->{'user'}, 'db');
+        !$dbuserclash || &usage($dbuserclash);
 	$user->{'pass'} = $pass;
 	# Create database user
         my $err = &create_databases_user($d, $user);
         &usage($err) if ($err);
         # Add user to domain list
+	my $dbuser;
 	$dbuser->{'user'} = $user->{'user'};
 	$dbuser->{'pass'} = $pass;
 	$dbuser->{'extra'} = 1;

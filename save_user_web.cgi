@@ -26,7 +26,7 @@ if (!$in{'new'}) {
         # If renaming user, check if new name is not already used
         if ($olduser_name ne $user_full) {
                 my $user_check = &check_extra_user_clash($d, $user_full, 'web');
-                !$user_check || &error(&text('user_ealreadyexist', &html_escape($user_full)));
+                !$user_check || &error($user_check);
                 }
 
         if ($in{'delete'}) {
@@ -52,7 +52,7 @@ else {
         $user->{'extra'} = 1;
         $user->{'type'} = 'web';
         my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'web');
-        !$userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
+        !$userclash || &error($userclash);
         
         # Set initial password
         $user->{'pass'} = $in{'webpass'};
