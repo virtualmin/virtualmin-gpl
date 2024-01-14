@@ -2941,6 +2941,7 @@ restore_mysqlimport=.. database already exists
 restore_mysqludummy=Restoring virtual MySQL users ..
 restore_mysqludummy2=Creating $1 user ..
 restore_emysqluimport=.. failed to create user : <tt>$1</tt>
+restore_emysqluimport2=.. failed, database user already exists outside of restored domain
 restore_apachecp=Restoring Apache virtual host configuration ..
 restore_apachecp2=Restoring Apache aliases ..
 restore_apachelog=Restoring Apache log files ..

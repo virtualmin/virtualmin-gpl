@@ -1372,7 +1372,15 @@ if (@dbusers_virt) {
 	&$first_print($text{'restore_mysqludummy'});
 	&$indent_print();
 	foreach my $dbuser_virt (@dbusers_virt) {
-		&$first_print(&text('restore_mysqludummy2', $dbuser_virt->{'user'}));
+		&$first_print(&text('restore_mysqludummy2', $dbuser_virt->{'user'}));	
+		# If restored user not under the same domain already
+		# exists, delete extra user record, and skip it
+		if (&check_any_database_user_clash($d, $dbuser_virt->{'user'}) &&
+		    $dbuser_virt->{'user'} eq &remove_userdom($dbuser_virt->{'user'}, $d)) {
+			&$second_print($text{'restore_emysqluimport2'});
+			&delete_extra_user($d, $dbuser_virt);
+			next;
+			}
 		my $err = &create_databases_user($d, $dbuser_virt, 'mysql');
 		if ($err) {
 			&$second_print(&text('restore_emysqluimport', $err));
