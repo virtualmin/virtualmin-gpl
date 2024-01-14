@@ -20,14 +20,12 @@ else {
 my $full_dbuser = lc("$in{'dbuser'}"."@".$d->{'dom'});
 if (!$in{'new'}) {
         my $olduser_name = $in{'olduser'};
-        my @dbuser = &list_extra_db_users($d, $olduser_name);
-        $user = $dbuser[0];
+        $user = &get_extra_db_user($d, $olduser_name);
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
         my %olduser = %{$user};
         # If renaming user, check if new name is not already used
         if ($olduser_name ne $full_dbuser) {
-                my ($user_check) = grep { $_->{'user'} eq $full_dbuser }
-			&check_users_clash($d, $full_dbuser, 'db');
+                my $user_check = &check_extra_user_clash($d, $full_dbuser, 'db');
                 !$user_check || &error(&text('user_ealreadyexist', &html_escape($full_dbuser)));
                 }
 
@@ -74,8 +72,8 @@ else {
         $user->{'extra'} = 1;
         $user->{'type'} = 'db';
         my @dbusers = &list_domain_users($d, 1, 1, 1, 0, 1);
-	my @userclash = &check_users_clash($d, $user->{'user'}, 'db');
-        !@userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
+	my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'db');
+        !$userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
         
         # Set initial password
         $user->{'pass'} = $in{'dbpass'};

@@ -525,8 +525,8 @@ else {
 
 		# Validate user unless extra database user
 		# which can be merged with Unix user
-		my @extra_db_user = &list_extra_db_users($d, $user->{'user'});
-		if (!@extra_db_user) {
+		my $extra_db_user = &get_extra_db_user($d, $user->{'user'});
+		if (!$extra_db_user) {
 			$err = &validate_user($d, $user);
 			&error($err) if ($err);
 			}

@@ -533,11 +533,10 @@ elsif ($user_type eq 'db') {
 	print &ui_hidden("olduser", $in{'user'});
 	print &ui_hidden("dom", $in{'dom'});
 
-	my $dbuser = {};
+	my $dbuser;
 	my $dbuser_name;
 	if (!$in{'new'}) {
-		my @dbuser = &list_extra_db_users($d, $in{'user'});
-		$dbuser = $dbuser[0];
+		$dbuser = &get_extra_db_user($d, $in{'user'});
 		$dbuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
 		$dbuser_name = &remove_userdom($dbuser->{'user'}, $d) || $dbuser->{'user'};
 		}
@@ -595,8 +594,7 @@ elsif ($user_type eq 'web') {
 	my $webuser = &create_initial_user($d);
 	my $webuser_name;
 	if (!$in{'new'}) {
-		my @webuser = &list_extra_web_users($d, $in{'user'});
-		$webuser = $webuser[0];
+		$webuser = &get_extra_web_user($d, $in{'user'});
 		$webuser || &error(&text('user_edoesntexist', &html_escape($in{'user'})));
 		$webuser_name = &remove_userdom($webuser->{'user'}, $d) || $webuser->{'user'};
 		}

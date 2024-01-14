@@ -20,14 +20,12 @@ else {
 my $user_full = lc("$in{'webuser'}"."@".$d->{'dom'});
 if (!$in{'new'}) {
         my $olduser_name = $in{'olduser'};
-        my @webuser = &list_extra_web_users($d, $in{'user'});
-        $user = $webuser[0];
+        $user = &get_extra_web_user($d, $olduser_name);
         $user || &error(&text('user_edoesntexist', &html_escape($olduser_name)));
         my %olduser = %{$user};
         # If renaming user, check if new name is not already used
         if ($olduser_name ne $user_full) {
-                my ($user_check) = grep { $_->{'user'} eq $user_full }
-                        &check_users_clash($d, $user_full, 'web');
+                my $user_check = &check_extra_user_clash($d, $user_full, 'web');
                 !$user_check || &error(&text('user_ealreadyexist', &html_escape($user_full)));
                 }
 
@@ -53,8 +51,8 @@ else {
         $user->{'user'} = lc("$in{'webuser'}"."@".$d->{'dom'});
         $user->{'extra'} = 1;
         $user->{'type'} = 'web';
-        my @userclash = &check_users_clash($d, $user->{'user'}, 'web');
-        !@userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
+        my $userclash = &check_extra_user_clash($d, $user->{'user'}, 'web');
+        !$userclash || &error(&text('user_ealreadyexist', &html_escape($user->{'user'})));
         
         # Set initial password
         $user->{'pass'} = $in{'webpass'};

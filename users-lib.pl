@@ -1,10 +1,10 @@
 # Functions for managing extra users
 
-# list_extra_users(&domain, user-type, [username])
+# list_extra_users(&domain, user-type)
 # Returns a list of extra users for some domain
 sub list_extra_users
 {
-my ($d, $t, $u) = @_;
+my ($d, $t) = @_;
 my @rv;
 my $path = "$extra_users_dir/$d->{'id'}/$t";
 return @rv if (!-d $path);
@@ -17,33 +17,43 @@ foreach my $f (readdir(DIR)) {
 		}
 	}
 closedir(DIR);
-@rv = grep { $_->{'user'} eq $u } @rv if ($u);
 return @rv;
 }
 
-# check_users_clash(&domain, username, type)
+# get_extra_user(&domain, user-type, username)
+# Returns a single extra user
+sub get_extra_user
+{
+my ($d, $t, $u) = @_;
+my @extra_users = &list_extra_users($d, $t);
+my ($extra_user) = grep { $_->{'user'} eq $u } @extra_users;
+return $extra_user;
+
+}
+
+# check_extra_user_clash(&domain, username, type)
 # Check for a username clash with all Unix
-# users and given type of extra users
-sub check_users_clash
+# users and given type of extra user
+sub check_extra_user_clash
 {
 my ($d, $u, $t) = @_;
 my @rv;
 # Check for clash with Unix users first
-my (@userclash) = grep { $_->{'user'} eq $u }
+my ($userclash) = grep { $_->{'user'} eq $u }
         &list_domain_users($d, 0, 0, 1, 1);
 # Check for clash with extra users if type is given
-if ($t && !@userclash) {
-        @userclash = &list_extra_users($d, $t, $u);
+if ($t && !$userclash) {
+        $userclash = &get_extra_user($d, $t, $u);
         }
-return @userclash;
+return $userclash;
 }
 
-# list_extra_db_users(&domain, [username])
+# list_extra_db_users(&domain)
 # Returns a list of extra users for some domain with database list
 sub list_extra_db_users
 {
-my ($d, $u) = @_;
-my @dbusers = &list_extra_users($d, 'db', $u);
+my ($d) = @_;
+my @dbusers = &list_extra_users($d, 'db');
 foreach my $dbuser (@dbusers) {
         my (@dbt) = grep { /^db_/ } keys %{$dbuser};
         my @dbs;
@@ -62,13 +72,33 @@ foreach my $dbuser (@dbusers) {
 return @dbusers;
 }
 
-# list_extra_web_users(&domain, [username])
+# get_extra_db_user(&domain, username)
+# Returns a single extra database user
+sub get_extra_db_user
+{
+my ($d, $u) = @_;
+my @extra_db_users = &list_extra_db_users($d);
+my ($extra_db_user) = grep { $_->{'user'} eq $u } @extra_db_users;
+return $extra_db_user;
+}
+
+# list_extra_web_users(&domain)
 # Return a list of extra web users for some domain
 sub list_extra_web_users
 {
-my ($d, $u) = @_;
-my @rv = &list_extra_users($d, 'web', $u);
+my ($d) = @_;
+my @rv = &list_extra_users($d, 'web');
 return @rv;
+}
+
+# get_extra_web_user(&domain, username)
+# Returns a single extra web user
+sub get_extra_web_user
+{
+my ($d, $u) = @_;
+my @extra_web_users = &list_extra_web_users($d);
+my ($extra_web_user) = grep { $_->{'user'} eq $u } @extra_web_users;
+return $extra_web_user;
 }
 
 # delete_extra_user(&domain, &user)
@@ -117,8 +147,8 @@ sub suppress_extra_user
 {
 my ($unix_user, $d) = @_;
 foreach (&suppressible_extra_users_types()) {
-	my @extra_user = &list_extra_users($d, $_, $unix_user->{'user'});
-	&delete_extra_user($d, $extra_user[0]) if ($extra_user[0]);
+	my $extra_user = &get_extra_user($d, $_, $unix_user->{'user'});
+	&delete_extra_user($d, $extra_user) if ($extra_user);
         }
 }
 
