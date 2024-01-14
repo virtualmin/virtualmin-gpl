@@ -40,7 +40,7 @@ my ($d, $u, $t) = @_;
 my ($userclash, @rv);
 
 # Check for clash with extra users if type is given
-if ($t && !$userclash) {
+if ($t) {
         $userclash = &get_extra_user($d, $t, $u);
         }
 # Check for clash with any existing database users
