@@ -25,10 +25,11 @@ return @rv;
 sub get_extra_user
 {
 my ($d, $t, $u) = @_;
-my @extra_users = &list_extra_users($d, $t);
-my ($extra_user) = grep { $_->{'user'} eq $u } @extra_users;
-return $extra_user;
-
+my $extra_user_file = "$extra_users_dir/$d->{'id'}/$t/$u.user";
+my %user;
+&read_file_cached($extra_user_file, \%user)
+	if (-r $extra_user_file);
+return keys %user ? \%user : undef;
 }
 
 # check_extra_user_clash(&domain, username, type)
