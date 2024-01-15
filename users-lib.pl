@@ -161,7 +161,7 @@ sub extra_user_object
 my ($user, $d) = @_;
 my %user = %{$user};
 %user = map { $_, $user{$_} }
-	grep { $_ =~ /^(user|pass|extra|type)$|^(pass_)|(_pass)$/ } keys %user;
+	grep { /^(user|pass|extra|type)$|^(pass_)|(_pass)$/ } keys %user;
 $user{'pass'} = $user->{'plainpass'} if ($user->{'plainpass'});
 if ($d->{'hashpass'} && $user->{'pass'} && $user->{'type'} eq 'db') {
 	my $hashes = &generate_password_hashes($user, $user->{'pass'}, $d);
