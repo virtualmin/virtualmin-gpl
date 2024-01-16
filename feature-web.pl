@@ -4187,7 +4187,7 @@ my $err;
 if (!$apache::httpd_modules{'mod_http2'}) {
 	$err = "Missing Apache <tt>mod_http2</tt> module";
 	}
-elsif ($apache::httpd_modules{'mod_prefork'}) {
+elsif ($apache::httpd_modules{'mod_mpm_prefork'}) {
 	$err = "Incompatible Apache <tt>mpm_prefork</tt> module is enabled";
 	}
 elsif (!$apache::site{'fullversion'} ||
