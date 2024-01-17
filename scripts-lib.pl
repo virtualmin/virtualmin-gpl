@@ -1893,7 +1893,9 @@ foreach $script (@list) {
 	}
 $stable .= &ui_columns_table(
 	[ $text{'tscripts_name'}, $text{'tscripts_version'},
-	  $text{'tscripts_path'}, $text{'tscripts_opts'} .
+	  $text{'tscripts_path'} .
+	  	"&nbsp;" . &ui_help($text{'tscripts_path_help'}),
+	  $text{'tscripts_opts'} .
 	  	"&nbsp;" . &ui_help($text{'tscripts_opts_help'}),
 	  $text{'tscripts_db'}, $text{'tscripts_dbtype'} ],
 	undef,
