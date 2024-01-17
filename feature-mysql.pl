@@ -1131,7 +1131,7 @@ foreach $db (@dbs) {
 			$mymod, "get_character_set", $db);
 		}
 	if (&foreign_defined($mymod, "get_collation_order")) {
-		$info{'collation_'.$db} = &foreign_call(
+		$info{'collate_'.$db} = &foreign_call(
 			$mymod, "get_collation_order", $db);
 		}
 	}
@@ -1314,7 +1314,10 @@ foreach my $db (@dbs) {
 		}
 	&$indent_print();
 	if (!$clash) {
-		&create_mysql_database($d, $db->[0]);
+		my $opts = { 'charset' => $info{'charset_'.$db->[0]},
+			     'collate' => $info{'collate_'.$db->[0]},
+			   };
+		&create_mysql_database($d, $db->[0], $info);
 		$created{$db->[0]} = 1;
 		}
 	&$outdent_print();
