@@ -2039,6 +2039,10 @@ if ($mode < 0) {
 	&$second_print(&text('backup_edesturl', $file, $user));
 	return 0;
 	}
+if ($mode == 0) {
+	# Canonicalize path
+	$file = $path;
+	}
 local $starpass = "*" x length($pass);
 if ($mode > 0) {
 	# Need to download to temp file/directory first
@@ -3205,6 +3209,10 @@ local ($file, $wantdoms, $key, $asd) = @_;
 local $backup;
 local ($mode, $user, $pass, $server, $path, $port) = &parse_backup_url($file);
 local $doms;
+if ($mode == 0) {
+	# Canonicalize path
+	$file = $path;
+	}
 local @fst = stat($file);
 local @ist = stat($file.".info");
 local @dst = stat($file.".dom");
@@ -3222,7 +3230,7 @@ if ($mode == 3) {
 elsif ($mode > 0) {
 	# Download info files via SSH or FTP
 	local $infotemp = &transname_owned($asd);
-	local $infoerr = &download_backup($_[0], $infotemp, undef, undef, 1, $asd);
+	local $infoerr = &download_backup($file, $infotemp, undef, undef, 1, $asd);
 	if (!$infoerr) {
 		if (-d $infotemp) {
 			# Got a whole dir of .info files
@@ -3250,7 +3258,7 @@ elsif ($mode > 0) {
 elsif (@ist && $ist[9] >= $fst[9]) {
 	# Local .info file exists, and is new
 	local $oneinfo = &unserialise_variable(
-			&read_file_contents($_[0].".info"));
+			&read_file_contents($file.".info"));
 	%info = %$oneinfo if (%$oneinfo);
 	}
 
@@ -3273,7 +3281,7 @@ if ($mode == 3) {
 elsif ($mode > 0) {
 	# Download .dom files via SSH or FTP
 	local $domtemp = &transname_owned($asd);
-	local $domerr = &download_backup($_[0], $domtemp, undef, undef, 2, $asd);
+	local $domerr = &download_backup($file, $domtemp, undef, undef, 2, $asd);
 	if (!$domerr) {
 		if (-d $domtemp) {
 			# Got a whole dir of .dom files
@@ -3301,7 +3309,7 @@ elsif ($mode > 0) {
 elsif (@dst && $dst[9] >= $fst[9]) {
 	# Local .dom file exists, and is new
 	local $onedom = &unserialise_variable(
-			&read_file_contents($_[0].".dom"));
+			&read_file_contents($file.".dom"));
 	%dom = %$onedom if (%$onedom);
 	}
 
@@ -3326,12 +3334,12 @@ if (%dom && %nvinfo && keys(%dom) >= keys(%nvinfo)) {
 if ($mode > 0) {
 	# Need to download the whole file
 	$backup = &transname_owned($asd);
-	local $derr = &download_backup($_[0], $backup, undef, undef, 0, $asd);
+	local $derr = &download_backup($file, $backup, undef, undef, 0, $asd);
 	return $derr if ($derr);
 	}
 else {
 	# Use local backup file
-	$backup = $_[0];
+	$backup = $file;
 	}
 
 local %rv;
@@ -4158,7 +4166,7 @@ elsif (!$url || $url =~ /^\//) {
 	}
 else {
 	# Relative to current dir
-	local $pwd = &get_current_dir();
+	local $pwd = $ENV{'WRAPPER_ORIGINAL_PWD'} || &get_current_dir();
 	@rv = (0, undef, undef, undef, $pwd."/".$url, undef);
 	$rv[4] =~ s/\/+$//;
 	}
