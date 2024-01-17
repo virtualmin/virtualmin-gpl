@@ -1878,7 +1878,8 @@ foreach $script (@list) {
 		&ui_opt_textbox("version_$i", $ver eq "latest" ? undef : $ver,
 				10, $text{'tscripts_latest'}."<br>",
 				$text{'tscripts_exact'}),
-		&ui_textbox("path_$i", $script->{'path'}, 25),
+		&ui_textbox("path_$i", $script->{'path'}, 15),
+		&ui_textbox("sopts_$i", $script->{'sopts'}, 25),
 		&ui_radio("db_def_$i",
 			$db_def,
 			[ [ 0, $text{'tscripts_none'} ],
@@ -1892,8 +1893,9 @@ foreach $script (@list) {
 	}
 $stable .= &ui_columns_table(
 	[ $text{'tscripts_name'}, $text{'tscripts_version'},
-	  $text{'tscripts_path'}, $text{'tscripts_db'},
-	  $text{'tscripts_dbtype'} ],
+	  $text{'tscripts_path'}, $text{'tscripts_opts'} .
+	  	"&nbsp;" . &ui_help($text{'tscripts_opts_help'}),
+	  $text{'tscripts_db'}, $text{'tscripts_dbtype'} ],
 	undef,
 	\@table,
 	undef,
@@ -1934,6 +1936,7 @@ else {
 		$path =~ /^\/\S*$/ || &error(&text('tscripts_epath', $i+1));
 		$script->{'path'} = $path;
 		$script->{'dbtype'} = $in{"dbtype_$i"};
+		$script->{'sopts'} = $in{"sopts_$i"};
 		if ($in{"db_def_$i"} == 1) {
 			$script->{'db'} = '${DB}';
 			}
