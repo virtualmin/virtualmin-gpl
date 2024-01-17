@@ -4892,7 +4892,10 @@ tscripts_name=Roteiro
 tscripts_version=Versão
 tscripts_latest=Últimas disponíveis
 tscripts_exact=Sempre
-tscripts_path=Caminho do URL (como / phpmyadmin)
+tscripts_path=Caminho do URL
+tscripts_path_help=Especifique o caminho da URL para o script, que é relativo ao diretório raiz do documento do domínio. Por exemplo, <tt>/wordpress</tt> ou <tt>/</tt>.
+tscripts_opts=Opções de script
+tscripts_opts_help=Opcionalmente, especifique uma sequência separada por vírgula de pares <tt>key=value</tt> como opções de script para o instalador. Estas opções correspondem aos parâmetros do nome de entrada encontrados no formulário HTML do script.
 tscripts_dbtype=Tipo de banco de dados
 tscripts_db=Nome do banco de dados
 tscripts_dbdef=Base de dados principal

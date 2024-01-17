@@ -2371,6 +2371,10 @@ validate_emysqluserhost=服务主机报告在 $1上找到MySQL登录名，但Vir
 tscripts_version=版
 tscripts_latest=最新可用
 tscripts_exact=总是
+tscripts_path=网址路径
+tscripts_path_help=指定脚本的 URL 路径，该路径相对于域的文档根目录。例如， <tt>/wordpress</tt> ”或<tt>/</tt> 。
+tscripts_opts=脚本选项
+tscripts_opts_help=（可选）指定以逗号分隔的<tt>key=value</tt>对字符串作为安装程序的脚本选项。这些选项对应于脚本 HTML 表单中的输入名称参数。
 tscripts_eversion=第 $1行中缺少版本号或版本号无效
 
 spam_elevel=删除垃圾邮件的得分必须是大于零的整数

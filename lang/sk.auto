@@ -5139,7 +5139,10 @@ tscripts_name=Skript
 tscripts_version=Verzia
 tscripts_latest=Najnovšie dostupné
 tscripts_exact=Vždy
-tscripts_path=Cesta URL (napríklad /phpmyadmin)
+tscripts_path=cesta URL
+tscripts_path_help=Zadajte cestu URL k skriptu, ktorá je relatívna ku koreňovému adresáru dokumentu domény. Napríklad <tt>/wordpress</tt> “ alebo <tt>/</tt>.
+tscripts_opts=Možnosti skriptu
+tscripts_opts_help=Voliteľne zadajte reťazec párov <tt>key=value</tt> oddelený čiarkami ako možnosti skriptu pre inštalačný program. Tieto možnosti zodpovedajú parametrom názvu vstupu, ktoré sa nachádzajú vo formulári HTML skriptu.
 tscripts_dbtype=Typ DB
 tscripts_db=Názov databázy
 tscripts_dbdef=Hlavná databáza

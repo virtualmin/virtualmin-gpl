@@ -2840,7 +2840,6 @@ tscripts_what=為新虛擬服務器安裝的腳本：
 tscripts_none=無
 tscripts_below=下面的腳本 .. 
 tscripts_name=腳本
-tscripts_path=URL路徑
 tscripts_dbtype=DB類型
 tscripts_db=DB名
 tscripts_dbdef=主數據庫

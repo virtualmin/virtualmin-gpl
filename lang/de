@@ -3181,7 +3181,6 @@ tscripts_name=Skript
 tscripts_version=Version
 tscripts_latest=Letzte verfügbare
 tscripts_exact=Immer
-tscripts_path=URL Pfad (wie /phpmyadmin)
 tscripts_dbtype=DB Typ
 tscripts_db=Datenbankname
 tscripts_dbdef=Hauptdatenbank

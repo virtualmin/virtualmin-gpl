@@ -2031,6 +2031,10 @@ validate_esslfirst=Das SSL-Zertifikat für den ersten virtuellen Apache SSL-Host
 validate_emysqlmod=MySQL Webmin Modul $1 existiert nicht!
 
 tscripts_none=Keiner
+tscripts_path=URL-Pfad
+tscripts_path_help=Geben Sie den URL-Pfad zum Skript an, der relativ zum Dokumentstammverzeichnis der Domäne ist. Zum Beispiel <tt>/wordpress</tt> “ oder <tt>/</tt>.
+tscripts_opts=Skriptoptionen
+tscripts_opts_help=Geben Sie optional eine durch Kommas getrennte Zeichenfolge aus <tt>key=value</tt> Paaren als Skriptoptionen für das Installationsprogramm an. Diese Optionen entsprechen den Eingabenamensparametern im HTML-Formular des Skripts.
 
 spam_ecannot=Sie dürfen die Zustellung von Spam und Viren nicht konfigurieren
 spam_virus0=Wegschmeißen

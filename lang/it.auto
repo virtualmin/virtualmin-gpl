@@ -4015,6 +4015,10 @@ validate_estatusssl=Nessun monitor di stato trovato per il sito Web SSL trovato
 tscripts_title=Programmi di installazione script modello
 tscripts_what=Script da installare per nuovi server virtuali:
 tscripts_below=Script di seguito ..
+tscripts_path=Percorso dell'URL
+tscripts_path_help=Specificare il percorso URL dello script, relativo alla directory root dei documenti del dominio. Ad esempio, <tt>/wordpress</tt> o <tt>/</tt>.
+tscripts_opts=Opzioni di script
+tscripts_opts_help=Facoltativamente, specificare una stringa separata da virgole di coppie <tt>key=value</tt> come opzioni di script per il programma di installazione. Queste opzioni corrispondono ai parametri del nome di input trovati nel modulo HTML dello script.
 tscripts_dbtype=Tipo di DB
 tscripts_db=Nome del database
 tscripts_dbdef=Database principale

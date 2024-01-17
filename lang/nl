@@ -4027,7 +4027,6 @@ tscripts_name=Script
 tscripts_version=Versie
 tscripts_latest=Laatst beschikbaar
 tscripts_exact=Altijd
-tscripts_path=URL pad (zoals /phpmyadmin)
 tscripts_dbtype=Database type
 tscripts_db=Database naam
 tscripts_dbdef=Hoofd database

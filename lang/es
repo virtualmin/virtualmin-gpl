@@ -3588,7 +3588,6 @@ tscripts_name=Script
 tscripts_version=Versión
 tscripts_latest=Último disponible
 tscripts_exact=Siempre
-tscripts_path=Ruta URL
 tscripts_dbtype=Tipo de BD
 tscripts_db=Nombre de BD
 tscripts_dbdef=Base de datos principal

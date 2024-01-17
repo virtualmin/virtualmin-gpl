@@ -4263,7 +4263,6 @@ tscripts_name=Script
 tscripts_version=Versjon
 tscripts_latest=Siste tilgjengelige
 tscripts_exact=Alltid
-tscripts_path=URL sti
 tscripts_dbtype=DB type
 tscripts_db=DB navn
 tscripts_dbdef=Hoved database

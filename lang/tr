@@ -2613,7 +2613,6 @@ tscripts_what=Yeni sanal sunucular için kurulacak kurulum sihirbazlar
 tscripts_none=Hiçbiri
 tscripts_below=Aþaðýdaki kurulum sihirbazlarý ..
 tscripts_name=Kurulum Sihirbazý
-tscripts_path=URL yolu
 tscripts_dbtype=DB tipi
 tscripts_db=DB ismi
 tscripts_dbdef=Ana veritabaný

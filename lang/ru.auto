@@ -3736,7 +3736,10 @@ tscripts_name=скрипт
 tscripts_version=Версия
 tscripts_latest=Последний доступный
 tscripts_exact=Всегда
-tscripts_path=URL-путь (например, / phpmyadmin)
+tscripts_path=URL-путь
+tscripts_path_help=Укажите URL-путь к сценарию относительно корневого каталога документов домена. Например, <tt>/wordpress</tt> или <tt>/</tt>.
+tscripts_opts=Параметры скрипта
+tscripts_opts_help=При необходимости укажите строку пар <tt>key=value</tt> разделенную запятыми, в качестве параметров сценария для установщика. Эти параметры соответствуют входным параметрам имени, найденным в HTML-форме сценария.
 tscripts_dbtype=Тип БД
 tscripts_db=Имя базы данных
 tscripts_dbdef=Основная база данных

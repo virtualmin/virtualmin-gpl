@@ -2840,7 +2840,6 @@ tscripts_what=为新虚拟服务器安装的脚本：
 tscripts_none=无
 tscripts_below=下面的脚本 .. 
 tscripts_name=脚本
-tscripts_path=URL路径
 tscripts_dbtype=DB类型
 tscripts_db=DB名
 tscripts_dbdef=主数据库

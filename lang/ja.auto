@@ -5139,7 +5139,10 @@ tscripts_name=脚本
 tscripts_version=バージョン
 tscripts_latest=利用可能な最新
 tscripts_exact=常に
-tscripts_path=URLパス（/ phpmyadminなど）
+tscripts_path=URLパス
+tscripts_path_help=スクリプトへの URL パスを指定します。これは、ドメインのドキュメント ルート ディレクトリに対する相対パスです。たとえば、 <tt>/wordpress</tt> 」または<tt>/</tt> 。
+tscripts_opts=スクリプトオプション
+tscripts_opts_help=必要に応じて、インストーラーのスクリプト オプションとして<tt>key=value</tt>ペアのカンマ区切り文字列を指定します。これらのオプションは、スクリプトの HTML フォームにある入力名パラメーターに対応します。
 tscripts_dbtype=DBタイプ
 tscripts_db=データベース名
 tscripts_dbdef=メインデータベース
