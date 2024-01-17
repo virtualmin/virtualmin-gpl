@@ -46,6 +46,7 @@ my $gpl_downgrading_all_done = "Your system has been successfully downgraded to 
 my $gpl_downgrading_some_failed = "Downgrading to Virtualmin GPL finished with errors! Thank you for giving Virtualmin Pro a try.";
 my $gpl_downgrading_done = ".. done";
 my $gpl_downgrading_failed = ".. failed";
+my $gpl_downgrading_failed_not_supported = ".. failed : automated downgrading is not yet supported for installations using .wbm.gz files";
 my $gpl_downgrading_failed_status;
 
 # Downgrade RHEL repo and the package
@@ -103,7 +104,7 @@ if (-r $virtualmin_yum_repo) {
 	}
 
 # Downgrade Debian/Ubuntu repo and the package
-if (-r $virtualmin_apt_repo) {
+elsif (-r $virtualmin_apt_repo) {
 	local $found = 0;
 	local $lref = &read_file_lines($virtualmin_apt_repo);
 	
@@ -156,6 +157,13 @@ if (-r $virtualmin_apt_repo) {
 		}
 	}
 
+# Downgrade wbm.gz install.
+else {
+	# https://software.virtualmin.com/vm/7/gpl/wbm/virtual-server-7.9.0.gpl-1.wbm.gz
+	# Downgrade package
+	&$first_print($gpl_downgrading_package);
+	&$second_print($gpl_downgrading_failed_not_supported);
+	}
 # Downgrade Virtualmin licence file
 &$first_print($gpl_downgrading_license);
 &lock_file($virtualmin_license_file);
