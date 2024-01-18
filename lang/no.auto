@@ -925,6 +925,11 @@ validate_esslcamatch=SSL CA-sertifisering for $1/$2 samsvarer ikke med utstedere
 validate_esslexpired=SSL-sertifikatet for denne virtuelle serveren gikk ut på $1 
 validate_emysqlmod=MySQL Webmin-modul $1 eksisterer ikke!
 
+tscripts_path=URL-bane
+tscripts_path_help=Angi URL-banen til skriptet, som er relativt til domenets dokumentrotkatalog. For eksempel <tt>/wordpress</tt> eller <tt>/</tt>.
+tscripts_opts=Skriptalternativer
+tscripts_opts_help=Du kan eventuelt angi en kommadelt streng med <tt>key=value</tt> -par som skriptalternativer for installasjonsprogrammet. Disse alternativene tilsvarer parameterne for inndatanavn som finnes i skriptets HTML-skjema.
+
 spam_scanner4=Ekstern server skanner
 spam_lookup_port=Domenesøk daemon-port
 spam_elookup_port=Lookup daemon portnummer være et nummer

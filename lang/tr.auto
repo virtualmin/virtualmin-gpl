@@ -2603,6 +2603,10 @@ validate_epostgresuser=PostgreSQL $1 girişi mevcut değil
 tscripts_version=versiyon
 tscripts_latest=En son kullanılabilir
 tscripts_exact=Her zaman
+tscripts_path=URL yolu
+tscripts_path_help=Komut dosyasının, etki alanının belge kök dizinine göre olan URL yolunu belirtin. Örneğin, <tt>/wordpress</tt> veya <tt>/</tt>.
+tscripts_opts=Komut dosyası seçenekleri
+tscripts_opts_help=İsteğe bağlı olarak, yükleyici için komut dosyası seçenekleri olarak virgülle ayrılmış <tt>key=value</tt> çiftlerinden oluşan bir dize belirtin. Bu seçenekler, betiğin HTML formunda bulunan giriş adı parametrelerine karşılık gelir.
 tscripts_eversion=$1 satırında eksik veya geçersiz sürüm numarası
 
 spam_elevel=Adresindeki spam'i silme puanı sıfırdan büyük bir tam sayı olmalıdır

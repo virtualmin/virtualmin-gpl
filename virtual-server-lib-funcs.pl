@@ -8110,6 +8110,11 @@ if (@scripts && !$dom->{'alias'} && !$noscripts &&
 				    $script->{'name'}, $ver));
 		local $opts = { 'path' => &substitute_scriptname_template(
 						$sinfo->{'path'}, $d) };
+		if ($sinfo->{'sopts'}) {
+			$opts->{$_->[0]} = $_->[1]
+				for map { [split(/=/, $_)] }
+					split(/,/, $sinfo->{'sopts'});
+			}
 		local $perr = &validate_script_path($opts, $script, $dom);
 		if ($perr) {
 			&$second_print($perr);

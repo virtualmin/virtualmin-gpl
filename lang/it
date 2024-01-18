@@ -1173,11 +1173,10 @@ validate_edir=Home directory $1 inesistente
 tscripts_sub=Per template $1
 tscripts_none=Nessuno
 tscripts_name=Script
+
 tscripts_version=Versione
 tscripts_latest=Ultimi disponibili
 tscripts_exact=Sempre
-tscripts_path=Percorso URL
-
 tscripts_other=Altri database..
 
 cat_objects=Oggetti Server

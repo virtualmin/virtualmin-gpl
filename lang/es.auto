@@ -1616,6 +1616,10 @@ validate_emysqlcheck=Error al verificar el inicio de sesión de MySQL en el host
 validate_emysqldbcheck=Error al verificar la base de datos MySQL $1 en el host de servicios : $2
 validate_emysqluserhost=El anfitrión de servicios informó que el inicio de sesión de MySQL se encontró en $1, pero Virtualmin esperaba $2
 
+tscripts_path=ruta URL
+tscripts_path_help=Especifique la ruta URL al script, que es relativa al directorio raíz del documento del dominio. Por ejemplo, <tt>/wordpress</tt> o <tt>/</tt>.
+tscripts_opts=Opciones de guión
+tscripts_opts_help=Opcionalmente, especifique una cadena separada por comas de pares <tt>key=value</tt> como opciones de secuencia de comandos para el instalador. Estas opciones corresponden a los parámetros de nombre de entrada que se encuentran en el formulario HTML del script.
 tscripts_eversion=Número de versión faltante o no válido en la fila $1
 
 spam_trashclear=¿Eliminar automáticamente la basura?

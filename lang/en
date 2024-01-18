@@ -5139,7 +5139,10 @@ tscripts_name=Script
 tscripts_version=Version
 tscripts_latest=Latest available
 tscripts_exact=Always
-tscripts_path=URL path (like /phpmyadmin)
+tscripts_path=URL path
+tscripts_path_help=Specify the URL path to the script, which is relative to the domain's document root directory. For example, <tt>/wordpress</tt> or <tt>/</tt>.
+tscripts_opts=Script options
+tscripts_opts_help=Optionally specify a comma-separated string of <tt>key=value</tt> pairs as script options for the installer. These options correspond to the input name parameters found in the script's HTML form.
 tscripts_dbtype=DB type
 tscripts_db=Database name
 tscripts_dbdef=Main database

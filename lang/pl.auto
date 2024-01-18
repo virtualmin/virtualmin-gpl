@@ -4356,7 +4356,10 @@ tscripts_below=Skrypty poniżej. ..
 tscripts_name=Scenariusz
 tscripts_latest=Najnowsze dostępne
 tscripts_exact=Zawsze
-tscripts_path=Ścieżka URL (jak / phpmyadmin)
+tscripts_path=Ścieżka adresu URL
+tscripts_path_help=Określ ścieżkę URL do skryptu, która jest zależna od katalogu głównego dokumentów domeny. Na przykład <tt>/wordpress</tt> ” lub <tt>/</tt>.
+tscripts_opts=Opcje skryptu
+tscripts_opts_help=Opcjonalnie określ rozdzielony przecinkami ciąg par <tt>key=value</tt> jako opcje skryptu dla instalatora. Opcje te odpowiadają parametrom nazwy wejściowej znajdującym się w formularzu HTML skryptu.
 tscripts_dbtype=Typ DB
 tscripts_dbdef=Główna baza danych
 tscripts_other=Inna baza danych ..

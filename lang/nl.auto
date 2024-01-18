@@ -1166,6 +1166,11 @@ validate_esslcamatch=SSL CA-certificaat voor $1/$2 komt niet overeen met de uitg
 validate_esslexpired=Het SSL-certificaat voor deze virtuele server is verlopen op $1
 validate_emysqlmod=MySQL Webmin-module $1 bestaat niet!
 
+tscripts_path=URL-pad
+tscripts_path_help=Geef het URL-pad naar het script op, dat relatief is ten opzichte van de documenthoofdmap van het domein. Bijvoorbeeld <tt>/wordpress</tt> of <tt>/</tt>.
+tscripts_opts=Scriptopties
+tscripts_opts_help=Geef optioneel een door komma's gescheiden reeks <tt>key=value</tt> paren op als scriptopties voor het installatieprogramma. Deze opties komen overeen met de invoernaamparameters die te vinden zijn in het HTML-formulier van het script.
+
 spam_trashclear=Prullenbak automatisch verwijderen?
 spam_etrashsize=Ontbrekende of ongeldige maximale prullenbakgrootte
 spam_etrashdays=Ontbrekende of ongeldige maximale prullenbak
