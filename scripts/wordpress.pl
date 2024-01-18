@@ -67,7 +67,7 @@ return ( "mysql" );
 
 sub script_wordpress_release
 {
-return 7;	# Allow to disable initial setup
+return 8;	# Fix regex for passmode
 }
 
 sub script_wordpress_php_fullver
@@ -395,7 +395,7 @@ return (128, 'M') ;
 
 sub script_wordpress_passmode
 {
-return (1, 8, '^(?=.*[a-zA-Z])(?=.*)[\w]{8,}$');
+return (1, 8, '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$');
 }
 
 1;
