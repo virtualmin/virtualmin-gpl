@@ -71,7 +71,7 @@ return ([ 'memory_limit', '64M', '+' ],
 
 sub script_roundcube_release
 {
-return 3;	# For folders path fix
+return 4;	# Fix upgrading
 }
 
 sub script_roundcube_php_fullver
@@ -290,38 +290,18 @@ if (!$upgrade) {
 			   "<tt>$out</tt>.");
 	}
 else {
-	# Create script of upgrade SQL to run, by extracting SQL from the old
-	# version onwards from mysql.update.sql
-	&require_mysql();
-	local $sqltemp = &transname();
-	&open_tempfile(SQLTEMP, ">$sqltemp", 0, 1);
-	open(SQLIN, "<$opts->{'dir'}/SQL/mysql.update.sql");
-	local $foundver = 0;
-	while(<SQLIN>) {
-		if (/Updates\s+from\s+version\s+(\S+)/ &&
-		    &compare_versions("$1", $upgrade->{'version'}) >= 0) {
-			$foundver = 1;
-			}
-		if ($foundver) {
-			&print_tempfile(SQLTEMP, $_);
-			}
-		}
-	close(SQLIN);
-	&close_tempfile(SQLTEMP);
-	if ($foundver) {
-		local ($ex, $out) = &mysql::execute_sql_file($dbname, $sqltemp,
-							     $dbuser, $dbpass);
-		$ex && return (-1, "Failed to run database date script : ".
-				   "<tt>$out</tt>.");
-		}
-	&unlink_file($sqltemp);
+	# Run update script
+	my $php_bin = &get_php_cli_command($opts->{'phpver'}) || &has_command("php");
+	my $upd_cmd = "$php_bin $opts->{'dir'}/bin/update.sh -v $upgrade->{'version'} -y";
+	&run_as_domain_user($d, $upd_cmd);
 	}
 
 # Return a URL for the user
 local $url = &script_path_url($d, $opts);
 local $rp = $opts->{'dir'};
 $rp =~ s/^$d->{'home'}\///;
-return (1, "RoundCube installation complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
+my $installtype = $upgrade ? 'upgrade' : 'installation';
+return (1, "RoundCube $installtype complete. It can be accessed at <a target=_blank href='$url'>$url</a>.", "Under $rp using $dbphptype database $dbname", $url);
 }
 
 # script_wordpress_db_conn_desc()
