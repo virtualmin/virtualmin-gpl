@@ -943,6 +943,21 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 			}
 		}
 	}
+elsif ($d->{'parent'} ne $oldd->{'parent'}) {
+	# Parent domain has changed, but domain name has not. May be eligible
+	# for a sub-domain transfer
+	my $dnsparent = &find_parent_dns_domain($d);
+	if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
+		&$first_print($text{'save_dns8'});
+		&push_all_print();
+		&set_all_null_print();
+		&save_dns_submode($d, 1);
+		&pop_all_print();
+		delete($domain_dns_records_cache{$d->{'id'}});
+		$recs = $file = undef;
+		&$second_print($text{'setup_done'});
+		}
+	}
 
 if ($oldip ne $newip) {
 	# IP address has changed .. need to update any records that use
