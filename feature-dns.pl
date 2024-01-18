@@ -796,6 +796,7 @@ my $rv = 0;
 my ($file, $recs);
 &pre_records_change($d);
 
+my $check_submode = 0;
 if ($d->{'dom'} ne $oldd->{'dom'} && $d->{'provision_dns'}) {
 	# Domain name has changed .. rename via API call
 	&$first_print($text{'save_dns2_provision'});
@@ -908,19 +909,9 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 	undef(@bind8::list_zone_names_cache);
 	&$second_print($text{'setup_done'});
 
-	# Converting from top-level to sub-domain .. move the records after they
-	# have been renamed
-	my $dnsparent = &find_parent_dns_domain($d);
-	if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
-		&$first_print($text{'save_dns8'});
-		&push_all_print();
-		&set_all_null_print();
-		&save_dns_submode($d, 1);
-		&pop_all_print();
-		delete($domain_dns_records_cache{$d->{'id'}});
-		$recs = $file = undef;
-		&$second_print($text{'setup_done'});
-		}
+	# After a rename, DNS records may now be eligible to be hosted by
+	# the parent DNS zone
+	$check_submode = 1;
 
 	if (!$d->{'dns_submode'}) {
 		my @slaves = split(/\s+/, $d->{'dns_slave'});
@@ -946,6 +937,10 @@ elsif ($d->{'dom'} ne $oldd->{'dom'}) {
 elsif ($d->{'parent'} ne $oldd->{'parent'}) {
 	# Parent domain has changed, but domain name has not. May be eligible
 	# for a sub-domain transfer
+	$check_submode = 1;
+	}
+
+if ($check_submode) {
 	my $dnsparent = &find_parent_dns_domain($d);
 	if (!$d->{'dns_submode'} && $tmpl->{'dns_sub'} eq 'yes' && $dnsparent) {
 		&$first_print($text{'save_dns8'});
