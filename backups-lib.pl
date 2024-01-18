@@ -322,6 +322,9 @@ local @okurls;
 foreach my $desturl (@$desturls) {
 	local ($mode, $user, $pass, $server, $path, $port) =
 		&parse_backup_url($desturl);
+	if ($mode == 0) {
+		$desturl = $path;	# Canonicalize path
+		}
 	if ($mode < 0) {
 		&$first_print(&text('backup_edesturl', &nice_backup_url($desturl), $user));
 		return (0, 0, $doms);
