@@ -459,6 +459,7 @@ if (-r $hometar) {
 	else {
 		&$second_print(".. done");
 		}
+	&set_home_ownership(\%dom);
 	}
 
 # Migrate Apache configuration
@@ -603,6 +604,7 @@ if ($?) {
 else {
 	&$second_print(".. done");
 	}
+&set_home_ownership(\%dom);
 
 # If php.ini is migrated wrong, fix it
 if ($dom{'web'}) {
@@ -1392,6 +1394,7 @@ foreach my $vf (readdir(VF)) {
 			else {
 				&$second_print(".. done");
 				}
+			&set_home_ownership(\%subs);
 			}
 
 		&$outdent_print();
