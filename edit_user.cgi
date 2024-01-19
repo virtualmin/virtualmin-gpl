@@ -317,18 +317,18 @@ elsif ($user_type eq 'mail') {
 				$pwfield,
 				2, \@tds);
 
+	# Password recovery field
+	print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
+		&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
+				$text{'user_norecovery'},
+				$text{'user_gotrecovery'}));
+
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'}) {
 		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
 				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
 					&vui_ui_input_noauto_attrs()), 2, \@tds);
 		}
-
-	# Password recovery field
-	print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),
-		&ui_opt_textbox("recovery", $user->{'recovery'}, 40,
-				$text{'user_norecovery'},
-				$text{'user_gotrecovery'}));
 
 	print &ui_hidden_table_end();
 
@@ -749,15 +749,6 @@ else {
 
 		}
 
-	# Real name - only for true Unix users or LDAP persons
-	if ($user->{'person'} && (!$mailbox || $user->{'real'})) {
-		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
-			$mailbox ? $user->{'real'} :
-				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
-				&vui_ui_input_noauto_attrs()),
-			2, \@tds);
-		}
-
 	# Password cannot be edited for domain owners (because it is the domain pass)
 	if (!$mailbox) {
 		$pwfield = "";
@@ -795,6 +786,15 @@ else {
 						$text{'user_norecovery'},
 						$text{'user_gotrecovery'}));
 			}
+		}
+
+	# Real name - only for true Unix users or LDAP persons
+	if ($user->{'person'} && (!$mailbox || $user->{'real'})) {
+		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
+			$mailbox ? $user->{'real'} :
+				&ui_textbox("real", $user->{'real'}, 40, 0, undef,
+				&vui_ui_input_noauto_attrs()),
+			2, \@tds);
 		}
 
 	# Show FTP shell field
