@@ -797,31 +797,31 @@ else {
 			}
 		}
 
-		# Show FTP shell field
-		if ($shell_switch) {
-			my $user_shell = $user->{'shell'};
-			# For the new user fall-back the user with no login shell
-			if ($in{'new'}) {
-				my @ftp_shell =
-					grep { $_->{'id'} eq 'ftp' && $_->{'avail'} }
-						&list_available_shells($d);
-				if (@ftp_shell) {
-					$user_shell = $ftp_shell[0]->{'shell'};
-					}
+	# Show FTP shell field
+	if ($shell_switch) {
+		my $user_shell = $user->{'shell'};
+		# For the new user fall-back the user with no login shell
+		if ($in{'new'}) {
+			my @ftp_shell =
+				grep { $_->{'id'} eq 'ftp' && $_->{'avail'} }
+					&list_available_shells($d);
+			if (@ftp_shell) {
+				$user_shell = $ftp_shell[0]->{'shell'};
 				}
-			print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
-				&available_shells_menu("shell", $user_shell, "mailbox",
-						0, $user->{'webowner'}),
-				2, \@tds);
 			}
+		print &ui_table_row(&hlink($text{'user_ushell'}, "ushell"),
+			&available_shells_menu("shell", $user_shell, "mailbox",
+					0, $user->{'webowner'}),
+			2, \@tds);
+		}
 
-		# Show secondary groups
-		if (@sgroups && $user->{'unix'}) {
-			print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
-					&ui_select("groups", $user->{'secs'},
-						[ map { [ $_ ] } @sgroups ], 5, 1, 1),
-					2, \@tds);
-			}
+	# Show secondary groups
+	if (@sgroups && $user->{'unix'}) {
+		print &ui_table_row(&hlink($text{'user_groups'},"usergroups"),
+				&ui_select("groups", $user->{'secs'},
+					[ map { [ $_ ] } @sgroups ], 5, 1, 1),
+				2, \@tds);
+		}
 
 	print &ui_hidden_table_end();
 
