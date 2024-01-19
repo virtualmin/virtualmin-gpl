@@ -7854,6 +7854,7 @@ dnscloud_cloudflare_email=Cloudflare account address
 dnscloud_cloudflare_apikey=Cloudflare API key
 dnscloud_caccount=Using account $1
 dnscloud_ctoken=Using API token $1
+dnscloud_ntoken=Using Namecheap account $1
 dnscloud_cloudflare_longdesc=The settings on this page can be found on the <a target=_blank href=https://dash.cloudflare.com/profile/api-tokens>API tokens</a> page of your Cloudflare dashboard. You can either authenticate using a token with permissions to manage all zones, or the API key associated with your account.
 dnscloud_cloudflare_eemail=Missing or invalid-looking email address
 dnscloud_cloudflare_eapikey=Missing or invalid-looking hexidecimal API key
@@ -7867,6 +7868,12 @@ dnscloud_cloudflare_ens3=NS records found for <tt>$1</tt> domain, however these 
 dnscloud_cloudflare_explain_err_1116=For Virtualmin to be able to create top-level virtual sub-servers with Cloudflare DNS, you must first allow creation of DNS sub-domains with a different owner on the <a href='$1'>Virtualmin Configuration / Advanced options</a> page.
 dnscloud_cloudflare_explain_err_1116_user=For Virtualmin to be able to create top-level virtual sub-servers with Cloudflare DNS, system administrator must first allow creation of DNS sub-domains with a different owner on the Virtualmin Configuration page.
 dnscloud_cloudflare_explain_err_1116_2=For this Virtualmin system to host top-level virtual sub-server <tt>$2</tt> it has to host <tt>$1</tt> as well
+dnscloud_namecheap_longdesc=XXX
+dnscloud_namecheap_account=Namecheap account
+dnscloud_namecheap_apikey=Namecheap API key
+dnscloud_namecheap_eaccount=Missing Namecheap account
+dnscloud_namecheap_eapikey=Missing or invalid-looking Namecheap API key
+dnscloud_namecheap_ecreds=Namecheap credentials are incorrect : $1
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
