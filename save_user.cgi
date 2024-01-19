@@ -395,6 +395,13 @@ else {
 		$fullemail = $user->{'email'};
 		}
 
+	# Setup SSH public key if one was given
+	if ($in{'sshkey_mode'} == 2) {
+		$in{'sshkey'} =~ s/\r|\n/ /g;
+		$err = &save_domain_ssh_pubkey($d, $in{'sshkey'});
+		&error($err) if ($err);
+		}
+
 	# Create or update the user
 	$emailmailbox = 0;
 	if ($in{'new'}) {
