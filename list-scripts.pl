@@ -46,7 +46,7 @@ while(@ARGV > 0) {
 		push(@users, shift(@ARGV));
 		}
 	elsif ($a eq "--type") {
-		$scripttype = shift(@ARGV);
+		$scripttype = lc(shift(@ARGV));
 		}
 	elsif ($a eq "--all-domains") {
 		$all = 1;
@@ -91,7 +91,7 @@ foreach my $d (@doms) {
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});
 			$opts = $sinfo->{'opts'};
-			print "$sinfo->{'id'}\n";
+			print "    ID: $sinfo->{'id'}\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Type: ".($script->{'name'} || $sinfo->{'name'})."\n";
 			print "    Description: ".($script->{'desc'} ||
@@ -141,25 +141,27 @@ foreach my $d (@doms) {
 		}
 	else {
 		# Show all on one line
-		if (@doms > 1) {
-			print "Scripts in domain $d->{'dom'} :\n"; 
-			}
-		$fmt = "%-16.16s %-25.25s %-10.10s %-25.25s\n";
-		printf $fmt, "ID", "Description", "Version", "URL path";
-		printf $fmt, ("-" x 16), ("-" x 25), ("-" x 10), ("-" x 25);
-		foreach $sinfo (@scripts) {
-			$script = &get_script($sinfo->{'name'});
-			$path = $sinfo->{'url'};
-			$path =~ s/^(http|https):\/\/([^\/]+)//;
-			$path ||= $sinfo->{'path'};
-			printf $fmt, $sinfo->{'id'},
-				     ($script->{'desc'} ||
-				     "$sinfo->{'name'} ($text{'scripts_discontinued'})"),
-				     $sinfo->{'version'},
-				     $path;
-			}
-		if (@doms > 1) {
-			print "\n";
+		if (@scripts) {
+			if (@doms > 1) {
+				print "Scripts in domain $d->{'dom'} :\n"; 
+				}
+			$fmt = "%-18.18s %-25.25s %-10.10s %-25.25s\n";
+			printf $fmt, "ID", "Description", "Version", "URL path";
+			printf $fmt, ("-" x 18), ("-" x 25), ("-" x 10), ("-" x 25);
+			foreach $sinfo (@scripts) {
+				$script = &get_script($sinfo->{'name'});
+				$path = $sinfo->{'url'};
+				$path =~ s/^(http|https):\/\/([^\/]+)//;
+				$path ||= $sinfo->{'path'};
+				printf $fmt, $sinfo->{'id'},
+					($script->{'desc'} ||
+					"$sinfo->{'name'} ($text{'scripts_discontinued'})"),
+					$sinfo->{'version'},
+					$path;
+				}
+			if (@doms > 1) {
+				print "\n";
+				}
 			}
 		}
 	}
