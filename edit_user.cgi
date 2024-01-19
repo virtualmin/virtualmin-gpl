@@ -85,14 +85,6 @@ if ($user_type eq 'ssh') {
 						0, $user->{'webowner'}),
 				2, \@tds);
 			}
-
-		# SSH public key for Unix user
-		print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
-			&ui_radio("sshkey_mode", 0,
-				[ [ 0, $text{'form_sshkey0'} ],
-				  [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
-			&ui_textarea("sshkey", undef, 3, 60,
-				undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
 		}
 
 	# Show secondary groups
