@@ -62,6 +62,19 @@ if ($user_type eq 'ssh') {
 				$pwfield,
 				2, \@tds);
 
+	# SSH public key for Unix user
+	my @ssh_shells = &list_available_shells_by_id_cached('ssh', $d);
+	if ($user->{'unix'}) {
+		if (@ssh_shells) {
+			print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
+				&ui_radio("sshkey_mode", 0,
+					[ [ 0, $text{'form_sshkey0'} ],
+					  [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
+				&ui_textarea("sshkey", undef, 3, 60,
+					undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
+			}
+		}
+
 	# Real name - only for true Unix users or LDAP persons
 	if ($user->{'person'}) {
 		print &ui_table_row(&hlink($text{'user_real'}, "realname"),
@@ -72,9 +85,6 @@ if ($user_type eq 'ssh') {
 
 	if (&can_mailbox_ftp() && $user->{'unix'}) {
 		# Show SSH shell select if more than one available
-		my @ssh_shells =
-			grep { $_->{'id'} eq 'ssh' && $_->{'avail'} }
-				&list_available_shells($d);
 		my $ssh_shell = $ssh_shells[0]->{'shell'};
 		if (scalar(@ssh_shells) == 1) {
 			print &ui_hidden("shell", $ssh_shell);
@@ -771,6 +781,19 @@ else {
 				$pwfield,
 				2, \@tds);
 
+		# SSH public key for Unix user
+		my @ssh_shells = &list_available_shells_by_id_cached('ssh', $d);
+		if ($user->{'unix'}) {
+			if (@ssh_shells) {
+				my $existing_key = &get_domain_user_ssh_pubkey($d, $user);
+				print &ui_table_row(&hlink($text{'form_sshkey'}, "sshkey"),
+					&ui_radio("sshkey_mode", $existing_key ? 2 : 0,
+						[ [ 0, $text{'form_sshkey0'} ],
+						  [ 2, $text{'form_sshkey2'} ] ])."<br>\n".
+					&ui_textarea("sshkey", $existing_key, 3, 60,
+						undef, undef, &vui_ui_input_noauto_attrs()), undef, \@tds);
+				}
+			}
 		# Password recovery field
 		if (!$user->{'webowner'}) {
 			print &ui_table_row(&hlink($text{'user_recovery'}, "recovery"),

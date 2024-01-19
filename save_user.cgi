@@ -78,6 +78,9 @@ elsif ($in{'delete'}) {
 		$simple = &get_simple_alias($d, $user);
 		&delete_simple_autoreply($d, $simple) if ($simple);
 
+		# Delete SSH public key
+		&delete_domain_user_ssh_pubkey($d, $user);
+
 		# Delete the user, his virtusers and aliases
 		&delete_user($user, $d);
 
@@ -545,6 +548,15 @@ else {
 		if ($user->{'email'} || $newmailto) {
 			$emailmailbox = 1;
 			}
+		
+		# Setup SSH public key if one was given
+		if ($in{'sshkey_mode'} == 2) {
+			my $sshkey = $in{'sshkey'};
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
+			&error($err) if ($err);
+			}
 		}
 	else { 
 		# Check if any extras clash
@@ -687,6 +699,25 @@ else {
 					&error($text{'user_eshell'});
 				$user->{'shell'} = $in{'shell'};
 				}
+			}
+
+		# Update SSH public key
+		if ($in{'sshkey_mode'} == 2) {
+			my $sshkey = $in{'sshkey'};
+			$sshkey =~ s/\r|\n/ /g;
+			$sshkey = &trim($sshkey);
+			my $existing_key = &get_domain_user_ssh_pubkey($d, \%old);
+			if ($existing_key) {
+				&update_domain_user_ssh_pubkey($d, $user, \%old, $sshkey)
+				}
+			else {
+				$err = &add_domain_user_ssh_pubkey($d, $user, $sshkey);
+				&error($err) if ($err);
+				}
+			}
+		# Delete SSH public key
+		else {
+			&delete_domain_user_ssh_pubkey($d, \%old);
 			}
 
 		# Update the user and any virtusers and aliases

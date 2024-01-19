@@ -18186,6 +18186,16 @@ $list_available_shells_cache{$mail} = \@rv;
 return @rv;
 }
 
+# list_available_shells_by_id_cached(id, [&domain], [mail])
+# Returns a list of shells assignable to domain by given id; caching results
+sub list_available_shells_by_id_cached
+{
+my ($id, $d, $mail) = @_;
+state @rv;
+@rv = &list_available_shells($d, $mail) if (!@rv);
+return grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
+}
+
 # save_available_shells(&shells|undef)
 # Updates the list of custom shells available, or resets to the built-in
 # defaults if undef is given
@@ -19867,6 +19877,103 @@ my $ex = -e $sshfile;
 &print_tempfile(SSHFILE, $pubkey."\n");
 &close_tempfile_as_domain_user($d, SSHFILE);
 &set_permissions_as_domain_user($d, 0600, $sshfile) if (!$ex);
+return undef;
+}
+
+# get_ssh_key_identifier(&user)
+# Returns a string that uniquely identifies a user's SSH public key
+sub get_ssh_key_identifier
+{
+my ($user, $d) = @_;
+my $username = &remove_userdom($user->{'user'}, $d);
+return "[$d->{'id'}:$username]"; # [1234567890123456:ilia]
+}
+
+# add_domain_user_ssh_pubkey(&domain, &user, pubkey)
+# Adds an SSH public key to the authorized keys file
+sub add_domain_user_ssh_pubkey
+{
+my ($d, $user, $pubkey) = @_;
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $err = &save_domain_ssh_pubkey($d, "$pubkey $identifier");
+return $err;
+}
+
+# get_domain_user_ssh_pubkey(&domain, &user)
+# Returns the SSH public key for some user
+# in a domain, or undef if none
+sub get_domain_user_ssh_pubkey
+{
+my ($d, $user) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $pubkey;
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile, 1);
+foreach my $authorized_key (@$authorized_keys) {
+	if ($authorized_key =~ /\Q$identifier\E/) {
+		$pubkey = $authorized_key;
+		$pubkey =~ s/\s+\Q$identifier\E//;
+		last;
+		}
+	}
+return $pubkey;
+}
+
+# delete_domain_user_ssh_pubkey(&domain, &user)
+# Removes an SSH public key from the authorized keys file
+# if it is used by the domain and key can be identified
+sub delete_domain_user_ssh_pubkey
+{
+my ($d, $user) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+for (my $i = 0; $i < @$authorized_keys; $i++) {
+	if ($authorized_keys->[$i] =~ /\Q$identifier\E/) {
+        	splice(@$authorized_keys, $i, 1);
+        	last;
+		}
+	}
+&flush_file_lines_as_domain_user($d, $sshfile);
+return undef;
+}
+
+# update_domain_user_ssh_pubkey(&domain, &user, &olduser, [pubkey])
+# Updates an SSH public key or key identifier in the authorized
+# keys file if it is used by the domain and the old key can be 
+# identified
+sub update_domain_user_ssh_pubkey
+{
+my ($d, $user, $olduser, $pubkey) = @_;
+return if (!$d->{'dir'});
+my $sshdir = $d->{'home'}."/.ssh";
+return if (!-d $sshdir);
+my $sshfile = "$sshdir/authorized_keys";
+return if (!-f $sshfile);
+my $identifier = &get_ssh_key_identifier($user, $d);
+my $identifier_old = &get_ssh_key_identifier($olduser, $d);
+my $authorized_keys = &read_file_lines_as_domain_user($d, $sshfile);
+foreach my $authorized_key (@$authorized_keys) {
+	if ($authorized_key =~ /\Q$identifier_old\E/) {
+		# Replace old key with new key if set
+		if ($pubkey) {
+			$authorized_key = "$pubkey $identifier";
+			}
+		# Just update identifier and keep same key
+		else {
+			$authorized_key =~ s/\Q$identifier_old\E/$identifier/;
+			}
+		}
+	}
+&flush_file_lines_as_domain_user($d, $sshfile);
 return undef;
 }
 

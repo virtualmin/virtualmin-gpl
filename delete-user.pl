@@ -71,6 +71,9 @@ if (defined(&get_simple_alias)) {
 	&delete_simple_autoreply($d, $simple) if ($simple);
 	}
 
+# Delete SSH public key
+&delete_domain_user_ssh_pubkey($d, $user);
+
 # Delete the user, his virtusers and aliases
 &delete_user($user, $d);
 
