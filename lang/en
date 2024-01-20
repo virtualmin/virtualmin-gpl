@@ -3770,6 +3770,7 @@ tmpl_espam=The SpamAssassin program $1 was not found on your system
 tmpl_espamd=You have chosen to use the <tt>spamc</tt> client program, but the <tt>spamd</tt> server does not appear to be running
 tmpl_ephpmode2=PHP execution via FCGId requires the Apache <tt>mod_fcgid</tt> module
 tmpl_spamclear=Automatically delete old spam?
+tmpl_trashclear=Automatically delete old trash?
 tmpl_spamtrap=Create <tt>spamtrap</tt> and <tt>hamtrap</tt> aliases?
 tmpl_ephpini=Template PHP configuration file does not exist
 tmpl_phpcgi=CGI wrapper for PHP $1

@@ -9474,6 +9474,7 @@ push(@rv, { 'id' => 0,
 	    'aliascopy' => $config{'aliascopy'} || 0,
 	    'bccto' => $config{'bccto'} || 'none',
 	    'spamclear' => $config{'spamclear'} || 'none',
+	    'trashclear' => $config{'trashclear'} || 'none',
 	    'spamtrap' => $config{'spamtrap'} || 'none',
 	    'defmquota' => $config{'defmquota'} || "none",
 	    'user_aliases' => $config{'newuser_aliases'} || "none",
@@ -9857,6 +9858,7 @@ if ($tmpl->{'id'} == 0) {
 	$config{'aliascopy'} = $tmpl->{'aliascopy'};
 	$config{'bccto'} = $tmpl->{'bccto'};
 	$config{'spamclear'} = $tmpl->{'spamclear'};
+	$config{'trashclear'} = $tmpl->{'trashclear'};
 	$config{'spamtrap'} = $tmpl->{'spamtrap'};
 	$config{'defmquota'} = $tmpl->{'defmquota'} eq "none" ?
 					"" : $tmpl->{'defmquota'};
@@ -10057,7 +10059,8 @@ if (!$tmpl->{'default'}) {
 		    "logrotate", "disabled_web", "disabled_url", "php_sock",
 		    "php_fpm", "php_log", "php", "newuser", "updateuser",
 		    "status", "extra_prefix", "capabilities",
-		    "webmin_group", "spamclear", "spamtrap", "namedconf",
+		    "webmin_group", "spamclear", "trashclear",
+		    "spamtrap", "namedconf",
 		    "nodbname", "norename", "forceunder", "safeunder",
 		    "ipfollow", "exclude", "cert_key_tmpl", "cert_cert_tmpl",
 		    "cert_ca_tmpl", "cert_combined_tmpl","cert_everything_tmpl",

@@ -207,9 +207,17 @@ if ($config{'spam_white'}) {
 	}
 
 # Setup automatic spam clearing
-local ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
+my $opts = { };
+my ($cmode, $cnum) = split(/\s+/, $tmpl->{'spamclear'});
 if ($cmode eq 'days' || $cmode eq 'size') {
-	&save_domain_spam_autoclear($_[0], { $cmode => $cnum });
+	$opts->{$cmode} = $cnum;
+	}
+my ($tmode, $tnum) = split(/\s+/, $tmpl->{'trashclear'});
+if ($tmode eq 'days' || $tmode eq 'size') {
+	$opts->{'trash'.$tmode} = $tnum;
+	}
+if (keys %$opts) {
+	&save_domain_spam_autoclear($_[0], $opts);
 	}
 
 # Setup spamtrap aliases, if requested
@@ -1146,6 +1154,21 @@ print &ui_table_row(&hlink($text{'tmpl_spamclear'}, 'template_spamclear'),
 			     &ui_bytesbox("spamclear_size", $csize)) ],
 		]));
 
+# Default trash clearing mode
+local ($cmode, $cnum) = split(/\s+/, $tmpl->{'trashclear'});
+local $cdays = $cmode eq 'days' ? $cnum : undef;
+local $csize = $cmode eq 'size' ? $cnum : undef;
+print &ui_table_row(&hlink($text{'tmpl_trashclear'}, 'template_trashclear'),
+	    &ui_radio("trashclear", $cmode,
+	        [ $tmpl->{'default'} ? ( )
+				     : ( [ "", $text{'default'}."<br>" ] ),
+		  [ "none", $text{'no'}."<br>" ],
+		  [ "days", &text('spam_cleardays',
+			     &ui_textbox("trashclear_days", $cdays, 5))."<br>"],
+		  [ "size", &text('spam_clearsize',
+			     &ui_bytesbox("trashclear_size", $csize)) ],
+		]));
+
 # Spamtrap default
 print &ui_table_row(&hlink($text{'tmpl_spamtrap'}, 'template_spamtrap'),
 	    &ui_radio("spamtrap", $tmpl->{'spamtrap'},
@@ -1161,7 +1184,7 @@ sub parse_template_spam
 {
 local ($tmpl) = @_;
 
-# Parse clearing option
+# Parse spam clearing option
 if ($in{'spamclear'} eq '') {
 	$tmpl->{'spamclear'} = '';
 	}
@@ -1178,6 +1201,25 @@ elsif ($in{'spamclear'} eq 'size') {
 		&error($text{'spam_esize'});
 	$tmpl->{'spamclear'} = 'size '.($in{'spamclear_size'}*
 					$in{'spamclear_size_units'});
+	}
+
+# Parse spam clearing option
+if ($in{'trashclear'} eq '') {
+	$tmpl->{'trashclear'} = '';
+	}
+elsif ($in{'trashclear'} eq 'none') {
+	$tmpl->{'trashclear'} = 'none';
+	}
+elsif ($in{'trashclear'} eq 'days') {
+	$in{'trashclear_days'} =~ /^\d+$/ && $in{'trashclear_days'} > 0 ||
+		&error($text{'spam_edays'});
+	$tmpl->{'trashclear'} = 'days '.$in{'trashclear_days'};
+	}
+elsif ($in{'trashclear'} eq 'size') {
+	$in{'trashclear_size'} =~ /^\d+$/ && $in{'trashclear_size'} > 0 ||
+		&error($text{'spam_esize'});
+	$tmpl->{'trashclear'} = 'size '.($in{'trashclear_size'}*
+					$in{'trashclear_size_units'});
 	}
 
 # Parse spam trap
