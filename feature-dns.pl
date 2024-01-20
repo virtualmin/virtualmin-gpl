@@ -113,7 +113,12 @@ elsif ($d->{'dns_cloud'} && !$dnsparent) {
 	# Create on Cloud DNS service
 	my $ctype = $d->{'dns_cloud'};
 	my ($cloud) = grep { $_->{'name'} eq $ctype } &list_dns_clouds();
-	&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+	if ($cloud->{'import'}) {
+		&$first_print(&text('setup_bind_cloudi', $cloud->{'desc'}));
+		}
+	else {
+		&$first_print(&text('setup_bind_cloud', $cloud->{'desc'}));
+		}
 	my $vfunc = "dnscloud_".$ctype."_valid_domain";
 	my $err = &$vfunc($d, $info);
 	if ($err) {
@@ -2422,6 +2427,8 @@ if (!$field || $field eq 'dom') {
 		if (!$state->{'ok'}) {
 			return &text('setup_ednscloudstate', $cloud->{'desc'});
 			}
+		return 0 if ($cloud->{'import'});  # Must always already exist
+						   # for this cloud provider
 		my $tfunc = "dnscloud_".$ctype."_check_domain";
 		my $info = { 'domain' => $d->{'dom'} };
 		my $exists = &$tfunc($d, $info);

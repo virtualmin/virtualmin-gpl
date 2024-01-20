@@ -572,6 +572,7 @@ setup_bind=Adding new DNS zone ..
 setup_bindremote=Adding new DNS zone on $1 ..
 setup_bind_provision=Adding new DNS zone on services host ..
 setup_bind_cloud=Adding new DNS zone hosted by $1 ..
+setup_bind_cloudi=Associating with DNS zone hosted by $1 ..
 setup_ebind_ecloud=.. not supported : $1
 setup_ebind_cloud=.. failed : $1
 setup_ebind_cloud2=.. done, but some records were not created : $1
@@ -7875,6 +7876,7 @@ dnscloud_namecheap_apikey=Namecheap API key
 dnscloud_namecheap_eaccount=Missing Namecheap account
 dnscloud_namecheap_eapikey=Missing or invalid-looking Namecheap API key
 dnscloud_namecheap_ecreds=Namecheap credentials are incorrect : $1
+dnscloud_namecheap_erename=Namecheap does not support domain renames
 
 install_mod_perl_link=Use the <a href='$1'>Perl Modules</a> page in Webmin to install it.
 
