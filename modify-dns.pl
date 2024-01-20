@@ -246,6 +246,9 @@ while(@ARGV > 0) {
 	elsif ($a eq "--cloud-dns") {
 		$clouddns = shift(@ARGV);
 		}
+	elsif ($a eq "--cloud-dns-import") {
+		$clouddns_import = 1;
+		}
 	elsif ($a eq "--remote-dns") {
 		$remotedns = shift(@ARGV);
 		}
@@ -270,7 +273,8 @@ defined($spf) || %add || %rem || defined($spfall) || defined($dns_ip) ||
   @addrecs || @delrecs || @addslaves || @delslaves || $addallslaves || $ttl ||
   defined($dmarc) || $dmarcp || defined($dmarcpct) || defined($dnssec) ||
   defined($tlsa) || $syncallslaves || defined($submode) || $clouddns ||
-  defined($remotedns) || defined($parentds) || &usage("Nothing to do");
+  defined($remotedns) || defined($parentds) || defined($clouddns_import) ||
+  &usage("Nothing to do");
 
 # Get domains to update
 if ($all_doms == 1) {
@@ -691,6 +695,9 @@ foreach $d (@doms) {
 		}
 
 	# Change DNS Cloud
+	if (defined($clouddns_import)) {
+		$d->{'dns_cloud_import'} = $clouddns_import;
+		}
 	if ($clouddns) {
 		if ($clouddns eq "local") {
 			&$first_print($text{'spf_dnslocal'});
@@ -772,6 +779,7 @@ print "                     [--enable-dnssec | --disable-dnssec]\n";
 print "                     [--enable-tlsa | --disable-tlsa | --sync-tlsa]\n";
 print "                     [--enable-subdomain | --disable-subdomain]\n";
 print "                     [--cloud-dns provider|\"local\"]\n";
+print "                     [--cloud-dns-import]\n";
 print "                     [--remote-dns hostname | --local-dns]\n";
 print "                     [--add-parent-ds | --remove-parent-ds]\n";
 exit(1);
