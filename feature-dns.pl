@@ -1603,6 +1603,7 @@ RECORD: foreach my $r (@$aliasrecs) {
 		}
 	if ($r->{'defttl'}) {
 		# Add default TTL
+		$keep{&dns_record_key($nr, 1)} = 1;
 		next if ($diff && $already{&dns_record_key($nr, 1)}--);
 		&create_dns_record($recs, $file, $nr);
 		next;
@@ -1651,7 +1652,6 @@ RECORD: foreach my $r (@$aliasrecs) {
 if ($diff) {
 	my @delrecs;
 	foreach my $r (@$recs) {
-		next if (defined($r->{'defttl'}));
 		next if ($r->{'type'} eq 'SOA');
 		next if (&is_dnssec_record($r));
 		next if ($keep{&dns_record_key($r, 1)});
@@ -3848,7 +3848,7 @@ my $idx = &indexof($r, @$recs);
 if ($idx >= 0) {
 	splice(@$recs, $idx, 1);
 	}
-my $len = $r->{'eline'} - $r->{'line'} + 1;
+my $len = defined($r->{'eline'}) ? $r->{'eline'} - $r->{'line'} + 1 : 1;
 foreach my $o (@$recs) {
 	$o->{'line'} -= $len if ($o->{'line'} > $r->{'line'});
 	$o->{'eline'} -= $len if (defined($o->{'eline'}) &&
@@ -5140,7 +5140,7 @@ my @r;
 if (defined($r->{'defttl'})) {
 	# Default TTL
 	@r = ( '$ttl' );
-	push(@r, $r->{'defttl'}) if ($val);
+	push(@r, &dns_ttl_to_seconds($r->{'defttl'})) if ($val);
 	}
 else {
 	# Regular record
