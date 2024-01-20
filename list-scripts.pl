@@ -91,7 +91,7 @@ foreach my $d (@doms) {
 		foreach $sinfo (@scripts) {
 			$script = &get_script($sinfo->{'name'});
 			$opts = $sinfo->{'opts'};
-			print "    ID: $sinfo->{'id'}\n";
+			print "$sinfo->{'id'}\n";
 			print "    Domain: $d->{'dom'}\n";
 			print "    Type: ".($script->{'name'} || $sinfo->{'name'})."\n";
 			print "    Description: ".($script->{'desc'} ||
