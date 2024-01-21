@@ -18191,9 +18191,10 @@ return @rv;
 sub list_available_shells_by_id_cached
 {
 my ($id, $d, $mail) = @_;
-state @rv;
-@rv = &list_available_shells($d, $mail) if (!@rv);
-return grep { $_->{'id'} eq $id && $_->{'avail'} } @rv;
+state $rv;
+my $d_id = $d ? $d->{'id'} : '0';
+($rv->{$d_id} = [&list_available_shells($d, $mail)]) if (!$rv->{$d_id});
+return grep { $_->{'id'} eq $id && $_->{'avail'} } @{$rv->{$d_id}};
 }
 
 # save_available_shells(&shells|undef)
