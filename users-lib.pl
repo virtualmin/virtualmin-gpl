@@ -150,7 +150,10 @@ if ($olduser->{'user'} && $user->{'user'} &&
     $olduser->{'user'} ne $user->{'user'}) {
         unlink(&extra_user_filename($olduser, $d));
 	}
-&write_file(&extra_user_filename($user, $d), &extra_user_object($user, $d));
+my $f = &extra_user_filename($user, $d);
+lock_file($f);
+&write_file($f, &extra_user_object($user, $d));
+&unlock_file($f);
 }
 
 # extra_user_object(&user)
