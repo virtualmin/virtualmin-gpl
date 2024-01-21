@@ -5479,10 +5479,11 @@ sub modify_webserver_user
 {
 my ($user, $olduser, $d) = @_;
 
-# Encrypt user initial password
- $user->{'pass'} = &encrypt_user_password($user, $user->{'pass'})
-        if (!$in{'webpass_def'});
-$user->{'pass_crypt'} = $user->{'pass'};
+# Encrypt user initial password if given
+$user->{'pass'} = &encrypt_user_password($user, $user->{'pass'})
+	if ($user->{'pass'});
+# Use new encrypted password if was given or use old one
+$user->{'pass_crypt'} = $user->{'pass'} || $user->{'pass_crypt'};
 
 # Validate plugins
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_validate")) {
