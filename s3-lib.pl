@@ -1222,5 +1222,45 @@ return undef if ($err);
 return $out =~ /"region"\s*:\s*"(\S+)"/ ? $1 : undef;
 }
 
+# list_s3_accounts()
+# Returns a list of hash refs each containing the details of one S3 account
+# registered with Virtualmin
+sub list_s3_accounts
+{
+my @rv;
+opendir(DIR, $s3_accounts_dir) || return ();
+foreach my $f (readdir(DIR)) {
+	next if ($f eq "." || $f eq "..");
+	my %account;
+	&read_file("$s3_accounts_dir/$f", \%account);
+	push(@rv, \%account);
+	}
+closedir(DIR);
+return @rv;
+}
+
+# save_s3_account(&account)
+# Create or update an S3 account
+sub save_s3_account
+{
+my ($account) = @_;
+$account->{'id'} ||= &domain_id();
+&make_dir($s3_accounts_dir, 0700) if (!-d $s3_accounts_dir);
+my $file = "$s3_accounts_dir/$account->{'id'}";
+&lock_file($file);
+&write_file($file, $account);
+&unlock_file($file);
+}
+
+# delete_s3_account(&account)
+# Remove one S3 account from Virtualmin
+sub delete_s3_account
+{
+my ($account) = @_;
+$account->{'id'} || &error("Missing account ID!");
+my $file = "$s3_accounts_dir/$account->{'id'}";
+&unlink_logged($file);
+}
+
 1;
 

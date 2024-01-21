@@ -6216,6 +6216,12 @@ if ($dokeys) {
 			 &make_tar_command("cf", $file."_keys", "."));
 	}
 
+# Also tar up S3 accounts dir
+if (-d $s3_accounts_dir) {
+	&execute_command("cd ".quotemeta($s3_accounts_dir)." && ".
+			 &make_tar_command("cf", $file."_s3accounts", "."));
+	}
+
 &$second_print($text{'setup_done'});
 return 1;
 }
@@ -6267,6 +6273,14 @@ if ($dokeys) {
 				};
 			}
 		}
+	}
+
+# Extract dir of S3 accounts
+if (-r $file."_s3accounts") {
+	&unlink_file($s3_accounts_dir);
+	&make_dir($s3_accounts_dir, 0700);
+	&execute_command("cd ".quotemeta($s3_accounts_dir)." && ".
+                         &make_tar_command("xf", $file."_s3accounts"));
 	}
 
 &$second_print($text{'setup_done'});

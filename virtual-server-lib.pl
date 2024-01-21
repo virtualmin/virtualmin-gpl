@@ -227,6 +227,7 @@ $ftp_upload_tries = $config{'upload_tries'} || 3;
 $gcs_upload_tries = $config{'upload_tries'} || 3;
 $dropbox_upload_tries = $config{'upload_tries'} || 3;
 $rr_upload_tries = $config{'upload_tries'} || 1;
+$s3_accounts_dir = "$module_config_directory/s3accounts";
 
 %get_domain_by_maps = ( 'user' => "$module_config_directory/map.user",
 			'gid' => "$module_config_directory/map.gid",
