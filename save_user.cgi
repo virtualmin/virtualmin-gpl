@@ -526,13 +526,39 @@ else {
 			&error($err) if ($err);
 			}
 
-		# Validate user unless extra database user
+		# Validate if extra database user exists
 		# which can be merged with Unix user
 		my $extra_db_user = &get_extra_db_user($d, $user->{'user'});
-		if (!$extra_db_user) {
-			$err = &validate_user($d, $user);
-			&error($err) if ($err);
+		my $extra_web_user = &get_extra_web_user($d, $user->{'user'});
+		if (($extra_db_user || $extra_web_user) && !$in{'confirm'}) {
+			# Confirm suppression first
+			&ui_print_header(&domain_in($d), $text{'user_createovertitle'}, "");
+			print "<center>\n";
+			print &ui_form_start("save_user.cgi");
+			foreach my $key (keys %in) {
+				print &ui_hidden($key, $in{$key});
+				}
+			my $createoverdesc = $extra_db_user && $extra_web_user ?
+				"dbweb" : $extra_db_user ? "db" : "web";
+			my $createoverdescm = $extra_db_user && $extra_web_user ? 2 : 1;
+			print &text("user_createoverdesc$createoverdesc", "<tt>$user->{'user'}</tt>");
+			print "<br>".$text{"user_createoverdescm$createoverdescm"};
+			print "<br>".$text{"user_createoverdescmf$createoverdescm"};
+			print &ui_form_end([ [ "confirm", $text{"user_createover$createoverdescm"} ],
+					     [ "", $text{'user_creategoback'}, undef,  undef,
+							'onclick="event.preventDefault(); '.
+							'event.stopImmediatePropagation(); '.
+							'window.history.back();"' ] ]);
+			print "</center>\n";
+			&ui_print_footer("list_users.cgi?dom=$in{'dom'}",
+				$text{'users_return'});
+			exit;
 			}
+		
+		# Validate user
+		$user->{'nocheck'} = 1 if ($extra_db_user);
+		$err = &validate_user($d, $user);
+		&error($err) if ($err);
 
 		if ($home && !$user->{'nocreatehome'} &&
 		    (!$user->{'maybecreatehome'} || !-d $home)) {

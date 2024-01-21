@@ -2638,7 +2638,8 @@ if ($d && @{$user->{'dbs'}} && (!$old || !@{$old->{'dbs'}})) {
 		return $text{'user_edbpass'};
 		}
 	# Check for username clash
-	return &check_any_database_user_clash($d, $user->{'user'});
+	return &check_any_database_user_clash($d, $user->{'user'})
+		if (!$user->{'nocheck'});
 	}
 if ($d && $user->{'home'} &&
     (!$old || $old->{'home'} ne $user->{'home'}) &&
