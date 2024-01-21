@@ -7870,7 +7870,7 @@ dnscloud_cloudflare_ens3=NS records found for <tt>$1</tt> domain, however these 
 dnscloud_cloudflare_explain_err_1116=For Virtualmin to be able to create top-level virtual sub-servers with Cloudflare DNS, you must first allow creation of DNS sub-domains with a different owner on the <a href='$1'>Virtualmin Configuration / Advanced options</a> page.
 dnscloud_cloudflare_explain_err_1116_user=For Virtualmin to be able to create top-level virtual sub-servers with Cloudflare DNS, system administrator must first allow creation of DNS sub-domains with a different owner on the Virtualmin Configuration page.
 dnscloud_cloudflare_explain_err_1116_2=For this Virtualmin system to host top-level virtual sub-server <tt>$2</tt> it has to host <tt>$1</tt> as well
-dnscloud_namecheap_longdesc=XXX
+dnscloud_namecheap_longdesc=To use Namecheap as a DNS provider, you must enter your Namecheap login and API key from the Tools page under Profile on your dashboard. API access must also be enabled first, and the IP of this system added to the Namecheap whitelist.
 dnscloud_namecheap_account=Namecheap account
 dnscloud_namecheap_apikey=Namecheap API key
 dnscloud_namecheap_eaccount=Missing Namecheap account
