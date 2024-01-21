@@ -32,7 +32,7 @@ else {
 if ($mleft != 0) {
 	push(@links, [ "edit_user.cgi?new=1&dom=$in{'dom'}",
 		       $text{'users_add'} ]);
-	my @ssh_shells = &list_available_shells_by_id_cached('ssh', $d);
+	my @ssh_shells = &list_available_shells_by_id('ssh', $d);
 	# Only available for master admin
 	if (&master_admin() && @ssh_shells) {
 		push(@links, [ "edit_user.cgi?new=1&type=ssh&dom=$in{'dom'}",
