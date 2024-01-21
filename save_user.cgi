@@ -560,6 +560,13 @@ else {
 		$err = &validate_user($d, $user);
 		&error($err) if ($err);
 
+		# If an extra web user exists and new directories are given then
+		# remove access to the old directories first to avoid overlap and
+		# have duplicated records
+		if ($extra_web_user && $in{'virtualmin_htpasswd'}) {
+			&revoke_webserver_user_access($user, $d);
+			}
+
 		if ($home && !$user->{'nocreatehome'} &&
 		    (!$user->{'maybecreatehome'} || !-d $home)) {
 			# Create his homedir, unless either this is a user

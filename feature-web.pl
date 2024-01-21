@@ -5500,14 +5500,23 @@ if (&plugin_defined("virtualmin-htpasswd", "mailbox_save")) {
 &update_extra_user($d, $user, $olduser);
 }
 
-# delete_webserver_user(&user, &domain)
-# Delete a webserver user
-sub delete_webserver_user
+# revoke_webserver_user_access(&user, &domain)
+# Remove a webserver user access
+sub revoke_webserver_user_access
 {
 my ($user, $d) = @_;
 if (&plugin_defined("virtualmin-htpasswd", "mailbox_delete")) {
 	&plugin_call("virtualmin-htpasswd", "mailbox_delete", $user, $d);
 	}
+}
+
+# delete_webserver_user(&user, &domain)
+# Delete a webserver user
+sub delete_webserver_user
+{
+my ($user, $d) = @_;
+# Remove a webserver user access
+&revoke_webserver_user_access($user, $d);
 # Delete user from domain config
 &delete_extra_user($d, $user);
 }
