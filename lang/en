@@ -2521,6 +2521,7 @@ backup_nicegop=$2 in Google folder $1
 backup_nicedb=Dropbox folder $1
 backup_nicedbp=$2 in Dropbox folder $1
 backup_nicebb=Backblaze bucket $1
+backup_nicebbt=Backblaze
 backup_nicebbp=$2 in Backblaze bucket $1
 backup_niceaz=Azure container $1
 backup_niceazp=$2 in Azure container $1

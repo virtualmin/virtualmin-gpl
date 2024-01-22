@@ -4111,7 +4111,7 @@ elsif ($url =~ /^dropbox:\/\/([^\/]+)(\/(\S+))?$/) {
 	# Dropbox folder
 	@rv = (8, undef, undef, $1, $3, undef);
 	}
-elsif ($url =~ /^bb:\/\/([^\/]+)(\/(\S+))?$/) {
+elsif ($url =~ /^bb:\/\/([^\/]*)(\/(\S+))?$/) {
 	# Backblaze bucket and file
 	my $st = &cloud_bb_get_state();
 	if ($st->{'ok'}) {
@@ -4227,7 +4227,9 @@ elsif ($proto == 9) {
 elsif ($proto == 10) {
 	$rv = $path ?
 		&text('backup_nicebbp', "<tt>$host</tt>", "<tt>$path</tt>") :
-		&text('backup_nicebb', "<tt>$host</tt>");
+	      $host ?
+		&text('backup_nicebb', "<tt>$host</tt>") :
+		&text('backup_nicebbt');
 	}
 elsif ($proto == 11) {
 	$rv = $path ?
