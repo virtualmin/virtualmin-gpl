@@ -5906,7 +5906,72 @@ elsif ($mode == 8) {
 		}
 	}
 
-elsif ($mode == 10) {
+elsif ($mode == 10 && $host =~ /\%/) {
+	# Search for Backblaze for buckets matching the date pattern
+	my $buckets = &list_bb_buckets();
+	if (!ref($buckets)) {
+		&$second_print(&text('backup_purgeebbbuckets', $buckets));
+		return 0;
+		}
+	foreach my $st (@$buckets) {
+		my $f = $st->{'name'};
+		my $info = &get_bb_bucket($f);
+		if ($detail) {
+			&$first_print(&text('backup_purgeposs2a', $f));
+			}
+		if ($f =~ /^$re$/) {
+			# Found one with a name to delete .. check the age of
+			# the newest file
+			my $ctime = 0;
+			my $files = &list_bb_files($f);
+			next if (!ref($files));
+			my $totalsize = 0;
+			foreach my $bf (@$files) {
+				$ctime = $bf->{'time'}
+					if ($bf->{'time'} > $ctime);
+				$totalsize += $bf->{'size'};
+				}
+			$mcount++;
+			if (!$ctime || $ctime >= $cutoff) {
+				if ($detail) {
+					&$second_print(&text('backup_purgenew',
+						&make_date($cutoff)));
+					}
+				next;
+				}
+			my $old = int((time() - $ctime) / (24*60*60));
+			if ($detail) {
+				&$second_print(&text('backup_purgecan',
+						     $re, $old));
+				}
+			&$first_print(&text('backup_deletingbucket',
+					    "<tt>$f</tt>", $old));
+
+			# Delete all the files in the bucket, then itself
+			my $err;
+			foreach my $bf (@$files) {
+				$err = &delete_bb_file($f, $bf->{'name'});
+				next if ($err);
+				}
+			$err = &delete_bb_bucket($f) if (!$err);
+			if ($err) {
+				&$second_print(
+					&text('backup_edelbucket', $err));
+				$ok = 0;
+				}
+			else {
+				&$second_print(&text('backup_deleted',
+					&nice_size($totalsize)));
+				$pcount++;
+				}
+			}
+		elsif ($detail) {
+			&$second_print(&text('backup_purgepat', $re));
+			}
+		}
+	}
+
+elsif ($mode == 10 && $path =~ /\%/) {
 	# Search for Backblaze for files matching the date pattern
 	my $dir;
 	if ($re =~ /^(.*)\//) {
