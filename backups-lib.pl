@@ -5034,6 +5034,12 @@ if (&can_cloud_providers()) {
 	push(@titles, $text{'index_clouds'});
 	push(@descs, $text{'index_cloudsdesc'});
 	push(@codes, 'clouds');
+
+	# Also Amazon S3 accounts
+	push(@links, "list_s3s.cgi");
+	push(@titles, $text{'index_s3s'});
+	push(@descs, $text{'index_s3sdesc'});
+	push(@codes, 's3s');
 	}
 if (&can_backup_buckets()) {
 	# Show list of S3 buckets
@@ -5908,7 +5914,7 @@ elsif ($mode == 10) {
 		}
 	local $files = &list_bb_files($base, $dir);
 	if (!ref($files)) {
-		&$second_print(&text('backup_purgeefiles4', $files));
+		&$second_print(&text('backup_purgeefiles5', $files));
 		return 0;
 		}
 	foreach my $st (@$files) {
@@ -6436,7 +6442,8 @@ sub list_all_s3_accounts
 {
 local @rv;
 if (&can_use_cloud("s3") && $config{'s3_akey'} && $config{'s3_skey'}) {
-	push(@rv, [ $config{'s3_akey'}, $config{'s3_skey'} ]);
+	push(@rv, [ $config{'s3_akey'}, $config{'s3_skey'},
+		    $config{'s3_endpoint'} ]);
 	}
 foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 	local @dests = &get_scheduled_backup_dests($sched);
@@ -6446,6 +6453,12 @@ foreach my $sched (grep { &can_backup_sched($_) } &list_scheduled_backups()) {
 		if ($mode == 3) {
 			push(@rv, [ $user, $pass ]);
 			}
+		}
+	}
+if (&can_cloud_providers()) {
+	foreach my $s3 (&list_s3_accounts()) {
+		push(@rv, [ $s3->{'access'}, $s3->{'secret'},
+			    $s3->{'endpoint'} ]);
 		}
 	}
 local %done;
