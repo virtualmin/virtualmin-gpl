@@ -19818,7 +19818,9 @@ my $tmpl = &get_template($d->{'template'});
 foreach my $f (&list_provision_features()) {
 	if ($f eq "dns") {
 		# Template has an option to control where DNS is hosted
-		my $cloud = $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
+		my $alias = $d->{'alias'} ? &get_domain($d->{'alias'}) : undef;
+		my $cloud = $alias && $alias->{'dns_cloud'} ? $alias->{'dns_cloud'} :
+			    $d->{'dns_cloud'} ? $d->{'dns_cloud'} :
 			    $d->{'dns_remote'} ? 'remote_'.$d->{'dns_remote'}
 					       : $tmpl->{'dns_cloud'};
 		if ($cloud eq 'services') {
