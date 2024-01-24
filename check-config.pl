@@ -8,9 +8,8 @@ This program checks your system's Virtualmin configuration, outputting the
 progress of the check as it goes. If any serious problems are found it will
 halt and display the error found.
 
-Unlike the I<Re-check Config> page in the Virtualmin web UI, it will not
-perform any system changes triggered by configuration changes, such as updating
-the Webmin modules available to domain owners.
+Otherwise, it may also update global settings determined by the Virtualmin
+configuration, such as Webmin modules granted to domain owners.
 
 =cut
 
