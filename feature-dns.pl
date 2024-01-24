@@ -1301,18 +1301,15 @@ my $tmpl = &get_template($d->{'template'});
 my $proxied = $tmpl->{'dns_cloud_proxy'};
 &require_bind();
 local $rootfile = &bind8::make_chroot($file);
-local $serial = $bconfig{'soa_style'} ?
-	&bind8::date_serial().sprintf("%2.2d", $bconfig{'soa_start'}) :
-	time();
-local %zd;
-&bind8::get_zone_defaults(\%zd);
+local $master = &get_master_nameserver($tmpl, $d);
+local $soa = &get_default_soa_record($d, $master);
 local @created_ns;
 
 # Extract custom records from the template
 my @tmplrecs;
 if ($tmpl->{'dns'} && $tmpl->{'dns'} ne 'none') {
 	my %subs = %$d;
-	$subs{'serial'} = $serial;
+	$subs{'serial'} = $soa->{'values'}->[2];
 	$subs{'dnsemail'} = $d->{'emailto_addr'};
 	$subs{'dnsemail'} =~ s/\@/./g;
 	my $recstxt = &substitute_domain_template(
@@ -1334,25 +1331,13 @@ if (!$tmpl->{'dns_replace'} || $d->{'dns_submode'}) {
 			# Add a default TTL
 			if ($tmpl->{'dns_ttl'} eq '') {
 				&create_dns_record($recs, $file,
-					{ 'defttl' => $zd{'minimum'}.
-						      $zd{'minunit'} });
+					{ 'defttl' => $soa->{'values'}->[6] });
 				}
 			elsif ($tmpl->{'dns_ttl'} ne 'none') {
 				&create_dns_record($recs, $file,
 					{ 'defttl' => $tmpl->{'dns_ttl'} });
 				}
 			}
-		local $master = &get_master_nameserver($tmpl, $d);
-		local $email = $bconfig{'tmpl_email'} ||
-			       "root\@$master";
-		$email = &bind8::email_to_dotted($email);
-		my $soa = { 'name' => '@',
-			    'type' => 'SOA',
-			    'values' => [ $master, $email, $serial,
-					  $zd{'refresh'}.$zd{'refunit'},
-					  $zd{'retry'}.$zd{'retunit'},
-					  $zd{'expiry'}.$zd{'expunit'},
-					  $zd{'minimum'}.$zd{'minunit'} ] };
 		&create_dns_record($recs, $file, $soa);
 
 		# Get nameservers from reseller, if any
@@ -1556,6 +1541,26 @@ if ($tmpl->{'dns_replace'} && !$d->{'dns_submode'}) {
 	}
 }
 
+# get_default_soa_record(&domain, master-nameserver)
+# Returns the default SOA record object for a new domain
+sub get_default_soa_record
+{
+my ($d, $master) = @_;
+&require_bind();
+my $email = $bconfig{'tmpl_email'} || "root\@$master";
+$email = &bind8::email_to_dotted($email);
+my %zd;
+&bind8::get_zone_defaults(\%zd);
+my $soa = { 'name' => $d->{'dom'}.'.',
+	    'type' => 'SOA',
+	    'values' => [ $master, $email, $serial,
+			  $zd{'refresh'}.$zd{'refunit'},
+			  $zd{'retry'}.$zd{'retunit'},
+			  $zd{'expiry'}.$zd{'expunit'},
+			  $zd{'minimum'}.$zd{'minunit'} ] };
+return $soa;
+}
+
 # create_alias_records(&records, file, &domain, ip, [diff-mode])
 # For a domain that is an alias, copy records from its target
 sub create_alias_records
@@ -1593,6 +1598,39 @@ foreach my $slave (@slaves) {
 		( $slave->{'nsname'} ) :
 		gethostbyname($slave->{'host'});
 	$tmplns{$bn[0]."."} = 1 if ($bn[0]);
+	}
+
+# Check if the source domain has an SOA record - if not (perhaps because it's
+# on a DNS cloud provider), we will need to create it here
+my $soacount = 0;
+my $nscount = 0;
+foreach my $r (@$aliasrecs) {
+	$soacount++ if ($r->{'type'} eq 'SOA');
+	$nscount++ if ($r->{'type'} eq 'NS');
+	}
+if (!$soacount) {
+	# Source zone has no SOA, so we need to create one in the alias
+	my ($soa) = grep { $_->{'type'} eq 'SOA' } @$recs;
+	if (!$soa) {
+		$soa = &get_default_soa_record($d, $master);
+		&create_dns_record($recs, $file, $soa);
+		}
+	$keep{&dns_record_key($soa, 1)} = 1;
+	}
+if (!$nscount) {
+	# Source zone has no NS records, so need to add the defaults in the
+	# alias if they are missing
+	foreach my $ns (keys %tmplns) {
+		my ($nsr) = grep { $_->{'type'} eq 'NS' &&
+				   $_->{'values'}->[0] eq $ns } @$recs;
+		if (!$nsr) {
+			$nsr = { 'name' => $d->{'dom'}.'.',
+				 'type' => 'NS',
+				 'values' => [ $ns ] };
+			&create_dns_record($recs, $file, $nsr);
+			}
+		$keep{&dns_record_key($nsr, 1)} = 1;
+		}
 	}
 
 RECORD: foreach my $r (@$aliasrecs) {
